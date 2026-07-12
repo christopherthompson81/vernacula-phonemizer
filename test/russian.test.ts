@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
@@ -40,7 +42,7 @@ describe("russian canonical IPA", () => {
 
   test("Phase 2: genitive г→v + loanword hard е/и", () => {
     expect(phonemizeWord("красного")).toBe("krˈasnəvə");  // genitive -ого → v
-    expect(phonemizeWord("большого")).toBe("bˈolʲʂəvə");
+    expect(phonemizeWord("большого")).toBe("bɐlʲʂˈovə");
     expect(phonemizeWord("много")).toBe("mnˈoɡə");        // adverb exception → keeps ɡ
     expect(phonemizeWord("тест")).toBe("tɛst");           // loanword hard т → tɛ (not tʲe)
     expect(phonemizeWord("отель")).toBe("ɐtˈɛlʲ");
@@ -51,9 +53,23 @@ describe("russian canonical IPA", () => {
   });
 
   test("numbers", () => {
-    expect(phonemize("21", "ru")).toBe("dvˈatt͡sətʲ ɐdʲˈin");        // двадцать один
+    expect(phonemize("21", "ru")).toBe("dvˈat͡sətʲ ɐdʲˈin");        // двадцать один
     expect(phonemize("100", "ru")).toBe("sto");                    // сто
-    expect(phonemize("2024", "ru")).toBe("dvʲe tˈɨsʲət͡ɕɪ dvˈatt͡sətʲ t͡ɕɪtˈɨrʲe"); // две тысячи…
+    expect(phonemize("2024", "ru")).toBe("dvʲe tˈɨsʲət͡ɕɪ dvˈat͡sətʲ t͡ɕɪtˈɨrʲe"); // две тысячи…
+  });
+
+  // Independent adjudicated micro-gold (tools/ru-gold.tsv) — hand-transcribed Moscow Russian, not Wiktionary.
+  test("adjudicated micro-gold (independent referee)", () => {
+    const rows = readFileSync(new URL("../tools/ru-gold.tsv", import.meta.url), "utf8").split("\n");
+    let match = 0, total = 0;
+    for (const line of rows) {
+      if (line === "" || line.startsWith("#") || !line.includes("\t")) continue;
+      const [word, gold] = line.split("\t");
+      total++;
+      if (phonemizeWord(word!) === gold!.trim()) match++;
+    }
+    expect(total).toBeGreaterThan(120);
+    expect(match / total).toBeGreaterThanOrEqual(0.96); // ≥96% (allows variable post-tonic я + 1 lexicon gap)
   });
 
   test("text: reduction + punctuation", () => {

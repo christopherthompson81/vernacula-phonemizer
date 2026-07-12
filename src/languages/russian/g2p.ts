@@ -46,7 +46,10 @@ function parse(w: string): Unit[] {
       const sIdx = soft ? i + 2 : i + 1;
       if (chars[sIdx] === "с") { units.push({ cyr: "ц", cons: { ph: soft ? "t͡sː" : "t͡s", soft: false } }); i = sIdx; continue; }
       if (chars[i + 1] === "ч") { units.push({ cyr: "ч", cons: { ph: "t͡ɕː", soft: true } }); i += 1; continue; } // тч → t͡ɕː
+      if (chars[i + 1] === "ц") continue;                                                                      // тц/дц → t͡s (т/д merges into ц; отца → ɐt͡sa)
     }
+    // сч / зч / жч → ɕː (счастье → ɕːasʲtʲjə, мужчина → mʊɕːinə).
+    if ((c === "с" || c === "з" || c === "ж") && chars[i + 1] === "ч") { units.push({ cyr: "щ", cons: { ph: "ɕː", soft: true } }); i += 1; continue; }
     // Reflexive -ся / -сь after a hard consonant keeps hard с (вернулся → …ɫsə); after й (-йся) it stays soft
     // (соприкасающийся → …jsʲə).
     if (c === "с" && (chars[i + 1] === "я" || chars[i + 1] === "ь") && i + 2 >= chars.length
@@ -73,9 +76,16 @@ function parse(w: string): Unit[] {
     if (!c.cons || c.cons.soft || !SOFTEN_TGT.includes(c.cyr)) continue;
     const nx = units[i + 1];
     if (!nx?.cons?.soft) continue;
-    // two-tier: с/з soften only before soft т/д; т/д/н soften before soft т/д/н (ежедневный → dʲnʲ)
-    const ok = "сз".includes(c.cyr) ? "тд".includes(nx.cyr) : "тднчщ".includes(nx.cyr); // н/т/д soften before ч/щ too (стаканчик)
+    // two-tier: с/з soften only before soft т (сделать/здесь keep hard z before soft д); т/д/н soften before
+    // soft т/д/н/ч (стаканчик → nʲt͡ɕ; but женщина keeps hard н before щ).
+    const ok = "сз".includes(c.cyr) ? nx.cyr === "т" : "тднч".includes(nx.cyr);
     if (ok) c.cons = { ph: CONS[c.cyr]![1], soft: true };
+  }
+  // Geminate softness agreement: identical adjacent consonant letters take the softness of the second (россия
+  // → sʲsʲ → collapses to sʲː downstream).
+  for (let i = 0; i < units.length - 1; i++) {
+    const a = units[i]!, b = units[i + 1]!;
+    if (a.cons && b.cons && a.cyr === b.cyr && b.cons.soft && !a.cons.soft && CONS[a.cyr]) a.cons = { ph: CONS[a.cyr]![1], soft: true };
   }
   return units;
 }
@@ -83,7 +93,7 @@ function parse(w: string): Unit[] {
 // Base (stressed) vowel quality by letter + whether the preceding consonant is soft.
 function stressedVowel(letter: string, softContext: boolean): string {
   switch (letter) {
-    case "а": return softContext ? "æ" : "a";
+    case "а": return "a";                            // а never fronts (счастье → ɕːasʲtʲjə); only я → æ
     case "я": return "æ";
     case "о": return "o";
     case "ё": return "o";
@@ -144,7 +154,7 @@ export function toIpa(word: string, stressOrd: number, hard?: number[]): string 
     const prevSoft = !!prevCons?.soft;
     if (i === stressPos) {
       v.ph = stressedVowel(v.letter, softCtx);
-      if ((v.letter === "я" || v.letter === "а") && v.ph === "æ" && !nextSoft) v.ph = "a"; // æ only between two soft C
+      if (v.letter === "я" && v.ph === "æ" && !nextSoft) v.ph = "a"; // я → æ only between two soft C, else a
       // ё → ɵ whenever not word-initial (встаёт, жильё); о → ɵ after a soft consonant (тётя).
       if ((v.letter === "ё" && i > 0) || (v.letter === "о" && prevSoft)) v.ph = "ɵ";
     } else {
@@ -158,9 +168,9 @@ export function toIpa(word: string, stressOrd: number, hard?: number[]): string 
       if (v.letter === "и") v.ph = "ɨ";
       else if (v.letter === "е") v.ph = i === stressPos ? "ɛ" : "ɨ";
     }
-    // Word-final unstressed vowels: е → e (сборище → …ɕːe), я → ə (дядя → …dʲə).
+    // Word-final unstressed vowels: е → e non-glide (сборище → …ɕːe) but jə after a glide (счастье → …jə); я → ə.
     if (i === units.length - 1 && i !== stressPos) {
-      if (v.letter === "е") v.ph = "e";
+      if (v.letter === "е") v.ph = v.glide ? "ə" : "e";
       else if (v.letter === "я") v.ph = "ə";
     }
   }
