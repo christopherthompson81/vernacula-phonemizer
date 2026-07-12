@@ -63,3 +63,30 @@ Adversarial review of the new engine found three concrete bugs, all fixed:
    stress. Added a hiatus guard: a post-vocalic i/u followed by a FINAL consonant other than s is a stressed
    nucleus (raiz→ʁɐˈiʃ, sair→sɐˈiɾ, possuir→pusuˈiɾ), while mais/dois/baixo keep the diphthong. The residual
    mais-vs-raiz ambiguity (both final-s) is lexical.
+
+## Run 2 — referee wired + rule-gap fixes
+Referee: wikipron European Portuguese (por_latn_po_broad_filtered, ~38k entries after dedup) via
+tools/pt-ref-sweep.mts. wikipron omits stress and coda-l velarization → normalized away (strip ˈ, ɫ→l) to
+compare SEGMENTS. It also carries two conventions that differ from standard Lisbon EP and are NOT our errors —
+betacism (intervocalic v→b) and the conservative affricate ch→t͡ʃ — folded (v↔b, t͡ʃ↔ʃ) for a "folded" metric.
+
+The referee revealed real RULE gaps beyond the deferred lexical axes. Fixed this run:
+ - ONGLIDE: an unstressed high/mid vowel (i/u/e) before another nucleus is a rising glide (história→iʃtɔɾjɐ,
+   água→aɡwɐ, leonardo→ljunaɾdu) — done as a POST-stress demotion pass (stress settled first: dia→diɐ keeps the
+   nucleus, diamante→djɐmɐ̃tɨ glides). Guard: a high vowel after an obstruent+liquid onset cluster stays a
+   nucleus (criança→kɾiɐ̃sɐ). o-onglide left out (moeda→muedɐ, not mwedɐ).
+ - ou → monophthong [o] (souto→sotu, amou→ɐmo), and the ou-derived o does NOT reduce (ouvir→oviɾ).
+ - a diphthong nucleus (vowel + offglide) is not reduced (ceilão→sejlɐ̃w̃, was ...ɨj).
+ - s does not voice after a nasal vowel — the absorbed coda n precedes it (sansão→sɐ̃sɐ̃w̃).
+
+Scores (segment-level vs wikipron EP): proper-noun-heavy uniform sample 47.9%→59.1% raw / 67.2% folded;
+FREQUENCY-common words 64.5% raw / 72.7% folded. The proper-noun sample is deflated by foreign names that
+resist reduction (Holanda→ɔlɐ̃dɐ, Belarus→bɛlɐɾuʃ).
+
+REMAINING folded residual on common words is now dominated by the LEXICAL open/close axis:
+ - «e»≠«ɛ» (ela→ɛlɐ), «o»≠«ɔ» (agora→ɐɡɔɾɐ) — stressed mid-vowel quality, ~8% of tokens. THE lexicon target.
+ - convention choices wikipron makes: word-initial pretonic e→i (está→iʃta, we give ɨʃta), initial o→ɔ (olá),
+   final -ei→e. To be decided (adopt vs keep) alongside the lexicon.
+NEXT (Phase 2 lexicon): resolve stressed open/close e/o + grapheme x. NOTE the design constraint — wikipron
+can't be used RAW as the lexicon (betacism injects b-for-v; ch→t͡ʃ). Either de-affricate + extract only the
+open/close & x decisions as corrections to the engine, or de-betacize carefully.
