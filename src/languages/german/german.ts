@@ -36,6 +36,40 @@ function ruleStress(): number {
   return 0;
 }
 
+// Stressed-vowel length corrections (word → L long / S short) where the spelling rule mispredicts. From kaikki.
+let LENGTH: Map<string, string> | undefined;
+function lengthDict(): Map<string, string> {
+  if (LENGTH === undefined) {
+    LENGTH = new Map();
+    try {
+      const path = join(dirname(fileURLToPath(import.meta.url)), "length.tsv");
+      for (const line of readFileSync(path, "utf8").split("\n")) {
+        if (line === "" || line.startsWith("#")) continue;
+        const tab = line.indexOf("\t");
+        if (tab > 0) LENGTH.set(line.slice(0, tab), line.slice(tab + 1));
+      }
+    } catch { /* absent → rule length only */ }
+  }
+  return LENGTH;
+}
+const LONG_OF: Record<string, string> = { a: "aː", ɛ: "eː", ɪ: "iː", ɔ: "oː", ʊ: "uː", œ: "øː", ʏ: "yː" };
+const SHORT_OF: Record<string, string> = { aː: "a", eː: "ɛ", iː: "ɪ", oː: "ɔ", uː: "ʊ", øː: "œ", yː: "ʏ", ɛː: "ɛ" };
+
+/** Fix the stressed vowel's length+quality per a correction flag (werden L → eː not ɛ; sagt L → aː). Anchors on
+ *  the stress mark; for a monosyllable (no ˈ) it corrects the single vowel. */
+function applyLength(ipa: string, flag: string | undefined): string {
+  if (!flag) return ipa;
+  let m = /ˈ([aɐeɛiɪoɔuʊøœyʏə])(ː?)/.exec(ipa);
+  let vi: number;
+  if (m) vi = m.index + 1;
+  else { m = /([aɐeɛiɪoɔuʊøœyʏə])(ː?)/.exec(ipa); if (!m) return ipa; vi = m.index; } // monosyllable
+  if ((ipa[vi + 1] ?? "") === "̯") return ipa;              // diphthong offglide → no length
+  const v = m[1]!, long = m[2] === "ː";
+  if (flag === "L" && !long) { const lo = LONG_OF[v]; if (lo) return ipa.slice(0, vi) + lo + ipa.slice(vi + 1); }
+  if (flag === "S" && long) { const sh = SHORT_OF[v + "ː"]; if (sh) return ipa.slice(0, vi) + sh + ipa.slice(vi + 2); }
+  return ipa;
+}
+
 const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏə]/g;
 
 /** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
@@ -82,7 +116,7 @@ export function phonemizeWord(word: string): string {
     // stress: the kaikki lexicon ordinal if known, else the morphology stress part's first vowel.
     const dictOrd = stressDict().get(w);
     const ord = dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-    return placeStress(full, ord);
+    return applyLength(placeStress(full, ord), lengthDict().get(w));
   }
 
   const segs = toSegments(w);
@@ -105,7 +139,7 @@ export function phonemizeWord(word: string): string {
     if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
     out += segs[i]!.ph;
   }
-  return out;
+  return applyLength(out, lengthDict().get(w));
 }
 
 const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
