@@ -43,7 +43,9 @@ const FOREIGN: Record<string, string> = {
   ちぇ: "t͡ɕ" + E, しぇ: "ɕ" + E, じぇ: "d͡ʑ" + E,
   つぁ: "t͡s" + A, つぃ: "t͡s" + I, つぇ: "t͡s" + E, つぉ: "t͡s" + O,
 };
-const SMALL_V = new Set(["ぁ", "ぃ", "ぅ", "ぇ", "ぉ"]);
+// Vowel-continuation kana → their vowel phoneme, for same-vowel lengthening. Small ぁぃぅぇぉ act as casual-text
+// prolongations (なぁ→näː). NOTE: を is excluded (see coalescence).
+const VOWEL_KANA: Record<string, string> = { あ: A, い: I, う: U, え: E, お: O, ぁ: A, ぃ: I, ぅ: U, ぇ: E, ぉ: O };
 
 /** Fold katakana (and the long mark) to hiragana; leave everything else. */
 function toHiragana(w: string): string {
@@ -64,37 +66,43 @@ export function kanaToIpa(word: string): string | null {
   const chars = [...w];
   const morae: string[] = [];
   let i = 0;
+  let prevYouon = false;   // the previous mora was a youon (small ゃゅょ) — blocks same-vowel coalescence (see below)
   while (i < chars.length) {
     const c = chars[i]!, nx = chars[i + 1] ?? "";
-    // Extended katakana (foreign sounds): base kana + small vowel replaces the vowel (ファ→ɸä, チェ→t͡ɕe̞, ディ→di).
-    if (SMALL_V.has(nx) && FOREIGN[c + nx]) { morae.push(FOREIGN[c + nx]!); i += 2; continue; }
+    // Extended katakana (foreign sounds): base kana + small kana → onset + vowel (ファ→ɸä, チェ→t͡ɕe̞, ディ→di,
+    // デュ→dʲɯᵝ). Keys carry the small 2nd kana, so a direct FOREIGN lookup can't shadow a normal mora sequence.
+    if (FOREIGN[c + nx]) { morae.push(FOREIGN[c + nx]!); prevYouon = false; i += 2; continue; }
     // Youon: Ci + small ゃゅょ.
-    if (YOUON_ONSET[c] && SMALL_Y[nx]) { morae.push(YOUON_ONSET[c]! + SMALL_Y[nx]!); i += 2; continue; }
+    if (YOUON_ONSET[c] && SMALL_Y[nx]) { morae.push(YOUON_ONSET[c]! + SMALL_Y[nx]!); prevYouon = true; i += 2; continue; }
     // Sokuon っ → geminate the next mora's first consonant.
     if (c === "っ" || c === "ッ") {
       const next = SMALL_Y[chars[i + 2] ?? ""] && YOUON_ONSET[nx] ? YOUON_ONSET[nx]! + SMALL_Y[chars[i + 2]!]! : MORA[nx];
       if (next && !isVowelChar(next[0]!)) morae.push(next[0]!); // double the onset consonant
       else morae.push("ʔ");                                     // word-final / vowel-onset っ → glottal stop
-      i++; continue;
+      prevYouon = false; i++; continue;
     }
     // Long vowel mark ー → lengthen the previous mora's vowel.
     if (c === "ー" || c === "ｰ") { const last = morae[morae.length - 1]; if (last) morae[morae.length - 1] = last + "ː"; i++; continue; }
     const m = MORA[c];
     if (m === undefined) return null;      // not kana → let the caller handle (romaji, punctuation, kanji)
+    // Long-vowel coalescence, keyed on the CURRENT KANA (not the phoneme): the お+う / え+い digraphs always fold
+    // (おう→o̞ː, えい→e̞ː; fires after youon too — きょう→kʲo̞ː). A vowel kana repeating the previous vowel folds
+    // (おお→o̞ː, いい→iː) EXCEPT after a youon mora, where espeak keeps the two morae (じゅう→d͡ʑɯᵝɯᵝ, きゅう→kʲɯᵝɯᵝ).
+    // を is EXCLUDED from the same-vowel rule (a distinct kana, near-always the particle): 語を→ɡo̞o̞, never ɡo̞ː.
+    const last = morae.length - 1, prev = morae[last];
+    if (prev !== undefined) {
+      // Compare against the mora's base vowel, ignoring an existing ː, so a further compatible vowel stacks
+      // another length mark (けいい→ke̞ːː, ごうう→ɡo̞ːː).
+      const pv = prev.endsWith("ː") ? prev.slice(0, -1) : prev;
+      if (c === "う" && pv.endsWith(O)) { morae[last] = prev + "ː"; prevYouon = false; i++; continue; }
+      else if (c === "い" && pv.endsWith(E)) { morae[last] = prev + "ː"; prevYouon = false; i++; continue; }
+      else if (!prevYouon) { const vp = VOWEL_KANA[c]; if (vp && pv.endsWith(vp)) { morae[last] = prev + "ː"; i++; continue; } }
+    }
     morae.push(m);
+    prevYouon = false;
     i++;
   }
-  // Long-vowel coalescence: おう→o̞ː, えい→e̞ː, and a vowel + the same vowel → ː.
-  const out: string[] = [];
-  for (const m of morae) {
-    const prev = out[out.length - 1];
-    if (prev && isVowelChar(m)) {
-      if (prev.endsWith(O) && m === U) { out[out.length - 1] = prev + "ː"; continue; }   // おう → o̞ː
-      if (prev.endsWith(E) && m === I) { out[out.length - 1] = prev + "ː"; continue; }   // えい → e̞ː
-      if (prev.endsWith(m)) { out[out.length - 1] = prev + "ː"; continue; }               // いい → iː, ああ → äː
-    }
-    out.push(m);
-  }
+  const out = morae;
   // Moraic ん assimilates to the following onset's place: n before coronals, ŋ before velars, m before labials,
   // else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
   for (let k = 0; k < out.length; k++) {
