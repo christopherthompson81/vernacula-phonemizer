@@ -111,7 +111,9 @@ export function toSegments(word: string): Seg[] {
       const g = w[i] ?? "";
       const after = w[i + 1] ?? "";
       const hiatus = after !== "" && after !== "s" && !isV(after) && (w[i + 2] ?? "") === ""; // i/u + final C(≠s)
-      if ((g === "i" || g === "u") && !isV(after) && !hiatus) { pushGlide(segs, g === "i" ? "j" : "w", false); i++; }
+      const accentedNext = after !== "" && "áàâãéêíóôõúü".includes(after); // guard ""; i/u before an accented vowel is hiatus (miúdo)
+      // falling diphthong: i/u after a vowel, even before another (unaccented) vowel (praia → pɾajɐ, raio → ʁaju)
+      if ((g === "i" || g === "u") && !hiatus && !accentedNext) { pushGlide(segs, g === "i" ? "j" : "w", false); i++; }
       continue;
     }
 

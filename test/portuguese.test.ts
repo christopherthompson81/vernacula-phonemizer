@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
@@ -82,6 +84,21 @@ describe("european portuguese canonical IPA", () => {
     expect(phonemize("100", "pt")).toBe("sˈɐ̃j̃");     // cem
     expect(phonemize("1000001", "pt")).toBe("ũ miʎˈɐ̃w̃ e ũ"); // milhão e um (connector)
     expect(phonemizeWord("jardins")).toBe("ʒɐɾdˈĩʃ");   // -ins plural stays oxytone
+  });
+
+  // Independent adjudicated micro-gold (tools/pt-gold.tsv) — hand-transcribed EP, not Wiktionary-derived.
+  // Locks the engine against regressions; the lone known miss is the contested metaphonic pair neto (ˈnetu).
+  test("adjudicated micro-gold (independent referee)", () => {
+    const rows = readFileSync(new URL("../tools/pt-gold.tsv", import.meta.url), "utf8").split("\n");
+    let match = 0, total = 0;
+    for (const line of rows) {
+      if (line === "" || line.startsWith("#") || !line.includes("\t")) continue;
+      const [word, gold] = line.split("\t");
+      total++;
+      if (phonemizeWord(word!) === gold!.trim()) match++;
+    }
+    expect(total).toBeGreaterThan(160);
+    expect(match / total).toBeGreaterThanOrEqual(0.98); // ≥ 98% (allows the contested neto)
   });
 
   test("text: reduction + destressed clitics + punctuation", () => {

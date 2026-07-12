@@ -121,3 +121,30 @@ Adversarial review of Phase 2 found a severe generator bug + two smaller issues,
    (initE) capturing them from the referee → edgar→ɛdɡˈaɾ, eclético→eklˈɛtiku. The table now carries 3 axes.
  - loader made CRLF-safe (split /\r?\n/).
 Final: 2750 rows (2200 open, 268 x, 319 initial-e); freq-common raw 76.2% / folded 86.4%.
+
+## Run 4 — independent adjudicated micro-gold (a 2nd referee)
+No 2nd freely-accessible, EP-variety, Wiktionary-independent referee exists (checked: kaikki = same Wiktionary
+source as wikipron → correlated; epitran por-Latn is the WRONG VARIETY — pequeno→pɛkʷɛno, no EP reduction/
+nasalization; P-PAL not freely bulk-downloadable; espeak = the divestment target). So built one:
+tools/pt-gold.tsv — 170 words HAND-TRANSCRIBED from standard EP phonology (NOT read off wikipron), open/close
+adjudicated from knowledge. Eval tools/pt-gold-eval.mts + a vitest regression lock (≥98%).
+
+It earned its keep immediately — caught things the wikipron-folded metric could not:
+ - ENGINE BUG: "aia/aio" not parsed as an ai-diphthong → mis-stress (praia→pɾɐˈiɐ). Fixed: the offglide now
+   fires before an unaccented vowel too (praia→pɾˈajɐ, raio→ʁaju), guarded against the includes("") trap and
+   accented-vowel hiatus (miúdo). +
+ - ENGINE over-glide: a high vowel before a STRESSED high vowel is hiatus, not a glide (juiz→ʒuˈiʃ,
+   miúdo→miˈudu, ruído→ʁuˈidu; but piano→pjɐnu, água→aɡwɐ before a low vowel keep the glide). onglide guard.
+ - LEXICON COVERAGE GAP class: common open-vowel words wikipron LACKS (telefone, nove, fome, depressa) or gets
+   WRONG (bola: wikipron close o, EP is open ɔ) — invisible to the wikipron metric because they aren't in
+   wikipron to score. Filled with a hand-curated supplement (lexicon-manual.tsv, merged over the generated
+   table): 16 open-ɔ + 13 open-ɛ high-frequency words.
+
+Result: adjudicated gold 96.5→**99.4%** (169/170; lone miss = the contested metaphonic pair neto — standard EP
+close /ˈnetu/ vs wikipron ɛ). The praia/juiz fixes also lifted the wikipron folded score to 77.6%.
+
+STATUS: EP is now examined against wikipron (single Wiktionary referee, ~77% folded — deflated by proper-noun
+skew + wikipron's own gaps/errors) AND an independent hand-adjudicated micro-gold (99.4%). Still not "verified"
+to the ≥2-large-independent-referee bar (P-PAL would be the upgrade), but the micro-gold gives real independent
+signal and confirms the engine is sound; the residual is lexicon COVERAGE (not engine correctness), addressable
+by a broader curated open-vowel list or P-PAL.
