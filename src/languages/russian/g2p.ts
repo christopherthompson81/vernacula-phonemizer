@@ -1,0 +1,203 @@
+/**
+ * Russian grapheme→phoneme engine (standard Moscow Russian). Cyrillic + a stress-vowel ordinal → canonical
+ * IPA. Handles palatalization (hard/soft consonant pairs Cʲ), iotation (я/е/ё/ю after a vowel/sign/initial →
+ * j+V), stress-based vowel reduction (akanye/ikanye), final devoicing and regressive voicing assimilation.
+ * Stress is lexical (not derivable from spelling) — supplied by the caller from stress.tsv. See
+ * docs/ru_native_bringup_investigation.md.
+ */
+
+// Consonant → [hard, soft] IPA. ж/ш/ц are always hard; ч/щ/й always soft.
+const CONS: Record<string, [string, string]> = {
+  б: ["b", "bʲ"], в: ["v", "vʲ"], г: ["ɡ", "ɡʲ"], д: ["d", "dʲ"], ж: ["ʐ", "ʐ"], з: ["z", "zʲ"],
+  к: ["k", "kʲ"], л: ["ɫ", "lʲ"], м: ["m", "mʲ"], н: ["n", "nʲ"], п: ["p", "pʲ"], р: ["r", "rʲ"],
+  с: ["s", "sʲ"], т: ["t", "tʲ"], ф: ["f", "fʲ"], х: ["x", "xʲ"], ц: ["t͡s", "t͡s"], ч: ["t͡ɕ", "t͡ɕ"],
+  ш: ["ʂ", "ʂ"], щ: ["ɕː", "ɕː"], й: ["j", "j"],
+};
+const ALWAYS_HARD = new Set(["ж", "ш", "ц"]);
+const ALWAYS_SOFT = new Set(["ч", "щ", "й"]);
+const SOFT_VOWEL = new Set(["е", "ё", "и", "ю", "я"]);   // palatalize the preceding consonant
+const VOWELS = new Set(["а", "е", "ё", "и", "о", "у", "ы", "э", "ю", "я"]);
+const IOTATED = new Set(["е", "ё", "ю", "я"]);            // → j+V after a vowel/ъ/ь/word-initial
+
+// Voicing pairs for final devoicing + regressive assimilation.
+const DEVOICE: Record<string, string> = { b: "p", bʲ: "pʲ", v: "f", vʲ: "fʲ", ɡ: "k", ɡʲ: "kʲ", d: "t", dʲ: "tʲ", z: "s", zʲ: "sʲ", ʐ: "ʂ" };
+const VOICE: Record<string, string> = { p: "b", pʲ: "bʲ", f: "v", fʲ: "vʲ", k: "ɡ", kʲ: "ɡʲ", t: "d", tʲ: "dʲ", s: "z", sʲ: "zʲ", ʂ: "ʐ", t͡s: "d͡z", t͡ɕ: "d͡ʑ" };
+const VOICELESS_OBSTR = new Set(["p", "pʲ", "f", "fʲ", "k", "kʲ", "t", "tʲ", "s", "sʲ", "ʂ", "x", "xʲ", "t͡s", "t͡ɕ", "ɕː"]);
+const VOICED_OBSTR = new Set(["b", "bʲ", "v", "vʲ", "ɡ", "ɡʲ", "d", "dʲ", "z", "zʲ", "ʐ"]);
+
+interface Unit {
+  cyr: string;
+  cons?: { ph: string; soft: boolean };  // a consonant (ph already hard/soft-selected)
+  vowel?: { letter: string; glide: boolean; stressed: boolean; ph: string }; // ph filled at realize
+}
+
+const SOFTEN_TGT = "сзтдн"; // dentals that soften regressively (л excluded — пополнять keeps ɫ)
+const SOFTEN_TRIG = "тд";   // ... before a soft т/д (before soft н is inconsistent: сняться keeps hard с)
+
+/** Split a lowercased Cyrillic word into consonant / vowel / sign units, resolving palatalization + iotation. */
+function parse(w: string): Unit[] {
+  const chars = [...w];
+  const units: Unit[] = [];
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i]!;
+    // т/д before с → affricate t͡s (детский, отсюда); with a ь between (-ться) → long t͡sː.
+    if ((c === "т" || c === "д")) {
+      const soft = chars[i + 1] === "ь";
+      const sIdx = soft ? i + 2 : i + 1;
+      if (chars[sIdx] === "с") { units.push({ cyr: "ц", cons: { ph: soft ? "t͡sː" : "t͡s", soft: false } }); i = sIdx; continue; }
+      if (chars[i + 1] === "ч") { units.push({ cyr: "ч", cons: { ph: "t͡ɕː", soft: true } }); i += 1; continue; } // тч → t͡ɕː
+    }
+    // Reflexive -ся / -сь after a hard consonant keeps hard с (вернулся → …ɫsə); after й (-йся) it stays soft
+    // (соприкасающийся → …jsʲə).
+    if (c === "с" && (chars[i + 1] === "я" || chars[i + 1] === "ь") && i + 2 >= chars.length
+        && chars[i - 1] !== "й" && !VOWELS.has(chars[i - 1] ?? "")) {
+      units.push({ cyr: "с", cons: { ph: "s", soft: false } }); continue;
+    }
+    if (CONS[c]) {
+      const next = chars[i + 1] ?? "";
+      let soft: boolean;
+      if (ALWAYS_HARD.has(c)) soft = false;
+      else if (ALWAYS_SOFT.has(c)) soft = true;
+      else soft = next === "ь" || SOFT_VOWEL.has(next);
+      units.push({ cyr: c, cons: { ph: CONS[c]![soft ? 1 : 0], soft } });
+    } else if (VOWELS.has(c)) {
+      const prev = chars[i - 1] ?? "";
+      const glide = IOTATED.has(c) && (prev === "" || VOWELS.has(prev) || prev === "ь" || prev === "ъ");
+      units.push({ cyr: c, vowel: { letter: c, glide, stressed: false, ph: "" } });
+    }
+    // ь/ъ carry no phoneme (ь already softened the preceding consonant); skip.
+  }
+  // Regressive palatalization: a dental softens before an immediately-following soft dental (гостиный → sʲtʲ).
+  for (let i = 0; i < units.length; i++) {
+    const c = units[i]!;
+    if (!c.cons || c.cons.soft || !SOFTEN_TGT.includes(c.cyr)) continue;
+    const nx = units[i + 1];
+    if (!nx?.cons?.soft) continue;
+    // two-tier: с/з soften only before soft т/д; т/д/н soften before soft т/д/н (ежедневный → dʲnʲ)
+    const ok = "сз".includes(c.cyr) ? "тд".includes(nx.cyr) : "тднчщ".includes(nx.cyr); // н/т/д soften before ч/щ too (стаканчик)
+    if (ok) c.cons = { ph: CONS[c.cyr]![1], soft: true };
+  }
+  return units;
+}
+
+// Base (stressed) vowel quality by letter + whether the preceding consonant is soft.
+function stressedVowel(letter: string, softContext: boolean): string {
+  switch (letter) {
+    case "а": return softContext ? "æ" : "a";
+    case "я": return "æ";
+    case "о": return "o";
+    case "ё": return "o";
+    case "э": return "ɛ";
+    case "е": return "e";
+    case "у": case "ю": return "u";
+    case "и": return "i";
+    case "ы": return "ɨ";
+    default: return letter;
+  }
+}
+
+// Unstressed reduction (akanye/ikanye), position-sensitive: `strong` = immediately-pretonic OR absolute
+// word-initial (→ ɐ for hard а/о); post-tonic soft vowels reduce further to ə.
+function reducedVowel(letter: string, softContext: boolean, strong: boolean, postTonic: boolean): string {
+  const soft = softContext || letter === "я" || letter === "е" || letter === "и" || letter === "ё" || letter === "ю";
+  switch (letter) {
+    case "а": case "о":
+      if (soft) return postTonic ? "ə" : "ɪ";       // after a soft consonant (ча, чо…): pretonic ɪ, post-tonic ə
+      return strong ? "ɐ" : "ə";                     // hard: 1st-pretonic/initial ɐ, else ə
+    case "я": return postTonic ? "ə" : "ɪ";          // post-tonic я → ə (далями), pretonic → ɪ
+    case "е": return "ɪ";                            // unstressed е → ɪ (both positions)
+    case "и": return "ɪ";
+    case "э": return postTonic ? "ə" : "ɪ";
+    case "у": case "ю": return "ʊ";
+    case "ы": return "ɨ";
+    case "ё": return "o";                            // ё is always stressed; unreached
+    default: return letter;
+  }
+}
+
+/** Phonemize a Russian word given the 0-based ordinal of its stressed vowel. */
+export function toIpa(word: string, stressOrd: number): string {
+  const units = parse(word.toLowerCase());
+  const vowelIdx = units.map((u, i) => (u.vowel ? i : -1)).filter((i) => i >= 0);
+  const stressPos = vowelIdx[stressOrd] ?? vowelIdx[vowelIdx.length - 1] ?? -1;
+
+  // Realize vowels (quality depends on stress + soft context + reduction position).
+  const stressK = vowelIdx.indexOf(stressPos);
+  for (let k = 0; k < vowelIdx.length; k++) {
+    const i = vowelIdx[k]!;
+    const v = units[i]!.vowel!;
+    const prevCons = units[i - 1]?.cons;
+    const softCtx = !!prevCons?.soft || (v.glide && v.letter !== "э" && v.letter !== "ы");
+    // soft context to the right (for æ/ɵ fronting): a soft consonant, or an iotated (glide) vowel.
+    let nextSoft = false;
+    for (let j = i + 1; j < units.length; j++) { if (units[j]!.cons) { nextSoft = units[j]!.cons!.soft; break; } if (units[j]!.vowel) { nextSoft = units[j]!.vowel!.glide; break; } }
+    const prevSoft = !!prevCons?.soft;
+    if (i === stressPos) {
+      v.ph = stressedVowel(v.letter, softCtx);
+      if ((v.letter === "я" || v.letter === "а") && v.ph === "æ" && !nextSoft) v.ph = "a"; // æ only between two soft C
+      // ё → ɵ whenever not word-initial (встаёт, жильё); о → ɵ after a soft consonant (тётя).
+      if ((v.letter === "ё" && i > 0) || (v.letter === "о" && prevSoft)) v.ph = "ɵ";
+    } else {
+      const strong = k === stressK - 1 || i === 0;   // immediately-pretonic or absolute word-initial
+      v.ph = reducedVowel(v.letter, softCtx, strong, k > stressK);
+    }
+    if ((v.letter === "у" || v.letter === "ю") && (prevSoft || v.glide) && nextSoft) v.ph = "ʉ"; // у between soft → ʉ
+    // After a hard sibilant / ц: и → ɨ, stressed е → ɛ, unstressed е → ɨ.
+    const prevCyr = units[i - 1]?.cyr;
+    if (prevCyr && "жшц".includes(prevCyr)) {
+      if (v.letter === "и") v.ph = "ɨ";
+      else if (v.letter === "е") v.ph = i === stressPos ? "ɛ" : "ɨ";
+    }
+    // Word-final unstressed vowels: е → e (сборище → …ɕːe), я → ə (дядя → …dʲə).
+    if (i === units.length - 1 && i !== stressPos) {
+      if (v.letter === "е") v.ph = "e";
+      else if (v.letter === "я") v.ph = "ə";
+    }
+  }
+
+  // Voicing: regressive assimilation + final devoicing (right to left over the segment sequence).
+  for (let i = units.length - 1; i >= 0; i--) {
+    const c = units[i]?.cons;
+    if (!c) continue;
+    let next: { ph: string; kind: "c" | "v" } | null = null;
+    for (let j = i + 1; j < units.length; j++) {
+      if (units[j]!.cons) { next = { ph: units[j]!.cons!.ph, kind: "c" }; break; }
+      if (units[j]!.vowel) { next = { ph: units[j]!.vowel!.ph, kind: "v" }; break; }
+    }
+    if (!next) {                                                 // word-final → devoice
+      if (VOICED_OBSTR.has(c.ph)) c.ph = DEVOICE[c.ph] ?? c.ph;
+      continue;
+    }
+    if (next.kind === "v") continue;                            // before a vowel: keep as is
+    // NB: в devoices normally (вш → fʂ), it just doesn't TRIGGER voicing of a preceding C (guarded below).
+    if (VOICELESS_OBSTR.has(next.ph) && VOICED_OBSTR.has(c.ph)) c.ph = DEVOICE[c.ph] ?? c.ph;
+    else if (VOICED_OBSTR.has(next.ph) && next.ph !== "v" && next.ph !== "vʲ" && VOICELESS_OBSTR.has(c.ph)) c.ph = VOICE[c.ph] ?? c.ph;
+  }
+
+  return withStress(units, stressPos);
+}
+
+/** Assemble the IPA string, inserting ˈ before the stressed vowel (after any onset j-glide). Monosyllables
+ *  carry no stress mark (matching the reference convention). */
+function withStress(units: Unit[], stressPos: number): string {
+  const nVowels = units.filter((u) => u.vowel).length;
+  const lastIdx = units.length - 1;
+  let out = "";
+  let prevCons = "";
+  for (let i = 0; i < units.length; i++) {
+    const u = units[i]!;
+    if (u.cons) {
+      if (u.cons.ph === prevCons) { if (i !== lastIdx) out += "ː"; }  // geminate → Cː; final geminate → single
+      else out += u.cons.ph;
+      prevCons = u.cons.ph;
+      continue;
+    }
+    if (u.vowel) {
+      if (u.vowel.glide) out += "j";
+      if (i === stressPos && nVowels > 1) out += "ˈ";
+      out += u.vowel.ph;
+      prevCons = "";
+    }
+  }
+  return out;
+}
