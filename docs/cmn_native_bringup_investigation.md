@@ -1,0 +1,113 @@
+# Mandarin (cmn) native bring-up — investigation
+
+Third native language for vernacula-phonemizer (after hi, en). Direct-to-vernacula,
+independent of the espeak base. Canonical-IPA output only.
+
+## Architecture
+
+`Han text → segment + Hanzi→pinyin (polyphone-aware) → tone sandhi → pinyin→IPA → canonical IPA (Chao tones)`
+
+- Hanzi→pinyin: pypinyin (MIT) char + phrase dicts; Unihan kMandarin fallback. NON-espeak.
+- pinyin→IPA: ~410-syllable lookup table GENERATED from espeak-ng-portable's already-converged
+  canonical cmn engine (validated vs wikipron+epitran). We carry the OUTPUT correspondence as
+  declarative data, not the espeak engine.
+- tones: number → Chao contour letters, kept as numbers through sandhi then rendered.
+- sandhi: 3-3 (214+214→35+214), 一 yī, 不 bù, neutral tone — engine.
+
+## Phasing
+1. Pinyin path: syllable→IPA + tones + sandhi. Anchor: espeak-portable integration-test values
+   (zhong1 guo2 → ʈ͡ʂˈoŋ˥˥ kˈuo˧˥ ; ni3 hao3 → nˈi˧˥ xˈɑᵘ˨˩˦ [3-3 sandhi]).
+2. Hanzi front-end: char + phrase dict + greedy longest-match segmentation.
+3. Numbers + normalization + punctuation→pause.
+
+## Resources located
+- /tmp/pptest/pp/pypinyin/{pinyin_dict.json (788K, char→readings), phrases_dict.json (2.5M, phrase→per-char)}
+- /tmp/Unihan_Readings.txt (kMandarin, 44,349 chars)
+- espeak-ng-portable data/cmn/ (converged; meta.toneChao, sandhi, canonicalGlyphMap)
+
+## Run 1 — Phase 1 complete (pinyin path)
+
+Generated the 424-syllable toneless IPA table from the converged engine. KEY FINDING: espeak places the
+Chao tone INCONSISTENTLY — `zhong1→ʈ͡ʂˈoŋ˥˥` (after coda) vs `bang2→pˈɑ˧˥ŋ` (before coda ŋ). Toneless
+segments are consistent, so we strip all tone letters and the engine re-appends the tone at SYLLABLE END
+uniformly (standard convention `中 [ʈʂʊŋ˥]`; fixes the espeak defect). 8 garbage rows (ü + syllabic-nasal
+interjections routed to English) hand-patched from validated pieces (lüe→lˈyɛ, ju→t͡ɕy → lü=lˈy etc.);
+non-standard `wong` dropped → 424 syllables.
+
+Engine: parseSyllable → third-tone sandhi (3+3→2+3, L→R pairwise) → append Chao. Reproduces the
+espeak-portable anchors exactly (zhong1 guo2 → ʈ͡ʂˈoŋ˥˥ kˈuo˧˥ ; ni3 hao3 → nˈi˧˥ xˈɑᵘ˨˩˦). 4 test groups pass.
+
+OPEN CONVENTION QUESTIONS (surfaced to user):
+- per-syllable ˈ on every full-tone syllable (espeak convention, kept) vs drop for a tone language.
+- tone-at-end regularization diverges from espeak on -n/-ng syllables (intentional).
+
+Next: Phase 2 Hanzi front-end (pypinyin char + phrase dicts, greedy segmentation, polyphone disambiguation).
+
+## Run 2 — Phase 2 complete (Hanzi front-end) + stress convention
+
+USER DECISION: dropped per-syllable stress (tone-only). Mandarin has no contrastive lexical stress;
+tone + neutral-tone absence carry prominence. Stripped ˈ/ˌ from syllable-ipa.tsv.
+
+Built chars.tsv (41,923 Hanzi → base+tone readings) + phrases.tsv (47,111 phrases) from pypinyin (MIT)
+via tools/build-cmn-pinyin.mjs (diacritic→base+tone at build time; runtime needs no diacritic parser).
+Segmenter: greedy longest-match against phrase dict (polyphone disambiguation), single-char fallback,
+non-Han pass-through. Verified: 银行→jin˧˥ xɑŋ˧˥ (行=háng, not xíng), 你好 3-3 sandhi across segmentation,
+绿→ly˥˩, phrase-baked 一 sandhi (一不小心→ji˧˥...=yí). Full suite green.
+
+Next: Phase 3 — numbers (Arabic + Chinese numerals), punctuation→pause, 一/不 sandhi for bare chars,
+Latin→English routing. Then: independent-referee validation pass (wikipron/epitran) + C# mirror decision.
+
+## Run 3 — Phase 3 complete (numbers, punctuation, Latin) + referee spot-check
+
+Phase 3: Arabic→Chinese-numeral quantity compositor (numbers.ts; 万/亿 grouping, internal 零, 12→十二),
+spliced inline before segmentation so number readings inherit sandhi+polyphone (123→一百二十三, 一→yì via
+phrase dict). Punctuation 。，、？！→inline pause marks; embedded Latin→injected en phonemizer. 24 tests pass.
+
+REFEREE SPOT-CHECK vs wikipron cmn (independent, Wiktionary): tones align PERFECTLY (˨˩˦=²¹⁴, ˥˩=⁵¹,
+˧˥=³⁵, ˥˥=⁵⁵). Segments agree modulo already-adjudicated broad/narrow convention (our oŋ vs their ʊŋ for
+-ong; our o vs their ɔ for 我; our glide j/ᶦ/ᵘ vs their i̯/ʊ̯ subscripts). No new defects from the tone-at-end
++ stress-drop transforms. 不 wikipron entry = fǒu (archaic) vs our bù (common, correct). Confirms the
+segmental IPA is inherited-validated; new surface (polyphone selection, number composition) is sound.
+
+STATUS: cmn native bring-up FUNCTIONAL across pinyin + Han text. Remaining refinements: year/ID digit-string
+reading, bare 一/不 sandhi, colloquial 两, full referee sweep, C# mirror (if pursued).
+
+## Run 4 — Full referee sweep (epitran + wikipron)
+
+Two independent referees, normalizer folds pure notation + adjudicated vowel conventions, diff-core buckets
+separate systematic convention from per-syllable defects.
+
+FOUND + FIXED 1 real defect: bare -e monophthong final was rendered INCONSISTENTLY (o for ce/ge/he/e/re/se;
+ə for de/te/ne/le) — should be ɤ. Both referees agree (wikipron 特tʰɤ 色sɤ 客kʰɤ; epitran ɤ). Fixed all 16
+bare-e syllables → ɤ (tools/cmn-referee-sweep.mjs surfaced it; pinned in mandarin.test.ts). NOT touched:
+-eng/-en (ə is standard-accepted before nasal), -ie/-üe (e=ɛ; epitran's ɤ there is ITS bug, ours right).
+
+AGREEMENT after fix (lenient = fold ɑ/a, ɔ/o, ʊ/o):
+- epitran cmn-Latn (syllable table): 82.1% (was 75%). Residual = glide sub/superscript, bo/po/mo/fo glide,
+  syllabic-nasal interjections, epitran üe naivety.
+- wikipron cmn (Hanzi, credit-any-reading, 20,103 chars): 75.8%. Residual buckets each = ONE systematic
+  convention across many syllables (y/w glide iy≠y, offglide iau≠iao, glottal onset ˀɤ, üan æ≠ɛ) — NOT
+  scattered errors. Confirms segment quality; polyphone selection sound.
+
+CONCLUSION: segmental IPA is referee-corroborated (2 referees). Residual divergence is convention, matching
+the espeak-portable convergence experience (which folded more aggressively to 94%). cmn segments VERIFIED.
+Tools: tools/cmn-referee-sweep.mjs (epitran), tools/cmn-wikipron-sweep.mts (wikipron).
+
+## Run 5 — Year reading, 一/不 sandhi, colloquial 两
+
+Three refinements added:
+- YEAR: a 4-digit run before 年 reads digit-by-digit (2024年 → 二〇二四年 = èr líng èr sì nián); shorter numbers
+  and bare numbers stay quantity readings (100年 → 一百年; 2024 → 两千零二十四).
+- 一/不 SANDHI (yiBuSandhi.ts, on segmented tokens with source char): 不 before 4th → 2nd (不是 bú shì);
+  一 before 4th → 2nd (一个 yí gè), before 1/2/3 → 4th (一天 yì tiān), final/ordinal(第一) → 1st (citation).
+- 两: standalone 2 before 千/万/亿 or a leading 百 → 两 (2000 → 两千, 200 → 两百); 2 before a measure word → 两
+  (2个 → 两个); but 二 kept in tens/units and inside compounds (十二个, 二十二). group4() `top` flag + measure set.
+
+BUG FOUND + FIXED during this work: pre-substituting numbers into the char stream let a spoken digit 一
+(三点一四, 2021年) wrongly take word-一 sandhi. Fixed by tracking a per-char `synth` mask through
+substituteNumbers → segment: synthesized digits get no token `src`, so 一/不 sandhi fires only on real input
+chars. Quantity 一 sandhi (一百 → yì bǎi) is unaffected (comes from the phrase dict). Refactored text() from a
+regex TOKEN loop to a code-point walk carrying the mask. 28 tests pass; syllable-table sweep unchanged (82.1%).
+
+REMAINING (documented in cmn.jsonc): counting-sequence 一 (一二三 reads sandhi'd, not citation — needs
+non-tonal context), phone/ID digit-strings, C# mirror.
