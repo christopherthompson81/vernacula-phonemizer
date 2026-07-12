@@ -76,7 +76,7 @@ export function toSegments(word: string): Seg[] {
   const emitArticle = (lamIdx: number): number => {
     let j = lamIdx + 1, shadda = false, vowelMark = "";
     while (HARAKAT.has(s[j] ?? "")) { if (s[j] === SHADDA) shadda = true; else vowelMark = s[j]!; j++; }
-    if (shadda) { pushCons("lː"); pushVowel(short[vowelMark] ?? ""); return j; } // الّذي/الله: article-lam + root-lam geminate
+    if (shadda) { pushCons("lː"); const r = resolveVowel(vowelMark, s, j); pushVowel(r.v); return r.next; } // الّذي/الله: geminate + its (possibly long) vowel
     if (!SUN.has(s[j] ?? "")) pushCons("l");     // moon letter keeps l (sun letter: drop l, it geminates via its shadda)
     return j;
   };

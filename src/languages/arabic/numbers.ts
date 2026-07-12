@@ -43,12 +43,18 @@ function below1e6(n: number): string {
   return r ? `${head} wa ${below1000(r)}` : head;
 }
 
-/** Non-negative integer (< 10⁹) → Arabic IPA words. Larger / invalid → digit-by-digit. */
+/** Non-negative integer (< 10⁹) → Arabic IPA words. Larger / invalid → digit-by-digit (digits only). */
 export function numberToIpa(n: number): string {
-  if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return [...String(Math.abs(n))].map((d) => ONES[Number(d)]!).join(" ");
+  if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
+    return [...String(Math.abs(n))].map((d) => ONES[Number(d)]).filter(Boolean).join(" ");
+  }
   if (n === 0) return "sˤifr";
   if (n < 1e6) return below1e6(n);
   const m = Math.floor(n / 1e6), r = n % 1e6;
-  const head = m === 1 ? "miljuːn" : `${below1000(m)} miljuːn`;
+  let head: string;
+  if (m === 1) head = "miljuːn";
+  else if (m === 2) head = "miljuːnaːn";                       // dual
+  else if (m <= 10) head = `${below100(m)} malaːjiːn`;         // 3–10 million: plural malaːjiːn
+  else head = `${below1000(m)} miljuːn`;
   return r ? `${head} wa ${below1e6(r)}` : head;
 }

@@ -33,6 +33,12 @@ describe("arabic canonical IPA — diacritized path", () => {
     expect(phonemize("٢٠٢٤", "ar")).toBe("ʔalfaːn wa ʔarbaʕa wa ʕiʃruːn"); // 2000 and 24
     expect(phonemize("100", "ar")).toBe("miʔa");
     expect(phonemize("21", "ar")).toBe("waːħid wa ʕiʃruːn");               // ones precede tens
+    expect(phonemize("2000000", "ar")).toBe("miljuːnaːn");                 // millions dual (review fix)
+    expect(phonemize("3000000", "ar")).toBe("θalaːθa malaːjiːn");          // millions plural
+  });
+
+  test("dagger-alif after a geminated article-lam keeps its long vowel (review fix)", () => {
+    expect(phonemizeWord("لِلّٰه")).toBe("lilːˈaːh"); // was dropping the aː
   });
 
   test("text: words + numbers + punctuation → pause", () => {

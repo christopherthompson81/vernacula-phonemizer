@@ -84,3 +84,21 @@ Then Phase 2: permissive BiLSTM retrain on /mnt/data (CATT teacher + Arabic Wiki
 Residual (deferred edges, ~4%): initial إي→ʔiː defective spelling, الا hamzat-wasl (form VII/VIII), nasal
 place assim (broad/folded), number-word stress. Convention: gemination Cː, pausal (no case ending), fold
 secondary stress. NEXT: PR + review + merge, THEN Phase 2 permissive diacritizer retrain (/mnt/data).
+
+## PR #3 review + fixes
+Two reviewers (g2p; stress/numbers/text). 3 fixes:
+1. emitArticle dropped a dagger-alif / long vowel after a geminated article-lam (لله→lilːh) — routed through
+   resolveVowel instead of the short-only lookup → lilːaːh.
+2. numberToIpa non-integer fallback emitted undefined (1.5→"waːħid  xamsa") — filter(Boolean).
+3. Millions lacked dual/plural (2M→"iθnaːn miljuːn") — added miljuːnaːn (dual) + malaːjiːn (3–10 plural),
+   matching the hundreds/thousands handling.
+Reviewers verified the rest extensively (gatherMarks, resolveVowel/bareGlide, article index math, taː-marbuta,
+bare-alif, alif-madda, degenerate inputs, number boundaries, TOKEN regex). 49 tests pass; segments 96.0%.
+
+## Phase 2 integration DE-RISKED (existing model as stand-in)
+Ran espeak-portable's loadArabicDiacritizer (onnxruntime-node 1.27) on the existing diacritizer.onnx → bare
+Arabic vocalizes correctly → chained into vernacula phonemize → CORRECT IPA end-to-end (كتب الطالب الدرس →
+kˈatab ʔatˤːˈaːlib ʔadːˈars). Plumbing PROVEN. Remaining Phase 2: port ~466 lines (arabicDiacritizer.ts +
+arabicDiacritizerModelOnnx.ts + helpers) into vernacula, onnxruntime-node OPTIONAL dep, async diacritize()
+pre-pass (phonemize stays sync), GITIGNORE the NC stand-in .onnx (local dev only), then permissive retrain
+(CATT + Arabic Wikipedia, /mnt/data) → swap the .onnx.
