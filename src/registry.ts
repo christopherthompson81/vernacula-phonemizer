@@ -3,6 +3,7 @@
  * language), built lazily and cached. No espeak, no fallback — an unknown language throws.
  */
 import { createHindi } from "./languages/hindi/hindi.ts";
+import { createEnglish } from "./languages/english/english.ts";
 
 export interface Phonemizer {
   /** Full text → canonical IPA. */
@@ -23,8 +24,9 @@ export function getPhonemizer(lang: string): Phonemizer {
 
 function build(lang: string): Phonemizer {
   switch (lang) {
-    // Embedded Latin in Hindi text will route to the English phonemizer once it lands; undefined drops it.
-    case "hi": return createHindi();
+    case "en": return createEnglish();
+    // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
+    case "hi": return createHindi((latin) => getPhonemizer("en").text(latin));
     default: throw new Error(`vernacula-phonemizer: no phonemizer registered for "${lang}"`);
   }
 }

@@ -1,0 +1,187 @@
+// Native canonical-IPA MANIFEST for English (en) — the small, hand-authored FACTS of the English
+// divestment, consolidated Hindi-style into one self-describing file. UNLIKE data/native/hindi.jsonc,
+// this is NOT the whole language: English is irregular, so its bulk data is STATISTICAL MODELS referenced
+// under "models" below (a 125k-word lexicon + an n-gram OOV G2P + a POS perceptron), which cannot be
+// authored as rules. Only the closed, hand-curatable facts live here.
+//
+// LOAD-BEARING blocks (read at runtime by src/loadData.ts + the C# LanguageLoader): "heteronyms",
+// "numbers". The "convention", "provenance", "models" blocks are self-describing documentation.
+{
+  "language": "en",
+  "name": "English (General American)",
+  "provenance": "CMUdict (public-domain lexicon) + a cleanroom joint-n-gram OOV G2P + a UD-EWT-trained averaged-perceptron POS tagger. NO espeak en_list / en_rules / number-fragment content is read for the DEFAULT render; espeak's compiled tables stay loaded only as the espeak-mode (ipaRendering:\"espeak\") regression guard. WHICH words are heteronyms, and the number words, are small closed language facts (no attribution needed).",
+
+  // The canonical-IPA conventions every value below (and the CMUdict lexicon) is written in. These are
+  // DOCUMENTATION — the engine applies them via arpabetToIpa + meta.json flags (postIpaFlapT, the
+  // canonicalGlyphMap ɜː→ɝ / ɾ→t̬), cross-referenced here so the reader sees the whole decision in one place.
+  "convention": {
+    "stress":     "before the nucleus (ˈ/ˌ precede the vowel, not the syllable)",
+    "flapping":   "intervocalic /t d/ → voiced flap t̬ (city → sˈɪt̬i)",
+    "aspiration": "stressed voiceless-stop onsets kʰ pʰ tʰ",
+    "darkL":      "coda /l/ → ɫ",
+    "offglides":  "FACE/PRICE/MOUTH offglides as superscripts aᶦ aᶷ",
+    "weakVowel":  "reduced KIT → ᵻ",
+    "rhotic":     "NURSE ɝ, lettER ɚ",
+    "merge":      "LOT–THOUGHT → ɔː"
+  },
+
+  // POS HETERONYMS — word → reading per part of speech, selected by the POS tagger (models.posModel) via
+  // the token's threaded expectation: past → verb → noun → default. Excluded from the flat lexicon so the
+  // POS choice wins. Regular -s/-es plurals get an appended allomorph (records → base + z); voicing pairs
+  // (use/close/house) defer their plurals to the lexicon. See src/Phonemize/render.ts.
+  "heteronyms": {
+    "absent": { "default": "ˈæbsənt", "verb": "æbsˈɛnt" },
+    "abstract": { "default": "ˈæbstɹækt", "verb": "æbstɹˈækt" },
+    "abuse": { "default": "əbjˈuːs", "verb": "əbjˈuːz" },
+    "accent": { "default": "ˈæksɛnt", "verb": "əksˈɛnt" },
+    "addict": { "default": "ˈædɪkt", "verb": "ədˈɪkt" },
+    "address": { "default": "ˈædɹɛs", "verb": "ədɹˈɛs" },
+    "advert": { "default": "ˈædvɚt", "verb": "ædvˈɝt" },
+    "alternate": { "default": "ˈɔːɫtɚnət", "verb": "ˈɔːɫtɚnˌeᶦt" },
+    "annex": { "default": "ˈænɛks", "verb": "ənˈɛks" },
+    "appropriate": { "default": "əpɹˈoᶷpɹiʲət", "verb": "əpɹˈoᶷpɹiʲˌeᶦt" },
+    "approximate": { "default": "əpɹˈɑːksəmət", "verb": "əpɹˈɑːksəmˌeᶦt" },
+    "attribute": { "default": "ˈætɹəbjˌuːt", "verb": "ətɹˈɪbjuːt" },
+    "bow": { "default": "bˈoᶷ", "verb": "bˈaᶷ" },
+    "close": { "default": "klˈoᶷs", "verb": "klˈoᶷz" },
+    "combat": { "default": "kʰˈɑːmbæt", "verb": "kəmbˈæt" },
+    "combine": { "default": "kəmbˈaᶦn", "noun": "kʰˈɑːmbaᶦn" },
+    "commune": { "default": "kʰˈɑːmjuːn", "verb": "kəmjˈuːn" },
+    "compact": { "default": "kʰˈɑːmpækt", "verb": "kəmpˈækt" },
+    "compound": { "default": "kʰˈɑːmpaᶷnd", "verb": "kəmpˈaᶷnd" },
+    "concert": { "default": "kʰˈɑːnsɚt", "verb": "kənsˈɝt" },
+    "concrete": { "default": "kʰˈɑːŋkɹit", "verb": "kəŋkɹˈiːt" },
+    "conduct": { "default": "kʰˈɑːndəkt", "verb": "kəndˈʌkt" },
+    "conflict": { "default": "kʰˈɑːnflɪkt", "verb": "kənflˈɪkt" },
+    "conscript": { "default": "kʰˈɑːnskɹɪpt", "verb": "kənskɹˈɪpt" },
+    "console": { "default": "kʰˈɑːnsoᶷɫ", "verb": "kənsˈoᶷɫ" },
+    "consort": { "default": "kʰˈɑːnsɔːɹt", "verb": "kənsˈɔːɹt" },
+    "construct": { "default": "kʰˈɑːnstɹəkt", "verb": "kənstɹˈʌkt" },
+    "content": { "default": "kʰˈɑːntɛnt", "verb": "kəntˈɛnt" },
+    "contest": { "default": "kʰˈɑːntɛst", "verb": "kəntˈɛst" },
+    "contract": { "default": "kʰˈɑːntɹækt", "verb": "kəntɹˈækt" },
+    "contrast": { "default": "kʰˈɑːntɹæst", "verb": "kəntɹˈæst" },
+    "converse": { "default": "kʰˈɑːnvɚs", "verb": "kənvˈɝs" },
+    "convert": { "default": "kʰˈɑːnvɚt", "verb": "kənvˈɝt" },
+    "convict": { "default": "kʰˈɑːnvɪkt", "verb": "kənvˈɪkt" },
+    "coordinate": { "default": "koᶷˈɔːɹd̬ənət", "verb": "koᶷˈɔːɹd̬ənˌeᶦt" },
+    "costume": { "default": "kʰˈɑːstuːm", "verb": "kɑːstˈuːm" },
+    "decrease": { "default": "dᵻkɹˈiːs", "noun": "dˈiːkɹiːs" },
+    "defect": { "default": "dˈiːfɛkt", "verb": "dᵻfˈɛkt" },
+    "degenerate": { "default": "dᵻd͡ʒˈɛnɚˌeᶦt", "noun": "dᵻd͡ʒˈɛnɚət" },
+    "deliberate": { "default": "dᵻlˈɪbɚət", "verb": "dᵻlˈɪbɚˌeᶦt" },
+    "desert": { "default": "dˈɛzɚt", "verb": "dᵻzˈɝt" },
+    "detail": { "default": "dˈiːt̬eᶦɫ", "verb": "dᵻtʰˈeᶦɫ" },
+    "detour": { "default": "dˈiːt̬ʊɹ", "verb": "dᵻtʰˈʊɹ" },
+    "dictate": { "default": "dɪktˈeᶦt", "noun": "dˈɪkteᶦt" },
+    "digest": { "default": "dˈaᶦd͡ʒɛst", "verb": "daᶦd͡ʒˈɛst" },
+    "discharge": { "default": "dɪst͡ʃˈɑːɹd͡ʒ", "noun": "dˈɪst͡ʃɑːɹd͡ʒ" },
+    "dove": { "default": "dˈʌv", "past": "dˈoᶷv" },
+    "egress": { "default": "ˈiːɡɹɛs", "verb": "iɡɹˈɛs" },
+    "elaborate": { "default": "ɪlˈæbɚˌeᶦt", "noun": "ɪlˈæbɹət" },
+    "entrance": { "default": "ˈɛntɹəns", "verb": "ɛntɹˈæns" },
+    "escort": { "default": "ˈɛskɔːɹt", "verb": "ɛskˈɔːɹt" },
+    "essay": { "default": "ˈɛseᶦ", "verb": "ɛsˈeᶦ" },
+    "estimate": { "default": "ˈɛstəmət", "verb": "ˈɛstəmˌeᶦt" },
+    "excess": { "default": "ˈɛksɛs", "verb": "ɪksˈɛs" },
+    "excise": { "default": "ˈɛksaᶦz", "verb": "ɛksˈaᶦs" },
+    "exploit": { "default": "ˈɛksplɔᶦt", "verb": "ɛksplˈɔᶦt" },
+    "export": { "default": "ˈɛkspɔːɹt", "verb": "ɪkspˈɔːɹt" },
+    "extract": { "default": "ˈɛkstɹækt", "verb": "ɪkstɹˈækt" },
+    "ferment": { "default": "fɚmˈɛnt", "noun": "fˈɝmɛnt" },
+    "finance": { "default": "fˈaᶦnæns", "verb": "fənˈæns" },
+    "forearm": { "default": "fˈɔːɹɑːɹm", "verb": "fɔːɹˈɑːɹm" },
+    "fragment": { "default": "fɹˈæɡmənt", "verb": "fɹæɡmˈɛnt" },
+    "graduate": { "default": "ɡɹˈæd͡ʒəwət", "verb": "ɡɹˈæd͡ʒuːˌeᶦt" },
+    "house": { "default": "hˈaᶷs", "verb": "hˈaᶷz" },
+    "houses": { "default": "hˈaᶷzəz" },
+    "impact": { "default": "ˈɪmpækt", "verb": "ɪmpˈækt" },
+    "implant": { "default": "ˈɪmplænt", "verb": "ɪmplˈænt" },
+    "import": { "default": "ˈɪmpɔːɹt", "verb": "ɪmpˈɔːɹt" },
+    "imprint": { "default": "ˈɪmpɹɪnt", "verb": "ɪmpɹˈɪnt" },
+    "impulse": { "default": "ˈɪmpəɫs", "verb": "ɪmpˈʌɫs" },
+    "inbound": { "default": "ˈɪnbaᶷnd", "verb": "ɪnbˈaᶷnd" },
+    "incense": { "default": "ˈɪnsɛns", "verb": "ɪnsˈɛns" },
+    "incline": { "default": "ɪŋklˈaᶦn", "noun": "ˈɪŋklaᶦn" },
+    "increase": { "default": "ˈɪŋkɹiːs", "verb": "ɪŋkɹˈiːs" },
+    "insert": { "default": "ˈɪnsɚt", "verb": "ɪnsˈɝt" },
+    "insult": { "default": "ˈɪnsʌɫt", "verb": "ɪnsˈʌɫt" },
+    "intern": { "default": "ˈɪntɚn", "verb": "ɪntˈɝn" },
+    "lead": { "default": "lˈiːd" },
+    "live": { "default": "lˈaᶦv", "verb": "lˈɪv" },
+    "moderate": { "default": "mˈɑːd̬ɚət", "verb": "mˈɑːd̬ɚˌeᶦt" },
+    "object": { "default": "ˈɑːbd͡ʒɛkt", "verb": "əbd͡ʒˈɛkt" },
+    "offset": { "default": "ˈɔːfsɛt", "verb": "ɔːfsˈɛt" },
+    "perfect": { "default": "pʰˈɝfɪkt", "verb": "pɚfˈɛkt" },
+    "permit": { "default": "pʰˈɝmᵻt", "verb": "pɚmˈɪt" },
+    "pervert": { "default": "pʰˈɝvɚt", "verb": "pɚvˈɝt" },
+    "present": { "default": "pɹˈɛzənt", "verb": "pɹᵻzˈɛnt" },
+    "produce": { "default": "pɹədˈuːs", "noun": "pɹˈoᶷd̬uːs" },
+    "progress": { "default": "pɹˈɑːɡɹɛs", "verb": "pɹəɡɹˈɛs" },
+    "project": { "default": "pɹˈɑːd͡ʒɛkt", "verb": "pɹəd͡ʒˈɛkt" },
+    "protest": { "default": "pɹˈoᶷt̬ɛst", "verb": "pɹətʰˈɛst" },
+    "read": { "default": "ɹˈiːd", "past": "ɹˈɛd" },
+    "rebel": { "default": "ɹˈɛbəɫ", "verb": "ɹᵻbˈɛɫ" },
+    "recall": { "default": "ɹˈiːkʰɔːɫ", "verb": "ɹᵻkʰˈɔːɫ" },
+    "recess": { "default": "ɹˈiːsɛs", "verb": "ɹᵻsˈɛs" },
+    "record": { "default": "ɹˈɛkɚd", "verb": "ɹᵻkʰˈɔːɹd" },
+    "redress": { "default": "ɹᵻdɹˈɛs", "noun": "ɹˈiːdɹɛs" },
+    "refund": { "default": "ɹˈiːfənd", "verb": "ɹᵻfˈʌnd" },
+    "refuse": { "default": "ɹᵻfjˈuːz", "noun": "ɹˈɛfjuːs" },
+    "reject": { "default": "ɹᵻd͡ʒˈɛkt", "noun": "ɹˈiːd͡ʒɛkt" },
+    "resent": { "default": "ɹᵻzˈɛnt", "past": "ɹizˈɛnt" },
+    "romance": { "default": "ɹˈoᶷmæns", "verb": "ɹoᶷmˈæns" },
+    "segment": { "default": "sˈɛɡmənt", "verb": "sɛɡmˈɛnt" },
+    "separate": { "default": "sˈɛpɹət", "verb": "sˈɛpɚˌeᶦt" },
+    "subject": { "default": "sˈʌbd͡ʒɪkt", "verb": "səbd͡ʒˈɛkt" },
+    "subordinate": { "default": "səbˈɔːɹd̬ənət", "verb": "səbˈɔːɹd̬ənˌeᶦt" },
+    "surcharge": { "default": "sˈɝt͡ʃɑːɹd͡ʒ", "verb": "sɚt͡ʃˈɑːɹd͡ʒ" },
+    "survey": { "default": "sˈɝveᶦ", "verb": "sɚvˈeᶦ" },
+    "suspect": { "default": "sˈʌspɛkt", "verb": "səspˈɛkt" },
+    "tear": { "default": "tʰˈɪɹ", "verb": "tʰˈɛɹ" },
+    "torment": { "default": "tʰˈɔːɹmɛnt", "verb": "tɔːɹmˈɛnt" },
+    "transfer": { "default": "tɹˈænsfɚ", "verb": "tɹænsfˈɝ" },
+    "transform": { "default": "tɹænsfˈɔːɹm", "noun": "tɹˈænsfɔːɹm" },
+    "transport": { "default": "tɹˈænspɔːɹt", "verb": "tɹænspˈɔːɹt" },
+    "triplicate": { "default": "tɹˈɪplɪkət", "verb": "tɹˈɪplɪkˌeᶦt" },
+    "update": { "default": "ˈʌpdeᶦt", "verb": "əpdˈeᶦt" },
+    "upgrade": { "default": "ˈʌpɡɹeᶦd", "verb": "əpɡɹˈeᶦd" },
+    "upset": { "default": "ˈʌpsɛt", "verb": "əpsˈɛt" },
+    "use": { "default": "jˈuːs", "verb": "jˈuːz" },
+    "wind": { "default": "wˈɪnd", "verb": "wˈaᶦnd" },
+    "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" }
+  },
+
+  // NUMBER WORDS — canonical IPA for the digit-input fragments, so 42 reads exactly like typed "forty two"
+  // (12 → twˈɛɫv, with dark-l/aspiration). CMUdict-sourced + an authored high-magnitude supplement
+  // (quadrillion…nonillion, on the regular -illion pattern). units[0-9], teens[10-19], tens by value,
+  // magnitudes[0]=thousand…[9]=nonillion (hundred is separate). Canonical render only; espeak mode keeps
+  // fragments.jsonl. The loader maps these to the pipeline's fragment keys (5→_5, 20→_2X, hundred→_0C,
+  // thousand→_0M1, and→_0and, point→_dpt). See src/Phonemize/render.ts (applyPronunciationOverride,
+  // fromNumber branch). ORDINALS (1st → "first") route through the flat lexicon as whole words — already
+  // native, nothing needed here.
+  "numbers": {
+    "units":      ["zˈɪɹoᶷ", "wˈʌn", "tʰˈuː", "θɹˈiː", "fˈɔːɹ", "fˈaᶦv", "sˈɪks", "sˈɛvən", "ˈeᶦt", "nˈaᶦn"],
+    "teens":      ["tʰˈɛn", "ɪlˈɛvən", "twˈɛɫv", "θˈɝtʰˈiːn", "fˈɔːɹtˈiːn", "fɪftˈiːn", "sɪkstˈiːn", "sˈɛvəntˈiːn", "eᶦtʰˈiːn", "nˈaᶦntˈiːn"],
+    "tens":       { "20": "twˈɛnti", "30": "θˈɝd̬iː", "40": "fˈɔːɹt̬i", "50": "fˈɪfti", "60": "sˈɪksti", "70": "sˈɛvənti", "80": "ˈeᶦt̬i", "90": "nˈaᶦnti" },
+    "hundred":    "hˈʌndɹəd",
+    "magnitudes": ["θˈaᶷzənd", "mˈɪɫjən", "bˈɪɫjən", "tɹˈɪɫjən", "kwɑːdɹˈɪɫjən", "kwɪntˈɪɫjən", "sɛkstˈɪɫjən", "sɛptˈɪɫjən", "ɑːktˈɪɫjən", "nɑːnˈɪɫjən"],
+    "and":        "ənd",
+    "point":      "pɔᶦnt"
+  },
+
+  // REFERENCED statistical models — the part Hindi has no equivalent of. NOT inlined (megabytes of
+  // lexical/statistical data, not authorable facts); listed here so the manifest documents the whole path.
+  "models": {
+    "lexicon":  { "file": "accent-lexicon.tsv", "words": 124928, "note": "CMUdict → canonical IPA; the flat per-word override (the 'grapheme→IPA table' an irregular language can only express as a word list)." },
+    "oovG2p":   { "model": "g2p-model.json", "dict": "g2p-dict.tsv", "common": "g2p-common.txt", "note": "cleanroom joint n-gram — the rule engine Hindi doesn't need (English spelling isn't rule-derivable)." },
+    "posModel": { "file": "pos-model.json", "note": "averaged perceptron (UD-EWT); drives heteronym selection. Hindi has no homographs to disambiguate." }
+  },
+
+  // Resolution order in applyPronunciationOverride (canonical mode). espeak base surfaces only in espeak mode.
+  "resolve": ["number-fragment", "heteronym (POS-gated)", "possessive 's", "flat lexicon", "OOV G2P"],
+  // UNSTRESSED function words (espeak $u set — a language fact): reduced/de-accented in connected speech.
+  // The de-accent pass strips their citation primary stress (I -> a, not stressed); a clause left with no
+  // primary then promotes its last word to the nuclear tonic. See src/languages/english/english.ts.
+  "unstressedWords": ["about", "above", "across", "already", "among", "amongst", "an", "and", "as", "at", "be", "became", "become", "been", "before", "behind", "below", "beneath", "beside", "between", "beyond", "by", "could", "did", "do", "does", "doth", "for", "from", "goeth", "had", "has", "have", "he", "her", "hers", "his", "i", "if", "in", "is", "it", "its", "made", "may", "might", "my", "not", "of", "or", "our", "over", "per", "she", "should", "than", "that", "thee", "their", "there", "these", "they", "thine", "this", "those", "through", "to", "together", "under", "upon", "we", "what", "whenever", "which", "will", "with", "within", "without", "would", "wouldst", "ye", "yer", "you", "your"]
+}
