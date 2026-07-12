@@ -60,11 +60,49 @@ export function phonemizeWord(word: string): string {
   const irr = IRREGULARS[w];
   if (irr !== undefined) return irr;
   let ord = stressDict().get(w);
+  if (ord === undefined && w.includes("е")) {
+    // Russian text usually writes ё as е. If the word is unknown, try restoring a ё that IS in the dictionary
+    // (ещё, моё, пришёл…) — the ё is inherently stressed, so this fixes both the segment and the stress.
+    for (let i = 0; i < w.length; i++) {
+      if (w[i] !== "е") continue;
+      const cand = w.slice(0, i) + "ё" + w.slice(i + 1);
+      if (stressDict().has(cand)) return phonemizeWord(cand);
+    }
+  }
+  if (ord === undefined) ord = adjectiveStress(w);  // inflected adjective/pronoun → stress from its masc. lemma
   if (ord === undefined) {
     const eIdx = [...w.matchAll(VOWEL_RE)].findIndex((m) => m[0] === "ё");
     ord = eIdx >= 0 ? eIdx : 0;                    // ё is always stressed; otherwise default to the first vowel
   }
   return toIpa(w, ord, hardDict().get(w));
+}
+
+// Adjective / participle / adjectival-pronoun case endings (longest first), each paired with the masculine
+// nominative endings used to reconstruct the lemma. HARD endings (-ое/-ая/-ые…) → -ый/-ой; SOFT (-ее/-яя/-ие…)
+// → -ий — so большое → большой (not the comparative больший). Stress is stem-relative → the lemma ordinal transfers.
+// -ий is a last-resort fallback on HARD endings for velar/hushing stems whose lemma is -ий but whose feminine
+// is spelled -ая (маленький → маленькая), while большое still resolves to большой before reaching -ий.
+const H = ["ый", "ой", "ий"], S = ["ий", "ый"];
+const ADJ_ENDINGS: [string, string[]][] = [
+  ["ыми", H], ["ими", S], ["ого", H], ["его", S], ["ому", H], ["ему", S],
+  ["ая", H], ["яя", S], ["ое", H], ["ее", S], ["ые", H], ["ие", S],
+  ["ым", H], ["им", S], ["ых", H], ["их", S], ["ую", H], ["юю", S],
+  ["ой", H], ["ей", S], ["ом", H], ["ем", S],
+];
+const countVowels = (w: string): number => [...w].filter((c) => "аеёиоуыэюя".includes(c)).length;
+
+/** Stress ordinal for an OOV inflected adjective/pronoun form, inferred from its masculine lemma (большое →
+ *  большой, которые → который). Returns undefined if no lemma is in the dictionary. */
+function adjectiveStress(w: string): number | undefined {
+  for (const [end, lemEnds] of ADJ_ENDINGS) {
+    if (!w.endsWith(end) || w.length - end.length < 2) continue;
+    const stem = w.slice(0, w.length - end.length);
+    for (const lemEnd of lemEnds) {
+      const ord = stressDict().get(stem + lemEnd);
+      if (ord !== undefined && ord < countVowels(w)) return ord;
+    }
+  }
+  return undefined;
 }
 
 const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
