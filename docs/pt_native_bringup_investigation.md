@@ -90,3 +90,34 @@ REMAINING folded residual on common words is now dominated by the LEXICAL open/c
 NEXT (Phase 2 lexicon): resolve stressed open/close e/o + grapheme x. NOTE the design constraint — wikipron
 can't be used RAW as the lexicon (betacism injects b-for-v; ch→t͡ʃ). Either de-affricate + extract only the
 open/close & x decisions as corrections to the engine, or de-betacize carefully.
+
+## Run 3 — Phase 2 lexical CORRECTION table (Approach A)
+The engine already gets reduction/stress/glides/nasals right; the only genuinely-lexical residual was the
+stressed mid-vowel QUALITY (open ɛ/ɔ vs close e/o) and grapheme x (s/z/ks vs ʃ). Rather than a full pronunciation
+lexicon (blocked anyway — wikipron's betacism injects b-for-v), Approach A extracts ONLY those two axes as a
+compact correction table.
+
+- Engine: x seg tagged raw="x" (lexicon-overridable); `renderWord(word, corr?)` core applies the correction
+  (open the stressed mid vowel e→ɛ/o→ɔ; override x); `phonemizeWord` loads src/languages/portuguese/lexicon.tsv.
+- Generator tools/pt-gen-lexicon.mts: for each wikipron word, if the engine emits a close ˈe/ˈo but the referee
+  has ɛ/ɔ → record the open code; for x-words, pick the s/z/ks that makes the folded output match. 2711 rows
+  (2470 open-vowel, 266 x), 30 KB — vs a 2.6 MB full lexicon.
+- Rule adopted alongside: word-initial unstressed e → i (está→iʃta, emérico→imɛɾiku) — the referee is consistent
+  on this and it unblocked x-detection. NASAL RAISING (a→ɐ before m/n) was tried and REVERTED: it HURT the
+  referee score (86.2→84.4) — wikipron mostly keeps a (estamos→iʃtamuʃ), raising only sometimes (exame). The
+  referee is the convention oracle, so a stays a.
+
+Scores vs wikipron EP (segment-level; betacism/affricate folded): FREQUENCY-common words 64.5→**76.0% raw /
+72.7→86.2% folded**; uniform sample 59.1→67.9% raw / 67.2→76.8% folded. Remaining residual: mostly wikipron
+convention/variation (final -ei→e, initial o→ɔ, ideia→idejɐ) + genuine referee noise, not reachable engine wins.
+
+### Run 3 review fixes
+Adversarial review of Phase 2 found a severe generator bug + two smaller issues, all fixed:
+ - open-vowel detection was POSITION-BLIND (gold.includes("ɛ")) → it opened the STRESSED vowel whenever the
+   referee had an open vowel anywhere, usually a PRETONIC one (freguês→fɾɨɡˈɛʃ wrong, the whole -ês class + all
+   ê/ô circumflex-stressed words). Now aligned by vowel index: only open when the referee's STRESSED nucleus is
+   ɛ/ɔ (freguês→fɾɨɡˈeʃ, robô→ʁubˈo). Open rows 2470→2200 (false positives removed).
+ - word-initial e→i over-raised ~319 words (edgar→idɡaɾ, eclético→iklɛtiku). Added an e:e|e:ɛ correction code
+   (initE) capturing them from the referee → edgar→ɛdɡˈaɾ, eclético→eklˈɛtiku. The table now carries 3 axes.
+ - loader made CRLF-safe (split /\r?\n/).
+Final: 2750 rows (2200 open, 268 x, 319 initial-e); freq-common raw 76.2% / folded 86.4%.
