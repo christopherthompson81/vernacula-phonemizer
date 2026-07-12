@@ -103,3 +103,24 @@ Result: adjudicated gold 84.4% → **96.9%** (124/128). Residual = genuinely-var
 
 STATUS: ru now checked against kaikki (single Wiktionary referee) AND an independent hand-adjudicated micro-gold
 (96.9%). Same bar as pt — the micro-gold gives real independent signal and confirms the engine + stress dict.
+
+## Run 4 — "are we done?" re-examination (found real reachable wins)
+Prompted by the residual question. Checked the disputed cases against kaikki and found the Run-3 micro-gold had
+a few of MY OWN transcription errors, which I'd overfit — regressing the broad sweep. Corrected:
+ - REVERTED three gold-driven changes that were wrong: а DOES front to æ between soft (счастье→ɕːæsʲtʲje,
+   просвещать→ɕːætʲ); glide-final -ье → je not jə; с/з DO soften before soft д (сделать→zʲdʲeɫətʲ, ездил→zʲdʲ,
+   здесь→zʲdʲesʲ — all confirmed soft in kaikki, my gold was hard). Fixed the gold entries too.
+ - NEW reachable rule: degemination of a SIBILANT assimilated across a morpheme (французский зс→s single), while
+   written doubles and voicing-assimilated stops stay long (русский→sː, отдых→odːɨx).
+Result: sweep 86.4→**87.8%**, freq-common 87.6→**90.3%**, gold back to 96.9% (now with CORRECT transcriptions).
+
+RESIDUAL CHARACTERIZATION (what's left, reachable vs not):
+ REACHABLE (still): (1) stress-dict OOV — ~10% of top-5000 freq words aren't in the 406k dict, but most are
+   monosyllables (no stress needed); the real wrong-stress class is ~2-3% and would need dict expansion or a
+   stress-prediction fallback (the genuinely hard part, like English OOV). (2) loanword hard-е table gaps
+   (интернет's 1st е). (3) a few small cluster rules.
+ NOT REACHABLE (~half the residual): kaikki SELF-INCONSISTENCY — post-tonic я ə~ɪ (месяц/далями), final-glide-е
+   e~ə, тся~тсся length; and genuinely-variable optional assimilation (жизнь з/н). The referee contradicts
+   itself here, so no rule can match both sides.
+CONCLUSION: the engine is near its reachable ceiling on the segmental rules (gold 96.9%); the one substantive
+lever left is stress-dict COVERAGE (OOV), which is a data-expansion problem, not an engine problem.
