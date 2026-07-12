@@ -1,35 +1,37 @@
 /**
- * French (fr) phonemizer — canonical IPA (standard/Parisian), espeak-independent. Rule-based g2p (g2p.ts)
- * for the ~80% regular core + an exception lexicon for irregulars (monsieur, femme, ville, Greek ch→k, …).
- * text() tokenizes words / numbers / punctuation; French has no lexical stress, so a single phrase-final
- * accent is added on the last word before a pause (the rhythmic-group stress).
+ * French (fr) phonemizer — canonical IPA (standard/Parisian), espeak-independent. Primary path is a
+ * pronunciation LEXICON (Lexique 3.83, ~125k forms) that carries every irregular as data; the rule-based
+ * g2p (g2p.ts) is the out-of-vocabulary fallback for unseen words. text() tokenizes words / numbers /
+ * punctuation; French has no lexical stress, so a single phrase-final accent marks each rhythmic group.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { Phonemizer } from "../../registry.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Irregular words the reading rules get wrong (silent/idiosyncratic spellings, Greek ch→k, -ome/-one).
-const EXCEPTIONS: Record<string, string> = {
-  monsieur: "məsjø", messieurs: "mesjø", femme: "fam", femmes: "fam", oignon: "ɔɲɔ̃", oignons: "ɔɲɔ̃",
-  ville: "vil", villes: "vil", village: "vilaʒ", mille: "mil", tranquille: "tʁɑ̃kil", fils: "fis",
-  gars: "ɡa", pays: "pei", second: "səɡɔ̃", seconde: "səɡɔ̃d", automne: "otɔn", sculpture: "skyltyʁ",
-  œufs: "ø", bœufs: "bø", œuf: "œf", bœuf: "bœf", est: "ɛ", et: "e", les: "le", des: "de", ces: "se",
-  mes: "me", tes: "te", ses: "se", aux: "o", eux: "ø", chœur: "kœʁ", chorale: "kɔʁal", orchestre: "ɔʁkɛstʁ",
-  technique: "tɛknik", écho: "eko", psychologie: "psikɔlɔʒi", chaos: "kao", chrome: "kʁom",
-  // counting forms (isolated): final consonant sounded
-  dix: "dis", six: "sis", huit: "ɥit", sept: "sɛt", neuf: "nœf", cinq: "sɛ̃k", plus: "plys",
-  // loanwords / learned words (final consonant sounded; -um Latin → ɔm)
-  film: "film", album: "albɔm", forum: "fɔʁɔm", item: "itɛm", direct: "diʁɛkt", strict: "stʁikt",
-  ours: "uʁs", ouest: "wɛst", août: "ut", tous: "tus",
-};
+// Lexique 3.83 pronunciation lexicon: word → IPA for ~125k attested forms, loaded once (lazily).
+let LEXICON: Map<string, string> | undefined;
+function lexicon(): Map<string, string> {
+  if (LEXICON === undefined) {
+    LEXICON = new Map();
+    const path = join(dirname(fileURLToPath(import.meta.url)), "lexicon.tsv");
+    for (const line of readFileSync(path, "utf8").split("\n")) {
+      if (line === "" || line.startsWith("#")) continue;
+      const tab = line.indexOf("\t");
+      if (tab > 0) LEXICON.set(line.slice(0, tab), line.slice(tab + 1));
+    }
+  }
+  return LEXICON;
+}
 
-const stripAccentsForKey = (w: string): string => w.toLowerCase();
 const VOWEL_IPA = /[aeiouyɛɔøœəɑ]/;
 
-/** One French word → IPA (exception lexicon first, then the g2p engine). */
+/** One French word → IPA: lexicon lookup first, then the g2p engine for out-of-vocabulary words. */
 export function phonemizeWord(word: string): string {
-  const key = stripAccentsForKey(word);
-  return EXCEPTIONS[key] ?? toIpa(word);
+  return lexicon().get(word.toLowerCase()) ?? toIpa(word);
 }
 
 /** Add a phrase-final accent: ˈ before the last vowel of the last IPA token (rhythmic-group stress). */

@@ -51,3 +51,25 @@ Two reviewers + self-probing. 8 g2p/text bugs fixed:
 8. empty g2p tokens → double spaces in text() → filter empties.
 Reviewers verified numbers (vigesimal), accentFinal (nasal tilde intact), apostrophe words, exceptions.
 Gold 78.9%→80.8%. 57 tests pass.
+
+## Phase 2 — pronunciation LEXICON (the lexical data table)
+Restructured to the English architecture: a pronunciation lexicon is the primary path, the g2p is the OOV
+fallback. Lexicon = Lexique 3.83 (lexique.org; New/Pallier) → src/languages/french/lexicon.tsv, 125,343
+word→IPA forms (2.6MB), SAMPA→IPA converted (@→ɑ̃ §→ɔ̃ 5→ɛ̃ 1→œ̃ 2→ø 9→œ N→ɲ R→ʁ S→ʃ Z→ʒ 8→ɥ g→ɡ). It
+carries every irregular as DATA (monsieur, Greek ch→k choline→kɔlin, -ome, the whole e/ɛ distribution).
+phonemizeWord: lexicon.get(word) ?? toIpa(word).
+
+## Test corpus — FREQUENCY-based (was alphabetical)
+The espeak words-50000.fr.txt is ALPHABETICAL (all ab- rare technical words: abajoue, abarticulaire) — a poor
+corpus. Built /tmp/fr_freq_gold.tsv = Lexique freqfilms2-ranked words ∩ wikipron gold (top-3000 spoken-
+frequent). tools/fr-ref-sweep.mts reports SYSTEM (lexicon→g2p) vs g2p-ALONE.
+
+RESULTS (frequency corpus vs wikipron): SYSTEM 82.8% vs g2p-alone 80.1% (+2.7 from the lexicon). KEY FINDING:
+the lexicon's disagreements with wikipron are almost all CONVENTION, not error — Lexique consistently uses o
+in open syllables (comment kom-), retains optional schwa (maintenant mɛ̃tənɑ̃), where wikipron is
+INCONSISTENT. Lexique preserves the œ census gap (4732 œ-words: seul s9l, fleur fl9R). One fixed mapping bug:
+g→ɡ (Latin vs IPA script) was 101 spurious mismatches. So 82.8% vs (inconsistent) wikipron understates the
+lexicon — Lexique is the more consistent canonical convention.
+
+REMAINING (Phase 2.5): align the g2p OOV convention to Lexique (o/ɔ open-syllable, schwa retention) so unseen
+words match the lexicon's convention; liaison/elision (cross-word).
