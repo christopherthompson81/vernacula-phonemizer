@@ -53,3 +53,23 @@ RESIDUAL (~29% vs kaikki, mostly not reachable): genuine kaikki inconsistency (p
 degemination of assimilated clusters (французский зс→s), and the productive adjective-genitive г→v (grammatical).
 NEXT: a pronunciation-lexicon layer (loanword hard-C-before-е, genitive г→v) — like French/pt Phase 2 — and an
 independent referee assessment (kaikki = single Wiktionary source, same caveat as pt).
+
+## Run 2 — Phase 2 lexical layer (genitive г→v + loanword hard-е/и)
+Two lexical residuals the rule engine can't predict, addressed the same way pt Phase 2 did — engine primary,
+minimal correction:
+ - GENITIVE г→v as a RULE (not a table): word-final -ого/-его → the г is [v] (красного→krˈasnəvə, этого→ˈɛtəvə),
+   with a small adverb exception set that keeps ɡ (много, дорого, строго…). kaikki: 664 -ого/-его words →v vs
+   only 13 →ɡ, so a rule + stoplist is right.
+ - LOANWORD hard-consonant-before-е/и — genuinely lexical (тест→tɛst hard vs тема→tʲemə soft; ~9k words carry
+   ɛ). Compact correction table hard-e.tsv (1951 rows, word→hard vowel ordinals), generated from kaikki
+   (tools/ru-gen-lexicon.mts): record ordinals where the engine emits soft e/i but the referee has hard ɛ/ɨ.
+   Engine hardens the preceding C and lowers the vowel (е→ɛ/ɨ, и→ɨ). отель→ɐtˈɛlʲ, форель→fɐrˈɛlʲ, секс→sɛks;
+   native тема/дерево stay soft.
+
+Scores: random-dictionary sweep barely moves (70.6→70.9% — loanwords/genitives are sparse among 407k regular
+inflected forms), but on FREQUENCY-common words (where they are dense) the system reaches **87.4%** vs kaikki.
+Remaining residual is genuine kaikki inconsistency (post-tonic я ə~ɪ, final-е e~ɪ) + rare degemination —
+not reachable engine wins. 73 tests pass.
+
+STATUS: same as pt — validated against kaikki (single Wiktionary source). An independent second referee (a
+hand-adjudicated micro-gold, as built for pt) would be the path toward a "verified" stamp.

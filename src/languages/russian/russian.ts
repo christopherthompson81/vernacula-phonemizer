@@ -27,6 +27,23 @@ function stressDict(): Map<string, number> {
   return STRESS;
 }
 
+// Loanword hard-consonant-before-е/и lexicon: word → vowel ordinals whose preceding C is hard (тест → tɛst).
+let HARD: Map<string, number[]> | undefined;
+function hardDict(): Map<string, number[]> {
+  if (HARD === undefined) {
+    HARD = new Map();
+    try {
+      const path = join(dirname(fileURLToPath(import.meta.url)), "hard-e.tsv");
+      for (const line of readFileSync(path, "utf8").split("\n")) {
+        if (line === "" || line.startsWith("#")) continue;
+        const tab = line.indexOf("\t");
+        if (tab > 0) HARD.set(line.slice(0, tab), line.slice(tab + 1).split(",").map(Number));
+      }
+    } catch { /* absent → no loanword corrections */ }
+  }
+  return HARD;
+}
+
 const VOWEL_RE = /[аеёиоуыэюя]/gi;
 
 // Closed-class irregulars the rules can't predict: чт→ʂt / чн→ʃn, and genitive -ого/-его → g→v. (The productive
@@ -46,7 +63,7 @@ export function phonemizeWord(word: string): string {
     const eIdx = [...w.matchAll(VOWEL_RE)].findIndex((m) => m[0] === "ё");
     ord = eIdx >= 0 ? eIdx : 0;                    // ё is always stressed; otherwise default to the first vowel
   }
-  return toIpa(w, ord);
+  return toIpa(w, ord, hardDict().get(w));
 }
 
 const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };

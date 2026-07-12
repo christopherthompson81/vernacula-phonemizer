@@ -38,6 +38,16 @@ describe("russian canonical IPA", () => {
     expect(phonemizeWord("большой")).toBe("bɐlʲʂˈoj");
   });
 
+  test("Phase 2: genitive г→v + loanword hard е/и", () => {
+    expect(phonemizeWord("красного")).toBe("krˈasnəvə");  // genitive -ого → v
+    expect(phonemizeWord("большого")).toBe("bˈolʲʂəvə");
+    expect(phonemizeWord("много")).toBe("mnˈoɡə");        // adverb exception → keeps ɡ
+    expect(phonemizeWord("тест")).toBe("tɛst");           // loanword hard т → tɛ (not tʲe)
+    expect(phonemizeWord("отель")).toBe("ɐtˈɛlʲ");
+    expect(phonemizeWord("форель")).toBe("fɐrˈɛlʲ");
+    expect(phonemizeWord("тема")).toBe("tʲˈemə");         // native → stays soft
+  });
+
   test("numbers", () => {
     expect(phonemize("21", "ru")).toBe("dvˈatt͡sətʲ ɐdʲˈin");        // двадцать один
     expect(phonemize("100", "ru")).toBe("sto");                    // сто

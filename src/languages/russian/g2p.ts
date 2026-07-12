@@ -115,9 +115,18 @@ function reducedVowel(letter: string, softContext: boolean, strong: boolean, pos
   }
 }
 
-/** Phonemize a Russian word given the 0-based ordinal of its stressed vowel. */
-export function toIpa(word: string, stressOrd: number): string {
-  const units = parse(word.toLowerCase());
+// Adverbs in -ого/-его that keep [ɡ] (the genitive -ого/-его → v rule does NOT apply to them).
+const GEN_KEEP_G = new Set(["много", "немного", "намного", "многого", "дорого", "недорого", "строго", "нестрого", "убого", "полого", "отлого", "пологого", "убогого", "строгого", "дорогого"]);
+
+/** Phonemize a Russian word given the 0-based ordinal of its stressed vowel, and optionally a set of vowel
+ *  ordinals whose preceding consonant is HARD (loanword е/и: тест → tɛst, not tʲest — supplied by the lexicon). */
+export function toIpa(word: string, stressOrd: number, hard?: number[]): string {
+  const w0 = word.toLowerCase();
+  const units = parse(w0);
+  // Genitive -ого/-его → the г is [v] (красного → …nəvə, его → jɪvo); adverbs (много…) keep ɡ.
+  if ((w0.endsWith("ого") || w0.endsWith("его")) && !GEN_KEEP_G.has(w0)) {
+    for (let i = units.length - 1; i >= 0; i--) if (units[i]!.cons?.ph === "ɡ" || units[i]!.cons?.ph === "ɡʲ") { units[i]!.cons = { ph: "v", soft: false }; break; }
+  }
   const vowelIdx = units.map((u, i) => (u.vowel ? i : -1)).filter((i) => i >= 0);
   const stressPos = vowelIdx[stressOrd] ?? vowelIdx[vowelIdx.length - 1] ?? -1;
 
@@ -172,6 +181,17 @@ export function toIpa(word: string, stressOrd: number): string {
     // NB: в devoices normally (вш → fʂ), it just doesn't TRIGGER voicing of a preceding C (guarded below).
     if (VOICELESS_OBSTR.has(next.ph) && VOICED_OBSTR.has(c.ph)) c.ph = DEVOICE[c.ph] ?? c.ph;
     else if (VOICED_OBSTR.has(next.ph) && next.ph !== "v" && next.ph !== "vʲ" && VOICELESS_OBSTR.has(c.ph)) c.ph = VOICE[c.ph] ?? c.ph;
+  }
+
+  // Loanword hard consonant before е/и (lexicon): harden the preceding C and lower the vowel (е→ɛ/ɨ, и→ɨ).
+  if (hard) for (const o of hard) {
+    const i = vowelIdx[o];
+    if (i === undefined) continue;
+    const v = units[i]!.vowel!;
+    const prev = units[i - 1]?.cons;
+    if (prev?.soft) { const cyr = units[i - 1]!.cyr; if (CONS[cyr]) prev.ph = CONS[cyr]![0], prev.soft = false; }
+    if (v.letter === "е") v.ph = i === stressPos ? "ɛ" : "ɨ";
+    else if (v.letter === "и") v.ph = "ɨ";
   }
 
   return withStress(units, stressPos);
