@@ -28,13 +28,33 @@ function stressedNucleus(word: string, segs: Seg[]): number {
   return oxytone ? nuclei[nuclei.length - 1]! : nuclei[nuclei.length - 2]!;
 }
 
+const isGlidePh = (ph: string): boolean => ph === "j" || ph === "w" || ph === "j̃" || ph === "w̃";
+
+/** Post-stress onglide demotion: an UNSTRESSED high vowel (i/u) immediately before another nucleus is a rising
+ *  glide, not a syllable of its own (diamante → djɐmɐ̃tɨ, água → aɡwɐ) — but a stressed one stays (dia → diɐ).
+ *  Runs after stress so the count is settled; mid-vowel onglides (e/o) are left alone (moeda → muɛðɐ). */
+const LIQUID = new Set(["ɾ", "l", "ʁ", "ɫ"]);
+function onglides(segs: Seg[], stress: number): void {
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i]!;
+    if (!s.nucleus || i === stress || (s.raw !== "i" && s.raw !== "u" && s.raw !== "e")) continue;
+    const next = segs[i + 1];
+    if (!next || !next.nucleus) continue;
+    // A high vowel after an obstruent+liquid onset cluster stays a nucleus (criança → kɾiɐ̃sɐ, not kɾjɐ̃-).
+    const p1 = segs[i - 1], p2 = segs[i - 2];
+    if (p1 && p2 && LIQUID.has(p1.ph) && !p2.nucleus) continue;
+    s.nucleus = false; s.ph = s.raw === "u" ? "w" : "j"; // i/e → j, u → w
+  }
+}
+
 /** Realize vowels: reduce unstressed oral vowels, nasalize nasal ones, mark the stressed nucleus with ˈ. */
 function realize(segs: Seg[], stress: number): string {
   let out = "";
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i]!;
     let ph = s.ph;
-    if (s.nucleus && i !== stress && !s.nasal && s.raw) ph = REDUCE[s.raw] ?? ph; // unstressed reduction
+    const diphthong = segs[i + 1] && !segs[i + 1]!.nucleus && isGlidePh(segs[i + 1]!.ph); // nucleus + offglide
+    if (s.nucleus && i !== stress && !s.nasal && !diphthong && s.raw) ph = REDUCE[s.raw] ?? ph; // reduce (not a diphthong nucleus)
     if (s.nasal && s.nucleus) ph = NASAL[ph] ?? ph;
     if (i === stress) out += "ˈ";
     out += ph;
@@ -48,6 +68,7 @@ export function phonemizeWord(word: string): string {
   if (segs.length === 0) return "";
   sibilants(segs);
   const stress = stressedNucleus(word, segs);
+  onglides(segs, stress);
   return realize(segs, stress);
 }
 

@@ -94,6 +94,9 @@ export function toSegments(word: string): Seg[] {
         pushGlide(segs, c === "a" || c === "á" ? "w̃" : "j̃", true);
         i += 2; continue;
       }
+      // ou → monophthong [o] (standard EP: souto → sotu, amou → ɐmo), not a diphthong. raw="" so it does NOT
+      // further reduce to u when unstressed (ouvir → oviɾ).
+      if (c === "o" && nx === "u" && !nasal) { segs.push({ ph: "o", nucleus: true, accent: false, raw: "", nasal: false }); i += 2; continue; }
       // Nasal diphthongs: ão/ãe/õe (+ optional final s).
       if (c === "ã" && nx === "o") { pushV(segs, "ã", true); pushGlide(segs, "w̃", true); i += 2; continue; }
       if (c === "ã" && nx === "e") { pushV(segs, "ã", true); pushGlide(segs, "j̃", true); i += 2; continue; }
@@ -161,9 +164,9 @@ export function sibilants(segs: Seg[]): void {
     const prevV = prev && (prev.nucleus || isVowelPh(prev.ph));
     const nextV = next && (next.nucleus || isVowelPh(next.ph));
     if (nextV) {                                                   // onset / intervocalic
-      if (prevV && s.raw === "s") s.ph = "z";                      // only a real single s voices (casa → kazɐ)
-      continue;                                                    // ç/soft-c/ss stay s; word-initial s stays s
-    }
+      if (prevV && !prev!.nasal && s.raw === "s") s.ph = "z";      // single s voices (casa → kazɐ); NOT after a
+      continue;                                                    // nasal vowel (sansão → sɐ̃sɐ̃w̃) — an absorbed
+    }                                                              // coda n precedes it. ç/ss/initial s stay s.
     s.ph = !next ? "ʃ" : (VOICED.has(next.ph) ? "ʒ" : "ʃ");        // coda → ʃ / ʒ (luz → luʃ, mesmo → meʒmu)
   }
 }

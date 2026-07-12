@@ -55,6 +55,18 @@ describe("european portuguese canonical IPA", () => {
     expect(phonemizeWord("país")).toBe("pɐˈiʃ");        // accent forces the hiatus
   });
 
+  test("rising glides (onglide), ou monophthong, cluster hiatus", () => {
+    expect(phonemizeWord("história")).toBe("iʃtˈɔɾjɐ"); // unstressed i before vowel → j
+    expect(phonemizeWord("água")).toBe("ˈaɡwɐ");         // u before vowel → w
+    expect(phonemizeWord("leonardo")).toBe("ljunˈaɾdu"); // e before vowel → j
+    expect(phonemizeWord("dia")).toBe("dˈiɐ");           // stressed i stays a nucleus
+    expect(phonemizeWord("crianças")).toBe("kɾiˈɐ̃sɐʃ"); // i after obstruent+liquid cluster stays a nucleus
+    expect(phonemizeWord("souto")).toBe("sˈotu");        // ou → monophthong o
+    expect(phonemizeWord("ouvir")).toBe("ovˈiɾ");        // ou-derived o does not reduce
+    expect(phonemizeWord("ceilão")).toBe("sejlˈɐ̃w̃");   // diphthong nucleus not reduced
+    expect(phonemizeWord("sansão")).toBe("sɐ̃sˈɐ̃w̃");   // s after a nasal vowel does not voice
+  });
+
   test("numbers (European convention, 'e' connector)", () => {
     expect(phonemize("21", "pt")).toBe("vˈĩtɨ e ũ");
     expect(phonemize("342", "pt")).toBe("tɾɨzˈẽtuʃ e kwɐɾˈẽtɐ e dˈojʃ");
