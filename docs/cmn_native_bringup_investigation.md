@@ -111,3 +111,22 @@ regex TOKEN loop to a code-point walk carrying the mask. 28 tests pass; syllable
 
 REMAINING (documented in cmn.jsonc): counting-sequence 一 (一二三 reads sandhi'd, not citation — needs
 non-tonal context), phone/ID digit-strings, C# mirror.
+
+## Run 6 — PR review + fixes
+
+Two parallel reviewers (numbers+sandhi, segmentation+routing) + self-probing. Found 4 real issues, all fixed:
+1. HIGH: oversized/unsafe integers were SILENTLY DROPPED (raw ASCII digits fell into text()'s skip branch).
+   Fix: digit-by-digit fallback (9007199254740992 → 九〇〇七… reads out).
+2. Quantity 一 sandhi INCONSISTENT: 100→yì bǎi (phrase dict) but 1000→yī qiān, 10000→yī wàn (should be
+   yì/yí). Root: the synth-exempt mask was too broad — it exempted quantity 一, not just digit-string 一.
+   Fix: exempt ONLY digit-string readings (year, decimal fraction, oversized); quantity integer chars keep
+   `src` so 一/不 sandhi fires (1000→yì qiān, matching typed 一千). Renamed mask synth→exempt.
+3. Latin-only input (hello, iPhone) passed through raw instead of routing to English. Fix: pinyin fast-path
+   now requires a tone digit + all-pinyin shape (PINYIN_INPUT), so bare Latin and number-bearing tokens
+   route through Han mode (hello→English, abc2024→ABC+两千零二十四). ü path (lv4) preserved.
+4. 第一个 read dì yí gè (greedy grabbed 一个 phrase, bypassing ordinal). Fix: segment forces 一 to a single
+   src token after 第 → dì yī gè; bare 一个 unchanged (yí gè).
+
+Reviewers confirmed NOT-bugs: UTF-16 number peek (self-consistent), synth/cp alignment, setTone regex,
+loader parsing, code-point walk. LOW direct-API-only (negative int, "3." dangling) — arabicToChinese removed
+(superseded by appendNumber). 32 tests pass; sweep unchanged (82.1%).

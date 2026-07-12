@@ -49,20 +49,9 @@ export function integerToChinese(n: number): string {
   return s.replace(/^一十/, "十");                     // 12 → 十二 (not 一十二); 十万, 十亿…
 }
 
-/** Digit string → per-digit numeral characters (0 → 〇). Used for year / ID readings (2024 → 二〇二四). */
+/** Digit string → per-digit numeral characters (0 → 〇). Used for year / ID / oversized readings (2024 →
+ *  二〇二四). These are read one digit at a time, so 一 among them is a spoken digit (citation), never the
+ *  quantity word — the caller marks them sandhi-exempt. */
 export function digitsToChinese(digits: string): string {
   return [...digits].map((d) => (d === "0" ? "〇" : DIG[Number(d)] ?? d)).join("");
-}
-
-/** Arabic number string (integer or decimal) → Chinese numeral characters. */
-export function arabicToChinese(num: string): string {
-  const dot = num.indexOf(".");
-  if (dot < 0) {
-    const n = Number(num);
-    return Number.isSafeInteger(n) ? integerToChinese(n) : num;
-  }
-  const n = Number(num.slice(0, dot) || "0");
-  if (!Number.isSafeInteger(n)) return num;
-  const frac = [...num.slice(dot + 1)].map((d) => DIG[Number(d)] ?? d).join("");
-  return integerToChinese(n) + "点" + frac;   // 3.14 → 三点一四
 }

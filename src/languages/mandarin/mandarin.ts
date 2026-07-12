@@ -12,7 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
-import { arabicToChinese, digitsToChinese } from "./numbers.ts";
+import { integerToChinese, digitsToChinese } from "./numbers.ts";
 
 const HAN = /\p{Script=Han}/u;
 const LATIN = /[A-Za-z]/;
@@ -23,14 +23,9 @@ const CLAUSE_MARK: Record<string, string> = {
 };
 // Common measure words: a standalone 2 before one of these reads colloquial 两 (两个, 两天), not 二.
 const MEASURE_WORDS = "个位本张只条头匹件双对群种次遍回天年岁块层排组步口面名首部台辆架座间扇页杯碗瓶盒袋斤";
-
-/** A number's spoken reading depends on context: 4-digit before 年 = year digits; a lone 2 before a measure
- *  word = 两; otherwise a quantity. */
-function readNumber(num: string, after: string | undefined): string {
-  if (/^\d{4}$/.test(num) && after === "年") return digitsToChinese(num);   // 2024年 → 二〇二四年
-  if (num === "2" && after !== undefined && MEASURE_WORDS.includes(after)) return "两"; // 2个 → 两个
-  return arabicToChinese(num);
-}
+// A whitespace-separated pinyin string with at least one tone digit takes the direct pinyin path. Requiring
+// a tone digit keeps bare Latin words (hello, iPhone) and number-bearing tokens out of it → routed properly.
+const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/i;
 
 /** Embedded Latin → foreign (en) phonemizer, injected by the registry (lazy, like Hindi). */
 export type ForeignPhonemizer = (latin: string) => string;
@@ -42,34 +37,48 @@ class MandarinPhonemizer implements Phonemizer {
     this.pinyinToIpa = makePinyinToIpa(tables);
   }
 
-  /** A Han run (with a per-char synth mask): segment → 一/不 sandhi → pinyin → IPA (3-3 sandhi within run). */
-  private hanRun(chars: string[], synth: boolean[]): string {
-    const tokens = segment(chars, this.pinyin, synth);
+  /** A Han run (with a per-char sandhi-exempt mask): segment → 一/不 sandhi → pinyin → IPA (3-3 within run). */
+  private hanRun(chars: string[], exempt: boolean[]): string {
+    const tokens = segment(chars, this.pinyin, exempt);
     applyYiBuSandhi(tokens);
     return this.pinyinToIpa(tokens.map((t) => t.py).join(" "));
   }
 
-  /** Substitute Arabic numbers with Chinese numeral characters, tracking which code points are synthesized. */
-  private substituteNumbers(input: string): { cp: string[]; synth: boolean[] } {
-    const cp: string[] = [], synth: boolean[] = [];
-    const push = (text: string, s: boolean): void => { for (const c of text) { cp.push(c); synth.push(s); } };
+  /** Append a number's Chinese-numeral reading, marking each code point sandhi-exempt or not. Digit-string
+   *  readings (year, decimal fraction, oversized) are exempt (their 一 is a spoken digit, citation tone); a
+   *  quantity reading is NOT exempt, so its 一 sandhis normally (一千 → yì qiān), matching typed 一千. */
+  private appendNumber(cp: string[], exempt: boolean[], num: string, after: string | undefined): void {
+    const push = (text: string, ex: boolean): void => { for (const c of text) { cp.push(c); exempt.push(ex); } };
+    if (/^\d{4}$/.test(num) && after === "年") { push(digitsToChinese(num), true); return; }           // year
+    if (num === "2" && after !== undefined && MEASURE_WORDS.includes(after)) { push("两", false); return; } // 2个 → 两个
+    const dot = num.indexOf(".");
+    const intStr = dot < 0 ? num : num.slice(0, dot);
+    const intN = Number(intStr || "0");
+    if (Number.isSafeInteger(intN)) push(integerToChinese(intN), false); // quantity → sandhi-eligible
+    else push(digitsToChinese(intStr), true);                            // oversized → digit-by-digit, exempt
+    if (dot >= 0 && dot < num.length - 1) { push("点", true); push(digitsToChinese(num.slice(dot + 1)), true); }
+  }
+
+  /** Substitute Arabic numbers with Chinese numeral characters, tracking which code points are sandhi-exempt. */
+  private substituteNumbers(input: string): { cp: string[]; exempt: boolean[] } {
+    const cp: string[] = [], exempt: boolean[] = [];
     let last = 0;
     const re = /\d+(?:\.\d+)?/g;
     let m: RegExpExecArray | null;
     while ((m = re.exec(input)) !== null) {
-      if (m.index > last) push(input.slice(last, m.index), false);
-      push(readNumber(m[0], input[m.index + m[0].length]), true);
+      if (m.index > last) for (const c of input.slice(last, m.index)) { cp.push(c); exempt.push(false); }
+      this.appendNumber(cp, exempt, m[0], input[m.index + m[0].length]);
       last = m.index + m[0].length;
     }
-    if (last < input.length) push(input.slice(last), false);
-    return { cp, synth };
+    if (last < input.length) for (const c of input.slice(last)) { cp.push(c); exempt.push(false); }
+    return { cp, exempt };
   }
 
   text(input: string): string {
-    // Pure pinyin input (letters, no Han) keeps the direct tone-digit path (e.g. "ni3 hao3").
-    if (/[a-zü]/i.test(input) && !HAN.test(input)) return this.pinyinToIpa(input);
+    // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
+    if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input)) return this.pinyinToIpa(input);
 
-    const { cp, synth } = this.substituteNumbers(input);
+    const { cp, exempt } = this.substituteNumbers(input);
     let out = "";
     let pending: string | null = null;
     const emit = (ipa: string): void => {
@@ -83,7 +92,7 @@ class MandarinPhonemizer implements Phonemizer {
       const ch = cp[i]!;
       if (HAN.test(ch)) {                       // Han run (may include synthesized numerals)
         let j = i; while (j < cp.length && HAN.test(cp[j]!)) j++;
-        emit(this.hanRun(cp.slice(i, j), synth.slice(i, j)));
+        emit(this.hanRun(cp.slice(i, j), exempt.slice(i, j)));
         i = j;
       } else if (LATIN.test(ch)) {              // Latin run → foreign (en)
         let j = i; while (j < cp.length && LATIN.test(cp[j]!)) j++;

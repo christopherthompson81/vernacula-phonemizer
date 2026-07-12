@@ -25,17 +25,21 @@ export interface Token {
 }
 
 /**
- * Segment a run of code points into pinyin tokens. `synth[i]` marks a character synthesized from a number
- * (2024 → 二〇二四): such characters are still phonemized, but get no `src`, so word-level 一/不 sandhi never
- * fires on a spoken digit (三点一四 keeps citation 一). Quantity 一 sandhi (一百 → yì bǎi) is unaffected — it
- * comes from the phrase dictionary, not the token `src`.
+ * Segment a run of code points into pinyin tokens. `exempt[i]` marks a character that must not drive word
+ * sandhi — a spoken digit synthesized from a number (三点一四, 2024) — so it gets no `src` and word-level
+ * 一/不 sandhi never fires on it. Quantity 一 (一千 → yì qiān) is NOT exempt and sandhis normally.
  */
-export function segment(chars: string[], t: PinyinTables, synth: boolean[] = []): Token[] {
+export function segment(chars: string[], t: PinyinTables, exempt: boolean[] = []): Token[] {
   const out: Token[] = [];
   let i = 0;
   while (i < chars.length) {
     const ch = chars[i]!;
     if (!HAN.test(ch)) { out.push({ py: ch }); i++; continue; }
+    // Ordinal 一: after 第, force 一 to a single-char token so its citation (第一 → dì yī) survives instead of
+    // being swallowed by a greedy 一X phrase (第一个 must not read the 一个 → yí gè sandhi).
+    if (ch === "一" && out[out.length - 1]?.src === "第") {
+      const r = t.chars.get("一"); out.push({ py: r ? r[0]! : "一", src: "一" }); i++; continue;
+    }
     // Greedy longest phrase starting at i.
     let matched = false;
     const maxLen = Math.min(t.maxPhrase, chars.length - i);
@@ -46,9 +50,9 @@ export function segment(chars: string[], t: PinyinTables, synth: boolean[] = [])
     }
     if (matched) continue;
     // Single-char fallback: most-common reading. Real input chars carry `src` (for 一/不/第 sandhi); a
-    // synthesized number digit does not.
+    // sandhi-exempt spoken digit does not.
     const readings = t.chars.get(ch);
-    out.push(synth[i] ? { py: readings ? readings[0]! : ch } : { py: readings ? readings[0]! : ch, src: ch });
+    out.push(exempt[i] ? { py: readings ? readings[0]! : ch } : { py: readings ? readings[0]! : ch, src: ch });
     i++;
   }
   return out;

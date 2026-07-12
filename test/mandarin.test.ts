@@ -77,4 +77,26 @@ describe("mandarin canonical IPA — pinyin path", () => {
     expect(phonemize("12个", "cmn")).toBe("ʂʐ̩˧˥ ər˥˩ kɤ˥˩");    // 十二个 — 二 kept inside 12
     expect(phonemize("2", "cmn")).toBe("ər˥˩");                  // bare 2 → 二
   });
+
+  // Regression tests for review-caught defects.
+  test("quantity 一 sandhi is consistent across multipliers (not just phrase-dict 一百)", () => {
+    expect(phonemize("1000", "cmn")).toBe("ji˥˩ t͡ɕʰiɛn˥˥");   // yì qiān (before 1st) — was wrongly yī
+    expect(phonemize("10000", "cmn")).toBe("ji˧˥ wɑn˥˩");      // yí wàn (before 4th) — was wrongly yī
+    expect(phonemize("1000", "cmn")).toBe(phonemize("一千", "cmn")); // typed vs synthesized agree
+  });
+
+  test("oversized numbers read digit-by-digit, not silently dropped", () => {
+    expect(phonemize("9007199254740992", "cmn")).not.toBe("");   // just above MAX_SAFE_INTEGER
+    expect(phonemize("共10000000000000000元", "cmn")).toContain("jyæn"); // 元 survives, 10¹⁶ voiced
+  });
+
+  test("Latin-only input routes to English, not raw passthrough", () => {
+    expect(phonemize("hello", "cmn")).toBe("həlˈoᶷ");
+    expect(phonemize("abc2024", "cmn")).toBe("ˈeᶦbiːsˌiː liɑŋ˨˩˦ t͡ɕʰiɛn˥˥ liŋ˧˥ ər˥˩ ʂʐ̩˧˥ sɹ̩˥˩");
+  });
+
+  test("第一个 keeps ordinal 第一 (dì yī), not the 一个 sandhi (yí)", () => {
+    expect(phonemize("第一个", "cmn")).toBe("ti˥˩ ji˥˥ kɤ˥˩");   // dì yī gè
+    expect(phonemize("一个", "cmn")).toBe("ji˧˥ kɤ˥˩");          // yí gè unchanged
+  });
 });
