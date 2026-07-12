@@ -78,7 +78,7 @@ function parse(w: string): Unit[] {
     if (!nx?.cons?.soft) continue;
     // two-tier: с/з soften only before soft т (сделать/здесь keep hard z before soft д); т/д/н soften before
     // soft т/д/н/ч (стаканчик → nʲt͡ɕ; but женщина keeps hard н before щ).
-    const ok = "сз".includes(c.cyr) ? nx.cyr === "т" : "тднч".includes(nx.cyr);
+    const ok = "сз".includes(c.cyr) ? "тд".includes(nx.cyr) : "тднч".includes(nx.cyr); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
     if (ok) c.cons = { ph: CONS[c.cyr]![1], soft: true };
   }
   // Geminate softness agreement: identical adjacent consonant letters take the softness of the second (россия
@@ -93,7 +93,7 @@ function parse(w: string): Unit[] {
 // Base (stressed) vowel quality by letter + whether the preceding consonant is soft.
 function stressedVowel(letter: string, softContext: boolean): string {
   switch (letter) {
-    case "а": return "a";                            // а never fronts (счастье → ɕːasʲtʲjə); only я → æ
+    case "а": return softContext ? "æ" : "a";        // а fronts to æ between soft C (счастье → ɕːæsʲtʲje)
     case "я": return "æ";
     case "о": return "o";
     case "ё": return "o";
@@ -154,7 +154,7 @@ export function toIpa(word: string, stressOrd: number, hard?: number[]): string 
     const prevSoft = !!prevCons?.soft;
     if (i === stressPos) {
       v.ph = stressedVowel(v.letter, softCtx);
-      if (v.letter === "я" && v.ph === "æ" && !nextSoft) v.ph = "a"; // я → æ only between two soft C, else a
+      if ((v.letter === "я" || v.letter === "а") && v.ph === "æ" && !nextSoft) v.ph = "a"; // æ only between two soft C
       // ё → ɵ whenever not word-initial (встаёт, жильё); о → ɵ after a soft consonant (тётя).
       if ((v.letter === "ё" && i > 0) || (v.letter === "о" && prevSoft)) v.ph = "ɵ";
     } else {
@@ -168,9 +168,9 @@ export function toIpa(word: string, stressOrd: number, hard?: number[]): string 
       if (v.letter === "и") v.ph = "ɨ";
       else if (v.letter === "е") v.ph = i === stressPos ? "ɛ" : "ɨ";
     }
-    // Word-final unstressed vowels: е → e non-glide (сборище → …ɕːe) but jə after a glide (счастье → …jə); я → ə.
+    // Word-final unstressed vowels: е → e (сборище → …ɕːe, счастье → …je); я → ə (дядя → …dʲə).
     if (i === units.length - 1 && i !== stressPos) {
-      if (v.letter === "е") v.ph = v.glide ? "ə" : "e";
+      if (v.letter === "е") v.ph = "e";
       else if (v.letter === "я") v.ph = "ə";
     }
   }
@@ -221,12 +221,19 @@ function withStress(units: Unit[], stressPos: number): string {
   const lastIdx = units.length - 1;
   let out = "";
   let prevCons = "";
+  let prevCyr = "";
   for (let i = 0; i < units.length; i++) {
     const u = units[i]!;
     if (u.cons) {
-      if (u.cons.ph === prevCons) { if (i !== lastIdx) out += "ː"; }  // geminate → Cː; final geminate → single
-      else out += u.cons.ph;
+      if (u.cons.ph === prevCons) {
+        // Geminate: written doubles and voicing-assimilated stops stay long (русский → sː, отдых → odːɨx); only
+        // a SIBILANT assimilated across a morpheme (different letters: французский зс → s) simplifies to single.
+        // Final geminate → single either way.
+        const sibilantAssim = /^[szʂʐ]|ɕ/.test(u.cons.ph) && u.cyr !== prevCyr;
+        if (!sibilantAssim && i !== lastIdx) out += "ː";
+      } else out += u.cons.ph;
       prevCons = u.cons.ph;
+      prevCyr = u.cyr;
       continue;
     }
     if (u.vowel) {
@@ -234,6 +241,7 @@ function withStress(units: Unit[], stressPos: number): string {
       if (i === stressPos && nVowels > 1) out += "ˈ";
       out += u.vowel.ph;
       prevCons = "";
+      prevCyr = "";
     }
   }
   return out;
