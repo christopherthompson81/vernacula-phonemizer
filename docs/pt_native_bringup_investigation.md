@@ -110,3 +110,14 @@ compact correction table.
 Scores vs wikipron EP (segment-level; betacism/affricate folded): FREQUENCY-common words 64.5→**76.0% raw /
 72.7→86.2% folded**; uniform sample 59.1→67.9% raw / 67.2→76.8% folded. Remaining residual: mostly wikipron
 convention/variation (final -ei→e, initial o→ɔ, ideia→idejɐ) + genuine referee noise, not reachable engine wins.
+
+### Run 3 review fixes
+Adversarial review of Phase 2 found a severe generator bug + two smaller issues, all fixed:
+ - open-vowel detection was POSITION-BLIND (gold.includes("ɛ")) → it opened the STRESSED vowel whenever the
+   referee had an open vowel anywhere, usually a PRETONIC one (freguês→fɾɨɡˈɛʃ wrong, the whole -ês class + all
+   ê/ô circumflex-stressed words). Now aligned by vowel index: only open when the referee's STRESSED nucleus is
+   ɛ/ɔ (freguês→fɾɨɡˈeʃ, robô→ʁubˈo). Open rows 2470→2200 (false positives removed).
+ - word-initial e→i over-raised ~319 words (edgar→idɡaɾ, eclético→iklɛtiku). Added an e:e|e:ɛ correction code
+   (initE) capturing them from the referee → edgar→ɛdɡˈaɾ, eclético→eklˈɛtiku. The table now carries 3 axes.
+ - loader made CRLF-safe (split /\r?\n/).
+Final: 2750 rows (2200 open, 268 x, 319 initial-e); freq-common raw 76.2% / folded 86.4%.

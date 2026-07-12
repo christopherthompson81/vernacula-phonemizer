@@ -15,7 +15,7 @@ import { numberToWords } from "./numbers.ts";
 // only patches the two genuinely-lexical axes it cannot predict — the STRESSED mid-vowel quality (open ɛ/ɔ vs
 // the close e/o default) and grapheme x (s/z/ks vs the ʃ default). Derived from wikipron EP (tools/pt-gen-
 // lexicon.mts). Row: word<TAB>code, code ∈ { "ɛ", "ɔ", "x:s", "x:z", "x:ks" }, "|"-joined if both apply.
-export interface Corr { open?: "ɛ" | "ɔ"; x?: string }
+export interface Corr { open?: "ɛ" | "ɔ"; x?: string; initE?: string }
 let LEXICON: Map<string, Corr> | undefined;
 function lexicon(): Map<string, Corr> {
   if (LEXICON === undefined) {
@@ -23,7 +23,7 @@ function lexicon(): Map<string, Corr> {
     const path = join(dirname(fileURLToPath(import.meta.url)), "lexicon.tsv");
     let text = "";
     try { text = readFileSync(path, "utf8"); } catch { text = ""; } // absent lexicon → pure rule engine
-    for (const line of text.split("\n")) {
+    for (const line of text.split(/\r?\n/)) {
       if (line === "" || line.startsWith("#")) continue;
       const tab = line.indexOf("\t");
       if (tab < 0) continue;
@@ -31,6 +31,7 @@ function lexicon(): Map<string, Corr> {
       for (const code of line.slice(tab + 1).split("|")) {
         if (code === "ɛ" || code === "ɔ") corr.open = code;
         else if (code.startsWith("x:")) corr.x = code.slice(2);
+        else if (code.startsWith("e:")) corr.initE = code.slice(2);   // word-initial e is e/ɛ (not the i default)
       }
       LEXICON.set(line.slice(0, tab), corr);
     }
@@ -103,6 +104,8 @@ function correct(segs: Seg[], stress: number, corr: Corr): void {
     if (segs[stress]!.ph === close) segs[stress]!.ph = corr.open;
   }
   if (corr.x) for (const s of segs) if (s.raw === "x") s.ph = corr.x;
+  // Word-initial e realizes as e/ɛ, overriding the default i-raising: raw="" so realize leaves ph untouched.
+  if (corr.initE && segs[0] && segs[0]!.nucleus && segs[0]!.raw === "e") { segs[0]!.ph = corr.initE; segs[0]!.raw = ""; }
 }
 
 /** Core: EP word → canonical IPA, applying an explicit correction (used by the lexicon and its generator). */
