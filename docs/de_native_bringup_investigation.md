@@ -69,3 +69,20 @@ Result: Laubsturm→lˈaʊ̯pʃtʊɐ̯m (st→ʃt + b→p), Warenkorb→vˈaːʁ
 freundlich→fʁˈɔʏ̯ntlɪç (d→t), while lieben→lˈiːbən and Häuser→hˈɔʏ̯zɐ stay correct. freq-common 66.3→**68.1%**,
 dictionary sweep 33→**41.2%** (+8). GENERALIZES to Dutch/English (affixes + compounds). NEXT: glottal stop at
 stem-initial vowels, unstressed-length, and growing the stem lexicon (Friedhof's "fried" not yet a stem).
+
+## Run 3 — flag lexicon + splittability test
+Moved decomposition from code heuristics to a DATA-DRIVEN FLAGGED LEXICON (lexicon.tsv, 18k words), the shape
+suggested (hunspell/espeak affix-flag model): presence = a known content word; k = compound constituent
+(derived from productivity — a real constituent begins/ends ≥2 attested compounds); N = noun (capitalization);
+s = takes Fugen-s (-ung/-heit/-ion…). The flags drive decomposition precisely:
+ - compound split → only k-constituents (gin/geh/stimmt garbage gone; Zeitungsartikel→zeitungs·artikel via s).
+ - ambiguous be-/ge-/er- prefix → stripped only if the remainder is a real word or splits (beiden↛be·iden,
+   Geburtstag→geburts·tag); the flat path reduces the prefix vowel only when the DICTIONARY stress says the
+   first syllable is unstressed (bestimmt→bə but beiden→baɪ̯, beten→beː).
+ - SPLITTABILITY TEST: a boundary-creating strip (compound seam, consonant-initial suffix -lich/-keit) is taken
+   only if the remainder RESOLVES (isWord ∥ isConstituent ∥ fully splits) — so -lich isn't peeled off a non-word
+   (endlich, möglich, eigentlich stay whole), while Möglichkeit→möglich·keit and freund·lich still split. This
+   +1.1% freq-common (67.9→69.0%) AND is more correct.
+
+Result: freq-common **69.0%**, dictionary sweep 40.8%. The morphology is now lexicon-driven and generalizes
+(Dutch, English). NEXT: grow the constituent lexicon (fried, umlaut suffixes), glottal stop, unstressed length.
