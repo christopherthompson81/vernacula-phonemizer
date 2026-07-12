@@ -1,7 +1,13 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, test } from "vitest";
 
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeArabic } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/arabic/arabic.ts";
+
+// The neural diacritizer model is gitignored (dev stand-in / built permissively) — skip its tests if absent.
+const haveDiacritizer = existsSync(join(import.meta.dirname, "../src/languages/arabic/diacritizer.onnx"));
 
 // Canonical-IPA goldens for Arabic (ar) — Phase 1: the DIACRITIZED input path (broad MSA, cleanroom rules,
 // no lexicon). Emphatics sˤ dˤ tˤ ðˤ, pharyngeals ʕ ħ (the census gaps), gemination Cː, al- sun/moon
@@ -44,5 +50,13 @@ describe("arabic canonical IPA — diacritized path", () => {
   test("text: words + numbers + punctuation → pause", () => {
     expect(phonemize("كَتَبَ الطَّالِبُ.", "ar")).toBe("kˈataba ʔatˤːˈaːlibu .");
     expect(phonemize("الْقَمَر وَالشَّمْس", "ar")).toBe("ʔalqˈamar waʃːˈams");
+  });
+
+  // Phase 2: bare (undiacritized) Arabic via the neural diacritizer pre-pass → g2p. Gated on the model.
+  describe.skipIf(!haveDiacritizer)("bare text via neural diacritizer", () => {
+    test("undiacritized input restores vowels then phonemizes", async () => {
+      expect(await phonemizeArabic("كتب الطالب الدرس")).toBe("kˈatab ʔatˤːˈaːlib ʔadːˈars");
+      expect(await phonemizeArabic("اللغة العربية جميلة")).toBe("ʔalːˈuɣa ʔalʕarabˈijːa d͡ʒamˈiːla");
+    });
   });
 });

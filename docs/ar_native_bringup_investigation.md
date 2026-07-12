@@ -102,3 +102,17 @@ kˈatab ʔatˤːˈaːlib ʔadːˈars). Plumbing PROVEN. Remaining Phase 2: port 
 arabicDiacritizerModelOnnx.ts + helpers) into vernacula, onnxruntime-node OPTIONAL dep, async diacritize()
 pre-pass (phonemize stays sync), GITIGNORE the NC stand-in .onnx (local dev only), then permissive retrain
 (CATT + Arabic Wikipedia, /mnt/data) → swap the .onnx.
+
+## Phase 2 COMPLETE — permissive neural diacritizer (bare text)
+Integration: ported ONNX inference (diacritizer.ts) + async phonemizeArabic() pre-pass; onnxruntime-node
+optional; .onnx gitignored, meta committed. Validated end-to-end with stand-in, then the CLEAN model.
+
+CLEAN MODEL (fully permissive — user cleared Tashkeela as ancient-PD, but silver-only won anyway):
+- CATT teacher (Apache-2.0) → 320k Arabic Wikipedia (CC-BY-SA) sentences, silver-only (no Leipzig NC, no
+  Tashkeela GPL warm-start). BiLSTM 15.3M params, int8 ONNX 15MB.
+- HEAD-TO-HEAD (warm-start experiment): silver-only BEATS warm-start on BOTH domains — modern (our target)
+  2.17% DER vs 2.36%, classical Fadel gold 4.21% vs 4.59%. Maximally-clean = best; no tradeoff. Tashkeela
+  not needed.
+- Swapped clean int8 model into vernacula; 7 ar tests pass; bare text → correct IPA (الشمس تشرق في الصباح →
+  ʔaʃːˈams tˈuʃriq fˈiː ʔasˤːabˈaːħ). Pipeline: /mnt/data/ar-diac (dump→extract→catt_silver→train silver-only→
+  export→int8). See src/languages/arabic/diacritizer.PROVENANCE.md.
