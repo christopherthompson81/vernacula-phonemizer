@@ -10,6 +10,7 @@ import { createArabic } from "./languages/arabic/arabic.ts";
 import { createFrench } from "./languages/french/french.ts";
 import { createPortuguese } from "./languages/portuguese/portuguese.ts";
 import { createRussian } from "./languages/russian/russian.ts";
+import { createGerman } from "./languages/german/german.ts";
 
 export interface Phonemizer {
   /** Full text → canonical IPA. */
@@ -38,6 +39,7 @@ function build(lang: string): Phonemizer {
     case "fr": return createFrench();
     case "pt": return createPortuguese();
     case "ru": return createRussian();
+    case "de": return createGerman();
     // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
     case "hi": return createHindi((latin) => getPhonemizer("en").text(latin));
     default: throw new Error(`vernacula-phonemizer: no phonemizer registered for "${lang}"`);
