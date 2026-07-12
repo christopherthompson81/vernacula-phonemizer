@@ -141,7 +141,7 @@ export function toSegments(word: string): Seg[] {
       case "t": pushC(segs, "t"); break;
       case "v": pushC(segs, "v"); break;
       case "w": pushC(segs, "v"); break;
-      case "x": pushC(segs, "ʃ"); break;                  // default ʃ (ks/z/s are lexical, deferred)
+      case "x": segs.push({ ph: "ʃ", nucleus: false, accent: false, raw: "x", nasal: false }); break; // default ʃ; raw="x" so the lexicon can override to s/z/ks
       case "z": pushC(segs, "z"); break;                  // coda → ʃ/ʒ downstream
       default: break;                                     // skip unknown
     }

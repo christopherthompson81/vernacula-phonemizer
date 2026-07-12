@@ -27,7 +27,7 @@ describe("european portuguese canonical IPA", () => {
     expect(phonemizeWord("coração")).toBe("kuɾɐsˈɐ̃w̃"); // ç → s, ão → ɐ̃w̃
     expect(phonemizeWord("não")).toBe("nˈɐ̃w̃");
     expect(phonemizeWord("também")).toBe("tɐ̃bˈɐ̃j̃");   // stressed -ém → ɐ̃j̃
-    expect(phonemizeWord("homem")).toBe("ˈomɐ̃j̃");      // unstressed final -em → ɐ̃j̃
+    expect(phonemizeWord("homem")).toBe("ˈɔmɐ̃j̃");      // unstressed final -em → ɐ̃j̃ (open o from lexicon)
     expect(phonemizeWord("falam")).toBe("fˈalɐ̃w̃");     // -am → ɐ̃w̃
     expect(phonemizeWord("bom")).toBe("bˈõ");
     expect(phonemizeWord("vinte")).toBe("vˈĩtɨ");
@@ -42,7 +42,7 @@ describe("european portuguese canonical IPA", () => {
 
   test("stress: written accent, oxytone vs paroxytone", () => {
     expect(phonemizeWord("difícil")).toBe("difˈisiɫ"); // accent wins (antepenult)
-    expect(phonemizeWord("estudante")).toBe("ɨʃtudˈɐ̃tɨ"); // paroxytone
+    expect(phonemizeWord("estudante")).toBe("iʃtudˈɐ̃tɨ"); // paroxytone; word-initial e → i
     expect(phonemizeWord("animal")).toBe("ɐnimˈaɫ");   // oxytone: ends in -l
   });
 
@@ -67,6 +67,15 @@ describe("european portuguese canonical IPA", () => {
     expect(phonemizeWord("sansão")).toBe("sɐ̃sˈɐ̃w̃");   // s after a nasal vowel does not voice
   });
 
+  test("lexical corrections: open stressed vowels + grapheme x", () => {
+    expect(phonemizeWord("ela")).toBe("ˈɛlɐ");          // stressed e opens (lexicon)
+    expect(phonemizeWord("agora")).toBe("ɐɡˈɔɾɐ");      // stressed o opens (lexicon)
+    expect(phonemizeWord("velho")).toBe("vˈɛʎu");
+    expect(phonemizeWord("próximo")).toBe("pɾˈɔsimu");  // x → s (+ ó → ɔ)
+    expect(phonemizeWord("táxi")).toBe("tˈaksi");       // x → ks
+    expect(phonemizeWord("gato")).toBe("ɡˈatu");        // not in the table → close-vowel default holds
+  });
+
   test("numbers (European convention, 'e' connector)", () => {
     expect(phonemize("21", "pt")).toBe("vˈĩtɨ e ũ");
     expect(phonemize("342", "pt")).toBe("tɾɨzˈẽtuʃ e kwɐɾˈẽtɐ e dˈojʃ");
@@ -77,6 +86,6 @@ describe("european portuguese canonical IPA", () => {
 
   test("text: reduction + destressed clitics + punctuation", () => {
     expect(phonemize("O gato preto dorme na casa.", "pt")).toBe("o ɡˈatu pɾˈetu dˈoɾmɨ na kˈazɐ .");
-    expect(phonemize("Bom dia, como está?", "pt")).toBe("bˈõ dˈiɐ , kˈomu ɨʃtˈa ?");
+    expect(phonemize("Bom dia, como está?", "pt")).toBe("bˈõ dˈiɐ , kˈomu iʃtˈa ?");
   });
 });
