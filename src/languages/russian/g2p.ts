@@ -50,6 +50,8 @@ function parse(w: string): Unit[] {
     }
     // сч / зч / жч → ɕː (счастье → ɕːasʲtʲjə, мужчина → mʊɕːinə).
     if ((c === "с" || c === "з" || c === "ж") && chars[i + 1] === "ч") { units.push({ cyr: "щ", cons: { ph: "ɕː", soft: true } }); i += 1; continue; }
+    // дж → the affricate d͡ʐ (loanwords: джинсы, менеджер, Джон, поджарить).
+    if (c === "д" && chars[i + 1] === "ж") { units.push({ cyr: "ж", cons: { ph: "d͡ʐ", soft: false } }); i += 1; continue; }
     // Reflexive -ся / -сь after a hard consonant keeps hard с (вернулся → …ɫsə); after й (-йся) it stays soft
     // (соприкасающийся → …jsʲə).
     if (c === "с" && (chars[i + 1] === "я" || chars[i + 1] === "ь") && i + 2 >= chars.length
