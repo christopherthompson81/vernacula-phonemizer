@@ -17,24 +17,27 @@ import { numberToWords } from "./numbers.ts";
 // lexicon.mts). Row: word<TAB>code, code ∈ { "ɛ", "ɔ", "x:s", "x:z", "x:ks" }, "|"-joined if both apply.
 export interface Corr { open?: "ɛ" | "ɔ"; x?: string; initE?: string }
 let LEXICON: Map<string, Corr> | undefined;
+function loadInto(map: Map<string, Corr>, file: string): void {
+  let text = "";
+  try { text = readFileSync(join(dirname(fileURLToPath(import.meta.url)), file), "utf8"); } catch { return; }
+  for (const line of text.split(/\r?\n/)) {
+    if (line === "" || line.startsWith("#")) continue;
+    const tab = line.indexOf("\t");
+    if (tab < 0) continue;
+    const corr: Corr = {};
+    for (const code of line.slice(tab + 1).split("|")) {
+      if (code === "ɛ" || code === "ɔ") corr.open = code;
+      else if (code.startsWith("x:")) corr.x = code.slice(2);
+      else if (code.startsWith("e:")) corr.initE = code.slice(2);   // word-initial e is e/ɛ (not the i default)
+    }
+    map.set(line.slice(0, tab), corr);
+  }
+}
 function lexicon(): Map<string, Corr> {
   if (LEXICON === undefined) {
     LEXICON = new Map();
-    const path = join(dirname(fileURLToPath(import.meta.url)), "lexicon.tsv");
-    let text = "";
-    try { text = readFileSync(path, "utf8"); } catch { text = ""; } // absent lexicon → pure rule engine
-    for (const line of text.split(/\r?\n/)) {
-      if (line === "" || line.startsWith("#")) continue;
-      const tab = line.indexOf("\t");
-      if (tab < 0) continue;
-      const corr: Corr = {};
-      for (const code of line.slice(tab + 1).split("|")) {
-        if (code === "ɛ" || code === "ɔ") corr.open = code;
-        else if (code.startsWith("x:")) corr.x = code.slice(2);
-        else if (code.startsWith("e:")) corr.initE = code.slice(2);   // word-initial e is e/ɛ (not the i default)
-      }
-      LEXICON.set(line.slice(0, tab), corr);
-    }
+    loadInto(LEXICON, "lexicon.tsv");          // wikipron-generated (absent → pure rule engine)
+    loadInto(LEXICON, "lexicon-manual.tsv");   // hand-curated supplement, overrides the generated table
   }
   return LEXICON;
 }
@@ -72,6 +75,9 @@ function onglides(segs: Seg[], stress: number): void {
     if (!s.nucleus || i === stress || (s.raw !== "i" && s.raw !== "u" && s.raw !== "e")) continue;
     const next = segs[i + 1];
     if (!next || !next.nucleus) continue;
+    // A high vowel before a STRESSED high vowel is hiatus, not a glide (juiz → ʒuiʃ, miúdo → miudu; but
+    // piano → pjɐnu, água → aɡwɐ glide before a low vowel).
+    if (i + 1 === stress && (next.raw === "i" || next.raw === "u")) continue;
     // A high vowel after an obstruent+liquid onset cluster stays a nucleus (criança → kɾiɐ̃sɐ, not kɾjɐ̃-).
     const p1 = segs[i - 1], p2 = segs[i - 2];
     if (p1 && p2 && LIQUID.has(p1.ph) && !p2.nucleus) continue;

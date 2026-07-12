@@ -1,0 +1,35 @@
+# European Portuguese MANUAL correction supplement — hand-curated, merged OVER the wikipron-generated
+# lexicon.tsv (manual wins). Fills the open-mid-vowel coverage class the adjudicated micro-gold exposed:
+# high-frequency words that wikipron either lacks (telefone, nove, fome) or transcribes with the wrong
+# quality (bola → wikipron close o, but EP is open ɔ). Same format: word<TAB>ɛ|ɔ (stressed mid vowel opens).
+# open ɔ (stressed o)
+bola	ɔ
+nove	ɔ
+fome	ɔ
+telefone	ɔ
+nota	ɔ
+moda	ɔ
+roda	ɔ
+nova	ɔ
+prova	ɔ
+forte	ɔ
+sorte	ɔ
+norte	ɔ
+morte	ɔ
+corte	ɔ
+pote	ɔ
+nora	ɔ
+# open ɛ (stressed e)
+depressa	ɛ
+sete	ɛ
+certo	ɛ
+perto	ɛ
+aberto	ɛ
+resto	ɛ
+gesto	ɛ
+testa	ɛ
+meta	ɛ
+seta	ɛ
+zero	ɛ
+belo	ɛ
+peça	ɛ
