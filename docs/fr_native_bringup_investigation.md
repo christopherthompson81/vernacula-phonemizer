@@ -73,3 +73,28 @@ lexicon — Lexique is the more consistent canonical convention.
 
 REMAINING (Phase 2.5): align the g2p OOV convention to Lexique (o/ɔ open-syllable, schwa retention) so unseen
 words match the lexicon's convention; liaison/elision (cross-word).
+
+## Phase 2.5 — g2p OOV convention aligned to the lexicon + liaison
+Two follow-ups from Phase 2.
+
+**(1) Align the g2p OOV to Lexique.** The g2p fallback was tuned to wikipron; unseen words therefore diverged
+from the lexicon's (Lexique) convention. Re-measured g2p vs a 3000-word frequency-ranked Lexique-gold corpus
+(/tmp/fr_lexique_gold.tsv) and aligned it: **73.8% → 85.8%**. Changes, each a real convention/correctness fix:
+ - o → o in an OPEN syllable (comment→komɑ̃), ɔ only when a coda closes it (porte→pɔʁt); geminate/`-es` word-final
+   is a coda (hommes→ɔm); obstruent+liquid before a pronounced vowel is a tautosyllabic ONSET (problème→pʁoblɛm).
+ - drop the loi-des-trois-consonnes deletion — Lexique keeps the citation schwa (maintenant→mɛ̃tənɑ̃); keep only
+   hiatus-schwa deletion (aboiement→abwamɑ̃).
+ - final -e silent before a plural -s (choses→ʃoz); -ses (s→z) opens the syllable (choses→ʃoz not ʃɔz).
+ - monosyllable detection now checks for a vowel ANYWHERE in a phoneme, so glide+vowel units (wa, ɥi, jɛ̃) count
+   as nuclei — croire→kʁwaʁ (was kʁwaʁə, misread as a monosyllable → spurious final ə).
+ - ai → ɛ across positions (vraiment→vʁɛmɑ̃), the Lexique convention (+0.9).
+The SYSTEM vs wikipron is unchanged (82.8%) — the lexicon already covers the frequent words; g2p-alone vs
+wikipron DROPS (80→75%) precisely because the OOV path now targets the lexicon convention, not wikipron. That is
+the intended outcome: OOV output is now consistent with the lexicon it falls back from.
+
+**(2) Liaison.** Obligatory function-word liaison: a latent final consonant surfaces as the onset of a following
+vowel-initial word — z (les/des/nous/vous/deux…), n (un/mon/en/on…), t (est/sont/tout/petit…, grand/quand d→t),
+incl. elided c'est/n'est. Attached to the NEXT word (re-syllabified: les amis → le zamˈi). Blocked across a pause
+and before h aspiré (H_ASPIRE set: les héros → le eʁo). Elision (l', j', c') was already handled by the
+tokenizer + lexicon. Chains correctly: les enfants ont un chien → le zɑ̃fɑ̃ ɔ̃ tœ̃ ʃjɛ̃. Remaining (not attempted):
+optional/stylistic liaison, singular-noun forbidden cases, full h-aspiré lexicon — these need POS/lexical data.

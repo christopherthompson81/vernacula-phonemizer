@@ -48,4 +48,25 @@ describe("french canonical IPA", () => {
     expect(phonemize("Bonjour le monde.", "fr")).toBe("bɔ̃ʒuʁ lə mˈɔ̃d .");
     expect(phonemize("Je mange une pomme.", "fr")).toBe("ʒə mɑ̃ʒ yn pˈɔm .");
   });
+
+  // Liaison: a latent final consonant surfaces as the onset of a following vowel-initial word (z/n/t);
+  // h aspiré blocks it. Elision (l', c') is handled by the tokenizer + lexicon.
+  test("liaison across words, h aspiré blocks", () => {
+    expect(phonemize("les amis", "fr")).toBe("le zamˈi");            // z-liaison
+    expect(phonemize("un ami", "fr")).toBe("œ̃ namˈi");               // n-liaison (nasal)
+    expect(phonemize("petit ami", "fr")).toBe("pəti tamˈi");         // t-liaison
+    expect(phonemize("c'est ici", "fr")).toBe("kɛ tisˈi");           // elided c'est → t-liaison
+    expect(phonemize("deux ans", "fr")).toBe("dø zˈɑ̃");              // number liaison
+    expect(phonemize("les héros", "fr")).toBe("le eʁˈo");            // h aspiré → NO liaison
+    expect(phonemize("les chats", "fr")).toBe("le ʃˈa");             // consonant-initial → no liaison
+  });
+
+  // g2p OOV convention aligned to the lexicon (Lexique): o open/closed, citation schwa, obstruent+liquid onset.
+  test("g2p OOV matches the lexicon convention", () => {
+    expect(toIpa("comment")).toBe("komɑ̃");     // open o → o (not ɔ)
+    expect(toIpa("problème")).toBe("pʁoblɛm");  // obstruent+liquid onset keeps o open
+    expect(toIpa("hommes")).toBe("ɔm");         // geminate coda before -es → closed ɔ
+    expect(toIpa("choses")).toBe("ʃoz");        // -ses (s→z) opens the syllable, final e silent
+    expect(toIpa("croire")).toBe("kʁwaʁ");      // wa nucleus recognised → final e silent (not schwa)
+  });
 });
