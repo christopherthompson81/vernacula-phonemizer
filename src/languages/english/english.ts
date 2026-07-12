@@ -178,7 +178,7 @@ export class EnglishPhonemizer {
     for (const c of clauses) {
       for (const it of c.items) {
         if (WH_SECONDARY.has(it.word)) it.display = it.citation.replace(/ˈ/g, "ˌ"); // wh-pronoun → secondary
-        else if (it.reduced) it.display = it.citation.replace(/ˈ/g, "");            // $u / decimal point → unstressed
+        else if (it.reduced) it.display = it.citation.replace(/ˈ/g, "");            // unstressed function word / decimal point
       }
       if (c.items.length > 0) {
         // Nuclear tonic: the clause-FINAL word takes primary in a TERMINAL clause (. ? ! / utterance end) —

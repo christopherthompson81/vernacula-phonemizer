@@ -1,5 +1,5 @@
 // Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
-// standard Hindi phonology, INDEPENDENT of espeak (no hi_rules / hi_list / phoneme-table ingestion).
+// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
 // This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
 // directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
@@ -9,7 +9,7 @@
   "language": "hi",
   "name": "Hindi",
   "script": "Devanagari",
-  "provenance": "Independently authored from the Unicode Devanagari chart + standard Hindi phonology. espeak used only as one reference among others; no espeak rule/table/dict content is ingested.",
+  "provenance": "Authored from the Unicode Devanagari chart + standard Hindi phonology. This file IS the language data — the native G2P engine reads it directly.",
 
   // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
   // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -122,7 +122,7 @@
   ],
 
   // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
-  // running these through the same native G2P (no hand-written phonemes, no espeak hi_list). The
+  // running these through the same native G2P (no hand-written phonemes). The
   // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
   // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
   // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
@@ -138,7 +138,7 @@
 
   // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
   // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-  // the espeak-hi stripRupeeSymbol behaviour.
+  // the amount reads as the bare number.
   "symbols": { "%": "प्रतिशत" },
   "stripSymbols": "₹",
 

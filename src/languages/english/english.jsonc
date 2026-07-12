@@ -1,19 +1,19 @@
-// Native canonical-IPA MANIFEST for English (en) — the small, hand-authored FACTS of the English
-// divestment, consolidated Hindi-style into one self-describing file. UNLIKE data/native/hindi.jsonc,
+// Native canonical-IPA MANIFEST for English (en) — the small, hand-authored FACTS of English —
+// hand-authored FACTS of English, consolidated into one self-describing file. UNLIKE hindi.jsonc,
 // this is NOT the whole language: English is irregular, so its bulk data is STATISTICAL MODELS referenced
 // under "models" below (a 125k-word lexicon + an n-gram OOV G2P + a POS perceptron), which cannot be
 // authored as rules. Only the closed, hand-curatable facts live here.
 //
-// LOAD-BEARING blocks (read at runtime by src/loadData.ts + the C# LanguageLoader): "heteronyms",
-// "numbers". The "convention", "provenance", "models" blocks are self-describing documentation.
+// LOAD-BEARING blocks (read by src/languages/english/english.ts): "heteronyms", "numbers",
+// "unstressedWords". The "convention", "provenance", "models" blocks are self-describing documentation.
 {
   "language": "en",
   "name": "English (General American)",
-  "provenance": "CMUdict (public-domain lexicon) + a cleanroom joint-n-gram OOV G2P + a UD-EWT-trained averaged-perceptron POS tagger. NO espeak en_list / en_rules / number-fragment content is read for the DEFAULT render; espeak's compiled tables stay loaded only as the espeak-mode (ipaRendering:\"espeak\") regression guard. WHICH words are heteronyms, and the number words, are small closed language facts (no attribution needed).",
+  "provenance": "CMUdict (public-domain lexicon) + a cleanroom joint-n-gram OOV G2P + a UD-EWT-trained averaged-perceptron POS tagger. Single canonical-IPA output mode, no fallback. WHICH words are heteronyms / function words, and the number words, are small closed language facts (no attribution needed).",
 
   // The canonical-IPA conventions every value below (and the CMUdict lexicon) is written in. These are
-  // DOCUMENTATION — the engine applies them via arpabetToIpa + meta.json flags (postIpaFlapT, the
-  // canonicalGlyphMap ɜː→ɝ / ɾ→t̬), cross-referenced here so the reader sees the whole decision in one place.
+  // DOCUMENTATION — the engine bakes them into the IPA via englishArpabet.ts (ARPABET -> canonical IPA)
+  // and the lexicon, cross-referenced here so the reader sees the whole decision in one place.
   "convention": {
     "stress":     "before the nucleus (ˈ/ˌ precede the vowel, not the syllable)",
     "flapping":   "intervocalic /t d/ → voiced flap t̬ (city → sˈɪt̬i)",
@@ -152,14 +152,12 @@
     "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" }
   },
 
-  // NUMBER WORDS — canonical IPA for the digit-input fragments, so 42 reads exactly like typed "forty two"
+  // NUMBER WORDS — canonical IPA for the number words, so 42 reads exactly like typed "forty two"
   // (12 → twˈɛɫv, with dark-l/aspiration). CMUdict-sourced + an authored high-magnitude supplement
   // (quadrillion…nonillion, on the regular -illion pattern). units[0-9], teens[10-19], tens by value,
-  // magnitudes[0]=thousand…[9]=nonillion (hundred is separate). Canonical render only; espeak mode keeps
-  // fragments.jsonl. The loader maps these to the pipeline's fragment keys (5→_5, 20→_2X, hundred→_0C,
-  // thousand→_0M1, and→_0and, point→_dpt). See src/Phonemize/render.ts (applyPronunciationOverride,
-  // fromNumber branch). ORDINALS (1st → "first") route through the flat lexicon as whole words — already
-  // native, nothing needed here.
+  // magnitudes[0]=thousand..[9]=nonillion (hundred is separate). Digit input is expanded to these WORDS
+  // (numbers.ts) which then resolve through the lexicon like any word, so 42 == "forty two". ORDINALS
+  // (1st -> "first") and decimals route through the same word path. See src/languages/english/english.ts.
   "numbers": {
     "units":      ["zˈɪɹoᶷ", "wˈʌn", "tʰˈuː", "θɹˈiː", "fˈɔːɹ", "fˈaᶦv", "sˈɪks", "sˈɛvən", "ˈeᶦt", "nˈaᶦn"],
     "teens":      ["tʰˈɛn", "ɪlˈɛvən", "twˈɛɫv", "θˈɝtʰˈiːn", "fˈɔːɹtˈiːn", "fɪftˈiːn", "sɪkstˈiːn", "sˈɛvəntˈiːn", "eᶦtʰˈiːn", "nˈaᶦntˈiːn"],
@@ -175,13 +173,14 @@
   "models": {
     "lexicon":  { "file": "accent-lexicon.tsv", "words": 124928, "note": "CMUdict → canonical IPA; the flat per-word override (the 'grapheme→IPA table' an irregular language can only express as a word list)." },
     "oovG2p":   { "model": "g2p-model.json", "dict": "g2p-dict.tsv", "common": "g2p-common.txt", "note": "cleanroom joint n-gram — the rule engine Hindi doesn't need (English spelling isn't rule-derivable)." },
-    "posModel": { "file": "pos-model.json", "note": "averaged perceptron (UD-EWT); drives heteronym selection. Hindi has no homographs to disambiguate." }
+    "posModel": { "file": "pos-model.json", "note": "averaged perceptron (UD-EWT); drives heteronym selection + de-accenting." }
   },
 
-  // Resolution order in applyPronunciationOverride (canonical mode). espeak base surfaces only in espeak mode.
-  "resolve": ["number-fragment", "heteronym (POS-gated)", "possessive 's", "flat lexicon", "OOV G2P"],
-  // UNSTRESSED function words (espeak $u set — a language fact): reduced/de-accented in connected speech.
-  // The de-accent pass strips their citation primary stress (I -> a, not stressed); a clause left with no
-  // primary then promotes its last word to the nuclear tonic. See src/languages/english/english.ts.
-  "unstressedWords": ["about", "above", "across", "already", "among", "amongst", "an", "and", "as", "at", "be", "became", "become", "been", "before", "behind", "below", "beneath", "beside", "between", "beyond", "by", "could", "did", "do", "does", "doth", "for", "from", "goeth", "had", "has", "have", "he", "her", "hers", "his", "i", "if", "in", "is", "it", "its", "made", "may", "might", "my", "not", "of", "or", "our", "over", "per", "she", "should", "than", "that", "thee", "their", "there", "these", "they", "thine", "this", "those", "through", "to", "together", "under", "upon", "we", "what", "whenever", "which", "will", "with", "within", "without", "would", "wouldst", "ye", "yer", "you", "your"]
+  // Per-word resolution order in src/languages/english/english.ts. No fallback anywhere.
+  "resolve": ["number words", "heteronym (POS-gated)", "possessive 's", "flat lexicon", "OOV G2P"],
+  // UNSTRESSED function words — English's closed grammatical class (articles, prepositions, conjunctions,
+  // auxiliaries, unstressed pronouns). WHICH words are function words is a language fact. The de-accent
+  // pass strips their citation primary stress (I -> a, not stressed); a clause left with no primary then
+  // promotes its last word to the nuclear tonic. See src/languages/english/english.ts.
+  "unstressedWords": ["about", "above", "across", "among", "amongst", "an", "and", "as", "at", "be", "been", "before", "behind", "below", "beneath", "beside", "between", "beyond", "by", "could", "did", "do", "does", "for", "from", "had", "has", "have", "he", "her", "hers", "his", "i", "if", "in", "is", "it", "its", "may", "might", "my", "not", "of", "or", "our", "over", "per", "she", "should", "than", "that", "their", "there", "these", "they", "this", "those", "through", "to", "under", "upon", "we", "what", "whenever", "which", "will", "with", "within", "without", "would", "you", "your"]
 }
