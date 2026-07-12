@@ -49,27 +49,81 @@ function accentFinal(tokens: string[]): void {
 const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
 const TOKEN = /([a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/giu;
 
+// Obligatory liaison: a normally-silent final consonant of a function word / number is pronounced as the
+// onset of a following vowel-initial word. z after plural determiners/pronouns & the -x/-s numbers; n after
+// nasal monosyllables; t after est/sont/tout/petit… (grand/quand: d→t). Attached to the next word (re-syllabified).
+const LIAISON: Record<string, string> = {
+  les: "z", des: "z", ces: "z", mes: "z", tes: "z", ses: "z", nos: "z", vos: "z", leurs: "z", aux: "z",
+  ils: "z", elles: "z", nous: "z", vous: "z", dans: "z", chez: "z", sans: "z", très: "z", plus: "z", moins: "z",
+  deux: "z", trois: "z", six: "z", dix: "z",
+  un: "n", mon: "n", ton: "n", son: "n", en: "n", on: "n", aucun: "n", bien: "n", rien: "n", commun: "n",
+  est: "t", sont: "t", ont: "t", font: "t", vont: "t", tout: "t", quand: "t", grand: "t", petit: "t", dont: "t", cet: "t",
+  "c'est": "t", "c’est": "t", "n'est": "t", "n’est": "t", // elided single tokens: c'est ici → sɛ tisi
+};
+// h aspiré (and vowel-initial words that block liaison, e.g. huit/onze/y-): the following word looks
+// vowel-initial but forbids liaison — les héros → le eʁo, not le zeʁo.
+const H_ASPIRE = new Set([
+  "hache", "haie", "haillon", "haine", "haïr", "hall", "halle", "halte", "hamac", "hameau", "hamburger",
+  "hamster", "hanche", "handicap", "handicapé", "hangar", "hanter", "harceler", "hardi", "hareng", "hargne",
+  "haricot", "harpe", "hasard", "hâte", "hausse", "haut", "hautain", "hauteur", "havre", "hennir", "hérault",
+  "hérisson", "hérissé", "hernie", "héron", "héros", "hêtre", "heurter", "hibou", "hiboux", "hiérarchie",
+  "homard", "hongrie", "hongrois", "honte", "hoquet", "horde", "hors", "hotte", "houle", "hublot", "huer",
+  "huit", "huitième", "hurler", "hutte", "hollande", "hollandais",
+  "onze", "onzième", "yaourt", "yacht", "yoga", "oui", "ouistiti", "uhlan",
+]);
+const STARTS_VOWEL = /^[aeiouyàâäéèêëîïôöûüùœæh]/i; // h → treat as mute unless the word is in H_ASPIRE
+function liaisonOnto(prev: string, next: string): string {
+  const c = LIAISON[prev.toLowerCase()];
+  if (!c) return "";
+  const nx = next.toLowerCase();
+  const aspire = H_ASPIRE.has(nx) || H_ASPIRE.has(nx.replace(/s$/, "")); // plural: homards, haricots
+  return STARTS_VOWEL.test(nx) && !aspire ? c : "";
+}
+// The liaison consonant re-syllabifies as the next word's onset; if the citation form already realises that
+// latent consonant (cet→sɛt, six→sis, dix→dis), strip it here so it isn't doubled. z↔final s/z, t↔t/d, n↔n.
+const LATENT: Record<string, RegExp> = { z: /[sz]$/, t: /[td]$/, n: /n$/ };
+function stripLatent(ipa: string, c: string): string {
+  return LATENT[c]?.test(ipa) ? ipa.slice(0, -1) : ipa;
+}
+
 class FrenchPhonemizer implements Phonemizer {
   constructor(private readonly foreign?: (latin: string) => string) {}
 
   text(input: string): string {
+    // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
+    // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
+    type Item = { word: string } | { pause: string };
+    const items: Item[] = [];
+    for (const m of input.matchAll(TOKEN)) {
+      if (m[1]) items.push({ word: m[1] });
+      else if (m[2]) {
+        const [intPart, frac] = m[2].split(/[.,]/);
+        for (const w of numberToWords(Number(intPart)).split(" ")) items.push({ word: w });
+        if (frac !== undefined) {                    // decimal: "virgule" + digit-by-digit
+          items.push({ word: "virgule" });
+          for (const d of frac) for (const w of numberToWords(Number(d)).split(" ")) items.push({ word: w });
+        }
+      } else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) items.push({ pause: mk }); }
+    }
+
     let group: string[] = [];        // IPA tokens of the current rhythmic group (until a pause)
     let out = "";
+    let carry = "";                  // liaison consonant to prepend to the next word (its new onset)
     const flush = (pause: string | null): void => {
       if (group.length) { accentFinal(group); out += (out ? " " : "") + group.join(" "); group = []; }
       if (pause) out += ` ${pause}`;
     };
-    const add = (word: string): void => { const ipa = phonemizeWord(word); if (ipa) group.push(ipa); }; // skip empties
-    for (const m of input.matchAll(TOKEN)) {
-      if (m[1]) add(m[1]);
-      else if (m[2]) {
-        const [intPart, frac] = m[2].split(/[.,]/);
-        for (const w of numberToWords(Number(intPart)).split(" ")) add(w);
-        if (frac !== undefined) {                    // decimal: "virgule" + digit-by-digit
-          add("virgule");
-          for (const d of frac) for (const w of numberToWords(Number(d)).split(" ")) add(w);
-        }
-      } else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && (group.length || out)) flush(mk); }
+    for (let k = 0; k < items.length; k++) {
+      const it = items[k]!;
+      if ("pause" in it) { carry = ""; if (group.length || out) flush(it.pause); continue; } // liaison never crosses a pause
+      let ipa = carry + phonemizeWord(it.word);
+      carry = "";
+      const next = items[k + 1];                       // liaison only onto an immediately adjacent word
+      if (next && "word" in next) {
+        carry = liaisonOnto(it.word, next.word);
+        if (carry) ipa = stripLatent(ipa, carry);      // avoid doubling a citation-realised final consonant
+      }
+      if (ipa) group.push(ipa);
     }
     flush(null);
     return out;

@@ -34,35 +34,48 @@ const FINAL_SOUNDED = new Set(["c", "r", "f", "l", "q", "k"]);
 const YOD_DOUBLE: [string, string][] = [["ouill", "uj"], ["euill", "œj"], ["aill", "aj"], ["eill", "ɛj"], ["ueill", "œj"], ["uill", "ɥij"]];
 const YOD_FINAL: [string, string][] = [["ouil", "uj"], ["euil", "œj"], ["ail", "aj"], ["eil", "ɛj"], ["ueil", "œj"]];
 
+/** True when position k begins a silent word-final tail: end of word, or a plural -s at the end (belle, hommes). */
+function silentTail(w: string, k: number): boolean {
+  const c = w[k] ?? "";
+  return c === "" || (c === "s" && (w[k + 1] ?? "") === "");
+}
+
 /** eu/œu is "closed" (→ œ not ø) when a pronounced consonant CLOSES the syllable: word-final sounded C
- *  (peur, seul), a coda before another consonant, or a C before a silent final -e (jeune, heure). Open (→ ø)
- *  when word-final vowel/end (feu) or the consonant is an onset before a vowel (heureux). */
+ *  (peur, seul), a coda before another consonant, or a C before a silent final -e(s) (jeune, heure). Open (→ ø)
+ *  when word-final vowel/end (feu), an onset before a vowel (heureux), or an obstruent+liquid onset (o.bli). */
 function euClosed(w: string, a: number): boolean {
   const c1 = w[a] ?? "";
   if (c1 === "" || isV(c1)) return false;
   const c2 = w[a + 1] ?? "";
   if (c2 === "") return "rlfcqkbɡv".includes(c1);        // V+C$ → closed iff C is sounded
-  if (c1 === c2) {                                       // geminate = single onset (abaissable) unless coda before -e (belle)
+  if (c1 === c2) {                                       // geminate = single onset (abaissable) unless a word-final coda (belle, hommes)
     const c3 = w[a + 2] ?? "";
-    return c3 === "e" && (w[a + 3] ?? "") === "" ? true : (c3 !== "" && !isV(c3));
+    return c3 === "e" && silentTail(w, a + 3) ? true : (c3 !== "" && !isV(c3));
   }
-  if (c2 === "e" && (w[a + 2] ?? "") === "") return true; // V+C+e$ (jeune, heure, belle) → closed
+  if (c2 === "e" && silentTail(w, a + 2)) return true;   // V+C+e(s)$ (jeune, heure, belle) → closed
+  // obstruent + liquid before a PRONOUNCED vowel = tautosyllabic onset (pro.blème, de.vrais) → syllable stays open
+  const c3 = w[a + 2] ?? "";
+  if ("pbcdfgktv".includes(c1) && (c2 === "l" || c2 === "r") && !((c1 === "t" || c1 === "d") && c2 === "l")
+      && isV(c3) && !(c3 === "e" && silentTail(w, a + 3))) return false;
   return !isV(c2);                                       // V+CC → closed ; V+C+V → open
 }
 
-/** o defaults to [ɔ] (incl. unstressed open syllables: abiotique → abjɔtik); it is [o] only word-finally
- *  (abdo), before z, or in -se→z (rose, chose). ô/au/eau are already [o] via the vowel table. */
+/** o is [o] in an OPEN syllable (comment → komɑ̃, abdo), [ɔ] in a closed one (porte → pɔʁt). Also [o]
+ *  word-finally, before z, in -se→z (rose), or before a silent final consonant (mot). Matches the Lexique
+ *  convention (an onset consonant, incl. a geminate → single onset, keeps the syllable open). */
 function oClosed(w: string, a: number): boolean {
   const c1 = w[a] ?? "";
   if (c1 === "") return false;                                                            // word-final → o
   if (c1 === "z") return false;                                                           // before z → o
-  if (c1 === "s" && (w[a + 1] ?? "") === "e" && (w[a + 2] ?? "") === "") return false;     // -se (→z) → o (rose)
-  if ((w[a + 1] ?? "") === "" && "tsdpx".includes(c1)) return false;                       // o + silent final C → o (abot, mot)
-  return true;                                                                            // else → ɔ
+  if (c1 === "s" && (w[a + 1] ?? "") === "e" && silentTail(w, a + 2)) return false;         // -se(s) (→z) → o (rose, choses)
+  if ((w[a + 1] ?? "") === "" && "tsdpx".includes(c1)) return false;                       // o + silent final C → o (mot)
+  return euClosed(w, a);                                                                   // ɔ if a coda closes the syllable, else o
 }
 
 const VOWEL_PH = "aeiouyɛɔøœəɑ"; // IPA vowel starts (for schwa-deletion consonant counting)
 const isConsPh = (ph: string): boolean => ph.length >= 1 && !VOWEL_PH.includes(ph[0]!);
+// A phoneme carries a syllable nucleus if any of its chars is a vowel (catches multi-char glides+vowel: wa, ɥi, jɛ̃).
+const hasNucleus = (ph: string): boolean => [...ph].some((c) => VOWEL_PH.includes(c));
 // A front vowel softens c→s / g→ʒ. NB: guard "" — "abc".includes("") is true, which would soften a word-final c/g.
 const isFront = (ch: string): boolean => ch !== "" && "eiéèêyœæ".includes(ch);
 
@@ -102,11 +115,8 @@ export function toIpa(word: string): string {
     }
     if (nasal) continue;
 
-    // ai → ɛ in a closed syllable (laine, aime) or word-finally (français, mais); e when open (maison, aimer).
-    if (rest.startsWith("ai")) {
-      const hasVowelAfter = /[aeiouyàâéèêëîïôûùœ]/.test(w.slice(i + 2));
-      out.push(euClosed(w, i + 2) || !hasVowelAfter ? "ɛ" : "e", i); i += 2; continue;
-    }
+    // ai → ɛ (laine, mais, vraiment, maison) — the Lexique convention renders it ɛ across positions.
+    if (rest.startsWith("ai")) { out.push("ɛ", i); i += 2; continue; }
 
     // ou before a vowel → glide w (oui → wi, accouer → akwe).
     if (rest.startsWith("ou") && isV(nx2)) { out.push("w", i); i += 2; continue; }
@@ -127,6 +137,7 @@ export function toIpa(word: string): string {
     if (vg) continue;
 
     // Consonant digraphs / context.
+    if (c === "c" && (nx === "'" || nx === "’")) { out.push("s", i); i++; continue; } // elided c' (ce/ça) → s, not k
     if (c === "c" && nx === "h") { out.push("ʃ", i); i += 2; continue; }
     if (c === "p" && nx === "h") { out.push("f", i); i += 2; continue; }
     if (c === "t" && nx === "h") { out.push("t", i); i += 2; continue; }
@@ -142,8 +153,9 @@ export function toIpa(word: string): string {
       case "a": case "à": out.push("a", i); i++; break;
       case "e": {
         // e: silent word-final; ə mid-word; but before a double consonant / two consonants → ɛ.
-        if (atEnd(1)) { if (!seg.some((s) => !isConsPh(s.ph))) out.push("ə", i); i++; break; } // final e: ə in a monosyllable (le, je), else silent
-        if (nx === "r" && atEnd(2) && seg.some((s) => !isConsPh(s.ph))) { out.push("e", i); i += 2; break; } // -er → e (polysyllable: manger); monosyllable mer/cher falls through → ɛʁ
+        // final e — silent (choses → ʃoz), also before a silent plural -s (e + final s); ə in a monosyllable (le, je)
+        if (atEnd(1) || (nx === "s" && atEnd(2))) { if (!seg.some((s) => hasNucleus(s.ph))) out.push("ə", i); i++; break; }
+        if (nx === "r" && atEnd(2) && seg.some((s) => hasNucleus(s.ph))) { out.push("e", i); i += 2; break; } // -er → e (polysyllable: manger); monosyllable mer/cher falls through → ɛʁ
         if (nx === "z" && atEnd(2)) { out.push("e", i); i += 2; break; } // -ez → e
         if (nx === "t" && atEnd(2)) { out.push("ɛ", i); i += 2; break; } // -et → ɛ
         // e → ɛ in a closed syllable (mer, sel, accentuel, belle); ə in an open one (later maybe deleted).
@@ -194,17 +206,15 @@ export function toIpa(word: string): string {
     dedup.push(s);
   }
 
-  // Post-pass 2 — schwa deletion (loi des trois consonnes): drop a word-internal ə preceded by a SINGLE
-  // consonant and followed by a consonant (VCəCV → VCCV): abaissement → abɛsmɑ̃. Keep after a cluster.
+  // Post-pass 2 — hiatus-schwa deletion only: drop a word-internal ə that directly follows a VOWEL
+  // (aboiement → abwamɑ̃, aient → ɛ). The loi des trois consonnes (VCəCV → VCCV, maintenant) is a prosodic
+  // reduction, NOT applied here: the Lexique convention keeps the citation schwa (maintenant → mɛ̃tənɑ̃).
   const collapsed: { ph: string; s: number }[] = [];
   for (let p = 0; p < dedup.length; p++) {
     if (dedup[p]!.ph === "ə" && p > 0 && p < dedup.length - 1) {
-      const before1 = dedup[p - 1], before2 = dedup[p - 2], after = dedup[p + 1];
+      const before1 = dedup[p - 1], after = dedup[p + 1];
       const endsVowel = (s?: { ph: string }): boolean => !!s && /[aeiouyɛɔøœəɑ]̃?$/.test(s.ph);
-      const vowelBefore = endsVowel(before1);                                       // hiatus schwa (aboiement → abwamɑ̃)
-      // single consonant preceded by a VOWEL (not word-initial: petit → pəti keeps ə)
-      const singleConsBefore = before1 && isConsPh(before1.ph) && endsVowel(before2);
-      if ((vowelBefore || singleConsBefore) && after && isConsPh(after.ph)) continue; // delete ə
+      if (endsVowel(before1) && after && isConsPh(after.ph)) continue;              // hiatus schwa → delete
     }
     collapsed.push(dedup[p]!);
   }
