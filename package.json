@@ -1,0 +1,19 @@
+{
+  "name": "vernacula-phonemizer",
+  "version": "0.1.0",
+  "description": "Canonical-IPA phonemizer — native, espeak-independent. Hindi + English.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4",
+    "typescript": "^5",
+    "vitest": "^2"
+  }
+}
