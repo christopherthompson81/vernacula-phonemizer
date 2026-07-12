@@ -1,17 +1,21 @@
 /**
- * Japanese (ja) phonemizer — Standard/Tokyo, canonical IPA, espeak-independent. PHASE 1: a native kana/katakana
- * → IPA engine (kana.ts) + Sino-Japanese numbers. Kanji requires morphological segmentation + reading
- * resolution (to be ported from ~/Programming/espeak-ng-portable, Phase 2); kanji spans are skipped for now.
- * Pitch accent (ꜜ) is Phase 3. See docs/ja_native_bringup_investigation.md.
+ * Japanese (ja) phonemizer — Standard/Tokyo, canonical IPA, espeak-independent.
+ *   text → segmentText (bunsetsu spaces) → per run: applyReadings (kanji→kana) → kanaToIpa.
+ * PHASE 1: native kana/katakana → IPA (kana.ts) + Sino-Japanese numbers. PHASE 2: kanji → kana via a 60k
+ * whole-word reading map + per-kanji on/kun/rendaku fallback (kanji.ts), and orthographic bunsetsu
+ * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3. See docs/ja_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { kanaToIpa } from "./kana.ts";
+import { applyReadings, segmentText } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
 
 // Japanese clause punctuation → canonical pause marks.
 const CLAUSE_MARK: Record<string, string> = { "。": ".", "．": ".", ".": ".", "！": "!", "!": "!", "？": "?", "?": "?", "、": ",", "，": ",", ",": "," };
-// A kana run (hiragana + katakana + long mark + small kana), a digit run, or clause punctuation.
-const TOKEN = /([ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])/gu;
+// A Japanese-script run (kanji incl. Ext-A/B + iteration marks + hiragana + katakana + long mark), a digit
+// run, or clause punctuation. Bunsetsu spaces inserted by segmentText split runs into phrase-sized tokens.
+const TOKEN = /([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])/gu;
+const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass left un-converted (unresolved kanji)
 
 class JapanesePhonemizer implements Phonemizer {
   text(input: string): string {
@@ -23,9 +27,11 @@ class JapanesePhonemizer implements Phonemizer {
       else if (pending !== null) { out += ` ${pending} ${ipa}`; pending = null; }
       else out += ` ${ipa}`;
     };
-    for (const m of input.matchAll(TOKEN)) {
-      if (m[1]) { const ipa = kanaToIpa(m[1]); if (ipa) emit(ipa); }
-      else if (m[2]) { const ipa = kanaToIpa(numberToKana(Number(m[2]))); if (ipa) emit(ipa); }
+    for (const m of segmentText(input).matchAll(TOKEN)) {
+      if (m[1]) {
+        const kana = applyReadings(m[1]).replace(KANA_ONLY, ""); // kanji → kana, drop the unresolvable tail
+        const ipa = kanaToIpa(kana); if (ipa) emit(ipa);
+      } else if (m[2]) { const ipa = kanaToIpa(numberToKana(Number(m[2]))); if (ipa) emit(ipa); }
       else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
     }
     if (pending !== null && out !== "") out += ` ${pending}`;
@@ -33,12 +39,12 @@ class JapanesePhonemizer implements Phonemizer {
   }
 }
 
-/** One Japanese word (kana) → canonical IPA. */
+/** One Japanese word/token → canonical IPA (applies kanji readings, so kanji tokens work too). */
 export function phonemizeWord(word: string): string {
-  return kanaToIpa(word) ?? "";
+  return kanaToIpa(applyReadings(word).replace(KANA_ONLY, "")) ?? "";
 }
 
-/** Build the Japanese phonemizer (Phase 1 — kana + numbers). */
+/** Build the Japanese phonemizer (kana + numbers + kanji readings + bunsetsu segmentation). */
 export function createJapanese(): Phonemizer {
   return new JapanesePhonemizer();
 }
