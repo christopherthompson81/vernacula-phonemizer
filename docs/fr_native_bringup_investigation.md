@@ -107,3 +107,24 @@ Adversarial review of the liaison path found three concrete bugs, all fixed:
  - c'est → kɛ (c before an apostrophe hit the front-vowel softening → k). Added c'→s in g2p (c'est→sɛ, c'était→setɛ).
  - H_ASPIRE was too small and missed plurals (les homards→le zomaʁ). Expanded the common h-aspiré set and match
    the singular after stripping a plural -s (les homards→le omaʁ), while h-muet still liaises (les hommes→le zˈɔm).
+
+## Does French need English-style POS homograph disambiguation? — NO (measured)
+Question raised: the ~14% "residual" looks like the English heteronym/POS problem — build a POS tagger too?
+Measured against Lexique (which carries a POS column, cgram):
+
+ - Heterophonic homographs (same spelling, ≥2 pronunciations): **78 forms, 0.06% of the lexicon**. 75/78 are
+   POS-resolvable (the two readings have disjoint POS). 25 are the -ent verb(silent)/noun(ɑ̃) class.
+ - But they are MASSIVELY frequency-skewed: est→e 22737 vs est→ɛst 87; plus→ply 4068 vs plys 21; as→a 3419 vs
+   as(noun) 19. A most-frequent-wins lexicon already takes the dominant reading.
+ - **Minority-pronunciation mass — what most-frequent-wins actually gets WRONG — is 0.035% of all tokens.** That
+   is the entire homograph error ceiling. A POS tagger would recover three hundredths of a percent.
+ - Lexicon token-coverage of ordinary modern prose: **100%** (127/127; OOV only proper nouns/neologisms/foreign,
+   which the rule g2p serves well because French orthography is shallow).
+
+Contrast with English: hundreds of heteronyms with BALANCED frequencies (read/read, lead/lead) → a POS tagger
+buys real accuracy there. French has ~78, nearly all frequency-degenerate → it does not. The "14%" was the
+lexicon-OVERRIDE rate (g2p/lexicon disagreement, lexicon wins), not an error rate; and the ~17% system-vs-
+wikipron gap is dominated by cross-CONVENTION (Lexique vs wikipron on o/ɔ, e/ɛ, schwa), not by errors or
+homographs. CONCLUSION: no POS tagger for French. The one POS-shaped case (-ent verb vs noun) is already
+resolved in-vocabulary by Lexique's stored inflected forms (disent→diz); it would only matter for OOV verbs,
+which are rare. Effective ceiling is ~99%+, and the residual is convention, not capability.
