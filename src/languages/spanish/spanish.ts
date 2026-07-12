@@ -30,8 +30,9 @@ function stressedNucleus(word: string, segs: Seg[]): number {
   const accented = nuclei.find((i) => segs[i]!.accent);
   if (accented !== undefined) return accented;
   if (nuclei.length === 1) return nuclei[0]!;
-  const last = word[word.length - 1] ?? "";
-  const penult = FINAL_VOWEL.test(word) || last === "n" || last === "s";
+  const w = word.toLowerCase();                          // n/s test must be case-insensitive (EXAMEN, CRISIS)
+  const last = w[w.length - 1] ?? "";
+  const penult = FINAL_VOWEL.test(w) || last === "n" || last === "s";
   return penult ? nuclei[nuclei.length - 2]! : nuclei[nuclei.length - 1]!;
 }
 
@@ -53,8 +54,18 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK: Record<string, string> = {
   ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
 };
-// A word / number / clause-punctuation token. Spanish letters incl. accents + ñ/ü.
-const TOKEN = /([a-záéíóúüñ]+)|(\d[\d.]*)|([.!?…,;:])/giu;
+// A word / number / clause-punctuation token. Numbers use the Spanish convention: dot = thousands separator
+// (1.500), comma = decimal (3,14). Each dot/comma must be followed by digits, so a clause-final "." or ","
+// glued to a number falls through to the punctuation branch. Spanish letters incl. accents + ñ/ü.
+const TOKEN = /([a-záéíóúüñ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+
+/** A number token (with Spanish thousands-dots / decimal-comma) → spoken words. */
+function numberTokenToWords(tok: string): string {
+  const [intRaw, frac] = tok.split(",");
+  let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
+  if (frac !== undefined) words += " coma " + [...frac].map((d) => numberToWords(Number(d))).join(" ");
+  return words;
+}
 // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in
 // running text. Accented counterparts (sí, tú, mí, más) keep their written accent and stay stressed.
 const FUNCTION_WORDS = new Set([
@@ -80,7 +91,7 @@ class SpanishPhonemizer implements Phonemizer {
     };
     for (const m of input.matchAll(TOKEN)) {
       if (m[1]) emit(wordIpa(m[1]));
-      else if (m[2]) emit(numberToWords(Number(m[2].replace(/\./g, ""))).split(" ").map(wordIpa).join(" "));
+      else if (m[2]) emit(numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "));
       else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
     }
     if (pending !== null && out !== "") out += ` ${pending}`;

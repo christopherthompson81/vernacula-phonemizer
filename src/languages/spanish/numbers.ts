@@ -37,12 +37,22 @@ function below1e6(n: number): string {
   return r ? `${thousand} ${below1000(r)}` : thousand;
 }
 
-/** Non-negative integer (< 10¹²) → Spanish words. Larger values fall back to the digit string. */
+// Long-scale groups above 10⁶ (checked high→low). Below 10⁶ is handled by below1e6.
+const SCALES: { value: number; one: string; many: string }[] = [
+  { value: 1e12, one: "un billón", many: "billones" },   // 10¹² = billón
+  { value: 1e6, one: "un millón", many: "millones" },     // 10⁶  = millón (10⁹ = mil millones)
+];
+
+/** Non-negative integer → Spanish words. Out-of-range / unsafe values read digit-by-digit (never empty). */
 export function numberToWords(n: number): string {
-  if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return String(n);
+  if (!Number.isSafeInteger(n) || n < 0 || n >= 1e18) return [...String(Math.abs(n))].map((d) => ONES[Number(d)]!).join(" ");
   if (n === 0) return "cero";
   if (n < 1e6) return below1e6(n);
-  const m = Math.floor(n / 1e6), r = n % 1e6;
-  const million = m === 1 ? "un millón" : `${below1e6(m)} millones`;
-  return r ? `${million} ${below1e6(r)}` : million;
+  for (const sc of SCALES) {
+    if (n < sc.value) continue;
+    const q = Math.floor(n / sc.value), r = n % sc.value;
+    const head = q === 1 ? sc.one : `${below1e6(q)} ${sc.many}`;
+    return r ? `${head} ${numberToWords(r)}` : head;
+  }
+  return below1e6(n); // unreachable (n ≥ 1e6 matched a scale)
 }

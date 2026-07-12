@@ -56,7 +56,7 @@ export function toSegments(word: string): Seg[] {
     if (c === "c" && nx === "h") { cons("t͡ʃ"); i += 2; continue; }
     if (c === "l" && nx === "l") { cons("ʎ"); i += 2; continue; }
     if (c === "r" && nx === "r") { cons("r"); i += 2; continue; }
-    if (c === "q" && nx === "u") { cons("k"); i += 2; continue; }                       // qu → k (u silent)
+    if (c === "q" && nx === "u") { cons("k"); if (!isFront(nx2)) cons("w"); i += 2; continue; } // que/qui → k (u silent); qua/quo → kw
     if (c === "g" && nx === "u" && isFront(nx2)) { cons("ɡ"); i += 2; continue; }        // gue/gui → ɡ (u silent)
     if (c === "g" && nx === "ü" && (nx2 === "e" || nx2 === "i")) { cons("ɡ"); cons("w"); i += 2; continue; } // güe/güi → ɡw
 
@@ -103,7 +103,7 @@ export function toSegments(word: string): Seg[] {
       case "s": cons("s"); break;
       case "t": cons("t"); break;
       case "w": cons("w"); break;
-      case "x": cons("k"); cons("s"); break;                    // x → ks
+      case "x": if (segs.length === 0) cons("s"); else { cons("k"); cons("s"); } break; // word-initial x → s (xenón); else ks
       default: if (/[a-zñ]/.test(c)) cons(c); break;            // unknown letter: pass through
     }
     i++;

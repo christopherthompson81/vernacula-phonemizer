@@ -42,3 +42,15 @@ CONVENTION DECISIONS (all referee-aligned, folding espeak's narrow allophony):
 - function words (monosyllabic clitics) de-accented in running text.
 
 DEFERRED: -mente adverb double stress; sentence nuclear-tonic; decimal reading detail; C# mirror.
+
+## PR #2 review + fixes
+
+Two parallel reviewers (g2p+numbers, stress+spirantization+text) + self-probing. 6 issues, all fixed:
+1. Uppercase words ending in n/s mis-stressed (EXAMEN→final) — stressedNucleus n/s test was case-sensitive; lowercase it.
+2. Clause-final "." glued to a number swallowed (Son 100.) — number regex `\d[\d.]*` ate the period; now `\d+(?:\.\d+)*(?:,\d+)?` (each dot/comma needs following digits).
+3. Spanish decimal comma read as a pause (3,14→"tres , catorce"); now "tres coma uno cuatro".
+4. Oversized numbers (≥10¹²) returned empty; numbers.ts extended to billón + digit-by-digit fallback (never empty).
+5. qu before a/o dropped /w/ (quark→kaɾk); now gated on isFront (qua/quo→kw, que/qui→k).
+6. Word-initial x → /ks/; now /s/ (xenón→senon), intervocalic stays ks.
+Reviewers verified numbers.ts + vowel/hiatus/triphthong/glide logic + spirantization fully correct.
+Known lexical exception left: México/Texas/Oaxaca x→[x] (mˈeksiko) — 3 proper nouns, not worth a lexicon. 45 tests pass; sweep unchanged 93.5%.

@@ -45,4 +45,27 @@ describe("spanish canonical IPA", () => {
     expect(phonemize("Me llamo Juan.", "es")).toBe("me ʎˈamo xwˈan .");   // 'me' clitic de-accented
     expect(phonemize("el gato", "es")).toBe("el ɡˈato");                  // 'el' article de-accented
   });
+
+  // Regression tests for review-caught defects.
+  test("uppercase words ending in n/s stress the penult (case-insensitive rule)", () => {
+    expect(phonemize("EXAMEN", "es")).toBe("eksˈamen");
+    expect(phonemize("CRISIS", "es")).toBe("kɾˈisis");
+  });
+
+  test("a clause-final period/comma glued to a number stays a pause", () => {
+    expect(phonemize("Son 100.", "es")).toBe("sˈon θjˈen .");
+  });
+
+  test("Spanish decimal comma reads 'coma'; oversized numbers never empty", () => {
+    expect(phonemize("3,14", "es")).toBe("tɾˈes kˈoma ˈuno kwˈatɾo"); // comma = decimal
+    expect(phonemize("1.500", "es")).toBe("mˈil kinjˈentos");         // dot = thousands
+    expect(phonemize("1000000000000", "es")).toBe("un biʎˈon");       // 10¹² → un billón (was empty)
+  });
+
+  test("qu before a/o keeps /w/; word-initial x is /s/", () => {
+    expect(phonemize("quark", "es")).toBe("kwˈaɾk");   // qua → kw (not que/qui, which silence u)
+    expect(phonemize("queso", "es")).toBe("kˈeso");    // que → k (u silent)
+    expect(phonemize("xenón", "es")).toBe("senˈon");   // word-initial x → s
+    expect(phonemize("examen", "es")).toBe("eksˈamen"); // non-initial x → ks
+  });
 });
