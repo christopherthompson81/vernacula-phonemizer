@@ -44,4 +44,19 @@ describe("french canonical IPA", () => {
     expect(phonemize("Bonjour le monde.", "fr")).toBe("bɔ̃ʒuʁ lə mˈɔ̃d .");
     expect(phonemize("Je mange une pomme.", "fr")).toBe("ʒə mɑ̃ʒ yn pˈɔm .");
   });
+
+  // Regression tests for review-caught defects.
+  test("word-final c/g not softened; -er sounded in monosyllables", () => {
+    expect(phonemizeWord("parc")).toBe("paʁk");   // was paʁs (the "".includes("") trap)
+    expect(phonemizeWord("avec")).toBe("avɛk");
+    expect(phonemizeWord("mer")).toBe("mɛʁ");     // was me (-er verb rule over-applied)
+    expect(phonemizeWord("manger")).toBe("mɑ̃ʒe"); // polysyllable -er → e stays
+  });
+
+  test("ai before nasal coda → ɛ; hiatus + word-initial schwa handled", () => {
+    expect(phonemizeWord("laine")).toBe("lɛn");        // ai closed → ɛ (was raw a+i)
+    expect(phonemizeWord("aimer")).toBe("eme");        // ai open → e
+    expect(phonemizeWord("aboiement")).toBe("abwamɑ̃"); // hiatus schwa deleted (wa ends in a vowel)
+    expect(phonemizeWord("petit")).toBe("pəti");       // word-initial schwa kept
+  });
 });

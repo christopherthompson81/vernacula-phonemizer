@@ -18,6 +18,9 @@ const EXCEPTIONS: Record<string, string> = {
   technique: "tɛknik", écho: "eko", psychologie: "psikɔlɔʒi", chaos: "kao", chrome: "kʁom",
   // counting forms (isolated): final consonant sounded
   dix: "dis", six: "sis", huit: "ɥit", sept: "sɛt", neuf: "nœf", cinq: "sɛ̃k", plus: "plys",
+  // loanwords / learned words (final consonant sounded; -um Latin → ɔm)
+  film: "film", album: "albɔm", forum: "fɔʁɔm", item: "itɛm", direct: "diʁɛkt", strict: "stʁikt",
+  ours: "uʁs", ouest: "wɛst", août: "ut", tous: "tus",
 };
 
 const stripAccentsForKey = (w: string): string => w.toLowerCase();
@@ -54,14 +57,15 @@ class FrenchPhonemizer implements Phonemizer {
       if (group.length) { accentFinal(group); out += (out ? " " : "") + group.join(" "); group = []; }
       if (pause) out += ` ${pause}`;
     };
+    const add = (word: string): void => { const ipa = phonemizeWord(word); if (ipa) group.push(ipa); }; // skip empties
     for (const m of input.matchAll(TOKEN)) {
-      if (m[1]) group.push(phonemizeWord(m[1]));
+      if (m[1]) add(m[1]);
       else if (m[2]) {
         const [intPart, frac] = m[2].split(/[.,]/);
-        for (const w of numberToWords(Number(intPart)).split(" ")) group.push(phonemizeWord(w));
+        for (const w of numberToWords(Number(intPart)).split(" ")) add(w);
         if (frac !== undefined) {                    // decimal: "virgule" + digit-by-digit
-          group.push(phonemizeWord("virgule"));
-          for (const d of frac) for (const w of numberToWords(Number(d)).split(" ")) group.push(phonemizeWord(w));
+          add("virgule");
+          for (const d of frac) for (const w of numberToWords(Number(d)).split(" ")) add(w);
         }
       } else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && (group.length || out)) flush(mk); }
     }

@@ -41,9 +41,13 @@ function euClosed(w: string, a: number): boolean {
   const c1 = w[a] ?? "";
   if (c1 === "" || isV(c1)) return false;
   const c2 = w[a + 1] ?? "";
-  if (c2 === "") return "rlfcqkbɡv".includes(c1);        // eu+C$ → closed iff C is sounded
-  if (c2 === "e" && (w[a + 2] ?? "") === "") return true; // eu+C+e$ (jeune, heure) → closed
-  return !isV(c2);                                       // eu+CC → closed ; eu+C+V → open
+  if (c2 === "") return "rlfcqkbɡv".includes(c1);        // V+C$ → closed iff C is sounded
+  if (c1 === c2) {                                       // geminate = single onset (abaissable) unless coda before -e (belle)
+    const c3 = w[a + 2] ?? "";
+    return c3 === "e" && (w[a + 3] ?? "") === "" ? true : (c3 !== "" && !isV(c3));
+  }
+  if (c2 === "e" && (w[a + 2] ?? "") === "") return true; // V+C+e$ (jeune, heure, belle) → closed
+  return !isV(c2);                                       // V+CC → closed ; V+C+V → open
 }
 
 /** o defaults to [ɔ] (incl. unstressed open syllables: abiotique → abjɔtik); it is [o] only word-finally
@@ -59,6 +63,8 @@ function oClosed(w: string, a: number): boolean {
 
 const VOWEL_PH = "aeiouyɛɔøœəɑ"; // IPA vowel starts (for schwa-deletion consonant counting)
 const isConsPh = (ph: string): boolean => ph.length >= 1 && !VOWEL_PH.includes(ph[0]!);
+// A front vowel softens c→s / g→ʒ. NB: guard "" — "abc".includes("") is true, which would soften a word-final c/g.
+const isFront = (ch: string): boolean => ch !== "" && "eiéèêyœæ".includes(ch);
 
 /** French word → broad IPA (no stress; French is phrase-final-stressed, added at the prosody layer). */
 export function toIpa(word: string): string {
@@ -84,12 +90,8 @@ export function toIpa(word: string): string {
     if (!yod) for (const [g, ipa] of YOD_FINAL) if (rest.startsWith(g) && i + g.length >= n) { out.push(ipa, i); i += g.length; yod = true; break; }
     if (yod) continue;
 
-    // ai → ɛ word-finally (français, mais), e non-finally (maison, abaissable).
-    if (rest.startsWith("ai") && !rest.startsWith("aim") && !rest.startsWith("ain")) {
-      out.push(/[aeiouyàâéèêëîïôûùœ]/.test(w.slice(i + 2)) ? "e" : "ɛ", i); i += 2; continue;
-    }
-
-    // Nasal vowel: a vowel-group + n/m, not followed by a vowel, not doubled.
+    // Nasal vowel: a vowel-group + n/m, not followed by a vowel, not doubled. (Runs before `ai` so pain→pɛ̃
+    // is taken as a nasal, while laine/aime fall through to `ai` below.)
     let nasal = false;
     for (const [g, ipa] of NASAL_GROUPS) {
       if (rest.startsWith(g)) {
@@ -100,14 +102,20 @@ export function toIpa(word: string): string {
     }
     if (nasal) continue;
 
+    // ai → ɛ in a closed syllable (laine, aime) or word-finally (français, mais); e when open (maison, aimer).
+    if (rest.startsWith("ai")) {
+      const hasVowelAfter = /[aeiouyàâéèêëîïôûùœ]/.test(w.slice(i + 2));
+      out.push(euClosed(w, i + 2) || !hasVowelAfter ? "ɛ" : "e", i); i += 2; continue;
+    }
+
     // ou before a vowel → glide w (oui → wi, accouer → akwe).
     if (rest.startsWith("ou") && isV(nx2)) { out.push("w", i); i += 2; continue; }
     // t before i+vowel → s (nation → nasjɔ̃, abbatial → abasjal), except after s (question → kɛstjɔ̃).
     if (c === "t" && nx === "i" && isV(nx2) && at(i - 1) !== "s") { out.push("s", i); i++; continue; }
 
-    // eu / œu: œ in a closed syllable (peur, seul), ø in open (deux, feu, heureux).
-    if (rest.startsWith("eu") || rest.startsWith("œu")) {
-      const g = rest.startsWith("œu") ? "œu" : "eu";
+    // eu / œu / eû: œ in a closed syllable (peur, seul), ø in open (deux, feu, jeûne).
+    if (rest.startsWith("eu") || rest.startsWith("œu") || rest.startsWith("eû")) {
+      const g = rest.startsWith("œu") ? "œu" : rest.startsWith("eû") ? "eû" : "eu";
       out.push(euClosed(w, i + g.length) ? "œ" : "ø", i); i += g.length; continue;
     }
 
@@ -124,7 +132,7 @@ export function toIpa(word: string): string {
     if (c === "t" && nx === "h") { out.push("t", i); i += 2; continue; }
     if (c === "g" && nx === "n") { out.push("ɲ", i); i += 2; continue; }
     if (c === "q" && nx === "u") { out.push("k", i); i += 2; continue; }              // qu → k
-    if (c === "g" && nx === "u" && "eiéèêy".includes(nx2)) { out.push("ɡ", i); i += 2; continue; } // gue/gui → ɡ (u silent)
+    if (c === "g" && nx === "u" && isFront(nx2)) { out.push("ɡ", i); i += 2; continue; } // gue/gui → ɡ (u silent)
     if (c === "i" && "ll".includes(nx) && at(i + 2) === "l" && !("mtv".includes(at(i - 1)))) {
       // -ill- → ij (fille → fij). Rough; ville/mille/tranquille exceptions handled by lexicon.
       out.push("ij", i); i += 3; continue;
@@ -135,7 +143,7 @@ export function toIpa(word: string): string {
       case "e": {
         // e: silent word-final; ə mid-word; but before a double consonant / two consonants → ɛ.
         if (atEnd(1)) { if (!seg.some((s) => !isConsPh(s.ph))) out.push("ə", i); i++; break; } // final e: ə in a monosyllable (le, je), else silent
-        if (nx === "r" && atEnd(2)) { out.push("e", i); i += 2; break; } // -er → e
+        if (nx === "r" && atEnd(2) && seg.some((s) => !isConsPh(s.ph))) { out.push("e", i); i += 2; break; } // -er → e (polysyllable: manger); monosyllable mer/cher falls through → ɛʁ
         if (nx === "z" && atEnd(2)) { out.push("e", i); i += 2; break; } // -ez → e
         if (nx === "t" && atEnd(2)) { out.push("ɛ", i); i += 2; break; } // -et → ɛ
         // e → ɛ in a closed syllable (mer, sel, accentuel, belle); ə in an open one (later maybe deleted).
@@ -155,11 +163,11 @@ export function toIpa(word: string): string {
         out.push(oClosed(w, i + 1) ? "ɔ" : "o", i); i++; break;
       case "u": out.push(isV(nx) ? "ɥ" : "y", i); i++; break;           // u before vowel → glide ɥ (huit → ɥi)
       case "b": out.push("b", i); i++; break;
-      case "c": out.push("eiéèêy".includes(nx) ? "s" : "k", i); i++; break;
+      case "c": out.push(isFront(nx) ? "s" : "k", i); i++; break;
       case "ç": out.push("s", i); i++; break;
       case "d": out.push("d", i); i++; break;
       case "f": out.push("f", i); i++; break;
-      case "g": out.push("eiéèêy".includes(nx) ? "ʒ" : "ɡ", i); i++; break;
+      case "g": out.push(isFront(nx) ? "ʒ" : "ɡ", i); i++; break;
       case "h": i++; break;                                          // silent
       case "j": out.push("ʒ", i); i++; break;
       case "k": out.push("k", i); i++; break;
@@ -192,8 +200,10 @@ export function toIpa(word: string): string {
   for (let p = 0; p < dedup.length; p++) {
     if (dedup[p]!.ph === "ə" && p > 0 && p < dedup.length - 1) {
       const before1 = dedup[p - 1], before2 = dedup[p - 2], after = dedup[p + 1];
-      const vowelBefore = before1 && !isConsPh(before1.ph);                       // hiatus schwa (aboiement)
-      const singleConsBefore = before1 && isConsPh(before1.ph) && (!before2 || !isConsPh(before2.ph));
+      const endsVowel = (s?: { ph: string }): boolean => !!s && /[aeiouyɛɔøœəɑ]̃?$/.test(s.ph);
+      const vowelBefore = endsVowel(before1);                                       // hiatus schwa (aboiement → abwamɑ̃)
+      // single consonant preceded by a VOWEL (not word-initial: petit → pəti keeps ə)
+      const singleConsBefore = before1 && isConsPh(before1.ph) && endsVowel(before2);
       if ((vowelBefore || singleConsBefore) && after && isConsPh(after.ph)) continue; // delete ə
     }
     collapsed.push(dedup[p]!);

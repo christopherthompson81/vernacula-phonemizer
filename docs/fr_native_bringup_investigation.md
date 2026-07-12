@@ -37,3 +37,17 @@ lexicon territory. 53 tests pass. espeak/epitran diverged toward the standard: �
 
 REMAINING (Phase 2): grow the exception lexicon (Greek/learned words, -ome), liaison + elision (cross-word,
 prosodic), e/ɛ refinement, embedded-English routing. Optional: generate a fuller lexicon from wikipron.
+
+## PR #5 review + fixes → 80.8%
+Two reviewers + self-probing. 8 g2p/text bugs fixed:
+1-2. word-final c/g softened to s/ʒ ("".includes("") trap) → isFront guard ; -er verb rule ate the r in
+     monosyllables (mer→me) → polysyllable guard (mer→mɛʁ, manger→mɑ̃ʒe).
+3. ai before nasal+vowel (laine, aime) left raw a+i → reordered ai after nasal-check + euClosed-based ɛ/e
+   (with geminate-as-onset handling so abaissable→abesabl).
+4. hiatus schwa after a glide phoneme (aboiement, wa) not deleted → endsVowel check (not isConsPh(ph[0])).
+5. eû not recognized (jeûne) → added to eu/œu rule.
+6. word-initial schwa over-deleted (petit→pti) → require a vowel before the single consonant (petit→pəti).
+7. loanword tail (film, album, direct, ours) → exception lexicon.
+8. empty g2p tokens → double spaces in text() → filter empties.
+Reviewers verified numbers (vigesimal), accentFinal (nasal tilde intact), apostrophe words, exceptions.
+Gold 78.9%→80.8%. 57 tests pass.
