@@ -82,3 +82,24 @@ Adversarial review of Phase 2 found three bugs, all fixed:
    loanword didn't re-harden с (стенд→sʲtɛnt). Now re-hardens the preceding dental (стенд→stɛnt); ~104 entries.
  - hard[] hardened the consonant even when the flagged vowel wasn't е/и (generator count-aligned but not
    letter-aligned → фюзеляже hardened лʲ). Guarded toIpa to е/и only + generator now checks the Cyrillic letter.
+
+## Run 3 — independent adjudicated micro-gold (a 2nd referee)
+Same as pt: no 2nd freely-accessible Wiktionary-independent Russian referee exists, so built one —
+tools/ru-gold.tsv, 128 words HAND-TRANSCRIBED from standard Moscow Russian phonology (stress + reduction +
+palatalization adjudicated from knowledge, NOT read off kaikki). Eval tools/ru-gold-eval.mts + a ≥96% vitest lock.
+
+It immediately caught what the kaikki sweep could not:
+ - STRESS-EXTRACTION BUG: the stress-dict generator's IPA vowel set was MISSING ʉ, so ʉ before the stress
+   wasn't counted → любить mis-stressed (0 instead of 1). Every у-between-soft word was affected. Regenerated
+   stress.tsv with ʉ → 312k → 406,679 words (the bug had also silently dropped ~94k) — большого/любить/хорошая
+   all correct now.
+ - ENGINE CLUSTER BUGS: тц/дц→t͡s merge (отца→ɐt͡sa, двадцать→dvat͡sətʲ), сч/зч/жч→ɕː (счастье, мужчина→mʊɕːinə),
+   с/з soften before soft т ONLY not д (сделать→zdʲeɫətʲ, здесь→zdʲesʲ), н hard before щ (женщина), geminate
+   softness agreement (россия→sʲː), letter а never fronts to æ (only я; счастье→ɕːasʲtʲjə), glide-final -ье→jə.
+ - silent-letter irregulars солнце→sont͡sə, сердце→sʲert͡sə, сейчас, здравствуйте.
+
+Result: adjudicated gold 84.4% → **96.9%** (124/128). Residual = genuinely-variable post-tonic я (месяц/заяц
+ɪ~ə, жизнь з/н) + one lexicon gap (интернет's 1st е) — not reachable. freq-common vs kaikki 87.4→87.6%.
+
+STATUS: ru now checked against kaikki (single Wiktionary referee) AND an independent hand-adjudicated micro-gold
+(96.9%). Same bar as pt — the micro-gold gives real independent signal and confirms the engine + stress dict.

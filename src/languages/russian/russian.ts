@@ -51,6 +51,7 @@ const VOWEL_RE = /[аеёиоуыэюя]/gi;
 const IRREGULARS: Record<string, string> = {
   что: "ʂto", чтобы: "ʂtˈobɨ", чтоб: "ʂtop", конечно: "kɐnʲˈeʃnə", скучно: "skˈuʃnə",
   его: "jɪvˈo", него: "nʲɪvˈo", сегодня: "sʲɪvˈodnʲə", ничего: "nʲɪt͡ɕɪvˈo", чей: "t͡ɕej",
+  солнце: "sˈont͡sə", сердце: "sʲˈert͡sə", сейчас: "sʲɪt͡ɕˈas", здравствуйте: "zdrˈastvʊjtʲe", // silent л/д/в, dropped й
 };
 
 /** One Russian word → canonical IPA. Stress from the dictionary; ё is inherently stressed; else first vowel. */
