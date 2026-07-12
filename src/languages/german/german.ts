@@ -30,14 +30,9 @@ function stressDict(): Map<string, number> {
   return STRESS;
 }
 
-// Unstressed inseparable prefixes: stress falls on the syllable AFTER them.
-const PREFIXES = ["ver", "ent", "emp", "zer", "ge", "be", "er"];
-
-/** Ordinal of the stressed vowel by rule: first nucleus, or the first after an unstressed prefix. */
-function ruleStress(w: string, nuclei: number): number {
-  for (const p of PREFIXES) {
-    if (w.startsWith(p) && w.length > p.length + 1 && nuclei > 1) return 1; // 2nd nucleus (prefix has one vowel)
-  }
+/** Rule stress for a word the morphology kept WHOLE (a single root) — the first syllable. Real prefixes are
+ *  extracted by decompose() upstream, so no prefix guessing is needed here. */
+function ruleStress(): number {
   return 0;
 }
 
@@ -93,16 +88,18 @@ export function phonemizeWord(word: string): string {
   const segs = toSegments(w);
   const vowelIdx = segs.map((s, i) => (s.vowel ? i : -1)).filter((i) => i >= 0);
   if (vowelIdx.length === 0) return segs.map((s) => s.ph).join("");
-  const ord = stressDict().get(w) ?? ruleStress(w, vowelIdx.length);
+  const dictOrd = stressDict().get(w);
+  const ord = dictOrd ?? ruleStress();
   const stressPos = vowelIdx[Math.min(ord, vowelIdx.length - 1)]!;
 
-  // Unstressed derivational prefix: reduce its vowel (be-/ge- → ə; ver-/er-/zer-/ent-/emp- → short ɛ). Only
-  // when the first syllable is unstressed — so a ge-/be- ROOT (gehen, geben) is untouched.
-  if (stressPos !== vowelIdx[0]) {
+  // An undecomposed be-/ge-/ver-… word whose DICTIONARY stress isn't on the first syllable has a real unstressed
+  // prefix (bestimmt ord 1 → bə), whereas a be-/ge- ROOT is dict-stressed on the first (beiden ord 0 → no ə).
+  if (dictOrd !== undefined && ord > 0) {
     const first = segs[vowelIdx[0]!]!;
     if (w.startsWith("be") || w.startsWith("ge")) first.ph = "ə";
     else if (/^(ver|zer|ent|emp|er)/.test(w)) first.ph = "ɛ";
   }
+
   let out = "";
   for (let i = 0; i < segs.length; i++) {
     if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
