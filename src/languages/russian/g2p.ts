@@ -115,8 +115,9 @@ function reducedVowel(letter: string, softContext: boolean, strong: boolean, pos
   }
 }
 
-// Adverbs in -ого/-его that keep [ɡ] (the genitive -ого/-его → v rule does NOT apply to them).
-const GEN_KEEP_G = new Set(["много", "немного", "намного", "многого", "дорого", "недорого", "строго", "нестрого", "убого", "полого", "отлого", "пологого", "убогого", "строгого", "дорогого"]);
+// Adverbs in -ого that keep [ɡ] (the genitive -ого/-его → v rule does NOT apply). Their genitive ADJECTIVE
+// forms (многого, дорогого…) are regular genitives → v, so they must NOT be listed here.
+const GEN_KEEP_G = new Set(["много", "немного", "намного", "дорого", "недорого", "строго", "нестрого", "убого", "полого", "отлого"]);
 
 /** Phonemize a Russian word given the 0-based ordinal of its stressed vowel, and optionally a set of vowel
  *  ordinals whose preceding consonant is HARD (loanword е/и: тест → tɛst, not tʲest — supplied by the lexicon). */
@@ -188,10 +189,16 @@ export function toIpa(word: string, stressOrd: number, hard?: number[]): string 
     const i = vowelIdx[o];
     if (i === undefined) continue;
     const v = units[i]!.vowel!;
+    if (v.letter !== "е" && v.letter !== "и") continue;         // guard: only е/и harden (generator may misalign)
     const prev = units[i - 1]?.cons;
-    if (prev?.soft) { const cyr = units[i - 1]!.cyr; if (CONS[cyr]) prev.ph = CONS[cyr]![0], prev.soft = false; }
-    if (v.letter === "е") v.ph = i === stressPos ? "ɛ" : "ɨ";
-    else if (v.letter === "и") v.ph = "ɨ";
+    if (prev?.soft) {
+      const cyr = units[i - 1]!.cyr;
+      if (CONS[cyr]) { prev.ph = CONS[cyr]![0]; prev.soft = false; }
+      // undo a stranded regressive softening of the consonant before it (стенд: с softened before soft т → re-hard)
+      const p2 = units[i - 2]?.cons;
+      if (p2?.soft && SOFTEN_TGT.includes(units[i - 2]!.cyr)) { const c2 = units[i - 2]!.cyr; p2.ph = CONS[c2]![0]; p2.soft = false; }
+    }
+    v.ph = v.letter === "и" ? "ɨ" : (i === stressPos ? "ɛ" : "ɨ");
   }
 
   return withStress(units, stressPos);

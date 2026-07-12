@@ -73,3 +73,12 @@ not reachable engine wins. 73 tests pass.
 
 STATUS: same as pt — validated against kaikki (single Wiktionary source). An independent second referee (a
 hand-adjudicated micro-gold, as built for pt) would be the path toward a "verified" stamp.
+
+### Run 2 review fixes
+Adversarial review of Phase 2 found three bugs, all fixed:
+ - GEN_KEEP_G wrongly listed the genitive ADJECTIVE forms (многого, дорогого, убогого…) alongside the adverbs;
+   those are regular genitives → v. Removed them (многого→mnˈoɡəvə).
+ - hard[] left a STRANDED soft consonant: parse() regressively softens с before soft т, but hardening т for a
+   loanword didn't re-harden с (стенд→sʲtɛnt). Now re-hardens the preceding dental (стенд→stɛnt); ~104 entries.
+ - hard[] hardened the consonant even when the flagged vowel wasn't е/и (generator count-aligned but not
+   letter-aligned → фюзеляже hardened лʲ). Guarded toIpa to е/и only + generator now checks the Cyrillic letter.

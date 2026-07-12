@@ -46,6 +46,8 @@ describe("russian canonical IPA", () => {
     expect(phonemizeWord("отель")).toBe("ɐtˈɛlʲ");
     expect(phonemizeWord("форель")).toBe("fɐrˈɛlʲ");
     expect(phonemizeWord("тема")).toBe("tʲˈemə");         // native → stays soft
+    expect(phonemizeWord("дорогого")).toBe("dˈorəɡəvə");  // genitive adjective (not the adverb дорого) → v
+    expect(phonemizeWord("стенд")).toBe("stɛnt");         // loanword: с re-hardens before hard т (no stranded sʲ)
   });
 
   test("numbers", () => {

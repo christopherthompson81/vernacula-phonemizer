@@ -32,11 +32,12 @@ for (const line of readFileSync("/mnt/data/ru_kaikki.tsv", "utf8").split("\n")) 
   if (ord === undefined) continue;
   const ours = vowels(toIpa(w, ord));
   const gold = vowels(foldRef(line.slice(tab + 1)));
-  if (ours.length !== gold.length) continue;                 // align only when vowel counts match
+  const cyrV = [...w].filter((c) => "аеёиоуыэюя".includes(c)); // Cyrillic vowel letters, in order
+  if (ours.length !== gold.length || ours.length !== cyrV.length) continue; // align only when all three match
   const hard: number[] = [];
   for (let i = 0; i < ours.length; i++) {
-    if (ours[i] === "e" && gold[i] === "ɛ") hard.push(i);      // soft e vs hard ɛ → loanword hard е
-    else if (ours[i] === "i" && gold[i] === "ɨ") hard.push(i); // soft i vs hard ɨ → loanword hard и
+    if (cyrV[i] === "е" && ours[i] === "e" && gold[i] === "ɛ") hard.push(i);      // hard е (loanword): soft e → ɛ
+    else if (cyrV[i] === "и" && ours[i] === "i" && gold[i] === "ɨ") hard.push(i); // hard и (loanword): soft i → ɨ
   }
   if (hard.length) rows.push(`${w}\t${hard.join(",")}`);
 }
