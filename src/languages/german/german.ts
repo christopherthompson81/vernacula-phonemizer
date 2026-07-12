@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments } from "./g2p.ts";
+import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed syllable nucleus (loanwords / exceptions).
@@ -40,9 +41,55 @@ function ruleStress(w: string, nuclei: number): number {
   return 0;
 }
 
-/** One German word → canonical IPA. */
+const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏə]/g;
+
+/** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
+function countNuclei(ipa: string): number {
+  let n = 0;
+  for (const m of ipa.matchAll(VOWEL_G)) if ((ipa[m.index + 1] ?? "") !== "̯") n++;
+  return n;
+}
+
+/** Insert ˈ before the ordinal-th nucleus of an IPA string (skipping non-syllabic offglides ̯). */
+function placeStress(ipa: string, ordinal: number): string {
+  let n = 0;
+  for (const m of ipa.matchAll(VOWEL_G)) {
+    if ((ipa[m.index + 1] ?? "") === "̯") continue;   // offglide, not a nucleus
+    if (n === ordinal) return ipa.slice(0, m.index) + "ˈ" + ipa.slice(m.index);
+    n++;
+  }
+  return ipa;
+}
+
+/** One German word → canonical IPA. Words that decompose into ≥2 morphemes are composed morpheme-by-morpheme,
+ *  so each stem is element-initial (sp/st→ʃ), devoices at its own boundary, and doesn't assimilate across it. */
 export function phonemizeWord(word: string): string {
   const w = word.toLowerCase();
+  const d = decompose(w);
+  // Vowel-initial suffixes resyllabify onto the stem (lieb+en → lie-ben, häus+er → häu-ser): NO boundary, NO
+  // devoicing. Merge them back into the preceding stem so it is g2p'd together; consonant-initial suffixes
+  // (lich, keit, chen…) keep their boundary (freund+lich → freunt-lich).
+  const VINIT_SUFFIX = new Set(["en", "er", "e", "es", "em", "et", "ung", "ungen", "ig", "isch"]);
+  const merged: { text: string; kind: string }[] = [];
+  for (let i = 0; i < d.parts.length; i++) {
+    const p = d.parts[i]!, k = d.kinds[i]!;
+    const last = merged[merged.length - 1];
+    if (k === "suffix" && VINIT_SUFFIX.has(p) && last?.kind === "stem") last.text += p;
+    else merged.push({ text: p, kind: k });
+  }
+  if (merged.length > 1) {
+    const pieces = merged.map((m) => {
+      if (m.kind === "prefix" && PREFIX_IPA[m.text]) return PREFIX_IPA[m.text]!;
+      if (m.kind === "suffix" && SUFFIX_IPA[m.text]) return SUFFIX_IPA[m.text]!;
+      return toSegments(m.text).map((s) => s.ph).join("");   // stem: element-initial g2p (i===0 inside)
+    });
+    const full = pieces.join("");
+    // stress: the kaikki lexicon ordinal if known, else the morphology stress part's first vowel.
+    const dictOrd = stressDict().get(w);
+    const ord = dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
+    return placeStress(full, ord);
+  }
+
   const segs = toSegments(w);
   const vowelIdx = segs.map((s, i) => (s.vowel ? i : -1)).filter((i) => i >= 0);
   if (vowelIdx.length === 0) return segs.map((s) => s.ph).join("");

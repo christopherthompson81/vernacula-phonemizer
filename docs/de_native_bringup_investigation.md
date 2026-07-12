@@ -45,3 +45,27 @@ lengthen wrongly (pedant→peːdant vs pedant), unstressed open syllables should
 (werden→veːɐ̯dən). (3) morpheme boundaries — compound st→ʃt (Laubsturm), devoicing (Friedhof→friːthoːf), nk~ŋk
 (Warenkorb) all need a compound splitter. (4) lexical length exceptions (Mond→moːnt, jagt→jaːkt). (5) loanword
 segments (Universität v→f). NEXT: unstressed-length rule + a compound splitter, then a lexical correction layer.
+
+## Run 2 — morphological decomposition (the encoding mechanism)
+German phonology is morphology-sensitive: compound seams reset the "word-initial" context (sp/st→ʃ, glottal
+stop), block cross-boundary assimilation (Waren·korb keeps n·k, not ŋk), and trigger morpheme-final devoicing
+(Fried·hof). A flat scan can't see any of this. Built a decomposition layer.
+
+DESIGN — decompose = PREFIX-strip (closed list) → SUFFIX-strip (closed list) → COMPOUND-split the residual
+(content-stem lexicon, frequency-safe) → compose the pronunciation morpheme-by-morpheme:
+ - src/languages/german/morphology.ts: PREFIX_UNSTRESSED/PREFIX_STRESSED + SUFFIXES lists (small, closed — the
+   affix table, same shape as hunspell/espeak SUFX flags) with fixed IPA (PREFIX_IPA/SUFFIX_IPA); a content-stem
+   set stems.txt (18k, kaikki ∩ frequency, function words excluded) for a conservative DP-ish compound splitter
+   (leading element ≥4 letters, frequency-safe, content-only → no beiden→bei·den garbage). decompose(word) →
+   {parts, kinds, stressPart}.
+ - german.ts composes: each STEM is g2p'd in isolation (so it is element-initial → sp/st→ʃ, and its own
+   finalDevoice runs → boundary devoicing), affixes use the fixed IPA, pieces are concatenated (→ assimilation
+   blocked across seams for free), and primary stress lands on the separable-prefix/first-stem (or the kaikki
+   dict ordinal). KEY subtlety: VOWEL-INITIAL inflection (-en/-er/-e/-ung/-ig…) RESYLLABIFIES onto the stem
+   (lieb+en → lie-ben) → merged back into the stem for g2p (NO devoicing); only consonant-initial suffixes and
+   compound seams get a real boundary (freund+lich → freunt-lich).
+
+Result: Laubsturm→lˈaʊ̯pʃtʊɐ̯m (st→ʃt + b→p), Warenkorb→vˈaːʁənkɔɐ̯p (n·k unassimilated), aufstehen→ˈaʊ̯fʃteːən,
+freundlich→fʁˈɔʏ̯ntlɪç (d→t), while lieben→lˈiːbən and Häuser→hˈɔʏ̯zɐ stay correct. freq-common 66.3→**68.1%**,
+dictionary sweep 33→**41.2%** (+8). GENERALIZES to Dutch/English (affixes + compounds). NEXT: glottal stop at
+stem-initial vowels, unstressed-length, and growing the stem lexicon (Friedhof's "fried" not yet a stem).
