@@ -101,3 +101,15 @@ Addressed the outstanding residual (was ~69%).
 STILL OUTSTANDING (documented): morpheme-final devoicing when a word ISN'T decomposed (möglich→…ɡlɪç should be
 k); unstressed-medial e→ə beyond endings (anderen); the -in feminine suffix (short ɪn, entangled with stress);
 x~χ and ŋ̩ referee conventions (foldable). The engine is now ~87% folded; the length lexicon is the biggest lift.
+
+## Run 5 — per-position vowel-length correction (unstressed too)
+The largest residual bucket was UNSTRESSED vowels wrongly long (damit→daːmɪt, vielleicht→fiːl-, freundin→…diːn),
+which the stressed-only length lexicon missed. Generalized length.tsv to a PER-POSITION spec (word → ord+L|S,…)
+covering every nucleus, and applyLength now walks the IPA counting nuclei and fixes each flagged one's length +
+quality. Fixed the diphthong guard: a vowel + ɐ̯ (vocalized r) still has a length axis (werden→veːɐ̯dən); only a
+true ɪ̯/ʊ̯/ʏ̯ glide blocks it. 22.3k corrections (German length is ~40% rule-mispredicted — genuinely lexical, so
+this is effectively a length lexicon, 372 KB). Result: freq-common 72.7→**76.0%** (+3.3).
+
+STILL OUTSTANDING: ge-/be- in a compound stem not schwa'd (Geburt→ɡɛ should be ɡə); morpheme-final devoicing on
+undecomposed words (möglich→ɡlɪç vs klɪç); unstressed-medial e→ə (anderen); loanword unstressed e stays ɛ
+(perfekt); referee conventions x~χ, ŋ̩, ̯, optional-t (foldable, ~60 misses, not real errors).

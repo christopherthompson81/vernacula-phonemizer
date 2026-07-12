@@ -53,21 +53,30 @@ function lengthDict(): Map<string, string> {
   return LENGTH;
 }
 const LONG_OF: Record<string, string> = { a: "aː", ɛ: "eː", ɪ: "iː", ɔ: "oː", ʊ: "uː", œ: "øː", ʏ: "yː" };
-const SHORT_OF: Record<string, string> = { aː: "a", eː: "ɛ", iː: "ɪ", oː: "ɔ", uː: "ʊ", øː: "œ", yː: "ʏ", ɛː: "ɛ" };
+const SHORT_OF: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", ø: "œ", y: "ʏ", ɛ: "ɛ" };
+const VOWEL_CHARS = "aɐeɛiɪoɔuʊøœyʏə";
 
-/** Fix the stressed vowel's length+quality per a correction flag (werden L → eː not ɛ; sagt L → aː). Anchors on
- *  the stress mark; for a monosyllable (no ˈ) it corrects the single vowel. */
-function applyLength(ipa: string, flag: string | undefined): string {
-  if (!flag) return ipa;
-  let m = /ˈ([aɐeɛiɪoɔuʊøœyʏə])(ː?)/.exec(ipa);
-  let vi: number;
-  if (m) vi = m.index + 1;
-  else { m = /([aɐeɛiɪoɔuʊøœyʏə])(ː?)/.exec(ipa); if (!m) return ipa; vi = m.index; } // monosyllable
-  if ((ipa[vi + 1] ?? "") === "̯") return ipa;              // diphthong offglide → no length
-  const v = m[1]!, long = m[2] === "ː";
-  if (flag === "L" && !long) { const lo = LONG_OF[v]; if (lo) return ipa.slice(0, vi) + lo + ipa.slice(vi + 1); }
-  if (flag === "S" && long) { const sh = SHORT_OF[v + "ː"]; if (sh) return ipa.slice(0, vi) + sh + ipa.slice(vi + 2); }
-  return ipa;
+/** Fix vowel length+quality per a positional correction spec ("0S,2L" = nucleus 0 short, 2 long). Walks the
+ *  IPA, counting syllable nuclei (a vowel not followed by an offglide ̯), applying the flag at each ordinal. */
+function applyLength(ipa: string, spec: string | undefined): string {
+  if (!spec) return ipa;
+  const corr = new Map<number, string>();
+  for (const c of spec.split(",")) if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
+  let out = "", ord = 0, i = 0;
+  while (i < ipa.length) {
+    const ch = ipa[i]!;
+    if (!VOWEL_CHARS.includes(ch)) { out += ch; i++; continue; }
+    if ((ipa[i + 1] ?? "") === "̯") { out += ch; i++; continue; }      // offglide, not a nucleus
+    const long = (ipa[i + 1] ?? "") === "ː";
+    // a TRUE diphthong (vowel + ɪ̯/ʊ̯/ʏ̯ glide) has no length axis; a vowel + ɐ̯ (vocalized r) still can (eːɐ̯).
+    const diphthong = "ɪʊʏ".includes(ipa[i + 1] ?? "") && (ipa[i + 2] ?? "") === "̯";
+    const flag = corr.get(ord);
+    if (!diphthong && flag === "L" && !long) { out += LONG_OF[ch] ?? ch; i++; }
+    else if (!diphthong && flag === "S" && long) { out += (SHORT_OF[ch] ?? ch); i += 2; }
+    else { out += long ? ch + "ː" : ch; i += long ? 2 : 1; }
+    ord++;
+  }
+  return out;
 }
 
 const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏə]/g;

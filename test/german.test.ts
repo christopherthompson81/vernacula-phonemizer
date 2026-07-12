@@ -53,7 +53,7 @@ describe("german canonical IPA", () => {
 
   test("flag-driven decomposition: linking-s, false-prefix guards", () => {
     expect(phonemizeWord("Zeitungsartikel")).toBe("t͡sˈaɪ̯tʊŋsaɐ̯tiːkəl"); // Fugen-s via the s flag
-    expect(phonemizeWord("Geburtstag")).toBe("ɡeːbˈuːɐ̯tstaːk");          // geburts·tag (ge NOT a prefix here)
+    expect(phonemizeWord("Geburtstag")).toBe("ɡɛbˈuːɐ̯tstaːk");          // geburts·tag (ge NOT a prefix here)
     expect(phonemizeWord("beiden")).toBe("bˈaɪ̯dən");                     // NOT be·iden (iden isn't a word)
     expect(phonemizeWord("beten")).toBe("bˈeːtən");                       // be- ROOT, dict-stressed on first
     expect(phonemizeWord("bestimmt")).toBe("bəʃtˈɪmt");                   // real be- prefix (dict stress ord 1)
