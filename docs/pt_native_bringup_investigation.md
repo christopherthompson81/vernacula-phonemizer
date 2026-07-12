@@ -52,3 +52,14 @@ DEFERRED (the lexical residuals, mirroring French's Phase 2 need):
 
 NEXT: wire an INDEPENDENT referee (wikipron por / kaikki) — the espeak shim is only a regression guard, not a
 canonical oracle — then decide the lexicon (open/close vowels + x) as Phase 2, as with French.
+
+### Run 1 review fixes
+Adversarial review of the new engine found three concrete bugs, all fixed:
+ - numbers: the millions branch never emitted the "e" connector (1000001 → "um milhão um"). Applied the same
+   connector rule as thousands (r<100 or round → "e"): "um milhão e um", "um milhão e quinhentos mil".
+ - stress: -ins/-uns plurals (jardins, atuns) were mis-stressed as paroxytone — the oxytone test stripped only a
+   final -s, leaving -in/-un which /[iu]m$/ never matched. Widened to /[iu][mn]$/ → jardins ʒɐɾdˈĩʃ.
+ - offglide over-applied to unaccented hiatus (raiz→ʁajʃ, sair→sajɾ), collapsing a nucleus and misplacing
+   stress. Added a hiatus guard: a post-vocalic i/u followed by a FINAL consonant other than s is a stressed
+   nucleus (raiz→ʁɐˈiʃ, sair→sɐˈiɾ, possuir→pusuˈiɾ), while mais/dois/baixo keep the diphthong. The residual
+   mais-vs-raiz ambiguity (both final-s) is lexical.

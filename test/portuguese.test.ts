@@ -46,10 +46,21 @@ describe("european portuguese canonical IPA", () => {
     expect(phonemizeWord("animal")).toBe("ɐnimˈaɫ");   // oxytone: ends in -l
   });
 
+  test("falling diphthong vs stressed hiatus (final C ≠ s)", () => {
+    expect(phonemizeWord("mais")).toBe("mˈajʃ");        // ai + final s → diphthong
+    expect(phonemizeWord("dois")).toBe("dˈojʃ");
+    expect(phonemizeWord("baixo")).toBe("bˈajʃu");      // ai before C+V → diphthong
+    expect(phonemizeWord("raiz")).toBe("ʁɐˈiʃ");        // i + final z → hiatus nucleus (stressed)
+    expect(phonemizeWord("sair")).toBe("sɐˈiɾ");
+    expect(phonemizeWord("país")).toBe("pɐˈiʃ");        // accent forces the hiatus
+  });
+
   test("numbers (European convention, 'e' connector)", () => {
     expect(phonemize("21", "pt")).toBe("vˈĩtɨ e ũ");
     expect(phonemize("342", "pt")).toBe("tɾɨzˈẽtuʃ e kwɐɾˈẽtɐ e dˈojʃ");
     expect(phonemize("100", "pt")).toBe("sˈɐ̃j̃");     // cem
+    expect(phonemize("1000001", "pt")).toBe("ũ miʎˈɐ̃w̃ e ũ"); // milhão e um (connector)
+    expect(phonemizeWord("jardins")).toBe("ʒɐɾdˈĩʃ");   // -ins plural stays oxytone
   });
 
   test("text: reduction + destressed clitics + punctuation", () => {

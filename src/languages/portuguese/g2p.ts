@@ -102,12 +102,13 @@ export function toSegments(word: string): Seg[] {
       i++;
       // Absorb a coda nasal m/n that nasalized this vowel (it is not itself pronounced).
       if (nasal && (nx === "m" || nx === "n")) i++;
-      // Oral offglide: a following unaccented i/u that is not itself a nucleus (pai → paj, mau → maw).
+      // Oral offglide: a following unaccented i/u forms a falling diphthong (pai → paj, mau → maw, baixo → bajʃu)
+      // — EXCEPT when it is a stressed hiatus nucleus, signalled by a final consonant other than s (raiz → ʁɐiʃ,
+      // sair → sɐiɾ, possuir → pusuiɾ; but mais/dois keep the glide). The mais-vs-raiz split is otherwise lexical.
       const g = w[i] ?? "";
-      if ((g === "i" || g === "u") && !isV(w[i + 1] ?? "")) {
-        // only when the previous nucleus is a strong/other vowel (avoid ii/uu); simple heuristic:
-        pushGlide(segs, g === "i" ? "j" : "w", false); i++;
-      }
+      const after = w[i + 1] ?? "";
+      const hiatus = after !== "" && after !== "s" && !isV(after) && (w[i + 2] ?? "") === ""; // i/u + final C(≠s)
+      if ((g === "i" || g === "u") && !isV(after) && !hiatus) { pushGlide(segs, g === "i" ? "j" : "w", false); i++; }
       continue;
     }
 

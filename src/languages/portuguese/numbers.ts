@@ -38,5 +38,7 @@ export function numberToWords(n: number): string {
   }
   const m = Math.floor(n / 1e6), r = n % 1e6;
   const million = m === 1 ? "um milhão" : `${below1000(m)} milhões`;
-  return r ? `${million} ${numberToWords(r)}` : million;
+  if (r === 0) return million;
+  // "e" before a remainder that is < 100 or "round" (milhão e um, milhão e cem, milhão e quinhentos mil)
+  return r < 100 || r % 100 === 0 ? `${million} e ${numberToWords(r)}` : `${million} ${numberToWords(r)}`;
 }

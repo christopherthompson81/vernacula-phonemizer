@@ -24,7 +24,7 @@ function stressedNucleus(word: string, segs: Seg[]): number {
   const last = w[w.length - 1] ?? "";
   const oxytone =
     "lrzx".includes(last) || last === "i" || last === "u" || last === "í" || last === "ú" ||
-    /[ãõ]$/.test(w) || /(ão|ãe|õe)$/.test(w) || /[iu]m$/.test(w);
+    /[ãõ]$/.test(w) || /(ão|ãe|õe)$/.test(w) || /[iu][mn]$/.test(w); // -im/-um and their -ins/-uns plurals (s already stripped)
   return oxytone ? nuclei[nuclei.length - 1]! : nuclei[nuclei.length - 2]!;
 }
 
