@@ -1,0 +1,48 @@
+/**
+ * Spanish number → words (long scale: millón = 10⁶). The words then phonemize through the same g2p as any
+ * other word, so digits read like written Spanish. Covers 0 … <10¹². Matches the espeak forms: no apocope
+ * in compounds (21000 → "veintiuno mil"), but "un millón" / cien vs ciento / quinientos.
+ */
+
+const ONES = [
+  "cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve",
+  "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve",
+  "veinte", "veintiuno", "veintidós", "veintitrés", "veinticuatro", "veinticinco", "veintiséis", "veintisiete", "veintiocho", "veintinueve",
+];
+const TENS = ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"];
+const HUNDREDS = ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"];
+
+/** 0 ≤ n < 100 */
+function below100(n: number): string {
+  if (n < 30) return ONES[n]!;
+  const t = Math.floor(n / 10), u = n % 10;
+  return u === 0 ? TENS[t]! : `${TENS[t]} y ${ONES[u]}`;
+}
+
+/** 1 ≤ n < 1000 */
+function below1000(n: number): string {
+  if (n === 100) return "cien";
+  const h = Math.floor(n / 100), r = n % 100;
+  const parts: string[] = [];
+  if (h) parts.push(HUNDREDS[h]!);
+  if (r) parts.push(below100(r));
+  return parts.join(" ");
+}
+
+/** 1 ≤ n < 10⁶ */
+function below1e6(n: number): string {
+  if (n < 1000) return below1000(n);
+  const th = Math.floor(n / 1000), r = n % 1000;
+  const thousand = th === 1 ? "mil" : `${below1000(th)} mil`;
+  return r ? `${thousand} ${below1000(r)}` : thousand;
+}
+
+/** Non-negative integer (< 10¹²) → Spanish words. Larger values fall back to the digit string. */
+export function numberToWords(n: number): string {
+  if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return String(n);
+  if (n === 0) return "cero";
+  if (n < 1e6) return below1e6(n);
+  const m = Math.floor(n / 1e6), r = n % 1e6;
+  const million = m === 1 ? "un millón" : `${below1e6(m)} millones`;
+  return r ? `${million} ${below1e6(r)}` : million;
+}
