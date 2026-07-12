@@ -71,3 +71,16 @@ Metrics vs 2500-word canonical (gemination CC↔Cː folded):
 3. text() routing (words / numbers / punctuation / tanwin; ٪ etc).
 4. register es-style, tests, PR + review + merge as the cleanroom "diacritized Arabic" language.
 Then Phase 2: permissive BiLSTM retrain on /mnt/data (CATT teacher + Arabic Wikipedia) → onnxruntime-node pre-pass.
+
+## Phase 1 COMPLETE (pending PR/review)
+- Proclitic+article (وَال/بِال/لِل + hamzat-wasl elision + sun assimilation) + الّذي/الله lam-gemination → segments 96.0%.
+- Refactored mark-gathering (gatherMarks + resolveVowel): shadda/harakat any order, decoupled from long-vowel
+  detection (fixes نَّا = fatha-before-shadda-before-alif → aː).
+- Stress refined: antepenult heavy-by-LONG-VOWEL attracts stress (ṭaːlib→ṭaː), heavy-by-CODA→penult (madrasa→ra).
+- Numbers: numberToIpa (0…<10⁹, MSA counting forms; 2024→ʔalfaːn wa ʔarbaʕa wa ʕiʃruːn == shim). Emitted as IPA
+  directly (g2p needs diacritics a bare numeral lacks). Number-internal stress = deferred refinement.
+- text(): Arabic+ASCII words/digits/punctuation routing. Registered "ar". 46 tests pass.
+
+Residual (deferred edges, ~4%): initial إي→ʔiː defective spelling, الا hamzat-wasl (form VII/VIII), nasal
+place assim (broad/folded), number-word stress. Convention: gemination Cː, pausal (no case ending), fold
+secondary stress. NEXT: PR + review + merge, THEN Phase 2 permissive diacritizer retrain (/mnt/data).

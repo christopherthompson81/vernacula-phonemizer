@@ -3,7 +3,9 @@
  * Diacritized g2p (g2p.ts) + quantity-sensitive stress. Phase 1 assumes vowelled input; a neural diacritizer
  * pre-pass (permissively-sourced) will restore short vowels for bare text in Phase 2.
  */
+import type { Phonemizer } from "../../registry.ts";
 import { toSegments, type Seg } from "./g2p.ts";
+import { numberToIpa } from "./numbers.ts";
 
 const isLongNucleus = (ph: string): boolean => /ː/.test(ph) || ph === "aj" || ph === "aw" || /[aiu]n$/.test(ph);
 
@@ -17,13 +19,14 @@ function stressedNucleus(segs: Seg[]): number {
   const nuclei = segs.map((s, i) => (s.vowel ? i : -1)).filter((i) => i >= 0);
   if (nuclei.length <= 1) return nuclei[0] ?? -1;
 
-  const heavy: boolean[] = [], superheavy: boolean[] = [];
+  const heavy: boolean[] = [], superheavy: boolean[] = [], longV: boolean[] = [];
   nuclei.forEach((vi, k) => {
     const long = isLongNucleus(segs[vi]!.ph);
     const end = k === nuclei.length - 1 ? segs.length : nuclei[k + 1]!;
     let consAfter = 0;
     for (let j = vi + 1; j < end; j++) if (!segs[j]!.vowel) consAfter += geminated(segs, j) ? 2 : 1;
     const coda = k === nuclei.length - 1 ? consAfter >= 1 : consAfter >= 2;
+    longV[k] = long;
     heavy[k] = long || coda;
     superheavy[k] = (long && coda) || consAfter >= 2;
   });
@@ -32,8 +35,9 @@ function stressedNucleus(segs: Seg[]): number {
   if (superheavy[last]) return nuclei[last]!;                  // ultima superheavy (CVːC/CVCC) → ultima
   if (heavy[last]) return nuclei[last - 1]!;                   // ultima heavy (CVV/CVC) → penult
   if (heavy[last - 1]) return nuclei[last - 1]!;               // ultima light, penult heavy → penult
-  if (last >= 2 && !heavy[last - 2]) return nuclei[last - 2]!; // all light + antepenult light → antepenult
-  return nuclei[last - 1]!;                                    // else (antepenult heavy) → penult
+  const ap = last - 2;                                        // all-light ultima+penult → antepenult, UNLESS the
+  if (ap >= 0 && heavy[ap] && !longV[ap]) return nuclei[last - 1]!; // antepenult is heavy by CODA only (madrasa → penult)
+  return nuclei[Math.max(0, ap)]!;                            // else antepenult (light, or heavy by long vowel: ṭaːlib)
 }
 
 /** Is the consonant seg at index j a geminate (rendered Cː) — it fills both coda and following onset. */
@@ -52,4 +56,39 @@ export function phonemizeWord(word: string): string {
     out += segs[i]!.ph;
   }
   return out;
+}
+
+// Clause / phrase punctuation (Arabic + ASCII) → canonical inline pause marks.
+const CLAUSE_MARK: Record<string, string> = {
+  "۔": ".", ".": ".", "!": "!", "؟": "?", "?": "?", "،": ",", ",": ",", "؛": ",", ";": ",", ":": ",", "…": ",",
+};
+// A word (Arabic letters + harakat) / number (Arabic-Indic or ASCII digits) / punctuation token.
+const TOKEN = /([ء-يٰٱً-ْـ]+)|([0-9٠-٩]+)|([۔.!؟?،,؛;:…])/gu;
+/** Arabic-Indic digits ٠..٩ → ASCII. */
+const toAscii = (d: string): string => d.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x0660));
+
+class ArabicPhonemizer implements Phonemizer {
+  text(input: string): string {
+    let out = "";
+    let pending: string | null = null;
+    const emit = (ipa: string): void => {
+      if (ipa === "") return;
+      if (out === "") out = ipa;
+      else if (pending !== null) { out += ` ${pending} ${ipa}`; pending = null; }
+      else out += ` ${ipa}`;
+    };
+    for (const m of input.matchAll(TOKEN)) {
+      if (m[1]) emit(phonemizeWord(m[1]));
+      else if (m[2]) emit(numberToIpa(Number(toAscii(m[2]))));
+      else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
+    }
+    if (pending !== null && out !== "") out += ` ${pending}`;
+    return out;
+  }
+}
+
+/** Build the Arabic phonemizer. Phase 1 expects diacritized input; a neural diacritizer pre-pass (Phase 2)
+ *  will restore short vowels for bare text. Fully rule-based — no data files. */
+export function createArabic(): Phonemizer {
+  return new ArabicPhonemizer();
 }

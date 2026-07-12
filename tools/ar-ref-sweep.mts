@@ -4,7 +4,9 @@ const args = new Set(process.argv.slice(2));
 // Fold espeak's inconsistent gemination (doubled consonant CC ↔ Cː) to Cː, and its narrow n→m/ŋ place
 // assimilation to broad n, and the trailing case-ending vowel (pausal difference).
 const gemFold = (s: string): string => s.replace(/(d͡ʒ|sˤ|tˤ|dˤ|ðˤ|[btθħxdðrzsʃʕɣfqklmnhwjʔ])\1/g, "$1ː");
-const stripStress = (s: string): string => gemFold(s.replace(/[ˈˌ]/g, ""));
+// espeak marks a final short case-vowel (contextual); we transcribe pausal (no case ending) → fold the ref.
+const caseFold = (s: string): string => s.replace(/(?<=[btθd͡ʒħxdðrzsʃsˤdˤtˤðˤʕɣfqklmnhwjʔ])[aiu]$/, "");
+const stripStress = (s: string): string => caseFold(gemFold(s.replace(/[ˈˌ]/g, "")));
 const ref = readFileSync("/tmp/ar_canonical_ref.tsv", "utf8").split("\n").filter(Boolean);
 let full = 0, seg = 0, total = 0;
 const buckets = new Map<string, { n: number; ex: string[] }>();
