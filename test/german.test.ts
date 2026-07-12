@@ -38,6 +38,19 @@ describe("german canonical IPA", () => {
     expect(phonemizeWord("gehen")).toBe("ɡˈeːən");     // ge- ROOT not reduced (stress on first)
   });
 
+  test("morphology: compound + affix boundary phonology", () => {
+    // Compound seams reset element-initial context (sp/st→ʃ), devoice the preceding stem, and block assimilation.
+    expect(phonemizeWord("Laubsturm")).toBe("lˈaʊ̯pʃtʊɐ̯m");  // st→ʃt at seam, b→p devoiced
+    expect(phonemizeWord("Warenkorb")).toBe("vˈaːʁənkɔɐ̯p");  // n·k NOT assimilated to ŋ
+    expect(phonemizeWord("aufstehen")).toBe("ˈaʊ̯fʃteːən");   // separable prefix stressed, st→ʃt
+    expect(phonemizeWord("verstehen")).toBe("fɛɐ̯ʃtˈeːən");   // ver- prefix, st→ʃt, stress on stem
+    expect(phonemizeWord("freundlich")).toBe("fʁˈɔʏ̯ntlɪç");  // -lich suffix, d→t devoiced at boundary
+    expect(phonemizeWord("Zeitung")).toBe("t͡sˈaɪ̯tʊŋ");      // -ung
+    // Vowel-initial inflection resyllabifies (no boundary): lieben not lieb·en, Häuser not häus·er.
+    expect(phonemizeWord("lieben")).toBe("lˈiːbən");         // b stays (not devoiced)
+    expect(phonemizeWord("Häuser")).toBe("hˈɔʏ̯zɐ");         // s → z (onset), not final s
+  });
+
   test("numbers + text", () => {
     expect(phonemize("21", "de")).toBe("ˈaɪ̯nʊntt͡svant͡sɪç");  // einundzwanzig
     expect(phonemize("100", "de")).toBe("ˈaɪ̯nhʊndɐt");         // einhundert
