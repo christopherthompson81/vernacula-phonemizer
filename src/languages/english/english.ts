@@ -25,6 +25,11 @@ const CLAUSE_MARK: Record<string, string> = { ".": ".", "?": "?", "!": "!", ",":
 // clause-final tonic, so they are excluded here.
 const NON_TONIC_FINAL = new Set(["i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them"]);
 
+// Interrogative / relative PRONOUNS demote to SECONDARY (not fully unstressed) in non-tonic position —
+// "what is the use" → wˌʌt. The wh-ADVERBS (how/where/when/why) keep their citation stress, so they are
+// not listed here.
+const WH_SECONDARY = new Set(["what", "which", "who", "whom", "whose"]);
+
 /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
  *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
 function sibilantAllomorph(ipa: string): string {
@@ -124,21 +129,24 @@ export class EnglishPhonemizer {
       else if (m[4] !== undefined) tokens.push({ kind: "clause", text: m[4] });
     }
 
-    // Expand numbers to words up-front so the POS tagger + resolver see a flat word stream.
-    interface Unit { words: string[]; clause?: string }
+    // Expand numbers to words up-front so the POS tagger + resolver see a flat word stream. A word may be
+    // flagged `reduced` at expansion time — the decimal separator "point" is a prosodically-weak connector,
+    // not a stressed content noun, so it is de-accented like a function word.
+    interface NumWord { text: string; reduced?: boolean }
+    interface Unit { words: NumWord[]; clause?: string }
     const units: Unit[] = [];
     for (const t of tokens) {
       if (t.kind === "clause") { const mk = CLAUSE_MARK[t.text]; if (mk) units.push({ words: [], clause: mk }); }
-      else if (t.kind === "word") units.push({ words: [t.text] });
+      else if (t.kind === "word") units.push({ words: [{ text: t.text }] });
       else {
         const n = BigInt(t.text.replace(/[,.]/g, "")); // integer part; fractional read separately below
         const dot = t.text.indexOf(".");
         if (dot >= 0) {
-          const intWords = numberToWords(BigInt(t.text.slice(0, dot).replace(/,/g, "") || "0"));
-          const frac = [...t.text.slice(dot + 1)].map((d) => numberToWords(BigInt(d))[0]!);
-          units.push({ words: [...intWords, "point", ...frac] });
+          const intWords = numberToWords(BigInt(t.text.slice(0, dot).replace(/,/g, "") || "0")).map((w) => ({ text: w }));
+          const frac = [...t.text.slice(dot + 1)].map((d) => ({ text: numberToWords(BigInt(d))[0]! }));
+          units.push({ words: [...intWords, { text: "point", reduced: true }, ...frac] });
         } else {
-          units.push({ words: t.ordinal ? ordinalToWords(n) : numberToWords(n) });
+          units.push({ words: (t.ordinal ? ordinalToWords(n) : numberToWords(n)).map((w) => ({ text: w })) });
         }
       }
     }
@@ -146,7 +154,7 @@ export class EnglishPhonemizer {
     // Tag word-by-word across the whole utterance (START/END padded), resolve each to CITATION IPA, then
     // de-accent: unstressed function words lose their primary; a clause left with no primary promotes its
     // last word back to the nuclear tonic. Clause boundaries are the pause marks.
-    const allWords = units.flatMap((u) => u.words);
+    const allWords = units.flatMap((u) => u.words.map((w) => w.text));
     const expect = this.posExpectations(allWords);
     let wi = 0;
     interface Item { word: string; citation: string; reduced: boolean; display: string }
@@ -158,17 +166,20 @@ export class EnglishPhonemizer {
         continue;
       }
       for (const w of u.words) {
-        const citation = this.resolveWord(w, expect[wi]);
+        const citation = this.resolveWord(w.text, expect[wi]);
         wi++;
         if (citation === "") continue;
-        const lw = w.toLowerCase();
-        clauses[clauses.length - 1]!.items.push({ word: lw, citation, reduced: this.unstressed.has(lw), display: citation });
+        const lw = w.text.toLowerCase();
+        clauses[clauses.length - 1]!.items.push({ word: lw, citation, reduced: (w.reduced ?? false) || this.unstressed.has(lw), display: citation });
       }
     }
 
     const parts: string[] = [];
     for (const c of clauses) {
-      for (const it of c.items) if (it.reduced) it.display = it.citation.replace(/ˈ/g, "");
+      for (const it of c.items) {
+        if (WH_SECONDARY.has(it.word)) it.display = it.citation.replace(/ˈ/g, "ˌ"); // wh-pronoun → secondary
+        else if (it.reduced) it.display = it.citation.replace(/ˈ/g, "");            // $u / decimal point → unstressed
+      }
       if (c.items.length > 0) {
         // Nuclear tonic: the clause-FINAL word takes primary in a TERMINAL clause (. ? ! / utterance end) —
         // EXCEPT a de-accentable personal pronoun ("please use it" → jˈuːz ɪt, not …ˈɪt). A clause with NO
