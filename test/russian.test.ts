@@ -61,6 +61,20 @@ describe("russian canonical IPA", () => {
     expect(phonemizeWord("маленькая")).toBe("mˈalʲɪnʲkəjə"); // ← маленький (soft stem, -ая spelling)
   });
 
+  // Transliterated foreign (mostly English) proper names. These are NOT stress-dict failures: the Cyrillic
+  // transliteration already encodes the Russian-adapted reading (э forces hard mɛ, H→Г→ɡ), and the first-vowel
+  // default matches English's predominant INITIAL stress (DAN-ny, MA-ry, EM-ily). This behaviour is intentional
+  // and correct; only final-stressed borrowings (Мишель) would need per-name stress data.
+  test("transliterated foreign names (adapted pronunciation, initial-stress default) — intentional", () => {
+    expect(phonemizeWord("дэнни")).toBe("dˈɛnʲːɪ");
+    expect(phonemizeWord("мэри")).toBe("mˈɛrʲɪ");
+    expect(phonemizeWord("гарри")).toBe("ɡˈarʲːɪ");     // H → Г, read as ɡ
+    expect(phonemizeWord("эмили")).toBe("ˈɛmʲɪlʲɪ");
+    expect(phonemizeWord("джонни")).toBe("d͡ʐˈonʲːɪ");   // дж affricate
+    expect(phonemizeWord("алекс")).toBe("ˈalʲɪks");
+    expect(phonemizeWord("сара")).toBe("sˈarə");
+  });
+
   test("numbers", () => {
     expect(phonemize("21", "ru")).toBe("dvˈat͡sətʲ ɐdʲˈin");        // двадцать один
     expect(phonemize("100", "ru")).toBe("sto");                    // сто
