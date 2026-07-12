@@ -4,6 +4,7 @@
  */
 import { createHindi } from "./languages/hindi/hindi.ts";
 import { createEnglish } from "./languages/english/english.ts";
+import { createMandarin } from "./languages/mandarin/mandarin.ts";
 
 export interface Phonemizer {
   /** Full text → canonical IPA. */
@@ -25,6 +26,8 @@ export function getPhonemizer(lang: string): Phonemizer {
 function build(lang: string): Phonemizer {
   switch (lang) {
     case "en": return createEnglish();
+    // Embedded Latin in Chinese text routes to the English phonemizer (lazy — loaded only if it appears).
+    case "cmn": return createMandarin((latin) => getPhonemizer("en").text(latin));
     // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
     case "hi": return createHindi((latin) => getPhonemizer("en").text(latin));
     default: throw new Error(`vernacula-phonemizer: no phonemizer registered for "${lang}"`);
