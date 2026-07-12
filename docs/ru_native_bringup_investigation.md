@@ -124,3 +124,20 @@ RESIDUAL CHARACTERIZATION (what's left, reachable vs not):
    itself here, so no rule can match both sides.
 CONCLUSION: the engine is near its reachable ceiling on the segmental rules (gold 96.9%); the one substantive
 lever left is stress-dict COVERAGE (OOV), which is a data-expansion problem, not an engine problem.
+
+## Run 5 — stress-dictionary OOV coverage + loanword table gaps
+The residual analysis said OOV stress was the main reachable lever. Measured: 11.6% of multisyllabic top-10k
+freq words are OOV, and almost NONE are in kaikki (genuinely absent). Three mechanisms, engine-side (no data
+bloat):
+ - Ё-RESTORATION: Russian text writes ё as е. For an OOV word with е, try restoring a ё that IS in the dict
+   (еще→ещё, пришел→пришёл, придется→придётся) — ё is inherently stressed, fixing segment AND stress. Biggest,
+   cleanest chunk (function words used constantly). OOV 11.6→9.7%.
+ - ADJECTIVE-LEMMA INFERENCE: an OOV inflected adjective/pronoun (которые, большое, маленькая) takes its
+   masculine lemma's stress ordinal (который/большой/маленький), which is stem-relative and stable across forms.
+   Hard endings (-ое/-ая) reconstruct -ый/-ой (большое→большой, NOT the comparative больший); soft (-ее/-яя) →
+   -ий; -ий is a last-resort fallback for velar/hushing stems (маленький→маленькая). OOV 9.7→6.5%.
+ - Regenerated hard-e.tsv against the fixed 406k stress dict: 1949 → 2668 loanword rows.
+
+Result: freq-common vs kaikki 87.6 → **90.7%** (+3.1); sweep 87.8→88.0%; gold 96.9%. Remaining multisyllabic OOV
+(6.5%) is almost entirely FOREIGN PROPER NAMES (дэнни/алекс/мэри — subtitle-corpus English names, unpredictable
+stress) + a few short-form participles. Those are genuinely not reachable without per-name data.

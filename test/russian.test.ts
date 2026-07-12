@@ -48,8 +48,16 @@ describe("russian canonical IPA", () => {
     expect(phonemizeWord("отель")).toBe("ɐtˈɛlʲ");
     expect(phonemizeWord("форель")).toBe("fɐrˈɛlʲ");
     expect(phonemizeWord("тема")).toBe("tʲˈemə");         // native → stays soft
-    expect(phonemizeWord("дорогого")).toBe("dˈorəɡəvə");  // genitive adjective (not the adverb дорого) → v
+    expect(phonemizeWord("дорогого")).toBe("dərɐɡˈovə");  // genitive adjective (not the adverb дорого) → v
     expect(phonemizeWord("стенд")).toBe("stɛnt");         // loanword: с re-hardens before hard т (no stranded sʲ)
+  });
+
+  test("OOV stress: ё-restoration + adjective-lemma inference", () => {
+    expect(phonemizeWord("еще")).toBe("jɪɕːˈɵ");        // ё written as е → ещё (ё stressed)
+    expect(phonemizeWord("пришел")).toBe("prʲɪʂˈɵɫ");   // пришёл
+    expect(phonemizeWord("которые")).toBe("kɐtˈorɨje"); // ← который (stem stress)
+    expect(phonemizeWord("большое")).toBe("bɐlʲʂˈoje");  // ← большой (not comparative больший)
+    expect(phonemizeWord("маленькая")).toBe("mˈalʲɪnʲkəjə"); // ← маленький (soft stem, -ая spelling)
   });
 
   test("numbers", () => {
