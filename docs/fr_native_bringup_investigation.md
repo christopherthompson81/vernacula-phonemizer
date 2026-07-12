@@ -98,3 +98,12 @@ incl. elided c'est/n'est. Attached to the NEXT word (re-syllabified: les amis �
 and before h aspiré (H_ASPIRE set: les héros → le eʁo). Elision (l', j', c') was already handled by the
 tokenizer + lexicon. Chains correctly: les enfants ont un chien → le zɑ̃fɑ̃ ɔ̃ tœ̃ ʃjɛ̃. Remaining (not attempted):
 optional/stylistic liaison, singular-noun forbidden cases, full h-aspiré lexicon — these need POS/lexical data.
+
+### Phase 2.5 review fixes
+Adversarial review of the liaison path found three concrete bugs, all fixed:
+ - liaison DOUBLED a citation-realised latent consonant (cet→sɛt + t = sɛt tˈɔm). Added stripLatent: when the
+   liaison fires and the word's IPA already ends in the latent consonant (z↔s/z, t↔t/d, n↔n), strip it so it
+   re-attaches once as the next onset (cet homme→sɛ tˈɔm, six ans→si zˈɑ̃, dix ans→di zˈɑ̃).
+ - c'est → kɛ (c before an apostrophe hit the front-vowel softening → k). Added c'→s in g2p (c'est→sɛ, c'était→setɛ).
+ - H_ASPIRE was too small and missed plurals (les homards→le zomaʁ). Expanded the common h-aspiré set and match
+   the singular after stripping a plural -s (les homards→le omaʁ), while h-muet still liaises (les hommes→le zˈɔm).

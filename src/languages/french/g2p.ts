@@ -137,6 +137,7 @@ export function toIpa(word: string): string {
     if (vg) continue;
 
     // Consonant digraphs / context.
+    if (c === "c" && (nx === "'" || nx === "’")) { out.push("s", i); i++; continue; } // elided c' (ce/ça) → s, not k
     if (c === "c" && nx === "h") { out.push("ʃ", i); i += 2; continue; }
     if (c === "p" && nx === "h") { out.push("f", i); i += 2; continue; }
     if (c === "t" && nx === "h") { out.push("t", i); i += 2; continue; }

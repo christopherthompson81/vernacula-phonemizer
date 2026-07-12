@@ -55,10 +55,14 @@ describe("french canonical IPA", () => {
     expect(phonemize("les amis", "fr")).toBe("le zamˈi");            // z-liaison
     expect(phonemize("un ami", "fr")).toBe("œ̃ namˈi");               // n-liaison (nasal)
     expect(phonemize("petit ami", "fr")).toBe("pəti tamˈi");         // t-liaison
-    expect(phonemize("c'est ici", "fr")).toBe("kɛ tisˈi");           // elided c'est → t-liaison
+    expect(phonemize("c'est ici", "fr")).toBe("sɛ tisˈi");           // elided c'est → s, t-liaison
     expect(phonemize("deux ans", "fr")).toBe("dø zˈɑ̃");              // number liaison
     expect(phonemize("les héros", "fr")).toBe("le eʁˈo");            // h aspiré → NO liaison
+    expect(phonemize("les homards", "fr")).toBe("le omˈaʁ");         // h aspiré, plural form → NO liaison
+    expect(phonemize("les hommes", "fr")).toBe("le zˈɔm");           // h muet → liaison DOES fire
     expect(phonemize("les chats", "fr")).toBe("le ʃˈa");             // consonant-initial → no liaison
+    expect(phonemize("cet homme", "fr")).toBe("sɛ tˈɔm");            // latent t not doubled (cet→sɛt)
+    expect(phonemize("six ans", "fr")).toBe("si zˈɑ̃");              // latent s→z not doubled (six→sis)
   });
 
   // g2p OOV convention aligned to the lexicon (Lexique): o open/closed, citation schwa, obstruent+liquid onset.

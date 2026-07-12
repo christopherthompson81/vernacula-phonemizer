@@ -63,16 +63,27 @@ const LIAISON: Record<string, string> = {
 // h aspiré (and vowel-initial words that block liaison, e.g. huit/onze/y-): the following word looks
 // vowel-initial but forbids liaison — les héros → le eʁo, not le zeʁo.
 const H_ASPIRE = new Set([
-  "héros", "haricot", "hasard", "haine", "hibou", "hiboux", "hangar", "honte", "haut", "hauteur", "hache",
-  "handicap", "hérisson", "hollande", "hongrie", "hamac", "hall", "hamburger", "hérault", "hérissé",
-  "huit", "huitième", "onze", "onzième", "yaourt", "yacht", "yoga", "oui", "ouistiti", "uhlan",
+  "hache", "haie", "haillon", "haine", "haïr", "hall", "halle", "halte", "hamac", "hameau", "hamburger",
+  "hamster", "hanche", "handicap", "handicapé", "hangar", "hanter", "harceler", "hardi", "hareng", "hargne",
+  "haricot", "harpe", "hasard", "hâte", "hausse", "haut", "hautain", "hauteur", "havre", "hennir", "hérault",
+  "hérisson", "hérissé", "hernie", "héron", "héros", "hêtre", "heurter", "hibou", "hiboux", "hiérarchie",
+  "homard", "hongrie", "hongrois", "honte", "hoquet", "horde", "hors", "hotte", "houle", "hublot", "huer",
+  "huit", "huitième", "hurler", "hutte", "hollande", "hollandais",
+  "onze", "onzième", "yaourt", "yacht", "yoga", "oui", "ouistiti", "uhlan",
 ]);
 const STARTS_VOWEL = /^[aeiouyàâäéèêëîïôöûüùœæh]/i; // h → treat as mute unless the word is in H_ASPIRE
 function liaisonOnto(prev: string, next: string): string {
   const c = LIAISON[prev.toLowerCase()];
   if (!c) return "";
   const nx = next.toLowerCase();
-  return STARTS_VOWEL.test(nx) && !H_ASPIRE.has(nx) ? c : "";
+  const aspire = H_ASPIRE.has(nx) || H_ASPIRE.has(nx.replace(/s$/, "")); // plural: homards, haricots
+  return STARTS_VOWEL.test(nx) && !aspire ? c : "";
+}
+// The liaison consonant re-syllabifies as the next word's onset; if the citation form already realises that
+// latent consonant (cet→sɛt, six→sis, dix→dis), strip it here so it isn't doubled. z↔final s/z, t↔t/d, n↔n.
+const LATENT: Record<string, RegExp> = { z: /[sz]$/, t: /[td]$/, n: /n$/ };
+function stripLatent(ipa: string, c: string): string {
+  return LATENT[c]?.test(ipa) ? ipa.slice(0, -1) : ipa;
 }
 
 class FrenchPhonemizer implements Phonemizer {
@@ -105,10 +116,13 @@ class FrenchPhonemizer implements Phonemizer {
     for (let k = 0; k < items.length; k++) {
       const it = items[k]!;
       if ("pause" in it) { carry = ""; if (group.length || out) flush(it.pause); continue; } // liaison never crosses a pause
-      const ipa = carry + phonemizeWord(it.word);
+      let ipa = carry + phonemizeWord(it.word);
       carry = "";
       const next = items[k + 1];                       // liaison only onto an immediately adjacent word
-      if (next && "word" in next) carry = liaisonOnto(it.word, next.word);
+      if (next && "word" in next) {
+        carry = liaisonOnto(it.word, next.word);
+        if (carry) ipa = stripLatent(ipa, carry);      // avoid doubling a citation-realised final consonant
+      }
       if (ipa) group.push(ipa);
     }
     flush(null);
