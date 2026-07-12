@@ -86,3 +86,18 @@ s = takes Fugen-s (-ung/-heit/-ion…). The flags drive decomposition precisely:
 
 Result: freq-common **69.0%**, dictionary sweep 40.8%. The morphology is now lexicon-driven and generalizes
 (Dutch, English). NEXT: grow the constituent lexicon (fried, umlaut suffixes), glottal stop, unstressed length.
+
+## Run 4 — cheap affix wins + stressed-vowel length correction
+Addressed the outstanding residual (was ~69%).
+ - Cheap wins: rr→r (Herr, irre), a short-function-word list (etwas, zur, vom, drin…). (+0.6)
+ - VOWEL LENGTH — the big lever. German length is partly LEXICAL (Tag long / weg short; sagt→zaːkt inherits the
+   long stem; Mond/Obst/Art long exceptions; unstressed loanword syllables short), so no rule gets it all.
+   Data-derived a stressed-vowel length-correction lexicon length.tsv (6559 words, word→L|S) from kaikki where
+   the spelling rule mispredicts (10% of words). applyLength fixes the stressed vowel's length AND QUALITY
+   (werden L → eː not ɛ; sagt → zaːkt; Mond → moːnt; Geburt → …buːɐ̯t), anchored on the stress mark (or the
+   single vowel for monosyllables). Result: freq-common 69.6 → **72.7%** (+3.1).
+ - (ver-→fɐ reduction tried and REVERTED — kaikki predominantly uses the careful fɛɐ̯; only ~13 words want fɐ.)
+
+STILL OUTSTANDING (documented): morpheme-final devoicing when a word ISN'T decomposed (möglich→…ɡlɪç should be
+k); unstressed-medial e→ə beyond endings (anderen); the -in feminine suffix (short ɪn, entangled with stress);
+x~χ and ŋ̩ referee conventions (foldable). The engine is now ~87% folded; the length lexicon is the biggest lift.

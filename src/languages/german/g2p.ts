@@ -23,9 +23,10 @@ function consRun(w: string, j: number): number {
   return n;
 }
 
-// Common short-vowel monosyllables (function words) that the V+single-final-C → long rule would over-lengthen.
+// Common short-vowel words (function words / clitics) that the V+single-final-C → long rule would over-lengthen.
 const SHORT_MONO = new Set(["das", "was", "des", "es", "in", "im", "an", "am", "um", "mit", "bis", "weg", "man",
-  "von", "hat", "ob", "ab", "bin", "hin", "wes", "des", "bist", "ist", "und", "als", "hast", "wenn", "denn"]);
+  "von", "hat", "ob", "ab", "bin", "hin", "wes", "bist", "ist", "und", "als", "hast", "wenn", "denn",
+  "zur", "zum", "vom", "drin", "etwas", "darum", "warum", "herum", "worum", "vielleicht", "hinein", "herein"]);
 // Stems whose vowel before ch is LONG (the minority; the default is short — ach, Bach, mich).
 const LONG_CH = ["nach", "buch", "such", "sprach", "hoch", "tuch", "fluch", "kuch", "wuch"];
 
@@ -106,7 +107,9 @@ export function toSegments(word: string): Seg[] {
     // in an onset and in a coda after a SHORT vowel (scherz → ʃɛʁt͡s, Herz → hɛʁt͡s).
     if (c === "r") {
       const prev = segs[segs.length - 1];
-      const coda = nx === "" || !isV(nx);
+      if (nx === "r") i++;                       // rr → single r (Herr, irre)
+      const after = w[i + 1] ?? "";
+      const coda = after === "" || !isV(after);
       if (coda && prev?.vowel) push("ɐ̯", i);   // coda r after a vowel → vocalized (Uhr, hart, Hamburg, scherz)
       else push("ʁ", i);                        // onset r (rot, drei, Straße)
       i++;
