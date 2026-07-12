@@ -32,6 +32,7 @@ describe("russian canonical IPA", () => {
     expect(phonemizeWord("русский")).toBe("rˈusːkʲɪj"); // geminate сс → sː
     expect(phonemizeWord("детский")).toBe("dʲˈet͡skʲɪj"); // тс → t͡s
     expect(phonemizeWord("пятиться")).toBe("pʲˈætʲɪt͡sːə"); // -ться → t͡sː
+    expect(phonemizeWord("джинсы")).toBe("d͡ʐˈɨnsɨ");   // дж → affricate d͡ʐ
   });
 
   test("stress dictionary + monosyllable (no mark)", () => {

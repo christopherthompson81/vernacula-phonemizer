@@ -141,3 +141,12 @@ bloat):
 Result: freq-common vs kaikki 87.6 → **90.7%** (+3.1); sweep 87.8→88.0%; gold 96.9%. Remaining multisyllabic OOV
 (6.5%) is almost entirely FOREIGN PROPER NAMES (дэнни/алекс/мэри — subtitle-corpus English names, unpredictable
 stress) + a few short-form participles. Those are genuinely not reachable without per-name data.
+
+## Run 6 — foreign-name/loanword affricate дж→d͡ʐ
+Prompted by asking whether the OOV foreign proper names encode CORRECT pronunciation. Finding: they largely DO
+— the Cyrillic transliteration encodes the Russian-adapted reading, and our g2p reads it right (мэри→mˈɛrʲɪ hard
+via э, гарри→ɡˈarʲːɪ H→Г). And the first-vowel stress default happens to be correct for most (English names are
+predominantly initial-stressed: DAN-ny, MA-ry, EM-ily). The one real gap it exposed was general (not
+name-specific): дж rendered as separate d+ʐ instead of the affricate d͡ʐ. Fixed дж→d͡ʐ — джинсы→d͡ʐɨnsɨ,
+менеджер→mˈɛnʲɪd͡ʐɨr, джонни→d͡ʐˈonʲːɪ, поджарить→pɐd͡ʐˈarʲɪtʲ. Sweep 88.0% (kaikki over-transcribes дж as d͡ʐʐ so
+the clean affricate doesn't perfectly match, but d͡ʐ is the correct canonical form), gold 96.9%, 76 tests.
