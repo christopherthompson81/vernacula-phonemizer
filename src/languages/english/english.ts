@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createEnglishG2p, type EnglishG2p, type EnglishG2pModel } from "./englishG2p.ts";
+import { makeArpabetToIpa, type ArpabetDef } from "./englishArpabet.ts";
 import { PosTagger, posExpectation, headsObjectPhrase, type PosExpectation, type PosModel } from "./posTagger.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
 
@@ -213,9 +214,11 @@ export function createEnglish(): EnglishPhonemizer {
   const manifest = JSON.parse(read("english.jsonc").replace(/^\s*\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "")) as {
     heteronyms: Record<string, HeteronymEntry>;
     unstressedWords: string[];
+    arpabet: ArpabetDef;
   };
   const heteronyms = new Map(Object.entries(manifest.heteronyms));
   const unstressed = new Set(manifest.unstressedWords);
+  const arpabetToIpa = makeArpabetToIpa(manifest.arpabet);
 
   const g2pDict = new Map<string, string[]>();
   for (const line of read("g2p-dict.tsv").split("\n")) {
@@ -224,7 +227,7 @@ export function createEnglish(): EnglishPhonemizer {
     if (tab > 0) g2pDict.set(line.slice(0, tab), line.slice(tab + 1).split(" "));
   }
   const g2pCommon = new Set(read("g2p-common.txt").split("\n").filter((w) => w !== ""));
-  const g2p = createEnglishG2p(JSON.parse(read("g2p-model.json")) as EnglishG2pModel, g2pDict, g2pCommon);
+  const g2p = createEnglishG2p(JSON.parse(read("g2p-model.json")) as EnglishG2pModel, g2pDict, g2pCommon, arpabetToIpa);
 
   const tagger = new PosTagger(JSON.parse(read("pos-model.json")) as PosModel);
 

@@ -6,14 +6,21 @@
  * so dict words and G2P'd words share one convention with no seam.
  */
 
-// ARPABET (stressless) → IPA, in the en canonical convention. Vowels that carry stress are handled in
-// arpabetToIpa(); AH is special (unstressed→ə, stressed→ʌ) and resolved there.
-const ARPA_IPA: Record<string, string> = {
-  AA: "ɑː", AE: "æ", AO: "ɔː", AW: "aᶷ", AY: "aᶦ", EH: "ɛ", EY: "eᶦ", IH: "ɪ", IY: "iː",
-  OW: "oᶷ", OY: "ɔᶦ", UH: "ʊ", UW: "uː",
-  B: "b", CH: "t͡ʃ", D: "d", DH: "ð", F: "f", G: "ɡ", HH: "h", JH: "d͡ʒ", K: "k", L: "l", M: "m",
-  N: "n", NG: "ŋ", P: "p", R: "ɹ", S: "s", SH: "ʃ", T: "t", TH: "θ", V: "v", W: "w", Y: "j", Z: "z", ZH: "ʒ",
-};
+/** The ARPABET→IPA correspondence DATA (from english.jsonc's `arpabet` block). The allophony ALGORITHM
+ *  below reads these values; a different English variety supplies its own `map` / `conditionalVowels`. */
+export interface ArpabetDef {
+  /** ARPABET phone → IPA: consonants + simple (unconditional) vowels. */
+  map: Record<string, string>;
+  /** Vowels resolved by stress (AH, ER) or a following R (IY, UW). */
+  conditionalVowels: {
+    AH: { unstressed: string; stressed: string };
+    ER: { unstressed: string; stressed: string };
+    IY: { beforeR: string; unstressed: string; stressed: string };
+    UW: { beforeR: string; default: string };
+  };
+}
+
+/** The ARPABET vowel bases — a fixed property of the notation (variety-independent), so the engine owns it. */
 const VOWELS = new Set(["AA", "AE", "AH", "AO", "AW", "AY", "EH", "ER", "EY", "IH", "IY", "OW", "OY", "UH", "UW"]);
 
 /** One CMUdict phone (e.g. "AH0", "T", "ER1") → {base, stress}. */
@@ -39,8 +46,12 @@ function isBarredI(word: string, P: { base: string; stress: number }[], vi: numb
   return false;
 }
 
-/** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
-export function arpabetToIpa(phones: string[], word = ""): string {
+/** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
+ *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
+export function makeArpabetToIpa(def: ArpabetDef): (phones: string[], word?: string) => string {
+  const { map, conditionalVowels: cv } = def;
+  /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
+  return function arpabetToIpa(phones: string[], word = ""): string {
   const P = phones.map(split);
   const nucleiIdx = P.map((p, i) => (VOWELS.has(p.base) ? i : -1)).filter((i) => i >= 0);
   const nucleusNum = new Map(nucleiIdx.map((vi, ni) => [vi, ni]));
@@ -58,11 +69,11 @@ export function arpabetToIpa(phones: string[], word = ""): string {
       out += mark;
       if (base === "AH" && isBarredI(word, P, i, ni, nucleiIdx.length)) out += "ᵻ";
       else if (base === "IH" && isBarredI(word, P, i, ni, nucleiIdx.length)) out += "ᵻ";
-      else if (base === "AH") out += stress <= 0 ? "ə" : "ʌ";
-      else if (base === "ER") out += stress <= 0 ? "ɚ" : "ɝ";
-      else if (base === "IY") out += nextIsR ? "ɪ" : (stress <= 0 ? "i" : "iː");
-      else if (base === "UW") out += nextIsR ? "ʊ" : "uː";
-      else out += ARPA_IPA[base] ?? base;
+      else if (base === "AH") out += stress <= 0 ? cv.AH.unstressed : cv.AH.stressed;
+      else if (base === "ER") out += stress <= 0 ? cv.ER.unstressed : cv.ER.stressed;
+      else if (base === "IY") out += nextIsR ? cv.IY.beforeR : (stress <= 0 ? cv.IY.unstressed : cv.IY.stressed);
+      else if (base === "UW") out += nextIsR ? cv.UW.beforeR : cv.UW.default;
+      else out += map[base] ?? base;
       // ʲ-glide hiatus: a high front nucleus (i/iː) directly before another vowel inserts ʲ.
       if ((base === "IY") && nextIsV) out += "ʲ";
       continue;
@@ -86,7 +97,8 @@ export function arpabetToIpa(phones: string[], word = ""): string {
     }
     // DARK-L (mined coda l→ɫ): l is velarized in the coda (before a consonant or word-finally).
     if (base === "L" && !(i + 1 < P.length && VOWELS.has(P[i + 1]!.base))) { out += "ɫ"; continue; }
-    out += ARPA_IPA[base] ?? base;
+    out += map[base] ?? base;
   }
   return out;
+  };
 }

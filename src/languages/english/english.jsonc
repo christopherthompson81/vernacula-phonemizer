@@ -25,6 +25,28 @@
     "merge":      "LOT–THOUGHT → ɔː"
   },
 
+  // ARPABET → canonical IPA correspondence (General American values). This is the DATA the converter reads;
+  // the allophony ALGORITHM (flapping, aspiration, dark-l, ŋ-assimilation, ʲ-glide, stress marking) lives in
+  // englishArpabet.ts. A different English variety (en-GB, en-AU) would supply its own `arpabet` block.
+  "arpabet": {
+    // Consonants + simple (unconditional) vowels. Stress-bearing / context-conditioned vowels are in
+    // `conditionalVowels` below; IH's reduced ᵻ realization is applied by the engine's weak-vowel rule.
+    "map": {
+      "AA": "ɑː", "AE": "æ", "AO": "ɔː", "AW": "aᶷ", "AY": "aᶦ", "EH": "ɛ", "EY": "eᶦ",
+      "IH": "ɪ", "OW": "oᶷ", "OY": "ɔᶦ", "UH": "ʊ",
+      "B": "b", "CH": "t͡ʃ", "D": "d", "DH": "ð", "F": "f", "G": "ɡ", "HH": "h", "JH": "d͡ʒ",
+      "K": "k", "L": "l", "M": "m", "N": "n", "NG": "ŋ", "P": "p", "R": "ɹ", "S": "s", "SH": "ʃ",
+      "T": "t", "TH": "θ", "V": "v", "W": "w", "Y": "j", "Z": "z", "ZH": "ʒ"
+    },
+    // Vowels the engine resolves by stress (AH, ER) or a following R (IY, UW).
+    "conditionalVowels": {
+      "AH": { "unstressed": "ə",  "stressed": "ʌ" },
+      "ER": { "unstressed": "ɚ",  "stressed": "ɝ" },
+      "IY": { "beforeR": "ɪ", "unstressed": "i", "stressed": "iː" },
+      "UW": { "beforeR": "ʊ", "default": "uː" }
+    }
+  },
+
   // POS HETERONYMS — word → reading per part of speech, selected by the POS tagger (models.posModel) via
   // the token's threaded expectation: past → verb → noun → default. Excluded from the flat lexicon so the
   // POS choice wins. Regular -s/-es plurals get an appended allomorph (records → base + z); voicing pairs

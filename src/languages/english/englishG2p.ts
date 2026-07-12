@@ -8,9 +8,8 @@
  * All paths emit stress-bearing ARPABET; {@link arpabetToIpa} renders the SAME canonical convention as the
  * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain, no
  * espeak); the model is built by tools/compile-data/build-en-g2p-ngram.ts (--emit). Pure function of its
- * injected {model, dict, common} — no filesystem/globals — so it ports trivially to C#.
+ * injected {model, dict, common, arpabetToIpa} — no filesystem/globals — so it ports trivially to C#.
  */
-import { arpabetToIpa } from "./englishArpabet.ts";
 
 /** Serialized model (from build-en-g2p-ngram.ts --emit): joint n-gram over grapheme:phone tokens. */
 export interface EnglishG2pModel {
@@ -72,7 +71,7 @@ export interface EnglishG2p {
  * stems) + the `common`-word set (frequency gate for compound pieces). Injected, not loaded, so this file
  * is pure and mirror-friendly.
  */
-export function createEnglishG2p(model: EnglishG2pModel, dict: ReadonlyMap<string, string[]>, common: ReadonlySet<string>): EnglishG2p {
+export function createEnglishG2p(model: EnglishG2pModel, dict: ReadonlyMap<string, string[]>, common: ReadonlySet<string>, arpabetToIpa: (phones: string[], word?: string) => string): EnglishG2p {
   const { order, alpha, evp, evpOrder } = model;
   const gchunks = new Map<string, string[]>(Object.entries(model.graphemeChunks));
 
