@@ -5,11 +5,14 @@
  * applied downstream. See docs/es_native_bringup_investigation.md for the convention.
  */
 
-const STRONG = "aeoáéó";       // strong vowels (each is its own nucleus; two adjacent = hiatus)
-const WEAK_UNACC = "iuü";      // unaccented weak vowels (glide beside another vowel)
-const WEAK_ACC = "íú";         // accented weak vowels (always a nucleus; breaks a diphthong)
-const ACCENTED: Record<string, string> = { á: "a", é: "e", í: "i", ó: "o", ú: "u", ü: "u" };
-const FRONT = "eiéí";          // front vowels that soften c and g
+import { MANIFEST } from "./manifest.ts";
+
+// Vowel classes + the accented→base map are DATA (spanish.jsonc).
+const STRONG = MANIFEST.vowels.strong;       // strong vowels (each is its own nucleus; two adjacent = hiatus)
+const WEAK_UNACC = MANIFEST.vowels.weakUnaccented; // unaccented weak vowels (glide beside another vowel)
+const WEAK_ACC = MANIFEST.vowels.weakAccented; // accented weak vowels (always a nucleus; breaks a diphthong)
+const ACCENTED = MANIFEST.accents;
+const FRONT = MANIFEST.vowels.front;         // front vowels that soften c and g
 
 // NB: guard against "" — "abc".includes("") is true, which at word end would misread the missing next char.
 const isVowel = (c: string): boolean => c !== "" && (STRONG.includes(c) || WEAK_UNACC.includes(c) || WEAK_ACC.includes(c));

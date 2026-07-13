@@ -5,9 +5,10 @@
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
-const NASALS = new Set(["m", "n", "ɲ", "ŋ"]);
-const STOP_TO_FRIC: Record<string, string> = { b: "β", d: "ð", ɡ: "ɣ" };
+const NASALS = new Set(MANIFEST.nasals);
+const STOP_TO_FRIC = MANIFEST.spirantize;
 const FINAL_VOWEL = /[aeiouáéíóú]$/i;
 
 /** b/d/ɡ → β/ð/ɣ except utterance-initial, after a nasal, or d after l. (Nasal place assimilation n→ŋ is
@@ -50,10 +51,7 @@ export function phonemizeWord(word: string): string {
   return out;
 }
 
-// Clause / phrase punctuation → canonical inline pause marks (¿¡ openers are silent).
-const CLAUSE_MARK: Record<string, string> = {
-  ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
-};
+const CLAUSE_MARK = MANIFEST.clausePunctuation; // ¿¡ openers are silent → absent from the map
 // A word / number / clause-punctuation token. Numbers use the Spanish convention: dot = thousands separator
 // (1.500), comma = decimal (3,14). Each dot/comma must be followed by digits, so a clause-final "." or ","
 // glued to a number falls through to the punctuation branch. Spanish letters incl. accents + ñ/ü.
@@ -63,15 +61,12 @@ const TOKEN = /([a-záéíóúüñ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu
 function numberTokenToWords(tok: string): string {
   const [intRaw, frac] = tok.split(",");
   let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
-  if (frac !== undefined) words += " coma " + [...frac].map((d) => numberToWords(Number(d))).join(" ");
+  if (frac !== undefined) words += ` ${MANIFEST.numbers.decimalConnector} ` + [...frac].map((d) => numberToWords(Number(d))).join(" ");
   return words;
 }
 // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in
-// running text. Accented counterparts (sí, tú, mí, más) keep their written accent and stay stressed.
-const FUNCTION_WORDS = new Set([
-  "el", "la", "los", "las", "un", "y", "e", "o", "u", "ni", "que", "si",
-  "a", "de", "con", "en", "por", "sin", "tras", "me", "te", "se", "lo", "le", "nos", "os", "mi", "tu", "su",
-]);
+// running text (DATA: spanish.jsonc). Accented counterparts (sí, tú, mí, más) keep their accent and stay stressed.
+const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 
 /** Phonemize one running-text word, de-accenting unstressed function words (y → i, de → de). */
 function wordIpa(word: string): string {

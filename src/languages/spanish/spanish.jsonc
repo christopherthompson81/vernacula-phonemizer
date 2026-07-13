@@ -1,0 +1,69 @@
+// Native canonical-IPA data manifest for Spanish (es) — broad Castilian, espeak-independent.
+// This file IS the hand-authored context-free language DATA: the vowel classes, the accented-vowel→base map,
+// the nasal + spirantization sets, the function-word clitic list, clause punctuation, and the number words. The
+// ALGORITHMS that read it stay in code:
+//   g2p.ts     — the left-to-right scan (consonant digraphs + context-sensitive single consonants: c/g softening,
+//                r-trill onset, x), the vowel-run nucleus/glide classifier, and the on/off-glide realization
+//   spanish.ts — spirantization, rule-based stress, the tokenizer + function-word de-accenting
+//   numbers.ts — the long-scale (millón/billón) cardinal compositor
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/es_native_bringup_investigation.md.
+{
+    "language": "es",
+    "name": "Spanish (broad Castilian)",
+    "script": "Latin",
+    "provenance": "Authored from Spanish orthography + phonology (shallow, near-deterministic). This file IS the language data — the native rule engine reads it directly. No lexicon.",
+
+    "convention": {
+        "seseo": "no — c(front)/z → θ (Castilian distinction: caza θ vs casa s)",
+        "spirantization": "b d ɡ → β ð ɣ except utterance-initial, after a nasal, or d after l",
+        "glides": "onglides consonantal j/w (cielo → θjelo); offglides non-syllabic ᶦ/ᶷ (aire → aᶦɾe)",
+        "stress": "written accent wins; else penult (word ends vowel/n/s) or final",
+        "trill": "r → trill r word-initial or after n/l/s; else tap ɾ; rr → r",
+    },
+
+    // Vowel classes. STRONG = each its own nucleus (two adjacent = hiatus); WEAK unaccented = glide beside another
+    // vowel; WEAK accented = always a nucleus (breaks a diphthong). FRONT = the vowels that soften c and g.
+    "vowels": {
+        "strong": "aeoáéó",
+        "weakUnaccented": "iuü",
+        "weakAccented": "íú",
+        "front": "eiéí",
+    },
+    // Accented vowel → its base (unaccented) letter.
+    "accents": { "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u" },
+
+    // Nasal phonemes (a following nasal blocks spirantization) and the stop→fricative spirantization pairs.
+    "nasals": ["m", "n", "ɲ", "ŋ"],
+    "spirantize": { "b": "β", "d": "ð", "ɡ": "ɣ" },
+
+    // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in
+    // running text. Accented counterparts (sí, tú, mí, más) keep their written accent and stay stressed.
+    "functionWords": [
+        "el", "la", "los", "las", "un", "y", "e", "o", "u", "ni", "que", "si",
+        "a", "de", "con", "en", "por", "sin", "tras", "me", "te", "se", "lo", "le", "nos", "os", "mi", "tu", "su",
+    ],
+
+    // Clause / phrase punctuation → canonical inline pause marks (¿¡ openers are silent → absent here).
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+    // Cardinal number words (long scale: millón = 10⁶). Read through the g2p like any word.
+    "numbers": {
+        "ones": [
+            "cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve",
+            "diez", "once", "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve",
+            "veinte", "veintiuno", "veintidós", "veintitrés", "veinticuatro", "veinticinco", "veintiséis", "veintisiete", "veintiocho", "veintinueve",
+        ],
+        "tens": ["", "", "", "treinta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"],
+        "hundreds": ["", "ciento", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos", "setecientos", "ochocientos", "novecientos"],
+        "hundredExact": "cien", // exactly 100 (not ciento)
+        "thousand": "mil",
+        "connector": "y", // tens + units (treinta y uno)
+        "decimalConnector": "coma", // 3,14 → tres coma uno cuatro
+        // Long-scale groups above 10⁶ (checked high→low). Below 10⁶ is the mil/cien compositor.
+        "scales": [
+            { "value": 1000000000000, "one": "un billón", "many": "billones" },
+            { "value": 1000000, "one": "un millón", "many": "millones" },
+        ],
+    },
+}
