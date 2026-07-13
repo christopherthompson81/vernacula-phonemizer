@@ -28,8 +28,14 @@ describe("Korean Hangul g2p + sandhi", () => {
     expect(phonemizeWord("하나")).toBe("hˈɐnɐ");         // open + open → stress 1st
   });
 
+  it("lexical tensification (경음화) — Sino-Korean §26 / loanword, native stays lenis", () => {
+    expect(phonemizeWord("갈등")).toBe("kˈɐɭt͈ɯŋ");   // Sino-Korean ㄹ+ㄷ → tense
+    expect(phonemizeWord("물질")).toBe("mˈuɭt͡ɕ͈iɭ");  // ㄹ+ㅈ → tense
+    expect(phonemizeWord("알다")).toBe("ˈɐɭdɐ");       // native ㄹ+ㄷ → stays LENIS (no over-tensing)
+  });
+
   it("numbers (Sino-Korean)", () => {
     expect(phonemize("10", "ko")).toBe("sˈip̚");
-    expect(phonemize("100", "ko")).toBe("pˈɛk̚");
+    expect(phonemize("100", "ko")).toBe("p͈ˈɛk̚"); // 백 is lexically tense (loanword-initial 경음화)
   });
 });
