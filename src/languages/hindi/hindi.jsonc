@@ -142,6 +142,9 @@
   "symbols": { "%": "प्रतिशत" },
   "stripSymbols": "₹",
 
+  // Clause / phrase punctuation → canonical inline pause marks (Devanagari danda ।/॥ + ASCII).
+  "clausePunctuation": { "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": "," },
+
   // Nasalization does NOT change vowel length: the WikiPron hin_deva narrow referee keeps nasal vowels
   // long (नहीं→nɐɦĩː, कांग्रेस→kãːŋ, यहाँ→jɐɦãː, गांव→ɡãː), so a long vowel + anusvara/chandrabindu stays
   // long (kaː̃) and a short one stays short (गंगा→ɡə̃ŋ). Setting this false keeps the length mark.

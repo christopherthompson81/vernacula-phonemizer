@@ -24,6 +24,7 @@ export interface HindiDef extends AbugidaDef {
   finalRules: { from: string; to: string }[];
   numbers: NumbersDef;
   schwaDeletion: { deleteWordFinal?: boolean; retainInMonosyllable?: boolean };
+  clausePunctuation: Record<string, string>;
   symbols?: Record<string, string>;
   stripSymbols?: string;
 }
@@ -33,10 +34,10 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 const VOWEL_G = new RegExp(`[${IPA_VOWELS}]`, "g");
 const DIGIT_CLASS = "0-9" + Object.keys(DEVANAGARI_DIGITS).join("");
-const CLAUSE_MARK: Record<string, string> = { "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": "," };
 
 export function makeNativeHindi(def: HindiDef, phon: Phonology = loadSharedPhonology(), foreign?: ForeignPhonemizer) {
   const g2p = makeAbugidaG2P(def, phon);
+  const CLAUSE_MARK = def.clausePunctuation; // Devanagari danda ।/॥ + ASCII → canonical pause (from hindi.jsonc)
   const post = def.postRules.map((r) => ({ re: new RegExp(r.from, "gu"), to: r.to }));
   const fin = def.finalRules.map((r) => ({ re: new RegExp(r.from, "gu"), to: r.to }));
   const symbols = def.symbols ?? {};
