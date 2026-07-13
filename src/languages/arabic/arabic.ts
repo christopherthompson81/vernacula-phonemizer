@@ -6,6 +6,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
+import { createArabicDiacritizer, type ArabicDiacritizer } from "./diacritizer.ts";
 
 const isLongNucleus = (ph: string): boolean => /ː/.test(ph) || ph === "aj" || ph === "aw" || /[aiu]n$/.test(ph);
 
@@ -91,4 +92,21 @@ class ArabicPhonemizer implements Phonemizer {
  *  will restore short vowels for bare text. Fully rule-based — no data files. */
 export function createArabic(): Phonemizer {
   return new ArabicPhonemizer();
+}
+
+let diacritizer: Promise<ArabicDiacritizer | undefined> | undefined;
+let phonemizer: Phonemizer | undefined;
+
+/**
+ * Phonemize BARE (undiacritized) Arabic. Runs the neural diacritizer pre-pass (ONNX, async) to restore short
+ * vowels, then the synchronous g2p. Requires the optional `onnxruntime-node` dependency and the diacritizer
+ * model beside this module; if the model is absent it falls back to phonemizing the input as-is (which is
+ * correct only for already-diacritized text). Diacritized input can use the sync `phonemize(text, "ar")`.
+ */
+export async function phonemizeArabic(text: string): Promise<string> {
+  if (diacritizer === undefined) diacritizer = createArabicDiacritizer();
+  const diac = await diacritizer;
+  const vocalized = diac ? await diac.diacritize(text) : text;
+  if (phonemizer === undefined) phonemizer = createArabic();
+  return phonemizer.text(vocalized);
 }
