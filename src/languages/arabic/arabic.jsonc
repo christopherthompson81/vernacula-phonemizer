@@ -1,13 +1,12 @@
-// Native canonical-IPA MANIFEST for Arabic (ar) — Modern Standard Arabic, broad phonemic. Consolidates the
-// hand-authored DATA tables of the Arabic module (consonant map, sun letters, proclitics, clause punctuation,
-// number words, and the diacritizer's label / defective-spelling tables) into one self-describing file, matching
-// english.jsonc / hindi.jsonc. The ALGORITHMS (diacritic parsing, article assimilation, quantity-sensitive
-// stress, number composition, neural diacritization) stay in code; only the closed, hand-curatable data lives
-// here. The Arabic SCRIPT constants the parser switches on (harakat marks, special letters like alif) remain
-// structural in g2p.ts — they are the script, not authored data.
+// Native canonical-IPA MANIFEST for Arabic (ar) — Modern Standard Arabic, broad phonemic. A fulsome, self-
+// describing description of the language's DATA, matching english.jsonc / hindi.jsonc: the script inventory
+// (harakat marks + special letters), the consonant map, sun letters, proclitics, clause punctuation, the number
+// words, and the diacritizer's label / defective-spelling tables. The ALGORITHMS (diacritic parsing, article
+// assimilation, quantity-sensitive stress, number composition, neural diacritization) stay in code and bind
+// these to readable local names (FATHA = marks.fatha, …); only the data lives here.
 //
-// LOAD-BEARING blocks (read via manifest.ts): "consonants", "sunLetters", "proclitics", "clausePunctuation",
-// "numbers", "diacritizer". "convention" / "provenance" are self-describing documentation.
+// LOAD-BEARING blocks (read via manifest.ts): "marks", "letters", "consonants", "sunLetters", "proclitics",
+// "clausePunctuation", "numbers", "diacritizer". "convention" / "provenance" are self-describing documentation.
 {
   "language": "ar",
   "name": "Arabic (Modern Standard)",
@@ -22,6 +21,19 @@
     "stress":      "MSA quantity-sensitive; the mark ˈ precedes the nucleus",
     "taaMarbuta":  "ة silent in pausal (phrase-final) form",
     "numbers":     "MSA counting / masculine forms; ones precede tens joined by wa; hundreds/thousands use construct + dual forms"
+  },
+
+  // Harakat — the Arabic combining marks the parser gathers after a consonant (short vowels, sukun, shadda
+  // gemination, the three tanwīn nunations, and the superscript dagger-alif = long /aː/).
+  "marks": {
+    "fatha": "َ", "kasra": "ِ", "damma": "ُ", "sukun": "ْ", "shadda": "ّ",
+    "fathatan": "ً", "kasratan": "ٍ", "dammatan": "ٌ", "daggerAlif": "ٰ"
+  },
+
+  // Special letters the parser treats specially: the alifs (long /aː/ carriers + madda glottal), tāʾ marbūṭa
+  // (silent in pausal form), and the glide letters و/ي (long /uː iː/ or the diphthong glides).
+  "letters": {
+    "alif": "ا", "alifMaqsura": "ى", "alifMadda": "آ", "taaMarbuta": "ة", "waw": "و", "ya": "ي"
   },
 
   // Consonant letter → IPA. Emphatics carry ˤ; pharyngeals ʕ/ħ; every hamza seat (ء أ إ ؤ ئ) → ʔ.
