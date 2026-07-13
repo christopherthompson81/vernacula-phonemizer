@@ -65,3 +65,20 @@ person-endings +761; -CA and the copula -mIş/-sA/-DI were net-NEGATIVE and drop
 + one optional trailing suffix): stress accuracy **78.5% → 87.5%**. Ported to `morphStress` as a single
 alternation regex. Full-pipeline result vs the gold: **exact 77.29% → 86.09%** (segmental unchanged at 98.39%;
 stress-only diff 21% → 12.3%). Number words forced to final stress so the -Iz rule doesn't break dokuz.
+
+## Run 3 — false-positive reduction (morphological guards) — 2026-07-12
+Diagnosed the 12.3% stress residual: 1983 FALSE POSITIVES (rule fired on a gold-final word) + 2900 MISSED
+(gold non-final, we said final) + 1264 wrong-position. The FPs were dominated by the predicative person endings
+colliding with non-predicate morphology. Harness-tuned fixes (fixes-minus-breaks over the gold):
+- **Drop the bare 2sg -sIn** from the person set: it collides with the imperative -sIn (olsun→oɫsˈun) and the
+  possessive+case -sInDA (arasında→aɾasɯndˈa). +2.7% alone (87.4%→90.1%).
+- **Add the conditional -sA** (olsa→ˈoɫsa, varsa→vˈaɾsa): +0.8% (→90.9%).
+- Keep -Im and -Iz (dropping either lost 1.7–2%; their FPs on nouns/numbers like yardım/dokuz are outweighed).
+  A past-tense -DIm guard was net-zero and skipped.
+Also ported espeak's 5 single-word dictionary.jsonl stress entries (benim→2, istanbul→2, …) — shared INPUT data.
+
+Result: stress accuracy 87.4%→90.9%; full-pipeline **exact 86.09% → 89.58%** (segmental unchanged 98.39%,
+stress-only 12.3%→8.8%). The remaining misses are lexically-stressed common words (gece→ɟˈece, insan→ˈinsan,
+önce→ˈønd͡ʒe) that espeak stresses via its internal rule/data — no general rule reaches them, and a lexicon
+derived from the espeak gold would be circular. That, plus residual -Im/-Iz FPs on monomorphemic nouns
+(yardım), is the honest floor without a real morphological analyzer + root lexicon.
