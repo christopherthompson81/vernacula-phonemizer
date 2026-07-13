@@ -82,3 +82,32 @@ stress-only 12.3%→8.8%). The remaining misses are lexically-stressed common wo
 önce→ˈønd͡ʒe) that espeak stresses via its internal rule/data — no general rule reaches them, and a lexicon
 derived from the espeak gold would be circular. That, plus residual -Im/-Iz FPs on monomorphemic nouns
 (yardım), is the honest floor without a real morphological analyzer + root lexicon.
+
+## Run 4 — morphological analyzer / root lexicon (NEGATIVE RESULT) — 2026-07-12
+Investigated a root lexicon + morphological guard to close the residual (FPs like yardım→jˈaɾdɯm where -Im
+mis-fires on a noun root, and non-final lexical roots like gece/insan). Source: the wooorm hunspell Turkish
+dictionary (MIT, © Harun Reşit Zafer, Zemberek-derived) — 371k entries, INDEPENDENT of the espeak gold, and it
+covers every test root (yardım, dokuz, kültür, gece, insan, kelime all present).
+
+Every dict-membership guard NET-HURT stress accuracy (baseline 90.93% fixes-minus-breaks):
+- require stem-after-strip ∈ dict → 85.49% (rejects legit multi-suffix stems the dict doesn't list as bare forms)
+- skip rules when W is a flagged lemma (all rules) → 88.13%; (noun-prone rules only) → 89.84%
+- skip only -Im/-Iz when W is a flagged lemma → 89.92%
+- skip -Im/-Iz iff W flagged AND stem invalid (most precise) → 90.26%
+
+WHY it fails: (1) the dict is a spell-checker word list that lists inflected/derived forms as entries
+(giderken, kaybetme are present), so it cannot cleanly separate a root ending in -Im (yardım) from a predicate
++ person ending (öğretmenim); (2) the true-positive rule firings on dict-listed words OUTNUMBER the ~1983 FPs,
+so any membership guard removes more good than bad. A simple root-lexicon does NOT validate Turkish
+morphological structure.
+
+What would actually be needed:
+- a FULL FST morphological analyzer (Zemberek-class) that produces real parses (root + POS + ordered
+  morphemes), so yardım is known to have NO valid noun-predicate parse — a large build with bounded upside
+  (~the final-stressed noun FPs; it would NOT fix the non-final LEXICAL roots like durum/gece/insan);
+- OR independent stress-ANNOTATED data for the ~2900 missed non-final lexical words (the bigger bucket); the
+  hunspell dict has no stress, Turkish Wiktionary rarely marks it, and deriving from the espeak gold is circular.
+
+DECISION: ship nothing (no guard net-improved). The pre-accenting suffix model (Run 2/3, 89.58% exact) stands
+as the honest floor for a rule-based engine; the remaining ~8.8% stress residual needs one of the two heavier
+pieces above. The wooorm dict path is recorded here for a future full-analyzer attempt.
