@@ -6,6 +6,7 @@
  * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3. See docs/ja_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { kanaToIpa, kanaToMorae } from "./kana.ts";
 import { applyReadings, segmentText } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
@@ -22,32 +23,23 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 
 class JapanesePhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (!ipa) return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of segmentText(input).matchAll(TOKEN)) {
+        // segmentText inserts bunsetsu spaces first, then assembleClauses runs the standard clause skeleton.
+        return assembleClauses(segmentText(input), TOKEN, (m, sink) => {
             if (m[1]) {
                 const reading = applyReadings(m[1]).replace(KANA_ONLY, ""); // kanji → kana, drop the unresolvable tail
                 const morae = kanaToMorae(reading);
                 if (morae)
-                    emit(placeDownstep(morae, accentNucleus(m[1], reading))); // pitch: surface m[1] disambiguates
+                    sink.emit(
+                        placeDownstep(morae, accentNucleus(m[1], reading)),
+                    ); // pitch: surface m[1] disambiguates
             } else if (m[2]) {
                 const ipa = kanaToIpa(numberToKana(Number(m[2])));
-                if (ipa) emit(ipa);
+                if (ipa) sink.emit(ipa);
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 
