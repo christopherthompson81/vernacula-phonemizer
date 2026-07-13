@@ -32,9 +32,16 @@ describe("Turkish g2p (segmental)", () => {
     expect(phonemizeWord("evdeyim")).toBe("evdˈejim");    // predicative person ending
   });
 
+  it("conditional -sA is pre-accenting", () => {
+    expect(phonemizeWord("olsa")).toBe("ˈoɫsa");
+    expect(phonemizeWord("varsa")).toBe("vˈaɾsa");
+  });
+
   it("no false positives: plain final-stress words stay final", () => {
     expect(phonemizeWord("kitap")).toBe("citˈap");
     expect(phonemizeWord("araba")).toBe("aɾabˈa");
+    expect(phonemizeWord("olsun")).toBe("oɫsˈun");   // imperative -sIn, NOT pre-accenting (bare -sIn excluded)
+    expect(phonemizeWord("arasında")).toBe("aɾasɯndˈa"); // possessive+locative -sInDA, not person -sIn
   });
 
   it("numbers", () => {
