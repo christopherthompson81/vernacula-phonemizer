@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./kazakh.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord } from "../src/languages/kazakh/kazakh.ts";
 
 describe("Kazakh Cyrillic g2p", () => {
   it("core words, vowels, canonical relabels", () => {

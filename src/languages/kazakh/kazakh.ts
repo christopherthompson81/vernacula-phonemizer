@@ -9,9 +9,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
-const NUCLEUS = /[ɑæeoɵʊʏəɪɛau]/u; // nucleus vowels (matches g2p's nucleus set; glides w/j excluded)
-const VOWEL_OR_GLIDE = /[аәеоөұүыіэиуяюё]/u; // any Kazakh vowel/glide letter — its absence means an abbreviation
+// Any Kazakh vowel/glide letter (from the manifest's vowel + glide tables) — its absence means an abbreviation.
+const VOWEL_OR_GLIDE = new RegExp(`[${Object.keys(MANIFEST.vowels).join("")}${Object.keys(MANIFEST.glides).join("")}]`, "u");
+const FRONT_VOWEL = new RegExp(`[${MANIFEST.frontVowels}]`, "u"); // vowel harmony: presence lightens dark ɫ → l
 
 /** One Kazakh word → canonical IPA with a single primary-stress mark (STRESSPOSN_1RU). */
 export function phonemizeWord(word: string): string {
@@ -45,11 +47,11 @@ export function phonemizeWord(word: string): string {
   }
   // Vowel harmony: a token with any front vowel [eɵʏɪæ] lightens ALL its dark ɫ → l (тіл→tɪl, Солтүстік→soltʏstɪk);
   // a pure back-harmony word keeps ɫ (климаты→kɫəjmɑtə).
-  if (/[eɵʏɪæ]/u.test(out)) out = out.replace(/ɫ/gu, "l");
+  if (FRONT_VOWEL.test(out)) out = out.replace(/ɫ/gu, "l");
   return out;
 }
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class KazakhPhonemizer implements Phonemizer {

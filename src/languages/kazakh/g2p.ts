@@ -11,17 +11,13 @@
  * Stress (espeak's STRESSPOSN_1RU) is applied downstream in kazakh.ts. See docs/kk_native_bringup_investigation.md.
  */
 
-// Nucleus vowels (glides w/j are not nuclei). ə (from ы and from и=əj) is the only "unstressed" vowel — see kazakh.ts.
-const VOWEL_IPA: Record<string, string> = {
-  "а": "ɑ", "ә": "æ", "е": "e", "о": "o", "ө": "ɵ", "ұ": "ʊ", "ү": "ʏ", "ы": "ə", "і": "ɪ", "э": "ɛ",
-};
-// Iotated / glide letters expand to a fixed IPA sequence (the vowel part is the nucleus).
-const GLIDE_IPA: Record<string, string> = { "и": "əj", "у": "w", "я": "ja", "ю": "ju", "ё": "jo" };
-const CONS_IPA: Record<string, string> = {
-  "б": "b", "в": "v", "г": "ɡ", "ғ": "ʁ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "қ": "q",
-  "м": "m", "н": "n", "ң": "ŋ", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ", "һ": "h",
-  "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃʃ", "ъ": "ʔ", "ь": "ʔ",
-};
+import { MANIFEST } from "./manifest.ts";
+
+// Letter→IPA lookup tables are DATA (kazakh.jsonc). Nucleus vowels (glides w/j are not nuclei); ə (from ы and from
+// и=əj) is the only "unstressed" vowel — see kazakh.ts. Iotated/glide letters expand to a fixed IPA sequence.
+const VOWEL_IPA = MANIFEST.vowels;
+const GLIDE_IPA = MANIFEST.glides;
+const CONS_IPA = MANIFEST.consonants;
 export interface Seg { ph: string; nucleus: boolean }
 
 /** Kazakh word → IPA segment list (nucleus flags drive stress). */

@@ -7,9 +7,11 @@
  * 100 omits the leading 1 (жүз, not біржүз); 1000 keeps it (бір мің). See docs/kk_native_bringup_investigation.md.
  */
 
-const UNIT = ["nˈøɫ", "bˈɪr", "jˈekɪ", "ˈʏʃ", "tˈɵrt", "bˈes", "ˈɑɫtə", "ʒˈetɪ", "sˈeɡɪz", "tˈoʁəz"]; // 0–9
-const TENS = ["", "ˈon", "ʒəjərmˈɑ", "ˈotəz", "qˈərəq", "jˈelw", "ˈɑlpəs", "ʒetpˈɪs", "seksˈen", "toqsˈɑn"]; // ×10
-const HUNDRED = "ʒˈʏz", THOUSAND = "mˈəŋ", MILLION = "məjlɫəjˈon";
+import { MANIFEST } from "./manifest.ts";
+
+// Number forms are authored DATA (finished IPA atoms) — consolidated in kazakh.jsonc; the compositor is the algorithm.
+const N = MANIFEST.numbers;
+const UNIT = N.units, TENS = N.tens, HUNDRED = N.hundred, THOUSAND = N.thousand, MILLION = N.million;
 
 /** 0–99 → concatenated IPA (tens and units glued, matching espeak). */
 function sub100(n: number): string {
