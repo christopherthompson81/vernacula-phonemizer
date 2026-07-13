@@ -5,14 +5,16 @@
  * downstream (german.ts). See docs/de_native_bringup_investigation.md.
  */
 
+import { MANIFEST } from "./manifest.ts";
+
 const VOWELS = "aeiouäöüy";
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 
-// Long / short IPA for each vowel letter.
-const LONG: Record<string, string> = { a: "aː", e: "eː", i: "iː", o: "oː", u: "uː", ä: "ɛː", ö: "øː", ü: "yː", y: "yː" };
-const SHORT: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", ä: "ɛ", ö: "œ", ü: "ʏ", y: "ʏ" };
-
-const VOICED_FINAL: Record<string, string> = { b: "p", d: "t", ɡ: "k", v: "f", z: "s" };
+// Long / short vowel IPA, context-free consonant letters, and final-devoicing pairs — from german.jsonc.
+const LONG = MANIFEST.vowels.long;
+const SHORT = MANIFEST.vowels.short;
+const CONS = MANIFEST.consonants;
+const VOICED_FINAL = MANIFEST.voicedFinal;
 
 export interface Seg { ph: string; s: number; vowel: boolean; }
 
@@ -23,12 +25,9 @@ function consRun(w: string, j: number): number {
   return n;
 }
 
-// Common short-vowel words (function words / clitics) that the V+single-final-C → long rule would over-lengthen.
-const SHORT_MONO = new Set(["das", "was", "des", "es", "in", "im", "an", "am", "um", "mit", "bis", "weg", "man",
-  "von", "hat", "ob", "ab", "bin", "hin", "wes", "bist", "ist", "und", "als", "hast", "wenn", "denn",
-  "zur", "zum", "vom", "drin", "etwas", "darum", "warum", "herum", "worum", "vielleicht", "hinein", "herein"]);
-// Stems whose vowel before ch is LONG (the minority; the default is short — ach, Bach, mich).
-const LONG_CH = ["nach", "buch", "such", "sprach", "hoch", "tuch", "fluch", "kuch", "wuch"];
+// Short-vowel function words + long-⟨ch⟩ stems (exception lists from german.jsonc).
+const SHORT_MONO = new Set(MANIFEST.shortMonosyllables);
+const LONG_CH = MANIFEST.longCh;
 
 /** Is the vowel at index i long? V+h, doubled vowel and ie → long; V+double-C / ck / tz / ≥2 C → short;
  *  V+single-C(+vowel|end) → long (open syllable). */
@@ -116,27 +115,11 @@ export function toSegments(word: string): Seg[] {
       continue;
     }
 
-    switch (c) {
-      case "b": push("b", i); break;
-      case "c": push("k", i); break;
-      case "d": push("d", i); break;
-      case "f": push("f", i); break;
-      case "g": push("ɡ", i); break;
-      case "h": if (!isV(w[i - 1] ?? "")) push("h", i); break; // onset h pronounced; after a vowel (sehen, Uhr) silent
-      case "j": push("j", i); break;
-      case "k": push("k", i); break;
-      case "l": push("l", i); break;
-      case "m": push("m", i); break;
-      case "n": push("n", i); break;
-      case "p": push("p", i); break;
-      case "s": push(isV(nx) ? "z" : "s", i); break; // s → z before a vowel (sehen, lesen); s finally / before a consonant
-      case "t": push("t", i); break;
-      case "v": push("f", i); break;
-      case "w": push("v", i); break;
-      case "x": push("k", i); push("s", i); break;
-      case "z": push("t͡s", i); break;
-      default: break;
-    }
+    // Context-DEPENDENT letters handled here; the rest are a data lookup (MANIFEST.consonants).
+    if (c === "h") { if (!isV(w[i - 1] ?? "")) push("h", i); }      // onset h pronounced; silent after a vowel (sehen, Uhr)
+    else if (c === "s") { push(isV(nx) ? "z" : "s", i); }           // s → z before a vowel (sehen, lesen); else s
+    else if (c === "x") { push("k", i); push("s", i); }             // x → ks
+    else { const cp = CONS[c]; if (cp !== undefined) push(cp, i); } // context-free consonant letter
     i++;
   }
 
