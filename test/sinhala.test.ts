@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./sinhala.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord } from "../src/languages/sinhala/sinhala.ts";
 
 describe("Sinhala abugida g2p", () => {
   it("schwa alternation (inherent a ↔ ə)", () => {

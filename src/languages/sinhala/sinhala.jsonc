@@ -26,5 +26,29 @@
   "signs": {
     "virama": { "char": "්" }, "anusvara": { "char": "ఀ" }, "chandrabindu": { "char": "ఀ" },
     "visarga": { "char": "ඃ" }, "nukta": { "char": "఼" }
+  },
+
+  // Anusvara ං is a homorganic nasal set by the FOLLOWING consonant. Each class lists the trigger consonants and
+  // the nasal-coda letter (nasal + virama) that ං is rewritten to; anything else falls to "default" (ම් = m).
+  "anusvara": {
+    "default": "ම්",
+    "classes": [
+      { "triggers": "කඛගඝඞහ", "nasal": "ඞ්", "note": "velar + h → ŋ (ඟ→m is an espeak quirk)" },
+      { "triggers": "චඡජඣඤ", "nasal": "ඤ්", "note": "palatal → ɲ" },
+      { "triggers": "ටඨඩඪණඬ", "nasal": "ණ්", "note": "retroflex → n" }
+    ]
+  },
+
+  // Clause-terminating punctuation → canonical inline pause marks.
+  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+  // AUTHORED cardinal number words (espeak's si number path is broken → no gold). Magnitudes ≥100 use the
+  // analytic multiplier form (දෙක සියය "two hundred"). The words are phonemized by the g2p.
+  "numbers": {
+    "units": ["බින්දුව", "එක", "දෙක", "තුන", "හතර", "පහ", "හය", "හත", "අට", "නවය"],
+    "teens": ["දහය", "එකොළහ", "දොළහ", "දහතුන", "දාහතර", "පහළොව", "දහසය", "දහහත", "දහඅට", "දහනවය"],
+    "tensWord": { "2": "විස්ස", "3": "තිහ", "4": "හතළිහ", "5": "පනහ", "6": "හැට", "7": "හැත්තෑව", "8": "අසූව", "9": "අනූව" },
+    "tensStem": { "2": "විසි", "3": "තිස්", "4": "හතළිස්", "5": "පනස්", "6": "හැට", "7": "හැත්තෑ", "8": "අසූ", "9": "අනූ" },
+    "magnitudes": { "hundred": "සියය", "thousand": "දහස", "lakh": "ලක්ෂය", "million": "මිලියනය" }
   }
 }
