@@ -25,8 +25,10 @@ const TONE_NO_MARK = MANIFEST.tone.noMark;
 export const THAI_TONE_IPA = MANIFEST.tone.ipa;
 
 /** Tonal class of a Thai initial consonant, or undefined if not a consonant. */
-export function thaiConsonantClass(consonant: string): ThaiConsonantClass | undefined {
-  return THAI_CLASS[consonant];
+export function thaiConsonantClass(
+    consonant: string,
+): ThaiConsonantClass | undefined {
+    return THAI_CLASS[consonant];
 }
 
 /**
@@ -38,11 +40,14 @@ export function thaiConsonantClass(consonant: string): ThaiConsonantClass | unde
  * identifies it). Centralising this here means `computeThaiTone` callers can't forget
  * the raise: they ask THIS for the class. Returns undefined if `initial` isn't a consonant.
  */
-export function thaiEffectiveClass(initial: string, silentLeader?: "ห" | "อ"): ThaiConsonantClass | undefined {
-  if (thaiConsonantClass(initial) === undefined) return undefined;
-  if (silentLeader === "ห") return "high"; // ห is high class; it governs the syllable's tone
-  if (silentLeader === "อ") return "mid"; //  อ is mid class (the อย words)
-  return thaiConsonantClass(initial);
+export function thaiEffectiveClass(
+    initial: string,
+    silentLeader?: "ห" | "อ",
+): ThaiConsonantClass | undefined {
+    if (thaiConsonantClass(initial) === undefined) return undefined;
+    if (silentLeader === "ห") return "high"; // ห is high class; it governs the syllable's tone
+    if (silentLeader === "อ") return "mid"; //  อ is mid class (the อย words)
+    return thaiConsonantClass(initial);
 }
 
 /**
@@ -59,13 +64,12 @@ export function thaiEffectiveClass(initial: string, silentLeader?: "ห" | "อ"
  *    `[่้๊๋̄].?[่้๊๋̄]`); this takes one already-resolved mark.
  */
 export function computeThaiTone(
-  consonantClass: ThaiConsonantClass,
-  life: "live" | "dead",
-  length: "long" | "short",
-  mark?: ThaiToneMark,
+    consonantClass: ThaiConsonantClass,
+    life: "live" | "dead",
+    length: "long" | "short",
+    mark?: ThaiToneMark,
 ): ThaiTone {
-  if (mark) return TONE_FROM_MARK[mark][consonantClass];
-  const key = life === "live" ? "live" : `dead-${length}`;
-  return TONE_NO_MARK[key]![consonantClass];
+    if (mark) return TONE_FROM_MARK[mark][consonantClass];
+    const key = life === "live" ? "live" : `dead-${length}`;
+    return TONE_NO_MARK[key]![consonantClass];
 }
-
