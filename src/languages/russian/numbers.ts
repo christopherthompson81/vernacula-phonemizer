@@ -2,13 +2,11 @@
  * Russian number → words (cardinals, nominative). Space-separated words that each read through the stress
  * dictionary + g2p. Covers 0 … <10⁹. Gender/case agreement is simplified to the nominative base forms.
  */
-const ONES = [
-  "ноль", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять",
-  "десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать",
-  "семнадцать", "восемнадцать", "девятнадцать",
-];
-const TENS = ["", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто"];
-const HUNDREDS = ["", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"];
+import { MANIFEST } from "./manifest.ts";
+
+// Number words are authored DATA — consolidated in russian.jsonc; the compositor below is the algorithm.
+const N = MANIFEST.numbers;
+const ONES = N.ones, TENS = N.tens, HUNDREDS = N.hundreds;
 
 /** Plural form selector for Russian quantities (1 → one, 2–4 → few, else → many). */
 function plural(n: number, one: string, few: string, many: string): string {
@@ -36,11 +34,11 @@ export function numberToWords(n: number): string {
   if (n < 1000) return below1000(n);
   const parts: string[] = [];
   const mil = Math.floor(n / 1e6), th = Math.floor((n % 1e6) / 1000), r = n % 1000;
-  if (mil) parts.push(below1000(mil), plural(mil, "миллион", "миллиона", "миллионов"));
+  if (mil) parts.push(below1000(mil), plural(mil, N.million[0]!, N.million[1]!, N.million[2]!));
   if (th) {
     // тысяча is feminine → 1 → одна, 2 → две
-    const thWords = below1000(th).replace(/один$/, "одна").replace(/два$/, "две"); // тысяча is feminine (JS \b fails on Cyrillic)
-    parts.push(thWords, plural(th, "тысяча", "тысячи", "тысяч"));
+    const thWords = below1000(th).replace(/один$/, N.thousandFeminine.one).replace(/два$/, N.thousandFeminine.two); // тысяча is feminine (JS \b fails on Cyrillic)
+    parts.push(thWords, plural(th, N.thousand[0]!, N.thousand[1]!, N.thousand[2]!));
   }
   if (r) parts.push(below1000(r));
   return parts.join(" ");

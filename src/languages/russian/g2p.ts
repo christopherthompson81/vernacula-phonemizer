@@ -6,24 +6,21 @@
  * docs/ru_native_bringup_investigation.md.
  */
 
-// Consonant → [hard, soft] IPA. ж/ш/ц are always hard; ч/щ/й always soft.
-const CONS: Record<string, [string, string]> = {
-  б: ["b", "bʲ"], в: ["v", "vʲ"], г: ["ɡ", "ɡʲ"], д: ["d", "dʲ"], ж: ["ʐ", "ʐ"], з: ["z", "zʲ"],
-  к: ["k", "kʲ"], л: ["ɫ", "lʲ"], м: ["m", "mʲ"], н: ["n", "nʲ"], п: ["p", "pʲ"], р: ["r", "rʲ"],
-  с: ["s", "sʲ"], т: ["t", "tʲ"], ф: ["f", "fʲ"], х: ["x", "xʲ"], ц: ["t͡s", "t͡s"], ч: ["t͡ɕ", "t͡ɕ"],
-  ш: ["ʂ", "ʂ"], щ: ["ɕː", "ɕː"], й: ["j", "j"],
-};
-const ALWAYS_HARD = new Set(["ж", "ш", "ц"]);
-const ALWAYS_SOFT = new Set(["ч", "щ", "й"]);
-const SOFT_VOWEL = new Set(["е", "ё", "и", "ю", "я"]);   // palatalize the preceding consonant
-const VOWELS = new Set(["а", "е", "ё", "и", "о", "у", "ы", "э", "ю", "я"]);
-const IOTATED = new Set(["е", "ё", "ю", "я"]);            // → j+V after a vowel/ъ/ь/word-initial
+import { MANIFEST } from "./manifest.ts";
 
-// Voicing pairs for final devoicing + regressive assimilation.
-const DEVOICE: Record<string, string> = { b: "p", bʲ: "pʲ", v: "f", vʲ: "fʲ", ɡ: "k", ɡʲ: "kʲ", d: "t", dʲ: "tʲ", z: "s", zʲ: "sʲ", ʐ: "ʂ" };
-const VOICE: Record<string, string> = { p: "b", pʲ: "bʲ", f: "v", fʲ: "vʲ", k: "ɡ", kʲ: "ɡʲ", t: "d", tʲ: "dʲ", s: "z", sʲ: "zʲ", ʂ: "ʐ", t͡s: "d͡z", t͡ɕ: "d͡ʑ" };
-const VOICELESS_OBSTR = new Set(["p", "pʲ", "f", "fʲ", "k", "kʲ", "t", "tʲ", "s", "sʲ", "ʂ", "x", "xʲ", "t͡s", "t͡ɕ", "ɕː"]);
-const VOICED_OBSTR = new Set(["b", "bʲ", "v", "vʲ", "ɡ", "ɡʲ", "d", "dʲ", "z", "zʲ", "ʐ"]);
+// All letter→IPA / voicing lookup tables are DATA (russian.jsonc). Consonant → [hard, soft] IPA (ж/ш/ц always
+// hard; ч/щ/й always soft). Voicing pairs drive final devoicing + regressive assimilation.
+const CONS = MANIFEST.consonants;
+const ALWAYS_HARD = new Set(MANIFEST.alwaysHard);
+const ALWAYS_SOFT = new Set(MANIFEST.alwaysSoft);
+const SOFT_VOWEL = new Set(MANIFEST.softVowels); // palatalize the preceding consonant
+const VOWELS = new Set([...MANIFEST.vowelLetters]);
+const IOTATED = new Set(MANIFEST.iotatedVowels); // → j+V after a vowel/ъ/ь/word-initial
+
+const DEVOICE = MANIFEST.devoice;
+const VOICE = MANIFEST.voice;
+const VOICELESS_OBSTR = new Set(MANIFEST.voicelessObstruents);
+const VOICED_OBSTR = new Set(MANIFEST.voicedObstruents);
 
 interface Unit {
   cyr: string;
@@ -31,8 +28,8 @@ interface Unit {
   vowel?: { letter: string; glide: boolean; stressed: boolean; ph: string }; // ph filled at realize
 }
 
-const SOFTEN_TGT = "сзтдн"; // dentals that soften regressively (л excluded — пополнять keeps ɫ)
-const SOFTEN_TRIG = "тд";   // ... before a soft т/д (before soft н is inconsistent: сняться keeps hard с)
+const SOFTEN_TGT = MANIFEST.softenTargets; // dentals that soften regressively (л excluded — пополнять keeps ɫ)
+const SOFTEN_TRIG = MANIFEST.softenTriggers; // ... before a soft т/д (before soft н is inconsistent: сняться keeps hard с)
 
 /** Split a lowercased Cyrillic word into consonant / vowel / sign units, resolving palatalization + iotation. */
 function parse(w: string): Unit[] {
@@ -129,7 +126,7 @@ function reducedVowel(letter: string, softContext: boolean, strong: boolean, pos
 
 // Adverbs in -ого that keep [ɡ] (the genitive -ого/-его → v rule does NOT apply). Their genitive ADJECTIVE
 // forms (многого, дорогого…) are regular genitives → v, so they must NOT be listed here.
-const GEN_KEEP_G = new Set(["много", "немного", "намного", "дорого", "недорого", "строго", "нестрого", "убого", "полого", "отлого"]);
+const GEN_KEEP_G = new Set(MANIFEST.genitiveKeepG);
 
 /** Phonemize a Russian word given the 0-based ordinal of its stressed vowel, and optionally a set of vowel
  *  ordinals whose preceding consonant is HARD (loanword е/и: тест → tɛst, not tʲest — supplied by the lexicon). */

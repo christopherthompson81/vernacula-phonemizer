@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import type { Phonemizer } from "../../registry.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed vowel. Loaded once, lazily.
 let STRESS: Map<string, number> | undefined;
@@ -44,15 +45,11 @@ function hardDict(): Map<string, number[]> {
   return HARD;
 }
 
-const VOWEL_RE = /[аеёиоуыэюя]/gi;
+const VOWEL_RE = new RegExp(`[${MANIFEST.vowelLetters}]`, "gi");
 
-// Closed-class irregulars the rules can't predict: чт→ʂt / чн→ʃn, and genitive -ого/-его → g→v. (The productive
-// adjective-genitive г→v is grammatical, not listed here — a known Run-1 gap.)
-const IRREGULARS: Record<string, string> = {
-  что: "ʂto", чтобы: "ʂtˈobɨ", чтоб: "ʂtop", конечно: "kɐnʲˈeʃnə", скучно: "skˈuʃnə",
-  его: "jɪvˈo", него: "nʲɪvˈo", сегодня: "sʲɪvˈodnʲə", ничего: "nʲɪt͡ɕɪvˈo", чей: "t͡ɕej",
-  солнце: "sˈont͡sə", сердце: "sʲˈert͡sə", сейчас: "sʲɪt͡ɕˈas", здравствуйте: "zdrˈastvʊjtʲe", // silent л/д/в, dropped й
-};
+// Closed-class irregulars the rules can't predict (чт→ʂt / чн→ʃn, genitive -ого/-его → g→v, silent letters) —
+// DATA (russian.jsonc).
+const IRREGULARS = MANIFEST.irregulars;
 
 /** One Russian word → canonical IPA. Stress from the dictionary; ё is inherently stressed; else first vowel. */
 export function phonemizeWord(word: string): string {
@@ -82,14 +79,12 @@ export function phonemizeWord(word: string): string {
 // → -ий — so большое → большой (not the comparative больший). Stress is stem-relative → the lemma ordinal transfers.
 // -ий is a last-resort fallback on HARD endings for velar/hushing stems whose lemma is -ий but whose feminine
 // is spelled -ая (маленький → маленькая), while большое still resolves to большой before reaching -ий.
-const H = ["ый", "ой", "ий"], S = ["ий", "ый"];
-const ADJ_ENDINGS: [string, string[]][] = [
-  ["ыми", H], ["ими", S], ["ого", H], ["его", S], ["ому", H], ["ему", S],
-  ["ая", H], ["яя", S], ["ое", H], ["ее", S], ["ые", H], ["ие", S],
-  ["ым", H], ["им", S], ["ых", H], ["их", S], ["ую", H], ["юю", S],
-  ["ой", H], ["ей", S], ["ом", H], ["ем", S],
-];
-const countVowels = (w: string): number => [...w].filter((c) => "аеёиоуыэюя".includes(c)).length;
+// Adjective-ending → lemma-ending table (DATA: russian.jsonc). Each ending is HARD (lemma -ый/-ой/-ий) or SOFT
+// (lemma -ий/-ый); the shared lemma lists are reconstructed from the manifest's hard/soft groups.
+const ADJ_ENDINGS: [string, string[]][] = MANIFEST.adjectiveStress.endings.map(
+  (e) => [e.end, e.type === "hard" ? MANIFEST.adjectiveStress.hardLemmas : MANIFEST.adjectiveStress.softLemmas],
+);
+const countVowels = (w: string): number => [...w].filter((c) => MANIFEST.vowelLetters.includes(c)).length;
 
 /** Stress ordinal for an OOV inflected adjective/pronoun form, inferred from its masculine lemma (большое →
  *  большой, которые → который). Returns undefined if no lemma is in the dictionary. */
@@ -105,7 +100,7 @@ function adjectiveStress(w: string): number | undefined {
   return undefined;
 }
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 class RussianPhonemizer implements Phonemizer {
@@ -123,7 +118,7 @@ class RussianPhonemizer implements Phonemizer {
       else if (m[2]) {
         const [intPart, frac] = m[2].split(/[.,]/);
         for (const wd of numberToWords(Number(intPart)).split(" ")) emit(phonemizeWord(wd));
-        if (frac !== undefined) { emit(phonemizeWord("целых")); for (const d of frac) for (const wd of numberToWords(Number(d)).split(" ")) emit(phonemizeWord(wd)); }
+        if (frac !== undefined) { emit(phonemizeWord(MANIFEST.numbers.decimalConnector)); for (const d of frac) for (const wd of numberToWords(Number(d)).split(" ")) emit(phonemizeWord(wd)); }
       } else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
     }
     if (pending !== null && out !== "") out += ` ${pending}`;

@@ -1,0 +1,95 @@
+// Native canonical-IPA data manifest for Russian (ru) — standard Moscow Russian, espeak-independent.
+// This file IS the hand-authored context-free DATA: the hard/soft consonant table, the letter class sets, the
+// voicing-pair maps + obstruent sets, the regressive-softening dental classes, the genitive-ɡ adverb list, the
+// closed-class irregulars, the adjective-ending → lemma table, clause punctuation, and the number words. The
+// ALGORITHMS that read it stay in code:
+//   g2p.ts     — the Cyrillic scan (palatalization, iotation, affricate digraphs), the stress-based vowel
+//                reduction (akanye/ikanye) realize pass, voicing assimilation + final devoicing, gemination
+//   russian.ts — stress-dictionary lookup, ё-restoration, adjective-lemma stress inference, tokenizer
+//   numbers.ts — the cardinal compositor (Slavic plural selection + тысяча feminine agreement)
+// Stress is lexical → the sibling stress.tsv (word → stressed-vowel ordinal) and the loanword hard-e.tsv drive
+// the g2p; those append-heavy dictionaries stay as .tsv, which the manifest only references.
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/ru_native_bringup_investigation.md.
+{
+    "language": "ru",
+    "name": "Russian (Standard, Moscow)",
+    "script": "Cyrillic",
+    "provenance": "Authored from Russian orthography + standard Moscow phonology. This file IS the language data — the native Cyrillic G2P engine reads it directly. Stress (lexical, not spelling-derivable) comes from a stress dictionary (stress.tsv); loanword hard-е from hard-e.tsv.",
+
+    "convention": {
+        "palatalization": "hard/soft consonant pairs Cʲ; ж ш ц always hard, ч щ й always soft",
+        "reduction": "akanye/ikanye — unstressed а/о → ɐ (strong) / ə; soft-context → ɪ / ə",
+        "voicing": "regressive assimilation + word-final devoicing over the obstruent sequence",
+        "iotation": "я/е/ё/ю after a vowel/ъ/ь/word-initial → j+V",
+        "stress": "lexical (from stress.tsv); ё is inherently stressed; monosyllables carry no ˈ mark",
+    },
+
+    // The 10 vowel letters (drives vowel detection, the stress-ordinal count, and iotation).
+    "vowelLetters": "аеёиоуыэюя",
+
+    // Consonant letter → [hard, soft] IPA. ж/ш/ц are always hard; ч/щ/й always soft (both slots identical).
+    "consonants": {
+        "б": ["b", "bʲ"], "в": ["v", "vʲ"], "г": ["ɡ", "ɡʲ"], "д": ["d", "dʲ"], "ж": ["ʐ", "ʐ"], "з": ["z", "zʲ"],
+        "к": ["k", "kʲ"], "л": ["ɫ", "lʲ"], "м": ["m", "mʲ"], "н": ["n", "nʲ"], "п": ["p", "pʲ"], "р": ["r", "rʲ"],
+        "с": ["s", "sʲ"], "т": ["t", "tʲ"], "ф": ["f", "fʲ"], "х": ["x", "xʲ"], "ц": ["t͡s", "t͡s"], "ч": ["t͡ɕ", "t͡ɕ"],
+        "ш": ["ʂ", "ʂ"], "щ": ["ɕː", "ɕː"], "й": ["j", "j"],
+    },
+    "alwaysHard": ["ж", "ш", "ц"],
+    "alwaysSoft": ["ч", "щ", "й"],
+    "softVowels": ["е", "ё", "и", "ю", "я"], // palatalize the preceding consonant
+    "iotatedVowels": ["е", "ё", "ю", "я"], // → j+V after a vowel/ъ/ь/word-initial
+
+    // Voicing pairs (final devoicing + regressive assimilation) and the obstruent-class membership sets.
+    "devoice": { "b": "p", "bʲ": "pʲ", "v": "f", "vʲ": "fʲ", "ɡ": "k", "ɡʲ": "kʲ", "d": "t", "dʲ": "tʲ", "z": "s", "zʲ": "sʲ", "ʐ": "ʂ" },
+    "voice": { "p": "b", "pʲ": "bʲ", "f": "v", "fʲ": "vʲ", "k": "ɡ", "kʲ": "ɡʲ", "t": "d", "tʲ": "dʲ", "s": "z", "sʲ": "zʲ", "ʂ": "ʐ", "t͡s": "d͡z", "t͡ɕ": "d͡ʑ" },
+    "voicelessObstruents": ["p", "pʲ", "f", "fʲ", "k", "kʲ", "t", "tʲ", "s", "sʲ", "ʂ", "x", "xʲ", "t͡s", "t͡ɕ", "ɕː"],
+    "voicedObstruents": ["b", "bʲ", "v", "vʲ", "ɡ", "ɡʲ", "d", "dʲ", "z", "zʲ", "ʐ"],
+
+    // Regressive palatalization: dentals that soften (л excluded) before a following soft trigger.
+    "softenTargets": "сзтдн",
+    "softenTriggers": "тд",
+
+    // Adverbs in -ого that KEEP [ɡ] (the genitive -ого/-его → v rule does not apply to them).
+    "genitiveKeepG": ["много", "немного", "намного", "дорого", "недорого", "строго", "нестрого", "убого", "полого", "отлого"],
+
+    // Closed-class irregulars the rules can't predict (чт→ʂt, чн→ʃn, genitive -ого→v, silent letters).
+    "irregulars": {
+        "что": "ʂto", "чтобы": "ʂtˈobɨ", "чтоб": "ʂtop", "конечно": "kɐnʲˈeʃnə", "скучно": "skˈuʃnə",
+        "его": "jɪvˈo", "него": "nʲɪvˈo", "сегодня": "sʲɪvˈodnʲə", "ничего": "nʲɪt͡ɕɪvˈo", "чей": "t͡ɕej",
+        "солнце": "sˈont͡sə", "сердце": "sʲˈert͡sə", "сейчас": "sʲɪt͡ɕˈas", "здравствуйте": "zdrˈastvʊjtʲe",
+    },
+
+    // OOV inflected adjective/pronoun stress: strip a case ending, reconstruct the masculine lemma, transfer its
+    // stress. Each ending is HARD (-ое/-ая/-ые… → lemma -ый/-ой/-ий) or SOFT (-ее/-яя/-ие… → -ий/-ый). Longest first.
+    "adjectiveStress": {
+        "hardLemmas": ["ый", "ой", "ий"],
+        "softLemmas": ["ий", "ый"],
+        "endings": [
+            { "end": "ыми", "type": "hard" }, { "end": "ими", "type": "soft" }, { "end": "ого", "type": "hard" }, { "end": "его", "type": "soft" },
+            { "end": "ому", "type": "hard" }, { "end": "ему", "type": "soft" }, { "end": "ая", "type": "hard" }, { "end": "яя", "type": "soft" },
+            { "end": "ое", "type": "hard" }, { "end": "ее", "type": "soft" }, { "end": "ые", "type": "hard" }, { "end": "ие", "type": "soft" },
+            { "end": "ым", "type": "hard" }, { "end": "им", "type": "soft" }, { "end": "ых", "type": "hard" }, { "end": "их", "type": "soft" },
+            { "end": "ую", "type": "hard" }, { "end": "юю", "type": "soft" }, { "end": "ой", "type": "hard" }, { "end": "ей", "type": "soft" },
+            { "end": "ом", "type": "hard" }, { "end": "ем", "type": "soft" },
+        ],
+    },
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+    // Cardinal number words (nominative; Slavic plural selection + тысяча feminine agreement in numbers.ts).
+    "numbers": {
+        "ones": [
+            "ноль", "один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять",
+            "десять", "одиннадцать", "двенадцать", "тринадцать", "четырнадцать", "пятнадцать", "шестнадцать",
+            "семнадцать", "восемнадцать", "девятнадцать",
+        ],
+        "tens": ["", "", "двадцать", "тридцать", "сорок", "пятьдесят", "шестьдесят", "семьдесят", "восемьдесят", "девяносто"],
+        "hundreds": ["", "сто", "двести", "триста", "четыреста", "пятьсот", "шестьсот", "семьсот", "восемьсот", "девятьсот"],
+        "million": ["миллион", "миллиона", "миллионов"], // one / few / many
+        "thousand": ["тысяча", "тысячи", "тысяч"], // one / few / many (feminine)
+        "thousandFeminine": { "one": "одна", "two": "две" }, // один→одна, два→две before тысяча
+        "decimalConnector": "целых", // 3,14 → три целых…
+    },
+}
