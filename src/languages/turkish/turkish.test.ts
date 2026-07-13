@@ -22,9 +22,19 @@ describe("Turkish g2p (segmental)", () => {
     for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
   });
 
-  it("progressive -Iyor pre-stressing suffix", () => {
-    expect(phonemizeWord("geliyor")).toBe("ɟelˈijoɾ");
+  it("pre-accenting suffixes → stress before the suffix", () => {
+    expect(phonemizeWord("geliyor")).toBe("ɟelˈijoɾ");    // -Iyor progressive
     expect(phonemizeWord("istiyorum")).toBe("istˈijoɾum");
+    expect(phonemizeWord("giderken")).toBe("ɟidˈeɾcen");  // -ken
+    expect(phonemizeWord("benimle")).toBe("benˈimle");    // -lA instrumental
+    expect(phonemizeWord("kaybetme")).toBe("kajbˈetme");  // -mA negation/verbal-noun
+    expect(phonemizeWord("güzeldir")).toBe("ɟyzˈeldiɾ");  // -DIr copula
+    expect(phonemizeWord("evdeyim")).toBe("evdˈejim");    // predicative person ending
+  });
+
+  it("no false positives: plain final-stress words stay final", () => {
+    expect(phonemizeWord("kitap")).toBe("citˈap");
+    expect(phonemizeWord("araba")).toBe("aɾabˈa");
   });
 
   it("numbers", () => {
