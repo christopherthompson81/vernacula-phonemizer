@@ -3,35 +3,19 @@
  * (Turkish default) with a lexicon (stress.tsv, mostly place names / loanwords) for the exceptions. text()
  * tokenizes words / numbers / punctuation. See docs/tr_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments, trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress exceptions: word → 1-based stressed syllable (default is the final syllable).
 let STRESS: Map<string, number> | undefined;
 function stressDict(): Map<string, number> {
-    if (STRESS === undefined) {
-        STRESS = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "stress.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    STRESS.set(line.slice(0, tab), Number(line.slice(tab + 1)));
-            }
-        } catch {
-            /* absent → pure final-syllable stress */
-        }
-    }
+    if (STRESS === undefined)
+        STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number, {
+            optional: true,
+        });
     return STRESS;
 }
 

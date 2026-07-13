@@ -15,3 +15,13 @@ export function loadManifest<T>(metaUrl: string, filename: string): T {
     const dir = dirname(fileURLToPath(metaUrl));
     return parseJsonc<T>(readFileSync(join(dir, filename), "utf8"));
 }
+
+/**
+ * Load a plain-JSON file beside the calling module — like loadManifest but with a direct JSON.parse and no
+ * JSONC comment-stripping. Use for large generated models (e.g. a multi-MB g2p model) where the character-by-
+ * character JSONC scan would be wasted work.
+ */
+export function loadJson<T>(metaUrl: string, filename: string): T {
+    const dir = dirname(fileURLToPath(metaUrl));
+    return JSON.parse(readFileSync(join(dir, filename), "utf8")) as T;
+}

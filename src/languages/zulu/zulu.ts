@@ -5,37 +5,21 @@
  * H/L/F/R code per vowel nucleus, placed after the vowel and its length); out-of-lexicon words are left untoned.
  * See docs/zu_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 const TONE_CHAO = MANIFEST.toneChao;
 
 // Tone lexicon: word → per-vowel tone codes (H/L/F/R). Out-of-lexicon words are left untoned.
 let TONE: Map<string, string> | undefined;
 function toneLexicon(): Map<string, string> {
-    if (TONE === undefined) {
-        TONE = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "tone.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    TONE.set(line.slice(0, tab), line.slice(tab + 1).trim());
-            }
-        } catch {
-            /* absent → all untoned */
-        }
-    }
+    if (TONE === undefined)
+        TONE = loadTsvMap(import.meta.url, "tone.tsv", (v) => v.trim(), {
+            optional: true,
+        });
     return TONE;
 }
 

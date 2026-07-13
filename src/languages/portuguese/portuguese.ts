@@ -3,14 +3,11 @@
  * stress pass → the EP vowel-REDUCTION pass (unstressed a→ɐ, e→ɨ, o→u) → sibilant voicing. text() tokenizes
  * words / numbers / punctuation. No lexicon (yet). See docs/pt_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexical CORRECTION table (Approach A): the engine gets reduction/stress/glides right on its own; the lexicon
 // only patches the two genuinely-lexical axes it cannot predict — the STRESSED mid-vowel quality (open ɛ/ɔ vs
@@ -22,34 +19,29 @@ export interface Corr {
     initE?: string;
 }
 let LEXICON: Map<string, Corr> | undefined;
-function loadInto(map: Map<string, Corr>, file: string): void {
-    let text = "";
-    try {
-        text = readFileSync(
-            join(dirname(fileURLToPath(import.meta.url)), file),
-            "utf8",
-        );
-    } catch {
-        return;
+/** Parse a correction code cell (e.g. "ɛ|x:s") into a Corr. */
+function parseCorr(cell: string): Corr {
+    const corr: Corr = {};
+    for (const code of cell.split("|")) {
+        if (code === "ɛ" || code === "ɔ") corr.open = code;
+        else if (code.startsWith("x:")) corr.x = code.slice(2);
+        else if (code.startsWith("e:")) corr.initE = code.slice(2); // word-initial e is e/ɛ (not the i default)
     }
-    for (const line of text.split(/\r?\n/)) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab < 0) continue;
-        const corr: Corr = {};
-        for (const code of line.slice(tab + 1).split("|")) {
-            if (code === "ɛ" || code === "ɔ") corr.open = code;
-            else if (code.startsWith("x:")) corr.x = code.slice(2);
-            else if (code.startsWith("e:")) corr.initE = code.slice(2); // word-initial e is e/ɛ (not the i default)
-        }
-        map.set(line.slice(0, tab), corr);
-    }
+    return corr;
 }
 function lexicon(): Map<string, Corr> {
     if (LEXICON === undefined) {
-        LEXICON = new Map();
-        loadInto(LEXICON, "lexicon.tsv"); // wikipron-generated (absent → pure rule engine)
-        loadInto(LEXICON, "lexicon-manual.tsv"); // hand-curated supplement, overrides the generated table
+        // wikipron-generated table, then the hand-curated supplement OVERRIDES it (loaded second).
+        LEXICON = loadTsvMap(import.meta.url, "lexicon.tsv", parseCorr, {
+            optional: true,
+        });
+        for (const [k, v] of loadTsvMap(
+            import.meta.url,
+            "lexicon-manual.tsv",
+            parseCorr,
+            { optional: true },
+        ))
+            LEXICON.set(k, v);
     }
     return LEXICON;
 }

@@ -4,60 +4,29 @@
  * rule g2p (g2p.ts). Words not in the dictionary fall back to a default (first-vowel) stress. text()
  * tokenizes words / numbers / punctuation. See docs/ru_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed vowel. Loaded once, lazily.
 let STRESS: Map<string, number> | undefined;
 function stressDict(): Map<string, number> {
-    if (STRESS === undefined) {
-        STRESS = new Map();
-        const path = join(
-            dirname(fileURLToPath(import.meta.url)),
-            "stress.tsv",
-        );
-        for (const line of readFileSync(path, "utf8").split("\n")) {
-            if (line === "" || line.startsWith("#")) continue;
-            const tab = line.indexOf("\t");
-            if (tab > 0)
-                STRESS.set(line.slice(0, tab), Number(line.slice(tab + 1)));
-        }
-    }
+    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number);
     return STRESS;
 }
 
 // Loanword hard-consonant-before-е/и lexicon: word → vowel ordinals whose preceding C is hard (тест → tɛst).
 let HARD: Map<string, number[]> | undefined;
 function hardDict(): Map<string, number[]> {
-    if (HARD === undefined) {
-        HARD = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "hard-e.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    HARD.set(
-                        line.slice(0, tab),
-                        line
-                            .slice(tab + 1)
-                            .split(",")
-                            .map(Number),
-                    );
-            }
-        } catch {
-            /* absent → no loanword corrections */
-        }
-    }
+    if (HARD === undefined)
+        HARD = loadTsvMap(
+            import.meta.url,
+            "hard-e.tsv",
+            (v) => v.split(",").map(Number),
+            { optional: true },
+        );
     return HARD;
 }
 

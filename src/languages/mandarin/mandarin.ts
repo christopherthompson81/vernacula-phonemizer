@@ -4,16 +4,13 @@
  * phrase dicts → polyphone-aware pinyin), Phase 3 numbers + normalization. The data (syllable→IPA table,
  * tone system, sandhi) lives beside this file; this module wires it into the Phonemizer interface.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 const HAN = /\p{Script=Han}/u;
 const LATIN = /[A-Za-z]/;
@@ -157,35 +154,14 @@ class MandarinPhonemizer implements Phonemizer {
 
 /** Load the Mandarin data (beside this file) and build the phonemizer. `foreign` handles embedded Latin. */
 export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
-    const dir = dirname(fileURLToPath(import.meta.url));
-    const read = (f: string): string => readFileSync(join(dir, f), "utf8");
-
-    const syllableIpa = new Map<string, string>();
-    for (const line of read("syllable-ipa.tsv").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab > 0) syllableIpa.set(line.slice(0, tab), line.slice(tab + 1));
-    }
-
-    const chars = new Map<string, string[]>();
-    for (const line of read("chars.tsv").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab > 0)
-            chars.set(line.slice(0, tab), line.slice(tab + 1).split(","));
-    }
-    const phrases = new Map<string, string>();
-    let maxPhrase = 2;
-    for (const line of read("phrases.tsv").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab > 0) {
-            const key = line.slice(0, tab);
-            phrases.set(key, line.slice(tab + 1));
-            const len = Array.from(key).length;
-            if (len > maxPhrase) maxPhrase = len;
-        }
-    }
+    const syllableIpa = loadTsvMap(import.meta.url, "syllable-ipa.tsv");
+    const chars = loadTsvMap(import.meta.url, "chars.tsv", (v) => v.split(","));
+    const phrases = loadTsvMap(import.meta.url, "phrases.tsv");
+    // Longest phrase key (code points) — the scan bound; ≥2 so a single-char run always has room.
+    const maxPhrase = Math.max(
+        2,
+        ...[...phrases.keys()].map((k) => Array.from(k).length),
+    );
 
     const st = MANIFEST.sandhi.thirdThird;
     const tables: MandarinTables = {

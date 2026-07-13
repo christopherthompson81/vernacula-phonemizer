@@ -6,11 +6,8 @@
  * Tone is NOT written in Boko — it is a lexical FACT overlaid from a Wiktionary-derived lexicon (tone.tsv);
  * out-of-lexicon words are left untoned. Stress is penultimate. See docs/ha_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Longest-match orthography→IPA rules + tone-code→Chao map — authored DATA in hausa.jsonc.
 const RULES = MANIFEST.rules;
@@ -19,23 +16,10 @@ const TONE_CHAO = MANIFEST.toneChao;
 // Tone lexicon: word → per-nucleus tone codes (H/L/F/R). All-Low words are omitted; out-of-lexicon → untoned.
 let TONE: Map<string, string> | undefined;
 function toneLexicon(): Map<string, string> {
-    if (TONE === undefined) {
-        TONE = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "tone.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    TONE.set(line.slice(0, tab), line.slice(tab + 1).trim());
-            }
-        } catch {
-            /* absent → all untoned */
-        }
-    }
+    if (TONE === undefined)
+        TONE = loadTsvMap(import.meta.url, "tone.tsv", (v) => v.trim(), {
+            optional: true,
+        });
     return TONE;
 }
 
