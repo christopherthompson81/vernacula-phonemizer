@@ -6,21 +6,18 @@
  * See docs/ar_native_bringup_investigation.md for the convention.
  */
 
-// Consonant letter → IPA. Emphatics carry ˤ; pharyngeals ʕ/ħ; all hamza seats → ʔ.
-const CONS: Record<string, string> = {
-  "ب": "b", "ت": "t", "ث": "θ", "ج": "d͡ʒ", "ح": "ħ", "خ": "x", "د": "d", "ذ": "ð", "ر": "r", "ز": "z",
-  "س": "s", "ش": "ʃ", "ص": "sˤ", "ض": "dˤ", "ط": "tˤ", "ظ": "ðˤ", "ع": "ʕ", "غ": "ɣ", "ف": "f", "ق": "q",
-  "ك": "k", "ل": "l", "م": "m", "ن": "n", "ه": "h", "و": "w", "ي": "j",
-  "ء": "ʔ", "أ": "ʔ", "إ": "ʔ", "ؤ": "ʔ", "ئ": "ʔ",
-};
+import { MANIFEST } from "./manifest.ts";
+
+// Authored DATA (consonant map, sun letters, proclitics) is consolidated in arabic.jsonc.
+const CONS = MANIFEST.consonants;
+const SUN = new Set(MANIFEST.sunLetters);
+const PROCLITIC = MANIFEST.proclitics;
+// Structural Arabic SCRIPT characters the parser switches on (the harakat marks and special letters) — these
+// are the script, not authored data, so they stay in code.
 const FATHA = "َ", KASRA = "ِ", DAMMA = "ُ", SUKUN = "ْ", SHADDA = "ّ";
 const TANWIN_A = "ً", TANWIN_I = "ٍ", TANWIN_U = "ٌ", DAGGER = "ٰ";
 const ALIF = "ا", ALIF_MAQSURA = "ى", ALIF_MADDA = "آ", TAA_MARBUTA = "ة", WAW = "و", YA = "ي";
 const HARAKAT = new Set([FATHA, KASRA, DAMMA, SUKUN, SHADDA, TANWIN_A, TANWIN_I, TANWIN_U, DAGGER]);
-// Sun letters: the article's ل assimilates into them (gemination); moon letters keep the l.
-const SUN = new Set(["ت", "ث", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ل", "ن"]);
-// Proclitics that fuse with a following article (وَال بِال…): the article's hamzat-wasl alif then elides.
-const PROCLITIC: Record<string, string> = { "و": "w", "ف": "f", "ب": "b", "ك": "k", "ل": "l" };
 
 export interface Seg {
   ph: string;        // IPA phoneme(s)

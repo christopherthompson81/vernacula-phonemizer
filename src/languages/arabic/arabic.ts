@@ -7,6 +7,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
 import { createArabicDiacritizer, type ArabicDiacritizer } from "./diacritizer.ts";
+import { MANIFEST } from "./manifest.ts";
 
 const isLongNucleus = (ph: string): boolean => /ː/.test(ph) || ph === "aj" || ph === "aw" || /[aiu]n$/.test(ph);
 
@@ -59,10 +60,8 @@ export function phonemizeWord(word: string): string {
   return out;
 }
 
-// Clause / phrase punctuation (Arabic + ASCII) → canonical inline pause marks.
-const CLAUSE_MARK: Record<string, string> = {
-  "۔": ".", ".": ".", "!": "!", "؟": "?", "?": "?", "،": ",", ",": ",", "؛": ",", ";": ",", ":": ",", "…": ",",
-};
+// Clause / phrase punctuation (Arabic + ASCII) → canonical inline pause marks (authored data in arabic.jsonc).
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Arabic letters + harakat) / number (Arabic-Indic or ASCII digits) / punctuation token.
 const TOKEN = /([ء-يٰٱً-ْـ]+)|([0-9٠-٩]+)|([۔.!؟?،,؛;:…])/gu;
 /** Arabic-Indic digits ٠..٩ → ASCII. */
