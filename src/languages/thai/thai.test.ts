@@ -27,4 +27,9 @@ describe("Thai g2p (ported syllabifier + native IPA render)", () => {
     expect(phonemizeWord("เกิด")).toBe("kˈɤː˨˩t");  // เ–ิ+coda → ɤː long (rule)
     expect(phonemizeWord("ณ")).toBe("nˈa˦˥ʔ");      // standalone letter → glottal
   });
+
+  it("word segmentation: a compound token splits into words (space-separated)", () => {
+    expect(phonemizeWord("ก็คือ")).toBe("kˈɔː˨˩ kʰˈɯː˧");   // ก็ + คือ
+    expect(phonemizeWord("ไม่ว่า")).toBe("mˈa˥˩j wˈaː˥˩");  // ไม่ + ว่า
+  });
 });

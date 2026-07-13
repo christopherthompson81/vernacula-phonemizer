@@ -46,3 +46,10 @@ the nucleus (with length before tone), diphthongs as one nucleus, and stress ˈ-
 self-match to the gold. Wired as a lookup before the rule engine. Also: fixed the g2p secondary-stress rule
 (even nuclei ≥2, not last), re-enabled เ–ิ→ɤː long (exceptions now dictionaried), and a final-short-open glottal
 (ณ→naʔ). 73.2%→89.3%. Next: port segmentThai + seg-words for the ~8% compound-split residual.
+## Run 3 — word segmentation (seg-words DAG) — 2026-07-13
+Ported segmentThai + segmentByDag + thaiTccBoundaries (→ segment.ts) and the seg-words set (64,808 words: ICU
+thaidict + PyThaiNLP + curated extra). phonemizeWord now SEGMENTS a token into words via the DAG (TCC-boundary-
+constrained maximal matching) and phonemizes each, joined by a space — so a compound corpus token espeak split
+(ก็คือ → ก็ คือ) now matches. 89.3%→97.1% exact (98.4% on monosyllables). Thai reaches parity-ish by reusing
+all three authored subsystems (syllabifier, dictionary, segmentation) + a native IPA renderer. Residual ~3% is
+minor segmental (rare vowel/length edge cases, a few multi-word dict compounds).
