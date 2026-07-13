@@ -13,6 +13,7 @@ describe("referee corroboration (segmental backbone vs independent sources)", ()
     zu: 0.99, // epitran zul-Latn — clicks/implosives/ejectives/laterals corroborated (measured 100%)
     si: 0.90, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
     kk: 0.83, // epitran kaz-Cyrl — measured 86.2%; residual is largely epitran's own ө/ү merger + palatalization
+    cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
   };
   for (const [lang, floor] of Object.entries(floors)) {
     it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of an independent referee`, () => {

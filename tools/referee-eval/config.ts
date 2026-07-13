@@ -58,6 +58,15 @@ export const CONFIG: Record<string, RefLang> = {
       [/wa$/gu, "w", "final-ව offglide: the schwa after ව→w is dialectally optional"],
     ],
   },
+  cs: {
+    referees: [{ file: "cs.epitran-ces-Latn.tsv", source: "epitran ces-Latn (programmatic)" }],
+    folds: [
+      [/ɛ/gu, "e", "Czech short e is phonetically [ɛ] (our convention); epitran writes the phonemic e"],
+      [/[ᶷ]/gu, "u", "diphthong offglide notation (oᶷ) vs epitran ou"],
+      [/r̩/gu, "r", "syllabic r notation"],
+      [/l̩/gu, "l", "syllabic l notation"],
+    ],
+  },
   kk: {
     referees: [{ file: "kk.epitran-kaz-Cyrl.tsv", source: "epitran kaz-Cyrl (programmatic)" }],
     folds: [

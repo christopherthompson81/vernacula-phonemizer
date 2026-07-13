@@ -14,9 +14,10 @@ import { fileURLToPath } from "node:url";
 import { phonemizeWord as zu } from "../../src/languages/zulu/zulu.ts";
 import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
+import { phonemizeWord as cs } from "../../src/languages/czech/czech.ts";
 import { BACKBONE, CONFIG, type RefLang } from "./config.ts";
 
-const PHON: Record<string, (w: string) => string> = { zu, si, kk };
+const PHON: Record<string, (w: string) => string> = { zu, si, kk, cs };
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */
