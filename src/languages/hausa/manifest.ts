@@ -11,20 +11,22 @@ import { fileURLToPath } from "node:url";
 import { parseJsonc } from "../../core/jsonc.ts";
 
 export interface HausaManifest {
-  rules: [string, string, boolean][];
-  toneChao: Record<string, string>;
-  clausePunctuation: Record<string, string>;
-  numbers: {
-    ones: string[];
-    tens: string[];
-    teensConnector: string;
-    connector: string;
-    hundred: string;
-    thousand: string;
-  };
+    rules: [string, string, boolean][];
+    toneChao: Record<string, string>;
+    clausePunctuation: Record<string, string>;
+    numbers: {
+        ones: string[];
+        tens: string[];
+        teensConnector: string;
+        connector: string;
+        hundred: string;
+        thousand: string;
+    };
 }
 
 const dir = dirname(fileURLToPath(import.meta.url));
 
 /** The consolidated hand-authored Hausa data tables (see hausa.jsonc). */
-export const MANIFEST = parseJsonc<HausaManifest>(readFileSync(join(dir, "hausa.jsonc"), "utf8"));
+export const MANIFEST = parseJsonc<HausaManifest>(
+    readFileSync(join(dir, "hausa.jsonc"), "utf8"),
+);
