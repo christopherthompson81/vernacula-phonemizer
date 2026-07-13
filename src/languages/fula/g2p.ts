@@ -11,32 +11,40 @@ import { MANIFEST } from "./manifest.ts";
 // Orthography → IPA, longest-match. `nuc` = a vowel nucleus (for stress).
 const RULES = MANIFEST.rules;
 
-interface Seg { ph: string; nuc: boolean }
+interface Seg {
+    ph: string;
+    nuc: boolean;
+}
 
 /** Scan Fula orthography into IPA segments (longest-match). */
 function toSegments(word: string): Seg[] {
-  const w = word.toLowerCase();
-  const segs: Seg[] = [];
-  let i = 0;
-  outer: while (i < w.length) {
-    for (const [orth, ipa, nuc] of RULES) {
-      if (w.startsWith(orth, i)) { segs.push({ ph: ipa, nuc }); i += orth.length; continue outer; }
+    const w = word.toLowerCase();
+    const segs: Seg[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        for (const [orth, ipa, nuc] of RULES) {
+            if (w.startsWith(orth, i)) {
+                segs.push({ ph: ipa, nuc });
+                i += orth.length;
+                continue outer;
+            }
+        }
+        i++; // unknown char
     }
-    i++; // unknown char
-  }
-  return segs;
+    return segs;
 }
 
 /** One Fula word → canonical IPA with penultimate stress. */
 export function phonemizeWord(word: string): string {
-  const segs = toSegments(word);
-  const nucIdx = segs.map((s, i) => (s.nuc ? i : -1)).filter((i) => i >= 0);
-  if (nucIdx.length === 0) return segs.map((s) => s.ph).join("");
-  const stressIdx = nucIdx.length >= 2 ? nucIdx[nucIdx.length - 2]! : nucIdx[0]!; // penultimate nucleus
-  let out = "";
-  for (let i = 0; i < segs.length; i++) {
-    if (i === stressIdx) out += "ˈ";
-    out += segs[i]!.ph;
-  }
-  return out;
+    const segs = toSegments(word);
+    const nucIdx = segs.map((s, i) => (s.nuc ? i : -1)).filter((i) => i >= 0);
+    if (nucIdx.length === 0) return segs.map((s) => s.ph).join("");
+    const stressIdx =
+        nucIdx.length >= 2 ? nucIdx[nucIdx.length - 2]! : nucIdx[0]!; // penultimate nucleus
+    let out = "";
+    for (let i = 0; i < segs.length; i++) {
+        if (i === stressIdx) out += "ˈ";
+        out += segs[i]!.ph;
+    }
+    return out;
 }

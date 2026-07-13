@@ -10,11 +10,13 @@ import { fileURLToPath } from "node:url";
 import { parseJsonc } from "../../core/jsonc.ts";
 
 export interface FulaManifest {
-  rules: [string, string, boolean][];
-  clausePunctuation: Record<string, string>;
+    rules: [string, string, boolean][];
+    clausePunctuation: Record<string, string>;
 }
 
 const dir = dirname(fileURLToPath(import.meta.url));
 
 /** The consolidated hand-authored Fula data tables (see fula.jsonc). */
-export const MANIFEST = parseJsonc<FulaManifest>(readFileSync(join(dir, "fula.jsonc"), "utf8"));
+export const MANIFEST = parseJsonc<FulaManifest>(
+    readFileSync(join(dir, "fula.jsonc"), "utf8"),
+);
