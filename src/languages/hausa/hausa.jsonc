@@ -1,0 +1,122 @@
+// Native canonical-IPA MANIFEST for Hausa (ha, Kano standard, Boko orthography) — AUTHORED beyond-espeak
+// (espeak ships no Hausa). A self-describing description of the language's DATA, matching english.jsonc /
+// arabic.jsonc: the longest-match orthography→IPA rule table, the tone-code→Chao map, clause punctuation, and
+// the cardinal number words. The ALGORITHM (the longest-match scan + penultimate stress + tone overlay) stays
+// in code; the per-word tone lexicon is a separate file (tone.tsv).
+//
+// LOAD-BEARING blocks (read via manifest.ts): "rules", "toneChao", "clausePunctuation", "numbers".
+// "convention" / "provenance" are self-describing documentation.
+{
+    "language": "ha",
+    "name": "Hausa (Kano standard)",
+    "provenance": "Cleanroom, rule-based g2p — Boko orthography is shallow and near-1:1. Authored beyond-espeak (espeak ships nothing); validated vs epitran hau-Latn + kaikki. Fills census gaps: implosives ɓ ɗ, ejectives kʼ t͡sʼ, labialization kʷ ɡʷ, glottalized ʔʲ, palatals c ɟ, ɸ. Tone is a Wiktionary-derived lexical FACT (tone.tsv).",
+
+    // The canonical-IPA conventions the values below are written in (documentation).
+    "convention": {
+        "implosives": "ɓ ɗ",
+        "ejectives": "ƙ→kʼ, ts→t͡sʼ, ƙw→kʷʼ",
+        "labialization": "kw→kʷ, gw→ɡʷ",
+        "glottalized": "'y / ƴ → ʔʲ; ' → ʔ",
+        "palatals": "ky→c, gy→ɟ; f→ɸ",
+        "tone": "NOT written — overlaid per-nucleus from tone.tsv (H→˥ L→˩ F→˥˩ R→˩˥); out-of-lexicon untoned",
+        "stress": "penultimate (a diphthong / long vowel counts as one nucleus)",
+    },
+
+    // Orthography → IPA rules, matched in ORDER (longest-match: trigraphs/digraphs precede the bare letter). Each
+    // entry is [orthography, ipa, isNucleus] — isNucleus marks a vowel (for penultimate-stress placement).
+    "rules": [
+        ["'y", "ʔʲ", false],
+        ["ƙw", "kʷʼ", false],
+        ["aa", "aː", true],
+        ["ee", "eː", true],
+        ["ii", "iː", true],
+        ["oo", "oː", true],
+        ["uu", "uː", true],
+        ["ai", "aⁱ", true],
+        ["au", "aᵘ", true],
+        ["sh", "ʃ", false],
+        ["ts", "t͡sʼ", false],
+        ["kw", "kʷ", false],
+        ["gw", "ɡʷ", false],
+        ["ky", "c", false],
+        ["gy", "ɟ", false],
+        ["a", "a", true],
+        ["e", "e", true],
+        ["i", "i", true],
+        ["o", "o", true],
+        ["u", "u", true],
+        ["b", "b", false],
+        ["c", "t͡ʃ", false],
+        ["d", "d", false],
+        ["f", "ɸ", false],
+        ["g", "ɡ", false],
+        ["h", "h", false],
+        ["j", "d͡ʒ", false],
+        ["k", "k", false],
+        ["l", "l", false],
+        ["m", "m", false],
+        ["n", "n", false],
+        ["p", "p", false],
+        ["q", "k", false],
+        ["r", "r", false],
+        ["s", "s", false],
+        ["t", "t", false],
+        ["v", "v", false],
+        ["w", "w", false],
+        ["x", "ks", false],
+        ["y", "j", false],
+        ["z", "z", false],
+        ["ɓ", "ɓ", false],
+        ["ɗ", "ɗ", false],
+        ["ƙ", "kʼ", false],
+        ["ƴ", "ʔʲ", false],
+        ["'", "ʔ", false],
+    ],
+
+    // Tone code → Chao contour letters (applied after each vowel nucleus, per tone.tsv).
+    "toneChao": { "H": "˥", "L": "˩", "F": "˥˩", "R": "˩˥" },
+
+    // Clause / phrase punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words. Units/tens lexicalised; teens = goma sha X; hundreds (ɗari) / thousands (dubu)
+    // compound with the connector "da". Composition logic is in numbers.ts.
+    "numbers": {
+        "ones": [
+            "sifili",
+            "ɗaya",
+            "biyu",
+            "uku",
+            "huɗu",
+            "biyar",
+            "shida",
+            "bakwai",
+            "takwas",
+            "tara",
+        ],
+        "tens": [
+            "",
+            "goma",
+            "ashirin",
+            "talatin",
+            "arba'in",
+            "hamsin",
+            "sittin",
+            "saba'in",
+            "tamanin",
+            "casa'in",
+        ],
+        "teensConnector": "sha",
+        "connector": "da",
+        "hundred": "ɗari",
+        "thousand": "dubu",
+    },
+}

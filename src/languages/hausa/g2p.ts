@@ -10,79 +10,81 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Orthography → IPA, longest-match (multi-char keys tried first). `nuc` = the unit is a vowel nucleus.
-const RULES: [string, string, boolean][] = [
-  // trigraphs / special-letter digraphs
-  ["'y", "ʔʲ", false], ["ƙw", "kʷʼ", false],
-  // long vowels + diphthongs
-  ["aa", "aː", true], ["ee", "eː", true], ["ii", "iː", true], ["oo", "oː", true], ["uu", "uː", true],
-  ["ai", "aⁱ", true], ["au", "aᵘ", true],
-  // consonant digraphs
-  ["sh", "ʃ", false], ["ts", "t͡sʼ", false], ["kw", "kʷ", false], ["gw", "ɡʷ", false], ["ky", "c", false], ["gy", "ɟ", false],
-  // single vowels
-  ["a", "a", true], ["e", "e", true], ["i", "i", true], ["o", "o", true], ["u", "u", true],
-  // single consonants
-  ["b", "b", false], ["c", "t͡ʃ", false], ["d", "d", false], ["f", "ɸ", false], ["g", "ɡ", false], ["h", "h", false],
-  ["j", "d͡ʒ", false], ["k", "k", false], ["l", "l", false], ["m", "m", false], ["n", "n", false], ["p", "p", false],
-  ["q", "k", false], ["r", "r", false], ["s", "s", false], ["t", "t", false], ["v", "v", false], ["w", "w", false],
-  ["x", "ks", false], ["y", "j", false], ["z", "z", false],
-  ["ɓ", "ɓ", false], ["ɗ", "ɗ", false], ["ƙ", "kʼ", false], ["ƴ", "ʔʲ", false], ["'", "ʔ", false],
-];
-const TONE_CHAO: Record<string, string> = { H: "˥", L: "˩", F: "˥˩", R: "˩˥" };
+import { MANIFEST } from "./manifest.ts";
+
+// Longest-match orthography→IPA rules + tone-code→Chao map — authored DATA in hausa.jsonc.
+const RULES = MANIFEST.rules;
+const TONE_CHAO = MANIFEST.toneChao;
 
 // Tone lexicon: word → per-nucleus tone codes (H/L/F/R). All-Low words are omitted; out-of-lexicon → untoned.
 let TONE: Map<string, string> | undefined;
 function toneLexicon(): Map<string, string> {
-  if (TONE === undefined) {
-    TONE = new Map();
-    try {
-      const path = join(dirname(fileURLToPath(import.meta.url)), "tone.tsv");
-      for (const line of readFileSync(path, "utf8").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab > 0) TONE.set(line.slice(0, tab), line.slice(tab + 1).trim());
-      }
-    } catch { /* absent → all untoned */ }
-  }
-  return TONE;
+    if (TONE === undefined) {
+        TONE = new Map();
+        try {
+            const path = join(
+                dirname(fileURLToPath(import.meta.url)),
+                "tone.tsv",
+            );
+            for (const line of readFileSync(path, "utf8").split("\n")) {
+                if (line === "" || line.startsWith("#")) continue;
+                const tab = line.indexOf("\t");
+                if (tab > 0)
+                    TONE.set(line.slice(0, tab), line.slice(tab + 1).trim());
+            }
+        } catch {
+            /* absent → all untoned */
+        }
+    }
+    return TONE;
 }
 
-interface Seg { ph: string; nuc: boolean }
+interface Seg {
+    ph: string;
+    nuc: boolean;
+}
 
 /** Scan Boko orthography into IPA segments (longest-match); n → ŋ before a velar. */
 function toSegments(word: string): Seg[] {
-  const w = word.toLowerCase();
-  const segs: Seg[] = [];
-  let i = 0;
-  outer: while (i < w.length) {
-    for (const [orth, ipa, nuc] of RULES) {
-      if (w.startsWith(orth, i)) {
-        // n → ŋ before a velar (k / g / ƙ), incl. their digraphs.
-        if (orth === "n" && /[kgƙ]/.test(w[i + 1] ?? "")) segs.push({ ph: "ŋ", nuc: false });
-        else segs.push({ ph: ipa, nuc });
-        i += orth.length;
-        continue outer;
-      }
+    const w = word.toLowerCase();
+    const segs: Seg[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        for (const [orth, ipa, nuc] of RULES) {
+            if (w.startsWith(orth, i)) {
+                // n → ŋ before a velar (k / g / ƙ), incl. their digraphs.
+                if (orth === "n" && /[kgƙ]/.test(w[i + 1] ?? ""))
+                    segs.push({ ph: "ŋ", nuc: false });
+                else segs.push({ ph: ipa, nuc });
+                i += orth.length;
+                continue outer;
+            }
+        }
+        i++; // unknown char (skip)
     }
-    i++; // unknown char (skip)
-  }
-  return segs;
+    return segs;
 }
 
 /** One Hausa word → canonical IPA: segments + penultimate stress + lexical tone overlay. */
 export function phonemizeWord(word: string): string {
-  const segs = toSegments(word);
-  const nucIdx = segs.map((s, i) => (s.nuc ? i : -1)).filter((i) => i >= 0);
-  if (nucIdx.length === 0) return segs.map((s) => s.ph).join("");
-  // Stress: the penultimate nucleus (the only one if monosyllabic).
-  const stressIdx = nucIdx.length >= 2 ? nucIdx[nucIdx.length - 2]! : nucIdx[0]!;
-  // Tone: per-nucleus codes from the lexicon (in nucleus order); untoned if absent.
-  const codes = toneLexicon().get(word) ?? toneLexicon().get(word.toLowerCase()) ?? "";
-  let out = "", n = 0;
-  for (let i = 0; i < segs.length; i++) {
-    if (i === stressIdx) out += "ˈ";
-    out += segs[i]!.ph;
-    if (segs[i]!.nuc) { out += TONE_CHAO[codes[n] ?? ""] ?? ""; n++; }
-  }
-  return out;
+    const segs = toSegments(word);
+    const nucIdx = segs.map((s, i) => (s.nuc ? i : -1)).filter((i) => i >= 0);
+    if (nucIdx.length === 0) return segs.map((s) => s.ph).join("");
+    // Stress: the penultimate nucleus (the only one if monosyllabic).
+    const stressIdx =
+        nucIdx.length >= 2 ? nucIdx[nucIdx.length - 2]! : nucIdx[0]!;
+    // Tone: per-nucleus codes from the lexicon (in nucleus order); untoned if absent.
+    const codes =
+        toneLexicon().get(word) ?? toneLexicon().get(word.toLowerCase()) ?? "";
+    let out = "",
+        n = 0;
+    for (let i = 0; i < segs.length; i++) {
+        if (i === stressIdx) out += "ˈ";
+        out += segs[i]!.ph;
+        if (segs[i]!.nuc) {
+            out += TONE_CHAO[codes[n] ?? ""] ?? "";
+            n++;
+        }
+    }
+    return out;
 }
