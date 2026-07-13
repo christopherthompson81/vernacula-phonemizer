@@ -1,0 +1,89 @@
+// Native canonical-IPA MANIFEST for French (fr) — standard / Parisian, broad IPA. A self-describing description
+// of the language's DATA, matching english.jsonc / arabic.jsonc: the vowel-letter inventory, the oral/nasal
+// vowel-multigraph tables, the yod (mouillé) groups, the sounded-final-consonant set, clause punctuation, the
+// liaison + h-aspiré lists, and the cardinal number words. The ALGORITHMS (the left-to-right scan, open/closed
+// syllable eu/o rules, schwa deletion, liaison re-syllabification, vigesimal number composition) stay in code
+// and read these tables; only the closed, hand-curatable data lives here.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "vowelLetters", "vowelPhonemes", "vowelGroups", "nasalGroups",
+// "finalSounded", "yodDouble", "yodFinal", "clausePunctuation", "liaison", "hAspire", "numbers".
+// "convention" / "provenance" are self-describing documentation.
+{
+  "language": "fr",
+  "name": "French (standard / Parisian)",
+  "provenance": "Cleanroom, rule-based g2p (French orthography is deep but rule-governed in the reading direction) + an exception lexicon (lexicon.tsv) + a vigesimal number compositor. espeak-independent. WHICH words are h-aspiré / take liaison, and the number words, are language facts.",
+
+  // The canonical-IPA conventions the values below are written in (documentation).
+  "convention": {
+    "vowels":  "ø/œ (peu/peur), nasals ɛ̃ ɑ̃ ɔ̃ œ̃, schwa ə",
+    "glides":  "ɥ (huit), j (yod / mouillé -ill-), w (oi→wa)",
+    "rhotic":  "uvular ʁ; palatal nasal ɲ (gn)",
+    "openClosed": "eu→ø open / œ closed; o→o open / ɔ closed (Lexique syllable-closure convention)",
+    "liaison": "obligatory liaison consonant re-syllabifies as the next word's onset; h-aspiré blocks it",
+    "numbers": "vigesimal 70/80/90 (soixante-dix, quatre-vingts); words space-separated so each reads through the g2p"
+  },
+
+  // Vowel LETTERS (orthographic) and vowel PHONEME starts (IPA — for schwa-deletion consonant counting / nuclei).
+  "vowelLetters": "aeiouyàâäéèêëîïôöùûüœæ",
+  "vowelPhonemes": "aeiouyɛɔøœəɑ",
+
+  // Oral vowel multigraphs → IPA, matched in ORDER (a longest-match scan; nasal groups are separate). [ortho, ipa].
+  "vowelGroups": [
+    ["eau", "o"], ["eaux", "o"], ["ou", "u"], ["au", "o"], ["où", "u"], ["oû", "u"], ["oi", "wa"], ["oy", "waj"],
+    ["ei", "ɛ"], ["ay", "ɛj"], ["ey", "ɛj"], ["é", "e"], ["è", "ɛ"], ["ê", "ɛ"], ["ë", "ɛ"], ["â", "a"], ["à", "a"],
+    ["ù", "y"], ["û", "y"], ["î", "i"], ["ï", "i"], ["ô", "o"], ["ö", "o"], ["ü", "y"]
+  ],
+
+  // Nasal vowel groups (vowel + n/m) → IPA. Applied when NOT followed by a vowel and NOT doubled (année/bonne = oral).
+  "nasalGroups": [
+    ["ain", "ɛ̃"], ["aim", "ɛ̃"], ["ein", "ɛ̃"], ["eim", "ɛ̃"], ["oin", "wɛ̃"], ["ien", "jɛ̃"], ["ion", "jɔ̃"],
+    ["yn", "ɛ̃"], ["ym", "ɛ̃"], ["an", "ɑ̃"], ["am", "ɑ̃"], ["en", "ɑ̃"], ["em", "ɑ̃"], ["in", "ɛ̃"], ["im", "ɛ̃"],
+    ["on", "ɔ̃"], ["om", "ɔ̃"], ["un", "œ̃"], ["um", "œ̃"]
+  ],
+
+  // Final consonants normally PRONOUNCED (c r f l q k); others are silent word-finally (-er/-ez/-et are special-cased).
+  "finalSounded": ["c", "r", "f", "l", "q", "k"],
+
+  // vowel + ill/il → yod (mouillé glide): double-l anywhere, single-l only word-finally. Matched longest-first.
+  "yodDouble": [["ouill", "uj"], ["euill", "œj"], ["aill", "aj"], ["eill", "ɛj"], ["ueill", "œj"], ["uill", "ɥij"]],
+  "yodFinal": [["ouil", "uj"], ["euil", "œj"], ["ail", "aj"], ["eil", "ɛj"], ["ueil", "œj"]],
+
+  // Clause / phrase punctuation → canonical inline pause marks.
+  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+  // Obligatory liaison: a normally-silent final consonant of a function word / number, pronounced as the onset
+  // of a following vowel-initial word. z (plural determiners/pronouns, -x/-s numbers), n (nasal monosyllables),
+  // t (est/sont/tout/petit…; grand/quand d→t). Attached to the next word (re-syllabified in code).
+  "liaison": {
+    "les": "z", "des": "z", "ces": "z", "mes": "z", "tes": "z", "ses": "z", "nos": "z", "vos": "z", "leurs": "z",
+    "aux": "z", "ils": "z", "elles": "z", "nous": "z", "vous": "z", "dans": "z", "chez": "z", "sans": "z",
+    "très": "z", "plus": "z", "moins": "z", "deux": "z", "trois": "z", "six": "z", "dix": "z",
+    "un": "n", "mon": "n", "ton": "n", "son": "n", "en": "n", "on": "n", "aucun": "n", "bien": "n", "rien": "n", "commun": "n",
+    "est": "t", "sont": "t", "ont": "t", "font": "t", "vont": "t", "tout": "t", "quand": "t", "grand": "t",
+    "petit": "t", "dont": "t", "cet": "t", "c'est": "t", "c’est": "t", "n'est": "t", "n’est": "t"
+  },
+
+  // h aspiré (+ vowel-initial words that block liaison, e.g. huit/onze/y-): looks vowel-initial but forbids
+  // liaison — les héros → le eʁo, not le zeʁo.
+  "hAspire": [
+    "hache", "haie", "haillon", "haine", "haïr", "hall", "halle", "halte", "hamac", "hameau", "hamburger",
+    "hamster", "hanche", "handicap", "handicapé", "hangar", "hanter", "harceler", "hardi", "hareng", "hargne",
+    "haricot", "harpe", "hasard", "hâte", "hausse", "haut", "hautain", "hauteur", "havre", "hennir", "hérault",
+    "hérisson", "hérissé", "hernie", "héron", "héros", "hêtre", "heurter", "hibou", "hiboux", "hiérarchie",
+    "homard", "hongrie", "hongrois", "honte", "hoquet", "horde", "hors", "hotte", "houle", "hublot", "huer",
+    "huit", "huitième", "hurler", "hutte", "hollande", "hollandais", "onze", "onzième", "yaourt", "yacht",
+    "yoga", "oui", "ouistiti", "uhlan"
+  ],
+
+  // Cardinal number words (vigesimal 70/80/90). Composition logic is in numbers.ts.
+  "numbers": {
+    "small": ["zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze",
+      "douze", "treize", "quatorze", "quinze", "seize", "dix sept", "dix huit", "dix neuf"],
+    "tens": ["", "", "vingt", "trente", "quarante", "cinquante"],
+    "magnitudes": {
+      "sixty": "soixante", "eighty": "quatre vingt", "hundred": "cent",
+      "thousand": "mille", "million": "million", "millions": "millions"
+    },
+    "decimalSeparator": "virgule"
+  }
+}
