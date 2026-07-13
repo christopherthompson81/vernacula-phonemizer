@@ -11,25 +11,34 @@ import { fileURLToPath } from "node:url";
 import { parseJsonc } from "../../core/jsonc.ts";
 
 export interface FrenchManifest {
-  vowelLetters: string;
-  vowelPhonemes: string;
-  vowelGroups: [string, string][];
-  nasalGroups: [string, string][];
-  finalSounded: string[];
-  yodDouble: [string, string][];
-  yodFinal: [string, string][];
-  clausePunctuation: Record<string, string>;
-  liaison: Record<string, string>;
-  hAspire: string[];
-  numbers: {
-    small: string[];
-    tens: string[];
-    magnitudes: { sixty: string; eighty: string; hundred: string; thousand: string; million: string; millions: string };
-    decimalSeparator: string;
-  };
+    vowelLetters: string;
+    vowelPhonemes: string;
+    vowelGroups: [string, string][];
+    nasalGroups: [string, string][];
+    finalSounded: string[];
+    yodDouble: [string, string][];
+    yodFinal: [string, string][];
+    clausePunctuation: Record<string, string>;
+    liaison: Record<string, string>;
+    hAspire: string[];
+    numbers: {
+        small: string[];
+        tens: string[];
+        magnitudes: {
+            sixty: string;
+            eighty: string;
+            hundred: string;
+            thousand: string;
+            million: string;
+            millions: string;
+        };
+        decimalSeparator: string;
+    };
 }
 
 const dir = dirname(fileURLToPath(import.meta.url));
 
 /** The consolidated hand-authored French data tables (see french.jsonc). */
-export const MANIFEST = parseJsonc<FrenchManifest>(readFileSync(join(dir, "french.jsonc"), "utf8"));
+export const MANIFEST = parseJsonc<FrenchManifest>(
+    readFileSync(join(dir, "french.jsonc"), "utf8"),
+);

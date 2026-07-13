@@ -35,7 +35,10 @@ function below1000(n: number): string {
     if (n < 100) return below100(n);
     const h = Math.floor(n / 100),
         r = n % 100;
-    const hundred = h === 1 ? MAG.hundred : `${SMALL[h]} ${MAG.hundred}${r === 0 ? "s" : ""}`; // deux cents, deux cent un
+    const hundred =
+        h === 1
+            ? MAG.hundred
+            : `${SMALL[h]} ${MAG.hundred}${r === 0 ? "s" : ""}`; // deux cents, deux cent un
     return r ? `${hundred} ${below100(r)}` : hundred;
 }
 
@@ -50,11 +53,13 @@ export function numberToWords(n: number): string {
     if (n < 1e6) {
         const th = Math.floor(n / 1000),
             r = n % 1000;
-        const thousand = th === 1 ? MAG.thousand : `${below1000(th)} ${MAG.thousand}`;
+        const thousand =
+            th === 1 ? MAG.thousand : `${below1000(th)} ${MAG.thousand}`;
         return r ? `${thousand} ${below1000(r)}` : thousand;
     }
     const m = Math.floor(n / 1e6),
         r = n % 1e6;
-    const million = m === 1 ? `un ${MAG.million}` : `${below1000(m)} ${MAG.millions}`;
+    const million =
+        m === 1 ? `un ${MAG.million}` : `${below1000(m)} ${MAG.millions}`;
     return r ? `${million} ${numberToWords(r)}` : million;
 }
