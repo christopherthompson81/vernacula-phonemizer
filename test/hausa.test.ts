@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { phonemizeWord } from "./hausa.ts";
+import { phonemizeWord } from "../src/languages/hausa/hausa.ts";
 
 describe("Hausa g2p (authored, Boko orthography)", () => {
   it("segmental: implosives, ejectives, palatals, ɸ, n-assimilation", () => {

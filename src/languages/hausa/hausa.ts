@@ -7,10 +7,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { phonemizeWord } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 export { phonemizeWord };
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Hausa Boko letters incl. ɓ ɗ ƙ ƴ (and their capitals) + apostrophe (a letter: 'yan, 'a'a).
 const TOKEN = /([a-zɓɗƙƴA-ZƁƊƘƳ'’]+)|(\d+)|([.!?…,;:])/gu;
 

@@ -10,25 +10,11 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Orthography → IPA, longest-match (multi-char keys tried first). `nuc` = the unit is a vowel nucleus.
-const RULES: [string, string, boolean][] = [
-  // trigraphs / special-letter digraphs
-  ["'y", "ʔʲ", false], ["ƙw", "kʷʼ", false],
-  // long vowels + diphthongs
-  ["aa", "aː", true], ["ee", "eː", true], ["ii", "iː", true], ["oo", "oː", true], ["uu", "uː", true],
-  ["ai", "aⁱ", true], ["au", "aᵘ", true],
-  // consonant digraphs
-  ["sh", "ʃ", false], ["ts", "t͡sʼ", false], ["kw", "kʷ", false], ["gw", "ɡʷ", false], ["ky", "c", false], ["gy", "ɟ", false],
-  // single vowels
-  ["a", "a", true], ["e", "e", true], ["i", "i", true], ["o", "o", true], ["u", "u", true],
-  // single consonants
-  ["b", "b", false], ["c", "t͡ʃ", false], ["d", "d", false], ["f", "ɸ", false], ["g", "ɡ", false], ["h", "h", false],
-  ["j", "d͡ʒ", false], ["k", "k", false], ["l", "l", false], ["m", "m", false], ["n", "n", false], ["p", "p", false],
-  ["q", "k", false], ["r", "r", false], ["s", "s", false], ["t", "t", false], ["v", "v", false], ["w", "w", false],
-  ["x", "ks", false], ["y", "j", false], ["z", "z", false],
-  ["ɓ", "ɓ", false], ["ɗ", "ɗ", false], ["ƙ", "kʼ", false], ["ƴ", "ʔʲ", false], ["'", "ʔ", false],
-];
-const TONE_CHAO: Record<string, string> = { H: "˥", L: "˩", F: "˥˩", R: "˩˥" };
+import { MANIFEST } from "./manifest.ts";
+
+// Longest-match orthography→IPA rules + tone-code→Chao map — authored DATA in hausa.jsonc.
+const RULES = MANIFEST.rules;
+const TONE_CHAO = MANIFEST.toneChao;
 
 // Tone lexicon: word → per-nucleus tone codes (H/L/F/R). All-Low words are omitted; out-of-lexicon → untoned.
 let TONE: Map<string, string> | undefined;
