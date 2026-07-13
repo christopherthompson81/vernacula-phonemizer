@@ -25,12 +25,24 @@ SHORT open syllable takes a glottal `ʔ` — but only word-finally (minor/unstre
 `ˈ` on the first syllable; `ˌ` on the last when there are ≥3.
 
 ## Validation
-vs the espeak-ng-portable authored gold (20k words): **exact 73.2%; 93% on monosyllables**. The residual is
-lexical irregulars that espeak handles via its Thai DICTIONARY: length irregulars (ได้→daːj, น้ำ→naːm), the
-silent-ร Sanskrit set (สร้าง→saːŋ, จริง→t͡ɕiŋ), a few cluster-under-leading-vowel cases (ใคร→kʰraj), and
-เ–ิ/เ–coda length variation. Porting that dictionary is the documented next step.
+vs the espeak-ng-portable authored gold (20k words): **exact 89.3%** (73.2% rules-only → 89.3% with the
+dictionary; 95% on monosyllables). The lexical irregulars are closed by porting espeak's Thai dictionary
+(dictionary.tsv, 1,789 entries, converted from espeak tone digits 1-5 → Chao contours placed after the nucleus,
+98.8% self-match to the gold): length irregulars (ได้→daːj, น้ำ→naːm), silent-ร Sanskrit (สร้าง→saːŋ,
+จริง→t͡ɕiŋ), cluster-under-leading-vowel (ใคร→kʰraj), and the short เ–ิ exceptions (เงิน) — which let the RULE
+treat เ–ิ as long (ɤː) since the exceptions are dictionaried. Secondary stress fixed to even nuclei (≥2). The
+remaining residual is ~8% compound words espeak splits into separate words (needs the seg-words segmentation,
+also reusable from espeak-ng-portable) + ~3% minor segmental.
 
 ## Run 1 — reuse the authored syllabifier — 2026-07-13
 Ported scriptSegmentation.ts (Thai portions) + thaiPron.ts; wrote a native IPA renderer over the scan output.
 24% (from-scratch) → 73.2% (with the ported syllabifier). 111 tests pass; residual is dictionary-class lexical
 irregulars.
+
+## Run 2 — Thai dictionary (Chao notation) — 2026-07-13
+Ported+converted espeak's data/th/dictionary.jsonl → dictionary.tsv (1,789 entries). The espeak phoneme tokens
+use tone DIGITS 1-5 before the vowel; the converter maps them to Chao contours (˩˩˦/˨˩/˧/˦˥/˥˩) placed AFTER
+the nucleus (with length before tone), diphthongs as one nucleus, and stress ˈ-first + ˌ-even-nuclei. 98.8%
+self-match to the gold. Wired as a lookup before the rule engine. Also: fixed the g2p secondary-stress rule
+(even nuclei ≥2, not last), re-enabled เ–ิ→ɤː long (exceptions now dictionaried), and a final-short-open glottal
+(ณ→naʔ). 73.2%→89.3%. Next: port segmentThai + seg-words for the ~8% compound-split residual.

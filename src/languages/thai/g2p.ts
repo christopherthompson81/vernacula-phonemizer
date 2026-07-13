@@ -5,8 +5,30 @@
  * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly (instead of the espeak L2S path).
  * Contributes ɤ. See docs/th_native_bringup_investigation.md.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { reorderThaiLeadingVowels, thaiLexicalFixup, thaiPrep, thaiScanSyllables, type ThaiSyllableScan } from "./syllabifier.ts";
 import { THAI_TONE_IPA } from "./thaiTone.ts";
+
+// Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
+// derive — word → IPA (Chao). Ported from espeak-ng-portable's Thai dictionary; consulted BEFORE the rule engine.
+let DICT: Map<string, string> | undefined;
+function dict(): Map<string, string> {
+  if (DICT === undefined) {
+    DICT = new Map();
+    try {
+      const path = join(dirname(fileURLToPath(import.meta.url)), "dictionary.tsv");
+      for (const line of readFileSync(path, "utf8").split("\n")) {
+        if (line === "" || line.startsWith("#")) continue;
+        const tab = line.indexOf("\t");
+        if (tab > 0) DICT.set(line.slice(0, tab), line.slice(tab + 1));
+      }
+    } catch { /* absent → rules only */ }
+  }
+  return DICT;
+}
 
 // Onset consonant grapheme → IPA. อ = glottal ʔ; a silent leader is dropped before this map is consulted.
 const INIT: Record<string, string> = {
@@ -33,7 +55,7 @@ const VQUAL: Record<string, string> = {
   "ไ": "a", "ใ": "a", "ไย": "a", "ำ": "a",
 };
 const NO_LENGTH = new Set(["ua", "ia", "ɯa"]); // diphthongs — never take ː
-const FORCE_LONG = new Set(["เอ"]);            // เ–อ is ɤː (long) despite the short-sign heuristic
+const FORCE_LONG = new Set(["เอ", "เิ"]);      // เ–อ / เ–ิ are ɤː (long); the short exceptions (เงิน) are in the dict
 const RAISABLE = new Set([..."งญณนมยรลฬว"]);
 
 /** Onset IPA for a syllable, dropping a silent ห/อ leader and joining any cluster. */
@@ -61,21 +83,25 @@ function renderSyllable(s: ThaiSyllableScan, first: boolean, last: boolean): str
   }
   const coda = s.codaG ? (CODA[s.codaG] ?? "") : glide;
   const tone = s.tone ? THAI_TONE_IPA[s.tone] : "";
-  // A written SHORT open syllable takes a glottal ʔ coda (จะ→t͡ɕaʔ); inherent-vowel syllables do not.
-  const finalCoda = coda || (last && vShort && s.codaG === "" ? "ʔ" : "");
+  // A word-FINAL short open syllable takes a glottal ʔ — a written short vowel (จะ→t͡ɕaʔ) or a standalone
+  // single-consonant letter with its inherent vowel (ณ→naʔ). A non-final minor short syllable does not.
+  const openLast = last && !coda;
+  const finalCoda = coda || (openLast && (vShort || s.nucUnit.kind === "C") ? "ʔ" : "");
   return onset + nucleus + tone + finalCoda;
 }
 
-/** One Thai word → canonical IPA (ported syllabifier + native IPA render). */
+/** One Thai word → canonical IPA (dictionary of irregulars, else the ported syllabifier + native render). */
 export function phonemizeWord(word: string): string {
+  const lex = dict().get(word);
+  if (lex !== undefined) return lex;
   const reordered = reorderThaiLeadingVowels(thaiLexicalFixup(word));
   const prep = thaiPrep(reordered);
   if (!prep) return "";
   const syls = thaiScanSyllables(prep.units, prep.fates, prep.unitMark, prep.shortMark);
-  // Stress: ˈ before the first syllable's nucleus; ˌ before the last syllable's when there are ≥3.
+  // Stress: ˈ on the first syllable; ˌ on even nucleus indices ≥2 (syllables 3, 5, 7…).
   return syls.map((s, i) => {
     const syl = renderSyllable(s, i === 0, i === syls.length - 1);
-    const mark = i === 0 ? "ˈ" : (i === syls.length - 1 && syls.length >= 3 ? "ˌ" : "");
+    const mark = i === 0 ? "ˈ" : (i >= 2 && i % 2 === 0 ? "ˌ" : "");
     if (mark === "") return syl;
     const m = syl.match(/[aeiouɛɔɤɯ]/u);
     return m && m.index !== undefined ? syl.slice(0, m.index) + mark + syl.slice(m.index) : mark + syl;
