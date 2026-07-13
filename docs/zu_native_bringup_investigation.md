@@ -33,12 +33,20 @@ vs the 49,621-word authored gold (text path): **exact 99.40%, tone-only 0**. The
 abbreviations / acronyms / code identifiers (NG, BBC, png, COinS, latNS) that espeak letter-spells — genuine
 corpus noise, not Zulu words.
 
-## Numbers — Zulu text composed through the g2p (untoned)
+## Numbers — Zulu text composed through the g2p (toned like any word)
 Zulu numerals are agglutinative Bantu: units 1–5 have distinct standalone (ku-), connective (na-) and
 multiplier (ama-) stems, and 6–9 are isi- nouns; tens/hundreds/thousands are noun classes with an ama-/izi-
 multiplier (amashumi amabili nanye = "tens two and-one" = 21). `numbers.ts` composes the Zulu TEXT and the
-phonemizer runs each word through the g2p (verified to reproduce espeak's number IPA), forcing them UNtoned
-(espeak's number path applies no tone even though ishumi/ikhulu are real toned words).
+phonemizer runs each word through the g2p, applying the tone lexicon exactly like any other word.
+
+**Tone on numbers (linguistic-correctness note).** Zulu number words are ordinary nouns and carry tone; the
+kaikki/Wiktionary referee (independent of espeak) lists ishumi→FFL, ikhulu→FFL, isithupha→LHLL,
+inkulungwane→HLHLH, isigidi→LHLL. espeak's *number compositor path* emits them untoned, but that is a
+deficiency of espeak, not a fact about Zulu — and the project target is canonical linguistic correctness, not
+espeak parity (numbers aren't in the corpus gold, so there is no regression-guard conflict). So numbers are
+toned wherever the lexicon has data (6, 7, 10, 100, 1000, 1000000); the ku-/na-/ama- combining stems have no
+tone entry and stay untoned, uniformly with how every out-of-lexicon word is handled. This is a deliberate,
+referee-backed divergence from espeak.
 
 ## Run 1 — port authored zu + penult/tone + numbers — 2026-07-13
 Built g2p.ts / zulu.ts / numbers.ts + copied tone.tsv; registered zu. Iteration on the 50k gold: 85.5% (first

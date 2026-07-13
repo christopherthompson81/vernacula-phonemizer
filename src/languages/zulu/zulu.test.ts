@@ -31,11 +31,11 @@ describe("Zulu (isiZulu) g2p — authored beyond-espeak", () => {
     expect(phonemizeWord("labantu")).toBe("laɓˈaːntʼu");   // out-of-lexicon → untoned, penult stress/length only
   });
 
-  it("cardinal numbers (untoned, agglutinative composition)", () => {
-    expect(phonemize("1", "zu")).toBe("kʼˈuːɲɛ");
-    expect(phonemize("10", "zu")).toBe("iʃˈuːmi");
-    expect(phonemize("21", "zu")).toBe("amaʃˈuːmi amaɓˈiːli nˈaːɲɛ");
-    expect(phonemize("100", "zu")).toBe("ikʰˈuːlu");
+  it("cardinal numbers (agglutinative; toned like any word where the lexicon has data)", () => {
+    expect(phonemize("1", "zu")).toBe("kʼˈuːɲɛ");             // ku- form not in lexicon → untoned
+    expect(phonemize("10", "zu")).toBe("i˥˩ʃˈuː˥˩mi˩");        // ishumi is a toned noun (kaikki: FFL)
+    expect(phonemize("100", "zu")).toBe("i˥˩kʰˈuː˥˩lu˩");      // ikhulu (kaikki: FFL)
+    expect(phonemize("21", "zu")).toBe("amaʃˈuːmi amaɓˈiːli nˈaːɲɛ"); // combining forms have no tone data
   });
 
   it("compound splits on internal capitals; tone threads across if the full word is listed", () => {
