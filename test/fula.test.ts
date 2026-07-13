@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { phonemizeWord } from "./fula.ts";
+import { phonemizeWord } from "../src/languages/fula/fula.ts";
 
 describe("Fula g2p (authored)", () => {
   it("implosives, prenasalized digraphs, geminates, length", () => {

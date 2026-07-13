@@ -1,0 +1,42 @@
+// Native canonical-IPA MANIFEST for Fula (ff, Fulfulde) — AUTHORED beyond-espeak (espeak ships no Fula). A
+// self-describing description of the language's DATA, matching english.jsonc / arabic.jsonc: the longest-match
+// orthography→IPA rule table and the clause punctuation. The ALGORITHM (the longest-match scan + penultimate
+// stress) stays in code and reads these tables.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "rules", "clausePunctuation". "convention" / "provenance" are
+// self-describing documentation.
+{
+  "language": "ff",
+  "name": "Fula (Fulfulde)",
+  "provenance": "Cleanroom, rule-based g2p — Fulfulde Boko/Latin orthography is shallow and near-1:1. Authored beyond-espeak (espeak ships nothing); validated vs the r12a/Wikipedia references + languagesandnumbers. Sole census provider of the implosives ʄ (ƴ) / ɠ.",
+
+  // The canonical-IPA conventions the values below are written in (documentation).
+  "convention": {
+    "implosives":    "ɓ ɗ ɠ, and ƴ → ʄ (palatal implosive)",
+    "prenasalised":  "mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ; the doubled nasal nng→ŋːɡ (velar)",
+    "gemination":    "a doubled consonant → length mark Cː",
+    "longVowels":    "doubled vowels aa/ee/ii/oo/uu → long aː eː iː oː uː",
+    "stress":        "penultimate (a diphthong / long vowel counts as one nucleus)"
+  },
+
+  // Orthography → IPA rules, matched in ORDER (longest-match: multi-char keys precede the bare letter). Each
+  // entry is [orthography, ipa, isNucleus] — isNucleus marks a vowel (for penultimate-stress placement).
+  "rules": [
+    ["nng", "ŋːɡ", false],
+    ["mb", "ᵐb", false], ["nd", "ⁿd", false], ["nj", "ⁿd͡ʒ", false], ["ng", "ᵑɡ", false], ["ny", "ɲ", false],
+    ["aa", "aː", true], ["ee", "eː", true], ["ii", "iː", true], ["oo", "oː", true], ["uu", "uː", true],
+    ["bb", "bː", false], ["pp", "pː", false], ["tt", "tː", false], ["dd", "dː", false], ["cc", "t͡ʃː", false],
+    ["jj", "d͡ʒː", false], ["kk", "kː", false], ["gg", "ɡː", false], ["ff", "fː", false], ["ss", "sː", false],
+    ["mm", "mː", false], ["nn", "nː", false], ["rr", "ɾː", false], ["ll", "lː", false], ["ww", "wː", false],
+    ["yy", "jː", false], ["ɓɓ", "ɓː", false], ["ɗɗ", "ɗː", false], ["ƴƴ", "ʄː", false],
+    ["a", "a", true], ["e", "e", true], ["i", "i", true], ["o", "o", true], ["u", "u", true],
+    ["b", "b", false], ["p", "p", false], ["t", "t", false], ["d", "d", false], ["c", "t͡ʃ", false],
+    ["j", "d͡ʒ", false], ["k", "k", false], ["g", "ɡ", false], ["f", "f", false], ["s", "s", false],
+    ["h", "h", false], ["m", "m", false], ["n", "n", false], ["ŋ", "ŋ", false], ["ɲ", "ɲ", false],
+    ["ñ", "ɲ", false], ["r", "ɾ", false], ["l", "l", false], ["w", "w", false], ["y", "j", false],
+    ["ɓ", "ɓ", false], ["ɗ", "ɗ", false], ["ɠ", "ɠ", false], ["ƴ", "ʄ", false], ["q", "ʔ", false]
+  ],
+
+  // Clause / phrase punctuation → canonical inline pause marks.
+  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," }
+}
