@@ -7,33 +7,40 @@ import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in tamil.jsonc; the Indian-grouping compositor is the algorithm.
 const N = MANIFEST.numbers;
-const ONES = N.units, TENS = N.tens, M = N.magnitudes;
+const ONES = N.units,
+    TENS = N.tens,
+    M = N.magnitudes;
 
 function below100(n: number): string[] {
-  if (n < 10) return n === 0 ? [] : [ONES[n]!];
-  const t = Math.floor(n / 10), u = n % 10;
-  return u === 0 ? [TENS[t]!] : [TENS[t]!, ONES[u]!];
+    if (n < 10) return n === 0 ? [] : [ONES[n]!];
+    const t = Math.floor(n / 10),
+        u = n % 10;
+    return u === 0 ? [TENS[t]!] : [TENS[t]!, ONES[u]!];
 }
 function below1000(n: number): string[] {
-  const h = Math.floor(n / 100), r = n % 100;
-  const parts: string[] = [];
-  if (h === 1) parts.push(M.hundred);
-  else if (h > 1) parts.push(ONES[h]!, M.hundred);
-  parts.push(...below100(r));
-  return parts;
+    const h = Math.floor(n / 100),
+        r = n % 100;
+    const parts: string[] = [];
+    if (h === 1) parts.push(M.hundred);
+    else if (h > 1) parts.push(ONES[h]!, M.hundred);
+    parts.push(...below100(r));
+    return parts;
 }
 
 /** Non-negative integer → Tamil words. */
 export function numberToWords(n: number): string {
-  if (!Number.isFinite(n) || n < 0) return "";
-  if (n === 0) return ONES[0]!;
-  const parts: string[] = [];
-  const crore = Math.floor(n / 10000000); n %= 10000000;
-  const lakh = Math.floor(n / 100000); n %= 100000;
-  const thou = Math.floor(n / 1000); n %= 1000;
-  if (crore > 0) parts.push(...below1000(crore), M.crore);
-  if (lakh > 0) parts.push(...below100(lakh), M.lakh);
-  if (thou > 0) parts.push(...below1000(thou), M.thousand);
-  parts.push(...below1000(n));
-  return parts.join(" ");
+    if (!Number.isFinite(n) || n < 0) return "";
+    if (n === 0) return ONES[0]!;
+    const parts: string[] = [];
+    const crore = Math.floor(n / 10000000);
+    n %= 10000000;
+    const lakh = Math.floor(n / 100000);
+    n %= 100000;
+    const thou = Math.floor(n / 1000);
+    n %= 1000;
+    if (crore > 0) parts.push(...below1000(crore), M.crore);
+    if (lakh > 0) parts.push(...below100(lakh), M.lakh);
+    if (thou > 0) parts.push(...below1000(thou), M.thousand);
+    parts.push(...below1000(n));
+    return parts.join(" ");
 }
