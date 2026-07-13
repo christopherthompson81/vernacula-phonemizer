@@ -1,0 +1,184 @@
+// Native canonical-IPA MANIFEST for Czech (cs) — West Slavic, Latin script. A self-describing description of the
+// language's DATA, matching english.jsonc / arabic.jsonc: the vowel + consonant maps, the palatalisation table,
+// the voicing-assimilation pairs, clause punctuation, and the cardinal number words. The ALGORITHMS (the ě
+// realisation, regressive/final voicing, ř progressive devoicing, syllabic r̩/l̩, nasal assimilation,
+// degemination, first-syllable stress, number composition) stay in code and read these tables; only the closed,
+// hand-curatable data lives here.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "vowels", "palatalisation", "consonants", "voicing",
+// "clausePunctuation", "numbers". "convention" / "provenance" are self-describing documentation.
+{
+    "language": "cs",
+    "name": "Czech",
+    "provenance": "Cleanroom, rule-based g2p + number compositor (no lexicon). The consonant/vowel maps and the number words are language facts. espeak-independent; validated vs an espeak-canonical regression bootstrap and the independent epitran ces-Latn referee (see docs/cs_native_bringup_investigation.md).",
+
+    // The canonical-IPA conventions the values below are written in (documentation; the engine bakes them in).
+    "convention": {
+        "shortVowels": "short e = ɛ, short i/y = ɪ; long í/ý = iː (close), é = ɛː",
+        "palatalisation": "d/t/n → ɟ/c/ɲ before i, í, ě (native rule; loanwords are a known un-modelled exception)",
+        "eHacek": "ě: after d/t/n → palatalised C + ɛ; after m → mɲɛ; after a labial b/p/v/f → jɛ",
+        "voicing": "regressive assimilation + word-final devoicing; v and ř are targets but not triggers; ř devoices progressively after a voiceless C",
+        "syllabic": "r/l between consonants → syllabic r̩/l̩",
+        "stress": "fixed first-syllable ˈ, with ˌ on even non-final nuclei",
+    },
+
+    // Vowel letter → IPA. Short a e i/y o u; long á é í/ý ó ú/ů. (The diphthong ou→oᶷ and hiatus j are in the scanner.)
+    "vowels": {
+        "a": "a",
+        "e": "ɛ",
+        "i": "ɪ",
+        "o": "o",
+        "u": "u",
+        "y": "ɪ",
+        "á": "aː",
+        "é": "ɛː",
+        "í": "iː",
+        "ó": "oː",
+        "ú": "uː",
+        "ů": "uː",
+        "ý": "iː",
+    },
+
+    // Palatalisation: d/t/n → ɟ/c/ɲ, triggered before one of `triggers` (i, í, ě). NOT before y, ý, e.
+    "palatalisation": {
+        "map": { "d": "ɟ", "t": "c", "n": "ɲ" },
+        "triggers": ["i", "í", "ě"],
+    },
+
+    // Consonant letter → IPA (ch→x and the ě digraphs are handled in the scanner).
+    "consonants": {
+        "b": "b",
+        "c": "t͡s",
+        "č": "t͡ʃ",
+        "d": "d",
+        "ď": "ɟ",
+        "f": "f",
+        "g": "ɡ",
+        "h": "ɦ",
+        "j": "j",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "ň": "ɲ",
+        "p": "p",
+        "q": "k",
+        "r": "r",
+        "ř": "r̝",
+        "s": "s",
+        "š": "ʃ",
+        "t": "t",
+        "ť": "c",
+        "v": "v",
+        "w": "v",
+        "x": "ks",
+        "z": "z",
+        "ž": "ʒ",
+    },
+
+    // Voicing-assimilation pairs (both directions), keyed by IPA phoneme.
+    "voicing": {
+        "toVoiceless": {
+            "b": "p",
+            "d": "t",
+            "ɟ": "c",
+            "ɡ": "k",
+            "v": "f",
+            "z": "s",
+            "ʒ": "ʃ",
+            "ɦ": "x",
+            "d͡z": "t͡s",
+            "d͡ʒ": "t͡ʃ",
+            "r̝": "r̝̊",
+        },
+        "toVoiced": {
+            "p": "b",
+            "t": "d",
+            "c": "ɟ",
+            "k": "ɡ",
+            "f": "v",
+            "s": "z",
+            "ʃ": "ʒ",
+            "x": "ɦ",
+            "t͡s": "d͡z",
+            "t͡ʃ": "d͡ʒ",
+            "r̝̊": "r̝",
+        },
+    },
+
+    // Clause / phrase punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words. tens+units concatenate (dvacetjeden = 21); hundreds/thousands are space-separated.
+    // Magnitude agreement: sg (1), paucal (2–4), plural (5+). Composition logic is in numbers.ts.
+    "numbers": {
+        "units": [
+            "nula",
+            "jeden",
+            "dva",
+            "tři",
+            "čtyři",
+            "pět",
+            "šest",
+            "sedm",
+            "osm",
+            "devět",
+        ],
+        "teens": [
+            "deset",
+            "jedenáct",
+            "dvanáct",
+            "třináct",
+            "čtrnáct",
+            "patnáct",
+            "šestnáct",
+            "sedmnáct",
+            "osmnáct",
+            "devatenáct",
+        ],
+        "tens": [
+            "",
+            "",
+            "dvacet",
+            "třicet",
+            "čtyřicet",
+            "padesát",
+            "šedesát",
+            "sedmdesát",
+            "osmdesát",
+            "devadesát",
+        ],
+        "hundreds": [
+            "",
+            "sto",
+            "dvěstě",
+            "třista",
+            "čtyřista",
+            "pětset",
+            "šestset",
+            "sedmset",
+            "osmset",
+            "devětset",
+        ],
+        "magnitudes": {
+            "thousand": {
+                "sg": "tisíc",
+                "paucal": "tisíce",
+                "plural": "tisíc",
+            },
+            "million": {
+                "sg": "milion",
+                "paucal": "miliony",
+                "plural": "milionů",
+            },
+        },
+    },
+}

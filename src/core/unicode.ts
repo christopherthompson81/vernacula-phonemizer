@@ -35,5 +35,14 @@ export const DEVANAGARI_WORD = "ऀ-ॣॲ-ॿ";
 
 /** Devanagari digits ०-९ → ASCII, for number parsing. The regex digit-class is built from these keys. */
 export const DEVANAGARI_DIGITS: Record<string, string> = {
-  "०": "0", "१": "1", "२": "2", "३": "3", "४": "4", "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
+    "०": "0",
+    "१": "1",
+    "२": "2",
+    "३": "3",
+    "४": "4",
+    "५": "5",
+    "६": "6",
+    "७": "7",
+    "८": "8",
+    "९": "9",
 };

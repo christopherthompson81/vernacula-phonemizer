@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import type { Phonemizer } from "../../registry.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { parseJsonc } from "../../core/jsonc.ts";
 import { numberToWords } from "./numbers.ts";
 
 const GEMINATE = /(t͡ʃ|d͡ʒ|t̪|d̪|ʂ|ʃ|[pbʈɖkɡmnŋɲlshjʋrf])\1/gu; // aspirates stay doubled (ඛ්ඛ→kʰkʰ)
@@ -21,8 +22,7 @@ let G2P: ((w: string) => string) | undefined;
 function g2p(word: string): string {
   if (G2P === undefined) {
     const path = join(dirname(fileURLToPath(import.meta.url)), "sinhala.jsonc");
-    const raw = readFileSync(path, "utf8").replace(/^\s*\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
-    G2P = makeAbugidaG2P(JSON.parse(raw) as AbugidaDef, loadSharedPhonology());
+    G2P = makeAbugidaG2P(parseJsonc<AbugidaDef>(readFileSync(path, "utf8")), loadSharedPhonology());
   }
   return G2P(word);
 }
