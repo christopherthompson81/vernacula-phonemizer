@@ -18,38 +18,47 @@ import { MANIFEST } from "./manifest.ts";
 const VOWEL_IPA = MANIFEST.vowels;
 const GLIDE_IPA = MANIFEST.glides;
 const CONS_IPA = MANIFEST.consonants;
-export interface Seg { ph: string; nucleus: boolean }
+export interface Seg {
+    ph: string;
+    nucleus: boolean;
+}
 
 /** Kazakh word → IPA segment list (nucleus flags drive stress). */
 export function toSegments(word: string): Seg[] {
-  const chars = [...word.toLowerCase()];
-  const segs: Seg[] = [];
-  let prevVowel = ""; // last vowel LETTER seen (for l-darkness)
-  for (let i = 0; i < chars.length; i++) {
-    const c = chars[i]!;
-    const next = chars[i + 1] ?? "";
-    // Plain vowel. Word-initial е → je: the j is a separate glide so stress lands on the vowel (ел→jˈel).
-    if (c in VOWEL_IPA) {
-      if (c === "е" && i === 0) segs.push({ ph: "j", nucleus: false });
-      segs.push({ ph: VOWEL_IPA[c]!, nucleus: true });
-      prevVowel = c;
-      continue;
+    const chars = [...word.toLowerCase()];
+    const segs: Seg[] = [];
+    let prevVowel = ""; // last vowel LETTER seen (for l-darkness)
+    for (let i = 0; i < chars.length; i++) {
+        const c = chars[i]!;
+        const next = chars[i + 1] ?? "";
+        // Plain vowel. Word-initial е → je: the j is a separate glide so stress lands on the vowel (ел→jˈel).
+        if (c in VOWEL_IPA) {
+            if (c === "е" && i === 0) segs.push({ ph: "j", nucleus: false });
+            segs.push({ ph: VOWEL_IPA[c]!, nucleus: true });
+            prevVowel = c;
+            continue;
+        }
+        // Iotated / glide letter.
+        if (c in GLIDE_IPA) {
+            const ph = GLIDE_IPA[c]!;
+            // у is a pure glide (no nucleus); и/я/ю/ё carry a vowel nucleus.
+            if (c === "у") segs.push({ ph, nucleus: false });
+            else {
+                for (const p of ph)
+                    segs.push({ ph: p, nucleus: /[əauo]/u.test(p) });
+            } // əj/ja/ju/jo: vowel is the nucleus
+            prevVowel = c;
+            continue;
+        }
+        // l: emitted DARK ɫ here; kazakh.ts lightens ɫ→l word-wide when the token carries a front vowel (Kazakh
+        // vowel harmony — a word is uniformly front or back).
+        if (c === "л") {
+            segs.push({ ph: "ɫ", nucleus: false });
+            continue;
+        }
+        const cons = CONS_IPA[c];
+        if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
+        // else: unknown char (punctuation) → skip
     }
-    // Iotated / glide letter.
-    if (c in GLIDE_IPA) {
-      const ph = GLIDE_IPA[c]!;
-      // у is a pure glide (no nucleus); и/я/ю/ё carry a vowel nucleus.
-      if (c === "у") segs.push({ ph, nucleus: false });
-      else { for (const p of ph) segs.push({ ph: p, nucleus: /[əauo]/u.test(p) }); } // əj/ja/ju/jo: vowel is the nucleus
-      prevVowel = c;
-      continue;
-    }
-    // l: emitted DARK ɫ here; kazakh.ts lightens ɫ→l word-wide when the token carries a front vowel (Kazakh
-    // vowel harmony — a word is uniformly front or back).
-    if (c === "л") { segs.push({ ph: "ɫ", nucleus: false }); continue; }
-    const cons = CONS_IPA[c];
-    if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
-    // else: unknown char (punctuation) → skip
-  }
-  return segs;
+    return segs;
 }

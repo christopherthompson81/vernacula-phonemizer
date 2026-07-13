@@ -23,8 +23,16 @@
 
     // Plain vowel letters → IPA nucleus. ə (from ы) is the only "unstressed" vowel (drives STRESSPOSN_1RU).
     "vowels": {
-        "а": "ɑ", "ә": "æ", "е": "e", "о": "o", "ө": "ɵ",
-        "ұ": "ʊ", "ү": "ʏ", "ы": "ə", "і": "ɪ", "э": "ɛ",
+        "а": "ɑ",
+        "ә": "æ",
+        "е": "e",
+        "о": "o",
+        "ө": "ɵ",
+        "ұ": "ʊ",
+        "ү": "ʏ",
+        "ы": "ə",
+        "і": "ɪ",
+        "э": "ɛ",
     },
 
     // Iotated / glide letters → a fixed IPA sequence (the vowel part is the nucleus). у is a pure glide (no nucleus).
@@ -32,22 +40,75 @@
 
     // Consonant letters → IPA (context-free; л is handled separately in g2p.ts for dark/clear allophony).
     "consonants": {
-        "б": "b", "в": "v", "г": "ɡ", "ғ": "ʁ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "қ": "q",
-        "м": "m", "н": "n", "ң": "ŋ", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ", "һ": "h",
-        "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃʃ", "ъ": "ʔ", "ь": "ʔ",
+        "б": "b",
+        "в": "v",
+        "г": "ɡ",
+        "ғ": "ʁ",
+        "д": "d",
+        "ж": "ʒ",
+        "з": "z",
+        "й": "j",
+        "к": "k",
+        "қ": "q",
+        "м": "m",
+        "н": "n",
+        "ң": "ŋ",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "ф": "f",
+        "х": "χ",
+        "һ": "h",
+        "ц": "t͡s",
+        "ч": "t͡ʃ",
+        "ш": "ʃ",
+        "щ": "ʃʃ",
+        "ъ": "ʔ",
+        "ь": "ʔ",
     },
 
     // Front vowels — their presence anywhere in a token lightens ALL its dark ɫ → l (vowel harmony).
     "frontVowels": "eɵʏɪæ",
 
     // Clause-terminating punctuation → canonical inline pause marks.
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
 
     // Cardinal number words as FINISHED canonical IPA (the espeak atoms — irregular stress/segments, so not routed
     // through the g2p). tens+units and the hundred-multiplier are glued by the compositor; magnitude groups spaced.
     "numbers": {
-        "units": ["nˈøɫ", "bˈɪr", "jˈekɪ", "ˈʏʃ", "tˈɵrt", "bˈes", "ˈɑɫtə", "ʒˈetɪ", "sˈeɡɪz", "tˈoʁəz"], // 0–9
-        "tens": ["", "ˈon", "ʒəjərmˈɑ", "ˈotəz", "qˈərəq", "jˈelw", "ˈɑlpəs", "ʒetpˈɪs", "seksˈen", "toqsˈɑn"], // ×10
+        "units": [
+            "nˈøɫ",
+            "bˈɪr",
+            "jˈekɪ",
+            "ˈʏʃ",
+            "tˈɵrt",
+            "bˈes",
+            "ˈɑɫtə",
+            "ʒˈetɪ",
+            "sˈeɡɪz",
+            "tˈoʁəz",
+        ], // 0–9
+        "tens": [
+            "",
+            "ˈon",
+            "ʒəjərmˈɑ",
+            "ˈotəz",
+            "qˈərəq",
+            "jˈelw",
+            "ˈɑlpəs",
+            "ʒetpˈɪs",
+            "seksˈen",
+            "toqsˈɑn",
+        ], // ×10
         "hundred": "ʒˈʏz",
         "thousand": "mˈəŋ",
         "million": "məjlɫəjˈon",
