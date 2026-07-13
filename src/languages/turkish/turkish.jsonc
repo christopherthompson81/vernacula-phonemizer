@@ -1,0 +1,114 @@
+// Native canonical-IPA data manifest for Turkish (tr) — espeak-independent.
+// This file IS the hand-authored context-free language DATA: the vowel letter→IPA table + harmony classes, the
+// circumflex fold, the consonant table + geminating-stop set, clause punctuation, and the number words. The
+// ALGORITHMS that read it stay in code:
+//   g2p.ts     — the left-to-right scan (k/g palatalization before front vowels, dark/clear l, ğ lengthening +
+//                vowel merge, geminate stops), and Turkish-locale lowercasing
+//   turkish.ts — final-syllable stress + the pre-accenting-suffix morphology (regexes), the tokenizer
+//   numbers.ts — the thousands-scale cardinal compositor (bir-dropping before yüz/bin)
+// Stress exceptions stay in the sibling stress.tsv (place names / loanwords), which the engine only patches with.
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/tr_native_bringup_investigation.md.
+{
+    "language": "tr",
+    "name": "Turkish",
+    "script": "Latin",
+    "provenance": "Authored from Turkish orthography + phonology (shallow, near-1:1; vowel harmony is already in the spelling). This file IS the language data — the native rule engine reads it directly. Stress exceptions come from a small lexicon (stress.tsv).",
+
+    "convention": {
+        "vowels": "phonemic — a e ı i o ö u ü → a e ɯ i o ø u y (front = e i ö ü, back = a ı o u)",
+        "palatalization": "k → c before a front vowel (asker → asceɾ); g → ɟ before a front vowel (not after a consonant)",
+        "darkL": "l → dark ɫ next to a back vowel, clear l next to a front vowel",
+        "softG": "ğ after e/i → j glide (değil → dejil); elsewhere lengthens the preceding vowel (dağ → daː)",
+        "stress": "final-syllable default; pre-accenting suffixes stress the syllable before them; else a lexicon",
+    },
+
+    // Vowel letter → IPA (phonemic), plus the harmony classes. FRONT = e i ö ü; FRONT_UNROUND = e i (ğ→j trigger);
+    // BACK = a ı o u (dark-l / ğ-lengthen trigger).
+    "vowels": {
+        "ipa": {
+            "a": "a",
+            "e": "e",
+            "ı": "ɯ",
+            "i": "i",
+            "o": "o",
+            "ö": "ø",
+            "u": "u",
+            "ü": "y",
+        },
+        "front": ["e", "i", "ö", "ü"],
+        "frontUnround": ["e", "i"],
+        "back": ["a", "ı", "o", "u"],
+    },
+    // Circumflex vowels fold to their base (â/î/û → a/i/u) during Turkish-locale lowercasing.
+    "circumflexFold": { "â": "a", "î": "i", "û": "u" },
+
+    // Context-free consonants (g/k/l/ğ are handled specially in g2p.ts). w/x/q are foreign-loan letters.
+    "consonants": {
+        "b": "b",
+        "c": "d͡ʒ",
+        "ç": "t͡ʃ",
+        "d": "d",
+        "f": "f",
+        "h": "h",
+        "j": "ʒ",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "r": "ɾ",
+        "s": "s",
+        "ş": "ʃ",
+        "t": "t",
+        "v": "v",
+        "y": "j",
+        "z": "z",
+        "w": "w",
+        "x": "ks",
+        "q": "k",
+    },
+    // Doubled STOPS/affricates geminate to Cː (teşekkür→teʃekːyɾ); doubled sonorants/fricatives stay written double.
+    "geminate": ["p", "t", "k", "b", "d", "c", "ç"],
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words (thousands scale: on/yüz/bin/milyon/…). bir is dropped before yüz and bin.
+    "numbers": {
+        "ones": [
+            "",
+            "bir",
+            "iki",
+            "üç",
+            "dört",
+            "beş",
+            "altı",
+            "yedi",
+            "sekiz",
+            "dokuz",
+        ],
+        "tens": [
+            "",
+            "on",
+            "yirmi",
+            "otuz",
+            "kırk",
+            "elli",
+            "altmış",
+            "yetmiş",
+            "seksen",
+            "doksan",
+        ],
+        "scales": ["", "bin", "milyon", "milyar", "trilyon", "katrilyon"], // 10³ⁿ group multipliers
+        "hundred": "yüz",
+        "zero": "sıfır",
+        "decimalConnector": "virgül", // 3,14 → üç virgül bir dört
+    },
+}
