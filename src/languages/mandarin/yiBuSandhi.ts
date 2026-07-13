@@ -10,23 +10,29 @@
  */
 import type { Token } from "./segment.ts";
 
-const toneOf = (py: string): number => { const m = /([1-5])$/.exec(py); return m ? Number(m[1]) : 5; };
-const setTone = (py: string, t: number): string => py.replace(/[1-5]?$/, String(t));
+const toneOf = (py: string): number => {
+    const m = /([1-5])$/.exec(py);
+    return m ? Number(m[1]) : 5;
+};
+const setTone = (py: string, t: number): string =>
+    py.replace(/[1-5]?$/, String(t));
 
 export function applyYiBuSandhi(tokens: Token[]): void {
-  for (let i = 0; i < tokens.length; i++) {
-    const src = tokens[i]!.src;
-    if (src !== "一" && src !== "不") continue;
-    const next = tokens[i + 1];
-    const nextTone = next ? toneOf(next.py) : 0; // 0 = no following syllable
-    if (src === "不") {
-      tokens[i]!.py = setTone(tokens[i]!.py, nextTone === 4 ? 2 : 4);
-      continue;
+    for (let i = 0; i < tokens.length; i++) {
+        const src = tokens[i]!.src;
+        if (src !== "一" && src !== "不") continue;
+        const next = tokens[i + 1];
+        const nextTone = next ? toneOf(next.py) : 0; // 0 = no following syllable
+        if (src === "不") {
+            tokens[i]!.py = setTone(tokens[i]!.py, nextTone === 4 ? 2 : 4);
+            continue;
+        }
+        // 一
+        const ordinal = tokens[i - 1]?.src === "第";
+        if (nextTone === 0 || ordinal)
+            tokens[i]!.py = setTone(tokens[i]!.py, 1); // final / ordinal → yī
+        else if (nextTone === 4)
+            tokens[i]!.py = setTone(tokens[i]!.py, 2); // before 4th → yí
+        else tokens[i]!.py = setTone(tokens[i]!.py, 4); // before 1/2/3 → yì
     }
-    // 一
-    const ordinal = tokens[i - 1]?.src === "第";
-    if (nextTone === 0 || ordinal) tokens[i]!.py = setTone(tokens[i]!.py, 1);        // final / ordinal → yī
-    else if (nextTone === 4) tokens[i]!.py = setTone(tokens[i]!.py, 2);              // before 4th → yí
-    else tokens[i]!.py = setTone(tokens[i]!.py, 4);                                  // before 1/2/3 → yì
-  }
 }
