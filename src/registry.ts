@@ -19,6 +19,7 @@ import { createKorean } from "./languages/korean/korean.ts";
 import { createHausa } from "./languages/hausa/hausa.ts";
 import { createThai } from "./languages/thai/thai.ts";
 import { createFula } from "./languages/fula/fula.ts";
+import { createSinhala } from "./languages/sinhala/sinhala.ts";
 
 export interface Phonemizer {
   /** Full text → canonical IPA. */
@@ -56,6 +57,7 @@ function build(lang: string): Phonemizer {
     case "ha": return createHausa();
     case "th": return createThai();
     case "ff": return createFula();
+    case "si": return createSinhala();
     // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
     case "hi": return createHindi((latin) => getPhonemizer("en").text(latin));
     default: throw new Error(`vernacula-phonemizer: no phonemizer registered for "${lang}"`);
