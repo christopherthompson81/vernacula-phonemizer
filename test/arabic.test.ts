@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-import { phonemize, phonemizeArabic } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/arabic/arabic.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeArabic, phonemizeWord } from "../src/languages/arabic/arabic.ts";
 
 // The neural diacritizer model is gitignored (dev stand-in / built permissively) — skip its tests if absent.
 const haveDiacritizer = existsSync(join(import.meta.dirname, "../src/languages/arabic/diacritizer.onnx"));
