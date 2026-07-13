@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { reorderThaiLeadingVowels, thaiLexicalFixup, thaiPrep, thaiScanSyllables, type ThaiSyllableScan } from "./syllabifier.ts";
+import { segment } from "./segment.ts";
 import { THAI_TONE_IPA } from "./thaiTone.ts";
 
 // Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
@@ -90,8 +91,13 @@ function renderSyllable(s: ThaiSyllableScan, first: boolean, last: boolean): str
   return onset + nucleus + tone + finalCoda;
 }
 
-/** One Thai word → canonical IPA (dictionary of irregulars, else the ported syllabifier + native render). */
-export function phonemizeWord(word: string): string {
+/** One Thai TOKEN → IPA: segment into words (a compound token like ก็คือ splits into ก็ คือ), phonemize each. */
+export function phonemizeWord(token: string): string {
+  return segment(token).map(phonemizeSubword).filter((s) => s !== "").join(" ");
+}
+
+/** One segmented Thai word → canonical IPA (dictionary of irregulars, else the ported syllabifier + render). */
+function phonemizeSubword(word: string): string {
   const lex = dict().get(word);
   if (lex !== undefined) return lex;
   const reordered = reorderThaiLeadingVowels(thaiLexicalFixup(word));
