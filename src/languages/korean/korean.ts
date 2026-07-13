@@ -6,10 +6,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { phonemizeWord } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 export { phonemizeWord };
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([가-힣]+)|(\d+)|([.!?…,;:])/gu;
 
 class KoreanPhonemizer implements Phonemizer {

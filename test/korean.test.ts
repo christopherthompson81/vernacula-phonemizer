@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./korean.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord } from "../src/languages/korean/korean.ts";
 
 describe("Korean Hangul g2p + sandhi", () => {
   it("core words + coda neutralisation (unreleased ̚)", () => {
