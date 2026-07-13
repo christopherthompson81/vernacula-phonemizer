@@ -5,36 +5,89 @@
 // already-converged cmn engine (validated vs wikipron + epitran); this manifest carries the tone system,
 // sandhi rules, and numbers. No espeak at runtime.
 {
-  "language": "cmn",
-  "name": "Mandarin Chinese (Standard, Hanyu Pinyin)",
-  "provenance": "Segmental IPA = a syllable→IPA table lifted from vernacula's converged cmn engine (itself validated against wikipron cmn + epitran cmn-Latn). Hanzi→pinyin = pypinyin (MIT) char + phrase dicts, Unihan kMandarin fallback. Tone system + sandhi + numbers authored from standard descriptions. Non-espeak.",
+    "language": "cmn",
+    "name": "Mandarin Chinese (Standard, Hanyu Pinyin)",
+    "provenance": "Segmental IPA = a syllable→IPA table lifted from vernacula's converged cmn engine (itself validated against wikipron cmn + epitran cmn-Latn). Hanzi→pinyin = pypinyin (MIT) char + phrase dicts, Unihan kMandarin fallback. Tone system + sandhi + numbers authored from standard descriptions. Non-espeak.",
 
-  "convention": {
-    "tones":       "Chao contour letters at SYLLABLE END (中 → ʈ͡ʂoŋ˥˥); regularizes espeak's mid-syllable placement",
-    "toneNumbers": "pinyin tone digit 1–4 = the four lexical tones; 5 or absent = neutral (unmarked)",
-    "retroflex":   "zh ch sh r → ʈ͡ʂ ʈ͡ʂʰ ʂ ʐ ; the -i after them is the syllabic ʐ̩ (chi → ʈ͡ʂʰʐ̩)",
-    "apical":      "-i after z c s → syllabic ɹ̩ (si → sɹ̩)",
-    "palatals":    "j q x → t͡ɕ t͡ɕʰ ɕ ; ü after them written u (ju → t͡ɕy)",
-    "aspiration":  "p t k / q c ch etc. aspirated as ʰ",
-    "stress":      "none — Mandarin has no contrastive lexical stress; tone (and its absence on neutral-tone syllables) carries prominence"
-  },
+    "convention": {
+        "tones": "Chao contour letters at SYLLABLE END (中 → ʈ͡ʂoŋ˥˥); regularizes espeak's mid-syllable placement",
+        "toneNumbers": "pinyin tone digit 1–4 = the four lexical tones; 5 or absent = neutral (unmarked)",
+        "retroflex": "zh ch sh r → ʈ͡ʂ ʈ͡ʂʰ ʂ ʐ ; the -i after them is the syllabic ʐ̩ (chi → ʈ͡ʂʰʐ̩)",
+        "apical": "-i after z c s → syllabic ɹ̩ (si → sɹ̩)",
+        "palatals": "j q x → t͡ɕ t͡ɕʰ ɕ ; ü after them written u (ju → t͡ɕy)",
+        "aspiration": "p t k / q c ch etc. aspirated as ʰ",
+        "stress": "none — Mandarin has no contrastive lexical stress; tone (and its absence on neutral-tone syllables) carries prominence",
+    },
 
-  // Tone number → Chao contour letters. Appended at syllable end. 5 (neutral) is unmarked.
-  "tones": { "1": "˥˥", "2": "˧˥", "3": "˨˩˦", "4": "˥˩", "5": "" },
+    // Tone number → Chao contour letters. Appended at syllable end. 5 (neutral) is unmarked.
+    "tones": { "1": "˥˥", "2": "˧˥", "3": "˨˩˦", "4": "˥˩", "5": "" },
 
-  // Tone sandhi (operate on tone NUMBERS before rendering).
-  "sandhi": {
-    // Third-tone sandhi: a 3rd tone before another 3rd tone becomes 2nd (你好 nǐ hǎo → ní hǎo).
-    // Applied left-to-right pairwise across a prosodic run.
-    "thirdThird": { "from": "3", "before": "3", "to": "2" }
-    // 一 yī / 不 bù sandhi need the source character → Phase 2 (Hanzi front-end).
-  },
+    // Tone sandhi (operate on tone NUMBERS before rendering).
+    "sandhi": {
+        // Third-tone sandhi: a 3rd tone before another 3rd tone becomes 2nd (你好 nǐ hǎo → ní hǎo).
+        // Applied left-to-right pairwise across a prosodic run (pinyinToIpa.ts reads this rule).
+        "thirdThird": { "from": "3", "before": "3", "to": "2" },
+        // 一 yī / 不 bù sandhi need the source character → yiBuSandhi.ts (Hanzi front-end).
+    },
 
-  "resolve": ["pinyin syllable → toneless lookup", "third-tone sandhi", "append Chao tone"],
+    "resolve": [
+        "pinyin syllable → toneless lookup",
+        "third-tone sandhi",
+        "append Chao tone",
+    ],
 
-  // NUMBERS + normalization + punctuation→pause: Phase 3.
-  "phases": {
-    "done":    ["pinyin path", "syllable→IPA", "tones", "third-tone sandhi", "Hanzi front-end (char + phrase polyphone disambiguation)", "numbers (Arabic → Chinese quantity reading + decimals)", "year digit-string reading (4-digit before 年)", "bare 一/不 sandhi", "colloquial 两 (multipliers + measure words)", "punctuation → pause", "embedded Latin → English", "referee sweep (epitran + wikipron); fixed -e→ɤ"],
-    "pending": ["counting-sequence 一 (一二三 reads sandhi'd, not citation — needs non-tonal context)", "phone/ID digit-string reading", "C# mirror (if pursued)"]
-  }
+    // Clause / phrase punctuation (Chinese + ASCII) → canonical inline pause marks.
+    "clausePunctuation": {
+        "。": ".",
+        "！": "!",
+        "？": "?",
+        "，": ",",
+        "、": ",",
+        "；": ",",
+        "：": ",",
+        "…": ",",
+        "—": ",",
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Common measure words: a standalone 2 before one of these reads colloquial 两 (两个, 两天), not 二.
+    "measureWords": "个位本张只条头匹件双对群种次遍回天年岁块层排组步口面名首部台辆架座间扇页杯碗瓶盒袋斤",
+
+    // Number reading (Arabic → Chinese numeral characters, then phonemized like any Han run).
+    "numbers": {
+        "digits": ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"], // 0–9 (digits[0] 零 = the internal zero-gap filler)
+        "positions": ["千", "百", "十", ""], // place value within a 4-digit group
+        "bigUnits": ["", "万", "亿", "兆"], // 10⁴ⁿ group multipliers
+        "two": "两", // colloquial 2 (千-multiplier, leading 百-multiplier, 万/亿 multiplier, before a measure word)
+        "decimalPoint": "点", // 点 between integer and fractional digit-string
+        "zeroDigit": "〇", // digit-string (year/ID) zero, distinct from quantity 零
+    },
+
+    // NUMBERS + normalization + punctuation→pause: Phase 3.
+    "phases": {
+        "done": [
+            "pinyin path",
+            "syllable→IPA",
+            "tones",
+            "third-tone sandhi",
+            "Hanzi front-end (char + phrase polyphone disambiguation)",
+            "numbers (Arabic → Chinese quantity reading + decimals)",
+            "year digit-string reading (4-digit before 年)",
+            "bare 一/不 sandhi",
+            "colloquial 两 (multipliers + measure words)",
+            "punctuation → pause",
+            "embedded Latin → English",
+            "referee sweep (epitran + wikipron); fixed -e→ɤ",
+        ],
+        "pending": [
+            "counting-sequence 一 (一二三 reads sandhi'd, not citation — needs non-tonal context)",
+            "phone/ID digit-string reading",
+            "C# mirror (if pursued)",
+        ],
+    },
 }
