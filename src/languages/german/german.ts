@@ -12,6 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed syllable nucleus (loanwords / exceptions).
 let STRESS: Map<string, number> | undefined;
@@ -52,9 +53,9 @@ function lengthDict(): Map<string, string> {
   }
   return LENGTH;
 }
-const LONG_OF: Record<string, string> = { a: "aː", ɛ: "eː", ɪ: "iː", ɔ: "oː", ʊ: "uː", œ: "øː", ʏ: "yː" };
-const SHORT_OF: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", ø: "œ", y: "ʏ", ɛ: "ɛ" };
-const VOWEL_CHARS = "aɐeɛiɪoɔuʊøœyʏə";
+const LONG_OF = MANIFEST.vowels.longOf;
+const SHORT_OF = MANIFEST.vowels.shortOf;
+const VOWEL_CHARS = MANIFEST.vowelChars;
 
 /** Fix vowel length+quality per a positional correction spec ("0S,2L" = nucleus 0 short, 2 long). Walks the
  *  IPA, counting syllable nuclei (a vowel not followed by an offglide ̯), applying the flag at each ordinal. */
@@ -151,7 +152,7 @@ export function phonemizeWord(word: string): string {
   return applyLength(out, lengthDict().get(w));
 }
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 class GermanPhonemizer implements Phonemizer {

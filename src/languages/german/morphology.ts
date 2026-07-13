@@ -11,6 +11,8 @@
  * the same shape as hunspell/espeak affix flags — the lists here ARE the affix table; a future lexicon could
  * instead carry per-word flags. See docs/de_native_bringup_investigation.md.
  */
+
+import { MANIFEST } from "./manifest.ts";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,12 +56,12 @@ const isConstituent = (w: string): boolean => w.length >= 3 && flags(w).includes
 const resolves = (w: string): boolean => isWord(w) || isConstituent(w) || splitCompound(w) !== null;
 // Suffixes that begin with a vowel resyllabify onto the stem (no boundary) — loose to strip; consonant-initial
 // suffixes create a devoicing boundary, so their stem must resolve.
-const VOWEL_INITIAL_SUFFIX = new Set(["ung", "ungen", "ig", "isch", "en", "er", "e", "es", "em", "et"]);
+const VOWEL_INITIAL_SUFFIX = new Set(MANIFEST.morphology.vowelInitialSuffixes);
 // be-/ge-/er- also occur root-initially (beide, geht, Erde); only strip them if the remainder is a real word.
-const PREFIX_AMBIGUOUS = new Set(["be", "ge", "er"]);
+const PREFIX_AMBIGUOUS = new Set(MANIFEST.morphology.ambiguousPrefixes);
 
 // Fugen-elemente in preference order; a stem with the s flag takes -s- (Zeitungs-, Arbeits-).
-const LINKS_DEFAULT = ["", "s", "n", "es", "en", "e", "er"];
+const LINKS_DEFAULT = MANIFEST.morphology.linkingElements;
 
 /** Split a run into flagged compound constituents (longest-leading, ≤3 parts). null = not a compound. The
  *  leading element is ≥4 letters (so ham·burg doesn't split and wrongly lengthen the a); trailing ≥3 (hof). */
@@ -81,19 +83,9 @@ function splitCompound(w: string, depth = 0): string[] | null {
   return null;
 }
 
-// Fixed IPA for the closed affixes (this list IS the affix "flag table"). Unstressed prefixes reduce; the
-// separable ones keep full vowels. Suffixes carry their regular phonology.
-export const PREFIX_IPA: Record<string, string> = {
-  be: "bə", ge: "ɡə", ver: "fɛɐ̯", zer: "t͡sɛɐ̯", ent: "ɛnt", emp: "ɛmp", miss: "mɪs", er: "ɛɐ̯",
-  auf: "aʊ̯f", aus: "aʊ̯s", ein: "aɪ̯n", vor: "foːɐ̯", mit: "mɪt", nach: "naːx", bei: "baɪ̯", zu: "t͡suː",
-  an: "an", ab: "ap", um: "ʊm", her: "heːɐ̯", hin: "hɪn", los: "loːs", weg: "vɛk", über: "yːbɐ", unter: "ʊntɐ",
-  durch: "dʊʁç", gegen: "ɡeːɡən", voll: "fɔl", wider: "viːdɐ", hinter: "hɪntɐ", dar: "daːɐ̯", empor: "ɛmpoːɐ̯", auseinander: "aʊ̯saɪ̯nandɐ",
-};
-export const SUFFIX_IPA: Record<string, string> = {
-  ung: "ʊŋ", ungen: "ʊŋən", heit: "haɪ̯t", heiten: "haɪ̯tən", keit: "kaɪ̯t", keiten: "kaɪ̯tən", schaft: "ʃaft",
-  lich: "lɪç", lichen: "lɪçən", isch: "ɪʃ", bar: "baːɐ̯", sam: "zaːm", los: "loːs", haft: "haft", nis: "nɪs",
-  tum: "tuːm", chen: "çən", lein: "laɪ̯n", ig: "ɪç", er: "ɐ", en: "ən", es: "əs", em: "əm", et: "ət", st: "st", e: "ə",
-};
+// Fixed IPA for the closed affixes (this list IS the affix "flag table") — data in german.jsonc.
+export const PREFIX_IPA = MANIFEST.morphology.prefixIpa;
+export const SUFFIX_IPA = MANIFEST.morphology.suffixIpa;
 
 export type Kind = "prefix" | "stem" | "suffix";
 export interface Decomp {
@@ -151,8 +143,7 @@ export function decompose(word: string): Decomp {
   return { parts, kinds, stressPart: prefixes.length };
 }
 
-const VALID_ONSET2 = new Set(["st", "sp", "sc", "sk", "sm", "sn", "sw", "tr", "dr", "kr", "gr", "br", "pr", "fr",
-  "kl", "gl", "bl", "pl", "fl", "kn", "gn", "pf", "kw", "zw", "tw", "ph", "th", "ch", "qu", "wr", "schl", "schw"]);
+const VALID_ONSET2 = new Set(MANIFEST.morphology.validOnsets);
 
 /** Loose gate: a stripped stem must have a vowel and start with a valid German onset (so a prefix isn't peeled
  *  off a non-word — be+rlin, where "rl" is not an onset). */
