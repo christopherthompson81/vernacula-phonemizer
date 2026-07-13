@@ -13,6 +13,10 @@
  * Contributes ̚ (unreleased) and ͈ (tense). See docs/ko_native_bringup_investigation.md.
  */
 
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 const SBASE = 0xac00, LCOUNT = 19, VCOUNT = 21, TCOUNT = 28, NCOUNT = VCOUNT * TCOUNT;
 // Jamo inventories (index order per the Unicode decomposition).
 const L_JAMO = [..."ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ"];
@@ -58,6 +62,26 @@ const NEUT: Record<string, string> = {
 const OBSTR_CODA_TO_NASAL: Record<string, string> = { "ㄱ": "ㅇ", "ㄷ": "ㄴ", "ㅂ": "ㅁ" }; // before a nasal onset
 const VOICE: Record<string, string> = { k: "ɡ", t: "d", p: "b", "t͡ɕ": "d͡ʑ" };
 const TENSE: Record<string, string> = { k: "k͈", t: "t͈", p: "p͈", "t͡ɕ": "t͡ɕ͈", s: "s͈" };
+
+// Lexical tensification onset jamo → its tense counterpart (lenis → fortis).
+const TENSE_JAMO: Record<string, string> = { "ㄱ": "ㄲ", "ㄷ": "ㄸ", "ㅂ": "ㅃ", "ㅅ": "ㅆ", "ㅈ": "ㅉ" };
+// Korean lexical/사잇소리 tensification (경음화) that is NOT phonologically rule-derivable (Sino-Korean §26
+// needs Hanja etymology). Word → 0-based syllable indices whose onset tenses. From wikipron (tensification.tsv).
+let TENS: Map<string, number[]> | undefined;
+function tensLexicon(): Map<string, number[]> {
+  if (TENS === undefined) {
+    TENS = new Map();
+    try {
+      const path = join(dirname(fileURLToPath(import.meta.url)), "tensification.tsv");
+      for (const line of readFileSync(path, "utf8").split("\n")) {
+        if (line === "" || line.startsWith("#")) continue;
+        const tab = line.indexOf("\t");
+        if (tab > 0) TENS.set(line.slice(0, tab), line.slice(tab + 1).split(",").map(Number));
+      }
+    } catch { /* absent → rule tensification only */ }
+  }
+  return TENS;
+}
 
 interface Syl { L: string; V: string; T: string } // jamo; T = "" if none
 
@@ -119,6 +143,11 @@ export function phonemizeWord(word: string): string {
     }
   }
 
+  // LEXICAL tensification (경음화): force-tense the onsets the lexicon lists for this word (a tense onset
+  // never voices). Applied after sandhi so it overrides the lenis realisation.
+  const tens = tensLexicon().get(word);
+  if (tens) for (const j of tens) if (onset[j] !== undefined && onset[j]! in TENSE_JAMO) onset[j] = TENSE_JAMO[onset[j]!]!;
+
   // Stress: the first HEAVY (coda-bearing, underlying) syllable; if none is closed, the first syllable.
   let stressIdx = syls.findIndex((s) => s.T !== "");
   if (stressIdx < 0) stressIdx = 0;
@@ -139,7 +168,7 @@ export function phonemizeWord(word: string): string {
     const afterSonorant = i > 0 && (prevCoda === "" || (prevCoda !== null && isSonorant(prevCoda)));
     if (voiceable && afterSonorant) onPh = VOICE[onPh]!;
     out += onPh;
-    if (i === stressIdx) out += "ˈ";
+    if (i === stressIdx) out += "ˈ"; // ˈ before the whole medial (incl. any onglide j/w — espeak convention)
     out += VOWEL[syls[i]!.V] ?? "";
     // coda
     if (coda[i]) out += CODA_PH[coda[i]!] ?? "";

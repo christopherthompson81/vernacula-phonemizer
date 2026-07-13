@@ -26,12 +26,20 @@ Korean has no lexical stress; espeak's stressRule 8 turned out to be a clean wei
 **stress the first HEAVY (coda-bearing) syllable; if no syllable is closed, the first.** For 2-syllable words
 this is exact: open+closed → stress 2 (사람→sɐɾˈɐm), everything else → stress 1 (100%/100%/89% in the data).
 
+## Lexical tensification (경음화) — a lexicon, NOT a rule
+The one class of Korean tensing that is NOT phonologically derivable: Sino-Korean §26 (한자어 ㄹ받침 + ㄷㅅㅈ →
+된소리: 갈등→kɐɭt͈ɯŋ), 사잇소리 compounds (물고기→muɭk͈oɡi), and loanword-initial fortis (게임→k͈eim). The
+espeak-ng-portable investigation MEASURED that no rule works — ㄹ+ㄷ is only 14% tense, ㄹ+ㅅ 43% (a blanket
+"ㄹ+C→tense" would be wrong 57–88% of the time), because §26 is scoped to Hanja-origin morphemes that Hangul
+doesn't mark. So `tensification.tsv` (1,208 entries, `word → syllable indices whose onset tenses`) is ported
+from espeak-ng-portable's `koreanTensLexicon.ts` — itself sourced from wikipron (independent human data). We
+force-tense those onsets (a tense onset never voices); native ㄹ+C words absent from the lexicon stay lenis
+(알다→ɐɭdɐ), so no over-tensing.
+
 ## Validation
-vs the espeak-ng-portable canonical gold (26.8k Hangul words): **exact 89.5%, segmental 97.5%**. The residual:
-- ~2.5% segmental — lexical Sino-Korean/loanword **tensification** that isn't from a general rule: word-initial
-  fortis in loanwords (신→s͈in, 게임→k͈eim) and the Sino-Korean ㄹ-tensification (결정→kjɘɭt͡ɕ͈ɘŋ, 발생→pɐɭs͈ɛŋ).
-  These are lexically conditioned (only some morphemes) — a rule-based engine can't reach them without a
-  dictionary marking Sino-Korean vs native, and applying them blindly over-tenses native words.
+vs the espeak-ng-portable canonical gold (26.8k Hangul words): **exact 91.2%, segmental 99.4%**. Residual:
+- ~0.6% segmental — tensing words beyond the 1,208-entry lexicon's coverage (it is word-level, so a tensing
+  word not in wikipron, or inside a spaceless compound, is missed).
 - ~8% stress-position — the 11% closed+closed exceptions and longer-word cases beyond the first-heavy rule.
 
 ## Numbers
