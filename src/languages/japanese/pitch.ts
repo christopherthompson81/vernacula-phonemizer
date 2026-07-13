@@ -13,6 +13,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { MANIFEST } from "./manifest.ts";
+
 let LEX: Map<string, number> | undefined;
 function lex(): Map<string, number> {
   if (LEX === undefined) {
@@ -38,8 +40,13 @@ function get(k: string): number | undefined {
 
 const HAN_END = /\p{Script=Han}$/u;
 // Trailing affixes to strip to recover a noun bunsetsu's content word (whose accent governs the phrase):
-// case/topic particles (橋を→橋), and the copula + optional sentence-final particle (天気です→天気).
-const STRIPS = [/[はがをにへとでものや]+$/u, /(?:だ|です|でした|だった|でしょう|だろう)(?:ね|よ|か|な|わ)?$/u];
+// case/topic particles (橋を→橋), and the copula + optional sentence-final particle (天気です→天気). The affix
+// sets are DATA (japanese.jsonc → pitchStrip); the strip logic is here.
+const PS = MANIFEST.pitchStrip;
+const STRIPS = [
+  new RegExp(`[${PS.particles}]+$`, "u"),
+  new RegExp(`(?:${PS.copula.join("|")})(?:[${PS.copulaFinalParticles}])?$`, "u"),
+];
 
 /** Resolve the accent nucleus (mora index, 0 = heiban) for a bunsetsu: surface first, then reading. */
 export function accentNucleus(surface: string, reading: string): number {

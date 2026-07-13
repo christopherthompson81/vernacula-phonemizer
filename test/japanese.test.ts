@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord, phonemizeWordSegmental } from "./japanese.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord, phonemizeWordSegmental } from "../src/languages/japanese/japanese.ts";
 
 describe("Japanese kana → IPA (Phase 1)", () => {
   it("core kana, youon, sokuon, long vowels, moraic ん", () => {

@@ -1,0 +1,117 @@
+// Native canonical-IPA data manifest for Japanese (ja) — Standard/Tokyo, espeak-independent.
+// This file IS the hand-authored language DATA: the kana→mora tables, the extended-katakana (foreign-sound)
+// map, the moraic-ん place-assimilation classes, the Sino-Japanese number words, clause punctuation, and the
+// pitch-accent affix-strip lists. The ALGORITHMS that read it stay in code:
+//   kana.ts    — mora segmentation, sokuon gemination, long-vowel coalescence, ん assimilation
+//   numbers.ts — 万/億/兆 group compositor
+//   kanji.ts   — longest-match kanji→kana + bunsetsu segmentation (data in readings.tsv/fallback.tsv/adverbs.txt)
+//   pitch.ts   — accent-nucleus lookup + downstep placement (data in pitch-accent.tsv)
+//   japanese.ts — tokenizer + clause assembly
+// The bulk lexical data stays referenced as sibling files (see "dataFiles"); only authorable tables live here.
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA (narrow Tokyo: centralized ä, compressed ɯᵝ,
+// mid-lowered e̞/o̞, moraic ɴ). See docs/ja_native_bringup_investigation.md.
+{
+    "language": "ja",
+    "name": "Japanese (Standard/Tokyo)",
+    "script": "Han + Hiragana + Katakana",
+    "provenance": "Authored from the gojūon kana chart + standard Tokyo phonology; readings/pitch lexica are derived data files (see dataFiles). This file IS the language data — the native kana/number/pitch engine reads it directly.",
+
+    "convention": {
+        "vowels": "narrow Tokyo — あ ä (centralized), う ɯᵝ (compressed), え e̞ / お o̞ (mid-lowered)",
+        "moraicN": "ん is a mora of its own, place-assimilated to the next onset (n/ŋ/m) else ɴ",
+        "sokuon": "っ geminates the next onset (its own mora); word-final/vowel-onset → glottal ʔ",
+        "longVowel": "ー and the おう/えい digraphs + repeated vowel kana → +1 ː mora",
+        "pitch": "lexical downstep ꜜ (U+A71C) AFTER the nucleus mora; heiban words carry no mark",
+    },
+
+    // The five vowel phonemes. Consumed by kana.ts (vowelOf / isVowelChar) and embedded in the mora values below.
+    "vowels": { "a": "ä", "i": "i", "u": "ɯᵝ", "e": "e̞", "o": "o̞" },
+
+    // Single kana → IPA mora (hiragana keys; katakana is folded to hiragana first). Onsets are pre-composed with
+    // their vowel so irregular morae (し ɕi, つ t͡sɯᵝ, ふ ɸɯᵝ, ひ çi) are explicit rather than rule-derived.
+    "mora": {
+        "あ": "ä", "い": "i", "う": "ɯᵝ", "え": "e̞", "お": "o̞",
+        "か": "kä", "き": "ki", "く": "kɯᵝ", "け": "ke̞", "こ": "ko̞",
+        "が": "ɡä", "ぎ": "ɡi", "ぐ": "ɡɯᵝ", "げ": "ɡe̞", "ご": "ɡo̞",
+        "さ": "sä", "し": "ɕi", "す": "sɯᵝ", "せ": "se̞", "そ": "so̞",
+        "ざ": "zä", "じ": "d͡ʑi", "ず": "zɯᵝ", "ぜ": "ze̞", "ぞ": "zo̞",
+        "た": "tä", "ち": "t͡ɕi", "つ": "t͡sɯᵝ", "て": "te̞", "と": "to̞",
+        "だ": "dä", "ぢ": "d͡ʑi", "づ": "zɯᵝ", "で": "de̞", "ど": "do̞",
+        "な": "nä", "に": "ni", "ぬ": "nɯᵝ", "ね": "ne̞", "の": "no̞",
+        "は": "hä", "ひ": "çi", "ふ": "ɸɯᵝ", "へ": "he̞", "ほ": "ho̞",
+        "ば": "bä", "び": "bi", "ぶ": "bɯᵝ", "べ": "be̞", "ぼ": "bo̞",
+        "ぱ": "pä", "ぴ": "pi", "ぷ": "pɯᵝ", "ぺ": "pe̞", "ぽ": "po̞",
+        "ま": "mä", "み": "mi", "む": "mɯᵝ", "め": "me̞", "も": "mo̞",
+        "や": "jä", "ゆ": "jɯᵝ", "よ": "jo̞",
+        "ら": "ɾä", "り": "ɾi", "る": "ɾɯᵝ", "れ": "ɾe̞", "ろ": "ɾo̞",
+        "わ": "wä", "ゐ": "wi", "ゑ": "we̞", "を": "o̞", "ん": "ɴ",
+        "ぁ": "ä", "ぃ": "i", "ぅ": "ɯᵝ", "ぇ": "e̞", "ぉ": "o̞", "ゔ": "vɯᵝ",
+    },
+
+    // Youon onsets (Ci + small ゃゅょ). Already-palatal ɕ/t͡ɕ/d͡ʑ/ç take no ʲ; others palatalize.
+    "youonOnset": {
+        "き": "kʲ", "ぎ": "ɡʲ", "し": "ɕ", "じ": "d͡ʑ", "ち": "t͡ɕ", "ぢ": "d͡ʑ",
+        "に": "nʲ", "ひ": "ç", "び": "bʲ", "ぴ": "pʲ", "み": "mʲ", "り": "ɾʲ",
+    },
+    // The small ゃゅょ vowel each youon onset takes.
+    "smallY": { "ゃ": "ä", "ゅ": "ɯᵝ", "ょ": "o̞" },
+
+    // Extended (foreign-sound) katakana: a base kana + a small kana → onset + vowel (ファ→ɸä, チェ→t͡ɕe̞, ディ→di).
+    "foreign": {
+        "ふぁ": "ɸä", "ふぃ": "ɸi", "ふぇ": "ɸe̞", "ふぉ": "ɸo̞", "ふゅ": "ɸʲɯᵝ",
+        "ゔぁ": "vä", "ゔぃ": "vi", "ゔぇ": "ve̞", "ゔぉ": "vo̞",
+        "うぃ": "wi", "うぇ": "we̞", "うぉ": "wo̞", "いぇ": "je̞",
+        "てぃ": "ti", "てゅ": "tʲɯᵝ", "でぃ": "di", "でゅ": "dʲɯᵝ", "とぅ": "tɯᵝ", "どぅ": "dɯᵝ",
+        "ちぇ": "t͡ɕe̞", "しぇ": "ɕe̞", "じぇ": "d͡ʑe̞",
+        "つぁ": "t͡sä", "つぃ": "t͡si", "つぇ": "t͡se̞", "つぉ": "t͡so̞",
+    },
+    // Vowel-continuation kana → their vowel phoneme, for same-vowel lengthening (おお→o̞ː). を is EXCLUDED
+    // (near-always the particle: 語を→ɡo̞o̞, never ɡo̞ː) — so it is absent here though present in "mora".
+    "vowelKana": {
+        "あ": "ä", "い": "i", "う": "ɯᵝ", "え": "e̞", "お": "o̞",
+        "ぁ": "ä", "ぃ": "i", "ぅ": "ɯᵝ", "ぇ": "e̞", "ぉ": "o̞",
+    },
+
+    // Moraic ん assimilates to the following onset's place; falls through to ɴ (before vowels/glides/fricatives
+    // or word-finally). Matched in order; each "onsets" is the set of onset consonants that select "nasal".
+    "nasalAssimilation": [
+        { "onsets": "tdnszɾ", "nasal": "n", "note": "coronal" },
+        { "onsets": "kɡ", "nasal": "ŋ", "note": "velar" },
+        { "onsets": "pbm", "nasal": "m", "note": "labial" },
+    ],
+
+    // Clause-terminating punctuation (full-width + ASCII) → canonical inline pause marks.
+    "clausePunctuation": {
+        "。": ".", "．": ".", ".": ".", "！": "!", "!": "!", "？": "?", "?": "?", "、": ",", "，": ",", ",": ",",
+    },
+
+    // Sino-Japanese cardinal reading (→ kana, then through the kana engine). Sound changes are pre-baked into
+    // the hundreds/thousands rows (300 さんびゃく, 600 ろっぴゃく, 3000 さんぜん, 8000 はっせん).
+    "numbers": {
+        "ones": ["", "いち", "に", "さん", "よん", "ご", "ろく", "なな", "はち", "きゅう"],
+        "hundreds": ["", "ひゃく", "にひゃく", "さんびゃく", "よんひゃく", "ごひゃく", "ろっぴゃく", "ななひゃく", "はっぴゃく", "きゅうひゃく"],
+        "thousands": ["", "せん", "にせん", "さんぜん", "よんせん", "ごせん", "ろくせん", "ななせん", "はっせん", "きゅうせん"],
+        "myriadUnits": ["", "まん", "おく", "ちょう", "けい"], // 10^0, 10^4, 10^8, 10^12, 10^16
+        "ten": "じゅう",
+        "zero": "れい",
+    },
+
+    // Pitch-accent bunsetsu recovery: trailing affixes stripped to find the content word whose accent governs
+    // the phrase. particles = case/topic set; copula = the copular verb forms; copulaFinalParticles = optional
+    // sentence-final particle after the copula (天気ですね → strip ですね → 天気).
+    "pitchStrip": {
+        "particles": "はがをにへとでものや",
+        "copula": ["だ", "です", "でした", "だった", "でしょう", "だろう"],
+        "copulaFinalParticles": "ねよかなわ",
+    },
+
+    // Bulk lexical DATA lives in sibling files (too large / append-heavy for the manifest), read directly by the
+    // engines. Listed here for a fulsome inventory of the language's data surface.
+    "dataFiles": {
+        "readings.tsv": "~60k whole-word kanji→kana map (longest-match; sidesteps on/kun disambiguation)",
+        "fallback.tsv": "per-kanji on/kun/rendaku readings for words uncovered by readings.tsv",
+        "adverbs.txt": "kana adverbs that form their own bunsetsu (segmentation cue)",
+        "pitch-accent.tsv": "accent-nucleus mora index per word (merged NHK-consensus > inflected > base)",
+    },
+}

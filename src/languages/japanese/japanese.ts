@@ -10,9 +10,10 @@ import { kanaToIpa, kanaToMorae } from "./kana.ts";
 import { applyReadings, segmentText } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
 import { accentNucleus, placeDownstep } from "./pitch.ts";
+import { MANIFEST } from "./manifest.ts";
 
-// Japanese clause punctuation → canonical pause marks.
-const CLAUSE_MARK: Record<string, string> = { "。": ".", "．": ".", ".": ".", "！": "!", "!": "!", "？": "?", "?": "?", "、": ",", "，": ",", ",": "," };
+// Japanese clause punctuation → canonical pause marks (from japanese.jsonc).
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Japanese-script run (kanji incl. Ext-A/B + iteration marks + hiragana + katakana + long mark), a digit
 // run, or clause punctuation. Bunsetsu spaces inserted by segmentText split runs into phrase-sized tokens.
 const TOKEN = /([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])/gu;
