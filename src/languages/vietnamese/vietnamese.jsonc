@@ -1,0 +1,105 @@
+// Native canonical-IPA data manifest for Vietnamese (vi) — Northern / Hanoi, espeak-independent.
+// This file IS the hand-authored context-free language DATA: the tone diacritic→Chao-contour map, the ordered
+// longest-match onset table, the vowel letter/phoneme sets, clause punctuation, and the number words. The
+// ALGORITHMS that read it stay in code:
+//   g2p.ts        — NFD tone extraction, longest-match onset parse (incl. gi/qu special cases), rhyme lookup,
+//                   and onset+glide+nucleus+tone+coda assembly (the coda regex + rhyme table stay here)
+//   vietnamese.ts — the tokenizer (space-separated monosyllables)
+//   numbers.ts    — the thousands-scale compositor (lăm/mốt/linh sound changes)
+// The closed rhyme set stays in the sibling rhymes.tsv (~370 entries), which the engine looks up.
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA; tones are Chao contour letters. See
+// docs/vi_native_bringup_investigation.md.
+{
+    "language": "vi",
+    "name": "Vietnamese (Northern / Hanoi)",
+    "script": "Latin (with diacritics)",
+    "provenance": "Authored from Vietnamese orthography + Hanoi phonology. This file IS the language data — the native syllable engine reads it directly. The closed rhyme set is derived data (rhymes.tsv).",
+
+    "convention": {
+        "syllable": "onset + (glide) + nucleus + tone + coda; tone as Chao contour letters after the nucleus",
+        "tones": "Northern 6-tone: ngang ˧, huyền ˨˩, sắc ˧˥, hỏi ˧˩˧, ngã ˧ˀ˥, nặng ˨˩ˀ",
+        "onset": "longest orthographic match (ngh/ng/nh/ch…); vowel-initial → glottal ʔ",
+    },
+
+    // Tone: the combining diacritic (extracted via NFD) → Chao contour; `ngang` (no mark) is the default ˧.
+    "tones": {
+        "diacritics": {
+            "̀": "˨˩", // huyền (grave) — low falling 21
+            "́": "˧˥", // sắc (acute) — high rising 35
+            "̉": "˧˩˧", // hỏi (hook above) — dipping 313
+            "̃": "˧ˀ˥", // ngã (tilde) — creaky rising 3ˀ5
+            "̣": "˨˩ˀ", // nặng (dot below) — heavy 21ˀ
+        },
+        "ngang": "˧",
+    },
+
+    // Onsets by LONGEST match (orthographic → IPA); order is load-bearing. qu → kw (u is the glide); gi → z.
+    "onsets": [
+        ["ngh", "ŋ"],
+        ["ng", "ŋ"],
+        ["nh", "ɲ"],
+        ["ch", "t͡ɕ"],
+        ["gh", "ɣ"],
+        ["gi", "z"],
+        ["kh", "x"],
+        ["ph", "f"],
+        ["th", "tʰ"],
+        ["tr", "t͡ɕ"],
+        ["qu", "kw"],
+        ["b", "b"],
+        ["c", "k"],
+        ["d", "z"],
+        ["đ", "ɗ"],
+        ["g", "ɣ"],
+        ["h", "h"],
+        ["k", "k"],
+        ["l", "l"],
+        ["m", "m"],
+        ["n", "n"],
+        ["p", "p"],
+        ["q", "k"],
+        ["r", "z"],
+        ["s", "s"],
+        ["t", "t̪"],
+        ["v", "v"],
+        ["x", "s"],
+    ],
+    // Vowel LETTERS (orthography) and vowel PHONEMES (IPA) — used by the onset/glide parse.
+    "vowelLetters": "aăâeêioôơuưy",
+    "vowelIpa": "aəɛeioɔuɨ",
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words (thousands scale: nghìn/triệu/tỷ), with the common sound changes handled by numbers.ts.
+    "numbers": {
+        "ones": [
+            "không",
+            "một",
+            "hai",
+            "ba",
+            "bốn",
+            "năm",
+            "sáu",
+            "bảy",
+            "tám",
+            "chín",
+        ],
+        "scales": ["", "nghìn", "triệu", "tỷ"], // 10³ⁿ group multipliers
+        "hundred": "trăm",
+        "ten": "mười", // tens digit 1 (mười, not một mươi)
+        "tensMultiplier": "mươi", // tens digit ≥2 (hai mươi)
+        "unitOneAfterTen": "mốt", // 21 → hai mươi mốt
+        "unitFiveAfterTen": "lăm", // 15/25 → mười/hai mươi lăm
+        "zeroTens": "linh", // 105 → một trăm linh năm
+    },
+}
