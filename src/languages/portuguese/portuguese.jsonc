@@ -1,0 +1,83 @@
+// Native canonical-IPA data manifest for European Portuguese (pt-PT), espeak-independent.
+// This file IS the hand-authored context-free language DATA: the accent letter classes, the vowel-letter→IPA
+// table, the unstressed-reduction and oral→nasal maps, the voiced-consonant / liquid sets, the function-word
+// clitic list, clause punctuation, and the number words. The ALGORITHMS that read it stay in code:
+//   g2p.ts        — the left-to-right scan (consonant digraphs + context-sensitive single consonants), nasal
+//                   look-ahead, offglides, and the position-based sibilant voicing
+//   portuguese.ts — stress placement, the reduction/nasalization realize pass, onglide demotion, tokenizer
+//   numbers.ts    — the European-convention cardinal compositor (the "e" connector logic)
+// The lexical CORRECTION table (stressed mid-vowel open/close + grapheme x) stays in the sibling lexicon.tsv /
+// lexicon-manual.tsv (append-heavy wikipron data), which the engine only patches with.
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/pt_native_bringup_investigation.md.
+{
+    "language": "pt",
+    "name": "Portuguese (European, pt-PT)",
+    "script": "Latin",
+    "provenance": "Authored from European Portuguese orthography + phonology (largely rule-governed). This file IS the language data — the native rule engine reads it directly. The two genuinely-lexical axes (stressed mid-vowel quality, grapheme x) are patched from a wikipron-derived correction lexicon (lexicon.tsv).",
+
+    "convention": {
+        "reduction": "unstressed oral vowels reduce — a→ɐ, e→ɨ, o→u (the EP signature)",
+        "nasal": "tilde or a coda m/n nasalizes the nucleus (bom→bõ, falam→fɐlɐ̃w̃)",
+        "sibilants": "single intervocalic s→z; any coda s/z→ʃ (voiceless/final) or ʒ (before a voiced C)",
+        "stress": "written accent wins; else oxytone on r/l/z/x, i/u, nasal, -im/-um; else paroxytone",
+        "midVowel": "bare stressed e/o default CLOSE (e/o); OPEN (ɛ/ɔ) is lexical (correction table)",
+    },
+
+    // Accent letter classes.
+    "accents": {
+        // Accented vowel → its base (unaccented) letter — drives reduction.
+        "toBase": { "á": "a", "à": "a", "â": "a", "ã": "a", "é": "e", "ê": "e", "í": "i", "ó": "o", "ô": "o", "õ": "o", "ú": "u", "ü": "u" },
+        "acuteGrave": "áàéíóú", // open / explicit-stress accents
+        "circumflex": "âêô", // close-quality stressed
+        "tilde": "ãõ", // nasal
+    },
+
+    // Vowel letters, and the front vowels that soften c/g (c→s, g→ʒ).
+    "vowelLetters": "aeiouáàâãéêíóôõúü",
+    "frontLetters": "eiéêíy",
+
+    // Vowel letter → its STRESSED IPA realization (bare e/o default CLOSE; open ɛ/ɔ is lexical). Reduction and
+    // nasalization rewrite these downstream.
+    "vowelIpa": {
+        "a": "a", "á": "a", "à": "a", "ã": "a", "â": "ɐ",
+        "e": "e", "ê": "e", "é": "ɛ", "i": "i", "í": "i",
+        "o": "o", "ô": "o", "õ": "o", "ó": "ɔ", "u": "u", "ú": "u", "ü": "u",
+    },
+
+    // Unstressed-vowel reduction (the EP signature). Keyed by the base vowel letter.
+    "reduce": { "a": "ɐ", "e": "ɨ", "o": "u", "i": "i", "u": "u" },
+    // Oral vowel IPA → its nasal quality (stressed keeps ɛ/ɔ/e/o; reduced e/o already normalised first).
+    "nasal": { "a": "ɐ̃", "ɐ": "ɐ̃", "e": "ẽ", "ɛ": "ẽ", "i": "ĩ", "ɨ": "ɨ̃", "o": "õ", "ɔ": "õ", "u": "ũ" },
+
+    // Consonants that make a preceding coda s/z surface as voiced ʒ (mesmo → meʒmu).
+    "voicedConsonants": ["b", "d", "ɡ", "v", "z", "ʒ", "m", "n", "ɲ", "l", "ɫ", "ʎ", "ɾ", "ʁ", "j", "w"],
+    // Liquids — an obstruent+liquid onset cluster keeps a following high vowel a nucleus (criança → kɾiɐ̃sɐ).
+    "liquids": ["ɾ", "l", "ʁ", "ɫ"],
+
+    // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-stressed in
+    // running text (the ˈ mark is stripped).
+    "functionWords": [
+        "o", "a", "os", "as", "um", "e", "ou", "que", "se", "de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas",
+        "com", "por", "me", "te", "lhe", "vos", "lhes", "meu", "teu", "seu", "sua", "ao", "aos", "à",
+    ],
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+    // Cardinal number words (European convention; the "e" connector logic is in numbers.ts).
+    "numbers": {
+        "small": [
+            "zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove",
+            "dez", "onze", "doze", "treze", "catorze", "quinze", "dezasseis", "dezassete", "dezoito", "dezanove",
+        ],
+        "tens": ["", "", "vinte", "trinta", "quarenta", "cinquenta", "sessenta", "setenta", "oitenta", "noventa"],
+        "hundreds": ["", "cento", "duzentos", "trezentos", "quatrocentos", "quinhentos", "seiscentos", "setecentos", "oitocentos", "novecentos"],
+        "hundredExact": "cem", // exactly 100 (not cento)
+        "thousand": "mil",
+        "million": "milhão",
+        "millionPlural": "milhões",
+        "connector": "e",
+        "decimalConnector": "vírgula", // 3,14 → três vírgula um quatro
+    },
+}

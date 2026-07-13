@@ -6,12 +6,16 @@
  * docs/pt_native_bringup_investigation.md. No lexicon (yet).
  */
 
-const ACCENTED: Record<string, string> = { á: "a", à: "a", â: "a", ã: "a", é: "e", ê: "e", í: "i", ó: "o", ô: "o", õ: "o", ú: "u", ü: "u" };
-const ACUTE_GRAVE = "áàéíóú";  // open/explicit-stress accents
-const CIRCUMFLEX = "âêô";      // close-quality stressed
-const TILDE = "ãõ";           // nasal
-const VOWELS = "aeiouáàâãéêíóôõúü";
-const FRONT = "eiéêíy";        // soften c/g
+import { MANIFEST } from "./manifest.ts";
+
+// Accent classes + letter sets are DATA (portuguese.jsonc).
+const ACCENTED = MANIFEST.accents.toBase;      // accented vowel → base letter
+const ACUTE_GRAVE = MANIFEST.accents.acuteGrave; // open/explicit-stress accents
+const CIRCUMFLEX = MANIFEST.accents.circumflex;  // close-quality stressed
+const TILDE = MANIFEST.accents.tilde;            // nasal
+const VOWELS = MANIFEST.vowelLetters;
+const FRONT = MANIFEST.frontLetters;             // soften c/g
+const VOWEL_IPA = MANIFEST.vowelIpa;             // vowel letter → stressed IPA realization
 
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 const isFront = (c: string): boolean => c !== "" && FRONT.includes(c);
@@ -25,20 +29,8 @@ export interface Seg {
   nasal: boolean;    // nasalized nucleus
 }
 
-/** Stressed IPA realization of a vowel from its letter. Bare e/o default to close e/o (open ɛ/ɔ is lexical). */
-function vowelIpa(ch: string): string {
-  switch (ch) {
-    case "a": case "á": case "à": case "ã": return "a";
-    case "â": return "ɐ";
-    case "e": case "ê": return "e";
-    case "é": return "ɛ";
-    case "i": case "í": return "i";
-    case "o": case "ô": case "õ": return "o";
-    case "ó": return "ɔ";
-    case "u": case "ú": case "ü": return "u";
-    default: return ch;
-  }
-}
+/** Stressed IPA realization of a vowel from its letter (VOWEL_IPA table). Bare e/o default to close e/o. */
+const vowelIpa = (ch: string): string => VOWEL_IPA[ch] ?? ch;
 
 const pushV = (segs: Seg[], ch: string, nasal: boolean): void => {
   segs.push({ ph: vowelIpa(ch), nucleus: true, accent: ACUTE_GRAVE.includes(ch) || CIRCUMFLEX.includes(ch), raw: base(ch), nasal });
@@ -156,8 +148,8 @@ const isVowelPh = (ph: string): boolean => /[aɐɛeiɔouɨ]/.test(ph);
 
 /** s/z realization by position: a single intervocalic s → z; any coda s/z → ʃ (before voiceless / word-final)
  *  or ʒ (before a voiced consonant). ç, ss, soft-c and x are fixed /s/ or /ʃ/ (raw≠"s") and do not voice. */
+const VOICED = new Set(MANIFEST.voicedConsonants);
 export function sibilants(segs: Seg[]): void {
-  const VOICED = new Set(["b", "d", "ɡ", "v", "z", "ʒ", "m", "n", "ɲ", "l", "ɫ", "ʎ", "ɾ", "ʁ", "j", "w"]);
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i]!;
     if (s.ph !== "s" && s.ph !== "z") continue;

@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import type { Phonemizer } from "../../registry.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // Lexical CORRECTION table (Approach A): the engine gets reduction/stress/glides right on its own; the lexicon
 // only patches the two genuinely-lexical axes it cannot predict — the STRESSED mid-vowel quality (open ɛ/ɔ vs
@@ -42,10 +43,10 @@ function lexicon(): Map<string, Corr> {
   return LEXICON;
 }
 
-// Unstressed-vowel reduction (the EP signature). Nasal vowels resist it (handled separately).
-const REDUCE: Record<string, string> = { a: "ɐ", e: "ɨ", o: "u", i: "i", u: "u" };
-// Oral → nasal quality (stressed keeps ɛ/ɔ/e/o; reduced e/o already normalised before this map is applied).
-const NASAL: Record<string, string> = { a: "ɐ̃", ɐ: "ɐ̃", e: "ẽ", ɛ: "ẽ", i: "ĩ", ɨ: "ɨ̃", o: "õ", ɔ: "õ", u: "ũ" };
+// Reduction / nasalization maps are DATA (portuguese.jsonc). Reduction is the EP signature (unstressed a→ɐ,
+// e→ɨ, o→u); nasal vowels resist it. NASAL maps an oral vowel IPA → its nasal quality.
+const REDUCE = MANIFEST.reduce;
+const NASAL = MANIFEST.nasal;
 
 /** Index of the stressed nucleus. Written accent wins; else oxytone (final nucleus) when the word — ignoring a
  *  final -s — ends in r/l/z/x, i/u, a nasal tilde vowel / diphthong, or -im/-um; else paroxytone (penult). */
@@ -68,7 +69,7 @@ const isGlidePh = (ph: string): boolean => ph === "j" || ph === "w" || ph === "j
 /** Post-stress onglide demotion: an UNSTRESSED high vowel (i/u) immediately before another nucleus is a rising
  *  glide, not a syllable of its own (diamante → djɐmɐ̃tɨ, água → aɡwɐ) — but a stressed one stays (dia → diɐ).
  *  Runs after stress so the count is settled; mid-vowel onglides (e/o) are left alone (moeda → muɛðɐ). */
-const LIQUID = new Set(["ɾ", "l", "ʁ", "ɫ"]);
+const LIQUID = new Set(MANIFEST.liquids);
 function onglides(segs: Seg[], stress: number): void {
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i]!;
@@ -130,7 +131,7 @@ export function phonemizeWord(word: string): string {
   return renderWord(word, lexicon().get(word.toLowerCase()));
 }
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14).
 const TOKEN = /([a-zà-ÿ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
 
@@ -138,16 +139,13 @@ const TOKEN = /([a-zà-ÿ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
 function numberTokenToWords(tok: string): string {
   const [intRaw, frac] = tok.split(",");
   let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
-  if (frac !== undefined) words += " vírgula " + [...frac].map((d) => numberToWords(Number(d))).join(" ");
+  if (frac !== undefined) words += ` ${MANIFEST.numbers.decimalConnector} ` + [...frac].map((d) => numberToWords(Number(d))).join(" ");
   return words;
 }
 
 // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-stressed in
-// running text.
-const FUNCTION_WORDS = new Set([
-  "o", "a", "os", "as", "um", "e", "ou", "que", "se", "de", "do", "da", "dos", "das", "em", "no", "na", "nos", "nas",
-  "com", "por", "me", "te", "lhe", "nos", "vos", "lhes", "meu", "teu", "seu", "sua", "ao", "aos", "à",
-]);
+// running text (DATA: portuguese.jsonc).
+const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 
 function wordIpa(word: string): string {
   const ipa = phonemizeWord(word);
