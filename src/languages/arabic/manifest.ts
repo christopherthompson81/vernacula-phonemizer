@@ -4,11 +4,8 @@
  * diacritizer's label / defective-spelling tables) live in the JSONC; the ALGORITHMS that consume them stay in
  * the sibling modules (g2p.ts, numbers.ts, diacritizer.ts, arabic.ts).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface ArabicManifest {
     marks: {
@@ -57,7 +54,5 @@ export interface ArabicManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Arabic data tables (see arabic.jsonc). */
-export const MANIFEST = parseJsonc<ArabicManifest>(readFileSync(join(dir, "arabic.jsonc"), "utf8"));
+export const MANIFEST = loadManifest<ArabicManifest>(import.meta.url, "arabic.jsonc");

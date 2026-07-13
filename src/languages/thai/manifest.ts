@@ -6,11 +6,8 @@
  * parser, the tone-computation functions, the IPA renderer, and word segmentation. The bulk lexica stay as
  * sibling files (dictionary.tsv, seg-words.txt), which the manifest only references.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import type { ThaiConsonantClass, ThaiTone, ThaiToneMark } from "./thaiTone.ts";
 
 export interface ThaiManifest {
@@ -30,12 +27,8 @@ export interface ThaiManifest {
     tcc: string[];
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Thai data tables (see thai.jsonc). */
-export const MANIFEST = parseJsonc<ThaiManifest>(
-    readFileSync(join(dir, "thai.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<ThaiManifest>(import.meta.url, "thai.jsonc");
 
 /** Thai Character Cluster matcher — one inseparable cluster at the START of a string. Compiled once from the
  *  ordered `tcc` pattern list (see thai.jsonc); `segment.ts` uses it to constrain word boundaries. */

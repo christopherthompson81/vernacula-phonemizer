@@ -4,11 +4,8 @@
  * words) lives in the JSONC; the ALGORITHM (longest-match scan + penultimate stress + tone overlay) stays in
  * g2p.ts / hausa.ts / numbers.ts, and the per-word tone lexicon is a separate file (tone.tsv).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface HausaManifest {
     rules: [string, string, boolean][];
@@ -24,9 +21,5 @@ export interface HausaManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Hausa data tables (see hausa.jsonc). */
-export const MANIFEST = parseJsonc<HausaManifest>(
-    readFileSync(join(dir, "hausa.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<HausaManifest>(import.meta.url, "hausa.jsonc");

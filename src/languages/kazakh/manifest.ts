@@ -4,11 +4,8 @@
  * pre-phonemized cardinal number forms. The ALGORITHMS that read them stay in code (g2p.ts / kazakh.ts /
  * numbers.ts): the Cyrillic scan, STRESSPOSN_1RU stress, epenthesis, ɫ→l lightening, and the number compositor.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface KazakhManifest {
     vowels: Record<string, string>;
@@ -25,9 +22,5 @@ export interface KazakhManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Kazakh data tables (see kazakh.jsonc). */
-export const MANIFEST = parseJsonc<KazakhManifest>(
-    readFileSync(join(dir, "kazakh.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<KazakhManifest>(import.meta.url, "kazakh.jsonc");

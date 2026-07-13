@@ -4,11 +4,8 @@
  * morphology tables, number words) live in the JSONC; the ALGORITHMS that consume them stay in the sibling
  * modules (g2p.ts, german.ts, morphology.ts, numbers.ts).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface GermanManifest {
     vowelChars: string;
@@ -45,9 +42,5 @@ export interface GermanManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored German data tables (see german.jsonc). */
-export const MANIFEST = parseJsonc<GermanManifest>(
-    readFileSync(join(dir, "german.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<GermanManifest>(import.meta.url, "german.jsonc");

@@ -7,10 +7,6 @@
  * terminating punctuation → canonical inline pause marks, symbols (% → प्रतिशत, ₹ stripped), and embedded
  * Latin runs → an injected foreign (en) phonemizer.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
@@ -21,7 +17,7 @@ import {
     DEVANAGARI_WORD,
     IPA_VOWELS,
 } from "../../core/unicode.ts";
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface HindiDef extends AbugidaDef {
     postRules: { from: string; to: string }[];
@@ -141,9 +137,8 @@ export function makeNativeHindi(
 export function createHindi(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {
-    const path = join(dirname(fileURLToPath(import.meta.url)), "hindi.jsonc");
     return makeNativeHindi(
-        parseJsonc<HindiDef>(readFileSync(path, "utf8")),
+        loadManifest<HindiDef>(import.meta.url, "hindi.jsonc"),
         loadSharedPhonology(),
         foreign,
     );

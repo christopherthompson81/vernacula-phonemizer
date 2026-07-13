@@ -6,11 +6,8 @@
  * stress, reduction pass, sibilant voicing, and the cardinal compositor. The lexical correction table stays in
  * the sibling lexicon.tsv / lexicon-manual.tsv, which the manifest only references.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface PortugueseManifest {
     accents: {
@@ -41,9 +38,5 @@ export interface PortugueseManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored European Portuguese data tables (see portuguese.jsonc). */
-export const MANIFEST = parseJsonc<PortugueseManifest>(
-    readFileSync(join(dir, "portuguese.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<PortugueseManifest>(import.meta.url, "portuguese.jsonc");

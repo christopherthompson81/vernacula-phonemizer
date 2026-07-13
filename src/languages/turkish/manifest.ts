@@ -5,11 +5,8 @@
  * code (g2p.ts / turkish.ts / numbers.ts): the scan (palatalization, dark-l, ğ), stress + suffix morphology, and
  * the cardinal compositor. Stress exceptions stay in the sibling stress.tsv, which the manifest only references.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface TurkishManifest {
     vowels: {
@@ -32,9 +29,5 @@ export interface TurkishManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Turkish data tables (see turkish.jsonc). */
-export const MANIFEST = parseJsonc<TurkishManifest>(
-    readFileSync(join(dir, "turkish.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<TurkishManifest>(import.meta.url, "turkish.jsonc");

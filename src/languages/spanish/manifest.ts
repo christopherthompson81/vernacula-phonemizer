@@ -4,11 +4,8 @@
  * function-word list, clause punctuation, and the number words. The ALGORITHMS that read them stay in code
  * (g2p.ts / spanish.ts / numbers.ts): the scan, glide classification, spirantization, stress, and the compositor.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface SpanishManifest {
     vowels: {
@@ -34,9 +31,5 @@ export interface SpanishManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Spanish data tables (see spanish.jsonc). */
-export const MANIFEST = parseJsonc<SpanishManifest>(
-    readFileSync(join(dir, "spanish.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<SpanishManifest>(import.meta.url, "spanish.jsonc");

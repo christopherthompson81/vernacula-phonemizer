@@ -5,11 +5,8 @@
  * pure englishG2p.ts via injection) read. The bulk statistical models stay referenced as files (see the jsonc's
  * "models" block); only authorable data lives here.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArpabetDef } from "./englishArpabet.ts";
 
 export interface HeteronymEntry {
@@ -43,9 +40,5 @@ export interface EnglishManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored English data facts (see english.jsonc). */
-export const MANIFEST = parseJsonc<EnglishManifest>(
-    readFileSync(join(dir, "english.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<EnglishManifest>(import.meta.url, "english.jsonc");

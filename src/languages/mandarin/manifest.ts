@@ -5,11 +5,8 @@
  * The ALGORITHMS that read this manifest stay in code (pinyinToIpa.ts / numbers.ts / mandarin.ts): the sandhi
  * scan, the Arabic→Chinese numeral compositor, and the tokenizer.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface CmnManifest {
     tones: Record<string, string>;
@@ -26,9 +23,5 @@ export interface CmnManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Mandarin data tables (see cmn.jsonc). */
-export const MANIFEST = parseJsonc<CmnManifest>(
-    readFileSync(join(dir, "cmn.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<CmnManifest>(import.meta.url, "cmn.jsonc");

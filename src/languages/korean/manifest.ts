@@ -6,11 +6,8 @@
  * neutralisation, stress, and the myriad-group number compositor. The lexical-tensification exceptions stay in
  * the sibling tensification.tsv (append-heavy wikipron data), which the manifest only references.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface KoreanManifest {
     jamo: { onset: string; vowel: string; coda: string };
@@ -38,9 +35,5 @@ export interface KoreanManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Korean data tables (see korean.jsonc). */
-export const MANIFEST = parseJsonc<KoreanManifest>(
-    readFileSync(join(dir, "korean.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<KoreanManifest>(import.meta.url, "korean.jsonc");

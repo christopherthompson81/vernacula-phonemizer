@@ -4,11 +4,8 @@
  * punctuation, number words) live in the JSONC; the ALGORITHMS that consume them stay in the sibling modules
  * (g2p.ts, numbers.ts, czech.ts).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 interface Agreement {
     sg: string;
@@ -34,9 +31,5 @@ export interface CzechManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Czech data tables (see czech.jsonc). */
-export const MANIFEST = parseJsonc<CzechManifest>(
-    readFileSync(join(dir, "czech.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<CzechManifest>(import.meta.url, "czech.jsonc");

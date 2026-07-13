@@ -5,11 +5,8 @@
  * (g2p.ts / vietnamese.ts / numbers.ts): NFD tone extraction, onset parse, rhyme lookup + assembly, the
  * tokenizer, and the number compositor. The closed rhyme set stays in the sibling rhymes.tsv.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface VietnameseManifest {
     tones: {
@@ -32,9 +29,5 @@ export interface VietnameseManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Vietnamese data tables (see vietnamese.jsonc). */
-export const MANIFEST = parseJsonc<VietnameseManifest>(
-    readFileSync(join(dir, "vietnamese.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<VietnameseManifest>(import.meta.url, "vietnamese.jsonc");
