@@ -1,0 +1,116 @@
+// Native canonical-IPA data manifest for Kazakh (kk) — Cyrillic, espeak-independent.
+// This file IS the hand-authored language DATA: the vowel / glide / consonant letter→IPA tables, the front-vowel
+// harmony trigger set, clause punctuation, and the (pre-phonemized) cardinal number forms. The ALGORITHMS that
+// read it stay in code:
+//   g2p.ts     — left-to-right Cyrillic scan: word-initial е→je, л→dark ɫ, glide expansion, nucleus flags
+//   kazakh.ts  — STRESSPOSN_1RU stress, initial-cluster epenthesis, vowel-harmony ɫ→l lightening, tokenizer
+//   numbers.ts — magnitude-group compositor (tens+units glued, groups spaced)
+//
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/kk_native_bringup_investigation.md.
+{
+    "language": "kk",
+    "name": "Kazakh",
+    "script": "Cyrillic",
+    "provenance": "Authored from the Kazakh Cyrillic orthography + standard phonology (a shallow near-1:1 script). This file IS the language data — the native Cyrillic G2P engine reads it directly. Number forms are the lexicalised espeak atoms (irregular stress/segments), captured as finished IPA.",
+
+    "convention": {
+        "eInitial": "word-initial е → je (ел→jel); elsewhere e",
+        "darkL": "л → dark ɫ next to back harmony; lightened to l word-wide when the token carries a front vowel",
+        "stress": "STRESSPOSN_1RU — last nucleus by default; the first reduced ə (ы, or the ə of и=əj) pulls stress to the syllable before it",
+        "relabels": "vs espeak-mode: ғ→ʁ, х→χ, р→r, ү→ʏ; щ→ʃʃ, ц→t͡s, ч→t͡ʃ; ъ/ь→ʔ",
+        "gemination": "doubled consonants stay doubled (кк→kk, сс→ss); no gemination-to-length",
+    },
+
+    // Plain vowel letters → IPA nucleus. ə (from ы) is the only "unstressed" vowel (drives STRESSPOSN_1RU).
+    "vowels": {
+        "а": "ɑ",
+        "ә": "æ",
+        "е": "e",
+        "о": "o",
+        "ө": "ɵ",
+        "ұ": "ʊ",
+        "ү": "ʏ",
+        "ы": "ə",
+        "і": "ɪ",
+        "э": "ɛ",
+    },
+
+    // Iotated / glide letters → a fixed IPA sequence (the vowel part is the nucleus). у is a pure glide (no nucleus).
+    "glides": { "и": "əj", "у": "w", "я": "ja", "ю": "ju", "ё": "jo" },
+
+    // Consonant letters → IPA (context-free; л is handled separately in g2p.ts for dark/clear allophony).
+    "consonants": {
+        "б": "b",
+        "в": "v",
+        "г": "ɡ",
+        "ғ": "ʁ",
+        "д": "d",
+        "ж": "ʒ",
+        "з": "z",
+        "й": "j",
+        "к": "k",
+        "қ": "q",
+        "м": "m",
+        "н": "n",
+        "ң": "ŋ",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "ф": "f",
+        "х": "χ",
+        "һ": "h",
+        "ц": "t͡s",
+        "ч": "t͡ʃ",
+        "ш": "ʃ",
+        "щ": "ʃʃ",
+        "ъ": "ʔ",
+        "ь": "ʔ",
+    },
+
+    // Front vowels — their presence anywhere in a token lightens ALL its dark ɫ → l (vowel harmony).
+    "frontVowels": "eɵʏɪæ",
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words as FINISHED canonical IPA (the espeak atoms — irregular stress/segments, so not routed
+    // through the g2p). tens+units and the hundred-multiplier are glued by the compositor; magnitude groups spaced.
+    "numbers": {
+        "units": [
+            "nˈøɫ",
+            "bˈɪr",
+            "jˈekɪ",
+            "ˈʏʃ",
+            "tˈɵrt",
+            "bˈes",
+            "ˈɑɫtə",
+            "ʒˈetɪ",
+            "sˈeɡɪz",
+            "tˈoʁəz",
+        ], // 0–9
+        "tens": [
+            "",
+            "ˈon",
+            "ʒəjərmˈɑ",
+            "ˈotəz",
+            "qˈərəq",
+            "jˈelw",
+            "ˈɑlpəs",
+            "ʒetpˈɪs",
+            "seksˈen",
+            "toqsˈɑn",
+        ], // ×10
+        "hundred": "ʒˈʏz",
+        "thousand": "mˈəŋ",
+        "million": "məjlɫəjˈon",
+    },
+}
