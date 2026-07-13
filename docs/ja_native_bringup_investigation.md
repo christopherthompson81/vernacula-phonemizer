@@ -79,3 +79,30 @@ Phase 3 (pitch accent ꜜ) remains deferred.
 **Data provenance:** the reading tables (`readings.tsv`, `fallback.tsv`, `adverbs.txt`) are derived from the
 espeak-ng-portable Japanese front-end, whose kanji readings come from JMdict / KANJIDIC (© EDRDG, licensed
 CC BY-SA 4.0) with IPADIC-derived surfaces. Attribution is carried here per the EDRDG licence.
+
+## Run 3 — pitch accent (Phase 3) — 2026-07-12
+
+Added `pitch.ts` (ported from espeak-ng-portable's `japanesePitchAccent.ts` + `render.ts` lookup) + the merged
+`pitch-accent.tsv` (434k keys, 7.7 MB). Tokyo lexical pitch is contrastive (箸 häꜜɕi vs 端 häɕi vs 橋 häɕiꜜ);
+the accent NUCLEUS (a mora index, 0 = heiban) is marked with the IPA downstep `ꜜ` after the nucleus mora.
+
+**Mora structure, not string re-parsing.** espeak's `segmentMorae` re-parses the IPA and relies on moraic ん
+surfacing as `ũ/ŋ/ɴ` (never an onset). OUR engine assimilates ん→`n/m` (cleaner, but ambiguous with onsets —
+`せんたく` would miscount). So `kana.ts` was refactored to expose `kanaToMorae` — the mora LIST it already builds
+(each ː / moraic ん / sokuon っ is its own element) — and the downstep is placed by index, never re-parsing.
+Same-vowel coalescence now tracks `lastVowel` (survives a ː) so stacking still works (`けいい→ke̞ːː`).
+
+**Lookup** (per bunsetsu, surface-first for homograph disambiguation): exact surface (箸) → surface content
+stem with trailing case-particles/copula stripped, kanji-ending only (橋を→橋, 天気です→天気) → reading stem →
+exact reading (はし). Merged lexicon priority: consensus (kanjium/OpenJTalk/UniDic vote) > OpenJTalk-inflected
+> UniDic base. Sources: kanjium (CC BY-SA), OpenJTalk (naist-jdic), UniDic (NINJAL).
+
+**Validation vs the espeak-ng-portable snapshot (WITH ꜜ): 92.54% byte-for-byte exact, 99.56% accounted**
+(2766 `ん→ũ` + 251 sokuon-`hC` deliberate segmental divergences, 490 pitch-position diffs). On the 46,761
+segmentally-identical words, **pitch agrees 98.95%** (46271/46761) — the 490 residual are nucleus-position
+disagreements from merge-priority differences. `phonemizeWord` now carries pitch; `phonemizeWordSegmental` is
+the pitch-free helper for segmental validation.
+
+**Japanese is now COMPLETE** across all three phases: kana core + numbers (Phase 1), kanji readings + bunsetsu
+segmentation (Phase 2), and lexical pitch accent (Phase 3). The census primitives ɯ ɸ ̞ ̈ ɴ ɾ ᵝ plus the
+downstep ꜜ are all emitted.
