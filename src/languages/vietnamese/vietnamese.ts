@@ -5,6 +5,7 @@
  * See docs/vi_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeSyllable } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -20,28 +21,16 @@ const TOKEN = /([a-zà-ỹăâđêôơưÀ-Ỹ̀-̣]+)|(\d+)|([.!?…,;:])/giu;
 
 class VietnamesePhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of input.matchAll(TOKEN)) {
-            if (m[1]) emit(phonemizeSyllable(m[1]));
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeSyllable(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
-                    emit(phonemizeSyllable(wd));
+                    sink.emit(phonemizeSyllable(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 

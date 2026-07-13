@@ -6,6 +6,7 @@
  * See docs/zu_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -73,32 +74,20 @@ const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
 
 class ZuluPhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "",
-            pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of input.matchAll(TOKEN)) {
+        return assembleClauses(input, TOKEN, (m, sink) => {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
-            if (m[1]) for (const part of phonemizeCompound(m[1])) emit(part);
+            if (m[1]) for (const part of phonemizeCompound(m[1])) sink.emit(part);
             // Numbers are ordinary Zulu nouns: tone them via the lexicon like any other word (ishumi→toned), rather
             // than mirroring espeak's untoned number path — the kaikki/Wiktionary referee confirms they carry tone.
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
-                    emit(phonemizeWord(wd));
+                    sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 export function createZulu(): Phonemizer {

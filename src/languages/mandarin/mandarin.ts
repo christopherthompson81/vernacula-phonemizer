@@ -10,6 +10,7 @@ import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { clauseSink } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 const HAN = /\p{Script=Han}/u;
@@ -115,16 +116,9 @@ class MandarinPhonemizer implements Phonemizer {
             return this.pinyinToIpa(input);
 
         const { cp, exempt } = this.substituteNumbers(input);
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
+        // Code-point run scanner (Han / Latin / punctuation), not a single regex — so it drives clauseSink()
+        // directly rather than going through assembleClauses, but reuses the shared emit/pause/flush assembly.
+        const { sink, finish } = clauseSink();
         let i = 0;
         while (i < cp.length) {
             const ch = cp[i]!;
@@ -132,23 +126,24 @@ class MandarinPhonemizer implements Phonemizer {
                 // Han run (may include synthesized numerals)
                 let j = i;
                 while (j < cp.length && HAN.test(cp[j]!)) j++;
-                emit(this.hanRun(cp.slice(i, j), exempt.slice(i, j)));
+                sink.emit(this.hanRun(cp.slice(i, j), exempt.slice(i, j)));
                 i = j;
             } else if (LATIN.test(ch)) {
                 // Latin run → foreign (en)
                 let j = i;
                 while (j < cp.length && LATIN.test(cp[j]!)) j++;
-                emit(this.foreign ? this.foreign(cp.slice(i, j).join("")) : "");
+                sink.emit(
+                    this.foreign ? this.foreign(cp.slice(i, j).join("")) : "",
+                );
                 i = j;
             } else {
                 // punctuation → pending pause; other → skip
                 const mk = CLAUSE_MARK[ch];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
                 i++;
             }
         }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        return finish();
     }
 }
 

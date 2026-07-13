@@ -5,6 +5,7 @@
  * punctuation. See docs/de_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
@@ -170,35 +171,23 @@ const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 class GermanPhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of input.matchAll(TOKEN)) {
-            if (m[1]) emit(phonemizeWord(m[1]));
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
                 for (const wd of numberToWords(Number(intPart)).split(" "))
-                    emit(phonemizeWord(wd));
+                    sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {
-                    emit(phonemizeWord("Komma"));
+                    sink.emit(phonemizeWord("Komma"));
                     for (const d of frac)
                         for (const wd of numberToWords(Number(d)).split(" "))
-                            emit(phonemizeWord(wd));
+                            sink.emit(phonemizeWord(wd));
                 }
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 

@@ -7,6 +7,7 @@
  * See docs/kk_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -72,31 +73,19 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class KazakhPhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "",
-            pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of input.matchAll(TOKEN)) {
+        return assembleClauses(input, TOKEN, (m, sink) => {
             // camelCase compound (proper-noun abbreviations like ҚазМұнайГаз) splits on internal capitals.
             if (m[1])
                 for (const part of m[1].split(/(?<=\p{Ll})(?=\p{Lu})/u))
-                    emit(phonemizeWord(part));
+                    sink.emit(phonemizeWord(part));
             else if (m[2])
                 for (const ipa of numberToIpa(Number(m[2])).split(" "))
-                    emit(ipa); // numbers are pre-phonemized
+                    sink.emit(ipa); // numbers are pre-phonemized
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 export function createKazakh(): Phonemizer {

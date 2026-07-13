@@ -4,6 +4,7 @@
  * words / numbers / punctuation. No lexicon (yet). See docs/pt_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -181,29 +182,17 @@ function wordIpa(word: string): string {
 
 class PortuguesePhonemizer implements Phonemizer {
     text(input: string): string {
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        for (const m of input.matchAll(TOKEN)) {
-            if (m[1]) emit(wordIpa(m[1]));
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(wordIpa(m[1]));
             else if (m[2])
-                emit(
+                sink.emit(
                     numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "),
                 );
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 }
 

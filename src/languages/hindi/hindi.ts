@@ -18,6 +18,7 @@ import {
     IPA_VOWELS,
 } from "../../core/unicode.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { assembleClauses } from "../../core/clauses.ts";
 
 export interface HindiDef extends AbugidaDef {
     postRules: { from: string; to: string }[];
@@ -103,31 +104,18 @@ export function makeNativeHindi(
     }
 
     function text(input: string): string {
-        let out = "";
-        let pending: string | null = null;
-        const emit = (ipa: string): void => {
-            if (ipa === "") return;
-            if (out === "") out = ipa;
-            else if (pending !== null) {
-                out += ` ${pending} ${ipa}`;
-                pending = null;
-            } else out += ` ${ipa}`;
-        };
-        let m: RegExpExecArray | null;
-        while ((m = tokenRe.exec(input)) !== null) {
-            if (m[1]) emit(word(m[1]));
-            else if (m[2]) emit(foreign ? foreign(m[2]) : "");
-            else if (m[3]) emit(number(m[3]));
+        return assembleClauses(input, tokenRe, (m, sink) => {
+            if (m[1]) sink.emit(word(m[1]));
+            else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
+            else if (m[3]) sink.emit(number(m[3]));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
-                if (mk && out !== "") pending = mk;
+                if (mk) sink.pause(mk);
             } else if (m[5]) {
                 if (!strip.includes(m[5]) && symbols[m[5]])
-                    emit(word(symbols[m[5]]!));
+                    sink.emit(word(symbols[m[5]]!));
             }
-        }
-        if (pending !== null && out !== "") out += ` ${pending}`;
-        return out;
+        });
     }
 
     return { word, number, text };
