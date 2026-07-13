@@ -32,5 +32,23 @@
     "chandrabindu": { "char": "ँ" },
     "visarga": { "char": "ஃ" },
     "nukta": { "char": "़" }
+  },
+
+  // Dravidian plosive voicing allophony (a post-pass over the abugida phoneme units). க/ட/த/ப voice; a
+  // following stop is BLOCKED from voicing after a voiceless obstruent or ற (r); it voices after a nasal.
+  "voicing": {
+    "voice": { "k": "ɡ", "ʈ": "ɖ", "t̪": "d̪", "p": "b" },
+    "nasals": ["m", "n", "n̪", "ɳ", "ŋ", "ɲ"],
+    "voicelessBlock": ["k", "t͡ɕ", "ʈ", "t̪", "p", "s", "ʂ", "ɕ", "h", "r"]
+  },
+
+  // Clause-terminating punctuation → canonical inline pause marks.
+  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+
+  // Cardinal number words (Indian grouping: ஆயிரம் 10³ / லட்சம் 10⁵ / கோடி 10⁷). Phonemized by the g2p.
+  "numbers": {
+    "units": ["பூஜ்ஜியம்", "ஒன்று", "இரண்டு", "மூன்று", "நான்கு", "ஐந்து", "ஆறு", "ஏழு", "எட்டு", "ஒன்பது"],
+    "tens": ["", "பத்து", "இருபது", "முப்பது", "நாற்பது", "ஐம்பது", "அறுபது", "எழுபது", "எண்பது", "தொண்ணூறு"],
+    "magnitudes": { "hundred": "நூறு", "thousand": "ஆயிரம்", "lakh": "லட்சம்", "crore": "கோடி" }
   }
 }

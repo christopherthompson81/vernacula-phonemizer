@@ -5,23 +5,19 @@
  * post-pass: the Dravidian plosive voicing allophony and the two-level (primary + secondary) stress, which are
  * context-sensitive and cannot be declarative. See docs/ta_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
-import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
+import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { parseJsonc } from "../../core/jsonc.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 const TIE = "͡";
 const COMBINING = new Set(["̪", "̃", "ᶦ", "ᶷ"]); // dental, nasalisation, superscript i/u (aᶦ/aᶷ diphthong offglides)
-const VOICE: Record<string, string> = { k: "ɡ", "ʈ": "ɖ", "t̪": "d̪", p: "b" }; // க/ட/த/ப voice
-const NASAL_UNITS = new Set(["m", "n", "n̪", "ɳ", "ŋ", "ɲ"]);
-// Units that BLOCK voicing of a following stop: voiceless obstruents + ற (r). The tap ர (ɾ) is NOT here, so a
-// stop voices after it (ர்க→rɡ) — the ற/ர contrast survives because they are distinct phonemes in the string.
-const VOICELESS_BLOCK = new Set(["k", "t͡ɕ", "ʈ", "t̪", "p", "s", "ʂ", "ɕ", "h", "r"]);
+// Dravidian voicing classes are DATA (tamil.jsonc). VOICE: க/ட/த/ப → voiced; VOICELESS_BLOCK: units (voiceless
+// obstruents + ற) that block a following stop from voicing (the tap ர ɾ is NOT here, so a stop voices after it).
+const VOICE = MANIFEST.voicing.voice;
+const NASAL_UNITS = new Set(MANIFEST.voicing.nasals);
+const VOICELESS_BLOCK = new Set(MANIFEST.voicing.voicelessBlock);
 const isVowel = (u: string): boolean => u !== "" && "aɐɪiʊueo".includes(u[0]!);
 
 /** Split an IPA string into phoneme units (base char + its combining marks / tie / length). */
@@ -85,10 +81,7 @@ function stress(units: string[]): string {
 
 let G2P: ((w: string) => string) | undefined;
 function g2p(word: string): string {
-  if (G2P === undefined) {
-    const path = join(dirname(fileURLToPath(import.meta.url)), "tamil.jsonc");
-    G2P = makeAbugidaG2P(parseJsonc<AbugidaDef>(readFileSync(path, "utf8")), loadSharedPhonology());
-  }
+  if (G2P === undefined) G2P = makeAbugidaG2P(MANIFEST, loadSharedPhonology());
   return G2P(word);
 }
 
@@ -97,7 +90,7 @@ export function phonemizeWord(word: string): string {
   return stress(allophony(segment(g2p(word))));
 }
 
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([஀-௿]+)|(\d+)|([.!?…,;:])/gu;
 
 class TamilPhonemizer implements Phonemizer {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./tamil.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord } from "../src/languages/tamil/tamil.ts";
 
 describe("Tamil abugida g2p", () => {
   it("core words, vowels, retroflex, dental", () => {
