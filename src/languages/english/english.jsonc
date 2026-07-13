@@ -327,23 +327,6 @@
     // stopPieces are short common words the compound-splitter must not split on.
     "g2pClasses": {
         "vowelLetters": ["a", "e", "i", "o", "u"],
-        "vowels": [
-            "AA",
-            "AE",
-            "AH",
-            "AO",
-            "AW",
-            "AY",
-            "EH",
-            "ER",
-            "EY",
-            "IH",
-            "IY",
-            "OW",
-            "OY",
-            "UH",
-            "UW",
-        ],
         "voiceless": ["P", "T", "K", "F", "TH", "S", "SH", "CH", "HH"],
         "sibilants": ["S", "Z", "SH", "ZH", "CH", "JH"],
         "stopPieces": [

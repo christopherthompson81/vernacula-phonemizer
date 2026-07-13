@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 import { parseJsonc } from "../../core/jsonc.ts";
 import type { ArpabetDef } from "./englishArpabet.ts";
 
-interface HeteronymEntry {
+export interface HeteronymEntry {
     default: string;
     verb?: string;
     noun?: string;
@@ -33,10 +33,10 @@ export interface EnglishManifest {
         scale: string[]; // thousand, million, … nonillion (10^3 … 10^30)
         ordinals: Record<string, string>;
     };
-    // ARPABET phonetic-class sets consumed (via injection) by the pure OOV G2P.
+    // ARPABET phonetic-class sets consumed (via injection) by the pure OOV G2P. `vowels` is NOT here — the OOV
+    // G2P reuses arpabet.vowels (single source of truth for the ARPABET vowel bases), spliced in at build time.
     g2pClasses: {
         vowelLetters: string[];
-        vowels: string[];
         voiceless: string[];
         sibilants: string[];
         stopPieces: string[];

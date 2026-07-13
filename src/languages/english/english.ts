@@ -12,7 +12,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { MANIFEST } from "./manifest.ts";
+import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 
 import {
     createEnglishG2p,
@@ -28,13 +28,6 @@ import {
     type PosModel,
 } from "./posTagger.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
-
-interface HeteronymEntry {
-    default: string;
-    verb?: string;
-    noun?: string;
-    past?: string;
-}
 
 /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
  *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
@@ -336,7 +329,7 @@ export function createEnglish(): EnglishPhonemizer {
         g2pDict,
         g2pCommon,
         arpabetToIpa,
-        manifest.g2pClasses,
+        { ...manifest.g2pClasses, vowels: manifest.arpabet.vowels }, // OOV G2P reuses arpabet.vowels (single source)
     );
 
     const tagger = new PosTagger(
