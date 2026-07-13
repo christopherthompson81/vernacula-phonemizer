@@ -1,25 +1,41 @@
 {
-  // Universal (NOT language-specific) phonology tables for the native abugida path. These decide WHICH
-  // phoneme is produced — homorganic nasal assimilation — so they are declarative DATA (a reviewer reads
-  // them; the C# port loads the same file). Notation-parsing primitives (which chars are vowels/modifiers/
-  // ties/digits, script block ranges) live in code — see src/Phonemize/native/unicode.ts.
-  //
-  // Loaded once and shared by every native language (registry.ts). The SECOND abugida language reuses
-  // this verbatim instead of copying it.
+    // Universal (NOT language-specific) phonology tables for the native abugida path. These decide WHICH
+    // phoneme is produced — homorganic nasal assimilation — so they are declarative DATA (a reviewer reads
+    // them; the C# port loads the same file). Notation-parsing primitives (which chars are vowels/modifiers/
+    // ties/digits, script block ranges) live in code — see src/Phonemize/native/unicode.ts.
+    //
+    // Loaded once and shared by every native language (registry.ts). The SECOND abugida language reuses
+    // this verbatim instead of copying it.
 
-  // IPA onset → place of articulation. Matched by LONGEST key prefix, so the affricate ties (t͡ʃ, d͡ʑ)
-  // and the dentals (t̪, d̪) win over any shorter prefix. This table is the TRIGGER set for anusvara
-  // homorganic-nasal assimilation, so it lists ONLY plosives + affricates: a nasal consonant is emitted
-  // before a stop (हिंदी→ɦɪ̃n̪d̪, कांग्रेस→kãːŋɡ), but NOT before a fricative/approximant/nasal, where the
-  // vowel is only nasalized (गांव→ɡãːʋ not ɡãːmʋ; कंस→kə̃s). Referee-confirmed on hin_deva.
-  "placeOfArticulation": {
-    "t͡ʃ": "palatal", "d͡ʒ": "palatal", "t͡ɕ": "palatal", "d͡ʑ": "palatal", "c": "palatal", "ɟ": "palatal",
-    "k": "velar", "ɡ": "velar", "q": "velar",
-    "ʈ": "retroflex", "ɖ": "retroflex",
-    "t̪": "dental", "d̪": "dental",
-    "p": "labial", "b": "labial"
-  },
+    // IPA onset → place of articulation. Matched by LONGEST key prefix, so the affricate ties (t͡ʃ, d͡ʑ)
+    // and the dentals (t̪, d̪) win over any shorter prefix. This table is the TRIGGER set for anusvara
+    // homorganic-nasal assimilation, so it lists ONLY plosives + affricates: a nasal consonant is emitted
+    // before a stop (हिंदी→ɦɪ̃n̪d̪, कांग्रेस→kãːŋɡ), but NOT before a fricative/approximant/nasal, where the
+    // vowel is only nasalized (गांव→ɡãːʋ not ɡãːmʋ; कंस→kə̃s). Referee-confirmed on hin_deva.
+    "placeOfArticulation": {
+        "t͡ʃ": "palatal",
+        "d͡ʒ": "palatal",
+        "t͡ɕ": "palatal",
+        "d͡ʑ": "palatal",
+        "c": "palatal",
+        "ɟ": "palatal",
+        "k": "velar",
+        "ɡ": "velar",
+        "q": "velar",
+        "ʈ": "retroflex",
+        "ɖ": "retroflex",
+        "t̪": "dental",
+        "d̪": "dental",
+        "p": "labial",
+        "b": "labial",
+    },
 
-  // place of articulation → the homorganic nasal a preceding anusvara realizes as before a stop of that place.
-  "homorganicNasal": { "velar": "ŋ", "palatal": "ɲ", "retroflex": "ɳ", "dental": "n̪", "labial": "m" }
+    // place of articulation → the homorganic nasal a preceding anusvara realizes as before a stop of that place.
+    "homorganicNasal": {
+        "velar": "ŋ",
+        "palatal": "ɲ",
+        "retroflex": "ɳ",
+        "dental": "n̪",
+        "labial": "m",
+    },
 }

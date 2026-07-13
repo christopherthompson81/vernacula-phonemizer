@@ -25,47 +25,71 @@ import { createZulu } from "./languages/zulu/zulu.ts";
 import { createCzech } from "./languages/czech/czech.ts";
 
 export interface Phonemizer {
-  /** Full text → canonical IPA. */
-  text(input: string): string;
+    /** Full text → canonical IPA. */
+    text(input: string): string;
 }
 
 const cache = new Map<string, Phonemizer>();
 
 /** Get (and memoize) the phonemizer for a language code. */
 export function getPhonemizer(lang: string): Phonemizer {
-  let p = cache.get(lang);
-  if (p === undefined) {
-    p = build(lang);
-    cache.set(lang, p);
-  }
-  return p;
+    let p = cache.get(lang);
+    if (p === undefined) {
+        p = build(lang);
+        cache.set(lang, p);
+    }
+    return p;
 }
 
 function build(lang: string): Phonemizer {
-  switch (lang) {
-    case "en": return createEnglish();
-    // Embedded Latin in Chinese text routes to the English phonemizer (lazy — loaded only if it appears).
-    case "cmn": return createMandarin((latin) => getPhonemizer("en").text(latin));
-    case "es": return createSpanish();
-    case "ar": return createArabic();
-    case "fr": return createFrench();
-    case "pt": return createPortuguese();
-    case "ru": return createRussian();
-    case "de": return createGerman();
-    case "ja": return createJapanese();
-    case "tr": return createTurkish();
-    case "vi": return createVietnamese();
-    case "ta": return createTamil();
-    case "ko": return createKorean();
-    case "ha": return createHausa();
-    case "th": return createThai();
-    case "ff": return createFula();
-    case "si": return createSinhala();
-    case "kk": return createKazakh();
-    case "zu": return createZulu();
-    case "cs": return createCzech();
-    // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
-    case "hi": return createHindi((latin) => getPhonemizer("en").text(latin));
-    default: throw new Error(`vernacula-phonemizer: no phonemizer registered for "${lang}"`);
-  }
+    switch (lang) {
+        case "en":
+            return createEnglish();
+        // Embedded Latin in Chinese text routes to the English phonemizer (lazy — loaded only if it appears).
+        case "cmn":
+            return createMandarin((latin) => getPhonemizer("en").text(latin));
+        case "es":
+            return createSpanish();
+        case "ar":
+            return createArabic();
+        case "fr":
+            return createFrench();
+        case "pt":
+            return createPortuguese();
+        case "ru":
+            return createRussian();
+        case "de":
+            return createGerman();
+        case "ja":
+            return createJapanese();
+        case "tr":
+            return createTurkish();
+        case "vi":
+            return createVietnamese();
+        case "ta":
+            return createTamil();
+        case "ko":
+            return createKorean();
+        case "ha":
+            return createHausa();
+        case "th":
+            return createThai();
+        case "ff":
+            return createFula();
+        case "si":
+            return createSinhala();
+        case "kk":
+            return createKazakh();
+        case "zu":
+            return createZulu();
+        case "cs":
+            return createCzech();
+        // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
+        case "hi":
+            return createHindi((latin) => getPhonemizer("en").text(latin));
+        default:
+            throw new Error(
+                `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
+            );
+    }
 }

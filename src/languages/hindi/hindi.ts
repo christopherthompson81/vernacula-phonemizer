@@ -17,6 +17,7 @@ import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { DEVANAGARI_DIGITS, DEVANAGARI_WORD, IPA_VOWELS } from "../../core/unicode.ts";
+import { parseJsonc } from "../../core/jsonc.ts";
 
 export interface HindiDef extends AbugidaDef {
   postRules: { from: string; to: string }[];
@@ -100,6 +101,5 @@ export function makeNativeHindi(def: HindiDef, phon: Phonology = loadSharedPhono
 /** Load hindi.jsonc (beside this file) and build the Hindi phonemizer. `foreign` handles embedded Latin. */
 export function createHindi(foreign?: ForeignPhonemizer): { text(input: string): string } {
   const path = join(dirname(fileURLToPath(import.meta.url)), "hindi.jsonc");
-  const raw = readFileSync(path, "utf8").replace(/^\s*\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
-  return makeNativeHindi(JSON.parse(raw) as HindiDef, loadSharedPhonology(), foreign);
+  return makeNativeHindi(parseJsonc<HindiDef>(readFileSync(path, "utf8")), loadSharedPhonology(), foreign);
 }

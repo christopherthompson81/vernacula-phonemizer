@@ -5,6 +5,7 @@
  * tone system, sandhi) lives beside this file; this module wires it into the Phonemizer interface.
  */
 import { readFileSync } from "node:fs";
+import { parseJsonc } from "../../core/jsonc.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -120,7 +121,7 @@ export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
     if (tab > 0) syllableIpa.set(line.slice(0, tab), line.slice(tab + 1));
   }
 
-  const manifest = JSON.parse(read("cmn.jsonc").replace(/^\s*\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "")) as {
+  const manifest = parseJsonc(read("cmn.jsonc")) as {
     tones: Record<string, string>;
   };
 

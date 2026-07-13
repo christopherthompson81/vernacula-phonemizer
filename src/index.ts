@@ -10,7 +10,7 @@ export { getPhonemizer, type Phonemizer } from "./registry.ts";
 
 /** Phonemize `text` in language `lang` to canonical IPA. Throws for an unregistered language. */
 export function phonemize(text: string, lang: string): string {
-  return getPhonemizer(lang).text(text);
+    return getPhonemizer(lang).text(text);
 }
 
 // NB bare (undiacritized) Arabic needs an async diacritizer pre-pass, so it is NOT on this sync path — import
