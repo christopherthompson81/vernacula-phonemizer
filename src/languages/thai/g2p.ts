@@ -1,0 +1,83 @@
+/**
+ * Thai grapheme→phoneme engine (authored beyond-espeak). The hard structural work — leading-vowel reorder,
+ * อักษรนำ leaders, the schwa/inherent-vowel algorithm, syllable segmentation, and computed tone — is done by
+ * the ported syllabifier (syllabifier.ts, from our espeak-ng-portable Thai front-end). This module RENDERS the
+ * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly (instead of the espeak L2S path).
+ * Contributes ɤ. See docs/th_native_bringup_investigation.md.
+ */
+import { reorderThaiLeadingVowels, thaiLexicalFixup, thaiPrep, thaiScanSyllables, type ThaiSyllableScan } from "./syllabifier.ts";
+import { THAI_TONE_IPA } from "./thaiTone.ts";
+
+// Onset consonant grapheme → IPA. อ = glottal ʔ; a silent leader is dropped before this map is consulted.
+const INIT: Record<string, string> = {
+  "ก": "k", "ข": "kʰ", "ฃ": "kʰ", "ค": "kʰ", "ฅ": "kʰ", "ฆ": "kʰ", "ง": "ŋ", "จ": "t͡ɕ", "ฉ": "t͡ɕʰ",
+  "ช": "t͡ɕʰ", "ซ": "s", "ฌ": "t͡ɕʰ", "ญ": "j", "ฎ": "d", "ฏ": "t", "ฐ": "tʰ", "ฑ": "tʰ", "ฒ": "tʰ",
+  "ณ": "n", "ด": "d", "ต": "t", "ถ": "tʰ", "ท": "tʰ", "ธ": "tʰ", "น": "n", "บ": "b", "ป": "p", "ผ": "pʰ",
+  "ฝ": "f", "พ": "pʰ", "ฟ": "f", "ภ": "pʰ", "ม": "m", "ย": "j", "ร": "r", "ล": "l", "ว": "w", "ศ": "s",
+  "ษ": "s", "ส": "s", "ห": "h", "ฬ": "l", "อ": "ʔ", "ฮ": "h", "ฤ": "r",
+};
+const CODA: Record<string, string> = {
+  "ก": "k", "ข": "k", "ค": "k", "ฆ": "k", "ง": "ŋ", "จ": "t", "ช": "t", "ซ": "t", "ฎ": "t", "ฏ": "t",
+  "ฐ": "t", "ฑ": "t", "ฒ": "t", "ด": "t", "ต": "t", "ถ": "t", "ท": "t", "ธ": "t", "ศ": "t", "ษ": "t",
+  "ส": "t", "ญ": "n", "ณ": "n", "น": "n", "ร": "n", "ล": "n", "ฬ": "n", "บ": "p", "ป": "p", "พ": "p",
+  "ฟ": "p", "ภ": "p", "ม": "m", "ย": "j", "ว": "w",
+};
+// Written-vowel unit (gs joined) → base quality (no length; ː is added from the scan's `long`). Diphthongs
+// (ua/ia/ɯa and the glide vowels) are in NO_LENGTH so they never take ː.
+const VQUAL: Record<string, string> = {
+  "ะ": "a", "ั": "a", "า": "a", "ิ": "i", "ี": "i", "ึ": "ɯ", "ื": "ɯ", "ือ": "ɯ", "ุ": "u", "ู": "u", "ๅ": "a",
+  "ัว": "ua", "ัวะ": "ua", "ว": "ua",
+  "เ": "e", "เะ": "e", "แ": "ɛ", "แะ": "ɛ", "โ": "o", "โะ": "o",
+  "เาะ": "ɔ", "เอ": "ɤ", "เอะ": "ɤ", "เิ": "ɤ", "เย": "ɤ", "เา": "a", "อ": "ɔ",
+  "เีย": "ia", "เียะ": "ia", "เือ": "ɯa", "เือะ": "ɯa",
+  "ไ": "a", "ใ": "a", "ไย": "a", "ำ": "a",
+};
+const NO_LENGTH = new Set(["ua", "ia", "ɯa"]); // diphthongs — never take ː
+const FORCE_LONG = new Set(["เอ"]);            // เ–อ is ɤː (long) despite the short-sign heuristic
+const RAISABLE = new Set([..."งญณนมยรลฬว"]);
+
+/** Onset IPA for a syllable, dropping a silent ห/อ leader and joining any cluster. */
+function onsetIpa(cs: string[], first: boolean): string {
+  let g = cs;
+  if (g.length >= 2 && ((g[0] === "ห" && RAISABLE.has(g[1]!)) || (first && g[0] === "อ" && g[1] === "ย"))) g = g.slice(1);
+  return g.map((c) => INIT[c] ?? "").join("");
+}
+
+/** Render one scanned syllable to IPA (onset + nucleus + tone + coda). */
+function renderSyllable(s: ThaiSyllableScan, first: boolean, last: boolean): string {
+  const onset = onsetIpa(s.onsetCs, first);
+  let nucleus: string, glide = "", vShort = false;
+  if (s.nucUnit.kind === "C") {
+    nucleus = s.fate === "o" ? "o" : "a"; // inherent vowel (short) — no glottal
+  } else {
+    const gs = s.nucUnit.gs.join("");
+    const q = VQUAL[gs] ?? "a";
+    if (s.nucUnit.glide) glide = s.nucUnit.glide;   // ไ/ใ/ำ → j/m coda (short vowel)
+    else if (gs === "เา") glide = "w";              // เ–า → aw (short)
+    const isEy = gs === "เย";                       // เ–ย → ɤːj (long ɤ, glide j)
+    const long = (s.long || FORCE_LONG.has(gs) || isEy) && !NO_LENGTH.has(q) && (glide === "" || isEy);
+    nucleus = q + (long ? "ː" : "");
+    vShort = !long && glide === "" && !NO_LENGTH.has(q); // an explicit SHORT written vowel, open (not a diphthong)
+  }
+  const coda = s.codaG ? (CODA[s.codaG] ?? "") : glide;
+  const tone = s.tone ? THAI_TONE_IPA[s.tone] : "";
+  // A written SHORT open syllable takes a glottal ʔ coda (จะ→t͡ɕaʔ); inherent-vowel syllables do not.
+  const finalCoda = coda || (last && vShort && s.codaG === "" ? "ʔ" : "");
+  return onset + nucleus + tone + finalCoda;
+}
+
+/** One Thai word → canonical IPA (ported syllabifier + native IPA render). */
+export function phonemizeWord(word: string): string {
+  const reordered = reorderThaiLeadingVowels(thaiLexicalFixup(word));
+  const prep = thaiPrep(reordered);
+  if (!prep) return "";
+  const syls = thaiScanSyllables(prep.units, prep.fates, prep.unitMark, prep.shortMark);
+  // Stress: ˈ before the first syllable's nucleus; ˌ before the last syllable's when there are ≥3.
+  return syls.map((s, i) => {
+    const syl = renderSyllable(s, i === 0, i === syls.length - 1);
+    const mark = i === 0 ? "ˈ" : (i === syls.length - 1 && syls.length >= 3 ? "ˌ" : "");
+    if (mark === "") return syl;
+    const m = syl.match(/[aeiouɛɔɤɯ]/u);
+    return m && m.index !== undefined ? syl.slice(0, m.index) + mark + syl.slice(m.index) : mark + syl;
+  }).join("");
+}
