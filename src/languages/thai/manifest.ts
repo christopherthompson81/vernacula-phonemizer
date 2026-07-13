@@ -11,11 +11,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { parseJsonc } from "../../core/jsonc.ts";
-import type {
-    ThaiConsonantClass,
-    ThaiTone,
-    ThaiToneMark,
-} from "./thaiTone.ts";
+import type { ThaiConsonantClass, ThaiTone, ThaiToneMark } from "./thaiTone.ts";
 
 export interface ThaiManifest {
     onset: Record<string, string>;
@@ -31,6 +27,7 @@ export interface ThaiManifest {
         ipa: Record<ThaiTone, string>;
     };
     clausePunctuation: Record<string, string>;
+    tcc: string[];
 }
 
 const dir = dirname(fileURLToPath(import.meta.url));
@@ -38,4 +35,11 @@ const dir = dirname(fileURLToPath(import.meta.url));
 /** The consolidated hand-authored Thai data tables (see thai.jsonc). */
 export const MANIFEST = parseJsonc<ThaiManifest>(
     readFileSync(join(dir, "thai.jsonc"), "utf8"),
+);
+
+/** Thai Character Cluster matcher — one inseparable cluster at the START of a string. Compiled once from the
+ *  ordered `tcc` pattern list (see thai.jsonc); `segment.ts` uses it to constrain word boundaries. */
+export const THAI_TCC_RE = new RegExp(
+    "^(?:" + MANIFEST.tcc.join("|") + ")",
+    "u",
 );
