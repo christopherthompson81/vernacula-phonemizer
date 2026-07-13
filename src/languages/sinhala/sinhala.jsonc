@@ -1,54 +1,174 @@
 {
-  // Sinhala (si) abugida definition for the shared core/abugida.ts. Canonical IPA forms baked in (ණ→n, ළ→l
-  // merged; ත→t̪ dental; ව→ʋ; ᶯɖ preserved). Schwa (inherent a↔ə), geminates, and stress are a post-pass in
-  // sinhala.ts. Anusvara ං is pre-rewritten to ඞ් (coda ŋ). See docs/si_native_bringup_investigation.md.
-  "language": "si", "name": "Sinhala", "script": "Sinhala", "inherentVowel": "a",
-  "consonants": {
-    "ක": { "ipa": "k" }, "ඛ": { "ipa": "kʰ" }, "ග": { "ipa": "ɡ" }, "ඝ": { "ipa": "ɡʰ" }, "ඞ": { "ipa": "ŋ" },
-    "ඟ": { "ipa": "ᵑɡ" }, "ච": { "ipa": "t͡ʃ" }, "ඡ": { "ipa": "t͡ʃh" }, "ජ": { "ipa": "d͡ʒ" }, "ඣ": { "ipa": "d͡ʒh" },
-    "ඤ": { "ipa": "ɲ" }, "ඥ": { "ipa": "ɡn" }, "ට": { "ipa": "ʈ" }, "ඨ": { "ipa": "ʈʰ" }, "ඩ": { "ipa": "ɖ" },
-    "ඪ": { "ipa": "ɖ" }, "ණ": { "ipa": "n" }, "ඬ": { "ipa": "ᶯɖ" }, "ත": { "ipa": "t̪" }, "ථ": { "ipa": "t̪ʰ" },
-    "ද": { "ipa": "d̪" }, "ධ": { "ipa": "d̪ʰ" }, "න": { "ipa": "n" }, "ඳ": { "ipa": "ⁿd̪" }, "ප": { "ipa": "p" },
-    "ඵ": { "ipa": "pʰ" }, "බ": { "ipa": "b" }, "භ": { "ipa": "bʰ" }, "ම": { "ipa": "m" }, "ඹ": { "ipa": "ᵐb" },
-    "ය": { "ipa": "j" }, "ර": { "ipa": "r" }, "ල": { "ipa": "l" }, "ව": { "ipa": "ʋ" }, "ශ": { "ipa": "s" },
-    "ෂ": { "ipa": "ʃ" }, "ස": { "ipa": "s" }, "හ": { "ipa": "h" }, "ළ": { "ipa": "l" }, "ෆ": { "ipa": "f" }
-  },
-  "independentVowels": {
-    "අ": { "ipa": "a" }, "ආ": { "ipa": "aː" }, "ඇ": { "ipa": "æ" }, "ඈ": { "ipa": "æː" }, "ඉ": { "ipa": "i" },
-    "ඊ": { "ipa": "iː" }, "උ": { "ipa": "u" }, "ඌ": { "ipa": "uː" }, "එ": { "ipa": "e" }, "ඒ": { "ipa": "eː" },
-    "ඓ": { "ipa": "aᶦ" }, "ඔ": { "ipa": "o" }, "ඕ": { "ipa": "oː" }, "ඖ": { "ipa": "aᶷ" }, "ඍ": { "ipa": "ru" }, "ඎ": { "ipa": "ruː" }
-  },
-  "vowelSigns": {
-    "ා": { "ipa": "aː" }, "ැ": { "ipa": "æ" }, "ෑ": { "ipa": "æː" }, "ි": { "ipa": "i" }, "ී": { "ipa": "iː" },
-    "ු": { "ipa": "u" }, "ූ": { "ipa": "uː" }, "ෙ": { "ipa": "e" }, "ේ": { "ipa": "eː" }, "ෛ": { "ipa": "aᶦ" },
-    "ො": { "ipa": "o" }, "ෝ": { "ipa": "oː" }, "ෞ": { "ipa": "aᶷ" }, "ෘ": { "ipa": "ru" }, "ෲ": { "ipa": "ruː" }
-  },
-  "signs": {
-    "virama": { "char": "්" }, "anusvara": { "char": "ఀ" }, "chandrabindu": { "char": "ఀ" },
-    "visarga": { "char": "ඃ" }, "nukta": { "char": "఼" }
-  },
+    // Sinhala (si) abugida definition for the shared core/abugida.ts. Canonical IPA forms baked in (ණ→n, ළ→l
+    // merged; ත→t̪ dental; ව→ʋ; ᶯɖ preserved). Schwa (inherent a↔ə), geminates, and stress are a post-pass in
+    // sinhala.ts. Anusvara ං is pre-rewritten to ඞ් (coda ŋ). See docs/si_native_bringup_investigation.md.
+    "language": "si",
+    "name": "Sinhala",
+    "script": "Sinhala",
+    "inherentVowel": "a",
+    "consonants": {
+        "ක": { "ipa": "k" },
+        "ඛ": { "ipa": "kʰ" },
+        "ග": { "ipa": "ɡ" },
+        "ඝ": { "ipa": "ɡʰ" },
+        "ඞ": { "ipa": "ŋ" },
+        "ඟ": { "ipa": "ᵑɡ" },
+        "ච": { "ipa": "t͡ʃ" },
+        "ඡ": { "ipa": "t͡ʃh" },
+        "ජ": { "ipa": "d͡ʒ" },
+        "ඣ": { "ipa": "d͡ʒh" },
+        "ඤ": { "ipa": "ɲ" },
+        "ඥ": { "ipa": "ɡn" },
+        "ට": { "ipa": "ʈ" },
+        "ඨ": { "ipa": "ʈʰ" },
+        "ඩ": { "ipa": "ɖ" },
+        "ඪ": { "ipa": "ɖ" },
+        "ණ": { "ipa": "n" },
+        "ඬ": { "ipa": "ᶯɖ" },
+        "ත": { "ipa": "t̪" },
+        "ථ": { "ipa": "t̪ʰ" },
+        "ද": { "ipa": "d̪" },
+        "ධ": { "ipa": "d̪ʰ" },
+        "න": { "ipa": "n" },
+        "ඳ": { "ipa": "ⁿd̪" },
+        "ප": { "ipa": "p" },
+        "ඵ": { "ipa": "pʰ" },
+        "බ": { "ipa": "b" },
+        "භ": { "ipa": "bʰ" },
+        "ම": { "ipa": "m" },
+        "ඹ": { "ipa": "ᵐb" },
+        "ය": { "ipa": "j" },
+        "ර": { "ipa": "r" },
+        "ල": { "ipa": "l" },
+        "ව": { "ipa": "ʋ" },
+        "ශ": { "ipa": "s" },
+        "ෂ": { "ipa": "ʃ" },
+        "ස": { "ipa": "s" },
+        "හ": { "ipa": "h" },
+        "ළ": { "ipa": "l" },
+        "ෆ": { "ipa": "f" },
+    },
+    "independentVowels": {
+        "අ": { "ipa": "a" },
+        "ආ": { "ipa": "aː" },
+        "ඇ": { "ipa": "æ" },
+        "ඈ": { "ipa": "æː" },
+        "ඉ": { "ipa": "i" },
+        "ඊ": { "ipa": "iː" },
+        "උ": { "ipa": "u" },
+        "ඌ": { "ipa": "uː" },
+        "එ": { "ipa": "e" },
+        "ඒ": { "ipa": "eː" },
+        "ඓ": { "ipa": "aᶦ" },
+        "ඔ": { "ipa": "o" },
+        "ඕ": { "ipa": "oː" },
+        "ඖ": { "ipa": "aᶷ" },
+        "ඍ": { "ipa": "ru" },
+        "ඎ": { "ipa": "ruː" },
+    },
+    "vowelSigns": {
+        "ා": { "ipa": "aː" },
+        "ැ": { "ipa": "æ" },
+        "ෑ": { "ipa": "æː" },
+        "ි": { "ipa": "i" },
+        "ී": { "ipa": "iː" },
+        "ු": { "ipa": "u" },
+        "ූ": { "ipa": "uː" },
+        "ෙ": { "ipa": "e" },
+        "ේ": { "ipa": "eː" },
+        "ෛ": { "ipa": "aᶦ" },
+        "ො": { "ipa": "o" },
+        "ෝ": { "ipa": "oː" },
+        "ෞ": { "ipa": "aᶷ" },
+        "ෘ": { "ipa": "ru" },
+        "ෲ": { "ipa": "ruː" },
+    },
+    "signs": {
+        "virama": { "char": "්" },
+        "anusvara": { "char": "ఀ" },
+        "chandrabindu": { "char": "ఀ" },
+        "visarga": { "char": "ඃ" },
+        "nukta": { "char": "఼" },
+    },
 
-  // Anusvara ං is a homorganic nasal set by the FOLLOWING consonant. Each class lists the trigger consonants and
-  // the nasal-coda letter (nasal + virama) that ං is rewritten to; anything else falls to "default" (ම් = m).
-  "anusvara": {
-    "default": "ම්",
-    "classes": [
-      { "triggers": "කඛගඝඞහ", "nasal": "ඞ්", "note": "velar + h → ŋ (ඟ→m is an espeak quirk)" },
-      { "triggers": "චඡජඣඤ", "nasal": "ඤ්", "note": "palatal → ɲ" },
-      { "triggers": "ටඨඩඪණඬ", "nasal": "ණ්", "note": "retroflex → n" }
-    ]
-  },
+    // Anusvara ං is a homorganic nasal set by the FOLLOWING consonant. Each class lists the trigger consonants and
+    // the nasal-coda letter (nasal + virama) that ං is rewritten to; anything else falls to "default" (ම් = m).
+    "anusvara": {
+        "default": "ම්",
+        "classes": [
+            {
+                "triggers": "කඛගඝඞහ",
+                "nasal": "ඞ්",
+                "note": "velar + h → ŋ (ඟ→m is an espeak quirk)",
+            },
+            { "triggers": "චඡජඣඤ", "nasal": "ඤ්", "note": "palatal → ɲ" },
+            { "triggers": "ටඨඩඪණඬ", "nasal": "ණ්", "note": "retroflex → n" },
+        ],
+    },
 
-  // Clause-terminating punctuation → canonical inline pause marks.
-  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
 
-  // AUTHORED cardinal number words (espeak's si number path is broken → no gold). Magnitudes ≥100 use the
-  // analytic multiplier form (දෙක සියය "two hundred"). The words are phonemized by the g2p.
-  "numbers": {
-    "units": ["බින්දුව", "එක", "දෙක", "තුන", "හතර", "පහ", "හය", "හත", "අට", "නවය"],
-    "teens": ["දහය", "එකොළහ", "දොළහ", "දහතුන", "දාහතර", "පහළොව", "දහසය", "දහහත", "දහඅට", "දහනවය"],
-    "tensWord": { "2": "විස්ස", "3": "තිහ", "4": "හතළිහ", "5": "පනහ", "6": "හැට", "7": "හැත්තෑව", "8": "අසූව", "9": "අනූව" },
-    "tensStem": { "2": "විසි", "3": "තිස්", "4": "හතළිස්", "5": "පනස්", "6": "හැට", "7": "හැත්තෑ", "8": "අසූ", "9": "අනූ" },
-    "magnitudes": { "hundred": "සියය", "thousand": "දහස", "lakh": "ලක්ෂය", "million": "මිලියනය" }
-  }
+    // AUTHORED cardinal number words (espeak's si number path is broken → no gold). Magnitudes ≥100 use the
+    // analytic multiplier form (දෙක සියය "two hundred"). The words are phonemized by the g2p.
+    "numbers": {
+        "units": [
+            "බින්දුව",
+            "එක",
+            "දෙක",
+            "තුන",
+            "හතර",
+            "පහ",
+            "හය",
+            "හත",
+            "අට",
+            "නවය",
+        ],
+        "teens": [
+            "දහය",
+            "එකොළහ",
+            "දොළහ",
+            "දහතුන",
+            "දාහතර",
+            "පහළොව",
+            "දහසය",
+            "දහහත",
+            "දහඅට",
+            "දහනවය",
+        ],
+        "tensWord": {
+            "2": "විස්ස",
+            "3": "තිහ",
+            "4": "හතළිහ",
+            "5": "පනහ",
+            "6": "හැට",
+            "7": "හැත්තෑව",
+            "8": "අසූව",
+            "9": "අනූව",
+        },
+        "tensStem": {
+            "2": "විසි",
+            "3": "තිස්",
+            "4": "හතළිස්",
+            "5": "පනස්",
+            "6": "හැට",
+            "7": "හැත්තෑ",
+            "8": "අසූ",
+            "9": "අනූ",
+        },
+        "magnitudes": {
+            "hundred": "සියය",
+            "thousand": "දහස",
+            "lakh": "ලක්ෂය",
+            "million": "මිලියනය",
+        },
+    },
 }
