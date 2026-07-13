@@ -14,8 +14,8 @@ import { fileURLToPath } from "node:url";
 
 import { MANIFEST } from "./manifest.ts";
 
-const SHADDA = "ّ"; // structural Arabic mark (the script), not authored data
-const LABEL_VOWEL_MARK = MANIFEST.diacritizer.labelMarks; // label → combining mark (authored data)
+const SHADDA = MANIFEST.marks.shadda;
+const LABEL_VOWEL_MARK = MANIFEST.diacritizer.labelMarks; // label → combining mark
 const MARK_TO_VOWEL: Record<string, string> = Object.fromEntries(Object.entries(LABEL_VOWEL_MARK).map(([k, v]) => [v, k]));
 const IS_MARK = new Set([SHADDA, ...Object.keys(MARK_TO_VOWEL)]);
 

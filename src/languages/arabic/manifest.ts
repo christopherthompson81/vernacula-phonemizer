@@ -9,6 +9,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export interface ArabicManifest {
+  marks: {
+    fatha: string; kasra: string; damma: string; sukun: string; shadda: string;
+    fathatan: string; kasratan: string; dammatan: string; daggerAlif: string;
+  };
+  letters: { alif: string; alifMaqsura: string; alifMadda: string; taaMarbuta: string; waw: string; ya: string };
   consonants: Record<string, string>;
   sunLetters: string[];
   proclitics: Record<string, string>;

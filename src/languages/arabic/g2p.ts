@@ -8,15 +8,15 @@
 
 import { MANIFEST } from "./manifest.ts";
 
-// Authored DATA (consonant map, sun letters, proclitics) is consolidated in arabic.jsonc.
+// All Arabic DATA — script inventory + maps — is consolidated in arabic.jsonc; here we bind it to the readable
+// local names the parsing algorithm below uses.
 const CONS = MANIFEST.consonants;
 const SUN = new Set(MANIFEST.sunLetters);
 const PROCLITIC = MANIFEST.proclitics;
-// Structural Arabic SCRIPT characters the parser switches on (the harakat marks and special letters) — these
-// are the script, not authored data, so they stay in code.
-const FATHA = "َ", KASRA = "ِ", DAMMA = "ُ", SUKUN = "ْ", SHADDA = "ّ";
-const TANWIN_A = "ً", TANWIN_I = "ٍ", TANWIN_U = "ٌ", DAGGER = "ٰ";
-const ALIF = "ا", ALIF_MAQSURA = "ى", ALIF_MADDA = "آ", TAA_MARBUTA = "ة", WAW = "و", YA = "ي";
+const M = MANIFEST.marks, L = MANIFEST.letters;
+const FATHA = M.fatha, KASRA = M.kasra, DAMMA = M.damma, SUKUN = M.sukun, SHADDA = M.shadda;
+const TANWIN_A = M.fathatan, TANWIN_I = M.kasratan, TANWIN_U = M.dammatan, DAGGER = M.daggerAlif;
+const ALIF = L.alif, ALIF_MAQSURA = L.alifMaqsura, ALIF_MADDA = L.alifMadda, TAA_MARBUTA = L.taaMarbuta, WAW = L.waw, YA = L.ya;
 const HARAKAT = new Set([FATHA, KASRA, DAMMA, SUKUN, SHADDA, TANWIN_A, TANWIN_I, TANWIN_U, DAGGER]);
 
 export interface Seg {
