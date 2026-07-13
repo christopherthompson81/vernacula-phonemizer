@@ -111,3 +111,30 @@ What would actually be needed:
 DECISION: ship nothing (no guard net-improved). The pre-accenting suffix model (Run 2/3, 89.58% exact) stands
 as the honest floor for a rule-based engine; the remaining ~8.8% stress residual needs one of the two heavier
 pieces above. The wooorm dict path is recorded here for a future full-analyzer attempt.
+
+## Run 5 — kaikki (independent) stress check + the espeak-idiosyncrasy finding — 2026-07-12
+Checked whether kaikki (Wiktionary) carries Turkish stress — it DOES: ~10.2k stress-marked words extracted
+(word→stressed-syllable). This is an INDEPENDENT reference (not espeak). Two findings, one big:
+
+**The "non-final lexical roots" were largely an espeak ARTIFACT.** The words I'd flagged as needing non-final
+stress (durum, gece, insan, masa, değil, yüksek, burada) are marked FINAL by Wiktionary
+(masa /mɑˈsɑ/, gece /ɟeˈd͡ʒɛ/, insan /inˈsan/, durum /duˈɾum/) — which is what OUR final-default engine already
+outputs. It is espeak that marks them non-final (initial). So there is nothing to "generate" for them; espeak
+is the outlier and our output is the standard one.
+
+**Quantified on the 5150-word overlap with kaikki stress:** OUR engine agrees with kaikki 75.3%; the ESPEAK
+gold agrees with kaikki only 73.9%. espeak marks NON-final where kaikki says final in 662 words. So our
+rule-based engine is marginally MORE aligned with the independent reference than espeak is — meaning the
+89.58%-vs-espeak number UNDERSTATES quality (a chunk of our "misses vs espeak" are cases where we match
+Wiktionary and espeak does not).
+
+**But kaikki disagrees with espeak in BOTH directions** (kaikki marks non-final where espeak+we say final:
+şimdi, dünya, hangi, evet, …), and these include genuinely contested common words — Turkish stress has real
+cross-reference disagreement, and kaikki has extraction noise. So there is no clean oracle and no clean
+kaikki-only lexicon win (it would trade espeak-agreement for kaikki-agreement on ~683 contested words).
+
+SHIPPED: a high-precision CONSENSUS non-final stress lexicon (123 new entries) — only words where espeak AND
+kaikki agree on the SAME non-final syllable (ama, sadece, böyle, lütfen, henüz, …). Improves both metrics,
+non-circular (kaikki independently confirms each espeak position). Full pipeline exact 89.58%→89.68%.
+NOT shipped: the broader 1636-word kaikki-only non-final set (conflicts with espeak on the contested words,
+noisier). The genuinely-lexical, cross-reference-agreed non-final vocabulary is small; the rest is contested.
