@@ -18,10 +18,14 @@ canonical output is the oracle.
 - **Stress**: primary `ˈ` on syllable 1; secondary `ˌ` on even nucleus indices (2, 4, 6…) EXCEPT the last —
   so 1–3-syllable words carry only the primary, 4+ get ˌ on syllables 3, 5, 7…
 
-## Engine (g2p.ts)
-Parse the script into aksharas (consonant + inherent/sign vowel, or independent vowel; pulli → bare consonant),
-keeping each consonant's source letter for allophony. Then resolve geminates (Cː; ற்ற→ʈr, ற்ச→t͡ɕː), the
-voicing allophony above, and place the two-level stress. No lexicon.
+## Engine (shared abugida core + Tamil post-pass)
+The systematic abugida parsing (consonant + inherent/sign vowel, virama clusters, independent vowels, nukta) is
+handled by the SHARED `core/abugida.ts` interpreter driven by `tamil.jsonc` — the SAME engine Hindi uses (the
+`~80-line` declarative core is portable to C# by loading the same data file). Tamil-specifics are layered on top
+in `tamil.ts` as a post-pass over the core's phoneme string: segment into phoneme units, resolve geminates
+(Cː; ற்ற→ʈr, ற்ச→t͡ɕː) and the voicing allophony above (the ற/ர contrast survives because they are distinct
+phonemes `r`/`ɾ` in the string), then place the two-level stress. No lexicon. (Originally a bespoke parser;
+refactored onto the shared core — same result, +79 words from the core's more robust cluster handling.)
 
 ## Validation
 vs the espeak-ng-portable canonical gold (50k Tamil-script words): **exact 88.7%** (stress-only diff 0 after

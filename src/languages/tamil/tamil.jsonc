@@ -1,0 +1,36 @@
+{
+  // Tamil (ta) abugida definition — consumed by the shared core/abugida.ts interpreter (same engine as Hindi).
+  // Base (citation) consonant phonemes; the Dravidian plosive voicing allophony + two-level stress are applied
+  // as a post-pass in tamil.ts (they are context-sensitive, not declarative). See docs/ta_native_bringup_investigation.md.
+  "language": "ta",
+  "name": "Tamil",
+  "script": "Tamil",
+  "inherentVowel": "ɐ",
+  "consonants": {
+    "க": { "ipa": "k" }, "ங": { "ipa": "ŋ" }, "ச": { "ipa": "t͡ɕ" }, "ஞ": { "ipa": "ɲ" },
+    "ட": { "ipa": "ʈ" }, "ண": { "ipa": "ɳ" }, "த": { "ipa": "t̪" }, "ந": { "ipa": "n̪" },
+    "ப": { "ipa": "p" }, "ம": { "ipa": "m" }, "ய": { "ipa": "j" }, "ர": { "ipa": "ɾ" },
+    "ல": { "ipa": "l" }, "வ": { "ipa": "ʋ" }, "ழ": { "ipa": "ɻ" }, "ள": { "ipa": "ɭ" },
+    "ற": { "ipa": "r" }, "ன": { "ipa": "n" }, "ஜ": { "ipa": "d͡ʒ" }, "ஷ": { "ipa": "ʂ" },
+    "ஸ": { "ipa": "s" }, "ஹ": { "ipa": "h" }, "ஶ": { "ipa": "ɕ" }
+  },
+  "independentVowels": {
+    "அ": { "ipa": "a" }, "ஆ": { "ipa": "aː" }, "இ": { "ipa": "ɪ" }, "ஈ": { "ipa": "iː" },
+    "உ": { "ipa": "ʊ" }, "ஊ": { "ipa": "uː" }, "எ": { "ipa": "e" }, "ஏ": { "ipa": "eː" },
+    "ஐ": { "ipa": "aᶦ" }, "ஒ": { "ipa": "o" }, "ஓ": { "ipa": "oː" }, "ஔ": { "ipa": "aᶷ" }
+  },
+  "vowelSigns": {
+    "ா": { "ipa": "aː" }, "ி": { "ipa": "ɪ" }, "ீ": { "ipa": "iː" }, "ு": { "ipa": "ʊ" },
+    "ூ": { "ipa": "uː" }, "ெ": { "ipa": "e" }, "ே": { "ipa": "eː" }, "ை": { "ipa": "aᶦ" },
+    "ொ": { "ipa": "o" }, "ோ": { "ipa": "oː" }, "ௌ": { "ipa": "aᶷ" }
+  },
+  // Tamil has only the pulli (virama) + aytham (ஃ, visarga-like → [h]). Anusvara / chandrabindu / nukta do not
+  // occur in Tamil script; they are set to inert (non-Tamil) placeholder chars so the shared core never fires them.
+  "signs": {
+    "virama": { "char": "்" },
+    "anusvara": { "char": "ं" },
+    "chandrabindu": { "char": "ँ" },
+    "visarga": { "char": "ஃ" },
+    "nukta": { "char": "़" }
+  }
+}
