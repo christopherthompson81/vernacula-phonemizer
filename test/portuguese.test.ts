@@ -86,11 +86,11 @@ describe("european portuguese canonical IPA", () => {
         expect(phonemizeWord("jardins")).toBe("ʒɐɾdˈĩʃ"); // -ins plural stays oxytone
     });
 
-    // Independent adjudicated micro-gold (tools/pt-gold.tsv) — hand-transcribed EP, not Wiktionary-derived.
+    // Independent adjudicated micro-gold (also the eval's secondary referee) — hand-transcribed EP, not Wiktionary-derived.
     // Locks the engine against regressions; the lone known miss is the contested metaphonic pair neto (ˈnetu).
     test("adjudicated micro-gold (independent referee)", () => {
         const rows = readFileSync(
-            new URL("../tools/pt-gold.tsv", import.meta.url),
+            new URL("../tools/referee-eval/referees/pt.gold-adjudicated.tsv", import.meta.url),
             "utf8",
         ).split("\n");
         let match = 0,
