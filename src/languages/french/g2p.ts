@@ -5,81 +5,17 @@
  * (french.ts). See docs/fr_native_bringup_investigation.md for the convention (ø œ ʁ ɥ ɲ nasals).
  */
 
-const VOWEL_LETTERS = "aeiouyàâäéèêëîïôöùûüœæ";
+import { MANIFEST } from "./manifest.ts";
+
+// All French DATA — letter inventory, oral/nasal vowel-multigraph tables, yod groups, sounded-final set — is
+// consolidated in french.jsonc; here we bind it to the local names the scanning algorithm below uses.
+const VOWEL_LETTERS = MANIFEST.vowelLetters;
 const isV = (c: string): boolean => c !== "" && VOWEL_LETTERS.includes(c);
-
-// Oral vowel multigraphs (longest first). Nasal groups are handled separately (they depend on a following
-// consonant/boundary). Values are IPA; "" for a glide-forming vowel handled elsewhere is not used here.
-const VOWEL_GROUPS: [string, string][] = [
-    ["eau", "o"],
-    ["eaux", "o"],
-    ["ou", "u"],
-    ["au", "o"],
-    ["où", "u"],
-    ["oû", "u"],
-    ["oi", "wa"],
-    ["oy", "waj"],
-    ["ei", "ɛ"],
-    ["ay", "ɛj"],
-    ["ey", "ɛj"],
-    ["é", "e"],
-    ["è", "ɛ"],
-    ["ê", "ɛ"],
-    ["ë", "ɛ"],
-    ["â", "a"],
-    ["à", "a"],
-    ["ù", "y"],
-    ["û", "y"],
-    ["î", "i"],
-    ["ï", "i"],
-    ["ô", "o"],
-    ["ö", "o"],
-    ["ü", "y"],
-];
-
-// Nasal vowel groups (vowel+n/m). Applied when NOT followed by a vowel and NOT doubled (année, bonne = oral).
-const NASAL_GROUPS: [string, string][] = [
-    ["ain", "ɛ̃"],
-    ["aim", "ɛ̃"],
-    ["ein", "ɛ̃"],
-    ["eim", "ɛ̃"],
-    ["oin", "wɛ̃"],
-    ["ien", "jɛ̃"],
-    ["ion", "jɔ̃"],
-    ["yn", "ɛ̃"],
-    ["ym", "ɛ̃"],
-    ["an", "ɑ̃"],
-    ["am", "ɑ̃"],
-    ["en", "ɑ̃"],
-    ["em", "ɑ̃"],
-    ["in", "ɛ̃"],
-    ["im", "ɛ̃"],
-    ["on", "ɔ̃"],
-    ["om", "ɔ̃"],
-    ["un", "œ̃"],
-    ["um", "œ̃"],
-];
-
-// Final consonants that are normally PRONOUNCED (the "careful" set c r f l + q k b g). Others are silent
-// word-finally. -er / -ez / -et endings are handled as special cases.
-const FINAL_SOUNDED = new Set(["c", "r", "f", "l", "q", "k"]);
-
-// vowel + ill/il → yod (a "mouillé" glide): double-l anywhere, single-l only word-finally. Longest first.
-const YOD_DOUBLE: [string, string][] = [
-    ["ouill", "uj"],
-    ["euill", "œj"],
-    ["aill", "aj"],
-    ["eill", "ɛj"],
-    ["ueill", "œj"],
-    ["uill", "ɥij"],
-];
-const YOD_FINAL: [string, string][] = [
-    ["ouil", "uj"],
-    ["euil", "œj"],
-    ["ail", "aj"],
-    ["eil", "ɛj"],
-    ["ueil", "œj"],
-];
+const VOWEL_GROUPS = MANIFEST.vowelGroups;
+const NASAL_GROUPS = MANIFEST.nasalGroups;
+const FINAL_SOUNDED = new Set(MANIFEST.finalSounded);
+const YOD_DOUBLE = MANIFEST.yodDouble;
+const YOD_FINAL = MANIFEST.yodFinal;
 
 /** True when position k begins a silent word-final tail: end of word, or a plural -s at the end (belle, hommes). */
 function silentTail(w: string, k: number): boolean {
@@ -129,7 +65,7 @@ function oClosed(w: string, a: number): boolean {
     return euClosed(w, a); // ɔ if a coda closes the syllable, else o
 }
 
-const VOWEL_PH = "aeiouyɛɔøœəɑ"; // IPA vowel starts (for schwa-deletion consonant counting)
+const VOWEL_PH = MANIFEST.vowelPhonemes; // IPA vowel starts (for schwa-deletion consonant counting)
 const isConsPh = (ph: string): boolean =>
     ph.length >= 1 && !VOWEL_PH.includes(ph[0]!);
 // A phoneme carries a syllable nucleus if any of its chars is a vowel (catches multi-char glides+vowel: wa, ɥi, jɛ̃).

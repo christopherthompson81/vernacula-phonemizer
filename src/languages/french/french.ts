@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import type { Phonemizer } from "../../registry.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // Lexique 3.83 pronunciation lexicon: word → IPA for ~125k attested forms, loaded once (lazily).
 let LEXICON: Map<string, string> | undefined;
@@ -49,143 +50,17 @@ function accentFinal(tokens: string[]): void {
     }
 }
 
-const CLAUSE_MARK: Record<string, string> = {
-    ".": ".",
-    "!": "!",
-    "?": "?",
-    "…": ",",
-    ",": ",",
-    ";": ",",
-    ":": ",",
-};
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN =
     /([a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/giu;
 
 // Obligatory liaison: a normally-silent final consonant of a function word / number is pronounced as the
 // onset of a following vowel-initial word. z after plural determiners/pronouns & the -x/-s numbers; n after
 // nasal monosyllables; t after est/sont/tout/petit… (grand/quand: d→t). Attached to the next word (re-syllabified).
-const LIAISON: Record<string, string> = {
-    les: "z",
-    des: "z",
-    ces: "z",
-    mes: "z",
-    tes: "z",
-    ses: "z",
-    nos: "z",
-    vos: "z",
-    leurs: "z",
-    aux: "z",
-    ils: "z",
-    elles: "z",
-    nous: "z",
-    vous: "z",
-    dans: "z",
-    chez: "z",
-    sans: "z",
-    très: "z",
-    plus: "z",
-    moins: "z",
-    deux: "z",
-    trois: "z",
-    six: "z",
-    dix: "z",
-    un: "n",
-    mon: "n",
-    ton: "n",
-    son: "n",
-    en: "n",
-    on: "n",
-    aucun: "n",
-    bien: "n",
-    rien: "n",
-    commun: "n",
-    est: "t",
-    sont: "t",
-    ont: "t",
-    font: "t",
-    vont: "t",
-    tout: "t",
-    quand: "t",
-    grand: "t",
-    petit: "t",
-    dont: "t",
-    cet: "t",
-    "c'est": "t",
-    "c’est": "t",
-    "n'est": "t",
-    "n’est": "t", // elided single tokens: c'est ici → sɛ tisi
-};
+const LIAISON = MANIFEST.liaison;
 // h aspiré (and vowel-initial words that block liaison, e.g. huit/onze/y-): the following word looks
 // vowel-initial but forbids liaison — les héros → le eʁo, not le zeʁo.
-const H_ASPIRE = new Set([
-    "hache",
-    "haie",
-    "haillon",
-    "haine",
-    "haïr",
-    "hall",
-    "halle",
-    "halte",
-    "hamac",
-    "hameau",
-    "hamburger",
-    "hamster",
-    "hanche",
-    "handicap",
-    "handicapé",
-    "hangar",
-    "hanter",
-    "harceler",
-    "hardi",
-    "hareng",
-    "hargne",
-    "haricot",
-    "harpe",
-    "hasard",
-    "hâte",
-    "hausse",
-    "haut",
-    "hautain",
-    "hauteur",
-    "havre",
-    "hennir",
-    "hérault",
-    "hérisson",
-    "hérissé",
-    "hernie",
-    "héron",
-    "héros",
-    "hêtre",
-    "heurter",
-    "hibou",
-    "hiboux",
-    "hiérarchie",
-    "homard",
-    "hongrie",
-    "hongrois",
-    "honte",
-    "hoquet",
-    "horde",
-    "hors",
-    "hotte",
-    "houle",
-    "hublot",
-    "huer",
-    "huit",
-    "huitième",
-    "hurler",
-    "hutte",
-    "hollande",
-    "hollandais",
-    "onze",
-    "onzième",
-    "yaourt",
-    "yacht",
-    "yoga",
-    "oui",
-    "ouistiti",
-    "uhlan",
-]);
+const H_ASPIRE = new Set(MANIFEST.hAspire);
 const STARTS_VOWEL = /^[aeiouyàâäéèêëîïôöûüùœæh]/i; // h → treat as mute unless the word is in H_ASPIRE
 function liaisonOnto(prev: string, next: string): string {
     const c = LIAISON[prev.toLowerCase()];
@@ -217,7 +92,7 @@ class FrenchPhonemizer implements Phonemizer {
                     items.push({ word: w });
                 if (frac !== undefined) {
                     // decimal: "virgule" + digit-by-digit
-                    items.push({ word: "virgule" });
+                    items.push({ word: MANIFEST.numbers.decimalSeparator });
                     for (const d of frac)
                         for (const w of numberToWords(Number(d)).split(" "))
                             items.push({ word: w });
