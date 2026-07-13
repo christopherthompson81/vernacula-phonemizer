@@ -13,6 +13,24 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+/** Read a data file beside `metaUrl`, returning its non-blank, non-`#`-comment lines. `optional` → [] on a
+ *  missing file (else rethrows). Shared by loadTsvMap and loadLines so both parse lines identically. */
+function readDataLines(
+    metaUrl: string,
+    filename: string,
+    optional: boolean,
+): string[] {
+    const path = join(dirname(fileURLToPath(metaUrl)), filename);
+    let text: string;
+    try {
+        text = readFileSync(path, "utf8");
+    } catch (err) {
+        if (optional) return [];
+        throw err;
+    }
+    return text.split(/\r?\n/).filter((l) => l !== "" && !l.startsWith("#"));
+}
+
 export function loadTsvMap<V = string>(
     metaUrl: string,
     filename: string,
@@ -20,17 +38,8 @@ export function loadTsvMap<V = string>(
         v as unknown as V,
     opts: { optional?: boolean } = {},
 ): Map<string, V> {
-    const path = join(dirname(fileURLToPath(metaUrl)), filename);
     const map = new Map<string, V>();
-    let text: string;
-    try {
-        text = readFileSync(path, "utf8");
-    } catch (err) {
-        if (opts.optional) return map;
-        throw err;
-    }
-    for (const line of text.split(/\r?\n/)) {
-        if (line === "" || line.startsWith("#")) continue;
+    for (const line of readDataLines(metaUrl, filename, opts.optional ?? false)) {
         const tab = line.indexOf("\t");
         if (tab <= 0) continue;
         const v = parse(line.slice(tab + 1), line.slice(0, tab));
@@ -52,13 +61,5 @@ export function loadLines(
     filename: string,
     opts: { optional?: boolean } = {},
 ): string[] {
-    const path = join(dirname(fileURLToPath(metaUrl)), filename);
-    let text: string;
-    try {
-        text = readFileSync(path, "utf8");
-    } catch (err) {
-        if (opts.optional) return [];
-        throw err;
-    }
-    return text.split(/\r?\n/).filter((l) => l !== "" && !l.startsWith("#"));
+    return readDataLines(metaUrl, filename, opts.optional ?? false);
 }

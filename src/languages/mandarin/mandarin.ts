@@ -157,10 +157,11 @@ export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
     const syllableIpa = loadTsvMap(import.meta.url, "syllable-ipa.tsv");
     const chars = loadTsvMap(import.meta.url, "chars.tsv", (v) => v.split(","));
     const phrases = loadTsvMap(import.meta.url, "phrases.tsv");
-    // Longest phrase key (code points) — the scan bound; ≥2 so a single-char run always has room.
-    const maxPhrase = Math.max(
+    // Longest phrase key (code points) — the scan bound; ≥2 so a single-char run always has room. reduce (not
+    // Math.max(...spread)) so a 47k-key map can't blow the call-argument limit.
+    const maxPhrase = [...phrases.keys()].reduce(
+        (m, k) => Math.max(m, Array.from(k).length),
         2,
-        ...[...phrases.keys()].map((k) => Array.from(k).length),
     );
 
     const st = MANIFEST.sandhi.thirdThird;

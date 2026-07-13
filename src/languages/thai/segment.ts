@@ -99,8 +99,9 @@ function words(): { set: Set<string>; maxLen: number } {
                 .map((l) => l.trim())
                 .filter(Boolean),
         );
-        // longest entry (code points) bounds the DAG scan; ≥1 so a single cluster always has room.
-        const maxLen = Math.max(1, ...[...set].map((w) => [...w].length));
+        // longest entry (code points) bounds the DAG scan; ≥1 so a single cluster always has room. reduce (not
+        // Math.max(...spread)) so the ~65k-entry seg-words set can't blow the call-argument limit.
+        const maxLen = [...set].reduce((m, w) => Math.max(m, [...w].length), 1);
         WORDS = { set, maxLen };
     }
     return WORDS;

@@ -294,11 +294,12 @@ export class EnglishPhonemizer {
 
 /** Load the English data (beside this file) and build the phonemizer. */
 export function createEnglish(): EnglishPhonemizer {
-    // accent-lexicon.tsv is 3-column (word<TAB>?<TAB>ipa); keep col 2 when non-empty.
+    // accent-lexicon.tsv is 3-column word<TAB>?<TAB>ipa. `parse` receives the post-first-tab REMAINDER
+    // ("?<TAB>ipa"), so the ipa is remainder field [1] (= file column 3). Keep it when non-empty.
     const lexicon = loadTsvMap(import.meta.url, "accent-lexicon.tsv", (rest) => {
-        const cols = rest.split("\t");
-        const ipa = cols[1]?.trim();
-        return cols.length >= 2 && ipa ? ipa : undefined;
+        const fields = rest.split("\t");
+        const ipa = fields[1]?.trim();
+        return fields.length >= 2 && ipa ? ipa : undefined;
     });
 
     const manifest = MANIFEST; // consolidated hand-authored facts (english.jsonc), loaded once by manifest.ts

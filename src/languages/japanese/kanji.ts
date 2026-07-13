@@ -39,14 +39,15 @@ function readings(): Readings {
             return fb;
         });
         const adverbs = new Set(loadLines(import.meta.url, "adverbs.txt"));
-        // Longest key (code points) — the segmentation scan bounds.
-        const maxKeyLength = Math.max(
+        // Longest key (code points) — the segmentation scan bounds. reduce (not Math.max(...spread)) so the
+        // ~60k-key readings map can't blow the call-argument limit.
+        const maxKeyLength = [...map.keys()].reduce(
+            (m, k) => Math.max(m, [...k].length),
             0,
-            ...[...map.keys()].map((k) => [...k].length),
         );
-        const maxUnitLength = Math.max(
+        const maxUnitLength = [...adverbs].reduce(
+            (m, a) => Math.max(m, [...a].length),
             maxKeyLength,
-            ...[...adverbs].map((a) => [...a].length),
         );
         READINGS = { map, maxKeyLength, fallback, adverbs, maxUnitLength };
     }
