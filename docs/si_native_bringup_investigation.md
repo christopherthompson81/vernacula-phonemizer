@@ -56,3 +56,9 @@ Key lessons:
   convention is absent.
 - espeak renders the same letter differently standalone vs in-word (ශ → ʃ alone but s in words); trust the
   in-word gold majority, not the isolated-letter probe.
+
+## Independent-referee corroboration (added 2026-07-13)
+Cross-checked against the **espeak-independent** wikipron `sin` human narrow referee via `tools/referee-eval`:
+**93.5%** segmental-backbone agreement (648 words) after folding the documented allophonic/notation classes
+(ʋ/w, r/ɾ, retroflex merger, dental detail, a/ə, geminate, final-ව offglide); the residual is 1× referee quirks
+(e.g. wikipron writing ම්බ as a long mː). `referee-eval.test.ts` pins a 90% floor.

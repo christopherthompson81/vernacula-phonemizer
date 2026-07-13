@@ -62,3 +62,11 @@ Key lessons:
   is exactly what makes бойынша initial-stressed.
 - The only unstressed vowel is ы→ə; і→ɪ is NOT unstressed (tʏrˈɪ takes final stress). Testing unstressed={ə,ɪ}
   dropped accuracy to 73%.
+
+## Independent-referee corroboration (added 2026-07-13)
+Cross-checked against the **espeak-independent** epitran `kaz-Cyrl` referee via `tools/referee-eval`: **86.2%**
+segmental-backbone agreement (1400 words) after folding dark-l harmony, uvular convention, and epitran's
+over-marked е palatal onglide. The residual is dominated by epitran's OWN limitations — it merges ө/ү→ʏ where we
+correctly keep ө(ɵ)≠ү(ʏ), and marks allophonic palatalization — so where we differ we are usually the more
+faithful transcription (this is why the espeak-ng-portable kk convergence used wikipron, not epitran). A human
+kk referee would be a stronger second source to add. `referee-eval.test.ts` pins an 83% floor.

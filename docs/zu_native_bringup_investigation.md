@@ -60,3 +60,9 @@ Key lessons:
   gold, not just the phoneme table.
 - Compound tone is a whole-word property: thread the lexicon codes across the split, and if the compound isn't
   listed, emit NO tone rather than falling back to per-part lookup (which wrongly tones standalone prefixes).
+
+## Independent-referee corroboration (added 2026-07-13)
+Beyond the espeak-canonical gold (a regression guard), the segmental backbone is cross-checked against the
+**espeak-independent** epitran `zul-Latn` referee via `tools/referee-eval` (fold classes justified in its
+config): **100%** backbone agreement (1047 words) — an independent G2P corroborates the full click / implosive /
+ejective / lateral-fricative inventory. `referee-eval.test.ts` pins a 99% floor.
