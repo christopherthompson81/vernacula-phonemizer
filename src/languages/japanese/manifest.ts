@@ -5,11 +5,8 @@
  * them stay in code (kana.ts / numbers.ts / kanji.ts / pitch.ts / japanese.ts); the bulk lexical data stays in
  * sibling .tsv/.txt files (readings/fallback/adverbs/pitch-accent), which the manifest only documents.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface JapaneseManifest {
     vowels: Record<string, string>;
@@ -35,9 +32,5 @@ export interface JapaneseManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Japanese data tables (see japanese.jsonc). */
-export const MANIFEST = parseJsonc<JapaneseManifest>(
-    readFileSync(join(dir, "japanese.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<JapaneseManifest>(import.meta.url, "japanese.jsonc");

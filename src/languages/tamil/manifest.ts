@@ -5,11 +5,8 @@
  * number words). The ALGORITHMS that read it stay in code (tamil.ts / numbers.ts): the IPA-unit segmenter, the
  * context-sensitive voicing allophony, the two-level stress pass, and the number compositor.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 
 export interface TamilManifest extends AbugidaDef {
@@ -31,9 +28,5 @@ export interface TamilManifest extends AbugidaDef {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */
-export const MANIFEST = parseJsonc<TamilManifest>(
-    readFileSync(join(dir, "tamil.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<TamilManifest>(import.meta.url, "tamil.jsonc");

@@ -5,11 +5,8 @@
  * number words). The ALGORITHMS that read it stay in code (sinhala.ts / numbers.ts): the anusvara rewrite, the
  * geminate / schwa / stress post-passes, and the number compositor.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 
 export interface SinhalaManifest extends AbugidaDef {
@@ -32,9 +29,5 @@ export interface SinhalaManifest extends AbugidaDef {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated Sinhala data (abugida def + post-pass tables; see sinhala.jsonc). */
-export const MANIFEST = parseJsonc<SinhalaManifest>(
-    readFileSync(join(dir, "sinhala.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<SinhalaManifest>(import.meta.url, "sinhala.jsonc");

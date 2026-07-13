@@ -5,11 +5,8 @@
  * penultimate stress + lengthening, the compound split + tone overlay, and the cardinal compositor. The per-word
  * tone lexicon stays in the sibling tone.tsv, which the manifest only references.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 interface NounClassMagnitude {
     one: string;
@@ -32,9 +29,5 @@ export interface ZuluManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Zulu data tables (see zulu.jsonc). */
-export const MANIFEST = parseJsonc<ZuluManifest>(
-    readFileSync(join(dir, "zulu.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<ZuluManifest>(import.meta.url, "zulu.jsonc");

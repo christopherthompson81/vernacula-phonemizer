@@ -6,11 +6,8 @@
  * code (g2p.ts / russian.ts / numbers.ts): the Cyrillic scan, vowel reduction, voicing assimilation, stress
  * inference, and the number compositor. The lexical stress + hard-е dictionaries stay in sibling .tsv files.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface RussianManifest {
     vowelLetters: string;
@@ -44,9 +41,5 @@ export interface RussianManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored Russian data tables (see russian.jsonc). */
-export const MANIFEST = parseJsonc<RussianManifest>(
-    readFileSync(join(dir, "russian.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<RussianManifest>(import.meta.url, "russian.jsonc");

@@ -4,11 +4,8 @@
  * punctuation, liaison + h-aspiré lists, number words) live in the JSONC; the ALGORITHMS that consume them stay
  * in the sibling modules (g2p.ts, french.ts, numbers.ts).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 
-import { parseJsonc } from "../../core/jsonc.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface FrenchManifest {
     vowelLetters: string;
@@ -36,9 +33,5 @@ export interface FrenchManifest {
     };
 }
 
-const dir = dirname(fileURLToPath(import.meta.url));
-
 /** The consolidated hand-authored French data tables (see french.jsonc). */
-export const MANIFEST = parseJsonc<FrenchManifest>(
-    readFileSync(join(dir, "french.jsonc"), "utf8"),
-);
+export const MANIFEST = loadManifest<FrenchManifest>(import.meta.url, "french.jsonc");
