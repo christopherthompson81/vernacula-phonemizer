@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { reorderThaiLeadingVowels, thaiLexicalFixup, thaiPrep, thaiScanSyllables, type ThaiSyllableScan } from "./syllabifier.ts";
 import { segment } from "./segment.ts";
 import { THAI_TONE_IPA } from "./thaiTone.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
 // derive — word → IPA (Chao). Ported from espeak-ng-portable's Thai dictionary; consulted BEFORE the rule engine.
@@ -31,33 +32,14 @@ function dict(): Map<string, string> {
   return DICT;
 }
 
-// Onset consonant grapheme → IPA. อ = glottal ʔ; a silent leader is dropped before this map is consulted.
-const INIT: Record<string, string> = {
-  "ก": "k", "ข": "kʰ", "ฃ": "kʰ", "ค": "kʰ", "ฅ": "kʰ", "ฆ": "kʰ", "ง": "ŋ", "จ": "t͡ɕ", "ฉ": "t͡ɕʰ",
-  "ช": "t͡ɕʰ", "ซ": "s", "ฌ": "t͡ɕʰ", "ญ": "j", "ฎ": "d", "ฏ": "t", "ฐ": "tʰ", "ฑ": "tʰ", "ฒ": "tʰ",
-  "ณ": "n", "ด": "d", "ต": "t", "ถ": "tʰ", "ท": "tʰ", "ธ": "tʰ", "น": "n", "บ": "b", "ป": "p", "ผ": "pʰ",
-  "ฝ": "f", "พ": "pʰ", "ฟ": "f", "ภ": "pʰ", "ม": "m", "ย": "j", "ร": "r", "ล": "l", "ว": "w", "ศ": "s",
-  "ษ": "s", "ส": "s", "ห": "h", "ฬ": "l", "อ": "ʔ", "ฮ": "h", "ฤ": "r",
-};
-const CODA: Record<string, string> = {
-  "ก": "k", "ข": "k", "ค": "k", "ฆ": "k", "ง": "ŋ", "จ": "t", "ช": "t", "ซ": "t", "ฎ": "t", "ฏ": "t",
-  "ฐ": "t", "ฑ": "t", "ฒ": "t", "ด": "t", "ต": "t", "ถ": "t", "ท": "t", "ธ": "t", "ศ": "t", "ษ": "t",
-  "ส": "t", "ญ": "n", "ณ": "n", "น": "n", "ร": "n", "ล": "n", "ฬ": "n", "บ": "p", "ป": "p", "พ": "p",
-  "ฟ": "p", "ภ": "p", "ม": "m", "ย": "j", "ว": "w",
-};
-// Written-vowel unit (gs joined) → base quality (no length; ː is added from the scan's `long`). Diphthongs
-// (ua/ia/ɯa and the glide vowels) are in NO_LENGTH so they never take ː.
-const VQUAL: Record<string, string> = {
-  "ะ": "a", "ั": "a", "า": "a", "ิ": "i", "ี": "i", "ึ": "ɯ", "ื": "ɯ", "ือ": "ɯ", "ุ": "u", "ู": "u", "ๅ": "a",
-  "ัว": "ua", "ัวะ": "ua", "ว": "ua",
-  "เ": "e", "เะ": "e", "แ": "ɛ", "แะ": "ɛ", "โ": "o", "โะ": "o",
-  "เาะ": "ɔ", "เอ": "ɤ", "เอะ": "ɤ", "เิ": "ɤ", "เย": "ɤ", "เา": "a", "อ": "ɔ",
-  "เีย": "ia", "เียะ": "ia", "เือ": "ɯa", "เือะ": "ɯa",
-  "ไ": "a", "ใ": "a", "ไย": "a", "ำ": "a",
-};
-const NO_LENGTH = new Set(["ua", "ia", "ɯa"]); // diphthongs — never take ː
-const FORCE_LONG = new Set(["เอ", "เิ"]);      // เ–อ / เ–ิ are ɤː (long); the short exceptions (เงิน) are in the dict
-const RAISABLE = new Set([..."งญณนมยรลฬว"]);
+// Grapheme→IPA tables + the length-exception sets are DATA (thai.jsonc). INIT: onset (อ = glottal ʔ; a silent
+// leader is dropped first). CODA: 8-way final. VQUAL: written-vowel unit → base quality (ː added from the scan).
+const INIT = MANIFEST.onset;
+const CODA = MANIFEST.coda;
+const VQUAL = MANIFEST.vowelQuality;
+const NO_LENGTH = new Set(MANIFEST.noLength); // diphthongs — never take ː
+const FORCE_LONG = new Set(MANIFEST.forceLong); // เ–อ / เ–ิ are ɤː (long); the short exceptions (เงิน) are in the dict
+const RAISABLE = new Set([...MANIFEST.raisable]);
 
 /** Onset IPA for a syllable, dropping a silent ห/อ leader and joining any cluster. */
 function onsetIpa(cs: string[], first: boolean): string {

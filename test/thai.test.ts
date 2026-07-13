@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { phonemizeWord } from "./thai.ts";
+import { phonemizeWord } from "../src/languages/thai/thai.ts";
 
 describe("Thai g2p (ported syllabifier + native IPA render)", () => {
   it("monosyllables: onset, vowel length, coda, computed tone", () => {

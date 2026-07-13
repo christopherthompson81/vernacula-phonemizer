@@ -4,11 +4,12 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { phonemizeWord } from "./g2p.ts";
+import { MANIFEST } from "./manifest.ts";
 
 export { phonemizeWord };
 
 const TOKEN = /([฀-๿]+)|(\d+)|([.!?…,;:])/gu;
-const CLAUSE_MARK: Record<string, string> = { ".": ".", "!": "!", "?": "?", ",": ",", ";": ",", ":": "," };
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
 class ThaiPhonemizer implements Phonemizer {
   text(input: string): string {
