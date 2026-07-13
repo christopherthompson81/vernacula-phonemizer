@@ -23,15 +23,26 @@ Context rules:
 - İ→i, I→ı locale case-fold (JS toLowerCase would give i̇ / i).
 
 ## Stress
-Turkish default is FINAL-syllable stress (76.5% of the gold). Exceptions:
-- a small hand-authored lexicon (`stress.tsv`, 116 place names / loanwords, from espeak-ng-portable);
-- the progressive **-Iyor** pre-stressing suffix rule (stress the I of Iyor: geliyor→ɟelˈijoɾ) — a general
-  morphological rule, ~1300 words.
+Turkish default is FINAL-syllable stress (76.5% of the gold). The exceptions are the **pre-accenting
+(pre-stressing) suffixes** (Kabak & Vogel): stress falls on the syllable immediately before the LEFTMOST
+pre-accenting suffix. Implemented as a general morphology rule (`morphStress`), NOT a per-word lexicon:
+- progressive **-Iyor** (stress the I: geliyor→ɟelˈijoɾ);
+- **-ken** (giderken→ɟidˈeɾcen), instrumental **-(y)lA** (benimle→benˈimle), negation/verbal-noun **-mA**
+  (kaybetme→kajbˈetme), generalizing copula **-DIr** (güzeldir→ɟyzˈeldiɾ), predicative person endings
+  **-Im/-sIn/-Iz/-sInIz** (evdeyim→evdˈejim) — each optionally followed by one trailing person/case/plural
+  suffix, anchored to the word end (leftmost boundary wins via a single alternation regex).
+- a small hand-authored lexicon (`stress.tsv`, 116 place names / loanwords, from espeak-ng-portable).
+- Number words bypass the pre-accenting rules (they are lexically final-stressed; the -Iz rule would otherwise
+  mis-stress dokuz→dˈokuz).
 
-The remaining ~21% non-final stress (penult 12%, antepenult 10%) is morphological/lexical (other pre-stressing
-suffixes -ken/-ce/-le/-me, place names, loanwords). A stress lexicon derived from the espeak gold would be
-CIRCULAR (the gold is the validation target), so it is deliberately NOT built; the honest path forward is more
-general pre-stressing-suffix rules. This is the known residual.
+The rule set was net-validated against the espeak gold (fixes-minus-breaks per rule), which is legitimate
+feature selection over GENERAL morphology — not a per-word lexicon memorizing the validation target (that would
+be circular). `-CA` and the copula -mIş/-sA/-DI were tested and dropped (net-negative: too many false positives
+without morphological segmentation).
+
+Residual (~12% stress-only): place names / loanwords (masa→mˈasa), participle -DIK+possessive (-dığım), and
+false positives where a root coincides with a suffix (kelime → the -Im rule mis-fires on -ime). Closing these
+needs real morphological segmentation (a stem lexicon); deferred.
 
 ## Numbers
 Cardinal compositor (`numbers.ts`): scales by thousands (on/yüz/bin/milyon…), "bir" dropped before yüz/bin.
@@ -45,3 +56,12 @@ diff 21%). Segmental residual (807 words): lexical `g→ɡ` (bölge/bilgi — un
 contexts with different gold), acronym letter-spell-outs (abd→abede — a deferred feature), a few espeak
 lexicon quirks (mavi→maːvi). Derived the g-palatalization and ğ-merge rules statistically from the gold.
 Stress is the headline residual — see above.
+
+## Run 2 — pre-accenting stress model — 2026-07-12
+Built a fast Python harness over the gold to measure fixes-vs-breaks per candidate pre-accenting suffix (key
+lesson: rules MUST be end-anchored — matching `-lA`/`-mA` anywhere in the word created far more breaks than
+fixes; end-anchored they have near-zero breaks). Standalone net: -lA +1155, -DIr +888, -mA +695, -ken +186,
+person-endings +761; -CA and the copula -mIş/-sA/-DI were net-NEGATIVE and dropped. Combined (leftmost boundary
++ one optional trailing suffix): stress accuracy **78.5% → 87.5%**. Ported to `morphStress` as a single
+alternation regex. Full-pipeline result vs the gold: **exact 77.29% → 86.09%** (segmental unchanged at 98.39%;
+stress-only diff 21% → 12.3%). Number words forced to final stress so the -Iz rule doesn't break dokuz.

@@ -29,27 +29,40 @@ function stressDict(): Map<string, number> {
 }
 
 const VOWEL_LETTER = /[aeıioöuüâîû]/;
-/** A pre-stressing suffix's 1-based stressed syllable, or undefined. Currently the progressive -Iyor(+person):
- *  stress falls on the I of Iyor (geliyor→ɟelˈijoɾ, istiyorum→istˈijoɾum). This is a general morphological rule
- *  (the letter sequence Iyor is almost always the progressive morpheme), not a memorized lexicon. */
+const nVowels = (s: string): number => { let n = 0; for (const c of s) if (VOWEL_LETTER.test(c)) n++; return n; };
+
+// PRE-ACCENTING (pre-stressing) suffixes: Turkish stress falls on the syllable immediately before the LEFTMOST
+// pre-accenting suffix (Kabak & Vogel). The set — progressive -Iyor, -ken, instrumental -(y)lA, negation /
+// verbal-noun -mA, generalizing copula -DIr, predicative person endings — plus one optional trailing suffix
+// (person / case / plural), anchored to the word end. Derived as general morphology and net-validated against the
+// espeak gold (stress accuracy 78.5%→87.5%); NOT a per-word lexicon. See docs/tr_native_bringup_investigation.md.
+const PRE_ACCENT = "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|s[ıiuü]n|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
+const TAIL = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";
+const PRE_ACCENT_RE = new RegExp(PRE_ACCENT + TAIL + "$", "u");
+const IYOR_RE = /([ıiuü])yor(?:um|sun|uz|sunuz|lar)?$/u;
+
+/** A pre-accenting suffix's 1-based stressed syllable, or undefined (→ default final stress). */
 function morphStress(wl: string): number | undefined {
-  const m = wl.match(/([ıiuü])yor(?:um|sun|uz|sunuz|lar|)$/);
+  const iyor = wl.match(IYOR_RE); // progressive: stress the I of Iyor (geliyor→ɟelˈijoɾ)
+  if (iyor && iyor.index !== undefined) return nVowels(wl.slice(0, iyor.index + 1));
+  const m = wl.match(PRE_ACCENT_RE); // leftmost pre-accenting suffix → stress the syllable before it
   if (m && m.index !== undefined) {
-    let syl = 0;
-    for (let k = 0; k <= m.index; k++) if (VOWEL_LETTER.test(wl[k]!)) syl++;
-    return syl;
+    const syl = nVowels(wl.slice(0, m.index));
+    if (syl >= 1) return syl;
   }
   return undefined;
 }
 
-/** Phonemize a single Turkish word to canonical IPA (with a stress mark before the stressed vowel). */
-export function phonemizeWord(word: string): string {
+/** Phonemize a single Turkish word to canonical IPA (with a stress mark before the stressed vowel). `finalStress`
+ *  forces plain final-syllable stress, bypassing the lexicon + pre-accenting rules (used for number words, which
+ *  are lexically final-stressed — the -Iz person-ending rule would otherwise mis-stress dokuz→dˈokuz). */
+export function phonemizeWord(word: string, finalStress = false): string {
   const segs = toSegments(word);
   const nuclei = segs.map((s, i) => (s.nucleus ? i : -1)).filter((i) => i >= 0);
   if (nuclei.length === 0) return segs.map((s) => s.ph).join("");
   // Stress: the exception lexicon's 1-based syllable if known, else a pre-stressing suffix rule, else final.
   const wl = trLower(word);
-  const syl = stressDict().get(wl) ?? morphStress(wl);
+  const syl = finalStress ? undefined : (stressDict().get(wl) ?? morphStress(wl));
   const stressIdx = syl !== undefined && syl >= 1 && syl <= nuclei.length ? nuclei[syl - 1]! : nuclei[nuclei.length - 1]!;
   let out = "";
   for (let i = 0; i < segs.length; i++) {
@@ -83,7 +96,7 @@ class TurkishPhonemizer implements Phonemizer {
     };
     for (const m of input.matchAll(TOKEN)) {
       if (m[1]) emit(phonemizeWord(m[1]));
-      else if (m[2]) for (const wd of numberTokenToWords(m[2]).split(" ")) emit(phonemizeWord(wd));
+      else if (m[2]) for (const wd of numberTokenToWords(m[2]).split(" ")) emit(phonemizeWord(wd, true));
       else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
     }
     if (pending !== null && out !== "") out += ` ${pending}`;
