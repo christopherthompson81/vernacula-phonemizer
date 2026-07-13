@@ -5,7 +5,6 @@
  * tone system, sandhi) lives beside this file; this module wires it into the Phonemizer interface.
  */
 import { readFileSync } from "node:fs";
-import { parseJsonc } from "../../core/jsonc.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -14,16 +13,14 @@ import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
 
 const HAN = /\p{Script=Han}/u;
 const LATIN = /[A-Za-z]/;
-// Clause / phrase punctuation (Chinese + ASCII) → canonical inline pause marks.
-const CLAUSE_MARK: Record<string, string> = {
-  "。": ".", "！": "!", "？": "?", "，": ",", "、": ",", "；": ",", "：": ",", "…": ",", "—": ",",
-  ".": ".", "!": "!", "?": "?", ",": ",", ";": ",", ":": ",",
-};
-// Common measure words: a standalone 2 before one of these reads colloquial 两 (两个, 两天), not 二.
-const MEASURE_WORDS = "个位本张只条头匹件双对群种次遍回天年岁块层排组步口面名首部台辆架座间扇页杯碗瓶盒袋斤";
+// Clause punctuation + the measure-word set are DATA (cmn.jsonc). A standalone 2 before a measure word reads
+// colloquial 两 (两个, 两天), not 二.
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
+const MEASURE_WORDS = MANIFEST.measureWords;
 // A whitespace-separated pinyin string with at least one tone digit takes the direct pinyin path. Requiring
 // a tone digit keeps bare Latin words (hello, iPhone) and number-bearing tokens out of it → routed properly.
 const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/i;
@@ -51,13 +48,13 @@ class MandarinPhonemizer implements Phonemizer {
   private appendNumber(cp: string[], exempt: boolean[], num: string, after: string | undefined): void {
     const push = (text: string, ex: boolean): void => { for (const c of text) { cp.push(c); exempt.push(ex); } };
     if (/^\d{4}$/.test(num) && after === "年") { push(digitsToChinese(num), true); return; }           // year
-    if (num === "2" && after !== undefined && MEASURE_WORDS.includes(after)) { push("两", false); return; } // 2个 → 两个
+    if (num === "2" && after !== undefined && MEASURE_WORDS.includes(after)) { push(MANIFEST.numbers.two, false); return; } // 2个 → 两个
     const dot = num.indexOf(".");
     const intStr = dot < 0 ? num : num.slice(0, dot);
     const intN = Number(intStr || "0");
     if (Number.isSafeInteger(intN)) push(integerToChinese(intN), false); // quantity → sandhi-eligible
     else push(digitsToChinese(intStr), true);                            // oversized → digit-by-digit, exempt
-    if (dot >= 0 && dot < num.length - 1) { push("点", true); push(digitsToChinese(num.slice(dot + 1)), true); }
+    if (dot >= 0 && dot < num.length - 1) { push(MANIFEST.numbers.decimalPoint, true); push(digitsToChinese(num.slice(dot + 1)), true); }
   }
 
   /** Substitute Arabic numbers with Chinese numeral characters, tracking which code points are sandhi-exempt. */
@@ -121,10 +118,6 @@ export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
     if (tab > 0) syllableIpa.set(line.slice(0, tab), line.slice(tab + 1));
   }
 
-  const manifest = parseJsonc(read("cmn.jsonc")) as {
-    tones: Record<string, string>;
-  };
-
   const chars = new Map<string, string[]>();
   for (const line of read("chars.tsv").split("\n")) {
     if (line === "" || line.startsWith("#")) continue;
@@ -144,5 +137,11 @@ export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
     }
   }
 
-  return new MandarinPhonemizer({ syllableIpa, tones: manifest.tones }, { chars, phrases, maxPhrase }, foreign);
+  const st = MANIFEST.sandhi.thirdThird;
+  const tables: MandarinTables = {
+    syllableIpa,
+    tones: MANIFEST.tones,
+    thirdToneSandhi: { from: Number(st.from), before: Number(st.before), to: Number(st.to) },
+  };
+  return new MandarinPhonemizer(tables, { chars, phrases, maxPhrase }, foreign);
 }

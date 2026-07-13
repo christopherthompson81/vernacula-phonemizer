@@ -25,12 +25,31 @@
   // Tone sandhi (operate on tone NUMBERS before rendering).
   "sandhi": {
     // Third-tone sandhi: a 3rd tone before another 3rd tone becomes 2nd (你好 nǐ hǎo → ní hǎo).
-    // Applied left-to-right pairwise across a prosodic run.
+    // Applied left-to-right pairwise across a prosodic run (pinyinToIpa.ts reads this rule).
     "thirdThird": { "from": "3", "before": "3", "to": "2" }
-    // 一 yī / 不 bù sandhi need the source character → Phase 2 (Hanzi front-end).
+    // 一 yī / 不 bù sandhi need the source character → yiBuSandhi.ts (Hanzi front-end).
   },
 
   "resolve": ["pinyin syllable → toneless lookup", "third-tone sandhi", "append Chao tone"],
+
+  // Clause / phrase punctuation (Chinese + ASCII) → canonical inline pause marks.
+  "clausePunctuation": {
+    "。": ".", "！": "!", "？": "?", "，": ",", "、": ",", "；": ",", "：": ",", "…": ",", "—": ",",
+    ".": ".", "!": "!", "?": "?", ",": ",", ";": ",", ":": ","
+  },
+
+  // Common measure words: a standalone 2 before one of these reads colloquial 两 (两个, 两天), not 二.
+  "measureWords": "个位本张只条头匹件双对群种次遍回天年岁块层排组步口面名首部台辆架座间扇页杯碗瓶盒袋斤",
+
+  // Number reading (Arabic → Chinese numeral characters, then phonemized like any Han run).
+  "numbers": {
+    "digits": ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"], // 0–9 (digits[0] 零 = the internal zero-gap filler)
+    "positions": ["千", "百", "十", ""], // place value within a 4-digit group
+    "bigUnits": ["", "万", "亿", "兆"], // 10⁴ⁿ group multipliers
+    "two": "两", // colloquial 2 (千-multiplier, leading 百-multiplier, 万/亿 multiplier, before a measure word)
+    "decimalPoint": "点", // 点 between integer and fractional digit-string
+    "zeroDigit": "〇" // digit-string (year/ID) zero, distinct from quantity 零
+  },
 
   // NUMBERS + normalization + punctuation→pause: Phase 3.
   "phases": {

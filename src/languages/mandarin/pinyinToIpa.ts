@@ -12,6 +12,8 @@ export interface MandarinTables {
   syllableIpa: ReadonlyMap<string, string>;
   /** tone number ("1".."5") → Chao contour letters ("" for neutral). */
   tones: Record<string, string>;
+  /** third-tone sandhi rule (from cmn.jsonc → sandhi.thirdThird), as tone NUMBERS. */
+  thirdToneSandhi: { from: number; before: number; to: number };
 }
 
 /** One parsed pinyin syllable: its toneless base and its lexical tone (1–5; 5 = neutral). */
@@ -37,24 +39,24 @@ function parseSyllable(token: string): Syllable {
 /**
  * Third-tone sandhi over a syllable run: a 3rd tone immediately before another 3rd tone surfaces as 2nd
  * (你好 nǐ hǎo → ní hǎo). Applied left-to-right pairwise; the final 3rd tone in a run stays 3rd. Returns the
- * realized tone numbers (does not mutate input).
+ * realized tone numbers (does not mutate input). The rule (3+3→2) is DATA — passed in from cmn.jsonc.
  */
-export function applyThirdToneSandhi(tones: number[]): number[] {
+export function applyThirdToneSandhi(tones: number[], rule: MandarinTables["thirdToneSandhi"]): number[] {
   const out = tones.slice();
   for (let i = 0; i < out.length - 1; i++) {
-    if (out[i] === 3 && out[i + 1] === 3) out[i] = 2;
+    if (out[i] === rule.from && out[i + 1] === rule.before) out[i] = rule.to;
   }
   return out;
 }
 
 /** Build the pinyin→IPA converter from the data tables. */
 export function makePinyinToIpa(tables: MandarinTables): (pinyin: string) => string {
-  const { syllableIpa, tones } = tables;
+  const { syllableIpa, tones, thirdToneSandhi } = tables;
   return function pinyinToIpa(pinyin: string): string {
     const tokens = pinyin.trim().split(/\s+/).filter(Boolean);
     if (tokens.length === 0) return "";
     const syls = tokens.map(parseSyllable);
-    const realized = applyThirdToneSandhi(syls.map((s) => s.tone));
+    const realized = applyThirdToneSandhi(syls.map((s) => s.tone), thirdToneSandhi);
     const out: string[] = [];
     for (let i = 0; i < syls.length; i++) {
       const seg = syllableIpa.get(syls[i]!.base);
