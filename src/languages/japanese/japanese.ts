@@ -6,9 +6,10 @@
  * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3. See docs/ja_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { kanaToIpa } from "./kana.ts";
+import { kanaToIpa, kanaToMorae } from "./kana.ts";
 import { applyReadings, segmentText } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
+import { accentNucleus, placeDownstep } from "./pitch.ts";
 
 // Japanese clause punctuation → canonical pause marks.
 const CLAUSE_MARK: Record<string, string> = { "。": ".", "．": ".", ".": ".", "！": "!", "!": "!", "？": "?", "?": "?", "、": ",", "，": ",", ",": "," };
@@ -29,8 +30,9 @@ class JapanesePhonemizer implements Phonemizer {
     };
     for (const m of segmentText(input).matchAll(TOKEN)) {
       if (m[1]) {
-        const kana = applyReadings(m[1]).replace(KANA_ONLY, ""); // kanji → kana, drop the unresolvable tail
-        const ipa = kanaToIpa(kana); if (ipa) emit(ipa);
+        const reading = applyReadings(m[1]).replace(KANA_ONLY, ""); // kanji → kana, drop the unresolvable tail
+        const morae = kanaToMorae(reading);
+        if (morae) emit(placeDownstep(morae, accentNucleus(m[1], reading))); // pitch: surface m[1] disambiguates
       } else if (m[2]) { const ipa = kanaToIpa(numberToKana(Number(m[2]))); if (ipa) emit(ipa); }
       else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk && out !== "") pending = mk; }
     }
@@ -39,8 +41,15 @@ class JapanesePhonemizer implements Phonemizer {
   }
 }
 
-/** One Japanese word/token → canonical IPA (applies kanji readings, so kanji tokens work too). */
+/** One Japanese word/token → canonical IPA (kanji readings + pitch downstep, so kanji tokens work too). */
 export function phonemizeWord(word: string): string {
+  const reading = applyReadings(word).replace(KANA_ONLY, "");
+  const morae = kanaToMorae(reading);
+  return morae === null ? "" : placeDownstep(morae, accentNucleus(word, reading));
+}
+
+/** One Japanese word/token → canonical IPA, SEGMENTAL only (no pitch downstep) — for segmental validation. */
+export function phonemizeWordSegmental(word: string): string {
   return kanaToIpa(applyReadings(word).replace(KANA_ONLY, "")) ?? "";
 }
 

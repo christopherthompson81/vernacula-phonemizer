@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./japanese.ts";
+import { phonemizeWord, phonemizeWordSegmental } from "./japanese.ts";
 
 describe("Japanese kana → IPA (Phase 1)", () => {
   it("core kana, youon, sokuon, long vowels, moraic ん", () => {
@@ -14,20 +14,20 @@ describe("Japanese kana → IPA (Phase 1)", () => {
       ["コーヒー", "ko̞ːçiː"],        // katakana + long mark
       ["いい", "iː"],               // same-vowel coalescence
     ];
-    for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
+    for (const [w, exp] of cases) expect(phonemizeWordSegmental(w)).toBe(exp);
   });
 
   it("moraic ん place assimilation (n / ŋ / m / ɴ)", () => {
-    expect(phonemizeWord("こんにちは")).toBe("ko̞nnit͡ɕihä"); // n before coronal
-    expect(phonemizeWord("にほんご")).toBe("niho̞ŋɡo̞");       // ŋ before velar
-    expect(phonemizeWord("さんぽ")).toBe("sämpo̞");           // m before labial
-    expect(phonemizeWord("にほん")).toBe("niho̞ɴ");           // ɴ word-finally
+    expect(phonemizeWordSegmental("こんにちは")).toBe("ko̞nnit͡ɕihä"); // n before coronal
+    expect(phonemizeWordSegmental("にほんご")).toBe("niho̞ŋɡo̞");       // ŋ before velar
+    expect(phonemizeWordSegmental("さんぽ")).toBe("sämpo̞");           // m before labial
+    expect(phonemizeWordSegmental("にほん")).toBe("niho̞ɴ");           // ɴ word-finally
   });
 
   it("extended (foreign-sound) katakana", () => {
-    expect(phonemizeWord("チェック")).toBe("t͡ɕe̞kkɯᵝ");
-    expect(phonemizeWord("ファン")).toBe("ɸäɴ");
-    expect(phonemizeWord("メディア")).toBe("me̞diä");
+    expect(phonemizeWordSegmental("チェック")).toBe("t͡ɕe̞kkɯᵝ");
+    expect(phonemizeWordSegmental("ファン")).toBe("ɸäɴ");
+    expect(phonemizeWordSegmental("メディア")).toBe("me̞diä");
   });
 
   it("numbers", () => {
@@ -41,10 +41,10 @@ describe("Japanese kana → IPA (Phase 1)", () => {
   });
 
   it("kanji → kana readings (Phase 2)", () => {
-    expect(phonemizeWord("日本語")).toBe("niho̞ŋɡo̞");
-    expect(phonemizeWord("東京")).toBe("to̞ːkʲo̞ː");
-    expect(phonemizeWord("食べる")).toBe("täbe̞ɾɯᵝ");
-    expect(phonemizeWord("十")).toBe("d͡ʑɯᵝɯᵝ");     // youon blocks same-vowel coalescence
+    expect(phonemizeWordSegmental("日本語")).toBe("niho̞ŋɡo̞");
+    expect(phonemizeWordSegmental("東京")).toBe("to̞ːkʲo̞ː");
+    expect(phonemizeWordSegmental("食べる")).toBe("täbe̞ɾɯᵝ");
+    expect(phonemizeWordSegmental("十")).toBe("d͡ʑɯᵝɯᵝ");     // youon blocks same-vowel coalescence
   });
 
   it("bunsetsu segmentation of spaceless kanji text", () => {
@@ -52,5 +52,18 @@ describe("Japanese kana → IPA (Phase 1)", () => {
     expect(phonemize("私は学生です", "ja")).toBe("wätäɕihä ɡäkɯᵝse̞ːde̞sɯᵝ");
     // 語を stays ɡo̞o̞ (を is a distinct kana, no same-vowel fold across the particle).
     expect(phonemize("日本語を", "ja")).toBe("niho̞ŋɡo̞o̞");
+  });
+});
+
+describe("Japanese pitch accent (Phase 3)", () => {
+  it("contrastive minimal pair via downstep ꜜ", () => {
+    expect(phonemizeWord("箸")).toBe("häꜜɕi");    // chopsticks, accent 1
+    expect(phonemizeWord("端")).toBe("häɕi");      // edge, heiban (no mark)
+    expect(phonemizeWord("橋")).toBe("häɕiꜜ");     // bridge, accent 2
+  });
+
+  it("bunsetsu: accent on the content stem, particle/copula stripped", () => {
+    // 今日 accent-2 (kʲo̞ꜜː) survives the topic は; 天気 accent-1 survives です.
+    expect(phonemize("今日は天気がいい", "ja")).toBe("kʲo̞ꜜːhä te̞ꜜŋkiɡä iꜜː");
   });
 });
