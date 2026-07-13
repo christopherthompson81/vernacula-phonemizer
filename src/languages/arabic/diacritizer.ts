@@ -12,10 +12,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SHADDA = "ّ";
-const LABEL_VOWEL_MARK: Record<string, string> = {
-  a: "َ", u: "ُ", i: "ِ", o: "ْ", F: "ً", N: "ٌ", K: "ٍ", "^": "ٰ",
-};
+import { MANIFEST } from "./manifest.ts";
+
+const SHADDA = "ّ"; // structural Arabic mark (the script), not authored data
+const LABEL_VOWEL_MARK = MANIFEST.diacritizer.labelMarks; // label → combining mark (authored data)
 const MARK_TO_VOWEL: Record<string, string> = Object.fromEntries(Object.entries(LABEL_VOWEL_MARK).map(([k, v]) => [v, k]));
 const IS_MARK = new Set([SHADDA, ...Object.keys(MARK_TO_VOWEL)]);
 
@@ -37,13 +37,9 @@ function labelToMarks(label: string): string {
   return out;
 }
 
-// Defective-spelling closed class: high-frequency words whose long /aː/ is an unwritten dagger-alif.
-const AR_DEFECTIVE_SPELLING = new Map<string, string>([
-  ["هذا", "هٰذَا"], ["هذه", "هٰذِهِ"], ["هذان", "هٰذَان"], ["هذين", "هٰذَيْن"],
-  ["ذلك", "ذٰلِكَ"], ["ذلكم", "ذٰلِكُم"], ["كذلك", "كَذٰلِكَ"], ["لكن", "لٰكِن"], ["هؤلاء", "هٰؤُلَاءِ"],
-  ["ثلاثمئة", "ثَلَاثُمِئَة"], ["أربعمئة", "أَرْبَعُمِئَة"], ["خمسمئة", "خَمْسُمِئَة"], ["ستمئة", "سِتْتُمِئَة"],
-  ["سبعمئة", "سَبْعُمِئَة"], ["ثمانمئة", "ثَمَانِمِئَة"], ["تسعمئة", "تِسْعُمِئَة"],
-]);
+// Defective-spelling closed class (authored data in arabic.jsonc): high-frequency words whose long /aː/ is an
+// unwritten dagger-alif.
+const AR_DEFECTIVE_SPELLING = new Map<string, string>(Object.entries(MANIFEST.diacritizer.defectiveSpelling));
 /** Classical otiose-alif مائة "hundred" → modern مئة (reads /miʔa/, not /maːʔa/). */
 function normalizeArabicNumberSpelling(skeleton: string): string {
   return skeleton.replace(/مائة/g, "مئة").replace(/مائت/g, "مئت");

@@ -1,0 +1,74 @@
+// Native canonical-IPA MANIFEST for Arabic (ar) — Modern Standard Arabic, broad phonemic. Consolidates the
+// hand-authored DATA tables of the Arabic module (consonant map, sun letters, proclitics, clause punctuation,
+// number words, and the diacritizer's label / defective-spelling tables) into one self-describing file, matching
+// english.jsonc / hindi.jsonc. The ALGORITHMS (diacritic parsing, article assimilation, quantity-sensitive
+// stress, number composition, neural diacritization) stay in code; only the closed, hand-curatable data lives
+// here. The Arabic SCRIPT constants the parser switches on (harakat marks, special letters like alif) remain
+// structural in g2p.ts — they are the script, not authored data.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "consonants", "sunLetters", "proclitics", "clausePunctuation",
+// "numbers", "diacritizer". "convention" / "provenance" are self-describing documentation.
+{
+  "language": "ar",
+  "name": "Arabic (Modern Standard)",
+  "provenance": "Cleanroom, rule-based g2p + number compositor (no lexicon). WHICH consonants/letters map where and the number words are language facts. The neural diacritizer MODEL is separately + permissively sourced (CATT teacher Apache-2.0 → Arabic Wikipedia CC-BY-SA silver, no NC/GPL) — see diacritizer.PROVENANCE.md.",
+
+  // The canonical-IPA conventions the values below are written in (documentation; the engine bakes them in).
+  "convention": {
+    "emphatics":   "ˤ on the emphatics sˤ dˤ tˤ ðˤ",
+    "pharyngeals": "ʕ (ع) and ħ (ح) — the census-gap pharyngeals",
+    "gemination":  "shadda → length mark Cː (not doubled CC)",
+    "article":     "al- with sun/moon assimilation; hamzat-wasl ʔ; a proclitic (وَ بِ …) fuses and the article alif elides",
+    "stress":      "MSA quantity-sensitive; the mark ˈ precedes the nucleus",
+    "taaMarbuta":  "ة silent in pausal (phrase-final) form",
+    "numbers":     "MSA counting / masculine forms; ones precede tens joined by wa; hundreds/thousands use construct + dual forms"
+  },
+
+  // Consonant letter → IPA. Emphatics carry ˤ; pharyngeals ʕ/ħ; every hamza seat (ء أ إ ؤ ئ) → ʔ.
+  "consonants": {
+    "ب": "b", "ت": "t", "ث": "θ", "ج": "d͡ʒ", "ح": "ħ", "خ": "x", "د": "d", "ذ": "ð", "ر": "r", "ز": "z",
+    "س": "s", "ش": "ʃ", "ص": "sˤ", "ض": "dˤ", "ط": "tˤ", "ظ": "ðˤ", "ع": "ʕ", "غ": "ɣ", "ف": "f", "ق": "q",
+    "ك": "k", "ل": "l", "م": "m", "ن": "n", "ه": "h", "و": "w", "ي": "j",
+    "ء": "ʔ", "أ": "ʔ", "إ": "ʔ", "ؤ": "ʔ", "ئ": "ʔ"
+  },
+
+  // Sun letters: the definite article's ل assimilates into them (gemination); moon letters keep the l.
+  "sunLetters": ["ت", "ث", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ل", "ن"],
+
+  // Proclitics that fuse with a following article (وَال بِال …) → IPA; the article's hamzat-wasl alif then elides.
+  "proclitics": { "و": "w", "ف": "f", "ب": "b", "ك": "k", "ل": "l" },
+
+  // Clause / phrase punctuation (Arabic + ASCII) → canonical inline pause marks.
+  "clausePunctuation": {
+    "۔": ".", ".": ".", "!": "!", "؟": "?", "?": "?", "،": ",", ",": ",", "؛": ",", ";": ",", ":": ",", "…": ","
+  },
+
+  // MSA cardinal number words (IPA). ones precede tens joined by `connector`; hundreds 3–9 use the construct
+  // stem + hundred; magnitudes carry singular/dual/plural forms. Composition logic is in numbers.ts.
+  "numbers": {
+    "ones":  ["sˤifr", "waːħid", "iθnaːn", "θalaːθa", "ʔarbaʕa", "xamsa", "sitta", "sabʕa", "θamaːnija", "tisʕa"],
+    "teens": ["ʕaʃara", "ʔaħada ʕaʃar", "iθnaː ʕaʃar", "θalaːθata ʕaʃar", "ʔarbaʕata ʕaʃar",
+      "xamsata ʕaʃar", "sittata ʕaʃar", "sabʕata ʕaʃar", "θamaːnijata ʕaʃar", "tisʕata ʕaʃar"],
+    "tens":  ["", "", "ʕiʃruːn", "θalaːθuːn", "ʔarbaʕuːn", "xamsuːn", "sittuːn", "sabʕuːn", "θamaːnuːn", "tisʕuːn"],
+    "hundredsConstruct": ["", "", "", "θalaːθu", "ʔarbaʕu", "xamsu", "sittu", "sabʕu", "θamaːnu", "tisʕu"],
+    "connector": "wa",
+    "magnitudes": {
+      "hundred": "miʔa", "hundredDual": "miʔataːn",
+      "thousand": "ʔalf", "thousandDual": "ʔalfaːn", "thousandsPlural": "ʔaːlaːf",
+      "million": "miljuːn", "millionDual": "miljuːnaːn", "millionsPlural": "malaːjiːn"
+    }
+  },
+
+  // Neural-diacritizer data tables (the model + inference live in diacritizer.ts).
+  "diacritizer": {
+    // Diacritizer output label → the Arabic combining mark it writes.
+    "labelMarks": { "a": "َ", "u": "ُ", "i": "ِ", "o": "ْ", "F": "ً", "N": "ٌ", "K": "ٍ", "^": "ٰ" },
+    // Defective-spelling closed class: high-frequency words whose long /aː/ is an unwritten dagger-alif.
+    "defectiveSpelling": {
+      "هذا": "هٰذَا", "هذه": "هٰذِهِ", "هذان": "هٰذَان", "هذين": "هٰذَيْن",
+      "ذلك": "ذٰلِكَ", "ذلكم": "ذٰلِكُم", "كذلك": "كَذٰلِكَ", "لكن": "لٰكِن", "هؤلاء": "هٰؤُلَاءِ",
+      "ثلاثمئة": "ثَلَاثُمِئَة", "أربعمئة": "أَرْبَعُمِئَة", "خمسمئة": "خَمْسُمِئَة", "ستمئة": "سِتْتُمِئَة",
+      "سبعمئة": "سَبْعُمِئَة", "ثمانمئة": "ثَمَانِمِئَة", "تسعمئة": "تِسْعُمِئَة"
+    }
+  }
+}
