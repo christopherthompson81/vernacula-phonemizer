@@ -4,36 +4,20 @@
  * a stress lexicon (stress.tsv, from kaikki) overrides loanwords/exceptions. text() tokenizes words / numbers /
  * punctuation. See docs/de_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed syllable nucleus (loanwords / exceptions).
 let STRESS: Map<string, number> | undefined;
 function stressDict(): Map<string, number> {
-    if (STRESS === undefined) {
-        STRESS = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "stress.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    STRESS.set(line.slice(0, tab), Number(line.slice(tab + 1)));
-            }
-        } catch {
-            /* absent → pure rule stress */
-        }
-    }
+    if (STRESS === undefined)
+        STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number, {
+            optional: true,
+        });
     return STRESS;
 }
 
@@ -46,23 +30,10 @@ function ruleStress(): number {
 // Stressed-vowel length corrections (word → L long / S short) where the spelling rule mispredicts. From kaikki.
 let LENGTH: Map<string, string> | undefined;
 function lengthDict(): Map<string, string> {
-    if (LENGTH === undefined) {
-        LENGTH = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "length.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    LENGTH.set(line.slice(0, tab), line.slice(tab + 1));
-            }
-        } catch {
-            /* absent → rule length only */
-        }
-    }
+    if (LENGTH === undefined)
+        LENGTH = loadTsvMap(import.meta.url, "length.tsv", undefined, {
+            optional: true,
+        });
     return LENGTH;
 }
 const LONG_OF = MANIFEST.vowels.longOf;

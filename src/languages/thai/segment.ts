@@ -4,11 +4,8 @@
  * TCC (Thai Character Cluster, PyThaiNLP/Theeramunkong) boundaries so a word never splits mid-cluster. Used to
  * split a corpus token that is actually a compound (ก็คือ → ก็ คือ). See docs/th_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { THAI_TCC_RE } from "./manifest.ts";
+import { loadLines } from "../../core/loadTsv.ts";
 
 /** Codepoint indices (1..n) at which a TCC cluster ENDS — the only LEGAL word-boundary
  *  positions for segmentThai, so a word is never split mid-cluster (เนี่ย stays whole). */
@@ -97,25 +94,14 @@ export function segmentByDag(
 let WORDS: { set: Set<string>; maxLen: number } | undefined;
 function words(): { set: Set<string>; maxLen: number } {
     if (WORDS === undefined) {
-        const set = new Set<string>();
-        let maxLen = 1;
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "seg-words.txt",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const w = line.trim();
-                if (w) {
-                    set.add(w);
-                    const l = [...w].length;
-                    if (l > maxLen) maxLen = l;
-                }
-            }
-        } catch {
-            /* absent → no segmentation */
-        }
+        const set = new Set(
+            loadLines(import.meta.url, "seg-words.txt", { optional: true })
+                .map((l) => l.trim())
+                .filter(Boolean),
+        );
+        // longest entry (code points) bounds the DAG scan; ≥1 so a single cluster always has room. reduce (not
+        // Math.max(...spread)) so the ~65k-entry seg-words set can't blow the call-argument limit.
+        const maxLen = [...set].reduce((m, w) => Math.max(m, [...w].length), 1);
         WORDS = { set, maxLen };
     }
     return WORDS;

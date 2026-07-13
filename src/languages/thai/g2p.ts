@@ -5,10 +5,6 @@
  * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly (instead of the espeak L2S path).
  * Contributes ɤ. See docs/th_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import {
     reorderThaiLeadingVowels,
     thaiLexicalFixup,
@@ -19,27 +15,16 @@ import {
 import { segment } from "./segment.ts";
 import { THAI_TONE_IPA } from "./thaiTone.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
 // derive — word → IPA (Chao). Ported from espeak-ng-portable's Thai dictionary; consulted BEFORE the rule engine.
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
-    if (DICT === undefined) {
-        DICT = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "dictionary.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0) DICT.set(line.slice(0, tab), line.slice(tab + 1));
-            }
-        } catch {
-            /* absent → rules only */
-        }
-    }
+    if (DICT === undefined)
+        DICT = loadTsvMap(import.meta.url, "dictionary.tsv", undefined, {
+            optional: true,
+        });
     return DICT;
 }
 

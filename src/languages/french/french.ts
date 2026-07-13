@@ -4,30 +4,16 @@
  * g2p (g2p.ts) is the out-of-vocabulary fallback for unseen words. text() tokenizes words / numbers /
  * punctuation; French has no lexical stress, so a single phrase-final accent marks each rhythmic group.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import type { Phonemizer } from "../../registry.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexique 3.83 pronunciation lexicon: word → IPA for ~125k attested forms, loaded once (lazily).
 let LEXICON: Map<string, string> | undefined;
 function lexicon(): Map<string, string> {
-    if (LEXICON === undefined) {
-        LEXICON = new Map();
-        const path = join(
-            dirname(fileURLToPath(import.meta.url)),
-            "lexicon.tsv",
-        );
-        for (const line of readFileSync(path, "utf8").split("\n")) {
-            if (line === "" || line.startsWith("#")) continue;
-            const tab = line.indexOf("\t");
-            if (tab > 0) LEXICON.set(line.slice(0, tab), line.slice(tab + 1));
-        }
-    }
+    if (LEXICON === undefined) LEXICON = loadTsvMap(import.meta.url, "lexicon.tsv");
     return LEXICON;
 }
 

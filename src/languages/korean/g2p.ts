@@ -13,11 +13,8 @@
  * Contributes ̚ (unreleased) and ͈ (tense). See docs/ko_native_bringup_investigation.md.
  */
 
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Unicode Hangul-decomposition constants (structural — drive the syllable-block index math).
 const SBASE = 0xac00,
@@ -47,29 +44,13 @@ const ASP_STOP_H = MANIFEST.aspiration.stopCodaHOnset; // stop coda + ㅎ onset 
 // needs Hanja etymology). Word → 0-based syllable indices whose onset tenses. From wikipron (tensification.tsv).
 let TENS: Map<string, number[]> | undefined;
 function tensLexicon(): Map<string, number[]> {
-    if (TENS === undefined) {
-        TENS = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "tensification.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    TENS.set(
-                        line.slice(0, tab),
-                        line
-                            .slice(tab + 1)
-                            .split(",")
-                            .map(Number),
-                    );
-            }
-        } catch {
-            /* absent → rule tensification only */
-        }
-    }
+    if (TENS === undefined)
+        TENS = loadTsvMap(
+            import.meta.url,
+            "tensification.tsv",
+            (v) => v.split(",").map(Number),
+            { optional: true },
+        );
     return TENS;
 }
 

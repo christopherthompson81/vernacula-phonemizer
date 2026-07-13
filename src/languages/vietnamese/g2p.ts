@@ -10,11 +10,8 @@
  *   4. assembles onset + glide + ˈ + nucleus + tone + coda.
  * See docs/vi_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Tone map, onset table, and vowel sets are DATA (vietnamese.jsonc). Northern tones: combining diacritic → Chao
 // contour (placed after the nucleus); ngang (no mark) = ˧. Onsets are matched longest-first (order-preserved).
@@ -27,18 +24,7 @@ const CODA_RE = /(t̪|[ptkmnŋɲwj])$/u;
 
 let RHYMES: Map<string, string> | undefined;
 function rhymes(): Map<string, string> {
-    if (RHYMES === undefined) {
-        RHYMES = new Map();
-        const path = join(
-            dirname(fileURLToPath(import.meta.url)),
-            "rhymes.tsv",
-        );
-        for (const line of readFileSync(path, "utf8").split("\n")) {
-            if (line === "" || line.startsWith("#")) continue;
-            const tab = line.indexOf("\t");
-            if (tab > 0) RHYMES.set(line.slice(0, tab), line.slice(tab + 1));
-        }
-    }
+    if (RHYMES === undefined) RHYMES = loadTsvMap(import.meta.url, "rhymes.tsv");
     return RHYMES;
 }
 

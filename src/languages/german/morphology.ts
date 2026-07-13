@@ -13,9 +13,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 export const BOUNDARY = "·"; // inserted between morphemes; the g2p treats the next letter as element-initial
 
@@ -33,23 +31,10 @@ export const SUFFIXES = MANIFEST.morphology.suffixes;
 // decomposition (like hunspell/espeak affix flags), so it's precise rather than heuristic.
 let LEXICON: Map<string, string> | undefined;
 function lexicon(): Map<string, string> {
-    if (LEXICON === undefined) {
-        LEXICON = new Map();
-        try {
-            const path = join(
-                dirname(fileURLToPath(import.meta.url)),
-                "lexicon.tsv",
-            );
-            for (const line of readFileSync(path, "utf8").split("\n")) {
-                if (line === "" || line.startsWith("#")) continue;
-                const tab = line.indexOf("\t");
-                if (tab > 0)
-                    LEXICON.set(line.slice(0, tab), line.slice(tab + 1));
-            }
-        } catch {
-            /* absent → no compound splitting */
-        }
-    }
+    if (LEXICON === undefined)
+        LEXICON = loadTsvMap(import.meta.url, "lexicon.tsv", undefined, {
+            optional: true,
+        });
     return LEXICON;
 }
 const flags = (w: string): string => lexicon().get(w) ?? "";

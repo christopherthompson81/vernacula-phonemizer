@@ -8,11 +8,9 @@
  * NOTE: this stage emits per-word CITATION stress + clause-pause marks. Sentence-level de-accenting (the
  * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
+import { loadJson } from "../../core/loadManifest.ts";
+import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
 
 import {
     createEnglishG2p,
@@ -296,36 +294,25 @@ export class EnglishPhonemizer {
 
 /** Load the English data (beside this file) and build the phonemizer. */
 export function createEnglish(): EnglishPhonemizer {
-    const dir = dirname(fileURLToPath(import.meta.url));
-    const read = (f: string): string => readFileSync(join(dir, f), "utf8");
-
-    const lexicon = new Map<string, string>();
-    for (const line of read("accent-lexicon.tsv").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const cols = line.split("\t");
-        if (cols.length >= 3 && cols[2]!.trim() !== "")
-            lexicon.set(cols[0]!, cols[2]!.trim());
-    }
+    // accent-lexicon.tsv is 3-column word<TAB>?<TAB>ipa. `parse` receives the post-first-tab REMAINDER
+    // ("?<TAB>ipa"), so the ipa is remainder field [1] (= file column 3). Keep it when non-empty.
+    const lexicon = loadTsvMap(import.meta.url, "accent-lexicon.tsv", (rest) => {
+        const fields = rest.split("\t");
+        const ipa = fields[1]?.trim();
+        return fields.length >= 2 && ipa ? ipa : undefined;
+    });
 
     const manifest = MANIFEST; // consolidated hand-authored facts (english.jsonc), loaded once by manifest.ts
     const heteronyms = new Map(Object.entries(manifest.heteronyms));
     const unstressed = new Set(manifest.unstressedWords);
     const arpabetToIpa = makeArpabetToIpa(manifest.arpabet);
 
-    const g2pDict = new Map<string, string[]>();
-    for (const line of read("g2p-dict.tsv").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        const tab = line.indexOf("\t");
-        if (tab > 0)
-            g2pDict.set(line.slice(0, tab), line.slice(tab + 1).split(" "));
-    }
-    const g2pCommon = new Set(
-        read("g2p-common.txt")
-            .split("\n")
-            .filter((w) => w !== ""),
+    const g2pDict = loadTsvMap(import.meta.url, "g2p-dict.tsv", (v) =>
+        v.split(" "),
     );
+    const g2pCommon = new Set(loadLines(import.meta.url, "g2p-common.txt"));
     const g2p = createEnglishG2p(
-        JSON.parse(read("g2p-model.json")) as EnglishG2pModel,
+        loadJson<EnglishG2pModel>(import.meta.url, "g2p-model.json"),
         g2pDict,
         g2pCommon,
         arpabetToIpa,
@@ -333,7 +320,7 @@ export function createEnglish(): EnglishPhonemizer {
     );
 
     const tagger = new PosTagger(
-        JSON.parse(read("pos-model.json")) as PosModel,
+        loadJson<PosModel>(import.meta.url, "pos-model.json"),
     );
 
     return new EnglishPhonemizer(

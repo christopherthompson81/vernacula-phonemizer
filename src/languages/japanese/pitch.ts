@@ -9,28 +9,16 @@
  * apply the nucleus to the full reading. Data: pitch-accent.tsv (merged consensus > inflected > base).
  * See docs/ja_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { MANIFEST } from "./manifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 let LEX: Map<string, number> | undefined;
 function lex(): Map<string, number> {
-    if (LEX === undefined) {
-        LEX = new Map();
-        const path = join(
-            dirname(fileURLToPath(import.meta.url)),
-            "pitch-accent.tsv",
-        );
-        for (const line of readFileSync(path, "utf8").split("\n")) {
-            if (line === "" || line.startsWith("#")) continue;
-            const tab = line.indexOf("\t");
-            if (tab < 0) continue;
-            const n = Number.parseInt(line.slice(tab + 1), 10);
-            if (Number.isInteger(n) && n >= 0) LEX.set(line.slice(0, tab), n);
-        }
-    }
+    if (LEX === undefined)
+        LEX = loadTsvMap(import.meta.url, "pitch-accent.tsv", (v) => {
+            const n = Number.parseInt(v, 10);
+            return Number.isInteger(n) && n >= 0 ? n : undefined;
+        });
     return LEX;
 }
 

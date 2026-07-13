@@ -9,9 +9,7 @@
  * The whole-word map handles reading choice; no 14MB Viterbi is needed. Data: readings.tsv / fallback.tsv /
  * adverbs.txt. See docs/ja_native_bringup_investigation.md.
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
 
 interface KanjiFallback {
     on?: string;
@@ -30,45 +28,27 @@ interface Readings {
 let READINGS: Readings | undefined;
 function readings(): Readings {
     if (READINGS === undefined) {
-        const dir = dirname(fileURLToPath(import.meta.url));
-        const map = new Map<string, string>();
-        let maxKeyLength = 0;
-        for (const line of readFileSync(
-            join(dir, "readings.tsv"),
-            "utf8",
-        ).split("\n")) {
-            if (line === "") continue;
-            const tab = line.indexOf("\t");
-            if (tab < 0) continue;
-            const key = line.slice(0, tab);
-            map.set(key, line.slice(tab + 1));
-            const len = [...key].length;
-            if (len > maxKeyLength) maxKeyLength = len;
-        }
-        const fallback = new Map<string, KanjiFallback>();
-        for (const line of readFileSync(
-            join(dir, "fallback.tsv"),
-            "utf8",
-        ).split("\n")) {
-            if (line === "") continue;
-            const [k, on, kun, rendaku] = line.split("\t");
-            if (!k) continue;
+        // 60k whole-word map (kanji-run → kana); a per-kanji on/kun/rendaku fallback (4-column); kana adverbs.
+        const map = loadTsvMap(import.meta.url, "readings.tsv");
+        const fallback = loadTsvMap(import.meta.url, "fallback.tsv", (rest) => {
+            const [on, kun, rendaku] = rest.split("\t");
             const fb: KanjiFallback = {};
             if (on) fb.on = on;
             if (kun) fb.kun = kun;
             if (rendaku) fb.rendaku = rendaku;
-            fallback.set(k, fb);
-        }
-        const adverbs = new Set<string>();
-        let maxUnitLength = maxKeyLength;
-        for (const a of readFileSync(join(dir, "adverbs.txt"), "utf8").split(
-            "\n",
-        )) {
-            if (a === "") continue;
-            adverbs.add(a);
-            const l = [...a].length;
-            if (l > maxUnitLength) maxUnitLength = l;
-        }
+            return fb;
+        });
+        const adverbs = new Set(loadLines(import.meta.url, "adverbs.txt"));
+        // Longest key (code points) — the segmentation scan bounds. reduce (not Math.max(...spread)) so the
+        // ~60k-key readings map can't blow the call-argument limit.
+        const maxKeyLength = [...map.keys()].reduce(
+            (m, k) => Math.max(m, [...k].length),
+            0,
+        );
+        const maxUnitLength = [...adverbs].reduce(
+            (m, a) => Math.max(m, [...a].length),
+            maxKeyLength,
+        );
         READINGS = { map, maxKeyLength, fallback, adverbs, maxUnitLength };
     }
     return READINGS;
