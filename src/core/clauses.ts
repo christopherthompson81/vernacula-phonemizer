@@ -20,11 +20,12 @@ export interface ClauseSink {
     pause(mark: string): void;
 }
 
-export function assembleClauses(
-    input: string,
-    token: RegExp,
-    handle: (match: RegExpMatchArray, sink: ClauseSink) => void,
-): string {
+/**
+ * The clause-assembly state machine, independent of how tokens are iterated. `sink` drives it; `finish()`
+ * flushes any trailing pause and returns the assembled string. Use this directly when the tokenization isn't a
+ * single regex matchAll (mandarin scans code-point Han/Latin runs); use assembleClauses otherwise.
+ */
+export function clauseSink(): { sink: ClauseSink; finish: () => string } {
     let out = "";
     let pending: string | null = null;
     const sink: ClauseSink = {
@@ -40,7 +41,21 @@ export function assembleClauses(
             if (out !== "") pending = mark;
         },
     };
+    return {
+        sink,
+        finish() {
+            if (pending !== null && out !== "") out += ` ${pending}`;
+            return out;
+        },
+    };
+}
+
+export function assembleClauses(
+    input: string,
+    token: RegExp,
+    handle: (match: RegExpMatchArray, sink: ClauseSink) => void,
+): string {
+    const { sink, finish } = clauseSink();
     for (const m of input.matchAll(token)) handle(m, sink);
-    if (pending !== null && out !== "") out += ` ${pending}`;
-    return out;
+    return finish();
 }
