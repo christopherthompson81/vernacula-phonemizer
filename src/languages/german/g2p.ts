@@ -10,9 +10,10 @@ import { MANIFEST } from "./manifest.ts";
 const VOWELS = "aeiouäöüy";
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 
-// Long / short vowel IPA + final-devoicing pairs — from german.jsonc.
+// Long / short vowel IPA, context-free consonant letters, and final-devoicing pairs — from german.jsonc.
 const LONG = MANIFEST.vowels.long;
 const SHORT = MANIFEST.vowels.short;
+const CONS = MANIFEST.consonants;
 const VOICED_FINAL = MANIFEST.voicedFinal;
 
 export interface Seg { ph: string; s: number; vowel: boolean; }
@@ -114,27 +115,11 @@ export function toSegments(word: string): Seg[] {
       continue;
     }
 
-    switch (c) {
-      case "b": push("b", i); break;
-      case "c": push("k", i); break;
-      case "d": push("d", i); break;
-      case "f": push("f", i); break;
-      case "g": push("ɡ", i); break;
-      case "h": if (!isV(w[i - 1] ?? "")) push("h", i); break; // onset h pronounced; after a vowel (sehen, Uhr) silent
-      case "j": push("j", i); break;
-      case "k": push("k", i); break;
-      case "l": push("l", i); break;
-      case "m": push("m", i); break;
-      case "n": push("n", i); break;
-      case "p": push("p", i); break;
-      case "s": push(isV(nx) ? "z" : "s", i); break; // s → z before a vowel (sehen, lesen); s finally / before a consonant
-      case "t": push("t", i); break;
-      case "v": push("f", i); break;
-      case "w": push("v", i); break;
-      case "x": push("k", i); push("s", i); break;
-      case "z": push("t͡s", i); break;
-      default: break;
-    }
+    // Context-DEPENDENT letters handled here; the rest are a data lookup (MANIFEST.consonants).
+    if (c === "h") { if (!isV(w[i - 1] ?? "")) push("h", i); }      // onset h pronounced; silent after a vowel (sehen, Uhr)
+    else if (c === "s") { push(isV(nx) ? "z" : "s", i); }           // s → z before a vowel (sehen, lesen); else s
+    else if (c === "x") { push("k", i); push("s", i); }             // x → ks
+    else { const cp = CONS[c]; if (cp !== undefined) push(cp, i); } // context-free consonant letter
     i++;
   }
 

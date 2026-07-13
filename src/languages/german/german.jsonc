@@ -7,82 +7,311 @@
 // LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "vowels", "voicedFinal", "shortMonosyllables",
 // "longCh", "clausePunctuation", "morphology", "numbers". "convention" / "provenance" are documentation.
 {
-  "language": "de",
-  "name": "German (standard / Hochdeutsch)",
-  "provenance": "Cleanroom, rule-based g2p + a pronunciation lexicon (lexicon.tsv) + morphological compound/affix analysis + a vigesimal-free number compositor. espeak-independent. The affix IPA, the exception word-lists, and the number words are language facts.",
+    "language": "de",
+    "name": "German (standard / Hochdeutsch)",
+    "provenance": "Cleanroom, rule-based g2p + a pronunciation lexicon (lexicon.tsv) + morphological compound/affix analysis + a vigesimal-free number compositor. espeak-independent. The affix IPA, the exception word-lists, and the number words are language facts.",
 
-  // The canonical-IPA conventions the values below are written in (documentation).
-  "convention": {
-    "vowelLength": "tense/long vs lax/short pairs (aː/a, eː/ɛ, iː/ɪ, oː/ɔ, uː/ʊ, øː/œ, yː/ʏ); ə/ɐ reduced",
-    "finalDevoicing": "Auslautverhärtung — b/d/ɡ/v/z → p/t/k/f/s word/syllable-finally",
-    "morphology": "compound splitting (Fugen-s), separable/inseparable prefixes, closed-class suffixes with fixed IPA",
-    "glides": "diphthongs aɪ̯ aʊ̯ ɔɪ̯; syllabic ɐ̯ (r-vocalisation); ç/x (ich/ach-Laut)",
-    "numbers": "compound words, units before tens (einundzwanzig); split at thousand/million boundaries"
-  },
-
-  // IPA vowel inventory (for nucleus detection in the lexicon post-pass).
-  "vowelChars": "aɐeɛiɪoɔuʊøœyʏə",
-
-  // Vowel length maps. `long`/`short`: orthographic vowel letter → IPA (the g2p length rule picks one).
-  // `longOf`/`shortOf`: IPA vowel → its long/short counterpart (the lexicon re-length post-pass).
-  "vowels": {
-    "long":    { "a": "aː", "e": "eː", "i": "iː", "o": "oː", "u": "uː", "ä": "ɛː", "ö": "øː", "ü": "yː", "y": "yː" },
-    "short":   { "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ", "ä": "ɛ", "ö": "œ", "ü": "ʏ", "y": "ʏ" },
-    "longOf":  { "a": "aː", "ɛ": "eː", "ɪ": "iː", "ɔ": "oː", "ʊ": "uː", "œ": "øː", "ʏ": "yː" },
-    "shortOf": { "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ", "ø": "œ", "y": "ʏ", "ɛ": "ɛ" }
-  },
-
-  // Final devoicing (Auslautverhärtung): voiced obstruent → voiceless word/syllable-finally.
-  "voicedFinal": { "b": "p", "d": "t", "ɡ": "k", "v": "f", "z": "s" },
-
-  // Short-vowel function words / clitics that the V+single-final-C → long rule would over-lengthen.
-  "shortMonosyllables": [
-    "das", "was", "des", "es", "in", "im", "an", "am", "um", "mit", "bis", "weg", "man", "von", "hat", "ob",
-    "ab", "bin", "hin", "wes", "bist", "ist", "und", "als", "hast", "wenn", "denn", "zur", "zum", "vom", "drin",
-    "etwas", "darum", "warum", "herum", "worum", "vielleicht", "hinein", "herein"
-  ],
-  // Stems whose vowel before ⟨ch⟩ is LONG (the minority; default is short — ach, Bach, mich).
-  "longCh": ["nach", "buch", "such", "sprach", "hoch", "tuch", "fluch", "kuch", "wuch"],
-
-  // Clause / phrase punctuation → canonical inline pause marks.
-  "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
-
-  // Morphological analysis tables (the algorithm — splitting/stripping/stress — is in morphology.ts).
-  "morphology": {
-    // Vowel-initial suffixes resyllabify onto the stem (no devoicing boundary).
-    "vowelInitialSuffixes": ["ung", "ungen", "ig", "isch", "en", "er", "e", "es", "em", "et"],
-    // be-/ge-/er- also occur root-initially (beide, geht, Erde): only strip if the remainder is a real word.
-    "ambiguousPrefixes": ["be", "ge", "er"],
-    // Fugen-elemente in preference order (a stem flagged `s` prefers -s-: Zeitungs-, Arbeits-).
-    "linkingElements": ["", "s", "n", "es", "en", "e", "er"],
-    // Valid German onset clusters (a stripped stem must start with one — so be+rlin is rejected).
-    "validOnsets": [
-      "st", "sp", "sc", "sk", "sm", "sn", "sw", "tr", "dr", "kr", "gr", "br", "pr", "fr", "kl", "gl", "bl",
-      "pl", "fl", "kn", "gn", "pf", "kw", "zw", "tw", "ph", "th", "ch", "qu", "wr", "schl", "schw"
-    ],
-    // Fixed IPA for the closed affixes. Unstressed prefixes reduce; separable ones keep full vowels.
-    "prefixIpa": {
-      "be": "bə", "ge": "ɡə", "ver": "fɛɐ̯", "zer": "t͡sɛɐ̯", "ent": "ɛnt", "emp": "ɛmp", "miss": "mɪs", "er": "ɛɐ̯",
-      "auf": "aʊ̯f", "aus": "aʊ̯s", "ein": "aɪ̯n", "vor": "foːɐ̯", "mit": "mɪt", "nach": "naːx", "bei": "baɪ̯", "zu": "t͡suː",
-      "an": "an", "ab": "ap", "um": "ʊm", "her": "heːɐ̯", "hin": "hɪn", "los": "loːs", "weg": "vɛk", "über": "yːbɐ", "unter": "ʊntɐ",
-      "durch": "dʊʁç", "gegen": "ɡeːɡən", "voll": "fɔl", "wider": "viːdɐ", "hinter": "hɪntɐ", "dar": "daːɐ̯", "empor": "ɛmpoːɐ̯", "auseinander": "aʊ̯saɪ̯nandɐ"
+    // The canonical-IPA conventions the values below are written in (documentation).
+    "convention": {
+        "vowelLength": "tense/long vs lax/short pairs (aː/a, eː/ɛ, iː/ɪ, oː/ɔ, uː/ʊ, øː/œ, yː/ʏ); ə/ɐ reduced",
+        "finalDevoicing": "Auslautverhärtung — b/d/ɡ/v/z → p/t/k/f/s word/syllable-finally",
+        "morphology": "compound splitting (Fugen-s), separable/inseparable prefixes, closed-class suffixes with fixed IPA",
+        "glides": "diphthongs aɪ̯ aʊ̯ ɔɪ̯; syllabic ɐ̯ (r-vocalisation); ç/x (ich/ach-Laut)",
+        "numbers": "compound words, units before tens (einundzwanzig); split at thousand/million boundaries",
     },
-    "suffixIpa": {
-      "ung": "ʊŋ", "ungen": "ʊŋən", "heit": "haɪ̯t", "heiten": "haɪ̯tən", "keit": "kaɪ̯t", "keiten": "kaɪ̯tən", "schaft": "ʃaft",
-      "lich": "lɪç", "lichen": "lɪçən", "isch": "ɪʃ", "bar": "baːɐ̯", "sam": "zaːm", "los": "loːs", "haft": "haft", "nis": "nɪs",
-      "tum": "tuːm", "chen": "çən", "lein": "laɪ̯n", "ig": "ɪç", "er": "ɐ", "en": "ən", "es": "əs", "em": "əm", "et": "ət", "st": "st", "e": "ə"
-    }
-  },
 
-  // Cardinal number words. Units precede tens, compounded (einundzwanzig); composition logic is in numbers.ts.
-  "numbers": {
-    "ones": ["null", "eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun",
-      "zehn", "elf", "zwölf", "dreizehn", "vierzehn", "fünfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn"],
-    "tens": ["", "", "zwanzig", "dreißig", "vierzig", "fünfzig", "sechzig", "siebzig", "achtzig", "neunzig"],
-    "compoundOne": "ein",
-    "connector": "und",
-    "hundred": "hundert",
-    "thousand": "tausend",
-    "million": { "sg": "eine Million", "pl": "Millionen" }
-  }
+    // IPA vowel inventory (for nucleus detection in the lexicon post-pass).
+    "vowelChars": "aɐeɛiɪoɔuʊøœyʏə",
+
+    // Vowel length maps. `long`/`short`: orthographic vowel letter → IPA (the g2p length rule picks one).
+    // `longOf`/`shortOf`: IPA vowel → its long/short counterpart (the lexicon re-length post-pass).
+    "vowels": {
+        "long": {
+            "a": "aː",
+            "e": "eː",
+            "i": "iː",
+            "o": "oː",
+            "u": "uː",
+            "ä": "ɛː",
+            "ö": "øː",
+            "ü": "yː",
+            "y": "yː",
+        },
+        "short": {
+            "a": "a",
+            "e": "ɛ",
+            "i": "ɪ",
+            "o": "ɔ",
+            "u": "ʊ",
+            "ä": "ɛ",
+            "ö": "œ",
+            "ü": "ʏ",
+            "y": "ʏ",
+        },
+        "longOf": {
+            "a": "aː",
+            "ɛ": "eː",
+            "ɪ": "iː",
+            "ɔ": "oː",
+            "ʊ": "uː",
+            "œ": "øː",
+            "ʏ": "yː",
+        },
+        "shortOf": {
+            "a": "a",
+            "e": "ɛ",
+            "i": "ɪ",
+            "o": "ɔ",
+            "u": "ʊ",
+            "ø": "œ",
+            "y": "ʏ",
+            "ɛ": "ɛ",
+        },
+    },
+
+    // Context-free consonant letters → IPA (the g2p's final switch). The context-DEPENDENT letters h (silent
+    // after a vowel), s (→z before a vowel), x (→ks) and all digraphs/diphthongs stay in the g2p scanner.
+    "consonants": {
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "j": "j", "k": "k", "l": "l", "m": "m", "n": "n",
+        "p": "p", "t": "t", "v": "f", "w": "v", "z": "t͡s"
+    },
+
+    // Final devoicing (Auslautverhärtung): voiced obstruent → voiceless word/syllable-finally.
+    "voicedFinal": { "b": "p", "d": "t", "ɡ": "k", "v": "f", "z": "s" },
+
+    // Short-vowel function words / clitics that the V+single-final-C → long rule would over-lengthen.
+    "shortMonosyllables": [
+        "das",
+        "was",
+        "des",
+        "es",
+        "in",
+        "im",
+        "an",
+        "am",
+        "um",
+        "mit",
+        "bis",
+        "weg",
+        "man",
+        "von",
+        "hat",
+        "ob",
+        "ab",
+        "bin",
+        "hin",
+        "wes",
+        "bist",
+        "ist",
+        "und",
+        "als",
+        "hast",
+        "wenn",
+        "denn",
+        "zur",
+        "zum",
+        "vom",
+        "drin",
+        "etwas",
+        "darum",
+        "warum",
+        "herum",
+        "worum",
+        "vielleicht",
+        "hinein",
+        "herein",
+    ],
+    // Stems whose vowel before ⟨ch⟩ is LONG (the minority; default is short — ach, Bach, mich).
+    "longCh": [
+        "nach",
+        "buch",
+        "such",
+        "sprach",
+        "hoch",
+        "tuch",
+        "fluch",
+        "kuch",
+        "wuch",
+    ],
+
+    // Clause / phrase punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Morphological analysis tables (the algorithm — splitting/stripping/stress — is in morphology.ts).
+    "morphology": {
+        // Prefixes/suffixes tried longest-first for greedy stripping. Unstressed prefixes reduce their vowel;
+        // stressed (separable) prefixes carry primary stress. Their IPA is in prefixIpa/suffixIpa below.
+        "prefixUnstressed": ["ver", "zer", "ent", "emp", "miss", "be", "ge", "er"],
+        "prefixStressed": ["hinter", "wider", "durch", "unter", "über", "gegen", "voll", "auseinander", "auf",
+            "aus", "ein", "vor", "mit", "nach", "bei", "zu", "an", "ab", "um", "her", "hin", "los", "weg", "empor", "dar"],
+        "suffixes": ["schaft", "ungen", "lichen", "keiten", "heiten", "chen", "lein", "ung", "heit", "keit",
+            "lich", "isch", "bar", "sam", "los", "haft", "nis", "tum", "ig", "er", "en", "es", "em", "et", "st", "e"],
+        // Vowel-initial suffixes resyllabify onto the stem (no devoicing boundary).
+        "vowelInitialSuffixes": [
+            "ung",
+            "ungen",
+            "ig",
+            "isch",
+            "en",
+            "er",
+            "e",
+            "es",
+            "em",
+            "et",
+        ],
+        // be-/ge-/er- also occur root-initially (beide, geht, Erde): only strip if the remainder is a real word.
+        "ambiguousPrefixes": ["be", "ge", "er"],
+        // Fugen-elemente in preference order (a stem flagged `s` prefers -s-: Zeitungs-, Arbeits-).
+        "linkingElements": ["", "s", "n", "es", "en", "e", "er"],
+        // Valid German onset clusters (a stripped stem must start with one — so be+rlin is rejected).
+        "validOnsets": [
+            "st",
+            "sp",
+            "sc",
+            "sk",
+            "sm",
+            "sn",
+            "sw",
+            "tr",
+            "dr",
+            "kr",
+            "gr",
+            "br",
+            "pr",
+            "fr",
+            "kl",
+            "gl",
+            "bl",
+            "pl",
+            "fl",
+            "kn",
+            "gn",
+            "pf",
+            "kw",
+            "zw",
+            "tw",
+            "ph",
+            "th",
+            "ch",
+            "qu",
+            "wr",
+            "schl",
+            "schw",
+        ],
+        // Fixed IPA for the closed affixes. Unstressed prefixes reduce; separable ones keep full vowels.
+        "prefixIpa": {
+            "be": "bə",
+            "ge": "ɡə",
+            "ver": "fɛɐ̯",
+            "zer": "t͡sɛɐ̯",
+            "ent": "ɛnt",
+            "emp": "ɛmp",
+            "miss": "mɪs",
+            "er": "ɛɐ̯",
+            "auf": "aʊ̯f",
+            "aus": "aʊ̯s",
+            "ein": "aɪ̯n",
+            "vor": "foːɐ̯",
+            "mit": "mɪt",
+            "nach": "naːx",
+            "bei": "baɪ̯",
+            "zu": "t͡suː",
+            "an": "an",
+            "ab": "ap",
+            "um": "ʊm",
+            "her": "heːɐ̯",
+            "hin": "hɪn",
+            "los": "loːs",
+            "weg": "vɛk",
+            "über": "yːbɐ",
+            "unter": "ʊntɐ",
+            "durch": "dʊʁç",
+            "gegen": "ɡeːɡən",
+            "voll": "fɔl",
+            "wider": "viːdɐ",
+            "hinter": "hɪntɐ",
+            "dar": "daːɐ̯",
+            "empor": "ɛmpoːɐ̯",
+            "auseinander": "aʊ̯saɪ̯nandɐ",
+        },
+        "suffixIpa": {
+            "ung": "ʊŋ",
+            "ungen": "ʊŋən",
+            "heit": "haɪ̯t",
+            "heiten": "haɪ̯tən",
+            "keit": "kaɪ̯t",
+            "keiten": "kaɪ̯tən",
+            "schaft": "ʃaft",
+            "lich": "lɪç",
+            "lichen": "lɪçən",
+            "isch": "ɪʃ",
+            "bar": "baːɐ̯",
+            "sam": "zaːm",
+            "los": "loːs",
+            "haft": "haft",
+            "nis": "nɪs",
+            "tum": "tuːm",
+            "chen": "çən",
+            "lein": "laɪ̯n",
+            "ig": "ɪç",
+            "er": "ɐ",
+            "en": "ən",
+            "es": "əs",
+            "em": "əm",
+            "et": "ət",
+            "st": "st",
+            "e": "ə",
+        },
+    },
+
+    // Cardinal number words. Units precede tens, compounded (einundzwanzig); composition logic is in numbers.ts.
+    "numbers": {
+        "ones": [
+            "null",
+            "eins",
+            "zwei",
+            "drei",
+            "vier",
+            "fünf",
+            "sechs",
+            "sieben",
+            "acht",
+            "neun",
+            "zehn",
+            "elf",
+            "zwölf",
+            "dreizehn",
+            "vierzehn",
+            "fünfzehn",
+            "sechzehn",
+            "siebzehn",
+            "achtzehn",
+            "neunzehn",
+        ],
+        "tens": [
+            "",
+            "",
+            "zwanzig",
+            "dreißig",
+            "vierzig",
+            "fünfzig",
+            "sechzig",
+            "siebzig",
+            "achtzig",
+            "neunzig",
+        ],
+        "compoundOne": "ein",
+        "connector": "und",
+        "hundred": "hundert",
+        "thousand": "tausend",
+        "million": { "sg": "eine Million", "pl": "Millionen" },
+    },
 }
