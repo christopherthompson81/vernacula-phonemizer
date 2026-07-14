@@ -127,3 +127,18 @@ REMAINING (next): numbers+counters in kanji-mixed text (8月20日 → our 8つ�
 月がつ/日か/時じ/人にん + digit reading), a few kanji-reading errors (気に入る→きにいる not きにはいった; 人 じん/ひと),
 and the ゅう/ゅー youon long-vowel notation inconsistency (しゅう→ɕɯᵝɯᵝ vs せい→se̞ː). Pitch not yet independently
 validated vs OpenJTalk (semi-circular anyway — we merged its data).
+
+## Run 5 — reading is ✅-level (97.7% per-char); full-width digits fixed
+
+Fair per-CHARACTER reading accuracy vs OpenJTalk (5684 non-number Tatoeba sentences, long-vowel-folded, after the
+は/へ fix): **97.7%** (whole-sentence exact 83.3% — harsh: one homograph fails a whole sentence). Comparable to cmn's
+CC-CEDICT 97.3%. Reusable tool: tools/ja-openjtalk-validate.mts. So the kanji reading front-end is ✅-level.
+Fixed: full-width digits ０-９ were dropped (３個 → こ, the 3 lost) → normalise to ASCII in text() (３個 → さんこ,
+２０２４年 → …). The residual ~2.3% per-char is homograph context (人 ひと/じん, 彼 かれ/あの, 気に入る→きにいる),
+は in fixed greetings (今日は/今晩は matched as whole words → は not converted), and the ゅう long-vowel convention.
+
+REMAINING for ✅: (1) COUNTER readings after numbers — a substantial subsystem: 月がつ, 日 irregular (ついたち/ふつか/
+はつか), 時じ, 人 irregular (ひとり/ふたり/にん), 分 rendaku (ぷん/ふん) — currently the standalone kanji reading is
+used (8月→はちつき not はちがつ); ~5% of sentences. (2) PITCH accent independent validation (built + self-consistent
+92-99% vs the espeak snapshot, but not yet vs OpenJTalk — semi-circular anyway since we merged its data). (3) the
+ゅう youon long-vowel notation (espeak-inherited ɯᵝɯᵝ vs the consistent ː).
