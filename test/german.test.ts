@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 25 — a STRESSED bare ɐ is a wrongly-reduced -er → ɛʁ", () => {
+        expect(phonemizeWord("Laterne")).toBe("latˈɛʁnə"); // stressed -er → ɛʁ (was ɐ)
+        expect(phonemizeWord("Inferno")).toBe("ɪnfˈɛʁno");
+        expect(phonemizeWord("Wasser")).toBe("vˈasɐ"); // control: UNSTRESSED -er stays reduced ɐ
+    });
+
     test("Run 24 — vocalized coda-r ɐ̯ holds a consonant slot (unblocks the lexicon)", () => {
         expect(phonemizeWord("Marge")).toBe("mˈaɐ̯ʒə"); // ʒ correction now lands (was skew-blocked by the r)
         expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native word, corrections unchanged

@@ -184,6 +184,13 @@ function restoreStressedIe(ipa: string): string {
     return ipa.replace(/i̯([ˈˌ])[əɛ]/gu, "$1iː");
 }
 
+/** A STRESSED bare ɐ is always a wrongly-reduced -er: our g2p reduces ⟨er⟩+C to ɐ (correct for the unstressed
+ *  ending, Wasser → vasɐ), but that nucleus can never legitimately carry stress — a stressed -er is the full ɛʁ
+ *  (Laterne → latɛʁnə, Inferno → ɪnfɛʁno, modern → modɛʁn). Restore ˈɐ/ˌɐ (not the ɐ̯ offglide) to ɛʁ. Runs last. */
+function restoreStressedEr(ipa: string): string {
+    return ipa.replace(/([ˈˌ])ɐ(?!̯)/gu, "$1ɛʁ");
+}
+
 const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏəƐ]/g; // includes the short-ä marker Ɛ so stress/nucleus counts see it
 
 /** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
@@ -239,7 +246,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)));
+        return restoreStressedEr(restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w))));
     }
 
     const segs = toSegments(w);
@@ -264,7 +271,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)));
+    return restoreStressedEr(restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w))));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
