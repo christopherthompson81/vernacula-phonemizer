@@ -55,6 +55,9 @@ let skewed = 0;
 for (const [w, kipa] of rows) {
     if (!w || !kipa) continue;
     if (!/^[a-zäöüß]+$/.test(w)) continue;
+    if (!/[aeiouäöüy]/.test(w)) continue; // skip vowelless acronyms (lkw, pkw) — kaikki letter-spells them, so
+    // the consonant alignment against our word-reading is spurious
+
     const kc = consonants(kipa), oc = consonants(phonemizeWord(w));
     if (oc.length !== kc.length) { skewed++; continue; }
     const cs: string[] = [];
