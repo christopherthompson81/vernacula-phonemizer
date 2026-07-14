@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 13 — loanword consonants (v→v, s→s), native unchanged", () => {
+        expect(phonemizeWord("Vase")).toBe("vˈaːzə"); // LOANWORD ⟨v⟩ → v
+        expect(phonemizeWord("Pseudonym")).toBe("psɔʏ̯donˈyːm"); // loanword initial ⟨s⟩ → s (not z)
+        expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: NATIVE ⟨v⟩ → f
+        expect(phonemizeWord("Sonne")).toBe("zˈɔnə"); // control: native initial ⟨s⟩ → z
+    });
+
     test("Run 12 — split ranking: don't shatter ⟨sch⟩ (…schen verb, not raus·chen)", () => {
         expect(phonemizeWord("rauschen")).toBe("ʁˈaʊ̯ʃən"); // rausch·en (sch = ʃ), NOT raus·chen (s+ç)
         expect(phonemizeWord("waschen")).toBe("vˈaʃən");
