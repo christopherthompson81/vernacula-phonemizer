@@ -72,3 +72,21 @@ bootstrapped from espeak, which renders short/unstressed ⟨i⟩ as ɨ (lladin�
 referee shows front **i** (pin→piːn). Re-examine the unstressed/closed i→ɨ rules against the referee (they may be
 espeak artifacts), and the **n/r/l vowel-length ambiguity** (tân/tan) — both likely need an oracle-derived,
 referee-GATED length/quality lexicon (cf. the Irish Run-3 method [[vernacula-oracle-lexicon-method]]).
+
+## Run 3 — 2026-07-14 — referee-guided: reverted the oracle's i→ɨ artifact (the Irish lesson)
+
+The Run-2 referee residual pointed at a systematic divergence, and the independent NW referee adjudicated it
+decisively: **Northern Welsh keeps the letter ⟨i⟩ FRONT (i/ɪ/iː) and centralizes only ⟨u⟩ and clear ⟨y⟩ to ɨ** —
+that i/ɨ distinction IS the Northern vowel system. Run 1's two `i→ɨ` rules (unstressed-i→ɨ + closed-stressed-i→ɨ)
+matched an espeak ARTEFACT: the oracle renders short/unstressed ⟨i⟩ as ɨ, but the referee shows front i
+(melin→mɛlɪn not mɛlɨn, brenin→brɛnɪn, gwin→ɡwiːn, min→miːn, enillodd→ɛnɪɬɔð not the oracle's ɛnɨɬɔð). Removed both.
+
+Result: referee folded **49.1% → 56.5%** (+7.4). Oracle exact "dropped" 88.98% → 72.4%, but the decomposition shows
+that drop is US being MORE correct: **i-quality-only mismatches = 19.4%** (words where the sole diff is i↔ɨ and the
+referee backs our front i), length-only = **0.6%** (a tiny residual where the oracle's length is right — the n/r/l
+lexical length, NOT worth a lexicon), other = 7.5% (names/loanwords + the lexical wy quality u/ʊ/uːɨ, e.g.
+gwyn = gw+ɨ not a wy-diphthong — deferred). LESSON (again): the espeak oracle carries dialect artefacts; the
+espeak-exact metric can REWARD matching them. Validate segment quality against the independent referee.
+
+Deferred (minor / lexical, referee-invisible because BACKBONE folds length): n/r/l vowel length (tân/tan), the
+wy-diphthong quality split, English loan-name code-switching.
