@@ -40,6 +40,11 @@ function nuclei(ipa: string): string[] {
     return out;
 }
 
+// Truncate reduction.tsv FIRST, so phonemizeWord's lazy reductionDict() load sees an empty lexicon and this
+// build always compares kaikki against the RAW (un-reduced) engine — otherwise a re-run would compare against
+// already-reduced output and silently drop every existing entry (a stale-feedback loop).
+writeFileSync(OUT, "");
+
 const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
 const out: [string, string][] = [];
 let matched = 0, skewed = 0;
