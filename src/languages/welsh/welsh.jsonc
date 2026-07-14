@@ -1,0 +1,55 @@
+// Native canonical-IPA data manifest for Welsh (cy / Cymraeg) — espeak-independent, Northern-leaning (u/clear-y
+// → ɨ). Welsh orthography is highly phonemic: the g2p resolves digraphs (ch dd ff ng ll ph rh th) and vowel
+// clusters (the diphthongs carry a superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH
+// rule. The y-vowel is the one subtlety: obscure ə (non-final syllables + function-word clitics) vs clear ɨ
+// (final syllable) — espeak's raw --ipa mislabels these ʌ/ø; the canonical values are ə/ɨ. ALGORITHMS in
+// g2p.ts (scan) / welsh.ts (stress + length + assembly). See docs/cy_bringup_investigation.md.
+{
+    "language": "cy",
+    "name": "Welsh (Cymraeg)",
+    "script": "Latin",
+    "provenance": "Authored from Welsh orthography + phonology (the standard penultimate-stress + vowel-length system), bootstrapped from the espeak-ng-portable cy canonical phonemize() output over the 50k corpus (its ə/ɨ y-vowel relabel, NOT the raw --ipa ʌ/ø). wikipron cym is the independent cross-check (later run).",
+
+    // Digraphs (resolved before single letters). ⟨si⟩+V → ʃ is handled in code (needs a following vowel).
+    "digraphs": {
+        "ch": "χ", "dd": "ð", "ff": "f", "ng": "ŋ", "ll": "ɬ", "ph": "f", "rh": "r̥", "th": "θ", "ngh": "ŋ̥",
+    },
+
+    // Single consonants. c always k, g always ɡ, f → v, ff/ph → f (digraphs); w/i as consonants (before a vowel)
+    // handled in code.
+    "consonants": {
+        "b": "b", "c": "k", "x": "ks", "d": "d", "f": "v", "g": "ɡ", "h": "h", "j": "d͡ʒ", "l": "l", "m": "m",
+        "n": "n", "p": "p", "r": "r", "s": "s", "t": "t",
+    },
+
+    // Vowel clusters → IPA, matched LONGEST-first. Diphthongs carry their offglide and are NOT length-adjusted;
+    // monophthongs are stored SHORT and lengthened by welsh.ts. Circumflex (to bach) marks an inherently long
+    // vowel. ⟨y⟩ is resolved in code (obscure ə vs clear ɨ), so only its long forms appear here.
+    "vowels": {
+        "ae": "aᶤ", "au": "aᶤ", "ai": "aᶦ", "aw": "aᶷ", "ay": "aᶦ",
+        "eu": "əᶤ", "ei": "əᶦ", "ew": "eᶷ", "ey": "əᶦ",
+        "oe": "ɔᶤ", "oi": "ɔᶦ", "ou": "ɔᶤ", "ow": "ɔᶷ", "oy": "ɔᶦ",
+        "wy": "uᶤ", "yw": "ɨᵘ", "iw": "ɪᵘ", "uw": "ɨᵘ", "ïe": "iɛ",
+        "â": "aː", "ê": "eː", "î": "iː", "ô": "oː", "û": "ɨː", "ŵ": "uː", "ŷ": "ɨː",
+        "à": "a", "è": "ɛ", "ì": "i", "ò": "ɔ", "ù": "ɨ", "ï": "i", "ë": "ɛ", "ö": "ɔ", "ä": "a", "ü": "ɨ",
+        "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "ɨ", "w": "ʊ",
+    },
+
+    // Short-quality → long-quality (lengthening raises/tenses). ə never lengthens.
+    "longVowel": { "a": "aː", "ɛ": "eː", "i": "iː", "ɔ": "oː", "ʊ": "uː", "ɨ": "ɨː", "e": "eː", "o": "oː" },
+
+    // A stressed monophthong lengthens when open (0 coda consonants) or before a SINGLE coda from this set
+    // (voiced stops + fricatives). Voiceless stops p t k, m, ŋ, ɬ, and any cluster keep it short. n/r/l are
+    // lexically variable (the circumflex disambiguates: tân/taːn vs tan/tan) — Run 1 treats them as non-length.
+    "lengthenBefore": "bdɡvðfχθsz",
+
+    // Function-word clitics where ⟨y⟩ stays OBSCURE (ə) despite being a final/only syllable.
+    "obscureY": ["y", "yr", "yn", "yng", "ym", "yng", "fy", "dy", "myn", "syr"],
+
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+
+    // Cardinal number words 0–10 (masculine; the full system with mutations/feminine is a later phase).
+    "numbers": {
+        "ones": ["dim", "un", "dau", "tri", "pedwar", "pump", "chwech", "saith", "wyth", "naw", "deg"],
+    },
+}
