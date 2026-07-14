@@ -1,18 +1,30 @@
 /**
  * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA, espeak-independent. Rule-based g2p
- * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default). No lexicon yet; the vowel
- * clusters are the documented Run-2+ residual. See docs/ga_bringup_investigation.md.
+ * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default) + i-offglide and svarabhakti
+ * passes, with a Connacht pronunciation lexicon (lexicon.tsv, Run 3) pinning the semi-lexical vowel detail the
+ * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/ga_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { toSegments } from "./g2p.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+import { type Seg, toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
-// Short vowels reduce to ə when unstressed; long vowels + diphthongs (with ː) keep their quality.
-const SHORT = new Set(["a", "ɛ", "ɪ", "ɔ", "ʊ"]);
+// Connacht pronunciation lexicon (Run 3): oracle-distilled, consonant+glide-skeleton-verified overrides that pin
+// the semi-lexical vowel-QUALITY detail the rules defer (io/oi/eo splits). Consulted before the g2p; OOV words
+// fall through to the rules. Lazily loaded (like french/swedish) so merely importing this module — e.g. from the
+// referee eval to score another language — does not parse the whole TSV. See lexicon.tsv.
+let LEXICON: Map<string, string> | undefined;
+function lexicon(): Map<string, string> {
+    if (LEXICON === undefined) LEXICON = loadTsvMap(import.meta.url, "lexicon.tsv");
+    return LEXICON;
+}
 
-type S = { ph: string; nucleus: boolean };
+// Short vowels reduce to ə when unstressed; long vowels + diphthongs (with ː) keep their quality. ɪ IS reduced:
+// the independent wikipron referee transcribes unstressed short i as ə (féidir → fʲeːdʲəɾʲ, milis → mʲɪlʲəʃ),
+// NOT the oracle's ɪ — espeak keeps the underlying i, but real Connacht centralizes it like a/o/u.
+const SHORT = new Set(["a", "ɛ", "ɪ", "ɔ", "ʊ"]);
 
 // A slender consonant (palatalized, or a palatal). A back vowel before a slender CODA gets an i-offglide.
 const isSlenderC = (ph: string): boolean => ph.endsWith("ʲ") || ph === "c" || ph === "ɟ" || ph === "ʃ" || ph === "ç";
@@ -21,20 +33,20 @@ const BACK_V = new Set(["ɑː", "oː"]); // LONG back vowels only (áit, cóir);
 const LIQUID = new Set(["ɾˠ", "ɾʲ", "l̪ˠ", "lʲ"]);
 const SVARABHAKTI_NEXT = new Set(["mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "w", "ɡ", "ɟ", "x", "ç", "ɣ", "j", "n̪ˠ", "nʲ"]);
 
-/** Back vowel + slender CODA consonant → insert an i-offglide ⁱ (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ, aill → aⁱlʲ);
- *  a pre-vocalic slender consonant (baile → balʲɛ) or uː/iː/eː gets none. */
-function offglide(segs: S[]): void {
+/** Long back vowel + a following slender consonant → insert an i-offglide ⁱ, whether that consonant is a coda
+ *  (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ) or an onset of the next syllable (óige → oːⁱɟə, áirithe → ɑːⁱɾʲə). A short back
+ *  vowel (baile → balʲə), an ⟨eo⟩-derived oː (ceoil), or uː/iː/eː gets none. */
+function offglide(segs: Seg[]): void {
     for (let i = segs.length - 1; i >= 1; i--) {
         const c = segs[i]!, prev = segs[i - 1]!;
-        const coda = i + 1 >= segs.length || !segs[i + 1]!.nucleus;
-        if (!c.nucleus && isSlenderC(c.ph) && coda && prev.nucleus && BACK_V.has(prev.ph))
-            segs.splice(i, 0, { ph: "ⁱ", nucleus: false });
+        if (c.nucleus || !prev.nucleus) continue;
+        if (isSlenderC(c.ph) && BACK_V.has(prev.ph) && !prev.noGlide) segs.splice(i, 0, { ph: "ⁱ", nucleus: false });
     }
 }
 
 /** Svarabhakti (epenthesis): a schwa between /r l/ and a following labial/velar/palatal (gorm → ɡɔɾˠəmˠ,
  *  bolg → bˠɔl̪ˠəɡ). /n/ does not trigger it (ainm → ˈanʲmˠ). */
-function epenthesis(segs: S[]): void {
+function epenthesis(segs: Seg[]): void {
     for (let i = segs.length - 2; i >= 0; i--) {
         const coda = i + 2 >= segs.length || !segs[i + 2]!.nucleus; // the 2nd consonant must be a coda (bolg, not Gaeilge)
         if (coda && LIQUID.has(segs[i]!.ph) && SVARABHAKTI_NEXT.has(segs[i + 1]!.ph))
@@ -55,6 +67,12 @@ function nasalAssim(segs: { ph: string; nucleus: boolean }[]): void {
 /** One Irish word → canonical IPA. Stress the first nucleus (native default; marked even on monosyllables);
  *  every OTHER short-vowel nucleus reduces to ə (unstressed reduction, e.g. madra → mˠˈad̪ˠɾˠə). */
 export function phonemizeWord(word: string): string {
+    const hit = lexicon().get(word.toLowerCase()); // Connacht lexicon override (semi-lexical vowel detail)
+    return hit !== undefined ? hit : g2pWord(word);
+}
+
+/** The pure rule-based g2p (no lexicon) — the OOV path, and the reference the lexicon build compares against. */
+export function g2pWord(word: string): string {
     const segs = toSegments(word.replace(/['’\-]/g, "")); // strip elision/prothesis apostrophes + hyphens
     if (segs.length === 0) return "";
     nasalAssim(segs);

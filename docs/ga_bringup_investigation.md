@@ -79,3 +79,34 @@ Broad oracle sweep + adversarial verifier. Fixes: (a) svarabhakti also fires bef
 dorn→d̪ˠˈɔɾˠən̪ˠ — the -bh→w words + rn were missing a schwa); (b) nasalAssim restricted to ⟨ng⟩ (not ⟨nc⟩), so
 the loanword banc→bˠˈan̪ˠk (was ŋk). Verifier confirmed the splice/pass/stress logic is sound (no code bug).
 Kept borb/colm svarabhakti (linguistically correct; the oracle is inconsistent there). Full suite 203/203.
+
+## Run 3 — 2026-07-14 — g2p rule-mining + referee-gated Connacht lexicon
+
+Goal (user): "improve g2p rules AND expand coverage." Distilled the espeak-ng-portable ga oracle over the 50k
+corpus (42,326 words), diffed against the pure g2p, and clustered the vowel divergences to separate GENERALIZABLE
+rules from genuinely LEXICAL residue.
+
+**Rule fixes (generalize to OOV too):**
+- `ia`/`ua` diphthongs had a spurious long first element (`iːə`/`uːə`) → shortened to `iə`/`uə`. REFEREE-CONFIRMED
+  (iad→iəd̪ˠ, bliana→bʲlʲiən̪ˠə, ciall→ciəl̪ˠ all match wikipron gle). Data fix in irish.jsonc.
+- i-offglide (ɑː/oː + slender consonant → ⁱ) loosened to fire before slender ONSETS too (áirithe→ɑːⁱɾʲə,
+  óige→oːⁱɟə), not just codas. Referee-neutral (it folds ⁱ away).
+- `eo`-derived oː carries its own on-glide → suppress the i-offglide (ceoil→koːlʲ, not koːⁱlʲ); new `noGlide` seg tag.
+
+**Rejected as oracle artefacts — the INDEPENDENT wikipron referee was the arbiter, NOT the oracle:**
+- Oracle keeps unstressed short i as **ɪ** (féidir→…dʲɪɾʲ); the referee shows **ə** (…dʲəɾʲ) — real Connacht
+  reduces it. Kept our reduction; a tempting "3283-word win toward the oracle" was an over-fit AWAY from ground
+  truth. Same for the oracle's spurious `iːə` break (níos: referee iːsˠ, no schwa) and its Munster before-nn/m
+  tense diphthongs (ceann: referee plain /a/, not caᶷ). LESSON: the espeak-ng-portable oracle has espeak DIALECT
+  artefacts; validate vowel quality against the independent referee, not the oracle.
+
+**Lexicon (tools/gen/build-ga-lexicon.mts → src/languages/irish/lexicon.tsv, 8108 entries):** oracle-distilled,
+Connacht-normalized (vˠ→w, final ɛ→ə, unstressed ɪ→ə, iːə→iː), kept ONLY where the consonant skeleton matches our
+g2p (never imports a consonant quirk — teanga ŋɡ→ŋ, eile l̪ˠ, grapheme leaks), THEN **referee-gated**: an entry the
+referee covers is kept only if it folds to a referee pronunciation. Gating dropped 276 entries that would have
+regressed a referee-confirmed g2p form. Net effect: the lexicon now RAISES referee agreement instead of lowering
+it — RULES-ONLY 44.1% → RULES+LEXICON **44.8%** (pre-Run-3 baseline 44.2%). Full suite 203/203; 7/7 ga goldens.
+deoch→dʲɔx (the Run-2 eo→oː residual, now referee-confirmed as ɔ).
+
+Residual referee divergences are pre-existing Run-1 dialect CHOICES (broad bh/mh→w vs referee vˠ; final -th→h vs
+drop; -igh→ə vs iː), not Run-3 regressions — left as-is (documented Connacht decisions), not reopened here.

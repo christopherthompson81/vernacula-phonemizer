@@ -50,7 +50,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> =
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */
-function makeFold(cfg: RefLang): (s: string) => string {
+export function makeFold(cfg: RefLang): (s: string) => string {
   return (s: string): string => {
     let out = s.normalize("NFD");
     for (const [re, rep] of cfg.preFolds ?? []) out = out.replace(re, rep); // before backbone (needs diacritics)
