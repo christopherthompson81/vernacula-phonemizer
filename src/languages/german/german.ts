@@ -98,14 +98,29 @@ function applyLength(ipa: string, spec: string | undefined): string {
 function applyReduction(ipa: string, spec: string | undefined): string {
     if (!spec) return ipa;
     const red = new Set(spec.split(",").map(Number));
-    let out = "", ord = 0, i = 0;
+    let out = "",
+        ord = 0,
+        i = 0;
     while (i < ipa.length) {
         const ch = ipa[i]!;
-        if (!VOWEL_CHARS.includes(ch)) { out += ch; i++; continue; }
-        if ((ipa[i + 1] ?? "") === "̯") { out += ch; i++; continue; } // offglide, not a nucleus
+        if (!VOWEL_CHARS.includes(ch)) {
+            out += ch;
+            i++;
+            continue;
+        }
+        if ((ipa[i + 1] ?? "") === "̯") {
+            out += ch;
+            i++;
+            continue;
+        } // offglide, not a nucleus
         const long = (ipa[i + 1] ?? "") === "ː";
-        if (red.has(ord) && !out.endsWith("ˈ")) { out += "ə"; i += long ? 2 : 1; } // reduce (drop length); never the stressed vowel
-        else { out += long ? ch + "ː" : ch; i += long ? 2 : 1; }
+        if (red.has(ord) && !out.endsWith("ˈ")) {
+            out += "ə"; // reduce (drop length); never the stressed vowel
+            i += long ? 2 : 1;
+        } else {
+            out += long ? ch + "ː" : ch;
+            i += long ? 2 : 1;
+        }
         ord++;
     }
     return out;

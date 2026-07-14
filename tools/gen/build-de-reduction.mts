@@ -9,13 +9,14 @@
  *
  * SOURCE: the kaikki German Wiktionary extract (word<TAB>IPA). Regenerate the intermediate with:
  *   curl -s https://kaikki.org/dictionary/German/kaikki.org-dictionary-German.jsonl \
- *     | python3 extract_kaikki_de.py de-kaikki-full.tsv        # word.lower()\t first sounds[].ipa, deduped
+ *     | python3 tools/gen/extract_kaikki_de.py de-kaikki-full.tsv        # word.lower()\t first sounds[].ipa, deduped
  *
  * Usage: npx tsx tools/gen/build-de-reduction.mts --kaikki <de-kaikki-full.tsv>
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
 import { phonemizeWord } from "../../src/languages/german/german.ts";
+import { MANIFEST } from "../../src/languages/german/manifest.ts";
 
 function arg(name: string, fb: string): string {
     const i = process.argv.indexOf(`--${name}`);
@@ -25,7 +26,7 @@ const KAIKKI = arg("kaikki", "");
 const OUT = "src/languages/german/reduction.tsv";
 if (!KAIKKI) throw new Error("pass --kaikki <word\\tIPA tsv> (see header to regenerate it)");
 
-const VOWELS = "aɐeɛiɪoɔuʊøœyʏə";
+const VOWELS = MANIFEST.vowelChars; // the ENGINE's vowel inventory — must stay identical or ordinals misalign
 /** The nucleus vowels of an IPA string, in order: a vowel char NOT followed by a non-syllabic glide ̯. Returns
  *  each nucleus's BASE vowel (length ː and the ̯ glide ignored). Mirrors applyLength's nucleus counting. */
 function nuclei(ipa: string): string[] {
@@ -40,14 +41,15 @@ function nuclei(ipa: string): string[] {
     return out;
 }
 
-// Truncate reduction.tsv FIRST, so phonemizeWord's lazy reductionDict() load sees an empty lexicon and this
-// build always compares kaikki against the RAW (un-reduced) engine — otherwise a re-run would compare against
-// already-reduced output and silently drop every existing entry (a stale-feedback loop).
+const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
+// Truncate reduction.tsv so phonemizeWord's lazy reductionDict() load sees an EMPTY lexicon and this build
+// always compares kaikki against the RAW (un-reduced) engine — otherwise a re-run would compare against
+// already-reduced output and silently drop every existing entry (a stale-feedback loop). After the kaikki read
+// so a bad --kaikki path throws before the committed file is touched.
 writeFileSync(OUT, "");
 
-const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
 const out: [string, string][] = [];
-let matched = 0, skewed = 0;
+let skewed = 0;
 for (const [w, kipa] of rows) {
     if (!w || !kipa) continue;
     if (!/^[a-zäöüß]+$/.test(w)) continue; // pure single German word only (skip kaikki phrases / 'ne clitics)
@@ -61,7 +63,7 @@ for (const [w, kipa] of rows) {
         // kaikki reduces this nucleus to ə but we render a short/long e or ɛ there → mark it for reduction
         if (kn[i] === "ə" && (on[i] === "e" || on[i] === "ɛ")) ords.push(i);
     }
-    if (ords.length) { out.push([w, ords.join(",")]); matched++; }
+    if (ords.length) out.push([w, ords.join(",")]);
 }
 out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 

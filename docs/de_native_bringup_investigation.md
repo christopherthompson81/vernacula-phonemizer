@@ -147,3 +147,10 @@ reduced forms (Geburtstag→ɡə, verstehen→fə, both kaikki-confirmed). Full 
 REMAINING (the 🟡 tail): loanword vowel quality (ɪ→i, ɔ→o — foreign, referee-noisy), and compound-seam st→ʃt /
 d→t which need the splitter to fire on more constituents. de-kaikki-full.tsv is a regenerable intermediate
 (scratchpad), not committed; the build script header documents the re-fetch.
+
+### Known pre-existing bug (surfaced during Run-7 review, NOT introduced by it)
+~34 words emit a STRESSED schwa ˈə (gesetzlich→ɡəzˈət͡slɪç, generell→ɡənəʁˈəl, gesellschaft→ɡəzˈəlʃaft). Verified
+with reduction.tsv emptied: the RAW g2p already produces ɡɛzˈət͡slɪç etc. — a base g2p/stress defect where a
+stressed short ⟨e⟩ before certain clusters surfaces as ə. applyReduction correctly leaves the stressed vowel
+alone (its ˈ-guard); it only reduces the unstressed ge-/ver- prefix on top of the already-broken stem. Separate
+fix needed in the g2p vowel/stress logic.
