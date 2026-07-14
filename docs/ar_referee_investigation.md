@@ -220,3 +220,25 @@ our neural, which sukuns them OOD — our epenthesis is worse than both) and ~ha
 = passive vs kaikki citation = active; both valid, a corpus-bias mismatch, not an error). The fixable half is the
 BASE: either the silver-retrain (stop the neural hedging to sukun on isolated words — the in-model path) or porting
 espeak's rule-based default vocalization. Not a quick patch; lexicon-primary (62.6) is the plateau without one.
+
+## Run 11 — PROSE test (running text = the real target): the result FLIPS
+
+Fair prose test on 600 gold-diacritized modern sentences (modern_eval.txt): for each system, does its BARE→IPA
+(restoration IN CONTEXT) match its OWN gold-diacritized→IPA (controls for g2p convention), per word, pausal-folded.
+
+| pipeline | isolated (kaikki) | RUNNING TEXT (prose) |
+|---|---|---|
+| ours — neural + lexicon-primary | 62.6% | **65.7%** |
+| espeak-ng-portable — rule-based + supplement | 69.8% | **51.9%** |
+
+**The ranking REVERSES: on running text we beat espeak by +13.8 pts.** The neural's CONTEXT disambiguation — the whole
+point of a sentence-level model — dominates on the real TTS target, which the isolated-lemma referee structurally
+could not show (and actively penalized). espeak's rule-based base, strong on context-free lemmas, degrades on prose
+where context matters. Our-variants on prose: neural-only 64.8, +skeleton-supplement 64.8, +lexicon-PRIMARY 65.7 —
+so lexicon-primary helps BOTH isolated AND prose (right call), and the neural base is the right engine for prose.
+
+**Resolution of the whole arc:** the wikipron/kaikki isolated-lemma referees are ADVERSARIAL for a context model —
+they measure citation-form diacritization of dictionary headwords, not phonemization of running text. On the real
+target (prose) our neural pipeline is clearly ahead of the authored approach. The earlier "arguably 🟡" caveat (from
+the isolated gap) is REFUTED: ar is a solid ✅ on the target that matters. The isolated gap is now understood
+(base-quality on context-free lemmas + citation-form ambiguity) and correctly deprioritized.
