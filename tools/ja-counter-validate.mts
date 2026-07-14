@@ -9,8 +9,9 @@
  *   python3 - <<'PY' > ojt_counters.tsv
  *   import pyopenjtalk
  *   COUNTERS = "月時円年人日分本匹杯泊個回階軒歳冊足枚番度台名秒羽頭着丁"
+ *   NUMS = list(range(1, 32)) + [40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000,2000,3000,8000,10000]
  *   for c in COUNTERS:
- *       for n in list(range(1, 32)) + [40, 50, 100, 1000]:
+ *       for n in NUMS:
  *           kata = pyopenjtalk.g2p(f"{n}{c}", kana=True)
  *           hira = ''.join(chr(ord(ch)-0x60) if 'ァ'<=ch<='ヶ' else ch for ch in kata)
  *           print(f"{n}\t{c}\t{hira}")

@@ -166,3 +166,23 @@ kana path and gets pitch. 1本→iꜜppo̞ɴ, 3個→säꜜŋko̞, 2024年→…
 
 REMAINING for ✅: PITCH accent independent validation (still only self-consistent vs the espeak snapshot; semi-circular
 vs OpenJTalk since we merged its data), and the ゅう youon long-vowel notation convention (ɯᵝɯᵝ vs ː).
+
+### Run 6b — review fixes (2 real bugs)
+
+8-angle review of PR #138 surfaced two real bugs (both merged into #138 before merge):
+1. **Internal は/へ corrupted by the particle heuristic.** The fused reading was injected into pre-segmentation
+   text as hiragana, so segmentText's は→わ / を particle rule mis-fired on a counter reading with an internal は
+   (2泊→にはく → にわく → `niwä kɯᵝ`). Fix: emit the reading as KATAKANA (kanaToIpa treats it identically; the
+   particle rule is hiragana-specific). にはく now survives.
+2. **Fusing before a compound.** `/(\d+)(\p{Script=Han})/` fused a counter kanji even when it heads a longer
+   compound word (3時間→さんじ+間→さんじあいだ; 3年生→さんねん+生→さんねんなま; 1日中→ついたち+中). The naive fix
+   (negative-lookahead "no kanji may follow") over-corrects — it also kills a legitimate euphonic counter before
+   a verb (1冊読む→いっさつ). The dictionary IS the discriminator: 時間/年生/日中/年間/週間/分間/人前 are whole-word
+   entries in the 60k readings map; 冊読 is not. New `headsCompound(text)` (kanji.ts) = "a ≥2-char reading word
+   starts here"; fusion is suppressed when the counter kanji heads one. 3時間→さん じかん ✓, 1冊読む→いっさつ ✓.
+
+A third finding — the irregular hundreds 300/600/800 (さんびゃく/ろっぴゃく/はっぴゃく) end in びゃく/ぴゃく and missed
+the ひゃく gemination (300本→さんびゃくほん should be さんびゃっぽん) — the *validator* had missed it because the
+OpenJTalk gold jumped 100→1000, skipping 200–900. Added びゃく/ぴゃく→びゃっ/ぴゃっ to the gemination table (k/h, not
+s: 300頭→さんびゃくとう) and widened the gold to all hundreds+thousands (1342 combos): **99.9% (1341/1342)** — again
+only the 1日 ついたち/いちにち semantic split remains.

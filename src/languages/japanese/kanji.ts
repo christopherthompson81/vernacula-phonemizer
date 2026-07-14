@@ -134,6 +134,18 @@ export function applyReadings(word: string): string {
     return out;
 }
 
+/** True if a whole-word reading entry of length ≥2 starts at the head of `text` — i.e. the leading kanji heads a
+ *  dictionary compound (時間, 年生, 日中, 年間, 分間). Used by the number+counter fusion to avoid splitting a compound
+ *  whose first kanji happens to be a counter (3時間 must stay さんじかん, not become さんじ + 間). A standalone counter
+ *  before a particle/verb/punctuation does NOT head a compound (冊読 is no word), so its euphonic reading still fires. */
+export function headsCompound(text: string): boolean {
+    const { map, maxKeyLength } = readings();
+    return (
+        longestKeyMatch([...text], 0, maxKeyLength, 2, (k) => map.has(k)) !==
+        null
+    );
+}
+
 /** Insert spaces at bunsetsu boundaries in a spaceless Japanese run (see module header). */
 export function segmentText(text: string): string {
     const { map, adverbs, maxUnitLength } = readings();

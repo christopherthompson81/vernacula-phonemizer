@@ -8,9 +8,14 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { kanaToIpa, kanaToMorae } from "./kana.ts";
-import { applyReadings, segmentText } from "./kanji.ts";
+import { applyReadings, segmentText, headsCompound } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
 import { readCounter } from "./counters.ts";
+
+// Fold hiragana → katakana (kanaToIpa treats them identically). Counter readings are injected as katakana so
+// segmentText's hiragana-specific は→わ / を particle heuristic can't corrupt an internal は/へ (2泊→にはく → にわく).
+const toKatakana = (s: string): string =>
+    s.replace(/[ぁ-ゖ]/gu, (c) => String.fromCodePoint(c.codePointAt(0)! + 0x60));
 import { accentNucleus, placeDownstep } from "./pitch.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -30,9 +35,15 @@ class JapanesePhonemizer implements Phonemizer {
         // Number + counter (助数詞): fuse a digit run + following counter kanji into its euphonic kana reading
         // (1本→いっぽん, 3個→さんこ, 2024年→にせんにじゅうよねん) BEFORE segmentation, so it flows through the kana path.
         // readCounter returns null for a non-counter kanji (or out-of-range n) → the digits pass through unchanged.
+        // Suppress the fusion when the counter kanji HEADS a dictionary compound (3時間, 3年生): splitting it off
+        // would orphan the trailing kanji into a wrong isolated reading (間→あいだ, 生→なま). See headsCompound.
         input = input.replace(
             /(\d+)(\p{Script=Han})/gu,
-            (m0, num, ctr) => readCounter(Number(num), ctr) ?? m0,
+            (m0, num, ctr, offset: number, str: string) => {
+                if (headsCompound(str.slice(offset + num.length))) return m0;
+                const reading = readCounter(Number(num), ctr);
+                return reading === null ? m0 : toKatakana(reading);
+            },
         );
         // segmentText inserts bunsetsu spaces first, then assembleClauses runs the standard clause skeleton.
         return assembleClauses(segmentText(input), TOKEN, (m, sink) => {

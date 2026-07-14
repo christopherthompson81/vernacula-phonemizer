@@ -89,14 +89,15 @@ export function readCounter(n: number, counter: string): string | null {
     if (c.cls === "regular") return num + c.reading;
 
     // Euphony keys on the ENDING of the number reading (so 21本→にじゅういっぽん, 100本→ひゃっぽん all work).
-    // Gemination: いち→いっ, はち→はっ, じゅう→じゅっ (all k/s/h); ろく→ろっ, ひゃく→ひゃっ (k/h, NOT s).
+    // Gemination: いち→いっ, はち→はっ, じゅう→じゅっ (all k/s/h); ろく→ろっ, and the ゃく-hundreds ひゃく/びゃく/ぴゃく
+    // (100/300/600/800 → ひゃっ/びゃっ/ぴゃっ) (k/h, NOT s: 300頭→さんびゃくとう keeps ゃく).
     const geminate = (end: string, rep: string): string | null =>
         num.endsWith(end) ? num.slice(0, -end.length) + rep : null;
     let gem: string | null = null;
     for (const [end, rep] of [["いち", "いっ"], ["はち", "はっ"], ["じゅう", "じゅっ"]] as const)
         gem = gem ?? geminate(end, rep);
     if (c.cls !== "s")
-        for (const [end, rep] of [["ろく", "ろっ"], ["ひゃく", "ひゃっ"]] as const)
+        for (const [end, rep] of [["ろく", "ろっ"], ["ひゃく", "ひゃっ"], ["びゃく", "びゃっ"], ["ぴゃく", "ぴゃっ"]] as const)
             gem = gem ?? geminate(end, rep);
 
     if (gem !== null) return gem + (c.cls === "h" ? pForm(c.reading) : c.reading);

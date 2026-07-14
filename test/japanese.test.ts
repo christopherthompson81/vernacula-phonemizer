@@ -79,6 +79,19 @@ describe("Japanese counters (助数詞)", () => {
         expect(phonemize("3階", "ja")).toBe("säŋɡäi"); // さんがい
         expect(phonemize("1000階", "ja")).toBe("se̞ꜜŋkäi"); // せんかい (no rendaku after せん)
     });
+    it("irregular hundreds geminate (びゃく/ぴゃく, not just ひゃく)", () => {
+        expect(phonemize("300本", "ja")).toBe("sämbʲäppo̞ɴ"); // さんびゃっぽん
+        expect(phonemize("600本", "ja")).toBe("ɾo̞ppʲäppo̞ɴ"); // ろっぴゃっぽん
+        expect(phonemize("800本", "ja")).toBe("häppʲäppo̞ɴ"); // はっぴゃっぽん
+    });
+    it("internal は/へ in a counter reading is not particle-converted (2泊→にはく)", () => {
+        expect(phonemize("2泊", "ja")).toBe("nihäkɯᵝ"); // にはく, not にわく
+    });
+    it("does not fuse when the counter kanji heads a compound; still fuses before a verb", () => {
+        expect(phonemize("3時間", "ja")).toBe("säɴ d͡ʑikäɴ"); // さん じかん, not さんじ+間
+        expect(phonemize("3年生", "ja")).toBe("säɴ ne̞nse̞ː"); // さん ねんせい, not さんねん+生
+        expect(phonemize("1冊読む", "ja")).toBe("issät͡sɯᵝ jo̞ꜜmɯᵝ"); // いっさつ (euphony kept before a verb kanji)
+    });
 });
 
 describe("Japanese pitch accent (Phase 3)", () => {
