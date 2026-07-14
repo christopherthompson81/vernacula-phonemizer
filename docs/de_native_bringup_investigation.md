@@ -252,3 +252,10 @@ scripts' parsing before counting → recovered ~2500 quality entries (15441→17
 heidelbeere→haɪdəlbeːʁə. kaikki 70.6→72.9%, INDEPENDENT wikipron 70.4→72.4% (+2.0 cross-source). common-word
 79.2→80.2%. This is the compound-coverage lever without touching the splitter — the reduction now reaches
 mid-compound -en via the whole-word lexicon.
+
+## Run 17 — unstressed -igen i→ɪ (reverse quality pair)
+The -igen -ig- vowel was over-long (würdigen → our iːɡ, kaikki ɪɡ): the -ig suffix merges back into the stem, so
+toSegments' single-consonant open-syllable rule lengthens the unstressed i. The quality PAIRS only had the
+loanword direction (ɪ→i), so the build never recorded the reverse. Added i→ɪ (and y→ʏ). Only fires UNSTRESSED
+(the build skips stressed nuclei), so Liga/Tiger keep their stressed iː. kaikki 72.9→73.5%, wikipron 72.4→72.8%.
+Deferred (inconsistent/lexical): -igkeit g→ç (geschwindigkeit) vs -iglich g→k (möglich), and long ä→ɛː.

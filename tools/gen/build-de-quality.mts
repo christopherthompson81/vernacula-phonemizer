@@ -39,6 +39,10 @@ const PAIRS: Record<string, Set<string>> = {
     "e": new Set(["ə"]),
     "ʏ": new Set(["y"]),
     "œ": new Set(["ø"]),
+    // reverse of the loanword tensing: an unstressed tense vowel our rule over-lengthened but kaikki keeps LAX
+    // (the -igen -ig- vowel: würdigen → our iːɡ, kaikki ɪɡ) — and the parallel high-front-round case.
+    "i": new Set(["ɪ"]),
+    "y": new Set(["ʏ"]),
 };
 
 /** Each nucleus of an IPA string as {vowel, stressed}: a VOWEL char not followed by a non-syllabic glide ̯; a

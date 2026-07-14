@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 17 — unstressed -igen i → ɪ (stressed iː protected)", () => {
+        expect(phonemizeWord("würdigen")).toBe("vˈʏɐ̯dɪɡən"); // -ig- unstressed → ɪ (was long iːɡ)
+        expect(phonemizeWord("Liga")).toBe("lˈiːɡa"); // control: STRESSED iː stays long (build skips stressed)
+    });
+
     test("Run 16 — mid-compound reduction recovered (kaikki syllabic n̩ expanded)", () => {
         expect(phonemizeWord("Christentum")).toBe("kʁˈɪstəntuːm"); // christen·tum: -en → ə (was ɛ)
         expect(phonemizeWord("Heidelbeere")).toBe("hˈaɪ̯dəlbeːʁə"); // heidel- -el → ə
