@@ -1,0 +1,139 @@
+// Native canonical-IPA MANIFEST for Swedish (sv) — Central Standard Swedish (rikssvenska), broad IPA. Matches
+// the english/german/arabic manifest shape: the DATA (vowel length/quality tables, the special consonant
+// digraph → IPA map, front-vowel set, clause punctuation, cardinal number words) lives here; the ALGORITHMS
+// (the g2p scan, the complementary-length rule, first-syllable stress, number composition) stay in the sibling
+// code modules (g2p.ts, swedish.ts, numbers.ts) and read these tables.
+//
+// Phase 1 is SEGMENTAL: rule g2p + first-syllable stress. Pitch accent (accent 1 vs 2, the referee's ² marker)
+// is deferred to Phase 2 — it is lexical and needs a lexicon. See docs/sv_bringup_investigation.md.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "frontVowels", "vowels", "digraphs",
+// "clausePunctuation", "numbers". "convention" / "provenance" are documentation.
+{
+    "language": "sv",
+    "name": "Swedish (Central Standard / rikssvenska)",
+    "provenance": "Cleanroom, rule-based g2p authored from Central Standard Swedish phonology (Elert; Engstrand). espeak-independent, beyond-espeak. The vowel/consonant tables and number words are language facts; the referee (wikipron swe) is a fallible cross-check, not an oracle.",
+
+    // The canonical-IPA conventions the values below are written in (documentation).
+    "convention": {
+        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) OR short-V + long-C (kött→ɕœtː). Nine long/short vowel pairs; o long is mostly uː but lexically oː (son) — a Phase-1 residual.",
+        "sjeTje": "sj/skj/stj/sch, and sk before a front vowel → the sje-sound ɧ; tj/kj, and k before a front vowel → the tje-sound ɕ; g before a front vowel → j.",
+        "retroflex": "r + dental → retroflex, absorbing the r: rt→ʈ rd→ɖ rn→ɳ rs→ʂ rl→ɭ (Central Standard). The broad referee is inconsistent here — folded in the eval.",
+        "silentDigraphs": "word-initial hj/lj/dj/gj → j; -tion → ɧuːn; final -rg/-lg soften g → j (berg→bɛrj).",
+        "stress": "Phase 1: first syllable (native default). Pitch accent deferred.",
+        "numbers": "tens-first compounds (tjugoett = 21); split at thousand/million boundaries.",
+    },
+
+    // IPA vowel inventory (nucleus detection for stress placement).
+    "vowelChars": "ɑaeɛiɪoɔuʉɵyʏøœæə",
+
+    // Orthographic front vowels — trigger sje/tje/g-softening on a preceding s­k / k / g / c.
+    "frontVowels": "eiyäöEIYÄÖ",
+
+    // Long / short vowel IPA by orthographic letter (the complementary-length rule picks one).
+    "vowels": {
+        "long": {
+            "a": "ɑː",
+            "e": "eː",
+            "i": "iː",
+            "o": "uː",
+            "u": "ʉː",
+            "y": "yː",
+            "å": "oː",
+            "ä": "ɛː",
+            "ö": "øː",
+            "é": "eː",
+        },
+        "short": {
+            "a": "a",
+            "e": "ɛ",
+            "i": "ɪ",
+            "o": "ɔ",
+            "u": "ɵ",
+            "y": "ʏ",
+            "å": "ɔ",
+            "ä": "ɛ",
+            "ö": "œ",
+            "é": "eː",
+        },
+        // Before /r/ the low front vowels lower: ä → æ(ː), ö → œ(ː). (e stays ɛ.)
+        "longBeforeR": { "ä": "æː", "ö": "œː" },
+        "shortBeforeR": { "ä": "æ", "ö": "œ" },
+    },
+
+    // Special consonant graphemes → IPA, matched longest-first BEFORE the plain single-letter map. Context-
+    // dependent ones (sk/k/g/c depend on the FOLLOWING vowel) are handled in code, not here.
+    "digraphs": {
+        "skj": "ɧ",
+        "stj": "ɧ",
+        "sch": "ɧ",
+        "sj": "ɧ",
+        "tj": "ɕ",
+        "kj": "ɕ",
+        "ng": "ŋ",
+        "gn": "ŋn",
+        "ck": "kː",
+        "qu": "kv",
+    },
+
+    // Plain single-letter consonants (context-free).
+    "consonants": {
+        "b": "b",
+        "d": "d",
+        "f": "f",
+        "h": "h",
+        "j": "j",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "r": "r",
+        "s": "s",
+        "t": "t",
+        "v": "v",
+        "w": "v",
+        "x": "ks",
+        "z": "s",
+    },
+
+    // Retroflex assimilation: r + dental → single retroflex consonant (absorbs the r).
+    "retroflex": {
+        "rt": "ʈ",
+        "rd": "ɖ",
+        "rn": "ɳ",
+        "rs": "ʂ",
+        "rl": "ɭ",
+    },
+
+    // High-frequency irregular function words the rules can't derive (silent finals, -ig → ɛj, ⟨g⟩ softening).
+    "exceptions": {
+        "och": "ɔ",
+        "jag": "jɑː",
+        "mig": "mɛj",
+        "dig": "dɛj",
+        "sig": "sɛj",
+        "det": "deː",
+        "de": "deː",
+        "med": "meːd",
+        "en": "ɛn",
+    },
+
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": "…",
+        ",": ",",
+        ";": ";",
+        ":": ":",
+    },
+
+    // Cardinal number words (language facts). Tens-first compounding is in numbers.ts.
+    "numbers": {
+        "ones": ["noll", "ett", "två", "tre", "fyra", "fem", "sex", "sju", "åtta", "nio", "tio", "elva", "tolv", "tretton", "fjorton", "femton", "sexton", "sjutton", "arton", "nitton"],
+        "tens": ["", "", "tjugo", "trettio", "fyrtio", "femtio", "sextio", "sjuttio", "åttio", "nittio"],
+        "hundred": "hundra",
+        "thousand": "tusen",
+        "million": { "sg": "en miljon", "pl": "miljoner" },
+    },
+}

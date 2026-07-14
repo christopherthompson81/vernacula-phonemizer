@@ -273,6 +273,28 @@ export const CONFIG: Record<string, RefLang> = {
       [/wa$/gu, "w", "final-ව offglide: the schwa after ව→w is dialectally optional"],
     ],
   },
+  sv: {
+    // Central Standard Swedish. Phase 2 adds the NST pitch-accent + stress lexicon; the accent-2 grave (combining
+    // U+0300) is backbone-stripped, so this stays a SEGMENTAL check, but the stress lexicon moves the long-vowel
+    // QUALITY onto the right syllable (48.3→52.0%). The broad wikipron referee marks the ² prosodeme (folded) and
+    // is INCONSISTENT on retroflex (mars→ʂ but barn→rn) → we fold our systematic retroflexes back to r+dental.
+    referees: [{ file: "sv.wikipron-swe.tsv", source: "wikipron swe broad (human)", role: "primary" }],
+    secondaryGap: "no independent second source wired; epitran ships no Swedish. The NST lexicon is the pitch/" +
+      "stress oracle (data/accent-stress.tsv) but is not a segmental referee; a kaikki swe pron-lexicon would be.",
+    segmentJoin: true,
+    folds: [
+      [/²/gu, "", "accent-2 prosodeme marker — a pitch feature, deferred to Phase 2"],
+      [/¹/gu, "", "accent-1 prosodeme marker — deferred"],
+      [/ʈ/gu, "rt", "retroflex ⟨rt⟩: ours assimilates (Central Standard), the broad referee often leaves r+t"],
+      [/ɖ/gu, "rd", "retroflex ⟨rd⟩ vs referee r+d"],
+      [/ɳ/gu, "rn", "retroflex ⟨rn⟩ vs referee r+n"],
+      [/ʂ/gu, "rs", "retroflex ⟨rs⟩ vs referee r+s"],
+      [/ɭ/gu, "rl", "retroflex ⟨rl⟩ vs referee r+l"],
+      [/tɕ/gu, "ɕ", "tje-sound: referee wobbles t͡ɕ ~ ɕ (tie already stripped) → our ɕ"],
+      [/æ/gu, "ɛ", "ä before r lowers to æ (ours, Central Standard); referee writes ɛ"],
+      [/œ/gu, "ø", "ö quality œ~ø (short/long, length already stripped) — notation"],
+    ],
+  },
   ta: {
     referees: [{ file: "ta.wikipron-tam-taml-broad.tsv", source: "wikipron tam_taml broad (human)", role: "primary" }],
     secondaryGap: "epitran tam-Taml echoes untransliterated Tamil graphemes (e.g. visarga ஃ) into its output, so " +
