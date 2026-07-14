@@ -4,6 +4,9 @@ vernacula targets **canonical IPA and linguistic correctness**, not espeak parit
 each language was bootstrapped from is a *regression guard* (it catches accidental drift), but it is **not** the
 definition of correct. This harness measures the other half: does our output agree with **independent** sources?
 
+> **The referee % is not a maturity score** — it is confounded by referee quality and fold ceilings.
+> For "is this language reliable / what work is left?", see [`docs/language-maturity.md`](../../docs/language-maturity.md).
+
 ## Method
 
 For each language we compare our phonemizer's **segmental backbone** against one or more **referees** — G2Ps or
