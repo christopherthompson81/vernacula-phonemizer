@@ -416,3 +416,12 @@ blocked the retry. Added a narrow OVERRIDE: allow the split when a non-first par
 must reset element-initial). schreiben has no such seam → still stays whole; Klarinette can't mis-split (inette isn't
 a constituent — the constituent gate is why this is safe where a prefixStressed "klar" would break klarinette).
 kaikki 77.8→77.9%, wikipron 76.3→76.4% (small in-sample, but the whole class is now correct). Full suite 240 green.
+
+## Run 37 — monomorphemic ge-/er-+st stoplist (gestern, erst) [✅-push 2/N]
+The ʃt→st residual: the sp/st-after-prefix rule over-fires on monomorphemic words where ⟨ge⟩/⟨er⟩ is NOT a prefix
+(gestern → ge·stern → ʃt, geste, gestapo, erst). The trap: the "stem" is often a real word (stern=star), so no
+structural test separates these from real ge-/er- prefixing (ge·stein → ʃt is correct). Added a curated stKeepWords
+stoplist (manifest), consulted by BOTH decompose (return whole, no ge-/er- strip) and the g2p (skip the st-sharpen
+branch). Real prefixes (Gestein/Gestalt/gestorben/erstaunen/erstatten) and word-initial st (Stern) unaffected. Also
+RESYNCED the quality/er/consonant lexicons (runs 34/36/37 changed g2p output → gestern had a stale quality entry that
+re-corrupted its now-correct ɡɛstɐn; rebuild fixed it). kaikki 77.9%, wikipron 76.4→76.5%. Full suite 241 green.

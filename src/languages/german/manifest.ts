@@ -30,6 +30,7 @@ export interface GermanManifest {
         validOnsets: string[];
         prefixIpa: Record<string, string>;
         suffixIpa: Record<string, string>;
+        stKeepWords: string[];
     };
     numbers: {
         ones: string[];
