@@ -251,6 +251,8 @@ export const CONFIG: Record<string, RefLang> = {
                 "eu/äu diphthong offglide ɔʏ ~ ɔɪ — notation convention",
             ],
             [/ʁ/gu, "r", "uvular ʁ ~ r — rhotic convention"],
+            [/j/gu, "i", "high-front glide notation: kaikki's j ~ our i̯ (→i after the backbone), e.g. -tion tsjoːn/tsi̯oːn, ⟨ja⟩"],
+            [/χ/gu, "x", "ach-laut: our velar x ~ kaikki's uvular χ both notate the back fricative (ich-laut ç unaffected)"],
         ],
     },
     en: {

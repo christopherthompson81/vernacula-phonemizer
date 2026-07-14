@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 6 — Latin -tion/-tial suffix (ti + o/a → t͡si̯), native -tie unaffected", () => {
+        expect(phonemizeWord("Aktion")).toBe("akt͡si̯ˈoːn"); // ti + o → t͡si̯
+        expect(phonemizeWord("Nation")).toBe("naːt͡si̯ˈoːn");
+        expect(phonemizeWord("Garantie")).toBe("ɡaʁantˈiː"); // word-final -tie (ie digraph) → tiː, NOT t͡si̯
+        expect(phonemizeWord("Studie")).toBe("ʃtˈuːdɪ"); // ⟨di⟩ not ⟨ti⟩ — unaffected
+    });
+
     test("numbers + text", () => {
         expect(phonemize("21", "de")).toBe("ˈaɪ̯nʊntt͡svant͡sɪç"); // einundzwanzig
         expect(phonemize("100", "de")).toBe("ˈaɪ̯nhʊndɐt"); // einhundert
