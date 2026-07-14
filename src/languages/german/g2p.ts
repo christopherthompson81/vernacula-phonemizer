@@ -309,7 +309,7 @@ function finalDevoice(segs: Seg[], w: string): void {
         if (
             !next ||
             (!next.vowel &&
-                ("ptksf".includes(next.ph[0] ?? "") || VOICED_FINAL[next.ph]))
+                ("ptksfçxʃ".includes(next.ph[0] ?? "") || VOICED_FINAL[next.ph]))
         )
             s.ph = dev;
     }

@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 21 — voiced obstruent devoices before ç/x/ʃ", () => {
+        expect(phonemizeWord("Mädchen")).toBe("mˈɛːtçən"); // d before ç (ch) → t
+        expect(phonemizeWord("Bildchen")).toBe("bˈɪltçən"); // control: cross-boundary case still devoices
+    });
+
     test("Run 20 — long ä is always ɛː (never eː)", () => {
         expect(phonemizeWord("Ärzte")).toBe("ˈɛːɐ̯t͡stə"); // cluster-preceded long ä → ɛː (not eː)
         expect(phonemizeWord("Gespräch")).toBe("ɡəʃpʁˈɛːç");

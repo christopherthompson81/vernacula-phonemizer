@@ -281,3 +281,10 @@ wikipron use ɛː). Fix: g2p emits an internal marker Ɛ for short ä; longOf[Ɛ
 correctly; applyLength normalises any surviving Ɛ→ɛ for genuinely-short ä (hätte→hɛtə). Open-syllable long ä (käse)
 already emitted ɛː directly and is unaffected. kaikki 73.9→74.2%, wikipron 73.3→73.4%; 346 words canonically correct
 (folded headline moves less because the backbone fold partly merges eː/ɛː — but canonical correctness is the goal).
+
+## Run 21 — voiced obstruent devoices before ç/x/ʃ
+The devoicing trigger set was "ptksf" — the voiceless fricatives ç, x, ʃ were missing, so a voiced obstruent before
+them stayed voiced (mädch·en g2p'd as one piece kept d before ç → mɛːdçən, should mɛːtçən). Added ç x ʃ to the
+trigger. Cross-morpheme cases (bild·chen) were already handled by piece-final devoicing; this fixes the within-piece
+case (bound-stem diminutives the -chen split misses, e.g. mädchen where "mäd" isn't a lexeme so it falls back to
+mädch·en). kaikki 74.2→74.3%, independent wikipron 73.4→73.7% (cross-source positive).
