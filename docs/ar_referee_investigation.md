@@ -194,3 +194,29 @@ bare-text goldens unchanged. Remaining ~7-pt gap to espeak is likely g2p-convent
 keep the neural for OOV; espeak uses epenthesis) — smaller, partly notation. Floor 0.48→0.55. OPTION 2 (confidence
 hybrid — keep the neural where its CONTEXT disambiguates mid-sentence) is DEFERRED until a running-text referee can
 actually measure the context trade-off, rather than guessing.
+
+## Run 10 — WHAT we're missing (the 62.6 vs 69.8 gap, decomposed)
+
+Dumped espeak-ng-portable's output for all 14,291 kaikki words and split by who matches (same makeFold):
+both-match 7260 · WE-only 1685 · **ESPEAK-only 2712** · neither 2634. The 2712 espeak-wins ARE "what we're missing":
+- **48% (1305) UNDER-voweled** — we dropped a vowel (ʔabd/ʔabħ/ʔaθ vs ref ʔabid/ʔabaħ/ʔaθaθ).
+- **43% (1156) DIFFERENT vowels, same count = AMBIGUITY** — our reading is valid but ≠ kaikki's (ʔubir vs ʔabar,
+  ʔuθir vs ʔaθir, ʔudʒbir vs ʔadʒbar). Systematic: our lexicon's most-frequent is often the PASSIVE أُ… (classical
+  Tashkeela is passive-heavy); kaikki's citation is the ACTIVE أَ… (fatḥa). Both correct.
+
+**Key correction to Run 8's framing:** espeak is NOT lexicon-primary — it is ALSO supplement-only (lexicon fires
+only on skeletons). Its edge is a strong RULE-BASED base L2S that vocalizes bare Arabic well (only 23% of its wins
+are trivial all-fatḥa; the rest get the right i/u). For an ambiguous word like أبر, both we and espeak hold the SAME
+lexicon entry (أُبِّر), but espeak never consults it (its base ʔabar isn't a skeleton), and ʔabar happens to match
+kaikki — so espeak's BASE beats our lexicon-primary AND our neural there.
+
+**Tested the natural fixes:**
+- lexicon + our epenthesis (no neural) = **50.7%** — WORSE than 62.6. Our "tight-skeleton" epenthesis under-vowels
+  more than the neural; replacing the neural is NOT the fix.
+- lexicon-primary (current) = 62.6 — best of what we have.
+
+**Conclusion:** the gap is ~half BASE-quality (espeak's hand-tuned ar_rules vocalize isolated/OOV lemmas better than
+our neural, which sukuns them OOD — our epenthesis is worse than both) and ~half AMBIGUITY (lexicon most-frequent
+= passive vs kaikki citation = active; both valid, a corpus-bias mismatch, not an error). The fixable half is the
+BASE: either the silver-retrain (stop the neural hedging to sukun on isolated words — the in-model path) or porting
+espeak's rule-based default vocalization. Not a quick patch; lexicon-primary (62.6) is the plateau without one.
