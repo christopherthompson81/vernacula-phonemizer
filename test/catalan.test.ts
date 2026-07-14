@@ -57,11 +57,23 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("molt")).toBe("mˈɔɫ"); // final -lt → l
     });
 
+    test("review fixes: velar-nasal cluster, -ig affricate, spirant-after-lateral, diphthong-final stress", () => {
+        expect(phonemizeWord("banc")).toBe("bˈaŋ"); // n→ŋ then final k drops
+        expect(phonemizeWord("sang")).toBe("sˈaŋ"); // -ng → ŋ
+        expect(phonemizeWord("maig")).toBe("mˈat͡ʃ"); // vowel-preceded -ig → t͡ʃ (i silent)
+        expect(phonemizeWord("mig")).toBe("mˈit͡ʃ"); // consonant-preceded -ig → i + t͡ʃ (i is a nucleus)
+        expect(phonemizeWord("alga")).toBe("ˈaɫɣə"); // ɡ DOES spirantize after a lateral (only d stays occlusive)
+        expect(phonemizeWord("remei")).toBe("rəmˈɛj"); // falling-diphthong-final → OXYTONE (final stress)
+        expect(phonemizeWord("correu")).toBe("kurˈɛw");
+        expect(phonemizeWord("pausa")).toBe("pˈawzə"); // s → z after a glide too
+    });
+
     test("numbers", () => {
         expect(phonemize("2", "ca")).toBe("dˈɔs");
         expect(phonemize("21", "ca")).toBe("bˈin i un"); // vint-i-un
         expect(phonemize("31", "ca")).toBe("tɾˈɛntə un"); // trenta-un
         expect(phonemize("100", "ca")).toBe("sˈɛn"); // cent
+        expect(phonemize("200", "ca")).toBe("dˈɔs sˈɛnts"); // dos-cents → two words (hyphen split)
         expect(phonemize("2024", "ca")).toBe("dˈɔs mˈiɫ bˈin i kwˈatɾə");
     });
 

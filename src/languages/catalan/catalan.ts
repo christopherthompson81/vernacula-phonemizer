@@ -24,6 +24,10 @@ function stressedNucleus(word: string, segs: Seg[]): number {
     const accented = nuclei.find((i) => segs[i]!.accent);
     if (accented !== undefined) return accented;
     if (nuclei.length === 1) return nuclei[0]!;
+    // A word ending in a falling diphthong (…V + glide j/w) is OXYTONE — the glide closes the syllable, so the
+    // 2R rule stresses the final nucleus (remei → rəmˈɛj, correu → kurˈɛw), unlike a bare vowel-final word.
+    const last = segs[segs.length - 1]!;
+    if (!last.nucleus && (last.ph === "j" || last.ph === "w")) return nuclei[nuclei.length - 1]!;
     const w = word.toLowerCase();
     const penult =
         /[aeiouàèéíòóúüï]$/.test(w) ||
@@ -62,7 +66,9 @@ function spirantize(segs: Seg[]): void {
         const fric = STOP_TO_FRIC[segs[i]!.ph];
         if (fric === undefined) continue;
         const prev = i > 0 ? segs[i - 1]!.ph : "";
-        const stop = i === 0 || NASALS.has(prev) || prev === "ɫ" || prev === "ʎ" || prev === "ɫː";
+        const afterLateral = prev === "ɫ" || prev === "ʎ" || prev === "ɫː";
+        // Only /d/ stays occlusive after a lateral (homorganic); /b/ and /ɡ/ DO spirantize (alga → aɫɣə).
+        const stop = i === 0 || NASALS.has(prev) || (afterLateral && segs[i]!.ph === "d");
         if (!stop) segs[i]!.ph = fric;
     }
 }
@@ -110,10 +116,10 @@ export function phonemizeWord(word: string): string {
     if (segs.length === 0) return "";
     const stress = stressedNucleus(word, segs);
     reduce(segs, stress);
-    finalPass(segs, segs.filter((s) => s.nucleus).length); // devoice + drop final-r BEFORE spirantization
-    voicingAssim(segs); // regressive cluster voicing (abs → aps) before spirantization
-    spirantize(segs);
-    nasalAssim(segs);
+    nasalAssim(segs); // BEFORE finalPass so n→ŋ feeds the coda-cluster drop (banc → baŋ)
+    voicingAssim(segs); // regressive cluster voicing (abs → aps)
+    finalPass(segs, segs.filter((s) => s.nucleus).length); // devoice + final-r + cluster drop
+    spirantize(segs); // last: after voicing/nasal context is settled
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         if (i === stress && stress >= 0) out += "ˈ";

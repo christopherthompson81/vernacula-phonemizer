@@ -66,7 +66,12 @@ export function toSegments(word: string): Seg[] {
         if (c === "t" && nx === "j") { cons("d͡ʒ"); i += 2; continue; } // tj → d͡ʒ
         if (c === "t" && nx === "g" && isFront(nx2)) { cons("d͡ʒ"); i += 2; continue; } // tg(e/i) → d͡ʒ
         if (c === "t" && nx === "z") { cons("d͡z"); i += 2; continue; } // tz → d͡z
-        if (c === "i" && nx === "g" && (i + 2 === n)) { cons("t͡ʃ"); i += 2; continue; } // final -ig → t͡ʃ (maig)
+        // consonant-preceded final ⟨ig⟩ → i + t͡ʃ (mig → mit͡ʃ, desig → dəzit͡ʃ): here the ⟨i⟩ IS a nucleus.
+        // (Vowel-preceded ⟨ig⟩ like maig → mat͡ʃ, where the i is silent, is handled in the vowel-run block.)
+        if (c === "i" && nx === "g" && i + 2 === n) {
+            segs.push({ ph: V["i"]!.stressed, nucleus: true, accent: false, reduced: V["i"]!.reduced });
+            cons("t͡ʃ"); i += 2; continue;
+        }
         if (c === "q" && nx === "u") { cons("k"); if (nx2 === "a" || nx2 === "o" || nx2 === "ü") cons("w"); i += 2; continue; }
         if (c === "g" && nx === "u" && isFront(nx2)) { cons("ɡ"); i += 2; continue; } // gue/gui → ɡ (u silent)
         if (c === "g" && nx === "ü") { cons("ɡ"); cons("w"); i += 2; continue; } // güe/güi → ɡw
@@ -76,10 +81,12 @@ export function toSegments(word: string): Seg[] {
         if (isVowel(c)) {
             let j = i;
             while (j < n && isVowel(w[j]!)) j++;
-            // ⟨ix⟩ after a vowel: the i is a silent digraph marker for ʃ (caixa → kaʃə, peix → peʃ), NOT a glide.
-            // Drop a trailing plain ⟨i⟩ from the run when ⟨x⟩ follows and a vowel remains before it.
+            // ⟨ix⟩ after a vowel: the i is a silent digraph marker for ʃ (caixa → kaʃə); word-final ⟨ig⟩ after a
+            // vowel → t͡ʃ (maig → mat͡ʃ, puig → put͡ʃ). In both the trailing plain ⟨i⟩ is silent, not a glide.
             let runEnd = j;
-            if (w[j] === "x" && (w[j - 1] === "i") && j - 1 > i) runEnd = j - 1;
+            const igFinal = w[j] === "g" && w[j - 1] === "i" && j + 1 === n && j - 1 > i;
+            if (w[j] === "x" && w[j - 1] === "i" && j - 1 > i) runEnd = j - 1; // x→ʃ handled by the main loop (i=j)
+            else if (igFinal) runEnd = j - 1;
             const run = w.slice(i, runEnd);
             const nuc = classifyRun(run, i === 0);
             [...run].forEach((vc, k) => {
@@ -87,6 +94,7 @@ export function toSegments(word: string): Seg[] {
                 if (nuc[k]) segs.push({ ph: real.stressed, nucleus: true, accent: isAccented(vc), reduced: real.reduced });
                 else cons(vc === "i" || vc === "í" ? "j" : "w"); // glide (on- or off-): i→j, u→w
             });
+            if (igFinal) { cons("t͡ʃ"); i = n; continue; } // consume the silent i + g
             i = j;
             continue;
         }
@@ -108,10 +116,10 @@ export function toSegments(word: string): Seg[] {
             case "p": cons("p"); break;
             case "r": { const p = lastPh(); cons(segs.length === 0 || p === "n" || p === "ɫ" || p === "s" ? "r" : "ɾ"); break; } // trill: initial / after n·l·s
             case "s": {
-                const prev = lastPh();
-                const nextV = isVowel(nx);
-                const prevV = segs.length > 0 && segs[segs.length - 1]!.nucleus;
-                cons(prevV && nextV ? "z" : "s"); // intervocalic s → z (casa → kazə)
+                const prevSeg = segs[segs.length - 1];
+                // intervocalic s → z (casa → kazə); a preceding glide j/w counts as the left vowel too (pausa → pawzə)
+                const prevVocalic = prevSeg !== undefined && (prevSeg.nucleus || prevSeg.ph === "j" || prevSeg.ph === "w");
+                cons(prevVocalic && isVowel(nx) ? "z" : "s");
                 break;
             }
             case "t": cons("t"); break;

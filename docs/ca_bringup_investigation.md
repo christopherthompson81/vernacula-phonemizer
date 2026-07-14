@@ -47,3 +47,19 @@ by hand (Wheeler). Unit test 8/8; full suite 191/191.
 **Deferred (Run 2+):** stressed open/close mid height (ɛ/e, ɔ/o) — LEXICAL, needs a lexicon (the ceiling; espeak
 uses its dict); bl/gl gemination (poble→pɔbːɫə); nx→ɲt͡ʃ affrication; degemination (abscessos pss→ps); a
 Central-only secondary referee (epitran cat / a pron-lexicon) to unlock the folded axes.
+
+### Run 1 review (2 agents) — fixes applied
+Two finders (g2p/pipeline correctness + Catalan phonology). Real bugs fixed:
+- **nasalAssim ran AFTER finalPass** → banc/sang/fang gave ŋk/ŋg not ŋ. Reordered nasalAssim BEFORE finalPass so
+  n→ŋ feeds the coda-cluster drop.
+- **final -ig after a VOWEL never fired** (the vowel-run swallowed the i) → maig gave majk not mat͡ʃ. Handle it
+  in the run (i silent → t͡ʃ). Also fixed the pre-existing consonant-preceded -ig which DROPPED the i nucleus
+  (mig → mt͡ʃ) → now mig → mit͡ʃ (i is a nucleus there).
+- **spirantization blocked b/ɡ after a lateral** — only /d/ stays occlusive; alga → aɫɣə, alba → aɫβə now.
+- **falling-diphthong-final words mis-stressed** (remei → rˈɛməj) — a final glide closes the syllable → OXYTONE
+  (remei → rəmˈɛj, correu → kurˈɛw).
+- **dos-cents number fusion** — HUNDREDS kept orthographic hyphens; the token phonemized as one word. Switched
+  to spaces (200 → dˈɔs sˈɛnts).
+- **s → z after a glide** (pausa → pˈawzə).
+Full suite 191/191; ca 79.5%. Deferred to Run 2: intervocalic ⟨x⟩ = ks/ɡz (examen — lexical), open/close mids,
+-nts→ns plural cluster.
