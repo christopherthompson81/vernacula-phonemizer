@@ -113,3 +113,19 @@ this is effectively a length lexicon, 372 KB). Result: freq-common 72.7→**76.0
 STILL OUTSTANDING: ge-/be- in a compound stem not schwa'd (Geburt→ɡɛ should be ɡə); morpheme-final devoicing on
 undecomposed words (möglich→ɡlɪç vs klɪç); unstressed-medial e→ə (anderen); loanword unstressed e stays ɛ
 (perfekt); referee conventions x~χ, ŋ̩, ̯, optional-t (foldable, ~60 misses, not real errors).
+
+## Run 6 — Latin -tion/-tial suffix + notation folds
+The kaikki residual (freq-common view; the full referee is loan/proper-noun deflated) had a clean self-contained
+class: **⟨t⟩+⟨i⟩+⟨o⟩/⟨a⟩ → t͡s + i̯ + vowel** (Nation→naːt͡si̯oːn, Aktion→akt͡si̯oːn, rational→ʁat͡si̯oːnaːl).
+Scoped to ti+o/a so word-final ⟨-tie⟩ / the ⟨ie⟩ digraph (Garantie→tiː) and ⟨di⟩ (Studie) are untouched — a g2p
+rule, generalizes to -tional/-tionen. Plus two honest NOTATION folds in the referee config (the doc's own Run-5
+"foldable" note): ach-laut x↔χ, and the high-front glide j↔i̯ (kaikki writes -tion as tsjoːn, we write tsi̯oːn).
+kaikki 49.8→**50.9%**, wikipron 2nd 52.2→**52.9%**. German unit tests 6/6→ now with a -tion block.
+
+**The big lever still open = unstressed e→ə** (schiebedach→ʃibədaχ, wesentlich→vezəntlɪç, ~600 words). It is
+genuinely LEXICAL (native → ə, loanword → ɛ): a blanket rule tests net-NEGATIVE (would fix ~684 ɛ→ə but break
+~1267 loanword ɛ). It needs to extend the per-position length.tsv with a schwa-reduction code ("R"→ə in
+applyLength) derived from a full kaikki German dump — but that source is no longer cached (only the 4744-word
+referee sample remains), so it's blocked on re-fetching/rebuilding the kaikki reduction lexicon (the next major
+lift). Loanword vowel quality (ɪ→i, ɔ→o) and compound-seam st→ʃt/d→t (needs the splitter to fire on more
+constituents) are the other deferred buckets.

@@ -95,6 +95,17 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
 
+        // Latin -tion/-tial suffixes: ⟨t⟩ + ⟨i⟩ + ⟨o⟩/⟨a⟩ → t͡s + i̯ (non-syllabic glide) + the vowel
+        // (nation → nat͡si̯oːn, initial → init͡si̯aːl, rational → ʁat͡si̯oːnaːl). Scoped to ti+o/a so word-final
+        // ⟨-tie⟩ / the ⟨ie⟩ digraph (Garantie → …tiː) is NOT matched.
+        if (c === "t" && nx === "i" && (nx2 === "o" || nx2 === "a")) {
+            push("t͡s", i);
+            push("i̯", i);
+            lastVowelLetter = "i";
+            i += 2;
+            continue;
+        }
+
         // Consonant digraphs / context.
         if (c === "s" && nx === "c" && nx2 === "h") {
             push("ʃ", i);

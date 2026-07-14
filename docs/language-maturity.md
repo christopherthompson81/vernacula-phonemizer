@@ -70,7 +70,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 | **ja** Japanese | 57.9% (.52) | — | 🟠 | Kana→IPA + numbers reliable; **pitch accent** deferred (Phase 2, needs a lexicon). Referee residual is narrow allophony. |
 | **sv** Swedish | 52.6% (.48) | — | 🟠 | Segmental + NST stress/accent lexicon done; **pitch accent 1/2** deferred (Phase 2) + lexical o=oː. |
 | **ar** Arabic | 45.4% (.40) | — | 🟠 | Core g2p + quantity-stress solid; depends on the **diacritization** subsystem (ONNX diacritizer has short-vowel misses; ADR pending on porting it). Reliable for *diacritized* input. |
-| **de** German | 49.8% (.46) | wikipron 52.2% | 🔵 | Actively building the **compound splitter + stem lexicon** (dictionary sweep at 41.2%, growing); unstressed-length + glottal-stop rules pending. The least-settled European bring-up. |
+| **de** German | 50.9% (.46) | wikipron 52.9% | 🔵 | Mature core (6 runs: compound splitter + per-position length lexicon; freq-common ~76%). The one open lever is unstressed **e→ə** (~600 words, lexical native-vs-loan) — blocked on re-fetching the kaikki source to rebuild the reduction lexicon. Referee is loan/proper-noun deflated. The least-settled European bring-up, but usable. |
 
 ## What "outstanding work" concretely means
 
