@@ -288,3 +288,12 @@ them stayed voiced (mädch·en g2p'd as one piece kept d before ç → mɛːdç�
 trigger. Cross-morpheme cases (bild·chen) were already handled by piece-final devoicing; this fixes the within-piece
 case (bound-stem diminutives the -chen split misses, e.g. mädchen where "mäd" isn't a lexeme so it falls back to
 mädch·en). kaikki 74.2→74.3%, independent wikipron 73.4→73.7% (cross-source positive).
+
+## Run 22 — unstressed Latinate -ie/-ien suffix → i̯ə/i̯ən
+The largest genuine native class (~76 words). Word-final ⟨ie⟩/⟨ien⟩ after another syllable (Familie, Ferien,
+Kastanie, Studie) is the unstressed Latinate suffix → non-syllabic glide i̯ + schwa (i̯ə / i̯ən), not iː. Handled in
+the g2p (before the quality lexicon, which otherwise mangled the iː→ɪ — the entanglement flagged earlier); the
+lexicons were rebuilt against the new g2p. Monosyllables (die, sie, Knie, Vieh — no preceding vowel) stay iː; the
+final-STRESSED loans (Melodie, Chemie, Batterie) are restored to iː by a stressed-i̯ə post-pass (restoreStressedIe,
+matching the ɛ that fixStressedSchwa leaves). kaikki 74.3→74.6%, wikipron 73.7→74.0% (cross-source positive). Updated
+the Run 6 Studie golden (ʃtˈuːdɪ → ʃtˈuːdi̯ə — it encoded the old wrong output).

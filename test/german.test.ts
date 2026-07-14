@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 22 — unstressed Latinate -ie/-ien suffix → i̯ə/i̯ən", () => {
+        expect(phonemizeWord("Familie")).toBe("famˈiːli̯ə"); // unstressed -ie → i̯ə
+        expect(phonemizeWord("Ferien")).toBe("fˈeːʁi̯ən"); // -ien → i̯ən
+        expect(phonemizeWord("Melodie")).toBe("melodˈiː"); // final-STRESSED loan → iː (restore post-pass)
+        expect(phonemizeWord("Knie")).toBe("kniː"); // control: monosyllable (no preceding vowel) → iː
+    });
+
     test("Run 21 — voiced obstruent devoices before ç/x/ʃ", () => {
         expect(phonemizeWord("Mädchen")).toBe("mˈɛːtçən"); // d before ç (ch) → t
         expect(phonemizeWord("Bildchen")).toBe("bˈɪltçən"); // control: cross-boundary case still devoices
@@ -150,7 +157,7 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("Aktion")).toBe("akt͡si̯ˈoːn"); // ti + o → t͡si̯
         expect(phonemizeWord("Nation")).toBe("naːt͡si̯ˈoːn");
         expect(phonemizeWord("Garantie")).toBe("ɡaʁantˈiː"); // word-final -tie (ie digraph) → tiː, NOT t͡si̯
-        expect(phonemizeWord("Studie")).toBe("ʃtˈuːdɪ"); // ⟨di⟩ not ⟨ti⟩ — unaffected
+        expect(phonemizeWord("Studie")).toBe("ʃtˈuːdi̯ə"); // unstressed -ie suffix → i̯ə (Run 22); ⟨di⟩ not ⟨ti⟩ — unaffected
     });
 
     test("numbers + text", () => {

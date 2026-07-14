@@ -169,6 +169,13 @@ function fixStressedSchwa(ipa: string): string {
     return ipa.replace(/([ˈˌ])ə/gu, "$1ɛ");
 }
 
+/** A -ie/-ien suffix the g2p rendered i̯ə but that turned out to carry primary stress is a final-stressed loan
+ *  (Melodie → melodˈiː, not …di̯ˈə): restore the stressed glide+schwa back to iː. Runs last (after stress). */
+function restoreStressedIe(ipa: string): string {
+    // the schwa is already ɛ here (fixStressedSchwa ran first on the stressed nucleus), so match either.
+    return ipa.replace(/i̯([ˈˌ])[əɛ]/gu, "$1iː");
+}
+
 const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏəƐ]/g; // includes the short-ä marker Ɛ so stress/nucleus counts see it
 
 /** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
@@ -224,7 +231,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w));
+        return restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)));
     }
 
     const segs = toSegments(w);
@@ -249,7 +256,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w));
+    return restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
