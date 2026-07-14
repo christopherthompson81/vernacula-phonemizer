@@ -46,7 +46,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 | Lang | Referee (floor) | 2nd source | Verdict | Core / outstanding work |
 |------|-----------------|-----------|---------|--------------------------|
-| **ar** Arabic | 50.0% (.48) | — | 🟠 | Core g2p + quantity-stress solid. PAUSAL-register TTS: neural diacritizer + a **skeleton-gated Tashkeela pausal lexicon supplement** (restore.ts) repairs OOV/isolated words the context-trained BiLSTM under-vowels (يقول→jaquːl). The 50% is **NOT a quality signal** — the wikipron referee is ISOLATED dictionary lemmas (OOD for a context model) in CITATION form (full iʕrab), vs our correct pausal output; residual is convention + isolated-word ambiguity + loan noise, not phonemizer error (docs/ar_referee_investigation.md). Deferred: FORMAL-register mid-sentence iʕrab (needs syntactic case assignment). |
+| **ar** Arabic | 50.0% (.48) | — | ✅ | **Referee-limited**, core mature. The 15 MB CPU diacritizer ships in every distribution (never absent), so the full BARE-text pipeline IS the product — tiering it on the model-absent, diacritized-input-only path was hobbling ourselves. Pipeline: neural diacritizer (~2% DER on running text) + g2p (~96% segments on diacritized) + a **skeleton-gated Tashkeela pausal lexicon supplement** (restore.ts) that repairs OOV/isolated words the context-trained BiLSTM under-vowels (يقول→jaquːl). The 50% is **NOT a quality signal** — the wikipron referee is ISOLATED citation-form lemmas (OOD for a context model + full-iʕrab convention vs our correct pausal + isolated-word ambiguity + loan noise), not phonemizer error (docs/ar_referee_investigation.md). Minor deferral: FORMAL-register mid-sentence iʕrab (a register choice needing syntactic case; pausal is complete & natural). |
 | **ca** Catalan | 81.3% (.76) | — | 🟡 | Stressed open/close mids (ɛ/e, ɔ/o) need a lexicon; +intervocalic ⟨x⟩, -nts→ns. |
 | **cmn** Mandarin | 84.7% (.80) | — | 🟠 | Syllable-level pinyin→IPA is reliable; deferred: **Hanzi text front-end** (char/phrase dicts, polyphones) + number compositor. Reliable for *pinyin* input, not raw Hanzi. |
 | **cs** Czech | 69.9% (.65) | — | 🟡 | Referee itself is epitran-buggy (deflates); loanword-exception lexicon (portable from espeak cs_list) is the real residual. |
@@ -74,10 +74,9 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 ## What "outstanding work" concretely means
 
-- **🟠 scope gaps** are the substantive items: Mandarin's Hanzi front-end, Japanese/Swedish pitch accent, Arabic's
-  diacritization port, Thai's compound segmentation. Each is a *subsystem*, tracked in that language's
-  `docs/<code>_*investigation.md`. Until built, feed these engines their supported input (pinyin, diacritized
-  Arabic, etc.) and treat the deferred layer as absent, not wrong.
+- **🟠 scope gaps** are the substantive items: Mandarin's Hanzi front-end, Japanese/Swedish pitch accent,
+  Thai's compound segmentation. Each is a *subsystem*, tracked in that language's
+  `docs/<code>_*investigation.md`. Until built, feed these engines their supported input (pinyin, etc.) and treat the deferred layer as absent, not wrong.
 - **🟡 lexical tails** are bounded: a specific, enumerable class (mid-vowel height, loanword C-hardening, learned
   stress) that a small exception lexicon closes. The rule engine is right for everything else. Irish's Run-3
   referee-gated lexicon (`docs/ga_bringup_investigation.md`, `[[vernacula-oracle-lexicon-method]]`) is the
