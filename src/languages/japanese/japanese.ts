@@ -23,6 +23,9 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 
 class JapanesePhonemizer implements Phonemizer {
     text(input: string): string {
+        // Normalise full-width digits ０-９ → ASCII so the number path fires (３個 → さんこ, ２０２４年 → …); the \d
+        // token and numberToKana are ASCII-only. (Counter readings 月→がつ, 日→か… are a separate deferred subsystem.)
+        input = input.replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
         // segmentText inserts bunsetsu spaces first, then assembleClauses runs the standard clause skeleton.
         return assembleClauses(segmentText(input), TOKEN, (m, sink) => {
             if (m[1]) {
