@@ -68,7 +68,12 @@ function splitCompound(w: string, depth = 0): string[] | null {
             if (!w.slice(i).startsWith(lk)) continue;
             const rest = w.slice(i + lk.length);
             if (rest.length < 3) continue;
-            if (isConstituent(rest)) return [head + lk, rest]; // linking element stays with the head
+            if (isConstituent(rest)) {
+                // rest is a known constituent, but it may ITSELF be a compound (stillstand → still·stand): recurse
+                // so the inner seam gets element-initial treatment (waffen·still·stand → the 2nd st → ʃt too).
+                const deeper = splitCompound(rest, depth + 1);
+                return deeper ? [head + lk, ...deeper] : [head + lk, rest];
+            }
             const tail = splitCompound(rest, depth + 1);
             if (tail) return [head + lk, ...tail];
         }

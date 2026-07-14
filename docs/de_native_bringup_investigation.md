@@ -265,3 +265,10 @@ The -igkeit suffix (geschwindigkeit → …ɪçkaɪt) rendered the -ig- g as a d
 consonant count out of the consonant lexicon. Added a g2p rule: ⟨g⟩ between ⟨i⟩ and ⟨k⟩ → ç (ich-laut).
 geschwindigkeit/schnelligkeit/süßigkeit/ewigkeit now correct; Iglu (igl≠igk) / Tag unaffected. kaikki 73.5→73.9%,
 wikipron 72.8→73.1%. Deferred (lexical): -iglich dissimilation (königlich → k, not ç), long ä→ɛː (ä/e merger).
+
+## Run 19 — recurse into a known constituent (triple-compound seam)
+splitCompound returned a known constituent `rest` whole (waffenstillstand → waffen·stillstand), so the inner seam
+kept its non-initial reading (2nd st → st, not ʃt). Now it recurses into a constituent rest (waffen·still·stand),
+giving the inner st → ʃt element-initial treatment. 2-part compounds (landstraße) and verbs (schreiben) unregressed.
+kaikki 73.9% (flat — rare), independent wikipron 73.1→73.3% (cross-source positive). Deferred: suffix-stripped
+triple seams (zahnstocher, fußstapfen) where the trailing constituent (stocher/stapfen) isn't lexicon-flagged.
