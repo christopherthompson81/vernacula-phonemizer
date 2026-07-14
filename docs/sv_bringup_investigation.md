@@ -55,3 +55,37 @@ segmental Phase 1. Unit test (exact golds) 9/9 is the regression guard.
 **Deferred to Phase 2 (needs a lexicon):** pitch accent 1/2; non-initial loanword/prefix stress; lexical o=oː
 vs uː; compound decomposition (storkök→ɧ). A kaikki swe lexicon would unlock all of these + provide the
 independent secondary referee (the current `secondaryGap`).
+
+## Run 4 — 2026-07-14 — Phase 2: NST pitch-accent + stress lexicon
+
+espeak-ng-portable has a full Swedish Phase-2 setup — the CC0 **NST Pronunciation Lexicon**
+(`swe030224NST.pron`) + `data/sv/accent-lexicon.tsv`. Reused it (the abstract, convention-independent features
+only — NOT the espeak-convention segments).
+
+**Lexicon build (`tools/gen/build-sv-lexicon.mts`):** parse NST field-12 SAMPA for every corpus word →
+- pitch **accent** 1|2 from the primary-stress marker (`""` = accent 2, `"` = accent 1),
+- absolute **stress ordinal** = the `$`-delimited syllable index carrying the `"` marker.
+Restricted to the 50k frequency corpus, homographs majority-resolved. Output committed:
+`src/languages/swedish/accent-stress.tsv` (42,052 words, 11,075 with a non-initial stress ordinal, ~480KB).
+
+**First tried** deriving from espeak-ng-portable's `accent-lexicon.tsv` col-3 IPA corrections — but col 3 only
+covers words espeak MIS-stresses (relative to espeak's rule), so `polis`/`station` (which espeak stressed
+correctly, non-initially) had no correction and stayed wrong. Went to the NST **source** for ABSOLUTE stress
+instead → fixed them.
+
+**Engine (`swedish.ts`):** look up word → stress ordinal (default first syllable) + accent (default the NST OOV
+rule: monosyllable / non-initial-stress → 1, polysyllable initial-stress → 2). `toSegments(word, stressOrd)`
+now takes the stress ordinal so the complementary-length rule lands the LONG vowel on the correct syllable; the
+accent-2 grave (combining U+0300) marks the primary-stressed vowel. Input + output NFC-normalized (robust to
+decomposed ö/ä/å input; deterministic grave).
+
+**Why the referee score moved even though ˈ/grave are backbone-stripped:** the stress lexicon relocates the
+long-vowel QUALITY (uː vs ɔ, ɑ vs a), which the backbone keeps. `polis`→pɔlˈiːs (was pˈuːlɪs), `telefon`→
+tɛlɛfˈuːn, `student`→stɵdˈɛnt. Folded backbone **48.3% → 52.0%** (now above German's 49.8%).
+
+**Verified accents are NST-faithful (majority-resolved homographs):** `boken`→accent 1 (the frequent noun sense;
+NST lists 2×A1 + 1×A2), `ligga`→accent 1 (what NST marks). The unit test asserts these, not my priors.
+
+**Still Phase-3+ (small residual):** lexical o=oː vs uː (son); compound decomposition (storkök); OOV loanword
+stress (words outside the 50k corpus fall to first-syllable). A kaikki swe *pron*-lexicon would be the
+independent segmental secondary referee (still a `secondaryGap`).

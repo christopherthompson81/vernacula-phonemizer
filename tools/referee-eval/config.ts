@@ -274,12 +274,13 @@ export const CONFIG: Record<string, RefLang> = {
     ],
   },
   sv: {
-    // Central Standard Swedish, SEGMENTAL Phase 1 (first-syllable stress; pitch accent deferred). The broad
-    // wikipron referee marks the accent-2 prosodeme ² (sparse) and is INCONSISTENT on retroflex assimilation
-    // (mars→ʂ but barn→rn) — so we fold our systematic retroflexes back to r+dental to compare inventories.
+    // Central Standard Swedish. Phase 2 adds the NST pitch-accent + stress lexicon; the accent-2 grave (combining
+    // U+0300) is backbone-stripped, so this stays a SEGMENTAL check, but the stress lexicon moves the long-vowel
+    // QUALITY onto the right syllable (48.3→52.0%). The broad wikipron referee marks the ² prosodeme (folded) and
+    // is INCONSISTENT on retroflex (mars→ʂ but barn→rn) → we fold our systematic retroflexes back to r+dental.
     referees: [{ file: "sv.wikipron-swe.tsv", source: "wikipron swe broad (human)", role: "primary" }],
-    secondaryGap: "no independent second source wired; epitran ships no Swedish. A kaikki swe lexicon (which also " +
-      "carries pitch accent) would corroborate and unlock Phase 2.",
+    secondaryGap: "no independent second source wired; epitran ships no Swedish. The NST lexicon is the pitch/" +
+      "stress oracle (data/accent-stress.tsv) but is not a segmental referee; a kaikki swe pron-lexicon would be.",
     segmentJoin: true,
     folds: [
       [/²/gu, "", "accent-2 prosodeme marker — a pitch feature, deferred to Phase 2"],
