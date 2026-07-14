@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 28 — loanword -er restoration lexicon (unstressed ɐ → ɛʁ)", () => {
+        expect(phonemizeWord("Adverb")).toBe("ˈatfɛʁp"); // loanword unstressed -er → ɛʁ (was ɐ)
+        expect(phonemizeWord("Expertise")).toBe("ɛkspɛʁtˈiːzə");
+        expect(phonemizeWord("Wasser")).toBe("vˈasɐ"); // control: native -er stays reduced ɐ
+        expect(phonemizeWord("Wanderer")).toBe("vˈandəʁɐ"); // control: native medial -er (ə/ɐ), not restored
+    });
+
     test("Run 27 — unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)", () => {
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // -ion → i̯oːn
         expect(phonemizeWord("genial")).toBe("ɡəni̯ˈaːl"); // -ial → i̯aːl

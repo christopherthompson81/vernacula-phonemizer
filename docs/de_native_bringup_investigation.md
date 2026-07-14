@@ -341,3 +341,14 @@ unstressed ⟨i⟩ before another vowel in the Latinate -iVC- pattern → non-sy
 word-initial (Ion). First cut (ungated) REGRESSED kaikki −6 by gliding proper-noun -iV#; the -iVC gate fixed that.
 kaikki flat (proper-noun-heavy), wikipron 74.8→74.9%, quality-skew 3936→3456. LEXICONS: all four (stress/length/
 quality/consonant) are implemented; the nucleus-skew fix unblocks ~480 more words into the existing quality lexicon.
+
+## Run 28 — the 5th lexicon: loanword -er restoration (ɐ → ɛʁ)
+The user-requested "missing lexicon". German ⟨er⟩+C reduces to vocalic ɐ natively (Wasser→vasɐ, Wanderer→vandəʁɐ)
+but an UNSTRESSED ⟨er⟩ keeps the full ɛʁ in loanwords (universal→univɛʁzaːl, transversal, Adverb→atfɛʁp, Expertise,
+emergent, divergent, Universität). This is a lexical native-vs-loan split no rule captures, AND it can't live in the
+vowel/consonant lexicons because it INSERTS a consonant (ɐ → ɛ + ʁ). New per-nucleus kaikki lexicon (er.tsv, 771
+entries) built by build-de-er.mts: flags each unstressed nucleus where our ɐ ↔ kaikki ɛ+ʁ/r. applyErRestore is a
+POST-PASS (after applyConsonant, so the inserted ʁ doesn't shift consonant ordinals); the STRESSED case is already
+the restoreStressedEr rule (Run 25). Measured 851 candidate words; the strict ɛʁ-exact filter yields 771 (excludes
+the long eːɐ̯ realizations like Pferd). kaikki 75.5→76.1%, wikipron 74.9→75.2% — both strong. Floor 0.74→0.75.
+LEXICON INVENTORY now: stress, length, quality, consonant, er (5). Full suite 233 green.
