@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 23 — French -age/-ge loans: g → ʒ", () => {
+        expect(phonemizeWord("Garage")).toBe("ɡaʁˈaːʒə"); // -age loan → ʒ
+        expect(phonemizeWord("Etage")).toBe("etˈaːʒə");
+        expect(phonemizeWord("Regen")).toBe("ʁˈeːɡən"); // control: native ⟨g⟩ stays ɡ
+    });
+
     test("Run 22 — unstressed Latinate -ie/-ien suffix → i̯ə/i̯ən", () => {
         expect(phonemizeWord("Familie")).toBe("famˈiːli̯ə"); // unstressed -ie → i̯ə
         expect(phonemizeWord("Ferien")).toBe("fˈeːʁi̯ən"); // -ien → i̯ən

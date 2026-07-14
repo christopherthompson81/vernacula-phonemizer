@@ -297,3 +297,11 @@ lexicons were rebuilt against the new g2p. Monosyllables (die, sie, Knie, Vieh �
 final-STRESSED loans (Melodie, Chemie, Batterie) are restored to iː by a stressed-i̯ə post-pass (restoreStressedIe,
 matching the ɛ that fixStressedSchwa leaves). kaikki 74.3→74.6%, wikipron 73.7→74.0% (cross-source positive). Updated
 the Run 6 Studie golden (ʃtˈuːdɪ → ʃtˈuːdi̯ə — it encoded the old wrong output).
+
+## Run 23 — French -age/-ge loans: g → ʒ
+Added the ɡ→ʒ pair to the consonant-lexicon build (build-de-consonant.mts): Garage, Etage, Doge, Montage render the
+French loan ⟨g⟩ as ʒ (native ⟨g⟩ stays ɡ — Regen, Gabe untouched). Data-driven, cross-validated. kaikki flat,
+wikipron 74.0→74.1%. Modest because many -ge loans (Marge, universal) are BLOCKED by r-vocalization consonant-count
+skew: our coda-r → ɐ̯ (0 consonants) vs kaikki ʁ (1 consonant) skews the alignment (the 16993 "skipped" words). That
+rhotic-count skew is the largest remaining lever for the consonant lexicon, but aligning it means making applyConsonant
+count ɐ̯ as a consonant too (ordinal-alignment refactor across the whole lexicon) — deferred as high-risk/low-marginal.

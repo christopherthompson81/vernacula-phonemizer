@@ -43,6 +43,7 @@ const PAIRS: Record<string, Set<string>> = {
     "x": new Set(["ç", "k"]),
     "k": new Set(["ç"]),
     "ŋ": new Set(["n"]),
+    "ɡ": new Set(["ʒ"]), // French -age/-ge loans: Garage, Etage, Doge, Marge → ʒ (native ⟨g⟩ → ɡ)
 };
 
 // Expand kaikki's syllabic consonants (kʁɪstn̩ → …stən) so the consonant sequence aligns with our ⟨-en⟩ etc.
