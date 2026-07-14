@@ -54,6 +54,19 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("papur")).toBe("pˈapɨr"); // lax a before p (voiceless)
     });
 
+    test("Run 2 — word-initial nasal mutation, irregular function words, apostrophe enclitics", () => {
+        expect(phonemizeWord("nhw")).toBe("n̥ˈuː"); // word-initial nh → n̥ (nasal mutation)
+        expect(phonemizeWord("nghymru")).toBe("ŋ̥ˈəmrɨ"); // ngh → ŋ̥
+        expect(phonemizeWord("enghraifft")).toBe("ˈɛŋhraᶦft"); // MEDIAL ngh is ŋ+h, not the mutation
+        expect(phonemizeWord("dechrau")).toBe("dˈɛχraᶤ"); // onset-cluster penult tensing (→ deχraᶤ) stays DEFERRED
+        expect(phonemizeWord("i")).toBe("ˈɨ"); // irregular clitic: i → ɨ (short), not the regular iː
+        expect(phonemizeWord("bod")).toBe("bˈɔd"); // irregular: short ɔ, not the regular oː
+        expect(phonemizeWord("heb")).toBe("hˈɛb"); // irregular: lax ɛ
+        expect(phonemizeWord("un")).toBe("ˈɨːn"); // irregular: long ɨː before n
+        expect(phonemizeWord("o'r")).toBe("ˈoːr"); // enclitic: stem ⟨o⟩ stays open (oː) + r
+        expect(phonemizeWord("hi'n")).toBe("hˈiːn"); // enclitic: stem ⟨hi⟩ open (hiː) + n
+    });
+
     test("w/i as consonants before a vowel; ⟨si⟩+V → ʃ; ⟨w⟩ as vowel (ʊ) otherwise", () => {
         expect(phonemizeWord("wal")).toBe("wˈal"); // word-initial w + vowel → consonant /w/ (not vowel ʊ)
         expect(phonemizeWord("teithio")).toBe("tˈəᶦθjɔ"); // i + vowel → /j/

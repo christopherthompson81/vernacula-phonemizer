@@ -12,31 +12,97 @@
 
     // Digraphs (resolved before single letters). ⟨si⟩+V → ʃ is handled in code (needs a following vowel).
     "digraphs": {
-        "ch": "χ", "dd": "ð", "ff": "f", "ng": "ŋ", "ll": "ɬ", "ph": "f", "rh": "r̥", "th": "θ", "ngh": "ŋ̥",
+        "ch": "χ",
+        "dd": "ð",
+        "ff": "f",
+        "ng": "ŋ",
+        "ll": "ɬ",
+        "ph": "f",
+        "rh": "r̥",
+        "th": "θ",
     },
+
+    // Nasal mutation (treiglad trwynol) — applied ONLY word-initially; medially these are ŋ+h / m+h / n+h
+    // (enghraifft → ɛŋhraᶦft). Word-initial: nhw → n̥uː, nghymru → ŋ̥əmrɨ, mhrifysgol → m̥rɨvəsɡɔl.
+    "nasalMutation": { "ngh": "ŋ̥", "mh": "m̥", "nh": "n̥" },
 
     // Single consonants. c always k, g always ɡ, f → v, ff/ph → f (digraphs); w/i as consonants (before a vowel)
     // handled in code.
     "consonants": {
-        "b": "b", "c": "k", "x": "ks", "d": "d", "f": "v", "g": "ɡ", "h": "h", "j": "d͡ʒ", "l": "l", "m": "m",
-        "n": "n", "p": "p", "r": "r", "s": "s", "t": "t",
+        "b": "b",
+        "c": "k",
+        "x": "ks",
+        "d": "d",
+        "f": "v",
+        "g": "ɡ",
+        "h": "h",
+        "j": "d͡ʒ",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "r": "r",
+        "s": "s",
+        "t": "t",
     },
 
     // Vowel clusters → IPA, matched LONGEST-first. Diphthongs carry their offglide and are NOT length-adjusted;
     // monophthongs are stored SHORT and lengthened by welsh.ts. Circumflex (to bach) marks an inherently long
     // vowel. ⟨y⟩ is resolved in code (obscure ə vs clear ɨ), so only its long forms appear here.
     "vowels": {
-        "ae": "aᶤ", "au": "aᶤ", "ai": "aᶦ", "aw": "aᶷ", "ay": "aᶦ",
-        "eu": "əᶤ", "ei": "əᶦ", "ew": "eᶷ", "ey": "əᶦ",
-        "oe": "ɔᶤ", "oi": "ɔᶦ", "ou": "ɔᶤ", "ow": "ɔᶷ", "oy": "ɔᶦ",
-        "wy": "uᶤ", "yw": "ɨᵘ", "iw": "ɪᵘ", "uw": "ɨᵘ", "ïe": "iɛ",
-        "â": "aː", "ê": "eː", "î": "iː", "ô": "oː", "û": "ɨː", "ŵ": "uː", "ŷ": "ɨː",
-        "à": "a", "è": "ɛ", "ì": "i", "ò": "ɔ", "ù": "ɨ", "ï": "i", "ë": "ɛ", "ö": "ɔ", "ä": "a", "ü": "ɨ",
-        "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "ɨ", "w": "ʊ",
+        "ae": "aᶤ",
+        "au": "aᶤ",
+        "ai": "aᶦ",
+        "aw": "aᶷ",
+        "ay": "aᶦ",
+        "eu": "əᶤ",
+        "ei": "əᶦ",
+        "ew": "eᶷ",
+        "ey": "əᶦ",
+        "oe": "ɔᶤ",
+        "oi": "ɔᶦ",
+        "ou": "ɔᶤ",
+        "ow": "ɔᶷ",
+        "oy": "ɔᶦ",
+        "wy": "uᶤ",
+        "yw": "ɨᵘ",
+        "iw": "ɪᵘ",
+        "uw": "ɨᵘ",
+        "ïe": "iɛ",
+        "â": "aː",
+        "ê": "eː",
+        "î": "iː",
+        "ô": "oː",
+        "û": "ɨː",
+        "ŵ": "uː",
+        "ŷ": "ɨː",
+        "à": "a",
+        "è": "ɛ",
+        "ì": "i",
+        "ò": "ɔ",
+        "ù": "ɨ",
+        "ï": "i",
+        "ë": "ɛ",
+        "ö": "ɔ",
+        "ä": "a",
+        "ü": "ɨ",
+        "a": "a",
+        "e": "ɛ",
+        "i": "i",
+        "o": "ɔ",
+        "u": "ɨ",
+        "w": "ʊ",
     },
 
     // Short-quality → long-quality (lengthening raises/tenses). ə never lengthens.
-    "longVowel": { "a": "aː", "ɛ": "eː", "i": "iː", "ɔ": "oː", "ʊ": "uː", "ɨ": "ɨː" },
+    "longVowel": {
+        "a": "aː",
+        "ɛ": "eː",
+        "i": "iː",
+        "ɔ": "oː",
+        "ʊ": "uː",
+        "ɨ": "ɨː",
+    },
 
     // A stressed monophthong lengthens when open (0 coda consonants) or before a SINGLE coda from this set
     // (voiced stops + fricatives). Voiceless stops p t k, m, ŋ, ɬ, and any cluster keep it short. n/r/l are
@@ -44,12 +110,43 @@
     "lengthenBefore": "bdɡvðfχθsz",
 
     // Function-word clitics where ⟨y⟩ stays OBSCURE (ə) despite being a final/only syllable.
-    "obscureY": ["y", "yr", "yn", "yng", "ym", "fy", "dy", "myn", "syr"],
+    "obscureY": ["y", "yr", "yn", "yng", "ym", "myn", "syr"],
 
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+    // Irregular common function words: short/lax vowels where the regular length rule would lengthen (bod → bɔd
+    // not boːd), plus the ⟨i⟩/⟨a⟩/⟨fy⟩/⟨dy⟩ clitics. Consulted before the rules (a tiny closed-class lexicon).
+    "exceptions": {
+        "i": "ˈɨ", "a": "ˈa", "fy": "vˈɨ", "dy": "dˈɨː", "bod": "bˈɔd", "fod": "vˈɔd", "pob": "pˈɔb",
+        "wedi": "wˈɛdɨ", "heb": "hˈɛb", "na": "nˈa", "sydd": "sˈɨð", "un": "ˈɨːn", "os": "ˈɔs", "nad": "nˈad",
+        "mai": "mˈaᶦ", "sy": "sˈɨ", "ei": "ˈəᶦ", "eu": "ˈəᶤ",
+    },
+
+    // Enclitics contracted with an apostrophe (o'r, hi'n): the stem is phonemized as a word, then this appended.
+    "enclitics": { "r": "r", "n": "n", "m": "m", "th": "θ", "ch": "χ" },
+
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": "…",
+        ",": ",",
+        ";": ";",
+        ":": ":",
+    },
 
     // Cardinal number words 0–10 (masculine; the full system with mutations/feminine is a later phase).
     "numbers": {
-        "ones": ["dim", "un", "dau", "tri", "pedwar", "pump", "chwech", "saith", "wyth", "naw", "deg"],
+        "ones": [
+            "dim",
+            "un",
+            "dau",
+            "tri",
+            "pedwar",
+            "pump",
+            "chwech",
+            "saith",
+            "wyth",
+            "naw",
+            "deg",
+        ],
     },
 }

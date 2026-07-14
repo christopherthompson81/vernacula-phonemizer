@@ -185,6 +185,27 @@ export const CONFIG: Record<string, RefLang> = {
             [/l̩/gu, "l", "syllabic l notation"],
         ],
     },
+    cy: {
+        // Welsh — dialect-MATCHED referee (we target Northern; wikipron has NW vs SW variants). The backbone
+        // already strips our stress + length and the referee's non-syllabic / lowered combining marks (ɨ̯ i̯ u̯
+        // ɨ̞ → ɨ i u), so folds only reconcile our modifier-letter diphthong offglides with the referee's vowels.
+        referees: [
+            {
+                file: "cy.wikipron-cym-nw-broad.tsv",
+                source: "wikipron cym_latn NW broad (human, North Wales)",
+                role: "primary",
+            },
+        ],
+        secondaryGap:
+            "wikipron cym SW (South Wales) is a DIFFERENT dialect (i/e for our ɨ, -e for final -au) so not an independent corroborator of the Northern target; the espeak-ng-portable cy engine is the bootstrap oracle but is not espeak-independent.",
+        segmentJoin: true,
+        folds: [
+            [/ᶤ/gu, "ɨ", "our ae/au/oe/wy CENTRAL i-offglide (aᶤ) ↔ the referee's non-syllabic ɨ̯ (breve stripped by the backbone)"],
+            [/ᶦ/gu, "i", "our ai/ei FRONT i-offglide (əᶦ) ↔ the referee's non-syllabic i̯"],
+            [/[ᶷᵘ]/gu, "u", "our diphthong u-offglide (aᶷ, ɨᵘ) ↔ the referee's non-syllabic u̯"],
+            [/ɪ/gu, "i", "referee lax ɪ vs our short-i i"],
+        ],
+    },
     de: {
         referees: [
             {

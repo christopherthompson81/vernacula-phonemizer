@@ -9,12 +9,18 @@
 import { MANIFEST } from "./manifest.ts";
 
 const DIGRAPHS = MANIFEST.digraphs;
+const NASAL_MUTATION = MANIFEST.nasalMutation;
 const CONSONANTS = MANIFEST.consonants;
-const VOWEL_CLUSTERS = Object.keys(MANIFEST.vowels).sort((a, b) => b.length - a.length); // longest-first
+const VOWEL_CLUSTERS = Object.keys(MANIFEST.vowels).sort(
+    (a, b) => b.length - a.length,
+); // longest-first
 const OBSCURE_Y = new Set(MANIFEST.obscureY);
 // Vowel LETTERS, derived from the manifest's single-char vowel keys (+ ⟨y⟩, which the code resolves separately)
 // so the accented inventory lives in ONE place — adding a vowel to welsh.jsonc can't silently desync the scanner.
-const VOWEL_LETTERS = new Set([...Object.keys(MANIFEST.vowels).filter((k) => k.length === 1), "y"]);
+const VOWEL_LETTERS = new Set([
+    ...Object.keys(MANIFEST.vowels).filter((k) => k.length === 1),
+    "y",
+]);
 
 const isVowelLetter = (c: string): boolean => c !== "" && VOWEL_LETTERS.has(c);
 
@@ -43,9 +49,26 @@ export function toSegments(word: string): Seg[] {
         const three = w.slice(i, i + 3);
         const two = w.slice(i, i + 2);
 
-        // --- digraphs (longest first: ngh, then the 2-char set) ---
-        if (DIGRAPHS[three]) { segs.push({ ph: DIGRAPHS[three]!, nucleus: false }); i += 3; continue; }
-        if (DIGRAPHS[two]) { segs.push({ ph: DIGRAPHS[two]!, nucleus: false }); i += 2; continue; }
+        // --- word-initial nasal mutation (ngh → ŋ̥, mh → m̥, nh → n̥); medial ⟨ngh⟩ etc. fall through to ŋ+h ---
+        if (i === 0) {
+            if (NASAL_MUTATION[three]) {
+                segs.push({ ph: NASAL_MUTATION[three]!, nucleus: false });
+                i += 3;
+                continue;
+            }
+            if (NASAL_MUTATION[two]) {
+                segs.push({ ph: NASAL_MUTATION[two]!, nucleus: false });
+                i += 2;
+                continue;
+            }
+        }
+
+        // --- digraphs (2-char: ch dd ff ng ll ph rh th) ---
+        if (DIGRAPHS[two]) {
+            segs.push({ ph: DIGRAPHS[two]!, nucleus: false });
+            i += 2;
+            continue;
+        }
 
         // --- ⟨si⟩ + vowel → ʃ (siarad → ʃarad); ⟨si⟩ + consonant stays s+i (sir → siːr) ---
         if (c === "s" && w[i + 1] === "i" && isVowelLetter(w[i + 2] ?? "")) {
@@ -56,10 +79,16 @@ export function toSegments(word: string): Seg[] {
 
         // --- vowels: multi-char clusters (diphthongs incl. wy/yw) win first, then w/i-as-consonant, then y ---
         if (isVowelLetter(c)) {
-            const key = VOWEL_CLUSTERS.find((k) => k.length >= 2 && w.startsWith(k, i));
+            const key = VOWEL_CLUSTERS.find(
+                (k) => k.length >= 2 && w.startsWith(k, i),
+            );
             if (key) {
                 const ph = MANIFEST.vowels[key]!;
-                segs.push({ ph, nucleus: true, long: ph.includes("ː") || /[ᶤᶦᶷᵘ]/.test(ph) });
+                segs.push({
+                    ph,
+                    nucleus: true,
+                    long: ph.includes("ː") || /[ᶤᶦᶷᵘ]/.test(ph),
+                });
                 i += key.length;
                 continue;
             }
@@ -68,12 +97,19 @@ export function toSegments(word: string): Seg[] {
             // being ɡ, NOT the raw ⟨g⟩, which would also match the ɡ of a ⟨ng⟩→ŋ digraph and wrongly consonantize
             // a nuclear ⟨w⟩ (llongwr → ɬɔŋʊr, dwr → dʊr keep ⟨w⟩ as the vowel).
             const prevSeg = segs[segs.length - 1];
-            if (c === "w" && (isVowelLetter(w[i + 1] ?? "") || prevSeg?.ph === "ɡ")) {
+            if (
+                c === "w" &&
+                (isVowelLetter(w[i + 1] ?? "") || prevSeg?.ph === "ɡ")
+            ) {
                 segs.push({ ph: "w", nucleus: false });
                 i += 1;
                 continue;
             }
-            if (c === "i" && isVowelLetter(w[i + 1] ?? "")) { segs.push({ ph: "j", nucleus: false }); i += 1; continue; }
+            if (c === "i" && isVowelLetter(w[i + 1] ?? "")) {
+                segs.push({ ph: "j", nucleus: false });
+                i += 1;
+                continue;
+            }
             if (c === "y") {
                 // obscure ə (a clitic word, or a later vowel exists → non-final) vs clear ɨ (final syllable)
                 const clear = !obscureWord && !vowelAfter(w, i + 1);
