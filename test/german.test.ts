@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 10 — compound-split retry after a suffix strip (fires the seam st→ʃt)", () => {
+        expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // wald·sterben: seam st→ʃt (was waldsterb·en)
+        expect(phonemizeWord("leben")).toBe("lˈeːbən"); // control: a simple -en word is NOT wrongly compound-split
+    });
+
     test("Run 9 — unstressed loanword vowel tensing (lax → tense, kaikki-derived quality lexicon)", () => {
         expect(phonemizeWord("November")).toBe("nofˈɛmbɐ"); // ɔ → o
         expect(phonemizeWord("digital")).toBe("diɡitˈaːl"); // ɪ → i (×2)

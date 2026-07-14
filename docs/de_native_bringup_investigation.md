@@ -171,3 +171,15 @@ now-tensed forms (Problem→pʁoblˈeːm, helikopter→helikɔptɐ — both kaik
 
 REMAINING: compound-seam st→ʃt / d→t (needs the splitter to fire on more constituents — the last structural
 lever) + fine loanword consonants (x~ç, ŋ~nɡ). de-kaikki-full.tsv stays a regenerable intermediate.
+
+## Run 10 — compound-split retry after a suffix strip
+The residual's compound-seam classes (st→ʃt, d→t) and mid-compound e→ə were gated on the splitter, which strips
+a trailing suffix BEFORE compound-splitting — so waldsterben → (−en) → "waldsterb" fails to split, though
+wald·sterben would. Added an additive retry in decompose: if a suffix strip left an UN-splittable single stem,
+re-run splitCompound on the un-stripped form (the suffix belongs to the last constituent). Only fires when the
+stem otherwise wouldn't split → simple -en/-e words (leben→leb·en) are untouched (verified no garbage splits).
+waldsterben→vˈaltʃtɛɐ̯bən (seam st→ʃt now fires). kaikki 66.0→67.3%, wikipron 66.3→67.2% (both up, no regression).
+
+Limit: only helps compounds whose constituents are FLAGGED in the stem lexicon (stems.txt). pickel·haube still
+doesn't split (haube unflagged), and erd·nuss can't (erd <4-letter leading threshold that guards ham·burg). The
+remaining compound residual is now stem-lexicon COVERAGE (growing stems.txt), not the ordering bug — deferred.
