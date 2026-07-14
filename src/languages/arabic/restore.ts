@@ -147,3 +147,21 @@ export function restoreSkeletons(vocalized: string, lexicon: ReadonlyMap<string,
         return w;
     });
 }
+
+/**
+ * LEXICON-PRIMARY restoration: a direct Tashkeela lexicon hit is AUTHORITATIVE — it overrides the neural
+ * diacritizer for any covered word (the classical citation-form vocalization is right for isolated/dictionary
+ * words, which the context-trained BiLSTM gets wrong out-of-distribution). An OOV word (no direct hit) keeps the
+ * neural output, unless that output is a skeleton — then it falls to the clitic/suffix-strip + epenthesis floor.
+ * (Trade-off vs restoreSkeletons: the lexicon's single reading wins even where the neural's CONTEXT would have
+ * disambiguated mid-sentence — measured net-better on isolated/dictionary referees; running-text is the open Q.)
+ */
+export function lexiconPrimary(vocalized: string, lexicon: ReadonlyMap<string, string>): string {
+    return vocalized.replace(WORD, (w) => {
+        const direct = lexicon.get(stripHarakat(w));
+        if (direct !== undefined) return direct;
+        if (!isSkeleton(w)) return w;
+        const cand = buildRestoredText(w, lexicon);
+        return cand !== undefined && !isSkeleton(cand) ? cand : w;
+    });
+}

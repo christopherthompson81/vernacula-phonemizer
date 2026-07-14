@@ -8,7 +8,7 @@ import {
     phonemizeArabic,
     phonemizeWord,
 } from "../src/languages/arabic/arabic.ts";
-import { isSkeleton, restoreSkeletons } from "../src/languages/arabic/restore.ts";
+import { isSkeleton, restoreSkeletons, lexiconPrimary } from "../src/languages/arabic/restore.ts";
 
 // The neural diacritizer model is gitignored (dev stand-in / built permissively) — skip its tests if absent.
 const haveDiacritizer = existsSync(
@@ -72,6 +72,9 @@ describe("arabic canonical IPA — diacritized path", () => {
         expect(restoreSkeletons("يقول كَتَبَ", lex)).toBe("يَقُول كَتَبَ");
         // OOV skeleton with no lexicon hit → epenthesis floor keeps it sayable (no longer 0-vowel).
         expect(isSkeleton(restoreSkeletons("قلب", new Map()))).toBe(false);
+        // LEXICON-PRIMARY: a direct lexicon hit overrides the neural output even when it is NOT a skeleton.
+        expect(lexiconPrimary("كُتِب", new Map([["كتب", "كَتَب"]]))).toBe("كَتَب");
+        expect(lexiconPrimary("مَدْرَسَة", new Map())).toBe("مَدْرَسَة"); // OOV non-skeleton kept as-is
     });
 
     // Phase 2: bare (undiacritized) Arabic via the neural diacritizer pre-pass → g2p. Gated on the model.

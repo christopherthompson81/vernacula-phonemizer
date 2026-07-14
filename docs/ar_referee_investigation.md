@@ -183,3 +183,14 @@ picture is input-dependent: lexicon-primary for dictionary/isolated, neural for 
 lexicon primary (or widen the gate well beyond skeletons) to capture most of the 14.5 pts; ideal is a confidence
 hybrid (lexicon for high-frequency dictionary words, neural for context/OOV). Label: ar is better read as 🟡 (a
 specific, known architecture improvement) than a clean ✅.
+
+## Run 9 — lexicon-PRIMARY implemented
+
+Switched phonemizeArabic from the skeleton-gated SUPPLEMENT to lexicon-PRIMARY (restore.ts lexiconPrimary): a direct
+Tashkeela hit is authoritative — it overrides the OOD neural output for any covered word; the neural is kept only for
+OOV (and its skeletons fall to clitic/suffix-strip + epenthesis). Measured: wikipron 50.0→57.4% (+7.4), kaikki
+55.3→62.6% (+7.3) — closing most of the 14.5-pt gap to espeak-ng-portable's authored 69.8%. Full suite 246 green;
+bare-text goldens unchanged. Remaining ~7-pt gap to espeak is likely g2p-convention differences + OOV handling (we
+keep the neural for OOV; espeak uses epenthesis) — smaller, partly notation. Floor 0.48→0.55. OPTION 2 (confidence
+hybrid — keep the neural where its CONTEXT disambiguates mid-sentence) is DEFERRED until a running-text referee can
+actually measure the context trade-off, rather than guessing.
