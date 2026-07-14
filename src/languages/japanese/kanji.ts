@@ -174,12 +174,23 @@ export function segmentText(text: string): string {
             prevParticle ||
             teFormAux;
         if (boundary) out += " ";
-        out += unit;
-        prevParticle =
+        // Case particles: a single-mora particle after a content word ends a bunsetsu. は/へ as particles are
+        // PRONOUNCED wa/e (not ha/he) — convert them here so the reading pass emits わ/え (私は→わたし わ, 東京へ→
+        // とうきょう え). を is already handled in kana.ts; が/を/に pass through unchanged (unambiguous kana). は/へ
+        // that START a dictionary word (はな, へや) are matched as a ≥2-mora unit above, so single-char は/へ after
+        // content is the particle. が/を/に keep the stricter isKanji(prev) gate the segmenter already relied on.
+        const particle =
             u.length === 1 &&
-            (unit === "が" || unit === "を" || unit === "に") &&
             prev !== undefined &&
-            isKanji(prev);
+            (((unit === "が" || unit === "を" || unit === "に") && isKanji(prev)) ||
+                ((unit === "は" || unit === "へ") &&
+                    (isKanji(prev) || isKana(prev))));
+        out += particle && unit === "は"
+            ? "わ"
+            : particle && unit === "へ"
+              ? "え"
+              : unit;
+        prevParticle = particle;
         prev = u[u.length - 1]!;
         prevAdv = isAdv;
         i += u.length;
