@@ -240,6 +240,17 @@ export function toSegments(word: string): Seg[] {
                 i += 2;
                 continue;
             }
+            // Unstressed ⟨i⟩ in a MEDIAL hiatus — the Latinate -iVC- suffix pattern (Union → uni̯oːn, genial →
+            // ɡeni̯aːl, Aluminium → …ni̯ʊm, Material → …ʁi̯aːl) → non-syllabic glide i̯, not a full syllable iː.
+            // Gated to -iV followed by MORE material (i + 2 < n): a WORD-FINAL -iV# stays two syllables (Radio, and
+            // crucially the many proper-noun -ia/-io: Liberia → …ʁi.a, Ontario, Ohio — kaikki keeps those syllabic).
+            // Excludes ⟨ie⟩ (handled above → iː) and word-initial ⟨i⟩ (Ion, Iota — seenVowel guards). The following
+            // vowel carries the syllable's stress, so the glide i̯ is never itself stressed.
+            if (c === "i" && "aouäöü".includes(nx) && seenVowel && i + 2 < n) {
+                push("i̯", i);
+                i++;
+                continue;
+            }
             // doubled vowel aa/ee/oo → one long vowel (Saat, See, Boot).
             if (nx === c && "aeo".includes(c)) {
                 push(LONG[c]!, i, true);

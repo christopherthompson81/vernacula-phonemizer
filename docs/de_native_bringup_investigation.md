@@ -330,3 +330,14 @@ closed list, so risky in-/un- never fire) leaving a constituent/split/stemish re
 element-initially (wahn·vor·stellung → inner st → ʃt). Regression controls (vorstellung standalone, landstraße,
 waffenstillstand, warenkorb, donaudampfschiff) unchanged; full suite 231 green. kaikki 75.3→75.5%, wikipron flat.
 Remaining st→ʃt residual: unrecognized compound heads (mühlstein) and the risky in- prefix (instabil) — deferred.
+
+## Run 27 — unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)
+INVESTIGATION of the quality-lexicon nucleus-skew (user-requested): measured 3936 skipped for nucleus skew, of which
+only 765 (19%) are i-glide-alignable — the rest (81%) is acronym/proper-noun NOISE (cia, fbi, dvd, malaysia, belize).
+So the quality-skew is NOT a rhotic-scale structural lever. But the i-hiatus is a real correctness rule on its own:
+unstressed ⟨i⟩ before another vowel in the Latinate -iVC- pattern → non-syllabic glide i̯ (Union→uni̯oːn, genial→
+ɡeni̯aːl, Aluminium→…ni̯ʊm, Material→…ʁi̯aːl). Gated to -iV + more material (i+2<n): word-final -iV# stays syllabic
+(Radio; and the many proper-noun -ia/-io: Liberia, Ontario, Ohio — kaikki keeps those two-syllable). seenVowel guards
+word-initial (Ion). First cut (ungated) REGRESSED kaikki −6 by gliding proper-noun -iV#; the -iVC gate fixed that.
+kaikki flat (proper-noun-heavy), wikipron 74.8→74.9%, quality-skew 3936→3456. LEXICONS: all four (stress/length/
+quality/consonant) are implemented; the nucleus-skew fix unblocks ~480 more words into the existing quality lexicon.
