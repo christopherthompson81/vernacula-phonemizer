@@ -222,8 +222,20 @@ export function toSegments(word: string): Seg[] {
                 i += 2;
                 continue;
             }
-            // ie → iː (native: die, Liebe, sieben).
+            // ie → iː (native: die, Liebe, sieben) — EXCEPT the unstressed Latinate suffix -ie/-ien after another
+            // syllable (Familie → famiːli̯ə, Ferien → feːʁi̯ən): word-final ⟨ie⟩/⟨ien⟩ preceded by a vowel becomes a
+            // non-syllabic glide i̯ + schwa. Monosyllables (die, sie, Knie) have no preceding vowel → stay iː; the
+            // final-stressed loans (Melodie → melodiː) are restored to iː by a stressed-i̯ə post-pass in german.ts.
             if (c === "i" && nx === "e") {
+                const ieEnd = i + 2 === n; // …ie#
+                const ienEnd = nx2 === "n" && i + 3 === n; // …ien#
+                if ((ieEnd || ienEnd) && segs.some((s) => s.vowel)) {
+                    push("i̯", i);
+                    push("ə", i, true);
+                    if (ienEnd) push("n", i);
+                    i += ienEnd ? 3 : 2;
+                    continue;
+                }
                 push("iː", i, true);
                 i += 2;
                 continue;

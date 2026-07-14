@@ -355,6 +355,7 @@ cadmiumhaltigsten	7ç
 cadmiumhaltigster	7ç
 cadmiumhaltigstes	7ç
 caravan	2v
+charakterlosigkeit	5s
 charon	0ç
 chauvi	1v
 chauvinist	1v
@@ -506,6 +507,7 @@ döfer	1v
 echse	1s
 echsen	1s
 edenkoben	1n
+ehrlosigkeit	1s
 eidechse	2s
 einbremsen	4s
 eingangsimpedanz	3s
@@ -634,6 +636,8 @@ feucht	1ç
 feuchte	1ç
 feuchter	1ç
 feuchtfröhlich	1ç
+feuchtigkeit	1ç
+feuchtigkeitsverlust	1ç
 feuchtphase	1ç
 feuchtwangen	1ç
 fietse	2s
@@ -655,9 +659,15 @@ flockigstem	3ç
 flockigsten	3ç
 flockigster	3ç
 flockigstes	3ç
+flugzeuggeschwindigkeit	5ç
+flugzeuggeschwindigkeiten	5ç
 fluvial	2v
 flächsern	3s
+flüssigchromatografie	3ç
+flüssigchromatographie	3ç
 flüssiggastank	3ç
+flüssigkeitsansammlung	6s
+flüssigkeitsansammlungen	6s
 franchise	4s
 frankenfelsers	7z
 freakigste	3ç
@@ -691,6 +701,7 @@ fuchsschwanz	1k
 fuchsschwanzes	1k
 fuchsschwänze	1k
 fuchsteufelswild	1k
+furchtlosigkeit	1ç
 futsal	2s
 füchse	2s
 füchsin	2s
@@ -759,6 +770,7 @@ geschäftsabschlüsse	4s
 gesetzesübertretung	4s
 gesträuch	4ç
 gewachsen	2k,3s
+gewaltlosigkeit	5s
 gewichtsabnahme	4s
 gewinnverwendung	3v
 gewinnverwendungsbeschluss	3v
@@ -799,6 +811,7 @@ grevens	2v
 grippevirus	3v
 groovig	2v
 großoffensive	6v
+grundstücksverkehrsgenehmigungszuständigkeitsübertragungsverordnung	26s
 gruslig	2z
 gründungsprivileg	8v
 grünflügelsittich	7s
@@ -817,11 +830,15 @@ halogenkohlenwasserstoff	3n
 halsabschneider	2s
 halsausschnitt	2s
 handelseinig	4s
+handelsreisende	6z
+handelsreisenden	6z
 handelsüberschuß	4s
 handelsüberschüsse	4s
 handlungsbevollmächtigte	12ç
 handlungsbevollmächtigten	12ç
 handlungsbevollmächtigter	12ç
+handlungsreisende	7z
+handlungsreisenden	7z
 hantavirus	3v
 hauptrefinanzierungsinstrument	11s
 hausaltars	1s
@@ -1270,12 +1287,12 @@ ludwigshafeners	3ç
 ludwigshafens	3ç
 ludwigslust	3ç
 luftfeuchte	4ç
+luftfeuchtigkeit	4ç
 luftoffensive	6v
 lustmolche	5ç
 lustmolches	5ç
 lustmolchs	5ç
 lövenich	1v
-löwchen	1f
 machiavellistisch	1k,2v
 machtvakuum	3v
 machtwechsel	5s
@@ -1290,6 +1307,7 @@ mancherorts	2ç
 manchmal	2ç
 mannigfach	2ç
 mannigfaltig	2ç
+mannigfaltigkeit	2ç
 manschettenknopf	4n
 manövrieren	2v
 manövrierfähig	2v
@@ -1298,6 +1316,7 @@ manövrierfähigem	2v
 manövrierfähigen	2v
 manövrierfähiger	2v
 manövrierfähiges	2v
+manövrierfähigkeit	2v
 markerbse	3s
 massenkarambolage	2n
 massenzwangsimpfungen	7s
@@ -1363,7 +1382,6 @@ mäßigt	2ç
 mäßigte	2ç
 möpse	2s
 möpsen	2s
-möwchen	1f
 mühlsteinkrause	4n
 mühlsteinkrausen	4n
 müßiggang	2ç
@@ -1377,6 +1395,7 @@ nachwachsend	3k,4s
 nachwuchs	3k
 nahrungsergänzungsmittel	3s
 naiver	1v
+namenlosigkeit	4s
 nasalvokal	3v
 navi	1v
 navigieren	1v
@@ -1777,6 +1796,7 @@ rotschwanzsittiches	7s
 rotschwanzsittichs	7s
 rover	1v
 rovibronisch	1v
+ruhelosigkeit	2s
 runzelerbse	6s
 rusine	1s
 rusinen	1s
@@ -1908,8 +1928,6 @@ sechsundvierzigstündig	2s,8ç
 sechsundvierzigstündiger	2s,8ç
 sechsundzwanzig	2s
 sechsundzwanzigfach	2s,11ç
-sechsundzwanzigköpfig	2s
-sechsundzwanzigköpfiger	2s
 sechsundzwanzigmal	2s
 sechsundzwanzigste	2s,11ç
 sechsundzwanzigstel	2s,11ç
@@ -2045,7 +2063,7 @@ souvenirladen	1v
 souvenirlädchen	1v
 souverän	1v
 souveränität	1v
-sowchos	0s,1f
+sowchos	0s
 sozialpsychologie	5s
 soßenkelle	2n
 sparfuchs	3k
@@ -2617,6 +2635,7 @@ wichtigtuerisch	3ç
 wiesenblumensträußchen	11ç
 wiesn	1z
 wildblumensträußchen	11ç
+willenlosigkeit	4s
 windeseile	3s
 windsurfen	3s
 windsurfing	3s
@@ -2626,8 +2645,6 @@ winkelzahnmolche	9ç
 winkelzahnmolches	9ç
 winkelzahnmolchs	9ç
 winteroffensive	6v
-wohltätigkeitsbazar	4ç,9z
-wohltätigkeitsveranstaltung	4ç
 wollpullover	4v
 wuchs	1k
 wuseligste	3ç
@@ -2657,6 +2674,7 @@ zeitaufwändigsten	7ç
 zeitaufwändigster	7ç
 zeitaufwändigstes	7ç
 zeitkapsel	5s
+zeitreisende	4z
 zeitungsausträgerin	4s
 zentralvietnam	6v
 zentralvietnams	6v
