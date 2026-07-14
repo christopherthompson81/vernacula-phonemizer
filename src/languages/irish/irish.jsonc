@@ -1,0 +1,49 @@
+// Native canonical-IPA data manifest for Irish Gaelic (ga) — Standard/Connacht-leaning, espeak-independent.
+// THE novel axis: every consonant is BROAD (velarized ˠ, next to a/o/u) or SLENDER (palatalized ʲ, next to
+// e/i) — "caol le caol". The g2p determines each consonant's quality from the flanking vowel LETTERS and emits
+// the matching form; the vowel clusters are a separate longest-match lookup (the pronounced vowel, semi-lexical).
+// ALGORITHMS in g2p.ts (scan + quality) / irish.ts (stress + assembly). See docs/ga_bringup_investigation.md.
+{
+    "language": "ga",
+    "name": "Irish Gaelic (Standard/Connacht)",
+    "script": "Latin",
+    "provenance": "Authored from Irish orthography + the broad/slender system (Ó Siadhail; the espeak-ng-portable authored ga engine as the canonical oracle). Rule engine; the wikipron gle referee is a 3-dialect, vowel-noisy cross-check (~34% ceiling), not a tight guard.",
+
+    // Slender-marking vowel LETTERS (e, i + fadas) vs broad-marking (a, o, u + fadas). A consonant is slender
+    // when its determining adjacent vowel is slender.
+    "slenderVowels": "eiéí",
+    "broadVowels": "aouáóú",
+
+    // Consonant → IPA, by quality. Digraphs (lenition) resolved before this.
+    "broad": {
+        "b": "bˠ", "c": "k", "d": "d̪ˠ", "f": "fˠ", "g": "ɡ", "h": "h", "l": "l̪ˠ", "m": "mˠ",
+        "n": "n̪ˠ", "p": "pˠ", "r": "ɾˠ", "s": "sˠ", "t": "t̪ˠ", "v": "vˠ", "z": "zˠ",
+    },
+    "slender": {
+        "b": "bʲ", "c": "c", "d": "dʲ", "f": "fʲ", "g": "ɟ", "h": "h", "l": "lʲ", "m": "mʲ",
+        "n": "nʲ", "p": "pʲ", "r": "ɾʲ", "s": "ʃ", "t": "tʲ", "v": "vʲ", "z": "ʒ",
+    },
+    // Lenited digraphs (séimhiú): [broad, slender]. "" = silent. bh/mh add a glide handled in code.
+    "lenition": {
+        "bh": ["w", "vʲ"], "mh": ["w", "vʲ"], "ch": ["x", "ç"], "dh": ["ɣ", "j"], "gh": ["ɣ", "j"],
+        "fh": ["", ""], "ph": ["fˠ", "fʲ"], "sh": ["h", "h"], "th": ["h", "h"],
+    },
+
+    // Vowel-cluster → IPA, matched LONGEST-first. The consonant quality is set separately (by the adjacent vowel
+    // letter), so these are just the pronounced nucleus. Semi-lexical / dialect-variable (the Run-2+ residual).
+    "vowels": {
+        "aoi": "iː", "eoi": "oː", "uai": "uːə", "iai": "iːə", "aío": "iː",
+        "ái": "ɑː", "aí": "iː", "ao": "eː", "eá": "ɑː", "éa": "eː", "eo": "oː", "eó": "oː", "éi": "eː",
+        "ia": "iːə", "ío": "iː", "iú": "uː", "iu": "ʊ", "ói": "oː", "oí": "iː", "ai": "a", "ea": "a",
+        "ei": "ɛ", "io": "ɪ", "oi": "ɛ", "ua": "uːə", "ui": "ɪ", "uí": "iː", "úi": "uː", "io": "ɪ",
+        "á": "ɑː", "é": "eː", "í": "iː", "ó": "oː", "ú": "uː",
+        "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ",
+    },
+
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+
+    // Cardinal number words (0–10 + tens; the counting system is complex — Phase 2).
+    "numbers": {
+        "ones": ["náid", "aon", "dó", "trí", "ceathair", "cúig", "sé", "seacht", "ocht", "naoi", "deich"],
+    },
+}

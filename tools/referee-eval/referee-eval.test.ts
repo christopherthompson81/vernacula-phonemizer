@@ -23,6 +23,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
     ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
     fr: 0.62, // wikipron fra — measured 66.5% (adjudicated gold 2nd: 85.6%); primary DEFLATED by wikipron noise
+    ga: 0.38, // wikipron gle_latn broad — measured 42.6%; 3-DIALECT referee (~34% ceiling even for a mature engine), vowel-noise dominated
     ha: 0.85, // wikipron hau (human) — measured 90.3% (epitran hau 2nd: 88.4%)
     hi: 0.72, // wikipron hin — measured 77.7%; residual = schwa-deletion edge cases + ref epenthesis + genuine ख़/ख (x/kʰ) noise
     ja: 0.52, // wikipron jpn_hira narrow — measured 57.9%; residual = allophonic palatalization + devoicing detail

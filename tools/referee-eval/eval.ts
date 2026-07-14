@@ -24,6 +24,7 @@ import { phonemizeWord as cs } from "../../src/languages/czech/czech.ts";
 import { phonemizeWord as de } from "../../src/languages/german/german.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
+import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
 import { phonemizeWord as ru } from "../../src/languages/russian/russian.ts";
@@ -45,7 +46,7 @@ const en = (w: string): string => enP.text(w);
 const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 const PHON: Record<string, (w: string) => string | Promise<string>> =
-  { ar, ca, cmn, cs, de, en, es, ff, fr, ha, hi, ja, kk, ko, pt, ru, si, sv, ta, th, tr, vi, zu };
+  { ar, ca, cmn, cs, de, en, es, ff, fr, ga, ha, hi, ja, kk, ko, pt, ru, si, sv, ta, th, tr, vi, zu };
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */
