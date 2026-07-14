@@ -370,3 +370,10 @@ obstruent (b/d/g), the case the boundary devoicing exists to fix. That guard kee
 Verständnis/Ergebnis/Gefängnis/Bildnis devoice correctly. Referee flat/−1 (the -nis words are sparse in the eval
 samples; the sole wikipron −1 is verlöbnis, where wikipron has an INCONSISTENT undevoiced …bnɪs — kaikki's -bnis→-pnɪs
 pattern confirms ours is right). Canonical-correctness win. Full suite 235 green.
+
+## Run 31 — unstressed uː/oː lax to ʊ/ɔ (Latinate -ium/-um)
+The um→ʊm residual (Aluminium → our …niːuːm, kaikki …ni̯ʊm): the quality lexicon had reverse laxing pairs for i→ɪ
+and y→ʏ (Run 17) but not the back vowels. Added u→ʊ and o→ɔ to build-de-quality.mts PAIRS — kaikki-derived, so it
+only fires where kaikki actually has the lax vowel (Aluminium/Helium/Studium/Zentrum -ium/-um → ʊm; unstressed -o-).
+STRESSED uː/oː are protected (the build skips stressed nuclei: Buch/gut/Hut stay long). kaikki 76.3→76.4%, wikipron
+75.3→75.5%. (Note: Museum→muːzɔʏ̯m is a separate pre-existing eu-hiatus bug, not this.) Full suite 236 green.

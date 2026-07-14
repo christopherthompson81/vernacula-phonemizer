@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 31 — unstressed uː/oː lax to ʊ/ɔ (Latinate -ium/-um)", () => {
+        expect(phonemizeWord("Aluminium")).toBe("aːluːmˈiːni̯ʊm"); // -ium → ʊm (was uːm)
+        expect(phonemizeWord("Zentrum")).toBe("t͡sˈɛntʁʊm"); // -um → ʊm
+        expect(phonemizeWord("Buch")).toBe("buːx"); // control: STRESSED uː stays long (build skips stressed)
+    });
+
     test("Run 30 — -nis suffix devoices a bound stem's final obstruent", () => {
         expect(phonemizeWord("Bündnis")).toBe("bˈʏntnɪs"); // bünd·nis: d → t at the boundary
         expect(phonemizeWord("Ergebnis")).toBe("ɛɐ̯ɡˈeːpnɪs"); // ergeb·nis: b → p
