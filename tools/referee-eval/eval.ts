@@ -97,13 +97,17 @@ export interface RefereeResult {
 
 /** Score a language's phonemizer against each of its independent referees (segmental backbone). Async because
  *  some phonemizers (ar's ONNX diacritizer) are async; sync ones resolve immediately. */
-export async function evaluate(lang: string): Promise<RefereeResult[]> {
+export async function evaluate(
+    lang: string,
+    primaryOnly = false,
+): Promise<RefereeResult[]> {
     const cfg = CONFIG[lang],
         phon = PHON[lang];
     if (!cfg || !phon) throw new Error(`no referee config for "${lang}"`);
     const fold = makeFold(cfg);
     const out: RefereeResult[] = [];
     for (const ref of cfg.referees) {
+        if (primaryOnly && ref.role !== "primary") continue; // floor test only needs the primary (skip slow 2nd)
         const pairs = readFileSync(join(HERE, "referees", ref.file), "utf8")
             .split("\n")
             .filter((l) => l.trim() !== "" && !l.startsWith("#"))
