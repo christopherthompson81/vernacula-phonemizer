@@ -129,3 +129,28 @@ applyLength) derived from a full kaikki German dump — but that source is no lo
 referee sample remains), so it's blocked on re-fetching/rebuilding the kaikki reduction lexicon (the next major
 lift). Loanword vowel quality (ɪ→i, ɔ→o) and compound-seam st→ʃt/d→t (needs the splitter to fire on more
 constituents) are the other deferred buckets.
+
+## Run 7 — the unstressed e→ə reduction lexicon (kaikki, re-fetched)
+Unblocked the Run-6 lever. Re-fetched the full kaikki German extract (streamed the 1 GB
+kaikki.org-dictionary-German.jsonl → 74,388 word→IPA; extractor tools/gen/extract_kaikki_de.py) and DERIVED a
+per-position reduction lexicon (tools/gen/build-de-reduction.mts → reduction.tsv, 7811 entries): for each word,
+align our nuclei against kaikki's and flag every nucleus where kaikki reduces an e/ɛ to ə but our rules keep it.
+new applyReduction (german.ts) sets those nuclei to ə (after applyLength; never the stressed vowel). This is
+LEXICAL by construction — native words reduce (schiebedach→ʃiːbədax, wesentlich→veːzəntlɪç, verstehen→fəɐ̯ʃteːən),
+loanwords don't (helikopter→hɛlɪkɔptɐ, perfekt), and the per-WORD granularity captures splits a rule can't
+(verstehen→fə but vergessen→fɛɐ̯).
+
+Result: kaikki 50.9→**57.4%** (+6.5); the INDEPENDENT wikipron secondary 52.9→**58.1%** (+5.2) — the cross-source
+validation that this is real correctness, not overfitting to kaikki. Two goldens updated to the now-correct
+reduced forms (Geburtstag→ɡə, verstehen→fə, both kaikki-confirmed). Full suite green.
+
+REMAINING (the 🟡 tail): loanword vowel quality (ɪ→i, ɔ→o — foreign, referee-noisy), and compound-seam st→ʃt /
+d→t which need the splitter to fire on more constituents. de-kaikki-full.tsv is a regenerable intermediate
+(scratchpad), not committed; the build script header documents the re-fetch.
+
+### Known pre-existing bug (surfaced during Run-7 review, NOT introduced by it)
+~34 words emit a STRESSED schwa ˈə (gesetzlich→ɡəzˈət͡slɪç, generell→ɡənəʁˈəl, gesellschaft→ɡəzˈəlʃaft). Verified
+with reduction.tsv emptied: the RAW g2p already produces ɡɛzˈət͡slɪç etc. — a base g2p/stress defect where a
+stressed short ⟨e⟩ before certain clusters surfaces as ə. applyReduction correctly leaves the stressed vowel
+alone (its ˈ-guard); it only reduces the unstressed ge-/ver- prefix on top of the already-broken stem. Separate
+fix needed in the g2p vowel/stress logic.

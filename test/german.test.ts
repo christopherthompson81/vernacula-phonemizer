@@ -43,7 +43,7 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("Laubsturm")).toBe("lˈaʊ̯pʃtʊɐ̯m"); // st→ʃt at seam, b→p devoiced
         expect(phonemizeWord("Warenkorb")).toBe("vˈaːʁənkɔɐ̯p"); // n·k NOT assimilated to ŋ
         expect(phonemizeWord("aufstehen")).toBe("ˈaʊ̯fʃteːən"); // separable prefix stressed, st→ʃt
-        expect(phonemizeWord("verstehen")).toBe("fɛɐ̯ʃtˈeːən"); // ver- prefix, st→ʃt, stress on stem
+        expect(phonemizeWord("verstehen")).toBe("fəɐ̯ʃtˈeːən"); // ver- → fə here (kaikki reduction lexicon; cf. vergessen fɛɐ̯ — per-word)
         expect(phonemizeWord("freundlich")).toBe("fʁˈɔʏ̯ntlɪç"); // -lich suffix, d→t devoiced at boundary
         expect(phonemizeWord("Zeitung")).toBe("t͡sˈaɪ̯tʊŋ"); // -ung
         // Vowel-initial inflection resyllabifies (no boundary): lieben not lieb·en, Häuser not häus·er.
@@ -53,13 +53,19 @@ describe("german canonical IPA", () => {
 
     test("flag-driven decomposition: linking-s, false-prefix guards", () => {
         expect(phonemizeWord("Zeitungsartikel")).toBe("t͡sˈaɪ̯tʊŋsaɐ̯tiːkəl"); // Fugen-s via the s flag
-        expect(phonemizeWord("Geburtstag")).toBe("ɡɛbˈuːɐ̯tstaːk"); // geburts·tag (ge NOT a prefix here)
+        expect(phonemizeWord("Geburtstag")).toBe("ɡəbˈuːɐ̯tstaːk"); // geburts·tag; ge- reduces to ə (kaikki ɡəˈbuːɐ̯tstaːk)
         expect(phonemizeWord("beiden")).toBe("bˈaɪ̯dən"); // NOT be·iden (iden isn't a word)
         expect(phonemizeWord("beten")).toBe("bˈeːtən"); // be- ROOT, dict-stressed on first
         expect(phonemizeWord("bestimmt")).toBe("bəʃtˈɪmt"); // real be- prefix (dict stress ord 1)
         // splittability test: a consonant-initial suffix is only stripped if the stem resolves.
         expect(phonemizeWord("Möglichkeit")).toBe("mˈøːɡlɪçkaɪ̯t"); // möglich·keit (möglich is a word)
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
+    });
+
+    test("Run 7 — unstressed e→ə reduction (lexical: native ə, loanword ɛ)", () => {
+        expect(phonemizeWord("wesentlich")).toBe("vˈeːzəntlɪç"); // native: -ent- e → ə
+        expect(phonemizeWord("anderen")).toBe("ˈandəʁən"); // native: -er- e → ə
+        expect(phonemizeWord("helikopter")).toBe("hɛlɪkˈɔptɐ"); // LOANWORD: e stays ɛ (not reduced)
     });
 
     test("Run 6 — Latin -tion/-tial suffix (ti + o/a → t͡si̯), native -tie unaffected", () => {

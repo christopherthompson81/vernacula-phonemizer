@@ -19,7 +19,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
     cy: 0.50, // wikipron cym_latn NW broad (dialect-matched, deduped) — measured 56.5% (Run 3: reverted the oracle's i→ɨ artifact — N Welsh keeps i FRONT, centralizes only u/y); residual is names/wy-quality + length (folded away)
-    de: 0.46, // kaikki deu — measured 50.9% (wikipron deu 2nd: 52.9%); Run 6 added -tion + x↔χ/j↔i folds; DEFLATED by kaikki's proper-noun/loan bulk. Big lever left = unstressed e→ə (needs the kaikki source to rebuild the reduction lexicon)
+    de: 0.52, // kaikki deu — measured 57.4% (wikipron deu 2nd: 58.1%); Run 7 added the kaikki-derived unstressed-e→ə reduction lexicon (+6.5/+5.2, independently validated by wikipron); still DEFLATED by kaikki's proper-noun/loan bulk
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
     ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
