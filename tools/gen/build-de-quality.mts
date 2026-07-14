@@ -46,6 +46,9 @@ const PAIRS: Record<string, Set<string>> = {
     "y": new Set(["ʏ"]),
     "u": new Set(["ʊ"]),
     "o": new Set(["ɔ"]),
+    // reverse of the native reduction: our weak-schwa rule over-reduced an unstressed ⟨e⟩ that a LOANWORD keeps as
+    // a full ɛ/e (bivalent → …lɛnt not …lənt; genial → ɡeni̯aːl not ɡə…). kaikki-gated, so native schwa is untouched.
+    "ə": new Set(["ɛ", "e"]),
 };
 
 /** Each nucleus of an IPA string as {vowel, stressed}: a VOWEL char not followed by a non-syllabic glide ̯; a

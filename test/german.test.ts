@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 33 — loanword full unstressed vowel (ə → ɛ/e), native schwa protected", () => {
+        expect(phonemizeWord("Talent")).toBe("talˈɛnt"); // loanword -ent → ɛ (was ə)
+        expect(phonemizeWord("Dokument")).toBe("dɔkumˈɛnt");
+        expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: native weak-schwa stays ə
+        expect(phonemizeWord("gemacht")).toBe("ɡəmˈaxt"); // control: native ge- prefix stays ə
+    });
+
     test("Run 32 — word-final French -eur → øːɐ̯ (not the ɔʏ̯ diphthong)", () => {
         expect(phonemizeWord("Friseur")).toBe("fʁizˈøːɐ̯"); // -eur loan suffix → øːɐ̯
         expect(phonemizeWord("Amateur")).toBe("amatˈøːɐ̯");
@@ -94,7 +101,7 @@ describe("german canonical IPA", () => {
 
     test("Run 27 — unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)", () => {
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // -ion → i̯oːn
-        expect(phonemizeWord("genial")).toBe("ɡəni̯ˈaːl"); // -ial → i̯aːl
+        expect(phonemizeWord("genial")).toBe("ɡeni̯ˈaːl"); // -ial → i̯aːl
         expect(phonemizeWord("Material")).toBe("maːteːʁi̯ˈaːl");
         expect(phonemizeWord("Liberia")).toBe("libˈeːʁia"); // control: word-final -iV# stays syllabic
     });
@@ -202,7 +209,7 @@ describe("german canonical IPA", () => {
 
     test("Run 8 — no stressed schwa (weak-schwa mis-fire on a stressed root → ɛ, lengthened where flagged)", () => {
         expect(phonemizeWord("gesetz")).toBe("ɡəzˈɛt͡s"); // setz is the stressed root, not a schwa ending
-        expect(phonemizeWord("generell")).toBe("ɡənəʁˈɛl");
+        expect(phonemizeWord("generell")).toBe("ɡenəʁˈɛl");
         expect(phonemizeWord("Problem")).toBe("pʁoblˈeːm"); // ɛ→eː (length 1L) + unstressed ɔ→o (quality lexicon)
         expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: genuine unstressed -en schwa unaffected
     });
@@ -224,7 +231,7 @@ describe("german canonical IPA", () => {
         expect(phonemize("21", "de")).toBe("ˈaɪ̯nʊntt͡svant͡sɪç"); // einundzwanzig
         expect(phonemize("100", "de")).toBe("ˈaɪ̯nhʊndɐt"); // einhundert
         expect(phonemize("Ich wohne in Berlin.", "de")).toBe(
-            "ɪç vˈoːnə ɪn bəɐ̯lˈiːn .",
+            "ɪç vˈoːnə ɪn bɛɐ̯lˈiːn .",
         );
     });
 });
