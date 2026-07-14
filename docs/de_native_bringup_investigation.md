@@ -407,3 +407,12 @@ parens are just notation. The eval fold (BACKBONE) didn't strip them, so these r
 [/[()]/→""] (referee-side only — our output has no parens). CONFIG-only, no engine change. kaikki 77.2→77.8%,
 wikipron flat (the human referee doesn't use parens). Floor 0.76→0.77. This is the paren analogue of the syllabic-n
 notation gap; the remaining ən→n / n→m (bare syllabic n̩/m̩, mark lost in the extract) is the same cosmetic class.
+
+## Run 36 — particle-verb seam splits (fest·stellen → st→ʃt) [✅-push 1/N]
+The biggest st→ʃt sub-class: particle-verbs (feststellen, klarstellen, bereitstellen, fertigstellen, sicherstellen,
+feststehen). All the parts are ALREADY constituents (fest/klar/stellen/stehen k-flagged), so splitCompound(whole)
+finds fest·stellen — but the Run 15 whole-verb guard (isWord+…en → don't split, protects schreiben→schreib·en)
+blocked the retry. Added a narrow OVERRIDE: allow the split when a non-first part is st/sp/sch-initial (the seam that
+must reset element-initial). schreiben has no such seam → still stays whole; Klarinette can't mis-split (inette isn't
+a constituent — the constituent gate is why this is safe where a prefixStressed "klar" would break klarinette).
+kaikki 77.8→77.9%, wikipron 76.3→76.4% (small in-sample, but the whole class is now correct). Full suite 240 green.

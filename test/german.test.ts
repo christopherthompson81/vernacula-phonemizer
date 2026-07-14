@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 36 — particle-verb seam splits (fest·stellen → st → ʃt)", () => {
+        expect(phonemizeWord("feststellen")).toBe("fˈɛstʃtɛlən"); // fest·stellen: seam st → ʃt
+        expect(phonemizeWord("klarstellen")).toBe("klˈaːɐ̯ʃtɛlən");
+        expect(phonemizeWord("schreiben")).toBe("ʃʁˈaɪ̯bən"); // control: simplex verb stays whole (no seam)
+        expect(phonemizeWord("Klarinette")).toBe("klaʁinˈɛtə"); // control: klar+inette NOT split (inette not a constituent)
+    });
+
     test("Run 34 — doubled voiced obstruent collapses before devoicing (Krabbe → kʁabə)", () => {
         expect(phonemizeWord("Krabbe")).toBe("kʁˈabə"); // bb → b (was wrongly kʁapbə)
         expect(phonemizeWord("Widder")).toBe("vˈɪdɐ"); // dd → d
