@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 39 — \"mit\" prefix needs a real-word stem (mittel not mit·tel)", () => {
+        expect(phonemizeWord("mittelmäßig")).toBe("mˈɪtəlmɛsɪç"); // mittel·mäßig: tt collapses (was mit·telmäßig → ɪttəl)
+        expect(phonemizeWord("mitteilen")).toBe("mˈɪttaɪ̯lən"); // control: real mit·teilen (teilen is a word)
+    });
+
     test("Run 38 — negation un- before a prefix blocks the ng→ŋ merge (ungefähr)", () => {
         expect(phonemizeWord("ungefähr")).toBe("ˈʊnɡəfɛːɐ̯"); // un·ge → nɡ (not ŋ), un → ʊn
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // control: un+ion NOT split (ion after un isn't a prefix)

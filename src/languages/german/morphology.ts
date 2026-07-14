@@ -154,13 +154,14 @@ export function decompose(word: string): Decomp {
     }
     let sepPrefix = "";
     for (const p of PREFIX_STRESSED) {
-        if (
-            rest.startsWith(p) &&
-            rest.length - p.length >= 4 &&
-            isStemish(rest.slice(p.length))
-        ) {
+        if (!rest.startsWith(p) || rest.length - p.length < 4) continue;
+        const r = rest.slice(p.length);
+        // "mit" needs a REAL-word stem (mit·teilen ✓) — isStemish is too loose and mis-splits mittel/mittwoch/
+        // mitternacht (mit·telmäßig etc.), tearing the ⟨tt⟩ so it isn't collapsed (mittelmäßig → mˈɪttəl…).
+        const ok = p === "mit" ? isWord(r) || splitCompound(r) !== null : isStemish(r);
+        if (ok) {
             sepPrefix = p;
-            rest = rest.slice(p.length);
+            rest = r;
             break;
         }
     }
