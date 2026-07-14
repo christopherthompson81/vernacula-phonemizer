@@ -50,7 +50,7 @@ function stressedLong(w: string, i: number): boolean {
 /** Scan a lowercased Swedish word into IPA segments (no stress mark). `stressOrd` (0-based nucleus index) is the
  *  syllable that carries the complementary-length contrast — its vowel is long/short by the coda rule; every
  *  other (unstressed) vowel is short. Defaults to the first syllable (the native rule). */
-export function toSegments(word: string, stressOrd = 0): Seg[] {
+export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
     const w = word.toLowerCase();
     const n = w.length;
     const segs: Seg[] = [];
@@ -84,7 +84,8 @@ export function toSegments(word: string, stressOrd = 0): Seg[] {
             const long = stressed && stressedLong(w, i);
             const beforeR = nx === "r";
             let ph: string;
-            if (long) ph = (beforeR && LBR[c]) || LONG[c] || c;
+            if (long && oLong && c === "o") ph = "oː"; // lexical: stressed ⟨o⟩ is [oː], not the default [uː]
+            else if (long) ph = (beforeR && LBR[c]) || LONG[c] || c;
             else ph = (beforeR && SBR[c]) || SHORT[c] || c;
             push(ph, true);
             vowelOrd++;

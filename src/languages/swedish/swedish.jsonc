@@ -16,7 +16,7 @@
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {
-        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) OR short-V + long-C (kött→ɕœtː). Nine long/short vowel pairs; o long is mostly uː but lexically oː (son) — a Phase-1 residual.",
+        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) OR short-V + long-C (kött→ɕœtː). Nine long/short vowel pairs; long ⟨o⟩ defaults to uː with a per-word [oː] override from the NST lexicon (telefon, kol) — the o/u split Swedish spelling underdetermines (Phase 3).",
         "sjeTje": "sj/skj/stj/sch, and sk before a front vowel → the sje-sound ɧ; tj/kj, and k before a front vowel → the tje-sound ɕ; g before a front vowel → j.",
         "retroflex": "r + dental → retroflex, absorbing the r: rt→ʈ rd→ɖ rn→ɳ rs→ʂ rl→ɭ (Central Standard). The broad referee is inconsistent here — folded in the eval.",
         "silentDigraphs": "word-initial hj/lj/dj/gj → j; -tion → ɧuːn; final -rg/-lg soften g → j (berg→bɛrj).",

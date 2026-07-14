@@ -113,3 +113,33 @@ Three finder agents (g2p correctness, lexicon-build, Swedish phonology) surfaced
 Referee 52.0→**52.3%**; unit test 12/12 (added a segmental-edge-cases block). Deferred (low severity): short
 /ɛ/→[æ] before r (speaker-variable; wikipron uses ɛ, and the eval folds æ→ɛ), negative-number sign word, and
 the au-collapse diphthong sub-class.
+
+## Run 6 — 2026-07-14 — Phase 3: lexical o-quality; compound decomposition evaluated & deferred
+
+**Data-first triage:** re-ran the referee residual (52.6%). It is now DIFFUSE — every top bucket is count 2–3,
+dominated by referee noise (truncated `inte→ɪnt`, casual `fan→faan`, `de` variants) and OOV/rare-word stress.
+The score is near its ceiling for this noisy broad referee; further gains are correctness-for-synthesis, not
+referee points. So Phase 3 targets canonical correctness, judged per-feature, not the headline number.
+
+### 3a — Lexical o-quality (oː vs uː) — DONE
+Swedish spelling underdetermines long ⟨o⟩: /uː/ (bok, son, sol) vs /oː/ (telefon, kol, adobe). NST distinguishes
+them (`bu:k` vs `fo:n`). Extended `build-sv-lexicon.mts` to emit a per-word `o` flag when the STRESSED nucleus is
+orthographic ⟨o⟩ that NST realises as long `o:` (605 corpus words). The engine (`toSegments(word, ord, oLong)`)
+emits [oː] there instead of the default [uː]. telefon→tɛlɛfˈoːn, kol→koːl, adobe→adˈoːbɛ; bok/son/sol keep [uː].
+Referee 52.3→52.6%. Lexicon format: `word\taccent[\tord][\to]` (numeric token = ordinal, "o" = oː flag).
+
+### 3b — Compound decomposition — EVALUATED, DEFERRED (measured precision too low)
+Prototyped a lexicon-driven greedy splitter (longest-first, parts ≥3 chars, from the 42k lexicon wordlist).
+Split 673/5286 referee words; many correct (affärs+liv, afton+falk, akvarell+målare). But precision is not
+ship-safe:
+- **Linking-⟨s⟩ (fogemorfem) false matches:** `aktningsvärd → aktning+svärd` (the "sword" trap), i.e. the
+  linking -s- is misparsed as the onset of a real word.
+- **False short / function-word parts:** `allemansrätt → alle+mans+rätt`, and soft-trigger traps like
+  `påsken → på+sken` (would mis-soften sk→ɧ giving *poɧen* for /ˈpoːskɛn/).
+These produce WRONG pronunciations, so a blind splitter is net-negative. A safe splitter needs fogemorfem-aware
+junctures + a frequency-weighted, function-word-excluded free-morpheme list — a larger effort. Notably
+espeak-ng-portable's own sv convergence doc also leaves "NST compound-juncture conventions" as a residual, so
+this is a genuinely hard sub-problem, deferred rather than shipped with regressions.
+
+**Still deferred:** compound decomposition (above), OOV loanword stress (words outside the 50k corpus → first
+syllable), short /ɛ/→[æ] before r (speaker-variable; wikipron uses ɛ).

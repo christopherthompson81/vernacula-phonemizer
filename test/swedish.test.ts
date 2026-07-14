@@ -65,8 +65,16 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("station")).toBe("staɧˈuːn"); // -tion stressed
         expect(phonemizeWord("student")).toBe("stɵdˈɛnt");
         expect(phonemizeWord("universitet")).toBe("ɵnɪvɛʂɪtˈeːt"); // stress on the 5th nucleus
-        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈuːn"); // NOTE: o=uː is the deferred lexical-o (target [oː])
         expect(phonemizeWord("europa")).toBe("ɛɵrˈuːpa"); // diphthong ⟨eu⟩ counts 2 nuclei → stress lands past it
+    });
+
+    test("Phase 3 — lexical o-quality (NST): stressed ⟨o⟩ is [oː] or [uː]", () => {
+        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈoːn"); // lexical [oː] override
+        expect(phonemizeWord("kol")).toBe("koːl");
+        expect(phonemizeWord("adobe")).toBe("adˈoːbɛ");
+        expect(phonemizeWord("bok")).toBe("buːk"); // default [uː] kept
+        expect(phonemizeWord("son")).toBe("suːn");
+        expect(phonemizeWord("stor")).toBe("stuːr");
     });
 
     test("segmental edge cases (é, gn, x, ck geminate, ä-before-r)", () => {

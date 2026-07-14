@@ -17,6 +17,7 @@ const GRAVE = "̀"; // combining grave = the accent-2 mark, placed on the primar
 interface LexEntry {
     accent: string;
     ord?: number;
+    oLong?: boolean; // stressed ⟨o⟩ is long [oː], not the default [uː]
 }
 
 // Phase-2 lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
@@ -29,8 +30,14 @@ function lexicon(): Map<string, LexEntry> {
             import.meta.url,
             "accent-stress.tsv",
             (rest) => {
-                const [accent, ord] = rest.split("\t");
-                return { accent: accent!, ord: ord ? Number(ord) : undefined };
+                // tokens after accent: a number = stress ordinal, "o" = stressed-o-is-long flag
+                const [accent, ...tokens] = rest.split("\t");
+                const ordTok = tokens.find((t) => /^\d+$/.test(t));
+                return {
+                    accent: accent!,
+                    ord: ordTok ? Number(ordTok) : undefined,
+                    oLong: tokens.includes("o"),
+                };
             },
             { optional: true },
         );
@@ -53,12 +60,13 @@ export function phonemizeWord(word: string): string {
 
     const lex = lexicon().get(w);
     const rawOrd = lex?.ord ?? 0;
-    let segs = toSegments(w, rawOrd);
+    const oLong = lex?.oLong ?? false;
+    let segs = toSegments(w, rawOrd, oLong);
     const nuclei = segs.filter((s) => s.vowel).length;
     if (nuclei === 0) return segs.map((s) => s.ph).join("");
 
     const ord = Math.min(rawOrd, nuclei - 1);
-    if (ord !== rawOrd) segs = toSegments(w, ord); // clamp: length must land on a real nucleus
+    if (ord !== rawOrd) segs = toSegments(w, ord, oLong); // clamp: length must land on a real nucleus
     const accent = lex?.accent ?? oovAccent(nuclei, ord);
 
     let out = "",
