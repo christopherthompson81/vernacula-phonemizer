@@ -119,8 +119,13 @@ export interface Decomp {
 
 /** Decompose a word into ordered morphemes with a stress hint. Only splits when confident (known affixes,
  *  content stems); otherwise returns the whole word as a single stem. */
+const ST_KEEP = new Set(MANIFEST.morphology.stKeepWords);
+
 export function decompose(word: string): Decomp {
     const w = word.toLowerCase();
+    // Monomorphemic ge-/er-+st words (gestern, erst): keep whole so no false ge-/er- prefix boundary is created
+    // (the g2p also skips its st-sharpen for these). Otherwise gestern → ge·stern → ʃt.
+    if (ST_KEEP.has(w)) return { parts: [w], kinds: ["stem"], stressPart: 0 };
     const prefixes: string[] = [];
     let rest = w;
     // Strip unstressed then a stressed prefix (at most a couple), keeping ≥4 letters of stem behind.

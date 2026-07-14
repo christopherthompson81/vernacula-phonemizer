@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 37 — monomorphemic ge-/er-+st keeps alveolar st (gestern, erst)", () => {
+        expect(phonemizeWord("gestern")).toBe("ɡˈɛstɐn"); // NOT ge·stern → ʃt
+        expect(phonemizeWord("erst")).toBe("eːɐ̯st");
+        expect(phonemizeWord("Gestein")).toBe("ɡəʃtˈaɪ̯n"); // control: real ge- prefix → ʃt
+        expect(phonemizeWord("erstaunen")).toBe("ɛɐ̯ʃtˈaʊ̯nən"); // control: real er- prefix → ʃt
+    });
+
     test("Run 36 — particle-verb seam splits (fest·stellen → st → ʃt)", () => {
         expect(phonemizeWord("feststellen")).toBe("fˈɛstʃtɛlən"); // fest·stellen: seam st → ʃt
         expect(phonemizeWord("klarstellen")).toBe("klˈaːɐ̯ʃtɛlən");

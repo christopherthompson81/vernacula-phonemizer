@@ -343,6 +343,15 @@
             "st": "st",
             "e": "ə",
         },
+        // Monomorphemic words where a leading ⟨ge⟩/⟨er⟩ is NOT a prefix, so the ⟨st⟩ stays alveolar st (gestern →
+        // ɡɛstɐn, NOT the ge·stern → ʃt the sp/st-after-prefix rule would give). The trap: the "stem" is often a real
+        // word (stern=star), so no structural test distinguishes these from real ge-/er- prefixing (ge·stein → ʃt).
+        // Consulted by BOTH decompose (keep whole, don't strip ge-/er-) and the g2p (skip the st-sharpen branch).
+        "stKeepWords": [
+            "gestern", "gesterns", "geste", "gesten", "gestik", "gestisch", "gestapo",
+            "erst", "erste", "ersten", "erster", "erstes", "erstem", "erstere", "ersteres",
+            "erstens", "erstmal", "erstmals", "erstmalig", "erstmalige",
+        ],
     },
 
     // Cardinal number words. Units precede tens, compounded (einundzwanzig); composition logic is in numbers.ts.

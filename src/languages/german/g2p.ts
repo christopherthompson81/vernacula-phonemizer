@@ -35,6 +35,8 @@ function consRun(w: string, j: number): number {
 // Short-vowel function words + long-⟨ch⟩ stems (exception lists from german.jsonc).
 const SHORT_MONO = new Set(MANIFEST.shortMonosyllables);
 const LONG_CH = MANIFEST.longCh;
+// Words where a leading ⟨ge⟩/⟨er⟩ is NOT a prefix → ⟨st⟩ stays alveolar (gestern, erst); see german.jsonc.
+const ST_KEEP = new Set(MANIFEST.morphology.stKeepWords);
 
 /** Is the vowel at index i long? V+h, doubled vowel and ie → long; V+double-C / ck / tz / ≥2 C → short;
  *  V+single-C(+vowel|end) → long (open syllable). */
@@ -136,7 +138,9 @@ export function toSegments(word: string): Seg[] {
         if (
             c === "s" &&
             (nx === "p" || nx === "t") &&
-            (initial || /^(be|ge|ver|zer|ent|emp|er)$/.test(w.slice(0, i)))
+            (initial ||
+                (!ST_KEEP.has(w) &&
+                    /^(be|ge|ver|zer|ent|emp|er)$/.test(w.slice(0, i))))
         ) {
             push("ʃ", i);
             i++;
