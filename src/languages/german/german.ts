@@ -37,6 +37,15 @@ function lengthDict(): Map<string, string> {
         });
     return LENGTH;
 }
+// Unstressed e→ə reductions (word → nucleus ordinals to schwa) — lexical (native ə vs loanword ɛ), from kaikki.
+let REDUCTION: Map<string, string> | undefined;
+function reductionDict(): Map<string, string> {
+    if (REDUCTION === undefined)
+        REDUCTION = loadTsvMap(import.meta.url, "reduction.tsv", undefined, {
+            optional: true,
+        });
+    return REDUCTION;
+}
 const LONG_OF = MANIFEST.vowels.longOf;
 const SHORT_OF = MANIFEST.vowels.shortOf;
 const VOWEL_CHARS = MANIFEST.vowelChars;
@@ -78,6 +87,25 @@ function applyLength(ipa: string, spec: string | undefined): string {
             out += long ? ch + "ː" : ch;
             i += long ? 2 : 1;
         }
+        ord++;
+    }
+    return out;
+}
+
+/** Reduce the flagged unstressed nuclei to ə ("1,3" = nuclei 1 and 3). German unstressed ⟨e⟩ → [ə] is LEXICAL
+ *  (native ə vs loanword ɛ), so the positions come from a kaikki-derived lexicon, not a rule. Never touches the
+ *  stressed nucleus (guarded by the preceding ˈ). Runs after applyLength (schwa has no length axis). */
+function applyReduction(ipa: string, spec: string | undefined): string {
+    if (!spec) return ipa;
+    const red = new Set(spec.split(",").map(Number));
+    let out = "", ord = 0, i = 0;
+    while (i < ipa.length) {
+        const ch = ipa[i]!;
+        if (!VOWEL_CHARS.includes(ch)) { out += ch; i++; continue; }
+        if ((ipa[i + 1] ?? "") === "̯") { out += ch; i++; continue; } // offglide, not a nucleus
+        const long = (ipa[i + 1] ?? "") === "ː";
+        if (red.has(ord) && !out.endsWith("ˈ")) { out += "ə"; i += long ? 2 : 1; } // reduce (drop length); never the stressed vowel
+        else { out += long ? ch + "ː" : ch; i += long ? 2 : 1; }
         ord++;
     }
     return out;
@@ -138,7 +166,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return applyLength(placeStress(full, ord), lengthDict().get(w));
+        return applyReduction(applyLength(placeStress(full, ord), lengthDict().get(w)), reductionDict().get(w));
     }
 
     const segs = toSegments(w);
@@ -163,7 +191,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return applyLength(out, lengthDict().get(w));
+    return applyReduction(applyLength(out, lengthDict().get(w)), reductionDict().get(w));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
