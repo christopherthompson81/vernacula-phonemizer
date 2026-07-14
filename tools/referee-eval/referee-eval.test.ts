@@ -20,17 +20,17 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     de: 0.46, // kaikki deu — measured 49.8% (wikipron deu 2nd: 52.2%); DEFLATED by kaikki's proper-noun/loan bulk
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
-    ff: 0.62, // epitran ful-Latn — measured 69.5%; residual = epitran nj→ɲ vs our prenasal + salt
+    ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
     fr: 0.62, // wikipron fra — measured 66.5% (adjudicated gold 2nd: 85.6%); primary DEFLATED by wikipron noise
     ha: 0.85, // wikipron hau (human) — measured 90.3% (epitran hau 2nd: 88.4%)
-    hi: 0.72, // wikipron hin — measured 78.7%; residual = schwa-deletion edge cases + ref epenthesis
+    hi: 0.72, // wikipron hin — measured 77.7%; residual = schwa-deletion edge cases + ref epenthesis + genuine ख़/ख (x/kʰ) noise
     ja: 0.52, // wikipron jpn_hira narrow — measured 57.9%; residual = allophonic palatalization + devoicing detail
     kk: 0.83, // epitran kaz-Cyrl — measured 86.2%; residual is largely epitran's own ө/ү merger + palatalization
     ko: 0.52, // wikipron kor_hang narrow — measured 58.5%; residual = ㄹ (ɭ~ɾ) + intervocalic voicing detail
     pt: 0.74, // wikipron por — measured 78.0% (adjudicated gold 2nd: 99.4%); residual is open/close vowels
     ru: 0.90, // kaikki rus — measured 94.8% (adjudicated gold 2nd: 97.7%)
     si: 0.90, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
-    ta: 0.60, // wikipron tam — measured 65.8%; residual = ற geminate (ʈr~rː) + diphthong notation
+    ta: 0.58, // wikipron tam — measured 63.0% (r→ɾ folded only word-finally, to keep the ற/ர contrast); residual = ற geminate + diphthong notation
     th: 0.76, // wikipron tha — measured 81.9%; residual is LEXICAL (Sanskrit/Pali readings), not segmental
     tr: 0.70, // wikipron tur — measured 76.2% (epitran tur 2nd: 79.8%); residual = loan long-vowels + ref noise
     vi: 0.65, // wikipron vie_hanoi narrow — measured 71.0% (epitran vie 2nd: 51.3%); residual = ə/ɛ nucleus + coda

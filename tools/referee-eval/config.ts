@@ -89,6 +89,7 @@ export const CONFIG: Record<string, RefLang> = {
       { file: "de.kaikki-deu.tsv", source: "kaikki deu (Wiktionary, CC-BY-SA)", role: "primary" },
       { file: "de.wikipron-deu.tsv", source: "wikipron deu_latn broad (human)", role: "secondary" },
     ],
+    segmentJoin: true, // kaikki primary has no spaces (harmless); the wikipron secondary is space-separated
     preFolds: [
       [/n̩/gu, "ən", "syllabic n̩ (referee) → our ən; expand before ̩ is stripped"],
       [/l̩/gu, "əl", "syllabic l̩ → əl"],
@@ -140,10 +141,12 @@ export const CONFIG: Record<string, RefLang> = {
     // notation divergences (affricate/implosive spelling, prenasal superscripts, gemination doubling).
     referees: [{ file: "ff.epitran-ful-Latn.tsv", source: "epitran ful-Latn (programmatic; via espeak-ng-portable ff_gold)", role: "primary" }],
     secondaryGap: "no independent second Fula source: wikipron ful/fuf are empty, so the only G2P is the primary.",
+    preFolds: [
+      [/ñ/gu, "ɲ", "epitran ⟨ñ⟩ → our ɲ; matches the NFD-decomposed n+◌̃ and runs before the backbone strips the tilde"],
+    ],
     folds: [
       [/c/gu, "tʃ", "epitran writes ⟨c⟩ where we render the affricate t͡ʃ"],
       [/ɟ/gu, "dʒ", "epitran ⟨ɟ⟩ vs our d͡ʒ"],
-      [/ñ/gu, "ɲ", "epitran ⟨ñ⟩ vs our ɲ"],
       [/ʔʲ/gu, "ʄ", "epitran ʔʲ vs our implosive ʄ"],
       [/nj/gu, "ɲ", "epitran keeps orthographic nj; we render the prenasal palatal"],
       [/ᵐ/gu, "m", "prenasal superscript → plain nasal"],
@@ -176,7 +179,7 @@ export const CONFIG: Record<string, RefLang> = {
       [/ᵐ/gu, "m", "prenasal superscript → plain nasal"],
       [/ⁿ/gu, "n", "prenasal superscript → plain nasal"],
       [/ᵑ/gu, "ŋ", "prenasal superscript → plain nasal"],
-      [/ʔ/gu, "", "epenthetic glottal onset on vowel-initial words — allophonic; referee marks it"],
+      [/^ʔ/gu, "", "epenthetic glottal onset on vowel-INITIAL words — allophonic; anchored so medial phonemic /ʔ/ (the ⟨'⟩ letter) still counts"],
     ],
   },
   hi: {
@@ -187,7 +190,8 @@ export const CONFIG: Record<string, RefLang> = {
     folds: [
       [/ɑ/gu, "a", "referee writes आ as ɑ(ː); we use a(ː) — same phoneme, notation"],
       [/ᵊ/gu, "", "referee's epenthetic final schwa (pətɾᵊ) — we don't emit it"],
-      [/x/gu, "kʰ", "ख़ nuqta: we keep x; the referee (no-nuqta) writes kʰ"],
+      // NOTE: no x→kʰ fold — ख़/ख is a real phonemic (nuqta) contrast our engine keeps and the referee marks
+      // inconsistently; folding it would mask the contrast (~1pp of residual is genuine referee noise here).
     ],
   },
   ja: {
@@ -196,7 +200,7 @@ export const CONFIG: Record<string, RefLang> = {
     segmentJoin: true,
     folds: [
       [/ꜜ/gu, "", "pitch-accent downstep marker — the referee is toneless"],
-      [/ä/gu, "a", "our central ä vs referee a̠ (both realise /a/)"],
+      // (ä vs a̠ needs no fold: NFD + the backbone strip both to plain a before folds run.)
       [/ᵝ/gu, "", "our compressed-u superscript (ɯᵝ) vs referee ɯ"],
       [/ɨ/gu, "ɯ", "referee ɨ for a high/devoiced う vs our ɯ"],
     ],
@@ -277,7 +281,7 @@ export const CONFIG: Record<string, RefLang> = {
     folds: [
       [/ɑ/gu, "a", "referee ஆ as ɑ(ː) vs our a(ː)"],
       [/ᶦ/gu, "i", "our superscript diphthong offglide (maᶦ) vs referee ɐ ɪ̯"],
-      [/r/gu, "ɾ", "final/geminate ⟨ற⟩ r~ɾ tap — referee inconsistent"],
+      [/r$/gu, "ɾ", "word-final ⟨ர⟩ tap: our r vs referee ɾ — anchored so the medial ற/ர contrast still counts"],
     ],
   },
   th: {
