@@ -57,19 +57,9 @@ export function phonemizeWord(word: string): string {
     const stressN = nucleiIdx.length >= 2 ? nucleiIdx.length - 2 : 0;
     const stress = nucleiIdx[stressN]!;
     applyLength(segs, stress, stressN === nucleiIdx.length - 1);
-    // Unstressed ⟨i⟩ centralizes to ɨ (Northern merger: lladin → ɬadɨn, iddi → iðɨ); stressed i keeps its quality.
-    for (const idx of nucleiIdx)
-        if (idx !== stress && segs[idx]!.ph === "i") segs[idx]!.ph = "ɨ";
-    // A stressed short ⟨i⟩ also centralizes in a CLOSED syllable (coda word-final or pre-consonantal) or a bare
-    // clitic (i, i'r → ɨr): dim → dɨm. An open stressed i (dinas) or a lengthened one (mis → miːs) stays front.
-    if (segs[stress]!.ph === "i") {
-        const nx = segs[stress + 1];
-        const closed =
-            !nx ||
-            (!nx.nucleus &&
-                (stress + 2 >= segs.length || !segs[stress + 2]!.nucleus));
-        if (closed) segs[stress]!.ph = "ɨ";
-    }
+    // NB: the letter ⟨i⟩ stays FRONT (i/ɪ/iː) everywhere — Northern Welsh centralizes only ⟨u⟩ and clear ⟨y⟩ to
+    // ɨ, keeping the i/ɨ contrast (melin → mɛlɪn, gwin → ɡwiːn). Run 1's i→ɨ rules matched an espeak ARTEFACT the
+    // independent NW referee contradicts, and were removed in Run 3. The residual is now purely n/r/l LENGTH.
     // Secondary stress on the first syllable when the primary is the 3rd nucleus or later (cymdeithasol →
     // ˌkəmdəᶦˈθasɔl).
     const secondary = stressN >= 2 ? nucleiIdx[0]! : -1;

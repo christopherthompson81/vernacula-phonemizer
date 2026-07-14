@@ -31,14 +31,14 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("cymru")).toBe("kˈəmrɨ"); // 1st y (non-final) → ə, u → ɨ
         expect(phonemizeWord("ysgol")).toBe("ˈəsɡɔl"); // obscure y → ə
         expect(phonemizeWord("blwyddyn")).toBe("blˈuᶤðɨn"); // final y → clear ɨ
-        expect(phonemizeWord("lladin")).toBe("ɬˈadɨn"); // unstressed i → ɨ
-        expect(phonemizeWord("dim")).toBe("dˈɨm"); // stressed short i in a closed syllable → ɨ
+        expect(phonemizeWord("lladin")).toBe("ɬˈadin"); // unstressed i stays FRONT (referee-backed; N Welsh centralizes only u/y)
+        expect(phonemizeWord("dim")).toBe("dˈim"); // stressed short i stays front (referee: dɪm, not the oracle ɨ)
         expect(phonemizeWord("dinas")).toBe("dˈinas"); // stressed short i in an OPEN syllable stays front
     });
 
     test("penultimate stress + secondary stress on a long word's first syllable", () => {
         expect(phonemizeWord("cymru")).toBe("kˈəmrɨ"); // penult
-        expect(phonemizeWord("prifysgol")).toBe("prɨvˈəsɡɔl"); // penult (3 syllables, no secondary)
+        expect(phonemizeWord("prifysgol")).toBe("privˈəsɡɔl"); // penult (3 syllables, no secondary)
         expect(phonemizeWord("gorffennaf")).toBe("ɡɔrfˈɛnnav"); // penult
         expect(phonemizeWord("llywodraeth")).toBe("ɬɨᵘˈɔdraᶤθ"); // penult
     });
@@ -59,7 +59,7 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("nghymru")).toBe("ŋ̥ˈəmrɨ"); // ngh → ŋ̥
         expect(phonemizeWord("enghraifft")).toBe("ˈɛŋhraᶦft"); // MEDIAL ngh is ŋ+h, not the mutation
         expect(phonemizeWord("dechrau")).toBe("dˈɛχraᶤ"); // onset-cluster penult tensing (→ deχraᶤ) stays DEFERRED
-        expect(phonemizeWord("i")).toBe("ˈɨ"); // irregular clitic: i → ɨ (short), not the regular iː
+        expect(phonemizeWord("i")).toBe("ˈiː"); // the word ⟨i⟩ → front iː (referee-backed; the Run-2 oracle ɨ was an artifact)
         expect(phonemizeWord("bod")).toBe("bˈɔd"); // irregular: short ɔ, not the regular oː
         expect(phonemizeWord("heb")).toBe("hˈɛb"); // irregular: lax ɛ
         expect(phonemizeWord("un")).toBe("ˈɨːn"); // irregular: long ɨː before n
