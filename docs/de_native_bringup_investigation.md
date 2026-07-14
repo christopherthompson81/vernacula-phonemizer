@@ -305,3 +305,12 @@ wikipron 74.0→74.1%. Modest because many -ge loans (Marge, universal) are BLOC
 skew: our coda-r → ɐ̯ (0 consonants) vs kaikki ʁ (1 consonant) skews the alignment (the 16993 "skipped" words). That
 rhotic-count skew is the largest remaining lever for the consonant lexicon, but aligning it means making applyConsonant
 count ɐ̯ as a consonant too (ordinal-alignment refactor across the whole lexicon) — deferred as high-risk/low-marginal.
+
+## Run 24 — vocalized coda-r ɐ̯ holds a consonant slot (unblocks ~7k r-words)
+The consonant lexicon skipped a word when our consonant count ≠ kaikki's. Our coda-r vocalizes to ɐ̯ (ɐ is a vowel →
+counted 0 consonants) while kaikki keeps ʁ (1) — skewing EVERY r-word out (≈half of the 16993 skipped; measured 8148
+rhotic-alignable). Fix: count the offglide ɐ̯ as ONE consonant slot in BOTH the build's consonants() tokenizer and
+applyConsonant (identical logic, index+lookahead). ɐ̯ is never itself corrected (no PAIR keys/targets it); it just
+holds a slot so the OTHER consonants align by ordinal. Consonant lexicon 2862→3320 entries, skew 16993→9897. kaikki
+74.6→75.2%, wikipron 74.1→74.6% (biggest jump of the session). Note: mid-word -er→ɐ (bare nucleus, universal→unifɐzaːl
+vs kaikki univɛʁzaːl) is a DIFFERENT skew (a vowel, not the offglide) — still deferred. Floor 0.73→0.74.

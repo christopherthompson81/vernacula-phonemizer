@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 24 — vocalized coda-r ɐ̯ holds a consonant slot (unblocks the lexicon)", () => {
+        expect(phonemizeWord("Marge")).toBe("mˈaɐ̯ʒə"); // ʒ correction now lands (was skew-blocked by the r)
+        expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native word, corrections unchanged
+    });
+
     test("Run 23 — French -age/-ge loans: g → ʒ", () => {
         expect(phonemizeWord("Garage")).toBe("ɡaʁˈaːʒə"); // -age loan → ʒ
         expect(phonemizeWord("Etage")).toBe("etˈaːʒə");
