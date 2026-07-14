@@ -12,6 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { phonemizeArabic as ar } from "../../src/languages/arabic/arabic.ts";
+import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
 import { phonemizeWord as ff } from "../../src/languages/fula/fula.ts";
 import { phonemizeWord as ha } from "../../src/languages/hausa/hausa.ts";
@@ -44,7 +45,7 @@ const en = (w: string): string => enP.text(w);
 const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 const PHON: Record<string, (w: string) => string | Promise<string>> =
-  { ar, cmn, cs, de, en, es, ff, fr, ha, hi, ja, kk, ko, pt, ru, si, sv, ta, th, tr, vi, zu };
+  { ar, ca, cmn, cs, de, en, es, ff, fr, ha, hi, ja, kk, ko, pt, ru, si, sv, ta, th, tr, vi, zu };
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */

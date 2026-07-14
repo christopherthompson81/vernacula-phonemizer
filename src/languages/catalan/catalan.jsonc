@@ -1,0 +1,82 @@
+// Native canonical-IPA data manifest for Catalan (ca) — General Eastern/Central Catalan (Barcelona standard),
+// espeak-independent. This file IS the hand-authored language DATA (vowel classes + accent map + reduction,
+// consonant/digraph rules, nasal + spirantization sets, function words, clause punctuation, number words). The
+// ALGORITHMS that read it stay in code:
+//   g2p.ts     — left-to-right scan: digraphs (ny/ll/l·l/tx/tj/tg/ig/ix/qu/gu), context consonants (c/g/x/r/s),
+//                vowel runs (nucleus/glide), and each vowel's stressed + reduced realisation
+//   catalan.ts — rule stress (2R + written accent), UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u), spirantization,
+//                palatal nasal assimilation, final devoicing, tokenizer + function-word handling
+//   numbers.ts — the cardinal compositor
+//
+// Central Catalan signature = vowel reduction. Stressed mid-vowel height (ɛ/e, ɔ/o) is LEXICAL (dona/dóna) and
+// left as the documented ceiling. See docs/ca_bringup_investigation.md.
+{
+    "language": "ca",
+    "name": "Catalan (General Eastern / Central)",
+    "script": "Latin",
+    "provenance": "Authored from Catalan orthography + Central-Catalan phonology (Wheeler, The Phonology of Catalan). Rule engine, no lexicon; the wikipron cat referee is a fallible cross-check. Stressed open/close mids default and are folded in the eval (lexical ceiling).",
+
+    "convention": {
+        "reduction": "unstressed a/e → ə, unstressed o → u (Central); i/u unchanged",
+        "midVowels": "stressed è/ò → open ɛ/ɔ, é/ó → close e/o; unaccented stressed e/o default open ɛ/ɔ (lexical)",
+        "rhotics": "trill r word-initial / after n·l·s / rr; tap ɾ elsewhere; final -r silent (cantar → kənta)",
+        "spirantization": "b d ɡ → β ð ɣ except utterance-initial, after a nasal, or d/ɡ after a lateral",
+        "betacism": "v → b (Central)",
+        "nasalAssim": "coda n → ɲ before a palatal (t͡ʃ d͡ʒ ʃ ʒ ʎ)",
+        "finalDevoicing": "b→p d→t ɡ→k z→s v→f d͡ʒ→t͡ʃ d͡z→t͡s word-finally",
+        "stress": "written accent wins; else penult if the word ends in a vowel, -vowel+s, or -en/-in; else final",
+    },
+
+    // Vowel realisation. `stressed` = IPA when the nucleus is stressed; `reduced` = IPA when UNSTRESSED (Central
+    // reduction). Accented vowels are always stressed, so their `reduced` is never used (kept = stressed).
+    "vowels": {
+        "a": { "stressed": "a", "reduced": "ə" },
+        "à": { "stressed": "a", "reduced": "a" },
+        "e": { "stressed": "ɛ", "reduced": "ə" },
+        "è": { "stressed": "ɛ", "reduced": "ɛ" },
+        "é": { "stressed": "e", "reduced": "e" },
+        "i": { "stressed": "i", "reduced": "i" },
+        "í": { "stressed": "i", "reduced": "i" },
+        "ï": { "stressed": "i", "reduced": "i" },
+        "o": { "stressed": "ɔ", "reduced": "u" },
+        "ò": { "stressed": "ɔ", "reduced": "ɔ" },
+        "ó": { "stressed": "o", "reduced": "o" },
+        "u": { "stressed": "u", "reduced": "u" },
+        "ú": { "stressed": "u", "reduced": "u" },
+        "ü": { "stressed": "u", "reduced": "u" },
+    },
+    // Vowels carrying a written accent → always the stressed nucleus.
+    "accentedVowels": "àèéíòóúï",
+    // Front vowels that soften c and g (→ s / ʒ).
+    "frontVowels": "eèéiíï",
+
+    // Nasal phonemes (a following nasal blocks spirantization); stop→fricative spirantization pairs.
+    "nasals": ["m", "n", "ɲ", "ŋ"],
+    "spirantize": { "b": "β", "d": "ð", "ɡ": "ɣ" },
+    // Word-final devoicing pairs.
+    "finalDevoice": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "v": "f", "d͡ʒ": "t͡ʃ", "d͡z": "t͡s", "ʒ": "ʃ" },
+    // Palatal phonemes that trigger coda-n → ɲ assimilation.
+    "palatals": ["t͡ʃ", "d͡ʒ", "ʃ", "ʒ", "ʎ"],
+
+    // Unstressed monosyllabic clitics — de-stressed in running text.
+    "functionWords": ["el", "els", "la", "les", "un", "una", "uns", "unes", "i", "o", "ni", "que", "de", "a",
+        "amb", "en", "per", "es", "et", "el", "em", "ens", "us", "li", "els", "les", "ho", "hi", "no", "que",
+        "del", "dels", "al", "als", "pel", "pels", "com", "si"],
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":",
+    },
+
+    // Cardinal number words (masculine). Composition logic in numbers.ts.
+    "numbers": {
+        "ones": ["zero", "un", "dos", "tres", "quatre", "cinc", "sis", "set", "vuit", "nou", "deu", "onze",
+            "dotze", "tretze", "catorze", "quinze", "setze", "disset", "divuit", "dinou"],
+        "tens": ["", "", "vint", "trenta", "quaranta", "cinquanta", "seixanta", "setanta", "vuitanta", "noranta"],
+        "hundreds": ["", "cent", "dos cents", "tres cents", "quatre cents", "cinc cents", "sis cents",
+            "set cents", "vuit cents", "nou cents"],
+        "thousand": "mil",
+        "million": { "sg": "un milió", "pl": "milions" },
+        "and": "i",
+        "decimalConnector": "coma",
+    },
+}

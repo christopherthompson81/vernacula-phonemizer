@@ -52,6 +52,31 @@ export const CONFIG: Record<string, RefLang> = {
       [/(.)\1+/gu, "$1", "gemination (shadda): collapse doubling — length already stripped by the backbone"],
     ],
   },
+  ca: {
+    // General Eastern/Central Catalan. The wikipron cat_narrow referee AGGREGATES dialects (multi-pron): it
+    // carries both reduced Central [ə]/[u] and unreduced Valencian/Balearic [a]/[e]/[o], and marks NO stress.
+    // We fold the lexical open/close mids (the ceiling), spirantization (ours honest), and dark-l.
+    referees: [{ file: "ca.wikipron-cat-narrow.tsv", source: "wikipron cat_latn narrow (human, multi-dialect)", role: "primary" }],
+    secondaryGap: "no independent second source wired; the referee mixes dialects and drops stress. A Central-only " +
+      "pron-lexicon (or epitran cat) would corroborate the reduction + open/close mids.",
+    segmentJoin: true,
+    folds: [
+      [/β/gu, "b", "spirantization β̞~b — ours marks it honestly; the referee varies"],
+      [/ð/gu, "d", "spirantization ð̞~d"],
+      [/ɣ/gu, "ɡ", "spirantization ɣ̞~ɡ"],
+      [/ɫ/gu, "l", "dark-l ɫ~l — ours velarized (Central), the referee writes plain l"],
+      // Neutralise the DIALECT reduction axis: the wikipron cat referee is an inconsistent MIX of reduced Central
+      // (ə/u) and unreduced Valencian/Balearic (a/e/o), with NO stress mark, so it cannot adjudicate vowel
+      // quality. Collapse {a,e,ɛ}→ə and {o,ɔ}→u so the eval measures the consonant/glide/palatal/rhotic system
+      // + i, not vowel quality (Central reduction + the lexical open/close mids, both the documented ceiling).
+      [/[ɛe]/gu, "ə", "unstressed a/e → ə (Central) vs referee a/e; folds the reduction axis + lexical ɛ/e"],
+      [/a/gu, "ə", "unstressed a → ə (Central) vs referee unreduced a"],
+      [/[ɔo]/gu, "u", "unstressed o → u (Central) vs referee o; + lexical ɔ/o"],
+      [/v/gu, "b", "betacism: Central merges v→b; the referee (multi-dialect) keeps v"],
+      [/dʒ/gu, "ʒ", "Catalan /dʒ~ʒ/ affrication is allophonic (metge dʒ ~ jo ʒ); tie already stripped, referee varies"],
+      [/[ɾr]$/gu, "", "final-r is a DIALECT axis: Central drops it (cantar→kənta), the referee (Valencian) keeps it"],
+    ],
+  },
   cmn: {
     // Syllable-level: the referee is epitran's toneless pinyin-syllable → IPA inventory (no word-level wikipron
     // cmn exists), and PHON[cmn] is the bare pinyin→IPA converter. Compares segment quality, not polyphone choice.

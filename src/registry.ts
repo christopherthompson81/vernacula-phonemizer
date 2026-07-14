@@ -17,6 +17,7 @@ import { createVietnamese } from "./languages/vietnamese/vietnamese.ts";
 import { createTamil } from "./languages/tamil/tamil.ts";
 import { createKorean } from "./languages/korean/korean.ts";
 import { createSwedish } from "./languages/swedish/swedish.ts";
+import { createCatalan } from "./languages/catalan/catalan.ts";
 import { createHausa } from "./languages/hausa/hausa.ts";
 import { createThai } from "./languages/thai/thai.ts";
 import { createFula } from "./languages/fula/fula.ts";
@@ -71,6 +72,8 @@ function build(lang: string): Phonemizer {
             return createTamil();
         case "sv":
             return createSwedish();
+        case "ca":
+            return createCatalan();
         case "ko":
             return createKorean();
         case "ha":
