@@ -145,7 +145,18 @@ export function decompose(word: string): Decomp {
         if (!stripped) break;
     }
     // Compound-split whatever remains.
-    const stemParts = splitCompound(rest) ?? [rest];
+    let stemParts = splitCompound(rest) ?? [rest];
+    // If a suffix strip left an unsplittable single stem, retry the compound split on the UN-stripped form — the
+    // suffix belongs to the last constituent, not the whole word (waldsterben: -en left "waldsterb" which can't
+    // split, but wald·sterben can; pickelhaube → pickel·haube). Only fires when the stem otherwise wouldn't split.
+    if (stemParts.length === 1 && suffixes.length) {
+        const whole = rest + suffixes.join("");
+        const cs = splitCompound(whole);
+        if (cs && cs.length >= 2) {
+            stemParts = cs;
+            suffixes.length = 0;
+        }
+    }
 
     const parts = [
         ...prefixes,
