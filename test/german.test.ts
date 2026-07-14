@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 16 — mid-compound reduction recovered (kaikki syllabic n̩ expanded)", () => {
+        expect(phonemizeWord("Christentum")).toBe("kʁˈɪstəntuːm"); // christen·tum: -en → ə (was ɛ)
+        expect(phonemizeWord("Heidelbeere")).toBe("hˈaɪ̯dəlbeːʁə"); // heidel- -el → ə
+    });
+
     test("Run 15 — split ordering: prefer the whole-word lexeme (schreib·en not schrei·ben)", () => {
         expect(phonemizeWord("schreiben")).toBe("ʃʁˈaɪ̯bən"); // known verb → schreib·en, not the schrei·ben compound
         expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // control: a non-lexeme compound still splits

@@ -45,7 +45,9 @@ const PAIRS: Record<string, Set<string>> = {
     "ŋ": new Set(["n"]),
 };
 
-const consonants = (ipa: string): string[] => [...ipa].filter(isConsChar);
+// Expand kaikki's syllabic consonants (kʁɪstn̩ → …stən) so the consonant sequence aligns with our ⟨-en⟩ etc.
+const consonants = (ipa: string): string[] =>
+    [...ipa.replace(/n̩/g, "ən").replace(/l̩/g, "əl").replace(/m̩/g, "əm").replace(/ŋ̩/g, "əŋ")].filter(isConsChar);
 
 const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
 writeFileSync(OUT, ""); // empty first → phonemizeWord's lazy load sees no corrections (compare vs the RAW engine)

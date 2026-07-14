@@ -243,3 +243,12 @@ The Run-10 compound retry had regressed known VERBS ending in a compound-looking
 is itself a known lexeme (isWord) — schreiben/abschreiben/verschreiben → schreib·en; waldsterben/schadenfreude
 (not base lexemes) still split. Deferred (entangled): irregular-long ⟨ä⟩→ɛː (the ä/e merger, LONG_OF[ɛ]=eː can't
 disambiguate ärzte→ɛː from e→eː) and -igen/-igkeit→ɪ/ç (suffix-machinery). Next: compound coverage (Phase 12b).
+
+## Run 16 (Phase 12b) — recover skewed -en entries: expand kaikki's syllabic consonants in the lexicon builds
+The mid-compound ɛ→ə words (christentum, heidelbeere) were IN kaikki but skewed OUT of the quality lexicon:
+kaikki renders unstressed -en/-el/-em as SYLLABIC n̩/l̩/m̩ (christen → kʁɪstn̩, no vowel), so the build's
+nucleus/consonant count mismatched ours (…stən) → skipped. Expanded n̩→ən, l̩→əl, m̩→əm, ŋ̩→əŋ in both build
+scripts' parsing before counting → recovered ~2500 quality entries (15441→17925). christentum→kʁɪstəntuːm,
+heidelbeere→haɪdəlbeːʁə. kaikki 70.6→72.9%, INDEPENDENT wikipron 70.4→72.4% (+2.0 cross-source). common-word
+79.2→80.2%. This is the compound-coverage lever without touching the splitter — the reduction now reaches
+mid-compound -en via the whole-word lexicon.
