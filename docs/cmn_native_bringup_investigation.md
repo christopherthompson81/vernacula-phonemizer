@@ -130,3 +130,25 @@ Two parallel reviewers (numbers+sandhi, segmentation+routing) + self-probing. Fo
 Reviewers confirmed NOT-bugs: UTF-16 number peek (self-consistent), synth/cp alignment, setTone regex,
 loader parsing, code-point walk. LOW direct-API-only (negative int, "3." dangling) — arabicToChinese removed
 (superseded by appendNumber). 32 tests pass; sweep unchanged (82.1%).
+
+## Run 7 — 2026-07-14 — independent word-level validation (CC-CEDICT)
+
+The epitran referee (84.7%) only scores SYLLABLE→IPA segment quality — it never tests the Hanzi front-end
+(segmentation + polyphone choice), which is the substantive Phase-2 work. Validated it against CC-CEDICT (CC-BY-SA,
+124k entries) — INDEPENDENT of our pypinyin-derived dicts, so not circular. Tool: tools/cmn-cedict-validate.mts
+(regenerable; CC-CEDICT is a download, not committed). Compares segment(word) base pinyin vs CC-CEDICT citation
+pinyin, per syllable, over 103,760 Han-only words:
+
+- **READING (polyphone/segmentation): 97.3%**  ·  **FULL (reading+tone): 92.8%**
+- Reading misses (2.7%) are almost all RARE/obscure chars (⺮ radical, 々 iteration mark, 〡–〩 Suzhou numerals,
+  CJK-ext 㐌/㐤/𪢌) absent from our common-char dict — noise, not real text.
+- Tone gap (4.5%) is mostly CONVENTION: ~2.3% neutral-tone (5) variation (optional/variable), and our phrase dict
+  bakes 一/不 SANDHI (一个 → yi2 ge4, the SPOKEN form) where CC-CEDICT gives citation (yi1 ge5) — ours is arguably
+  more correct for TTS. The GENUINE tone tail (non-neutral, non-一/不) is **2.14%** (2158 words): specific
+  tone-polyphones (趟 tàng/tāng, 一打 dá "dozen", 更 gēng/gèng, 相 xiāng/xiàng), many in obscure idioms.
+
+VERDICT: the Hanzi front-end is BUILT and validated — ~97% reading, ~98% tone-on-common; the 🟠 "pinyin-only,
+not raw Hanzi" label is stale. Re-tier 🟠 → 🟡 (reliable for raw Hanzi; a small ~2% tone-polyphone + rare-char tail
+a dict layer closes). CAVEAT: CC-CEDICT is isolated words, so this tests segmentation + within-word polyphones but
+NOT cross-word CONTEXT disambiguation (rarer; the large phrase dict covers the common cases) — a running-text gold
+would test that, same lesson as the Arabic isolated-vs-prose axis.
