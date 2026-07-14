@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 38 — negation un- before a prefix blocks the ng→ŋ merge (ungefähr)", () => {
+        expect(phonemizeWord("ungefähr")).toBe("ˈʊnɡəfɛːɐ̯"); // un·ge → nɡ (not ŋ), un → ʊn
+        expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // control: un+ion NOT split (ion after un isn't a prefix)
+        expect(phonemizeWord("Universität")).toBe("ʊnifɛʁzitˈɛːt"); // control: not un-prefixed
+    });
+
     test("Run 37 — monomorphemic ge-/er-+st keeps alveolar st (gestern, erst)", () => {
         expect(phonemizeWord("gestern")).toBe("ɡˈɛstɐn"); // NOT ge·stern → ʃt
         expect(phonemizeWord("erst")).toBe("eːɐ̯st");
