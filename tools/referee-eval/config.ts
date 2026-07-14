@@ -273,6 +273,27 @@ export const CONFIG: Record<string, RefLang> = {
       [/wa$/gu, "w", "final-ව offglide: the schwa after ව→w is dialectally optional"],
     ],
   },
+  sv: {
+    // Central Standard Swedish, SEGMENTAL Phase 1 (first-syllable stress; pitch accent deferred). The broad
+    // wikipron referee marks the accent-2 prosodeme ² (sparse) and is INCONSISTENT on retroflex assimilation
+    // (mars→ʂ but barn→rn) — so we fold our systematic retroflexes back to r+dental to compare inventories.
+    referees: [{ file: "sv.wikipron-swe.tsv", source: "wikipron swe broad (human)", role: "primary" }],
+    secondaryGap: "no independent second source wired; epitran ships no Swedish. A kaikki swe lexicon (which also " +
+      "carries pitch accent) would corroborate and unlock Phase 2.",
+    segmentJoin: true,
+    folds: [
+      [/²/gu, "", "accent-2 prosodeme marker — a pitch feature, deferred to Phase 2"],
+      [/¹/gu, "", "accent-1 prosodeme marker — deferred"],
+      [/ʈ/gu, "rt", "retroflex ⟨rt⟩: ours assimilates (Central Standard), the broad referee often leaves r+t"],
+      [/ɖ/gu, "rd", "retroflex ⟨rd⟩ vs referee r+d"],
+      [/ɳ/gu, "rn", "retroflex ⟨rn⟩ vs referee r+n"],
+      [/ʂ/gu, "rs", "retroflex ⟨rs⟩ vs referee r+s"],
+      [/ɭ/gu, "rl", "retroflex ⟨rl⟩ vs referee r+l"],
+      [/tɕ/gu, "ɕ", "tje-sound: referee wobbles t͡ɕ ~ ɕ (tie already stripped) → our ɕ"],
+      [/æ/gu, "ɛ", "ä before r lowers to æ (ours, Central Standard); referee writes ɛ"],
+      [/œ/gu, "ø", "ö quality œ~ø (short/long, length already stripped) — notation"],
+    ],
+  },
   ta: {
     referees: [{ file: "ta.wikipron-tam-taml-broad.tsv", source: "wikipron tam_taml broad (human)", role: "primary" }],
     secondaryGap: "epitran tam-Taml echoes untransliterated Tamil graphemes (e.g. visarga ஃ) into its output, so " +
