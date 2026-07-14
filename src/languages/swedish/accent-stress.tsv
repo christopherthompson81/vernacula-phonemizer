@@ -68,11 +68,11 @@ accepteras	1	2
 accepterat	1	2
 access	1	1
 accessoarer	1	3
-aceton	1	2
+aceton	1	2	o
 achilles	2	1
 ack	1
 ackompanjeras	1	3
-ackord	1	1
+ackord	1	1	o
 ackreditering	1	3
 ackumulerade	1	3
 acne	2
@@ -114,7 +114,7 @@ administrera	1	3
 administrerar	1	3
 administreras	1	3
 adnan	1
-adobe	1	1
+adobe	1	1	o
 adolf	1
 adolfs	1
 adolfsson	2
@@ -268,7 +268,7 @@ akademiskt	1	2
 akalla	2
 aki	1
 akilles	1	1
-akropolis	1	1
+akropolis	1	1	o
 akt	1
 akta	2
 akten	1
@@ -405,23 +405,23 @@ alistair	1
 alkis	1
 alkisar	1
 alkohol	2
-alkoholdrycker	2	2
+alkoholdrycker	2	2	o
 alkoholen	2
-alkoholfri	2	2
-alkoholfria	2	2
-alkoholfritt	2	2
-alkoholhalt	2	2
-alkoholhaltiga	2	2
+alkoholfri	2	2	o
+alkoholfria	2	2	o
+alkoholfritt	2	2	o
+alkoholhalt	2	2	o
+alkoholhaltiga	2	2	o
 alkoholiserad	1	4
 alkoholiserade	1	4
 alkoholism	1	3
 alkoholist	1	3
 alkoholister	1	3
 alkoholkonsumtion	2	2
-alkohollagen	2	2
-alkoholmissbruk	2	2
-alkoholpolitik	2	2
-alkoholproblem	2	2
+alkohollagen	2	2	o
+alkoholmissbruk	2	2	o
+alkoholpolitik	2	2	o
+alkoholproblem	2	2	o
 all	1
 alla	1
 allah	1	1
@@ -555,7 +555,7 @@ alva	2
 alvar	2
 alvarez	1	1
 alvaro	1	1
-alvedon	1	2
+alvedon	1	2	o
 alver	1
 alverna	1
 alves	2
@@ -571,8 +571,8 @@ amanda	2	1
 amandas	2	1
 amatör	1	2
 amatörer	1	2
-amazon	1	2
-amazonas	1	2
+amazon	1	2	o
+amazonas	1	2	o
 ambassad	1	2
 ambassaden	1	2
 ambassader	1	2
@@ -636,7 +636,7 @@ amnesty	1
 amning	2
 amok	1	1
 amor	1
-amore	1	1
+amore	1	1	o
 amortera	1	2
 amorterar	1	2
 amortering	1	2
@@ -650,14 +650,14 @@ ams	1
 amsterdam	1
 an	1
 ana	2
-anabola	1	2
+anabola	1	2	o
 anade	2
 anagram	1	2
 anal	1	1
 analfabet	1	3
 analfabeter	1	3
-analog	1	2
-analoga	1	2
+analog	1	2	o
+analoga	1	2	o
 analogi	1	3
 analsex	2	1
 analt	1	1
@@ -690,7 +690,7 @@ anas	2
 anastasia	1	2
 anat	2
 anatomi	1	3
-anatomiska	1	2
+anatomiska	1	2	o
 anblick	2
 anblicken	2
 anbud	2
@@ -746,7 +746,7 @@ andrej	1
 andres	1
 andrew	1
 andrews	1
-andromeda	1	1
+andromeda	1	1	o
 andrum	2
 andré	1	1
 andrén	1	1
@@ -754,9 +754,9 @@ andrés	1	1
 andy	1
 andys	1
 aneby	2
-anekdot	1	2
-anekdoter	1	2
-anekdotisk	1	2
+anekdot	1	2	o
+anekdoter	1	2	o
+anekdotisk	1	2	o
 anemi	1	2
 anette	1	1
 anfall	2
@@ -800,7 +800,7 @@ angivet	2
 angivit	2
 angivna	2
 anglosaxiska	1	2
-angola	2	1
+angola	2	1	o
 angrep	2
 angrepp	2
 angreppen	2
@@ -1103,7 +1103,7 @@ antennen	1	1
 antenner	1	1
 anthony	1
 anti	1
-antibiotika	1	3
+antibiotika	1	3	o
 anticimex	1	2
 antidemokratiska	2
 antidepressiva	2
@@ -1136,12 +1136,12 @@ antoinette	1	3
 antologi	1	3
 antologin	1	3
 anton	1
-antonia	1	1
-antonio	1	1
-antonius	1	1
+antonia	1	1	o
+antonio	1	1	o
+antonius	1	1	o
 antons	1
 antonsson	2
-antropolog	1	3
+antropolog	1	3	o
 antropologi	1	4
 antti	1
 anttila	1
@@ -1388,19 +1388,19 @@ aria	1
 ariel	1	2
 arier	1
 ariska	1
-aristoteles	2	2
-arizona	1	2
+aristoteles	2	2	o
+arizona	1	2	o
 arja	2
 arjeplog	1
 ark	1
 arkansas	1	1
 arken	1
-arkeolog	1	3
-arkeologer	1	3
-arkeologerna	1	3
+arkeolog	1	3	o
+arkeologer	1	3	o
+arkeologerna	1	3	o
 arkeologi	1	4
-arkeologisk	1	3
-arkeologiska	1	3
+arkeologisk	1	3	o
+arkeologiska	1	3	o
 arkitekt	1	2
 arkitekten	1	2
 arkitekter	1	2
@@ -1457,7 +1457,7 @@ arnhem	2
 arnold	1
 arnstad	1
 aro	1
-arom	1	1
+arom	1	1	o
 aron	1
 aronsson	2
 aros	1
@@ -1530,7 +1530,7 @@ artists	1	1
 arto	1
 arton	2
 artrit	1	1
-artros	1	1
+artros	1	1	o
 arts	1
 artur	1
 arturo	1	1
@@ -1617,14 +1617,14 @@ asteroider	1	3
 astma	2
 aston	1
 astor	1
-astoria	1	1
+astoria	1	1	o
 astra	2
 astrid	1
 astrologi	1	3
 astronaut	1	2
 astronauter	1	2
 astronomi	1	3
-astronomiska	1	2
+astronomiska	1	2	o
 asyl	1	1
 asylansökan	2	1
 asylpolitik	2	1
@@ -1660,11 +1660,11 @@ atletisk	1	1
 atmosfär	1	2
 atmosfären	1	2
 atollen	1	1
-atom	1	1
-atombomb	2	1
-atombomben	2	1
-atombomber	2	1
-atomer	1	1
+atom	1	1	o
+atombomb	2	1	o
+atombomben	2	1	o
+atombomber	2	1	o
+atomer	1	1	o
 atp	1	2
 att	1
 attack	1	1
@@ -1724,7 +1724,7 @@ auktoritära	1	4
 aula	1
 aulan	1
 aura	2
-aurora	2	2
+aurora	2	2	o
 auschwitz	1
 austin	1
 australian	2	1
@@ -1759,8 +1759,8 @@ automatisk	1	3
 automatiska	1	3
 automatiskt	1	3
 automatvapen	2	3
-autonom	1	3
-autonoma	1	3
+autonom	1	3	o
+autonoma	1	3	o
 autonomi	1	4
 autopilot	2
 autostart	2
@@ -2143,7 +2143,7 @@ axel	2
 axeln	1
 axelsson	2
 axevalla	2
-axiom	1	2
+axiom	1	2	o
 axla	2
 axlar	2
 axlarna	2
@@ -2442,8 +2442,8 @@ barberare	2	1
 barberaren	2	1
 barbie	1
 barbro	1
-barcelona	2	2
-barcelonas	2	2
+barcelona	2	2	o
+barcelonas	2	2	o
 bard	1
 bare	2
 baren	1
@@ -3009,11 +3009,11 @@ benämningar	1	1
 benämningen	1	1
 benämns	1	1
 benämnt	1	1
-beordra	1	1
-beordrade	1	1
-beordrades	1	1
-beordrar	1	1
-beordrat	1	1
+beordra	1	1	o
+beordrade	1	1	o
+beordrades	1	1	o
+beordrar	1	1	o
+beordrat	1	1	o
 beprövad	1	1
 beprövade	1	1
 beprövat	1	1
@@ -3062,7 +3062,7 @@ berit	1
 berkeley	1
 berlin	1	1
 berlinmuren	2	1
-berlusconi	1	2
+berlusconi	1	2	o
 bern	1
 bernadotte	2
 bernardo	1	1
@@ -3661,13 +3661,13 @@ biografi	1	3
 biografier	1	3
 biografin	1	3
 biokemi	2
-biolog	1	2
-biologer	1	2
+biolog	1	2	o
+biologer	1	2	o
 biologi	1	3
 biologin	1	3
-biologisk	1	2
-biologiska	1	2
-biologiskt	1	2
+biologisk	1	2	o
+biologiska	1	2	o
+biologiskt	1	2	o
 bion	1
 biopremiär	2
 bios	1
@@ -4103,7 +4103,7 @@ bollen	1
 bollnäs	1
 bologna	2	1
 bolsjevikerna	1	2
-bolton	1
+bolton	1	o
 bolund	2
 bolån	2
 bom	1
@@ -4146,7 +4146,7 @@ bonn	1
 bonnie	1
 bonnier	1
 bonniers	1
-bono	1
+bono	1	o
 bonus	1
 bonusar	1
 bonusen	1
@@ -4160,7 +4160,7 @@ boots	1
 boplats	2
 bor	1
 bora	2
-boras	1
+boras	1	o
 borat	1	1
 bord	1
 borda	2
@@ -4192,10 +4192,10 @@ borgström	2
 borgå	2
 boris	1
 bork	1
-borlänge	2
-borna	2
-borneo	1
-bornholm	2
+borlänge	2	o
+borna	2	o
+borneo	1	o
+bornholm	2	o
 borr	1
 borra	2
 borrade	2
@@ -5152,7 +5152,7 @@ cajsa	2
 calcutta	2	1
 calgary	1
 cali	1
-californien	1	2
+californien	1	2	o
 call	1
 calle	2
 calvin	1
@@ -5229,12 +5229,12 @@ carlton	1
 carmen	1
 carnegie	1	1
 carol	1
-carola	2	1
+carola	2	1	o
 carole	2
 carolin	1	2
 carolina	2	2
 caroline	1	2
-carolus	1	1
+carolus	1	1	o
 carolyn	1
 carrera	1	1
 carrie	1
@@ -5248,7 +5248,7 @@ carter	1
 cartier	1	1
 cary	1
 casablanca	2	2
-casanova	2	2
+casanova	2	2	o
 case	1
 cashewnötter	2
 casino	1	1
@@ -5566,7 +5566,7 @@ claudio	1
 claus	1
 clay	1
 clemens	1
-cleopatra	1	1
+cleopatra	1	1	o
 cleveland	1
 cliff	1
 clint	1
@@ -5586,17 +5586,17 @@ co	2
 coacha	2
 coachen	1
 coacher	2
-cobra	2
+cobra	2	o
 coca	1
 cockpit	1
 cocktail	1
 cocktails	1
 coco	2
-code	1
+code	1	o
 cognac	1
 cohen	1
-cola	2
-colan	2
+cola	2	o
+colan	2	o
 colin	1
 collage	1	1
 collection	1	1
@@ -5611,7 +5611,7 @@ colombianska	1	3
 colombo	1	1
 color	1
 colorado	1	2
-colors	2
+colors	2	o
 colosseum	2	2
 colour	1
 colt	1
@@ -5626,13 +5626,13 @@ commercial	1	1
 commission	1	1
 communication	1	3
 communications	1	3
-como	1
+como	1	o
 compact	1
 company	1
 computer	1	1
 comviq	1
 con	1
-concordia	1	1
+concordia	1	1	o
 conference	1
 connecticut	1	1
 connection	1	1
@@ -5658,16 +5658,16 @@ copco	1
 copyright	1
 copywriter	1
 coq	1
-cord	1
+cord	1	o
 cordelia	1	1
 cornelia	1	1
 cornelis	1	1
 cornelius	1	1
 cornflakes	1
-cornwall	1
+cornwall	1	o
 corp	1
 corporation	1	2
-corps	1
+corps	1	o
 corvette	1	1
 costello	1	1
 council	1
@@ -5805,7 +5805,7 @@ dahlén	1	1
 dahmer	1
 daily	1
 daisy	1
-dakota	1	1
+dakota	1	1	o
 dal	1
 dala	2
 dalahästar	2
@@ -6052,7 +6052,7 @@ deklarera	1	2
 deklarerade	1	2
 deklarerar	1	2
 deklarerat	1	2
-dekor	1	1
+dekor	1	1	o
 dekoration	1	3
 dekorationer	1	3
 dekorativ	1	3
@@ -6146,9 +6146,9 @@ demokratisering	1	4
 demokratisk	1	2
 demokratiska	1	2
 demon	1
-demonen	1	1
-demoner	1	1
-demonerna	1	1
+demonen	1	1	o
+demoner	1	1	o
+demonerna	1	1	o
 demonstranter	1	2
 demonstranterna	1	2
 demonstration	1	3
@@ -6259,19 +6259,19 @@ development	1	1
 devil	1
 devis	1	1
 devisen	1	1
-devon	1	1
+devon	1	1	o
 di	1
 dia	2
 diabetes	1	2
 diabetiker	1	2
-diagnos	1	2
-diagnosen	1	2
-diagnoser	1	2
+diagnos	1	2	o
+diagnosen	1	2	o
+diagnoser	1	2	o
 diagnostisera	1	4
 diagonalt	1	3
 diagram	1	2
 diagrammet	1	2
-diakon	1	2
+diakon	1	2	o
 diakoni	1	3
 dialekt	1	2
 dialektala	1	3
@@ -6279,9 +6279,9 @@ dialektalt	1	3
 dialekten	1	2
 dialekter	1	2
 dialekterna	1	2
-dialog	1	2
-dialogen	1	2
-dialoger	1	2
+dialog	1	2	o
+dialogen	1	2	o
+dialoger	1	2	o
 diamant	1	2
 diamanten	1	2
 diamanter	1	2
@@ -6358,9 +6358,9 @@ dinosaur	1	2
 dinosaurie	1	2
 dinosaurier	1	2
 dinosaurierna	1	2
-dior	1	1
+dior	1	1	o
 dip	1
-diplom	1	1
+diplom	1	1	o
 diplomat	1	2
 diplomaten	1	2
 diplomater	1	2
@@ -6588,17 +6588,17 @@ dokumentärer	1	3
 dokumentärfilm	2	3
 dokumentärserie	2	3
 dolce	1
-dold	1
-dolda	2
-dolde	2
+dold	1	o
+dolda	2	o
+dolde	2	o
 dolk	1
 dollar	1
 dollarn	1
 dollars	1
 dolly	1
-dolores	1	1
+dolores	1	1	o
 dolph	1
-dolt	1
+dolt	1	o
 dom	1
 domar	2
 domare	2
@@ -6606,7 +6606,7 @@ domaren	2
 domarens	2
 domarn	2
 domarna	2
-dome	1
+dome	1	o
 domedagen	2
 domen	1
 dominans	1	2
@@ -6647,7 +6647,7 @@ donationer	1	2
 donator	2	1
 donatorer	1	2
 donatorn	2	1
-donau	1
+donau	1	o
 donera	1	1
 donerade	1	1
 donerar	1	1
@@ -6671,7 +6671,7 @@ doppade	2
 doppar	2
 dora	2
 doris	1
-doro	1
+doro	1	o
 dorota	1
 dorotea	2	2
 dorothy	1
@@ -6691,9 +6691,9 @@ dottern	2
 dotterns	2
 dotters	2
 douglas	1
-dov	1
-dove	2
-dover	1
+dov	1	o
+dove	2	o
+dover	1	o
 dow	1
 down	1
 downing	1
@@ -6794,20 +6794,20 @@ drivna	2
 drivning	2
 drivor	2
 drivs	1
-drog	1
-droga	2
-drogad	2
-drogade	2
-drogberoende	2
-drogen	1
-droger	1
-drogerna	1
-drogfri	2
-droghandel	2
-drogmissbruk	2
-drogproblem	2
-drogpåverkad	2
-drogs	1
+drog	1	o
+droga	2	o
+drogad	2	o
+drogade	2	o
+drogberoende	2	o
+drogen	1	o
+droger	1	o
+drogerna	1	o
+drogfri	2	o
+droghandel	2	o
+drogmissbruk	2	o
+drogproblem	2	o
+drogpåverkad	2	o
+drogs	1	o
 drop	1
 dropp	1
 droppa	2
@@ -7031,7 +7031,7 @@ dyslexi	1	2
 dyster	1
 dystert	1
 dystopi	1	2
-dystopisk	1	1
+dystopisk	1	1	o
 dystra	2
 däck	1
 däckad	2
@@ -7381,22 +7381,22 @@ ekman	1
 eko	1
 ekollon	2
 ekologi	1	3
-ekologisk	1	2
-ekologiska	1	2
-ekologiskt	1	2
+ekologisk	1	2	o
+ekologiska	1	2	o
+ekologiskt	1	2	o
 ekon	1
-ekonom	1	2
-ekonomen	1	2
-ekonomer	1	2
+ekonom	1	2	o
+ekonomen	1	2	o
+ekonomer	1	2	o
 ekonomi	1	3
 ekonomichef	2	3
 ekonomier	1	3
 ekonomifakta	2	3
 ekonomin	1	3
 ekonomins	1	3
-ekonomisk	1	2
-ekonomiska	1	2
-ekonomiskt	1	2
+ekonomisk	1	2	o
+ekonomiska	1	2	o
+ekonomiskt	1	2	o
 ekorrar	2
 ekorre	2
 ekorren	2
@@ -7460,16 +7460,16 @@ elektriker	1	1
 elektrisk	1	1
 elektriska	1	1
 elektriskt	1	1
-elektroder	1	2
+elektroder	1	2	o
 elektromagnetisk	2	1
 elektromagnetiska	2	1
-elektroner	1	2
-elektronerna	1	2
+elektroner	1	2	o
+elektronerna	1	2	o
 elektronik	1	3
 elektroniken	1	3
-elektronisk	1	2
-elektroniska	1	2
-elektroniskt	1	2
+elektronisk	1	2	o
+elektroniska	1	2	o
+elektroniskt	1	2	o
 elektroteknik	2	1
 element	1	2
 elementen	1	2
@@ -7478,7 +7478,7 @@ elements	1	2
 elementära	1	3
 elen	1
 elena	2	1
-eleonora	2	3
+eleonora	2	3	o
 elev	1	1
 eleven	1	1
 elevens	1	1
@@ -7507,7 +7507,7 @@ eliminerar	1	3
 elimineras	1	3
 elin	1
 elina	1	1
-elinor	1	2
+elinor	1	2	o
 elins	1
 eliot	1
 elis	1
@@ -7532,7 +7532,7 @@ ellen	1
 eller	1
 elli	1
 ellie	1
-ellinor	1	2
+ellinor	1	2	o
 elliot	1
 elliott	1
 ellis	1
@@ -7544,7 +7544,7 @@ elmer	1
 elnät	2
 elnätet	2
 elofsson	2
-eloge	1	1
+eloge	1	1	o
 elon	1
 elpriset	2
 elproduktion	2
@@ -7747,7 +7747,7 @@ enstaka	2
 enström	2
 enter	1
 entre	1	1
-entrecote	1	2
+entrecote	1	2	o
 entreprenör	1	3
 entreprenören	1	3
 entreprenörer	1	3
@@ -7773,7 +7773,7 @@ envist	2
 enzym	1	1
 enzymer	1	1
 enzymet	1	1
-eon	1	1
+eon	1	1	o
 ep	2
 epa	2
 epidemi	1	3
@@ -7787,9 +7787,9 @@ episoden	1	2
 episoder	1	2
 epitet	1	2
 epitetet	1	2
-epok	1	1
-epoken	1	1
-epoker	1	1
+epok	1	1	o
+epoken	1	1	o
+epoker	1	1	o
 er	1
 era	2
 eran	2
@@ -7863,9 +7863,9 @@ ernst	1
 eros	1
 erosion	1	2
 erotik	1	2
-erotisk	1	1
-erotiska	1	1
-erotiskt	1	1
+erotisk	1	1	o
+erotiska	1	1	o
+erotiskt	1	1	o
 errol	1
 ers	1
 ersatte	2
@@ -7932,7 +7932,7 @@ esther	1
 estland	1
 estlands	1
 estniska	1
-estonia	1	1
+estonia	1	1	o
 estrella	2	1
 et	1
 etablera	1	2
@@ -7949,7 +7949,7 @@ etablissemang	1	4
 etablissemanget	1	4
 etablissemangets	1	4
 etage	1	1
-etanol	1	2
+etanol	1	2	o
 etapp	1	1
 etappen	1	1
 etapper	1	1
@@ -7981,7 +7981,7 @@ ettåriga	2
 etymologi	1	4
 eu	2
 eufori	1	3
-euforisk	1	2
+euforisk	1	2	o
 eugene	1	2
 eureka	1	1
 euro	1
@@ -8094,9 +8094,9 @@ exklusiva	1	2
 exklusivt	1	2
 exodus	1
 exorcism	1	2
-exotisk	1	1
-exotiska	1	1
-exotiskt	1	1
+exotisk	1	1	o
+exotiska	1	1	o
+exotiskt	1	1	o
 exp	1	3
 expandera	1	2
 expanderade	1	2
@@ -8134,7 +8134,7 @@ explodera	1	2
 exploderade	1	2
 exploderar	1	2
 exploderat	1	2
-explorer	1	1
+explorer	1	1	o
 explosion	1	2
 explosionen	1	2
 explosioner	1	2
@@ -8336,7 +8336,7 @@ fantastiskt	1	1
 fantisera	1	2
 fantiserar	1	2
 fantiserat	1	2
-fantomen	1	1
+fantomen	1	1	o
 far	1
 fara	2
 faran	2
@@ -8718,17 +8718,17 @@ filmskapare	2
 filmstaden	2
 filmstjärnor	2
 filmvisning	2
-filosof	1	2
-filosofen	1	2
-filosofer	1	2
+filosof	1	2	o
+filosofen	1	2	o
+filosofer	1	2	o
 filosofera	1	3
 filosofi	1	3
 filosofie	2	3
 filosofin	1	3
 filosofins	1	3
-filosofisk	1	2
-filosofiska	1	2
-filosofiskt	1	2
+filosofisk	1	2	o
+filosofiska	1	2	o
+filosofiskt	1	2	o
 filt	1
 filtar	2
 filten	1
@@ -8896,7 +8896,7 @@ fjol	1
 fjolla	2
 fjollor	2
 fjolårets	2
-fjorden	1
+fjorden	1	o
 fjorton	2
 fjortonde	2
 fjäder	1
@@ -9033,11 +9033,11 @@ flopp	1
 floppade	2
 flor	1
 flora	2
-florence	1
-florens	1
+florence	1	o
+florens	1	o
 florerar	1	1
-flores	1
-florian	1
+flores	1	o
+florian	1	o
 florida	1
 floridas	1
 floskler	1
@@ -9191,7 +9191,7 @@ fniss	1
 fnissa	2
 fnissade	2
 fnissar	2
-fo	1
+fo	1	o
 foajén	1	2
 fobi	1	1
 fobier	1	1
@@ -9288,7 +9288,7 @@ food	1
 foods	1
 for	1
 forbes	1
-force	1
+force	1	o
 forcera	1	1
 fordon	2
 fordonen	2
@@ -9298,7 +9298,7 @@ fordonsindustrin	2
 fordran	2
 fordrar	2
 fordringar	2
-forex	1
+forex	1	o
 forfarande	2
 form	1
 forma	2
@@ -9406,9 +9406,9 @@ fortsättningsvis	2
 fortuna	1	1
 forum	2
 forumet	2
-forward	1
-forwarden	1
-forwards	1
+forward	1	o
+forwarden	1	o
+forwards	1	o
 fosfor	1
 foss	1
 fossil	1	1
@@ -10112,7 +10112,7 @@ fysiken	1	1
 fysikens	1	1
 fysiker	1
 fysiologi	1	4
-fysiologiska	1	3
+fysiologiska	1	3	o
 fysisk	1
 fysiska	1
 fysiskt	1
@@ -10453,7 +10453,7 @@ fördjupad	1	1
 fördjupade	1	1
 fördjupar	1	1
 fördjupning	1	1
-fördolda	1	1
+fördolda	1	1	o
 fördom	2
 fördomar	2
 fördomarna	2
@@ -10818,10 +10818,10 @@ förlorat	1	1
 förlorats	1	1
 förlossning	1	1
 förlossningen	1	1
-förlovad	1	1
-förlovade	1	1
-förlovning	1	1
-förlovningen	1	1
+förlovad	1	1	o
+förlovade	1	1	o
+förlovning	1	1	o
+förlovningen	1	1	o
 förlust	1	1
 förlusten	1	1
 förluster	1	1
@@ -10931,10 +10931,10 @@ förolämpningar	2
 förord	2
 förordar	2
 förordet	2
-förordnande	1	1
-förordning	1	1
-förordningar	1	1
-förordningen	1	1
+förordnande	1	1	o
+förordning	1	1	o
+förordningar	1	1	o
+förordningen	1	1	o
 förorenade	2
 förorenar	2
 förorenat	2
@@ -11030,8 +11030,8 @@ försommaren	2
 försonas	1	1
 försoning	1	1
 försorg	1	1
-försov	1	1
-försovit	1	1
+försov	1	1	o
+försovit	1	1	o
 förspel	2
 förspelet	2
 försprång	2
@@ -11530,9 +11530,9 @@ garde	2
 gardell	1	1
 garden	2
 gardens	1
-garderob	1	2
-garderoben	1	2
-garderober	1	2
+garderob	1	2	o
+garderoben	1	2	o
+garderober	1	2	o
 gardet	2
 gardin	1	1
 gardinen	1	1
@@ -11732,9 +11732,9 @@ geografin	1	3
 geografisk	1	2
 geografiska	1	2
 geografiskt	1	2
-geolog	1	2
+geolog	1	2	o
 geologi	1	3
-geologiska	1	2
+geologiska	1	2	o
 geometri	1	3
 geometrin	1	3
 geometriska	1	2
@@ -11955,9 +11955,9 @@ globalt	1	1
 globen	1
 glodde	2
 glor	1
-gloria	1
+gloria	1	o
 glosor	2
-glukos	1	1
+glukos	1	1	o
 gluten	1
 glutenfri	2
 gläder	2
@@ -12095,7 +12095,7 @@ golv	1
 golven	1
 golvet	1
 golvvärme	2
-gomez	1
+gomez	1	o
 gommen	1
 gomorron	2	1
 gonatt	1	1
@@ -12105,11 +12105,11 @@ gonzalez	1	1
 good	1
 goodman	1
 goodwill	1
-goran	1
+goran	1	o
 gorbatjov	1
-gordon	1
-gordons	1
-gore	1
+gordon	1	o
+gordons	1	o
+gore	1	o
 gorilla	2	1
 gosa	2
 gosar	2
@@ -12704,8 +12704,8 @@ gymnastik	1	2
 gymnastiken	1	2
 gympa	2
 gympan	2
-gynekolog	1	3
-gynekologen	1	3
+gynekolog	1	3	o
+gynekologen	1	3	o
 gynekologi	1	4
 gynna	2
 gynnade	2
@@ -13148,7 +13148,7 @@ hannas	2
 hanne	2
 hannes	1
 hannibal	1
-hannover	1	1
+hannover	1	1	o
 hanns	1
 hanoi	1	1
 hans	1
@@ -13555,12 +13555,12 @@ hermes	1
 hermods	1
 hernandez	1	1
 herngren	2
-hero	1	1
+hero	1	1	o
 herodes	1	1
 heroin	1	2
 heroinet	1	2
-heroiska	1	1
-heron	1	1
+heroiska	1	1	o
+heron	1	1	o
 herpes	1
 herr	1
 herrans	2
@@ -13616,7 +13616,7 @@ hettan	2
 hettar	2
 hette	2
 hewlett	1
-hexagon	1	2
+hexagon	1	2	o
 hf	2
 hg	1	2
 hi	1
@@ -13676,7 +13676,7 @@ hipp	1
 hippa	2
 hippie	1
 hippies	1
-hiroshima	1	1
+hiroshima	1	1	o
 hirsch	1
 hiskeligt	2
 hisnande	2
@@ -13877,8 +13877,8 @@ honolulu	1	2
 honom	2
 honor	2
 honorna	2
-honung	2
-honungen	2
+honung	2	o
+honungen	2	o
 hood	1
 hop	1
 hopkins	1
@@ -13926,7 +13926,7 @@ hornsgatan	2
 hornstull	1	1
 horor	2
 hororna	2
-horoskop	1	2
+horoskop	1	2	o
 horribel	1	1
 horribelt	1	1
 horribla	1	1
@@ -13971,10 +13971,10 @@ hotmail	1
 houston	1
 hov	1
 hovar	2
-hoven	1
-hovet	1
-hovrätt	2
-hovrätten	2
+hoven	1	o
+hovet	1	o
+hovrätt	2	o
+hovrätten	2	o
 hovslagare	2
 hovås	2
 howard	1
@@ -14023,7 +14023,7 @@ hultén	1	1
 hum	1
 human	1	1
 humana	1	1
-humaniora	2	3
+humaniora	2	3	o
 humanism	1	2
 humanismen	1	2
 humanist	1	2
@@ -14236,7 +14236,7 @@ hymlar	2
 hymn	1
 hyn	1
 hyper	1
-hypnos	1	1
+hypnos	1	1	o
 hypokondriker	1	2
 hypotes	1	2
 hypotesen	1	2
@@ -14791,13 +14791,13 @@ identiskt	1	1
 identitet	1	3
 identiteten	1	3
 identiteter	1	3
-ideologer	1	3
+ideologer	1	3	o
 ideologi	1	4
 ideologier	1	4
 ideologin	1	4
-ideologisk	1	3
-ideologiska	1	3
-ideologiskt	1	3
+ideologisk	1	3	o
+ideologiska	1	3	o
+ideologiskt	1	3	o
 idg	1	2
 idiot	1	2
 idioten	1	2
@@ -14810,9 +14810,9 @@ idiotiska	1	2
 idiotiskt	1	2
 idka	2
 idkar	2
-idol	1	1
-idoler	1	1
-idols	1	1
+idol	1	1	o
+idoler	1	1	o
+idols	1	1	o
 idre	2
 idrott	2
 idrotta	2
@@ -14895,11 +14895,11 @@ ikea	2	1
 ikeas	2	1
 iklädd	2
 iklädda	2
-ikon	1	1
+ikon	1	1	o
 ikonen	1
-ikoner	1	1
-ikonisk	1	1
-ikoniska	1	1
+ikoner	1	1	o
+ikonisk	1	1	o
+ikoniska	1	1	o
 ikväll	1	1
 il	1
 iland	1	1
@@ -14926,7 +14926,7 @@ illustrerar	1	2
 illustreras	1	2
 illustrerat	1	2
 illvilja	2
-ilona	2	1
+ilona	2	1	o
 ilska	2
 ilskan	2
 ilsken	2
@@ -16096,7 +16096,7 @@ jeep	1
 jeff	1
 jefferson	1
 jeffrey	1
-jehovas	1	1
+jehovas	1	1	o
 jekyll	1
 jelena	2	1
 jem	1
@@ -16205,8 +16205,8 @@ joho	2
 joint	1
 jojje	2
 jojo	2
-joker	1
-jokern	1
+joker	1	o
+jokern	1	o
 jokkmokk	1
 jolle	2
 jomen	1
@@ -16229,7 +16229,7 @@ jonssons	1
 jonte	2
 joo	1
 jord	1
-jordan	1
+jordan	1	o
 jordanien	1	1
 jordar	2
 jordbro	1
@@ -16380,10 +16380,10 @@ jungfru	2
 jungfrun	2
 jungfrur	2
 juni	1
-juniorer	1	2
-juniorerna	1	2
-juniorlag	2	2
-juniors	1	2
+juniorer	1	2	o
+juniorerna	1	2	o
+juniorlag	2	2	o
+juniors	1	2	o
 juno	1
 jupiter	1
 jur	1
@@ -16631,8 +16631,8 @@ kaliber	1	1
 kalibern	1	1
 kalifat	1	2
 kalifatet	1	2
-kalifornien	1	2
-kaliforniens	1	2
+kalifornien	1	2	o
+kaliforniens	1	2	o
 kaliningrad	1	1
 kalium	1
 kalix	1
@@ -16838,7 +16838,7 @@ karaktärsdrag	2	2
 karamell	1	2
 karameller	1	2
 karantän	1	2
-karaoke	1	2
+karaoke	1	2	o
 karat	1	1
 karate	2	1
 kardemumma	2	2
@@ -16955,19 +16955,19 @@ kastruller	1	1
 kastrup	1
 kata	2
 katalanska	1	2
-katalog	1	2
-katalogen	1	2
-kataloger	1	2
+katalog	1	2	o
+katalogen	1	2	o
+kataloger	1	2	o
 katalonien	1	2
 kataloniens	1	2
 katalysator	2	3
 katarina	2	2
-katastrof	1	2
+katastrof	1	2	o
 katastrofal	1	3
 katastrofala	1	3
 katastrofalt	1	3
-katastrofen	1	2
-katastrofer	1	2
+katastrofen	1	2	o
+katastrofer	1	2	o
 katedral	1	2
 katedralen	1	2
 kategori	1	3
@@ -16990,7 +16990,7 @@ katolik	1	2
 katoliker	1	2
 katolikerna	1	2
 katolsk	1	1
-katolska	1	1
+katolska	1	1	o
 katolskt	1	1
 katrin	1	1
 katrina	2	1
@@ -17328,7 +17328,7 @@ klein	1
 klen	1
 klena	2
 klent	1
-kleopatra	1	1
+kleopatra	1	1	o
 klev	1
 kli	1
 klia	2
@@ -17418,7 +17418,7 @@ klokt	1
 klon	1
 klona	2
 kloner	2
-klor	1
+klor	1	o
 klorin	1	1
 klorna	1
 klorofyll	1	2
@@ -17636,23 +17636,23 @@ ko	2
 koalition	1	3
 koalitionen	1	3
 koalitionsregering	2	3
-kobra	2
+kobra	2	o
 koch	1
 kock	1
 kockar	2
 kocken	1
 kockums	2
-kod	1
-koda	2
-kodade	2
-kodak	1
-kodar	2
-kodat	2
-koden	1
-koder	1
-koderna	1
-kodning	2
-kodord	2
+kod	1	o
+koda	2	o
+kodade	2	o
+kodak	1	o
+kodar	2	o
+kodat	2	o
+koden	1	o
+koder	1	o
+koderna	1	o
+kodning	2	o
+kodord	2	o
 koffein	1	2
 kofot	2
 kofta	2
@@ -17672,19 +17672,19 @@ kokos	1
 koks	1
 kokt	1
 kokta	2
-kol	1
-kola	2
-kolan	2
-koldioxid	2
-koldioxiden	2
-koldioxidutsläpp	2
-koldioxidutsläppen	2
+kol	1	o
+kola	2	o
+kolan	2	o
+koldioxid	2	o
+koldioxiden	2	o
+koldioxidutsläpp	2	o
+koldioxidutsläppen	2	o
 kolera	1
-kolesterol	1	3
-kolet	1
-kolfiber	2
-kolhydrater	2
-kolkraft	2
+kolesterol	1	3	o
+kolet	1	o
+kolfiber	2	o
+kolhydrater	2	o
+kolkraft	2	o
 koll	1
 kolla	2
 kollade	2
@@ -17723,7 +17723,7 @@ kollision	1	2
 kollisionen	1	2
 kollo	1
 kolloidalt	1	3
-kolmården	2
+kolmården	2	o
 kolon	1
 koloni	1	2
 kolonial	1	3
@@ -17740,17 +17740,17 @@ kolonisering	1	3
 koloniseringen	1	3
 kolonn	1	1
 kolossalt	1	2
-kolsvart	2
-kolsyra	2
+kolsvart	2	o
+kolsyra	2	o
 kolumn	1	1
 kolumnen	1	1
 kolumner	1	1
 kolumnist	1	2
 kolv	1
 kolven	1
-kolväten	2
+kolväten	2	o
 kom	1
-koma	2
+koma	2	o
 kombi	1
 kombination	1	3
 kombinationen	1	3
@@ -17959,9 +17959,9 @@ kondition	1	2
 konditor	2	1
 konditori	1	3
 konditoriet	1	3
-kondom	1	1
-kondomen	1	1
-kondomer	1	1
+kondom	1	1	o
+kondomen	1	1	o
+kondomer	1	1	o
 konduktören	1	2
 koner	1
 konferens	1	2
@@ -18221,10 +18221,10 @@ kontroverser	1	2
 kontroversiell	1	4
 kontroversiella	1	4
 kontroversiellt	1	4
-konung	2
-konungariket	2
-konungen	2
-konungens	2
+konung	2	o
+konungariket	2	o
+konungen	2	o
+konungens	2	o
 konvent	1	1
 konventet	1	1
 konvention	1	2
@@ -18282,13 +18282,13 @@ kopplingar	2
 kopplingarna	2
 kopplingen	2
 kor	1
-kora	2
+kora	2	o
 koraller	1	1
 korallrev	2	1
 koran	1	1
 koranen	1	1
 koranens	1	1
-koras	2
+koras	2	o
 korea	2	1
 korean	1	2
 koreaner	1	2
@@ -18318,10 +18318,10 @@ korrelation	1	3
 korrelerar	1	2
 korrespondens	1	3
 korrespondent	1	3
-korridor	1	2
-korridoren	1	2
-korridorer	1	2
-korridorerna	1	2
+korridor	1	2	o
+korridoren	1	2	o
+korridorer	1	2	o
+korridorerna	1	2	o
 korrigera	1	2
 korrigerar	1	2
 korrigeras	1	2
@@ -18369,7 +18369,7 @@ kortfilm	2
 kortfilmer	2
 korthet	2
 korthus	2
-kortison	1	2
+kortison	1	2	o
 kortlek	2
 kortlivade	2
 kortläsare	2
@@ -18427,7 +18427,7 @@ kostymer	1	1
 kottar	2
 kotte	2
 kotten	2
-kovacs	1
+kovacs	1	o
 kpi	1	2
 kr	2
 krabba	2
@@ -18554,8 +18554,8 @@ kriminell	1	2
 kriminella	1	2
 kriminellas	1	2
 kriminellt	1	2
-kriminolog	1	3
-kriminologer	1	3
+kriminolog	1	3	o
+kriminologer	1	3	o
 kriminologi	1	4
 krimskrams	2
 kring	1
@@ -18648,9 +18648,9 @@ krokodil	1	2
 krokodiler	1	2
 krokom	2
 krokoms	2
-krom	1
-kromosom	1	2
-kromosomer	1	2
+krom	1	o
+kromosom	1	2	o
+kromosomer	1	2	o
 krona	2
 kronan	2
 kronans	2
@@ -18660,7 +18660,7 @@ kroniskt	1
 kronoberg	1	2
 kronobergs	1	2
 kronofogden	2
-kronologisk	1	2
+kronologisk	1	2	o
 kronor	2
 kronorna	2
 kronors	2
@@ -18958,8 +18958,8 @@ kupa	2
 kupan	2
 kuperad	1	1
 kuperat	1	1
-kupol	1	1
-kupolen	1	1
+kupol	1	1	o
+kupolen	1	1	o
 kupong	1	1
 kupongen	1	1
 kuponger	1	1
@@ -19181,7 +19181,7 @@ kylning	2
 kyls	1
 kylskåp	2
 kylskåpet	2
-kyoto	1	1
+kyoto	1	1	o
 kypare	2
 kyrka	2
 kyrkan	2
@@ -19460,7 +19460,7 @@ laboratorier	1	3
 laboratoriet	1	3
 laboratorium	1	3
 labour	1
-labrador	1	2
+labrador	1	2	o
 labyrint	1	2
 labyrinten	1	2
 lack	1
@@ -19579,7 +19579,7 @@ lake	2
 lakejer	1	1
 lakes	2
 lakrits	1
-laktos	1	1
+laktos	1	1	o
 lalla	2
 lam	1
 lama	2
@@ -19688,7 +19688,7 @@ lantliga	2
 lantmännen	2
 lantmäteriet	1	3
 lantz	1
-lanzarote	2	2
+lanzarote	2	2	o
 laos	1
 lap	1
 lapidus	1
@@ -20458,9 +20458,9 @@ lodrätt	2
 loffe	2
 loftet	1
 log	1
-loge	1
-logen	1
-loger	2
+loge	1	o
+logen	1	o
+loger	2	o
 logg	1
 logga	2
 loggade	2
@@ -20469,9 +20469,9 @@ loggbok	2
 logi	1	1
 logik	1	1
 logiken	1	1
-logisk	1
-logiska	1
-logiskt	1
+logisk	1	o
+logiska	1	o
+logiskt	1	o
 logistik	1	2
 logistiken	1	2
 logistiska	1	1
@@ -20508,7 +20508,7 @@ loke	2
 loket	1
 lokförare	2
 lokföraren	2
-lola	2
+lola	2	o
 lolita	2	1
 lollo	2
 lolo	2
@@ -20522,7 +20522,7 @@ look	1
 looken	1
 looks	1
 loop	1
-lopez	1
+lopez	1	o
 lopp	1
 loppan	2
 loppen	1
@@ -20531,12 +20531,12 @@ loppis	1
 loppmarknad	2
 loppor	2
 lorca	1
-lord	1
-lords	1
-lorentz	1
-lorentzon	2
+lord	1	o
+lords	1	o
+lorentz	1	o
+lorentzon	2	o
 lorenzo	1	1
-lori	1
+lori	1	o
 lorraine	1	1
 lort	1
 los	1
@@ -20574,21 +20574,21 @@ louisiana	1	3
 lounge	2
 lourdes	1
 louvren	1
-lov	1
-lova	2
-lovad	2
-lovade	2
-lovande	2
+lov	1	o
+lova	2	o
+lovad	2	o
+lovade	2	o
+lovande	2	o
 lovar	2
-lovat	2
+lovat	2	o
 love	2
-loven	1
+loven	1	o
 loves	2
-lovet	1
+lovet	1	o
 lovisa	2	1
-lovligt	2
-lovord	2
-lovsång	2
+lovligt	2	o
+lovord	2	o
+lovsång	2	o
 lowe	2
 lp	2
 lrf	1	2
@@ -20804,7 +20804,7 @@ lyktan	2
 lyktor	2
 lyktstolpe	2
 lyman	1
-lymfom	1	1
+lymfom	1	1	o
 lynn	1
 lynne	2
 lyon	1	1
@@ -21386,7 +21386,7 @@ magnifik	1	2
 magnifika	1	2
 magnifikt	1	2
 magnitud	1	2
-magnolia	1	1
+magnolia	1	1	o
 magnum	2
 magnus	1
 magnusson	2
@@ -22049,9 +22049,9 @@ medierna	1
 mediernas	1
 mediers	1
 mediet	1
-medioker	1	2
-mediokert	1	2
-mediokra	1	2
+medioker	1	2	o
+mediokert	1	2	o
+mediokra	1	2	o
 meditation	1	3
 meditera	1	2
 medium	1
@@ -22109,7 +22109,7 @@ medvetslös	2
 medvetslöshet	2
 medvind	2
 meg	1
-megafon	1	2
+megafon	1	2	o
 mehdi	1
 mehmet	1
 mej	1
@@ -22187,7 +22187,7 @@ menar	2
 menas	2
 menat	2
 mendez	1
-mendoza	1	1
+mendoza	1	1	o
 mened	2
 mening	2
 meningar	2
@@ -22238,21 +22238,21 @@ messmör	2
 mestadels	2
 meta	2
 metabolism	1	3
-metadon	1	2
-metafor	1	2
-metaforen	1	2
-metaforer	1	2
+metadon	1	2	o
+metafor	1	2	o
+metaforen	1	2	o
+metaforer	1	2	o
 metall	1	1
 metallen	1	1
 metaller	1	1
 metan	1	1
 metangas	2	1
-metanol	1	2
-meteor	1	2
-meteorolog	1	4
-meteorologer	1	4
+metanol	1	2	o
+meteor	1	2	o
+meteorolog	1	4	o
+meteorologer	1	4	o
 meteorologi	1	5
-meteorologiska	1	4
+meteorologiska	1	4	o
 meter	1
 meters	1
 metod	1	1
@@ -22264,8 +22264,8 @@ metodiken	1	2
 metodiskt	1	1
 metro	2
 metron	1
-metropol	1	2
-metropolis	1	1
+metropol	1	2	o
+metropolis	1	1	o
 metropolitan	1	2
 mets	1
 mette	2
@@ -22330,16 +22330,16 @@ mikhail	1
 miki	1
 mikkelsen	2
 mikro	1
-mikrober	1	1
+mikrober	1	1	o
 mikrobiologi	2
-mikrofon	1	2
-mikrofonen	1	2
-mikrofoner	1	2
+mikrofon	1	2	o
+mikrofonen	1	2	o
+mikrofoner	1	2	o
 mikrogram	1	2
 mikron	1
 mikroorganismer	2
-mikroskop	1	2
-mikroskopiska	1	2
+mikroskop	1	2	o
+mikroskopiska	1	2	o
 mikrovågsugn	2
 mil	1
 mila	1
@@ -22433,7 +22433,7 @@ milwaukee	1	1
 mim	1
 mimi	2
 mimmi	2
-mimosa	2	1
+mimosa	2	1	o
 min	1
 mina	2
 minas	2
@@ -22817,10 +22817,10 @@ molin	1	1
 molins	1	1
 moll	1
 molly	1
-moln	1
-molnen	1
-molnet	1
-molnigt	2
+moln	1	o
+molnen	1	o
+molnet	1	o
+molnigt	2	o
 mom	1	1
 moment	1	1
 momentet	1	1
@@ -22828,7 +22828,7 @@ moments	1	1
 moms	1
 momsen	1
 mon	1
-mona	2
+mona	2	o
 monaco	1
 monark	1	1
 monarken	1	1
@@ -22840,16 +22840,16 @@ monetära	1	2
 mongolerna	1	1
 mongoliet	1	2
 mongoliska	1	1
-monica	1
-monika	1
+monica	1	o
+monika	1	o
 monique	1	1
 monitor	1
 mono	1
-monolog	1	2
-monopol	1	2
-monopolet	1	2
-monotona	1	2
-monotont	1	2
+monolog	1	2	o
+monopol	1	2	o
+monopolet	1	2	o
+monotona	1	2	o
+monotont	1	2	o
 monroe	1	1
 monsieur	1	1
 monster	1
@@ -22916,8 +22916,8 @@ morfin	1	1
 morföräldrar	2
 morgan	1
 morgans	1
-morgnar	2
-morgnarna	2
+morgnar	2	o
+morgnarna	2	o
 morgon	2
 morgondag	2
 morgondagen	2
@@ -22937,8 +22937,8 @@ morin	1	1
 mormon	1	1
 mormoner	1	1
 mormor	2
-mornarna	2
-morning	1
+mornarna	2	o
+morning	1	o
 morot	2
 moroten	2
 morr	1
@@ -22952,8 +22952,8 @@ morsan	2
 morsans	2
 morse	2
 morsor	2
-morten	1
-mortimer	1
+morten	1	o
+mortimer	1	o
 morötter	2
 mos	1
 mosa	2
@@ -23026,7 +23026,7 @@ motorhuven	2
 motoriska	1	1
 motorn	2
 motorns	2
-motorola	2	2
+motorola	2	2	o
 motors	2
 motorsport	2
 motorstopp	2
@@ -23117,8 +23117,8 @@ motvind	2
 mount	1
 mountainbike	1
 mountains	1
-mozart	1
-mozarts	1
+mozart	1	o
+mozarts	1	o
 mozzarella	2	2
 mp	2
 mr	1
@@ -23330,7 +23330,7 @@ myterna	1
 mytiska	1
 mytologi	1	3
 mytologin	1	3
-mytologisk	1	2
+mytologisk	1	2	o
 mytoman	1	2
 mytomspunna	2
 mä	1
@@ -23742,11 +23742,11 @@ nara	2
 narcissism	1	2
 narcissistiska	1	2
 narkomaner	1	2
-narkos	1	1
-narkotika	1	1
-narkotikabrott	2	1
-narkotikan	1	1
-narkotikapolitik	2	1
+narkos	1	1	o
+narkotika	1	1	o
+narkotikabrott	2	1	o
+narkotikan	1	1	o
+narkotikapolitik	2	1	o
 narr	1
 narrativ	1
 narva	2
@@ -23965,7 +23965,7 @@ nelly	1
 nelson	1
 nemesis	2
 nemo	1
-neon	1	1
+neon	1	1	o
 nepal	1	1
 nepotism	1	2
 neptunus	1	1
@@ -24117,7 +24117,7 @@ nobelpris	2	1
 nobelpriset	2	1
 nobelpristagare	2	1
 nobelpristagaren	2	1
-noble	1
+noble	1	o
 nock	1
 nod	1
 noder	2
@@ -24171,7 +24171,7 @@ norden	1
 nordens	1
 nordeuropa	2
 nordgren	2
-nordic	1
+nordic	1	o
 nordin	1	1
 nordirland	2
 nordisk	1
@@ -24261,7 +24261,7 @@ norske	2
 norskt	1
 norstedt	2
 norström	2
-north	1
+north	1	o
 norwich	1
 norén	1	1
 nos	1
@@ -24294,7 +24294,7 @@ notiser	1	1
 notre	1
 nottingham	1
 nov	1	1
-nova	2
+nova	2	o
 novak	1
 novell	1	1
 novellen	1	1
@@ -24441,7 +24441,7 @@ nyliberaler	2
 nyliberalism	2
 nyligen	2
 nyllet	2
-nylon	1	1
+nylon	1	1	o
 nyman	1
 nymodigheter	2
 nynazister	2
@@ -25445,10 +25445,10 @@ ordens	1
 ordentlig	1	1
 ordentliga	1	1
 ordentligt	1	1
-order	1
-orderingång	2
-ordern	1
-orders	1
+order	1	o
+orderingång	2	o
+ordern	1	o
+orders	1	o
 ordet	1
 ordets	1
 ordf	2
@@ -25463,19 +25463,19 @@ ordinär	1	2
 ordlek	2
 ordlista	2
 ordlistan	2
-ordna	2
-ordnad	2
-ordnade	2
-ordnades	2
-ordnar	2
-ordnas	2
-ordnat	2
-ordning	2
-ordningen	2
-ordningsmakten	2
-ordningsregler	2
-ordningsvakter	2
-ordningsvakterna	2
+ordna	2	o
+ordnad	2	o
+ordnade	2	o
+ordnades	2	o
+ordnar	2	o
+ordnas	2	o
+ordnat	2	o
+ordning	2	o
+ordningen	2	o
+ordningsmakten	2	o
+ordningsregler	2	o
+ordningsvakter	2	o
+ordningsvakterna	2	o
 ords	1
 ordspråk	2
 ordspråket	2
@@ -25564,7 +25564,7 @@ orkester	1	1
 orkestern	1	1
 orkestrar	1	1
 orkidéer	1	2
-orlov	1	1
+orlov	1	1	o
 orm	1
 ormar	2
 ormen	1
@@ -25598,7 +25598,7 @@ orsaken	2
 orsaker	2
 orsakerna	2
 orsakssamband	2
-orson	1
+orson	1	o
 ort	1
 ortega	1	1
 orten	1
@@ -25611,7 +25611,7 @@ ortodoxa	1	2
 orup	1
 orust	1
 orvar	1
-orwell	1
+orwell	1	o
 orädd	2
 orädda	2
 oräkneliga	2
@@ -25791,19 +25791,19 @@ outsourcing	2
 outstanding	1	2
 oval	1	1
 ovala	1	1
-ovan	2
+ovan	2	o
 ovana	2
-ovanifrån	2
+ovanifrån	2	o
 ovanlig	2
 ovanliga	2
 ovanligare	2
 ovanligt	2
-ovannämnda	2
-ovansida	2
-ovansidan	2
-ovanstående	2
+ovannämnda	2	o
+ovansida	2	o
+ovansidan	2	o
+ovanstående	2	o
 ovant	2
-ovanvåningen	2
+ovanvåningen	2	o
 ovationer	1	2
 ove	2
 overall	1	2
@@ -25850,7 +25850,7 @@ oxfilé	2
 oxford	1
 oxie	1
 oy	1
-ozon	1	1
+ozon	1	1	o
 oäkta	2
 oändlig	1	1
 oändliga	1	1
@@ -25951,7 +25951,7 @@ panda	2
 pandan	2
 pandemin	1	2
 pandor	2
-pandora	2	1
+pandora	2	1	o
 panel	1	1
 panelen	1	1
 paneler	1	1
@@ -26202,7 +26202,7 @@ patienter	1	2
 patienterna	1	2
 patients	1	2
 patologi	1	3
-patologisk	1	2
+patologisk	1	2	o
 patos	1
 patrask	1	1
 patriarkala	1	3
@@ -26254,13 +26254,13 @@ peab	1
 pearl	1
 pearson	1
 peck	1
-pedagog	1	2
-pedagoger	1	2
+pedagog	1	2	o
+pedagoger	1	2	o
 pedagogik	1	3
 pedagogiken	1	3
-pedagogisk	1	2
-pedagogiska	1	2
-pedagogiskt	1	2
+pedagogisk	1	2	o
+pedagogiska	1	2	o
+pedagogiskt	1	2	o
 pedal	1	1
 pedalen	1	1
 peder	1
@@ -26362,7 +26362,7 @@ perez	1
 perfekt	1	1
 perfekta	1	1
 perfektion	1	2
-performance	1	1
+performance	1	1	o
 perifera	1	2
 periferin	1	3
 period	1	2
@@ -26391,7 +26391,7 @@ persilja	2
 persisk	1
 persiska	1
 person	1
-persona	2	1
+persona	2	1	o
 personal	1	2
 personalbrist	2	2
 personalen	1	2
@@ -26546,7 +26546,7 @@ pinnarna	2
 pinne	2
 pinnen	2
 pinocchio	1	1
-pinot	1	1
+pinot	1	1	o
 pins	1
 pinsam	2
 pinsamma	2
@@ -26573,7 +26573,7 @@ pirater	1	1
 piraterna	1	1
 piratkopiering	2	1
 piren	1
-piroger	1	1
+piroger	1	1	o
 pirr	1
 pirrar	2
 pirrig	2
@@ -26821,8 +26821,8 @@ pojkvänner	2
 pojkväns	2
 pokal	1	1
 pokalen	1	1
-poker	1
-pokerspelare	2
+poker	1	o
+pokerspelare	2	o
 pokus	1
 pol	1
 polack	1	1
@@ -26840,7 +26840,7 @@ polarn	2
 polarna	2
 polcirkeln	2
 polemik	1	2
-polen	1
+polen	1	o
 polens	1
 polera	1	1
 polerna	2
@@ -26906,9 +26906,9 @@ pollen	1
 polletten	1	1
 polly	1
 polo	1
-polsk	1
-polska	2
-polskt	1
+polsk	1	o
+polska	2	o
+polskt	1	o
 poltava	2	1
 polyester	1	2
 polymer	1	2
@@ -26927,7 +26927,7 @@ pontén	1	1
 pool	1
 poolen	1
 pooler	2
-pop	1
+pop	1	o
 popcorn	1
 popcornen	1
 popmusik	2
@@ -26979,13 +26979,13 @@ portaler	1	1
 portar	2
 portarna	2
 porten	1
-porter	1
+porter	1	o
 portfölj	1	1
 portföljen	1	1
 portion	1	1
 portioner	1	1
 portkod	2
-portland	1
+portland	1	o
 porto	1
 porträtt	1	1
 porträtten	1	1
@@ -26997,7 +26997,7 @@ portugals	1
 portugiserna	1	2
 portugisisk	1	2
 portugisiska	1	2
-pose	1
+pose	1	o
 poseidon	1	1
 posera	1	1
 poserar	1	1
@@ -27413,10 +27413,10 @@ profilerat	1	2
 profilering	1	2
 profilerna	1	1
 profit	1	1
-prognos	1	1
-prognosen	1	1
-prognoser	1	1
-prognoserna	1	1
+prognos	1	1	o
+prognosen	1	1	o
+prognoser	1	1	o
+prognoserna	1	1	o
 program	1	1
 programledare	2	1
 programledaren	2	1
@@ -27464,7 +27464,7 @@ promille	2	1
 prominenta	1	2
 promotion	1	2
 prompt	1
-pronomen	1	1
+pronomen	1	1	o
 prop	1	3
 propaganda	2	2
 propagandan	2	2
@@ -27472,7 +27472,7 @@ propagera	1	2
 propagerar	1	2
 propeller	1	1
 propellern	1	1
-proper	1
+proper	1	o
 proportion	1	2
 proportionell	1	3
 proportionellt	1	3
@@ -27513,7 +27513,7 @@ protesterna	1	1
 protokoll	1	2
 protokollen	1	2
 protokollet	1	2
-proton	1	1
+proton	1	1	o
 prototyp	1	2
 prototypen	1	2
 prototyper	1	2
@@ -27620,22 +27620,22 @@ psykiska	1
 psykiskt	1
 psykoanalys	2
 psykofarmaka	1	2
-psykolog	1	2
-psykologen	1	2
-psykologer	1	2
+psykolog	1	2	o
+psykologen	1	2	o
+psykologer	1	2	o
 psykologi	1	3
 psykologin	1	3
-psykologisk	1	2
-psykologiska	1	2
-psykologiskt	1	2
+psykologisk	1	2	o
+psykologiska	1	2	o
+psykologiskt	1	2	o
 psykopat	1	2
 psykopater	1	2
-psykos	1	1
-psykoser	1	1
+psykos	1	1	o
+psykoser	1	1	o
 psykoterapeut	2
 psykoterapi	2
-psykotisk	1	1
-psykotiska	1	1
+psykotisk	1	1	o
+psykotiska	1	1	o
 psykvården	2
 pts	1	2
 pub	1
@@ -28036,7 +28036,7 @@ ramlat	2
 ramlösa	2
 ramnäs	2
 ramon	1	1
-ramona	2	1
+ramona	2	1	o
 ramones	1	1
 ramos	1
 ramp	1
@@ -28225,7 +28225,7 @@ receptionist	1	3
 receptionisten	1	3
 receptorer	1	2
 recitera	1	2
-record	1	1
+record	1	1	o
 red	1
 reda	2
 redaktion	1	2
@@ -28454,9 +28454,9 @@ rekommenderas	1	3
 rekommenderat	1	3
 rekonstruera	1	3
 rekonstruktion	1	3
-rekord	1	1
-rekordet	1	1
-rekordmånga	2	1
+rekord	1	1	o
+rekordet	1	1	o
+rekordmånga	2	1	o
 rekreation	1	3
 rekryter	1	1
 rekrytera	1	2
@@ -28592,10 +28592,10 @@ replikerna	1	1
 repor	2
 reportage	1	2
 reportaget	1	2
-reporter	1	1
-reportern	1	1
-reportrar	1	1
-reportrarna	1	1
+reporter	1	1	o
+reportern	1	1	o
+reportrar	1	1	o
+reportrarna	1	1	o
 reporäntan	2
 representant	1	3
 representanten	1	3
@@ -28801,7 +28801,7 @@ rfsu	1	3
 rheborg	2
 rhen	1
 rhododendron	1	2
-rhodos	1
+rhodos	1	o
 ria	2
 ribba	2
 ribban	2
@@ -29033,10 +29033,10 @@ roade	2
 roande	2
 roar	1
 roat	2
-rob	1
+rob	1	o
 robban	2
 robbie	1
-robert	1
+robert	1	o
 roberto	1	1
 robertsfors	1	2
 robin	1
@@ -29066,9 +29066,9 @@ rodd	1
 rodde	2
 rodeo	1	1
 roder	1
-rodna	2
-rodnad	2
-rodnar	2
+rodna	2	o
+rodnad	2	o
+rodnar	2	o
 rodney	1
 rodret	1
 rodrigo	1	1
@@ -29076,12 +29076,12 @@ rodriguez	1	1
 roffa	2
 roffar	2
 roffe	2
-roger	1
-rogers	1
+roger	1	o
+rogers	1	o
 rogivande	2
 rojas	1
-roland	1
-rolex	1
+roland	1	o
+rolex	1	o
 rolf	1
 rolig	2
 roliga	2
@@ -29118,10 +29118,10 @@ romantiskt	1	1
 romare	2
 romarna	2
 romarriket	2
-romeo	1
-romer	1
-romerna	1
-romernas	1
+romeo	1	o
+romer	1	o
+romerna	1	o
+romernas	1	o
 romero	1	1
 romersk	1
 romerska	1
@@ -29168,7 +29168,7 @@ rosengård	2
 rosenlund	2
 rosenqvist	2
 rosett	1	1
-rosie	1
+rosie	1	o
 rosita	2	1
 roskilde	2	1
 roslagen	2
@@ -29177,7 +29177,7 @@ roslagsbanan	2
 rosling	2
 roslings	2
 roslund	2
-rosmarin	2
+rosmarin	2	o
 rosor	2
 rosorna	2
 ross	1
@@ -29193,7 +29193,7 @@ rostbiff	2
 rostfritt	2
 rostig	2
 rostiga	2
-rostock	1
+rostock	1	o
 rosé	1	1
 rosén	1	1
 rot	1
@@ -29201,7 +29201,7 @@ rota	2
 rotad	2
 rotade	2
 rotar	2
-rotary	1
+rotary	1	o
 rotat	2
 rotation	1	2
 rotebro	1	2
@@ -29221,7 +29221,7 @@ router	1
 rov	1
 rovdjur	2
 rovdjuren	2
-rover	1
+rover	1	o
 roxette	1	1
 roy	1
 royal	1
@@ -29868,9 +29868,9 @@ saluhall	2
 saluhallen	2
 salut	1	1
 salva	2
-salvador	1	2
+salvador	1	2	o
 salvan	2
-salvatore	1	2
+salvatore	1	2	o
 salvia	1
 salvor	2
 salzburg	1
@@ -30026,7 +30026,7 @@ samordnare	2
 samordnas	2
 samordnat	2
 samordning	2
-sampdoria	1	1
+sampdoria	1	1	o
 sampson	1
 samråd	2
 samröre	2
@@ -30201,7 +30201,7 @@ sawyer	1
 sax	1
 saxar	2
 saxen	1
-saxofon	1	2
+saxofon	1	2	o
 sca	1	2
 scala	1
 scan	1
@@ -30420,9 +30420,9 @@ senatorer	1	2
 senatorn	2	1
 senegal	1	2
 senil	1	1
-senior	1	2
-seniorer	1	2
-seniors	1	2
+senior	1	2	o
+seniorer	1	2	o
+seniors	1	2	o
 senor	2
 sensation	1	2
 sensationell	1	3
@@ -30610,9 +30610,9 @@ shoppade	2
 shoppar	2
 shoppat	2
 shopping	1
-short	1
-shorts	1
-shortsen	1
+short	1	o
+shorts	1	o
+shortsen	1	o
 shot	1
 show	1
 showen	1
@@ -30701,7 +30701,7 @@ sil	1
 sila	2
 silar	2
 silas	2
-silikon	1	2
+silikon	1	2	o
 silja	2
 siljan	2
 silke	2
@@ -30730,7 +30730,7 @@ simmat	2
 simmons	1
 simning	2
 simon	1
-simone	2	1
+simone	2	1	o
 simons	1
 simonsson	2
 simpel	1
@@ -31600,8 +31600,8 @@ skrotade	2
 skrotar	2
 skrotas	2
 skroten	1
-skrov	1
-skrovet	1
+skrov	1	o
+skrovet	1	o
 skrubb	1
 skrubba	2
 skruv	1
@@ -32309,7 +32309,7 @@ smittsam	2
 smittsamma	2
 smittskyddsinstitutet	2
 smittspridning	2
-smoking	1
+smoking	1	o
 sms	1	2
 smuggla	2
 smugglade	2
@@ -32574,7 +32574,7 @@ snöstormen	2
 snövit	2
 so	2
 soares	1	2
-sober	1
+sober	1	o
 social	1	2
 sociala	1	2
 socialarbetare	2	2
@@ -32616,9 +32616,9 @@ socialtjänstens	2	2
 societeten	1	3
 socioekonomiska	2
 sociologi	1	4
-sociologiska	1	3
-socionom	1	3
-socionomer	1	3
+sociologiska	1	3	o
+socionom	1	3	o
+socionomer	1	3	o
 sockar	2
 sockel	1
 socken	1
@@ -32653,7 +32653,7 @@ soja	2
 sojabönor	2
 sojamjölk	2
 sok	2
-sokrates	1
+sokrates	1	o
 sol	1
 sola	2
 solade	2
@@ -32696,7 +32696,7 @@ sollefteå	1	1
 sollentuna	2
 solljus	2
 solljuset	2
-solna	2
+solna	2	o
 solnedgång	2
 solnedgångar	2
 solnedgången	2
@@ -32774,17 +32774,17 @@ sonat	2
 sond	1
 sonden	1
 sondera	1	1
-sondotter	2
-sonen	1
-sonens	1
+sondotter	2	o
+sonen	1	o
+sonens	1	o
 sonia	2
-sonic	1
+sonic	1	o
 sonika	1
 sonja	2
 sonny	1
 sons	1
-sonson	2
-sony	1
+sonson	2	o
+sony	1	o
 sopa	2
 sopade	2
 sopar	2
@@ -32853,12 +32853,12 @@ south	1
 southampton	1	2
 souvenir	1	2
 souvenirer	1	2
-sov	1
-sova	2
-sovandes	2
-sovdags	2
-sover	1
-sovit	2
+sov	1	o
+sova	2	o
+sovandes	2	o
+sovdags	2	o
+sover	1	o
+sovit	2	o
 sovjet	1	1
 sovjetisk	1	1
 sovjetiska	1	1
@@ -32866,12 +32866,12 @@ sovjetiskt	1	1
 sovjets	1	1
 sovjetunionen	2	1
 sovjetunionens	2	1
-sovmorgon	2
-sovplats	2
-sovplatser	2
-sovrum	2
-sovrummet	2
-sovsäck	2
+sovmorgon	2	o
+sovplats	2	o
+sovplatser	2	o
+sovrum	2	o
+sovrummet	2	o
+sovsäck	2	o
 sp	2
 space	1
 spade	2
@@ -33869,8 +33869,8 @@ stortrivs	2
 storuman	2
 storvinsten	2
 storvreta	2
-story	1
-storyn	1
+story	1	o
+storyn	1	o
 straff	1
 straffa	2
 straffade	2
@@ -33967,7 +33967,7 @@ strip	1
 strippa	2
 strippar	2
 strips	1
-stroganoff	1
+stroganoff	1	o
 stroke	1
 strong	1
 strosa	2
@@ -34530,11 +34530,11 @@ superstjärna	2
 superstjärnan	2
 supit	2
 suppleant	1	2
-support	1	1
-supporter	1	1
-supporters	1	1
-supportrar	1	1
-supportrarna	1	1
+support	1	1	o
+supporter	1	1	o
+supporters	1	1	o
+supportrar	1	1	o
+supportrarna	1	1	o
 sur	1
 sura	2
 surahammar	2	2
@@ -34874,18 +34874,18 @@ sylten	1
 sylvester	1	1
 sylvia	1
 symaskin	2
-symbios	1	2
-symbol	1	1
-symbolen	1	1
-symboler	1	1
-symbolerna	1	1
+symbios	1	2	o
+symbol	1	1	o
+symbolen	1	1	o
+symboler	1	1	o
+symbolerna	1	1	o
 symbolik	1	2
 symboliken	1	2
 symbolisera	1	3
 symboliserar	1	3
-symbolisk	1	1
-symboliska	1	1
-symboliskt	1	1
+symbolisk	1	1	o
+symboliska	1	1	o
+symboliskt	1	1	o
 symfoni	1	2
 symfoniorkester	2	2
 symmetri	1	2
@@ -34900,11 +34900,11 @@ sympatiska	1	1
 sympatiskt	1	1
 sympatisör	1	3
 sympatisörer	1	3
-symposium	1	1
-symptom	1	1
-symptomen	1	1
-symtom	1	1
-symtomen	1	1
+symposium	1	1	o
+symptom	1	1	o
+symptomen	1	1	o
+symtom	1	1	o
+symtomen	1	1	o
 syn	1
 syna	2
 synagoga	2
@@ -34924,8 +34924,8 @@ synder	2
 synderna	2
 syndernas	2
 syndiga	2
-syndrom	1	1
-syndromet	1	1
+syndrom	1	1	o
+syndromet	1	1	o
 syne	2
 synen	1
 syner	2
@@ -35186,7 +35186,7 @@ sättet	1
 sättning	2
 sätts	1
 säve	2
-sävehof	1	2
+sävehof	1	2	o
 sävsjö	2
 så	1
 sådana	2
@@ -35700,31 +35700,31 @@ tekniskt	1
 teknologi	1	3
 teknologier	1	3
 teknologin	1	3
-teknologisk	1	2
-teknologiska	1	2
+teknologisk	1	2	o
+teknologiska	1	2	o
 tel	1
 tele	2
 telecom	1	2
-telefon	1	2
-telefonen	1	2
-telefonens	1	2
-telefoner	1	2
-telefonerna	1	2
-telefonförsäljare	2	2
+telefon	1	2	o
+telefonen	1	2	o
+telefonens	1	2	o
+telefoner	1	2	o
+telefonerna	1	2	o
+telefonförsäljare	2	2	o
 telefoni	1	3
 telefonist	1	3
-telefonkö	2	2
-telefonnummer	2	2
-telefonnumret	2	2
-telefonsamtal	2	2
-telefonsamtalet	2	2
-telefonsvarare	2	2
+telefonkö	2	2	o
+telefonnummer	2	2	o
+telefonnumret	2	2	o
+telefonsamtal	2	2	o
+telefonsamtalet	2	2	o
+telefonsvarare	2	2	o
 telegram	1	2
 telekom	1	2
 telekommunikation	2
 telenor	1	2
-teleskop	1	2
-teleskopet	1	2
+teleskop	1	2	o
+teleskopet	1	2	o
 televerket	2
 television	1	3
 televisionen	1	3
@@ -35760,7 +35760,7 @@ tennessee	1	2
 tennis	1
 tennisen	1
 tennisspelare	2
-tenor	1	1
+tenor	1	1	o
 tensta	1
 tenta	2
 tentakler	1	1
@@ -35770,9 +35770,9 @@ tentor	2
 teo	1
 teodor	1
 teologi	1	3
-teologisk	1	2
-teologiska	1	2
-teologiskt	1	2
+teologisk	1	2	o
+teologiska	1	2	o
+teologiskt	1	2	o
 teoretiker	1	2
 teoretisk	1	2
 teoretiska	1	2
@@ -35862,7 +35862,7 @@ testet	1
 testiklar	1	1
 testiklarna	1	1
 testning	2
-testosteron	1	3
+testosteron	1	3	o
 testresultat	2
 tet	1
 tetra	2
@@ -36367,7 +36367,7 @@ tjejs	1
 tjejsnack	2
 tjena	1
 tjenare	2
-tjernobyl	1	1
+tjernobyl	1	1	o
 tjetjenien	1	1
 tji	1
 tjo	1
@@ -36379,7 +36379,7 @@ tjockisar	1
 tjockisen	1
 tjocklek	2
 tjockt	1
-tjog	1
+tjog	1	o
 tjomme	2
 tjuga	2
 tjugo	2
@@ -36438,7 +36438,7 @@ tjörn	1
 tjörns	1
 tjöt	1
 tnt	2
-to	1
+to	1	o
 toa	2
 toalett	1	2
 toaletten	1	2
@@ -36472,7 +36472,7 @@ tokig	2
 tokiga	2
 tokigheter	2
 tokigt	2
-tokyo	1
+tokyo	1	o
 toledo	1	1
 tolerans	1	2
 tolerant	1	2
@@ -36512,7 +36512,7 @@ tomelilla	2
 tomgång	2
 tomhet	2
 tomheten	2
-tomi	1
+tomi	1	o
 tomma	2
 tommie	1
 tommy	1
@@ -36547,7 +36547,7 @@ tons	1
 tonsättare	2
 tonvikt	2
 tonvis	2
-tony	1
+tony	1	o
 tonår	2
 tonåren	2
 tonårig	2
@@ -36589,14 +36589,14 @@ tor	1
 tora	2
 torben	1
 torbjörn	1
-tord	1
+tord	1	o
 torde	2
 tore	2
 torftigt	2
 torg	1
 torget	1
 torgny	1
-tori	1
+tori	1	o
 torino	1	1
 tork	1
 torka	2
@@ -36610,10 +36610,10 @@ torktumlare	2
 torktumlaren	2
 torn	1
 tornado	1	1
-tornedalen	2
+tornedalen	2	o
 tornen	1
 tornet	1
-toro	1
+toro	1	o
 toronto	1	1
 torp	1
 torpa	2
@@ -36902,7 +36902,7 @@ trist	1
 trista	2
 tristan	2
 tristess	1	1
-triton	1	1
+triton	1	1	o
 triumf	1	1
 trivas	2
 trivdes	2
@@ -36959,7 +36959,7 @@ trollkarlen	2
 trolls	1
 trollsländor	2
 trollstav	2
-trombon	1	1
+trombon	1	1	o
 tromsö	2
 tron	1
 tronarvinge	2
@@ -36968,9 +36968,9 @@ tronen	1
 tronföljare	2
 trons	1
 tropikerna	1	1
-tropisk	1
-tropiska	1
-tropiskt	1
+tropisk	1	o
+tropiska	1	o
+tropiskt	1	o
 tror	1
 tros	1
 trosa	2
@@ -37170,7 +37170,7 @@ tu	1
 tub	1
 tuben	1
 tuber	2
-tuberkulos	1	3
+tuberkulos	1	3	o
 tucker	1
 tuff	1
 tuffa	2
@@ -37275,7 +37275,7 @@ turkiets	1	1
 turkisk	1
 turkiska	1
 turkiskt	1
-turkos	1	1
+turkos	1	1	o
 turligt	2
 turner	1
 turnera	1	1
@@ -37458,7 +37458,7 @@ tyranner	1	1
 tyranni	1	2
 tyresö	2
 tyringe	2
-tyrone	2	1
+tyrone	2	1	o
 tysk	1
 tyska	2
 tyskan	2
@@ -39571,9 +39571,9 @@ vermont	1	1
 verner	1
 vernissage	1	2
 vernon	1
-verona	2	1
-veronica	1	1
-veronika	1	1
+verona	2	1	o
+veronica	1	1	o
+veronika	1	1	o
 vers	1
 versa	2
 versailles	1	1
@@ -40003,7 +40003,7 @@ vm	2
 vodka	2
 vodkan	2
 voff	1
-vogel	1
+vogel	1	o
 vogue	1
 voice	1
 vokabulär	1	3
@@ -40985,7 +40985,7 @@ zoo	1
 zoom	1
 zooma	2
 zoomar	2
-zorn	1
+zorn	1	o
 zorro	1
 zucchini	1	1
 zulu	1

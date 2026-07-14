@@ -65,8 +65,21 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("station")).toBe("staɧˈuːn"); // -tion stressed
         expect(phonemizeWord("student")).toBe("stɵdˈɛnt");
         expect(phonemizeWord("universitet")).toBe("ɵnɪvɛʂɪtˈeːt"); // stress on the 5th nucleus
-        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈuːn"); // NOTE: o=uː is the deferred lexical-o (target [oː])
         expect(phonemizeWord("europa")).toBe("ɛɵrˈuːpa"); // diphthong ⟨eu⟩ counts 2 nuclei → stress lands past it
+    });
+
+    test("Phase 3 — lexical o-quality (NST): stressed ⟨o⟩ is [oː] or [uː]", () => {
+        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈoːn"); // lexical [oː] override
+        expect(phonemizeWord("kol")).toBe("koːl");
+        expect(phonemizeWord("biolog")).toBe("bɪɔlˈoːɡ"); // stressed o → oː; unstressed o stays ɔ
+        expect(phonemizeWord("monopol")).toBe("mɔnɔpˈoːl");
+        expect(phonemizeWord("adobe")).toBe("adˈoːbɛ"); // loanword silent final ⟨e⟩ is POST-stress → oː still holds
+        expect(phonemizeWord("bok")).toBe("buːk"); // default [uː] kept
+        expect(phonemizeWord("son")).toBe("suːn");
+        expect(phonemizeWord("stor")).toBe("stuːr");
+        // Alignment guard: a PRE-stress vowel-count mismatch (NST consonantises ⟨eu⟩ → ne$vrU, shifting the
+        // ordinal) withholds the override — conservative uː — rather than land oː on the wrong ⟨o⟩.
+        expect(phonemizeWord("neurolog")).toBe("nɛɵrˈuːlɔɡ");
     });
 
     test("segmental edge cases (é, gn, x, ck geminate, ä-before-r)", () => {
