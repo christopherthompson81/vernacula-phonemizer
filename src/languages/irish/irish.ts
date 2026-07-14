@@ -19,7 +19,7 @@ const isSlenderC = (ph: string): boolean => ph.endsWith("ʲ") || ph === "c" || p
 const BACK_V = new Set(["ɑː", "oː"]); // LONG back vowels only (áit, cóir); short a is inconsistent (gairm has none)
 // /r/ or /l/ (broad or slender) triggers svarabhakti before a labial/velar/palatal consonant.
 const LIQUID = new Set(["ɾˠ", "ɾʲ", "l̪ˠ", "lʲ"]);
-const SVARABHAKTI_NEXT = new Set(["mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "ɡ", "ɟ", "x", "ç", "ɣ", "j"]);
+const SVARABHAKTI_NEXT = new Set(["mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "w", "ɡ", "ɟ", "x", "ç", "ɣ", "j", "n̪ˠ", "nʲ"]);
 
 /** Back vowel + slender CODA consonant → insert an i-offglide ⁱ (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ, aill → aⁱlʲ);
  *  a pre-vocalic slender consonant (baile → balʲɛ) or uː/iː/eː gets none. */
@@ -42,10 +42,11 @@ function epenthesis(segs: S[]): void {
     }
 }
 
-/** Coda /n/ → ŋ before a velar (long → l̪ˠɔŋ); a word-final ɡ after that ŋ is absorbed (ng → ŋ). */
+/** Native ⟨ng⟩ → ŋ (long → l̪ˠɔŋ), the word-final ɡ absorbed. Only before ɡ — not ⟨nc⟩, which stays n̪ˠk in the
+ *  loanwords that have it (banc → bˠan̪ˠk). */
 function nasalAssim(segs: { ph: string; nucleus: boolean }[]): void {
     for (let i = 0; i < segs.length - 1; i++)
-        if ((segs[i]!.ph === "n̪ˠ" || segs[i]!.ph === "nʲ") && (segs[i + 1]!.ph === "ɡ" || segs[i + 1]!.ph === "k"))
+        if ((segs[i]!.ph === "n̪ˠ" || segs[i]!.ph === "nʲ") && segs[i + 1]!.ph === "ɡ")
             segs[i]!.ph = "ŋ";
     const L = segs.length;
     if (L >= 2 && segs[L - 1]!.ph === "ɡ" && segs[L - 2]!.ph === "ŋ") segs.pop();

@@ -73,3 +73,9 @@ Referee 44.2→44.4% (these are ⁱ/ə-folded in the eval, so ~neutral — canon
 diphthongization (poll→pˠaᶷl̪ˠ, ceann→cˈaᶷn̪ˠ — but trom→ɔ, fionn→ɔ inconsistent); short-V lengthening before
 tense clusters (bord→bˠoːɾˠd̪ˠ); medial dh/gh vocalization (aghaidh); eo→ɔ vs oː context (deoch/ceol); airgead-
 type pre-vocalic epenthesis.
+
+### Run 2 review — epenthesis triggers + nasalAssim scope
+Broad oracle sweep + adversarial verifier. Fixes: (a) svarabhakti also fires before /w/ and /n/ (marbh→mˠˈaɾˠəw,
+dorn→d̪ˠˈɔɾˠən̪ˠ — the -bh→w words + rn were missing a schwa); (b) nasalAssim restricted to ⟨ng⟩ (not ⟨nc⟩), so
+the loanword banc→bˠˈan̪ˠk (was ŋk). Verifier confirmed the splice/pass/stress logic is sound (no code bug).
+Kept borb/colm svarabhakti (linguistically correct; the oracle is inconsistent there). Full suite 203/203.
