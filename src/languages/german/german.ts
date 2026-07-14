@@ -126,6 +126,14 @@ function applyReduction(ipa: string, spec: string | undefined): string {
     return out;
 }
 
+/** German has no stressed schwa: a ˈə/ˌə is the g2p weak-schwa rule ("final-syllable e → ə") mis-firing on what
+ *  turned out to be the STRESSED root syllable (gesetz → the setz e; the g2p runs before stress and can't see it).
+ *  Restore it to short ɛ — applyLength then lengthens to eː where the length lexicon flags that nucleus long
+ *  (Problem → …bleːm, System → …teːm). Must run BEFORE applyLength. */
+function fixStressedSchwa(ipa: string): string {
+    return ipa.replace(/([ˈˌ])ə/gu, "$1ɛ");
+}
+
 const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏə]/g;
 
 /** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
@@ -181,7 +189,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return applyReduction(applyLength(placeStress(full, ord), lengthDict().get(w)), reductionDict().get(w));
+        return applyReduction(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), reductionDict().get(w));
     }
 
     const segs = toSegments(w);
@@ -206,7 +214,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return applyReduction(applyLength(out, lengthDict().get(w)), reductionDict().get(w));
+    return applyReduction(applyLength(fixStressedSchwa(out), lengthDict().get(w)), reductionDict().get(w));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
