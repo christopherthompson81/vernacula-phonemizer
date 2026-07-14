@@ -62,17 +62,24 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 9 — unstressed loanword vowel tensing (lax → tense, kaikki-derived quality lexicon)", () => {
+        expect(phonemizeWord("November")).toBe("nofˈɛmbɐ"); // ɔ → o
+        expect(phonemizeWord("digital")).toBe("diɡitˈaːl"); // ɪ → i (×2)
+        expect(phonemizeWord("Dezember")).toBe("det͡sˈɛmbɐ"); // ɛ → e
+        expect(phonemizeWord("Plural")).toBe("pluʁˈaːl"); // ʊ → u
+    });
+
     test("Run 8 — no stressed schwa (weak-schwa mis-fire on a stressed root → ɛ, lengthened where flagged)", () => {
         expect(phonemizeWord("gesetz")).toBe("ɡəzˈɛt͡s"); // setz is the stressed root, not a schwa ending
         expect(phonemizeWord("generell")).toBe("ɡənəʁˈɛl");
-        expect(phonemizeWord("Problem")).toBe("pʁɔblˈeːm"); // ɛ → eː via the length lexicon (1L)
+        expect(phonemizeWord("Problem")).toBe("pʁoblˈeːm"); // ɛ→eː (length 1L) + unstressed ɔ→o (quality lexicon)
         expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: genuine unstressed -en schwa unaffected
     });
 
     test("Run 7 — unstressed e→ə reduction (lexical: native ə, loanword ɛ)", () => {
         expect(phonemizeWord("wesentlich")).toBe("vˈeːzəntlɪç"); // native: -ent- e → ə
         expect(phonemizeWord("anderen")).toBe("ˈandəʁən"); // native: -er- e → ə
-        expect(phonemizeWord("helikopter")).toBe("hɛlɪkˈɔptɐ"); // LOANWORD: e stays ɛ (not reduced)
+        expect(phonemizeWord("helikopter")).toBe("helikˈɔptɐ"); // LOANWORD: unstressed e/i TENSE (quality lexicon), not reduced to ə
     });
 
     test("Run 6 — Latin -tion/-tial suffix (ti + o/a → t͡si̯), native -tie unaffected", () => {

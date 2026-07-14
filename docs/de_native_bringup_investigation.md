@@ -156,3 +156,18 @@ alone (its ˈ-guard); it only reduces the unstressed ge-/ver- prefix on top of t
 weak-schwa mis-fire — restore it to short ɛ BEFORE applyLength, which then lengthens it to eː where the length
 lexicon flags that nucleus long (Problem→pʁɔblˈeːm, System→zʏstˈeːm). Fixes gesetz→ɡəzˈɛt͡s, generell→ɡənəʁˈɛl,
 moment/effekt/modell/gesellschaft. kaikki 57.4→57.7%, wikipron 58.1→58.2% (both up; small sample overlap).
+
+## Run 9 — generalized the reduction lexicon to a full unstressed-vowel QUALITY lexicon
+The residual's two biggest classes were both LEXICAL and both the same mechanism: more unstressed e→ə (mid-
+compound -el-/-en-, OOV words) AND loanword lax→tense vowels (november→noˈvɛmbɐ, digital→diɡiˈtaːl, Plural→
+pluˈʁaːl — unstressed ɪ→i, ɔ→o, ɛ→e, ʊ→u). Generalized the Run-7 reduction lexicon (reduction.tsv, applyReduction)
+into a per-position QUALITY lexicon (quality.tsv, 15,441 entries, applyQuality; tools/gen/build-de-reduction.mts
+→ build-de-quality.mts) that records, for each UNSTRESSED nucleus, the target vowel where kaikki differs from
+ours along a known lax→tense / e→ə pair. Stressed quality stays length.tsv's job (skipped here + guarded).
+
+kaikki 57.4→**66.0%** (+8.6); the INDEPENDENT wikipron secondary 58.1→**66.3%** (+8.1 — the cross-source proof
+this is real, not kaikki overfitting; validated the tensing before building). Two Run-7/8 goldens updated to the
+now-tensed forms (Problem→pʁoblˈeːm, helikopter→helikɔptɐ — both kaikki-confirmed; the old lax ones were wrong).
+
+REMAINING: compound-seam st→ʃt / d→t (needs the splitter to fire on more constituents — the last structural
+lever) + fine loanword consonants (x~ç, ŋ~nɡ). de-kaikki-full.tsv stays a regenerable intermediate.
