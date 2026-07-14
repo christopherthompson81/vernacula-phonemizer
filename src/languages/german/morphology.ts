@@ -131,6 +131,11 @@ export function decompose(word: string): Decomp {
         for (const s of SUFFIXES) {
             if (!rest.endsWith(s) || rest.length - s.length < 3) continue;
             const stem = rest.slice(0, rest.length - s.length);
+            // Don't strip a boundary INSIDE the ⟨sch⟩ digraph: a "…schen" word is the far-commoner VERB rausch·en
+            // (sch = one /ʃ/), not the raus·chen diminutive. The rare s-final-noun diminutives (Häuschen) already
+            // don't reach here (häus isn't a lexeme). This is the split-ranking principle in miniature: reject a
+            // boundary that shatters a digraph. (Also guards ⟨ch⟩-initial suffixes generally.)
+            if (s.startsWith("ch") && stem.endsWith("s")) continue;
             // vowel-initial suffix resyllabifies (loose); consonant-initial one creates a boundary → stem must resolve.
             const ok = VOWEL_INITIAL_SUFFIX.has(s)
                 ? isStemish(stem)
