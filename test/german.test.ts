@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 12 — split ranking: don't shatter ⟨sch⟩ (…schen verb, not raus·chen)", () => {
+        expect(phonemizeWord("rauschen")).toBe("ʁˈaʊ̯ʃən"); // rausch·en (sch = ʃ), NOT raus·chen (s+ç)
+        expect(phonemizeWord("waschen")).toBe("vˈaʃən");
+        expect(phonemizeWord("Tuch")).toBe("tuːx"); // control: ⟨ch⟩ unaffected
+    });
+
     test("Run 11 — word-initial ch (ç/k) + coda-cluster final devoicing", () => {
         expect(phonemizeWord("China")).toBe("çˈiːna"); // initial ch + front vowel → ç
         expect(phonemizeWord("Christ")).toBe("kʁɪst"); // initial ch + consonant → k

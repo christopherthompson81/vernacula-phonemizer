@@ -209,3 +209,12 @@ Two clean, self-contained fixes from the ✅-plan's bucket A:
 Deferred within bucket A (need morphology, → Phase 12): -igkeit→ç (suffix coverage), boundary ⟨ng⟩→n+g (prefix
 coverage), and the -chen/-schen split ambiguity (rauschen=rausch·en vs Häuschen=häus·chen — needs split RANKING,
 not greedy first-match; see Phase 12).
+
+## Run 12 (Phase 12a) — split ranking: don't shatter the ⟨sch⟩ digraph
+The greedy first-match suffix strip wrongly split "…schen" verbs into raus·chen (breaking sch into s+ç): rauschen→
+raus·chen. Applied the split-RANKING principle in miniature — reject a boundary that shatters a digraph: skip a
+⟨ch⟩-initial suffix when the stem ends in ⟨s⟩, defaulting "…schen" to the far-commoner VERB rausch·en (sch = ʃ).
+rauschen/waschen/wünschen/mischen/forschen now correct; the rare s-final diminutives (Häuschen) are unchanged
+(they already don't reach here). Full-corpus (74k) 64.3→66.2% cumulative with Phase 11; full suite green. The
+FULLER candidate-ranking (score competing decompositions by digraph-integrity + constituent attestation, not
+first-match) is the architecture for the remaining compound-coverage work (growing stems.txt, Phase 12b).
