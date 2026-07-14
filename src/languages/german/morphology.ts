@@ -69,14 +69,34 @@ function splitCompound(w: string, depth = 0): string[] | null {
             const rest = w.slice(i + lk.length);
             if (rest.length < 3) continue;
             if (isConstituent(rest)) {
-                // rest is a known constituent, but it may ITSELF be a compound (stillstand → still·stand): recurse
-                // so the inner seam gets element-initial treatment (waffen·still·stand → the 2nd st → ʃt too).
-                const deeper = splitCompound(rest, depth + 1);
+                // rest is a known constituent, but it may ITSELF be a compound (stillstand → still·stand) or carry a
+                // stressed prefix (vorstellung → vor·stellung): recurse / strip so the inner seam gets element-initial
+                // treatment (waffen·still·stand, wahn·vor·stellung → the inner st → ʃt too).
+                const deeper =
+                    splitCompound(rest, depth + 1) ??
+                    splitPrefixedStem(rest, depth + 1);
                 return deeper ? [head + lk, ...deeper] : [head + lk, rest];
             }
             const tail = splitCompound(rest, depth + 1);
             if (tail) return [head + lk, ...tail];
         }
+    }
+    return null;
+}
+
+/** A compound constituent may itself be a stressed-prefix + stem (vorstellung → vor·stellung): strip the prefix so
+ *  the stem is g2p'd element-initially (the inner st/sp/sch → ʃ). Gated to a known constituent by the caller; the
+ *  remainder must be a constituent, itself split, or at least stemish (so vor·stellung splits even though "stellung"
+ *  isn't a standalone lexeme). Uses the closed stressed-prefix list, so the risky in-/un- never fire here. */
+function splitPrefixedStem(w: string, depth: number): string[] | null {
+    if (depth > 2) return null;
+    for (const p of PREFIX_STRESSED) {
+        if (!w.startsWith(p) || w.length - p.length < 4) continue;
+        const r = w.slice(p.length);
+        if (isConstituent(r)) return [p, r];
+        const sub = splitCompound(r, depth + 1);
+        if (sub) return [p, ...sub];
+        if (isStemish(r)) return [p, r];
     }
     return null;
 }

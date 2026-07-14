@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 26 — recurse into a prefixed compound constituent (wahn·vor·stellung)", () => {
+        expect(phonemizeWord("Wahnvorstellung")).toBe("vˈaːnfoːɐ̯ʃtɛlʊŋ"); // inner vor·stellung → st → ʃt
+        expect(phonemizeWord("Vorstellung")).toBe("fˈoːɐ̯ʃtɛlʊŋ"); // control: standalone still correct
+        expect(phonemizeWord("Donaudampfschiff")).toBe("dˈoːnaʊ̯dampfʃɪf"); // control: unaffected compound
+    });
+
     test("Run 25 — a STRESSED bare ɐ is a wrongly-reduced -er → ɛʁ", () => {
         expect(phonemizeWord("Laterne")).toBe("latˈɛʁnə"); // stressed -er → ɛʁ (was ɐ)
         expect(phonemizeWord("Inferno")).toBe("ɪnfˈɛʁno");
