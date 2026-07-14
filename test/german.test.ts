@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 29 — -er restore before consonant lexicon unblocks loanword v→v", () => {
+        expect(phonemizeWord("universal")).toBe("univɛʁzˈaːl"); // v now lands (was f) — ʁ inserted before applyConsonant
+        expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native ⟨v⟩ → f unchanged
+    });
+
     test("Run 28 — loanword -er restoration lexicon (unstressed ɐ → ɛʁ)", () => {
         expect(phonemizeWord("Adverb")).toBe("ˈatfɛʁp"); // loanword unstressed -er → ɛʁ (was ɐ)
         expect(phonemizeWord("Expertise")).toBe("ɛkspɛʁtˈiːzə");
