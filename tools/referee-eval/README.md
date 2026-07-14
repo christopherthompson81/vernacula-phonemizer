@@ -53,7 +53,7 @@ Every language with a phonemizer has a referee (or a documented gap). Current ba
 independent secondary in parens): **zu 100%** · **es 92.5%** · **ha 90.3%** (epitran 88.4%) · **th 81.9%** ·
 **hi 77.7%** · **ta 63.0%** · **tr 76.2%** (epitran 79.8%) · **ru 94.8%** (gold 97.7%) · **si 93.5%** · **sv 52.6%** (Phase 3, NST accent+stress+o-quality lexicon) · **ca 81.3%** (Central; multi-dialect referee, reduction folded) ·
 **kk 86.2%** · **cmn 84.7%** (syllable) · **pt 78.0%** (gold 99.4%) · **vi 71.0%** (epitran 51.3%) · **ff 71.2%**
-· **cs 69.9%** · **fr 66.5%** (gold 85.6%) · **ga 44.8%** (Celtic broad/slender; 3-dialect referee) · **cy 56.5%** (Welsh; dialect-matched NW referee) · **ko 58.5%** · **ja 57.9%** · **de 76.5%** (wikipron 75.6%) ·
+· **cs 69.9%** · **fr 66.5%** (gold 85.6%) · **ga 44.8%** (Celtic broad/slender; 3-dialect referee) · **cy 56.5%** (Welsh; dialect-matched NW referee) · **ko 58.5%** · **ja 57.9%** · **de 77.0%** (wikipron 76.3%) ·
 **ar 45.4%** · **en 36.1%**.
 
 The low ones are referee-quality artifacts, not engine defects: **en** vs wikipron is a noisy referee (proper

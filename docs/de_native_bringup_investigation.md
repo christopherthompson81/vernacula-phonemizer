@@ -384,3 +384,11 @@ The ɔɪ→ør residual (Friseur → our fʁizɔʏ̯ɐ̯, kaikki fʁizøːɐ̯):
 word-final so ⟨-euer⟩ (Steuer→ʃtɔʏ̯ɐ, teuer) stays the diphthong; -euC- mid-word (heute, Europa, neu) unaffected.
 kaikki 76.4→76.5%, wikipron 75.5→75.6%. (Ingenieur→…iːuːɐ̯ is -ieur, the ie-digraph fires first — separate, deferred.)
 Full suite 237 green.
+
+## Run 33 — loanword full unstressed vowel (ə → ɛ/e), native schwa protected
+The ən→ɛn / ən→en residual (bivalent/benzol/dokument, genial/genital, Berlin): our weak-schwa rule over-reduces an
+unstressed ⟨e⟩ that a LOANWORD keeps as full ɛ/e (Talent→talɛnt, Dokument→dɔkumɛnt, general→ɡenəʁaːl, Berlin→bɛʁliːn).
+Added the reverse pair "ə":{ɛ,e} to build-de-quality.mts. kaikki-gated, so NATIVE schwa is untouched (machen→maxən,
+gemacht→gəmaxt, Blume, beruf all keep ə — kaikki has ə there too). Quality lexicon 18113→18573. kaikki 76.5→77.0%,
+wikipron 75.6→76.3% — a big cross-source jump. Updated 3 stale goldens (genial/general/Berlin encoded the old ə).
+Floor 0.75→0.76. Full suite 238 green.
