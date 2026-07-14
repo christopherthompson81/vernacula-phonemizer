@@ -48,7 +48,7 @@ describe("Japanese kana → IPA (Phase 1)", () => {
         expect(phonemizeWordSegmental("日本語")).toBe("niho̞ŋɡo̞");
         expect(phonemizeWordSegmental("東京")).toBe("to̞ːkʲo̞ː");
         expect(phonemizeWordSegmental("食べる")).toBe("täbe̞ɾɯᵝ");
-        expect(phonemizeWordSegmental("十")).toBe("d͡ʑɯᵝɯᵝ"); // youon blocks same-vowel coalescence
+        expect(phonemizeWordSegmental("十")).toBe("d͡ʑɯᵝː"); // じゅう → long vowel ː (preferred notation, even after youon)
     });
 
     it("bunsetsu segmentation of spaceless kanji text", () => {

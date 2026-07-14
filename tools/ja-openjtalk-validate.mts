@@ -1,10 +1,10 @@
 /**
  * Independent validation of the Japanese reading front-end (kanji→kana + は/へ particles) against OpenJTalk
  * (pyopenjtalk, naist-jdic — a DIFFERENT source than our JMdict-derived readings.tsv). Both readings go through
- * our OWN kanaToIpa (normalises katakana/long-vowel notation), so the difference is purely the reading; long
- * vowels are further folded (our ゅう=ɯᵝɯᵝ vs OpenJTalk ー=ɯᵝː). Reports per-CHARACTER accuracy (fair — a single
+ * our OWN kanaToIpa (normalises katakana/long-vowel notation to the length mark ː, so our ゅう and OpenJTalk's
+ * ー both surface as ɯᵝː), so the difference is purely the reading. Reports per-CHARACTER accuracy (fair — a single
  * homograph error doesn't fail a whole sentence) and whole-sentence exact. Number-bearing sentences are excluded
- * (counters are a separate deferred subsystem).
+ * (counters are the separate readCounter subsystem).
  *
  * REGENERATE the gold (run in a venv with `pip install pyopenjtalk`):
  *   Tatoeba jpn: curl -sL https://downloads.tatoeba.org/exports/per_language/jpn/jpn_sentences.tsv.bz2 | bunzip2 > jpn.tsv

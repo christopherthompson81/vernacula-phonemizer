@@ -186,3 +186,13 @@ the ひゃく gemination (300本→さんびゃくほん should be さんびゃ�
 OpenJTalk gold jumped 100→1000, skipping 200–900. Added びゃく/ぴゃく→びゃっ/ぴゃっ to the gemination table (k/h, not
 s: 300頭→さんびゃくとう) and widened the gold to all hundreds+thousands (1342 combos): **99.9% (1341/1342)** — again
 only the 1日 ついたち/いちにち semantic split remains.
+
+## Run 7 — 2026-07-14 — ː preferred for long vowels (youon inconsistency closed)
+
+Per user steer, ː is now the preferred long-vowel notation EVERYWHERE. Previously the same-vowel coalescence in
+kanaToMorae was gated on `!prevYouon` (espeak-matching: じゅう→d͡ʑɯᵝɯᵝ but じゅー→d͡ʑɯᵝː) — an inconsistency where a
+doubled vowel and a ー-lengthened vowel of the SAME length rendered differently. Removed the guard (and the now
+write-only `prevYouon` var): じゅう→d͡ʑɯᵝː, きゅう→kʲɯᵝː, しゅう→ɕɯᵝː == しゅー. Morae count is unchanged (ː is still its
+own mora), so pitch downstep placement is unaffected. Reading validator steady at 97.7% per-char (it already folded
+long vowels, so the change is neutral there — but the raw canonical output is now consistent). Updated the 十 golden
+(d͡ʑɯᵝɯᵝ→d͡ʑɯᵝː) and stale validator comments.
