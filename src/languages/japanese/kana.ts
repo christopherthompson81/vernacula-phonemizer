@@ -50,7 +50,6 @@ export function kanaToMorae(word: string): string[] | null {
     const chars = [...toHiragana(word)];
     const morae: string[] = [];
     let i = 0;
-    let prevYouon = false; // the previous mora was a youon (small ゃゅょ) — blocks same-vowel coalescence (see below)
     let lastVowel = ""; // trailing vowel of the current syllable (survives a ː, cleared by ん/っ)
     while (i < chars.length) {
         const c = chars[i]!,
@@ -61,7 +60,6 @@ export function kanaToMorae(word: string): string[] | null {
             const ms = FOREIGN[c + nx]!;
             morae.push(ms);
             lastVowel = vowelOf(ms);
-            prevYouon = false;
             i += 2;
             continue;
         }
@@ -70,7 +68,6 @@ export function kanaToMorae(word: string): string[] | null {
             const ms = YOUON_ONSET[c]! + SMALL_Y[nx]!;
             morae.push(ms);
             lastVowel = vowelOf(ms);
-            prevYouon = true;
             i += 2;
             continue;
         }
@@ -82,7 +79,6 @@ export function kanaToMorae(word: string): string[] | null {
                     : MORA[nx];
             morae.push(next && !isVowelChar(next[0]!) ? next[0]! : "ʔ");
             lastVowel = "";
-            prevYouon = false;
             i++;
             continue;
         }
@@ -94,9 +90,10 @@ export function kanaToMorae(word: string): string[] | null {
         }
         const m = MORA[c];
         if (m === undefined) return null; // not kana → let the caller handle (romaji, punctuation, kanji)
-        // Long-vowel coalescence, keyed on the CURRENT KANA (not the phoneme): the お+う / え+い digraphs always fold
-        // (おう→o̞ː, えい→e̞ː; fires after youon too — きょう→kʲo̞ː). A vowel kana repeating the previous vowel folds
-        // (おお→o̞ː, いい→iː) EXCEPT after a youon mora, where espeak keeps the two morae (じゅう→d͡ʑɯᵝɯᵝ, きゅう→kʲɯᵝɯᵝ).
+        // Long-vowel coalescence, keyed on the CURRENT KANA (not the phoneme): the お+う / え+い digraphs (おう→o̞ː,
+        // えい→e̞ː) and a vowel kana repeating the previous vowel (おお→o̞ː, いい→iː) all fold to a length mark. This
+        // fires after a youon mora too — ː is the preferred long-vowel notation everywhere (じゅう→d͡ʑɯᵝː, きゅう→kʲɯᵝː,
+        // きょう→kʲo̞ː), for canonical consistency (a doubled vowel and a ー-lengthened vowel are the same length).
         // A fold pushes a bare ː mora; stacking (けいい→ke̞ːː) works since lastVowel survives the ː. を is EXCLUDED from
         // the same-vowel rule (a distinct kana, near-always the particle): 語を→ɡo̞o̞, never ɡo̞ː.
         if (lastVowel !== "") {
@@ -108,7 +105,7 @@ export function kanaToMorae(word: string): string[] | null {
                 morae.push("ː");
                 i++;
                 continue;
-            } else if (!prevYouon && VOWEL_KANA[c] === lastVowel) {
+            } else if (VOWEL_KANA[c] === lastVowel) {
                 morae.push("ː");
                 i++;
                 continue;
@@ -116,7 +113,6 @@ export function kanaToMorae(word: string): string[] | null {
         }
         morae.push(m);
         lastVowel = vowelOf(m);
-        prevYouon = false;
         i++;
     }
     // Moraic ん assimilates to the following onset's place: n before coronals, ŋ before velars, m before labials,
