@@ -59,6 +59,15 @@ function consonantDict(): Map<string, string> {
 }
 // Ɛ = the g2p's internal marker for short ⟨ä⟩ (see g2p.ts): it lengthens to ɛː (not the eː that ⟨e⟩'s ɛ gives),
 // and applyLength normalises any surviving Ɛ back to plain ɛ. It must count as a vowel nucleus everywhere upstream.
+// Loanword -er RESTORATION (word → nucleus-ordinal,…) — the unstressed ⟨er⟩ that stays the full ɛʁ in loans
+// (universal → univɛʁzaːl) instead of our native reduction ɐ; from kaikki. Can't live in the vowel/consonant
+// lexicons — it INSERTS a consonant (ɐ → ɛ + ʁ). Applied as a post-pass (after applyConsonant, so ordinals hold).
+let ER: Map<string, string> | undefined;
+function erDict(): Map<string, string> {
+    if (ER === undefined)
+        ER = loadTsvMap(import.meta.url, "er.tsv", undefined, { optional: true });
+    return ER;
+}
 const LONG_OF: Record<string, string> = { ...MANIFEST.vowels.longOf, "Ɛ": "ɛː" };
 const SHORT_OF = MANIFEST.vowels.shortOf;
 const VOWEL_CHARS = MANIFEST.vowelChars + "Ɛ";
@@ -184,6 +193,33 @@ function restoreStressedIe(ipa: string): string {
     return ipa.replace(/i̯([ˈˌ])[əɛ]/gu, "$1iː");
 }
 
+/** Restore an UNSTRESSED reduced -er (bare ɐ) to the full loanword ɛʁ at the kaikki-flagged nuclei (universal →
+ *  univɛʁzaːl). Post-pass — runs after applyConsonant so the inserted ʁ doesn't shift consonant ordinals. The
+ *  stressed case is the restoreStressedEr rule; this is the lexical unstressed native(ɐ)-vs-loan(ɛʁ) split. */
+function applyErRestore(ipa: string, spec: string | undefined): string {
+    if (!spec) return ipa;
+    const corr = new Set(spec.split(",").map(Number));
+    let out = "", ord = 0, i = 0;
+    while (i < ipa.length) {
+        const ch = ipa[i]!;
+        if (!VOWEL_CHARS.includes(ch) || (ipa[i + 1] ?? "") === "̯") {
+            out += ch; // consonant, or an offglide (incl. ɐ̯) which is not a nucleus
+            i++;
+            continue;
+        }
+        if (corr.has(ord) && ch === "ɐ") {
+            out += "ɛʁ";
+            i++;
+        } else {
+            const long = (ipa[i + 1] ?? "") === "ː";
+            out += long ? ch + "ː" : ch;
+            i += long ? 2 : 1;
+        }
+        ord++;
+    }
+    return out;
+}
+
 /** A STRESSED bare ɐ is always a wrongly-reduced -er: our g2p reduces ⟨er⟩+C to ɐ (correct for the unstressed
  *  ending, Wasser → vasɐ), but that nucleus can never legitimately carry stress — a stressed -er is the full ɛʁ
  *  (Laterne → latɛʁnə, Inferno → ɪnfɛʁno, modern → modɛʁn). Restore ˈɐ/ˌɐ (not the ɐ̯ offglide) to ɛʁ. Runs last. */
@@ -246,7 +282,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return restoreStressedEr(restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w))));
+        return restoreStressedEr(restoreStressedIe(applyErRestore(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)), erDict().get(w))));
     }
 
     const segs = toSegments(w);
@@ -271,7 +307,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return restoreStressedEr(restoreStressedIe(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w))));
+    return restoreStressedEr(restoreStressedIe(applyErRestore(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)), erDict().get(w))));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;

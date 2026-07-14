@@ -19,7 +19,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
     cy: 0.50, // wikipron cym_latn NW broad (dialect-matched, deduped) — measured 56.5% (Run 3: reverted the oracle's i→ɨ artifact — N Welsh keeps i FRONT, centralizes only u/y); residual is names/wy-quality + length (folded away)
-    de: 0.74, // kaikki deu — measured 75.5% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
+    de: 0.75, // kaikki deu — measured 76.1% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
     ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
