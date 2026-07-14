@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 32 — word-final French -eur → øːɐ̯ (not the ɔʏ̯ diphthong)", () => {
+        expect(phonemizeWord("Friseur")).toBe("fʁizˈøːɐ̯"); // -eur loan suffix → øːɐ̯
+        expect(phonemizeWord("Amateur")).toBe("amatˈøːɐ̯");
+        expect(phonemizeWord("Steuer")).toBe("ʃtˈɔʏ̯ɐ"); // control: -euer is eu+er → diphthong stays
+    });
+
     test("Run 31 — unstressed uː/oː lax to ʊ/ɔ (Latinate -ium/-um)", () => {
         expect(phonemizeWord("Aluminium")).toBe("aːluːmˈiːni̯ʊm"); // -ium → ʊm (was uːm)
         expect(phonemizeWord("Zentrum")).toBe("t͡sˈɛntʁʊm"); // -um → ʊm

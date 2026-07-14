@@ -88,6 +88,15 @@ export function toSegments(word: string): Seg[] {
             i += 2;
             continue;
         }
+        // Word-final French -eur → øːɐ̯ (Friseur → fʁizøːɐ̯, Amateur, Ingenieur): NOT the ⟨eu⟩ diphthong ɔʏ̯. Only
+        // word-final ⟨eur⟩ (i+3===n) is the loan suffix; ⟨-euer⟩ (Steuer → ʃtɔʏ̯ɐ) is eu+er and stays the diphthong.
+        if (c === "e" && nx === "u" && nx2 === "r" && i + 3 === n) {
+            push("øː", i, true);
+            push("ɐ̯", i);
+            lastVowelLetter = "u";
+            i += 3;
+            continue;
+        }
         if ((c === "e" && nx === "u") || (c === "ä" && nx === "u")) {
             push("ɔʏ̯", i, true);
             lastVowelLetter = "u";

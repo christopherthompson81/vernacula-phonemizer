@@ -377,3 +377,10 @@ and y→ʏ (Run 17) but not the back vowels. Added u→ʊ and o→ɔ to build-de
 only fires where kaikki actually has the lax vowel (Aluminium/Helium/Studium/Zentrum -ium/-um → ʊm; unstressed -o-).
 STRESSED uː/oː are protected (the build skips stressed nuclei: Buch/gut/Hut stay long). kaikki 76.3→76.4%, wikipron
 75.3→75.5%. (Note: Museum→muːzɔʏ̯m is a separate pre-existing eu-hiatus bug, not this.) Full suite 236 green.
+
+## Run 32 — word-final French -eur → øːɐ̯
+The ɔɪ→ør residual (Friseur → our fʁizɔʏ̯ɐ̯, kaikki fʁizøːɐ̯): our ⟨eu⟩ diphthong rule read the French -eur suffix as
+ɔʏ̯. Added a g2p rule: word-final ⟨eur⟩ (i+3===n) → øːɐ̯ (Friseur, Amateur, Chauffeur, Masseur, Dompteur). Gated to
+word-final so ⟨-euer⟩ (Steuer→ʃtɔʏ̯ɐ, teuer) stays the diphthong; -euC- mid-word (heute, Europa, neu) unaffected.
+kaikki 76.4→76.5%, wikipron 75.5→75.6%. (Ingenieur→…iːuːɐ̯ is -ieur, the ie-digraph fires first — separate, deferred.)
+Full suite 237 green.
