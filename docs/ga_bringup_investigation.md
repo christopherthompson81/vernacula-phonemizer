@@ -1,0 +1,58 @@
+# Irish Gaelic (ga) bring-up investigation
+
+FIRST Celtic/Goidelic. THE novel axis: BROAD (velarized ˠ) vs SLENDER (palatalized ʲ) consonants — every
+consonant has two forms, orthographically determined by flanking vowels (*caol le caol, leathan le leathan*:
+a consonant is slender next to e/i, broad next to a/o/u). Target: Standard/Connacht-ish canonical IPA.
+Oracle: espeak-ng-portable's mature authored ga engine (`phonemize(w, loadLanguage("ga"))` — full ˠ/ʲ).
+Referee: wikipron gle_latn broad (21k, but 3-DIALECT multi-pron, heavy vowel variation → ~34% ceiling even
+for a mature engine; the referee is vowel-noise-dominated, NOT a tight guard).
+
+## Canonical map (from the oracle)
+- **Broad** (ˠ): bˠ mˠ fˠ pˠ sˠ ɾˠ; dental l̪ˠ n̪ˠ d̪ˠ t̪ˠ; velar k ɡ; ch→x.
+- **Slender** (ʲ): bʲ mʲ fʲ pʲ ɾʲ lʲ nʲ dʲ tʲ; s→ʃ; velar k→c ɡ→ɟ (PALATAL stops); ch→ç.
+- Word-initial r ALWAYS broad (rí→ɾˠiː); rr broad (carr→kaɾˠ).
+- Lenition (séimhiú): bh/mh→v(ˠ/ʲ) (+w broad glide), ch→x/ç, dh/gh→ɣ/j, fh→∅, ph→f, sh/th→h.
+- Vowels: fada á→ɑː é→eː í→iː ó→oː ú→uː; short a e→ɛ i→ɪ o→ɔ u→ʊ; unstressed→ə. Stress: first syllable (native).
+- Vowel digraphs (semi-lexical): ea→a, ai→a, ao→eː, eo→oː, ua→uːə, ia→iːə, iú→uː, ói→oːⁱ … (helping vowel marks
+  the adjacent consonant's quality; the "real" vowel is the other). This is the Run-2+ residual.
+
+## Run 1 — 2026-07-14 — broad/slender core + vowels + lenition
+
+### Run 1 result — broad/slender core, 42.6% vs referee (21/24 vs oracle)
+Built irish.jsonc + manifest.ts + g2p.ts + irish.ts + numbers.ts + registry + test + referee-eval CONFIG.
+The g2p: consonant quality from the nearest flanking vowel LETTER (slender e/i, broad a/o/u; word-initial r
+broad); broad/slender consonant maps (velar k/ɡ → palatal c/ɟ slender, s→ʃ, dentals l̪ˠ/n̪ˠ/d̪ˠ/t̪ˠ);
+lenition digraphs; a longest-match vowel-cluster lookup. Orchestrator: first-syllable stress (marked even on
+monosyllables), unstressed short vowels → ə.
+
+**Fixes in-run:** monosyllables DO take stress; unstressed short-vowel reduction → ə (madra→mˠˈad̪ˠɾˠə);
+doubled consonant collapse (carr→kˈaɾˠ); final -dh/-gh silent (chéadaigh→çˈeːd̪ˠə — the -aigh/-idh endings).
+
+**21/24 exact vs the espeak-ng-portable canonical oracle** (the broad/slender + reduction + stress + lenition
++ digraph system). **Referee 42.6%** — ABOVE the ~34% ceiling a mature engine hits on this referee, because we
+fold the 3-dialect vowel-noise (the wikipron gle referee mixes Connacht/Munster/Ulster with heavy vowel
+variation; it is NOT a tight guard). Unit test 5/5.
+
+**Run-2+ residual (vowel clusters + endings):** i-offglide before a slender consonant (áit→ɑːⁱtʲ, aill→ailʲ);
+eo→ɔ vs oː context (deoch); ea→a vs ɑː dialect; bh/mh vocalization to a vowel (eabhair→…au…); -aigh→iː vs ə
+dialect; a single-dialect (Connacht) pronunciation lexicon from the oracle to pin the semi-lexical vowels.
+
+### Run 1 review (2 agents) — eclipsis, cluster quality, ng, oi
+Two finders (g2p correctness + Irish phonology). Real bugs fixed:
+- **ECLIPSIS (urú) not handled** — word-initial mb/gc/nd/bp/dt/ng/ts/bhf emitted BOTH letters. Added the eclipsis
+  table (eclipsing consonant wins, radical silent): gcat→ɡˈat̪ˠ, mbád→mˠˈɑːd̪ˠ, ngaeilge→ŋˈeːəlʲɟə, bhfuil→wˈɪlʲ.
+- **consonantSlender tunneled through consonants** — slenderized ⟨s⟩ in s-clusters (spéir→ʃpʲ) and coda consonants
+  across a cluster. Rewrote to the IMMEDIATELY-adjacent vowel; s stays broad before a consonant; coda cluster →
+  broad. spéir→sˠpʲˈeːɾʲ, ainm→ˈanʲmˠ, seanfhear→ʃˈan̪ˠəɾˠ.
+- **native ng/nc → ŋ** — n before a velar → ŋ; a word-final ɡ after it is absorbed (long→l̪ˠˈɔŋ).
+- **oi → ɔ** (was ɛ, wrong 8/8: scoil→sˠkˈɔlʲ, toil, cois).
+- **tokenizer dropped apostrophe/hyphen** (d'ól, n-éan orphaned the clitic) + unknown chars leaked into the IPA —
+  keep them in the token, strip ['-] before g2p, skip non-letters.
+- **stress**: the g2p finder claimed fada attracts stress (Munster) — the ORACLE confirms FIRST-syllable
+  (arán→ˈaɾˠˌɑːn̪ˠ, Connacht), so NO change; my first-syllable stress is correct.
+- provenance/test wording corrected: Connacht-authored, oracle a LOOSE cross-check (bh/mh→w, final -e→ə, silent
+  -dh/-gh deliberately diverge). VALIDATED: broad bh/mh→w is Connacht-correct (oracle's vˠ is Munster).
+
+Referee 42.6→**44.2%**; unit test 6/6; full suite 202/202. Deferred to Run 2 (all vowel-realization): i-offglide
+before slender C, diphthongization before tense sonorants (poll→pˠaᶷl̪ˠ), medial dh/gh vocalization, epenthetic
+schwa (gorm→ɡɔɾˠəmˠ), eo/ea context.

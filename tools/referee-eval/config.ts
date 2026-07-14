@@ -190,6 +190,24 @@ export const CONFIG: Record<string, RefLang> = {
       [/ə/gu, "", "optional/final schwa — the referee is inconsistent on mute-e"],
     ],
   },
+  ga: {
+    // Irish — the broad/slender axis. The wikipron gle_latn broad referee is a 3-DIALECT multi-pron set
+    // (Connacht/Munster/Ulster) with heavy vowel variation, so it caps around ~34% even for a mature engine;
+    // the residual is dialect vowel-noise, NOT segmental error. We fold the noisiest vowel-quality variation.
+    referees: [{ file: "ga.wikipron-gle-broad.tsv", source: "wikipron gle_latn broad (human, 3-dialect)", role: "primary" }],
+    secondaryGap: "no independent second source; the referee itself mixes 3 dialects. The espeak-ng-portable " +
+      "authored ga engine is the canonical oracle but is not espeak-independent. A single-dialect lexicon would help.",
+    segmentJoin: true,
+    folds: [
+      [/ⁱ/gu, "", "our i-offglide before a slender consonant (áit → ɑːⁱtʲ) — the referee omits it"],
+      [/[ɪi]/gu, "i", "short i / ɪ — the referee's coarse i vs our lax ɪ (Ó Siadhail standard)"],
+      [/[ʊu]/gu, "u", "short u / ʊ — coarse vs lax"],
+      [/[əɐ]/gu, "ə", "reduced vowel notation"],
+      [/[ɑa]/gu, "a", "the 3-dialect a/ɑ/ɑː variation (Connacht a, Munster ɑː)"],
+      [/[ɛe]/gu, "e", "unstressed e → ə/ɛ + short e/ɛ notation"],
+      [/[ɔo]/gu, "o", "o-quality dialect variation"],
+    ],
+  },
   ha: {
     referees: [
       { file: "ha.wikipron-hau-latn-broad.tsv", source: "wikipron hau_latn broad (human, tone-marked)", role: "primary" },
