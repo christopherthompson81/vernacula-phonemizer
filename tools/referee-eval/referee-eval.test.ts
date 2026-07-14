@@ -42,11 +42,11 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
   };
   for (const [lang, floor] of Object.entries(floors)) {
     it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
-      const primary = (await evaluate(lang)).find((r) => r.role === "primary");
+      const primary = (await evaluate(lang, true)).find((r) => r.role === "primary");
       expect(primary, `${lang} has no primary referee result`).toBeDefined();
       const frac = primary!.folded / primary!.total;
       expect(frac, `${lang} vs ${primary!.source}: ${primary!.folded}/${primary!.total}`).toBeGreaterThanOrEqual(floor);
-    });
+    }, 30000); // ONNX diacritizer (ar) is slow; generous per-test timeout
   }
 
   // Languages with no viable independent referee must RECORD the gap (not silently omit it).
