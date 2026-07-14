@@ -95,10 +95,11 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
 
-        // Latin -tion/-tial suffixes: ⟨t⟩ + ⟨i⟩ + ⟨o⟩/⟨a⟩ → t͡s + i̯ (non-syllabic glide) + the vowel
-        // (nation → nat͡si̯oːn, initial → init͡si̯aːl, rational → ʁat͡si̯oːnaːl). Scoped to ti+o/a so word-final
-        // ⟨-tie⟩ / the ⟨ie⟩ digraph (Garantie → …tiː) is NOT matched.
-        if (c === "t" && nx === "i" && (nx2 === "o" || nx2 === "a")) {
+        // Latin -tion/-tial suffixes: ⟨t⟩ + ⟨i⟩ + ⟨o⟩ (or ⟨ia⟩ + ⟨l⟩) → t͡s + i̯ (non-syllabic glide) + the vowel
+        // (nation → nat͡si̯oːn, initial → init͡si̯aːl, rational → ʁat͡si̯oːnaːl). ti+o always (reliably Latin); ti+a
+        // ONLY before ⟨l⟩ (-tial) so ⟨-tian⟩ NAMES (Christian, Bastian → ti) don't misfire; word-final ⟨-tie⟩ /
+        // the ⟨ie⟩ digraph (Garantie → …tiː) is ti+e and also unmatched.
+        if (c === "t" && nx === "i" && (nx2 === "o" || (nx2 === "a" && nx3 === "l"))) {
             push("t͡s", i);
             push("i̯", i);
             lastVowelLetter = "i";
