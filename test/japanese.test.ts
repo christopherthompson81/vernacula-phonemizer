@@ -59,6 +59,28 @@ describe("Japanese kana → IPA (Phase 1)", () => {
     });
 });
 
+describe("Japanese counters (助数詞)", () => {
+    it("gemination + handaku/rendaku on h-counters", () => {
+        expect(phonemize("1本", "ja")).toBe("iꜜppo̞ɴ"); // いっぽん
+        expect(phonemize("3本", "ja")).toBe("säꜜmbo̞ɴ"); // さんぼん (rendaku after ん)
+        expect(phonemize("10本", "ja")).toBe("d͡ʑɯᵝppo̞ɴ"); // じゅっぽん
+        expect(phonemize("4分", "ja")).toBe("jo̞mpɯᵝɴ"); // よんぷん (four-form handaku)
+        expect(phonemize("3分", "ja")).toBe("sämpɯᵝɴ"); // さんぷん
+    });
+    it("Sino number readings for 4/7/9 on some counters", () => {
+        expect(phonemize("4時", "ja")).toBe("jo̞ꜜd͡ʑi"); // よじ, not よんじ
+        expect(phonemize("8月", "ja")).toBe("hät͡ɕiɡät͡sɯᵝ"); // はちがつ
+    });
+    it("wholly-irregular readings (人 1/2)", () => {
+        expect(phonemize("1人", "ja")).toBe("çito̞ꜜɾi"); // ひとり
+        expect(phonemize("2人", "ja")).toBe("ɸɯᵝtäɾi"); // ふたり
+    });
+    it("digit-3-only rendaku: 3階 rendakus but 1000階 does not", () => {
+        expect(phonemize("3階", "ja")).toBe("säŋɡäi"); // さんがい
+        expect(phonemize("1000階", "ja")).toBe("se̞ꜜŋkäi"); // せんかい (no rendaku after せん)
+    });
+});
+
 describe("Japanese pitch accent (Phase 3)", () => {
     it("contrastive minimal pair via downstep ꜜ", () => {
         expect(phonemizeWord("箸")).toBe("häꜜɕi"); // chopsticks, accent 1

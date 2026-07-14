@@ -142,3 +142,27 @@ REMAINING for ✅: (1) COUNTER readings after numbers — a substantial subsyste
 used (8月→はちつき not はちがつ); ~5% of sentences. (2) PITCH accent independent validation (built + self-consistent
 92-99% vs the espeak snapshot, but not yet vs OpenJTalk — semi-circular anyway since we merged its data). (3) the
 ゅう youon long-vowel notation (espeak-inherited ɯᵝɯᵝ vs the consistent ː).
+
+## Run 6 — 2026-07-14 — counter subsystem (助数詞): 99.9% vs OpenJTalk
+
+Built `src/languages/japanese/counters.ts` (`readCounter(n, counter)`): number+counter euphony — gemination
+(促音便: 1→いっ, 8→はっ, 10→じゅっ; 6→ろっ/100→ひゃっ for k/h not s), h-counter handaku/rendaku (本 1→いっぽん,
+3→さんぼん), Sino 4/7/9 readings (4月→しがつ, 4時→よじ, 7人→しちにん), and fully-irregular tables (日 ついたち…はつか;
+人 ひとり/ふたり). ~28 counters. Data model: `cls` (k/s/h/regular) drives gemination; `three` = post-ん rendaku form
+(broad by default: さん AND せん both rendaku, e.g. 本→ぼん, 軒→げん, 足→ぞく); `narrowThree` restricts it to digit-3
+(階: 3階さんがい but 1000階せんかい); `four` = post-よん handaku (分→ぷん, 泊→ぱく); `n4/n7/n9` Sino overrides; `irr`/`table`.
+
+Validated vs an OpenJTalk gold of 980 num×counter combos (`tools/ja-counter-validate.mts`, long-vowel-notation-folded,
+impossible combos like 13月/32日 skipped): **99.9% (941/942)**. The one "miss" is 1日 ついたち (calendar date) vs
+OpenJTalk's いちにち (one-day duration) — both correct, a semantic not a phonological divergence, so kept ついたち.
+Iterations that got there: 35.8% → 96.8% (data: 日/人 Sino 7/9, 分/泊 handaku four-form; algorithm: generalize the
+digit-3 handaku check to all ん-ending numbers so せん=1000 rendakus like さん) → 99.9% (頭/着/丁 are gemination-class
+not regular; 軒/足 broad rendaku; 階 narrowThree).
+
+WIRED into the pipeline: `text()` fuses a `\d+` + following counter kanji into its kana reading BEFORE segmentation
+(`/(\d+)(\p{Script=Han})/` → readCounter, null for non-counters → digits pass through), so it flows through the normal
+kana path and gets pitch. 1本→iꜜppo̞ɴ, 3個→säꜜŋko̞, 2024年→…jo̞ne̞ɴ (was …jo̞nne̞ɴ, now the 4→よ fusion is correct).
+5 counter tests added to test/japanese.test.ts. Full suite 250/250, typecheck clean.
+
+REMAINING for ✅: PITCH accent independent validation (still only self-consistent vs the espeak snapshot; semi-circular
+vs OpenJTalk since we merged its data), and the ゅう youon long-vowel notation convention (ɯᵝɯᵝ vs ː).
