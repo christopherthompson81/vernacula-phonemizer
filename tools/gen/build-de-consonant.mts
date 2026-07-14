@@ -46,9 +46,19 @@ const PAIRS: Record<string, Set<string>> = {
     "ɡ": new Set(["ʒ"]), // French -age/-ge loans: Garage, Etage, Doge, Marge → ʒ (native ⟨g⟩ → ɡ)
 };
 
-// Expand kaikki's syllabic consonants (kʁɪstn̩ → …stən) so the consonant sequence aligns with our ⟨-en⟩ etc.
-const consonants = (ipa: string): string[] =>
-    [...ipa.replace(/n̩/g, "ən").replace(/l̩/g, "əl").replace(/m̩/g, "əm").replace(/ŋ̩/g, "əŋ")].filter(isConsChar);
+// Tokenise the consonant sequence. Expand kaikki's syllabic consonants (kʁɪstn̩ → …stən) so ⟨-en⟩ etc. align, and
+// count a vocalised coda-r ɐ̯ (our reading) as ONE consonant slot — otherwise it counts 0 (ɐ is a vowel) while
+// kaikki's ʁ counts 1, skewing the whole word out of the lexicon (≈half of all skew). It's never itself corrected
+// (no PAIR targets/keys ɐ̯), it just holds a slot so the OTHER consonants align by ordinal. applyConsonant matches.
+const consonants = (ipa: string): string[] => {
+    const s = ipa.replace(/n̩/g, "ən").replace(/l̩/g, "əl").replace(/m̩/g, "əm").replace(/ŋ̩/g, "əŋ");
+    const out: string[] = [];
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] === "ɐ" && s[i + 1] === "̯") { out.push("ɐ̯"); i++; continue; }
+        if (isConsChar(s[i]!)) out.push(s[i]!);
+    }
+    return out;
+};
 
 const rows = readFileSync(KAIKKI, "utf8").trim().split("\n").map((l) => l.split("\t"));
 writeFileSync(OUT, ""); // empty first → phonemizeWord's lazy load sees no corrections (compare vs the RAW engine)

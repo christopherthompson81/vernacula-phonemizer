@@ -152,7 +152,15 @@ function applyConsonant(ipa: string, spec: string | undefined): string {
     for (const c of spec.split(","))
         if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
     let out = "", ci = 0;
-    for (const ch of ipa) {
+    for (let i = 0; i < ipa.length; i++) {
+        const ch = ipa[i]!;
+        // a vocalised coda-r ɐ̯ holds ONE consonant slot (matches the build's counting) but is never corrected.
+        if (ch === "ɐ" && ipa[i + 1] === "̯") {
+            out += (corr.get(ci) ?? "ɐ̯");
+            ci++;
+            i++; // consume the ̯
+            continue;
+        }
         if (!VOWEL_CHARS.includes(ch) && !"ˈˌʔ()ː̯̩̥͡".includes(ch)) {
             out += corr.get(ci) ?? ch;
             ci++;
