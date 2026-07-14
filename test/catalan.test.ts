@@ -77,12 +77,33 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("pausa")).toBe("pˈawzə"); // s → z after a glide too
     });
 
+    test("Run 3 — ⟨x⟩ realization, -Cs cluster, bl/gl gemination", () => {
+        expect(phonemizeWord("taxi")).toBe("tˈaksi"); // ⟨x⟩ after a vowel → ks
+        expect(phonemizeWord("box")).toBe("bˈɔks"); // coda ⟨x⟩ → ks
+        expect(phonemizeWord("panxa")).toBe("pˈaɲʃə"); // ⟨x⟩ after a consonant → ʃ
+        expect(phonemizeWord("examen")).toBe("əɡzˈamən"); // ex- prefix → ɡz
+        expect(phonemizeWord("forts")).toBe("fˈɔɾs"); // -rts → rs (but fort → fˈɔɾt keeps its t)
+        expect(phonemizeWord("fort")).toBe("fˈɔɾt");
+        expect(phonemizeWord("poble")).toBe("pˈɔbːɫə"); // bl → bː + l (geminate; popular word, lexicon)
+        expect(phonemizeWord("regla")).toBe("rˈeɡːɫə"); // gl → ɡː + l
+        expect(phonemizeWord("problema")).toBe("pɾuβɫˈemə"); // learned word: bl SPIRANTIZES (not in the geminate lexicon)
+        expect(phonemizeWord("obligar")).toBe("uβɫiɣˈa");
+    });
+
+    test("review fixes: diphthong+coda oxytone stress, gua/guo glide", () => {
+        expect(phonemizeWord("correus")).toBe("kurˈɛws"); // falling diphthong + plural -s → still OXYTONE (not penult)
+        expect(phonemizeWord("dijous")).toBe("diʒˈɔws");
+        expect(phonemizeWord("remeis")).toBe("rəmˈɛjs");
+        expect(phonemizeWord("aigua")).toBe("ˈajɣwə"); // gua → ɡw (u is a glide, not a hiatus nucleus)
+        expect(phonemizeWord("guardar")).toBe("ɡwəɾðˈa");
+    });
+
     test("numbers", () => {
         expect(phonemize("2", "ca")).toBe("dˈos");
         expect(phonemize("21", "ca")).toBe("bˈin i un"); // vint-i-un
         expect(phonemize("31", "ca")).toBe("tɾˈɛntə un"); // trenta-un
         expect(phonemize("100", "ca")).toBe("sˈen"); // cent
-        expect(phonemize("200", "ca")).toBe("dˈos sˈents"); // dos-cents → two words (hyphen split)
+        expect(phonemize("200", "ca")).toBe("dˈos sˈens"); // dos-cents → two words (hyphen split)
         expect(phonemize("2024", "ca")).toBe("dˈos mˈiɫ bˈin i kwˈatɾə");
     });
 

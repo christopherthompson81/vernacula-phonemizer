@@ -20,6 +20,14 @@ function midVowels(): Map<string, string> {
     return MID_VOWELS;
 }
 
+// Words whose intervocalic ⟨bl⟩/⟨gl⟩ GEMINATES (popular: poble→pˈɔbːlə) rather than spirantizes (learned:
+// problema→pɾuβlə, obligar→uβliɣə) — a LEXICAL split from the espeak Central shim. See tools/gen/build-ca-geminate.mts.
+let GEMINATE: Map<string, string> | undefined;
+function geminates(word: string): boolean {
+    if (GEMINATE === undefined) GEMINATE = loadTsvMap(import.meta.url, "bl-gl-geminate.tsv", undefined, { optional: true });
+    return GEMINATE.has(word);
+}
+
 const NASALS = new Set(MANIFEST.nasals);
 const STOP_TO_FRIC = MANIFEST.spirantize;
 const FINAL_DEVOICE = MANIFEST.finalDevoice;
@@ -34,10 +42,13 @@ function stressedNucleus(word: string, segs: Seg[]): number {
     const accented = nuclei.find((i) => segs[i]!.accent);
     if (accented !== undefined) return accented;
     if (nuclei.length === 1) return nuclei[0]!;
-    // A word ending in a falling diphthong (…V + glide j/w) is OXYTONE — the glide closes the syllable, so the
-    // 2R rule stresses the final nucleus (remei → rəmˈɛj, correu → kurˈɛw), unlike a bare vowel-final word.
-    const last = segs[segs.length - 1]!;
-    if (!last.nucleus && (last.ph === "j" || last.ph === "w")) return nuclei[nuclei.length - 1]!;
+    // A word whose FINAL syllable is a falling diphthong (…V + glide j/w, optionally + a coda like the plural -s)
+    // is OXYTONE — the glide closes the syllable, so the 2R rule stresses the final nucleus: correu → kurˈɛw,
+    // correus → kurˈɛws, remeis → rəmˈɛjs, dijous → diʒˈɔws. (Check the seg after the LAST nucleus, not the last
+    // seg, so a following coda consonant doesn't mask the diphthong.)
+    const lastNuc = nuclei[nuclei.length - 1]!;
+    const afterLastNuc = segs[lastNuc + 1];
+    if (afterLastNuc && !afterLastNuc.nucleus && (afterLastNuc.ph === "j" || afterLastNuc.ph === "w")) return lastNuc;
     const w = word.toLowerCase();
     const penult =
         /[aeiouàèéíòóúüï]$/.test(w) ||
@@ -70,15 +81,27 @@ function voicingAssim(segs: Seg[]): void {
     }
 }
 
+/** Intervocalic ⟨bl⟩/⟨gl⟩ geminate the stop (poble → pˈɔbːlə, regla → rˈeɡːlə); the geminate blocks
+ *  spirantization (bː/ɡː are not in the STOP_TO_FRIC keys, so spirantize skips them). */
+function geminateBlGl(segs: Seg[]): void {
+    for (let i = 1; i < segs.length - 1; i++) {
+        const ph = segs[i]!.ph;
+        if ((ph === "b" || ph === "ɡ") && segs[i - 1]!.nucleus && segs[i + 1]!.ph === "ɫ") segs[i]!.ph = ph + "ː";
+    }
+}
+
 /** b/d/ɡ → β/ð/ɣ except utterance-initial, after a nasal, or after a lateral. */
 function spirantize(segs: Seg[]): void {
     for (let i = 0; i < segs.length; i++) {
         const fric = STOP_TO_FRIC[segs[i]!.ph];
         if (fric === undefined) continue;
         const prev = i > 0 ? segs[i - 1]!.ph : "";
+        const nextPh = segs[i + 1]?.ph ?? "";
         const afterLateral = prev === "ɫ" || prev === "ʎ" || prev === "ɫː";
-        // Only /d/ stays occlusive after a lateral (homorganic); /b/ and /ɡ/ DO spirantize (alga → aɫɣə).
-        const stop = i === 0 || NASALS.has(prev) || (afterLateral && segs[i]!.ph === "d");
+        // Only /d/ stays occlusive after a lateral (homorganic); /b/ and /ɡ/ DO spirantize (alga → aɫɣə). A stop
+        // before a sibilant stays occlusive too (examen → əɡzamən, not əɣz).
+        const beforeSibilant = nextPh === "z" || nextPh === "s" || nextPh === "ʃ" || nextPh === "ʒ";
+        const stop = i === 0 || NASALS.has(prev) || (afterLateral && segs[i]!.ph === "d") || beforeSibilant;
         if (!stop) segs[i]!.ph = fric;
     }
 }
@@ -99,6 +122,9 @@ function nasalAssim(segs: Seg[]): void {
 const CLUSTER_DROP: Record<string, string[]> = {
     n: ["t", "d"], ɲ: ["t", "d"], ŋ: ["k", "ɡ"], ɫ: ["t", "d"], l: ["t", "d"], m: ["p", "b"],
 };
+// The same drop before a FINAL plural -s (cents→sens, forts→fɔrs, molts→mɔls, camps→kams). ⟨r⟩ is included here
+// (rt+s → rs) but NOT in CLUSTER_DROP — word-final -rt KEEPS its stop (fort → fɔrt), only -rts drops it.
+const CLUSTER_DROP_S: Record<string, string[]> = { ...CLUSTER_DROP, r: ["t", "d"], ɾ: ["t", "d"] };
 
 /** Central word-final processes: final-r deletion (polysyllabic vowel+r → drop), coda-cluster simplification
  *  (vint → bin, camp → kam, banc → baŋ), then obstruent devoicing of the resulting final consonant. */
@@ -109,6 +135,11 @@ function finalPass(segs: Seg[], nucleiCount: number): void {
     if ((last.ph === "ɾ" || last.ph === "r") && nucleiCount >= 2) {
         const prev = segs[segs.length - 2];
         if (prev && prev.nucleus) { segs.pop(); return finalPass(segs, nucleiCount); }
+    }
+    // -nts→ns, -rts→rs, -lts→ls, -mps→ms: a stop between a homorganic sonorant and the FINAL plural -s drops.
+    if (last.ph === "s" && segs.length >= 3) {
+        const stopPh = segs[segs.length - 2]!.ph, sonPh = segs[segs.length - 3]!.ph;
+        if (CLUSTER_DROP_S[sonPh]?.includes(stopPh)) { segs.splice(segs.length - 2, 1); return finalPass(segs, nucleiCount); }
     }
     // coda-cluster simplification: drop the final stop after a homorganic sonorant (nt→n, mp→m, nk→ŋ, lt→l)
     if (segs.length >= 2) {
@@ -135,6 +166,7 @@ export function phonemizeWord(word: string): string {
     nasalAssim(segs); // BEFORE finalPass so n→ŋ feeds the coda-cluster drop (banc → baŋ)
     voicingAssim(segs); // regressive cluster voicing (abs → aps)
     finalPass(segs, segs.filter((s) => s.nucleus).length); // devoice + final-r + cluster drop
+    if (geminates(word.toLowerCase())) geminateBlGl(segs); // bl/gl → bːl/ɡːl for LEXICALLY-geminating words only
     spirantize(segs); // last: after voicing/nasal context is settled
     let out = "";
     for (let i = 0; i < segs.length; i++) {

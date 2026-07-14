@@ -74,6 +74,7 @@ export function toSegments(word: string): Seg[] {
         }
         if (c === "q" && nx === "u") { cons("k"); if (nx2 === "a" || nx2 === "o" || nx2 === "ü") cons("w"); i += 2; continue; }
         if (c === "g" && nx === "u" && isFront(nx2)) { cons("ɡ"); i += 2; continue; } // gue/gui → ɡ (u silent)
+        if (c === "g" && nx === "u" && (nx2 === "a" || nx2 === "o")) { cons("ɡ"); cons("w"); i += 2; continue; } // gua/guo → ɡw (aigua)
         if (c === "g" && nx === "ü") { cons("ɡ"); cons("w"); i += 2; continue; } // güe/güi → ɡw
         if (c === "q" && nx === "ü") { cons("k"); cons("w"); i += 2; continue; }
 
@@ -84,9 +85,9 @@ export function toSegments(word: string): Seg[] {
             // ⟨ix⟩ after a vowel: the i is a silent digraph marker for ʃ (caixa → kaʃə); word-final ⟨ig⟩ after a
             // vowel → t͡ʃ (maig → mat͡ʃ, puig → put͡ʃ). In both the trailing plain ⟨i⟩ is silent, not a glide.
             let runEnd = j;
+            const ixDigraph = w[j] === "x" && w[j - 1] === "i" && j - 1 > i;
             const igFinal = w[j] === "g" && w[j - 1] === "i" && j + 1 === n && j - 1 > i;
-            if (w[j] === "x" && w[j - 1] === "i" && j - 1 > i) runEnd = j - 1; // x→ʃ handled by the main loop (i=j)
-            else if (igFinal) runEnd = j - 1;
+            if (ixDigraph || igFinal) runEnd = j - 1; // the trailing plain ⟨i⟩ is a silent digraph marker
             const run = w.slice(i, runEnd);
             const nuc = classifyRun(run, i === 0);
             [...run].forEach((vc, k) => {
@@ -94,7 +95,8 @@ export function toSegments(word: string): Seg[] {
                 if (nuc[k]) segs.push({ ph: real.stressed, nucleus: true, accent: isAccented(vc), reduced: real.reduced });
                 else cons(vc === "i" || vc === "í" ? "j" : "w"); // glide (on- or off-): i→j, u→w
             });
-            if (igFinal) { cons("t͡ʃ"); i = n; continue; } // consume the silent i + g
+            if (ixDigraph) { cons("ʃ"); i = j + 1; continue; } // consume the silent i + x → ʃ (caixa → kaʃə)
+            if (igFinal) { cons("t͡ʃ"); i = n; continue; } // consume the silent i + g → t͡ʃ (maig → mat͡ʃ)
             i = j;
             continue;
         }
@@ -124,7 +126,14 @@ export function toSegments(word: string): Seg[] {
             }
             case "t": cons("t"); break;
             case "w": cons("w"); break;
-            case "x": cons(segs.length === 0 ? "ʃ" : "ʃ"); break; // ⟨x⟩ → ʃ (initial + most; ks/ɡz learned = residual)
+            case "x": {
+                const prevSeg = segs[segs.length - 1];
+                const afterVowel = prevSeg !== undefined && (prevSeg.nucleus || prevSeg.ph === "j" || prevSeg.ph === "w");
+                if (!afterVowel) cons("ʃ"); // word-initial (xocolata) or after a consonant (panxa → paɲʃə) → ʃ
+                else if (i === 1 && w[0] === "e" && isVowel(nx)) { cons("ɡ"); cons("z"); } // ex- prefix: examen → əɡz
+                else { cons("k"); cons("s"); } // after a vowel: intervocalic (taxi) or coda (box) → ks
+                break;
+            }
             case "y": cons("j"); break;
             case "z": cons("z"); break;
             default: if (/[a-zç]/.test(c)) cons(c); break; // unknown letter: pass through

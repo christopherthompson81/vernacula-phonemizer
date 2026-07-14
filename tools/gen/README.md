@@ -10,6 +10,8 @@ One-off tools that BUILD shipped data files (not eval). They read source corpora
   Pronunciation Lexicon (abstract features only: accent 1|2 + stress ordinal — not the NST segments).
 - `build-ca-midvowels.mts` — Catalan stressed mid-vowel HEIGHT (mid-vowels.tsv) from the espeak-ng 1.52
   Central shim over the 50k corpus (abstract feature only: is the stressed ⟨e⟩/⟨o⟩ close or open).
+- `build-ca-geminate.mts` — Catalan bl/gl-gemination lexicon (bl-gl-geminate.tsv) from the same espeak run
+  (abstract feature only: does intervocalic ⟨bl⟩/⟨gl⟩ geminate — popular — or spirantize — learned).
 
 These are provenance/reproducibility records; the corpora they read are not committed. For eval (does our
 output agree with independent referees?), see `../referee-eval/`.
