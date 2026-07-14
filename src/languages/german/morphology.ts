@@ -194,9 +194,17 @@ export function decompose(word: string): Decomp {
         // Ordering: prefer the un-split analysis for a whole that is a known VERB lexeme (…en) — schreiben →
         // schreib·en, not the schrei·ben the greedy split would pick. Scoped to -en so compound NOUN lexemes
         // (landstraße, a lexeme, must still split land·straße → ʃt) and non-lexeme compounds (waldsterben) split.
-        const cs = isWord(whole) && whole.endsWith("en")
+        const split = splitCompound(whole);
+        // A st/sp/sch-initial NON-first constituent (fest·stellen, klar·stellen, bereit·stellen) is a genuine
+        // particle-verb whose seam must reset element-initial (st→ʃt) — the whole-word reading would wrongly keep
+        // it medial. So override the schreiben-guard for that case (schreiben has no such seam → still stays whole).
+        const seamSplit =
+            !!split &&
+            split.length >= 2 &&
+            split.slice(1).some((p) => /^(st|sp|sch)/.test(p));
+        const cs = isWord(whole) && whole.endsWith("en") && !seamSplit
             ? null
-            : splitCompound(whole);
+            : split;
         if (cs && cs.length >= 2) {
             stemParts = cs;
             suffixes.length = 0;
