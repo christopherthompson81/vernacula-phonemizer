@@ -134,10 +134,14 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
         if (c === "c" && nx === "h") {
-            push(chSound(lastVowelLetter), i);
+            // Word-initial ⟨ch⟩ is never the ach-laut x: → ç before a front vowel (China → çiːna, Chemie → çe…),
+            // → k before a consonant or back vowel (Christ → kʁ…, Chaos → k…, Chlor → k…). (French ⟨ch⟩→ʃ in
+            // Chef/Chance is lexical, left as residual.) Mid-word ⟨ch⟩ uses the ach/ich-laut rule.
+            if (initial) push("eiäöüy".includes(nx2) ? "ç" : "k", i);
+            else push(chSound(lastVowelLetter), i);
             i += 2;
             continue;
-        } // ch → x/ç
+        } // ch → x/ç/k
         if (c === "c" && nx === "k") {
             push("k", i);
             i += 2;
@@ -284,7 +288,14 @@ function finalDevoice(segs: Seg[], w: string): void {
         const dev = VOICED_FINAL[s.ph];
         if (!dev) continue;
         const next = segs[k + 1];
-        if (!next || (!next.vowel && "ptksf".includes(next.ph[0] ?? "")))
+        // Devoice a coda voiced obstruent word-finally, before a voiceless obstruent (-bt, -gt), OR before another
+        // voiced obstruent that will itself devoice (the whole coda cluster devoices: smaragd → smarakt, bagdad
+        // → bakdat). Before a sonorant/vowel it's an onset and stays voiced (Adler, wagen).
+        if (
+            !next ||
+            (!next.vowel &&
+                ("ptksf".includes(next.ph[0] ?? "") || VOICED_FINAL[next.ph]))
+        )
             s.ph = dev;
     }
     void w;
