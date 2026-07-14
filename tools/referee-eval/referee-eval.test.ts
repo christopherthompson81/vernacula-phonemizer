@@ -14,8 +14,8 @@ import { CONFIG } from "./config.ts";
 describe("referee corroboration (segmental backbone vs the PRIMARY independent source)", () => {
   // Floor = the primary referee's folded-agreement fraction, set below the measured value. Alphabetical.
   const floors: Record<string, number> = {
-    ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     ar: 0.40, // wikipron ara via the async ONNX diacritizer — measured 45.4%; residual = diacritizer short-vowel misses
+    ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
     de: 0.46, // kaikki deu — measured 49.8% (wikipron deu 2nd: 52.2%); DEFLATED by kaikki's proper-noun/loan bulk

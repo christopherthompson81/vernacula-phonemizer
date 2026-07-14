@@ -45,75 +45,131 @@ const enP = createEnglish();
 const en = (w: string): string => enP.text(w);
 const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
-const PHON: Record<string, (w: string) => string | Promise<string>> =
-  { ar, ca, cmn, cs, de, en, es, ff, fr, ga, ha, hi, ja, kk, ko, pt, ru, si, sv, ta, th, tr, vi, zu };
+const PHON: Record<string, (w: string) => string | Promise<string>> = {
+    ar,
+    ca,
+    cmn,
+    cs,
+    de,
+    en,
+    es,
+    ff,
+    fr,
+    ga,
+    ha,
+    hi,
+    ja,
+    kk,
+    ko,
+    pt,
+    ru,
+    si,
+    sv,
+    ta,
+    th,
+    tr,
+    vi,
+    zu,
+};
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */
 export function makeFold(cfg: RefLang): (s: string) => string {
-  return (s: string): string => {
-    let out = s.normalize("NFD");
-    for (const [re, rep] of cfg.preFolds ?? []) out = out.replace(re, rep); // before backbone (needs diacritics)
-    for (const [re, rep] of BACKBONE) out = out.replace(re, rep);
-    for (const [re, rep] of cfg.folds) out = out.replace(re, rep);
-    return out.normalize("NFC");
-  };
+    return (s: string): string => {
+        let out = s.normalize("NFD");
+        for (const [re, rep] of cfg.preFolds ?? []) out = out.replace(re, rep); // before backbone (needs diacritics)
+        for (const [re, rep] of BACKBONE) out = out.replace(re, rep);
+        for (const [re, rep] of cfg.folds) out = out.replace(re, rep);
+        return out.normalize("NFC");
+    };
 }
 
 export interface RefereeResult {
-  source: string;
-  role: "primary" | "secondary";
-  total: number;
-  raw: number;
-  folded: number;
-  residual: { key: string; count: number; example: string }[];
+    source: string;
+    role: "primary" | "secondary";
+    total: number;
+    raw: number;
+    folded: number;
+    residual: { key: string; count: number; example: string }[];
 }
 
 /** Score a language's phonemizer against each of its independent referees (segmental backbone). Async because
  *  some phonemizers (ar's ONNX diacritizer) are async; sync ones resolve immediately. */
 export async function evaluate(lang: string): Promise<RefereeResult[]> {
-  const cfg = CONFIG[lang], phon = PHON[lang];
-  if (!cfg || !phon) throw new Error(`no referee config for "${lang}"`);
-  const fold = makeFold(cfg);
-  const out: RefereeResult[] = [];
-  for (const ref of cfg.referees) {
-    const pairs = readFileSync(join(HERE, "referees", ref.file), "utf8").split("\n")
-      .filter((l) => l.trim() !== "" && !l.startsWith("#"))
-      .map((l) => l.split("\t")).filter((a) => a.length >= 2 && a[0] && a[1]) as [string, string][];
-    let raw = 0, folded = 0;
-    const diffClass: Record<string, number> = {};
-    const example: Record<string, string> = {};
-    for (const [w, refIpa] of pairs) {
-      const ours = await phon(w);
-      const refJoined = cfg.segmentJoin ? refIpa.replace(/\s+/g, "") : refIpa;
-      if (ours === refJoined) raw++;
-      const of = fold(ours), rf = fold(refJoined);
-      if (of === rf) { folded++; continue; }
-      const key = `${of}  ≠  ${rf}`;
-      diffClass[key] = (diffClass[key] ?? 0) + 1;
-      example[key] ??= `${w}: ${ours}  |  ${refIpa}`;
+    const cfg = CONFIG[lang],
+        phon = PHON[lang];
+    if (!cfg || !phon) throw new Error(`no referee config for "${lang}"`);
+    const fold = makeFold(cfg);
+    const out: RefereeResult[] = [];
+    for (const ref of cfg.referees) {
+        const pairs = readFileSync(join(HERE, "referees", ref.file), "utf8")
+            .split("\n")
+            .filter((l) => l.trim() !== "" && !l.startsWith("#"))
+            .map((l) => l.split("\t"))
+            .filter((a) => a.length >= 2 && a[0] && a[1]) as [string, string][];
+        let raw = 0,
+            folded = 0;
+        const diffClass: Record<string, number> = {};
+        const example: Record<string, string> = {};
+        for (const [w, refIpa] of pairs) {
+            const ours = await phon(w);
+            const refJoined = cfg.segmentJoin
+                ? refIpa.replace(/\s+/g, "")
+                : refIpa;
+            if (ours === refJoined) raw++;
+            const of = fold(ours),
+                rf = fold(refJoined);
+            if (of === rf) {
+                folded++;
+                continue;
+            }
+            const key = `${of}  ≠  ${rf}`;
+            diffClass[key] = (diffClass[key] ?? 0) + 1;
+            example[key] ??= `${w}: ${ours}  |  ${refIpa}`;
+        }
+        const residual = Object.entries(diffClass)
+            .sort((a, b) => b[1] - a[1])
+            .map(([key, count]) => ({ key, count, example: example[key]! }));
+        out.push({
+            source: ref.source,
+            role: ref.role,
+            total: pairs.length,
+            raw,
+            folded,
+            residual,
+        });
     }
-    const residual = Object.entries(diffClass).sort((a, b) => b[1] - a[1])
-      .map(([key, count]) => ({ key, count, example: example[key]! }));
-    out.push({ source: ref.source, role: ref.role, total: pairs.length, raw, folded, residual });
-  }
-  return out;
+    return out;
 }
 
 async function main(): Promise<void> {
-  const lang = process.argv[2];
-  if (!lang || !CONFIG[lang]) { console.error(`usage: eval.ts <${Object.keys(CONFIG).join("|")}> [--examples N]`); process.exit(1); }
-  const exIdx = process.argv.indexOf("--examples");
-  const nEx = exIdx >= 0 ? Number(process.argv[exIdx + 1] ?? 25) : 12;
-  for (const r of await evaluate(lang)) {
-    console.log(`\n=== ${lang} vs ${r.source} [${r.role}] (${r.total} words) ===`);
-    console.log(`raw exact:      ${r.raw}/${r.total} (${((100 * r.raw) / r.total).toFixed(1)}%)`);
-    console.log(`folded backbone:${r.folded}/${r.total} (${((100 * r.folded) / r.total).toFixed(1)}%)  — after the config folds`);
-    console.log(`residual divergence classes (top ${nEx}, count × folded-form; investigate, don't auto-fix):`);
-    for (const d of r.residual.slice(0, nEx)) console.log(`  ${d.count}×  ${d.key}\n       e.g. ${d.example}`);
-  }
-  const gap = CONFIG[lang]!.secondaryGap;
-  if (gap) console.log(`\n⚠ secondary-source gap: ${gap}`);
+    const lang = process.argv[2];
+    if (!lang || !CONFIG[lang]) {
+        console.error(
+            `usage: eval.ts <${Object.keys(CONFIG).join("|")}> [--examples N]`,
+        );
+        process.exit(1);
+    }
+    const exIdx = process.argv.indexOf("--examples");
+    const nEx = exIdx >= 0 ? Number(process.argv[exIdx + 1] ?? 25) : 12;
+    for (const r of await evaluate(lang)) {
+        console.log(
+            `\n=== ${lang} vs ${r.source} [${r.role}] (${r.total} words) ===`,
+        );
+        console.log(
+            `raw exact:      ${r.raw}/${r.total} (${((100 * r.raw) / r.total).toFixed(1)}%)`,
+        );
+        console.log(
+            `folded backbone:${r.folded}/${r.total} (${((100 * r.folded) / r.total).toFixed(1)}%)  — after the config folds`,
+        );
+        console.log(
+            `residual divergence classes (top ${nEx}, count × folded-form; investigate, don't auto-fix):`,
+        );
+        for (const d of r.residual.slice(0, nEx))
+            console.log(`  ${d.count}×  ${d.key}\n       e.g. ${d.example}`);
+    }
+    const gap = CONFIG[lang]!.secondaryGap;
+    if (gap) console.log(`\n⚠ secondary-source gap: ${gap}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) void main();
