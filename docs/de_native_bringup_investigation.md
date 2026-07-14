@@ -360,3 +360,13 @@ consonants vs kaikki's 5). Reordered applyErRestore to run BEFORE applyConsonant
 consonant.tsv (now aligned): universal/transversal/aversion get their loanword v. Native words (Vater, November)
 unchanged. Consonant lexicon 3333→3426, skew 9756→9127. kaikki 76.1→76.3%, wikipron 75.2→75.4%. (The stressed-er
 restoreStressedEr rule still runs last — a pre-existing benign ordering, no post-ɛʁ corrections in those words.)
+
+## Run 30 — -nis suffix devoices a bound stem's final obstruent
+The dn→tn residual (Bündnis → our bʏndnɪs, kaikki bʏntnɪs): -nis IS a suffix but its stem is often a BOUND form
+(bünd, ergeb, ständ) that fails the resolves() gate, so it wasn't split and the stem-final d/b never devoiced. Added
+a RELIABLE_CONS_SUFFIX set ({nis}) that strips on the loose isStemish test — but ONLY when the stem ends in a voiced
+obstruent (b/d/g), the case the boundary devoicing exists to fix. That guard keeps a monomorphemic -nis word whole
+(Tennis, Firnis — sonorant stems that a naive strip would wrongly split + re-lengthen: ten→teːn). Now Bündnis/
+Verständnis/Ergebnis/Gefängnis/Bildnis devoice correctly. Referee flat/−1 (the -nis words are sparse in the eval
+samples; the sole wikipron −1 is verlöbnis, where wikipron has an INCONSISTENT undevoiced …bnɪs — kaikki's -bnis→-pnɪs
+pattern confirms ours is right). Canonical-correctness win. Full suite 235 green.

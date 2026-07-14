@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 30 — -nis suffix devoices a bound stem's final obstruent", () => {
+        expect(phonemizeWord("Bündnis")).toBe("bˈʏntnɪs"); // bünd·nis: d → t at the boundary
+        expect(phonemizeWord("Ergebnis")).toBe("ɛɐ̯ɡˈeːpnɪs"); // ergeb·nis: b → p
+        expect(phonemizeWord("Tennis")).toBe("tˈɛnɪs"); // control: monomorphemic (sonorant stem) → NOT split
+    });
+
     test("Run 29 — -er restore before consonant lexicon unblocks loanword v→v", () => {
         expect(phonemizeWord("universal")).toBe("univɛʁzˈaːl"); // v now lands (was f) — ʁ inserted before applyConsonant
         expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native ⟨v⟩ → f unchanged

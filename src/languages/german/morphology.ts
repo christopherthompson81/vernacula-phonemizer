@@ -48,6 +48,11 @@ const resolves = (w: string): boolean =>
 // Suffixes that begin with a vowel resyllabify onto the stem (no boundary) — loose to strip; consonant-initial
 // suffixes create a devoicing boundary, so their stem must resolve.
 const VOWEL_INITIAL_SUFFIX = new Set(MANIFEST.morphology.vowelInitialSuffixes);
+// Highly reliable nominal suffixes whose stem is often a BOUND form (bünd·nis, ergeb·nis, ständ·nis — "bünd" etc.
+// aren't standalone words): strip them on the loose isStemish test like vowel-initial suffixes, so the stem-final
+// obstruent still devoices at the boundary (Bündnis → bʏntnɪs, Ergebnis → ɛɐ̯ɡeːpnɪs). -nis is not a false-strip
+// risk (a word merely ending in it — Tennis, Penis — has a vowel-final or sonorant stem that devoices to itself).
+const RELIABLE_CONS_SUFFIX = new Set(["nis"]);
 // be-/ge-/er- also occur root-initially (beide, geht, Erde); only strip them if the remainder is a real word.
 const PREFIX_AMBIGUOUS = new Set(MANIFEST.morphology.ambiguousPrefixes);
 
@@ -162,7 +167,12 @@ export function decompose(word: string): Decomp {
             // boundary that shatters a digraph. (Also guards ⟨ch⟩-initial suffixes generally.)
             if (s.startsWith("ch") && stem.endsWith("s")) continue;
             // vowel-initial suffix resyllabifies (loose); consonant-initial one creates a boundary → stem must resolve.
-            const ok = VOWEL_INITIAL_SUFFIX.has(s)
+            // Loose-strip a reliable suffix ONLY when the stem ends in a voiced obstruent (b/d/g) — the case the
+            // boundary devoicing exists to fix (Bünd·nis, Ergeb·nis). This keeps a monomorphemic -nis word whole
+            // (Tennis, Firnis: stem ends in a sonorant, nothing to devoice) so it isn't wrongly split + re-lengthened.
+            const reliableLoose =
+                RELIABLE_CONS_SUFFIX.has(s) && /[bdg]$/.test(stem);
+            const ok = VOWEL_INITIAL_SUFFIX.has(s) || reliableLoose
                 ? isStemish(stem)
                 : resolves(stem);
             if (ok) {
