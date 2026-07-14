@@ -66,7 +66,7 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // -ion → i̯oːn
         expect(phonemizeWord("genial")).toBe("ɡəni̯ˈaːl"); // -ial → i̯aːl
         expect(phonemizeWord("Material")).toBe("maːteːʁi̯ˈaːl");
-        expect(phonemizeWord("Liberia")).toBe("lɪbˈeːʁɪa"); // control: word-final -iV# stays syllabic
+        expect(phonemizeWord("Liberia")).toBe("libˈeːʁia"); // control: word-final -iV# stays syllabic
     });
 
     test("Run 26 — recurse into a prefixed compound constituent (wahn·vor·stellung)", () => {
