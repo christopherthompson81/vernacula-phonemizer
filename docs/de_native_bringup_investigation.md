@@ -314,3 +314,10 @@ applyConsonant (identical logic, index+lookahead). ɐ̯ is never itself correcte
 holds a slot so the OTHER consonants align by ordinal. Consonant lexicon 2862→3320 entries, skew 16993→9897. kaikki
 74.6→75.2%, wikipron 74.1→74.6% (biggest jump of the session). Note: mid-word -er→ɐ (bare nucleus, universal→unifɐzaːl
 vs kaikki univɛʁzaːl) is a DIFFERENT skew (a vowel, not the offglide) — still deferred. Floor 0.73→0.74.
+
+## Run 25 — a stressed bare ɐ is a wrongly-reduced -er → ɛʁ
+The g2p reduces ⟨er⟩+C to ɐ (correct for the unstressed ending: Wasser→vasɐ), but that ɐ nucleus can NEVER
+legitimately carry stress — a stressed -er is the full ɛʁ (Laterne→latɛʁnə, Inferno→ɪnfɛʁno, Konzert→kɔntsɛʁt).
+Post-stress pass restoreStressedEr: ˈɐ/ˌɐ (NOT the ɐ̯ offglide) → ɛʁ. Safe (stressed bare ɐ is only ever -er-derived).
+kaikki 75.2→75.3%, wikipron 74.6→74.8%. The UNSTRESSED-loan -er (Robert→ʁoːbɛʁt, universal→univɛʁzaːl) needs
+lexical native(→ɐ)-vs-loan(→ɛʁ) knowledge no rule captures — still deferred. modern additionally has wrong stress.
