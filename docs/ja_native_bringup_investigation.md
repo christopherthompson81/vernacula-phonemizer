@@ -106,3 +106,24 @@ the pitch-free helper for segmental validation.
 **Japanese is now COMPLETE** across all three phases: kana core + numbers (Phase 1), kanji readings + bunsetsu
 segmentation (Phase 2), and lexical pitch accent (Phase 3). The census primitives ɯ ɸ ̞ ̈ ɴ ɾ ᵝ plus the
 downstep ꜜ are all emitted.
+
+## Run 4 — 2026-07-14 — independent validation vs OpenJTalk + は/へ particle fix
+
+The wikipron referee (57.9%) is toneless/segmental and can't measure the kanji front-end or pitch; the Run-3
+validation was vs the espeak-ng-portable SNAPSHOT the tables were ported from (semi-circular). Wired an INDEPENDENT
+reference: pyopenjtalk (OpenJTalk, naist-jdic — a different reading source than our JMdict-derived readings.tsv) over
+6000 random Tatoeba sentences. Compared full-sentence reading via our OWN kanaToIpa (normalises katakana/long-vowel
+notation → the diff is purely the reading).
+
+**FOUND: は/へ topic/direction particles read as ha/he, not wa/e** — a systematic bug (は is in nearly every
+sentence; を already worked). Full-reading match was only 30.4% (kanji-only, particles normalised: 74.8%). FIX
+(kanji.ts segmentText): extend the が/を/に particle detection to は/へ (single mora after a content char — はな/へや
+that START a word are matched as ≥2-mora units, so a single-char は/へ after content is the particle) and convert
+は→わ, へ→え inline so the reading pass emits wa/e. 私は→wätäɕiwä, 東京へ→…e̞, はな→häꜜnä (unchanged). **Full reading
+30.4% → 74.2%** (now == the kanji-only 74.9%, i.e. the particle bug is fully closed). Updated 2 goldens that encoded
+the old は→ha bug.
+
+REMAINING (next): numbers+counters in kanji-mixed text (8月20日 → our 8つき20ひ vs はちがつはつか — counter readings
+月がつ/日か/時じ/人にん + digit reading), a few kanji-reading errors (気に入る→きにいる not きにはいった; 人 じん/ひと),
+and the ゅう/ゅー youon long-vowel notation inconsistency (しゅう→ɕɯᵝɯᵝ vs せい→se̞ː). Pitch not yet independently
+validated vs OpenJTalk (semi-circular anyway — we merged its data).
