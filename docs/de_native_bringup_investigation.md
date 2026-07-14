@@ -225,3 +225,14 @@ loans (Vase→vaːzə); word-initial ⟨s⟩→/z/ natively (Sonne) but /s/ in l
 k~ç, ŋ~n. Per-CONSONANT-position, kaikki-derived (tools/gen/build-de-consonant.mts → consonant.tsv, 2778
 entries; applyConsonant). kaikki 67.6→69.9%, INDEPENDENT wikipron 67.9→69.7% (+1.8 cross-source validation).
 Native consonants unchanged (Vater→f, Sonne→z, von/viel→f).
+
+## Run 14 (Phase 14) — fold genuine notation + re-diagnose
+Added three de-config folds for referee NOTATION (not real errors): syllabic ŋ̩ (…gen/…ken → kaikki ɡŋ̩ vs our
+ən), kaikki syllable-boundary dots (ɡar.tən), and fixed the -er fold to match kaikki's ə+ʁ (the ʁ→r fold hadn't
+run yet). kaikki 69.9→70.6%, wikipron 69.7→70.4%, common-word 76.5→79.2%.
+
+RE-DIAGNOSIS (common-word residual, 3789 of 18185): now ~half proper-noun/loanword NOISE (haiti, alert, berlin,
+edinburgh, moslem — stays residual, this is the noise that makes ✅ legitimate) and ~half genuine native classes
+still to close: mid-compound ɛ→ə (christentum, heidelbeere — Phase 12b compound coverage), the schreiben
+garbage-split (schrei·ben → beːn), -igen/-igkeit → ɪ/ç, and short ⟨ä⟩→ɛ (ärzte). Session progress: referee
+49.8→70.6% (kaikki), 52.2→70.4% (independent wikipron); common-word 73.8→79.2%.

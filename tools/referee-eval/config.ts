@@ -228,6 +228,7 @@ export const CONFIG: Record<string, RefLang> = {
             ],
             [/l̩/gu, "əl", "syllabic l̩ → əl"],
             [/m̩/gu, "əm", "syllabic m̩ → əm"],
+            [/ŋ̩/gu, "ən", "syllabic ŋ̩ (…gen/…ken → ɡŋ̩) → our ən; expand before ̩ is stripped"],
             [
                 /ɐ̯/gu,
                 "r",
@@ -241,10 +242,11 @@ export const CONFIG: Record<string, RefLang> = {
                 "glottal-stop onset before a vowel-initial syllable — allophonic; referee marks it",
             ],
             [
-                /ər/gu,
+                /ə[rʁ]/gu,
                 "ɐ",
-                "r-vocalization: unstressed -er → ɐ (both write the vocalized form)",
+                "r-vocalization: unstressed -er → ɐ (both write the vocalized form; match ʁ too, which the ʁ→r fold hasn't reached yet)",
             ],
+            [/\./gu, "", "kaikki syllable-boundary dots (ɡar.tən) — not a segment"],
             [
                 /ɔʏ/gu,
                 "ɔɪ",
