@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 19 — recurse into a known constituent (triple compound seam)", () => {
+        expect(phonemizeWord("Waffenstillstand")).toBe("vˈafənʃtɪlʃtant"); // waffen·still·stand: inner st → ʃt
+        expect(phonemizeWord("Landstraße")).toBe("lˈantʃtʁaːsə"); // control: 2-part still splits
+    });
+
     test("Run 18 — -igkeit: ⟨g⟩ between i and k → ç", () => {
         expect(phonemizeWord("Geschwindigkeit")).toBe("ɡəʃvˈɪndɪçkaɪ̯t"); // -igk- → ɪçk
         expect(phonemizeWord("Iglu")).toBe("ˈiːɡlu"); // control: igl (not igk) → ɡl
