@@ -433,3 +433,10 @@ unver-/unzer-/unent-) — safe because no non-un word starts that way (union/uni
 Needed PREFIX_IPA["un"]="ʊn" too (else the un piece g2p'd open-syllable as long uːn — a −5-word regression that the
 short-vowel fix reversed, same trap as her-). Lexicons resynced. kaikki 77.9→78.1% (crosses 78%), wikipron 76.5→76.6%.
 Floor 0.77→0.78. Full suite 242 green.
+
+## Run 39 — "mit" prefix needs a real-word stem (mittel not mit·tel) [✅-push 4/N]
+The tə→əl residual (mittelmäßig → our mˈɪttəl…, kaikki mˈɪtəl…): the separable prefix "mit" was stripped from
+mittel-compounds via the loose isStemish gate (mit·telmäßig), tearing the ⟨tt⟩ across the boundary so the geminate
+collapse couldn't fire → ɪttəl. Gated "mit" on isWord/splitCompound (like the ambiguous prefixes): mit·teilen splits
+(teilen is a word), mittel·mäßig / mitteleuropa / mittellos / mittelalter keep mittel whole (tt collapses → ɪtəl).
+Controls (mitkommen, mitnehmen, mitarbeiter, Mittag) unaffected. kaikki 78.1→78.2%, wikipron 76.6→76.7%. Suite 243.
