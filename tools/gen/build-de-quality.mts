@@ -44,7 +44,11 @@ const PAIRS: Record<string, Set<string>> = {
 /** Each nucleus of an IPA string as {vowel, stressed}: a VOWEL char not followed by a non-syllabic glide ̯; a
  *  nucleus is stressed when a ˈ/ˌ immediately precedes it. Mirrors the engine's nucleus counting. */
 function nuclei(ipa: string): { v: string; str: boolean }[] {
-    const s = ipa.replace(/[()]/g, ""); // drop kaikki's optional-length parens
+    // Expand kaikki's syllabic consonants (christen → kʁɪstn̩, not …stən) to schwa+C so the nucleus count matches
+    // our ⟨-en⟩/⟨-el⟩/⟨-em⟩ rendering — otherwise these (mostly compound) words skew out of the lexicon.
+    const s = ipa
+        .replace(/n̩/g, "ən").replace(/l̩/g, "əl").replace(/m̩/g, "əm").replace(/ŋ̩/g, "əŋ")
+        .replace(/[()]/g, ""); // drop kaikki's optional-length parens
     const out: { v: string; str: boolean }[] = [];
     let pendingStress = false;
     for (let i = 0; i < s.length; i++) {
