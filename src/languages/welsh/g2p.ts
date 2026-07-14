@@ -12,9 +12,11 @@ const DIGRAPHS = MANIFEST.digraphs;
 const CONSONANTS = MANIFEST.consonants;
 const VOWEL_CLUSTERS = Object.keys(MANIFEST.vowels).sort((a, b) => b.length - a.length); // longest-first
 const OBSCURE_Y = new Set(MANIFEST.obscureY);
-const VOWEL_LETTERS = "aeiouwyâêîôûŵŷàèìòùïëöäü";
+// Vowel LETTERS, derived from the manifest's single-char vowel keys (+ ⟨y⟩, which the code resolves separately)
+// so the accented inventory lives in ONE place — adding a vowel to welsh.jsonc can't silently desync the scanner.
+const VOWEL_LETTERS = new Set([...Object.keys(MANIFEST.vowels).filter((k) => k.length === 1), "y"]);
 
-const isVowelLetter = (c: string): boolean => c !== "" && VOWEL_LETTERS.includes(c);
+const isVowelLetter = (c: string): boolean => c !== "" && VOWEL_LETTERS.has(c);
 
 export interface Seg {
     ph: string;
@@ -62,9 +64,11 @@ export function toSegments(word: string): Seg[] {
                 continue;
             }
             // ⟨w⟩ and ⟨i⟩ are CONSONANTS (/w/, /j/) before a vowel letter (wedi → wɛdi, iaith → jaᶦθ). ⟨w⟩ also
-            // stays a consonant in the ⟨gw⟩ onset before a liquid (gwreiddiol → ɡwr…, gwlad → ɡwl…), where ⟨dw⟩
-            // etc. would be a vowel (dwr → dʊr).
-            if (c === "w" && (isVowelLetter(w[i + 1] ?? "") || w[i - 1] === "g")) {
+            // stays a consonant in the ⟨gw⟩ onset (gwlad → ɡwlaːd, gwr → ɡwr) — keyed on the previous SEGMENT
+            // being ɡ, NOT the raw ⟨g⟩, which would also match the ɡ of a ⟨ng⟩→ŋ digraph and wrongly consonantize
+            // a nuclear ⟨w⟩ (llongwr → ɬɔŋʊr, dwr → dʊr keep ⟨w⟩ as the vowel).
+            const prevSeg = segs[segs.length - 1];
+            if (c === "w" && (isVowelLetter(w[i + 1] ?? "") || prevSeg?.ph === "ɡ")) {
                 segs.push({ ph: "w", nucleus: false });
                 i += 1;
                 continue;

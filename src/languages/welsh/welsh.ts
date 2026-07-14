@@ -49,7 +49,8 @@ export function phonemizeWord(word: string): string {
         const closed = !nx || (!nx.nucleus && (stress + 2 >= segs.length || !segs[stress + 2]!.nucleus));
         if (closed) segs[stress]!.ph = "ɨ";
     }
-    // Secondary stress on the first syllable when the primary is the 3rd nucleus or later (america → ˌamɛrˈɨka).
+    // Secondary stress on the first syllable when the primary is the 3rd nucleus or later (cymdeithasol →
+    // ˌkəmdəᶦˈθasɔl).
     const secondary = stressN >= 2 ? nucleiIdx[0]! : -1;
     let out = "";
     for (let i = 0; i < segs.length; i++) {

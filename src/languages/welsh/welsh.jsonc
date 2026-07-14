@@ -36,7 +36,7 @@
     },
 
     // Short-quality → long-quality (lengthening raises/tenses). ə never lengthens.
-    "longVowel": { "a": "aː", "ɛ": "eː", "i": "iː", "ɔ": "oː", "ʊ": "uː", "ɨ": "ɨː", "e": "eː", "o": "oː" },
+    "longVowel": { "a": "aː", "ɛ": "eː", "i": "iː", "ɔ": "oː", "ʊ": "uː", "ɨ": "ɨː" },
 
     // A stressed monophthong lengthens when open (0 coda consonants) or before a SINGLE coda from this set
     // (voiced stops + fricatives). Voiceless stops p t k, m, ŋ, ɬ, and any cluster keep it short. n/r/l are
@@ -44,7 +44,7 @@
     "lengthenBefore": "bdɡvðfχθsz",
 
     // Function-word clitics where ⟨y⟩ stays OBSCURE (ə) despite being a final/only syllable.
-    "obscureY": ["y", "yr", "yn", "yng", "ym", "yng", "fy", "dy", "myn", "syr"],
+    "obscureY": ["y", "yr", "yn", "yng", "ym", "fy", "dy", "myn", "syr"],
 
     "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
 
