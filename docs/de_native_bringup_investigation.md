@@ -148,9 +148,11 @@ REMAINING (the 🟡 tail): loanword vowel quality (ɪ→i, ɔ→o — foreign, r
 d→t which need the splitter to fire on more constituents. de-kaikki-full.tsv is a regenerable intermediate
 (scratchpad), not committed; the build script header documents the re-fetch.
 
-### Known pre-existing bug (surfaced during Run-7 review, NOT introduced by it)
+### Run 8 — fixed the stressed-schwa g2p bug (surfaced during the Run-7 review)
 ~34 words emit a STRESSED schwa ˈə (gesetzlich→ɡəzˈət͡slɪç, generell→ɡənəʁˈəl, gesellschaft→ɡəzˈəlʃaft). Verified
 with reduction.tsv emptied: the RAW g2p already produces ɡɛzˈət͡slɪç etc. — a base g2p/stress defect where a
 stressed short ⟨e⟩ before certain clusters surfaces as ə. applyReduction correctly leaves the stressed vowel
-alone (its ˈ-guard); it only reduces the unstressed ge-/ver- prefix on top of the already-broken stem. Separate
-fix needed in the g2p vowel/stress logic.
+alone (its ˈ-guard); it only reduces the unstressed ge-/ver- prefix on top of the already-broken stem. FIXED via a fixStressedSchwa post-pass in german.ts: German has NO stressed schwa, so any ˈə/ˌə is the
+weak-schwa mis-fire — restore it to short ɛ BEFORE applyLength, which then lengthens it to eː where the length
+lexicon flags that nucleus long (Problem→pʁɔblˈeːm, System→zʏstˈeːm). Fixes gesetz→ɡəzˈɛt͡s, generell→ɡənəʁˈɛl,
+moment/effekt/modell/gesellschaft. kaikki 57.4→57.7%, wikipron 58.1→58.2% (both up; small sample overlap).

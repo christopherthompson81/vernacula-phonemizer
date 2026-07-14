@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 8 — no stressed schwa (weak-schwa mis-fire on a stressed root → ɛ, lengthened where flagged)", () => {
+        expect(phonemizeWord("gesetz")).toBe("ɡəzˈɛt͡s"); // setz is the stressed root, not a schwa ending
+        expect(phonemizeWord("generell")).toBe("ɡənəʁˈɛl");
+        expect(phonemizeWord("Problem")).toBe("pʁɔblˈeːm"); // ɛ → eː via the length lexicon (1L)
+        expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: genuine unstressed -en schwa unaffected
+    });
+
     test("Run 7 — unstressed e→ə reduction (lexical: native ə, loanword ɛ)", () => {
         expect(phonemizeWord("wesentlich")).toBe("vˈeːzəntlɪç"); // native: -ent- e → ə
         expect(phonemizeWord("anderen")).toBe("ˈandəʁən"); // native: -er- e → ə
