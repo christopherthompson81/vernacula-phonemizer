@@ -56,3 +56,20 @@ Two finders (g2p correctness + Irish phonology). Real bugs fixed:
 Referee 42.6→**44.2%**; unit test 6/6; full suite 202/202. Deferred to Run 2 (all vowel-realization): i-offglide
 before slender C, diphthongization before tense sonorants (poll→pˠaᶷl̪ˠ), medial dh/gh vocalization, epenthetic
 schwa (gorm→ɡɔɾˠəmˠ), eo/ea context.
+
+## Run 2 — 2026-07-14 — i-offglide + svarabhakti epenthesis (two clean vowel rules)
+Probed the oracle for the deferred vowel classes; two are clean rules (implemented), the rest inconsistent/
+semi-lexical (deferred):
+- **i-offglide** (offglide()): a LONG back vowel (ɑː/oː) before a slender CODA consonant → +ⁱ (áit→ˈɑːⁱtʲ,
+  cóir→kˈoːⁱɾʲ, báid, páirc). Short a is inconsistent (aill has it, gairm doesn't) → restricted to long vowels;
+  uː gets none (súil→sˠˈuːlʲ); a pre-vocalic slender consonant gets none (baile→bˠˈalʲə).
+- **svarabhakti epenthesis** (epenthesis()): a schwa between /r l/ and a following CODA labial/velar/palatal
+  (gorm→ɡˈɔɾˠəmˠ, bolg→bˠˈɔl̪ˠəɡ, dearg, gairm). /n/ does NOT trigger it (ainm→ˈanʲmˠ); a PRE-VOCALIC 2nd
+  consonant gets none (Gaeilge lʲɟ before ə → no schwa — the coda guard).
+
+Referee 44.2→44.4% (these are ⁱ/ə-folded in the eval, so ~neutral — canonical-correctness). Unit test 7/7.
+
+**Still deferred (inconsistent / lexical — a Connacht lexicon from the oracle would pin them):** tense-sonorant
+diphthongization (poll→pˠaᶷl̪ˠ, ceann→cˈaᶷn̪ˠ — but trom→ɔ, fionn→ɔ inconsistent); short-V lengthening before
+tense clusters (bord→bˠoːɾˠd̪ˠ); medial dh/gh vocalization (aghaidh); eo→ɔ vs oː context (deoch/ceol); airgead-
+type pre-vocalic epenthesis.
