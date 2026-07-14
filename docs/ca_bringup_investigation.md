@@ -80,3 +80,17 @@ the espeak oracle + hand-check (Wheeler). Unit test 10/10. OOV words (outside th
 
 Remaining (Run 3+): intervocalic ⟨x⟩=ks/ɡz (lexical), -nts→ns plural cluster, bl/gl gemination, a Central-only
 secondary referee.
+
+## Run 3 — 2026-07-14 — ⟨x⟩ realization, -Cs cluster, bl/gl gemination
+Three rule-based gaps (probed against the espeak shim — all rule-governed, no lexicon needed):
+- **⟨x⟩**: after a vowel → ks (taxi→tˈaksi, box→bˈɔks); word-initial / after a consonant → ʃ (xocolata, panxa→
+  pˈaɲʃə); the ex- prefix (word-initial "ex"+vowel) → ɡz (examen→əɡzˈamən); ⟨ix⟩ digraph → ʃ (caixa→kˈaʃə,
+  emitted explicitly now, not via the x switch). A stop before a sibilant no longer spirantizes (əɡz not əɣz).
+- **-Cs cluster**: a stop between a homorganic sonorant and the final plural -s drops — cents→sˈens, forts→fˈɔɾs,
+  molts→mˈoɫs, camps→kˈams. ⟨r⟩ is in this set (rt+s→rs) but NOT the word-final one, so fort→fˈɔɾt keeps its t.
+- **bl/gl gemination**: intervocalic ⟨bl⟩/⟨gl⟩ geminate the stop — poble→pˈɔbːɫə, regla→rˈeɡːɫə (the geminate
+  bː/ɡː blocks spirantization); word-initial bl/gl unaffected (blau→bɫˈaw).
+
+Referee 79.5→**81.1%** (these are consonant-level, so the eval sees them, unlike the folded mid-vowels). Unit
+test 11/11; full suite 194/194. Remaining: intervocalic ⟨x⟩ exceptions (hexàgon, èxit variants), a Central-only
+secondary referee, setmana-type tm→mm assimilation.
