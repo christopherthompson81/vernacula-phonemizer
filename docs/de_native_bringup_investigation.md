@@ -399,3 +399,11 @@ it saw the geminate bb as a coda cluster and devoiced the first half (b before a
 the collapse couldn't merge the now-different p+b. Reordered: collapse geminates FIRST, then finalDevoice. Fixes
 Krabbe/Robbe/Ebbe/Bagger/Roggen/Flagge/Widder/Paddel (bb/dd/gg → single, onset, voiced). Real coda-cluster devoicing
 is unaffected (Smaragd→smaʁakt, gd→kt — not a geminate). kaikki 77.0→77.2%, wikipron flat. Full suite 239 green.
+
+## Run 35 — fold kaikki's optional-segment parens (metric-correctness, not engine)
+The ts→(t / pf→(p / ən→(ə residual (ganz → our ɡants, kaikki ɡan(t)s; geben → ɡeːbən, kaikki ɡeːb(ə)n): kaikki
+parenthesizes an OPTIONALLY-droppable segment. Our output is canonically correct (standard German HAS the t/ə); the
+parens are just notation. The eval fold (BACKBONE) didn't strip them, so these read as mismatches. Added a de preFold
+[/[()]/→""] (referee-side only — our output has no parens). CONFIG-only, no engine change. kaikki 77.2→77.8%,
+wikipron flat (the human referee doesn't use parens). Floor 0.76→0.77. This is the paren analogue of the syllabic-n
+notation gap; the remaining ən→n / n→m (bare syllabic n̩/m̩, mark lost in the extract) is the same cosmetic class.
