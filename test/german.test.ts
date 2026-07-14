@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 20 — long ä is always ɛː (never eː)", () => {
+        expect(phonemizeWord("Ärzte")).toBe("ˈɛːɐ̯t͡stə"); // cluster-preceded long ä → ɛː (not eː)
+        expect(phonemizeWord("Gespräch")).toBe("ɡəʃpʁˈɛːç");
+        expect(phonemizeWord("Hätte")).toBe("hˈɛtə"); // control: genuinely-short ä → ɛ (marker normalised)
+        expect(phonemizeWord("Käse")).toBe("kˈɛːzə"); // control: open-syllable long ä unaffected
+    });
+
     test("Run 19 — recurse into a known constituent (triple compound seam)", () => {
         expect(phonemizeWord("Waffenstillstand")).toBe("vˈafənʃtɪlʃtant"); // waffen·still·stand: inner st → ʃt
         expect(phonemizeWord("Landstraße")).toBe("lˈantʃtʁaːsə"); // control: 2-part still splits

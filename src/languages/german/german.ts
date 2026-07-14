@@ -57,14 +57,16 @@ function consonantDict(): Map<string, string> {
         });
     return CONSONANT;
 }
-const LONG_OF = MANIFEST.vowels.longOf;
+// Ɛ = the g2p's internal marker for short ⟨ä⟩ (see g2p.ts): it lengthens to ɛː (not the eː that ⟨e⟩'s ɛ gives),
+// and applyLength normalises any surviving Ɛ back to plain ɛ. It must count as a vowel nucleus everywhere upstream.
+const LONG_OF: Record<string, string> = { ...MANIFEST.vowels.longOf, "Ɛ": "ɛː" };
 const SHORT_OF = MANIFEST.vowels.shortOf;
-const VOWEL_CHARS = MANIFEST.vowelChars;
+const VOWEL_CHARS = MANIFEST.vowelChars + "Ɛ";
 
 /** Fix vowel length+quality per a positional correction spec ("0S,2L" = nucleus 0 short, 2 long). Walks the
  *  IPA, counting syllable nuclei (a vowel not followed by an offglide ̯), applying the flag at each ordinal. */
 function applyLength(ipa: string, spec: string | undefined): string {
-    if (!spec) return ipa;
+    if (!spec) return ipa.replace(/Ɛ/gu, "ɛ"); // no length flag: a short-ä marker just normalises to ɛ (hätte)
     const corr = new Map<number, string>();
     for (const c of spec.split(","))
         if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
@@ -100,7 +102,7 @@ function applyLength(ipa: string, spec: string | undefined): string {
         }
         ord++;
     }
-    return out;
+    return out.replace(/Ɛ/gu, "ɛ"); // normalise any short-ä marker that wasn't lengthened (ɛː done above)
 }
 
 /** Set the flagged UNSTRESSED nuclei to their kaikki quality ("1ə,2i" = nucleus 1 → ə, nucleus 2 → i). German
@@ -167,7 +169,7 @@ function fixStressedSchwa(ipa: string): string {
     return ipa.replace(/([ˈˌ])ə/gu, "$1ɛ");
 }
 
-const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏə]/g;
+const VOWEL_G = /[aɐeɛiɪoɔuʊøœyʏəƐ]/g; // includes the short-ä marker Ɛ so stress/nucleus counts see it
 
 /** Count syllable nuclei (vowels, skipping non-syllabic offglides ̯) in an IPA string. */
 function countNuclei(ipa: string): number {

@@ -272,3 +272,12 @@ kept its non-initial reading (2nd st → st, not ʃt). Now it recurses into a co
 giving the inner st → ʃt element-initial treatment. 2-part compounds (landstraße) and verbs (schreiben) unregressed.
 kaikki 73.9% (flat — rare), independent wikipron 73.1→73.3% (cross-source positive). Deferred: suffix-stripped
 triple seams (zahnstocher, fußstapfen) where the trailing constituent (stocher/stapfen) isn't lexicon-flagged.
+
+## Run 20 — long ä is always ɛː (never eː)
+The largest remaining single native class (346 kaikki words). Cluster-preceded lexically-long ä (ärzte, mädchen,
+gespräch) was rendered short ɛ by the spelling rule, then LENGTHENED by the length lexicon via longOf[ɛ]=eː — the
+wrong long counterpart (that's ⟨e⟩'s). Standard German long ä is ALWAYS ɛː (the eː merger is colloquial; kaikki/
+wikipron use ɛː). Fix: g2p emits an internal marker Ɛ for short ä; longOf[Ɛ]=ɛː so a length flag lengthens it
+correctly; applyLength normalises any surviving Ɛ→ɛ for genuinely-short ä (hätte→hɛtə). Open-syllable long ä (käse)
+already emitted ɛː directly and is unaffected. kaikki 73.9→74.2%, wikipron 73.3→73.4%; 346 words canonically correct
+(folded headline moves less because the backbone fold partly merges eː/ɛː — but canonical correctness is the goal).

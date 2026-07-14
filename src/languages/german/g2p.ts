@@ -207,6 +207,14 @@ export function toSegments(word: string): Seg[] {
         if (isV(c)) {
             lastVowelLetter = c;
             const seenVowel = segs.some((s) => s.vowel);
+            // Short ⟨ä⟩: emit the marker Ɛ (not plain ɛ) so a downstream lexicon length flag lengthens it to ɛː,
+            // NOT the eː that longOf[ɛ] gives ⟨e⟩ (Standard German long ä is ALWAYS ɛː: ärzte → ɛːɐ̯tstə, not eː).
+            // applyLength (german.ts) normalises any surviving Ɛ back to ɛ for genuinely-short ä (hätte → hɛtə).
+            if (c === "ä" && !isLong(w, i)) {
+                push("Ɛ", i, true);
+                i++;
+                continue;
+            }
             const noVowelAfter = !/[aeiouäöüy]/.test(w.slice(i + 1));
             // -er coda in a non-first syllable → ɐ (Vater, über, Wasser); Erde (first syllable) keeps eː + ɐ̯.
             if (c === "e" && nx === "r" && !isV(nx2) && seenVowel) {
