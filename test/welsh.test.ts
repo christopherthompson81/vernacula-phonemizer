@@ -59,7 +59,7 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("nghymru")).toBe("ŋ̥ˈəmrɨ"); // ngh → ŋ̥
         expect(phonemizeWord("enghraifft")).toBe("ˈɛŋhraᶦft"); // MEDIAL ngh is ŋ+h, not the mutation
         expect(phonemizeWord("dechrau")).toBe("dˈɛχraᶤ"); // onset-cluster penult tensing (→ deχraᶤ) stays DEFERRED
-        expect(phonemizeWord("i")).toBe("ˈɨ"); // irregular clitic: i → ɨ (short), not the regular iː
+        expect(phonemizeWord("i")).toBe("ˈiː"); // the word ⟨i⟩ → front iː (referee-backed; the Run-2 oracle ɨ was an artifact)
         expect(phonemizeWord("bod")).toBe("bˈɔd"); // irregular: short ɔ, not the regular oː
         expect(phonemizeWord("heb")).toBe("hˈɛb"); // irregular: lax ɛ
         expect(phonemizeWord("un")).toBe("ˈɨːn"); // irregular: long ɨː before n

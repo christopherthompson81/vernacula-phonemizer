@@ -51,9 +51,9 @@
     "obscureY": ["y", "yr", "yn", "yng", "ym", "myn", "syr"],
 
     // Irregular common function words: short/lax vowels where the regular length rule would lengthen (bod → bɔd
-    // not boːd), plus the ⟨i⟩/⟨a⟩/⟨fy⟩ clitics. Consulted before the rules (a tiny closed-class lexicon).
+    // not boːd), plus the ⟨a⟩/⟨fy⟩ clitics (⟨i⟩→iː now comes from the rules). Consulted before the rules (a tiny closed-class lexicon).
     "exceptions": {
-        "i": "ˈɨ", "a": "ˈa", "fy": "vˈɨ", "bod": "bˈɔd", "fod": "vˈɔd", "pob": "pˈɔb", "wedi": "wˈɛdɨ",
+        "a": "ˈa", "fy": "vˈɨ", "bod": "bˈɔd", "fod": "vˈɔd", "pob": "pˈɔb", "wedi": "wˈɛdɨ",
         "heb": "hˈɛb", "na": "nˈa", "sydd": "sˈɨð", "un": "ˈɨːn", "os": "ˈɔs", "nad": "nˈad", "sy": "sˈɨ",
     },
 

@@ -79,7 +79,7 @@ The Run-2 referee residual pointed at a systematic divergence, and the independe
 decisively: **Northern Welsh keeps the letter ⟨i⟩ FRONT (i/ɪ/iː) and centralizes only ⟨u⟩ and clear ⟨y⟩ to ɨ** —
 that i/ɨ distinction IS the Northern vowel system. Run 1's two `i→ɨ` rules (unstressed-i→ɨ + closed-stressed-i→ɨ)
 matched an espeak ARTEFACT: the oracle renders short/unstressed ⟨i⟩ as ɨ, but the referee shows front i
-(melin→mɛlɪn not mɛlɨn, brenin→brɛnɪn, gwin→ɡwiːn, min→miːn, enillodd→ɛnɪɬɔð not the oracle's ɛnɨɬɔð). Removed both.
+(melin→mɛlɪn not mɛlɨn, brenin→brɛnɪn, gwin→ɡwiːn, min→miːn, enillodd→ɛnɪɬɔð not the oracle's ɛnɨɬɔð). Removed both. Also dropped the Run-2 "i"→ɨ exception (same artifact: the referee has i→iː front) — the rules now produce the correct ˈiː for the word ⟨i⟩ once the closed-i→ɨ rule is gone.
 
 Result: referee folded **49.1% → 56.5%** (+7.4). Oracle exact "dropped" 88.98% → 72.4%, but the decomposition shows
 that drop is US being MORE correct: **i-quality-only mismatches = 19.4%** (words where the sole diff is i↔ɨ and the
