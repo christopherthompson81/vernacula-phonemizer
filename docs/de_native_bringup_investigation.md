@@ -183,3 +183,29 @@ waldsterben→vˈaltʃtɛɐ̯bən (seam st→ʃt now fires). kaikki 66.0→67.3%
 Limit: only helps compounds whose constituents are FLAGGED in the stem lexicon (stems.txt). pickel·haube still
 doesn't split (haube unflagged), and erd·nuss can't (erd <4-letter leading threshold that guards ham·burg). The
 remaining compound residual is now stem-lexicon COVERAGE (growing stems.txt), not the ordering bug — deferred.
+
+## Path to ✅ (plan, from the common-word residual decomposition)
+Common-word (freq-50k ∩ kaikki, 18,185) residual = 4,762 (26%). ✅ = drive the GENUINE native-word error
+classes to negligible so the remainder is only notation + proper-noun/loan noise (the referee-limited profile
+that makes en/ga ✅). Phases (each a PR, cross-validated on the INDEPENDENT wikipron):
+- Phase 11 — native g2p rule gaps: initial ⟨ch⟩→ç(front)/k(Greek cluster) [china, christ]; ⟨-ig⟩ before a
+  consonant-suffix →ç [geschwindigkeit]; coda cluster devoicing gd→kt/bd→pt [smaragd]; boundary ⟨ng⟩→n+g via
+  prefix coverage [ungar]; + the sch/-en anomalies [rauschen, schreiben]. ~500, low risk.
+- Phase 12 — grow stems.txt from kaikki (compound coverage): mid-compound ɛ→ə + seam s→ʃ/b→p/d→t. ~500.
+- Phase 13 — kaikki-derived loanword consonant/vowel lexicon (common loans only): f→v, z→s, ɪ→i, ə→ɛ. ~700.
+  Proper-noun noise (Venezuela, Albert, Edinburgh) STAYS residual — that's the noise that makes ✅ legitimate.
+- Phase 14 — fold genuine notation (r-vocalization ɐ~ər) + RE-DIAGNOSE. ✅ gate: genuine-native-error bucket
+  negligible on both kaikki AND wikipron (~88-90% common-word folded, remainder characterized as noise).
+
+## Run 11 (Phase 11) — native g2p rule gaps: initial ch + coda-cluster devoicing
+Two clean, self-contained fixes from the ✅-plan's bucket A:
+- **Word-initial ⟨ch⟩** was wrongly the ach-laut x (a JS bug: chSound's `"aou".includes("")` is TRUE for the
+  empty word-initial prevVowel). Fixed: initial ⟨ch⟩ → ç before a front vowel (China→çiːna, Chemie→çe…), → k
+  before a consonant or back vowel (Christ→kʁ…, Chaos, Chlor). French ⟨ch⟩→ʃ (Chef/Chance) left as lexical residual.
+- **Coda-cluster final devoicing**: a coda voiced obstruent now devoices before ANOTHER voiced obstruent that
+  will itself devoice (smaragd→smaʁakt, bagdad→bakdat, magd→maːkt) — the whole coda cluster devoices; before a
+  sonorant/vowel it stays voiced (Adler, wagen). kaikki 67.3→67.6%, wikipron 67.2→67.9%.
+
+Deferred within bucket A (need morphology, → Phase 12): -igkeit→ç (suffix coverage), boundary ⟨ng⟩→n+g (prefix
+coverage), and the -chen/-schen split ambiguity (rauschen=rausch·en vs Häuschen=häus·chen — needs split RANKING,
+not greedy first-match; see Phase 12).

@@ -62,6 +62,15 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 11 — word-initial ch (ç/k) + coda-cluster final devoicing", () => {
+        expect(phonemizeWord("China")).toBe("çˈiːna"); // initial ch + front vowel → ç
+        expect(phonemizeWord("Christ")).toBe("kʁɪst"); // initial ch + consonant → k
+        expect(phonemizeWord("Chaos")).toBe("kˈaːɔs"); // initial ch + back vowel → k
+        expect(phonemizeWord("Milch")).toBe("mɪlç"); // control: mid/final ich-laut ç unaffected
+        expect(phonemizeWord("Smaragd")).toBe("smaʁˈakt"); // coda cluster gd → kt (both devoice)
+        expect(phonemizeWord("Adler")).toBe("ˈaːdlɐ"); // control: d before a sonorant stays voiced
+    });
+
     test("Run 10 — compound-split retry after a suffix strip (fires the seam st→ʃt)", () => {
         expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // wald·sterben: seam st→ʃt (was waldsterb·en)
         expect(phonemizeWord("leben")).toBe("lˈeːbən"); // control: a simple -en word is NOT wrongly compound-split
