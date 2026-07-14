@@ -321,3 +321,12 @@ legitimately carry stress — a stressed -er is the full ɛʁ (Laterne→latɛʁ
 Post-stress pass restoreStressedEr: ˈɐ/ˌɐ (NOT the ɐ̯ offglide) → ɛʁ. Safe (stressed bare ɐ is only ever -er-derived).
 kaikki 75.2→75.3%, wikipron 74.6→74.8%. The UNSTRESSED-loan -er (Robert→ʁoːbɛʁt, universal→univɛʁzaːl) needs
 lexical native(→ɐ)-vs-loan(→ɛʁ) knowledge no rule captures — still deferred. modern additionally has wrong stress.
+
+## Run 26 — recurse into a prefixed compound constituent (wahn·vor·stellung)
+The st→ʃt compound-seam class: a compound constituent that itself carries a stressed prefix (wahnvorstellung → wahn +
+vorstellung) was kept whole, so the inner st stayed medial (…foːɐ̯stɛlʊŋ). Extended the Run 19 constituent recursion
+with splitPrefixedStem: when a constituent rest won't splitCompound, strip a stressed prefix (vor/dar/um/an… — the
+closed list, so risky in-/un- never fire) leaving a constituent/split/stemish remainder, exposing the stem
+element-initially (wahn·vor·stellung → inner st → ʃt). Regression controls (vorstellung standalone, landstraße,
+waffenstillstand, warenkorb, donaudampfschiff) unchanged; full suite 231 green. kaikki 75.3→75.5%, wikipron flat.
+Remaining st→ʃt residual: unrecognized compound heads (mühlstein) and the risky in- prefix (instabil) — deferred.
