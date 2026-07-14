@@ -76,11 +76,12 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([a-zåäöA-ZÅÄÖ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
+const TOKEN = /([a-zåäöéA-ZÅÄÖÉ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 class SwedishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NFC first so decomposed å/ä/ö/é tokenize as single letters (the TOKEN class matches only precomposed).
+        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);

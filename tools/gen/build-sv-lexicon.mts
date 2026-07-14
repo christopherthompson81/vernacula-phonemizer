@@ -22,13 +22,20 @@ const OUT = "src/languages/swedish/accent-stress.tsv";
 
 const corpus = new Set(readFileSync(CORPUS, "utf8").split("\n").map((w) => w.trim().toLowerCase()).filter(Boolean));
 
-/** accent (1|2) + 0-based stressed-syllable ordinal from an NST SAMPA string, or null if no primary stress. */
+// NST-SAMPA vowel onset symbols (a=a A=ɑ e E=ɛ i I=ɪ o O=ɔ u U y Y }=ʉ 2=ø 9=œ). Length ':' , the 'u0' quality
+// modifier '0', diphthong marker '*', retroflex '`', and 'x\' (ɧ) are NOT vowels. Counting these before the
+// primary-stress '"' gives the ordinal in terms of VOWEL LETTERS — matching the engine's per-letter nucleus
+// counting, so orthographic diphthongs (Europa E*U = two vowels) align instead of being off by one.
+const SAMPA_VOWEL = new Set([..."aAeEiIoOuUyY}29"]);
+
+/** accent (1|2) + 0-based stressed nucleus ordinal from an NST SAMPA string, or null if no primary stress. */
 function parse(sampa: string): { accent: string; ord: number } | null {
-    if (!sampa.includes('"')) return null; // clitic / unstressed form
+    const stress = sampa.indexOf('"');
+    if (stress < 0) return null; // clitic / unstressed form
     const accent = sampa.includes('""') ? "2" : "1";
-    const syls = sampa.split("$");
-    const ord = syls.findIndex((s) => s.includes('"'));
-    return ord < 0 ? null : { accent, ord };
+    let ord = 0;
+    for (const ch of sampa.slice(0, stress)) if (SAMPA_VOWEL.has(ch)) ord++;
+    return { accent, ord };
 }
 
 // Collect every NST reading per corpus word.

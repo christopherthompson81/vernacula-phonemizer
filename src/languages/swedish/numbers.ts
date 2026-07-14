@@ -35,7 +35,10 @@ export function numberToWords(n: number): string {
         th = Math.floor((n % 1e6) / 1000),
         r = n % 1000;
     if (mil) parts.push(mil === 1 ? N.million.sg : `${below1000(mil)} ${N.million.pl}`);
-    if (th) parts.push(th === 1 ? "ettusen" : `${below1000(th)}${N.thousand}`); // ettusen (elided), tvåtusen
+    if (th) {
+        const t = below1000(th); // ett+tusen elides to ettusen (tjugoett+tusen → tjugoettusen)
+        parts.push((t.endsWith("ett") ? t.slice(0, -1) : t) + N.thousand);
+    }
     if (r) parts.push(below1000(r));
     return parts.join(" ");
 }

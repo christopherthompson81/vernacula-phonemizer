@@ -8,7 +8,7 @@
 
 import { MANIFEST } from "./manifest.ts";
 
-const VOWELS = "aeiouyåäö";
+const VOWELS = "aeiouyåäöé"; // é (idé, armé, kafé) is an always-long /eː/ loanword vowel
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 const FRONT = MANIFEST.frontVowels.toLowerCase();
 const isFront = (c: string): boolean => c !== "" && FRONT.includes(c);
@@ -36,6 +36,9 @@ function stressedLong(w: string, i: number): boolean {
         if (w[j] === "r" && RETRO_2ND.includes(w[j + 1] ?? "")) {
             count++; // retroflex r+dental = one consonant
             j += 2;
+        } else if (w[j] === "x") {
+            count += 2; // ⟨x⟩ = the cluster /ks/ → closes the syllable (sex → sɛks, not seːks)
+            j++;
         } else {
             count++;
             j++;
@@ -64,8 +67,9 @@ export function toSegments(word: string, stressOrd = 0): Seg[] {
         const three = w.slice(i, i + 3);
         const two = w.slice(i, i + 2);
 
-        // --- the -tion / -sion suffix → ɧuːn (always stressed in Swedish; a Phase-1 stress residual) ---
-        if ((two === "ti" || two === "si") && w.slice(i, i + 4) === c + "ion") {
+        // --- the -tion / -sion SUFFIX → ɧuːn. Gated to i>0 so a word-initial stem "tio…"/"sio…" (tionde) is
+        //     not swallowed; the suffix is always preceded by its stem (na-tion, sta-tion, pen-sion). ---
+        if (i > 0 && (two === "ti" || two === "si") && w.slice(i, i + 4) === c + "ion") {
             push("ɧ");
             push("uː", true);
             push("n");
@@ -91,6 +95,14 @@ export function toSegments(word: string, stressOrd = 0): Seg[] {
         // --- word-initial silent digraphs: hj/lj/dj/gj → j (medially these are C + j, handled below) ---
         if (i === 0 && nx === "j" && "hldg".includes(c)) {
             push("j");
+            i += 2;
+            continue;
+        }
+
+        // --- word-initial ⟨gn⟩ → ɡn (gnista/gno); only medial/coda ⟨gn⟩ velarises to ŋn (regn, vagn) ---
+        if (i === 0 && two === "gn") {
+            push("ɡ");
+            push("n");
             i += 2;
             continue;
         }

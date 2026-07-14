@@ -50,12 +50,12 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("fisk")).toBe("fɪsk"); // coda cluster → short i
         expect(phonemizeWord("egg")).toBe("ɛɡː"); // geminate gg → ɡː
         expect(phonemizeWord("ligga")).toBe("lˈɪɡːa"); // accent 1 (per NST)
-        expect(phonemizeWord("flicka")).toBe("flˈɪ̀ka"); // ck → k; accent 2
+        expect(phonemizeWord("flicka")).toBe("flˈɪ̀kːa"); // ck → kː (geminate, like tt/kk/gg); accent 2
     });
 
     test("Phase 2 — pitch accent (NST lexicon): accent-2 grave vs unmarked accent 1", () => {
         expect(phonemizeWord("tala")).toBe("tˈɑ̀ːla"); // accent 2 (grave on the stressed vowel)
-        expect(phonemizeWord("flicka")).toBe("flˈɪ̀ka"); // accent 2
+        expect(phonemizeWord("flicka")).toBe("flˈɪ̀kːa"); // accent 2
         expect(phonemizeWord("bil")).toBe("biːl"); // monosyllable → accent 1, no mark
         expect(phonemizeWord("boken")).toBe("bˈuːkɛn"); // accent 1 polysyllable → no grave
     });
@@ -65,7 +65,19 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("station")).toBe("staɧˈuːn"); // -tion stressed
         expect(phonemizeWord("student")).toBe("stɵdˈɛnt");
         expect(phonemizeWord("universitet")).toBe("ɵnɪvɛʂɪtˈeːt"); // stress on the 5th nucleus
-        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈuːn");
+        expect(phonemizeWord("telefon")).toBe("tɛlɛfˈuːn"); // NOTE: o=uː is the deferred lexical-o (target [oː])
+        expect(phonemizeWord("europa")).toBe("ɛɵrˈuːpa"); // diphthong ⟨eu⟩ counts 2 nuclei → stress lands past it
+    });
+
+    test("segmental edge cases (é, gn, x, ck geminate, ä-before-r)", () => {
+        expect(phonemizeWord("idé")).toBe("ɪdˈeː"); // é → long eː (loanword vowel), stressed via lexicon
+        expect(phonemizeWord("kafé")).toBe("kafˈeː");
+        expect(phonemizeWord("gnista")).toBe("ɡnˈɪ̀sta"); // word-initial gn → ɡn (not ŋn)
+        expect(phonemizeWord("regn")).toBe("rɛŋn"); // coda gn → ŋn
+        expect(phonemizeWord("sex")).toBe("sɛks"); // ⟨x⟩ = /ks/ cluster → short vowel
+        expect(phonemizeWord("dricka")).toBe("drˈɪ̀kːa"); // ck → kː geminate
+        expect(phonemizeWord("tionde")).toBe("tˈìːɔndɛ"); // NOT the -tion suffix (word-initial stem tio-)
+        expect(phonemizeWord("är")).toBe("æːr"); // ä-before-r lowering (not a hardcoded ɛːr)
     });
 
     test("irregular function words", () => {
@@ -79,7 +91,7 @@ describe("swedish canonical IPA", () => {
         expect(phonemize("21", "sv")).toBe("ɕˈʉ̀ːɡɔɛtː"); // tjugoett
         expect(phonemize("100", "sv")).toBe("ɛtːhˈɵndra"); // etthundra
         expect(phonemize("1000", "sv")).toBe("ˈɛ̀tːɵsɛn"); // ettusen
-        expect(phonemize("1000000", "sv")).toBe("eːn mɪljˈuːn"); // en miljon
+        expect(phonemize("1000000", "sv")).toBe("ɛn mɪljˈuːn"); // en miljon (unstressed en → ɛn)
     });
 
     test("text: clause assembly + punctuation", () => {

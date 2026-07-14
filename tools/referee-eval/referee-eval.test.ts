@@ -30,7 +30,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     pt: 0.74, // wikipron por — measured 78.0% (adjudicated gold 2nd: 99.4%); residual is open/close vowels
     ru: 0.90, // kaikki rus — measured 94.8% (adjudicated gold 2nd: 97.7%)
     si: 0.90, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
-    sv: 0.48, // wikipron swe broad — measured 52.0% (Phase 2: NST stress+accent lexicon; ² accent + retroflex folded); residual = lexical o quality + referee noise
+    sv: 0.48, // wikipron swe broad — measured 52.3% (Phase 2: NST stress+accent lexicon; ² accent + retroflex folded); residual = lexical o quality + referee noise
     ta: 0.58, // wikipron tam — measured 63.0% (r→ɾ folded only word-finally, to keep the ற/ர contrast); residual = ற geminate + diphthong notation
     th: 0.76, // wikipron tha — measured 81.9%; residual is LEXICAL (Sanskrit/Pali readings), not segmental
     tr: 0.70, // wikipron tur — measured 76.2% (epitran tur 2nd: 79.8%); residual = loan long-vowels + ref noise

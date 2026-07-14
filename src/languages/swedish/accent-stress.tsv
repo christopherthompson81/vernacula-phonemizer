@@ -1710,58 +1710,58 @@ augusta	2	1
 augusti	1	1
 augustin	1	2
 augustine	1	2
-augustus	2	1
-auktion	1	1
-auktionen	1	1
-auktioner	1	1
-auktoriserad	1	3
-auktoriserade	1	3
-auktoritet	1	3
-auktoriteten	1	3
-auktoriteter	1	3
-auktoritär	1	3
-auktoritära	1	3
+augustus	2	2
+auktion	1	2
+auktionen	1	2
+auktioner	1	2
+auktoriserad	1	4
+auktoriserade	1	4
+auktoritet	1	4
+auktoriteten	1	4
+auktoriteter	1	4
+auktoritär	1	4
+auktoritära	1	4
 aula	1
 aulan	1
 aura	2
-aurora	2	1
+aurora	2	2
 auschwitz	1
 austin	1
 australian	2	1
-australien	1	1
-australiens	1	1
-australiensisk	1	3
-australiensiska	1	3
-australienska	1	3
-australisk	1	1
-australiska	1	1
-autentisk	1	1
-autentiska	1	1
-autentiskt	1	1
-autism	1	1
-autistisk	1	1
-autistiska	1	1
+australien	1	2
+australiens	1	2
+australiensisk	1	4
+australiensiska	1	4
+australienska	1	4
+australisk	1	2
+australiska	1	2
+autentisk	1	2
+autentiska	1	2
+autentiskt	1	2
+autism	1	2
+autistisk	1	2
+autistiska	1	2
 auto	1
 autogiro	2
-autograf	1	2
-autografer	1	2
-automat	1	2
-automaten	1	2
-automater	1	2
-automatik	1	3
-automation	1	3
-automatisera	1	4
-automatiserade	1	4
-automatiseras	1	4
-automatiserat	1	4
-automatisering	1	4
-automatisk	1	2
-automatiska	1	2
-automatiskt	1	2
-automatvapen	2	2
-autonom	1	2
-autonoma	1	2
-autonomi	1	3
+autograf	1	3
+autografer	1	3
+automat	1	3
+automaten	1	3
+automater	1	3
+automatik	1	4
+automation	1	4
+automatisera	1	5
+automatiserade	1	5
+automatiseras	1	5
+automatiserat	1	5
+automatisering	1	5
+automatisk	1	3
+automatiska	1	3
+automatiskt	1	3
+automatvapen	2	3
+autonom	1	3
+autonoma	1	3
+autonomi	1	4
 autopilot	2
 autostart	2
 aux	1
@@ -7980,28 +7980,28 @@ ettårig	2
 ettåriga	2
 etymologi	1	4
 eu	2
-eufori	1	2
-euforisk	1	1
-eugene	1	1
+eufori	1	3
+euforisk	1	2
+eugene	1	2
 eureka	1	1
 euro	1
 euron	1
-europa	1	1
-europacupen	2	1
-europadomstolen	2	1
-europakonventionen	2	1
-europaparlamentet	2	1
-europaparlamentets	2	1
-europas	1	1
+europa	1	2
+europacupen	2	2
+europadomstolen	2	2
+europakonventionen	2	2
+europaparlamentet	2	2
+europaparlamentets	2	2
+europas	1	2
 european	1	2
-europeisk	1	2
-europeiska	1	2
-europeiskt	1	2
-europé	1	2
-européer	1	2
-européerna	1	2
+europeisk	1	3
+europeiska	1	3
+europeiskt	1	3
+europé	1	3
+européer	1	3
+européerna	1	3
 eurosport	1
-eurostat	1	2
+eurostat	1	3
 eurovision	1	2
 eus	2
 ev	1	3
@@ -8487,7 +8487,7 @@ fazer	1
 fbi	1	2
 fbk	2
 fc	2
-fd	2	1
+fd	2	2
 fda	1	2
 fe	1
 feature	1
@@ -17322,7 +17322,7 @@ klassrum	2
 klassrummen	2
 klassrummet	2
 klaus	1
-klausul	1	1
+klausul	1	2
 kleen	1
 klein	1
 klen	1
@@ -19770,7 +19770,7 @@ lauderdale	1
 laura	1
 laurence	1
 laurent	1
-laurentius	1	1
+laurentius	1	2
 lausanne	1	1
 lava	2
 laval	1	1
@@ -19970,7 +19970,7 @@ letterman	1
 letters	1
 lettiska	1
 lettland	1
-leukemi	1	2
+leukemi	1	3
 lev	1
 leva	2
 levande	2
@@ -21911,8 +21911,8 @@ maud	1
 maude	1
 maui	1
 maurice	1
-mauricio	1	1
-mauritius	1	1
+mauricio	1	2
+mauritius	1	2
 mauritz	1
 mauro	1
 max	1
@@ -23128,7 +23128,7 @@ msk	2
 msn	1	2
 mtg	1	2
 mtv	1	2
-mu	1	1
+mu	1	2
 mucka	2
 muckade	2
 muckar	2
@@ -25705,7 +25705,7 @@ ostört	2
 osund	2
 osunda	2
 osunt	2
-osv	2
+osv	2	2
 osvensk	2
 osvenskt	2
 oswald	1
@@ -25788,7 +25788,7 @@ outnyttjad	2
 outsider	1
 outsiders	1
 outsourcing	2
-outstanding	1	1
+outstanding	1	2
 oval	1	1
 ovala	1	1
 ovan	2
@@ -26231,7 +26231,7 @@ pattarna	2
 paul	1
 paula	1
 pauli	1
-paulina	2	1
+paulina	2	2
 pauline	1	1
 paulo	1
 pauls	1
@@ -26470,7 +26470,7 @@ peugeot	1	1
 peyton	1
 pff	1	2
 pg	2
-pga	1
+pga	1	1
 ph	2
 phil	1
 philadelphia	1	2
@@ -28708,8 +28708,8 @@ restaurangen	1	2
 restauranger	1	2
 restaurangerna	1	2
 restaurant	1	2
-restaurera	1	2
-restaurering	1	2
+restaurera	1	3
+restaurering	1	3
 reste	2
 resten	1
 rester	2
@@ -28760,7 +28760,7 @@ retur	1	1
 returen	1	1
 returer	1	1
 returnera	1	2
-reumatism	1	2
+reumatism	1	3
 reuters	1
 rev	1
 reva	2
@@ -30339,7 +30339,7 @@ seine	1
 seinfeld	1
 seinäjoki	1
 sej	1
-sek	2	1
+sek	2	2
 sekel	1
 sekelskiftet	2
 sekler	1
@@ -32850,7 +32850,7 @@ sounds	1
 soundtrack	1
 soundtracket	1
 south	1
-southampton	1	1
+southampton	1	2
 souvenir	1	2
 souvenirer	1	2
 sov	1
@@ -34643,7 +34643,7 @@ svartvit	2
 svartvita	2
 svartvitt	2
 svavel	1
-svd	2	1
+svd	2	2
 svea	2
 svealand	2
 sveavägen	2
@@ -35868,7 +35868,7 @@ tet	1
 tetra	2
 teve	2
 teven	2
-tex	1	1
+tex	1	2
 texas	1
 text	1
 texten	1
@@ -36806,9 +36806,9 @@ tratten	1
 trauma	1
 trauman	1
 traumat	1
-traumatisk	1	1
-traumatiska	1	1
-traumatiskt	1	1
+traumatisk	1	2
+traumatiska	1	2
+traumatiskt	1	2
 trav	1
 travar	2
 travbana	2

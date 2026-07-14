@@ -89,3 +89,27 @@ NST lists 2×A1 + 1×A2), `ligga`→accent 1 (what NST marks). The unit test ass
 **Still Phase-3+ (small residual):** lexical o=oː vs uː (son); compound decomposition (storkök); OOV loanword
 stress (words outside the 50k corpus fall to first-syllable). A kaikki swe *pron*-lexicon would be the
 independent segmental secondary referee (still a `secondaryGap`).
+
+## Run 5 — 2026-07-14 — PR #75 review fixes (3-agent review)
+
+Three finder agents (g2p correctness, lexicon-build, Swedish phonology) surfaced real bugs; fixed:
+
+- **é loanword vowel unhandled** (idé/armé/kafé): `é` was in neither the vowel table nor the TOKEN char class,
+  so it leaked as a literal / was dropped by `text()`. Added `é → eː` + to VOWELS + TOKEN. 104 lexicon rows
+  were dead; now live (idé→ɪdˈeː).
+- **Diphthong stress off-by-one** (europa): the build counted NST `$`-SYLLABLES, but the engine counts vowel
+  LETTERS; NST ties ⟨eu⟩ into one syllable. Rebuilt the ordinal as a count of SAMPA VOWEL symbols before the
+  `"` (matches the engine's per-letter nuclei). europa 1→2. (Residual: ~155 words where NST collapses ⟨au⟩ to
+  a single vowel `}` — e.g. restaurang — stay off; a bounded NST-encoding inconsistency, documented.)
+- **-tion fired word-initially** (tionde→ɧuːnde): gated the suffix rule to `i>0` (it always follows a stem).
+- **⟨x⟩ mis-counted as one coda consonant** (sex→seːks): `x`=/ks/ now counts 2 in the length rule → sɛks.
+- **Word-initial ⟨gn⟩** (gnista→ŋnɪsta): onset gn→ɡn; only coda/medial gn→ŋn (regn, vagn).
+- **⟨ck⟩ dropped geminate length** (flicka): ck→kː (consistent with tt/kk/gg; canonical-consistency).
+- **är hardcoded ɛːr** contradicted the ä-before-r rule → removed the exception (rule gives æːr). Added the
+  unstressed numeral **en → ɛn** (fixes "en miljon"→ɛn).
+- **thousands ending in ett** (21000→tjugoetttusen): generalized the ett+tusen elision → tjugoettusen.
+- **text() tokenized RAW input**: NFD ä/ö/å broke tokenization (för→fo+r); NFC-normalize before tokenizing.
+
+Referee 52.0→**52.3%**; unit test 12/12 (added a segmental-edge-cases block). Deferred (low severity): short
+/ɛ/→[æ] before r (speaker-variable; wikipron uses ɛ, and the eval folds æ→ɛ), negative-number sign word, and
+the au-collapse diphthong sub-class.
