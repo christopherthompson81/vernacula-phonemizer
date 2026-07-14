@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 27 — unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)", () => {
+        expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // -ion → i̯oːn
+        expect(phonemizeWord("genial")).toBe("ɡəni̯ˈaːl"); // -ial → i̯aːl
+        expect(phonemizeWord("Material")).toBe("maːteːʁi̯ˈaːl");
+        expect(phonemizeWord("Liberia")).toBe("lɪbˈeːʁɪa"); // control: word-final -iV# stays syllabic
+    });
+
     test("Run 26 — recurse into a prefixed compound constituent (wahn·vor·stellung)", () => {
         expect(phonemizeWord("Wahnvorstellung")).toBe("vˈaːnfoːɐ̯ʃtɛlʊŋ"); // inner vor·stellung → st → ʃt
         expect(phonemizeWord("Vorstellung")).toBe("fˈoːɐ̯ʃtɛlʊŋ"); // control: standalone still correct
