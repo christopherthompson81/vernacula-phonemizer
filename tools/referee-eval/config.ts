@@ -222,6 +222,11 @@ export const CONFIG: Record<string, RefLang> = {
         segmentJoin: true, // kaikki primary has no spaces (harmless); the wikipron secondary is space-separated
         preFolds: [
             [
+                /[()]/gu,
+                "",
+                "kaikki's optional-segment parens — keep the content (ganz ɡan(t)s, geben ɡeːb(ə)n = our ɡants/ɡeːbən; the segment IS present in standard German, the parens only mark it droppable)",
+            ],
+            [
                 /n̩/gu,
                 "ən",
                 "syllabic n̩ (referee) → our ən; expand before ̩ is stripped",
