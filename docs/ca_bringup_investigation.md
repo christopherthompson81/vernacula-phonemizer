@@ -63,3 +63,20 @@ Two finders (g2p/pipeline correctness + Catalan phonology). Real bugs fixed:
 - **s → z after a glide** (pausa → pˈawzə).
 Full suite 191/191; ca 79.5%. Deferred to Run 2: intervocalic ⟨x⟩ = ks/ɡz (examen — lexical), open/close mids,
 -nts→ns plural cluster.
+
+## Run 2 — 2026-07-14 — lexical stressed mid-vowel height (open/close)
+The stressed mid-vowel height (⟨e⟩=ɛ/e, ⟨o⟩=ɔ/o) is LEXICAL (dona/dóna, os/ós — not spelling-derivable), the
+Run-1 ceiling. Swedish-style solution: the mature **espeak-ng 1.52 Central shim** (the project's ca convergence
+reference) is the oracle. Ran it over the 50k frequency corpus (paragraph-per-word for clean 1:1 alignment —
+space-split misaligns because espeak inserts prefix-boundary spaces), extracted the STRESSED mid height per
+word, and committed the CLOSE deviations from the engine's open default → `src/languages/catalan/mid-vowels.tsv`
+(10,413 words: 5,706 close-e, 4,707 close-o; `word\te` / `word\to`). Engine: after stress, a flagged word's
+stressed ɛ→e / ɔ→o. Generator: `tools/gen/build-ca-midvowels.mts`.
+
+Fixes the exact Run-1 ceiling words: menja→mˈeɲʒə, metge→mˈed͡ʒə, Barcelona→bəɾsəɫˈonə, pedra→pˈeðɾə, molt→mˈoɫ
+(unflagged stay open: dona→dˈɔnə, terra→tˈɛrə, cel→sˈɛɫ). **Referee UNCHANGED (79.5%)** — the eval folds
+open/close (the wikipron referee is itself unreliable on height), so it can't see the win; validated instead by
+the espeak oracle + hand-check (Wheeler). Unit test 10/10. OOV words (outside the 50k) keep the open default.
+
+Remaining (Run 3+): intervocalic ⟨x⟩=ks/ɡz (lexical), -nts→ns plural cluster, bl/gl gemination, a Central-only
+secondary referee.

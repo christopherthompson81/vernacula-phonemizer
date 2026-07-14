@@ -17,14 +17,23 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("dona")).toBe("dˈɔnə"); // stressed open ɔ (correct here)
     });
 
+    test("Run 2 — lexical stressed mid-vowel height (open ɛ/ɔ default, close e/o from the espeak-derived lexicon)", () => {
+        expect(phonemizeWord("pedra")).toBe("pˈeðɾə"); // close e (lexicon)
+        expect(phonemizeWord("menja")).toBe("mˈeɲʒə"); // close e
+        expect(phonemizeWord("por")).toBe("pˈoɾ"); // close o
+        expect(phonemizeWord("Barcelona")).toBe("bəɾsəɫˈonə"); // close o
+        expect(phonemizeWord("terra")).toBe("tˈɛrə"); // stays OPEN ɛ (not flagged)
+        expect(phonemizeWord("cosa")).toBe("kˈɔzə"); // stays OPEN ɔ
+    });
+
     test("palatals, affricates, digraphs (ny/ll/tx/tj/tg/ix)", () => {
         expect(phonemizeWord("any")).toBe("ˈaɲ"); // ny → ɲ
         expect(phonemizeWord("panxa")).toBe("pˈaɲʃə"); // n → ɲ before ʃ
         expect(phonemizeWord("caixa")).toBe("kˈaʃə"); // ix → ʃ (the i is a silent marker, not a glide)
-        expect(phonemizeWord("peix")).toBe("pˈɛʃ");
+        expect(phonemizeWord("peix")).toBe("pˈeʃ");
         expect(phonemizeWord("platja")).toBe("pɫˈad͡ʒə"); // tj → d͡ʒ
-        expect(phonemizeWord("metge")).toBe("mˈɛd͡ʒə"); // tg(e) → d͡ʒ
-        expect(phonemizeWord("cotxe")).toBe("kˈɔt͡ʃə"); // tx → t͡ʃ
+        expect(phonemizeWord("metge")).toBe("mˈed͡ʒə"); // tg(e) → d͡ʒ
+        expect(phonemizeWord("cotxe")).toBe("kˈot͡ʃə"); // tx → t͡ʃ
         expect(phonemizeWord("col·legi")).toBe("kuɫːˈɛʒi"); // l·l → ɫː
     });
 
@@ -39,7 +48,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("peu")).toBe("pˈɛw"); // eu → ɛw
         expect(phonemizeWord("ciutat")).toBe("siwtˈat"); // iu → iw (falling); i is the nucleus
         expect(phonemizeWord("ciència")).toBe("siˈɛnsiə"); // Cia/Cie → HIATUS (not a rising glide, unlike Spanish)
-        expect(phonemizeWord("llei")).toBe("ʎˈɛj"); // ll → ʎ, ei → ɛj
+        expect(phonemizeWord("llei")).toBe("ʎˈej"); // ll → ʎ, ei → ɛj
     });
 
     test("stress (2R + written accent) + final-r deletion", () => {
@@ -53,8 +62,8 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("esbós")).toBe("əzβˈos"); // s → z before voiced b (regressive)
         expect(phonemizeWord("actitud")).toBe("əktitˈut"); // final d → t
         expect(phonemizeWord("vint")).toBe("bˈin"); // v→b; final -nt → n (cluster simplification)
-        expect(phonemizeWord("cent")).toBe("sˈɛn");
-        expect(phonemizeWord("molt")).toBe("mˈɔɫ"); // final -lt → l
+        expect(phonemizeWord("cent")).toBe("sˈen");
+        expect(phonemizeWord("molt")).toBe("mˈoɫ"); // final -lt → l
     });
 
     test("review fixes: velar-nasal cluster, -ig affricate, spirant-after-lateral, diphthong-final stress", () => {
@@ -69,15 +78,15 @@ describe("catalan canonical IPA", () => {
     });
 
     test("numbers", () => {
-        expect(phonemize("2", "ca")).toBe("dˈɔs");
+        expect(phonemize("2", "ca")).toBe("dˈos");
         expect(phonemize("21", "ca")).toBe("bˈin i un"); // vint-i-un
         expect(phonemize("31", "ca")).toBe("tɾˈɛntə un"); // trenta-un
-        expect(phonemize("100", "ca")).toBe("sˈɛn"); // cent
-        expect(phonemize("200", "ca")).toBe("dˈɔs sˈɛnts"); // dos-cents → two words (hyphen split)
-        expect(phonemize("2024", "ca")).toBe("dˈɔs mˈiɫ bˈin i kwˈatɾə");
+        expect(phonemize("100", "ca")).toBe("sˈen"); // cent
+        expect(phonemize("200", "ca")).toBe("dˈos sˈents"); // dos-cents → two words (hyphen split)
+        expect(phonemize("2024", "ca")).toBe("dˈos mˈiɫ bˈin i kwˈatɾə");
     });
 
     test("text: reduction + function-word destressing + punctuation", () => {
-        expect(phonemize("El gat menja peix.", "ca")).toBe("ɛɫ ɡˈat mˈɛɲʒə pˈɛʃ .");
+        expect(phonemize("El gat menja peix.", "ca")).toBe("ɛɫ ɡˈat mˈeɲʒə pˈeʃ .");
     });
 });
