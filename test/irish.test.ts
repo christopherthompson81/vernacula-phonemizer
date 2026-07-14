@@ -53,6 +53,17 @@ describe("irish canonical IPA", () => {
         expect(phonemizeWord("scoil")).toBe("sˠkˈɔlʲ"); // oi → ɔ (not ɛ)
     });
 
+    test("Run 2 — i-offglide (long back V + slender coda) + svarabhakti epenthesis", () => {
+        expect(phonemizeWord("áit")).toBe("ˈɑːⁱtʲ"); // ɑː + slender coda t → i-offglide
+        expect(phonemizeWord("cóir")).toBe("kˈoːⁱɾʲ");
+        expect(phonemizeWord("súil")).toBe("sˠˈuːlʲ"); // uː gets NO offglide
+        expect(phonemizeWord("baile")).toBe("bˠˈalʲə"); // pre-vocalic slender l → no offglide
+        expect(phonemizeWord("gorm")).toBe("ɡˈɔɾˠəmˠ"); // r + coda m → epenthetic ə
+        expect(phonemizeWord("bolg")).toBe("bˠˈɔl̪ˠəɡ"); // l + coda ɡ → ə
+        expect(phonemizeWord("gairm")).toBe("ɡˈaɾʲəmˠ"); // r-epenthesis; short a → no offglide
+        expect(phonemizeWord("ainm")).toBe("ˈanʲmˠ"); // n does NOT trigger epenthesis
+    });
+
     test("fada (long vowels) + first-syllable stress", () => {
         expect(phonemizeWord("bó")).toBe("bˠˈoː");
         expect(phonemizeWord("fada")).toBe("fˠˈad̪ˠə");
