@@ -21,6 +21,7 @@ import { phonemizeWord as ja } from "../../src/languages/japanese/japanese.ts";
 import { phonemizeWord as ko } from "../../src/languages/korean/korean.ts";
 import { createPinyinPhonemizer } from "../../src/languages/mandarin/mandarin.ts";
 import { phonemizeWord as cs } from "../../src/languages/czech/czech.ts";
+import { phonemizeWord as cy } from "../../src/languages/welsh/welsh.ts";
 import { phonemizeWord as de } from "../../src/languages/german/german.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
@@ -50,6 +51,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ca,
     cmn,
     cs,
+    cy,
     de,
     en,
     es,

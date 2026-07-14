@@ -8,14 +8,20 @@ import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface WelshManifest {
     digraphs: Record<string, string>;
+    nasalMutation: Record<string, string>;
     consonants: Record<string, string>;
     vowels: Record<string, string>;
     longVowel: Record<string, string>;
     lengthenBefore: string;
     obscureY: string[];
+    exceptions: Record<string, string>;
+    enclitics: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: { ones: string[] };
 }
 
 /** The consolidated hand-authored Welsh data tables (see welsh.jsonc). */
-export const MANIFEST = loadManifest<WelshManifest>(import.meta.url, "welsh.jsonc");
+export const MANIFEST = loadManifest<WelshManifest>(
+    import.meta.url,
+    "welsh.jsonc",
+);

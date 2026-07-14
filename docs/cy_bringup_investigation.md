@@ -46,3 +46,29 @@ unstressed i→ɨ) → 85.5% (secondary stress on syllable 1 when primary ≥ 3r
 - Cymraeg-type final-stress exceptions; deeper secondary-stress placement.
 - English loan-names (glasgow, royal, saturday) — espeak code-switches; out of scope for the Welsh g2p.
 - The wikipron cym referee (independent validation).
+
+## Run 2 — 2026-07-14 — nasal mutation, function-word exceptions, clitics, + the wikipron NW referee
+
+88.3% → 88.98% exact vs oracle. Changes:
+- **Word-initial nasal mutation** (treiglad trwynol): ngh→ŋ̥, mh→m̥, nh→n̥ applied ONLY at word start (nhw→n̥uː,
+  nghymru→ŋ̥əmrɨ); MEDIALLY ⟨ngh⟩ etc. are ŋ+h / m+h / n+h (enghraifft→ɛŋhraᶦft). Fixed both directions.
+- **Irregular function-word exception table** (a tiny closed-class lexicon): i→ɨ, bod→bɔd, heb→hɛb, un→ɨːn,
+  sydd→sɨð, fy/dy… — short/lax where the regular length rule would lengthen. Removed fy/dy from obscureY
+  (their y is clear ɨ).
+- **Apostrophe enclitics** (o'r→oːr, hi'n→hiːn): phonemize the STEM as its own word so its length rule sees the
+  real open syllable, then append the enclitic — instead of merging into one closed syllable.
+- REVERTED an onset-cluster penult-tensing attempt (dechrau→deχraᶤ): it over-fired on eglwys (ɛ before ɡl stays
+  lax) and llywodraeth (net-negative); the tense-before-onset-cluster rule needs the first C to be a fricative,
+  not just any lengthener — not cleanly capturable, deferred.
+
+**wikipron cym referee wired** — DIALECT-MATCHED: wikipron has NW (North Wales) vs SW variants; we target
+Northern, so cym_latn_nw_broad_filtered (17,291 words) is a clean independent referee (unlike Irish's 3-dialect
+mess). Folded backbone **49.1%** (deduped; floor 0.45). Folds: our modifier-letter diphthong offglides ᶤ→ɨ (central,
+matching the referee's ɨ̯ for ae/au/oe/wy) / ᶦ→i (front, ai/ei) / ᶷᵘ→u; ɪ→i. The backbone already strips our
+stress+length and the referee's non-syllabic/lowered combining marks.
+
+**Run 3 (referee-guided, the Irish pattern):** the residual is dominated by the oracle's **i→ɨ artifact** — we
+bootstrapped from espeak, which renders short/unstressed ⟨i⟩ as ɨ (lladin→ɬadɨn, pin→pɨn), but the INDEPENDENT NW
+referee shows front **i** (pin→piːn). Re-examine the unstressed/closed i→ɨ rules against the referee (they may be
+espeak artifacts), and the **n/r/l vowel-length ambiguity** (tân/tan) — both likely need an oracle-derived,
+referee-GATED length/quality lexicon (cf. the Irish Run-3 method [[vernacula-oracle-lexicon-method]]).
