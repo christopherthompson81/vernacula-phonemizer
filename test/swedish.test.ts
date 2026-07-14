@@ -71,10 +71,15 @@ describe("swedish canonical IPA", () => {
     test("Phase 3 — lexical o-quality (NST): stressed ⟨o⟩ is [oː] or [uː]", () => {
         expect(phonemizeWord("telefon")).toBe("tɛlɛfˈoːn"); // lexical [oː] override
         expect(phonemizeWord("kol")).toBe("koːl");
-        expect(phonemizeWord("adobe")).toBe("adˈoːbɛ");
+        expect(phonemizeWord("biolog")).toBe("bɪɔlˈoːɡ"); // stressed o → oː; unstressed o stays ɔ
+        expect(phonemizeWord("monopol")).toBe("mɔnɔpˈoːl");
+        expect(phonemizeWord("adobe")).toBe("adˈoːbɛ"); // loanword silent final ⟨e⟩ is POST-stress → oː still holds
         expect(phonemizeWord("bok")).toBe("buːk"); // default [uː] kept
         expect(phonemizeWord("son")).toBe("suːn");
         expect(phonemizeWord("stor")).toBe("stuːr");
+        // Alignment guard: a PRE-stress vowel-count mismatch (NST consonantises ⟨eu⟩ → ne$vrU, shifting the
+        // ordinal) withholds the override — conservative uː — rather than land oː on the wrong ⟨o⟩.
+        expect(phonemizeWord("neurolog")).toBe("nɛɵrˈuːlɔɡ");
     });
 
     test("segmental edge cases (é, gn, x, ck geminate, ä-before-r)", () => {

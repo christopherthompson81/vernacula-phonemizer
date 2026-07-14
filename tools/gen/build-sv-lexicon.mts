@@ -41,7 +41,15 @@ function parse(word: string, sampa: string): { accent: string; ord: number; oLon
     // The stressed syllable = from the marker to the next syllable boundary; oː override only for orthographic ⟨o⟩.
     const stressedSyl = sampa.slice(stress + 1).split("$")[0]!;
     const orthVowels = [...word].filter((c) => ORTHO_VOWEL.includes(c));
-    const oLong = orthVowels[ord] === "o" && stressedSyl.includes("o:");
+    // The ordinal indexes orthVowels, so it is only trustworthy when NST's vowels line up with the word's. A
+    // PRE-stress mismatch (NST consonantises ⟨eu⟩ → ne$vrU, dropping a vowel BEFORE the stress) shifts every
+    // index and lands oː on the wrong ⟨o⟩ — withhold. A POST-stress mismatch is harmless: a loanword's silent
+    // final ⟨e⟩ (adobe → a"do:b, pose → "po:s) drops a vowel AFTER the stressed ⟨o⟩, so the ordinal still holds.
+    const sampaVowels = [...sampa].filter((c) => SAMPA_VOWEL.has(c)).length;
+    let effectiveOrtho = orthVowels.length;
+    if (word.endsWith("e") && effectiveOrtho === sampaVowels + 1) effectiveOrtho--; // absorb one trailing silent ⟨e⟩
+    const aligned = sampaVowels === effectiveOrtho;
+    const oLong = aligned && orthVowels[ord] === "o" && stressedSyl.includes("o:");
     return { accent, ord, oLong };
 }
 

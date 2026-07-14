@@ -128,6 +128,8 @@ orthographic ⟨o⟩ that NST realises as long `o:` (605 corpus words). The engi
 emits [oː] there instead of the default [uː]. telefon→tɛlɛfˈoːn, kol→koːl, adobe→adˈoːbɛ; bok/son/sol keep [uː].
 Referee 52.3→52.6%. Lexicon format: `word\taccent[\tord][\to]` (numeric token = ordinal, "o" = oː flag).
 
+**Review follow-up (alignment guard):** the adversarial verifier found the oː could land on the WRONG ⟨o⟩ for the `neuro-` family — NST consonantises ⟨eu⟩ (`ne$vrU$"lo:g`), dropping a vowel BEFORE the stress, so the ordinal shifts. Fixed by withholding the `o` flag when NST's vowel count and the word's disagree in a way that moves the index. The mismatch is PRE-stress (harmful: neurolog) vs POST-stress (harmless: a loanword's silent final ⟨e⟩ — adobe `a"do:b`, pose `"po:s`, where the stressed ⟨o⟩ still lines up). The guard absorbs one trailing silent ⟨e⟩ before comparing, so adobe/pose/code KEEP their correct oː while neurolog/neurologiska drop to uː. 605→592 flagged. (Prompted by review feedback: a "silent final e" is NST-accurate for the Swedish adaptation of these loans, but the drop is post-stress, so those overrides were correct and shouldn't have been withheld.)
+
 ### 3b — Compound decomposition — EVALUATED, DEFERRED (measured precision too low)
 Prototyped a lexicon-driven greedy splitter (longest-first, parts ≥3 chars, from the 42k lexicon wordlist).
 Split 673/5286 referee words; many correct (affärs+liv, afton+falk, akvarell+målare). But precision is not

@@ -417,7 +417,7 @@ alkoholiserade	1	4
 alkoholism	1	3
 alkoholist	1	3
 alkoholister	1	3
-alkoholkonsumtion	2	2	o
+alkoholkonsumtion	2	2
 alkohollagen	2	2	o
 alkoholmissbruk	2	2	o
 alkoholpolitik	2	2	o
@@ -4005,7 +4005,7 @@ bni	1	2
 bnp	2
 bo	1
 boa	2
-board	1	o
+board	1
 bob	1
 bobs	1
 boca	1
@@ -4320,7 +4320,7 @@ boule	1
 boulevard	1	2
 bourbon	1
 bourgogne	1	1
-bournemouth	1	o
+bournemouth	1
 bov	1
 bovarna	2
 boven	1
@@ -4339,7 +4339,7 @@ boxholm	2
 boxning	2
 boy	1
 boye	2
-boys	1	o
+boys	1
 bp	2
 bradley	1
 bragd	1
@@ -5663,7 +5663,7 @@ cordelia	1	1
 cornelia	1	1
 cornelis	1	1
 cornelius	1	1
-cornflakes	1	o
+cornflakes	1
 cornwall	1	o
 corp	1
 corporation	1	2
@@ -9287,7 +9287,7 @@ fontäner	1	1
 food	1
 foods	1
 for	1
-forbes	1	o
+forbes	1
 force	1	o
 forcera	1	1
 fordon	2
@@ -17632,7 +17632,7 @@ knåpa	2
 knöl	1
 knölar	2
 knöt	1
-ko	2	o
+ko	2
 koalition	1	3
 koalitionen	1	3
 koalitionsregering	2	3
@@ -22878,7 +22878,7 @@ monumentala	1	3
 monumentet	1	2
 mood	1
 moody	1
-moore	1	o
+moore	1
 moped	1	1
 mopeden	1	1
 mopeder	1	1
@@ -23993,9 +23993,9 @@ netto	2
 nettovinst	2
 network	1
 networks	1
-neurolog	1	2	o
-neurologisk	1	2	o
-neurologiska	1	2	o
+neurolog	1	2
+neurologisk	1	2
+neurologiska	1	2
 neutral	1	2
 neutrala	1	2
 neutralisera	1	4
@@ -26991,7 +26991,7 @@ porträtt	1	1
 porträtten	1	1
 porträtteras	1	2
 porträttet	1	1
-portsmouth	1	o
+portsmouth	1
 portugal	1
 portugals	1
 portugiserna	1	2
@@ -29158,7 +29158,7 @@ rosalie	1	2
 rosas	2
 rosberg	2
 rose	1
-rosemary	2	o
+rosemary	2
 rosen	1
 rosenbad	1	2
 rosenberg	2
