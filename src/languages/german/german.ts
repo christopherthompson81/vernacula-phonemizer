@@ -282,7 +282,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return restoreStressedEr(restoreStressedIe(applyErRestore(applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)), erDict().get(w))));
+        return restoreStressedEr(restoreStressedIe(applyConsonant(applyErRestore(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), erDict().get(w)), consonantDict().get(w))));
     }
 
     const segs = toSegments(w);
@@ -307,7 +307,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return restoreStressedEr(restoreStressedIe(applyErRestore(applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w)), erDict().get(w))));
+    return restoreStressedEr(restoreStressedIe(applyConsonant(applyErRestore(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), erDict().get(w)), consonantDict().get(w))));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;

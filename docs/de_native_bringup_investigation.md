@@ -352,3 +352,11 @@ POST-PASS (after applyConsonant, so the inserted ʁ doesn't shift consonant ordi
 the restoreStressedEr rule (Run 25). Measured 851 candidate words; the strict ɛʁ-exact filter yields 771 (excludes
 the long eːɐ̯ realizations like Pferd). kaikki 75.5→76.1%, wikipron 74.9→75.2% — both strong. Floor 0.74→0.75.
 LEXICON INVENTORY now: stress, length, quality, consonant, er (5). Full suite 233 green.
+
+## Run 29 — -er restoration before applyConsonant unblocks loanword v→v
+The fɛ→vɛ residual (universal → unifɛʁzaːl, should univɛʁzaːl): the consonant lexicon's f→v correction was
+consonant-count-SKEW-blocked because it was built before the -er restoration inserted the ʁ (our unifɐzaːl had 4
+consonants vs kaikki's 5). Reordered applyErRestore to run BEFORE applyConsonant (insert the ʁ first), then rebuilt
+consonant.tsv (now aligned): universal/transversal/aversion get their loanword v. Native words (Vater, November)
+unchanged. Consonant lexicon 3333→3426, skew 9756→9127. kaikki 76.1→76.3%, wikipron 75.2→75.4%. (The stressed-er
+restoreStressedEr rule still runs last — a pre-existing benign ordering, no post-ɛʁ corrections in those words.)
