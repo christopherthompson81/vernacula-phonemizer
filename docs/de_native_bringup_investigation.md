@@ -236,3 +236,10 @@ edinburgh, moslem — stays residual, this is the noise that makes ✅ legitimat
 still to close: mid-compound ɛ→ə (christentum, heidelbeere — Phase 12b compound coverage), the schreiben
 garbage-split (schrei·ben → beːn), -igen/-igkeit → ɪ/ç, and short ⟨ä⟩→ɛ (ärzte). Session progress: referee
 49.8→70.6% (kaikki), 52.2→70.4% (independent wikipron); common-word 73.8→79.2%.
+
+## Run 15 — split ordering: prefer the whole-word lexeme
+The Run-10 compound retry had regressed known VERBS ending in a compound-looking tail: schreiben→schrei·ben
+(→ beːn). Applied the ordering principle (from the split-ranking discussion): skip the retry-split when the whole
+is itself a known lexeme (isWord) — schreiben/abschreiben/verschreiben → schreib·en; waldsterben/schadenfreude
+(not base lexemes) still split. Deferred (entangled): irregular-long ⟨ä⟩→ɛː (the ä/e merger, LONG_OF[ɛ]=eː can't
+disambiguate ärzte→ɛː from e→eː) and -igen/-igkeit→ɪ/ç (suffix-machinery). Next: compound coverage (Phase 12b).

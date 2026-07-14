@@ -156,7 +156,10 @@ export function decompose(word: string): Decomp {
     // split, but wald·sterben can; pickelhaube → pickel·haube). Only fires when the stem otherwise wouldn't split.
     if (stemParts.length === 1 && suffixes.length) {
         const whole = rest + suffixes.join("");
-        const cs = splitCompound(whole);
+        // Ordering: prefer the un-split analysis when the whole is itself a known LEXEME — schreiben is a verb
+        // (→ schreib·en), not the schrei·ben compound the greedy split would pick; waldsterben isn't a base
+        // lexeme, so it still splits.
+        const cs = isWord(whole) ? null : splitCompound(whole);
         if (cs && cs.length >= 2) {
             stemParts = cs;
             suffixes.length = 0;
