@@ -12,6 +12,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { phonemizeArabic as ar } from "../../src/languages/arabic/arabic.ts";
+import { createEnglish } from "../../src/languages/english/english.ts";
+import { phonemizeWord as ff } from "../../src/languages/fula/fula.ts";
+import { phonemizeWord as ha } from "../../src/languages/hausa/hausa.ts";
+import { createHindi } from "../../src/languages/hindi/hindi.ts";
+import { phonemizeWord as ja } from "../../src/languages/japanese/japanese.ts";
+import { phonemizeWord as ko } from "../../src/languages/korean/korean.ts";
 import { createPinyinPhonemizer } from "../../src/languages/mandarin/mandarin.ts";
 import { phonemizeWord as cs } from "../../src/languages/czech/czech.ts";
 import { phonemizeWord as de } from "../../src/languages/german/german.ts";
@@ -21,14 +27,23 @@ import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
 import { phonemizeWord as ru } from "../../src/languages/russian/russian.ts";
 import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
+import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
+import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
+import { phonemizeWord as tr } from "../../src/languages/turkish/turkish.ts";
+import { phonemizeWord as vi } from "../../src/languages/vietnamese/vietnamese.ts";
 import { phonemizeWord as zu } from "../../src/languages/zulu/zulu.ts";
 import { BACKBONE, CONFIG, type RefLang } from "./config.ts";
 
 // Alphabetical; each maps a word → our canonical IPA (sync or async). ar goes through the async ONNX
-// diacritizer pre-pass (phonemizeArabic) so the referee's voweled IPA is comparable. (cmn is syllable-level →
-// handled separately.)
+// diacritizer pre-pass (phonemizeArabic) so the referee's voweled IPA is comparable. cmn is syllable-level. en
+// and hi have no bare phonemizeWord export — instantiate their factory once and take the word through .text().
 const cmn = createPinyinPhonemizer();
-const PHON: Record<string, (w: string) => string | Promise<string>> = { ar, cmn, cs, de, es, fr, kk, pt, ru, si, zu };
+const enP = createEnglish();
+const en = (w: string): string => enP.text(w);
+const hiP = createHindi();
+const hi = (w: string): string => hiP.text(w);
+const PHON: Record<string, (w: string) => string | Promise<string>> =
+  { ar, cmn, cs, de, en, es, ff, fr, ha, hi, ja, kk, ko, pt, ru, si, ta, th, tr, vi, zu };
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */

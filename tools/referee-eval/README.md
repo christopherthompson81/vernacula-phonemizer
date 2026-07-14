@@ -42,19 +42,24 @@ Two languages need a non-default path, handled inside the one framework:
 ## Run
 
 ```bash
-npx tsx tools/referee-eval/eval.ts <ar|cmn|cs|de|es|fr|kk|pt|ru|si|zu> [--examples N]  # report + residuals + gap
-npx vitest run tools/referee-eval/referee-eval.test.ts                                 # primary-source floors
+npx tsx tools/referee-eval/eval.ts <ar|cmn|cs|de|en|es|ff|fr|ha|hi|ja|kk|ko|pt|ru|si|ta|th|tr|vi|zu> [--examples N]
+npx vitest run tools/referee-eval/referee-eval.test.ts   # primary-source floors
 ```
 
-Current backbone corroboration (primary; secondary in parens): **zu 100%** · **es 92.5%** · **ru 94.8%**
-(gold 97.7%) · **si 93.5%** · **kk 86.2%** · **cmn 84.7%** (syllable) · **pt 78.0%** (gold 99.4%) · **cs 69.9%**
-· **fr 66.5%** (gold 85.6%) · **de 49.8%** (wikipron 52.2%) · **ar 45.4%**.
+Every language with a phonemizer has a referee (or a documented gap). Current backbone corroboration (primary;
+independent secondary in parens): **zu 100%** · **es 92.5%** · **ha 90.3%** (epitran 88.4%) · **th 81.9%** ·
+**hi 78.7%** · **ta 65.8%** · **tr 76.2%** (epitran 79.8%) · **ru 94.8%** (gold 97.7%) · **si 93.5%** ·
+**kk 86.2%** · **cmn 84.7%** (syllable) · **pt 78.0%** (gold 99.4%) · **vi 71.0%** (epitran 51.3%) · **ff 69.5%**
+· **cs 69.9%** · **fr 66.5%** (gold 85.6%) · **ko 58.5%** · **ja 57.9%** · **de 49.8%** (wikipron 52.2%) ·
+**ar 45.4%** · **en 36.1%**.
 
-The low ones are referee-quality artifacts, not engine defects: **de** vs kaikki is dragged down by kaikki's
-proper-noun/loanword bulk (the wikipron secondary agrees at 52.2%); **fr** vs raw wikipron is noisy (the
-adjudicated gold gives 85.6%); **cs** is deflated by epitran's own voicing bugs; **ar** is bounded by the ONNX
-diacritizer's short-vowel misses. Where we differ from a programmatic referee we are often the more faithful one
-— a divergence is a candidate to adjudicate, never an auto-fix.
+The low ones are referee-quality artifacts, not engine defects: **en** vs wikipron is a noisy referee (proper
+nouns, British variants, letter-name rows); **de** vs kaikki is dragged down by kaikki's proper-noun/loanword
+bulk (the wikipron secondary agrees at 52.2%); **ja/ko** narrow wikipron carries allophonic palatalization and
+devoicing detail we fold only partially; **fr** vs raw wikipron is noisy (the adjudicated gold gives 85.6%);
+**th** residual is lexical Sanskrit/Pali readings, not segmental; **cs** is deflated by epitran's own voicing
+bugs; **ar** is bounded by the ONNX diacritizer's short-vowel misses. Where we differ from a programmatic referee
+we are often the more faithful one — a divergence is a candidate to adjudicate, never an auto-fix.
 
 ## Referee data (`referees/`)
 
@@ -62,6 +67,15 @@ TSVs are `word<TAB>ipa`, independent of espeak, committed (small):
 
 - `zu.epitran-zul-Latn.tsv`, `si.wikipron-sin.tsv` — copied from espeak-ng-portable's committed referee sets.
 - `kk.epitran-kaz-Cyrl.tsv` — generated from the first 1,400 real Cyrillic corpus words via epitran.
+- `<lang>.wikipron-*.tsv` (en/ha/hi/ja/ko/ta/th/tr/vi) — stride-sampled (~4.5k, alphabetically uniform) from the
+  CUNY wikipron scrape; ja/ko/vi are narrow-only (no broad variant), so their extra narrow detail is folded.
+- `ff.epitran-ful-Latn.tsv` — copied from espeak-ng-portable's `tools/qa-compare/ff_gold.tsv` (no wikipron Fula
+  exists); the `.venv-epitran` there is also what generated the ha/tr/vi epitran secondaries.
+
+**Secondary gaps that are real, not lazy:** epitran Indic G2Ps are not usable corroborators — `hin-Deva` skips
+Hindi schwa-deletion (disagrees with everyone) and `tam-Taml` echoes untransliterated graphemes — so hi/ta
+record a `secondaryGap` pointing at a kaikki lexicon as the right second source. en's would-be epitran secondary
+is CMU-derived (circular with our g2p). ff has no independent second Fula source at all.
 
 Regenerate an epitran referee (epitran isn't a repo dependency — use a throwaway venv):
 

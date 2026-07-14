@@ -102,6 +102,24 @@ export const CONFIG: Record<string, RefLang> = {
       [/ʁ/gu, "r", "uvular ʁ ~ r — rhotic convention"],
     ],
   },
+  en: {
+    // en is CMUdict-derived, so wikipron eng_us (independent human Wiktionary transcriptions) is a genuine
+    // referee. It is noisy (proper nouns, British variants, letter-name entries) → a modest floor. We fold our
+    // narrow allophonic detail (aspiration, dark-l, r-coloured schwa) and our superscript diphthong offglides.
+    referees: [{ file: "en.wikipron-eng-latn-us-broad.tsv", source: "wikipron eng_latn_us broad (human, GenAm)", role: "primary" }],
+    secondaryGap: "epitran eng-Latn is itself CMU-derived — circular with our CMUdict-based g2p, so not independent.",
+    segmentJoin: true,
+    folds: [
+      [/eᶦ/gu, "eɪ", "our superscript FACE offglide eᶦ vs referee eɪ"],
+      [/oᶷ/gu, "oʊ", "our GOAT offglide oᶷ vs referee oʊ"],
+      [/aᶦ/gu, "aɪ", "our PRICE offglide aᶦ vs referee aɪ"],
+      [/aᶷ/gu, "aʊ", "our MOUTH offglide aᶷ vs referee aʊ"],
+      [/ɔᶦ/gu, "ɔɪ", "our CHOICE offglide ɔᶦ vs referee ɔɪ"],
+      [/ɚ/gu, "əɹ", "r-coloured schwa ɚ vs referee ə + ɹ (the letter r written out)"],
+      [/ʰ/gu, "", "allophonic aspiration on voiceless stops — referee omits it"],
+      [/ɫ/gu, "l", "dark-l is allophonic — referee writes plain l"],
+    ],
+  },
   es: {
     referees: [{ file: "es.wikipron-spa.tsv", source: "wikipron spa_latn_ca broad (human, Castilian)", role: "primary" }],
     secondaryGap: "no independent second source wired; kaikki spa or a Latin-American wikipron would corroborate.",
@@ -116,6 +134,24 @@ export const CONFIG: Record<string, RefLang> = {
       [/ᶷ/gu, "u", "our non-syllabic offglide ᶷ (auto→aᶷto) vs referee plain u"],
     ],
   },
+  ff: {
+    // No wikipron Fula exists (ful/fuf scrapes are empty), so the independent referee is epitran ful-Latn —
+    // committed by espeak-ng-portable's Fula bring-up as ff_gold.tsv. Folds = the documented ff↔epitran
+    // notation divergences (affricate/implosive spelling, prenasal superscripts, gemination doubling).
+    referees: [{ file: "ff.epitran-ful-Latn.tsv", source: "epitran ful-Latn (programmatic; via espeak-ng-portable ff_gold)", role: "primary" }],
+    secondaryGap: "no independent second Fula source: wikipron ful/fuf are empty, so the only G2P is the primary.",
+    folds: [
+      [/c/gu, "tʃ", "epitran writes ⟨c⟩ where we render the affricate t͡ʃ"],
+      [/ɟ/gu, "dʒ", "epitran ⟨ɟ⟩ vs our d͡ʒ"],
+      [/ñ/gu, "ɲ", "epitran ⟨ñ⟩ vs our ɲ"],
+      [/ʔʲ/gu, "ʄ", "epitran ʔʲ vs our implosive ʄ"],
+      [/nj/gu, "ɲ", "epitran keeps orthographic nj; we render the prenasal palatal"],
+      [/ᵐ/gu, "m", "prenasal superscript → plain nasal"],
+      [/ⁿ/gu, "n", "prenasal superscript → plain nasal"],
+      [/ᵑ/gu, "ŋ", "prenasal superscript → plain nasal"],
+      [/(.)\1+/gu, "$1", "collapse geminate doubling — length already stripped by the backbone"],
+    ],
+  },
   fr: {
     referees: [
       { file: "fr.wikipron-fra.tsv", source: "wikipron fra_latn broad (human)", role: "primary" },
@@ -124,6 +160,45 @@ export const CONFIG: Record<string, RefLang> = {
     segmentJoin: true,
     folds: [
       [/ə/gu, "", "optional/final schwa — the referee is inconsistent on mute-e"],
+    ],
+  },
+  ha: {
+    referees: [
+      { file: "ha.wikipron-hau-latn-broad.tsv", source: "wikipron hau_latn broad (human, tone-marked)", role: "primary" },
+      { file: "ha.epitran-hau-Latn.tsv", source: "epitran hau-Latn (programmatic)", role: "secondary" },
+    ],
+    segmentJoin: true,
+    folds: [
+      [/ʔʲ/gu, "j", "glottalised ⟨ƴ⟩: our ʔʲ vs referee creaky j̰ (̰ stripped by the backbone)"],
+      [/ɸ/gu, "f", "⟨f⟩ realised [ɸ]~[f] — dialectal/allophonic"],
+      [/ⁱ/gu, "i", "our superscript diphthong offglide (aⁱ) vs referee a i"],
+      [/ɽ/gu, "r", "⟨r⟩ tap/retroflex ɽ~r — referee writes ɽ"],
+      [/ᵐ/gu, "m", "prenasal superscript → plain nasal"],
+      [/ⁿ/gu, "n", "prenasal superscript → plain nasal"],
+      [/ᵑ/gu, "ŋ", "prenasal superscript → plain nasal"],
+      [/ʔ/gu, "", "epenthetic glottal onset on vowel-initial words — allophonic; referee marks it"],
+    ],
+  },
+  hi: {
+    referees: [{ file: "hi.wikipron-hin-deva-broad.tsv", source: "wikipron hin_deva broad (human)", role: "primary" }],
+    secondaryGap: "epitran hin-Deva doesn't perform Hindi schwa-deletion (writes every inherent अ), so it disagrees " +
+      "systematically with both us and wikipron — not a usable corroborator. A kaikki/Wiktionary hin lexicon would be.",
+    segmentJoin: true,
+    folds: [
+      [/ɑ/gu, "a", "referee writes आ as ɑ(ː); we use a(ː) — same phoneme, notation"],
+      [/ᵊ/gu, "", "referee's epenthetic final schwa (pətɾᵊ) — we don't emit it"],
+      [/x/gu, "kʰ", "ख़ nuqta: we keep x; the referee (no-nuqta) writes kʰ"],
+    ],
+  },
+  ja: {
+    referees: [{ file: "ja.wikipron-jpn-hira-narrow.tsv", source: "wikipron jpn_hira narrow (human)", role: "primary" }],
+    secondaryGap: "no independent second source wired; the narrow wikipron is the human transcription and epitran jpn is unreliable.",
+    segmentJoin: true,
+    folds: [
+      [/ꜜ/gu, "", "pitch-accent downstep marker — the referee is toneless"],
+      [/ä/gu, "a", "our central ä vs referee a̠ (both realise /a/)"],
+      [/ᵝ/gu, "", "our compressed-u superscript (ɯᵝ) vs referee ɯ"],
+      [/ɨ/gu, "ɯ", "referee ɨ for a high/devoiced う vs our ɯ"],
     ],
   },
   kk: {
@@ -136,6 +211,17 @@ export const CONFIG: Record<string, RefLang> = {
       [/ʁ/gu, "ʀ", "ʁ/ʀ — uvular convention"],
       [/je/gu, "e", "epitran over-marks the е palatal onglide everywhere; [je] is word-initial-only in Kazakh"],
       [/ij/gu, "əj", "epitran writes и as ij, ours as əj (reduced-vowel convention)"],
+    ],
+  },
+  ko: {
+    referees: [{ file: "ko.wikipron-kor-hang-narrow.tsv", source: "wikipron kor_hang narrow (human)", role: "primary" }],
+    secondaryGap: "no independent second source wired; epitran kor-Hang would corroborate the ㅓ/ㅏ vowel qualities.",
+    segmentJoin: true,
+    folds: [
+      [/ɐ/gu, "a", "our ㅏ as ɐ vs referee a̠ — same /a/"],
+      [/ɘ/gu, "ʌ", "our ㅓ as ɘ vs referee ʌ(̹) — same vowel, notation"],
+      [/sʰ/gu, "s", "referee marks ㅅ aspiration (sʰ); we write plain s"],
+      [/ɦ/gu, "h", "intervocalic ㅎ voicing ɦ~h"],
     ],
   },
   pt: {
@@ -181,6 +267,52 @@ export const CONFIG: Record<string, RefLang> = {
       [/[əɐä]/gu, "a", "a/ə are allophones in Sinhala"],
       [/(.)\1+/gu, "$1", "geminate length vs doubling — both referee and ours inconsistent"],
       [/wa$/gu, "w", "final-ව offglide: the schwa after ව→w is dialectally optional"],
+    ],
+  },
+  ta: {
+    referees: [{ file: "ta.wikipron-tam-taml-broad.tsv", source: "wikipron tam_taml broad (human)", role: "primary" }],
+    secondaryGap: "epitran tam-Taml echoes untransliterated Tamil graphemes (e.g. visarga ஃ) into its output, so " +
+      "it is not a usable corroborator. A kaikki/Wiktionary tam lexicon would be the independent second source.",
+    segmentJoin: true,
+    folds: [
+      [/ɑ/gu, "a", "referee ஆ as ɑ(ː) vs our a(ː)"],
+      [/ᶦ/gu, "i", "our superscript diphthong offglide (maᶦ) vs referee ɐ ɪ̯"],
+      [/r/gu, "ɾ", "final/geminate ⟨ற⟩ r~ɾ tap — referee inconsistent"],
+    ],
+  },
+  th: {
+    // Tones are Chao on both sides (stripped by the backbone), so this is a pure segmental check. The residual
+    // is LEXICAL (Sanskrit/Pali readings), not a segment-inventory gap — see the th convergence note.
+    referees: [{ file: "th.wikipron-tha-thai-broad.tsv", source: "wikipron tha_thai broad (human, tone-marked)", role: "primary" }],
+    secondaryGap: "no independent second source wired; a pronunciation lexicon (kaikki tha) would corroborate the Sanskrit readings.",
+    segmentJoin: true,
+    folds: [
+      [/ʔ/gu, "", "glottal coda on open short syllables — allophonic; referee writes an unreleased stop or nothing"],
+    ],
+  },
+  tr: {
+    referees: [
+      { file: "tr.wikipron-tur-latn-broad.tsv", source: "wikipron tur_latn broad (human)", role: "primary" },
+      { file: "tr.epitran-tur-Latn.tsv", source: "epitran tur-Latn (programmatic)", role: "secondary" },
+    ],
+    segmentJoin: true,
+    folds: [
+      [/ɫ/gu, "l", "dark-l (back-harmony allophone) — referee writes plain l"],
+      [/ʰ/gu, "", "final-stop aspiration — allophonic"],
+      [/ɑ/gu, "a", "back /a/ [ɑ] vs referee a — allophonic"],
+      [/ɔ/gu, "o", "/o/ [ɔ]~[o] — no contrast in Turkish"],
+      [/æ/gu, "e", "/e/ [æ]~[e] — allophonic"],
+    ],
+  },
+  vi: {
+    referees: [
+      { file: "vi.wikipron-vie-latn-hanoi-narrow.tsv", source: "wikipron vie_hanoi narrow (human, Northern)", role: "primary" },
+      { file: "vi.epitran-vie-Latn.tsv", source: "epitran vie-Latn (programmatic)", role: "secondary" },
+    ],
+    segmentJoin: true,
+    folds: [
+      [/ˀ/gu, "", "our glottalised-tone marker (creaky ˀ) — realises the referee's ʔ coda / glottal-tone feature"],
+      [/ʔ/gu, "", "referee's glottal-stop coda on broken/creaky tones — the same feature we mark on the tone"],
     ],
   },
   zu: {
