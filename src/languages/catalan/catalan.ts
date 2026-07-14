@@ -6,9 +6,19 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+
+// Lexical stressed mid-vowel HEIGHT (open/close is not spelling-derivable — dona/dóna, os/ós). From the espeak
+// 1.52 Central shim over the 50k corpus; word → "e" (stressed ⟨e⟩ is close /e/) or "o" (stressed ⟨o⟩ is close
+// /o/). The engine defaults to OPEN (ɛ/ɔ), so a flag only marks the close deviations. See tools/gen/build-ca-midvowels.mts.
+let MID_VOWELS: Map<string, string> | undefined;
+function midVowels(): Map<string, string> {
+    if (MID_VOWELS === undefined) MID_VOWELS = loadTsvMap(import.meta.url, "mid-vowels.tsv", undefined, { optional: true });
+    return MID_VOWELS;
+}
 
 const NASALS = new Set(MANIFEST.nasals);
 const STOP_TO_FRIC = MANIFEST.spirantize;
@@ -116,6 +126,12 @@ export function phonemizeWord(word: string): string {
     if (segs.length === 0) return "";
     const stress = stressedNucleus(word, segs);
     reduce(segs, stress);
+    // lexical mid-vowel height: the stressed open default (ɛ/ɔ) → close (e/o) for flagged words (pedra→pˈeðɾə).
+    if (stress >= 0) {
+        const flag = midVowels().get(word.toLowerCase());
+        if (flag === "e" && segs[stress]!.ph === "ɛ") segs[stress]!.ph = "e";
+        else if (flag === "o" && segs[stress]!.ph === "ɔ") segs[stress]!.ph = "o";
+    }
     nasalAssim(segs); // BEFORE finalPass so n→ŋ feeds the coda-cluster drop (banc → baŋ)
     voicingAssim(segs); // regressive cluster voicing (abs → aps)
     finalPass(segs, segs.filter((s) => s.nucleus).length); // devoice + final-r + cluster drop
