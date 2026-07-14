@@ -32,10 +32,10 @@
     // Vowel-cluster → IPA, matched LONGEST-first. The consonant quality is set separately (by the adjacent vowel
     // letter), so these are just the pronounced nucleus. Semi-lexical / dialect-variable (the Run-2+ residual).
     "vowels": {
-        "aoi": "iː", "eoi": "oː", "uai": "uːə", "iai": "iːə", "aío": "iː",
+        "aoi": "iː", "eoi": "oː", "uai": "uə", "iai": "iə", "aío": "iː",
         "ái": "ɑː", "aí": "iː", "ao": "eː", "ae": "eː", "eá": "ɑː", "éa": "eː", "eo": "oː", "eó": "oː", "éi": "eː",
-        "ia": "iːə", "ío": "iː", "iú": "uː", "iu": "ʊ", "ói": "oː", "oí": "iː", "ai": "a", "ea": "a",
-        "ei": "ɛ", "io": "ɪ", "oi": "ɔ", "ua": "uːə", "ui": "ɪ", "uí": "iː", "úi": "uː",
+        "ia": "iə", "ío": "iː", "iú": "uː", "iu": "ʊ", "ói": "oː", "oí": "iː", "ai": "a", "ea": "a",
+        "ei": "ɛ", "io": "ɪ", "oi": "ɔ", "ua": "uə", "ui": "ɪ", "uí": "iː", "úi": "uː",
         "á": "ɑː", "é": "eː", "í": "iː", "ó": "oː", "ú": "uː",
         "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ",
     },

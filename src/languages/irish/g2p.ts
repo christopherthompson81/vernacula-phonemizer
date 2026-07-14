@@ -24,6 +24,7 @@ const ECLIPSIS: Record<string, string> = { mb: "m", gc: "g", nd: "n", bp: "b", d
 export interface Seg {
     ph: string;
     nucleus: boolean; // is a vowel nucleus (for stress placement)
+    noGlide?: boolean; // long oː spelled ⟨eo⟩ already carries its on-glide → suppresses the i-offglide (ceoil)
 }
 
 /** Is the consonant at index i SLENDER? Its quality comes from the IMMEDIATELY adjacent vowel letter — the one
@@ -60,7 +61,8 @@ export function toSegments(word: string): Seg[] {
             if (ECLIPSIS[two]) { cons((slender ? SLENDER : BROAD)[ECLIPSIS[two]!]!); i += 2; continue; }
         }
 
-        // --- word-final ⟨dh⟩/⟨gh⟩ → silent (the -aigh/-idh verbal endings: chéadaigh → çeːd̪ˠə) ---
+        // --- word-final ⟨dh⟩/⟨gh⟩ → silent (the -aigh/-idh verbal endings: chéadaigh → çeːd̪ˠə); the exposed
+        // short nucleus then reduces to the ending schwa (airigh → aɾʲə) via the unstressed reduction. ---
         if ((two === "dh" || two === "gh") && i + 2 === n && segs.length > 0) { i += 2; continue; }
 
         // --- lenition digraphs (séimhiú): bh ch dh fh gh mh ph sh th ---
@@ -85,7 +87,10 @@ export function toSegments(word: string): Seg[] {
         if (isVowel(c)) {
             const key = VOWEL_CLUSTERS.find((k) => w.startsWith(k, i));
             if (key) {
-                segs.push({ ph: MANIFEST.vowels[key]!, nucleus: true });
+                // ⟨eo⟩/⟨eó⟩/⟨eoi⟩ → oː but with a built-in on-glide → no separate i-offglide (ceoil → koːlʲ).
+                const seg: Seg = { ph: MANIFEST.vowels[key]!, nucleus: true };
+                if (/^e[oó]/.test(key)) seg.noGlide = true;
+                segs.push(seg);
                 i += key.length;
                 continue;
             }

@@ -37,7 +37,7 @@ describe("irish canonical IPA", () => {
     test("lenition (séimhiú) + silent -dh/-gh endings", () => {
         expect(phonemizeWord("bhí")).toBe("vʲˈiː"); // bh → vʲ (slender)
         expect(phonemizeWord("oíche")).toBe("ˈiːçə"); // ch → ç (slender)
-        expect(phonemizeWord("deoch")).toBe("dʲˈoːx"); // ch → x (broad) [eo→oː is the Run-2 residual]
+        expect(phonemizeWord("deoch")).toBe("dʲˈɔx"); // eo → ɔ here (lexicon pins the semi-lexical eo split)
         expect(phonemizeWord("chéadaigh")).toBe("çˈeːd̪ˠə"); // ch→ç, final -aigh: gh silent, ai→ə
         expect(phonemizeWord("airigh")).toBe("ˈaɾʲə");
     });
@@ -45,7 +45,7 @@ describe("irish canonical IPA", () => {
     test("review fixes: eclipsis (urú), s-cluster + coda quality, native ng → ŋ, oi → ɔ", () => {
         expect(phonemizeWord("gcat")).toBe("ɡˈat̪ˠ"); // eclipsis gc → ɡ (c silent)
         expect(phonemizeWord("mbád")).toBe("mˠˈɑːd̪ˠ"); // mb → mˠ
-        expect(phonemizeWord("ngaeilge")).toBe("ŋˈeːəlʲɟə"); // ng → ŋ
+        expect(phonemizeWord("ngaeilge")).toBe("ŋˈeːəlʲɟə"); // ng → ŋ; unstressed i reduces to ə (referee-backed)
         expect(phonemizeWord("bhfuil")).toBe("wˈɪlʲ"); // bhf → w (f silent)
         expect(phonemizeWord("spéir")).toBe("sˠpʲˈeːɾʲ"); // s stays BROAD in the s-cluster; only p palatalizes
         expect(phonemizeWord("ainm")).toBe("ˈanʲmˠ"); // final m broad (no adjacent slender vowel)
@@ -62,6 +62,16 @@ describe("irish canonical IPA", () => {
         expect(phonemizeWord("bolg")).toBe("bˠˈɔl̪ˠəɡ"); // l + coda ɡ → ə
         expect(phonemizeWord("gairm")).toBe("ɡˈaɾʲəmˠ"); // r-epenthesis; short a → no offglide
         expect(phonemizeWord("ainm")).toBe("ˈanʲmˠ"); // n does NOT trigger epenthesis
+    });
+
+    test("Run 3 — ia/ua diphthongs, onset offglide, eo no-glide, lexicon overrides", () => {
+        expect(phonemizeWord("iad")).toBe("ˈiəd̪ˠ"); // ia → iə (short first element; referee-confirmed)
+        expect(phonemizeWord("ciall")).toBe("cˈiəl̪ˠ");
+        expect(phonemizeWord("nuair")).toBe("n̪ˠˈuəɾʲ"); // ua → uə
+        expect(phonemizeWord("áirithe")).toBe("ˈɑːⁱɾʲəhə"); // offglide before a slender ONSET, not just coda
+        expect(phonemizeWord("ceoil")).toBe("cˈoːlʲ"); // eo carries its glide → no i-offglide
+        expect(phonemizeWord("deoch")).toBe("dʲˈɔx"); // lexicon: the semi-lexical eo → ɔ split
+        expect(phonemizeWord("féidir")).toBe("fʲˈeːdʲəɾʲ"); // unstressed i reduces to ə (referee), NOT the oracle's ɪ
     });
 
     test("fada (long vowels) + first-syllable stress", () => {

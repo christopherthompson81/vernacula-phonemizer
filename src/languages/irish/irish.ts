@@ -1,18 +1,27 @@
 /**
  * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA, espeak-independent. Rule-based g2p
- * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default). No lexicon yet; the vowel
- * clusters are the documented Run-2+ residual. See docs/ga_bringup_investigation.md.
+ * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default) + i-offglide and svarabhakti
+ * passes, with a Connacht pronunciation lexicon (lexicon.tsv, Run 3) pinning the semi-lexical vowel detail the
+ * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/ga_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
-// Short vowels reduce to ə when unstressed; long vowels + diphthongs (with ː) keep their quality.
+// Connacht pronunciation lexicon (Run 3): oracle-distilled, consonant-skeleton-verified overrides that pin the
+// semi-lexical VOWEL detail the rules defer (io/oi/ao splits, tense-sonorant diphthongs, function-word
+// reduction). Consulted before the g2p; OOV words fall through to the rules. See lexicon.tsv.
+const LEXICON = loadTsvMap(import.meta.url, "lexicon.tsv");
+
+// Short vowels reduce to ə when unstressed; long vowels + diphthongs (with ː) keep their quality. ɪ IS reduced:
+// the independent wikipron referee transcribes unstressed short i as ə (féidir → fʲeːdʲəɾʲ, milis → mʲɪlʲəʃ),
+// NOT the oracle's ɪ — espeak keeps the underlying i, but real Connacht centralizes it like a/o/u.
 const SHORT = new Set(["a", "ɛ", "ɪ", "ɔ", "ʊ"]);
 
-type S = { ph: string; nucleus: boolean };
+type S = { ph: string; nucleus: boolean; noGlide?: boolean };
 
 // A slender consonant (palatalized, or a palatal). A back vowel before a slender CODA gets an i-offglide.
 const isSlenderC = (ph: string): boolean => ph.endsWith("ʲ") || ph === "c" || ph === "ɟ" || ph === "ʃ" || ph === "ç";
@@ -21,14 +30,14 @@ const BACK_V = new Set(["ɑː", "oː"]); // LONG back vowels only (áit, cóir);
 const LIQUID = new Set(["ɾˠ", "ɾʲ", "l̪ˠ", "lʲ"]);
 const SVARABHAKTI_NEXT = new Set(["mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "w", "ɡ", "ɟ", "x", "ç", "ɣ", "j", "n̪ˠ", "nʲ"]);
 
-/** Back vowel + slender CODA consonant → insert an i-offglide ⁱ (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ, aill → aⁱlʲ);
- *  a pre-vocalic slender consonant (baile → balʲɛ) or uː/iː/eː gets none. */
+/** Long back vowel + a following slender consonant → insert an i-offglide ⁱ, whether that consonant is a coda
+ *  (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ) or an onset of the next syllable (óige → oːⁱɟə, áirithe → ɑːⁱɾʲə). A short back
+ *  vowel (baile → balʲə), an ⟨eo⟩-derived oː (ceoil), or uː/iː/eː gets none. */
 function offglide(segs: S[]): void {
     for (let i = segs.length - 1; i >= 1; i--) {
         const c = segs[i]!, prev = segs[i - 1]!;
-        const coda = i + 1 >= segs.length || !segs[i + 1]!.nucleus;
-        if (!c.nucleus && isSlenderC(c.ph) && coda && prev.nucleus && BACK_V.has(prev.ph))
-            segs.splice(i, 0, { ph: "ⁱ", nucleus: false });
+        if (c.nucleus || !prev.nucleus) continue;
+        if (isSlenderC(c.ph) && BACK_V.has(prev.ph) && !prev.noGlide) segs.splice(i, 0, { ph: "ⁱ", nucleus: false });
     }
 }
 
@@ -55,6 +64,12 @@ function nasalAssim(segs: { ph: string; nucleus: boolean }[]): void {
 /** One Irish word → canonical IPA. Stress the first nucleus (native default; marked even on monosyllables);
  *  every OTHER short-vowel nucleus reduces to ə (unstressed reduction, e.g. madra → mˠˈad̪ˠɾˠə). */
 export function phonemizeWord(word: string): string {
+    const hit = LEXICON.get(word.toLowerCase()); // Connacht lexicon override (semi-lexical vowel detail)
+    return hit !== undefined ? hit : g2pWord(word);
+}
+
+/** The pure rule-based g2p (no lexicon) — the OOV path, and the reference the lexicon build compares against. */
+export function g2pWord(word: string): string {
     const segs = toSegments(word.replace(/['’\-]/g, "")); // strip elision/prothesis apostrophes + hyphens
     if (segs.length === 0) return "";
     nasalAssim(segs);
