@@ -8,6 +8,7 @@ import {
     phonemizeArabic,
     phonemizeWord,
 } from "../src/languages/arabic/arabic.ts";
+import { isSkeleton, restoreSkeletons } from "../src/languages/arabic/restore.ts";
 
 // The neural diacritizer model is gitignored (dev stand-in / built permissively) — skip its tests if absent.
 const haveDiacritizer = existsSync(
@@ -59,6 +60,18 @@ describe("arabic canonical IPA — diacritized path", () => {
         expect(phonemize("الْقَمَر وَالشَّمْس", "ar")).toBe(
             "ʔalqˈamar waʃːˈams",
         );
+    });
+
+    // Supplement-only skeleton restoration (restore.ts): sync, no model needed.
+    test("skeleton detection + lexicon supplement (supplement-only)", () => {
+        // a fully-voweled word is NOT a skeleton; a bare consonant string IS (0 vowels).
+        expect(isSkeleton("كَتَبَ")).toBe(false);
+        expect(isSkeleton("كتب")).toBe(true); // bare skeleton
+        // restoreSkeletons overrides ONLY the skeleton word, from the lexicon; the voweled word is untouched.
+        const lex = new Map([["يقول", "يَقُول"]]);
+        expect(restoreSkeletons("يقول كَتَبَ", lex)).toBe("يَقُول كَتَبَ");
+        // OOV skeleton with no lexicon hit → epenthesis floor keeps it sayable (no longer 0-vowel).
+        expect(isSkeleton(restoreSkeletons("قلب", new Map()))).toBe(false);
     });
 
     // Phase 2: bare (undiacritized) Arabic via the neural diacritizer pre-pass → g2p. Gated on the model.

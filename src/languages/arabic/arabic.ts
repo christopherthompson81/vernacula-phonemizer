@@ -11,6 +11,8 @@ import {
     createArabicDiacritizer,
     type ArabicDiacritizer,
 } from "./diacritizer.ts";
+import { restoreSkeletons } from "./restore.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const isLongNucleus = (ph: string): boolean =>
@@ -97,6 +99,16 @@ export function createArabic(): Phonemizer {
 
 let diacritizer: Promise<ArabicDiacritizer | undefined> | undefined;
 let phonemizer: Phonemizer | undefined;
+// Tashkeela-derived PAUSAL restoration lexicon (undiacritized → vocalized) — the supplement that repairs words the
+// neural diacritizer leaves as skeletons. Optional: absent → the restore pass falls back to epenthesis only.
+let restoreLexicon: ReadonlyMap<string, string> | undefined;
+function restoreLex(): ReadonlyMap<string, string> {
+    if (restoreLexicon === undefined)
+        restoreLexicon = loadTsvMap(import.meta.url, "diacritization.tsv", undefined, {
+            optional: true,
+        });
+    return restoreLexicon;
+}
 
 /**
  * Phonemize BARE (undiacritized) Arabic. Runs the neural diacritizer pre-pass (ONNX, async) to restore short
@@ -108,6 +120,9 @@ export async function phonemizeArabic(text: string): Promise<string> {
     if (diacritizer === undefined) diacritizer = createArabicDiacritizer();
     const diac = await diacritizer;
     const vocalized = diac ? await diac.diacritize(text) : text;
+    // Supplement-only: repair words the diacritizer left as skeletons from the Tashkeela pausal lexicon (never
+    // touches an already-voweled word) — see restore.ts. Skipped when no diacritizer ran (already-diacritized in).
+    const restored = diac ? restoreSkeletons(vocalized, restoreLex()) : vocalized;
     if (phonemizer === undefined) phonemizer = createArabic();
-    return phonemizer.text(vocalized);
+    return phonemizer.text(restored);
 }
