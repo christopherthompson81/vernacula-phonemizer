@@ -26,18 +26,40 @@ No referee is an oracle. Each is **fallible**, so:
 The committed correctness anchor stays the hand-authored unit test per language (`*.test.ts`); this harness is
 the cross-check that those authored expectations are linguistically real.
 
+## Sources: primary / secondary / gap
+
+Each language declares its independent sources in `config.ts` with a **role** — a `primary` and, ideally, an
+independent `secondary` (≥2 sources before trusting a divergence). Where no independent secondary exists, that is
+recorded as an explicit `secondaryGap` string, **not** silently omitted. `eval.ts` reports the role per referee
+and prints the gap; the test floors the **primary**.
+
+Two languages need a non-default path, handled inside the one framework:
+- **ar** is evaluated through the **async** ONNX diacritizer (`phonemizeArabic`): the referee's IPA is fully
+  voweled, so the short-vowel restoration must run first (the sync `phonemizeWord` would compare skeletons).
+- **cmn** is **syllable-level**: the referee is epitran's toneless pinyin-syllable→IPA inventory (no word-level
+  wikipron cmn exists), and `PHON[cmn]` is the bare pinyin converter (`createPinyinPhonemizer`).
+
 ## Run
 
 ```bash
-npx tsx tools/referee-eval/eval.ts <zu|si|kk> [--examples N]   # report + residual divergence classes
-npx vitest run tools/referee-eval/referee-eval.test.ts          # corroboration floors (regression guard)
+npx tsx tools/referee-eval/eval.ts <ar|cmn|cs|de|en|es|ff|fr|ha|hi|ja|kk|ko|pt|ru|si|ta|th|tr|vi|zu> [--examples N]
+npx vitest run tools/referee-eval/referee-eval.test.ts   # primary-source floors
 ```
 
-Current backbone corroboration: **zu 100%** (epitran), **si 93.5%** (wikipron human), **kk 86.2%** (epitran).
-kk's residual is dominated by epitran's *own* limitations (it merges ө/ү→ʏ where we correctly keep ө≠ү, and
-over-marks the е palatal onglide) — i.e. where we differ from epitran, we are usually the more faithful one.
-This is why the espeak-ng-portable kk convergence used wikipron, not epitran; a human kk referee would be a
-better second source to add here.
+Every language with a phonemizer has a referee (or a documented gap). Current backbone corroboration (primary;
+independent secondary in parens): **zu 100%** · **es 92.5%** · **ha 90.3%** (epitran 88.4%) · **th 81.9%** ·
+**hi 77.7%** · **ta 63.0%** · **tr 76.2%** (epitran 79.8%) · **ru 94.8%** (gold 97.7%) · **si 93.5%** ·
+**kk 86.2%** · **cmn 84.7%** (syllable) · **pt 78.0%** (gold 99.4%) · **vi 71.0%** (epitran 51.3%) · **ff 71.2%**
+· **cs 69.9%** · **fr 66.5%** (gold 85.6%) · **ko 58.5%** · **ja 57.9%** · **de 49.8%** (wikipron 52.2%) ·
+**ar 45.4%** · **en 36.1%**.
+
+The low ones are referee-quality artifacts, not engine defects: **en** vs wikipron is a noisy referee (proper
+nouns, British variants, letter-name rows); **de** vs kaikki is dragged down by kaikki's proper-noun/loanword
+bulk (the wikipron secondary agrees at 52.2%); **ja/ko** narrow wikipron carries allophonic palatalization and
+devoicing detail we fold only partially; **fr** vs raw wikipron is noisy (the adjudicated gold gives 85.6%);
+**th** residual is lexical Sanskrit/Pali readings, not segmental; **cs** is deflated by epitran's own voicing
+bugs; **ar** is bounded by the ONNX diacritizer's short-vowel misses. Where we differ from a programmatic referee
+we are often the more faithful one — a divergence is a candidate to adjudicate, never an auto-fix.
 
 ## Referee data (`referees/`)
 
@@ -45,6 +67,15 @@ TSVs are `word<TAB>ipa`, independent of espeak, committed (small):
 
 - `zu.epitran-zul-Latn.tsv`, `si.wikipron-sin.tsv` — copied from espeak-ng-portable's committed referee sets.
 - `kk.epitran-kaz-Cyrl.tsv` — generated from the first 1,400 real Cyrillic corpus words via epitran.
+- `<lang>.wikipron-*.tsv` (en/ha/hi/ja/ko/ta/th/tr/vi) — stride-sampled (~4.5k, alphabetically uniform) from the
+  CUNY wikipron scrape; ja/ko/vi are narrow-only (no broad variant), so their extra narrow detail is folded.
+- `ff.epitran-ful-Latn.tsv` — copied from espeak-ng-portable's `tools/qa-compare/ff_gold.tsv` (no wikipron Fula
+  exists); the `.venv-epitran` there is also what generated the ha/tr/vi epitran secondaries.
+
+**Secondary gaps that are real, not lazy:** epitran Indic G2Ps are not usable corroborators — `hin-Deva` skips
+Hindi schwa-deletion (disagrees with everyone) and `tam-Taml` echoes untransliterated graphemes — so hi/ta
+record a `secondaryGap` pointing at a kaikki lexicon as the right second source. en's would-be epitran secondary
+is CMU-derived (circular with our g2p). ff has no independent second Fula source at all.
 
 Regenerate an epitran referee (epitran isn't a repo dependency — use a throwaway venv):
 

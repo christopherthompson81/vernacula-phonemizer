@@ -83,10 +83,10 @@ describe("russian canonical IPA", () => {
         ); // две тысячи…
     });
 
-    // Independent adjudicated micro-gold (tools/ru-gold.tsv) — hand-transcribed Moscow Russian, not Wiktionary.
+    // Independent adjudicated micro-gold (also the eval's secondary referee) — hand-transcribed Moscow Russian, not Wiktionary.
     test("adjudicated micro-gold (independent referee)", () => {
         const rows = readFileSync(
-            new URL("../tools/ru-gold.tsv", import.meta.url),
+            new URL("../tools/referee-eval/referees/ru.gold-adjudicated.tsv", import.meta.url),
             "utf8",
         ).split("\n");
         let match = 0,

@@ -147,6 +147,17 @@ class MandarinPhonemizer implements Phonemizer {
     }
 }
 
+/** A bare pinyin-syllable → segmental IPA converter (no Hanzi / number / clause front-end). Used by the referee
+ *  eval, which compares our syllable inventory against epitran's toneless pinyin→IPA table. */
+export function createPinyinPhonemizer(): (pinyin: string) => string {
+    const st = MANIFEST.sandhi.thirdThird;
+    return makePinyinToIpa({
+        syllableIpa: loadTsvMap(import.meta.url, "syllable-ipa.tsv"),
+        tones: MANIFEST.tones,
+        thirdToneSandhi: { from: Number(st.from), before: Number(st.before), to: Number(st.to) },
+    });
+}
+
 /** Load the Mandarin data (beside this file) and build the phonemizer. `foreign` handles embedded Latin. */
 export function createMandarin(foreign?: ForeignPhonemizer): Phonemizer {
     const syllableIpa = loadTsvMap(import.meta.url, "syllable-ipa.tsv");

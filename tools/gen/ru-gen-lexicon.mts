@@ -6,7 +6,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
-import { toIpa } from "../src/languages/russian/g2p.ts";
+import { toIpa } from "../../src/languages/russian/g2p.ts";
 
 const V = "aɐəeɛiɪɨoɔuʊæɵ";
 const vowels = (s: string): string[] => [...s.matchAll(new RegExp(`[${V}]`, "g"))].map((m) => m[0]);
