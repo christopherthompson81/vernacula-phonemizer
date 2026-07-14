@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 18 — -igkeit: ⟨g⟩ between i and k → ç", () => {
+        expect(phonemizeWord("Geschwindigkeit")).toBe("ɡəʃvˈɪndɪçkaɪ̯t"); // -igk- → ɪçk
+        expect(phonemizeWord("Iglu")).toBe("ˈiːɡlu"); // control: igl (not igk) → ɡl
+    });
+
     test("Run 17 — unstressed -igen i → ɪ (stressed iː protected)", () => {
         expect(phonemizeWord("würdigen")).toBe("vˈʏɐ̯dɪɡən"); // -ig- unstressed → ɪ (was long iːɡ)
         expect(phonemizeWord("Liga")).toBe("lˈiːɡa"); // control: STRESSED iː stays long (build skips stressed)

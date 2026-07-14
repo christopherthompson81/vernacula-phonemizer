@@ -259,3 +259,9 @@ toSegments' single-consonant open-syllable rule lengthens the unstressed i. The 
 loanword direction (ɪ→i), so the build never recorded the reverse. Added i→ɪ (and y→ʏ). Only fires UNSTRESSED
 (the build skips stressed nuclei), so Liga/Tiger keep their stressed iː. kaikki 72.9→73.5%, wikipron 72.4→72.8%.
 Deferred (inconsistent/lexical): -igkeit g→ç (geschwindigkeit) vs -iglich g→k (möglich), and long ä→ɛː.
+
+## Run 18 — -igkeit: ⟨g⟩ between i and k → ç
+The -igkeit suffix (geschwindigkeit → …ɪçkaɪt) rendered the -ig- g as a devoiced k (…ɪkaɪt), which also skewed the
+consonant count out of the consonant lexicon. Added a g2p rule: ⟨g⟩ between ⟨i⟩ and ⟨k⟩ → ç (ich-laut).
+geschwindigkeit/schnelligkeit/süßigkeit/ewigkeit now correct; Iglu (igl≠igk) / Tag unaffected. kaikki 73.5→73.9%,
+wikipron 72.8→73.1%. Deferred (lexical): -iglich dissimilation (königlich → k, not ç), long ä→ɛː (ä/e merger).

@@ -147,6 +147,13 @@ export function toSegments(word: string): Seg[] {
             i += 2;
             continue;
         } // ck → k
+        // -igk- (the -igkeit suffix): ⟨g⟩ between ⟨i⟩ and ⟨k⟩ → ç (ich-laut), not the devoiced k
+        // (geschwindigkeit → …ɪçkaɪt). ⟨igl⟩ (königlich k / Iglu ɡ) is lexical, left alone.
+        if (c === "g" && w[i - 1] === "i" && nx === "k") {
+            push("ç", i);
+            i++;
+            continue;
+        }
         if (c === "t" && nx === "s" && nx2 === "c" && nx3 === "h") {
             push("t͡ʃ", i);
             i += 4;
