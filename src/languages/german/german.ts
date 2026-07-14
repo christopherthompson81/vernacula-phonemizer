@@ -119,7 +119,7 @@ function applyQuality(ipa: string, spec: string | undefined): string {
         } // offglide, not a nucleus
         const long = (ipa[i + 1] ?? "") === "ː";
         const t = corr.get(ord);
-        if (t !== undefined && !out.endsWith("ˈ")) {
+        if (t !== undefined && !/[ˈˌ]$/.test(out)) {
             out += t; // set the kaikki quality (drops length); never the stressed vowel
             i += long ? 2 : 1;
         } else {
