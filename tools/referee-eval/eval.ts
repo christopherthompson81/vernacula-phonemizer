@@ -108,26 +108,27 @@ export async function evaluate(lang: string): Promise<RefereeResult[]> {
             .split("\n")
             .filter((l) => l.trim() !== "" && !l.startsWith("#"))
             .map((l) => l.split("\t"))
-            .filter((a) => a.length >= 2 && a[0] && a[1]) as [string, string][];
+            .filter((a) => a.length >= 2 && a[0] && a[1]);
         let raw = 0,
             folded = 0;
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
-        for (const [w, refIpa] of pairs) {
+        for (const row of pairs) {
+            const w = row[0]!;
+            // A word may carry MULTIPLE reference pronunciations (kaikki/ca dictionaries list variants) as extra
+            // tab-separated fields — credit the word if ANY of them matches (folded). Single-pron files (one field)
+            // are the length-1 case, unchanged.
+            const refIpas = row.slice(1).map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
             const ours = await phon(w);
-            const refJoined = cfg.segmentJoin
-                ? refIpa.replace(/\s+/g, "")
-                : refIpa;
-            if (ours === refJoined) raw++;
-            const of = fold(ours),
-                rf = fold(refJoined);
-            if (of === rf) {
+            if (refIpas.some((rf) => ours === rf)) raw++;
+            const of = fold(ours);
+            if (refIpas.some((rf) => fold(rf) === of)) {
                 folded++;
                 continue;
             }
-            const key = `${of}  ≠  ${rf}`;
+            const key = `${of}  ≠  ${fold(refIpas[0]!)}`;
             diffClass[key] = (diffClass[key] ?? 0) + 1;
-            example[key] ??= `${w}: ${ours}  |  ${refIpa}`;
+            example[key] ??= `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
         }
         const residual = Object.entries(diffClass)
             .sort((a, b) => b[1] - a[1])
