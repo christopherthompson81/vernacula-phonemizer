@@ -18,19 +18,26 @@ const VOWEL_CLUSTERS = Object.keys(MANIFEST.vowels).sort((a, b) => b.length - a.
 const isVowel = (c: string): boolean => c !== "" && VOWELS.includes(c);
 const isSlenderV = (c: string): boolean => c !== "" && SLENDER_V.includes(c);
 
+// Word-initial ECLIPSIS (urú): the eclipsing consonant is pronounced, the radical letter is silent.
+const ECLIPSIS: Record<string, string> = { mb: "m", gc: "g", nd: "n", bp: "b", dt: "d", ts: "t" };
+
 export interface Seg {
     ph: string;
     nucleus: boolean; // is a vowel nucleus (for stress placement)
 }
 
-/** Is the consonant at index i SLENDER? Determined by the nearest vowel LETTER — the one immediately after (the
- *  onset rule), else the one immediately before (coda) — searching past any intervening consonants. Word-initial
- *  ⟨r⟩ is always broad. */
+/** Is the consonant at index i SLENDER? Its quality comes from the IMMEDIATELY adjacent vowel letter — the one
+ *  right after (onset) else right before (coda). Word-initial ⟨r⟩ is always broad. A cluster-internal consonant
+ *  (no adjacent vowel) agrees with the following vowel (bl → both slender), EXCEPT ⟨s⟩ which is broad before a
+ *  consonant (spéir → sˠpʲeːɾʲ); a coda cluster with no following vowel is broad (ainm → …mˠ). */
 function consonantSlender(w: string, i: number): boolean {
     if (w[i] === "r" && i === 0) return false; // word-initial r → always broad
-    for (let j = i + 1; j < w.length; j++) if (isVowel(w[j]!)) return isSlenderV(w[j]!);
-    for (let j = i - 1; j >= 0; j--) if (isVowel(w[j]!)) return isSlenderV(w[j]!);
-    return false; // no vowels (all-consonant token) → broad
+    const nx = w[i + 1] ?? "", pv = w[i - 1] ?? "";
+    if (isVowel(nx)) return isSlenderV(nx); // onset: immediate following vowel
+    if (isVowel(pv)) return isSlenderV(pv); // coda: immediate preceding vowel
+    if (w[i] === "s") return false; // s before a consonant (sp/st/sc/sm/sn) is broad
+    for (let j = i + 1; j < w.length; j++) if (isVowel(w[j]!)) return isSlenderV(w[j]!); // onset cluster (bl/br…)
+    return false; // coda cluster with no following vowel → broad
 }
 
 /** Scan a lowercased Irish word into segments. */
@@ -44,6 +51,14 @@ export function toSegments(word: string): Seg[] {
     while (i < n) {
         const c = w[i]!;
         const two = w.slice(i, i + 2);
+
+        // --- word-initial ECLIPSIS (urú): eclipsing consonant wins, radical letter silent (mbád → mˠɑːd̪ˠ) ---
+        if (i === 0) {
+            const slender = consonantSlender(w, 0);
+            if (w.slice(0, 3) === "bhf") { cons(slender ? "vʲ" : "w"); i += 3; continue; } // bhf → w/vʲ (f silent)
+            if (two === "ng") { cons(slender ? "ɲ" : "ŋ"); i += 2; continue; } // ng → ŋ (g silent)
+            if (ECLIPSIS[two]) { cons((slender ? SLENDER : BROAD)[ECLIPSIS[two]!]!); i += 2; continue; }
+        }
 
         // --- word-final ⟨dh⟩/⟨gh⟩ → silent (the -aigh/-idh verbal endings: chéadaigh → çeːd̪ˠə) ---
         if ((two === "dh" || two === "gh") && i + 2 === n && segs.length > 0) { i += 2; continue; }
@@ -80,11 +95,9 @@ export function toSegments(word: string): Seg[] {
         }
 
         // --- single consonants: broad or slender ---
-        const slender = consonantSlender(w, i);
-        const map = slender ? SLENDER : BROAD;
+        const map = consonantSlender(w, i) ? SLENDER : BROAD;
         if (map[c]) cons(map[c]!);
-        else if (c === "h") { /* handled in lenition; stray h → silent */ }
-        else cons(c); // unknown consonant: pass through
+        else if (/[a-z]/.test(c)) cons(c); // unknown letter: pass through; apostrophe/hyphen/punct → skip
         i++;
     }
     return segs;

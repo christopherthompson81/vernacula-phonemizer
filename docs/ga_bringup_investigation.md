@@ -36,3 +36,23 @@ variation; it is NOT a tight guard). Unit test 5/5.
 **Run-2+ residual (vowel clusters + endings):** i-offglide before a slender consonant (áit→ɑːⁱtʲ, aill→ailʲ);
 eo→ɔ vs oː context (deoch); ea→a vs ɑː dialect; bh/mh vocalization to a vowel (eabhair→…au…); -aigh→iː vs ə
 dialect; a single-dialect (Connacht) pronunciation lexicon from the oracle to pin the semi-lexical vowels.
+
+### Run 1 review (2 agents) — eclipsis, cluster quality, ng, oi
+Two finders (g2p correctness + Irish phonology). Real bugs fixed:
+- **ECLIPSIS (urú) not handled** — word-initial mb/gc/nd/bp/dt/ng/ts/bhf emitted BOTH letters. Added the eclipsis
+  table (eclipsing consonant wins, radical silent): gcat→ɡˈat̪ˠ, mbád→mˠˈɑːd̪ˠ, ngaeilge→ŋˈeːəlʲɟə, bhfuil→wˈɪlʲ.
+- **consonantSlender tunneled through consonants** — slenderized ⟨s⟩ in s-clusters (spéir→ʃpʲ) and coda consonants
+  across a cluster. Rewrote to the IMMEDIATELY-adjacent vowel; s stays broad before a consonant; coda cluster →
+  broad. spéir→sˠpʲˈeːɾʲ, ainm→ˈanʲmˠ, seanfhear→ʃˈan̪ˠəɾˠ.
+- **native ng/nc → ŋ** — n before a velar → ŋ; a word-final ɡ after it is absorbed (long→l̪ˠˈɔŋ).
+- **oi → ɔ** (was ɛ, wrong 8/8: scoil→sˠkˈɔlʲ, toil, cois).
+- **tokenizer dropped apostrophe/hyphen** (d'ól, n-éan orphaned the clitic) + unknown chars leaked into the IPA —
+  keep them in the token, strip ['-] before g2p, skip non-letters.
+- **stress**: the g2p finder claimed fada attracts stress (Munster) — the ORACLE confirms FIRST-syllable
+  (arán→ˈaɾˠˌɑːn̪ˠ, Connacht), so NO change; my first-syllable stress is correct.
+- provenance/test wording corrected: Connacht-authored, oracle a LOOSE cross-check (bh/mh→w, final -e→ə, silent
+  -dh/-gh deliberately diverge). VALIDATED: broad bh/mh→w is Connacht-correct (oracle's vˠ is Munster).
+
+Referee 42.6→**44.2%**; unit test 6/6; full suite 202/202. Deferred to Run 2 (all vowel-realization): i-offglide
+before slender C, diphthongization before tense sonorants (poll→pˠaᶷl̪ˠ), medial dh/gh vocalization, epenthetic
+schwa (gorm→ɡɔɾˠəmˠ), eo/ea context.
