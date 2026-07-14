@@ -46,31 +46,31 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 | Lang | Referee (floor) | 2nd source | Verdict | Core / outstanding work |
 |------|-----------------|-----------|---------|--------------------------|
-| **zu** Zulu | 100% (.99) | — | ✅ | Clicks/implosives/ejectives/laterals all corroborated. Done. |
+| **ar** Arabic | 45.4% (.40) | — | 🟠 | Core g2p + quantity-stress solid; depends on the **diacritization** subsystem (ONNX diacritizer has short-vowel misses; ADR pending on porting it). Reliable for *diacritized* input. |
+| **ca** Catalan | 81.3% (.76) | — | 🟡 | Stressed open/close mids (ɛ/e, ɔ/o) need a lexicon; +intervocalic ⟨x⟩, -nts→ns. |
+| **cmn** Mandarin | 84.7% (.80) | — | 🟠 | Syllable-level pinyin→IPA is reliable; deferred: **Hanzi text front-end** (char/phrase dicts, polyphones) + number compositor. Reliable for *pinyin* input, not raw Hanzi. |
+| **cs** Czech | 69.9% (.65) | — | 🟡 | Referee itself is epitran-buggy (deflates); loanword-exception lexicon (portable from espeak cs_list) is the real residual. |
+| **cy** Welsh | 56.5% (.50) | — | 🟡 | Runs 1–3 done (i-front fixed vs the oracle artifact). Deferred: n/r/l vowel length (`tân`/`tan`), wy-diphthong quality, loan-name switch — minor/lexical, mostly length-folded-away. |
+| **de** German | 57.4% (.52) | wikipron 58.1% | 🟡 | Mature core (7 runs: compound splitter + per-position length + unstressed-e→ə reduction lexicons, all kaikki-derived). Run 7 closed the big lever (+6.5 kaikki / +5.2 independent wikipron). Remaining tail is loanword vowel quality (ɪ/ɔ) + compound-seam st→ʃt/d→t (needs the splitter to fire on more constituents). Referee still loan/proper-noun deflated. |
+| **en** English | 36.1% (.30) | — | ✅ | **Referee-noise-limited** (proper nouns, GB variants, letter-names). Core is mature; the % is not a quality signal. |
+| **es** Spanish | 92.5% (.88) | — | ✅ | Only `-mente` double-stress deferred (minor). |
+| **ff** Fula | 71.2% (.62) | — | ✅ | Referee-limited (epitran nj→ɲ vs our prenasal + non-Fula salt). |
+| **fr** French | 66.5% (.62) | gold 85.6% | 🟡 | Primary is wikipron-noisy (gold confirms core); Phase 2 = exception lexicon (learned words) + cross-word liaison/elision. |
+| **ga** Irish | 44.8% (.40) | — | ✅ | **3-dialect referee, ~34% ceiling.** Runs 1–3 + a referee-gated Connacht lexicon done. |
+| **ha** Hausa | 90.3% (.85) | epitran 88.4% | ✅ | Tone + segmental corroborated across two sources. |
+| **hi** Hindi | 77.7% (.72) | — | ✅ | Schwa-deletion edge cases only. |
+| **kk** Kazakh | 86.2% (.83) | — | ✅ | Residual ~7.8% is stress-only + epitran's own ө/ү merger. |
+| **ko** Korean | 58.5% (.52) | — | ✅ | Referee-limited (narrow-transcription allophony: ㄹ ɭ~ɾ, intervocalic voicing). |
+| **ja** Japanese | 57.9% (.52) | — | 🟠 | Kana→IPA + numbers reliable; **pitch accent** deferred (Phase 2, needs a lexicon). Referee residual is narrow allophony. |
+| **pt** Portuguese | 78.0% (.74) | gold 99.4% | 🟡 | Gold shows near-perfect; grapheme `x` (ʃ/z/ks/s) + `l`-coda are the lexical tail. |
 | **ru** Russian | 94.8% (.90) | gold 97.7% | ✅ | Loanword hard-C-before-е + genitive г→v are a tiny lexical tail (🟡-adjacent). |
 | **si** Sinhala | 93.5% (.90) | — | ✅ | Residual is 1× referee quirks. |
-| **es** Spanish | 92.5% (.88) | — | ✅ | Only `-mente` double-stress deferred (minor). |
-| **ha** Hausa | 90.3% (.85) | epitran 88.4% | ✅ | Tone + segmental corroborated across two sources. |
-| **kk** Kazakh | 86.2% (.83) | — | ✅ | Residual ~7.8% is stress-only + epitran's own ө/ү merger. |
-| **hi** Hindi | 77.7% (.72) | — | ✅ | Schwa-deletion edge cases only. |
-| **en** English | 36.1% (.30) | — | ✅ | **Referee-noise-limited** (proper nouns, GB variants, letter-names). Core is mature; the % is not a quality signal. |
-| **ga** Irish | 44.8% (.40) | — | ✅ | **3-dialect referee, ~34% ceiling.** Runs 1–3 + a referee-gated Connacht lexicon done. |
-| **ta** Tamil | 63.0% (.58) | — | ✅ | Referee-limited (ற geminate + diphthong notation). |
-| **ff** Fula | 71.2% (.62) | — | ✅ | Referee-limited (epitran nj→ɲ vs our prenasal + non-Fula salt). |
-| **vi** Vietnamese | 71.0% (.65) | epitran 51.3% | ✅ | Referee-limited (2nd source is *lower*); minor foreign-word switch deferred. |
-| **ko** Korean | 58.5% (.52) | — | ✅ | Referee-limited (narrow-transcription allophony: ㄹ ɭ~ɾ, intervocalic voicing). |
-| **cy** Welsh | 56.5% (.50) | — | 🟡 | Runs 1–3 done (i-front fixed vs the oracle artifact). Deferred: n/r/l vowel length (`tân`/`tan`), wy-diphthong quality, loan-name switch — minor/lexical, mostly length-folded-away. |
-| **pt** Portuguese | 78.0% (.74) | gold 99.4% | 🟡 | Gold shows near-perfect; grapheme `x` (ʃ/z/ks/s) + `l`-coda are the lexical tail. |
-| **ca** Catalan | 81.3% (.76) | — | 🟡 | Stressed open/close mids (ɛ/e, ɔ/o) need a lexicon; +intervocalic ⟨x⟩, -nts→ns. |
-| **tr** Turkish | 76.2% (.70) | epitran 79.8% | 🟡 | Morphological segmentation (stem lexicon) + acronym spell-outs deferred. |
-| **fr** French | 66.5% (.62) | gold 85.6% | 🟡 | Primary is wikipron-noisy (gold confirms core); Phase 2 = exception lexicon (learned words) + cross-word liaison/elision. |
-| **cs** Czech | 69.9% (.65) | — | 🟡 | Referee itself is epitran-buggy (deflates); loanword-exception lexicon (portable from espeak cs_list) is the real residual. |
-| **th** Thai | 81.9% (.76) | — | 🟠 | Segmentally strong; residual ~8% is compound words needing the **seg-words segmentation** subsystem + lexical Sanskrit/Pali readings. |
-| **cmn** Mandarin | 84.7% (.80) | — | 🟠 | Syllable-level pinyin→IPA is reliable; deferred: **Hanzi text front-end** (char/phrase dicts, polyphones) + number compositor. Reliable for *pinyin* input, not raw Hanzi. |
-| **ja** Japanese | 57.9% (.52) | — | 🟠 | Kana→IPA + numbers reliable; **pitch accent** deferred (Phase 2, needs a lexicon). Referee residual is narrow allophony. |
 | **sv** Swedish | 52.6% (.48) | — | 🟠 | Segmental + NST stress/accent lexicon done; **pitch accent 1/2** deferred (Phase 2) + lexical o=oː. |
-| **ar** Arabic | 45.4% (.40) | — | 🟠 | Core g2p + quantity-stress solid; depends on the **diacritization** subsystem (ONNX diacritizer has short-vowel misses; ADR pending on porting it). Reliable for *diacritized* input. |
-| **de** German | 57.4% (.52) | wikipron 58.1% | 🟡 | Mature core (7 runs: compound splitter + per-position length + unstressed-e→ə reduction lexicons, all kaikki-derived). Run 7 closed the big lever (+6.5 kaikki / +5.2 independent wikipron). Remaining tail is loanword vowel quality (ɪ/ɔ) + compound-seam st→ʃt/d→t (needs the splitter to fire on more constituents). Referee still loan/proper-noun deflated. |
+| **ta** Tamil | 63.0% (.58) | — | ✅ | Referee-limited (ற geminate + diphthong notation). |
+| **th** Thai | 81.9% (.76) | — | 🟠 | Segmentally strong; residual ~8% is compound words needing the **seg-words segmentation** subsystem + lexical Sanskrit/Pali readings. |
+| **tr** Turkish | 76.2% (.70) | epitran 79.8% | 🟡 | Morphological segmentation (stem lexicon) + acronym spell-outs deferred. |
+| **vi** Vietnamese | 71.0% (.65) | epitran 51.3% | ✅ | Referee-limited (2nd source is *lower*); minor foreign-word switch deferred. |
+| **zu** Zulu | 100% (.99) | — | ✅ | Clicks/implosives/ejectives/laterals all corroborated. Done. |
 
 ## What "outstanding work" concretely means
 
