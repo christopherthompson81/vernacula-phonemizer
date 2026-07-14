@@ -448,3 +448,12 @@ in the g2p: pronounce h before ⟨ö⟩ when the text before it ends with a pref
 to ⟨hö⟩+prefix so gehen (h→e), fröhlich (öh not hö), Möhre, rohöl (roh, not a prefix) all keep their silent h. gehör/
 gehören/behörde/zubehör/erhören/unerhört/zugehörig/verhör all correct. Lexicons resynced (runs 39/40 changed output).
 kaikki 78.2%, wikipron 76.7%. Full suite 244 green. This closes the last cleanly-fixable native class → German ✅.
+
+## ✅ VERIFIED — 2026-07-14 (40 runs)
+German flipped to ✅ in language-maturity.md. Rationale (per the ✅ gate = "deferrals are minor/notation, or the low %
+is referee noise / a fold ceiling"): ~85% common-word agreement; the residual decomposes to ~5–6% English/French loan
+readings (dessert, beige, Stil, artillerie) + acronyms + proper nouns + ~0.3% cosmetic syllabic-n̩ notation (our
+output is canonically correct). The genuine-native-fixable classes are ALL closed (Runs 6–40); what remains is a small
+set of documented MINOR exceptions that ✅ explicitly permits: her- (lexically inconsistent even in kaikki), in-
+(ambiguous prefix, deliberately excluded), loan -er (dessert→eːɐ̯, English reading), and a few unflagged compound
+heads (Mühlstein — stem-data-entry, not a mechanism gap). Session arc: kaikki 49.8→78.2%, wikipron 52.2→76.7%.
