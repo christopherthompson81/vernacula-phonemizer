@@ -62,6 +62,13 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 40 — the ⟨hör⟩ root keeps its h after a prefix (gehör, behörde)", () => {
+        expect(phonemizeWord("gehör")).toBe("ɡəhˈøːɐ̯"); // ge+hör: h is a real onset (was dropped)
+        expect(phonemizeWord("Behörde")).toBe("bəhˈøːɐ̯də");
+        expect(phonemizeWord("gehen")).toBe("ɡˈeːən"); // control: silent lengthening h stays silent
+        expect(phonemizeWord("fröhlich")).toBe("fʁˈøːlɪç"); // control: öh (not hö) stays silent
+    });
+
     test("Run 39 — \"mit\" prefix needs a real-word stem (mittel not mit·tel)", () => {
         expect(phonemizeWord("mittelmäßig")).toBe("mˈɪtəlmɛsɪç"); // mittel·mäßig: tt collapses (was mit·telmäßig → ɪttəl)
         expect(phonemizeWord("mitteilen")).toBe("mˈɪttaɪ̯lən"); // control: real mit·teilen (teilen is a word)

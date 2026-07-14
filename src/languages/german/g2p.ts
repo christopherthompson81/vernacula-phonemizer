@@ -298,7 +298,15 @@ export function toSegments(word: string): Seg[] {
 
         // Context-DEPENDENT letters handled here; the rest are a data lookup (MANIFEST.consonants).
         if (c === "h") {
-            if (!isV(w[i - 1] ?? "")) push("h", i);
+            // Onset h is pronounced; h after a vowel is silent (sehen, Uhr, fröhlich) — EXCEPT the ⟨hör⟩ root after
+            // a prefix (ge·hör, be·hörde, zu·be·hör → ɡəhøːɐ̯), where h is a real onset. Gated to ⟨hö⟩ + a preceding
+            // prefix, so gehen (h→e, silent) and rohöl (roh, not a prefix) are unaffected.
+            if (
+                !isV(w[i - 1] ?? "") ||
+                (nx === "ö" &&
+                    /(be|ge|ver|zer|er|vor|zu|un|emp|ent|miss)$/.test(w.slice(0, i)))
+            )
+                push("h", i);
         } // onset h pronounced; silent after a vowel (sehen, Uhr)
         else if (c === "s") {
             push(isV(nx) ? "z" : "s", i);

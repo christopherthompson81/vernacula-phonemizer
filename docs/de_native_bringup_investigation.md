@@ -440,3 +440,11 @@ mittel-compounds via the loose isStemish gate (mit·telmäßig), tearing the ⟨
 collapse couldn't fire → ɪttəl. Gated "mit" on isWord/splitCompound (like the ambiguous prefixes): mit·teilen splits
 (teilen is a word), mittel·mäßig / mitteleuropa / mittellos / mittelalter keep mittel whole (tt collapses → ɪtəl).
 Controls (mitkommen, mitnehmen, mitarbeiter, Mittag) unaffected. kaikki 78.1→78.2%, wikipron 76.6→76.7%. Suite 243.
+
+## Run 40 — the ⟨hör⟩ root keeps its h after a prefix (gehör, behörde) [✅-push 5/5]
+The ør→hø residual (gehör → our ɡəøːɐ̯, kaikki ɡəhøːɐ̯): the silent-h-after-vowel rule (sehen, fröhlich) wrongly
+dropped the h of the ⟨hör⟩ root (ge·hör, be·hörde — hör doesn't decompose, it's below the 4-letter stem gate). Fixed
+in the g2p: pronounce h before ⟨ö⟩ when the text before it ends with a prefix (ge/be/ver/zer/er/vor/zu/un/…). Gated
+to ⟨hö⟩+prefix so gehen (h→e), fröhlich (öh not hö), Möhre, rohöl (roh, not a prefix) all keep their silent h. gehör/
+gehören/behörde/zubehör/erhören/unerhört/zugehörig/verhör all correct. Lexicons resynced (runs 39/40 changed output).
+kaikki 78.2%, wikipron 76.7%. Full suite 244 green. This closes the last cleanly-fixable native class → German ✅.
