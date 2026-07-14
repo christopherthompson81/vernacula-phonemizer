@@ -47,6 +47,16 @@ function qualityDict(): Map<string, string> {
         });
     return QUALITY;
 }
+// Loanword CONSONANT corrections (word → cons-ordinal+target,…) — lexical native-vs-loan splits (v→f/f→v,
+// s→z/z→s, x→ç/k, ŋ→n), from kaikki. Companion to the vowel quality lexicon.
+let CONSONANT: Map<string, string> | undefined;
+function consonantDict(): Map<string, string> {
+    if (CONSONANT === undefined)
+        CONSONANT = loadTsvMap(import.meta.url, "consonant.tsv", undefined, {
+            optional: true,
+        });
+    return CONSONANT;
+}
 const LONG_OF = MANIFEST.vowels.longOf;
 const SHORT_OF = MANIFEST.vowels.shortOf;
 const VOWEL_CHARS = MANIFEST.vowelChars;
@@ -131,6 +141,24 @@ function applyQuality(ipa: string, spec: string | undefined): string {
     return out;
 }
 
+/** Set flagged CONSONANT positions to their kaikki (loanword) value ("0v,3s"). A "consonant" is a char that is
+ *  not a vowel / stress-boundary / length / combining mark (must match the build's counting). Lexical
+ *  native-vs-loan splits (November → …v…, Safe → s…), from a kaikki-derived lexicon. */
+function applyConsonant(ipa: string, spec: string | undefined): string {
+    if (!spec) return ipa;
+    const corr = new Map<number, string>();
+    for (const c of spec.split(","))
+        if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
+    let out = "", ci = 0;
+    for (const ch of ipa) {
+        if (!VOWEL_CHARS.includes(ch) && !"ˈˌʔ()ː̯̩̥͡".includes(ch)) {
+            out += corr.get(ci) ?? ch;
+            ci++;
+        } else out += ch;
+    }
+    return out;
+}
+
 /** German has no stressed schwa: a ˈə/ˌə is the g2p weak-schwa rule ("final-syllable e → ə") mis-firing on what
  *  turned out to be the STRESSED root syllable (gesetz → the setz e; the g2p runs before stress and can't see it).
  *  Restore it to short ɛ — applyLength then lengthens to eː where the length lexicon flags that nucleus long
@@ -194,7 +222,7 @@ export function phonemizeWord(word: string): string {
         const dictOrd = stressDict().get(w);
         const ord =
             dictOrd ?? countNuclei(pieces.slice(0, d.stressPart).join(""));
-        return applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w));
+        return applyConsonant(applyQuality(applyLength(fixStressedSchwa(placeStress(full, ord)), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w));
     }
 
     const segs = toSegments(w);
@@ -219,7 +247,7 @@ export function phonemizeWord(word: string): string {
         if (i === stressPos && vowelIdx.length > 1) out += "ˈ";
         out += segs[i]!.ph;
     }
-    return applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w));
+    return applyConsonant(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), consonantDict().get(w));
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;

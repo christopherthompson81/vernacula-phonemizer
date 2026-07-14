@@ -218,3 +218,10 @@ rauschen/waschen/wünschen/mischen/forschen now correct; the rare s-final diminu
 (they already don't reach here). Full-corpus (74k) 64.3→66.2% cumulative with Phase 11; full suite green. The
 FULLER candidate-ranking (score competing decompositions by digraph-integrity + constituent attestation, not
 first-match) is the architecture for the remaining compound-coverage work (growing stems.txt, Phase 12b).
+
+## Run 13 (Phase 13) — loanword CONSONANT lexicon
+Companion to the vowel quality lexicon, for the lexical consonant splits: ⟨v⟩→/f/ natively (Vater) but /v/ in
+loans (Vase→vaːzə); word-initial ⟨s⟩→/z/ natively (Sonne) but /s/ in loans (Safe, Pseudonym→ps…); + x~ç/k,
+k~ç, ŋ~n. Per-CONSONANT-position, kaikki-derived (tools/gen/build-de-consonant.mts → consonant.tsv, 2778
+entries; applyConsonant). kaikki 67.6→69.9%, INDEPENDENT wikipron 67.9→69.7% (+1.8 cross-source validation).
+Native consonants unchanged (Vater→f, Sonne→z, von/viel→f).
