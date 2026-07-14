@@ -11,7 +11,7 @@ import {
     createArabicDiacritizer,
     type ArabicDiacritizer,
 } from "./diacritizer.ts";
-import { restoreSkeletons } from "./restore.ts";
+import { lexiconPrimary } from "./restore.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -122,7 +122,7 @@ export async function phonemizeArabic(text: string): Promise<string> {
     const vocalized = diac ? await diac.diacritize(text) : text;
     // Supplement-only: repair words the diacritizer left as skeletons from the Tashkeela pausal lexicon (never
     // touches an already-voweled word) — see restore.ts. Skipped when no diacritizer ran (already-diacritized in).
-    const restored = diac ? restoreSkeletons(vocalized, restoreLex()) : vocalized;
+    const restored = diac ? lexiconPrimary(vocalized, restoreLex()) : vocalized;
     if (phonemizer === undefined) phonemizer = createArabic();
     return phonemizer.text(restored);
 }

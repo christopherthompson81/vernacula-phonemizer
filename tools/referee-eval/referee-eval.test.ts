@@ -14,7 +14,7 @@ import { CONFIG } from "./config.ts";
 describe("referee corroboration (segmental backbone vs the PRIMARY independent source)", () => {
   // Floor = the primary referee's folded-agreement fraction, set below the measured value. Alphabetical.
   const floors: Record<string, number> = {
-    ar: 0.48, // wikipron ara via the async ONNX diacritizer + skeleton-gated Tashkeela lexicon supplement + PAUSAL fold — measured 50.0%. NOT a quality signal: referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
+    ar: 0.55, // wikipron ara via the ONNX diacritizer + LEXICON-PRIMARY Tashkeela restoration + PAUSAL fold — measured 57.4% (kaikki 2nd: 62.6%). Referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
     ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
