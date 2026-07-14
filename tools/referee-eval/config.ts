@@ -51,9 +51,12 @@ export const CONFIG: Record<string, RefLang> = {
                 source: "wikipron ara_arab broad (human)",
                 role: "primary",
             },
+            {
+                file: "ar.kaikki-ara.tsv",
+                source: "kaikki ara (Wiktionary) — PAUSAL, multi-pron",
+                role: "secondary",
+            },
         ],
-        secondaryGap:
-            "no independent second source wired; kaikki ara would corroborate the diacritizer + g2p.",
         segmentJoin: true,
         preFolds: [
             [

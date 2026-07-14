@@ -159,3 +159,27 @@ sounds we should produce. Implemented as an ar preFold: drop a word-final SHORT 
 ː so are preserved; runs before the backbone strips length). Measured: strip-final-short-vowel +4.4 (45.6→50.0%);
 NOT stripping tanwin -Vn (over-matches real min/ʔan → net-negative, so excluded). Floor 0.40→0.48. ar re-labelled: the
 50% is explicitly NOT a quality signal (referee OOD + convention + ambiguity), pausal-register scope documented.
+
+## Run 8 — kaikki referee (pausal, multi-pron) + espeak-ng-portable head-to-head
+
+Built ar.kaikki-ara.tsv from kaikki-Arabic.jsonl (14,291 words, bare headword → PAUSAL IPA, MULTI-pron). Wired as
+the ar SECONDARY source; extended the eval to credit ANY of a word's listed pronunciations (backward-compatible with
+single-pron files). kaikki is a much FAIRER referee than wikipron: pausal (no citation-convention confound) and
+multi-pron (credits valid ambiguity). Same fold; verified faithful (our pipeline scores 55.3% under both makeFold
+and the standalone replica).
+
+**Head-to-head on the SAME kaikki referee, SAME fold:**
+| pipeline | match |
+|---|---|
+| ours — neural diacritizer PRIMARY + skeleton-gated lexicon supplement | **55.3%** |
+| espeak-ng-portable — authored lexicon PRIMARY + clitic/suffix strip + epenthesis (NO neural) | **69.8%** |
+
+**This tempers the ✅.** The referee is NOT pure noise — it discriminates quality, and the authored lexicon-PRIMARY
+architecture beats our neural-primary one by **+14.5 pts** on isolated/dictionary words. Root cause: we use the
+Tashkeela lexicon only as a SKELETON-gated supplement (fires on 2.4%), so the OOD neural output dominates; espeak
+uses the lexicon as PRIMARY (every covered word takes the lexicon form). On isolated/citation words the lexicon wins
+decisively. (The neural's edge is CONTEXT on running text, which an isolated-lemma referee can't show — so the true
+picture is input-dependent: lexicon-primary for dictionary/isolated, neural for context.) IMPLICATION: make the
+lexicon primary (or widen the gate well beyond skeletons) to capture most of the 14.5 pts; ideal is a confidence
+hybrid (lexicon for high-frequency dictionary words, neural for context/OOV). Label: ar is better read as 🟡 (a
+specific, known architecture improvement) than a clean ✅.
