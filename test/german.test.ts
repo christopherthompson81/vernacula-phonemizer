@@ -62,6 +62,11 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 15 — split ordering: prefer the whole-word lexeme (schreib·en not schrei·ben)", () => {
+        expect(phonemizeWord("schreiben")).toBe("ʃʁˈaɪ̯bən"); // known verb → schreib·en, not the schrei·ben compound
+        expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // control: a non-lexeme compound still splits
+    });
+
     test("Run 13 — loanword consonants (v→v, s→s), native unchanged", () => {
         expect(phonemizeWord("Vase")).toBe("vˈaːzə"); // LOANWORD ⟨v⟩ → v
         expect(phonemizeWord("Pseudonym")).toBe("psɔʏ̯donˈyːm"); // loanword initial ⟨s⟩ → s (not z)
