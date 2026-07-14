@@ -145,3 +145,17 @@ lemma referee only 2.4% of words produce a skeleton (short lemmas yield valid-bu
 skeletons), so the referee barely moves BY DESIGN — the pass targets broken/OOV running-text words (where skeletons
 are common and matter for TTS), not the referee's convention/ambiguity mismatches. The referee lever remains the
 pausal fold (+6.1). Deeper fix (silver cleaning + retrain) is the separate in-model path.
+
+## Run 7 — pausal fold applied + re-label
+
+Q: are the iʕrab (final case/mood) vowels sounds the TTS should synthesize? A: NO in the position the referee tests.
+Utterance-final is ALWAYS pausal (al-waqf) — nobody says كِتَابٌ /kitaːbun/ as an isolated utterance, only /kitaːb/;
+the wikipron isolated-lemma list is entirely utterance-final, so our pausal output is the CORRECT thing to say and
+the referee's citation ending is a dictionary convention. (Mid-sentence formal-register iʕrab would need syntactic
+case assignment, deliberately deferred — pausal is a valid informal register and avoids wrong-case errors.)
+
+So the pausal fold is a legitimate convention normalization (like the German paren / syllabic-n̩ folds), NOT masking
+sounds we should produce. Implemented as an ar preFold: drop a word-final SHORT vowel [aiu]$ (long aː/iː/uː end in
+ː so are preserved; runs before the backbone strips length). Measured: strip-final-short-vowel +4.4 (45.6→50.0%);
+NOT stripping tanwin -Vn (over-matches real min/ʔan → net-negative, so excluded). Floor 0.40→0.48. ar re-labelled: the
+50% is explicitly NOT a quality signal (referee OOD + convention + ambiguity), pausal-register scope documented.

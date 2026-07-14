@@ -46,7 +46,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 | Lang | Referee (floor) | 2nd source | Verdict | Core / outstanding work |
 |------|-----------------|-----------|---------|--------------------------|
-| **ar** Arabic | 45.4% (.40) | — | 🟠 | Core g2p + quantity-stress solid; depends on the **diacritization** subsystem (ONNX diacritizer has short-vowel misses; ADR pending on porting it). Reliable for *diacritized* input. |
+| **ar** Arabic | 50.0% (.48) | — | 🟠 | Core g2p + quantity-stress solid. PAUSAL-register TTS: neural diacritizer + a **skeleton-gated Tashkeela pausal lexicon supplement** (restore.ts) repairs OOV/isolated words the context-trained BiLSTM under-vowels (يقول→jaquːl). The 50% is **NOT a quality signal** — the wikipron referee is ISOLATED dictionary lemmas (OOD for a context model) in CITATION form (full iʕrab), vs our correct pausal output; residual is convention + isolated-word ambiguity + loan noise, not phonemizer error (docs/ar_referee_investigation.md). Deferred: FORMAL-register mid-sentence iʕrab (needs syntactic case assignment). |
 | **ca** Catalan | 81.3% (.76) | — | 🟡 | Stressed open/close mids (ɛ/e, ɔ/o) need a lexicon; +intervocalic ⟨x⟩, -nts→ns. |
 | **cmn** Mandarin | 84.7% (.80) | — | 🟠 | Syllable-level pinyin→IPA is reliable; deferred: **Hanzi text front-end** (char/phrase dicts, polyphones) + number compositor. Reliable for *pinyin* input, not raw Hanzi. |
 | **cs** Czech | 69.9% (.65) | — | 🟡 | Referee itself is epitran-buggy (deflates); loanword-exception lexicon (portable from espeak cs_list) is the real residual. |

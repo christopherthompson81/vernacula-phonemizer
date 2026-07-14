@@ -55,6 +55,13 @@ export const CONFIG: Record<string, RefLang> = {
         secondaryGap:
             "no independent second source wired; kaikki ara would corroborate the diacritizer + g2p.",
         segmentJoin: true,
+        preFolds: [
+            [
+                /[aiu]$/gu,
+                "",
+                "PAUSAL normalization: drop a word-final SHORT vowel (the iʕrab case/mood ending, and the verb -a) — MSA is pausal utterance-finally (al-waqf), so our TTS correctly omits it; the wikipron citation form spells it. Runs as a preFold so long vowels aː/iː/uː (which end in ː) are preserved. (Tanwin -Vn is NOT stripped — it over-matches real -Vn words like min/ʔan and net-regresses.)",
+            ],
+        ],
         folds: [
             [
                 /(.)\1+/gu,
