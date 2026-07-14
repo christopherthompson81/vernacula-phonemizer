@@ -18,7 +18,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.65, // epitran ces-Latn — measured 69.9%; DEFLATED by epitran's own voicing bugs (pr→br, tr→dr, s→z)
-    cy: 0.42, // wikipron cym_latn NW broad (dialect-matched) — measured 45.4% (Run 2); residual = the oracle's i→ɨ artifact vs the referee's front i + the n/r/l vowel-length ambiguity (Run 3, referee-guided)
+    cy: 0.45, // wikipron cym_latn NW broad (dialect-matched, deduped) — measured 49.1% (Run 2); residual = the oracle's i→ɨ artifact vs the referee's front i + the n/r/l vowel-length ambiguity (Run 3, referee-guided)
     de: 0.46, // kaikki deu — measured 49.8% (wikipron deu 2nd: 52.2%); DEFLATED by kaikki's proper-noun/loan bulk
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation

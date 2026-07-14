@@ -63,7 +63,7 @@ unstressed i→ɨ) → 85.5% (secondary stress on syllable 1 when primary ≥ 3r
 
 **wikipron cym referee wired** — DIALECT-MATCHED: wikipron has NW (North Wales) vs SW variants; we target
 Northern, so cym_latn_nw_broad_filtered (17,291 words) is a clean independent referee (unlike Irish's 3-dialect
-mess). Folded backbone **45.4%** (floor 0.42). Folds: our modifier-letter diphthong offglides ᶤ→ɨ (central,
+mess). Folded backbone **49.1%** (deduped; floor 0.45). Folds: our modifier-letter diphthong offglides ᶤ→ɨ (central,
 matching the referee's ɨ̯ for ae/au/oe/wy) / ᶦ→i (front, ai/ei) / ᶷᵘ→u; ɪ→i. The backbone already strips our
 stress+length and the referee's non-syllabic/lowered combining marks.
 
