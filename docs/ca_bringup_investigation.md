@@ -94,3 +94,18 @@ Three rule-based gaps (probed against the espeak shim — all rule-governed, no 
 Referee 79.5→**81.1%** (these are consonant-level, so the eval sees them, unlike the folded mid-vowels). Unit
 test 11/11; full suite 194/194. Remaining: intervocalic ⟨x⟩ exceptions (hexàgon, èxit variants), a Central-only
 secondary referee, setmana-type tm→mm assimilation.
+
+### Run 3 review — bl/gl gemination made LEXICAL
+Review found the Run-3 gemination rule OVER-applied: gemination vs spirantization is lexical (popular poble→pɔbːlə
+vs learned problema→pɾuβlə, obligar→uβliɣə), not surface-derivable. Fixed the Swedish way — derived a 578-word
+gemination lexicon from the espeak shim (bl-gl-geminate.tsv, build-ca-geminate.mts); the engine geminates only
+flagged words. Referee unchanged (the eval folds bː/β→b) — a canonical-correctness fix. Full suite 194/194.
+
+### Run 3 review (2nd finding) — diphthong+coda stress + gua/guo glide
+Adversarial verifier caught a broad PRE-EXISTING stress bug: the oxytone rule for a falling-diphthong-final word
+only fired when the glide was the LAST segment, so plurals (correus, museus, dijous, remeis) with a coda -s fell to
+PENULT — wrong stress + wrong reduction (correus → kˈɔrəws instead of kurˈɛws). Fixed: check the seg after the
+LAST NUCLEUS, not the last seg. Testing that surfaced a second pre-existing gap: ⟨gua⟩/⟨guo⟩ (plain u before a/o)
+wasn't handled as a glide (only gü/gue/gui were), so aigua → əjɣˈuə (u a hiatus nucleus). Added gua/guo → ɡw
+(aigua → ˈajɣwə, guardar → ɡwəɾðˈa). Referee 81.1→81.3%; full suite 194/194. coexistir ks (vs espeak ɡz) left as
+an espeak inconsistency (preexistir/inexistent also give ks — ours is more consistent).

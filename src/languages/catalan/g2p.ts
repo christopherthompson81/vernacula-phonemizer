@@ -74,6 +74,7 @@ export function toSegments(word: string): Seg[] {
         }
         if (c === "q" && nx === "u") { cons("k"); if (nx2 === "a" || nx2 === "o" || nx2 === "ü") cons("w"); i += 2; continue; }
         if (c === "g" && nx === "u" && isFront(nx2)) { cons("ɡ"); i += 2; continue; } // gue/gui → ɡ (u silent)
+        if (c === "g" && nx === "u" && (nx2 === "a" || nx2 === "o")) { cons("ɡ"); cons("w"); i += 2; continue; } // gua/guo → ɡw (aigua)
         if (c === "g" && nx === "ü") { cons("ɡ"); cons("w"); i += 2; continue; } // güe/güi → ɡw
         if (c === "q" && nx === "ü") { cons("k"); cons("w"); i += 2; continue; }
 

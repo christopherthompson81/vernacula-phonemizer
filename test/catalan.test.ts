@@ -84,8 +84,18 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("examen")).toBe("əɡzˈamən"); // ex- prefix → ɡz
         expect(phonemizeWord("forts")).toBe("fˈɔɾs"); // -rts → rs (but fort → fˈɔɾt keeps its t)
         expect(phonemizeWord("fort")).toBe("fˈɔɾt");
-        expect(phonemizeWord("poble")).toBe("pˈɔbːɫə"); // bl → bː + l (geminate, no spirantization)
+        expect(phonemizeWord("poble")).toBe("pˈɔbːɫə"); // bl → bː + l (geminate; popular word, lexicon)
         expect(phonemizeWord("regla")).toBe("rˈeɡːɫə"); // gl → ɡː + l
+        expect(phonemizeWord("problema")).toBe("pɾuβɫˈemə"); // learned word: bl SPIRANTIZES (not in the geminate lexicon)
+        expect(phonemizeWord("obligar")).toBe("uβɫiɣˈa");
+    });
+
+    test("review fixes: diphthong+coda oxytone stress, gua/guo glide", () => {
+        expect(phonemizeWord("correus")).toBe("kurˈɛws"); // falling diphthong + plural -s → still OXYTONE (not penult)
+        expect(phonemizeWord("dijous")).toBe("diʒˈɔws");
+        expect(phonemizeWord("remeis")).toBe("rəmˈɛjs");
+        expect(phonemizeWord("aigua")).toBe("ˈajɣwə"); // gua → ɡw (u is a glide, not a hiatus nucleus)
+        expect(phonemizeWord("guardar")).toBe("ɡwəɾðˈa");
     });
 
     test("numbers", () => {
