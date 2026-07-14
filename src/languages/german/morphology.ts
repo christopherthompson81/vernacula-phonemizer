@@ -135,9 +135,14 @@ export function decompose(word: string): Decomp {
             if (!rest.startsWith(p) || rest.length - p.length < 4) continue;
             const r = rest.slice(p.length);
             // ambiguous be-/ge-/er- must leave a real word (beiden ✗, gemacht ✓); others just need a plausible onset.
-            const ok = PREFIX_AMBIGUOUS.has(p)
-                ? isWord(r) || splitCompound(r) !== null
-                : isStemish(r);
+            // Negation un- ONLY before ANOTHER prefix (unge-/unbe-/unver-/unzer-/unent-): safe (no non-un word starts
+            // that way — union/universal/unter don't match), and it blocks the un|ge ng→ŋ merge (ungefähr → ʊnɡə…).
+            const ok =
+                p === "un"
+                    ? /^(ge|be|ver|zer|ent)/.test(r)
+                    : PREFIX_AMBIGUOUS.has(p)
+                      ? isWord(r) || splitCompound(r) !== null
+                      : isStemish(r);
             if (ok) {
                 prefixes.push(p);
                 rest = r;

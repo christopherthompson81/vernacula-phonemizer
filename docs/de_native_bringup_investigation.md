@@ -425,3 +425,11 @@ stoplist (manifest), consulted by BOTH decompose (return whole, no ge-/er- strip
 branch). Real prefixes (Gestein/Gestalt/gestorben/erstaunen/erstatten) and word-initial st (Stern) unaffected. Also
 RESYNCED the quality/er/consonant lexicons (runs 34/36/37 changed g2p output → gestern had a stale quality entry that
 re-corrupted its now-correct ɡɛstɐn; rebuild fixed it). kaikki 77.9%, wikipron 76.4→76.5%. Full suite 241 green.
+
+## Run 38 — negation un- before a prefix blocks the ng→ŋ merge (ungefähr) [✅-push 3/N]
+The ŋə→nɡ residual (ungefähr → our ʊŋəfɛːɐ̯, kaikki ʊnɡəfɛːɐ̯): un|ge is a morpheme boundary that blocks ng→ŋ, but we
+didn't split un-. Added un- to prefixUnstressed with a SPECIAL gate: strip only before another prefix (unge-/unbe-/
+unver-/unzer-/unent-) — safe because no non-un word starts that way (union/universal/unter/und all unaffected).
+Needed PREFIX_IPA["un"]="ʊn" too (else the un piece g2p'd open-syllable as long uːn — a −5-word regression that the
+short-vowel fix reversed, same trap as her-). Lexicons resynced. kaikki 77.9→78.1% (crosses 78%), wikipron 76.5→76.6%.
+Floor 0.77→0.78. Full suite 242 green.
