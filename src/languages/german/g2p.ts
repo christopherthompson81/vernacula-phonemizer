@@ -310,8 +310,9 @@ export function toSegments(word: string): Seg[] {
         i++;
     }
 
-    finalDevoice(segs, w);
-    // Collapse doubled consonants — German writes them only to mark a short vowel (Wasser, null, mittage → single).
+    // Collapse doubled consonants FIRST, before devoicing — German writes them only to mark a short vowel (Wasser,
+    // Krabbe, Roggen → single). If finalDevoice ran first it would see the geminate as a coda cluster and wrongly
+    // devoice its first half (Krabbe → kʁapbə instead of kʁabə; the second b "will itself devoice", triggering it).
     const out: Seg[] = [];
     for (const s of segs) {
         const prev = out[out.length - 1];
@@ -325,6 +326,7 @@ export function toSegments(word: string): Seg[] {
             continue;
         out.push(s);
     }
+    finalDevoice(out, w);
     return out;
 }
 

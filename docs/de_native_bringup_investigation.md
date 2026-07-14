@@ -392,3 +392,10 @@ Added the reverse pair "ə":{ɛ,e} to build-de-quality.mts. kaikki-gated, so NAT
 gemacht→gəmaxt, Blume, beruf all keep ə — kaikki has ə there too). Quality lexicon 18113→18573. kaikki 76.5→77.0%,
 wikipron 75.6→76.3% — a big cross-source jump. Updated 3 stale goldens (genial/general/Berlin encoded the old ə).
 Floor 0.75→0.76. Full suite 238 green.
+
+## Run 34 — doubled voiced obstruent collapses before devoicing (real bug)
+The pb→bə residual (Krabbe → our kʁapbə, should kʁabə): finalDevoice ran BEFORE the doubled-consonant collapse, so
+it saw the geminate bb as a coda cluster and devoiced the first half (b before a "will-itself-devoice" b → p), then
+the collapse couldn't merge the now-different p+b. Reordered: collapse geminates FIRST, then finalDevoice. Fixes
+Krabbe/Robbe/Ebbe/Bagger/Roggen/Flagge/Widder/Paddel (bb/dd/gg → single, onset, voiced). Real coda-cluster devoicing
+is unaffected (Smaragd→smaʁakt, gd→kt — not a geminate). kaikki 77.0→77.2%, wikipron flat. Full suite 239 green.

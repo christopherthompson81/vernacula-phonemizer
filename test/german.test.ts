@@ -62,6 +62,12 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
+    test("Run 34 — doubled voiced obstruent collapses before devoicing (Krabbe → kʁabə)", () => {
+        expect(phonemizeWord("Krabbe")).toBe("kʁˈabə"); // bb → b (was wrongly kʁapbə)
+        expect(phonemizeWord("Widder")).toBe("vˈɪdɐ"); // dd → d
+        expect(phonemizeWord("Smaragd")).toBe("smaʁˈakt"); // control: real coda cluster gd → kt still devoices
+    });
+
     test("Run 33 — loanword full unstressed vowel (ə → ɛ/e), native schwa protected", () => {
         expect(phonemizeWord("Talent")).toBe("talˈɛnt"); // loanword -ent → ɛ (was ə)
         expect(phonemizeWord("Dokument")).toBe("dɔkumˈɛnt");
