@@ -1,0 +1,13 @@
+// Burmese (my) — Sino-Tibetan, Mon-Burmese abugida. wikipron mya (human) PRIMARY + kaikki mya (human) SECONDARY.
+// Phase 1 = SEGMENTAL: the backbone strips TONE (the referee's à/á/a̰ diacritics) so this grades the segmental
+// backbone. The score is deflated by the still-DEFERRED layers (below). Folds: ɴ~n nasal-coda notation.
+{
+    "referees": [
+        { "file": "my.wikipron-mya-broad.tsv", "source": "wikipron mya_mymr broad (human)", "role": "primary" },
+        { "file": "my.kaikki-mya.tsv", "source": "kaikki mya (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ɴ", "replace": "n", "note": "nasal coda ɴ ~ n — final-nasal place notation" }
+    ]
+}

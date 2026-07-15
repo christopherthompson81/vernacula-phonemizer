@@ -1,0 +1,61 @@
+// Native canonical-IPA definition for Burmese / မြန်မာဘာသာ (my) — Sino-Tibetan (Lolo-Burmese), the Mon-Burmese
+// abugida (Unicode U+1000–U+109F), stored in LOGICAL order (consonant-first, no reordering). burmese.ts reads
+// this file. The hard part is the RIME system: a vowel's quality depends on its CODA — open, NASAL (killed
+// ŋ/ɲ/n/m or anusvara → ɴ) or CHECKED (killed k/s/t/p → ʔ) — e.g. -i open→i, nasal→ɪɴ, checked→ɪʔ. Medials
+// palatalise velars (ကျ→t͡ɕ) or add glides -j-/-w-; ⟨ှ⟩ devoices sonorants (မှ→m̥, လှ→ɬ). Phase 1: SEGMENTAL —
+// tones (low à / high á / creaky a̰ / checked) are DEFERRED (the referee's tone diacritics fold in the backbone).
+// See docs/my_native_bringup_investigation.md.
+{
+    "language": "my",
+    "name": "Burmese",
+    "script": "Myanmar (Mon-Burmese)",
+    "provenance": "Authored from standard Burmese phonology (MLC transcription) + the epitran mya-Mymr inventory. Validated against wikipron mya + kaikki mya (human).",
+
+    // Base consonants (inherent vowel added by the g2p). ⟨ရ⟩→j, ⟨သ⟩→θ, ⟨အ⟩→ʔ (glottal / vowel carrier).
+    "consonants": {
+        "က": "k", "ခ": "kʰ", "ဂ": "ɡ", "ဃ": "ɡ", "င": "ŋ", "စ": "s", "ဆ": "sʰ", "ဇ": "z", "ဈ": "z",
+        "ဉ": "ɲ", "ည": "ɲ", "ဋ": "t", "ဌ": "tʰ", "ဍ": "d", "ဎ": "d", "ဏ": "n", "တ": "t", "ထ": "tʰ",
+        "ဒ": "d", "ဓ": "d", "န": "n", "ပ": "p", "ဖ": "pʰ", "ဗ": "b", "ဘ": "b", "မ": "m", "ယ": "j",
+        "ရ": "j", "လ": "l", "ဝ": "w", "သ": "θ", "ဟ": "h", "ဠ": "l", "အ": "ʔ"
+    },
+
+    // Independent (standalone) vowels → IPA.
+    "independentVowels": { "ဣ": "ʔi", "ဤ": "ʔi", "ဥ": "ʔu", "ဦ": "ʔu", "ဧ": "ʔe", "ဩ": "ʔɔ", "ဪ": "ʔɔ" },
+
+    // Vowel signs → an abstract vowel KEY (inherent | aa | i | u | e | ai | o | au). The combos ို=o (ိ+ု) and
+    // ⣟ော=au (ေ+ာ) are assembled in burmese.ts; the actual IPA comes from the rime chart below (vowel × coda).
+    "vowelSigns": { "ာ": "aa", "ါ": "aa", "ိ": "i", "ီ": "i", "ု": "u", "ူ": "u", "ေ": "e", "ဲ": "ai" },
+
+    // Killed-consonant / anusvara coda → a coda CLASS. anusvara ံ behaves like -m/-n (nasal a).
+    "codaClass": {
+        "င": "ng", "ဉ": "ny", "ည": "nyi", "ဏ": "n", "န": "n", "မ": "m",
+        "က": "k", "ခ": "k", "ဂ": "k", "ဃ": "k", "စ": "c", "ဆ": "c", "ဇ": "c", "ဈ": "c",
+        "တ": "t", "ထ": "t", "ဒ": "t", "ဓ": "t", "ဋ": "t", "ဌ": "t", "ဍ": "t", "ဎ": "t",
+        "ပ": "p", "ဖ": "p", "ဗ": "p", "ဘ": "p", "ယ": "y", "ရ": "y", "လ": "t", "ဝ": "t", "သ": "t"
+    },
+
+    // The Burmese RIME chart: codaClass → (vowelKey → IPA, tone-free). "open" = no coda. Diphthongs surface only in
+    // CLOSED syllables (ောင်→aʊɴ aung, ိုင်→aɪɴ aing, ိန်→eɪɴ ein, ုန်→oʊɴ oun); the bare (inherent) rime takes the
+    // historical vowel of the coda letter (င်→ɪɴ, န်→aɴ, က်→ɛʔ, စ်→ɪʔ, တ်→aʔ).
+    "rimeChart": {
+        "open": { "inherent": "a", "aa": "a", "i": "i", "u": "u", "e": "e", "ai": "ɛ", "o": "o", "au": "ɔ", "wu": "a" },
+        "ng": { "inherent": "ɪɴ", "aa": "aɴ", "i": "ɪɴ", "u": "oʊɴ", "e": "eɪɴ", "ai": "ɪɴ", "o": "aɪɴ", "au": "aʊɴ", "wu": "ɪɴ" },
+        "ny": { "inherent": "ɪɴ", "aa": "aɴ", "i": "i", "u": "oʊɴ", "e": "eɪɴ", "ai": "ɪɴ", "o": "aɪɴ", "au": "aʊɴ", "wu": "ɪɴ" },
+        "nyi": { "inherent": "i", "aa": "a", "i": "i", "u": "u", "e": "e", "ai": "ɛ", "o": "o", "au": "ɔ", "wu": "i" },
+        "n": { "inherent": "aɴ", "aa": "aɴ", "i": "eɪɴ", "u": "oʊɴ", "e": "eɪɴ", "ai": "ɪɴ", "o": "aɪɴ", "au": "aʊɴ", "wu": "ʊɴ" },
+        "m": { "inherent": "aɴ", "aa": "aɴ", "i": "eɪɴ", "u": "oʊɴ", "e": "eɪɴ", "ai": "ɪɴ", "o": "aɪɴ", "au": "aʊɴ", "wu": "ʊɴ" },
+        "anu": { "inherent": "aɴ", "aa": "aɴ", "i": "eɪɴ", "u": "oʊɴ", "e": "eɪɴ", "ai": "ɪɴ", "o": "aɪɴ", "au": "aʊɴ", "wu": "ʊɴ" },
+        "k": { "inherent": "ɛʔ", "aa": "aʔ", "i": "ɪʔ", "u": "oʊʔ", "e": "eʔ", "ai": "ɛʔ", "o": "aɪʔ", "au": "aʊʔ", "wu": "ɛʔ" },
+        "c": { "inherent": "ɪʔ", "aa": "aʔ", "i": "ɪʔ", "u": "oʊʔ", "e": "eʔ", "ai": "ɛʔ", "o": "aɪʔ", "au": "aʊʔ", "wu": "ɪʔ" },
+        "t": { "inherent": "aʔ", "aa": "aʔ", "i": "eɪʔ", "u": "oʊʔ", "e": "eʔ", "ai": "ɛʔ", "o": "aɪʔ", "au": "aʊʔ", "wu": "ʊʔ" },
+        "p": { "inherent": "aʔ", "aa": "aʔ", "i": "eɪʔ", "u": "oʊʔ", "e": "eʔ", "ai": "ɛʔ", "o": "aɪʔ", "au": "aʊʔ", "wu": "ʊʔ" },
+        "y": { "inherent": "ɛ", "aa": "a", "i": "i", "u": "u", "e": "e", "ai": "ɛ", "o": "o", "au": "ɔ", "wu": "a" }
+    },
+
+    // The voiceless (⟨ှ⟩ medial) sonorant realisations.
+    "voiceless": { "ŋ": "ŋ̥", "ɲ": "ɲ̥", "n": "n̥", "m": "m̥", "l": "l̥", "w": "ʍ", "j": "ʃ" },
+    // Velar/affricate palatalisation from the ⟨ျ⟩/⟨ြ⟩ medial.
+    "palatal": { "k": "t͡ɕ", "kʰ": "t͡ɕʰ", "ɡ": "d͡ʑ", "sʰ": "sʰ", "h": "ʃ" },
+
+    "clausePunctuation": { "။": " . ", "၊": " , ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , " }
+}
