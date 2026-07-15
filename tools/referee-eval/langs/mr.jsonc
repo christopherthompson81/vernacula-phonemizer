@@ -1,0 +1,60 @@
+// Marathi (Devanagari) — reuses the Hindi abugida engine + a Marathi data file. wikipron mar is a broad
+// HUMAN referee. Folds: the alveolo-palatal notation (ɕ/t͡ɕ/d͡ʑ = our ʃ/t͡ʃ/d͡ʒ) and the च/ज DENTAL~PALATAL
+// variation (t͡s~t͡ʃ — the referee is inconsistent: चाक→t͡sak yet चाकर→t͡ɕakəɾ), plus tap ɾ + degemination.
+{
+    "referees": [
+        {
+            "file": "mr.wikipron-mar-broad.tsv",
+            "source": "wikipron mar_deva broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "mr.gold-adjudicated.tsv",
+            "source": "adjudicated common-word gold (our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "tap ɾ vs referee r — notation"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "short ि [ɪ] (ours) vs referee [i] — the referee does not mark the ɪ/i split"
+        },
+        {
+            "pattern": "ʊ",
+            "replace": "u",
+            "note": "short ु [ʊ] vs referee [u] — ditto"
+        },
+        {
+            "pattern": "ɕ",
+            "replace": "ʃ",
+            "note": "ɕ (referee) = ʃ (ours श) — notation"
+        },
+        {
+            "pattern": "ʑ",
+            "replace": "ʒ",
+            "note": "ʑ (referee) = ʒ — notation"
+        },
+        {
+            "pattern": "t͡?[sɕ]",
+            "replace": "t͡ʃ",
+            "note": "affricate t͡s~t͡ɕ~t͡ʃ (च dental~palatal variation) — referee-inconsistent"
+        },
+        {
+            "pattern": "d͡?[zʑ]",
+            "replace": "d͡ʒ",
+            "note": "affricate d͡z~d͡ʑ~d͡ʒ (ज variation) — referee-inconsistent"
+        },
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"
+        }
+    ]
+}

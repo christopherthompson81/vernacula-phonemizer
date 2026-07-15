@@ -20,8 +20,8 @@ No referee is an oracle. Each is **fallible**, so:
 
 1. We fold away the layers where we are simply *richer* than the referee (tone, length, depressor voicing,
    ejectives, tie-bars) and the documented **allophonic** differences (mid-vowel raising, dark-l harmony, a/ə).
-   Every fold is justified in `config.ts` — a fold either neutralises notation or a genuinely predictable
-   allophone, never a real contrast.
+   Every fold is justified in its `langs/<code>.jsonc` file (the `note` field of each fold object) — a fold
+   either neutralises notation or a genuinely predictable allophone, never a real contrast.
 2. Whatever **remains** after folding is the linguistic signal: a *candidate* to adjudicate against published
    phonology — **not** an automatic bug, and **not** something to reflex-fix toward the referee. Corroborate
    across ≥2 referees before trusting a divergence.
@@ -31,10 +31,18 @@ the cross-check that those authored expectations are linguistically real.
 
 ## Sources: primary / secondary / gap
 
-Each language declares its independent sources in `config.ts` with a **role** — a `primary` and, ideally, an
-independent `secondary` (≥2 sources before trusting a divergence). Where no independent secondary exists, that is
-recorded as an explicit `secondaryGap` string, **not** silently omitted. `eval.ts` reports the role per referee
-and prints the gap; the test floors the **primary**.
+Each language declares its independent sources in its `langs/<code>.jsonc` file with a **role** — a `primary`
+and, ideally, an independent `secondary` (≥2 sources before trusting a divergence). Where no independent
+secondary exists, that is recorded as an explicit `secondaryGap` string, **not** silently omitted. `eval.ts`
+reports the role per referee and prints the gap; the test floors the **primary**.
+
+## Layout
+
+- `langs/<code>.jsonc` — one file per language: its `referees`, `segmentJoin`, `secondaryGap`, and the
+  `folds`/`preFolds` (each a `{ "pattern", "replace", "note" }` object; the `pattern` compiles with the `gu`
+  flags). **To add or tune a language, edit its jsonc file** — nothing in the loader changes.
+- `config.ts` — loads every `langs/*.jsonc`, compiles the fold patterns to RegExps, and exposes the shared
+  `BACKBONE` strip + the `CONFIG` map. `eval.ts` runs the comparison; `referee-eval.test.ts` holds the floors.
 
 Two languages need a non-default path, handled inside the one framework:
 - **ar** is evaluated through the **async** ONNX diacritizer (`phonemizeArabic`): the referee's IPA is fully

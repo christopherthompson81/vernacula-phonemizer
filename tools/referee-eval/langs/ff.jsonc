@@ -1,0 +1,62 @@
+// No wikipron Fula exists (ful/fuf scrapes are empty), so the independent referee is epitran ful-Latn —
+// committed by espeak-ng-portable's Fula bring-up as ff_gold.tsv. Folds = the documented ff↔epitran
+// notation divergences (affricate/implosive spelling, prenasal superscripts, gemination doubling).
+{
+    "referees": [
+        {
+            "file": "ff.epitran-ful-Latn.tsv",
+            "source": "epitran ful-Latn (programmatic; via espeak-ng-portable ff_gold)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "no independent second Fula source: wikipron ful/fuf are empty, so the only G2P is the primary.",
+    "preFolds": [
+        {
+            "pattern": "ñ",
+            "replace": "ɲ",
+            "note": "epitran ⟨ñ⟩ → our ɲ; matches the NFD-decomposed n+◌̃ and runs before the backbone strips the tilde"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "c",
+            "replace": "tʃ",
+            "note": "epitran writes ⟨c⟩ where we render the affricate t͡ʃ"
+        },
+        {
+            "pattern": "ɟ",
+            "replace": "dʒ",
+            "note": "epitran ⟨ɟ⟩ vs our d͡ʒ"
+        },
+        {
+            "pattern": "ʔʲ",
+            "replace": "ʄ",
+            "note": "epitran ʔʲ vs our implosive ʄ"
+        },
+        {
+            "pattern": "nj",
+            "replace": "ɲ",
+            "note": "epitran keeps orthographic nj; we render the prenasal palatal"
+        },
+        {
+            "pattern": "ᵐ",
+            "replace": "m",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "ⁿ",
+            "replace": "n",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "ᵑ",
+            "replace": "ŋ",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "collapse geminate doubling — length already stripped by the backbone"
+        }
+    ]
+}

@@ -1,0 +1,84 @@
+{
+    "referees": [
+        {
+            "file": "de.kaikki-deu.tsv",
+            "source": "kaikki deu (Wiktionary, CC-BY-SA)",
+            "role": "primary"
+        },
+        {
+            "file": "de.wikipron-deu.tsv",
+            "source": "wikipron deu_latn broad (human)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[()]",
+            "replace": "",
+            "note": "kaikki's optional-segment parens — keep the content (ganz ɡan(t)s, geben ɡeːb(ə)n = our ɡants/ɡeːbən; the segment IS present in standard German, the parens only mark it droppable)"
+        },
+        {
+            "pattern": "n̩",
+            "replace": "ən",
+            "note": "syllabic n̩ (referee) → our ən; expand before ̩ is stripped"
+        },
+        {
+            "pattern": "l̩",
+            "replace": "əl",
+            "note": "syllabic l̩ → əl"
+        },
+        {
+            "pattern": "m̩",
+            "replace": "əm",
+            "note": "syllabic m̩ → əm"
+        },
+        {
+            "pattern": "ŋ̩",
+            "replace": "ən",
+            "note": "syllabic ŋ̩ (…gen/…ken → ɡŋ̩) → our ən; expand before ̩ is stripped"
+        },
+        {
+            "pattern": "ɐ̯",
+            "replace": "r",
+            "note": "vocalized-r ɐ̯ → r; normalize before ̯ is stripped (ours writes ʁ→r, referee ɐ̯)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "ʔ",
+            "replace": "",
+            "note": "glottal-stop onset before a vowel-initial syllable — allophonic; referee marks it"
+        },
+        {
+            "pattern": "ə[rʁ]",
+            "replace": "ɐ",
+            "note": "r-vocalization: unstressed -er → ɐ (both write the vocalized form; match ʁ too, which the ʁ→r fold hasn't reached yet)"
+        },
+        {
+            "pattern": "\\.",
+            "replace": "",
+            "note": "kaikki syllable-boundary dots (ɡar.tən) — not a segment"
+        },
+        {
+            "pattern": "ɔʏ",
+            "replace": "ɔɪ",
+            "note": "eu/äu diphthong offglide ɔʏ ~ ɔɪ — notation convention"
+        },
+        {
+            "pattern": "ʁ",
+            "replace": "r",
+            "note": "uvular ʁ ~ r — rhotic convention"
+        },
+        {
+            "pattern": "j",
+            "replace": "i",
+            "note": "high-front glide notation: kaikki's j ~ our i̯ (→i after the backbone), e.g. -tion tsjoːn/tsi̯oːn, ⟨ja⟩"
+        },
+        {
+            "pattern": "χ",
+            "replace": "x",
+            "note": "ach-laut: our velar x ~ kaikki's uvular χ both notate the back fricative (ich-laut ç unaffected)"
+        }
+    ]
+}

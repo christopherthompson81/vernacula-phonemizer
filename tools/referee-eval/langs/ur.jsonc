@@ -1,0 +1,32 @@
+// Urdu — Perso-Arabic abjad, Hindi phonology. wikipron urd is fully-voweled (HUMAN); our g2p produces
+// the consonant + LONG-vowel skeleton with a default [ə] for the omitted short vowels (restoration is the
+// deferred subsystem, 🟠). Fold the short-vowel QUALITY (ə~ɪ~ʊ) and the long/short axis so the eval
+// measures the CONSONANT + long-vowel backbone we can actually derive, not the unrecoverable short vowels.
+{
+    "referees": [
+        {
+            "file": "ur.wikipron-urd-broad.tsv",
+            "source": "wikipron urd_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "short-vowel restoration is deferred (the abjad omits ə/ɪ/ʊ); no independent diacritized-Urdu source wired.",
+    "folds": [
+        {
+            "pattern": "[ɪʊ]",
+            "replace": "ə",
+            "note": "short-vowel QUALITY ə~ɪ~ʊ — unrecoverable from the undiacritized skeleton"
+        },
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "tap ɾ vs referee r — notation"
+        },
+        {
+            "pattern": "ʋ",
+            "replace": "v",
+            "note": "ʋ~v — notation"
+        }
+    ]
+}

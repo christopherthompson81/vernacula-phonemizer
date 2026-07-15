@@ -1,0 +1,22 @@
+{
+    "referees": [
+        {
+            "file": "fr.wikipron-fra.tsv",
+            "source": "wikipron fra_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "fr.gold-freq.tsv",
+            "source": "frequency-ranked adjudicated gold (3k, our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ə",
+            "replace": "",
+            "note": "optional/final schwa — the referee is inconsistent on mute-e"
+        }
+    ]
+}

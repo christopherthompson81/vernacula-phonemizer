@@ -1,0 +1,23 @@
+{
+    "referees": [
+        {
+            "file": "hi.wikipron-hin-deva-broad.tsv",
+            "source": "wikipron hin_deva broad (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "epitran hin-Deva doesn't perform Hindi schwa-deletion (writes every inherent अ), so it disagrees systematically with both us and wikipron — not a usable corroborator. A kaikki/Wiktionary hin lexicon would be.",
+    "folds": [
+        {
+            "pattern": "ɑ",
+            "replace": "a",
+            "note": "referee writes आ as ɑ(ː); we use a(ː) — same phoneme, notation"
+        },
+        {
+            "pattern": "ᵊ",
+            "replace": "",
+            "note": "referee's epenthetic final schwa (pətɾᵊ) — we don't emit it"
+        }
+    ]
+}

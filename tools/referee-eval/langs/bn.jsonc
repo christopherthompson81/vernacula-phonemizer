@@ -1,0 +1,55 @@
+// Bengali — native abugida G2P (bengali.jsonc + core/abugida). wikipron ben is a broad HUMAN referee
+// (Wiktionary), noisy on the inherent-vowel ɔ/o + the [æ] realization of ⟨e⟩ (dialect-split). Folds
+// below neutralize the notational/allophonic differences; whatever remains is the real signal.
+{
+    "referees": [
+        {
+            "file": "bn.wikipron-ben-broad.tsv",
+            "source": "wikipron ben_beng broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "bn.gold-adjudicated.tsv",
+            "source": "adjudicated common-word gold (our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "[ɾɹ]",
+            "replace": "r",
+            "note": "tap ɾ (ours) / approximant ɹ (referee) vs plain r — notation"
+        },
+        {
+            "pattern": "d͡?ʑ",
+            "replace": "d͡ʒ",
+            "note": "d͡ʑ (referee) = d͡ʒ (ours) — notation"
+        },
+        {
+            "pattern": "t͡?ɕ",
+            "replace": "t͡ʃ",
+            "note": "t͡ɕ (referee) = t͡ʃ (ours) — notation"
+        },
+        {
+            "pattern": "ɕ",
+            "replace": "ʃ",
+            "note": "ɕ (referee) = ʃ (ours) — notation"
+        },
+        {
+            "pattern": "ʑ",
+            "replace": "ʒ",
+            "note": "ʑ (referee) = ʒ (ours) — notation"
+        },
+        {
+            "pattern": "[æɛ]",
+            "replace": "e",
+            "note": "front-mid [e]~[ɛ]~[æ] — referee-inconsistent allophony"
+        },
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"
+        }
+    ]
+}

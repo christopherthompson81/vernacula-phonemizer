@@ -1,0 +1,37 @@
+{
+    "referees": [
+        {
+            "file": "kk.epitran-kaz-Cyrl.tsv",
+            "source": "epitran kaz-Cyrl (programmatic)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "no human second source wired; wikipron kaz would be a better corroborator than epitran (which merges ө/ү→ʏ and over-marks the е palatal onglide — the espeak-ng-portable kk work used wikipron).",
+    "folds": [
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "dark-l is allophonic (harmony); epitran writes plain l"
+        },
+        {
+            "pattern": "χ",
+            "replace": "x",
+            "note": "χ/x — uvular vs velar fricative convention"
+        },
+        {
+            "pattern": "ʁ",
+            "replace": "ʀ",
+            "note": "ʁ/ʀ — uvular convention"
+        },
+        {
+            "pattern": "je",
+            "replace": "e",
+            "note": "epitran over-marks the е palatal onglide everywhere; [je] is word-initial-only in Kazakh"
+        },
+        {
+            "pattern": "ij",
+            "replace": "əj",
+            "note": "epitran writes и as ij, ours as əj (reduced-vowel convention)"
+        }
+    ]
+}

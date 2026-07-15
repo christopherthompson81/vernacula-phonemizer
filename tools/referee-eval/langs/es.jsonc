@@ -1,0 +1,48 @@
+{
+    "referees": [
+        {
+            "file": "es.wikipron-spa.tsv",
+            "source": "wikipron spa_latn_ca broad (human, Castilian)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; kaikki spa or a Latin-American wikipron would corroborate.",
+    "folds": [
+        {
+            "pattern": "β",
+            "replace": "b",
+            "note": "spirantization β̞~b — allophonic; referee may write either"
+        },
+        {
+            "pattern": "ð",
+            "replace": "d",
+            "note": "spirantization ð̞~d — allophonic"
+        },
+        {
+            "pattern": "ɣ",
+            "replace": "ɡ",
+            "note": "spirantization ɣ̞~ɡ — allophonic"
+        },
+        {
+            "pattern": "ʝ",
+            "replace": "j",
+            "note": "⟨y/hi⟩ ʝ~j — convention"
+        },
+        {
+            "pattern": "r",
+            "replace": "ɾ",
+            "note": "trill/tap r~ɾ — referee inconsistent on rr vs intervocalic"
+        },
+        {
+            "pattern": "ᶦ",
+            "replace": "i",
+            "note": "our non-syllabic offglide ᶦ (aire→aᶦɾe) vs referee plain i"
+        },
+        {
+            "pattern": "ᶷ",
+            "replace": "u",
+            "note": "our non-syllabic offglide ᶷ (auto→aᶷto) vs referee plain u"
+        }
+    ]
+}

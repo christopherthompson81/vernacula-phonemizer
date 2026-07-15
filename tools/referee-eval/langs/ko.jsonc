@@ -1,0 +1,33 @@
+{
+    "referees": [
+        {
+            "file": "ko.wikipron-kor-hang-narrow.tsv",
+            "source": "wikipron kor_hang narrow (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; epitran kor-Hang would corroborate the ㅓ/ㅏ vowel qualities.",
+    "folds": [
+        {
+            "pattern": "ɐ",
+            "replace": "a",
+            "note": "our ㅏ as ɐ vs referee a̠ — same /a/"
+        },
+        {
+            "pattern": "ɘ",
+            "replace": "ʌ",
+            "note": "our ㅓ as ɘ vs referee ʌ(̹) — same vowel, notation"
+        },
+        {
+            "pattern": "sʰ",
+            "replace": "s",
+            "note": "referee marks ㅅ aspiration (sʰ); we write plain s"
+        },
+        {
+            "pattern": "ɦ",
+            "replace": "h",
+            "note": "intervocalic ㅎ voicing ɦ~h"
+        }
+    ]
+}

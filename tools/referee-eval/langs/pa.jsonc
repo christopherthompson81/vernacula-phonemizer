@@ -1,0 +1,40 @@
+// Punjabi (Gurmukhi) — Brahmic abugida + TONOGENESIS. The BACKBONE already strips Chao tone letters, so
+// the eval measures the SEGMENTAL output: the key is the de-aspiration of the voiced-aspirate letters
+// (ਘਝਢਧਭ → k/ɡ t͡ʃ/d͡ʒ … not the breathy series). wikipron pan is a broad HUMAN referee.
+{
+    "referees": [
+        {
+            "file": "pa.wikipron-pan-broad.tsv",
+            "source": "wikipron pan_guru broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "pa.gold-adjudicated.tsv",
+            "source": "adjudicated common-word gold (our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "tap ɾ vs referee r — notation"
+        },
+        {
+            "pattern": "ʋ",
+            "replace": "w",
+            "note": "ਵ ʋ~w — referee-split notation"
+        },
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"
+        },
+        {
+            "pattern": "ə$",
+            "replace": "",
+            "note": "word-final inherent schwa: we DELETE it (Punjabi speech); the referee keeps an ultrashort ə̆ — convention"
+        }
+    ]
+}

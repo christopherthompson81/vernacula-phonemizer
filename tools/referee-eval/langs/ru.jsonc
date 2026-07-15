@@ -1,0 +1,51 @@
+{
+    "referees": [
+        {
+            "file": "ru.kaikki-rus.tsv",
+            "source": "kaikki rus (Wiktionary, CC-BY-SA)",
+            "role": "primary"
+        },
+        {
+            "file": "ru.gold-adjudicated.tsv",
+            "source": "adjudicated micro-gold (hand-transcribed, our convention)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "[⁽⁾()]",
+            "replace": "",
+            "note": "kaikki optional-palatalization ⁽ʲ⁾ / optional-segment () markers"
+        },
+        {
+            "pattern": "ˠ",
+            "replace": "",
+            "note": "velarization mark on dark l"
+        },
+        {
+            "pattern": "ʲ",
+            "replace": "",
+            "note": "palatalization: fold to compare the segmental skeleton (both mark it, differently placed)"
+        },
+        {
+            "pattern": "ɐ",
+            "replace": "a",
+            "note": "unstressed a/o reduction ɐ~a — notation"
+        },
+        {
+            "pattern": "ə",
+            "replace": "a",
+            "note": "further-reduced schwa ə~a — notation"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "unstressed i-reduction ɪ~i"
+        },
+        {
+            "pattern": "ɨ",
+            "replace": "i",
+            "note": "ɨ~i after hard C — allophonic"
+        }
+    ]
+}

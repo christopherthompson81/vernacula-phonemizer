@@ -1,0 +1,32 @@
+{
+    "referees": [
+        {
+            "file": "pt.wikipron-por.tsv",
+            "source": "wikipron por_latn_po broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "pt.gold-adjudicated.tsv",
+            "source": "adjudicated gold (open/close-vowel + x cases, our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "coda-l velarization — wikipron omits it"
+        },
+        {
+            "pattern": "tʃ",
+            "replace": "ʃ",
+            "note": "⟨ch⟩: Lisbon standard ʃ vs the referee's conservative t͡ʃ"
+        },
+        {
+            "pattern": "v",
+            "replace": "b",
+            "note": "betacism: the referee's intervocalic v→b vs our v"
+        }
+    ]
+}
