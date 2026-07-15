@@ -1,0 +1,23 @@
+// Swahili / Kiswahili (sw) — Bantu, highly phonemic Latin orthography, no tone. wikipron swa (human, space-sep
+// phones) PRIMARY + kaikki swa (human) SECONDARY; epitran swa-Latn is a third (independent map) corroborating the
+// inventory (implosives, prenasalization). Folds: r~ɾ tap notation, aspiration (unwritten, referee-variable),
+// a~ɑ / e~ɛ / o~ɔ where a referee uses the cardinal vowels, and the labialization/glide notation.
+{
+    "referees": [
+        { "file": "sw.wikipron-swa-broad.tsv", "source": "wikipron swa_latn broad (human)", "role": "primary" },
+        { "file": "sw.kaikki-swa.tsv", "source": "kaikki swa (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "aspiration — not written, referee-variable (Pemba pʰ~p)" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨r⟩ tap ɾ ~ trill r — referee-inconsistent (Afrika r, Amerika ɾ)" },
+        { "pattern": "ː", "replace": "", "note": "length — non-phonemic, referee marks penult lengthening variably" },
+        { "pattern": "[aä]", "replace": "ɑ", "note": "/a/ = [ɑ]~[a] cardinal-vowel notation — both referees inconsistent" },
+        { "pattern": "e", "replace": "ɛ", "note": "/e/ = [ɛ]~[e] cardinal-vowel notation" },
+        { "pattern": "o", "replace": "ɔ", "note": "/o/ = [ɔ]~[o] cardinal-vowel notation" },
+        { "pattern": "ɓ", "replace": "b", "note": "implosive [ɓ]~plain [b] notation for /b/ — both referees inconsistent (hotuba b, abu ɓ)" },
+        { "pattern": "ɗ", "replace": "d", "note": "implosive [ɗ]~[d] notation for /d/" },
+        { "pattern": "ɠ", "replace": "ɡ", "note": "implosive [ɠ]~[ɡ] notation for /ɡ/" },
+        { "pattern": "ʄ", "replace": "dʒ", "note": "implosive [ʄ]~[d͡ʒ] notation for /j/" }
+    ]
+}
