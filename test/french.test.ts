@@ -58,7 +58,7 @@ describe("french canonical IPA", () => {
         expect(phonemize("c'est ici", "fr")).toBe("sɛ tisˈi"); // elided c'est → s, t-liaison
         expect(phonemize("deux ans", "fr")).toBe("dø zˈɑ̃"); // number liaison
         expect(phonemize("les héros", "fr")).toBe("le eʁˈo"); // h aspiré → NO liaison
-        expect(phonemize("les homards", "fr")).toBe("le omˈaʁ"); // h aspiré, plural form → NO liaison
+        expect(phonemize("les homards", "fr")).toBe("le ɔmˈaʁ"); // h aspiré, no liaison; standard ⟨o⟩→ɔ (homard=ɔmaʁ)
         expect(phonemize("les hommes", "fr")).toBe("le zˈɔm"); // h muet → liaison DOES fire
         expect(phonemize("les chats", "fr")).toBe("le ʃˈa"); // consonant-initial → no liaison
         expect(phonemize("cet homme", "fr")).toBe("sɛ tˈɔm"); // latent t not doubled (cet→sɛt)
@@ -66,11 +66,11 @@ describe("french canonical IPA", () => {
     });
 
     // g2p OOV convention aligned to the lexicon (Lexique): o open/closed, citation schwa, obstruent+liquid onset.
-    test("g2p OOV matches the lexicon convention", () => {
-        expect(toIpa("comment")).toBe("komɑ̃"); // open o → o (not ɔ)
-        expect(toIpa("problème")).toBe("pʁoblɛm"); // obstruent+liquid onset keeps o open
-        expect(toIpa("hommes")).toBe("ɔm"); // geminate coda before -es → closed ɔ
-        expect(toIpa("choses")).toBe("ʃoz"); // -ses (s→z) opens the syllable, final e silent
+    test("g2p OOV o/ɔ loi de position (standard: ⟨o⟩→ɔ by default; [o] only final-open/before-z)", () => {
+        expect(toIpa("comment")).toBe("kɔmɑ̃"); // geminate closes → ɔ (standard, not Lexique's [o])
+        expect(toIpa("problème")).toBe("pʁɔblɛm"); // bare ⟨o⟩ → ɔ even in an open onset syllable
+        expect(toIpa("hommes")).toBe("ɔm"); // geminate coda → closed ɔ
+        expect(toIpa("choses")).toBe("ʃoz"); // before z (-ses→z) → [o]
         expect(toIpa("croire")).toBe("kʁwaʁ"); // wa nucleus recognised → final e silent (not schwa)
     });
 });

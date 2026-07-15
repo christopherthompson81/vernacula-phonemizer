@@ -31,13 +31,9 @@ function euClosed(w: string, a: number): boolean {
     if (c1 === "" || isV(c1)) return false;
     const c2 = w[a + 1] ?? "";
     if (c2 === "") return "rlfcqkbɡv".includes(c1); // V+C$ → closed iff C is sounded
-    if (c1 === c2) {
-        // geminate = single onset (abaissable) unless a word-final coda (belle, hommes)
-        const c3 = w[a + 2] ?? "";
-        return c3 === "e" && silentTail(w, a + 3)
-            ? true
-            : c3 !== "" && !isV(c3);
-    }
+    // A double consonant CLOSES the preceding syllable for vowel QUALITY — standard loi de position: comme→kɔm,
+    // comment→kɔmɑ̃, donner→dɔne, occuper→ɔkype, belle→bɛl (Lexique's merged [o]/[e] here is non-standard).
+    if (c1 === c2) return true;
     if (c2 === "e" && silentTail(w, a + 2)) return true; // V+C+e(s)$ (jeune, heure, belle) → closed
     // obstruent + liquid before a PRONOUNCED vowel = tautosyllabic onset (pro.blème, de.vrais) → syllable stays open
     const c3 = w[a + 2] ?? "";
@@ -52,17 +48,17 @@ function euClosed(w: string, a: number): boolean {
     return !isV(c2); // V+CC → closed ; V+C+V → open
 }
 
-/** o is [o] in an OPEN syllable (comment → komɑ̃, abdo), [ɔ] in a closed one (porte → pɔʁt). Also [o]
- *  word-finally, before z, in -se→z (rose), or before a silent final consonant (mot). Matches the Lexique
- *  convention (an onset consonant, incl. a geminate → single onset, keeps the syllable open). */
+/** Bare ⟨o⟩ is [ɔ] by DEFAULT — standard French: closed syllables (porte→pɔʁt, comme→kɔm) AND open ones
+ *  (voler→vɔle, joli→ʒɔli, photo→fɔto, poème→pɔɛm). It is [o] only in the restricted set: word-final OPEN
+ *  (mot, piano, abdo), before [z] (rose, chose). (⟨ô⟩/⟨au⟩/⟨eau⟩→[o] are separate graphemes, not this case.) */
 function oClosed(w: string, a: number): boolean {
     const c1 = w[a] ?? "";
-    if (c1 === "") return false; // word-final → o
+    if (c1 === "") return false; // word-final open → o
     if (c1 === "z") return false; // before z → o
     if (c1 === "s" && (w[a + 1] ?? "") === "e" && silentTail(w, a + 2))
         return false; // -se(s) (→z) → o (rose, choses)
-    if ((w[a + 1] ?? "") === "" && "tsdpx".includes(c1)) return false; // o + silent final C → o (mot)
-    return euClosed(w, a); // ɔ if a coda closes the syllable, else o
+    if ((w[a + 1] ?? "") === "" && "tsdpx".includes(c1)) return false; // o + silent final C → o (mot, gros, abdo)
+    return true; // everything else (closed OR open) → ɔ
 }
 
 const VOWEL_PH = MANIFEST.vowelPhonemes; // IPA vowel starts (for schwa-deletion consonant counting)

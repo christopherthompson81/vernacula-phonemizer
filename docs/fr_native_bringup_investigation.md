@@ -128,3 +128,23 @@ wikipron gap is dominated by cross-CONVENTION (Lexique vs wikipron on o/ɔ, e/ɛ
 homographs. CONCLUSION: no POS tagger for French. The one POS-shaped case (-ent verb vs noun) is already
 resolved in-vocabulary by Lexique's stored inflected forms (disent→diz); it would only matter for OOV verbs,
 which are rare. Effective ceiling is ~99%+, and the residual is convention, not capability.
+
+## Run (2026-07-14) — o/ɔ loi de position FIXED toward standard (gold 85.6→90.8%, wikipron 66.5→78.5%)
+
+REVERSED the earlier "keep Lexique's convention" decision (Run 2.5). Lexique 3.83 MERGES ⟨o⟩ to [o] in closed AND
+open syllables (comment→komɑ̃, occuper→okype, donner→done) — but that is NON-STANDARD: standard Parisian French and
+the adjudicated gold have the loi-de-position [ɔ] (kɔmɑ̃, ɔkype, dɔne — dictionary-confirmed, Larousse/Robert). The
+prior "Lexique is the more consistent canonical convention" was a misjudgment; Lexique's o/ɔ merger reflects a
+variety, not the standard target.
+
+FIX (grapheme-aware, so ⟨au⟩/⟨ô⟩→[o] are untouched): g2p `oClosed` now returns [ɔ] by DEFAULT for bare ⟨o⟩ —
+[o] only word-final-open (mot, piano), before [z] (rose, chose); geminates CLOSE the syllable (comme→kɔm). Then
+`tools/gen/fix-fr-lexicon-loi.mts` corrects the 125k Lexique lexicon: for each entry where the fixed g2p agrees with
+Lexique on everything EXCEPT o↔ɔ, adopt the g2p's standard value (16340 corrected, 109003 kept — real irregulars).
+
+RESULT: comment→kɔmɑ̃, occuper→ɔkype, donnez→dɔne, problème→pʁɔblɛm, volé→vɔle, joli→ʒɔli; mot→mo, rose→ʁoz, aube→ob,
+côte→kot preserved. wikipron **66.5→78.5%**, adjudicated gold **85.6→90.8%**. Floor .62→.75. Suite 262/262.
+
+Remaining gold residual is MIXED (no single class): ⟨au⟩+r→ɔ (aurais), ⟨e⟩→ə in pre- (première, ours ø), + some
+gold NON-standard entries (meilleur/maison ⟨ai⟩→e where standard is ɛ; jouer→ʒue where standard is the glide ʒwe) +
+gold liaison/corrupt forms (elle→a). The wikipron primary stays name-deflated (agamemnon, alexandrovsk).
