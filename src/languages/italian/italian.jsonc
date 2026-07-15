@@ -1,0 +1,41 @@
+// Native canonical-IPA definition for Italian (it) — a shallow, near-phonemic Latin orthography. italian.ts reads
+// this file. The CONTEXTUAL rules (c/g softening before e/i, ⟨ci/gi⟩+V silent-i, ⟨sc⟩→ʃ, ⟨gl⟩i→ʎ, ⟨gn⟩→ɲ,
+// ⟨qu⟩→kw, gemination via doubled consonants, i/u glides, stress) live in the g2p; this file holds the plain
+// letter→IPA maps, accented vowels, punctuation, and number spellings. 7-vowel system a e ɛ i o ɔ u.
+{
+    "language": "it",
+    "name": "Italian",
+    "script": "Latin",
+    "provenance": "Authored from standard Italian orthography + phonology (7-vowel, gemination, c/g softening). This file IS the language data — the g2p reads it directly.",
+
+    // Simple (context-free) consonant letters → IPA. c/g/s/z/q and the digraphs gl/gn/sc/ch/gh are handled
+    // contextually in the g2p and are NOT here.
+    "consonants": {
+        "b": "b", "d": "d", "f": "f", "l": "l", "m": "m", "n": "n",
+        "p": "p", "r": "r", "t": "t", "v": "v",
+        "h": "", "j": "j", "k": "k", "w": "w", "x": "ks", "y": "j"
+    },
+
+    // Plain vowels (unstressed / stressed-close default). Stressed ⟨e⟩/⟨o⟩ openness is lexical → folded.
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Accented vowels mark STRESS and (for è/é, ò/ó) the open/close quality explicitly.
+    "accented": {
+        "à": "a", "è": "ɛ", "é": "e", "ì": "i", "í": "i", "î": "i",
+        "ò": "ɔ", "ó": "o", "ù": "u", "ú": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Italian spellings; canonical IPA DERIVED by running them through the same g2p. Italian numbers
+    // fuse at the tens+unit seam: drop the tens' final vowel before uno/otto (ventuno, ventotto, trentotto),
+    // and -tré carries a written accent (ventitré). Handled in italian.ts.
+    "numbers": {
+        "units": ["zero", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove"],
+        "teens": ["dieci", "undici", "dodici", "tredici", "quattordici", "quindici", "sedici", "diciassette", "diciotto", "diciannove"],
+        "tens": ["", "", "venti", "trenta", "quaranta", "cinquanta", "sessanta", "settanta", "ottanta", "novanta"],
+        "hundred": "cento", "thousand": "mille", "thousands": "mila", "million": "milione", "millions": "milioni", "and": "e"
+    }
+}
