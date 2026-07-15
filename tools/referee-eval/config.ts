@@ -177,22 +177,23 @@ export const CONFIG: Record<string, RefLang> = {
     cs: {
         referees: [
             {
-                file: "cs.epitran-ces-Latn.tsv",
-                source: "epitran ces-Latn (programmatic)",
+                file: "cs.wikipron-ces-narrow.tsv",
+                source: "wikipron ces_latn narrow (human, multi-pron)",
                 role: "primary",
             },
+            {
+                file: "cs.epitran-ces-Latn.tsv",
+                source: "epitran ces-Latn (programmatic — buggy p→b/palatalization, corroboration only)",
+                role: "secondary",
+            },
         ],
-        secondaryGap:
-            "no independent second source wired; wikipron ces would be a good human corroborator.",
         folds: [
             [
                 /ɛ/gu,
                 "e",
                 "Czech short e is phonetically [ɛ] (our convention); epitran writes the phonemic e",
             ],
-            [/[ᶷ]/gu, "u", "diphthong offglide notation (oᶷ) vs epitran ou"],
-            [/r̩/gu, "r", "syllabic r notation"],
-            [/l̩/gu, "l", "syllabic l notation"],
+            [/ᶷ/gu, "u", "diphthong offglide: ours ᶷ (modifier letter); the referee's combining u̯ is stripped by the backbone"],
         ],
     },
     cy: {
