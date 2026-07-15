@@ -1,0 +1,20 @@
+// Cantonese / Yue — Han→Jyutping (rime-cantonese dict) → canonical IPA. The primary referee is epitran yue-Latn
+// (INDEPENDENT, jyutping→IPA), keyed by jyutping syllable; it MERGES the phonemic aa[aː]/a[ɐ] length and drops
+// the checked-coda release, so those axes are folded. Han→Jyutping (rime-cantonese) is the standard, trusted.
+{
+    "referees": [
+        { "file": "yue.epitran-jyutping.tsv", "source": "epitran yue-Latn (programmatic, jyutping→IPA)", "role": "primary" },
+        { "file": "yue.gold-adjudicated.tsv", "source": "adjudicated common-word gold (Han→IPA, our convention)", "role": "secondary" }
+    ],
+    "secondaryGap": "epitran merges the aa/a length and is crude on rimes; a wikipron yue would corroborate. The Han→Jyutping layer is rime-cantonese (standard).",
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "[ɐaɑ]", "replace": "a", "note": "epitran MERGES aa[aː]/a[ɐ] — the length/quality contrast it cannot render; fold to a" },
+        { "pattern": "[ei]", "replace": "e", "note": "ei~e / epitran vowel-quality variance" },
+        { "pattern": "t͡?s", "replace": "ts", "note": "z = t͡s (ours) vs ts (epitran) — tie notation" },
+        { "pattern": "t͡?sʰ", "replace": "tsʰ", "note": "c = t͡sʰ — tie notation" },
+        { "pattern": "kʷ", "replace": "kw", "note": "gw/kw labio-velar — kʷ (ours) vs kw (epitran) notation" },
+        { "pattern": "j", "replace": "i", "note": "diphthong offglide: [i] (ours) vs glide [j] (epitran aw/aj) — notation" },
+        { "pattern": "w", "replace": "u", "note": "diphthong offglide: [u] (ours) vs glide [w] (epitran) — notation" }
+    ]
+}

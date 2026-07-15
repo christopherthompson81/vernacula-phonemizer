@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **31 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **32 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,7 +21,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-31 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+32 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian and Niger-Congo — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
 
@@ -37,7 +37,7 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Romance | Catalan `ca`, Spanish `es`, French `fr`, Portuguese `pt` |
 | Semitic | Arabic `ar` |
 | Slavic | Czech `cs`, Russian `ru` |
-| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Thai `th`, Vietnamese `vi` |
+| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Cantonese `yue`, Thai `th`, Vietnamese `vi` |
 | Turkic | Kazakh `kk`, Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
