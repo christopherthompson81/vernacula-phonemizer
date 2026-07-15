@@ -1,0 +1,161 @@
+/**
+ * Native Punjabi (pa) text phonemizer — canonical IPA, espeak-independent. Gurmukhi is a Brahmic abugida read
+ * by the generic engine (core/abugida.ts); on top, punjabi.ts adds the features Hindi's assembly does not share:
+ *
+ *   1. addak ੱ gemination — the following consonant is long (ਪੱਕਾ → pəkːaː).
+ *   2. TONOGENESIS (Punjabi's signature): the historical voiced-aspirate letters ਘ ਝ ਢ ਧ ਭ (carried here as the
+ *      breathy markers ɡʱ d͡ʒʱ ɖʱ d̪ʱ bʱ) DE-ASPIRATE and shift tone — voiceless + LOW tone word-initially
+ *      (ਘੋੜਾ → kòːɽaː), voiced + HIGH tone post-vocalically (ਕੰਘਾ → kə́ŋɡaː).
+ *   3. inherent-vowel (schwa) deletion — word-final + medial Ohala, shared with Hindi.
+ *
+ * The referee-eval strips Chao tone letters, so tones are graded on the synthesis output, not the backbone.
+ */
+import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
+import { applyWeightStress } from "../../core/weightStress.ts";
+import { deleteMedialSchwa } from "../../core/schwa.ts";
+import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+
+export interface PunjabiDef extends AbugidaDef {
+    numbers: NumbersDef;
+    clausePunctuation: Record<string, string>;
+}
+export type ForeignPhonemizer = (latin: string) => string;
+
+const VOWEL = "əaɪiʊueɛoɔ";
+const VOWEL_G = new RegExp(`[${VOWEL}]`, "g");
+const GURMUKHI_WORD = "਀-੿";
+const GURMUKHI_DIGITS: Record<string, string> = {
+    "੦": "0", "੧": "1", "੨": "2", "੩": "3", "੪": "4",
+    "੫": "5", "੬": "6", "੭": "7", "੮": "8", "੯": "9",
+};
+const DIGIT_CLASS = "0-9" + Object.keys(GURMUKHI_DIGITS).join("");
+const ADDAK = "ੱ";
+const CONS_CLASS = "ਕ-ਹਖ਼-ੜ"; // Gurmukhi consonant range (for addak gemination)
+
+// Historical voiced aspirate → [word-initial voiceless, post-vocalic voiced] de-aspirated realization.
+const BREATHY: Record<string, [string, string]> = {
+    "d͡ʒʱ": ["t͡ʃ", "d͡ʒ"],
+    "ɡʱ": ["k", "ɡ"],
+    "ɖʱ": ["ʈ", "ɖ"],
+    "d̪ʱ": ["t̪", "d̪"],
+    "bʱ": ["p", "b"],
+};
+const BREATHY_KEYS = Object.keys(BREATHY).sort((a, b) => b.length - a.length);
+const HIGH = "˥˩", // high-falling tone (post-vocalic source)
+    LOW = "˨˩"; // low(-rising) tone (word-initial source)
+
+/** Append a tone letter after the LAST vowel (+ length) already in `s`. */
+function toneOnLastVowel(s: string, tone: string): string {
+    const m = [...s.matchAll(new RegExp(`[${VOWEL}]ː?̃?`, "gu"))].pop();
+    if (!m) return s;
+    const end = m.index! + m[0].length;
+    return s.slice(0, end) + tone + s.slice(end);
+}
+
+/** Punjabi tonogenesis: rewrite each breathy voiced-aspirate marker to its de-aspirated, TONED realization —
+ *  voiceless + low tone in a word-initial onset, voiced + high tone post-vocalically. */
+function tonogenesis(ipa: string): string {
+    let out = "";
+    let i = 0;
+    let seenVowel = false;
+    while (i < ipa.length) {
+        const key = BREATHY_KEYS.find((k) => ipa.startsWith(k, i));
+        if (key) {
+            const [voiceless, voiced] = BREATHY[key]!;
+            if (!seenVowel) {
+                out += voiceless;
+                i += key.length;
+                const vm = new RegExp(`^[${VOWEL}]ː?̃?`, "u").exec(ipa.slice(i));
+                if (vm) {
+                    out += vm[0] + LOW;
+                    i += vm[0].length;
+                    seenVowel = true;
+                }
+            } else {
+                out = toneOnLastVowel(out, HIGH);
+                out += voiced;
+                i += key.length;
+            }
+            continue;
+        }
+        const ch = ipa[i]!;
+        if (VOWEL.includes(ch)) seenVowel = true;
+        out += ch;
+        i++;
+    }
+    return out;
+}
+
+export function makeNativePunjabi(
+    def: PunjabiDef,
+    phon: Phonology = loadSharedPhonology(),
+    foreign?: ForeignPhonemizer,
+) {
+    const g2p = makeAbugidaG2P(def, phon);
+    const CLAUSE_MARK = def.clausePunctuation;
+    const addakRe = new RegExp(`${ADDAK}([${CONS_CLASS}]਼?)`, "gu");
+    const tokenRe = new RegExp(
+        `([${GURMUKHI_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
+        "gu",
+    );
+
+    function word(w: string): string {
+        // addak ੱ → geminate the following consonant (ਪੱਕਾ → ਪਕ੍ਕਾ → pəkːaː).
+        const norm = w.normalize("NFC").replace(addakRe, "$1੍$1");
+        let x = g2p(norm);
+        // geminate → length + aspiration-before-length reorder.
+        x = x
+            .replace(/(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ɖʱ|ʈʰ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlsʃɾɽŋɳɭjɦʋʈɖ])\1(?!͡)/gu, "$1ː")
+            .replace(/ː([ʰʱ])/gu, "$1ː");
+        // word-final then medial inherent-vowel (schwa) deletion — same as Hindi.
+        const syls = (x.match(VOWEL_G) || []).length;
+        if (syls >= 2) x = x.replace(/ə$/u, "");
+        x = deleteMedialSchwa(x);
+        // TONOGENESIS: de-aspirate the breathy markers + assign tone.
+        x = tonogenesis(x);
+        return applyWeightStress(x).normalize("NFC");
+    }
+
+    const toAscii = (d: string): string =>
+        [...d].map((c) => GURMUKHI_DIGITS[c] ?? c).join("");
+    function number(digits: string): string {
+        const n = Number(toAscii(digits));
+        if (!Number.isSafeInteger(n)) return digits;
+        return renderNumber(n, def.numbers, word);
+    }
+
+    function text(input: string): string {
+        return assembleClauses(input, tokenRe, (m, sink) => {
+            if (m[1]) sink.emit(word(m[1]));
+            else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
+            else if (m[3]) sink.emit(number(m[3]));
+            else if (m[4]) {
+                const mk = CLAUSE_MARK[m[4]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+    return { word, number, text };
+}
+
+/** Bare word→IPA (tests / referee eval). */
+export function phonemizeWord(w: string): string {
+    return (PA ??= makeNativePunjabi(
+        loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
+    )).word(w);
+}
+let PA: ReturnType<typeof makeNativePunjabi> | undefined;
+
+/** Build the Punjabi phonemizer. `foreign` handles embedded Latin. */
+export function createPunjabi(foreign?: ForeignPhonemizer): {
+    text(input: string): string;
+} {
+    return makeNativePunjabi(
+        loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
+        loadSharedPhonology(),
+        foreign,
+    );
+}
