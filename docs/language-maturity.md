@@ -55,7 +55,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 | **en** English | 36.1% (.30) | — | ✅ | **Referee-noise-limited** (proper nouns, GB variants, letter-names). Core is mature; the % is not a quality signal. |
 | **es** Spanish | 92.5% (.88) | — | ✅ | Only `-mente` double-stress deferred (minor). |
 | **ff** Fula | 71.2% (.62) | — | ✅ | Referee-limited (epitran nj→ɲ vs our prenasal + non-Fula salt). |
-| **fr** French | 66.5% (.62) | gold 85.6% | 🟡 | Primary is wikipron-noisy (gold confirms core); Phase 2 = exception lexicon (learned words) + cross-word liaison/elision. |
+| **fr** French | 78.5% (.75) | gold 90.8% | 🟡 | **o/ɔ loi de position fixed toward STANDARD** (was Lexique's merged [o], non-standard): comment→kɔmɑ̃, donnez→dɔne, problème→pʁɔblɛm — grapheme-aware g2p (⟨au⟩/⟨ô⟩→o preserved) + corrected 16340 lexicon entries. wikipron **66.5→78.5%**, adjudicated gold **85.6→90.8%**. The wikipron primary is still name-deflated (agamemnon, alexandrovsk). Remaining: mixed small classes (⟨au⟩+r→ɔ aurais, pre-⟨e⟩→ə première) + cross-word liaison/elision + some gold non-standard/liaison entries. |
 | **ga** Irish | 44.8% (.40) | — | ✅ | **3-dialect referee, ~34% ceiling.** Runs 1–3 + a referee-gated Connacht lexicon done. |
 | **ha** Hausa | 90.3% (.85) | epitran 88.4% | ✅ | Tone + segmental corroborated across two sources. |
 | **hi** Hindi | 77.7% (.72) | — | ✅ | Schwa-deletion edge cases only. |
