@@ -8,9 +8,22 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+
+// LEXICON (lexicon.tsv, kaikki/Wiktionary NW-derived): pronunciations the rules mis-derive — per-word ⟨ae⟩/⟨ai⟩
+// diphthong QUALITY (aeres→eɨ), lexical ⟨y⟩-obscure/clear irregularities, loan vowels, monosyllable length. See
+// tools/gen/build-cy-kaikki-dict.mts.
+let LEX: Map<string, string> | undefined;
+function lexicon(): Map<string, string> {
+    if (LEX === undefined)
+        LEX = loadTsvMap(import.meta.url, "lexicon.tsv", undefined, {
+            optional: true,
+        });
+    return LEX;
+}
 
 const LONG = MANIFEST.longVowel; // lax short → long tense (adds ː): ɛ→eː, ɔ→oː, …
 const LENGTHENS = new Set([...MANIFEST.lengthenBefore]); // single coda consonants that give a long/tense context
@@ -41,6 +54,8 @@ export function phonemizeWord(word: string): string {
     const lw = word.toLowerCase();
     const exc = EXCEPTIONS[lw.replace(/['’]/g, "")];
     if (exc !== undefined) return exc; // irregular function word (i → ɨ, bod → bɔd)
+    const lex = lexicon().get(word) ?? lexicon().get(lw);
+    if (lex !== undefined) return lex; // kaikki NW lexicon: rules-can't-derive words
     // Apostrophe enclitic (o'r → oːr, hi'n → hiːn): phonemize the STEM as its own word so its length rule sees the
     // real (open) syllable, then append the enclitic — instead of merging them into one closed syllable.
     const clitic = lw.match(/^(.+)['’]([a-z]+)$/);

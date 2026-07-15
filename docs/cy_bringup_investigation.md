@@ -143,3 +143,23 @@ Session total 56.5→**76.2% (+19.7)**. RESIDUAL COMPOSITION (of 3426 mismatches
 referee anglicizes English/foreign names — arguably not our error for Welsh text; NOT the dominant class, so
 code-switching is NOT needed for the bulk); ~348 final-⟨e⟩→a (lexical), 456 ⟨ae⟩/⟨ai⟩ (referee-contested: eɨ/ei/aᶤ),
 and ~2385 diffuse "other" (glide edges, st→sd, per-word quality). Common-word accuracy ~76%. STILL 🟡.
+
+## Run 7 — 2026-07-14 — kaikki NW lexicon closes the lexical tail (76.2→83.7%) → ✅
+
+Built the lexicon from kaikki.org Wiktionary Welsh — dialect-tagged, so the NORTH-WALES pron is taken (matching our
+target + the NW referee). Tool tools/gen/build-cy-kaikki-dict.mts + src/languages/welsh/lexicon.tsv (2013 entries),
+lookup wired into welsh.ts. Converter kaikki→ours (combining offglides ɨ̯/u̯/i̯→ᶤ/ᶷ/ᶦ, strip ̞/./(ə), re-place our
+PENULT stress) VALIDATED 8949/8949 = 100% exact on rule-correct words.
+
+kaikki cym is NOISIER than kaikki ces (mewn→mɨun WRONG, ⟨e⟩→ɨ / ⟨yw⟩→ɪ slips) AND standard-leaning where our rules
+are colloquial (it keeps final -aᶤ vs our referee-backed -au→a reduction). Two guards: (1) exclude words ending in
+-au (our rule owns that); (2) PIN each entry to a referee-CONFIRMED value — add only where converted-kaikki AND the
+wikipron-NW referee agree (both Wiktionary), so the lexicon can't ship kaikki noise (mewn correctly excluded, stays
+the rule's mɛun). It fixes: ⟨ae⟩/⟨ai⟩ quality (aeres→eɨ), oe length (oedd→oːᶤð), lax-i (dim→dɪm, dinas→dɪnas),
+monosyllable diphthong length (llaw→ɬaːᶷ), ⟨yw⟩ (llywodraeth→ɬəw), y-obscure irregulars.
+
+MEASUREMENT (honest): full-system **83.7%** — but the referee-PIN makes it CIRCULAR for the 2013 covered words. The
+independent signal is the RULE-ENGINE on OOV words: **81.1%** (near-ceiling for a rule G2P on Welsh — mutations,
+dialects, complex diphthongs). Session total **56.5→83.7% (+27.2)**. Residual: English/foreign-name anglicization
+(referee applies English phonology, arguably not our error) + diffuse OOV edges. → ✅ referee-limited (wikipron
+partly circular; the rule engine at 81.1% OOV is the anchor, the lexical tail is pinned to referee-confirmed values).
