@@ -1,0 +1,51 @@
+// Irish — the broad/slender axis. The wikipron gle_latn broad referee is a 3-DIALECT multi-pron set
+// (Connacht/Munster/Ulster) with heavy vowel variation, so it caps around ~34% even for a mature engine;
+// the residual is dialect vowel-noise, NOT segmental error. We fold the noisiest vowel-quality variation.
+{
+    "referees": [
+        {
+            "file": "ga.wikipron-gle-broad.tsv",
+            "source": "wikipron gle_latn broad (human, 3-dialect)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source; the referee itself mixes 3 dialects. The espeak-ng-portable authored ga engine is the canonical oracle but is not espeak-independent. A single-dialect lexicon would help.",
+    "folds": [
+        {
+            "pattern": "ⁱ",
+            "replace": "",
+            "note": "our i-offglide before a slender consonant (áit → ɑːⁱtʲ) — the referee omits it"
+        },
+        {
+            "pattern": "[ɪi]",
+            "replace": "i",
+            "note": "short i / ɪ — the referee's coarse i vs our lax ɪ (Ó Siadhail standard)"
+        },
+        {
+            "pattern": "[ʊu]",
+            "replace": "u",
+            "note": "short u / ʊ — coarse vs lax"
+        },
+        {
+            "pattern": "[əɐ]",
+            "replace": "ə",
+            "note": "reduced vowel notation"
+        },
+        {
+            "pattern": "[ɑa]",
+            "replace": "a",
+            "note": "the 3-dialect a/ɑ/ɑː variation (Connacht a, Munster ɑː)"
+        },
+        {
+            "pattern": "[ɛe]",
+            "replace": "e",
+            "note": "unstressed e → ə/ɛ + short e/ɛ notation"
+        },
+        {
+            "pattern": "[ɔo]",
+            "replace": "o",
+            "note": "o-quality dialect variation"
+        }
+    ]
+}

@@ -1,0 +1,26 @@
+{
+    "referees": [
+        {
+            "file": "cs.wikipron-ces-narrow.tsv",
+            "source": "wikipron ces_latn narrow (human, multi-pron)",
+            "role": "primary"
+        },
+        {
+            "file": "cs.epitran-ces-Latn.tsv",
+            "source": "epitran ces-Latn (programmatic — buggy p→b/palatalization, corroboration only)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "ɛ",
+            "replace": "e",
+            "note": "Czech short e is phonetically [ɛ] (our convention); epitran writes the phonemic e"
+        },
+        {
+            "pattern": "ᶷ",
+            "replace": "u",
+            "note": "diphthong offglide: ours ᶷ (modifier letter); the referee's combining u̯ is stripped by the backbone"
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+// Indonesian — shallow near-phonemic Latin orthography. wikipron ind is a broad HUMAN referee. We render
+// the closed-syllable lax allophones (ɪ ʊ ɛ ɔ) and glottal-stop coda k explicitly; fold the referee's
+// unreleased-stop notation and the ə~e ambiguity of ⟨e⟩ where it is a convention/lexical difference.
+{
+    "referees": [
+        {
+            "file": "id.wikipron-ind-broad.tsv",
+            "source": "wikipron ind_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "id.gold-adjudicated.tsv",
+            "source": "adjudicated common-word gold (our convention)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "k̚",
+            "replace": "k",
+            "note": "unreleased final stop k̚ (referee) = k — notation"
+        },
+        {
+            "pattern": "ʔ",
+            "replace": "k",
+            "note": "coda glottal-stop ⟨k⟩ (ours ʔ) vs referee k/k̚ — allophonic"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "i~ɪ closed-syllable laxing — referee-inconsistent allophony"
+        },
+        {
+            "pattern": "ʊ",
+            "replace": "u",
+            "note": "u~ʊ closed-syllable laxing — referee-inconsistent allophony"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "o~ɔ — allophonic"
+        },
+        {
+            "pattern": "[əɛe]",
+            "replace": "e",
+            "note": "⟨e⟩ = /ə/ vs /e/~/ɛ/ — orthographically merged, lexically unrecoverable"
+        }
+    ]
+}

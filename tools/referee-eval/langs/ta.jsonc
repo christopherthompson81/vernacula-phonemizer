@@ -1,0 +1,28 @@
+{
+    "referees": [
+        {
+            "file": "ta.wikipron-tam-taml-broad.tsv",
+            "source": "wikipron tam_taml broad (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "epitran tam-Taml echoes untransliterated Tamil graphemes (e.g. visarga ஃ) into its output, so it is not a usable corroborator. A kaikki/Wiktionary tam lexicon would be the independent second source.",
+    "folds": [
+        {
+            "pattern": "ɑ",
+            "replace": "a",
+            "note": "referee ஆ as ɑ(ː) vs our a(ː)"
+        },
+        {
+            "pattern": "ᶦ",
+            "replace": "i",
+            "note": "our superscript diphthong offglide (maᶦ) vs referee ɐ ɪ̯"
+        },
+        {
+            "pattern": "r$",
+            "replace": "ɾ",
+            "note": "word-final ⟨ர⟩ tap: our r vs referee ɾ — anchored so the medial ற/ர contrast still counts"
+        }
+    ]
+}

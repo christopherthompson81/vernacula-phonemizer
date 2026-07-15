@@ -1,0 +1,68 @@
+{
+    "referees": [
+        {
+            "file": "si.wikipron-sin.tsv",
+            "source": "wikipron sin_sinh_narrow (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; epitran sin would corroborate the retroflex mergers.",
+    "folds": [
+        {
+            "pattern": "ʋ",
+            "replace": "w",
+            "note": "ʋ/w — the referee is itself split; convention"
+        },
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "r/ɾ — referee split; convention"
+        },
+        {
+            "pattern": "ɳ",
+            "replace": "n",
+            "note": "retroflex ɳ→n merger (Standard Spoken Sinhala)"
+        },
+        {
+            "pattern": "ɭ",
+            "replace": "l",
+            "note": "retroflex ɭ→l merger"
+        },
+        {
+            "pattern": "t̪",
+            "replace": "t",
+            "note": "narrow dental detail → phonemic"
+        },
+        {
+            "pattern": "d̪",
+            "replace": "d",
+            "note": "narrow dental detail → phonemic"
+        },
+        {
+            "pattern": "n̪",
+            "replace": "n",
+            "note": "narrow dental detail → phonemic"
+        },
+        {
+            "pattern": "[ʰʱ]",
+            "replace": "",
+            "note": "aspiration — ours keeps it (loan register), referee deaspirates"
+        },
+        {
+            "pattern": "[əɐä]",
+            "replace": "a",
+            "note": "a/ə are allophones in Sinhala"
+        },
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "geminate length vs doubling — both referee and ours inconsistent"
+        },
+        {
+            "pattern": "wa$",
+            "replace": "w",
+            "note": "final-ව offglide: the schwa after ව→w is dialectally optional"
+        }
+    ]
+}

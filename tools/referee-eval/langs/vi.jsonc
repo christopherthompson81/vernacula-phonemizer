@@ -1,0 +1,27 @@
+{
+    "referees": [
+        {
+            "file": "vi.wikipron-vie-latn-hanoi-narrow.tsv",
+            "source": "wikipron vie_hanoi narrow (human, Northern)",
+            "role": "primary"
+        },
+        {
+            "file": "vi.epitran-vie-Latn.tsv",
+            "source": "epitran vie-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ˀ",
+            "replace": "",
+            "note": "our glottalised-tone marker (creaky ˀ) — realises the referee's ʔ coda / glottal-tone feature"
+        },
+        {
+            "pattern": "ʔ",
+            "replace": "",
+            "note": "referee's glottal-stop coda on broken/creaky tones — the same feature we mark on the tone"
+        }
+    ]
+}

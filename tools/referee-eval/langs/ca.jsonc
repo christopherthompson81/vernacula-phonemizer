@@ -1,0 +1,66 @@
+// General Eastern/Central Catalan. The wikipron cat_narrow referee AGGREGATES dialects (multi-pron): it
+// carries both reduced Central [ə]/[u] and unreduced Valencian/Balearic [a]/[e]/[o], and marks NO stress.
+// We fold the lexical open/close mids (the ceiling), spirantization (ours honest), and dark-l.
+{
+    "referees": [
+        {
+            "file": "ca.wikipron-cat-narrow.tsv",
+            "source": "wikipron cat_latn narrow (human, multi-dialect)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; the referee mixes dialects and drops stress. A Central-only pron-lexicon (or epitran cat) would corroborate the reduction + open/close mids.",
+    "folds": [
+        {
+            "pattern": "β",
+            "replace": "b",
+            "note": "spirantization β̞~b — ours marks it honestly; the referee varies"
+        },
+        {
+            "pattern": "ð",
+            "replace": "d",
+            "note": "spirantization ð̞~d"
+        },
+        {
+            "pattern": "ɣ",
+            "replace": "ɡ",
+            "note": "spirantization ɣ̞~ɡ"
+        },
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "dark-l ɫ~l — ours velarized (Central), the referee writes plain l"
+        },
+        {
+            "pattern": "[ɛe]",
+            "replace": "ə",
+            "note": "unstressed a/e → ə (Central) vs referee a/e; folds the reduction axis + lexical ɛ/e"
+        },
+        {
+            "pattern": "a",
+            "replace": "ə",
+            "note": "unstressed a → ə (Central) vs referee unreduced a"
+        },
+        {
+            "pattern": "[ɔo]",
+            "replace": "u",
+            "note": "unstressed o → u (Central) vs referee o; + lexical ɔ/o"
+        },
+        {
+            "pattern": "v",
+            "replace": "b",
+            "note": "betacism: Central merges v→b; the referee (multi-dialect) keeps v"
+        },
+        {
+            "pattern": "dʒ",
+            "replace": "ʒ",
+            "note": "Catalan /dʒ~ʒ/ affrication is allophonic (metge dʒ ~ jo ʒ); tie already stripped, referee varies"
+        },
+        {
+            "pattern": "[ɾr]$",
+            "replace": "",
+            "note": "final-r is a DIALECT axis: Central drops it (cantar→kənta), the referee (Valencian) keeps it"
+        }
+    ]
+}

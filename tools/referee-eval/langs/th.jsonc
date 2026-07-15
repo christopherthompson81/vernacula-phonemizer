@@ -1,0 +1,20 @@
+// Tones are Chao on both sides (stripped by the backbone), so this is a pure segmental check. The residual
+// is LEXICAL (Sanskrit/Pali readings), not a segment-inventory gap — see the th convergence note.
+{
+    "referees": [
+        {
+            "file": "th.wikipron-tha-thai-broad.tsv",
+            "source": "wikipron tha_thai broad (human, tone-marked)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; a pronunciation lexicon (kaikki tha) would corroborate the Sanskrit readings.",
+    "folds": [
+        {
+            "pattern": "ʔ",
+            "replace": "",
+            "note": "glottal coda on open short syllables — allophonic; referee writes an unreleased stop or nothing"
+        }
+    ]
+}

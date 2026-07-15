@@ -1,0 +1,28 @@
+{
+    "referees": [
+        {
+            "file": "ja.wikipron-jpn-hira-narrow.tsv",
+            "source": "wikipron jpn_hira narrow (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; the narrow wikipron is the human transcription and epitran jpn is unreliable.",
+    "folds": [
+        {
+            "pattern": "ꜜ",
+            "replace": "",
+            "note": "pitch-accent downstep marker — the referee is toneless"
+        },
+        {
+            "pattern": "ᵝ",
+            "replace": "",
+            "note": "our compressed-u superscript (ɯᵝ) vs referee ɯ"
+        },
+        {
+            "pattern": "ɨ",
+            "replace": "ɯ",
+            "note": "referee ɨ for a high/devoiced う vs our ɯ"
+        }
+    ]
+}

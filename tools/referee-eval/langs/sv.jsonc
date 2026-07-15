@@ -1,0 +1,67 @@
+// Central Standard Swedish. Phase 2 adds the NST pitch-accent + stress lexicon; the accent-2 grave (combining
+// U+0300) is backbone-stripped, so this stays a SEGMENTAL check, but the stress lexicon moves the long-vowel
+// QUALITY onto the right syllable (48.3→52.0%). The broad wikipron referee marks the ² prosodeme (folded) and
+// is INCONSISTENT on retroflex (mars→ʂ but barn→rn) → we fold our systematic retroflexes back to r+dental.
+{
+    "referees": [
+        {
+            "file": "sv.wikipron-swe.tsv",
+            "source": "wikipron swe broad (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source wired; epitran ships no Swedish. The NST lexicon is the pitch/stress oracle (data/accent-stress.tsv) but is not a segmental referee; a kaikki swe pron-lexicon would be.",
+    "folds": [
+        {
+            "pattern": "²",
+            "replace": "",
+            "note": "accent-2 prosodeme marker — a pitch feature, deferred to Phase 2"
+        },
+        {
+            "pattern": "¹",
+            "replace": "",
+            "note": "accent-1 prosodeme marker — deferred"
+        },
+        {
+            "pattern": "ʈ",
+            "replace": "rt",
+            "note": "retroflex ⟨rt⟩: ours assimilates (Central Standard), the broad referee often leaves r+t"
+        },
+        {
+            "pattern": "ɖ",
+            "replace": "rd",
+            "note": "retroflex ⟨rd⟩ vs referee r+d"
+        },
+        {
+            "pattern": "ɳ",
+            "replace": "rn",
+            "note": "retroflex ⟨rn⟩ vs referee r+n"
+        },
+        {
+            "pattern": "ʂ",
+            "replace": "rs",
+            "note": "retroflex ⟨rs⟩ vs referee r+s"
+        },
+        {
+            "pattern": "ɭ",
+            "replace": "rl",
+            "note": "retroflex ⟨rl⟩ vs referee r+l"
+        },
+        {
+            "pattern": "tɕ",
+            "replace": "ɕ",
+            "note": "tje-sound: referee wobbles t͡ɕ ~ ɕ (tie already stripped) → our ɕ"
+        },
+        {
+            "pattern": "æ",
+            "replace": "ɛ",
+            "note": "ä before r lowers to æ (ours, Central Standard); referee writes ɛ"
+        },
+        {
+            "pattern": "œ",
+            "replace": "ø",
+            "note": "ö quality œ~ø (short/long, length already stripped) — notation"
+        }
+    ]
+}

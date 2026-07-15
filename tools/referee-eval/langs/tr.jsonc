@@ -1,0 +1,82 @@
+{
+    "referees": [
+        {
+            "file": "tr.wikipron-tur-latn-broad.tsv",
+            "source": "wikipron tur_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "tr.epitran-tur-Latn.tsv",
+            "source": "epitran tur-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "dark-l (back-harmony allophone) — referee writes plain l"
+        },
+        {
+            "pattern": "ʰ",
+            "replace": "",
+            "note": "final-stop aspiration — allophonic"
+        },
+        {
+            "pattern": "ɑ",
+            "replace": "a",
+            "note": "back /a/ [ɑ]~[a] — allophonic"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "/o/ [ɔ]~[o] — no contrast"
+        },
+        {
+            "pattern": "[æɛ]",
+            "replace": "e",
+            "note": "/e/ [æ]~[ɛ]~[e] — closed-syllable laxing, allophonic"
+        },
+        {
+            "pattern": "ʊ",
+            "replace": "u",
+            "note": "/u/ [ʊ]~[u] — allophonic"
+        },
+        {
+            "pattern": "œ",
+            "replace": "ø",
+            "note": "/ø/ [œ]~[ø] — allophonic"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "/i/ [ɪ]~[i] — allophonic"
+        },
+        {
+            "pattern": "ʏ",
+            "replace": "y",
+            "note": "/y/ [ʏ]~[y] — allophonic"
+        },
+        {
+            "pattern": "c",
+            "replace": "k",
+            "note": "k→c palatalization before/next to a front vowel — allophonic"
+        },
+        {
+            "pattern": "ɟ",
+            "replace": "ɡ",
+            "note": "ɡ→ɟ palatalization — allophonic"
+        },
+        {
+            "pattern": "ŋ",
+            "replace": "n",
+            "note": "n→ŋ nasal place assimilation before a velar — allophonic"
+        },
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"
+        }
+    ]
+}

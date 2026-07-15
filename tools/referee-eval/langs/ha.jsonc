@@ -1,0 +1,57 @@
+{
+    "referees": [
+        {
+            "file": "ha.wikipron-hau-latn-broad.tsv",
+            "source": "wikipron hau_latn broad (human, tone-marked)",
+            "role": "primary"
+        },
+        {
+            "file": "ha.epitran-hau-Latn.tsv",
+            "source": "epitran hau-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "ʔʲ",
+            "replace": "j",
+            "note": "glottalised ⟨ƴ⟩: our ʔʲ vs referee creaky j̰ (̰ stripped by the backbone)"
+        },
+        {
+            "pattern": "ɸ",
+            "replace": "f",
+            "note": "⟨f⟩ realised [ɸ]~[f] — dialectal/allophonic"
+        },
+        {
+            "pattern": "ⁱ",
+            "replace": "i",
+            "note": "our superscript diphthong offglide (aⁱ) vs referee a i"
+        },
+        {
+            "pattern": "ɽ",
+            "replace": "r",
+            "note": "⟨r⟩ tap/retroflex ɽ~r — referee writes ɽ"
+        },
+        {
+            "pattern": "ᵐ",
+            "replace": "m",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "ⁿ",
+            "replace": "n",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "ᵑ",
+            "replace": "ŋ",
+            "note": "prenasal superscript → plain nasal"
+        },
+        {
+            "pattern": "^ʔ",
+            "replace": "",
+            "note": "epenthetic glottal onset on vowel-INITIAL words — allophonic; anchored so medial phonemic /ʔ/ (the ⟨'⟩ letter) still counts"
+        }
+    ]
+}

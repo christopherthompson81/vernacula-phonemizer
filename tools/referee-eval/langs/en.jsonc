@@ -1,0 +1,56 @@
+// en is CMUdict-derived, so wikipron eng_us (independent human Wiktionary transcriptions) is a genuine
+// referee. It is noisy (proper nouns, British variants, letter-name entries) → a modest floor. We fold our
+// narrow allophonic detail (aspiration, dark-l, r-coloured schwa) and our superscript diphthong offglides.
+{
+    "referees": [
+        {
+            "file": "en.wikipron-eng-latn-us-broad.tsv",
+            "source": "wikipron eng_latn_us broad (human, GenAm)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "epitran eng-Latn is itself CMU-derived — circular with our CMUdict-based g2p, so not independent.",
+    "folds": [
+        {
+            "pattern": "eᶦ",
+            "replace": "eɪ",
+            "note": "our superscript FACE offglide eᶦ vs referee eɪ"
+        },
+        {
+            "pattern": "oᶷ",
+            "replace": "oʊ",
+            "note": "our GOAT offglide oᶷ vs referee oʊ"
+        },
+        {
+            "pattern": "aᶦ",
+            "replace": "aɪ",
+            "note": "our PRICE offglide aᶦ vs referee aɪ"
+        },
+        {
+            "pattern": "aᶷ",
+            "replace": "aʊ",
+            "note": "our MOUTH offglide aᶷ vs referee aʊ"
+        },
+        {
+            "pattern": "ɔᶦ",
+            "replace": "ɔɪ",
+            "note": "our CHOICE offglide ɔᶦ vs referee ɔɪ"
+        },
+        {
+            "pattern": "ɚ",
+            "replace": "əɹ",
+            "note": "r-coloured schwa ɚ vs referee ə + ɹ (the letter r written out)"
+        },
+        {
+            "pattern": "ʰ",
+            "replace": "",
+            "note": "allophonic aspiration on voiceless stops — referee omits it"
+        },
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "dark-l is allophonic — referee writes plain l"
+        }
+    ]
+}

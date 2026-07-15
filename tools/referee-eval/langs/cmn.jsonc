@@ -1,0 +1,67 @@
+// Syllable-level: the referee is epitran's toneless pinyin-syllable → IPA inventory (no word-level wikipron
+// cmn exists), and PHON[cmn] is the bare pinyin→IPA converter. Compares segment quality, not polyphone choice.
+{
+    "referees": [
+        {
+            "file": "cmn.epitran-cmn-Latn.tsv",
+            "source": "epitran cmn-Latn pinyin-syllable inventory",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no word-level independent source: wikipron cmn is Hanzi-keyed (polyphone-ambiguous) and this eval is deliberately syllable-level. A char→IPA set crediting any-attested-reading would be a second source.",
+    "preFolds": [
+        {
+            "pattern": "[ʐzɻɹʑ]̩",
+            "replace": "ɹ̩",
+            "note": "apical/retroflex syllabic vowel (chi ʈʂʰʐ̩, si sɹ̩) unified before ̩ is stripped"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "[ᶦⁱᵢ]",
+            "replace": "i",
+            "note": "our superscript i-offglide → base i"
+        },
+        {
+            "pattern": "[ᵘᶷᵁ]",
+            "replace": "u",
+            "note": "our superscript u-offglide → base u"
+        },
+        {
+            "pattern": "w",
+            "replace": "u",
+            "note": "onset glide w~u — no phonemic contrast in Mandarin"
+        },
+        {
+            "pattern": "j",
+            "replace": "i",
+            "note": "onset glide j~i — no phonemic contrast"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "ɪ~i — notation"
+        },
+        {
+            "pattern": "[ɑä]",
+            "replace": "a",
+            "note": "/a/ allophones [a]~[ɑ]~[ä] by final (an/ang/ian) — we transcribe narrow, epitran broad"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "/o/ allophone [ɔ]~[o] — we narrow, epitran broad"
+        },
+        {
+            "pattern": "ʊ",
+            "replace": "u",
+            "note": "/u/ allophone [ʊ]~[u] — we narrow, epitran broad"
+        },
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "collapse any doubling (no meaningful gemination in Mandarin)"
+        }
+    ]
+}

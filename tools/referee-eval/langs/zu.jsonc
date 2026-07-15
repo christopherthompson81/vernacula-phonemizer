@@ -1,0 +1,52 @@
+{
+    "referees": [
+        {
+            "file": "zu.epitran-zul-Latn.tsv",
+            "source": "epitran zul-Latn (programmatic)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "no independent second source wired; a curated Nguni-tone gold would corroborate the clicks.",
+    "folds": [
+        {
+            "pattern": "ʼ",
+            "replace": "",
+            "note": "ejective — we keep it, epitran drops it"
+        },
+        {
+            "pattern": "k(?=[ǀǃǁǂʘ])",
+            "replace": "",
+            "note": "our click k-release (kǀ) vs epitran bare click (ǀ)"
+        },
+        {
+            "pattern": "ŋɡ",
+            "replace": "ŋ",
+            "note": "our prenasalised ŋɡ (⟨ng⟩) vs epitran bare ŋ"
+        },
+        {
+            "pattern": "ⁿ",
+            "replace": "n",
+            "note": "prenasal superscript → full nasal"
+        },
+        {
+            "pattern": "ᵐ",
+            "replace": "m",
+            "note": "prenasal superscript → full nasal"
+        },
+        {
+            "pattern": "ᵑ",
+            "replace": "ŋ",
+            "note": "prenasal superscript → full nasal"
+        },
+        {
+            "pattern": "ɛ",
+            "replace": "e",
+            "note": "mid-vowel raising is allophonic (ɛ↔e); neither transcription is wrong"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "mid-vowel raising is allophonic (ɔ↔o)"
+        }
+    ]
+}

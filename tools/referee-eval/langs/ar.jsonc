@@ -1,0 +1,32 @@
+// Evaluated through the ASYNC diacritized pipeline (phonemizeArabic): the ONNX pre-pass restores the short
+// vowels the script omits, so our output is comparable to the referee's fully-voweled IPA. (The sync
+// phonemizeWord expects already-diacritized input and would compare skeletons — the wrong test.)
+{
+    "referees": [
+        {
+            "file": "ar.wikipron-ara.tsv",
+            "source": "wikipron ara_arab broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "ar.kaikki-ara.tsv",
+            "source": "kaikki ara (Wiktionary) — PAUSAL, multi-pron",
+            "role": "secondary"
+        }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL normalization: drop a word-final SHORT vowel (the iʕrab case/mood ending, and the verb -a) — MSA is pausal utterance-finally (al-waqf), so our TTS correctly omits it; the wikipron citation form spells it. Runs as a preFold so long vowels aː/iː/uː (which end in ː) are preserved. (Tanwin -Vn is NOT stripped — it over-matches real -Vn words like min/ʔan and net-regresses.)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}
