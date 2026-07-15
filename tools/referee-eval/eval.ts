@@ -47,6 +47,7 @@ import { phonemizeWord as gu } from "../../src/languages/gujarati/gujarati.ts";
 import { phonemizeWord as ps } from "../../src/languages/pashto/pashto.ts";
 import { phonemizeWord as kn } from "../../src/languages/kannada/kannada.ts";
 import { phonemizeWord as am } from "../../src/languages/amharic/amharic.ts";
+import { phonemizeWord as yo } from "../../src/languages/yoruba/yoruba.ts";
 import { phonemizeWord as jv } from "../../src/languages/javanese/javanese.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
@@ -91,6 +92,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ps,
     kn,
     am,
+    yo,
     kk,
     ko,
     mr,
