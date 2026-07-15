@@ -12,55 +12,66 @@ import { CONFIG } from "./config.ts";
  * independent referee are recorded as gaps (asserted below), not silently skipped.
  */
 describe("referee corroboration (segmental backbone vs the PRIMARY independent source)", () => {
-  // Floor = the primary referee's folded-agreement fraction, set below the measured value. Alphabetical.
-  const floors: Record<string, number> = {
-    te: 0.76, // wikipron tel_telu broad (HUMAN, 5117) — 79.6% all-rows / 98.2% DEDUPLICATED (multi-pron rows deflate the headline); adjudicated common-word gold (2nd) 100%. Dravidian abugida, NO inherent-vowel deletion, ళ→ɭ, ష→ʂ, short/long e·o, ౘ/ౙ dental affricates, final ం→m. Residual is the ఋ→ɻ̍-vs-ɾu convention + multi-pron variants
-    mr: 0.64, // wikipron mar_deva broad (HUMAN, 4872) — 68.3% FOLDED; adjudicated common-word gold (2nd) 100%. Reuses the Hindi abugida engine + a Marathi data file (ळ→ɭ, ष→ʂ, च/ज→dental t͡s/d͡z before back vowels, ऐ→əi/औ→əu, ृ→ɾu). Folds: ɪ~i/ʊ~u (referee doesn't mark the lax split), alveolo-palatal notation, affricate place variation, degemination. Tail: final-schwa-after-cluster retention, ज्ञ conjunct
-    pa: 0.58, // wikipron pan_guru broad (HUMAN, small 1586) — 61.7% FOLDED; adjudicated common-word gold (2nd) 100%. Gurmukhi abugida + TONOGENESIS (voiced-aspirate de-aspiration + tone; eval strips Chao letters → grades the SEGMENTAL de-aspiration). Referee noisy (epenthetic ᵊ/ə̆, medial-schwa variation). 🟡 — tail: intervocalic-h tonogenesis, medial schwa
-    id: 0.92, // wikipron ind_latn broad (HUMAN, 18590) — measured 94.9% FOLDED; adjudicated common-word gold (2nd) 100%. Shallow Latin G2P (digraphs, c/j, final-k→ʔ, acronym spell-out). Folds: closed-syllable lax allophony (i~ɪ/u~ʊ/o~ɔ — referee-erratic) + the ⟨e⟩=/ə/~/e/~/ɛ/ ORTHOGRAPHIC ambiguity (both written ⟨e⟩, lexically unrecoverable). 🟡 — loanword ⟨e⟩ quality is the lexicon-closable tail
-    ur: 0.40, // wikipron urd_arab broad (HUMAN, fully-voweled) — measured 42.9% FOLDED (short-vowel quality ə~ɪ~ʊ folded, as it is UNRECOVERABLE from the undiacritized abjad). 🟠 scope-limited: the consonant + long-vowel SKELETON is correct (aspiration, retroflex, long vowels, nasal assimilation, hamza seats); short-vowel restoration is the deferred subsystem (like Arabic pre-diacritizer)
-    bn: 0.40, // wikipron ben_beng broad (HUMAN) — measured 42.5%; the wikipron primary is REFEREE-NOISE-LIMITED (retroflex ট/ড written dental — a real contrast we keep; literary final-[o] retention word-variable). The adjudicated common-word GOLD (2nd) is 92.0% — the real quality signal. Full core: harmony ɔ→o/e→æ, final+medial (Ohala) inherent-vowel deletion, phôla/ক্ষ/জ্ঞ gemination. Tail: lexical final-o (বড়/ছোট), hiatus (বই), closed-syllable æ (এক)
-    ar: 0.55, // wikipron ara via the ONNX diacritizer + LEXICON-PRIMARY Tashkeela restoration + PAUSAL fold — measured 57.4% (kaikki 2nd: 62.6%). Referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
-    ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
-    cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
-    cs: 0.95, // wikipron ces_latn (HUMAN) — 97.0% with the kaikki loanword lexicon (de-palatalization: stadion/studie/technik). Rule-engine OOV alone 97.7% (independent). Partly circular for the 404 dict-covered (kaikki~wikipron both Wiktionary)
-    cy: 0.80, // wikipron cym_latn NW — 83.7% WITH the kaikki NW lexicon (ae quality/oe length/dim/y-obscure, referee-confirmed → PARTLY CIRCULAR). Rule-engine OOV alone 81.1% (independent).
-    de: 0.75, // kaikki deu — measured 76.1% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
-    en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
-    es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
-    ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
-    fr: 0.76, // wikipron fra — 79.1% (adjudicated gold 91.3%); ✅ referee name/acronym-limited (92.5% common-word). Full loi de position: o/ɔ default + au/eau+r→ɔ + o-before-z→o + x-closes; e/ɛ-before-cluster kept lexical (Lexique). Headline deflated by proper-name/acronym/rare tail
-    ga: 0.40, // wikipron gle_latn broad — measured 44.8% (Run-3 referee-gated lexicon); 3-DIALECT referee (~34% ceiling even for a mature engine), vowel-noise dominated
-    ha: 0.85, // wikipron hau (human) — measured 90.3% (epitran hau 2nd: 88.4%)
-    hi: 0.72, // wikipron hin — measured 77.7%; residual = schwa-deletion edge cases + ref epenthesis + genuine ख़/ख (x/kʰ) noise
-    ja: 0.52, // wikipron jpn_hira narrow — measured 57.9%; residual = allophonic palatalization + devoicing detail
-    kk: 0.83, // epitran kaz-Cyrl — measured 86.2%; residual is largely epitran's own ө/ү merger + palatalization
-    ko: 0.52, // wikipron kor_hang narrow — measured 58.5%; residual = ㄹ (ɭ~ɾ) + intervocalic voicing detail
-    pt: 0.80, // wikipron por — 81.2% (adjudicated gold 2nd: 99.4%); ✅ referee register/name-limited after dark-l blocks a/e reduction (salvar→saɫvaɾ 53:0, -vel→vɛɫ 89:0). Residual one-directional: we reduce EP pretonic o→u/e→ɨ uniformly, referee keeps mid in learned words (195:0 / 386:8)
-    ru: 0.90, // kaikki rus — measured 94.8% (adjudicated gold 2nd: 97.7%)
-    si: 0.90, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
-    sv: 0.52, // wikipron swe broad — measured 55.7% (Phase 3: + NST compound secondary-stress → boundary-safe vowel length/quality + 2nd-onset softening); residual = referee noise (casual/truncated forms)
-    ta: 0.58, // wikipron tam — measured 63.0% (r→ɾ folded only word-finally, to keep the ற/ர contrast); residual = ற geminate + diphthong notation
-    th: 0.76, // wikipron tha — measured 81.9%; residual is LEXICAL (Sanskrit/Pali readings), not segmental
-    tr: 0.92, // wikipron tur — 93.7% (epitran tur 2nd: 94.5% — both referees now corroborate) after (a) engine: coda velar palatalization k/ɡ→c/ɟ (renk→ɾeɲc) + nasal place assimilation n→ŋ/ɲ (angut→aŋɡut), (b) completing the lax-vowel allophony folds (ɛ/ʊ/œ/ɪ/ʏ) + palatal/nasal + degemination folds. Residual = names + ğ glide-vs-length + h→x/ç
-    vi: 0.65, // wikipron vie_hanoi narrow — measured 71.0% (epitran vie 2nd: 51.3%); residual = ə/ɛ nucleus + coda
-    zu: 0.99, // epitran zul-Latn — clicks/implosives/ejectives/laterals corroborated (measured 100%)
-  };
-  for (const [lang, floor] of Object.entries(floors)) {
-    it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
-      const primary = (await evaluate(lang, true)).find((r) => r.role === "primary");
-      expect(primary, `${lang} has no primary referee result`).toBeDefined();
-      const frac = primary!.folded / primary!.total;
-      expect(frac, `${lang} vs ${primary!.source}: ${primary!.folded}/${primary!.total}`).toBeGreaterThanOrEqual(floor);
-    }, 30000); // ONNX diacritizer (ar) is slow; generous per-test timeout
-  }
-
-  // Languages with no viable independent referee must RECORD the gap (not silently omit it).
-  it("gap languages document why they have no independent referee", () => {
-    for (const [lang, cfg] of Object.entries(CONFIG)) {
-      if (cfg.referees.length === 0) {
-        expect(cfg.secondaryGap, `${lang} has no referees but no documented gap`).toBeTruthy();
-      }
+    // Floor = the primary referee's folded-agreement fraction, set below the measured value. Alphabetical.
+    const floors: Record<string, number> = {
+        ar: 0.55, // wikipron ara via the ONNX diacritizer + LEXICON-PRIMARY Tashkeela restoration + PAUSAL fold — measured 57.4% (kaikki 2nd: 62.6%). Referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
+        bn: 0.4, // wikipron ben_beng broad (HUMAN) — measured 42.5%; the wikipron primary is REFEREE-NOISE-LIMITED (retroflex ট/ড written dental — a real contrast we keep; literary final-[o] retention word-variable). The adjudicated common-word GOLD (2nd) is 92.0% — the real quality signal. Full core: harmony ɔ→o/e→æ, final+medial (Ohala) inherent-vowel deletion, phôla/ক্ষ/জ্ঞ gemination. Tail: lexical final-o (বড়/ছোট), hiatus (বই), closed-syllable æ (এক)
+        ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
+        cmn: 0.8, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
+        cs: 0.95, // wikipron ces_latn (HUMAN) — 97.0% with the kaikki loanword lexicon (de-palatalization: stadion/studie/technik). Rule-engine OOV alone 97.7% (independent). Partly circular for the 404 dict-covered (kaikki~wikipron both Wiktionary)
+        cy: 0.8, // wikipron cym_latn NW — 83.7% WITH the kaikki NW lexicon (ae quality/oe length/dim/y-obscure, referee-confirmed → PARTLY CIRCULAR). Rule-engine OOV alone 81.1% (independent).
+        de: 0.75, // kaikki deu — measured 76.1% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
+        en: 0.3, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
+        es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
+        ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
+        fr: 0.76, // wikipron fra — 79.1% (adjudicated gold 91.3%); ✅ referee name/acronym-limited (92.5% common-word). Full loi de position: o/ɔ default + au/eau+r→ɔ + o-before-z→o + x-closes; e/ɛ-before-cluster kept lexical (Lexique). Headline deflated by proper-name/acronym/rare tail
+        ga: 0.4, // wikipron gle_latn broad — measured 44.8% (Run-3 referee-gated lexicon); 3-DIALECT referee (~34% ceiling even for a mature engine), vowel-noise dominated
+        ha: 0.85, // wikipron hau (human) — measured 90.3% (epitran hau 2nd: 88.4%)
+        hi: 0.72, // wikipron hin — measured 77.7%; residual = schwa-deletion edge cases + ref epenthesis + genuine ख़/ख (x/kʰ) noise
+        id: 0.92, // wikipron ind_latn broad (HUMAN, 18590) — measured 94.9% FOLDED; adjudicated common-word gold (2nd) 100%. Shallow Latin G2P (digraphs, c/j, final-k→ʔ, acronym spell-out). Folds: closed-syllable lax allophony (i~ɪ/u~ʊ/o~ɔ — referee-erratic) + the ⟨e⟩=/ə/~/e/~/ɛ/ ORTHOGRAPHIC ambiguity (both written ⟨e⟩, lexically unrecoverable). 🟡 — loanword ⟨e⟩ quality is the lexicon-closable tail
+        ja: 0.52, // wikipron jpn_hira narrow — measured 57.9%; residual = allophonic palatalization + devoicing detail
+        kk: 0.83, // epitran kaz-Cyrl — measured 86.2%; residual is largely epitran's own ө/ү merger + palatalization
+        ko: 0.52, // wikipron kor_hang narrow — measured 58.5%; residual = ㄹ (ɭ~ɾ) + intervocalic voicing detail
+        mr: 0.64, // wikipron mar_deva broad (HUMAN, 4872) — 68.3% FOLDED; adjudicated common-word gold (2nd) 100%. Reuses the Hindi abugida engine + a Marathi data file (ळ→ɭ, ष→ʂ, च/ज→dental t͡s/d͡z before back vowels, ऐ→əi/औ→əu, ृ→ɾu). Folds: ɪ~i/ʊ~u (referee doesn't mark the lax split), alveolo-palatal notation, affricate place variation, degemination. Tail: final-schwa-after-cluster retention, ज्ञ conjunct
+        pa: 0.58, // wikipron pan_guru broad (HUMAN, small 1586) — 61.7% FOLDED; adjudicated common-word gold (2nd) 100%. Gurmukhi abugida + TONOGENESIS (voiced-aspirate de-aspiration + tone; eval strips Chao letters → grades the SEGMENTAL de-aspiration). Referee noisy (epenthetic ᵊ/ə̆, medial-schwa variation). 🟡 — tail: intervocalic-h tonogenesis, medial schwa
+        pt: 0.8, // wikipron por — 81.2% (adjudicated gold 2nd: 99.4%); ✅ referee register/name-limited after dark-l blocks a/e reduction (salvar→saɫvaɾ 53:0, -vel→vɛɫ 89:0). Residual one-directional: we reduce EP pretonic o→u/e→ɨ uniformly, referee keeps mid in learned words (195:0 / 386:8)
+        ru: 0.9, // kaikki rus — measured 94.8% (adjudicated gold 2nd: 97.7%)
+        si: 0.9, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
+        sv: 0.52, // wikipron swe broad — measured 55.7% (Phase 3: + NST compound secondary-stress → boundary-safe vowel length/quality + 2nd-onset softening); residual = referee noise (casual/truncated forms)
+        ta: 0.58, // wikipron tam — measured 63.0% (r→ɾ folded only word-finally, to keep the ற/ர contrast); residual = ற geminate + diphthong notation
+        te: 0.76, // wikipron tel_telu broad (HUMAN, 5117) — 79.6% all-rows / 98.2% DEDUPLICATED (multi-pron rows deflate the headline); adjudicated common-word gold (2nd) 100%. Dravidian abugida, NO inherent-vowel deletion, ళ→ɭ, ష→ʂ, short/long e·o, ౘ/ౙ dental affricates, final ం→m. Residual is the ఋ→ɻ̍-vs-ɾu convention + multi-pron variants
+        th: 0.76, // wikipron tha — measured 81.9%; residual is LEXICAL (Sanskrit/Pali readings), not segmental
+        tr: 0.92, // wikipron tur — 93.7% (epitran tur 2nd: 94.5% — both referees now corroborate) after (a) engine: coda velar palatalization k/ɡ→c/ɟ (renk→ɾeɲc) + nasal place assimilation n→ŋ/ɲ (angut→aŋɡut), (b) completing the lax-vowel allophony folds (ɛ/ʊ/œ/ɪ/ʏ) + palatal/nasal + degemination folds. Residual = names + ğ glide-vs-length + h→x/ç
+        ur: 0.4, // wikipron urd_arab broad (HUMAN, fully-voweled) — measured 42.9% FOLDED (short-vowel quality ə~ɪ~ʊ folded, as it is UNRECOVERABLE from the undiacritized abjad). 🟠 scope-limited: the consonant + long-vowel SKELETON is correct (aspiration, retroflex, long vowels, nasal assimilation, hamza seats); short-vowel restoration is the deferred subsystem (like Arabic pre-diacritizer)
+        vi: 0.65, // wikipron vie_hanoi narrow — measured 71.0% (epitran vie 2nd: 51.3%); residual = ə/ɛ nucleus + coda
+        zu: 0.99, // epitran zul-Latn — clicks/implosives/ejectives/laterals corroborated (measured 100%)
+    };
+    for (const [lang, floor] of Object.entries(floors)) {
+        it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
+            const primary = (await evaluate(lang, true)).find(
+                (r) => r.role === "primary",
+            );
+            expect(
+                primary,
+                `${lang} has no primary referee result`,
+            ).toBeDefined();
+            const frac = primary!.folded / primary!.total;
+            expect(
+                frac,
+                `${lang} vs ${primary!.source}: ${primary!.folded}/${primary!.total}`,
+            ).toBeGreaterThanOrEqual(floor);
+        }, 30000); // ONNX diacritizer (ar) is slow; generous per-test timeout
     }
-  });
+
+    // Languages with no viable independent referee must RECORD the gap (not silently omit it).
+    it("gap languages document why they have no independent referee", () => {
+        for (const [lang, cfg] of Object.entries(CONFIG)) {
+            if (cfg.referees.length === 0) {
+                expect(
+                    cfg.secondaryGap,
+                    `${lang} has no referees but no documented gap`,
+                ).toBeTruthy();
+            }
+        }
+    });
 });

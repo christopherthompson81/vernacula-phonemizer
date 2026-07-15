@@ -134,7 +134,9 @@ export async function evaluate(
             // A word may carry MULTIPLE reference pronunciations (kaikki/ca dictionaries list variants) as extra
             // tab-separated fields — credit the word if ANY of them matches (folded). Single-pron files (one field)
             // are the length-1 case, unchanged.
-            const refIpas = row.slice(1).map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
+            const refIpas = row
+                .slice(1)
+                .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
             const ours = await phon(w);
             if (refIpas.some((rf) => ours === rf)) raw++;
             const of = fold(ours);

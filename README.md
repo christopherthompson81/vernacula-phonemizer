@@ -27,18 +27,18 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 
 | Family / area | Languages |
 |---|---|
-| Indo-Aryan | Hindi `hi`, Marathi `mr` 🟡, Bengali `bn` 🟡, Urdu `ur` 🟠, Punjabi `pa` 🟡 (tonal), Sinhala `si` |
-| Dravidian | Tamil `ta`, Telugu `te` |
-| Romance | Spanish `es`, French `fr`, Portuguese `pt`, Catalan `ca` |
-| Germanic | English `en`, German `de`, Swedish `sv` |
-| Slavic | Russian `ru`, Czech `cs` |
-| Celtic | Welsh `cy`, Irish `ga` |
-| Turkic | Turkish `tr`, Kazakh `kk` |
-| Semitic | Arabic `ar` |
-| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Thai `th`, Vietnamese `vi` |
-| Japonic / Koreanic | Japanese `ja`, Korean `ko` |
 | Austronesian | Indonesian `id` 🟡 |
-| Niger-Congo | Hausa `ha`, Fula `ff`, Zulu `zu` |
+| Celtic | Welsh `cy`, Irish `ga` |
+| Dravidian | Tamil `ta`, Telugu `te` |
+| Germanic | German `de`, English `en`, Swedish `sv` |
+| Indo-Aryan | Bengali `bn` 🟡, Hindi `hi`, Marathi `mr` 🟡, Punjabi `pa` 🟡, Sinhala `si` (tonal), Urdu `ur` 🟠 |
+| Japonic / Koreanic | Japanese `ja`, Korean `ko` |
+| Niger-Congo | Fula `ff`, Hausa `ha`, Zulu `zu` |
+| Romance | Catalan `ca`, Spanish `es`, French `fr`, Portuguese `pt` |
+| Semitic | Arabic `ar` |
+| Slavic | Czech `cs`, Russian `ru` |
+| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Thai `th`, Vietnamese `vi` |
+| Turkic | Kazakh `kk`, Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
 ✅ reliable / referee-limited (25) · 🟡 reliable + a documented lexical tail (Bengali, Indonesian) ·
