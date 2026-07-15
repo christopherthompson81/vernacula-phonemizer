@@ -127,3 +127,19 @@ Total Run 5: 67.1→**73.5%**. Floor .63→.70. Suite 262/262 (nesaf/pobol golde
 Session total: 56.5→73.5% (+17.0). Remaining residual: English/foreign-name anglicization (referee applies English
 phonology — arguably not our error), ⟨ae⟩ (referee-contested), degemination (nn→n), st→sd + glide edges — intricate/
 lexical/referee-limited. Common-word accuracy is now ~73%; STILL 🟡 (the diffuse tail is real but small-per-class).
+
+## Run 6 — 2026-07-14 — degemination of written double consonants (73.5→76.2%)
+
+Welsh writes ⟨nn⟩/⟨rr⟩ to mark the preceding vowel short, but they are pronounced SINGLE: gorffennaf→ɡɔrfɛnav (not
+…ɛnnav), torri→tɔri, cynnar→kənar, ennill→ɛniɬ. Our engine emitted both consonants. Fixed: collapse adjacent
+identical consonant phonemes in the OUTPUT — applyLength already counts the doubled coda (so the short-vowel marking
+is preserved; only the surface form collapses). +2.7%. (ll/dd/ff/… are single digraph phonemes, never
+identical-adjacent, so untouched.)
+
+TESTED-and-REJECTED: **final unstressed ⟨e⟩→[a]** (the NW reduction bore→bɔra, carreg→karaɡ) — net −3.5% at scale.
+Too many final ⟨e⟩ stay ɛ; the reduction is colloquial/lexical, not reliably rule-conditioned. Left as residual.
+
+Session total 56.5→**76.2% (+19.7)**. RESIDUAL COMPOSITION (of 3426 mismatches): only **237 are proper names** (the
+referee anglicizes English/foreign names — arguably not our error for Welsh text; NOT the dominant class, so
+code-switching is NOT needed for the bulk); ~348 final-⟨e⟩→a (lexical), 456 ⟨ae⟩/⟨ai⟩ (referee-contested: eɨ/ei/aᶤ),
+and ~2385 diffuse "other" (glide edges, st→sd, per-word quality). Common-word accuracy ~76%. STILL 🟡.

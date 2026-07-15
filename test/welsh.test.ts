@@ -39,7 +39,7 @@ describe("welsh canonical IPA", () => {
     test("penultimate stress + secondary stress on a long word's first syllable", () => {
         expect(phonemizeWord("cymru")).toBe("kˈəmrɨ"); // penult
         expect(phonemizeWord("prifysgol")).toBe("privˈəsɡɔl"); // penult (3 syllables, no secondary)
-        expect(phonemizeWord("gorffennaf")).toBe("ɡɔrfˈɛnnav"); // penult
+        expect(phonemizeWord("gorffennaf")).toBe("ɡɔrfˈɛnav"); // nn degeminates → n (referee: ɡɔrfɛna); penult
         expect(phonemizeWord("llywodraeth")).toBe("ɬɨᵘˈɔdraᶤθ"); // penult
     });
 
