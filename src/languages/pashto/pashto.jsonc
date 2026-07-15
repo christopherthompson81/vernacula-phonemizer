@@ -1,0 +1,45 @@
+// Native canonical-IPA definition for Pashto / پښتو (ps) — first Eastern Iranian language, a Perso-Arabic ABJAD
+// (extended: retroflex letters ټ ډ ړ ڼ ښ ږ, affricates څ ts / ځ dz, the velar ګ). pashto.ts reads this file.
+// Pashto is a SHALLOWER abjad than Urdu/Arabic — it writes ā (ا), e (ې), o/u (و), i (ی) distinctly — but the SHORT
+// vowels a/ə/i/u are still usually UNWRITTEN, so a default short vowel [ə] (the zwarakay) + medial-schwa deletion
+// stand in for the deferred short-vowel restoration (🟠, like Urdu/Persian). Dialect note: ښ/ږ are rendered as the
+// SW/Kandahari retroflex ʂ/ʐ (NE dialects x/ɡ, Central ç/ʝ). See docs/ps_native_bringup_investigation.md.
+{
+    "language": "ps",
+    "name": "Pashto",
+    "script": "Arabic (Perso-Arabic, extended)",
+    "provenance": "Authored from the Unicode Arabic/Pashto chart + standard (Kandahari/literary) Pashto phonology. Validated against wikipron pus + kaikki pus (human).",
+
+    // Consonant letters → canonical IPA. Dental t̪/d̪ (ت/ط, د), retroflex ʈ ɖ ɳ ɻ (ټ ډ ڼ ړ), retroflex sibilants
+    // ʂ ʐ (ښ ږ, Kandahari), affricates t͡s d͡z (څ ځ), the Pashto velar ګ=ɡ.
+    "consonants": {
+        "ب": "b", "پ": "p", "ت": "t̪", "ټ": "ʈ", "ث": "s", "ج": "d͡ʒ", "ځ": "d͡z",
+        "چ": "t͡ʃ", "څ": "t͡s", "ح": "h", "خ": "x", "د": "d̪", "ډ": "ɖ", "ذ": "z",
+        "ر": "r", "ړ": "ɻ", "ز": "z", "ژ": "ʒ", "ږ": "ʐ", "س": "s", "ش": "ʃ",
+        "ښ": "ʂ", "ص": "s", "ض": "z", "ط": "t̪", "ظ": "z", "ع": "ʔ", "غ": "ɣ",
+        "ف": "f", "ق": "q", "ک": "k", "ك": "k", "ګ": "ɡ", "گ": "ɡ", "ل": "l",
+        "م": "m", "ن": "n", "ڼ": "ɳ", "ء": "ʔ", "ھ": "h"
+    },
+
+    // Short-vowel diacritics (harakat) — usually ABSENT in running text (the restoration gap). Applied when present.
+    "harakat": { "َ": "a", "ِ": "i", "ُ": "u", "ٰ": "ɑ", "ٗ": "u" },
+    "sukun": "ْ",
+    "shadda": "ّ",
+
+    // The DEFAULT short vowel inserted between consonants when none is written — Pashto's zwarakay /ə/.
+    "inherentVowel": "ə",
+
+    "clausePunctuation": {
+        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ",
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Pashto spellings; canonical IPA DERIVED by the same g2p. Pashto 11-19/tens are irregular; the units
+    // + round tens + magnitudes are authored (21-99 compose as tens+unit — a bounded gap).
+    "numbers": {
+        "units": ["صفر", "یو", "دوه", "درې", "څلور", "پنځه", "شپږ", "اوه", "اته", "نهه"],
+        "ten": "لس",
+        "tens": { "20": "شل", "30": "دېرش", "40": "څلوېښت", "50": "پنځوس", "60": "شپېته", "70": "اویا", "80": "اتیا", "90": "نوی" },
+        "hundred": "سل", "thousand": "زر", "million": "میلیون", "and": "و"
+    }
+}
