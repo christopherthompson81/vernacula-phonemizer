@@ -22,6 +22,7 @@ interface LexEntry {
     oLong?: boolean; // stressed ⟨o⟩ is long [oː], not the default [uː]
     secOrd?: number; // secondary-stress nucleus (compound) → ˌ + secondary softening
     longOrds?: Set<number>; // NST-long vowel ordinals (compound length, boundary-safe)
+    secVowelInitial?: boolean; // secondary element vowel-initial → don't soften the (coda) C before it
 }
 
 // Phase-2 lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
@@ -48,6 +49,7 @@ function lexicon(): Map<string, LexEntry> {
                     longOrds: longTok
                         ? new Set(longTok.slice(1).split(",").map(Number))
                         : undefined,
+                    secVowelInitial: tokens.includes("vi"),
                 };
             },
             { optional: true },
@@ -79,7 +81,11 @@ export function phonemizeWord(word: string): string {
         lex?.secOrd !== undefined &&
         lex.secOrd !== rawOrd &&
         lex.secOrd < nucleiProbe
-            ? { secOrd: lex.secOrd, longOrds: lex.longOrds ?? new Set() }
+            ? {
+                  secOrd: lex.secOrd,
+                  longOrds: lex.longOrds ?? new Set(),
+                  secVowelInitial: lex.secVowelInitial,
+              }
             : undefined;
     let segs = toSegments(w, rawOrd, oLong, compound);
     const nuclei = segs.filter((s) => s.vowel).length;

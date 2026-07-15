@@ -35,6 +35,7 @@ export interface Seg {
 export interface Compound {
     secOrd: number;
     longOrds: Set<number>;
+    secVowelInitial?: boolean; // secondary element is vowel-initial → its "onset" C is really a coda; don't soften
 }
 
 /** Is the stressed vowel at index i LONG? Count coda consonant LETTERS to the next vowel/end, collapsing a
@@ -85,7 +86,10 @@ export function toSegments(
         // in a compound — the secondary-stressed element's onset (storkök k→ɕ). vowelOrd here = the ordinal of the
         // upcoming vowel, so its onset is at vowelOrd === secOrd.
         const softenOnset =
-            vowelOrd === 0 || (compound !== undefined && vowelOrd === compound.secOrd);
+            vowelOrd === 0 ||
+            (compound !== undefined &&
+                vowelOrd === compound.secOrd &&
+                !compound.secVowelInitial);
 
         // --- the -tion / -sion SUFFIX → ɧuːn. Gated to i>0 so a word-initial stem "tio…"/"sio…" (tionde) is
         //     not swallowed; the suffix is always preceded by its stem (na-tion, sta-tion, pen-sion). ---

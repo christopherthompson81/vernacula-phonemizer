@@ -38,6 +38,7 @@ interface Parsed {
     oLong: boolean;
     secOrd: number; // secondary-stress (%) nucleus ordinal, or -1 (simplex / no secondary stress = no compound)
     longOrds: number[]; // ordinals of every NST-long vowel (drives compound length boundary-safely); [] if simplex
+    secVowelInitial: boolean; // secondary element is vowel-initial (björk|ö) → the preceding C is a CODA, keep hard
 }
 /** Count SAMPA vowels before position p → the 0-based nucleus ordinal of the marker at p. */
 const ordAt = (sampa: string, p: number): number =>
@@ -78,12 +79,14 @@ function parse(word: string, sampa: string): Parsed | null {
     // boundary-safe instead of the engine's boundary-unaware coda rule.
     const pct = sampa.indexOf("%");
     let secOrd = -1,
-        longOrds: number[] = [];
+        longOrds: number[] = [],
+        secVowelInitial = false;
     if (pct >= 0 && aligned) {
         secOrd = ordAt(sampa, pct);
         longOrds = longOrdsOf(sampa);
+        secVowelInitial = SAMPA_VOWEL.has(sampa[pct + 1] ?? ""); // %V… → vowel-initial second element
     }
-    return { accent, ord, oLong, secOrd, longOrds };
+    return { accent, ord, oLong, secOrd, longOrds, secVowelInitial };
 }
 
 // Collect every NST reading per corpus word.
@@ -127,6 +130,8 @@ for (const [word, readings] of [...entries].sort((a, b) => (a[0] < b[0] ? -1 : 1
     const secMatch = secReadings.filter((r) => r.secOrd === secOrd);
     const longOrds =
         secOrd >= 0 ? majority(secMatch.map((r) => r.longOrds.join(","))) : "";
+    const secVowelInitial =
+        secOrd >= 0 && majority(secMatch.map((r) => r.secVowelInitial));
     // Tokens after accent: a number = the stress ordinal (omitted when 0 = first syllable = engine default);
     // "o" flags a stressed long ⟨o⟩ → [oː]; "s<N>" the secondary-stress nucleus; "L<ords>" the NST-long vowel
     // ordinals (comma-sep) that drive boundary-safe compound length.
@@ -136,6 +141,7 @@ for (const [word, readings] of [...entries].sort((a, b) => (a[0] < b[0] ? -1 : 1
     if (secOrd >= 0) {
         tokens.push(`s${secOrd}`);
         if (longOrds) tokens.push(`L${longOrds}`);
+        if (secVowelInitial) tokens.push("vi"); // suppress secondary-onset softening (preceding C is a coda)
         withSec++;
     }
     out.push(`${word}\t${tokens.join("\t")}`);

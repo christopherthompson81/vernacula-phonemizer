@@ -207,3 +207,16 @@ noise as before (de/fan/inte casual forms) — no new compound-error class. Full
 This closes the last sv subsystem gap. The splitter dead-end (Run 6, Run 8 head) is avoided entirely by using NST's
 own secondary-stress marks — high precision, zero false positives. Remaining tail is OOV compounds (outside the 42k
 corpus → first-syllable stress, no secondary) + the minor folded items (short ɛ→æ before r).
+
+### 8b — review fixes
+
+Adversarial review of the compound change surfaced two candidates:
+- **Bug 1 (empty-`L` shortens the primary vowel)** — INVESTIGATED, NOT a bug. NST genuinely marks these compounds
+  short (inom→`""In$%Om`, bomull→`""bU$%mu0l`); Swedish compounds reduce the first element, and the independent
+  wikipron referee CORROBORATES (morbror→[mʊrbrʊr], not the citation [muːr]). Measured the reviewer's proposed
+  fallback (empty-`L` → coda rule): referee 2944 vs trusting-NST 2945 — trusting NST is at least as good. Kept.
+- **Bug 2 (secondary-onset softening over-fires on a vowel-initial 2nd element)** — REAL, 11 words (björkö→bjœrɕøː,
+  påskägg, lagändring…). The consonant before a vowel-initial second element is element-1's CODA, not an onset, so
+  it must stay hard. Fixed: extract `%V` (vowel-initial secondary) from NST → `vi` token → suppress secondary
+  softening there. björkö→bjˈœ̀rkˌøː; storkök/barnkör (consonant-initial 2nd element) still soften correctly.
+  Referee 2945→2946.

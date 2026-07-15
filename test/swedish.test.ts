@@ -68,6 +68,10 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("järnväg")).toBe("jˈæ̀ːɳvˌɛːɡ");
         expect(phonemizeWord("arbetsplats")).toBe("ˈàrbeːtsplˌats"); // unstressed-but-long ⟨e⟩ kept (NST length set)
         expect(phonemizeWord("barnbok")).toBe("bˈɑ̀ːɳbˌuːk"); // bok→uː secondary
+        // vowel-initial second element (björk|ö): the preceding ⟨k⟩ is björk's CODA, stays hard (not ɕ); contrast
+        // storkök where ⟨k⟩ is kök's onset and softens. NST's %V marks the vowel-initial second element.
+        expect(phonemizeWord("björkö")).toBe("bjˈœ̀rkˌøː");
+        expect(phonemizeWord("barnkör")).toBe("bˈɑ̀ːɳɕˌœːr"); // consonant-initial 2nd element → onset k→ɕ still fires
     });
 
     test("Phase 2 — stress lexicon fixes non-initial (loanword) stress + its vowel quality", () => {

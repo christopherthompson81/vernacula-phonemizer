@@ -1,5 +1,5 @@
 a	1
-aa	2	s1	L0,1
+aa	2	s1	L0,1	vi
 aalborg	1
 aaron	1
 ab	2
@@ -132,7 +132,7 @@ adresser	1	1
 adressera	1	2
 adresserat	1	2
 adresserna	1	1
-adressändring	2	1	s2
+adressändring	2	1	s2	vi
 adrian	1
 adriana	2	2
 adrienne	1	2
@@ -283,8 +283,8 @@ aktiemarknaden	2	s3
 aktien	1
 aktier	1
 aktierna	1
-aktieägare	2	s3	L3
-aktieägarna	2	s3	L3
+aktieägare	2	s3	L3	vi
+aktieägarna	2	s3	L3	vi
 aktion	1	1
 aktionen	1	1
 aktioner	1	1
@@ -506,7 +506,7 @@ allvarligaste	2	s1	L1
 allvarligt	2	s1	L1
 allvetande	2	s1	L1
 ally	1
-allätare	2	s1	L1
+allätare	2	s1	L1	vi
 allé	1	1
 allén	1	1
 alm	1
@@ -947,16 +947,16 @@ anonyma	1	2
 anonymitet	1	4
 anonymt	1	2
 anor	2
-anordna	2	s1	L1
-anordnade	2	s1	L1
-anordnades	2	s1	L1
-anordnar	2	s1	L1
-anordnare	2	s1	L1
-anordnas	2	s1	L1
-anordnat	2	s1	L1
-anordning	2	s1	L1
-anordningar	2	s1	L1
-anordningen	2	s1	L1
+anordna	2	s1	L1	vi
+anordnade	2	s1	L1	vi
+anordnades	2	s1	L1	vi
+anordnar	2	s1	L1	vi
+anordnare	2	s1	L1	vi
+anordnas	2	s1	L1	vi
+anordnat	2	s1	L1	vi
+anordning	2	s1	L1	vi
+anordningar	2	s1	L1	vi
+anordningen	2	s1	L1	vi
 anorexia	2	3
 anpassa	2	s1
 anpassade	2	s1
@@ -1429,7 +1429,7 @@ armarna	2
 armband	2	s1
 armbanden	2	s1
 armbandet	2	s1
-armbandsur	2	s2	L2
+armbandsur	2	s2	L2	vi
 armborst	2	s1
 armbågar	2	s1	L1
 armbågarna	2	s1	L1
@@ -1573,7 +1573,7 @@ asken	1
 askersund	1	2
 askfat	2	s1	L1
 askim	2
-askungen	2	s1
+askungen	2	s1	vi
 asp	1
 aspekt	1	1
 aspekten	1	1
@@ -1582,7 +1582,7 @@ aspekterna	1	1
 aspen	1
 asplund	2	s1
 asplöven	2	s1	L1
-aspudden	2	s1
+aspudden	2	s1	vi
 ass	1
 assa	2
 assad	1	1
@@ -2099,7 +2099,7 @@ avtog	2	s1	L0,1
 avtryck	2	s1	L0
 avtryckaren	2	s1	L0
 avund	2
-avundas	2	s1	L0
+avundas	2	s1	L0	vi
 avundsjuk	2	s2	L0,2
 avundsjuka	2	s2	L0,2
 avundsjukan	2	s2	L0,2
@@ -2136,7 +2136,7 @@ avvisning	2	s1	L0,1
 avvägning	2	s1	L0,1
 avväpna	2	s1	L0,1
 avvärja	2	s1	L0
-avyttring	2	s1	L0
+avyttring	2	s1	L0	vi
 award	1	1
 ax	1
 axel	2
@@ -2516,7 +2516,7 @@ barnslig	2
 barnsliga	2
 barnsligt	2
 barnsäng	2	s1	L0
-barnunge	2	s1	L0
+barnunge	2	s1	L0	vi
 barnuppfostran	2	s2	L0
 barnvagn	2	s1	L0
 barnvagnar	2	s1	L0
@@ -2573,7 +2573,7 @@ bastard	1	1
 bastion	1	2
 bastu	2
 bastun	2
-basår	2	s1	L0,1
+basår	2	s1	L0,1	vi
 bataljon	1	2
 bataljonen	1	2
 bataljoner	1	2
@@ -2698,8 +2698,8 @@ befolkningen	1	1
 befolkningens	1	1
 befolkningstillväxt	2	1	s4
 befolkningstäthet	2	1	s4	L3,4
-befolkningsökning	2	1	s3	L3
-befolkningsökningen	2	1	s3	L3
+befolkningsökning	2	1	s3	L3	vi
+befolkningsökningen	2	1	s3	L3	vi
 befordran	1	1
 befria	1	1
 befriade	1	1
@@ -3053,7 +3053,7 @@ bergslagen	2	s1	L1
 bergstopp	2	s1
 bergstrand	2	s1
 bergström	2	s1
-bergsåker	2	s1	L1
+bergsåker	2	s1	L1	vi
 bergvik	2	s1	L1
 bergwall	2	s1
 berika	1	1
@@ -3218,7 +3218,7 @@ beslutsfattande	2	1	s2	L1
 beslutsfattare	2	1	s2	L1
 beslutsfattarna	2	1	s2	L1
 beslutsunderlag	2	1	s4	L1,4
-beslutsångest	2	1	s2	L1
+beslutsångest	2	1	s2	L1	vi
 besläktad	1	1
 besläktade	1	1
 besläktat	1	1
@@ -3480,7 +3480,7 @@ bevisen	1	1
 beviset	1	1
 bevisföring	2	1	s2	L1,2
 bevisligen	1	1
-bevismaterial	2	1	s5	L1,5
+bevismaterial	2	1	s5	L1,5	vi
 bevisning	1	1
 bevisningen	1	1
 bevittna	1	1
@@ -3628,7 +3628,7 @@ biltvätt	2	s1	L0
 biltvätten	2	s1	L0
 bilverkstad	2	s1	L0,2
 bilväg	2	s1	L0,1
-bilägare	2	s1	L0,1
+bilägare	2	s1	L0,1	vi
 bimbo	1
 bin	1
 bina	1
@@ -3669,7 +3669,7 @@ biologisk	1	2	o
 biologiska	1	2	o
 biologiskt	1	2	o
 bion	1
-biopremiär	2	s4	L0,4
+biopremiär	2	s4	L0,4	vi
 bios	1
 bioteknik	2	s3	L0,3
 bipolär	1	2
@@ -3690,8 +3690,8 @@ bis	1
 bisarr	1	1
 bisarra	1	1
 bisarrt	1	1
-bisexuell	2	s3	L0,2
-bisexuella	2	s3	L0,2
+bisexuell	2	s3	L0,2	vi
+bisexuella	2	s3	L0,2	vi
 bisittare	2	s1	L0
 biskop	2
 biskopar	2
@@ -3751,7 +3751,7 @@ björklund	2	s1
 björklunds	2	s1
 björklöven	2	s1	L1
 björkman	1
-björkö	2	s1	L1
+björkö	2	s1	L1	vi
 björling	2	s1	L0
 björn	1
 björnar	2
@@ -3984,8 +3984,8 @@ blått	1
 blåvit	2	s1	L0,1
 blåvita	2	s1	L0,1
 blåvitt	2	s1	L0
-blåögd	2	s1	L0
-blåögda	2	s1	L0
+blåögd	2	s1	L0	vi
+blåögda	2	s1	L0	vi
 blöda	2
 blödande	2
 blödde	2
@@ -4080,7 +4080,7 @@ bokstaven	2	s1	L1
 bokstavera	1	2
 bokstavligen	2
 bokstavligt	2
-bokstavsordning	2	s2	L1,2
+bokstavsordning	2	s2	L1,2	vi
 bokstäver	2
 bokstäverna	2
 boktips	2	s1	L0
@@ -4150,7 +4150,7 @@ bono	1	o
 bonus	1
 bonusar	1
 bonusen	1
-bonuspoäng	2	s3	L0
+bonuspoäng	2	s3	L0	vi
 boo	1
 boogie	1
 book	1
@@ -4189,7 +4189,7 @@ borgmästare	2	s1
 borgmästaren	2	s1
 borgs	1
 borgström	2	s1
-borgå	2	s1	L1
+borgå	2	s1	L1	vi
 boris	1
 bork	1
 borlänge	2	o	s1	L0
@@ -4275,15 +4275,15 @@ bostadsminister	2	s3	L0,1
 bostadsområde	2	s3	L0,1,3
 bostadsområden	2	s3	L0,1,3
 bostadsområdet	2	s3	L0,1,3
-bostadsort	2	s2	L0,1
+bostadsort	2	s2	L0,1	vi
 bostadspolitik	2	s4	L0,1,4
 bostadspolitiken	2	s4	L0,1,4
 bostadsrätt	2	s2	L0,1
 bostadsrätten	2	s2	L0,1
 bostadsrätter	2	s2	L0,1
-bostadsrättsförening	2	s4	L0,1,4
-bostadsrättsföreningar	2	s4	L0,1,4
-bostadsrättsföreningen	2	s4	L0,1,4
+bostadsrättsförening	2	s4	L0,1,4	vi
+bostadsrättsföreningar	2	s4	L0,1,4	vi
+bostadsrättsföreningen	2	s4	L0,1,4	vi
 boston	1
 boström	2	s1	L0
 bostäder	2	s1	L0,1
@@ -4415,7 +4415,7 @@ bredden	1
 breddgrader	2	s1	L1
 breder	1
 bredvid	2	s1	L0,1
-bredäng	2	s1	L0
+bredäng	2	s1	L0	vi
 bremen	1
 bremer	1
 brenda	2
@@ -4479,7 +4479,7 @@ bristfälligt	2	s1
 bristningsgränsen	2	s2
 bristol	1
 bristvara	2	s1	L1
-bristyrken	2	s1
+bristyrken	2	s1	vi
 brit	1
 brita	1
 britannien	1	1
@@ -4526,7 +4526,7 @@ bron	1
 brons	1
 bronset	1
 bronsmedalj	2	s2
-bronsåldern	2	s1
+bronsåldern	2	s1	vi
 bronx	1
 brook	1
 brooklyn	1
@@ -4566,8 +4566,8 @@ brottsling	2
 brottslingar	2
 brottslingarna	2
 brottslingen	2
-brottsoffer	2	s1
-brottsoffret	2	s1
+brottsoffer	2	s1	vi
+brottsoffret	2	s1	vi
 brottsplats	2	s1
 brottsplatsen	2	s1
 brottsregister	2	s2
@@ -4768,8 +4768,8 @@ budgeten	1
 budgetförslag	2	s3	L3
 budgetpropositionen	2
 budgivningen	2	s1	L0,1
-budord	2	s1	L0,1
-budorden	2	s1	L0,1
+budord	2	s1	L0,1	vi
+budorden	2	s1	L0,1	vi
 buds	1
 budskap	2	s1	L0,1
 budskapet	2	s1	L0,1
@@ -4858,7 +4858,7 @@ bus	1
 busa	2
 busar	2
 busch	1
-busenkelt	2	s1	L0
+busenkelt	2	s1	L0	vi
 buset	1
 business	1
 buskage	1	1
@@ -4896,7 +4896,7 @@ butikerna	1	1
 butikschef	2	1	s2	L0,1,2
 butikskedja	2	1	s2	L0,1,2
 butikspersonal	2	1	s4	L0,1,4
-butiksägare	2	1	s2	L0,1,2
+butiksägare	2	1	s2	L0,1,2	vi
 butler	1
 butt	1
 butter	1
@@ -4935,7 +4935,7 @@ byggherren	2	s1
 byggindustrin	2	s3	L2,3
 byggjobbare	2	s1
 bygglov	2	s1	L1
-byggmaterial	2	s4	L4
+byggmaterial	2	s4	L4	vi
 byggmästare	2	s1
 byggnad	2
 byggnaden	2
@@ -4944,7 +4944,7 @@ byggnader	2
 byggnaderna	2
 byggnads	2
 byggnadsarbetare	2	s3	L3
-byggnadsmaterial	2	s5	L5
+byggnadsmaterial	2	s5	L5	vi
 byggnadsnämnden	2	s2
 byggnadsverk	2	s2
 byggnation	1	2
@@ -5181,7 +5181,7 @@ cancer	1
 cancerfonden	2	s2
 cancerframkallande	2	s3
 cancern	1
-cancerpatienter	2	s4
+cancerpatienter	2	s4	vi
 cancersjuka	2	s2	L2
 candice	1
 candy	1
@@ -5319,15 +5319,15 @@ centra	1
 central	1	1
 centrala	1	1
 centralamerika	2	1	s3	L1,3
-centralasien	2	1	s2	L1,2
+centralasien	2	1	s2	L1,2	vi
 centralbank	2	1	s2	L1
 centralbanken	2	1	s2	L1
 centralbyrån	2	1	s2	L1,2,3
 centralen	1	1
 centraleuropa	2	1	s4	L1,4
 centralisering	1	3
-centralort	2	1	s2	L1
-centralorten	2	1	s2	L1
+centralort	2	1	s2	L1	vi
+centralorten	2	1	s2	L1	vi
 centralstation	2	1
 centralstationen	2	1
 centralt	1	1
@@ -5778,8 +5778,8 @@ dagligen	2
 dagligt	2
 dagmar	1
 dagny	1
-dagordning	2	s1	L0,1
-dagordningen	2	s1	L0,1
+dagordning	2	s1	L0,1	vi
+dagordningen	2	s1	L0,1	vi
 dags	1
 dagsböter	2	s1	L1
 dagsljus	2	s1	L1
@@ -5813,7 +5813,7 @@ dalai	1
 dalar	2
 dalarna	2
 dalarnas	2
-dalarö	2	s2	L0,2
+dalarö	2	s2	L0,2	vi
 dalbana	2	s1	L0,1
 dalby	1
 dale	2
@@ -5828,7 +5828,7 @@ dals	1
 dalsland	1
 dalta	2
 daltande	2
-dalälven	2	s1	L0
+dalälven	2	s1	L0	vi
 dam	1
 damallsvenskan	2	s2	L0
 damaskus	1	1
@@ -5998,8 +5998,8 @@ debattörerna	1	2
 debbie	1
 deborah	1
 debut	1	1
-debutalbum	2	1	s2	L1
-debutalbumet	2	1	s2	L1
+debutalbum	2	1	s2	L1	vi
+debutalbumet	2	1	s2	L1	vi
 debutant	1	2
 debutanter	1	2
 debuten	1	1
@@ -6066,8 +6066,8 @@ dela	2
 delad	2
 delade	2
 delades	2
-delaktig	2	s1	L0
-delaktiga	2	s1	L0
+delaktig	2	s1	L0	vi
+delaktiga	2	s1	L0	vi
 delaktighet	2	s3	L0,3
 delar	2
 delarna	2
@@ -6121,8 +6121,8 @@ deltävling	2	s1	L0,1
 deltävlingar	2	s1	L0,1
 deltävlingen	2	s1	L0,1
 delvis	2	s1	L0,1
-delägare	2	s1	L0,1
-delägarna	2	s1	L0,1
+delägare	2	s1	L0,1	vi
+delägarna	2	s1	L0,1	vi
 dem	1
 demens	1	1
 dement	1	1
@@ -6503,7 +6503,7 @@ djupet	1
 djupgående	2	s1	L0,1
 djupt	1
 djur	1
-djurarter	2	s1	L0,1
+djurarter	2	s1	L0,1	vi
 djuren	1
 djurens	1
 djuret	1
@@ -6524,7 +6524,7 @@ djurriket	2	s1	L0,1
 djurs	1
 djursholm	1	1
 djursjukhuset	2	s2	L0,1,2
-djurägare	2	s1	L0,1
+djurägare	2	s1	L0,1	vi
 djärv	1
 djärva	2
 djärvt	1
@@ -7118,7 +7118,7 @@ dödsfallet	2	s1
 dödshjälp	2	s1
 dödshot	2	s1	L1
 dödskalle	2	s1	L0
-dödsoffer	2	s1
+dödsoffer	2	s1	vi
 dödsolyckor	2	s2	L1
 dödsorsak	2	s2	L1,2
 dödsorsaken	2	s2	L1,2
@@ -7131,7 +7131,7 @@ dödsstöten	2	s1	L1
 dödssynd	2	s1
 dödssynderna	2	s1
 dödstrött	2	s1
-dödsångest	2	s1
+dödsångest	2	s1	vi
 döende	2
 dög	1
 dök	1
@@ -7163,7 +7163,7 @@ dörr	1
 dörrar	2
 dörrarna	2
 dörren	1
-dörröppningen	2	s1
+dörröppningen	2	s1	vi
 dötid	2	s1	L0,1
 dött	1
 döttrar	2
@@ -7259,7 +7259,7 @@ efterföljande	2	s2
 efterföljare	2	s2
 efterföljs	2	s2
 eftergifter	2	s2
-eftergymnasial	2	s5	L5
+eftergymnasial	2	s5	L5	vi
 efterklok	2	s2	L2
 efterkommande	2	s2
 efterleva	2	s2	L2
@@ -7302,7 +7302,7 @@ efterträda	2	s2	L2
 efterträdare	2	s2	L2
 efterträdaren	2	s2	L2
 eftervärlden	2	s2	L2
-efteråt	2	s2	L2
+efteråt	2	s2	L2	vi
 eg	2
 egen	2
 egendom	2	s2	L0
@@ -7370,7 +7370,7 @@ ekelund	2	s2	L0
 eken	1
 ekenäs	2	s2	L0,2
 ekeroth	2	s2	L0,2
-ekerö	2	s2	L0,2
+ekerö	2	s2	L0,2	vi
 ekg	1	2
 ekholm	2	s1	L0
 ekipage	1	2
@@ -7379,7 +7379,7 @@ eklund	2	s1	L0
 eklöf	2	s1	L0,1
 ekman	1
 eko	1
-ekollon	2	s1	L0
+ekollon	2	s1	L0	vi
 ekologi	1	3
 ekologisk	1	2	o
 ekologiska	1	2	o
@@ -7575,7 +7575,7 @@ embryon	1
 embryot	1
 emedan	2	1
 emelie	1
-emellanåt	2	1	s3	L3
+emellanåt	2	1	s3	L3	vi
 emellertid	1	1
 emeritus	2	1
 emfas	1	1
@@ -7614,7 +7614,7 @@ enad	2
 enade	2
 enades	2
 enar	2
-enarmade	2	s1	L0
+enarmade	2	s1	L0	vi
 enas	2
 enastående	2	s2	L0,2
 enat	2
@@ -7976,10 +7976,10 @@ etta	2
 ettan	2
 etthundra	1	1
 ettor	2
-ettårig	2	s1	L1
-ettåriga	2	s1	L1
+ettårig	2	s1	L1	vi
+ettåriga	2	s1	L1	vi
 etymologi	1	4
-eu	2	s1	L0,1
+eu	2	s1	L0,1	vi
 eufori	1	3
 euforisk	1	2	o
 eugene	1	2
@@ -8003,7 +8003,7 @@ européerna	1	3
 eurosport	1
 eurostat	1	3
 eurovision	1	2
-eus	2	s1	L0,1
+eus	2	s1	L0,1	vi
 ev	1	3
 eva	2
 evakuera	1	3
@@ -8204,9 +8204,9 @@ facket	1
 fackets	1
 fackförbund	2	s2
 fackförbundet	2	s2
-fackförening	2	s2	L2
-fackföreningar	2	s2	L2
-fackföreningarna	2	s2	L2
+fackförening	2	s2	L2	vi
+fackföreningar	2	s2	L2	vi
+fackföreningarna	2	s2	L2	vi
 fackföreningsrörelsen	2	s4	L2,4
 facklan	2
 facklig	2
@@ -8346,7 +8346,7 @@ farbrorn	2	s1
 farbröder	2	s1	L1
 farfar	2	s1
 farfars	2	s1
-farföräldrar	2	s2	L0
+farföräldrar	2	s2	L0	vi
 farhågor	2	s1	L0,1
 farit	2
 farkost	2	s1	L0
@@ -8431,8 +8431,8 @@ fastighetsmäklare	2	s3	L2,3
 fastighetsskatt	2	s3	L2
 fastighetsskatten	2	s3	L2
 fastighetsskötare	2	s3	L2,3
-fastighetsägare	2	s3	L2,3
-fastighetsägaren	2	s3	L2,3
+fastighetsägare	2	s3	L2,3	vi
+fastighetsägaren	2	s3	L2,3	vi
 fastlandet	2	s1
 fastna	2
 fastnade	2
@@ -8517,10 +8517,10 @@ fejs	1
 fejset	1
 fel	1
 fela	2
-felaktig	2	s1	L0
-felaktiga	2	s1	L0
+felaktig	2	s1	L0	vi
+felaktiga	2	s1	L0	vi
 felaktigheter	2	s3	L0,3
-felaktigt	2	s1	L0
+felaktigt	2	s1	L0	vi
 felande	2
 felen	1
 felet	1
@@ -8558,9 +8558,9 @@ femtiotal	2	s3	L3
 femtiotalet	2	s3	L3
 femton	2
 femtonde	2
-femtonåring	2	s2	L2
-femåriga	2	s1	L1
-femåring	2	s1	L1
+femtonåring	2	s2	L2	vi
+femåriga	2	s1	L1	vi
+femåring	2	s1	L1	vi
 femårskontrakt	2	s3	L1
 fen	1
 fena	2
@@ -8895,7 +8895,7 @@ fjellström	2	s1
 fjol	1
 fjolla	2
 fjollor	2
-fjolårets	2	s1	L0,1
+fjolårets	2	s1	L0,1	vi
 fjorden	1	o
 fjorton	2
 fjortonde	2
@@ -8922,7 +8922,7 @@ fjärren	1
 fjärrkontroll	2	s2
 fjärrkontrollen	2	s2
 fjärrvärme	2	s1
-fjärås	2	s1	L0,1
+fjärås	2	s1	L0,1	vi
 fjäska	2
 fk	2
 flack	1
@@ -8968,7 +8968,7 @@ flerfamiljshus	2	s3	L0,3
 flerspråkiga	2	s1	L0,1
 flertal	2	s1	L0,1
 flertalet	2	s1	L0,1
-flerårig	2	s1	L0,1
+flerårig	2	s1	L0,1	vi
 flest	1
 flesta	2
 fleur	1
@@ -9276,7 +9276,7 @@ folkvald	2	s1	L1
 folkvalda	2	s1	L1
 folkvett	2	s1
 folkviljan	2	s1
-folköl	2	s1	L1
+folköl	2	s1	L1	vi
 fond	1
 fonden	1
 fonder	2
@@ -9472,7 +9472,7 @@ fotgängare	2	s1	L0
 fotmassage	2	s2	L0,2
 fotnot	2	s1	L0,1
 foto	2
-fotoalbum	2	s2
+fotoalbum	2	s2	vi
 fotogen	1	2
 fotograf	1	2
 fotografen	1	2
@@ -9856,7 +9856,7 @@ frustrationen	1	2
 frustrerad	1	1
 frustrerade	1	1
 frustrerande	1	1
-fruängen	2	s1	L0
+fruängen	2	s1	L0	vi
 frys	1
 frysa	2
 frysdisken	2	s1	L0
@@ -9884,11 +9884,11 @@ främjas	2
 främling	2
 främlingar	2
 främlingen	2
-främlingsfientlig	2	s3
-främlingsfientliga	2	s3
+främlingsfientlig	2	s3	vi
+främlingsfientliga	2	s3	vi
 främlingsfientlighet	2	s5	L5
 främlingsfientligheten	2	s5	L5
-främlingsfientligt	2	s3
+främlingsfientligt	2	s3	vi
 främmande	2
 främre	1
 främsta	2
@@ -9942,7 +9942,7 @@ frölunda	2	s1	L0
 frön	1
 fröna	1
 frös	1
-frösön	2	s1	L0,1
+frösön	2	s1	L0,1	vi
 fsb	2
 fuchs	1
 fuentes	1	1
@@ -10000,8 +10000,8 @@ fullvuxen	2	s1
 fullvuxna	2	s1
 fullvärdig	2	s1	L1
 fullvärdiga	2	s1	L1
-fulländade	2	s1
-fulländat	2	s1
+fulländade	2	s1	vi
+fulländat	2	s1	vi
 fulländning	2	s1
 fult	1
 fund	1
@@ -10093,11 +10093,11 @@ fyr	1
 fyra	2
 fyran	2
 fyrar	2
-fyraåring	2	s2	L0,2
+fyraåring	2	s2	L0,2	vi
 fyrbenta	2	s1	L0,1
 fyren	1
 fyrhjulsdrift	2	s2	L0,1
-fyrisån	2	s2	L0,2
+fyrisån	2	s2	L0,2	vi
 fyrkant	2	s1	L0
 fyrkantig	2	s1	L0
 fyrkantiga	2	s1	L0
@@ -10196,7 +10196,7 @@ färgstark	2	s1
 färgstarka	2	s1
 färgstarkt	2	s1
 färgsättning	2	s1
-färgämnen	2	s1
+färgämnen	2	s1	vi
 färila	2
 färja	2
 färjan	2
@@ -10229,7 +10229,7 @@ fästningen	2
 fästs	1
 fåfänga	2	s1	L0
 fågel	1
-fågelarter	2	s2	L0,2
+fågelarter	2	s2	L0,2	vi
 fågeln	1
 fågelskådare	2	s2	L0,2
 fågelsång	2	s2	L0
@@ -10259,7 +10259,7 @@ fånigt	2
 får	1
 fåren	1
 fåret	1
-fårö	2	s1	L0,1
+fårö	2	s1	L0,1	vi
 fårösund	1	2
 fås	1
 fåtal	2	s1	L0,1
@@ -10286,8 +10286,8 @@ födelsedagskalas	2	s5	L0,3,5
 födelsedagspresent	2	s5	L0,3
 födelsedatum	2	s3	L0,3
 födelsen	2
-födelseort	2	s3	L0
-födelseår	2	s3	L0,3
+födelseort	2	s3	L0	vi
+födelseår	2	s3	L0,3	vi
 föder	1
 föds	1
 födsel	1
@@ -10928,9 +10928,9 @@ förolämpade	2	s2	L0
 förolämpar	2	s2	L0
 förolämpning	2	s2	L0
 förolämpningar	2	s2	L0
-förord	2	s1	L0,1
-förordar	2	s1	L0,1
-förordet	2	s1	L0,1
+förord	2	s1	L0,1	vi
+förordar	2	s1	L0,1	vi
+förordet	2	s1	L0,1	vi
 förordnande	1	1	o
 förordning	1	1	o
 förordningar	1	1	o
@@ -10942,10 +10942,10 @@ förorening	2	s2	L0,2
 föroreningar	2	s2	L0,2
 förorsaka	2	s2	L0,2
 förorsakar	2	s2	L0,2
-förort	2	s1	L0
-förorten	2	s1	L0
-förorter	2	s1	L0
-förorterna	2	s1	L0
+förort	2	s1	L0	vi
+förorten	2	s1	L0	vi
+förorter	2	s1	L0	vi
+förorterna	2	s1	L0	vi
 förpackning	1	1
 förpackningar	1	1
 förpackningen	1	1
@@ -11773,7 +11773,7 @@ get	1
 geten	1
 geting	2
 getingar	2
-getost	2	s1	L0
+getost	2	s1	L0	vi
 gets	1
 gett	1
 getter	1
@@ -11923,8 +11923,8 @@ glassbilen	2	s1	L1
 glassen	1
 glassplitter	2	s1	L0
 glasyr	1	1
-glasögon	2	s1	L0,1
-glasögonen	2	s1	L0,1
+glasögon	2	s1	L0,1	vi
+glasögonen	2	s1	L0,1	vi
 glatt	1
 glatta	2
 gled	1
@@ -11970,7 +11970,7 @@ glädjen	2
 glädjens	2
 glädjer	1
 glädjetårar	2	s2	L0,2
-glädjeämnen	2	s2	L0
+glädjeämnen	2	s2	L0	vi
 gläds	1
 glänsa	2
 glänsande	2
@@ -12064,7 +12064,7 @@ gods	1
 godsaker	2	s1	L0,1
 godset	1
 godståg	2	s1	L1
-godsägaren	2	s1	L1
+godsägaren	2	s1	L1	vi
 godta	2	s1	L0,1
 godtagbar	2	s2	L0,1,2
 godtagbara	2	s2	L0,1,2
@@ -12411,8 +12411,8 @@ grundutbildningen	2	s2	L1
 grundval	2	s1	L1
 grundvatten	2	s1
 grundvattnet	2	s1
-grundämne	2	s1
-grundämnen	2	s1
+grundämne	2	s1	vi
+grundämnen	2	s1	vi
 grunge	1
 grunt	1
 grupp	1
@@ -12617,7 +12617,7 @@ guldmedalj	2	s2
 guldmedaljer	2	s2
 guldmynt	2	s1
 guldstjärna	2	s1	L1
-guldålder	2	s1
+guldålder	2	s1	vi
 gulf	1
 gull	1
 gulla	2
@@ -12835,7 +12835,7 @@ göteborgarna	2	2
 göteborgs	1	2
 göteborgska	1	2
 göteborgsområdet	2	2	s4	L4
-göteborgsoperan	2	2	s3	L3
+göteborgsoperan	2	2	s3	L3	vi
 götene	2
 götet	2
 götgatan	2	s1	L0,1
@@ -12954,7 +12954,7 @@ halsen	1
 halsfluss	2	s1
 halshuggning	2	s1
 halshöggs	2	s1
-halsont	2	s1
+halsont	2	s1	vi
 halstabletter	2	s2
 halt	1
 halta	2
@@ -12993,11 +12993,11 @@ halvtimme	2	s1
 halvtimmen	2	s1
 halvtimmes	2	s1
 halvvägs	2	s1	L1
-halvår	2	s1	L1
-halvåret	2	s1	L1
-halvårs	2	s1	L1
-halvö	2	s1	L1
-halvön	2	s1	L1
+halvår	2	s1	L1	vi
+halvåret	2	s1	L1	vi
+halvårs	2	s1	L1	vi
+halvö	2	s1	L1	vi
+halvön	2	s1	L1	vi
 ham	1
 hamad	1	1
 hamas	1	1
@@ -13017,7 +13017,7 @@ hammare	2
 hammaren	2
 hammarskjöld	2	s2
 hammarström	2	s2
-hammarö	2	s2	L2
+hammarö	2	s2	L2	vi
 hammer	1
 hamn	1
 hamna	2
@@ -13135,7 +13135,7 @@ hanen	2
 hang	1
 hangar	1	1
 hangarfartyg	2	1	s3	L1,2,3
-hangö	2	s1	L1
+hangö	2	s1	L1	vi
 haninge	2
 hank	1
 hanka	2
@@ -13264,7 +13264,7 @@ havs	1
 havsbad	2	s1	L1
 havsbotten	2	s1
 havsvatten	2	s1
-havsytan	2	s1	L1
+havsytan	2	s1	L1	vi
 hawaii	1	1
 hawaiian	1	3
 hawkins	1
@@ -13423,7 +13423,7 @@ helvete	2
 helvetes	2
 helvetet	2
 helvetets	2
-helägt	2	s1	L0,1
+helägt	2	s1	L0,1	vi
 helén	1	1
 heléne	1	1
 hem	1
@@ -13436,7 +13436,7 @@ hembiträde	2	s2	L1,2
 hembränt	2	s1
 hemby	2	s1	L1
 hembygd	2	s1
-hembygdsförening	2	s3	L3
+hembygdsförening	2	s3	L3	vi
 hembygdsgården	2	s2	L2
 hemelektronik	2	s4	L4
 hemfosa	2	s1	L1
@@ -13493,8 +13493,8 @@ hemmen	1
 hemmet	1
 hemmets	1
 hemorrojder	1	2
-hemort	2	s1
-hemorten	2	s1
+hemort	2	s1	vi
+hemorten	2	s1	vi
 hemresa	2	s1	L1
 hemresan	2	s1	L1
 hemse	2
@@ -13931,8 +13931,8 @@ horribel	1	1
 horribelt	1	1
 horribla	1	1
 horst	1
-horungar	2	s1	L0
-horunge	2	s1	L0
+horungar	2	s1	L0	vi
+horunge	2	s1	L0	vi
 hos	1
 hospital	1	2
 host	1
@@ -13976,7 +13976,7 @@ hovet	1	o
 hovrätt	2	o	s1	L0
 hovrätten	2	o	s1	L0
 hovslagare	2	s1	L0,1
-hovås	2	s1	L0,1
+hovås	2	s1	L0,1	vi
 howard	1
 hp	2
 hr	1
@@ -14069,13 +14069,13 @@ hundratal	2	s2	L2
 hundratalet	2	s2	L2
 hundratals	2	s2	L2
 hundratusen	1	2
-hundraåringen	2	s2	L2
+hundraåringen	2	s2	L2	vi
 hundring	2
 hunds	1
 hundskit	2	s1	L1
 hundvakt	2	s1
 hundvalp	2	s1
-hundägare	2	s1	L1
+hundägare	2	s1	L1	vi
 hunger	1
 hungern	1
 hungersnöd	2	s2	L2
@@ -14188,8 +14188,8 @@ huvudvägen	2	s2	L0,2
 huvudvärk	2	s2	L0
 huvudvärken	2	s2	L0
 huvudvärkstabletter	2	s4	L0
-huvudägare	2	s2	L0,2
-huvudämne	2	s2	L0
+huvudägare	2	s2	L0,2	vi
+huvudämne	2	s2	L0	vi
 hux	1
 hv	2
 hy	1
@@ -14254,7 +14254,7 @@ hyresgäst	2	s2	L0
 hyresgästen	2	s2	L0
 hyresgäster	2	s2	L0
 hyresgästerna	2	s2	L0
-hyresgästföreningen	2	s4	L0,4
+hyresgästföreningen	2	s4	L0,4	vi
 hyreshus	2	s2	L0,2
 hyreskontrakt	2	s3	L0
 hyreslägenhet	2	s4	L0,2,4
@@ -14292,7 +14292,7 @@ häck	1
 häckar	2
 häcken	1
 hädan	2
-hädanefter	2	s2	L0
+hädanefter	2	s2	L0	vi
 hädelse	2
 häfte	2
 häften	2
@@ -14823,8 +14823,8 @@ idrottarna	2	s1	L0
 idrotts	2
 idrottsevenemang	2	s5	L0
 idrottsförbund	2	s3	L0
-idrottsförening	2	s3	L0,3
-idrottsföreningar	2	s3	L0,3
+idrottsförening	2	s3	L0,3	vi
+idrottsföreningar	2	s3	L0,3	vi
 idrottshall	2	s2	L0
 idrottsliga	2
 idrottslärare	2	s2	L0,2
@@ -14832,7 +14832,7 @@ idrottsman	2	s2	L0
 idrottsmän	2	s2	L0
 idrottsplats	2	s2	L0
 idrottsrörelsen	2	s2	L0,2
-idrottsutövare	2	s3	L0,2,3
+idrottsutövare	2	s3	L0,2,3	vi
 ids	1
 idun	1
 idyll	1	1
@@ -14994,9 +14994,9 @@ impulsiv	1	2
 in	1
 ina	2
 inaktiv	1	2
-inandning	2	s1
+inandning	2	s1	vi
 inatt	1	1
-inavel	2	s1	L1
+inavel	2	s1	L1	vi
 inbegriper	2	s2	L2
 inbetalning	2	s2	L2
 inbilla	2	s1
@@ -15417,7 +15417,7 @@ innsbruck	1
 inofficiell	1	4
 inofficiella	1	4
 inofficiellt	1	4
-inom	2	s1
+inom	2	s1	vi
 inombords	2	s2	L2
 inomhus	2	s2	L2
 input	1
@@ -15842,7 +15842,7 @@ iof	1	2
 iogt	1	3
 iok	1	2
 ion	1
-iordning	2	s1	L1
+iordning	2	s1	L1	vi
 iowa	1
 ip	2
 iq	2
@@ -16255,7 +16255,7 @@ jordnötter	2	s1	L0
 jordskalv	2	s1	L0
 jordskorpan	2	s1	L0
 jordskred	2	s1	L0,1
-jordytan	2	s1	L0,1
+jordytan	2	s1	L0,1	vi
 jorge	1
 jos	1
 jose	1	1
@@ -16300,7 +16300,7 @@ jsm	1	2
 ju	1
 juana	2	1
 jubel	1
-jubelidiot	2	s4	L0,4
+jubelidiot	2	s4	L0,4	vi
 jubileum	1	2
 jubla	2
 jublade	2
@@ -16327,7 +16327,7 @@ juice	1
 juicen	1
 jul	1
 jula	2
-julafton	2	s1	L0
+julafton	2	s1	L0	vi
 jular	2
 julas	2
 julbocken	2	s1	L0
@@ -16462,7 +16462,7 @@ jämnan	2
 jämnar	2
 jämnare	2
 jämnt	1
-jämnåriga	2	s1	L1
+jämnåriga	2	s1	L1	vi
 jämsides	2	s1	L1
 jämställa	2	s1
 jämställdhet	2	s2	L2
@@ -16495,7 +16495,7 @@ järnvägsnätet	2	s2	L0,1,2
 järnvägsspår	2	s2	L0,1,2
 järnvägsstation	2
 järnvägsstationen	2
-järnåldern	2	s1	L0
+järnåldern	2	s1	L0	vi
 järv	1
 järva	2
 järvafältet	2	s2
@@ -16664,7 +16664,7 @@ kallvatten	2	s1
 kalmar	1
 kalmars	1
 kalmarsund	1	2
-kalmarunionen	2	s4	L4
+kalmarunionen	2	s4	L4	vi
 kalori	1	2
 kalorier	1	2
 kalsonger	1	1
@@ -16722,7 +16722,7 @@ kanalen	1	1
 kanaler	1	1
 kanalerna	1	1
 kanalisera	1	3
-kanarieöarna	2	1	s4	L1,4
+kanarieöarna	2	1	s4	L1,4	vi
 kand	1
 kandidat	1	2
 kandidaten	1	2
@@ -17006,8 +17006,8 @@ katterna	2
 kattis	1
 kattmat	2	s1	L1
 katts	1
-kattungar	2	s1
-kattunge	2	s1
+kattungar	2	s1	vi
+kattunge	2	s1	vi
 katz	1
 kaukasus	1
 kavaj	1	1
@@ -17349,10 +17349,10 @@ klienterna	1	1
 klimakteriet	1	2
 klimat	1	1
 klimatet	1	1
-klimatförändring	2	1	s3	L1
-klimatförändringar	2	1	s3	L1
-klimatförändringarna	2	1	s3	L1
-klimatförändringen	2	1	s3	L1
+klimatförändring	2	1	s3	L1	vi
+klimatförändringar	2	1	s3	L1	vi
+klimatförändringarna	2	1	s3	L1	vi
+klimatförändringen	2	1	s3	L1	vi
 klimatpolitiken	2	1	s4	L1,4
 klimax	1
 kling	1
@@ -17652,7 +17652,7 @@ koden	1	o
 koder	1	o
 koderna	1	o
 kodning	2	o
-kodord	2	o	s1	L0,1
+kodord	2	o	s1	L0,1	vi
 koffein	1	2
 kofot	2	s1	L0,1
 kofta	2
@@ -18121,7 +18121,7 @@ konstverk	2	s1
 konstverken	2	s1
 konstverket	2	s1
 konstvärlden	2	s1	L1
-konståkning	2	s1	L1
+konståkning	2	s1	L1	vi
 konsul	2
 konsulat	1	2
 konsulatet	1	2
@@ -18348,7 +18348,7 @@ korsning	2
 korsningar	2
 korsningen	2
 korsnäs	1
-korsord	2	s1	L1
+korsord	2	s1	L1	vi
 korståg	2	s1	L1
 korstågen	2	s1	L1
 korståget	2	s1	L1
@@ -18465,7 +18465,7 @@ kramen	1
 kramer	1
 kramfors	2	s1	L0
 kramp	1
-krampaktigt	2	s1
+krampaktigt	2	s1	vi
 kramper	2
 kran	1
 kranar	2
@@ -18535,7 +18535,7 @@ krigsherrar	2	s1
 krigsherre	2	s1
 krigsmakt	2	s1
 krigsmakten	2	s1
-krigsmateriel	2	s4	L4
+krigsmateriel	2	s4	L4	vi
 krigsslutet	2	s1	L1
 krigsstigen	2	s1	L1
 krigstid	2	s1	L1
@@ -18861,8 +18861,8 @@ kult	1
 kulten	1
 kultur	1	1
 kulturarbetare	2	1	s3	L1,3
-kulturarv	2	1	s2	L1
-kulturarvet	2	1	s2	L1
+kulturarv	2	1	s2	L1	vi
+kulturarvet	2	1	s2	L1	vi
 kulturcentrum	2	1	s2	L1
 kulturchef	2	1	s2	L1,2
 kultureliten	2	1	s3	L1,3
@@ -18934,11 +18934,11 @@ kungsgården	2	s1	L1
 kungshamn	2	s1
 kungsholmen	2	s1
 kungsträdgården	2	s2	L2
-kungsängen	2	s1
+kungsängen	2	s1	vi
 kungsör	1	1
 kungsörs	1	1
-kungälv	2	s1
-kungälvs	2	s1
+kungälv	2	s1	vi
+kungälvs	2	s1	vi
 kungörelse	2	s1	L1
 kunna	2
 kunnande	2
@@ -19232,7 +19232,7 @@ källan	2
 källare	2
 källaren	2
 källkritik	2	s2	L2
-källmaterial	2	s4	L4
+källmaterial	2	s4	L4	vi
 källor	2
 källorna	2
 källström	2	s1
@@ -19379,7 +19379,7 @@ könsfördelningen	2	s2	L0,2
 könsidentitet	2	s4	L0,4
 könskvotering	2	s2	L0,2
 könsneutral	2	s3	L0,1,2,3
-könsord	2	s1	L0,1
+könsord	2	s1	L0,1	vi
 könsorgan	2	s2	L0,2
 könsorganen	2	s2	L0,2
 könsorganet	2	s2	L0,2
@@ -19447,8 +19447,8 @@ köttet	1
 köttets	1
 köttfärs	2	s1
 köttfärssås	2	s2	L2
-köttätande	2	s1	L1
-köttätare	2	s1	L1
+köttätande	2	s1	L1	vi
+köttätare	2	s1	L1	vi
 l	1
 la	1
 lab	1
@@ -19563,9 +19563,9 @@ lagtexten	2	s1	L0
 laguna	1	1
 lagunen	1	1
 laguppställning	2	s2	L0
-lagändring	2	s1	L0
-lagändringar	2	s1	L0
-lagändringen	2	s1	L0
+lagändring	2	s1	L0	vi
+lagändringar	2	s1	L0	vi
+lagändringen	2	s1	L0	vi
 laholm	1	1
 laholms	1	1
 lahti	1
@@ -19640,7 +19640,7 @@ landslagsspelare	2	s2	L1,2
 landsman	2	s1
 landsmän	2	s1
 landsomfattande	2	s2
-landsort	2	s1
+landsort	2	s1	vi
 landsteg	2	s1	L1
 landsting	2	s1
 landstingen	2	s1
@@ -19777,12 +19777,12 @@ laval	1	1
 lavar	2
 lavendel	1	1
 lavin	1	1
-lavinartat	2	1	s2	L1,2
+lavinartat	2	1	s2	L1,2	vi
 lawrence	1
 lax	1
 laxar	2
 laxen	1
-laxå	2	s1	L1
+laxå	2	s1	L1	vi
 layout	1	1
 layouten	1	1
 lazarus	1
@@ -20005,7 +20005,7 @@ levnadsstandarden	2	s2	L0
 levnadssätt	2	s2	L0
 levnadsvanor	2	s2	L0,2
 levnadsvillkor	2	s3	L0,3
-levnadsår	2	s2	L0,2
+levnadsår	2	s2	L0,2	vi
 levt	1
 levy	1
 lewis	1
@@ -20043,7 +20043,7 @@ lidande	2
 lidanden	2
 lidandet	2
 lider	1
-lidingö	2	s2	L0,2
+lidingö	2	s2	L0,2	vi
 lidit	2
 lidköping	2	s1	L0,1
 lidköpings	2	s1	L0,1
@@ -20083,9 +20083,9 @@ likadant	1	2
 likaledes	2	s2	L0,2
 likande	2
 likar	2
-likartad	2	s1	L0,1
-likartade	2	s1	L0,1
-likartat	2	s1	L0,1
+likartad	2	s1	L0,1	vi
+likartade	2	s1	L0,1	vi
+likartat	2	s1	L0,1	vi
 likasinnade	2	s2	L0
 likaså	1	2
 likaväl	1	2
@@ -20142,7 +20142,7 @@ lillen	2
 lillfingret	2	s1
 lillian	1
 lilly	1
-lillån	2	s1	L1
+lillån	2	s1	L1	vi
 lily	1
 lim	1
 limbo	1
@@ -20368,7 +20368,7 @@ livsverk	2	s1
 livsviktiga	2	s1
 livsviktigt	2	s1
 livsåskådning	2	s2	L1,2
-livsöden	2	s1	L1
+livsöden	2	s1	L1	vi
 livvakt	2	s1	L0
 livvakten	2	s1	L0
 livvakter	2	s1	L0
@@ -20420,7 +20420,7 @@ ljusstakar	2	s1	L0,1
 ljusstaken	2	s1	L0,1
 ljusstyrka	2	s1	L0
 ljust	1
-ljusår	2	s1	L0,1
+ljusår	2	s1	L0,1	vi
 ljuv	1
 ljuva	2
 ljuvlig	2
@@ -20571,7 +20571,7 @@ louis	1	1
 louisa	2	1
 louise	1	1
 louisiana	1	3
-lounge	2	s1	L0
+lounge	2	s1	L0	vi
 lourdes	1
 louvren	1
 lov	1	o
@@ -20587,7 +20587,7 @@ loves	2
 lovet	1	o
 lovisa	2	1
 lovligt	2	o
-lovord	2	o	s1	L0,1
+lovord	2	o	s1	L0,1	vi
 lovsång	2	o	s1	L0
 lowe	2
 lp	2
@@ -20869,7 +20869,7 @@ lägenheter	2	s2	L0,2
 lägenheterna	2	s2	L0,2
 lägenhetshus	2	s3	L0,2,3
 läger	1
-lägereld	2	s2	L0
+lägereld	2	s2	L0	vi
 lägesrapport	2	s3	L0
 läget	2
 lägg	1
@@ -20946,7 +20946,7 @@ längd	1
 längden	1
 längder	2
 längdskidor	2	s1	L1
-längdskidåkning	2	s2	L1,2
+längdskidåkning	2	s2	L1,2	vi
 länge	2
 längesedan	2	s2	L2
 längesen	2	s2
@@ -21001,7 +21001,7 @@ lärarna	2
 lärarnas	2
 lärarutbildning	2	s3	L0,2
 lärarutbildningen	2	s3	L0,2
-läraryrket	2	s2	L0
+läraryrket	2	s2	L0	vi
 läras	2
 lärd	1
 lärda	2
@@ -21040,7 +21040,7 @@ läser	1
 läses	2
 läsförståelse	2	s2	L0,2
 läsförståelsen	2	s2	L0,2
-läsglasögon	2	s2	L0,1,2
+läsglasögon	2	s2	L0,1,2	vi
 läsk	1
 läsken	1
 läskig	2
@@ -21058,8 +21058,8 @@ lästips	2	s1	L0
 läsvärd	2	s1	L0,1
 läsvärda	2	s1	L0,1
 läsvärt	2	s1	L0,1
-läsår	2	s1	L0,1
-läsåret	2	s1	L0,1
+läsår	2	s1	L0,1	vi
+läsåret	2	s1	L0,1	vi
 lät	1
 läte	2
 läten	2
@@ -21087,7 +21087,7 @@ lättsamma	2	s1
 lättsamt	2	s1
 lättskrämd	2	s1
 lättvindigt	2	s1
-lättöl	2	s1	L1
+lättöl	2	s1	L1	vi
 läxa	2
 läxan	2
 läxar	2
@@ -21166,7 +21166,7 @@ långvarig	2	s1	L1
 långvariga	2	s1	L1
 långvarigt	2	s1	L1
 långväga	2	s1	L1
-lånord	2	s1	L0,1
+lånord	2	s1	L0,1	vi
 lår	1
 låren	1
 låret	1
@@ -21201,8 +21201,8 @@ löften	2
 löftena	2
 löftet	2
 lögn	1
-lögnaktig	2	s1
-lögnaktiga	2	s1
+lögnaktig	2	s1	vi
+lögnaktiga	2	s1	vi
 lögnare	2
 lögnen	1
 lögner	2
@@ -21236,8 +21236,8 @@ löneskillnaderna	2	s2	L0
 lönesättning	2	s2	L0
 löneutveckling	2	s3	L0,2
 löneutvecklingen	2	s3	L0,2
-löneökning	2	s2	L0,2
-löneökningar	2	s2	L0,2
+löneökning	2	s2	L0,2	vi
+löneökningar	2	s2	L0,2	vi
 löning	2
 lönlöst	2	s1	L0,1
 lönn	1
@@ -21257,7 +21257,7 @@ löp	1
 löpande	2
 löpare	2
 löparen	2
-löpeld	2	s1	L0
+löpeld	2	s1	L0	vi
 löper	1
 löpet	2
 löpning	2
@@ -21284,8 +21284,8 @@ lös	1
 lösa	2
 lösas	2
 lösen	1
-lösenord	2	s2	L0,2
-lösenordet	2	s2	L0,2
+lösenord	2	s2	L0,2	vi
+lösenordet	2	s2	L0,2	vi
 löser	1
 löses	2
 lösgodis	2	s1	L0,1
@@ -21390,7 +21390,7 @@ magnolia	1	1	o
 magnum	2
 magnus	1
 magnusson	2	s2
-magont	2	s1	L0
+magont	2	s1	L0	vi
 magra	2
 magsjuk	2	s1	L0,1
 magsjuka	2	s1	L0,1
@@ -21484,7 +21484,7 @@ malmqvist	2	s1
 malmskillnadsgatan	2	s3	L3
 malmsten	2	s1	L1
 malmström	2	s1
-malmö	2	s1	L1
+malmö	2	s1	L1	vi
 malmöbor	2	s2	L1,2
 malmöhus	1	2
 malmös	2
@@ -21493,7 +21493,7 @@ malt	1
 malta	2
 malte	2
 malung	2
-malå	2	s1	L0,1
+malå	2	s1	L0,1	vi
 mambo	1
 mamma	2
 mammaledig	2	s2	L2
@@ -21515,9 +21515,9 @@ mandarin	1	2
 mandat	1	1
 mandaten	1	1
 mandatet	1	1
-mandatperiod	2	1	s4	L1,4
-mandatperioden	2	1	s4	L1,4
-mandatperioder	2	1	s4	L1,4
+mandatperiod	2	1	s4	L1,4	vi
+mandatperioden	2	1	s4	L1,4	vi
+mandatperioder	2	1	s4	L1,4	vi
 mandel	2
 mandela	1	1
 mandelmassa	2	s2
@@ -21717,9 +21717,9 @@ marknivå	2	s2	L2
 marko	1
 marks	1
 markus	1
-markytan	2	s1	L1
-markägare	2	s1	L1
-markägaren	2	s1	L1
+markytan	2	s1	L1	vi
+markägare	2	s1	L1	vi
+markägaren	2	s1	L1	vi
 markör	1	1
 markörer	1	1
 marlboro	1
@@ -22003,9 +22003,9 @@ medeltiden	2	s2	L0,2
 medeltidens	2	s2	L0,2
 medelvärde	2	s2	L0,2
 medelvärdet	2	s2	L0,2
-medelålder	2	s2	L0
-medelåldern	2	s2	L0
-medelålders	2	s2	L0
+medelålder	2	s2	L0	vi
+medelåldern	2	s2	L0	vi
+medelålders	2	s2	L0	vi
 medfödd	2	s1	L0
 medfödda	2	s1	L0
 medföljer	2	s1	L0
@@ -22090,14 +22090,14 @@ medmänsklighet	2	s3	L0,3
 medresenärer	2	s3	L0,3
 medskyldig	2	s1	L0
 medskyldiga	2	s1	L0
-medurs	2	s1	L0,1
+medurs	2	s1	L0,1	vi
 medusa	2	1
 medverka	2	s1	L0
-medverkade	2	s1	L0
+medverkade	2	s1	L0	vi
 medverkan	2	s1	L0
 medverkande	2	s1	L0
 medverkar	2	s1	L0
-medverkat	2	s1	L0
+medverkat	2	s1	L0	vi
 medvetande	2	s1	L0,1
 medvetandet	2	s1	L0,1
 medveten	2	s1	L0,1
@@ -22188,7 +22188,7 @@ menas	2
 menat	2
 mendez	1
 mendoza	1	1	o
-mened	2	s1	L0,1
+mened	2	s1	L0,1	vi
 mening	2
 meningar	2
 meningarna	2
@@ -22313,7 +22313,7 @@ midjan	2
 midland	1
 midnatt	2	s1	L0
 midsommar	2	s1	L0
-midsommarafton	2	s3	L0
+midsommarafton	2	s3	L0	vi
 midsommarkransen	2	s3	L0
 midsommarstången	2	s3	L0
 midway	1
@@ -22340,7 +22340,7 @@ mikron	1
 mikroorganismer	2	s4
 mikroskop	1	2	o
 mikroskopiska	1	2	o
-mikrovågsugn	2	s3	L2
+mikrovågsugn	2	s3	L2	vi
 mil	1
 mila	1
 milan	2
@@ -22438,8 +22438,8 @@ min	1
 mina	2
 minas	2
 mind	1
-minderårig	2	s2	L2
-minderåriga	2	s2	L2
+minderårig	2	s2	L2	vi
+minderåriga	2	s2	L2	vi
 mindes	2
 minen	1
 miner	2
@@ -22518,7 +22518,7 @@ minstingen	2
 mint	1
 minus	1
 minusgrader	2	s2	L0,2
-minuspoäng	2	s3	L0
+minuspoäng	2	s3	L0	vi
 minusränta	2	s2	L0
 minut	1	1
 minuten	1	1
@@ -22670,7 +22670,7 @@ mjukare	2
 mjukglass	2	s1	L0
 mjukis	1
 mjuknar	2
-mjukost	2	s1	L0
+mjukost	2	s1	L0	vi
 mjukt	1
 mjukvara	2	s1	L0,1
 mjukvaran	2	s1	L0,1
@@ -22913,7 +22913,7 @@ moreno	1	1
 morfar	2	s1
 morfars	2	s1
 morfin	1	1
-morföräldrar	2	s2	L0
+morföräldrar	2	s2	L0	vi
 morgan	1
 morgans	1
 morgnar	2	o
@@ -23289,7 +23289,7 @@ myndigheternas	2	s2	L2
 myndigheters	2	s2	L2
 myndighets	2	s2	L2
 myndighetsbeslut	2	s4	L2,4
-myndighetsutövning	2	s4	L2,3,4
+myndighetsutövning	2	s4	L2,3,4	vi
 mynnar	2
 mynning	2
 mynningen	2
@@ -23487,8 +23487,8 @@ målområdet	2	s2	L0,2
 målskillnad	2	s1	L0
 målskytt	2	s1	L0
 målskyttar	2	s1	L0
-målsägande	2	s1	L0,1
-målsäganden	2	s1	L0,1
+målsägande	2	s1	L0,1	vi
+målsäganden	2	s1	L0,1	vi
 målsättning	2	s1	L0
 målsättningar	2	s1	L0
 målsättningen	2	s1	L0
@@ -23536,8 +23536,8 @@ mångkulturella	2	s3	L2
 mångkulturellt	2	s3	L2
 mångsidig	2	s1	L1
 mångt	1
-mångårig	2	s1	L1
-mångåriga	2	s1	L1
+mångårig	2	s1	L1	vi
+mångåriga	2	s1	L1	vi
 månlandningen	2	s1	L0
 månne	2
 måns	1
@@ -23604,7 +23604,7 @@ mönstring	2
 mönstringen	2
 mör	1
 mörby	1
-mörbylånga	2	2	s3	L0,1
+mörbylånga	2	2	s3	L0,1	vi
 mörda	2
 mördade	2
 mördades	2
@@ -23846,8 +23846,8 @@ naturnära	2	1	s2	L1,2
 naturreservat	2	1	s4	L1,4
 naturreservatet	2	1	s4	L1,4
 naturresurser	2	1	s3	L1
-naturskyddsföreningen	2	1	s4	L1,4
-naturskyddsföreningens	2	1	s4	L1,4
+naturskyddsföreningen	2	1	s4	L1,4	vi
+naturskyddsföreningens	2	1	s4	L1,4	vi
 natursköna	2	1	s2	L1,2
 natursten	2	1	s2	L1,2
 naturtillgångar	2	1	s3	L1
@@ -23936,7 +23936,7 @@ nedtill	2	s1	L0
 nedtryckt	2	s1	L0
 nedvärdera	2	s2	L0,1,2
 nedvärderar	2	s2	L0,1,2
-nedärvd	2	s1	L0
+nedärvd	2	s1	L0	vi
 nedåtgående	2	s2	L0,2
 nee	1
 negativ	1
@@ -24068,7 +24068,7 @@ nintendo	1	1
 nio	2
 nionde	2
 nior	2
-nioåring	2	s2	L0,2
+nioåring	2	s2	L0,2	vi
 nirvana	2	1
 nisch	1
 nissan	2
@@ -24160,7 +24160,7 @@ nora	2
 norah	2
 norberg	1
 nord	1
-nordafrika	2	s1	L0,1
+nordafrika	2	s1	L0,1	vi
 nordafrikanska	2	s3	L0,3
 nordahl	2	s1	L0,1
 nordamerika	2	s2	L0,2
@@ -24173,12 +24173,12 @@ nordeuropa	2	s3	L0,3
 nordgren	2	s1	L0,1
 nordic	1	o
 nordin	1	1
-nordirland	2	s1	L0
+nordirland	2	s1	L0	vi
 nordisk	1
 nordiska	1
 nordiskt	1
 nordkorea	2	s2	L0,2
-nordkoreanska	2	s3	L0,3
+nordkoreanska	2	s3	L0,3	vi
 nordkoreas	2	s2	L0,2
 nordlig	2
 nordliga	2
@@ -24220,7 +24220,7 @@ normaliseras	1	3
 normalisering	1	3
 normaliseringen	1	3
 normalt	1	1
-normalår	2	1	s2	L1,2
+normalår	2	1	s2	L1,2	vi
 norman	1
 normandie	1	2
 normativa	1
@@ -24248,7 +24248,7 @@ norrman	1
 norrmannen	2	s1
 norrmän	2	s1
 norrmännen	2	s1
-norrort	2	s1
+norrort	2	s1	vi
 norrsken	2	s1	L1
 norrtälje	2	1
 norrut	1
@@ -24372,8 +24372,8 @@ nybörjare	2	s1	L0
 nyckel	2
 nyckelbenet	2	s2	L2
 nyckeln	2
-nyckelord	2	s2	L2
-nyckelordet	2	s2	L2
+nyckelord	2	s2	L2	vi
+nyckelordet	2	s2	L2	vi
 nyckelpersoner	2	s3	L3
 nyckelpiga	2	s2	L2
 nyckelpigor	2	s2	L2
@@ -24404,7 +24404,7 @@ nyheter	2	s1	L0,1
 nyheterna	2	s1	L0,1
 nyheters	2	s1	L0,1
 nyhets	2	s1	L0,1
-nyhetsankare	2	s2	L0,1
+nyhetsankare	2	s2	L0,1	vi
 nyhetsbrev	2	s2	L0,1,2
 nyhetsbyrån	2	s2	L0,1,2,3
 nyhetsflödet	2	s2	L0,1,2
@@ -24484,9 +24484,9 @@ nytänkande	2	s1	L0
 nyval	2	s1	L0,1
 nyvalda	2	s1	L0,1
 nyvunna	2	s1	L0
-nyår	2	s1	L0,1
-nyåret	2	s1	L0,1
-nyårsafton	2	s2	L0,1
+nyår	2	s1	L0,1	vi
+nyåret	2	s1	L0,1	vi
+nyårsafton	2	s2	L0,1	vi
 nyårsdagen	2	s2	L0,1,2
 nyårslöfte	2	s2	L0,1
 nä	1
@@ -24532,7 +24532,7 @@ näring	2
 näringar	2
 näringen	2
 näringsbrist	2	s2	L0
-näringsidkare	2	s2	L0
+näringsidkare	2	s2	L0	vi
 näringskedjan	2	s2	L0,2
 näringsliv	2	s2	L0,2
 näringslivet	2	s2	L0,2
@@ -24540,7 +24540,7 @@ näringslivets	2	s2	L0,2
 näringslivs	2	s2	L0,2
 näringsrik	2	s2	L0,2
 näringsverksamhet	2	s4	L0,4
-näringsämnen	2	s2	L0
+näringsämnen	2	s2	L0	vi
 närkamp	2	s1	L0
 närke	1
 närkontakt	2	s2	L0
@@ -24689,7 +24689,7 @@ o'neill	1	1
 oacceptabel	2	s3	L0,3
 oacceptabelt	2	s3	L0,3
 oacceptabla	2	s3	L0,3
-oaktat	2	s1	L0
+oaktat	2	s1	L0	vi
 oaktsamhet	2	s3	L0,3
 oanständiga	2	s2	L0
 oanständigt	2	s2	L0
@@ -24699,7 +24699,7 @@ oansvarigt	2	s2	L0,2
 oanvänd	2	s2	L0
 oanvända	2	s2	L0
 oanvändbar	2	s3	L0,3
-oartigt	2	s1	L0,1
+oartigt	2	s1	L0,1	vi
 oas	1	1
 oasen	1	1
 oasis	1	1
@@ -24851,15 +24851,15 @@ oecd	1	3
 oegentligheter	2	s4	L0,4
 oemotsagda	2	s3	L0,2
 oemotståndlig	2	s3	L0,2
-oeniga	2	s1	L0,1
+oeniga	2	s1	L0,1	vi
 oenighet	2	s3	L0,1,3
-oense	2	s1	L0
+oense	2	s1	L0	vi
 oerfaren	2	s2	L0,1,2
 oerfarna	2	s2	L0,1,2
 oerhörd	2	s2	L0,2
 oerhörda	2	s2	L0,2
 oerhört	2	s2	L0,2
-oetiskt	2	s1	L0,1
+oetiskt	2	s1	L0,1	vi
 of	1
 ofantliga	1	1
 ofantligt	1	1
@@ -24923,7 +24923,7 @@ ofullständiga	2	s2	L0
 ofödda	2	s1	L0
 oförberedd	2	s3	L0,1
 oförberedda	2	s3	L0,1
-oförenliga	2	s2	L0,2
+oförenliga	2	s2	L0,2	vi
 oförglömlig	2	s2	L0
 oförglömligt	2	s2	L0
 oförklarlig	2	s2	L0,2
@@ -24945,9 +24945,9 @@ oförutsett	2	s3	L0,2
 oförutsägbar	2	s4	L0,2,4
 oförutsägbara	2	s4	L0,2,4
 oförutsägbart	2	s4	L0,2,4
-oförändrad	2	s2	L0
-oförändrade	2	s2	L0
-oförändrat	2	s2	L0
+oförändrad	2	s2	L0	vi
+oförändrade	2	s2	L0	vi
+oförändrat	2	s2	L0	vi
 ogenerat	2	s2	L0,2
 ogenomtänkt	2	s3	L0,1
 ogenomtänkta	2	s3	L0,1
@@ -25062,7 +25062,7 @@ oliv	1	1
 oliver	1
 olivers	1
 olivia	1	1
-olivolja	2	1	s2	L1
+olivolja	2	1	s2	L1	vi
 olja	2
 oljan	2
 olje	2
@@ -25349,7 +25349,7 @@ onåd	2	s1	L0,1
 onödan	2	s1	L0,1
 onödig	2	s1	L0,1
 onödiga	2	s1	L0,1
-oordning	2	s1	L0,1
+oordning	2	s1	L0,1	vi
 opal	1	1
 opartisk	2	s1	L0,1
 opartiska	2	s1	L0,1
@@ -25648,10 +25648,10 @@ oscar	1
 oscars	1
 oscarsgalan	2	s2	L2
 oscarsson	2
-oscarsteatern	2	s3	L3
-oseriös	2	s3	L0,3
-oseriösa	2	s3	L0,3
-oseriöst	2	s3	L0,3
+oscarsteatern	2	s3	L3	vi
+oseriös	2	s3	L0,3	vi
+oseriösa	2	s3	L0,3	vi
+oseriöst	2	s3	L0,3	vi
 osis	1
 oskadd	2	s1	L0
 oskadda	2	s1	L0
@@ -25694,7 +25694,7 @@ ostar	2
 ostbågar	2	s1	L1
 osten	1
 osthyvel	2	s1	L1
-ostindiska	2	s1
+ostindiska	2	s1	vi
 ostkaka	2	s1	L1
 ostkusten	2	s1
 ostraffad	2	s1	L0
@@ -25851,18 +25851,18 @@ oxford	1
 oxie	1
 oy	1
 ozon	1	1	o
-oäkta	2	s1	L0
+oäkta	2	s1	L0	vi
 oändlig	1	1
 oändliga	1	1
 oändlighet	1	1
 oändligheten	1	1
-oärlig	2	s1	L0,1
-oärliga	2	s1	L0,1
-oärligt	2	s1	L0,1
-oönskad	2	s1	L0
-oönskade	2	s1	L0
-oönskat	2	s1	L0
-oöppnad	2	s1	L0
+oärlig	2	s1	L0,1	vi
+oärliga	2	s1	L0,1	vi
+oärligt	2	s1	L0,1	vi
+oönskad	2	s1	L0	vi
+oönskade	2	s1	L0	vi
+oönskat	2	s1	L0	vi
+oöppnad	2	s1	L0	vi
 p	1
 pa	1
 paavo	1
@@ -25939,7 +25939,7 @@ palmemordet	2	s2	L2
 palmer	1
 palmers	2
 palmes	2
-palmolja	2	s1
+palmolja	2	s1	vi
 palms	1
 palo	1
 palsternacka	2	s2
@@ -25960,7 +25960,7 @@ pang	1
 panik	1	1
 panikattack	2	1	s3	L1
 paniken	1	1
-panikångest	2	1	s2	L1
+panikångest	2	1	s2	L1	vi
 pank	1
 panna	2
 pannan	2
@@ -26571,7 +26571,7 @@ pirat	1	1
 piraten	1	1
 pirater	1	1
 piraterna	1	1
-piratkopiering	2	1	s4	L1,4
+piratkopiering	2	1	s4	L1,4	vi
 piren	1
 piroger	1	1	o
 pirr	1
@@ -26757,7 +26757,7 @@ plural	1	1
 pluralis	2	s1	L0,1
 plus	1
 plusgrader	2	s1	L1
-pluspoäng	2	s2
+pluspoäng	2	s2	vi
 pluto	1
 pluton	1	1
 plutonen	1	1
@@ -26832,7 +26832,7 @@ polar	1	1
 polare	2
 polaren	2
 polares	1	1
-polaris	2	1	s2	L1,2
+polaris	2	1	s2	L1,2	vi
 polarisera	1	3
 polarisering	1	3
 polariseringen	1	3
@@ -26886,13 +26886,13 @@ polisstationen	2	1
 polisstyrka	2	1	s2	L1
 polisutbildningen	2	1	s3	L1,2
 polisväsendet	2	1	s2	L1,2
-polisyrket	2	1	s2	L1
+polisyrket	2	1	s2	L1	vi
 politik	1	2
 politiken	1	2
 politikens	1	2
 politiker	1	1
-politikerförakt	2	1	s5	L1
-politikerföraktet	2	1	s5	L1
+politikerförakt	2	1	s5	L1	vi
+politikerföraktet	2	1	s5	L1	vi
 politikern	1	1
 politikerna	1	1
 politikernas	1	1
@@ -27029,7 +27029,7 @@ postkontoret	2	s2	L2
 postmodern	2	s2	L2
 postmoderna	2	s2	L2
 postnummer	2	s1
-postorder	2	s1	L1
+postorder	2	s1	L1	vi
 posts	1
 postumt	1	1
 potatis	1	1
@@ -27121,7 +27121,7 @@ predikat	1	2
 predikningar	1	1
 prefekt	1	1
 preferens	1	2
-preferensaktier	2	2	s3
+preferensaktier	2	2	s3	vi
 preferenser	1	2
 prefix	1	1
 prejudikat	1	3
@@ -27189,7 +27189,7 @@ presschef	2	s1	L1
 pressekreterare	2	s3	L3
 pressen	1
 pressens	1
-pressetiska	2	s1	L1
+pressetiska	2	s1	L1	vi
 pressfrihet	2	s2	L1,2
 presskonferens	2	s3
 presskonferensen	2	s3
@@ -27310,9 +27310,9 @@ privatperson	2	1	s3	L1,3
 privatpersoner	2	1	s3	L1,3
 privatpersoners	2	1	s3	L1,3
 privatskola	2	1	s2	L1,2
-privatägd	2	1	s2	L1,2
-privatägda	2	1	s2	L1,2
-privatägt	2	1	s2	L1,2
+privatägd	2	1	s2	L1,2	vi
+privatägda	2	1	s2	L1,2	vi
+privatägt	2	1	s2	L1,2	vi
 privilegier	1	2
 privilegierad	1	4
 privilegierade	1	4
@@ -27848,7 +27848,7 @@ påsatt	2	s1	L0
 påse	2	s1	L0
 påsen	2
 påsk	1
-påskafton	2	s1
+påskafton	2	s1	vi
 påskdagen	2	s1	L1
 påsken	1
 påskhelgen	2	s1
@@ -27857,7 +27857,7 @@ påsklov	2	s1	L1
 påsklovet	2	s1	L1
 påskrivet	2	s1	L0,1
 påskynda	2	s1	L0
-påskägg	2	s1
+påskägg	2	s1	vi
 påslag	2	s1	L0,1
 påslagen	2	s1	L0,1
 påslakan	2	s1	L0,1
@@ -27974,7 +27974,7 @@ radiosporten	2	s3	L0
 radiostation	2
 radiostationen	2
 radiostationer	2
-radioteatern	2	s4	L0,4
+radioteatern	2	s4	L0,4	vi
 radiotjänst	2	s3	L0
 radiovågor	2	s3	L0,3
 raf	1
@@ -28058,8 +28058,8 @@ randiga	2
 randigt	2
 rang	1
 rangen	1
-rangordna	2	s1	L1
-rangordning	2	s1	L1
+rangordna	2	s1	L1	vi
+rangordning	2	s1	L1	vi
 rank	1
 ranka	2
 rankad	2
@@ -28100,7 +28100,7 @@ rapporterats	1	2
 rapportering	1	2
 rapporteringen	1	2
 rapporterna	1	1
-rapsolja	2	s1
+rapsolja	2	s1	vi
 rar	1
 rara	2
 rare	2
@@ -28542,8 +28542,8 @@ renhet	2	s1	L0,1
 rening	2
 reningsverk	2	s2	L0
 reningsverket	2	s2	L0
-renodlade	2	s1	L0,1
-renodlat	2	s1	L0,1
+renodlade	2	s1	L0,1	vi
+renodlat	2	s1	L0,1	vi
 renovera	1	2
 renoverade	1	2
 renoverades	1	2
@@ -28898,7 +28898,7 @@ rikspolischef	2	s3	L2,3
 rikspolischefen	2	s3	L2,3
 rikspolisstyrelsen	2	s3	L2,3
 rikssvenska	2	s1
-riksteatern	2	s2	L2
+riksteatern	2	s2	L2	vi
 rikstäckande	2	s1
 riksväg	2	s1	L1
 riksvägen	2	s1	L1
@@ -29060,7 +29060,7 @@ rockmusik	2	s2	L1,2
 rocks	1
 rockstjärna	2	s1	L1
 rocky	1
-rockärmen	2	s1
+rockärmen	2	s1	vi
 rod	1
 rodd	1
 rodde	2
@@ -29393,7 +29393,7 @@ rygga	2
 ryggar	2
 ryggen	1
 ryggmärgen	2	s1
-ryggont	2	s1
+ryggont	2	s1	vi
 ryggrad	2	s1	L1
 ryggraden	2	s1	L1
 ryggradslösa	2	s2	L1,2
@@ -29605,7 +29605,7 @@ råkade	2
 råkar	2
 råkas	2
 råkat	2
-råmaterial	2	s4	L0,4
+råmaterial	2	s4	L0,4	vi
 rån	1
 råna	2
 rånade	2
@@ -29617,7 +29617,7 @@ rånarna	2
 rånat	2
 rånet	1
 råneå	1
-råolja	2	s1	L0
+råolja	2	s1	L0	vi
 rår	1
 rårörda	2	s1	L0,1
 råsunda	2	s1	L0
@@ -29721,13 +29721,13 @@ röstningen	2
 rösträkningen	2	s1	L1
 rösträtt	2	s1
 rösträtten	2	s1
-röstånga	2	s1	L0
+röstånga	2	s1	L0	vi
 röt	1
 röta	2
 rött	1
 rötter	1
 rötterna	1
-rötägg	2	s1	L0
+rötägg	2	s1	L0	vi
 röv	1
 röva	2
 rövar	2
@@ -29741,7 +29741,7 @@ sabbade	2
 sabbar	2
 sabbat	2
 sabbaten	1
-sabbatsår	2	s2	L2
+sabbatsår	2	s2	L2	vi
 sabel	1
 sabina	2	1
 sabine	2	1
@@ -30043,9 +30043,9 @@ samtalar	2	s1	L1
 samtalen	2	s1	L1
 samtalet	2	s1	L1
 samtalsterapi	2	s4	L1,4
-samtalsämne	2	s2	L1
-samtalsämnen	2	s2	L1
-samtalsämnet	2	s2	L1
+samtalsämne	2	s2	L1	vi
+samtalsämnen	2	s2	L1	vi
+samtalsämnet	2	s2	L1	vi
 samtid	2	s1	L1
 samtida	2	s1	L1
 samtiden	2	s1	L1
@@ -30117,7 +30117,7 @@ sanning	2
 sanningar	2
 sanningen	2
 sanningens	2
-sanningsenlig	2	s2	L2
+sanningsenlig	2	s2	L2	vi
 sanningshalten	2	s2
 sannolik	2	s2	L2
 sannolika	2	s2	L2
@@ -30468,7 +30468,7 @@ sergel	1
 sergels	1
 sergio	1
 serie	1
-seriealbum	2	s3	L0
+seriealbum	2	s3	L0	vi
 seriefigur	2	s4	L0,4
 seriemördare	2	s3	L0,3
 serien	1
@@ -30558,7 +30558,7 @@ sexualundervisning	2	2	s5	L1,2,5
 sexuell	1	2
 sexuella	1	2
 sexuellt	1	2
-sexåring	2	s1	L1
+sexåring	2	s1	L1	vi
 sexövergrepp	2	s3	L1
 seymour	1
 sf	2
@@ -30750,7 +30750,7 @@ simulerar	1	2
 simulering	1	2
 sin	1
 sina	2
-sinai	2	s2	L2
+sinai	2	s2	L2	vi
 sinar	2
 sinatra	1	1
 sinclair	1	1
@@ -30890,7 +30890,7 @@ sjunnesson	2
 sjuttio	2
 sjuttiotalet	2	s3	L3
 sjutton	2
-sjuåring	2	s1	L0,1
+sjuåring	2	s1	L0,1	vi
 sjysst	1
 själ	1
 själar	2
@@ -30902,7 +30902,7 @@ själslig	2
 själsliga	2
 själv	1
 själva	2
-självaktning	2	s1
+självaktning	2	s1	vi
 självaste	2
 självbehärskning	2	s2
 självbestämmande	2	s2
@@ -30916,7 +30916,7 @@ självcensur	2	s2	L2
 självdisciplin	2	s3	L3
 självdistans	2	s2
 självfallet	2	s1
-självförakt	2	s2
+självförakt	2	s2	vi
 självförsvar	2	s2	L2
 självförsörjning	2	s2
 självförtroende	2	s2	L2
@@ -30965,7 +30965,7 @@ självt	1
 självupptagen	2	s2	L2
 självutnämnd	2	s2	L1
 självutnämnda	2	s2	L1
-självömkan	2	s1
+självömkan	2	s1	vi
 sjätte	2
 sjö	1
 sjöar	2
@@ -31061,7 +31061,7 @@ skalla	2
 skallar	2
 skalle	2
 skallen	1
-skallerorm	2	s2
+skallerorm	2	s2	vi
 skallig	2
 skalliga	2
 skalor	2
@@ -31146,8 +31146,8 @@ skattebetalare	2	s3	L3
 skattebetalarna	2	s3	L3
 skattebetalarnas	2	s3	L3
 skattebrott	2	s2
-skattefinansierad	2	s5	L5
-skattefinansierade	2	s5	L5
+skattefinansierad	2	s5	L5	vi
+skattefinansierade	2	s5	L5	vi
 skatteflykt	2	s2
 skattefritt	2	s2
 skattehöjning	2	s2
@@ -31255,9 +31255,9 @@ skidor	2
 skidorna	2
 skidresa	2	s1	L0,1
 skidskytte	2	s1	L0
-skidåkare	2	s1	L0,1
-skidåkning	2	s1	L0,1
-skidåkningen	2	s1	L0,1
+skidåkare	2	s1	L0,1	vi
+skidåkning	2	s1	L0,1	vi
+skidåkningen	2	s1	L0,1	vi
 skiffer	1
 skifs	1
 skift	1
@@ -31345,8 +31345,8 @@ skitsnacket	2	s1	L0
 skitsnygg	2	s1	L0
 skitstövel	2	s1	L0
 skitstövlar	2	s1	L0
-skitungar	2	s1	L0
-skitunge	2	s1	L0
+skitungar	2	s1	L0	vi
+skitunge	2	s1	L0	vi
 skiva	2
 skivan	2
 skivans	2
@@ -31407,8 +31407,8 @@ skogsbränderna	2	s1
 skogsindustrin	2	s3	L2,3
 skogsmark	2	s1
 skogsområde	2	s2	L2
-skogsägare	2	s1	L1
-skogås	2	s1	L0,1
+skogsägare	2	s1	L1	vi
+skogås	2	s1	L0,1	vi
 skoj	1
 skoja	2
 skojade	2
@@ -31481,7 +31481,7 @@ skolverket	2	s1	L0
 skolverkets	2	s1	L0
 skolvärlden	2	s1	L0,1
 skolväsendet	2	s1	L0,1
-skolår	2	s1	L0,1
+skolår	2	s1	L0,1	vi
 skomakare	2	s1	L0,1
 skon	1
 skona	1
@@ -31550,7 +31550,7 @@ skribenterna	1	1
 skridsko	1
 skridskor	1
 skridskorna	1
-skridskoåkning	2	s2	L2
+skridskoåkning	2	s2	L2	vi
 skrift	1
 skriften	1
 skrifter	2
@@ -31719,7 +31719,7 @@ skyddsrum	2	s1
 skyddstillsyn	2	s2	L2
 skyddsutrustning	2	s2	L1
 skyddsväst	2	s1
-skyddsängel	2	s1
+skyddsängel	2	s1	vi
 skyfall	2	s1	L0
 skyffla	2
 skygg	1
@@ -31789,7 +31789,7 @@ skäll	1
 skälla	2
 skällde	2
 skäller	1
-skällsord	2	s1	L1
+skällsord	2	s1	L1	vi
 skällt	1
 skämde	2
 skämdes	2
@@ -31894,7 +31894,7 @@ sköndal	1	1
 skönhet	2	s1	L0,1
 skönheten	2	s1	L0,1
 skönheter	2	s1	L0,1
-skönhetsideal	2	s4	L0,1,4
+skönhetsideal	2	s4	L0,1,4	vi
 skönhetssömn	2	s2	L0,1
 skönja	2
 skönlitteratur	2	s4	L0,4
@@ -31942,7 +31942,7 @@ slagfält	2	s1	L0
 slagfältet	2	s1	L0
 slagit	1
 slagits	1
-slagord	2	s1	L0,1
+slagord	2	s1	L0,1	vi
 slagpåse	2	s1	L0,1
 slags	1
 slagskepp	2	s1	L0
@@ -32132,8 +32132,8 @@ slutsålt	2	s1	L0
 sluttning	2
 sluttningar	2
 sluttningen	2
-slutändan	2	s1	L0
-slutänden	2	s1	L0
+slutändan	2	s1	L0	vi
+slutänden	2	s1	L0	vi
 sly	1
 slyna	2
 slynor	2
@@ -32366,8 +32366,8 @@ smärtsamt	2	s1
 smärtstillande	2	s1
 små	1
 småbarn	2	s1	L0,1
-småbarnsförälder	2	s3	L0,1
-småbarnsföräldrar	2	s3	L0,1
+småbarnsförälder	2	s3	L0,1	vi
+småbarnsföräldrar	2	s3	L0,1	vi
 småbitar	2	s1	L0,1
 smådjur	2	s1	L0,1
 småflickor	2	s1	L0
@@ -32385,7 +32385,7 @@ småländska	2	s1	L0
 smålänning	2	s1	L0
 smålänningar	2	s1	L0
 småningom	2
-småorter	2	s1	L0
+småorter	2	s1	L0	vi
 småpartier	2	s2	L0,2
 småpengar	2	s1	L0
 småpojkar	2	s1	L0
@@ -32400,7 +32400,7 @@ småstäder	2	s1	L0,1
 småsyskon	2	s1	L0
 småtjejer	2	s1	L0
 smått	1
-småungar	2	s1	L0
+småungar	2	s1	L0	vi
 småvägar	2	s1	L0,1
 smög	1
 smögen	1
@@ -32485,8 +32485,8 @@ snoppen	1
 snor	1
 snorig	2
 snorre	2
-snorungar	2	s1	L0
-snorunge	2	s1	L0
+snorungar	2	s1	L0	vi
+snorunge	2	s1	L0	vi
 snott	1
 snowboard	1
 sns	1	2
@@ -32675,8 +32675,8 @@ solen	1
 solenergi	2	s3	L0,3
 solens	1
 solförmörkelse	2	s2	L0
-solglasögon	2	s2	L0,1,2
-solglasögonen	2	s2	L0,1,2
+solglasögon	2	s2	L0,1,2	vi
+solglasögonen	2	s2	L0,1,2	vi
 solid	1	1
 solida	1	1
 solidarisk	1	2
@@ -32736,7 +32736,7 @@ sommardag	2	s2	L2
 sommardäck	2	s2
 sommaren	2
 sommarens	2
-sommarhalvåret	2	s3	L3
+sommarhalvåret	2	s3	L3	vi
 sommarhus	2	s2	L2
 sommarjobb	2	s2
 sommarjobbet	2	s2
@@ -32864,8 +32864,8 @@ sovjetisk	1	1
 sovjetiska	1	1
 sovjetiskt	1	1
 sovjets	1	1
-sovjetunionen	2	1	s4	L4
-sovjetunionens	2	1	s4	L4
+sovjetunionen	2	1	s4	L4	vi
+sovjetunionens	2	1	s4	L4	vi
 sovmorgon	2	o	s1	L0
 sovplats	2	o	s1	L0
 sovplatser	2	o	s1	L0
@@ -33243,7 +33243,7 @@ sprängningar	2
 sprängningen	2
 sprängs	1
 sprängt	1
-sprängämnen	2	s1
+sprängämnen	2	s1	vi
 sprätt	1
 språk	1
 språkbruk	2	s1	L0,1
@@ -33402,8 +33402,8 @@ stadsmissionen	2
 stadsmuseet	2	s2	L1,2
 stadsparken	2	s1
 stadsplanering	2	s2	L2
-stadsteater	2	s2	L2
-stadsteatern	2	s2	L1,2
+stadsteater	2	s2	L2	vi
+stadsteatern	2	s2	L1,2	vi
 stafett	1	1
 stafetten	1	1
 staff	1
@@ -33466,7 +33466,7 @@ starkast	2
 starkaste	2
 starke	2
 starkt	1
-starköl	2	s1	L1
+starköl	2	s1	L1	vi
 starr	1
 start	1
 starta	2
@@ -33477,7 +33477,7 @@ startar	2
 startas	2
 startat	2
 startats	2
-startelvan	2	s1	L0
+startelvan	2	s1	L0	vi
 starten	1
 starter	2
 startfältet	2	s1	L0
@@ -33640,7 +33640,7 @@ stenson	1
 stensson	1
 stenström	2	s1	L0
 stenungsund	1	2
-stenåldern	2	s1	L0
+stenåldern	2	s1	L0	vi
 step	1
 stephan	1
 stephanie	1
@@ -33762,7 +33762,7 @@ stockholms	2	s1
 stockholmsbörsen	2	s2
 stockholmska	2
 stockholmsområdet	2	s3	L3
-stockholmsregionen	2	s4	L4
+stockholmsregionen	2	s4	L4	vi
 stockholmstrakten	2	s2
 stockton	1
 stod	1
@@ -33833,8 +33833,8 @@ storlek	2	s1	L0,1
 storlekar	2	s1	L0,1
 storlekarna	2	s1	L0,1
 storleken	2	s1	L0,1
-storleksordning	2	s2	L0,1,2
-storleksordningen	2	s2	L0,1,2
+storleksordning	2	s2	L0,1,2	vi
+storleksordningen	2	s2	L0,1,2	vi
 storm	1
 storma	2
 stormade	2
@@ -34093,7 +34093,7 @@ studenternas	1	1
 studenters	1	1
 studentexamen	2	1	s3	L0,3
 studentförbundet	2	1	s3	L0
-studentförening	2	1	s3	L0,3
+studentförening	2	1	s3	L0,3	vi
 studentkår	2	1	s2	L0,2
 studentkåren	2	1	s2	L0,2
 studentliv	2	1	s2	L0,2
@@ -34512,7 +34512,7 @@ sundsvalls	2	s1
 sune	2
 sunes	2
 sunkiga	2
-sunnanå	2	s2	L2
+sunnanå	2	s2	L2	vi
 sunne	2
 sunt	1
 sup	1
@@ -34787,8 +34787,8 @@ svärd	1
 svärdet	1
 svärdsjö	2	s1	L0,1
 svärfar	2	s1	L0,1
-svärföräldrar	2	s2	L0
-svärföräldrarna	2	s2	L0
+svärföräldrar	2	s2	L0	vi
+svärföräldrarna	2	s2	L0	vi
 svärm	1
 svärmar	2
 svärmor	2	s1	L0,1
@@ -34829,23 +34829,23 @@ swiss	1
 swärd	1
 sy	1
 syd	1
-sydafrika	2	s1	L0,1
+sydafrika	2	s1	L0,1	vi
 sydafrikansk	2	s3	L0,3
 sydafrikanska	2	s3	L0,3
-sydafrikas	2	s1	L0,1
+sydafrikas	2	s1	L0,1	vi
 sydamerika	2	s2	L0,2
 sydamerikanska	2	s4	L0,4
 sydde	2
 sydeuropa	2	s3	L0,3
 sydkorea	2	s2	L0,2
-sydkoreanska	2	s3	L0,3
+sydkoreanska	2	s3	L0,3	vi
 sydkoreas	2	s2	L0,2
 sydkusten	2	s1	L0
 sydlig	2
 sydliga	2
 sydligare	2
 sydligaste	2
-sydostasien	2	1	s2	L0,2
+sydostasien	2	1	s2	L0,2	vi
 sydostlig	2	1
 sydow	1
 sydpolen	2	s1	L0,1
@@ -35145,13 +35145,13 @@ säpos	1
 sär	1
 sära	2
 särar	2
-särart	2	s1	L0,1
+särart	2	s1	L0,1	vi
 särbehandlas	2	s2	L0
 särbehandling	2	s2	L0
 särdeles	2
 särdrag	2	s1	L0,1
-säregen	2	s1	L0,1
-säregna	2	s1	L0,1
+säregen	2	s1	L0,1	vi
+säregna	2	s1	L0,1	vi
 särintressen	2	s2	L0
 särklass	2	s1	L0
 särskild	2	s1	L0
@@ -35234,7 +35234,7 @@ sånt	1
 sånär	1	1
 såpa	2
 såpass	1
-såpopera	2	s1	L0,1
+såpopera	2	s1	L0,1	vi
 sår	1
 såra	2
 sårade	2
@@ -35274,7 +35274,7 @@ söderman	2	s2	L0
 södermanland	1
 södermanlands	1
 södern	1
-söderort	2	s2	L0
+söderort	2	s2	L0	vi
 söderqvist	2	s2	L0
 söders	1
 söderstadion	2	s2	L0,2
@@ -35964,7 +35964,7 @@ tidpunkt	2	s1	L0
 tidpunkten	2	s1	L0
 tidpunkter	2	s1	L0
 tids	1
-tidsandan	2	s1	L0
+tidsandan	2	s1	L0	vi
 tidsbegränsade	2	s2	L0
 tidsfrist	2	s1	L0
 tidsfristen	2	s1	L0
@@ -35978,16 +35978,16 @@ tidskrifter	2	s1	L0
 tidskrävande	2	s1	L0,1
 tidsmaskin	2	s2	L0,2
 tidsmässigt	2	s1	L0
-tidsperiod	2	s3	L0,3
-tidsperioden	2	s3	L0,3
-tidsperioder	2	s3	L0,3
+tidsperiod	2	s3	L0,3	vi
+tidsperioden	2	s3	L0,3	vi
+tidsperioder	2	s3	L0,3	vi
 tidsplan	2	s1	L0,1
 tidsplanen	2	s1	L0,1
 tidspress	2	s1	L0
 tidsram	2	s1	L0,1
 tidszon	2	s1	L0,1
 tidszoner	2	s1	L0,1
-tidsålder	2	s1	L0
+tidsålder	2	s1	L0	vi
 tidtabell	2	s2	L0
 tidtabellen	2	s2	L0
 tidvis	2	s1	L0,1
@@ -36048,7 +36048,7 @@ tilldelning	2	s1	L1
 tillfalla	2	s1
 tillfaller	2	s1
 tillflykt	2	s1
-tillflyktsort	2	s2
+tillflyktsort	2	s2	vi
 tillfreds	1	1
 tillfredsställa	2	s2	L1
 tillfredsställande	2	s2	L1
@@ -36081,7 +36081,7 @@ tillförlitlig	2	s2	L2
 tillförlitliga	2	s2	L2
 tillförlitlighet	2	s4	L2,4
 tillförlitligt	2	s2	L2
-tillförordnad	2	s2	L2
+tillförordnad	2	s2	L2	vi
 tillförs	2	s1	L1
 tillfört	2	s1	L1
 tillgivenhet	2	s3	L1,3
@@ -36212,11 +36212,11 @@ tillägga	2	s1
 tilläggas	2	s1
 tillägger	2	s1
 tillägget	2	s1
-tillägna	2	s1
-tillägnad	2	s1
-tillägnar	2	s1
-tillägnas	2	s1
-tillägnat	2	s1
+tillägna	2	s1	vi
+tillägnad	2	s1	vi
+tillägnar	2	s1	vi
+tillägnas	2	s1	vi
+tillägnat	2	s1	vi
 tillämpa	2	s1
 tillämpade	2	s1
 tillämpar	2	s1
@@ -36240,7 +36240,7 @@ tillåtit	2	s1	L1
 tillåtits	2	s1	L1
 tillåtna	2	s1	L1
 tillåts	2	s1	L1
-tillökning	2	s1	L1
+tillökning	2	s1	L1	vi
 tim	1
 timanställd	2	s2
 timber	1
@@ -36290,8 +36290,8 @@ tiotal	2	s2	L0,2
 tiotals	2	s2	L0,2
 tiotusen	1	2
 tiotusentals	2	2	s4	L0,2,4
-tioårig	2	s2	L0,2
-tioåring	2	s2	L0,2
+tioårig	2	s2	L0,2	vi
+tioåring	2	s2	L0,2	vi
 tip	1
 tipp	1
 tippa	2
@@ -36387,7 +36387,7 @@ tjugofem	1	2
 tjugonde	2
 tjugotal	2	s2	L0,2
 tjugotvå	1	2
-tjugoårsåldern	2	s3	L0,2
+tjugoårsåldern	2	s3	L0,2	vi
 tjur	1
 tjura	2
 tjurar	2
@@ -36499,7 +36499,7 @@ tolkningsfråga	2	s2	L2
 tolkningsföreträde	2	s4	L2,4
 tolv	1
 tolvslaget	2	s1	L1
-tolvåring	2	s1	L1
+tolvåring	2	s1	L1	vi
 tom	1
 tomas	1
 tomat	1	1
@@ -36645,7 +36645,7 @@ torslanda	2	s1
 torso	1
 torsten	1
 torstensson	2
-torsås	2	s1	L0,1
+torsås	2	s1	L0,1	vi
 tortera	1	1
 torterad	1	1
 torterade	1	1
@@ -36776,7 +36776,7 @@ transportsektorn	2	1	s2
 transportören	1	2
 transsexuella	1	3
 tranströmer	2	s1	L0
-tranås	2	s1	L0,1
+tranås	2	s1	L0,1	vi
 trapp	1
 trappa	2
 trappan	2
@@ -36846,7 +36846,7 @@ trendiga	2
 trendigt	2
 treo	1
 treor	2
-trepoängare	2	s2	L0
+trepoängare	2	s2	L0	vi
 trerätters	2	s1	L0
 tres	1
 trettio	2
@@ -36861,9 +36861,9 @@ trevliga	2
 trevligare	2
 trevligaste	2
 trevligt	2
-treårig	2	s1	L0,1
-treåriga	2	s1	L0,1
-treåring	2	s1	L0,1
+treårig	2	s1	L0,1	vi
+treåriga	2	s1	L0,1	vi
+treåring	2	s1	L0,1	vi
 treårskontrakt	2	s3	L0,1
 tri	1
 trial	1
@@ -37027,7 +37027,7 @@ trycker	1
 tryckeri	1	2
 tryckeriet	1	2
 trycket	1
-tryckfrihetsförordningen	2	s4	L1,2,4
+tryckfrihetsförordningen	2	s4	L1,2,4	vi
 tryckning	2
 trycks	1
 tryckt	1
@@ -37265,7 +37265,7 @@ turistbyrå	2	1	s2	L0,2,3
 turister	1	1
 turisterna	1	1
 turistmål	2	1	s2	L0,2
-turistort	2	1	s2	L0
+turistort	2	1	s2	L0	vi
 turk	1
 turkar	2
 turkarna	2
@@ -37290,7 +37290,7 @@ turneringens	1	1
 turné	1	1
 turnéer	1	1
 turnén	1	1
-turordning	2	s1	L0,1
+turordning	2	s1	L0,1	vi
 tusen	1
 tusenlapp	2	s2	L0
 tusenlappar	2	s2	L0
@@ -37340,7 +37340,7 @@ tvistemål	2	s2	L2
 tvisten	1
 tvister	2
 tvivel	1
-tvivelaktig	2	s2	L0
+tvivelaktig	2	s2	L0	vi
 tvivelaktigt	2	s2	L0
 tvivla	2
 tvivlade	2
@@ -37371,7 +37371,7 @@ tvättmaskiner	2	s2	L2
 tvättmedel	2	s1	L1
 tvättstuga	2	s1	L1
 tvättstugan	2	s1	L1
-tvättäkta	2	s1
+tvättäkta	2	s1	vi
 två	1
 tvåa	2
 tvåan	2
@@ -37390,9 +37390,9 @@ tvåorna	2
 tvåspråkig	2	s1	L0,1
 tvåspråkiga	2	s1	L0,1
 tvåtusen	1	1
-tvååker	2	s1	L0,1
-tvåårig	2	s1	L0,1
-tvååring	2	s1	L0,1
+tvååker	2	s1	L0,1	vi
+tvåårig	2	s1	L0,1	vi
+tvååring	2	s1	L0,1	vi
 twh	2	2
 twist	1
 ty	1
@@ -37559,10 +37559,10 @@ tätare	2
 tätbefolkade	2	s2	L0
 täten	1
 täthet	2	s1	L0,1
-tätort	2	s1	L0
-tätorten	2	s1	L0
-tätorter	2	s1	L0
-tätorterna	2	s1	L0
+tätort	2	s1	L0	vi
+tätorten	2	s1	L0	vi
+tätorter	2	s1	L0	vi
+tätorterna	2	s1	L0	vi
 tätt	1
 tävla	2
 tävlade	2
@@ -37611,7 +37611,7 @@ tårna	1
 tårta	2
 tårtan	2
 tårtor	2
-tårögd	2	s1	L0
+tårögd	2	s1	L0	vi
 töm	1
 tömde	2
 tömdes	2
@@ -37683,7 +37683,7 @@ ultraljud	2	s2	L2
 ultraviolett	2	s4
 ulvaeus	1	1
 ume	1
-umeälven	2	s2	L0
+umeälven	2	s2	L0	vi
 umeå	1
 umeås	1
 umgicks	2	s1
@@ -37706,8 +37706,8 @@ undantagstillstånd	2	s4	L2
 undantagsvis	2	s3	L2,3
 undantas	2	s2	L2
 under	1
-underarmar	2	s2
-underarter	2	s2	L2
+underarmar	2	s2	vi
+underarter	2	s2	L2	vi
 underbar	2	s2	L2
 underbara	2	s2	L2
 underbaraste	2	s2	L2
@@ -37778,9 +37778,9 @@ undermåliga	2	s2	L2
 undermåligt	2	s2	L2
 undernäring	2	s2	L2
 underofficer	2	s4	L4
-underordnad	2	s2	L2
-underordnade	2	s2	L2
-underordning	2	s2	L2
+underordnad	2	s2	L2	vi
+underordnade	2	s2	L2	vi
+underordning	2	s2	L2	vi
 underrätta	2	s2
 underrättad	2	s2
 underrättelse	2	s2
@@ -38207,8 +38207,8 @@ uppnås	2	s1	L1
 uppnått	2	s1
 uppnåtts	2	s1
 uppochner	1	2
-uppoffring	2	s1
-uppoffringar	2	s1
+uppoffring	2	s1	vi
+uppoffringar	2	s1	vi
 upprepa	2	s1	L1
 upprepade	2	s1	L1
 upprepades	2	s1	L1
@@ -38357,16 +38357,16 @@ uppvärmningen	2	s1
 uppvärmt	2	s1
 uppväxt	2	s1
 uppväxten	2	s1
-uppäten	2	s1	L1
-uppätna	2	s1	L1
+uppäten	2	s1	L1	vi
+uppätna	2	s1	L1	vi
 uppåt	1
 uppåtgående	2	s2	L2
 upsala	2	s1	L1
 ur	1
 uran	1	1
 uranus	1	1
-urartade	2	s1	L0,1
-urartar	2	s1	L0,1
+urartade	2	s1	L0,1	vi
+urartar	2	s1	L0,1	vi
 urban	1
 urbana	1	1
 urbanisering	1	3
@@ -38390,7 +38390,7 @@ urmakare	2	s1	L0,1
 urminnes	2	s1	L0
 urna	2
 urnan	2
-urpremiär	2	s3	L0,3
+urpremiär	2	s3	L0,3	vi
 urskilja	2	s1	L0
 urskog	2	s1	L0,1
 ursprung	2	s1	L0
@@ -38410,16 +38410,16 @@ ursäktas	2	s1	L0
 ursäkten	2	s1	L0
 ursäkter	2	s1	L0
 uruguay	1	3
-urusel	2	s1	L0,1
-uruselt	2	s1	L0,1
-urusla	2	s1	L0,1
+urusel	2	s1	L0,1	vi
+uruselt	2	s1	L0,1	vi
+urusla	2	s1	L0,1	vi
 urval	2	s1	L0,1
 urvalet	2	s1	L0,1
 urvattnat	2	s1	L0
 urverk	2	s1	L0
-uråldrig	2	s1	L0
-uråldriga	2	s1	L0
-uråldrigt	2	s1	L0
+uråldrig	2	s1	L0	vi
+uråldriga	2	s1	L0	vi
+uråldrigt	2	s1	L0	vi
 us	2
 usa	1	2
 usas	1	2
@@ -39000,24 +39000,24 @@ utväxling	2	s1	L0
 utväxt	2	s1	L0
 utåtriktad	2	s2	L0
 utåtriktade	2	s2	L0
-utö	2	s1	L0,1
-utöka	2	s1	L0,1
-utökad	2	s1	L0,1
-utökade	2	s1	L0,1
-utökades	2	s1	L0,1
-utökar	2	s1	L0,1
-utökas	2	s1	L0,1
-utökat	2	s1	L0,1
-utökats	2	s1	L0,1
-utökning	2	s1	L0,1
-utöva	2	s1	L0,1
-utövade	2	s1	L0,1
-utövandet	2	s1	L0,1
-utövar	2	s1	L0,1
-utövare	2	s1	L0,1
-utövarna	2	s1	L0,1
-utövas	2	s1	L0,1
-utövat	2	s1	L0,1
+utö	2	s1	L0,1	vi
+utöka	2	s1	L0,1	vi
+utökad	2	s1	L0,1	vi
+utökade	2	s1	L0,1	vi
+utökades	2	s1	L0,1	vi
+utökar	2	s1	L0,1	vi
+utökas	2	s1	L0,1	vi
+utökat	2	s1	L0,1	vi
+utökats	2	s1	L0,1	vi
+utökning	2	s1	L0,1	vi
+utöva	2	s1	L0,1	vi
+utövade	2	s1	L0,1	vi
+utövandet	2	s1	L0,1	vi
+utövar	2	s1	L0,1	vi
+utövare	2	s1	L0,1	vi
+utövarna	2	s1	L0,1	vi
+utövas	2	s1	L0,1	vi
+utövat	2	s1	L0,1	vi
 utöver	1	1
 uv	1
 uwe	1
@@ -39184,8 +39184,8 @@ valv	1
 valvaka	2	s1	L0,1
 valvakan	2	s1	L0,1
 valvet	1
-valår	2	s1	L0,1
-valåret	2	s1	L0,1
+valår	2	s1	L0,1	vi
+valåret	2	s1	L0,1	vi
 valörer	1	1
 vampyr	1	1
 vampyren	1	1
@@ -39260,8 +39260,8 @@ vapnet	1
 var	1
 vara	2
 varade	2
-varaktig	2	s1	L0
-varaktigt	2	s1	L0
+varaktig	2	s1	L0	vi
+varaktigt	2	s1	L0	vi
 varan	2
 varande	2
 varandra	1	1
@@ -39424,8 +39424,8 @@ vattentät	2	s2	L2
 vattentäta	2	s2	L2
 vattentätt	2	s2
 vattenverk	2	s2
-vattenytan	2	s2	L2
-vattenånga	2	s2
+vattenytan	2	s2	L2	vi
+vattenånga	2	s2	vi
 vattkoppor	2	s1
 vattna	2
 vattnade	2
@@ -39457,7 +39457,7 @@ veckors	2
 veckovis	2	s2	L2
 ved	1
 veddige	2
-vedeldad	2	s1	L0
+vedeldad	2	s1	L0	vi
 veden	1
 vederbörande	2	s2	L0,2
 vedergällning	2	s2	L0
@@ -39524,7 +39524,7 @@ verk	1
 verka	2
 verkade	2
 verkan	2
-verkanseld	2	s2
+verkanseld	2	s2	vi
 verkar	2
 verkat	2
 verken	1
@@ -39539,7 +39539,7 @@ verkligheten	2	s2	L2
 verklighetens	2	s2	L2
 verkligheter	2	s2	L2
 verklighetsfrämmande	2	s3	L2
-verklighetsförankring	2	s4	L2
+verklighetsförankring	2	s4	L2	vi
 verklighetsuppfattning	2	s4	L2
 verkligt	2
 verkningar	2
@@ -39687,7 +39687,7 @@ vidtagit	2	s1	L0,1
 vidtar	2	s1	L0,1
 vidtas	2	s1	L0,1
 vidtog	2	s1	L0,1
-vidöppna	2	s1	L0
+vidöppna	2	s1	L0	vi
 vietnam	1	2
 vietnamesisk	1	3
 vietnamesiska	1	3
@@ -39770,7 +39770,7 @@ villa	2
 villan	2
 villaområde	2	s3	L3
 villas	2
-villaägare	2	s2	L2
+villaägare	2	s2	L2	vi
 ville	2
 villebråd	2	s2	L2
 villig	2
@@ -39825,7 +39825,7 @@ vinge	2
 vingen	2
 vinglas	2	s1	L0,1
 vingslag	2	s1	L1
-vingåker	2	s1	L1
+vingåker	2	s1	L1	vi
 vingård	2	s1	L0,1
 vingården	2	s1	L0,1
 vink	1
@@ -39862,7 +39862,7 @@ vinstintresse	2	s2
 vinter	1
 vinterdäck	2	s2
 vintergatan	2	s2	L2
-vinterhalvåret	2	s3	L3
+vinterhalvåret	2	s3	L3	vi
 vinterkriget	2	s2	L2
 vintern	1
 vinterns	1
@@ -39910,7 +39910,7 @@ visats	2
 visby	1
 vischan	2
 visdom	2	s1	L0
-visdomsord	2	s2	L0,2
+visdomsord	2	s2	L0,2	vi
 visdomstand	2	s2	L0
 visdomständer	2	s2	L0
 vise	2
@@ -39993,7 +39993,7 @@ vittra	2
 vittring	2
 vittsjö	2	s1	L1
 vitvaror	2	s1	L0,1
-vitögat	2	s1	L0,1
+vitögat	2	s1	L0,1	vi
 viva	2
 viveka	1
 vivian	1	2
@@ -40416,14 +40416,14 @@ världsmästerskapet	2	s3	L0,3
 världsnaturfonden	2	s3	L0,2
 världsomfattande	2	s2	L0
 världsomspännande	2	s2	L0
-världsordningen	2	s1	L0,1
+världsordningen	2	s1	L0,1	vi
 världsrekord	2	s2	L0,2
 världsrekordet	2	s2	L0,2
 världsutställningen	2	s2	L0,1
 värm	1
 värma	2
 värmde	2
-värmdö	2	s1	L1
+värmdö	2	s1	L1	vi
 värme	2
 värmebölja	2	s2
 värmeböljan	2	s2
@@ -40472,7 +40472,7 @@ väskorna	2
 väsnas	2
 vässa	2
 väst	1
-västafrika	2	s1	L1
+västafrika	2	s1	L1	vi
 västanfors	2	s2
 västar	2
 västbanken	2	s1
@@ -40492,7 +40492,7 @@ västerlänningar	2	s2
 västern	1
 västernorrland	2	s2
 västernorrlands	2	s2
-västerort	2	s2
+västerort	2	s2	vi
 västerut	1
 västervik	2	s2	L2
 västerviks	2	s2	L2
@@ -40501,7 +40501,7 @@ västeuropa	2	s3	L3
 västeuropeiska	2	s4	L4
 västfronten	2	s1
 västgöta	2	s1	L1
-västindien	2	s1
+västindien	2	s1	vi
 västkust	2	s1
 västkusten	2	s1
 västkustens	2	s1
@@ -40607,7 +40607,7 @@ våldtäktsman	2	s2
 våldtäktsmannen	2	s2
 våldtäktsmän	2	s2
 våldtäktsmännen	2	s2
-våldtäktsoffer	2	s2
+våldtäktsoffer	2	s2	vi
 vålla	2
 vållande	2
 vållat	2
@@ -40909,7 +40909,7 @@ yrkesmässiga	2	s2
 yrkesmässigt	2	s2
 yrkesroll	2	s2
 yrkesutbildning	2	s3	L2
-yrkesutövning	2	s3	L2,3
+yrkesutövning	2	s3	L2,3	vi
 yrkesval	2	s2	L2
 yrkesverksamma	2	s2
 yrkesvägledare	2	s3	L2,3
@@ -41109,7 +41109,7 @@ zulu	1
 ända	2
 ändamål	2	s2	L2
 ändamålet	2	s2	L2
-ändamålsenliga	2	s3	L2,3
+ändamålsenliga	2	s3	L2,3	vi
 ändan	2
 ändar	2
 ändarna	2
@@ -41460,10 +41460,10 @@ zulu	1
 återfår	2	s2	L0,2
 återfått	2	s2	L0
 återföra	2	s2	L0,2
-återförenade	2	s3	L0,3
-återförenas	2	s3	L0,3
-återförening	2	s3	L0,3
-återföreningen	2	s3	L0,3
+återförenade	2	s3	L0,3	vi
+återförenas	2	s3	L0,3	vi
+återförening	2	s3	L0,3	vi
+återföreningen	2	s3	L0,3	vi
 återförsäljare	2	s3	L0
 återge	2	s2	L0,2
 återger	2	s2	L0,2
@@ -41562,7 +41562,7 @@ zulu	1
 åtskillnad	2	s1	L0
 åtta	2
 åttan	2
-åttaåring	2	s2	L2
+åttaåring	2	s2	L2	vi
 åttio	2
 åttiotalet	2	s3	L3
 åttonde	2
@@ -41695,7 +41695,7 @@ zulu	1
 ören	1
 öresund	1	2
 öresundsbron	2	2	s3	L0,3
-öresundsregionen	2	2	s5	L5
+öresundsregionen	2	2	s5	L5	vi
 örfil	2	s1	L0,1
 örfilar	2	s1	L0,1
 örgryte	2	s1	L0,1
@@ -41723,8 +41723,8 @@ zulu	1
 ösmo	1
 ösregn	2	s1	L0
 öst	1
-östafrika	2	s1	L1
-östasien	2	s1	L1
+östafrika	2	s1	L1	vi
+östasien	2	s1	L1	vi
 östberg	2	s1
 östberga	2	s1
 östblocket	2	s1
@@ -41752,7 +41752,7 @@ zulu	1
 östersund	1	2
 östersunds	1	2
 österut	1
-österåker	2	s2	L2
+österåker	2	s2	L2	vi
 östeuropa	2	s3	L3
 östeuropeiska	2	s4	L4
 östfronten	2	s1
@@ -41848,7 +41848,7 @@ zulu	1
 övergång	2	s2	L0
 övergångar	2	s2	L0
 övergången	2	s2	L0
-övergångsperiod	2	s5	L0,5
+övergångsperiod	2	s5	L0,5	vi
 övergångsställe	2	s3	L0
 övergångsställen	2	s3	L0
 övergångsstället	2	s3	L0
@@ -41918,8 +41918,8 @@ zulu	1
 övernaturlig	2	s3	L0,3
 övernaturliga	2	s3	L0,3
 övernaturligt	2	s3	L0,3
-överordnad	2	s2	L0,2
-överordnade	2	s2	L0,2
+överordnad	2	s2	L0,2	vi
+överordnade	2	s2	L0,2	vi
 överpris	2	s2	L0,2
 överpriser	2	s2	L0,2
 överraska	2	s2	L0
