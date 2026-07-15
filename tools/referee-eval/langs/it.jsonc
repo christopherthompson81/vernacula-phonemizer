@@ -1,0 +1,73 @@
+// Italian — shallow near-phonemic Latin orthography. wikipron ita_latn broad is a large HUMAN referee. We render
+// the 7-vowel system, gemination (doubled consonants — the referee's own convention), and c/g softening
+// explicitly. The folds neutralise the THREE genuinely-lexical axes that spelling does not encode: stressed
+// mid-vowel OPENNESS (⟨e⟩=/e/~/ɛ/, ⟨o⟩=/o/~/ɔ/), intervocalic ⟨s⟩ VOICING (casa/rosa), and ⟨z⟩ voicing
+// (/t͡s/~/d͡z/) — plus the referee-inconsistent glide/hiatus notation and geminate-affricate notation. NOTE: these
+// patterns run AFTER the shared backbone, which strips tie bars — so affricates are tie-free here (tʃ dʒ ts dz).
+{
+    "language": "it",
+    "name": "Italian",
+    "script": "Latin",
+    "provenance": "Authored from standard Italian orthography + phonology.",
+    "referees": [
+        {
+            "file": "it.wikipron-ita-broad.tsv",
+            "source": "wikipron ita_latn broad (human)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "wikipron ita is the large human primary; the adjudicated common-word gold (test/italian.test.ts) is the committed anchor. No independent second G2P source wired.",
+    "segmentJoin": true,
+    "folds": [
+        {
+            "pattern": "(?:t|tʃ)tʃ",
+            "replace": "tʃ",
+            "note": "geminate affricate NOTATION: our doubled tʃtʃ AND the referee's stop+affricate ttʃ → single — same phoneme (affricate-gemination length folded, as length is elsewhere)"
+        },
+        {
+            "pattern": "(?:d|dʒ)dʒ",
+            "replace": "dʒ",
+            "note": "geminate affricate NOTATION: our dʒdʒ AND referee ddʒ → single — same phoneme (length folded)"
+        },
+        {
+            "pattern": "(?:t|ts)ts",
+            "replace": "ts",
+            "note": "geminate ⟨zz⟩ NOTATION: our tsts AND referee tts → single — same phoneme (length folded)"
+        },
+        {
+            "pattern": "(?:d|dz)dz",
+            "replace": "dz",
+            "note": "geminate voiced ⟨zz⟩ NOTATION: our dzdz AND referee ddz → single — same phoneme (length folded)"
+        },
+        {
+            "pattern": "dz",
+            "replace": "ts",
+            "note": "⟨z⟩ voicing /t͡s/~/d͡z/ — LEXICAL (zucchero d͡z vs scienza t͡s); runs AFTER dz-degemination"
+        },
+        {
+            "pattern": "j",
+            "replace": "i",
+            "note": "glide/hiatus i̯~i — the referee transcribes ⟨i⟩+V INCONSISTENTLY (mai→maj yet voi→voi) and glide-vs-hiatus is largely lexical, so neutralise the semivowel notation"
+        },
+        {
+            "pattern": "w",
+            "replace": "u",
+            "note": "glide/hiatus u̯~u — referee-inconsistent semivowel notation (aura→awra yet paura→paura), as for ⟨i⟩"
+        },
+        {
+            "pattern": "ɛ",
+            "replace": "e",
+            "note": "stressed ⟨e⟩ open/close /e/~/ɛ/ — LEXICAL, unrecoverable from spelling"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "stressed ⟨o⟩ open/close /o/~/ɔ/ — LEXICAL, unrecoverable from spelling"
+        },
+        {
+            "pattern": "z",
+            "replace": "s",
+            "note": "intervocalic ⟨s⟩ voicing /s/~/z/ — LEXICAL/dialectal (casa s vs rosa z)"
+        }
+    ]
+}

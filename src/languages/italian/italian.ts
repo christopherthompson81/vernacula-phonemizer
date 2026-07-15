@@ -1,0 +1,324 @@
+/**
+ * Native Italian (it) text phonemizer — canonical IPA, espeak-independent. Italian's Latin orthography is shallow
+ * and near-phonemic, so this is a rule-based g2p: c/g soften to t͡ʃ/d͡ʒ before e/i (⟨ci⟩/⟨gi⟩+V drop a silent i),
+ * ⟨sc⟩→ʃ, ⟨gl⟩i→ʎ, ⟨gn⟩→ɲ, ⟨ch⟩/⟨gh⟩→k/ɡ, ⟨qu⟩→kw; GEMINATION is written as doubled consonants (gatto→ɡatto —
+ * the referee's own convention, and a real Italian contrast the shared backbone would strip if we used ː);
+ * intervocalic ʎ/ɲ/ʃ geminate; i/u become glides j/w before a vowel; penultimate stress (written accent overrides).
+ * The 7-vowel system a e ɛ i o ɔ u: unstressed mids are close, but STRESSED ⟨e⟩/⟨o⟩ openness (/e/~/ɛ/, /o/~/ɔ/)
+ * is LEXICAL and unrecoverable from spelling — as are intervocalic ⟨s⟩ voicing and ⟨z⟩ voicing — so we take a
+ * documented default and fold those axes against the referee. See docs/it_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface NumbersDef {
+    units: string[];
+    teens: string[];
+    tens: string[];
+    hundred: string;
+    thousand: string;
+    thousands: string;
+    million: string;
+    millions: string;
+    and: string;
+}
+interface ItalianDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    accented: Record<string, string>;
+    clausePunctuation: Record<string, string>;
+    numbers: NumbersDef;
+}
+const DEF = loadManifest<ItalianDef>(import.meta.url, "italian.jsonc");
+const CLAUSE_MARK = DEF.clausePunctuation;
+const NUM = DEF.numbers;
+
+const VOWEL_LETTERS = "aeiouàèéìíîòóùú";
+const FRONT = "eièéìí"; // c/g soften and ⟨sc⟩→ʃ before these
+const VOWEL_PH = "aeɛioɔu";
+const isVowelLetter = (c: string): boolean => VOWEL_LETTERS.includes(c);
+const isFront = (c: string | undefined): boolean => c !== undefined && FRONT.includes(c);
+const isConsLetter = (c: string): boolean =>
+    /[a-z]/u.test(c) && !isVowelLetter(c);
+
+interface Seg {
+    ph: string;
+    accent: boolean; // came from a written-accent vowel (à è é ì …) → bears stress
+}
+
+/** Resolve a vowel letter to its IPA, recording whether it was written with a stress accent. */
+function vowelSeg(c: string): Seg {
+    const acc = DEF.accented[c];
+    if (acc !== undefined) return { ph: acc, accent: true };
+    return { ph: DEF.vowels[c] ?? c, accent: false };
+}
+
+/** Scan a lowercased Italian word into phoneme segments (contextual c/g/s/z, digraphs, gemination, glides). */
+function scan(word: string): Seg[] {
+    const s = [...word];
+    const n = s.length;
+    const segs: Seg[] = [];
+    const prevIsVowel = (): boolean =>
+        segs.length > 0 && VOWEL_PH.includes(segs[segs.length - 1]!.ph[0] ?? "");
+    const push = (ph: string): void => {
+        segs.push({ ph, accent: false });
+    };
+    /** Push a consonant that geminates (emits twice) when it sits between vowels. */
+    const pushGem = (ph: string, nextVowel: boolean): void => {
+        if (prevIsVowel() && nextVowel) {
+            push(ph);
+            push(ph);
+        } else push(ph);
+    };
+
+    let i = 0;
+    while (i < n) {
+        const c = s[i]!;
+        const nx = s[i + 1];
+        const nn = s[i + 2];
+
+        // ── digraphs / contextual clusters (longest first) ──
+        // ⟨gli⟩ → ʎ (intervocalic geminate); ⟨gli⟩+V drops the silent i (figlio→fiʎʎo), else keep i (figli→fiʎi).
+        if (c === "g" && nx === "l" && nn === "i") {
+            const after = s[i + 3];
+            pushGem("ʎ", true);
+            if (after !== undefined && isVowelLetter(after)) i += 3; // i silent
+            else i += 2; // leave the i as a nucleus
+            continue;
+        }
+        // ⟨gn⟩ → ɲ (intervocalic geminate).
+        if (c === "g" && nx === "n") {
+            pushGem("ɲ", isVowelLetter(nn ?? ""));
+            i += 2;
+            continue;
+        }
+        // ⟨sc⟩ before e/i → ʃ (geminate intervocalic); ⟨sci⟩+V drops the silent i (sciare→ʃare, scienza→ʃɛntsa).
+        if (c === "s" && nx === "c" && isFront(nn)) {
+            const iDot = nn === "i" || nn === "ì";
+            const after = s[i + 3];
+            pushGem("ʃ", true);
+            if (iDot && after !== undefined && isVowelLetter(after)) i += 3;
+            else i += 2;
+            continue;
+        }
+        // ⟨c⟩: ch→k; before e/i → t͡ʃ (⟨ci⟩+V silent i); else k. Doubled ⟨cc⟩ geminates.
+        if (c === "c") {
+            const doubled = nx === "c";
+            const follow = doubled ? nn : nx; // the letter that decides hard/soft
+            const rest = doubled ? s[i + 3] : nn;
+            if (follow === "h") {
+                // ch → k
+                if (doubled) push("k");
+                push("k");
+                i += doubled ? 3 : 2;
+                continue;
+            }
+            if (isFront(follow)) {
+                if (doubled) push("t͡ʃ");
+                push("t͡ʃ");
+                const iDot = follow === "i" || follow === "ì";
+                if (iDot && rest !== undefined && isVowelLetter(rest))
+                    i += doubled ? 3 : 2; // ⟨ci⟩+V: silent i (ciao, faccia) — leave the following vowel
+                else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
+                continue;
+            }
+            // hard c → k
+            if (doubled) push("k");
+            push("k");
+            i += doubled ? 2 : 1;
+            continue;
+        }
+        // ⟨g⟩: gh→ɡ; before e/i → d͡ʒ (⟨gi⟩+V silent i); else ɡ. Doubled ⟨gg⟩ geminates. (gl/gn already handled.)
+        if (c === "g") {
+            const doubled = nx === "g";
+            const follow = doubled ? nn : nx;
+            const rest = doubled ? s[i + 3] : nn;
+            if (follow === "h") {
+                if (doubled) push("ɡ");
+                push("ɡ");
+                i += doubled ? 3 : 2;
+                continue;
+            }
+            if (isFront(follow)) {
+                if (doubled) push("d͡ʒ");
+                push("d͡ʒ");
+                const iDot = follow === "i" || follow === "ì";
+                if (iDot && rest !== undefined && isVowelLetter(rest))
+                    i += doubled ? 3 : 2; // ⟨gi⟩+V: silent i (giorno, oggi) — leave the following vowel
+                else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
+                continue;
+            }
+            if (doubled) push("ɡ");
+            push("ɡ");
+            i += doubled ? 2 : 1;
+            continue;
+        }
+        // ⟨qu⟩ → kw; ⟨q⟩ alone → k.
+        if (c === "q") {
+            push("k");
+            if (nx === "u" && isVowelLetter(nn ?? "")) {
+                push("w");
+                i += 2;
+            } else i += 1;
+            continue;
+        }
+        // ⟨s⟩: ss → geminate s; single ⟨s⟩ voices to z between vowels or before a voiced consonant (default —
+        // lexical, folded); else s.
+        if (c === "s") {
+            if (nx === "s") {
+                // ⟨ss⟩ is always a long, voiceless geminate.
+                push("s");
+                push("s");
+                i += 2;
+                continue;
+            }
+            const nextVoiced =
+                nx !== undefined && "bdglmnrvz".includes(nx);
+            const voiced = (prevIsVowel() && isVowelLetter(nx ?? "")) || nextVoiced;
+            push(voiced ? "z" : "s");
+            i += 1;
+            continue;
+        }
+        // ⟨z⟩ → t͡s (default; /t͡s/~/d͡z/ is lexical, folded). ⟨zz⟩ geminates.
+        if (c === "z") {
+            const doubled = nx === "z";
+            push("t͡s");
+            if (doubled) push("t͡s");
+            i += doubled ? 2 : 1;
+            continue;
+        }
+
+        // ── doubled simple consonant (bb dd ff ll mm nn pp rr tt vv) → geminate ──
+        if (isConsLetter(c) && nx === c && DEF.consonants[c]) {
+            const ph = DEF.consonants[c]!;
+            if (ph) {
+                push(ph);
+                push(ph);
+            }
+            i += 2;
+            continue;
+        }
+        // ── single simple consonant ──
+        if (c in DEF.consonants) {
+            const ph = DEF.consonants[c]!;
+            if (ph) push(ph); // ⟨h⟩ maps to "" (silent)
+            i += 1;
+            continue;
+        }
+
+        // ── vowels & glides ──
+        if (isVowelLetter(c)) {
+            // Unaccented i/u are semivowels next to another vowel: ONGLIDE before a vowel (piano→pjano,
+            // uomo→wɔmo, buono→bwɔno) or OFFGLIDE after one (aura→awra, mai→maj). Stressed hiatus (via, bugia)
+            // is lexical and lost — a documented tail.
+            const semivowel =
+                (c === "i" || c === "u") &&
+                ((nx !== undefined && isVowelLetter(nx)) || prevIsVowel());
+            if (semivowel) {
+                push(c === "i" ? "j" : "w");
+                i += 1;
+                continue;
+            }
+            segs.push(vowelSeg(c));
+            i += 1;
+            continue;
+        }
+        i += 1; // unknown → skip
+    }
+    return segs;
+}
+
+/** Stressed nucleus index: the written accent if any, else penultimate vowel (or the only/last nucleus). */
+function stressIndex(segs: Seg[]): number {
+    const nuclei = segs
+        .map((sg, i) => (VOWEL_PH.includes(sg.ph[0] ?? "") ? i : -1))
+        .filter((i) => i >= 0);
+    if (nuclei.length === 0) return -1;
+    const accented = nuclei.find((i) => segs[i]!.accent);
+    if (accented !== undefined) return accented;
+    if (nuclei.length === 1) return nuclei[0]!;
+    return nuclei[nuclei.length - 2]!; // default penultimate (antepenult is lexical/unmarked)
+}
+
+/** One Italian word → canonical IPA. */
+export function phonemizeWord(word: string): string {
+    const segs = scan(word.toLowerCase());
+    if (segs.length === 0) return "";
+    const stress = stressIndex(segs);
+    let out = "";
+    for (let i = 0; i < segs.length; i++) {
+        if (i === stress) out += "ˈ";
+        out += segs[i]!.ph;
+    }
+    return out.normalize("NFC");
+}
+
+// ── Numbers (compositional, with the tens+unit fusion) ────────────────────────
+/** Build the fused Italian word for 0 ≤ n < 1000 (ventuno, duecentotrentaquattro). */
+function under1000(n: number): string {
+    if (n < 10) return NUM.units[n]!;
+    if (n < 20) return NUM.teens[n - 10]!;
+    if (n < 100) {
+        const t = Math.floor(n / 10),
+            u = n % 10;
+        let tens = NUM.tens[t]!;
+        if (u === 1 || u === 8) tens = tens.slice(0, -1); // ventuno, ventotto (drop final vowel)
+        const unit = u === 3 ? "tré" : u ? NUM.units[u]! : ""; // ventitré carries the accent
+        return tens + unit;
+    }
+    const h = Math.floor(n / 100),
+        r = n % 100;
+    const hundreds = (h > 1 ? NUM.units[h]! : "") + NUM.hundred;
+    return hundreds + (r ? under1000(r) : "");
+}
+
+/** Spoken Italian for a non-negative integer → space-separated magnitude words (thousands fused, millions split). */
+function numberWords(n: number): string {
+    if (n === 0) return NUM.units[0]!;
+    const parts: string[] = [];
+    const millions = Math.floor(n / 1000000);
+    const rest = n % 1000000;
+    if (millions) {
+        parts.push(
+            millions === 1
+                ? `un ${NUM.million}` // un milione (uno apocopates before milione)
+                : `${numberWords(millions)} ${NUM.millions}`,
+        );
+    }
+    if (rest || !millions) {
+        const thousands = Math.floor(rest / 1000);
+        const under = rest % 1000;
+        let group = "";
+        if (thousands === 1) group += NUM.thousand; // mille
+        else if (thousands > 1) group += under1000(thousands) + NUM.thousands; // duemila
+        if (under || !thousands) group += under1000(under);
+        if (group) parts.push(group);
+    }
+    return parts.join(" ");
+}
+
+const TOKEN = /([a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]+)|(\d+)|([.?!,;:])/gu;
+
+class ItalianPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) {
+                const num = Number(m[2]);
+                if (Number.isSafeInteger(num))
+                    for (const wd of numberWords(num).split(" "))
+                        sink.emit(phonemizeWord(wd));
+                else sink.emit(m[2]);
+            } else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Italian phonemizer (no data files beyond the manifest — the engine is rule-based). */
+export function createItalian(): Phonemizer {
+    return new ItalianPhonemizer();
+}

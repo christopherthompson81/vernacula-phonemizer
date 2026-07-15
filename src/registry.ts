@@ -36,6 +36,7 @@ import { createTelugu } from "./languages/telugu/telugu.ts";
 import { createCantonese } from "./languages/cantonese/cantonese.ts";
 import { createTagalog } from "./languages/tagalog/tagalog.ts";
 import { createPersian } from "./languages/persian/persian.ts";
+import { createItalian } from "./languages/italian/italian.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -126,6 +127,8 @@ function build(lang: string): Phonemizer {
             return createTagalog();
         case "fa":
             return createPersian((latin) => getPhonemizer("en").text(latin));
+        case "it":
+            return createItalian();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
