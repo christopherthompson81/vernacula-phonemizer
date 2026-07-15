@@ -145,3 +145,27 @@ this is a genuinely hard sub-problem, deferred rather than shipped with regressi
 
 **Still deferred:** compound decomposition (above), OOV loanword stress (words outside the 50k corpus → first
 syllable), short /ɛ/→[æ] before r (speaker-variable; wikipron uses ɛ).
+
+## Run 7 — 2026-07-14 — pitch accent (accent 1/2) VALIDATED vs wikipron + numeral fix
+
+The maturity note ("pitch accent deferred") was STALE: accent 1/2 is already rendered (swedish.ts — accent-2 = a
+combining grave on the primary-stressed vowel, accent-1 = plain ˈ, from the NST lexicon's accent column; OOV falls
+to oovAccent by shape). Validated it against an INDEPENDENT source: wikipron swe marks accent before the stressed
+syllable (² = accent 2, ¹ = accent 1) — from English Wiktionary, independent of our NST-derived lexicon. New
+committed eval `tools/sv-accent-eval.mts` + floor `test/swedish-accent.test.ts`.
+
+RESULT (excluding 21 homographs wikipron lists with both ¹/², e.g. anden 'duck'/'spirit', buren 'carried'/'cage' —
+our single reading can't match both): **1073/1111 = 96.6%** accent agreement. Accent-2 recall (the reliably-marked
+class) **98.0%**; accent-1 recall 64.6% on a small (48) adversarial subset — Wiktionary marks ¹ mostly to
+disambiguate, so its accent-1 set is skewed to hard/contested/slang (byxis/fritis/sade). Like Japanese pitch, this
+is an inherent ~95% task where two independent lexica disagree on the contested tail.
+
+REAL BUG found + fixed: the **tens numerals 30–80** (trettio/fyrtio/femtio/sextio/sjuttio/åttio) rendered accent 1,
+but the compound X+tio numerals are accent 2 (wikipron ² confirms; NST itself gives 10/20/90 = tio/tjugo/nittio
+accent 2 — 30–80 was an NST inconsistency). Corrected in build-sv-lexicon.mts (ACCENT2_NUMERALS override, documented)
++ regenerated (6 rows changed). trettio→trˈɛ̀tːɪɔ. Accuracy 96.0→96.6%. Numbers are high-frequency for synthesis, so
+this matters beyond the referee point.
+
+STATUS: all of segmental + tonal accent + stress + o-quality + numbers are built and (accent now) independently
+validated. Remaining deferred item is compound decomposition (Run 6 — hard, fogemorfem-aware junctures needed) +
+minor tails (OOV loanword stress, short ɛ→æ before r).

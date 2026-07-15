@@ -1,8 +1,10 @@
 /**
  * Swedish (sv) phonemizer — Central Standard Swedish (rikssvenska), canonical IPA, espeak-independent. Rule-based
- * g2p (g2p.ts) + first-syllable stress (the native default); a small exception map covers irregular function
- * words. text() tokenizes words / numbers / punctuation. Phase 1 is SEGMENTAL — pitch accent (accent 1/2) is
- * deferred to Phase 2. See docs/sv_bringup_investigation.md.
+ * g2p (g2p.ts) + the NST accent/stress lexicon: tonal word accent 1/2 (accent-2 = combining grave on the
+ * primary-stressed vowel) + non-initial stress, falling to first-syllable stress + shape-based accent for OOV
+ * words. A small exception map covers irregular function words. text() tokenizes words / numbers / punctuation.
+ * Accent validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts).
+ * See docs/sv_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

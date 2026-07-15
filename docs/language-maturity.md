@@ -65,7 +65,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 | **pt** Portuguese | 78.0% (.74) | gold 99.4% | 🟡 | Gold shows near-perfect; grapheme `x` (ʃ/z/ks/s) + `l`-coda are the lexical tail. |
 | **ru** Russian | 94.8% (.90) | gold 97.7% | ✅ | Loanword hard-C-before-е + genitive г→v are a tiny lexical tail (🟡-adjacent). |
 | **si** Sinhala | 93.5% (.90) | — | ✅ | Residual is 1× referee quirks. |
-| **sv** Swedish | 52.6% (.48) | — | 🟠 | Segmental + NST stress/accent lexicon done; **pitch accent 1/2** deferred (Phase 2) + lexical o=oː. |
+| **sv** Swedish | 52.6% (.48) | wikipron accent 96.6% | 🟠 | Segmental + NST stress/accent lexicon + **tonal word accent 1/2** (accent-2 = grave on the stressed vowel) + lexical o-quality + numbers all DONE. Accent now **independently validated 96.6% vs wikipron ¹/²** (accent-2 recall 98%; an inherent ~95% task — two independent lexica disagree on the contested tail, `tools/sv-accent-eval.mts`); fixed the tens numerals (trettio…åttio accent 2, an NST quirk). The 52.6% primary is a noisy broad referee that strips the accent (not a quality signal). Remaining scope gap: **compound decomposition** (Run 6 — a lexicon splitter is net-negative without fogemorfem-aware junctures; espeak-ng-portable defers it too) + minor tails (OOV loanword stress, short ɛ→æ before r). |
 | **ta** Tamil | 63.0% (.58) | — | ✅ | Referee-limited (ற geminate + diphthong notation). |
 | **th** Thai | 81.9% (.76) | — | 🟠 | Segmentally strong; residual ~8% is compound words needing the **seg-words segmentation** subsystem + lexical Sanskrit/Pali readings. |
 | **tr** Turkish | 76.2% (.70) | epitran 79.8% | 🟡 | Morphological segmentation (stem lexicon) + acronym spell-outs deferred. |
@@ -74,7 +74,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 ## What "outstanding work" concretely means
 
-- **🟠 scope gaps** are the substantive items: Swedish pitch accent and Thai's compound segmentation. Each is a
+- **🟠 scope gaps** are the substantive items: Swedish and Thai compound decomposition/segmentation. Each is a
   *subsystem*, tracked in that language's
   `docs/<code>_*investigation.md`. Until built, feed these engines their supported input (pinyin, etc.) and treat the deferred layer as absent, not wrong.
 - **🟡 lexical tails** are bounded: a specific, enumerable class (mid-vowel height, loanword C-hardening, learned
