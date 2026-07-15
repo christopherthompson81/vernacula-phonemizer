@@ -32,6 +32,12 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("পদ্ম")).toBe("pɔd̪ːo"); // pôdmo: môphôla → geminate
     });
 
+    test("medial inherent-vowel deletion (Ohala VCɔCV) + ক্ষ / জ্ঞ conjuncts", () => {
+        expect(phonemizeWord("আপনার")).toBe("apnaɾ"); // apnar: medial ɔ deleted (apɔnaɾ→apnaɾ)
+        expect(phonemizeWord("অক্ষর")).toBe("ɔkʰːɔɾ"); // ôkkhôr: ক্ষ → [kʰː]
+        expect(phonemizeWord("বিজ্ঞান")).toBe("biɡːan"); // biggan: জ্ঞ → [ɡː]
+    });
+
     test("text: words + Bengali danda pause", () => {
         expect(phonemize("আমি বাংলা বলি।", "bn")).toContain("baŋla");
     });

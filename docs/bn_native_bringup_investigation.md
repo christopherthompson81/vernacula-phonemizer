@@ -39,3 +39,21 @@ Fixed and extended against the wikipron ben broad referee (6666 rows / 4357 dist
 plateau needs: general conjunct-cluster handling (many Sanskritic conjuncts assimilate/geminate: ত্ব→tt, ক্ত…),
 the [æ] realization of ⟨e⟩ (একটা→ækʈa), medial inherent-vowel deletion (একটা→ækʈa, অকরণ→ɔkrɔn), and a lexical
 layer for the literary final-[o] words. Deferred deliberately; documented rather than forced past the noisy referee.
+
+## Run 3 — 2026-07-15 — medial inherent-vowel deletion + ক্ষ/জ্ঞ conjuncts (37.5→39.5%)
+
+Attacked the two biggest residual classes found by re-classifying the miss set:
+- **Medial inherent-vowel deletion** (the dominant class — ~300 words across the "medialDel" + "conjunct"
+  buckets). The referee deletes the medial inherent ɔ in a V·C·ɔ·C·V context (আপনার→apnaɾ, আকবর→akbɔr,
+  অকালবর্ষণ→ɔkalbɔrʃɔn) — exactly Hindi's Ohala schwa-deletion but on /ɔ/. Generalized the shared
+  core/schwa.ts deleteMedialSchwa to take the inherent-vowel symbol (default "ə"; Bengali passes "ɔ"), and
+  call it after geminate→length, before harmony. Hindi is untouched (default param). +~90 words.
+- **ক্ষ → [kʰː]** (অক্ষর→ɔkʰːɔr) and **জ্ঞ → [ɡː]** (বিজ্ঞান→biɡːan) — two specific high-frequency conjuncts
+  the akshara mapping gets wrong (kʃ / d͡ʒn). Grapheme presubstitution ক্ষ→ক্খ, জ্ঞ→গ্গ. +~43 words.
+
+Net wikipron 37.5→**39.5%**. Suite 267/267, typecheck clean.
+
+KNOWN IMPERFECTION (documented, not chased): Ohala deletes RIGHT-TO-LEFT, which mispicks on all-ɔ words where
+Bengali prefers the first medial (আকবর→akɔbɾo not akbɔr; কলম→kɔlmo not kɔlom). Net-positive on the corpus, but
+a Bengali-specific deletion direction/preference would fix the tail. The [æ] realization of ⟨e⟩/্যা (এক→æk,
+ক্যা→kæ) is real but context-lexical and low-yield on this noisy referee — deferred.
