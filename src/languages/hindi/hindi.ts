@@ -37,14 +37,22 @@ export interface HindiDef extends AbugidaDef {
 export type ForeignPhonemizer = (latin: string) => string;
 
 const VOWEL_G = new RegExp(`[${IPA_VOWELS}]`, "g");
-const DIGIT_CLASS = "0-9" + Object.keys(DEVANAGARI_DIGITS).join("");
+
+/** The script's word-run char class + digit map — defaults to Devanagari (Hindi/Marathi); Gujarati etc. pass
+ *  their own so the whole abugida orchestration (schwa deletion, weight stress, numbers) is reused as-is. */
+export interface AbugidaScript {
+    word: string;
+    digits: Record<string, string>;
+}
 
 export function makeNativeHindi(
     def: HindiDef,
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
+    script: AbugidaScript = { word: DEVANAGARI_WORD, digits: DEVANAGARI_DIGITS },
 ) {
     const g2p = makeAbugidaG2P(def, phon);
+    const DIGIT_CLASS = "0-9" + Object.keys(script.digits).join("");
     const CLAUSE_MARK = def.clausePunctuation; // Devanagari danda ।/॥ + ASCII → canonical pause (from hindi.jsonc)
     const post = def.postRules.map((r) => ({
         re: new RegExp(r.from, "gu"),
@@ -58,7 +66,7 @@ export function makeNativeHindi(
     const strip = def.stripSymbols ?? "";
     const symbolClass = [...Object.keys(symbols), ...strip].join("");
     const tokenRe = new RegExp(
-        `([${DEVANAGARI_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
+        `([${script.word}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,
         "gu",
     );
@@ -80,7 +88,7 @@ export function makeNativeHindi(
     const toAscii = (digits: string): string =>
         [...digits]
             .filter((d) => d !== ",")
-            .map((d) => DEVANAGARI_DIGITS[d] ?? d)
+            .map((d) => script.digits[d] ?? d)
             .join("");
 
     function number(digits: string): string {

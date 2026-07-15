@@ -1,0 +1,74 @@
+// Native canonical-IPA definition for Gujarati (gu) — Indo-Aryan, the Gujarati abugida (Unicode U+0A80–U+0AFF).
+// Reuses the shared abugida engine + the Hindi orchestration (makeNativeHindi) with Gujarati Unicode + values:
+// a shallow abugida whose one hard rule is schwa deletion (Ohala, shared with Hindi). Differences from Hindi:
+// Gujarati has NO phonemic vowel LENGTH (ઇ/ઈ→i, ઉ/ઊ→u), ⟨આ⟩/⟨ા⟩ = [ɑ], and the ⟨ે⟩/⟨ો⟩ mids are [e]~[ɛ]/[o]~[ɔ]
+// (the candra signs ૅ/ૉ + ૈ/ૌ mark the open [ɛ]/[ɔ]) — folded vs the referee. Dental t̪/d̪ vs retroflex ʈ/ɖ (fleet
+// Indic dental). Validated against wikipron guj + kaikki guj (human). See docs/gu_native_bringup_investigation.md.
+{
+    "language": "gu",
+    "name": "Gujarati",
+    "script": "Gujarati",
+    "provenance": "Authored from the Unicode Gujarati chart + standard Gujarati phonology. Reuses the generic abugida engine + the Hindi orchestration with Gujarati Unicode.",
+
+    "inherentVowel": "ə",
+
+    "consonants": {
+        "ક": { "ipa": "k" }, "ખ": { "ipa": "kʰ" }, "ગ": { "ipa": "ɡ" }, "ઘ": { "ipa": "ɡʱ" }, "ઙ": { "ipa": "ŋ" },
+        "ચ": { "ipa": "t͡ʃ" }, "છ": { "ipa": "t͡ʃʰ" }, "જ": { "ipa": "d͡ʒ" }, "ઝ": { "ipa": "d͡ʒʱ" }, "ઞ": { "ipa": "ɲ" },
+        "ટ": { "ipa": "ʈ" }, "ઠ": { "ipa": "ʈʰ" }, "ડ": { "ipa": "ɖ" }, "ઢ": { "ipa": "ɖʱ" }, "ણ": { "ipa": "ɳ" },
+        "ત": { "ipa": "t̪", "note": "DENTAL (vs retroflex ટ=ʈ)" }, "થ": { "ipa": "t̪ʰ" }, "દ": { "ipa": "d̪" }, "ધ": { "ipa": "d̪ʱ" }, "ન": { "ipa": "n" },
+        "પ": { "ipa": "p" }, "ફ": { "ipa": "pʰ" }, "બ": { "ipa": "b" }, "ભ": { "ipa": "bʱ" }, "મ": { "ipa": "m" },
+        "ય": { "ipa": "j" }, "ર": { "ipa": "ɾ" }, "લ": { "ipa": "l" }, "વ": { "ipa": "ʋ" }, "ળ": { "ipa": "ɭ", "note": "retroflex lateral" },
+        "શ": { "ipa": "ʃ" }, "ષ": { "ipa": "ʂ" }, "સ": { "ipa": "s" }, "હ": { "ipa": "ɦ" },
+        // Nukta letters (Perso-Arabic / loans)
+        "ક઼": { "ipa": "q" }, "ખ઼": { "ipa": "x" }, "ગ઼": { "ipa": "ɣ" }, "જ઼": { "ipa": "z" }, "ડ઼": { "ipa": "ɽ" }, "ઢ઼": { "ipa": "ɽʱ" }, "ફ઼": { "ipa": "f" }
+    },
+
+    // Gujarati vowels — NO phonemic length. ⟨અ⟩=ə (inherent) vs ⟨આ⟩=a (open; the referee writes it [ɑ] — folded);
+    // ⟨ઇ/ઈ⟩ both /i/, ⟨ઉ/ઊ⟩ both /u/; the mids
+    // ⟨એ⟩=e ⟨ઓ⟩=o, with the historic diphthongs ⟨ઐ⟩=ɛ ⟨ઔ⟩=ɔ and the candra loans ⟨ઍ⟩=ɛ ⟨ઑ⟩=ɔ.
+    "independentVowels": {
+        "અ": { "ipa": "ə" }, "આ": { "ipa": "a" }, "ઇ": { "ipa": "i" }, "ઈ": { "ipa": "i" }, "ઉ": { "ipa": "u" }, "ઊ": { "ipa": "u" },
+        "ઋ": { "ipa": "ɾu" }, "એ": { "ipa": "e" }, "ઐ": { "ipa": "ɛ" }, "ઓ": { "ipa": "o" }, "ઔ": { "ipa": "ɔ" },
+        "ઍ": { "ipa": "ɛ" }, "ઑ": { "ipa": "ɔ" }, "ૐ": { "ipa": "õm" }
+    },
+
+    "vowelSigns": {
+        "ા": { "ipa": "a" }, "િ": { "ipa": "i" }, "ી": { "ipa": "i" }, "ુ": { "ipa": "u" }, "ૂ": { "ipa": "u" },
+        "ૃ": { "ipa": "ɾu" }, "ે": { "ipa": "e" }, "ૈ": { "ipa": "ɛ" }, "ો": { "ipa": "o" }, "ૌ": { "ipa": "ɔ" },
+        "ૅ": { "ipa": "ɛ" }, "ૉ": { "ipa": "ɔ" }
+    },
+
+    "signs": {
+        "virama": { "char": "્", "effect": "suppressInherentVowel" },
+        "anusvara": { "char": "ં", "effect": "nasalizeVowel", "note": "nasalizes the vowel + homorganic nasal before a stop (અંક→əŋk)" },
+        "chandrabindu": { "char": "ઁ", "effect": "nasalizeVowel" },
+        "visarga": { "char": "ઃ", "effect": "appendH" },
+        "nukta": { "char": "઼", "effect": "composeNukta" }
+    },
+
+    "schwaDeletion": {
+        "deleteWordFinal": true,
+        "retainInMonosyllable": true,
+        "medialRule": "ohala-VCaCV"
+    },
+
+    // Geminate → length + the aspiration-before-length reorder — the fleet-wide Indic conventions.
+    "postRules": [
+        { "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃʂsɳŋɭɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)", "to": "$1ː", "note": "geminate → single + length" },
+        { "from": "ː([ʰʱ])", "to": "$1ː", "note": "aspiration-before-length reorder" }
+    ],
+    "finalRules": [],
+
+    "clausePunctuation": { "।": " . ", "॥": " . ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : " },
+
+    // NUMBERS — Gujarati spellings (public-fact numerals); canonical IPA DERIVED by the same g2p. 21–99 are
+    // IRREGULAR (like Hindi) — the round tens + 0–20 + magnitudes are authored; the ~80 compound spellings are a
+    // bounded remaining task (documented gap), so 21–99 compose as "tens unit" for now.
+    "numbers": {
+        "units": ["શૂન્ય", "એક", "બે", "ત્રણ", "ચાર", "પાંચ", "છ", "સાત", "આઠ", "નવ"],
+        "teens": ["દસ", "અગિયાર", "બાર", "તેર", "ચૌદ", "પંદર", "સોળ", "સત્તર", "અઢાર", "ઓગણીસ"],
+        "tens": { "20": "વીસ", "30": "ત્રીસ", "40": "ચાળીસ", "50": "પચાસ", "60": "સાઠ", "70": "સિત્તેર", "80": "એંસી", "90": "નેવું" },
+        "magnitudes": { "hundred": "સો", "thousand": "હજાર", "lakh": "લાખ", "crore": "કરોડ" }
+    }
+}

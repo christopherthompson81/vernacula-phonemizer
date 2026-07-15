@@ -52,6 +52,23 @@ export const DEVANAGARI_DIGITS: Record<string, string> = {
  *  Bengali uses the shared danda । (U+0964) for clause punctuation, handled separately. */
 export const BENGALI_WORD = "ঀ-ৣৰ-৾";
 
+// Gujarati block (U+0A80–U+0AFF) minus the digit range — a word run.
+export const GUJARATI_WORD = "઀-૥૰-૿";
+
+/** Gujarati digits ૦-૯ → ASCII, for number parsing. */
+export const GUJARATI_DIGITS: Record<string, string> = {
+    "૦": "0",
+    "૧": "1",
+    "૨": "2",
+    "૩": "3",
+    "૪": "4",
+    "૫": "5",
+    "૬": "6",
+    "૭": "7",
+    "૮": "8",
+    "૯": "9",
+};
+
 /** Bengali digits ০-৯ → ASCII, for number parsing. */
 export const BENGALI_DIGITS: Record<string, string> = {
     "০": "0",
