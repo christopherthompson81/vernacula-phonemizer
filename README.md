@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **36 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **37 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,16 +21,16 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-36 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+37 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
 
 | Family / area | Languages |
 |---|---|
-| Austronesian | Indonesian `id` 🟡, Tagalog `tl` 🟡 |
-| Celtic | Welsh `cy`, Irish `ga` |
-| Dravidian | Tamil `ta`, Telugu `te` |
-| Germanic | German `de`, English `en`, Swedish `sv` |
+| Austronesian | • Indonesian `id` 🟡,<br>• Tagalog `tl` 🟡 |
+| Celtic | • Irish `ga`,<br>• Welsh `cy` |
+| Dravidian | • Tamil `ta`,,<br>• Telugu `te` |
+| Germanic | • German `de`,• English `en`,<br>• Swedish `sv` |
 | Indo-Aryan | Bengali `bn` 🟡, Hindi `hi`, Marathi `mr` 🟡, Punjabi `pa` 🟡, Sinhala `si` (tonal), Urdu `ur` 🟠 |
 | Japonic / Koreanic | Japanese `ja`, Korean `ko` |
 | Niger-Congo | Fula `ff`, Hausa `ha`, Zulu `zu` |
@@ -38,12 +38,12 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Romance | Catalan `ca`, Spanish `es`, French `fr`, Italian `it`, Portuguese `pt` |
 | Semitic / Iranian | Arabic `ar`, Persian `fa` 🟠 |
 | Slavic | Czech `cs`, Russian `ru` |
-| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Cantonese `yue`, Thai `th`, Vietnamese `vi` |
+| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Cantonese `yue`, Wu `wuu` 🟡, Thai `th`, Vietnamese `vi` |
 | Turkic | Kazakh `kk`, Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (6: Bengali, Indonesian,
-Marathi, Punjabi, Tagalog, Nigerian Pidgin) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
+✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (7: Bengali, Indonesian,
+Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
 🔵 in active development.
 
 ## How it works

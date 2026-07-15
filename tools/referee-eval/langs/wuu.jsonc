@@ -1,0 +1,16 @@
+// Wu Chinese / Shanghainese (wuu) — the third Sinitic language, Han → Wugniu → IPA. GAP language: there is NO
+// independent automated referee — wikipron has no wuu, epitran has no wuu-Latn, and no tone-marked Wu lexicon
+// exists (re-verified during the espeak-ng-portable bring-up: rime-wugniu zaonhe/lopha carry no tone; the wuuwiki
+// dump has ~50 scattered tone-marked IPA examples). The committed correctness anchor is the adjudicated gold in
+// test/wu.test.ts, validated against the wuuwiki inline-IPA examples (上海 zɑ̃hɛ, 自組網 zɿ t͡su mɑ̃) and standard
+// Shanghainese phonology (Zhu 2006 / Wugniu). Recorded here (not silently omitted); the floor test skips wuu.
+{
+    "language": "wuu",
+    "name": "Wu Chinese (Shanghainese)",
+    "script": "Han",
+    "provenance": "rime-wugniu zaonhe → IPA; ported from espeak-ng-portable authoring.",
+    "referees": [],
+    "secondaryGap": "No independent referee for Wu: wikipron has no wuu, epitran has no wuu, and no tone-marked Wu lexicon exists (rime-wugniu carries no tone; citation tone is DERIVED from onset register + MC tone category via Unihan kCantonese, sandhi from the 廣用式 register 2-melody). The anchor is the adjudicated gold in test/wu.test.ts (wuuwiki inline-IPA-validated + Zhu 2006 phonology).",
+    "segmentJoin": true,
+    "folds": []
+}

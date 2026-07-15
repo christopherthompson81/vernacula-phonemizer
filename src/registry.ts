@@ -38,6 +38,7 @@ import { createTagalog } from "./languages/tagalog/tagalog.ts";
 import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
+import { createWu } from "./languages/wu/wu.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -133,6 +134,9 @@ function build(lang: string): Phonemizer {
         // Embedded/code-switched English is available to Naija, but loans are nativised by the rule g2p (lazy).
         case "pcm":
             return createNaija((latin) => getPhonemizer("en").text(latin));
+        // Embedded Latin in Wu text routes to the English phonemizer (lazy — loaded only if it appears).
+        case "wuu":
+            return createWu((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

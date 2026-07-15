@@ -1,0 +1,49 @@
+// Wu Chinese / Shanghainese (wuu) — Wugniu (zaonhe) romanization → canonical IPA. wu.ts reads this file. Each
+// dict reading is ONE syllable = [initial] + final + tone-digit. Ported from the espeak-ng-portable authoring
+// (authoring/wuu/wuu_rules + ph_wuu) — the Shanghainese inventory: a THREE-WAY obstruent contrast (voiceless /
+// aspirated / VOICED b d ɡ z dʑ ʑ v ɦ — the yang register), glottalised yin sonorants (ʔm ʔn ʔl ʔŋ), a checked
+// glottal-stop coda (入声 -q → ʔ), front-rounded ø/y, apical ɿ, and nasalised finals. Tones are Chao contour
+// letters. See docs/wu_native_bringup_investigation.md.
+{
+    "language": "wuu",
+    "name": "Wu Chinese (Shanghainese)",
+    "script": "Han",
+
+    // Consonant onsets → IPA (tried longest-first, so digraphs win: tsh/ts, ph/th/kh, ch/sh/zh/gh, ng/gn/ngh,
+    // mh/nh/lh). The aspirated and VOICED (yang-register) series are the Wu signature.
+    "initials": {
+        "tsh": "t͡sʰ", "ts": "t͡s", "ph": "pʰ", "th": "tʰ", "kh": "kʰ",
+        "ch": "t͡ɕʰ", "sh": "ɕ", "zh": "ʑ", "gh": "ɦ", "ngh": "ʔŋ",
+        "gn": "ɲ", "ng": "ŋ", "mh": "ʔm", "nh": "ʔn", "lh": "ʔl",
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "c": "t͡ɕ", "j": "d͡ʑ", "f": "f", "v": "v", "s": "s", "z": "z",
+        "h": "h", "m": "m", "n": "n", "l": "l"
+    },
+
+    // Finals (rimes) → IPA. Medial i-/u- rimes carry the on-glide (ia→ja, ua→wa); -n/-ng nasalise (an→ɛ̃, aon→ɑ̃,
+    // on→oŋ, en→əɲ, in→ɪɲ); -q is the checked glottal coda (ʔ). Bare "y" is the apical ɿ (after a sibilant).
+    "finals": {
+        "a": "a", "an": "ɛ̃", "ao": "ɔ", "aon": "ɑ̃", "aq": "aʔ", "au": "ɔ",
+        "e": "ɛ", "ee": "e", "en": "əɲ", "eq": "əʔ", "eu": "ɤ", "er": "əl",
+        "i": "i", "in": "ɪɲ", "iq": "iʔ", "ie": "jɛ", "ieu": "jɤ",
+        "ia": "ja", "ian": "jɛ̃", "iau": "jɔ", "iaq": "jaʔ", "io": "jo",
+        "ioe": "jø", "ion": "joŋ", "ioq": "joʔ", "iu": "y", "iun": "yəɲ", "iuq": "yʔ",
+        "o": "o", "on": "oŋ", "oq": "oʔ", "oe": "ø",
+        "u": "u", "ue": "wɛ", "uan": "wɛ̃", "uaon": "wɑ̃", "uaq": "waʔ",
+        "ua": "wa", "uen": "wəɲ", "un": "wəɲ", "ueq": "wəʔ", "uoe": "wø", "uq": "uʔ",
+        "y": "ɿ", "yu": "y", "yun": "yəɲ", "yuq": "yʔ"
+    },
+
+    // Tone digits → Chao contour letters. Citation (from wuu_listx): 1 陰平 ˥˧ · 0 陰去/上 ˧˦ · 6 陽 ˩˧ · 7 陰入 ˥ ·
+    // 8 陽入 ˩˨. Sandhi (baked into the multi-char word readings, 廣用式 register 2-melody): yin σ1 5 ˥ / medial 9 ˧ /
+    // final 3 ˧˩ · yang σ1 2 ˨ / rest 4 ˦.
+    "tones": {
+        "0": "˧˦", "1": "˥˧", "2": "˨", "3": "˧˩", "4": "˦",
+        "5": "˥", "6": "˩˧", "7": "˥", "8": "˩˨", "9": "˧"
+    },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ",
+        "；": " ; ", "：": " : ", ".": " . ", ",": " , ", "?": " ? ", "!": " ! "
+    }
+}
