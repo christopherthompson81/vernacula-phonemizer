@@ -30,7 +30,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     ja: 0.52, // wikipron jpn_hira narrow — measured 57.9%; residual = allophonic palatalization + devoicing detail
     kk: 0.83, // epitran kaz-Cyrl — measured 86.2%; residual is largely epitran's own ө/ү merger + palatalization
     ko: 0.52, // wikipron kor_hang narrow — measured 58.5%; residual = ㄹ (ɭ~ɾ) + intervocalic voicing detail
-    pt: 0.74, // wikipron por — measured 78.0% (adjudicated gold 2nd: 99.4%); residual is open/close vowels
+    pt: 0.80, // wikipron por — 81.2% (adjudicated gold 2nd: 99.4%); ✅ referee register/name-limited after dark-l blocks a/e reduction (salvar→saɫvaɾ 53:0, -vel→vɛɫ 89:0). Residual one-directional: we reduce EP pretonic o→u/e→ɨ uniformly, referee keeps mid in learned words (195:0 / 386:8)
     ru: 0.90, // kaikki rus — measured 94.8% (adjudicated gold 2nd: 97.7%)
     si: 0.90, // wikipron sin (human) — measured 93.5%; residual is 1× referee quirks
     sv: 0.52, // wikipron swe broad — measured 55.7% (Phase 3: + NST compound secondary-stress → boundary-safe vowel length/quality + 2nd-onset softening); residual = referee noise (casual/truncated forms)
