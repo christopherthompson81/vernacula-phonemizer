@@ -71,11 +71,20 @@ function majority<T>(xs: T[]): T {
     return [...count.entries()].sort((a, b) => b[1] - a[1])[0]![0];
 }
 
+// NST inconsistently marks the tens 30–80 (trettio…åttio) as accent 1 while giving 10/20/90 (tio/tjugo/nittio)
+// accent 2 — but the compound numerals X+tio are all accent 2 in standard Swedish (independent wikipron ² confirms
+// trettio…åttio). Correct that NST quirk so the whole tens series is internally consistent and canonical.
+const ACCENT2_NUMERALS = new Set(["trettio", "fyrtio", "femtio", "sextio", "sjuttio", "åttio"]);
+
 const out: string[] = [];
 let withOrd = 0, withO = 0;
 for (const [word, readings] of [...entries].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
-    const accent = majority(readings.map((r) => r.accent));
-    const matching = readings.filter((r) => r.accent === accent);
+    const accent = ACCENT2_NUMERALS.has(word)
+        ? "2"
+        : majority(readings.map((r) => r.accent));
+    // ord/oLong from the readings at the chosen accent; if the accent override left none, use all readings.
+    const atAccent = readings.filter((r) => r.accent === accent);
+    const matching = atAccent.length > 0 ? atAccent : readings;
     const ord = majority(matching.map((r) => r.ord)); // stress ordinal among majority-accent readings
     const oLong = majority(matching.map((r) => r.oLong));
     // Tokens after accent: a number is the stress ordinal (omitted when 0 = first syllable = engine default);

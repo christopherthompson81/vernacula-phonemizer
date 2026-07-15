@@ -107,6 +107,14 @@ describe("swedish canonical IPA", () => {
         expect(phonemize("1000000", "sv")).toBe("ɛn mɪljˈuːn"); // en miljon (unstressed en → ɛn)
     });
 
+    test("numeral tens are accent 2 (compound X+tio; corrects an NST accent-1 quirk)", () => {
+        // wikipron ² confirms trettio…åttio are accent 2 like tio/tjugo/nittio; NST inconsistently marked 30–80
+        // as accent 1 (fixed in build-sv-lexicon.mts). The grave sits on the stressed first vowel.
+        expect(phonemize("30", "sv")).toBe("trˈɛ̀tːɪɔ"); // trettio
+        expect(phonemize("50", "sv")).toBe("fˈɛ̀mtɪɔ"); // femtio
+        expect(phonemize("80", "sv")).toBe("ˈɔ̀tːɪɔ"); // åttio
+    });
+
     test("text: clause assembly + punctuation", () => {
         expect(phonemize("Jag talar svenska.", "sv")).toBe("jɑː tˈɑ̀ːlar svˈɛ̀nska .");
     });
