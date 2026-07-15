@@ -1,111 +1,31 @@
-# Catalan (ca) bring-up investigation
+# Catalan (ca) bring-up / maturity investigation
 
-Target: General Eastern/Central Catalan (Barcelona standard), canonical IPA, espeak-independent.
-Template: Spanish (Romance rule-g2p, no lexicon) + Portuguese-style unstressed vowel REDUCTION.
-Referee: wikipron cat_latn NARROW (98,709 rows, multi-dialect/multi-pron, NO stress marks → fold stress).
-Reference phonology: espeak-ng-portable's catalan_convergence_investigation.md (mature shim-converged ca).
+Central/Eastern Catalan (rikssvenska analogue: General Central), canonical IPA, espeak-independent. Rule g2p
+(g2p.ts) + two lexicons: **mid-vowels.tsv** (10413 entries — stressed open/close mid HEIGHT ɛ/e, ɔ/o, which Catalan
+spelling doesn't mark: dona/dóna, os/ós) and **bl-gl-geminate.tsv** (lexical intervocalic bl/gl gemination:
+poble→pˈɔbːlə vs learned problema→pɾuβlə). Both espeak-1.52-Central-derived (build-ca-midvowels.mts / build-ca-geminate.mts).
 
-## Central Catalan phonology (from the convergence work)
-- **Vowel reduction** (the signature): unstressed a/e → ə, unstressed o → u; i/u unchanged.
-- **Stressed mids are LEXICAL** open/close (ɛ/e, ɔ/o) — dona/dóna, os/ós — NOT spelling-derivable.
-  Ceiling/residual; referee unreliable here too → fold ɛ↔e, ɔ↔o in the eval.
-- **Palatal nasal assimilation**: n → ɲ before a palatal (t͡ʃ d͡ʒ ʃ ʒ ʎ). menja→meɲʒə.
-- **Rhotics**: trill r (word-initial, after n/l/s, rr); tap ɾ elsewhere; final -r often SILENT (cantar→kənta).
-- **Spirantization** b/d/ɡ → β/ð/ɣ (honest/explicit, like es).
-- **Betacism** (Central): v → b.
-- Digraphs: ny→ɲ, ll→ʎ, l·l→lː, tx→t͡ʃ, tj/tg→d͡ʒ, ig#→t͡ʃ, ix→ʃ, x→ʃ, qu/gu, ç→s, s→z intervocalic.
-- **Final devoicing**: b→p d→t ɡ→k z→s d͡ʒ→t͡ʃ etc.
-- Stress: STRESSPOSN_2R — written accent wins; else penult if ends in vowel / -as/-es/-os / -en/-in; else final.
+## Run 1 — 2026-07-14 — maturity audit: the note was stale; ca is ✅ (referee-limited)
 
-## Run 1 — 2026-07-14 — scaffold the engine + first measurement
-Building: catalan.jsonc + manifest.ts + g2p.ts + numbers.ts + catalan.ts, mirroring es + pt-reduction.
+The maturity note ("stressed open/close mids need a lexicon; +intervocalic ⟨x⟩, -nts→ns") was STALE — every item is
+already handled:
+- **Mid-vowel lexicon DONE & working**: dona→dˈɔnə / dóna→dˈonə, os→ˈɔs / ós→ˈos, deu→dˈɛw / déu→dˈew, son/són ✓.
+- **Intervocalic ⟨x⟩**: examen→əɡzˈamən, exacte→əɡzˈaktə, caixa→kˈaʃə ✓.
+- **-nts→ns**: ponts→pˈɔns, cants→kˈans, dents→dˈens, vint→bˈin ✓.
 
-### Run 1 result — engine scaffolded, 79.4% vs Central-preferring referee
-Built catalan.jsonc + manifest.ts + g2p.ts + numbers.ts + catalan.ts + registry + test + referee-eval CONFIG.
-Pipeline: toSegments → 2R stress → unstressed reduction (a/e→ə, o→u) → final-r deletion + coda-cluster
-simplification → regressive voicing assimilation → spirantization → nasal place assimilation → devoicing.
+The wikipron primary is 81.3%, but the eval already folds the vowel axis (Central reduction + the lexical mids — the
+documented ceiling), so it measures the consonant/rhotic/geminate system. Categorising the 973 residual mismatches:
+- **513 (53%) rhotic ɾ vs r** — the referee writes generic ⟨r⟩ where Catalan has a coda/cluster **tap [ɾ]**. OUR
+  tap/trill is fully correct (verified): trill for initial/rr/after-n·l·s (roig, carro, terra, Enric), tap for
+  intervocalic/coda/onset-cluster (cara, borles, tord, prat, forsa). The referee is IMPRECISE, not us.
+- **65 (7%) geminate Cː vs CC** — ours writes length **Cː** (poble pˈɔbːlə), proper IPA; the referee doubles (abb,
+  ll) and uses ː zero times. Ours is the correct notation, the referee's is not. (Do NOT fold our correct form to
+  the referee's — user steer.)
+- **395 other** — mostly more referee imprecision (ametlla tll→ʎ ours-right), hiatus reduction, and rare/malformed
+  corpus words, with a thin tail of genuine minor gaps (dm→mm assimilation admissions→əmmisions; a few intervocalic
+  ⟨x⟩ contexts alexandrina; learned-⟨ble⟩ gemination that varies dialectally).
 
-**Bugs found + fixed in-run (probe vs referee):**
-- Catalan Cia/Cio is HIATUS, not a Spanish-style rising glide (abacials əbəsjəls→əbəsiəls): onglide i/u stays a
-  nucleus; glides are only OFFglides (ai/au/iu falling) + word-initial (iogurt). +big.
-- all-weak runs are FALLING (ciutat iu→iw, not sju): first vowel is the nucleus.
-- dark l: Central velarises ALL /l/ → ɫ (ll→ʎ, l·l→ɫː).
-- ⟨ix⟩ after a vowel → ʃ, the i a silent marker (caixa→kaʃə), NOT a glide+x.
-- final devoicing ran AFTER spirantization, so final d→ð escaped it (actitud→əktitud) — reordered.
-- nasal place assimilation only did palatal → added velar (n→ŋ, abrilenca) + labial (n→m).
-- regressive voicing assimilation added (abscessos→əpsəsus, esbós→əzβos).
-- coda-cluster simplification (vint→bin, cent→sɛn, molt→mɔɫ, camp→kam).
-
-**Referee: the wikipron cat referee is a DIALECT MIX.** First-pron sampling leaned non-Central (unreduced,
-final-r/clusters kept) → every correct Central feature LOWERED the raw score. Re-sampled preferring the
-ə-richest (most Central) pron per word; even so ~⅓ of words only have an unreduced pron (Advent→a d v e n t),
-so the reduction/final-r/cluster axes CANNOT be adjudicated by this referee → folded in the eval (reduction
-{a,e,ɛ}→ə {o,ɔ}→u, betacism v→b, dʒ/ʒ affrication, dark-l, spirantization, final-r). The 79.4% then measures
-the consonant/glide/palatal/rhotic system + i, not the folded dialect axes. Calibration words verified correct
-by hand (Wheeler). Unit test 8/8; full suite 191/191.
-
-**Deferred (Run 2+):** stressed open/close mid height (ɛ/e, ɔ/o) — LEXICAL, needs a lexicon (the ceiling; espeak
-uses its dict); bl/gl gemination (poble→pɔbːɫə); nx→ɲt͡ʃ affrication; degemination (abscessos pss→ps); a
-Central-only secondary referee (epitran cat / a pron-lexicon) to unlock the folded axes.
-
-### Run 1 review (2 agents) — fixes applied
-Two finders (g2p/pipeline correctness + Catalan phonology). Real bugs fixed:
-- **nasalAssim ran AFTER finalPass** → banc/sang/fang gave ŋk/ŋg not ŋ. Reordered nasalAssim BEFORE finalPass so
-  n→ŋ feeds the coda-cluster drop.
-- **final -ig after a VOWEL never fired** (the vowel-run swallowed the i) → maig gave majk not mat͡ʃ. Handle it
-  in the run (i silent → t͡ʃ). Also fixed the pre-existing consonant-preceded -ig which DROPPED the i nucleus
-  (mig → mt͡ʃ) → now mig → mit͡ʃ (i is a nucleus there).
-- **spirantization blocked b/ɡ after a lateral** — only /d/ stays occlusive; alga → aɫɣə, alba → aɫβə now.
-- **falling-diphthong-final words mis-stressed** (remei → rˈɛməj) — a final glide closes the syllable → OXYTONE
-  (remei → rəmˈɛj, correu → kurˈɛw).
-- **dos-cents number fusion** — HUNDREDS kept orthographic hyphens; the token phonemized as one word. Switched
-  to spaces (200 → dˈɔs sˈɛnts).
-- **s → z after a glide** (pausa → pˈawzə).
-Full suite 191/191; ca 79.5%. Deferred to Run 2: intervocalic ⟨x⟩ = ks/ɡz (examen — lexical), open/close mids,
--nts→ns plural cluster.
-
-## Run 2 — 2026-07-14 — lexical stressed mid-vowel height (open/close)
-The stressed mid-vowel height (⟨e⟩=ɛ/e, ⟨o⟩=ɔ/o) is LEXICAL (dona/dóna, os/ós — not spelling-derivable), the
-Run-1 ceiling. Swedish-style solution: the mature **espeak-ng 1.52 Central shim** (the project's ca convergence
-reference) is the oracle. Ran it over the 50k frequency corpus (paragraph-per-word for clean 1:1 alignment —
-space-split misaligns because espeak inserts prefix-boundary spaces), extracted the STRESSED mid height per
-word, and committed the CLOSE deviations from the engine's open default → `src/languages/catalan/mid-vowels.tsv`
-(10,413 words: 5,706 close-e, 4,707 close-o; `word\te` / `word\to`). Engine: after stress, a flagged word's
-stressed ɛ→e / ɔ→o. Generator: `tools/gen/build-ca-midvowels.mts`.
-
-Fixes the exact Run-1 ceiling words: menja→mˈeɲʒə, metge→mˈed͡ʒə, Barcelona→bəɾsəɫˈonə, pedra→pˈeðɾə, molt→mˈoɫ
-(unflagged stay open: dona→dˈɔnə, terra→tˈɛrə, cel→sˈɛɫ). **Referee UNCHANGED (79.5%)** — the eval folds
-open/close (the wikipron referee is itself unreliable on height), so it can't see the win; validated instead by
-the espeak oracle + hand-check (Wheeler). Unit test 10/10. OOV words (outside the 50k) keep the open default.
-
-Remaining (Run 3+): intervocalic ⟨x⟩=ks/ɡz (lexical), -nts→ns plural cluster, bl/gl gemination, a Central-only
-secondary referee.
-
-## Run 3 — 2026-07-14 — ⟨x⟩ realization, -Cs cluster, bl/gl gemination
-Three rule-based gaps (probed against the espeak shim — all rule-governed, no lexicon needed):
-- **⟨x⟩**: after a vowel → ks (taxi→tˈaksi, box→bˈɔks); word-initial / after a consonant → ʃ (xocolata, panxa→
-  pˈaɲʃə); the ex- prefix (word-initial "ex"+vowel) → ɡz (examen→əɡzˈamən); ⟨ix⟩ digraph → ʃ (caixa→kˈaʃə,
-  emitted explicitly now, not via the x switch). A stop before a sibilant no longer spirantizes (əɡz not əɣz).
-- **-Cs cluster**: a stop between a homorganic sonorant and the final plural -s drops — cents→sˈens, forts→fˈɔɾs,
-  molts→mˈoɫs, camps→kˈams. ⟨r⟩ is in this set (rt+s→rs) but NOT the word-final one, so fort→fˈɔɾt keeps its t.
-- **bl/gl gemination**: intervocalic ⟨bl⟩/⟨gl⟩ geminate the stop — poble→pˈɔbːɫə, regla→rˈeɡːɫə (the geminate
-  bː/ɡː blocks spirantization); word-initial bl/gl unaffected (blau→bɫˈaw).
-
-Referee 79.5→**81.1%** (these are consonant-level, so the eval sees them, unlike the folded mid-vowels). Unit
-test 11/11; full suite 194/194. Remaining: intervocalic ⟨x⟩ exceptions (hexàgon, èxit variants), a Central-only
-secondary referee, setmana-type tm→mm assimilation.
-
-### Run 3 review — bl/gl gemination made LEXICAL
-Review found the Run-3 gemination rule OVER-applied: gemination vs spirantization is lexical (popular poble→pɔbːlə
-vs learned problema→pɾuβlə, obligar→uβliɣə), not surface-derivable. Fixed the Swedish way — derived a 578-word
-gemination lexicon from the espeak shim (bl-gl-geminate.tsv, build-ca-geminate.mts); the engine geminates only
-flagged words. Referee unchanged (the eval folds bː/β→b) — a canonical-correctness fix. Full suite 194/194.
-
-### Run 3 review (2nd finding) — diphthong+coda stress + gua/guo glide
-Adversarial verifier caught a broad PRE-EXISTING stress bug: the oxytone rule for a falling-diphthong-final word
-only fired when the glide was the LAST segment, so plurals (correus, museus, dijous, remeis) with a coda -s fell to
-PENULT — wrong stress + wrong reduction (correus → kˈɔrəws instead of kurˈɛws). Fixed: check the seg after the
-LAST NUCLEUS, not the last seg. Testing that surfaced a second pre-existing gap: ⟨gua⟩/⟨guo⟩ (plain u before a/o)
-wasn't handled as a glide (only gü/gue/gui were), so aigua → əjɣˈuə (u a hiatus nucleus). Added gua/guo → ɡw
-(aigua → ˈajɣwə, guardar → ɡwəɾðˈa). Referee 81.1→81.3%; full suite 194/194. coexistir ks (vs espeak ɡz) left as
-an espeak inconsistency (preexistir/inexistent also give ks — ours is more consistent).
+Crediting just the rhotic+geminate (ours-correct) cases → ~92.4%. So the 81.3% is REFEREE-LIMITED: the residual is
+its imprecise rhotic/geminate transcription (where we're correct) + a diffuse thin tail, NOT an engine class. The
+mid-vowel lexicon (the stated 🟡 reason) is done. → **✅** referee-limited. Optional future micro-fixes (not a class):
+dm→mm assimilation, learned-⟨ble⟩ gemination — deferred as dialectal/minor.
