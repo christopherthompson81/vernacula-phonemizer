@@ -30,3 +30,36 @@ verified; the tail is intervocalic ਹ→tone (we keep ɦ) and medial-schwa vari
 
 NEXT (deferred): intervocalic/coda ਹ → tone + h-deletion (ਕਹਾਣੀ→käːɳiː); a larger/cleaner tone referee (the
 narrow wikipron, or epitran pan-Guru) for the tone axis proper.
+
+## Run 2 — 2026-07-15 — Shahmukhi (Perso-Arabic) front-end → 24.1% (abjad-capped, one phonology two scripts)
+
+Punjabi is written in TWO scripts: Gurmukhi (India) and **Shahmukhi** (Perso-Arabic, Pakistan). Added a Shahmukhi
+front-end exactly parallel to the Javanese Aksara-Jawa work: a new abjad scanner (`shahmukhi.ts` + `shahmukhi.jsonc`)
+that scans the script into the SAME raw canonical IPA the Gurmukhi abugida emits, so the shared Punjabi phonology in
+`punjabi.ts` (gemination→length, inherent-schwa deletion, TONOGENESIS, weight stress) applies UNCHANGED. `word()`
+routes by script (`SHAHMUKHI_WORD.test` → scanner, else Gurmukhi g2p); the tokenizer/number/pause paths gained the
+Arabic letter/digit/punctuation ranges.
+
+The scanner is modelled on the Urdu abjad g2p but emits Punjabi values (dental t̪ d̪, retroflex ʈ ɖ ɳ ɽ ɭ, ʋ,
+long-a = aː) and — critically — the historical voiced-aspirate digraphs بھ گھ دھ ڈھ جھ emit the breathy MARKERS
+bʱ/ɡʱ/d̪ʱ/ɖʱ/d͡ʒʱ, so tonogenesis fires identically. Punjabi-specific letters ݨ→ɳ, ࣇ→ɭ. Shadda ّ doubles the
+consonant (→ length in the shared reorder, as Gurmukhi addak). Word-initial و/ی route through the consonant branch
+as glides that carry an inherent vowel (وڈّا→ʋˈəɖːaː, یار→jˈaːɾ). Added **homorganic nasal assimilation** to the
+shared post-processing (n → ŋ/ɲ/ɳ before a velar/palatal/retroflex): Gurmukhi encodes this via tippi ੰ, but the
+abjad writes a generic ن (سنگھی→sˈə˥˩ŋɡiː, پنجابی→pəɲd͡ʒˈaːbiː) — Gurmukhi primary held at 61.7% (no regression).
+
+REFEREE: wikipron **pan_arab** broad (1360 Shahmukhi words, human) — a genuine INDEPENDENT referee for the alternate
+script (the Aksara-Jawa secondary pattern). It directly confirms the shared tonogenesis: بھا→`p äː ˩` (bh→p + LOW
+word-initial), باگھ→`b ɑ́ː ɡ` (medial gh→ɡ + HIGH). Wired as a secondary in pa.jsonc; the language headline stays
+Gurmukhi 61.7% / gold 100%.
+
+RESULT: **24.1% folded** on pan_arab. This is CAPPED by the abjad, not a segmental defect: Shahmukhi omits the
+short vowels (ادر→our ˈəd̪əɾ vs referee ʊdər; تند→t̪ˈənəd̪ vs tʊnd) and often the shadda (ادر spelt without gemination
+yet pronounced with dd), so undiacritized text falls back to the default schwa — the SAME short-vowel-restoration
+gap as Urdu. Where the vowels ARE written the output matches Gurmukhi byte-for-byte (the parity tests). The
+consonantal skeleton, retroflexes, gemination-when-marked, and tonogenesis all carry through correctly. This is a
+scope-limited front-end whose ceiling is the deferred short-vowel-restoration subsystem — see the note below on a
+shared cross-language restorer.
+
+NEXT (Shahmukhi): the abjad ceiling is the restoration subsystem shared with ur/fa/ar/ps — a per-language or (better)
+a single multilingual short-vowel restorer over Perso-Arabic script would lift all of them at once.

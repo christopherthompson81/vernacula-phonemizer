@@ -17,6 +17,13 @@ import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import {
+    scanShahmukhi,
+    SHAHMUKHI_CLASS,
+    SHAHMUKHI_WORD,
+    shahmukhiDigit,
+    shahmukhiPause,
+} from "./shahmukhi.ts";
 
 export interface PunjabiDef extends AbugidaDef {
     numbers: NumbersDef;
@@ -31,7 +38,7 @@ const GURMUKHI_DIGITS: Record<string, string> = {
     "੦": "0", "੧": "1", "੨": "2", "੩": "3", "੪": "4",
     "੫": "5", "੬": "6", "੭": "7", "੮": "8", "੯": "9",
 };
-const DIGIT_CLASS = "0-9" + Object.keys(GURMUKHI_DIGITS).join("");
+const DIGIT_CLASS = "0-9\\u0660-\\u0669\\u06F0-\\u06F9" + Object.keys(GURMUKHI_DIGITS).join("");
 const ADDAK = "ੱ";
 const CONS_CLASS = "ਕ-ਹਖ਼-ੜ"; // Gurmukhi consonant range (for addak gemination)
 
@@ -98,14 +105,16 @@ export function makeNativePunjabi(
     const CLAUSE_MARK = def.clausePunctuation;
     const addakRe = new RegExp(`${ADDAK}([${CONS_CLASS}]਼?)`, "gu");
     const tokenRe = new RegExp(
-        `([${GURMUKHI_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
+        `([${GURMUKHI_WORD}${SHAHMUKHI_CLASS}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:۔؟،؛])`,
         "gu",
     );
 
     function word(w: string): string {
-        // addak ੱ → geminate the following consonant (ਪੱਕਾ → ਪਕ੍ਕਾ → pəkːaː).
-        const norm = w.normalize("NFC").replace(addakRe, "$1੍$1");
-        let x = g2p(norm);
+        // Raw canonical IPA, script-routed: Shahmukhi (Perso-Arabic) → the abjad scanner, else the Gurmukhi
+        // abugida (with addak ੱ pre-normalized to a geminate ਪੱਕਾ → ਪਕ੍ਕਾ). Both feed the shared post-processing.
+        let x = SHAHMUKHI_WORD.test(w)
+            ? scanShahmukhi(w)
+            : g2p(w.normalize("NFC").replace(addakRe, "$1੍$1"));
         // geminate → length + aspiration-before-length reorder.
         x = x
             .replace(/(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ɖʱ|ʈʰ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlsʃɾɽŋɳɭjɦʋʈɖ])\1(?!͡)/gu, "$1ː")
@@ -114,13 +123,20 @@ export function makeNativePunjabi(
         const syls = (x.match(VOWEL_G) || []).length;
         if (syls >= 2) x = x.replace(/ə$/u, "");
         x = deleteMedialSchwa(x);
+        // Homorganic nasal assimilation: a plain /n/ takes the place of a following velar/palatal/retroflex stop
+        // (ਪੰਜਾਬੀ ɲd͡ʒ, ŋɡ, ɳɖ). Gurmukhi encodes this via tippi ੰ + the engine's homorganic nasal; Shahmukhi
+        // writes a generic ن, so the raw string carries a plain n here — assimilate it (matches wikipron pan_arab).
+        x = x
+            .replace(/n(?=t͡ʃ|d͡ʒ)/gu, "ɲ")
+            .replace(/n(?=ʈʰ|ɖʱ|[ʈɖɽ])/gu, "ɳ")
+            .replace(/n(?=kʰ|ɡʱ|[kɡxɣq])/gu, "ŋ");
         // TONOGENESIS: de-aspirate the breathy markers + assign tone.
         x = tonogenesis(x);
         return applyWeightStress(x).normalize("NFC");
     }
 
     const toAscii = (d: string): string =>
-        [...d].map((c) => GURMUKHI_DIGITS[c] ?? c).join("");
+        [...d].map((c) => GURMUKHI_DIGITS[c] ?? shahmukhiDigit(c) ?? c).join("");
     function number(digits: string): string {
         const n = Number(toAscii(digits));
         if (!Number.isSafeInteger(n)) return digits;
@@ -133,7 +149,7 @@ export function makeNativePunjabi(
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
             else if (m[4]) {
-                const mk = CLAUSE_MARK[m[4]];
+                const mk = CLAUSE_MARK[m[4]] ?? shahmukhiPause(m[4]);
                 if (mk) sink.pause(mk);
             }
         });

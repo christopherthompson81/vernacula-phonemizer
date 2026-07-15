@@ -23,7 +23,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 48 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
-Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Geʽez, Myanmar, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
+Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic (incl. Shahmukhi), Geʽez, Myanmar, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
 | Family / area | Languages |
 |---|---|
@@ -33,7 +33,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic,
 | Creole (English-lexified) | • Nigerian Pidgin `pcm` 🟡 |
 | Dravidian | • Kannada `kn`,<br>• Tamil `ta`,<br>• Telugu `te` |
 | Germanic | • English `en`,<br>• German `de`,<br>• Swedish `sv` |
-| Indo-Aryan | • Bengali `bn` 🟡,<br>• Bhojpuri `bho` ⛔,<br>• Gujarati `gu` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
+| Indo-Aryan | • Bengali `bn` 🟡,<br>• Bhojpuri `bho` ⛔,<br>• Gujarati `gu` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal; Gurmukhi + Shahmukhi),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
 | Japonic | • Japanese `ja` |
 | Koreanic | • Korean `ko` |
 | Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Igbo `ig` 🟡 (tonal),<br>• Swahili `sw`,<br>• Yoruba `yo` (tonal),<br>• Zulu `zu` |

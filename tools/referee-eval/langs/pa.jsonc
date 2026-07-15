@@ -12,6 +12,11 @@
             "file": "pa.gold-adjudicated.tsv",
             "source": "adjudicated common-word gold (our convention)",
             "role": "secondary"
+        },
+        {
+            "file": "pa.wikipron-pan-arab-broad.tsv",
+            "source": "wikipron pan_arab broad (human) — SHAHMUKHI script",
+            "role": "secondary"
         }
     ],
     "segmentJoin": true,

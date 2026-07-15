@@ -1,0 +1,73 @@
+// Shahmukhi (Perso-Arabic) front-end data for Punjabi (pa) — the SECOND script Punjabi is written in (Pakistan;
+// Gurmukhi is used in India). shahmukhi.ts reads this file and scans the abjad into the SAME raw canonical IPA
+// the Gurmukhi abugida emits, so the shared Punjabi phonology in punjabi.ts (addak/shadda gemination → length,
+// inherent-schwa deletion, TONOGENESIS, weight stress) applies UNCHANGED — one phonology, two scripts (the
+// Aksara-Jawa pattern). Stored in logical order = phonetic order, so RTL is a non-issue (as for Urdu/Arabic).
+//
+// The tonal crux carries through identically: the historical voiced-aspirate digraphs بھ گھ دھ ڈھ جھ emit the
+// breathy MARKERS bʱ/ɡʱ/d̪ʱ/ɖʱ/d͡ʒʱ, which punjabi.ts's tonogenesis de-aspirates + tones (word-initial voiceless +
+// low ˨˩, post-vocalic voiced + high ˥˩) — confirmed by the wikipron pan_arab referee (بھا→p äː ˩, باگھ→b ɑ́ː ɡ).
+// The abjad omits most short vowels, so a DEFAULT [ə] stands in between consonants (the shared restoration gap,
+// as for Urdu) — this caps the Shahmukhi score below Gurmukhi (which writes its vowels). Phoneme values match
+// punjabi.jsonc (dental t̪ d̪, retroflex ʈ ɖ ɳ ɽ ɭ, ʋ, long-a = aː). See docs/pa_native_bringup_investigation.md.
+{
+    "language": "pa",
+    "name": "Punjabi (Shahmukhi)",
+    "script": "Arabic (Shahmukhi)",
+    "provenance": "Authored from the Unicode Arabic/Shahmukhi chart + standard (Majhi) Punjabi phonology, matching the Gurmukhi phoneme values in punjabi.jsonc. Validated against wikipron pan_arab broad (human).",
+
+    // Unambiguous consonant letters → canonical Punjabi IPA (same inventory as the Gurmukhi punjabi.jsonc).
+    "consonants": {
+        "ب": "b", "پ": "p", "ت": "t̪", "ٹ": "ʈ", "ث": "s",
+        "ج": "d͡ʒ", "چ": "t͡ʃ", "ح": "ɦ", "خ": "x", "د": "d̪",
+        "ڈ": "ɖ", "ذ": "z", "ر": "ɾ", "ڑ": "ɽ", "ز": "z",
+        "ژ": "ʒ", "س": "s", "ش": "ʃ", "ص": "s", "ض": "z",
+        "ط": "t̪", "ظ": "z", "غ": "ɣ", "ف": "f", "ق": "q",
+        "ک": "k", "گ": "ɡ", "ل": "l", "م": "m", "ن": "n",
+        "ہ": "ɦ", "ھ": "ɦ", "ء": "ʔ", "ع": "ʔ",
+        // Punjabi-specific Shahmukhi letters (not in Urdu): retroflex nasal ݨ (noon + small ṭāʾ) and retroflex
+        // lateral ࣇ (lām + small ṭāʾ) — the abjad counterparts of Gurmukhi ਣ (ɳ) and ਲ਼ (ɭ).
+        "ݨ": "ɳ", "ࣇ": "ɭ"
+    },
+
+    // ھ (do-chashmi he) right after a consonant makes it ASPIRATED — voiceless → ʰ, voiced → ʱ (the breathy tone
+    // markers punjabi.ts's tonogenesis consumes: بھ→bʱ گھ→ɡʱ دھ→d̪ʱ ڈھ→ɖʱ جھ→d͡ʒʱ).
+    "aspirateHe": "ھ",
+    "aspirates": {
+        "k": "kʰ", "p": "pʰ", "t̪": "t̪ʰ", "ʈ": "ʈʰ", "t͡ʃ": "t͡ʃʰ",
+        "b": "bʱ", "d̪": "d̪ʱ", "ɖ": "ɖʱ", "d͡ʒ": "d͡ʒʱ", "ɡ": "ɡʱ", "ɽ": "ɽʱ", "l": "lʱ", "m": "mʱ", "n": "nʱ"
+    },
+
+    // Long-vowel / vowel-carrier letters. Punjabi long-a is aː (NOT Urdu's ɑː). و/ی default to oː/iː (also
+    // uː~ɔː / eː — lexical, unrecoverable from the skeleton); ے (bari ye) → eː.
+    "longVowels": {
+        "ا": "aː", "آ": "aː", "و": "oː", "ی": "iː", "ے": "eː", "ﯼ": "iː", "ﯽ": "iː", "ئ": "iː"
+    },
+
+    // Harakat (short-vowel diacritics) — usually ABSENT in running text (the restoration gap). Applied when present.
+    "harakat": {
+        "َ": "ə", "ِ": "ɪ", "ُ": "ʊ", "ٰ": "aː", "ً": "ən", "ٌ": "ʊn", "ٍ": "ɪn"
+    },
+    "sukun": "ْ",
+    "shadda": "ّ",
+
+    // Nasalization: ں (noon ghunna) + ٘ nasalize the preceding vowel.
+    "nasalizers": ["ں", "٘"],
+
+    // The DEFAULT short vowel inserted between consonants when none is written (the abjad's missing vowel) — the
+    // crude stand-in for the deferred short-vowel-restoration subsystem, shared with Urdu.
+    "inherentVowel": "ə",
+
+    // Arabic-Indic digits → ASCII (numbers route through the shared Punjabi number words).
+    "digits": {
+        "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+        "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+        "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+        "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
+    },
+
+    // Urdu/Arabic punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; "
+    }
+}
