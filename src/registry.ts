@@ -40,6 +40,7 @@ import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
 import { createWu } from "./languages/wu/wu.ts";
 import { createSwahili } from "./languages/swahili/swahili.ts";
+import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 
 export interface Phonemizer {
@@ -143,6 +144,8 @@ function build(lang: string): Phonemizer {
             return createJavanese();
         case "sw":
             return createSwahili();
+        case "gu":
+            return createGujarati((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

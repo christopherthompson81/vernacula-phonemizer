@@ -1,0 +1,19 @@
+// Gujarati (gu) — Indo-Aryan, Gujarati abugida, reuses the shared engine + Hindi orchestration. wikipron guj
+// (human) PRIMARY + kaikki guj (human) SECONDARY. Folds the referee-inconsistent mid-vowel openness (⟨ે⟩=[e]~[ɛ],
+// ⟨ો⟩=[o]~[ɔ] — Gujarati writes both with the same sign), length (non-phonemic), the ə̃~ə nasalization notation
+// (backbone), and the ʂ~ʃ retroflex-sibilant merger.
+{
+    "referees": [
+        { "file": "gu.wikipron-guj-broad.tsv", "source": "wikipron guj_gujr broad (human)", "role": "primary" },
+        { "file": "gu.kaikki-guj.tsv", "source": "kaikki guj (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ɑ", "replace": "a", "note": "⟨આ⟩/⟨ા⟩ ā = [ɑ] (referee) ~ [a] (ours) — same open vowel, notation" },
+        { "pattern": "[ɛe]", "replace": "e", "note": "⟨ે⟩ mid front [e]~[ɛ] — one sign, openness lexical (kem→ɛ vs namaste→e)" },
+        { "pattern": "[ɔo]", "replace": "o", "note": "⟨ો⟩ mid back [o]~[ɔ] — openness lexical" },
+        { "pattern": "ʂ", "replace": "ʃ", "note": "ષ retroflex ʂ ~ ʃ merger (referee-variable)" },
+        { "pattern": "(?:t|tʃ)tʃʰ", "replace": "tʃʰ", "note": "geminate affricate NOTATION: our length tʃʰː vs referee stop+affricate ttʃʰ (ઓચ્છવ)" },
+        { "pattern": "(?:d|dʒ)dʒʱ", "replace": "dʒʱ", "note": "geminate affricate notation (voiced)" }
+    ]
+}
