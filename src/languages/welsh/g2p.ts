@@ -79,9 +79,14 @@ export function toSegments(word: string): Seg[] {
 
         // --- vowels: multi-char clusters (diphthongs incl. wy/yw) win first, then w/i-as-consonant, then y ---
         if (isVowelLetter(c)) {
-            const key = VOWEL_CLUSTERS.find(
+            let key = VOWEL_CLUSTERS.find(
                 (k) => k.length >= 2 && w.startsWith(k, i),
             );
+            // In a ⟨gw⟩/⟨chw⟩ onset cluster, ⟨wy⟩ is NOT the diphthong — w is the /w/ consonant + y the vowel
+            // (gwyn→ɡwɨn, gwybod→ɡwɨbɔd, achwyn→aχwɨn, not the ʊɨ diphthong; contrast Arglwydd→arɡlʊɨð where ⟨gl⟩ is
+            // the onset and ⟨wy⟩ the nucleus). Skip the cluster so the w-as-consonant rule below fires.
+            const pph = segs[segs.length - 1]?.ph;
+            if (key === "wy" && (pph === "ɡ" || pph === "χ")) key = undefined;
             if (key) {
                 let ph = MANIFEST.vowels[key]!;
                 // North Welsh: UNSTRESSED word-final ⟨au⟩ (the plural/verb suffix) reduces to [a] — llyfrau→ɬəvra,
@@ -119,8 +124,12 @@ export function toSegments(word: string): Seg[] {
                 continue;
             }
             if (c === "y") {
-                // obscure ə (a clitic word, or a later vowel exists → non-final) vs clear ɨ (final syllable)
-                const clear = !obscureWord && !vowelAfter(w, i + 1);
+                // obscure ə (a clitic word, or a later vowel exists → non-final) vs clear ɨ (final syllable).
+                // EXCEPTION: ⟨y⟩ in the ⟨gwy⟩ onset stays clear ɨ even non-finally (gwybod→ɡwɨbɔd, gwylio→ɡwɨljɔ) —
+                // the preceding segment is the /w/ of gw (the wy-cluster was skipped for the gw onset above).
+                const clear =
+                    !obscureWord &&
+                    (!vowelAfter(w, i + 1) || segs[segs.length - 1]?.ph === "w");
                 segs.push({ ph: clear ? "ɨ" : "ə", nucleus: true });
                 i += 1;
                 continue;

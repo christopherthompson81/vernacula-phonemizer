@@ -18,7 +18,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
     cs: 0.95, // wikipron ces_latn (HUMAN) — 97.0% with the kaikki loanword lexicon (de-palatalization: stadion/studie/technik). Rule-engine OOV alone 97.7% (independent). Partly circular for the 404 dict-covered (kaikki~wikipron both Wiktionary)
-    cy: 0.63, // wikipron cym_latn NW broad (dialect-matched) — 67.1% (Run 4: referee-backed diphthong nuclei — final -au→a, wy→ʊɨ, ew→ɛu, ei/ey→ei, eu→eɨ). Residual: names/loan code-switch (Algeria→d͡ʒ), gwy/yw structural, ae (contested)
+    cy: 0.70, // wikipron cym_latn NW broad — 73.5% (Run 5: penult vowels stay LAX pobol→pɔbɔl [espeak-tensed was an artifact, cf. i→ɨ]; ⟨gwy⟩/⟨chwy⟩ structural gwyn→ɡwɨn). Residual: names anglicized + ae contested + degemination/glide edges
     de: 0.75, // kaikki deu — measured 76.1% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation

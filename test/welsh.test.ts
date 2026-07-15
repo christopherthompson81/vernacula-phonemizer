@@ -48,8 +48,8 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("tad")).toBe("tˈaːd"); // long before d
         expect(phonemizeWord("nos")).toBe("nˈoːs"); // long before s
         expect(phonemizeWord("braf")).toBe("brˈaːv"); // long before f→v
-        expect(phonemizeWord("nesaf")).toBe("nˈesav"); // penult tense e (no ː) before single s
-        expect(phonemizeWord("pobol")).toBe("pˈobɔl"); // penult tense o before b; final o → lax ɔ
+        expect(phonemizeWord("nesaf")).toBe("nˈɛsav"); // penult stays LAX ɛ (referee-backed; not espeak-tensed e)
+        expect(phonemizeWord("pobol")).toBe("pˈɔbɔl"); // penult stays LAX ɔ (referee: pɔbɔl)
         expect(phonemizeWord("bore")).toBe("bˈɔrɛ"); // lax ɔ before r (a deferred n/r/l lengthener)
         expect(phonemizeWord("papur")).toBe("pˈapɨr"); // lax a before p (voiceless)
     });
