@@ -60,12 +60,21 @@ export function phonemizeWord(word: string): string {
     // independent NW referee contradicts, and were removed in Run 3. The residual is now purely n/r/l LENGTH.
     // Secondary stress on the first syllable when the primary is the 3rd nucleus or later (cymdeithasol →
     // ˌkəmdəᶦˈθasɔl).
+    // (Final unstressed ⟨e⟩→[a] — bore→bɔra, carreg→karaɡ — is a colloquial NW reduction, but not reliably
+    // rule-based: at corpus scale it net-regresses [-3.5%], too many final ⟨e⟩ stay ɛ. Left as a lexical residual.)
     const secondary = stressN >= 2 ? nucleiIdx[0]! : -1;
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         if (i === stress) out += "ˈ";
         else if (i === secondary) out += "ˌ";
-        out += segs[i]!.ph;
+        // Degeminate: a written double consonant (nn, rr, …) is pronounced SINGLE (gorffennaf→ɡɔrfɛnav, torri→tɔrɪ).
+        // It marks the preceding vowel short — applyLength already saw the doubled coda above, so only the OUTPUT
+        // collapses. (ll/dd/ff/… are single digraph phonemes, not identical-adjacent, so untouched.)
+        const s = segs[i]!;
+        const prev = segs[i - 1];
+        if (i > 0 && !s.nucleus && prev && !prev.nucleus && s.ph === prev.ph)
+            continue;
+        out += s.ph;
     }
     return out;
 }
