@@ -1,0 +1,52 @@
+// Native canonical-IPA definition for Indonesian (id) — a shallow, near-phonemic Latin orthography. The g2p
+// (indonesian.ts) reads this file: digraphs first (ng→ŋ, ny→ɲ, sy→ʃ, kh→x, gh→ɣ), then single letters, with
+// ⟨e⟩ defaulting to schwa [ə] (the pepet — the one real ambiguity; loanword [e]/[ɛ] is a lexical tail), the
+// closed-syllable lax allophones (i→ɪ, u→ʊ, e→ɛ, o→ɔ), diphthongs ai/au/oi, and final ⟨k⟩ → glottal stop [ʔ].
+{
+    "language": "id",
+    "name": "Indonesian",
+    "script": "Latin",
+    "provenance": "Authored from standard Indonesian (Bahasa Indonesia) orthography + phonology. This file IS the language data — the g2p reads it directly.",
+
+    // Multi-letter graphemes (longest-first) → IPA.
+    "digraphs": {
+        "ng": "ŋ", "ny": "ɲ", "sy": "ʃ", "kh": "x", "gh": "ɣ"
+    },
+
+    // Single consonant letters → IPA.
+    "consonants": {
+        "b": "b", "c": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h",
+        "j": "d͡ʒ", "k": "k", "l": "l", "m": "m", "n": "n", "p": "p",
+        "q": "k", "r": "r", "s": "s", "t": "t", "v": "v", "w": "w",
+        "x": "ks", "y": "j", "z": "z"
+    },
+
+    // Vowel letters → their DEFAULT (open-syllable, tense) IPA. ⟨e⟩ → schwa by default.
+    "vowels": { "a": "a", "e": "ə", "i": "i", "o": "o", "u": "u" },
+
+    // Closed-syllable LAX allophones (a vowel with a following coda consonant in the same syllable).
+    "laxVowels": { "i": "ɪ", "u": "ʊ", "e": "ɛ", "o": "ɔ" },
+
+    // Falling diphthongs (word-final vowel sequences).
+    "diphthongs": { "ai": "ai", "au": "au", "oi": "oi" },
+
+    // Letter NAMES (for all-caps acronyms spelled out letter-by-letter: BBM → be-be-em → bebeem).
+    "letterNames": {
+        "a": "a", "b": "be", "c": "t͡ʃe", "d": "de", "e": "e", "f": "ɛf",
+        "g": "ɡe", "h": "ha", "i": "i", "j": "d͡ʒe", "k": "ka", "l": "ɛl",
+        "m": "ɛm", "n": "ɛn", "o": "o", "p": "pe", "q": "ki", "r": "ɛr",
+        "s": "ɛs", "t": "te", "u": "u", "v": "fe", "w": "we", "x": "ɛks",
+        "y": "je", "z": "zɛt"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Indonesian spellings; canonical IPA DERIVED by running them through the same g2p. Indonesian
+    // numbers are regular and compositional (belas teens, puluh tens, ratus/ribu/juta), unlike the Indic irregulars.
+    "numbers": {
+        "units": ["nol", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"],
+        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "ribu": "ribu", "juta": "juta", "seprefix": "se"
+    }
+}

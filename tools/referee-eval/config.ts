@@ -561,6 +561,28 @@ export const CONFIG: Record<string, RefLang> = {
             // inconsistently; folding it would mask the contrast (~1pp of residual is genuine referee noise here).
         ],
     },
+    id: {
+        // Indonesian — shallow near-phonemic Latin orthography. wikipron ind is a broad HUMAN referee. We render
+        // the closed-syllable lax allophones (ɪ ʊ ɛ ɔ) and glottal-stop coda k explicitly; fold the referee's
+        // unreleased-stop notation and the ə~e ambiguity of ⟨e⟩ where it is a convention/lexical difference.
+        referees: [
+            { file: "id.wikipron-ind-broad.tsv", source: "wikipron ind_latn broad (human)", role: "primary" },
+            { file: "id.gold-adjudicated.tsv", source: "adjudicated common-word gold (our convention)", role: "secondary" },
+        ],
+        segmentJoin: true,
+        folds: [
+            [/k̚/gu, "k", "unreleased final stop k̚ (referee) = k — notation"],
+            [/ʔ/gu, "k", "coda glottal-stop ⟨k⟩ (ours ʔ) vs referee k/k̚ — allophonic"],
+            // Closed-syllable lax allophones i→ɪ, u→ʊ, o→ɔ: real but the referee marks them ERRATICALLY
+            // (bordil→bordɪl yet bandit→bandit) → fold the tense/lax axis to the phoneme.
+            [/ɪ/gu, "i", "i~ɪ closed-syllable laxing — referee-inconsistent allophony"],
+            [/ʊ/gu, "u", "u~ʊ closed-syllable laxing — referee-inconsistent allophony"],
+            [/ɔ/gu, "o", "o~ɔ — allophonic"],
+            // ⟨e⟩ writes BOTH /ə/ (pepet) and /e/~/ɛ/ (loanwords) with no orthographic distinction — the choice is
+            // lexical/etymological, UNRECOVERABLE from spelling (like Urdu's short vowels). Fold the front-mid axis.
+            [/[əɛe]/gu, "e", "⟨e⟩ = /ə/ vs /e/~/ɛ/ — orthographically merged, lexically unrecoverable"],
+        ],
+    },
     ja: {
         referees: [
             {
