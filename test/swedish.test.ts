@@ -60,6 +60,20 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("boken")).toBe("bˈuːkɛn"); // accent 1 polysyllable → no grave
     });
 
+    test("Phase 3 — compound prosody (NST secondary stress): ˌ + boundary-safe length/quality + 2nd-onset softening", () => {
+        // The element boundary (stor|stad) makes the first ⟨o⟩ an open syllable → long [uː], not the coda-rule's
+        // short [ɔ]; the second element takes secondary stress ˌ and its own length. NST supplies both.
+        expect(phonemizeWord("storstad")).toBe("stˈùːʂtˌɑːd"); // stor→uː (not ɔ), stad ˌɑː; rs→ʂ across boundary
+        expect(phonemizeWord("storkök")).toBe("stˈùːrɕˌøːk"); // 2nd-onset softening k→ɕ + ö long
+        expect(phonemizeWord("järnväg")).toBe("jˈæ̀ːɳvˌɛːɡ");
+        expect(phonemizeWord("arbetsplats")).toBe("ˈàrbeːtsplˌats"); // unstressed-but-long ⟨e⟩ kept (NST length set)
+        expect(phonemizeWord("barnbok")).toBe("bˈɑ̀ːɳbˌuːk"); // bok→uː secondary
+        // vowel-initial second element (björk|ö): the preceding ⟨k⟩ is björk's CODA, stays hard (not ɕ); contrast
+        // storkök where ⟨k⟩ is kök's onset and softens. NST's %V marks the vowel-initial second element.
+        expect(phonemizeWord("björkö")).toBe("bjˈœ̀rkˌøː");
+        expect(phonemizeWord("barnkör")).toBe("bˈɑ̀ːɳɕˌœːr"); // consonant-initial 2nd element → onset k→ɕ still fires
+    });
+
     test("Phase 2 — stress lexicon fixes non-initial (loanword) stress + its vowel quality", () => {
         expect(phonemizeWord("polis")).toBe("pɔlˈiːs"); // stress 2nd → o unstressed short ɔ, i long
         expect(phonemizeWord("station")).toBe("staɧˈuːn"); // -tion stressed

@@ -2,14 +2,14 @@
  * Swedish (sv) phonemizer — Central Standard Swedish (rikssvenska), canonical IPA, espeak-independent. Rule-based
  * g2p (g2p.ts) + the NST accent/stress lexicon: tonal word accent 1/2 (accent-2 = combining grave on the
  * primary-stressed vowel) + non-initial stress, falling to first-syllable stress + shape-based accent for OOV
- * words. A small exception map covers irregular function words. text() tokenizes words / numbers / punctuation.
- * Accent validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts).
- * See docs/sv_bringup_investigation.md.
+ * words + NST secondary stress for compounds (ˌ + boundary-safe vowel length/quality + 2nd-onset softening). A
+ * small exception map covers irregular function words. text() tokenizes words / numbers / punctuation. Accent
+ * validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts). See docs/sv_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { toSegments } from "./g2p.ts";
+import { toSegments, type Compound } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -20,6 +20,9 @@ interface LexEntry {
     accent: string;
     ord?: number;
     oLong?: boolean; // stressed ⟨o⟩ is long [oː], not the default [uː]
+    secOrd?: number; // secondary-stress nucleus (compound) → ˌ + secondary softening
+    longOrds?: Set<number>; // NST-long vowel ordinals (compound length, boundary-safe)
+    secVowelInitial?: boolean; // secondary element vowel-initial → don't soften the (coda) C before it
 }
 
 // Phase-2 lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
@@ -32,13 +35,21 @@ function lexicon(): Map<string, LexEntry> {
             import.meta.url,
             "accent-stress.tsv",
             (rest) => {
-                // tokens after accent: a number = stress ordinal, "o" = stressed-o-is-long flag
+                // tokens after accent: a number = stress ordinal, "o" = stressed-o-is-long, "s<N>" = secondary-stress
+                // nucleus (compound), "L<ords>" = comma-sep NST-long vowel ordinals.
                 const [accent, ...tokens] = rest.split("\t");
                 const ordTok = tokens.find((t) => /^\d+$/.test(t));
+                const secTok = tokens.find((t) => /^s\d+$/.test(t));
+                const longTok = tokens.find((t) => /^L[\d,]+$/.test(t));
                 return {
                     accent: accent!,
                     ord: ordTok ? Number(ordTok) : undefined,
                     oLong: tokens.includes("o"),
+                    secOrd: secTok ? Number(secTok.slice(1)) : undefined,
+                    longOrds: longTok
+                        ? new Set(longTok.slice(1).split(",").map(Number))
+                        : undefined,
+                    secVowelInitial: tokens.includes("vi"),
                 };
             },
             { optional: true },
@@ -63,12 +74,25 @@ export function phonemizeWord(word: string): string {
     const lex = lexicon().get(w);
     const rawOrd = lex?.ord ?? 0;
     const oLong = lex?.oLong ?? false;
-    let segs = toSegments(w, rawOrd, oLong);
+    // Compound prosody (NST secondary stress): a valid secondary nucleus distinct from the primary → drive length
+    // from the NST-long set + a ˌ mark + secondary-onset softening. Absent → simplex rule.
+    const nucleiProbe = toSegments(w, rawOrd, oLong).filter((s) => s.vowel).length;
+    const compound: Compound | undefined =
+        lex?.secOrd !== undefined &&
+        lex.secOrd !== rawOrd &&
+        lex.secOrd < nucleiProbe
+            ? {
+                  secOrd: lex.secOrd,
+                  longOrds: lex.longOrds ?? new Set(),
+                  secVowelInitial: lex.secVowelInitial,
+              }
+            : undefined;
+    let segs = toSegments(w, rawOrd, oLong, compound);
     const nuclei = segs.filter((s) => s.vowel).length;
     if (nuclei === 0) return segs.map((s) => s.ph).join("");
 
     const ord = Math.min(rawOrd, nuclei - 1);
-    if (ord !== rawOrd) segs = toSegments(w, ord, oLong); // clamp: length must land on a real nucleus
+    if (ord !== rawOrd) segs = toSegments(w, ord, oLong, compound); // clamp: length must land on a real nucleus
     const accent = lex?.accent ?? oovAccent(nuclei, ord);
 
     let out = "",
@@ -78,6 +102,9 @@ export function phonemizeWord(word: string): string {
             if (seen === ord && nuclei > 1) {
                 out += "ˈ";
                 out += accent === "2" ? s.ph[0]! + GRAVE + s.ph.slice(1) : s.ph;
+            } else if (compound && seen === compound.secOrd) {
+                out += "ˌ"; // secondary stress (compound element)
+                out += s.ph;
             } else out += s.ph;
             seen++;
         } else out += s.ph;
