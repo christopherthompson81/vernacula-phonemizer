@@ -39,10 +39,23 @@ inconsistent multi-syllable harmony (hanacaraka fully harmonises → hɔnɔt͡ʃ
 and optional h-dropping (hasti~asti). 🟡 for the documented **⟨e⟩ pepet/taling ambiguity** (the lexical tail) and
 the deferred breathy/slack-voice register on the "voiced" stops.
 
-## Follow-up phase — Aksara Jawa (Hanacaraka) front-end
-Worth doing as a SECOND script front-end for `jv`: it's a Brahmic abugida → reuses `core/abugida.ts`, then the
-SAME phonology above. Two payoffs: (1) it **resolves the ⟨e⟩ ambiguity** — Aksara Jawa writes pepet vs taling with
-distinct sandhangan, and dental vs retroflex with distinct aksara, so script input is *more* phonemic than Latin;
-(2) it is **better refereed** — 1,693 Aksara-Jawa→IPA pairs in kaikki (vs 137 pure-Latin). Wrinkles: pasangan
-(subjoined cluster consonants instead of a visible virama), sandhangan vowel signs, pangkon (final vowel-killer),
-angka/pada. A focused abugida bring-up on existing infrastructure.
+## Phase 2 — 2026-07-15 — Aksara Jawa (Hanacaraka) front-end ✅
+Added the native abugida as a SECOND script front-end. Rather than the generic `core/abugida.ts` (which returns a
+string and doesn't model coda-signs/medials), a focused scanner `aksara.ts` produces the SAME `Seg[]` the Latin
+g2p does — so the shared `applyPhonology` (extracted from the Latin path: a→ɔ, laxing, final-k→ʔ, stress) runs
+unchanged. `phonemizeWord` routes by script; `text()` also tokenises Aksara word runs, angka digits (→ the ngoko
+compositor) and pada punctuation. The model: base consonant + inherent /a/, sandhangan vowel signs (taling ꦺ = e,
+**taling + tarung ꦴ = o**, pepet ꦼ = ə), medial signs (cakra ꦿ = -r-, pengkal ꦾ = -y-, **keret ꦽ = -rə-**), coda
+signs (cecak ꦁ = ŋ, layar ꦂ = r, wignyan ꦃ = h), pangkon ꧀ = virama.
+
+Validated against **1,268 Aksara-Jawa→IPA kaikki pairs**. First pass 75.2%; the residual was one dominant class —
+**ꦲ "ha" is the zero-onset VOWEL CARRIER** (silent [h]: ꦧꦁ→abang not *habang, ꦧꦲꦸ…→bau… not *bahu…; a real /h/
+coda is wignyan ꦃ). Making ꦲ a silent carrier → **83.5%**, then a ɲ-before-affricate precision fold (the script
+writes ꦚ ɲ explicitly where the referee writes plain n) → **84.5%**, right alongside the Latin 86.2%. The two
+front-ends share one phonology (ꦥꦶꦠꦶꦏ꧀ and "pitik" both → pit̪ɪʔ). This also **closed the secondaryGap** — the
+script path is now a genuine second referee. Payoffs realised: Aksara input carries the pepet/taling and
+dental/retroflex distinctions the Latin ⟨e⟩/⟨t⟩ blur.
+
+LIMITATION: Aksara Jawa is traditionally written WITHOUT inter-word spaces; a space-less script run is treated as
+one token (glued), so connected space-less text would need a segmenter (Thai/Wu pattern). Per-word (the referee,
+and modern spaced usage) works.

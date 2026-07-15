@@ -6,15 +6,17 @@
 // laxing) → too crude to grade the contextual rules; not wired as a second source.
 {
     "referees": [
-        { "file": "jv.kaikki-jav.tsv", "source": "kaikki jav (Wiktionary, human)", "role": "primary" }
+        { "file": "jv.kaikki-jav.tsv", "source": "kaikki jav Latin (Wiktionary, human)", "role": "primary" },
+        { "file": "jv.kaikki-aksara.tsv", "source": "kaikki jav Aksara Jawa script (Wiktionary, human)", "role": "secondary" }
     ],
-    "secondaryGap": "No independent SECOND source: no wikipron jav (404); epitran jav-Latn is a flat segment map (no a→ɔ rule, no closed-syllable laxing, no stress) — too crude to corroborate the contextual rules that define Javanese, so it is not wired. kaikki jav is the human primary.",
+    "note": "Two front-ends, one phonology: kaikki jav Latin (primary) and kaikki jav Aksara Jawa SCRIPT (secondary — exercises the abugida front-end aksara.ts, which resolves the ⟨e⟩ pepet/taling ambiguity the Latin cannot). epitran jav-Latn is map-only (no a→ɔ/laxing) → too crude, not wired.",
     "folds": [
         { "pattern": "t̪", "replace": "t", "note": "dental ⟨t⟩ — referee marks it inconsistently (bantu→t̪ yet tun→t)" },
         { "pattern": "d̪", "replace": "d", "note": "dental ⟨d⟩ — referee-inconsistent notation" },
         { "pattern": "ɪ", "replace": "i", "note": "closed-syllable i-laxing — referee-erratic allophony (as Indonesian)" },
         { "pattern": "ʊ", "replace": "u", "note": "closed-syllable u-laxing — referee-erratic allophony" },
         { "pattern": "[əɛe]", "replace": "e", "note": "bare ⟨e⟩ = /ə/ (pepet) vs /e/~/ɛ/ (taling) — orthographically merged, unrecoverable without diacritics" },
-        { "pattern": "k̚", "replace": "k", "note": "unreleased final stop k̚ (referee) = k — notation" }
+        { "pattern": "k̚", "replace": "k", "note": "unreleased final stop k̚ (referee) = k — notation" },
+        { "pattern": "ɲ(?=tʃ|dʒ)", "replace": "n", "note": "homorganic nasal before an affricate — Aksara Jawa writes ꦚ (ɲ) explicitly (kencheng, kanca), the referee writes plain n; fold our richer form" }
     ]
 }

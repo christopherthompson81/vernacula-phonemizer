@@ -23,7 +23,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 38 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
-Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
+Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
 | Family / area | Languages |
 |---|---|
