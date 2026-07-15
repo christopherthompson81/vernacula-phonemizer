@@ -1,0 +1,14 @@
+// Yoruba (yo) — Volta-Niger, highly phonemic three-tone Latin orthography. wikipron yor (human) PRIMARY + kaikki
+// yor (human) SECONDARY (+ epitran yor-Latn corroborates). The backbone strips TONE (our Chao letters ˥˧˩ AND
+// the referee's tone-accent diacritics á à ā) + nasalisation, so this grades the SEGMENTAL backbone. Folds: r~ɾ
+// tap notation, and the referee's syllabic-nasal default (ŋ̍/n̩~m̩).
+{
+    "referees": [
+        { "file": "yo.wikipron-yor-broad.tsv", "source": "wikipron yor_latn broad (human)", "role": "primary" },
+        { "file": "yo.kaikki-yor.tsv", "source": "kaikki yor (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "r", "replace": "ɾ", "note": "/r/ tap ɾ — the referee writes the trill symbol r (same sound)" }
+    ]
+}

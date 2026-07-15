@@ -1,0 +1,30 @@
+// Native canonical-IPA definition for Yoruba / Èdè Yorùbá (yo) — Volta-Niger (Niger-Congo), Latin script, a
+// highly PHONEMIC three-tone orthography. yoruba.ts reads this file. Signature features: the labial-velar stops
+// ⟨gb⟩→ɡ͡b and ⟨p⟩→k͡p (Yoruba has NO plain /p/), ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→tap ɾ, ⟨y⟩→j; the dotted-below vowels
+// ẹ→ɛ ọ→ɔ (7 oral vowels i e ɛ a ɔ o u); NASAL vowels from a coda ⟨n⟩ (ọn→ɔ̃; onset n before a vowel stays n);
+// syllabic nasals m̩/n̩; and THREE level tones marked on the vowel: High=acute ˥, Mid=unmarked ˧, Low=grave ˩
+// (Chao letters). Ported from the espeak-ng-portable authoring (epitran-validated). See docs/yo_native_bringup_investigation.md.
+{
+    "language": "yo",
+    "name": "Yoruba",
+    "script": "Latin",
+    "provenance": "Authored from standard Yoruba phonology + the highly phonemic orthography. Validated against wikipron yor + kaikki yor (human) + epitran yor-Latn.",
+
+    // Consonant letters → IPA. ⟨gb⟩/⟨p⟩ are the labial-velars ɡ͡b/k͡p; ⟨j⟩ is the affricate d͡ʒ, ⟨y⟩ the glide j;
+    // ⟨ṣ⟩ (s with dot below) → ʃ (handled in yoruba.ts via the combining dot). ⟨r⟩ → tap ɾ.
+    "consonants": {
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "gb": "ɡ͡b", "h": "h",
+        "j": "d͡ʒ", "k": "k", "l": "l", "m": "m", "n": "n", "p": "k͡p",
+        "r": "ɾ", "s": "s", "t": "t", "w": "w", "y": "j"
+    },
+
+    // Oral vowels → IPA. The dotted-below ẹ/ọ (→ ɛ/ɔ) are derived in yoruba.ts from the base + combining dot.
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Three level tones → Chao contour letters: High (acute ́), Mid (unmarked), Low (grave ̀).
+    "tones": { "high": "˥", "mid": "˧", "low": "˩" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
