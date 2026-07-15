@@ -49,8 +49,10 @@ function segmentUnits(ipa: string): Unit[] {
     return units;
 }
 
-/** Delete medial schwas in VCəCV context (right-to-left), per word (whitespace-preserving). */
-export function deleteMedialSchwa(ipa: string): string {
+/** Delete the medial inherent vowel in a V·C·_·C·V context (right-to-left), per word (whitespace-preserving).
+ *  `schwa` is the inherent-vowel symbol to delete — /ə/ for Hindi, /ɔ/ for Bengali (both already in the vowel
+ *  base set), so the same Ohala rule serves either abugida. */
+export function deleteMedialSchwa(ipa: string, schwa = "ə"): string {
     return ipa
         .split(/(\s+)/u)
         .map((w) => {
@@ -72,7 +74,7 @@ export function deleteMedialSchwa(ipa: string): string {
                 if (
                     units[idx]!.isStress ||
                     deleted[idx] ||
-                    units[idx]!.text !== "ə"
+                    units[idx]!.text !== schwa
                 )
                     continue;
                 const p = prevPhon(idx - 1); // consonant?

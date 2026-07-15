@@ -16,6 +16,7 @@
  */
 import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 import { BENGALI_DIGITS, BENGALI_WORD, IPA_VOWELS } from "../../core/unicode.ts";
@@ -101,6 +102,8 @@ export function makeNativeBengali(
             .normalize("NFC")
             .replace(/ং/gu, "ঙ্") // velar-nasal sign → full [ŋ]
             .replace(/ৎ/gu, "ত্") // khanda ta → vowelless dental [t̪]
+            .replace(/ক্ষ/gu, "ক্খ") // ক্ষ conjunct → [kkʰ] (অক্ষর→ɔkkʰɔr), not [kʃ]
+            .replace(/জ্ঞ/gu, "গ্গ") // জ্ঞ conjunct → [ɡɡ] ('gyô': জ্ঞান→ɡɡæn), not [d͡ʒn]
             // Phôla gemination — য/ব/ম as the 2nd member of a conjunct GEMINATE the preceding consonant
             // medially (jôphôla বিদ্যা→bid̪d̪a, অকাট্য→ɔkaʈːo; bôphôla মহত্ব→mɔhɔt̪t̪o; môphôla পদ্ম→pɔd̪d̪o), and
             // word-INITIALLY just drop (the phôla member is silent: ব্যথা→bæt̪ʰa, দ্বিতীয়→d̪it̪io).
@@ -111,9 +114,12 @@ export function makeNativeBengali(
         let x = g2p(norm);
         // 3. geminate → length + aspiration-before-length reorder (युद्ध-type conjuncts).
         x = x.replace(GEMINATE, "$1ː").replace(/ː([ʰʱ])/gu, "$1ː");
-        // 4. vowel harmony ɔ→o.
+        // 4. MEDIAL inherent-vowel deletion — the Ohala V·C·ɔ·C·V rule (আপনার→apnaɾ, আকবর→akbɔɾ), same shared
+        //    algorithm as Hindi's schwa deletion but on /ɔ/; a geminate coda keeps the syllable heavy (no delete).
+        x = deleteMedialSchwa(x, "ɔ");
+        // 5. vowel harmony ɔ→o (on the surviving inherent vowels).
         x = harmony(x);
-        // 5. word-final inherent-vowel deletion / retention.
+        // 6. word-final inherent-vowel deletion / retention.
         const syls = (x.match(VOWEL_G) || []).length;
         if (syls >= 2) x = deleteFinalInherent(x);
         return x.normalize("NFC");
