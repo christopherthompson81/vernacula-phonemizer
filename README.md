@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **43 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **44 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,7 +21,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-43 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+44 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Geʽez, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
@@ -33,7 +33,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic,
 | Creole (English-lexified) | • Nigerian Pidgin `pcm` 🟡 |
 | Dravidian | • Kannada `kn`,<br>• Tamil `ta`,<br>• Telugu `te` |
 | Germanic | • English `en`,<br>• German `de`,<br>• Swedish `sv` |
-| Indo-Aryan | • Bengali `bn` 🟡,<br>• Gujarati `gu` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
+| Indo-Aryan | • Bengali `bn` 🟡,<br>• Bhojpuri `bho` ⛔,<br>• Gujarati `gu` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
 | Japonic | • Japanese `ja` |
 | Koreanic | • Korean `ko` |
 | Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Swahili `sw`,<br>• Zulu `zu` |
@@ -47,7 +47,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic,
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
 ✅ reliable / referee-limited (30) · 🟡 reliable + a documented lexical tail (10: Amharic, Bengali, Gujarati, Indonesian, Javanese,
 Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (3: Urdu, Persian, Pashto) ·
-🔵 in active development.
+🔵 in active development · ⛔ cannot-verify (1: Bhojpuri — no independent referee).
 
 ## How it works
 
