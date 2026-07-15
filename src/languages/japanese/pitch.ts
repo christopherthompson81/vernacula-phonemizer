@@ -36,6 +36,13 @@ function get(k: string): number | undefined {
     );
 }
 
+/** Whether the pitch lexicon has an entry for a surface/reading key (with the katakana→hiragana fold get() applies).
+ *  For the pitch eval's OOV tracking: an out-of-lexicon word renders heiban (0), indistinguishable from a real
+ *  heiban hit, so the eval must be able to tell a genuine agreement from an OOV-defaulted-flat coincidence. */
+export function pitchLexiconHas(key: string): boolean {
+    return get(key) !== undefined;
+}
+
 const HAN_END = /\p{Script=Han}$/u;
 // Trailing affixes to strip to recover a noun bunsetsu's content word (whose accent governs the phrase):
 // case/topic particles (橋を→橋), and the copula + optional sentence-final particle (天気です→天気). The affix
