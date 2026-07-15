@@ -1,0 +1,29 @@
+// Min Nan / Taiwanese Hokkien (nan) — Tâi-lô (教育部臺灣閩南語羅馬字) / POJ romanization → canonical IPA.
+// minnan.ts reads this file. Sinitic, tonal, ~50M speakers. Written in Han characters and/or the Latin
+// romanizations Tâi-lô / POJ. The converter: strip the tone diacritic (identifies the tone) → [initial] + final →
+// IPA + Chao tone letter. Sibilants PALATALISE before i (ts/tsh/s/j + i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ). Checked finals -p̚/-t̚/-k̚
+// and glottal -h→ʔ; nasalised -nn vowels; syllabic m̩/ŋ̍. Inventory + initial/final maps from epitran nan-Latn-tl
+// (the Tâi-lô spec). Phase 1: segmental + CITATION tone (sandhi deferred). See docs/nan_native_bringup_investigation.md.
+{
+    "language": "nan",
+    "name": "Min Nan (Taiwanese Hokkien)",
+    "script": "Latin (Tâi-lô/POJ) + Han",
+
+    // Onset consonants → IPA. The four sibilants have PALATALISED allophones before i (handled in minnan.ts):
+    // ts→t͡ɕ, tsh→t͡ɕʰ, s→ɕ, j→d͡ʑ.
+    "initials": { "p": "p", "ph": "pʰ", "b": "b", "m": "m", "t": "t", "th": "tʰ", "n": "n", "l": "l", "tsi": "t͡ɕ", "tshi": "t͡ɕʰ", "si": "ɕ", "ji": "d͡ʑ", "ts": "t͡s", "tsh": "t͡sʰ", "s": "s", "j": "d͡z", "k": "k", "kh": "kʰ", "g": "ɡ", "ng": "ŋ", "h": "h" },
+    "palatalBeforeI": { "ts": "t͡ɕ", "tsh": "t͡ɕʰ", "s": "ɕ", "j": "d͡ʑ" },
+
+    // Rimes (toneless) → IPA: nucleus (+ medial/off-glide) + coda. Checked -p/-t/-k → p̚/t̚/k̚, -h → ʔ; -nn → nasal
+    // vowel; -m/-n/-ng nasal codas.
+    "finals": { "a": "a", "ah": "aʔ", "ap": "ap", "at": "at", "ak": "ak", "e": "e", "eh": "eʔ", "i": "i", "ih": "iʔ", "ip": "ip", "it": "it", "o": "ə", "oh": "əʔ", "ot": "ət", "ong": "ɔŋ", "om": "ɔm", "op": "ɔp", "ok": "ɔk", "oo": "ɔ", "ooh": "ɔʔ", "oop": "ɔp", "oot": "ɔt", "ook": "ɔk", "u": "u", "uh": "uʔ", "up": "up", "ut": "ut", "uk": "uk", "ai": "ai̯", "aih": "ai̯ʔ", "aip": "ai̯p", "ait": "ai̯t", "aik": "ai̯k", "au": "au̯", "auh": "au̯ʔ", "aup": "au̯p", "aut": "au̯t", "auk": "au̯k", "ia": "i̯a", "iah": "i̯aʔ", "iap": "i̯ap", "iak": "i̯ak", "ing": "iə̯ŋ", "ik": "iə̯k", "ian": "i̯ɛn", "iat": "i̯ɛt", "io": "i̯o", "ioh": "i̯oʔ", "iop": "i̯op", "iot": "i̯ot", "iok": "i̯ok", "iong": "i̯ɔŋ", "iu": "i̯u", "iuh": "i̯uʔ", "iup": "i̯up", "iut": "i̯ut", "iuk": "i̯uk", "ua": "u̯a", "uah": "u̯aʔ", "uap": "u̯ap", "uat": "u̯at", "uak": "u̯ak", "ue": "u̯e", "ueh": "u̯eʔ", "uep": "u̯ep", "uet": "u̯et", "uek": "u̯ek", "ui": "u̯i", "uih": "u̯iʔ", "uip": "u̯ip", "uit": "u̯it", "uik": "u̯ik", "iau": "i̯au̯", "iauh": "i̯au̯ʔ", "iaup": "i̯au̯p", "iaut": "i̯au̯t", "iauk": "i̯au̯k", "uai": "u̯ai̯", "uaih": "u̯ai̯ʔ", "uaip": "u̯ai̯p", "uait": "u̯ai̯t", "uaik": "u̯ai̯k", "ann": "ã", "annh": "ãʔ", "enn": "ẽ", "ennh": "ẽʔ", "inn": "ĩ", "innh": "ĩʔ", "onn": "ɔ̃", "onnh": "ɔ̃ʔ", "ainn": "ãĩ̯", "ainnh": "ãĩ̯ʔ", "iann": "ĩ̯ã", "iannh": "ĩ̯ãʔ", "ionn": "ĩ̯ɔ̃", "ionnh": "ĩ̯ɔ̃ʔ", "iunn": "ĩ̯ũ", "iunnh": "ĩ̯ũʔ", "uann": "ũ̯ã", "uannh": "ũ̯ãʔ", "uinn": "ũ̯ĩ", "uinnh": "ũ̯ĩʔ", "iaunn": "ĩ̯ãũ̯", "iaunnh": "ĩ̯ãũ̯ʔ", "uainn": "ũ̯ãĩ̯", "uainnh": "ũ̯ãĩ̯ʔ" },
+
+    // Tone: the Tâi-lô vowel diacritic → tone number; number → Chao contour letters. Unmarked = 1 (open) / 4
+    // (checked). 6 = 2 in Taiwanese. (Combining marks: ́=2 ̀=3 ̂=5 ̌=6 ̄=7 ̍=8 ̋=9.)
+    "toneChao": { "1": "˥", "2": "˥˩", "3": "˧˩", "4": "˧", "5": "˨˦", "6": "˥˩", "7": "˧", "8": "˥", "9": "˧˥" },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ", "；": " ; ", "：": " : ",
+        ".": " . ", ",": " , ", "?": " ? ", "!": " ! ", ";": " ; ", ":": " : "
+    }
+}
