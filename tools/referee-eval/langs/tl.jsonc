@@ -1,0 +1,14 @@
+// Tagalog / Filipino — shallow Latin orthography, rule-based g2p. No wikipron tgl exists; the primary referee is
+// epitran tgl-Latn (INDEPENDENT, programmatic). Both add a word-initial glottal stop; we ALSO map a hyphen → [ʔ]
+// (pag-asa→paɡʔasa) where epitran keeps the hyphen, so that is folded. Intervocalic/final ʔ is unwritten (lexical).
+{
+    "referees": [
+        { "file": "tl.epitran.tsv", "source": "epitran tgl-Latn (programmatic)", "role": "primary" },
+        { "file": "tl.gold-adjudicated.tsv", "source": "adjudicated common-word gold (our convention)", "role": "secondary" }
+    ],
+    "secondaryGap": "no wikipron tgl available; epitran is a rule-based transliterator (partly circular for the trivial letter map). The adjudicated gold is the real signal.",
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "-", "replace": "ʔ", "note": "hyphen = glottal stop [ʔ] (ours) vs literal hyphen (epitran) — pag-asa" }
+    ]
+}

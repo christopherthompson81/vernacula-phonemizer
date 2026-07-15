@@ -1,0 +1,41 @@
+// Native canonical-IPA definition for Tagalog / Filipino (tl) — a shallow, near-phonemic Latin orthography.
+// tagalog.ts reads this file: digraphs first (ng→ŋ, ch→t͡ʃ, ny/ñ→ɲ, sy→ʃ), then single letters, with a
+// WORD-INITIAL glottal stop [ʔ] before a vowel and a hyphen → [ʔ] (pag-asa→paɡʔasa). Native words keep the
+// 5-vowel a e i o u. Special words (mga→maŋa, ng→naŋ) and penultimate stress live in the g2p.
+{
+    "language": "tl",
+    "name": "Tagalog",
+    "script": "Latin",
+    "provenance": "Authored from standard Filipino/Tagalog orthography + phonology. This file IS the language data — the g2p reads it directly.",
+
+    // Multi-letter graphemes (longest-first).
+    "digraphs": {
+        "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "sy": "ʃ", "ll": "lj", "ts": "t͡s"
+    },
+
+    // Single consonant letters → IPA (native + nativized Spanish/English loans).
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "m": "m", "n": "n", "s": "s", "h": "h", "l": "l", "r": "ɾ",
+        "w": "w", "y": "j", "ñ": "ɲ",
+        "c": "k", "q": "k", "z": "z", "f": "f", "v": "v", "j": "d͡ʒ", "x": "ks"
+    },
+
+    // Vowels → IPA (modern 5-vowel system; native i~e and u~o merger is a lexical residual).
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Whole-word irregulars, given as an orthographic RESPELLING the g2p scans: the plural marker ⟨mga⟩ →
+    // ⟨manga⟩ = [maˈŋa], the linker/particle ⟨ng⟩ → ⟨nang⟩ = [naŋ].
+    "specialWords": { "mga": "manga", "ng": "nang" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Tagalog spellings; canonical IPA DERIVED by running them through the same g2p. Tagalog numbers
+    // are largely regular/compositional (labing- teens, -pu tens, daan hundreds, libo thousands).
+    "numbers": {
+        "units": ["sero", "isa", "dalawa", "tatlo", "apat", "lima", "anim", "pito", "walo", "siyam"],
+        "ten": "sampu", "teenPrefix": "labing", "tensSuffix": "pu", "hundred": "daan", "thousand": "libo", "million": "milyon", "and": "at"
+    }
+}
