@@ -1,0 +1,190 @@
+/**
+ * Native Pashto / پښتو (ps) phonemizer — Perso-Arabic (extended) abjad → canonical IPA. First Eastern Iranian
+ * language. Logical order = phonetic order, so RTL is a non-issue. Pashto is a SHALLOWER abjad than Urdu/Arabic:
+ * it writes the long/mid vowels distinctly — ا/آ→ɑ (ā), ې→e, و→o (or the glide w), ی→i (or the glide j), ۍ/ئ→əi —
+ * but the SHORT vowels a/ə/i/u are usually UNWRITTEN, so a default [ə] (the zwarakay) + medial-schwa deletion
+ * stand in for the deferred short-vowel-restoration subsystem (🟠, as for Urdu/Persian). Word-final ه→[ə]
+ * (ښه→ʂə); ع→ʔ. Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ. See docs/ps_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { deleteMedialSchwa } from "../../core/schwa.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface NumbersDef {
+    units: string[];
+    ten: string;
+    tens: Record<string, string>;
+    hundred: string;
+    thousand: string;
+    million: string;
+    and: string;
+}
+interface PashtoDef {
+    consonants: Record<string, string>;
+    harakat: Record<string, string>;
+    sukun: string;
+    shadda: string;
+    inherentVowel: string;
+    numbers: NumbersDef;
+    clausePunctuation: Record<string, string>;
+}
+const DEF = loadManifest<PashtoDef>(import.meta.url, "pashto.jsonc");
+const C = DEF.consonants;
+const HARAKAT = DEF.harakat;
+const INH = DEF.inherentVowel;
+const CLAUSE_MARK = DEF.clausePunctuation;
+
+const ALIF = "ا", ALIF_MADDA = "آ", WAW = "و", YA = "ی", YA_AR = "ي",
+    YA_E = "ې", YA_FEM = "ۍ", YA_HAMZA = "ئ", HE = "ه", HE_DO = "ھ";
+// The vowel/glide-bearing letters (after a consonant → a long/mid vowel; after a vowel → a glide).
+const isVowelCarrier = (c: string): boolean =>
+    c === ALIF || c === WAW || c === YA || c === YA_AR || c === YA_E || c === YA_FEM || c === YA_HAMZA;
+const endsInVowel = (out: string): boolean => /[aeiouɑə]$/u.test(out);
+
+/** A vowel-carrier letter standing after a consonant → its long/mid vowel. */
+function longVowel(ch: string): string {
+    if (ch === ALIF || ch === ALIF_MADDA) return "ɑ";
+    if (ch === WAW) return "o";
+    if (ch === YA || ch === YA_AR) return "i";
+    if (ch === YA_E) return "e";
+    if (ch === YA_FEM || ch === YA_HAMZA) return "əi";
+    return "";
+}
+
+/** Pashto word → canonical IPA (consonant + written-vowel skeleton + default [ə]). */
+function g2p(word: string): string {
+    const s = [...word.normalize("NFC")];
+    const n = s.length;
+    let out = "";
+    let i = 0;
+
+    // Word-initial vowel carrier: آ→ɑ; ا + long-vowel letter → that vowel; bare ا → short [a].
+    if (s[0] === ALIF_MADDA) {
+        out += "ɑ";
+        i = 1;
+    } else if (s[0] === ALIF) {
+        if (s[1] === WAW) { out += "o"; i = 2; }
+        else if (s[1] === YA || s[1] === YA_AR) { out += "i"; i = 2; }
+        else if (s[1] === YA_E) { out += "e"; i = 2; }
+        else { out += "a"; i = 1; }
+    }
+
+    while (i < n) {
+        const ch = s[i]!;
+        // ه / ھ: word-final → the schwa [ə] (ښه→ʂə); before a consonant when it can't be a vowel → [h].
+        if (ch === HE || ch === HE_DO) {
+            if (i === n - 1 && out && !endsInVowel(out)) out += "ə";
+            else out += "h";
+            i++;
+            continue;
+        }
+        // Vowel/glide letters: a glide (w/j) after a vowel OR before a word-final ه (ـیه→jə); else the long vowel.
+        if (isVowelCarrier(ch)) {
+            const glideBeforeFinalHe =
+                s[i + 1] === HE && i + 2 === n && (ch === WAW || ch === YA || ch === YA_AR);
+            if (endsInVowel(out) || glideBeforeFinalHe)
+                out += ch === WAW ? "w" : "j";
+            else out += longVowel(ch);
+            i++;
+            continue;
+        }
+        // Consonant.
+        if (ch in C) {
+            out += C[ch]!;
+            i++;
+            if (s[i] === DEF.shadda) { out += "ː"; i++; }
+            const hk = s[i] !== undefined ? HARAKAT[s[i]!] : undefined;
+            if (s[i] === DEF.sukun) i++;
+            else if (hk !== undefined) { out += hk; i++; }
+            else {
+                // A following vowel-carrier letter is the nucleus; otherwise insert the default short vowel [ə].
+                const next = s[i];
+                if (next !== undefined && !isVowelCarrier(next) && next !== HE && next !== HE_DO)
+                    out += INH;
+            }
+            continue;
+        }
+        i++; // unknown / diacritic → skip
+    }
+    return out.normalize("NFC");
+}
+
+const VOWEL_G = /[aeiouɑə]/g;
+
+/** One Pashto word → canonical IPA (skeleton + default-schwa deletion + stress). */
+export function phonemizeWord(word: string): string {
+    let ipa = g2p(word);
+    if (!ipa) return "";
+    ipa = deleteMedialSchwa(ipa, "ə");
+    // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters
+    // (اخښل→axʂəl), unlike Persian; deleting it there hurt the referee.
+    // Stress: default to the last long vowel (ɑ/o/u/e/i), else the last nucleus.
+    const longs = [...ipa.matchAll(/[ɑoue]|i(?!̯)/gu)];
+    const marks = longs.length ? longs : [...ipa.matchAll(VOWEL_G)];
+    if (marks.length) {
+        const at = marks[marks.length - 1]!.index!;
+        ipa = ipa.slice(0, at) + "ˈ" + ipa.slice(at);
+    }
+    return ipa.normalize("NFC");
+}
+
+const EASTERN_DIGITS: Record<string, string> = {
+    "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+    "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+};
+const DIGIT_CLASS = "0-9" + Object.keys(EASTERN_DIGITS).join("");
+const PERSO_ARABIC_WORD = "ء-ٟٮ-ۿ";
+const toAscii = (d: string): string => [...d].map((c) => EASTERN_DIGITS[c] ?? c).join("");
+const NUM = DEF.numbers;
+/** Non-negative integer → Pashto numeral spelling (decimal; و-joined). 21-99 compose as tens+unit (bounded gap). */
+function numberToText(nn: number): string {
+    if (nn < 0) return "";
+    if (nn < 10) return NUM.units[nn]!;
+    if (nn === 10) return NUM.ten;
+    if (nn < 20) return `${NUM.units[nn - 10]} ${NUM.ten}`;
+    if (nn < 100) {
+        const t = Math.floor(nn / 10), u = nn % 10;
+        return NUM.tens[String(t)]! + (u ? ` ${NUM.and} ${NUM.units[u]}` : "");
+    }
+    if (nn < 1000) {
+        const h = Math.floor(nn / 100), r = nn % 100;
+        return `${h > 1 ? NUM.units[h] + " " : ""}${NUM.hundred}${r ? ` ${NUM.and} ${numberToText(r)}` : ""}`;
+    }
+    if (nn < 1_000_000) {
+        const th = Math.floor(nn / 1000), r = nn % 1000;
+        return `${th > 1 ? numberToText(th) + " " : ""}${NUM.thousand}${r ? ` ${NUM.and} ${numberToText(r)}` : ""}`;
+    }
+    return String(nn);
+}
+function number(digits: string): string {
+    const nn = Number(toAscii(digits));
+    if (!Number.isSafeInteger(nn)) return digits;
+    return numberToText(nn).split(" ").map(phonemizeWord).join(" ");
+}
+const TOKEN = new RegExp(
+    `([${PERSO_ARABIC_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,
+    "gu",
+);
+
+export type ForeignPhonemizer = (latin: string) => string;
+
+class PashtoPhonemizer implements Phonemizer {
+    constructor(private foreign?: ForeignPhonemizer) {}
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
+            else if (m[3]) sink.emit(number(m[3]));
+            else if (m[4]) {
+                const mk = CLAUSE_MARK[m[4]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Pashto phonemizer. `foreign` handles embedded Latin runs. */
+export function createPashto(foreign?: ForeignPhonemizer): Phonemizer {
+    return new PashtoPhonemizer(foreign);
+}

@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **40 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **41 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,7 +21,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-40 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+41 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
@@ -38,7 +38,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kan
 | Koreanic | • Korean `ko` |
 | Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Swahili `sw`,<br>• Zulu `zu` |
 | Romance | • Catalan `ca`,<br>• French `fr`,<br>• Italian `it`,<br>• Portuguese `pt`,<br>• Spanish `es` |
-| Semitic / Iranian | • Arabic `ar`,<br>• Persian `fa` 🟠 |
+| Semitic / Iranian | • Arabic `ar`,<br>• Pashto `ps` 🟠,<br>• Persian `fa` 🟠 |
 | Sinitic | • Mandarin `cmn` (tonal),<br>• Cantonese `yue` (tonal),<br>• Wu `wuu` 🟡 (tonal) |
 | Slavic | • Czech `cs`,<br>• Russian `ru` |
 | Tai-Kadai | • Thai `th` (tonal) |
@@ -46,7 +46,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kan
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
 ✅ reliable / referee-limited (29) · 🟡 reliable + a documented lexical tail (9: Bengali, Gujarati, Indonesian, Javanese,
-Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
+Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (3: Urdu, Persian, Pashto) ·
 🔵 in active development.
 
 ## How it works

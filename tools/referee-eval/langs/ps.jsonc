@@ -1,0 +1,20 @@
+// Pashto (ps) — Eastern Iranian, Perso-Arabic ABJAD (extended). wikipron pus (human) PRIMARY + kaikki pus (human)
+// SECONDARY. Like Urdu/Persian, SHORT vowels are usually unwritten → folded (unrecoverable): a~ə~i~u default-vowel
+// quality. Also folds: dental t̪~t / retroflex notation, r~ɻ, dialect ښ/ږ (ʂ~x, ʐ~ɡ), and length.
+{
+    "referees": [
+        { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human)", "role": "primary" },
+        { "file": "ps.kaikki-pus.tsv", "source": "kaikki pus (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "t̪", "replace": "t", "note": "dental ⟨ت/ط/د⟩ notation (referee-variable)" },
+        { "pattern": "d̪", "replace": "d", "note": "dental notation" },
+        { "pattern": "[əaiu]", "replace": "ə", "note": "SHORT vowel quality a~ə~i~u — UNRECOVERABLE from the undiacritized abjad (the deferred restoration subsystem)" },
+        { "pattern": "ɪ", "replace": "ə", "note": "referee short ɪ = our default short vowel" },
+        { "pattern": "ʊ", "replace": "ə", "note": "referee short ʊ = default short vowel" },
+        { "pattern": "[ʂç]", "replace": "ʃ", "note": "ښ = Kandahari ʂ ~ NE x ~ Central ç ~ ʃ — DIALECT variation (multi-dialect referee)" },
+        { "pattern": "ʐ", "replace": "ʒ", "note": "ږ = Kandahari ʐ ~ NE ɡ ~ Central ʝ ~ ʒ — dialect variation" },
+        { "pattern": "ɻ", "replace": "r", "note": "retroflex flap ⟨ړ⟩ ɻ ~ r notation" }
+    ]
+}
