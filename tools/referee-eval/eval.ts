@@ -33,6 +33,7 @@ import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
 import { phonemizeWord as bn } from "../../src/languages/bengali/bengali.ts";
 import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
 import { phonemizeWord as id } from "../../src/languages/indonesian/indonesian.ts";
+import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
@@ -68,6 +69,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ja,
     kk,
     ko,
+    pa,
     pt,
     ru,
     si,

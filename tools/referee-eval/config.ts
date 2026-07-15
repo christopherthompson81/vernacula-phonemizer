@@ -654,6 +654,22 @@ export const CONFIG: Record<string, RefLang> = {
             [/ɦ/gu, "h", "intervocalic ㅎ voicing ɦ~h"],
         ],
     },
+    pa: {
+        // Punjabi (Gurmukhi) — Brahmic abugida + TONOGENESIS. The BACKBONE already strips Chao tone letters, so
+        // the eval measures the SEGMENTAL output: the key is the de-aspiration of the voiced-aspirate letters
+        // (ਘਝਢਧਭ → k/ɡ t͡ʃ/d͡ʒ … not the breathy series). wikipron pan is a broad HUMAN referee.
+        referees: [
+            { file: "pa.wikipron-pan-broad.tsv", source: "wikipron pan_guru broad (human)", role: "primary" },
+            { file: "pa.gold-adjudicated.tsv", source: "adjudicated common-word gold (our convention)", role: "secondary" },
+        ],
+        segmentJoin: true,
+        folds: [
+            [/ɾ/gu, "r", "tap ɾ vs referee r — notation"],
+            [/ʋ/gu, "w", "ਵ ʋ~w — referee-split notation"],
+            [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
+            [/ə$/gu, "", "word-final inherent schwa: we DELETE it (Punjabi speech); the referee keeps an ultrashort ə̆ — convention"],
+        ],
+    },
     pt: {
         referees: [
             {

@@ -30,6 +30,7 @@ import { createCzech } from "./languages/czech/czech.ts";
 import { createBengali } from "./languages/bengali/bengali.ts";
 import { createUrdu } from "./languages/urdu/urdu.ts";
 import { createIndonesian } from "./languages/indonesian/indonesian.ts";
+import { createPunjabi } from "./languages/punjabi/punjabi.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -108,6 +109,8 @@ function build(lang: string): Phonemizer {
             return createUrdu((latin) => getPhonemizer("en").text(latin));
         case "id":
             return createIndonesian();
+        case "pa":
+            return createPunjabi((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

@@ -1,0 +1,100 @@
+// Native canonical-IPA definition for Punjabi (pa), Gurmukhi script — a Brahmic abugida read by the generic
+// engine (core/abugida.ts). Punjabi's distinctive feature is TONE: the historical voiced-aspirate letters
+// ਘ ਝ ਢ ਧ ਭ lost their breathy voice (→ tone) and DE-ASPIRATE — voiceless word-initially (ਘ→k + low tone),
+// voiced medially (ਘ→ɡ + high tone). Here they carry the breathy form ɡʱ/d͡ʒʱ/ɖʱ/d̪ʱ/bʱ as a MARKER; punjabi.ts
+// rewrites them to the toned, de-aspirated realization. Retroflex ʈ ɖ ɳ ɽ, dental t̪ d̪, inherent vowel /ə/.
+{
+    "language": "pa",
+    "name": "Punjabi",
+    "script": "Gurmukhi",
+    "provenance": "Authored from the Unicode Gurmukhi chart + standard (Majhi) Punjabi phonology. This file IS the language data — the native G2P engine reads it directly.",
+
+    "inherentVowel": "ə",
+
+    "consonants": {
+        "ਕ": { "ipa": "k", "note": "velar voiceless" },
+        "ਖ": { "ipa": "kʰ", "note": "velar voiceless aspirated" },
+        "ਗ": { "ipa": "ɡ", "note": "velar voiced" },
+        "ਘ": { "ipa": "ɡʱ", "note": "TONE marker: historical voiced-aspirate → de-aspirated + tone" },
+        "ਙ": { "ipa": "ŋ", "note": "velar nasal" },
+        "ਚ": { "ipa": "t͡ʃ", "note": "post-alveolar affricate voiceless" },
+        "ਛ": { "ipa": "t͡ʃʰ", "note": "post-alveolar affricate voiceless aspirated" },
+        "ਜ": { "ipa": "d͡ʒ", "note": "post-alveolar affricate voiced" },
+        "ਝ": { "ipa": "d͡ʒʱ", "note": "TONE marker" },
+        "ਞ": { "ipa": "ɲ", "note": "palatal nasal" },
+        "ਟ": { "ipa": "ʈ", "note": "retroflex voiceless" },
+        "ਠ": { "ipa": "ʈʰ", "note": "retroflex voiceless aspirated" },
+        "ਡ": { "ipa": "ɖ", "note": "retroflex voiced" },
+        "ਢ": { "ipa": "ɖʱ", "note": "TONE marker" },
+        "ਣ": { "ipa": "ɳ", "note": "retroflex nasal" },
+        "ਤ": { "ipa": "t̪", "note": "dental voiceless" },
+        "ਥ": { "ipa": "t̪ʰ", "note": "dental voiceless aspirated" },
+        "ਦ": { "ipa": "d̪", "note": "dental voiced" },
+        "ਧ": { "ipa": "d̪ʱ", "note": "TONE marker" },
+        "ਨ": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "ਪ": { "ipa": "p", "note": "labial voiceless" },
+        "ਫ": { "ipa": "pʰ", "note": "labial voiceless aspirated" },
+        "ਬ": { "ipa": "b", "note": "labial voiced" },
+        "ਭ": { "ipa": "bʱ", "note": "TONE marker" },
+        "ਮ": { "ipa": "m", "note": "labial nasal" },
+        "ਯ": { "ipa": "j", "note": "palatal approximant" },
+        "ਰ": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ਲ": { "ipa": "l", "note": "alveolar lateral" },
+        "ਵ": { "ipa": "ʋ", "note": "labiodental approximant" },
+        "ੜ": { "ipa": "ɽ", "note": "retroflex flap" },
+        "ਸ": { "ipa": "s", "note": "alveolar sibilant" },
+        "ਹ": { "ipa": "ɦ", "note": "voiced glottal fricative (also a tone source)" },
+        "ਸ਼": { "ipa": "ʃ", "note": "sha (sa + nukta)" },
+        "ਖ਼": { "ipa": "x", "note": "kha (nukta)" },
+        "ਗ਼": { "ipa": "ɣ", "note": "gha (nukta)" },
+        "ਜ਼": { "ipa": "z", "note": "za (nukta)" },
+        "ਫ਼": { "ipa": "f", "note": "fa (nukta)" },
+        "ਲ਼": { "ipa": "ɭ", "note": "retroflex lateral (la + nukta)" }
+    },
+
+    "independentVowels": {
+        "ਅ": { "ipa": "ə", "note": "short central" },
+        "ਆ": { "ipa": "aː", "note": "long open" },
+        "ਇ": { "ipa": "ɪ", "note": "short front" },
+        "ਈ": { "ipa": "iː", "note": "long front" },
+        "ਉ": { "ipa": "ʊ", "note": "short back" },
+        "ਊ": { "ipa": "uː", "note": "long back" },
+        "ਏ": { "ipa": "eː", "note": "long close-mid front" },
+        "ਐ": { "ipa": "ɛː", "note": "long open-mid front" },
+        "ਓ": { "ipa": "oː", "note": "long close-mid back" },
+        "ਔ": { "ipa": "ɔː", "note": "long open-mid back" }
+    },
+
+    "vowelSigns": {
+        "ਾ": { "ipa": "aː" },
+        "ਿ": { "ipa": "ɪ" },
+        "ੀ": { "ipa": "iː" },
+        "ੁ": { "ipa": "ʊ" },
+        "ੂ": { "ipa": "uː" },
+        "ੇ": { "ipa": "eː" },
+        "ੈ": { "ipa": "ɛː" },
+        "ੋ": { "ipa": "oː" },
+        "ੌ": { "ipa": "ɔː" }
+    },
+
+    "signs": {
+        "virama": { "char": "੍", "effect": "suppressInherentVowel", "note": "halant" },
+        "anusvara": { "char": "ੰ", "effect": "nasalizeVowel", "note": "tippi → nasalization (+ homorganic nasal before a stop)" },
+        "chandrabindu": { "char": "ਂ", "effect": "nasalizeVowel", "note": "bindi → nasalizes the preceding vowel" },
+        "visarga": { "char": "ਃ", "effect": "appendH", "note": "→ [h] (rare)" },
+        "nukta": { "char": "਼", "effect": "composeNukta", "note": "combines with the preceding consonant (ਸ਼ ਜ਼ ਖ਼ …)" }
+    },
+
+    "clausePunctuation": {
+        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Gurmukhi spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes
+    // (21-99 irregular like the other Indic languages — a bounded authoring task).
+    "numbers": {
+        "units": ["ਸਿਫ਼ਰ", "ਇੱਕ", "ਦੋ", "ਤਿੰਨ", "ਚਾਰ", "ਪੰਜ", "ਛੇ", "ਸੱਤ", "ਅੱਠ", "ਨੌਂ"],
+        "teens": ["ਦਸ", "ਗਿਆਰਾਂ", "ਬਾਰਾਂ", "ਤੇਰਾਂ", "ਚੌਦਾਂ", "ਪੰਦਰਾਂ", "ਸੋਲਾਂ", "ਸਤਾਰਾਂ", "ਅਠਾਰਾਂ", "ਉੱਨੀ"],
+        "tens": { "20": "ਵੀਹ", "30": "ਤੀਹ", "40": "ਚਾਲੀ", "50": "ਪੰਜਾਹ", "60": "ਸੱਠ", "70": "ਸੱਤਰ", "80": "ਅੱਸੀ", "90": "ਨੱਬੇ" },
+        "magnitudes": { "hundred": "ਸੌ", "thousand": "ਹਜ਼ਾਰ", "lakh": "ਲੱਖ", "crore": "ਕਰੋੜ" }
+    }
+}
