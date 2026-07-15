@@ -116,8 +116,20 @@ function realize(segs: Seg[], stress: number): string {
         const diphthong =
             segs[i + 1] && !segs[i + 1]!.nucleus && isGlidePh(segs[i + 1]!.ph); // nucleus + offglide
         if (s.nucleus && i !== stress && !s.nasal && !diphthong && s.raw) {
+            // Unstressed ⟨a⟩/⟨e⟩ before a coda dark-l (ɫ) do NOT reduce/raise — the velarized ɫ keeps the vowel
+            // open: ⟨a⟩→[a] (altura → aɫtuɾɐ, salvar → saɫvaɾ) and ⟨e⟩→[ɛ] (delgado → dɛɫɡadu, the -ável/-ível
+            // suffix -vel → vɛɫ). Onset l still reduces (falar → fɐlaɾ). ⟨o⟩ still raises before ɫ (soldado →
+            // suɫdadu — the referee corroborates the o-raise, unlike a/e). Referee-confirmed 53:0 (a), 89:0 (e).
+            const beforeDarkL = segs[i + 1]?.ph === "ɫ";
             // word-initial unstressed e → i (está → iʃta, emérico → imɛɾiku), the EP raising; else the usual reduction.
-            ph = i === 0 && s.raw === "e" ? "i" : (REDUCE[s.raw] ?? ph);
+            ph =
+                beforeDarkL && s.raw === "a"
+                    ? "a"
+                    : beforeDarkL && s.raw === "e"
+                      ? "ɛ"
+                      : i === 0 && s.raw === "e"
+                        ? "i"
+                        : (REDUCE[s.raw] ?? ph);
         }
         if (s.nasal && s.nucleus) ph = NASAL[ph] ?? ph;
         if (i === stress) out += "ˈ";

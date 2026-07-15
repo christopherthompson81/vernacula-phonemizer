@@ -148,3 +148,35 @@ skew + wikipron's own gaps/errors) AND an independent hand-adjudicated micro-gol
 to the ≥2-large-independent-referee bar (P-PAL would be the upgrade), but the micro-gold gives real independent
 signal and confirms the engine is sound; the residual is lexicon COVERAGE (not engine correctness), addressable
 by a broader curated open-vowel list or P-PAL.
+
+## Run (2026-07-14) — dark-l blocks a/e reduction (2 real rules); pt → ✅ (referee register-limited)
+
+Pushed pt from the 🟡 tail toward ✅ by finding the two genuine systematic bugs in the residual and proving the
+rest is referee register/name-limited.
+
+**Two real rules found (dark-l blocks vowel reduction).** European Portuguese unstressed /a/ and /e/ do NOT
+reduce before a coda dark-l (ɫ) — the velarized ɫ keeps the vowel open:
+- **⟨a⟩ before coda ɫ → [a]** (not [ɐ]): altura→aɫtuɾɐ, salvar→saɫvaɾ, balneário→baɫnjaɾju. wikipron 53:0.
+- **⟨e⟩ before coda ɫ → [ɛ]** (not [ɨ]): delgado→dɛɫɡadu, and the whole -ável/-ível suffix -vel→vɛɫ
+  (abominável→ɐbuminavɛɫ), papel→pɐpɛɫ, túnel→tunɛɫ. wikipron 89:0 (final -el 76:0, mid-word el+C 13:0; quality
+  [ɛ] 76:0).
+Onset l still reduces (falar→fɐlaɾ, coda vs onset l already distinguished by the ɫ/l split). ⟨o⟩ before ɫ is NOT
+added — the referee corroborates our o-raise there (soldado→suɫdadu; 46 [u] : 16 mid, mixed → left as-is).
+Implemented as a guard in the reduction pass (portuguese.ts realize()). wikipron **78.0→81.2%**; gold 99.4%
+(one adjudication fix: algum ɐɫɡũ→aɫɡũ — the gold entry was the lone outlier vs 53:0 wikipron + sibling
+alguém=[alɡɐ̃j̃], so the gold was corrected, not the rule).
+
+**Rest of the residual is referee register + names — NOT error.** The a/ɐ tail is confirmed referee-noise: our
+reduction is corroborated 220:5 (word-initial a+onset) and 37:1 (a before coda ɾ). The two big remaining classes
+(o/u/ɔ 239, e-vowels 131) are ONE-DIRECTIONAL: ours reduces / referee keeps mid — o-axis 386:8, e-axis **195:0**
+(we NEVER under-reduce). This is a register/lexical difference, not a bug: our engine models the characteristic EP
+pretonic reduction (poder→puˈdeɾ, o→u / e→ɨ) UNIFORMLY, while the Wiktionary referee is conservative and preserves
+mid-vowels in learned/scientific compounds (monolítico→mɔnɔ, macrocéfalo→makɾɔ, hipopótama→ipɔ) and names
+(oscar→ɔʃkaɾ). For the synthesis target — consistent, explicit EP reduction (canonical_ipa_validation_goal) — OUR
+uniform reduction is the intended canonical form; a learned-word lexicon would make the output register-INCONSISTENT.
+The "other" class is proper names + foreign words (malawi, taipei, appenzeller, cancan) + acronyms (affs).
+
+**✅ determination.** gold (adjudicated common words) 99.4%; two real systematic rules fixed; remaining wikipron
+residual is one-directional register reduction (we-reduce vs referee-conservative, 195:0 / 386:8) + names + foreign.
+Referee register-limited, same bar as de/fr/hi. Marked ✅. A kaikki-pt learned-word lexicon is possible but would
+trade canonical consistency for referee-matching — deliberately NOT done.
