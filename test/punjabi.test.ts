@@ -26,3 +26,26 @@ describe("punjabi canonical IPA", () => {
         expect(phonemize("ਪੰਜਾਬੀ ਬੋਲੀ।", "pa")).toContain("d͡ʒaːbiː");
     });
 });
+
+// Shahmukhi (Perso-Arabic) is the SECOND script Punjabi is written in (Pakistan). The abjad front-end
+// (shahmukhi.ts) feeds the SAME shared Punjabi phonology, so a Shahmukhi spelling with its vowels written yields
+// the SAME canonical IPA as the Gurmukhi one — one phonology, two scripts. The abjad omits most short vowels, so
+// undiacritized text falls back to the default schwa (the shared restoration gap, as for Urdu).
+describe("punjabi Shahmukhi front-end", () => {
+    test("script parity: same IPA as Gurmukhi (tonogenesis + retroflex + gemination carry through)", () => {
+        expect(phonemizeWord("گھوڑا")).toBe("kˈoː˨˩ɽaː"); // ghoṛā: bh-init de-aspirate → k + low tone
+        expect(phonemizeWord("بھارت")).toBe("pˈaː˨˩ɾət̪"); // bhārat: bh→p + low tone
+        expect(phonemizeWord("پاݨی")).toBe("pˈaːɳiː"); // pāṇī: Punjabi-specific ݨ → retroflex ɳ
+        expect(phonemizeWord("وڈّا")).toBe("ʋˈəɖːaː"); // vaḍḍā: word-initial و glide + shadda → geminate ɖː
+        expect(phonemizeWord("یار")).toBe("jˈaːɾ"); // yār: word-initial ی → glide j
+    });
+
+    test("homorganic nasal: generic ن assimilates before velar/palatal (abjad has no tippi)", () => {
+        expect(phonemizeWord("سنگھی")).toBe("sˈə˥˩ŋɡiː"); // saṅghī: نگ → ŋɡ + medial gh high tone
+        expect(phonemizeWord("پنجابی")).toBe("pəɲd͡ʒˈaːbiː"); // panjābī: نج → ɲd͡ʒ
+    });
+
+    test("text: Shahmukhi word run + Urdu punctuation", () => {
+        expect(phonemize("پنجابی بولی۔", "pa")).toBe("pəɲd͡ʒˈaːbiː bˈoːliː");
+    });
+});
