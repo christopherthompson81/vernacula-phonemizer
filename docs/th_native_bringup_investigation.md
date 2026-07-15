@@ -94,3 +94,30 @@ inserted-vowel (กรกฎา→ka-ra, same graphemes as the cluster reading) 
 ธรรม→tʰam·ma) — which no structural rule can disambiguate and espeak resolves via its dictionary. Closing that tail
 needs dictionary expansion from an independent pronunciation source (not the wikipron referee → circular), a
 separate effort. The ceiling for the rule engine alone is here; ✅ would require the lexical layer.
+
+## Run 6 — 2026-07-14 — dictionary layer: kaikki (Wiktionary) expansion for the lexical tail
+
+Per user steer (kaikki is the authoritative Thai pronunciation source — the only path to correct lexical output,
+accepting the circularity), expanded the dictionary from espeak-ng-portable's th_kaikki_gold (9025 Wiktionary
+IPA+tone entries), following espeak's methodology: dictionary ONLY the words the rules can't derive.
+
+CONVERTER (tools/gen/build-th-kaikki-dict.mts): kaikki IPA → our convention — strip syllable dots + unreleased ̚
++ offglide ̯; move the tone from after-coda to after-nucleus (wat̚˨˩→wa˨˩t); add stress ˈ/ˌ. VALIDATED: on words
+our rules already get right, converted-kaikki reproduces our EXACT output **6172/6173 = 100.0%** — so the converter
+is faithful and any remaining diff is a real rules-gap, not a conversion artifact.
+
+Added **+774 multi-syllable content words** (1789→2563). Restricted to ≥2-syllable words: single letters (ก→kɔː
+name) and monosyllabic function words (ก็, ณ) are where kaikki's letter-name/colloquial noise lives, and the rules
+already handle real monosyllables ~98% — an unfiltered dump broke 2 goldens (re-introduced the adversarial
+letter-names). The additions are exactly the Sanskrit/Pali tail the rules mis-derived: วิทยาศาสตร์ (science),
+ประวัติศาสตร์ (history), ประชาธิปไตย (democracy), คณิตศาสตร์, อุตสาหกรรม — all now correct.
+
+MEASUREMENT (honest): wikipron full-system 81.9→84.7%, but kaikki and wikipron are BOTH Wiktionary, so the 874
+dict-covered wikipron words match CIRCULARLY — that rise is NOT independent validation. The independent signal is
+the RULE-ENGINE accuracy on OOV (non-dictionaried) words: **82.7%** (3944/4771) — the rules' true quality on their
+own domain, now that the dictionary absorbs the hard irregulars. Suite 262/262. This closes the lexical tail to the
+extent an authoritative source covers it; the thin remainder (Sanskrit words absent from kaikki, e.g. กรมการ) has
+no available source. → ✅ referee-limited (wikipron partly circular; the rule engine is the independent anchor).
+
+### 6a — pruned redundant espeak imports
+Our port's rule gaps differ from espeak's (esp. the Run-5 cluster fix), so 22 of the 1789 imported espeak entries are now RULES-DERIVABLE dead weight — mostly the kr/pr/tr cluster words espeak dictionaried but our rules now handle (ตรงกลาง/ตรงข้าม/กรงขัง/ปรบมือ/พรมแดน). The build tool is now self-maintaining: it empties the dict, runs RULES-ONLY, and keeps only entries the rules can't reproduce (prune) + adds kaikki the rules mis-derive. Net 1789 → 2541 (kept 1767, pruned 22, +774 kaikki). Referee unchanged by the prune (rules give identical output).
