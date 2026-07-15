@@ -67,16 +67,16 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 | **si** Sinhala | 93.5% (.90) | — | ✅ | Residual is 1× referee quirks. |
 | **sv** Swedish | 55.7% (.52) | wikipron accent 96.6% | ✅ | **Referee-limited** (the 55.7% broad wikipron strips stress/length + has casual/truncated forms — not a quality signal). Full pipeline built: segmental + NST stress + **tonal word accent 1/2** (accent-2 grave, **validated 96.6% vs wikipron ¹/²**, an inherent ~95% task) + lexical o-quality + numbers + **compound prosody**. Compounds use NST's own secondary stress (13178 words, `s<N>`/`L<ords>` → ˌ + boundary-safe vowel length/quality + 2nd-onset softening: storkök→stˈùːrɕˌøːk), sidestepping the net-negative wordlist-splitter path (Run 6/8); +3.1 referee. Residual is OOV compounds (outside the 42k corpus → first-syllable stress) + minor folds (short ɛ→æ before r). |
 | **ta** Tamil | 63.0% (.58) | — | ✅ | Referee-limited (ற geminate + diphthong notation). |
-| **th** Thai | 81.9% (.76) | — | 🟠 | Segmentally strong; residual ~8% is compound words needing the **seg-words segmentation** subsystem + lexical Sanskrit/Pali readings. |
+| **th** Thai | 81.9% (.76) | espeak-gold 97.1% | 🟡 | Full pipeline built: syllabifier + computed 5-tone + dictionary + **word segmentation** (seg-words DAG, 64.8k ICU/PyThaiNLP words — the compound subsystem, DONE in Run 3: running-text espeak-gold 89.3→**97.1%**; เขาไปโรงเรียน→เขา\|ไป\|โรงเรียน). The 81.9% wikipron primary is an ISOLATED-word referee, deflated by adversarial artifacts — isolated consonant-LETTER names (ก→kɔː, inconsistent even within wikipron: จ→t͡ɕaʔ) and Sanskrit/Pali CITATION forms — not running-text error. Remaining real class: multi-syllable **Sanskrit/Pali readings** (กรมการ→krommakaːn: word-internal ร cluster-vs-inserted-vowel), dictionary-closable (espeak resolves these the same way). |
 | **tr** Turkish | 76.2% (.70) | epitran 79.8% | 🟡 | Morphological segmentation (stem lexicon) + acronym spell-outs deferred. |
 | **vi** Vietnamese | 71.0% (.65) | epitran 51.3% | ✅ | Referee-limited (2nd source is *lower*); minor foreign-word switch deferred. |
 | **zu** Zulu | 100% (.99) | — | ✅ | Clicks/implosives/ejectives/laterals all corroborated. Done. |
 
 ## What "outstanding work" concretely means
 
-- **🟠 scope gaps** are the substantive items: Thai's compound segmentation. Each is a
-  *subsystem*, tracked in that language's
-  `docs/<code>_*investigation.md`. Until built, feed these engines their supported input (pinyin, etc.) and treat the deferred layer as absent, not wrong.
+- **🟠 scope gaps** — a whole *subsystem* deferred (Mandarin Hanzi front-end, Japanese/Swedish pitch accent, Thai
+  compound segmentation) — are now **all built**: no language currently sits at 🟠. The pattern, when one recurs,
+  is to feed the engine its supported input and treat the deferred layer as absent (not wrong) until built.
 - **🟡 lexical tails** are bounded: a specific, enumerable class (mid-vowel height, loanword C-hardening, learned
   stress) that a small exception lexicon closes. The rule engine is right for everything else. Irish's Run-3
   referee-gated lexicon (`docs/ga_bringup_investigation.md`, `[[vernacula-oracle-lexicon-method]]`) is the

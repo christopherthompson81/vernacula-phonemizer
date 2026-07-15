@@ -53,3 +53,25 @@ constrained maximal matching) and phonemizes each, joined by a space — so a co
 (ก็คือ → ก็ คือ) now matches. 89.3%→97.1% exact (98.4% on monosyllables). Thai reaches parity-ish by reusing
 all three authored subsystems (syllabifier, dictionary, segmentation) + a native IPA renderer. Residual ~3% is
 minor segmental (rare vowel/length edge cases, a few multi-word dict compounds).
+## Run 4 — 2026-07-14 — segmentation is DONE; honest residual audit + re-tier 🟠→🟡
+
+Revisited the "compound segmentation" 🟠 gap. It was already CLOSED in Run 3 (segment.ts + 64.8k-word seg-words
+DAG, wired into phonemizeWord) — the maturity note was stale. Confirmed on independent running text: เขาไปโรงเรียน
+→ เขา|ไป|โรงเรียน, ฉันรักประเทศไทย → ฉัน|รัก|ประเทศไทย, วันนี้อากาศดี → วันนี้|อากาศ|ดี. Running-text espeak-gold
+89.3→97.1% (Run 3), with an INDEPENDENT word-list (ICU thaidict + PyThaiNLP), so the segmentation itself isn't
+espeak-circular.
+
+Audited the wikipron residual (81.9% folded, 1024 mismatches) to find what's actually left:
+- **Isolated consonant-LETTER names** (23 words): ก→kɔː vs our inherent-vowel ก→kaʔ. Tried the letter-name reading
+  (append อ → Cɔː); +0.2% but it's an ADVERSARIAL, INCONSISTENT referee — wikipron gives ก→kɔː (name) yet จ→t͡ɕaʔ
+  (inherent) and ณ→naʔ (the WORD "at"), and ฤ/ฦ are vocalic letters. It also broke the deliberate ณ→naʔ test.
+  REVERTED — this is isolated-lemma noise, not a quality gap.
+- **Sanskrit/Pali multi-syllable readings** (~50+): กรมการ→ours kon-ma-kaːn vs krom-ma-kaːn; การพิจารณา→…jaːn-naː
+  vs …jaːra-naː. The single/short forms are RIGHT (กรม→krom ✓, ตรง→troŋ ✓, ทรง→soŋ ✓); the failures are word-internal
+  ร in longer seg-words the syllabifier mis-parses (cluster-vs-inserted-vowel ambiguity). This is the genuine real
+  residual — a bounded lexical class, dictionary-closable (espeak resolves it the same way, via its dictionary;
+  we already imported all 1789 espeak entries, so the tail beyond that needs new entries). Not chased: low-leverage
+  long tail + high regression risk in the 31 KB ported syllabifier (111 tests green).
+
+VERDICT: the compound-segmentation SUBSYSTEM is done → off 🟠. A specific dictionary-closable Sanskrit class remains
+→ **🟡**. With this, NO language sits at 🟠 — every language is ✅ or 🟡.
