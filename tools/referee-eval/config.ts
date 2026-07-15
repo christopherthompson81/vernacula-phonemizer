@@ -41,6 +41,31 @@ export const BACKBONE: [RegExp, string][] = [
 ];
 
 export const CONFIG: Record<string, RefLang> = {
+    bn: {
+        // Bengali — native abugida G2P (bengali.jsonc + core/abugida). wikipron ben is a broad HUMAN referee
+        // (Wiktionary), noisy on the inherent-vowel ɔ/o + the [æ] realization of ⟨e⟩ (dialect-split). Folds
+        // below neutralize the notational/allophonic differences; whatever remains is the real signal.
+        referees: [
+            {
+                file: "bn.wikipron-ben-broad.tsv",
+                source: "wikipron ben_beng broad (human)",
+                role: "primary",
+            },
+        ],
+        secondaryGap:
+            "epitran ben-Beng is phonologically CRUDE (no vowel harmony, no final-inherent-vowel deletion — it renders both করি as kɔri and জল as d͡ʒɔlɔ), so its raw agreement UNDERSTATES correctness and it is not wired as a scored referee. The wikipron ben referee itself is noisy (retroflex ট/ড often written dental t/d, and the literary final-[o] retention varies word-by-word) → a low ceiling (~62% even for a mature engine, per the sibling espeak-parity project).",
+        segmentJoin: true,
+        folds: [
+            [/[ɾɹ]/gu, "r", "tap ɾ (ours) / approximant ɹ (referee) vs plain r — notation"],
+            // Bengali sibilants/affricates are alveolo-palatal; we write the ʃ/t͡ʃ/d͡ʒ series, the referee
+            // often the ɕ/t͡ɕ/d͡ʑ series — the SAME phonemes, different transcription convention.
+            [/d͡?ʑ/gu, "d͡ʒ", "d͡ʑ (referee) = d͡ʒ (ours) — notation"],
+            [/t͡?ɕ/gu, "t͡ʃ", "t͡ɕ (referee) = t͡ʃ (ours) — notation"],
+            [/ɕ/gu, "ʃ", "ɕ (referee) = ʃ (ours) — notation"],
+            [/ʑ/gu, "ʒ", "ʑ (referee) = ʒ (ours) — notation"],
+            [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
+        ],
+    },
     ar: {
         // Evaluated through the ASYNC diacritized pipeline (phonemizeArabic): the ONNX pre-pass restores the short
         // vowels the script omits, so our output is comparable to the referee's fully-voweled IPA. (The sync

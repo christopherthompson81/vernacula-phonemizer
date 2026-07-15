@@ -46,3 +46,22 @@ export const DEVANAGARI_DIGITS: Record<string, string> = {
     "८": "8",
     "९": "9",
 };
+
+/** Word-forming Bengali (U+0980 block): letters + signs + matras + vocalic, EXCLUDING the digits
+ *  (U+09E6–09EF) and punctuation — i.e. ঀ-ৣ (U+0980–09E3) + ৰ-৾ (U+09F0–09FE, ra/wa variants + signs).
+ *  Bengali uses the shared danda । (U+0964) for clause punctuation, handled separately. */
+export const BENGALI_WORD = "ঀ-ৣৰ-৾";
+
+/** Bengali digits ০-৯ → ASCII, for number parsing. */
+export const BENGALI_DIGITS: Record<string, string> = {
+    "০": "0",
+    "১": "1",
+    "২": "2",
+    "৩": "3",
+    "৪": "4",
+    "৫": "5",
+    "৬": "6",
+    "৭": "7",
+    "৮": "8",
+    "৯": "9",
+};

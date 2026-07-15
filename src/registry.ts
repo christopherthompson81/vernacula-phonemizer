@@ -27,6 +27,7 @@ import { createSinhala } from "./languages/sinhala/sinhala.ts";
 import { createKazakh } from "./languages/kazakh/kazakh.ts";
 import { createZulu } from "./languages/zulu/zulu.ts";
 import { createCzech } from "./languages/czech/czech.ts";
+import { createBengali } from "./languages/bengali/bengali.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -99,6 +100,8 @@ function build(lang: string): Phonemizer {
         // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
         case "hi":
             return createHindi((latin) => getPhonemizer("en").text(latin));
+        case "bn":
+            return createBengali((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
