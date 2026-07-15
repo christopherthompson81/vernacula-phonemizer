@@ -17,20 +17,20 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("gwlad")).toBe("ɡwlˈaːd"); // c/g always hard; gw- onset w stays consonant
     });
 
-    test("diphthongs carry a superscript offglide (ae/au→aᶤ, ai/ei→aᶦ/əᶦ, aw/ew→aᶷ/eᶷ, oe→ɔᶤ, wy→uᶤ)", () => {
+    test("diphthongs carry a superscript offglide (ae/au→aᶤ, ai/ei→aᶦ/eᶦ, aw/ew→aᶷ/ɛᶷ, oe→ɔᶤ, wy→ʊᶤ)", () => {
         expect(phonemizeWord("gwaith")).toBe("ɡwˈaᶦθ"); // ai → aᶦ
         expect(phonemizeWord("traeth")).toBe("trˈaᶤθ"); // ae → aᶤ
-        expect(phonemizeWord("mewn")).toBe("mˈeᶷn"); // ew → eᶷ
+        expect(phonemizeWord("mewn")).toBe("mˈɛᶷn"); // ew → ɛᶷ (short; referee: mɛun)
         expect(phonemizeWord("llaw")).toBe("ɬˈaᶷ"); // aw → aᶷ
         expect(phonemizeWord("oedd")).toBe("ˈɔᶤð"); // oe → ɔᶤ
-        expect(phonemizeWord("eglwys")).toBe("ˈɛɡluᶤs"); // wy → uᶤ
-        expect(phonemizeWord("cymdeithas")).toBe("kəmdˈəᶦθas"); // ei → əᶦ
+        expect(phonemizeWord("eglwys")).toBe("ˈɛɡlʊᶤs"); // wy diphthong → ʊᶤ (referee: ɛɡlʊɨs)
+        expect(phonemizeWord("cymdeithas")).toBe("kəmdˈeᶦθas"); // ei → eᶦ (referee-backed)
     });
 
     test("the y-vowel: obscure ə (non-final) vs clear ɨ (final syllable); unstressed i → ɨ", () => {
         expect(phonemizeWord("cymru")).toBe("kˈəmrɨ"); // 1st y (non-final) → ə, u → ɨ
         expect(phonemizeWord("ysgol")).toBe("ˈəsɡɔl"); // obscure y → ə
-        expect(phonemizeWord("blwyddyn")).toBe("blˈuᶤðɨn"); // final y → clear ɨ
+        expect(phonemizeWord("blwyddyn")).toBe("blˈʊᶤðɨn"); // wy → ʊᶤ; final y → clear ɨ (referee: blʊɨðɨn)
         expect(phonemizeWord("lladin")).toBe("ɬˈadin"); // unstressed i stays FRONT (referee-backed; N Welsh centralizes only u/y)
         expect(phonemizeWord("dim")).toBe("dˈim"); // stressed short i stays front (referee: dɪm, not the oracle ɨ)
         expect(phonemizeWord("dinas")).toBe("dˈinas"); // stressed short i in an OPEN syllable stays front
@@ -58,7 +58,7 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("nhw")).toBe("n̥ˈuː"); // word-initial nh → n̥ (nasal mutation)
         expect(phonemizeWord("nghymru")).toBe("ŋ̥ˈəmrɨ"); // ngh → ŋ̥
         expect(phonemizeWord("enghraifft")).toBe("ˈɛŋhraᶦft"); // MEDIAL ngh is ŋ+h, not the mutation
-        expect(phonemizeWord("dechrau")).toBe("dˈɛχraᶤ"); // onset-cluster penult tensing (→ deχraᶤ) stays DEFERRED
+        expect(phonemizeWord("dechrau")).toBe("dˈɛχra"); // NW final unstressed -au → [a] (referee: dɛχra)
         expect(phonemizeWord("i")).toBe("ˈiː"); // the word ⟨i⟩ → front iː (referee-backed; the Run-2 oracle ɨ was an artifact)
         expect(phonemizeWord("bod")).toBe("bˈɔd"); // irregular: short ɔ, not the regular oː
         expect(phonemizeWord("heb")).toBe("hˈɛb"); // irregular: lax ɛ
@@ -69,7 +69,7 @@ describe("welsh canonical IPA", () => {
 
     test("w/i as consonants before a vowel; ⟨si⟩+V → ʃ; ⟨w⟩ as vowel (ʊ) otherwise", () => {
         expect(phonemizeWord("wal")).toBe("wˈal"); // word-initial w + vowel → consonant /w/ (not vowel ʊ)
-        expect(phonemizeWord("teithio")).toBe("tˈəᶦθjɔ"); // i + vowel → /j/
+        expect(phonemizeWord("teithio")).toBe("tˈeᶦθjɔ"); // ei → eᶦ (referee-backed); i+vowel → /j/
         expect(phonemizeWord("bara")).toBe("bˈara"); // plain
     });
 });

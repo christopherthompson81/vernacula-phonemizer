@@ -83,7 +83,15 @@ export function toSegments(word: string): Seg[] {
                 (k) => k.length >= 2 && w.startsWith(k, i),
             );
             if (key) {
-                const ph = MANIFEST.vowels[key]!;
+                let ph = MANIFEST.vowels[key]!;
+                // North Welsh: UNSTRESSED word-final ⟨au⟩ (the plural/verb suffix) reduces to [a] — llyfrau→ɬəvra,
+                // pethau→pɛθa. Only in polysyllables (a nucleus precedes); a stressed monosyllable keeps [aɨ] (cau).
+                if (
+                    key === "au" &&
+                    i + 2 === w.length &&
+                    segs.some((s) => s.nucleus)
+                )
+                    ph = MANIFEST.vowels["a"] ?? "a";
                 segs.push({
                     ph,
                     nucleus: true,
