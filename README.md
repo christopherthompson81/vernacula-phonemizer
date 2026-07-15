@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **27 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **28 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,8 +21,8 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-27 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
-Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic and Niger-Congo — across
+28 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian and Niger-Congo — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
 
 | Family / area | Languages |
@@ -37,10 +37,11 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Semitic | Arabic `ar` |
 | Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Thai `th`, Vietnamese `vi` |
 | Japonic / Koreanic | Japanese `ja`, Korean `ko` |
+| Austronesian | Indonesian `id` 🟡 |
 | Niger-Congo | Hausa `ha`, Fula `ff`, Zulu `zu` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (25) · 🟡 reliable + a documented lexical tail (Bengali) ·
+✅ reliable / referee-limited (25) · 🟡 reliable + a documented lexical tail (Bengali, Indonesian) ·
 🟠 scope-limited, one subsystem deferred (Urdu — see below) · 🔵 in active development.
 
 ## How it works
