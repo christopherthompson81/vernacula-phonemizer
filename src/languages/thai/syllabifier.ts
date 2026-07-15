@@ -220,6 +220,17 @@ const THAI_CLUSTER_FORMER: Readonly<Record<string, string>> = {
     th: "t",
 };
 
+/** Does an onset of cluster-class `former` (k/p/t) accept `med` (l/r/w) as the 2nd cluster member? k→l/r/w,
+ *  p→l/r, t→r (kr/kl/kw, pr/pl, tr). Used by rule 5 (cluster schwa-deletion) and rule 3's cluster-schwa guard. */
+const thaiIsCluster = (former: string | undefined, med: string): boolean =>
+    former === "k"
+        ? med === "l" || med === "r" || med === "w"
+        : former === "p"
+          ? med === "l" || med === "r"
+          : former === "t"
+            ? med === "r"
+            : false;
+
 // A vowel UNIT carries its graphemes plus an optional trailing GLIDE consonant:
 // ไ/ใ (aj) and ำ (am) are vowel + a glide (j / m) that, like any consonant, fills
 // the coda slot so a FOLLOWING consonant opens a new syllable (ใหม่ → hajmaʔ, ม is
@@ -421,11 +432,24 @@ function thaiSchwaFates(units: readonly ThaiUnit[]): Map<number, "o" | "a"> {
         seq.pop();
 
     // 3: ə → 0 / VC_CV  (consume V·C·ə·C·V; advance past the trailing CV)
-    seq = rewriteThai(seq, 5, (w) =>
-        isV(w[0]) && isC(w[1]) && w[2]!.sym === "ə" && isC(w[3]) && isV(w[4])
-            ? [w[0]!, w[1]!, w[3]!, w[4]!]
-            : null,
-    );
+    seq = rewriteThai(seq, 5, (w) => {
+        if (!(isV(w[0]) && isC(w[1]) && w[2]!.sym === "ə" && isC(w[3]) && isV(w[4])))
+            return null;
+        // Protect a CLUSTER schwa: when w[1] is ר after an onset (w[0] is that onset's own schwa) forming a
+        // valid kr/pr/tr cluster, w[2] is the cluster's nucleus schwa — deleting it here strands ר as a coda
+        // (rule 4 → น). Leave it for rule 5: กรมการ → krom·kaːn, not kon·ma·kaːn. Restricted to ר: kr/pr/tr are
+        // almost always true clusters, whereas ל/ו after an onset are usually the inserted-o + ל-coda reading
+        // (ผล → pʰon, พล → pʰon, not pʰl). A Sanskrit inserted-vowel ר (กรกฎา → ka-ra) is the dictionary's job.
+        const onset = units[w[0]!.owner];
+        if (
+            w[0]!.sym === "ə" &&
+            w[1]!.sym === "r" &&
+            onset?.kind === "C" &&
+            thaiIsCluster(THAI_CLUSTER_FORMER[onset.ph], "r")
+        )
+            return null;
+        return [w[0]!, w[1]!, w[3]!, w[4]!];
+    });
 
     // 4: neutralization before #/C (l/r→n runs BEFORE the cluster rule, so a coda
     //    ร doesn't cluster) — mutate consonant syms in place.
@@ -452,17 +476,9 @@ function thaiSchwaFates(units: readonly ThaiUnit[]): Map<number, "o" | "a"> {
     // 5: cluster schwa-deletion — (k)_(l/r/w), (p)_(l/r), (t)_r  (consume C·ə·C)
     seq = rewriteThai(seq, 3, (w) => {
         if (!(isC(w[0]) && w[1]!.sym === "ə" && isC(w[2]))) return null;
-        const former = THAI_CLUSTER_FORMER[w[0]!.sym],
-            med = w[2]!.sym;
-        const ok =
-            former === "k"
-                ? med === "l" || med === "r" || med === "w"
-                : former === "p"
-                  ? med === "l" || med === "r"
-                  : former === "t"
-                    ? med === "r"
-                    : false;
-        return ok ? [w[0]!, w[2]!] : null;
+        return thaiIsCluster(THAI_CLUSTER_FORMER[w[0]!.sym], w[2]!.sym)
+            ? [w[0]!, w[2]!]
+            : null;
     });
 
     // 6: ə → o / _C(#|C)  (right-context lookahead — surfaces as o in a closed syllable)

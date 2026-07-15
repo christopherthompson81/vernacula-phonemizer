@@ -75,3 +75,22 @@ Audited the wikipron residual (81.9% folded, 1024 mismatches) to find what's act
 
 VERDICT: the compound-segmentation SUBSYSTEM is done → off 🟠. A specific dictionary-closable Sanskrit class remains
 → **🟡**. With this, NO language sits at 🟠 — every language is ✅ or 🟡.
+
+## Run 5 — 2026-07-14 — word-internal ר-cluster fix (partial Sanskrit close)
+
+Traced the multi-syllable ר failures to a rule interaction in the ported epitran schwa-fates algorithm: for กรม
+ALONE, ר keeps its schwa → rule 5 clusters ก+ר → krom. But inside กรมการ, the extra context lets **rule 3**
+(ə→0 / VC_CV) delete ר's cluster schwa BEFORE rule 5 runs, so rule 4 neutralizes the stranded ר→น → kon·ma·kaːn.
+
+Fix: rule 3 now PROTECTS a cluster schwa — when w[1] is ר right after an onset that forms a valid kr/pr/tr cluster,
+the middle schwa is left for rule 5 to cluster. Restricted to ר (med==="r"): kr/pr/tr are almost always true
+clusters, whereas ל/ו after an onset are usually the inserted-o + ל-coda reading (ผล→pʰon, พล→pʰon) — an unrestricted
+guard broke 6 ל-words (ผลงาน, พลเอก…) to fix 3 ר-words. Narrowed: **FIXED 2, BROKE 0** on the referee (81.9%,
++2 net); real running-text wins beyond the referee (กรมการ→krom·kaːn, ตรงนั้น→troŋ·nan, ผลกระทบ's กร→kra). Suite
+261/261. Shared thaiIsCluster() helper (rules 3 & 5).
+
+Thai STAYS 🟡: this closes the structural kr-cluster half; the remaining ר residual is genuinely lexical — Sanskrit
+inserted-vowel (กรกฎา→ka-ra, same graphemes as the cluster reading) and coda-sonorant doubling (กรมการ→krom·MA·kaːn,
+ธรรม→tʰam·ma) — which no structural rule can disambiguate and espeak resolves via its dictionary. Closing that tail
+needs dictionary expansion from an independent pronunciation source (not the wikipron referee → circular), a
+separate effort. The ceiling for the rule engine alone is here; ✅ would require the lexical layer.
