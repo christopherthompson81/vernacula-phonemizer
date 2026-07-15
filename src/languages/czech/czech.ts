@@ -5,12 +5,27 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
+// LOANWORD lexicon (loanwords.tsv, kaikki/Wiktionary-derived): pronunciations the native rules mis-derive — chiefly
+// di/ti/ni NON-palatalization in loans (stadion→stadɪjon, not staɟɪjon), loanword long í, foreign names. The rules
+// correctly palatalize NATIVE di/ti/ni (tisíc→cɪsiːts), so only the exceptions are dictionaried. See build-cs-kaikki-dict.mts.
+let LEX: Map<string, string> | undefined;
+function lexicon(): Map<string, string> {
+    if (LEX === undefined)
+        LEX = loadTsvMap(import.meta.url, "loanwords.tsv", undefined, {
+            optional: true,
+        });
+    return LEX;
+}
+
 /** One Czech word → canonical IPA with first-syllable primary stress + even-non-final secondary stress. */
 export function phonemizeWord(word: string): string {
+    const lex = lexicon().get(word) ?? lexicon().get(word.toLowerCase());
+    if (lex !== undefined) return lex;
     const segs = toSegments(word);
     const nucIdx = segs
         .map((s, i) => (s.nucleus ? i : -1))

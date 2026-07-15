@@ -17,7 +17,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     ar: 0.55, // wikipron ara via the ONNX diacritizer + LEXICON-PRIMARY Tashkeela restoration + PAUSAL fold — measured 57.4% (kaikki 2nd: 62.6%). Referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
     ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail
-    cs: 0.92, // wikipron ces_latn narrow (HUMAN) — measured 94.8% (was epitran 69.9%, deflated by its p→b/palatalization bugs). Residual = loanword de-palatalization (di/ti/ni stay hard: stadion, studie) + foreign names
+    cs: 0.95, // wikipron ces_latn (HUMAN) — 97.0% with the kaikki loanword lexicon (de-palatalization: stadion/studie/technik). Rule-engine OOV alone 97.7% (independent). Partly circular for the 404 dict-covered (kaikki~wikipron both Wiktionary)
     cy: 0.50, // wikipron cym_latn NW broad (dialect-matched, deduped) — measured 56.5% (Run 3: reverted the oracle's i→ɨ artifact — N Welsh keeps i FRONT, centralizes only u/y); residual is names/wy-quality + length (folded away)
     de: 0.75, // kaikki deu — measured 76.1% (wikipron deu 2nd: 74.9%); Run 27 glided unstressed i in medial hiatus (Latinate -iVC-: genial, union, aluminium). Residual now DOMINATED by proper-noun/loanword noise (haiti/alert/berlin/moslem) — the referee-limited tail
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
