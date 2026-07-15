@@ -29,6 +29,7 @@ function silentTail(w: string, k: number): boolean {
 function euClosed(w: string, a: number): boolean {
     const c1 = w[a] ?? "";
     if (c1 === "" || isV(c1)) return false;
+    if (c1 === "x" && (w[a + 1] ?? "") !== "") return true; // pronounced mid-word ⟨x⟩=[ks]/[ɡz] closes (sexuel→sɛ, texte→tɛ, examen→ɛ); word-final ⟨x⟩ is silent (deux→dø) and falls through
     const c2 = w[a + 1] ?? "";
     if (c2 === "") return "rlfcqkbɡv".includes(c1); // V+C$ → closed iff C is sounded
     // A double consonant CLOSES the preceding syllable for vowel QUALITY — standard loi de position: comme→kɔm,
@@ -55,8 +56,7 @@ function oClosed(w: string, a: number): boolean {
     const c1 = w[a] ?? "";
     if (c1 === "") return false; // word-final open → o
     if (c1 === "z") return false; // before z → o
-    if (c1 === "s" && (w[a + 1] ?? "") === "e" && silentTail(w, a + 2))
-        return false; // -se(s) (→z) → o (rose, choses)
+    if (c1 === "s" && isV(w[a + 1] ?? "")) return false; // o + intervocalic ⟨s⟩ (→[z]) → o (rose, poser, position, philosophe)
     if ((w[a + 1] ?? "") === "" && "tsdpx".includes(c1)) return false; // o + silent final C → o (mot, gros, abdo)
     return true; // everything else (closed OR open) → ɔ
 }
@@ -167,6 +167,17 @@ export function toIpa(word: string): string {
             out.push(euClosed(w, i + g.length) ? "œ" : "ø", i);
             i += g.length;
             continue;
+        }
+
+        // ⟨au⟩/⟨eau⟩ before ⟨r⟩ lowers to [ɔ] (standard: restaurant→ʁɛstɔʁɑ̃, aurais→ɔʁɛ, dinosaure→dinozɔʁ,
+        // Laure→lɔʁ). Everywhere else ⟨au⟩/⟨eau⟩ stays [o] (handled by the vowel-group table below).
+        if (rest.startsWith("au") || rest.startsWith("eau")) {
+            const g = rest.startsWith("eau") ? "eau" : "au";
+            if (at(i + g.length) === "r") {
+                out.push("ɔ", i);
+                i += g.length;
+                continue;
+            }
         }
 
         // Oral vowel multigraphs (longest first).

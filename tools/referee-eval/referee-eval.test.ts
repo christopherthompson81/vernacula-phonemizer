@@ -23,7 +23,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     en: 0.30, // wikipron eng_us — measured 36.1%; DEFLATED by a noisy referee (proper nouns, GB variants, letter-names)
     es: 0.88, // wikipron spa_latn_ca — measured 92.5%; residual is loanwords + diphthong-offglide notation
     ff: 0.62, // epitran ful-Latn — measured 71.2%; residual = epitran nj→ɲ vs our prenasal + salt
-    fr: 0.75, // wikipron fra — 78.5% (adjudicated gold 90.8%) after the o/ɔ loi-de-position fix toward STANDARD (comment→kɔmɑ̃, donnez→dɔne); was 66.5%/85.6% on Lexique's merged [o]. primary still name-deflated
+    fr: 0.76, // wikipron fra — 79.1% (adjudicated gold 91.3%); ✅ referee name/acronym-limited (92.5% common-word). Full loi de position: o/ɔ default + au/eau+r→ɔ + o-before-z→o + x-closes; e/ɛ-before-cluster kept lexical (Lexique). Headline deflated by proper-name/acronym/rare tail
     ga: 0.40, // wikipron gle_latn broad — measured 44.8% (Run-3 referee-gated lexicon); 3-DIALECT referee (~34% ceiling even for a mature engine), vowel-noise dominated
     ha: 0.85, // wikipron hau (human) — measured 90.3% (epitran hau 2nd: 88.4%)
     hi: 0.72, // wikipron hin — measured 77.7%; residual = schwa-deletion edge cases + ref epenthesis + genuine ख़/ख (x/kʰ) noise
