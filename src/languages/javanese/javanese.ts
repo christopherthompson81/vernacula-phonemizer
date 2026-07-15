@@ -10,6 +10,11 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import {
+    scanAksara,
+    aksaraDigit,
+    aksaraPada,
+} from "./aksara.ts";
 
 interface NumbersDef {
     units: string[];
@@ -35,10 +40,12 @@ const NUM = DEF.numbers;
 const VOWEL_LETTERS = "aiueoéèê";
 const LAX: Record<string, string> = { i: "ɪ", u: "ʊ", o: "ɔ" }; // closed-syllable laxing (keyed by SOURCE letter)
 
-interface Seg {
+export interface Seg {
     ph: string;
     v: string; // source vowel letter for a nucleus; "" for a consonant
 }
+// Aksara Jawa (Hanacaraka) word run, and any single letter/sign of it — for script detection + tokenising.
+const AKSARA_WORD = /[\u{A980}-\u{A9CF}]/u;
 
 /** Scan a lowercased Javanese word into segments (digraphs first, then single letters). */
 function scan(w: string): Seg[] {
@@ -69,9 +76,9 @@ function consonantsAfter(segs: Seg[], i: number): [number, number] {
     return [j - i - 1, j];
 }
 
-/** One Javanese word → canonical IPA. */
-export function phonemizeWord(word: string): string {
-    const segs = scan(word.toLowerCase());
+/** Apply the shared Javanese phonology to a segment list (from EITHER the Latin scan or the Aksara Jawa scan):
+ *  final-⟨k⟩→ʔ, closed-syllable laxing, the a→ɔ harmony, penult stress. Returns canonical IPA. */
+export function applyPhonology(segs: Seg[]): string {
     if (segs.length === 0) return "";
 
     // Word-final ⟨k⟩ → glottal stop ʔ.
@@ -118,6 +125,14 @@ export function phonemizeWord(word: string): string {
     return out.normalize("NFC");
 }
 
+/** One Javanese word → canonical IPA. Routes by script: Aksara Jawa (Hanacaraka) → the abugida scanner, else the
+ *  Latin g2p — both feed the shared phonology. */
+export function phonemizeWord(word: string): string {
+    return applyPhonology(
+        AKSARA_WORD.test(word) ? scanAksara(word) : scan(word.toLowerCase()),
+    );
+}
+
 // ── Numbers (ngoko; irregular) — ported from the espeak-ng-portable compositor ────────────────────────────────
 /** n in [1,99] → ngoko spelling. */
 function belowHundred(n: number): string {
@@ -162,21 +177,29 @@ function numberToText(n: number): string {
     return parts.join(" ");
 }
 
-const TOKEN = /([a-zA-ZéèêÉÈÊ]+)|(\d+)|([.?!,;:])/gu;
+// Latin word · Aksara Jawa word run (letters+signs, U+A980–U+A9C0) · Aksara digits · ASCII digits · Aksara pada
+// punctuation (U+A9C1–U+A9CE, U+A9DE–U+A9DF) · ASCII punctuation.
+const TOKEN =
+    /([a-zA-ZéèêÉÈÊ]+)|([\u{A980}-\u{A9C0}]+)|([\u{A9D0}-\u{A9D9}]+)|(\d+)|([\u{A9C1}-\u{A9CE}\u{A9DE}\u{A9DF}])|([.?!,;:])/gu;
+
+/** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
+function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
+    if (Number.isSafeInteger(n))
+        for (const wd of numberToText(n).split(" ")) sink.emit(phonemizeWord(wd));
+}
 
 class JavanesePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) {
-                const n = Number(m[2]);
-                // Each numeral word is emitted separately so word-final laxing / a→ɔ apply per word.
-                if (Number.isSafeInteger(n))
-                    for (const wd of numberToText(n).split(" "))
-                        sink.emit(phonemizeWord(wd));
-                else sink.emit(m[2]);
-            } else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+            if (m[1] || m[2]) sink.emit(phonemizeWord(m[1] ?? m[2]!));
+            else if (m[3])
+                emitNumber(Number([...m[3]].map(aksaraDigit).join("")), sink);
+            else if (m[4]) emitNumber(Number(m[4]), sink);
+            else if (m[5]) {
+                const mk = aksaraPada(m[5]);
+                if (mk) sink.pause(mk);
+            } else if (m[6]) {
+                const mk = CLAUSE_MARK[m[6]];
                 if (mk) sink.pause(mk);
             }
         });

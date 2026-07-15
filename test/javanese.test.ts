@@ -56,4 +56,25 @@ describe("javanese canonical IPA", () => {
             "ˈaku mˈaŋan sˈəɡɔ",
         );
     });
+
+    // Aksara Jawa (Hanacaraka) front-end — the native abugida, scanned into the SAME phonology as Latin. It is
+    // MORE phonemic than the Latin: pepet vs taling and dental vs retroflex are written distinctly.
+    test("Aksara Jawa script: abugida → same phonology", () => {
+        const cases: [string, string][] = [
+            ["ꦗꦮ", "d͡ʒˈɔwɔ"], // jawa — a→ɔ from the inherent vowels
+            ["ꦱꦺꦭ", "sˈelɔ"], // sela — taling ꦺ = /e/ (not the pepet default)
+            ["ꦥꦸꦭꦺꦴ", "pˈulo"], // pulo — taling + tarung = /o/
+            ["ꦮꦺꦴꦁ", "wˈɔŋ"], // wong — o→ɔ closed laxing, cecak coda ŋ
+            ["ꦱꦽꦔꦺꦔꦺ", "srəŋˈeŋe"], // srengenge — keret = medial -rə-
+            ["ꦏꦸꦛ", "kˈuʈɔ"], // kutha — retroflex ꦛ = ʈ
+            ["ꦒꦗꦃ", "ɡˈad͡ʒah"], // gajah — wignyan ꦃ = final /h/
+            ["ꦲꦧꦁ", "ˈabaŋ"], // abang — ꦲ "ha" is the silent vowel carrier
+            ["ꦥꦶꦠꦶꦏ꧀", "pˈit̪ɪʔ"], // pitik — same output as the Latin "pitik" (shared phonology)
+        ];
+        for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
+    });
+
+    test("Aksara Jawa digits route through the ngoko compositor", () => {
+        expect(phonemize("꧑꧒꧓", "jv")).toBe("sˈat̪ʊs t̪əlulˈikʊr"); // 123 = satus telulikur
+    });
 });

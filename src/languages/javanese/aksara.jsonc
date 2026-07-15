@@ -1,0 +1,52 @@
+// Aksara Jawa (Hanacaraka) → phoneme-segment table for Javanese (jv) — the native Brahmic abugida, the SECOND
+// script front-end (Unicode block U+A980–U+A9DF). aksara.ts scans this into the SAME Seg[] the Latin g2p produces,
+// then the shared jv phonology (a→ɔ, laxing, final-k→ʔ, stress) applies. Because the script writes pepet (ə) vs
+// taling (e) with distinct signs — and dental vs retroflex with distinct aksara — it is MORE phonemic than the
+// Latin orthography (it resolves the ⟨e⟩ ambiguity). Murda/mahaprana honorific/Sanskrit letters are pronounced
+// like their base. See docs/jv_native_bringup_investigation.md.
+{
+    // Base consonants (inherent /a/) + murda (honorific) / mahaprana (Sanskrit) variants → IPA (all pronounced
+    // as the base — the "aspirate" mahaprana are NOT aspirated in modern Javanese). t̪/d̪ dental vs ʈ/ɖ retroflex.
+    "consonants": {
+        "ꦏ": "k", "ꦐ": "k", "ꦑ": "k", "ꦒ": "ɡ", "ꦓ": "ɡ", "ꦔ": "ŋ",
+        "ꦕ": "t͡ʃ", "ꦖ": "t͡ʃ", "ꦗ": "d͡ʒ", "ꦙ": "d͡ʒ", "ꦚ": "ɲ",
+        "ꦛ": "ʈ", "ꦜ": "ʈ", "ꦝ": "ɖ", "ꦞ": "ɖ", "ꦟ": "n",
+        "ꦠ": "t̪", "ꦡ": "t̪", "ꦢ": "d̪", "ꦣ": "d̪", "ꦤ": "n",
+        "ꦥ": "p", "ꦦ": "p", "ꦧ": "b", "ꦨ": "b", "ꦩ": "m",
+        "ꦪ": "j", "ꦫ": "r", "ꦬ": "r", "ꦭ": "l", "ꦮ": "w",
+        "ꦯ": "s", "ꦰ": "s", "ꦱ": "s", "ꦲ": "h"
+    },
+
+    // Syllabic consonants (carry an inherent pepet /ə/): pa-cerek = rə, nga-lelet = lə.
+    "syllabic": { "ꦉ": "r", "ꦊ": "l" },
+
+    // Independent (word-initial / hiatus) vowels → IPA.
+    "independentVowels": {
+        "ꦄ": "a", "ꦅ": "i", "ꦆ": "i", "ꦇ": "i", "ꦈ": "u",
+        "ꦌ": "e", "ꦍ": "ai", "ꦎ": "o"
+    },
+
+    // Dependent vowel SIGNS (sandhangan swara) — replace the inherent /a/. taling ꦺ = /e/ alone, but taling +
+    // tarung (ꦴ) = /o/ (handled in aksara.ts). pepet ꦼ = /ə/.
+    "vowelSigns": {
+        "ꦶ": "i", "ꦷ": "i", "ꦸ": "u", "ꦹ": "u",
+        "ꦺ": "e", "ꦻ": "ai", "ꦼ": "ə"
+    },
+    "tarung": "ꦴ",
+
+    // Medial consonant signs (sandhangan wyanjana): cakra = -r-, pengkal = -y- (j). keret = -rə- (r + pepet).
+    "medials": { "ꦿ": "r", "ꦾ": "j" },
+    "keret": "ꦽ",
+
+    // Coda signs (sandhangan panyigeg): cecak = final -ng, layar = final -r, wignyan = final -h.
+    "codas": { "ꦁ": "ŋ", "ꦂ": "r", "ꦃ": "h" },
+
+    // Pangkon (patèn) = virama: suppresses the inherent vowel (word-final coda or, before a consonant, a cluster).
+    "virama": "꧀",
+
+    // Aksara Jawa digits (angka) → ASCII (routed to the ngoko number compositor).
+    "digits": { "꧐": "0", "꧑": "1", "꧒": "2", "꧓": "3", "꧔": "4", "꧕": "5", "꧖": "6", "꧗": "7", "꧘": "8", "꧙": "9" },
+
+    // Pada (punctuation) → canonical inline pause marks.
+    "pada": { "꧈": " , ", "꧉": " . ", "꧊": " . ", "꧋": " . ", "꧌": " , ", "꧍": " . " }
+}
