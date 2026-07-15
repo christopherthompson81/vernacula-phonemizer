@@ -1,0 +1,14 @@
+// Min Nan / Taiwanese Hokkien (nan) — Sinitic, tonal, Tâi-lô/POJ + Han. Referee GAP: no independent HUMAN referee
+// exists (no wikipron nan, no kaikki extract). epitran nan-Latn-tl IS the Tâi-lô→IPA source the converter's
+// initial/final/tone tables were derived from — so wiring it as a referee would be circular (it IS the spec).
+// The committed anchor is the hand-adjudicated gold in test/minnan.test.ts (validated 400/400 vs epitran during
+// the espeak-ng-portable bring-up).
+{
+    "language": "nan",
+    "name": "Min Nan (Taiwanese Hokkien)",
+    "script": "Latin (Tâi-lô/POJ) + Han",
+    "provenance": "Tâi-lô→IPA converter from the epitran nan-Latn-tl spec + Han→Tâi-lô dict (MOE 臺灣閩南語辭典).",
+    "referees": [],
+    "secondaryGap": "No independent HUMAN referee for Min Nan (no wikipron nan, no kaikki extract). epitran nan-Latn-tl is the Tâi-lô spec the converter derives from → circular, not wired. Anchor: the adjudicated gold in test/minnan.test.ts (segmental converter validated 400/400 vs epitran in the espeak-ng-portable bring-up). Tone SANDHI (連讀變調) is deferred — Phase 1 is citation tone.",
+    "folds": []
+}
