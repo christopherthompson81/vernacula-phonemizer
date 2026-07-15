@@ -2,8 +2,9 @@
  * Swedish (Central Standard) grapheme→phoneme engine. Latin, largely rule-governed. Handles the sje-sound ɧ
  * (sj/skj/stj/sch, sk+front), the tje-sound ɕ (tj/kj, k+front), g→j before front vowels, retroflex assimilation
  * (rt/rd/rn/rs/rl → ʈ/ɖ/ɳ/ʂ/ɭ), word-initial silent digraphs (hj/lj/dj/gj → j), geminate consonants
- * (doubling → Cː + short vowel), and the complementary vowel-length rule on the STRESSED (first) syllable.
- * Stress + clause assembly are added downstream (swedish.ts). See docs/sv_bringup_investigation.md.
+ * (doubling → Cː + short vowel), and the complementary vowel-length rule on the stressed syllable. A `compound`
+ * (NST secondary stress) drives length from an NST-long ordinal set (boundary-safe) and fires softening at the
+ * secondary onset too. Stress + clause assembly are added downstream (swedish.ts). See docs/sv_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";
@@ -25,6 +26,15 @@ const RETRO_2ND = "tdnsl"; // r + one of these → a single retroflex consonant
 export interface Seg {
     ph: string;
     vowel: boolean;
+}
+
+/** Compound prosody from NST (secondary stress). secOrd = the secondary-stressed nucleus; longOrds = every NST-long
+ *  vowel ordinal. When present, compound length comes from NST (the coda rule is boundary-unaware — storkök's ⟨o⟩ is
+ *  long [stuːr] but the rule sees "rk" and shortens it) and consonant softening fires at the secondary onset too
+ *  (storkök k→ɕ). */
+export interface Compound {
+    secOrd: number;
+    longOrds: Set<number>;
 }
 
 /** Is the stressed vowel at index i LONG? Count coda consonant LETTERS to the next vowel/end, collapsing a
@@ -50,7 +60,12 @@ function stressedLong(w: string, i: number): boolean {
 /** Scan a lowercased Swedish word into IPA segments (no stress mark). `stressOrd` (0-based nucleus index) is the
  *  syllable that carries the complementary-length contrast — its vowel is long/short by the coda rule; every
  *  other (unstressed) vowel is short. Defaults to the first syllable (the native rule). */
-export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
+export function toSegments(
+    word: string,
+    stressOrd = 0,
+    oLong = false,
+    compound?: Compound,
+): Seg[] {
     const w = word.toLowerCase();
     const n = w.length;
     const segs: Seg[] = [];
@@ -66,6 +81,11 @@ export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
             nx2 = w[i + 2] ?? "";
         const three = w.slice(i, i + 3);
         const two = w.slice(i, i + 2);
+        // Consonant softening (k→ɕ, sk→ɧ, g→j, c→s) fires at a STRESSED-syllable onset: the first syllable, and —
+        // in a compound — the secondary-stressed element's onset (storkök k→ɕ). vowelOrd here = the ordinal of the
+        // upcoming vowel, so its onset is at vowelOrd === secOrd.
+        const softenOnset =
+            vowelOrd === 0 || (compound !== undefined && vowelOrd === compound.secOrd);
 
         // --- the -tion / -sion SUFFIX → ɧuːn. Gated to i>0 so a word-initial stem "tio…"/"sio…" (tionde) is
         //     not swallowed; the suffix is always preceded by its stem (na-tion, sta-tion, pen-sion). ---
@@ -80,8 +100,12 @@ export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
 
         // --- vowels ---
         if (isV(c)) {
-            const stressed = vowelOrd === stressOrd;
-            const long = stressed && stressedLong(w, i);
+            const isPrimary = vowelOrd === stressOrd;
+            // Length: for a compound, the NST-long ordinal set (boundary-safe, incl. an unstressed long vowel like
+            // arbetsplats' ⟨e⟩); for a simplex word, the complementary-length coda rule on the stressed syllable.
+            const long = compound
+                ? compound.longOrds.has(vowelOrd)
+                : isPrimary && stressedLong(w, i);
             const beforeR = nx === "r";
             let ph: string;
             if (long && oLong && c === "o") ph = "oː"; // lexical: stressed ⟨o⟩ is [oː], not the default [uː]
@@ -118,7 +142,7 @@ export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
         // --- sk before a front vowel in the STRESSED onset → ɧ (sk elsewhere → s + k) ---
         // Softening (sk/k/g/c) is a first-syllable-onset phenomenon and needs the front vowel IMMEDIATELY after,
         // else roots keep their hard consonant before front-vowel inflections (boken kk, dragen ɡ, akter k).
-        if (two === "sk" && vowelOrd === 0 && isFront(nx2)) {
+        if (two === "sk" && softenOnset && isFront(nx2)) {
             push("ɧ");
             i += 2;
             continue;
@@ -151,20 +175,20 @@ export function toSegments(word: string, stressOrd = 0, oLong = false): Seg[] {
 
         // --- context-dependent single consonants (softening: first-syllable onset, immediate front vowel) ---
         if (c === "k") {
-            push(vowelOrd === 0 && isFront(nx) ? "ɕ" : "k");
+            push(softenOnset && isFront(nx) ? "ɕ" : "k");
             i++;
             continue;
         }
         if (c === "g") {
             const prev = segs[segs.length - 1]?.ph ?? "";
-            if (vowelOrd === 0 && isFront(nx)) push("j"); // ge/gi/gy/gä/gö in the stressed onset → j
+            if (softenOnset && isFront(nx)) push("j"); // ge/gi/gy/gä/gö in the stressed onset → j
             else if (!isV(nx) && /[rlɭ]$/.test(prev)) push("j"); // berg/älg: r/l + g → j
             else push("ɡ");
             i++;
             continue;
         }
         if (c === "c") {
-            push(vowelOrd === 0 && isFront(nx) ? "s" : "k");
+            push(softenOnset && isFront(nx) ? "s" : "k");
             i++;
             continue;
         }

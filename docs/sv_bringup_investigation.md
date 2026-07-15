@@ -169,3 +169,41 @@ this matters beyond the referee point.
 STATUS: all of segmental + tonal accent + stress + o-quality + numbers are built and (accent now) independently
 validated. Remaining deferred item is compound decomposition (Run 6 — hard, fogemorfem-aware junctures needed) +
 minor tails (OOV loanword stress, short ɛ→æ before r).
+
+## Run 8 — 2026-07-14 — compound prosody via NST secondary stress (NOT a splitter)
+
+Re-attacked compound decomposition (the Run 6 deferral). First re-confirmed Run 6: a lexicon-wordlist splitter is
+net-negative. A fogemorfem-aware (linking-s) recursive splitter reached 24/25 on a labeled set BUT at scale split
+38% of words with terrible precision — inflected simplexes and loans parse into spurious words (bommar→bom+mar,
+klasser→klas+ser, kontrovers→kon+tro+vers, skorstenen→skor+stenen). Confirmed the splitter path is a dead end
+without a morphology/inflection model. Threw it away.
+
+PIVOT: **NST already marks secondary stress with `%`** — `storstad → ""stu:$%s\`t\`A:d`, `storkök → ""stu:r$%s'2:k`
+(NST even softens k→ɕ and lengthens the vowels at the element boundaries). 32.2% of the 42k corpus words carry a
+`%`. So compound prosody is available as HIGH-PRECISION LEXICON DATA — no splitter, no false positives. This is the
+same "take abstract features from NST, not its segments" principle the accent/stress/o-quality layers already use.
+
+The gap the current engine has on compounds is boundary-unaware: storstad→stˈɔ̀ʂtad — the first ⟨o⟩ is computed SHORT
+(coda "rst" counts ≥2) so it surfaces ɔ, but the element boundary stor|stad makes it an open syllable → long [uː]
+(stor→stuːr standalone). Vowel QUALITY is coupled to length in Swedish (long o = [uː]/[oː], short o = [ɔ]), and the
+BACKBONE keeps quality, so this is referee-visible AND a synthesis error. Plan: extract the secondary-stress ordinal
++ the LENGTH of the primary & secondary stressed nuclei from NST; the engine emits ˌ at the secondary nucleus,
+drives compound stressed-vowel length from NST (not the boundary-unaware coda rule), and fires consonant softening
+(k→ɕ, sk→ɧ, g→j) at the secondary onset too. Simplex words are unchanged (no `%` → rule as before).
+
+### 8a — Result: compound prosody shipped
+
+Implemented. build-sv-lexicon.mts now extracts, per corpus word, the secondary-stress ordinal (`s<N>`) + the set of
+NST-long vowel ordinals (`L<ords>`) — 13178 of 42052 words carry it. The engine (g2p.ts `Compound`) emits ˌ at the
+secondary nucleus, takes length from the NST-long set (boundary-safe — captures storkök's long stor-⟨o⟩ that the coda
+rule shortens, AND unstressed-but-long vowels like arbetsplats' ⟨e⟩), and fires consonant softening at the secondary
+onset (storkök k→ɕ). Simplex words (no `%`) are byte-identical to before.
+
+storstad stˈɔ̀ʂtad → **stˈùːʂtˌɑːd** (o→uː quality fixed, stad ˌɑː), storkök stˈɔ̀rkœk → **stˈùːrɕˌøːk** (k→ɕ + ö long),
+barnbok → bˈɑ̀ːɳbˌuːk. Referee **52.6% → 55.7%** (+3.1) — vowel QUALITY is backbone-visible (long o = uː/oː vs short
+ɔ), so the boundary-safe length shows up. Accent unchanged 96.6%. Residual divergence classes are the SAME referee
+noise as before (de/fan/inte casual forms) — no new compound-error class. Full suite 260/260 + 5 compound goldens.
+
+This closes the last sv subsystem gap. The splitter dead-end (Run 6, Run 8 head) is avoided entirely by using NST's
+own secondary-stress marks — high precision, zero false positives. Remaining tail is OOV compounds (outside the 42k
+corpus → first-syllable stress, no secondary) + the minor folded items (short ɛ→æ before r).
