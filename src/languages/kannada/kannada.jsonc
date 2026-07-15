@@ -1,0 +1,60 @@
+// Native canonical-IPA definition for Kannada (kn) — a Dravidian Brahmic abugida read by the generic engine
+// (core/abugida.ts), mirroring Telugu. Like Telugu (and unlike Hindi) Kannada does NOT delete the inherent vowel
+// — every akshara is pronounced (inherent /a/, [ɐ] phonetically — the referee writes ɐ, folded). Dravidian
+// short/long e,o are distinguished (ಎ e / ಏ eː, ಒ o / ಓ oː). Retroflex ʈ ɖ ɳ ɭ (ಟ ಡ ಣ ಳ) vs dental t̪ d̪ (ತ ದ),
+// ಷ→ʂ, the archaic ೞ→ɻ / ಱ→r. Validated against wikipron kan + kaikki kan + epitran kan-Knda.
+{
+    "language": "kn",
+    "name": "Kannada",
+    "script": "Kannada",
+    "provenance": "Authored from the Unicode Kannada chart + standard Kannada phonology. This file IS the language data — the generic abugida engine reads it directly.",
+
+    "inherentVowel": "a",
+
+    "consonants": {
+        "ಕ": { "ipa": "k" }, "ಖ": { "ipa": "kʰ" }, "ಗ": { "ipa": "ɡ" }, "ಘ": { "ipa": "ɡʱ" }, "ಙ": { "ipa": "ŋ" },
+        "ಚ": { "ipa": "t͡ʃ" }, "ಛ": { "ipa": "t͡ʃʰ" }, "ಜ": { "ipa": "d͡ʒ" }, "ಝ": { "ipa": "d͡ʒʱ" }, "ಞ": { "ipa": "ɲ" },
+        "ಟ": { "ipa": "ʈ" }, "ಠ": { "ipa": "ʈʰ" }, "ಡ": { "ipa": "ɖ" }, "ಢ": { "ipa": "ɖʱ" }, "ಣ": { "ipa": "ɳ" },
+        "ತ": { "ipa": "t̪", "note": "DENTAL (vs retroflex ಟ=ʈ)" }, "ಥ": { "ipa": "t̪ʰ" }, "ದ": { "ipa": "d̪" }, "ಧ": { "ipa": "d̪ʱ" }, "ನ": { "ipa": "n" },
+        "ಪ": { "ipa": "p" }, "ಫ": { "ipa": "pʰ" }, "ಬ": { "ipa": "b" }, "ಭ": { "ipa": "bʱ" }, "ಮ": { "ipa": "m" },
+        "ಯ": { "ipa": "j" }, "ರ": { "ipa": "ɾ" }, "ಱ": { "ipa": "r", "note": "archaic alveolar trill" }, "ಲ": { "ipa": "l" }, "ವ": { "ipa": "ʋ" },
+        "ಶ": { "ipa": "ʃ" }, "ಷ": { "ipa": "ʂ" }, "ಸ": { "ipa": "s" }, "ಹ": { "ipa": "h" },
+        "ಳ": { "ipa": "ɭ", "note": "retroflex lateral" }, "ೞ": { "ipa": "ɻ", "note": "archaic retroflex approximant" }
+    },
+
+    "independentVowels": {
+        "ಅ": { "ipa": "a", "note": "short a (inherent; [ɐ])" },
+        "ಆ": { "ipa": "aː", "note": "long a" },
+        "ಇ": { "ipa": "i" }, "ಈ": { "ipa": "iː" }, "ಉ": { "ipa": "u" }, "ಊ": { "ipa": "uː" },
+        "ಋ": { "ipa": "ɾu", "note": "vocalic r" }, "ೠ": { "ipa": "ɾuː" },
+        "ಎ": { "ipa": "e", "note": "SHORT e (Dravidian)" }, "ಏ": { "ipa": "eː", "note": "long e" }, "ಐ": { "ipa": "ai" },
+        "ಒ": { "ipa": "o", "note": "SHORT o (Dravidian)" }, "ಓ": { "ipa": "oː", "note": "long o" }, "ಔ": { "ipa": "au" }
+    },
+
+    "vowelSigns": {
+        "ಾ": { "ipa": "aː" }, "ಿ": { "ipa": "i" }, "ೀ": { "ipa": "iː" }, "ು": { "ipa": "u" }, "ೂ": { "ipa": "uː" },
+        "ೃ": { "ipa": "ɾu" }, "ೄ": { "ipa": "ɾuː" }, "ೆ": { "ipa": "e" }, "ೇ": { "ipa": "eː" }, "ೈ": { "ipa": "ai" },
+        "ೊ": { "ipa": "o" }, "ೋ": { "ipa": "oː" }, "ೌ": { "ipa": "au" }
+    },
+
+    "signs": {
+        "virama": { "char": "್", "effect": "suppressInherentVowel", "note": "vowel suppression / clusters" },
+        "anusvara": { "char": "ಂ", "effect": "nasalizeVowel", "note": "→ homorganic nasal (aŋk); final → [m]" },
+        "chandrabindu": { "char": "ಁ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel" },
+        "visarga": { "char": "ಃ", "effect": "appendH", "note": "→ [h]" },
+        "nukta": { "char": "಼", "effect": "composeNukta", "note": "nukta (rare)" }
+    },
+
+    "clausePunctuation": {
+        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Kannada spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes
+    // (Indic lakh/crore); 21-99 compound spellings are a bounded remaining task.
+    "numbers": {
+        "units": ["ಸೊನ್ನೆ", "ಒಂದು", "ಎರಡು", "ಮೂರು", "ನಾಲ್ಕು", "ಐದು", "ಆರು", "ಏಳು", "ಎಂಟು", "ಒಂಬತ್ತು"],
+        "teens": ["ಹತ್ತು", "ಹನ್ನೊಂದು", "ಹನ್ನೆರಡು", "ಹದಿಮೂರು", "ಹದಿನಾಲ್ಕು", "ಹದಿನೈದು", "ಹದಿನಾರು", "ಹದಿನೇಳು", "ಹದಿನೆಂಟು", "ಹತ್ತೊಂಬತ್ತು"],
+        "tens": { "20": "ಇಪ್ಪತ್ತು", "30": "ಮೂವತ್ತು", "40": "ನಲವತ್ತು", "50": "ಐವತ್ತು", "60": "ಅರವತ್ತು", "70": "ಎಪ್ಪತ್ತು", "80": "ಎಂಬತ್ತು", "90": "ತೊಂಬತ್ತು" },
+        "magnitudes": { "hundred": "ನೂರು", "thousand": "ಸಾವಿರ", "lakh": "ಲಕ್ಷ", "crore": "ಕೋಟಿ" }
+    }
+}

@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **41 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **42 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,9 +21,9 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-41 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+42 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
-Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
+Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
 | Family / area | Languages |
 |---|---|
@@ -31,7 +31,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kan
 | Austronesian | • Indonesian `id` 🟡,<br>• Javanese `jv` 🟡,<br>• Tagalog `tl` 🟡 |
 | Celtic | • Irish `ga`,<br>• Welsh `cy` |
 | Creole (English-lexified) | • Nigerian Pidgin `pcm` 🟡 |
-| Dravidian | • Tamil `ta`,<br>• Telugu `te` |
+| Dravidian | • Kannada `kn`,<br>• Tamil `ta`,<br>• Telugu `te` |
 | Germanic | • English `en`,<br>• German `de`,<br>• Swedish `sv` |
 | Indo-Aryan | • Bengali `bn` 🟡,<br>• Gujarati `gu` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
 | Japonic | • Japanese `ja` |
@@ -45,7 +45,7 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Tamil, Sinhala, Arabic, Han, Kan
 | Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (29) · 🟡 reliable + a documented lexical tail (9: Bengali, Gujarati, Indonesian, Javanese,
+✅ reliable / referee-limited (30) · 🟡 reliable + a documented lexical tail (9: Bengali, Gujarati, Indonesian, Javanese,
 Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (3: Urdu, Persian, Pashto) ·
 🔵 in active development.
 

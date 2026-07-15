@@ -1,0 +1,16 @@
+// Kannada (kn) — Dravidian Brahmic abugida (mirrors Telugu). wikipron kan (human) PRIMARY + kaikki kan (human)
+// SECONDARY. Folds: the inherent short /a/ = [ɐ]~[a] (the referee writes ɐ), length (non-phonemic in the
+// backbone), alveolo-palatal notation, tap ɾ, ʂ~ʃ retroflex-sibilant, and degemination.
+{
+    "referees": [
+        { "file": "kn.wikipron-kan-broad.tsv", "source": "wikipron kan_knda broad (human)", "role": "primary" },
+        { "file": "kn.kaikki-kan.tsv", "source": "kaikki kan (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "(?:t|tʃ)tʃ", "replace": "tʃ", "note": "geminate affricate NOTATION: our length t͡ʃː vs the referee's doubled t͡ʃt͡ʃ" },
+        { "pattern": "(?:d|dʒ)dʒ", "replace": "dʒ", "note": "geminate affricate notation (voiced)" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "geminate NOTATION: our length Cː (backbone-stripped) vs the referee's DOUBLED consonant (ಕ್ಕ → referee kk, ours kː)" },
+        { "pattern": "[aɑə]", "replace": "ɐ", "note": "the /a/ vowel = [ɐ]~[a]~[ɑ] — the referee's short-a notation varies (ɐ native, ɑ in Sanskrit loans)" }
+    ]
+}
