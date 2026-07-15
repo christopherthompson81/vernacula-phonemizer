@@ -867,6 +867,23 @@ export const CONFIG: Record<string, RefLang> = {
             ],
         ],
     },
+    te: {
+        // Telugu (Dravidian abugida) — generic engine + a Telugu data file, NO inherent-vowel deletion. wikipron
+        // tel is a broad HUMAN referee. Folds: the alveolo-palatal notation (ɕ/t͡ɕ/d͡ʑ = our ʃ/t͡ʃ/d͡ʒ), tap ɾ,
+        // degemination. The anusvara vowel-nasalization is already stripped by the backbone.
+        referees: [
+            { file: "te.wikipron-tel-broad.tsv", source: "wikipron tel_telu broad (human)", role: "primary" },
+            { file: "te.gold-adjudicated.tsv", source: "adjudicated common-word gold (our convention)", role: "secondary" },
+        ],
+        segmentJoin: true,
+        folds: [
+            [/ɾ/gu, "r", "tap ɾ vs referee r — notation"],
+            [/t͡?ɕ/gu, "t͡ʃ", "t͡ɕ (referee) = t͡ʃ (ours చ) — notation"],
+            [/d͡?ʑ/gu, "d͡ʒ", "d͡ʑ (referee) = d͡ʒ (ours జ) — notation"],
+            [/ɕ/gu, "ʃ", "ɕ (referee) = ʃ (ours శ) — notation"],
+            [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
+        ],
+    },
     th: {
         // Tones are Chao on both sides (stripped by the backbone), so this is a pure segmental check. The residual
         // is LEXICAL (Sanskrit/Pali readings), not a segment-inventory gap — see the th convergence note.

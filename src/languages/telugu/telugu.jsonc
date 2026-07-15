@@ -1,0 +1,107 @@
+// Native canonical-IPA definition for Telugu (te) — a Dravidian Brahmic abugida read by the generic engine
+// (core/abugida.ts). Unlike Hindi, Telugu does NOT delete the inherent vowel — every akshara is pronounced
+// (inherent /a/; అంకము → aŋkamu). Dravidian short/long e,o are distinguished (ఎ e / ఏ eː, ఒ o / ఓ oː). Telugu
+// also has the DENTAL affricates ౘ [t͡s] ౙ [d͡z] alongside the palatal చ [t͡ʃ] జ [d͡ʒ], retroflex ళ [ɭ], and ఱ [r].
+{
+    "language": "te",
+    "name": "Telugu",
+    "script": "Telugu",
+    "provenance": "Authored from the Unicode Telugu chart + standard Telugu phonology. This file IS the language data — the native G2P engine reads it directly.",
+
+    "inherentVowel": "a",
+
+    "consonants": {
+        "క": { "ipa": "k", "note": "velar voiceless" },
+        "ఖ": { "ipa": "kʰ", "note": "velar voiceless aspirated" },
+        "గ": { "ipa": "ɡ", "note": "velar voiced" },
+        "ఘ": { "ipa": "ɡʱ", "note": "velar voiced breathy" },
+        "ఙ": { "ipa": "ŋ", "note": "velar nasal" },
+        "చ": { "ipa": "t͡ʃ", "note": "palatal affricate voiceless (referee t͡ɕ)" },
+        "ఛ": { "ipa": "t͡ʃʰ", "note": "palatal affricate voiceless aspirated" },
+        "జ": { "ipa": "d͡ʒ", "note": "palatal affricate voiced" },
+        "ఝ": { "ipa": "d͡ʒʱ", "note": "palatal affricate voiced breathy" },
+        "ఞ": { "ipa": "ɲ", "note": "palatal nasal" },
+        "ౘ": { "ipa": "t͡s", "note": "DENTAL affricate voiceless (Telugu-specific)" },
+        "ౙ": { "ipa": "d͡z", "note": "DENTAL affricate voiced (Telugu-specific)" },
+        "ట": { "ipa": "ʈ", "note": "retroflex voiceless" },
+        "ఠ": { "ipa": "ʈʰ", "note": "retroflex voiceless aspirated" },
+        "డ": { "ipa": "ɖ", "note": "retroflex voiced" },
+        "ఢ": { "ipa": "ɖʱ", "note": "retroflex voiced breathy" },
+        "ణ": { "ipa": "ɳ", "note": "retroflex nasal" },
+        "త": { "ipa": "t̪", "note": "dental voiceless" },
+        "థ": { "ipa": "t̪ʰ", "note": "dental voiceless aspirated" },
+        "ద": { "ipa": "d̪", "note": "dental voiced" },
+        "ధ": { "ipa": "d̪ʱ", "note": "dental voiced breathy" },
+        "న": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "ప": { "ipa": "p", "note": "labial voiceless" },
+        "ఫ": { "ipa": "pʰ", "note": "labial voiceless aspirated" },
+        "బ": { "ipa": "b", "note": "labial voiced" },
+        "భ": { "ipa": "bʱ", "note": "labial voiced breathy" },
+        "మ": { "ipa": "m", "note": "labial nasal" },
+        "య": { "ipa": "j", "note": "palatal approximant" },
+        "ర": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ల": { "ipa": "l", "note": "alveolar lateral" },
+        "వ": { "ipa": "ʋ", "note": "labiodental approximant" },
+        "ళ": { "ipa": "ɭ", "note": "retroflex lateral" },
+        "ఴ": { "ipa": "ɻ", "note": "retroflex approximant (archaic)" },
+        "ఱ": { "ipa": "r", "note": "alveolar trill/tap (archaic ṟa)" },
+        "శ": { "ipa": "ʃ", "note": "palatal sibilant (referee ɕ)" },
+        "ష": { "ipa": "ʂ", "note": "retroflex sibilant" },
+        "స": { "ipa": "s", "note": "alveolar sibilant" },
+        "హ": { "ipa": "h", "note": "voiceless glottal fricative (referee [h])" }
+    },
+
+    "independentVowels": {
+        "అ": { "ipa": "a", "note": "short a (inherent)" },
+        "ఆ": { "ipa": "aː", "note": "long a" },
+        "ఇ": { "ipa": "i", "note": "short i" },
+        "ఈ": { "ipa": "iː", "note": "long i" },
+        "ఉ": { "ipa": "u", "note": "short u" },
+        "ఊ": { "ipa": "uː", "note": "long u" },
+        "ఋ": { "ipa": "ɾu", "note": "vocalic r → [ɾu]" },
+        "ౠ": { "ipa": "ɾuː", "note": "long vocalic r" },
+        "ఎ": { "ipa": "e", "note": "SHORT e (Dravidian)" },
+        "ఏ": { "ipa": "eː", "note": "long e" },
+        "ఐ": { "ipa": "ai", "note": "diphthong" },
+        "ఒ": { "ipa": "o", "note": "SHORT o (Dravidian)" },
+        "ఓ": { "ipa": "oː", "note": "long o" },
+        "ఔ": { "ipa": "au", "note": "diphthong" }
+    },
+
+    "vowelSigns": {
+        "ా": { "ipa": "aː" },
+        "ి": { "ipa": "i" },
+        "ీ": { "ipa": "iː" },
+        "ు": { "ipa": "u" },
+        "ూ": { "ipa": "uː" },
+        "ృ": { "ipa": "ɾu" },
+        "ౄ": { "ipa": "ɾuː" },
+        "ె": { "ipa": "e" },
+        "ే": { "ipa": "eː" },
+        "ై": { "ipa": "ai" },
+        "ొ": { "ipa": "o" },
+        "ో": { "ipa": "oː" },
+        "ౌ": { "ipa": "au" }
+    },
+
+    "signs": {
+        "virama": { "char": "్", "effect": "suppressInherentVowel", "note": "pollu — vowel suppression / clusters" },
+        "anusvara": { "char": "ం", "effect": "nasalizeVowel", "note": "sunna → homorganic nasal (aŋk / final am̃)" },
+        "chandrabindu": { "char": "ఁ", "effect": "nasalizeVowel", "note": "arasunna → nasalizes the preceding vowel" },
+        "visarga": { "char": "ః", "effect": "appendH", "note": "→ [h]" },
+        "nukta": { "char": "఼", "effect": "composeNukta", "note": "nukta (rare)" }
+    },
+
+    "clausePunctuation": {
+        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Telugu spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes
+    // (21-99 partly irregular; a bounded authoring task).
+    "numbers": {
+        "units": ["సున్నా", "ఒకటి", "రెండు", "మూడు", "నాలుగు", "అయిదు", "ఆరు", "ఏడు", "ఎనిమిది", "తొమ్మిది"],
+        "teens": ["పది", "పదకొండు", "పన్నెండు", "పదమూడు", "పద్నాలుగు", "పదిహేను", "పదహారు", "పదిహేడు", "పద్దెనిమిది", "పంతొమ్మిది"],
+        "tens": { "20": "ఇరవై", "30": "ముప్పై", "40": "నలభై", "50": "యాభై", "60": "అరవై", "70": "డెబ్బై", "80": "ఎనభై", "90": "తొంభై" },
+        "magnitudes": { "hundred": "వంద", "thousand": "వెయ్యి", "lakh": "లక్ష", "crore": "కోటి" }
+    }
+}
