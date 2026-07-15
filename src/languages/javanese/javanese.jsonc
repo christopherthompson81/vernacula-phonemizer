@@ -1,0 +1,49 @@
+// Native canonical-IPA definition for Javanese / Basa Jawa (jv) — Austronesian, Latin script. javanese.ts reads
+// this file. Ported from the espeak-ng-portable authored bring-up (authoring/jv). The signature features: the
+// ⟨a⟩→[ɔ] rule (open final syllable + regressive open-penult harmony: apa→ɔpɔ, sanga→sɔŋɔ), the DENTAL vs
+// RETROFLEX stop contrast (⟨t d⟩→t̪ d̪ vs ⟨th dh⟩→ʈ ɖ, NOT aspiration — Indonesian lacks this), closed-syllable
+// laxing (i→ɪ u→ʊ o→ɔ), word-final ⟨k⟩→ʔ. The "voiced" stops are phonetically breathy/slack-voiced (light vs
+// heavy register) — rendered PLAIN voiced (register deferred, folded vs epitran). Tone: none. See
+// docs/jv_native_bringup_investigation.md.
+{
+    "language": "jv",
+    "name": "Javanese",
+    "script": "Latin",
+    "provenance": "Ported from the espeak-ng-portable authored jv bring-up (Wikipedia Javanese-phonology + standard references). Validated against kaikki jav (human) + epitran jav-Latn.",
+
+    // Multi-letter graphemes (longest-first): retroflex th/dh, palatal/velar nasals ny/ng.
+    "digraphs": { "th": "ʈ", "dh": "ɖ", "ny": "ɲ", "ng": "ŋ" },
+
+    // Single consonant letters → IPA. ⟨t d⟩ are DENTAL (t̪ d̪); ⟨c j⟩ affricates; loan f/v/z/q/x nativised.
+    "consonants": {
+        "p": "p", "b": "b", "t": "t̪", "d": "d̪", "k": "k", "g": "ɡ",
+        "c": "t͡ʃ", "j": "d͡ʒ", "m": "m", "n": "n", "s": "s", "h": "h",
+        "l": "l", "r": "r", "w": "w", "y": "j",
+        "f": "f", "v": "v", "z": "z", "q": "k", "x": "ks"
+    },
+
+    // Vowels. Bare ⟨e⟩ defaults to the pepet /ə/ (most frequent); the taling diacritics disambiguate é→e, è→ɛ; ê→ə
+    // (explicit pepet). Standard orthography writes /ə/, /e/, /ɛ/ ALL as bare ⟨e⟩ — an unmarked taling word reads
+    // with ə (a documented ambiguity, folded vs the referee). ⟨a⟩/⟨i⟩/⟨u⟩/⟨o⟩ take the contextual rules in the g2p.
+    "vowels": {
+        "a": "a", "i": "i", "u": "u", "o": "o",
+        "e": "ə", "é": "e", "è": "ɛ", "ê": "ə"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — the standard NGOKO system (irregular): teens -welas/-las, 21–29 -likur (25 = selawé, suppletive),
+    // 50/60 = seket/sewidak, combining multipliers rong/telung/… before puluh/atus/ewu/yuta (1 fuses: satus/sewu).
+    // Spellings are read back through the same g2p (so a→ɔ / laxing fall out); selawé carries é for /e/.
+    "numbers": {
+        "units": ["nol", "siji", "loro", "telu", "papat", "lima", "nem", "pitu", "wolu", "sanga"],
+        "teens": ["sepuluh", "sewelas", "rolas", "telulas", "patbelas", "limalas", "nembelas", "pitulas", "wolulas", "sangalas"],
+        "likur": ["", "selikur", "rolikur", "telulikur", "patlikur", "selawé", "nemlikur", "pitulikur", "wolulikur", "sangalikur"],
+        "mult": ["", "", "rong", "telung", "patang", "limang", "nem", "pitung", "wolung", "sangang"],
+        "tens": { "2": "rong puluh", "3": "telung puluh", "4": "patang puluh", "5": "seket", "6": "sewidak", "7": "pitung puluh", "8": "wolung puluh", "9": "sangang puluh" },
+        "magnitudes": { "thousand": ["sewu", "ewu"], "million": ["sayuta", "yuta"], "billion": ["semilyar", "milyar"] },
+        "hundredOne": "satus", "hundred": "atus"
+    }
+}

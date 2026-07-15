@@ -1,0 +1,20 @@
+// Javanese / Basa Jawa (jv) — Austronesian, Latin script. kaikki jav (Wiktionary, human) is the PRIMARY referee
+// and marks the signature features: the ⟨a⟩→[ɔ] rule (mata→mɔtɔ, gawa→ɡɔwɔ), dental t̪/d̪ (bantu→bant̪u), pepet ə.
+// The folds neutralise (a) referee-inconsistent dental notation (t̪/d̪ written plain), (b) the ⟨e⟩ pepet/taling
+// ambiguity (bare ⟨e⟩ = /ə/~/e/~/ɛ/, unrecoverable without diacritics), (c) closed-syllable laxing (referee-
+// erratic, as for Indonesian), (d) syllabic/notation marks. epitran jav-Latn exists but is map-only (no a→ɔ, no
+// laxing) → too crude to grade the contextual rules; not wired as a second source.
+{
+    "referees": [
+        { "file": "jv.kaikki-jav.tsv", "source": "kaikki jav (Wiktionary, human)", "role": "primary" }
+    ],
+    "secondaryGap": "No independent SECOND source: no wikipron jav (404); epitran jav-Latn is a flat segment map (no a→ɔ rule, no closed-syllable laxing, no stress) — too crude to corroborate the contextual rules that define Javanese, so it is not wired. kaikki jav is the human primary.",
+    "folds": [
+        { "pattern": "t̪", "replace": "t", "note": "dental ⟨t⟩ — referee marks it inconsistently (bantu→t̪ yet tun→t)" },
+        { "pattern": "d̪", "replace": "d", "note": "dental ⟨d⟩ — referee-inconsistent notation" },
+        { "pattern": "ɪ", "replace": "i", "note": "closed-syllable i-laxing — referee-erratic allophony (as Indonesian)" },
+        { "pattern": "ʊ", "replace": "u", "note": "closed-syllable u-laxing — referee-erratic allophony" },
+        { "pattern": "[əɛe]", "replace": "e", "note": "bare ⟨e⟩ = /ə/ (pepet) vs /e/~/ɛ/ (taling) — orthographically merged, unrecoverable without diacritics" },
+        { "pattern": "k̚", "replace": "k", "note": "unreleased final stop k̚ (referee) = k — notation" }
+    ]
+}

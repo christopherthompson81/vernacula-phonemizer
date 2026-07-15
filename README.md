@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **37 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **38 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,14 +21,14 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-37 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+38 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
 
 | Family / area | Languages |
 |---|---|
 | Austroasiatic | • Vietnamese `vi` (tonal) |
-| Austronesian | • Indonesian `id` 🟡,<br>• Tagalog `tl` 🟡 |
+| Austronesian | • Indonesian `id` 🟡,<br>• Javanese `jv` 🟡,<br>• Tagalog `tl` 🟡 |
 | Celtic | • Irish `ga`,<br>• Welsh `cy` |
 | Creole (English-lexified) | • Nigerian Pidgin `pcm` 🟡 |
 | Dravidian | • Tamil `ta`,<br>• Telugu `te` |
@@ -45,7 +45,7 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (7: Bengali, Indonesian,
+✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (8: Bengali, Indonesian, Javanese,
 Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
 🔵 in active development.
 

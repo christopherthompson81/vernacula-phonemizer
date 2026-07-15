@@ -39,6 +39,7 @@ import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
 import { createWu } from "./languages/wu/wu.ts";
+import { createJavanese } from "./languages/javanese/javanese.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -137,6 +138,8 @@ function build(lang: string): Phonemizer {
         // Embedded Latin in Wu text routes to the English phonemizer (lazy — loaded only if it appears).
         case "wuu":
             return createWu((latin) => getPhonemizer("en").text(latin));
+        case "jv":
+            return createJavanese();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
