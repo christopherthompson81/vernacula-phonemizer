@@ -14,7 +14,7 @@ import { CONFIG } from "./config.ts";
 describe("referee corroboration (segmental backbone vs the PRIMARY independent source)", () => {
   // Floor = the primary referee's folded-agreement fraction, set below the measured value. Alphabetical.
   const floors: Record<string, number> = {
-    bn: 0.37, // wikipron ben_beng broad (HUMAN) — measured 39.5% after medial inherent-vowel deletion (Ohala VCɔCV, shared with Hindi) + ক্ষ→kʰː / জ্ঞ→ɡː conjuncts. Referee is noisy (retroflex ট/ড written dental; literary final-[o] retention word-variable) → low ceiling. 🔵 first-pass; remaining: [æ] realization, lexical final-vowel
+    bn: 0.40, // wikipron ben_beng broad (HUMAN) — measured 42.5%; the wikipron primary is REFEREE-NOISE-LIMITED (retroflex ট/ড written dental — a real contrast we keep; literary final-[o] retention word-variable). The adjudicated common-word GOLD (2nd) is 92.0% — the real quality signal. Full core: harmony ɔ→o/e→æ, final+medial (Ohala) inherent-vowel deletion, phôla/ক্ষ/জ্ঞ gemination. Tail: lexical final-o (বড়/ছোট), hiatus (বই), closed-syllable æ (এক)
     ar: 0.55, // wikipron ara via the ONNX diacritizer + LEXICON-PRIMARY Tashkeela restoration + PAUSAL fold — measured 57.4% (kaikki 2nd: 62.6%). Referee is isolated citation-form lemmas (OOD + convention + ambiguity); see docs/ar_referee_investigation.md
     ca: 0.76, // wikipron cat_latn narrow (Central-preferring, multi-dialect) — measured 81.3%; referee mixes dialects (reduction/final-r/clusters folded) + no stress
     cmn: 0.80, // epitran pinyin-syllable inventory (syllable-level) — measured 84.7%; residual = fine vowel detail

@@ -51,9 +51,12 @@ export const CONFIG: Record<string, RefLang> = {
                 source: "wikipron ben_beng broad (human)",
                 role: "primary",
             },
+            {
+                file: "bn.gold-adjudicated.tsv",
+                source: "adjudicated common-word gold (our convention)",
+                role: "secondary",
+            },
         ],
-        secondaryGap:
-            "epitran ben-Beng is phonologically CRUDE (no vowel harmony, no final-inherent-vowel deletion — it renders both করি as kɔri and জল as d͡ʒɔlɔ), so its raw agreement UNDERSTATES correctness and it is not wired as a scored referee. The wikipron ben referee itself is noisy (retroflex ট/ড often written dental t/d, and the literary final-[o] retention varies word-by-word) → a low ceiling (~62% even for a mature engine, per the sibling espeak-parity project).",
         segmentJoin: true,
         folds: [
             [/[ɾɹ]/gu, "r", "tap ɾ (ours) / approximant ɹ (referee) vs plain r — notation"],
@@ -63,6 +66,9 @@ export const CONFIG: Record<string, RefLang> = {
             [/t͡?ɕ/gu, "t͡ʃ", "t͡ɕ (referee) = t͡ʃ (ours) — notation"],
             [/ɕ/gu, "ʃ", "ɕ (referee) = ʃ (ours) — notation"],
             [/ʑ/gu, "ʒ", "ʑ (referee) = ʒ (ours) — notation"],
+            // Front-mid vowel [e]~[ɛ]~[æ]: the allophonic lowering of এ before [a] (দেখা→dækʰa), which the
+            // referee notates inconsistently (লেখা appears as lekʰa AND lækʰa AND lɛkʰa). Fold to [e] for the backbone.
+            [/[æɛ]/gu, "e", "front-mid [e]~[ɛ]~[æ] — referee-inconsistent allophony"],
             [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
         ],
     },

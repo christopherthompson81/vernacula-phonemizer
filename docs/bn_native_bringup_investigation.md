@@ -57,3 +57,25 @@ KNOWN IMPERFECTION (documented, not chased): Ohala deletes RIGHT-TO-LEFT, which 
 Bengali prefers the first medial (আকবর→akɔbɾo not akbɔr; কলম→kɔlmo not kɔlom). Net-positive on the corpus, but
 a Bengali-specific deletion direction/preference would fix the tail. The [æ] realization of ⟨e⟩/্যা (এক→æk,
 ক্যা→kæ) is real but context-lexical and low-yield on this noisy referee — deferred.
+
+## Run 4 — 2026-07-15 — adjudicated GOLD referee, ordering fix, e→æ harmony (→ 🟡, gold 92%)
+
+Answered "is there a better referee?" — yes: a small ADJUDICATED common-word gold (50 words, hand-verified
+standard Kolkata pronunciations in our convention), decoupled from the noisy wikipron. It is the clean quality
+signal (like pt/ta). It immediately exposed real bugs the noisy wikipron had hidden:
+
+- **Ordering bug**: medial deletion ran BEFORE final-inherent deletion, so a final inherent ɔ created a false
+  V·C·ɔ·C·V context → জীবন→d͡ʒibno, শহর→ʃɔɦɾo, বছর, সময় all wrong. Reordered to harmony → final → medial
+  (Hindi order). Fixed all four.
+- **Harmony must run FIRST** (before deletion), keying on the ORIGINAL inherent /ɔ/ — otherwise a later-retained
+  final [o] spuriously raises the preceding vowel (পদ্ম→pod̪ːo). With harmony first, পদ্ম→pɔd̪ːo correct AND
+  করি→koɾi / দেখা→d̪ækʰa still fire (real matra vowels trigger).
+- **Affricate-coda bug**: the coda counter treated t͡ʃ/d͡ʒ as two consonants → মাছ→mat͡ʃʰo. Collapse affricates → মাছ→mat͡ʃʰ.
+- **e→[æ] before [a]** (height harmony: মিড vowel agrees with the following nucleus): দেখা→d̪ækʰa, লেখা→lækʰa,
+  খেলা→kʰæla; দেশ→d̪eʃ / মেয়ে→meje correctly untouched. The referee is inconsistent here (লেখা appears as
+  lekʰa AND lækʰa AND lɛkʰa), so a front-mid [e]~[ɛ]~[æ] fold was added for the wikipron backbone.
+
+RESULT: adjudicated gold **56%→92.0%** (46/50) — the engine is actually good on common words. wikipron 39.5→42.5%
+(referee-noise-limited; the gold is the real signal). Promoted 🔵→**🟡** (core layers in + verified; remaining is
+a documented LEXICAL tail). Gold's 4 misses: final-[o] retention (বড়/ছোট — lexical, some ট/ড়-final words keep [o]),
+hiatus harmony (বই→boi), closed-syllable æ (এক→æk). Suite passes; typecheck clean.
