@@ -37,6 +37,7 @@ import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as mr } from "../../src/languages/marathi/marathi.ts";
 import { phonemizeWord as te } from "../../src/languages/telugu/telugu.ts";
 import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts";
+import { phonemizeWord as tl } from "../../src/languages/tagalog/tagalog.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
@@ -81,6 +82,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ta,
     te,
     th,
+    tl,
     tr,
     ur,
     vi,
