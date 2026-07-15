@@ -72,6 +72,27 @@ export const CONFIG: Record<string, RefLang> = {
             [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
         ],
     },
+    ur: {
+        // Urdu — Perso-Arabic abjad, Hindi phonology. wikipron urd is fully-voweled (HUMAN); our g2p produces
+        // the consonant + LONG-vowel skeleton with a default [ə] for the omitted short vowels (restoration is the
+        // deferred subsystem, 🟠). Fold the short-vowel QUALITY (ə~ɪ~ʊ) and the long/short axis so the eval
+        // measures the CONSONANT + long-vowel backbone we can actually derive, not the unrecoverable short vowels.
+        referees: [
+            {
+                file: "ur.wikipron-urd-broad.tsv",
+                source: "wikipron urd_arab broad (human)",
+                role: "primary",
+            },
+        ],
+        secondaryGap:
+            "short-vowel restoration is deferred (the abjad omits ə/ɪ/ʊ); no independent diacritized-Urdu source wired.",
+        segmentJoin: true,
+        folds: [
+            [/[ɪʊ]/gu, "ə", "short-vowel QUALITY ə~ɪ~ʊ — unrecoverable from the undiacritized skeleton"],
+            [/ɾ/gu, "r", "tap ɾ vs referee r — notation"],
+            [/ʋ/gu, "v", "ʋ~v — notation"],
+        ],
+    },
     ar: {
         // Evaluated through the ASYNC diacritized pipeline (phonemizeArabic): the ONNX pre-pass restores the short
         // vowels the script omits, so our output is comparable to the referee's fully-voweled IPA. (The sync
