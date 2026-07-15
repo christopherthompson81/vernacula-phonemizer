@@ -40,6 +40,7 @@ import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts
 import { phonemizeWord as tl } from "../../src/languages/tagalog/tagalog.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
+import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
@@ -75,6 +76,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     id,
     it,
     ja,
+    pcm,
     kk,
     ko,
     mr,

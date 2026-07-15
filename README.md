@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **35 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **36 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,8 +21,8 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-35 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
-Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian and Niger-Congo — across
+36 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hangul scripts.
 
 | Family / area | Languages |
@@ -34,6 +34,7 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Indo-Aryan | Bengali `bn` 🟡, Hindi `hi`, Marathi `mr` 🟡, Punjabi `pa` 🟡, Sinhala `si` (tonal), Urdu `ur` 🟠 |
 | Japonic / Koreanic | Japanese `ja`, Korean `ko` |
 | Niger-Congo | Fula `ff`, Hausa `ha`, Zulu `zu` |
+| Creole (English-lexified) | Nigerian Pidgin `pcm` 🟡 |
 | Romance | Catalan `ca`, Spanish `es`, French `fr`, Italian `it`, Portuguese `pt` |
 | Semitic / Iranian | Arabic `ar`, Persian `fa` 🟠 |
 | Slavic | Czech `cs`, Russian `ru` |
@@ -41,8 +42,9 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 | Turkic | Kazakh `kk`, Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (25) · 🟡 reliable + a documented lexical tail (Bengali, Indonesian) ·
-🟠 scope-limited, one subsystem deferred (Urdu — see below) · 🔵 in active development.
+✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (6: Bengali, Indonesian,
+Marathi, Punjabi, Tagalog, Nigerian Pidgin) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
+🔵 in active development.
 
 ## How it works
 
@@ -61,6 +63,8 @@ Four G2P paradigms, chosen per language by how its orthography relates to its ph
 - **Lexicon + statistical OOV** — where the orthography is irregular. English is a
   CMUdict-derived lexicon + a cleanroom joint n-gram OOV model + a POS perceptron for
   heteronyms; French is a Lexique-derived lexicon over a loi-de-position rule engine.
+  Nigerian Pidgin (an English-lexified creole in its media orthography) is a lexicon of
+  the irregular high-frequency words over a Naija-phonology rule g2p that nativises the rest.
 
 These sit on a small **shared core**: the abugida engine, quantity-sensitive weight
 stress, Ohala schwa/inherent-vowel deletion, an Indic number compositor, clause

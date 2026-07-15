@@ -37,6 +37,7 @@ import { createCantonese } from "./languages/cantonese/cantonese.ts";
 import { createTagalog } from "./languages/tagalog/tagalog.ts";
 import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
+import { createNaija } from "./languages/naija/naija.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -129,6 +130,9 @@ function build(lang: string): Phonemizer {
             return createPersian((latin) => getPhonemizer("en").text(latin));
         case "it":
             return createItalian();
+        // Embedded/code-switched English is available to Naija, but loans are nativised by the rule g2p (lazy).
+        case "pcm":
+            return createNaija((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

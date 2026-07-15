@@ -1,0 +1,81 @@
+// Native canonical-IPA definition for Nigerian Pidgin / Naija (pcm) — an English-lexified creole in the
+// English-etymological MEDIA orthography (BBC Pidgin / social media, the norm people actually read and write).
+// naija.ts reads this file. Two layers: (1) a LEXICON of high-frequency words whose media spelling is irregular
+// (English-etymological) or whose mid-vowel quality needs adjudication; (2) a Naija-phonology RULE g2p for
+// everything else — 7 vowels /i e ɛ a ɔ o u/, TH-stopping, NO schwa reduction, labial-velars ɡ͡b/k͡p, ɲ/ŋ.
+// Tone (H/L) is unmarked in the orthography → out of scope (segmental output). No independent referee exists
+// (no wikipron/epitran/kaikki pcm); the anchor is the adjudicated gold in test/naija.test.ts. Sources: Faraclas,
+// Nigerian Pidgin (Routledge 1996) + the Naija Languej Akademi orthography manual.
+{
+    "language": "pcm",
+    "name": "Nigerian Pidgin",
+    "script": "Latin",
+    "provenance": "Authored from Faraclas (1996) + NLA orthography. Media (English-etymological) orthography; segmental only (tone unmarked in spelling).",
+
+    // Multi-letter graphemes (longest-first), Naija values.
+    "digraphs": {
+        "gb": "ɡ͡b", "kp": "k͡p", "ch": "t͡ʃ", "sh": "ʃ", "ny": "ɲ",
+        "ng": "ŋ", "kw": "kw", "gw": "ɡw", "th": "t"
+    },
+
+    // Single consonant letters → Naija IPA. ⟨c⟩→k, ⟨q⟩→kw, ⟨x⟩→ks, ⟨j⟩→d͡ʒ, ⟨y⟩→j (glide), ⟨r⟩→ɾ (tap).
+    "consonants": {
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "r": "ɾ", "s": "s",
+        "t": "t", "v": "v", "w": "w", "z": "z",
+        "c": "k", "j": "d͡ʒ", "q": "k", "x": "ks", "y": "j"
+    },
+
+    // Vowels → IPA. Media ⟨e⟩/⟨o⟩ underspecify the 7-vowel /e/~/ɛ/, /o/~/ɔ/ openness (lexical); the DEFAULT here is
+    // close-mid /e/,/o/ — the frequent open-mid words live in the lexicon, and the OOV open/close tail is accepted.
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // High-frequency lexicon: media spelling → adjudicated Naija IPA (segmental, no tone). Covers the irregular
+    // (English-etymological) spellings and the frequent open-mid /ɛ//ɔ/ words the rule g2p's close-mid default misses.
+    "lexicon": {
+        "you": "ju", "yu": "ju", "i": "a", "me": "mi", "my": "ma",
+        "us": "ɔs", "our": "awa", "your": "jɔ",
+        "na": "na", "bi": "bi", "be": "bi", "dey": "dɛ", "de": "dɛ",
+        "di": "di", "dem": "dɛm", "den": "dɛn", "e": "i", "im": "im",
+        "am": "am", "una": "una", "wuna": "wuna", "we": "wi", "wey": "wɛ",
+        "wetin": "wɛtin", "wen": "wɛn", "wia": "wia", "weda": "wɛda",
+        "go": "ɡo", "don": "dɔn", "bin": "bin", "fit": "fit", "wan": "wan",
+        "won": "wɔn", "make": "mek", "mek": "mek", "no": "no", "nor": "no",
+        "say": "se", "se": "se", "sef": "sɛf", "get": "ɡɛt", "gi": "ɡi",
+        "give": "ɡi", "tey": "te", "of": "ɔf", "for": "fɔ", "comot": "kɔmɔt",
+        "dis": "dis", "dat": "dat", "wit": "wit", "kain": "kain",
+        "kind": "kain", "how": "hau", "now": "nau", "sha": "ʃa", "abi": "abi",
+        "shebi": "ʃɛbi", "sebi": "ʃɛbi", "abeg": "abɛɡ", "biko": "biko",
+        "oya": "oja", "oga": "oɡa", "sotay": "sote", "sote": "sote",
+        "sabi": "sabi", "chop": "t͡ʃɔp", "waka": "waka", "tok": "tɔk",
+        "talk": "tɔk", "pipo": "pipo", "pipol": "pipo", "pesin": "pɛsin",
+        "person": "pɛsin", "bikos": "bikɔs", "becos": "bikɔs", "pikin": "pikin",
+        "wahala": "wahala", "palava": "palava", "gbege": "ɡ͡bɛɡɛ",
+        "gist": "ɡist", "yarn": "jaɾn", "vex": "vɛks", "craze": "kɾez",
+        "were": "wɛre", "werey": "wɛre", "mumu": "mumu", "japa": "d͡ʒapa",
+        "jare": "d͡ʒare", "oyibo": "ɔjibo", "oyinbo": "ɔjinbo",
+        "wowo": "wowo", "katakata": "katakata", "wayo": "wajo",
+        "omo": "omo", "notin": "nɔtin", "somtin": "sɔmtin", "haba": "haba",
+        "ehen": "ɛhɛn", "chai": "t͡ʃai", "jor": "d͡ʒɔ", "ba": "ba", "o": "o",
+        "come": "kɔm", "some": "sɔm", "do": "du", "to": "tu", "so": "so",
+        "one": "wan", "name": "nem", "take": "tek", "tek": "tek",
+        "time": "taim", "water": "wata", "road": "ɾod", "well": "wɛl",
+        "small": "smɔl", "smol": "smɔl", "why": "wai", "who": "hu",
+        "here": "hia", "there": "dia", "thing": "tin", "ting": "tin",
+        "big": "biɡ", "house": "haus", "money": "mɔni", "food": "fud",
+        "good": "ɡud", "work": "wɔk", "wok": "wɔk", "belle": "bɛlɛ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — nativised English (Naija counts with English numerals read in Naija phonology). Canonical IPA is
+    // given directly (the number words are themselves media-spelled loans the rule g2p would mis-vowel).
+    "numbers": {
+        "units": ["ziɾo", "wan", "tu", "tɾi", "fo", "faiv", "siks", "sɛvin", "et", "nain"],
+        "teens": ["ten", "ilɛvin", "twɛlv", "tatin", "fotin", "fiftin", "sikstin", "sɛvintin", "etin", "naintin"],
+        "tens": ["", "", "twɛnti", "tɔti", "foti", "fifti", "siksti", "sɛventi", "eti", "nainti"],
+        "hundred": "hɔndɛd", "thousand": "tauzin", "and": "an"
+    }
+}

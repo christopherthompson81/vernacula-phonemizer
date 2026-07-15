@@ -1,0 +1,15 @@
+// Nigerian Pidgin / Naija (pcm) — an English-lexified creole in the media (English-etymological) orthography.
+// GAP language: there is NO independent automated referee — no wikipron pcm, no epitran pcm-Latn, no kaikki
+// extract (all 404). The committed correctness anchor is the hand-adjudicated gold in test/naija.test.ts
+// (Faraclas 1996 + the Naija Languej Akademi orthography manual). Recorded here (not silently omitted) so the
+// gap is explicit; the referee-eval floor test skips pcm (no primary), the gap test asserts this documentation.
+{
+    "language": "pcm",
+    "name": "Nigerian Pidgin",
+    "script": "Latin",
+    "provenance": "Authored from Faraclas (1996) + NLA orthography.",
+    "referees": [],
+    "secondaryGap": "No independent referee exists for Nigerian Pidgin: wikipron pcm_latn, epitran pcm-Latn, and the kaikki extract are all 404. Naija tone is also unmarked in the media orthography (segmental output only). The correctness anchor is the adjudicated common-word gold in test/naija.test.ts, drawn from Faraclas, Nigerian Pidgin (Routledge 1996) and the Naija Languej Akademi orthography manual.",
+    "segmentJoin": true,
+    "folds": []
+}
