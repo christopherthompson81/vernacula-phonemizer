@@ -1,0 +1,108 @@
+/**
+ * Native Amharic / አማርኛ (am) text phonemizer — canonical IPA, espeak-independent. Ethiopian Semitic, written in
+ * the Ge'ez/Fidäl SYLLABARY-abugida: each codepoint is a whole CV syllable (the vowel is baked into the glyph),
+ * so the g2p is a flat lookup (fidel.tsv, one Ethiopic codepoint → its CV) rather than a Brahmic matra/virama
+ * engine. Two features are UNWRITTEN: GEMINATION (phonemic but unmarked — rendered single, folded vs the referee)
+ * and the 6th-order vowel [ɨ], which is epenthetic and DELETED word-finally (ሁለት→hulət) and before a vowel.
+ * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/am_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface NumbersDef {
+    units: string[];
+    ten: string;
+    teenPrefix: string;
+    tens: Record<string, string>;
+    hundred: string;
+    thousand: string;
+}
+interface AmharicDef {
+    clausePunctuation: Record<string, string>;
+    numbers: NumbersDef;
+}
+const DEF = loadManifest<AmharicDef>(import.meta.url, "amharic.jsonc");
+const CLAUSE_MARK = DEF.clausePunctuation;
+const NUM = DEF.numbers;
+
+let FIDEL: Map<string, string> | undefined;
+function fidel(): Map<string, string> {
+    return (FIDEL ??= loadTsvMap(import.meta.url, "fidel.tsv"));
+}
+
+const VOWEL = "əuiaeɨo";
+
+/** One Amharic word → canonical IPA: fidel→CV lookup + 6th-order ɨ deletion. */
+export function phonemizeWord(word: string): string {
+    // The Ethiopic wordspace ፡ (and any space) is a word boundary — phonemize each part independently.
+    if (/[፡\s]/u.test(word))
+        return word.split(/[፡\s]+/u).filter(Boolean).map(phonemizeWord).join(" ");
+    let out = "";
+    for (const ch of word.normalize("NFC")) out += fidel().get(ch) ?? "";
+    // The 6th-order [ɨ] (sadis) is epenthetic — it surfaces only to break a word-initial cluster, and is deleted
+    // elsewhere (ሆስፒታል→hospital, not hosɨpital). Heuristic: keep the FIRST ɨ only if it is the word's first vowel;
+    // delete every other ɨ.
+    let seenVowel = false;
+    out = out.replace(new RegExp(`[${VOWEL}]`, "gu"), (v) => {
+        if (v === "ɨ") {
+            if (seenVowel) return "";
+            seenVowel = true;
+            return v;
+        }
+        seenVowel = true;
+        return v;
+    });
+    return out.normalize("NFC");
+}
+
+// ── Numbers (decimal; Amharic) ────────────────────────────────────────────────
+function numberToText(n: number): string {
+    if (n < 0) return "";
+    if (n < 10) return NUM.units[n]!;
+    if (n === 10) return NUM.ten;
+    if (n < 20) return `${NUM.teenPrefix} ${NUM.units[n - 10]}`;
+    if (n < 100) {
+        const t = Math.floor(n / 10), u = n % 10;
+        return NUM.tens[String(t)]! + (u ? ` ${NUM.units[u]}` : "");
+    }
+    if (n < 1000) {
+        const h = Math.floor(n / 100), r = n % 100;
+        return `${h > 1 ? NUM.units[h] + " " : ""}${NUM.hundred}${r ? " " + numberToText(r) : ""}`;
+    }
+    if (n < 1_000_000) {
+        const th = Math.floor(n / 1000), r = n % 1000;
+        return `${th > 1 ? numberToText(th) + " " : ""}${NUM.thousand}${r ? " " + numberToText(r) : ""}`;
+    }
+    return String(n);
+}
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToText(n).split(" ").map(phonemizeWord).join(" ");
+}
+
+// Ethiopic letters (U+1200–U+135A, incl. combining marks) · Arabic digits · Ethiopic + ASCII punctuation.
+const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
+
+export type ForeignPhonemizer = (latin: string) => string;
+
+class AmharicPhonemizer implements Phonemizer {
+    constructor(private foreign?: ForeignPhonemizer) {}
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Amharic phonemizer. `foreign` handles embedded Latin runs. */
+export function createAmharic(foreign?: ForeignPhonemizer): Phonemizer {
+    return new AmharicPhonemizer(foreign);
+}
