@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **42 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **43 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,9 +21,9 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-42 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+43 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
-Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
+Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Geʽez, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
 | Family / area | Languages |
 |---|---|
@@ -38,14 +38,14 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic,
 | Koreanic | • Korean `ko` |
 | Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Swahili `sw`,<br>• Zulu `zu` |
 | Romance | • Catalan `ca`,<br>• French `fr`,<br>• Italian `it`,<br>• Portuguese `pt`,<br>• Spanish `es` |
-| Semitic / Iranian | • Arabic `ar`,<br>• Pashto `ps` 🟠,<br>• Persian `fa` 🟠 |
+| Semitic / Iranian | • Amharic `am` 🟡,<br>• Arabic `ar`,<br>• Pashto `ps` 🟠,<br>• Persian `fa` 🟠 |
 | Sinitic | • Mandarin `cmn` (tonal),<br>• Cantonese `yue` (tonal),<br>• Wu `wuu` 🟡 (tonal) |
 | Slavic | • Czech `cs`,<br>• Russian `ru` |
 | Tai-Kadai | • Thai `th` (tonal) |
 | Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (30) · 🟡 reliable + a documented lexical tail (9: Bengali, Gujarati, Indonesian, Javanese,
+✅ reliable / referee-limited (30) · 🟡 reliable + a documented lexical tail (10: Amharic, Bengali, Gujarati, Indonesian, Javanese,
 Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (3: Urdu, Persian, Pashto) ·
 🔵 in active development.
 

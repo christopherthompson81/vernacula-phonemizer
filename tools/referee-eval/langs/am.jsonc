@@ -1,0 +1,17 @@
+// Amharic (am) — Ethiopian Semitic, Ge'ez/Fidäl syllabary. wikipron amh (human) PRIMARY + kaikki amh (human)
+// SECONDARY. Two UNWRITTEN features are folded (unrecoverable from the script): GEMINATION (the referee marks
+// tː/ɲː, we render single → degemination fold) and length. Also folds the ə~ɐ short-vowel notation.
+{
+    "referees": [
+        { "file": "am.wikipron-amh-broad.tsv", "source": "wikipron amh_ethi broad (human)", "role": "primary" },
+        { "file": "am.kaikki-amh.tsv", "source": "kaikki amh (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "GEMINATION is UNWRITTEN in the Fidel (phonemic but unmarked) — the referee doubles (hulətː), we render single; degeminate both" },
+        { "pattern": "ɐ", "replace": "ə", "note": "central short vowel [ɐ]~[ə] notation" },
+        { "pattern": "[()]", "replace": "", "note": "kaikki marks the optional glottal onset in parentheses (ʔ)amət — strip the parens" },
+        { "pattern": "ʔ", "replace": "", "note": "word-initial glottal onset of a vowel-initial syllable — the referee marks it INCONSISTENTLY (አመት→amət yet ʔamət); drop it" },
+        { "pattern": "r", "replace": "ɾ", "note": "Amharic /r/ tap — wikipron writes ɾ, kaikki writes plain r; unify" }
+    ]
+}

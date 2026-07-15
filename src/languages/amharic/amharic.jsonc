@@ -1,0 +1,28 @@
+// Native canonical-IPA definition for Amharic / አማርኛ (am) — Ethiopian Semitic, written in the Ge'ez/Fidäl
+// SYLLABARY-abugida (each codepoint = a whole CV syllable, the vowel baked into the glyph; NO matras/virama, so
+// the generic Brahmic engine does not apply). amharic.ts reads the fidel→CV table (fidel.tsv, derived from the
+// epitran amh-Ethi map, Apache-2.0, with the guttural 1st-order fix ሀ/ሐ/ኀ→ha, አ/ዐ→a) and this file (numbers +
+// punctuation). Two features are UNWRITTEN in the script: GEMINATION (phonemic but unmarked — folded vs the
+// referee) and the 6th-order ɨ, which is epenthetic (deleted word-finally: ሁለት→hulət). Ejectives kʼ tʼ t͡ʃʼ pʼ
+// t͡sʼ. See docs/am_native_bringup_investigation.md.
+{
+    "language": "am",
+    "name": "Amharic",
+    "script": "Ethiopic (Ge'ez / Fidäl)",
+    "provenance": "Fidel→CV syllabary from the epitran amh-Ethi map (Apache-2.0) + guttural 1st-order fix; numbers/phonology authored from standard Amharic.",
+
+    "clausePunctuation": {
+        "።": " . ", "፣": " , ", "፤": " ; ", "፥": " : ", "፦": " : ", "፧": " ? ", "፨": " . ",
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Amharic (Fidel) spellings; canonical IPA DERIVED via the same fidel→CV g2p. Units + teens
+    // (አስራ + unit) + round tens + magnitudes; 21-99 compose as "tens unit".
+    "numbers": {
+        "units": ["ዜሮ", "አንድ", "ሁለት", "ሦስት", "አራት", "አምስት", "ስድስት", "ሰባት", "ስምንት", "ዘጠኝ"],
+        "ten": "አስር",
+        "teenPrefix": "አስራ",
+        "tens": { "20": "ሃያ", "30": "ሰላሳ", "40": "አርባ", "50": "ሃምሳ", "60": "ስልሳ", "70": "ሰባ", "80": "ሰማንያ", "90": "ዘጠና" },
+        "hundred": "መቶ", "thousand": "ሺ"
+    }
+}
