@@ -90,3 +90,24 @@ espeak-exact metric can REWARD matching them. Validate segment quality against t
 
 Deferred (minor / lexical, referee-invisible because BACKBONE folds length): n/r/l vowel length (tân/tan), the
 wy-diphthong quality split, English loan-name code-switching.
+
+## Run 4 — 2026-07-14 — referee-backed diphthong nuclei (56.5→67.1%)
+
+The Run-3 residual was dominated by DIPHTHONG-QUALITY mismatches. The NW referee adjudicates each nucleus; applied
+the referee-confirmed corrections (all folded-agreement wins, goldens updated):
+- **final unstressed ⟨-au⟩ → [a]** (707): the NW plural/verb-suffix reduction — llyfrau→ɬəvra, pethau→pɛθa,
+  dechrau→dɛχra. g2p rule (only in polysyllables; a stressed monosyllable cau→kaᶤ keeps the diphthong). +2.1%.
+- **⟨wy⟩-diphthong nucleus u→ʊ** (930): eglwys→ɛɡlʊɨs, Arglwydd→arɡlʊɨð, blwyddyn→blʊɨðɨn. Data. +2.0%.
+- **⟨ew⟩ nucleus e→ɛ** (short; the length rule still gives eː in monosyllables tew→teːu): mewn→mɛun, Dewi→dɛu. +0.9%.
+- **⟨ei⟩/⟨ey⟩ nucleus ə→e** (942): cymdeithas→kəmdeiθas, teithio→teiθjo, Aberteifi→...teivi. +4.5% (the big one).
+- **⟨eu⟩ nucleus ə→e** (matching ei). +1.0%.
+Total **56.5→67.1% (+10.5)**. Floor .50→.63. Suite 262/262 (5 goldens updated to the referee-matching values).
+
+TESTED-and-REJECTED: ⟨ae⟩→eᶤ went NEGATIVE (−0.2%) — the referee is inconsistent (Aeres→eɨ, Aeddan→ei, some stay
+aᶤ), so ⟨ae⟩ is genuinely contested; left as aᶤ.
+
+STILL 🟡. Remaining residual: (1) **English/foreign-name code-switching** (Algeria→ald͡ʒiːrja, Aidan→ei̯dən — the
+referee applies English phonology to English names; a name lexicon like the cs/th kaikki approach could help but
+Welsh-ifies unpredictably); (2) **⟨gwy⟩/⟨yw⟩ structural** (gwyn→ɡwɨn not the diphthong; bywyd→bəuɨd — intertwined
+with the imperfect y-obscure rule); (3) **⟨ae⟩ contested**; (4) n/r/l length (folded away). These are intricate /
+lexical, lower-leverage than the nuclei just fixed.
