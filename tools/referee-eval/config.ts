@@ -583,6 +583,36 @@ export const CONFIG: Record<string, RefLang> = {
             [/[əɛe]/gu, "e", "⟨e⟩ = /ə/ vs /e/~/ɛ/ — orthographically merged, lexically unrecoverable"],
         ],
     },
+    mr: {
+        // Marathi (Devanagari) — reuses the Hindi abugida engine + a Marathi data file. wikipron mar is a broad
+        // HUMAN referee. Folds: the alveolo-palatal notation (ɕ/t͡ɕ/d͡ʑ = our ʃ/t͡ʃ/d͡ʒ) and the च/ज DENTAL~PALATAL
+        // variation (t͡s~t͡ʃ — the referee is inconsistent: चाक→t͡sak yet चाकर→t͡ɕakəɾ), plus tap ɾ + degemination.
+        referees: [
+            {
+                file: "mr.wikipron-mar-broad.tsv",
+                source: "wikipron mar_deva broad (human)",
+                role: "primary",
+            },
+            {
+                file: "mr.gold-adjudicated.tsv",
+                source: "adjudicated common-word gold (our convention)",
+                role: "secondary",
+            },
+        ],
+        segmentJoin: true,
+        folds: [
+            [/ɾ/gu, "r", "tap ɾ vs referee r — notation"],
+            [/ɪ/gu, "i", "short ि [ɪ] (ours) vs referee [i] — the referee does not mark the ɪ/i split"],
+            [/ʊ/gu, "u", "short ु [ʊ] vs referee [u] — ditto"],
+            [/ɕ/gu, "ʃ", "ɕ (referee) = ʃ (ours श) — notation"],
+            [/ʑ/gu, "ʒ", "ʑ (referee) = ʒ — notation"],
+            // च/ज are variably DENTAL [t͡s d͡z] or PALATAL [t͡ʃ~t͡ɕ d͡ʒ~d͡ʑ] — the referee is inconsistent (same
+            // context both ways), so fold the affricate place of articulation.
+            [/t͡?[sɕ]/gu, "t͡ʃ", "affricate t͡s~t͡ɕ~t͡ʃ (च dental~palatal variation) — referee-inconsistent"],
+            [/d͡?[zʑ]/gu, "d͡ʒ", "affricate d͡z~d͡ʑ~d͡ʒ (ज variation) — referee-inconsistent"],
+            [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
+        ],
+    },
     ja: {
         referees: [
             {

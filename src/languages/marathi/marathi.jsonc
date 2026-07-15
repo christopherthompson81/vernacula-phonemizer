@@ -1,0 +1,237 @@
+// Native canonical-IPA definition for Hindi (hi) — re-derived from the Devanagari orthography and
+// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
+// This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
+// directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
+// only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
+//
+// Format: plain JSONC. Verbose, self-describing keys. Every phoneme value is CANONICAL IPA.
+{
+    "language": "mr",
+    "name": "Marathi",
+    "script": "Devanagari",
+    "provenance": "Authored from the Unicode Devanagari chart + standard Hindi phonology. This file IS the language data — the native G2P engine reads it directly.",
+
+    // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
+    // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
+    "inherentVowel": "ə",
+
+    // Consonant letters → canonical IPA. `note` documents the phonological class + any referee decision.
+    "consonants": {
+        "क": { "ipa": "k", "note": "velar stop, voiceless" },
+        "ख": { "ipa": "kʰ", "note": "velar stop, voiceless aspirated" },
+        "ग": { "ipa": "ɡ", "note": "velar stop, voiced" },
+        "घ": { "ipa": "ɡʱ", "note": "velar stop, voiced breathy" },
+        "ङ": { "ipa": "ŋ", "note": "velar nasal" },
+        "च": {
+            "ipa": "t͡ʃ",
+            "note": "post-alveolar affricate, voiceless (Hindi च = t͡ʃ, cf. Bengali t͡ɕ)",
+        },
+        "छ": {
+            "ipa": "t͡ʃʰ",
+            "note": "post-alveolar affricate, voiceless aspirated",
+        },
+        "ज": { "ipa": "d͡ʒ", "note": "post-alveolar affricate, voiced" },
+        "झ": {
+            "ipa": "d͡ʒʱ",
+            "note": "post-alveolar affricate, voiced breathy",
+        },
+        "ञ": { "ipa": "ɲ", "note": "palatal nasal" },
+        "ट": { "ipa": "ʈ", "note": "retroflex stop, voiceless" },
+        "ठ": { "ipa": "ʈʰ", "note": "retroflex stop, voiceless aspirated" },
+        "ड": { "ipa": "ɖ", "note": "retroflex stop, voiced" },
+        "ढ": { "ipa": "ɖʱ", "note": "retroflex stop, voiced breathy" },
+        "ण": { "ipa": "ɳ", "note": "retroflex nasal" },
+        "त": {
+            "ipa": "t̪",
+            "note": "DENTAL stop, voiceless (t̪ vs retroflex ट=ʈ — the core coronal contrast)",
+        },
+        "थ": { "ipa": "t̪ʰ", "note": "dental stop, voiceless aspirated" },
+        "द": { "ipa": "d̪", "note": "dental stop, voiced" },
+        "ध": { "ipa": "d̪ʱ", "note": "dental stop, voiced breathy" },
+        "न": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "प": { "ipa": "p", "note": "labial stop, voiceless" },
+        "फ": { "ipa": "pʰ", "note": "labial stop, voiceless aspirated" },
+        "ब": { "ipa": "b", "note": "labial stop, voiced" },
+        "भ": { "ipa": "bʱ", "note": "labial stop, voiced breathy" },
+        "म": { "ipa": "m", "note": "labial nasal" },
+        "य": { "ipa": "j", "note": "palatal approximant" },
+        "र": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ल": { "ipa": "l", "note": "alveolar lateral" },
+        "ळ": { "ipa": "ɭ", "note": "retroflex lateral (Marathi-specific)" },
+        "व": { "ipa": "ʋ", "note": "labiodental approximant" },
+        "श": { "ipa": "ʃ", "note": "post-alveolar sibilant" },
+        "ष": {
+            "ipa": "ʂ",
+            "note": "retroflex sibilant — KEPT in Marathi (अंडकोष→əɳɖkoʂ), unlike Hindi's ʃ-merger",
+        },
+        "स": { "ipa": "s", "note": "alveolar sibilant" },
+        "ह": { "ipa": "ɦ", "note": "voiced glottal fricative" },
+        // Nukta letters (borrowed/Perso-Arabic sounds)
+        "क़": { "ipa": "q", "note": "uvular stop (nukta क)" },
+        "ख़": { "ipa": "x", "note": "velar fricative voiceless (nukta ख)" },
+        "ग़": { "ipa": "ɣ", "note": "velar fricative voiced (nukta ग)" },
+        "ज़": { "ipa": "z", "note": "alveolar sibilant voiced (nukta ज)" },
+        "ड़": { "ipa": "ɽ", "note": "retroflex flap (nukta ड)" },
+        "ढ़": { "ipa": "ɽʱ", "note": "retroflex flap breathy (nukta ढ)" },
+        "फ़": { "ipa": "f", "note": "labiodental fricative (nukta फ)" },
+        "य़": { "ipa": "j", "note": "ya with nukta" },
+    },
+
+    // Independent vowel letters (word-initial / standalone).
+    "independentVowels": {
+        "अ": { "ipa": "ə", "note": "short central (schwa)" },
+        "आ": { "ipa": "aː", "note": "long open" },
+        "इ": { "ipa": "ɪ", "note": "short near-close front" },
+        "ई": { "ipa": "iː", "note": "long close front" },
+        "उ": { "ipa": "ʊ", "note": "short near-close back" },
+        "ऊ": { "ipa": "uː", "note": "long close back" },
+        "ऋ": {
+            "ipa": "ɾu",
+            "note": "vocalic r ऋ — realized [ɾu] in Marathi (कृपा→kɾupaː), unlike Hindi ɾɪ",
+        },
+        "ए": { "ipa": "eː", "note": "long close-mid front" },
+        "ऐ": { "ipa": "əi", "note": "diphthong [əi] in Marathi (दैव→d̪əiʋ), not the Hindi monophthong ɛː" },
+        "ओ": { "ipa": "oː", "note": "long close-mid back" },
+        "औ": { "ipa": "əu", "note": "diphthong [əu] in Marathi (नौदल→nəud̪əl), not the Hindi monophthong ɔː" },
+        "ऍ": { "ipa": "ɛː", "note": "candra e (loans)" },
+        "ऑ": { "ipa": "ɔː", "note": "candra o (loans, e.g. English 'o')" },
+        "ॐ": { "ipa": "õːm", "note": "Om sign (U+0950) — a whole syllable" },
+    },
+
+    // Dependent vowel signs (matras) — replace the inherent vowel on the preceding consonant.
+    "vowelSigns": {
+        "ा": { "ipa": "aː" },
+        "ि": { "ipa": "ɪ" },
+        "ी": { "ipa": "iː" },
+        "ु": { "ipa": "ʊ" },
+        "ू": { "ipa": "uː" },
+        "ृ": { "ipa": "ɾu" },
+        "े": { "ipa": "eː" },
+        "ै": { "ipa": "əi" },
+        "ो": { "ipa": "oː" },
+        "ौ": { "ipa": "əu" },
+        "ॅ": { "ipa": "ɛː" },
+        "ॉ": { "ipa": "ɔː" },
+    },
+
+    // Combining signs with special effects.
+    "signs": {
+        "virama": {
+            "char": "्",
+            "effect": "suppressInherentVowel",
+            "note": "halant — the consonant carries no vowel (forms clusters/conjuncts)",
+        },
+        "anusvara": {
+            "char": "ं",
+            "effect": "nasalizeVowel",
+            "note": "nasalizes the preceding vowel (canonical Hindi + wikipron: कांग्रेस→kãɡɾeːs, not a homorganic nasal consonant). Nasal vowels are short.",
+        },
+        "chandrabindu": {
+            "char": "ँ",
+            "effect": "nasalizeVowel",
+            "note": "nasalizes the preceding vowel",
+        },
+        "visarga": { "char": "ः", "effect": "appendH", "note": "→ [h]" },
+        "nukta": {
+            "char": "़",
+            "effect": "composeNukta",
+            "note": "combines with the preceding consonant (decomposed form) into the nukta letter",
+        },
+    },
+
+    // Schwa deletion — the one hard rule. Hindi deletes the inherent schwa word-finally (except
+    // monosyllables) and medially in a VCəCV context (Ohala 1983), applied right-to-left after the
+    // final deletion. The engine implements this; parameters are declared here for transparency.
+    "schwaDeletion": {
+        "deleteWordFinal": true,
+        "retainInMonosyllable": true,
+        "medialRule": "ohala-VCaCV",
+        "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
+    },
+
+    // Post-rules applied to the raw akshara IPA (declarative, ordered regex — portable). Geminate→length
+    // is the fleet-wide Indic convention; the offglide + अय→ɛ are systematic Hindi realizations.
+    "postRules": [
+        {
+            "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
+            "to": "$1ː",
+            "note": "geminate → single + length (क्क→kː, च्च→t͡ʃː)",
+        },
+        {
+            "from": "ː([ʰʱ])",
+            "to": "$1ː",
+            "note": "aspiration-before-length reorder: differing-aspiration conjunct द्ध→d̪ːʱ→d̪ʱː (fleet convention, matches bn/si)",
+        },
+        {
+            "from": "t͡ʃʰ(?=[əaɑoɔuʊ])",
+            "to": "t͡sʰ",
+            "note": "Marathi छ → DENTAL affricate [t͡sʰ] before a back/central vowel",
+        },
+        {
+            "from": "d͡ʒʱ(?=[əaɑoɔuʊ])",
+            "to": "d͡zʱ",
+            "note": "Marathi झ → dental [d͡zʱ] before a back/central vowel",
+        },
+        {
+            "from": "t͡ʃ(?=[əaɑoɔuʊ])",
+            "to": "t͡s",
+            "note": "Marathi च → dental [t͡s] before a back/central vowel (चार→t͡saːɾ); stays palatal t͡ʃ before front i/e/y",
+        },
+        {
+            "from": "d͡ʒ(?=[əaɑoɔuʊ])",
+            "to": "d͡z",
+            "note": "Marathi ज → dental [d͡z] before a back/central vowel (जन→d͡zən)",
+        },
+    ],
+    // No Hindi-style finalRules — Marathi keeps intervocalic əɦə (शहर→ɕəɦəɾ, not the Hindi ɛɦɛ) and has no
+    // और-offglide convention.
+    "finalRules": [],
+
+    // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
+    // running these through the same native G2P (no hand-written phonemes). The
+    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
+    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
+    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    "numbers": {
+        "units": ["शून्य", "एक", "दोन", "तीन", "चार", "पाच", "सहा", "सात", "आठ", "नऊ"],
+        "teens": ["दहा", "अकरा", "बारा", "तेरा", "चौदा", "पंधरा", "सोळा", "सतरा", "अठरा", "एकोणीस"],
+        "tens": {
+            "20": "वीस",
+            "30": "तीस",
+            "40": "चाळीस",
+            "50": "पन्नास",
+            "60": "साठ",
+            "70": "सत्तर",
+            "80": "ऐंशी",
+            "90": "नव्वद"
+        },
+        "magnitudes": {
+            "hundred": "शंभर",
+            "thousand": "हजार",
+            "lakh": "लाख",
+            "crore": "कोटी"
+        },
+        "grouping": "indian-lakh-crore",
+        "decimalWord": "दशांश"
+    },
+
+    "symbols": { "%": "टक्के" },
+    "stripSymbols": "₹",
+
+    // Clause / phrase punctuation → canonical inline pause marks (Devanagari danda ।/॥ + ASCII).
+    "clausePunctuation": {
+        "।": ".",
+        "॥": ".",
+        ".": ".",
+        "?": "?",
+        "!": "!",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Nasalization does NOT change vowel length: the WikiPron hin_deva narrow referee keeps nasal vowels
+    // long (नहीं→nɐɦĩː, कांग्रेस→kãːŋ, यहाँ→jɐɦãː, गांव→ɡãː), so a long vowel + anusvara/chandrabindu stays
+    // long (kaː̃) and a short one stays short (गंगा→ɡə̃ŋ). Setting this false keeps the length mark.
+    "nasalVowelsAreShort": false,
+}
