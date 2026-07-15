@@ -67,15 +67,24 @@ export function makeNativeBengali(
         let out = ipa;
         for (let k = vowels.length - 2; k >= 0; k--) {
             const idx = vowels[k]!.index!;
-            if (out[idx] !== "ɔ") continue;
+            const cur = out[idx]!;
+            if (cur !== "ɔ" && cur !== "e") continue;
             const nextIdx = vowels[k + 1]!.index!;
-            if (!HIGH_MID.test(out[nextIdx]!)) continue;
-            // Between this ɔ and the next vowel: count base consonants (strip ties/modifiers). Harmony fires in
-            // an OPEN syllable — exactly one onset consonant (কর.ি→koɾi); a coda cluster (≥2) or hiatus (0, the
-            // referee is inconsistent) blocks it.
+            const nextV = out[nextIdx]!;
+            // Between this vowel and the next: count base consonants (strip ties/modifiers). Height harmony
+            // fires in an OPEN syllable — exactly one onset consonant (কর.ি→koɾi); a coda cluster (≥2) or
+            // hiatus (0, the referee is inconsistent) blocks it.
             const between = out.slice(idx + 1, nextIdx).replace(/[ʰʱ̪̃͡ːʲ]/gu, "");
-            if ([...between].length === 1)
-                out = out.slice(0, idx) + "o" + out.slice(idx + 1);
+            if ([...between].length !== 1) continue;
+            // /ɔ/ raises to [o] before a high/mid vowel (kɔ.ri→ko.ri); /e/ lowers to [æ] before low [a]
+            // (de.kʰa→dæ.kʰa) — the mid vowel agrees in height with the following nucleus.
+            const to =
+                cur === "ɔ" && HIGH_MID.test(nextV)
+                    ? "o"
+                    : cur === "e" && nextV === "a"
+                      ? "æ"
+                      : "";
+            if (to) out = out.slice(0, idx) + to + out.slice(idx + 1);
         }
         return out;
     }
@@ -91,8 +100,11 @@ export function makeNativeBengali(
         if (!lastV) return body; // no vowel → drop (unusual)
         const coda = body.slice(lastV.index! + 1);
         // A heavy coda RETAINS the final vowel (realized [o]): a geminate (…ː, pɔd̪ːo) or a true cluster
-        // (two+ base consonants, ɔŋʃo). A single light coda consonant DELETES it (bɔl, d͡ʒɔl).
-        const codaBases = coda.replace(/[ʰʱ̪͡ː̃]/gu, "");
+        // (two+ base consonants, ɔŋʃo). A single light coda consonant DELETES it (bɔl, d͡ʒɔl) — an affricate
+        // t͡ʃ/d͡ʒ counts as ONE (মাছ→mat͡ʃʰ, not mat͡ʃʰo).
+        const codaBases = coda
+            .replace(/t͡ʃ|d͡ʒ/gu, "C")
+            .replace(/[ʰʱ̪͡ː̃]/gu, "");
         return coda.includes("ː") || codaBases.length >= 2 ? body + "o" : body;
     }
 
@@ -114,14 +126,17 @@ export function makeNativeBengali(
         let x = g2p(norm);
         // 3. geminate → length + aspiration-before-length reorder (युद्ध-type conjuncts).
         x = x.replace(GEMINATE, "$1ː").replace(/ː([ʰʱ])/gu, "$1ː");
-        // 4. MEDIAL inherent-vowel deletion — the Ohala V·C·ɔ·C·V rule (আপনার→apnaɾ, আকবর→akbɔɾ), same shared
-        //    algorithm as Hindi's schwa deletion but on /ɔ/; a geminate coda keeps the syllable heavy (no delete).
-        x = deleteMedialSchwa(x, "ɔ");
-        // 5. vowel harmony ɔ→o (on the surviving inherent vowels).
+        // 4. HEIGHT HARMONY (ɔ→o, e→æ) — BEFORE deletion, so it keys on the ORIGINAL inherent /ɔ/. An inherent
+        //    ɔ is not itself a high/mid trigger, so a later-retained final [o] can't spuriously raise the vowel
+        //    before it (পদ্ম→pɔd̪ːo, not pod̪ːo); the real matra vowels still trigger (করি→koɾi, দেখা→d̪ækʰa).
         x = harmony(x);
-        // 6. word-final inherent-vowel deletion / retention.
+        // 5. WORD-FINAL inherent-vowel deletion / retention — BEFORE medial (like Hindi) so a final inherent
+        //    ɔ does not create a false V·C·ɔ·C·V context for the preceding vowel (জীবন→d͡ʒibɔn, শহর→ʃɔɦɔɾ).
         const syls = (x.match(VOWEL_G) || []).length;
         if (syls >= 2) x = deleteFinalInherent(x);
+        // 6. MEDIAL inherent-vowel deletion — the Ohala V·C·ɔ·C·V rule (আপনার→apnaɾ, আকবর→akbɔɾ), same shared
+        //    algorithm as Hindi's schwa deletion but on /ɔ/; a geminate coda keeps the syllable heavy (no delete).
+        x = deleteMedialSchwa(x, "ɔ");
         return x.normalize("NFC");
     }
 
