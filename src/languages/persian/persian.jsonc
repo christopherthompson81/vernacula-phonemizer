@@ -1,0 +1,49 @@
+// Native canonical-IPA definition for Persian / Farsi (fa) — the Perso-Arabic ABJAD. Like Urdu, LONG vowels are
+// written (ا/آ→aː, و→uː, ی→iː) but SHORT vowels (a e o) are usually OMITTED and must be restored — the deferred
+// subsystem (🟠). Persian phonology (NOT Hindi): no retroflexes, no aspirates; â=[aː], and the four Persian
+// letters پ چ ژ گ. persian.ts (g2p) reads this file. Stored in logical order = phonetic order (RTL is a non-issue).
+{
+    "language": "fa",
+    "name": "Persian",
+    "script": "Arabic (Perso-Arabic)",
+    "provenance": "Authored from the Unicode Arabic/Persian chart + standard Iranian Persian phonology. This file IS the language data — the g2p reads it directly.",
+
+    // Unambiguous consonant letters → canonical IPA.
+    "consonants": {
+        "ب": "b", "پ": "p", "ت": "t", "ث": "s", "ج": "d͡ʒ", "چ": "t͡ʃ",
+        "ح": "h", "خ": "x", "د": "d", "ذ": "z", "ر": "ɾ", "ز": "z",
+        "ژ": "ʒ", "س": "s", "ش": "ʃ", "ص": "s", "ض": "z", "ط": "t",
+        "ظ": "z", "ع": "ʔ", "غ": "ɣ", "ف": "f", "ق": "q", "ک": "k",
+        "ك": "k", "گ": "ɡ", "ل": "l", "م": "m", "ن": "n", "ه": "h",
+        "ی": "j", "ي": "j", "و": "v", "ء": "ʔ"
+    },
+
+    // Harakat (short-vowel diacritics) — usually ABSENT in running text (the restoration gap). Applied when present.
+    "harakat": {
+        "َ": "a",  // zabar / fatha → a
+        "ِ": "e",  // zer / kasra → e
+        "ُ": "o",  // pesh / damma → o
+        "ٰ": "aː", // superscript alef → aː
+        "ً": "an", "ٌ": "on", "ٍ": "en"
+    },
+    "sukun": "ْ",   // jazm/sukun → no vowel
+    "shadda": "ّ",  // tashdid → gemination (→ length)
+
+    // The DEFAULT short vowel inserted between consonants when none is written (the abjad's missing vowel).
+    // Persian's most frequent short vowel is /a/ (zabar); /e//o/ are lexical. The stand-in for the deferred layer.
+    "inherentVowel": "a",
+
+    // Danda / ASCII → canonical inline pause marks.
+    "clausePunctuation": {
+        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ",
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Persian spellings; canonical IPA DERIVED by the same g2p (with harakat so short vowels are right).
+    "numbers": {
+        "units": ["صِفر", "یِک", "دو", "سِه", "چَهار", "پَنج", "شِش", "هَفت", "هَشت", "نُه"],
+        "teens": ["دَه", "یازدَه", "دَوازدَه", "سیزدَه", "چَهاردَه", "پانزدَه", "شانزدَه", "هِفدَه", "هِجدَه", "نوزدَه"],
+        "tens": { "20": "بیست", "30": "سی", "40": "چِهِل", "50": "پَنجاه", "60": "شَصت", "70": "هَفتاد", "80": "هَشتاد", "90": "نَوَد" },
+        "magnitudes": { "hundred": "صَد", "thousand": "هِزار", "lakh": "صَد هِزار", "crore": "دَه میلیون" }
+    }
+}
