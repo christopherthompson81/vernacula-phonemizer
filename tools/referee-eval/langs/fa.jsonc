@@ -1,0 +1,23 @@
+// Persian / Farsi — Perso-Arabic abjad, Persian phonology. wikipron fas is fully-voweled (HUMAN); our g2p
+// produces the consonant + LONG-vowel skeleton with a default [a] for the omitted short vowels (restoration is
+// the deferred subsystem, 🟠). Fold the short-vowel QUALITY (a~e~o) so the eval measures the CONSONANT +
+// long-vowel backbone we can derive, not the unrecoverable short vowels (کتاب = ketâb/kitâb, مرد = mard/merd/murd).
+{
+    "referees": [
+        { "file": "fa.wikipron-fas-broad.tsv", "source": "wikipron fas_arab broad (human)", "role": "primary" },
+        { "file": "fa.gold-adjudicated.tsv", "source": "adjudicated common-word gold (our convention)", "role": "secondary" }
+    ],
+    "secondaryGap": "short-vowel restoration is deferred (the abjad omits a/e/o); no independent diacritized-Persian source wired.",
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "oː", "replace": "uː", "note": "long و = [uː]~[oː] (unrecoverable which); fold to uː" },
+        { "pattern": "eː", "replace": "iː", "note": "long ی = [iː]~[eː] (unrecoverable which); fold to iː" },
+        { "pattern": "i(?!ː)", "replace": "a", "note": "classical SHORT i (referee) vs our default a — unrecoverable short-vowel quality (long iː is kept: the ː guards it)" },
+        { "pattern": "u(?!ː)", "replace": "a", "note": "classical SHORT u (referee) vs our default a — long uː kept" }
+    ],
+    "folds": [
+        { "pattern": "[eo]", "replace": "a", "note": "short-vowel QUALITY a~e~o — unrecoverable from the undiacritized skeleton" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ vs referee r — notation" },
+        { "pattern": "ɒ", "replace": "a", "note": "â [ɒ]~[aː] — the referee writes aː" }
+    ]
+}
