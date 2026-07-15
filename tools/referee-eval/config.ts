@@ -789,9 +789,26 @@ export const CONFIG: Record<string, RefLang> = {
                 "dark-l (back-harmony allophone) — referee writes plain l",
             ],
             [/ʰ/gu, "", "final-stop aspiration — allophonic"],
-            [/ɑ/gu, "a", "back /a/ [ɑ] vs referee a — allophonic"],
-            [/ɔ/gu, "o", "/o/ [ɔ]~[o] — no contrast in Turkish"],
-            [/æ/gu, "e", "/e/ [æ]~[e] — allophonic"],
+            // The 8 Turkish vowels each have a lax~tense allophonic pair with NO phonemic contrast; the
+            // referees differ on which they mark. Fold the whole set to the tense member (ɑ/ɔ/æ were already
+            // folded; ɛ/ʊ/œ/ɪ/ʏ complete it): ev [ɛv]~[ev], boncuk [ʊ]~[u], bölük [œ]~[ø].
+            [/ɑ/gu, "a", "back /a/ [ɑ]~[a] — allophonic"],
+            [/ɔ/gu, "o", "/o/ [ɔ]~[o] — no contrast"],
+            [/[æɛ]/gu, "e", "/e/ [æ]~[ɛ]~[e] — closed-syllable laxing, allophonic"],
+            [/ʊ/gu, "u", "/u/ [ʊ]~[u] — allophonic"],
+            [/œ/gu, "ø", "/ø/ [œ]~[ø] — allophonic"],
+            [/ɪ/gu, "i", "/i/ [ɪ]~[i] — allophonic"],
+            [/ʏ/gu, "y", "/y/ [ʏ]~[y] — allophonic"],
+            // Velar palatalization (k/ɡ→c/ɟ next to a front vowel: renk→ɾeɲc) and nasal PLACE assimilation
+            // (n→ŋ/ɲ before a velar/palatal: angut→aŋɡut). We render both EXPLICITLY (correct richer canonical
+            // form, per the explicitness principle); they are predictable allophones and the epitran referee
+            // does not mark them, so fold to the plain member for the shared backbone (cf. the ʰ/ɫ folds).
+            [/c/gu, "k", "k→c palatalization before/next to a front vowel — allophonic"],
+            [/ɟ/gu, "ɡ", "ɡ→ɟ palatalization — allophonic"],
+            [/ŋ/gu, "n", "n→ŋ nasal place assimilation before a velar — allophonic"],
+            // Our geminates use the length mark ː (stripped by the backbone); the referees double the consonant
+            // (or vowel, for loan-vowel length). Collapse any doubled symbol so the two notations compare equal.
+            [/(.)\1/gu, "$1", "geminate as length ː (ours) vs doubled symbol (referee) — notation"],
         ],
     },
     vi: {

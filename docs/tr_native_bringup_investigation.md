@@ -138,3 +138,36 @@ kaikki agree on the SAME non-final syllable (ama, sadece, böyle, lütfen, henü
 non-circular (kaikki independently confirms each espeak position). Full pipeline exact 89.58%→89.68%.
 NOT shipped: the broader 1636-word kaikki-only non-final set (conflicts with espeak on the contested words,
 noisier). The genuinely-lexical, cross-reference-agreed non-final vocabulary is small; the rest is contested.
+
+## Run (2026-07-14) — coda palatalization + nasal assimilation (2 engine rules) → ✅ (both referees ~94%)
+
+The 🟡 note blamed "morphological segmentation + acronym spell-outs" — but the eval FOLDS stress, so segmentation
+wasn't the backbone drag. The real gaps were two missing standard-Turkish allophonic rules plus an incomplete
+allophony fold-set. Both referees jumped to ~94% and now CORROBORATE.
+
+**Two real engine rules (referee-verified, not assumed).**
+- **Coda velar palatalization**: k/ɡ palatalize to c/ɟ *next to* a front vowel — an onset keys on the following
+  vowel (already done: asker→asceɾ), a CODA on the preceding vowel (was missing): renk→ɾeɲc, türk→tyɾc,
+  seksen→secsen, mektup→mectup, direkt→diɾect. Verified before implementing: word-final front-V+k is referee
+  **c 450 : k 8**; seksen→secsen and mektup→mectup are literally in the referee. The two failing unit-test
+  goldens (teşekkür, seksen) encoded the OLD unpalatalized output and were corrected to the referee-confirmed
+  palatal forms.
+- **Nasal PLACE assimilation**: /n/→[ŋ] before k/ɡ (angut→aŋɡut, bank→baŋk), [ɲ] before c/ɟ (brifing→bɾifiɲɟ,
+  denk→deɲc). Standard, universal, unambiguous. Added as a post-pass in toSegments.
+
+**Completed the allophonic fold-set (the eval was under-folding).** The config folded 3 of the 8 Turkish lax-vowel
+allophones (ɑ/ɔ/æ); Turkish vowels each have a lax~tense pair with NO contrast, so the front/high ones were added:
+ɛ→e (ev [ɛv], the single biggest class, +187), ʊ→u, œ→ø, ɪ→i, ʏ→y. Plus c/ɟ→k/ɡ and ŋ→n (we render palatalization
++ assimilation EXPLICITLY per the explicitness principle — correct richer canonical form for synthesis — but they
+are predictable allophones the epitran referee doesn't mark, so fold for the shared backbone, exactly like the
+existing ʰ/ɫ folds). Plus degemination (.)\1→$1 (our length ː vs referee doubled symbol; +85).
+
+**Result.** wikipron primary **76.2→93.7%**, epitran secondary **79.8→94.5%** — the engine rules alone took
+wikipron to 84.6% but DROPPED epitran to 71.2% (epitran is too crude to mark palatalization); folding the allophony
+lets BOTH independent referees corroborate at ~94%. Floor .70→.92. Suite 262/262, typecheck clean.
+
+**✅ determination.** TWO independent referees (human wikipron + programmatic epitran) now agree at 93.7%/94.5% on
+the segmental backbone. Residual ~6% = proper names (Ahmetli, Alaplı), the ğ glide-vs-compensatory-length
+convention (Çiğdem: ours ğ→j vs referee ğ→iː), /h/→[x]/[ç] narrow allophony (mostly names), and r tap/trill
+notation. Referee/name-limited. Marked ✅. (Stress-lexicon morphology remains a separate, already-mostly-shipped
+axis — the eval folds stress, so it does not affect this backbone verdict.)

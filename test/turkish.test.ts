@@ -15,7 +15,7 @@ describe("Turkish g2p (segmental)", () => {
             ["değil", "dejˈil"], // ğ→j between front vowels
             ["düğün", "dˈyːn"], // ğ merges identical ü
             ["asker", "ascˈeɾ"], // k→c after consonant before front e
-            ["teşekkür", "teʃekːˈyɾ"], // doubled stop → geminate ː
+            ["teşekkür", "teʃecːˈyɾ"], // doubled stop → geminate ː; palatal cː between front e…ü
             ["anne", "annˈe"], // doubled sonorant stays double
             ["İzmir", "ˈizmiɾ"], // İ→i locale fold (+ lexicon stress)
         ];
@@ -47,6 +47,6 @@ describe("Turkish g2p (segmental)", () => {
     it("numbers", () => {
         expect(phonemize("0", "tr")).toBe("sɯfˈɯɾ");
         expect(phonemize("42", "tr")).toBe("kˈɯɾk icˈi");
-        expect(phonemize("1985", "tr")).toBe("bˈin dokˈuz jˈyz seksˈen bˈeʃ");
+        expect(phonemize("1985", "tr")).toBe("bˈin dokˈuz jˈyz secsˈen bˈeʃ"); // seksen: coda k→c after front e (referee: secsen)
     });
 });

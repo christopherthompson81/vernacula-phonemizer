@@ -84,19 +84,31 @@ export function toSegments(word: string): Seg[] {
             segs.push({ ph: BACK.has(ctx) ? "ɫ" : "l", nucleus: false });
             continue;
         }
-        // k → c before a front vowel (asker → asceɾ), else k.
+        // k/g palatalize to c/ɟ in the environment of a FRONT vowel — an onset keys on the FOLLOWING vowel
+        // (asker → asceɾ), a coda on the PRECEDING vowel (renk → ɾeɲc, türk → tyɾc, direkt → diɾect). Same
+        // onset/coda logic as l above.
         if (c === "k") {
-            segs.push({ ph: FRONT.has(next) ? "c" : "k", nucleus: false });
+            const ctx = isVowel(next) ? next : prevVowel;
+            segs.push({ ph: FRONT.has(ctx) ? "c" : "k", nucleus: false });
             continue;
         }
         // g → ɟ before a front vowel (majority of the gold; the ɡ cases like bölge are lexical), else ɡ.
         if (c === "g") {
-            segs.push({ ph: FRONT.has(next) ? "ɟ" : "ɡ", nucleus: false });
+            const ctx = isVowel(next) ? next : prevVowel;
+            segs.push({ ph: FRONT.has(ctx) ? "ɟ" : "ɡ", nucleus: false });
             continue;
         }
         const cons = CONS_IPA[c];
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
         // else: unknown char (punctuation slipped in) → skip
+    }
+    // Nasal PLACE assimilation: /n/ takes the place of a following velar/palatal stop — [ŋ] before k/ɡ
+    // (angut → aŋɡut, denk → deŋk when back), [ɲ] before c/ɟ (renk → ɾeɲc, brifing → bɾifiɲɟ). Standard Turkish.
+    for (let i = 0; i < segs.length - 1; i++) {
+        if (segs[i]!.ph !== "n") continue;
+        const nx = segs[i + 1]!.ph;
+        if (nx === "k" || nx === "ɡ") segs[i]!.ph = "ŋ";
+        else if (nx === "c" || nx === "ɟ") segs[i]!.ph = "ɲ";
     }
     return segs;
 }
