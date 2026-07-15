@@ -1,9 +1,9 @@
 /**
  * Welsh (cy) phonemizer — canonical IPA, espeak-independent, Northern-leaning. Rule-based g2p (g2p.ts) +
- * PENULTIMATE stress + the Welsh vowel-length rule. A stressed monophthong is "strong" (tense) in a long context
- * — open, or before a single voiced/fricative coda — where it takes full length (ː) in a monosyllable/final
- * syllable (mis → miːs) and just the tense quality in a penult (nesaf → nesav, pobol → pobɔl); elsewhere it stays
- * lax and short (bore → bɔrɛ). Diphthongs and circumflex vowels are already long and untouched.
+ * PENULTIMATE stress + the Welsh vowel-length rule. A stressed monophthong in a long context — open, or before a
+ * single voiced/fricative coda — takes full length (ː) in a monosyllable/final syllable (mis → miːs); in a penult
+ * it stays SHORT and LAX (pobol → pɔbɔl, nesaf → nɛsav — the NW referee shows lax, not the espeak-tensed [o]/[e]).
+ * Elsewhere it stays lax and short (bore → bɔrɛ). Diphthongs and circumflex vowels are already long and untouched.
  * See docs/cy_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -14,8 +14,6 @@ import { MANIFEST } from "./manifest.ts";
 
 const LONG = MANIFEST.longVowel; // lax short → long tense (adds ː): ɛ→eː, ɔ→oː, …
 const LENGTHENS = new Set([...MANIFEST.lengthenBefore]); // single coda consonants that give a long/tense context
-// Penult tense quality WITHOUT length (half-long, rendered short): the raise a lax vowel takes in a long context.
-const TENSE_SHORT: Record<string, string> = { ɛ: "e", ɔ: "o", ʊ: "u" };
 
 /** Apply the vowel-length rule to the stressed nucleus. `stress` is its index; `isFinal` = no nucleus follows. */
 function applyLength(segs: Seg[], stress: number, isFinal: boolean): void {
@@ -30,9 +28,9 @@ function applyLength(segs: Seg[], stress: number, isFinal: boolean): void {
     }
     const longContext = coda === 0 || (coda === 1 && LENGTHENS.has(single));
     if (!longContext) return; // lax + short (voiceless stop, m, ŋ, ɬ, cluster, or the deferred n/r/l)
-    if (isFinal)
-        v.ph = LONG[v.ph] ?? v.ph; // monosyllable / final syllable → full length
-    else v.ph = TENSE_SHORT[v.ph] ?? v.ph; // penult → tense quality only
+    // Full length ː only in a monosyllable / final syllable; a PENULT keeps its short LAX quality (pobol→pɔbɔl,
+    // nesaf→nɛsav — the NW referee shows lax; the espeak-tensed penult [o]/[e] was an oracle artifact, cf. i→ɨ).
+    if (isFinal) v.ph = LONG[v.ph] ?? v.ph;
 }
 
 const EXCEPTIONS = MANIFEST.exceptions; // irregular function words (short/lax where the rule would lengthen)

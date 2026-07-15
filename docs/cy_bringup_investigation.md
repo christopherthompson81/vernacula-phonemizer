@@ -111,3 +111,19 @@ referee applies English phonology to English names; a name lexicon like the cs/t
 Welsh-ifies unpredictably); (2) **⟨gwy⟩/⟨yw⟩ structural** (gwyn→ɡwɨn not the diphthong; bywyd→bəuɨd — intertwined
 with the imperfect y-obscure rule); (3) **⟨ae⟩ contested**; (4) n/r/l length (folded away). These are intricate /
 lexical, lower-leverage than the nuclei just fixed.
+
+## Run 5 — 2026-07-14 — penult vowels stay LAX (another oracle artifact) + gwy/chwy structural (67.1→73.5%)
+
+The lowercase common-word residual was dominated by penult ⟨e⟩/⟨o⟩: ours TENSED them ([e]/[o]) but the NW referee
+keeps them LAX (pobol→pɔbɔl, abadesau→abadɛsa, nesaf→nɛsav). This was the SAME espeak-oracle artifact as the Run-3
+i→ɨ: the bootstrap tensed penult vowels; the independent referee shows lax. Removed the penult TENSE_SHORT step
+(full length ː still applies in monosyllables/final syllables). **+5.9%** — the biggest single fix.
+
+Also structural: ⟨wy⟩ in a ⟨gw⟩/⟨chw⟩ ONSET cluster is w-consonant + y (gwyn→ɡwɨn, gwybod→ɡwɨbɔd, achwyn→aχwɨn), NOT
+the ʊɨ diphthong (contrast Arglwydd→arɡlʊɨð where ⟨gl⟩ is the onset). Skip the wy-cluster after ɡ/χ; ⟨y⟩ after that
+/w/ stays clear ɨ even non-finally. +0.5%.
+
+Total Run 5: 67.1→**73.5%**. Floor .63→.70. Suite 262/262 (nesaf/pobol goldens updated to the lax referee forms).
+Session total: 56.5→73.5% (+17.0). Remaining residual: English/foreign-name anglicization (referee applies English
+phonology — arguably not our error), ⟨ae⟩ (referee-contested), degemination (nn→n), st→sd + glide edges — intricate/
+lexical/referee-limited. Common-word accuracy is now ~73%; STILL 🟡 (the diffuse tail is real but small-per-class).
