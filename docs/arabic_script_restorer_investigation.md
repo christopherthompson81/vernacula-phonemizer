@@ -114,6 +114,35 @@ Why harakat wins: the model's output space shrinks to ~a handful of diacritics p
 transfers on the loan stratum), and the deterministic g2p — already correct for consonants, retroflexes, emphatics,
 gemination, nasalization — supplies everything except the one thing that's genuinely unwritten and ambiguous.
 
+## Run 5 — 2026-07-15 — the anchor model already exists; build the multilingual char vocab
+
+Discovery: the repo ALREADY ships a harakat restorer for Arabic — `src/languages/arabic/diacritizer.onnx`, a
+char-level **BiLSTM** (emb 128, hidden 512, 3 layers, ~15.3 M params, int8), permissively sourced (CATT Apache-2.0
+teacher → arwiki CC-BY-SA silver, no Tashkeela/Leipzig in the model), with a **19-label pausal harakat scheme**
+(`diacritizer.meta.json`) and a 259k Tashkeela-derived restoration lexicon (`diacritization.tsv`). So the harakat
+target, the label scheme, AND the anchor training pipeline are already settled. The multilingual restorer is a
+GENERALIZATION of this, not a greenfield build.
+
+What generalizing needs, and the data reality:
+1. **Char vocabulary** spanning every rider letter — BUILT this run (`build_charvocab.py` → `multilingual_charvocab.json`).
+   Unions all 95 skeleton letters across the 19 languages with the Arabic model's char map, **preserving the Arabic
+   indices 0–38** (so the trained Arabic embedding rows stay valid; new letters append at 39+). Vocab **39 → 98**;
+   the 19 harakat LABELS are unchanged (fatḥa/kasra/ḍamma/sukūn/shadda/tanwīn are shared across all Perso-Arabic).
+   The additions sort cleanly: high-frequency shared Persian/Urdu forms (ی ک ہ گ پ ھ چ ں) + rider-specific tails
+   (Sindhi implosives ٻ ڄ ڏ ڳ +23 letters; Pashto ښ ګ ړ ږ +19; Kashmiri +18; Saraiki +17; Kalami +16).
+2. **Harakat training labels per language.** Anchor (Arabic) is DONE (arwiki+CATT silver + the lexicon). Persian/Urdu
+   have some diacritized text (sparse). The riders have **≈no diacritized corpus** → they cannot be supervised
+   directly. Strategy: train the BiLSTM on the anchor(s) with the expanded vocab + a **language tag**, and let the
+   riders ride on **cross-lingual transfer** (shared script + Perso-Arabic loan vocabulary + tag) — strong on the
+   loan stratum, honest-weak on native roots. **Evaluate** riders end-to-end on the wikipron reference (Runs 2–3):
+   skeleton →[model] harakat →[deterministic g2p] IPA vs the normalized IPA. Optional booster: **g2p-inversion** —
+   for a language with a deterministic g2p (ur/ps/pa/fa/ar), search the harakat vocalization of each wikipron
+   skeleton whose g2p output matches the reference IPA, yielding a few-shot silver harakat set (and an eval gold).
+   That's the next run.
+
+Silver-data prep status: eval reference ✅ (Runs 2–3, #187) · multilingual char vocab ✅ (this run) · anchor harakat
+✅ (pre-existing) · Persian/Urdu diacritized text + rider g2p-inversion → next.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
