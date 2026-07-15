@@ -1,0 +1,77 @@
+// Native canonical-IPA definition for Urdu (ur) — the Perso-Arabic abjad. Urdu is the SAME spoken language as
+// Hindi, so the phoneme inventory is Hindi's (retroflex ʈ ɖ ɽ, dental t̪ d̪, breathy-voiced aspirates, ɦ, ɲ/ŋ).
+// The g2p (g2p.ts) reads this file: consonant letters → IPA, aspiration via ھ (do-chashmi he), long vowels
+// written with ا و ی ے, short vowels from harakat WHEN present (usually omitted — the deferred restoration
+// subsystem), ں nasalization, shadda gemination. Stored in logical order = phonetic order, so RTL is a non-issue.
+{
+    "language": "ur",
+    "name": "Urdu",
+    "script": "Arabic (Nastaʿlīq)",
+    "provenance": "Authored from the Unicode Arabic/Urdu chart + standard Urdu (= Hindi) phonology. This file IS the language data — the g2p reads it directly.",
+
+    // Unambiguous consonant letters → canonical IPA.
+    "consonants": {
+        "ب": "b", "پ": "p", "ت": "t̪", "ٹ": "ʈ", "ث": "s",
+        "ج": "d͡ʒ", "چ": "t͡ʃ", "ح": "ɦ", "خ": "x", "د": "d̪",
+        "ڈ": "ɖ", "ذ": "z", "ر": "ɾ", "ڑ": "ɽ", "ز": "z",
+        "ژ": "ʒ", "س": "s", "ش": "ʃ", "ص": "s", "ض": "z",
+        "ط": "t̪", "ظ": "z", "غ": "ɣ", "ف": "f", "ق": "q",
+        "ک": "k", "گ": "ɡ", "ل": "l", "م": "m", "ن": "n",
+        "ہ": "ɦ", "ھ": "ɦ", "ء": "ʔ", "ع": "ʔ"
+    },
+
+    // ھ / ﮪ (do-chashmi he) right after a consonant makes it ASPIRATED/breathy (کھ→kʰ, بھ→bʱ, تھ→t̪ʰ).
+    "aspirateHe": "ھ",
+
+    // Aspirated realizations (base consonant + ھ). Voiceless → ʰ, voiced → ʱ (breathy).
+    "aspirates": {
+        "k": "kʰ", "p": "pʰ", "t̪": "t̪ʰ", "ʈ": "ʈʰ", "t͡ʃ": "t͡ʃʰ",
+        "b": "bʱ", "d̪": "d̪ʱ", "ɖ": "ɖʱ", "d͡ʒ": "d͡ʒʱ", "ɡ": "ɡʱ", "ɽ": "ɽʱ", "ɾ": "ɾʱ", "l": "lʱ", "m": "mʱ", "n": "nʱ"
+    },
+
+    // Long-vowel / vowel-carrier letters (resolved in context by g2p).
+    "longVowels": {
+        "ا": "ɑː",  // alif — medial/long ɑː (word-initial bare alif = a vowel-carrier, handled in g2p)
+        "آ": "ɑː",  // alif madda — ɑː
+        "و": "oː",  // waw as vowel — DEFAULT oː (also uː/ɔː; ambiguous, lexical)
+        "ی": "iː",  // ya as vowel — DEFAULT iː (also eː; ambiguous, lexical)
+        "ے": "eː",  // bari ye — eː
+        "ﯼ": "iː", "ﯽ": "iː", "ئ": "iː"
+    },
+
+    // و and ی act as CONSONANT glides word-initially or after a vowel.
+    "glides": { "و": "ʋ", "ی": "j" },
+
+    // Harakat (short-vowel diacritics) — usually ABSENT in running text (the restoration gap). Applied when present.
+    "harakat": {
+        "َ": "ə",  // zabar / fatha → ə
+        "ِ": "ɪ",  // zer / kasra → ɪ
+        "ُ": "ʊ",  // pesh / damma → ʊ
+        "ٰ": "ɑː", // khari zabar (superscript alif) → ɑː
+        "ً": "ən", "ٌ": "ʊn", "ٍ": "ɪn" // tanwin
+    },
+    "sukun": "ْ",   // jazm/sukun → no vowel
+    "shadda": "ّ",  // tashdid → gemination (→ length)
+
+    // Nasalization: ں (noon ghunna) + ٘ nasalize the preceding vowel.
+    "nasalizers": ["ں", "٘"],
+
+    // The DEFAULT short vowel inserted between consonants when none is written (the abjad's missing vowel). ə is
+    // the statistical default; ɪ/ʊ are lexical. This is the crude stand-in for the deferred restoration subsystem.
+    "inherentVowel": "ə",
+
+    // Danda / ASCII → canonical inline pause marks.
+    "clausePunctuation": {
+        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ",
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Urdu spellings; canonical IPA DERIVED by running them through the same g2p (with harakat so the
+    // short vowels are correct). Units + round tens + magnitudes; 21-99 irregular (bounded authoring task).
+    "numbers": {
+        "units": ["صِفْر", "ایک", "دو", "تِین", "چار", "پانچ", "چھے", "سات", "آٹھ", "نَو"],
+        "teens": ["دَس", "گِیارہ", "بارہ", "تیرہ", "چودہ", "پَندرہ", "سولہ", "سَترہ", "اَٹھارہ", "اُنِیس"],
+        "tens": { "20": "بِیس", "30": "تِیس", "40": "چالِیس", "50": "پَچاس", "60": "ساٹھ", "70": "سَتَّر", "80": "اَسّی", "90": "نَوے" },
+        "magnitudes": { "hundred": "سَو", "thousand": "ہَزار", "lakh": "لاکھ", "crore": "کَروڑ" }
+    }
+}
