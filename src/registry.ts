@@ -44,6 +44,7 @@ import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
 import { createKannada } from "./languages/kannada/kannada.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
+import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 
 export interface Phonemizer {
@@ -155,6 +156,8 @@ function build(lang: string): Phonemizer {
             return createKannada((latin) => getPhonemizer("en").text(latin));
         case "am":
             return createAmharic((latin) => getPhonemizer("en").text(latin));
+        case "bho":
+            return createBhojpuri((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

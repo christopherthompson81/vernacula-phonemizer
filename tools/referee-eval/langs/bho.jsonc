@@ -1,0 +1,15 @@
+// Bhojpuri (bho) — Indo-Aryan, Devanagari. ⚠ CANNOT-VERIFY (referee GAP). There is NO independent referee:
+// wikipron bho (404) and kaikki Bhojpuri (404) do not exist, and epitran bho-Deva is a CIRCULAR Hindi clone
+// (same Devanagari→IPA map: श→ʃ, ऐ→æː — the HINDI values, wrong for Bhojpuri). Since Bhojpuri's segmental
+// phonology is very close to Hindi, an engine and a Hindi-clone referee agree trivially — measuring nothing.
+// The committed anchor is instead a hand-adjudicated gold of the DISTINCTIVE Bhojpuri features (test/bhojpuri.
+// test.ts): श/ष→s (no /ʃ/), ऐ/औ→ai/au diphthongs, no əɦə-lowering — the axis that is NOT circular with a Hindi clone.
+{
+    "language": "bho",
+    "name": "Bhojpuri",
+    "script": "Devanagari",
+    "provenance": "Hindi-derived Devanagari engine + Bhojpuri divergences.",
+    "referees": [],
+    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Bhojpuri (no wikipron, no kaikki extract; epitran bho-Deva is a circular Hindi clone giving the HINDI values श→ʃ / ऐ→æː). Because Bhojpuri is segmentally ~Hindi, any agreement with a Hindi-clone referee is trivial. The anchor is the hand-adjudicated gold in test/bhojpuri.test.ts, grading the DISTINCTIVE features (श/ष→s, ऐ/औ→ai/au, no əɦə-lowering) where a Hindi clone is demonstrably wrong.",
+    "folds": []
+}
