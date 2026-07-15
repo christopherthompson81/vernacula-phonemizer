@@ -1,0 +1,13 @@
+// Igbo (ig) — Igboid (Volta-Niger, Niger-Congo). Referee GAP: no independent referee EXISTS (no wikipron ibo,
+// no epitran ibo-Latn, no kaikki extract — all 404). Unlike Bhojpuri this is NOT circular (Igbo is a distinct
+// language, not a clone of a covered one), so the hand-adjudicated gold in test/igbo.test.ts (Emenanjo 1978;
+// Green & Igwe 1963) is a MEANINGFUL correctness anchor — the Naija/Wu no-referee pattern.
+{
+    "language": "ig",
+    "name": "Igbo",
+    "script": "Latin",
+    "provenance": "Authored from standard Igbo phonology; ported from the espeak-ng-portable ig inventory + tone.",
+    "referees": [],
+    "secondaryGap": "No independent referee for Igbo: wikipron ibo_latn, epitran ibo-Latn, and the kaikki Igbo extract are all 404. The anchor is the adjudicated common-word gold in test/igbo.test.ts (Emenanjo 1978; Green & Igwe 1963) — meaningful (Igbo is a distinct language, not a clone). Tone is read only when MARKED (Igbo standard orthography usually omits it); connected-speech downstep/spreading + the vigesimal numbers are deferred.",
+    "folds": []
+}

@@ -1,0 +1,33 @@
+// Native canonical-IPA definition for Igbo / Asụsụ Igbo (ig) — Igboid (Volta-Niger, Niger-Congo), Latin script.
+// igbo.ts reads this file. Ported from the espeak-ng-portable authoring + tone added. Signature features: the
+// labial-velar stops ⟨gb⟩→ɡ͡b / ⟨kp⟩→k͡p, the labialised ⟨nw⟩→ŋʷ ⟨gw⟩→ɡʷ ⟨kw⟩→kʷ, ⟨ny⟩→ɲ, ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ,
+// ⟨sh⟩→ʃ, ⟨gh⟩→ɣ; the 8-vowel harmony system with dotted ị→ɪ ọ→ɔ ụ→ʊ; and TWO tones (High=acute ˥, Low=grave ˩)
+// + downstep — but Igbo standard orthography usually OMITS tone, so it is read only when marked (else no tone).
+// NO independent referee exists (no wikipron/epitran/kaikki) → adjudicated gold. See docs/ig_native_bringup_investigation.md.
+{
+    "language": "ig",
+    "name": "Igbo",
+    "script": "Latin",
+    "provenance": "Authored from standard Igbo phonology (Emenanjo 1978; Green & Igwe 1963) + the espeak-ng-portable ig inventory. No independent referee — anchored on an adjudicated gold.",
+
+    // Multi-letter graphemes (longest-first): affricates, labial-velars, labialised, palatal nasal.
+    "digraphs": { "ch": "t͡ʃ", "gb": "ɡ͡b", "gh": "ɣ", "gw": "ɡʷ", "kp": "k͡p", "kw": "kʷ", "nw": "ŋʷ", "ny": "ɲ", "sh": "ʃ" },
+
+    // Single consonant letters → IPA. ⟨j⟩→d͡ʒ, ⟨y⟩→j (glide), ⟨r⟩→tap ɾ, ⟨ṅ⟩/⟨ŋ⟩→ŋ (velar nasal).
+    "consonants": {
+        "b": "b", "p": "p", "d": "d", "t": "t", "j": "d͡ʒ", "g": "ɡ", "k": "k",
+        "f": "f", "v": "v", "s": "s", "z": "z", "h": "h", "m": "m", "n": "n",
+        "l": "l", "r": "ɾ", "w": "w", "y": "j", "ṅ": "ŋ", "ŋ": "ŋ"
+    },
+
+    // Oral vowels → IPA. The dotted-below ị/ọ/ụ (→ ɪ/ɔ/ʊ, the [-ATR] harmony set) are derived in igbo.ts from the
+    // base + combining dot.
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Two tones → Chao contour letters: High (acute), Low (grave); downstep (macron) → a lowered mid.
+    "tones": { "high": "˥", "low": "˩", "down": "˧" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

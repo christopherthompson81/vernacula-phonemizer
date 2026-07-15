@@ -47,6 +47,7 @@ import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createMinnan } from "./languages/minnan/minnan.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
+import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 
 export interface Phonemizer {
@@ -164,6 +165,8 @@ function build(lang: string): Phonemizer {
             return createMinnan((latin) => getPhonemizer("en").text(latin));
         case "yo":
             return createYoruba((latin) => getPhonemizer("en").text(latin));
+        case "ig":
+            return createIgbo((latin) => getPhonemizer("en").text(latin));
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
