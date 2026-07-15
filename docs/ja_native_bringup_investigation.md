@@ -196,3 +196,27 @@ write-only `prevYouon` var): じゅう→d͡ʑɯᵝː, きゅう→kʲɯᵝː, �
 own mora), so pitch downstep placement is unaffected. Reading validator steady at 97.7% per-char (it already folded
 long vowels, so the change is neutral there — but the raw canonical output is now consistent). Updated the 十 golden
 (d͡ʑɯᵝɯᵝ→d͡ʑɯᵝː) and stale validator comments.
+
+## Run 8 — 2026-07-14 — pitch-accent validation vs OpenJTalk (committed eval)
+
+Goal: independently validate the Tokyo pitch accent (ꜜ downstep). FINDING on referees: our pitch-accent.tsv merges
+the THREE standard Tokyo-accent corpora (kanjium/OpenJTalk/UniDic), and there is NO large free accent source
+outside them — the entire 375 MB kaikki/Wiktionary ja extract contains **3** explicit-Tokyo-accent words (it carries
+Kyōto/Kagoshima DIALECTAL accents, not standard Tokyo; the note-less default is bare kana with no accent). So a
+fully-independent scale referee does not exist. Per the user's steer, validate against OpenJTalk with the honest
+semi-circular caveat (OJT is one of the three voters).
+
+Ported the OpenJTalk eval into this repo: `tools/ja-pitch-eval.mts` + committed gold `tools/ja_pitch_reference.tsv`
+(2500 complete content words, OJT nucleus/mora/reading — OJT integers only, facts-not-expression). The eval computes
+OUR nucleus (accentNucleus) + morae (kanaToMorae), restricts to reading-matched + mora-aligned words (so it measures
+ACCENT not reading), and DISCOUNTS OOV-heiban coincidences (a word absent from the lexicon defaults to flat 0).
+
+RESULT: **1911/1990 = 96.0%** nucleus agreement (95.6% discounting the 8 OOV-heiban coincidences → good lexicon
+coverage). 503 reading-mismatches (excluded; scored by the reading eval) + 7 mora-mismatches. This matches
+espeak-ng-portable's 95.9% — the port is faithful. The 79 disagreements are 52 off-by-1 and are dominated by the
+DOCUMENTED contested set (映画 0/1, 毎日 0/1, 期間 1/2, 機会/機械 1/2, 心 2/3) + verb-stem FRAGMENTS (聞い/言い/歩い —
+mid-conjugation, ill-defined isolated accent), i.e. contested-accent + measurement artifact, NOT systematic error.
+JA accent is an inherent ~90-95% task (dictionaries themselves disagree), so 96% is near the achievable ceiling.
+
+Regression floor: `test/japanese-pitch.test.ts` (agreement ≥94%, sample >1800, OOV-heiban <40). CAVEAT stays honest:
+conservative-but-not-fully-independent referee. VERDICT: pitch validated at near-ceiling (semi-circular referee).

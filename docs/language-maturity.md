@@ -61,7 +61,7 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 | **hi** Hindi | 77.7% (.72) | — | ✅ | Schwa-deletion edge cases only. |
 | **kk** Kazakh | 86.2% (.83) | — | ✅ | Residual ~7.8% is stress-only + epitran's own ө/ү merger. |
 | **ko** Korean | 58.5% (.52) | — | ✅ | Referee-limited (narrow-transcription allophony: ㄹ ɭ~ɾ, intervocalic voicing). |
-| **ja** Japanese | 57.9% (.52) | — | 🟠 | Kana→IPA + numbers reliable; **pitch accent** deferred (Phase 2, needs a lexicon). Referee residual is narrow allophony. |
+| **ja** Japanese | 57.9% (.52) | OpenJTalk (kanji 97.7% · pitch 96.0%) | ✅ | **Referee-limited** (the wikipron primary is toneless/segmental — it can't see the kanji front-end or pitch, so 57.9% is not a quality signal). ALL subsystems built + independently validated vs OpenJTalk (an independent reading/accent engine): kana→IPA **99.7%**, numbers, counter (助数詞) fusion **99.9%**, kanji reading **97.7%** per-char, and **pitch accent 96.0%** nucleus (`tools/ja-pitch-eval.mts`). Pitch is near the inherent ~90-95% ceiling — JA accent is a task where dictionaries themselves disagree (映画 0/1, 期間 1/2), and the residual is contested-accent + verb-stem-fragment artifacts, not systematic error. CAVEAT: OpenJTalk is one of the three voters (kanjium/OpenJTalk/UniDic) behind our merged pitch lexicon, so pitch is a conservative-but-not-fully-independent referee — no larger free Tokyo-accent source exists (kaikki/Wiktionary carries ~3 Tokyo words). ː is the unified long-vowel notation. |
 | **pt** Portuguese | 78.0% (.74) | gold 99.4% | 🟡 | Gold shows near-perfect; grapheme `x` (ʃ/z/ks/s) + `l`-coda are the lexical tail. |
 | **ru** Russian | 94.8% (.90) | gold 97.7% | ✅ | Loanword hard-C-before-е + genitive г→v are a tiny lexical tail (🟡-adjacent). |
 | **si** Sinhala | 93.5% (.90) | — | ✅ | Residual is 1× referee quirks. |
@@ -74,8 +74,8 @@ primary — see fr/pt/de/ru/ha/vi/tr).
 
 ## What "outstanding work" concretely means
 
-- **🟠 scope gaps** are the substantive items: Mandarin's Hanzi front-end, Japanese/Swedish pitch accent,
-  Thai's compound segmentation. Each is a *subsystem*, tracked in that language's
+- **🟠 scope gaps** are the substantive items: Swedish pitch accent and Thai's compound segmentation. Each is a
+  *subsystem*, tracked in that language's
   `docs/<code>_*investigation.md`. Until built, feed these engines their supported input (pinyin, etc.) and treat the deferred layer as absent, not wrong.
 - **🟡 lexical tails** are bounded: a specific, enumerable class (mid-vowel height, loanword C-hardening, learned
   stress) that a small exception lexicon closes. The rule engine is right for everything else. Irish's Run-3
