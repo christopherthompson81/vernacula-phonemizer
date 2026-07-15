@@ -27,19 +27,22 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana and Hang
 
 | Family / area | Languages |
 |---|---|
+| Austroasiatic | • Vietnamese `vi` (tonal) |
 | Austronesian | • Indonesian `id` 🟡,<br>• Tagalog `tl` 🟡 |
 | Celtic | • Irish `ga`,<br>• Welsh `cy` |
-| Dravidian | • Tamil `ta`,,<br>• Telugu `te` |
-| Germanic | • German `de`,• English `en`,<br>• Swedish `sv` |
-| Indo-Aryan | Bengali `bn` 🟡, Hindi `hi`, Marathi `mr` 🟡, Punjabi `pa` 🟡, Sinhala `si` (tonal), Urdu `ur` 🟠 |
-| Japonic / Koreanic | Japanese `ja`, Korean `ko` |
-| Niger-Congo | Fula `ff`, Hausa `ha`, Zulu `zu` |
-| Creole (English-lexified) | Nigerian Pidgin `pcm` 🟡 |
-| Romance | Catalan `ca`, Spanish `es`, French `fr`, Italian `it`, Portuguese `pt` |
-| Semitic / Iranian | Arabic `ar`, Persian `fa` 🟠 |
-| Slavic | Czech `cs`, Russian `ru` |
-| Tonal (Sino-Tibetan / Tai / Austroasiatic) | Mandarin `cmn`, Cantonese `yue`, Wu `wuu` 🟡, Thai `th`, Vietnamese `vi` |
-| Turkic | Kazakh `kk`, Turkish `tr` |
+| Creole (English-lexified) | • Nigerian Pidgin `pcm` 🟡 |
+| Dravidian | • Tamil `ta`,<br>• Telugu `te` |
+| Germanic | • English `en`,<br>• German `de`,<br>• Swedish `sv` |
+| Indo-Aryan | • Bengali `bn` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
+| Japonic | • Japanese `ja` |
+| Koreanic | • Korean `ko` |
+| Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Zulu `zu` |
+| Romance | • Catalan `ca`,<br>• French `fr`,<br>• Italian `it`,<br>• Portuguese `pt`,<br>• Spanish `es` |
+| Semitic / Iranian | • Arabic `ar`,<br>• Persian `fa` 🟠 |
+| Sinitic | • Mandarin `cmn` (tonal),<br>• Cantonese `yue` (tonal),<br>• Wu `wuu` 🟡 (tonal) |
+| Slavic | • Czech `cs`,<br>• Russian `ru` |
+| Tai-Kadai | • Thai `th` (tonal) |
+| Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
 ✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (7: Bengali, Indonesian,
