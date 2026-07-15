@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **38 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **39 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,7 +21,7 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-38 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+39 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
 Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
@@ -36,7 +36,7 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul 
 | Indo-Aryan | • Bengali `bn` 🟡,<br>• Hindi `hi`,<br>• Marathi `mr` 🟡,<br>• Punjabi `pa` 🟡 (tonal),<br>• Sinhala `si`,<br>• Urdu `ur` 🟠 |
 | Japonic | • Japanese `ja` |
 | Koreanic | • Korean `ko` |
-| Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Zulu `zu` |
+| Niger-Congo | • Fula `ff`,<br>• Hausa `ha`,<br>• Swahili `sw`,<br>• Zulu `zu` |
 | Romance | • Catalan `ca`,<br>• French `fr`,<br>• Italian `it`,<br>• Portuguese `pt`,<br>• Spanish `es` |
 | Semitic / Iranian | • Arabic `ar`,<br>• Persian `fa` 🟠 |
 | Sinitic | • Mandarin `cmn` (tonal),<br>• Cantonese `yue` (tonal),<br>• Wu `wuu` 🟡 (tonal) |
@@ -45,7 +45,7 @@ Latin, Cyrillic, Devanagari, Bengali, Tamil, Sinhala, Arabic, Han, Kana, Hangul 
 | Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
-✅ reliable / referee-limited (28) · 🟡 reliable + a documented lexical tail (8: Bengali, Indonesian, Javanese,
+✅ reliable / referee-limited (29) · 🟡 reliable + a documented lexical tail (8: Bengali, Indonesian, Javanese,
 Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (2: Urdu, Persian) ·
 🔵 in active development.
 

@@ -1,0 +1,45 @@
+// Native canonical-IPA definition for Swahili / Kiswahili (sw) — Bantu, Latin script. swahili.ts reads this file.
+// Swahili has a highly PHONEMIC, shallow orthography and (unusually for Bantu) NO tone — just regular penultimate
+// stress. The distinctive features: the plain voiced stops are IMPLOSIVES (b→ɓ d→ɗ j→ʄ g→ɠ, both human referees
+// mark them), PRENASALIZED stops written as a nasal + voiced consonant (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ) with a
+// homorganic superscript nasal, ⟨ng'⟩→ŋ (velar nasal, DISTINCT from ⟨ng⟩→ᵑɡ), syllabic nasals (mtu→m̩tu), and
+// Arabic-loan fricatives (dh→ð, th→θ, gh→ɣ, kh→x). Vowels are [ɑ ɛ i ɔ u]. See docs/sw_native_bringup_investigation.md.
+{
+    "language": "sw",
+    "name": "Swahili",
+    "script": "Latin",
+    "provenance": "Authored from standard Swahili phonology (implosives, prenasalization, penultimate stress). Validated against wikipron swa + kaikki swa (human) + epitran swa-Latn.",
+
+    // ⟨ng'⟩ (with apostrophe) → the velar nasal ŋ — scanned before ⟨ng⟩ (the prenasalized ᵑɡ).
+    "velarNasal": "ng'",
+
+    // Prenasalized units: a homorganic nasal + voiced consonant → one prenasalized segment (superscript nasal).
+    "prenasal": { "mb": "ᵐb", "nd": "ⁿd", "nj": "ⁿd͡ʒ", "ng": "ᵑɡ", "mv": "ᵐv", "nz": "ⁿz" },
+
+    // Other multi-letter graphemes: affricate/fricative digraphs + the Arabic-loan fricatives.
+    "digraphs": { "ch": "t͡ʃ", "sh": "ʃ", "ny": "ɲ", "dh": "ð", "th": "θ", "gh": "ɣ", "kh": "x" },
+
+    // Single consonant letters → IPA. The plain voiced stops are IMPLOSIVE (ɓ ɗ ʄ ɠ); ⟨r⟩ is a tap ɾ.
+    "consonants": {
+        "p": "p", "b": "ɓ", "t": "t", "d": "ɗ", "k": "k", "g": "ɠ",
+        "j": "ʄ", "f": "f", "v": "v", "s": "s", "z": "z", "h": "h",
+        "m": "m", "n": "n", "l": "l", "r": "ɾ", "w": "w", "y": "j",
+        "c": "k", "q": "k", "x": "ks"
+    },
+
+    // Vowels — the 5-vowel system, phonetically [ɑ ɛ i ɔ u] (the convention of both human referees).
+    "vowels": { "a": "ɑ", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — standard Swahili, joined by "na". units siz. tens kumi/ishirini/…; hundreds mia; thousands elfu;
+    // millions milioni. Spellings read back through the same g2p.
+    "numbers": {
+        "units": ["sifuri", "moja", "mbili", "tatu", "nne", "tano", "sita", "saba", "nane", "tisa"],
+        "ten": "kumi",
+        "tens": { "2": "ishirini", "3": "thelathini", "4": "arobaini", "5": "hamsini", "6": "sitini", "7": "sabini", "8": "themanini", "9": "tisini" },
+        "hundred": "mia", "thousand": "elfu", "million": "milioni", "and": "na"
+    }
+}
