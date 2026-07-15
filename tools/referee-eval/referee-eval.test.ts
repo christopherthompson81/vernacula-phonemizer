@@ -36,7 +36,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     sv: 0.52, // wikipron swe broad — measured 55.7% (Phase 3: + NST compound secondary-stress → boundary-safe vowel length/quality + 2nd-onset softening); residual = referee noise (casual/truncated forms)
     ta: 0.58, // wikipron tam — measured 63.0% (r→ɾ folded only word-finally, to keep the ற/ர contrast); residual = ற geminate + diphthong notation
     th: 0.76, // wikipron tha — measured 81.9%; residual is LEXICAL (Sanskrit/Pali readings), not segmental
-    tr: 0.70, // wikipron tur — measured 76.2% (epitran tur 2nd: 79.8%); residual = loan long-vowels + ref noise
+    tr: 0.92, // wikipron tur — 93.7% (epitran tur 2nd: 94.5% — both referees now corroborate) after (a) engine: coda velar palatalization k/ɡ→c/ɟ (renk→ɾeɲc) + nasal place assimilation n→ŋ/ɲ (angut→aŋɡut), (b) completing the lax-vowel allophony folds (ɛ/ʊ/œ/ɪ/ʏ) + palatal/nasal + degemination folds. Residual = names + ğ glide-vs-length + h→x/ç
     vi: 0.65, // wikipron vie_hanoi narrow — measured 71.0% (epitran vie 2nd: 51.3%); residual = ə/ɛ nucleus + coda
     zu: 0.99, // epitran zul-Latn — clicks/implosives/ejectives/laterals corroborated (measured 100%)
   };
