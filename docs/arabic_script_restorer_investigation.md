@@ -74,7 +74,47 @@ exactly the argument for training them inside the shared pool.
 Silver, not gold: these are Wiktionary transcriptions (CC-BY-SA) with per-editor convention drift — training data,
 not an eval reference. Curate a held-out per-language eval slice separately; don't trust these labels as truth.
 
-### Recommended proof-of-concept
+## Run 3 — 2026-07-15 — normalize the IPA target inventory
+
+`tools/arabic-restorer/normalize_ipa.py` → `silver.normalized.tsv` + `inventory.txt`. The raw wikipron IPA had
+**411 distinct phone tokens** over 297k occurrences — a long tail of per-editor notation drift. Harmonized to a
+single canonical alphabet the same way the referee-eval folds work: **strip notation, never a real contrast.**
+
+- **KEPT (phonemic):** Arabic emphatics ˤ (`tˤ` alone is 2,308 occurrences), aspiration ʰ/ʱ, dental ̪, the retroflex
+  series ʈ ɖ ɳ ɽ ɭ ʂ, implosives ɓ ɗ ʄ ɠ ᶑ, nasal vowels ̃ (õː etc.), labialization ʷ, palatalization ʲ, tie bars.
+- **STRIPPED (notation):** Chao tone letters, epenthetic ᵊ, ultrashort breve ̆, tone accents ́ ̀ ̂ ̌, half-long ˑ,
+  non-syllabic ̯, unreleased ̚, voiceless ̥/̊, lowering ̞, centralized, syllabic, macron, rhotic hook, liaison ‿ ~.
+  Glyph folds ä→a (via stripped diaeresis), ɒ→ɑ, ɫ→l; tie U+035C→U+0361. Tokens reducing to modifiers-only (a
+  stripped tone+length token → bare ː) are dropped.
+
+Result: **411 → 252 canonical symbols**, 50,799 rows retained, 411 tone-only tokens dropped. 43 of the 252 are
+singletons — all genuine rare phones (ʈʲ, β, ɬ, the implosive ᶑ), NOT noise, so kept (folding them would destroy
+contrast). Verified same-row: 7,958 emphatic/dental/aspirate rows preserved every such feature; the only changes on
+those rows were tone-accent stripping (ə́→ə). **Tone is dropped deliberately** — not recoverable from the abjad
+(the restorer's premise) and marked erratically.
+
+## Run 4 — 2026-07-15 — TARGET DECISION: harakat, not skeleton→IPA (the wikipron set is the EVAL, not training)
+
+Course-correction. Runs 2–3 built + normalized a skeleton→**IPA** set — but the whole architecture is: one shared
+model restores **harakat** → each language's EXISTING deterministic g2p (`urdu/g2p.ts`, `shahmukhi.ts`,
+`pashto.ts`, …) turns the vocalized text into IPA. Building an IPA target had quietly drifted to making the model
+*replace* the g2p (relearn every retroflex/emphatic/aspirate the engine already nails) instead of *feeding* it —
+which is exactly the hopeless regime for a 247-word rider. Decided (owner-confirmed): **target = harakat.**
+
+Consequences:
+- **`silver.tsv` / `silver.normalized.tsv` are re-cast as the end-to-end EVAL reference**, not the training target:
+  score skeleton →[model] harakat →[deterministic g2p] IPA against these normalized IPA pairs, per language. Run 3's
+  notation-harmonization is exactly right *for that eval* (compare phonology, not editor notation). Nothing wasted.
+- **Training data is a separate build:** diacritized text → `(skeleton, lang, vocalized)` pairs (self-supervised:
+  strip harakat for the input, keep the vocalized form as target). Abundant for the Arabic anchor (Tashkeela —
+  ancient PD, now unblocked — + Quran), thinner for Persian/Urdu, ~nil for the riders (which lean on cross-lingual
+  transfer via shared script + Perso-Arabic loan vocabulary + the language tag). See Run 5.
+
+Why harakat wins: the model's output space shrinks to ~a handful of diacritics per character (data-efficient,
+transfers on the loan stratum), and the deterministic g2p — already correct for consonants, retroflexes, emphatics,
+gemination, nasalization — supplies everything except the one thing that's genuinely unwritten and ambiguous.
+
+### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
 them. Skip `uig` + modern Turkic. If it shows transfer (riders' held-out IPA accuracy rises vs a rider-only
