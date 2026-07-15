@@ -30,6 +30,7 @@ import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
 import { phonemizeWord as ru } from "../../src/languages/russian/russian.ts";
 import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
+import { phonemizeWord as bn } from "../../src/languages/bengali/bengali.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
@@ -48,6 +49,7 @@ const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
+    bn,
     ca,
     cmn,
     cs,

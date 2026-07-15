@@ -1,0 +1,130 @@
+// Native canonical-IPA definition for Bengali (bn) — authored from the Unicode Bengali chart (U+0980)
+// + standard (Bangladeshi/standard-colloquial) Bengali phonology. The generic abugida G2P engine
+// (src/core/abugida.ts) reads this file directly; bengali.ts layers the Bengali-specific vowel harmony
+// (ɔ→o raising), inherent-vowel deletion, and geminate→length on top. Every value is CANONICAL IPA.
+//
+// Key Bengali facts encoded here:
+//  - inherent vowel is /ɔ/ (NOT the Hindi schwa /ə/); it raises to [o] by vowel harmony (bengali.ts).
+//  - the three sibilants শ ষ স all merge to [ʃ] (Bengali has no /s/~/ʃ/ contrast in native words).
+//  - ত থ দ ধ are DENTAL (t̪ t̪ʰ d̪ d̪ʱ); ট ঠ ড ঢ retroflex (ʈ ʈʰ ɖ ɖʱ) — the fleet Indic dental convention.
+//  - retroflex nasal ণ and dental ন both → [n] (Bengali merged the nasal contrast).
+//  - ং (anusvara) → [ŋ]; ঁ (chandrabindu) → vowel nasalization; ঃ (visarga) → [h] (rare).
+//  - র → tap [ɾ]; ড় ঢ় → retroflex flap [ɽ ɽʱ]; য় → glide [j].
+{
+    "language": "bn",
+    "name": "Bengali",
+    "script": "Bengali",
+    "provenance": "Authored from the Unicode Bengali chart + standard Bengali phonology (Kolkata/standard-colloquial). This file IS the language data — the native G2P engine reads it directly.",
+
+    // The abugida inherent vowel: Bengali's is /ɔ/. Vowel harmony (ɔ→o) + deletion live in bengali.ts.
+    "inherentVowel": "ɔ",
+
+    // Consonant letters → canonical IPA.
+    "consonants": {
+        "ক": { "ipa": "k", "note": "velar stop, voiceless" },
+        "খ": { "ipa": "kʰ", "note": "velar stop, voiceless aspirated" },
+        "গ": { "ipa": "ɡ", "note": "velar stop, voiced" },
+        "ঘ": { "ipa": "ɡʱ", "note": "velar stop, voiced breathy" },
+        "ঙ": { "ipa": "ŋ", "note": "velar nasal" },
+        "চ": { "ipa": "t͡ʃ", "note": "post-alveolar affricate, voiceless" },
+        "ছ": { "ipa": "t͡ʃʰ", "note": "post-alveolar affricate, voiceless aspirated" },
+        "জ": { "ipa": "d͡ʒ", "note": "post-alveolar affricate, voiced" },
+        "ঝ": { "ipa": "d͡ʒʱ", "note": "post-alveolar affricate, voiced breathy" },
+        "ঞ": { "ipa": "n", "note": "palatal nasal — realized [n] in modern Bengali (only in conjuncts)" },
+        "ট": { "ipa": "ʈ", "note": "retroflex stop, voiceless" },
+        "ঠ": { "ipa": "ʈʰ", "note": "retroflex stop, voiceless aspirated" },
+        "ড": { "ipa": "ɖ", "note": "retroflex stop, voiced" },
+        "ঢ": { "ipa": "ɖʱ", "note": "retroflex stop, voiced breathy" },
+        "ণ": { "ipa": "n", "note": "retroflex nasal — merged to [n] in Bengali" },
+        "ত": { "ipa": "t̪", "note": "DENTAL stop, voiceless (t̪ vs retroflex ট=ʈ)" },
+        "থ": { "ipa": "t̪ʰ", "note": "dental stop, voiceless aspirated" },
+        "দ": { "ipa": "d̪", "note": "dental stop, voiced" },
+        "ধ": { "ipa": "d̪ʱ", "note": "dental stop, voiced breathy" },
+        "ন": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "প": { "ipa": "p", "note": "labial stop, voiceless" },
+        "ফ": { "ipa": "pʰ", "note": "labial stop, voiceless aspirated (also [f] in loans)" },
+        "ব": { "ipa": "b", "note": "labial stop, voiced (also the conjunct 'w')" },
+        "ভ": { "ipa": "bʱ", "note": "labial stop, voiced breathy (also [v] in loans)" },
+        "ম": { "ipa": "m", "note": "labial nasal" },
+        "য": { "ipa": "d͡ʒ", "note": "ôntôsthô ja → [d͡ʒ]" },
+        "র": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ল": { "ipa": "l", "note": "alveolar lateral" },
+        "শ": { "ipa": "ʃ", "note": "sibilant → ʃ (tal.); all three sibilants merge to ʃ" },
+        "ষ": { "ipa": "ʃ", "note": "sibilant → ʃ (murd.; historically retroflex)" },
+        "স": { "ipa": "ʃ", "note": "sibilant → ʃ (dent.; [s] only in some clusters/loans)" },
+        "হ": { "ipa": "ɦ", "note": "voiced glottal fricative" },
+        "ড়": { "ipa": "ɽ", "note": "retroflex flap (ra with nukta)" },
+        "ঢ়": { "ipa": "ɽʱ", "note": "breathy retroflex flap" },
+        "য়": { "ipa": "j", "note": "ya with nukta → glide [j]" },
+        "ৎ": { "ipa": "t̪", "note": "khanda ta → final dental [t̪], carries no inherent vowel" },
+    },
+
+    // Independent vowel letters (word-initial / standalone).
+    "independentVowels": {
+        "অ": { "ipa": "ɔ", "note": "short open-mid back (inherent vowel)" },
+        "আ": { "ipa": "a", "note": "open" },
+        "ই": { "ipa": "i", "note": "close front" },
+        "ঈ": { "ipa": "i", "note": "close front (length merged)" },
+        "উ": { "ipa": "u", "note": "close back" },
+        "ঊ": { "ipa": "u", "note": "close back (length merged)" },
+        "ঋ": { "ipa": "ɾi", "note": "vocalic r → [ɾi]" },
+        "এ": { "ipa": "e", "note": "close-mid front (lowers to [æ] in some contexts)" },
+        "ঐ": { "ipa": "oi", "note": "diphthong" },
+        "ও": { "ipa": "o", "note": "close-mid back" },
+        "ঔ": { "ipa": "ou", "note": "diphthong" },
+    },
+
+    // Dependent vowel signs (matras) — replace the inherent vowel on the preceding consonant.
+    "vowelSigns": {
+        "া": { "ipa": "a" },
+        "ি": { "ipa": "i" },
+        "ী": { "ipa": "i" },
+        "ু": { "ipa": "u" },
+        "ূ": { "ipa": "u" },
+        "ৃ": { "ipa": "ɾi" },
+        "ে": { "ipa": "e" },
+        "ৈ": { "ipa": "oi" },
+        "ো": { "ipa": "o" },
+        "ৌ": { "ipa": "ou" },
+    },
+
+    // Combining signs.
+    "signs": {
+        "virama": { "char": "্", "effect": "suppressInherentVowel", "note": "hôsôntô — no inherent vowel (conjuncts)" },
+        "anusvara": { "char": "ং", "effect": "velarNasal", "note": "Bengali ং → [ŋ] (a full velar nasal, NOT vowel nasalization)" },
+        "chandrabindu": { "char": "ঁ", "effect": "nasalizeVowel", "note": "chandrabindu → nasalizes the preceding vowel" },
+        "visarga": { "char": "ঃ", "effect": "appendH", "note": "→ [h] (rare)" },
+        "nukta": { "char": "়", "effect": "composeNukta", "note": "combines with the preceding consonant (ড়/ঢ়/য়)" },
+    },
+
+    // NUMBERS — authored Bengali spellings; canonical IPA is DERIVED by running them through the same G2P.
+    // Bengali 1-99 are largely irregular (like Hindi); the units + round tens + magnitudes are here.
+    "numbers": {
+        "units": ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়"],
+        "teens": ["দশ", "এগারো", "বারো", "তেরো", "চোদ্দো", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ"],
+        "tens": {
+            "20": "বিশ",
+            "30": "ত্রিশ",
+            "40": "চল্লিশ",
+            "50": "পঞ্চাশ",
+            "60": "ষাট",
+            "70": "সত্তর",
+            "80": "আশি",
+            "90": "নব্বই"
+        },
+        "magnitudes": { "hundred": "একশো", "thousand": "হাজার", "lakh": "লাখ", "crore": "কোটি" },
+        "decimalWord": "দশমিক"
+    },
+
+    // Danda / ASCII → canonical inline pause marks.
+    "clausePunctuation": {
+        "।": " । ",
+        "॥": " ॥ ",
+        ".": " . ",
+        "?": " ? ",
+        "!": " ! ",
+        ",": " , ",
+        ";": " ; ",
+        ":": " : "
+    }
+}
