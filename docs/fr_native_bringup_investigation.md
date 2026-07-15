@@ -148,3 +148,36 @@ côte→kot preserved. wikipron **66.5→78.5%**, adjudicated gold **85.6→90.8
 Remaining gold residual is MIXED (no single class): ⟨au⟩+r→ɔ (aurais), ⟨e⟩→ə in pre- (première, ours ø), + some
 gold NON-standard entries (meilleur/maison ⟨ai⟩→e where standard is ɛ; jouer→ʒue where standard is the glide ʒwe) +
 gold liaison/corrupt forms (elle→a). The wikipron primary stays name-deflated (agamemnon, alexandrovsk).
+
+## Run (2026-07-14) — au+r→ɔ, o-before-z, ⟨x⟩-closes; e/ɛ pass REJECTED; fr → ✅ (referee-limited)
+
+Cleaned up the remaining o/ɔ sub-rules and made the honest ✅ call. Three g2p fixes, all dictionary-confirmed:
+- **⟨au⟩/⟨eau⟩ before ⟨r⟩ → [ɔ]** (restaurant→ʁɛstɔʁɑ̃, aurais→ɔʁɛ, dinosaure→dinozɔʁ, Laure→lɔʁ). Was [o].
+- **⟨o⟩ before intervocalic ⟨s⟩ (→[z]) → [o]** — generalized the "-se(s)" case to any o+s+VOWEL (poser→poze,
+  position→pozisjɔ̃, philosophe→filozɔf); poste→pɔst, dossier→dɔsje (ss) unaffected. This ALSO undid a self-inflicted
+  regression: last run's o/ɔ pass had overwritten Lexique's correct `poze`→`pɔze` because the old g2p said pɔze.
+- **pronounced mid-word ⟨x⟩=[ks]/[ɡz] closes the syllable for e-quality** (sexuel→sɛksɥɛl, texte→tɛkst, examen→ɛ);
+  word-final silent ⟨x⟩ (deux→dø) still opens.
+Re-ran fix-fr-lexicon-loi from the pristine Lexique backup: 15761 o/ɔ-corrected, 109582 kept. wikipron 78.5→**79.2%**,
+gold 90.8→**91.3%**.
+
+**e/ɛ correction pass INVESTIGATED and REJECTED.** The gold's biggest residual class is e/ɛ (90 words), and the g2p
+implements the standard loi de position (closed→ɛ, open→e). A dry-run of "adopt g2p where it agrees with Lexique
+except on e↔ɛ" would change 1946 entries — but it is NET-AMBIGUOUS: French ⟨e⟩ before a consonant cluster/double
+consonant is LEXICALLY idiosyncratic, not rule-governed. Learned/Latin prefixes take [e] where a naive syllable rule
+says [ɛ]: effacer=[efase] (g2p wrongly ɛfase), cellulaire=[selylɛʁ] (g2p wrongly sɛlylɛʁ), dessus=[dəsy] — while
+blessure=[blɛsyʁ], descriptions=[dɛskʁipsjɔ̃] DO close. Lexique carries this lexical split; no rule reproduces it. So
+UNLIKE o/ɔ (cleanly rule-governed, g2p wins), e/ɛ-before-cluster is lexical (Lexique wins). Kept Lexique for e/ɛ.
+Also confirmed Lexique already gives ⟨-ai⟩→[ɛ] for future verbs (ferai=fəʁɛ, same as g2p) — the gold's [fəʁe] is its
+OWN modern e/ɛ merge, not a Lexique/ours error; so ⟨-ai⟩→ɛ is our consistent convention, not a bug.
+
+**✅ determination (referee-limited, the de-German precedent).** Headline wikipron is 79.1%, but that is
+name/acronym/rare-word DEFLATED, not a quality problem:
+- On the common-word subset (wikipron words also in the frequency gold, n=173): **only 7.5% error = 92.5% agreement**.
+- The full-set residual is: proper names with irregular pron (agamemnon, dreyfus, auxerre→osɛʁ, caen→kɑ̃),
+  acronyms wikipron spells letter-by-letter (cdd→sedede, fpr→ɛfpeɛʁ — a different subsystem), rare foreign words.
+- The gold (91.3%, real common words) residual is the gold's OWN modern e/ɛ merge (terreur/terrible/mettons/vraiment
+  — ours [ɛ] is standard-correct) + gold noise (ça→ha, nom→nõʊ̯̃, depuis→depi) + the small lexical e/ɛ-cluster tail
+  (destruction) Lexique handles better than any rule.
+This matches the ✅ bar set by **de** German (✅ at wikipron 78.2%, "~85% common-word agreement; residual loans/
+acronyms/proper nouns"). French is at 92.5% common-word / 91.3% gold — clears it. Marked ✅ referee-limited.
