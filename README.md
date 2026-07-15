@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **47 languages** — native, self-contained, and
+A **canonical-IPA** phonemizer for **48 languages** — native, self-contained, and
 espeak-independent. One output mode: consistent canonical IPA for speech-synthesis /
 TTS training. No parity mode, no dual rendering, no runtime fallback.
 
@@ -21,9 +21,9 @@ phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
 
 ## Languages
 
-47 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
+48 languages spanning Indo-Aryan, Dravidian, Romance, Germanic, Slavic, Celtic, Turkic,
 Semitic, Sino-Tibetan, Japonic, Koreanic, Tai, Austroasiatic, Austronesian, Niger-Congo and an English-lexified creole — across
-Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Geʽez, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
+Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic, Geʽez, Myanmar, Han, Kana, Hangul and Javanese (Aksara Jawa) scripts.
 
 | Family / area | Languages |
 |---|---|
@@ -40,13 +40,14 @@ Latin, Cyrillic, Devanagari, Gujarati, Bengali, Kannada, Tamil, Sinhala, Arabic,
 | Romance | • Catalan `ca`,<br>• French `fr`,<br>• Italian `it`,<br>• Portuguese `pt`,<br>• Spanish `es` |
 | Semitic / Iranian | • Amharic `am` 🟡,<br>• Arabic `ar`,<br>• Pashto `ps` 🟠,<br>• Persian `fa` 🟠 |
 | Sinitic | • Mandarin `cmn` (tonal),<br>• Cantonese `yue` (tonal),<br>• Wu `wuu` 🟡 (tonal),<br>• Min Nan `nan` 🟡 (tonal) |
+| Sino-Tibetan (Tibeto-Burman) | • Burmese `my` 🟠 (tonal) |
 | Slavic | • Czech `cs`,<br>• Russian `ru` |
 | Tai-Kadai | • Thai `th` (tonal) |
 | Turkic | • Kazakh `kk`,<br>• Turkish `tr` |
 
 **Maturity** (full detail in [`docs/language-maturity.md`](docs/language-maturity.md)):
 ✅ reliable / referee-limited (31) · 🟡 reliable + a documented lexical tail (12: Amharic, Bengali, Gujarati, Igbo, Indonesian, Javanese, Min Nan,
-Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (3: Urdu, Persian, Pashto) ·
+Marathi, Punjabi, Tagalog, Nigerian Pidgin, Wu) · 🟠 scope-limited, one subsystem deferred (4: Urdu, Persian, Pashto, Burmese) ·
 🔵 in active development · ⛔ cannot-verify (1: Bhojpuri — no independent referee).
 
 ## How it works
