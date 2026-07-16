@@ -134,5 +134,30 @@ Bengali is NOT referee-dead: independent, non-Wiktionary sources exist that targ
 - **BanglaIPA "DUAL-IPA"** (arXiv 2601.01778) — 130k unique words with linguistically-validated IPA — a candidate
   genuine SECOND referee (license TBD before shipping).
 
-PLAN: wire an independent referee to break the wikipron self-inconsistency (the confidence blocker), then improve
-the deletion rule on the Johny-2018 conditioning, verify non-circularly. [in progress]
+FOUND & MEASURED the independent referee: **Bengali.AI DUAL-IPA** (`Lancelot53/bengali_ai_ipa` on HF — the
+DataVerse/Bhashamul release; 150k linguist-validated sentences, 4 graduate linguists + an independent evaluator;
+newspaper 33% + literature 66%). It is genuinely INDEPENDENT of Wiktionary and word-alignable (text & IPA both
+space-tokenized per word). Built a 32,941-word lexicon locally (NOT committed — see caveats) by zipping equal-token
+sentence pairs, and measured our engine against it (dialect/notation-neutralized fold: ɐ→a, g→ɡ, ɦ→h, ɟ→d͡ʒ, ʲ→j,
+ʈ/t̪→t, pʰ→f, degeminate):
+- **full segmental 48.2%** — comparable to same-dialect wikipron's 45.9%, which is *reassuring* since DUAL-IPA is a
+  DIFFERENT standard (Bangladeshi/Dhaka, not our Kolkata target).
+- **vowel-presence skeleton 58.9%; medial-deletion agreement (skeleton ignoring the word-final vowel) 62.8%.**
+- The disagreements DECOMPOSE cleanly into: (a) a **systematic DIALECT split** — Dhaka RETAINS the word-final
+  inherent vowel Kolkata deletes (আদালত: Dhaka adalɔto vs our adalɔt; 1294 pure word-final cases) + Dhaka raises
+  ɔ→o more; and (b) **symmetric** medial-deletion disagreement (they-keep-we-delete 2167 ≈ we-keep-they-delete
+  2271). The symmetry is the key result: it is NOT a one-directional rule bug, so medial deletion is genuinely
+  VARIABLE/conditioned (matching Johny 2018), not a mistake we can rule our way out of against THIS referee.
+
+TWO conclusions that settle the original question:
+1. **Neither class is idiosyncratic-lexical.** The ɔ~o class is a rule (F&C, Run 6, fixed). The deletion class is
+   *conditioned* (Johny 2018 classifier-predictable; the DUAL-IPA dialect differences are themselves systematic).
+   So the honest ✅ lever is a **better-CONDITIONED deletion rule + an expanded Kolkata gold** — NOT a big lexicon.
+2. **DUAL-IPA must NOT be wired as a committed correctness referee.** (a) It is Bangladeshi/Dhaka — matching it
+   would push us toward the WRONG target (final-vowel retention, extra raising) for our Kolkata convention; a
+   naive gate would reward dialect drift. (b) Its license is unspecified (competition release) → not
+   redistributable into the repo. It is valuable for offline analysis (as here), not as a checked-in gate.
+
+NEXT (proposed, not yet done): (i) improve the medial-deletion rule on principled conditioning (syllable
+weight / tatsama-stratum tells) and validate on an EXPANDED hand-adjudicated Kolkata gold (150–200 words), the
+honest cs/cy ✅ path; (ii) a small curated lexicon only for the true residue (final-[o] retention words, এক).
