@@ -161,8 +161,27 @@ long-vowel realizations (needs the scanner to accept per-position vowel override
 rider with an exported bare `phonemizeWord` (ur/ps/fa/ar) — across the riders it yields a few thousand native silver
 harakat pairs for few-shot, on top of the anchor-transfer baseline.
 
+## Run 7 — 2026-07-15 — scale g2p-inversion to ur/ps/fa (10,929 rider harakat pairs)
+
+Wired ur/ps/fa into `invert_harakat.ts` (each exports a bare `phonemizeWord` + has a referee fold config; the
+slot-finder treats a letter listed in both cons and vowelLetters — Persian/Pashto write و/ی/ه as consonants but
+the g2p reads them as vowels — as a VOWEL, so the search doesn't blow up). `invert_harakat.ts all`, ~19 s:
+
+| lang | words | labeled | % |
+|---|---:|---:|---:|
+| `fa` Persian | 10,235 | 6,916 | 67.6% |
+| `ps` Pashto | 1,303 | 575 | 44.1% |
+| `ur` Urdu | 7,614 | 3,144 | 41.3% |
+| `pa` Punjabi | 1,260 | 294 | 23.3% |
+| **total** | | **10,929** | |
+
+Persian's high yield = leaky abjad (long vowels written → fewer ambiguous slots) + mature g2p; Punjabi's low = و/ی
+long-vowel ambiguity + tonogenesis. Precision spot-checked sound on all four (ps آبکند→آبْکَنْدْ recovers fatḥa on ک
++ sukūn on the clusters = ref `ɑː b k ə n d`; ur آئین→آئینْ; fa آباد→آبادْ). **10,929 native rider harakat pairs** now
+exist where there were zero — the few-shot signal to complement anchor transfer.
+
 Silver-data prep status: eval reference ✅ · multilingual char vocab ✅ · anchor harakat ✅ (pre-existing) · rider
-g2p-inversion ✅ (pa proven; ur/ps/fa next) · Persian/Urdu diacritized text → optional.
+g2p-inversion ✅ (pa/ur/ps/fa, 10.9k pairs) · Persian/Urdu diacritized text → optional. **Ready for a training run.**
 
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k

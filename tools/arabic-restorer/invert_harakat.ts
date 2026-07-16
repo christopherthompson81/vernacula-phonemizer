@@ -5,42 +5,43 @@
  * vocalization is the silver harakat label — training data the restorer otherwise could not get for the riders.
  *
  * The fold preserves vowel QUALITY (it only strips stress/tone/length + folds ɾ→r ʋ→w degemination final-ə), so a
- * fold-match pins down the correct short vowel; gemination is fold-neutralized, so shadda is not searched. Proven
- * here on Punjabi Shahmukhi (pa) against the 1,360-word pan_arab reference. Run: npx tsx invert_harakat.ts pa
+ * fold-match pins down the correct short vowel; gemination is fold-neutralized, so shadda is not searched.
+ * Run: npx tsx invert_harakat.ts <pa|ur|ps|fa|all>
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
+import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
+import { phonemizeWord as ps } from "../../src/languages/pashto/pashto.ts";
+import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { makeFold } from "../referee-eval/eval.ts";
 import { CONFIG } from "../referee-eval/config.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-// Per-language config: the phonemizer, and the Perso-Arabic letter classes for slot-finding. Only pa is wired now;
-// ur/ps/fa/ar slot in the same way once their bare phonemizeWord is exported.
-const LANGS: Record<
-    string,
-    { phon: (w: string) => string; silverCode: string; cons: string; vowelLetters: string }
-> = {
-    pa: {
-        phon: pa,
-        silverCode: "pan", // wikipron ISO 639-3 tag in silver.tsv
-        cons: "بپتٹثجچحخدڈذرڑزژسشصضطظغفقکگلمنہھءعݨࣇ",
-        vowelLetters: "اآویےئؤ",
-    },
+// Per-language config: the phonemizer, the wikipron tag in silver.tsv, and the Perso-Arabic letter classes for
+// slot-finding. A letter in BOTH cons and vowelLetters (Persian/Pashto list و/ی/ه as consonants but the g2p treats
+// them as vowels/glides) is treated as a VOWEL letter — no slot — so the search space doesn't blow up.
+interface LangCfg { phon: (w: string) => string; silverCode: string; cons: string; vowelLetters: string }
+const LANGS: Record<string, LangCfg> = {
+    pa: { phon: pa, silverCode: "pan", cons: "بپتٹثجچحخدڈذرڑزژسشصضطظغفقکگلمنہھءعݨࣇ", vowelLetters: "اآویےئؤ" },
+    ur: { phon: ur, silverCode: "urd", cons: "بپتٹثجچحخدڈذرڑزژسشصضطظغفقکگلمنہھءع", vowelLetters: "اآویےئؤﯼﯽ" },
+    ps: { phon: ps, silverCode: "pus", cons: "بپتټثجځچڅحخدډذرړزژږسشښصضطظعغفقکكګگلمنڼءھ", vowelLetters: "اآویېۍئےؤهۀ" },
+    fa: { phon: fa, silverCode: "fas", cons: "بپتثجچحخدذرزژسشصضطظعغفقکكگلمنء", vowelLetters: "اآویيئؤه" },
 };
 
 const FATHA = "َ", KASRA = "ِ", DAMMA = "ُ", SUKUN = "ْ";
 const HARAKAT = [FATHA, KASRA, DAMMA, SUKUN]; // a / i / u / no-vowel — the search options per slot
 const MAX_SLOTS = 7; // 4^7 = 16384 candidates; longer words are reported as capped
 
-/** Indices of consonants that take a harakat slot: a consonant NOT immediately followed by a written vowel letter
- *  (word-final, or before another consonant/nasalizer) has an ambiguous short vowel. */
-function slots(chars: string[], cfg: { cons: string; vowelLetters: string }): number[] {
+/** Indices of consonants that take a harakat slot: a consonant (NOT a vowel-letter) NOT immediately followed by a
+ *  written vowel letter (word-final, or before another consonant/nasalizer) has an ambiguous short vowel. */
+function slots(chars: string[], cfg: LangCfg): number[] {
     const out: number[] = [];
     for (let i = 0; i < chars.length; i++) {
-        if (!cfg.cons.includes(chars[i]!)) continue;
+        const c = chars[i]!;
+        if (!cfg.cons.includes(c) || cfg.vowelLetters.includes(c)) continue;
         const next = chars[i + 1];
         if (next === undefined || !cfg.vowelLetters.includes(next)) out.push(i);
     }
@@ -60,8 +61,7 @@ function vocalize(chars: string[], slotIdx: number[], choice: number[]): string 
     return out;
 }
 
-function main(): void {
-    const lang = process.argv[2] ?? "pa";
+function label(lang: string): void {
     const cfg = LANGS[lang];
     if (!cfg) throw new Error(`no inversion config for "${lang}"`);
     const fold = makeFold(CONFIG[lang]!);
@@ -81,7 +81,6 @@ function main(): void {
         let found: string | null = null;
         const total = 4 ** sl.length;
         for (let n = 0; n < total && !found; n++) {
-            // n → base-4 digits = the harakat choice per slot
             const choice: number[] = [];
             let x = n;
             for (let k = 0; k < sl.length; k++) { choice.push(x & 3); x >>= 2; }
@@ -94,12 +93,12 @@ function main(): void {
 
     const out = join(HERE, `harakat.${lang}.silver.tsv`);
     writeFileSync(out, labeled.join("\n") + (labeled.length ? "\n" : ""));
-    const tot = rows.length;
-    console.log(`${lang}: ${tot} reference words`);
-    console.log(`  labeled (g2p reproduces the reference IPA): ${ok}  (${(100 * ok / tot).toFixed(1)}%)`);
-    console.log(`  no vocalization matched:                    ${miss}  (${(100 * miss / tot).toFixed(1)}%)`);
-    console.log(`  skipped (>${MAX_SLOTS} ambiguous slots):             ${capped}`);
-    console.log(`  wrote ${labeled.length} silver harakat pairs -> ${out.replace(HERE + "/", "")}`);
+    const tot = rows.length || 1;
+    console.log(
+        `${lang}: ${rows.length} words · labeled ${ok} (${(100 * ok / tot).toFixed(1)}%) · ` +
+        `miss ${miss} · capped(>${MAX_SLOTS} slots) ${capped} → harakat.${lang}.silver.tsv`,
+    );
 }
 
-main();
+const arg = process.argv[2] ?? "pa";
+for (const l of arg === "all" ? ["pa", "ur", "ps", "fa"] : [arg]) label(l);
