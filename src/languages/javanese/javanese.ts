@@ -10,6 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import {
     scanAksara,
     aksaraDigit,
@@ -85,6 +86,13 @@ export function applyPhonology(segs: Seg[]): string {
     const last = segs[segs.length - 1]!;
     if (last.ph === "k") last.ph = "ʔ";
 
+    // Homorganic nasal assimilation: /n/ → [ɲ] before a palatal affricate (kanca→kaɲt͡ʃɔ, banci→baɲt͡ʃi). The
+    // Aksara Jawa writes ꦚ (ɲ) explicitly; the Latin writes plain ⟨n⟩ but it is realized [ɲ] — so the Latin
+    // front-end needs the rule (the referee writes plain n → folded, as the config note documents).
+    for (let i = 0; i < segs.length - 1; i++)
+        if (segs[i]!.ph === "n" && (segs[i + 1]!.ph === "t͡ʃ" || segs[i + 1]!.ph === "d͡ʒ"))
+            segs[i]!.ph = "ɲ";
+
     // Closed-syllable laxing (i→ɪ u→ʊ o→ɔ): a vowel is CLOSED when a coda follows — i.e. ≥2 consonants before the
     // next vowel (first is a coda), or ≥1 trailing consonant at word end.
     for (let i = 0; i < segs.length; i++) {
@@ -108,7 +116,8 @@ export function applyPhonology(segs: Seg[]): string {
         const lastV = vowelIdx[vowelIdx.length - 1]!;
         segs[lastV]!.ph = "ɔ";
         // Reach back ONE syllable: a penult /a/ separated from the final by exactly one consonant unit (a single
-        // letter or a digraph) → [ɔ]. No antepenult spread; a heavier penult coda (bangsa) is left to the referee.
+        // letter or a digraph) → [ɔ]. No antepenult spread; a heavier penult coda (bangsa) is left to the referee
+        // (spreading across a closed penult is net-NEGATIVE — the referee is inconsistent there, measured 2026-07-16).
         const penult = vowelIdx[vowelIdx.length - 2];
         if (penult !== undefined && segs[penult]!.v === "a" && lastV - penult === 2)
             segs[penult]!.ph = "ɔ";
@@ -125,12 +134,30 @@ export function applyPhonology(segs: Seg[]): string {
     return out.normalize("NFC");
 }
 
-/** One Javanese word → canonical IPA. Routes by script: Aksara Jawa (Hanacaraka) → the abugida scanner, else the
- *  Latin g2p — both feed the shared phonology. */
-export function phonemizeWord(word: string): string {
+/** One Javanese word → canonical IPA, RULE-ENGINE ONLY (no cross-script lexicon). Routes by script: Aksara Jawa
+ *  → the abugida scanner, else the Latin g2p — both feed the shared phonology. The honest signal for the eval. */
+export function phonemizeWordRules(word: string): string {
     return applyPhonology(
         AKSARA_WORD.test(word) ? scanAksara(word) : scan(word.toLowerCase()),
     );
+}
+
+// Cross-script ⟨e⟩ lexicon (Aksara-resolved, Latin-keyed; see javanese-lexicon.tsv). Applied on the SHIPPED Latin
+// path only — Aksara input already resolves ⟨e⟩ via the script, so it never consults this.
+let LEXICON: Map<string, string> | undefined;
+const lexicon = (): Map<string, string> =>
+    (LEXICON ??= loadTsvMap(import.meta.url, "javanese-lexicon.tsv", (v) => v, {
+        optional: true,
+    }));
+
+/** SHIPPED Javanese word → canonical IPA. For Latin input a cross-script ⟨e⟩ lexicon override applies (pepet vs
+ *  taling, unrecoverable from Latin); Aksara input and everything else fall through to the rule engine. */
+export function phonemizeWord(word: string): string {
+    if (!AKSARA_WORD.test(word)) {
+        const hit = lexicon().get(word.toLowerCase());
+        if (hit !== undefined) return hit;
+    }
+    return phonemizeWordRules(word);
 }
 
 // ── Numbers (ngoko; irregular) — ported from the espeak-ng-portable compositor ────────────────────────────────
@@ -185,7 +212,10 @@ const TOKEN =
 /** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
 function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
     if (Number.isSafeInteger(n))
-        for (const wd of numberToText(n).split(" ")) sink.emit(phonemizeWord(wd));
+        // Number words bypass the content lexicon — the ngoko spellings collide with taling homographs (the
+        // number seket [səkət̪] vs a taling seket [sekət̪]); the compositor's words are the rule-form pronunciation.
+        for (const wd of numberToText(n).split(" "))
+            sink.emit(phonemizeWordRules(wd));
 }
 
 class JavanesePhonemizer implements Phonemizer {

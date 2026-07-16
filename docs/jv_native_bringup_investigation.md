@@ -59,3 +59,25 @@ dental/retroflex distinctions the Latin ⟨e⟩/⟨t⟩ blur.
 LIMITATION: Aksara Jawa is traditionally written WITHOUT inter-word spaces; a space-less script run is treated as
 one token (glued), so connected space-less text would need a segmenter (Thai/Wu pattern). Per-word (the referee,
 and modern spaced usage) works.
+
+## Run (2026-07-16) — REVIEW: cross-script ⟨e⟩ lexicon (Punjabi pattern) + homorganic-nasal rule
+
+Bucketed the residual (kaikki Latin, 187 misses): diffuse — dominated by lexical a→ɔ loan exceptions (denta, ora,
+angsa) + harmony-spread + the folded ⟨e⟩ tail. Two candidate rules DIED on measurement: final-obstruent devoicing
+(referee devoices only 17/152 → lexical) and a~ɑ (ɑ appears 2× total → negligible).
+
+The stated ⟨e⟩ tail: Latin ⟨e⟩ defaults to pepet ə, but taling words (pangeran, bebek, raden) are [e]/[ɛ] — and
+it is UNRECOVERABLE from Latin orthography (no rule). CROSS-SCRIPT TRANSFER (the Punjabi approach): the Aksara Jawa
+script writes pepet ꦼ vs taling ꦺ distinctly. Transliterated each kaikki-Aksara word → its Latin key (Aksara→Latin
+is deterministic, collapsing pepet/taling→⟨e⟩, exactly the ambiguity) and phonemized it via our OWN Aksara
+front-end (resolves ⟨e⟩); pinned the resolved form to the Latin word where the Latin default differs. **130 entries**
+(all pure ⟨e⟩ resolutions), shipped-Latin-only (Aksara input resolves natively; numbers bypass it — the taling
+homograph seket ≠ the number 50 [səkət̪]). Rule-only Latin 0/130 correct → shipped 130/130.
+
+Also found a RULE (the user's "even better"): homorganic nasal n→ɲ before a palatal affricate (kanca→kaɲt͡ʃɔ,
+banci→baɲt͡ʃi) — the Latin under-specified the nasal (the Aksara writes ꦚ). Eval-neutral (config folds ɲ~n),
+shipped-correct. The a→ɔ closed-penult harmony spread (bangsa→bɔŋsɔ) was tested and REVERTED (net −2pp; the referee
+is inconsistent on closed penults, as the code comment already warned).
+
+Eval rule-only unchanged (86.2/84.5, the eval folds ⟨e⟩); the cross-script lexicon is a shipped-quality gain the
+folded % cannot see. Suite 373/373.

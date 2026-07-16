@@ -53,7 +53,9 @@ import { phonemizeWord as kn } from "../../src/languages/kannada/kannada.ts";
 import { phonemizeWord as am } from "../../src/languages/amharic/amharic.ts";
 import { phonemizeWord as yo } from "../../src/languages/yoruba/yoruba.ts";
 import { phonemizeWord as my } from "../../src/languages/burmese/burmese.ts";
-import { phonemizeWord as jv } from "../../src/languages/javanese/javanese.ts";
+// RULE-ONLY for jv: the shipped phonemizeWord adds a cross-script ⟨e⟩ lexicon sourced from the Aksara referee;
+// phonemizeWordRules bypasses it → the honest engine signal (the eval folds ⟨e⟩ anyway, so the % is identical).
+import { phonemizeWordRules as jv } from "../../src/languages/javanese/javanese.ts";
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
