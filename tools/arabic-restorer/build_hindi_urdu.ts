@@ -29,13 +29,6 @@ function main(): void {
     if (!existsSync(DUMP)) { console.error(`missing ${DUMP} — download the kaikki Hindi dump first`); process.exit(1); }
     const hi = getPhonemizer("hi");
 
-    // Existing wikipron Urdu skeletons — only ADD new words.
-    const have = new Set<string>();
-    for (const l of readFileSync(join(HERE, "silver.tsv"), "utf8").split("\n")) {
-        const p = l.split("\t");
-        if (p.length >= 3 && p[1] === "urd") have.add(p[0]!);
-    }
-
     const seen = new Set<string>();
     const rows: string[] = [];
     let entries = 0, withUrdu = 0;
@@ -50,7 +43,8 @@ function main(): void {
         if (!urduForm?.form) continue;
         withUrdu++;
         const skel = urduForm.form.normalize("NFC").replace(HARAKAT, "");
-        if ([...skel].length < 2 || have.has(skel) || seen.has(skel)) continue;
+        // ALL Urdu-spelling words (dedup only) — this is a LEXICON/COVERAGE source (real spellings + gold IPA).
+        if ([...skel].length < 2 || seen.has(skel)) continue;
         const ipa = harmonize(hi.text(dev).trim());
         if (!ipa) continue;
         seen.add(skel);
@@ -58,7 +52,7 @@ function main(): void {
     }
 
     writeFileSync(join(HERE, "silver.hindiurdu.tsv"), rows.join("\n") + (rows.length ? "\n" : ""));
-    console.log(`Hindi entries ${entries}, with Urdu spelling ${withUrdu} → ${rows.length} NEW urd pairs`);
+    console.log(`Hindi entries ${entries}, with Urdu spelling ${withUrdu} → ${rows.length} urd pairs (all Urdu-spelling words)`);
     console.log(`  wrote silver.hindiurdu.tsv`);
 }
 

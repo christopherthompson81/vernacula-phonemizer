@@ -33,6 +33,13 @@ GOLD vocalizations. It is a different VOCABULARY distribution than wikipron, so 
 neural generalization (measured flat) — it's a COVERAGE win for the LEXICON layer (exact-match at inference). Kept
 OUT of the neural training manifest. Inherits CC-BY-SA; the raw Hindi dump (~160 MB) is not committed.
 
+## `lexicon.<lang>.tsv` — the shippable production lexicon (COVERAGE layer)
+`invert_harakat.ts --lexicon` mines ALL sources (wikipron + harmonized kaikki + Hindi→Urdu real spellings), one
+vocalization per skeleton → `skeleton⇥lang⇥vocalized`. The Arabic `restore.ts`/`diacritization.tsv` analogue for the
+riders: at inference, look up a word; if present, use its exact vocalization → g2p → IPA; else fall to the neural
+model. Urdu: 8,120 words = **66.4% of production tokens** (measured by `coverage_eval.py` on OpenSubtitles frequency
+lists). Inherits the CC-BY-SA of its sources. This is the axis the held-out neural eval can't see (docs Run 20–21).
+
 ## Role: EVALUATION reference (not the training target)
 The shared model's TARGET is **harakat** (short-vowel diacritics) → each language's existing deterministic g2p turns
 the vocalized text into IPA (see `docs/arabic_script_restorer_investigation.md`, Run 4). These wikipron IPA pairs

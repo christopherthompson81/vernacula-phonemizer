@@ -444,6 +444,36 @@ Coverage IS scalable — Hindi→Urdu/kaikki add thousands of real words handled
 step is a **production/coverage eval + wiring the lexicon layer**, and accepting the neural held-out is near its
 ceiling — not chasing data to move a metric that structurally can't move on that axis.
 
+## Run 21 — 2026-07-15 — production COVERAGE eval + shippable lexicon: the scaling made visible
+
+Run 20 concluded the held-out GENERALIZATION eval is at its g2p-coverage ceiling and can't see coverage-scaling.
+So built the metric that CAN — `coverage_eval.py`, over real OpenSubtitles token-frequency lists (ur 242k tokens,
+fa 40M): the fraction of production TOKENS whose skeleton each data layer covers. TOKEN-weighted = production
+reality (common words recur), vs the near-useless TYPE coverage.
+
+**Urdu — the scaling that was FLAT on the held-out is +12 points here:**
+
+| layer | token-cov | type-cov |
+|---|---:|---:|
+| wikipron reference | 71.0% | 26.6% |
+| + kaikki | 71.0% | 26.6% |
+| **+ Hindi→Urdu** | **83.1%** | 36.7% |
+| **SHIPPABLE lexicon (vocalized)** | **66.4%** | 28.1% |
+
+(Persian: kaikki +2.9; Hindi→Urdu is Urdu-only.) The token/type gap (83% vs 37%) IS the production reality — you
+cover most of what people SAY. Hindi→Urdu — flat on the held-out (Run 19-20) — adds **+12 pts of production
+token-coverage**, exactly the "scaling that genuinely works, now visible."
+
+**Shippable lexicon.** `invert_harakat.ts --lexicon` mines ALL sources (wikipron + kaikki + Hindi→Urdu, real Urdu
+spellings + gold IPA), deduped per skeleton → `lexicon.<lang>.tsv` (the Arabic `restore.ts`/`diacritization.tsv`
+analogue). Urdu: **8,120 vocalized words → 66.4% of production tokens handled EXACTLY** (up from 56% neural-only;
+Hindi added +10 pts). Kept OUT of neural training (harakat.*.silver.tsv unchanged; the neural baseline stays +15.5).
+The 66.4→83.1% gap is inversion yield on the Hindi words (34% don't invert — the remaining g2p-coverage work).
+
+Two-layer production path now concrete: **lexicon lookup (exact, ~2-in-3 Urdu tokens) → else neural (novel words) →
+else default g2p.** Wiring the lexicon into the live Urdu/Persian phonemizer (the `restore.ts` pass) is the deploy
+step; the artifacts + both evals are committed. The scaling frontier is measured on BOTH axes now.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
