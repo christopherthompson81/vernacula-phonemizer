@@ -145,8 +145,9 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        "retainFinalAfterCluster": true,
         "medialRule": "ohala-VCaCV",
-        "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
+        "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context). MARATHI keeps the word-final inherent schwa after a consonant CLUSTER or GEMINATE (अंक→əŋkə, महत्त्व→məɦət̪ːʋə, अन्न→ənːə) but deletes it after a single consonant (घर→ɡʱəɾ) — retainFinalAfterCluster; Hindi deletes both.",
     },
 
     // Post-rules applied to the raw akshara IPA (declarative, ordered regex — portable). Geminate→length
