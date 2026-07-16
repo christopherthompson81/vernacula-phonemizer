@@ -1,50 +1,110 @@
-# Javanese Latin ⟨e⟩ lexicon — CROSS-SCRIPT TRANSFER (the Punjabi Gurmukhi↔Shahmukhi pattern). The Latin ⟨e⟩ is
-# ambiguous: pepet /ə/ vs taling /e/~/ɛ/ are BOTH written ⟨e⟩ and unrecoverable from Latin orthography (no rule).
-# The Aksara Jawa script writes them with distinct signs (pepet ꦼ vs taling ꦺ), so it is MORE phonemic.
+# Javanese Latin ⟨e⟩ lexicon — CROSS-SCRIPT TRANSFER (the Punjabi Gurmukhi↔Shahmukhi pattern). Latin ⟨e⟩ conflates
+# pepet /ə/ and taling /e/~/ɛ/ — BOTH written ⟨e⟩ and unrecoverable from Latin orthography (no rule; that IS the
+# ambiguity). The Aksara Jawa script writes them with distinct signs, so it is more phonemic.
 #
-# PROVENANCE: each Aksara word (kaikki jav Aksara, Wiktionary human) was transliterated to its Latin form
-# (deterministic — Aksara→Latin collapses pepet/taling→⟨e⟩, exactly the ambiguity) and phonemized via our OWN
-# Aksara front-end (aksara.ts, which resolves ⟨e⟩); the resolved pronunciation is pinned to the Latin key. Pinned
-# only where the Latin default (⟨e⟩→ə) DIFFERS — i.e. the taling words the Latin path gets wrong (pangeran→paŋeran,
-# bebek→bebeʔ). Overrides the SHIPPED Latin path only; phonemizeWordRules (and the referee eval) bypass it. The
-# referee eval FOLDS ⟨e⟩ (əɛe→e), so this is a shipped-quality gain the folded % cannot see.
+# PROVENANCE: each Aksara word (full kaikki Javanese dump — 2365 Aksara headwords + 149 exact Latin↔Aksara pairs)
+# was transliterated to its Latin key (Aksara→Latin is DETERMINISTIC, collapsing pepet/taling→⟨e⟩, exactly the
+# ambiguity) and phonemized via our own ⟨e⟩-resolving Aksara front-end; the resolved pronunciation is pinned to the
+# Latin key where the Latin default (⟨e⟩→ə) differs. Reliable — the sister SCRIPT (deterministic), not a noisy
+# consensus. Kept ONLY the ⟨e⟩-only diffs (a synonym in the kaikki forms field differs in consonants → excluded:
+# deling→pring dropped). A single-referee a→ɔ loan-exception layer was mined and DROPPED — it was noisy (the kaikki
+# entry kutha→kuʈa contradicts the hand-verified golden kuʈɔ; that tail needs a reliable exception source).
+#
+# Overrides the SHIPPED Latin path only; phonemizeWordRules (and the referee eval) bypass it. Numbers bypass it too.
 abiseka	abisˈekɔ
 ade	ˈad̪e
+ae	ˈae
+ajamaneh	ad͡ʒamˈaneh
+ajameneh	ad͡ʒamˈəneh
 akeh	ˈakeh
+akerat	akˈerat̪
+amben	ˈamben
 ampel	ˈampel
 ampeyan	ampˈejan
+anem	ˈanem
+angabei	aŋabˈei
 angel	ˈaŋel
 anthek	ˈanʈeʔ
+apamaneh	apamˈaneh
+apameneh	apamˈəneh
 areh	ˈareh
+asemasetat	asəmasˈet̪at̪
+asemdheyoksiribonukleyat	asəmɖejɔksiribonʊklˈejat̪
+asemetanowat	asəmet̪anˈowat̪
+asemmetanakarboksilat	asəmmet̪anakarbɔksˈilat̪
+bae	bˈae
 bale	bˈale
+bandhek	bˈanɖeʔ
+bandhekan	banɖˈekan
 bebek	bˈebeʔ
 beda	bˈed̪ɔ
 beji	bˈed͡ʒi
+benet	bˈenet̪
+benteng	bˈent̪eŋ
+beres	bˈeres
+beteng	bˈet̪eŋ
 beya	bˈejɔ
 brewu	brˈewu
 cabe	t͡ʃˈabe
+canela	t͡ʃanˈelɔ
+capgomeh	t͡ʃapɡˈomeh
 cawe	t͡ʃˈawe
 cecel	t͡ʃˈet͡ʃel
+cedhak	t͡ʃˈeɖaʔ
+celeng	t͡ʃˈeleŋ
+celengan	t͡ʃelˈeŋan
+cempe	t͡ʃˈəmpe
 centhang	t͡ʃˈenʈaŋ
+daerahistimewangayogyakarta	d̪aerahɪst̪imewaŋajɔɡjakˈart̪ɔ
+dares	d̪ˈares
+dede	d̪ˈed̪e
 denta	d̪ˈent̪ɔ
 desa	d̪ˈesɔ
 dhaeng	ɖˈaeŋ
+dheweke	ɖewˈeke
+dongeng	d̪ˈoŋeŋ
+duren	d̪ˈuren
 duwe	d̪ˈuwe
+eca	ˈet͡ʃɔ
+eka	ˈekɔ
+eling	ˈelɪŋ
+emba	ˈembɔ
+ember	ˈember
 enak	ˈenaʔ
+enem	ˈənem
+enggeh	ˈəŋɡeh
+enjing	ˈeɲd͡ʒɪŋ
 enten	ˈent̪ən
 enyong	ˈeɲɔŋ
+epolusi	epolˈusi
+estri	ˈest̪ri
+esuk	ˈesʊʔ
+ewu	ˈewu
 gandhek	ɡˈanɖeʔ
+garwaampeyan	ɡarwaampˈejan
+gawe	ɡˈawe
+gede	ɡˈəd̪e
+gedhe	ɡˈəɖe
 gedheg	ɡˈəɖeɡ
 geger	ɡˈeɡer
+gendera	ɡənd̪ˈerɔ
 gepeng	ɡˈepeŋ
 gledhah	ɡlˈeɖah
+greja	ɡrˈed͡ʒɔ
 grendhel	ɡrˈenɖel
+idrogenasetat	ɪd̪roɡenasˈet̪at̪
+idrogennitrat	ɪd̪roɡennˈɪt̪rat̪
+jae	d͡ʒˈae
 jebule	d͡ʒəbˈule
 jene	d͡ʒˈəne
+joged	d͡ʒˈoɡed̪
 joget	d͡ʒˈoɡet̪
+kabupaten	kabupˈat̪en
 kadipaten	kad̪ipˈat̪en
+kae	kˈae
 kalen	kˈalen
 kamantren	kamˈant̪ren
+kaneya	kanˈejɔ
 kapanewon	kapanˈewɔn
 kareta	karˈet̪ɔ
 kasep	kˈasep
@@ -52,22 +112,46 @@ katela	kat̪ˈelɔ
 kates	kˈat̪es
 kedah	kˈed̪ah
 keju	kˈed͡ʒu
+kekah	kˈekah
 kemantren	kəmˈant̪ren
+kemawon	kemˈawɔn
 ken	kˈen
 kenceng	kˈeɲt͡ʃeŋ
+kenek	kˈəneʔ
 keputren	kəpˈʊt̪ren
+kereta	kərˈet̪ɔ
+kewan	kˈewan
 klewer	klˈewer
 kowe	kˈowe
 krecek	krˈet͡ʃeʔ
 kreta	krˈet̪ɔ
 kretek	krˈet̪eʔ
+kuwewung	kuwˈewʊŋ
+laen	lˈaen
 lare	lˈare
+lawe	lˈawe
+len	lˈen
+lepen	lˈepen
+leter	lˈet̪er
+maesa	maˈesɔ
+malaekat	malaˈekat̪
 malige	malˈiɡe
+mantega	mant̪ˈeɡɔ
 marakke	marˈakke
+mega	mˈeɡɔ
+meja	mˈed͡ʒɔ
 menak	mˈenaʔ
+mentega	mənt̪ˈeɡɔ
+mertega	mərt̪ˈeɡɔ
+meru	mˈeru
+mokel	mˈokel
+nem	nˈem
 ngabei	ŋabˈei
+ngangkatake	ŋaŋkat̪ˈake
+ngelingngi	ŋelˈɪŋŋi
 ngene	ŋˈene
 ngresmekake	ŋrəsmekˈake
+pabeyan	pabˈejan
 pace	pˈat͡ʃe
 pamer	pˈamer
 pandhe	pˈanɖe
@@ -77,26 +161,37 @@ pangreh	pˈaŋreh
 pangrehpraja	paŋrehprˈɔd͡ʒɔ
 pare	pˈare
 parentah	parˈent̪ah
+pasarean	pasarˈean
+pasareyan	pasarˈejan
 paseban	pasˈeban
+pasek	pˈaseʔ
+pe	pˈe
 pego	pˈeɡo
 pegon	pˈeɡɔn
 pelog	pˈelɔɡ
+perak	pˈeraʔ
 peso	pˈeso
 prameswari	prameswˈari
 prei	prˈei
 prentah	prˈent̪ah
+purbawisesa	pʊrbawisˈesɔ
 raden	rˈad̪en
 rase	rˈase
 regol	rˈeɡɔl
 reh	rˈeh
+rekayasa	rekajˈɔsɔ
+rema	rˈemɔ
 rena	rˈenɔ
 rencang	rˈeɲt͡ʃaŋ
 reta	rˈet̪ɔ
 rewang	rˈewaŋ
+sae	sˈae
 sampeyan	sampˈejan
+sanes	sˈanes
 sarasean	sarasˈean
 sare	sˈare
 sareh	sˈareh
+sarekat	sarˈekat̪
 sate	sˈat̪e
 seba	sˈebɔ
 seda	sˈed̪ɔ
@@ -106,30 +201,40 @@ sela	sˈelɔ
 selawe	səlˈawe
 senapati	senapˈat̪i
 sendaren	sənd̪ˈaren
+sendher	sˈenɖer
 sengenge	səŋˈeŋe
 senter	sˈent̪ər
 sentir	sˈent̪ɪr
 sentra	sˈent̪rɔ
 sep	sˈep
 sepedha	səpˈeɖɔ
+sepedhah	səpˈeɖah
 sere	sˈəre
+sered	sˈered̪
 serep	sˈerəp
 seret	sˈeret̪
 seri	sˈeri
 sero	sˈero
 seser	sˈeser
+seta	sˈet̪ɔ
 setra	sˈet̪rɔ
 sewa	sˈewɔ
 sewer	sˈewer
+sewu	sˈewu
 sindhen	sˈɪnɖen
 slendro	slˈend̪ro
 sondher	sˈɔnɖer
+songket	sˈɔŋket̪
+sore	sˈore
 srei	srˈei
 srengenge	srəŋˈeŋe
 srundeng	srˈʊnd̪eŋ
+suwe	sˈuwe
+suwenter	suwˈent̪ər
 taken	t̪ˈaken
 teja	t̪ˈed͡ʒɔ
 tela	t̪ˈelɔ
+telewasi	t̪elewˈasi
 terong	t̪ˈerɔŋ
 truwelu	t̪ruwˈelu
 tulen	t̪ˈulen
@@ -137,4 +242,7 @@ tuwek	t̪ˈuweʔ
 wae	wˈae
 wasesa	wasˈesɔ
 we	wˈe
+wedang	wˈed̪aŋ
 wenten	wˈent̪ən
+wetan	wˈet̪an
+yen	jˈen
