@@ -183,3 +183,27 @@ RESULT: wikipron **46.6%**, gold **94.6%** (147 words, the 8 misses = the proven
 much larger verified gold. The honest ✅ lever is now precisely scoped: a curated lexicon for the ~closed-syllable-o
 / tatsama-medial-ɔ / bô-phola residue (built independently, NOT fit to the gold; the rule engine stays the honest
 non-lexical signal). Suite 8/8; typecheck clean.
+
+## Run 9 — 2026-07-16 — the CROSS-SOURCE CONSENSUS lexicon (rule 93.9% → shipped 98.0% on the gold)
+
+Built the lexicon for the proven-lexical tail. The naive approach (pin wikipron's vowel where we differ) FAILS:
+of 13 entries checkable against the hand gold, **6 were wrong** (~46%) — it imports wikipron's own ɔ/o noise
+(শহর→ʃɔɦoɾ but also জীবন→d͡ʒibon, wrong). wikipron is too noisy on the exact class to auto-mine.
+
+The fix is **cross-source consensus**: re-download Bengali.AI DUAL-IPA (offline), and pin a vowel ONLY when
+wikipron (Kolkata) AND DUAL-IPA (Dhaka) — two independent dialects — attest the SAME vowel sequence (same
+consonant skeleton as ours, lexical-swap-only). Two dialects agreeing filters BOTH noise and dialect-specificity.
+Result: **142 entries**, and against the hand gold only 1 "disagreement" (শহর) — which turned out to be MY gold
+being wrong (শহর is [ʃɔɦoɾ]; fixed). It correctly ABSTAINS on জীবন→d͡ʒibɔn (sources disagree → not pinned).
+
+WIRING (kept honest): `bengali-lexicon.tsv` overrides only the SHIPPED path (`phonemizeWord`/`text`). The rule
+engine `phonemizeWordRules` bypasses it, and the referee eval was pointed at `phonemizeWordRules` — so the wikipron
+number stays **non-circular** (the lexicon is wikipron-informed). DUAL-IPA is used OFFLINE for validation only, not
+committed (license unspecified); the committed values are corroborated linguistic facts in our convention, on the
+same CC-BY-SA footing as the already-committed wikipron referee.
+
+RESULT: **rule engine 93.9% / shipped-with-lexicon 98.0%** on the 147-word gold; wikipron 46.6% (rule-only,
+unchanged). Still **🟡**: the lexicon closes the COMMON lexical tail but OOV closed-syllable-o words outside the 142
+still err, and 3 classes are uncovered (medial-deletion পুরনো, bô-phola লম্বা, ড়-final বড়/ছোট — not vowel-quality
+patterns). Full ✅ needs broader lexicon coverage, capped by the wikipron∩DUAL-IPA overlap (~the reliable ceiling of
+the auto method). The mechanism + 142 verified entries are the real deliverable. Suite 53/53; typecheck clean.

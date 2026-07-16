@@ -30,7 +30,9 @@ import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
 import { phonemizeWord as ru } from "../../src/languages/russian/russian.ts";
 import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
-import { phonemizeWord as bn } from "../../src/languages/bengali/bengali.ts";
+// RULE-ONLY for bn: the shipped phonemizeWord applies a wikipron-informed lexicon, so evaluating it against
+// wikipron would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
+import { phonemizeWordRules as bn } from "../../src/languages/bengali/bengali.ts";
 import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
 import { phonemizeWord as id } from "../../src/languages/indonesian/indonesian.ts";
 import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";

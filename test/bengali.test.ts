@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/bengali/bengali.ts";
+import {
+    phonemizeWord,
+    phonemizeWordRules,
+} from "../src/languages/bengali/bengali.ts";
 
 // Canonical-IPA goldens for Bengali (bn) — native abugida G2P (bengali.jsonc + core/abugida) + Bengali-specific
 // vowel harmony, inherent-vowel deletion, and phôla gemination. Standard (Kolkata/standard-colloquial) variety:
@@ -62,6 +65,22 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("দেওয়া")).toBe("d̪eoa"); // 'to give'
         expect(phonemizeWord("যাওয়া")).toBe("d͡ʒaoa"); // 'to go'
         expect(phonemizeWord("মেয়ে")).toBe("meje"); // য় IS [j] here — untouched
+    });
+
+    // Whole-word lexicon for the PROVEN-lexical vowel tail (closed-syllable ɔ→o), built from the cross-source
+    // consensus of wikipron (Kolkata) + Bengali.AI DUAL-IPA (Dhaka). SHIPPED phonemizeWord applies it; the rule
+    // engine (phonemizeWordRules) — and the referee eval — are unaffected.
+    test("pronunciation lexicon: shipped override for the lexical tail; rule engine untouched", () => {
+        expect(phonemizeWord("মন")).toBe("mon"); // closed-syllable ɔ→o (lexical)
+        expect(phonemizeWord("কলম")).toBe("kɔlom");
+        expect(phonemizeWord("এক")).toBe("æk");
+        expect(phonemizeWord("করে")).toBe("koɾe");
+        // ABSTAINS where the two dialects disagree — leaves the (correct) rule form:
+        expect(phonemizeWord("কম")).toBe("kɔm"); // minimal-pair partner of মন — stays ɔ
+        expect(phonemizeWord("জীবন")).toBe("d͡ʒibɔn");
+        // the rule engine is the honest, lexicon-free signal:
+        expect(phonemizeWordRules("মন")).toBe("mɔn");
+        expect(phonemizeWordRules("কলম")).toBe("kɔlɔm");
     });
 
     test("text: words + Bengali danda pause", () => {

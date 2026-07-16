@@ -21,7 +21,29 @@ import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 import { BENGALI_DIGITS, BENGALI_WORD, IPA_VOWELS } from "../../core/unicode.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+
+// Whole-word pronunciation lexicon for the PROVEN-lexical vowel tail (closed-syllable ɔ→o, final-[o] retention)
+// that no rule can derive — see bengali-lexicon.tsv for the cross-source-consensus provenance. Loaded once; the
+// override is applied only on the SHIPPED path (phonemizeWord / text), never in the rule engine.
+let LEXICON: Map<string, string> | undefined;
+const lexicon = (): Map<string, string> => {
+    if (!LEXICON) {
+        // NFC-normalize keys on load: Bengali nukta letters (ড় ঢ় য়) have composed/decomposed forms, and the
+        // lookup normalizes the query to NFC — so the stored keys must be NFC too or a decomposed entry would
+        // silently never match.
+        LEXICON = new Map();
+        for (const [k, v] of loadTsvMap(
+            import.meta.url,
+            "bengali-lexicon.tsv",
+            (v) => v,
+            { optional: true },
+        ))
+            LEXICON.set(k.normalize("NFC"), v);
+    }
+    return LEXICON;
+};
 
 export interface BengaliDef extends AbugidaDef {
     numbers: NumbersDef;
@@ -125,7 +147,8 @@ export function makeNativeBengali(
         return coda.includes("ː") || codaBases.length >= 2 ? body + "o" : body;
     }
 
-    function word(w: string): string {
+    /** Pure RULE-ENGINE word→IPA (no lexicon): the honest signal used by the referee eval. */
+    function wordRules(w: string): string {
         // 1. orthographic normalization (before the generic engine sees it).
         const norm = w
             .normalize("NFC")
@@ -163,6 +186,11 @@ export function makeNativeBengali(
         //    algorithm as Hindi's schwa deletion but on /ɔ/; a geminate coda keeps the syllable heavy (no delete).
         x = deleteMedialSchwa(x, "ɔ");
         return x.normalize("NFC");
+    }
+
+    /** SHIPPED word→IPA: a whole-word lexicon override (for the proven-lexical tail) then the rule engine. */
+    function word(w: string): string {
+        return lexicon().get(w.normalize("NFC")) ?? wordRules(w);
     }
 
     const toAscii = (digits: string): string =>
@@ -206,7 +234,7 @@ export function makeNativeBengali(
         });
     }
 
-    return { word, number, text };
+    return { word, wordRules, number, text };
 }
 
 /** Load bengali.jsonc (beside this file) and build the Bengali phonemizer. `foreign` handles embedded Latin. */
@@ -220,10 +248,16 @@ export function createBengali(foreign?: ForeignPhonemizer): {
     );
 }
 
-/** Bare word→IPA (for tests / the referee eval). */
+/** Bare word→IPA, SHIPPED path (lexicon override → rule engine). For tests and real text. */
 export function phonemizeWord(w: string): string {
     return (BN ??= makeNativeBengali(
         loadManifest<BengaliDef>(import.meta.url, "bengali.jsonc"),
     )).word(w);
+}
+/** Bare word→IPA, RULE-ENGINE ONLY (no lexicon) — the honest, non-circular signal for the referee eval. */
+export function phonemizeWordRules(w: string): string {
+    return (BN ??= makeNativeBengali(
+        loadManifest<BengaliDef>(import.meta.url, "bengali.jsonc"),
+    )).wordRules(w);
 }
 let BN: ReturnType<typeof makeNativeBengali> | undefined;
