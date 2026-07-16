@@ -32,26 +32,35 @@ const LANGS: Record<string, LangCfg> = {
 };
 
 const FATHA = "َ", KASRA = "ِ", DAMMA = "ُ", SUKUN = "ْ";
-const HARAKAT = [FATHA, KASRA, DAMMA, SUKUN]; // a / i / u / no-vowel — the search options per slot
-const MAX_SLOTS = 7; // 4^7 = 16384 candidates; longer words are reported as capped
+// Options per slot. BARE ("") = no diacritic → the g2p's DEFAULT (ə medial / none final), label "0". It is index 0
+// so a default schwa harmonizes to "0" (matching the cross-script convention) rather than an explicit fatḥa — the
+// fix that lets the silver and cross-script sources agree. FATHA stays available but BARE always wins the tie.
+const BARE = "";
+const SHORT_OPTS = [BARE, FATHA, KASRA, DAMMA, SUKUN]; // default-ə / ə / ɪ / ʊ / no-vowel
+const WAW = "و"; // و — the one AMBIGUOUS long-vowel letter
+const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (the long-vowel search)
+const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
 
 /** Indices of consonants that take a harakat slot: a consonant (NOT a vowel-letter) NOT immediately followed by a
  *  written vowel letter (word-final, or before another consonant/nasalizer) has an ambiguous short vowel. */
-function slots(chars: string[], cfg: LangCfg): number[] {
-    const out: number[] = [];
+interface Slot { pos: number; options: string[] }
+function slots(chars: string[], cfg: LangCfg): Slot[] {
+    const out: Slot[] = [];
     for (let i = 0; i < chars.length; i++) {
         const c = chars[i]!;
         if (!cfg.cons.includes(c) || cfg.vowelLetters.includes(c)) continue;
         const next = chars[i + 1];
-        if (next === undefined || !cfg.vowelLetters.includes(next)) out.push(i);
+        if (next === WAW) out.push({ pos: i, options: WAW_OPTS }); // long vowel: oː (bare) vs uː (damma)
+        else if (next === undefined || !cfg.vowelLetters.includes(next))
+            out.push({ pos: i, options: SHORT_OPTS }); // short vowel: default-ə / ɪ / ʊ / none
     }
     return out;
 }
 
 /** Build the vocalized skeleton for one assignment of harakat to the slots. */
-function vocalize(chars: string[], slotIdx: number[], choice: number[]): string {
+function vocalize(chars: string[], sl: Slot[], choice: number[]): string {
     const ins = new Map<number, string>();
-    slotIdx.forEach((pos, k) => ins.set(pos, HARAKAT[choice[k]!]!));
+    sl.forEach((s, k) => { const h = s.options[choice[k]!]!; if (h) ins.set(s.pos, h); });
     let out = "";
     for (let i = 0; i < chars.length; i++) {
         out += chars[i];
@@ -76,14 +85,15 @@ function label(lang: string): void {
     for (const [skel, , ipa] of rows) {
         const chars = [...skel!.normalize("NFC")];
         const sl = slots(chars, cfg);
-        if (sl.length > MAX_SLOTS) { capped++; continue; }
+        let total = 1;
+        for (const s of sl) total *= s.options.length;
+        if (total > MAX_COMBOS) { capped++; continue; }
         const target = fold(ipa!);
         let found: string | null = null;
-        const total = 4 ** sl.length;
         for (let n = 0; n < total && !found; n++) {
             const choice: number[] = [];
             let x = n;
-            for (let k = 0; k < sl.length; k++) { choice.push(x & 3); x >>= 2; }
+            for (const s of sl) { choice.push(x % s.options.length); x = Math.floor(x / s.options.length); }
             const voc = vocalize(chars, sl, choice);
             if (fold(cfg.phon(voc)) === target) found = voc;
         }
@@ -96,7 +106,7 @@ function label(lang: string): void {
     const tot = rows.length || 1;
     console.log(
         `${lang}: ${rows.length} words · labeled ${ok} (${(100 * ok / tot).toFixed(1)}%) · ` +
-        `miss ${miss} · capped(>${MAX_SLOTS} slots) ${capped} → harakat.${lang}.silver.tsv`,
+        `miss ${miss} · capped(>${MAX_COMBOS} combos) ${capped} → harakat.${lang}.silver.tsv`,
     );
 }
 
