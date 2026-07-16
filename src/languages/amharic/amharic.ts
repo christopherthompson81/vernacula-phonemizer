@@ -34,17 +34,9 @@ function fidel(): Map<string, string> {
 
 const VOWEL = "əuiaeɨo";
 const VOWELS = new Set([...VOWEL]);
-const isVowel = (c: string | undefined): boolean => c !== undefined && VOWELS.has(c);
+/** A phoneme token is a VOWEL if its BASE code point is one (so a modifier-bearing token like 'aː' still counts). */
+const isVowelTok = (t: string | undefined): boolean => t !== undefined && VOWELS.has([...t][0] ?? "");
 
-/**
- * Delete the epenthetic 6th-order [ɨ] where the surrounding consonants form a LEGAL cluster; keep it where deleting
- * would create an illegal one. Amharic [ɨ] (sadis) is inserted to break clusters, so on the surface it survives
- * only where needed: (a) KEPT word-initially (ɨɡɨɾ 'foot'); (b) KEPT if deleting it would leave a WORD-FINAL
- * consonant cluster of ≥3 — an illegal complex coda (አምስት→amɨst, since 'mst#' is illegal; but MEDIALLY the cluster
- * resyllabifies, so አምስተኛ→amstəɲa keeps NO ɨ); (c) KEPT before a truly-illegal 2-cluster — anything before /ɾ/
- * (ɡɨɾ, bɨɾ) or a nasal + a non-coronal/nasal (nɨɲ, nɨɡ, mɨn). Processed RIGHT-TO-LEFT so an earlier ɨ sees the
- * clusters a later deletion already created.
- */
 /** Split an IPA string into PHONEME tokens: an affricate (X͡Y) + any trailing modifiers (ʼ ʷ ʰ ̥ ː) count as ONE
  *  consonant, so cluster counting isn't fooled by the multi-codepoint spellings (d͡ʒ is one C, not three). */
 function toPhonemes(s: string): string[] {
@@ -58,10 +50,19 @@ function toPhonemes(s: string): string[] {
     }
     return out;
 }
-const isVowelTok = (t: string | undefined): boolean => t !== undefined && t.length === 1 && VOWELS.has(t);
 
+/**
+ * Delete the epenthetic 6th-order [ɨ] where the surrounding consonants form a LEGAL cluster; keep it where deleting
+ * would create an illegal one. Amharic [ɨ] (sadis) is inserted to break clusters, so on the surface it survives
+ * only where needed: (a) KEPT word-initially (ɨɡɨɾ 'foot'); (b) KEPT if deleting it would leave a WORD-FINAL
+ * consonant cluster of ≥3 — an illegal complex coda (አምስት→amɨst, since 'mst#' is illegal; but MEDIALLY the cluster
+ * resyllabifies, so አምስተኛ→amstəɲa keeps NO ɨ); (c) KEPT where deleting would abut a truly-illegal 2-cluster — a
+ * STOP + /ɾ/ (ɡɨɾ, bɨɾ; a fricative + ɾ like sɾ is legal) or a nasal + nasal (nɨɲ, mɨn). Processed RIGHT-TO-LEFT so
+ * an earlier ɨ sees the clusters a later deletion already created.
+ */
 function deleteEpenthetic(s: string): string {
     const p = toPhonemes(s);
+    const isCons = (t: string | undefined): boolean => t !== undefined && t !== "" && !isVowelTok(t);
     for (let i = p.length - 1; i >= 0; i--) {
         if (p[i] !== "ɨ") continue;
         if (p.slice(0, i).every((c) => c === "" || !isVowelTok(c))) continue; // word-initial ɨ is kept
@@ -71,21 +72,24 @@ function deleteEpenthetic(s: string): string {
         let right = 0;
         for (let j = i + 1; j < p.length && !isVowelTok(p[j]); j++) if (p[j] !== "") right++;
         if (wordFinal && left + right >= 3) continue; // deleting → illegal ≥3 complex coda → keep
-        const prev = p.slice(0, i).reverse().find((c) => c !== "" && !isVowelTok(c));
-        const next = p.slice(i + 1).find((c) => c !== "" && !isVowelTok(c));
-        if (illegalCluster(prev, next)) continue; // deleting would abut a truly-illegal 2-cluster → keep
+        // The IMMEDIATE non-empty neighbours become adjacent when the ɨ is deleted; a cluster forms only if BOTH
+        // are consonants (a vowel on either side means no cluster — nothing to break).
+        const prev = [...p.slice(0, i)].reverse().find((c) => c !== "");
+        const next = p.slice(i + 1).find((c) => c !== "");
+        if (isCons(prev) && isCons(next) && illegalCluster(prev!, next!)) continue; // deleting → illegal 2-cluster → keep
         p[i] = "";
     }
     return p.join("");
 }
 const NASAL = new Set([..."mnɲŋ"]);
 const FRICATIVE = new Set([..."szʃʒfh"]);
-/** Is the 2-consonant sequence c1·c2 an illegal Amharic cluster that an epenthetic ɨ must break? Nasal + a
- *  homorganic stop (nb, nd, nɡ) is LEGAL; a fricative + ɾ (sɾ) is LEGAL; only a STOP + ɾ and nasal + nasal break. */
-function illegalCluster(c1: string | undefined, c2: string | undefined): boolean {
-    if (c1 === undefined || c2 === undefined) return false;
-    if (c2 === "ɾ" && !FRICATIVE.has(c1)) return true; // stop + ɾ (ɡɨɾ, bɨɾ); fricative + ɾ (sɾ) is fine
-    if (NASAL.has(c1) && NASAL.has(c2)) return true; // nasal + nasal (nɨɲ, mɨn)
+/** Is the consonant sequence c1·c2 an illegal Amharic cluster that an epenthetic ɨ must break? Keyed on each token's
+ *  BASE code point (so labialized sʷ/mʷ classify by s/m). Nasal + a homorganic stop (nb, nd, nɡ) is LEGAL; a
+ *  fricative + ɾ (sɾ) is LEGAL; only a STOP + ɾ and nasal + nasal break. */
+function illegalCluster(c1: string, c2: string): boolean {
+    const b1 = [...c1][0]!, b2 = [...c2][0]!;
+    if (b2 === "ɾ" && !FRICATIVE.has(b1)) return true; // stop + ɾ (ɡɨɾ, bɨɾ); fricative + ɾ (sɾ) is fine
+    if (NASAL.has(b1) && NASAL.has(b2)) return true; // nasal + nasal (nɨɲ, mɨn)
     return false;
 }
 
