@@ -14,6 +14,11 @@
     "secondaryGap": "short-vowel restoration is deferred (the abjad omits ə/ɪ/ʊ); no independent diacritized-Urdu source wired.",
     "folds": [
         {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation (as pa)"
+        },
+        {
             "pattern": "[ɪʊ]",
             "replace": "ə",
             "note": "short-vowel QUALITY ə~ɪ~ʊ — unrecoverable from the undiacritized skeleton"

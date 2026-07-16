@@ -16,6 +16,11 @@
         { "pattern": "u(?!ː)", "replace": "a", "note": "classical SHORT u (referee) vs our default a — long uː kept" }
     ],
     "folds": [
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation (as pa)"
+        },
         { "pattern": "[eo]", "replace": "a", "note": "short-vowel QUALITY a~e~o — unrecoverable from the undiacritized skeleton" },
         { "pattern": "ɾ", "replace": "r", "note": "tap ɾ vs referee r — notation" },
         { "pattern": "ɒ", "replace": "a", "note": "â [ɒ]~[aː] — the referee writes aː" }
