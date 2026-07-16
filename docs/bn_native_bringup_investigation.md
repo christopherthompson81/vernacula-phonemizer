@@ -161,3 +161,25 @@ TWO conclusions that settle the original question:
 NEXT (proposed, not yet done): (i) improve the medial-deletion rule on principled conditioning (syllable
 weight / tatsama-stratum tells) and validate on an EXPANDED hand-adjudicated Kolkata gold (150–200 words), the
 honest cs/cy ✅ path; (ii) a small curated lexicon only for the true residue (final-[o] retention words, এক).
+
+## Run 8 — 2026-07-16 — expanded gold (50→147) + ওয়া glide rule; PROVED the residue is lexical
+
+Executed the ✅-path step. Adjudicated 103 new common words by running each through the engine and cross-checking
+against the independent wikipron: **68 corroborated** (accept engine output), 24 notation-only diffs (accept), 11
+no-wikipron (adjudicate). Added 90 corroborated + 7 hand-adjudicated words where the engine currently ERRS (kept at
+their true Kolkata form so the gold captures the real error rate). **Gold 50→147 words.**
+
+The 24 disagreements sorted the residual cleanly:
+- **ওয়া glide (RULE fix):** খাওয়া/যাওয়া/দেওয়া were getting a spurious [j] (kʰaoja). ওয়া (o + য় + aa) spells
+  [oa]/[wa], not [oja] — the য় is not a full glide here. Rewrote ওয়া→ওআ in normalization (মেয়ে→meje, where য় IS
+  [j], is untouched). wikipron 45.9→**46.6%**, gold 93.2→**94.6%**.
+- **closed-syllable ɔ→o, medial-ɔ retention, bô-phola vs cluster (LEXICAL):** tested whether the closed-syllable
+  raising is a rule. It is NOT — the minimal pair **মন[mon] / জন[d͡ʒon] / ধন[d̪ʱon]** (raise) vs **কম[kɔm] /
+  বন[bɔn] / রণ[rɔn]** (stay ɔ) is phonologically IDENTICAL (Cɔ + nasal#) with opposite outcomes. No surface
+  feature separates them → the split is etymological (tatsama raises), i.e. genuinely LEXICAL. This is the decisive
+  evidence the whole referee hunt was after: the residue needs a **curated lexicon**, not a better rule.
+
+RESULT: wikipron **46.6%**, gold **94.6%** (147 words, the 8 misses = the proven-lexical tail). Strong 🟡 with a
+much larger verified gold. The honest ✅ lever is now precisely scoped: a curated lexicon for the ~closed-syllable-o
+/ tatsama-medial-ɔ / bô-phola residue (built independently, NOT fit to the gold; the rule engine stays the honest
+non-lexical signal). Suite 8/8; typecheck clean.

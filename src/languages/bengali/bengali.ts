@@ -131,6 +131,10 @@ export function makeNativeBengali(
             .normalize("NFC")
             .replace(/ং/gu, "ঙ্") // velar-nasal sign → full [ŋ]
             .replace(/ৎ/gu, "ত্") // khanda ta → vowelless dental [t̪]
+            // ওয়া (o + antasthya-ya য় + aa) spells the glide sequence [oa]/[wa], NOT [oja] — the য় is not a
+            // full [j] here (খাওয়া→kʰaoa, দেওয়া→d̪eoa, যাওয়া→d͡ʒaoa). Rewrite to ও + independent আ so the engine
+            // emits o·a with no glide. (Elsewhere য় IS [j]: মেয়ে→meje is untouched.)
+            .replace(/ওয়া/gu, "ওআ")
             // WORD-INITIAL ্যা → [æ] (ক্যা→kæ, গ্যাস→ɡæʃ, ন্যায়→næj) and অ্যা → [æ] (অ্যাসিড→æʃiɖ).
             // Only word-initial: MEDIAL ্যা geminates instead (বিদ্যা→bid̪d̪a) via the phôla rule below.
             .replace(/^অ্যা/u, AE)
