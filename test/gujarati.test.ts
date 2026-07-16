@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/gujarati/gujarati.ts";
+import {
+    phonemizeWord,
+    phonemizeWordRules,
+} from "../src/languages/gujarati/gujarati.ts";
 
 // Canonical-IPA goldens for Gujarati (gu) — Indo-Aryan, the Gujarati abugida. Reuses the generic abugida engine +
 // the Hindi orchestration (schwa deletion, weight stress, numbers) with a Gujarati-Unicode data file. Validated
@@ -34,5 +37,16 @@ describe("gujarati canonical IPA", () => {
 
     test("Gujarati digits", () => {
         expect(phonemize("૫૦૦", "gu")).toBe("pˈãɲt͡ʃ sˈo"); // 500 = paanch so
+    });
+
+    // Whole-word schwa lexicon (cross-source consensus of wikipron+kaikki) for the proven-lexical medial-schwa
+    // tail. SHIPPED phonemizeWord applies it; phonemizeWordRules (and the referee eval) bypass it.
+    test("schwa lexicon: shipped override for the lexical tail; rule engine untouched", () => {
+        expect(phonemizeWord("અબલખ")).toBe("ˈəbələkʰ"); // schwa RETAINED (rule over-deletes → əbləkʰ)
+        expect(phonemizeWord("અન્ય")).toBe("ˈənjə"); // final schwa retained after cluster
+        expect(phonemizeWord("અષ્ટકોણ")).toBe("ˈəʂʈkoɳ"); // schwa DELETED (rule under-deletes → əʂʈəkoɳ)
+        // the rule engine is the honest, lexicon-free signal:
+        expect(phonemizeWordRules("અબલખ")).toBe("ˈəbləkʰ");
+        expect(phonemizeWordRules("અષ્ટકોણ")).toBe("ˈəʂʈəkoɳ");
     });
 });
