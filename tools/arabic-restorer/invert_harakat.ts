@@ -40,6 +40,7 @@ const SHORT_OPTS = [BARE, FATHA, KASRA, DAMMA, SUKUN]; // default-ə / ə / ɪ /
 const WAW = "و"; // و — the one AMBIGUOUS long-vowel letter
 const YA = "ی"; // ی choti ye — for glide detection (ی before a vowel is a glide, not a long vowel)
 const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (the long-vowel search)
+const YA_OPTS = [BARE, FATHA]; // bare ی → iː · یَ (ya+fatḥa) → eː (the adapted-word encoding of the iː/eː split)
 const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
 
 /** Indices of consonants that take a harakat slot: a consonant (NOT a vowel-letter) NOT immediately followed by a
@@ -49,6 +50,14 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
     const out: Slot[] = [];
     for (let i = 0; i < chars.length; i++) {
         const c = chars[i]!;
+        // Long-vowel ی → iː (bare) vs eː (یَ): a slot only when it's a real long vowel — preceded by a consonant
+        // onset and NOT followed by another vowel letter (which would make it a glide).
+        const prev = chars[i - 1];
+        if (c === YA && prev !== undefined && cfg.cons.includes(prev) && !cfg.vowelLetters.includes(prev) &&
+            !(chars[i + 1] !== undefined && cfg.vowelLetters.includes(chars[i + 1]!))) {
+            out.push({ pos: i, options: YA_OPTS });
+            continue;
+        }
         if (!cfg.cons.includes(c) || cfg.vowelLetters.includes(c)) continue;
         const next = chars[i + 1];
         // A ی/و that is itself followed by a vowel letter is a GLIDE (‑iyā, ‑uwā); the consonant before it still
