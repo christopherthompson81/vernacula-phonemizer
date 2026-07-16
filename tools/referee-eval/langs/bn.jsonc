@@ -47,6 +47,11 @@
             "note": "front-mid [e]~[ɛ]~[æ] — referee-inconsistent allophony"
         },
         {
+            "pattern": "pʰ",
+            "replace": "f",
+            "note": "ফ = standard-Kolkata [pʰ] (ours) ~ Bangladeshi/loan [f] (referee) — dialect notation"
+        },
+        {
             "pattern": "(.)\\1",
             "replace": "$1",
             "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"

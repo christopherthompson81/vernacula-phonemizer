@@ -79,3 +79,32 @@ RESULT: adjudicated gold **56%→92.0%** (46/50) — the engine is actually good
 (referee-noise-limited; the gold is the real signal). Promoted 🔵→**🟡** (core layers in + verified; remaining is
 a documented LEXICAL tail). Gold's 4 misses: final-[o] retention (বড়/ছোট — lexical, some ট/ড়-final words keep [o]),
 hiatus harmony (বই→boi), closed-syllable æ (এক→æk). Suite passes; typecheck clean.
+
+## Run 5 — 2026-07-16 — miss-bucketing, two rule wins + one honest fold (42.5 → 44.6%, gold 92 → 94%)
+
+Bucketed the full wikipron miss-set to separate genuinely-fixable rule classes from irreducible referee noise
+(a re-check on whether 🟡 could improve). The ~46% ceiling is dominated by GENUINELY VARIABLE features, confirming
+the noise-limited verdict — but three honest wins fell out:
+
+- **Word-initial ্যা / অ্যা → [æ]** (ক্যা→kæ, গ্যাস→ɡæʃ, ন্যায়→næj, অ্যাসিড→æʃiɖ). No [æ] matra exists, so
+  the sequence is rewritten to a PUA sentinel registered as an æ matra + independent vowel (contained in
+  bengali.ts; no data-file edit). **This is lexically split** — word-initial ্যা is [æ] (loanwords + native
+  tatsama ব্যাকরণ), but MEDIAL ্যা GEMINATES (বিদ্যা→bid̪ːa, অকাট্য→ɔkaʈʈo), so the rewrite is anchored `^` only;
+  the medial phôla-gemination path is untouched. ~27 wikipron words + canonical correctness.
+- **Hiatus harmony**: /ɔ/ raises to [o] before a CLOSE vowel [i u] with no consonant between (বই→boi, অই→oi) —
+  but NOT before a mid [o e] (অওসৎ→ɔosɔt̪ keeps ɔ, referee-confirmed). Closes the gold's বই→boi miss.
+- **ফ fold** (config): ফ is standard-Kolkata [pʰ] (ours) ~ Bangladeshi/loan [f] (referee, ~61 words) — a dialect
+  notation difference, same class as the existing dental/ɔ~o folds. pʰ→f in the wikipron backbone.
+
+**Two classes were investigated and DECLINED as not rule-fixable** (they confirm the 🟡 ceiling, not a bug):
+- **medial-ɔ retention** (220 wikipron over-deletions, অকথা→ɔkt̪ʰa vs referee ɔkɔt̪ʰa): the Hindi Ohala rule
+  over-deletes for Bengali, which keeps the medial ɔ in *tatsama/learned* words (গold শহর→ʃɔɦɔɾ keeps both) but
+  deletes in *tadbhava* — a LEXICAL (etymological) split, not a phonotactic one. Disabling medial deletion
+  entirely is net-NEGATIVE (wikipron 46→43%, gold 92→90%), so it stays; the residual is an irreducible lexical tail.
+- **ɔ~o quality** (369+ words, both directions — অকলুষ we-raise vs অংকন referee-raises): the classic Bengali ô/o
+  ambiguity that dictionaries themselves disagree on. Genuinely variable → folded, not chased.
+
+RESULT: wikipron 42.5→**44.6%**, adjudicated gold 92.0→**94.0%** (47/50). Stays **🟡** — the core is now more
+complete (hiatus + ্যা), but the remaining tail (final-[o], closed-syllable এক→æk, tatsama medial-ɔ) is genuinely
+LEXICAL and, like Amharic's ɨ, sits on a referee that is itself inconsistent on those exact classes — a mined
+lexicon would be circular on the noisy wikipron. Suite 7/7; typecheck clean.
