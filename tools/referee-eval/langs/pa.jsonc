@@ -54,7 +54,7 @@
         {
             "pattern": "ɦ",
             "replace": "",
-            "note": "the ਹ /ɦ/ tone-source: Punjabi is TONAL and ਹ is variably lost to tone. The referee is INCONSISTENT — word-initial ɦ kept 62/dropped 8, post-vocalic kept 29/dropped 42 (a register split: formal keeps [ɦ], casual → tone). We keep [ɦ] consistently (a valid formal-register canonical choice; the tone the referee marks is already BACKBONE-stripped). Fold ɦ on BOTH sides to neutralise the referee's ɦ~tone inconsistency, exactly as the Chao letters are stripped. NOT a segmental defect (ɦ only ever comes from ਹ, so this can't mask a wrong consonant)."
+            "note": "the ਹ /ɦ/ tone-source: Punjabi is TONAL and ਹ is variably lost to tone. The referee is INCONSISTENT — word-initial ɦ kept 62/dropped 8, post-vocalic kept 29/dropped 42 (a register split: formal keeps [ɦ], casual → tone). We keep [ɦ] consistently (a valid formal-register canonical choice; the tone the referee marks is already BACKBONE-stripped). Fold ɦ on BOTH sides to neutralise the referee's ɦ~tone inconsistency, exactly as the Chao letters are stripped. NOT a segmental defect: ɦ never comes from a de-aspiration source (aspiration surfaces as ʰ/ʱ, resolved before any plain-ɦ fallback), so folding it cannot hide a wrong or de-aspirated consonant."
         }
     ]
 }
