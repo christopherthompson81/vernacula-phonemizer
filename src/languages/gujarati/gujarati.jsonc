@@ -56,7 +56,9 @@
     // Geminate → length + the aspiration-before-length reorder — the fleet-wide Indic conventions.
     "postRules": [
         { "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃʂsɳŋɭɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)", "to": "$1ː", "note": "geminate → single + length" },
-        { "from": "ː([ʰʱ])", "to": "$1ː", "note": "aspiration-before-length reorder" }
+        { "from": "ː([ʰʱ])", "to": "$1ː", "note": "aspiration-before-length reorder" },
+        { "from": "([aeiouəɑ])ɖʱ([aeiouəɑ])", "to": "$1ɽʱ$2", "note": "INTERVOCALIC ɖʱ → flap ɽʱ (Gujarati; Cardona) — not word-initial/geminate/cluster" },
+        { "from": "([aeiouəɑ])ɖ([aeiouəɑ])", "to": "$1ɽ$2", "note": "INTERVOCALIC ɖ → flap ɽ (અડદ→əɽəd̪); the historical ડ allophone" }
     ],
     "finalRules": [],
 
