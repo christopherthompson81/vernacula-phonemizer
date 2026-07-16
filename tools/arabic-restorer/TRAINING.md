@@ -46,3 +46,14 @@ Success = riders' end-to-end IPA beats the default-schwa baseline (pa 23.3% toda
 ## Export
 `export_onnx.py` → int8 `quantize_dynamic`, mirroring the Arabic pipeline. Commit `*.meta.json` (char/label/lang
 maps) beside the gitignored `.onnx`.
+
+## Actual run (2026-07-15, RTX 3090)
+```
+/mnt/data/ar-diac-venv/bin/python train_multilingual_harakat.py --epochs 25 --upsample 4
+/mnt/data/ar-diac-venv/bin/python predict_harakat.py --in eval.tsv --out /tmp/pred.tsv
+npx tsx eval_endtoend.ts /tmp/pred.tsv
+```
+Warm-started `bilstm_pausal.pt` (26 lstm/fc tensors + 39 embedding rows copied; 5 lang tokens appended), 15.3 M
+params, best at epoch 1. Held-out harakat DER: ur 2.4% / fa 2.6% / ps 4.0% / pa 7.2%. **End-to-end IPA (model vs
+bare-skeleton baseline): 68.7% → 86.5%, +17.8** (fa +25.2, ps +9.3, ur +4.5, pa +2.7). Checkpoint on `/mnt/data`
+(gitignored); `multilingual_diacritizer.meta.json` committed. See docs Run 9.

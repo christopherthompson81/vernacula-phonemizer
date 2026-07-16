@@ -207,6 +207,37 @@ the held-out split, and the real target, **end-to-end IPA** (skeleton →[model]
 `silver.normalized.tsv`, reusing the eval fold). The run itself is an **offline GPU job**, not CI (as for the
 Arabic model). Everything up to `python train_*.py` is now committed and reproducible.
 
+## Run 9 — 2026-07-15 — TRAINED on the GPU box: the multilingual restorer works (+17.8 end-to-end)
+
+Ran the fine-tune on the RTX 3090 (`/mnt/data/ar-diac-venv`, torch 2.6+cu124). `train_multilingual_harakat.py`
+warm-starts `bilstm_pausal.pt` (its char/label maps match the committed Arabic meta exactly) — copies the 26
+vocab-independent lstm/fc tensors + 39 Arabic embedding rows by char identity, appends 5 language tokens (prepended
+per word for conditioning, no arch change), and fine-tunes on `train.tsv` with riders upsampled 4× + Arabic replay
+(pausalized to match the pausal warm-start). 15.3 M params, best at epoch 1, early-stopped.
+
+Held-out **harakat DER**: ur 2.4% · fa 2.6% · ps 4.0% · pa 7.2% (Arabic replay 12% = the known classical-Tashkeela-
+vs-modern gap, not a rider concern).
+
+The real metric — **end-to-end IPA** (predicted harakat →[deterministic g2p]→ IPA vs the wikipron reference, model
+vs bare-skeleton baseline; `predict_harakat.py` → `eval_endtoend.ts`), on the held-out split:
+
+| lang | n | baseline | model | lift |
+|---|---:|---:|---:|---:|
+| fa | 659 | 62.1% | 87.3% | **+25.2** |
+| ps | 54 | 68.5% | 77.8% | +9.3 |
+| ur | 288 | 83.7% | 88.2% | +4.5 |
+| pa | 37 | 70.3% | 73.0% | +2.7 |
+| **ALL** | 1038 | 68.7% | **86.5%** | **+17.8** |
+
+The thesis holds: warm-start from Arabic + 10.9k mined rider labels → the restorer predicts g2p-correct harakat on
+UNSEEN words, lifting end-to-end IPA +17.8. Persian gains most (most data + most short-vowel ambiguity to resolve);
+Punjabi least (257 train words + the و/ی long-vowel ambiguity harakat can't fix — a g2p limitation, not the model).
+Honest scope: this is measured on the held-out INVERTIBLE subset (words a valid vocalization exists for); the full
+pipeline is still capped by g2p expressiveness on the non-invertible tail. Checkpoint `bilstm_multilingual.pt` +
+int8 ONNX live on `/mnt/data` (gitignored, as the Arabic model); `multilingual_diacritizer.meta.json` (char/label/
+lang maps) is committed. NEXT: export ONNX + wire a rider restore pass (the Arabic `restore.ts` analogue); fix the
+و/ی long-vowel search to lift Punjabi; add Sindhi/Saraiki once their g2p exists.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
