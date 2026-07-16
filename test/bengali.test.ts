@@ -24,6 +24,11 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("কর")).toBe("kɔɾ"); // kôr: no following vowel → ɔ stays, final inherent deleted
         expect(phonemizeWord("জল")).toBe("d͡ʒɔl"); // jôl: final inherent deleted after single C
         expect(phonemizeWord("অংশ")).toBe("ɔŋʃo"); // ôngsho: cluster coda → final inherent retained as [o]
+        // Height harmony is triggered by a [+HIGH] vowel [i u] only (Ferguson & Chowdhury 1960), NOT by a mid
+        // vowel — /ɔ/ raises before i/u (কলি→koli) but stays before o/e (ঘরে→ɡʱɔɾe, অকলুষ→ɔkoluʃ).
+        expect(phonemizeWord("কলি")).toBe("koli"); // ɔ raises before high [i]
+        expect(phonemizeWord("ঘরে")).toBe("ɡʱɔɾe"); // ɔ stays before mid [e]
+        expect(phonemizeWord("অকলুষ")).toBe("ɔkoluʃ"); // ɔ stays before mid [o] (no over-raising)
     });
 
     test("phôla gemination (jô/bô/mô) + geminate-coda vowel retention", () => {

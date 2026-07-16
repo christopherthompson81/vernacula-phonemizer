@@ -108,3 +108,31 @@ RESULT: wikipron 42.5→**44.6%**, adjudicated gold 92.0→**94.0%** (47/50). St
 complete (hiatus + ্যা), but the remaining tail (final-[o], closed-syllable এক→æk, tatsama medial-ɔ) is genuinely
 LEXICAL and, like Amharic's ɨ, sits on a referee that is itself inconsistent on those exact classes — a mined
 lexicon would be circular on the noisy wikipron. Suite 7/7; typecheck clean.
+
+## Run 6 — 2026-07-16 — I over-called it "lexical": the ɔ~o class is RULE-governed ([+high] harmony)
+
+Run 5 declined the ɔ~o quality class as "genuinely lexical, dictionaries disagree." That was too quick — a
+reference decides it. **Ferguson & Chowdhury (1960), "The Phonemes of Bengali"** state Bengali height harmony is
+triggered by a **[+HIGH]** vowel (i, u) in the following syllable. Our rule was raising /ɔ/ before mid o/e too
+(`HIGH_MID = /[iueo]/`) — an over-firing bug, not lexical variation. Restricting the trigger to [i u]:
+- **অকলুষ→ɔkoluʃ** (was okoluʃ), **ঘরে→ɡʱɔɾe** (was ɡʱoɾe) — the over-raisings vanish; **করি→koɾi** (before i) kept.
+- wikipron **44.6→45.9%**, gold **94.0%** unchanged. A one-line rule change, not a lexicon.
+
+LESSON (mirrors the Amharic Fidel-transparency correction): "the referee disagrees with itself, so it's lexical"
+is a weak inference — check the phonology literature first. A documented rule (F&C's [+high] conditioning) settled
+it against the lexical hypothesis.
+
+## Run 7 — 2026-07-16 — the deletion class + a genuinely INDEPENDENT referee (breaking the Wiktionary circularity)
+
+The remaining big class is medial inherent-vowel (ɔ) deletion — Run 5's tatsama/tadbhava split. Unlike Amharic,
+Bengali is NOT referee-dead: independent, non-Wiktionary sources exist that target exactly this class.
+- **Johny et al. 2018, "Brahmic Schwa-Deletion with Neural Classifiers: Bengali"** (ISCA SLTU) — shows Bengali
+  inherent-vowel deletion is CLASSIFIER-PREDICTABLE, i.e. conditioned (stratum + phonotactics), NOT idiosyncratic
+  word-by-word lexical. So a better-conditioned deletion rule + a tatsama-stratum signal should carry most of it.
+- **Google `language-resources/bn`** (Apache-2.0; phone-set G2P + textnorm, deletion via FST) — an independent
+  reference implementation + phone set.
+- **BanglaIPA "DUAL-IPA"** (arXiv 2601.01778) — 130k unique words with linguistically-validated IPA — a candidate
+  genuine SECOND referee (license TBD before shipping).
+
+PLAN: wire an independent referee to break the wikipron self-inconsistency (the confidence blocker), then improve
+the deletion rule on the Johny-2018 conditioning, verify non-circularly. [in progress]

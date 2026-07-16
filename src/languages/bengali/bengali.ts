@@ -40,7 +40,10 @@ const DIGIT_CLASS = "0-9" + Object.keys(BENGALI_DIGITS).join("");
 const GEMINATE =
     /(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlʃɾɽŋjɦ])\1(?!͡)/gu;
 // A vowel nucleus (for the harmony look-ahead and syllable count). Bengali vowels + diphthong heads.
-const HIGH_MID = /[iueo]/; // vowels that trigger ɔ→o raising in the preceding syllable
+// Bengali height harmony is triggered by a [+HIGH] vowel (i, u) in the next syllable — /ɔ/ raises to [o]
+// before it (Ferguson & Chowdhury 1960). A following MID vowel (o, e) does NOT raise /ɔ/ (ঘরে→ɡʱɔre stays,
+// অকলুষ→ɔkoluʃ stays), so the trigger is i/u only — not [iueo].
+const HIGH = /[iu]/; // vowels that trigger ɔ→o raising in the preceding syllable
 
 export function makeNativeBengali(
     def: BengaliDef,
@@ -65,7 +68,7 @@ export function makeNativeBengali(
     );
 
     /** Bengali vowel HEIGHT HARMONY: /ɔ/ raises to [o] when the immediately following syllable is OPEN
-     *  (exactly one consonant between it and the next vowel) and that vowel is high/mid [i u o] — kɔ.ri→ko.ri,
+     *  (exactly one consonant between it and the next vowel) and that vowel is HIGH [i u] — kɔ.ri→ko.ri,
      *  but a CODA blocks it (kɔɾ.ʃit stays ɔ). Right-to-left so a chain can propagate (ɔ.ɡu.ni→o.ɡu.ni). */
     function harmony(ipa: string): string {
         const vowels = [...ipa.matchAll(VOWEL_G)];
@@ -90,10 +93,10 @@ export function makeNativeBengali(
                 continue;
             }
             if (nBetween !== 1) continue;
-            // /ɔ/ raises to [o] before a high/mid vowel (kɔ.ri→ko.ri); /e/ lowers to [æ] before low [a]
+            // /ɔ/ raises to [o] before a HIGH vowel [i u] (kɔ.ri→ko.ri); /e/ lowers to [æ] before low [a]
             // (de.kʰa→dæ.kʰa) — the mid vowel agrees in height with the following nucleus.
             const to =
-                cur === "ɔ" && HIGH_MID.test(nextV)
+                cur === "ɔ" && HIGH.test(nextV)
                     ? "o"
                     : cur === "e" && nextV === "a"
                       ? "æ"
