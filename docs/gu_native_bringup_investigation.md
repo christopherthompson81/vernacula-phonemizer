@@ -54,3 +54,20 @@ rule, and it is partly lexical/variable), **anusvara-before-fricative** (અં�
 we vowel-nasalize — a shared-engine representation choice), aspirated-geminate notation (ʈʰʈʰ, not in the geminate
 class), and loanword nukta (ફ→pʰ/f, ઝ→d͡ʒʱ/z). ✅ would need the Gujarati-specific schwa-deletion rule; the referee
 being split BOTH ways on it suggests a real variable/lexical ceiling, not a single clean rule.
+
+## Run (2026-07-16) — schwa-deletion: tried a phonological rule, it's LEXICAL (negative result, don't retry)
+
+Attacked the schwa-deletion tail (the dominant 🟡 residual). Bucketing the misses: we **OVER-delete 155** (we drop,
+referee keeps: əɡəɳit, əd̪əɾək, əbələkʰ) vs **under-delete 39** — the Hindi Ohala rule is too aggressive for
+Gujarati. Every over-deletion had a SONORANT (ɳ/ɾ/l/ʋ/n) as the flanking consonant, so the hypothesis was: Gujarati
+keeps a medial schwa adjacent to a sonorant. Implemented `protectSonorant` (gated, Hindi/others unaffected).
+
+RESULT: **86.0% → 69.6%** (−16pp). The block broke **~700 correct deletions** to fix 155 — Gujarati DELETES before
+sonorants in the large majority of words; the 155 "keep" cases are LEXICAL exceptions, not a rule. Confirmed by the
+minimal contrast already noted: same Cəɾ context, tatsama əntɾikʃ ('space') DROPS but common əd̪əɾək ('ginger')
+KEEPS — etymological (tatsama/tadbhava), not phonological. Reverted.
+
+CONCLUSION: the Gujarati medial-schwa residual is genuinely LEXICAL (same shape as Bengali's medial-ɔ). No
+phonological context — sonorant or otherwise — cleanly separates keep from delete. The honest ✅ lever is a
+pronunciation LEXICON (a Bengali-style cross-source consensus over wikipron+kaikki, the two human referees we
+already have), NOT a rule. Gujarati stays a strong 🟡 at 86.0/87.9% (the intervocalic-flap + notation-fold win).
