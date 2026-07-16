@@ -40,6 +40,27 @@ Processed RIGHT-TO-LEFT so an earlier ɨ sees the clusters a later deletion crea
 tokenization** (`toPhonemes`): an affricate d͡ʒ (3 codepoints) was being counted as 3 consonants, so ልጅ wrongly kept
 its final ɨ (lɨd͡ʒɨ). Counting phoneme UNITS fixed it. **80.1/78.3 → 86.4/83.3%** across both human referees.
 
+## Run 6 — 2026-07-16 — can we get a MORE ROBUST referee for a ✅ push? (No — searched, dead-end)
+
+The 🟡→✅ blocker is confidence: the ɨ-epenthesis + gemination residual sits on a TINY referee (wikipron 478 + kaikki
+437), and the two sources are both Wiktionary (correlated), so a kaikki-mined lexicon would be near-fully circular.
+Searched for a larger and/or INDEPENDENT Amharic IPA referee:
+- **wikipron `amh_ethi_broad`** — the full upstream scrape is **478 lines**: our committed file IS the whole set.
+  No `amh_ethi_narrow` exists.
+- **kaikki `Amharic`** — the full dump is 2425 entries but only **~441 unique have IPA** (we already have 437; the
+  4 extra are multi-word phrases like ዶሮ ወጥ). Wiktionary Amharic is exhausted.
+- **ALFFA Amharic ASR lexicon** (getalp/ALFFA_PUBLIC, `ASR/AMHARIC/data/lexicon.txt`) — **51,361 entries**, but it
+  is **GRAPHEMIC**: the "pronunciation" is the word's own Fidel glyphs (ሀሂሪህ → ሀ ሂ ሪ ህ) and the phone set is the
+  glyphs themselves — NO IPA, no ɨ-deletion, no gemination. Amharic ASR is graphemic *because* the Fidel is
+  transparent, so it can't referee the two UNWRITTEN features. Converting its glyphs via our own table is circular.
+
+**Conclusion:** there is no readily-available robust referee for the exact features that limit Amharic. The segmental
+Fidel core is transparent (near-trivially verifiable); the ɨ-epenthesis is genuinely VARIABLE (the two human referees
+disagree with each other — a careful/colloquial continuum, not one ground truth), and gemination is unrecoverable
+from the script. So Amharic stays **🟡** honestly: a ✅ would need a hand-adjudicated running-speech gold (which no
+public resource provides), and a Wiktionary-mined lexicon ✅ would be circular. Recorded so a future ✅ attempt does
+not re-run this search.
+
 ## Result — 🟡
 **86.4% / 83.3%** across two human referees — strong for a new script model, with the ɨ-epenthesis now a principled
 phonotactic RULE (Run 5), not a heuristic. The syllabary segmental core is essentially exact. The residual is now:
