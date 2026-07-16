@@ -48,5 +48,15 @@ describe("gujarati canonical IPA", () => {
         // the rule engine is the honest, lexicon-free signal:
         expect(phonemizeWordRules("અબલખ")).toBe("ˈəbləkʰ");
         expect(phonemizeWordRules("અષ્ટકોણ")).toBe("ˈəʂʈəkoɳ");
+        // nukta loanword ફ → [f] (not native [pʰ]) — a consensus lexicon entry
+        expect(phonemizeWord("કોફી")).toBe("kˈofi");
+    });
+
+    // 21-99 are IRREGULAR compound spellings (like Hindi), authored in numbers.compound.
+    test("irregular 21-99 numbers + Indic grouping", () => {
+        expect(phonemize("21", "gu")).toBe("ˈekʋis"); // ekvees
+        expect(phonemize("45", "gu")).toBe("pˈist̪alis"); // pistaalees
+        expect(phonemize("99", "gu")).toBe("nˈəʋʋaɳũ"); // navvaanoo
+        expect(phonemize("4567", "gu")).toBe("t͡ʃˈaɾ ɦˈəd͡ʒaɾ pˈãɲt͡ʃ sˈo sˈəɽsəʈʰ");
     });
 });
