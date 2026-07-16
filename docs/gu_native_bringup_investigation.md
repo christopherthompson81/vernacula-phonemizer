@@ -71,3 +71,25 @@ CONCLUSION: the Gujarati medial-schwa residual is genuinely LEXICAL (same shape 
 phonological context — sonorant or otherwise — cleanly separates keep from delete. The honest ✅ lever is a
 pronunciation LEXICON (a Bengali-style cross-source consensus over wikipron+kaikki, the two human referees we
 already have), NOT a rule. Gujarati stays a strong 🟡 at 86.0/87.9% (the intervocalic-flap + notation-fold win).
+
+## Run (2026-07-16, cont.) — copy-and-modify: rigorously ruled out (firing-context keep-rate is flat ~5-10%)
+
+Follow-up: rather than one failed hypothesis, characterized the discriminator properly. Two copy-and-modify
+attempts both went NEGATIVE:
+- `protectSonorant` (keep if either flanking C is a sonorant): 86.0 → **69.6%** (−16pp).
+- `keepBeforeNasal` (keep if the FOLLOWING C is a nasal — an aggregate keep-rate of 63-92% looked promising):
+  86.0 → **84.2%** (−1.8pp).
+
+The keepBeforeNasal aggregate was a MEASUREMENT ARTIFACT: it counted ALL medial schwa slots (including clusters
+V·CC·ə·C·V and word-edges where a schwa is naturally retained), not the slots where the Ohala rule actually fires.
+Restricting to the true firing context **V·C·ə·C·V** (single consonant each side), the referee keep-rate is FLAT:
+
+| following consonant | Nasal | Liquid | Glide | Obstruent |
+|---|---|---|---|---|
+| referee keep-rate    | 10%   | 9%     | 5%    | 4%        |
+
+i.e. in the context the rule fires, Gujarati DELETES 90-96% regardless of the flanking consonant class. The Ohala
+rule is already ~90-96% correct there; the 155 over-deletions are the ~4-10% LEXICAL exceptions, and there is NO
+consonant-context feature that separates them (any rule keeping them breaks the 90% it gets right — exactly why both
+attempts regressed). DEFINITIVELY lexical (tatsama/tadbhava). The honest ✅ lever is a pronunciation LEXICON, not a
+copy-and-modify rule.
