@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/javanese/javanese.ts";
+import {
+    phonemizeWord,
+    phonemizeWordRules,
+} from "../src/languages/javanese/javanese.ts";
 
 // Canonical-IPA goldens for Javanese / Basa Jawa (jv) — Austronesian, Latin script, rule-based g2p ported from
 // the espeak-ng-portable authored bring-up and validated against kaikki jav (human, 85.9% folded). The signature
@@ -38,6 +41,18 @@ describe("javanese canonical IPA", () => {
         expect(phonemizeWord("sega")).toBe("sˈəɡɔ"); // bare ⟨e⟩ → pepet ə
         expect(phonemizeWord("élok")).toBe("ˈelɔʔ"); // é → /e/
         expect(phonemizeWord("kringèt")).toBe("krˈiŋɛt̪"); // è → /ɛ/
+
+        // Homorganic nasal assimilation: /n/ → [ɲ] before a palatal affricate (rule, both scripts).
+        expect(phonemizeWord("kanca")).toBe("kˈaɲt͡ʃɔ");
+        expect(phonemizeWord("banci")).toBe("bˈaɲt͡ʃi");
+
+        // CROSS-SCRIPT ⟨e⟩ lexicon: for undiacritized Latin the ⟨e⟩ pepet/taling is unrecoverable, so the SHIPPED
+        // path pins the Aksara-resolved taling vowel (pangeran→paŋeran); phonemizeWordRules keeps the pepet default.
+        expect(phonemizeWord("pangeran")).toBe("paŋˈeran"); // taling — from the Aksara cross-script
+        expect(phonemizeWordRules("pangeran")).toBe("paŋˈəran"); // Latin rule default (pepet)
+        expect(phonemizeWord("bebek")).toBe("bˈebeʔ");
+        // Number words bypass the content lexicon (the taling homograph seket ≠ the number 50 [səkət̪]):
+        expect(phonemize("50", "jv")).toBe("sˈəkət̪");
     });
 
     test("numbers (ngoko; irregular -likur / suppletive seket·sewidak)", () => {
