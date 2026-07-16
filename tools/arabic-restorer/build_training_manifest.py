@@ -13,11 +13,16 @@ split (md5-bucketed on the skeleton — no RNG, fully reproducible). The trainin
 in the 19-label harakat scheme by aligning `vocalized` to `skeleton`. Coverage against the char vocab is checked so
 no input char silently becomes <unk>.
 """
+import argparse
 import hashlib
 import json
 import os
 from collections import Counter
 
+ap = argparse.ArgumentParser()
+ap.add_argument("--crossscript", action="store_true",
+                help="include cross-script GOLD shards (harmonize the default-schwa convention first — see MODEL_NOTES.md)")
+args = ap.parse_args()
 HERE = os.path.dirname(os.path.abspath(__file__))
 AR_TSV = os.path.join(HERE, "..", "..", "src", "languages", "arabic", "diacritization.tsv")
 VOCAB = os.path.join(HERE, "multilingual_charvocab.json")
@@ -35,12 +40,22 @@ def main() -> None:
     chars = set(json.load(open(VOCAB, encoding="utf-8"))["chars"])
     rows: list[tuple[str, str, str]] = []  # (skeleton, lang, vocalized)
 
+    # NOTE: cross-script GOLD (harakat.<lang>.crossscript.tsv) is OPT-IN (--crossscript). Naive combination with the
+    # silver currently REGRESSES the affected language because the two sources disagree on the default-schwa label
+    # (inversion writes explicit fatḥa for ə; the sister-script transliteration leaves it bare = "0"). Harmonize
+    # that convention (default ə → "0" in the inversion) before enabling. See MODEL_NOTES.md § "Cross-script".
+    kinds = ("crossscript", "silver") if args.crossscript else ("silver",)
     for lang in RIDERS:
-        path = os.path.join(HERE, f"harakat.{lang}.silver.tsv")
-        for line in open(path, encoding="utf-8"):
-            p = line.rstrip("\n").split("\t")
-            if len(p) >= 3:
-                rows.append((p[0], p[1], p[2]))
+        seen_skel: set[str] = set()
+        for kind in kinds:  # prefer cross-script GOLD when enabled; dedup by skeleton
+            path = os.path.join(HERE, f"harakat.{lang}.{kind}.tsv")
+            if not os.path.exists(path):
+                continue
+            for line in open(path, encoding="utf-8"):
+                p = line.rstrip("\n").split("\t")
+                if len(p) >= 3 and p[0] not in seen_skel:
+                    seen_skel.add(p[0])
+                    rows.append((p[0], p[1], p[2]))
 
     # Arabic replay: deterministically sample ~AR_REPLAY entries (undiacritized -> vocalized), tag `ar`.
     ar_all = [l.rstrip("\n").split("\t") for l in open(AR_TSV, encoding="utf-8") if "\t" in l]

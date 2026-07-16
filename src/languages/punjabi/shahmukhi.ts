@@ -135,9 +135,11 @@ export function scanShahmukhi(word: string): string {
             } else if (hk !== undefined) {
                 out += hk;
                 i++;
-                // harakat + a matching long-vowel letter lengthens (kasra+ی→iː, damma+و→oː).
+                // harakat + a matching long-vowel letter lengthens to the HIGH long vowel: kasra+ی→iː, damma+و→uː
+                // (the explicit diacritic disambiguates the letter — bare ی/و default to iː/oː; damma+waw pins uː,
+                // e.g. Urdu/Punjabi پُورا pūrā). This is the diacritic the Gurmukhi sister-script supplies as gold.
                 if ((hk === "ɪ" && s[i] === YA) || (hk === "ʊ" && s[i] === WAW)) {
-                    out = out.slice(0, -hk.length) + (s[i] === YA ? "iː" : "oː");
+                    out = out.slice(0, -hk.length) + (s[i] === YA ? "iː" : "uː");
                     i++;
                 }
             } else {

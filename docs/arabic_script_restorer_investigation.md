@@ -238,6 +238,28 @@ int8 ONNX live on `/mnt/data` (gitignored, as the Arabic model); `multilingual_d
 lang maps) is committed. NEXT: export ONNX + wire a rider restore pass (the Arabic `restore.ts` analogue); fix the
 و/ی long-vowel search to lift Punjabi; add Sindhi/Saraiki once their g2p exists.
 
+## Run 10 — 2026-07-15 — cross-script GOLD (sister-script) + the durable notes doc
+
+**Cross-script mechanism.** Several abjad languages have a voweled SISTER-SCRIPT that writes the vowels the abjad
+drops (Punjabi↔Gurmukhi, Urdu↔Hindi-Devanagari, Sindhi↔Devanagari, Persian↔Tajik-Cyrillic; Pashto is the exception).
+`crossscript_pa.ts`: transliterate a Gurmukhi word → vocalized Shahmukhi → keep only pairs whose Shahmukhi form
+phonemizes to the SAME IPA as the Gurmukhi original (hard gate) → GOLD harakat. Punjabi (both scripts = the same
+`pa` module): **916 gold pairs @ 70.1%** vs 294 silver @ 23.3%. Surfaced + fixed a real g2p bug: `damma+waw وُ → uː`
+(was oː). Vocab fix: `build_charvocab.py` now unions ALL skeleton sources so sister-script-only letters (ࣇ U+08C7)
+are covered (99 chars).
+
+**Finding — naive combination REGRESSES, so cross-script is OPT-IN.** Adding the gold pairs dropped Punjabi −12.5
+(DER 7→17%). Cause: the two sources disagree on the **default-schwa label** — g2p-inversion writes explicit *fatḥa*
+for ə (its search has no bare option); the sister-script transliteration leaves inherent ə *bare* = `0`. Same sound,
+contradictory supervision. Fix (before enabling `--crossscript`): give the inverter a bare/`0` option and prefer it
+for default-ə, matching real undiacritized text. Silver-only retrain (99-char vocab) reconfirms the working model:
+end-to-end **+18.4** (fa +26.4, ps +8.0, ur +5.4; pa noisy on n=37).
+
+**Durable docs (the training knowledge was being lost).** `tools/arabic-restorer/MODEL_NOTES.md` now captures the
+whole thing — GPU-box env (`/mnt/data/ar-diac-venv`), checkpoints (`bilstm_pausal.pt` = the warm-start), the 19-label
+scheme, the fine-tune recipe, every pipeline script, results, the cross-script mechanism + open issue, and how to
+extend to a new language. Memory note `harakat_restorer_training` points to it.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
