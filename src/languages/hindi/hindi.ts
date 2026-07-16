@@ -50,6 +50,7 @@ export function makeNativeHindi(
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
     script: AbugidaScript = { word: DEVANAGARI_WORD, digits: DEVANAGARI_DIGITS },
+    lexicon?: ReadonlyMap<string, string>,
 ) {
     const g2p = makeAbugidaG2P(def, phon);
     const DIGIT_CLASS = "0-9" + Object.keys(script.digits).join("");
@@ -71,7 +72,8 @@ export function makeNativeHindi(
         "gu",
     );
 
-    function word(w: string): string {
+    /** Pure RULE-ENGINE word→IPA (no lexicon) — the honest, non-circular signal used by the referee eval. */
+    function wordRules(w: string): string {
         let x = g2p(w);
         for (const r of post) x = x.replace(r.re, r.to);
         const syls = (x.match(VOWEL_G) || []).length;
@@ -83,6 +85,11 @@ export function makeNativeHindi(
         x = deleteMedialSchwa(x);
         for (const r of fin) x = x.replace(r.re, r.to);
         return applyWeightStress(x).normalize("NFC");
+    }
+
+    /** SHIPPED word→IPA: a whole-word lexicon override (for the proven-lexical schwa tail) then the rule engine. */
+    function word(w: string): string {
+        return lexicon?.get(w.normalize("NFC")) ?? wordRules(w);
     }
 
     const toAscii = (digits: string): string =>
@@ -126,7 +133,7 @@ export function makeNativeHindi(
         });
     }
 
-    return { word, number, text };
+    return { word, wordRules, number, text };
 }
 
 /** Load hindi.jsonc (beside this file) and build the Hindi phonemizer. `foreign` handles embedded Latin. */

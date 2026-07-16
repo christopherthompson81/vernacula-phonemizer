@@ -93,3 +93,30 @@ rule is already ~90-96% correct there; the 155 over-deletions are the ~4-10% LEX
 consonant-context feature that separates them (any rule keeping them breaks the 90% it gets right — exactly why both
 attempts regressed). DEFINITIVELY lexical (tatsama/tadbhava). The honest ✅ lever is a pronunciation LEXICON, not a
 copy-and-modify rule.
+
+## Run (2026-07-16) — the schwa LEXICON (cross-source consensus): rule 86.0% → shipped 93.1%
+
+Having proven the schwa tail is lexical (not rule-derivable), built the pronunciation lexicon. Key correction: an
+early miner reported only 15 consensus entries — that was a MINER-FOLD bug (its fold omitted the affricate-gemination
+folds and over-applied ɦ~ʱ, masking schwa-only diffs behind notation artifacts, and it forgot the NFD-decompose the
+eval's makeFold already does for precomposed nasals ã/õ). Using the EXACT eval fold (`makeFold(CONFIG.gu)`):
+- wp∩kk 4077 words: already-correct 3582, **no-consensus (corpora disagree) only 24**, CONSENSUS-but-we-differ
+  SCHWA-only **253**, beyond-schwa 218.
+- So the corpora barely disagree on the schwa (24) — the DIALECTAL variability (user's point) is in the
+  beyond-schwa 218: ઐ/ઔ kept as diphthongs [əi]/[əu] vs our standard monophthong [e]/[o], and word-initial ə/a
+  (અખાડો əkʰaɖo~akʰaɖo). Those are correctly NOT pinned (dialect, not our error).
+
+LEXICON: each entry = our rule-engine output (our conventions kept) with the schwa pattern set to the consensus,
+reconstructed by a two-pointer align (char-level tokenizer binding only ties, to survive the ɖʱ/ɦ fold). **185
+entries** validated (each folds back to the consensus; 64 reconstruction edge-cases skipped). Wired via an optional
+`lexicon` param on makeNativeHindi (Hindi/Marathi unaffected) + a `wordRules` rule-only export; the referee eval
+points at `phonemizeWordRules` so the 86.0/87.9% stays NON-CIRCULAR. **Shipped phonemizeWord: 93.1% (either-referee)
+vs rule-only 88.5%.** Suite 371/371. 🟡 for the OOV schwa words outside the 185 (the honest signal is the rule
+engine); the lexicon closes the common lexical tail. The dialectal ઐ/ઔ + word-initial ə/a are a separate,
+corpus-limited class (a fold could neutralize ઐ/ઔ but it is small).
+
+Review caught two reconstruction bugs (fixed): (1) the two-pointer inserted a spurious schwa next to a nasalized
+ə̃ (folded ə̃→ə looked like a deletable slot) — 4 such words are now rejected (adjacent-schwa guard) and fall to the
+rule; (2) the align stripped the primary-stress ˈ and never re-added it — the entries now re-apply
+`applyWeightStress` to the reconstructed segments, so lexicon hits carry the SAME stress marking as OOV words.
+Final: 185 entries, shipped 93.0% (either-referee).
