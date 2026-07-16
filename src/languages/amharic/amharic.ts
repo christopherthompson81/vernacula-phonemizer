@@ -33,6 +33,61 @@ function fidel(): Map<string, string> {
 }
 
 const VOWEL = "əuiaeɨo";
+const VOWELS = new Set([...VOWEL]);
+const isVowel = (c: string | undefined): boolean => c !== undefined && VOWELS.has(c);
+
+/**
+ * Delete the epenthetic 6th-order [ɨ] where the surrounding consonants form a LEGAL cluster; keep it where deleting
+ * would create an illegal one. Amharic [ɨ] (sadis) is inserted to break clusters, so on the surface it survives
+ * only where needed: (a) KEPT word-initially (ɨɡɨɾ 'foot'); (b) KEPT if deleting it would leave a WORD-FINAL
+ * consonant cluster of ≥3 — an illegal complex coda (አምስት→amɨst, since 'mst#' is illegal; but MEDIALLY the cluster
+ * resyllabifies, so አምስተኛ→amstəɲa keeps NO ɨ); (c) KEPT before a truly-illegal 2-cluster — anything before /ɾ/
+ * (ɡɨɾ, bɨɾ) or a nasal + a non-coronal/nasal (nɨɲ, nɨɡ, mɨn). Processed RIGHT-TO-LEFT so an earlier ɨ sees the
+ * clusters a later deletion already created.
+ */
+/** Split an IPA string into PHONEME tokens: an affricate (X͡Y) + any trailing modifiers (ʼ ʷ ʰ ̥ ː) count as ONE
+ *  consonant, so cluster counting isn't fooled by the multi-codepoint spellings (d͡ʒ is one C, not three). */
+function toPhonemes(s: string): string[] {
+    const a = [...s];
+    const out: string[] = [];
+    for (let i = 0; i < a.length; i++) {
+        let t = a[i]!;
+        if (a[i + 1] === "͡") { t += a[i + 1]! + (a[i + 2] ?? ""); i += 2; } // affricate base ͡ base
+        while (a[i + 1] !== undefined && "ʼʷʰ̥ː".includes(a[i + 1]!)) t += a[++i]!; // trailing modifiers
+        out.push(t);
+    }
+    return out;
+}
+const isVowelTok = (t: string | undefined): boolean => t !== undefined && t.length === 1 && VOWELS.has(t);
+
+function deleteEpenthetic(s: string): string {
+    const p = toPhonemes(s);
+    for (let i = p.length - 1; i >= 0; i--) {
+        if (p[i] !== "ɨ") continue;
+        if (p.slice(0, i).every((c) => c === "" || !isVowelTok(c))) continue; // word-initial ɨ is kept
+        const wordFinal = !p.slice(i + 1).some(isVowelTok); // no vowel follows → word-final cluster
+        let left = 0;
+        for (let j = i - 1; j >= 0 && !isVowelTok(p[j]); j--) if (p[j] !== "") left++;
+        let right = 0;
+        for (let j = i + 1; j < p.length && !isVowelTok(p[j]); j++) if (p[j] !== "") right++;
+        if (wordFinal && left + right >= 3) continue; // deleting → illegal ≥3 complex coda → keep
+        const prev = p.slice(0, i).reverse().find((c) => c !== "" && !isVowelTok(c));
+        const next = p.slice(i + 1).find((c) => c !== "" && !isVowelTok(c));
+        if (illegalCluster(prev, next)) continue; // deleting would abut a truly-illegal 2-cluster → keep
+        p[i] = "";
+    }
+    return p.join("");
+}
+const NASAL = new Set([..."mnɲŋ"]);
+const FRICATIVE = new Set([..."szʃʒfh"]);
+/** Is the 2-consonant sequence c1·c2 an illegal Amharic cluster that an epenthetic ɨ must break? Nasal + a
+ *  homorganic stop (nb, nd, nɡ) is LEGAL; a fricative + ɾ (sɾ) is LEGAL; only a STOP + ɾ and nasal + nasal break. */
+function illegalCluster(c1: string | undefined, c2: string | undefined): boolean {
+    if (c1 === undefined || c2 === undefined) return false;
+    if (c2 === "ɾ" && !FRICATIVE.has(c1)) return true; // stop + ɾ (ɡɨɾ, bɨɾ); fricative + ɾ (sɾ) is fine
+    if (NASAL.has(c1) && NASAL.has(c2)) return true; // nasal + nasal (nɨɲ, mɨn)
+    return false;
+}
 
 /** One Amharic word → canonical IPA: fidel→CV lookup + 6th-order ɨ deletion. */
 export function phonemizeWord(word: string): string {
@@ -41,20 +96,7 @@ export function phonemizeWord(word: string): string {
         return word.split(/[፡\s]+/u).filter(Boolean).map(phonemizeWord).join(" ");
     let out = "";
     for (const ch of word.normalize("NFC")) out += fidel().get(ch) ?? "";
-    // The 6th-order [ɨ] (sadis) is epenthetic — it surfaces only to break a word-initial cluster, and is deleted
-    // elsewhere (ሆስፒታል→hospital, not hosɨpital). Heuristic: keep the FIRST ɨ only if it is the word's first vowel;
-    // delete every other ɨ.
-    let seenVowel = false;
-    out = out.replace(new RegExp(`[${VOWEL}]`, "gu"), (v) => {
-        if (v === "ɨ") {
-            if (seenVowel) return "";
-            seenVowel = true;
-            return v;
-        }
-        seenVowel = true;
-        return v;
-    });
-    return out.normalize("NFC");
+    return deleteEpenthetic(out).normalize("NFC");
 }
 
 // ── Numbers (decimal; Amharic) ────────────────────────────────────────────────

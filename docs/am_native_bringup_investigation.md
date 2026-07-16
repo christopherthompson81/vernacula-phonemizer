@@ -25,9 +25,29 @@ Neither is marked in the script:
 - **Run 3** — /r/→tap ɾ in the map (wikipron writes ɾ) + the Ethiopic wordspace ፡ as a word boundary → **74.9%.**
 - **Run 4** — folds for kaikki's conventions (plain r, the optional-glottal parens (ʔ)) → **80.1% / 78.3%.**
 
+## Run 5 — 2026-07-16 — the ɨ-epenthesis PHONOTACTIC rule (80.1 → 86.4%)
+
+Run 4's heuristic ("keep only the word's first-vowel ɨ, delete the rest") OVER-deleted: the referee keeps medial ɨ
+that breaks illegal clusters (አምስት→amɨst, እግር→ɨɡɨɾ, አርመንኛ→aɾmənɨɲa). Replaced it with a principled phonotactic rule
+(`deleteEpenthetic`) that deletes ɨ EXCEPT where the resulting cluster is illegal:
+- **word-initial ɨ** is kept (ɨɡɨɾ);
+- a **word-FINAL** cluster of ≥3 consonants is illegal → keep (አምስት→amɨst; but MEDIALLY the cluster resyllabifies,
+  so አምስተኛ→amstəɲa keeps NO ɨ — the same letters, opposite outcome, was the key insight);
+- an illegal **2-cluster** is kept: a STOP + ɾ (ɡɨɾ, bɨɾ; a fricative + ɾ like sɾ is legal), or a nasal + nasal
+  (nɨɲ, mɨn; a nasal + a homorganic stop like nb/nd/nɡ is legal).
+
+Processed RIGHT-TO-LEFT so an earlier ɨ sees the clusters a later deletion created. The other +4 came from **phoneme
+tokenization** (`toPhonemes`): an affricate d͡ʒ (3 codepoints) was being counted as 3 consonants, so ልጅ wrongly kept
+its final ɨ (lɨd͡ʒɨ). Counting phoneme UNITS fixed it. **80.1/78.3 → 86.4/83.3%** across both human referees.
+
 ## Result — 🟡
-80.1% / 78.3% across two human referees — strong for a new script model. The residual is the **ɨ-epenthesis tail**
-(amst~amɨst, ahja~ahɨja — partly lexical, like schwa deletion, and the referees disagree with each other on it),
-plus a few compound-with-wordspace referee entries. The syllabary segmental core is essentially exact; 🟡 for the
-two documented unwritten-feature tails (gemination + ɨ epenthesis). A lexicon would close the ɨ tail; gemination
-needs a lexicon or morphology (unrecoverable from the script).
+**86.4% / 83.3%** across two human referees — strong for a new script model, with the ɨ-epenthesis now a principled
+phonotactic RULE (Run 5), not a heuristic. The syllabary segmental core is essentially exact. The residual is now:
+- **vowel-quality / fidel-table edges** — the guttural-1st-order ə~a (አዝማሪ→əzmaɾi vs our azmaɾi) and the labiovelar
+  1st-order vowel (አንጐል→anɡʷəl vs anɡʷel) are partly lexical;
+- **gemination** — unwritten, folded, but the referee's tie-bar geminates leak a little;
+- a **lexical ɨ tail** — the few clusters the phonotactic rule can't adjudicate (h_j: ahja~ahɨja; some medial 3-runs)
+  where even the two referees disagree.
+
+🟡: a pronunciation lexicon could close the lexical tail, but the referees are TINY (478 / 437 words) and share the
+Wiktionary source, so a mined lexicon would be near-fully circular — the honest signal is the rule engine's 86.4%.

@@ -18,9 +18,15 @@ describe("amharic canonical IPA", () => {
             ["ውሃ", "wɨha"], // water — word-initial ɨ kept
             ["ቤት", "bet"], // house — 5th-order e
             ["ሁለት", "hulət"], // two — final 6th-order ɨ deleted
-            ["ልጅ", "lɨd͡ʒ"], // child — ɨ kept (first vowel), ጅ → d͡ʒ
+            ["ልጅ", "lɨd͡ʒ"], // child — ɨ kept, final ɨ deleted (ጅ → d͡ʒ, affricate = one C)
             ["መጽሐፍ", "mət͡sʼhaf"], // book — ejective t͡sʼ, guttural ሐ→ha
             ["ቀን", "kʼən"], // day — ejective kʼ
+            // Epenthetic-ɨ phonotactics: kept to break an illegal cluster, deleted where the cluster is legal.
+            ["አምስት", "amɨst"], // 'five' — ɨ KEPT: deleting → word-final 'mst', an illegal ≥3 complex coda
+            ["አምስተኛ", "amstəɲa"], // 'fifth' — same letters but MEDIAL (before ə) → the cluster resyllabifies, ɨ deleted
+            ["እግር", "ɨɡɨɾ"], // 'foot' — word-initial ɨ kept; medial ɨ kept before ɾ (stop + ɾ illegal)
+            ["አሥራራት", "asɾaɾat"], // ɨ deleted — a fricative + ɾ (sɾ) is a legal cluster
+            ["አርመንኛ", "aɾmənɨɲa"], // ɨ kept before ɲ (nasal + nasal illegal); aɾm/mən legal
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
     });
