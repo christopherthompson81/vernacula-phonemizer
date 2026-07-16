@@ -10,12 +10,15 @@ expanded map + a per-language coverage report.
 The 19 harakat LABELS are unchanged: the short-vowel diacritics (fatḥa/kasra/ḍamma/sukūn/shadda/tanwīn) are shared
 across all Perso-Arabic orthographies, which is exactly why one label scheme serves every language.
 """
+import glob
 import json
 import os
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SILVER = os.path.join(HERE, "silver.tsv")
+# Scan EVERY skeleton source so the vocab covers every letter the g2ps can read — the wikipron silver alone misses
+# letters only the sister-script transliteration produces (e.g. Punjabi ࣇ U+08C7, from Gurmukhi ਲ਼).
+SKELETON_SOURCES = [os.path.join(HERE, "silver.tsv")] + sorted(glob.glob(os.path.join(HERE, "harakat.*.tsv")))
 META = os.path.join(HERE, "..", "..", "src", "languages", "arabic", "diacritizer.meta.json")
 OUT = os.path.join(HERE, "multilingual_charvocab.json")
 
@@ -29,15 +32,16 @@ def main() -> None:
     per_lang: dict[str, set[str]] = defaultdict(set)
     char_langs: dict[str, set[str]] = defaultdict(set)
     freq: Counter[str] = Counter()
-    for line in open(SILVER, encoding="utf-8"):
-        p = line.rstrip("\n").split("\t")
-        if len(p) < 3:
-            continue
-        skel, lang = p[0], p[1]
-        for ch in skel:
-            per_lang[lang].add(ch)
-            char_langs[ch].add(lang)
-            freq[ch] += 1
+    for src in SKELETON_SOURCES:
+        for line in open(src, encoding="utf-8"):
+            p = line.rstrip("\n").split("\t")
+            if len(p) < 3:
+                continue
+            skel, lang = p[0], p[1]
+            for ch in skel:
+                per_lang[lang].add(ch)
+                char_langs[ch].add(lang)
+                freq[ch] += 1
 
     # Append every letter not already in the Arabic char map, most-frequent first (stable, meaningful order).
     all_chars = {c for s in per_lang.values() for c in s}
