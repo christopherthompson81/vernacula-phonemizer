@@ -58,17 +58,22 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
 ### Train / evaluate
 ```
 /mnt/data/ar-diac-venv/bin/python train_multilingual_harakat.py --epochs 25 --upsample 4
-/mnt/data/ar-diac-venv/bin/python predict_harakat.py --in eval.tsv --out /tmp/pred.tsv
+/mnt/data/ar-diac-venv/bin/python predict_harakat.py --out /tmp/pred.tsv   # defaults --in eval_set.tsv
 npx tsx eval_endtoend.ts /tmp/pred.tsv
 ```
 - **Warm-start:** copy the 26 vocab-independent lstm/fc tensors directly; copy embedding rows by CHAR IDENTITY
   (Arabic rows transfer, rider/lang rows random-init). New lang embedding init random.
 - **Upsample riders ~4×** (Arabic replay stays 1×). Best usually at epoch 1–2, early-stops fast.
-- **Two metrics:** held-out harakat DER (inner loop); the real one is **end-to-end IPA** — predicted harakat →
-  deterministic g2p → IPA vs the wikipron reference, MODEL vs bare-skeleton BASELINE.
-- **Result (silver-only):** end-to-end **+18.4** (fa +26.4, ps +8.0, ur +5.4; pa ≈0, noisy on n=37). Held-out DER
-  ur 2.1% / fa 2.5% / ps 3.3% / pa 8.6%. Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt` (gitignored);
-  `multilingual_diacritizer.meta.json` committed.
+- **Two metrics:** in-domain harakat DER (`eval.tsv`, inner-loop early-stop); the REPORTING metric is **end-to-end
+  IPA on the STABLE `eval_set.tsv`** — predicted harakat → deterministic g2p → IPA vs the wikipron reference, MODEL
+  vs bare-skeleton BASELINE. `eval_set.tsv` is a fixed 10% slice of the WIKIPRON reference (not the silver labels),
+  excluded from training, so it does NOT move when the inversion changes → version comparisons are exact. It covers
+  ALL held-out words incl. the ~half the g2p can't reproduce → honest full-coverage denominator (lower absolutes).
+- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 54.3% (+10.8)**. Per language: **fa +19.2**
+  (44→63%), **ur +3.2** (48→52%) — the data-rich riders clearly benefit; **pa −0.8, ps −0.9** — the data-starved,
+  g2p-ceiling-limited riders are ~neutral (model neither helps nor hurts; NOT noise now — n≈120). Checkpoint
+  `/mnt/data/ar-diac/bilstm_multilingual.pt` (gitignored); `multilingual_diacritizer.meta.json` committed.
+  (An earlier "+18" was on a DIFFERENT, moving eval that scored only the invertible subset — not comparable.)
 
 ## Cross-script GOLD (`crossscript_pa.ts`) — the mechanism, and why it's opt-in
 Several abjad languages have a **voweled sister-script** (Punjabi↔Gurmukhi, Urdu↔Hindi-Devanagari,
@@ -87,10 +92,10 @@ net win: transliterate to *real* Shahmukhi orthography (needs a Gurmukhi↔Shahm
 corpus, not a phonetic transliteration), or evaluate/train on the sister-script distribution directly. Also note
 the `damma+waw وُ → uː` g2p fix the sister-script surfaced (in `shahmukhi.ts`).
 
-**Eval caveat:** the held-out split is deterministic but buckets over the *silver data*, so when the inversion
-labels change, the eval set moves too — per-language numbers aren't comparable across versions (esp. the small-n
-riders pa/ps, which swing ±several words). Pin a STABLE held-out reference (a fixed wikipron slice) before the
-final retrain so version comparisons are exact.
+**Eval (pinned).** The reporting eval is now the STABLE `eval_set.tsv` — a fixed 10% slice of the WIKIPRON reference
+(not the silver labels), excluded from training, so it doesn't move when the inversion changes. `build_training_
+manifest.py` writes it and drops those skeletons from train/in-domain-eval. This is what made pa/ps legible: they're
+~neutral (not the old ±4-word swing). Use it (not the old moving split) for every version comparison from here.
 
 ## Extending to a new language
 1. Build its deterministic g2p (front-end) as usual.

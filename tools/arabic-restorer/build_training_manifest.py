@@ -26,7 +26,9 @@ args = ap.parse_args()
 HERE = os.path.dirname(os.path.abspath(__file__))
 AR_TSV = os.path.join(HERE, "..", "..", "src", "languages", "arabic", "diacritization.tsv")
 VOCAB = os.path.join(HERE, "multilingual_charvocab.json")
+SILVER = os.path.join(HERE, "silver.tsv")
 RIDERS = ["pa", "ur", "ps", "fa"]
+WIKI_CODE = {"pan": "pa", "urd": "ur", "pus": "ps", "fas": "fa"}  # wikipron tag → phonemizer code
 AR_REPLAY = 15000  # Arabic replay words (hash-selected from the ~259k lexicon) — enough to prevent forgetting
                    # without swamping the ~11k riders. Bump for a more Arabic-weighted fine-tune.
 
@@ -63,37 +65,56 @@ def main() -> None:
     for p in ar_sorted[:AR_REPLAY]:
         rows.append((p[0], "ar", p[1]))
 
-    # Clean (strip tatweel/kashida — decorative, already stripped from the rider skeletons), split, coverage.
-    def clean(s: str) -> str:
+    def clean(s: str) -> str:  # strip tatweel/kashida — decorative, already gone from the rider skeletons
         return s.replace("ـ", "")
+
+    # STABLE held-out eval slice, defined over the WIKIPRON reference (silver.tsv is fixed — it does NOT move when
+    # the inversion labels change), a deterministic 10% per rider. EXCLUDED from training entirely and reported
+    # end-to-end by eval_endtoend.ts, so version-to-version comparisons are exact (unlike the in-domain split, which
+    # bucketed over the shifting silver labels). Includes words the inversion couldn't label — honest full coverage.
+    heldout: dict[str, set[str]] = {l: set() for l in RIDERS}
+    eval_set: list[str] = []
+    for line in open(SILVER, encoding="utf-8"):
+        p = line.rstrip("\n").split("\t")
+        if len(p) >= 3 and p[1] in WIKI_CODE:
+            lang = WIKI_CODE[p[1]]
+            skel = clean(p[0])
+            if skel and bucket(skel) == 0 and skel not in heldout[lang]:
+                heldout[lang].add(skel)
+                eval_set.append(f"{skel}\t{lang}")
 
     skipped = Counter()
     train, ev = [], []
     per_lang: dict[str, list[int]] = {}
     for skel, lang, voc in rows:
         skel, voc = clean(skel), clean(voc)
+        if lang in heldout and skel in heldout[lang]:
+            continue  # stable held-out — never train (or in-domain-eval) on it
         bad = [ch for ch in skel if ch not in chars]
         if bad:  # a skeleton char outside the vocab (stray punctuation etc.) → drop, don't emit an <unk>
             skipped.update(bad)
             continue
-        (ev if bucket(skel) == 0 else train).append(f"{skel}\t{lang}\t{voc}")
+        in_eval = bucket(skel) == 1  # small in-domain slice for the training-DER early-stop (bucket 0 = held-out)
+        (ev if in_eval else train).append(f"{skel}\t{lang}\t{voc}")
         per_lang.setdefault(lang, [0, 0])
-        per_lang[lang][1 if bucket(skel) == 0 else 0] += 1
+        per_lang[lang][1 if in_eval else 0] += 1
 
     open(os.path.join(HERE, "train.tsv"), "w", encoding="utf-8").write("\n".join(train) + "\n")
     open(os.path.join(HERE, "eval.tsv"), "w", encoding="utf-8").write("\n".join(ev) + "\n")
+    open(os.path.join(HERE, "eval_set.tsv"), "w", encoding="utf-8").write("\n".join(eval_set) + "\n")
 
-    print(f"{'lang':>6} {'train':>7} {'eval':>6}")
-    print("-" * 21)
+    print(f"{'lang':>6} {'train':>7} {'eval':>6} {'held-out':>9}")
+    print("-" * 32)
     for lang in sorted(per_lang):
         tr, e = per_lang[lang]
-        print(f"{lang:>6} {tr:>7} {e:>6}")
-    print("-" * 21)
-    print(f"{'TOTAL':>6} {len(train):>7} {len(ev):>6}")
+        print(f"{lang:>6} {tr:>7} {e:>6} {len(heldout.get(lang, [])):>9}")
+    print("-" * 32)
+    print(f"{'TOTAL':>6} {len(train):>7} {len(ev):>6} {sum(len(h) for h in heldout.values()):>9}")
     if skipped:
         print(f"\ndropped {sum(skipped.values())} rows with out-of-vocab chars: "
               + " ".join(f"{c}(U+{ord(c):04X})×{n}" for c, n in skipped.most_common(20)))
     print("char-vocab coverage of emitted rows: 100%")
+    print(f"stable eval_set.tsv: {len(eval_set)} wikipron held-out words (fixed across versions)")
 
 
 if __name__ == "__main__":

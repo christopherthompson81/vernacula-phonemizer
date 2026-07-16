@@ -281,6 +281,19 @@ but `--crossscript` still isn't a clear net win — deeper cause is a **distribu
 *synthetic* orthography, not real Shahmukhi spelling). Stays opt-in; see MODEL_NOTES.md. Also logged: the eval split
 moves with the silver data, so pin a stable held-out reference before the final retrain (follow-up). Suite 357/357.
 
+## Run 12 — 2026-07-15 — pin a stable eval set (version-comparable, honest coverage)
+
+The end-to-end eval had been bucketing over the *silver labels*, so it moved every time the inversion changed —
+pa/ps were uninterpretable (±several words). Fixed: `build_training_manifest.py` now derives a STABLE held-out
+slice from the WIKIPRON reference (`silver.tsv`, fixed) — a deterministic 10% per rider (`eval_set.tsv`, 1,699
+words) — EXCLUDES those skeletons from training, and `eval_endtoend.ts` reports on it. It covers ALL held-out words
+(incl. the ~half the g2p can't reproduce) → honest full-coverage denominator.
+
+Stable result (silver-only): **43.5% → 54.3% (+10.8)** — fa +19.2 (44→63%), ur +3.2 (48→52%) clearly benefit;
+**pa −0.8, ps −0.9 are ~neutral** (n≈120 — real signal now, not noise: the data-starved, g2p-ceiling-limited riders
+neither gain nor lose). The lower absolutes vs the earlier "+18" are because that number scored only the invertible
+subset on a moving split — not comparable. From here, all version comparisons use `eval_set.tsv`.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
