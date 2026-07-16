@@ -44,7 +44,9 @@ const VOWEL_G = new RegExp(`[${IPA_VOWELS}]`, "g");
  *  consonant (घर→ɡʱəɾ) but RETAINED to avoid a word-final cluster (अंक→əŋkə, महत्त्व→məɦət̪ːʋə, अन्न→ənːə).
  *  Affricates (t͡ʃ d͡ʒ t͡s d͡z) are ONE consonant (आज→aːd͡z deletes); a length mark ː is a geminate = heavy. */
 export function heavyFinalCoda(body: string): boolean {
-    if (/ː$/.test(body)) return true; // geminate/long consonant coda (क्क→kː) is heavy
+    // Geminate/long CONSONANT coda (क्क→kː) is heavy. Guard the ː to a consonant so a (structurally
+    // unreachable, but defensive for future flag users) trailing long VOWEL isn't misread as a geminate.
+    if (new RegExp(`[^${IPA_VOWELS}]ː$`).test(body)) return true;
     // Collapse affricates to a single placeholder BEFORE stripping the (combining) tie bar, so d͡z counts as 1.
     const collapsed = body
         .replace(/t͡ʃ|d͡ʒ|t͡s|d͡z/g, "Ç")
