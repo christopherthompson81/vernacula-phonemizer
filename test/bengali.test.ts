@@ -38,6 +38,20 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("বিজ্ঞান")).toBe("biɡːan"); // biggan: জ্ঞ → [ɡː]
     });
 
+    test("word-initial ্যা / অ্যা → [æ] (loanword/tatsama); medial ্যা still geminates", () => {
+        expect(phonemizeWord("গ্যাস")).toBe("ɡæʃ"); // 'gas' — word-initial ্যা → æ
+        expect(phonemizeWord("ক্যান্ডি")).toBe("kænɖi"); // 'candy' — ্যা → æ, retroflex ɖ
+        expect(phonemizeWord("ন্যায়")).toBe("næj"); // 'justice' — word-initial ্যা → æ
+        expect(phonemizeWord("অ্যাসিড")).toBe("æʃiɖ"); // 'acid' — অ্যা → æ (স→ʃ merger)
+        // MEDIAL ্যা geminates instead of æ (বিদ্যা → bid̪ːa is covered above)
+        expect(phonemizeWord("অকাট্য")).toBe("ɔkaʈʈo"); // medial ্য → geminate ʈ, not æ
+    });
+
+    test("hiatus harmony: /ɔ/ → [o] before a close vowel [i u]", () => {
+        expect(phonemizeWord("বই")).toBe("boi"); // 'book' — ɔ→o before i in hiatus
+        expect(phonemizeWord("অই")).toBe("oi"); // ɔ→o before i (independent vowels)
+    });
+
     test("text: words + Bengali danda pause", () => {
         expect(phonemize("আমি বাংলা বলি।", "bn")).toContain("baŋla");
     });

@@ -47,6 +47,12 @@ export function makeNativeBengali(
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
 ) {
+    // ্যা (ya-phôla + aa-matra) and word-initial অ্যা spell the vowel [æ] in Bengali (mostly loanwords:
+    // ক্যান্ডি→kænɖi, গ্যাস→ɡæʃ, ব্যাগ→bæɡ). There is no [æ] matra, so we rewrite the sequence to a private-use
+    // SENTINEL and register it as both a matra (after a consonant) and an independent vowel (word-initial অ্যা).
+    const AE = String.fromCharCode(0xe001);
+    def.vowelSigns[AE] = { ipa: "æ" };
+    def.independentVowels[AE] = { ipa: "æ" };
     const g2p = makeAbugidaG2P(def, phon);
     const CLAUSE_MARK = def.clausePunctuation;
     const symbols = def.symbols ?? {};
@@ -75,7 +81,15 @@ export function makeNativeBengali(
             // fires in an OPEN syllable — exactly one onset consonant (কর.ি→koɾi); a coda cluster (≥2) or
             // hiatus (0, the referee is inconsistent) blocks it.
             const between = out.slice(idx + 1, nextIdx).replace(/[ʰʱ̪̃͡ːʲ]/gu, "");
-            if ([...between].length !== 1) continue;
+            const nBetween = [...between].length;
+            // HIATUS (no consonant between): /ɔ/ still raises to [o] before a CLOSE vowel [i u] (বই→boi,
+            // অই→oi) — but not before a mid [o e] (অওসৎ→ɔosɔt̪ keeps ɔ, referee-confirmed).
+            if (nBetween === 0) {
+                if (cur === "ɔ" && (nextV === "i" || nextV === "u"))
+                    out = out.slice(0, idx) + "o" + out.slice(idx + 1);
+                continue;
+            }
+            if (nBetween !== 1) continue;
             // /ɔ/ raises to [o] before a high/mid vowel (kɔ.ri→ko.ri); /e/ lowers to [æ] before low [a]
             // (de.kʰa→dæ.kʰa) — the mid vowel agrees in height with the following nucleus.
             const to =
@@ -114,6 +128,10 @@ export function makeNativeBengali(
             .normalize("NFC")
             .replace(/ং/gu, "ঙ্") // velar-nasal sign → full [ŋ]
             .replace(/ৎ/gu, "ত্") // khanda ta → vowelless dental [t̪]
+            // WORD-INITIAL ্যা → [æ] (ক্যা→kæ, গ্যাস→ɡæʃ, ন্যায়→næj) and অ্যা → [æ] (অ্যাসিড→æʃiɖ).
+            // Only word-initial: MEDIAL ্যা geminates instead (বিদ্যা→bid̪d̪a) via the phôla rule below.
+            .replace(/^অ্যা/u, AE)
+            .replace(/^(\S)্যা/u, "$1" + AE)
             .replace(/ক্ষ/gu, "ক্খ") // ক্ষ conjunct → [kkʰ] (অক্ষর→ɔkkʰɔr), not [kʃ]
             .replace(/জ্ঞ/gu, "গ্গ") // জ্ঞ conjunct → [ɡɡ] ('gyô': জ্ঞান→ɡɡæn), not [d͡ʒn]
             // Phôla gemination — য/ব/ম as the 2nd member of a conjunct GEMINATE the preceding consonant
