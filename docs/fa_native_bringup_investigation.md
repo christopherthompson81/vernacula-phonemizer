@@ -26,3 +26,34 @@ gemination (اتحاد→ittihaːd), and the ع realization are the deferred res
 
 NEXT (deferred): short-vowel restoration — a diacritized-Persian lexicon or a neural diacritizer would lift fa the
 way the ONNX diacritizer lifted ar; the ezâfe linker (-e) is a separate syntactic layer.
+
+## Run (2026-07-16) — REVIEW: restoration under-diacritized; root cause = folded silver; FULL-diacritization fix
+
+Reviewed the shipped restoration. Findings (all measured):
+- The neural diacritizer LOADS and runs, but changes only **10.7%** of words and its changes are often wrong
+  (دنیا→danejaː). The coverage lexicon was PARTIAL (کتاب not in it → kataːb; many entries only a sukun). Net: the
+  Iranian gold UNFOLDED was **13/18**, and کتاب/دنیا/ستاره all fell to the default [a]. The maturity doc's
+  "+29 held-out / wins any covered word" OVERSTATED the shipped reality.
+
+ROOT CAUSE — the silver labels were mined SHORT-VOWEL-BLIND. `invert_harakat.ts` searched the vocalization whose
+g2p matches the reference **under the referee-eval fold**, and Persian's fold COLLAPSES short-vowel quality
+(a~e~o~i~u→a). So for کتاب, bare→kataːb and the target kitaːb are fold-equal → the miner picks BARE → کتاب is
+literally labeled bare. 69% of fa training words carried no vowel mark; the model faithfully learned to
+under-vocalize. **This is a DATA-pipeline bug, not a model-architecture problem** — a Persian-specific BiLSTM on
+the same labels would reproduce it (and the shared model under-vocalizes Urdu *more* than Persian: 3 marks/10 vs
+7/10, so multilingual dilution is not the cause).
+
+FIX — mine with FULL DIACRITIZATION. A new `FA_FULL_FOLD` keeps a/e/o DISTINCT and DIALECT-NORMALIZES the
+classical/Dari wikipron references to Iranian: the standard historical short shift **classical i→e, u→o** (which
+the g2p reproduces via kasra→e / damma→o) + the long merge eː→iː/oː→uː + a word-final ه [a]→[e] normalization
+(خانه xaːna→xaːne). Mined TWO-PASS (full fold first; loose fold as fallback) so no coverage is lost.
+
+RESULT: fa silver diacritization **31%→48% voweled** (3073 kasra + 1134 damma marks now ENCODE the short vowels).
+The regenerated COVERAGE LEXICON (ships immediately, no retrain) grew 3040→4128 rows and fixes the common tail:
+کتاب→ketaːb, دنیا→donjaː, ستاره→setaːɾe — Iranian gold UNFOLDED **13/18 → 16/18**, with the folded skeleton eval
+preserved (72.0%→71.3%). Suite 371/371. The 2 residual gold misses are a gold convention (آسمان ʔ-initial) and a
+multi-variant edge (گل [gil]/[gul]→gel vs Iranian gol).
+
+RETRAIN (the user's GPU step): the new `harakat.fa.silver.tsv` is the training data — retrain the BiLSTM
+(`train_multilingual_harakat.py`) + re-export the ONNX so the NEURAL tier (uncovered words) also stops
+under-vocalizing. ur/ps/pa need their own dialect maps (analogous FULL_FOLD) — a follow-up.
