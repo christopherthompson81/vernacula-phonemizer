@@ -124,7 +124,11 @@ export function phonemizeWord(word: string): string {
             if (s[i] === DEF.sukun) {
                 i++; // explicit no-vowel
             } else if (hk !== undefined) {
-                out += hk;
+                // An EXPLICITLY-WRITTEN fatḥa (= /ə/) must survive medial schwa-deletion, which only elides the
+                // g2p's UNwritten default schwa. Mark it (ə + U+0332) so deleteMedialSchwa (targets bare "ə") skips
+                // it; urdu.ts strips the mark. Without this, a written vowel gets deleted and no vocalization can
+                // reproduce e.g. کَرَنو → kəɾənoː (the cap on inversion for tri-consonantal words).
+                out += hk === "ə" ? "ə̲" : hk;
                 i++;
                 // harakat + a long-vowel letter lengthens (zabar+ا etc. is rare; kasra+ی→iː)
                 const lv = longVowelAfterConsonant(s[i] ?? "");

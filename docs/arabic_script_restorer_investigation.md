@@ -294,6 +294,24 @@ Stable result (silver-only): **43.5% → 54.3% (+10.8)** — fa +19.2 (44→63%)
 neither gain nor lose). The lower absolutes vs the earlier "+18" are because that number scored only the invertible
 subset on a moving split — not comparable. From here, all version comparisons use `eval_set.tsv`.
 
+## Run 13 — 2026-07-15 — g2p/inversion fixes from the failure-cause analysis (+10.8 → +12.5)
+
+Diagnosed WHY ~half the held-out words are unreachable (referee residual classes + a failure-cause tally on the
+unlabeled set), then fixed the systematic ones — the couple lever (each g2p fix raises the ceiling AND adds labels):
+- **Explicit fatḥa protected from schwa-deletion** (`urdu/g2p.ts` marks a written fatḥa ə+U+0332; `urdu.ts` strips
+  it). `deleteMedialSchwa` was eliding *written* vowels, so no vocalization could reproduce e.g. کَرَنو→kəɾənoː.
+  Quality fix (225 ur labels corrected); on its own, coverage-neutral — but it UNBLOCKS the next fix.
+- **Consonant-before-glide is a short slot** (the ‑iyā/‑iyoṅ class, 77% of the "neither" failure bucket): آبادیات
+  needs ɑbɑd·ə·jɑt but the inverter skipped the د (next char ی was treated as a vowel letter). Now it's a slot →
+  the epenthetic ə is reachable (and survives, thanks to the protection fix).
+
+**Inversion yields:** ur 53.1→**56.5%**, fa 67.5→**69.5%**, pa 36.1→37.2%, ps 44.7% (12,471 pairs). **Stable eval
+(n=1699): 54.3% → 56.0%, +12.5** — **ur +3.2→+5.9**, **fa +19.2→+20.3**, **pa −0.8→+2.4 (positive!)**; ps −1.8 the
+holdout. Bare-text referee % unchanged (fixes touch only vocalized input). Suite 357/357.
+
+Remaining measured levers: unwritten **gemination** (9% of ur failures — needs a targeted shadda search), **ی→eː**
+(14% — lexical, no clean harakat), and Pashto (no sister-script + dialectal referee).
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
