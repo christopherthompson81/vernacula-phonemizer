@@ -198,11 +198,11 @@ function dictionary(): ReadonlyMap<string, string> {
     return (DICTIONARY ??= loadTsvMap(import.meta.url, "dictionary.tsv", undefined, { optional: true }));
 }
 
-/** One segmented Burmese WORD → canonical IPA (lexicon override, else syllabify + orthographic tone + voicing). */
-function phonemizeSubword(word: string): string {
+/** RULE-only word → IPA (syllabify + orthographic tone + voicing sandhi), WITHOUT the pronunciation-lexicon
+ *  override. Exposed for tools/build-my-dict.ts: the dict miner must compare the gold against the RULES (else it
+ *  reads the dict it is rebuilding and drops every covered entry). */
+export function phonemizeWordRules(word: string): string {
     const nfc = word.normalize("NFC");
-    const lex = dictionary().get(nfc);
-    if (lex !== undefined) return lex; // authoritative pronunciation override
     const syls = syllabify(nfc);
     const flags = voicingLexicon().get(nfc);
     if (flags) {
@@ -214,6 +214,12 @@ function phonemizeSubword(word: string): string {
         }
     }
     return syls.map((s) => s.onset + s.body).join("").normalize("NFC");
+}
+
+/** One segmented Burmese WORD → canonical IPA: the authoritative lexicon override, else the rule engine. */
+function phonemizeSubword(word: string): string {
+    const lex = dictionary().get(word.normalize("NFC"));
+    return lex ? lex : phonemizeWordRules(word); // a blank/empty dict value falls through to the rules
 }
 
 // Word SEGMENTATION: Burmese is spaceless, so a text run is one token that must be split into words before the
