@@ -183,6 +183,30 @@ exist where there were zero — the few-shot signal to complement anchor transfe
 Silver-data prep status: eval reference ✅ · multilingual char vocab ✅ · anchor harakat ✅ (pre-existing) · rider
 g2p-inversion ✅ (pa/ur/ps/fa, 10.9k pairs) · Persian/Urdu diacritized text → optional. **Ready for a training run.**
 
+## Run 8 — 2026-07-15 — assemble the fine-tune manifest + harness
+
+`build_training_manifest.py` → `train.tsv` / `eval.tsv` (`skeleton⇥lang⇥vocalized`) + `TRAINING.md` (the recipe).
+The multilingual restorer is a **fine-tune** of the existing Arabic diacritizer — the char vocab was built to
+preserve the Arabic indices 0–38 exactly for this, so the trained embedding rows transfer and the rider letters
+append at 39+. Manifest = the 10,929 mined rider pairs + a hash-selected 15k Arabic **replay** sample (tagged `ar`,
+so fine-tuning doesn't forget Arabic), deterministic 90/10 per-language split (md5-bucketed, no RNG):
+
+| lang | train | eval |
+|---|---:|---:|
+| ar (replay) | 13,543 | 1,453 |
+| fa | 6,257 | 659 |
+| ur | 2,856 | 288 |
+| ps | 521 | 54 |
+| pa | 257 | 37 |
+| **total** | **23,434** | **2,491** |
+
+100% char-vocab coverage (4 stray-punctuation rows dropped; tatweel stripped to match the rider skeletons).
+`TRAINING.md` specifies: expand the embedding 39→98 (copy Arabic rows), add a learned **language embedding** on the
+lang tag, fine-tune with riders upsampled ~5–10× + Arabic replay, and evaluate on TWO axes — direct harakat DER on
+the held-out split, and the real target, **end-to-end IPA** (skeleton →[model] harakat →[deterministic g2p] IPA vs
+`silver.normalized.tsv`, reusing the eval fold). The run itself is an **offline GPU job**, not CI (as for the
+Arabic model). Everything up to `python train_*.py` is now committed and reproducible.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
