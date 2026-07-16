@@ -418,6 +418,32 @@ in-distribution GENERALIZATION**; it adds COVERAGE the held-out eval can't see. 
   vocalizations into the production lexicon layer is the follow-up. The pipeline is a template: Devanagari→Sindhi,
   Gurmukhi→Punjabi (with real spellings) next.
 
+## Run 20 — 2026-07-15 — is the held-out eval reachable by data? Tested: NO, and here's why
+
+Tested the hypothesis from Run 19: use Hindi's GOLD IPA to relabel the IN-DISTRIBUTION wikipron words that
+g2p-inversion misses (not add off-distribution words). Flipped `build_hindi_urdu.ts` to keep the wikipron-OVERLAPPING
+words and fed their Hindi IPA to the inverter as an alternate target.
+
+**Refuted, with evidence.** Hindi labeled only **70 more unique ur words** (4764→4834); held-out ur +12.8→+13.0
+(noise), ALL −0.3. Traced why on the actual misses:
+- **Hindi and Urdu DISAGREE on exactly these words** — آئرلینڈ is `ɑjərlɛɳɖ` in Hindi (retroflex ɳ) but `ɑərlɛnɖ`
+  in wikipron Urdu (plain n); آدرنیہ `ɑdərɳij` vs `ɑdərnəjɑ`. Same language, but the hard words differ (retroflex,
+  final vowels), so the "gold" doesn't match the eval's target.
+- The rest are **g2p-COVERAGE gaps** (glide+vowel, ɳ) unreachable by ANY reference — the g2p can't produce that IPA
+  regardless of which source supplies it.
+
+**Conclusion — the concern is real but precisely bounded.** The held-out GENERALIZATION eval is at its
+**g2p-coverage ceiling** (~62% model vs ~76% coverage for ur). Data expansion cannot move it: off-distribution data
+adds COVERAGE not generalization; in-distribution relabeling fails because sources disagree on the hard words and
+the true misses are coverage gaps. The ONLY lever left for the held-out is **more g2p coverage** on hard lexical
+cases (retroflex ن→ɳ, …) — which is DATA-LIMITED per language (Run 16's retroflex result).
+
+**Resolution.** This isn't a dead end — it's the held-out eval measuring the wrong AXIS for the goal. Production
+accuracy = COVERAGE (lexicon; common/seen words, exact) + generalization (neural; novel words, near ceiling).
+Coverage IS scalable — Hindi→Urdu/kaikki add thousands of real words handled exactly (Run 19). So the correct next
+step is a **production/coverage eval + wiring the lexicon layer**, and accepting the neural held-out is near its
+ceiling — not chasing data to move a metric that structurally can't move on that axis.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
