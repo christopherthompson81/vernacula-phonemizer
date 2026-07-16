@@ -111,7 +111,7 @@ reconstructed by a two-pointer align (char-level tokenizer binding only ties, to
 entries** validated (each folds back to the consensus; 64 reconstruction edge-cases skipped). Wired via an optional
 `lexicon` param on makeNativeHindi (Hindi/Marathi unaffected) + a `wordRules` rule-only export; the referee eval
 points at `phonemizeWordRules` so the 86.0/87.9% stays NON-CIRCULAR. **Shipped phonemizeWord: 93.1% (either-referee)
-vs rule-only 88.5%.** Suite 371/371. 🟡 for the OOV schwa words outside the 185 (the honest signal is the rule
+vs rule-only 88.5%.** Suite 371/371. 🟡 for the OOV schwa words outside the corpora (the honest signal is the rule
 engine); the lexicon closes the common lexical tail. The dialectal ઐ/ઔ + word-initial ə/a are a separate,
 corpus-limited class (a fold could neutralize ઐ/ઔ but it is small).
 
@@ -120,3 +120,16 @@ Review caught two reconstruction bugs (fixed): (1) the two-pointer inserted a sp
 rule; (2) the align stripped the primary-stress ˈ and never re-added it — the entries now re-apply
 `applyWeightStress` to the reconstructed segments, so lexicon hits carry the SAME stress marking as OOV words.
 Final: 185 entries, shipped 93.0% (either-referee).
+
+## Run (2026-07-16) — the two bounded non-schwa residuals closed
+
+- **21-99 irregular numbers** (were rendering "?"/null): authored the full `numbers.compound` map (the ~72
+  irregular compound spellings, languagesandnumbers.com) mirroring Hindi's structure. 21→ekʋis, 45→pist̪alis,
+  99→nəʋʋaɳũ, 4567→t͡ʃaɾ ɦəd͡ʒaɾ pãɲt͡ʃ so səɽsəʈʰ.
+- **Nukta loanword ફ→[f]**: only **4** cross-source-consensus words (કોફી coffee, ફજર fajr, લિફાફો envelope,
+  શેફિલ્ડ Sheffield) and 0 for ઝ→z — pinned into the lexicon as loanword [f] entries (not a fold, which would hide
+  the native-pʰ vs loanword-f distinction). Lexicon now 189 (185 schwa + 4 nukta).
+
+Remaining 🟡 (not ✅) is the single DATA-BOUND class: OOV medial-schwa words outside the ~4200-word corpora
+(proven lexical → no rule; the lexicon caps at what the two referees cover). Rule-only 86.0/87.9% (non-circular),
+shipped 93.0%.
