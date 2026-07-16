@@ -312,6 +312,22 @@ holdout. Bare-text referee % unchanged (fixes touch only vocalized input). Suite
 Remaining measured levers: unwritten **gemination** (9% of ur failures — needs a targeted shadda search), **ی→eː**
 (14% — lexical, no clean harakat), and Pashto (no sister-script + dialectal referee).
 
+## Run 14 — 2026-07-15 — Urdu و→uː + size-aware upsampling (+12.5 → +13.2)
+
+Continued the failure-cause loop. The dominant remaining Urdu pattern was **medial و → uː** (آلو ours ɑlo vs ref
+ɑlu, آرزو, آلود, آزمودہ…). The `damma+waw → uː` fix from Run 10 was only in `shahmukhi.ts`; **Urdu's separate
+`urdu/g2p.ts` still mapped it to oː**. Fixed there too (Persian already defaulted و→uː). Urdu inversion
+**56.5→62.0%** (~420 words); stable eval **ur +5.9→+9.8**.
+
+But as ur/fa improved, **Pashto regressed** (−1.8→−3.6): uniform upsampling let the data-rich riders dominate and the
+model applied their patterns to data-starved Pashto (440 words). Fix: **size-aware upsampling** (`--balance 4000` →
+ps 9×, pa 12×, ur/fa 1×) — recovered Pashto (−3.6→−1.8) with no ur/fa loss. A unified model shouldn't sacrifice its
+weakest language.
+
+**Stable eval (n=1699): 56.0% → 56.7% net (+13.2)** — fa +19.3, ur +9.5, pa +1.6, ps −1.8. Suite 357/357, tsc clean.
+Pashto remains the structural holdout (no sister-script, dialectal referee); it needs Pashto-specific g2p/data, not
+more transfer. Next measured lever: unwritten gemination (shadda search).
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

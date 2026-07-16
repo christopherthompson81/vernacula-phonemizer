@@ -22,7 +22,8 @@ ap.add_argument("--train", default=os.path.join(HERE, "train.tsv"))
 ap.add_argument("--eval", default=os.path.join(HERE, "eval.tsv"))
 ap.add_argument("--ckpt", default="/mnt/data/ar-diac/bilstm_multilingual.pt")
 ap.add_argument("--epochs", type=int, default=25)
-ap.add_argument("--upsample", type=int, default=4, help="replicate rider rows N× (Arabic replay stays 1×)")
+ap.add_argument("--upsample", type=int, default=4, help="(legacy uniform rider ×; superseded by --balance)")
+ap.add_argument("--balance", type=int, default=4000, help="size-aware upsampling target: each rider → ~N examples")
 ap.add_argument("--lr", type=float, default=7e-4)
 ap.add_argument("--batch", type=int, default=128)
 ap.add_argument("--patience", type=int, default=5)
@@ -105,13 +106,19 @@ def enc(lang, cs, ls):
 
 train_rows = load(args.train)
 eval_rows = load(args.eval)
-# Upsample riders in the training set (Arabic replay 1×).
+# SIZE-AWARE upsampling: replicate each rider toward `--balance` examples so the small, structurally-different
+# riders (ps 440, pa 330) aren't drowned by the data-rich ones (ur/fa) — without size-aware weighting the model
+# over-fits ur/fa and REGRESSES Pashto via cross-lingual interference. Arabic replay stays 1×.
+from collections import Counter
+counts = Counter(lang for lang, _, _ in train_rows)
+reps_of = {}
+for lang in set(counts):
+    reps_of[lang] = 1 if lang == "ar" else max(1, min(12, round(args.balance / max(counts[lang], 1))))
 train_enc = []
 for lang, cs, ls in train_rows:
-    reps = args.upsample if lang in RIDERS else 1
-    for _ in range(reps): train_enc.append(enc(lang, cs, ls))
+    for _ in range(reps_of[lang]): train_enc.append(enc(lang, cs, ls))
 eval_enc = [enc(lang, cs, ls) for lang, cs, ls in eval_rows]
-print(f"# train rows {len(train_rows)} (×upsample → {len(train_enc)})  eval {len(eval_enc)}", file=sys.stderr)
+print(f"# reps {reps_of}  train {len(train_rows)} → {len(train_enc)}  eval {len(eval_enc)}", file=sys.stderr)
 
 
 def collate(b):
