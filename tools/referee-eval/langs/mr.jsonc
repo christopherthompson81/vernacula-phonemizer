@@ -42,14 +42,19 @@
             "note": "ʑ (referee) = ʒ — notation"
         },
         {
-            "pattern": "t͡?[sɕ]",
-            "replace": "t͡ʃ",
-            "note": "affricate t͡s~t͡ɕ~t͡ʃ (च dental~palatal variation) — referee-inconsistent"
+            "pattern": "t͡?[sɕʃ]",
+            "replace": "tʃ",
+            "note": "affricate t͡s~t͡ɕ~t͡ʃ (च dental~palatal variation) — referee-inconsistent. Tie-less replacement (BACKBONE strips ties) + ʃ in the class so the already ɕ→ʃ-folded referee form also normalises."
         },
         {
-            "pattern": "d͡?[zʑ]",
-            "replace": "d͡ʒ",
-            "note": "affricate d͡z~d͡ʑ~d͡ʒ (ज variation) — referee-inconsistent"
+            "pattern": "d͡?[zʑʒ]",
+            "replace": "dʒ",
+            "note": "affricate d͡z~d͡ʑ~d͡ʒ (ज variation) — referee-inconsistent. Tie-less + ʒ in the class (see the t͡ʃ fold)."
+        },
+        {
+            "pattern": "e$",
+            "replace": "ə",
+            "note": "word-final ⟨े⟩ (e-matra): wikipron mar is 47/53 INCONSISTENT between [ə] and [e] on the identical ending (589 ə vs 675 e across 1264 C+े words; the infinitive -णे etc.) — it cannot adjudicate final e vs ə. Our output and the gold keep [e] (चौथे→t͡səut̪ʰe); fold both sides to neutralise the referee's split. o-matra shows NO such reduction (8/8 keep o), so this is े-specific referee noise, not a real final-vowel merge."
         },
         {
             "pattern": "(.)\\1",

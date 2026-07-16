@@ -27,6 +27,7 @@ export interface HindiDef extends AbugidaDef {
     schwaDeletion: {
         deleteWordFinal?: boolean;
         retainInMonosyllable?: boolean;
+        retainFinalAfterCluster?: boolean;
     };
     clausePunctuation: Record<string, string>;
     symbols?: Record<string, string>;
@@ -37,6 +38,27 @@ export interface HindiDef extends AbugidaDef {
 export type ForeignPhonemizer = (latin: string) => string;
 
 const VOWEL_G = new RegExp(`[${IPA_VOWELS}]`, "g");
+
+/** Does the coda (a word body with the final schwa already removed) end in a consonant CLUSTER or GEMINATE?
+ *  Used by `retainFinalAfterCluster` (Marathi): the word-final inherent schwa is deleted after a single
+ *  consonant (घर→ɡʱəɾ) but RETAINED to avoid a word-final cluster (अंक→əŋkə, महत्त्व→məɦət̪ːʋə, अन्न→ənːə).
+ *  Affricates (t͡ʃ d͡ʒ t͡s d͡z) are ONE consonant (आज→aːd͡z deletes); a length mark ː is a geminate = heavy. */
+export function heavyFinalCoda(body: string): boolean {
+    if (/ː$/.test(body)) return true; // geminate/long consonant coda (क्क→kː) is heavy
+    // Collapse affricates to a single placeholder BEFORE stripping the (combining) tie bar, so d͡z counts as 1.
+    const collapsed = body
+        .replace(/t͡ʃ|d͡ʒ|t͡s|d͡z/g, "Ç")
+        .normalize("NFD")
+        .replace(/[̀-ͯʰ-ʱːˈˌ]/g, ""); // drop combining marks, ʰ ʱ, ː, stress
+    let n = 0;
+    const chars = [...collapsed];
+    for (let i = chars.length - 1; i >= 0; i--) {
+        const c = chars[i]!;
+        if (IPA_VOWELS.includes(c)) break;
+        if (c.trim() !== "") n++;
+    }
+    return n >= 2;
+}
 
 /** The script's word-run char class + digit map — defaults to Devanagari (Hindi/Marathi); Gujarati etc. pass
  *  their own so the whole abugida orchestration (schwa deletion, weight stress, numbers) is reused as-is. */
@@ -79,7 +101,12 @@ export function makeNativeHindi(
         const syls = (x.match(VOWEL_G) || []).length;
         if (
             def.schwaDeletion.deleteWordFinal &&
-            !(def.schwaDeletion.retainInMonosyllable && syls <= 1)
+            !(def.schwaDeletion.retainInMonosyllable && syls <= 1) &&
+            !(
+                def.schwaDeletion.retainFinalAfterCluster &&
+                /ə$/.test(x) &&
+                heavyFinalCoda(x.slice(0, -1))
+            )
         )
             x = x.replace(/ə$/, "");
         x = deleteMedialSchwa(x);
