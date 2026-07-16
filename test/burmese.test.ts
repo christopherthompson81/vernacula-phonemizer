@@ -20,6 +20,7 @@ describe("burmese canonical IPA", () => {
             ["ဆရာ", "sʰəja˨"], // 'teacher' — ဆ→sʰ, ရ→j, minor ə
             ["ငြိမ့်", "ɲeɪ˥ˀɴ"], // 'calm' — ငြ → ɲ (velar-nasal palatalisation), dot ့ → creaky
             ["လွင်", "lwɪ˨ɴ"], // ⟨ွ⟩ stays a -w- glide before -ng (not rounded)
+            ["ဗုဒ္ဓ", "boʊʔda˥ˀ"], // 'Buddha' — stacked ဒ္ဓ: the upper ဒ is a CHECKED coda (oʊʔ), ဓ the next onset
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
     });
@@ -49,9 +50,17 @@ describe("burmese canonical IPA", () => {
     // OOV words keep the careful voiceless reading.
     test("voicing sandhi (lexicon)", () => {
         expect(phonemizeWord("စကား")).toBe("zəɡa˥˩"); // sa-ka → zə-ɡa (minor-ə initial + medial voice)
-        expect(phonemizeWord("ကမ္ဘာ")).toBe("ɡəba˨"); // kaba → ɡəba ('world', stacked ္ဘ)
+        expect(phonemizeWord("ဗုဒ္ဓဟူး")).toBe("boʊʔdəhu˥˩"); // 'Buddha' — voiced ဟ→d + stacked ဒ္ဓ checked coda
         expect(phonemizeWord("ကတော့")).toBe("ɡədɔ˥ˀ"); // ka-tɔ → ɡə-dɔ
-        expect(phonemizeWord("ကား")).toBe("ka˥˩"); // OOV-style: word-initial FULL syllable does NOT voice
+    });
+
+    // Pronunciation lexicon (the LEXICAL layer, dictionary.tsv, mined from the kaikki gold): a per-word canonical-IPA
+    // override for words the rule g2p can't derive — lexical rime (ည→ɛ, ေ→i), colloquial forms, Pali gemination.
+    // Authoritative over the rules; OOV words fall through to the rule g2p.
+    test("pronunciation lexicon (lexical overrides)", () => {
+        expect(phonemizeWord("လည်")).toBe("lɛ˨"); // lexical ◌ည် → ɛ (not the rule default i)
+        expect(phonemizeWord("ချေး")).toBe("t͡ɕʰi˥˩"); // lexical ◌ေး → i
+        expect(phonemizeWord("ဘုရား")).toBe("pʰəja˥˩"); // colloquial 'pagoda'
     });
 
     // Word segmentation: Burmese is spaceless, so a connected run is split into words (DAG maximal-match over

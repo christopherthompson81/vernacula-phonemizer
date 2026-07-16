@@ -29,6 +29,7 @@ interface BurmeseDef {
 const DEF = loadManifest<BurmeseDef>(import.meta.url, "burmese.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 const VIRAMA = "်", // asat (kills the consonant → coda)
+    STACKER = "္", // virama-stacker (U+1039): C1 ္ C2 conjunct — C1 is the coda, C2 the next onset
     ANUSVARA = "ံ",
     VISARGA = "း", // high-tone mark
     DOT_BELOW = "့", // creaky-tone mark
@@ -74,15 +75,13 @@ export function syllabify(word: string): Syllable[] {
     const n = s.length;
     const syls: Syllable[] = [];
     let i = 0;
-    let pending = -1; // a skipped stacked upper member (ကမ္ဘာ's မ) belongs to the NEXT syllable → its boundary
 
     while (i < n) {
         const ch = s[i]!;
         if (DEF.independentVowels[ch] !== undefined) {
             // Standalone vowel (ʔ-onset): its default tone, with a trailing visarga း → high / dot-below ့ → creaky.
             // (Rare independent-vowel + killed-consonant coda, ဣန်, is left to the next-syllable scan — a known gap.)
-            const start = pending >= 0 ? pending : i;
-            pending = -1;
+            const start = i;
             i++;
             let cat = DEF.independentTone[ch] ?? "low";
             while (i < n && (s[i] === VISARGA || s[i] === DOT_BELOW)) {
@@ -93,32 +92,26 @@ export function syllabify(word: string): Syllable[] {
             continue;
         }
         if (!isConsonant(ch)) {
-            pending = -1; // a stray sign ends any pending stacked-conjunct carry
             i++; // punctuation handled by text(); stray sign → skip
             continue;
         }
-        // Stacked consonant: a consonant directly before the virama-stacker ္ (U+1039) is the silent upper member
-        // of a Pali/Sanskrit conjunct (ကမ္ဘာ → the မ is silent, ဘ is the onset) — skip it and the stacker.
-        if (s[i + 1] === "္") {
-            if (pending < 0) pending = i;
-            i += 2;
-            continue;
-        }
         // Onset consonant.
-        const start = pending >= 0 ? pending : i;
-        pending = -1;
+        const start = i;
         let onset = DEF.consonants[ch]!;
         i++;
         // Medials: ျ/ြ palatalise (velars → t͡ɕ) else add -j-; ွ labialises; ှ devoices the sonorant.
         let glide = "";
-        let wMedial = false;
+        let wMedial = false, hasPalatal = false, hasH = false;
         while (i < n && [MEDIAL_Y, MEDIAL_R, MEDIAL_W, MEDIAL_H].includes(s[i]!)) {
-            if (s[i] === MEDIAL_Y || s[i] === MEDIAL_R)
-                onset = DEF.palatal[onset] ?? onset + "j";
+            if (s[i] === MEDIAL_Y || s[i] === MEDIAL_R) hasPalatal = true;
             else if (s[i] === MEDIAL_W) wMedial = true;
-            else if (s[i] === MEDIAL_H) onset = DEF.voiceless[onset] ?? onset;
+            else if (s[i] === MEDIAL_H) hasH = true;
             i++;
         }
+        // Apply in PHONOLOGICAL order (not text order): the ⟨ှ⟩ devoices the base FIRST, then ⟨ျ⟩/⟨ြ⟩ palatalise —
+        // so လျှ → devoiced l̥ → palatal ʃ (lya-ha = /ʃ/), while မျှ → m̥ + j (m̥ja). Native ရှ (j→ʃ) still works.
+        if (hasH) onset = DEF.voiceless[onset] ?? onset;
+        if (hasPalatal) onset = DEF.palatal[onset] ?? onset + "j";
         // Vowel signs → an abstract vowel KEY. Combos: ိ+ု = o, ေ+ာ = au (else the last sign, or inherent).
         const signs: string[] = [];
         while (i < n && DEF.vowelSigns[s[i]!] !== undefined) {
@@ -143,15 +136,20 @@ export function syllabify(word: string): Syllable[] {
             // killed consonant (the dot-below creaky mark may sit between the coda letter and its asat: ကန့်).
             coda = DEF.codaClass[s[i]!] ?? "t";
             i += s[i + 1] === VIRAMA ? 2 : 1; // leave the dot for the tone-mark scan below
+        } else if (isConsonant(s[i] ?? "") && s[i + 1] === STACKER) {
+            // Stacked conjunct C1 ္ C2: the upper member C1 is the CODA of THIS syllable (stop → checked ʔ, nasal →
+            // ɴ: ဗုဒ္ဓ→boʊʔda, အိန္ဒိယ→ʔeɪndija), and C2 (after the stacker) is the next onset.
+            coda = DEF.codaClass[s[i]!] ?? "t";
+            i += 2; // consume C1 + the stacker, leaving C2 as the next onset
         } else if (s[i] === VIRAMA) {
             asatOnVowel = true;
             i++;
         }
-        // ⟨ွ⟩ / a /w/ onset (ဝ) on an inherent-vowel syllable: it ROUNDS the rime to ʊ (ကွန်→kʊɴ, ဝန်→wʊɴ,
-        // လွတ်→lʊʔ) — EXCEPT before the velar-nasal -ng coda (င်), where the front rime blocks rounding and ⟨ွ⟩
-        // stays a -w- glide (လွင်→lwɪɴ, ဝင်→wɪɴ). Coda-specific, so decided after the coda is known.
+        // ⟨ွ⟩ / a /w/ onset (ဝ) on an inherent-vowel syllable: before an -n/-m/stop coda it ROUNDS the rime to ʊ
+        // (ကွန်→kʊɴ, ဝန်→wʊɴ, လွတ်→lʊʔ), but before the velar-nasal -ng coda (လွင်→lwɪɴ, ဝင်→wɪɴ) and in an OPEN
+        // syllable (ခွ→kʰwa̰, ဝ→wa) the ⟨ွ⟩ stays a -w- glide over the plain rime. Coda-specific, decided here.
         if (vowel === "inherent" && (wMedial || onset === "w")) {
-            if (coda === "ng") { if (wMedial) glide = "w"; } // keep the glide, inherent rime → wɪɴ
+            if (coda === "ng" || coda === "open") { if (wMedial) glide = "w"; } // keep the glide, plain rime
             else vowel = "wu"; // round: ʊɴ / ʊʔ
         }
         // Explicit tone marks (visarga း = high, dot-below ့ = creaky) — may trail the coda, in either order — plus
@@ -187,14 +185,23 @@ export function syllabify(word: string): Syllable[] {
 // The flags are POSITIONAL (index-aligned to syllabify()), so a change to syllabify() requires REBUILDING the
 // lexicon — a misalignment surfaces as a referee-eval drop (guarded by the my floor in referee-eval.test.ts).
 const VOICE = DEF.voicing;
-// Lazy: registry.ts imports every language eagerly; the ~1.3k-row TSV is only read on first Burmese use.
+// Lazy (registry.ts imports every language eagerly; the TSVs are only read on first Burmese use).
 let VOICING_LEXICON: ReadonlyMap<string, string> | undefined;
 function voicingLexicon(): ReadonlyMap<string, string> {
     return (VOICING_LEXICON ??= loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true }));
 }
+// Pronunciation lexicon (the LEXICAL layer): a per-word canonical-IPA override for words the rule g2p can't derive
+// — lexical rime (ည→i~ɛ), colloquial forms, Pali gemination, loanword ⟨ရ⟩→ɹ. Mined from the kaikki gold
+// (tools/build-my-dict.ts), authoritative over the rules; OOV words fall through to the rule g2p. See docs.
+let DICTIONARY: ReadonlyMap<string, string> | undefined;
+function dictionary(): ReadonlyMap<string, string> {
+    return (DICTIONARY ??= loadTsvMap(import.meta.url, "dictionary.tsv", undefined, { optional: true }));
+}
 
-/** One segmented Burmese WORD → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
-function phonemizeSubword(word: string): string {
+/** RULE-only word → IPA (syllabify + orthographic tone + voicing sandhi), WITHOUT the pronunciation-lexicon
+ *  override. Exposed for tools/build-my-dict.ts: the dict miner must compare the gold against the RULES (else it
+ *  reads the dict it is rebuilding and drops every covered entry). */
+export function phonemizeWordRules(word: string): string {
     const nfc = word.normalize("NFC");
     const syls = syllabify(nfc);
     const flags = voicingLexicon().get(nfc);
@@ -207,6 +214,12 @@ function phonemizeSubword(word: string): string {
         }
     }
     return syls.map((s) => s.onset + s.body).join("").normalize("NFC");
+}
+
+/** One segmented Burmese WORD → canonical IPA: the authoritative lexicon override, else the rule engine. */
+function phonemizeSubword(word: string): string {
+    const lex = dictionary().get(word.normalize("NFC"));
+    return lex ? lex : phonemizeWordRules(word); // a blank/empty dict value falls through to the rules
 }
 
 // Word SEGMENTATION: Burmese is spaceless, so a text run is one token that must be split into words before the
