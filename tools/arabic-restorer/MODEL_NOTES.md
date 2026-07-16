@@ -90,6 +90,26 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
   (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
   only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)
 
+## Two-layer system (lexicon + neural) — the Arabic architecture, mirrored (`eval_combined.ts`)
+Arabic has TWO restoration layers: the neural BiLSTM + a `restore.ts` lexicon (`diacritization.tsv`, exact
+per-wordform vocalization, supplement-only). The riders get the same for free: the mined `harakat.<lang>.silver.tsv`
+IS a per-word lexicon. At inference: **lexicon lookup → else neural → else default g2p.** `eval_combined.ts` runs it
+on the full wikipron rider set:
+
+| lang | lex-coverage | neural-only | combined |
+|---|---:|---:|---:|
+| ur | 76.2% | 73.8% | 76.2% |
+| fa | 75.3% | 73.6% | 75.4% |
+| ps | 52.5% | 51.0% | 52.5% |
+| pa | 41.4% | 38.5% | 41.5% |
+
+Findings: (1) the lexicon adds only ~2–3 pts over neural — because the neural **already memorizes** the training
+words; its value is *exactness/robustness* on seen words, not coverage. (2) **combined ≈ lexicon-coverage exactly**,
+which means the non-covered words get ~0 from either layer — they're g2p-UNREPRODUCIBLE (no vocalization exists), so
+the real ceiling is **g2p coverage**, and that's what the adapted-word encodings (uː, eː, …) raise. (3) This is
+TYPE-level on wikipron; production is TOKEN-level → higher (common words recur, and are in the lexicon). Held-out
+novel-word generalization is the separate `eval_set.tsv` number (+16.0); production ≈ the ~76% seen-word figure.
+
 ## Cross-script GOLD (`crossscript_pa.ts`) — the mechanism, and why it's opt-in
 Several abjad languages have a **voweled sister-script** (Punjabi↔Gurmukhi, Urdu↔Hindi-Devanagari,
 Sindhi↔Devanagari, Persian↔Tajik-Cyrillic). The sister writes the vowels the abjad drops. Method: voweled word →
