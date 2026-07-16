@@ -38,7 +38,13 @@ bare default-schwa baseline: **+23.5 overall** (fa +29.0, ur +18.6, ps +4.1, pa 
 `tools/arabic-restorer/harakat.fa.silver.tsv` was re-mined with `FA_FULL_FOLD` (two-pass: full-diacritization —
 a/e/o kept distinct, classical→Iranian i→e/u→o, final-ه a→e — then loose fallback). Diacritization density
 31%→48% (the old labels were short-vowel-blind: mined under the referee-eval fold that collapses a~e~o~i~u, so
-کتاب was labeled bare → the model learned to under-vocalize). **The committed `.onnx` PREDATES this** and still
-under-vocalizes; a retrain (`train_multilingual_harakat.py`) + re-export picks up the fixed labels. The coverage
-LEXICON (`src/languages/persian/lexicon.tsv`) was already regenerated from the same mine and ships now. ur/ps/pa
-still use the short-vowel-blind loose fold — their own FULL_FOLD dialect maps are a follow-up.
+کتاب was labeled bare → the model learned to under-vocalize). The coverage LEXICON
+(`src/languages/persian/lexicon.tsv`) was regenerated from the same mine and ships now. ur/ps/pa still use the
+short-vowel-blind loose fold — their own FULL_FOLD dialect maps are a follow-up.
+
+**RETRAINED 2026-07-16** (this committed `.onnx`): warm-started from `bilstm_pausal.pt`, fine-tuned on the
+regenerated manifest (fa 6397 train), early-stopped ep 18, held-out **fa DER 7.30%** (ar 10.75% ur 4.89% ps 4.26%
+pa 8.52%), fp32→int8 with 5/5 argmax parity. The neural now ENCODES the short vowels it used to drop: کتاب→کِتاب,
+دنیا→دُنیا, ستاره→سِتاره (was bare). CAVEAT: as the flip side of vocalizing more, it slightly OVER-predicts kasra
+on a few bare-vowel words on the async neural path (زن→zen); the SYNC shipped `phonemizeWord` does not use the
+neural, so default output is unaffected (زن→zan, and covered words go through the lexicon).

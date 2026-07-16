@@ -27,12 +27,13 @@ describe("rider neural diacritizer (two-layer path)", () => {
         });
 
         // An OOV compound the lexicon misses: the neural pre-pass supplies short vowels the default-schwa path
-        // gets wrong (here the ش/n ordering + vowel placement), so the neural IPA differs from the bare sync IPA.
+        // gets wrong — شناسی is [ʃenaːsiː] ('shenâsi'), so the neural restores the ش→[ʃe] the bare default reads
+        // as [ʃa]. (Value updated after the 2026-07-16 full-diacritization retrain fixed the ش short vowel.)
         test("OOV word: neural restores vowels the default-schwa path misses", async () => {
             const sync = phonemize("زبانشناسی", "fa");
             const neural = await phonemizeRiderNeural("زبانشناسی", "fa");
             expect(neural).not.toBe(sync);
-            expect(neural).toBe("zabaːnʃanaːsˈiː");
+            expect(neural).toBe("zabaːnʃenaːsˈiː");
         });
     });
 });
