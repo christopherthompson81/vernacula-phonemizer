@@ -207,3 +207,27 @@ unchanged). Still **🟡**: the lexicon closes the COMMON lexical tail but OOV c
 still err, and 3 classes are uncovered (medial-deletion পুরনো, bô-phola লম্বা, ড়-final বড়/ছোট — not vowel-quality
 patterns). Full ✅ needs broader lexicon coverage, capped by the wikipron∩DUAL-IPA overlap (~the reliable ceiling of
 the auto method). The mechanism + 142 verified entries are the real deliverable. Suite 53/53; typecheck clean.
+
+## Run 10 — 2026-07-16 — pushing coverage: the reliable ceiling is ~168 (142 → 168), and WHY it stops there
+
+Tried to expand the lexicon "a few hundred more." Findings:
+- **No third independent Kolkata human source exists.** Checked the other public Bengali-IPA datasets
+  (Virus-Proton/Combined, krishnAbadikelA/massive-ipa + indicxnli-ipa): all are MODEL-GENERATED (stress-marked
+  machine G2P) and **bn-BD (Dhaka)** — not independent human Kolkata references. So consensus stays wikipron∩DUAL.
+- **Generalized the consensus** from vowel-quality+final-o to ANY vowel sequence both sources attest (added the
+  medial-retention/insertion class: ঘোষণা→ɡʱoʃona, গণনা→ɡɔnona, উৎসাহ→ut̪ʃaɦo). Needed a proper consonant-UNIT
+  tokenizer (base+ties/modifiers) — the naive char-walk mis-aligned d͡ʒ/t̪. Yield: **156** (0 gold disagreements).
+- **Hand supplement (+12)**: adjudicated the top-frequency uncovered words. Most either already agree, or are
+  DIALECT-AMBIGUOUS (DUAL is Dhaka — চলে=cɔle, পড়ে=pɔɽe: I'd raise, the source doesn't → SKIPPED, respecting the
+  disagreement). Kept only source-corroborated confident ones (verb ô→o before -e: বলে/ধরে/হলে/বসে; the িয়ে
+  glide: নিয়ে/দিয়ে/গিয়ে; এক→æk: একটি/এখন; medial: কারণে). **Total 168.**
+
+The hand pass also caught a SECOND error in my own 147-word gold (এখন was ekʰɔn, wikipron says ækʰɔn — fixed;
+শহর was the first, Run 9) — concrete evidence that solo adjudication carries a ~1–2% error rate, which is exactly
+why the cross-source consensus (not my judgment) is the reliable core.
+
+**The honest ceiling: ~168.** The high-frequency lexical tail is only ~168 words; beyond that, entries are either
+dialect-ambiguous (Dhaka-only raising we can't confirm for Kolkata) or low-frequency (low real-text impact). "A few
+hundred more" reliable Kolkata entries is NOT achievable from the available sources — it would require a
+comprehensive Kolkata pronunciation dictionary that no public resource provides. Bengali is a **strong 🟡**: rule
+engine 93.9% + a 168-entry cross-source-verified lexicon (shipped 98.0% on the gold), honestly bounded. Suite green.

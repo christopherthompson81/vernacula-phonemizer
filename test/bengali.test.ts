@@ -75,6 +75,8 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("কলম")).toBe("kɔlom");
         expect(phonemizeWord("এক")).toBe("æk");
         expect(phonemizeWord("করে")).toBe("koɾe");
+        expect(phonemizeWord("ঘোষণা")).toBe("ɡʱoʃona"); // medial-ɔ retention (consensus insert/delete class)
+        expect(phonemizeWord("বলে")).toBe("bole"); // verb ô→o before -e (hand supplement)
         // ABSTAINS where the two dialects disagree — leaves the (correct) rule form:
         expect(phonemizeWord("কম")).toBe("kɔm"); // minimal-pair partner of মন — stays ɔ
         expect(phonemizeWord("জীবন")).toBe("d͡ʒibɔn");
