@@ -40,4 +40,14 @@ describe("burmese canonical IPA", () => {
         expect(phonemizeWord("ကျော်")).toBe("t͡ɕɔ˨"); // asat-on-vowel ော် → low
         expect(phonemizeWord("မီး")).toBe("mi˥˩"); // long ◌ီ + visarga → high
     });
+
+    // Intervocalic voicing sandhi is LEXICAL (per-word voicing-lexicon.tsv, mined from the kaikki gold): a
+    // voiceless onset voices after a vowel/nasal inside a compound (word-initial only for a minor ə syllable).
+    // OOV words keep the careful voiceless reading.
+    test("voicing sandhi (lexicon)", () => {
+        expect(phonemizeWord("စကား")).toBe("zəɡa˥˩"); // sa-ka → zə-ɡa (minor-ə initial + medial voice)
+        expect(phonemizeWord("ကမ္ဘာ")).toBe("ɡəba˨"); // kaba → ɡəba ('world', stacked ္ဘ)
+        expect(phonemizeWord("ကတော့")).toBe("ɡədɔ˥ˀ"); // ka-tɔ → ɡə-dɔ
+        expect(phonemizeWord("ကား")).toBe("ka˥˩"); // OOV-style: word-initial FULL syllable does NOT voice
+    });
 });

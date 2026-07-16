@@ -10,6 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 interface BurmeseDef {
     consonants: Record<string, string>;
@@ -18,6 +19,7 @@ interface BurmeseDef {
     codaClass: Record<string, string>;
     rimeChart: Record<string, Record<string, string>>;
     tones: Record<string, string>;
+    voicing: Record<string, string>;
     voiceless: Record<string, string>;
     palatal: Record<string, string>;
     clausePunctuation: Record<string, string>;
@@ -59,17 +61,21 @@ function toneLetter(
     return DEF.tones[cat]!;
 }
 
-/** Scan a Burmese word into IPA (per orthographic syllable; tones deferred). */
-export function phonemizeWord(word: string): string {
+/** One syllable: the ONSET (voiceable) + the BODY (glide + rime + tone). Kept split so the voicing lexicon can
+ *  target the onset without re-parsing. */
+interface Syllable { onset: string; body: string; }
+
+/** Scan a Burmese word into syllables (onset + body). Exposed for the voicing-lexicon builder. */
+export function syllabify(word: string): Syllable[] {
     const s = [...word.normalize("NFC")];
     const n = s.length;
-    let out = "";
+    const syls: Syllable[] = [];
     let i = 0;
 
     while (i < n) {
         const ch = s[i]!;
         if (DEF.independentVowels[ch] !== undefined) {
-            out += DEF.independentVowels[ch];
+            syls.push({ onset: "", body: DEF.independentVowels[ch]! });
             i++;
             continue;
         }
@@ -145,7 +151,7 @@ export function phonemizeWord(word: string): string {
         const minor =
             vowel === "inherent" && coda === "open" && i < n && isConsonant(s[i]!);
         if (minor) {
-            out += onset + glide + "ə";
+            syls.push({ onset, body: glide + "ə" });
             continue;
         }
         const rime = DEF.rimeChart[coda]?.[vowel] ?? DEF.rimeChart["open"]![vowel] ?? "a";
@@ -153,9 +159,30 @@ export function phonemizeWord(word: string): string {
         const tone = toneLetter(vowel, signs, coda, checked, asatOnVowel, hasVisarga, hasDot);
         const codaChar = /[ɴʔ]$/u.test(rime) ? rime.slice(-1) : "";
         const nucleus = codaChar ? rime.slice(0, -codaChar.length) : rime;
-        out += onset + glide + nucleus + tone + codaChar;
+        syls.push({ onset, body: glide + nucleus + tone + codaChar });
     }
-    return out.normalize("NFC");
+    return syls;
+}
+
+// Intervocalic voicing sandhi (LEXICAL): the per-word `voicing-lexicon.tsv` maps an undiacritized word to a
+// per-syllable flag string ('1' = voice this syllable's onset). Built from the kaikki gold (tools/build-my-voicing
+// .ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing, never removes it.
+const VOICE = DEF.voicing;
+const VOICING_LEXICON = loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true });
+
+/** One Burmese word → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
+export function phonemizeWord(word: string): string {
+    const syls = syllabify(word);
+    const flags = VOICING_LEXICON.get(word.normalize("NFC"));
+    if (flags) {
+        for (let k = 0; k < syls.length && k < flags.length; k++) {
+            if (flags[k] === "1") {
+                const v = VOICE[syls[k]!.onset];
+                if (v) syls[k] = { onset: v, body: syls[k]!.body };
+            }
+        }
+    }
+    return syls.map((s) => s.onset + s.body).join("").normalize("NFC");
 }
 
 const TOKEN = /([က-႟꧰-꧹]+)|(\d+)|([။၊.?!,])/gu;

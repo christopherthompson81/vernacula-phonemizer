@@ -52,6 +52,11 @@
         "y": { "inherent": "ɛ", "aa": "a", "i": "i", "u": "u", "e": "e", "ai": "ɛ", "o": "o", "au": "ɔ", "wu": "a" }
     },
 
+    // Intervocalic VOICING sandhi: a voiceless onset → its voiced counterpart when the (per-word, LEXICAL)
+    // voicing-lexicon.tsv flags that syllable (an unaspirated OR aspirated stop/fricative voices to the plain
+    // voiced after a vowel/nasal inside a compound: က→ɡ, စကား→zəɡá). Applied to the syllable onset in burmese.ts.
+    "voicing": { "k": "ɡ", "kʰ": "ɡ", "t": "d", "tʰ": "d", "t͡ɕ": "d͡ʑ", "t͡ɕʰ": "d͡ʑ", "p": "b", "pʰ": "b", "s": "z", "sʰ": "z", "θ": "ð" },
+
     // The FOUR Burmese tones as Chao contour letters, inserted after the nucleus (before a nasal/checked coda).
     // Burmese tone is ORTHOGRAPHIC (rule-derivable, not lexical): low à (level ˨), high á (heavy, high-falling ˥˩),
     // creaky a̰ (short, high-glottal ˥ˀ). The CHECKED tone is carried by the ʔ stop coda itself — no Chao letter.

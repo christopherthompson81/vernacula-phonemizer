@@ -45,12 +45,37 @@ whole-word sequence is 79.9%, deflated almost entirely by syllable-count mismatc
 the still-deferred minor-syllable-reduction problem, not the tone rules. The segmental eval folds the creaky `ˀ`
 (a tone marker) like vi.
 
-## Result — 🟠 (scope-limited; the hardest abugida) — tones now done
-**54.2% / 55.9%** FOLDED segmental (the backbone strips TONE — the referees' à/á/a̰ diacritics + our Chao letters).
-Tones are DONE and measured (99.6% mono). Common vocabulary correct (`မြန်မာ→mja˨ɴma˨`, `ကျောင်း→t͡ɕaʊ˥˩ɴ`,
-`ကန်း→ka˥˩ɴ`). Still 🟠 — two whole subsystems remain DEFERRED (needs a pronunciation lexicon):
-- **Intervocalic voicing sandhi** — an unaspirated onset voices after a vowel/nasal (k→ɡ, t→d, s→z, tɕ→dʑ, θ→ð),
-  compound-boundary governed → the biggest residual class (`က→ka` vs referee `ɡa`). Buildable from the kaikki data
-  (which carries the voiced forms), as the old espeak-ng-portable bring-up did.
-- **Lexical rime variation** (`ည` → i ~ ɛ) and **word segmentation** (no inter-word spaces) + minor-syllable
-  reduction (the syllable-count tail on the tone whole-word metric).
+## Run — 2026-07-16 (cont.) — VOICING SANDHI (lexicon) — the second deferred subsystem
+
+Intervocalic voicing sandhi was the BIGGEST residual class (`က→ka` vs referee `ɡa`). A ceiling probe (fold both,
+allow onset-voicing substitutions) said **+14.1 pts recoverable** (55.9→70.0% on kaikki) — worth a lexicon.
+
+Voicing is LEXICAL (compound-boundary governed, ~68% rule-predictable → over-applies as a rule), so it is a
+per-word lexicon like the old espeak-ng-portable bring-up. Refactored the g2p into `syllabify()` (onset + body) so
+voicing can target an onset without re-parsing, added a `voicing` map (k→ɡ, t→d, s→z, t͡ɕ→d͡ʑ, θ→ð, aspirates→plain
+voiced) + `voicing-lexicon.tsv` (word → per-syllable '0'/'1' flags). `tools/build-my-voicing.ts` mines it: syllabify
+each kaikki word, greedily align our syllables to the folded gold allowing each onset to voice; if the whole gold is
+reproduced and ≥1 onset voiced, emit the flag string. **Word-INITIAL voicing is refused unless the syllable is a
+minor ə** (ကစား→ɡəza ok; ကား→ɡá is a compound-sandhi citation artifact, wrong in isolation → skipped). The pass only
+ADDS voicing; OOV words keep the careful voiceless reading, so it can't regress an uncovered word.
+
+- **1258 words** get a voicing pattern. Segmental **54.2→69.0% wikipron / 55.9→71.4% kaikki**.
+- **Honest signal = wikipron 69.0%** (independent human transcription): the kaikki-mined voicing is CORROBORATED
+  on wikipron at **+1210 / −4** — the two independent sources agree the words voice. The **kaikki 71.4% is partly
+  circular** (self-referential for the 1258 covered words). Spot: `စကား→zəɡa˥˩`, `ကမ္ဘာ→ɡəba˨`, `ကတော့→ɡədɔ˥ˀ`.
+- The 4 wikipron regressions are genuine kaikki-vs-wikipron disagreements on a medial onset (e.g. မီးခတ်) — negligible.
+
+## Result — 🟠 (scope-limited; the hardest abugida) — tones + voicing now done
+**69.0% wikipron / 71.4% kaikki** FOLDED segmental (the backbone strips TONE — the referees' à/á/a̰ diacritics + our
+Chao letters). TONES done (99.6% mono, `tools/my-tone-eval.ts`) and VOICING sandhi done (per-word lexicon, wikipron
+corroborated +1210/−4). Common vocabulary correct (`မြန်မာ→mja˨ɴma˨`, `ကျောင်း→t͡ɕaʊ˥˩ɴ`, `စကား→zəɡa˥˩`). Still 🟠 —
+**ONE** whole subsystem now remains DEFERRED:
+- **Word segmentation** — Burmese has no inter-word spaces, so raw running text is one token; the word tokenizer +
+  per-word phonemization is reliable for pre-segmented / space-delimited input (and the referee eval is per-word, so
+  the 69% is a real word-level signal). A DAG maximal-match over a kaikki word-list (reusing the Thai segmenter) is
+  the remaining lift; the voicing lexicon also keys on whole words, so segmentation would extend voicing to running
+  text. Plus the minor tail: lexical rime variation (`ည` → i ~ ɛ) + minor-syllable reduction.
+
+Superseded the earlier "voicing deferred" note:
+- ~~**Intervocalic voicing sandhi**~~ — DONE (Run 2026-07-16 cont.): the per-word `voicing-lexicon.tsv` (1258 words)
+  + `build-my-voicing.ts`. Was the biggest residual class.
