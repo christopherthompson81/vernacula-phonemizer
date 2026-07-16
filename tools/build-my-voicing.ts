@@ -14,13 +14,15 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { syllabify } from "../src/languages/burmese/burmese.ts";
+import { loadManifest } from "../src/core/loadManifest.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-// Same voiceless→voiced pairs as burmese.jsonc "voicing" (an aspirated stop voices to the plain voiced).
-const VOICE: Record<string, string> = {
-    k: "ɡ", "kʰ": "ɡ", t: "d", "tʰ": "d", "t͡ɕ": "d͡ʑ", "t͡ɕʰ": "d͡ʑ",
-    p: "b", "pʰ": "b", s: "z", "sʰ": "z", "θ": "ð",
-};
+// The voiceless→voiced pairs are the SINGLE SOURCE in burmese.jsonc "voicing" (also applied at runtime); read them
+// here so the mined flags can never drift from the runtime's voicing capability.
+const VOICE: Record<string, string> =
+    loadManifest<{ voicing: Record<string, string> }>(
+        new URL("../src/languages/burmese/burmese.ts", import.meta.url).href, "burmese.jsonc",
+    ).voicing;
 // Fold to the comparable segmental backbone (same as the referee eval): strip Chao letters + our creaky ˀ + the
 // referee's combining tone diacritics, and normalise the nasal coda ɴ~n.
 const fold = (x: string): string =>

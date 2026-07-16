@@ -40,7 +40,7 @@ bare-inherent / short `ိ`/`ု`→creaky, else (long `ီ`/`ူ`, `ာ`, `ေ`
 The dot-below can sit between the coda letter and its asat (`ကန့်`) — handled in the coda scan.
 
 **Tone eval** (`tools/my-tone-eval.ts`, tone-category sequence ours-Chao ↔ referee-diacritics): **99.6% mono
-(1633/1640), 97.9% per-syllable aligned** vs kaikki (same vs wikipron) — beats the prior bring-up's 92.2%. The
+(2010/2019), 97.6% per-syllable aligned** vs kaikki (same vs wikipron) — beats the prior bring-up's 92.2%. The
 whole-word sequence is 79.9%, deflated almost entirely by syllable-count mismatch (1340 length vs 290 tone), i.e.
 the still-deferred minor-syllable-reduction problem, not the tone rules. The segmental eval folds the creaky `ˀ`
 (a tone marker) like vi.
@@ -79,3 +79,15 @@ corroborated +1210/−4). Common vocabulary correct (`မြန်မာ→mja˨
 Superseded the earlier "voicing deferred" note:
 - ~~**Intervocalic voicing sandhi**~~ — DONE (Run 2026-07-16 cont.): the per-word `voicing-lexicon.tsv` (1258 words)
   + `build-my-voicing.ts`. Was the biggest residual class.
+
+## Run — 2026-07-16 (cont.) — review fixes (8-angle review of the tones+voicing PR)
+
+- **Independent-vowel TONE gap.** Standalone vowels (ဦး ဩ ဧ ဣ …, ~106 referee words) bypassed the tone logic →
+  emitted toneless (ဦး→ʔu not ʔú). Added `independentTone` defaults (referee-verified: ဣ/ဥ creaky, ဤ/ဦ/ဧ/ဪ low,
+  ဩ high) + a trailing visarga/dot override. Rare independent-vowel + coda (ဣန်) still splits — a noted minor gap.
+- **Tone-eval measurement bug.** `my-tone-eval.ts` counted an ONSET ʔ (from အ / independent vowels) as a checked
+  tone, injecting phantom K and excluding glottal-initial words. Fixed to count ʔ only as a syllable-final coda →
+  honest **99.6% mono (2010/2019, +370 words now scored), 97.6% per-syllable**.
+- **Lazy lexicon load** (registry imports every language eagerly — matches the riders' lazy pattern), **deduped the
+  VOICE map** (builder now reads it from the manifest, so mined flags can't drift from the runtime), single NFC
+  normalize, removed a dead `void this.foreign`. Suite 365/365.

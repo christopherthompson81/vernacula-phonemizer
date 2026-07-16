@@ -39,6 +39,8 @@ describe("burmese canonical IPA", () => {
         expect(phonemizeWord("ကန့်")).toBe("ka˥ˀɴ"); // dot-below → creaky
         expect(phonemizeWord("ကျော်")).toBe("t͡ɕɔ˨"); // asat-on-vowel ော် → low
         expect(phonemizeWord("မီး")).toBe("mi˥˩"); // long ◌ီ + visarga → high
+        expect(phonemizeWord("ဩ")).toBe("ʔɔ˥˩"); // independent vowel: default high
+        expect(phonemizeWord("ဦး")).toBe("ʔu˥˩"); // independent vowel ဦ (low) + visarga → high
     });
 
     // Intervocalic voicing sandhi is LEXICAL (per-word voicing-lexicon.tsv, mined from the kaikki gold): a

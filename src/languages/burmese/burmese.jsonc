@@ -19,8 +19,10 @@
         "ရ": "j", "လ": "l", "ဝ": "w", "သ": "θ", "ဟ": "h", "ဠ": "l", "အ": "ʔ"
     },
 
-    // Independent (standalone) vowels → IPA.
+    // Independent (standalone) vowels → IPA, and their default TONE category (referee-verified; a trailing visarga
+    // း overrides → high, dot-below ့ → creaky). ဣ/ဥ short → creaky; ဤ/ဦ long + ဧ + ဪ → low; ဩ → high.
     "independentVowels": { "ဣ": "ʔi", "ဤ": "ʔi", "ဥ": "ʔu", "ဦ": "ʔu", "ဧ": "ʔe", "ဩ": "ʔɔ", "ဪ": "ʔɔ" },
+    "independentTone": { "ဣ": "creaky", "ဤ": "low", "ဥ": "creaky", "ဦ": "low", "ဧ": "low", "ဩ": "high", "ဪ": "low" },
 
     // Vowel signs → an abstract vowel KEY (inherent | aa | i | u | e | ai | o | au). The combos ို=o (ိ+ု) and
     // ⣟ော=au (ေ+ာ) are assembled in burmese.ts; the actual IPA comes from the rime chart below (vowel × coda).

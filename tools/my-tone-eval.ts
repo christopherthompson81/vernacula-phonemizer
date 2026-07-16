@@ -16,19 +16,27 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const which = process.argv[2] === "kaikki" ? "kaikki" : "wikipron";
 const file = which === "kaikki" ? "my.kaikki-mya.tsv" : "my.wikipron-mya-broad.tsv";
 
+// A glottal stop is the CHECKED tone (K) only as a syllable-final CODA; a ʔ that is an ONSET (from အ / the
+// independent vowels ʔe/ʔɔ/…) is followed by a vowel and must NOT be counted as a tone.
+const VOWEL = /[aeiouɛɔəʊɪ]/u;
+const codaGlottal = (s: string, at: number): boolean => !VOWEL.test(s[at + 1] ?? "");
+
 /** Ordered tone-category sequence from OUR Chao output. */
 function oursSeq(ipa: string): string[] {
     const out: string[] = [];
     for (const m of ipa.matchAll(/˥˩|˥ˀ|˨|ʔ/gu)) {
-        out.push(m[0] === "˥˩" ? "H" : m[0] === "˥ˀ" ? "C" : m[0] === "˨" ? "L" : "K");
+        if (m[0] === "ʔ") { if (codaGlottal(ipa, m.index!)) out.push("K"); continue; }
+        out.push(m[0] === "˥˩" ? "H" : m[0] === "˥ˀ" ? "C" : "L");
     }
     return out;
 }
-/** Ordered tone-category sequence from the referee's combining tone diacritics + checked ʔ. */
+/** Ordered tone-category sequence from the referee's combining tone diacritics + checked (coda) ʔ. */
 function refSeq(ipa: string): string[] {
+    const s = ipa.normalize("NFD");
     const out: string[] = [];
-    for (const m of ipa.normalize("NFD").matchAll(/̀|́|̰|ʔ/gu)) {
-        out.push(m[0] === "̀" ? "L" : m[0] === "́" ? "H" : m[0] === "̰" ? "C" : "K");
+    for (const m of s.matchAll(/̀|́|̰|ʔ/gu)) {
+        if (m[0] === "ʔ") { if (codaGlottal(s, m.index!)) out.push("K"); continue; }
+        out.push(m[0] === "̀" ? "L" : m[0] === "́" ? "H" : "C");
     }
     return out;
 }

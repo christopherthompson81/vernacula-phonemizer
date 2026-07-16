@@ -15,6 +15,7 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
 interface BurmeseDef {
     consonants: Record<string, string>;
     independentVowels: Record<string, string>;
+    independentTone: Record<string, string>;
     vowelSigns: Record<string, string>;
     codaClass: Record<string, string>;
     rimeChart: Record<string, Record<string, string>>;
@@ -75,8 +76,15 @@ export function syllabify(word: string): Syllable[] {
     while (i < n) {
         const ch = s[i]!;
         if (DEF.independentVowels[ch] !== undefined) {
-            syls.push({ onset: "", body: DEF.independentVowels[ch]! });
+            // Standalone vowel (ʔ-onset): its default tone, with a trailing visarga း → high / dot-below ့ → creaky.
+            // (Rare independent-vowel + killed-consonant coda, ဣန်, is left to the next-syllable scan — a known gap.)
             i++;
+            let cat = DEF.independentTone[ch] ?? "low";
+            while (i < n && (s[i] === VISARGA || s[i] === DOT_BELOW)) {
+                cat = s[i] === VISARGA ? "high" : "creaky";
+                i++;
+            }
+            syls.push({ onset: "", body: DEF.independentVowels[ch]! + (DEF.tones[cat] ?? "") });
             continue;
         }
         if (!isConsonant(ch)) {
@@ -165,20 +173,29 @@ export function syllabify(word: string): Syllable[] {
 }
 
 // Intervocalic voicing sandhi (LEXICAL): the per-word `voicing-lexicon.tsv` maps an undiacritized word to a
-// per-syllable flag string ('1' = voice this syllable's onset). Built from the kaikki gold (tools/build-my-voicing
-// .ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing, never removes it.
+// per-syllable flag string ('1' = voice this syllable's onset, via DEF.voicing). Built from the kaikki gold
+// (tools/build-my-voicing.ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing.
+// The flags are POSITIONAL (index-aligned to syllabify()), so a change to syllabify() requires REBUILDING the
+// lexicon — a misalignment surfaces as a referee-eval drop (guarded by the my floor in referee-eval.test.ts).
+// NOTE: keyed on a whole word, so voicing fires on word / space-delimited tokens; a fully SPACELESS run reaches
+// phonemizeWord as one token and misses (voicing on running text awaits the deferred segmentation layer).
 const VOICE = DEF.voicing;
-const VOICING_LEXICON = loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true });
+// Lazy: registry.ts imports every language eagerly; the ~1.3k-row TSV is only read on first Burmese use.
+let VOICING_LEXICON: ReadonlyMap<string, string> | undefined;
+function voicingLexicon(): ReadonlyMap<string, string> {
+    return (VOICING_LEXICON ??= loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true }));
+}
 
 /** One Burmese word → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
 export function phonemizeWord(word: string): string {
-    const syls = syllabify(word);
-    const flags = VOICING_LEXICON.get(word.normalize("NFC"));
+    const nfc = word.normalize("NFC");
+    const syls = syllabify(nfc);
+    const flags = voicingLexicon().get(nfc);
     if (flags) {
         for (let k = 0; k < syls.length && k < flags.length; k++) {
             if (flags[k] === "1") {
                 const v = VOICE[syls[k]!.onset];
-                if (v) syls[k] = { onset: v, body: syls[k]!.body };
+                if (v) syls[k]!.onset = v;
             }
         }
     }
@@ -203,7 +220,6 @@ class BurmesePhonemizer implements Phonemizer {
                 if (mk) sink.pause(mk);
             }
         }
-        void this.foreign;
         return finish();
     }
 }
