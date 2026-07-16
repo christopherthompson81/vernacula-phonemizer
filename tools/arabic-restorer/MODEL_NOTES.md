@@ -51,8 +51,9 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
    Also: a consonant before a **ی/و GLIDE** (‑iyā/‑uwā — followed by another vowel letter) is a short slot too
    (آبادیات → ɑbɑd·ə·jɑt). And an explicitly-written fatḥa is now PROTECTED from medial schwa-deletion (`g2p.ts`
    marks it, `urdu.ts` strips the mark) so deletion elides only the *unwritten* default schwa — needed, or the ‑iyā
-   epenthetic ə sits in a deletion context and vanishes. Yields: fa 69.5%, ur 56.5%, ps 44.7%, pa 37.2%
-   (**12,471 pairs**).
+   epenthetic ə sits in a deletion context and vanishes. Also `damma+waw وُ → uː` in BOTH g2ps (`urdu/g2p.ts`,
+   `shahmukhi.ts`; Persian already defaulted و→uː) — medial و could only surface as oː, so no vocalization reached
+   the ‑ū words. Yields: fa 69.5%, ur 62.0%, ps 44.7%, pa 37.2% (**12,887 pairs**).
 4. `crossscript_pa.ts` → `harakat.pa.crossscript.tsv` — **cross-script GOLD** (see below). Currently OPT-IN.
 5. `build_charvocab.py` → `multilingual_charvocab.json` — union of every letter across ALL skeleton sources
    (silver + harakat shards) with the Arabic char map, Arabic indices preserved. 99 chars, 19 labels.
@@ -67,15 +68,18 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
 ```
 - **Warm-start:** copy the 26 vocab-independent lstm/fc tensors directly; copy embedding rows by CHAR IDENTITY
   (Arabic rows transfer, rider/lang rows random-init). New lang embedding init random.
-- **Upsample riders ~4×** (Arabic replay stays 1×). Best usually at epoch 1–2, early-stops fast.
+- **SIZE-AWARE upsampling** (`--balance 4000`): each rider → ~4k examples (ps 9×, pa 12×, ur/fa 1×), Arabic
+  replay 1×. Uniform upsampling let the data-rich ur/fa dominate and REGRESSED Pashto via cross-lingual
+  interference (−3.6); size-aware weighting recovered it (−1.8) with no ur/fa loss. Best at epoch 1–2.
 - **Two metrics:** in-domain harakat DER (`eval.tsv`, inner-loop early-stop); the REPORTING metric is **end-to-end
   IPA on the STABLE `eval_set.tsv`** — predicted harakat → deterministic g2p → IPA vs the wikipron reference, MODEL
   vs bare-skeleton BASELINE. `eval_set.tsv` is a fixed 10% slice of the WIKIPRON reference (not the silver labels),
   excluded from training, so it does NOT move when the inversion changes → version comparisons are exact. It covers
   ALL held-out words incl. the ~half the g2p can't reproduce → honest full-coverage denominator (lower absolutes).
-- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 56.0% (+12.5)**. Per language: **fa +20.3**
-  (44→64%), **ur +5.9** (48→54%), **pa +2.4** (now positive) — helped by the g2p/inversion fixes above; **ps −1.8**
-  still the holdout (no voweled sister-script, different ی realization, dialectal referee). Baseline 43.5% is the
+- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 56.7% (+13.2)**. Per language: **fa +19.3**
+  (44→63%), **ur +9.5** (48→58% — the ‑ū fix), **pa +1.6** (positive); **ps −1.8** still the holdout (no voweled
+  sister-script, different ی realization, dialectal referee) — size-aware upsampling keeps it from regressing
+  further as ur/fa improve. Baseline 43.5% is the
   g2p-COVERAGE floor (the ~half no harakat can reach). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
   (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
   only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)

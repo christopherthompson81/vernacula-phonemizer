@@ -130,10 +130,11 @@ export function phonemizeWord(word: string): string {
                 // reproduce e.g. کَرَنو → kəɾənoː (the cap on inversion for tri-consonantal words).
                 out += hk === "ə" ? "ə̲" : hk;
                 i++;
-                // harakat + a long-vowel letter lengthens (zabar+ا etc. is rare; kasra+ی→iː)
-                const lv = longVowelAfterConsonant(s[i] ?? "");
-                if (lv && ((hk === "ɪ" && s[i] === YA) || (hk === "ʊ" && s[i] === WAW))) {
-                    out = out.slice(0, -hk.length) + lv;
+                // harakat + a matching long-vowel letter lengthens to the HIGH long vowel: kasra+ی→iː, damma+و→uː
+                // (the explicit diacritic pins the letter — bare ی/و default to iː/oː; damma+waw = uː, e.g. آلُو ɑːluː,
+                // آرزُو ɑːrzuː). Without this, medial و can only surface as oː and no vocalization reaches the ū words.
+                if ((hk === "ɪ" && s[i] === YA) || (hk === "ʊ" && s[i] === WAW)) {
+                    out = out.slice(0, -hk.length) + (s[i] === YA ? "iː" : "uː");
                     i++;
                 }
             } else {
