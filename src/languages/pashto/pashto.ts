@@ -113,12 +113,17 @@ function g2p(word: string): string {
 
 const VOWEL_G = /[aeiouɑə]/g;
 
-// COVERAGE layer: mined undiacritized skeletons are vocalized before g2p (see core/harakatLexicon.ts).
-export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
+// COVERAGE layer: mined undiacritized skeletons are vocalized before g2p (see core/harakatLexicon.ts). Loaded
+// LAZILY (registry.ts imports every rider eagerly; the TSV is only read on first Pashto use).
+let LEXICON: ReadonlyMap<string, string> | undefined;
+export function harakatLexicon(): ReadonlyMap<string, string> {
+    return (LEXICON ??= loadHarakatLexicon(import.meta.url));
+}
 
-/** One Pashto word → canonical IPA (lexicon restore + skeleton g2p + default-schwa deletion + stress). */
-export function phonemizeWord(word: string): string {
-    let ipa = g2p(restoreHarakat(word, HARAKAT_LEXICON));
+/** Lexicon-FREE core: skeleton g2p + default-schwa deletion + stress. Used by the number path and the mining tool,
+ *  which must NOT consult the content lexicon (number words / mining candidates collide with content homographs). */
+export function phonemizeWordCore(word: string): string {
+    let ipa = g2p(word);
     if (!ipa) return "";
     ipa = deleteMedialSchwa(ipa, "ə");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters
@@ -131,6 +136,11 @@ export function phonemizeWord(word: string): string {
         ipa = ipa.slice(0, at) + "ˈ" + ipa.slice(at);
     }
     return ipa.normalize("NFC");
+}
+
+/** One Pashto word → canonical IPA (coverage-lexicon restore + the lexicon-free core). */
+export function phonemizeWord(word: string): string {
+    return phonemizeWordCore(restoreHarakat(word, harakatLexicon()));
 }
 
 const EASTERN_DIGITS: Record<string, string> = {
@@ -164,7 +174,7 @@ function numberToText(nn: number): string {
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
     if (!Number.isSafeInteger(nn)) return digits;
-    return numberToText(nn).split(" ").map(phonemizeWord).join(" ");
+    return numberToText(nn).split(" ").map(phonemizeWordCore).join(" "); // numbers bypass the content lexicon
 }
 const TOKEN = new RegExp(
     `([${PERSO_ARABIC_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,

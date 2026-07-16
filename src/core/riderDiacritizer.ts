@@ -5,13 +5,16 @@
  * covers is LEFT BARE here so the (authoritative, gold) sync lexicon layer vocalizes it — giving the precedence
  * lexicon → neural → default. Vocalized output feeds the SYNC g2p, so phonemize() stays sync and dependency-free;
  * only this pre-pass touches ONNX. `onnxruntime-node` is an OPTIONAL dependency, imported lazily; the model is a
- * per-word restorer (one language TOKEN prepended, char sequence, argmax harakat per position). The int8 model is
- * gitignored-optional: absent → the pre-pass is a no-op and callers get the lexicon+default path. See
+ * per-word restorer (one language TOKEN prepended, char sequence, argmax harakat per position). The int8 model
+ * ships in-repo (like the Arabic diacritizer) but is optional at RUNTIME: if it — or `onnxruntime-node` — is
+ * absent, the pre-pass degrades to a no-op and callers get the lexicon+default path. See
  * docs/arabic_script_restorer_investigation.md and tools/arabic-restorer/export_onnx.py.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { HARAKAT, HARAKAT_G, stripHarakat } from "./harakatLexicon.ts";
 
 // label → the combining harakat to append after a base letter. Mirrors the training VOWELS map (invert_harakat.ts /
 // train_multilingual_harakat.py): a fatḥa, u damma, i kasra, o sukūn, F/N/K tanwīn, ^ dagger-alif (U+0670); a "~"
@@ -25,8 +28,6 @@ function harOf(label: string): string {
     return HAR[label] ?? "";
 }
 
-// Arabic harakat block (U+064B…U+0652) + U+0670 — stripped to the skeleton before inference (the model's input).
-const HARAKAT_G = /[ً-ْٰ]/gu;
 // A Perso-Arabic word run: letters/joiners in U+0600–06FF + U+0750–077F, PLUS the ZWNJ/ZWJ (U+200C/200D) that
 // glue morphemes in Persian/Urdu compounds — the model was trained on those as ONE sequence (a ZWNJ-split would
 // change the LSTM context and the predicted harakat), MINUS the harakat (handled separately).
@@ -91,31 +92,40 @@ export async function loadRiderDiacritizer(modelBytes: Uint8Array, meta: RiderDi
             const langTok = meta.lang_tokens[lang];
             const langTokIdx = langTok !== undefined ? meta.chars[langTok] : undefined;
             if (langTokIdx === undefined) return text; // unknown language → no-op
-            const words = [...text.matchAll(WORD)];
-            let outText = text, shift = 0;
-            for (const m of words) {
+            // Rebuild the text with a single cursor (append the gap before each word, then the word's replacement),
+            // avoiding shift bookkeeping and repeated full-string slicing.
+            const out: string[] = [];
+            let cursor = 0;
+            for (const m of text.matchAll(WORD)) {
                 const raw = m[0]!;
-                const skel = raw.replace(HARAKAT_G, "");
-                if (skel.length === 0 || lexicon.has(skel)) continue; // lexicon-covered → leave for the sync layer
-                const chars = [...skel].map((c) => meta.chars[c] ?? UNK);
-                const labels = await predict(langTokIdx, chars);
-                let voc = "";
-                [...skel].forEach((c, k) => { voc += c + harOf(labels[k] ?? "0"); });
-                const at = m.index! + shift;
-                outText = outText.slice(0, at) + voc + outText.slice(at + raw.length);
-                shift += voc.length - raw.length;
+                out.push(text.slice(cursor, m.index!));
+                cursor = m.index! + raw.length;
+                // Respect writer-supplied harakat (like restoreHarakat) and leave lexicon-covered words BARE for the
+                // authoritative sync lexicon layer — both are emitted unchanged.
+                const skel = stripHarakat(raw).normalize("NFC");
+                if (skel.length === 0 || HARAKAT.test(raw) || lexicon.has(skel)) { out.push(raw); continue; }
+                const cps = [...skel];
+                const labels = await predict(langTokIdx, cps.map((c) => meta.chars[c] ?? UNK));
+                out.push(cps.map((c, k) => c + harOf(labels[k] ?? "0")).join(""));
             }
-            return outText;
+            out.push(text.slice(cursor));
+            return out.join("");
         },
     };
 }
 
-/** Load the rider diacritizer from the model + meta beside this file (model is gitignored-optional — absent →
- *  undefined, and callers fall back to the lexicon+default path). */
+/** Load the rider diacritizer from the model + meta beside this file. The model ships in-repo but this DEGRADES to
+ *  undefined (callers fall back to the lexicon+default path) on ANY unavailability — a missing model or meta, OR a
+ *  failed `onnxruntime-node` load (optional native dep absent / ABI mismatch) — rather than throwing. Call
+ *  loadRiderDiacritizer directly if you want the underlying error surfaced. */
 export async function createRiderDiacritizer(): Promise<RiderDiacritizer | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
-    let bytes: Buffer;
-    try { bytes = readFileSync(join(dir, "riderDiacritizer.onnx")); } catch { return undefined; }
-    const meta = JSON.parse(readFileSync(join(dir, "riderDiacritizer.meta.json"), "utf8")) as RiderDiacritizerMeta;
-    return loadRiderDiacritizer(new Uint8Array(bytes), meta);
+    let bytes: Buffer, meta: RiderDiacritizerMeta;
+    try {
+        bytes = readFileSync(join(dir, "riderDiacritizer.onnx"));
+        meta = JSON.parse(readFileSync(join(dir, "riderDiacritizer.meta.json"), "utf8")) as RiderDiacritizerMeta;
+    } catch { return undefined; } // model or sidecar meta absent/corrupt
+    try {
+        return await loadRiderDiacritizer(new Uint8Array(bytes), meta);
+    } catch { return undefined; } // onnxruntime-node absent or the session failed to build → sync fallback
 }

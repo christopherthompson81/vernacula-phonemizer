@@ -130,13 +130,18 @@ function g2p(word: string): string {
 
 const VOWEL_G = /[aeiouɒ]/g;
 
-// COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized
-// before g2p, so the g2p reads the real e/o/u instead of a default schwa (see core/harakatLexicon.ts).
-export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
+// COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized before
+// g2p, so the g2p reads the real e/o/u instead of a default schwa (see core/harakatLexicon.ts). Loaded LAZILY
+// (registry.ts imports every rider eagerly; the ~3k-line TSV is only read on first Persian use).
+let LEXICON: ReadonlyMap<string, string> | undefined;
+export function harakatLexicon(): ReadonlyMap<string, string> {
+    return (LEXICON ??= loadHarakatLexicon(import.meta.url));
+}
 
-/** One Persian word → canonical IPA (lexicon restore + g2p + default-short-vowel deletion + final stress). */
-export function phonemizeWord(word: string): string {
-    let ipa = g2p(restoreHarakat(word, HARAKAT_LEXICON));
+/** Lexicon-FREE core: g2p + default-short-vowel deletion + final stress. Used by the number path and the mining
+ *  tool, which must NOT consult the content lexicon (number words / mining candidates collide with homographs). */
+export function phonemizeWordCore(word: string): string {
+    let ipa = g2p(word);
     if (!ipa) return "";
     // Persian, like Urdu, drops the over-inserted default vowel in a medial C·a·C cluster (the shared Ohala
     // rule on /a/). The correct e/o quality needs the deferred restoration layer; the STRUCTURE is right.
@@ -156,6 +161,11 @@ export function phonemizeWord(word: string): string {
     return ipa.normalize("NFC");
 }
 
+/** One Persian word → canonical IPA (coverage-lexicon restore + the lexicon-free core). */
+export function phonemizeWord(word: string): string {
+    return phonemizeWordCore(restoreHarakat(word, harakatLexicon()));
+}
+
 const EASTERN_DIGITS: Record<string, string> = {
     "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
     "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
@@ -167,7 +177,7 @@ const toAscii = (d: string): string =>
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
     if (!Number.isSafeInteger(nn)) return digits;
-    return renderNumber(nn, DEF.numbers, phonemizeWord);
+    return renderNumber(nn, DEF.numbers, phonemizeWordCore); // numbers bypass the content lexicon
 }
 const TOKEN = new RegExp(
     `([${PERSO_ARABIC_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,

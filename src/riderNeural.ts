@@ -9,13 +9,14 @@
  */
 import { getPhonemizer } from "./registry.ts";
 import { createRiderDiacritizer, type RiderDiacritizer } from "./core/riderDiacritizer.ts";
-import { HARAKAT_LEXICON as UR } from "./languages/urdu/urdu.ts";
-import { HARAKAT_LEXICON as FA } from "./languages/persian/persian.ts";
-import { HARAKAT_LEXICON as PS } from "./languages/pashto/pashto.ts";
-import { HARAKAT_LEXICON as PA } from "./languages/punjabi/punjabi.ts";
+import { harakatLexicon as ur } from "./languages/urdu/urdu.ts";
+import { harakatLexicon as fa } from "./languages/persian/persian.ts";
+import { harakatLexicon as ps } from "./languages/pashto/pashto.ts";
+import { harakatLexicon as pa } from "./languages/punjabi/punjabi.ts";
 
-// The model's language token codes (train_multilingual_harakat.py LANGS) → each rider's coverage lexicon.
-const LEXICONS: Record<string, ReadonlyMap<string, string>> = { ur: UR, fa: FA, ps: PS, pa: PA };
+// The model's language token codes (train_multilingual_harakat.py LANGS) → each rider's coverage-lexicon ACCESSOR.
+// Lazy (functions, not eager Maps) so a single-language neural call loads only that rider's lexicon, not all four.
+const LEXICONS: Record<string, () => ReadonlyMap<string, string>> = { ur, fa, ps, pa };
 
 /** The rider languages served by the neural pre-pass (the model was trained on exactly these + Arabic). */
 export const NEURAL_RIDERS = Object.keys(LEXICONS);
@@ -28,12 +29,12 @@ let diacritizer: Promise<RiderDiacritizer | undefined> | undefined;
  * path (lexicon + default) when the model/`onnxruntime-node` is unavailable.
  */
 export async function phonemizeRiderNeural(text: string, lang: string): Promise<string> {
-    const lexicon = LEXICONS[lang];
-    if (lexicon === undefined) {
+    const lex = LEXICONS[lang];
+    if (lex === undefined) {
         throw new Error(`phonemizeRiderNeural: "${lang}" is not a neural rider (expected one of ${NEURAL_RIDERS.join(", ")})`);
     }
     if (diacritizer === undefined) diacritizer = createRiderDiacritizer();
-    const diac = await diacritizer;
-    const vocalized = diac ? await diac.diacritize(text, lang, lexicon) : text;
+    const diac = await diacritizer; // undefined when the model or onnxruntime-node is unavailable → sync fallback
+    const vocalized = diac ? await diac.diacritize(text, lang, lex()) : text;
     return getPhonemizer(lang).text(vocalized);
 }

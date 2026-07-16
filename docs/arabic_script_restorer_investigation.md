@@ -541,6 +541,30 @@ the bare skeleton accidentally satisfied (that is why the full-set number reads 
 NEW bring-ups (Sindhi/Saraiki — near-perfect transfer from Urdu/Punjabi) and scaling the Arabic anchor, not the
 plumbing.
 
+## Run 24 — 2026-07-16 — pre-merge review fixes (8-angle review of PR #208)
+
+An 8-angle code review surfaced real issues; fixed before merge:
+
+- **Circular re-mining (the serious one).** `invert_harakat.ts` imported the rider `phonemizeWord`, which now applies
+  the lexicon — so the miner's all-bare candidate got the *already-mined* vocalization injected and was recorded as
+  an identity row, which `export_lexicons.sh` drops → every regen would silently erode coverage to zero. Fix: each
+  rider now exports a **lexicon-free `phonemizeWordCore`**; the miner (and the number path) use it. `phonemizeWord`
+  = `phonemizeWordCore(restoreHarakat(word, …))`.
+- **NFC.** `restoreHarakat` keyed on the raw word; NFD input (decomposed آ/أ) silently missed the NFC lexicon keys.
+  Now normalizes the lookup key. The neural pre-pass NFC-normalizes the skeleton too.
+- **Numbers coupled to the content lexicon.** Spelled-out number words routed through the lexicon-aware
+  `phonemizeWord` (Pashto درې/شپږ collided with content entries). Numbers now use `phonemizeWordCore` — deterministic
+  from the manifest, consistent with Punjabi which already bypassed.
+- **Neural graceful degrade.** `phonemizeRiderNeural` threw (not degraded) when the committed model was present but
+  `onnxruntime-node` absent; `createRiderDiacritizer` now catches the ORT-load failure and the meta read → returns
+  undefined → sync fallback, matching its documented contract.
+- **Eager import I/O.** The lexicon loaded at module import for all four riders (registry imports them eagerly), so
+  every consumer paid ~5.7k lines of TSV. Now **lazy** (`harakatLexicon()` accessor), matching french/german.
+- **Neural respects writer harakat** (skips words carrying harakat, like the lexicon layer); cursor-based rebuild
+  replaces the `shift` bookkeeping; shared HARAKAT regex/`stripHarakat` reused from `harakatLexicon.ts`; the
+  Punjabi assimilation test asserts the `ŋɡ` property vowel-agnostically (the mined سُنگھی vowel is noisy) and the
+  "gitignored-optional" comments corrected to "in-repo, optional at runtime." Suite 363/363, tsc clean.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

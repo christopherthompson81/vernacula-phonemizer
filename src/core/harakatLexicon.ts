@@ -10,7 +10,12 @@
 import { loadTsvMap } from "./loadTsv.ts";
 
 // Arabic harakat block (U+064B tanwīn … U+0652 sukūn) + U+0670 dagger alif — the diacritics an abjad may carry.
-const HARAKAT = /[ً-ْٰ]/u;
+// Shared by the lexicon layer (this file) and the neural pre-pass (riderDiacritizer.ts) so the two agree on what a
+// "skeleton" is; the `g` variant strips them, the non-`g` variant tests for their presence.
+export const HARAKAT = /[ً-ْٰ]/u;
+export const HARAKAT_G = /[ً-ْٰ]/gu;
+/** Strip every combining haraka → the bare consonant skeleton. */
+export const stripHarakat = (word: string): string => word.replace(HARAKAT_G, "");
 
 /** Load a rider's `skeleton⇥vocalized` restoration lexicon beside its module. Optional: absent → empty Map. */
 export function loadHarakatLexicon(metaUrl: string): ReadonlyMap<string, string> {
@@ -21,8 +26,10 @@ export function loadHarakatLexicon(metaUrl: string): ReadonlyMap<string, string>
  * Restore a single word's short vowels from the lexicon. If the word already carries harakat it is RESPECTED
  * (the writer supplied explicit vowels — never clobber them); otherwise a lexicon hit replaces the bare skeleton
  * with our vocalization, and a miss returns the word unchanged. Pure lookup — the g2p still does the IPA mapping.
+ * The lookup key is NFC-normalized (the mined lexicon keys are NFC): NFD input (decomposed آ/أ, reordered marks)
+ * would otherwise silently miss a covered word.
  */
 export function restoreHarakat(word: string, lexicon: ReadonlyMap<string, string>): string {
     if (HARAKAT.test(word)) return word;
-    return lexicon.get(word) ?? word;
+    return lexicon.get(word.normalize("NFC")) ?? word;
 }

@@ -159,14 +159,24 @@ export function makeNativePunjabi(
 }
 
 // COVERAGE layer: mined Shahmukhi (Perso-Arabic) skeletons are vocalized before g2p; Gurmukhi input has no
-// harakat keys in the lexicon so it passes through unchanged (see core/harakatLexicon.ts).
-export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
+// harakat keys in the lexicon so it passes through unchanged (see core/harakatLexicon.ts). Loaded LAZILY
+// (registry.ts imports every rider eagerly; the TSV is only read on first Punjabi use).
+let LEXICON: ReadonlyMap<string, string> | undefined;
+export function harakatLexicon(): ReadonlyMap<string, string> {
+    return (LEXICON ??= loadHarakatLexicon(import.meta.url));
+}
 
-/** Bare word→IPA (tests / referee eval). */
-export function phonemizeWord(w: string): string {
+/** Lexicon-FREE core: bare word→IPA. Used by the mining tool, which must NOT consult the content lexicon (mining
+ *  candidates would collide with content homographs). The number path already uses this via the `word` closure. */
+export function phonemizeWordCore(w: string): string {
     return (PA ??= makeNativePunjabi(
         loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
-    )).word(restoreHarakat(w, HARAKAT_LEXICON));
+    )).word(w);
+}
+
+/** Bare word→IPA (tests / referee eval): coverage-lexicon restore + the lexicon-free core. */
+export function phonemizeWord(w: string): string {
+    return phonemizeWordCore(restoreHarakat(w, harakatLexicon()));
 }
 let PA: ReturnType<typeof makeNativePunjabi> | undefined;
 
