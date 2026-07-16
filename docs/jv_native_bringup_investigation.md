@@ -81,3 +81,23 @@ is inconsistent on closed penults, as the code comment already warned).
 
 Eval rule-only unchanged (86.2/84.5, the eval folds ⟨e⟩); the cross-script lexicon is a shipped-quality gain the
 folded % cannot see. Suite 373/373.
+
+## Run (2026-07-16, cont.) — extend the cross-script ⟨e⟩ lexicon toward ✅; find the HOMOGRAPH ceiling
+
+Pulled the FULL kaikki Javanese dump (6107 entries → 2365 Aksara headwords + 149 exact Latin↔Aksara pairs, vs the
+1268-word referee subset) and re-ran the transliterate→resolve→pin pipeline: **130 → 235 cross-script ⟨e⟩ entries**
+(220 OOV in the Latin referee = unambiguous taling wins; kept ⟨e⟩-only diffs, dropping synonym pairings from the
+kaikki forms field, e.g. deling→pring).
+
+Two findings that BOUND ✅:
+- **HOMOGRAPHS** — the Latin ⟨e⟩ ambiguity includes homographs: sela = *stone* (ꦱꦼꦭ pepet [səlɔ]) vs *gap* (ꦱꦺꦭ
+  taling [selɔ]), one Latin spelling. A whole-word lexicon can only pin ONE sense; measured against the Latin
+  referee (unfolded) shipped is 85.7% vs rule 86.5% — the drop is these homographs (+ the Latin referee's own
+  pepet-default ⟨e⟩ errors). True resolution needs POS/context disambiguation, not a lexicon.
+- **a→ɔ loan exceptions are NOISY single-referee** — mined 30 from kaikki jav Latin, but kutha→kuʈa contradicts the
+  hand-verified golden kuʈɔ (a→ɔ DOES apply). The a→ɔ referee marking is unreliable; DROPPED (the Aksara can't
+  cross-verify — it applies the a→ɔ rule too). Needs a reliable exception source we don't have.
+
+So Javanese is a STRONGER 🟡, not ✅: the cross-script transfer reliably fixes UNAMBIGUOUS taling ⟨e⟩ (the bulk), but
+the homograph ⟨e⟩ + the noisy a→ɔ exceptions are the ceiling. For AKSARA input it is effectively ✅ (the script
+resolves everything natively). Eval rule-only unchanged 86.2/84.5 (folds ⟨e⟩). Suite 373/373.
