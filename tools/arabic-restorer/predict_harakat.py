@@ -14,7 +14,7 @@ from torch.nn.utils.rnn import pad_sequence
 HERE = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
 ap.add_argument("--ckpt", default="/mnt/data/ar-diac/bilstm_multilingual.pt")
-ap.add_argument("--in", dest="inp", default=os.path.join(HERE, "eval.tsv"))
+ap.add_argument("--in", dest="inp", default=os.path.join(HERE, "eval_set.tsv"))
 ap.add_argument("--out", default="/tmp/pred.tsv")
 args = ap.parse_args()
 dev = "cuda" if torch.cuda.is_available() else "cpu"
