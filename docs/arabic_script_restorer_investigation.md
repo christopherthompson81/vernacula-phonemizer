@@ -474,6 +474,34 @@ Two-layer production path now concrete: **lexicon lookup (exact, ~2-in-3 Urdu to
 else default g2p.** Wiring the lexicon into the live Urdu/Persian phonemizer (the `restore.ts` pass) is the deploy
 step; the artifacts + both evals are committed. The scaling frontier is measured on BOTH axes now.
 
+## Run 22 — 2026-07-15 — the last mile: wire the coverage lexicon into the LIVE rider phonemizers
+
+Run 21 built the shippable lexicon but left it in `tools/`. This wires it into the live path, making the coverage
+layer actually ship. Mirrors Arabic's `restore.ts`/`diacritization.tsv`, but simpler — no neural pre-pass yet, so
+it's a pure exact-match lookup, not a skeleton-repair supplement.
+
+**What shipped.** `export_lexicons.sh` strips `lexicon.<lang>.tsv` to 2 columns (`skeleton⇥vocalized`), DROPS the
+identity rows (a bare-skeleton vocalization is a no-op — the g2p already yields that IPA), and writes
+`src/languages/<lang>/lexicon.tsv` beside each g2p. Non-identity counts (the rows that actually carry short-vowel
+info): **ur 2,640 · fa 3,040 · ps 113 · pa 158.** New shared `core/harakatLexicon.ts`: `loadHarakatLexicon(url)`
+(loadTsvMap, optional) + `restoreHarakat(word, lex)` — if the word already carries harakat it's RESPECTED (never
+clobber a caller's explicit vowels), else a lexicon hit substitutes our vocalization before g2p, miss → unchanged.
+Wired one line into `phonemizeWord` for all four riders (ur/fa/ps/pa; Punjabi Gurmukhi input has no Perso-Arabic
+harakat keys so it passes through).
+
+**No circularity.** The lexicon was mined with `fold(phonemizeWord(voc)) == fold(ref)`; `voc` carries harakat, so
+`restoreHarakat` returns it unchanged during mining — re-mining is stable, and the live output for a covered
+skeleton equals `phonemizeWord(voc)`, which folds to the reference.
+
+**Effect (probes).** آبرو `ɑːbəɾoː → ɑːbɾˈuː` (و→uː, ābrū), آبادیات `…d̪jɑːt̪ → …d̪ˈʊjɑːt̪` (ʊ restored), مدرسه
+`madɾasˈe` (madrase). Two nasal-assimilation goldens drifted because the lexicon now supplies the true vowel
+(انگور *angūr* oː→**uː**; سنگھی ə→**ʊ**) — updated, not regressions. Suite **357/357**, tsc clean; added a
+coverage-layer test per rider (hit + respect-user-harakat).
+
+**Still deferred:** the neural GENERALIZATION layer for novel (OOV) words needs the multilingual BiLSTM exported to
+ONNX + an `onnxruntime` pre-pass (the Arabic `diacritizer.ts` analogue). The lexicon is the exact-match tier under
+it. Production path today: **lexicon lookup → default g2p**; the full three-tier (…→ neural → default) awaits the export.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

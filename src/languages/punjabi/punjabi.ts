@@ -16,6 +16,7 @@ import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import {
     scanShahmukhi,
@@ -157,11 +158,15 @@ export function makeNativePunjabi(
     return { word, number, text };
 }
 
+// COVERAGE layer: mined Shahmukhi (Perso-Arabic) skeletons are vocalized before g2p; Gurmukhi input has no
+// harakat keys in the lexicon so it passes through unchanged (see core/harakatLexicon.ts).
+const LEXICON = loadHarakatLexicon(import.meta.url);
+
 /** Bare word→IPA (tests / referee eval). */
 export function phonemizeWord(w: string): string {
     return (PA ??= makeNativePunjabi(
         loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
-    )).word(w);
+    )).word(restoreHarakat(w, LEXICON));
 }
 let PA: ReturnType<typeof makeNativePunjabi> | undefined;
 

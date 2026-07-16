@@ -10,6 +10,7 @@ import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 import { phonemizeWord as g2p } from "./g2p.ts";
 
 interface UrduTextDef {
@@ -30,9 +31,13 @@ const DIGIT_CLASS = "0-9" + Object.keys(EASTERN_DIGITS).join("");
 // Arabic-script word range (U+0600–06FF + U+0750–077F extensions), excluding the digits/punctuation handled below.
 const URDU_WORD = "ء-ٟٮ-ۓە-ۜ۞-ۿ";
 
-/** One Urdu word → canonical IPA (g2p + default-schwa deletion + weight stress). */
+// COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized
+// before g2p, so the g2p reads the real ɪ/ʊ instead of a default schwa (see core/harakatLexicon.ts).
+const LEXICON = loadHarakatLexicon(import.meta.url);
+
+/** One Urdu word → canonical IPA (lexicon restore + g2p + default-schwa deletion + weight stress). */
 export function phonemizeWord(word: string): string {
-    let ipa = g2p(word);
+    let ipa = g2p(restoreHarakat(word, LEXICON));
     if (!ipa) return "";
     // The g2p inserts a default [ə] for every unwritten short vowel; Urdu (like Hindi) then DELETES the schwa
     // in a medial V·C·ə·C·V context, so consonant clusters surface bare (پاکستان → pɑːkɪst̪ɑːn-skeleton pɑːkst̪ɑːn,

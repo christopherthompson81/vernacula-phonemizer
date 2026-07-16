@@ -10,6 +10,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 
 interface NumbersDef {
     units: string[];
@@ -112,9 +113,12 @@ function g2p(word: string): string {
 
 const VOWEL_G = /[aeiouɑə]/g;
 
-/** One Pashto word → canonical IPA (skeleton + default-schwa deletion + stress). */
+// COVERAGE layer: mined undiacritized skeletons are vocalized before g2p (see core/harakatLexicon.ts).
+const LEXICON = loadHarakatLexicon(import.meta.url);
+
+/** One Pashto word → canonical IPA (lexicon restore + skeleton g2p + default-schwa deletion + stress). */
 export function phonemizeWord(word: string): string {
-    let ipa = g2p(word);
+    let ipa = g2p(restoreHarakat(word, LEXICON));
     if (!ipa) return "";
     ipa = deleteMedialSchwa(ipa, "ə");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters

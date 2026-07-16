@@ -41,7 +41,7 @@ describe("punjabi Shahmukhi front-end", () => {
     });
 
     test("homorganic nasal: generic ن assimilates before velar/palatal (abjad has no tippi)", () => {
-        expect(phonemizeWord("سنگھی")).toBe("sˈə˥˩ŋɡiː"); // saṅghī: نگ → ŋɡ + medial gh high tone
+        expect(phonemizeWord("سنگھی")).toBe("sˈʊ˥˩ŋɡiː"); // saṅghī: نگ → ŋɡ + medial gh high tone; س→ʊ from the coverage lexicon (سُنگھی)
         expect(phonemizeWord("پنجابی")).toBe("pəɲd͡ʒˈaːbiː"); // panjābī: نج → ɲd͡ʒ
     });
 

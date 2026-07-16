@@ -25,4 +25,11 @@ describe("persian canonical IPA", () => {
         expect(phonemizeWord("مرد")).toBe("mˈaɾd"); // mard: final cluster rd, no inserted vowel
         expect(phonemize("سلام", "fa")).toContain("salˈaːm");
     });
+
+    // COVERAGE layer (core/harakatLexicon.ts): a mined skeleton is vocalized before g2p so the short vowels
+    // surface (madrase, not the default schwa filler); caller-supplied harakat is respected.
+    test("coverage lexicon restores mined short vowels", () => {
+        expect(phonemizeWord("مدرسه")).toBe("madɾasˈe"); // madrase: sukun on د from the lexicon (مدْرسه)
+        expect(phonemizeWord("مدْرسه")).toBe("madɾasˈe"); // caller-supplied sukun is respected (not clobbered)
+    });
 });

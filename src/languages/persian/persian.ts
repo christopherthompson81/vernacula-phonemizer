@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 
 interface PersianDef {
     consonants: Record<string, string>;
@@ -129,9 +130,13 @@ function g2p(word: string): string {
 
 const VOWEL_G = /[aeiouɒ]/g;
 
-/** One Persian word → canonical IPA (g2p + default-short-vowel deletion + final stress). */
+// COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized
+// before g2p, so the g2p reads the real e/o/u instead of a default schwa (see core/harakatLexicon.ts).
+const LEXICON = loadHarakatLexicon(import.meta.url);
+
+/** One Persian word → canonical IPA (lexicon restore + g2p + default-short-vowel deletion + final stress). */
 export function phonemizeWord(word: string): string {
-    let ipa = g2p(word);
+    let ipa = g2p(restoreHarakat(word, LEXICON));
     if (!ipa) return "";
     // Persian, like Urdu, drops the over-inserted default vowel in a medial C·a·C cluster (the shared Ohala
     // rule on /a/). The correct e/o quality needs the deferred restoration layer; the STRUCTURE is right.
