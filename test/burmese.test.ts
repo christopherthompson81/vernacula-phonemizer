@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/burmese/burmese.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord, segment } from "../src/languages/burmese/burmese.ts";
 
 // Canonical-IPA goldens for Burmese / မြန်မာ (my) — Sino-Tibetan, the Mon-Burmese abugida (logical order). The
 // core challenge is the RIME chart (vowel × coda: ောင်→aʊɴ, ိုင်→aɪɴ, ိန်→eɪɴ, ုန်→oʊɴ, bare င်→ɪɴ), the ⟨ွ⟩
@@ -51,5 +52,16 @@ describe("burmese canonical IPA", () => {
         expect(phonemizeWord("ကမ္ဘာ")).toBe("ɡəba˨"); // kaba → ɡəba ('world', stacked ္ဘ)
         expect(phonemizeWord("ကတော့")).toBe("ɡədɔ˥ˀ"); // ka-tɔ → ɡə-dɔ
         expect(phonemizeWord("ကား")).toBe("ka˥˩"); // OOV-style: word-initial FULL syllable does NOT voice
+    });
+
+    // Word segmentation: Burmese is spaceless, so a connected run is split into words (DAG maximal-match over
+    // seg-words.txt, boundaries constrained to syllable starts) before phonemizing — which also lets the per-word
+    // voicing lexicon fire on running text. A single word segments to itself (per-word eval unaffected).
+    test("segmentation splits spaceless runs (+ voicing on running text)", () => {
+        expect(segment("စကားပြော")).toEqual(["စကား", "ပြော"]); // 'speak' + 'say'
+        expect(segment("မြန်မာစကား")).toEqual(["မြန်မာ", "စကား"]);
+        expect(segment("စကား")).toEqual(["စကား"]); // a single word is unchanged
+        // voicing now fires across the segmented run (စကား → zəɡa)
+        expect(phonemize("မြန်မာစကား", "my")).toBe("mja˨ɴma˨ zəɡa˥˩");
     });
 });
