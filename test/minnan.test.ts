@@ -14,7 +14,7 @@ describe("min nan (Taiwanese Hokkien) canonical IPA", () => {
             ["Tâi", "tai̯˨˦"], // tone 5 ˨˦ (â)
             ["pe̍h", "peʔ˥"], // tone 8 ˥ (a̍), -h → ʔ
             ["tsia̍h", "t͡ɕi̯aʔ˥"], // ts+i palatalises → t͡ɕ
-            ["kok", "kɔk̚˧"], // unmarked checked → tone 4 ˧, -k → k̚
+            ["kok", "kɔk̚˧˨"], // unmarked checked → tone 4 (陰入, LOW ˧˨ — distinct from tone 7 ˧), -k → k̚
             ["sann", "sã˥"], // -nn → nasal vowel ã, unmarked open → tone 1 ˥
             ["sī", "ɕi˧"], // s+i → ɕ, tone 7 ˧ (ā)
             ["gí", "ɡi˥˩"], // tone 2 ˥˩ (á)
@@ -37,6 +37,22 @@ describe("min nan (Taiwanese Hokkien) canonical IPA", () => {
             ["sng", "sŋ̍˥"],
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
+    });
+
+    test("tone 4 (陰入, low ˧˨) is distinct from tone 7 (陽去, mid ˧); tone 8 (˥) shares pitch with tone 1 but is checked", () => {
+        expect(phonemizeWord("kok")).toBe("kɔk̚˧˨"); // tone 4 — LOW checked
+        expect(phonemizeWord("sī")).toBe("ɕi˧"); // tone 7 — mid open
+        expect(phonemizeWord("Ji̍t")).toBe("d͡ʑit̚˥"); // tone 8 — high checked
+        expect(phonemizeWord("si")).toBe("ɕi˥"); // tone 1 — high open (same ˥ as tone 8, distinguished by the coda)
+    });
+
+    test("word-internal tone SANDHI (連讀變調): every syllable but the last takes its sandhi tone", () => {
+        // The Taiwanese tone circle: 1→7, 7→3, 3→2, 2→1, 5→7; checked -ptk 4↔8; checked -h 4→2, 8→3.
+        expect(phonemizeWord("pîng-iú")).toBe("piə̯ŋ˧ i̯u˥˩"); // 朋友: pîng tone 5 → 7 (˧); iú tone 2 stays (final)
+        expect(phonemizeWord("tāi-ke")).toBe("tai̯˨˩ ke˥"); // 大家: tāi tone 7 → 3 (˨˩)
+        expect(phonemizeWord("ha̍k-sing")).toBe("hak̚˧˨ ɕiə̯ŋ˥"); // 學生: ha̍k tone 8 → 4 (˧˨, stop coda)
+        expect(phonemizeWord("tsit-ê")).toBe("t͡ɕit̚˥ e˨˦"); // 一个: tsit tone 4 → 8 (˥, stop coda)
+        expect(phonemizeWord("sian-sinn")).toBe("ɕi̯ɛn˧ ɕĩ˥"); // 先生: sian tone 1 → 7 (˧)
     });
 
     test("Han → Tâi-lô dict → IPA", () => {

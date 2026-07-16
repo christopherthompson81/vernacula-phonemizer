@@ -20,8 +20,20 @@
         "am": "am", "an": "an", "ang": "aŋ", "im": "im", "in": "in", "un": "un", "iam": "i̯am", "iang": "i̯aŋ", "uan": "u̯an", "uang": "u̯aŋ", "m": "m̩", "ng": "ŋ̍", "mh": "m̩ʔ", "ngh": "ŋ̍ʔ", "aunn": "ãũ̯", "aunnh": "ãũ̯ʔ" },
 
     // Tone: the Tâi-lô vowel diacritic → tone number; number → Chao contour letters. Unmarked = 1 (open) / 4
-    // (checked). 6 = 2 in Taiwanese. (Combining marks: ́=2 ̀=3 ̂=5 ̌=6 ̄=7 ̍=8 ̋=9.)
-    "toneChao": { "1": "˥", "2": "˥˩", "3": "˧˩", "4": "˧", "5": "˨˦", "6": "˥˩", "7": "˧", "8": "˥", "9": "˧˥" },
+    // (checked). 6 = 2 in Taiwanese. (Combining marks: ́=2 ̀=3 ̂=5 ̌=6 ̄=7 ̍=8 ̋=9.) Values grounded on the wikipron
+    // nan_hani_hokkien referee (citation contours: 1=44 2=41 3=21 4=32 5=23 7=33 8=high). Tone 4 (陰入, LOW checked
+    // 32→˧˨) is distinct from tone 7 (陽去, mid 33→˧) — they must NOT both be ˧; tone 8 (陽入, high checked ˥) shares
+    // pitch with tone 1 (陰平 ˥) but is distinguished by its checked coda (p̚/t̚/k̚/ʔ). See the tone-value note in docs.
+    "toneChao": { "1": "˥", "2": "˥˩", "3": "˨˩", "4": "˧˨", "5": "˨˦", "6": "˥˩", "7": "˧", "8": "˥", "9": "˧˥" },
+
+    // Tone SANDHI (連讀變調) — the Taiwanese tone circle, applied WORD-INTERNALLY (every syllable but the last).
+    // Coda-dependent for the checked tones: open/nasal → the main circle; -p/-t/-k (stop) → 4↔8; -h (ʔ) → 4→2, 8→3.
+    // Grounded on the referee's citation→sandhi contours (44→33, 33→21, 21→41, 41→44, 23→33; 32→4, 4→32; 32→41, 4→21).
+    "toneSandhi": {
+        "open": { "1": "7", "2": "1", "3": "2", "5": "7", "7": "3" },
+        "stop": { "4": "8", "8": "4" },
+        "glottal": { "4": "2", "8": "3" }
+    },
 
     "clausePunctuation": {
         "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ", "；": " ; ", "：": " : ",

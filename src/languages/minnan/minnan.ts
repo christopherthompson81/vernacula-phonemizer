@@ -18,6 +18,7 @@ interface MinnanDef {
     palatalBeforeI: Record<string, string>;
     finals: Record<string, string>;
     toneChao: Record<string, string>;
+    toneSandhi?: Record<string, Record<string, string>>;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<MinnanDef>(import.meta.url, "minnan.jsonc");
@@ -62,25 +63,42 @@ function baseToIpa(base: string): string {
     return iniIpa + fin.replace(/([ptk])$/u, "$1̚");
 }
 
-/** One Tâi-lô/POJ syllable → IPA + Chao tone. */
-function syllableToIpa(syl: string): string {
+/** One Tâi-lô/POJ syllable → (segmental IPA, tone CATEGORY). Unmarked tone: checked (coda -p/-t/-k/-h) = 4, open = 1. */
+function syllableParts(syl: string): { seg: string; tone: string } | null {
     const nfd = syl.normalize("NFD");
     let tone = "";
     for (const ch of nfd) if (TONE_MARK[ch]) tone = TONE_MARK[ch]!;
     const base = [...nfd].filter((c) => !(c in TONE_MARK)).join("").normalize("NFC").toLowerCase();
-    if (!base) return "";
-    const ipa = baseToIpa(base);
-    // Unmarked tone: checked syllable (coda -p/-t/-k/-h) = 4, open = 1.
+    if (!base) return null;
     if (!tone) tone = /[ptkh]$/u.test(base) ? "4" : "1";
-    return ipa + (DEF.toneChao[tone] ?? "");
+    return { seg: baseToIpa(base), tone };
 }
 
-/** A Tâi-lô/POJ word (hyphen/space-joined syllables) → IPA. */
+const SANDHI = DEF.toneSandhi;
+/** Coda class of a segmental syllable, selecting the tone-sandhi sub-table: -p/-t/-k → stop (4↔8), -h → glottal
+ *  (ʔ; 4→2, 8→3), else open (the main circle). */
+function codaClass(seg: string): "stop" | "glottal" | "open" {
+    if (/[ptk]̚$/u.test(seg)) return "stop"; // unreleased p̚/t̚/k̚
+    if (seg.endsWith("ʔ")) return "glottal"; // -h
+    return "open";
+}
+
+/** A Tâi-lô/POJ word (hyphen/space-joined syllables) → IPA. Tone SANDHI (連讀變調) applies WORD-INTERNALLY: every
+ *  syllable but the LAST takes its sandhi tone (the Taiwanese tone circle); the final syllable keeps citation tone.
+ *  Sandhi changes ONLY the tone — segments (incl. the checked coda) are unchanged. Cross-word (phrase-level tone
+ *  group) sandhi is deferred: each dict word / hyphenated Tâi-lô token is treated as one tone group. */
 function tailoToIpa(word: string): string {
-    return word
+    const sylls = word
         .split(/[-\s]+/u)
         .filter(Boolean)
-        .map(syllableToIpa)
+        .map(syllableParts)
+        .filter((s): s is { seg: string; tone: string } => s !== null);
+    const last = sylls.length - 1;
+    return sylls
+        .map(({ seg, tone }, i) => {
+            const t = SANDHI && i < last ? (SANDHI[codaClass(seg)]?.[tone] ?? tone) : tone;
+            return seg + (DEF.toneChao[t] ?? "");
+        })
         .join(" ");
 }
 
