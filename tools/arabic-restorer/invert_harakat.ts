@@ -8,7 +8,7 @@
  * fold-match pins down the correct short vowel; gemination is fold-neutralized, so shadda is not searched.
  * Run: npx tsx invert_harakat.ts <pa|ur|ps|fa|all>
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
@@ -90,8 +90,9 @@ function label(lang: string): void {
     if (!cfg) throw new Error(`no inversion config for "${lang}"`);
     const fold = makeFold(CONFIG[lang]!);
 
-    const rows = readFileSync(join(HERE, "silver.tsv"), "utf8")
-        .split("\n")
+    // Reference pairs: wikipron (silver.tsv, also the eval_set source) + the kaikki augmentation (new words).
+    const rows = ["silver.tsv", "silver.kaikki.tsv"]
+        .flatMap((f) => existsSync(join(HERE, f)) ? readFileSync(join(HERE, f), "utf8").split("\n") : [])
         .map((l) => l.split("\t"))
         .filter((a) => a.length >= 3 && a[1] === cfg.silverCode);
 

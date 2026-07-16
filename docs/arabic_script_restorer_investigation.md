@@ -356,6 +356,28 @@ diacritization. Lesson (again): "the g2p can't produce phoneme X" is often solva
 adapted-word scheme, NOT by declaring it lexical. The genuinely-lexical residue (rare, unpredictable per-word
 pronunciations) is what an OPTIONAL per-word lexicon (the Arabic `restore.ts` analogue) would mop up on top.
 
+## Run 17 — 2026-07-15 — scaling: freeze the harness, then the convention-harmonization constraint
+
+Two scaling prerequisites, both learned by measurement.
+
+**(1) Froze the upsampling reps (#202).** They were `round(balance/count)` from LIVE counts, so a 16-word data
+change flipped a rep (pa 9→8) and swung the whole shared eval ±2pts — which had confounded every sub-point check
+this session (fa folds, word-initial ا, schwa, retroflex). Now `REPS={ar:1,ur:1,fa:1,ps:7,pa:9}` fixed. Stable
+baseline **+15.6**. THIS is what makes "did more data help?" answerable.
+
+**(2) First data-scaling probe (kaikki) → the key constraint.** kaikki (a second, larger Wiktionary extraction:
+Persian 20k vs wikipron's 10k) added **+336 new fa labels** (`build_kaikki.py` → `silver.kaikki.tsv`;
+invert_harakat reads it alongside wikipron; the eval_set stays wikipron-only so it's untouched). But with the reps
+frozen, it cleanly **REGRESSED**: fa +21.1→+20.5, ALL +15.6→+14.9. Cause: kaikki's conventions differ (narrow t̪ʰ
+aspiration, ɒ vs ɑ, syllable dots), so its labels teach the model inconsistent vocalization patterns that mis-apply
+to the broad-wikipron eval. **Scaling requires CONVENTION-HARMONIZED data, not just more of it** — the same lesson
+as the synthetic-orthography cross-script (Run 10). To make kaikki (or any second source) help, normalize its IPA
+to the reference convention BEFORE inverting (strip aspiration, ɒ→ɑ, …). Tooling kept + inert (no `silver.kaikki.tsv`
+committed) for that follow-up. epitran is NOT a source: it's an abjad-reader too (کتاب→ktɒb, no short vowels).
+
+Net: the harness is now measurable; the scaling path is data + a per-source IPA harmonizer, and the biggest clean
+source remains real-orthography Hindi→Urdu cross-script (a whole language's corpus, same-convention if sourced right).
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
