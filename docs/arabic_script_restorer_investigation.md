@@ -396,6 +396,28 @@ overlaps wikipron ~95%, only 150 new), and the small riders (pa/ps, n≈120) sti
 **per-source scaling mechanism**; moving the aggregate needs substantial new data in MULTIPLE languages (the
 real-orthography Hindi→Urdu cross-script) + shared-model rebalancing as totals grow.
 
+## Run 19 — 2026-07-15 — real Hindi→Urdu parallel spellings: coverage ≠ generalization
+
+Sourced the big Urdu lever the right way (real spellings, not synthetic transliteration). Hindi & Urdu are one
+language (Hindustani); **kaikki Hindi carries the actual Urdu spelling** as a form (11,701 entries do). So:
+Devanagari headword →[our `hi` g2p]→ GOLD IPA (Devanagari is voweled) + the REAL Urdu spelling → skeleton;
+harmonize the Hindi IPA to the Urdu convention (aː→ɑː) → invert. `build_hindi_urdu.ts` → `silver.hindiurdu.tsv`:
+**5,014 NEW Urdu words** (not in wikipron), **3,286 mined at 66% yield**, and the labels are GOLD and correct —
+نیپالی→neːpɑːliː (via the یَ→eː encoding), گرہ→ɡrɪɦ, مورکھ→muːrkʰ. Unlike the Punjabi synthetic cross-script (Run 10),
+these are the spellings people actually use, so no orthography drift.
+
+**But the wikipron-held-out neural eval stayed FLAT** (ur +12.8→+12.7). The reason is the sharpest metric insight of
+the scaling work: these Hindi words are a different VOCABULARY distribution (Sanskritic/formal — نیپالی, گرہ, مورکھ)
+than wikipron Urdu (everyday/Perso-Arabic). Off-distribution data — even gold-correct — **cannot improve
+in-distribution GENERALIZATION**; it adds COVERAGE the held-out eval can't see. So:
+- **Coverage-scaling ≠ generalization.** The held-out wikipron eval measures generalization to wikipron-distribution
+  words; the right yardstick for coverage is a broader/production eval (or the two-layer lexicon).
+- Hindi→Urdu is therefore a **LEXICON source** (3,286 real Urdu words handled EXACTLY in production), NOT neural
+  training data (where it's distribution-flat and mildly interferes). Kept out of the neural manifest; the neural
+  baseline stays +15.5. `silver.hindiurdu.tsv` committed as the sourced parallel data (CC-BY-SA); wiring its mined
+  vocalizations into the production lexicon layer is the follow-up. The pipeline is a template: Devanagari→Sindhi,
+  Gurmukhi→Punjabi (with real spellings) next.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
