@@ -160,13 +160,13 @@ export function makeNativePunjabi(
 
 // COVERAGE layer: mined Shahmukhi (Perso-Arabic) skeletons are vocalized before g2p; Gurmukhi input has no
 // harakat keys in the lexicon so it passes through unchanged (see core/harakatLexicon.ts).
-const LEXICON = loadHarakatLexicon(import.meta.url);
+export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
 
 /** Bare word→IPA (tests / referee eval). */
 export function phonemizeWord(w: string): string {
     return (PA ??= makeNativePunjabi(
         loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
-    )).word(restoreHarakat(w, LEXICON));
+    )).word(restoreHarakat(w, HARAKAT_LEXICON));
 }
 let PA: ReturnType<typeof makeNativePunjabi> | undefined;
 

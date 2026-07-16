@@ -114,11 +114,11 @@ function g2p(word: string): string {
 const VOWEL_G = /[aeiouɑə]/g;
 
 // COVERAGE layer: mined undiacritized skeletons are vocalized before g2p (see core/harakatLexicon.ts).
-const LEXICON = loadHarakatLexicon(import.meta.url);
+export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
 
 /** One Pashto word → canonical IPA (lexicon restore + skeleton g2p + default-schwa deletion + stress). */
 export function phonemizeWord(word: string): string {
-    let ipa = g2p(restoreHarakat(word, LEXICON));
+    let ipa = g2p(restoreHarakat(word, HARAKAT_LEXICON));
     if (!ipa) return "";
     ipa = deleteMedialSchwa(ipa, "ə");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters

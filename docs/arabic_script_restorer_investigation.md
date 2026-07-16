@@ -502,6 +502,45 @@ coverage-layer test per rider (hit + respect-user-harakat).
 ONNX + an `onnxruntime` pre-pass (the Arabic `diacritizer.ts` analogue). The lexicon is the exact-match tier under
 it. Production path today: **lexicon lookup → default g2p**; the full three-tier (…→ neural → default) awaits the export.
 
+## Run 23 — 2026-07-15 — the neural GENERALIZATION tier: ONNX export + live wiring (the last of the last mile)
+
+Run 22 shipped the exact-match lexicon; this ships the tier UNDER it — the multilingual BiLSTM, live via ONNX. Now
+the full two-layer path runs: **lexicon (exact) → neural (OOV) → default**.
+
+**ONNX export** (`export_onnx.py`): `/mnt/data/ar-diac/bilstm_multilingual.pt` (15.3M params) → fp32 ONNX → int8
+dynamic-quantize → **15.3 MB** (on par with the Arabic diacritizer). fp32 argmax == PyTorch **100%**; int8 == fp32
+**98.9%** word-level (≈1% flips — the quantization cost). Committed in-repo like the Arabic model + a small
+`riderDiacritizer.meta.json`.
+
+**TS pre-pass** (`core/riderDiacritizer.ts`): per-word, prepend the language token, argmax harakat per position,
+insert marks — position-preserving. Crucially it LEAVES lexicon-covered words BARE so the authoritative gold lexicon
+(sync layer) wins them; it neural-vocalizes only the rest. Async entry `src/riderNeural.ts::phonemizeRiderNeural
+(text, lang)` runs the pre-pass then the sync g2p. `onnxruntime-node` optional + model gitignorable → absent = no-op
+(lexicon+default). ZWNJ/ZWJ (U+200C/D) are kept INSIDE the word run — the model was trained on ZWNJ-joined
+compounds as one sequence; splitting there changes the LSTM context.
+
+**Parity proof.** TS-int8 == Python-int8 single-sequence **100.0%** on the held-out set (all four langs). The
+apparent 92% vs `predict_harakat.py` was a RED HERRING: that script runs PADDED batches, so the BiLSTM backward pass
+is contaminated by pad tokens on short words — per-word (unpadded) inference is cleaner, and the TS path does it right.
+
+**Effect.** End-to-end IPA on the held-out invertible split, neural vs the pure default-schwa baseline (lexicon
+disabled to isolate the tier): **+23.5 overall** (fa +29.0, ur +18.6, ps +4.1, pa +4.5) — reproduces/exceeds the
+historical +15.5–17.8 with the retrained checkpoint. With the lexicon ENABLED the eval instead measures neural vs
+lexicon (baseline 95.7% > neural 88.8%) — the lexicon rightly wins covered words; that is the precedence working, not
+a regression. Live demo (OOV): زبانشناسی default `zabaːnaʃnaːsˈiː` → neural `zabaːnʃanaːsˈiː`; پژوهشگر → `paʒˈuːhʃɡɾ`.
+Suite 363/363, tsc clean; +4 gated neural tests.
+
+**Eval-methodology note (for future me).** `eval_endtoend.ts` calls the LIVE `phonemizeWord`, which is now
+lexicon-aware — so its baseline is inflated for any word in the lexicon (i.e. all wikipron held-out words, since the
+lexicon mined all of silver.tsv). To measure the PURE neural-vs-default lift, disable the lexicon
+(`mv src/languages/*/lexicon.tsv aside`) or eval only OOV words. And use the INVERTIBLE split (`eval.tsv`), not the
+full `eval_set.tsv` — non-invertible words have no matching vocalization, so any added vowel only breaks fold-matches
+the bare skeleton accidentally satisfied (that is why the full-set number reads negative).
+
+**Riders complete.** Both tiers of the two-layer rider phonemizer are now live and shippable. Remaining frontier is
+NEW bring-ups (Sindhi/Saraiki — near-perfect transfer from Urdu/Punjabi) and scaling the Arabic anchor, not the
+plumbing.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

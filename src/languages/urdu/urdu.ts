@@ -33,11 +33,11 @@ const URDU_WORD = "ء-ٟٮ-ۓە-ۜ۞-ۿ";
 
 // COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized
 // before g2p, so the g2p reads the real ɪ/ʊ instead of a default schwa (see core/harakatLexicon.ts).
-const LEXICON = loadHarakatLexicon(import.meta.url);
+export const HARAKAT_LEXICON = loadHarakatLexicon(import.meta.url);
 
 /** One Urdu word → canonical IPA (lexicon restore + g2p + default-schwa deletion + weight stress). */
 export function phonemizeWord(word: string): string {
-    let ipa = g2p(restoreHarakat(word, LEXICON));
+    let ipa = g2p(restoreHarakat(word, HARAKAT_LEXICON));
     if (!ipa) return "";
     // The g2p inserts a default [ə] for every unwritten short vowel; Urdu (like Hindi) then DELETES the schwa
     // in a medial V·C·ə·C·V context, so consonant clusters surface bare (پاکستان → pɑːkɪst̪ɑːn-skeleton pɑːkst̪ɑːn,
