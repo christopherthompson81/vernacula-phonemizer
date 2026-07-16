@@ -32,6 +32,16 @@
             "note": "ਵ ʋ~w — referee-split notation"
         },
         {
+            "pattern": "ᵊ",
+            "replace": "",
+            "note": "the referee inserts an ULTRASHORT epenthetic schwa (ᵊ, U+1D4A) inside clusters and after aspirates/finals (ʈʰᵊt̪, sᵊ, bᵊ) — a narrow-phonetic detail we don't emit; strip it (not stripped by BACKBONE as it's a modifier letter, not combining)."
+        },
+        {
+            "pattern": "[ɑäɑ̈ɐ]",
+            "replace": "a",
+            "note": "the ⟨ਾ/ਅ⟩ vowel: the referee writes it back/centralised [ɑ]~[ä]~[ɑ̈]; ours is [a] — notation."
+        },
+        {
             "pattern": "(.)\\1",
             "replace": "$1",
             "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation"
@@ -40,6 +50,11 @@
             "pattern": "ə$",
             "replace": "",
             "note": "word-final inherent schwa: we DELETE it (Punjabi speech); the referee keeps an ultrashort ə̆ — convention"
+        },
+        {
+            "pattern": "ɦ",
+            "replace": "",
+            "note": "the ਹ /ɦ/ tone-source: Punjabi is TONAL and ਹ is variably lost to tone. The referee is INCONSISTENT — word-initial ɦ kept 62/dropped 8, post-vocalic kept 29/dropped 42 (a register split: formal keeps [ɦ], casual → tone). We keep [ɦ] consistently (a valid formal-register canonical choice; the tone the referee marks is already BACKBONE-stripped). Fold ɦ on BOTH sides to neutralise the referee's ɦ~tone inconsistency, exactly as the Chao letters are stripped. NOT a segmental defect (ɦ only ever comes from ਹ, so this can't mask a wrong consonant)."
         }
     ]
 }

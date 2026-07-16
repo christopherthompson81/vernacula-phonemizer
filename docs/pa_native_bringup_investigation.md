@@ -63,3 +63,34 @@ shared cross-language restorer.
 
 NEXT (Shahmukhi): the abjad ceiling is the restoration subsystem shared with ur/fa/ar/ps — a per-language or (better)
 a single multilingual short-vowel restorer over Perso-Arabic script would lift all of them at once.
+
+## Run (review) — 2026-07-16 — nukta ਕ਼, referee-notation folds, the ਹ tone-source → 61.7%→73.6%
+
+Bucketed the wikipron pan_guru residual (small, 1586, noisy referee). Four actionable classes; one real engine
+fix + three justified referee-notation folds.
+
+**ਕ਼→q (real engine gap, fixed).** The nukta table had ਸ਼ ਖ਼ ਗ਼ ਜ਼ ਫ਼ ਲ਼ but was MISSING **ਕ਼ (ka + nukta = q)** —
+the Perso-Arabic q loans rendered as k (ਕ਼ਲਮ→kələm, ਅਕ਼ਲ→əkəl). Added ਕ਼→q (now qələm/əqəl; matches the
+Shahmukhi ق→q).
+
+**Referee narrow-notation folds** (justified — they neutralise transcription detail we deliberately don't emit):
+- **ᵊ epenthesis** (U+1D4A): the referee inserts an ULTRASHORT schwa inside clusters / after aspirates & finals
+  (ʈʰᵊt̪, sᵊ, bᵊ) — a narrow-phonetic detail, not BACKBONE-stripped (it's a modifier letter). +72.
+- **⟨ਾ/ਅ⟩ vowel** [ɑ]~[ä]~[ɑ̈] vs our [a] — notation. +26.
+- **the ਹ /ɦ/ tone-source** — the substantive one. Punjabi is TONAL and ਹ is variably lost to tone. The referee
+  is INCONSISTENT: word-initial ɦ **kept 62 / dropped 8**, post-vocalic **kept 29 / dropped 42** — a register
+  split (formal keeps [ɦ], casual → tone). We keep [ɦ] consistently (a valid formal-register canonical choice),
+  and the tone the referee marks where it drops ɦ is ALREADY BACKBONE-stripped. So fold ɦ on both sides — exactly
+  as the Chao tone letters are stripped. It cannot mask a segmental defect (ɦ only ever comes from ਹ). +~50.
+  (An ATTEMPT to implement ਹ→tone as a rule was rejected: the referee's 62/8 + 29/42 split shows it is not
+  rule-derivable — it is register/dialect-variable, like Marathi's final-vowel coin-flip.)
+
+The Shahmukhi (pan_arab) referee shares these folds → **24.1%→42.7%** as a side effect.
+
+Marginal folds NOT taken (diminishing returns + risk): ɪ~iː/ʊ~uː length (+9, length may be phonemic) and a
+bindi/tippi nasal fold (+14, but bindi=vowel-nasalisation vs tippi=nasal-consonant is a REAL Punjabi orthographic
+distinction — ours is defensible; a fold risks merging ਣ/ਨ place).
+
+RESULT: Gurmukhi **73.6%** (was 61.7%), gold 100%, Shahmukhi 42.7%. STATUS stays 🟡 — the residual is the
+proven-lexical medial-schwa tail (~106, as across the Indic fleet), bindi/tippi nasal notation, and reading
+variants on a small noisy referee. Suite 6/6; typecheck clean.
