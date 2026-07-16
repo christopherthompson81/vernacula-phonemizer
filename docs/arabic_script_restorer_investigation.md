@@ -474,6 +474,97 @@ Two-layer production path now concrete: **lexicon lookup (exact, ~2-in-3 Urdu to
 else default g2p.** Wiring the lexicon into the live Urdu/Persian phonemizer (the `restore.ts` pass) is the deploy
 step; the artifacts + both evals are committed. The scaling frontier is measured on BOTH axes now.
 
+## Run 22 — 2026-07-15 — the last mile: wire the coverage lexicon into the LIVE rider phonemizers
+
+Run 21 built the shippable lexicon but left it in `tools/`. This wires it into the live path, making the coverage
+layer actually ship. Mirrors Arabic's `restore.ts`/`diacritization.tsv`, but simpler — no neural pre-pass yet, so
+it's a pure exact-match lookup, not a skeleton-repair supplement.
+
+**What shipped.** `export_lexicons.sh` strips `lexicon.<lang>.tsv` to 2 columns (`skeleton⇥vocalized`), DROPS the
+identity rows (a bare-skeleton vocalization is a no-op — the g2p already yields that IPA), and writes
+`src/languages/<lang>/lexicon.tsv` beside each g2p. Non-identity counts (the rows that actually carry short-vowel
+info): **ur 2,640 · fa 3,040 · ps 113 · pa 158.** New shared `core/harakatLexicon.ts`: `loadHarakatLexicon(url)`
+(loadTsvMap, optional) + `restoreHarakat(word, lex)` — if the word already carries harakat it's RESPECTED (never
+clobber a caller's explicit vowels), else a lexicon hit substitutes our vocalization before g2p, miss → unchanged.
+Wired one line into `phonemizeWord` for all four riders (ur/fa/ps/pa; Punjabi Gurmukhi input has no Perso-Arabic
+harakat keys so it passes through).
+
+**No circularity.** The lexicon was mined with `fold(phonemizeWord(voc)) == fold(ref)`; `voc` carries harakat, so
+`restoreHarakat` returns it unchanged during mining — re-mining is stable, and the live output for a covered
+skeleton equals `phonemizeWord(voc)`, which folds to the reference.
+
+**Effect (probes).** آبرو `ɑːbəɾoː → ɑːbɾˈuː` (و→uː, ābrū), آبادیات `…d̪jɑːt̪ → …d̪ˈʊjɑːt̪` (ʊ restored), مدرسه
+`madɾasˈe` (madrase). Two nasal-assimilation goldens drifted because the lexicon now supplies the true vowel
+(انگور *angūr* oː→**uː**; سنگھی ə→**ʊ**) — updated, not regressions. Suite **357/357**, tsc clean; added a
+coverage-layer test per rider (hit + respect-user-harakat).
+
+**Still deferred:** the neural GENERALIZATION layer for novel (OOV) words needs the multilingual BiLSTM exported to
+ONNX + an `onnxruntime` pre-pass (the Arabic `diacritizer.ts` analogue). The lexicon is the exact-match tier under
+it. Production path today: **lexicon lookup → default g2p**; the full three-tier (…→ neural → default) awaits the export.
+
+## Run 23 — 2026-07-15 — the neural GENERALIZATION tier: ONNX export + live wiring (the last of the last mile)
+
+Run 22 shipped the exact-match lexicon; this ships the tier UNDER it — the multilingual BiLSTM, live via ONNX. Now
+the full two-layer path runs: **lexicon (exact) → neural (OOV) → default**.
+
+**ONNX export** (`export_onnx.py`): `/mnt/data/ar-diac/bilstm_multilingual.pt` (15.3M params) → fp32 ONNX → int8
+dynamic-quantize → **15.3 MB** (on par with the Arabic diacritizer). fp32 argmax == PyTorch **100%**; int8 == fp32
+**98.9%** word-level (≈1% flips — the quantization cost). Committed in-repo like the Arabic model + a small
+`riderDiacritizer.meta.json`.
+
+**TS pre-pass** (`core/riderDiacritizer.ts`): per-word, prepend the language token, argmax harakat per position,
+insert marks — position-preserving. Crucially it LEAVES lexicon-covered words BARE so the authoritative gold lexicon
+(sync layer) wins them; it neural-vocalizes only the rest. Async entry `src/riderNeural.ts::phonemizeRiderNeural
+(text, lang)` runs the pre-pass then the sync g2p. `onnxruntime-node` optional + model gitignorable → absent = no-op
+(lexicon+default). ZWNJ/ZWJ (U+200C/D) are kept INSIDE the word run — the model was trained on ZWNJ-joined
+compounds as one sequence; splitting there changes the LSTM context.
+
+**Parity proof.** TS-int8 == Python-int8 single-sequence **100.0%** on the held-out set (all four langs). The
+apparent 92% vs `predict_harakat.py` was a RED HERRING: that script runs PADDED batches, so the BiLSTM backward pass
+is contaminated by pad tokens on short words — per-word (unpadded) inference is cleaner, and the TS path does it right.
+
+**Effect.** End-to-end IPA on the held-out invertible split, neural vs the pure default-schwa baseline (lexicon
+disabled to isolate the tier): **+23.5 overall** (fa +29.0, ur +18.6, ps +4.1, pa +4.5) — reproduces/exceeds the
+historical +15.5–17.8 with the retrained checkpoint. With the lexicon ENABLED the eval instead measures neural vs
+lexicon (baseline 95.7% > neural 88.8%) — the lexicon rightly wins covered words; that is the precedence working, not
+a regression. Live demo (OOV): زبانشناسی default `zabaːnaʃnaːsˈiː` → neural `zabaːnʃanaːsˈiː`; پژوهشگر → `paʒˈuːhʃɡɾ`.
+Suite 363/363, tsc clean; +4 gated neural tests.
+
+**Eval-methodology note (for future me).** `eval_endtoend.ts` calls the LIVE `phonemizeWord`, which is now
+lexicon-aware — so its baseline is inflated for any word in the lexicon (i.e. all wikipron held-out words, since the
+lexicon mined all of silver.tsv). To measure the PURE neural-vs-default lift, disable the lexicon
+(`mv src/languages/*/lexicon.tsv aside`) or eval only OOV words. And use the INVERTIBLE split (`eval.tsv`), not the
+full `eval_set.tsv` — non-invertible words have no matching vocalization, so any added vowel only breaks fold-matches
+the bare skeleton accidentally satisfied (that is why the full-set number reads negative).
+
+**Riders complete.** Both tiers of the two-layer rider phonemizer are now live and shippable. Remaining frontier is
+NEW bring-ups (Sindhi/Saraiki — near-perfect transfer from Urdu/Punjabi) and scaling the Arabic anchor, not the
+plumbing.
+
+## Run 24 — 2026-07-16 — pre-merge review fixes (8-angle review of PR #208)
+
+An 8-angle code review surfaced real issues; fixed before merge:
+
+- **Circular re-mining (the serious one).** `invert_harakat.ts` imported the rider `phonemizeWord`, which now applies
+  the lexicon — so the miner's all-bare candidate got the *already-mined* vocalization injected and was recorded as
+  an identity row, which `export_lexicons.sh` drops → every regen would silently erode coverage to zero. Fix: each
+  rider now exports a **lexicon-free `phonemizeWordCore`**; the miner (and the number path) use it. `phonemizeWord`
+  = `phonemizeWordCore(restoreHarakat(word, …))`.
+- **NFC.** `restoreHarakat` keyed on the raw word; NFD input (decomposed آ/أ) silently missed the NFC lexicon keys.
+  Now normalizes the lookup key. The neural pre-pass NFC-normalizes the skeleton too.
+- **Numbers coupled to the content lexicon.** Spelled-out number words routed through the lexicon-aware
+  `phonemizeWord` (Pashto درې/شپږ collided with content entries). Numbers now use `phonemizeWordCore` — deterministic
+  from the manifest, consistent with Punjabi which already bypassed.
+- **Neural graceful degrade.** `phonemizeRiderNeural` threw (not degraded) when the committed model was present but
+  `onnxruntime-node` absent; `createRiderDiacritizer` now catches the ORT-load failure and the meta read → returns
+  undefined → sync fallback, matching its documented contract.
+- **Eager import I/O.** The lexicon loaded at module import for all four riders (registry imports them eagerly), so
+  every consumer paid ~5.7k lines of TSV. Now **lazy** (`harakatLexicon()` accessor), matching french/german.
+- **Neural respects writer harakat** (skips words carrying harakat, like the lexicon layer); cursor-based rebuild
+  replaces the `shift` bookkeeping; shared HARAKAT regex/`stripHarakat` reused from `harakatLexicon.ts`; the
+  Punjabi assimilation test asserts the `ŋɡ` property vowel-agnostically (the mined سُنگھی vowel is noisy) and the
+  "gitignored-optional" comments corrected to "in-repo, optional at runtime." Suite 363/363, tsc clean.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

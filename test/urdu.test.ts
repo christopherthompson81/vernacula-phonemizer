@@ -23,11 +23,18 @@ describe("urdu canonical IPA", () => {
     });
 
     test("nasal place assimilation (n→ŋ before velar, n→m before labial)", () => {
-        expect(phonemizeWord("انگور")).toBe("əŋɡˈoːɾ"); // angur: n→ŋ before ɡ
+        expect(phonemizeWord("انگور")).toBe("əŋɡˈuːɾ"); // angūr: n→ŋ before ɡ; و→uː from the coverage lexicon (انگُور)
         expect(phonemizeWord("انبار")).toBe("ˈəmbɑːɾ"); // ambar: n→m before b
     });
 
     test("text: words + Urdu full-stop (۔) pause", () => {
         expect(phonemize("میرا نام", "ur")).toContain("nɑːm");
+    });
+
+    // COVERAGE layer (core/harakatLexicon.ts): an undiacritized skeleton we've mined is vocalized before g2p, so
+    // the real short/long vowel surfaces instead of the default schwa. Miss → unchanged; user harakat → respected.
+    test("coverage lexicon restores mined short/long vowels", () => {
+        expect(phonemizeWord("آبرو")).toBe("ɑːbɾˈuː"); // ābrū: و→uː from the lexicon (آبرُو), not default oː
+        expect(phonemizeWord("آبرُو")).toBe("ɑːbɾˈuː"); // caller-supplied damma is respected (not clobbered)
     });
 });

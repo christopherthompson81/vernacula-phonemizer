@@ -11,10 +11,13 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
-import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
-import { phonemizeWord as ps } from "../../src/languages/pashto/pashto.ts";
-import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
+// Use the LEXICON-FREE core: the miner searches the vocalization whose g2p reproduces the reference, so it must NOT
+// route through the now-lexicon-aware phonemizeWord — that would inject the already-mined vocalization for the bare
+// candidate and make re-mining circular (every covered word collapses to an identity row and is dropped on export).
+import { phonemizeWordCore as pa } from "../../src/languages/punjabi/punjabi.ts";
+import { phonemizeWordCore as ur } from "../../src/languages/urdu/urdu.ts";
+import { phonemizeWordCore as ps } from "../../src/languages/pashto/pashto.ts";
+import { phonemizeWordCore as fa } from "../../src/languages/persian/persian.ts";
 import { makeFold } from "../referee-eval/eval.ts";
 import { CONFIG } from "../referee-eval/config.ts";
 
