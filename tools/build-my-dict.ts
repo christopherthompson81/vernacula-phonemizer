@@ -16,7 +16,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { phonemizeWord as my } from "../src/languages/burmese/burmese.ts";
+// RULE-only (no dict, no segmentation) — the miner decides "does the RULE g2p get this word wrong?", so it must
+// NOT read the dictionary it is rebuilding (that would drop every already-covered entry on regen).
+import { phonemizeWordRules as my } from "../src/languages/burmese/burmese.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PERSO = /^[က-႟꧰-꧹]+$/u;
@@ -46,8 +48,9 @@ for (const [w, ipa] of first) {
 rows.sort();
 const header =
     "# Burmese pronunciation lexicon (the 🟡→✅ lexical layer) — undiacritized word ⇥ canonical IPA, for words the\n" +
-    "# rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from the kaikki gold\n" +
-    "# (Wiktionary, CC-BY-SA) by tools/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in\n" +
-    "# burmese.ts (an exact-word override before the g2p rules); OOV words keep the rule reading.\n";
+    "# rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from kaikki.org (an\n" +
+    "# extraction of https://en.wiktionary.org Burmese pronunciations; CC-BY-SA 4.0 — this derived TSV inherits it)\n" +
+    "# by tools/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in burmese.ts (an exact-word\n" +
+    "# override before the g2p rules); OOV words keep the rule reading.\n";
 writeFileSync(join(HERE, "..", "src", "languages", "burmese", "dictionary.tsv"), header + rows.join("\n") + "\n");
 console.log(`kaikki words: rule-g2p already right ${agree} · corrections stored ${corrections} → dictionary.tsv`);

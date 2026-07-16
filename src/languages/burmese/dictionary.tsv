@@ -1,7 +1,8 @@
 # Burmese pronunciation lexicon (the 🟡→✅ lexical layer) — undiacritized word ⇥ canonical IPA, for words the
-# rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from the kaikki gold
-# (Wiktionary, CC-BY-SA) by tools/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in
-# burmese.ts (an exact-word override before the g2p rules); OOV words keep the rule reading.
+# rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from kaikki.org (an
+# extraction of https://en.wiktionary.org Burmese pronunciations; CC-BY-SA 4.0 — this derived TSV inherits it)
+# by tools/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in burmese.ts (an exact-word
+# override before the g2p rules); OOV words keep the rule reading.
 ကကတစ်	ka˥ˀɡədɪʔ
 ကကုသန်	ka˥ˀku˥ˀθa˨ɴ
 ကကုသန်ဘုရား	ka˥ˀku˥ˀθa˨ɴpʰəja˥˩
