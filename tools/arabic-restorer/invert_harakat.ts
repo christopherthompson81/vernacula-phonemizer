@@ -23,6 +23,19 @@ import { CONFIG } from "../referee-eval/config.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
+// FULL-DIACRITIZATION fold for Persian (fa): unlike the referee-eval fold (which COLLAPSES short-vowel quality
+// a~e~o~i~u → a, so the search accepts a bare default-[a] for any short vowel and mines under-diacritized labels),
+// this fold KEEPS a/e/o DISTINCT and DIALECT-NORMALIZES the classical/Dari wikipron references to Iranian: the
+// standard historical short-vowel shift classical i→e, u→o (کِتاب kitāb→ketâb, بِله bila→bele) — which the g2p
+// reproduces via kasra→e / damma→o — plus the long-vowel merge eː→iː, oː→uː. Result: the inversion is forced to
+// pick the harakat that encodes the ACTUAL short vowel, so the mined labels fully encode the pronunciation.
+const FA_FULL_FOLD = (s: string): string =>
+    s.replace(/[ˈˌ]/g, "").replace(/\s/g, "")
+        .replace(/[ɑɒ]ː?/g, "aː").replace(/ɾ/g, "r")
+        .replace(/oː/g, "uː").replace(/eː/g, "iː")
+        .replace(/i(?!ː)/g, "e").replace(/u(?!ː)/g, "o") // classical short i→e, u→o (Iranian)
+        .replace(/(.)\1/g, "$1").normalize("NFC");
+
 // Per-language config: the phonemizer, the wikipron tag in silver.tsv, and the Perso-Arabic letter classes for
 // slot-finding. A letter in BOTH cons and vowelLetters (Persian/Pashto list و/ی/ه as consonants but the g2p treats
 // them as vowels/glides) is treated as a VOWEL letter — no slot — so the search space doesn't blow up.
@@ -93,7 +106,12 @@ const LEXICON = process.argv.includes("--lexicon");
 function label(lang: string): void {
     const cfg = LANGS[lang];
     if (!cfg) throw new Error(`no inversion config for "${lang}"`);
-    const fold = makeFold(CONFIG[lang]!);
+    const looseFold = makeFold(CONFIG[lang]!);
+    // fa mines TWO-PASS: first the FULL-DIACRITIZATION fold (keeps short-vowel quality, dialect-normalizes
+    // classical→Iranian i→e/u→o) so the label encodes the real pronunciation; on a miss, fall back to the loose
+    // referee-eval fold (short-vowels collapsed → a bare skeleton label) so we never LOSE the coverage the loose
+    // fold had. Other riders use the loose fold only (their dialect maps are a follow-up). See FA_FULL_FOLD.
+    const passes = lang === "fa" ? [FA_FULL_FOLD, looseFold] : [looseFold];
 
     // Two outputs from the SAME inverter:
     //  • NEURAL training (default) — wikipron + convention-harmonized kaikki only. NOT Hindi→Urdu: it's a different
@@ -118,14 +136,21 @@ function label(lang: string): void {
         let total = 1;
         for (const s of sl) total *= s.options.length;
         if (total > MAX_COMBOS) { capped++; continue; }
-        const target = fold(ipa!);
+        const heFinal = lang === "fa" && /[هة]$/.test(skel!.normalize("NFC"));
         let found: string | null = null;
-        for (let n = 0; n < total && !found; n++) {
-            const choice: number[] = [];
-            let x = n;
-            for (const s of sl) { choice.push(x % s.options.length); x = Math.floor(x / s.options.length); }
-            const voc = vocalize(chars, sl, choice);
-            if (fold(cfg.phon(voc)) === target) found = voc;
+        for (const fold of passes) {
+            let target = fold(ipa!);
+            // fa: word-final ه is our Iranian [e] but the classical reference writes final [a] (خانه xaːna) — a
+            // non-slot position no harakat can fix, so normalize the reference's final [a] to [e] for ه-final words.
+            if (heFinal) target = target.replace(/a$/, "e");
+            for (let n = 0; n < total && !found; n++) {
+                const choice: number[] = [];
+                let x = n;
+                for (const s of sl) { choice.push(x % s.options.length); x = Math.floor(x / s.options.length); }
+                const voc = vocalize(chars, sl, choice);
+                if (fold(cfg.phon(voc)) === target) found = voc;
+            }
+            if (found) break; // full-diacritization pass won; don't fall back to the loose skeleton
         }
         if (found) { ok++; labeled.push(`${skel}\t${lang}\t${found}`); if (LEXICON) seenSkel.add(skel!); }
         else miss++;

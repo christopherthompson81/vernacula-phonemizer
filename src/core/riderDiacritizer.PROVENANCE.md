@@ -33,3 +33,12 @@ Arabic model does); absent → the pre-pass is a no-op and callers get the lexic
 End-to-end IPA on the held-out INVERTIBLE split (predicted harakat → g2p → IPA vs wikipron reference), neural vs the
 bare default-schwa baseline: **+23.5 overall** (fa +29.0, ur +18.6, ps +4.1, pa +4.5). Under the shipped precedence
 (lexicon → neural → default) the exact lexicon wins any word it covers; the neural handles the OOV tail.
+
+## 2026-07-16 — fa silver regenerated FULL-DIACRITIZATION (model retrain pending)
+`tools/arabic-restorer/harakat.fa.silver.tsv` was re-mined with `FA_FULL_FOLD` (two-pass: full-diacritization —
+a/e/o kept distinct, classical→Iranian i→e/u→o, final-ه a→e — then loose fallback). Diacritization density
+31%→48% (the old labels were short-vowel-blind: mined under the referee-eval fold that collapses a~e~o~i~u, so
+کتاب was labeled bare → the model learned to under-vocalize). **The committed `.onnx` PREDATES this** and still
+under-vocalizes; a retrain (`train_multilingual_harakat.py`) + re-export picks up the fixed labels. The coverage
+LEXICON (`src/languages/persian/lexicon.tsv`) was already regenerated from the same mine and ships now. ur/ps/pa
+still use the short-vowel-blind loose fold — their own FULL_FOLD dialect maps are a follow-up.
