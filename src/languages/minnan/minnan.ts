@@ -45,6 +45,8 @@ const HAN = /\p{Script=Han}/u;
 function baseToIpa(base: string): string {
     if (base === "m") return "m̩";
     if (base === "ng") return "ŋ̍";
+    if (base === "mh") return "m̩ʔ"; // syllabic-nasal + checked -h (standalone; the initial-scan would eat the m)
+    if (base === "ngh") return "ŋ̍ʔ";
     let ini = "";
     for (const k of INITIALS)
         if (base.startsWith(k)) {

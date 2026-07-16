@@ -1,14 +1,59 @@
-// Min Nan / Taiwanese Hokkien (nan) — Sinitic, tonal, Tâi-lô/POJ + Han. Referee GAP: no independent HUMAN referee
-// exists (no wikipron nan, no kaikki extract). epitran nan-Latn-tl IS the Tâi-lô→IPA source the converter's
-// initial/final/tone tables were derived from — so wiring it as a referee would be circular (it IS the spec).
-// The committed anchor is the hand-adjudicated gold in test/minnan.test.ts (validated 400/400 vs epitran during
-// the espeak-ng-portable bring-up).
+// Min Nan / Taiwanese Hokkien (nan) — Sinitic, tonal, Tâi-lô/POJ + Han. INDEPENDENT HUMAN referee:
+// wikipron nan_hani_hokkien_broad (CUNY-CL/wikipron, Wiktionary Hokkien readings). This is NOT epitran (the
+// spec the converter derives from) → non-circular; it validates the Han dict + Tâi-lô→IPA converter at the
+// SEGMENTAL layer. The referee's tone is a numeric pitch contour (⁴¹) with sandhi arrows ⁻; our Phase-1 tone is
+// citation Chao letters, so tone/sandhi is not comparable yet (deferred) — the folds strip both sides' tones.
 {
     "language": "nan",
     "name": "Min Nan (Taiwanese Hokkien)",
     "script": "Latin (Tâi-lô/POJ) + Han",
     "provenance": "Tâi-lô→IPA converter from the epitran nan-Latn-tl spec + Han→Tâi-lô dict (MOE 臺灣閩南語辭典).",
-    "referees": [],
-    "secondaryGap": "No independent HUMAN referee for Min Nan (no wikipron nan, no kaikki extract). epitran nan-Latn-tl is the Tâi-lô spec the converter derives from → circular, not wired. Anchor: the adjudicated gold in test/minnan.test.ts (segmental converter validated 400/400 vs epitran in the espeak-ng-portable bring-up). Tone SANDHI (連讀變調) is deferred — Phase 1 is citation tone.",
-    "folds": []
+    "referees": [
+        {
+            "file": "nan.wikipron-hokkien-broad.tsv",
+            "source": "wikipron nan_hani_hokkien broad (human, single-char)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "Single independent referee (wikipron Hokkien, single-char). Tone SANDHI (連讀變調) is deferred — Phase 1 is citation tone; the eval strips tones and validates the SEGMENTAL backbone only.",
+    "folds": [
+        {
+            "pattern": "[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]",
+            "replace": "",
+            "note": "referee tone = numeric pitch contour (⁴¹) + sandhi arrow ⁻; strip it (BACKBONE already strips OUR Chao letters). Tone/sandhi is a deferred layer — segmental comparison only."
+        },
+        {
+            "pattern": "t͡?ɕʰ",
+            "replace": "tsʰ",
+            "note": "sibilant palatalisation before i is ALLOPHONIC: ours ts/tsh/s/j+i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ; the referee keeps dental t͡s/t͡sʰ/s. Tie-less replacement (BACKBONE strips ties)."
+        },
+        { "pattern": "t͡?ɕ", "replace": "ts", "note": "palatalisation (see the tsʰ fold)" },
+        { "pattern": "ɕ", "replace": "s", "note": "palatalisation (see the tsʰ fold)" },
+        {
+            "pattern": "d͡?[ʑz]",
+            "replace": "z",
+            "note": "the 入/j initial is [d͡z]~[z]~[d͡ʑ] (dialectal/notational): ours d͡z (palatal d͡ʑ), referee z. Fold to z."
+        },
+        {
+            "pattern": "iəŋ",
+            "replace": "iɪŋ",
+            "note": "the -ing/-eng final [iɪŋ]~[iəŋ]: ours ing→iə̯ŋ, referee iɪŋ — notational."
+        },
+        { "pattern": "iək", "replace": "iɪk", "note": "-ik final, ditto the -ing fold" },
+        {
+            "pattern": "ə",
+            "replace": "ɤ",
+            "note": "the Tâi-lô ⟨o⟩ vowel is [ə]~[ɤ]~[o] (Taiwanese dialects): ours o→ə, referee ɤ. Fold (our ə comes ONLY from ⟨o⟩)."
+        },
+        {
+            "pattern": "iok",
+            "replace": "iɔk",
+            "note": "the -iok final: the ⟨o⟩ RAISES to [ɔ] before the velar (as ok→ɔk, iong→i̯ɔŋ); ours i̯ok, referee iɔk. Fold before the open-io rule so it isn't caught by it."
+        },
+        {
+            "pattern": "io",
+            "replace": "iɤ",
+            "note": "the open -io(h) final [iɤ]~[io]: ours i̯o, referee iɤ (same ⟨o⟩=ɤ dialect vowel as the ə→ɤ fold) — notational."
+        }
+    ]
 }

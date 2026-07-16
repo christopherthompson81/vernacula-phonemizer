@@ -1,0 +1,5536 @@
+# wikipron nan_hani_hokkien_broad (HUMAN, CUNY-CL/wikipron) — single-char Hokkien readings, consolidated one row per char with tab-joined variants. Tones are numeric pitch contours (⁴¹ etc.) + sandhi arrows ⁻; the nan folds strip tones (sandhi deferred) → SEGMENTAL validation.
+㒒	p ɔ k̚ ⁴
+㔂	l a n ² ³
+㗆	k i ʔ ⁴	k i ⁴ ⁴
+㜅	tʰ i ɪ k̚ ³ ²
+㧌	m ã u ⁴ ⁴
+㧒	h i ɛ t̚ ³ ²
+㧣	t u ⁴ ⁴
+㧾	h u t̚ ³ ²
+㨂	t a ŋ ² ¹
+㴘	b a u ² ¹	b a u ³ ³
+㵶	t͡s u a t̚ ³ ²	t͡s u a ʔ ³ ²
+㷮	t͡s a u ⁴ ⁴
+㼜	i ũ ⁴ ¹
+㾀	kʰ i a p̚ ³ ²
+㾪	s a n ⁴ ¹
+䀁	h u i ² ³
+䀐	s i a m ⁴ ⁴
+䀫	kʰ e ʔ ³ ²
+䆀	b a i ⁴ ¹
+䋎	tʰ ĩ ³ ³
+䑩	k ɔ ⁴ ⁴
+䖙	tʰ e ⁴ ⁴
+䖳	tʰ e ³ ³
+䘷	p i ʔ ³ ²
+䘼	ŋ̍ ⁴ ¹
+䟙	t͡sʰ i ʔ ³ ²
+䤝	ɡ i a ŋ ⁴ ⁴
+䫀	k u n ⁴ ¹
+䫌	pʰ u e ⁴ ¹
+䭕	t͡s i ã ⁴ ¹
+䭞	s i ɤ ʔ ⁴
+䲅	k u i ⁴ ⁴
+一	i t̚ ³ ²	t͡s i t̚ ⁴
+丁	t i ɪ ŋ ⁴ ⁴
+七	t͡sʰ i t̚ ³ ²
+丈	t i ũ ³ ³	t i ɔ ŋ ³ ³	t ŋ̍ ³ ³
+三	s a m ² ¹	s a m ⁴ ⁴	s ã ⁴ ⁴
+上	s i ɔ ŋ ³ ³	s i ɔ ŋ ⁴ ¹	tʰ ɔ ŋ ³ ³	t͡s i ũ ³ ³	t͡sʰ i ũ ³ ³
+下	e ³ ³	h a ³ ³	h e ³ ³	k e ³ ³	kʰ e ³ ³
+不	m̩ ³ ³	p u t̚ ³ ²
+丏	b i ɛ n ⁴ ¹
+丐	k a i ² ¹
+丑	tʰ i u ⁴ ¹
+且	t͡sʰ i ã ⁴ ¹
+世	s e ² ¹	s i ² ¹
+丘	kʰ i u ⁴ ⁴	kʰ u ⁴ ⁴
+丙	p i ã ⁴ ¹	p i ɪ ŋ ⁴ ¹
+丞	s i ɪ ŋ ² ³
+丟	t a n ² ¹	t i u ⁴ ⁴
+並	p i ɪ ŋ ³ ³	pʰ i ɪ ŋ ³ ³
+丨	k u n ⁴ ¹
+丫	a ⁴ ⁴
+中	t i ɔ ŋ ² ¹	t i ɔ ŋ ⁴ ⁴	t i ɪ ŋ ² ¹
+丱	k u a n ² ¹
+串	t͡sʰ u a n ² ¹	t͡sʰ ŋ̍ ² ¹
+丶	t͡s u ⁴ ¹
+丸	u a n ² ³	ĩ ² ³
+丹	t a n ⁴ ⁴
+主	t͡s u ⁴ ¹
+丼	t ɔ m ² ³
+丿	pʰ i ɛ t̚ ³ ²
+乃	n ã i ⁴ ¹
+久	k i u ⁴ ¹	k u ⁴ ¹
+之	t͡s i ⁴ ⁴
+乍	t͡s ã ² ¹
+乎	h ɔ ³ ³	h ɔ ⁴ ⁴	h ɔ̃ ʔ ³ ²
+乏	h a t̚ ⁴	h u a t̚ ⁴
+乒	pʰ i n ⁴ ¹
+乓	pʰ ɔ ŋ ⁴ ¹
+乖	k u a i ⁴ ⁴
+乘	s i ɪ ŋ ² ³	s i ɪ ŋ ³ ³
+乙	i t̚ ³ ²
+乜	m ĩ ʔ ³ ²
+九	k a u ⁴ ¹	k i u ⁴ ¹
+乞	kʰ i t̚ ³ ²
+也	a ³ ³	i a ³ ³	i a ⁴ ¹
+乩	k i ⁴ ⁴
+乳	z u ⁴ ¹
+乾	k a n ⁴ ⁴	k u ã ⁴ ⁴	kʰ i ɛ n ² ³	t a ⁴ ⁴
+亂	l u a n ³ ³
+亅	k u a t̚ ⁴
+了	l i a u ⁴ ¹
+予	h ɔ ³ ³
+事	s u ³ ³	t a i ³ ³
+二	z i ³ ³
+于	i ² ³	u ² ³	u ⁴ ⁴
+云	u n ² ³
+互	h ɔ ³ ³
+五	ŋ ɔ̃ ⁴ ¹	ɡ ɔ ³ ³
+井	t͡s i ɪ ŋ ⁴ ¹	t͡s ẽ ⁴ ¹
+亙	k i ɪ ŋ ² ¹	kʰ i ɛ n ² ¹	kʰ i ɪ ŋ ² ¹
+些	s i a ⁴ ⁴
+亞	a ² ¹	a ⁴ ⁴
+亡	b ɔ ŋ ² ³
+交	k a u ⁴ ⁴	k a ⁴ ⁴
+亥	h a i ³ ³
+亦	i a ʔ ⁴	i ɪ k̚ ⁴
+亨	h i ɪ ŋ ⁴ ⁴
+享	h i a ŋ ⁴ ¹
+京	k i ã ⁴ ⁴	k i ɪ ŋ ⁴ ⁴
+亭	t a n ² ³	t i ɪ ŋ ² ³
+亮	l i a ŋ ³ ³	l i ɔ ŋ ³ ³
+亶	t͡s ĩ ⁴ ⁴
+人	l a ŋ ² ³	z i n ² ³
+什	s i m ⁴ ¹	s i p̚ ⁴	s i ã ⁴ ¹	s ã ⁴ ¹
+仁	z i n ² ³
+仄	t͡s e ʔ ³ ²	t͡s i ɪ k̚ ³ ²
+仆	pʰ a k̚ ³ ²
+仇	k i u ² ³	s i u ² ³
+今	k i m ⁴ ⁴	k i n ⁴ ⁴	t ã ⁴ ⁴
+介	k a i ² ¹
+仔	a ⁴ ¹	k i ã ⁴ ¹	n ã ² ¹	t͡s u ⁴ ¹
+他	tʰ ã ⁴ ⁴	tʰ ɤ ⁴ ⁴
+仗	t i a ŋ ³ ³	t i ɔ ŋ ³ ³
+付	h u ² ¹
+仙	s i ɛ n ⁴ ¹	s i ɛ n ⁴ ⁴
+仝	k a ŋ ² ³	k a ŋ ³ ³
+仟	t͡sʰ i ɪ ŋ ⁴ ⁴
+代	t a i ² ¹	t a i ³ ³	t e ³ ³
+令	l i ɪ ŋ ³ ³
+以	i ⁴ ¹
+仰	ɡ i ɔ ŋ ⁴ ¹
+仲	t i ɔ ŋ ³ ³
+仳	p i ² ³	p i ⁴ ¹
+件	k i ã ³ ³	k i ɛ n ³ ³
+任	z i m ³ ³
+份	h u n ³ ³
+仿	h ɔ ŋ ⁴ ¹
+企	kʰ i ² ¹
+伉	k ɔ ŋ ⁴ ⁴	kʰ ɔ ŋ ² ¹
+伊	i ⁴ ⁴
+伍	ŋ ɔ̃ ⁴ ¹	ɡ ɔ ³ ³
+伏	h ɔ k̚ ⁴
+伐	h u a t̚ ⁴	h u a ʔ ⁴
+休	h i u ⁴ ⁴
+伓	m̩ ³ ³
+伙	h u e ⁴ ¹
+伨	tʰ i n ³ ³	tʰ i ɪ ŋ ³ ³
+伯	p a ² ¹	p e ʔ ³ ²	p i t̚ ³ ²	p i ɪ k̚ ³ ²	pʰ i ɪ k̚ ³ ²
+估	k ɔ ⁴ ¹
+伴	pʰ u a n ³ ³	pʰ u ã ³ ³
+伶	l i ɪ ŋ ² ³	l i ɪ ŋ ⁴ ¹
+伸	s i n ⁴ ⁴	t͡sʰ u n ⁴ ⁴
+伺	s u ² ¹	s u ³ ³
+似	s a i ³ ³	s u ³ ³
+佃	t a n ³ ³	t i ɛ n ³ ³
+但	n ã ³ ³	t a n ³ ³
+佇	t i ³ ³
+佈	p ɔ ² ¹
+位	u i ³ ³
+低	k e ³ ³	t e ⁴ ⁴
+住	t͡s u ³ ³
+佐	t͡s ɤ ² ³	t͡s ɤ ² ¹	t͡s ɤ ⁴ ¹
+佑	i u ³ ³
+佔	t͡s i a m ² ¹
+何	h ɤ ² ³	u a ² ³
+佗	t a ʔ ³ ²	t a ⁴ ¹	t u e ³ ³	t u e ʔ ³ ²	t ɤ ² ³	t ɤ ʔ ³ ²	t ɤ ⁴ ¹
+佘	s i a ² ³
+余	i ² ³	u ² ³
+佚	i ɪ k̚ ⁴	t i ɛ t̚ ⁴
+佛	h u t̚ ⁴	p u t̚ ⁴
+作	t͡s ɔ k̚ ³ ²	t͡s ɤ ² ¹	t͡s ɤ ʔ ³ ²
+佞	l i n ³ ³
+你	l i ⁴ ¹	n ĩ ⁴ ¹
+佣	i ɔ ŋ ³ ³
+佩	p u e ³ ³	pʰ u e ² ¹
+佬	l a u ⁴ ¹
+佮	k a p̚ ³ ²	k a ʔ ³ ²
+佯	i ɔ ŋ ² ³	t ẽ ² ¹
+佰	p a ʔ ³ ²
+佳	k a ⁴ ⁴
+併	p i ɪ ŋ ² ¹
+使	s a i ² ¹	s a i ⁴ ¹	s u ² ¹	s u ⁴ ¹
+來	l a i ² ³
+侈	t͡sʰ i ⁴ ¹
+例	l e ³ ³
+侍	s a i ³ ³
+侕	z i ² ³
+侖	l u n ² ³
+供	k i ɔ ŋ ⁴ ⁴	k i ɪ ŋ ² ¹	k i ɪ ŋ ⁴ ⁴
+依	i ⁴ ⁴
+侮	b u ⁴ ¹
+侯	h a u ² ³	h ɔ ² ³
+侵	t͡sʰ i m ⁴ ⁴
+侶	l u ³ ³
+便	p a n ² ³	p i ɛ n ³ ³
+係	h e ³ ³	s i ³ ³
+促	t͡sʰ i ɔ k̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+俄	ɡ ɤ ² ³
+俊	t͡s u n ² ¹
+俎	t͡s ɔ ⁴ ¹
+俏	t͡sʰ i a u ² ¹	t͡sʰ i ɤ ² ¹
+俐	l i ³ ³
+俓	k i ɪ ŋ ² ¹
+俗	s i ɔ k̚ ⁴
+俘	h u ² ³	h u ⁴ ⁴
+俚	l i ⁴ ¹
+保	p ɤ ⁴ ¹
+俞	z u ² ³
+俟	k i ² ³	s u ³ ³
+俠	k i a p̚ ³ ²
+信	s i n ² ¹	s i ɛ n ² ¹
+修	s i u ⁴ ⁴
+俯	h u ⁴ ¹
+俱	kʰ u ³ ³
+俳	p a i ² ³	p a i ⁴ ⁴
+俴	t͡s i ɛ n ⁴ ¹
+俸	h ɔ ŋ ³ ³
+俺	a n ⁴ ¹	l a n ⁴ ¹
+俾	p i ³ ³	p i ⁴ ¹	pʰ i ² ¹
+倀	t i ɔ ŋ ² ¹	t͡sʰ i ɪ ŋ ² ³
+倆	l i ɔ ŋ ⁴ ¹
+倉	t͡sʰ ŋ̍ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+個	e ² ³	k ɤ ² ¹
+倌	k u ã ⁴ ⁴
+倍	p u e ³ ³
+倏	s i ɔ k̚ ³ ²
+們	b u n ² ³
+倒	t a u ⁴ ¹	t ɤ ² ¹	t ɤ ⁴ ¹
+倔	k u t̚ ⁴
+倖	h i ɪ ŋ ³ ³	s i ɪ ŋ ³ ³
+倘	tʰ a ŋ ⁴ ⁴	tʰ ɔ ŋ ⁴ ¹
+候	h a u ³ ³	h ɔ ³ ³
+倚	i ⁴ ¹	u a ⁴ ¹
+倞	k i ɔ ŋ ³ ³	k i ɪ ŋ ³ ³	l i ɔ ŋ ³ ³
+借	t͡s i a ² ¹	t͡s i ɤ ʔ ³ ²
+倡	t͡sʰ i a ŋ ² ¹	t͡sʰ i ɔ ŋ ² ¹	t͡sʰ i ɔ ŋ ⁴ ⁴
+倦	k u a n ³ ³
+倨	k u ² ¹
+倩	t͡sʰ i ã ² ¹	t͡sʰ i ɛ n ² ¹	t͡sʰ i ɪ ŋ ² ¹
+倪	ɡ e ² ³
+倫	l u n ² ³
+倭	e ⁴ ⁴	u e ⁴ ⁴	ɤ ⁴ ⁴
+倯	s ɔ ŋ ² ³
+值	t a t̚ ⁴	t i t̚ ⁴
+偃	i ɛ n ⁴ ¹
+偆	t͡sʰ u n ⁴ ⁴
+假	k a ² ¹	k a ⁴ ¹	k e ⁴ ¹
+偈	k i ɛ t̚ ³ ²	k i ɛ t̚ ⁴	kʰ i ² ¹
+偉	u i ⁴ ¹
+偌	l u a ³ ³	z u a ³ ³	ɡ u a ³ ³
+偎	u a ⁴ ¹	u e ⁴ ⁴	u i ⁴ ⁴
+偏	pʰ i ɛ n ⁴ ⁴	pʰ ĩ ⁴ ⁴
+做	t͡s ɤ ² ¹
+停	tʰ i ɪ ŋ ² ³
+偝	p u e ³ ³	ã i ³ ³
+健	k i ã ³ ³	k i ɛ n ³ ³
+偭	b i ɛ n ³ ³
+側	t͡sʰ i ɪ k̚ ³ ²
+偵	t͡s i ɪ ŋ ⁴ ⁴
+偶	ŋ ã u ʔ ³ ²	ŋ ɔ̃ ⁴ ¹
+偷	tʰ a u ⁴ ⁴
+偽	ɡ u i ³ ³
+傀	k a ⁴ ⁴
+傅	h u ³ ³	p ɔ ² ¹
+傈	l i ɪ k̚ ⁴
+傍	p ŋ̍ ³ ³
+傑	k i ɛ t̚ ⁴
+傔	kʰ i a m ² ¹	kʰ i a m ³ ³
+傗	tʰ i ɔ k̚ ³ ²
+傘	s a n ² ¹	s u ã ² ¹
+備	p i ³ ³
+傜	i a u ² ¹
+催	t͡sʰ u i ⁴ ⁴
+傭	i ɔ ŋ ² ³
+傱	t͡s ɔ ŋ ² ³
+傲	ŋ ɔ̃ ³ ³
+傳	t u a n ³ ³	t ŋ̍ ² ³	tʰ u a n ² ³	tʰ ŋ̍ ² ³	t͡sʰ u a n ² ³
+債	t͡s a i ² ¹	t͡s e ² ¹
+傷	s i ũ ⁴ ⁴	s i ɔ ŋ ⁴ ⁴
+傾	kʰ i ɪ ŋ ⁴ ⁴
+僄	pʰ i a u ² ¹	pʰ i a u ⁴ ⁴
+僅	k i n ³ ³	k i n ⁴ ¹
+僆	n u ã ³ ³
+僉	t͡sʰ i a m ⁴ ⁴
+僎	t͡sʰ u a n ² ³
+像	s i a ŋ ³ ³	s i ɔ ŋ ³ ³	t͡sʰ i ũ ³ ³
+僑	k i a u ² ³
+僕	p ɔ k̚ ⁴
+僖	h i ⁴ ⁴
+僚	l i a u ² ³
+僥	h i a u ⁴ ⁴
+僧	s i ɪ ŋ ⁴ ⁴	t͡s i ɪ ŋ ⁴ ⁴
+僬	t͡s i a u ² ³
+僱	k ɔ ² ¹
+僵	k i ɔ ŋ ⁴ ⁴	kʰ i ɔ ŋ ⁴ ⁴
+價	k a ² ¹	k e ² ¹
+僻	pʰ i a ʔ ³ ²	pʰ i ɪ k̚ ³ ²
+儀	ɡ i ² ³
+儂	l a ŋ ² ³	l ɔ ŋ ² ³
+儃	s i ɛ n ² ³	s i ɛ n ³ ³
+億	i ɪ k̚ ³ ²
+儅	t ɔ ŋ ² ¹	t ɔ ŋ ⁴ ⁴
+儆	k i ɪ ŋ ⁴ ¹
+儇	h u a n ² ³
+儈	k u e ² ¹
+儉	kʰ i a m ³ ³
+儊	t͡sʰ u ² ¹	t͡sʰ ɔ ⁴ ¹
+儌	h i a u ⁴ ⁴	i a u ⁴ ⁴	i ɤ ⁴ ⁴
+儐	p i n ⁴ ⁴
+儒	z u ² ³
+儓	t a i ² ³
+儔	t i u ² ³
+儕	t͡sʰ a i ² ³
+儗	ɡ i ⁴ ¹
+儘	t͡s i n ³ ³
+儚	b i ɪ ŋ ² ³
+儜	l i ɪ ŋ ² ³
+償	s i ɔ ŋ ² ³	s i ɔ ŋ ⁴ ¹
+儠	l i a p̚ ⁴
+儡	l e ⁴ ¹
+優	i u ⁴ ⁴
+儲	t u ² ³	tʰ u ² ³	tʰ u ⁴ ¹
+儴	s i ɔ ŋ ⁴ ⁴	z i ɔ ŋ ² ³
+儷	l e ³ ³	l i ² ³
+儸	l ɤ ² ³
+儹	t͡s a n ⁴ ¹
+儼	ɡ i a m ⁴ ¹
+儽	l u i ⁴ ¹
+兀	ɡ u t̚ ³ ²	ɡ u t̚ ⁴
+允	i n ⁴ ¹
+元	ɡ u a n ² ³
+兄	h i ã ⁴ ⁴	h i ɪ ŋ ⁴ ⁴
+充	t͡sʰ i ɔ ŋ ⁴ ⁴
+兆	t i a u ³ ³
+兇	h i ɔ ŋ ⁴ ⁴
+先	s i ɛ n ⁴ ⁴	s i ɪ ŋ ⁴ ⁴
+光	k ŋ̍ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+克	kʰ a t̚ ³ ²	kʰ i ɪ k̚ ³ ²
+兌	l u i ⁴ ¹	t u e ³ ³	t u i ³ ³
+免	b i ɛ n ⁴ ¹
+兒	z i ² ³
+兔	tʰ ɔ ² ¹
+兗	i ɛ n ⁴ ¹
+党	t ɔ ŋ ⁴ ¹
+兜	t a u ⁴ ⁴
+兢	k i ɪ ŋ ⁴ ⁴
+入	z i p̚ ⁴
+內	l a i ³ ³	l u e ³ ³
+全	t͡s u a n ² ³	t͡s ŋ̍ ² ³
+兩	l i ɔ ŋ ⁴ ¹	n i ũ ⁴ ¹	n ŋ̍ ³ ³
+八	p a t̚ ³ ²	p e ʔ ³ ²
+公	k a ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+六	l a k̚ ⁴	l i ɔ k̚ ⁴
+兮	e ² ³	h e ² ³
+共	k a ³ ³	k a ŋ ³ ³	k i ɔ ŋ ³ ³
+兵	p i ã ⁴ ⁴	p i ɪ ŋ ⁴ ⁴	pʰ i ã ⁴ ⁴
+其	k i ² ³
+具	k u ³ ³	kʰ u ³ ³
+典	t i ɛ n ⁴ ¹
+兼	k i a m ⁴ ⁴
+冀	k i ² ¹
+冂	k i ɪ ŋ ⁴ ⁴
+冇	pʰ ã ² ¹
+冊	t͡sʰ e ʔ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+再	t͡s a i ² ¹
+冑	t i u ³ ³
+冒	m ɔ̃ ³ ³
+冔	h u ⁴ ¹	h u ⁴ ⁴
+冕	b i ɛ n ⁴ ¹
+冗	l i ɔ ŋ ³ ³	l i ɪ ŋ ³ ³
+冘	i m ² ³	i u ² ³
+冠	k u a n ² ¹	k u a n ⁴ ⁴
+冢	tʰ i ɔ ŋ ⁴ ¹
+冤	u a n ⁴ ⁴
+冥	b i ɪ ŋ ² ³
+冫	p i ɪ ŋ ⁴ ⁴
+冬	t a ŋ ⁴ ⁴	t ɔ ŋ ⁴ ⁴
+冰	p i ɪ ŋ ⁴ ⁴
+冶	i a ⁴ ¹
+冷	l i ɪ ŋ ⁴ ¹
+冽	l i ɛ t̚ ⁴
+准	t͡s u n ⁴ ¹
+凊	t͡sʰ i n ² ¹
+凋	t i a u ⁴ ⁴
+凌	l i ɪ ŋ ² ³
+凍	t a ŋ ² ¹	t ɔ ŋ ² ¹
+凜	l i m ⁴ ¹
+凝	ɡ i n ² ³	ɡ i ɪ ŋ ² ³
+几	k i ⁴ ¹
+凡	h u a n ² ³	h u a n ³ ³
+凰	h ɔ ŋ ² ³
+凱	kʰ a i ⁴ ¹
+凳	t i ɪ ŋ ² ¹
+凶	h i ɔ ŋ ⁴ ⁴
+凹	a u ⁴ ⁴	n ã ʔ ³ ²
+出	t͡sʰ u t̚ ³ ²
+函	h a m ² ³
+刀	t ɤ ⁴ ⁴
+刁	t i a u ⁴ ⁴	tʰ i a u ⁴ ⁴
+刃	z i m ³ ³
+分	h u n ³ ³	h u n ⁴ ⁴	p u n ⁴ ⁴
+切	t͡sʰ e ² ¹	t͡sʰ i ɛ t̚ ³ ²
+刈	ŋ ã i ³ ³
+刊	kʰ a n ⁴ ⁴
+刎	b u n ⁴ ¹
+刐	t ã i ⁴ ¹
+刑	h i ɪ ŋ ² ³
+划	h u a ² ³	k ɤ ² ¹
+刓	ɡ u a n ² ³
+刖	ɡ u a t̚ ⁴
+列	l i ɛ t̚ ⁴
+刜	h u t̚ ³ ²	pʰ u t̚ ³ ²
+初	t͡sʰ e ⁴ ⁴	t͡sʰ ɔ ⁴ ⁴
+刡	b i n ⁴ ¹
+刣	tʰ a i ² ³	t͡s i ɔ ŋ ⁴ ⁴
+判	pʰ a n ² ¹	pʰ u ã ² ¹
+別	p a t̚ ⁴	p i ɛ t̚ ³ ²	p i ɛ t̚ ⁴
+利	l a i ³ ³	l i ³ ³
+刪	s a n ⁴ ⁴
+刮	k u a t̚ ³ ²	k u a ʔ ³ ²	kʰ e ⁴ ⁴	kʰ u e ⁴ ⁴
+到	k a u ² ¹	t a u ² ¹	t ɤ ² ¹
+刳	k ɔ ⁴ ⁴	kʰ u a ⁴ ⁴
+制	t͡s e ² ¹
+刷	s e ʔ ³ ²	s u a t̚ ³ ²	s u a ⁴ ⁴
+券	k u a n ² ¹	k u a n ³ ³	k ŋ̍ ² ¹
+刺	t͡sʰ i a ʔ ³ ²	t͡sʰ i ² ¹
+刻	kʰ i ɪ k̚ ³ ²
+剁	t ɔ k̚ ³ ²
+剃	tʰ i ² ¹
+剄	k i ɪ ŋ ⁴ ¹
+則	t͡s i ɪ k̚ ³ ²
+剉	t͡sʰ u a ʔ ³ ²	t͡sʰ ɤ ² ¹
+削	s i a ʔ ³ ²
+剋	kʰ i ɪ k̚ ³ ²
+前	t͡s i ɛ n ² ³	t͡s i ɪ ŋ ² ³	t͡s u n ² ³
+剎	s a t̚ ³ ²
+剔	tʰ a k̚ ³ ²	tʰ i ɪ k̚ ³ ²
+剖	pʰ ɔ ⁴ ¹
+剚	t͡s u ² ¹
+剛	k ɔ ŋ ⁴ ⁴
+剜	u a n ⁴ ¹	u a n ⁴ ⁴
+剝	p a k̚ ³ ²	p ɔ k̚ ³ ²
+剩	s i n ³ ³	s i ɪ ŋ ³ ³	t͡sʰ u n ⁴ ⁴
+剪	t͡s i ɛ n ⁴ ¹
+副	h u ² ¹
+割	k a t̚ ³ ²	k u a ʔ ³ ²
+創	t͡sʰ ŋ̍ ⁴ ⁴	t͡sʰ ɔ ŋ ² ¹	t͡sʰ ɔ ŋ ⁴ ⁴
+剷	tʰ u ã ⁴ ¹
+剺	l i ² ¹
+剾	kʰ a u ⁴ ⁴
+剿	t͡s a u ² ³	t͡s i a u ² ³
+劃	h i ɪ k̚ ⁴	u a ³ ³	u e ʔ ⁴
+劇	k i a k̚ ⁴	k i ɔ k̚ ⁴	k i ɪ k̚ ⁴	kʰ i a k̚ ⁴
+劈	pʰ i ɪ k̚ ³ ²
+劉	l a u ² ³	l i u ² ³
+劊	k u e ² ¹	k u i ² ¹
+劌	k u e ² ¹	k u e ʔ ³ ²	k u i ² ¹
+劍	k i a m ² ¹
+劑	t͡s e ² ¹	t͡s e ³ ³	t͡s e ⁴ ⁴
+劓	ɡ i ³ ³
+力	l a t̚ ⁴	l i ɪ k̚ ⁴
+功	k a ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+加	k a ⁴ ⁴	k e ⁴ ⁴
+劣	l i ɛ t̚ ⁴	l u a t̚ ⁴
+劦	h i a p̚ ⁴
+助	t͡s ɔ ³ ³
+努	l ɔ ⁴ ¹	n ɔ̃ ⁴ ¹
+劫	k i a p̚ ³ ²
+劭	s i a u ³ ³
+勁	k i ɪ ŋ ² ¹
+勃	p u t̚ ⁴
+勇	i ɔ ŋ ⁴ ¹
+勉	b i ɛ n ⁴ ¹
+勒	l e ʔ ³ ²	l i ɪ k̚ ⁴
+動	t a ŋ ³ ³	t ɔ ŋ ³ ³
+勘	kʰ a m ² ¹	kʰ a m ⁴ ⁴
+務	b u ³ ³
+勝	s i ɪ ŋ ² ¹	s i ɪ ŋ ⁴ ⁴
+勞	l ɔ ⁴ ¹	l ɤ ² ³	l ɤ ³ ³
+募	b ɔ ³ ³
+勢	s e ² ¹	s i ² ¹
+勤	kʰ i n ² ³
+勥	kʰ i a ŋ ² ¹
+勰	h i a p̚ ⁴
+勱	m ã i ³ ³
+勵	l e ³ ³
+勸	kʰ u a n ² ¹	kʰ ŋ̍ ² ¹
+勺	s i a ʔ ⁴
+勻	u n ² ³
+勼	k i u ⁴ ⁴
+勾	k a u ⁴ ⁴	k ɔ ⁴ ⁴
+勿	b u t̚ ⁴	m ã i ² ¹
+包	p a u ⁴ ⁴
+匆	t͡sʰ ɔ ŋ ⁴ ⁴
+匈	h i ɔ ŋ ⁴ ⁴	h i ɪ ŋ ⁴ ⁴
+匊	k i ɔ k̚ ³ ²
+匍	p ɔ ² ³
+匏	p u ² ³
+匕	p i ⁴ ¹
+化	h u a ² ¹	h u a ⁴ ⁴	h u e ² ¹	u a ² ¹
+北	p a k̚ ³ ²	p ɔ k̚ ³ ²
+匙	s i ² ³
+匚	h ɔ ŋ ⁴ ⁴
+匝	t͡s a t̚ ³ ²
+匠	t͡sʰ i ũ ³ ³
+匡	kʰ ɔ ŋ ⁴ ⁴
+匣	a p̚ ⁴	a ʔ ⁴
+匪	h u i ⁴ ¹
+匯	h u e ³ ³
+匱	k u i ³ ³
+匸	h e ³ ³
+匹	pʰ i t̚ ³ ²
+匼	k a p̚ ³ ²	kʰ a p̚ ³ ²	ã ⁴ ¹
+匾	p i ɛ n ⁴ ¹
+匿	l i ɪ k̚ ⁴
+區	kʰ u ⁴ ⁴	ɔ ⁴ ⁴
+十	s i p̚ ⁴	t͡s a p̚ ⁴
+千	t͡sʰ i ɛ n ⁴ ⁴	t͡sʰ i ɪ ŋ ⁴ ⁴
+卅	s a p̚ ⁴	s i a p̚ ³ ²
+升	s i ɪ ŋ ⁴ ⁴	t͡s i n ⁴ ⁴
+午	ŋ ɔ̃ ⁴ ¹	ɡ ɔ ³ ³
+卉	h u i ² ¹	h u i ³ ³	h u i ⁴ ¹
+半	p u a n ² ¹	p u ã ² ¹
+卌	s i a p̚ ³ ²
+卍	b a n ³ ³
+卐	b a n ³ ³
+卑	p i ⁴ ⁴
+卒	t͡s u t̚ ³ ²
+卓	t ɔ k̚ ³ ²	t ɤ ʔ ³ ²
+協	h i a p̚ ⁴
+南	l a m ² ³
+博	p ɤ ʔ ³ ²	pʰ ɔ k̚ ³ ²
+卜	p ɔ k̚ ³ ²	p ɤ ʔ ³ ²
+卞	p i ɛ n ³ ³
+占	t͡s i a m ² ¹	t͡s i a m ⁴ ⁴
+卡	kʰ a ʔ ³ ²	kʰ a ʔ ⁴	kʰ a ⁴ ¹	kʰ a ⁴ ⁴
+卣	i u ² ³	i u ⁴ ¹
+卦	k u a ² ¹
+卬	ɡ a ŋ ³ ³
+卯	b a u ⁴ ¹	m ã u ʔ ³ ²
+印	i n ² ¹
+危	h u i ² ³
+卲	s i a u ³ ³
+即	t͡s i t̚ ³ ²	t͡s i ɪ k̚ ³ ²
+卵	l u a n ⁴ ¹	n ŋ̍ ³ ³
+卷	k u a n ² ¹	k ŋ̍ ² ¹	k ŋ̍ ⁴ ¹
+卸	s i a ² ¹
+卻	kʰ i ɔ k̚ ³ ²	kʰ i ɤ ʔ ³ ²
+卿	kʰ i ɪ ŋ ⁴ ⁴
+厄	e ʔ ³ ²	i ɪ k̚ ³ ²
+厚	h ɔ ³ ³	k a u ³ ³
+厜	t͡s u i ⁴ ⁴
+厝	t͡sʰ u ² ¹
+原	ɡ u a n ² ³
+厥	kʰ u a t̚ ³ ²
+厭	i a m ² ¹	i a ² ¹
+厲	l e ³ ³	l i ³ ³
+去	kʰ i ² ¹
+厾	t u ʔ ³ ²
+參	s a m ⁴ ⁴	s i m ⁴ ⁴	t͡sʰ a m ⁴ ⁴
+又	i u ³ ³
+叉	t͡sʰ e ⁴ ⁴
+及	k i p̚ ⁴
+友	i u ⁴ ¹
+反	h u a n ⁴ ¹	p i ɪ ŋ ⁴ ¹
+叔	s i ɔ k̚ ³ ²	t͡s i ɪ k̚ ³ ²
+取	t͡sʰ i u ⁴ ¹	t͡sʰ i ũ ⁴ ¹	t͡sʰ u ⁴ ¹
+受	s i u ³ ³
+叛	p u a n ³ ³
+叟	s ɔ ⁴ ¹
+叢	t͡s a ŋ ² ³	t͡s ɔ ŋ ² ³
+口	k a u ⁴ ¹	kʰ a u ⁴ ¹	kʰ i ɤ ⁴ ¹
+古	k ɔ ⁴ ¹
+句	k u ² ¹
+另	l i ɪ ŋ ³ ³
+叨	t u e ³ ³	t u e ʔ ³ ²	t ɤ ⁴ ¹
+叩	kʰ a u ² ¹	kʰ i ɤ ² ¹
+只	t͡s i ⁴ ¹
+叫	k i a u ² ¹	k i ɤ ² ¹
+召	s i a u ³ ³	t i a u ² ¹	t i a u ³ ³
+叭	p a ⁴ ⁴
+叮	t i n ⁴ ⁴	t i ɪ ŋ ⁴ ⁴
+可	kʰ u a ⁴ ¹	kʰ ɤ ⁴ ¹
+台	i ² ³	tʰ a i ⁴ ⁴
+叱	tʰ i ɪ k̚ ³ ²
+史	s a i ⁴ ¹	s u ⁴ ¹
+右	i u ³ ³
+叴	k ɤ ⁴ ⁴
+叵	pʰ ɔ ⁴ ¹	pʰ ɤ ⁴ ¹
+司	s a i ⁴ ⁴	s i ⁴ ⁴	s u ⁴ ⁴
+叻	l a t̚ ⁴
+叼	t ɤ ʔ ³ ²
+叽	k i a u ² ¹	k i ɤ ² ¹
+吃	kʰ i t̚ ³ ²	kʰ i ɪ k̚ ³ ²	t͡s i a ʔ ⁴	ɡ u t̚ ³ ²
+各	k ɔ k̚ ³ ²	k ɤ ʔ ³ ²
+合	h a p̚ ⁴	h a ʔ ⁴	k a p̚ ³ ²	k a ʔ ³ ²
+吉	k i ɛ t̚ ³ ²
+吊	t i a u ² ¹	t i ɤ ² ¹
+吋	t͡sʰ u n ² ¹
+同	t a ŋ ² ³	t ɔ ŋ ² ³
+名	b i ɪ ŋ ² ³	m i ã ² ³
+后	h i ɤ ³ ³	h ɔ ³ ³
+吏	l i ³ ³
+吐	tʰ ɔ ² ¹	tʰ ɔ ⁴ ¹
+向	h i a ŋ ² ¹	h i ã ² ¹	h i ũ ² ¹	h i ɔ ŋ ² ¹	ã ² ¹	ŋ̍ ² ¹
+吒	t a ² ¹	t͡sʰ a ² ¹	t͡sʰ i a ⁴ ⁴
+君	k u n ⁴ ⁴
+吝	l i n ³ ³
+吞	tʰ u n ⁴ ⁴
+吟	ɡ i m ² ³
+吠	h u i ³ ³	p u i ³ ³
+否	h ɔ ⁴ ¹	h ɔ̃ ⁴ ¹	pʰ i ⁴ ¹
+吧	p a ³ ³	p a ⁴ ⁴
+吩	h u a n ⁴ ⁴	h u n ⁴ ⁴
+含	h a m ² ³	k a m ² ³	k ã ² ³
+吭	kʰ ŋ̍ ʔ ³ ²	kʰ ɔ ŋ ³ ³
+吮	t͡s ŋ̍ ³ ³	t͡sʰ u ĩ ⁴ ¹	t͡sʰ ŋ̍ ⁴ ¹	u n ⁴ ¹
+吰	h ɔ ŋ ² ³
+吱	k i ⁴ ⁴	t͡s i ⁴ ⁴
+吳	ŋ ɔ̃ ² ³
+吵	t͡sʰ a ⁴ ¹
+吶	n ã ³ ³
+吸	kʰ i p̚ ³ ²
+吹	t͡sʰ u e ⁴ ⁴	t͡sʰ u i ⁴ ⁴
+吻	b u n ⁴ ¹
+吼	h a u ⁴ ¹
+吾	ŋ ɔ̃ ² ³
+呀	a ⁴ ⁴	i a ⁴ ⁴
+呂	l i ³ ³
+呃	e ʔ ³ ²
+呆	t a i ⁴ ⁴
+呈	t i ã ² ³	t i ɪ ŋ ² ³	tʰ i ã ² ³	tʰ i ɪ ŋ ² ³
+告	k ɤ ² ¹
+呎	t͡sʰ i ɪ k̚ ³ ²
+呔	tʰ a i ² ¹	tʰ a i ⁴ ¹
+呢	n ĩ ² ³
+呣	m̩ ³ ³
+呦	i u ⁴ ⁴
+呧	t i ⁴ ⁴
+周	t͡s i u ⁴ ⁴
+呰	t͡s i a ʔ ³ ²
+呱	k u a ³ ³
+味	b i ³ ³
+呵	ɤ ⁴ ⁴
+呷	h a p̚ ³ ²	t͡s i a ʔ ⁴
+呸	pʰ u i ² ¹
+呻	t͡sʰ a n ⁴ ⁴
+呼	h ɔ ⁴ ⁴	kʰ ɔ ⁴ ⁴
+命	b i ɪ ŋ ³ ³	m i ã ³ ³
+呾	t ã ² ¹
+咁	k a m ⁴ ¹
+和	h a m ² ³	h a m ³ ³	h u e ² ³	h ɤ ² ³	h ɤ ³ ³	ɔ ² ³
+咎	k i u ³ ³
+咐	h u ² ¹
+咒	t͡s i u ² ¹
+咖	k a ⁴ ⁴
+咢	ɡ ɔ k̚ ⁴
+咧	l e ʔ ³ ²	l i ɛ t̚ ⁴	t e ʔ ³ ²
+咨	t͡s u ⁴ ⁴
+咩	m ẽ ʔ ³ ²
+咪	b i ² ³
+咫	t͡s i ⁴ ¹
+咬	k a ³ ³	ŋ ã u ⁴ ¹
+咭	k i ɛ t̚ ³ ²
+咯	k ɔ k̚ ⁴	kʰ a k̚ ⁴
+咱	l a n ⁴ ¹	t͡s a ⁴ ⁴
+咳	k a ⁴ ⁴	kʰ a ⁴ ⁴
+咸	h a m ² ³
+咻	h i u ⁴ ⁴
+咽	i ɛ n ⁴ ⁴
+咾	l ɤ ⁴ ¹
+哀	a i ⁴ ⁴
+品	pʰ i n ⁴ ¹
+哂	s i n ⁴ ¹
+哄	h a ŋ ⁴ ¹	h ã ⁴ ¹	h ɔ ŋ ³ ³
+哆	t ɤ ⁴ ⁴
+哈	h a ³ ³	h a ⁴ ⁴	h ã ² ³	h ã ³ ³	h ẽ ³ ³
+哉	t͡s a i ² ¹	t͡s a i ⁴ ⁴
+哎	a i ⁴ ⁴
+哖	n ĩ ² ³
+哚	tʰ ɤ ʔ ⁴
+哞	m ã ⁴ ⁴
+員	u a n ² ³	u n ³ ³	ĩ ² ³	ɡ u a n ² ³
+哢	l ɔ ŋ ² ¹
+哥	k ɤ ʔ ³ ²	k ɤ ⁴ ⁴
+哦	ɔ ² ³
+哨	s a u ² ¹
+哩	m ã i ⁴ ⁴
+哪	l ɤ ² ³	n ã ⁴ ¹
+哭	kʰ a u ² ¹	kʰ ɔ k̚ ³ ²
+哮	h a u ² ¹	h a u ⁴ ¹
+哱	pʰ u ʔ ³ ²
+哲	t i ɛ t̚ ³ ²	tʰ i ɛ t̚ ³ ²
+哺	p ɔ ³ ³
+哼	h ŋ̍ ʔ ³ ²
+哽	k i ɪ ŋ ⁴ ¹	k ẽ ⁴ ¹
+唅	a m ³ ³	h a ² ¹	h ã ² ¹	h ã ʔ ³ ²
+唆	s ɤ ⁴ ⁴
+唉	h a i ʔ ³ ²
+唌	s i ã ² ³
+唏	h i ² ¹	h i ³ ³	h i ⁴ ⁴
+唐	t ŋ̍ ² ³	t ɔ ŋ ² ³
+唚	t͡s i m ⁴ ⁴
+唬	h ɤ ⁴ ¹
+售	s i u ² ³	s i u ³ ³
+唯	b i ² ³	u i ² ³
+唱	t͡sʰ i a ŋ ² ¹	t͡sʰ i ũ ² ¹	t͡sʰ i ɔ ŋ ² ¹
+唵	a m ² ³	a m ³ ³
+唾	tʰ ɤ ² ¹
+啄	t ɔ k̚ ³ ²
+商	s i ɔ ŋ ⁴ ⁴
+啉	l i m ⁴ ⁴
+啊	a ʔ ³ ²	a ⁴ ⁴
+問	b u n ³ ³	m ŋ̍ ³ ³
+啖	t a m ³ ³	t a m ⁴ ⁴
+啞	a ⁴ ¹	a ⁴ ⁴	e ⁴ ¹	i ɪ k̚ ³ ²
+啟	kʰ e ⁴ ¹
+啡	h u i ⁴ ⁴	p i ⁴ ⁴
+啤	p i ² ³
+啥	s i ã ʔ ³ ²	s i ã ⁴ ¹	s ã ⁴ ¹
+啲	t e ʔ ³ ²
+啷	l ɔ ŋ ⁴ ⁴
+啻	t͡sʰ i ² ¹
+啼	tʰ i ² ³
+喂	e ʔ ³ ²	u e ² ³	u e ʔ ³ ²
+善	s i ɛ n ³ ³
+喇	l a ⁴ ¹
+喈	k ã i ⁴ ⁴
+喉	a u ² ³
+喊	h a n ⁴ ¹	h i a m ² ¹
+喌	t͡s u ² ³
+喔	a k̚ ³ ²	ɔ k̚ ³ ²	ɔ ʔ ³ ²
+喘	t͡sʰ u a n ⁴ ¹
+喙	h u i ² ¹	t͡sʰ u i ² ¹
+喚	h u a n ² ¹
+喜	h i ⁴ ¹
+喝	h a t̚ ³ ²	h u a ʔ ³ ²
+喧	s u a n ⁴ ⁴
+喪	s ŋ̍ ⁴ ⁴	s ɔ ŋ ² ¹	s ɔ ŋ ⁴ ⁴
+喬	k i a u ² ³	kʰ i a u ² ³	t͡sʰ i a u ² ³
+單	s i ɛ n ² ³	s i ɛ n ³ ³	t a n ⁴ ⁴	t u ã ⁴ ⁴
+喳	t͡sʰ a ³ ³
+喻	z u ³ ³
+嗄	s a ² ¹
+嗅	h i u ² ¹
+嗆	t͡sʰ i ũ ² ¹	t͡sʰ ŋ̍ ʔ ³ ²	t͡sʰ ŋ̍ ʔ ⁴
+嗇	s i a ʔ ³ ²	s i ɪ k̚ ³ ²
+嗍	s u ʔ ³ ²	s ɔ k̚ ³ ²	s ɤ ʔ ³ ²
+嗎	m ã ⁴ ¹	m ɔ̃ ² ³
+嗓	s ɔ ŋ ⁴ ¹
+嗖	s i ɔ k̚ ³ ²
+嗚	ɔ ⁴ ⁴
+嗜	s i ³ ³
+嗟	t a ² ¹	t͡s i a ⁴ ⁴
+嗣	s u ² ³	s u ³ ³
+嗤	t͡sʰ i ⁴ ⁴
+嗦	s ɤ ⁴ ⁴
+嗨	h a i ² ¹
+嗽	s a u ² ¹
+嘆	tʰ a n ² ¹
+嘈	t͡s ɤ ² ³	t͡sʰ a u ³ ³
+嘉	k a ⁴ ⁴
+嘍	l ɔ ⁴ ⁴
+嘏	k ɔ ⁴ ¹
+嘐	h a u ⁴ ⁴
+嘓	kʰ ɔ k̚ ⁴
+嘔	a u ⁴ ¹	ɔ ⁴ ¹
+嘗	s i ɔ ŋ ² ³
+嘛	m ã ² ¹	m ã ³ ³
+嘜	b a k̚ ⁴	m ã i ² ¹
+嘩	h u a ³ ³	h u a ⁴ ⁴
+嘮	l ɤ ² ³
+嘯	s i a u ² ¹
+嘰	k i ⁴ ⁴
+嘲	s a u ⁴ ⁴
+嘴	t͡sʰ u i ² ¹
+嘸	b ɤ ² ³	m̩ ³ ³
+嘹	l i a u ² ³
+嘻	h i ⁴ ⁴
+噂	t͡s u n ⁴ ¹
+噎	e ʔ ³ ²
+噗	pʰ ɔ k̚ ⁴
+噞	ɡ i a m ⁴ ¹
+噠	t a t̚ ⁴
+噤	h a m ³ ³	h i m ³ ³	k i m ² ¹
+器	kʰ i ² ¹
+噪	s ɤ ² ¹	t͡sʰ ɤ ² ¹
+噲	k u e ³ ³
+噴	pʰ u n ² ¹
+噷	h m̩ ʔ ⁴
+噸	t u n ² ¹	t ɔ ŋ ² ¹
+噹	t a ŋ ⁴ ⁴
+嚇	h a t̚ ³ ²	h e ʔ ³ ²	h i ã ʔ ³ ²	h i ɪ k̚ ³ ²	h ã ⁴ ¹	h ẽ ʔ ³ ²
+嚎	a u ² ³
+嚨	l ɔ ŋ ² ³	n ã ² ³
+嚲	t ɤ ² ¹
+嚳	kʰ ɔ k̚ ³ ²
+嚴	ɡ i a m ² ³
+嚷	z i a ŋ ⁴ ¹
+嚼	t͡s i a u ʔ ³ ²	t͡s i a u ʔ ⁴	t͡s i ɔ k̚ ³ ²	t͡sʰ i a u ʔ ³ ²	t͡sʰ i a u ʔ ⁴
+嚾	u a ŋ ⁴ ⁴
+囁	l i a p̚ ³ ²
+囂	h i a u ⁴ ⁴
+囉	l ɤ ² ³	l ɤ ³ ³	l ɤ ⁴ ⁴
+囊	l ɔ ŋ ² ³	l ɔ ŋ ⁴ ⁴
+囍	s i a ŋ ⁴ ⁴ ⁻ ³ ³ h i ⁴ ¹
+囑	t͡s i ɔ k̚ ³ ²
+囚	s i u ² ³
+四	s i ² ¹	s u ² ¹
+囝	k i ã ⁴ ¹	k i ɛ n ⁴ ¹	k ã ⁴ ⁴
+回	h u e ² ³
+囟	s i n ² ¹
+因	i n ⁴ ⁴
+囡	ɡ i n ⁴ ¹
+囤	t u n ³ ³	t u n ⁴ ¹
+囥	kʰ ŋ̍ ² ¹
+囧	k i ɪ ŋ ⁴ ¹
+囫	h u t̚ ³ ²
+困	kʰ u n ² ¹
+固	k ɔ ² ¹
+圃	pʰ ɔ ⁴ ¹
+圇	l u n ² ³	l u n ⁴ ⁴
+圈	kʰ i ɛ n ⁴ ⁴	kʰ u a n ² ³	kʰ u a n ⁴ ⁴	kʰ ŋ̍ ⁴ ⁴	kʰ ɔ ŋ ⁴ ⁴
+國	k ɔ k̚ ³ ²
+圍	u i ² ³	u ² ³
+園	h ŋ̍ ² ³	u a n ² ³
+圓	u a n ² ³	ĩ ² ³
+圖	t ɔ ² ³
+團	tʰ u a n ² ³	tʰ ŋ̍ ² ³
+土	tʰ ɔ ⁴ ¹
+在	t i ³ ³	t͡s a i ³ ³
+圭	k e ⁴ ⁴	k u i ⁴ ⁴
+地	t e ² ¹	t e ³ ³	t i ³ ³
+圳	t͡s u n ² ¹
+圾	s a p̚ ³ ²
+址	t͡s i ⁴ ¹
+均	k i n ⁴ ⁴
+坊	h ŋ̍ ⁴ ⁴	h ɔ ŋ ⁴ ⁴
+坎	kʰ a m ⁴ ¹
+坐	t͡s e ³ ³	t͡s ɤ ³ ³
+坑	kʰ i ɪ ŋ ⁴ ⁴	kʰ ẽ ⁴ ⁴
+坒	p i ³ ³
+坡	pʰ ɤ ⁴ ⁴
+坤	kʰ u n ⁴ ⁴
+坦	tʰ a n ⁴ ¹
+坩	kʰ ã ⁴ ⁴
+坪	p ẽ ² ³	pʰ i ã ² ³	pʰ i ɪ ŋ ² ³	pʰ ẽ ² ³
+坮	t a i ² ³
+坯	pʰ u e ⁴ ⁴
+坵	kʰ i u ⁴ ⁴	kʰ u ⁴ ⁴
+坷	kʰ i ɛ t̚ ⁴
+坼	tʰ i ɪ k̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+垂	s e ² ³	s u e ² ³	s u i ² ³
+垃	l a p̚ ³ ²	l a ʔ ³ ²
+型	h i ɪ ŋ ² ³
+垛	t e ⁴ ¹	t ɤ ⁴ ¹
+垠	ɡ u n ² ³
+垢	k a u ⁴ ¹
+垣	h u a n ² ³	u a n ² ³
+垵	u ã ⁴ ⁴
+垺	p u ² ³
+埃	a i ⁴ ⁴	i a ⁴ ⁴
+埋	b a i ² ³	m ã i ² ³	t a i ² ³
+城	s i ã ² ³	s i ɪ ŋ ² ³
+埔	p ɔ ⁴ ⁴
+埕	t i ã ² ³
+域	h i ɪ k̚ ⁴	i ɪ k̚ ⁴
+埠	p ɔ ⁴ ⁴
+埤	p i ⁴ ⁴
+埯	a m ² ³	u ã ⁴ ⁴
+執	t͡s i p̚ ³ ²
+培	p u e ² ³
+基	k i ⁴ ⁴
+堀	kʰ u t̚ ³ ²
+堂	t ŋ̍ ² ³	t ɔ ŋ ² ³
+堅	k i ɛ n ⁴ ⁴
+堆	t u i ⁴ ⁴	t u ⁴ ⁴
+堞	t i a p̚ ⁴
+堡	p ɤ ⁴ ¹
+堤	tʰ e ² ³
+堪	kʰ a m ⁴ ⁴
+堯	ɡ i a u ² ³
+報	p ɤ ² ¹
+場	t i ũ ² ³	t͡sʰ i a ŋ ² ³
+堵	t ɔ ⁴ ¹
+塊	kʰ u a i ² ¹	t e ² ¹	t e ʔ ³ ²
+塌	l a p̚ ³ ²	tʰ a p̚ ³ ²
+塑	s ɔ k̚ ³ ²	s ɔ ² ¹
+塒	s i ² ³
+塔	tʰ a ʔ ³ ²
+塕	i ɪ ŋ ⁴ ⁴
+塗	t ɔ ² ³	tʰ ɔ ² ³
+塘	t ŋ̍ ² ³	t ɔ ŋ ² ³
+塚	tʰ i ɔ ŋ ⁴ ¹
+塞	s a i ² ¹	s a t̚ ³ ²	s e ʔ ³ ²	s i ɪ k̚ ³ ²	s u e ʔ ³ ²
+塢	u ² ¹	ɔ ⁴ ¹	ɔ ⁴ ⁴
+填	tʰ i a m ³ ³	tʰ u n ³ ³
+塭	u n ² ¹
+塵	t i n ² ³	tʰ u n ² ³
+塾	s i ɔ k̚ ⁴
+境	k i ɪ ŋ ⁴ ¹
+墅	s u ⁴ ¹
+墊	t i a m ³ ³
+墓	b ɔ ŋ ³ ³
+墘	k ĩ ² ³
+墜	t u i ³ ³	tʰ u i ³ ³
+增	t͡s i ɪ ŋ ⁴ ⁴
+墣	pʰ ɔ k̚ ³ ²
+墨	b a k̚ ⁴	b i ɪ k̚ ⁴
+墩	t u n ⁴ ⁴
+墮	t u i ³ ³
+墳	h u n ² ³	pʰ u n ² ³
+墾	kʰ u n ⁴ ¹
+壁	p i a ʔ ³ ²	p i ɪ k̚ ³ ²
+壅	i ɔ ŋ ⁴ ⁴	i ɪ ŋ ² ¹
+壇	t a n ² ³	t u ã ² ³
+壈	l a m ⁴ ¹
+壏	n ã ³ ³
+壑	h ɔ k̚ ³ ²
+壓	a p̚ ³ ²	a ʔ ³ ²
+壕	h ɤ ² ³
+壘	l u i ⁴ ¹
+壞	h a i ³ ³	h u a i ³ ³
+壟	l i ɔ ŋ ⁴ ¹	l ɔ ŋ ⁴ ¹
+壢	l i ɪ k̚ ⁴
+壤	z i a ŋ ⁴ ¹	z i ɔ ŋ ⁴ ¹
+壩	p a ² ¹	p e ² ¹
+士	s u ³ ³
+壬	z i m ² ³	z i m ³ ³
+壯	t͡s a ŋ ² ¹	t͡s ɔ ŋ ² ¹
+壹	i t̚ ³ ²	t͡s i t̚ ⁴
+壺	h ɔ ² ³	ɔ ² ³
+壽	s i u ³ ³
+夆	h ɔ ŋ ³ ³	h ɔ ŋ ³ ⁵
+夊	s u i ⁴ ⁴
+夏	h a ³ ³	h e ³ ³
+夕	s i a ʔ ⁴	s i ɪ k̚ ⁴
+外	ɡ u a ³ ³	ɡ u e ³ ³
+夙	s i ɔ k̚ ³ ²
+多	t ɤ ⁴ ⁴	t͡s e ³ ³
+夜	i a ³ ³	m ẽ ² ³
+夠	k a u ² ¹
+夢	b a ŋ ³ ³	b ɔ ŋ ³ ³
+夤	i n ² ³
+夥	h u e ⁴ ¹
+大	t a i ³ ³	t u a ³ ³
+天	tʰ i ɛ n ⁴ ⁴	tʰ ĩ ⁴ ⁴
+太	tʰ a i ² ¹
+夫	h u ⁴ ⁴	p ɔ ⁴ ⁴
+夬	k u a i ⁴ ¹	k u a t̚ ³ ²
+夭	i a u ⁴ ¹
+央	i a ŋ ⁴ ⁴	i ɔ ŋ ⁴ ⁴	ŋ̍ ⁴ ⁴
+夯	h a ŋ ⁴ ⁴
+失	s i t̚ ³ ²
+夷	i ² ³	tʰ a i ² ³
+夾	k a p̚ ³ ²	k a ʔ ³ ²	k i a p̚ ³ ²	ŋ ẽ ʔ ³ ²	ɡ i a p̚ ³ ²
+奄	a m ⁴ ⁴	i a m ⁴ ¹
+奅	pʰ ã ³ ³
+奇	k i ² ³	kʰ a ⁴ ⁴	kʰ i a ⁴ ⁴
+奈	n ã i ³ ³	t a ³ ³	t a ⁴ ⁴
+奉	h ɔ ŋ ³ ³
+奊	k u i ² ³
+奎	k e ⁴ ⁴	k u i ⁴ ⁴
+奏	t͡s a u ² ¹	t͡s a u ⁴ ¹
+奐	h u a n ² ¹
+契	kʰ e ² ¹
+奒	h a i ⁴ ⁴
+奔	p u n ⁴ ⁴	pʰ u n ⁴ ⁴
+奕	i ³ ³
+套	s u ⁴ ⁴	tʰ ɤ ² ¹
+奘	t͡s ɔ ŋ ³ ³
+奚	h e ² ³
+奠	t i ɛ n ³ ³
+奢	t͡sʰ i a ⁴ ⁴
+奧	a u ² ¹	ɤ ² ¹
+奩	l i a m ² ³
+奪	t e ʔ ⁴	t u a t̚ ⁴
+奭	s i ɪ k̚ ³ ²
+奮	h u n ² ¹
+女	l u ⁴ ¹
+奴	l ɔ ² ³
+奶	l i ɪ ŋ ⁴ ⁴	n ã i ⁴ ¹	n ã i ⁴ ⁴	n ẽ ⁴ ⁴
+奸	k a n ⁴ ⁴
+她	i ⁴ ⁴	tʰ ã ⁴ ⁴	tʰ ɤ ⁴ ⁴
+好	h ɔ̃ ² ¹	h ɤ ⁴ ¹
+如	z u ² ³
+妃	h u i ⁴ ⁴
+妄	b ɔ ŋ ³ ³
+妊	z i m ³ ³
+妒	t ɔ ² ¹
+妓	k i ³ ³	k i ⁴ ⁴
+妖	i a u ⁴ ⁴
+妗	k i m ³ ³
+妙	b i a u ³ ³	m i ã u ³ ³
+妝	t͡s ŋ̍ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+妞	n i ũ ⁴ ⁴
+妣	p i ⁴ ¹
+妥	tʰ ɤ ² ¹
+妨	h ɔ ŋ ² ³
+妲	t a t̚ ³ ²	tʰ a n ⁴ ¹
+妳	l i ⁴ ¹	n ĩ ⁴ ¹
+妹	m u ẽ ³ ³
+妻	t͡sʰ e ⁴ ⁴
+妾	t͡sʰ i a p̚ ³ ²
+姆	b ɤ ⁴ ¹	m̩ ⁴ ¹
+姊	t͡s e ⁴ ¹	t͡s i ⁴ ¹
+始	s i ⁴ ¹
+姐	t͡s e ⁴ ¹	t͡s i a ⁴ ¹
+姑	k ɔ ⁴ ⁴
+姒	s a i ³ ³
+姓	s i ɪ ŋ ² ¹	s ẽ ² ¹
+委	u i ⁴ ¹
+姘	pʰ i ɪ ŋ ⁴ ⁴
+姚	i a u ² ³	i ɤ ² ³
+姜	k i ũ ⁴ ⁴	k i ɔ ŋ ⁴ ⁴	kʰ i ũ ⁴ ⁴	kʰ i ɔ ŋ ⁴ ⁴
+姣	h i a u ² ³
+姦	k a n ² ¹	k a n ⁴ ⁴
+姨	i ² ³
+姪	t i t̚ ⁴	t͡s i t̚ ³ ²
+姬	k i ⁴ ⁴
+姻	i n ⁴ ⁴	i ɛ n ⁴ ⁴
+姿	t͡s u ⁴ ⁴
+威	u i ⁴ ⁴
+娃	u a ⁴ ⁴
+娉	pʰ i ɪ ŋ ² ¹	pʰ i ɪ ŋ ⁴ ⁴
+娎	h i a u ʔ ³ ²
+娘	n i ũ ² ³
+娛	ŋ ɔ̃ ² ³	ɡ u ² ³	ɡ ɔ ² ³
+娜	n ã ³ ³	n ã ⁴ ¹	n ã ⁴ ⁴
+娟	k u a n ⁴ ⁴
+娠	s i n ⁴ ⁴
+娥	ŋ ɔ̃ ² ³
+娩	b i ɛ n ⁴ ¹
+娶	t͡sʰ u a ³ ³	t͡sʰ u ³ ³
+娼	t͡sʰ a ŋ ⁴ ⁴	t͡sʰ i ɔ ŋ ⁴ ⁴
+婀	ɤ ⁴ ⁴
+婁	l ɔ ² ³
+婆	p ɤ ² ³
+婉	u a n ⁴ ¹
+婊	p i a u ⁴ ¹
+婚	h u n ⁴ ⁴
+婢	p i ³ ³
+婦	h u ³ ³	p u ³ ³
+婭	a ² ¹
+婷	t i ɪ ŋ ² ³
+婿	s a i ² ¹
+媌	b a ² ³
+媒	h m̩ ² ³	m u ã i ² ³	m u ĩ ² ³	m u ẽ ² ³
+媚	b i ³ ³
+媛	u a n ³ ³
+媠	s u i ⁴ ¹
+媧	k u a ⁴ ⁴	u a ⁴ ⁴	ɤ ⁴ ⁴
+媯	ɡ u i ³ ³
+媳	s i ɪ k̚ ³ ²
+媵	i n ³ ³
+媸	t͡sʰ i ⁴ ⁴
+媼	a u ⁴ ¹	u n ⁴ ¹
+媽	m ã ⁴ ¹
+媾	k ɔ ² ¹
+嫁	k a ² ¹	k e ² ¹
+嫂	s ɤ ⁴ ¹
+嫉	t͡s i t̚ ⁴	t͡s i ɪ k̚ ⁴
+嫌	h i a m ² ³
+嫐	h i a u ² ³
+嫖	pʰ i a u ² ³
+嫠	l i ² ³
+嫡	t i ɪ k̚ ³ ²
+嫢	k u i ⁴ ¹	k u i ⁴ ⁴
+嫣	i ɛ n ⁴ ⁴
+嫦	s i ɔ ŋ ² ³
+嫩	l u n ³ ³
+嬈	h i a u ² ³
+嬉	h i ⁴ ⁴
+嬋	s i ɛ n ² ³
+嬌	k i a u ⁴ ⁴
+嬔	h u a n ³ ³
+嬪	p i n ² ³	p i n ³ ³
+嬰	i ɪ ŋ ⁴ ⁴	ẽ ⁴ ⁴
+嬲	l i a u ⁴ ¹	s i a u ⁴ ¹	s i ɤ ⁴ ¹
+嬸	s i m ⁴ ¹	t͡s i m ⁴ ¹
+孀	s ŋ̍ ⁴ ⁴	s ɔ ŋ ⁴ ⁴
+孅	s i a m ⁴ ⁴
+孌	l u a n ² ³
+子	t͡s i ⁴ ¹	t͡s u ⁴ ¹	z i ⁴ ¹
+孑	kʰ i ɛ t̚ ³ ²
+孔	kʰ a ŋ ⁴ ¹	kʰ ɔ ŋ ⁴ ¹
+孕	i n ³ ³	u n ³ ³
+字	t͡s u ³ ³	z i ³ ³
+存	t͡s u n ² ³
+孛	p u e ³ ³	p u t̚ ⁴
+孜	t͡s u ⁴ ⁴
+孝	h a u ² ¹	h a ² ¹
+孟	b i ɪ ŋ ³ ³
+季	k u i ² ¹
+孤	k ɔ ⁴ ⁴
+孥	l ɔ ² ³
+孩	h a i ² ³
+孫	s u n ² ¹	s u n ⁴ ⁴	s ŋ̍ ⁴ ⁴
+孰	s i ɔ k̚ ⁴
+孱	t͡sʰ a n ⁴ ⁴
+孳	t͡s u ⁴ ⁴
+孵	p u ³ ³
+學	h a k̚ ⁴	ɤ ʔ ⁴
+孽	ɡ i ɛ t̚ ³ ²	ɡ i ɛ t̚ ⁴
+孿	l u a n ² ³
+宀	b i ɛ n ² ³	b ɔ ² ³
+它	tʰ ã ⁴ ⁴	tʰ ɤ ⁴ ⁴
+宅	tʰ e ʔ ⁴
+宇	u ⁴ ¹
+守	s i u ⁴ ¹	t͡s i u ⁴ ¹	t͡s i ũ ⁴ ¹
+安	a n ⁴ ⁴	u ã ⁴ ⁴
+宋	s a ŋ ² ¹	s ɔ ŋ ² ¹
+完	u a n ² ³
+宏	h ɔ ŋ ² ³
+宓	b i t̚ ⁴	h ɔ k̚ ⁴
+宕	t ɔ ŋ ³ ³
+宗	t͡s ɔ ŋ ⁴ ⁴
+官	k u a n ⁴ ⁴	k u ã ⁴ ⁴
+宙	t i u ³ ³
+定	t i ã ³ ³	t i ɪ ŋ ³ ³
+宛	u a n ⁴ ¹
+宜	ɡ i ² ³
+客	kʰ e ʔ ³ ²	kʰ i ɪ k̚ ³ ²
+宣	s u a n ⁴ ⁴
+室	s i ɪ k̚ ³ ²
+宥	i u ³ ³
+宦	h u a n ³ ³
+宮	k i ɔ ŋ ⁴ ⁴	k i ɪ ŋ ⁴ ⁴
+宰	t͡s a i ⁴ ¹	t͡s ã i ⁴ ¹
+害	h a i ³ ³
+宴	i ɛ n ² ¹
+宵	s i a u ⁴ ⁴
+家	k a ⁴ ⁴	k e ⁴ ⁴	kʰ i a ⁴ ⁴
+宸	s i n ² ³
+容	i ɔ ŋ ² ³
+宿	s i u ² ¹	s i ɔ k̚ ³ ²	s ɔ k̚ ³ ²
+寂	s i ɔ k̚ ³ ²	t͡s i a u ʔ ³ ²	t͡s i p̚ ⁴	t͡s i t̚ ⁴	t͡s i ɪ k̚ ⁴
+寄	k i a ² ¹	k i ² ¹
+寅	i n ² ³
+密	b a t̚ ⁴	b i t̚ ⁴
+寇	kʰ ɔ ² ¹
+富	h u ² ¹	p u ² ¹
+寐	b i ³ ³
+寒	h a n ² ³	k u ã ² ³
+寓	ɡ u ³ ³
+寞	b ɔ k̚ ⁴
+察	t͡sʰ a t̚ ³ ²
+寡	k u a ⁴ ¹	k u ã ⁴ ¹
+寢	t͡sʰ i m ⁴ ¹
+寤	ɡ ɔ ³ ³
+寥	l i a u ² ³
+實	s i t̚ ⁴	t͡s a t̚ ⁴
+寧	l i ɪ ŋ ² ³
+寨	t͡s e ³ ³
+審	s i m ⁴ ¹
+寫	s i a ⁴ ¹
+寬	kʰ u a n ⁴ ⁴	kʰ u ã ⁴ ⁴
+寮	l i a u ² ³
+寵	tʰ i ɔ ŋ ⁴ ¹	tʰ i ɪ ŋ ⁴ ¹
+寶	p ɤ ⁴ ¹
+寸	t͡sʰ u n ² ¹
+寺	s i ³ ³	s u ³ ³
+封	h ɔ ŋ ⁴ ⁴	p a ŋ ⁴ ⁴
+尃	h u ⁴ ⁴
+射	i a ² ¹	i ɪ k̚ ⁴	s i a ³ ³	s i ɪ k̚ ⁴
+將	t͡s i a ŋ ² ¹	t͡s i ɔ ŋ ² ¹	t͡s i ɔ ŋ ⁴ ⁴	t͡sʰ i ɔ ŋ ⁴ ⁴
+專	t͡s u a n ⁴ ⁴
+尉	u i ² ¹
+尊	t͡s u n ⁴ ⁴
+尋	s i a m ² ³	s i m ² ³
+對	t u i ² ¹	u i ² ¹
+導	t ɤ ³ ³	t͡sʰ u a ³ ³
+小	s i a u ² ³	s i a u ⁴ ¹	s i ɤ ⁴ ¹
+少	s i a u ² ¹	s i a u ⁴ ¹	t͡s i ɤ ⁴ ¹
+尖	t͡s i a m ⁴ ⁴
+尚	s i ũ ³ ³	s i ɔ ŋ ³ ³	s i ɔ ŋ ⁴ ¹
+尢	ɔ ŋ ⁴ ⁴
+尤	i u ² ³
+尪	a ŋ ⁴ ⁴
+就	t i ɤ ³ ³	t i ɤ ʔ ⁴	t ɤ ³ ³	t ɤ ʔ ⁴	t͡s i u ³ ³
+尸	s i ⁴ ⁴
+尹	u n ⁴ ¹
+尺	t͡sʰ e ⁴ ⁴	t͡sʰ i ɤ ʔ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+尻	kʰ a ⁴ ⁴
+尼	l i ² ³
+尾	b i ⁴ ¹	b u e ⁴ ¹
+尿	n i ã u ³ ³	z i ɤ ³ ³
+局	k i ɔ k̚ ⁴	k i ɪ k̚ ⁴
+屁	pʰ u i ² ¹
+屄	b a i ⁴ ⁴	p i ⁴ ⁴
+居	k i ⁴ ⁴	k u ² ¹
+屆	k a i ² ¹	k a i ⁴ ¹
+屇	t i ɛ n ² ³
+屈	kʰ u t̚ ³ ²
+屋	ɔ k̚ ³ ²
+屌	t i a u ⁴ ¹
+屍	s i ⁴ ⁴
+屎	s a i ⁴ ¹	s u ⁴ ¹
+屏	p i n ² ³
+屐	k i a ʔ ⁴
+屑	s a p̚ ³ ²	s e ʔ ³ ²	s i ɛ t̚ ³ ²	s u t̚ ³ ²
+展	t i ɛ n ⁴ ¹	tʰ i ɛ n ⁴ ¹
+屘	b a n ⁴ ⁴
+屙	ɤ ⁴ ⁴
+屜	tʰ u a ʔ ³ ²
+屠	t ɔ ² ³	t ɔ ⁴ ¹
+屢	l i ⁴ ¹
+層	t͡s a n ² ³	t͡s a n ² ¹
+履	l i ⁴ ¹
+屧	s i a p̚ ³ ²
+屬	s i ɔ k̚ ⁴	t͡s i ɔ k̚ ³ ²
+屮	tʰ i ɛ t̚ ³ ²
+屯	t u n ³ ³	t u n ⁴ ⁴
+山	s a n ⁴ ⁴	s u ã ⁴ ⁴
+屹	k i t̚ ³ ²	ɡ i t̚ ³ ²	ɡ u t̚ ³ ²
+岌	ɡ i p̚ ⁴
+岐	k i ² ³
+岑	ɡ i m ² ³
+岔	t͡sʰ e ⁴ ⁴
+岜	p a ⁴ ⁴
+岡	k ɔ ŋ ⁴ ⁴
+岩	ɡ a m ² ³	ɡ i a m ² ³
+岫	s i u ³ ³
+岳	ɡ a k̚ ⁴
+岷	b i n ² ³
+岸	h u ã ³ ³	ɡ a n ³ ³
+峇	b a ² ³	b a ³ ³
+峨	ŋ ɔ̃ ² ³	ɡ ɤ ² ³
+峰	h ɔ ŋ ⁴ ⁴
+島	t ɤ ⁴ ¹
+峻	t͡s u n ² ¹
+峽	k i a p̚ ³ ²
+崁	kʰ a m ² ¹
+崇	t͡s ɔ ŋ ² ³
+崎	k i a ³ ³	k i ² ³	kʰ i ⁴ ⁴
+崔	t͡sʰ u i ⁴ ⁴
+崖	ɡ a i ² ³
+崗	k a ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+崙	l u n ³ ³
+崛	k u t̚ ⁴
+崢	t͡s i ɪ ŋ ⁴ ⁴
+崩	p a ŋ ⁴ ⁴	p i ɪ ŋ ⁴ ⁴	pʰ i ɪ ŋ ⁴ ⁴
+崴	u e ⁴ ⁴
+崽	t͡s ã i ⁴ ¹
+嵊	s i ɪ ŋ ³ ³
+嵐	l a m ² ³
+嶄	t͡s a m ² ³	t͡s a m ² ¹	t͡s a m ⁴ ¹	t͡s ã ⁴ ¹
+嶇	kʰ u ⁴ ⁴
+嶝	t i ɪ ŋ ² ¹
+嶮	h i a m ⁴ ¹
+嶸	i ɪ ŋ ² ³
+嶺	l i ɪ ŋ ⁴ ¹	n i ã ⁴ ¹
+嶼	s u ³ ³
+嶽	ɡ a k̚ ⁴
+巒	l u a n ² ³
+巔	t i ɛ n ⁴ ⁴
+川	t͡sʰ u a n ⁴ ⁴	t͡sʰ ŋ̍ ⁴ ⁴
+州	t͡s i u ⁴ ⁴
+巠	k i ɪ ŋ ⁴ ⁴
+巡	s u n ² ³
+巢	s i u ³ ³	t͡s a u ² ³
+工	k a ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴	kʰ a ŋ ⁴ ⁴
+左	t͡s ɤ ⁴ ¹
+巧	kʰ a u ⁴ ¹	kʰ a ⁴ ¹	kʰ i a u ⁴ ¹
+巨	k i ³ ³
+巫	b u ² ³
+差	t͡sʰ a i ⁴ ⁴	t͡sʰ a ⁴ ⁴	t͡sʰ e ⁴ ⁴	t͡sʰ i ⁴ ⁴
+己	k i ³ ³	k i ⁴ ¹
+已	i ⁴ ¹
+巳	s u ³ ³	t͡s i ³ ³
+巴	p a ⁴ ⁴
+巷	h a ŋ ³ ³
+巽	s u n ² ¹
+巾	k i n ⁴ ⁴
+市	s i ³ ³	t͡sʰ i ³ ³
+布	p ɔ ² ¹
+帆	h u a n ² ³	pʰ a ŋ ² ³
+希	h i ⁴ ⁴
+帑	l ɔ ² ³	tʰ ɔ ŋ ⁴ ¹
+帕	pʰ e ² ¹
+帖	tʰ i a p̚ ³ ²
+帙	t i ɛ t̚ ⁴
+帚	t͡s i u ⁴ ¹	t͡sʰ i u ⁴ ¹
+帛	p e ʔ ⁴	p i ɪ k̚ ⁴
+帝	t e ² ¹
+帥	s u e ² ¹
+師	s a i ⁴ ⁴	s u ⁴ ⁴
+席	s i ɪ k̚ ⁴	t͡sʰ i ɤ ʔ ⁴
+帳	t i ũ ² ¹	t i ɔ ŋ ² ¹
+帶	t a i ² ¹	t e ² ¹	t u a ² ¹	t͡s a ʔ ³ ²
+帷	u i ² ³
+常	s i ũ ² ³	s i ɔ ŋ ² ³	s i ɤ ² ³	t͡sʰ i a ŋ ² ³
+帽	b ɤ ³ ³
+幅	h ɔ k̚ ³ ²	p a k̚ ³ ²
+幌	h i ɛ n ⁴ ¹	h ã i ² ¹
+幔	b a n ³ ³	m u ã ⁴ ⁴
+幕	b ɔ k̚ ⁴	b ɔ ³ ³
+幛	t͡s i ũ ² ¹
+幟	t͡s i ² ¹
+幡	h u a n ⁴ ⁴
+幢	t ɔ ŋ ² ³
+幣	p e ² ¹	p e ³ ³
+幫	p a ŋ ⁴ ⁴	p ŋ̍ ⁴ ⁴
+干	k a n ⁴ ⁴
+平	p i ã ² ³	p i ɪ ŋ ² ³	p ẽ ² ³	pʰ i ã ² ³	pʰ ĩ ² ³
+年	l i ɛ n ² ³	n ĩ ² ³
+幵	k i ɛ n ⁴ ⁴	kʰ i ɛ n ⁴ ⁴
+幸	h i ɪ ŋ ³ ³
+幹	k a n ² ¹
+幺	a u ⁴ ⁴	i ɤ ⁴ ⁴
+幻	h u a n ² ¹
+幼	i u ² ¹
+幽	i u ⁴ ⁴
+幾	k i ⁴ ¹	k u i ⁴ ¹
+庇	p i ² ¹
+床	s ŋ̍ ² ³	t͡sʰ ŋ̍ ² ³	t͡sʰ ɔ ŋ ² ³
+序	s i ³ ³	s u ³ ³
+底	t e ʔ ³ ²	t e ⁴ ¹	t i ³ ³	t i ⁴ ¹
+庖	p a u ² ³
+店	t i a m ² ¹
+庚	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+府	h u ⁴ ¹
+庠	s i ɔ ŋ ² ³
+度	t ɔ k̚ ⁴	t ɔ ³ ³
+座	t͡s e ³ ³	t͡s ɤ ³ ³	t͡s ɤ ⁴ ¹
+庫	kʰ ɔ ² ¹
+庭	t i ã ² ³	t i ɪ ŋ ² ³
+庵	a m ⁴ ⁴
+庶	s u ² ¹
+康	kʰ ŋ̍ ⁴ ⁴	kʰ ɔ ŋ ⁴ ⁴
+庸	i ũ ² ³	i ɔ ŋ ² ³
+庾	l u ⁴ ¹	z u ⁴ ¹
+廁	t͡sʰ e ² ¹	t͡sʰ i ɪ k̚ ³ ²
+廂	s i ũ ⁴ ⁴	s i ɔ ŋ ⁴ ⁴
+廈	e ³ ³	h a ³ ³
+廉	l i a m ² ³
+廊	l ɔ ŋ ² ³
+廍	pʰ ɔ ³ ³
+廒	ŋ ɔ̃ ² ³	ɡ ɤ ² ³
+廓	kʰ ɔ k̚ ³ ²
+廖	l i a u ³ ³
+廚	t u ² ³	t ɔ ² ³
+廛	t i ɛ n ² ³
+廟	b i ɤ ³ ³
+廠	t͡sʰ i ũ ⁴ ¹
+廡	b u ² ³	b u ⁴ ¹	m u ã ⁴ ⁴
+廢	h u e ² ¹	h u i ² ¹
+廣	k ŋ̍ ⁴ ¹	k ɔ ŋ ⁴ ¹
+廬	l ɔ ² ³
+廳	tʰ i ã ⁴ ⁴	tʰ i ɪ ŋ ⁴ ⁴
+廴	i n ⁴ ⁴
+延	i ɛ n ² ³	t͡sʰ i ɛ n ² ³
+廷	t i ɪ ŋ ² ³
+建	k i ɛ n ² ¹
+廿	z i a p̚ ⁴
+弄	l a ŋ ³ ³	l ɔ ŋ ³ ³
+弈	i ɪ k̚ ⁴
+弊	p e ² ¹	p e ³ ³
+弋	i ɪ k̚ ⁴
+式	s i t̚ ³ ²	s i ɪ k̚ ³ ²
+弒	s i ² ¹	t͡sʰ i ² ¹
+弓	k i ɔ ŋ ⁴ ⁴	k i ɪ ŋ ⁴ ⁴
+引	i n ⁴ ¹
+弗	h u t̚ ³ ²
+弘	h ɔ ŋ ² ³
+弛	s i ⁴ ¹
+弟	t e ³ ³	t i ³ ³	t i ʔ ³ ²
+弦	h i ɛ n ² ³
+弧	h ɔ ² ³	ɔ ² ³
+弭	b i ⁴ ¹
+弱	z i a k̚ ⁴	z i ɔ k̚ ⁴
+弳	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+張	t i ũ ⁴ ⁴	t i ɔ ŋ ⁴ ⁴	t ŋ̍ ⁴ ⁴
+強	k i ɔ ŋ ² ³	k i ɔ ŋ ³ ³	k i ɔ ŋ ⁴ ¹
+弼	p i t̚ ⁴
+彀	k ɔ ² ¹
+彈	t a n ² ³	t a n ³ ³	t u ã ² ³	t u ã ³ ³	tʰ a n ² ³
+彊	k i ɔ ŋ ² ³
+彌	b i ² ³	b i ⁴ ¹	m ĩ ² ³	m ĩ ⁴ ¹	n ĩ ² ³	n ĩ ⁴ ¹
+彎	u a n ⁴ ⁴	u ã i ⁴ ⁴
+彐	k e ² ¹
+彔	l i ɔ k̚ ⁴
+彖	tʰ u a n ² ¹
+彗	h u i ³ ³
+彘	t e ³ ³
+彙	l u i ³ ³
+彡	s a m ⁴ ⁴
+形	h i ɪ ŋ ² ³
+彤	t ɔ ŋ ² ³
+彥	ɡ a n ³ ³	ɡ i ɛ n ³ ³
+彧	h i ɔ k̚ ³ ²
+彩	t͡sʰ a i ⁴ ¹
+彪	p i u ⁴ ⁴	pʰ i u ⁴ ⁴
+彬	p i n ⁴ ⁴
+彭	pʰ i ɪ ŋ ² ³	pʰ ẽ ² ³
+彰	t͡s i ɔ ŋ ⁴ ⁴
+影	i ã ⁴ ¹	i ɪ ŋ ⁴ ¹	ŋ̍ ⁴ ¹
+彳	t͡sʰ i ɪ k̚ ³ ²
+彷	h ɔ ŋ ⁴ ¹
+役	i a ʔ ⁴	i ɪ k̚ ⁴
+彼	h e ⁴ ⁴	h i t̚ ³ ²	p i ⁴ ¹
+彿	h u t̚ ³ ²
+往	i ɪ ŋ ⁴ ¹	ɔ ŋ ⁴ ¹
+征	t͡s i ɪ ŋ ⁴ ⁴
+待	t a i ³ ³	tʰ a i ³ ³
+很	h u n ⁴ ¹
+徊	h u a i ² ³	h u e ² ³
+律	l u t̚ ⁴
+後	a u ³ ³	h a u ³ ³	h i ɤ ³ ³	h ɔ ³ ³
+徐	t͡sʰ i ² ³
+徑	k i ɪ ŋ ² ¹	k ĩ ² ¹
+徒	t ɔ ² ³
+得	t i t̚ ³ ²	t i ɪ k̚ ³ ²
+徘	p a i ² ³
+徙	s u a ⁴ ¹
+徛	k i ² ¹	kʰ i a ³ ³
+徜	s i ɔ ŋ ² ³
+徝	tʰ i t̚ ⁴
+從	t͡s i ɔ ŋ ² ³	t͡s i ɔ ŋ ³ ³	t͡s i ɔ ŋ ⁴ ⁴	t͡s i ɪ ŋ ² ³	t͡s ŋ̍ ² ³	t͡sʰ i ɔ ŋ ² ¹	t͡sʰ i ɔ ŋ ⁴ ⁴
+御	ɡ i ³ ³	ɡ u ³ ³
+復	h ɔ k̚ ⁴
+循	s u n ² ³
+徭	i a u ² ³
+微	b i ² ³	b i ⁴ ⁴	b u e ⁴ ⁴	b u i ⁴ ⁴
+徵	t i n ⁴ ⁴	t i ⁴ ¹	t͡s ŋ̍ ⁴ ⁴
+德	t i ɪ k̚ ³ ²
+徹	tʰ e ʔ ³ ²	tʰ i ɛ t̚ ³ ²
+徼	k i a u ² ¹
+徽	h u i ⁴ ⁴
+心	s i m ⁴ ⁴
+必	p i t̚ ³ ²
+忌	k i ³ ³	kʰ i ³ ³
+忍	l u n ⁴ ¹	z i m ⁴ ¹
+忐	tʰ a m ⁴ ¹
+忑	tʰ i ɪ k̚ ³ ²
+忒	tʰ i ɪ k̚ ³ ²
+忖	t͡sʰ u n ⁴ ¹
+志	t͡s i ² ¹
+忘	b ɔ ŋ ² ³	b ɔ ŋ ³ ³
+忙	b a ŋ ² ³	b ɔ ŋ ² ³
+忝	tʰ i a m ⁴ ¹
+忠	t i ɔ ŋ ⁴ ⁴
+快	kʰ u a i ² ¹	kʰ u ĩ ² ¹
+忱	s i m ² ³
+念	l i a m ³ ³
+忽	h u t̚ ³ ²
+忿	h u n ⁴ ¹
+怎	t͡s a i ⁴ ¹	t͡s a ⁴ ¹	t͡s i m ⁴ ¹	t͡s u a ⁴ ¹	t͡s u ã ⁴ ¹	t͡s ã i ⁴ ¹
+怒	l ɔ ³ ³	n ɔ̃ ³ ³
+怕	pʰ a ² ¹	pʰ ã ² ¹
+怖	p ɔ ² ¹
+思	s i ⁴ ⁴	s u ² ¹	s u ⁴ ⁴
+怠	t a i ³ ³
+怡	i ² ³
+急	k i p̚ ³ ²
+怦	pʰ ẽ ³ ³
+性	s i ɪ ŋ ² ¹	s ẽ ² ¹
+怨	u a n ² ¹
+怪	k u a i ² ¹	k u e ² ¹
+怯	kʰ i a p̚ ³ ²
+恁	l i n ⁴ ¹	z i m ³ ³
+恂	s u n ⁴ ¹
+恆	h i ɪ ŋ ² ³
+恍	h u ã ⁴ ¹	h ɔ ŋ ⁴ ¹
+恐	kʰ i ɔ ŋ ⁴ ¹
+恕	s u ² ¹
+恙	i ɔ ŋ ³ ³
+恢	h e ⁴ ⁴	h u e ⁴ ⁴	kʰ u e ⁴ ⁴
+恤	s u t̚ ³ ²
+恥	tʰ i ⁴ ¹
+恨	h i n ³ ³
+恩	u n ⁴ ⁴
+恬	t i a m ³ ³
+恭	k i ɔ ŋ ⁴ ⁴
+息	s i t̚ ³ ²	s i ɪ k̚ ³ ²
+恰	kʰ a p̚ ³ ²
+恿	i ɔ ŋ ⁴ ¹
+悄	t͡sʰ i a u ⁴ ¹
+悉	s i t̚ ³ ²	s i ɪ k̚ ³ ²
+悌	t e ³ ³
+悔	h u e ⁴ ¹	h u i ⁴ ¹
+悖	p u e ³ ³
+悟	ŋ ɔ̃ ³ ³	ɡ ɔ ³ ³
+悠	i u ² ³	i u ⁴ ⁴
+患	h u a n ³ ³
+悲	p i ⁴ ⁴
+悶	b u n ³ ³
+悼	t ɤ ³ ³
+悾	kʰ ɔ ŋ ⁴ ⁴
+悿	tʰ i a m ⁴ ¹
+情	t͡s i ã ² ³	t͡s i ɪ ŋ ² ³
+惑	h i ɪ k̚ ⁴
+惘	b ɔ ŋ ² ¹
+惙	tʰ u e ² ¹
+惚	h u t̚ ³ ²
+惜	s i ɤ ʔ ³ ²	s i ɪ k̚ ³ ²
+惝	tʰ ɔ ŋ ⁴ ¹
+惟	i ² ³	u i ² ³
+惠	h u i ³ ³
+惡	ɔ k̚ ³ ²	ɔ̃ ² ¹	ɤ ʔ ³ ²
+惦	t i a m ² ¹
+惰	t u ã ³ ³	t ɤ ³ ³
+惱	l ɔ ⁴ ¹	l ɤ ⁴ ¹	n ã u ⁴ ¹
+想	s i ũ ³ ³	s i ɔ ŋ ⁴ ¹
+惶	h i ã ² ³	h ɔ ŋ ² ³
+惹	z i a ⁴ ¹
+惻	t͡sʰ i ɪ k̚ ³ ²
+愁	t͡sʰ i u ² ³
+愈	z u ⁴ ¹
+愉	z u ² ³
+愍	b i n ⁴ ¹	b i ɛ n ⁴ ¹
+愎	p i ɪ k̚ ⁴
+意	i ² ¹
+愐	b i ɛ n ⁴ ¹
+愔	i m ⁴ ⁴
+愕	ŋ i ã ʔ ⁴	ɡ i a ʔ ⁴	ɡ ɔ k̚ ⁴
+愖	s i m ³ ³
+愚	ɡ u ² ³
+愛	a i ² ¹
+愜	k i a p̚ ³ ²
+感	k a m ⁴ ¹
+愧	kʰ u i ² ¹
+愫	s ɔ ² ¹
+愾	h i ² ¹	kʰ a i ² ¹
+慈	t͡s u ² ³
+態	tʰ a i ² ¹	tʰ a i ³ ³
+慌	h ɔ ŋ ⁴ ⁴
+慍	u n ² ¹
+慎	s i m ³ ³	s i n ³ ³
+慒	t͡s ɤ ⁴ ⁴
+慕	b ɔ ³ ³
+慘	t͡sʰ a m ⁴ ¹
+慚	t͡sʰ a m ² ³	t͡sʰ a n ² ³
+慟	t ɔ ŋ ³ ³
+慢	b a n ³ ³
+慣	k u a n ² ¹	k u ã i ² ¹
+慧	h u e ³ ³	h u i ³ ³
+慨	kʰ a i ² ¹
+慮	l i ³ ³
+慰	u i ² ¹
+慶	kʰ i ɪ ŋ ² ¹
+慷	kʰ ɔ ŋ ⁴ ¹
+慼	t͡sʰ e ʔ ³ ²
+慾	i ɔ k̚ ⁴
+憂	i u ⁴ ⁴
+憊	p e ³ ³
+憋	p e ʔ ³ ²	p i ʔ ³ ²
+憎	t͡s i ɪ ŋ ⁴ ⁴
+憐	l i n ² ³	l i ɛ n ² ³
+憑	p i n ² ³	p i ɪ ŋ ² ³
+憔	t a ² ³	t͡s i a u ² ³
+憚	t a n ³ ³	t u ã ³ ³
+憢	ɡ i a u ² ³
+憤	h u n ² ¹
+憧	t͡sʰ i ɔ ŋ ⁴ ⁴
+憩	kʰ e ² ¹
+憫	b i n ⁴ ¹
+憬	k i ɪ ŋ ⁴ ¹
+憭	l i a u ⁴ ¹
+憯	t͡sʰ a m ⁴ ¹
+憲	h i ɛ n ² ¹
+憶	i t̚ ³ ²	i ɪ k̚ ³ ²
+憾	h a m ³ ³
+懂	t a ŋ ⁴ ¹	t ɔ ŋ ⁴ ¹
+懇	kʰ u n ⁴ ¹
+懈	h a i ³ ³
+應	i n ² ¹	i ɪ ŋ ² ¹	i ɪ ŋ ⁴ ⁴
+懊	a u ² ¹	ɤ ² ¹
+懍	l u n ⁴ ¹
+懦	n ɔ̃ ³ ³
+懲	t i ɪ ŋ ² ³
+懵	b a ŋ ⁴ ¹
+懶	l a n ⁴ ¹	n u ã ³ ³
+懷	h u a i ² ³	k u i ³ ³
+懸	h i ɛ n ² ³	k u a n ² ³
+懺	t͡sʰ a m ² ¹
+懼	k u ³ ³	kʰ u ³ ³
+懾	l i a p̚ ³ ²
+懿	i ² ¹
+戀	l u a n ² ³
+戇	ɡ ɔ ŋ ³ ³
+戈	k ɤ ⁴ ⁴
+戊	b ɔ ³ ³
+戌	s u t̚ ³ ²
+戍	s u ² ¹
+戎	z i ɔ ŋ ² ³
+成	s i ã ² ³	s i ɪ ŋ ² ³	t͡s i ã ² ³	t͡sʰ i ã ² ³
+我	ŋ ɔ̃ ⁴ ¹	ɡ u a ⁴ ¹
+戒	k a i ² ¹
+戔	t͡s a n ² ³	t͡s i ɛ n ⁴ ⁴
+戕	t͡sʰ i a ŋ ² ³	t͡sʰ i ɔ ŋ ² ³
+或	h i ɪ k̚ ⁴
+戚	t͡sʰ i ɪ k̚ ³ ²
+戟	k i ɪ k̚ ³ ²
+戡	kʰ a m ⁴ ⁴
+戢	t͡sʰ i p̚ ³ ²
+戥	t i ɪ ŋ ⁴ ¹
+截	t͡s e ʔ ⁴	t͡s i ɛ t̚ ⁴	t͡s u e ʔ ⁴
+戮	l a k̚ ³ ²	l i ɔ k̚ ⁴
+戰	t͡s i ɛ n ² ¹
+戲	h i ² ¹
+戳	tʰ ɔ k̚ ³ ²
+戴	t a i ² ¹	t e ² ¹	t i ² ¹
+戶	h ɔ ³ ³
+戽	h ɔ ² ¹
+戾	l e ³ ³
+房	p a ŋ ² ³	p ɔ ŋ ² ³
+所	s ɔ ⁴ ¹
+扁	p i n ⁴ ¹	p i ɛ n ⁴ ¹	p u n ⁴ ¹	p ĩ ⁴ ¹
+扇	s i ɛ n ² ¹	s ĩ ² ¹
+扈	h ɔ ³ ³
+扉	h u i ⁴ ⁴
+手	s i u ⁴ ¹	t͡sʰ i u ⁴ ¹
+才	t͡s a i ² ³	t͡s i a ʔ ³ ²	t͡sʰ a i ² ³
+扎	t͡s a t̚ ³ ²	t͡s a ʔ ³ ²
+扒	p e ² ³
+打	t a ⁴ ¹	t ã ⁴ ¹
+扔	z i ɪ ŋ ² ³
+托	tʰ u ʔ ³ ²	tʰ ɔ k̚ ³ ²
+扛	k ŋ̍ ⁴ ⁴
+扢	kʰ i ɛ t̚ ³ ²
+扣	kʰ a u ² ¹	kʰ a u ⁴ ⁴
+扭	l a u ⁴ ¹	l i u ⁴ ¹	n i ũ ⁴ ¹	ŋ i ũ ⁴ ¹
+扮	p a n ³ ³
+扯	t͡sʰ e ⁴ ¹
+扱	kʰ i p̚ ⁴
+扲	ɡ i m ³ ³
+扳	p a n ⁴ ⁴	p i ɛ n ⁴ ⁴
+扶	h u ² ³	pʰ ɔ ² ³
+批	pʰ i ⁴ ⁴	pʰ u e ⁴ ⁴
+扼	i ɪ k̚ ⁴
+找	t͡s a u ³ ³	t͡sʰ u e ³ ³
+承	s i n ² ³	s i ɪ ŋ ² ³
+技	k i ³ ³	k i ⁴ ⁴
+抄	t͡sʰ a u ⁴ ⁴	t͡sʰ i a u ⁴ ⁴
+抉	k u a t̚ ³ ²
+把	p a ² ¹	p a ⁴ ¹	p e ⁴ ¹
+抌	t i m ² ¹
+抐	l a ³ ³
+抑	i a ʔ ⁴	i ɪ k̚ ³ ²
+抒	s u ⁴ ⁴
+抓	l i a u ² ¹	z i a u ² ¹	ɡ i a u ² ¹
+抔	p u t̚ ³ ²
+投	t a u ² ³
+抖	t i ɤ ³ ³
+抗	kʰ ɔ ŋ ² ¹
+折	t͡s i ɛ t̚ ³ ²	t͡s i ɪ k̚ ³ ²	t͡s i ʔ ⁴
+抨	p i ã ⁴ ⁴	p i ɪ ŋ ² ³	pʰ ĩ ⁴ ⁴
+披	pʰ i ⁴ ⁴
+抬	tʰ a i ⁴ ⁴
+抱	pʰ a u ³ ³	pʰ ɤ ³ ³
+抵	t e ⁴ ¹	t i ⁴ ¹
+抹	b u a ʔ ³ ²
+押	a p̚ ³ ²	a ʔ ³ ²
+抽	tʰ i u ⁴ ⁴
+抾	kʰ i ɤ ʔ ³ ²
+抿	b i n ⁴ ¹
+拂	h u t̚ ³ ²
+拄	t u ⁴ ¹
+拆	tʰ i a ʔ ³ ²	tʰ i ɪ k̚ ³ ²
+拇	b u ⁴ ¹	b ɤ ⁴ ¹
+拈	l i a m ⁴ ⁴	n ĩ ⁴ ⁴
+拉	l a p̚ ⁴	l a ⁴ ¹	l a ⁴ ⁴	l i a p̚ ⁴
+拊	h u ⁴ ¹
+拋	pʰ a u ⁴ ⁴	pʰ a ⁴ ⁴
+拌	p u a n ³ ³	p u ã ³ ³
+拍	pʰ a ʔ ³ ²	pʰ i ɪ k̚ ³ ²
+拎	l i ɪ ŋ ² ³
+拐	k u a i ⁴ ¹	k u ã i ³ ³
+拑	kʰ ĩ ² ³
+拒	k i ³ ³
+拓	tʰ u ʔ ³ ²	tʰ ɔ k̚ ³ ²
+拔	p u a t̚ ⁴	p u a ʔ ⁴	p u e ʔ ⁴	pʰ u a ʔ ⁴
+拖	tʰ u a ⁴ ⁴
+拗	a u ⁴ ¹
+拘	kʰ u ⁴ ⁴
+拙	t͡s u a t̚ ³ ²
+拚	p i ã ² ¹
+招	t͡s i a u ⁴ ⁴	t͡s i ɤ ⁴ ⁴
+拜	p a i ² ¹
+括	k u a t̚ ³ ²	k u a ʔ ³ ²
+拭	t͡sʰ i t̚ ³ ²
+拯	t͡s i ɪ ŋ ⁴ ¹
+拱	k i ɔ ŋ ⁴ ¹
+拳	k u a n ² ³	k u n ² ³
+拶	s u a n ⁴ ¹
+拹	h i a p̚ ⁴
+拼	p i ɪ ŋ ⁴ ⁴	pʰ i ɪ ŋ ² ¹	pʰ i ɪ ŋ ⁴ ⁴
+拾	kʰ i ɤ ʔ ³ ²	s i p̚ ⁴
+拿	n ã ⁴ ¹	tʰ e ʔ ⁴
+持	t i ² ³	t͡sʰ i ² ³
+挂	k u i ² ¹
+挃	t i ʔ ⁴
+指	k i ⁴ ¹	t͡s i ⁴ ¹	t͡s ã i ⁴ ¹
+挈	kʰ e ʔ ⁴	kʰ i ɛ t̚ ³ ²
+按	a n ² ¹
+挐	z u ² ³
+挑	tʰ i a u ⁴ ⁴	tʰ i ɤ ⁴ ⁴
+挓	tʰ a ² ¹
+挔	h i ã ʔ ³ ²
+挕	h ĩ ² ¹
+挖	i a ʔ ³ ²	u a t̚ ³ ²	u e ʔ ³ ²	ɔ ⁴ ¹
+挨	a i ⁴ ⁴	e ⁴ ⁴
+挩	tʰ u a ʔ ³ ²
+挪	n ã ⁴ ¹
+挫	t͡sʰ ɤ ² ¹
+振	t i n ⁴ ¹	t͡s i n ⁴ ¹
+挲	s ɤ ⁴ ⁴
+挵	l ɔ ŋ ² ¹
+挹	i p̚ ³ ²
+挺	tʰ i ɪ ŋ ⁴ ¹	tʰ ã ⁴ ¹
+挼	z u e ² ³
+挽	b a n ⁴ ¹	b u a n ⁴ ¹
+挾	h i a p̚ ⁴	ŋ ẽ ʔ ⁴	ɡ i a p̚ ⁴
+捀	pʰ a ŋ ² ³
+捂	ɔ̃ ⁴ ⁴
+捅	tʰ ɔ ŋ ⁴ ¹
+捆	kʰ u n ⁴ ¹
+捉	t͡sʰ i ɔ k̚ ³ ²
+捋	l u a ʔ ³ ²	l u a ʔ ⁴	l u t̚ ⁴
+捌	b a t̚ ³ ²	p e ʔ ³ ²
+捍	h a n ³ ³	h a n ⁴ ¹	h u ã ³ ³
+捎	s a u ⁴ ⁴	s a ⁴ ⁴
+捏	l i a p̚ ³ ²	l i a p̚ ⁴	n ĩ ʔ ⁴	t ẽ ³ ³
+捐	i ɛ n ² ³	k u a n ⁴ ⁴
+捒	s a k̚ ³ ²
+捔	k a k̚ ⁴
+捕	p ɔ ² ³	p ɔ ³ ³	p ɔ ⁴ ¹
+捘	t͡s u n ³ ³
+捙	t͡sʰ i a ⁴ ⁴
+捧	pʰ a ŋ ² ³	pʰ ɔ ŋ ⁴ ¹
+捨	s i a ⁴ ¹
+捩	l e ʔ ⁴
+捫	b u n ² ³
+捬	h u ⁴ ¹
+捱	e ² ³	h u e ² ³	u e ² ³	ɡ a i ² ³
+捲	k ŋ̍ ⁴ ¹
+捶	t u i ² ³
+捷	t͡s i a p̚ ⁴	t͡s i ɛ t̚ ⁴
+捺	l a t̚ ³ ²
+捻	l i a m ² ¹
+捽	t͡s u t̚ ⁴
+捾	k u ã ³ ³
+掀	h i ɛ n ⁴ ⁴
+掂	t i m ² ¹
+掃	s a u ² ¹	s ɤ ² ¹
+掄	l u n ² ³
+授	s i u ³ ³
+掉	t i a u ³ ³	t i ɤ ³ ³
+掌	t͡s i a ŋ ⁴ ¹	t͡s i ũ ⁴ ¹	t͡s i ɔ ŋ ⁴ ¹	t͡s i ɪ ŋ ⁴ ¹
+排	p a i ² ³
+掖	i a ³ ³
+掗	u e ² ¹
+掘	k u t̚ ⁴
+掙	t͡s i ã ³ ³	t͡s ĩ ⁴ ⁴
+掛	k u a ² ¹	k u i ² ¹	kʰ u a ² ¹
+掠	l i a ʔ ⁴
+採	t͡sʰ a i ⁴ ¹
+探	tʰ a m ² ¹	tʰ a m ⁴ ⁴
+掣	t͡sʰ i ɛ t̚ ³ ²	t͡sʰ u a ʔ ³ ²
+接	t͡s i a p̚ ³ ²	t͡s i ʔ ³ ²
+控	kʰ a ŋ ² ¹	kʰ ɔ ŋ ² ¹
+推	tʰ e ⁴ ⁴	tʰ u i ⁴ ⁴	t͡sʰ u i ⁴ ⁴
+掩	a m ⁴ ⁴	i a m ⁴ ¹	ŋ̍ ⁴ ⁴	ɔ m ⁴ ⁴
+措	t͡sʰ ɔ ² ¹	t͡sʰ ɤ ² ¹
+掬	k i ɔ k̚ ³ ²
+掮	kʰ ã i ⁴ ⁴
+掰	p a i ⁴ ⁴	p u e ⁴ ¹
+揀	k a n ⁴ ¹	k i ɪ ŋ ⁴ ¹
+揈	h ɔ ŋ ⁴ ⁴
+揉	z i u ² ³
+描	b i a u ² ³	b i ɤ ² ³
+提	e ʔ ⁴	tʰ e ² ³	tʰ e ʔ ⁴
+插	t͡sʰ a p̚ ³ ²	t͡sʰ a ʔ ³ ²
+揕	t i m ² ¹
+揖	i p̚ ³ ²
+揚	i ɔ ŋ ² ³	t͡sʰ i ũ ² ³
+換	h u a n ² ¹	h u a n ³ ³	u ã ³ ³
+揜	i a p̚ ³ ²
+揞	a m ⁴ ¹	ã ² ¹
+揠	a t̚ ³ ²
+握	a k̚ ³ ²
+揣	t͡sʰ u e ³ ³	t͡sʰ u e ⁴ ¹
+揤	t͡sʰ i ʔ ⁴	z i ʔ ⁴
+揪	kʰ i u ⁴ ¹	t͡sʰ i u ² ³
+揬	t u ʔ ⁴
+揭	k i ɛ t̚ ³ ²	k i ɛ t̚ ⁴	kʰ i ɛ t̚ ³ ²
+揮	h u i ⁴ ⁴
+揲	t i a p̚ ⁴
+揳	s u e ʔ ³ ²
+援	h u a n ³ ³	u a n ³ ³
+揹	pʰ ã i ³ ³
+揻	u i ⁴ ⁴
+損	s u n ⁴ ¹	s ŋ̍ ⁴ ¹
+搏	pʰ ɔ k̚ ³ ²
+搐	t i u ʔ ³ ²
+搓	s ɤ ⁴ ⁴	t͡sʰ ɤ ⁴ ⁴
+搔	s ɤ ⁴ ⁴
+搖	i a u ² ³	i ɤ ² ³
+搗	t a u ⁴ ¹
+搜	s ɔ ⁴ ¹	s ɔ ⁴ ⁴	t͡sʰ i a u ² ³	t͡sʰ i a u ⁴ ⁴
+搝	kʰ i u ⁴ ¹	ɡ i u ⁴ ¹
+搟	h i ɛ n ⁴ ¹
+搢	t͡s ĩ ² ¹
+搣	b i ɛ t̚ ⁴	m ẽ ⁴ ⁴
+搤	i a ʔ ³ ²
+搦	l a k̚ ⁴	z i ɔ k̚ ⁴
+搧	s a m ² ¹	s i ɛ n ² ¹
+搩	k i ɛ t̚ ³ ²	k i ɛ t̚ ⁴
+搪	t ŋ̍ ³ ³	tʰ ŋ̍ ³ ³
+搬	p u a n ⁴ ⁴	p u ã ⁴ ⁴
+搭	t a p̚ ³ ²	t a ʔ ³ ²
+搵	u n ² ¹
+搶	t͡sʰ i ũ ⁴ ¹	t͡sʰ i ɔ ŋ ⁴ ¹
+搽	t a ² ³
+摀	ɔ ⁴ ¹
+摃	k ɔ ŋ ² ¹
+摑	k i ɪ k̚ ³ ²	k ɔ k̚ ³ ²
+摒	p i ã ² ¹	p i ɪ ŋ ² ¹
+摔	s i a k̚ ³ ²	s i a ŋ ² ¹	s u t̚ ³ ²
+摘	t i a ʔ ³ ²	t i ɪ k̚ ³ ²
+摠	t͡s a ŋ ⁴ ¹
+摧	t͡s u i ² ³	t͡sʰ u e ² ³	t͡sʰ u i ⁴ ⁴
+摩	m ɔ̃ ² ³
+摯	t͡s i ² ¹
+摳	kʰ a u ⁴ ⁴
+摵	t͡sʰ i ɪ k̚ ⁴
+摸	b ɔ ŋ ⁴ ⁴
+摺	t͡s i ʔ ³ ²
+摻	t͡sʰ a m ² ¹	t͡sʰ a m ⁴ ⁴
+摽	p i ɤ ⁴ ⁴
+撆	p i ʔ ³ ²
+撇	pʰ i ɛ t̚ ³ ²	pʰ u a t̚ ³ ²
+撈	h ɔ ² ³	l ɤ ² ³
+撏	s i a m ² ³	z i m ² ³
+撐	tʰ e ⁴ ⁴	tʰ i ɪ ŋ ⁴ ⁴	tʰ ẽ ⁴ ⁴
+撒	s u a ʔ ³ ²
+撓	ŋ i ã u ⁴ ¹
+撚	l i ɛ n ⁴ ¹
+撞	t ŋ̍ ³ ³	t ɔ ŋ ³ ³	t͡s ɔ ŋ ³ ³
+撟	t͡sʰ i a u ² ³
+撠	ɡ i a ʔ ³ ²
+撤	tʰ i ɛ t̚ ³ ²
+撥	p u a t̚ ³ ²	p u a ʔ ³ ²
+撨	t͡sʰ i a u ² ³
+撩	l i a u ² ³	l i ɤ ² ³
+撫	b u ⁴ ¹	h u ⁴ ¹
+撬	k i a u ³ ³
+播	p ɔ ² ¹	p ɤ ² ¹
+撮	t͡s u a t̚ ³ ²	t͡sʰ u a t̚ ³ ²	t͡sʰ ɔ k̚ ³ ²
+撰	t͡s u a n ³ ³
+撲	pʰ ɔ k̚ ³ ²
+撻	tʰ a t̚ ³ ²
+撼	h a m ³ ³	h a m ⁴ ¹
+撿	k i a m ⁴ ¹
+擀	k a n ⁴ ¹
+擁	i ɔ ŋ ⁴ ¹
+擂	l u i ² ³
+擄	l ɔ ⁴ ¹
+擅	s i ɛ n ³ ³
+擇	t i ɪ k̚ ⁴	t ɤ ʔ ⁴
+擉	t i a k̚ ³ ²	t i a k̚ ⁴
+擊	k i ɪ k̚ ³ ²
+擋	t ɔ ŋ ² ¹	t ɔ ŋ ⁴ ¹
+操	t͡sʰ a u ⁴ ⁴	t͡sʰ ɤ ² ¹	t͡sʰ ɤ ⁴ ¹	t͡sʰ ɤ ⁴ ⁴
+擎	k i n ² ¹	kʰ i ɪ ŋ ² ³
+擒	kʰ i m ² ³
+擔	t a m ⁴ ⁴	t ã ² ¹	t ã ⁴ ⁴
+擗	p e ʔ ³ ²	p i t̚ ⁴	pʰ i a k̚ ⁴	pʰ i ɪ k̚ ³ ²
+擘	p e ʔ ³ ²
+據	k i ² ¹
+擛	i ɛ t̚ ⁴
+擠	kʰ e ʔ ³ ²	t͡s i ɪ k̚ ³ ²
+擢	t i ɤ ʔ ³ ²
+擤	t͡sʰ i ɪ ŋ ² ¹
+擦	t͡sʰ a k̚ ³ ²	t͡sʰ a t̚ ³ ²	t͡sʰ u a ʔ ³ ²
+擬	ɡ i ⁴ ¹
+擰	l i a m ² ¹
+擱	k ɔ k̚ ³ ²	k ɤ ʔ ³ ²
+擲	t a n ² ¹
+擴	kʰ ɔ k̚ ³ ²
+擺	p a i ⁴ ¹	p ã i ⁴ ¹
+擽	ŋ i ã u ⁴ ⁴
+擾	z i a u ⁴ ¹
+攀	pʰ a n ⁴ ⁴
+攄	l u ⁴ ⁴	tʰ u ⁴ ⁴
+攆	l i ɛ n ² ¹
+攏	l a ŋ ⁴ ¹	l ɔ ŋ ⁴ ¹
+攑	ɡ i a ʔ ⁴
+攔	l a n ² ³	n u ã ² ³	ã ² ³
+攕	t͡sʰ i a m ⁴ ¹
+攙	t͡sʰ a m ⁴ ⁴
+攛	t͡sʰ u a n ² ¹
+攜	h e ² ³
+攝	l i a p̚ ³ ²
+攢	t͡sʰ u a n ² ³
+攣	l u a n ² ³	l u a n ³ ³
+攤	tʰ a n ⁴ ⁴	tʰ u ã ⁴ ⁴
+攪	k a ⁴ ¹	k i a u ʔ ³ ²	k i a u ⁴ ¹
+攬	l a m ⁴ ¹
+支	k i ⁴ ⁴	t͡s i ⁴ ⁴
+攲	kʰ i a ⁴ ⁴	kʰ i ⁴ ⁴
+攴	pʰ ɔ k̚ ³ ²
+收	s i u ⁴ ⁴
+攸	i u ² ³	i u ⁴ ⁴
+改	k a i ⁴ ¹
+攻	k ɔ ŋ ⁴ ⁴
+放	h a ŋ ² ¹	h ɔ ŋ ² ¹	kʰ ŋ̍ ² ¹	p a ŋ ² ¹
+政	t͡s i ɪ ŋ ² ¹
+故	k ɔ ² ¹
+效	h a u ³ ³
+敉	m ĩ ³ ³
+敏	b i n ⁴ ¹
+救	k i u ² ¹
+敕	tʰ i ɪ k̚ ³ ²
+敖	ŋ ɔ̃ ² ³	ŋ ɔ̃ ³ ³	ɡ ɤ ² ³	ɡ ɤ ³ ³
+敗	p a i ³ ³
+敘	s u ³ ³
+教	k a u ² ¹	k a ² ¹
+敝	p e ² ¹
+敢	k a m ⁴ ¹	k ã ⁴ ¹
+散	s a m ⁴ ¹	s a n ² ¹	s a n ⁴ ¹	s u ã ² ¹	s u ã ⁴ ¹
+敦	t u n ⁴ ⁴
+敨	tʰ a u ⁴ ¹
+敬	k i ɪ ŋ ² ¹
+敱	kʰ ã i ⁴ ¹
+敲	kʰ a u ⁴ ⁴	kʰ a ² ¹
+整	t͡s i ɪ ŋ ⁴ ¹
+敵	t i ɪ k̚ ⁴
+敷	h u ⁴ ⁴
+數	s i a u ² ¹	s ɔ k̚ ³ ²	s ɔ ² ¹	s ɔ ⁴ ¹	t͡sʰ i ɔ k̚ ³ ²
+斂	l i a m ³ ³	l i a m ⁴ ¹
+斃	p e ² ¹	p e ³ ³
+文	b u n ² ³
+斐	h u i ⁴ ¹
+斑	p a n ⁴ ⁴
+斕	l a n ² ³
+斗	t a u ʔ ³ ²	t a u ⁴ ¹	t ɔ ⁴ ¹
+料	l i a u ³ ³
+斜	s i a ² ³	t͡sʰ i a ² ³
+斟	tʰ i n ² ³	t͡s i m ⁴ ⁴
+斡	u a t̚ ³ ²	u a t̚ ⁴
+斤	k i n ⁴ ⁴
+斥	tʰ i ɪ k̚ ³ ²
+斧	h u ⁴ ¹	p ɔ ⁴ ¹
+斫	t͡s i ɔ k̚ ³ ²	t͡s i ɤ ʔ ³ ²
+斬	t͡s a m ³ ³	t͡s a m ⁴ ¹	t͡s ã ⁴ ¹
+斯	s u ⁴ ⁴
+新	s i n ⁴ ⁴
+斲	t ɔ k̚ ³ ²
+斷	t u a n ² ¹	t u a n ³ ³	t ŋ̍ ³ ³
+斸	t͡s i ɔ k̚ ³ ²
+方	h ŋ̍ ⁴ ⁴	h ɔ ŋ ⁴ ⁴	p a ŋ ⁴ ⁴	p ŋ̍ ⁴ ⁴
+於	i ² ³	u ² ³	u ⁴ ⁴	ɔ ⁴ ⁴
+施	s i ² ¹	s i ⁴ ⁴	s u a ⁴ ⁴
+旁	p ɔ ŋ ² ³
+旄	m ɔ̃ ² ³
+旅	l i ⁴ ¹
+旋	s u a n ² ³	s ŋ̍ ² ³	t͡s ŋ̍ ² ³	t͡s ŋ̍ ³ ³
+旌	t͡s i ɪ ŋ ⁴ ⁴
+族	t͡s a k̚ ⁴	t͡s ɔ k̚ ⁴
+旒	l i u ² ³
+旖	i ⁴ ¹
+旗	k i ² ³
+旡	k i ² ¹
+既	k i ² ¹
+日	z i t̚ ⁴
+旦	t a n ² ¹	t u ã ² ¹
+旨	t͡s i ⁴ ¹
+早	t͡s a i ⁴ ¹	t͡s a ⁴ ¹
+旬	s u n ² ³
+旭	h i ɔ k̚ ³ ²
+旰	h a n ⁴ ¹
+旱	h a n ³ ³	h u ã ³ ³	u ã ³ ³
+旺	ɔ ŋ ³ ³
+昂	kʰ ɔ ŋ ² ³	ɡ ɔ ŋ ² ³
+昆	kʰ u n ⁴ ⁴
+昊	h ɤ ³ ³
+昌	t͡sʰ i ũ ⁴ ⁴	t͡sʰ i ɔ ŋ ⁴ ⁴
+明	b i n ² ³	b i ɪ ŋ ² ³	m i ã ² ³	m ã ² ³	m ẽ ² ³
+昏	h u n ⁴ ⁴	h ŋ̍ ⁴ ⁴
+易	i a ʔ ⁴	i ³ ³	i ɪ k̚ ⁴
+昔	s i ɪ k̚ ³ ²	t͡s a ⁴ ¹
+昜	i ɔ ŋ ² ³
+星	s a n ⁴ ⁴	s i ɪ ŋ ⁴ ⁴	t͡sʰ ẽ ⁴ ⁴
+映	i ã ² ¹	i ã ⁴ ⁴	i ɔ ŋ ² ¹	i ɪ ŋ ² ¹
+春	t͡sʰ u n ⁴ ⁴
+昧	m ã i ³ ³
+昨	t͡s a ³ ³	t͡s a ŋ ³ ⁵	t͡s ɤ ʔ ⁴
+昭	t͡s i a u ⁴ ⁴
+是	s i ³ ³
+昱	i ɔ k̚ ⁴
+昳	tʰ i ʔ ⁴
+昴	b a u ⁴ ¹
+晁	t i a u ² ³
+時	s i ² ³
+晃	h u ã ⁴ ¹	h ɔ ŋ ⁴ ¹
+晉	t͡s i n ² ¹
+晌	h i ɔ ŋ ² ¹	s i ɔ ŋ ⁴ ¹
+晏	a n ² ¹	u ã ² ¹
+晚	b u a n ⁴ ¹	m ŋ̍ ⁴ ¹
+晝	t a u ² ¹	t i u ² ¹
+晟	s i ɪ ŋ ³ ³
+晡	p ɔ ⁴ ⁴
+晤	ŋ ɔ̃ ³ ³	ɡ ɔ ³ ³
+晦	h u e ² ¹
+晨	s i n ² ³
+晬	t͡s e ² ¹
+普	pʰ ɔ ⁴ ¹
+景	k i ɪ ŋ ⁴ ¹
+晴	t͡s i ɪ ŋ ² ³	t͡s ẽ ² ³
+晶	t͡s i ɪ ŋ ⁴ ⁴	t͡s ĩ ⁴ ⁴	t͡s ẽ ⁴ ⁴
+智	t i ² ¹
+晾	n ẽ ² ³
+暇	h a ³ ³	h e ³ ³
+暈	h u n ³ ³	u n ³ ³	ŋ̍ ³ ³
+暉	h u i ⁴ ⁴
+暍	h ã ʔ ³ ²
+暑	s u ⁴ ¹
+暖	l u a n ⁴ ¹
+暗	a m ² ¹
+暝	b i ɪ ŋ ² ³	m ẽ ² ³
+暢	tʰ i ɔ ŋ ² ¹
+暨	k i ² ¹
+暫	t͡s a m ³ ³	t͡s i a m ³ ³
+暮	b ɔ ³ ³
+暱	l i t̚ ⁴
+暴	p u ʔ ³ ²	p ɔ k̚ ⁴	p ɤ ³ ³	p ɤ ʔ ⁴
+暹	s i a m ³ ³
+暾	tʰ u n ⁴ ⁴
+曆	l a ʔ ⁴	l i ɪ k̚ ⁴
+曇	tʰ a m ² ³
+曈	t ɔ ŋ ² ³
+曉	h i a u ⁴ ¹
+曖	a i ² ¹
+曙	s u ⁴ ¹
+曜	i a u ³ ³
+曝	pʰ a k̚ ⁴	pʰ ɔ k̚ ⁴
+曠	kʰ ŋ̍ ² ¹	kʰ ɔ ŋ ² ¹
+曦	h i ⁴ ⁴
+曬	s a i ² ¹
+曰	u a t̚ ⁴
+曲	kʰ i a u ⁴ ⁴	kʰ i ɔ k̚ ³ ²	kʰ i ɪ k̚ ³ ²
+曳	e ² ¹	i ɛ t̚ ⁴
+更	k i ɪ ŋ ² ¹	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+曷	a t̚ ³ ²	h a t̚ ³ ²
+書	s i ⁴ ⁴	s u ⁴ ⁴	t͡s u ⁴ ⁴
+曹	t͡s ɤ ² ³
+曼	b a n ³ ³
+曾	t͡s a n ⁴ ⁴	t͡s i ɪ ŋ ² ³	t͡s i ɪ ŋ ⁴ ⁴
+替	tʰ e ² ¹	tʰ u e ʔ ³ ²	tʰ u i ² ¹
+最	t͡s u e ² ¹
+朁	t͡s i a m ² ³	t͡sʰ a m ⁴ ¹
+會	e ³ ³	h u e ³ ³	k u e ² ¹
+月	ɡ u a t̚ ⁴	ɡ u e ʔ ⁴
+有	i u ⁴ ¹	u ³ ³
+朋	p i ɪ ŋ ² ³
+服	h ɔ k̚ ⁴
+朔	s ɔ k̚ ³ ²
+朕	t i m ³ ³
+朗	l a ŋ ⁴ ¹	l a ŋ ⁴ ⁴	l ɔ ŋ ⁴ ¹
+望	b a ŋ ³ ³	b ɔ ŋ ³ ³
+朝	t i a u ² ³	t i a u ⁴ ⁴
+期	k i ² ³
+朥	l a ² ³
+朦	b ɔ ŋ ² ³
+木	b a k̚ ⁴	b ɔ k̚ ⁴
+未	b i ³ ³	b u e ³ ³
+末	b u a t̚ ⁴	b u a ʔ ⁴
+本	p u n ⁴ ¹	p ŋ̍ ⁴ ¹
+札	t͡s a t̚ ³ ²
+朱	t͡s u ⁴ ⁴
+朴	pʰ ɤ ʔ ³ ²
+朵	t ɤ ² ³
+朽	h i u ⁴ ¹
+杆	k a n ⁴ ⁴	k u ã i ⁴ ⁴	k u ã ⁴ ⁴
+杈	t͡sʰ e ⁴ ⁴
+杉	s a m ⁴ ⁴
+李	l i ⁴ ¹
+杏	h i ɪ ŋ ³ ³
+材	t͡s a i ² ³	t͡sʰ a i ² ³
+村	t͡sʰ u a n ⁴ ⁴	t͡sʰ u n ⁴ ⁴	t͡sʰ ŋ̍ ⁴ ⁴
+杓	s i a ʔ ⁴
+杖	t i ɔ ŋ ³ ³	tʰ ŋ̍ ³ ³
+杙	kʰ i t̚ ⁴
+杜	t ɔ ³ ³
+杞	k i ⁴ ¹
+束	s ɔ k̚ ³ ²
+杭	h a ŋ ² ³
+杯	p u e ⁴ ⁴
+東	t a ŋ ⁴ ⁴	t ɔ ŋ ⁴ ⁴
+杵	tʰ u ⁴ ¹	t͡sʰ u ⁴ ¹
+杷	p a ² ³	p e ² ³
+杼	tʰ u ⁴ ¹
+松	s i ɔ ŋ ² ³	t͡sʰ i ɪ ŋ ² ³
+板	p a n ⁴ ¹
+枇	p i ² ³	t i ² ³
+枉	ɔ ŋ ⁴ ¹
+枋	p a ŋ ⁴ ⁴
+析	s i ɪ k̚ ³ ²
+枕	t͡s i m ⁴ ¹
+林	l i m ² ³	n ã ² ³
+枚	m u ĩ ² ³
+果	k u e ⁴ ¹	k ɤ ⁴ ¹
+枝	k i ⁴ ⁴	t͡s i ⁴ ⁴
+枯	k ɔ ⁴ ⁴	kʰ ɔ ⁴ ⁴
+枳	t͡s i ⁴ ¹
+枴	k u a i ³ ³	k u a i ⁴ ¹	k u ã i ⁴ ¹
+枵	i a u ⁴ ⁴
+架	k a ² ¹	k e ² ¹	kʰ u e ² ¹
+枷	k a ⁴ ⁴	k e ² ³
+枸	k ɔ ⁴ ¹
+柄	p i ɪ ŋ ² ¹	p ẽ ² ¹
+柏	p e ʔ ³ ²	p i ɪ k̚ ³ ²
+某	b ɔ ⁴ ¹
+柑	k a m ⁴ ⁴
+柒	t͡sʰ i t̚ ³ ²
+染	n ĩ ⁴ ¹	z i a m ⁴ ¹
+柔	z i u ² ³
+柘	t͡s i a ² ¹
+柙	k a ʔ ³ ²
+柚	i u ³ ³
+查	t͡s a ⁴ ⁴	t͡sʰ a ² ³
+柩	k i u ³ ³	kʰ u ³ ³
+柬	k a n ⁴ ¹
+柯	k u a ⁴ ⁴	kʰ ɤ ⁴ ⁴
+柰	n ã i ³ ³
+柱	t u ³ ³	tʰ i a u ³ ³	t͡s u ³ ³
+柳	l i u ⁴ ¹
+柴	t͡sʰ a i ² ³	t͡sʰ a ² ³
+柿	kʰ i ³ ³
+栓	s ŋ̍ ⁴ ⁴	t͡sʰ u a n ⁴ ⁴	t͡sʰ ŋ̍ ⁴ ⁴
+栗	l a t̚ ⁴	l i ɪ k̚ ³ ²	l i ɪ k̚ ⁴
+校	h a u ³ ³	k a u ² ¹	k a ² ¹
+株	t i ⁴ ⁴	t u ⁴ ⁴	t͡s u ⁴ ⁴
+核	h a t̚ ⁴	h i ɪ k̚ ⁴	h u t̚ ⁴
+根	k i n ⁴ ⁴
+格	k e ʔ ³ ²	k i ɪ k̚ ³ ²
+栽	t͡s a i ⁴ ⁴
+桀	k e ʔ ⁴	k i ɛ t̚ ⁴
+桁	k ɔ ŋ ² ³
+桂	k u i ² ¹
+桃	t ɤ ² ³	tʰ ɤ ² ³
+桅	u i ² ³	ɡ u i ² ³
+框	kʰ i ɪ ŋ ⁴ ⁴	kʰ ɔ ŋ ⁴ ⁴
+案	a n ² ¹	u ã ² ¹
+桌	t ɔ k̚ ³ ²	t ɤ ʔ ³ ²
+桐	t a ŋ ² ³	t ɔ ŋ ² ³	tʰ a ŋ ² ³
+桑	s ŋ̍ ⁴ ⁴	s ɔ ŋ ⁴ ⁴
+桓	h u a n ² ³
+桔	k i ɛ t̚ ³ ²
+桱	k i ɪ ŋ ² ¹
+桶	tʰ a ŋ ⁴ ¹
+桸	h i a ⁴ ⁴
+桿	k a n ⁴ ⁴	k u ã i ⁴ ¹
+梁	l i ɔ ŋ ² ³	n i ũ ² ³
+梅	m u ĩ ² ³	m u ẽ ² ³
+梆	p a ŋ ⁴ ⁴
+梔	k i ⁴ ⁴	t͡s i ⁴ ⁴
+梗	k i ɪ ŋ ³ ³	k i ɪ ŋ ⁴ ¹	k ẽ ⁴ ¹
+條	l i a u ² ³	t i a u ² ³
+梟	h i a u ⁴ ⁴
+梢	s a u ⁴ ⁴	s i a u ⁴ ⁴
+梧	ŋ ɔ̃ ² ³	ɡ ɔ ² ³
+梨	l a i ² ³	l e ² ³
+梭	s ɤ ⁴ ⁴
+梯	tʰ e ⁴ ⁴	tʰ u i ⁴ ⁴
+械	h a i ² ³	h a i ³ ³
+梳	s e ⁴ ⁴
+梵	h u a n ³ ³
+棄	kʰ i ² ¹
+棉	b i ɛ n ² ³	m ĩ ² ³
+棋	k i ² ³	k i ⁴ ⁴
+棍	k u n ² ¹
+棑	p a i ² ³
+棒	p a ŋ ³ ³
+棕	t͡s a ŋ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+棗	t͡s ɤ ⁴ ¹
+棘	k i ɪ k̚ ³ ²
+棚	p i ɪ ŋ ² ³	p ẽ ² ³
+棟	t a ŋ ² ¹	t i ɔ ŋ ² ¹	t ɔ ŋ ² ¹
+棠	t ɔ ŋ ² ³
+棧	t͡s a n ² ¹
+森	s i m ⁴ ⁴
+棲	s e ⁴ ⁴	t͡sʰ e ⁴ ⁴
+棺	k u a n ⁴ ⁴	k u ã ⁴ ⁴
+椅	i ⁴ ¹
+椆	t i a u ² ³
+植	s i t̚ ⁴	t i t̚ ⁴
+椎	t͡s u i ⁴ ⁴
+椏	a ⁴ ⁴	u e ⁴ ⁴	u ã i ³ ³	u ã i ⁴ ⁴
+椒	t͡s i a u ⁴ ⁴	t͡s i ɤ ⁴ ⁴
+椰	i a ² ³
+椵	k a ⁴ ¹
+椽	i ɛ n ² ³
+椿	tʰ u n ⁴ ⁴	t͡sʰ u n ⁴ ⁴
+楂	t͡s a ⁴ ⁴
+楊	i ũ ² ³	i ɔ ŋ ² ³
+楓	h ɔ ŋ ⁴ ⁴	p ŋ̍ ⁴ ⁴
+楔	s e ʔ ³ ²
+楗	k i ɪ ŋ ³ ³
+楚	t͡sʰ ɔ ⁴ ¹	t͡sʰ ɤ ⁴ ¹
+楝	l i ɛ n ³ ³	l i ɪ ŋ ³ ³
+楞	ɡ ɔ ŋ ² ³
+楠	l a m ² ³
+楦	h u n ² ¹
+楪	i a p̚ ⁴
+業	ɡ i a p̚ ⁴
+極	k i ɪ k̚ ⁴
+楷	kʰ a i ⁴ ¹
+楹	ẽ ² ³
+楻	h ɔ ŋ ² ³
+概	k a i ² ¹	kʰ a i ² ¹
+榆	z i u ² ³	z u ² ³
+榔	l ɔ ŋ ² ³	n ŋ̍ ² ³
+榕	i ɔ ŋ ² ³	t͡sʰ i ɪ ŋ ² ³
+榖	k ɔ k̚ ³ ²
+榛	t͡s i n ⁴ ⁴
+榜	p ŋ̍ ⁴ ¹	p ɔ ŋ ⁴ ¹
+榧	h u i ⁴ ¹
+榨	t͡s a ² ¹
+榫	s u n ⁴ ¹
+榮	i ɪ ŋ ² ³
+榴	l i u ² ³
+構	k ɔ ² ¹
+槌	tʰ u i ² ³
+槍	t͡sʰ i ũ ⁴ ⁴	t͡sʰ i ɪ ŋ ² ¹
+槐	h u a i ² ³
+槓	k a ŋ ² ¹	k ŋ̍ ² ¹
+槭	t͡sʰ i ɔ k̚ ³ ²
+槳	t͡s i ũ ⁴ ¹
+槽	t͡s ɤ ² ³
+槿	k i n ⁴ ¹
+樂	l ɔ k̚ ⁴	ŋ ã u ³ ³	ɡ a k̚ ⁴
+樑	l i ɔ ŋ ² ³	n i ũ ² ³
+樓	l a u ² ³
+標	p i a u ⁴ ⁴	p i ɤ ⁴ ⁴	pʰ i a u ⁴ ⁴
+樛	kʰ i u ⁴ ⁴
+樞	t͡sʰ u ⁴ ⁴
+樟	t͡s i ũ ⁴ ⁴	t͡s i ɔ ŋ ⁴ ⁴
+樠	m i ã ² ³
+模	b ɔ ² ³	m ɔ̃ ² ³
+樣	i ũ ³ ³	i ɔ ŋ ³ ³
+樵	t͡s i a u ² ³
+樸	pʰ ɔ k̚ ³ ²	pʰ ɤ ʔ ³ ²	pʰ ɤ ʔ ⁴
+樹	s u ³ ³	t͡sʰ i u ³ ³
+樺	h u a ² ³
+樽	t͡s u n ⁴ ⁴
+樾	u a t̚ ⁴
+橄	k a n ⁴ ⁴	k ã ⁴ ⁴
+橋	k i a u ² ³	k i ɤ ² ³
+橐	l a k̚ ³ ²	l ɔ k̚ ³ ²	l ɔ p̚ ³ ²
+橘	k i ɛ t̚ ³ ²
+橙	t i ɪ ŋ ² ³	t͡sʰ i a ŋ ² ³
+橛	k u e ʔ ⁴
+機	k i ⁴ ⁴	k u i ⁴ ⁴
+橡	t͡sʰ i ũ ³ ³
+橢	tʰ ɤ ² ¹	tʰ ɤ ⁴ ¹
+橫	h i ɪ ŋ ² ³	h u ã i ² ³	h u ẽ ² ³
+橿	k i ɔ ŋ ⁴ ⁴
+檀	t u ã ² ³
+檄	h i ɪ k̚ ⁴
+檉	t͡sʰ i ɪ ŋ ⁴ ⁴
+檎	kʰ i m ² ³	ɡ ɔ ² ¹
+檐	t͡s ĩ ² ³
+檔	t ɔ ŋ ⁴ ¹
+檜	k u e ² ¹
+檠	k i ã ² ³
+檢	k i a m ⁴ ¹
+檨	s u ã i ³ ³
+檬	b ɔ ŋ ² ³	b ɔ ŋ ⁴ ¹
+檯	t a i ² ³
+檳	p i n ⁴ ⁴
+檸	l e ² ³	l i ɪ ŋ ² ³
+檻	l a m ³ ³
+櫃	k u i ³ ³
+櫓	l ɔ ⁴ ¹
+櫛	s a t̚ ³ ²
+櫜	k ɤ ⁴ ⁴
+櫞	i ɛ n ² ³
+櫟	l i ɪ k̚ ⁴	l ɔ k̚ ⁴
+櫥	t u ² ³
+櫧	t͡s u ⁴ ⁴
+櫬	t͡sʰ a n ² ¹	t͡sʰ i n ² ¹
+櫳	l a ŋ ⁴ ⁴	l ɔ ŋ ² ³
+櫻	i ɪ ŋ ⁴ ⁴
+櫼	t͡s ĩ ⁴ ⁴
+欄	l a n ² ³	n u ã ² ³
+欉	t͡s a ŋ ² ³
+權	k u a n ² ³	kʰ u a n ² ³
+欒	l u a n ² ³
+欖	l a m ⁴ ¹	n ã ⁴ ¹
+欠	kʰ i a m ² ¹
+次	t͡sʰ u ² ¹
+欣	h i m ⁴ ⁴
+欱	h a p̚ ³ ²
+欲	a i ² ¹	b e ʔ ³ ²	b u e ʔ ³ ²	i ɔ k̚ ⁴
+欶	s u ʔ ³ ²
+欺	kʰ i ⁴ ⁴
+欽	kʰ i m ⁴ ⁴
+款	kʰ u a n ⁴ ¹	kʰ u ã ⁴ ¹
+歁	kʰ a m ⁴ ¹
+歃	t͡sʰ a p̚ ³ ²
+歇	h i ɤ ʔ ³ ²
+歉	kʰ i a m ² ¹	kʰ i a m ⁴ ¹	kʰ i a m ⁴ ⁴
+歌	k u a ⁴ ⁴	k ɤ ⁴ ⁴
+歍	ɔ ⁴ ⁴
+歐	a u ⁴ ⁴	i ɤ ⁴ ⁴
+歕	p u n ² ³
+歙	h i p̚ ³ ²
+歟	u ² ³
+歡	h u a n ⁴ ⁴	h u ã ⁴ ⁴
+止	t͡s i ⁴ ¹
+正	t͡s i ã ² ¹	t͡s i ã ⁴ ⁴	t͡s i ɪ ŋ ² ¹
+此	t͡sʰ u ⁴ ¹
+步	p ɔ ³ ³
+武	b u ⁴ ¹
+歧	k i ² ³
+歪	u a i ⁴ ⁴
+歲	h u e ² ¹	s u e ² ¹
+歷	l i ɪ k̚ ⁴
+歸	k u i ⁴ ⁴
+歹	l a i ⁴ ¹	pʰ ã i ⁴ ¹	t a i ⁴ ¹	t ã i ⁴ ¹
+死	s i ⁴ ¹	s u ⁴ ¹
+歿	b u t̚ ⁴
+殃	i ɔ ŋ ⁴ ⁴
+殆	t a i ³ ³
+殉	s u n ² ³	s u n ³ ³
+殊	s u ² ³
+殕	pʰ u ⁴ ¹
+殖	s i t̚ ⁴	s i ɪ k̚ ⁴
+殘	t͡s a n ² ³	t͡s u ã ² ³	t͡sʰ a n ² ³
+殞	u n ⁴ ¹
+殤	s i ɔ ŋ ⁴ ⁴
+殮	l i a m ³ ³	l i a m ⁴ ¹
+殯	p i n ² ¹	p i n ⁴ ⁴
+殳	s u ² ³
+段	t u a n ³ ³	t u ã ³ ³
+殷	i n ⁴ ⁴
+殺	s a i ² ¹	s a t̚ ³ ²	s u a ʔ ³ ²	tʰ a i ² ³
+殼	kʰ a k̚ ³ ²	kʰ ɔ k̚ ³ ²
+殿	t i ɛ n ³ ³
+毀	h u i ⁴ ¹
+毅	ɡ e ³ ³	ɡ i ³ ³
+毆	i ɤ ⁴ ¹
+毋	b u ² ³	m̩ ³ ³
+毌	k u a n ² ¹
+母	b i ɤ ⁴ ¹	b u ⁴ ¹	b ɤ ⁴ ¹
+每	m u ĩ ⁴ ¹
+毒	t a k̚ ⁴	t ɔ k̚ ⁴	tʰ a u ³ ³
+毓	i ɔ k̚ ⁴
+比	p i ⁴ ¹
+毖	p i ² ¹
+毗	p i ² ³	p i ⁴ ¹
+毚	t͡sʰ a m ² ³
+毛	m ŋ̍ ² ³	m ɔ̃ ² ³
+毣	b a k̚ ³ ²
+毫	h ɤ ² ³
+毬	k i u ² ³	kʰ i u ² ³
+毯	tʰ a n ⁴ ¹
+毽	k i ɛ n ² ¹
+氈	t͡s i ɛ n ⁴ ⁴	t͡s ĩ ⁴ ⁴
+氍	k u ² ³
+氏	s i ³ ³
+氐	t e ⁴ ¹	t e ⁴ ⁴	t i ⁴ ¹
+民	b i n ² ³
+氓	b a ŋ ² ³
+氛	h u n ⁴ ⁴
+氣	kʰ i ² ¹	kʰ u i ² ¹
+氤	i n ⁴ ⁴
+氦	h a i ³ ³
+氧	i ɔ ŋ ⁴ ¹
+氨	a n ⁴ ⁴
+氪	kʰ i ɪ k̚ ³ ²
+氫	kʰ i n ⁴ ⁴	kʰ i ɪ ŋ ⁴ ⁴
+氬	a ² ¹	a ⁴ ⁴
+氮	t a m ³ ³
+氯	l i ɔ k̚ ⁴	l i ɪ k̚ ⁴
+氳	u n ⁴ ⁴
+水	s u i ⁴ ¹	t͡s u i ⁴ ¹
+氵	t͡s u i ⁴ ¹
+永	i ɪ ŋ ⁴ ¹
+汀	tʰ i ɪ ŋ ⁴ ⁴
+汁	t͡s i a p̚ ³ ²
+求	k i u ² ³
+汏	tʰ u a ³ ³
+汐	s i ɪ k̚ ⁴
+汔	k i t̚ ⁴
+汕	s u ã ² ¹
+汗	h a n ² ³	h a n ³ ³	k u ã ³ ³
+汛	s i n ² ¹
+汝	l i ⁴ ¹	z u ⁴ ¹
+汞	h ɔ ŋ ⁴ ¹
+江	k a ŋ ⁴ ⁴
+池	t i ² ³
+污	u ² ¹	u ⁴ ⁴
+汨	b i ɪ k̚ ⁴
+汪	ɔ ŋ ⁴ ⁴
+汫	kʰ i ɪ ŋ ⁴ ¹	t͡s i ã ⁴ ¹	t͡s i ɪ ŋ ³ ³
+汭	z u e ³ ³
+汰	tʰ a i ² ¹	tʰ u a ³ ³
+汱	kʰ i n ⁴ ¹
+汲	kʰ i p̚ ³ ²
+汴	p a n ³ ³	p i ɛ n ³ ³
+汶	b u n ² ³	b u n ³ ³
+決	k u a t̚ ³ ²
+汽	k i t̚ ⁴	kʰ i ² ¹
+汾	h u n ² ³	h u n ⁴ ⁴
+沁	s i m ² ¹	s i m ⁴ ⁴
+沂	k i ² ³
+沃	a k̚ ³ ²
+沅	ɡ u a n ² ³	ɡ u a n ⁴ ¹
+沆	kʰ ɔ ŋ ² ¹
+沈	s i m ⁴ ¹
+沉	t i a m ² ³	t i m ² ³
+沌	t u n ³ ³
+沏	t͡sʰ i ɛ t̚ ³ ²
+沐	b a k̚ ³ ²	b ɔ k̚ ⁴
+沒	b i t̚ ⁴	b u a t̚ ⁴	b u t̚ ⁴
+沓	t a p̚ ⁴	t a u ʔ ⁴	tʰ a u ʔ ⁴	t͡sʰ a u ʔ ⁴
+沔	b i ɛ n ⁴ ¹
+沕	b i t̚ ⁴
+沖	t͡sʰ i ɔ ŋ ⁴ ⁴	t͡sʰ i ɪ ŋ ² ¹
+沙	s a ⁴ ⁴	s e ⁴ ⁴	s u a ⁴ ⁴
+沛	pʰ a i ² ¹
+沝	t͡s u i ⁴ ¹
+沫	pʰ u e ʔ ⁴
+沬	b i ³ ³
+沭	s u t̚ ⁴	t͡s u t̚ ⁴
+沮	t͡s u ⁴ ⁴
+沯	t͡sʰ i a ŋ ² ³
+河	h ɤ ² ³
+沸	h u t̚ ³ ²
+油	i u ² ³
+治	t i ³ ³
+沼	t͡s i a u ⁴ ⁴
+沽	k ɔ ⁴ ¹	k ɔ ⁴ ⁴
+沾	t i a m ⁴ ⁴	t͡s a m ⁴ ⁴
+沿	i ɛ n ² ³
+況	h ɔ ŋ ² ¹	h ɔ ŋ ⁴ ¹
+泄	s i ɛ t̚ ³ ²
+泅	s i u ² ³
+泆	i ɪ k̚ ⁴	t i ɛ t̚ ⁴
+泉	t͡s u a n ² ³	t͡s u ã ² ³
+泊	p ɔ k̚ ⁴	p ɤ ʔ ⁴
+泌	p i ² ¹
+泏	t͡s u ʔ ³ ²
+泐	l i ɪ k̚ ³ ²
+泓	h ɔ ŋ ² ³
+泔	a m ⁴ ¹	k a m ⁴ ⁴
+法	h u a t̚ ³ ²
+泖	b a u ⁴ ¹
+泛	h a m ² ¹	h u a n ² ¹	h u a n ³ ³
+泡	pʰ a u ² ¹	pʰ ɤ ² ¹	pʰ ɤ ⁴ ⁴
+波	p ɤ ⁴ ⁴	pʰ ɤ ⁴ ⁴
+泣	kʰ i p̚ ³ ²
+泥	n ĩ ² ³
+注	t u ² ¹	t͡s u ² ¹
+泯	b i n ⁴ ¹
+泰	tʰ a i ² ¹	tʰ u a ² ¹
+泱	i a ŋ ⁴ ⁴	i ɔ ŋ ⁴ ⁴
+泳	i ɪ ŋ ⁴ ¹
+泵	p ɔ ŋ ³ ³
+洋	i ũ ² ³	i ɔ ŋ ² ³
+洎	k i ² ¹
+洗	s e ⁴ ¹	s i ɛ n ⁴ ¹
+洘	kʰ ɤ ⁴ ¹
+洛	l ɔ k̚ ⁴
+洞	t ɔ ŋ ³ ³
+津	t i n ⁴ ⁴	t͡s i n ⁴ ⁴
+洨	s i a u ² ³
+洩	s i a p̚ ⁴
+洪	a ŋ ² ³	h ɔ ŋ ² ³
+洲	t͡s i u ⁴ ⁴
+洶	h i ɔ ŋ ⁴ ⁴
+洸	k ɔ ŋ ⁴ ⁴
+活	h u a t̚ ⁴	u a ʔ ⁴
+洽	h a p̚ ⁴	h i a p̚ ⁴	k a p̚ ⁴
+派	pʰ a i ² ¹
+流	l a u ² ³	l i u ² ³
+浙	t͡s i ɛ t̚ ³ ²
+浞	t͡sʰ i ɔ k̚ ⁴
+浡	pʰ u ³ ³	pʰ u ʔ ⁴
+浣	u a n ³ ³	u a n ⁴ ¹
+浥	i p̚ ³ ²
+浦	p ɔ ⁴ ¹	pʰ ɔ ⁴ ¹
+浩	h ɤ ³ ³
+浪	l ɔ ŋ ³ ³
+浮	h u ² ³	h ɔ ² ³	pʰ u ² ³
+浴	i ɔ k̚ ⁴	i ɪ k̚ ⁴
+海	h a i ⁴ ¹
+浸	t͡s i m ² ¹
+涂	tʰ ɔ ² ³
+涅	l i a p̚ ³ ²
+涇	k i ɪ ŋ ⁴ ⁴	kʰ i ɪ ŋ ³ ³
+消	s i a u ⁴ ⁴
+涉	s i a p̚ ⁴
+涊	l i ɛ n ⁴ ¹	z i m ⁴ ¹
+涎	i ɛ n ² ³	s i ɛ n ² ³
+涓	k u a n ⁴ ⁴
+涔	t͡sʰ a m ² ³
+涯	ɡ a i ² ³
+液	i ɪ k̚ ⁴	s i ɤ ʔ ⁴
+涵	a m ² ³	h a m ² ³
+涸	h ɔ k̚ ³ ²	kʰ ɔ k̚ ³ ²
+涼	l i a ŋ ² ³	l i ɔ ŋ ² ³	n i ũ ² ³
+淄	t͡s u ⁴ ⁴
+淅	s i ɪ k̚ ³ ²
+淋	l a m ² ³	l i m ² ³
+淑	s i ɔ k̚ ³ ²
+淒	t͡sʰ e ⁴ ⁴	t͡sʰ i ⁴ ⁴
+淖	n u ã ² ¹
+淘	t ɤ ² ³
+淙	tʰ ɔ ŋ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+淚	l u i ³ ³
+淠	p i ² ¹
+淡	t a m ³ ³	t ã ³ ³
+淥	l i ɪ k̚ ⁴
+淦	k a m ² ¹
+淨	t͡s i ã ³ ³	t͡s i ɪ ŋ ³ ³	t͡s ĩ ³ ³
+淩	l i ɪ ŋ ² ³
+淪	l u n ² ³
+淫	i m ² ³	t a m ² ³
+淬	t͡sʰ u ʔ ³ ²
+淮	h u a i ² ³
+深	t͡sʰ i m ⁴ ⁴
+淳	s u n ² ³
+淵	i ɛ n ⁴ ⁴
+混	h u n ³ ³
+淹	i m ⁴ ⁴
+淺	t͡sʰ i ɛ n ⁴ ¹	t͡sʰ ĩ ⁴ ¹
+添	tʰ i a m ⁴ ⁴	tʰ ĩ ⁴ ⁴
+清	t͡sʰ i ɪ ŋ ⁴ ⁴	t͡sʰ ĩ ⁴ ⁴
+渙	h u a n ² ¹
+渚	t͡s u ⁴ ¹
+減	k i a m ⁴ ¹
+渝	u ² ³	z u ² ³
+渟	t i ɪ ŋ ² ³
+渡	t ɔ ³ ³	tʰ ɔ ³ ³
+渢	h u a n ² ¹	h ɔ ŋ ² ³	h ɔ ŋ ⁴ ⁴
+渣	t͡s e ⁴ ⁴
+渤	p u t̚ ⁴
+渥	a k̚ ³ ²
+渦	ɤ ⁴ ⁴
+渧	t e ² ¹
+渨	u e ⁴ ⁴
+渫	t i a p̚ ⁴
+測	t͡sʰ i ɪ k̚ ³ ²
+渭	u i ³ ³
+港	k a ŋ ⁴ ¹
+渴	kʰ a t̚ ³ ²	kʰ u a ʔ ³ ²
+游	i u ² ³
+渺	b i a u ⁴ ¹
+渾	h u n ² ³
+湃	p a i ² ¹
+湄	b i ² ³
+湅	l i ɛ n ³ ³
+湊	t͡sʰ a u ² ¹
+湍	tʰ u a n ⁴ ⁴	t͡sʰ u a n ⁴ ⁴
+湎	b i n ⁴ ¹	b i ɛ n ³ ³	b i ɛ n ⁴ ¹
+湓	pʰ u n ² ³
+湔	t͡s i ɛ n ² ³	t͡s i ɛ n ² ¹	t͡s i ɛ n ⁴ ⁴
+湖	h ɔ ² ³	ɔ ² ³
+湘	s i ɔ ŋ ⁴ ⁴
+湛	s i m ² ³	t a m ³ ³	t a m ⁴ ⁴	t͡s i m ⁴ ⁴
+湞	t͡s i ɪ ŋ ⁴ ⁴
+湠	tʰ a n ² ¹	tʰ u ã ² ¹
+湧	i ɔ ŋ ⁴ ¹	i ɪ ŋ ⁴ ¹
+湯	tʰ ŋ̍ ⁴ ⁴	tʰ ɔ ŋ ⁴ ⁴
+溉	k a i ² ¹	kʰ a i ² ¹
+源	ɡ u a n ² ³
+準	t͡s u n ⁴ ¹
+溜	l i u ⁴ ⁴
+溝	k a u ⁴ ⁴	k ɔ ⁴ ⁴
+溟	b i ɪ ŋ ² ³
+溡	t͡sʰ i ² ³
+溢	i ɤ ʔ ³ ²	i ɪ k̚ ³ ²
+溥	pʰ ɤ ⁴ ¹
+溦	b i ² ³
+溪	kʰ e ⁴ ⁴
+溫	u n ⁴ ⁴
+溯	s ɔ ² ¹
+溴	h i u ² ¹
+溶	i ũ ² ³	i ɔ ŋ ² ³
+溷	h u n ³ ³
+溺	l i ɪ k̚ ⁴
+溽	z i ɔ k̚ ⁴
+滂	pʰ ɔ ŋ ³ ³
+滃	ɔ ŋ ⁴ ¹
+滄	t͡sʰ ŋ̍ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+滅	b i ɛ t̚ ⁴
+滇	t i ɛ n ⁴ ⁴	t ĩ ³ ³
+滋	t͡s u ⁴ ⁴
+滌	t i ɪ k̚ ⁴
+滑	k u t̚ ⁴
+滒	k ɤ ³ ³
+滓	l a i ⁴ ¹	t a i ⁴ ¹	t͡s ã i ⁴ ¹
+滕	t i ɪ ŋ ² ³
+滬	h ɔ ³ ³
+滮	p i u ⁴ ⁴
+滯	t i ³ ³	t u ² ¹	tʰ i ² ¹
+滲	s i a m ² ¹	s i m ² ¹
+滴	t i ɪ k̚ ³ ²	t i ʔ ³ ²
+滷	l ɔ ⁴ ¹
+滸	h ɔ ⁴ ¹
+滹	h ɔ ⁴ ⁴
+滾	k u n ⁴ ¹
+滿	b u a n ⁴ ¹	m u ã ⁴ ¹
+漁	h i ² ³	ɡ u ² ³
+漂	pʰ i ɤ ² ¹
+漆	t͡sʰ a t̚ ³ ²
+漉	l ɔ k̚ ³ ²	l ɔ k̚ ⁴
+漏	l a u ³ ³	l ɔ ³ ³
+演	i ɛ n ⁴ ¹
+漕	t͡s ɤ ² ³
+漖	k a ² ¹
+漘	t u n ² ³
+漚	a u ² ¹	a u ⁴ ⁴
+漠	b ɔ k̚ ⁴	b ɔ ² ³	m ɔ̃ ʔ ⁴
+漢	h a n ² ¹
+漣	l i ɛ n ² ³
+漤	l a m ² ¹	l a m ³ ³	l a m ⁴ ¹
+漦	l a i ² ³	l i ² ³
+漩	s u a n ³ ³
+漪	i ³ ³
+漫	b a n ³ ³
+漬	t͡s u ² ¹
+漭	b ɔ ŋ ⁴ ¹
+漱	s i ɪ k̚ ³ ²	s u a ⁴ ¹
+漲	t i ũ ² ¹	t i ɔ ŋ ² ¹
+漳	t͡s i a ŋ ⁴ ⁴
+漸	t͡s i a m ³ ³
+漿	t͡s i ũ ⁴ ⁴	t͡s i ɔ ŋ ⁴ ⁴
+潁	i ɪ ŋ ⁴ ¹
+潑	pʰ u a t̚ ³ ²	pʰ u a ʔ ³ ²
+潔	k i ɛ t̚ ³ ²
+潕	b u ³ ³	b u ⁴ ¹
+潘	pʰ u a n ⁴ ⁴	pʰ u n ⁴ ⁴	pʰ u ã ⁴ ⁴
+潛	t͡s i a m ² ³
+潢	h ɔ ŋ ² ³	h ɔ ŋ ⁴ ¹
+潤	z u n ³ ³
+潦	l ɤ ⁴ ¹
+潭	tʰ a m ² ³
+潮	t i a u ² ³	t i ɤ ² ³
+潯	s i m ² ³	t͡s i m ³ ³	z i m ³ ³
+潰	kʰ u i ² ¹
+潲	s a u ² ¹	s i a u ² ³
+潷	p i t̚ ³ ²
+潸	s a n ⁴ ⁴
+潺	t͡sʰ a n ⁴ ⁴
+潼	t ɔ ŋ ² ³	t ɔ ŋ ² ¹
+潾	l i n ⁴ ⁴
+澀	s i a p̚ ³ ²	s i p̚ ³ ²
+澄	t i ɪ ŋ ² ³
+澆	k i a u ⁴ ⁴
+澇	l a u ² ¹
+澈	tʰ e ʔ ³ ²	tʰ i ɛ t̚ ³ ²
+澍	s i ⁴ ⁴	s u ³ ³	t͡sʰ u ³ ³
+澗	k a n ² ¹
+澡	t͡s ɤ ⁴ ¹
+澤	t i ɪ k̚ ⁴
+澥	h a i ³ ³
+澨	s e ³ ³
+澮	k u e ² ¹
+澱	t i ɛ n ³ ³
+澳	ɤ ² ¹
+澶	s i ɛ n ² ³
+澹	t a m ² ³	t a m ³ ³
+激	k i ɪ k̚ ³ ²
+濁	l ɤ ² ³	t a k̚ ⁴	t͡s ɔ k̚ ⁴
+濂	l i a m ² ³
+濃	l ɔ ŋ ² ³
+濆	h u n ² ³
+濇	s i p̚ ³ ²	s i ɪ k̚ ³ ²
+濈	t͡sʰ i p̚ ³ ²
+濔	l e ⁴ ¹
+濕	s i p̚ ³ ²
+濘	l i ɪ ŋ ² ³	l i ɪ ŋ ³ ³	l i ɪ ŋ ⁴ ¹
+濛	b ɔ ŋ ² ³
+濜	t͡s i n ³ ³
+濟	t͡s e ² ¹	t͡s e ³ ³	t͡s e ⁴ ¹
+濠	h ɤ ² ³
+濡	s u ⁴ ⁴	z u ² ³
+濤	t ɤ ² ³
+濫	l a m ³ ³
+濮	p ɔ k̚ ⁴
+濯	t͡s ɔ k̚ ⁴
+濰	i ² ³
+濱	p i n ⁴ ⁴
+濺	t͡s u ã ³ ³
+濾	l i ³ ³
+濿	l e ³ ³
+瀁	i ɔ ŋ ³ ³	i ɔ ŋ ⁴ ¹
+瀅	i ɪ ŋ ² ³
+瀆	t ɔ k̚ ⁴
+瀉	s i a ² ¹
+瀋	s i m ⁴ ¹
+瀌	pʰ i a u ⁴ ⁴
+瀏	l i u ² ³
+瀑	p ɤ ³ ³	pʰ ɔ k̚ ⁴
+瀚	h a n ³ ³
+瀛	i ɪ ŋ ² ³
+瀝	l i ɪ k̚ ⁴
+瀟	s i a u ⁴ ⁴
+瀠	i ɪ ŋ ² ³
+瀡	t͡sʰ u i ⁴ ¹
+瀦	t͡s u ⁴ ⁴
+瀧	l i ɔ ŋ ² ³	l ɔ ŋ ² ³
+瀨	l u a ³ ³	n ã i ³ ³
+瀰	b i ² ³	b i ⁴ ¹
+瀲	l i a m ⁴ ¹
+瀳	t͡sʰ ĩ ² ³
+瀷	i ɪ k̚ ⁴
+瀼	z i ɔ ŋ ² ³
+瀾	l a n ² ³	n u ã ³ ³
+灃	h ɔ ŋ ⁴ ⁴
+灇	t͡s a ŋ ² ³
+灌	k u a n ² ¹
+灑	s a ⁴ ¹
+灒	t͡s a n ² ¹
+灕	l i ² ³
+灘	tʰ a n ⁴ ⁴	tʰ u ã ⁴ ⁴
+灝	h ɤ ³ ³
+灢	l ɔ ŋ ⁴ ¹
+灣	u a n ² ³	u a n ⁴ ⁴
+灩	i a m ³ ³
+火	h u e ⁴ ¹	h ɔ̃ ⁴ ¹
+灰	h u a ⁴ ⁴	h u e ⁴ ⁴
+灴	h ɔ ŋ ² ³
+灶	t͡s a u ² ¹	t͡s ɤ ² ¹
+灸	k i u ² ¹	k u ² ¹
+灺	t ɤ ³ ³
+災	t͡s a i ⁴ ⁴	t͡s e ⁴ ⁴
+炊	t͡sʰ u e ⁴ ⁴
+炎	i a m ³ ³
+炒	t͡sʰ a u ⁴ ¹	t͡sʰ a ⁴ ¹
+炕	kʰ ɔ ŋ ² ¹
+炘	h i m ⁴ ⁴
+炙	t͡s i a ² ¹	t͡s i a ʔ ⁴	t͡s i ɤ ʔ ³ ²	t͡s u ã ² ¹
+炫	h i ɛ n ² ³	h i ɛ n ³ ³
+炬	k u ³ ³
+炭	tʰ u ã ² ¹
+炮	pʰ a u ² ¹
+炯	k i ɪ ŋ ⁴ ¹
+炰	p a u ² ³	p u ² ³	pʰ a u ² ¹
+炱	t a i ² ³	t e ⁴ ⁴	tʰ a i ⁴ ⁴
+炳	p i ɪ ŋ ⁴ ¹
+炷	t͡s u ² ¹
+炸	t͡s a ² ¹	t͡s i a ʔ ⁴
+為	u i ² ³	u i ³ ³
+烈	l i ɛ t̚ ⁴
+烊	i ũ ² ³	i ɔ ŋ ² ³
+烋	h a u ⁴ ⁴	h i u ⁴ ⁴
+烌	h u ⁴ ⁴
+烏	ɔ ⁴ ⁴
+烘	h a ŋ ⁴ ⁴	h ɔ ŋ ⁴ ⁴
+烙	l ɤ ³ ³
+烜	h u i ⁴ ¹	s u a n ⁴ ⁴
+烝	t͡s i ɪ ŋ ⁴ ⁴
+烤	kʰ ɤ ⁴ ¹
+烰	h ɔ ² ³
+烷	u a n ² ³
+烹	pʰ i ɪ ŋ ⁴ ⁴
+烺	l ɔ ŋ ³ ³	l ɔ ŋ ⁴ ¹
+烽	h ɔ ŋ ⁴ ⁴
+焄	h u n ⁴ ⁴
+焉	i ɛ n ² ¹	i ɛ n ⁴ ⁴
+焊	h a n ³ ³	h u ã ³ ³
+焗	k ɔ k̚ ⁴
+焙	p e ³ ³	p u e ³ ³
+焚	h u n ² ³
+焜	h u n ³ ³	kʰ u n ⁴ ⁴
+焞	s u n ² ³	tʰ u i ⁴ ⁴	tʰ u n ⁴ ⁴
+焟	s i ɪ k̚ ³ ²	t͡s i ɤ ʔ ³ ²
+無	b u ² ³	b ɤ ² ³
+焢	kʰ ɔ ŋ ² ¹
+焦	n ã ⁴ ⁴	t a ⁴ ⁴	t͡s a u ⁴ ⁴	t͡s i a u ⁴ ⁴
+焮	h i m ² ¹	h i m ⁴ ⁴
+焯	t ɔ k̚ ³ ²	t͡sʰ i ɔ k̚ ³ ²
+焰	i a m ³ ³
+焱	i ã ³ ³
+焲	i ɪ k̚ ⁴
+然	z i ɛ n ² ³
+煁	s i m ² ³
+煄	t͡s i ɔ ŋ ⁴ ¹	t͡s i ɪ ŋ ⁴ ¹
+煋	s i ɪ ŋ ⁴ ⁴
+煌	h ɔ ŋ ² ³
+煍	t͡s i a u ⁴ ¹
+煎	t͡s i ɛ n ⁴ ⁴	t͡s u ã ⁴ ⁴
+煏	p i a k̚ ³ ²
+煑	t͡s u ⁴ ¹
+煒	u i ⁴ ¹
+煓	t͡sʰ u a n ⁴ ⁴
+煙	h u n ⁴ ⁴	i ɛ n ⁴ ⁴
+煜	i ɔ k̚ ⁴
+煞	s a t̚ ³ ²	s u a ʔ ³ ²	s ã ʔ ³ ²
+煠	s a ʔ ⁴
+煢	kʰ i ɪ ŋ ² ³
+煣	z i u ⁴ ¹
+煤	b u e ² ³	m u ĩ ² ³	m u ẽ ² ³
+煥	h u a n ² ¹	h u a n ³ ³
+煦	h u ⁴ ¹	u ² ¹
+照	t͡s i a u ² ¹	t͡s i ɤ ² ¹	t͡sʰ i ɤ ³ ³
+煨	u e ⁴ ⁴
+煩	h u a n ² ³
+煪	i u ² ³	t͡s i u ⁴ ⁴	t͡sʰ i u ⁴ ⁴
+煮	t͡s u ⁴ ¹
+煲	p ɤ ⁴ ⁴
+煽	s i ɛ n ² ¹
+熄	s i t̚ ³ ²
+熊	h i m ² ³	h i ɔ ŋ ² ³
+熏	h u n ⁴ ⁴
+熒	i ɪ ŋ ² ³
+熔	i ũ ² ³	i ɔ ŋ ² ³
+熕	k ɔ ŋ ² ¹
+熗	t͡sʰ i ɪ ŋ ² ¹
+熙	h i ⁴ ⁴
+熟	s i ɔ k̚ ⁴	s i ɪ k̚ ⁴
+熥	tʰ ŋ̍ ³ ³
+熨	u t̚ ³ ²
+熬	ŋ ã u ² ³	ɡ ɤ ² ³
+熱	z i ɛ t̚ ⁴	z u a ʔ ⁴	ɡ i ɛ t̚ ⁴
+熵	s i ɔ ŋ ⁴ ⁴
+熹	h i ⁴ ⁴
+燁	i a p̚ ³ ²
+燃	h i ã ² ³	z i ɛ n ² ³
+燈	t i ɪ ŋ ⁴ ⁴
+燉	t u n ³ ³
+燒	s i a u ⁴ ⁴	s i ɤ ⁴ ⁴
+燔	h u a n ² ³
+燕	i ɛ n ² ¹	ĩ ² ¹
+燖	t i m ³ ³
+燙	tʰ ŋ̍ ² ¹	tʰ ɔ ŋ ² ¹
+燜	b u n ³ ³
+營	i ã ² ³	i ɪ ŋ ² ³
+燡	i a k̚ ⁴
+燥	s ɤ ² ¹
+燦	t͡sʰ a n ² ¹
+燧	s u i ³ ³
+燬	h u i ⁴ ¹
+燭	t͡s i ɔ k̚ ³ ²	t͡s i ɪ k̚ ³ ²
+燹	s i ɛ n ⁴ ¹
+爁	l a m ³ ³	l a m ⁴ ¹	n ã ʔ ³ ²
+爆	p ɔ k̚ ⁴	pʰ ɔ k̚ ⁴
+爌	kʰ ɔ ŋ ² ¹
+爍	s i a k̚ ³ ²	s i ɔ k̚ ³ ²	s i ʔ ³ ²	s ĩ ʔ ³ ²
+爐	l ɔ ² ³
+爛	l a n ³ ³	n u ã ³ ³
+爟	k u a n ² ¹
+爪	z i a u ² ¹	z i a u ⁴ ¹
+爬	p a ² ³	p e ² ³
+爭	t͡s i ɪ ŋ ⁴ ⁴	t͡s ẽ ⁴ ⁴
+爵	t͡s i ɔ k̚ ³ ²	t͡s i ɪ k̚ ³ ²
+父	h u ³ ³
+爸	p a ² ³	p a ³ ³	p a ⁴ ⁴	p e ³ ³
+爹	t i a ⁴ ⁴
+爺	i a ² ³
+爻	ŋ ã u ² ³	ɡ a u ² ³
+爽	s ŋ̍ ⁴ ¹	s ɔ ŋ ⁴ ¹
+爾	n i ã ² ³	n i ã ³ ³	n ĩ ³ ³	n ĩ ⁴ ¹	z ĩ ⁴ ¹
+爿	p i ɪ ŋ ² ³
+牂	t͡s ŋ̍ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+牆	t͡sʰ i ũ ² ³	t͡sʰ i ɔ ŋ ² ³
+片	pʰ i ɛ n ² ¹	pʰ ĩ ² ¹
+版	p a n ⁴ ¹
+牌	p a i ² ³
+牖	i u ⁴ ¹
+牘	t ɔ k̚ ⁴
+牙	ɡ a ² ³	ɡ e ² ³
+牚	tʰ ẽ ² ¹
+牛	ɡ i u ² ³	ɡ u ² ³
+牝	p i n ³ ³	p i n ⁴ ¹
+牟	b ɔ ² ³
+牠	tʰ ã ⁴ ⁴	tʰ ɤ ⁴ ⁴
+牡	b ɔ ⁴ ¹
+牢	l ɤ ² ³	t i a u ² ³
+牣	l i m ³ ³
+牧	b ɔ k̚ ⁴
+物	b u t̚ ⁴	m ĩ ʔ ³ ²	m ĩ ʔ ⁴
+牯	k ɔ ⁴ ¹
+牲	s i ɪ ŋ ⁴ ⁴	s ẽ ⁴ ⁴
+特	t i ɪ k̚ ⁴
+牽	kʰ a n ⁴ ⁴	kʰ i ɛ n ⁴ ⁴
+犀	s a i ⁴ ⁴	s e ⁴ ⁴
+犁	l e ² ³
+犄	i ⁴ ⁴	kʰ i ⁴ ⁴
+犍	k i ɛ n ³ ³	k i ɛ n ⁴ ⁴
+犒	kʰ ɤ ² ¹
+犢	t ɔ k̚ ⁴
+犧	h i ⁴ ⁴
+犬	kʰ i ɛ n ⁴ ¹
+犮	p u a t̚ ⁴
+犯	h u a n ³ ³
+狀	t͡s i ɔ ŋ ³ ³	t͡s ŋ̍ ³ ³	t͡s ɔ ŋ ³ ³
+狁	u n ⁴ ¹
+狂	k ɔ ŋ ² ³
+狄	t i ɪ k̚ ⁴
+狐	h ɔ ² ³
+狗	k a u ⁴ ¹	k ɔ ⁴ ¹
+狙	t͡s u ⁴ ⁴	t͡sʰ u ² ¹
+狡	k a u ⁴ ¹
+狩	s i u ² ¹	s i u ⁴ ¹
+狸	l i ² ³
+狹	e ʔ ⁴	h i a p̚ ⁴
+狼	l i ɔ ŋ ² ³	l ɔ ŋ ² ³
+狽	p u e ³ ³
+猋	pʰ i a u ⁴ ⁴
+猌	ɡ i n ³ ³
+猖	t͡sʰ i ɔ ŋ ⁴ ⁴
+猛	b i ɪ ŋ ⁴ ¹	m ẽ ⁴ ¹
+猜	i ɤ ʔ ³ ²	t͡sʰ a i ⁴ ⁴
+猥	u e ⁴ ¹	u i ⁴ ¹
+猩	s i ɪ ŋ ⁴ ⁴
+猰	kʰ i ɛ t̚ ³ ²
+猱	l ɤ ² ³	z i u ² ³
+猴	k a u ² ³
+猶	a ʔ ³ ²	a ⁴ ¹	i a u ⁴ ¹	i a ʔ ³ ²	i a ⁴ ¹	i u ² ³	i u ⁴ ⁴
+猷	i u ² ³
+猾	k u t̚ ⁴
+猿	u a n ² ³
+獃	t a i ⁴ ⁴
+獄	ɡ a k̚ ⁴	ɡ i ɪ k̚ ⁴
+獅	s a i ⁴ ⁴	s u ⁴ ⁴
+獎	t͡s i a ŋ ⁴ ¹	t͡s i ũ ⁴ ¹	t͡s i ɔ ŋ ⁴ ¹
+獐	k i ũ ⁴ ⁴	t͡s i ũ ⁴ ⁴
+獗	k u e ² ¹	kʰ u a t̚ ³ ²
+獟	h i ã u ʔ ⁴
+獨	t a k̚ ⁴	t ɔ k̚ ⁴
+獫	h i a m ⁴ ¹
+獰	l i ɪ ŋ ² ³
+獲	h i ɪ k̚ ⁴
+獵	l a ʔ ⁴	l i a p̚ ⁴
+獸	s i u ² ¹
+獺	tʰ u a ʔ ³ ²
+獻	h i ɛ n ² ¹
+獼	b i ² ³
+玁	h i a m ⁴ ¹
+玄	h i ɛ n ² ³	ɡ u a n ² ³
+玆	t͡s u ⁴ ⁴
+率	l u t̚ ⁴	s u a i ² ¹	s u t̚ ³ ²
+玉	ɡ i ɔ k̚ ⁴	ɡ i ɪ k̚ ⁴
+王	ŋ̍ ² ³	ɔ ŋ ² ³	ɔ ŋ ³ ³
+玍	l a n ³ ³
+玏	l i ɪ k̚ ⁴
+玖	k a u ⁴ ¹	k i u ⁴ ¹
+玥	ɡ u a t̚ ⁴
+玦	k u a t̚ ³ ²
+玨	k a k̚ ³ ²
+玩	u a n ⁴ ¹	ɡ u a n ⁴ ¹
+玫	m u ĩ ² ³
+玲	l i n ⁴ ⁴	l i ɪ ŋ ² ³
+玳	t a i ³ ³
+玻	p ɤ ⁴ ⁴
+珊	s u a n ⁴ ⁴
+珍	t i n ⁴ ⁴	t ĩ ⁴ ⁴	t͡s i n ⁴ ⁴
+珓	k a u ² ¹
+珠	t͡s i u ⁴ ⁴	t͡s u ⁴ ⁴
+珪	k e ⁴ ⁴	k u i ⁴ ⁴
+班	p a n ⁴ ⁴
+珮	pʰ u a ʔ ⁴
+現	h i ɛ n ² ¹	h i ɛ n ³ ³
+球	k i u ² ³
+理	l i ⁴ ¹
+琉	l i u ² ³
+琛	tʰ i m ⁴ ⁴
+琢	t ɔ k̚ ³ ²
+琤	t͡s i ɪ ŋ ⁴ ⁴
+琥	h ɔ ⁴ ¹
+琰	i a m ⁴ ¹
+琲	p u e ³ ³
+琳	l i m ² ³
+琴	kʰ i m ² ³
+琵	p i ² ³
+琶	p e ² ³
+瑋	u i ⁴ ¹
+瑕	h a ² ³
+瑙	l ɤ ⁴ ¹
+瑚	l ɔ ² ³	ɔ ² ³
+瑛	i ɪ ŋ ⁴ ⁴
+瑜	z u ² ³
+瑝	h ɔ ŋ ² ³
+瑞	s u i ³ ³
+瑟	s i t̚ ³ ²	s i ɪ k̚ ³ ²
+瑣	s ɤ ⁴ ¹
+瑤	i a u ² ³
+瑩	i ɪ ŋ ² ³
+瑪	b e ⁴ ¹	m ã ⁴ ¹
+瑯	l ɔ ŋ ² ³	l ɔ ŋ ⁴ ⁴
+瑰	k u i ² ¹
+璁	t͡sʰ ɔ ŋ ⁴ ⁴
+璃	l e ² ³	l i ² ³
+璆	k i u ² ³
+璇	s u a n ² ³	s u a n ³ ³
+璉	l i ɛ n ⁴ ¹
+璜	h i ɪ ŋ ² ³	h ɔ ŋ ² ³
+璞	pʰ ɔ k̚ ³ ²
+璧	pʰ i ɪ k̚ ³ ²
+環	h u a n ² ³	kʰ u a n ² ³
+璽	s u ⁴ ¹
+瓊	kʰ i ɔ ŋ ² ³	kʰ i ɪ ŋ ² ³
+瓏	l ɔ ŋ ² ³	l ɔ ŋ ⁴ ⁴
+瓘	k u a n ² ¹
+瓜	k u a ⁴ ⁴	k u e ⁴ ⁴
+瓢	pʰ i a u ² ³	pʰ i ɤ ² ³
+瓣	b a n ³ ³	p a n ³ ³
+瓤	n ŋ̍ ² ³	z i ɔ ŋ ² ³
+瓦	h i a ³ ³	u a ⁴ ¹
+瓶	p a n ² ³
+瓷	h u i ² ³	t͡s u ² ³
+甄	t͡s i n ⁴ ⁴
+甌	a u ⁴ ⁴
+甓	pʰ i a ʔ ⁴
+甕	a ŋ ² ¹	ɔ ŋ ² ¹
+甘	k a m ⁴ ⁴
+甚	s i m ³ ³
+甜	t i a m ² ³	t ĩ ⁴ ⁴
+生	s i ɪ ŋ ⁴ ⁴	s ẽ ⁴ ⁴	t͡sʰ ẽ ⁴ ⁴
+產	s a n ⁴ ¹	s u ã ⁴ ¹
+甥	s i ɪ ŋ ⁴ ⁴
+甦	s ɔ ⁴ ⁴
+用	i ɔ ŋ ³ ³	i ɪ ŋ ³ ³
+甩	h i u ² ¹
+甪	l u t̚ ³ ²	l ɔ k̚ ⁴
+甫	h u ⁴ ¹
+甬	i ɔ ŋ ⁴ ¹
+甭	b a ŋ ² ¹	m ã i ² ¹
+田	t i ɛ n ² ³	t͡sʰ a n ² ³
+由	i u ² ³
+甲	k a p̚ ³ ²	k a ³ ³	k a ʔ ³ ²
+申	s i n ⁴ ⁴	t͡sʰ u n ⁴ ⁴
+甶	h u i ² ¹	h u t̚ ³ ²
+男	l a m ² ³
+甸	t i ɛ n ³ ³	t i ɛ n ⁴ ¹
+町	t i ɪ ŋ ⁴ ⁴
+界	k a i ² ¹	k e ² ¹
+畏	u i ² ¹
+畔	p i ɪ ŋ ² ³	p u a n ³ ³
+留	l a u ² ³	l i u ² ³
+畚	pʰ u n ⁴ ¹
+畜	h i ɔ k̚ ³ ²	tʰ i ɔ k̚ ³ ²	tʰ i ɪ k̚ ³ ²
+畝	b ɔ ⁴ ¹
+畢	p i t̚ ³ ²
+略	l i a k̚ ⁴	l i ɔ k̚ ⁴	l i ɤ ʔ ⁴
+番	h a n ⁴ ⁴	h u a n ⁴ ⁴
+畫	u e ³ ³
+畬	s i a ² ³	u ² ³
+異	i ³ ³	ĩ ³ ³
+當	t a ŋ ² ¹	t a ŋ ⁴ ⁴	t ŋ̍ ² ¹	t ŋ̍ ⁴ ⁴	t ɔ ŋ ² ¹	t ɔ ŋ ⁴ ⁴
+畸	k i ² ³
+畿	k i ² ³	k i ⁴ ⁴
+疆	k i a ŋ ⁴ ⁴	k i ɔ ŋ ⁴ ⁴
+疇	t i u ² ³
+疊	t i a p̚ ⁴	tʰ a ʔ ⁴	tʰ i a p̚ ⁴
+疋	s u ⁴ ⁴
+疏	s e ⁴ ⁴	s ɔ ² ¹	s ɔ ⁴ ⁴
+疑	ɡ i ² ³
+疒	l i ɪ k̚ ⁴	t͡sʰ ɔ ŋ ² ³
+疔	t i ɪ ŋ ⁴ ⁴
+疕	pʰ i ⁴ ¹
+疚	k i u ² ¹
+疝	s a n ² ¹
+疣	i u ² ³
+疤	p a ⁴ ⁴
+疥	k a i ² ¹	k e ² ¹
+疫	i a ʔ ⁴	i ɪ k̚ ⁴
+疲	pʰ i ² ³
+疳	k a m ⁴ ⁴
+疶	t͡sʰ u a ʔ ³ ²
+疸	tʰ a n ⁴ ¹
+疹	h m̩ ² ³	t͡s i n ⁴ ¹
+疼	t ɔ ŋ ² ³	tʰ i ã ² ¹
+疾	t͡s i t̚ ⁴	t͡s i ɪ k̚ ⁴
+痀	k u ⁴ ⁴
+病	p i ɪ ŋ ³ ³	p ẽ ³ ³
+症	t͡s i ɪ ŋ ² ¹
+痔	t i ³ ³
+痕	h u n ² ³
+痘	t a u ³ ³	t ɔ ³ ³
+痙	k i ɪ ŋ ³ ³
+痚	h e ⁴ ⁴
+痛	tʰ a ŋ ² ¹	tʰ ɔ ŋ ² ¹
+痞	pʰ i ⁴ ¹
+痟	s i a u ⁴ ¹	s i a u ⁴ ⁴
+痠	s u a n ⁴ ⁴	s ŋ̍ ⁴ ⁴
+痢	l i ³ ³
+痣	k i ² ¹
+痧	s u a ⁴ ⁴
+痰	tʰ a m ² ³
+痱	p u i ² ¹
+痲	m u ã ² ³
+痴	t͡sʰ i ⁴ ⁴
+痺	p i ² ¹
+痿	u i ⁴ ¹
+瘋	h ɔ ŋ ⁴ ⁴
+瘍	i a ʔ ⁴	i ũ ² ³	i ɔ ŋ ² ³	i ɪ k̚ ⁴
+瘟	u n ⁴ ⁴
+瘡	t͡sʰ ŋ̍ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+瘤	l a u ² ³	l i u ² ³
+瘦	s a n ⁴ ¹	s ɔ ⁴ ¹
+瘧	l i ɔ k̚ ⁴	ɡ i ɔ k̚ ⁴
+瘴	t͡s i ɔ ŋ ² ¹
+瘸	kʰ u e ² ³
+癀	h ɔ ŋ ² ³
+療	l i a u ² ³
+癆	l ɤ ² ³
+癇	h a n ² ³
+癈	h u e ² ¹	h u i ² ¹
+癉	t a n ⁴ ⁴
+癌	ɡ a m ² ³
+癖	pʰ i a ʔ ³ ²	pʰ i a ʔ ⁴	pʰ i ɪ k̚ ³ ²
+癗	l u i ⁴ ⁴
+癢	i ɔ ŋ ⁴ ¹	t͡s i ũ ³ ³
+癥	t i ɪ ŋ ⁴ ⁴
+癩	tʰ a i ⁴ ¹
+癬	s i ɛ n ⁴ ¹	t͡sʰ u ã ⁴ ¹
+癮	i n ⁴ ¹	ɡ i ɛ n ² ¹
+癰	i ɪ ŋ ⁴ ⁴
+癲	t i ɛ n ⁴ ⁴
+癶	p u a t̚ ³ ²
+癸	k u i ² ¹	k u i ⁴ ¹
+登	t i ɪ ŋ ⁴ ⁴
+發	h u a t̚ ³ ²	h u a t̚ ⁴
+白	p e ʔ ⁴	p i ɪ k̚ ⁴
+百	p a ʔ ³ ²	p e ʔ ³ ²	p i ɪ k̚ ³ ²
+皂	t͡s ɤ ³ ³
+的	e ² ³	t i ɪ k̚ ³ ²
+皆	k a i ⁴ ⁴
+皇	h ɔ ŋ ² ³
+皋	k ɤ ⁴ ⁴
+皎	k i a u ⁴ ¹
+皓	h ɤ ³ ³
+皖	u a n ⁴ ¹
+皚	kʰ a i ⁴ ¹	ɡ a i ² ³
+皤	p ɤ ² ³	pʰ ɤ ⁴ ⁴
+皫	pʰ i a u ⁴ ¹
+皮	p i ² ³	pʰ i ² ³	pʰ u e ² ³
+皺	z i a u ² ³
+皿	b i ɪ ŋ ⁴ ¹
+盂	u ² ³
+盅	t͡s i ɪ ŋ ⁴ ⁴
+盆	pʰ u n ² ³
+盈	i ɪ ŋ ² ³	ĩ ʔ ³ ²
+益	i a ʔ ³ ²	i ɪ k̚ ³ ²
+盍	a p̚ ⁴	kʰ a ʔ ³ ²
+盎	ɔ ŋ ² ¹
+盒	a p̚ ⁴	a ʔ ⁴
+盔	kʰ u e ⁴ ⁴
+盛	s i ã ³ ³	s i ɪ ŋ ³ ³
+盜	t ɤ ³ ³
+盞	t͡s a n ⁴ ¹	t͡s u ã ⁴ ¹
+盟	b i ɪ ŋ ² ³
+盡	t͡s i n ³ ³
+監	k a m ² ¹	k ã ⁴ ⁴
+盤	p u ã ² ³	pʰ u a n ² ³
+盧	l ɔ ² ³
+盪	t ŋ̍ ³ ³
+目	b a k̚ ⁴	b ɔ k̚ ⁴
+盯	t i ɪ ŋ ² ¹	t i ɪ ŋ ⁴ ⁴
+盲	b ɔ ŋ ² ³	m ɔ̃ ² ³	m ẽ ² ³
+直	t i t̚ ⁴
+相	s i a ŋ ² ¹	s i a ŋ ⁴ ⁴	s i ũ ² ¹	s i ũ ⁴ ⁴	s i ɔ ŋ ² ¹	s i ɔ ŋ ⁴ ⁴	s i ɤ ⁴ ⁴	s ã ⁴ ⁴
+盹	t u n ⁴ ¹	t u ʔ ³ ²
+盼	pʰ a n ² ¹
+盾	t u n ⁴ ¹
+省	s i ã ⁴ ¹	s i ɪ ŋ ⁴ ¹
+眄	b i ɛ n ³ ³	b i ɛ n ⁴ ¹
+眈	t a m ⁴ ⁴
+眉	b a i ² ³	b i ² ³
+看	kʰ a n ² ¹	kʰ a n ⁴ ⁴	kʰ u ã ² ¹
+真	t͡s i n ⁴ ⁴
+眠	b i n ² ³	b i ɛ n ² ³
+眨	t͡sʰ a p̚ ⁴
+眩	h i n ² ³	h i ɛ n ² ³
+眯	b i ² ³	m ĩ ⁴ ⁴
+眶	kʰ a ŋ ⁴ ¹	kʰ a ŋ ⁴ ⁴	kʰ ɔ ŋ ⁴ ⁴
+眷	k u a n ² ¹
+眼	ɡ a n ⁴ ¹	ɡ i ɪ ŋ ⁴ ¹
+眾	t͡s i ɔ ŋ ² ¹	t͡s i ɪ ŋ ² ¹
+睆	u a n ³ ³	u a n ⁴ ¹
+睈	tʰ ẽ ² ³
+睏	kʰ u n ² ¹
+睛	t͡s i ɪ ŋ ⁴ ⁴	t͡sʰ i ɪ ŋ ⁴ ¹
+睜	t͡s i ɪ ŋ ⁴ ⁴
+睡	kʰ u n ² ¹	s u i ³ ³
+督	t ɔ k̚ ³ ²
+睦	b ɔ k̚ ⁴
+睨	ɡ i n ² ³	ɡ i ɤ ʔ ⁴
+睪	i ɪ k̚ ⁴
+睫	t͡s e ʔ ³ ²	t͡s i a p̚ ³ ²	t͡s i a ʔ ³ ²
+睬	t͡sʰ a i ⁴ ¹
+睭	t͡s i u ⁴ ⁴
+睹	t ɔ ⁴ ¹
+睿	z u e ³ ³
+瞄	b i a u ² ³	b i ɤ ² ³
+瞅	t͡sʰ i u ⁴ ⁴
+瞇	b i ² ³	m ĩ ⁴ ⁴
+瞌	kʰ e ʔ ³ ²
+瞎	kʰ u e ʔ ³ ²
+瞞	m u ã ² ³
+瞪	t ẽ ² ¹	tʰ ĩ ² ³	t͡sʰ ĩ ² ³
+瞬	s u n ² ¹	s u t̚ ³ ²
+瞭	l i a u ² ³	l i a u ⁴ ¹	l i ɤ ⁴ ¹
+瞰	kʰ a m ² ¹
+瞳	t ɔ ŋ ² ³
+瞻	t͡s i a m ⁴ ⁴
+瞿	k u ² ³	k u ² ¹	kʰ u ² ³
+矓	l ɔ ŋ ² ³
+矗	t͡sʰ a k̚ ³ ²	t͡sʰ i ɔ k̚ ³ ²
+矚	t͡s i ɔ k̚ ³ ²
+矛	b a u ² ³	m ã u ² ³
+矜	k i ɪ ŋ ⁴ ⁴	kʰ i m ⁴ ⁴
+矢	s i ⁴ ¹
+矣	i ² ¹	i ⁴ ¹
+知	t i ² ¹	t i ⁴ ⁴	t͡s a i ⁴ ⁴
+矧	s i n ⁴ ¹
+矩	k i ⁴ ¹
+短	t e ⁴ ¹	t u a n ⁴ ¹
+矮	e ⁴ ¹
+矯	k i a u ⁴ ¹
+石	s i a ʔ ⁴	s i ɪ k̚ ⁴	t͡s i ɤ ʔ ⁴
+矸	k a n ⁴ ⁴
+矽	s i a k̚ ⁴
+砂	s e ⁴ ⁴	s u a ⁴ ⁴
+砌	k i ʔ ³ ²	ɡ i ʔ ³ ²
+砍	kʰ a m ⁴ ¹
+研	ɡ i ɛ n ⁴ ¹	ɡ i ɪ ŋ ⁴ ¹
+砛	ɡ i m ² ³
+砧	t i a m ⁴ ⁴
+破	pʰ u a ² ¹	pʰ ɤ ² ¹
+硃	t͡s u ⁴ ⁴
+硇	l a u ² ³
+硘	h u i ² ³
+硝	s i a u ⁴ ⁴
+硞	kʰ ɔ k̚ ³ ²	kʰ ɔ k̚ ⁴
+硩	t e ʔ ³ ²
+硫	l i u ² ³
+硬	ŋ ẽ ³ ³	ɡ i ɪ ŋ ³ ³
+确	kʰ a k̚ ³ ²
+硯	h i ɛ n ³ ³	h ĩ ³ ³
+硼	p i ɪ ŋ ² ³	pʰ i ɪ ŋ ² ³
+硿	kʰ ã ⁴ ⁴
+碇	t i ã ³ ³	t i ɪ ŋ ³ ³
+碌	l i ɪ k̚ ⁴	l ɔ k̚ ⁴
+碎	t͡sʰ u i ² ¹
+碑	p i ⁴ ⁴
+碓	t u i ² ¹
+碗	u ã ⁴ ¹
+碘	t i ɛ n ⁴ ¹
+碟	t i a p̚ ⁴	t i ʔ ⁴
+碧	pʰ i ɪ k̚ ³ ²
+碩	s i ɪ k̚ ⁴
+碭	tʰ ŋ̍ ³ ³
+碰	p ɔ ŋ ³ ³	pʰ ɔ ŋ ² ¹
+碳	tʰ u ã ² ¹
+確	kʰ a k̚ ³ ²
+碻	k u e ⁴ ¹
+碼	b a ³ ³	b e ⁴ ¹	m ã ⁴ ¹
+碾	l i ɛ n ⁴ ¹	l u n ⁴ ¹
+磁	h u i ² ³	t͡s u ² ³
+磅	p ɔ ŋ ³ ³
+磊	l u i ⁴ ¹
+磐	p u a n ² ³	p u ã ² ³	pʰ u a n ² ³
+磒	u n ⁴ ¹
+磕	kʰ a p̚ ⁴
+磘	i ɤ ² ³
+磚	t͡s u a n ⁴ ⁴	t͡s ŋ̍ ⁴ ⁴
+磡	kʰ a m ² ¹
+磨	b u a ² ³	b ɤ ³ ³	m ɔ̃ ² ³
+磷	l i n ² ³
+磺	h ɔ ŋ ² ³	ŋ̍ ² ³
+礁	t a ⁴ ⁴	t͡s i a u ⁴ ⁴
+礎	t͡sʰ ɔ ⁴ ¹
+礙	ɡ a i ³ ³
+礤	t͡sʰ a t̚ ³ ²	t͡sʰ u a ʔ ³ ²
+礦	kʰ ɔ ŋ ² ¹
+礪	l e ³ ³
+礫	l i ɪ k̚ ⁴
+礬	h u a n ² ³
+礱	l a ŋ ² ³	l ɔ ŋ ² ³
+礵	s ɔ ŋ ⁴ ⁴
+礶	k u a n ² ¹
+示	s i ³ ³
+社	s i a ³ ³
+祀	s a i ³ ³	s u ³ ³	t͡sʰ a i ³ ³
+祆	h i ɛ n ⁴ ⁴
+祈	k i ² ³
+祉	t͡s i ⁴ ¹
+祐	i u ³ ³
+祓	h u t̚ ³ ²
+祖	t͡s ɔ ⁴ ¹
+祝	t͡s i ɔ k̚ ³ ²
+神	s i n ² ³
+祟	s u i ³ ³
+祠	s u ² ³
+祢	l i ⁴ ¹
+祥	s i ɔ ŋ ² ³
+票	pʰ i ɤ ² ¹
+祭	t͡s e ² ¹
+祺	k i ² ³
+祿	l ɔ k̚ ⁴
+禁	k i m ² ¹
+禂	t ɤ ⁴ ¹
+禍	e ³ ³	h ɤ ³ ³
+禎	t͡s i ɪ ŋ ⁴ ⁴
+福	h ɔ k̚ ³ ²	p a k̚ ³ ²
+禤	h u a n ⁴ ⁴
+禦	ɡ i ³ ³	ɡ u ³ ³
+禧	h i ⁴ ¹	h i ⁴ ⁴
+禪	s i ɛ n ² ³	s i ɛ n ³ ³
+禮	l e ⁴ ¹
+禱	t ɤ ⁴ ¹
+禸	l i u ⁴ ¹
+禹	u ⁴ ¹
+禺	ɡ u ² ³
+禽	kʰ i m ² ³
+禾	h ɤ ² ³
+禿	tʰ u t̚ ³ ²	tʰ u ʔ ³ ²
+秀	s i u ² ¹	s i ɤ ⁴ ¹
+私	s a i ⁴ ⁴	s u ⁴ ⁴
+秉	p i ɪ ŋ ⁴ ¹
+秋	t͡sʰ i u ⁴ ⁴
+种	tʰ i ɔ ŋ ² ³
+科	kʰ e ⁴ ⁴	kʰ ɤ ⁴ ⁴
+秒	b i a u ⁴ ¹	b i ɤ ⁴ ¹
+秘	p i ² ¹
+租	t͡s ɔ ⁴ ⁴
+秤	t͡sʰ i n ² ¹
+秦	t͡s i n ² ³
+秧	i a ŋ ⁴ ⁴	i ɔ ŋ ⁴ ⁴	ŋ̍ ⁴ ⁴
+秩	t i t̚ ⁴	t i ɛ t̚ ⁴
+秫	t͡s u t̚ ⁴
+秬	k u ⁴ ¹
+秮	t a i ⁴ ⁴
+秸	k a i ⁴ ⁴
+移	i ² ³
+稀	h i ⁴ ⁴
+稅	s u e ² ¹
+稈	k u ã i ⁴ ¹
+程	t i ɪ ŋ ² ³	tʰ i ã ² ³	tʰ i ɪ ŋ ² ³
+稍	s i a u ⁴ ⁴
+稗	pʰ e ³ ³
+稚	t i ³ ³
+稜	l i ɪ ŋ ² ³	l i ɪ ŋ ³ ³
+稟	p i n ⁴ ¹
+稠	t i u ² ³
+種	t͡s i ɔ ŋ ² ¹	t͡s i ɔ ŋ ⁴ ¹	t͡s i ɪ ŋ ² ¹	t͡s i ɪ ŋ ⁴ ¹
+稱	t͡sʰ i ɪ ŋ ⁴ ⁴
+稷	t͡s i ɪ k̚ ³ ²
+稻	t ɤ ³ ³
+稽	kʰ e ⁴ ¹	kʰ e ⁴ ⁴	kʰ u e ⁴ ⁴
+稿	k ɤ ⁴ ¹
+穀	k a k̚ ³ ²	k ɔ k̚ ³ ²
+穆	b ɔ k̚ ⁴
+積	t͡s i ɪ k̚ ³ ²
+穎	i ɪ ŋ ⁴ ¹	ĩ ⁴ ¹
+穗	h u i ³ ³	s u i ³ ³
+穡	s i t̚ ³ ²	s i ɪ k̚ ³ ²
+穢	u e ² ¹
+穩	u n ⁴ ¹
+穫	h i ɪ k̚ ⁴
+穴	h i ɛ t̚ ⁴
+究	k i u ² ¹
+穸	s i ɪ k̚ ⁴
+穹	k i ɔ ŋ ⁴ ⁴
+空	kʰ a ŋ ² ¹	kʰ a ŋ ⁴ ⁴	kʰ ɔ ŋ ² ¹	kʰ ɔ ŋ ⁴ ⁴
+穿	t͡sʰ i ɪ ŋ ³ ³	t͡sʰ u a n ⁴ ⁴	t͡sʰ ŋ̍ ⁴ ⁴
+突	t u t̚ ⁴	tʰ u t̚ ⁴
+窄	t͡s i ɪ k̚ ³ ²
+窈	i a u ⁴ ¹
+窒	tʰ a t̚ ³ ²
+窕	tʰ i a u ⁴ ¹
+窗	tʰ a ŋ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+窘	k u n ³ ³	kʰ u n ⁴ ¹
+窟	kʰ u t̚ ³ ²
+窩	ɤ ⁴ ⁴
+窪	u a ² ¹
+窮	k i ɔ ŋ ² ³	k i ɪ ŋ ² ³	kʰ i ɪ ŋ ² ³
+窯	i ɤ ² ³
+窵	t i a u ² ¹
+窺	kʰ u i ⁴ ⁴
+窿	l i ɔ ŋ ² ³	l ɔ ŋ ⁴ ⁴
+竄	t͡sʰ u a n ² ¹	t͡sʰ ŋ̍ ² ¹
+竅	kʰ i a u ² ¹	kʰ i ɤ ² ¹
+竇	t ɔ ³ ³
+竊	t͡sʰ i a p̚ ³ ²	t͡sʰ i ɛ t̚ ³ ²
+立	l i a p̚ ⁴	l i p̚ ⁴
+竑	h ɔ ŋ ² ³
+站	t͡s a m ³ ³
+竟	k i ɪ ŋ ² ¹
+章	t͡s i ũ ⁴ ⁴	t͡s i ɔ ŋ ⁴ ⁴
+竣	t͡s u n ² ¹
+童	t a ŋ ² ³	t ɔ ŋ ² ³	tʰ a ŋ ² ³
+竭	k i ɛ t̚ ⁴	kʰ a t̚ ⁴
+端	t u a n ⁴ ⁴	t u ã ⁴ ⁴
+競	k i ɪ ŋ ³ ³
+竹	t i ɔ k̚ ³ ²	t i ɪ k̚ ³ ²
+竺	t i ɔ k̚ ³ ²
+竿	k a n ⁴ ⁴	k u ã ⁴ ⁴
+笄	k e ⁴ ⁴
+笆	p a ⁴ ⁴
+笏	h u t̚ ³ ²
+笑	s i a u ² ¹	t͡sʰ i a u ² ¹	t͡sʰ i ɤ ² ¹
+笙	s i ɪ ŋ ⁴ ⁴
+笚	h a ʔ ³ ²
+笛	t a t̚ ⁴	t i ² ³	t i ɪ k̚ ⁴
+笠	l e ʔ ⁴	l i p̚ ⁴
+笢	b i n ⁴ ¹
+笥	s u ⁴ ⁴
+符	h u ² ³
+笨	p u n ³ ³
+笪	t a t̚ ⁴
+第	t e ³ ³
+笱	k ɤ ² ³
+笳	k a ⁴ ⁴
+筅	t͡sʰ i ɪ ŋ ⁴ ¹
+筆	p i t̚ ³ ²
+等	t a n ⁴ ¹	t i ɪ ŋ ⁴ ¹
+筋	k i n ⁴ ⁴
+筍	s u n ⁴ ¹
+筐	kʰ i ɪ ŋ ⁴ ⁴
+筒	t a ŋ ² ³
+答	t a p̚ ³ ²	t a ʔ ³ ²
+策	t͡sʰ i ɪ k̚ ³ ²
+筧	k i ɛ n ⁴ ¹	k i ɪ ŋ ⁴ ¹
+筪	h a ʔ ³ ²
+筮	s e ³ ³
+筵	i ɛ n ² ³
+筷	t i ³ ³
+箅	p i n ⁴ ¹
+箍	kʰ ɔ ⁴ ⁴
+箏	t͡s i ɪ ŋ ⁴ ⁴
+箔	p ɔ k̚ ⁴	p ɤ ʔ ⁴
+箕	k i ⁴ ⁴
+算	s u a n ² ¹	s ŋ̍ ² ¹
+箠	t͡sʰ e ² ³	t͡sʰ u e ² ³
+管	k u a n ⁴ ¹	k u n ⁴ ¹	k ŋ̍ ⁴ ¹	k ɔ ŋ ⁴ ¹
+箬	h a ʔ ⁴	h i ɤ ʔ ⁴
+箭	t͡s i ɛ n ² ¹	t͡s ĩ ² ¹
+箱	s i ũ ⁴ ⁴
+箴	t͡s i m ⁴ ⁴
+箸	t i ³ ³
+節	t͡s a t̚ ³ ²	t͡s e ʔ ³ ²	t͡s i ɛ t̚ ³ ²
+範	h u a n ³ ³	p a n ³ ³
+篆	t u a n ³ ³	tʰ u a n ² ¹	tʰ u a n ³ ³
+篇	pʰ i ɛ n ⁴ ⁴	pʰ ĩ ⁴ ⁴
+築	t i ɔ k̚ ³ ²	t i ɔ k̚ ⁴
+篋	k a p̚ ³ ²	k i a p̚ ³ ²	kʰ e ʔ ³ ²
+篙	k ɤ ⁴ ⁴
+篡	t͡sʰ u a n ² ¹
+篤	t a u ʔ ³ ²	t ɔ k̚ ³ ²
+篦	p i n ² ¹
+篩	tʰ a i ⁴ ⁴
+篪	t i ² ³
+篷	h ɔ ŋ ² ³	p ɔ ŋ ² ³	pʰ a ŋ ² ³	pʰ ɔ ŋ ² ³
+篾	b i ɛ t̚ ⁴	b i ʔ ⁴
+簇	t͡sʰ ɔ k̚ ³ ²
+簋	k u i ⁴ ¹	kʰ u i ⁴ ¹
+簍	l ɔ ⁴ ¹
+簟	t i a m ³ ³
+簠	h u ⁴ ¹
+簡	k a n ⁴ ¹
+簧	h ɔ ŋ ² ³
+簪	t͡s a m ⁴ ⁴	t͡s i a m ⁴ ⁴
+簫	s i a u ⁴ ⁴
+簸	p u a ² ¹	p u ã ⁴ ⁴
+簽	t͡sʰ i a m ⁴ ⁴
+簾	l i a m ² ³	l i ² ³	n ĩ ² ³
+簿	pʰ ɔ k̚ ³ ²	pʰ ɔ ³ ³
+籃	l a m ² ³	n ã ² ³
+籌	t i u ² ³
+籍	t͡s i p̚ ⁴	t͡s i ɪ k̚ ⁴
+籗	kʰ a ʔ ³ ²
+籠	l a ŋ ² ³	l a ŋ ⁴ ¹	l ɔ ŋ ² ³	l ɔ ŋ ⁴ ¹
+籤	t͡sʰ i a m ⁴ ⁴
+籥	i ɔ k̚ ⁴
+籩	p i ɛ n ⁴ ⁴
+籬	l i ² ³
+籮	l u a ² ³	l ɤ ² ³
+籯	i ɪ ŋ ² ³
+籲	i ɔ k̚ ⁴
+米	b i ² ¹	b i ʔ ³ ²	b i ⁴ ¹
+籽	t͡s i ⁴ ¹
+粅	b u t̚ ³ ²
+粉	h u n ⁴ ¹
+粏	t a i ⁴ ⁴
+粒	l i a p̚ ⁴
+粕	pʰ ɤ ʔ ³ ²
+粗	t͡sʰ ɔ ⁴ ⁴
+粘	l i a m ² ³
+粙	t i u ³ ³
+粞	t͡sʰ e ² ¹
+粟	s i ɔ k̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+粥	m u ã i ² ³	t͡s i ɔ k̚ ³ ²
+粩	l a u ⁴ ¹
+粱	l i a ŋ ² ³
+粵	u a t̚ ⁴
+粹	s u i ² ¹	t͡sʰ u i ² ¹
+粽	t͡s a ŋ ² ¹
+精	t͡s i ã ⁴ ⁴	t͡s i ɪ ŋ ⁴ ⁴	t͡s ĩ ⁴ ⁴
+粿	k u e ⁴ ¹
+糅	z i u ² ³	z i u ⁴ ¹
+糈	s u ⁴ ⁴
+糊	h ɔ ² ³	k ɔ ² ³	kʰ ɔ ² ³
+糋	t͡s ĩ ² ¹
+糍	t͡s i ² ³	t͡s u ² ³
+糕	k ɤ ⁴ ⁴
+糖	tʰ ŋ̍ ² ³	tʰ ɔ ŋ ² ³
+糗	h i u ² ¹
+糙	t͡sʰ ɤ ² ¹
+糜	b i ² ³	b u e ² ³	m u ã i ² ³	m ĩ ⁴ ⁴	m ẽ ² ³
+糝	s a m ⁴ ¹
+糞	h u n ² ¹	p u n ² ¹
+糟	t͡s a u ⁴ ⁴	t͡s ɤ ⁴ ⁴
+糠	kʰ ŋ̍ ⁴ ⁴
+糧	l i ɔ ŋ ² ³	n i ũ ² ³
+糯	l ɤ ³ ³	t͡s u t̚ ⁴
+糰	t u a n ² ³	tʰ u a n ² ³
+糴	t i a ʔ ⁴
+糶	t i a u ³ ³	tʰ i a u ² ¹	tʰ i ɤ ² ¹
+系	h e ³ ³
+糾	k i u ² ¹
+紀	k i ² ¹	k i ⁴ ¹
+紂	t i u ³ ³
+約	i a k̚ ³ ²	i ɔ k̚ ³ ²	i ɤ ʔ ³ ²
+紅	a ŋ ² ³	h ɔ ŋ ² ³
+紆	u ⁴ ⁴
+紊	b u n ³ ³
+紋	b u n ² ³
+納	l a p̚ ⁴
+紐	l i u ⁴ ¹
+紓	s u ⁴ ⁴
+純	s u n ² ³
+紗	s a ⁴ ⁴	s e ⁴ ⁴	s u a ⁴ ⁴
+紘	h i ɪ ŋ ² ³	h ɔ ŋ ² ³
+紙	t͡s i ⁴ ¹	t͡s u a ⁴ ¹
+級	k i p̚ ³ ²
+紛	h u n ⁴ ⁴
+素	s ɔ ² ¹
+紡	h ɔ ŋ ⁴ ¹	pʰ a ŋ ⁴ ¹
+索	s i ɪ k̚ ³ ²	s ɔ k̚ ³ ²	s ɤ ʔ ³ ²
+紨	p ɔ ² ³
+紩	tʰ ĩ ³ ³
+紫	t͡s i ⁴ ¹
+紬	tʰ i u ⁴ ⁴
+紮	t͡s a t̚ ³ ²	t͡s a ʔ ³ ²
+累	l u i ³ ³	l u i ⁴ ¹
+細	s e ² ¹
+紲	s i ɛ t̚ ³ ²	s u a ² ¹
+紳	s i n ⁴ ⁴
+紹	s i a u ³ ³
+紺	k a m ² ¹	kʰ ɔ ŋ ⁴ ¹
+絀	tʰ u t̚ ³ ²
+終	t͡s i ɔ ŋ ⁴ ⁴
+組	t͡s ɔ ⁴ ¹	t͡s ɔ ⁴ ⁴
+絆	p u a n ² ¹	p u ã ² ¹
+結	k a t̚ ³ ²	k i ɛ t̚ ³ ²
+絕	t͡s e ʔ ⁴	t͡s u a t̚ ⁴
+絚	a n ² ³
+絞	k a ⁴ ¹
+絡	l e ⁴ ⁴	l ɔ k̚ ⁴	l ɤ ʔ ⁴
+絢	h i ɛ n ² ¹
+給	h ɔ ³ ³	k i p̚ ³ ²
+絨	z i ɔ ŋ ² ³
+絮	s u ² ¹
+統	tʰ a ŋ ⁴ ¹	tʰ ɔ ŋ ⁴ ¹
+絲	s i ⁴ ⁴
+絳	k a ŋ ² ¹	k ɔ ŋ ² ¹
+絹	k i n ² ¹
+綁	p a ŋ ⁴ ¹
+經	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+綜	t͡s ɔ ŋ ⁴ ⁴
+綠	l i ɔ k̚ ⁴	l i ɪ k̚ ⁴
+綢	t i u ² ³
+維	i ² ³	u i ² ³
+綰	k u a n ⁴ ¹	k u ã ³ ³	u a n ⁴ ¹
+綱	k ɔ ŋ ⁴ ⁴
+網	b a ŋ ³ ³	b ɔ ŋ ⁴ ¹
+綴	t u e ² ¹	t͡s u e ² ¹
+綸	k u a n ⁴ ⁴	l u n ² ³
+綹	l i u ⁴ ¹
+綺	kʰ i ⁴ ¹
+綻	t i ɛ n ³ ³
+綽	t͡sʰ i ɔ k̚ ³ ²
+綾	l i n ² ³	l i ɪ ŋ ² ³
+綿	b i ɛ n ² ³	m ĩ ² ³
+緊	k i n ⁴ ¹
+緋	h u i ⁴ ⁴
+緎	h i t̚ ⁴
+緒	s u ³ ³
+緘	k i a m ⁴ ⁴	kʰ i a m ² ³
+線	s i ɛ n ² ¹	s u ã ² ¹
+緝	t͡s i p̚ ³ ²	t͡s i p̚ ⁴	t͡sʰ i p̚ ³ ²
+緞	t u a n ³ ³
+緟	tʰ ɔ ŋ ³ ³
+締	t e ² ¹	t e ³ ³
+緣	i ɛ n ² ³
+編	p i ɛ n ⁴ ⁴	p ĩ ³ ³	pʰ i ɛ n ⁴ ⁴
+緩	u a n ³ ³
+緬	b i ɛ n ⁴ ¹
+緯	h u i ³ ³	u i ³ ³	u i ⁴ ¹
+練	l i ɛ n ³ ³
+縈	i ɪ ŋ ² ³
+縊	e ² ¹
+縋	l u i ³ ³	t u i ³ ³
+縒	t͡s u a ʔ ⁴
+縖	h a ² ³
+縛	p a k̚ ⁴
+縣	h i ɛ n ³ ³	k u a n ³ ³
+縫	h ɔ ŋ ² ³	p a ŋ ² ³	pʰ a ŋ ³ ³
+縮	s i ɔ k̚ ³ ²	s ɔ k̚ ³ ²
+縱	t͡sʰ i ɔ ŋ ² ¹	t͡sʰ i ɔ ŋ ⁴ ¹	t͡sʰ i ɔ ŋ ⁴ ⁴
+縲	l u i ² ³
+縴	kʰ i ɛ n ⁴ ⁴
+總	t͡s a ŋ ⁴ ¹	t͡s ɔ ŋ ⁴ ¹
+績	t͡s e ʔ ³ ²	t͡s i ɤ ʔ ³ ²	t͡s i ɪ k̚ ³ ²
+繁	h u a n ² ³
+繃	p ẽ ⁴ ⁴
+織	t͡s i t̚ ³ ²
+繚	l i a u ² ³	l i a u ³ ³
+繡	s i u ² ¹
+繩	s i ɪ ŋ ² ³	t͡s i n ² ³
+繪	h u e ³ ³	k u e ² ¹
+繫	h e ³ ³
+繭	k a n ⁴ ¹	k i ɛ n ⁴ ¹	k i ɪ ŋ ⁴ ¹
+繳	k i a u ⁴ ¹
+繼	k e ² ¹
+繽	p i n ⁴ ⁴	pʰ i n ⁴ ⁴
+繾	kʰ i ɛ n ⁴ ¹
+纂	t͡sʰ u a n ² ¹
+纆	h m̩ ʔ ³ ²
+續	s i ɔ k̚ ⁴
+纍	l u i ² ³
+纏	t i ɛ n ² ³	t ĩ ² ³
+纓	i ã ⁴ ⁴
+纖	s i a m ⁴ ⁴	t͡sʰ i a m ⁴ ⁴
+纛	t ɔ k̚ ⁴	t ɤ ³ ³
+纜	l a m ⁴ ¹
+缸	k ŋ̍ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+缺	kʰ i ʔ ³ ²	kʰ u a t̚ ³ ²	kʰ u e ʔ ³ ²
+缽	p u a t̚ ³ ²	p u a ʔ ³ ²
+缿	h a ŋ ³ ³
+罅	h a ² ¹	h e ⁴ ⁴	h ẽ ⁴ ⁴
+罈	tʰ a m ² ³
+罐	k u a n ² ¹
+罔	b ɔ ŋ ⁴ ¹
+罕	h a n ⁴ ¹	h u ã ⁴ ¹
+罘	h ɔ ² ³
+罟	k ɔ ⁴ ⁴
+罡	k ɔ ŋ ⁴ ⁴
+罦	h u ⁴ ⁴
+罩	t a u ² ¹	t a ² ¹
+罪	t͡s e ³ ³	t͡s u e ³ ³
+置	t i ² ¹	t i ³ ³
+罰	h u a t̚ ⁴
+署	s u ⁴ ¹
+罳	s u ⁴ ⁴
+罵	m ã ³ ³	m ẽ ³ ³
+罷	p a ³ ³
+罾	t͡s a n ⁴ ⁴
+羅	l ɤ ² ³
+羆	pʰ i ² ³
+羈	k i ⁴ ⁴	k u a ⁴ ⁴
+羊	i ũ ² ³	i ɔ ŋ ² ³
+羋	b i ⁴ ¹
+羌	k i ũ ⁴ ⁴	k i ɔ ŋ ⁴ ⁴	kʰ i a ŋ ⁴ ⁴
+美	b i ⁴ ¹
+羔	k ɤ ⁴ ⁴
+羚	l i ɪ ŋ ² ³
+羞	s i u ⁴ ⁴	t͡sʰ i u ⁴ ⁴
+群	k u n ² ³
+羨	s i ɛ n ³ ³	s u a n ³ ³	s u a n ⁴ ⁴
+義	ɡ i ³ ³
+羯	k i ɛ t̚ ³ ²
+羲	h i ⁴ ⁴
+羹	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+羼	s a n ⁴ ¹	t͡sʰ a n ⁴ ¹
+羽	u ⁴ ¹
+翁	a ŋ ⁴ ⁴	ɔ ŋ ⁴ ⁴
+翃	h ɔ ŋ ² ³
+翅	s i t̚ ⁴	t͡sʰ i ² ¹
+翊	i ɪ k̚ ⁴
+翌	i ɪ k̚ ⁴
+翎	l i ɪ ŋ ² ³
+翏	l i a u ² ³	l i u ² ¹
+習	s i p̚ ⁴
+翔	s i ɔ ŋ ² ³
+翕	h i p̚ ³ ²
+翟	t i ɪ k̚ ⁴
+翠	t͡sʰ u i ² ¹
+翡	h u i ⁴ ¹
+翦	t͡s i ɛ n ⁴ ¹
+翩	pʰ i ɛ n ⁴ ⁴
+翰	h a n ³ ³
+翱	k ɤ ² ³	k ɤ ³ ³
+翳	e ² ¹
+翹	kʰ i a u ² ¹
+翻	h u a n ⁴ ⁴
+翼	i ɪ k̚ ⁴	s i t̚ ⁴
+耀	i a u ³ ³
+老	l a u ³ ³	l a u ⁴ ¹	l ɤ ⁴ ¹	n ɔ̃ ⁴ ¹
+考	kʰ ɤ ⁴ ¹
+耄	m ã u ʔ ³ ²	m ɔ̃ ³ ³
+者	t͡s i a ⁴ ¹
+耆	k i ² ³
+而	z i ² ³
+耍	s ŋ̍ ⁴ ¹
+耐	n ã i ³ ³
+耑	t͡s u a n ⁴ ⁴
+耒	l u e ³ ³	l u i ³ ³
+耕	k i ɪ ŋ ⁴ ⁴
+耗	h a u ² ¹	h ɔ̃ ² ¹
+耘	u n ² ³
+耙	p e ² ³	p e ³ ³
+耞	k ẽ ⁴ ¹
+耦	ŋ ɔ̃ ⁴ ¹
+耨	l ɔ ³ ³
+耩	k a ŋ ⁴ ¹
+耰	i u ⁴ ⁴
+耳	h ĩ ³ ³	n ĩ ⁴ ¹	z i ⁴ ¹
+耶	i a ² ³
+耽	t a m ⁴ ⁴
+耾	h ɔ ŋ ² ³
+耿	k i ɪ ŋ ⁴ ¹
+聆	l i ɪ ŋ ² ³
+聊	l i a u ² ³
+聒	k u a t̚ ³ ²
+聖	s i ã ² ¹	s i ɪ ŋ ² ¹
+聘	pʰ i ɪ ŋ ² ¹
+聚	t͡s u ³ ³
+聞	b u n ² ³
+聯	l i ɛ n ² ³
+聰	t͡sʰ a ŋ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+聲	s i ã ⁴ ⁴	s i ɪ ŋ ⁴ ⁴
+聳	t͡sʰ a ŋ ² ¹
+職	t͡s i t̚ ³ ²
+聽	tʰ i ã ⁴ ⁴	tʰ i ɪ ŋ ² ¹	tʰ i ɪ ŋ ⁴ ⁴
+聾	l a ŋ ² ³	l ɔ ŋ ² ³
+聿	u t̚ ⁴
+肄	i ³ ³
+肅	s i ɔ k̚ ³ ²	s ɔ k̚ ³ ²
+肆	s i ² ¹	s u ² ¹
+肇	t i a u ³ ³
+肉	b a ʔ ³ ²	h i ɪ k̚ ⁴	z i ɔ k̚ ⁴
+肋	l i ɪ k̚ ⁴
+肌	k i ⁴ ⁴
+肏	t͡sʰ ɤ ʔ ³ ²
+肖	s i a u ² ¹	s i a u ⁴ ⁴
+肘	t i u ⁴ ¹
+肙	u a n ⁴ ⁴
+肚	t ɔ ³ ³	t ɔ ⁴ ¹
+肛	k a ŋ ³ ³	k ɔ ŋ ⁴ ⁴
+肝	k a n ⁴ ⁴	k u ã ⁴ ⁴
+股	k ɔ ⁴ ¹
+肢	k i ⁴ ⁴	t͡s i ⁴ ⁴
+肥	h u i ² ³	p u i ² ³
+肨	h a ŋ ² ¹
+肩	k i ɛ n ⁴ ⁴	k i ɪ ŋ ⁴ ⁴
+肪	h ɔ ŋ ² ³
+肭	l u t̚ ³ ²
+肯	kʰ i ɪ ŋ ⁴ ¹
+肱	k i ɪ ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+育	i ɔ k̚ ⁴
+肴	ŋ ã u ² ³
+肺	h i ² ¹	h u i ² ¹
+胃	u i ³ ³
+背	p e ² ¹	p e ³ ³	p u e ² ¹	p u e ³ ³
+胎	tʰ a i ⁴ ⁴	tʰ e ⁴ ⁴
+胖	pʰ a ŋ ² ¹	pʰ ɔ ŋ ² ¹
+胘	k i ɛ n ³ ³
+胚	pʰ u e ⁴ ⁴
+胛	k a p̚ ³ ²	k a ʔ ³ ²
+胞	p a u ⁴ ⁴
+胡	h ɔ ² ³	ɔ ² ³
+胤	i n ³ ³
+胥	s u ⁴ ⁴
+胭	i ɛ n ⁴ ⁴
+胮	h a ŋ ² ¹
+胰	i ² ³
+胱	k ɔ ŋ ⁴ ⁴
+胳	k ɤ ʔ ³ ²
+胸	h i ɔ ŋ ⁴ ⁴	h i ɪ ŋ ⁴ ⁴
+能	l i ɪ ŋ ² ³
+胿	k u a i ⁴ ⁴	k u i ⁴ ⁴
+脂	t͡s i ⁴ ¹	t͡s i ⁴ ⁴
+脅	h i a p̚ ⁴
+脆	t͡sʰ e ² ¹	t͡sʰ u i ² ¹
+脈	b i ɪ k̚ ⁴	m ẽ ʔ ⁴
+脊	t͡s i a ʔ ³ ²	t͡s i t̚ ³ ²	t͡s i ɪ k̚ ³ ²
+脛	h i ɪ ŋ ³ ³	k i ɪ ŋ ³ ³
+脞	t͡sʰ ɤ ² ¹
+脣	t u n ² ³
+脩	s i u ⁴ ⁴
+脫	tʰ u a t̚ ³ ²	tʰ u t̚ ³ ²	tʰ u t̚ ⁴
+脬	pʰ a u ⁴ ⁴	pʰ a ⁴ ⁴
+脯	h u ⁴ ¹	p ɔ ⁴ ¹
+脰	t a u ³ ³
+脹	t i ũ ² ¹	t i ɔ ŋ ² ¹
+脾	p i ² ³	pʰ i ² ³
+腈	t͡s i ã ⁴ ⁴
+腋	i ɪ k̚ ⁴
+腎	s i n ³ ³	s i ɛ n ³ ³
+腐	h u ³ ³	h u ⁴ ¹
+腑	h u ⁴ ¹
+腓	h u i ² ³	h u i ⁴ ⁴
+腔	kʰ a ŋ ⁴ ⁴	kʰ i ũ ⁴ ⁴	kʰ i ɔ ŋ ⁴ ⁴
+腕	u a n ⁴ ¹	u ã ⁴ ¹
+腠	t͡s ɔ ² ¹
+腡	l e ² ³
+腥	t͡sʰ ẽ ⁴ ⁴
+腦	l ɤ ⁴ ¹	n ã u ⁴ ¹
+腩	l a m ⁴ ¹
+腫	t͡s i ɪ ŋ ⁴ ¹
+腬	z i u ² ³
+腮	s a i ⁴ ⁴	t͡sʰ i ⁴ ⁴
+腰	i a u ⁴ ⁴	i ɤ ⁴ ⁴
+腱	k i ɛ n ³ ³
+腳	k i ɔ k̚ ³ ²	k i ɤ ʔ ³ ²	kʰ a ⁴ ⁴
+腸	t i ɔ ŋ ² ³	t ŋ̍ ² ³	t͡sʰ i a ŋ ² ³	t͡sʰ i ɛ n ² ³
+腹	h ɔ k̚ ³ ²	p a k̚ ³ ²
+腺	s a n ² ¹	s i ɛ n ² ¹	s u ã ² ¹
+腼	b i ɛ n ⁴ ¹
+腿	tʰ u i ⁴ ¹
+膀	p ɔ ŋ ⁴ ¹	pʰ ɔ ŋ ² ³	pʰ ɔ ŋ ³ ³
+膈	k e ʔ ³ ²	k i ɪ k̚ ³ ²
+膊	pʰ ɔ k̚ ³ ²
+膎	k e ² ³
+膏	k ɔ ⁴ ⁴	k ɤ ³ ³	k ɤ ⁴ ⁴
+膗	t͡s u a i ² ³	t͡s u ã i ³ ³
+膘	p i ɤ ⁴ ⁴
+膚	h u ⁴ ⁴
+膜	m ɔ̃ ʔ ³ ²	m ɔ̃ ʔ ⁴
+膝	s i t̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+膠	k a u ⁴ ⁴	k a ⁴ ⁴
+膣	t i t̚ ³ ²	t͡s i ⁴ ⁴
+膨	pʰ i ɪ ŋ ² ³
+膩	z i ³ ³
+膳	s i ɛ n ³ ³
+膵	t͡s u i ³ ³
+膽	t a m ⁴ ¹	t ã ⁴ ¹
+膾	k u e ² ¹
+膿	l a ŋ ² ³	l ɔ ŋ ² ³
+臂	p i ² ¹
+臆	i ɤ ʔ ³ ²	i ɪ k̚ ³ ²
+臉	l i a m ⁴ ¹	l i ɛ n ⁴ ¹
+臊	t͡sʰ ɤ ⁴ ⁴
+臍	t͡s a i ² ³	t͡s e ² ³
+臘	l a ʔ ⁴	l i a p̚ ⁴
+臟	t͡s ŋ̍ ³ ³	t͡s ɔ ŋ ³ ³
+臣	s i n ² ³
+臥	ŋ ɔ̃ ³ ³	ɡ ɔ ³ ³	ɡ ɤ ³ ³
+臨	l i a m ² ³	l i m ² ³	l i m ⁴ ¹
+自	t͡s u ³ ³
+臭	h i u ² ¹	t͡sʰ a u ² ¹
+至	t͡s i ² ¹
+致	t i ² ¹
+臺	t a i ² ³
+臻	t͡s i n ⁴ ⁴
+臼	kʰ u ³ ³
+臿	t͡sʰ a p̚ ³ ²
+舀	i ũ ⁴ ¹
+舁	k u ⁴ ¹	u ² ³	u ³ ³
+舂	t͡s i ɔ ŋ ⁴ ⁴	t͡s i ɪ ŋ ⁴ ⁴
+舅	k i u ³ ³	k u ³ ³
+與	i ² ³	i ⁴ ¹	u ² ³	u ³ ³	u ⁴ ¹
+興	h i ɪ ŋ ² ¹	h i ɪ ŋ ⁴ ⁴
+舉	k i ⁴ ¹
+舊	k i u ³ ³	k u ³ ³
+舌	s i ɛ t̚ ⁴	t͡s i ʔ ⁴
+舍	s i a ² ¹
+舐	t͡s ĩ ³ ³
+舒	s u ⁴ ⁴	s ɔ ⁴ ⁴	t͡sʰ u ⁴ ⁴
+舔	tʰ i a m ⁴ ¹
+舛	t͡sʰ u a n ⁴ ¹
+舜	s u n ² ¹
+舞	b u ⁴ ¹
+舟	t͡s i u ⁴ ⁴
+航	h a ŋ ² ³	h ɔ ŋ ² ³
+舫	h ɔ ŋ ⁴ ¹	h ɔ ŋ ⁴ ⁴
+般	p a n ⁴ ⁴	p u a t̚ ⁴	p u ã ⁴ ⁴
+舵	t a i ³ ³	t u a ³ ³	t ɤ ³ ³
+舶	p i ɪ k̚ ⁴
+舷	h i ɛ n ² ³	k ĩ ² ³
+船	s u a n ² ³	t͡s u n ² ³
+舺	k a ʔ ³ ²
+艇	tʰ i ɪ ŋ ⁴ ¹
+艏	s i u ⁴ ¹
+艙	t͡sʰ ŋ̍ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+艚	t͡s ɤ ² ³
+艤	ɡ i ⁴ ¹
+艦	k a m ² ¹	l a m ³ ³
+艮	k u n ² ¹
+良	l i a ŋ ² ³	l i ɔ ŋ ² ³
+艱	k a n ⁴ ⁴
+色	s i ɪ k̚ ³ ²
+艾	h i ã ³ ³	ŋ ã i ³ ³	ɡ a i ³ ³
+芋	u ³ ³	ɔ ³ ³
+芍	t͡s i ɔ k̚ ³ ²
+芎	k i ɔ ŋ ⁴ ⁴
+芒	b a ŋ ² ³	b ɔ ŋ ² ³	m ẽ ² ³
+芙	h u ² ³	pʰ u ² ³
+芚	t u n ² ³	tʰ u n ⁴ ⁴
+芝	t͡s i ⁴ ⁴
+芡	kʰ i a m ² ¹	kʰ i ɛ n ² ¹
+芥	k a i ² ¹	k e ² ¹	k u a ² ¹
+芫	i ɛ n ² ³
+芬	h u n ⁴ ⁴
+芭	p a ⁴ ⁴
+芮	z u e ³ ³
+芯	s i m ⁴ ⁴
+花	h u a ⁴ ⁴	h u e ⁴ ⁴
+芳	h ɔ ŋ ⁴ ⁴	pʰ a ŋ ⁴ ⁴
+芷	t͡s i ⁴ ¹
+芸	u n ² ³
+芹	kʰ i n ² ³
+芻	t͡s ɔ ⁴ ⁴
+芽	ɡ e ² ³
+苑	u a n ⁴ ¹
+苒	z i a m ² ³
+苗	b i a u ² ³
+苛	kʰ ɤ ² ³	kʰ ɤ ⁴ ⁴
+苞	p a u ⁴ ⁴	p ɔ ² ³
+苟	k ɔ ⁴ ¹
+苣	k u ³ ³
+若	l u a ³ ³	n ã ³ ³	n ã ⁴ ¹	t͡s e ⁴ ¹	z i a ⁴ ¹	z i ɔ k̚ ⁴	z u a ³ ³	ɡ u a ³ ³
+苦	kʰ ɔ ⁴ ¹
+苧	t e ³ ³	tʰ u ⁴ ¹
+英	i ɪ ŋ ⁴ ⁴
+苴	t͡s u ³ ³
+苶	l i a p̚ ³ ²
+茂	b ɔ ³ ³
+范	h u a n ³ ³
+茄	k a ⁴ ⁴	k i ɤ ² ³
+茅	h m̩ ² ³	m ã u ² ³
+茈	t͡s ĩ ⁴ ¹	t͡sʰ u ² ³	t͡sʰ u ⁴ ¹
+茉	b a k̚ ⁴	b u a ʔ ⁴
+茗	b i ɪ ŋ ² ³
+茜	s e ⁴ ⁴	t͡sʰ i ɛ n ² ¹
+茫	b a ŋ ² ³	b ɔ ŋ ² ³
+茯	h ɔ k̚ ⁴
+茲	t͡s u ⁴ ⁴
+茴	h u e ² ³
+茵	i n ⁴ ⁴
+茶	t a ² ³	t e ² ³	t͡sʰ a ² ³
+茸	z i ɔ ŋ ² ³
+茹	z u ² ³
+荀	s u n ² ³
+荃	t͡s u a n ² ³	t͡sʰ u a n ⁴ ⁴
+草	t͡sʰ a u ⁴ ¹	t͡sʰ ɤ ⁴ ¹
+荊	k i ɪ ŋ ⁴ ⁴
+荏	l a m ⁴ ¹
+荒	h ŋ̍ ⁴ ⁴	h ɔ ŋ ⁴ ⁴
+荔	l a i ³ ³	l e ³ ³
+荖	l a u ⁴ ¹	l ɤ ⁴ ¹
+荷	h a ² ³	h ɤ ² ³	h ɤ ³ ³	ɤ ² ³
+荸	p u t̚ ⁴
+荼	t ɔ ² ³
+荽	s u i ⁴ ⁴
+莆	p ɔ ² ³	pʰ ɔ ² ³
+莉	l i ³ ³	n ĩ ³ ³
+莊	t͡s ŋ̍ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+莒	k i ⁴ ¹
+莓	m̩ ² ³
+莖	h u ã i ² ³	k i ɪ ŋ ⁴ ⁴
+莘	s i n ⁴ ⁴
+莛	t i ɪ ŋ ² ³
+莢	k e ʔ ³ ²	k i a p̚ ³ ²	ŋ u ẽ ʔ ³ ²	ŋ ẽ ʔ ³ ²
+莧	h i ɛ n ³ ³	h i ɪ ŋ ³ ³
+莪	ɡ ɤ ² ³
+莫	b ɔ k̚ ⁴	b ɤ ʔ ⁴	m ã i ² ¹
+莽	b ɔ ŋ ⁴ ¹
+菁	t͡s i ɪ ŋ ⁴ ⁴	t͡sʰ ẽ ⁴ ⁴
+菅	k a n ⁴ ⁴	k u ã ⁴ ⁴
+菇	k ɔ ⁴ ⁴
+菊	k i ɔ k̚ ³ ²	k i ɪ k̚ ³ ²
+菌	kʰ u n ⁴ ¹
+菏	h a ² ³
+菑	t͡s u ⁴ ⁴
+菔	h ɔ k̚ ⁴	p ɔ k̚ ⁴
+菖	t͡sʰ i ũ ⁴ ⁴	t͡sʰ i ɔ ŋ ⁴ ⁴
+菜	t͡sʰ a i ² ¹
+菝	p a t̚ ⁴	p u a t̚ ⁴
+菠	p u e ⁴ ⁴	p ɤ ⁴ ⁴
+菩	pʰ ɔ ² ³
+菫	k i n ⁴ ¹
+華	h u a ² ³	h u a ² ¹	h u a ⁴ ⁴
+菰	k ɔ ⁴ ⁴
+菱	l i ɪ ŋ ² ³
+菲	h u i ⁴ ⁴
+菼	t a m ³ ³	tʰ a m ⁴ ¹
+菽	s i ɔ k̚ ³ ²
+萄	t ɤ ² ³
+萇	t i ɔ ŋ ² ³
+萊	l a i ² ³
+萌	b i ɪ ŋ ² ³
+萍	pʰ i ɤ ² ³	pʰ i ɪ ŋ ² ³
+萎	u i ⁴ ¹	u i ⁴ ⁴
+萣	t i ã ³ ³
+萬	b a n ³ ³
+萱	s u a n ⁴ ⁴
+萵	m ẽ ʔ ³ ²	ɤ ⁴ ⁴
+萼	ɡ ɔ k̚ ⁴
+落	l a k̚ ³ ²	l a u ² ¹	l a u ʔ ⁴	l ɔ k̚ ⁴	l ɔ ³ ³	l ɤ ʔ ⁴
+葉	h i ɤ ʔ ⁴	i a p̚ ⁴
+著	t i ² ¹	t i ɔ k̚ ⁴	t i ɤ ³ ³	t i ɤ ʔ ⁴	t u ² ¹	t ɤ ³ ³	t ɤ ʔ ⁴
+葙	s i ũ ⁴ ⁴
+葛	k a t̚ ³ ²	k u a ʔ ³ ²
+葡	p ɔ ² ³	pʰ u ² ³	pʰ ɤ ² ³
+董	t a ŋ ⁴ ¹	t ɔ ŋ ⁴ ¹
+葩	pʰ a ⁴ ⁴
+葫	h ɔ ² ³
+葬	t͡s ɔ ŋ ² ¹
+葭	k a ⁴ ⁴
+葵	k u e ² ³	k u i ² ³	kʰ u e ² ³
+葺	t͡sʰ i p̚ ³ ²
+蒂	t i ² ¹
+蒔	s i ² ³	s i ³ ³
+蒙	b ɔ ŋ ² ³
+蒜	s u a n ² ¹
+蒲	p ɔ ² ³	pʰ ɔ ² ³
+蒸	t͡s i ɪ ŋ ⁴ ⁴
+蒹	k i a m ⁴ ⁴
+蒼	t͡sʰ ɔ ŋ ⁴ ⁴
+蒿	ɤ ⁴ ⁴
+蓄	h a k̚ ³ ²	tʰ i ɔ k̚ ³ ²
+蓆	s i ɪ k̚ ⁴	t͡sʰ i ɤ ʔ ⁴
+蓉	i ɔ ŋ ² ³
+蓊	ɔ m ³ ³
+蓋	k a i ² ¹	k a p̚ ³ ²	k a ʔ ³ ²	k u a ² ¹	kʰ a p̚ ³ ²
+蓍	s i ⁴ ⁴
+蓑	s u i ⁴ ⁴
+蓖	p i ⁴ ⁴
+蓬	h ɔ ŋ ² ³	p ɔ ŋ ³ ³	pʰ ɔ ŋ ² ³	pʰ ɔ ŋ ³ ³
+蓮	l i ɛ n ² ³
+蓳	k i n ⁴ ¹
+蓼	l a u ⁴ ¹
+蔑	b i ɛ t̚ ⁴
+蔓	b a n ³ ³	m u ã ³ ³
+蔔	p ɔ k̚ ⁴
+蔗	t͡s i a ² ¹
+蔚	u i ² ¹	u t̚ ³ ²
+蔡	t͡sʰ a i ² ¹	t͡sʰ u a ² ¹
+蔣	t͡s i ũ ⁴ ¹
+蔥	t͡sʰ a ŋ ⁴ ⁴	t͡sʰ ɔ ŋ ⁴ ⁴
+蔫	l i ɛ n ⁴ ⁴
+蔬	s e ⁴ ⁴	s ɔ ⁴ ⁴
+蔭	i m ² ¹	ŋ̍ ⁴ ¹
+蔻	kʰ ɔ ² ¹
+蔽	p e ² ¹
+蕃	h u a n ² ³	h u a n ⁴ ⁴
+蕉	t͡s i a u ⁴ ⁴	t͡s i ɤ ⁴ ⁴
+蕊	l u i ⁴ ¹
+蕎	k i ɤ ² ³	z i ɤ ³ ³
+蕘	ɡ i ɤ ² ³
+蕩	t ŋ̍ ³ ³	t ɔ ŋ ³ ³
+蕪	b u ² ³
+蕭	s i a u ⁴ ⁴
+蕹	i ɪ ŋ ² ¹
+蕾	l e ⁴ ¹	l u i ⁴ ¹
+薄	p ɔ k̚ ⁴	p ɤ ʔ ⁴
+薅	kʰ a u ⁴ ⁴
+薇	b i ² ³
+薈	h e ³ ³	h u e ³ ³	k u e ² ¹	u e ² ¹
+薊	k e ² ¹
+薑	k i ũ ⁴ ⁴
+薛	s i ʔ ³ ²
+薟	h i a m ⁴ ⁴
+薦	t͡s i ɛ n ² ¹
+薨	h ɔ ŋ ⁴ ⁴	i ɪ ŋ ⁴ ⁴
+薩	s a t̚ ³ ²
+薪	s i n ⁴ ⁴
+薯	t͡s i ² ³
+薰	h u n ⁴ ⁴
+薹	t a i ² ³
+薺	t͡s e ² ³	t͡s e ³ ³	t͡s i ² ³
+藁	k ɤ ⁴ ¹
+藍	l a m ² ³	n ã ² ³
+藏	t͡s ŋ̍ ³ ³	t͡s ɔ ŋ ² ³	t͡s ɔ ŋ ³ ³	t͡sʰ a ŋ ² ¹
+藐	b i a u ⁴ ¹
+藕	ŋ ã u ³ ³
+藝	ɡ e ³ ³
+藟	l u i ⁴ ¹
+藤	t i n ² ³	t i ɪ ŋ ² ³
+藥	i ɔ k̚ ⁴	i ɤ ʔ ⁴
+藩	h u a n ⁴ ⁴	pʰ u a n ⁴ ⁴
+藪	s ɔ ⁴ ¹
+藶	l i ɪ k̚ ⁴
+藹	a i ⁴ ¹
+藺	l i n ³ ³
+藻	t͡s ɤ ⁴ ¹
+蘆	l ɔ ² ³
+蘇	s ɔ ⁴ ⁴
+蘊	u n ² ¹
+蘋	p i n ² ³	p i ɪ ŋ ² ³	p ɔ ŋ ² ³	pʰ ɔ ŋ ³ ³
+蘑	m ɔ̃ ² ³
+蘡	ĩ ⁴ ¹
+蘢	l a ŋ ⁴ ⁴	l i ɪ ŋ ⁴ ⁴
+蘭	l a n ² ³
+蘸	t͡s a m ² ¹
+蘿	l a ² ³	l ɤ ² ³	n ã ² ³
+虍	h ɔ ⁴ ⁴
+虎	h u ⁴ ⁴	h ɔ ⁴ ¹
+虐	z i ɔ k̚ ⁴	ɡ i ɔ k̚ ⁴	ɡ i ɤ ʔ ⁴	ɡ i ɪ k̚ ⁴
+虔	kʰ i ɛ n ² ³
+處	t͡sʰ u ² ¹	t͡sʰ u ⁴ ¹
+虛	h i ⁴ ⁴	h u ⁴ ⁴
+虜	l ɔ ⁴ ¹
+虞	ɡ u ² ³
+號	h ɤ ² ³	h ɤ ³ ³	k ɤ ³ ³
+虧	kʰ u i ⁴ ⁴
+虯	kʰ i u ² ³
+虹	h ɔ ŋ ² ³	kʰ i ɪ ŋ ³ ³
+虺	h u e ⁴ ⁴	h u i ⁴ ¹
+虼	k a ⁴ ⁴
+蚊	b u n ² ³
+蚌	p a ŋ ³ ³
+蚓	i n ⁴ ¹	k u n ⁴ ¹
+蚜	ɡ a ² ³	ɡ e ² ³
+蚣	k a ŋ ⁴ ⁴	k ɔ ŋ ⁴ ⁴
+蚤	t͡s a u ⁴ ¹
+蚱	t͡s a ² ¹
+蚵	ɤ ² ³
+蚶	h a m ⁴ ⁴
+蚹	h u ³ ³
+蚻	t͡s u a ʔ ⁴
+蛀	t͡s i u ² ¹
+蛄	k ɔ ⁴ ⁴
+蛆	t͡sʰ i ⁴ ⁴
+蛇	i ² ³	s i a ² ³	t͡s u a ² ³
+蛉	n ĩ ⁴ ⁴
+蛋	t a n ² ¹	t a n ³ ³	t u ã ⁴ ⁴
+蛔	h u e ² ³
+蛙	u a ⁴ ⁴
+蛛	t u ⁴ ⁴
+蛞	kʰ u a t̚ ³ ²
+蛟	k a u ⁴ ⁴
+蛤	k a p̚ ³ ²
+蛩	k i ɔ ŋ ² ³	kʰ i ɔ ŋ ² ³
+蛹	i ɔ ŋ ⁴ ¹
+蛺	k i a p̚ ³ ²
+蛻	tʰ u e ² ¹	tʰ u i ² ¹
+蛾	i a ʔ ⁴	ŋ ɔ̃ ² ³	ɡ ɤ ² ³
+蜀	s i ɔ k̚ ⁴	t͡s i t̚ ⁴
+蜂	h ɔ ŋ ⁴ ⁴	pʰ a ŋ ⁴ ⁴
+蜃	s i n ³ ³
+蜅	p ɔ ⁴ ⁴
+蜈	ŋ ɔ̃ ² ³	ɡ i a ² ³	ɡ ɔ ² ³
+蜊	l a ² ³
+蜍	t͡s i ² ³
+蜓	tʰ i ɪ ŋ ² ³
+蜘	t i ⁴ ⁴
+蜚	p u i ³ ³
+蜜	b i t̚ ⁴
+蜞	kʰ i ² ³
+蜢	b i ɪ ŋ ⁴ ¹	m ĩ ʔ ³ ²	m ẽ ⁴ ¹
+蜱	p i ⁴ ⁴
+蜷	kʰ u n ² ³
+蝒	b i n ³ ³
+蝕	s i t̚ ³ ²	s i ɪ k̚ ⁴	s i ʔ ⁴
+蝙	p i ɛ n ⁴ ¹	p i ɛ n ⁴ ⁴
+蝠	h ɔ k̚ ³ ²
+蝣	i u ² ³
+蝦	h a ² ³	h e ² ³
+蝨	s a t̚ ³ ²
+蝰	kʰ u i ⁴ ¹
+蝴	h ɔ ² ³	ɔ ² ³
+蝶	i a ʔ ⁴	t i a p̚ ⁴
+蝸	ɤ ⁴ ⁴
+蝹	u n ⁴ ⁴
+螃	p ɔ ŋ ² ³
+融	h i ɔ ŋ ² ³	i ɔ ŋ ² ³
+螟	b i ɪ ŋ ² ³
+螢	i ã ² ³	i ɪ ŋ ² ³
+螫	t͡sʰ i ɤ ʔ ³ ²
+螺	l e ² ³	l ɔ ² ³
+螽	t͡s i ɔ ŋ ⁴ ⁴
+螿	t͡s i ũ ⁴ ⁴
+蟀	s u t̚ ³ ²
+蟄	t i t̚ ⁴
+蟋	s i ɪ k̚ ³ ²	s i ʔ ³ ²
+蟒	b a ŋ ⁴ ¹	b ɔ ŋ ⁴ ¹
+蟬	s i ɛ n ² ³
+蟯	ŋ i ã u ʔ ⁴	ɡ i ɤ ² ³
+蟲	tʰ a ŋ ² ³	tʰ i ɔ ŋ ² ³
+蟳	t͡s i m ² ³
+蟶	tʰ a n ⁴ ⁴	t͡sʰ i ɪ ŋ ⁴ ⁴
+蟹	h a i ³ ³	h e ³ ³
+蟻	h i a ³ ³	ɡ i ⁴ ¹
+蟾	s i a m ² ³
+蠅	s i n ² ³
+蠍	ɡ i ɛ t̚ ³ ²
+蠐	t͡s e ² ³
+蠓	b a ŋ ⁴ ¹
+蠔	ɤ ² ³
+蠕	z u ² ³
+蠘	t͡sʰ i ʔ ⁴
+蠟	l a p̚ ⁴	l a ʔ ⁴
+蠢	tʰ u n ⁴ ¹	t͡sʰ u n ⁴ ¹
+蠣	l e ³ ³
+蠱	k ɔ ⁴ ¹
+蠲	k u a n ⁴ ⁴
+蠶	tʰ a m ² ³	t͡sʰ a m ² ³	t͡sʰ a n ² ³
+蠻	b a n ² ³
+血	h i ɛ t̚ ³ ²	h u e ʔ ³ ²
+衁	h ɔ ŋ ⁴ ⁴
+衋	h i ɪ k̚ ³ ²
+行	h a ŋ ² ³	h i ɪ ŋ ² ³	h i ɪ ŋ ³ ³	k i ã ² ³
+衍	i ɛ n ⁴ ¹
+術	s u t̚ ⁴
+衕	t ɔ ŋ ² ¹
+街	k e ⁴ ⁴
+衙	ɡ e ² ³
+衚	h ɔ ² ³	ɔ ² ³
+衛	u e ³ ³	u i ³ ³
+衝	t͡s i ɪ ŋ ⁴ ⁴	t͡sʰ i a ŋ ³ ³	t͡sʰ i ɔ ŋ ⁴ ⁴	t͡sʰ i ɪ ŋ ² ¹
+衡	h i ɪ ŋ ² ³
+衢	k u ² ³
+衣	i ² ¹	i ⁴ ⁴	u i ⁴ ⁴
+表	p i a u ⁴ ¹	p i ɤ ⁴ ¹
+衫	s a m ⁴ ⁴	s ã ⁴ ⁴
+衰	s u e ⁴ ⁴
+衷	t i ɔ ŋ ⁴ ⁴	tʰ i ɔ ŋ ⁴ ⁴
+衾	kʰ i m ⁴ ⁴
+袁	u a n ² ³
+袂	b e ³ ³	ŋ̍ ⁴ ¹
+袈	k a ⁴ ⁴
+袋	t a i ³ ³	t e ³ ³
+袍	p a u ² ³	p ɔ ² ³	pʰ a u ² ³	pʰ a u ² ¹
+袒	tʰ a n ⁴ ¹
+袖	s i u ² ¹	s i u ³ ³	ŋ̍ ⁴ ¹
+袚	pʰ u a ʔ ⁴
+袞	k u n ⁴ ¹
+被	p i ³ ³	pʰ u e ³ ³
+袱	h ɔ k̚ ⁴
+裁	t͡sʰ a i ² ³
+裂	l i ɛ t̚ ⁴	l i ʔ ⁴
+裊	n i ã u ⁴ ¹
+裔	e ² ¹	i ² ¹
+裕	z u ³ ³
+裘	h i u ² ³	k i u ² ³
+裙	k u n ² ³
+補	p ɔ ⁴ ¹
+裝	t͡s ŋ̍ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+裟	s e ⁴ ⁴
+裡	l i n ⁴ ¹	l i ⁴ ¹	n ĩ ʔ ⁴
+裨	p i ² ³	p i ⁴ ⁴
+裱	k i a u ⁴ ¹	p i a u ⁴ ¹	p i ɤ ⁴ ¹
+裳	s i ɔ ŋ ² ³	t͡s i ũ ² ³
+裴	p u e ² ³
+裸	l ɔ ³ ³
+裹	k a u ʔ ³ ²	k ɔ ⁴ ¹	k ɤ ⁴ ¹
+製	t͡s e ² ¹
+裾	k i ⁴ ⁴
+褂	k u a ² ¹
+複	h ɔ k̚ ⁴
+褒	p ɤ ⁴ ⁴
+褔	h u ² ¹
+褙	p e ² ¹	p u e ² ¹
+褚	tʰ u ⁴ ¹
+褥	z i ɔ k̚ ⁴
+褪	tʰ ŋ̍ ² ¹
+褫	tʰ i ⁴ ¹
+褱	h u a i ² ³
+褲	kʰ ɔ ² ¹
+褻	s i ɛ t̚ ³ ²
+襀	t͡s i ɤ ʔ ³ ²
+襖	ɤ ⁴ ¹
+襟	kʰ i m ⁴ ⁴
+襠	t ɔ ŋ ⁴ ⁴
+襤	l a m ⁴ ⁴
+襪	b u a t̚ ⁴	b u e ʔ ⁴
+襫	s i ɪ k̚ ³ ²
+襯	t͡sʰ a n ² ¹	t͡sʰ i n ² ¹
+襲	s i p̚ ⁴
+襻	pʰ a n ² ¹
+襾	a ² ¹	h a ² ¹
+西	s a i ⁴ ⁴	s e ⁴ ⁴	s i ⁴ ⁴
+要	i a u ² ¹	i a u ⁴ ⁴
+覃	tʰ a m ² ³
+覆	h ɔ k̚ ³ ²	pʰ a k̚ ³ ²
+見	h i ɛ n ³ ³	k i ɛ n ² ¹	k ĩ ² ¹
+規	k u i ⁴ ⁴
+覓	b a i ³ ³	b a ³ ³	b a ʔ ⁴	b i ʔ ³ ²	m ã i ³ ³
+覕	b i ʔ ³ ²
+視	s e ³ ³	s i ³ ³
+覗	s u ² ¹
+親	t͡s i m ⁴ ⁴	t͡sʰ i n ⁴ ⁴	t͡sʰ ẽ ⁴ ⁴
+覯	k ɔ ² ¹
+覺	k a k̚ ³ ²
+覽	l a m ⁴ ¹
+觀	k u a n ² ¹	k u a n ⁴ ⁴
+角	k a k̚ ³ ²
+觚	k ɔ ⁴ ⁴
+觟	h a i ³ ³	h u a ⁴ ¹
+解	k a i ² ¹	k a i ⁴ ¹	k e ⁴ ¹
+觱	p i ⁴ ⁴
+觳	kʰ ɔ k̚ ³ ²
+觸	t a k̚ ³ ²	t͡sʰ i ɔ k̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+言	ɡ i ɛ n ² ³
+訂	t i ã ³ ³	t i ɪ ŋ ² ¹	t i ɪ ŋ ³ ³
+訃	h u ² ¹
+計	k e ² ¹	k i ² ¹
+訊	s i n ² ¹
+訌	h ɔ ŋ ² ³	h ɔ ŋ ² ¹	h ɔ ŋ ³ ³
+討	tʰ ɤ ⁴ ¹
+訓	h u n ² ¹
+訕	s u a n ³ ³	s u a n ⁴ ⁴
+訖	k i t̚ ³ ²	ɡ i t̚ ³ ²	ɡ u t̚ ³ ²
+託	tʰ ɔ k̚ ³ ²
+記	k i ² ¹
+訛	ŋ ɔ̃ ² ³
+訝	ŋ ã ³ ³
+訟	s i ɔ ŋ ³ ³
+訣	k u a t̚ ³ ²
+訥	l u t̚ ⁴
+訪	h ɔ ŋ ⁴ ¹
+設	s i ɛ t̚ ³ ²
+許	h i ⁴ ¹	kʰ ɔ ⁴ ¹
+訴	s ɔ ² ¹
+訶	ɤ ⁴ ⁴
+診	t͡s i n ⁴ ¹
+註	t͡s u ² ¹
+証	t͡s i ɪ ŋ ² ¹
+詆	t i ⁴ ¹
+詈	l e ⁴ ¹
+詐	t͡s a ² ¹	t͡s e ² ¹
+詔	t͡s i a u ² ¹
+評	pʰ i ɪ ŋ ² ³
+詝	tʰ u ⁴ ¹
+詞	s u ² ³
+詡	h u ⁴ ¹
+詢	s u n ² ³
+詣	ɡ e ³ ³
+試	s i ² ¹	t͡sʰ i ² ¹
+詩	s i ⁴ ⁴
+詫	tʰ a ² ¹
+詭	k u i ⁴ ¹	kʰ u i ⁴ ¹
+詮	t͡sʰ u a n ⁴ ⁴
+話	h u a ³ ³	u e ³ ³
+該	k a i ⁴ ⁴
+詳	s i a ŋ ² ³	s i ɔ ŋ ² ³
+詹	t͡s i a m ⁴ ⁴
+詼	kʰ u e ⁴ ⁴
+誇	kʰ u a ⁴ ⁴
+誌	t͡s i ² ¹
+認	z i m ³ ³	z i n ³ ³
+誓	s e ² ¹	t͡s u a ³ ³
+誕	t a n ² ¹	t a n ³ ³
+誘	i u ⁴ ¹
+誚	s a u ⁴ ⁴	s i a u ² ¹
+語	ɡ i ⁴ ¹
+誠	s i ɪ ŋ ² ³	t͡s i ã ² ³
+誡	k a i ² ¹
+誣	b u ² ³
+誤	ɡ ɔ ³ ³
+誦	s i ɔ ŋ ³ ³
+誨	h u e ² ¹
+說	s u a t̚ ³ ²	s u e ² ¹	s u e ʔ ³ ²
+誰	s i a ŋ ² ³	s i a ŋ ⁴ ¹	s u i ² ³	t͡s u i ² ³	t͡s u i ³ ³
+課	kʰ u e ² ¹	kʰ ɤ ² ¹
+誹	h u i ⁴ ¹
+誼	ɡ i ² ³	ɡ i ³ ³
+調	t i a u ² ³	t i a u ² ¹	t i a u ³ ³
+諄	t u n ⁴ ⁴
+談	t a m ² ³
+請	t͡sʰ i ã ⁴ ¹	t͡sʰ i ɪ ŋ ⁴ ¹
+諍	t͡s i ɪ ŋ ² ¹	t͡s ẽ ² ¹
+諒	l i ɔ ŋ ³ ³
+論	l u n ³ ³
+諗	s i m ⁴ ¹
+諛	z u ² ³
+諜	t i a p̚ ⁴
+諞	p i ɛ n ⁴ ¹
+諦	t e ² ¹
+諧	h a i ² ³
+諫	k a n ² ¹
+諭	z u ³ ³
+諱	h u i ² ¹
+諶	s i m ² ³
+諷	h ɔ ŋ ⁴ ¹	h ɔ ŋ ⁴ ⁴
+諸	t͡s u ⁴ ⁴
+諺	ɡ a n ³ ³
+諾	l ɔ k̚ ⁴
+謀	b ɔ ² ³
+謁	i ɛ t̚ ³ ²
+謂	u i ³ ³
+謄	tʰ i ɪ ŋ ² ³
+謅	t͡s ɔ ⁴ ⁴	t͡sʰ a u ⁴ ¹	t͡sʰ a u ⁴ ⁴
+謊	h ɔ ŋ ⁴ ¹
+謎	b e ² ³	b i ² ³	b i ³ ³
+謔	h i ɔ k̚ ³ ²	ɡ i a k̚ ³ ²	ɡ i ɔ k̚ ³ ²	ɡ i ɔ k̚ ⁴	ɡ i ɤ ʔ ⁴
+謗	p ɔ ŋ ² ¹
+謙	kʰ i a m ⁴ ⁴
+謚	i ɪ k̚ ³ ²
+講	k a ŋ ⁴ ¹	k ɔ ŋ ⁴ ¹
+謝	s i a ³ ³	t͡s i a ³ ³
+謠	i a u ² ³
+謨	b ɔ ² ³
+謬	b i u ³ ³
+謳	ɔ ⁴ ⁴
+謹	k i n ⁴ ¹
+謾	b a n ³ ³
+譀	h a m ² ¹
+證	t͡s i ɪ ŋ ² ¹
+譏	k i ⁴ ⁴
+譐	t͡s u n ⁴ ¹
+識	b a t̚ ³ ²	s i ɪ k̚ ³ ²
+譚	t a m ² ³	t ã ² ³	tʰ a m ² ³
+譜	pʰ ɔ ⁴ ¹
+警	k i ɪ ŋ ² ¹	k i ɪ ŋ ⁴ ¹
+譬	pʰ i ² ¹
+譯	i ɪ k̚ ⁴
+議	ɡ i ³ ³
+譴	kʰ i ɛ n ² ¹	kʰ i ɛ n ⁴ ¹
+護	h ɔ ³ ³
+譽	i ³ ³	u ³ ³
+讀	t a u ³ ³	t ɔ ³ ³	tʰ a k̚ ⁴	tʰ ɔ k̚ ⁴
+變	p i ɛ n ² ¹	p ĩ ² ¹
+讎	s i u ² ³
+讒	t͡s a m ² ³	t͡sʰ a m ² ³
+讓	n i ũ ³ ³	z i ɔ ŋ ³ ³
+讖	t͡sʰ a m ² ¹
+讚	t͡s a n ² ¹	t͡s a n ⁴ ¹
+讞	h i ɛ n ² ¹
+谷	k i ɔ k̚ ⁴	k ɔ k̚ ³ ²
+豁	h a t̚ ³ ²
+豆	t a u ³ ³	t ɔ ³ ³
+豈	kʰ i ⁴ ¹
+豉	s ĩ ³ ³
+豌	u a n ⁴ ¹
+豎	s u ³ ³
+豐	h ɔ ŋ ⁴ ⁴	pʰ ɔ ŋ ⁴ ⁴
+豔	i a m ³ ³
+豕	s i ⁴ ¹
+豚	tʰ u n ² ³
+象	s i ɔ ŋ ³ ³	s i ɔ ŋ ⁴ ¹	t͡sʰ i ũ ³ ³
+豨	h i ⁴ ⁴
+豪	h ɤ ² ³
+豫	i ³ ³	u ³ ³
+豬	t i ⁴ ⁴
+豭	k a ⁴ ⁴
+豸	tʰ u a ³ ³
+豹	p a ² ¹
+豺	t͡s a i ² ³	t͡sʰ a i ² ³
+貂	t i a u ⁴ ⁴
+貅	h i u ⁴ ⁴
+貊	b i ɪ k̚ ⁴
+貌	m ã u ³ ³
+貓	b a u ² ³	b a ² ³	n i ã u ⁴ ⁴
+貔	p i ² ³
+貝	p u e ² ¹
+貞	t͡s i ɪ ŋ ⁴ ⁴
+負	h u ³ ³
+財	t͡s a i ² ³
+貢	k ɔ ŋ ² ¹
+貧	p a n ² ³	p i n ² ³
+貨	h u e ² ¹	h ɤ ² ¹
+販	h u a n ² ¹	pʰ u ã ² ¹
+貪	tʰ a m ⁴ ⁴
+貫	k u a n ² ¹	k ŋ̍ ² ¹
+責	t͡s i ɪ k̚ ³ ²
+貯	t e ⁴ ¹	tʰ u ⁴ ¹
+貲	t͡s u ⁴ ⁴
+貳	z i ³ ³
+貴	k u i ² ¹
+貶	p i ɛ n ⁴ ¹
+買	b e ⁴ ¹	m ã i ⁴ ¹
+貸	t a i ² ¹	t a i ³ ³	tʰ i ɪ k̚ ³ ²
+貺	h i ɪ ŋ ³ ³
+費	h u i ² ¹
+貼	t a ʔ ³ ²	tʰ i a p̚ ³ ²
+貽	i ² ³
+貿	b a u ³ ³	b ɔ ³ ³
+賀	h ɤ ³ ³
+賁	p i ² ¹
+賂	l ɔ ³ ³
+賄	h u e ² ¹	h u e ⁴ ¹
+賅	k a i ⁴ ⁴
+資	t͡s u ⁴ ⁴
+賈	k a ⁴ ¹	k ɔ ⁴ ¹
+賊	t͡s a t̚ ⁴	t͡s i ɪ k̚ ⁴	t͡sʰ a t̚ ⁴
+賑	t͡s i n ⁴ ¹
+賒	s i a ⁴ ⁴
+賓	p i n ⁴ ⁴
+賜	s u ² ¹
+賞	s i ũ ⁴ ¹	s i ɔ ŋ ⁴ ¹
+賠	p u e ² ³
+賢	h i ɛ n ² ³	ɡ a u ² ³
+賣	b e ³ ³	m ã i ³ ³
+賤	t͡s i ɛ n ³ ³	t͡s u ã ³ ³
+賦	h u ² ¹
+質	t͡s i t̚ ³ ²	t͡s i ² ¹
+賭	t ɔ ⁴ ¹
+賰	t͡sʰ u n ⁴ ⁴
+賴	l u a ³ ³	n ã i ³ ³
+賺	t͡s u a n ⁴ ¹
+賻	h u ² ¹	h u ³ ³	p u a ʔ ⁴
+購	k a ŋ ⁴ ¹	k ɔ ² ¹
+賽	s a i ² ¹	s e ² ¹
+贅	t͡s e ² ¹	t͡s u e ² ¹
+贈	t͡s a n ³ ³	t͡s i ɪ ŋ ³ ³
+贊	t͡s a n ² ¹	t͡s a n ³ ³
+贍	s i a m ³ ³
+贏	i ã ² ³	i ɪ ŋ ² ³
+贓	t͡s ŋ̍ ⁴ ⁴	t͡s ɔ ŋ ⁴ ⁴
+贖	s i ɔ k̚ ⁴
+贗	ɡ a n ³ ³
+贛	k a m ² ¹
+赤	t͡sʰ i a ʔ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+赦	s i a ² ¹
+赫	h i ɪ k̚ ³ ²	n i ã ʔ ³ ²
+走	k i ã ² ³	t͡s a u ⁴ ¹	t͡s ɔ ⁴ ¹
+赴	h u ² ¹
+起	kʰ i ⁴ ¹
+趁	tʰ a n ² ¹	tʰ i n ² ¹
+趄	t͡sʰ u ⁴ ⁴
+超	t͡sʰ i a u ⁴ ⁴
+越	u a t̚ ⁴
+趒	t i ɤ ² ³
+趔	l i ɛ t̚ ⁴
+趕	k u ã ⁴ ¹
+趖	s ɤ ² ³
+趙	t i ɤ ³ ³
+趣	t͡sʰ u ² ¹
+趨	t͡sʰ u ⁴ ⁴
+足	t͡s i ɔ k̚ ³ ²	t͡s ɔ k̚ ³ ²
+趼	l a n ⁴ ⁴
+趾	t͡s i ⁴ ¹
+趿	s ã ʔ ³ ²
+跂	k u e ⁴ ¹
+跉	l a n ⁴ ⁴
+跋	p u a t̚ ⁴	p u a ʔ ⁴
+跌	t i ɛ t̚ ⁴
+跍	kʰ u ² ³
+跑	pʰ a u ⁴ ¹
+跔	k u ⁴ ⁴
+跖	t͡s i ɔ k̚ ³ ²	t͡s i ɪ k̚ ³ ²
+跙	t͡sʰ u ³ ³
+跚	s a n ⁴ ⁴
+跛	p a i ⁴ ¹	p ã i ⁴ ¹
+距	k i ³ ³
+跟	k i n ⁴ ⁴	t u e ² ¹
+跡	t͡s i a ʔ ³ ²	t͡s i ɪ k̚ ³ ²	z i a ʔ ³ ²
+跤	kʰ a ⁴ ⁴
+跨	kʰ u a ² ¹
+跩	t͡sʰ u a ʔ ⁴
+跪	k u i ³ ³
+跫	k i ɔ ŋ ² ³
+路	l ɔ ³ ³
+跳	t i ɤ ² ³	tʰ i a u ² ¹
+跺	t ɤ ⁴ ¹
+踅	s e ʔ ⁴
+踊	i ɔ ŋ ⁴ ¹
+踏	t a p̚ ⁴	t a ʔ ⁴
+踐	t͡s i ɛ n ³ ³
+踔	t͡sʰ i ɪ k̚ ⁴
+踞	k u ² ¹
+踢	tʰ a t̚ ³ ²
+踩	t͡sʰ a i ⁴ ¹
+踮	t a m ² ¹	t i a m ² ¹
+踱	t ɔ k̚ ⁴	tʰ ɤ ʔ ⁴
+踴	i ɔ ŋ ⁴ ¹
+踵	t͡s i ɔ ŋ ⁴ ¹	t͡s i ɪ ŋ ⁴ ¹
+蹄	t e ² ³
+蹇	k i ɛ n ⁴ ¹
+蹈	t ɤ ³ ³
+蹉	t͡sʰ e ² ³	t͡sʰ u e ² ³
+蹊	h e ² ³	kʰ i ⁴ ⁴
+蹌	t͡sʰ i a ŋ ³ ³
+蹔	t͡s a m ² ¹
+蹕	p i t̚ ³ ²
+蹙	t͡sʰ i ɔ k̚ ³ ²
+蹛	t u a ² ¹
+蹣	b u a n ² ³
+蹮	t͡sʰ i ɛ n ⁴ ⁴
+蹲	t͡s u n ⁴ ⁴
+蹺	kʰ i a u ⁴ ⁴
+蹻	kʰ i a u ² ³
+躁	s ɤ ² ¹
+躇	t i ² ³	t u ² ³	tʰ u ² ³
+躊	t i u ² ³
+躋	t͡s e ² ¹	t͡s e ⁴ ⁴
+躍	i ɔ k̚ ⁴
+躕	t u ² ³
+躘	l i ɔ ŋ ² ¹	l i ɪ ŋ ² ¹
+躚	t͡sʰ i ɛ n ⁴ ⁴
+躡	n ĩ ² ¹	n ẽ ʔ ³ ²
+身	s i n ⁴ ⁴	s i ɛ n ⁴ ⁴
+躬	k i ɔ ŋ ⁴ ⁴
+躲	b i ʔ ³ ²	t ɤ ⁴ ¹
+躼	l ɤ ² ¹
+軀	k u ⁴ ⁴	kʰ u ⁴ ⁴	s u ⁴ ⁴
+軁	n ŋ̍ ² ¹	n ŋ̍ ⁴ ⁴
+車	k i ⁴ ⁴	t͡sʰ i a ⁴ ⁴
+軋	a t̚ ³ ²	a ʔ ³ ²	k a u ʔ ³ ²
+軌	k u i ⁴ ¹	kʰ u i ⁴ ¹
+軍	k u n ⁴ ⁴
+軒	h i ɛ n ⁴ ⁴
+軔	l i m ³ ³
+軟	l u a n ⁴ ¹	n ŋ̍ ⁴ ¹
+軸	t i ɪ k̚ ⁴
+軹	t͡s i ⁴ ¹
+軾	s i ɪ k̚ ³ ²
+較	k a u ² ¹	k a ² ¹	k a ʔ ³ ²	kʰ a ʔ ³ ²
+輅	l ɔ ³ ³
+載	t͡s a i ² ¹	t͡s ã i ⁴ ¹
+輒	t i a p̚ ³ ²
+輓	b u a n ⁴ ¹
+輔	h u ² ¹	h u ⁴ ¹
+輕	kʰ i n ⁴ ⁴	kʰ i ã ⁴ ⁴	kʰ i ɪ ŋ ⁴ ⁴
+輛	l i ɔ ŋ ⁴ ¹
+輜	t͡s u ⁴ ⁴
+輝	h u i ⁴ ⁴
+輟	t u a t̚ ³ ²
+輦	l i ɛ n ⁴ ¹
+輩	p u e ² ¹
+輪	l u n ² ³
+輯	t͡s i p̚ ³ ²	t͡s i p̚ ⁴	t͡sʰ i p̚ ³ ²
+輸	s u ⁴ ⁴
+輻	h ɔ k̚ ³ ²
+輾	l i n ² ¹	l i ɛ n ² ¹	t i ɛ n ⁴ ¹
+輿	i ² ³	u ² ³
+轂	k ɔ k̚ ³ ²
+轄	h a t̚ ³ ²	h a t̚ ⁴
+轅	u a n ² ³
+轆	l a k̚ ³ ²	l ɔ k̚ ⁴
+轉	t ŋ̍ ⁴ ¹	t͡s u a n ³ ³	t͡s u a n ⁴ ¹
+轍	t i ɛ t̚ ⁴
+轎	k i a u ³ ³	k i a u ⁴ ⁴	k i ɤ ³ ³
+轟	h ɔ ŋ ⁴ ⁴	i ɪ ŋ ⁴ ⁴
+辛	s i n ⁴ ⁴
+辜	k ɔ ⁴ ⁴
+辟	pʰ i a ʔ ³ ²	pʰ i ɪ k̚ ³ ²
+辦	p a n ³ ³
+辨	p i ɛ n ³ ³
+辭	s i ² ³	s u ² ³
+辮	p ĩ ³ ³
+辯	p i ɛ n ³ ³
+辰	s i n ² ³
+辱	z i ɔ k̚ ⁴
+農	l a ŋ ² ³	l ɔ ŋ ² ³
+辵	tʰ i ɔ k̚ ³ ²
+迄	ɡ i t̚ ³ ²	ɡ u t̚ ³ ²
+迅	s i n ² ¹
+迎	ŋ i ã ² ³	ɡ i ɪ ŋ ² ³
+近	k i n ³ ³
+迒	h ã ³ ³
+迓	ɡ a ³ ³
+返	h u a n ⁴ ¹	t ŋ̍ ⁴ ¹
+迢	s i a u ² ³	t i a u ² ³
+迦	kʰ i a ⁴ ⁴
+迪	t i ɪ k̚ ⁴
+迫	p i ɪ k̚ ³ ²
+迭	t i ɛ t̚ ⁴
+述	s u t̚ ⁴
+迴	h u e ² ³
+迵	tʰ a ŋ ² ¹
+迷	b e ² ³	b i ² ³
+迸	p i a ŋ ² ¹	p i ɪ ŋ ² ¹
+迺	s e ʔ ⁴
+追	l i ɔ k̚ ³ ²	t u i ⁴ ⁴	z i ɔ k̚ ³ ²
+退	tʰ e ² ¹
+送	s a ŋ ² ¹	s ɔ ŋ ² ¹
+适	k u a t̚ ³ ²
+逃	t ɤ ² ³
+逄	p a ŋ ² ³
+逅	h ɔ ³ ³
+逆	k e ʔ ⁴	ɡ i ɪ k̚ ⁴
+透	tʰ a u ² ¹	tʰ ɤ ² ¹
+逐	l i ɔ k̚ ³ ²	t a k̚ ⁴	t i ɔ k̚ ⁴	z i ɔ k̚ ³ ²
+途	t ɔ ² ³
+逖	t i ɪ k̚ ⁴
+逗	t a u ³ ³	t u i ² ¹
+這	t͡s e ⁴ ⁴	t͡s i a ʔ ³ ²	t͡s i t̚ ³ ²
+通	tʰ a ŋ ² ¹	tʰ a ŋ ⁴ ⁴	tʰ ɔ ŋ ⁴ ⁴
+逝	s e ³ ³	s u a ³ ³	t͡s u a ³ ³
+逞	tʰ i ɪ ŋ ⁴ ¹
+速	s ɔ k̚ ³ ²
+造	t͡s ɤ ³ ³	t͡sʰ ɤ ² ¹
+逡	t͡s u n ² ¹
+逢	h ɔ ŋ ² ³	p a ŋ ² ³	pʰ ɔ ŋ ² ³
+連	l i a m ² ³	l i ɛ n ² ³	n ĩ ² ³
+逭	k u a n ⁴ ¹
+逮	t a i ³ ³
+週	t͡s i u ⁴ ⁴
+進	t͡s i n ² ¹
+逵	k u i ² ³
+逸	i t̚ ⁴	i ɪ k̚ ⁴
+逼	p i a k̚ ³ ²	p i ɪ k̚ ³ ²
+遂	s u i ³ ³
+遇	ɡ u ³ ³
+遊	i u ² ³
+運	u n ³ ³
+遍	p i ɛ n ² ¹	pʰ i ɛ n ² ¹
+過	k u a ² ¹	k u e ² ¹	k ɤ ² ¹
+遏	a t̚ ³ ²
+遐	h a ² ³	h i a ʔ ³ ²	h i a ⁴ ⁴
+遒	i u ² ³
+道	t ɤ ³ ³
+達	t a t̚ ⁴
+違	u i ² ³
+遘	k a u ² ¹	k ɔ ² ¹
+遙	i a u ² ³
+遜	s u n ² ¹
+遝	t a p̚ ⁴
+遞	t e ² ¹	t e ³ ³
+遠	h ŋ̍ ³ ³	u a n ³ ³	u a n ⁴ ¹
+遣	kʰ i ɛ n ⁴ ¹
+遨	ŋ ɔ̃ ² ³	ɡ ɤ ² ³
+適	s i ɪ k̚ ³ ²
+遭	t͡s ɤ ⁴ ⁴
+遮	t͡s i a ʔ ³ ²	t͡s i a ⁴ ⁴	z i a ⁴ ⁴
+遲	t i ² ³
+遵	t͡s u n ⁴ ⁴
+遷	t͡sʰ i ɛ n ⁴ ⁴
+選	s u a n ⁴ ¹
+遹	u t̚ ⁴
+遺	i ² ³	u i ² ³
+遼	l i a u ² ³
+避	pʰ i a ʔ ³ ²
+邀	i a u ⁴ ⁴	i ɤ ⁴ ⁴
+邁	m ã i ³ ³
+邂	h a i ³ ³
+還	h i ɪ ŋ ² ³	h u a n ² ³	h ã i ² ³
+邅	t i ɛ n ⁴ ⁴
+邈	b i a u ⁴ ¹
+邊	p i ɛ n ⁴ ⁴	p ĩ ⁴ ⁴
+邏	l ɤ ² ³
+邑	i p̚ ³ ²
+邕	i ɔ ŋ ⁴ ⁴
+邢	h i ɪ ŋ ² ³
+那	n ã ³ ³	n ã ⁴ ¹
+邦	p a ŋ ⁴ ⁴
+邪	i a ² ³	s i a ² ³
+邯	h a m ² ³	h a n ² ³
+邱	kʰ u ⁴ ⁴
+邴	p i ɪ ŋ ⁴ ¹
+邵	s i ɤ ³ ³
+邽	k e ⁴ ⁴
+郁	h i ɔ k̚ ³ ²
+郄	kʰ i ɪ k̚ ³ ²
+郇	h u a n ² ³	s u n ² ³
+郊	k a u ⁴ ⁴
+郎	l ɔ ŋ ² ³	n ŋ̍ ² ³
+郗	h i ⁴ ⁴	tʰ i ⁴ ⁴
+郛	h u ⁴ ⁴
+郜	kʰ ɔ k̚ ³ ²	kʰ ɤ ² ¹
+郝	h ɔ k̚ ³ ²
+郡	k u n ³ ³
+部	p ɔ ³ ³	pʰ ɤ ³ ³
+郭	k u e ʔ ³ ²	k ɔ k̚ ³ ²
+郳	ɡ e ² ³
+郴	tʰ i m ⁴ ⁴
+郵	i u ² ³
+都	t ɔ ⁴ ⁴	t ɤ ⁴ ⁴
+鄂	ɡ ɔ k̚ ⁴
+鄉	h i ũ ⁴ ⁴	h i ɔ ŋ ⁴ ⁴
+鄒	t͡s a u ⁴ ⁴	t͡s ɔ ⁴ ⁴
+鄔	ɔ ⁴ ⁴
+鄙	p i ⁴ ¹	pʰ i ⁴ ¹
+鄚	b ɔ k̚ ⁴
+鄞	ɡ i n ² ³
+鄢	i ɛ n ⁴ ⁴
+鄧	t i ɪ ŋ ³ ³
+鄭	t i ɪ ŋ ³ ³	t ẽ ³ ³
+鄰	l i n ² ³
+鄲	t a n ⁴ ⁴
+鄺	k ɔ ŋ ⁴ ¹
+鄾	i u ⁴ ⁴
+酉	i u ³ ³	i u ⁴ ¹
+酋	i u ² ³	s i u ² ³
+酌	t͡s i ɔ k̚ ³ ²
+配	pʰ u e ² ¹
+酒	t͡s i u ⁴ ¹
+酢	t͡sʰ ɔ ² ¹
+酥	s ɔ ⁴ ⁴
+酪	l ɔ k̚ ⁴
+酬	s i u ² ³
+酯	t͡s i ⁴ ¹
+酵	k ã ² ¹
+酷	kʰ ɔ k̚ ³ ²
+酸	s u a n ⁴ ⁴	s ŋ̍ ⁴ ⁴
+醃	a m ⁴ ⁴
+醅	pʰ e ⁴ ⁴
+醇	s u n ² ³
+醉	t͡s u i ² ¹
+醋	t͡sʰ ɔ ² ¹
+醒	s i ɪ ŋ ⁴ ¹	t͡sʰ ẽ ⁴ ¹
+醜	t͡sʰ i u ⁴ ¹
+醨	l i ² ³
+醪	l ɤ ² ³
+醫	i ⁴ ⁴
+醬	t͡s i ũ ² ¹	t͡s i ɔ ŋ ² ¹
+醮	t͡s i ɤ ² ¹
+釀	z i ɔ ŋ ² ¹	z i ɔ ŋ ³ ³
+釃	s u ⁴ ⁴
+釅	ɡ i a m ² ³
+釆	p i ɛ n ³ ³
+采	t͡sʰ a i ⁴ ¹
+釉	i u ³ ³	i u ⁴ ⁴
+釋	s i ɪ k̚ ³ ²
+里	l i ⁴ ¹
+重	t a ŋ ³ ³	t i ɔ ŋ ² ³	t i ɔ ŋ ³ ³	t i ɪ ŋ ² ³
+野	i a ⁴ ¹
+量	l i ɔ ŋ ² ³	l i ɔ ŋ ³ ³	n i ũ ² ³	n i ũ ³ ³
+釐	l i ² ³
+金	k i m ⁴ ⁴
+釘	t i ɪ ŋ ² ¹	t i ɪ ŋ ⁴ ⁴
+釜	h u ⁴ ¹
+針	t͡s i a m ⁴ ⁴	t͡s i m ⁴ ⁴
+釣	t i a u ² ¹	t i ɤ ² ¹
+釦	kʰ a u ² ¹	kʰ a ² ¹	kʰ i ɤ ² ¹
+釧	t͡sʰ u a n ⁴ ⁴
+釵	tʰ e ⁴ ⁴	t͡sʰ a i ⁴ ⁴
+鈁	h u a ŋ ⁴ ¹
+鈂	t i m ² ¹	tʰ i m ² ¹
+鈉	l a p̚ ⁴
+鈍	t u n ² ¹	t u n ³ ³	t u n ⁴ ⁴
+鈔	t͡sʰ a u ⁴ ⁴	t͡sʰ a ² ¹
+鈕	l i u ⁴ ¹
+鈞	k u n ⁴ ⁴
+鈣	k a i ² ¹
+鈴	l i ɪ ŋ ² ³
+鈷	k ɔ ⁴ ¹
+鈸	p u a t̚ ⁴	p u a ʔ ⁴	p u t̚ ⁴
+鈹	pʰ i ² ³	pʰ i ⁴ ⁴
+鈾	i u ² ³
+鈿	t i ɛ n ² ³	t i ɛ n ³ ³
+鉀	k a ʔ ³ ²
+鉅	k u ³ ³
+鉎	s i ɛ n ⁴ ⁴	s ẽ ⁴ ⁴
+鉗	kʰ ĩ ² ³
+鉛	i ɛ n ² ³
+鉤	k a u ⁴ ⁴
+鉸	k a ⁴ ⁴
+鉼	pʰ i ã ⁴ ¹
+銀	ɡ i n ² ³
+銃	t͡sʰ i ɪ ŋ ² ¹
+銅	t a ŋ ² ³	t ɔ ŋ ² ³
+銑	s i ɛ n ⁴ ¹
+銘	b i ɪ ŋ ² ³
+銚	t i ɤ ³ ³
+銜	h a m ² ³	h ã ² ³	kʰ ã ² ³
+銬	kʰ a u ² ¹
+銳	z u e ³ ³
+銷	s i a u ⁴ ⁴
+鋁	l i ³ ³	l u ³ ³	l u ⁴ ¹
+鋒	h ɔ ŋ ⁴ ⁴
+鋤	t i ² ³
+鋩	m ĩ ² ³	m ẽ ² ³	m ẽ ʔ ⁴
+鋪	pʰ ɔ ² ¹	pʰ ɔ ⁴ ⁴
+鋰	l i ⁴ ¹
+鋸	k i ² ¹
+鋼	k ŋ̍ ² ¹	k ɔ ŋ ⁴ ⁴
+錄	l i ɔ k̚ ⁴	l i ɪ k̚ ⁴	l ɔ k̚ ⁴
+錐	t͡s u i ⁴ ⁴
+錔	tʰ a p̚ ³ ²
+錘	tʰ u i ² ³
+錙	t͡s u ⁴ ⁴
+錞	s u n ² ³	t u i ³ ³
+錠	t i ã ² ¹	t i ã ³ ³	t i ɪ ŋ ³ ³
+錢	t͡s i ɛ n ² ³	t͡s ĩ ² ³	t͡sʰ i ɛ n ² ³
+錦	k i m ⁴ ¹	ɡ i m ⁴ ¹
+錨	b a ² ³	b i a u ² ³
+錫	s i a ʔ ³ ²	s i ɪ k̚ ³ ²
+錯	t͡sʰ ɔ k̚ ³ ²	t͡sʰ ɔ ² ¹	t͡sʰ ɤ ² ¹
+錳	b i ɪ ŋ ⁴ ¹
+錶	p i ɤ ⁴ ¹
+鍊	l i ɛ n ³ ³
+鍋	k ɤ ⁴ ⁴	u e ⁴ ⁴	ɤ ⁴ ⁴
+鍍	t ɔ ³ ³
+鍘	t͡s a t̚ ⁴	t͡s a ʔ ⁴
+鍛	t u a n ² ¹	tʰ u a n ² ¹
+鍥	k e ʔ ³ ²	kʰ i ɛ t̚ ³ ²
+鍬	t͡sʰ i a u ⁴ ⁴	t͡sʰ i u ⁴ ⁴
+鍰	h u a n ² ³
+鍵	k i ɛ n ² ¹	k i ɛ n ³ ³
+鍾	t͡s i ɔ ŋ ⁴ ⁴	t͡s i ɪ ŋ ⁴ ⁴
+鎂	b i ⁴ ¹
+鎔	i ũ ² ³
+鎖	s ɤ ⁴ ¹
+鎢	ɔ ⁴ ⁴
+鎣	i ɪ ŋ ² ³
+鎧	kʰ a i ⁴ ¹
+鎩	s a t̚ ³ ²
+鎬	h ɤ ³ ³
+鎮	t i n ² ¹
+鏃	t͡s ɔ k̚ ⁴
+鏇	s u a n ³ ³
+鏈	l i ɛ n ³ ³
+鏖	ɤ ⁴ ⁴
+鏗	kʰ i a ŋ ⁴ ⁴	kʰ i ɛ n ⁴ ⁴
+鏟	s a n ⁴ ¹	t͡sʰ a n ⁴ ¹
+鏡	k i ã ² ¹
+鏢	p i ɤ ⁴ ⁴
+鏤	l ɔ ² ³	l ɤ ² ³
+鏨	t͡s a m ³ ³
+鏽	s i u ² ¹
+鐃	l a u ² ³	n ã ² ³
+鐇	pʰ u ĩ ⁴ ⁴
+鐐	l i a u ² ³
+鐘	t͡s i ɔ ŋ ⁴ ⁴	t͡s i ɪ ŋ ⁴ ⁴
+鐮	l i a m ² ³
+鐲	s i ɔ k̚ ⁴	s ɤ ʔ ⁴
+鐳	l u i ² ³	l u i ⁴ ⁴
+鐵	tʰ i ɛ t̚ ³ ²	tʰ i ʔ ³ ²
+鐸	t ɔ k̚ ⁴
+鐺	t a ŋ ⁴ ⁴
+鑄	t͡s u ² ¹
+鑒	k a m ² ¹
+鑢	l e ² ¹	l e ³ ³	l u ² ¹
+鑫	h i m ⁴ ⁴
+鑰	i ɤ ʔ ⁴
+鑲	s i ũ ⁴ ⁴
+鑶	t͡s ɔ ŋ ² ³
+鑼	l ɤ ² ³
+鑽	t͡s ŋ̍ ² ¹
+鑾	l u a n ² ³
+鑿	t͡sʰ a k̚ ⁴
+長	t i ũ ⁴ ¹	t i ɔ ŋ ² ³	t i ɔ ŋ ⁴ ¹	t ŋ̍ ² ³	t͡s i a ŋ ⁴ ¹	t͡sʰ i a ŋ ² ³
+門	b u n ² ³	m ŋ̍ ² ³
+閂	t͡sʰ u ã ² ¹
+閃	s i a m ⁴ ¹	s i ʔ ³ ²	s ĩ ʔ ³ ²
+閆	i a m ² ³	ɡ i a m ² ³
+閈	h a n ³ ³
+閉	p i ² ¹
+開	kʰ a i ⁴ ⁴	kʰ u i ⁴ ⁴
+閏	z u n ³ ³
+閒	h a n ² ³	i ɪ ŋ ² ³
+間	k a n ² ¹	k a n ⁴ ⁴	k i ɪ ŋ ⁴ ⁴
+閔	b i n ⁴ ¹
+閘	t͡s a ʔ ⁴
+閣	k ɔ k̚ ³ ²	k ɤ ʔ ³ ²
+閤	k a p̚ ³ ²
+閥	h u a t̚ ⁴
+閨	k e ⁴ ⁴	k u i ⁴ ⁴
+閩	b a n ² ³
+閬	l ɔ ŋ ² ¹
+閭	l i ² ³	l u ² ³
+閱	i ɛ t̚ ⁴	u a t̚ ⁴
+閵	l i ɪ ŋ ³ ³
+閶	t͡sʰ i ɔ ŋ ⁴ ⁴
+閹	i a m ⁴ ⁴
+閻	ɡ i a m ² ³
+閼	a t̚ ³ ²
+闈	u i ² ³
+闊	kʰ u a t̚ ³ ²	kʰ u a ʔ ³ ²
+闌	l a n ² ³
+闑	ɡ i ɛ t̚ ⁴
+闔	h a p̚ ⁴	kʰ a ʔ ⁴
+闕	kʰ u a t̚ ³ ²
+闖	t͡sʰ u a n ² ¹	t͡sʰ u a ŋ ² ¹	t͡sʰ u ã ² ¹
+關	k u a n ⁴ ⁴	k u ã i ⁴ ⁴
+闡	t͡sʰ i ɛ n ⁴ ¹
+闢	p i t̚ ⁴	p i ɪ k̚ ⁴	pʰ i ɪ k̚ ³ ²
+阜	h u ³ ³
+阪	h u a n ⁴ ¹	p a n ⁴ ¹	p u ã ⁴ ¹
+阮	ŋ̍ ⁴ ¹	ɡ u a n ⁴ ¹
+阱	t͡s ẽ ⁴ ¹
+防	h ɔ ŋ ² ³
+阻	t͡s ɔ ⁴ ¹
+阿	a ⁴ ⁴	ɔ ⁴ ⁴	ɤ ⁴ ⁴
+陀	t ɤ ² ³
+陂	p i ⁴ ⁴
+附	h u ² ¹	h u ³ ³
+陋	l ɔ ³ ³
+陌	b i ɪ k̚ ⁴
+降	h a ŋ ² ³	k a ŋ ² ¹
+限	a n ³ ³	h a n ³ ³
+陛	p e ³ ³
+陝	s i a m ⁴ ¹
+陟	tʰ i ɪ k̚ ³ ²
+院	ĩ ³ ³
+陣	t i n ³ ³	t͡s u n ³ ³
+除	t i ² ³
+陪	p u e ² ³
+陰	i a m ⁴ ⁴	i m ⁴ ⁴
+陲	s u i ² ³
+陳	t a n ² ³	t i n ² ³
+陵	l i ɪ ŋ ² ³	n i ã ³ ³
+陶	t ɤ ² ³
+陷	h a m ³ ³
+陸	l a k̚ ⁴	l i ɔ k̚ ⁴	l i ɪ k̚ ⁴
+陽	i ũ ² ³	i ɔ ŋ ² ³
+隅	ɡ u ² ³
+隆	l i ɔ ŋ ² ³
+隊	t u i ³ ³	tʰ u i ³ ³
+隋	s u i ² ³
+隍	h ɔ ŋ ² ³
+階	k a i ⁴ ⁴
+隔	k e ʔ ³ ²	k i ɪ k̚ ³ ²
+隕	u n ⁴ ¹
+隘	a i ² ¹
+隙	kʰ i a ʔ ³ ²	kʰ i ɪ k̚ ³ ²
+際	t͡s e ² ¹
+障	t͡s i a ŋ ² ¹	t͡s i ɔ ŋ ² ¹	t͡s i ɔ ŋ ⁴ ⁴
+隧	s u i ³ ³
+隨	s u i ² ³
+險	h i a m ⁴ ¹
+隱	i n ⁴ ¹	u n ⁴ ¹
+隴	l ɔ ŋ ⁴ ¹
+隸	l e ³ ³
+隹	t͡s u i ⁴ ⁴
+隻	t͡s i a ʔ ³ ²	t͡s i ɪ k̚ ³ ²
+雀	t͡s i a ʔ ³ ²	t͡sʰ i a k̚ ³ ²	t͡sʰ i ɔ k̚ ³ ²	t͡sʰ i ɪ k̚ ³ ²
+雁	ɡ a n ³ ³
+雄	h i n ² ³	h i ɔ ŋ ² ³	h i ɪ ŋ ² ³
+雅	ŋ ã ⁴ ¹	ŋ ẽ ⁴ ¹
+集	t͡s i p̚ ⁴
+雉	t i ³ ³	tʰ i ³ ³
+雌	t͡sʰ u ² ³
+雍	i ɔ ŋ ⁴ ⁴
+雒	l ɔ k̚ ⁴
+雔	s i u ² ³
+雕	t i a u ⁴ ⁴
+雖	s u i ⁴ ⁴
+雙	s i a ŋ ⁴ ⁴	s ɔ ŋ ⁴ ⁴
+雛	t͡s ɔ ² ³
+雜	t͡s a p̚ ⁴
+雞	k e ⁴ ⁴
+離	l i ² ³	l i ³ ³
+難	l a n ² ³	l a n ³ ³
+雨	h ɔ ³ ³	i ² ¹	i ⁴ ¹	u ² ¹	u ⁴ ¹
+雪	s e ʔ ³ ²	s u a t̚ ³ ²
+雯	b u n ² ³
+雰	h u n ⁴ ⁴
+雲	h u n ² ³
+零	l a n ² ³	l i ɪ ŋ ² ³
+雷	l u i ² ³
+雹	pʰ a u ʔ ⁴
+雺	b ɔ ŋ ² ³
+電	t i ɛ n ³ ³
+需	s u ⁴ ⁴
+霂	b ɔ k̚ ⁴
+霄	s i a u ⁴ ⁴	s i ɤ ⁴ ⁴
+霆	t a n ² ³	t i ɪ ŋ ² ³
+震	t͡s i n ² ¹	t͡s i n ⁴ ¹
+霈	pʰ a i ² ¹
+霍	h ɔ k̚ ³ ²
+霎	s a p̚ ³ ²	s a p̚ ⁴	t i a p̚ ³ ²	t i a p̚ ⁴
+霓	n ĩ ² ³	ɡ e ² ³
+霖	l i m ² ³
+霜	s ŋ̍ ⁴ ⁴	s ɔ ŋ ⁴ ⁴
+霝	l i ɪ ŋ ² ³
+霞	h a ² ³	h e ² ³
+霧	b u ³ ³
+露	l ɔ ³ ³
+霸	p a ² ¹
+霹	pʰ i ɪ k̚ ³ ²
+霽	t͡s e ² ¹
+靂	l i ɪ k̚ ⁴
+靆	t a i ³ ³
+靈	l i ɪ ŋ ² ³
+靉	a i ² ¹	a i ⁴ ¹
+青	t͡sʰ i ɪ ŋ ⁴ ⁴	t͡sʰ ĩ ⁴ ⁴	t͡sʰ ẽ ⁴ ⁴
+靖	t͡s i ɪ ŋ ³ ³
+靚	t͡s i ɪ ŋ ³ ³
+靛	t i ã ³ ³	t i ɛ n ³ ³
+靜	t͡s i ɪ ŋ ³ ³	t͡s ẽ ³ ³
+非	h u i ⁴ ⁴
+靠	kʰ u a ² ¹	kʰ ɤ ² ¹
+靡	b i ⁴ ¹
+面	b i n ³ ³	b i ɛ n ³ ³
+靦	b i ɛ n ⁴ ¹
+靨	i a p̚ ³ ²
+革	k i ɪ k̚ ³ ²
+靴	h i a ⁴ ⁴
+靶	p a ⁴ ¹	p e ⁴ ¹
+鞄	pʰ a u ʔ ³ ²
+鞋	e ² ³	h a i ² ³
+鞍	a n ⁴ ⁴	u ã ⁴ ⁴
+鞏	k i ɔ ŋ ⁴ ¹	kʰ ɔ ŋ ³ ³
+鞘	s a u ⁴ ⁴	s i a u ² ¹	s i u ² ¹
+鞠	k i ɔ k̚ ³ ²
+鞦	t͡sʰ i u ⁴ ⁴
+鞫	k i ɔ k̚ ³ ²
+鞭	p i ɛ n ⁴ ⁴	p ĩ ⁴ ⁴
+韁	k i ũ ⁴ ⁴
+韃	tʰ a t̚ ³ ²
+韆	t͡sʰ i ɛ n ⁴ ⁴
+韋	u i ² ³
+韌	z u n ³ ³
+韓	h a n ² ³
+韜	tʰ ɤ ⁴ ⁴
+韞	u n ² ¹	u n ⁴ ⁴
+韭	k u ⁴ ¹
+韱	s i a m ⁴ ⁴
+音	i m ⁴ ⁴
+韶	s i a u ² ³
+韻	u n ³ ³
+響	h i a ŋ ⁴ ¹	h i ɔ ŋ ⁴ ¹
+頁	i a ʔ ⁴
+頂	t i ɪ ŋ ⁴ ¹
+頃	kʰ i ɪ ŋ ⁴ ¹
+項	h a ŋ ³ ³
+順	s u n ³ ³
+須	s u ⁴ ⁴
+頊	h i ɔ k̚ ³ ²
+頌	s i ɔ ŋ ³ ³	t͡sʰ i ɪ ŋ ³ ³
+預	i ³ ³
+頑	ɡ u a n ² ³
+頒	p a n ⁴ ⁴
+頓	t u n ² ¹	t ŋ̍ ² ¹
+頕	t a m ² ¹
+頗	pʰ ɔ ⁴ ¹	pʰ ɤ ² ¹	pʰ ɤ ⁴ ¹
+領	l i ɪ ŋ ⁴ ¹	n i ã ⁴ ¹
+頡	kʰ i ɛ t̚ ³ ²
+頤	i ² ³
+頦	h a i ² ³
+頫	h u ⁴ ¹
+頭	tʰ a u ² ³	tʰ i ɤ ² ³	tʰ ɤ ² ³
+頷	a m ³ ³
+頸	k i ɪ ŋ ⁴ ¹	k u n ⁴ ¹
+頹	t u e ² ³	tʰ u e ² ³	tʰ u e ³ ³
+頻	p i n ² ³
+顆	kʰ ɤ ² ¹	kʰ ɤ ⁴ ⁴
+題	t e ² ³
+額	h i a ʔ ⁴	ɡ i a ʔ ⁴	ɡ i ɪ k̚ ⁴
+顎	ɡ ɔ k̚ ⁴
+顏	ɡ a n ² ³
+顓	t͡sʰ u a n ⁴ ⁴
+願	ɡ u a n ³ ³
+顙	s ɔ ŋ ⁴ ¹
+顛	t i ɛ n ⁴ ⁴	tʰ i ɛ n ⁴ ⁴
+類	l u i ³ ³
+顥	h ɤ ³ ³
+顧	k ɔ ² ¹
+顫	t͡s u n ² ¹
+顯	h i ã ⁴ ¹	h i ɛ n ⁴ ¹
+顰	p i n ² ³
+顱	l u ² ³
+風	h ɔ ŋ ⁴ ⁴
+颱	tʰ a i ⁴ ⁴
+颳	k u a t̚ ³ ²
+颶	k u ³ ³
+颺	i ã ³ ³	t͡sʰ i ũ ² ³
+颼	s a u ⁴ ⁴
+飄	pʰ i a u ⁴ ⁴
+飆	p i ɤ ⁴ ⁴	pʰ i a u ⁴ ⁴
+飛	h u e ⁴ ⁴	h u i ⁴ ⁴	p u e ⁴ ⁴
+食	s i t̚ ⁴	t͡s i a ʔ ⁴
+飢	k i ⁴ ⁴
+飣	t i ɪ ŋ ² ¹
+飪	z i m ³ ³
+飫	u i ² ¹	u ² ¹
+飭	t i ɪ k̚ ³ ²
+飯	h u a n ³ ³	p ŋ̍ ³ ³
+飲	a m ⁴ ¹	i m ⁴ ¹	l i m ⁴ ⁴
+飴	i ² ³
+飼	s u ³ ³	t͡sʰ i ³ ³
+飽	p a u ⁴ ¹	p a u ⁴ ⁴	p a ⁴ ¹
+飾	s i ɪ k̚ ³ ²
+餂	t i a m ² ³	tʰ i a m ⁴ ¹
+餃	k i a u ⁴ ¹
+餅	p i ã ⁴ ¹	p i ɪ ŋ ⁴ ¹
+餉	h i a ŋ ² ¹	h i ɔ ŋ ² ¹
+養	i a ŋ ⁴ ¹	i ũ ⁴ ¹	i ɔ ŋ ⁴ ¹	t͡s i ũ ³ ³
+餌	z i ³ ³
+餐	t͡sʰ a n ⁴ ⁴
+餒	l u e ⁴ ¹
+餓	ɡ ɤ ³ ³
+餖	t ɔ ³ ³
+餘	i ² ³	u ² ³
+餜	k u e ⁴ ¹
+餞	t͡s i ɛ n ² ¹	t͡s i ɛ n ⁴ ¹
+餡	ã ³ ³
+館	k u a n ⁴ ¹
+餲	a i ⁴ ¹
+餳	s i ã ² ³
+餼	h i ² ¹
+餾	l i u ² ³	l i u ³ ³
+饃	m ɔ̃ ² ³
+饅	b a n ² ³	b a n ⁴ ¹
+饇	u ² ¹
+饋	k u i ³ ³
+饌	t͡s u a n ³ ³	t͡s ŋ̍ ³ ³
+饑	k i ⁴ ⁴
+饒	z i a u ² ³
+饕	tʰ ɤ ⁴ ⁴
+饗	h i a ŋ ⁴ ¹
+饜	i a m ² ¹
+饞	s a i ² ³	t͡s a m ² ³
+首	s i u ⁴ ¹	t͡sʰ i u ⁴ ¹
+馗	kʰ u e ⁴ ⁴
+香	h i a ŋ ⁴ ⁴	h i ũ ⁴ ⁴	h i ɔ ŋ ⁴ ⁴	pʰ a ŋ ⁴ ⁴
+馝	p i ʔ ³ ²
+馞	p u t̚ ⁴	pʰ u t̚ ³ ²
+馨	h i ɪ ŋ ⁴ ⁴
+馬	b e ⁴ ¹	m ã ⁴ ¹
+馮	p a ŋ ² ³
+馱	t ɤ ² ³
+馲	l ɔ k̚ ⁴	tʰ ɔ k̚ ³ ²
+馳	t i ² ³
+馴	s u n ² ³
+馵	t͡s u ² ¹
+馹	z i t̚ ⁴
+駁	p a k̚ ³ ²	p ɔ k̚ ³ ²	p ɤ ʔ ³ ²
+駉	k i ɪ ŋ ⁴ ¹
+駏	k u ³ ³
+駐	t͡s u ² ¹	t͡s u ³ ³
+駒	k u ⁴ ⁴	kʰ u ⁴ ⁴
+駓	pʰ i ⁴ ⁴
+駔	t͡s ɔ ŋ ⁴ ¹	t͡s ɔ ⁴ ¹
+駕	k a ² ¹
+駘	t a i ² ³	tʰ a i ³ ³	tʰ a i ⁴ ⁴
+駙	h u ³ ³
+駛	s a i ⁴ ¹	s u ⁴ ¹
+駜	p i t̚ ³ ²	p i ³ ³
+駝	t ɤ ² ³
+駟	s u ² ¹
+駪	s i n ⁴ ⁴
+駬	z ĩ ⁴ ¹
+駰	i n ⁴ ⁴
+駱	l ɔ k̚ ⁴
+駸	t͡sʰ i m ⁴ ⁴
+駹	b a ŋ ² ³
+駻	h a n ³ ³
+駽	h i ɛ n ² ³
+駿	t͡s u n ² ¹
+騁	pʰ i ɪ ŋ ² ¹
+騂	s i n ⁴ ⁴
+騃	ŋ ã i ⁴ ¹	ɡ a i ² ³	ɡ a i ⁴ ¹
+騄	l i ɔ k̚ ⁴
+騅	t͡s u i ⁴ ⁴
+騋	l a i ² ³
+騍	kʰ ɤ ² ¹
+騎	kʰ i a ² ³	kʰ i ² ³
+騏	k i ² ³
+騖	b u ³ ³
+騙	pʰ i ɛ n ² ¹
+騧	k u a ⁴ ⁴	u a ⁴ ⁴
+騫	h i ɛ n ⁴ ⁴
+騬	s i ɪ ŋ ³ ³	t͡s i ɪ ŋ ⁴ ⁴
+騰	tʰ i ɪ ŋ ² ³
+騷	s a u ⁴ ⁴	s ɤ ⁴ ⁴
+騾	l e ² ³
+驁	ɡ ɤ ² ³	ɡ ɤ ³ ³
+驄	t͡sʰ ɔ ŋ ⁴ ⁴
+驅	kʰ u ⁴ ⁴
+驌	s i u ʔ ⁴
+驕	k i a u ⁴ ⁴
+驖	tʰ i ɛ t̚ ³ ²
+驗	ɡ i a m ³ ³
+驚	k i ã ⁴ ⁴	k i ɪ ŋ ⁴ ⁴	k ẽ ⁴ ⁴
+驛	i a ʔ ⁴	i ɪ k̚ ⁴
+驟	t͡s ɔ ³ ³
+驢	l i ² ³
+驤	s i ɔ ŋ ⁴ ⁴
+驥	k i ² ¹
+驫	p i a u ⁴ ⁴
+骨	k u t̚ ³ ²
+骭	h a n ³ ³	k a n ² ¹
+骰	t a u ² ³
+骸	h a i ² ³
+骼	k e ʔ ³ ²	k i ɪ k̚ ³ ²
+骿	pʰ i ã ⁴ ⁴
+髂	kʰ a ³ ³
+髆	pʰ ɔ k̚ ³ ²
+髒	t͡s ɔ ŋ ² ¹
+髓	t͡sʰ u e ⁴ ¹	t͡sʰ u i ⁴ ¹
+體	tʰ a i ⁴ ¹	tʰ e ⁴ ¹	tʰ u e ⁴ ¹
+高	k a u ⁴ ⁴	k u a n ² ³	k ɤ ⁴ ⁴
+髟	pʰ i a u ⁴ ⁴	s a m ⁴ ⁴
+髡	kʰ u n ⁴ ⁴
+髦	m ɔ̃ ² ³
+髫	tʰ i a u ² ³
+髮	h u a t̚ ³ ²
+髹	h i u ⁴ ⁴
+髺	k u a t̚ ³ ²
+髻	k u e ² ¹
+鬃	t͡s a ŋ ⁴ ⁴
+鬆	s a ŋ ⁴ ⁴	s ɔ ŋ ⁴ ⁴
+鬍	h ɔ ² ³
+鬐	k i ² ³
+鬒	t͡s i n ⁴ ⁴
+鬖	s a m ² ¹
+鬙	t͡s i ɪ ŋ ⁴ ⁴
+鬚	s u ⁴ ⁴	t͡sʰ i u ⁴ ⁴
+鬢	p i n ² ¹
+鬥	t a u ² ¹	t ɔ ² ¹
+鬧	l a u ³ ³	l a ³ ³	n ã u ³ ³
+鬮	k i u ⁴ ⁴	kʰ a u ⁴ ⁴
+鬯	tʰ i ɔ ŋ ² ¹
+鬱	u t̚ ³ ²
+鬲	k i ɪ k̚ ³ ²	l i ɪ k̚ ⁴
+鬻	i ɔ k̚ ⁴
+鬼	k u i ⁴ ¹
+魁	kʰ u e ⁴ ⁴
+魂	h u n ² ³
+魄	pʰ i ɪ k̚ ³ ²
+魅	b i ³ ³
+魍	b a ŋ ⁴ ¹
+魎	s ŋ̍ ² ¹	s ŋ̍ ʔ ³ ²
+魏	ɡ u i ³ ³
+魔	m ɔ̃ ² ³
+魘	i a m ⁴ ¹
+魚	h i ² ³	ɡ u ² ³
+魛	t ɤ ⁴ ⁴
+魟	k ɔ ŋ ⁴ ⁴
+魯	l u ʔ ³ ²	l ɔ ⁴ ¹
+魴	h a ŋ ⁴ ⁴
+魷	i u ² ³
+鮀	t ɤ ² ³
+鮑	p a u ² ³	p a u ³ ³	p a u ⁴ ⁴
+鮓	tʰ e ³ ³
+鮕	k ɔ ⁴ ⁴
+鮘	t a i ⁴ ⁴
+鮫	k a u ⁴ ⁴
+鮭	h a i ² ³	k u e ² ³
+鮮	s i ɛ n ⁴ ¹	s i ɛ n ⁴ ⁴	t͡sʰ ĩ ⁴ ⁴
+鮸	b i ɛ n ⁴ ¹
+鯉	l e ³ ³	l i ⁴ ¹	t a i ³ ³
+鯊	s a ⁴ ⁴	s u a ⁴ ⁴
+鯓	s i n ⁴ ⁴
+鯔	t͡s u ⁴ ⁴
+鯖	t͡s i ɪ ŋ ⁴ ⁴	t͡sʰ i ɪ ŋ ⁴ ¹
+鯛	t i a u ⁴ ⁴
+鯧	t͡sʰ i ũ ⁴ ⁴
+鯨	k i a ŋ ⁴ ⁴	k i ɪ ŋ ⁴ ⁴	kʰ i ɪ ŋ ² ³
+鯸	h ɔ ² ³
+鯽	t͡s i t̚ ³ ²
+鰆	t͡sʰ u n ⁴ ⁴
+鰇	z i u ² ³
+鰍	t͡sʰ i u ⁴ ⁴
+鰒	h ɔ k̚ ⁴
+鰓	s a i ⁴ ⁴	t͡sʰ i ⁴ ⁴
+鰗	h ɔ ² ³
+鰜	k i a m ⁴ ⁴
+鰡	l i u ² ³
+鰥	k u a n ⁴ ⁴
+鰭	k i ² ³
+鰮	u n ⁴ ⁴
+鰱	l i ɛ n ² ³
+鰳	l i ɪ k̚ ⁴
+鰷	tʰ i a u ² ³
+鰹	k i ɛ n ⁴ ⁴
+鰻	m u ã ² ³
+鰾	p i ɤ ³ ³
+鱅	i ɔ ŋ ² ³
+鱈	s u a t̚ ³ ²
+鱉	p i ɛ t̚ ³ ²	p i ʔ ³ ²
+鱔	s i ɛ n ³ ³	t͡sʰ u ã ³ ³
+鱖	k u e ² ¹
+鱗	l a n ² ³	l i n ² ³
+鱘	s i m ² ³
+鱟	h a u ³ ³
+鱠	k u e ² ¹
+鱣	s i ɛ n ³ ³	t͡s i ɛ n ⁴ ⁴
+鱨	s i ɔ ŋ ² ³
+鱷	kʰ ɔ k̚ ⁴	ɡ ɔ k̚ ⁴
+鱸	l ɔ ² ³
+鳥	n i ã u ⁴ ¹	t͡s i a u ⁴ ¹
+鳧	h u ² ³
+鳩	kʰ i u ⁴ ⁴
+鳳	h ɔ ŋ ³ ³
+鳴	b i ɪ ŋ ² ³
+鳶	i ɛ n ² ³
+鴆	tʰ i m ⁴ ⁴
+鴉	a ⁴ ⁴
+鴒	l i ɪ ŋ ³ ³
+鴕	t ɤ ² ³
+鴛	u a n ⁴ ⁴
+鴞	h i ɤ ʔ ⁴
+鴟	b a ³ ³	l a i ³ ³	t͡sʰ i ⁴ ⁴
+鴣	k ɔ ⁴ ⁴
+鴥	u t̚ ⁴
+鴦	i ũ ⁴ ⁴	i ɔ ŋ ⁴ ⁴
+鴨	a p̚ ³ ²	a ʔ ³ ²
+鴻	h ɔ ŋ ² ³
+鴿	k a p̚ ³ ²
+鵐	b u ² ³
+鵑	k u a n ⁴ ⁴
+鵝	ŋ ɔ̃ ² ³	ɡ ɤ ² ³
+鵡	b u ⁴ ¹
+鵪	a m ⁴ ⁴	i ɛ n ⁴ ⁴
+鵬	p i ɪ ŋ ² ³
+鵲	t͡sʰ i ɔ k̚ ³ ²
+鶄	t͡s i ɪ ŋ ⁴ ⁴	t͡sʰ i ɪ ŋ ⁴ ⁴
+鶉	tʰ u n ⁴ ⁴	t͡s u n ⁴ ⁴	t͡sʰ u n ⁴ ⁴
+鶯	i ɪ ŋ ⁴ ⁴
+鶲	ɔ ŋ ⁴ ⁴
+鶴	h ɔ k̚ ⁴	h ɤ ʔ ⁴
+鶺	t͡sʰ i ɤ ⁴ ⁴
+鶻	k u t̚ ³ ²
+鶼	k i a m ⁴ ⁴
+鶿	t͡s i ² ³
+鷁	i ɪ k̚ ³ ²
+鷂	i a u ² ³	i a u ³ ³	i ɤ ³ ³
+鷓	t͡s i a ² ¹
+鷕	i a u ⁴ ¹	u i ⁴ ¹
+鷗	a u ⁴ ⁴	i ɤ ⁴ ⁴	ɔ ⁴ ⁴
+鷥	s i ⁴ ⁴
+鷯	l i a u ² ³
+鷹	i ɪ ŋ ⁴ ⁴
+鷺	l ɔ ³ ³
+鷽	a k̚ ³ ²
+鸕	l ɔ ² ³
+鸚	i ɪ ŋ ⁴ ⁴
+鸛	k u a n ² ¹
+鸞	l u a n ² ³
+鹵	l ɔ ³ ³	l ɔ ⁴ ¹
+鹹	k i a m ² ³
+鹼	k ĩ ⁴ ⁴
+鹽	i a m ² ³	i a m ³ ³	s ĩ ² ³	s ĩ ³ ³
+鹿	l ɔ k̚ ⁴
+麀	i u ⁴ ⁴
+麋	b i ² ³
+麒	k i ² ³
+麓	l ɔ k̚ ⁴
+麗	l e ² ³	l e ³ ³
+麝	s i a ³ ³
+麟	l i n ² ³
+麥	b e ʔ ⁴	b i ɪ k̚ ⁴	m ã i ² ¹
+麩	h u ⁴ ⁴	kʰ ɔ ⁴ ⁴	pʰ ɔ ⁴ ⁴
+麭	pʰ a ŋ ⁴ ¹
+麴	kʰ a k̚ ³ ²	kʰ i ɔ k̚ ³ ²
+麵	b i ɛ n ³ ³	m ĩ ³ ³
+麶	tʰ i ⁴ ⁴
+麻	b a ² ³	m u ã ² ³	m ã ² ³
+麼	m ɔ̃ ² ³	m ɔ̃ ⁴ ¹
+黃	h ɔ ŋ ² ³	ŋ̍ ² ³
+黌	h ɔ ŋ ² ³
+黍	s e ⁴ ¹
+黎	l e ² ³
+黏	l i a m ² ³
+黐	tʰ i ʔ ⁴	tʰ i ⁴ ⁴
+黑	h i ɪ k̚ ³ ²	ɔ ⁴ ⁴
+黓	i ɪ k̚ ⁴
+黔	kʰ a m ² ³
+默	b i ɪ k̚ ⁴
+黛	t a i ³ ³
+黜	tʰ u t̚ ³ ²
+點	t i a m ⁴ ¹
+黨	t ɔ ŋ ⁴ ¹
+黯	a m ⁴ ¹
+黲	t͡sʰ a m ⁴ ¹
+黴	b i ² ³
+黷	t ɔ k̚ ⁴
+黹	t͡s i ⁴ ¹
+黽	b i n ⁴ ¹
+黿	ɡ u a n ² ³
+鼎	t i ã ⁴ ¹	t i ɪ ŋ ⁴ ¹
+鼐	n ã i ³ ³
+鼓	k ɔ ⁴ ¹
+鼖	h u n ² ³
+鼠	t͡sʰ i ⁴ ¹
+鼪	s i ɪ ŋ ⁴ ⁴
+鼬	i u ³ ³
+鼻	pʰ ĩ ³ ³
+鼾	h u ã ² ³	h u ã ⁴ ⁴	h ɔ̃ ² ³	k ɔ̃ ² ³
+齁	h ɔ̃ ʔ ³ ²	h ɔ̃ ⁴ ⁴	k ɔ̃ ² ³
+齆	ɔ ŋ ² ¹
+齇	t͡s a ⁴ ⁴
+齉	l ɔ ŋ ³ ³
+齊	t͡s e ² ³	t͡s i a u ² ³
+齋	t͡s a i ⁴ ⁴	t͡s e ⁴ ⁴
+齎	t͡s e ⁴ ⁴
+齒	kʰ i ⁴ ¹
+齔	t͡sʰ i n ⁴ ¹
+齟	t͡s u ⁴ ¹	t͡s ɔ ⁴ ⁴
+齡	l i ɪ ŋ ² ³
+齣	t͡sʰ u t̚ ³ ²
+齧	kʰ e ² ¹	ɡ i ɛ t̚ ³ ²
+齪	t͡s a k̚ ³ ²	t͡sʰ i ɔ k̚ ³ ²	t͡sʰ ɔ k̚ ³ ²
+齴	ɡ i a ŋ ² ¹
+齷	a k̚ ³ ²	ɔ k̚ ³ ²
+龍	l i ɔ ŋ ² ³	l i ɪ ŋ ² ³	ɡ i ɪ ŋ ² ³
+龐	p a ŋ ² ³
+龔	k i ɔ ŋ ⁴ ¹	k i ɪ ŋ ⁴ ¹
+龕	kʰ a m ⁴ ⁴
+龘	t a p̚ ⁴
+龜	k u i ⁴ ⁴	k u n ⁴ ⁴	k u ⁴ ⁴
+龤	h a i ² ³
+𠒣	h i ɪ ŋ ² ³
+𠕇	t i ɪ ŋ ³ ³
+𠘥	ɡ i a m ² ³
+𠜺	l e ʔ ⁴
+𠞩	t͡s u i ² ³
+𠡡	t͡s a n ² ³
+𠢕	ɡ a u ² ³
+𠯗	s i p̚ ⁴	t͡s i p̚ ⁴
+𡢃	k a n ⁴ ¹
+𡧣	k a i ⁴ ¹
+𡳞	l a n ³ ³
+𢪱	b u t̚ ⁴
+𢯾	m ɔ̃ ʔ ³ ²
+𢲸	l ɔ ³ ³
+𢼌	p a ⁴ ⁴
+𣀀	l u i ² ³
+𣁳	h a t̚ ³ ²	kʰ a t̚ ³ ²
+𣍐	b e ³ ³
+𣗬	t͡sʰ i u ³ ³
+𣛮	s i ã ³ ³
+𣮈	kʰ u t̚ ⁴
+𣸄	t a m ² ³
+𣻸	s i ũ ² ³
+𤆤	t i m ³ ³
+𤆬	t͡sʰ u a ³ ³
+𤉙	k u n ² ³
+𤢎	t a ŋ ⁴ ⁴
+𤭫	i ɪ ŋ ⁴ ⁴	ẽ ⁴ ⁴
+𤲍	kʰ e ʔ ³ ²
+𤶃	tʰ i a u ³ ³
+𤺪	s i ɛ n ³ ³
+𥍉	l i a p̚ ³ ²	n ĩ ʔ ³ ²
+𥐵	pʰ i ɛ t̚ ³ ²
+𥑮	k ɔ ⁴ ¹
+𥓍	t ɔ k̚ ³ ²
+𥖄	s u a n ³ ³
+𥭘	tʰ a i ⁴ ⁴
+𥰔	pʰ i n ⁴ ¹
+𥴊	k a m ⁴ ¹
+𦊓	l i ɪ ŋ ² ³
+𦜆	h a m ⁴ ⁴
+𦺥	t ɔ ⁴ ⁴
+𧉟	t a i ² ³
+𧌄	a m ² ¹	a m ⁴ ¹
+𧑎	t͡s u a ʔ ⁴
+𧮙	t͡sʰ ɤ ʔ ³ ²
+𧿬	tʰ u n ⁴ ¹
+𧿳	pʰ u t̚ ⁴
+𨂿	u a i ʔ ³ ²	u ã i ⁴ ¹
+𨃅	p a i ⁴ ¹
+𨑨	tʰ i t̚ ³ ²	t͡sʰ i t̚ ³ ²
+𩉍	t͡s i ã ⁴ ¹
+𩗗	p ɤ ² ¹
+𩚨	kʰ i u ³ ³
+𩛩	k a u ʔ ³ ²
+𩟗	t͡s i ã ⁴ ¹
+𩩍	pʰ i ã ⁴ ⁴
+𩵚	tʰ ɔ ² ³
+𩵱	ŋ ɔ̃ ⁴ ¹
+𪁎	t͡sʰ i ɤ ⁴ ⁴
+𪐎	b a ² ³
+𪐞	t ɔ ² ¹
+𪛟	b ɔ ŋ ² ³	b ɔ ŋ ³ ³
+𪜶	i n ⁴ ⁴
+𫝏	ɡ a n ² ¹
+𫝛	s i a ŋ ² ³	s i a ŋ ³ ³
+𫞼	t͡sʰ a i ³ ³
+𬦰	p e ʔ ³ ²
+𮰵	t a i ³ ³ ⁻ ² ¹ k i ɛ t̚ ³ ²
+𰣻	k ɤ ⁴ ⁴
+𰹬	t͡s ŋ̍ ³ ³
+𲓖	m ã i ² ¹
