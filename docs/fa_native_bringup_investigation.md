@@ -57,3 +57,25 @@ multi-variant edge (گل [gil]/[gul]→gel vs Iranian gol).
 RETRAIN (the user's GPU step): the new `harakat.fa.silver.tsv` is the training data — retrain the BiLSTM
 (`train_multilingual_harakat.py`) + re-export the ONNX so the NEURAL tier (uncovered words) also stops
 under-vocalizing. ur/ps/pa need their own dialect maps (analogous FULL_FOLD) — a follow-up.
+
+## Run (2026-07-16) — can the retrained neural be BAKED into the sync lexicon? NO (net-negative, don't retry)
+
+Goal: get the retrained neural's benefit into the SYNC `phonemizeWord` path (which can't run async ONNX) by
+pre-computing its vocalizations offline over a Persian frequency vocab (behnam/persian-words-frequency, 406k,
+CC-BY-SA) and adding the confident ones to the coverage lexicon.
+
+MEASURED (held-out eval_set, 1082 words with a reference, dialect-normalized whole-word match):
+- **DEFAULT (bare→[a]): 37.6%** vs **NEURAL vocalization: 40.2%** — the neural is only **+2.6pp** better than just
+  guessing [a].
+- Of words the neural VOCALIZES (adds a short vowel), only **~22–25% are correct**, and **confidence does NOT
+  separate right from wrong** (0.99+ conf gives 25%, same as 0%). It makes CONFIDENT errors, especially
+  OVER-vocalizing the many Arabic-loan/'a'-vowel words the default already nails (احمر→ahmeɾ [should ahmar],
+  ابتدا→abtadaː [should ebtedaː], ابرش→abreʃ). Some "errors" are actually the neural being right in Iranian vs a
+  classical reference (آبرو→âberu, آسمانی→âsemâni), but enough are real that the NET is barely above default.
+
+CONCLUSION: **do NOT bake the neural into the authoritative sync lexicon.** For a +2.6pp net it would FREEZE wrong
+pronunciations for common words (احمر→ahmeɾ) that the default gets right, and confidence can't filter them. The
+neural stays the async generalization tier (`phonemizeRiderNeural`), where it's a slight, opt-in improvement over
+default — not a reliable production restorer. The OOV short-vowel tail is bounded by IRANIAN reference data (same
+wall as Bengali/Amharic): the corroborated coverage lexicon is reliable but limited to the reference vocab, and
+the neural is not accurate enough to extend it unsupervised. Persian stays a strong 🟡.
