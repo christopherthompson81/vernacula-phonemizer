@@ -38,6 +38,7 @@ const FATHA = "َ", KASRA = "ِ", DAMMA = "ُ", SUKUN = "ْ";
 const BARE = "";
 const SHORT_OPTS = [BARE, FATHA, KASRA, DAMMA, SUKUN]; // default-ə / ə / ɪ / ʊ / no-vowel
 const WAW = "و"; // و — the one AMBIGUOUS long-vowel letter
+const YA = "ی"; // ی choti ye — for glide detection (ی before a vowel is a glide, not a long vowel)
 const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (the long-vowel search)
 const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
 
@@ -50,7 +51,12 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
         const c = chars[i]!;
         if (!cfg.cons.includes(c) || cfg.vowelLetters.includes(c)) continue;
         const next = chars[i + 1];
-        if (next === WAW) out.push({ pos: i, options: WAW_OPTS }); // long vowel: oː (bare) vs uː (damma)
+        // A ی/و that is itself followed by a vowel letter is a GLIDE (‑iyā, ‑uwā); the consonant before it still
+        // takes a short vowel (آبادیات → ɑbɑd·ə·jɑt), so treat it as a short slot rather than skipping it.
+        const glideNext = (next === YA || next === WAW) && chars[i + 2] !== undefined &&
+            cfg.vowelLetters.includes(chars[i + 2]!);
+        if (glideNext) out.push({ pos: i, options: SHORT_OPTS });
+        else if (next === WAW) out.push({ pos: i, options: WAW_OPTS }); // و long vowel: oː (bare) vs uː (damma)
         else if (next === undefined || !cfg.vowelLetters.includes(next))
             out.push({ pos: i, options: SHORT_OPTS }); // short vowel: default-ə / ɪ / ʊ / none
     }

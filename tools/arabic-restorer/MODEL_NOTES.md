@@ -48,7 +48,11 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
    where no diacritized corpus exists. Per-slot options: a short-vowel slot tries `{BARE, fatḥa, kasra, ḍamma,
    sukūn}` with **BARE (no diacritic = default-ə, label "0") preferred** (harmonizes with the cross-script
    convention); a consonant before **و** is a **long-vowel slot** trying `{bare → oː, ḍamma+waw → uː}`. Yields:
-   fa 67.5%, ur 53.1%, ps 44.7%, pa 36.1% (**11,984 pairs** — the long-vowel search lifted ur 41→53%, pa 23→36%).
+   Also: a consonant before a **ی/و GLIDE** (‑iyā/‑uwā — followed by another vowel letter) is a short slot too
+   (آبادیات → ɑbɑd·ə·jɑt). And an explicitly-written fatḥa is now PROTECTED from medial schwa-deletion (`g2p.ts`
+   marks it, `urdu.ts` strips the mark) so deletion elides only the *unwritten* default schwa — needed, or the ‑iyā
+   epenthetic ə sits in a deletion context and vanishes. Yields: fa 69.5%, ur 56.5%, ps 44.7%, pa 37.2%
+   (**12,471 pairs**).
 4. `crossscript_pa.ts` → `harakat.pa.crossscript.tsv` — **cross-script GOLD** (see below). Currently OPT-IN.
 5. `build_charvocab.py` → `multilingual_charvocab.json` — union of every letter across ALL skeleton sources
    (silver + harakat shards) with the Arabic char map, Arabic indices preserved. 99 chars, 19 labels.
@@ -69,11 +73,12 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
   vs bare-skeleton BASELINE. `eval_set.tsv` is a fixed 10% slice of the WIKIPRON reference (not the silver labels),
   excluded from training, so it does NOT move when the inversion changes → version comparisons are exact. It covers
   ALL held-out words incl. the ~half the g2p can't reproduce → honest full-coverage denominator (lower absolutes).
-- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 54.3% (+10.8)**. Per language: **fa +19.2**
-  (44→63%), **ur +3.2** (48→52%) — the data-rich riders clearly benefit; **pa −0.8, ps −0.9** — the data-starved,
-  g2p-ceiling-limited riders are ~neutral (model neither helps nor hurts; NOT noise now — n≈120). Checkpoint
-  `/mnt/data/ar-diac/bilstm_multilingual.pt` (gitignored); `multilingual_diacritizer.meta.json` committed.
-  (An earlier "+18" was on a DIFFERENT, moving eval that scored only the invertible subset — not comparable.)
+- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 56.0% (+12.5)**. Per language: **fa +20.3**
+  (44→64%), **ur +5.9** (48→54%), **pa +2.4** (now positive) — helped by the g2p/inversion fixes above; **ps −1.8**
+  still the holdout (no voweled sister-script, different ی realization, dialectal referee). Baseline 43.5% is the
+  g2p-COVERAGE floor (the ~half no harakat can reach). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
+  (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
+  only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)
 
 ## Cross-script GOLD (`crossscript_pa.ts`) — the mechanism, and why it's opt-in
 Several abjad languages have a **voweled sister-script** (Punjabi↔Gurmukhi, Urdu↔Hindi-Devanagari,

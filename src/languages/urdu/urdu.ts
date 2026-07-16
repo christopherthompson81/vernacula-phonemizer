@@ -38,6 +38,7 @@ export function phonemizeWord(word: string): string {
     // in a medial V·C·ə·C·V context, so consonant clusters surface bare (پاکستان → pɑːkɪst̪ɑːn-skeleton pɑːkst̪ɑːn,
     // not pɑːkəsət̪ɑːn). The correct ɪ/ʊ quality needs the deferred restoration layer; the STRUCTURE is right.
     ipa = deleteMedialSchwa(ipa);
+    ipa = ipa.replace(/̲/gu, ""); // strip the explicit-fatḥa protection mark (see g2p.ts) — deletion is done
     // Nasal PLACE assimilation: /n/ → [m] before a labial (b/p), [ŋ] before a velar (k/ɡ) — انبار→əmbɑːɾ,
     // انگور→əŋɡuːɾ. Standard Hindustani (and matches the referee).
     ipa = ipa.replace(/n(?=[bp])/gu, "m").replace(/n(?=[kɡ])/gu, "ŋ");
