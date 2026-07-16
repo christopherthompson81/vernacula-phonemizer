@@ -35,6 +35,30 @@ def clean_ipa(s):
     return s.strip().strip("/[]").replace(".", " ").replace("ˈ", "").replace("ˌ", "").strip()
 
 
+# Per-source IPA HARMONIZER: normalize the source's narrow transcription to OUR g2p's (broad) convention BEFORE
+# inversion, so more of it inverts consistently and its labels don't teach off-convention patterns to the shared
+# model. Without this, a second source's conventions REGRESS the wikipron eval (Run 17). Per language, since e.g.
+# aspiration is phonemic in Urdu but not Persian.
+def harmonize(ipa, code):
+    if code == "fas":
+        # Persian: strip combining marks except the tie bar (removes stress accents ́, dental ̪, voiceless ring ̥),
+        # then map narrow base/modifier symbols — no phonemic aspiration/palatalization; ɒ→ɑ, æ→a (Tehran short-a),
+        # ɹ→ɾ, ð→z, glide w→v. Labialization ʷ (خو) is KEPT.
+        ipa = "".join(c for c in unicodedata.normalize("NFD", ipa)
+                      if unicodedata.combining(c) == 0 or c == "͡")
+        for a, b in [("ʰ", ""), ("ʲ", ""), ("ɒ", "ɑ"), ("æ", "a"), ("ɹ", "ɾ"), ("ð", "z"), ("w", "v")]:
+            ipa = ipa.replace(a, b)
+        ipa = unicodedata.normalize("NFC", ipa)
+    elif code == "urd":
+        # Urdu kaikki already matches our convention (dental t̪, aspiration ʰ/ʱ, ə/ɪ/ʊ, ʋ, ɦ). Just drop the
+        # optional-segment parentheses + stress accents; KEEP dental ̪, nasalization ̃, tie ͡, aspiration.
+        ipa = ipa.replace("(", "").replace(")", "")
+        ipa = "".join(c for c in unicodedata.normalize("NFD", ipa)
+                      if unicodedata.combining(c) == 0 or c in "̪̃͡")
+        ipa = unicodedata.normalize("NFC", ipa)
+    return ipa
+
+
 def main():
     # Existing wikipron skeletons per lang — so we only ADD new words (dedup vs the eval reference).
     have = {c: set() for c in WIKI_CODE}
@@ -61,6 +85,7 @@ def main():
             ipa = next((clean_ipa(s["ipa"]) for s in d.get("sounds", []) if s.get("ipa")), "")
             if not ipa:
                 continue
+            ipa = harmonize(ipa, code)  # normalize to our g2p's convention before inversion
             seen.add(skel)
             rows.append(f"{skel}\t{code}\t{ipa}")
             added[code] += 1

@@ -378,6 +378,24 @@ committed) for that follow-up. epitran is NOT a source: it's an abjad-reader too
 Net: the harness is now measurable; the scaling path is data + a per-source IPA harmonizer, and the biggest clean
 source remains real-orthography Hindi→Urdu cross-script (a whole language's corpus, same-convention if sourced right).
 
+## Run 18 — 2026-07-15 — the per-source harmonizer: kaikki now HELPS (fa +0.7)
+
+Built the harmonizer that Run 17 said was the fix. `build_kaikki.py` now normalizes a source's narrow IPA to our
+g2p's convention BEFORE inversion, per language: **Persian** — strip aspiration ʰ (Persian has none) + dental ̪ +
+stress accents, ɒ→ɑ, æ→a (Tehran short-a), ɹ→ɾ, ð→z, glide w→v (keep labialization ʷ); **Urdu** — already matches
+(dental, aspiration ʰ/ʱ, ə/ɪ/ʊ), just drop optional-segment parens + accents.
+
+Effect, measured on the frozen harness: harmonization **doubled the kaikki fa yield** (336→612 words invert) and
+**flipped the regression into a gain — fa +21.1 → +21.8** (the unharmonized version had regressed to +20.5). That's
+the Run-17 hypothesis confirmed: convention-harmonized data helps, raw second-source data hurts. `silver.kaikki.tsv`
+(1,822 new fa pairs) is committed; kaikki is ON for Persian.
+
+Honest scope: ALL stays ~flat (+15.3–15.5) — fa is the only language with substantial NEW data (Urdu kaikki
+overlaps wikipron ~95%, only 150 new), and the small riders (pa/ps, n≈120) still swing ±2 on the shared model
+(residual sensitivity the frozen reps reduced but didn't eliminate). So the harmonizer is validated as the
+**per-source scaling mechanism**; moving the aggregate needs substantial new data in MULTIPLE languages (the
+real-orthography Hindi→Urdu cross-script) + shared-model rebalancing as totals grow.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

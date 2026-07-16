@@ -17,6 +17,14 @@ Uyghur (a fully vocalized alphabet — nothing to restore) and single-letter hea
 ## Format
 `skeleton <TAB> lang(ISO 639-3) <TAB> ipa(space-separated phones)` — one row per unique triple.
 
+## `silver.kaikki.tsv` — harmonized second-source augmentation
+Extra `(skeleton, lang, ipa)` pairs from **kaikki** (Wiktionary, CC-BY-SA) — a larger extraction than wikipron —
+for words NOT already in `silver.tsv`. `build_kaikki.py` fetches a kaikki dump and **harmonizes** its narrow IPA to
+our g2p's convention BEFORE inversion (per language: Persian strips aspiration/dental, ɒ→ɑ, æ→a, w→v; Urdu keeps
+aspiration/dental). Without harmonization a second source's conventions regress the eval (docs Run 17); with it,
+Persian gains (+0.7 held-out). `invert_harakat.ts` labels it alongside wikipron; the eval_set stays wikipron-only.
+Inherits CC-BY-SA. The raw dumps (~30–85 MB) are not committed; regenerate with the URLs in `build_kaikki.py`.
+
 ## Role: EVALUATION reference (not the training target)
 The shared model's TARGET is **harakat** (short-vowel diacritics) → each language's existing deterministic g2p turns
 the vocalized text into IPA (see `docs/arabic_script_restorer_investigation.md`, Run 4). These wikipron IPA pairs
