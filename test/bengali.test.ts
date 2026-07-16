@@ -57,6 +57,13 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("অই")).toBe("oi"); // ɔ→o before i (independent vowels)
     });
 
+    test("ওয়া glide → [oa] (not [oja]); য় stays [j] elsewhere", () => {
+        expect(phonemizeWord("খাওয়া")).toBe("kʰaoa"); // 'to eat' — ওয়া = oa, no glide
+        expect(phonemizeWord("দেওয়া")).toBe("d̪eoa"); // 'to give'
+        expect(phonemizeWord("যাওয়া")).toBe("d͡ʒaoa"); // 'to go'
+        expect(phonemizeWord("মেয়ে")).toBe("meje"); // য় IS [j] here — untouched
+    });
+
     test("text: words + Bengali danda pause", () => {
         expect(phonemize("আমি বাংলা বলি।", "bn")).toContain("baŋla");
     });
