@@ -106,14 +106,14 @@ def enc(lang, cs, ls):
 
 train_rows = load(args.train)
 eval_rows = load(args.eval)
-# SIZE-AWARE upsampling: replicate each rider toward `--balance` examples so the small, structurally-different
-# riders (ps 440, pa 330) aren't drowned by the data-rich ones (ur/fa) — without size-aware weighting the model
-# over-fits ur/fa and REGRESSES Pashto via cross-lingual interference. Arabic replay stays 1×.
+# FIXED per-language replication so the small, structurally-different riders (pa/ps) aren't drowned by the data-rich
+# ur/fa. Deliberately FROZEN (not derived from live counts): a count-derived `round(balance/count)` flips a rep on
+# any small data change and swings the WHOLE shared eval ±2pts, making sub-point scaling steps unmeasurable. Adjust
+# these consciously when a language's data scales a lot (e.g. drop ur→1 stays fine; if ur 10×'s, revisit).
 from collections import Counter
+REPS = {"ar": 1, "ur": 1, "fa": 1, "ps": 7, "pa": 9}
 counts = Counter(lang for lang, _, _ in train_rows)
-reps_of = {}
-for lang in set(counts):
-    reps_of[lang] = 1 if lang == "ar" else max(1, min(12, round(args.balance / max(counts[lang], 1))))
+reps_of = {lang: REPS.get(lang, 1) for lang in set(counts)}
 train_enc = []
 for lang, cs, ls in train_rows:
     for _ in range(reps_of[lang]): train_enc.append(enc(lang, cs, ls))
