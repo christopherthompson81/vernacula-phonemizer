@@ -8,6 +8,11 @@
     ],
     "segmentJoin": true,
     "folds": [
+        {
+            "pattern": "(.)\\1",
+            "replace": "$1",
+            "note": "geminate as length ː (ours) vs doubled symbol (referee) — notation (as pa)"
+        },
         { "pattern": "t̪", "replace": "t", "note": "dental ⟨ت/ط/د⟩ notation (referee-variable)" },
         { "pattern": "d̪", "replace": "d", "note": "dental notation" },
         { "pattern": "[əaiu]", "replace": "ə", "note": "SHORT vowel quality a~ə~i~u — UNRECOVERABLE from the undiacritized abjad (the deferred restoration subsystem)" },
