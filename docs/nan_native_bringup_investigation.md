@@ -69,3 +69,42 @@ RESULT: **97.6% segmental accuracy on covered chars** vs an independent human re
 epitran-circular). STATUS stays **🟡** for two REAL limitations, now precisely characterised: (1) tone SANDHI
 (連讀變調) deferred — Phase 1 citation tone; (2) dict coverage 58% (real rare chars, closable). The converter
 itself is validated. Suite green; typecheck clean.
+
+## Run 3 — 2026-07-16 — tone-value fix (陰入 4 ≠ 陽去 7) + word-internal tone SANDHI (連讀變調)
+
+Two connected pieces, both driven by the independent wikipron referee.
+
+**Tone-value defect (surfaced by inspection of the Chao map).** The map rendered tone 4 (陰入) and tone 7 (陽去)
+BOTH as ˧, and tone 1 (陰平) and tone 8 (陽入) both as ˥. The 1/8 pair is CORRECT — both are high-pitched; tone 8
+is the checked counterpart, distinguished by its stop/glottal coda. But 4/7 was a real DEFECT: the referee's
+citation contours (single-char, tone-position) are **checked 32 (tone 4, LOW) vs 4/high (tone 8)** and **open 44
+(1), 41 (2), 33 (7), 23 (5), 21 (3)** — so tone 4 (陰入) is genuinely a LOW checked tone, not mid. Rendering it ˧
+both misrepresented its pitch and collided with tone 7. Fixed: tone 4 ˧→**˧˨** (32) and tone 3 ˧˩→**˨˩** (21) to
+match the referee (keeping 3 and 4 distinct). Tones/eval unaffected (the eval strips Chao letters); only the
+gold tone-rendering changed (kok→kɔk̚˧˨).
+
+**Tone sandhi (連讀變調) — the defining Min Nan prosody, Phase 1→2.** The referee ENCODES sandhi (the `⁻` arrow:
+citation contour ⁻ sandhi contour). Extracting all citation→sandhi pairs reproduced the documented Taiwanese
+tone circle exactly: **44→33 (1→7), 33→21 (7→3), 21→41 (3→2), 41→44 (2→1), 23→33 (5→7)**; checked **32→4 (4→8)
+/ 4→32 (8→4)** for -p/-t/-k, and **32→41 (4→2) / 4→21 (8→3)** for -h. Crucially, sandhi'd -h syllables KEEP their
+ʔ in the referee (l ɤ ʔ ⁴→21) — sandhi changes ONLY the tone, never the segments.
+
+Implemented as a declarative `toneSandhi` map (open / stop / glottal sub-tables) applied WORD-INTERNALLY in
+`tailoToIpa`: every syllable but the LAST takes its sandhi tone; the final keeps citation. Coda class (stop /
+glottal / open) selects the sub-table. Cross-word (phrase-level tone-group) sandhi is DEFERRED — each dict word /
+hyphenated Tâi-lô token is treated as one tone group (the well-defined, validatable domain; true tone-group
+boundaries need syntactic parsing).
+
+**Validated against the referee.** On 26,912 two-char words (both chars in our dict, forced into one tone group),
+our sandhi matches wikipron **95.0% per-syllable** / 90.5% whole-word (tone-category level). The residual is
+polyphonic-char reading variants + the 5→7/5→3 Taipei/Tainan split. The tone circle + position + coda logic is
+confirmed correct.
+
+**Limitation.** Sandhi fires only where the tone group is known: hyphenated Tâi-lô input, or a Han string that is
+a MULTI-char dict entry. A Han phrase segmented into single chars (我食飯 → 我+食+飯) stays citation — real
+Taiwanese would sandhi within phrases, but that needs phrase parsing (deferred). So sandhi coverage in running
+Han text is bounded by the dict's multi-char word inventory.
+
+RESULT: tone sandhi (the marquee deferral) is now implemented + referee-validated at 95% per-syllable, and the
+陰入/陽去 tone-value defect is fixed. Remaining 🟡: (1) cross-word phrase-level sandhi (needs parsing); (2) dict
+coverage 58%. Suite 6/6; segmental eval unchanged (57.0%); typecheck clean.
