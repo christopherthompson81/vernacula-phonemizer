@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 interface NumbersDef {
     units: string[];
@@ -91,8 +92,9 @@ function stressIndex(segs: Seg[]): number {
     return penult;
 }
 
-/** One Indonesian word → canonical IPA. */
-export function phonemizeWord(word: string): string {
+/** One Indonesian word → canonical IPA, RULE-ENGINE ONLY (no ⟨e⟩ lexicon). The honest, non-circular engine
+ *  signal used by the referee eval; the shipped phonemizeWord layers the consensus ⟨e⟩ lexicon on top. */
+export function phonemizeWordRules(word: string): string {
     // All-caps acronym → spell each letter by its Indonesian name (BBM → be-be-em → bebeem).
     if (/^[A-Z]{2,}$/.test(word))
         return [...word.toLowerCase()]
@@ -114,6 +116,25 @@ export function phonemizeWord(word: string): string {
         out += segs[i]!.ph;
     }
     return out.normalize("NFC");
+}
+
+// ⟨e⟩ pepet/taling lexicon — cross-source consensus (wikipron ind ∩ kaikki ind), Latin-keyed. Latin ⟨e⟩ conflates
+// pepet /ə/ (the rule default) and taling /e/~/ɛ/, which is lexical and unrecoverable from the orthography; each
+// entry pins the taling quality where both independent human referees agree. See indonesian-e-lexicon.tsv.
+let LEXICON: Map<string, string> | undefined;
+const lexicon = (): Map<string, string> =>
+    (LEXICON ??= loadTsvMap(import.meta.url, "indonesian-e-lexicon.tsv", (v) => v, {
+        optional: true,
+    }));
+
+/** SHIPPED Indonesian word → canonical IPA. A consensus ⟨e⟩ lexicon override resolves the pepet/taling ambiguity
+ *  for known words; everything else falls through to the rule engine (which defaults pepet). */
+export function phonemizeWord(word: string): string {
+    if (!/^[A-Z]{2,}$/.test(word)) {
+        const hit = lexicon().get(word.toLowerCase());
+        if (hit !== undefined) return hit;
+    }
+    return phonemizeWordRules(word);
 }
 
 // ── Numbers (regular, compositional) ─────────────────────────────────────────
@@ -154,8 +175,9 @@ class IndonesianPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
+                    // Number words bypass the ⟨e⟩ lexicon (their ⟨e⟩ is pepet; avoid any taling homograph).
                     for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeWord(wd));
+                        sink.emit(phonemizeWordRules(wd));
                 else sink.emit(m[2]);
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
