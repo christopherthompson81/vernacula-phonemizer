@@ -34,3 +34,23 @@ kaikki guj (both human, ~4,200 pairs each).
 
 🟡 for the schwa-deletion tail + the **21–99 number gap** (the irregular compound spellings are a bounded
 authoring task; round tens + 0–20 + magnitudes are authored, so 21–99 currently mis-compose).
+
+## Run (2026-07-16) — REVIEW: intervocalic ɖ→ɽ flap rule + notation folds (80.4/82.2 → 86.0/87.9%)
+
+Bucketed the wikipron+kaikki miss set (backbone-folded). The dominant "other" bucket was vowel nasalization
+(ə̃ŋk vs referee əŋk) — already neutralized by the eval BACKBONE (it strips combining ̃), so not a real miss. The
+true residual, in order:
+- **ɖ~ɽ (98)** — intervocalic ડ: referee split 43 ɖ / 37 ɽ; word-initial ડ is ALWAYS ɖ (31/0). Standard Gujarati
+  (Cardona) realizes intervocalic /ɖ ɖʱ/ as the flaps [ɽ ɽʱ], so the 37 ɽ are correct and the 43 ɖ are referee
+  under-marking. Added a postRule **`(V)ɖ(V)→(V)ɽ(V)`** (+ ɖʱ→ɽʱ) — fires only intervocalically (અડદ→əɽəd̪), not
+  word-initial (ડબ→ɖəb), geminate (અડ્ડો→əɖɖo) or cluster. CANONICAL correctness for shipped output; the eval
+  gain comes from also folding ɖ~ɽ (the referee is inconsistent → allophonic fold).
+- **ɦ~ʱ (50)** — હ post-vocalic breathy: referee [ʱ], ours [ɦ] — notation fold.
+- **gemination** — our length ː (backbone-stripped) vs referee doubled consonant (əkkəl) — degemination fold.
+
+RESULT: wikipron **86.0%**, kaikki **87.9%** (+5.6/+5.7); suite 371/371. The remaining ~14% is the genuine 🟡 tail:
+**schwa-deletion** (~281, BOTH directions — Gujarati deletes/retains medial schwa differently from Hindi's Ohala
+rule, and it is partly lexical/variable), **anusvara-before-fricative** (અંશુ→ənʃu: the referee writes an [n] where
+we vowel-nasalize — a shared-engine representation choice), aspirated-geminate notation (ʈʰʈʰ, not in the geminate
+class), and loanword nukta (ફ→pʰ/f, ઝ→d͡ʒʱ/z). ✅ would need the Gujarati-specific schwa-deletion rule; the referee
+being split BOTH ways on it suggests a real variable/lexical ceiling, not a single clean rule.

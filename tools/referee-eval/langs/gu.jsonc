@@ -13,6 +13,9 @@
         { "pattern": "[ɛe]", "replace": "e", "note": "⟨ે⟩ mid front [e]~[ɛ] — one sign, openness lexical (kem→ɛ vs namaste→e)" },
         { "pattern": "[ɔo]", "replace": "o", "note": "⟨ો⟩ mid back [o]~[ɔ] — openness lexical" },
         { "pattern": "ʂ", "replace": "ʃ", "note": "ષ retroflex ʂ ~ ʃ merger (referee-variable)" },
+        { "pattern": "ɽ", "replace": "ɖ", "note": "intervocalic ડ flap: ours [ɽ] (Cardona) ~ referee split ɖ/ɽ — allophonic, fold" },
+        { "pattern": "ʱ(?![aeiouəɑ])|ɦ", "replace": "ɦ", "note": "હ post-vocalic breathy [ʱ] (referee) ~ [ɦ] (ours) — notation" },
+        { "pattern": "(.)\\1", "replace": "$1", "note": "gemination: our length ː (backbone-stripped) vs referee doubled consonant (əkkəl) — notation" },
         { "pattern": "(?:t|tʃ)tʃʰ", "replace": "tʃʰ", "note": "geminate affricate NOTATION: our length tʃʰː vs referee stop+affricate ttʃʰ (ઓચ્છવ)" },
         { "pattern": "(?:d|dʒ)dʒʱ", "replace": "dʒʱ", "note": "geminate affricate notation (voiced)" }
     ]
