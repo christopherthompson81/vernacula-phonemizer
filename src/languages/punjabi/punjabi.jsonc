@@ -45,6 +45,7 @@
         "ਸ": { "ipa": "s", "note": "alveolar sibilant" },
         "ਹ": { "ipa": "ɦ", "note": "voiced glottal fricative (also a tone source)" },
         "ਸ਼": { "ipa": "ʃ", "note": "sha (sa + nukta)" },
+        "ਕ਼": { "ipa": "q", "note": "qa (ka + nukta) — Perso-Arabic q loans (ਕ਼ਲਮ→qələm)" },
         "ਖ਼": { "ipa": "x", "note": "kha (nukta)" },
         "ਗ਼": { "ipa": "ɣ", "note": "gha (nukta)" },
         "ਜ਼": { "ipa": "z", "note": "za (nukta)" },

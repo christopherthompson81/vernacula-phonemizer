@@ -118,7 +118,7 @@ export function makeNativePunjabi(
             : g2p(w.normalize("NFC").replace(addakRe, "$1੍$1"));
         // geminate → length + aspiration-before-length reorder.
         x = x
-            .replace(/(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ɖʱ|ʈʰ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlsʃɾɽŋɳɭjɦʋʈɖ])\1(?!͡)/gu, "$1ː")
+            .replace(/(t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|ɖʱ|ʈʰ|ɡʱ|kʰ|t̪|d̪|[kɡpbmnlsʃɾɽŋɳɭjɦʋʈɖqxzɣf])\1(?!͡)/gu, "$1ː")
             .replace(/ː([ʰʱ])/gu, "$1ː");
         // word-final then medial inherent-vowel (schwa) deletion — same as Hindi.
         const syls = (x.match(VOWEL_G) || []).length;
