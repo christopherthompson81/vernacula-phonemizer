@@ -85,24 +85,31 @@ function vocalize(chars: string[], sl: Slot[], choice: number[]): string {
     return out;
 }
 
+const LEXICON = process.argv.includes("--lexicon");
+
 function label(lang: string): void {
     const cfg = LANGS[lang];
     if (!cfg) throw new Error(`no inversion config for "${lang}"`);
     const fold = makeFold(CONFIG[lang]!);
 
-    // NEURAL-training reference: wikipron (silver.tsv, the eval_set source) + the convention-harmonized kaikki
-    // augmentation. NOTE: silver.hindiurdu.tsv (Hindi→Urdu, real spellings + gold IPA) is deliberately NOT here — it
-    // is a different VOCABULARY distribution (Sanskritic/formal), so it can't improve wikipron-distribution neural
-    // GENERALIZATION (measured flat). Its 3,286 gold vocalizations are a COVERAGE win for the LEXICON layer instead
-    // (exact-match at inference) — see MODEL_NOTES § "Two-layer" and build_hindi_urdu.ts.
-    const rows = ["silver.tsv", "silver.kaikki.tsv"]
+    // Two outputs from the SAME inverter:
+    //  • NEURAL training (default) — wikipron + convention-harmonized kaikki only. NOT Hindi→Urdu: it's a different
+    //    vocabulary distribution, so it can't improve wikipron-distribution GENERALIZATION (measured flat, Run 20).
+    //  • LEXICON (--lexicon) — ALL sources incl. Hindi→Urdu (real Urdu spellings + gold IPA). This is the COVERAGE
+    //    layer (exact-match at inference); Hindi adds +12 pts of production token-coverage for Urdu (coverage_eval).
+    const sources = LEXICON
+        ? ["silver.tsv", "silver.kaikki.tsv", "silver.hindiurdu.tsv"]
+        : ["silver.tsv", "silver.kaikki.tsv"];
+    const rows = sources
         .flatMap((f) => existsSync(join(HERE, f)) ? readFileSync(join(HERE, f), "utf8").split("\n") : [])
         .map((l) => l.split("\t"))
         .filter((a) => a.length >= 3 && a[1] === cfg.silverCode);
 
     const labeled: string[] = [];
+    const seenSkel = new Set<string>(); // lexicon: one vocalization per skeleton (the lookup key)
     let ok = 0, capped = 0, miss = 0;
     for (const [skel, , ipa] of rows) {
+        if (LEXICON && seenSkel.has(skel!)) continue;
         const chars = [...skel!.normalize("NFC")];
         const sl = slots(chars, cfg);
         let total = 1;
@@ -117,18 +124,18 @@ function label(lang: string): void {
             const voc = vocalize(chars, sl, choice);
             if (fold(cfg.phon(voc)) === target) found = voc;
         }
-        if (found) { ok++; labeled.push(`${skel}\t${lang}\t${found}`); }
+        if (found) { ok++; labeled.push(`${skel}\t${lang}\t${found}`); if (LEXICON) seenSkel.add(skel!); }
         else miss++;
     }
 
-    const out = join(HERE, `harakat.${lang}.silver.tsv`);
-    writeFileSync(out, labeled.join("\n") + (labeled.length ? "\n" : ""));
+    const fname = LEXICON ? `lexicon.${lang}.tsv` : `harakat.${lang}.silver.tsv`;
+    writeFileSync(join(HERE, fname), labeled.join("\n") + (labeled.length ? "\n" : ""));
     const tot = rows.length || 1;
     console.log(
         `${lang}: ${rows.length} words · labeled ${ok} (${(100 * ok / tot).toFixed(1)}%) · ` +
-        `miss ${miss} · capped(>${MAX_COMBOS} combos) ${capped} → harakat.${lang}.silver.tsv`,
+        `miss ${miss} · capped(>${MAX_COMBOS} combos) ${capped} → ${fname}`,
     );
 }
 
-const arg = process.argv[2] ?? "pa";
+const arg = process.argv.slice(2).find((a) => !a.startsWith("--")) ?? "pa";
 for (const l of arg === "all" ? ["pa", "ur", "ps", "fa"] : [arg]) label(l);
