@@ -56,7 +56,10 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
    the ‑ū words. Plus a **degemination fold** added to ur/fa/ps referee configs (`(.)\1→$1`, as pa already had):
    our g2p writes gemination as length (Cː, stripped by the backbone) but the referee DOUBLES it (CC) — a notation
    mismatch, not a harakat problem, so shadda is NOT searched; folding it neutralizes it and the geminate words
-   label via the default. Yields: fa 73.7%, ur 65.4%, ps 44.9%, pa 37.2% (**13,578 pairs**).
+   label via the default. And **یَ (ya+fatḥa) → eː** in `urdu/g2p.ts` (bare ی = iː) — same ADAPTED-WORD trick as
+   damma+waw→uː: the output is a diacritized word in OUR convention, so we encode a distinction standard harakat
+   lacks and the model LEARNS it (NOT a lexical dead-end — the model is the lexicon). Yields: fa 73.7%, **ur 69.7%**,
+   ps 44.9%, pa 37.2% (**13,908 pairs**).
 4. `crossscript_pa.ts` → `harakat.pa.crossscript.tsv` — **cross-script GOLD** (see below). Currently OPT-IN.
 5. `build_charvocab.py` → `multilingual_charvocab.json` — union of every letter across ALL skeleton sources
    (silver + harakat shards) with the Arabic char map, Arabic indices preserved. 99 chars, 19 labels.
@@ -79,12 +82,11 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
   vs bare-skeleton BASELINE. `eval_set.tsv` is a fixed 10% slice of the WIKIPRON reference (not the silver labels),
   excluded from training, so it does NOT move when the inversion changes → version comparisons are exact. It covers
   ALL held-out words incl. the ~half the g2p can't reproduce → honest full-coverage denominator (lower absolutes).
-- **Result (silver-only, stable eval, n=1699):** end-to-end **45.0% → 59.7% (+14.8)**. Per language: **fa +21.4**
-  (46→67%), **ur +10.6** (50→61%), **pa +1.6** (positive), **ps −0.9** (recovered). The degemination fold raised the
-  baseline too (43.5→45.0 — a more-correct metric), but the model gains sit on top. ps still the holdout (no voweled
-  sister-script, different ی realization, dialectal referee) — size-aware upsampling keeps it from regressing as
-  ur/fa improve. Baseline 45.0% is the
-  g2p-COVERAGE floor (the ~half no harakat can reach). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
+- **Result (silver-only, stable eval, n=1699):** end-to-end **45.0% → 61.0% (+16.0)**. Per language: **fa +21.3**
+  (46→67%), **ur +13.9** (50→64% — incl. the یَ→eː win), **pa +2.4**, **ps +0.9** (now positive!). The ADAPTED-WORD
+  encodings (damma+waw→uː, ya+fatḥa→eː) closed most of what had looked like the "lexical" tail — the model learns
+  them from the mined labels, so the harakat scheme itself is the lexicon-generalizer. Baseline 45.0% is the
+  g2p-COVERAGE floor (the words no harakat can reach — genuinely lexical residue for an optional per-word lexicon). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
   (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
   only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)
 

@@ -342,6 +342,20 @@ fa +21.4, ur +10.6, pa +1.6, ps −0.9 (recovered). The fold raised the baseline
 metric); the model gains sit on top. Suite 357/357, tsc clean. Lesson: when the g2p and referee agree on the
 phoneme but differ on how they WRITE a length/gemination/tone feature, it's a fold, not a search.
 
+## Run 16 — 2026-07-15 — the "lexical" tail is mostly ADAPTED-WORD encodable (+14.8 → +16.0)
+
+Correction to Run 13/15's claim that ی→eː is "lexical, unaddressable by harakat." The harakat model's OUTPUT is a
+diacritized word in OUR convention — so we can encode a distinction standard Arabic harakat lacks, exactly as
+damma+waw→uː did. Defined **یَ (ya+fatḥa) → eː** (bare ی = iː) in `urdu/g2p.ts`, added a ی long-vowel slot
+`{bare→iː, fatḥa→eː}` to the inverter. No label-scheme change — the label is the existing "a" (fatḥa), contextual
+(ə on a consonant, eː on a ی). The g2p reads it, the model learns which words take it.
+
+Urdu inversion **65.4→69.7%**; stable eval **ur +10.6→+13.9**, **ALL +14.8→+16.0**, and **ps flipped positive
+(+0.9)**. The model generalizes ی→eː to held-out words — it IS the lexicon (memorize+generalize), like Arabic
+diacritization. Lesson (again): "the g2p can't produce phoneme X" is often solvable by giving X a diacritic in the
+adapted-word scheme, NOT by declaring it lexical. The genuinely-lexical residue (rare, unpredictable per-word
+pronunciations) is what an OPTIONAL per-word lexicon (the Arabic `restore.ts` analogue) would mop up on top.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

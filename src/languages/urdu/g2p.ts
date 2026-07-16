@@ -144,8 +144,11 @@ export function phonemizeWord(word: string): string {
                     longVowelAfterConsonant(s[i + 1] ?? "") !== undefined;
                 const lv = glideNext ? undefined : longVowelAfterConsonant(s[i] ?? "");
                 if (lv !== undefined) {
-                    out += lv;
-                    i++;
+                    // یَ (ya + fatḥa) → eː in our ADAPTED-WORD convention (bare ی = iː). The diacritic encodes the
+                    // iː/eː distinction standard harakat lacks — the g2p reads it and the model learns which words
+                    // take it, exactly as damma+waw encodes uː. Output is a diacritized word in OUR scheme.
+                    if (s[i] === YA && s[i + 1] === "َ") { out += "eː"; i += 2; }
+                    else { out += lv; i++; }
                 } else if (glideNext) {
                     out += s[i] === YA ? "j" : "ʋ"; // glide; the following vowel letter provides the nucleus
                     i++;
