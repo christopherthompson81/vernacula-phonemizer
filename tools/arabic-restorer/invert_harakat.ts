@@ -90,7 +90,11 @@ function label(lang: string): void {
     if (!cfg) throw new Error(`no inversion config for "${lang}"`);
     const fold = makeFold(CONFIG[lang]!);
 
-    // Reference pairs: wikipron (silver.tsv, also the eval_set source) + the kaikki augmentation (new words).
+    // NEURAL-training reference: wikipron (silver.tsv, the eval_set source) + the convention-harmonized kaikki
+    // augmentation. NOTE: silver.hindiurdu.tsv (Hindi→Urdu, real spellings + gold IPA) is deliberately NOT here — it
+    // is a different VOCABULARY distribution (Sanskritic/formal), so it can't improve wikipron-distribution neural
+    // GENERALIZATION (measured flat). Its 3,286 gold vocalizations are a COVERAGE win for the LEXICON layer instead
+    // (exact-match at inference) — see MODEL_NOTES § "Two-layer" and build_hindi_urdu.ts.
     const rows = ["silver.tsv", "silver.kaikki.tsv"]
         .flatMap((f) => existsSync(join(HERE, f)) ? readFileSync(join(HERE, f), "utf8").split("\n") : [])
         .map((l) => l.split("\t"))

@@ -25,6 +25,14 @@ aspiration/dental). Without harmonization a second source's conventions regress 
 Persian gains (+0.7 held-out). `invert_harakat.ts` labels it alongside wikipron; the eval_set stays wikipron-only.
 Inherits CC-BY-SA. The raw dumps (~30–85 MB) are not committed; regenerate with the URLs in `build_kaikki.py`.
 
+## `silver.hindiurdu.tsv` — Hindi→Urdu cross-script COVERAGE source (lexicon, not neural training)
+Real Urdu spellings paired with gold IPA, from **kaikki Hindi** (Wiktionary, CC-BY-SA): a Hindi (Devanagari, voweled)
+entry carries the actual Urdu spelling as a form. `build_hindi_urdu.ts` takes that spelling as the skeleton and the
+IPA from our `hi` g2p (harmonized aː→ɑː), for words NOT in wikipron. 5,014 new Urdu words; inversion mines ~3,286
+GOLD vocalizations. It is a different VOCABULARY distribution than wikipron, so it does NOT improve wikipron-held-out
+neural generalization (measured flat) — it's a COVERAGE win for the LEXICON layer (exact-match at inference). Kept
+OUT of the neural training manifest. Inherits CC-BY-SA; the raw Hindi dump (~160 MB) is not committed.
+
 ## Role: EVALUATION reference (not the training target)
 The shared model's TARGET is **harakat** (short-vowel diacritics) → each language's existing deterministic g2p turns
 the vocalized text into IPA (see `docs/arabic_script_restorer_investigation.md`, Run 4). These wikipron IPA pairs
