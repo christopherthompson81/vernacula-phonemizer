@@ -1,20 +1,27 @@
 # Bengali pronunciation lexicon — genuinely-LEXICAL whole-word overrides for the vowel classes the rule engine
-# cannot derive (closed-syllable ɔ→o and final-[o] retention; PROVEN lexical by the minimal pair মন[mon] vs
-# কম[kɔm], identical shape, opposite outcome — an etymological tatsama/tadbhava split, not surface-derivable).
+# cannot derive (closed-syllable ɔ→o, medial-ɔ retention, final-[o] retention; PROVEN lexical by the minimal
+# pair মন[mon] vs কম[kɔm], identical shape, opposite outcome — an etymological tatsama/tadbhava split).
 #
-# PROVENANCE: each entry is our engine's own consonant skeleton with the vowel(s) set to the CROSS-SOURCE
-# CONSENSUS of two INDEPENDENT human references — wikipron ben (CC BY-SA, Kolkata-leaning) AND Bengali.AI
-# DUAL-IPA (Dhaka; used OFFLINE for validation only, not redistributed). Requiring two different dialects to
-# AGREE filters out both wikipron noise and dialect-specific forms (it correctly ABSTAINS on জীবন→d͡ʒibɔn, where
-# the sources disagree). Pronunciations are linguistic facts. Overrides SHIPPED whole-word output only; the rule
-# engine (phonemizeWordRules) — and therefore the referee-eval — is unaffected and stays the honest signal.
+# PROVENANCE: 168 entries = (a) 156 CROSS-SOURCE CONSENSUS — our engine's own consonant skeleton with the
+# vowel(s) set to the sequence that TWO independent human references AGREE on: wikipron ben (CC BY-SA, Kolkata)
+# AND Bengali.AI DUAL-IPA (Dhaka; used OFFLINE for validation only, not redistributed). Two dialects agreeing
+# filters out both wikipron noise and dialect-specific forms (it correctly ABSTAINS on জীবন→d͡ʒibɔn). Plus
+# (b) a 12-word HAND supplement of high-frequency common words, each corroborated by DUAL and/or wikipron +
+# standard-Kolkata knowledge (verb ô→o before -e: bole/d̪ʱoɾe/ɦole/boʃe; the িয়ে glide drop-j: nie/d̪ie/ɡie;
+# এক→æk consistency: ækʈi/ækʰɔn; medial retention: kaɾone) — skipped where a source disagreed (চলে, পড়ে).
+#
+# Pronunciations are linguistic facts, in our convention, on the same CC-BY-SA footing as the committed wikipron
+# referee. Overrides SHIPPED whole-word output only; the rule engine (phonemizeWordRules) — and the referee
+# eval — bypass it and stay the honest, non-circular signal.
 অংকন	ɔŋkon
 অখণ্ডতা	ɔkʰɔnɖot̪a
 অখিলেশ	ɔkʰileʃ
 অগণিত	ɔɡonit̪o
 অগ্রগতি	ɔɡɾoɡot̪i
 অঙ্গন	ɔŋɡon
+অথবা	ɔt̪ʰoba
 অন্ধকার	ɔnd̪ʱokaɾ
+অপরাধ	ɔpoɾad̪ʱ
 অপারেশন	ɔpaɾeʃon
 অফিস	ɔpʰiʃ
 অমিতাভ	ɔmit̪abʱ
@@ -22,73 +29,83 @@
 অসি	ɔʃi
 অসুখ	ɔʃukʰ
 অসুস্থ	ɔʃuʃt̪ʰo
-আজব	ad͡ʒob
-আজম	ad͡ʒom
+অহরহ	ɔɦoɾɔɦo
 আদম	ad̪om
 আদর	ad̪oɾ
 আদর্শ	ad̪oɾʃo
 আনন্দ	anond̪o
 আপন	apon
+আপনি	apni
 আমল	amol
+আলভী	albʱi
 আলম	alom
 আসর	aʃoɾ
 আসল	aʃol
-ইজতেমা	id͡ʒt̪ema
+ইনকিলাব	inkilab
 ইন্তেকাল	int̪ekal
-উদাহরণ	ud̪aɦɾɔno
 উৎসাহ	ut̪ʃaɦo
+উদাহরণ	ud̪aɦɔɾon
+উপহার	upoɦaɾ
 এক	æk
+একটি	ækʈi
+একতা	ækot̪a
 একলা	ækla
+এখন	ækʰɔn
 এখান	ekʰan
 এটা	eʈa
 এভাবে	ebʱabe
 এরা	eɾa
 এলাকা	elaka
-ওজন	od͡ʒon
+ওরফে	oɾopʰe
 কত	kɔt̪o
 কদর	kɔd̪oɾ
 কবর	kɔboɾ
 করে	koɾe
 কলকাতা	kolkat̪a
 কলম	kɔlom
-কাগজ	kaɡod͡ʒ
 কারণ	kaɾon
+কারণে	kaɾone
 কিরণ	kiɾon
+কুরআন	kuɾan
 কেনা	kena
 কেরামত	keɾamɔt̪
 কোমর	komoɾ
 খন্দকার	kʰɔnd̪okaɾ
 খবর	kʰɔboɾ
+গণতন্ত্র	ɡɔnot̪ɔnt̪ɾo
+গণতান্ত্রিক	ɡɔnot̪ant̪ɾik
+গণনা	ɡɔnona
 গরম	ɡɔɾom
-গাজর	ɡad͡ʒoɾ
+গহনা	ɡɔɦona
+গিয়ে	ɡie
 গোসল	ɡoʃol
 গ্রন্থাগার	ɡɾont̪ʰaɡaɾ
-জখম	d͡ʒɔkʰom
-জফর	d͡ʒɔpʰoɾ
-জীবিত	d͡ʒibit̪o
-জেরা	d͡ʒeɾa
-জেলা	d͡ʒela
-ঝিনাইদহ	d͡ʒʱinaid̪ɔɦo
-ডজন	ɖɔd͡ʒon
+ঘোষণা	ɡʱoʃona
 তরফদার	t̪ɔɾopʰd̪aɾ
 তলব	t̪ɔlob
 তুরস্ক	t̪uɾoʃko
 তৃণ	t̪ɾino
+দিয়ে	d̪ie
 দেহ	d̪eɦo
 দ্রুত	d̪ɾut̪o
+ধরে	d̪ʱoɾe
+ধারণা	d̪ʱaɾona
 নগর	nɔɡoɾ
 নব	nɔbo
+নববর্ষ	nɔbobɔɾʃo
 নরম	nɔɾom
-নেতাজি	net̪ad͡ʒi
+নাসরিন	naʃɾin
+নিয়ে	nie
 নেপাল	nepal
 নেভানো	nebʱano
+পরশু	poɾʃu
 পরিকল্পনা	poɾikɔlpona
 পহেলা	pɔɦela
 পাথর	pat̪ʰoɾ
 পালক	palok
 পুরস্কার	puɾoʃkaɾ
+প্রকৃত	pɾokɾit̪o
 প্রকৃতি	pɾokɾit̪i
-প্রজাপতি	pɾod͡ʒapot̪i
 প্রতিষ্ঠিত	pɾot̪iʃʈʰit̪o
 প্রধান	pɾod̪ʱan
 প্রশ্ন	pɾoʃno
@@ -96,46 +113,56 @@
 প্রস্তুত	pɾoʃt̪ut̪
 প্রহরী	pɾoɦoɾi
 প্রেরিত	pɾeɾit̪o
-ফজর	pʰɔd͡ʒoɾ
-ফজল	pʰɔd͡ʒol
-ফরজ	pʰɔɾod͡ʒ
 ফাতেমা	pʰat̪ema
 ফেরা	pʰeɾa
+ফেসবুক	pʰeʃbuk
 বড়	bɔɽo
 বন্ধু	bond̪ʱu
 বরফ	bɔɾopʰ
 বর্ণনা	bɔɾnona
 বর্ণমালা	bɔɾnomala
 বর্তমান	bɔɾt̪oman
+বলে	bole
+বসে	boʃe
 বান্দরবান	band̪oɾban
+বালতি	balt̪i
+বাসনা	baʃona
 বিবাহ	bibaɦo
+বুলবুল	bulbul
 বেগম	beɡom
 বেদানা	bed̪ana
 বোতল	bot̪ol
+ব্যবহার	bæboɦaɾ
+ভরসা	bʱɔɾoʃa
 ভারত	bʱaɾot̪
 ভাল	bʱalo
 ভিত	bʱit̪o
-মগজ	mɔɡod͡ʒ
+ভিতরে	bʱit̪ɔɾe
 মঙ্গলবার	moŋɡolbaɾ
 মন	mon
+মনে	mone
+মরহুম	moɾɦum
 মাখন	makʰon
+মুরগি	muɾɡi
+মুশকিল	muʃkil
+মুসলিম	muʃlim
 মৃত	mɾit̪o
 মেরা	meɾa
 মেরামত	meɾamɔt̪
 মোগল	moɡol
-যমজ	d͡ʒɔmod͡ʒ
-যেখান	d͡ʒekʰan
 রকম	ɾɔkom
 রতন	ɾɔt̪on
 রবীন্দ্রনাথ	ɾobind̪ɾonat̪ʰ
 রেবেকা	ɾebeka
-রেহাই	ɾeɦai
+রেস্টুরেন্ট	ɾeʃʈuɾenʈ
 লবণ	lɔbon
 লালন	lalon
+লিপস্টিক	lipʃʈik
 লেখা	lekʰa
 শত্রু	ʃot̪ɾu
 শরবত	ʃɔɾbot̪
 শহর	ʃɔɦoɾ
+শুঁটকি	ʃũʈki
 শেখা	ʃekʰa
 শেখানো	ʃekʰano
 শ্রাবণ	ʃɾabon
@@ -144,9 +171,13 @@
 সপ্তাহ	ʃɔpt̪aɦo
 সমন	ʃɔmon
 সরল	ʃɔɾol
-সহজ	ʃɔɦod͡ʒ
+সাবরিনা	ʃabɾina
 সিংহাসন	ʃiŋɦaʃon
 সুন্দরবন	ʃund̪oɾbon
 সুপ্রভাত	ʃupɾobʱat̪
+সেকেন্ড	ʃekenɖ
 সেখান	ʃekʰan
+সেনগুপ্ত	ʃenɡupt̪o
 স্বপন	ʃɔpon
+হয়ে	ɦɔe
+হলে	ɦole
