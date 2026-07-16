@@ -68,7 +68,7 @@
     "voiceless": { "ŋ": "ŋ̥", "ɲ": "ɲ̥", "n": "n̥", "m": "m̥", "l": "l̥", "w": "ʍ", "j": "ʃ" },
     // Velar/affricate palatalisation from the ⟨ျ⟩/⟨ြ⟩ medial: velar stops → alveolo-palatal affricates, the velar
     // nasal → the palatal nasal (ငြိမ်→ɲeɪɴ).
-    "palatal": { "k": "t͡ɕ", "kʰ": "t͡ɕʰ", "ɡ": "d͡ʑ", "ŋ": "ɲ", "sʰ": "sʰ", "h": "ʃ" },
+    "palatal": { "k": "t͡ɕ", "kʰ": "t͡ɕʰ", "ɡ": "d͡ʑ", "ŋ": "ɲ", "sʰ": "sʰ", "h": "ʃ", "l̥": "ʃ" },
 
     "clausePunctuation": { "။": " . ", "၊": " , ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , " }
 }

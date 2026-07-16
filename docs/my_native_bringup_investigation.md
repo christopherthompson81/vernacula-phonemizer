@@ -100,6 +100,27 @@ Burmese is SPACELESS: a text run is one token, so the per-word voicing lexicon c
 [ကျွန်တော်, စကား, ပြောသည်]`. Boundary recovery on composed input: **pairs 100% (478/478), triples 99.7% (317/318)**.
 Segmental eval UNCHANGED (69.0/71.4% — referee words segment to themselves; +1 word each, no regression). Suite 371/371.
 
+## Run — 2026-07-16 (cont.) — segmental push toward ✅ (rule-based classes)
+
+Characterized the 🟡 residual and closed the RULE-based segmental classes (69.0/71.5 → **71.4/73.7%**):
+- **Stacked-conjunct coda (the big lever, ~470 mismatches → 312).** A stacked C1 ္ C2 is not a silent upper
+  member — C1 is the CODA of the preceding syllable (stop→checked ʔ, nasal→ɴ): `ဗုဒ္ဓ→boʊʔda`, `တက္က→tɛʔka`,
+  `အိန္ဒိယ→ʔeɪɴdija`, `ကိစ္စ→kɪʔsa`. Reworked from a skip into the coda scan (removed the `pending` carry). Lexical
+  exception `ကမ္ဘာ→kəba` (Pali မ္ဘ→b assimilation) is now `kaɴba` — a documented 1-word miss. Rebuilt the voicing +
+  seg-words lexicons against the new syllabification.
+- **Bare ⟨ွ⟩ open → -w- glide.** `ခွ→kʰwa`, `ကွ→kwa`, `မွ→mwa` (was collapsing to plain `a`). The ⟨ွ⟩ keeps the glide
+  in OPEN syllables and before -ng; it only rounds to ʊ before -n/-m/stop.
+- **လျှ → ʃ.** Reordered the medials to PHONOLOGICAL order (⟨ှ⟩ devoices first, then ⟨ျ⟩/⟨ြ⟩ palatalise): လ→l̥→ʃ, while
+  မျှ→m̥ja, ရှ→ʃ, ကျ→t͡ɕ all still hold.
+
+**Residual is now a LEXICAL TAIL (🟡), not rule bugs.** Of the ~2130 kaikki mismatches: **loanword ⟨ရ⟩→ɹ (333)** —
+we render the native /j/ uniformly, the referee keeps the loanword /ɹ/ (a register/convention difference, our
+modern-standard reading); **killed-final silent ⟨လ/ဟ⟩ (42)**; short-i rime ɪ~eɪ (18); nasal→minor Pali assimilation
+(14); and a diverse **~1720 lexical tail** — lexical rime variation (`ည`→i~ɛ: လည်/lɛ, `ေ`→e~i: ချေး/tɕʰi), colloquial
+forms (ဘုရား→pʰəja), Pali gemination (ခုနစ်→kʰʊnnɪʔ), OOV voicing, single-letter Pali-etymology rows (ဋ→ʈa). These
+are per-word LEXICAL — a pronunciation lexicon (the Thai `dictionary.tsv` pattern, mined from kaikki + corroborated
+on the independent wikipron) is the 🟡→✅ path; the rule engine is now correct for the derivable bulk.
+
 ## Run — 2026-07-16 (cont.) — segmentation review fixes
 
 An 8-angle review of the segmentation PR caught a real regression + cleanups:

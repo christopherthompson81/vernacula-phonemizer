@@ -20,6 +20,8 @@ describe("burmese canonical IPA", () => {
             ["ဆရာ", "sʰəja˨"], // 'teacher' — ဆ→sʰ, ရ→j, minor ə
             ["ငြိမ့်", "ɲeɪ˥ˀɴ"], // 'calm' — ငြ → ɲ (velar-nasal palatalisation), dot ့ → creaky
             ["လွင်", "lwɪ˨ɴ"], // ⟨ွ⟩ stays a -w- glide before -ng (not rounded)
+            ["ခွ", "kʰwa˥ˀ"], // bare ⟨ွ⟩ open → -w- glide over the plain rime (not rounded)
+            ["ဗုဒ္ဓ", "boʊʔda˥ˀ"], // 'Buddha' — stacked ဒ္ဓ: the upper ဒ is a CHECKED coda (oʊʔ), ဓ the next onset
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
     });
@@ -49,7 +51,7 @@ describe("burmese canonical IPA", () => {
     // OOV words keep the careful voiceless reading.
     test("voicing sandhi (lexicon)", () => {
         expect(phonemizeWord("စကား")).toBe("zəɡa˥˩"); // sa-ka → zə-ɡa (minor-ə initial + medial voice)
-        expect(phonemizeWord("ကမ္ဘာ")).toBe("ɡəba˨"); // kaba → ɡəba ('world', stacked ္ဘ)
+        expect(phonemizeWord("ဗုဒ္ဓဟူး")).toBe("boʊʔdəhu˥˩"); // 'Buddha' — voiced ဟ→d + stacked ဒ္ဓ checked coda
         expect(phonemizeWord("ကတော့")).toBe("ɡədɔ˥ˀ"); // ka-tɔ → ɡə-dɔ
         expect(phonemizeWord("ကား")).toBe("ka˥˩"); // OOV-style: word-initial FULL syllable does NOT voice
     });
