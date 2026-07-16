@@ -11,6 +11,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { segmentByDag, loadSegWords } from "../../core/segment.ts";
 
 interface BurmeseDef {
     consonants: Record<string, string>;
@@ -62,42 +63,50 @@ function toneLetter(
     return DEF.tones[cat]!;
 }
 
-/** One syllable: the ONSET (voiceable) + the BODY (glide + rime + tone). Kept split so the voicing lexicon can
- *  target the onset without re-parsing. */
-interface Syllable { onset: string; body: string; }
+/** One syllable: the ONSET (voiceable) + the BODY (glide + rime + tone), plus `start` — the code-point index in
+ *  the NFC word where the syllable begins (a legal word-boundary for segmentation). Split so the voicing lexicon
+ *  can target the onset without re-parsing. */
+interface Syllable { onset: string; body: string; start: number }
 
-/** Scan a Burmese word into syllables (onset + body). Exposed for the voicing-lexicon builder. */
+/** Scan a Burmese word into syllables (onset + body + start). Exposed for the voicing-lexicon builder + segmenter. */
 export function syllabify(word: string): Syllable[] {
     const s = [...word.normalize("NFC")];
     const n = s.length;
     const syls: Syllable[] = [];
     let i = 0;
+    let pending = -1; // a skipped stacked upper member (ကမ္ဘာ's မ) belongs to the NEXT syllable → its boundary
 
     while (i < n) {
         const ch = s[i]!;
         if (DEF.independentVowels[ch] !== undefined) {
             // Standalone vowel (ʔ-onset): its default tone, with a trailing visarga း → high / dot-below ့ → creaky.
             // (Rare independent-vowel + killed-consonant coda, ဣန်, is left to the next-syllable scan — a known gap.)
+            const start = pending >= 0 ? pending : i;
+            pending = -1;
             i++;
             let cat = DEF.independentTone[ch] ?? "low";
             while (i < n && (s[i] === VISARGA || s[i] === DOT_BELOW)) {
                 cat = s[i] === VISARGA ? "high" : "creaky";
                 i++;
             }
-            syls.push({ onset: "", body: DEF.independentVowels[ch]! + (DEF.tones[cat] ?? "") });
+            syls.push({ onset: "", body: DEF.independentVowels[ch]! + (DEF.tones[cat] ?? ""), start });
             continue;
         }
         if (!isConsonant(ch)) {
+            pending = -1; // a stray sign ends any pending stacked-conjunct carry
             i++; // punctuation handled by text(); stray sign → skip
             continue;
         }
         // Stacked consonant: a consonant directly before the virama-stacker ္ (U+1039) is the silent upper member
         // of a Pali/Sanskrit conjunct (ကမ္ဘာ → the မ is silent, ဘ is the onset) — skip it and the stacker.
         if (s[i + 1] === "္") {
+            if (pending < 0) pending = i;
             i += 2;
             continue;
         }
         // Onset consonant.
+        const start = pending >= 0 ? pending : i;
+        pending = -1;
         let onset = DEF.consonants[ch]!;
         i++;
         // Medials: ျ/ြ palatalise (velars → t͡ɕ) else add -j-; ွ labialises; ှ devoices the sonorant.
@@ -159,7 +168,7 @@ export function syllabify(word: string): Syllable[] {
         const minor =
             vowel === "inherent" && coda === "open" && i < n && isConsonant(s[i]!);
         if (minor) {
-            syls.push({ onset, body: glide + "ə" });
+            syls.push({ onset, body: glide + "ə", start });
             continue;
         }
         const rime = DEF.rimeChart[coda]?.[vowel] ?? DEF.rimeChart["open"]![vowel] ?? "a";
@@ -167,7 +176,7 @@ export function syllabify(word: string): Syllable[] {
         const tone = toneLetter(vowel, signs, coda, checked, asatOnVowel, hasVisarga, hasDot);
         const codaChar = /[ɴʔ]$/u.test(rime) ? rime.slice(-1) : "";
         const nucleus = codaChar ? rime.slice(0, -codaChar.length) : rime;
-        syls.push({ onset, body: glide + nucleus + tone + codaChar });
+        syls.push({ onset, body: glide + nucleus + tone + codaChar, start });
     }
     return syls;
 }
@@ -177,8 +186,6 @@ export function syllabify(word: string): Syllable[] {
 // (tools/build-my-voicing.ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing.
 // The flags are POSITIONAL (index-aligned to syllabify()), so a change to syllabify() requires REBUILDING the
 // lexicon — a misalignment surfaces as a referee-eval drop (guarded by the my floor in referee-eval.test.ts).
-// NOTE: keyed on a whole word, so voicing fires on word / space-delimited tokens; a fully SPACELESS run reaches
-// phonemizeWord as one token and misses (voicing on running text awaits the deferred segmentation layer).
 const VOICE = DEF.voicing;
 // Lazy: registry.ts imports every language eagerly; the ~1.3k-row TSV is only read on first Burmese use.
 let VOICING_LEXICON: ReadonlyMap<string, string> | undefined;
@@ -186,8 +193,8 @@ function voicingLexicon(): ReadonlyMap<string, string> {
     return (VOICING_LEXICON ??= loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true }));
 }
 
-/** One Burmese word → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
-export function phonemizeWord(word: string): string {
+/** One segmented Burmese WORD → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
+function phonemizeSubword(word: string): string {
     const nfc = word.normalize("NFC");
     const syls = syllabify(nfc);
     const flags = voicingLexicon().get(nfc);
@@ -200,6 +207,42 @@ export function phonemizeWord(word: string): string {
         }
     }
     return syls.map((s) => s.onset + s.body).join("").normalize("NFC");
+}
+
+// Word SEGMENTATION: Burmese is spaceless, so a text run is one token that must be split into words before the
+// per-word voicing lexicon can fire. DAG maximal-match over seg-words.txt (multi-σ headwords), with word
+// boundaries constrained to SYLLABLE starts (syllabify().start). Lazy-loaded. A single word segments to itself
+// (so the per-word referee eval is unaffected); an unknown run coalesces into one token and still phonemizes.
+let SEG: { set: Set<string>; maxLen: number } | undefined;
+function segWords(): { set: Set<string>; maxLen: number } {
+    return (SEG ??= loadSegWords(import.meta.url));
+}
+/**
+ * Segment a spaceless Burmese run into words. Word boundaries are constrained to syllable starts (so the DAG never
+ * splits mid-syllable). A FULL dictionary cover (every part is a known word) is trusted and split — the per-word
+ * voicing lexicon then applies (like Thai). A PARTIAL cover (a dict word next to an OOV remainder) is the risky
+ * case: peeling the OOV fragment and re-syllabifying it standalone can make a would-be word-internal MINOR syllable
+ * word-final and lose its [ə] (ကစကား → the leading က must stay reduced kə, not become full ka). For those we accept
+ * the split ONLY if it preserves every syllable BODY (whole-run vs concatenated per-part), else keep the run WHOLE.
+ * So segmentation only ever IMPROVES the segmental output, never regresses it.
+ */
+export function segment(token: string): string[] {
+    const { set, maxLen } = segWords();
+    const cs = [...token.normalize("NFC")];
+    if (set.size === 0 || cs.length === 0) return [token];
+    const sylls = syllabify(cs.join("")); // whole-run pass, reused for both the boundaries and the safety check
+    const bound = new Set<number>([cs.length]);
+    for (const syl of sylls) bound.add(syl.start);
+    const parts = segmentByDag(cs, set, maxLen, bound);
+    if (parts.length <= 1 || parts.every((w) => set.has(w))) return parts; // single word, or a full dictionary cover
+    const whole = sylls.map((s) => s.body).join("");
+    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("");
+    return whole === split ? parts : [token]; // split changes a syllable body (lost minor-ə) → keep whole
+}
+
+/** One Burmese TOKEN → IPA: segment the spaceless run into words, phonemize each (voicing per word), space-join. */
+export function phonemizeWord(token: string): string {
+    return segment(token).map(phonemizeSubword).filter((w) => w !== "").join(" ");
 }
 
 const TOKEN = /([က-႟꧰-꧹]+)|(\d+)|([။၊.?!,])/gu;

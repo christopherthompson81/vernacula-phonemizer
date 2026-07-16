@@ -65,20 +65,53 @@ ADDS voicing; OOV words keep the careful voiceless reading, so it can't regress 
   circular** (self-referential for the 1258 covered words). Spot: `စကား→zəɡa˥˩`, `ကမ္ဘာ→ɡəba˨`, `ကတော့→ɡədɔ˥ˀ`.
 - The 4 wikipron regressions are genuine kaikki-vs-wikipron disagreements on a medial onset (e.g. မီးခတ်) — negligible.
 
-## Result — 🟠 (scope-limited; the hardest abugida) — tones + voicing now done
-**69.0% wikipron / 71.4% kaikki** FOLDED segmental (the backbone strips TONE — the referees' à/á/a̰ diacritics + our
-Chao letters). TONES done (99.6% mono, `tools/my-tone-eval.ts`) and VOICING sandhi done (per-word lexicon, wikipron
-corroborated +1210/−4). Common vocabulary correct (`မြန်မာ→mja˨ɴma˨`, `ကျောင်း→t͡ɕaʊ˥˩ɴ`, `စကား→zəɡa˥˩`). Still 🟠 —
-**ONE** whole subsystem now remains DEFERRED:
-- **Word segmentation** — Burmese has no inter-word spaces, so raw running text is one token; the word tokenizer +
-  per-word phonemization is reliable for pre-segmented / space-delimited input (and the referee eval is per-word, so
-  the 69% is a real word-level signal). A DAG maximal-match over a kaikki word-list (reusing the Thai segmenter) is
-  the remaining lift; the voicing lexicon also keys on whole words, so segmentation would extend voicing to running
-  text. Plus the minor tail: lexical rime variation (`ည` → i ~ ɛ) + minor-syllable reduction.
+## Result — 🟡 (reliable + lexical tail) — all three subsystems now built
+**69.0% wikipron / 71.4% kaikki** FOLDED segmental. **ALL THREE deferred subsystems are now DONE** — TONES (99.6%
+mono, `tools/my-tone-eval.ts`), VOICING sandhi (per-word lexicon, wikipron-corroborated +1210/−4), and WORD
+SEGMENTATION (DAG over syllable boundaries, 100%/99.7% pair/triple recovery; voicing fires on running text now).
+Common vocabulary correct (`မြန်မာ→mja˨ɴma˨`, `ကျောင်း→t͡ɕaʊ˥˩ɴ`, `မြန်မာစကား→mja˨ɴma˨ zəɡa˥˩`). Moved 🟠→🟡: no
+subsystem is deferred; what remains is a **lexical/coverage tail**, not a whole layer:
+- **Segmentation dictionary coverage** — the seg-words set is 6687 words; OOV words in real prose coalesce (graceful,
+  but under-segmented). More words = better, exactly like Thai's dictionary.
+- **Lexical rime variation** (`ည` → i ~ ɛ) and **minor-syllable reduction** — the remaining per-word residual (the
+  syllable-count tail on the tone whole-word metric).
 
 Superseded the earlier "voicing deferred" note:
 - ~~**Intervocalic voicing sandhi**~~ — DONE (Run 2026-07-16 cont.): the per-word `voicing-lexicon.tsv` (1258 words)
   + `build-my-voicing.ts`. Was the biggest residual class.
+
+## Run — 2026-07-16 (cont.) — WORD SEGMENTATION — the last deferred subsystem
+
+Burmese is SPACELESS: a text run is one token, so the per-word voicing lexicon could never fire on running text
+(`စကားပြော` → looked up whole → miss). Built the segmenter (the same DAG the Thai front-end uses).
+
+- **Shared core.** Moved `segmentByDag` (DAG maximal-match, fewest tokens, boundary-constrained, OOV-coalescing)
+  out of `thai/segment.ts` into `src/core/segment.ts`; Thai now imports it (unchanged, tests green).
+- **Boundaries = syllable starts.** `syllabify()` now returns each syllable's `start` (code-point index, handling
+  the stacked-conjunct case where the upper member ကမ္ဘာ`မ` belongs to the next syllable). A word may begin/end
+  only at a syllable start, so the DAG never splits mid-syllable.
+- **seg-words.txt** = 6687 MULTI-syllable headwords from kaikki + wikipron (`tools/build-my-segwords.ts`). Single-σ
+  words are excluded (they'd shatter unknown runs and beat correct longer words in the fewest-tokens DAG). Every
+  ≥2-σ referee headword is therefore in the set → segments to ITSELF, so the per-word eval is unaffected.
+- **Wiring.** `phonemizeWord(token)` = `segment(token).map(phonemizeSubword).join(" ")` (the Thai pattern);
+  `phonemizeSubword` is the old per-word path (tone + voicing). Lazy-loaded.
+
+**Effect.** `စကားပြော → [စကား, ပြော] → zəɡa˥˩ pjɔ˥˩` — **voicing now fires on running text**. `ကျွန်တော်စကားပြောသည် →
+[ကျွန်တော်, စကား, ပြောသည်]`. Boundary recovery on composed input: **pairs 100% (478/478), triples 99.7% (317/318)**.
+Segmental eval UNCHANGED (69.0/71.4% — referee words segment to themselves; +1 word each, no regression). Suite 371/371.
+
+## Run — 2026-07-16 (cont.) — segmentation review fixes
+
+An 8-angle review of the segmentation PR caught a real regression + cleanups:
+- **Peeled-fragment minor-ə un-reduction.** For an OOV run whose tail is a dict word, the DAG peeled the OOV
+  prefix (`ကစကား → [က, စကား]`) and re-syllabified `က` standalone → word-final → un-reduced (`ka˥ˀ` instead of the
+  whole-word `kə`). Fixed with a **partial-cover safety check**: a FULL dictionary cover is trusted and split (like
+  Thai; the voicing lexicon then applies per word), but a PARTIAL cover (an OOV fragment) is accepted only if it
+  PRESERVES every syllable BODY (whole-run vs concatenated per-part) — else the run is kept WHOLE. So `ကစကား` stays
+  `kəsəka`, `စကားပြော` still splits to `zəɡa pjɔ`. Boundary recovery back to 100%/99.7%; eval unchanged.
+- **Cleanups:** centralized the seg-words loader in `core/segment.ts` (`loadSegWords`, shared with Thai, carrying
+  the load-bearing `reduce`-not-spread comment); reset the stacked-conjunct `pending` carry on a stray sign;
+  stripped OUR spaces under `segmentJoin` in the raw eval metric; cleared the stale `🟠` fa/ps/ur floor comments.
 
 ## Run — 2026-07-16 (cont.) — review fixes (8-angle review of the tones+voicing PR)
 
