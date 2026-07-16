@@ -34,7 +34,10 @@ import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
 // wikipron would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
 import { phonemizeWordRules as bn } from "../../src/languages/bengali/bengali.ts";
 import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
-import { phonemizeWord as id } from "../../src/languages/indonesian/indonesian.ts";
+// RULE-ONLY for id: the shipped phonemizeWord applies a cross-source consensus ⟨e⟩ lexicon (wikipron ∩ kaikki),
+// so evaluating it against those referees would be circular. phonemizeWordRules bypasses it → the honest engine
+// signal (the eval folds ⟨e⟩ anyway, so the % is identical).
+import { phonemizeWordRules as id } from "../../src/languages/indonesian/indonesian.ts";
 import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as mr } from "../../src/languages/marathi/marathi.ts";
 import { phonemizeWord as te } from "../../src/languages/telugu/telugu.ts";
