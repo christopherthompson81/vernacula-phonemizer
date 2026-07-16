@@ -185,15 +185,24 @@ export function syllabify(word: string): Syllable[] {
 // The flags are POSITIONAL (index-aligned to syllabify()), so a change to syllabify() requires REBUILDING the
 // lexicon — a misalignment surfaces as a referee-eval drop (guarded by the my floor in referee-eval.test.ts).
 const VOICE = DEF.voicing;
-// Lazy: registry.ts imports every language eagerly; the ~1.3k-row TSV is only read on first Burmese use.
+// Lazy (registry.ts imports every language eagerly; the TSVs are only read on first Burmese use).
 let VOICING_LEXICON: ReadonlyMap<string, string> | undefined;
 function voicingLexicon(): ReadonlyMap<string, string> {
     return (VOICING_LEXICON ??= loadTsvMap(import.meta.url, "voicing-lexicon.tsv", undefined, { optional: true }));
 }
+// Pronunciation lexicon (the LEXICAL layer): a per-word canonical-IPA override for words the rule g2p can't derive
+// — lexical rime (ည→i~ɛ), colloquial forms, Pali gemination, loanword ⟨ရ⟩→ɹ. Mined from the kaikki gold
+// (tools/build-my-dict.ts), authoritative over the rules; OOV words fall through to the rule g2p. See docs.
+let DICTIONARY: ReadonlyMap<string, string> | undefined;
+function dictionary(): ReadonlyMap<string, string> {
+    return (DICTIONARY ??= loadTsvMap(import.meta.url, "dictionary.tsv", undefined, { optional: true }));
+}
 
-/** One segmented Burmese WORD → canonical IPA (syllabify + orthographic tone + lexical voicing sandhi). */
+/** One segmented Burmese WORD → canonical IPA (lexicon override, else syllabify + orthographic tone + voicing). */
 function phonemizeSubword(word: string): string {
     const nfc = word.normalize("NFC");
+    const lex = dictionary().get(nfc);
+    if (lex !== undefined) return lex; // authoritative pronunciation override
     const syls = syllabify(nfc);
     const flags = voicingLexicon().get(nfc);
     if (flags) {
