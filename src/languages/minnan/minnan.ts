@@ -37,7 +37,12 @@ const TONE_MARK: Record<string, string> = {
 
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
-    return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv"));
+    if (DICT) return DICT;
+    // Single-char Han→Tâi-lô SUPPLEMENT (ChhoeTaigi dictionaries; closes the coverage gap) loaded FIRST, then the
+    // main MOE word dict overlaid so it wins on any overlap (see dict-chars.tsv).
+    DICT = loadTsvMap(import.meta.url, "dict-chars.tsv", (v) => v, { optional: true });
+    for (const [k, v] of loadTsvMap(import.meta.url, "dict.tsv")) DICT.set(k, v);
+    return DICT;
 }
 const MAX_WORD = 6;
 const HAN = /\p{Script=Han}/u;

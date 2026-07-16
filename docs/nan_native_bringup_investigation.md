@@ -108,3 +108,25 @@ Han text is bounded by the dict's multi-char word inventory.
 RESULT: tone sandhi (the marquee deferral) is now implemented + referee-validated at 95% per-syllable, and the
 陰入/陽去 tone-value defect is fixed. Remaining 🟡: (1) cross-word phrase-level sandhi (needs parsing); (2) dict
 coverage 58%. Suite 6/6; segmental eval unchanged (57.0%); typecheck clean.
+
+## Run 4 — 2026-07-16 — closing the single-char coverage gap (independent ChhoeTaigi dictionaries)
+
+The remaining 🟡 coverage limitation (58.4% of the referee's single-char set) was closable with a fuller Han→
+Tâi-lô source — the key constraint being INDEPENDENCE from wikipron (using the referee to build the dict would
+make the eval circular). **ChhoeTaigi** (the open Taiwanese dictionary database) provides exactly that: multiple
+digitised dictionaries with a `KipUnicode` (台羅/Tâi-lô) column keyed to Han.
+
+Extracted single-char Han→Tâi-lô from three ChhoeTaigi dictionaries — **教育部台語辭典 (MOE) > 甘字典 (Kam) >
+台日大辭典 (Taijit)**, in that priority order — giving 11,535 single chars, **8,045 not already in our MOE word
+dict** (`dict-chars.tsv`). Cross-validated against wikipron (non-circular — different source): the MOE-only
+additions matched **99.2%**; the full three-dictionary set matched **89.4% first-reading / 94.4% any-reading**
+(the older 台日大辭典 adds some archaic/variant readings; the residual is polyphonic-char 多音字 variants, not
+errors). Loaded as a supplement in `dict()` with the main MOE word dict overlaid so it wins on any overlap.
+
+RESULT: referee coverage **58.4% → 96.2%**; folded backbone (coverage×accuracy) **57.0% → 90.7%**. Accuracy-on-
+covered dips 97.6%→94.4% — honest: we now cover far rarer chars, which carry more valid reading variants. New
+chars read correctly (丘→kʰi̯u, 互→hɔ, 仲→ti̯ɔŋ, 些→ɕi̯a). The single-char coverage gap is essentially closed.
+
+STATUS: the two Run-3 limitations are now down to ONE — cross-word **phrase-level tone sandhi** (each dict word
+is one tone group; true tone-group boundaries need syntactic parsing). Segmental converter validated, tone
+sandhi (word-internal) validated, coverage 96%. Suite 6/6; typecheck clean.
