@@ -45,7 +45,10 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
    tone/notation) so the eval scores phonology.
 3. `invert_harakat.ts` → `harakat.{pa,ur,ps,fa}.silver.tsv` — **g2p-inversion**: for each (skeleton, IPA), search
    the harakat vocalization whose deterministic g2p output reproduces the IPA (fold-matched). SILVER rider labels
-   where no diacritized corpus exists. Yields: fa 67.6%, ps 44.1%, ur 41.3%, pa 23.3% (10,929 pairs).
+   where no diacritized corpus exists. Per-slot options: a short-vowel slot tries `{BARE, fatḥa, kasra, ḍamma,
+   sukūn}` with **BARE (no diacritic = default-ə, label "0") preferred** (harmonizes with the cross-script
+   convention); a consonant before **و** is a **long-vowel slot** trying `{bare → oː, ḍamma+waw → uː}`. Yields:
+   fa 67.5%, ur 53.1%, ps 44.7%, pa 36.1% (**11,984 pairs** — the long-vowel search lifted ur 41→53%, pa 23→36%).
 4. `crossscript_pa.ts` → `harakat.pa.crossscript.tsv` — **cross-script GOLD** (see below). Currently OPT-IN.
 5. `build_charvocab.py` → `multilingual_charvocab.json` — union of every letter across ALL skeleton sources
    (silver + harakat shards) with the Arabic char map, Arabic indices preserved. 99 chars, 19 labels.
@@ -74,13 +77,20 @@ Sindhi↔Devanagari, Persian↔Tajik-Cyrillic). The sister writes the vowels the
 the SAME IPA (a hard gate) → GOLD harakat. Punjabi (both scripts are the same `pa` module): **916 gold pairs @
 70.1%** vs 294 silver @ 23.3%. Pashto is the exception — no voweled sister-script → stays on inversion/self-training.
 
-**KNOWN ISSUE (why opt-in):** naive combination with the silver REGRESSED Punjabi (−12.5, DER 7→17%). The two
-sources disagree on the **default-schwa label**: g2p-inversion has no bare option so it writes explicit *fatḥa* for
-ə; the sister-script transliteration leaves inherent ə *bare* = label `0`. Contradictory supervision for the same
-sound. **FIX before enabling:** harmonize the convention — give `invert_harakat.ts` a bare/`0` option and PREFER it
-for default-ə, so both sources label an unwritten schwa `0` (matching real undiacritized text, where the reader/g2p
-supplies the default). Then `--crossscript` should help, not hurt. Also relevant: `damma+waw وُ → uː` (a real g2p
-fix the sister-script surfaced, already in `shahmukhi.ts`).
+**STATUS (still opt-in).** The default-schwa convention clash is FIXED (`invert_harakat.ts` now prefers a bare/`0`
+option for default-ə, matching the transliteration). That removed the catastrophic conflict — pa held-out DER
+17%→~12%. But `--crossscript` still isn't a clear end-to-end WIN, and the deeper reason is a **distribution shift**:
+the Gurmukhi→Shahmukhi transliteration produces *synthetic* orthography (phonetically transliterated skeletons),
+which drifts from how real Shahmukhi words are actually spelled — so the model over-fits transliteration artifacts
+and doesn't gain on the real (wikipron) test words. The vowel CONTENT is gold; the SPELLING is not. To make it a
+net win: transliterate to *real* Shahmukhi orthography (needs a Gurmukhi↔Shahmukhi orthographic map / parallel
+corpus, not a phonetic transliteration), or evaluate/train on the sister-script distribution directly. Also note
+the `damma+waw وُ → uː` g2p fix the sister-script surfaced (in `shahmukhi.ts`).
+
+**Eval caveat:** the held-out split is deterministic but buckets over the *silver data*, so when the inversion
+labels change, the eval set moves too — per-language numbers aren't comparable across versions (esp. the small-n
+riders pa/ps, which swing ±several words). Pin a STABLE held-out reference (a fixed wikipron slice) before the
+final retrain so version comparisons are exact.
 
 ## Extending to a new language
 1. Build its deterministic g2p (front-end) as usual.

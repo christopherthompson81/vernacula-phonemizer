@@ -260,6 +260,27 @@ whole thing — GPU-box env (`/mnt/data/ar-diac-venv`), checkpoints (`bilstm_pau
 scheme, the fine-tune recipe, every pipeline script, results, the cross-script mechanism + open issue, and how to
 extend to a new language. Memory note `harakat_restorer_training` points to it.
 
+## Run 11 — 2026-07-15 — inversion long-vowel search + bare-schwa convention
+
+Two changes to `invert_harakat.ts`'s per-slot search, composed into the same fold-match loop:
+- **Long-vowel slot:** a consonant before **و** now tries `{bare → oː, ḍamma+waw → uː}` — previously the inverter
+  skipped consonants before a vowel letter, so it could never mine the oː/uː distinction (the g2p `وُ→uː` fix from
+  Run 10 was unusable). Lifts the languages with و/ی ambiguity and no sister-script.
+- **Bare-schwa convention:** short-vowel slots gained a `BARE` option (no diacritic = default-ə, label "0"),
+  preferred over explicit fatḥa — so a default schwa harmonizes to "0", matching the cross-script transliteration.
+
+**Inversion yields:** pa 23.3→**36.1%**, ur 41.3→**53.1%**, ps 44.1→44.7%, fa 67.6→67.5% (**11,984 pairs**). The
+gains land exactly on the و/ی-ambiguous, no-sister-script riders (pa, ur), as predicted.
+
+**End-to-end (silver-only)** stayed **+18** overall; the reliable large-n signals improved — **ur +4.5→+7.8**
+(model 88→91%, n=344), **fa +25.2→+26.8** (n=616). pa/ps swung negative but are noise (n≈50, ±1–2 words; pa has
+bounced +2.7/−2.7/−3.9 across runs).
+
+**Cross-script re-tested with the harmonized convention:** the catastrophic regression is gone (pa DER 17→~12%),
+but `--crossscript` still isn't a clear net win — deeper cause is a **distribution shift** (the transliteration is
+*synthetic* orthography, not real Shahmukhi spelling). Stays opt-in; see MODEL_NOTES.md. Also logged: the eval split
+moves with the silver data, so pin a stable held-out reference before the final retrain (follow-up). Suite 357/357.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
