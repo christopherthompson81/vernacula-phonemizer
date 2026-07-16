@@ -143,6 +143,27 @@ What generalizing needs, and the data reality:
 Silver-data prep status: eval reference ✅ (Runs 2–3, #187) · multilingual char vocab ✅ (this run) · anchor harakat
 ✅ (pre-existing) · Persian/Urdu diacritized text + rider g2p-inversion → next.
 
+## Run 6 — 2026-07-15 — g2p-inversion silver-labeler (rider harakat from wikipron)
+
+`invert_harakat.ts` — mines harakat labels for a rider with a deterministic g2p but no diacritized corpus. For each
+wikipron `(skeleton, IPA)` pair it searches the harakat vocalization (fatḥa/kasra/ḍamma/sukūn per ambiguous
+consonant slot, ≤7 slots → ≤4⁷ candidates) whose full phonemizer output reproduces the reference IPA under the
+referee-eval fold. Gemination is fold-neutralized so shadda isn't searched; the fold preserves vowel QUALITY, so a
+match pins the actual short vowel.
+
+Proven on **Punjabi Shahmukhi**: **294 / 1,260 (23.3%)** words labeled, high-precision — e.g. اسر→اسُرَ recovers the
+damma /ʊ/ (`ˈəsʊɾ`, matching ref `ə s ʊ ɾ`), اصفہان→اصْفَہانَ finds a sukūn on the ص cluster. These are exactly the
+native short vowels default-schwa misses — training data that did not exist for this language. Runs in ~2 s.
+
+The 76.7% miss is **not** a labeler flaw: it's dominated by long-vowel ambiguity the g2p doesn't resolve (و→oː only,
+never uː; ی→iː only, never eː) plus genuine g2p divergences / wikipron quirks. A future boost: also search the
+long-vowel realizations (needs the scanner to accept per-position vowel overrides). The method generalizes to any
+rider with an exported bare `phonemizeWord` (ur/ps/fa/ar) — across the riders it yields a few thousand native silver
+harakat pairs for few-shot, on top of the anchor-transfer baseline.
+
+Silver-data prep status: eval reference ✅ · multilingual char vocab ✅ · anchor harakat ✅ (pre-existing) · rider
+g2p-inversion ✅ (pa proven; ur/ps/fa next) · Persian/Urdu diacritized text → optional.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping

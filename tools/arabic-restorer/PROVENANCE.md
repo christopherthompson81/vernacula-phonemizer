@@ -41,3 +41,14 @@ IPA here. Training data (skeleton→harakat) is built separately from diacritize
 Silver, not gold: Wiktionary transcriptions vary in quality/narrowness and carry per-editor convention drift; this
 is training data, not an evaluation reference. Hold out a curated per-language slice for eval rather than trusting
 these labels as ground truth.
+
+## `harakat.<lang>.silver.tsv` — mined harakat labels (g2p-inversion)
+
+The riders have no diacritized corpus, so their harakat training labels are MINED from the wikipron reference by
+`invert_harakat.ts`: for each `(skeleton, IPA)` pair it searches the harakat vocalization of the skeleton whose full
+deterministic phonemizer output reproduces the reference IPA (under the referee-eval fold). The winning vocalization
+is the label. Format `skeleton <TAB> lang(phonemizer code) <TAB> vocalized`. High precision (the fold preserves vowel
+QUALITY, so a match pins down the actual short vowel — e.g. اسر→اسُرَ recovers the damma /ʊ/ that a default schwa
+would miss). Coverage is bounded by what the g2p can reproduce: Punjabi Shahmukhi yields **294 / 1,260 (23.3%)**;
+the misses are dominated by long-vowel ambiguity the g2p doesn't resolve (و→oː only, never uː; ی→iː only, never eː),
+not by the labeler. Derived from wikipron (CC-BY-SA) via the deterministic g2p — inherits CC-BY-SA.
