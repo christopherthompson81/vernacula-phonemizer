@@ -10,8 +10,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
-import { segmentByDag } from "../../core/segment.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+import { segmentByDag, loadSegWords } from "../../core/segment.ts";
 
 interface BurmeseDef {
     consonants: Record<string, string>;
@@ -93,6 +93,7 @@ export function syllabify(word: string): Syllable[] {
             continue;
         }
         if (!isConsonant(ch)) {
+            pending = -1; // a stray sign ends any pending stacked-conjunct carry
             i++; // punctuation handled by text(); stray sign → skip
             continue;
         }
@@ -214,25 +215,29 @@ function phonemizeSubword(word: string): string {
 // (so the per-word referee eval is unaffected); an unknown run coalesces into one token and still phonemizes.
 let SEG: { set: Set<string>; maxLen: number } | undefined;
 function segWords(): { set: Set<string>; maxLen: number } {
-    if (SEG === undefined) {
-        const set = new Set(loadLines(import.meta.url, "seg-words.txt", { optional: true }).map((l) => l.trim()).filter(Boolean));
-        const maxLen = [...set].reduce((m, w) => Math.max(m, [...w].length), 1);
-        SEG = { set, maxLen };
-    }
-    return SEG;
+    return (SEG ??= loadSegWords(import.meta.url));
 }
-/** Legal word boundaries in a Burmese run = the code-point index of every syllable start (+ the end). */
-function boundaries(cs: readonly string[]): Set<number> {
-    const b = new Set<number>([cs.length]);
-    for (const syl of syllabify(cs.join(""))) b.add(syl.start);
-    return b;
-}
-/** Segment a spaceless Burmese run into words (a single word comes back unchanged; unknown runs coalesce). */
+/**
+ * Segment a spaceless Burmese run into words. Word boundaries are constrained to syllable starts (so the DAG never
+ * splits mid-syllable). A FULL dictionary cover (every part is a known word) is trusted and split — the per-word
+ * voicing lexicon then applies (like Thai). A PARTIAL cover (a dict word next to an OOV remainder) is the risky
+ * case: peeling the OOV fragment and re-syllabifying it standalone can make a would-be word-internal MINOR syllable
+ * word-final and lose its [ə] (ကစကား → the leading က must stay reduced kə, not become full ka). For those we accept
+ * the split ONLY if it preserves every syllable BODY (whole-run vs concatenated per-part), else keep the run WHOLE.
+ * So segmentation only ever IMPROVES the segmental output, never regresses it.
+ */
 export function segment(token: string): string[] {
     const { set, maxLen } = segWords();
     const cs = [...token.normalize("NFC")];
     if (set.size === 0 || cs.length === 0) return [token];
-    return segmentByDag(cs, set, maxLen, boundaries(cs));
+    const sylls = syllabify(cs.join("")); // whole-run pass, reused for both the boundaries and the safety check
+    const bound = new Set<number>([cs.length]);
+    for (const syl of sylls) bound.add(syl.start);
+    const parts = segmentByDag(cs, set, maxLen, bound);
+    if (parts.length <= 1 || parts.every((w) => set.has(w))) return parts; // single word, or a full dictionary cover
+    const whole = sylls.map((s) => s.body).join("");
+    const split = parts.flatMap((p) => syllabify(p).map((s) => s.body)).join("");
+    return whole === split ? parts : [token]; // split changes a syllable body (lost minor-ə) → keep whole
 }
 
 /** One Burmese TOKEN → IPA: segment the spaceless run into words, phonemize each (voicing per word), space-join. */

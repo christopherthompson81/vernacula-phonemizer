@@ -100,6 +100,19 @@ Burmese is SPACELESS: a text run is one token, so the per-word voicing lexicon c
 [ကျွန်တော်, စကား, ပြောသည်]`. Boundary recovery on composed input: **pairs 100% (478/478), triples 99.7% (317/318)**.
 Segmental eval UNCHANGED (69.0/71.4% — referee words segment to themselves; +1 word each, no regression). Suite 371/371.
 
+## Run — 2026-07-16 (cont.) — segmentation review fixes
+
+An 8-angle review of the segmentation PR caught a real regression + cleanups:
+- **Peeled-fragment minor-ə un-reduction.** For an OOV run whose tail is a dict word, the DAG peeled the OOV
+  prefix (`ကစကား → [က, စကား]`) and re-syllabified `က` standalone → word-final → un-reduced (`ka˥ˀ` instead of the
+  whole-word `kə`). Fixed with a **partial-cover safety check**: a FULL dictionary cover is trusted and split (like
+  Thai; the voicing lexicon then applies per word), but a PARTIAL cover (an OOV fragment) is accepted only if it
+  PRESERVES every syllable BODY (whole-run vs concatenated per-part) — else the run is kept WHOLE. So `ကစကား` stays
+  `kəsəka`, `စကားပြော` still splits to `zəɡa pjɔ`. Boundary recovery back to 100%/99.7%; eval unchanged.
+- **Cleanups:** centralized the seg-words loader in `core/segment.ts` (`loadSegWords`, shared with Thai, carrying
+  the load-bearing `reduce`-not-spread comment); reset the stacked-conjunct `pending` carry on a stray sign;
+  stripped OUR spaces under `segmentJoin` in the raw eval metric; cleared the stale `🟠` fa/ps/ur floor comments.
+
 ## Run — 2026-07-16 (cont.) — review fixes (8-angle review of the tones+voicing PR)
 
 - **Independent-vowel TONE gap.** Standalone vowels (ဦး ဩ ဧ ဣ …, ~106 referee words) bypassed the tone logic →

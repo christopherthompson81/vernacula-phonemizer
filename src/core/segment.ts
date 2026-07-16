@@ -5,6 +5,17 @@
  * Runs of out-of-dictionary clusters coalesce into ONE unknown token (graceful: the caller phonemizes it whole).
  */
 
+import { loadLines } from "./loadTsv.ts";
+
+/** Load a `seg-words.txt` beside `metaUrl` (one word per line, `#` comments skipped) into a set + its longest
+ *  entry (which bounds the DAG scan). Shared by the spaceless-script segmenters. `reduce` (not Math.max(...spread))
+ *  so a ~65k-entry set can't blow the call-argument limit. */
+export function loadSegWords(metaUrl: string): { set: Set<string>; maxLen: number } {
+    const set = new Set(loadLines(metaUrl, "seg-words.txt", { optional: true }).map((l) => l.trim()).filter(Boolean));
+    const maxLen = [...set].reduce((m, w) => Math.max(m, [...w].length), 1);
+    return { set, maxLen };
+}
+
 /** Cover `cs` with the fewest dictionary `words`, boundaries constrained to `bound`; OOV runs coalesce to one token. */
 export function segmentByDag(
     cs: readonly string[],

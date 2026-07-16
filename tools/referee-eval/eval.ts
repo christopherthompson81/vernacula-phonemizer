@@ -165,7 +165,10 @@ export async function evaluate(
             const refIpas = row
                 .slice(1)
                 .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
-            const ours = await phon(w);
+            const rawOurs = await phon(w);
+            // Under segmentJoin the reference is space-stripped; strip OUR word-separator spaces too (a segmented
+            // phonemizer, e.g. Burmese/Thai, joins subwords with a space) so the raw metric compares like with like.
+            const ours = cfg.segmentJoin ? rawOurs.replace(/\s+/g, "") : rawOurs;
             if (refIpas.some((rf) => ours === rf)) raw++;
             const of = fold(ours);
             if (refIpas.some((rf) => fold(rf) === of)) {

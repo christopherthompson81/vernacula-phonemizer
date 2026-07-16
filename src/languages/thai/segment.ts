@@ -5,8 +5,7 @@
  * split a corpus token that is actually a compound (ก็คือ → ก็ คือ). See docs/th_native_bringup_investigation.md.
  */
 import { THAI_TCC_RE } from "./manifest.ts";
-import { loadLines } from "../../core/loadTsv.ts";
-import { segmentByDag } from "../../core/segment.ts";
+import { segmentByDag, loadSegWords } from "../../core/segment.ts";
 
 /** Codepoint indices (1..n) at which a TCC cluster ENDS — the only LEGAL word-boundary
  *  positions for segmentThai, so a word is never split mid-cluster (เนี่ย stays whole). */
@@ -41,18 +40,7 @@ export function segmentThai(
 // Load the seg-words set (beside this file) once; longest entry bounds the DAG scan.
 let WORDS: { set: Set<string>; maxLen: number } | undefined;
 function words(): { set: Set<string>; maxLen: number } {
-    if (WORDS === undefined) {
-        const set = new Set(
-            loadLines(import.meta.url, "seg-words.txt", { optional: true })
-                .map((l) => l.trim())
-                .filter(Boolean),
-        );
-        // longest entry (code points) bounds the DAG scan; ≥1 so a single cluster always has room. reduce (not
-        // Math.max(...spread)) so the ~65k-entry seg-words set can't blow the call-argument limit.
-        const maxLen = [...set].reduce((m, w) => Math.max(m, [...w].length), 1);
-        WORDS = { set, maxLen };
-    }
-    return WORDS;
+    return (WORDS ??= loadSegWords(import.meta.url));
 }
 
 /** Segment a Thai token into words via the seg-words DAG (a single in-dictionary word comes back unchanged). */
