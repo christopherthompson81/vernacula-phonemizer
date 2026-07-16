@@ -49,6 +49,17 @@ The riders have no diacritized corpus, so their harakat training labels are MINE
 deterministic phonemizer output reproduces the reference IPA (under the referee-eval fold). The winning vocalization
 is the label. Format `skeleton <TAB> lang(phonemizer code) <TAB> vocalized`. High precision (the fold preserves vowel
 QUALITY, so a match pins down the actual short vowel — e.g. اسر→اسُرَ recovers the damma /ʊ/ that a default schwa
-would miss). Coverage is bounded by what the g2p can reproduce: Punjabi Shahmukhi yields **294 / 1,260 (23.3%)**;
-the misses are dominated by long-vowel ambiguity the g2p doesn't resolve (و→oː only, never uː; ی→iː only, never eː),
-not by the labeler. Derived from wikipron (CC-BY-SA) via the deterministic g2p — inherits CC-BY-SA.
+would miss). Coverage is bounded by what the g2p can reproduce; the misses are dominated by long-vowel ambiguity the
+g2p doesn't resolve (و→oː/uː, ی→iː/eː), not by the labeler. Yields (`invert_harakat.ts all`):
+
+| lang | words | labeled | % |
+|---|---:|---:|---:|
+| `fa` Persian | 10,235 | 6,916 | 67.6% |
+| `ps` Pashto | 1,303 | 575 | 44.1% |
+| `ur` Urdu | 7,614 | 3,144 | 41.3% |
+| `pa` Punjabi Shahmukhi | 1,260 | 294 | 23.3% |
+| **total** | | **10,929** | |
+
+Persian's high yield reflects its leaky abjad (long vowels written → fewer ambiguous slots) + a mature g2p; Punjabi's
+low yield reflects its و/ی long-vowel ambiguity + tonogenesis. Derived from wikipron (CC-BY-SA) via the deterministic
+g2p — inherits CC-BY-SA.
