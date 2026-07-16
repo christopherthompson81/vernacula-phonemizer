@@ -53,7 +53,10 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
    marks it, `urdu.ts` strips the mark) so deletion elides only the *unwritten* default schwa — needed, or the ‑iyā
    epenthetic ə sits in a deletion context and vanishes. Also `damma+waw وُ → uː` in BOTH g2ps (`urdu/g2p.ts`,
    `shahmukhi.ts`; Persian already defaulted و→uː) — medial و could only surface as oː, so no vocalization reached
-   the ‑ū words. Yields: fa 69.5%, ur 62.0%, ps 44.7%, pa 37.2% (**12,887 pairs**).
+   the ‑ū words. Plus a **degemination fold** added to ur/fa/ps referee configs (`(.)\1→$1`, as pa already had):
+   our g2p writes gemination as length (Cː, stripped by the backbone) but the referee DOUBLES it (CC) — a notation
+   mismatch, not a harakat problem, so shadda is NOT searched; folding it neutralizes it and the geminate words
+   label via the default. Yields: fa 73.7%, ur 65.4%, ps 44.9%, pa 37.2% (**13,578 pairs**).
 4. `crossscript_pa.ts` → `harakat.pa.crossscript.tsv` — **cross-script GOLD** (see below). Currently OPT-IN.
 5. `build_charvocab.py` → `multilingual_charvocab.json` — union of every letter across ALL skeleton sources
    (silver + harakat shards) with the Arabic char map, Arabic indices preserved. 99 chars, 19 labels.
@@ -76,10 +79,11 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
   vs bare-skeleton BASELINE. `eval_set.tsv` is a fixed 10% slice of the WIKIPRON reference (not the silver labels),
   excluded from training, so it does NOT move when the inversion changes → version comparisons are exact. It covers
   ALL held-out words incl. the ~half the g2p can't reproduce → honest full-coverage denominator (lower absolutes).
-- **Result (silver-only, stable eval, n=1699):** end-to-end **43.5% → 56.7% (+13.2)**. Per language: **fa +19.3**
-  (44→63%), **ur +9.5** (48→58% — the ‑ū fix), **pa +1.6** (positive); **ps −1.8** still the holdout (no voweled
-  sister-script, different ی realization, dialectal referee) — size-aware upsampling keeps it from regressing
-  further as ur/fa improve. Baseline 43.5% is the
+- **Result (silver-only, stable eval, n=1699):** end-to-end **45.0% → 59.7% (+14.8)**. Per language: **fa +21.4**
+  (46→67%), **ur +10.6** (50→61%), **pa +1.6** (positive), **ps −0.9** (recovered). The degemination fold raised the
+  baseline too (43.5→45.0 — a more-correct metric), but the model gains sit on top. ps still the holdout (no voweled
+  sister-script, different ی realization, dialectal referee) — size-aware upsampling keeps it from regressing as
+  ur/fa improve. Baseline 45.0% is the
   g2p-COVERAGE floor (the ~half no harakat can reach). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
   (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
   only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)

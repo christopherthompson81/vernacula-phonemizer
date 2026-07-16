@@ -328,6 +328,20 @@ weakest language.
 Pashto remains the structural holdout (no sister-script, dialectal referee); it needs Pashto-specific g2p/data, not
 more transfer. Next measured lever: unwritten gemination (shadda search).
 
+## Run 15 — 2026-07-15 — gemination is NOTATION: a degemination fold, not a shadda search (+13.2 → +14.8)
+
+Chased the unwritten-gemination bucket. First tried a targeted shadda SEARCH — it labeled ~nothing (ur unchanged)
+and doubled runtime. Root cause (traced on بلا): our g2p writes gemination as **length** (بلّا → bˈəlːɑː, the ː
+stripped by the backbone → `bəlɑ`), but the referee **doubles** the consonant (`b ə l l ɑ` → `bəllɑ`). It's a
+NOTATION mismatch, not a harakat problem. Reverted the shadda search; added the **degemination fold** `(.)\1→$1`
+to ur/fa/ps (pa already had it). Now the referee's `ll` collapses to `l`, matching our length-stripped `l`, and the
+geminate words label via the default.
+
+Inversion: **fa 69.5→73.7%, ur 62.0→65.4%** (~690 words; 13,578 pairs). Stable eval **56.7% → 59.7% net (+14.8)** —
+fa +21.4, ur +10.6, pa +1.6, ps −0.9 (recovered). The fold raised the baseline too (43.5→45.0 — a more-correct
+metric); the model gains sit on top. Suite 357/357, tsc clean. Lesson: when the g2p and referee agree on the
+phoneme but differ on how they WRITE a length/gemination/tone feature, it's a fold, not a search.
+
 ### Superseded — the earlier IPA-target proof-of-concept sketch (kept for the record)
 Char-level, language-tagged encoder (BiLSTM+CRF or small Transformer), IPA-vowel target, trained on the ~51.7k
 joint pool with the riders **upsampled 5–10×** so the anchor shapes the shared representation without swamping
