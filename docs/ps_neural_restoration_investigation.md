@@ -115,7 +115,7 @@ Asked whether more data / a literary reference could lift the ~30% multi-dialect
   letter-name artifacts (letter/name/phoneme). So the "multi-dialect ceiling" is a REFEREE-AGGREGATION artifact,
   not the data: the aggregated referee marks us wrong for reading ښ as our Kandahari ʂ when it recorded the
   Peshawar x for that word. Filtering to the **Kandahari/Southern** slice (matching our ʂ/ʐ engine), excluding
-  letter-names, gives **68.4%** vs 55.7% (multi-dialect wikipron) / 63.0% (aggregated kaikki) — ~13pp of the gap
+  letter-names, gives **69.5%** vs 55.7% (multi-dialect wikipron) / 63.0% (aggregated kaikki) — ~13pp of the gap
   is dialect-mismatch penalty, NOT engine quality. (88/114 ښ/ږ words in the slice use ʂ/ʐ, matching us.)
   Wired as a dialect-consistent SECONDARY referee: `ps.kaikki-kandahari.tsv` (98 words).
 - **NOT more data.** It's the same Wiktionary source, just dialect-tagged; the Kandahari slice is small (~139
@@ -128,5 +128,5 @@ Asked whether more data / a literary reference could lift the ~30% multi-dialect
   single-dialect engine against a single dialect rather than the aggregated referee.
 
 CONCLUSION: the remaining Pashto gap is METHODOLOGICAL (multi-dialect referee), not engine- or data-bound — the
-true single-dialect quality is ~68%. The primary wikipron floor stays multi-dialect (not gamed); the Kandahari
+true single-dialect quality is ~69%. The primary wikipron floor stays multi-dialect (not gamed); the Kandahari
 secondary reports the fair number. This is the right place to STOP engine work.
