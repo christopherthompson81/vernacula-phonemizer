@@ -50,6 +50,7 @@ import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
 import { createKannada } from "./languages/kannada/kannada.ts";
 import { createMalayalam } from "./languages/malayalam/malayalam.ts";
+import { createOdia } from "./languages/odia/odia.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
@@ -192,6 +193,8 @@ function build(lang: string): Phonemizer {
             return createKannada((latin) => getPhonemizer("en").text(latin));
         case "ml":
             return createMalayalam((latin) => getPhonemizer("en").text(latin));
+        case "or":
+            return createOdia((latin) => getPhonemizer("en").text(latin));
         case "am":
             return createAmharic((latin) => getPhonemizer("en").text(latin));
         case "bho":

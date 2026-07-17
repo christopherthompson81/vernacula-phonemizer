@@ -1,0 +1,61 @@
+// Native canonical-IPA definition for Odia / ଓଡ଼ିଆ (or) — Eastern Indo-Aryan, Odia Brahmic abugida, read by the
+// generic engine (core/abugida.ts) like the Dravidian trio (Telugu/Kannada/Malayalam): NO inherent-vowel deletion
+// — every akshara is pronounced, and the inherent vowel is /ɔ/ (ଘର→ɡʱɔɾɔ, ହାତ→hat̪ɔ), like Bengali. Odia has NO
+// phonemic vowel length (ଇ/ଈ→i, ଉ/ଊ→u). Distinctive: the SIBILANT MERGER ଶ/ଷ/ସ→[s] (ଭାଷା→bʱasa), dental t̪ d̪ n̪
+// vs retroflex ʈ ɖ ɳ, ଳ→ɭ, the retroflex flap ଡ଼→ɽ / ଢ଼→ɽʱ, ୱ→w. No intervocalic voicing (Indo-Aryan, unlike the
+// Dravidian trio). Validated against kaikki ori + epitran ori-Orya.
+{
+    "language": "or",
+    "name": "Odia",
+    "script": "Odia",
+    "provenance": "Authored from the Unicode Odia chart + standard Odia phonology. This file IS the language data — the generic abugida engine reads it directly.",
+
+    "inherentVowel": "ɔ",
+
+    "consonants": {
+        "କ": { "ipa": "k" }, "ଖ": { "ipa": "kʰ" }, "ଗ": { "ipa": "ɡ" }, "ଘ": { "ipa": "ɡʱ" }, "ଙ": { "ipa": "ŋ" },
+        "ଚ": { "ipa": "t͡ʃ" }, "ଛ": { "ipa": "t͡ʃʰ" }, "ଜ": { "ipa": "d͡ʒ" }, "ଝ": { "ipa": "d͡ʒʱ" }, "ଞ": { "ipa": "ɲ" },
+        "ଟ": { "ipa": "ʈ" }, "ଠ": { "ipa": "ʈʰ" }, "ଡ": { "ipa": "ɖ" }, "ଢ": { "ipa": "ɖʱ" }, "ଣ": { "ipa": "ɳ" },
+        "ତ": { "ipa": "t̪", "note": "DENTAL (vs retroflex ଟ=ʈ)" }, "ଥ": { "ipa": "t̪ʰ" }, "ଦ": { "ipa": "d̪" }, "ଧ": { "ipa": "d̪ʱ" }, "ନ": { "ipa": "n̪", "note": "dental nasal (kaikki writes n̪)" },
+        "ପ": { "ipa": "p" }, "ଫ": { "ipa": "pʰ" }, "ବ": { "ipa": "b" }, "ଭ": { "ipa": "bʱ" }, "ମ": { "ipa": "m" },
+        "ଯ": { "ipa": "d͡ʒ", "note": "Odia ଯ → [d͡ʒ] (historical ya → ja)" }, "ୟ": { "ipa": "j", "note": "ୟ (yya) → glide [j]" },
+        "ର": { "ipa": "ɾ", "note": "tap" }, "ଲ": { "ipa": "l" }, "ଳ": { "ipa": "ɭ", "note": "retroflex lateral" }, "ଵ": { "ipa": "ʋ" }, "ୱ": { "ipa": "w", "note": "wa" },
+        "ଶ": { "ipa": "s", "note": "Odia merges the sibilants → [s] (no /ʃ/)" }, "ଷ": { "ipa": "s" }, "ସ": { "ipa": "s" }, "ହ": { "ipa": "ɦ", "note": "voiced glottal (kaikki writes h — folded)" },
+        "ଡ଼": { "ipa": "ɽ", "note": "retroflex flap (nukta ଡ)" }, "ଢ଼": { "ipa": "ɽʱ", "note": "retroflex flap breathy (nukta ଢ)" }, "ଫ଼": { "ipa": "f" }, "ଜ଼": { "ipa": "z" }
+    },
+
+    "independentVowels": {
+        "ଅ": { "ipa": "ɔ", "note": "inherent (short open-mid back)" },
+        "ଆ": { "ipa": "a", "note": "open" },
+        "ଇ": { "ipa": "i" }, "ଈ": { "ipa": "i", "note": "no phonemic length in Odia" }, "ଉ": { "ipa": "u" }, "ଊ": { "ipa": "u" },
+        "ଋ": { "ipa": "ɾu", "note": "vocalic r" },
+        "ଏ": { "ipa": "e" }, "ଐ": { "ipa": "ɔi", "note": "diphthong" },
+        "ଓ": { "ipa": "o" }, "ଔ": { "ipa": "ɔu", "note": "diphthong" }
+    },
+
+    "vowelSigns": {
+        "ା": { "ipa": "a" }, "ି": { "ipa": "i" }, "ୀ": { "ipa": "i" }, "ୁ": { "ipa": "u" }, "ୂ": { "ipa": "u" },
+        "ୃ": { "ipa": "ɾu" }, "େ": { "ipa": "e" }, "ୈ": { "ipa": "ɔi" }, "ୋ": { "ipa": "o" }, "ୌ": { "ipa": "ɔu" }
+    },
+
+    "signs": {
+        "virama": { "char": "୍", "effect": "suppressInherentVowel", "note": "vowel suppression / clusters" },
+        "anusvara": { "char": "ଂ", "effect": "nasalizeVowel", "note": "→ homorganic nasal before a stop; final → [ⁿ]" },
+        "chandrabindu": { "char": "ଁ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel (ମୁଁ→mũ)" },
+        "visarga": { "char": "ଃ", "effect": "appendH", "note": "→ [h]" },
+        "nukta": { "char": "଼", "effect": "composeNukta", "note": "nukta (ଡ଼ ଢ଼ etc.)" }
+    },
+
+    "clausePunctuation": {
+        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Odia spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes
+    // (Indic lakh/crore); 21-99 compound spellings are a bounded remaining task.
+    "numbers": {
+        "units": ["ଶୂନ୍ୟ", "ଏକ", "ଦୁଇ", "ତିନି", "ଚାରି", "ପାଞ୍ଚ", "ଛଅ", "ସାତ", "ଆଠ", "ନଅ"],
+        "teens": ["ଦଶ", "ଏଗାର", "ବାର", "ତେର", "ଚଉଦ", "ପନ୍ଦର", "ଷୋହଳ", "ସତର", "ଅଠର", "ଊଣେଇଶ"],
+        "tens": { "20": "କୋଡ଼ିଏ", "30": "ତିରିଶ", "40": "ଚାଳିଶ", "50": "ପଚାଶ", "60": "ଷାଠିଏ", "70": "ସତୁରି", "80": "ଅଶୀ", "90": "ନବେ" },
+        "magnitudes": { "hundred": "ଶହ", "thousand": "ହଜାର", "lakh": "ଲକ୍ଷ", "crore": "କୋଟି" }
+    }
+}
