@@ -1,0 +1,16 @@
+// Jin Chinese / 晋语 (cjy), Taiyuan 太原 dialect — a distinct Sinitic branch (retained 入声/checked -ʔ coda).
+// GAP language: there is NO independent automated referee. wikipron cjy 404s (which deferred Jin once), epitran
+// ships no Jin, and the ONLY machine-readable Taiyuan IPA is the Wiktionary Chinese dialectal data — which is
+// exactly our source (via the kaikki.org extract), so any automated check is circular with it. Recorded here
+// (not silently omitted) so the gap is explicit; the correctness anchor is the adjudicated gold in
+// test/jin.test.ts. See docs/jin_native_bringup_investigation.md.
+{
+    "language": "cjy",
+    "name": "Jin Chinese (Taiyuan)",
+    "script": "Han",
+    "provenance": "Wiktionary Chinese Taiyuan Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
+    "referees": [],
+    "secondaryGap": "No independent referee exists for Taiyuan Jin: wikipron cjy 404s and epitran ships no Jin. The only machine-readable Taiyuan IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Wu/Igbo/Naija pattern; the correctness anchor is the adjudicated gold in test/jin.test.ts.",
+    "segmentJoin": true,
+    "folds": []
+}

@@ -56,6 +56,7 @@ import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
 import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";
 import { phonemizeWord as nan } from "../../src/languages/minnan/minnan.ts";
 import { phonemizeWord as wuu } from "../../src/languages/wu/wu.ts";
+import { phonemizeWord as cjy } from "../../src/languages/jin/jin.ts";
 import { phonemizeWord as sw } from "../../src/languages/swahili/swahili.ts";
 // RULE-ONLY for gu: the shipped phonemizeWord applies a wikipron/kaikki-informed schwa lexicon, so evaluating it
 // against those referees would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
@@ -110,6 +111,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     pcm,
     nan,
     wuu,
+    cjy,
     jv,
     sw,
     gu,

@@ -42,6 +42,7 @@ import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
 import { createWu } from "./languages/wu/wu.ts";
+import { createJin } from "./languages/jin/jin.ts";
 import { createSwahili } from "./languages/swahili/swahili.ts";
 import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
@@ -166,6 +167,9 @@ function build(lang: string): Phonemizer {
         // Embedded Latin in Wu text routes to the English phonemizer (lazy — loaded only if it appears).
         case "wuu":
             return createWu((latin) => getPhonemizer("en").text(latin));
+        // Jin Chinese (Taiyuan) — Han → Sinological IPA + Chao tones; embedded Latin routes to English.
+        case "cjy":
+            return createJin((latin) => getPhonemizer("en").text(latin));
         case "jv":
             return createJavanese();
         case "sw":
