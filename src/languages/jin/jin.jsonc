@@ -1,0 +1,20 @@
+// Jin Chinese / 晋语 (cjy), Taiyuan 太原 dialect — canonical IPA. jin.ts reads this file. Jin is a distinct
+// primary branch of Sinitic (split from Mandarin for its retention of the 入声/checked tone — a glottal-stop
+// coda ʔ — and its rich tone sandhi). The dict (dict.tsv) already carries the Sinological IPA per syllable
+// (segmental IPA + a superscript pitch-number tone, e.g. ma⁵³, yəʔ²); the runtime only converts the pitch
+// digits → Chao contour letters (1→˩ … 5→˥) and resolves the sandhi arrow ⁻ (underlying⁻surface → surface).
+// SINGLE authoritative source (Wiktionary/kaikki Taiyuan Sinological-IPA) — no independent referee (🔷).
+// See docs/jin_native_bringup_investigation.md.
+{
+    "language": "cjy",
+    "name": "Jin Chinese (Taiyuan)",
+    "script": "Han",
+
+    // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
+    "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ",
+        "；": " ; ", "：": " : ", ".": " . ", ",": " , ", "?": " ? ", "!": " ! "
+    }
+}
