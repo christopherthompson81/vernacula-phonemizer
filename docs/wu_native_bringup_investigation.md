@@ -35,10 +35,14 @@ rime-wugniu reading for 衣 is bare `i1` (Wugniu writes the on-glide only where 
 is the faithful port output, confirmed against the compiled espeak-ng-portable dict (`{"words":["衣"],"phonemes":
 "i1"}`). Three-way contrast, checked codas, sandhi words, and Han-numeral composition all verified.
 
-## Result — 🟡
+## Result — 🔷 single-source verified (was 🟡; reclassified 2026-07-16)
 Faithful port of a validated bring-up. Sandhi + three-way voicing + checked codas + the 陰平/陰去 split all present.
-**GAP language** (no independent referee — no wikipron/epitran wuu, no tone-marked Wu lexicon; recorded as
-`referees: []` + `secondaryGap`). Anchor: the adjudicated gold `test/wu.test.ts`. 🟡 for the inherited deferrals:
+**SINGLE-SOURCE** (no independent CROSS-referee — no wikipron/epitran wuu, and the whole modern Wu pronunciation
+ecosystem derives from the ONE Wugniu/Zaonhe romanization tradition, so any automated referee would be circular
+with our source; recorded as `referees: []` + `secondaryGap`). But the correctness rests on a SUBSTANTIAL
+authoritative source (rime-wugniu, 101k entries) + spot-corroboration (Zhu 2006, wuuwiki inline IPA, the adjudicated
+gold `test/wu.test.ts`). That is NOT ⛔ cannot-verify (bho's circular clone) — it's verified, single-source. The
+caveat is evidence breadth, not output quality. See the 🔷 tier in docs/language-maturity.md. 🔷, with the inherited deferrals:
 - composed word entries use the σ1 **citation** reading (a char's word-specific 文白 reading is captured only where
   the rime-wugniu source word list had it); the sandhi *melody* is unaffected (register-driven);
 - simplified-only characters absent from the traditional-keyed source may miss (OpenCC fold covers the frequent
