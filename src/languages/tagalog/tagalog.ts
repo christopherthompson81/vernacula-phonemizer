@@ -2,13 +2,15 @@
  * Native Tagalog / Filipino (tl) text phonemizer — canonical IPA, espeak-independent. A shallow near-phonemic
  * Latin orthography → rule-based transliterator: digraphs (ng→ŋ, ch→t͡ʃ, ny/ñ→ɲ, sy→ʃ) then single letters,
  * with a WORD-INITIAL glottal stop [ʔ] before a vowel and a hyphen → [ʔ] (pag-asa→paɡʔasa); whole-word
- * irregulars (mga→maŋa, ng→naŋ); penultimate stress. Intervocalic/word-final glottal stops are phonemic but
- * unwritten (bata 'child' [ˈbataʔ] vs bata 'robe' [ˈbata]) — a lexical residual. See docs/tl_native_bringup_investigation.md.
+ * irregulars (mga→maŋa, ng→naŋ). Stress defaults to PENULTIMATE but is phonemic and unwritten, so the shipped path
+ * pins the ~23% non-penultimate cases from a kaikki-sourced stress lexicon (magandá, ngayón); the rule engine keeps
+ * the penult default (the referee eval folds stress). Intervocalic/word-final glottal stops are likewise phonemic
+ * but unwritten (bata 'child' [ˈbataʔ] vs bata 'robe' [ˈbata]) — a lexical residual. See docs/tl_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { loadLines } from "../../core/loadTsv.ts";
+import { loadLines, loadTsvMap } from "../../core/loadTsv.ts";
 
 interface NumbersDef {
     units: string[];
@@ -71,14 +73,18 @@ function scan(w: string): string[] {
     return out;
 }
 
-/** Penultimate stress on the second-to-last vowel nucleus (default; phonemic stress is unmarked in spelling). */
-function stressed(units: string[]): string {
+/** Stress the given vowel-nucleus (0-based `overrideVowelIdx`, from the stress lexicon) or the penultimate nucleus
+ *  (default; phonemic stress is unmarked in spelling, and ~77% of words are penultimate). */
+function stressed(units: string[], overrideVowelIdx?: number): string {
     const nuclei = units
         .map((u, i) => (VOWEL_PH.includes(u[0] ?? "") ? i : -1))
         .filter((i) => i >= 0);
     if (nuclei.length === 0) return units.join("");
-    const idx =
-        nuclei.length >= 2 ? nuclei[nuclei.length - 2]! : nuclei[0]!;
+    const vni =
+        overrideVowelIdx !== undefined && overrideVowelIdx >= 0 && overrideVowelIdx < nuclei.length
+            ? overrideVowelIdx
+            : nuclei.length >= 2 ? nuclei.length - 2 : 0;
+    const idx = nuclei[vni]!;
     let out = "";
     for (let i = 0; i < units.length; i++) {
         if (i === idx) out += "ˈ";
@@ -87,15 +93,21 @@ function stressed(units: string[]): string {
     return out;
 }
 
-/** One Tagalog word → canonical IPA, RULE-ENGINE ONLY (no word-final-glottal lexicon) — the honest, non-circular
- *  signal used by the referee eval (the final ʔ is unwritten/lexical, so a wikipron-sourced set would be circular). */
-export function phonemizeWordRules(word: string): string {
+/** Scan + stress one word (shared core). `overrideVowelIdx` (from the stress lexicon) moves stress off the
+ *  penultimate default; undefined keeps the default. */
+function phonemizeCore(word: string, overrideVowelIdx?: number): string {
     const lw = word.toLowerCase();
     const special = DEF.specialWords[lw];
-    if (special !== undefined) return stressed(scan(special));
-    const units = scan(lw);
+    const units = special !== undefined ? scan(special) : scan(lw);
     if (units.length === 0) return "";
-    return stressed(units).normalize("NFC");
+    return stressed(units, overrideVowelIdx).normalize("NFC");
+}
+
+/** One Tagalog word → canonical IPA, RULE-ENGINE ONLY (no word-final-glottal or stress lexicon) — the honest,
+ *  non-circular signal used by the referee eval (the final ʔ is unwritten/lexical, so a wikipron-sourced set would
+ *  be circular; stress is folded by the eval backbone anyway, so the penult default is the honest rule signal). */
+export function phonemizeWordRules(word: string): string {
+    return phonemizeCore(word);
 }
 
 // The unwritten word-final glottal stop (bata child [bataʔ] vs bata robe [bata]) is phonemic but lexical. This SET
@@ -105,10 +117,23 @@ let FINAL_GLOTTAL: ReadonlySet<string> | undefined;
 const finalGlottal = (): ReadonlySet<string> =>
     (FINAL_GLOTTAL ??= new Set(loadLines(import.meta.url, "final-glottal.txt")));
 
-/** One Tagalog word → canonical IPA (shipped): the rule engine + the word-final-glottal lexical pin. */
+// Phonemic stress is UNWRITTEN; the rule engine defaults to PENULTIMATE, but ~23% of words stress elsewhere (mostly
+// FINAL: balik→balík). This MAP (stress-lexicon.tsv, kaikki-sourced: single confident stress position, vowel-count-
+// aligned, only where it differs from the penult default) moves the stress mark on the SHIPPED path only — the eval
+// backbone folds stress ˈˌ, so this is a TTS-quality closure invisible to the referee %. See the investigation doc.
+let STRESS_LEX: ReadonlyMap<string, number> | undefined;
+const stressLex = (): ReadonlyMap<string, number> =>
+    (STRESS_LEX ??= loadTsvMap(import.meta.url, "stress-lexicon.tsv", (v) => {
+        const n = Number(v);
+        // reject empty/whitespace (Number("")===0 would else silently pin the first vowel) and non-integers
+        return v.trim() !== "" && Number.isInteger(n) && n >= 0 ? n : undefined;
+    }));
+
+/** One Tagalog word → canonical IPA (shipped): the rule engine + the stress lexicon + the word-final-glottal pin. */
 export function phonemizeWord(word: string): string {
-    const ipa = phonemizeWordRules(word);
-    if (ipa && !ipa.endsWith("ʔ") && finalGlottal().has(word.toLowerCase())) return ipa + "ʔ";
+    const lw = word.toLowerCase();
+    const ipa = phonemizeCore(word, stressLex().get(lw));
+    if (ipa && !ipa.endsWith("ʔ") && finalGlottal().has(lw)) return ipa + "ʔ";
     return ipa;
 }
 
@@ -148,10 +173,11 @@ class TagalogPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
-                    // Number words bypass the final-glottal set — else it fires inconsistently by incidental
-                    // membership (sampu→sampuʔ but dalawampu not); keep the composed number system uniform.
+                    // Number words take the STRESS lexicon (dalawá/tatló/waló are final-stressed — so "2" and the
+                    // typed word "dalawa" agree) but bypass the final-glottal set, which fires inconsistently by
+                    // incidental membership (sampu→sampuʔ but dalawampu not); keep the composed number system uniform.
                     for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeWordRules(wd));
+                        sink.emit(phonemizeCore(wd, stressLex().get(wd.toLowerCase())));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

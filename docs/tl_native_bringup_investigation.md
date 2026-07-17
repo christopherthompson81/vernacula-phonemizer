@@ -50,3 +50,32 @@ human set is far harder + surfaces three tails, measured:
 The NATIVE core is excellent (gold 100%); the 77.3% reflects the lexical/loanword/proper-noun tail on a large
 human referee, not the common-word quality. STATUS 🟡: the final-ʔ lexical tail is now closed on the shipped path;
 phonemic STRESS (unwritten) + the ambiguous loanword VV remain.
+
+## Run — 2026-07-16 — the stress lexical tail (kaikki stress lexicon)
+
+The remaining lexical tail flagged above was phonemic STRESS (unwritten in the orthography). Measured the
+penult-default's error rate against **kaikki tgl (27,398 IPA entries, which mark stress explicitly with ˈ**;
+abay→ˈʔabaj, abdomen→ʔabˈdomen — broad wikipron does NOT mark stress, so kaikki is the referee here):
+
+- Penult-default is CORRECT on **77.3%** of single-stress kaikki words; **~23% stress elsewhere**, mostly FINAL
+  (magandá, ngayón, salmón, doktór, and the plural marker mga = mangá).
+
+CLOSED on the SHIPPED path with `stress-lexicon.tsv` (2,540 pins): kaikki words with a SINGLE confident stress
+position (all readings agree — stress homographs like balík/bálik are ABSTAINED → penult default), vowel-count-
+aligned with our segmentation so the 0-based stressed-nucleus index transfers safely. `phonemizeWord` applies it;
+`phonemizeWordRules` (the referee eval) keeps the penult default — and the eval backbone FOLDS stress ˈˌ, so this
+is a **shipped/TTS-quality closure invisible to the referee %** (the Indonesian ⟨e⟩ / final-ʔ pattern).
+
+**Stress-inclusive accuracy vs kaikki (single-confident, 10,479 words):** rule-only penult **67.1%** → shipped
++lexicon **91.3%**. The residual 8.7% is honest abstention — words where our segmentation's vowel count differs
+from kaikki's, so the index can't transfer without segment alignment (not pinned). Three naive-penult goldens
+(maganda, ngayon, mga) were CORRECTED to their true final stress by the lexicon. STATUS 🟡→ the stress tail is now
+closed on the shipped path; the ambiguous loanword VV (glide/plain/hiatus) is the last documented lexical residual.
+
+**Review (PR #242) caught** a number-path stress leak: the digit path routed number words through
+`phonemizeWordRules` (penult), so "2"→dalˈawa disagreed with the typed word dalawa→dalawˈa (dalawá IS final-stressed).
+Fixed: numbers now take the stress lexicon via `phonemizeCore(wd, stressLex().get(wd))` while still bypassing the
+final-glottal set (the #241 uniformity fix). Also hardened the lexicon parser to reject empty values (Number("")===0
+would else pin the first vowel). **Pre-existing follow-up (NOT this PR):** the tens compositor is `units[t]+"pu"`
+→ *dalawapu/tatlopu*, missing the irregular -ng- ligature (correct: dalawampú, tatlumpú, apatnapú, …); a separate
+number-morphology task.
