@@ -1,0 +1,13 @@
+// Polish (pl) — West Slavic, Latin rule g2p. PRIMARY = wikipron pol_latn broad (HUMAN, 129736); SECONDARY =
+// epitran pol-Latn on the same wordlist (programmatic). Both use ties (t͡s) and ł→w. Segmental backbone comparison.
+{
+    "referees": [
+        { "file": "pl.wikipron-pol.tsv", "source": "wikipron pol_latn broad (human)", "role": "primary" },
+        { "file": "pl.epitran-pol.tsv", "source": "epitran pol-Latn on the wordlist (programmatic)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ɘ", "replace": "ɨ", "note": "⟨y⟩ vowel: wikipron writes [ɘ]~[ɨ] (both appear) — notation" },
+        { "pattern": "ŋ", "replace": "n", "note": "nasal PLACE before a velar is allophonic ([ŋ]~[n]); wikipron marks it inconsistently (abisynka→n, abdanch→ŋ) — fold" }
+    ]
+}

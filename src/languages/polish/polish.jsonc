@@ -1,0 +1,42 @@
+// Native canonical-IPA definition for Polish (pl) — West Slavic, Latin script with diacritics. polish.ts / g2p.ts
+// read this file. Polish orthography is systematic but with real rule systems (handled in g2p.ts):
+//   - digraphs ch→x, cz→t͡ʂ, dz→d͡z, dź→d͡ʑ, dż→d͡ʐ, rz→ʐ, sz→ʂ
+//   - the ⟨i⟩ palatalizer: coronal c/s/z/n(/dz) + i → the SOFT series t͡ɕ/ɕ/ʑ/ɲ(/d͡ʑ) (i silent before a vowel:
+//     siano→ɕanɔ; the i-vowel before a consonant/end: zima→ʑima); velar k/g + i → palatalized kʲ/ɡʲ; any other
+//     consonant + i + VOWEL → a [j] glide (pies→pjɛs, radio→radjɔ).
+//   - nasal vowels ą/ę: oral vowel + a homorganic nasal element by the FOLLOWING consonant's place — matching the
+//     wikipron human convention, which realizes the nasality as a consonant before an obstruent (stop OR fricative):
+//     m/n/ŋ (ząb→zɔmp, wąs→vɔns, wąchać→vɔŋx), a [w̃] glide before a palatal fricative ɕ/ʑ (gęś→ɡɛw̃ɕ), and pure
+//     vowel-nasalization before a sonorant. ą word-FINAL → [ɔw̃] (są→sɔw̃); ę word-FINAL denasalizes to ɛ (się→ɕɛ).
+//   - regressive voicing assimilation + word-final devoicing; progressive devoicing of w(v)/rz(ʐ) after a voiceless
+//     obstruent (świat→ɕfjat, przez→pʂɛs). Stress is PENULTIMATE (applied in polish.ts).
+{
+    "language": "pl",
+    "name": "Polish",
+    "script": "Latin",
+    "provenance": "Authored from standard Polish orthography + phonology; cross-checked vs wikipron pol + epitran pol-Latn.",
+
+    "vowels": { "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u", "ó": "u", "y": "ɨ" },
+    "nasalVowels": { "ą": "ɔ", "ę": "ɛ" },
+
+    "consonants": {
+        "p": "p", "b": "b", "t": "t", "d": "d", "k": "k", "g": "ɡ",
+        "c": "t͡s", "ć": "t͡ɕ", "f": "f", "w": "v", "s": "s", "z": "z",
+        "ś": "ɕ", "ź": "ʑ", "ż": "ʐ", "l": "l", "ł": "w", "r": "r", "j": "j",
+        "m": "m", "n": "n", "ń": "ɲ", "h": "x", "q": "k", "v": "v", "x": "ks"
+    },
+    "digraphs": { "ch": "x", "cz": "t͡ʂ", "dz": "d͡z", "dź": "d͡ʑ", "dż": "d͡ʐ", "rz": "ʐ", "sz": "ʂ" },
+
+    // ⟨i⟩-palatalizer classes: coronal SOFT series (c/s/z/n + i → these); the velar/labial/glide behaviour is in g2p.ts.
+    "softI": { "c": "t͡ɕ", "s": "ɕ", "z": "ʑ", "n": "ɲ" },
+
+    // Voicing-assimilation pairs (voiced ↔ voiceless), for regressive assimilation + final devoicing.
+    "voicing": {
+        "toVoiceless": { "b": "p", "d": "t", "ɡ": "k", "v": "f", "z": "s", "ʑ": "ɕ", "ʐ": "ʂ", "d͡z": "t͡s", "d͡ʑ": "t͡ɕ", "d͡ʐ": "t͡ʂ" },
+        "toVoiced": { "p": "b", "t": "d", "k": "ɡ", "f": "v", "s": "z", "ɕ": "ʑ", "ʂ": "ʐ", "x": "ɣ", "t͡s": "d͡z", "t͡ɕ": "d͡ʑ", "t͡ʂ": "d͡ʐ" }
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
