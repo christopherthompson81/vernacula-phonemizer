@@ -79,3 +79,31 @@ final-glottal set (the #241 uniformity fix). Also hardened the lexicon parser to
 would else pin the first vowel). **Pre-existing follow-up (NOT this PR):** the tens compositor is `units[t]+"pu"`
 → *dalawapu/tatlopu*, missing the irregular -ng- ligature (correct: dalawampú, tatlumpú, apatnapú, …); a separate
 number-morphology task.
+
+## Run — 2026-07-16 — native number morphology overhaul
+
+The prior compositor was a naive `unit+"pu"` / space-join that produced wrong morphology at every tier. Probed
+1–2,000,000 and pinned the correct native (Tagalog-origin, not Spanish) forms against **Wiktionary
+Appendix:Tagalog_numbers**:
+
+- **Teens 11–19** — one word with `labing-` + unit, irregular sandhi (ng→n/m, hyphen before vowels):
+  labing-isa, labindalawa, labintatlo, labing-apat, labinlima, labing-anim, labimpito, labingwalo, labinsiyam.
+  (was two words "labing isa".)
+- **Tens 20–90** — irregular, with o→u raising (tatlo→tatlu, pito→pitu, walo→walu) and na/ng split:
+  dalawampu, tatlumpu, apatnapu, limampu, animnapu, pitumpu, walumpu, siyamnapu. (was dalawapu/tatlopu/…)
+- **Ligature -ng / na** (the productive multiplier linker before daan/libo/milyon): vowel-final → +ng
+  (dalawa→dalawang, tatlo→tatlong, pito→pitong), consonant-final → + " na" (apat→apat na, anim→anim na,
+  siyam→siyam na). Attaches to the LAST word of a multi-word multiplier (25000 → dalawampu't limang libo).
+- **Hundreds** — sandaan (100); else ligate(unit) + daan, with **daan→raan after "na"**: dalawang daan (200),
+  apat na raan (400), siyam na raan (900). (was "dalawa daan", missing -ng.)
+- **Thousands** — sanlibo (1000); else ligate(mult) + libo: dalawang libo (2000), apat na libo (4000). (libo does
+  NOT alternate to ribo.) Millions: ligate(mult) + milyon (isang milyon; no san- form).
+- **Connector at→'t** — a single `joinRemainder(high, r)`: a sub-100 remainder attaches with "at", contracting to
+  "'t" after a vowel (dalawampu't isa 21; sandaan at isa 101; sandaan at dalawampu't lima 125); a ≥100 remainder is
+  space-juxtaposed (isang libo dalawang daan… 1234). VARIATION NOTE: Tagalog "at" placement in multi-group numbers
+  varies in usage; this rule (at before every sub-100 tail) is the consistent/standard reading — Wiktionary's
+  informal examples sometimes omit the medial "at" (1234), which is also heard.
+
+**Review (PR #243) caught** the ligature's missing third branch: an /n/-final multiplier takes `-g` not `" na"`
+(daan→daang), so 100,000 = sandaang libo (not "sandaan na libo"), 200,000 = dalawang daang libo. Only surfaced for
+exact-hundred multipliers of thousands/millions (units are never n-final). Fixed + regression test.
