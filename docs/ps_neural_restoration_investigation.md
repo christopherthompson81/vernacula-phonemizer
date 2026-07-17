@@ -107,3 +107,26 @@ of small, increasingly-ambiguous reading disambiguations (word-initial و, و=u/
 diminishing returns. The realistic ceiling on THIS referee is ~60-65%; the gap is REFEREE-bound (multi-dialect +
 artifacts), not engine-bound. Pashto arc: 35.4%→55.7% wikipron / 63.0% kaikki, entirely via the data/engine
 layer — the neural was never the lever (net-negative throughout, as for Persian).
+
+## Data-source finding — 2026-07-16 — a DIALECT-CONSISTENT referee (breaks the multi-dialect "ceiling")
+
+Asked whether more data / a literary reference could lift the ~30% multi-dialect ceiling. Findings:
+- **kaikki Pashto TAGS the dialect** on every pronunciation (Kandahar/Northern/Peshawar/Southern/…) + tags the
+  letter-name artifacts (letter/name/phoneme). So the "multi-dialect ceiling" is a REFEREE-AGGREGATION artifact,
+  not the data: the aggregated referee marks us wrong for reading ښ as our Kandahari ʂ when it recorded the
+  Peshawar x for that word. Filtering to the **Kandahari/Southern** slice (matching our ʂ/ʐ engine), excluding
+  letter-names, gives **69.5%** vs 55.7% (multi-dialect wikipron) / 63.0% (aggregated kaikki) — ~13pp of the gap
+  is dialect-mismatch penalty, NOT engine quality. (88/114 ښ/ږ words in the slice use ʂ/ʐ, matching us.)
+  Wired as a dialect-consistent SECONDARY referee: `ps.kaikki-kandahari.tsv` (98 words).
+- **NOT more data.** It's the same Wiktionary source, just dialect-tagged; the Kandahari slice is small (~139
+  pairs). There is NO larger machine-readable Pashto IPA corpus — wikipron (~1400) + kaikki (~1650) is the
+  ceiling; the Pashto NLP repos (nlpashto, pashto-text-dataset) are text/POS, no pronunciations. Pashto is
+  genuinely under-resourced.
+- **Literary references (descriptive, back the methodology):** MacKenzie, *A Standard Pashto* (1959) — the
+  canonical standardization; the ښ/ږ are his dialect-diagnostic sounds (ṣ̌/ẓ̌ abstracting ʂ/x/ç). Penzl, *A
+  Grammar of Pashto* (1955) — the standard phonology. Not datasets, but they legitimize grading a coherent
+  single-dialect engine against a single dialect rather than the aggregated referee.
+
+CONCLUSION: the remaining Pashto gap is METHODOLOGICAL (multi-dialect referee), not engine- or data-bound — the
+true single-dialect quality is ~69%. The primary wikipron floor stays multi-dialect (not gamed); the Kandahari
+secondary reports the fair number. This is the right place to STOP engine work.
