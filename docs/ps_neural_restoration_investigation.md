@@ -54,7 +54,14 @@ Two coordinated changes let the miner reach the glide reading:
    [w]. The referee fold-match then disambiguates verb (glide, awəl) vs noun (long vowel, pul) PER WORD.
 
 Re-mined: ps silver 623→647 labeled, shipped restoration lexicon 232→251 entries. **25/38 ول-final verbs now
-match.** SYNC eval: wikipron 45.7%→**47.4%**, kaikki 50.0%→**52.4%**. Gold green; numbers unaffected; typecheck clean.
+match.** SYNC eval: wikipron 45.7%→**47.7%**, kaikki 50.0%→**52.8%**. Gold green; numbers unaffected; typecheck clean.
 
 Remaining ceiling: multi-dialect ښ/ږ (~129, inherent), the و-glide words the referee attests with a form the g2p
 can't reach (foreign/irregular), and short-vowel/epenthesis noise — the documented abjad + multi-dialect tail.
+
+### Review fix — glide+cluster ambiguity made lexicon-correctable
+The glide-epenthesis over-fired on glide+consonant-CLUSTER (ښایسته→ʂɑjəstə; the referee attests ʂɑjsta, no schwa),
+and — worse — it wasn't lexicon-correctable (the ə was forced at the glide step). Fix: the epenthesis is SUPPRESSED
+by a sukun on the post-glide consonant (ښایسْته→ʂɑjstə), so the distinction (راوستل WANTS the ə, ښایسته doesn't —
+lexically ambiguous) is mineable/lexicon-correctable per word. The miner recovers the ښایسته class → wikipron
+47.4%→47.7%, kaikki 52.4%→52.8%. The و-glide options are gated to ps in the shared miner (WAW_GLIDE_OPTS).

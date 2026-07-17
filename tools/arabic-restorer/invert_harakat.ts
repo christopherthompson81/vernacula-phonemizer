@@ -67,10 +67,11 @@ const BARE = "";
 const SHORT_OPTS = [BARE, FATHA, KASRA, DAMMA, SUKUN]; // default-ə / ə / ɪ / ʊ / no-vowel
 const WAW = "و"; // و — the one AMBIGUOUS long-vowel letter
 const YA = "ی"; // ی choti ye — for glide detection (ی before a vowel is a glide, not a long vowel)
-// و after a consonant: bare → oː · damma+waw وُ → uː (long vowel). PLUS the GLIDE reading — a short vowel on the
-// consonant makes و a glide [w] (fatḥa → a·w, kasra → i·w): the verbal infinitive -ول = /awəl/ (کَول→kawəl). The
-// fold-match against the referee disambiguates verb (glide) vs noun (long vowel) per word.
-const WAW_OPTS = [BARE, DAMMA, FATHA, KASRA];
+const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (the long-vowel search)
+// ps ONLY (validated for Pashto; a follow-up for the others): the و GLIDE reading — a short vowel on the preceding
+// consonant makes و a glide [w] (fatḥa → a·w, kasra → i·w), the verbal infinitive -ول = /awəl/ (کَول→kawəl). The
+// referee fold-match disambiguates verb (glide) vs noun (long vowel) per word.
+const WAW_GLIDE_OPTS = [BARE, DAMMA, FATHA, KASRA];
 const YA_OPTS = [BARE, FATHA]; // bare ی → iː · یَ (ya+fatḥa) → eː (the adapted-word encoding of the iː/eː split)
 const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
 
@@ -96,7 +97,8 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
         const glideNext = (next === YA || next === WAW) && chars[i + 2] !== undefined &&
             cfg.vowelLetters.includes(chars[i + 2]!);
         if (glideNext) out.push({ pos: i, options: SHORT_OPTS });
-        else if (next === WAW) out.push({ pos: i, options: WAW_OPTS }); // و long vowel: oː (bare) vs uː (damma)
+        else if (next === WAW) // و long vowel oː/uː; ps also searches the glide reading (‑ول → /awəl/)
+            out.push({ pos: i, options: cfg.silverCode === "pus" ? WAW_GLIDE_OPTS : WAW_OPTS });
         else if (next === undefined || !cfg.vowelLetters.includes(next))
             out.push({ pos: i, options: SHORT_OPTS }); // short vowel: default-ə / ɪ / ʊ / none
     }
