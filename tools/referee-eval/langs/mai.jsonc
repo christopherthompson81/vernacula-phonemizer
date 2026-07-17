@@ -1,0 +1,23 @@
+// Maithili (mai) — Eastern Indo-Aryan (Bihari group), Devanagari. wikipron mai_deva narrow (167, HUMAN) is the
+// ONLY referee — small, so 🔷 single-source (distinct from the ⛔ Bhojpuri/Awadhi stubs which have no referee at
+// all). Reuses the Hindi engine + Maithili divergences (short e/o, ऐ→əɪ). Folds: the ULTRASHORT ᵊ/ĕ (a cluster
+// schwa Hindi deletes → Maithili reduces; narrow — fold to ∅), dental notation t̪~t/d̪~d (wikipron writes plain),
+// gemination (our length Cː vs doubled), the ə̆ ultrashort-nasal.
+{
+    "referees": [
+        { "file": "mai.wikipron-deva.tsv", "source": "wikipron mai_deva narrow (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ᵊ", "replace": "", "note": "the ULTRASHORT schwa ᵊ — a cluster schwa Hindi deletes, Maithili reduces (इसपात→ɪsᵊpaːt); narrow, we delete (Hindi engine), fold to align" },
+        { "pattern": "ĕ", "replace": "", "note": "ultrashort e (आएब→aːĕb) — same reduction class" },
+        { "pattern": "t̪", "replace": "t", "note": "dental t̪~t (wikipron writes plain t)" },
+        { "pattern": "d̪", "replace": "d", "note": "dental d̪~d" },
+        { "pattern": "n̪", "replace": "n", "note": "dental n̪~n" },
+        { "pattern": "ɽ", "replace": "ɾ", "note": "ड़ flap ɽ~ɾ (wikipron writes ɾ)" },
+        { "pattern": "tɕ", "replace": "tʃ", "note": "च = alveolo-palatal [t͡ɕ]~[t͡ʃ] (backbone strips the tie, so match tɕ)" },
+        { "pattern": "dʑ", "replace": "dʒ", "note": "ज = [d͡ʑ]~[d͡ʒ]" },
+        { "pattern": "ɕ", "replace": "ʃ", "note": "श = [ɕ]~[ʃ] notation" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "geminate NOTATION: our length Cː vs the referee's doubled consonant (अन्न ənnᵊ)" }
+    ]
+}
