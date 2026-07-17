@@ -55,6 +55,7 @@ import { createUzbek } from "./languages/uzbek/uzbek.ts";
 import { createMaithili } from "./languages/maithili/maithili.ts";
 import { createUkrainian } from "./languages/ukrainian/ukrainian.ts";
 import { createSundanese } from "./languages/sundanese/sundanese.ts";
+import { createNepali } from "./languages/nepali/nepali.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
@@ -214,6 +215,8 @@ function build(lang: string): Phonemizer {
             return createUkrainian();
         case "su":
             return createSundanese();
+        case "ne":
+            return createNepali((latin) => getPhonemizer("en").text(latin));
         case "nan":
             return createMinnan((latin) => getPhonemizer("en").text(latin));
         case "yo":
