@@ -55,7 +55,7 @@ function nativise(en: string): string {
         .replace(/ɝ/gu, "ɔ").replace(/ɚ/gu, "a") // NURSE/lettER — the r is absorbed
         .replace(/ʰ/gu, "").replace(/̬/gu, "") // deaspirate, un-flap
         .replace(/θ/gu, "t").replace(/ð/gu, "d") // TH-stopping
-        .replace(/ɫ/gu, "l")
+        .replace(/ɫ/gu, "l").replace(/ʲ/gu, "j") // dark-l → l; palatal glide (abbreviate→abɾivijet) → j
         .replace(new RegExp(`[ɹr](?=[${V}])`, "gu"), "ɾ") // ONSET r → tap
         .replace(/[ɹr]/gu, "") // CODA r → dropped (Naija is non-rhotic)
         .replace(/[iɪᵻ]/gu, "i").replace(/[uʊ]/gu, "u") // FLEECE/KIT, GOOSE/FOOT

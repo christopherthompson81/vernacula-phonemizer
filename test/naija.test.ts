@@ -58,11 +58,12 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // OOV substrate loans (danfo, egusi) fall through to the rule g2p instead.
         const cases: [string, string][] = [
             ["once", "wɔns"], // STRUT → ɔ
-            ["when", "wɛn"], // wh → w, DRESS → ɛ
+            ["when", "wɛn"], // DRESS → ɛ
             ["while", "wail"], // PRICE → ai
             ["because", "bikɔz"], // THOUGHT → ɔ
-            ["water", "wata"], // non-rhotic coda (r dropped)
+            ["sister", "sista"], // non-rhotic coda (r dropped) + lettER → a
             ["first", "fɔst"], // NURSE → ɔ
+            ["abbreviate", "abɾivijet"], // palatal glide ʲ → j
             ["though", "do"], // ð → d (TH-stopping)
             ["people", "pipal"], // schwa → a (lossy — the documented GenAm-source ceiling)
         ];
