@@ -1,0 +1,62 @@
+// Native canonical-IPA definition for Malayalam (ml) — a Dravidian Brahmic abugida read by the generic engine
+// (core/abugida.ts), mirroring Telugu/Kannada. Like the other Dravidian languages (and unlike Hindi) Malayalam
+// does NOT delete the inherent vowel — every akshara is pronounced (inherent /a/, [ɐ] phonetically — the referee
+// writes ɐ, folded). Dravidian short/long e,o are distinguished (എ e / ഏ eː, ഒ o / ഓ oː). Retroflex ʈ ɖ ɳ ɭ
+// (ട ഡ ണ ള) vs dental t̪ d̪ (ത ദ) vs the ALVEOLAR series റ (r) / ന (n); ഴ→ɻ (retroflex approximant, shared with
+// Tamil), ഷ→ʂ. Malayalam-specific handling (chillu pure-consonants, word-final samvritokaram) is in malayalam.ts.
+// Validated against wikipron mal + kaikki mal.
+{
+    "language": "ml",
+    "name": "Malayalam",
+    "script": "Malayalam",
+    "provenance": "Authored from the Unicode Malayalam chart + standard Malayalam phonology. This file IS the language data — the generic abugida engine reads it directly.",
+
+    "inherentVowel": "a",
+
+    "consonants": {
+        "ക": { "ipa": "k" }, "ഖ": { "ipa": "kʰ" }, "ഗ": { "ipa": "ɡ" }, "ഘ": { "ipa": "ɡʱ" }, "ങ": { "ipa": "ŋ" },
+        "ച": { "ipa": "t͡ʃ" }, "ഛ": { "ipa": "t͡ʃʰ" }, "ജ": { "ipa": "d͡ʒ" }, "ഝ": { "ipa": "d͡ʒʱ" }, "ഞ": { "ipa": "ɲ" },
+        "ട": { "ipa": "ʈ" }, "ഠ": { "ipa": "ʈʰ" }, "ഡ": { "ipa": "ɖ" }, "ഢ": { "ipa": "ɖʱ" }, "ണ": { "ipa": "ɳ" },
+        "ത": { "ipa": "t̪", "note": "DENTAL (vs retroflex ട=ʈ)" }, "ഥ": { "ipa": "t̪ʰ" }, "ദ": { "ipa": "d̪" }, "ധ": { "ipa": "d̪ʱ" }, "ന": { "ipa": "n" },
+        "പ": { "ipa": "p" }, "ഫ": { "ipa": "pʰ" }, "ബ": { "ipa": "b" }, "ഭ": { "ipa": "bʱ" }, "മ": { "ipa": "m" },
+        "യ": { "ipa": "j" }, "ര": { "ipa": "ɾ", "note": "tap" }, "റ": { "ipa": "r", "note": "ALVEOLAR trill/tap (റ്റ geminate → rː; the referee writes it doubled)" }, "ല": { "ipa": "l" }, "വ": { "ipa": "ʋ" },
+        "ശ": { "ipa": "ʃ" }, "ഷ": { "ipa": "ʂ" }, "സ": { "ipa": "s" }, "ഹ": { "ipa": "h" },
+        "ള": { "ipa": "ɭ", "note": "retroflex lateral" }, "ഴ": { "ipa": "ɻ", "note": "retroflex approximant (shared with Tamil)" }, "ഺ": { "ipa": "t̪" }
+    },
+
+    "independentVowels": {
+        "അ": { "ipa": "a", "note": "short a (inherent; [ɐ])" },
+        "ആ": { "ipa": "aː", "note": "long a" },
+        "ഇ": { "ipa": "i" }, "ഈ": { "ipa": "iː" }, "ഉ": { "ipa": "u" }, "ഊ": { "ipa": "uː" },
+        "ഋ": { "ipa": "ɾu", "note": "vocalic r" }, "ൠ": { "ipa": "ɾuː" }, "ഌ": { "ipa": "lu", "note": "vocalic l (rare)" }, "ൡ": { "ipa": "luː" },
+        "എ": { "ipa": "e", "note": "SHORT e (Dravidian)" }, "ഏ": { "ipa": "eː", "note": "long e" }, "ഐ": { "ipa": "ai" },
+        "ഒ": { "ipa": "o", "note": "SHORT o (Dravidian)" }, "ഓ": { "ipa": "oː", "note": "long o" }, "ഔ": { "ipa": "au" }
+    },
+
+    "vowelSigns": {
+        "ാ": { "ipa": "aː" }, "ി": { "ipa": "i" }, "ീ": { "ipa": "iː" }, "ു": { "ipa": "u" }, "ൂ": { "ipa": "uː" },
+        "ൃ": { "ipa": "ɾu" }, "ൄ": { "ipa": "ɾuː" }, "െ": { "ipa": "e" }, "േ": { "ipa": "eː" }, "ൈ": { "ipa": "ai" },
+        "ൊ": { "ipa": "o" }, "ോ": { "ipa": "oː" }, "ൌ": { "ipa": "au" }, "ൗ": { "ipa": "au", "note": "au-length mark" }
+    },
+
+    "signs": {
+        "virama": { "char": "്", "effect": "suppressInherentVowel", "note": "chandrakkala — vowel suppression / clusters" },
+        "anusvara": { "char": "ം", "effect": "nasalizeVowel", "note": "→ homorganic nasal; final → [m]" },
+        "chandrabindu": { "char": "ഁ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel" },
+        "visarga": { "char": "ഃ", "effect": "appendH", "note": "→ [h]" },
+        "nukta": { "char": "഼", "effect": "composeNukta", "note": "nukta (rare)" }
+    },
+
+    "clausePunctuation": {
+        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Malayalam spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes
+    // (Indic lakh/crore); 21-99 compound spellings are a bounded remaining task.
+    "numbers": {
+        "units": ["പൂജ്യം", "ഒന്ന്", "രണ്ട്", "മൂന്ന്", "നാല്", "അഞ്ച്", "ആറ്", "ഏഴ്", "എട്ട്", "ഒമ്പത്"],
+        "teens": ["പത്ത്", "പതിനൊന്ന്", "പന്ത്രണ്ട്", "പതിമൂന്ന്", "പതിനാല്", "പതിനഞ്ച്", "പതിനാറ്", "പതിനേഴ്", "പതിനെട്ട്", "പത്തൊമ്പത്"],
+        "tens": { "20": "ഇരുപത്", "30": "മുപ്പത്", "40": "നാല്പത്", "50": "അമ്പത്", "60": "അറുപത്", "70": "എഴുപത്", "80": "എൺപത്", "90": "തൊണ്ണൂറ്" },
+        "magnitudes": { "hundred": "നൂറ്", "thousand": "ആയിരം", "lakh": "ലക്ഷം", "crore": "കോടി" }
+    }
+}

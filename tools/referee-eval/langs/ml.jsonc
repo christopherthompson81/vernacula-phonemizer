@@ -1,0 +1,23 @@
+// Malayalam (ml) — Dravidian Brahmic abugida (mirrors Telugu/Kannada). wikipron mal (human) PRIMARY + kaikki mal
+// (human) SECONDARY. Folds: the inherent short /a/ = [ɐ]~[a] (the referee writes ɐ), length (non-phonemic in the
+// backbone), gemination (our length Cː vs the referee's doubled consonant), dental n̪~n, ʂ~ʃ, tap ɾ, diphthong
+// offglide notation (ɐi̯~ai).
+{
+    "referees": [
+        { "file": "ml.wikipron-mal-broad.tsv", "source": "wikipron mal_mlym broad (human)", "role": "primary" },
+        { "file": "ml.kaikki-mal.tsv", "source": "kaikki mal (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "(?:t|tʃ)tʃ", "replace": "tʃ", "note": "geminate affricate NOTATION: our length t͡ʃː vs the referee's doubled t͡ʃt͡ʃ" },
+        { "pattern": "(?:d|dʒ)dʒ", "replace": "dʒ", "note": "geminate affricate notation (voiced)" },
+        { "pattern": "n̪", "replace": "n", "note": "the referee writes DENTAL n̪ for ന; we write plain n (the alveolar/dental contrast is positional, not phonemic in the orthography)" },
+        { "pattern": "ʱ", "replace": "", "note": "voiced ASPIRATES (Sanskrit loans ഭ ധ ഘ) — the referee consistently drops the breathy voice (ɐbʱid͡ʒaːɾam → ɐbid͡ʒaːɾam); we keep bʱ, fold for comparison" },
+        { "pattern": "kju", "replace": "ku", "note": "the -ിക്കുക verb infinitive: the referee writes a narrow palatal ONGLIDE [kkju] (from the preceding /i/) where we write plain [kːu] — a consistent narrow-transcription artifact, not a segment we author" },
+        { "pattern": "ɾ", "replace": "r", "note": "the rhotic ര: we write tap ɾ everywhere; the referee writes ɾ intervocalically but r in CLUSTERS (akɾamam~akramam) — neutralize tap~trill (ര/റ are both rhotic)" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "geminate NOTATION: our length Cː (backbone-stripped) vs the referee's DOUBLED consonant" },
+        { "pattern": "[aɑə]", "replace": "ɐ", "note": "the inherent /a/ = [ɐ]~[a]~[ɑ] — the referee's short-a notation (ɐ native, ɑ in Sanskrit loans)" },
+        { "pattern": "ai", "replace": "ɐi", "note": "the ഐ diphthong ai~ɐi̯ (referee writes an offglide i̯; length/tie already backbone-stripped)" },
+        { "pattern": "au", "replace": "ɐu", "note": "the ഔ diphthong au~ɐu̯" }
+    ]
+}
