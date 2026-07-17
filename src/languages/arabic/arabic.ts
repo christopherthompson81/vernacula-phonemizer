@@ -86,6 +86,7 @@ function compileVariety(d: VarietyDef): VarietyRules {
 }
 const VARIETIES: Record<string, VarietyRules> = {
     egyptian: compileVariety(loadManifest<VarietyDef>(import.meta.url, "egyptian.jsonc")),
+    levantine: compileVariety(loadManifest<VarietyDef>(import.meta.url, "levantine.jsonc")),
 };
 
 /** Phonemize a single diacritized Arabic word to canonical IPA (with a stress mark). `variety` (e.g. "egyptian")

@@ -81,6 +81,8 @@ function build(lang: string): Phonemizer {
             return createArabic();
         case "arz": // Egyptian Arabic — shares the Arabic engine, Egyptian variety data
             return createArabic("egyptian");
+        case "apc": // North Levantine Arabic (Syrian/Lebanese) — Levantine variety data
+            return createArabic("levantine");
         case "fr":
             return createFrench();
         case "pt":
