@@ -148,8 +148,10 @@ class TagalogPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
+                    // Number words bypass the final-glottal set — else it fires inconsistently by incidental
+                    // membership (sampu→sampuʔ but dalawampu not); keep the composed number system uniform.
                     for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeWord(wd));
+                        sink.emit(phonemizeWordRules(wd));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
