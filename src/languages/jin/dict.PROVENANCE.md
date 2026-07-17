@@ -22,7 +22,11 @@ in simplified Han) resolves too.
 - **Simplified aliases:** the kaikki headwords are traditional. Each traditional key is converted
   character-by-character to simplified via **OpenCC `TSCharacters`** (Apache-2.0) and, where the result differs
   and doesn't collide with an existing key, added as an alias pointing at the same reading (中國 → 中国, both →
-  `t͡suŋ˩˩ kuəʔ˨`). 2,033 aliases added, 17 collisions skipped.
+  `t͡suŋ˩˩ kuəʔ˨`). 2,033 aliases added, 17 collisions skipped. **Caveat (inherent to any simplified-Han G2P):**
+  where one simplified glyph merges several traditional characters with different readings (只/隻, 干/幹/乾,
+  里/裏), the merged glyph keeps only its own primary-sense reading — the alias generator skips it on collision,
+  so it never overwrites, but a reader who intends the *other* traditional sense gets the primary one. This is
+  simplified ambiguity present in the source, not an aliasing defect.
 - **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
   OpenCC `TSCharacters` is Apache-2.0 (the same basis already used for the Wu simplified↔traditional folds).
 
