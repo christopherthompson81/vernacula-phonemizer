@@ -1,0 +1,28 @@
+// Dutch (nl) — Northern Standard Dutch, a cleanroom rule-based g2p. Referees: kaikki nl (PRIMARY, HUMAN, 46.5k)
+// + wikipron nld_latn broad (SECONDARY, HUMAN, 45.9k). Both are Wiktionary-derived — a different parsing/coverage
+// of the SAME source, so this is weak (same-source) corroboration, not two independent referees; recorded as the
+// secondaryGap. Duplicate/variant prons are merged into tab-separated variants (the eval credits any). The
+// BACKBONE strips length ː and the offglide ̯, so the surviving signal is vowel QUALITY (aː/ɑ → a/ɑ stays
+// contrastive: schwa vs full vowel is the load-bearing distinction) + consonants. Folds are notational only.
+{
+    "referees": [
+        {
+            "file": "nl.kaikki-nl.tsv",
+            "source": "kaikki nl (Wiktionary, human)",
+            "role": "primary"
+        },
+        {
+            "file": "nl.wikipron-nld-broad.tsv",
+            "source": "wikipron nld_latn broad (human)",
+            "role": "secondary"
+        }
+    ],
+    "secondaryGap": "Both Dutch referees (kaikki, wikipron) are Wiktionary-derived — the same underlying human source parsed two ways, so they are weak (same-source) corroboration rather than two independent referees. No non-Wiktionary Dutch pronunciation corpus is free; epitran nld-Latn is unusable as a referee here because it does NOT reduce unstressed ⟨e⟩ to schwa (water→ʋaːtɛr), the opposite of the truth and of both Wiktionary referees.",
+    "folds": [
+        {
+            "pattern": "β̞",
+            "replace": "ʋ",
+            "note": "kaikki narrow bilabial-approximant variant of ⟨w⟩ → the labiodental ʋ (notational)"
+        }
+    ]
+}

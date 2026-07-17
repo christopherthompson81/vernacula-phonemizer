@@ -1,0 +1,133 @@
+// Native canonical-IPA MANIFEST for Dutch (nl) — Northern Standard Dutch (Netherlands), broad IPA, matching the
+// wikipron nld_latn broad convention. Self-describing DATA (the vowel length maps, final-devoicing pairs, clause
+// punctuation, number words); the ALGORITHMS (the open/closed length scan, the diphthong/digraph scanner, final
+// devoicing, stress, number composition) stay in code (g2p.ts, dutch.ts, numbers.ts) and read these tables.
+//
+// LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "vowels", "voicedFinal", "clausePunctuation",
+// "numbers". "convention" / "provenance" are documentation.
+{
+    "language": "nl",
+    "name": "Dutch (Northern Standard / Netherlands)",
+    "provenance": "Cleanroom, rule-based g2p (open/closed-syllable vowel length, Dutch diphthongs, final devoicing g→x/ɣ, w→ʋ, h→ɦ) + a cardinal number compositor. espeak-independent. The number words are language facts.",
+
+    // The canonical-IPA conventions the values below are written in (documentation).
+    "convention": {
+        "vowelLength": "tense/long vs lax/short by syllable structure: open (V# or V.CV) → tense aː eː i oː y øː; closed (VC# or VCC) → lax ɑ ɛ ɪ ɔ ʏ; unstressed → ə",
+        "finalDevoicing": "Auslautverhärtung — b/d/v/z/ɣ → p/t/f/s/x word/syllable-finally (hond → hɔnt, dag → dɑx)",
+        "fricatives": "g is /ɣ/ in the onset (geven → ɣeːvə), /x/ in a coda (dag → dɑx); ch → x; sch → sx (school) / s (final -isch)",
+        "glides": "diphthongs ɛi̯ (ij/ei) œy̯ (ui) ɑu̯ (ou/au) øː (eu); w → ʋ (labiodental); h → ɦ (voiced)",
+        "numbers": "compound words, units before tens with the connector -en- (eenentwintig); split at thousand/million boundaries",
+    },
+
+    // IPA vowel inventory (nucleus detection).
+    "vowelChars": "ɑaɛeɪioɔuyʏøœəɐ",
+
+    // Orthographic vowel letter → IPA, chosen by the g2p's open/closed length rule. `long` = tense (open
+    // syllable / doubled); `short` = lax (closed syllable). Trema letters (ë ï ö ü) base-map to their plain
+    // vowel; they never join a preceding vowel into a digraph (tweeën → tʋeːə, the ë breaks the ⟨ee⟩).
+    "vowels": {
+        "long": {
+            "a": "aː",
+            "e": "eː",
+            "i": "i",
+            "o": "oː",
+            "u": "y",
+            "y": "i",
+            "ë": "eː",
+            "ï": "i",
+            "ö": "øː",
+            "ü": "y",
+        },
+        "short": {
+            "a": "ɑ",
+            "e": "ɛ",
+            "i": "ɪ",
+            "o": "ɔ",
+            "u": "ʏ",
+            "y": "ɪ",
+            "ë": "ɛ",
+            "ï": "ɪ",
+            "ö": "œ",
+            "ü": "ʏ",
+        },
+    },
+
+    // Context-free consonant letters → IPA (the g2p's final switch). The context-DEPENDENT letters g (ɣ/x),
+    // c (s/k), s (sch), h (ɦ), x (→ks) and all digraphs/diphthongs stay in the g2p scanner.
+    "consonants": {
+        "b": "b",
+        "d": "d",
+        "f": "f",
+        "j": "j",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "q": "k",
+        "r": "r",
+        "s": "s",
+        "t": "t",
+        "v": "v",
+        "w": "ʋ",
+        "z": "z",
+    },
+
+    // Final devoicing (Auslautverhärtung): voiced obstruent → voiceless word/syllable-finally.
+    "voicedFinal": { "b": "p", "d": "t", "v": "f", "z": "s", "ɣ": "x", "ʒ": "ʃ" },
+
+    // Clause / phrase punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words. Units precede tens, compounded with the connector -en- (eenentwintig); composition
+    // logic is in numbers.ts. Tens index 0/1 are unused (0-19 come from `ones`).
+    "numbers": {
+        "ones": [
+            "nul",
+            "een",
+            "twee",
+            "drie",
+            "vier",
+            "vijf",
+            "zes",
+            "zeven",
+            "acht",
+            "negen",
+            "tien",
+            "elf",
+            "twaalf",
+            "dertien",
+            "veertien",
+            "vijftien",
+            "zestien",
+            "zeventien",
+            "achttien",
+            "negentien",
+        ],
+        "tens": [
+            "",
+            "",
+            "twintig",
+            "dertig",
+            "veertig",
+            "vijftig",
+            "zestig",
+            "zeventig",
+            "tachtig",
+            "negentig",
+        ],
+        "connector": "en",
+        "hundred": "honderd",
+        "thousand": "duizend",
+        "million": { "sg": "een miljoen", "pl": "miljoen" },
+        "milliard": { "sg": "een miljard", "pl": "miljard" },
+    },
+}
