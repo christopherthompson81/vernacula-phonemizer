@@ -48,6 +48,7 @@ import { createSwahili } from "./languages/swahili/swahili.ts";
 import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
 import { createKannada } from "./languages/kannada/kannada.ts";
+import { createMalayalam } from "./languages/malayalam/malayalam.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createMinnan } from "./languages/minnan/minnan.ts";
@@ -184,6 +185,8 @@ function build(lang: string): Phonemizer {
             return createPashto((latin) => getPhonemizer("en").text(latin));
         case "kn":
             return createKannada((latin) => getPhonemizer("en").text(latin));
+        case "ml":
+            return createMalayalam((latin) => getPhonemizer("en").text(latin));
         case "am":
             return createAmharic((latin) => getPhonemizer("en").text(latin));
         case "bho":
