@@ -13,13 +13,17 @@
 
 export interface NumbersDef {
     units: string[]; // 0..9 spellings
-    teens: string[]; // 10..19 spellings
-    tens: Record<string, string>; // "20".."90" (round) spellings
+    teens?: string[]; // 10..19 spellings (Indic irregular teens; omitted by systems that compose them, e.g. Turkic oʻn+unit)
+    tens: Record<string, string>; // "20".."90" (round) spellings (Turkic includes "10")
+    // Magnitude words. hundred/thousand are universal; Indic adds lakh/crore, Western/Turkic adds million/billion.
+    // (ADR-0002: the data-schema lift lands with the 2nd numbering system — Uzbek's Turkic composer.)
     magnitudes: {
         hundred: string;
         thousand: string;
-        lakh: string;
-        crore: string;
+        lakh?: string;
+        crore?: string;
+        million?: string;
+        billion?: string;
     };
     /** Optional full irregular 21..99 spellings (keyed by the number); overrides tens+unit composition. */
     compound?: Record<string, string>;
@@ -36,7 +40,7 @@ export type NumberComposer = (n: number, d: NumbersDef) => (string | null)[];
  */
 export const indicNumberWords: NumberComposer = (n, d) => {
     if (n < 10) return [d.units[n]!];
-    if (n < 20) return [d.teens[n - 10]!];
+    if (n < 20) return [d.teens![n - 10]!];
     if (n < 100) {
         const t = Math.floor(n / 10) * 10,
             u = n % 10;
@@ -70,7 +74,7 @@ export const indicNumberWords: NumberComposer = (n, d) => {
             r = n % 100000;
         return [
             ...indicNumberWords(l, d),
-            d.magnitudes.lakh,
+            d.magnitudes.lakh!,
             ...(r ? indicNumberWords(r, d) : []),
         ];
     }
@@ -78,7 +82,7 @@ export const indicNumberWords: NumberComposer = (n, d) => {
         r = n % 10000000;
     return [
         ...indicNumberWords(c, d),
-        d.magnitudes.crore,
+        d.magnitudes.crore!,
         ...(r ? indicNumberWords(r, d) : []),
     ];
 };
