@@ -1,0 +1,31 @@
+// Native canonical-IPA definition for Oromo / Afaan Oromoo (om) — a shallow, near-phonemic Latin (Qubee)
+// orthography. oromo.ts reads this file: digraphs first (ch→t͡ʃ, dh→ᶑ, ny→ɲ, ph→pʼ, sh→ʃ), then single letters,
+// with DOUBLED VOWELS = long (aa→aː) and DOUBLED CONSONANTS = geminate (bb→bː) handled in the scanner, and the
+// apostrophe → glottal stop [ʔ] (buʼaa→buʔaː). Qubee is largely phonemic — the g2p is deterministic.
+// Oromo (Cushitic) fills a census gap: the EJECTIVES c→t͡ʃʼ, q→kʼ, x→tʼ, ph→pʼ + the retroflex IMPLOSIVE dh→ᶑ.
+{
+    "language": "om",
+    "name": "Oromo",
+    "script": "Latin",
+    "provenance": "Authored from the standard Qubee orthography + Oromo phonology; cross-checked against epitran orm-Latn.",
+
+    // Multi-letter graphemes (longest-first).
+    "digraphs": {
+        "ch": "t͡ʃ", "dh": "ᶑ", "ny": "ɲ", "ph": "pʼ", "sh": "ʃ"
+    },
+
+    // Single consonant letters → IPA. The EJECTIVES (c q x) and the loan letters (v z) are the Oromo signature.
+    "consonants": {
+        "p": "p", "b": "b", "t": "t", "d": "d", "k": "k", "g": "ɡ",
+        "c": "t͡ʃʼ", "q": "kʼ", "x": "tʼ",
+        "f": "f", "s": "s", "h": "h", "m": "m", "n": "n", "l": "l", "r": "r",
+        "w": "w", "y": "j", "j": "d͡ʒ", "v": "v", "z": "z"
+    },
+
+    // Vowels → IPA (5-vowel system; length is written by DOUBLING, handled in the scanner: aa→aː).
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
