@@ -64,6 +64,7 @@ import { phonemizeWord as or } from "../../src/languages/odia/odia.ts";
 import { phonemizeWord as uz } from "../../src/languages/uzbek/uzbek.ts";
 import { phonemizeWord as mai } from "../../src/languages/maithili/maithili.ts";
 import { phonemizeWord as uk } from "../../src/languages/ukrainian/ukrainian.ts";
+import { phonemizeWord as su } from "../../src/languages/sundanese/sundanese.ts";
 import { phonemizeWord as sw } from "../../src/languages/swahili/swahili.ts";
 // RULE-ONLY for gu: the shipped phonemizeWord applies a wikipron/kaikki-informed schwa lexicon, so evaluating it
 // against those referees would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
@@ -125,6 +126,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     uz,
     mai,
     uk,
+    su,
     ml,
     jv,
     sw,
