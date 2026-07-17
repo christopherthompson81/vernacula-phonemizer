@@ -82,6 +82,18 @@ function g2p(word: string): string {
         }
         // Vowel/glide letters: a glide (w/j) after a vowel OR before a word-final ه (ـیه→jə); else the long vowel.
         if (isVowelCarrier(ch)) {
+            // Explicit glide: وْ/یْ (a sukun on the و/ی) → the consonantal glide w/j — a cluster onset, NOT a vowel
+            // nucleus (الوْتل→alwətəl vs the long-vowel الوتل→alot̪əl). Medial و/ی is long-vowel-vs-glide ambiguous, so
+            // the sukun makes it mineable/lexicon-correctable. Consumes the sukun; epenthesis before a next consonant.
+            if ((ch === WAW || ch === YA || ch === YA_AR) && s[i + 1] === DEF.sukun) {
+                out += ch === WAW ? "w" : "j";
+                const nx = s[i + 2];
+                if (nx !== undefined && nx in C && !isVowelCarrier(nx) && nx !== HE && nx !== HE_DO &&
+                    s[i + 3] !== DEF.sukun)
+                    out += INH;
+                i += 2;
+                continue;
+            }
             const glideBeforeFinalHe =
                 s[i + 1] === HE && i + 2 === n && (ch === WAW || ch === YA || ch === YA_AR);
             // ـيا: a ی before a word-final ا is the glide [j], and the ا is the [ɑ] nucleus (اسپانيا→əspɑnjɑ,

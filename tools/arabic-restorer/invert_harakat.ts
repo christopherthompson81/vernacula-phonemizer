@@ -90,6 +90,12 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
             out.push({ pos: i, options: YA_OPTS });
             continue;
         }
+        // ps: a MEDIAL و between two consonants is long-vowel (bare, الوتل→alot̪əl) vs GLIDE (وْ sukun, الوْتل→alwətəl).
+        const cons = (x: string | undefined) => x !== undefined && cfg.cons.includes(x) && !cfg.vowelLetters.includes(x);
+        if (cfg.silverCode === "pus" && c === "و" && cons(chars[i - 1]) && cons(chars[i + 1])) {
+            out.push({ pos: i, options: [BARE, SUKUN] });
+            continue;
+        }
         if (!cfg.cons.includes(c) || cfg.vowelLetters.includes(c)) continue;
         const next = chars[i + 1];
         // A ی/و that is itself followed by a vowel letter is a GLIDE (‑iyā, ‑uwā); the consonant before it still

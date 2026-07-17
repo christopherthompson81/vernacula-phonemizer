@@ -85,3 +85,25 @@ Result: shipped restoration lexicon 256→**327 entries**; SYNC eval wikipron 47
 Gold + numbers unaffected; only ps changed. This confirms the diagnosis: Pashto is g2p-coverage-bound, not
 data-bound — each g2p gap (‑ول glide, ‑ای diphthong) unlocks a class the existing mining then restores per-word.
 The hard multi-dialect floor (~28 words, ~2%) remains.
+
+## Continuation 3 — 2026-07-16 — medial و-glide (الوتل→alwətəl), the closer
+
+The last sizable clean lever from the un-invertible analysis: the MEDIAL و-glide (~59), the الو- cousin of the
+-ول suffix. Here و is a glide directly after a consonant (cluster lw), which the g2p never produced (it only
+glides و after a vowel). Same g2p-unlock-then-mine pattern:
+- g2p: an explicit-glide marker — a sukun on و/ی (وْ/یْ) → the consonantal glide w/j (a cluster onset, not a
+  nucleus): الوْتل→alwətəl vs the bare long-vowel الوتل→alot̪əl. Consumes the sukun; epenthesis before a next
+  consonant. Bare skeletons (no sukun) unaffected → gold green.
+- inverter: a medial و between two consonants gets a [BARE, SUKUN] slot (long vowel vs glide), mined per-word.
+
+Result: shipped restoration lexicon 326→**351**; SYNC eval wikipron 53.8%→**55.7%**, kaikki 60.8%→**63.0%**.
+
+## Where Pashto stops — the honest ceiling
+
+The high-value g2p levers (-ول glide, -ای diphthong, medial و-glide) are now SPENT. The remaining misses (~625)
+are ~30% HARD data-bound — multi-dialect ښ/ږ (129, the referee spans ʂ~x~ç / ʐ~ɡ~ʝ; unfoldable without merging
+خ/ګ) + letter-name referee artifacts (65) + dialect consonant variants (ف→p, ځ→z) — and the rest is a long tail
+of small, increasingly-ambiguous reading disambiguations (word-initial و, و=u/o, epenthesis position) with steep
+diminishing returns. The realistic ceiling on THIS referee is ~60-65%; the gap is REFEREE-bound (multi-dialect +
+artifacts), not engine-bound. Pashto arc: 35.4%→55.7% wikipron / 63.0% kaikki, entirely via the data/engine
+layer — the neural was never the lever (net-negative throughout, as for Persian).
