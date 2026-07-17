@@ -105,9 +105,9 @@ export function toSegments(word: string): Seg[] {
         } // oei → ui̯ (moeite)
 
         // ── Two-letter vowel digraphs. ──
-        if (c === "i" && (nx === "j" || nx === "e") && !(nx === "e" && isV(nx2))) {
-            // ij / ei-less i... ⟨ij⟩ → ɛi̯; ⟨ie⟩ → i (long). ⟨ie⟩ before another vowel (Italië) is i + hiatus, but
-            // word-medial ⟨ie⟩ stays i here (the following vowel is a separate nucleus).
+        if (c === "i" && (nx === "j" || nx === "e")) {
+            // ⟨ij⟩ → ɛi̯; ⟨ie⟩ → i (long). ⟨ie⟩ + ⟨ë⟩ is the -iën plural (knieën, bacteriën): ⟨ie⟩→i here and the
+            // ⟨ë⟩ becomes its own schwa next iteration. (⟨ië⟩ without the ⟨e⟩ — Italië — never enters this branch.)
             if (nx === "j") {
                 push("ɛi̯", i, true);
                 i += 2;
@@ -227,6 +227,17 @@ export function toSegments(word: string): Seg[] {
             // stressed first ⟨e⟩ (eten → eːtə) are consumed earlier, so they keep their full quality. Non-initial
             // FULL-vowel ⟨e⟩ (loanword second-syllable stress, protest → proːtɛst) is the minority residual.
             if (c === "e" && seenVowel) {
+                push("ə", i, true);
+                i++;
+                continue;
+            }
+            // Trema ⟨ë⟩ in a final -ën / -ë ending (a hiatus/plural schwa: tweeën → tʋeːə, ideeën, knieën) → schwa.
+            // A stressed ⟨ë⟩ with more material after it (poëzie → poːeːzi) keeps its full quality (falls through).
+            if (
+                c === "ë" &&
+                seenVowel &&
+                !new RegExp(`[${VOWELS}]`, "u").test(w.slice(i + 1))
+            ) {
                 push("ə", i, true);
                 i++;
                 continue;

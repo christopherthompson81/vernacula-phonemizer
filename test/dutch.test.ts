@@ -53,9 +53,18 @@ describe("Dutch canonical IPA", () => {
         expect(phonemizeWord("lijk")).toBe("lˈɛi̯k"); // word-initial lijk: NOT the suffix
     });
 
-    test("unstressed-prefix stress shift never lands on a schwa", () => {
-        expect(phonemizeWord("verkopen")).toBe("vɛrkˈoːpən"); // stress → kopen
-        expect(phonemizeWord("geven")).toBe("ɣˈeːvən"); // ge = root here, stress stays first (no stressed schwa)
+    test("unstressed prefix: stress shifts + ge-/be-/ver-/te- vowel reduces to schwa", () => {
+        expect(phonemizeWord("verkopen")).toBe("vərkˈoːpən"); // ver → vər (reduced), stress → kopen
+        expect(phonemizeWord("gemaakt")).toBe("ɣəmˈaːkt"); // ge- participle → ɣə
+        expect(phonemizeWord("begin")).toBe("bəɣˈɪn"); // be- → bə
+        expect(phonemizeWord("geven")).toBe("ɣˈeːvən"); // ge = ROOT here (nucleus2 is schwa) → stays ɣeː, stress first
+        expect(phonemizeWord("geel")).toBe("ɣˈeːl"); // monosyllable → not a prefix
+    });
+
+    test("trema ⟨ë⟩ in the -ën plural → schwa (but stressed ë keeps quality)", () => {
+        expect(phonemizeWord("knieën")).toBe("knˈiən"); // ie→i, ë→ə
+        expect(phonemizeWord("tweeën")).toBe("tʋˈeːən"); // ee→eː, ë→ə
+        expect(phonemizeWord("poëzie")).toBe("pˈoːeːzi"); // stressed ë keeps eː (more material after)
     });
 
     test("function words + numbers", () => {

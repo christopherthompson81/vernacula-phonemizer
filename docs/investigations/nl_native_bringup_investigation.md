@@ -39,14 +39,23 @@ Native unstressed suffixes -ig→əx, -lijk→lək, -isch→is (all guarded agai
 the noun lijk→lɛi̯k) added another +2.4pp; adding ⟨y⟩ to the vowel maps (a real dropped-vowel bug: typisch→tpis)
 +0.6pp. High-frequency clitics (de→də) are a small reduced-function-word map.
 
+**ge-/be-/ver-/te- prefix reduction (+3.5pp, adversarial-review fix).** The first review flagged that the ge-
+participle class (gemaakt→ɣəmaːkt, not ɣeːmaːkt) is high-frequency *native*, not the loanword tail. The fix
+couples the prefix-vowel reduction to the SAME decision the stress placer already makes: the prefix is treated as
+unstressed (stress shifts past it) only when a later non-schwa nucleus exists — which cleanly separates a real
+prefix (ge·maakt, nucleus2 = aː → reduce ge→ɣə) from a ⟨ge⟩-root (geven, nucleus2 = ə → no shift, ɣeː stays). ont-/
+her- shift stress but keep their full vowel (ɔnt-/hɛr-), so they are excluded from the reduction. The review also
+fixed the -ën plural (knieën→kniən: ⟨ë⟩→schwa, guarded so stressed poëzie→poːeːzi keeps eː) and the unreachable
+leading-apostrophe clitics ('t→ət).
+
 ## Run — vs the two referees
 
-**61.0% vs kaikki (primary) / 61.2% vs wikipron (secondary).** The two Wiktionary parsings agree to within 0.2pp,
-so 61% is a real ceiling for the pure rule core, not a referee artifact. The residual is:
+**64.5% vs kaikki (primary) / 64.7% vs wikipron (secondary).** The two Wiktionary parsings agree to within 0.2pp,
+so ~64.5% is a real ceiling for the pure rule core, not a referee artifact. The residual is:
 
 1. **The referee's composition.** Both are dictionary-lemma lists dense with Dutch **proper nouns / place-names**
    (Achterbos, Beisterveld, Batenburg) and **loanwords** (Champagne, America, Archipel) — out-of-distribution for
-   a native-Dutch rule set. On the native core the g2p is far better than 61% (all 31 hand-diagnostic words correct).
+   a native-Dutch rule set. On the native core the g2p is far better than 64.5% (all 31 hand-diagnostic words correct).
 2. **The loanword lexical tail** — the German pattern exactly: non-initial stress the initial-stress heuristic
    over-reduces (archipel→…pɛl, not …pəl), loan vowel quality (America→ɑ…), French-loan consonants (gn→nj, ch→ʃ),
    the be-/ge-/ver- prefix vowel (begin→bə… vs our bɛ…). None is a rule — each is a finite set of known words, so
