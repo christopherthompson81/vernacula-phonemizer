@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import {
+    numberWords,
     phonemizeWord,
     phonemizeWordRules,
 } from "../src/languages/tagalog/tagalog.ts";
@@ -50,5 +51,42 @@ describe("tagalog canonical IPA", () => {
     test("hyphen → glottal stop; number", () => {
         expect(phonemize("pag-ibig", "tl")).toBe("paɡʔˈibiɡ");
         expect(phonemize("salamat", "tl")).toContain("salˈamat");
+    });
+
+    // Native Tagalog number morphology (Wiktionary Appendix:Tagalog_numbers): irregular teens (labing- sandhi) and
+    // tens (o→u raising, na/ng split), the productive -ng/" na" ligature + daan→raan + at→'t sandhi. Orthography
+    // asserted directly; the IPA is derived via g2p (numbers are final-stressed except a penult exception set).
+    test("number orthography (composition + ligature sandhi)", () => {
+        const cases: [number, string][] = [
+            [12, "labindalawa"],
+            [14, "labing-apat"],
+            [17, "labimpito"],
+            [20, "dalawampu"],
+            [21, "dalawampu't isa"],
+            [40, "apatnapu"],
+            [90, "siyamnapu"],
+            [100, "sandaan"],
+            [101, "sandaan at isa"],
+            [125, "sandaan at dalawampu't lima"],
+            [200, "dalawang daan"],
+            [400, "apat na raan"], // daan → raan after the " na" ligature
+            [900, "siyam na raan"],
+            [1000, "sanlibo"],
+            [2000, "dalawang libo"],
+            [12345, "labindalawang libo tatlong daan at apatnapu't lima"],
+            [100000, "sandaang libo"], // n-final ligature: daan/sandaan → daang/sandaang (not " na")
+            [200000, "dalawang daang libo"],
+            [1000000, "isang milyon"],
+        ];
+        for (const [n, exp] of cases) expect(numberWords(n)).toBe(exp);
+    });
+
+    test("number stress (final-except-penult; number-sense homographs)", () => {
+        expect(phonemize("0", "tl")).toBe("sˈeɾo"); // séro — penult exception
+        expect(phonemize("5", "tl")).toBe("limˈa"); // limá — final (number sense, general lexicon abstains)
+        expect(phonemize("20", "tl")).toBe("dalawampˈu"); // dalawampú — final
+        expect(phonemize("100", "tl")).toBe("sandaʔˈan"); // sandaán — final
+        expect(phonemize("1000", "tl")).toBe("sanlˈibo"); // sanlíbo — penult exception
+        expect(phonemize("200", "tl")).toBe("dalawˈaŋ daʔˈan"); // dalawáng daán — ligature keeps final stress
     });
 });

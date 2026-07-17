@@ -14,13 +14,16 @@ import { loadLines, loadTsvMap } from "../../core/loadTsv.ts";
 
 interface NumbersDef {
     units: string[];
-    ten: string;
-    teenPrefix: string;
-    tensSuffix: string;
-    hundred: string;
-    thousand: string;
+    teens: string[]; // 10–19: explicit (irregular labing- sandhi)
+    tens: string[]; // indexed by tens digit 1–9: explicit (o→u raising, na/ng split)
+    hundred: string; // daan
+    hundredAfterNa: string; // raan (after a " na" ligature: apat na raan)
+    hundred1: string; // sandaan (100)
+    thousand: string; // libo
+    thousand1: string; // sanlibo (1000)
     million: string;
-    and: string;
+    and: string; // at → 't after a vowel
+    stressPenult: string[]; // number roots that are penult- not final-stressed (séro, ápat, líbo, …)
 }
 interface TagalogDef {
     digraphs: Record<string, string>;
@@ -137,30 +140,69 @@ export function phonemizeWord(word: string): string {
     return ipa;
 }
 
-// ── Numbers (compositional; native Tagalog) ──────────────────────────────────
-function numberWords(n: number): string {
+// ── Numbers (native Tagalog; explicit irregular teens/tens + productive ligature sandhi) ──────────────────────
+const endsInVowel = (s: string): boolean => "aeiou".includes(s[s.length - 1] ?? "");
+
+/** The multiplier ligature before daan/libo/milyon: vowel-final → +ng (dalawa→dalawang), /n/-final → +g
+ *  (daan→daang, so sandaang libo = 100,000), other consonant → + " na" (apat→apat na). Attaches to the phrase's
+ *  last word, so a multi-word multiplier ligates correctly (…lima→…limang, sandaan→sandaang). */
+const ligate = (phrase: string): string =>
+    endsInVowel(phrase)
+        ? phrase + "ng"
+        : phrase.endsWith("n")
+          ? phrase + "g"
+          : phrase + " na";
+
+/** Attach a remainder r to a higher group: a sub-100 tail joins with "at" → "'t" after a vowel (dalawampu't isa;
+ *  sandaan at isa); a ≥100 tail is space-juxtaposed (isang libo dalawang daan). */
+function joinRemainder(high: string, r: number): string {
+    if (r === 0) return high;
+    const low = numberWords(r);
+    if (r >= 100) return `${high} ${low}`;
+    return endsInVowel(high) ? `${high}'t ${low}` : `${high} ${NUM.and} ${low}`;
+}
+
+/** Native Tagalog cardinal for a non-negative integer (exported for the orthography test; the IPA is derived by
+ *  running each space-separated word through the g2p). */
+export function numberWords(n: number): string {
     if (n < 0) return "";
     if (n < 10) return NUM.units[n]!;
-    if (n === 10) return NUM.ten;
-    if (n < 20) return `${NUM.teenPrefix} ${NUM.units[n - 10]}`;
+    if (n < 20) return NUM.teens[n - 10]!; // 10–19 explicit
     if (n < 100) {
-        const t = Math.floor(n / 10),
-            r = n % 10;
-        return `${NUM.units[t]}${NUM.tensSuffix}${r ? " " + NUM.and + " " + numberWords(r) : ""}`;
+        const t = Math.floor(n / 10);
+        return joinRemainder(NUM.tens[t]!, n % 10);
     }
     if (n < 1000) {
-        const h = Math.floor(n / 100),
-            r = n % 100;
-        return `${h === 1 ? "isang" : NUM.units[h]} ${NUM.hundred}${r ? " " + numberWords(r) : ""}`;
+        const h = Math.floor(n / 100);
+        const lig = ligate(NUM.units[h]!);
+        const daan = lig.endsWith("na") ? NUM.hundredAfterNa : NUM.hundred; // apat na raan vs dalawang daan
+        const hundreds = h === 1 ? NUM.hundred1 : `${lig} ${daan}`;
+        return joinRemainder(hundreds, n % 100);
     }
     if (n < 1000000) {
-        const th = Math.floor(n / 1000),
-            r = n % 1000;
-        return `${numberWords(th)} ${NUM.thousand}${r ? " " + numberWords(r) : ""}`;
+        const th = Math.floor(n / 1000);
+        const thousands = th === 1 ? NUM.thousand1 : `${ligate(numberWords(th))} ${NUM.thousand}`;
+        return joinRemainder(thousands, n % 1000);
     }
-    const m = Math.floor(n / 1000000),
-        r = n % 1000000;
-    return `${numberWords(m)} ${NUM.million}${r ? " " + numberWords(r) : ""}`;
+    const m = Math.floor(n / 1000000);
+    return joinRemainder(`${ligate(numberWords(m))} ${NUM.million}`, n % 1000000);
+}
+
+const NUM_PENULT = new Set(NUM.stressPenult);
+
+/** The stressed vowel-nucleus index for one emitted number token — FINAL by default, PENULT for the kaikki-mined
+ *  exceptions (séro, ápat, líbo, …). The -ng ligature and 't contraction add no vowel, so they leave the index
+ *  unchanged; strip them to recover the root for the penult lookup. Overrides the general (prose) stress lexicon,
+ *  which abstains on the number-sense homographs (isá, limá, pitó). */
+function numberStressIdx(token: string): number | undefined {
+    const root = token.endsWith("'t")
+        ? token.slice(0, -2)
+        : token.endsWith("ng")
+          ? token.slice(0, -2)
+          : token;
+    const nuclei = [...token].filter((c) => "aeiou".includes(c)).length;
+    if (nuclei === 0) return undefined;
+    return NUM_PENULT.has(root) && nuclei >= 2 ? nuclei - 2 : nuclei - 1;
 }
 
 const TOKEN = /([A-Za-zÑñ]+(?:[-‑][A-Za-zÑñ]+)*)|(\d+)|([.?!,;:])/gu;
@@ -173,11 +215,11 @@ class TagalogPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
-                    // Number words take the STRESS lexicon (dalawá/tatló/waló are final-stressed — so "2" and the
-                    // typed word "dalawa" agree) but bypass the final-glottal set, which fires inconsistently by
-                    // incidental membership (sampu→sampuʔ but dalawampu not); keep the composed number system uniform.
+                    // Number words take the NUMBER-sense stress (numberStressIdx: final-except-penult, correct for
+                    // the number reading of homographs like isá/limá/pitó) and bypass the final-glottal set, which
+                    // fires inconsistently by incidental membership (sampu→sampuʔ but dalawampu not).
                     for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeCore(wd, stressLex().get(wd.toLowerCase())));
+                        sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
