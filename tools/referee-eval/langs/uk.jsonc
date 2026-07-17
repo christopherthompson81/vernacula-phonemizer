@@ -1,0 +1,18 @@
+// Ukrainian (uk) — East Slavic, Cyrillic. wikipron ukr_cyrl narrow (HUMAN, 50k) PRIMARY. Ukrainian has NO vowel
+// reduction, so the g2p is a flat scan; the folds neutralise the referee's NARROW allophonic notation: the
+// unstressed vowel shades ɐ~a (а), e~ɛ (е), ʊ~u (у); the vocalised glides u̯~w (в) and i̯~j (й/coda); the
+// stressed-а backing ɑ~a.
+{
+    "referees": [
+        { "file": "uk.wikipron-narrow.tsv", "source": "wikipron ukr_cyrl narrow (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ɐ", "replace": "a", "note": "unstressed а = [ɐ]~[a] (mild reduction; Ukrainian has no phonemic reduction)" },
+        { "pattern": "ɑ", "replace": "a", "note": "stressed а = [ɑ]~[a] (backing, narrow)" },
+        { "pattern": "ɪ", "replace": "e", "note": "и/е NEUTRALISE (unstressed и→[e], unstressed е→[e]) and we cannot predict stress — merge ɪ→e" },
+        { "pattern": "ɛ", "replace": "e", "note": "…and ɛ→e (the same и/е merge; keeps STRESSED и/е matching too — a lossy comparison fold, not an output change)" },
+        { "pattern": "ʊ", "replace": "u", "note": "unstressed у = [ʊ]~[u]" },
+        { "pattern": "tʃtʃ", "replace": "tʃ", "note": "affricate GEMINATION ччя/щ (t͡ʃː): our doubled t͡ʃt͡ʃ vs referee length (backbone strips tie+length)" }
+    ]
+}
