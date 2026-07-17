@@ -15,7 +15,7 @@
     // Multi-letter graphemes (longest-first), Naija values.
     "digraphs": {
         "gb": "ɡ͡b", "kp": "k͡p", "ch": "t͡ʃ", "sh": "ʃ", "ny": "ɲ",
-        "ng": "ŋ", "kw": "kw", "gw": "ɡw", "th": "t"
+        "ng": "ŋ", "kw": "kw", "gw": "ɡw", "th": "t", "wh": "w"
     },
 
     // Single consonant letters → Naija IPA. ⟨c⟩→k, ⟨q⟩→kw, ⟨x⟩→ks, ⟨j⟩→d͡ʒ, ⟨y⟩→j (glide), ⟨r⟩→ɾ (tap).

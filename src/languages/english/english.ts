@@ -85,6 +85,14 @@ export class EnglishPhonemizer {
         private readonly whSecondary: ReadonlySet<string>,
     ) {}
 
+    /** Dict-only lookup for creoles (e.g. Naija) that NATIVISE English-etymological words: the CMUdict-derived
+     *  citation IPA if `word` is known English, else undefined (an OOV word — likely a substrate loan — for the
+     *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation to remap. */
+    knownWord(word: string): string | undefined {
+        const lower = word.toLowerCase();
+        return this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
+    }
+
     /** One orthographic word → canonical IPA, given its POS expectation. */
     private resolveWord(word: string, e: PosExpectation | undefined): string {
         const lower = word.toLowerCase();

@@ -54,3 +54,44 @@ three deliberate scope boundaries, all inherent to the target rather than engine
 3. **Deep-English un-respelled words** (formal borrowings, proper nouns) — a lexical tail; Naija nativises them
    with the rule g2p, which is generally more correct than the English phonemizer for the creole register.
 A larger adjudicated lexicon (2 & 3) and a tone lexicon (1) are the paths to ✅.
+
+## Run 2 — 2026-07-16 — English-spelling → Naija phonetics (nativise via the English dict) + soft-c/wh
+
+Confirmed there is genuinely NO independent pronunciation referee (unlike Min Nan): no wikipron/kaikki/epitran
+pcm; the ChhoeTaigi-analogue `naijalex` (SFB1102 / discourse-lab) is a discourse-connective lexicon with NO IPA.
+So pcm stays gold-anchored. But `naijalex` gives a FREQUENCY-RANKED high-frequency word list, which surfaced
+real rule-g2p gaps in the commonest words.
+
+**The reframing (user steer): conventional English spellings must collapse to Naija phonetics too.** Nigerian
+Pidgin is English-lexified and real (BBC-Pidgin / media) text is a MIX — respelled forms for distinctly-Naija
+items (dey, wetin, comot, sabi, pikin) and STANDARD ENGLISH spelling for the large English-derived vocabulary
+(when, because, people, water, once, though). A TTS user expects Naija phonetics across the whole line. So
+English-spelling→Naija is the CORE job, not a deferrable tail.
+
+**Architecture: nativise via the English dict, rule-g2p for substrate loans.** We already ship a cleanroom
+English G2P (englishG2p) that solves spelling→sound INCLUDING irregulars. New word path (naija.ts phonemizeWord):
+1. Naija lexicon (respellings + substrate loans + irregulars) — first.
+2. If the word is a known-English DICT hit (new `EnglishPhonemizer.knownWord` — dict-only, no OOV G2P) →
+   **nativise** its CMUdict IPA → Naija: the 7-vowel system /i e ɛ a ɔ o u/ (no schwa reduction, no length),
+   TH-stopping (θ→t, ð→d), NON-RHOTIC codas (water→wata, car→ka; onset r→ɾ). once→wɔns, because→bikɔz,
+   while→wail, though→do, first→fɔst.
+3. Rule g2p — for OOV words (substrate loans, phonemically spelled): danfo/egusi/suya/jollof stay correct because
+   they are OOV in the English dict, so they never route through nativisation. The DICT-MEMBERSHIP is the clean
+   routing signal (English → nativise; OOV → rule).
+
+Also added two English spelling conventions the rule g2p had missed (they fix the highest-frequency words even
+before nativisation, and help any OOV English-etymological word): **soft-c** (⟨c⟩ before e/i/y → /s/: once, since,
+hence) and **⟨wh⟩→w** (when, while, what, why).
+
+**Diaphonemic DTO — considered and DEFERRED.** A dialect-neutral lexical-set intermediate (Wells sets / the
+Unisyn model) was prototyped and set aside: our GenAm CMUdict SOURCE has already merged the dialect-distinguishing
+sets (TRAP≡BATH, LOT≡PALM), so a diaphonemic layer derived FROM GenAm is a faithful pipe with a lossy payload — it
+can't drive en-GB correctly for the merged sets, and it buys Naija nothing over the flat nativise (same merges).
+The richer right answer (a grapheme↔phoneme object carrying the transform history, so BATH is recovered from the
+SPELLING where the distinction still lives) is the future foundation, to be built from a real diaphonemic source
+(Unisyn) when en-GB is tackled — not bootstrapped from the one accent that merged the distinctions.
+
+RESULT: conventional English spellings now nativise to Naija phonetics (the core creole-TTS behaviour), substrate
+loans still read phonemically, gold 100%, suite 380/380. The `nativise` map inherits the GenAm-source merges
+(LOT/PALM, TRAP/BATH) and the lossy schwa (people→pipal not pipul) — a documented ceiling, closable only with a
+diaphonemic source. STATUS stays 🟡 (no referee; tone still unmarked/underivable).
