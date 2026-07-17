@@ -1,0 +1,19 @@
+// Libyan Arabic (ayl — Tripolitanian) variety data. Applied on the MSA g2p output, same shape as egyptian.jsonc.
+// Libyan sits between the Maghrebi and Bedouin patterns: ق→[ɡ] (the Bedouin voiced reflex, referee-dominant) and
+// ج→[ʒ] (fricative — the Maghrebi neighbour reflex, unlike the eastern [d͡ʒ] of Iraqi/Gulf), plus خ→[χ] (uvular).
+// But it is CONSERVATIVE on the interdentals ث/ذ/ظ — KEPT as [θ ð ðˤ] (the Bedouin pattern, unlike Egyptian/
+// Levantine/Moroccan which merge them to stops). Historical diphthongs monophthongize (ħajtˤ→[ħeːtˤ], jawm→[joːm]).
+// Referee: wikipron ayl_arab_broad. See docs/investigations/ayl_libyan_bringup_investigation.md.
+{
+    "variety": "libyan",
+    "iso": "ayl",
+    "consonantShifts": [
+        ["q", "ɡ"], // ق → [ɡ] (Bedouin voiced reflex)
+        ["d͡ʒ", "ʒ"], // ج → [ʒ] (Maghrebi fricative — vs eastern [d͡ʒ]). Interdentals ث/ذ/ظ KEPT.
+        ["x", "χ"] // خ → [χ] (uvular)
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // بيت bajt → beːt
+        "aw": "oː" // يوم jawm → joːm
+    }
+}

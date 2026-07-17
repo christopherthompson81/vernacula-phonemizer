@@ -1,0 +1,31 @@
+// Moroccan Arabic (ary — Darija) — an Arabic VARIETY. Evaluated through phonemizeArabic(text, "moroccan"): the MSA
+// neural diacritizer restores short vowels, the MSA g2p runs, then the Moroccan shifts (ج→ʒ, ث→t, ذ/ظ→d/dˤ; ق KEPT
+// [q]; ay→eː, aw→oː) transform it. Referee: wikipron ary_arab_broad (HUMAN, fully-voweled DIALECTAL IPA,
+// INDEPENDENT) — by far the largest Arabic-variety scrape (2168). Same pausal + gemination folds as MSA. Moroccan is
+// the deepest vowel gap in the family: MSA short a/i/u collapse to schwa or delete (a wholesale restructuring, not a
+// shift table), so the referee % here is consonant-dominated with a large vowel tail — data-blocked, as for arz/apc.
+{
+    "referees": [
+        {
+            "file": "ary.wikipron-ary-broad.tsv",
+            "source": "wikipron ary_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "No independent secondary for Moroccan Arabic: wikipron ary broad is the only free dialectal-IPA source (no kaikki ary, no epitran). The consonant fingerprint (ق KEPT q, ج→ʒ, interdentals→stops) is corroborated against published Darija phonology; the schwa/deleted short-vowel system is the (large) data-limited tail.",
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}

@@ -135,4 +135,52 @@ describe("arabic canonical IPA — diacritized path", () => {
             expect(phonemizeWord("بَيت", "sudanese")).toBe("bˈeːt"); // ay → eː
         });
     });
+
+    // Iraqi Arabic (acm — Baghdadi gilit). Fingerprint: ق→[ɡ] (gilit), everything else CONSERVATIVE — ج kept [d͡ʒ],
+    // خ kept [x], interdentals ث/ذ/ظ KEPT. Referee-measured (wikipron acm broad).
+    describe("Iraqi variety (acm)", () => {
+        test("ق→ɡ (gilit); ج, خ, interdentals all kept", () => {
+            expect(phonemizeWord("قَال", "iraqi")).toBe("ɡˈaːl"); // ق → ɡ (gilit)
+            expect(phonemizeWord("جَمَل", "iraqi")).toBe("d͡ʒˈamal"); // ج KEPT [d͡ʒ] (vs Egy [ɡ]/Lev [ʒ])
+            expect(phonemizeWord("ثَلَاثَة", "iraqi")).toBe("θalˈaːθa"); // ث KEPT [θ] (vs Egy/Lev [t])
+            expect(phonemizeWord("ذَهَب", "iraqi")).toBe("ðˈahab"); // ذ KEPT [ð]
+            expect(phonemizeWord("خَبَر", "iraqi")).toBe("xˈabar"); // خ KEPT [x] (vs Gulf/Libyan [χ])
+            expect(phonemizeWord("بَيت", "iraqi")).toBe("bˈeːt"); // ay → eː
+        });
+    });
+
+    // Gulf Arabic (afb — Khaleeji). Fingerprint: ق→[ɡ], خ→[χ] (uvular), ج + interdentals KEPT.
+    describe("Gulf variety (afb)", () => {
+        test("ق→ɡ, خ→χ; ج and interdentals kept", () => {
+            expect(phonemizeWord("قَال", "gulf")).toBe("ɡˈaːl"); // ق → ɡ
+            expect(phonemizeWord("خَمسَة", "gulf")).toBe("χˈamsa"); // خ → χ (uvular — vs Iraqi [x])
+            expect(phonemizeWord("جَمَل", "gulf")).toBe("d͡ʒˈamal"); // ج KEPT [d͡ʒ]
+            expect(phonemizeWord("ثَلَاثَة", "gulf")).toBe("θalˈaːθa"); // ث KEPT [θ]
+            expect(phonemizeWord("يَوم", "gulf")).toBe("jˈoːm"); // aw → oː
+        });
+    });
+
+    // Moroccan Arabic (ary — Darija). Fingerprint: ق KEPT [q] (the Maghrebi signature, NOT eastern g/ʔ), ج→[ʒ],
+    // interdentals ث/ذ/ظ → stops [t]/[d]/[dˤ]. (The deep vowel restructuring to schwa is the deferred data tail.)
+    describe("Moroccan variety (ary)", () => {
+        test("ق KEPT [q]; ج→ʒ; interdentals→stops", () => {
+            expect(phonemizeWord("قَلب", "moroccan")).toBe("qˈalb"); // ق KEPT [q] (the Maghrebi signature)
+            expect(phonemizeWord("جَمِيل", "moroccan")).toBe("ʒamˈiːl"); // ج → ʒ
+            expect(phonemizeWord("ثَلَاثَة", "moroccan")).toBe("talˈaːta"); // ث → t
+            expect(phonemizeWord("ذَهَب", "moroccan")).toBe("dˈahab"); // ذ → d
+            expect(phonemizeWord("ظَرف", "moroccan")).toBe("dˤˈarf"); // ظ [ðˤ] → [dˤ]
+        });
+    });
+
+    // Libyan Arabic (ayl — Tripolitanian). Fingerprint: ق→[ɡ], ج→[ʒ] (Maghrebi fricative), خ→[χ] (uvular),
+    // interdentals ث/ذ/ظ KEPT (Bedouin-conservative).
+    describe("Libyan variety (ayl)", () => {
+        test("ق→ɡ, ج→ʒ, خ→χ; interdentals kept", () => {
+            expect(phonemizeWord("قَال", "libyan")).toBe("ɡˈaːl"); // ق → ɡ
+            expect(phonemizeWord("جَمِيل", "libyan")).toBe("ʒamˈiːl"); // ج → ʒ (Maghrebi fricative — vs Iraqi/Gulf [d͡ʒ])
+            expect(phonemizeWord("خَبَر", "libyan")).toBe("χˈabar"); // خ → χ (uvular)
+            expect(phonemizeWord("ثَلَاثَة", "libyan")).toBe("θalˈaːθa"); // ث KEPT [θ] (Bedouin-conservative)
+            expect(phonemizeWord("بَيت", "libyan")).toBe("bˈeːt"); // ay → eː
+        });
+    });
 });

@@ -1,0 +1,30 @@
+// Libyan Arabic (ayl — Tripolitanian) — an Arabic VARIETY. Evaluated through phonemizeArabic(text, "libyan"): the
+// MSA neural diacritizer restores short vowels, the MSA g2p runs, then the Libyan shifts (ق→ɡ, ج→ʒ, خ→χ;
+// interdentals ث/ذ/ظ KEPT; ay→eː, aw→oː) transform it. Referee: wikipron ayl_arab_broad (HUMAN, fully-voweled
+// DIALECTAL IPA, INDEPENDENT). Same pausal + gemination folds as MSA. The short-vowel restructuring gap (MSA
+// diacritizer restores MSA vowels) is the documented tail, as for arz/apc — consonants only.
+{
+    "referees": [
+        {
+            "file": "ayl.wikipron-ayl-broad.tsv",
+            "source": "wikipron ayl_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "No independent secondary for Libyan Arabic: wikipron ayl broad is the only free dialectal-IPA source (no kaikki ayl, no epitran). The consonant fingerprint (ق→ɡ, ج→ʒ, خ→χ, kept interdentals) is corroborated against published Libyan phonology; the shared MSA vowels are the data-limited tail (as arz/apc).",
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}

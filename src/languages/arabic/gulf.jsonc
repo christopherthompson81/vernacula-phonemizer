@@ -1,0 +1,18 @@
+// Gulf Arabic (afb — Khaleeji: Bahrain/Kuwait/Qatar/UAE urban) variety data. Applied on the MSA g2p output, same
+// shape as egyptian.jsonc. The Gulf fingerprint: ق→[ɡ] (the Bedouin voiced reflex, dominant in the referee 80:30
+// over retained [q]) and خ→[χ] (uvular fricative — the referee writes χ, not the Egyptian/Iraqi [x]). Like Iraqi it
+// is CONSERVATIVE on ج (kept [d͡ʒ]) and the interdentals ث/ذ/ظ (KEPT [θ ð ðˤ]). Deferred lexical tails: the Gulf
+// ج→[j] reflex (yaʕal), ق/ك affrication before front vowels (ق→[d͡ʒ], kaškaša ك→[t͡ʃ]) — all conditional/lexical.
+// Historical diphthongs monophthongize. Referee: wikipron afb_arab_broad. See docs/investigations/afb_gulf_bringup_investigation.md.
+{
+    "variety": "gulf",
+    "iso": "afb",
+    "consonantShifts": [
+        ["q", "ɡ"], // ق → [ɡ] (Bedouin voiced reflex; [q] in loans is a tail). ج=[d͡ʒ], interdentals KEPT.
+        ["x", "χ"] // خ → [χ] (uvular — the referee's consistent transcription vs Egyptian/Iraqi [x])
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // بيت bajt → beːt
+        "aw": "oː" // يوم jawm → joːm
+    }
+}
