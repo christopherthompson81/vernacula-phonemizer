@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/bhojpuri/bhojpuri.ts";
 // segmentally ~Hindi, so this gold deliberately targets the DISTINCTIVE features — the axis where Bhojpuri ≠ Hindi
 // and a Hindi clone is demonstrably wrong: श/ष→[s] (NO /ʃ/), ऐ/औ kept as the diphthongs [ai]/[au] (Hindi
 // monophthongised to ɛː/ɔː), and no Hindi əɦə-lowering. Adjudicated from Shukla (1981) + Grierson LSI VI.
-// See docs/bho_native_bringup_investigation.md.
+// See docs/investigations/bho_native_bringup_investigation.md.
 describe("bhojpuri canonical IPA (distinctive features vs Hindi)", () => {
     test("श/ष → [s] — Bhojpuri has no /ʃ/", () => {
         expect(phonemizeWord("शहर")).toBe("sˈəɦəɾ"); // 'city' — श→s AND no əɦə→ɛɦɛ lowering (Hindi: ʃɛɦɛɾ)

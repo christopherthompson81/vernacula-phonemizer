@@ -10,7 +10,7 @@
  * distinguished chiefly by GRAMMAR, so most rules are shared with Hindi BY ATTESTATION, not by defaulting to the
  * parent. The committed anchor is a small hand-adjudicated gold of Saksena-transcribed forms (test/awadhi.test.ts),
  * which grades where Awadhi is documented to diverge. This is a SOURCED stub, not a measured convergence. See
- * docs/awa_native_bringup_investigation.md.
+ * docs/investigations/awa_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

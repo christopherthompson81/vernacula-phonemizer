@@ -3,7 +3,7 @@
  * this is a left-to-right scan producing a segment list (phoneme + nucleus/accent flags + the raw vowel), then
  * a stress pass, then the EP-signature vowel-REDUCTION pass (unstressed a→ɐ, e→ɨ, o→u). Stressed mid-vowel
  * quality (open ɛ/ɔ vs close e/o on bare e/o) and grapheme x are the partly-lexical residuals — see
- * docs/pt_native_bringup_investigation.md. No lexicon (yet).
+ * docs/investigations/pt_native_bringup_investigation.md. No lexicon (yet).
  */
 
 import { MANIFEST } from "./manifest.ts";

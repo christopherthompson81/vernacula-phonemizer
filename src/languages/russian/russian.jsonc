@@ -10,7 +10,7 @@
 // Stress is lexical → the sibling stress.tsv (word → stressed-vowel ordinal) and the loanword hard-e.tsv drive
 // the g2p; those append-heavy dictionaries stay as .tsv, which the manifest only references.
 //
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/ru_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/ru_native_bringup_investigation.md.
 {
     "language": "ru",
     "name": "Russian (Standard, Moscow)",

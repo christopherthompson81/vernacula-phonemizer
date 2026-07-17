@@ -5,7 +5,7 @@
  * (`lexicon.tsv` beside each g2p — g2p-inversion over wikipron + kaikki + Hindi→Urdu real spellings) and, on a hit,
  * substitutes OUR vocalization (کِرن) so the g2p reads the real short vowel (ɪ/ʊ/…). On a miss the word is returned
  * unchanged (current default-schwa behavior). This is the exact-match analogue of Arabic's restore.ts/diacritization
- * .tsv; the neural GENERALIZATION layer (novel words) is a later ONNX pass. See docs/arabic_script_restorer_investigation.md.
+ * .tsv; the neural GENERALIZATION layer (novel words) is a later ONNX pass. See docs/investigations/arabic_script_restorer_investigation.md.
  */
 import { loadTsvMap } from "./loadTsv.ts";
 

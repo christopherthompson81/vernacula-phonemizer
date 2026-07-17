@@ -2,7 +2,7 @@
 # OpenJTalk (pyopenjtalk, modified BSD / naist-jdic) is an INDEPENDENT accent engine; only the derived
 # integers + kana reading are kept (facts, not expression). CAVEAT: OpenJTalk is one of the three voters
 # behind our merged pitch-accent.tsv (kanjium/OpenJTalk/UniDic), so agreement is a conservative but not
-# fully-independent referee (see docs/ja_native_bringup_investigation.md). Regenerate with pyopenjtalk in a
+# fully-independent referee (see docs/investigations/ja_native_bringup_investigation.md). Regenerate with pyopenjtalk in a
 # venv over a frequency word list (see build-ja-pitch-reference.py in espeak-ng-portable).
 人	0	2	ひと
 年	2	2	とし

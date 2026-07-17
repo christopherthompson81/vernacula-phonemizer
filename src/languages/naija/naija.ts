@@ -10,7 +10,7 @@
  * tokens rather than routing them to the English phonemizer (which is wired as `foreign` but not auto-used —
  * nativising is more correct for the creole). Tone (H/L) is UNMARKED in the media orthography → out of scope
  * (segmental output, no stress/tone marks). No independent referee exists; the anchor is the adjudicated gold in
- * test/naija.test.ts (Faraclas 1996 + NLA). See docs/pcm_native_bringup_investigation.md.
+ * test/naija.test.ts (Faraclas 1996 + NLA). See docs/investigations/pcm_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

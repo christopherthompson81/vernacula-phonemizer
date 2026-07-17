@@ -4,7 +4,7 @@
  * counters (本 3→ぼん / 1→いっぽん), and Sino number readings for 4/7/9 on some counters (4月→しがつ, 4時→よじ).
  * A few counters are wholly irregular (日: ついたち…はつか; 人: ひとり/ふたり). Built and validated against OpenJTalk
  * (BSD; the readings are linguistic facts). Feeds kana to kanaToIpa like the plain number path. See
- * docs/ja_native_bringup_investigation.md.
+ * docs/investigations/ja_native_bringup_investigation.md.
  */
 import { numberToKana } from "./numbers.ts";
 

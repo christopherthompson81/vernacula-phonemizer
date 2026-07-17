@@ -5,7 +5,7 @@
  * regressively through open penults (apa→ɔpɔ, sanga→sɔŋɔ, Jawa→d͡ʒɔwɔ); a closed final syllable blocks it
  * (mangan→maŋan); (2) the DENTAL vs RETROFLEX contrast (⟨t d⟩→t̪ d̪, ⟨th dh⟩→ʈ ɖ); (3) closed-syllable laxing
  * (i→ɪ u→ʊ o→ɔ) + word-final ⟨k⟩→ʔ (pitik→pitɪʔ). Bare ⟨e⟩ defaults to pepet /ə/. Penultimate stress. The
- * ngoko NUMBER system is irregular (-likur/-welas, seket/sewidak). See docs/jv_native_bringup_investigation.md.
+ * ngoko NUMBER system is irregular (-likur/-welas, seket/sewidak). See docs/investigations/jv_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

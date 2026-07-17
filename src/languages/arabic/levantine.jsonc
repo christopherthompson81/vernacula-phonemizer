@@ -1,6 +1,6 @@
 // North Levantine Arabic (apc — Syrian/Lebanese, urban) variety data. Same shape as egyptian.jsonc (shifts on the
 // MSA g2p output), differing mainly in ج: Levantine keeps the [ʒ] fricative where Egyptian has [ɡ]. Urban Levantine
-// ق → [ʔ] (rural/Druze [q], Bedouin [g] are other registers). See docs/apc_levantine_bringup_investigation.md.
+// ق → [ʔ] (rural/Druze [q], Bedouin [g] are other registers). See docs/investigations/apc_levantine_bringup_investigation.md.
 {
     "variety": "levantine",
     "iso": "apc",

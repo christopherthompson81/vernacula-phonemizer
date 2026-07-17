@@ -10,7 +10,7 @@
  *     voiceless form r̝̊.
  * Vowels short a e i/y o u → a ɛ ɪ o u, long á é í/ý ó ú/ů → aː ɛː iː oː uː; diphthong ou → oᶷ. Syllabic r̩/l̩
  * between consonants (krk→kr̩k, vlk→vl̩k). Stress (first-syllable) is applied in czech.ts.
- * See docs/cs_native_bringup_investigation.md.
+ * See docs/investigations/cs_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

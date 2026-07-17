@@ -6,7 +6,7 @@
  * intervocalic ʎ/ɲ/ʃ geminate; i/u become glides j/w before a vowel; penultimate stress (written accent overrides).
  * The 7-vowel system a e ɛ i o ɔ u: unstressed mids are close, but STRESSED ⟨e⟩/⟨o⟩ openness (/e/~/ɛ/, /o/~/ɔ/)
  * is LEXICAL and unrecoverable from spelling — as are intervocalic ⟨s⟩ voicing and ⟨z⟩ voicing — so we take a
- * documented default and fold those axes against the referee. See docs/it_native_bringup_investigation.md.
+ * documented default and fold those axes against the referee. See docs/investigations/it_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

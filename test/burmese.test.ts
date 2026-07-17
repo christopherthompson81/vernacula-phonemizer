@@ -8,7 +8,7 @@ import { phonemizeWord, segment } from "../src/languages/burmese/burmese.ts";
 // labialisation, minor-syllable reduction (bare open non-final → ə), medial palatalisation (ကျ→t͡ɕ, ငြ→ɲ) and the
 // voiceless ⟨ှ⟩ sonorants (မှ→m̥). The FOUR tones (low ˨ / high ˥˩ / creaky ˥ˀ / checked ʔ) are ORTHOGRAPHIC and
 // rule-derived — see the tone test below. Validated vs wikipron mya (54.2% segmental, 99.6% mono tone) + kaikki
-// mya (55.9%). See docs/my_native_bringup_investigation.md.
+// mya (55.9%). See docs/investigations/my_native_bringup_investigation.md.
 describe("burmese canonical IPA", () => {
     test("consonants, medials, rimes, minor-syllable reduction (+ tone)", () => {
         const cases: [string, string][] = [

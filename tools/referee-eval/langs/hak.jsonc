@@ -2,7 +2,7 @@
 // -p̚ -t̚ -k̚). GAP language: NO independent automated referee. No wikipron hak; epitran ships no Hakka; the only
 // machine-readable Meixian IPA is the Wiktionary Chinese dialectal data — exactly our source (kaikki.org extract),
 // so any automated check is circular with it. Recorded here (not silently omitted) so the gap is explicit; the
-// correctness anchor is the adjudicated gold in test/hakka.test.ts. See docs/hakka_native_bringup_investigation.md.
+// correctness anchor is the adjudicated gold in test/hakka.test.ts. See docs/investigations/hakka_native_bringup_investigation.md.
 {
     "language": "hak",
     "name": "Hakka Chinese (Meixian)",

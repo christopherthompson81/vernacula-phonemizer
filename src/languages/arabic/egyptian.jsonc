@@ -1,6 +1,6 @@
 // Egyptian Arabic (arz) variety data. Applied on the MSA g2p output (the "restore MSA then transform" path): the
 // shared Arabic engine + diacritizer produce the MSA vocalization, and these Cairene shifts make it Egyptian.
-// See docs/arz_egyptian_bringup_investigation.md.
+// See docs/investigations/arz_egyptian_bringup_investigation.md.
 //
 // Two kinds, because they need different scopes:
 //   consonantShifts — unambiguous string rewrites on the joined IPA (a consonant is always a consonant).

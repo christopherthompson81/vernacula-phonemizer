@@ -4,7 +4,7 @@
  * it writes the long/mid vowels distinctly — ا/آ→ɑ (ā), ې→e, و→o (or the glide w), ی→i (or the glide j), ۍ/ئ→əi —
  * but the SHORT vowels a/ə/i/u are usually UNWRITTEN, so a default [ə] (the zwarakay) + medial-schwa deletion
  * stand in for the deferred short-vowel-restoration subsystem (🟠, as for Urdu/Persian). Word-final ه→[ə]
- * (ښه→ʂə); ع→ʔ. Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ. See docs/ps_native_bringup_investigation.md.
+ * (ښه→ʂə); ع→ʔ. Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ. See docs/investigations/ps_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

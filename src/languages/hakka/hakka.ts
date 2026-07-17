@@ -10,7 +10,7 @@
  * (segmental IPA + a superscript pitch-number tone), so the front-end is the shared Han-dict engine
  * (hanDictIpa.ts): greedy longest-match segmentation, superscript-tone → Chao contour letters (SURFACE tone after
  * a sandhi arrow ⁻), Han numerals. SINGLE authoritative source (Wiktionary/kaikki Meixian Sinological-IPA), no
- * independent referee → 🔷. See docs/hakka_native_bringup_investigation.md.
+ * independent referee → 🔷. See docs/investigations/hakka_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

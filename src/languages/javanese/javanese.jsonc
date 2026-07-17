@@ -4,7 +4,7 @@
 // RETROFLEX stop contrast (⟨t d⟩→t̪ d̪ vs ⟨th dh⟩→ʈ ɖ, NOT aspiration — Indonesian lacks this), closed-syllable
 // laxing (i→ɪ u→ʊ o→ɔ), word-final ⟨k⟩→ʔ. The "voiced" stops are phonetically breathy/slack-voiced (light vs
 // heavy register) — rendered PLAIN voiced (register deferred, folded vs epitran). Tone: none. See
-// docs/jv_native_bringup_investigation.md.
+// docs/investigations/jv_native_bringup_investigation.md.
 {
     "language": "jv",
     "name": "Javanese",

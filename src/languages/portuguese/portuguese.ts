@@ -1,7 +1,7 @@
 /**
  * European Portuguese (pt-PT) phonemizer — canonical IPA, espeak-independent. Rule-based g2p (g2p.ts) →
  * stress pass → the EP vowel-REDUCTION pass (unstressed a→ɐ, e→ɨ, o→u) → sibilant voicing. text() tokenizes
- * words / numbers / punctuation. No lexicon (yet). See docs/pt_native_bringup_investigation.md.
+ * words / numbers / punctuation. No lexicon (yet). See docs/investigations/pt_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

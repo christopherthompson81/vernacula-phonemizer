@@ -8,7 +8,7 @@
  * epenthesis FLOOR so the output is always sayable. It NEVER touches a word the diacritizer already voweled — so
  * it can only improve, never degrade. Ported from espeak-ng-portable's restoreShortVowels.ts.
  *
- * See docs/ar_referee_investigation.md and diacritization.PROVENANCE.md.
+ * See docs/investigations/ar_referee_investigation.md and diacritization.PROVENANCE.md.
  */
 
 import { toSegments } from "./g2p.ts";

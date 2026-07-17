@@ -5,7 +5,7 @@
  * irregulars (mga→maŋa, ng→naŋ). Stress defaults to PENULTIMATE but is phonemic and unwritten, so the shipped path
  * pins the ~23% non-penultimate cases from a kaikki-sourced stress lexicon (magandá, ngayón); the rule engine keeps
  * the penult default (the referee eval folds stress). Intervocalic/word-final glottal stops are likewise phonemic
- * but unwritten (bata 'child' [ˈbataʔ] vs bata 'robe' [ˈbata]) — a lexical residual. See docs/tl_native_bringup_investigation.md.
+ * but unwritten (bata 'child' [ˈbataʔ] vs bata 'robe' [ˈbata]) — a lexical residual. See docs/investigations/tl_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -115,7 +115,7 @@ export function phonemizeWordRules(word: string): string {
 
 // The unwritten word-final glottal stop (bata child [bataʔ] vs bata robe [bata]) is phonemic but lexical. This SET
 // (final-glottal.txt, wikipron-sourced: all readings end in ʔ and the rest already matches) closes it on the SHIPPED
-// path only — homographs are abstained. See docs/tl_native_bringup_investigation.md.
+// path only — homographs are abstained. See docs/investigations/tl_native_bringup_investigation.md.
 let FINAL_GLOTTAL: ReadonlySet<string> | undefined;
 const finalGlottal = (): ReadonlySet<string> =>
     (FINAL_GLOTTAL ??= new Set(loadLines(import.meta.url, "final-glottal.txt")));

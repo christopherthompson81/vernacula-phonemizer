@@ -3,7 +3,7 @@
  * IPA. Handles palatalization (hard/soft consonant pairs Cʲ), iotation (я/е/ё/ю after a vowel/sign/initial →
  * j+V), stress-based vowel reduction (akanye/ikanye), final devoicing and regressive voicing assimilation.
  * Stress is lexical (not derivable from spelling) — supplied by the caller from stress.tsv. See
- * docs/ru_native_bringup_investigation.md.
+ * docs/investigations/ru_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

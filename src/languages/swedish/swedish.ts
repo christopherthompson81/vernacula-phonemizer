@@ -4,7 +4,7 @@
  * primary-stressed vowel) + non-initial stress, falling to first-syllable stress + shape-based accent for OOV
  * words + NST secondary stress for compounds (ˌ + boundary-safe vowel length/quality + 2nd-onset softening). A
  * small exception map covers irregular function words. text() tokenizes words / numbers / punctuation. Accent
- * validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts). See docs/sv_bringup_investigation.md.
+ * validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts). See docs/investigations/sv_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -27,7 +27,7 @@ interface LexEntry {
 
 // Phase-2 lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
 // nucleus ordinal where it deviates from the first syllable. OOV words fall to the rule (first-syllable stress;
-// accent by the swedishAccentRule). See tools/gen/build-sv-lexicon.mts + docs/sv_bringup_investigation.md.
+// accent by the swedishAccentRule). See tools/gen/build-sv-lexicon.mts + docs/investigations/sv_bringup_investigation.md.
 let LEXICON: Map<string, LexEntry> | undefined;
 function lexicon(): Map<string, LexEntry> {
     if (LEXICON === undefined)

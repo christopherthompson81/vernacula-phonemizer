@@ -5,7 +5,7 @@
  *
  * The BROADER loanword VV/glide/hiatus class is deliberately NOT mined: the SAME spelling is native [ij]/hiatus-ʔ vs
  * loanword glide/plain, so a referee-mined pin corrupts core words (siya→sia, tao→tao without its phonemic ʔ). That
- * class stays a documented residual. See docs/tl_native_bringup_investigation.md.
+ * class stays a documented residual. See docs/investigations/tl_native_bringup_investigation.md.
  *
  * Each pin is built by applying the foreign op to OUR OWN shipped-no-loan output (so it inherits our stress + final-ʔ)
  * and is kept ONLY if (a) all referee readings agree and (b) the op makes our folded output match the referee. The

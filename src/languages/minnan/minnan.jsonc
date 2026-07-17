@@ -3,7 +3,7 @@
 // romanizations Tâi-lô / POJ. The converter: strip the tone diacritic (identifies the tone) → [initial] + final →
 // IPA + Chao tone letter. Sibilants PALATALISE before i (ts/tsh/s/j + i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ). Checked finals -p̚/-t̚/-k̚
 // and glottal -h→ʔ; nasalised -nn vowels; syllabic m̩/ŋ̍. Inventory + initial/final maps from epitran nan-Latn-tl
-// (the Tâi-lô spec). Phase 1: segmental + CITATION tone (sandhi deferred). See docs/nan_native_bringup_investigation.md.
+// (the Tâi-lô spec). Phase 1: segmental + CITATION tone (sandhi deferred). See docs/investigations/nan_native_bringup_investigation.md.
 {
     "language": "nan",
     "name": "Min Nan (Taiwanese Hokkien)",

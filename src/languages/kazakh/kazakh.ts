@@ -4,7 +4,7 @@
  * second, the first "unstressed" vowel moves stress to the syllable BEFORE it. The only unstressed vowel is ə
  * (ы, and the ə of и=əj) — so a reduced ы between full vowels pulls stress leftward (бойынша→bˈojənʃɑ) while
  * words with no reduced vowel take final stress (Санат→sɑnˈɑt). text() tokenizes words / numbers / punctuation.
- * See docs/kk_native_bringup_investigation.md.
+ * See docs/investigations/kk_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

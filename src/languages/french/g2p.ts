@@ -2,7 +2,7 @@
  * French grapheme→phoneme engine (standard/Parisian French, broad IPA). French orthography is deep but
  * rule-GOVERNED in the reading direction: a left-to-right scan with context + longest-match multigraphs,
  * plus silent-final and glide handling. Irregular words are caught by an exception lexicon upstream
- * (french.ts). See docs/fr_native_bringup_investigation.md for the convention (ø œ ʁ ɥ ɲ nasals).
+ * (french.ts). See docs/investigations/fr_native_bringup_investigation.md for the convention (ø œ ʁ ɥ ɲ nasals).
  */
 
 import { MANIFEST } from "./manifest.ts";

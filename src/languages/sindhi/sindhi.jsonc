@@ -3,7 +3,7 @@
 // series ٽ ٺ ڊ ڍ ڻ ڙ. Like Urdu, the SHORT vowels are usually UNWRITTEN → a default [ə] stands in (the abjad wall);
 // the consonant + LONG-vowel skeleton (incl. the implosives) IS recoverable. Aspiration: some letters are dedicated
 // (ڀ bʰ, ٿ t̪ʰ, ٺ ʈʰ, ڦ pʰ, ک kʰ, ڇ t͡ʃʰ, ڌ d̪ʰ, ڍ ɖʰ), others take ھ (جھ d͡ʒʰ, گھ ɡʰ, نھ nʰ …). See
-// docs/sd_native_bringup_investigation.md.
+// docs/investigations/sd_native_bringup_investigation.md.
 {
     "language": "sd",
     "name": "Sindhi",

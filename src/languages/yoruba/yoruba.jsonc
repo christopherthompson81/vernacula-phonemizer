@@ -3,7 +3,7 @@
 // ⟨gb⟩→ɡ͡b and ⟨p⟩→k͡p (Yoruba has NO plain /p/), ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→tap ɾ, ⟨y⟩→j; the dotted-below vowels
 // ẹ→ɛ ọ→ɔ (7 oral vowels i e ɛ a ɔ o u); NASAL vowels from a coda ⟨n⟩ (ọn→ɔ̃; onset n before a vowel stays n);
 // syllabic nasals m̩/n̩; and THREE level tones marked on the vowel: High=acute ˥, Mid=unmarked ˧, Low=grave ˩
-// (Chao letters). Ported from the espeak-ng-portable authoring (epitran-validated). See docs/yo_native_bringup_investigation.md.
+// (Chao letters). Ported from the espeak-ng-portable authoring (epitran-validated). See docs/investigations/yo_native_bringup_investigation.md.
 {
     "language": "yo",
     "name": "Yoruba",

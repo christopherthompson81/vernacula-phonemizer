@@ -4,7 +4,7 @@
 // epitran amh-Ethi map, Apache-2.0, with the guttural 1st-order fix ሀ/ሐ/ኀ→ha, አ/ዐ→a) and this file (numbers +
 // punctuation). Two features are UNWRITTEN in the script: GEMINATION (phonemic but unmarked — folded vs the
 // referee) and the 6th-order ɨ, which is epenthetic (deleted word-finally: ሁለት→hulət). Ejectives kʼ tʼ t͡ʃʼ pʼ
-// t͡sʼ. See docs/am_native_bringup_investigation.md.
+// t͡sʼ. See docs/investigations/am_native_bringup_investigation.md.
 {
     "language": "am",
     "name": "Amharic",

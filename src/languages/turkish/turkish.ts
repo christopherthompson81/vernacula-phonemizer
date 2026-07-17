@@ -1,7 +1,7 @@
 /**
  * Turkish (tr) phonemizer — canonical IPA, espeak-independent. Rule-based g2p (g2p.ts) + final-syllable stress
  * (Turkish default) with a lexicon (stress.tsv, mostly place names / loanwords) for the exceptions. text()
- * tokenizes words / numbers / punctuation. See docs/tr_native_bringup_investigation.md.
+ * tokenizes words / numbers / punctuation. See docs/investigations/tr_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -33,7 +33,7 @@ const nVowels = (s: string): number => {
 // one optional trailing suffix (person / case / plural), anchored to the word end. NB the bare 2sg -sIn is
 // deliberately EXCLUDED: it collides with the imperative -sIn (olsun) and possessive+case -sInDA (arasında),
 // costing more than it fixes. Derived as general morphology and net-validated against the espeak gold (stress
-// accuracy 78.5%→90.9% fixes-minus-breaks); NOT a per-word lexicon. See docs/tr_native_bringup_investigation.md.
+// accuracy 78.5%→90.9% fixes-minus-breaks); NOT a per-word lexicon. See docs/investigations/tr_native_bringup_investigation.md.
 const PRE_ACCENT =
     "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|s[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
 const TAIL = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";

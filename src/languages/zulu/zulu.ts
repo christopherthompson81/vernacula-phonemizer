@@ -3,7 +3,7 @@
  * Nguni penultimate stress with vowel LENGTHENING (the penult vowel takes ˈ and ː) + a lexical TONE overlay.
  * Zulu tone is not derivable from spelling, so it is overlaid from tone.tsv (kaikki/Wiktionary-derived, one
  * H/L/F/R code per vowel nucleus, placed after the vowel and its length); out-of-lexicon words are left untoned.
- * See docs/zu_native_bringup_investigation.md.
+ * See docs/investigations/zu_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

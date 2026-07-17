@@ -9,7 +9,7 @@
 //   numbers.ts — the cardinal compositor
 //
 // Central Catalan signature = vowel reduction. Stressed mid-vowel height (ɛ/e, ɔ/o) is LEXICAL (dona/dóna) and
-// left as the documented ceiling. See docs/ca_bringup_investigation.md.
+// left as the documented ceiling. See docs/investigations/ca_bringup_investigation.md.
 {
     "language": "ca",
     "name": "Catalan (General Eastern / Central)",

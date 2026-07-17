@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/welsh/welsh.ts";
 // highly phonemic: the g2p resolves digraphs (ch→χ dd→ð ll→ɬ rh→r̥ th→θ) and vowel clusters (diphthongs carry a
 // superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH rule. Bootstrapped from the
 // espeak-ng-portable cy canonical phonemize() output over the 50k corpus (its ə/ɨ y-vowel relabel, NOT the raw
-// --ipa ʌ/ø); every golden below matches that reference. See docs/cy_bringup_investigation.md.
+// --ipa ʌ/ø); every golden below matches that reference. See docs/investigations/cy_bringup_investigation.md.
 describe("welsh canonical IPA", () => {
     test("consonant digraphs (ch→χ dd→ð ff→f ll→ɬ rh→r̥ th→θ) + always-hard c/g", () => {
         expect(phonemizeWord("chwech")).toBe("χwˈeːχ"); // ch → χ

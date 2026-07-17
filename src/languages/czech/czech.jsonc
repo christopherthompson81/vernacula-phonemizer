@@ -10,7 +10,7 @@
 {
     "language": "cs",
     "name": "Czech",
-    "provenance": "Cleanroom, rule-based g2p + number compositor (no lexicon). The consonant/vowel maps and the number words are language facts. espeak-independent; validated vs an espeak-canonical regression bootstrap and the independent epitran ces-Latn referee (see docs/cs_native_bringup_investigation.md).",
+    "provenance": "Cleanroom, rule-based g2p + number compositor (no lexicon). The consonant/vowel maps and the number words are language facts. espeak-independent; validated vs an espeak-canonical regression bootstrap and the independent epitran ces-Latn referee (see docs/investigations/cs_native_bringup_investigation.md).",
 
     // The canonical-IPA conventions the values below are written in (documentation; the engine bakes them in).
     "convention": {

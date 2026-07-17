@@ -8,7 +8,7 @@
  *     a front vowel (ә е ө ү і э) — the ɫ census contribution. г→ɡ and к→k do NOT palatalize (unlike Turkish).
  *   - relabels vs espeak-mode: ғ→ʁ (uvular), х→χ, р→r (not the tap), ү→ʏ. щ→ʃʃ, ц→t͡s, ч→t͡ʃ. ъ/ь→ʔ.
  *   - doubled consonants stay doubled (кк→kk, сс→ss); Kazakh has no gemination-to-length.
- * Stress (espeak's STRESSPOSN_1RU) is applied downstream in kazakh.ts. See docs/kk_native_bringup_investigation.md.
+ * Stress (espeak's STRESSPOSN_1RU) is applied downstream in kazakh.ts. See docs/investigations/kk_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

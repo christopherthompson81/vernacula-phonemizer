@@ -2,7 +2,7 @@
  * Hausa (ha) phonemizer — Kano standard, canonical IPA, espeak-independent (AUTHORED beyond-espeak). Boko-
  * orthography g2p (g2p.ts) + penultimate stress + a Wiktionary-derived tone lexicon. text() tokenizes Hausa
  * words (incl. ɓ ɗ ƙ ƴ and apostrophe as a letter) / numbers / punctuation.
- * See docs/ha_native_bringup_investigation.md.
+ * See docs/investigations/ha_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

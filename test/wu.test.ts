@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/wu/wu.ts";
 // romanization, rime-wugniu dict.tsv) with greedy longest-match segmentation → IPA (initial + final + Chao
 // tone). Ported from the espeak-ng-portable authoring. No independent referee exists (no wikipron/epitran wuu);
 // these values are the wuuwiki inline-IPA-validated adjudicated gold. Segmental + the left-prominent register
-// sandhi. See docs/wu_native_bringup_investigation.md.
+// sandhi. See docs/investigations/wu_native_bringup_investigation.md.
 describe("wu (Shanghainese) canonical IPA", () => {
     test("three-way obstruent contrast + register tone (the Wu signature)", () => {
         // voiceless-unaspirated (yin ˥˧) / aspirated (yin) / VOICED (yang ˩˧) — the retained MC voicing.

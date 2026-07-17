@@ -2,7 +2,7 @@
  * Catalan (ca) phonemizer — General Eastern/Central Catalan, canonical IPA, espeak-independent. Rule-based g2p
  * (g2p.ts) → rule stress (2R + written accent) → UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u) → spirantization →
  * palatal nasal assimilation → word-final devoicing + final-r deletion. No lexicon; stressed open/close mids
- * default (lexical ceiling). See docs/ca_bringup_investigation.md.
+ * default (lexical ceiling). See docs/investigations/ca_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -10,7 +10,7 @@ import {
 // Canonical-IPA goldens for Tagalog / Filipino (tl) — shallow near-phonemic Latin orthography, rule-based g2p.
 // Digraphs ng→ŋ, ch→t͡ʃ, ny/ñ→ɲ; r→ɾ; word-initial + intervocalic glottal stops [ʔ] (tao→taʔo); hyphen → [ʔ]
 // (pag-ibig→paɡʔibiɡ); whole-word irregulars (mga→maŋa, ng→naŋ); penultimate stress (phonemic stress is
-// unmarked in spelling). See docs/tl_native_bringup_investigation.md.
+// unmarked in spelling). See docs/investigations/tl_native_bringup_investigation.md.
 describe("tagalog canonical IPA", () => {
     test("g2p: ng digraph, r→ɾ, glottal stops, special words", () => {
         const cases: [string, string][] = [

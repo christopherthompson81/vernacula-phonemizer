@@ -5,7 +5,7 @@ import { phonemizeWord } from "../src/languages/cantonese/cantonese.ts";
 
 // Canonical-IPA goldens for Cantonese / Yue (yue). Han → Jyutping (rime-cantonese dict) → IPA: initial + final
 // (phonemic aː/ɐ length, checked -p̚/-t̚/-k̚ codas) + one of the six tones as Chao contour letters
-// (1˥ 2˧˥ 3˧ 4˨˩ 5˩˧ 6˨). Polyphones resolve by word. See docs/yue_native_bringup_investigation.md.
+// (1˥ 2˧˥ 3˧ 4˨˩ 5˩˧ 6˨). Polyphones resolve by word. See docs/investigations/yue_native_bringup_investigation.md.
 describe("cantonese canonical IPA", () => {
     test("Han → IPA (tones, aː/ɐ length, checked codas, polyphones)", () => {
         expect(phonemizeWord("香港")).toBe("hœːŋ˥ kɔːŋ˧˥"); // hoeng1 gong2 'Hong Kong'

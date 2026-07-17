@@ -10,7 +10,7 @@
  *   - nasalization: an obstruent coda + a nasal → nasal coda (국물→kuŋmuɭ… wait kuŋmul; 합니→hɐmni);
  *   - lateralization: ㄴㄹ / ㄹㄴ → ll (신라→siɭɭɐ);
  *   - coda neutralization: the 7 possible codas, obstruents unreleased ̚ (밥→pɐp̚).
- * Contributes ̚ (unreleased) and ͈ (tense). See docs/ko_native_bringup_investigation.md.
+ * Contributes ̚ (unreleased) and ͈ (tense). See docs/investigations/ko_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

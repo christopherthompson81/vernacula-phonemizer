@@ -10,7 +10,7 @@
  *     following identical vowel merges (dağ→daː, soğuk→soːuk, düğün→dyːn).
  *   - a doubled consonant geminates to Cː (teşekkür→teʃekːyɾ).
  * Stress (final-syllable default + a lexicon) and number reading are applied downstream. See
- * docs/tr_native_bringup_investigation.md for the convention.
+ * docs/investigations/tr_native_bringup_investigation.md for the convention.
  */
 
 import { MANIFEST } from "./manifest.ts";

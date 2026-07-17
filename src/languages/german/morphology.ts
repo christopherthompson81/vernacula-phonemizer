@@ -9,7 +9,7 @@
  * Two closed, curated lists (prefixes/suffixes — small by nature) drive the reliable part; an open content-stem
  * lexicon (stems.txt, from kaikki ∩ frequency) drives conservative, frequency-safe compound splitting. This is
  * the same shape as hunspell/espeak affix flags — the lists here ARE the affix table; a future lexicon could
- * instead carry per-word flags. See docs/de_native_bringup_investigation.md.
+ * instead carry per-word flags. See docs/investigations/de_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

@@ -38,7 +38,7 @@
     // NUMBERS — native Tagalog (not Spanish) spellings; canonical IPA DERIVED by running them through the same g2p.
     // The teens (labing- + unit, irregular ng→n/m sandhi) and tens (o→u raising: tatlo→tatlu; na/ng split) are
     // IRREGULAR, so they are explicit tables rather than composed. The productive multiplier ligature -ng/" na" and
-    // the daan→raan / at→'t sandhi are handled in numberWords(). See docs/tl_native_bringup_investigation.md.
+    // the daan→raan / at→'t sandhi are handled in numberWords(). See docs/investigations/tl_native_bringup_investigation.md.
     "numbers": {
         "units": ["sero", "isa", "dalawa", "tatlo", "apat", "lima", "anim", "pito", "walo", "siyam"],
         "teens": ["sampu", "labing-isa", "labindalawa", "labintatlo", "labing-apat", "labinlima", "labing-anim", "labimpito", "labingwalo", "labinsiyam"],
@@ -48,7 +48,7 @@
         // Number-sense stress (kaikki-mined): number words are FINAL-stressed EXCEPT these penult roots (séro, ápat,
         // ánim, líbo, sanlíbo, labíng-ápat, labíng-ánim). The -ng/'t/na ligatures add no vowel, so they don't move
         // stress. This overrides the general stress lexicon for the number path (which abstains on the number-sense
-        // homographs isá/lima, pitó/píto 'bird', daán/libo). See docs/tl_native_bringup_investigation.md.
+        // homographs isá/lima, pitó/píto 'bird', daán/libo). See docs/investigations/tl_native_bringup_investigation.md.
         "stressPenult": ["sero", "apat", "anim", "libo", "sanlibo", "labing-apat", "labing-anim"]
     }
 }

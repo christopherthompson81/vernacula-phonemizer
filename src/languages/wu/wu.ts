@@ -9,7 +9,7 @@
  * with greedy longest-match segmentation, so multi-char words carry their baked sandhi melody (上海 zaon2 he4)
  * and unknown chars fall back to per-char citation tone. The back-end (wu.jsonc) maps each Wugniu syllable →
  * IPA: [initial] + final + one of the tones as Chao contour letters. Ported from the espeak-ng-portable authoring
- * (rime-wugniu dict + wuu_rules/ph_wuu). See docs/wu_native_bringup_investigation.md.
+ * (rime-wugniu dict + wuu_rules/ph_wuu). See docs/investigations/wu_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";

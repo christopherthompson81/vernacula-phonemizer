@@ -8,7 +8,7 @@ import { phonemizeWord } from "../src/languages/naija/naija.ts";
 // Naija-phonology RULE g2p for the rest (7 vowels, TH-stopping, no schwa, ɡ͡b/k͡p, ɲ/ŋ, ɾ, degemination). NO
 // independent referee exists (no wikipron/epitran/kaikki pcm) — this gold, drawn from Faraclas (1996) + the NLA
 // orthography manual, IS the committed anchor. Segmental only (Naija tone is unmarked in the media orthography).
-// See docs/pcm_native_bringup_investigation.md.
+// See docs/investigations/pcm_native_bringup_investigation.md.
 describe("naija (Nigerian Pidgin) canonical IPA", () => {
     test("lexicon: irregular / open-mid high-frequency words", () => {
         const cases: [string, string][] = [

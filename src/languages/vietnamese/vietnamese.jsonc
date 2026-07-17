@@ -9,7 +9,7 @@
 // The closed rhyme set stays in the sibling rhymes.tsv (~370 entries), which the engine looks up.
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA; tones are Chao contour letters. See
-// docs/vi_native_bringup_investigation.md.
+// docs/investigations/vi_native_bringup_investigation.md.
 {
     "language": "vi",
     "name": "Vietnamese (Northern / Hanoi)",

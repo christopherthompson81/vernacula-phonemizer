@@ -1,7 +1,7 @@
 /**
  * Korean (ko) phonemizer — Seoul standard, canonical IPA, espeak-independent. Hangul g2p (g2p.ts) with the full
  * cross-syllable sandhi + coda neutralisation; no lexicon. text() tokenizes Hangul words / numbers / punctuation.
- * See docs/ko_native_bringup_investigation.md.
+ * See docs/investigations/ko_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Jin Chinese / 晋语 (cjy), Taiyuan 太原 dialect — a distinct Sinitic branch. The
 // signature is the retained 入声/checked coda -ʔ (月→yəʔ, 十→səʔ) that separates Jin from Mandarin, plus the
 // five-tone system rendered as Chao contour letters (平 ˩˩, 上 ˥˧, 去 ˦˥, 阴入 ˨, 阳入 ˥˦). Readings are from
-// Wiktionary/kaikki Taiyuan Sinological-IPA. See docs/jin_native_bringup_investigation.md.
+// Wiktionary/kaikki Taiyuan Sinological-IPA. See docs/investigations/jin_native_bringup_investigation.md.
 describe("Jin Chinese (Taiyuan) canonical IPA", () => {
     test("single characters — tones as Chao letters", () => {
         expect(phonemizeWord("馬")).toBe("ma˥˧"); // 上声 53

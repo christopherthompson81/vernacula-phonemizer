@@ -9,7 +9,7 @@
 // The bulk lexica stay as sibling files (dictionary.tsv irregulars, seg-words.txt segmentation dictionary).
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA (contributes ɤ; tones as Chao contour letters).
-// See docs/th_native_bringup_investigation.md.
+// See docs/investigations/th_native_bringup_investigation.md.
 {
     "language": "th",
     "name": "Thai",

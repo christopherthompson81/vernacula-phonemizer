@@ -3,7 +3,7 @@
 // ships no Jin, and the ONLY machine-readable Taiyuan IPA is the Wiktionary Chinese dialectal data — which is
 // exactly our source (via the kaikki.org extract), so any automated check is circular with it. Recorded here
 // (not silently omitted) so the gap is explicit; the correctness anchor is the adjudicated gold in
-// test/jin.test.ts. See docs/jin_native_bringup_investigation.md.
+// test/jin.test.ts. See docs/investigations/jin_native_bringup_investigation.md.
 {
     "language": "cjy",
     "name": "Jin Chinese (Taiyuan)",

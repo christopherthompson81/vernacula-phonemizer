@@ -17,4 +17,4 @@ the words the neural diacritizer leaves as skeletons, never an already-voweled w
   advice; revisitable; Tashkeela credited regardless.
 - **Classical vs modern:** Tashkeela's classical citation-form vocalizations complement the neural diacritizer's
   modern/running-text coverage — the lexicon nails isolated/dictionary headwords the context-trained BiLSTM
-  under-vowels. See docs/ar_referee_investigation.md.
+  under-vowels. See docs/investigations/ar_referee_investigation.md.

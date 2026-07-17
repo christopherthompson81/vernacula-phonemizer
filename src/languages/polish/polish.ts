@@ -1,7 +1,7 @@
 /**
  * Polish (pl) phonemizer — canonical IPA, espeak-independent. Rule g2p (g2p.ts) + fixed PENULTIMATE stress
  * (the near-universal Polish pattern). text() tokenizes words / numbers / punctuation. Numbers are deferred (the
- * number WORDS phonemize fine). See docs/pl_native_bringup_investigation.md.
+ * number WORDS phonemize fine). See docs/investigations/pl_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

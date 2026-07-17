@@ -6,7 +6,7 @@
  * The Tâi-lô→IPA converter (minnan.jsonc, initial/final/tone maps from the epitran nan-Latn-tl spec): strip the
  * tone diacritic (identifies the tone) → [initial] + final → IPA + Chao tone letter. Sibilants PALATALISE before
  * i (ts/tsh/s/j+i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ); checked finals -p̚/-t̚/-k̚, -h→ʔ; nasalised -nn vowels; syllabic m̩/ŋ̍.
- * Phase 1: segmental + CITATION tone (the tone-sandhi circle is deferred). See docs/nan_native_bringup_investigation.md.
+ * Phase 1: segmental + CITATION tone (the tone-sandhi circle is deferred). See docs/investigations/nan_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
