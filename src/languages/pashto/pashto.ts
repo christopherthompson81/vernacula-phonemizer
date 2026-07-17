@@ -90,9 +90,16 @@ function g2p(word: string): string {
                 s[i + 1] === ALIF && i + 2 === n && (ch === YA || ch === YA_AR);
             if (endsInVowel(out) || glideBeforeFinalHe || glideBeforeFinalAlif) {
                 // A WORD-FINAL و/ی after a vowel is the DIPHTHONG offglide (سړی -ay→saɽaɪ, لوی→loɪ), not the
-                // consonantal glide — the offglide ɪ/ʊ; a medial glide (دنيا→dənjɑ) stays j/w.
+                // consonantal glide — a medial glide (دنيا→dənjɑ) stays j/w. EXCEPT when homorganic with the
+                // preceding vowel (و after u / ی after i): there و/ی is the long-vowel mater lectionis, آسُو→ɑsuː.
                 const finalOffglide = i === n - 1 && endsInVowel(out);
-                out += finalOffglide ? (ch === WAW ? "ʊ" : "ɪ") : ch === WAW ? "w" : "j";
+                if (finalOffglide) {
+                    const pv = out.at(-1);
+                    out +=
+                        (ch === WAW && (pv === "u" || pv === "ʊ")) || (ch !== WAW && (pv === "i" || pv === "ɪ"))
+                            ? "ː"
+                            : ch === WAW ? "ʊ" : "ɪ";
+                } else out += ch === WAW ? "w" : "j";
                 // A glide behaves like a coda consonant: before another consonant it takes an epenthetic ə (the
                 // verbal infinitive -ول = /awəl/: کَول→kawəl, not kawl). Mirrors the consonant-branch INH insertion.
                 // SUPPRESSED by a sukun on that consonant (ښایسْته→ʂɑjstə, not ʂɑjəstə) — glide+CC is lexically

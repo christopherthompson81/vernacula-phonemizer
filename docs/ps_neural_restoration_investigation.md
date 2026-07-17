@@ -81,7 +81,7 @@ are disambiguated. (The و word-final diphthong is already covered by WAW_GLIDE_
 **+ ɻ~ɽ fold:** ړ is our retroflex approximant ɻ (folded to r) but the referee writes the flap ɽ — same phoneme,
 notation only. Extended the ɻ→r fold to [ɻɽ]→r; recovered the ړ words (سړی).
 
-Result: shipped restoration lexicon 256→**327 entries**; SYNC eval wikipron 47.7%→**53.1%**, kaikki 52.8%→**59.8%**.
+Result: shipped restoration lexicon 256→**327 entries**; SYNC eval wikipron 47.7%→**53.8%**, kaikki 52.8%→**60.8%**.
 Gold + numbers unaffected; only ps changed. This confirms the diagnosis: Pashto is g2p-coverage-bound, not
 data-bound — each g2p gap (‑ول glide, ‑ای diphthong) unlocks a class the existing mining then restores per-word.
 The hard multi-dialect floor (~28 words, ~2%) remains.
