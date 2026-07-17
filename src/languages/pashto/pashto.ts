@@ -88,9 +88,14 @@ function g2p(word: string): string {
             // دنيا→dunjɑ) — without this the ی reads as [i] and the ا wrongly glides (…nij).
             const glideBeforeFinalAlif =
                 s[i + 1] === ALIF && i + 2 === n && (ch === YA || ch === YA_AR);
-            if (endsInVowel(out) || glideBeforeFinalHe || glideBeforeFinalAlif)
+            if (endsInVowel(out) || glideBeforeFinalHe || glideBeforeFinalAlif) {
                 out += ch === WAW ? "w" : "j";
-            else out += longVowel(ch);
+                // A glide behaves like a coda consonant: before another consonant it takes an epenthetic ə (the
+                // verbal infinitive -ول = /awəl/: کَول→kawəl, not kawl). Mirrors the consonant-branch INH insertion.
+                const nx = s[i + 1];
+                if (nx !== undefined && nx in C && !isVowelCarrier(nx) && nx !== HE && nx !== HE_DO)
+                    out += INH;
+            } else out += longVowel(ch);
             i++;
             continue;
         }

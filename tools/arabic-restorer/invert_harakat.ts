@@ -67,7 +67,10 @@ const BARE = "";
 const SHORT_OPTS = [BARE, FATHA, KASRA, DAMMA, SUKUN]; // default-ə / ə / ɪ / ʊ / no-vowel
 const WAW = "و"; // و — the one AMBIGUOUS long-vowel letter
 const YA = "ی"; // ی choti ye — for glide detection (ی before a vowel is a glide, not a long vowel)
-const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (the long-vowel search)
+// و after a consonant: bare → oː · damma+waw وُ → uː (long vowel). PLUS the GLIDE reading — a short vowel on the
+// consonant makes و a glide [w] (fatḥa → a·w, kasra → i·w): the verbal infinitive -ول = /awəl/ (کَول→kawəl). The
+// fold-match against the referee disambiguates verb (glide) vs noun (long vowel) per word.
+const WAW_OPTS = [BARE, DAMMA, FATHA, KASRA];
 const YA_OPTS = [BARE, FATHA]; // bare ی → iː · یَ (ya+fatḥa) → eː (the adapted-word encoding of the iː/eː split)
 const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
 
