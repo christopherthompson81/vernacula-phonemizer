@@ -20,7 +20,10 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
 // A doubled base (optionally aspirated) → single + length ː; guard against a tie bar (there are none here, but
 // keep it parallel to the fleet convention).
 const AS_GEMINATE = /(tʰ|dʱ|[tdszxpbkɡmnlŋ])\1/gu;
-const collapseGeminates = (ipa: string): string => ipa.replace(AS_GEMINATE, "$1ː");
+// Collapse, then reorder length AFTER a trailing breathy/aspiration mark so an aspirated geminate is Cʰː/Cʱː,
+// NOT the stranded Cːʰ (যুদ্ধ d+dʱ → dʱː, not dːʱ) — the same reorder the Bengali engine pairs with its own set.
+const collapseGeminates = (ipa: string): string =>
+    ipa.replace(AS_GEMINATE, "$1ː").replace(/ː([ʰʱ])/gu, "$1ː");
 
 function wrap(base: ReturnType<typeof makeNativeBengali>): ReturnType<typeof makeNativeBengali> {
     return {
