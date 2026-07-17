@@ -65,3 +65,23 @@ and — worse — it wasn't lexicon-correctable (the ə was forced at the glide 
 by a sukun on the post-glide consonant (ښایسْته→ʂɑjstə), so the distinction (راوستل WANTS the ə, ښایسته doesn't —
 lexically ambiguous) is mineable/lexicon-correctable per word. The miner recovers the ښایسته class → wikipron
 47.4%→47.7%, kaikki 52.4%→52.8%. The و-glide options are gated to ps in the shared miner (WAW_GLIDE_OPTS).
+
+## Continuation 2 — 2026-07-16 — final -ی /ai/ diphthong (the g2p-unlock-then-mine pattern again)
+
+The un-invertible analysis (answering "data-bound?") showed the ceiling is NOT mostly data-bound: only ~28 words
+are the hard multi-dialect floor; the bulk are G2P-COVERAGE gaps that unlock a mining class each. The biggest was
+final -ی → /ai/ (~89): the adjectival/-ay suffix (سړی saɽay) which our g2p read as the long vowel /iː/.
+
+**g2p (engine):** a WORD-FINAL و/ی after a vowel is the DIPHTHONG offglide ʊ/ɪ (سړی→saɽaɪ, لوی→loɪ), not the
+consonantal glide j/w (a medial glide, دنيا→dənjɑ, is unchanged). The referee's offglide ɪ folds to ə (matching
+the fold), where our old glide j did not.
+**inverter:** a consonant before a word-final ی gains a [BARE, FATHA] slot — bare→iː (long), fatḥa→the -ay
+diphthong. Per-word mined vs the referee, so genuine /iː/ finals (اغزی→aɣzi) and -ay diphthongs (اغزَی→aɣzaɪ)
+are disambiguated. (The و word-final diphthong is already covered by WAW_GLIDE_OPTS.)
+**+ ɻ~ɽ fold:** ړ is our retroflex approximant ɻ (folded to r) but the referee writes the flap ɽ — same phoneme,
+notation only. Extended the ɻ→r fold to [ɻɽ]→r; recovered the ړ words (سړی).
+
+Result: shipped restoration lexicon 256→**327 entries**; SYNC eval wikipron 47.7%→**53.1%**, kaikki 52.8%→**59.8%**.
+Gold + numbers unaffected; only ps changed. This confirms the diagnosis: Pashto is g2p-coverage-bound, not
+data-bound — each g2p gap (‑ول glide, ‑ای diphthong) unlocks a class the existing mining then restores per-word.
+The hard multi-dialect floor (~28 words, ~2%) remains.

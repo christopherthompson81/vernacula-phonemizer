@@ -97,6 +97,8 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
         const glideNext = (next === YA || next === WAW) && chars[i + 2] !== undefined &&
             cfg.vowelLetters.includes(chars[i + 2]!);
         if (glideNext) out.push({ pos: i, options: SHORT_OPTS });
+        else if (cfg.silverCode === "pus" && next === YA && i + 2 === chars.length)
+            out.push({ pos: i, options: [BARE, FATHA] }); // word-final ی: bare → iː (long) vs fatḥa → the -ay diphthong (aɪ)
         else if (next === WAW) // و long vowel oː/uː; ps also searches the glide reading (‑ول → /awəl/)
             out.push({ pos: i, options: cfg.silverCode === "pus" ? WAW_GLIDE_OPTS : WAW_OPTS });
         else if (next === undefined || !cfg.vowelLetters.includes(next))
