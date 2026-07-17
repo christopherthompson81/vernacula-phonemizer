@@ -36,6 +36,18 @@ const FA_FULL_FOLD = (s: string): string =>
         .replace(/i(?!ː)/g, "e").replace(/u(?!ː)/g, "o") // classical short i→e, u→o (Iranian)
         .replace(/(.)\1/g, "$1").normalize("NFC");
 
+// FULL-DIACRITIZATION fold for Pashto (ps): like FA_FULL_FOLD, KEEPS the short-vowel quality a/ə/i/u/o DISTINCT so
+// the inversion is forced to pin the actual short vowel (the loose referee-eval fold collapses a/i/u/ɪ/ʊ→ə, so it
+// accepts a bare default-ə for ANY short vowel → 78% of ps silver was under-diacritized, the Persian bug). Folds
+// only the DIALECT-invariant axes: the multi-dialect ښ (ʂ/ç→ʃ) / ږ (ʐ→ʒ), the retroflex rhotic ɻ→r, the dental
+// t̪/d̪, and length/gemination (marked inconsistently by the referee). The lax ɪ/ʊ fold to tense i/u (kasra→i, damma→u).
+const PS_FULL_FOLD = (s: string): string =>
+    s.replace(/[ˈˌ]/g, "").replace(/\s/g, "").replace(/ː/g, "")
+        .replace(/t̪/g, "t").replace(/d̪/g, "d")
+        .replace(/[ʂç]/g, "ʃ").replace(/ʐ/g, "ʒ").replace(/ɻ/g, "r")
+        .replace(/ɪ/g, "i").replace(/ʊ/g, "u") // lax→tense; a/ə/i/u/o kept DISTINCT (the fix)
+        .replace(/(.)\1/g, "$1").normalize("NFC");
+
 // Per-language config: the phonemizer, the wikipron tag in silver.tsv, and the Perso-Arabic letter classes for
 // slot-finding. A letter in BOTH cons and vowelLetters (Persian/Pashto list و/ی/ه as consonants but the g2p treats
 // them as vowels/glides) is treated as a VOWEL letter — no slot — so the search space doesn't blow up.
@@ -111,7 +123,10 @@ function label(lang: string): void {
     // classical→Iranian i→e/u→o) so the label encodes the real pronunciation; on a miss, fall back to the loose
     // referee-eval fold (short-vowels collapsed → a bare skeleton label) so we never LOSE the coverage the loose
     // fold had. Other riders use the loose fold only (their dialect maps are a follow-up). See FA_FULL_FOLD.
-    const passes = lang === "fa" ? [FA_FULL_FOLD, looseFold] : [looseFold];
+    const passes =
+        lang === "fa" ? [FA_FULL_FOLD, looseFold]
+        : lang === "ps" ? [PS_FULL_FOLD, looseFold]
+        : [looseFold];
 
     // Two outputs from the SAME inverter:
     //  • NEURAL training (default) — wikipron + convention-harmonized kaikki only. NOT Hindi→Urdu: it's a different
