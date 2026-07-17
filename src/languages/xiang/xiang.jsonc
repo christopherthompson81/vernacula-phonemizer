@@ -1,0 +1,21 @@
+// Xiang Chinese / 湘语 (hsn), Changsha 长沙 (New Xiang) dialect — canonical IPA. xiang.ts reads this file. Xiang is
+// a distinct primary branch of Sinitic; Changsha is its prestige/representative variety. Its signature within
+// the Sinitic set: it RETAINS the Middle Chinese 入声 (entering) TONE CATEGORY (Chao 24) but has LOST the checked
+// stop coda entirely — no -p̚/-t̚/-k̚ (as Hakka keeps) and no glottal -ʔ (as Jin keeps). The dict (dict.tsv)
+// already carries the Sinological IPA per syllable (segmental IPA + a superscript pitch-number tone, with the
+// narrow Changsha vowel diacritics kept verbatim); the shared Han-dict engine (hanDictIpa.ts) converts the pitch
+// digits → Chao contour letters and resolves the sandhi arrow ⁻. SINGLE authoritative source (Wiktionary/kaikki
+// Changsha Sinological-IPA) — no independent referee (🔷). See docs/hsn_native_bringup_investigation.md.
+{
+    "language": "hsn",
+    "name": "Xiang Chinese (Changsha)",
+    "script": "Han",
+
+    // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
+    "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ",
+        "；": " ; ", "：": " : ", ".": " . ", ",": " , ", "?": " ? ", "!": " ! "
+    }
+}

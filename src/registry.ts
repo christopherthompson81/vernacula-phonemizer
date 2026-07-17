@@ -44,6 +44,7 @@ import { createNaija } from "./languages/naija/naija.ts";
 import { createWu } from "./languages/wu/wu.ts";
 import { createJin } from "./languages/jin/jin.ts";
 import { createHakka } from "./languages/hakka/hakka.ts";
+import { createXiang } from "./languages/xiang/xiang.ts";
 import { createSwahili } from "./languages/swahili/swahili.ts";
 import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
@@ -176,6 +177,9 @@ function build(lang: string): Phonemizer {
         // Hakka Chinese (Meixian) — same shared Han-dict engine; embedded Latin routes to English.
         case "hak":
             return createHakka((latin) => getPhonemizer("en").text(latin));
+        // Xiang Chinese (Changsha) — same shared Han-dict engine; embedded Latin routes to English.
+        case "hsn":
+            return createXiang((latin) => getPhonemizer("en").text(latin));
         case "jv":
             return createJavanese();
         case "sw":
