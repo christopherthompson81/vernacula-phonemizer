@@ -20,6 +20,9 @@ describe("pashto canonical IPA", () => {
             ["نوم", "nˈom"], // name
             ["ماشوم", "mɑʃˈom"], // child
             ["ورځ", "ˈorəd͡z"], // day — ځ → d͡z affricate
+            ["اسپانيا", "aspɑnjˈɑ"], // Spain — ـيا: ی is the glide [j], the final ا the [ɑ] nucleus
+            ["دنيا", "d̪ənjˈɑ"], // world — ـيا → jɑ
+            ["انګور", "aŋɡˈor"], // grapes — homorganic ن → [ŋ] before the velar ګ
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
     });
