@@ -28,7 +28,7 @@ Malagasy orthography is fairly shallow; the notable rules:
 - Numbers compose **units-first** with the connector "amby" (21 → iraika amby roapolo; the unit 1 is iray alone
   but iraika in a compound).
 
-## The load-bearing fold — weak final vowels (46% → 80.7%)
+## The load-bearing fold — weak final vowels (46% → 78.6%)
 
 The referees **delete Malagasy's famous weak final vowels** (the unstressed final a/o/y), realising them as a
 secondary articulation on the preceding consonant. Our **broad canonical transcription KEEPS them** — the correct
@@ -38,13 +38,13 @@ on that final vowel alone.
 
 The fold **strips a word-final vowel from BOTH sides** (after the ʷ/ʲ folds expose the referee's deleted vowel),
 plus the notational allophony (ʔ→h, retroflex ʈ/ɖ→t/d, tap/uvular ɾ/ʁ→r, lax ɛ→e, prenasalisation marks). This
-takes the primary **46.0% → 80.7%** — i.e. **the 80.7% measures the verifiable core (consonants + o→u + stress),
+takes the primary **46.0% → 78.6%** — i.e. **the 78.6% measures the verifiable core (consonants + o→u + stress),
 NOT the final vowels**, which the referee deletes and so cannot verify either way. This fold-depth is load-bearing
 and stated here and in the floor comment.
 
 ## Run — vs the two referees
 
-**80.7% vs wikipron (core) / 73.1% vs kaikki (core).** On the verifiable core the two Wiktionary parsings
+**78.6% vs wikipron (core) / 73.1% vs kaikki (core).** On the verifiable core the two Wiktionary parsings
 corroborate the distinctive Malagasy rules (o→u, retroflex tr/dr, prenasalized stops, penult stress). The residual
 is proper nouns / loanwords (Antananarivo, Arzantina, anglisy), extreme casual reductions the referee records
 (adana→[ad]), and glide/diphthong details (aiay, akio).

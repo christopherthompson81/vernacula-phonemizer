@@ -5,7 +5,7 @@ import { phonemizeWord, createMalagasy } from "../src/languages/malagasy/malagas
 // Canonical-IPA goldens for Malagasy / Malagasy (mg) — Standard/Official (Merina), Austronesian, Latin. A shallow
 // rule g2p: ⟨o⟩=/u/, ⟨y⟩=final /i/, the retroflex affricates ⟨tr⟩→ʈʂ / ⟨dr⟩→ɖʐ, ⟨j⟩→dz, prenasalized stops
 // (mb→ᵐb, nd→ⁿd, ndr→ⁿɖʐ, ng→ᵑɡ, …), penultimate stress. This is a BROAD canonical transcription that KEEPS the
-// weak final vowels (which the narrow referees delete). Validated at ~80.7% on the verifiable core (final vowels
+// weak final vowels (which the narrow referees delete). Validated at ~78.6% on the verifiable core (final vowels
 // excluded) vs wikipron mlg + kaikki. See docs/investigations/mg_native_bringup_investigation.md.
 describe("Malagasy canonical IPA", () => {
     test("⟨o⟩ → /u/, ⟨y⟩ → /i/, penultimate stress", () => {
@@ -32,7 +32,7 @@ describe("Malagasy canonical IPA", () => {
     test("numbers (units-first with amby)", () => {
         const d = createMalagasy();
         expect(d.text("10").trim()).toBe("fˈulu"); // folo
-        expect(d.text("21").trim()).toBe("iraˈika ˈaᵐbi ruapˈulu"); // iraika amby roapolo (units first)
+        expect(d.text("21").trim()).toBe("irˈajka ˈaᵐbi ruapˈulu"); // iraika amby roapolo (units first; ⟨ai⟩→[aj])
         expect(d.text("100").trim()).toBe("zˈatu"); // zato
         expect(d.text("1000").trim()).toBe("arˈivu"); // arivo
     });

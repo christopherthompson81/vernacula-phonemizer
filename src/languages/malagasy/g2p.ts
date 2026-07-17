@@ -34,6 +34,15 @@ const DIGRAPHS: [string, string][] = [
     ["j", "dz"],
 ];
 
+// Vowel sequences that are ONE nucleus (a diphthong or a monophthongized digraph), so ⟨o⟩ inside them does NOT
+// take the /u/ value and stress counts them as a single syllable: ⟨ai⟩/⟨ay⟩ → the diphthong [aj], ⟨ao⟩ → [o]
+// (tao→to, not tau). Checked before the single-vowel rule.
+const VOWEL_SEQ: [string, string][] = [
+    ["ai", "aj"],
+    ["ay", "aj"],
+    ["ao", "o"],
+];
+
 export interface Seg {
     ph: string;
     nucleus: boolean;
@@ -50,6 +59,14 @@ export function toSegments(word: string): Seg[] {
         for (const [seq, ph] of DIGRAPHS) {
             if (w.startsWith(seq, i)) {
                 segs.push({ ph, nucleus: false });
+                i += seq.length;
+                continue outer;
+            }
+        }
+        // Vowel digraphs (one nucleus): ⟨ai⟩/⟨ay⟩→[aj], ⟨ao⟩→[o].
+        for (const [seq, ph] of VOWEL_SEQ) {
+            if (w.startsWith(seq, i)) {
+                segs.push({ ph, nucleus: true });
                 i += seq.length;
                 continue outer;
             }

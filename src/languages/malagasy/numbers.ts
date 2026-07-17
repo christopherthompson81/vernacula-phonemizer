@@ -31,14 +31,22 @@ function below1000(n: number, compound = false): string {
     return r ? `${below100(r, true)} ${N.connector} ${HUNDREDS[h]}` : HUNDREDS[h]!;
 }
 
-/** Non-negative integer (< 10⁶) → Malagasy words; larger / non-finite → digit-by-digit. */
+/** Non-negative integer (< 10⁹) → Malagasy words; larger / non-finite → digit-by-digit. Units-first "amby"
+ *  chaining across the arivo (10³) and tapitrisa (10⁶) scales. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6)
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...String(Math.abs(n))].map((d) => ONES[Number(d)] || N.zero).join(" ");
     if (n === 0) return N.zero;
     if (n < 1000) return below1000(n);
-    const th = Math.floor(n / 1000),
-        r = n % 1000;
-    const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
-    return r ? `${below1000(r, true)} ${N.connector} ${thousand}` : thousand;
+    if (n < 1e6) {
+        const th = Math.floor(n / 1000),
+            r = n % 1000;
+        const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
+        return r ? `${below1000(r, true)} ${N.connector} ${thousand}` : thousand;
+    }
+    // Millions and up: read the million group + the remainder, units-first (remainder amby million-part).
+    const mil = Math.floor(n / 1e6),
+        r = n % 1e6;
+    const million = `${below1000(mil)} ${N.million}`; // iray tapitrisa, roa tapitrisa, …
+    return r ? `${numberToWords(r)} ${N.connector} ${million}` : million;
 }
