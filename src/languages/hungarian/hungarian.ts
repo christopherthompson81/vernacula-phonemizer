@@ -1,0 +1,112 @@
+/**
+ * Hungarian (hu, magyar) phonemizer — Uralic, Latin, canonical IPA, espeak-independent. A longest-match scan
+ * (g2p reads the rule table in hungarian.jsonc): trigraphs / geminate-digraphs / digraphs before single letters,
+ * then a doubled-single-consonant → Cː gemination pass, then FIXED first-syllable stress (Hungarian). Signature:
+ * ⟨s⟩→[ʃ] / ⟨sz⟩→[s], ⟨gy⟩→[ɟ] / ⟨ty⟩→[c], ⟨a⟩→[ɒ], the full long/short vowel system. text() tokenizes words /
+ * numbers / punctuation. See docs/investigations/hu_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
+import { MANIFEST } from "./manifest.ts";
+
+const RULES = MANIFEST.rules;
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
+
+interface Seg {
+    ph: string;
+    v: boolean;
+}
+
+/** Scan a lowercased Hungarian word into IPA segments (longest-match), then collapse a doubled single consonant
+ *  to length (ll→lː, jj→jː, ss→ʃː) — the geminate DIGRAPHS (ssz→sː) are already single Cː segments from the scan. */
+function toSegments(word: string): Seg[] {
+    const w = word.toLowerCase();
+    const segs: Seg[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        for (const [orth, ipa, v] of RULES) {
+            if (w.startsWith(orth, i)) {
+                segs.push({ ph: ipa, v });
+                i += orth.length;
+                continue outer;
+            }
+        }
+        i++; // unknown char (punctuation) → skip
+    }
+    // Gemination: two adjacent identical single-consonant segments → one long consonant (Cː).
+    const out: Seg[] = [];
+    for (const s of segs) {
+        const prev = out[out.length - 1];
+        if (prev && !prev.v && !s.v && prev.ph === s.ph && !/ː$/.test(s.ph)) {
+            prev.ph += "ː";
+            continue;
+        }
+        out.push({ ...s });
+    }
+    // j-palatalization: a coronal d/t/n/l (or ɟ/c) + ⟨j⟩ → a long palatal (feddj→[fɛɟː], adj→[ɒɟː], bánja→
+    // [baːɲːɒ], hallja→[hɒjːɒ]) — the productive Hungarian imperative/3sg assimilation. Consumes the ⟨j⟩.
+    const PAL: Record<string, string> = { d: "ɟ", t: "c", n: "ɲ", l: "j", ɟ: "ɟ", c: "c" };
+    for (let k = 0; k < out.length - 1; k++) {
+        if (out[k + 1]!.ph === "j" && PAL[base(out[k]!.ph)]) {
+            out[k]!.ph = PAL[base(out[k]!.ph)]! + "ː";
+            out.splice(k + 1, 1);
+        }
+    }
+    // Nasal place assimilation: /n/ → [ŋ] before a velar stop k/ɡ (dzsungel→d͡ʒuŋɡɛl, hang→hɒŋɡ, bank→bɒŋk).
+    for (let k = 0; k < out.length - 1; k++)
+        if (out[k]!.ph === "n" && /^[kɡ]/.test(out[k + 1]!.ph)) out[k]!.ph = "ŋ";
+    voicingAssimilation(out);
+    return out;
+}
+
+// Obstruent voicing pairs (base phoneme, no length). Hungarian has REGRESSIVE voicing assimilation: an obstruent
+// takes the voicing of a following obstruent (biztat→[bistɒt] z→s; lég·szivattyú→[leːk…] ɡ→k; vasgolyó→[vaʒɡ…]).
+const DEVOICE: Record<string, string> = { b: "p", d: "t", ɡ: "k", v: "f", z: "s", ʒ: "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", ɟ: "c" };
+const VOICE: Record<string, string> = { p: "b", t: "d", k: "ɡ", f: "v", s: "z", ʃ: "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", c: "ɟ" };
+const VOICELESS_TRIGGER = new Set(["p", "t", "k", "f", "s", "ʃ", "t͡s", "t͡ʃ", "c", "x"]);
+// Voiced obstruents that TRIGGER voicing of a preceding one — /v/ and /h/ are excluded (v devoices but does not
+// voice a preceding obstruent; h is not a trigger).
+const VOICED_TRIGGER = new Set(["b", "d", "ɡ", "z", "ʒ", "d͡z", "d͡ʒ", "ɟ"]);
+const base = (ph: string): string => ph.replace(/ː$/u, "");
+
+/** Regressive obstruent voicing assimilation (right-to-left so a cluster propagates). Preserves length. */
+function voicingAssimilation(segs: Seg[]): void {
+    for (let k = segs.length - 2; k >= 0; k--) {
+        const b = base(segs[k]!.ph),
+            nb = base(segs[k + 1]!.ph),
+            long = segs[k]!.ph.endsWith("ː");
+        if (VOICELESS_TRIGGER.has(nb) && DEVOICE[b]) segs[k]!.ph = DEVOICE[b] + (long ? "ː" : "");
+        else if (VOICED_TRIGGER.has(nb) && VOICE[b]) segs[k]!.ph = VOICE[b] + (long ? "ː" : "");
+    }
+}
+
+/** One Hungarian word → canonical IPA with FIXED first-syllable stress. Hungarian primary stress is always
+ *  word-initial, so the ˈ precedes the first syllable's onset — i.e. the very start of the word. */
+export function phonemizeWord(word: string): string {
+    const segs = toSegments(word);
+    if (segs.length === 0) return "";
+    return "ˈ" + segs.map((s) => s.ph).join("");
+}
+
+// A word (Hungarian letters incl. accented vowels) / number / punctuation token.
+const TOKEN = /([a-záéíóöőúüű]+)|(\d+)|([.!?…,;:])/giu;
+
+class HungarianPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Hungarian phonemizer (longest-match g2p + gemination + fixed first-syllable stress). */
+export function createHungarian(): Phonemizer {
+    return new HungarianPhonemizer();
+}
