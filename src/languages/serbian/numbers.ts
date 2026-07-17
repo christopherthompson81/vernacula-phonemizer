@@ -24,11 +24,12 @@ function below1000(n: number): string {
     return r ? `${N.hundreds[h]} ${below100(r)}` : N.hundreds[h]!;
 }
 
-/** Slavic count agreement: 1 → one, 2–4 (not 12–14) → few, else many. */
+/** Slavic count agreement: a count ending in 1 (not 11) → the nominative-singular "one" form (dvadeset jedan
+ *  milion), ending in 2–4 (not 12–14) → "few", else "many". */
 function agree(count: number, m: { one: string; few?: string; many: string }): string {
     const d = count % 10,
         dd = count % 100;
-    if (count === 1) return m.one;
+    if (d === 1 && dd !== 11) return m.one;
     if (m.few && d >= 2 && d <= 4 && !(dd >= 12 && dd <= 14)) return m.few;
     return m.many;
 }
@@ -44,8 +45,9 @@ export function numberToWords(n: number): string {
         th = Math.floor((n % 1e6) / 1000),
         r = n % 1000;
     if (mil) parts.push(`${below1000(mil)} ${agree(mil, N.million)}`);
-    // 1000 alone is "hiljadu" (not "jedan hiljadu"); ≥2 keeps the multiplier.
-    if (th) parts.push(th === 1 ? N.thousand.one : `${below1000(th)} ${agree(th, N.thousand)}`);
+    // The thousands group of exactly 1 is the standalone "hiljadu" (1000, 1001000, …); ≥2 (incl. 21, 31, …)
+    // keeps the multiplier + the agreeing form (dvadeset jedna → …jedan hiljada; dve hiljade; pet hiljada).
+    if (th) parts.push(th === 1 ? N.thousand.standalone! : `${below1000(th)} ${agree(th, N.thousand)}`);
     if (r) parts.push(below1000(r));
     return parts.join(" ");
 }

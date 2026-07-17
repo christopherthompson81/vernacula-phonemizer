@@ -17,8 +17,11 @@
         "accent": "lexical pitch accent (4-way) + length — unwritten, DEFERRED (no stress/tone mark emitted)",
     },
 
-    // Latin DIGRAPHS (tried before the single letters). ⟨dj⟩ is an ASCII fallback for ⟨đ⟩.
-    "digraphs": { "dž": "d͡ʒ", "lj": "ʎ", "nj": "ɲ", "dj": "d͡ʑ" },
+    // Latin DIGRAPHS (tried before the single letters). ⟨dj⟩ is deliberately NOT included: modern Serbian writes
+    // ⟨đ⟩ directly, and the native ⟨d⟩+⟨j⟩ sequence across a prefix boundary (od·jek→od͡jek, pod·jednako) is far more
+    // common than the ASCII ⟨dj⟩-for-đ fallback — so ⟨dj⟩ scans as two phonemes. (The ⟨dž⟩/⟨nj⟩ prefix-boundary
+    // cases nad·živeti / in·jekcija stay a small residual — a prefix guard would break odžak/konj/konjak.)
+    "digraphs": { "dž": "d͡ʒ", "lj": "ʎ", "nj": "ɲ" },
 
     // Single letters → IPA. Both scripts in one table (a word is one script; the maps don't collide). Every value
     // is CANONICAL IPA.
@@ -46,7 +49,7 @@
         "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
         "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
         "hundreds": ["", "sto", "dvesta", "trista", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
-        "thousand": { "one": "hiljadu", "few": "hiljade", "many": "hiljada" },
-        "million": { "one": "milion", "many": "miliona" }
+        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada" },
+        "million": { "one": "milion", "few": "miliona", "many": "miliona" }
     }
 }

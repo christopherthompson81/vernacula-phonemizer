@@ -7,6 +7,7 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface SlavicMagnitude {
+    standalone?: string; // the special standalone form (hiljadu = 1000), distinct from the paucal-1 nom-sg
     one: string;
     few?: string;
     many: string;
