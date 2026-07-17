@@ -11,6 +11,7 @@ import { createFrench } from "./languages/french/french.ts";
 import { createPortuguese } from "./languages/portuguese/portuguese.ts";
 import { createRussian } from "./languages/russian/russian.ts";
 import { createGerman } from "./languages/german/german.ts";
+import { createDutch } from "./languages/dutch/dutch.ts";
 import { createJapanese } from "./languages/japanese/japanese.ts";
 import { createTurkish } from "./languages/turkish/turkish.ts";
 import { createVietnamese } from "./languages/vietnamese/vietnamese.ts";
@@ -115,6 +116,8 @@ function build(lang: string): Phonemizer {
             return createRussian();
         case "de":
             return createGerman();
+        case "nl":
+            return createDutch();
         case "ja":
             return createJapanese();
         case "tr":

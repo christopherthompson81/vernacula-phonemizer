@@ -23,6 +23,7 @@ import { createPinyinPhonemizer } from "../../src/languages/mandarin/mandarin.ts
 import { phonemizeWord as cs } from "../../src/languages/czech/czech.ts";
 import { phonemizeWord as cy } from "../../src/languages/welsh/welsh.ts";
 import { phonemizeWord as de } from "../../src/languages/german/german.ts";
+import { phonemizeWord as nl } from "../../src/languages/dutch/dutch.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
@@ -107,6 +108,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     bn,
     ca,
     cmn,
+    nl,
     cs,
     cy,
     de,
