@@ -85,6 +85,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
     arz: (w: string) => ar(w, "egyptian"), // Egyptian Arabic variety — shares phonemizeArabic
     apc: (w: string) => ar(w, "levantine"), // North Levantine Arabic variety
+    apd: (w: string) => ar(w, "sudanese"), // Sudanese Arabic variety (no referee — gold-anchored 🔷)
 
     bn,
     ca,

@@ -83,6 +83,8 @@ function build(lang: string): Phonemizer {
             return createArabic("egyptian");
         case "apc": // North Levantine Arabic (Syrian/Lebanese) — Levantine variety data
             return createArabic("levantine");
+        case "apd": // Sudanese Arabic — Sudanese variety data (authored; ق→ɡ, ج→ɟ, interdentals kept)
+            return createArabic("sudanese");
         case "fr":
             return createFrench();
         case "pt":

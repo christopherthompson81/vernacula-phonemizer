@@ -122,4 +122,17 @@ describe("arabic canonical IPA — diacritized path", () => {
             expect(phonemizeWord("بَيت", "levantine")).toBe("bˈeːt"); // ay → eː
         });
     });
+
+    // Sudanese Arabic (apd) — AUTHORED (no wikipron referee); this gold IS the correctness anchor, validated against
+    // published Sudanese phonology (Dickins). Fingerprint: ق→[ɡ], ج→[ɟ] (palatal), interdentals ث/ذ/ظ KEPT.
+    describe("Sudanese variety (apd) — gold-anchored", () => {
+        test("ق→ɡ, ج→ɟ (palatal), interdentals kept", () => {
+            expect(phonemizeWord("قَال", "sudanese")).toBe("ɡˈaːl"); // ق → ɡ (voiced velar, not ʔ)
+            expect(phonemizeWord("جَمَل", "sudanese")).toBe("ɟˈamal"); // ج → ɟ (voiced palatal — the signature)
+            expect(phonemizeWord("جَدِيد", "sudanese")).toBe("ɟadˈiːd");
+            expect(phonemizeWord("ثَلَاثَة", "sudanese")).toBe("θalˈaːθa"); // ث KEPT as [θ] (vs Egy/Lev [t])
+            expect(phonemizeWord("ذَهَب", "sudanese")).toBe("ðˈahab"); // ذ KEPT as [ð]
+            expect(phonemizeWord("بَيت", "sudanese")).toBe("bˈeːt"); // ay → eː
+        });
+    });
 });
