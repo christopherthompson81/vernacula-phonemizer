@@ -1,0 +1,127 @@
+// Native canonical-IPA definition for Assamese / অসমীয়া (as) — Eastern Indo-Aryan, Bengali-Assamese script.
+// Authored from the Unicode chart + standard (Central/Standard) Assamese phonology. Reuses the Bengali engine
+// (makeNativeBengali — abugida scan + ɔ→o height harmony + inherent-vowel deletion + geminate→length) with the
+// Assamese phoneme values, which diverge from Bengali on the DEFINING points:
+//   - the three sibilants শ ষ স → [x] (voiceless VELAR fricative) — Assamese's signature (Bengali has [ʃ]).
+//   - DEAFFRICATION: চ ছ → [s], জ ঝ → [z] (Bengali keeps the affricates t͡ʃ/d͡ʒ).
+//   - NO retroflex/dental split: ট ঠ ড ঢ and ত থ দ ধ all → plain ALVEOLAR t tʰ d dʱ (Bengali has ʈ… vs t̪…).
+//   - the two extra Assamese letters ৰ [ɹ] (ra) and ৱ [w] (wa); য → [z].
+// See docs/investigations/as_native_bringup_investigation.md.
+{
+    "language": "as",
+    "name": "Assamese",
+    "script": "Bengali",
+    "provenance": "Authored from the Unicode Bengali-Assamese chart + standard Assamese phonology. Reuses the Bengali G2P engine (shared Eastern-Indic harmony + deletion) with Assamese phoneme values — the signature x-fricative, deaffrication, and alveolar merger.",
+
+    // Assamese inherent vowel is /ɔ/ (as Bengali). Assamese does NOT share Bengali's ɔ→o height harmony (the
+    // referee keeps ɔ before a high vowel: চকৰি→sɔkɔɹi, not sɔkoɹi), so it is disabled here.
+    "inherentVowel": "ɔ",
+    "heightHarmony": false,
+    "medialSchwaDeletion": false,
+    "skipLexicon": true,
+
+    "consonants": {
+        "ক": { "ipa": "k", "note": "velar stop, voiceless" },
+        "খ": { "ipa": "kʰ", "note": "velar stop, voiceless aspirated (→ [x] for some speakers)" },
+        "গ": { "ipa": "ɡ", "note": "velar stop, voiced" },
+        "ঘ": { "ipa": "ɡʱ", "note": "velar stop, voiced breathy" },
+        "ঙ": { "ipa": "ŋ", "note": "velar nasal" },
+        "চ": { "ipa": "s", "note": "DEAFFRICATED to [s] (Bengali t͡ʃ)" },
+        "ছ": { "ipa": "s", "note": "DEAFFRICATED to [s] (Bengali t͡ʃʰ)" },
+        "জ": { "ipa": "z", "note": "DEAFFRICATED to [z] (Bengali d͡ʒ)" },
+        "ঝ": { "ipa": "z", "note": "DEAFFRICATED to [z] (Bengali d͡ʒʱ)" },
+        "ঞ": { "ipa": "n", "note": "palatal nasal → [n] (only in conjuncts)" },
+        "ট": { "ipa": "t", "note": "ALVEOLAR (Assamese lost the retroflex series; Bengali ʈ)" },
+        "ঠ": { "ipa": "tʰ", "note": "alveolar, voiceless aspirated" },
+        "ড": { "ipa": "d", "note": "alveolar, voiced" },
+        "ঢ": { "ipa": "dʱ", "note": "alveolar, voiced breathy" },
+        "ণ": { "ipa": "n", "note": "retroflex nasal → [n]" },
+        "ত": { "ipa": "t", "note": "ALVEOLAR (Assamese has no dental/retroflex split; Bengali t̪)" },
+        "থ": { "ipa": "tʰ", "note": "alveolar, voiceless aspirated" },
+        "দ": { "ipa": "d", "note": "alveolar, voiced" },
+        "ধ": { "ipa": "dʱ", "note": "alveolar, voiced breathy" },
+        "ন": { "ipa": "n", "note": "alveolar nasal" },
+        "প": { "ipa": "p", "note": "labial stop, voiceless" },
+        "ফ": { "ipa": "pʰ", "note": "labial, voiceless aspirated (→ [f]~[ɸ] for many speakers)" },
+        "ব": { "ipa": "b", "note": "labial stop, voiced" },
+        "ভ": { "ipa": "bʱ", "note": "labial stop, voiced breathy (→ [β]~[v])" },
+        "ম": { "ipa": "m", "note": "labial nasal" },
+        "য": { "ipa": "z", "note": "ôntôsthô ja → [z] (Assamese)" },
+        "র": { "ipa": "ɹ", "note": "rhotic → alveolar approximant [ɹ] (Assamese)" },
+        "ল": { "ipa": "l", "note": "alveolar lateral" },
+        "শ": { "ipa": "x", "note": "sibilant → [x] VELAR FRICATIVE — the Assamese signature" },
+        "ষ": { "ipa": "x", "note": "sibilant → [x] (velar fricative)" },
+        "স": { "ipa": "x", "note": "sibilant → [x] (velar fricative)" },
+        "হ": { "ipa": "ɦ", "note": "voiced glottal fricative" },
+        "ৰ": { "ipa": "ɹ", "note": "Assamese RA (extra letter) → alveolar approximant [ɹ]" },
+        "ৱ": { "ipa": "w", "note": "Assamese WA (extra letter) → labiovelar glide [w]" },
+        "ড়": { "ipa": "ɹ", "note": "ra with nukta → [ɹ] (Assamese has no retroflex flap)" },
+        "ঢ়": { "ipa": "ɹʱ", "note": "breathy variant" },
+        "য়": { "ipa": "j", "note": "ya with nukta → glide [j]" },
+        "ৎ": { "ipa": "t", "note": "khanda ta → final alveolar [t], no inherent vowel" },
+    },
+
+    "independentVowels": {
+        "অ": { "ipa": "ɔ", "note": "short open-mid back (inherent)" },
+        "আ": { "ipa": "a", "note": "open" },
+        "ই": { "ipa": "i", "note": "close front" },
+        "ঈ": { "ipa": "i", "note": "close front (length merged)" },
+        "উ": { "ipa": "u", "note": "close back" },
+        "ঊ": { "ipa": "u", "note": "close back (length merged)" },
+        "ঋ": { "ipa": "ɹi", "note": "vocalic r → [ɹi]" },
+        "এ": { "ipa": "e", "note": "close-mid front (→ [ɛ] in closed/some syllables)" },
+        "ঐ": { "ipa": "ɔi", "note": "diphthong" },
+        "ও": { "ipa": "o", "note": "close-mid back" },
+        "ঔ": { "ipa": "ɔu", "note": "diphthong" },
+    },
+
+    "vowelSigns": {
+        "া": { "ipa": "a" },
+        "ি": { "ipa": "i" },
+        "ী": { "ipa": "i" },
+        "ু": { "ipa": "u" },
+        "ূ": { "ipa": "u" },
+        "ৃ": { "ipa": "ɹi" },
+        "ে": { "ipa": "e" },
+        "ৈ": { "ipa": "ɔi" },
+        "ো": { "ipa": "o" },
+        "ৌ": { "ipa": "ɔu" },
+    },
+
+    "signs": {
+        "virama": { "char": "্", "effect": "suppressInherentVowel", "note": "hôxôntô — conjuncts" },
+        "anusvara": { "char": "ং", "effect": "velarNasal", "note": "ং → [ŋ]" },
+        "chandrabindu": { "char": "ঁ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel" },
+        "visarga": { "char": "ঃ", "effect": "appendH", "note": "→ [h] (rare)" },
+        "nukta": { "char": "়", "effect": "composeNukta", "note": "combines with ড়/ঢ়/য়" },
+    },
+
+    // NUMBERS — authored Assamese spellings; canonical IPA is DERIVED by running them through the G2P.
+    "numbers": {
+        "units": ["শূন্য", "এক", "দুই", "তিনি", "চাৰি", "পাঁচ", "ছয়", "সাত", "আঠ", "ন"],
+        "teens": ["দহ", "এঘাৰ", "বাৰ", "তেৰ", "চৈধ্য", "পোন্ধৰ", "ষোল", "সোতৰ", "ওঠৰ", "ঊনৈশ"],
+        "tens": {
+            "20": "বিছ",
+            "30": "ত্ৰিশ",
+            "40": "চল্লিশ",
+            "50": "পঞ্চাশ",
+            "60": "ষাঠি",
+            "70": "সত্তৰ",
+            "80": "আশী",
+            "90": "নব্বৈ"
+        },
+        "magnitudes": { "hundred": "এশ", "thousand": "হাজাৰ", "lakh": "লাখ", "crore": "কোটি" },
+        "decimalWord": "দশমিক"
+    },
+
+    "clausePunctuation": {
+        "।": " । ",
+        "॥": " ॥ ",
+        ".": " . ",
+        "?": " ? ",
+        "!": " ! ",
+        ",": " , ",
+        ";": " ; ",
+        ":": " : "
+    }
+}
