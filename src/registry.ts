@@ -3,7 +3,7 @@
  * language), built lazily and cached. No espeak, no fallback — an unknown language throws.
  */
 import { createHindi } from "./languages/hindi/hindi.ts";
-import { createEnglish } from "./languages/english/english.ts";
+import { createEnglish, EnglishPhonemizer } from "./languages/english/english.ts";
 import { createMandarin } from "./languages/mandarin/mandarin.ts";
 import { createSpanish } from "./languages/spanish/spanish.ts";
 import { createArabic } from "./languages/arabic/arabic.ts";
@@ -142,9 +142,12 @@ function build(lang: string): Phonemizer {
             return createPersian((latin) => getPhonemizer("en").text(latin));
         case "it":
             return createItalian();
-        // Embedded/code-switched English is available to Naija, but loans are nativised by the rule g2p (lazy).
+        // Naija is English-lexified: a known-English word is nativised (English dict IPA → Naija phonology), an
+        // OOV word (substrate loan) falls through to the rule g2p. Pass the English DICT lookup (knownWord).
         case "pcm":
-            return createNaija((latin) => getPhonemizer("en").text(latin));
+            return createNaija((latin) =>
+                (getPhonemizer("en") as EnglishPhonemizer).knownWord(latin),
+            );
         // Embedded Latin in Wu text routes to the English phonemizer (lazy — loaded only if it appears).
         case "wuu":
             return createWu((latin) => getPhonemizer("en").text(latin));

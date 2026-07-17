@@ -36,12 +36,40 @@ const DEF = loadManifest<NaijaDef>(import.meta.url, "naija.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
-export type ForeignPhonemizer = (latin: string) => string;
+/** Dict-only English lookup: the CMUdict-derived citation IPA if the word is known English, else undefined
+ *  (an OOV word — likely a substrate loan — that the rule g2p reads phonemically instead). */
+export type ForeignPhonemizer = (latin: string) => string | undefined;
+
+// NATIVISATION: standard-English CMUdict IPA → Naija phonology. Nigerian Pidgin is English-lexified and written
+// (BBC-Pidgin / media style) mostly in ENGLISH spelling, so a known-English word is realised with Naija values:
+// the 7-vowel system /i e ɛ a ɔ o u/ (no schwa reduction, no vowel-length), TH-stopping (θ→t, ð→d), NON-RHOTIC
+// codas (car→ka, water→wata; onset r→ɾ). Lexical mergers inherited from the GenAm source (LOT/PALM, TRAP/BATH)
+// are unresolved — a documented ceiling (see the diaphonemic-source note in pcm_native_bringup_investigation.md).
+const V = "iɪeɛæaɑɔoʊuʌəɐ"; // English vowels (for the onset-/r/ lookahead), before nativisation collapses them
+function nativise(en: string): string {
+    return en
+        .normalize("NFC")
+        .replace(/[ˈˌː]/gu, "") // stress, length
+        .replace(/aᶦ/gu, "ai").replace(/aᶷ/gu, "au").replace(/[ɔo]ᶦ/gu, "ɔi") // PRICE/MOUTH/CHOICE
+        .replace(/eᶦ/gu, "e").replace(/[oə]ᶷ/gu, "o") // FACE→e, GOAT→o
+        .replace(/ɝ/gu, "ɔ").replace(/ɚ/gu, "a") // NURSE/lettER — the r is absorbed
+        .replace(/ʰ/gu, "").replace(/̬/gu, "") // deaspirate, un-flap
+        .replace(/θ/gu, "t").replace(/ð/gu, "d") // TH-stopping
+        .replace(/ɫ/gu, "l").replace(/ʲ/gu, "j") // dark-l → l; palatal glide (abbreviate→abɾivijet) → j
+        .replace(new RegExp(`[ɹr](?=[${V}])`, "gu"), "ɾ") // ONSET r → tap
+        .replace(/[ɹr]/gu, "") // CODA r → dropped (Naija is non-rhotic)
+        .replace(/[iɪᵻ]/gu, "i").replace(/[uʊ]/gu, "u") // FLEECE/KIT, GOOSE/FOOT
+        .replace(/[ʌɐ]/gu, "ɔ").replace(/ə/gu, "a") // STRUT→ɔ; schwa→a (lossy — see note)
+        .replace(/[ɔɒ]/gu, "ɔ").replace(/[æɑ]/gu, "a"); // THOUGHT/LOT→ɔ; TRAP/PALM→a
+}
 
 /** Scan a lowercased Naija word with the rule g2p (digraphs first, then single letters, Naija values). Naija has
  *  no geminates, so doubled letters (English-spelling artifacts: jollof, garri) collapse to one first. */
 function scan(w: string): string {
-    const s = [...w.replace(/(.)\1+/gu, "$1")];
+    // Degeminate (Naija has no geminates), then apply the SOFT-C convention the English-etymological media
+    // orthography inherits: ⟨c⟩ before e/i/y → /s/ (once→wɔns, since→sins); elsewhere ⟨c⟩→k (the consonant map).
+    // Naija phonemic spelling uses ⟨k⟩/⟨s⟩ (not ⟨c⟩), so this only ever touches English-etymological ⟨c⟩.
+    const s = [...w.replace(/c(?=[eiy])/gu, "s").replace(/(.)\1+/gu, "$1")];
     let out = "";
     for (let i = 0; i < s.length; ) {
         const dg = (s[i] ?? "") + (s[i + 1] ?? "");
@@ -59,12 +87,16 @@ function scan(w: string): string {
     return out;
 }
 
-/** One Naija word → canonical IPA (lexicon first, then the rule g2p). Segmental only — Naija tone is unmarked
- *  in the media orthography, so no tone/stress mark is emitted. */
-export function phonemizeWord(word: string): string {
+/** One Naija word → canonical IPA. Order: (1) the Naija lexicon (respellings + substrate loans + irregulars);
+ *  (2) if `known` resolves it as standard English → NATIVISE that (BBC-Pidgin text is mostly English spelling);
+ *  (3) the nativising rule g2p (phonemically-spelled substrate loans: danfo, egusi). Segmental only — Naija tone
+ *  is unmarked in the media orthography. `known` is omitted by the referee eval (rule path only; no referee). */
+export function phonemizeWord(word: string, known?: ForeignPhonemizer): string {
     const lw = word.toLowerCase();
     const lex = DEF.lexicon[lw];
     if (lex !== undefined) return lex;
+    const en = known?.(lw);
+    if (en !== undefined) return nativise(en).normalize("NFC");
     return scan(lw).normalize("NFC");
 }
 
@@ -94,13 +126,12 @@ function numberWords(n: number): string {
 const TOKEN = /([A-Za-z]+)|(\d+)|([.?!,;:])/gu;
 
 class NaijaPhonemizer implements Phonemizer {
-    // `foreign` (the English phonemizer) is wired and available, but Naija nativises loans so the rule g2p is the
-    // default reading for English-spelled tokens; `foreign` is the hook for a future explicit code-switch path.
+    // `foreign` = the English DICT lookup (knownWord): a known-English word is nativised, an OOV one (substrate
+    // loan) falls through to the rule g2p. Wired in the registry from the English module.
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        void this.foreign;
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], this.foreign));
             else if (m[2]) {
                 const n = Number(m[2]);
                 // numberWords already yields canonical IPA (the number words are media-spelled loans given

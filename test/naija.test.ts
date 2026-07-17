@@ -52,6 +52,27 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
     });
 
+    test("English-spelling nativisation: known-English words → Naija phonetics (via the English dict)", () => {
+        // BBC-Pidgin text is mostly ENGLISH-spelled; a known-English word (English CMUdict dict-hit) is nativised
+        // to the 7-vowel system, TH-stopped, NON-rhotic. Routed through phonemize → the English knownWord lookup;
+        // OOV substrate loans (danfo, egusi) fall through to the rule g2p instead.
+        const cases: [string, string][] = [
+            ["once", "wɔns"], // STRUT → ɔ
+            ["when", "wɛn"], // DRESS → ɛ
+            ["while", "wail"], // PRICE → ai
+            ["because", "bikɔz"], // THOUGHT → ɔ
+            ["sister", "sista"], // non-rhotic coda (r dropped) + lettER → a
+            ["first", "fɔst"], // NURSE → ɔ
+            ["abbreviate", "abɾivijet"], // palatal glide ʲ → j
+            ["though", "do"], // ð → d (TH-stopping)
+            ["people", "pipal"], // schwa → a (lossy — the documented GenAm-source ceiling)
+        ];
+        for (const [w, exp] of cases) expect(phonemize(w, "pcm")).toBe(exp);
+        // An OOV substrate loan is NOT routed through English — the rule g2p reads it phonemically:
+        expect(phonemize("danfo", "pcm")).toBe("danfo");
+        expect(phonemize("egusi", "pcm")).toBe("eɡusi");
+    });
+
     test("numbers (nativised English, compositional)", () => {
         expect(phonemize("1", "pcm")).toBe("wan");
         expect(phonemize("15", "pcm")).toBe("fiftin");
