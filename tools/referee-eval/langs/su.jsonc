@@ -1,0 +1,25 @@
+// Sundanese (su) — Austronesian, Latin. kaikki su (HUMAN, 465) is the ONLY referee → single-source. Shallow
+// Latin g2p; the folds neutralise kaikki's notation: syllable dots, the OPTIONAL hiatus glides (w)/(j) it writes
+// in parens, the word-initial glottal ʔ it marks INCONSISTENTLY (phonetically real, we emit it always), the
+// closed-syllable lax allophones o~ɔ/u~ʊ/i~ɪ/e~ɛ, and the ⟨eu⟩ central-vowel variant ɤ~ɨ.
+{
+    "referees": [
+        { "file": "su.kaikki-su.tsv", "source": "kaikki su (Wiktionary, human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki syllable-boundary dots (ba.lad)" },
+        { "pattern": "\\([wj]\\)", "replace": "", "note": "kaikki writes an OPTIONAL hiatus glide in parens (du.(w)a) — we don't glide, so drop it" },
+        { "pattern": "[\\[\\]() ~]", "replace": "", "note": "stray brackets/variant markers in a few kaikki rows" }
+    ],
+    "folds": [
+        { "pattern": "ˈ", "replace": "", "note": "kaikki marks (inconsistent) stress; ours is penult — strip (backbone leaves ˈ)" },
+        { "pattern": "ʔ", "replace": "", "note": "glottal stop: we emit it by rule (word-initial vowel, same-vowel hiatus), but kaikki marks it ERRATICALLY (naam→naʔam yes, waas→waas no; ieu no, awi yes) so it cannot adjudicate — strip all ʔ for comparison" },
+        { "pattern": "ɤ", "replace": "ɨ", "note": "⟨eu⟩ central vowel = [ɨ]~[ɤ] (kaikki uses both: eusi→ɨsi, bareuh→barɤh)" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨r⟩ = [r]~[ɾ] tap/trill (kaikki writes both, inconsistently)" },
+        { "pattern": "ɔ", "replace": "o", "note": "closed-syllable ⟨o⟩ = [o]~[ɔ] (tolong→tɔlɔŋ) — lax allophone" },
+        { "pattern": "ʊ", "replace": "u", "note": "closed-syllable ⟨u⟩ = [u]~[ʊ] (sarung→sarʊŋ)" },
+        { "pattern": "ɪ", "replace": "i", "note": "closed-syllable ⟨i⟩ = [i]~[ɪ]" },
+        { "pattern": "ɛ", "replace": "e", "note": "closed-syllable ⟨é⟩ = [e]~[ɛ]" }
+    ]
+}

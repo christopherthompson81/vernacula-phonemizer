@@ -1,0 +1,37 @@
+// Native canonical-IPA definition for Sundanese / Basa Sunda (su) — Austronesian (West Java), modern LATIN
+// orthography. sundanese.ts reads this file. Sundanese has a shallow, near-phonemic orthography (the id/jv
+// pattern), so a flat left-to-right scan. Its signature is the SEVEN-vowel system with the central vowel
+// ⟨eu⟩→[ɨ] (ieu→iɨ, eusi→ɨsi) alongside ⟨e⟩→[ə] (schwa) and ⟨é⟩→[e]. Glottal stop: a word-initial vowel and a
+// same-vowel hiatus both take [ʔ] (awi→ʔawi, naam→naʔam). Penultimate stress. Validated against kaikki su.
+{
+    "language": "su",
+    "name": "Sundanese",
+    "script": "Latin",
+    "provenance": "Authored from the modern Sundanese Latin orthography + standard Sundanese phonology; cross-checked vs kaikki su (the only referee).",
+
+    // Digraphs (tried longest-first): the central vowel ⟨eu⟩→[ɨ], ng→[ŋ], ny→[ɲ]. (kh/sy for loans.)
+    "digraphs": { "eu": "ɨ", "ng": "ŋ", "ny": "ɲ", "kh": "x", "sy": "ʃ" },
+
+    // Single vowels. ⟨e⟩ = schwa [ə]; ⟨é⟩ (acute) = [e]; ⟨o⟩/⟨u⟩/⟨i⟩ lax in closed syllables (folded).
+    "vowels": { "a": "a", "e": "ə", "é": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Single consonants. c→[t͡ʃ], j→[d͡ʒ], y→[j]; loans f/q/v/x/z.
+    "consonants": {
+        "b": "b", "c": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "d͡ʒ", "k": "k", "l": "l",
+        "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "f", "w": "w",
+        "x": "ks", "y": "j", "z": "z"
+    },
+
+    "glottal": "ʔ",
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . "
+    },
+
+    // NUMBERS — Sundanese Latin spellings; canonical IPA DERIVED via the same g2p. Austronesian decimal (units +
+    // -belas teens + -puluh tens + ratus/rebu/yuta), like Indonesian; sa- prefix for a leading 1.
+    "numbers": {
+        "units": ["enol", "hiji", "dua", "tilu", "opat", "lima", "genep", "tujuh", "dalapan", "salapan"],
+        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "rebu": "rebu", "yuta": "yuta", "seprefix": "sa"
+    }
+}
