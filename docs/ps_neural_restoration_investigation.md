@@ -39,3 +39,29 @@ shared multilingual model risks fa/ur/pa. The durable win is the improved lexico
 shipped sync path directly) — the part of the Persian work that actually moved the number. The retrained-neural
 path stays a documented negative result (as for fa). The improved silver is committed and ready IF a future
 retrain is warranted.
+
+## Continuation — 2026-07-16 — the و-glide (verbal -ول) via g2p epenthesis + inverter glide options
+
+The biggest remaining residual was the و glide/vowel ambiguity (~117), dominated by the verbal infinitive
+**-ول = /awəl/** (استول→əstawəl, we read و→o→əstol). This is a DATA/mining problem, not a rule (word-final ول is
+ambiguous: verb کول→kawəl vs noun پول→pul, so no blanket rule — it must be mined per-word against the referee).
+
+Two coordinated changes let the miner reach the glide reading:
+1. **g2p (engine): a glide before a consonant epenthesises ə** (کَول→kawəl, not kawl) — mirrors the consonant
+   branch's INH insertion; the glide behaves like a coda consonant. Fires ONLY when و/ی is a genuine glide (after
+   a vowel), so bare skeletons (و = long vowel) are unchanged → gold green.
+2. **inverter: WAW_OPTS gains fatḥa/kasra** — a short vowel on the pre-و consonant makes the g2p read و as a glide
+   [w]. The referee fold-match then disambiguates verb (glide, awəl) vs noun (long vowel, pul) PER WORD.
+
+Re-mined: ps silver 623→647 labeled, shipped restoration lexicon 232→251 entries. **25/38 ول-final verbs now
+match.** SYNC eval: wikipron 45.7%→**47.7%**, kaikki 50.0%→**52.8%**. Gold green; numbers unaffected; typecheck clean.
+
+Remaining ceiling: multi-dialect ښ/ږ (~129, inherent), the و-glide words the referee attests with a form the g2p
+can't reach (foreign/irregular), and short-vowel/epenthesis noise — the documented abjad + multi-dialect tail.
+
+### Review fix — glide+cluster ambiguity made lexicon-correctable
+The glide-epenthesis over-fired on glide+consonant-CLUSTER (ښایسته→ʂɑjəstə; the referee attests ʂɑjsta, no schwa),
+and — worse — it wasn't lexicon-correctable (the ə was forced at the glide step). Fix: the epenthesis is SUPPRESSED
+by a sukun on the post-glide consonant (ښایسْته→ʂɑjstə), so the distinction (راوستل WANTS the ə, ښایسته doesn't —
+lexically ambiguous) is mineable/lexicon-correctable per word. The miner recovers the ښایسته class → wikipron
+47.4%→47.7%, kaikki 52.4%→52.8%. The و-glide options are gated to ps in the shared miner (WAW_GLIDE_OPTS).
