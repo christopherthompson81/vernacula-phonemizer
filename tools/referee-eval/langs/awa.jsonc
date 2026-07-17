@@ -1,0 +1,15 @@
+// Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. ⚠ CANNOT-VERIFY (referee GAP). No independent referee
+// exists: wikipron awa (0 lines) and kaikki Awadhi (404) do not exist, and epitran ships no Awadhi (an epitran
+// clone would give the HINDI values anyway). Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are
+// "perceptibly identical", so an engine and any Hindi-clone check agree trivially — measuring nothing. The
+// committed anchor is instead a hand-adjudicated gold of the DOCUMENTED divergences (test/awadhi.test.ts): the
+// sibilant merger श/ष→[s] and the intervocalic flap ड→ɽ — from Baburam Saksena, Evolution of Awadhi (1937).
+{
+    "language": "awa",
+    "name": "Awadhi",
+    "script": "Devanagari",
+    "provenance": "Hindi-derived Devanagari engine + Awadhi divergences from Saksena (1937).",
+    "referees": [],
+    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Awadhi (wikipron awa is empty, no kaikki extract, epitran ships none). Because Awadhi is segmentally ~Hindi (Saksena, quoting Bloch: the Eastern-IA phonologies are 'perceptibly identical', distinguished chiefly by grammar), any agreement with a Hindi-clone check is trivial. The anchor is the hand-adjudicated gold in test/awadhi.test.ts, grading the documented divergences (श/ष→s, intervocalic ड→ɽ) from Baburam Saksena, Evolution of Awadhi (1937, Lakhimpuri dialect). A SOURCED stub, not a measured convergence.",
+    "folds": []
+}
