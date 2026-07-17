@@ -30,11 +30,11 @@ Three referees — a real convergence:
   teens (Turkic composes 11 = oʻn bir). kaikki was low (46%) purely from its **syllable-dot** notation (ɒ.ta).
 - **Run 2 — notation + allophony folds.** Stripped kaikki's syllable dots (preFold), folded ⟨o⟩=[ɒ]~[ɔ] (kaikki's
   notation — preserving the ⟨o⟩/⟨oʻ⟩ contrast, since [o]=⟨oʻ⟩ is untouched), and the allophones ⟨i⟩=[i]~[ɨ]
-  (back-i after uvulars) / [ɪ] (lax), ⟨e⟩=[e]~[ɛ], ⟨u⟩=[u]~[ʊ], dark ⟨l⟩=[l]~[ɫ]. → **91.3% / 87.1%**.
+  (back-i after uvulars) / [ɪ] (lax), ⟨e⟩=[e]~[ɛ], ⟨u⟩=[u]~[ʊ], dark ⟨l⟩=[l]~[ɫ]. → **91.6% / 87.3%**.
 
 ## Verdict — ✅ Referee-limited
 
-**91.3% vs wikipron + 87.1% vs kaikki**, two human referees corroborating. The residual is a diffuse
+**91.6% vs wikipron + 87.3% vs kaikki**, two human referees corroborating. The residual is a diffuse
 proper-noun / loanword tail — the small referees are dominated by foreign place-names (Afrika, Chikago, Mozambik,
 Rossiya) that the referee reads with source-language phonology ([o] kept, palatalised sʲ), which our
 orthography-driven g2p (correctly) does not. The native core is solid. Deferred: the morpheme-boundary sh (Is-hoq

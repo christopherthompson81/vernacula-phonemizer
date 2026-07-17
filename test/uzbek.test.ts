@@ -18,6 +18,7 @@ describe("Uzbek canonical IPA", () => {
         expect(phonemizeWord("gʻalaba")).toBe("ʁalabˈa"); // gʻ → ʁ (voiced uvular)
         expect(phonemizeWord("qishloq")).toBe("qiʃlˈɒq"); // sh→ʃ, q, o→ɒ
         expect(phonemizeWord("rang")).toBe("rˈaŋ"); // ng → ŋ
+        expect(phonemizeWord("toʻngʻiz")).toBe("tonʁˈiz"); // n+gʻ must NOT be parsed as ng+ʻ (→ ton-ʁ, not toŋ-ʔ)
         expect(phonemizeWord("chiroyli")).toBe("t͡ʃirɒjlˈi"); // ch→t͡ʃ, y→j, o→ɒ
     });
 

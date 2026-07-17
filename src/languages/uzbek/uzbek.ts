@@ -33,9 +33,11 @@ export function phonemizeWord(word: string): string {
     const chars = [...s];
     const out: string[] = [];
     for (let i = 0; i < chars.length; ) {
-        // Digraphs first (oʻ, gʻ, sh, ch, ng) — two-char lookahead.
+        // Digraphs first (oʻ, gʻ, sh, ch, ng) — two-char lookahead. GUARD: don't let a greedy "ng" swallow the g
+        // of a following gʻ (toʻngʻiz = to + ngʻ... is n + gʻ, → tonʁiz, NOT toŋ + ʔ) — if an apostrophe follows
+        // the g, this is n + gʻ, so emit the single n and let the gʻ digraph fire next.
         const two = chars[i]! + (chars[i + 1] ?? "");
-        if (DEF.digraphs[two] !== undefined) {
+        if (DEF.digraphs[two] !== undefined && !(two === "ng" && chars[i + 2] === APOS_C)) {
             out.push(DEF.digraphs[two]!);
             i += 2;
             continue;
@@ -86,12 +88,17 @@ function turkicNumberWords(n: number, d: NumbersDef): (string | null)[] {
             r = n % 1000;
         return [...(th > 1 ? turkicNumberWords(th, d) : []), d.magnitudes.thousand!, ...(r ? turkicNumberWords(r, d) : [])];
     }
-    const m = Math.floor(n / 1_000_000),
-        r = n % 1_000_000;
-    return [...turkicNumberWords(m, d), d.magnitudes.million!, ...(r ? turkicNumberWords(r, d) : [])];
+    if (n < 1_000_000_000) {
+        const m = Math.floor(n / 1_000_000),
+            r = n % 1_000_000;
+        return [...turkicNumberWords(m, d), d.magnitudes.million!, ...(r ? turkicNumberWords(r, d) : [])];
+    }
+    const b = Math.floor(n / 1_000_000_000),
+        r = n % 1_000_000_000;
+    return [...turkicNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkicNumberWords(r, d) : [])];
 }
 
-const TOKEN = /([a-zʻ'’‘`ʼ]+)|(\d+)|([.?!,;:…])/giu;
+const TOKEN = /([a-zʻ'’‘`ʼ′]+)|(\d+)|([.?!,;:…])/giu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
