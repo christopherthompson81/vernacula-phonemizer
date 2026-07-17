@@ -1,0 +1,20 @@
+// Hakka Chinese / 客家话 (hak), Meixian 梅县 (Moiyen) dialect — canonical IPA. hakka.ts reads this file. Hakka is
+// a distinct primary branch of Sinitic; Meixian is its traditional prestige/representative variety. Its signature
+// is the retention of ALL THREE Middle Chinese stop codas -p̚ -t̚ -k̚ (十→səp̚, 月→ŋiat̚, 六→liʊk̚) — where Jin
+// merged them to -ʔ and Mandarin lost them. The dict (dict.tsv) already carries the Sinological IPA per syllable
+// (segmental IPA + a superscript pitch-number tone); the shared Han-dict engine (hanDictIpa.ts) converts the pitch
+// digits → Chao contour letters and resolves the sandhi arrow ⁻. SINGLE authoritative source (Wiktionary/kaikki
+// Meixian Sinological-IPA) — no independent referee (🔷). See docs/hakka_native_bringup_investigation.md.
+{
+    "language": "hak",
+    "name": "Hakka Chinese (Meixian)",
+    "script": "Han",
+
+    // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
+    "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ",
+        "；": " ; ", "：": " : ", ".": " . ", ",": " , ", "?": " ? ", "!": " ! "
+    }
+}
