@@ -33,7 +33,7 @@ accent-free output matches.
 
 ## Run — vs the two referees
 
-**97.9% vs wikipron / 99.2% vs epitran** — essentially a perfect phonemic g2p, both independent referees agreeing.
+**98.4% vs wikipron / 99.2% vs epitran** — essentially a perfect phonemic g2p, both independent referees agreeing.
 The only phoneme-level fold is ⟨v⟩ [v]~[ʋ] (the referee is inconsistent: voda→ʋoda but vuk→vuk) and ⟨h⟩ [x]~[ɦ]
 (epitran voices it intervocalically). The tiny residual is: standalone **accent-letter headwords** (ȑ ȁ ȅ … — the
 accented vowel letters as dictionary lemmas, which our letter map returns empty for), a few **foreign names**

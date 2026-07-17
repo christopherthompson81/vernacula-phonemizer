@@ -5,7 +5,7 @@ import { phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.t
 // Canonical-IPA goldens for Serbian / српски (sr) — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully
 // phonemic. Both scripts map to the same IPA. Signature: ⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ / ⟨ћ⟩→t͡ɕ
 // (alveolo-palatal affricates), ⟨џ/dž⟩→d͡ʒ, ⟨љ/lj⟩→ʎ / ⟨њ/nj⟩→ɲ, ⟨х/h⟩→x, syllabic ⟨r⟩; NO vowel reduction. The
-// lexical pitch accent + length are unwritten → deferred (no accent mark). Validated at 97.9% vs wikipron hbs
+// lexical pitch accent + length are unwritten → deferred (no accent mark). Validated at 98.4% vs wikipron hbs
 // latin + 99.2% vs epitran. See docs/investigations/sr_native_bringup_investigation.md.
 describe("Serbian canonical IPA", () => {
     test("Latin: v→ʋ, the alveolo-palatal + palatal series, syllabic r", () => {
