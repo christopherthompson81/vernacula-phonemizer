@@ -33,7 +33,10 @@ import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
 // RULE-ONLY for bn: the shipped phonemizeWord applies a wikipron-informed lexicon, so evaluating it against
 // wikipron would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
 import { phonemizeWordRules as bn } from "../../src/languages/bengali/bengali.ts";
-import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
+// RULE-ONLY (skeleton) for ur: the shipped phonemizeWord restores short vowels from a coverage lexicon MINED FROM
+// wikipron+kaikki, so evaluating it against wikipron would be CIRCULAR. phonemizeWordCore is the lexicon-free g2p
+// skeleton (default-ə + Ohala) → the honest, non-circular backbone signal (short vowels are folded anyway).
+import { phonemizeWordCore as ur } from "../../src/languages/urdu/urdu.ts";
 // RULE-ONLY for id: the shipped phonemizeWord applies a cross-source consensus ⟨e⟩ lexicon (wikipron ∩ kaikki),
 // so evaluating it against those referees would be circular. phonemizeWordRules bypasses it → the honest engine
 // signal (the eval folds ⟨e⟩ anyway, so the % is identical).
