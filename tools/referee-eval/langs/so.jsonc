@@ -17,15 +17,17 @@
         }
     ],
     "secondaryGap": "Somali referees are small (~230 words each): epitran som-Latn (programmatic) + kaikki so (human) — genuinely independent, but no large corpus (no wikipron som). The unwritten ATR vowel harmony and grammatical tone cannot be derived from the orthography and are folded/deferred.",
+    "preFolds": [
+        { "pattern": "ʡ͡ʢ|ʡ͜ʢ|ʡʢ|ʢ", "replace": "ʕ", "note": "⟨c⟩ — the kaikki epiglottal [ʡ͜ʢ]/[ʢ] realisation of the voiced pharyngeal → ʕ. preFold: the tie bar is stripped by the backbone, so this must run first" },
+        { "pattern": "ɡ̊", "replace": "ɡ", "note": "kaikki narrow devoiced-onset ⟨g⟩ [ɡ̊] → ɡ. preFold: the combining ring is stripped by the backbone" },
+        { "pattern": "β̞", "replace": "b", "note": "kaikki narrow spirantised ⟨b⟩ [β̞] → b. preFold: the down-tack is stripped by the backbone" }
+    ],
     "folds": [
         { "pattern": "[æɑ]", "replace": "a", "note": "⟨a⟩: Somali ATR harmony realises it front [æ] (epitran) or back [ɑ] (kaikki) — unwritten, one written vowel; we write a" },
         { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ ATR variant [ɛ] → e (unwritten harmony)" },
         { "pattern": "ɪ", "replace": "i", "note": "⟨i⟩ ATR/lax variant [ɪ] → i (unwritten harmony)" },
         { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩ ATR variant [ɔ] → o (unwritten harmony)" },
         { "pattern": "ʊ", "replace": "u", "note": "⟨u⟩ ATR/lax variant [ʊ] → u (unwritten harmony)" },
-        { "pattern": "ʡ͡ʢ|ʡ͜ʢ|ʢ", "replace": "ʕ", "note": "⟨c⟩ — the kaikki epiglottal [ʡ͜ʢ]/[ʢ] realisation of the voiced pharyngeal → ʕ" },
-        { "pattern": "[ɡ]̊", "replace": "ɡ", "note": "kaikki narrow devoiced-onset allophone → ɡ" },
-        { "pattern": "β̞", "replace": "b", "note": "kaikki narrow spirantised ⟨b⟩ [β̞] → b" },
         { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination: the referees write a doubled consonant (dd), we mark length (dː, stripped by the backbone) — collapse both to a single for comparison" },
         { "pattern": "^ʔ", "replace": "", "note": "kaikki inserts a predictable glottal stop before a word-initial vowel (af→ʔaf); epitran and we do not — strip for comparison" }
     ]

@@ -25,14 +25,21 @@ function below1000(n: number): string {
     return r ? `${hundred} ${N.connector} ${below100(r)}` : hundred;
 }
 
-/** Non-negative integer (< 10⁶) → Somali words; larger / non-finite → digit-by-digit. */
+/** Non-negative integer (< 10⁹) → Somali words; larger / non-finite → digit-by-digit. Chains kun (10³) and
+ *  malyuun (10⁶) with the "iyo" connector, largest-first. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6)
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...String(Math.abs(n))].map((d) => ONES[Number(d)] ?? d).join(" ");
     if (n === 0) return ONES[0]!; // eber
     if (n < 1000) return below1000(n);
-    const th = Math.floor(n / 1000),
-        r = n % 1000;
-    const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
-    return r ? `${thousand} ${N.connector} ${below1000(r)}` : thousand;
+    if (n < 1e6) {
+        const th = Math.floor(n / 1000),
+            r = n % 1000;
+        const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
+        return r ? `${thousand} ${N.connector} ${below1000(r)}` : thousand;
+    }
+    const mil = Math.floor(n / 1e6),
+        r = n % 1e6;
+    const million = `${below1000(mil)} ${N.million}`; // kow malyuun, laba malyuun, …
+    return r ? `${million} ${N.connector} ${numberToWords(r)}` : million;
 }

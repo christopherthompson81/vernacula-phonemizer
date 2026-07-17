@@ -18,8 +18,9 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// A word (Somali letters + apostrophe for the glottal stop) / number / punctuation token.
-const TOKEN = /([a-z'ʼ]+)|(\d+)|([.!?…,;:])/giu;
+// A word (Somali letters + apostrophe for the glottal stop, incl. the typographic ’) / number / punctuation.
+// g2p normalizes ’→', but the tokenizer must accept ’ or it would split su’aal and drop the glottal.
+const TOKEN = /([a-z'ʼ’]+)|(\d+)|([.!?…,;:])/giu;
 
 class SomaliPhonemizer implements Phonemizer {
     text(input: string): string {
