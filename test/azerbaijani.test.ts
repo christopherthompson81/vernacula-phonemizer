@@ -41,4 +41,11 @@ describe("Azerbaijani canonical IPA", () => {
         expect(d.text("100").trim()).toBe("jˈyz"); // yüz (not bir yüz)
         expect(d.text("1985").trim()).toBe("mˈin doɡːˈuz jˈyz sæcsˈæn bˈeʃ"); // min doqquz yüz səksən beş
     });
+
+    test("dotted-I tokenization: capital İ→i, capital I→ı (not dropped)", () => {
+        const d = createAzerbaijani();
+        expect(d.text("İki").trim()).toBe("icˈi"); // İ must NOT be dropped by the tokenizer
+        expect(d.text("salam İki").trim()).toBe("sɑɫˈɑm icˈi");
+        expect(d.text("Irəli").trim()).toBe("ɯɾælˈi"); // capital dotless I → ı
+    });
 });

@@ -40,7 +40,11 @@ function numberTokenToWords(tok: string): string {
 
 class AzerbaijaniPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Normalise the Azerbaijani dotted-I pair BEFORE tokenizing: capital İ (U+0130) has no Unicode simple
+        // case-fold to i, so the /i/-flag TOKEN class would silently DROP it (İki → ki). Map İ→i and I→ı up front
+        // (azLower does the same per-token, but the tokenizer must see the lowercase forms to match at all).
+        const normalized = input.replace(/İ/gu, "i").replace(/I/gu, "ı");
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberTokenToWords(m[2]).split(" ")) sink.emit(phonemizeWord(wd));

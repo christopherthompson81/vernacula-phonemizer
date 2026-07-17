@@ -35,6 +35,10 @@ export function numberToWords(n: number): string {
         groups.push(x % 1000);
         x = Math.floor(x / 1000);
     }
+    // Beyond the largest scale word (katrilyon = 10¹⁵) — only reachable past MAX_SAFE_INTEGER — read digit-by-digit
+    // rather than dropping the magnitude.
+    if (groups.length > SCALES.length)
+        return [...String(Math.floor(n))].map((d) => ONES[Number(d)] || N.zero).join(" ");
     const parts: string[] = [];
     for (let g = groups.length - 1; g >= 0; g--) {
         const v = groups[g]!;

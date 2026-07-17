@@ -74,9 +74,9 @@
     "numbers": {
         "ones": ["", "bir", "iki", "üç", "dörd", "beş", "altı", "yeddi", "səkkiz", "doqquz"],
         "tens": ["", "on", "iyirmi", "otuz", "qırx", "əlli", "altmış", "yetmiş", "səksən", "doxsan"],
-        "scales": ["", "min", "milyon", "milyard", "trilyon"], // 10³ⁿ group multipliers
+        "scales": ["", "min", "milyon", "milyard", "trilyon", "katrilyon"], // 10³ⁿ group multipliers (covers all safe integers)
         "hundred": "yüz",
         "zero": "sıfır",
-        "decimalConnector": "tam", // 3,14 → üç tam on dörd
+        "decimalConnector": "tam", // 3,14 → üç tam bir dörd (the fractional is read digit-by-digit, as in the Turkish engine)
     },
 }
