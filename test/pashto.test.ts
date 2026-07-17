@@ -11,11 +11,11 @@ import { phonemizeWord } from "../src/languages/pashto/pashto.ts";
 describe("pashto canonical IPA", () => {
     test("consonant + written-vowel skeleton (retroflex, affricate, long vowels)", () => {
         const cases: [string, string][] = [
-            ["پښتو", "pəʂt̪ˈo"], // Pashto — ښ→ʂ retroflex, ت→t̪ dental, و→o
+            ["پښتو", "paʂt̪ˈo"], // Pashto — ښ→ʂ retroflex, ت→t̪ dental, و→o; پ→[a] restored (Kandahari paʂto)
             ["سلام", "səlˈɑm"], // salaam — ا→ɑ
             ["ښه", "ʂˈə"], // good — final ه → ə
             ["کور", "kˈor"], // house — و→o
-            ["کتاب", "kət̪ˈɑb"], // book — dental t̪, ا→ɑ
+            ["کتاب", "kit̪ˈɑb"], // book — dental t̪, ا→ɑ; ك→[i] restored (the Arabic loan kitāb, not the schwa default)
             ["اوبه", "ˈobə"], // water — initial او→o, final ه→ə
             ["نوم", "nˈom"], // name
             ["ماشوم", "mɑʃˈom"], // child
