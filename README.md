@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **70 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **71 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-70 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+71 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
 Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
@@ -52,7 +52,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Ukrainian `uk` |
 | Tai-Kadai | Thai `th` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
-| Turkic | Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
+| Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
 
 ## How it works
 

@@ -1,0 +1,71 @@
+// Azerbaijani (az) — North Azerbaijani, Latin, a cleanroom rule g2p (the Turkish/Turkic engine shape). Referees:
+// wikipron aze_latn NARROW (PRIMARY, HUMAN, 4034 merged) + epitran aze-Latn (SECONDARY, programmatic, INDEPENDENT).
+// The wikipron narrow is very fine-grained (aspiration, palatalization marks, affrication + final-devoicing
+// variants), so duplicate prons are merged into tab-variants and the folds below neutralise the systematic narrow
+// allophony (never a real contrast). epitran is naive on the allophony (no dark-l, no k→c palatalization).
+{
+    "referees": [
+        {
+            "file": "az.wikipron-aze-narrow.tsv",
+            "source": "wikipron aze_latn narrow (human)",
+            "role": "primary"
+        },
+        {
+            "file": "az.epitran-aze-latn.tsv",
+            "source": "epitran aze-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "ʰ",
+            "replace": "",
+            "note": "narrow aspiration (pʰ/tʰ/kʰ/cʰ) — an allophonic detail neither we nor a broad transcription carries"
+        },
+        {
+            "pattern": "ʲ",
+            "replace": "",
+            "note": "narrow secondary palatalization mark (kʲ) — allophonic, subsumed by our c/ɟ palatalization"
+        },
+        {
+            "pattern": "ɫ",
+            "replace": "l",
+            "note": "dark-l allophone → l: the narrow referee marks it inconsistently and epitran not at all (notational)"
+        },
+        {
+            "pattern": "ɾ",
+            "replace": "r",
+            "note": "tap/trill rhotic — the narrow referee uses both r and ɾ for the single Azerbaijani rhotic"
+        },
+        {
+            "pattern": "ɢ",
+            "replace": "ɡ",
+            "note": "uvular realisation of ⟨q⟩ [ɡ] — a back-vowel allophone the narrow referee sometimes marks"
+        },
+        {
+            "pattern": "χ",
+            "replace": "x",
+            "note": "uvular realisation of ⟨x⟩/final ⟨q⟩ [x] — a back allophone, one canonical velar fricative for us"
+        },
+        {
+            "pattern": "ɑ",
+            "replace": "a",
+            "note": "the single low unrounded vowel ⟨a⟩ — the narrow referee writes it inconsistently as a and ɑ (notational)"
+        },
+        {
+            "pattern": "q",
+            "replace": "ɡ",
+            "note": "the referee's voiceless-uvular [q] for ⟨q⟩ → our voiced-velar [ɡ]: [q]~[ɡ]~[ɢ] are allophones of one phoneme"
+        },
+        {
+            "pattern": "ɪ",
+            "replace": "i",
+            "note": "Azerbaijani has no /ɪ/ — epitran's lax realisation of ⟨i⟩ [i] (allophonic)"
+        },
+        {
+            "pattern": "ɔ",
+            "replace": "o",
+            "note": "Azerbaijani has no /ɔ/ — epitran's lax realisation of ⟨o⟩ [o] (allophonic)"
+        }
+    ]
+}
