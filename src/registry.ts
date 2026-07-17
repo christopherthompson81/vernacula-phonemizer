@@ -52,6 +52,7 @@ import { createKannada } from "./languages/kannada/kannada.ts";
 import { createMalayalam } from "./languages/malayalam/malayalam.ts";
 import { createOdia } from "./languages/odia/odia.ts";
 import { createUzbek } from "./languages/uzbek/uzbek.ts";
+import { createMaithili } from "./languages/maithili/maithili.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
@@ -205,6 +206,8 @@ function build(lang: string): Phonemizer {
         // Awadhi (Eastern Hindi) — Saksena-sourced ⛔ stub on the shared Hindi engine.
         case "awa":
             return createAwadhi((latin) => getPhonemizer("en").text(latin));
+        case "mai":
+            return createMaithili((latin) => getPhonemizer("en").text(latin));
         case "nan":
             return createMinnan((latin) => getPhonemizer("en").text(latin));
         case "yo":
