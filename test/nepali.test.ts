@@ -24,6 +24,13 @@ describe("Nepali canonical IPA", () => {
         expect(phonemizeWord("हिमाल")).toBe("ɦˈimal"); // 'mountain'
     });
 
+    test("embedded English keeps its schwa — only Devanagari ə becomes ʌ", () => {
+        // The ə→ʌ realisation must NOT touch the (contrastive) English /ə/ in an embedded Latin run.
+        const out = getPhonemizer("ne").text("म computer").trim();
+        expect(out).toContain("kəmpj"); // 'computer' keeps ə, not kʌmpj
+        expect(out.startsWith("mˈʌ")).toBe(true); // the Nepali म → mʌ
+    });
+
     test("numbers (Nepali words; 21-99 compounds deferred)", () => {
         expect(getPhonemizer("ne").text("6").trim()).toBe("t͡sʰˈʌ"); // छ (dental affricate)
         expect(getPhonemizer("ne").text("2").trim()).toBe("d̪ˈui"); // दुई

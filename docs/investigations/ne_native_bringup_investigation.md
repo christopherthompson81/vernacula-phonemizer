@@ -35,8 +35,20 @@ length, diphthongs) are verified; the number is capped by two things:
    (गुहु→ɡu, कहिले→kʌile, हवाईजहाज→…zaz) is pervasive in the narrow transcription but variable, so it can't be
    rule-modelled — we keep [ɦ]. This is the ja/ko narrow-referee shape.
 2. **The schwa-position tail.** Nepali's medial + final schwa retention differs from Hindi in ways that are
-   proven-lexical (नेपाल deletes the final but एगार retains it; आइतबार retains a medial ə Hindi deletes). The
-   retainFinalAfterCluster rule closes the cluster cases; the rest is a lexical residual.
+   proven-lexical against the primary (नेपाल deletes the final but एगार retains it; आइतबार retains a medial ə
+   Hindi deletes). Note the *secondary* (kaikki) is more systematic here: it retains the word-final inherent
+   vowel in **citation form** (तीर→tirʌ, हजुर→ɦʌzurʌ), a dictionary-citation-vs-connected-speech convention, so
+   the kaikki final-schwa gap is stylistic rather than genuinely lexical. The retainFinalAfterCluster rule closes
+   the cluster cases; the rest is a lexical/citation residual.
+
+## Review note — the ə→ʌ wrapper and embedded Latin
+
+The ə→ʌ realisation is a post-process on the engine output. Adversarial review caught that applying it to the
+whole `text()` string corrupts EMBEDDED-Latin runs (English via the foreign phonemizer): computer→kʌmpjuːt̬ɚ,
+since English /ə/ (STRUT-adjacent, contrastive) is a real vowel, not the Nepali inherent one. Fixed by shielding
+the foreign output's ə behind a private-use sentinel before the Devanagari ə→ʌ map, then restoring it — so
+`म computer` → mˈʌ kəmpjˈuːt̬ɚ (Nepali [ʌ], English [ə] intact). The `word`/`number` paths are pure Devanagari, so
+they map directly.
 
 ## Verdict — 🟡 Reliable + lexical tail
 

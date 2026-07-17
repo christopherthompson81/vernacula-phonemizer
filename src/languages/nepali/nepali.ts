@@ -10,20 +10,30 @@ import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 
-// The inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces as the Nepali [ʌ].
+// The Devanagari inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces as the
+// Nepali [ʌ]. The word/wordRules/number paths are pure Devanagari, so mapping ə→ʌ on them is safe.
 const nepaliVowel = (s: string): string => s.replace(/ə/gu, "ʌ");
 
+// text() interleaves EMBEDDED-Latin runs (English via `foreign`), whose /ə/ is a real, contrastive vowel that
+// must NOT become [ʌ]. So the foreign output's ə is shielded behind a private-use sentinel before interleaving,
+// then restored after the Devanagari ə→ʌ map.
+const SENTINEL = "";
+
 function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi> {
+    const shieldedForeign: ForeignPhonemizer | undefined = foreign
+        ? (latin) => foreign(latin).replace(/ə/gu, SENTINEL)
+        : undefined;
     const base = makeNativeHindi(
         loadManifest<HindiDef>(import.meta.url, "nepali.jsonc"),
         loadSharedPhonology(),
-        foreign,
+        shieldedForeign,
     );
     return {
         word: (w) => nepaliVowel(base.word(w)),
         wordRules: (w) => nepaliVowel(base.wordRules(w)),
         number: (d) => nepaliVowel(base.number(d)),
-        text: (i) => nepaliVowel(base.text(i)),
+        // Map Devanagari ə→ʌ, then restore the shielded English ə (computer stays kəmpjuːt̬ɚ, not kʌmpjuːt̬ɚ).
+        text: (i) => nepaliVowel(base.text(i)).split(SENTINEL).join("ə"),
     };
 }
 
