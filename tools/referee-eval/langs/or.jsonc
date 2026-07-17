@@ -1,0 +1,22 @@
+// Odia (or) — Eastern Indo-Aryan, Odia Brahmic abugida (generic engine, inherent /ɔ/, NO deletion). kaikki ori
+// (human, Wiktionary) PRIMARY. epitran ori-Orya SECONDARY but NOISY: it wrongly DELETES the final inherent vowel
+// (ହାତ→hat, Hindi-style) where Odia RETAINS it (kaikki hat̪ɔ, ours hat̪ɔ), misses the ଡ଼→ɽ flap, and uses b̤/t
+// notation — so it corroborates loosely, deflated by its own bugs. Folds: the glottal ɦ~h (we write ɦ, kaikki h),
+// gemination (our length Cː vs doubled), dental notation t̪~t (epitran under-marks), b̤~bʱ, tap ɾ~r.
+{
+    "referees": [
+        { "file": "or.kaikki-ori.tsv", "source": "kaikki ori (Wiktionary, human)", "role": "primary" },
+        { "file": "or.epitran-ori.tsv", "source": "epitran ori-Orya (noisy — deletes final vowel)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "b̤", "replace": "bʱ", "note": "epitran writes breathy voice as b̤ (diaeresis-below); we write bʱ" },
+        { "pattern": "ɦ", "replace": "h", "note": "ହ = /ɦ/ (we write ɦ); both referees write plain h" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "geminate NOTATION: our length Cː (backbone-stripped) vs a DOUBLED consonant" },
+        { "pattern": "t̪", "replace": "t", "note": "dental t̪~t (epitran under-marks the dental; kaikki marks it — fold both)" },
+        { "pattern": "d̪", "replace": "d", "note": "dental d̪~d" },
+        { "pattern": "n̪", "replace": "n", "note": "dental n̪~n" },
+        { "pattern": "ɲ", "replace": "n", "note": "the conjunct nasal ଞ୍ଜ/ଞ୍ଚ/ଜ୍ଞ: we write the homorganic palatal ɲ (ɡɔɲd͡ʒa), the referee normalises to n̪ — a nasal-place notation diff" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ~r" }
+    ]
+}

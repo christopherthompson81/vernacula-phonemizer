@@ -42,7 +42,10 @@ export const indicNumberWords: NumberComposer = (n, d) => {
             u = n % 10;
         if (u === 0) return [d.tens[String(t)]!];
         if (d.compound?.[String(n)]) return [d.compound[String(n)]!];
-        return [null]; // 21-99 irregular spelling not authored yet
+        // 21-99 fused spelling not authored → degrade to a best-effort UNIT+TENS reading (the Indic order, e.g.
+        // ekchalis-shape) instead of leaking a "?" into the IPA. Approximate (the real fused form differs) but
+        // readable; a full `compound` map overrides it. See the per-language "21-99 deferred" notes.
+        return [d.units[u]!, d.tens[String(t)]!];
     }
     if (n < 1000) {
         const h = Math.floor(n / 100),
