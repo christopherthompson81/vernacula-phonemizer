@@ -1,0 +1,40 @@
+// Xhosa (xh) — Nguni Bantu, AUTHORED beyond-espeak (the Zulu sibling). Referees: wikipron xho_latn NARROW
+// (PRIMARY, HUMAN, 874) + epitran xho-Latn (SECONDARY, programmatic, INDEPENDENT). Two independent sources. The
+// wikipron narrow is very fine-grained; the folds neutralise the systematic narrow allophony (tone/breathy/length
+// via the backbone; ejective ʼ, depressor voicing, prenasalisation, ɔ~o unmarked by the narrow transcription).
+// The census click letters ǀ ǃ ǁ are KEPT (a real contrast).
+{
+    "referees": [
+        {
+            "file": "xh.wikipron-xho-narrow.tsv",
+            "source": "wikipron xho_latn narrow (human)",
+            "role": "primary"
+        },
+        {
+            "file": "xh.epitran-xho-latn.tsv",
+            "source": "epitran xho-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "preFolds": [
+        { "pattern": "[\\u1DC0-\\u1DFF]", "replace": "", "note": "exotic tone-contour combining marks (᷈ etc., U+1DC0 block) the backbone's U+0300–U+036F strip misses" },
+        { "pattern": "d̥", "replace": "d", "note": "the narrow referee's prenasalised/devoiced ⟨d⟩ [d̥] → d (allophonic); preFold before the backbone strips the ring" },
+        { "pattern": "b̥", "replace": "b", "note": "narrow devoiced ⟨b⟩ → b (preFold, ring stripped by backbone)" }
+    ],
+    "folds": [
+        { "pattern": "ʼ", "replace": "", "note": "ejective release on plain stops (pʼ/tʼ/kʼ) — the narrow referee does not mark it consistently; neutralise (we keep it in output)" },
+        { "pattern": "ⁿ", "replace": "n", "note": "prenasalisation: the referee writes the homorganic nasal as a superscript ([ⁿd]); it IS a nasal → n" },
+        { "pattern": "ᵐ", "replace": "m", "note": "prenasalisation: superscript labial nasal ([ᵐb]) → m" },
+        { "pattern": "ᶬ", "replace": "m", "note": "prenasalisation: superscript labiodental nasal ([ᶬv]) → m" },
+        { "pattern": "ᵑ", "replace": "ŋ", "note": "prenasalisation: superscript velar nasal ([ᵑɡ]) → ŋ" },
+        { "pattern": "p̪", "replace": "", "note": "the epenthetic labiodental stop the referee inserts in ⟨mf⟩→[ᶬp̪f] — our canonical ⟨mf⟩=[mf] omits it" },
+        { "pattern": "ʷ", "replace": "w", "note": "labialisation ([kǀʷ]) — the referee marks ⟨Cw⟩ as a superscript; we write the w glide" },
+        { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩ [h]~[ɦ] — the referee voices it (depressor/intervocalic); one phoneme" },
+        { "pattern": "ɔ", "replace": "o", "note": "the mid-back vowel ⟨o⟩ [ɔ]~[o] — the narrow referee writes o; one phoneme" },
+        { "pattern": "ɛ", "replace": "e", "note": "the mid-front vowel ⟨e⟩ [ɛ]~[e] — the narrow referee writes e; one phoneme" },
+        { "pattern": "d͡ʒ", "replace": "ʒ", "note": "⟨j⟩/⟨nj⟩ affricate [d͡ʒ]~[ʒ] — the referee variably drops the stop portion; non-contrastive" },
+        { "pattern": "ɲ", "replace": "n", "note": "the ⟨nj⟩/⟨ny⟩ nasal [ɲ]~[n] before the affricate — the referee writes a plain nasal; neutralise" },
+        { "pattern": "dz", "replace": "z", "note": "NC prenasalisation: Xhosa ⟨nz⟩→[ndz] inserts an epenthetic stop the referee marks but our canonical ⟨nz⟩=[nz] omits — neutralise the epenthetic d" },
+        { "pattern": "dɮ", "replace": "ɮ", "note": "NC prenasalisation: ⟨ndl⟩→[ndɮ] — neutralise the epenthetic d before the lateral affricate" }
+    ]
+}
