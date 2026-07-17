@@ -14,6 +14,8 @@
     "folds": [
         { "pattern": "-", "replace": "ʔ", "note": "hyphen = glottal stop [ʔ] (ours) vs literal hyphen (epitran) — pag-asa" },
         { "pattern": "sj", "replace": "ʃ", "note": "⟨sy⟩ palatal: our fused [ʃ] (naʃon) ~ referee decomposed [sj] (nasjon) — same phoneme sequence, same syllable count (notation)" },
-        { "pattern": "nj", "replace": "ɲ", "note": "⟨ny⟩ palatal: our fused [ɲ] (abisiɲa) ~ referee decomposed [nj] (abisinja) — notation, not an error" }
+        { "pattern": "nj", "replace": "ɲ", "note": "⟨ny⟩ palatal: our fused [ɲ] (abisiɲa) ~ referee decomposed [nj] (abisinja) — notation, not an error" },
+        { "pattern": "ij(?=[aeiou])", "replace": "i", "note": "⟨iy⟩ offglide before a vowel: our EXPLICIT [ij] (siya→sija, diyos→dijos) ~ referee's under-specified [i] (sia) — non-contrastive palatal offglide (the referee itself uses both for native words: siya→[sia] vs hiyip→[hijip]). We keep the explicit glide in output per the OmniVoice explicitness principle; fold for the comparison" },
+        { "pattern": "uw(?=[aeiou])", "replace": "u", "note": "⟨uw⟩ offglide before a vowel: our EXPLICIT [uw] ~ referee's [u] — the labial counterpart of the ij~i offglide fold" }
     ]
 }

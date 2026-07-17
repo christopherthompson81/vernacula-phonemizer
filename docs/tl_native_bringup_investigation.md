@@ -148,3 +148,24 @@ genuinely ambiguous with native phonology, not mineable.
 
 STATUS still 🟡 (not ✅): the shipped closures have an OOV tail on the unwritten contrasts (final-ʔ, stress) —
 structurally identical to Indonesian ⟨e⟩ / Indic schwa. A stronger, better-measured 🟡, not a promotion.
+
+## Run — 2026-07-16 — foreign-word detector: tested, rejected; offglide fold instead
+
+Q: would a foreign-word detector (tag non-native words, then gate the rejected loanword rules on it) help?
+Prototyped a phonotactic detector (loan letters c/f/j/q/v/x/z/ñ, ll/rr, Spanish affixes, non-native clusters) and
+tested gating. **It does not help:**
+- intervocalic-ʔ suppression gated on foreign STILL breaks 277 native hiatus words (imprecise; false positives —
+  *maganda* tagged foreign from its medial `nd`).
+- for the glide over-generation, UNGATED beats gated (the tag costs more fixes than it saves: 713 vs 423 fixed).
+- the residual ambiguity is native-vs-native, not native-vs-foreign: the referee renders native *siya*→[sia] but
+  native *hiyip*→[hijip]. Foreignness is orthogonal, and the 🟡 anchors (final-ʔ minimal pair bata/bata, stress)
+  are native contrasts. The foreign-SEGMENT part (⟨j⟩/⟨c⟩) is already closed by the 115-word lexicon.
+
+The probe DID surface that the [ij]/[i] glide difference (713 words) is NOTATION/explicitness, not error: our
+explicit [ij] (siya→[sija], diyos→[dijos]) is arguably *more* correct than the referee's under-specified [sia] (per
+the explicitness principle), and the referee proves it non-contrastive by using both for native words. A *rule*
+(ij→i) would degrade native *siya*→[sia]; the honest close is a **FOLD** (ij~i, uw~u before a vowel — the sy/ny
+pattern, and the Bulgarian offglide steer: keep the explicit glide in OUTPUT, fold for comparison). **rule-only
+81.5→87.0%, shipped 87.6→93.1%**, ZERO output change (siya stays [sˈija]). Floor 0.80→0.86.
+
+Still 🟡: the fold closes notation; the unwritten NATIVE contrasts (final-ʔ, stress) remain OOV-bounded.
