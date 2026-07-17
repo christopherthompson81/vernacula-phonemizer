@@ -34,3 +34,23 @@ land exactly. The residual is now the predicted VOWEL tail:
 
 Phase 1 = the architecture + the deterministic consonants (what makes it SOUND Egyptian). Phase 2 = a
 wikipron-arz-mined VOWEL LEXICON (the Urdu/id pattern) to close the short-vowel restructuring. 🟡 (Phase-1).
+
+## Run 3 — 2026-07-17 — Phase 2 (vowels) is DATA-BLOCKED, not algorithm-blocked
+
+Phase 2 was meant to close the short-vowel restructuring with a dialect vowel lexicon. It has no tractable lever:
+
+- **Vowel RULES are all net-negative** (tested vs the arz referee, fixed−broken): imāla aː→æ **−55**, short a→æ
+  **−157**, i→e **−32**, u→o **−12**, word-initial ʔ-drop **−7**. The Egyptian vowel changes (imāla, short-vowel
+  quality, epenthesis) are LEXICALLY/context conditioned, not derivable by a blanket rule — the tl/ur pattern.
+- **A lexicon has no independent source.** The ONLY machine-readable Egyptian IPA is wikipron arz — and the full
+  scrape is the SAME 590 words that ARE the eval referee. Mining a lexicon from it is circular (and 590 words is
+  negligible coverage of 118M-speaker text). kaikki arz is sparse; there is no free Egyptian pronunciation corpus.
+- The gap is also partly **restoration**: the shared MSA diacritizer under-vowels dialectal words (∅→V) and restores
+  MSA (not Egyptian) qualities (i↔a, u↔o). An Egyptian diacritizer would need Egyptian diacritized training data,
+  which likewise does not exist.
+
+**Conclusion:** Egyptian **consonants** (the audible dialect character — ج→ɡ, ق→ʔ, ث→t) are done and verified
+(37.3% vs an independent referee, up from 28.6% MSA-baseline). The **vowels** are a documented ceiling with current
+data — recoverable in principle (a dialect diacritizer/lexicon *would* work), but no independent Egyptian corpus
+exists to build or measure one. arz = consonant-correct / vowel-MSA-biased. 🟡 (a real path — more Egyptian data —
+that is simply unavailable, like Urdu's restoration wall). Phase 1 was the tractable deliverable.
