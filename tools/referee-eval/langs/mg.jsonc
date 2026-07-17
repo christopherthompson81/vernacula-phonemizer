@@ -1,0 +1,33 @@
+// Malagasy (mg) — Standard/Merina, a cleanroom rule g2p. Referees: wikipron mlg broad (PRIMARY, HUMAN, 187) +
+// kaikki mg (SECONDARY, HUMAN, 201). BOTH are Wiktionary-derived (same-source, weak corroboration) and SMALL, and
+// both are very NARROW: they mark the glottal-h [ʔ], the retroflex affricates with a plain stop (t͡ʂ/d͡ʐ), and —
+// the big one — they DELETE the weak final vowels (Malagasy's famous unstressed final a/o/y), realising them as
+// labialisation ʷ / palatalisation ʲ / devoicing on the preceding consonant. Our BROAD canonical transcription
+// KEEPS those vowels (correct for a synthesis target), so the folds below neutralise the narrow allophony but the
+// keep-vs-delete final-vowel difference is a documented ceiling, not an error. → single-source (🔷).
+{
+    "referees": [
+        {
+            "file": "mg.wikipron-mlg-broad.tsv",
+            "source": "wikipron mlg_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "mg.kaikki-mg.tsv",
+            "source": "kaikki mg (Wiktionary, human)",
+            "role": "secondary"
+        }
+    ],
+    "secondaryGap": "Both Malagasy referees are Wiktionary-derived (wikipron + kaikki = the same human source parsed twice), small (~200 words), and very narrow (weak-final-vowel deletion, glottal-h). No independent non-Wiktionary Malagasy pronunciation corpus is free; epitran has no Malagasy. → single-source (🔷).",
+    "folds": [
+        { "pattern": "ʔ", "replace": "h", "note": "intervocalic ⟨h⟩ realised as a glottal stop in the narrow referee → our canonical h" },
+        { "pattern": "ʷ", "replace": "", "note": "labialisation from a weak final ⟨o⟩ (the referee deletes the vowel, we keep it) — notational" },
+        { "pattern": "ʲ", "replace": "", "note": "palatalisation from a weak final ⟨y⟩/⟨i⟩ (referee deletes the vowel) — notational" },
+        { "pattern": "ʈ", "replace": "t", "note": "⟨tr⟩ affricate: our retroflex stop ʈ vs the referee's plain t (both + ʂ) — notation of the same affricate" },
+        { "pattern": "ɖ", "replace": "d", "note": "⟨dr⟩ affricate: our retroflex stop ɖ vs the referee's plain d (both + ʐ) — notation of the same affricate" },
+        { "pattern": "[ɾʁ]", "replace": "r", "note": "the single Malagasy rhotic ⟨r⟩ — the referee uses the tap ɾ (and uvular ʁ in loans); we write r" },
+        { "pattern": "ɛ", "replace": "e", "note": "lax realisation of ⟨e⟩ [e] in the narrow referee (allophonic; Malagasy has one mid-front vowel)" },
+        { "pattern": "[ⁿᵐᵑ]", "replace": "", "note": "prenasalisation onset — the referee marks it inconsistently; segmental comparison" },
+        { "pattern": "[aeiou]$", "replace": "", "note": "the referee DELETES the weak final vowel (realising it as consonant labialisation/palatalisation), which our broad canonical KEEPS — strip a final vowel from BOTH sides (after the ʷ/ʲ folds expose it) so the comparison measures the verifiable core (consonants + o→u + stress), not a broad-vs-narrow choice the referee cannot adjudicate" }
+    ]
+}

@@ -1,0 +1,74 @@
+// Native canonical-IPA data manifest for Malagasy / Malagasy (mg) — Standard/Official Malagasy (Merina-based),
+// Latin script, espeak-independent. Austronesian (the westernmost — Madagascar). A shallow rule g2p: the
+// orthography is fairly regular, the notable points being ⟨o⟩ = /u/, ⟨y⟩ = final /i/, the retroflex affricates
+// ⟨tr⟩/⟨dr⟩, and the prenasalized stops. The ALGORITHM (the left-to-right scan + penultimate stress + weak-final
+// handling) is in code (g2p.ts / malagasy.ts). See docs/investigations/mg_native_bringup_investigation.md.
+{
+    "language": "mg",
+    "name": "Malagasy (Standard, Merina)",
+    "script": "Latin",
+    "provenance": "Authored from Malagasy orthography + published phonology (Merina/Official Malagasy). Shallow near-phonemic g2p; the referees (wikipron + kaikki, both Wiktionary-derived, ~200 words, narrow) are a folded regression anchor, not independent triangulation → single-source (🔷).",
+
+    "convention": {
+        "vowels": "a e i o y ô → a e i u i o — ⟨o⟩ is /u/, ⟨y⟩ is word-final /i/, the loan ⟨ô⟩ is /o/",
+        "affricates": "⟨tr⟩ → ʈʂ, ⟨dr⟩ → ɖʐ (retroflex); ⟨ts⟩ → ts, ⟨j⟩ → dz",
+        "prenasalized": "⟨mb mp nd nt ndr ntr ng nk nj nts⟩ → prenasalized stops ᵐb ᵐp ⁿd ⁿt ⁿɖʐ ⁿʈʂ ᵑɡ ᵑk ⁿdz ⁿts",
+        "stress": "penultimate default (Malagasy); final weak vowels (a/o/y in the last, unstressed syllable) are kept full in the canonical broad transcription",
+    },
+
+    // Orthographic vowel letter → IPA. ⟨o⟩ = /u/ is the signature Malagasy value; ⟨y⟩ (only word-final) = /i/;
+    // the loan/diacritic ⟨ô⟩ = /o/.
+    "vowels": {
+        "a": "a",
+        "e": "e",
+        "i": "i",
+        "o": "u",
+        "y": "i",
+        "ô": "o",
+        "à": "a",
+        "é": "e",
+    },
+
+    // Context-free consonants. The digraphs (tr/dr/ts/j) and the prenasalized clusters are handled in g2p.ts.
+    "consonants": {
+        "b": "b",
+        "d": "d",
+        "f": "f",
+        "g": "ɡ",
+        "h": "h",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "r": "r",
+        "s": "s",
+        "t": "t",
+        "v": "v",
+        "z": "z",
+    },
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words. Malagasy composes units-FIRST with the connector "amby" (unit amby ten) and "sy" at
+    // higher joins; tens are unit+"polo" (with sandhi). The compositor in numbers.ts handles 0…<10⁶.
+    "numbers": {
+        "ones": ["", "iray", "roa", "telo", "efatra", "dimy", "enina", "fito", "valo", "sivy"],
+        "tens": ["", "folo", "roapolo", "telopolo", "efapolo", "dimampolo", "enimpolo", "fitopolo", "valopolo", "sivifolo"],
+        "hundreds": ["", "zato", "roanjato", "telonjato", "efajato", "dimanjato", "eninjato", "fitonjato", "valonjato", "sivinjato"],
+        "connector": "amby",
+        "join": "sy",
+        "thousand": "arivo",
+        "million": "tapitrisa",
+        "zero": "aotra",
+    },
+}
