@@ -1,0 +1,41 @@
+// Native canonical-IPA definition for Ukrainian / українська (uk) — East Slavic, Cyrillic. ukrainian.ts reads
+// this file. Ukrainian is phonologically simpler than Russian in the key respect: NO vowel reduction (akanye) —
+// о stays [ɔ] regardless of stress — so no stress dictionary is needed for vowel quality. Signatures: г→[ɦ]
+// (voiced glottal, the Ukrainian hallmark vs Russian ɡ) with ґ→[ɡ]; л→[ɫ] (velarised dark l); в→[ʋ] before a
+// vowel but [w] in the coda (vocalisation); PALATALISATION (Cʲ) before ь, і, or an iotated vowel я/ю/є/ї.
+// Validated against wikipron ukr_cyrl narrow + kaikki + epitran ukr-Cyrl.
+{
+    "language": "uk",
+    "name": "Ukrainian",
+    "script": "Cyrillic",
+    "provenance": "Authored from Ukrainian Cyrillic orthography + standard Ukrainian phonology; cross-checked vs wikipron ukr_cyrl narrow (53021) + kaikki + epitran ukr-Cyrl.",
+
+    // Plain vowels (no stress-conditioned reduction). а→a, е→ɛ, и→ɪ, і→i, о→ɔ, у→u.
+    "vowels": { "а": "a", "е": "ɛ", "и": "ɪ", "і": "i", "о": "ɔ", "у": "u" },
+
+    // Iotated / soft vowels: after a consonant they PALATALISE it and contribute the base vowel; word-initially or
+    // after a vowel / apostrophe they are [j] + the base vowel. (я→a, ю→u, є→ɛ, ї→i — ї is always j+i.)
+    "iotated": { "я": "a", "ю": "u", "є": "ɛ", "ї": "i" },
+
+    // Consonants → their HARD IPA. Palatalisation appends ʲ (ɫ→lʲ is special: the dark l loses velarisation).
+    // г→ɦ, ґ→ɡ; в→ʋ (vocalises to w in the coda, in ukrainian.ts); dark л→ɫ.
+    "consonants": {
+        "б": "b", "в": "ʋ", "г": "ɦ", "ґ": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k",
+        "л": "ɫ", "м": "m", "н": "n", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x",
+        "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃt͡ʃ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+    },
+
+    // NUMBERS — Ukrainian Cyrillic spellings; canonical IPA DERIVED via the same g2p. Slavic decimal (units + tens
+    // + hundreds + magnitudes, space-separated). 21-99 = tens + units (двадцять п'ять). 11-19 irregular teens.
+    "numbers": {
+        "units": ["нуль", "один", "два", "три", "чотири", "п'ять", "шість", "сім", "вісім", "дев'ять"],
+        "teens": ["десять", "одинадцять", "дванадцять", "тринадцять", "чотирнадцять", "п'ятнадцять", "шістнадцять", "сімнадцять", "вісімнадцять", "дев'ятнадцять"],
+        "tens": { "20": "двадцять", "30": "тридцять", "40": "сорок", "50": "п'ятдесят", "60": "шістдесят", "70": "сімдесят", "80": "вісімдесят", "90": "дев'яносто" },
+        "hundreds": ["", "сто", "двісті", "триста", "чотириста", "п'ятсот", "шістсот", "сімсот", "вісімсот", "дев'ятсот"],
+        "magnitudes": { "thousand": "тисяча", "million": "мільйон", "billion": "мільярд" }
+    }
+}
