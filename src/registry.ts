@@ -43,6 +43,7 @@ import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
 import { createWu } from "./languages/wu/wu.ts";
 import { createJin } from "./languages/jin/jin.ts";
+import { createHakka } from "./languages/hakka/hakka.ts";
 import { createSwahili } from "./languages/swahili/swahili.ts";
 import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
@@ -170,6 +171,9 @@ function build(lang: string): Phonemizer {
         // Jin Chinese (Taiyuan) — Han → Sinological IPA + Chao tones; embedded Latin routes to English.
         case "cjy":
             return createJin((latin) => getPhonemizer("en").text(latin));
+        // Hakka Chinese (Meixian) — same shared Han-dict engine; embedded Latin routes to English.
+        case "hak":
+            return createHakka((latin) => getPhonemizer("en").text(latin));
         case "jv":
             return createJavanese();
         case "sw":
