@@ -1,0 +1,21 @@
+// Oromo / Afaan Oromoo (om) — shallow Qubee Latin orthography, rule-based g2p. PRIMARY = epitran orm-Latn
+// (programmatic Qubee→IPA) on the kaikki wordlist (5336 words) — the Hausa pattern (two rule implementations
+// cross-check; disagreements adjudicated). SECONDARY = kaikki HUMAN IPA (51, narrow/allophonic) — a truly
+// independent corroboration, folded to the phonemic backbone.
+{
+    "referees": [
+        { "file": "om.epitran-orm.tsv", "source": "epitran orm-Latn on the kaikki wordlist (programmatic)", "role": "primary" },
+        { "file": "om.human-kaikki.tsv", "source": "kaikki (Wiktionary) human IPA — narrow, 51", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ʔ", "replace": "", "note": "epitran drops the apostrophe glottal stop (a'aa→aaː); our [ʔ] is correct → fold it out" },
+        { "pattern": "[ɐɑ]", "replace": "a", "note": "human narrow: [ɐ]/[ɑ] are allophones of /a/" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination: the human writes CC (tokko→tɔkkɔ) where we write Cː (length already stripped by the backbone) — collapse both" },
+        { "pattern": "ʊ", "replace": "u", "note": "human narrow: [ʊ]~/u/" },
+        { "pattern": "ɔ", "replace": "o", "note": "human narrow: [ɔ]~/o/" },
+        { "pattern": "ɛ", "replace": "e", "note": "human narrow: [ɛ]~/e/" },
+        { "pattern": "ɪ", "replace": "i", "note": "human narrow: [ɪ]~/i/" },
+        { "pattern": "β", "replace": "b", "note": "human narrow: [β] is the intervocalic spirantized allophone of /b/" }
+    ]
+}

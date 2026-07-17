@@ -35,6 +35,7 @@ import { createMarathi } from "./languages/marathi/marathi.ts";
 import { createTelugu } from "./languages/telugu/telugu.ts";
 import { createCantonese } from "./languages/cantonese/cantonese.ts";
 import { createTagalog } from "./languages/tagalog/tagalog.ts";
+import { createOromo } from "./languages/oromo/oromo.ts";
 import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
@@ -144,6 +145,8 @@ function build(lang: string): Phonemizer {
             return createCantonese((latin) => getPhonemizer("en").text(latin));
         case "tl":
             return createTagalog();
+        case "om":
+            return createOromo();
         case "fa":
             return createPersian((latin) => getPhonemizer("en").text(latin));
         case "it":
