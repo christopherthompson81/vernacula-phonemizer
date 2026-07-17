@@ -1,12 +1,15 @@
-// Tagalog / Filipino — shallow Latin orthography, rule-based g2p. No wikipron tgl exists; the primary referee is
-// epitran tgl-Latn (INDEPENDENT, programmatic). Both add a word-initial glottal stop; we ALSO map a hyphen → [ʔ]
-// (pag-asa→paɡʔasa) where epitran keeps the hyphen, so that is folded. Intervocalic/final ʔ is unwritten (lexical).
+// Tagalog / Filipino — shallow Latin orthography, rule-based g2p. PRIMARY = wikipron tgl_latn broad (HUMAN, 25k),
+// which CORRECTLY marks the glottal stops (intervocalic + word-final) the crude epitran omits. The eval uses
+// phonemizeWordRules (rule-only, non-circular — the shipped path appends a wikipron-sourced word-final-ʔ set). The
+// set is proper-noun/Spanish-loanword heavy, so the folded % is deflated by (a) the genuinely-LEXICAL word-final ʔ
+// (closed on the shipped path), (b) ambiguous loanword VV (glide/plain/hiatus — Spanish -ia/-ua), (c) proper-noun
+// idiosyncrasy — the common-word gold is 100%. epitran kept as a secondary (crude, wrong on ʔ).
 {
     "referees": [
-        { "file": "tl.epitran.tsv", "source": "epitran tgl-Latn (programmatic)", "role": "primary" },
-        { "file": "tl.gold-adjudicated.tsv", "source": "adjudicated common-word gold (our convention)", "role": "secondary" }
+        { "file": "tl.wikipron-tgl-broad.tsv", "source": "wikipron tgl_latn broad (human)", "role": "primary" },
+        { "file": "tl.gold-adjudicated.tsv", "source": "adjudicated common-word gold (our convention)", "role": "secondary" },
+        { "file": "tl.epitran.tsv", "source": "epitran tgl-Latn (programmatic, crude — omits ʔ)", "role": "secondary" }
     ],
-    "secondaryGap": "no wikipron tgl available; epitran is a rule-based transliterator (partly circular for the trivial letter map). The adjudicated gold is the real signal.",
     "segmentJoin": true,
     "folds": [
         { "pattern": "-", "replace": "ʔ", "note": "hyphen = glottal stop [ʔ] (ours) vs literal hyphen (epitran) — pag-asa" }

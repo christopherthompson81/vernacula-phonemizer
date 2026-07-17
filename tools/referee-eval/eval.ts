@@ -42,7 +42,9 @@ import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as mr } from "../../src/languages/marathi/marathi.ts";
 import { phonemizeWord as te } from "../../src/languages/telugu/telugu.ts";
 import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts";
-import { phonemizeWord as tl } from "../../src/languages/tagalog/tagalog.ts";
+// RULE-ONLY for tl: the shipped phonemizeWord appends the wikipron-sourced word-final glottal stop, so evaluating
+// it against wikipron would be circular. phonemizeWordRules bypasses it → the honest engine signal.
+import { phonemizeWordRules as tl } from "../../src/languages/tagalog/tagalog.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
 import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";

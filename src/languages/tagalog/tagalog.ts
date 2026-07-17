@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadLines } from "../../core/loadTsv.ts";
 
 interface NumbersDef {
     units: string[];
@@ -86,14 +87,29 @@ function stressed(units: string[]): string {
     return out;
 }
 
-/** One Tagalog word → canonical IPA. */
-export function phonemizeWord(word: string): string {
+/** One Tagalog word → canonical IPA, RULE-ENGINE ONLY (no word-final-glottal lexicon) — the honest, non-circular
+ *  signal used by the referee eval (the final ʔ is unwritten/lexical, so a wikipron-sourced set would be circular). */
+export function phonemizeWordRules(word: string): string {
     const lw = word.toLowerCase();
     const special = DEF.specialWords[lw];
     if (special !== undefined) return stressed(scan(special));
     const units = scan(lw);
     if (units.length === 0) return "";
     return stressed(units).normalize("NFC");
+}
+
+// The unwritten word-final glottal stop (bata child [bataʔ] vs bata robe [bata]) is phonemic but lexical. This SET
+// (final-glottal.txt, wikipron-sourced: all readings end in ʔ and the rest already matches) closes it on the SHIPPED
+// path only — homographs are abstained. See docs/tl_native_bringup_investigation.md.
+let FINAL_GLOTTAL: ReadonlySet<string> | undefined;
+const finalGlottal = (): ReadonlySet<string> =>
+    (FINAL_GLOTTAL ??= new Set(loadLines(import.meta.url, "final-glottal.txt")));
+
+/** One Tagalog word → canonical IPA (shipped): the rule engine + the word-final-glottal lexical pin. */
+export function phonemizeWord(word: string): string {
+    const ipa = phonemizeWordRules(word);
+    if (ipa && !ipa.endsWith("ʔ") && finalGlottal().has(word.toLowerCase())) return ipa + "ʔ";
+    return ipa;
 }
 
 // ── Numbers (compositional; native Tagalog) ──────────────────────────────────
@@ -132,8 +148,10 @@ class TagalogPhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
+                    // Number words bypass the final-glottal set — else it fires inconsistently by incidental
+                    // membership (sampu→sampuʔ but dalawampu not); keep the composed number system uniform.
                     for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeWord(wd));
+                        sink.emit(phonemizeWordRules(wd));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
