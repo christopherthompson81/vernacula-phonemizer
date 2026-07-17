@@ -23,37 +23,36 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-63 languages spanning Indo-Aryan, Iranian, Dravidian, Sinitic, Tibeto-Burman, Slavic,
-Romance, Germanic, Celtic, Turkic, Afroasiatic (Semitic, Cushitic, Chadic), Niger-Congo,
-Austronesian, Austroasiatic, Tai-Kadai, Japonic, Koreanic and an English-lexified creole —
+63 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
+Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
 Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
-outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md). Status is
-kept out of the table below on purpose, so the two don't drift.
+outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md).
 
 | Family / area | Languages |
 |---|---|
+| Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`), Hausa `ha`, Oromo `om` |
+| Austroasiatic | Vietnamese `vi` (tonal) |
+| Austronesian | Indonesian `id`, Javanese `jv`, Tagalog `tl` |
+| Celtic | Irish `ga`, Welsh `cy` |
+| Creole (English-lexified) | Nigerian Pidgin `pcm` |
+| Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
+| Germanic | English `en`, German `de`, Swedish `sv` (tonal accent) |
 | Indo-Aryan | Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
 | Iranian | Pashto `ps`, Persian `fa` |
-| Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
-| Sinitic | Mandarin `cmn`, Cantonese `yue`, Wu `wuu`, Min Nan `nan`, Jin `cjy`, Hakka `hak`, Xiang `hsn` — all tonal |
-| Tibeto-Burman | Burmese `my` (tonal) |
-| Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Ukrainian `uk` |
-| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt`, Spanish `es` |
-| Germanic | English `en`, German `de`, Swedish `sv` (tonal accent) |
-| Celtic | Irish `ga`, Welsh `cy` |
-| Turkic | Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
-| Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`), Hausa `ha`, Oromo `om` |
-| Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Yoruba `yo` (tonal), Zulu `zu` |
-| Austronesian | Indonesian `id`, Javanese `jv`, Tagalog `tl` |
-| Austroasiatic | Vietnamese `vi` (tonal) |
-| Tai-Kadai | Thai `th` (tonal) |
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |
-| Creole (English-lexified) | Nigerian Pidgin `pcm` |
+| Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Yoruba `yo` (tonal), Zulu `zu` |
+| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt`, Spanish `es` |
+| Sinitic | Cantonese `yue`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
+| Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Ukrainian `uk` |
+| Tai-Kadai | Thai `th` (tonal) |
+| Tibeto-Burman | Burmese `my` (tonal) |
+| Turkic | Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
 
 ## How it works
 
