@@ -1,0 +1,28 @@
+// Uzbek (uz) — Turkic, Latin. wikipron uzb_latn broad (HUMAN) PRIMARY + kaikki uz (HUMAN) SECONDARY + epitran
+// uzb-Latn (independent). Uzbek lost vowel harmony, so g2p is a flat scan. Folds: ⟨a⟩=a~æ (front-allophone in
+// loans), ⟨v⟩=ʋ~v, tap ɾ~r, ŋ~ŋɡ (ng), ɸ~f (⟨f⟩), the referee's word-initial glottal ʔ (kaikki adds it).
+{
+    "referees": [
+        { "file": "uz.wikipron-latn.tsv", "source": "wikipron uzb_latn broad (human)", "role": "primary" },
+        { "file": "uz.kaikki-uz.tsv", "source": "kaikki uz (Wiktionary, human)", "role": "secondary" },
+        { "file": "uz.epitran-latn.tsv", "source": "epitran uzb-Latn", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with '.' (ɒ.ta) — strip them (before the backbone) so they don't count as mismatches" }
+    ],
+    "folds": [
+        { "pattern": "æ", "replace": "a", "note": "⟨a⟩ = [a]~[æ] (front allophone in loans; referee-variable)" },
+        { "pattern": "ɔ", "replace": "ɒ", "note": "⟨o⟩ = [ɒ] (ours + wikipron) ~ [ɔ] (kaikki) — same open-back vowel, notation. Does NOT touch [o] (=⟨oʻ⟩), so the ⟨o⟩/⟨oʻ⟩ contrast is preserved" },
+        { "pattern": "ɨ", "replace": "i", "note": "⟨i⟩ = [i]~[ɨ] (the Uzbek 'back i' allophone after back consonants — chivin tʃɨvɨn)" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ = [e]~[ɛ] (Toshkent tɒʃkɛnt)" },
+        { "pattern": "ʊ", "replace": "u", "note": "⟨u⟩ = [u]~[ʊ] (lax allophone — gul ɡʊl)" },
+        { "pattern": "ɪ", "replace": "i", "note": "⟨i⟩ = [i]~[ɪ] (lax allophone — bilmoq bɪlmɒq)" },
+        { "pattern": "ɫ", "replace": "l", "note": "⟨l⟩ = [l]~[ɫ] (dark l in back-vowel context — adyol adjɒɫ)" },
+        { "pattern": "ʋ", "replace": "v", "note": "⟨v⟩ = [ʋ]~[v]" },
+        { "pattern": "ɸ", "replace": "f", "note": "⟨f⟩ = [f]~[ɸ] (bilabial in some loans)" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ~r" },
+        { "pattern": "ɡ(?=ŋ)|ŋɡ", "replace": "ŋ", "note": "⟨ng⟩ = [ŋ]~[ŋɡ] notation" },
+        { "pattern": "ʔ", "replace": "", "note": "the referee (kaikki) inserts a word-initial glottal ʔ before vowels; we don't" }
+    ]
+}

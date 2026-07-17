@@ -1,0 +1,41 @@
+// Native canonical-IPA definition for Uzbek / oʻzbekcha (uz) — Turkic, modern LATIN orthography. uzbek.ts reads
+// this file. Uzbek is the Turkic outlier that has LOST vowel harmony (Persian/Tajik contact), so — unlike Turkish
+// or Kazakh — the g2p needs no harmony rules; every letter has a fixed value. The signature vowel split is
+// ⟨o⟩→[ɒ] (open back) vs ⟨oʻ⟩→[o] (close-mid back). Digraphs sh/ch/ng + the two comma-letters oʻ/gʻ; the separate
+// tutuq belgisi (ʼ) is a glottal stop. Validated against wikipron uzb_latn + kaikki uz + epitran uzb-Latn.
+{
+    "language": "uz",
+    "name": "Uzbek",
+    "script": "Latin",
+    "provenance": "Authored from the modern Uzbek Latin orthography + standard Uzbek phonology; cross-checked vs wikipron uzb_latn + kaikki + epitran uzb-Latn.",
+
+    // Single vowels. ⟨o⟩ is the open back [ɒ] (Eron→erɒn); ⟨oʻ⟩ (a digraph below) is the close-mid [o].
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "ɒ", "u": "u" },
+
+    // Single consonants. ⟨j⟩→[d͡ʒ] (native; [ʒ] in Russian loans — not distinguished), ⟨v⟩→[ʋ], ⟨x⟩→[χ], ⟨q⟩→[q],
+    // ⟨y⟩→[j], ⟨r⟩→[r]. ⟨c⟩/⟨w⟩ appear only in unadapted loans.
+    "consonants": {
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "d͡ʒ", "k": "k", "l": "l",
+        "m": "m", "n": "n", "p": "p", "q": "q", "r": "r", "s": "s", "t": "t", "v": "ʋ",
+        "x": "χ", "y": "j", "z": "z"
+    },
+
+    // Digraphs (tried longest-first). oʻ/gʻ use the comma-letter (ʻ), normalised from any apostrophe variant in
+    // uzbek.ts; sh/ch/ng are plain digraphs. ng → [ŋ].
+    "digraphs": { "oʻ": "o", "gʻ": "ʁ", "sh": "ʃ", "ch": "t͡ʃ", "ng": "ŋ" },
+
+    // Tutuq belgisi (glottal-stop / length sign) — an apostrophe NOT forming oʻ/gʻ → [ʔ].
+    "glottal": "ʔ",
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . "
+    },
+
+    // NUMBERS — Uzbek Latin spellings; canonical IPA DERIVED via the same g2p. Turkic decimal system: units + tens
+    // + magnitudes, concatenated with spaces (no fusion). 11 = oʻn bir, 25 = yigirma besh, 100 = yuz.
+    "numbers": {
+        "units": ["nol", "bir", "ikki", "uch", "toʻrt", "besh", "olti", "yetti", "sakkiz", "toʻqqiz"],
+        "tens": { "10": "oʻn", "20": "yigirma", "30": "oʻttiz", "40": "qirq", "50": "ellik", "60": "oltmish", "70": "yetmish", "80": "sakson", "90": "toʻqson" },
+        "magnitudes": { "hundred": "yuz", "thousand": "ming", "million": "million", "billion": "milliard" }
+    }
+}
