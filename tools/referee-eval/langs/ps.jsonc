@@ -4,7 +4,8 @@
 {
     "referees": [
         { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human)", "role": "primary" },
-        { "file": "ps.kaikki-pus.tsv", "source": "kaikki pus (Wiktionary, human)", "role": "secondary" }
+        { "file": "ps.kaikki-pus.tsv", "source": "kaikki pus (Wiktionary, human)", "role": "secondary" },
+        { "file": "ps.kaikki-kandahari.tsv", "source": "kaikki pus KANDAHARI slice (dialect-consistent, matches our ʂ/ʐ)", "role": "secondary" }
     ],
     "segmentJoin": true,
     "folds": [
