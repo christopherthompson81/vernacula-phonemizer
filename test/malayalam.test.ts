@@ -19,6 +19,7 @@ describe("Malayalam canonical IPA", () => {
     test("intervocalic voicing (Dravidian sonorization) — geminates stay voiceless", () => {
         expect(phonemizeWord("അടി")).toBe("ˈaɖi"); // single ട ʈ→ɖ between vowels
         expect(phonemizeWord("കറുക")).toBe("kˈaruɡa"); // single ക k→ɡ intervocalic
+        expect(phonemizeWord("പണ്ട്")).toBe("pˈaɳɖɨ"); // retroflex ണ്ട ɳʈ→ɳɖ (scoped post-nasal, even before samvrit)
     });
 
     test("samvritokaram — word-final chandrakkala → [ɨ]", () => {

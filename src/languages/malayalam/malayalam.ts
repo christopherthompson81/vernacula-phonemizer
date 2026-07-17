@@ -27,7 +27,7 @@ const MALAYALAM_DIGITS: Record<string, string> = {
     "൫": "5", "൬": "6", "൭": "7", "൮": "8", "൯": "9",
 };
 const DIGIT_CLASS = "0-9" + Object.keys(MALAYALAM_DIGITS).join("");
-const VOWEL = "aeiouɨɾ";
+const VOWEL = "aeiouɨ"; // vowel nuclei for the stress scan (NOT ɾ — a word-onset ര is not a nucleus)
 const VIRAMA = "്"; // chandrakkala
 
 // Chillu (pure-consonant) letters → their base consonant + virama, so the engine reads them as bare codas.
@@ -72,6 +72,10 @@ export function phonemizeWord(word: string): string {
     // geminate blocks the following-vowel lookahead. Applied BEFORE the samvritokaram [ɨ] is appended, so a
     // word-final stop (historically utterance-final) stays voiceless (അതത്→ad̪at̪ɨ, NOT ad̪ad̪ɨ).
     x = x.replace(/(?<=[aeiouɨɐ̃ː])(k|t̪|ʈ|t͡ʃ|p)(?=[aeiouɨɐ])/gu, (c) => VOICE[c]!);
+    // POST-NASAL voicing is scoped to the RETROFLEX cluster only: ണ്ട ɳʈ → ɳɖ (both referees ~90% voiced, even
+    // before samvrit: പണ്ട്→paɳɖɨ). The other nasal+stop clusters (മ്പ mp, ന്ത nt̪, ങ്ക ŋk) are voiceless-dominant
+    // in Sanskrit loans and are NOT voiced. Aspirated ɳʈʰ and the geminate ɳʈː are left as-is.
+    x = x.replace(/ɳʈ(?![ʰː])/gu, "ɳɖ");
     if (samvrit) x += "ɨ";
     // First-syllable (weak) stress: mark the first vowel nucleus.
     const m = new RegExp(`[${VOWEL}]`, "u").exec(x);

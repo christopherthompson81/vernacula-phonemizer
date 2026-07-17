@@ -28,20 +28,24 @@ Unlike the recent Sinitic stubs, Malayalam has **two independent human referees*
   plosive/affricate voices between vowels (അടി→aɖi, കറുക→karuɡa; k→ɡ, t̪→d̪, ʈ→ɖ, t͡ʃ→d͡ʒ, p→b). Geminates (now
   Cː) and word-initial stops stay voiceless. **Crucially applied BEFORE the samvrit [ɨ] is appended**, so a
   word-final stop (historically utterance-final) stays voiceless — the referee keeps it so (അതത്→ad̪at̪ɨ, not
-  ad̪ad̪ɨ). **POST-NASAL voicing was TESTED and REJECTED**: the referee is inconsistent on nasal+stop clusters
-  (ɳʈ→ɳɖ voices in native words, but nt̪/mp stay voiceless in Sanskrit loans — not orthographically recoverable),
-  and intervocalic-only scored higher. → 66.7%. + the ʱ breathy-voice fold (the referee drops the aspiration on
-  Sanskrit voiced aspirates ഭ ധ ഘ) → 73.3%.
+  ad̪ad̪ɨ). **BLANKET post-nasal voicing was TESTED and REJECTED**: the referee is inconsistent on nasal+stop
+  clusters, so intervocalic-only scored higher (the retroflex case is restored, scoped, in Run 5). → 66.7%. + the
+  ʱ breathy-voice fold (the referee drops the aspiration on Sanskrit voiced aspirates ഭ ധ ഘ) → 73.3%.
 - **Run 3 — rhotic tap~trill fold.** We write tap ɾ for ര everywhere; the referee writes ɾ intervocalically but
   r in clusters (akɾamam~akramam). Neutralizing tap~trill (both ര/റ are rhotic) → 82.9%.
 - **Run 4 — the -ിക്കുക verb ending + anusvara-before-sibilant.** The referee writes a narrow palatal onglide
   [kkju] for the -ിക്കുക infinitive (from the preceding /i/) where we write plain [kːu] — folded. And medial
   anusvara before a non-stop (sibilant/ഹ/sonorant) → [m] (അംശം→amʃam), authored in the module (before a stop it
   stays for the engine's homorganic assimilation, അംഗം→aŋɡam). → **87.0%**.
+- **Run 5 — scoped retroflex post-nasal voicing (adversarial review).** The review quantified the nasal+stop
+  clusters against both referees: the RETROFLEX ണ്ട ɳʈ is voiced-dominant (~90%: wikipron 207 [ɳɖ] / 23 [ɳʈ],
+  kaikki 217 / 20) — voiced even before samvrit (പണ്ട്→paɳɖɨ) — while മ്പ/ന്ത/ങ്ക stay voiceless-dominant. So a
+  SCOPED `ɳʈ→ɳɖ` rule (not blanket post-nasal, aspirate ɳʈʰ + geminate ɳʈː excepted) is correct. Also fixed a
+  cosmetic stress bug (a word-onset ര was counted as a nucleus: രാമൻ→ɾˈaːman, was ˈɾaːman). → **88.4%**.
 
 ## Verdict — ✅ Referee-limited (matches the Dravidian siblings)
 
-**87.0% vs wikipron + 80.0% vs kaikki**, two independent human referees corroborating — comparable to Telugu
+**88.4% vs wikipron + 81.5% vs kaikki**, two independent human referees corroborating — comparable to Telugu
 (79.6%) and in line with the Dravidian family. The residual is diffuse: referee narrow-notation, and Sanskrit-loan
 aspiration the referee inconsistently drops while we emit it correctly (over-folding ʰ would merge the genuinely
 contrastive aspirated/unaspirated stops of the loan stratum — declined per the honesty principle). Bounded

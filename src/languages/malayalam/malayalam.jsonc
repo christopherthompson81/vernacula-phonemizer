@@ -19,7 +19,7 @@
         "ട": { "ipa": "ʈ" }, "ഠ": { "ipa": "ʈʰ" }, "ഡ": { "ipa": "ɖ" }, "ഢ": { "ipa": "ɖʱ" }, "ണ": { "ipa": "ɳ" },
         "ത": { "ipa": "t̪", "note": "DENTAL (vs retroflex ട=ʈ)" }, "ഥ": { "ipa": "t̪ʰ" }, "ദ": { "ipa": "d̪" }, "ധ": { "ipa": "d̪ʱ" }, "ന": { "ipa": "n" },
         "പ": { "ipa": "p" }, "ഫ": { "ipa": "pʰ" }, "ബ": { "ipa": "b" }, "ഭ": { "ipa": "bʱ" }, "മ": { "ipa": "m" },
-        "യ": { "ipa": "j" }, "ര": { "ipa": "ɾ", "note": "tap" }, "റ": { "ipa": "r", "note": "ALVEOLAR (റ്റ→[ʈː] handled in ts)" }, "ല": { "ipa": "l" }, "വ": { "ipa": "ʋ" },
+        "യ": { "ipa": "j" }, "ര": { "ipa": "ɾ", "note": "tap" }, "റ": { "ipa": "r", "note": "ALVEOLAR trill/tap (റ്റ geminate → rː; the referee writes it doubled)" }, "ല": { "ipa": "l" }, "വ": { "ipa": "ʋ" },
         "ശ": { "ipa": "ʃ" }, "ഷ": { "ipa": "ʂ" }, "സ": { "ipa": "s" }, "ഹ": { "ipa": "h" },
         "ള": { "ipa": "ɭ", "note": "retroflex lateral" }, "ഴ": { "ipa": "ɻ", "note": "retroflex approximant (shared with Tamil)" }, "ഺ": { "ipa": "t̪" }
     },
