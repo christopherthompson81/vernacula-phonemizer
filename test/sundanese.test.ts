@@ -12,8 +12,8 @@ describe("Sundanese canonical IPA", () => {
     test("the seven-vowel system: ⟨eu⟩→ɨ, ⟨e⟩→ə, ⟨é⟩→e", () => {
         expect(phonemizeWord("ieu")).toBe("ʔˈiɨ"); // ⟨eu⟩ → ɨ (+ word-initial glottal)
         expect(phonemizeWord("seukeut")).toBe("sˈɨkɨt"); // ⟨eu⟩ → ɨ twice
-        expect(phonemizeWord("kecap")).toBe("kˈət͡ʃap"); // ⟨e⟩ → ə (schwa), c → t͡ʃ
-        expect(phonemizeWord("ngéwé")).toBe("ŋˈewe"); // ng → ŋ, ⟨é⟩ → e
+        expect(phonemizeWord("kecap")).toBe("kət͡ʃˈap"); // ⟨e⟩ → ə (schwa), c → t͡ʃ; stress shifts off the schwa penult
+        expect(phonemizeWord("ngéwé")).toBe("ŋˈewe"); // ng → ŋ, ⟨é⟩ → e (é is not a schwa, so penult stress)
     });
 
     test("consonants + glottal in same-vowel hiatus", () => {
@@ -23,6 +23,8 @@ describe("Sundanese canonical IPA", () => {
     });
 
     test("numbers compose (Austronesian decimal)", () => {
+        expect(getPhonemizer("su").text("11").trim()).toBe("sabəlˈas"); // sabelas (only 11 takes the sa- prefix)
+        expect(getPhonemizer("su").text("12").trim()).toBe("dˈua bəlˈas"); // dua belas
         expect(getPhonemizer("su").text("25").trim()).toBe("dˈua pˈuluh lˈima"); // dua puluh lima
         expect(getPhonemizer("su").text("100").trim()).toBe("sarˈatus"); // saratus
     });

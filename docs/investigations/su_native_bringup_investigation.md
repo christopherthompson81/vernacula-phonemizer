@@ -32,7 +32,10 @@ majority of words — reverted to [r] + a fold.
 ## Verdict — ✅ Referee-limited (single independent referee)
 
 **86.5% folded vs kaikki su (465, the only referee)** — a shallow, highly rule-derivable Latin g2p, same shape as
-the other Austronesian ✅s. The residual is diffuse: **Aksara Sunda script entries** (~7 — kaikki includes native-
+the other Austronesian ✅s. **Fold-depth note:** the glottal-strip fold is load-bearing (~12pp — without it ~75%),
+because kaikki marks the glottal so erratically that it's the largest single disagreement class; the fold is
+*bidirectional* (we both over-fire — waas→waʔas vs kaikki waas — and miss — bao→bao vs kaikki baoʔ), so it
+neutralises referee inconsistency rather than hiding a one-sided segmental error. The residual is diffuse: **Aksara Sunda script entries** (~7 — kaikki includes native-
 script single letters ᮊ→ka; we have a Latin-only front-end), the loanword ⟨e⟩=[e]-not-[ə] tail (profesor), a few
 inconsistent hiatus glides (siam→sijam), and final-obstruent devoicing in Arabic loans (sujud). Deferred: an
 Aksara Sunda front-end (the Javanese Aksara-Jawa pattern), and the loan-⟨e⟩ quality (unrecoverable from spelling,

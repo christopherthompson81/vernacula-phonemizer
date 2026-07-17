@@ -55,10 +55,12 @@ export function phonemizeWord(word: string): string {
     for (let i = segs.length - 1; i > 0; i--) {
         if (isVowelPh(segs[i]!) && segs[i] === segs[i - 1]) segs.splice(i, 0, DEF.glottal);
     }
-    // Penultimate (weak) stress on the penult vowel nucleus (skipping a final schwa where possible).
+    // Penultimate (weak) stress on the penult vowel nucleus — but a schwa penult can't bear stress, so it shifts
+    // to the final vowel (the Indonesian/Malay pattern: hese→hesˈe, not hˈəse).
     const vidx = segs.map((ph, idx) => (isVowelPh(ph) ? idx : -1)).filter((x) => x >= 0);
     if (vidx.length >= 2) {
-        const at = vidx[vidx.length - 2]!;
+        const penult = vidx[vidx.length - 2]!;
+        const at = segs[penult] === "ə" ? vidx[vidx.length - 1]! : penult;
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("").normalize("NFC");
@@ -68,7 +70,7 @@ export function phonemizeWord(word: string): string {
 // "1" of a magnitude is the sa- prefix (sapuluh, saratus). Word forms are read back through the g2p.
 function toWords(n: number): string {
     if (n < 10) return NUM.units[n]!;
-    if (n < 20) return (n === 10 ? NUM.seprefix + NUM.puluh : NUM.units[n - 10]! + " " + NUM.belas);
+    if (n < 20) return n === 10 ? NUM.seprefix + NUM.puluh : n === 11 ? NUM.seprefix + NUM.belas : NUM.units[n - 10]! + " " + NUM.belas;
     if (n < 100) {
         const t = Math.floor(n / 10),
             u = n % 10;
