@@ -1,0 +1,82 @@
+// Native canonical-IPA data manifest for Azerbaijani / Azərbaycan dili (az) — North Azerbaijani, Latin script,
+// espeak-independent. Turkic, the Oghuz sibling of Turkish, so it reuses the Turkish engine's shape (a shallow
+// left-to-right scan: vowel harmony is already in the spelling, k/g palatalize before front vowels, dark/clear l,
+// geminate stops, nasal place assimilation). The DATA differences from Turkish live here; the ALGORITHM differences
+// (ğ→ɣ not lengthening; q→ɡ/x; x→x) are in g2p.ts. See docs/investigations/az_native_bringup_investigation.md.
+{
+    "language": "az",
+    "name": "Azerbaijani (North, Latin)",
+    "script": "Latin",
+    "provenance": "Authored from Azerbaijani orthography + phonology (shallow, near-1:1; vowel harmony is already spelled). This file IS the language data — the native rule engine reads it directly. The Oghuz sibling of Turkish, sharing the scan shape.",
+
+    "convention": {
+        "vowels": "phonemic — a e ə ı i o ö u ü → ɑ e æ ɯ i o œ u y (front = e i ə ö ü, back = a ı o u); ə is the extra Azerbaijani front vowel /æ/",
+        "palatalization": "k → c before a front vowel (kitab → citɑb); g → ɟ (Azerbaijani g is inherently palatal); q → ɡ (the back voiced stop), word-final → x (oxumaq → oxumɑx)",
+        "fricatives": "x → x (voiceless velar — a real letter, NOT Turkish ks); ğ → ɣ (voiced velar — NOT the Turkish lengthening/j)",
+        "darkL": "l → dark ɫ next to a back vowel, clear l next to a front vowel",
+        "stress": "final-syllable default (Turkic)",
+    },
+
+    // Vowel letter → IPA (phonemic), plus the harmony classes. Azerbaijani a is BACK [ɑ] (opener than Turkish a),
+    // ö is [œ] (opener than Turkish ø). ə [æ] is a FRONT vowel (harmony + palatalization trigger).
+    "vowels": {
+        "ipa": {
+            "a": "ɑ",
+            "e": "e",
+            "ə": "æ",
+            "ı": "ɯ",
+            "i": "i",
+            "o": "o",
+            "ö": "œ",
+            "u": "u",
+            "ü": "y",
+        },
+        "front": ["e", "i", "ə", "ö", "ü"],
+        "back": ["a", "ı", "o", "u"],
+    },
+
+    // Context-free consonants. g/k/q/l/ğ/x are handled specially in g2p.ts (palatalization, dark-l, q-devoicing,
+    // fricatives), so they are NOT here. c → d͡ʒ and ç → t͡ʃ and j → ʒ as in Turkish.
+    "consonants": {
+        "b": "b",
+        "c": "d͡ʒ",
+        "ç": "t͡ʃ",
+        "d": "d",
+        "f": "f",
+        "h": "h",
+        "j": "ʒ",
+        "m": "m",
+        "n": "n",
+        "p": "p",
+        "r": "ɾ",
+        "s": "s",
+        "ş": "ʃ",
+        "t": "t",
+        "v": "v",
+        "y": "j",
+        "z": "z",
+    },
+    // Doubled STOPS/affricates geminate to Cː (səkkiz → sæccɯz→ sæcːiz); sonorants/fricatives stay written double.
+    "geminate": ["p", "t", "k", "b", "d", "c", "ç", "q", "g"],
+
+    // Clause-terminating punctuation → canonical inline pause marks.
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words (thousands scale: on/yüz/min/milyon/…). bir is dropped before yüz and min.
+    "numbers": {
+        "ones": ["", "bir", "iki", "üç", "dörd", "beş", "altı", "yeddi", "səkkiz", "doqquz"],
+        "tens": ["", "on", "iyirmi", "otuz", "qırx", "əlli", "altmış", "yetmiş", "səksən", "doxsan"],
+        "scales": ["", "min", "milyon", "milyard", "trilyon", "katrilyon"], // 10³ⁿ group multipliers (covers all safe integers)
+        "hundred": "yüz",
+        "zero": "sıfır",
+        "decimalConnector": "tam", // 3,14 → üç tam bir dörd (the fractional is read digit-by-digit, as in the Turkish engine)
+    },
+}
