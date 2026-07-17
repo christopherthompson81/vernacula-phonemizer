@@ -1,7 +1,9 @@
-// Urdu — Perso-Arabic abjad, Hindi phonology. wikipron urd is fully-voweled (HUMAN); our g2p produces
-// the consonant + LONG-vowel skeleton with a default [ə] for the omitted short vowels (restoration is the
-// deferred subsystem, 🟠). Fold the short-vowel QUALITY (ə~ɪ~ʊ) and the long/short axis so the eval
-// measures the CONSONANT + long-vowel backbone we can actually derive, not the unrecoverable short vowels.
+// Urdu — Perso-Arabic abjad, Hindi phonology. wikipron urd is fully-voweled (HUMAN). The eval uses
+// phonemizeWordCore (lexicon-free skeleton) — NON-CIRCULAR: the shipped phonemizeWord restores short vowels
+// from a wikipron-MINED lexicon, so scoring it against wikipron would be circular. We fold what the abjad does
+// NOT determine — short-vowel quality (ə~ɪ~ʊ) AND majhūl long-vowel quality (و=uː~oː, ی=iː~eː) — so the eval
+// measures the CONSONANT + long-vowel backbone we can derive, not the unrecoverable vowel qualities. Short-vowel
+// restoration is a shipped subsystem (coverage lexicon + neural), measured separately, not by this backbone eval.
 {
     "referees": [
         {
@@ -11,7 +13,7 @@
         }
     ],
     "segmentJoin": true,
-    "secondaryGap": "short-vowel restoration is deferred (the abjad omits ə/ɪ/ʊ); no independent diacritized-Urdu source wired.",
+    "secondaryGap": "no independent diacritized-Urdu referee wired; the eval measures the non-circular consonant+long-vowel backbone (short vowels + majhūl quality folded as abjad-unrecoverable). Short-vowel restoration ships (coverage lexicon + neural) but its accuracy is not measured here (the lexicon is wikipron-mined → circular).",
     "folds": [
         {
             "pattern": "(.)\\1",
@@ -22,6 +24,16 @@
             "pattern": "[ɪʊ]",
             "replace": "ə",
             "note": "short-vowel QUALITY ə~ɪ~ʊ — unrecoverable from the undiacritized skeleton"
+        },
+        {
+            "pattern": "[oɔ]",
+            "replace": "u",
+            "note": "MAJHŪL long-vowel quality: و is written for both maʿrūf [uː] and majhūl [oː]~[ɔː] — the abjad does NOT distinguish them (آرزو = arzo~arzu), so fold like the short-vowel quality. We default to [oː]; the referee varies"
+        },
+        {
+            "pattern": "[eɛ]",
+            "replace": "i",
+            "note": "MAJHŪL long-vowel quality: ی is written for both maʿrūf [iː] and majhūl [eː]~[ɛː] — abjad-unrecoverable (آسیب = asib~aseb). Counterpart of the [oɔ]→u fold"
         },
         {
             "pattern": "ɾ",

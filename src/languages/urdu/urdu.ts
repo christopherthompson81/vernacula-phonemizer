@@ -52,6 +52,9 @@ export function phonemizeWordCore(word: string): string {
     // Nasal PLACE assimilation: /n/ → [m] before a labial (b/p), [ŋ] before a velar (k/ɡ) — انبار→əmbɑːɾ,
     // انگور→əŋɡuːɾ. Standard Hindustani (and matches the referee).
     ipa = ipa.replace(/n(?=[bp])/gu, "m").replace(/n(?=[kɡ])/gu, "ŋ");
+    // NOTE: word-final ـیہ (ی+ہ) is NOT rewritten here — the ending is genuinely ambiguous (feminine -iyya حاشیہ→[jɑ]
+    // vs masculine Arabic -īh فقیہ→[iːh]), identical in spelling with no orthographic signal, so a blanket rule
+    // corrupts common loanwords. It is a per-word restoration/lexicon matter. See docs/ur_convergence_investigation.md.
     return applyWeightStress(ipa).normalize("NFC");
 }
 
