@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **72 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **73 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-72 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+73 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
 Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
@@ -42,7 +42,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Creole (English-lexified) | Nigerian Pidgin `pcm` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
 | Germanic | Dutch `nl`, English `en`, German `de`, Swedish `sv` (tonal accent) |
-| Indo-Aryan | Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
+| Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
 | Iranian | Pashto `ps`, Persian `fa` |
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |

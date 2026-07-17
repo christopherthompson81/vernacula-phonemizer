@@ -50,6 +50,12 @@ export interface BengaliDef extends AbugidaDef {
     clausePunctuation: Record<string, string>;
     symbols?: Record<string, string>;
     stripSymbols?: string;
+    /** Bengali height harmony (ɔ→o before a high vowel). Set false for Assamese, which lacks it. Default true. */
+    heightHarmony?: boolean;
+    /** Hindi/Bengali-style medial inherent-vowel deletion. Set false for Assamese, which retains it. Default true. */
+    medialSchwaDeletion?: boolean;
+    /** Skip the (Bengali-specific) whole-word lexicon override — set true for a reusing language (Assamese). */
+    skipLexicon?: boolean;
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
@@ -177,20 +183,26 @@ export function makeNativeBengali(
         // 4. HEIGHT HARMONY (ɔ→o, e→æ) — BEFORE deletion, so it keys on the ORIGINAL inherent /ɔ/. An inherent
         //    ɔ is not itself a high/mid trigger, so a later-retained final [o] can't spuriously raise the vowel
         //    before it (পদ্ম→pɔd̪ːo, not pod̪ːo); the real matra vowels still trigger (করি→koɾi, দেখা→d̪ækʰa).
-        x = harmony(x);
+        if (def.heightHarmony !== false) x = harmony(x); // Assamese (heightHarmony:false) lacks Bengali's ɔ→o raising
         // 5. WORD-FINAL inherent-vowel deletion / retention — BEFORE medial (like Hindi) so a final inherent
         //    ɔ does not create a false V·C·ɔ·C·V context for the preceding vowel (জীবন→d͡ʒibɔn, শহর→ʃɔɦɔɾ).
         const syls = (x.match(VOWEL_G) || []).length;
         if (syls >= 2) x = deleteFinalInherent(x);
         // 6. MEDIAL inherent-vowel deletion — the Ohala V·C·ɔ·C·V rule (আপনার→apnaɾ, আকবর→akbɔɾ), same shared
         //    algorithm as Hindi's schwa deletion but on /ɔ/; a geminate coda keeps the syllable heavy (no delete).
-        x = deleteMedialSchwa(x, "ɔ");
+        if (def.medialSchwaDeletion !== false) x = deleteMedialSchwa(x, "ɔ"); // Assamese retains medial inherent ɔ (চকৰি→sɔkɔɹi)
         return x.normalize("NFC");
     }
 
-    /** SHIPPED word→IPA: a whole-word lexicon override (for the proven-lexical tail) then the rule engine. */
+    /** SHIPPED word→IPA: a whole-word lexicon override (for the proven-lexical tail) then the rule engine. The
+     *  lexicon is Bengali-specific (bengali-lexicon.tsv), so a reusing language (Assamese) sets skipLexicon:true
+     *  to avoid Bengali overrides (এক→æk) leaking onto its shared spellings. */
     function word(w: string): string {
-        return lexicon().get(w.normalize("NFC")) ?? wordRules(w);
+        if (!def.skipLexicon) {
+            const hit = lexicon().get(w.normalize("NFC"));
+            if (hit !== undefined) return hit;
+        }
+        return wordRules(w);
     }
 
     const toAscii = (digits: string): string =>

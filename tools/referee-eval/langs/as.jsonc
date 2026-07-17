@@ -1,0 +1,28 @@
+// Assamese (as) — Eastern Indo-Aryan, Bengali-Assamese script; the Bengali engine + Assamese phoneme values.
+// Referees: wikipron asm broad (PRIMARY, HUMAN, 2982) + kaikki as (SECONDARY, HUMAN, 3327). Both Wiktionary-
+// derived (same-source, weak corroboration). Folds are notational/allophonic: the rhotic ɾ~ɹ, the e~ɛ mid-vowel,
+// the ⟨ফ⟩ pʰ~f~ɸ realisation, and the h ɦ~ʱ.
+{
+    "referees": [
+        {
+            "file": "as.wikipron-asm-broad.tsv",
+            "source": "wikipron asm_beng broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "as.kaikki-as.tsv",
+            "source": "kaikki as (Wiktionary, human)",
+            "role": "secondary"
+        }
+    ],
+    "secondaryGap": "Both Assamese referees (wikipron, kaikki) are Wiktionary-derived — the same human source parsed twice (weak same-source corroboration). No independent non-Wiktionary Assamese pronunciation corpus is free; epitran has no Assamese.",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with a dot (kɔl.ka.ta) — strip for segmental comparison" },
+        { "pattern": "ɾ", "replace": "ɹ", "note": "the single Assamese rhotic — the referee uses both the tap ɾ and the approximant ɹ; we write ɹ" },
+        { "pattern": "ɛ", "replace": "e", "note": "the mid-front vowel ⟨এ⟩ [e]~[ɛ] (Assamese lowers it in closed syllables; one phoneme)" },
+        { "pattern": "[fɸ]", "replace": "pʰ", "note": "⟨ফ⟩ realised [pʰ]~[f]~[ɸ] — one phoneme, we write the aspirate pʰ" },
+        { "pattern": "ʊ", "replace": "o", "note": "⟨ও⟩/⟨ো⟩ [o]~[ʊ] — Assamese raises the mid-back vowel; one phoneme, we write o" },
+        { "pattern": "ij", "replace": "i", "note": "the homorganic glide ⟨য়⟩ after ⟨i⟩ ([ij]~[i]): our explicit iya→[ija] vs the referee's hiatus [ia] — under-specified, non-contrastive (the Tagalog offglide pattern)" },
+        { "pattern": "ʱ$", "replace": "ɦ", "note": "word-final breathy ⟨হ⟩ [ʱ] → our [ɦ] (notational)" }
+    ]
+}
