@@ -111,28 +111,36 @@ function integerToHan(n: number): string {
     return out;
 }
 
+// The greedy-segmentation window = the longest dict key (in code points). Cached per dict Map instance so it is
+// scanned once, not on every phonemizeHanWord() call (the eval sweeps thousands of words through one dict).
+const MAX_WORD_CACHE = new WeakMap<Map<string, string>, number>();
+function maxWordFor(dict: Map<string, string>): number {
+    let m = MAX_WORD_CACHE.get(dict);
+    if (m === undefined) {
+        m = 0;
+        for (const k of dict.keys()) m = Math.max(m, [...k].length);
+        MAX_WORD_CACHE.set(dict, m);
+    }
+    return m;
+}
+
 class HanDictPhonemizer implements Phonemizer {
-    private maxWord: number;
     constructor(
         private dict: () => Map<string, string>,
         private def: HanDictDef,
         private foreign?: ForeignPhonemizer,
-    ) {
-        this.maxWord = 0; // computed lazily from the dict on first use
-    }
-    private max(): number {
-        if (!this.maxWord) for (const k of this.dict().keys()) this.maxWord = Math.max(this.maxWord, [...k].length);
-        return this.maxWord;
-    }
+    ) {}
     text(input: string): string {
+        const d = this.dict();
+        const max = maxWordFor(d);
         const { sink, finish } = clauseSink();
         const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
         let m: RegExpExecArray | null;
         while ((m = tok.exec(input))) {
-            if (m[1]) sink.emit(hanRun(m[1], this.dict(), this.max(), this.def.chao));
+            if (m[1]) sink.emit(hanRun(m[1], d, max, this.def.chao));
             else if (m[2]) {
                 const n = Number(m[2]);
-                if (Number.isSafeInteger(n)) sink.emit(hanRun(integerToHan(n), this.dict(), this.max(), this.def.chao));
+                if (Number.isSafeInteger(n)) sink.emit(hanRun(integerToHan(n), d, max, this.def.chao));
             } else if (m[3]) sink.emit(this.foreign ? this.foreign(m[3]) : "");
             else if (m[4]) {
                 const mk = this.def.clausePunctuation[m[4]];
@@ -151,7 +159,6 @@ export function createHanDictPhonemizer(dict: () => Map<string, string>, def: Ha
 /** Bare word→IPA (tests / eval): a Han run → IPA. */
 export function phonemizeHanWord(dict: () => Map<string, string>, def: HanDictDef, word: string): string {
     if (!HAN.test(word)) return "";
-    let maxWord = 0;
-    for (const k of dict().keys()) maxWord = Math.max(maxWord, [...k].length);
-    return hanRun(word, dict(), maxWord, def.chao);
+    const d = dict();
+    return hanRun(word, d, maxWordFor(d), def.chao);
 }
