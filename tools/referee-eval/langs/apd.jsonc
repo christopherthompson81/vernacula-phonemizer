@@ -1,0 +1,12 @@
+// Sudanese Arabic (apd — Khartoum) — 3rd Arabic VARIETY. NO independent referee: wikipron has no apd (both broad
+// and narrow are 404; the scraped Arabic varieties are acm/afb/ajp/apc/ary/arz/ayl), and there is no free Sudanese
+// pronunciation corpus. So `referees: []` + `secondaryGap`; the correctness anchor is the adjudicated gold in
+// test/arabic.test.ts, validated against published Sudanese phonology (Dickins, Sudanese Arabic Phonematics). This
+// makes apd 🔷 single-source verified (the Wu/Igbo pattern) — the distinctive fingerprint (ق→ɡ, ج→ɟ, interdentals
+// kept) is gold-checked, not measured. The shared MSA vowels are the same data-limited tail as arz/apc.
+{
+    "referees": [],
+    "segmentJoin": true,
+    "secondaryGap": "No independent referee for Sudanese Arabic: wikipron has no apd (404), no kaikki apd, no free Sudanese pronunciation corpus. Authored from Dickins (Sudanese Arabic Phonematics); anchor = the adjudicated gold in test/arabic.test.ts. Distinctive consonants (ق→ɡ, ج→ɟ, interdentals ث/ذ/ظ kept) gold-checked; the shared MSA vowels are the data-limited tail (as arz/apc).",
+    "folds": []
+}
