@@ -1,0 +1,15 @@
+// Xiang Chinese / 湘语 (hsn), Changsha 长沙 (New Xiang) dialect — a distinct Sinitic branch (retains the 入声 TONE
+// but lost the checked coda). GAP language: NO independent automated referee. No wikipron hsn; epitran ships no
+// Xiang; the only machine-readable Changsha IPA is the Wiktionary Chinese dialectal data — exactly our source
+// (kaikki.org extract), so any automated check is circular with it. Recorded here (not silently omitted) so the
+// gap is explicit; the correctness anchor is the adjudicated gold in test/xiang.test.ts. See docs/hsn_native_bringup_investigation.md.
+{
+    "language": "hsn",
+    "name": "Xiang Chinese (Changsha)",
+    "script": "Han",
+    "provenance": "Wiktionary Chinese Changsha Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
+    "referees": [],
+    "secondaryGap": "No independent referee exists for Changsha Xiang: no wikipron hsn and epitran ships no Xiang. The only machine-readable Changsha IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Jin/Hakka/Wu pattern; the correctness anchor is the adjudicated gold in test/xiang.test.ts.",
+    "segmentJoin": true,
+    "folds": []
+}
