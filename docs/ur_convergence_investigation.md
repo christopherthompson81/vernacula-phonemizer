@@ -44,3 +44,37 @@ real rule-work (و/ی consonant, ain); (b) the restoration accuracy is NOT indep
 lexicon is wikipron-mined → circular, and the neural's Urdu DER is unquantified). So Urdu is NOT cleanly ✅ yet, and
 NOT 🟢-capped either (restoration via a neural model IS a generative path, unlike tl's final-ʔ). Kept 🟡 pending
 (a) backbone و/ی+ain cleanup and (b) an independent restoration-accuracy measurement.
+
+## Run 2 — 2026-07-16 — independent restoration-accuracy measurement (resolves the status)
+
+To settle ✅ (Arabic precedent) vs 🟡 vs 🟢, measured the SHORT-VOWEL RESTORATION on a NON-CIRCULAR split: wikipron
+words whose skeleton is NOT in the coverage lexicon (OOV → the neural does the work), scored WITHOUT folding short
+vowels (so restoration must actually get them right), majhūl folded (under-determined even for a restorer).
+
+- **Coverage lexicon:** 2,089 / 7,709 wikipron types (27%; "66% of production TOKENS" per the bring-up doc). These
+  are CIRCULAR vs wikipron (the lexicon is mined from it) — reliable-by-construction, not a generalization signal.
+- **OOV (n=700 sample):** default-ə baseline **48.9%** exact vs neural restoration **48.7%** — **~0 lift (−0.1pp).**
+  Without the majhūl fold it was −2.4pp.
+
+The neural IS active and doing meaningful work (4/8 spot-checked words changed; the changes are reasonable schwa
+REPOSITIONING — احترام baseline əɦət̪ɾɑːm → neural əɦt̪əɾɑːm, matching the referee's ɦtəɾ; انجماد ənəd͡ʒmɑːd̪ →
+ənd͡ʒəmɑːd̪). But across the OOV set it helps as often as it hurts vs wikipron-broad → no net agreement gain.
+
+**This is confounded, and that IS the finding:** the neural was trained on a mined distribution whose short-vowel/
+schwa convention differs from wikipron-broad's, so exact-match vs wikipron penalizes both the baseline and the
+neural and can't credit the neural's real repositioning. The bring-up doc's "+18.6 held-out" is on the neural's OWN
+distribution; this is the independent one. **Net: the restoration layer is NOT independently verifiable here** —
+covered words are circular, OOV words are convention-mismatched. (Echoes the fa/ps lesson: the neural was
+net-negative/neutral there too; the DATA/lexicon layer was the real win.)
+
+### Status resolution → 🟡 (with evidence)
+
+- **Not ✅:** Arabic's ✅ rests on a diacritizer that demonstrably generalizes (~2% DER, verified on a matching
+  prose referee). Urdu's restoration shows ~0 verifiable OOV lift against the only independent referee we have, so
+  the "bare-text pipeline IS the product" claim can't be substantiated the way Arabic's can.
+- **Not 🟢 (capped):** short vowels ARE recoverable in principle (Arabic proves the abjad short-vowel signal is
+  ~98% learnable) — so a better diacritizer / a matching-convention referee is a REAL path, not a wall. The info is
+  partly in the input; we just can't verify or fully exploit it yet.
+- **🟡:** the verifiable consonant+long-vowel backbone is 56.8%; the coverage lexicon is reliable on attested words;
+  the restoration-generalization + an independent diacritized-Urdu referee (Arabic-style prose test in a matching
+  convention) is the outstanding work. That's a genuine path → 🟡, not a ceiling.
