@@ -1,0 +1,25 @@
+// Sindhi (sd) — Indo-Aryan, Perso-Arabic ABJAD. Rule g2p recovers the consonant + long-vowel skeleton (incl. the
+// implosives ٻɓ ڏɗ ڄʄ ڳɠ); SHORT vowels are UNWRITTEN → a default [ə] (folded, as for Urdu). Referee = combined
+// kaikki + wikipron snd_arab HUMAN IPA. Fold: short-vowel quality (a/i/u/ɪ/ʊ ~ ə) unrecoverable from the abjad;
+// gemination as length; tap ɾ~r; ʋ~v.
+{
+    "referees": [
+        { "file": "sd.human-combined.tsv", "source": "kaikki + wikipron snd_arab (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "[aiuɪʊɐəɛɔ](?!ː)", "replace": "", "note": "short vowels (quality AND presence) are UNWRITTEN in the abjad — strip them (BEFORE the backbone removes the length ː, so long vowels V+ː are preserved) → the eval measures the recoverable CONSONANT + long-vowel backbone (as for Urdu)" }
+    ],
+    "folds": [
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination as length ː (ours) vs doubled (referee) — notation" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ ~ referee r" },
+        { "pattern": "ʋ", "replace": "v", "note": "ʋ ~ v" },
+        { "pattern": "ɦ", "replace": "h", "note": "breathy [ɦ] ~ [h] (referee marks ح/ه as ɦ)" },
+        { "pattern": "[ɕʂ]", "replace": "ʃ", "note": "sibilant notation ʃ~ɕ~ʂ (چ/ش place varies)" },
+        { "pattern": "ʱ", "replace": "ʰ", "note": "breathy/aspiration notation [ʱ]~[ʰ]" },
+        { "pattern": "[oɔ]", "replace": "u", "note": "و majhūl: [oː]~[uː] (both written و) — abjad-unrecoverable (after the backbone strips ː)" },
+        { "pattern": "[eɛ]", "replace": "i", "note": "ي majhūl: [eː]~[iː] both written ي" },
+        { "pattern": "ɑ", "replace": "a", "note": "long-ā quality [ɑ]~[a]" },
+        { "pattern": "q", "replace": "k", "note": "ق → [k] (Sindhi commonly de-uvularizes)" }
+    ]
+}

@@ -1,0 +1,37 @@
+// Native canonical-IPA definition for Sindhi (sd) — Indo-Aryan, Perso-Arabic (Sindhi) ABJAD. sindhi.ts reads this.
+// Sindhi's signature is the four-way IMPLOSIVE series ٻ→ɓ, ڏ→ɗ, ڄ→ʄ, ڳ→ɠ (a real census gap) + a full retroflex
+// series ٽ ٺ ڊ ڍ ڻ ڙ. Like Urdu, the SHORT vowels are usually UNWRITTEN → a default [ə] stands in (the abjad wall);
+// the consonant + LONG-vowel skeleton (incl. the implosives) IS recoverable. Aspiration: some letters are dedicated
+// (ڀ bʰ, ٿ t̪ʰ, ٺ ʈʰ, ڦ pʰ, ک kʰ, ڇ t͡ʃʰ, ڌ d̪ʰ, ڍ ɖʰ), others take ھ (جھ d͡ʒʰ, گھ ɡʰ, نھ nʰ …). See
+// docs/sd_native_bringup_investigation.md.
+{
+    "language": "sd",
+    "name": "Sindhi",
+    "script": "Arabic",
+    "provenance": "Authored from standard Sindhi (Perso-Arabic) orthography + phonology; cross-checked vs kaikki + wikipron snd.",
+
+    "consonants": {
+        "ب": "b", "ٻ": "ɓ", "ڀ": "bʰ", "پ": "p", "ڦ": "pʰ",
+        "ت": "t̪", "ٿ": "t̪ʰ", "ٽ": "ʈ", "ٺ": "ʈʰ", "ث": "s",
+        "د": "d̪", "ڌ": "d̪ʰ", "ڏ": "ɗ", "ڊ": "ɖ", "ڍ": "ɖʰ", "ذ": "z",
+        "ج": "d͡ʒ", "ڄ": "ʄ", "ڃ": "ɲ", "چ": "t͡ʃ", "ڇ": "t͡ʃʰ",
+        "ح": "h", "خ": "x", "ر": "ɾ", "ڙ": "ɽ", "ز": "z", "س": "s", "ش": "ʃ",
+        "ص": "s", "ض": "z", "ط": "t̪", "ظ": "z", "غ": "ɣ", "ف": "f", "ق": "q",
+        "ک": "kʰ", "ڪ": "k", "گ": "ɡ", "ڳ": "ɠ", "ڱ": "ŋ",
+        "ل": "l", "م": "m", "ن": "n", "ڻ": "ɳ", "ه": "h", "ھ": "h", "ہ": "h",
+        "ء": "ʔ"
+    },
+    // C + ھ → aspirated, for the consonants WITHOUT a dedicated aspirate letter (ج گ + the sonorants).
+    "aspirateWithHe": { "ج": "d͡ʒʰ", "گ": "ɡʰ", "ڪ": "kʰ", "ن": "nʰ", "ڻ": "ɳʰ", "م": "mʰ", "ل": "lʰ", "ر": "ɾʰ", "ڙ": "ɽʰ", "و": "ʋʰ", "ي": "jʰ" },
+
+    // Long-vowel / glide letters (context-resolved in g2p.ts): ا/آ→ɑː, و→uː/oː or ʋ, ي/ی/ے→iː/eː or j.
+    "longVowels": { "ا": "aː", "آ": "aː", "و": "oː", "ي": "iː", "ی": "iː", "ے": "eː" },
+    "glides": { "و": "ʋ", "ي": "j", "ی": "j", "ے": "j" },
+
+    // Harakat (short-vowel diacritics), used when explicitly written; otherwise a default [ə] is inserted.
+    "harakat": { "َ": "ə", "ِ": "i", "ُ": "u" },
+
+    "clausePunctuation": {
+        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ", ".": " . ", "?": " ? ", ",": " , "
+    }
+}
