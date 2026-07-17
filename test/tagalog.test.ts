@@ -15,10 +15,10 @@ describe("tagalog canonical IPA", () => {
         const cases: [string, string][] = [
             ["mabuti", "mabˈuti"], // penult stress, r→ɾ absent here
             ["tao", "tˈaʔo"], // intervocalic glottal stop
-            ["maganda", "maɡˈanda"], // ɡ
-            ["kaibigan", "kaʔibˈiɡan"], // intervocalic ʔ + ɡ
-            ["ngayon", "ŋˈajon"], // ng→ŋ, y→j
-            ["mga", "mˈaŋa"], // special word: plural marker
+            ["maganda", "maɡandˈa"], // ɡ; final stress (magandá) — from the stress lexicon, not naive penult
+            ["kaibigan", "kaʔibˈiɡan"], // intervocalic ʔ + ɡ; penult (default)
+            ["ngayon", "ŋajˈon"], // ng→ŋ, y→j; final stress (ngayón) — stress lexicon
+            ["mga", "maŋˈa"], // special word: plural marker, pronounced mangá (final stress) — stress lexicon
             ["araw", "ʔˈaɾaw"], // word-initial ʔ, r→ɾ, w
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
@@ -33,6 +33,18 @@ describe("tagalog canonical IPA", () => {
         // Words NOT in the set are unchanged (and an already-ʔ-final rule output is not doubled):
         expect(phonemizeWord("tao")).toBe("tˈaʔo");
         expect(phonemizeWord("araw")).toBe("ʔˈaɾaw");
+    });
+
+    test("stress lexicon (shipped) vs penult default (rule-only)", () => {
+        // Phonemic stress is unwritten; the rule engine defaults to penultimate, but ~23% of words stress elsewhere.
+        // The shipped path pins stress from a kaikki-sourced lexicon (single confident position); the rule engine
+        // (used by the non-circular referee eval, which folds stress anyway) keeps the penultimate default.
+        expect(phonemizeWord("salmon")).toBe("salmˈon"); // final stress (loanword)
+        expect(phonemizeWordRules("salmon")).toBe("sˈalmon"); // penult default
+        expect(phonemizeWord("doktor")).toBe("doktˈoɾ");
+        expect(phonemizeWordRules("doktor")).toBe("dˈoktoɾ");
+        // Stress homographs (kaikki lists >1 position) are abstained → penult default on both paths:
+        expect(phonemizeWord("balik")).toBe("bˈalik");
     });
 
     test("hyphen → glottal stop; number", () => {
