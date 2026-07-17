@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **73 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **74 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-73 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+74 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
 Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
@@ -35,7 +35,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 
 | Family / area | Languages |
 |---|---|
-| Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`, Iraqi `acm`, Gulf `afb`, Moroccan `ary`, Libyan `ayl`), Hausa `ha`, Oromo `om` |
+| Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`, Iraqi `acm`, Gulf `afb`, Moroccan `ary`, Libyan `ayl`), Hausa `ha`, Oromo `om`, Somali `so` |
 | Austroasiatic | Vietnamese `vi` (tonal) |
 | Austronesian | Indonesian `id`, Javanese `jv`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
 | Celtic | Irish `ga`, Welsh `cy` |

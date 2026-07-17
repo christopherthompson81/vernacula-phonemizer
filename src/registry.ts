@@ -17,6 +17,7 @@ import { createTurkish } from "./languages/turkish/turkish.ts";
 import { createAzerbaijani } from "./languages/azerbaijani/azerbaijani.ts";
 import { createMalagasy } from "./languages/malagasy/malagasy.ts";
 import { createAssamese } from "./languages/assamese/assamese.ts";
+import { createSomali } from "./languages/somali/somali.ts";
 import { createVietnamese } from "./languages/vietnamese/vietnamese.ts";
 import { createTamil } from "./languages/tamil/tamil.ts";
 import { createKorean } from "./languages/korean/korean.ts";
@@ -164,6 +165,8 @@ function build(lang: string): Phonemizer {
             return createBengali((latin) => getPhonemizer("en").text(latin));
         case "as":
             return createAssamese((latin) => getPhonemizer("en").text(latin));
+        case "so":
+            return createSomali();
         case "ur":
             return createUrdu((latin) => getPhonemizer("en").text(latin));
         case "id":

@@ -1,0 +1,32 @@
+// Somali (so) — Cushitic (2nd, after Oromo), 1972 Latin orthography, a shallow rule g2p. Referees: epitran som-Latn
+// (PRIMARY, programmatic, INDEPENDENT) + kaikki so (SECONDARY, HUMAN). Two genuinely independent sources (a rule
+// G2P + Wiktionary), but both SMALL (~230). Folds are the unwritten ATR harmony (Somali's 10-vowel front/back
+// system collapses to the 5 written qualities — not derivable from spelling) + narrow allophony; tone (grammatical
+// pitch-accent) is stripped by the backbone. None fold a written contrast.
+{
+    "referees": [
+        {
+            "file": "so.epitran-som-latn.tsv",
+            "source": "epitran som-Latn (programmatic)",
+            "role": "primary"
+        },
+        {
+            "file": "so.kaikki-so.tsv",
+            "source": "kaikki so (Wiktionary, human)",
+            "role": "secondary"
+        }
+    ],
+    "secondaryGap": "Somali referees are small (~230 words each): epitran som-Latn (programmatic) + kaikki so (human) — genuinely independent, but no large corpus (no wikipron som). The unwritten ATR vowel harmony and grammatical tone cannot be derived from the orthography and are folded/deferred.",
+    "folds": [
+        { "pattern": "[æɑ]", "replace": "a", "note": "⟨a⟩: Somali ATR harmony realises it front [æ] (epitran) or back [ɑ] (kaikki) — unwritten, one written vowel; we write a" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ ATR variant [ɛ] → e (unwritten harmony)" },
+        { "pattern": "ɪ", "replace": "i", "note": "⟨i⟩ ATR/lax variant [ɪ] → i (unwritten harmony)" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩ ATR variant [ɔ] → o (unwritten harmony)" },
+        { "pattern": "ʊ", "replace": "u", "note": "⟨u⟩ ATR/lax variant [ʊ] → u (unwritten harmony)" },
+        { "pattern": "ʡ͡ʢ|ʡ͜ʢ|ʢ", "replace": "ʕ", "note": "⟨c⟩ — the kaikki epiglottal [ʡ͜ʢ]/[ʢ] realisation of the voiced pharyngeal → ʕ" },
+        { "pattern": "[ɡ]̊", "replace": "ɡ", "note": "kaikki narrow devoiced-onset allophone → ɡ" },
+        { "pattern": "β̞", "replace": "b", "note": "kaikki narrow spirantised ⟨b⟩ [β̞] → b" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination: the referees write a doubled consonant (dd), we mark length (dː, stripped by the backbone) — collapse both to a single for comparison" },
+        { "pattern": "^ʔ", "replace": "", "note": "kaikki inserts a predictable glottal stop before a word-initial vowel (af→ʔaf); epitran and we do not — strip for comparison" }
+    ]
+}
