@@ -1,0 +1,55 @@
+// Native canonical-IPA data manifest for Serbian / српски (sr) — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's
+// Latin), fully PHONEMIC ("write as you speak", Vuk Karadžić). serbian.ts reads this file: the Latin digraphs
+// ⟨dž lj nj⟩ (+ ⟨dj⟩→đ) first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme. Serbian
+// has NO vowel reduction (unlike Russian). Its lexical PITCH ACCENT (4-way rising/falling × short/long) + length
+// are unwritten in normal text and DEFERRED (the referee marks them; the eval backbone folds them). The signature
+// segments: ⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ / ⟨ћ⟩→t͡ɕ (alveolo-palatal affricates), syllabic ⟨r⟩.
+// See docs/investigations/sr_native_bringup_investigation.md.
+{
+    "language": "sr",
+    "name": "Serbian (српски)",
+    "script": "Cyrillic/Latin",
+    "provenance": "Authored from Serbian phonemic orthography (both scripts) + standard phonology. Fully phonemic (one grapheme = one phoneme). Referees: wikipron hbs (Serbo-Croatian) latin + cyrillic + epitran srp-Latn.",
+
+    "convention": {
+        "phonemic": "one grapheme = one phoneme; no vowel reduction; the two scripts map to the same IPA",
+        "signature": "⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ ⟨ћ⟩→t͡ɕ (alveolo-palatal), ⟨џ/dž⟩→d͡ʒ ⟨ч/č⟩→t͡ʃ, ⟨љ/lj⟩→ʎ ⟨њ/nj⟩→ɲ, ⟨х/h⟩→x",
+        "accent": "lexical pitch accent (4-way) + length — unwritten, DEFERRED (no stress/tone mark emitted)",
+    },
+
+    // Latin DIGRAPHS (tried before the single letters). ⟨dj⟩ is deliberately NOT included: modern Serbian writes
+    // ⟨đ⟩ directly, and the native ⟨d⟩+⟨j⟩ sequence across a prefix boundary (od·jek→od͡jek, pod·jednako) is far more
+    // common than the ASCII ⟨dj⟩-for-đ fallback — so ⟨dj⟩ scans as two phonemes. (The ⟨dž⟩/⟨nj⟩ prefix-boundary
+    // cases nad·živeti / in·jekcija stay a small residual — a prefix guard would break odžak/konj/konjak.)
+    "digraphs": { "dž": "d͡ʒ", "lj": "ʎ", "nj": "ɲ" },
+
+    // Single letters → IPA. Both scripts in one table (a word is one script; the maps don't collide). Every value
+    // is CANONICAL IPA.
+    "letters": {
+        // Cyrillic (азбука).
+        "а": "a", "б": "b", "в": "ʋ", "г": "ɡ", "д": "d", "ђ": "d͡ʑ", "е": "e", "ж": "ʒ",
+        "з": "z", "и": "i", "ј": "j", "к": "k", "л": "l", "љ": "ʎ", "м": "m", "н": "n",
+        "њ": "ɲ", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "ћ": "t͡ɕ", "у": "u",
+        "ф": "f", "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "џ": "d͡ʒ", "ш": "ʃ",
+        // Gaj's Latin (abeceda).
+        "a": "a", "b": "b", "c": "t͡s", "č": "t͡ʃ", "ć": "t͡ɕ", "d": "d", "đ": "d͡ʑ", "e": "e",
+        "f": "f", "g": "ɡ", "h": "x", "i": "i", "j": "j", "k": "k", "l": "l", "m": "m",
+        "n": "n", "o": "o", "p": "p", "r": "r", "s": "s", "š": "ʃ", "t": "t", "u": "u",
+        "v": "ʋ", "z": "z", "ž": "ʒ",
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words (Serbian, Latin — run through the g2p like any word). Hundreds are irregular
+    // (dvesta/trista); tens + units are space-joined (dvadeset jedan).
+    "numbers": {
+        "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
+        "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
+        "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
+        "hundreds": ["", "sto", "dvesta", "trista", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
+        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada" },
+        "million": { "one": "milion", "few": "miliona", "many": "miliona" }
+    }
+}

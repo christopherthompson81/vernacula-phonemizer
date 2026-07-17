@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **76 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **77 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-76 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+77 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
 Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
@@ -49,7 +49,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt`, Spanish `es` |
 | Sinitic | Cantonese `yue`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
-| Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Ukrainian `uk` |
+| Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Ukrainian `uk` |
 | Tai-Kadai | Thai `th` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uzbek `uz` |

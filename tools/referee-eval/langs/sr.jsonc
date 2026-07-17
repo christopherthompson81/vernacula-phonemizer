@@ -1,0 +1,22 @@
+// Serbian (sr) — South Slavic, dual-script, fully phonemic g2p. Referees: wikipron hbs_latn broad (PRIMARY, HUMAN,
+// Serbo-Croatian, 26486) + epitran srp-Latn (SECONDARY, programmatic, INDEPENDENT). Two independent sources. The
+// wikipron marks the lexical PITCH ACCENT + length + syllabic-r, which we defer → the backbone folds the combining
+// accent/length marks; the only phoneme-level fold is ⟨v⟩ [v]~[ʋ] (the referee is inconsistent).
+{
+    "referees": [
+        {
+            "file": "sr.wikipron-hbs-latn.tsv",
+            "source": "wikipron hbs_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "sr.epitran-srp-latn.tsv",
+            "source": "epitran srp-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        { "pattern": "v", "replace": "ʋ", "note": "⟨v⟩ → the labiodental approximant ʋ: the referee variably writes [v]~[ʋ] (voda→ʋoda but vuk→vuk) — one phoneme" },
+        { "pattern": "ɦ", "replace": "x", "note": "⟨h⟩ [x]~[ɦ] — epitran voices it intervocalically; one phoneme (we write the voiceless x)" }
+    ]
+}
