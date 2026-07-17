@@ -1,0 +1,72 @@
+// Native canonical-IPA data manifest for Somali / Af-Soomaali (so) — Cushitic (the 2nd, after Oromo), the 1972
+// Latin orthography, espeak-independent. Somali spelling is shallow and near-phonemic, so this is a digraph-aware
+// left-to-right scan (g2p.ts). The signature Cushitic consonants: ⟨c⟩ = /ʕ/ (voiced pharyngeal), ⟨x⟩ = /ħ/
+// (voiceless pharyngeal), ⟨dh⟩ = /ɖ/ (retroflex), ⟨q⟩ = /q/ (uvular), ⟨'⟩ = /ʔ/. Doubled letters geminate; doubled
+// vowels are long. Tone (grammatical pitch-accent) is unwritten and DEFERRED. See docs/investigations/so_native_bringup_investigation.md.
+{
+    "language": "so",
+    "name": "Somali (Af-Soomaali)",
+    "script": "Latin",
+    "provenance": "Authored from the Somali Latin orthography (1972) + standard phonology. Shallow near-phonemic g2p; the signature pharyngeals/retroflex/uvular are language facts. Referees: epitran som-Latn + kaikki so.",
+
+    "convention": {
+        "consonants": "⟨c⟩→ʕ, ⟨x⟩→ħ (pharyngeals); ⟨dh⟩→ɖ (retroflex); ⟨q⟩→q (uvular); ⟨kh⟩→χ; ⟨sh⟩→ʃ; ⟨j⟩→d͡ʒ; ⟨'⟩→ʔ; ⟨y⟩→j",
+        "vowels": "5 written vowels a e i o u + long aa ee ii oo uu → aː eː iː oː uː. Somali's unwritten ATR harmony (front æ ɛ… vs back ɑ ɔ…) is NOT derivable from spelling → 5 canonical qualities, ATR folded.",
+        "geminates": "a doubled consonant → Cː (abbaan → abːaːn)",
+        "tone": "grammatical high pitch-accent, UNWRITTEN → deferred (segmental output only)",
+    },
+
+    // Long vowels (doubled) → IPA with length; short vowels → plain. The scan tries the doubled form first.
+    "longVowels": { "aa": "aː", "ee": "eː", "ii": "iː", "oo": "oː", "uu": "uː" },
+    "shortVowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Consonant digraphs (tried before the single letters): sh/dh/kh.
+    "digraphs": { "sh": "ʃ", "dh": "ɖ", "kh": "χ" },
+
+    // Single consonant letters → IPA. The signature Cushitic set: c→ʕ, x→ħ, q→q, ' → ʔ.
+    "consonants": {
+        "b": "b",
+        "t": "t",
+        "j": "d͡ʒ",
+        "x": "ħ",
+        "d": "d",
+        "r": "r",
+        "s": "s",
+        "c": "ʕ",
+        "g": "ɡ",
+        "f": "f",
+        "q": "q",
+        "k": "k",
+        "l": "l",
+        "m": "m",
+        "n": "n",
+        "w": "w",
+        "h": "h",
+        "y": "j",
+        "'": "ʔ",
+        "ʼ": "ʔ",
+        "p": "p",
+        "v": "v",
+        "z": "z",
+    },
+
+    "clausePunctuation": {
+        ".": ".",
+        "!": "!",
+        "?": "?",
+        "…": ",",
+        ",": ",",
+        ";": ",",
+        ":": ",",
+    },
+
+    // Cardinal number words. Somali composes units-FIRST joined by "iyo" (and): 21 → kow iyo labaatan.
+    "numbers": {
+        "ones": ["eber", "kow", "laba", "saddex", "afar", "shan", "lix", "toddoba", "sideed", "sagaal"],
+        "tens": ["", "toban", "labaatan", "soddon", "afartan", "konton", "lixdan", "toddobaatan", "sideetan", "sagaashan"],
+        "connector": "iyo",
+        "hundred": "boqol",
+        "thousand": "kun",
+        "million": "malyuun"
+    },
+}
