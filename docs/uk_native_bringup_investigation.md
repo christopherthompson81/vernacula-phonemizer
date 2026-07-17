@@ -37,11 +37,12 @@ quality, so it is left unmarked.
 - **Run 3 — в allophony.** The full /w/ allophony ([w] before о/у + word-initial-before-C, [ʋ] before а/е/и). → 82.7%.
 - **Run 4 — regressive palatalisation + affricate gemination.** The coronal-before-palatalised rule + the
   affricate-geminate fold (ччя/щ). → 87.6%.
-- **Run 5 — palatalised geminates.** CʲCʲ→Cʲː (the regressive rule had doubled both halves of ття/ння). → **90.2%**.
+- **Run 5 — palatalised geminates.** CʲCʲ→Cʲː (the regressive rule had doubled both halves of ття/ння). → 90.2%.
+- **Run 6 — review fixes.** в before an iotated vowel → [ʋʲ] (was plain ʋ — 92+ words, and it blocked the regressive palatalisation of the preceding coronal: свято→sʲʋʲatɔ); й before an iotated → [i̯] glide + the iotated as [j]V (Майя→mai̯ja, was the invalid jʲ); and the о-raising fold (unstressed о→[o], we write [ɔ], stress-unpredictable — same class as и/е). → **95.1%**.
 
 ## Verdict — ✅ Referee-limited
 
-**90.2% folded vs wikipron ukr_cyrl narrow (50k, human).** The residual is diffuse: **regressive VOICING**
+**95.1% folded vs wikipron ukr_cyrl narrow (50k, human).** The residual is diffuse: **regressive VOICING**
 assimilation (кз→ɡz, Вокзальна — deferred; Ukrainian's voicing assimilation is narrower than Russian's), a few
 over/under-palatalisation edges (the -ський suffix н, й before an iotated vowel), and single-letter name entries.
 The folds neutralise the referee's narrow allophonic notation (the и/е unstressed neutralisation, the glide

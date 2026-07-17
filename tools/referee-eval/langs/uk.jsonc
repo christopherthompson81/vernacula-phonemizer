@@ -10,6 +10,7 @@
     "folds": [
         { "pattern": "ɐ", "replace": "a", "note": "unstressed а = [ɐ]~[a] (mild reduction; Ukrainian has no phonemic reduction)" },
         { "pattern": "ɑ", "replace": "a", "note": "stressed а = [ɑ]~[a] (backing, narrow)" },
+        { "pattern": "o", "replace": "ɔ", "note": "unstressed о RAISES toward [o] (we always write [ɔ]); stress-unpredictable, same class as the и/е merge — a lossy comparison fold, not an output change" },
         { "pattern": "ɪ", "replace": "e", "note": "и/е NEUTRALISE (unstressed и→[e], unstressed е→[e]) and we cannot predict stress — merge ɪ→e" },
         { "pattern": "ɛ", "replace": "e", "note": "…and ɛ→e (the same и/е merge; keeps STRESSED и/е matching too — a lossy comparison fold, not an output change)" },
         { "pattern": "ʊ", "replace": "u", "note": "unstressed у = [ʊ]~[u]" },

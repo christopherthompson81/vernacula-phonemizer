@@ -25,6 +25,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const SOFT = "ь";
 const PALATALIZERS = new Set(["ь", "і", "я", "ю", "є", "ї"]);
 const VOWEL_LETTERS = new Set(["а", "е", "и", "і", "о", "у", "я", "ю", "є", "ї"]);
+const PLAIN_VOWELS = new Set(["а", "е", "и", "і", "о", "у"]); // non-iotated vowels (for the й onset test)
 const isCons = (c: string): boolean => c in DEF.consonants;
 
 /** Palatalise a hard-consonant IPA: dark ɫ → lʲ (loses velarisation), everything else appends ʲ. */
@@ -46,10 +47,9 @@ export function phonemizeWord(word: string): string {
             if (c === "в") {
                 if (nxt === "о" || nxt === "у") ipa = "w";
                 else if (nxt === "а" || nxt === "е" || nxt === "и") ipa = "ʋ";
-                else if (nxt === "і" || nxt === SOFT) ipa = "ʋʲ";
-                else if (nxt in DEF.iotated) ipa = "ʋ";
+                else if (nxt === "і" || nxt === SOFT || nxt in DEF.iotated) ipa = "ʋʲ"; // palatalised before і/ь/iotated (свято→sʲʋʲatɔ)
                 else ipa = i > 0 && VOWEL_LETTERS.has(chars[i - 1] ?? "") ? "u̯" : "w"; // coda vs word-initial-before-C
-            } else if (c === "й" && !VOWEL_LETTERS.has(nxt)) ipa = "i̯"; // coda й = [i̯]; onset й = [j]
+            } else if (c === "й") ipa = PLAIN_VOWELS.has(nxt) ? "j" : "i̯"; // onset [j] before a plain vowel; else coda [i̯] (Майя→…i̯j…)
             // Palatalise before ь / і / an iotated vowel (unless an apostrophe intervenes — handled by adjacency).
             else if (PALATALIZERS.has(nxt)) ipa = palatalise(ipa);
             out.push(ipa);
@@ -60,9 +60,10 @@ export function phonemizeWord(word: string): string {
         if (c in DEF.iotated) {
             const v = DEF.iotated[c]!;
             const prev = chars[i - 1] ?? "";
-            // ї is always [ji]; the others are the bare vowel ONLY when they directly follow a consonant (which
-            // they palatalised) — otherwise (initial / after a vowel / after an apostrophe) they are [j]+V.
-            if (c === "ї" || !isCons(prev)) {
+            // ї is always [ji]; the others are the bare vowel ONLY when they directly follow a PALATALISABLE
+            // consonant (which they palatalised) — otherwise (initial / after a vowel / apostrophe / the glide й)
+            // they are [j]+V. й is a glide, not a palatalising consonant (Майя→mai̯ja).
+            if (c === "ї" || !isCons(prev) || prev === "й") {
                 out.push("j");
                 out.push(v);
             } else out.push(v);
