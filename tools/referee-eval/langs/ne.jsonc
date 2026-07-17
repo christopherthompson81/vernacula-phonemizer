@@ -1,0 +1,20 @@
+// Nepali (ne) — Indo-Aryan, Devanagari. wikipron nep_deva narrow (HUMAN, 2329) PRIMARY + kaikki ne (HUMAN, 2231)
+// SECONDARY. Reuses the Hindi engine + Nepali divergences (inherent [ʌ], dental affricates, श/ष→s, no length,
+// ऐ→ʌi). Folds neutralise the referee's notation: आ [ä]~[a], the tap ɾ~r, the SHORT-vowel lax allophones ɪ~i/
+// ʊ~u (Nepali इ/उ are plain i/u), ज = [d͡z]~[z], gemination. (Narrow diacritics — ɡ̞, s̠, breathy ̤, offglide i̯,
+// unreleased t̚, dental n̪ — are stripped by the shared backbone.)
+{
+    "referees": [
+        { "file": "ne.wikipron-deva.tsv", "source": "wikipron nep_deva narrow (human)", "role": "primary" },
+        { "file": "ne.kaikki-ne.tsv", "source": "kaikki ne (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ä", "replace": "a", "note": "आ/ा = [ä]~[a] (referee writes the centralised ä)" },
+        { "pattern": "dz", "replace": "z", "note": "ज = [d͡z]~[z] (both in the referee; backbone strips the tie)" },
+        { "pattern": "ɸ", "replace": "pʰ", "note": "फ = [pʰ]~[ɸ] (Nepali bilabial-fricative realisation)" },
+        { "pattern": "ʱ", "replace": "", "note": "voiced ASPIRATES ग/ज/ब/द+ह: the referee inconsistently drops the breathy voice (अभिषेक ʌbʱisek→ʌbisek); we keep it, fold for comparison" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ~r (referee writes r)" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "geminate NOTATION: our length Cː vs the referee's doubled consonant" }
+    ]
+}
