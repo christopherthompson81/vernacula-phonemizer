@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/oromo/oromo.ts";
 // Canonical-IPA goldens for Oromo / Afaan Oromoo (om) — shallow near-phonemic Qubee Latin orthography. Signature
 // Cushitic features: EJECTIVES c→t͡ʃʼ, q→kʼ, x→tʼ, ph→pʼ; retroflex IMPLOSIVE dh→ᶑ; DOUBLED vowels = long (aa→aː),
 // DOUBLED consonants = geminate (bb→bː); apostrophe → glottal stop [ʔ]. Cross-checked vs epitran orm-Latn (100%
-// folded) + kaikki human IPA (96%). See docs/om_native_bringup_investigation.md.
+// folded) + kaikki human IPA (96%). See docs/investigations/om_native_bringup_investigation.md.
 describe("Oromo canonical IPA", () => {
     test("ejectives, implosive, length, gemination, glottal", () => {
         const cases: [string, string][] = [

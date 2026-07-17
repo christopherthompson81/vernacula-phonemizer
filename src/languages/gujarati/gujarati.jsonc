@@ -3,7 +3,7 @@
 // a shallow abugida whose one hard rule is schwa deletion (Ohala, shared with Hindi). Differences from Hindi:
 // Gujarati has NO phonemic vowel LENGTH (ઇ/ઈ→i, ઉ/ઊ→u), ⟨આ⟩/⟨ા⟩ = [ɑ], and the ⟨ે⟩/⟨ો⟩ mids are [e]~[ɛ]/[o]~[ɔ]
 // (the candra signs ૅ/ૉ + ૈ/ૌ mark the open [ɛ]/[ɔ]) — folded vs the referee. Dental t̪/d̪ vs retroflex ʈ/ɖ (fleet
-// Indic dental). Validated against wikipron guj + kaikki guj (human). See docs/gu_native_bringup_investigation.md.
+// Indic dental). Validated against wikipron guj + kaikki guj (human). See docs/investigations/gu_native_bringup_investigation.md.
 {
     "language": "gu",
     "name": "Gujarati",

@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // branch. Its signature within the Sinitic set: it retains the Middle Chinese 入声 (entering) TONE (Chao 24) but
 // LOST the checked stop coda entirely — no -p̚/-t̚/-k̚ (Hakka keeps) and no -ʔ (Jin keeps): 十→sz̩˨˦, 月→y̯e̞˨˦ end
 // in a bare vowel/nasal. Six tones as Chao letters (陰平 ˧˧, 陽平 ˩˧, 上 ˦˩, 陰去 ˦˥, 陽去 ˨˩, 入 ˨˦). Readings from
-// Wiktionary/kaikki Changsha Sinological-IPA (narrow vowel diacritics kept verbatim). See docs/hsn_native_bringup_investigation.md.
+// Wiktionary/kaikki Changsha Sinological-IPA (narrow vowel diacritics kept verbatim). See docs/investigations/hsn_native_bringup_investigation.md.
 describe("Xiang Chinese (Changsha) canonical IPA", () => {
     test("single characters — tones as Chao letters", () => {
         expect(phonemizeWord("馬")).toBe("ma̠˦˩"); // 上 41

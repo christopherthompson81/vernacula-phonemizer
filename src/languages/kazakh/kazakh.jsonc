@@ -6,7 +6,7 @@
 //   kazakh.ts  — STRESSPOSN_1RU stress, initial-cluster epenthesis, vowel-harmony ɫ→l lightening, tokenizer
 //   numbers.ts — magnitude-group compositor (tens+units glued, groups spaced)
 //
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/kk_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/kk_native_bringup_investigation.md.
 {
     "language": "kk",
     "name": "Kazakh",

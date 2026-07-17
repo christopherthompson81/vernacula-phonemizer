@@ -8,7 +8,7 @@
  *   3. looks up the RHYME (everything after the onset) in a table (rhymes.tsv, the closed Vietnamese rhyme
  *      set, ~370 entries, derived from espeak-ng-portable);
  *   4. assembles onset + glide + ˈ + nucleus + tone + coda.
- * See docs/vi_native_bringup_investigation.md.
+ * See docs/investigations/vi_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";

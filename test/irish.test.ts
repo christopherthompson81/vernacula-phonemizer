@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/irish/irish.ts";
 // the flanking vowel letters ("caol le caol"). Slender velars are the palatal stops c/ɟ; slender s → ʃ. First-
 // syllable stress (marked even on monosyllables); unstressed short vowels reduce to ə. Authored to
 // Standard/Connacht; the espeak-ng-portable ga engine is a LOOSE cross-check — a few goldens deliberately
-// diverge from it (Connacht final -e → ə, silent -dh/-gh, broad bh/mh → w). See docs/ga_bringup_investigation.md.
+// diverge from it (Connacht final -e → ə, silent -dh/-gh, broad bh/mh → w). See docs/investigations/ga_bringup_investigation.md.
 describe("irish canonical IPA", () => {
     test("broad consonants (velarized ˠ, dental l̪ˠ/n̪ˠ/d̪ˠ/t̪ˠ)", () => {
         expect(phonemizeWord("mór")).toBe("mˠˈoːɾˠ");

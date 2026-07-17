@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/telugu/telugu.ts";
 // Canonical-IPA goldens for Telugu (te) — a Dravidian Brahmic abugida via the generic engine. Unlike Hindi
 // there is NO inherent-vowel deletion (inherent /a/, every akshara pronounced); short/long e,o are distinguished
 // (ఎ e / ఏ eː, ఒ o / ఓ oː); retroflex ళ→ɭ, ష→ʂ; geminate → length ː; word-final anusvara ం → [m].
-// See docs/te_native_bringup_investigation.md.
+// See docs/investigations/te_native_bringup_investigation.md.
 describe("telugu canonical IPA", () => {
     test("abugida core: inherent /a/, retroflex, short/long e·o, gemination, final ం", () => {
         const cases: [string, string][] = [

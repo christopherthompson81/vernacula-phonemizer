@@ -1,7 +1,7 @@
 /**
  * Czech (cs) phonemizer — canonical IPA, espeak-independent. Rule g2p (g2p.ts) + fixed FIRST-syllable stress
  * with secondary stress on even non-final nuclei (republika→rˈɛpublˌɪka). Syllabic r̩/l̩ count as nuclei.
- * text() tokenizes words / numbers / punctuation. See docs/cs_native_bringup_investigation.md.
+ * text() tokenizes words / numbers / punctuation. See docs/investigations/cs_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

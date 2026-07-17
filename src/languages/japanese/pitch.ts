@@ -7,7 +7,7 @@
  * disambiguated (はし→箸=1), then the READING (kana). A bunsetsu is a content word + trailing case/topic
  * particles or copula (橋を, 天気です); the accent sits on the content stem, so we strip those to recover it and
  * apply the nucleus to the full reading. Data: pitch-accent.tsv (merged consensus > inflected > base).
- * See docs/ja_native_bringup_investigation.md.
+ * See docs/investigations/ja_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";

@@ -32,4 +32,4 @@ in simplified Han) resolves too.
 
 **Single-source (🔷):** there is no independent second referee for Taiyuan Jin (no wikipron cjy — the scrape
 404s — and epitran ships no Jin), so this dict is verified only *within* the Wiktionary tradition. A systematic
-error shared with that source would go undetected. See docs/jin_native_bringup_investigation.md.
+error shared with that source would go undetected. See docs/investigations/jin_native_bringup_investigation.md.

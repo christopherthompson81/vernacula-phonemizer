@@ -4,7 +4,7 @@
 //   ق → [ɡ] (voiced velar — the Bedouin reflex, NOT urban [ʔ])   ج → [ɟ] (voiced PALATAL plosive — the signature)
 // and it is CONSERVATIVE on the interdentals: ث ذ ظ are KEPT as [θ ð ðˤ] (Egyptian/Levantine merge them to stops),
 // so there is no θ/ð shift here. Historical diphthongs are monophthongized (Khartoum ay→[eː], aw→[oː]).
-// See docs/apd_sudanese_bringup_investigation.md.
+// See docs/investigations/apd_sudanese_bringup_investigation.md.
 {
     "variety": "sudanese",
     "iso": "apd",

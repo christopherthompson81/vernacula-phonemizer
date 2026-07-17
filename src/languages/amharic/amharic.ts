@@ -4,7 +4,7 @@
  * so the g2p is a flat lookup (fidel.tsv, one Ethiopic codepoint → its CV) rather than a Brahmic matra/virama
  * engine. Two features are UNWRITTEN: GEMINATION (phonemic but unmarked — rendered single, folded vs the referee)
  * and the 6th-order vowel [ɨ], which is epenthetic and DELETED word-finally (ሁለት→hulət) and before a vowel.
- * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/am_native_bringup_investigation.md.
+ * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/am_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

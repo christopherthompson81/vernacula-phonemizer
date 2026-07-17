@@ -10,7 +10,7 @@
  *     aspirates ph/th/kh → pʰ/tʰ/kʰ; voiced obstruents carry the depressor (breathy) diacritic (g→ɡ̤, d→d̤, z→z̤).
  *   - lateral fricatives hl→ɬ, dl→ɮ̤; velar-lateral affricate kl→kxʼ; nasal place-assimilation n→ŋ/ɲ before
  *     velar/palatal (nk→ŋkʼ, nj→ɲdʒ̤, ng→ŋɡ̤).
- * Penultimate stress + length and lexical tone are applied downstream in zulu.ts. See docs/zu_native_bringup_investigation.md.
+ * Penultimate stress + length and lexical tone are applied downstream in zulu.ts. See docs/investigations/zu_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

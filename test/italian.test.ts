@@ -8,7 +8,7 @@ import { phonemizeWord } from "../src/languages/italian/italian.ts";
 // /o/~/ɔ/ openness is LEXICAL and folded in the eval), intervocalic ⟨s⟩→z default (casa/rosa lexical, folded),
 // gemination as DOUBLED consonants (the referee's own convention). c/g soften to t͡ʃ/d͡ʒ before e/i (⟨ci⟩/⟨gi⟩+V
 // drop a silent i), ⟨sc⟩→ʃ, ⟨gl⟩i→ʎ, ⟨gn⟩→ɲ, ⟨ch⟩/⟨gh⟩→k/ɡ, ⟨qu⟩→kw, i/u glides. Penultimate/accent stress
-// (antepenult sdrucciole are unmarked in spelling → a documented lexical tail). See docs/it_native_bringup_investigation.md.
+// (antepenult sdrucciole are unmarked in spelling → a documented lexical tail). See docs/investigations/it_native_bringup_investigation.md.
 describe("italian canonical IPA", () => {
     test("c/g softening, digraphs (gl/gn/sc/ch/gh), qu, gemination", () => {
         const cases: [string, string][] = [

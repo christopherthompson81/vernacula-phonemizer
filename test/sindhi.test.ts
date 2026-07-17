@@ -4,7 +4,7 @@ import { phonemizeWord } from "../src/languages/sindhi/sindhi.ts";
 
 // Canonical-IPA goldens for Sindhi (sd) — Perso-Arabic ABJAD, Indo-Aryan. The signature is the four-way IMPLOSIVE
 // series ٻ→ɓ, ڏ→ɗ, ڄ→ʄ, ڳ→ɠ (a census gap) + the retroflex series ٽ ٺ ڊ ڍ ڻ ڙ + aspiration (ڀ bʰ, ٿ t̪ʰ,
-// جھ d͡ʒʰ, لھ lʰ). SHORT vowels are unwritten → a default [ə] (the abjad wall). See docs/sd_native_bringup_investigation.md.
+// جھ d͡ʒʰ, لھ lʰ). SHORT vowels are unwritten → a default [ə] (the abjad wall). See docs/investigations/sd_native_bringup_investigation.md.
 describe("Sindhi canonical IPA", () => {
     test("the four implosives ٻɓ ڏɗ ڄʄ ڳɠ (the census gap)", () => {
         expect(phonemizeWord("ٻارو")).toBe("ɓaːɾoː"); // ٻ → ɓ

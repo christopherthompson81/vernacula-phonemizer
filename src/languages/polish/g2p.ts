@@ -1,7 +1,7 @@
 /**
  * Polish (pl) grapheme→phoneme engine — West Slavic, Latin script, canonical IPA, espeak-independent. See
  * polish.jsonc for the rule overview. Pipeline: scan (digraphs + the ⟨i⟩ palatalizer) → nasal-vowel realization →
- * voicing assimilation. See docs/pl_native_bringup_investigation.md.
+ * voicing assimilation. See docs/investigations/pl_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 

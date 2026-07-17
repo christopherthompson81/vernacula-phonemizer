@@ -2,7 +2,7 @@
 # converged cmn engine (validated vs wikipron+epitran); tone letters STRIPPED — the engine
 # appends the Chao tone at syllable end (standard convention, fixes espeak's mid-syllable
 # placement). Stress marks DROPPED — Mandarin has no contrastive lexical stress; tone (and its
-# absence on neutral-tone syllables) carries prominence.  # placement). ü syllables + syllabic-nasal interjections hand-set. See docs/cmn_native_bringup_investigation.md
+# absence on neutral-tone syllables) carries prominence.  # placement). ü syllables + syllabic-nasal interjections hand-set. See docs/investigations/cmn_native_bringup_investigation.md
 a	ɑ
 ai	aⁱ
 an	an

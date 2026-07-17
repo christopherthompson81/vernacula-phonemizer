@@ -2,7 +2,7 @@
  * Czech (cs) cardinal number compositor. Returns composed Czech TEXT (space-separated) that the phonemizer runs
  * through the g2p, so the IPA stays consistent with the word engine. Tens+units concatenate (dvacetjeden = 21);
  * hundreds and thousands are space-separated. Czech thousand agreement: 1 tisíc, 2–4 tisíce, 5+ tisíc (likewise
- * milion/miliony/milionů). See docs/cs_native_bringup_investigation.md.
+ * milion/miliony/milionů). See docs/investigations/cs_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

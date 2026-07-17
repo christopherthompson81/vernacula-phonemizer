@@ -4,7 +4,7 @@
  * labial-velars ⟨gb⟩→ɡ͡b / ⟨p⟩→k͡p (no plain /p/), ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→ɾ; the dotted-below vowels ẹ→ɛ ọ→ɔ; NASAL
  * vowels from a coda ⟨n⟩ (ọn→ɔ̃; an onset n before a vowel stays n); syllabic nasals m̩/n̩; and THREE level tones
  * on each vowel/syllabic nasal — High=acute ˥, Mid=unmarked ˧, Low=grave ˩ (Chao letters). Ported from the
- * espeak-ng-portable authoring (epitran-validated). See docs/yo_native_bringup_investigation.md.
+ * espeak-ng-portable authoring (epitran-validated). See docs/investigations/yo_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

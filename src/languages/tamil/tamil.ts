@@ -3,7 +3,7 @@
  * inherent/sign vowel, virama clusters, independent vowels) is handled by the SHARED core/abugida.ts
  * interpreter driven by tamil.jsonc — the same engine Hindi uses. Tamil-specifics are layered on top as a
  * post-pass: the Dravidian plosive voicing allophony and the two-level (primary + secondary) stress, which are
- * context-sensitive and cannot be declarative. See docs/ta_native_bringup_investigation.md.
+ * context-sensitive and cannot be declarative. See docs/investigations/ta_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

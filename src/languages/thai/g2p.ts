@@ -3,7 +3,7 @@
  * อักษรนำ leaders, the schwa/inherent-vowel algorithm, syllable segmentation, and computed tone — is done by
  * the ported syllabifier (syllabifier.ts, from our espeak-ng-portable Thai front-end). This module RENDERS the
  * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly (instead of the espeak L2S path).
- * Contributes ɤ. See docs/th_native_bringup_investigation.md.
+ * Contributes ɤ. See docs/investigations/th_native_bringup_investigation.md.
  */
 import {
     reorderThaiLeadingVowels,

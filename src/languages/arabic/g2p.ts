@@ -3,7 +3,7 @@
  * Arabic (harakat present) and produces canonical IPA — cleanroom, rule-based, no lexicon. Short-vowel
  * restoration for bare text is a separate pre-pass (the neural diacritizer); this engine assumes the vowels
  * are already there. Arabic is stored in logical order = phonetic order, so RTL is a non-issue.
- * See docs/ar_native_bringup_investigation.md for the convention.
+ * See docs/investigations/ar_native_bringup_investigation.md for the convention.
  */
 
 import { MANIFEST } from "./manifest.ts";

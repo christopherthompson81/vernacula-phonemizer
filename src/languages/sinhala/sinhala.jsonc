@@ -1,7 +1,7 @@
 {
     // Sinhala (si) abugida definition for the shared core/abugida.ts. Canonical IPA forms baked in (ණ→n, ළ→l
     // merged; ත→t̪ dental; ව→ʋ; ᶯɖ preserved). Schwa (inherent a↔ə), geminates, and stress are a post-pass in
-    // sinhala.ts. Anusvara ං is pre-rewritten to ඞ් (coda ŋ). See docs/si_native_bringup_investigation.md.
+    // sinhala.ts. Anusvara ං is pre-rewritten to ඞ් (coda ŋ). See docs/investigations/si_native_bringup_investigation.md.
     "language": "si",
     "name": "Sinhala",
     "script": "Sinhala",

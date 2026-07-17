@@ -7,7 +7,7 @@
  *
  * 🔷 SINGLE-SOURCE: the only referee is wikipron mai_deva narrow (167 human pairs) — small, so this is a
  * single-source-verified bring-up, not a confident convergence. Distinct from the ⛔ Bhojpuri/Awadhi stubs, which
- * have NO referee at all. See docs/mai_native_bringup_investigation.md.
+ * have NO referee at all. See docs/investigations/mai_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

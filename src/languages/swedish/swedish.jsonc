@@ -5,7 +5,7 @@
 // code modules (g2p.ts, swedish.ts, numbers.ts) and read these tables.
 //
 // Phase 1 is SEGMENTAL: rule g2p + first-syllable stress. Pitch accent (accent 1 vs 2, the referee's ² marker)
-// is deferred to Phase 2 — it is lexical and needs a lexicon. See docs/sv_bringup_investigation.md.
+// is deferred to Phase 2 — it is lexical and needs a lexicon. See docs/investigations/sv_bringup_investigation.md.
 //
 // LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "frontVowels", "vowels", "digraphs",
 // "clausePunctuation", "numbers". "convention" / "provenance" are documentation.

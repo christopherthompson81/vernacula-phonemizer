@@ -3,7 +3,7 @@
 // clusters (the diphthongs carry a superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH
 // rule. The y-vowel is the one subtlety: obscure ə (non-final syllables + function-word clitics) vs clear ɨ
 // (final syllable) — espeak's raw --ipa mislabels these ʌ/ø; the canonical values are ə/ɨ. ALGORITHMS in
-// g2p.ts (scan) / welsh.ts (stress + length + assembly). See docs/cy_bringup_investigation.md.
+// g2p.ts (scan) / welsh.ts (stress + length + assembly). See docs/investigations/cy_bringup_investigation.md.
 {
     "language": "cy",
     "name": "Welsh (Cymraeg)",

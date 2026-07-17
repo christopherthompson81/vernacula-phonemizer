@@ -2,7 +2,7 @@
  * Native Urdu (ur) text phonemizer — canonical IPA, espeak-independent. Urdu = Hindi phonology in the
  * Perso-Arabic abjad; the g2p (g2p.ts) does the script→IPA mapping, this file layers weight-based stress
  * (shared with Hindi), numbers, clause punctuation, and embedded-Latin routing. Short-vowel restoration for
- * undiacritized text is DEFERRED (the g2p inserts a default [ə]); see docs/ur_native_bringup_investigation.md.
+ * undiacritized text is DEFERRED (the g2p inserts a default [ə]); see docs/investigations/ur_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -54,7 +54,7 @@ export function phonemizeWordCore(word: string): string {
     ipa = ipa.replace(/n(?=[bp])/gu, "m").replace(/n(?=[kɡ])/gu, "ŋ");
     // NOTE: word-final ـیہ (ی+ہ) is NOT rewritten here — the ending is genuinely ambiguous (feminine -iyya حاشیہ→[jɑ]
     // vs masculine Arabic -īh فقیہ→[iːh]), identical in spelling with no orthographic signal, so a blanket rule
-    // corrupts common loanwords. It is a per-word restoration/lexicon matter. See docs/ur_convergence_investigation.md.
+    // corrupts common loanwords. It is a per-word restoration/lexicon matter. See docs/investigations/ur_convergence_investigation.md.
     return applyWeightStress(ipa).normalize("NFC");
 }
 

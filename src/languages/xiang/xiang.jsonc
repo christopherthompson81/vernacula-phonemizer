@@ -5,7 +5,7 @@
 // already carries the Sinological IPA per syllable (segmental IPA + a superscript pitch-number tone, with the
 // narrow Changsha vowel diacritics kept verbatim); the shared Han-dict engine (hanDictIpa.ts) converts the pitch
 // digits → Chao contour letters and resolves the sandhi arrow ⁻. SINGLE authoritative source (Wiktionary/kaikki
-// Changsha Sinological-IPA) — no independent referee (🔷). See docs/hsn_native_bringup_investigation.md.
+// Changsha Sinological-IPA) — no independent referee (🔷). See docs/investigations/hsn_native_bringup_investigation.md.
 {
     "language": "hsn",
     "name": "Xiang Chinese (Changsha)",

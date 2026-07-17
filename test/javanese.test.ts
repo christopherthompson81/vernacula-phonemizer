@@ -9,7 +9,7 @@ import {
 // Canonical-IPA goldens for Javanese / Basa Jawa (jv) — Austronesian, Latin script, rule-based g2p ported from
 // the espeak-ng-portable authored bring-up and validated against kaikki jav (human, 85.9% folded). The signature
 // processes: the ⟨a⟩→[ɔ] rule (open final + penult harmony), the DENTAL vs RETROFLEX contrast (t̪ d̪ vs ʈ ɖ),
-// closed-syllable laxing (i→ɪ u→ʊ) + final ⟨k⟩→ʔ, pepet/taling ⟨e⟩. See docs/jv_native_bringup_investigation.md.
+// closed-syllable laxing (i→ɪ u→ʊ) + final ⟨k⟩→ʔ, pepet/taling ⟨e⟩. See docs/investigations/jv_native_bringup_investigation.md.
 describe("javanese canonical IPA", () => {
     test("the a→ɔ rule (open final + penult harmony; closed final blocks it)", () => {
         const cases: [string, string][] = [

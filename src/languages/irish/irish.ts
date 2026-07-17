@@ -2,7 +2,7 @@
  * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA, espeak-independent. Rule-based g2p
  * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default) + i-offglide and svarabhakti
  * passes, with a Connacht pronunciation lexicon (lexicon.tsv, Run 3) pinning the semi-lexical vowel detail the
- * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/ga_bringup_investigation.md.
+ * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/investigations/ga_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

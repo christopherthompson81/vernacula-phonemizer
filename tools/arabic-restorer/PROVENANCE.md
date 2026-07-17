@@ -1,7 +1,7 @@
 # `silver.tsv` provenance
 
 Silver training data for the shared Arabic-script short-vowel restorer (see
-`docs/arabic_script_restorer_investigation.md`).
+`docs/investigations/arabic_script_restorer_investigation.md`).
 
 ## Source
 [**wikipron**](https://github.com/CUNY-CL/wikipron) — the Arabic-script (`*_arab_broad`) scrapes of Wiktionary
@@ -42,7 +42,7 @@ lists). Inherits the CC-BY-SA of its sources. This is the axis the held-out neur
 
 ## Role: EVALUATION reference (not the training target)
 The shared model's TARGET is **harakat** (short-vowel diacritics) → each language's existing deterministic g2p turns
-the vocalized text into IPA (see `docs/arabic_script_restorer_investigation.md`, Run 4). These wikipron IPA pairs
+the vocalized text into IPA (see `docs/investigations/arabic_script_restorer_investigation.md`, Run 4). These wikipron IPA pairs
 are the **end-to-end eval reference**: run skeleton →[model] harakat →[deterministic g2p] IPA and score against the
 IPA here. Training data (skeleton→harakat) is built separately from diacritized corpora.
 

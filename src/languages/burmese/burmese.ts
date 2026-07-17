@@ -5,7 +5,7 @@
  * inherent rime to ʊ, ှ devoices sonorants မှ→m̥) → the RIME, whose vowel quality depends on the CODA — open, NASAL
  * (killed ŋ/ɲ/n/m or anusvara ံ → ɴ) or CHECKED (killed k/s/t/p → ʔ): -i open→i, nasal→ɪɴ, checked→ɪʔ. Then the
  * TONE (orthographic, rule-derived: low ˨ / high ˥˩ / creaky ˥ˀ, checked = the ʔ coda) is inserted after the
- * nucleus. DEFERRED: intervocalic voicing sandhi (lexical) + minor-syllable reduction. See docs/my_native_bringup_investigation.md.
+ * nucleus. DEFERRED: intervocalic voicing sandhi (lexical) + minor-syllable reduction. See docs/investigations/my_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";

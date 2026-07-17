@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/punjabi/punjabi.ts";
 // Canonical-IPA goldens for Punjabi (pa), Gurmukhi script — a Brahmic abugida via the generic engine, plus
 // Punjabi's signature TONOGENESIS: the historical voiced-aspirate letters ਘ ਝ ਢ ਧ ਭ de-aspirate and shift tone
 // (voiceless + low tone ˨˩ word-initially, voiced + high-falling ˥˩ post-vocalically); addak ੱ geminates the
-// following consonant (→ length ː); retroflex ʈ ɖ ɳ ɽ vs dental t̪ d̪. See docs/pa_native_bringup_investigation.md.
+// following consonant (→ length ː); retroflex ʈ ɖ ɳ ɽ vs dental t̪ d̪. See docs/investigations/pa_native_bringup_investigation.md.
 describe("punjabi canonical IPA", () => {
     test("tonogenesis (voiced-aspirate de-aspiration + tone)", () => {
         expect(phonemizeWord("ਘੋੜਾ")).toBe("kˈoː˨˩ɽaː"); // ghoṛā 'horse': word-initial gh→k + low tone

@@ -3,7 +3,7 @@
 // labial-velar stops ⟨gb⟩→ɡ͡b / ⟨kp⟩→k͡p, the labialised ⟨nw⟩→ŋʷ ⟨gw⟩→ɡʷ ⟨kw⟩→kʷ, ⟨ny⟩→ɲ, ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ,
 // ⟨sh⟩→ʃ, ⟨gh⟩→ɣ; the 8-vowel harmony system with dotted ị→ɪ ọ→ɔ ụ→ʊ; and TWO tones (High=acute ˥, Low=grave ˩)
 // + downstep — but Igbo standard orthography usually OMITS tone, so it is read only when marked (else no tone).
-// NO independent referee exists (no wikipron/epitran/kaikki) → adjudicated gold. See docs/ig_native_bringup_investigation.md.
+// NO independent referee exists (no wikipron/epitran/kaikki) → adjudicated gold. See docs/investigations/ig_native_bringup_investigation.md.
 {
     "language": "ig",
     "name": "Igbo",

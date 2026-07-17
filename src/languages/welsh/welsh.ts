@@ -4,7 +4,7 @@
  * single voiced/fricative coda — takes full length (ː) in a monosyllable/final syllable (mis → miːs); in a penult
  * it stays SHORT and LAX (pobol → pɔbɔl, nesaf → nɛsav — the NW referee shows lax, not the espeak-tensed [o]/[e]).
  * Elsewhere it stays lax and short (bore → bɔrɛ). Diphthongs and circumflex vowels are already long and untouched.
- * See docs/cy_bringup_investigation.md.
+ * See docs/investigations/cy_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -3,7 +3,7 @@
 The neural GENERALIZATION tier for the Perso-Arabic riders (Urdu, Persian, Pashto, Punjabi-Shahmukhi) — a shared
 multilingual BiLSTM that restores short-vowel harakat on a bare skeleton, under the exact-match coverage lexicon
 (`src/languages/<lang>/lexicon.tsv`). Loaded by `riderDiacritizer.ts` via ONNX Runtime as an async pre-pass. See
-`docs/arabic_script_restorer_investigation.md`.
+`docs/investigations/arabic_script_restorer_investigation.md`.
 
 ## Model
 Char-level BiLSTM (emb 128, hidden 512×2, 3 layers, 15.3M params), per-word: a language TOKEN is prepended to the

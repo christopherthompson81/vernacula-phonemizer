@@ -2,7 +2,7 @@
 // THE novel axis: every consonant is BROAD (velarized ˠ, next to a/o/u) or SLENDER (palatalized ʲ, next to
 // e/i) — "caol le caol". The g2p determines each consonant's quality from the flanking vowel LETTERS and emits
 // the matching form; the vowel clusters are a separate longest-match lookup (the pronounced vowel, semi-lexical).
-// ALGORITHMS in g2p.ts (scan + quality) / irish.ts (stress + assembly). See docs/ga_bringup_investigation.md.
+// ALGORITHMS in g2p.ts (scan + quality) / irish.ts (stress + assembly). See docs/investigations/ga_bringup_investigation.md.
 {
     "language": "ga",
     "name": "Irish Gaelic (Standard/Connacht)",

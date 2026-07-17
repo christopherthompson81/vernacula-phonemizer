@@ -3,7 +3,7 @@
  * shared core/abugida.ts (sinhala.jsonc); Sinhala-specifics are a post-pass: homorganic anusvara ං (velar/h→ŋ,
  * palatal→ɲ, retroflex→n, else→m; pre-rewritten to a nasal-coda letter), geminate C→Cː, coda/final ව→w, the
  * inherent-vowel schwa alternation (a in the first syllable of a polysyllable, else ə), and initial stress with
- * ˌ on even non-final nuclei. Shim-parity (espeak ships si). See docs/si_native_bringup_investigation.md.
+ * ˌ on even non-final nuclei. Shim-parity (espeak ships si). See docs/investigations/si_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

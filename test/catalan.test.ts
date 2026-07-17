@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/catalan/catalan.ts";
 // g2p → 2R stress → UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u) → regressive voicing assimilation → spirantization
 // → nasal place assimilation → final devoicing + final-r deletion + coda-cluster simplification. Stressed
 // open/close mid height (ɛ/e, ɔ/o) is LEXICAL and defaults to open (the documented ceiling — dona/dóna).
-// See docs/ca_bringup_investigation.md.
+// See docs/investigations/ca_bringup_investigation.md.
 describe("catalan canonical IPA", () => {
     test("vowel reduction (the Central signature) + dark l", () => {
         expect(phonemizeWord("casa")).toBe("kˈazə"); // final a → ə, intervocalic s → z

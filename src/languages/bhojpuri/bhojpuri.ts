@@ -7,7 +7,7 @@
  * ⚠ CANNOT-VERIFY: there is NO independent referee for Bhojpuri — wikipron/kaikki have none, and epitran bho-Deva
  * is a CIRCULAR Hindi clone (it gives the Hindi values श→ʃ, ऐ→ɛː). The committed anchor is a small hand-adjudicated
  * gold of the DISTINCTIVE features (test/bhojpuri.test.ts), which grades exactly where Bhojpuri ≠ Hindi — the one
- * axis that is NOT circular with a Hindi clone. See docs/bho_native_bringup_investigation.md.
+ * axis that is NOT circular with a Hindi clone. See docs/investigations/bho_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

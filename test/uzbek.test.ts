@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // outlier that LOST vowel harmony (Persian/Tajik contact), so the g2p is a flat scan with fixed letter values.
 // Signature: the vowel split ⟨o⟩→[ɒ] vs ⟨oʻ⟩→[o]; digraphs sh/ch/ng + the comma-letters oʻ/gʻ; the separate
 // tutuq belgisi (ʼ) → glottal [ʔ]. Validated at 91.3% vs wikipron uzb_latn + 87.1% vs kaikki (folded). See
-// docs/uz_native_bringup_investigation.md.
+// docs/investigations/uz_native_bringup_investigation.md.
 describe("Uzbek canonical IPA", () => {
     test("the vowel split ⟨o⟩→[ɒ] vs ⟨oʻ⟩→[o] (the signature)", () => {
         expect(phonemizeWord("Oʻzbekiston")).toBe("ozbekistˈɒn"); // oʻ→o, o→ɒ in one word
