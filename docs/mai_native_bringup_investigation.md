@@ -19,7 +19,7 @@ transcriptions is not. 167 words is thin, but it measures.
 - **Inherent /ə/** (like Hindi, not Bengali/Odia's ɔ): अन्न→ənnᵊ, हुनका→ɦʊnᵊkaː.
 - **The ultrashort ᵊ signature** — a cluster schwa that Hindi *deletes* instead reduces to an ultrashort [ᵊ]
   (इसपात→ɪsᵊpaːt, ऎकरा→ekᵊɾaː). A narrow phonetic detail; our Hindi-engine deletion + a `ᵊ~∅` fold align.
-- **Short e/o**, including the **dedicated short-vowel letters ऎ (U+098E) / ऒ (U+0912)** — distinct codepoints
+- **Short e/o**, including the **dedicated short-vowel letters ऎ (U+090E) / ऒ (U+0912)** — distinct codepoints
   from ए/ओ that Maithili actually uses (ऎकरा). Missing these dropped the initial vowel entirely (the +8.4pp fix).
 - **Diphthongs ऐ→[əɪ], औ→[əʊ]** (बैसब→bəɪsəb, दौड़ब→dəʊɾəb) — kept, like the eastern group.
 - **च/ज = alveolo-palatal [t͡ɕ]/[d͡ʑ]** in the narrow referee (Eastern-Indic), vs our [t͡ʃ]/[d͡ʒ] — folded.
@@ -28,7 +28,7 @@ transcriptions is not. 167 words is thin, but it measures.
 
 - **Run 1 — Hindi engine + Maithili jsonc** (short e/o, ऐ→əɪ, inherent ə). 62.9%. Folds: ᵊ~∅ (ultrashort),
   dental t̪~t, gemination.
-- **Run 2 — the short-vowel letters + ड़ flap.** Added ऎ/ऒ (U+098E/U+0912) + their matras (the initial vowel was
+- **Run 2 — the short-vowel letters + ड़ flap.** Added ऎ/ऒ (U+090E/U+0912) + their matras (the initial vowel was
   being dropped) + folded ड़ ɽ~ɾ. → 71.3%.
 - **Run 3 — alveolo-palatal + औ→əʊ + the ꣿ sign.** The big lever: folding च/ज = [t͡ɕ]/[d͡ʑ]~[t͡ʃ]/[d͡ʒ] (the
   backbone strips the tie bar, so the fold pattern is `tɕ`/`dʑ`, not `t͡ɕ` — a subtle fix worth +10.7pp).
@@ -36,7 +36,16 @@ transcriptions is not. 167 words is thin, but it measures.
 
 ## Verdict — 🔷 Single-source verified
 
-**84.4% folded vs wikipron mai_deva narrow (167, human)** — the only referee, so single-source. The residual is
+**84.4% folded vs wikipron mai_deva narrow (167, human)** — the only referee, so single-source. **Fold-depth
+disclosure (honesty):** ~22pp of that rests on the single `ᵊ~∅` fold — **without it the score is 62.3%
+(104/167)**. That fold deletes the ultrashort vowel the referee writes, to match our Hindi-engine deletion; the
+review confirmed the deletion *positions* are correct (all 37 ᵊ sites are Hindi-deletion sites, so it's a
+delete-vs-reduce *realization* gap, not a placement error), but ɪspaːt vs ɪsᵊpaːt is audibly different.
+**Per the OmniVoice explicitness principle, the principled fix is to MODEL the ᵊ** (emit the reduced vowel at
+the deletion site) rather than fold it away — deferred here because it needs engine-level knowledge of the Hindi
+deletion sites, disproportionate for a 167-word 🔷 stub. Also note raw-exact agreement is 0/167 (all post-fold),
+and श/ष are essentially unverified (0 ष referee words, 1 split श word — the ʃ/ʂ values are authored, not
+corroborated). The residual is
 diffuse orthographic edge cases (the rare Maithili signs ꣿ/ऽ/꣱, the आए→[æ] verb-form monophthong variant, the
 word-final य offglide the referee reads as a vowel). This is the Wu/Igbo/Naija 🔷 pattern but *measured* rather
 than gold-anchored. Distinct from the ⛔ Awadhi/Bhojpuri stubs: those have no referee at all, whereas Maithili has

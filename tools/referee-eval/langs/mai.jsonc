@@ -10,7 +10,6 @@
     "segmentJoin": true,
     "folds": [
         { "pattern": "ᵊ", "replace": "", "note": "the ULTRASHORT schwa ᵊ — a cluster schwa Hindi deletes, Maithili reduces (इसपात→ɪsᵊpaːt); narrow, we delete (Hindi engine), fold to align" },
-        { "pattern": "ĕ", "replace": "", "note": "ultrashort e (आएब→aːĕb) — same reduction class" },
         { "pattern": "t̪", "replace": "t", "note": "dental t̪~t (wikipron writes plain t)" },
         { "pattern": "d̪", "replace": "d", "note": "dental d̪~d" },
         { "pattern": "n̪", "replace": "n", "note": "dental n̪~n" },

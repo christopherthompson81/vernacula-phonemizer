@@ -9,7 +9,7 @@
     "language": "mai",
     "name": "Maithili",
     "script": "Devanagari",
-    "provenance": "Authored from standard Maithili phonology; cross-checked vs wikipron mai_deva narrow (167, the ONLY referee — small, so single-source). Reuses the Hindi Devanagari engine with the Maithili divergences: SHORT e/o (ए→e, ओ→o), diphthongs ऐ→əɪ / औ→əu, inherent /ə/. The signature ULTRASHORT schwa ᵊ (a cluster schwa Hindi deletes → Maithili reduces: इसपात→ɪsᵊpaːt) is a narrow phonetic detail folded (ᵊ~∅) in the eval. 🔷 single-source (small referee).",
+    "provenance": "Authored from standard Maithili phonology; cross-checked vs wikipron mai_deva narrow (167, the ONLY referee — small, so single-source). Reuses the Hindi Devanagari engine with the Maithili divergences: SHORT e/o (ए→e, ओ→o), diphthongs ऐ→əɪ / औ→əʊ, inherent /ə/. The signature ULTRASHORT schwa ᵊ (a cluster schwa Hindi deletes → Maithili reduces: इसपात→ɪsᵊpaːt) is a narrow phonetic detail folded (ᵊ~∅) in the eval. 🔷 single-source (small referee).",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -58,7 +58,7 @@
         "र": { "ipa": "ɾ", "note": "alveolar tap" },
         "ल": { "ipa": "l", "note": "alveolar lateral" },
         "व": { "ipa": "ʋ", "note": "labiodental approximant" },
-        "श": { "ipa": "ʃ", "note": "palatal sibilant (kept — Maithili is conservative)" },
+        "श": { "ipa": "ʃ", "note": "palatal sibilant (AUTHORED — near-zero referee data: 1 split श word, 0 ष)" },
         "ष": { "ipa": "ʂ", "note": "retroflex sibilant" },
         "स": { "ipa": "s", "note": "alveolar sibilant" },
         "ह": { "ipa": "ɦ", "note": "voiced glottal fricative (Hindi ह = ɦ)" },
@@ -89,7 +89,7 @@
             "ipa": "ɾɪ",
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
         },
-        "ए": { "ipa": "e", "note": "SHORT e (Maithili/Eastern IA — एकरा→ekᵊɾaː)" }, "ऎ": { "ipa": "e", "note": "Maithili short-e letter (U+098E) — ऎकरा→ekᵊɾaː" },
+        "ए": { "ipa": "e", "note": "SHORT e (Maithili/Eastern IA — एकरा→ekᵊɾaː)" }, "ऎ": { "ipa": "e", "note": "Maithili short-e letter (U+090E) — ऎकरा→ekᵊɾaː" },
         "ऐ": { "ipa": "əɪ", "note": "Maithili diphthong [əɪ] (बैसब→bəɪsəb; wikipron)" },
         "ओ": { "ipa": "o", "note": "SHORT o (Maithili/Eastern IA)" }, "ऒ": { "ipa": "o", "note": "Maithili short-o letter (U+0912) — ऒकरा→okᵊɾaː" },
         "औ": { "ipa": "əʊ", "note": "Maithili diphthong [əʊ] (दौड़ब→dəʊɾəb; wikipron)" },
@@ -165,8 +165,8 @@
     ],
     // Final conventions applied AFTER schwa deletion.
     "finalRules": [],
-    // No Hindi-style finalRules: Bhojpuri keeps intervocalic əɦə (शहर→sahar, not the Hindi ɛɦɛ) and has no
-    // और-offglide / अय→ɛj convention.
+    // No Hindi-style finalRules: Maithili keeps the intervocalic schwa (no Hindi əɦə→ɛɦɛ lowering; श→ʃ so
+    // शहर→ʃəɦəɾ) and has no और-offglide / अय→ɛj convention.
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The

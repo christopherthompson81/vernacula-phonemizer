@@ -8,7 +8,7 @@ import { phonemizeWord } from "../src/languages/maithili/maithili.ts";
 // reduces to ULTRASHORT [ᵊ] — is a narrow detail (folded in the eval). 🔷 single-source: only referee is
 // wikipron mai_deva narrow (167, human), measured at 84.4% folded. See docs/mai_native_bringup_investigation.md.
 describe("Maithili canonical IPA", () => {
-    test("short e/o — incl. the dedicated ऎ (U+098E) / ऒ (U+0912) letters", () => {
+    test("short e/o — incl. the dedicated ऎ (U+090E) / ऒ (U+0912) letters", () => {
         expect(phonemizeWord("एकरा")).toBe("ˈekɾaː"); // ए short e (Hindi would be eː)
         expect(phonemizeWord("ऎकरा")).toBe("ˈekɾaː"); // ऎ = the Maithili short-e letter (was dropped before the fix)
     });
