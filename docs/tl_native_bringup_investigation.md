@@ -107,3 +107,44 @@ Appendix:Tagalog_numbers**:
 **Review (PR #243) caught** the ligature's missing third branch: an /n/-final multiplier takes `-g` not `" na"`
 (daan→daang), so 100,000 = sandaang libo (not "sandaan na libo"), 200,000 = dalawang daang libo. Only surfaced for
 exact-hundred multipliers of thousands/millions (units are never n-final). Fixed + regression test.
+
+## Run — 2026-07-16 — loanword phonology (lever 1: close the loanword class)
+
+Bucketed the shipped residual (82.9%): a *systematic loanword class*, not diffuse noise. Tested every tempting fix
+empirically (fixed−broken vs the unanimous-referee set) BEFORE shipping:
+
+| candidate | Δ rule-only | verdict |
+|---|---|---|
+| **sy/ny palatal folds** ([ʃ]~[sj], [ɲ]~[nj]) | **+3.9%** | notation (same syllable count) → FOLD in eval, no output change |
+| **z→s** (no native [z]) | +0.17% | safe RULE |
+| **geminate ⟨rr⟩→ɾ** | +0.13% | safe RULE |
+| ⟨iy⟩→[j] / ⟨uw⟩→[w] (drop spurious vowel) | **−0.02% / 0.0%** | NET-NEGATIVE — breaks native [ij] (kaniya) → lexicon only |
+| Spanish ⟨j⟩→[h] | 0.0% | breaks native [d͡ʒ] as often → lexicon only |
+| ⟨ll⟩→[l] | −1.49% | ⟨ll⟩→[lj] is the better default (English-name [l] is minority) |
+
+Rules+folds took **rule-only 77.3→81.5%, shipped 82.9→87.1%**. The net-negative glide/j rules confirmed the
+origin-ambiguity the doc warned about (SAME spelling = native [ij]/hiatus-ʔ vs loanword glide/plain).
+
+**KEY FINDING (adversarial review caught this): the broad VV/glide/hiatus class is NOT safely mineable.** A first
+cut pinned 2,129 words via a neutralizing fold that collapsed `ij→i` and stripped `ʔ` — which reported a shiny
+**95.6% shipped, but was ILLUSORY**: those folds are entangled with NATIVE phonology (the glide in *siya*→[sija],
+the phonemic hiatus ʔ in *tao*→[taʔo]), so the referee's *reduced* readings of native words satisfied "in-class"
+and got pinned — corrupting core vocabulary (*siya*→[sia], *kaniya*→[kania]). Unanimity gives no protection (a
+single-reading row is trivially unanimous). **You cannot mine this class from a referee without a native/loan
+discriminator, which spelling does not provide.**
+
+The genuinely SAFE, closable subset is the **foreign-segment** class only — Spanish ⟨j⟩→[h] (abenojar→abenohaɾ),
+soft ⟨c⟩→[s] (abece→abese) — origin-specific (native Tagalog has neither), so pinning never touches native words.
+`loanword-lexicon.tsv` = **115 words**, built by applying the orthography-gated foreign op to OUR OWN shipped-no-loan
+output (so pins inherit our stress + final-ʔ — fixing the forced-penult regression the review also caught, e.g.
+kampeón/león), kept only where all wikipron readings agree AND the op matches the referee; a NATIVE-CANARY guard
+(siya/tao/…) aborts generation if the mining ever pins a native word; baselined against `phonemizeShippedNoLoan`
+(not phonemizeWord) so regenerating is idempotent. SHIPPED-only → eval non-circular. gen:
+`tools/referee-eval/gen-tl-loanword-lexicon.ts`.
+
+**HONEST result: rule-only 77.3→81.5%, shipped 82.9→87.6%** (not 95.6%). Native words verified uncorrupted
+(siya/kaniya/tao/mabuti/maganda unchanged). The VV/glide/hiatus loanword class remains a documented residual —
+genuinely ambiguous with native phonology, not mineable.
+
+STATUS still 🟡 (not ✅): the shipped closures have an OOV tail on the unwritten contrasts (final-ʔ, stress) —
+structurally identical to Indonesian ⟨e⟩ / Indic schwa. A stronger, better-measured 🟡, not a promotion.
