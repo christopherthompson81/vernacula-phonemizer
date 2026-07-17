@@ -1,0 +1,46 @@
+// Native canonical-IPA definition for Cebuano / Sinugboanon (ceb) — a shallow, near-phonemic Philippine (Central
+// Bisayan) Latin orthography, the Tagalog pattern. cebuano.ts reads this file: the digraph ⟨ng⟩→ŋ (+ nativized
+// Spanish/English loan digraphs), then single letters, with a WORD-INITIAL glottal stop [ʔ] before a vowel, a
+// HIATUS glottal between two vowels (kaon→kaʔon, maayo→maʔajo), and a hyphen → [ʔ]. Native words keep the 5-vowel
+// a e i o u (the i~e / u~o merger is a lexical residual). Penultimate stress (unwritten, folded by the eval).
+{
+    "language": "ceb",
+    "name": "Cebuano",
+    "script": "Latin",
+    "provenance": "Authored from standard Cebuano/Bisaya orthography + phonology (the Tagalog near-phonemic pattern). This file IS the language data — the g2p reads it directly.",
+
+    // Multi-letter graphemes (longest-first). Native Cebuano has only ⟨ng⟩; the rest are nativized loan digraphs.
+    "digraphs": { "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "ts": "t͡s", "ll": "lj", "rr": "ɾ" },
+
+    // Single consonant letters → IPA (native + nativized loans). ⟨z⟩→[s], ⟨c⟩/⟨q⟩→[k], ⟨j⟩→[d͡ʒ], ⟨v⟩→[b] (Cebuano
+    // has no native [z v]; Spanish ⟨j⟩ is [h] in some loans — a lexical residual, default [d͡ʒ] for the English set).
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "m": "m", "n": "n", "s": "s", "h": "h", "l": "l", "r": "ɾ",
+        "w": "w", "y": "j", "ñ": "ɲ", "'": "ʔ", "ʼ": "ʔ",
+        "c": "k", "q": "k", "z": "s", "f": "f", "v": "b", "j": "d͡ʒ", "x": "ks"
+    },
+
+    // Vowels → IPA (modern 5-vowel system; the native 3-vowel core means i~e and u~o vary — a lexical residual).
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    // Whole-word irregulars, given as an orthographic RESPELLING the g2p scans: the plural marker ⟨mga⟩ → [maˈŋa].
+    "specialWords": { "mga": "manga" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — native Cebuano spellings; canonical IPA DERIVED by running them through the same g2p. Tens are the
+    // irregular ka-…-an circumfix forms (explicit table); compounds join with the ligature "ug" (and); hundreds /
+    // thousands use the "ka" ligature (duha ka gatos). Spanish numerals (uno, dos) are common in speech but not modelled.
+    "numbers": {
+        "units": ["sero", "usa", "duha", "tulo", "upat", "lima", "unom", "pito", "walo", "siyam"],
+        "tens": ["", "napulo", "kaluhaan", "katloan", "kap-atan", "kalim-an", "kan-uman", "kapitoan", "kawaloan", "kasiyaman"],
+        "connector": "ug",
+        "ligature": "ka",
+        "hundred": "gatos",
+        "thousand": "libo",
+        "million": "milyon"
+    }
+}

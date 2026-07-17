@@ -1,0 +1,23 @@
+// Cebuano (ceb) — Philippine (Central Bisayan), a shallow near-phonemic Latin g2p (the Tagalog pattern). Referees:
+// wikipron ceb_latn broad (PRIMARY, HUMAN, 3895) + epitran ceb-Latn (SECONDARY, programmatic, INDEPENDENT). Two
+// genuinely independent sources. Folds are notational / unwritten-layer: the word-final glottal is variable and
+// lexical (variant-merged where the referee lists both), the y-glide j~d͡ʒ, the tap ɾ~r.
+{
+    "referees": [
+        {
+            "file": "ceb.wikipron-ceb-broad.tsv",
+            "source": "wikipron ceb_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "ceb.epitran-ceb-latn.tsv",
+            "source": "epitran ceb-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        { "pattern": "ɾ", "replace": "r", "note": "the single Cebuano rhotic ⟨r⟩ — referee uses the tap ɾ, we write ɾ→r for comparison" },
+        { "pattern": "d͡ʒ", "replace": "j", "note": "the ⟨y⟩ glide: referee variably [j]~[d͡ʒ] (maayo→maʔajo~maʔad͡ʒo) — non-contrastive, fold to j" },
+        { "pattern": "ʔ$", "replace": "", "note": "the UNWRITTEN word-final glottal stop (phonemic but lexical: bata child [bataʔ] vs robe [bata]) — we don't emit it (deferred); strip the referee's for the rule comparison" }
+    ]
+}
