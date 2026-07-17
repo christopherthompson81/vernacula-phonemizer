@@ -48,6 +48,22 @@ describe("tagalog canonical IPA", () => {
         expect(phonemizeWord("balik")).toBe("bˈalik");
     });
 
+    test("loanword phonology: safe rules + shipped loanword lexicon", () => {
+        // Safe deterministic rules (no native counterexample): ⟨z⟩→[s] (no native [z]), geminate ⟨rr⟩→[ɾ].
+        expect(phonemizeWordRules("almarez")).toBe("ʔalmˈaɾes"); // z→s
+        expect(phonemizeWordRules("aparri")).toBe("ʔapˈaɾi"); // rr→ɾ (not ɾɾ)
+        // The FOREIGN-SEGMENT loanword class (Spanish ⟨j⟩→[h], soft ⟨c⟩→[s]) is pinned per-word on the SHIPPED path
+        // only — origin-specific, so it never touches native words; the rule engine keeps ⟨j⟩→[d͡ʒ] → non-circular eval.
+        expect(phonemizeWord("abenojar")).toBe("ʔabenˈohaɾ"); // Spanish ⟨j⟩→[h]
+        expect(phonemizeWord("abece")).toBe("ʔabˈese"); // soft ⟨c⟩→[s]
+        expect(phonemizeWordRules("abenojar")).toBe("ʔabenˈod͡ʒaɾ"); // rule engine keeps native ⟨j⟩→[d͡ʒ]
+        // The ambiguous VV/glide/hiatus class is deliberately NOT mined (same spelling is native): core native words
+        // keep their glide/ʔ, and a loan spelled the same way keeps the rule reading — no per-word corruption.
+        expect(phonemizeWord("siya")).toBe("sˈija"); // native glide intact (would be corrupted by VV mining)
+        expect(phonemizeWord("tao")).toBe("tˈaʔo"); // native hiatus ʔ intact
+        expect(phonemizeWord("mabuti")).toBe("mabˈuti");
+    });
+
     test("hyphen → glottal stop; number", () => {
         expect(phonemize("pag-ibig", "tl")).toBe("paɡʔˈibiɡ");
         expect(phonemize("salamat", "tl")).toContain("salˈamat");

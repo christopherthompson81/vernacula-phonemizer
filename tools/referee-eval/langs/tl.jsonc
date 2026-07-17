@@ -12,6 +12,8 @@
     ],
     "segmentJoin": true,
     "folds": [
-        { "pattern": "-", "replace": "ʔ", "note": "hyphen = glottal stop [ʔ] (ours) vs literal hyphen (epitran) — pag-asa" }
+        { "pattern": "-", "replace": "ʔ", "note": "hyphen = glottal stop [ʔ] (ours) vs literal hyphen (epitran) — pag-asa" },
+        { "pattern": "sj", "replace": "ʃ", "note": "⟨sy⟩ palatal: our fused [ʃ] (naʃon) ~ referee decomposed [sj] (nasjon) — same phoneme sequence, same syllable count (notation)" },
+        { "pattern": "nj", "replace": "ɲ", "note": "⟨ny⟩ palatal: our fused [ɲ] (abisiɲa) ~ referee decomposed [nj] (abisinja) — notation, not an error" }
     ]
 }

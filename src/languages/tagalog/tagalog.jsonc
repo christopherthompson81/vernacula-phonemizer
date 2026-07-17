@@ -10,15 +10,18 @@
 
     // Multi-letter graphemes (longest-first).
     "digraphs": {
-        "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "sy": "ʃ", "ll": "lj", "ts": "t͡s"
+        "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "sy": "ʃ", "ll": "lj", "ts": "t͡s",
+        // Spanish-loan geminate ⟨rr⟩ → single tap (Tagalog has no geminate rhotic): aparri→apaɾi.
+        "rr": "ɾ"
     },
 
-    // Single consonant letters → IPA (native + nativized Spanish/English loans).
+    // Single consonant letters → IPA (native + nativized Spanish/English loans). ⟨z⟩→[s]: Tagalog has no native
+    // [z], so every ⟨z⟩ is a loan realized [s] (almarez→almaɾes).
     "consonants": {
         "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
         "m": "m", "n": "n", "s": "s", "h": "h", "l": "l", "r": "ɾ",
         "w": "w", "y": "j", "ñ": "ɲ",
-        "c": "k", "q": "k", "z": "z", "f": "f", "v": "v", "j": "d͡ʒ", "x": "ks"
+        "c": "k", "q": "k", "z": "s", "f": "f", "v": "v", "j": "d͡ʒ", "x": "ks"
     },
 
     // Vowels → IPA (modern 5-vowel system; native i~e and u~o merger is a lexical residual).
