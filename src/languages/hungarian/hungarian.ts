@@ -53,11 +53,30 @@ function toSegments(word: string): Seg[] {
             out.splice(k + 1, 1);
         }
     }
-    // Nasal place assimilation: /n/ → [ŋ] before a velar stop k/ɡ (dzsungel→d͡ʒuŋɡɛl, hang→hɒŋɡ, bank→bɒŋk).
-    for (let k = 0; k < out.length - 1; k++)
-        if (out[k]!.ph === "n" && /^[kɡ]/.test(out[k + 1]!.ph)) out[k]!.ph = "ŋ";
+    // Nasal PLACE assimilation: /n/ takes the place of a following stop — [ŋ] before velar k/ɡ (hang→hɒŋɡ),
+    // [ɲ] before palatal ɟ/c (angyal→ɒɲɟɒl, Lengyel→lɛɲɟɛl), [m] before labial p/b (színpad→siːmpɒd).
+    for (let k = 0; k < out.length - 1; k++) {
+        if (out[k]!.ph !== "n") continue;
+        const nb = base(out[k + 1]!.ph);
+        if (nb === "k" || nb === "ɡ") out[k]!.ph = "ŋ";
+        else if (nb === "ɟ" || nb === "c") out[k]!.ph = "ɲ";
+        else if (nb === "p" || nb === "b") out[k]!.ph = "m";
+    }
     voicingAssimilation(out);
+    mergeGeminates(out); // devoicing can create an identical-consonant pair across a boundary (feddte→fɛtːɛ)
     return out;
+}
+
+/** Merge two adjacent consonants with the same BASE phoneme into one long consonant (t+t / tː+t / t+tː → tː). */
+function mergeGeminates(segs: Seg[]): void {
+    for (let k = segs.length - 2; k >= 0; k--) {
+        const a = segs[k]!,
+            b = segs[k + 1]!;
+        if (!a.v && !b.v && base(a.ph) === base(b.ph)) {
+            a.ph = base(a.ph) + "ː";
+            segs.splice(k + 1, 1);
+        }
+    }
 }
 
 // Obstruent voicing pairs (base phoneme, no length). Hungarian has REGRESSIVE voicing assimilation: an obstruent

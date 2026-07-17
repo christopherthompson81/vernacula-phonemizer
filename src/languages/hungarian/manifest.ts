@@ -17,6 +17,7 @@ export interface HungarianManifest {
         hundred: string;
         thousand: string;
         million: string;
+        milliard: string;
     };
 }
 

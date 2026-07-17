@@ -27,16 +27,20 @@ function below1000(n: number): string {
     return r ? `${hundred}${below100(r)}` : hundred;
 }
 
-/** Non-negative integer (< 10⁹) → Hungarian words; larger / non-finite → digit-by-digit. */
+/** Non-negative integer (< 10¹²) → Hungarian words; larger / non-finite → digit-by-digit. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
         return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // nulla
     const parts: string[] = [];
-    const mil = Math.floor(n / 1e6),
+    const mrd = Math.floor(n / 1e9),
+        mil = Math.floor((n % 1e9) / 1e6),
         thg = Math.floor((n % 1e6) / 1000),
         r = n % 1000;
-    if (mil) parts.push(`${mil === 1 ? "egy" : below1000(mil)} ${N.million}`);
+    // The multiplier before a scale word: 1→"egy", 2→"két" (not "kettő"), else the composed group.
+    const mult = (c: number): string => (c === 1 ? "egy" : c === 2 ? "két" : below1000(c));
+    if (mrd) parts.push(`${mult(mrd)} ${N.milliard}`);
+    if (mil) parts.push(`${mult(mil)} ${N.million}`);
     // thousands + remainder concatenate into one word (kétezer-…); "2" before ezer → "két".
     let word = "";
     if (thg) word += thg === 1 ? N.thousand : `${thg === 2 ? "két" : below1000(thg)}${N.thousand}`;

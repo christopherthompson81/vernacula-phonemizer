@@ -88,6 +88,7 @@
         "tensPrefix": { "20": "huszon", "10": "tizen" },
         "hundred": "száz",
         "thousand": "ezer",
-        "million": "millió"
+        "million": "millió",
+        "milliard": "milliárd"
     }
 }

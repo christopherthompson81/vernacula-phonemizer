@@ -6,7 +6,7 @@ import { phonemizeWord, createHungarian } from "../src/languages/hungarian/hunga
 // their geminate forms (ssz→sː, ggy→ɟː) before single letters, then doubled-consonant → Cː, then FIXED
 // first-syllable stress. Signature: ⟨s⟩→ʃ / ⟨sz⟩→s (reversed), ⟨gy⟩→ɟ / ⟨ty⟩→c (palatal stops), ⟨a⟩→ɒ, the full
 // long/short vowel system; plus REGRESSIVE voicing assimilation (biztat→ˈbistɒt), j-palatalization (feddj→ˈfɛɟː),
-// and n→ŋ before k/ɡ. Validated at 91.3% vs wikipron hun narrow + 87.6% vs epitran. See
+// and n→ŋ before k/ɡ. Validated at 92.6% vs wikipron hun narrow + 87.6% vs epitran. See
 // docs/investigations/hu_native_bringup_investigation.md.
 describe("Hungarian canonical IPA", () => {
     test("the reversed sibilants + palatal stops + ⟨a⟩→ɒ, first-syllable stress", () => {
