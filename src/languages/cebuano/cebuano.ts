@@ -31,7 +31,9 @@ function scan(w: string): string[] {
     for (let i = 0; i < s.length; ) {
         const c = s[i]!;
         if (c === "-" || c === "‑") {
-            out.push("ʔ"); // hyphen → glottal stop
+            // Intra-word hyphen → glottal stop (pag-asa→paɡʔasa), but ONLY when it joins two parts — a standalone
+            // or word-edge dash (a range/punctuation dash) must not inject a spurious [ʔ].
+            if (out.length > 0 && i + 1 < s.length) out.push("ʔ");
             i++;
             continue;
         }

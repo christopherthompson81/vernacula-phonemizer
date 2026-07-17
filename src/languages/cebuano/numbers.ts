@@ -38,14 +38,21 @@ function below1000(n: number): string {
     return r ? `${hundred} ${N.connector} ${below100(r)}` : hundred;
 }
 
-/** Non-negative integer (< 10⁶) → Cebuano words; larger / non-finite → digit-by-digit. */
+/** Non-negative integer (< 10⁹) → Cebuano words; larger / non-finite → digit-by-digit. Chains the libo (10³) and
+ *  milyon (10⁶) scales with the "ug" connector. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6)
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
     if (n === 0) return N.units[0]!; // sero
     if (n < 1000) return below1000(n);
-    const th = Math.floor(n / 1000),
-        r = n % 1000;
-    const thousand = kaGroup(th, N.thousand);
-    return r ? `${thousand} ${N.connector} ${below1000(r)}` : thousand;
+    if (n < 1e6) {
+        const th = Math.floor(n / 1000),
+            r = n % 1000;
+        const thousand = kaGroup(th, N.thousand);
+        return r ? `${thousand} ${N.connector} ${below1000(r)}` : thousand;
+    }
+    const mil = Math.floor(n / 1e6),
+        r = n % 1e6;
+    const million = kaGroup(mil, N.million); // usa ka milyon, duha ka milyon, …
+    return r ? `${million} ${N.connector} ${numberToWords(r)}` : million;
 }
