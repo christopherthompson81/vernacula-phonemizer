@@ -1,11 +1,11 @@
-# kaikki Pashto — KANDAHARI/SOUTHERN dialect slice (single-dialect, matches our ʂ/ʐ engine), letter-name/phoneme entries excluded, narrow syllable-dots/stress stripped. A DIALECT-CONSISTENT secondary referee: the primary wikipron pus is multi-dialect (ښ=ʂ~x~ç), which penalises a coherent single-dialect engine. See docs/ps_native_bringup_investigation.md.
+# kaikki Pashto — KANDAHARI/SOUTHERN dialect slice (single-dialect, matches our ʂ/ʐ engine); letter-name/phoneme entries + single-letter words excluded; narrow syllable-dots/stress/parens stripped (BACKBONE also strips combining accents). DIALECT-CONSISTENT secondary referee: the primary wikipron pus is multi-dialect (ښ=ʂ~x~ç), penalising a coherent single-dialect engine. See docs/ps_native_bringup_investigation.md.
 پښتو	pəʂt̪o	pəʃt̪o
 غښتل	ɣəʂt̪ə́l
 ښه	ʂə	ʃə	ʂa	ʃa
 غږېدل	ʐaɣed̪əl
 نږدې	niʐde	niʒde
 ځينې	d͡zine
-ځوان	d͡z(ə)wɑn
+ځوان	d͡zəwɑn
 غاښ	ɣɑʂ
 غوږ	ɣwaʐ	ɣwaʒ
 غوښه	ɣwaʂa
@@ -17,9 +17,6 @@
 موږ	muʐ
 ستاسې	stɑse
 شرمښ	ʃərməʂ
-ږ	ʐe	ʒe	ʐ	ʒ
-ښ	ʂin	ʃin	ʂ	ʃ
-ۍ	ʂədzinaje	ʃədzinaje
 ښوونځی	ʂowəndzai
 اغږم	äɣäʐə́m
 اخښل	axʂəl	äxʂə́l
