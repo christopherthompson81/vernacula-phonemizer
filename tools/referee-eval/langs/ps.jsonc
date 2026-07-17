@@ -20,6 +20,6 @@
         { "pattern": "ʊ", "replace": "ə", "note": "referee short ʊ = default short vowel" },
         { "pattern": "[ʂç]", "replace": "ʃ", "note": "ښ = Kandahari ʂ ~ NE x ~ Central ç ~ ʃ — DIALECT variation (multi-dialect referee)" },
         { "pattern": "ʐ", "replace": "ʒ", "note": "ږ = Kandahari ʐ ~ NE ɡ ~ Central ʝ ~ ʒ — dialect variation" },
-        { "pattern": "ɻ", "replace": "r", "note": "retroflex flap ⟨ړ⟩ ɻ ~ r notation" }
+        { "pattern": "[ɻɽ]", "replace": "r", "note": "retroflex flap ⟨ړ⟩ ɻ ~ r notation" }
     ]
 }
