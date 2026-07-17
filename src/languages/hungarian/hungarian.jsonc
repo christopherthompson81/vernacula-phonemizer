@@ -1,0 +1,94 @@
+// Native canonical-IPA data manifest for Hungarian / magyar (hu) — Uralic (Finno-Ugric), Latin script. Hungarian
+// orthography is deep-ish but REGULAR: a longest-match scan (trigraphs/digraphs before single letters) resolves
+// the digraphs and their GEMINATE forms (written by doubling the digraph's FIRST letter: sz→s but ssz→[sː],
+// gy→ɟ but ggy→[ɟː]). hungarian.ts reads this table, then collapses doubled single consonants to length and adds
+// FIXED first-syllable stress. Signature: ⟨s⟩→[ʃ] / ⟨sz⟩→[s] (the reverse of the intuition), ⟨gy⟩→[ɟ] ⟨ty⟩→[c]
+// (palatal stops), ⟨a⟩→[ɒ], a full long/short vowel system (14 vowels). See docs/investigations/hu_native_bringup_investigation.md.
+{
+    "language": "hu",
+    "name": "Hungarian (magyar)",
+    "script": "Latin",
+    "provenance": "Authored from Hungarian orthography + phonology (regular, near-phonemic). This file IS the language data — the g2p reads it directly. Referees: wikipron hun_latn narrow + epitran hun-Latn.",
+
+    "convention": {
+        "sibilants": "⟨s⟩→ʃ, ⟨sz⟩→s (the reverse of the naive reading); ⟨zs⟩→ʒ, ⟨z⟩→z",
+        "palatals": "⟨gy⟩→ɟ, ⟨ty⟩→c (palatal stops); ⟨ny⟩→ɲ; ⟨ly⟩→j (merged with ⟨j⟩)",
+        "vowels": "long/short + front/back-round: a ɒ / á aː, e ɛ / é eː, o o / ó oː, ö ø / ő øː, u u / ú uː, ü y / ű yː, i i / í iː",
+        "gemination": "a geminate digraph doubles the FIRST letter (ssz=[sː], ggy=[ɟː], nny=[ɲː]); a doubled single consonant → Cː",
+        "stress": "FIXED first-syllable (Hungarian); vowel length is independent of stress",
+    },
+
+    // Longest-match orthography → IPA. The boolean = the unit is a vowel nucleus. Geminate digraphs (first letter
+    // doubled) come before their base digraph; digraphs before single letters.
+    "rules": [
+        ["ddzs", "d͡ʒː", false],
+        ["dzs", "d͡ʒ", false],
+        ["ccs", "t͡ʃː", false],
+        ["ddz", "d͡zː", false],
+        ["ggy", "ɟː", false],
+        ["lly", "jː", false],
+        ["nny", "ɲː", false],
+        ["ssz", "sː", false],
+        ["tty", "cː", false],
+        ["zzs", "ʒː", false],
+        ["cs", "t͡ʃ", false],
+        ["dz", "d͡z", false],
+        ["gy", "ɟ", false],
+        ["ly", "j", false],
+        ["ny", "ɲ", false],
+        ["sz", "s", false],
+        ["ty", "c", false],
+        ["zs", "ʒ", false],
+        ["á", "aː", true],
+        ["é", "eː", true],
+        ["í", "iː", true],
+        ["ó", "oː", true],
+        ["ő", "øː", true],
+        ["ú", "uː", true],
+        ["ű", "yː", true],
+        ["ö", "ø", true],
+        ["ü", "y", true],
+        ["a", "ɒ", true],
+        ["e", "ɛ", true],
+        ["i", "i", true],
+        ["o", "o", true],
+        ["u", "u", true],
+        ["b", "b", false],
+        ["c", "t͡s", false],
+        ["d", "d", false],
+        ["f", "f", false],
+        ["g", "ɡ", false],
+        ["h", "h", false],
+        ["j", "j", false],
+        ["k", "k", false],
+        ["l", "l", false],
+        ["m", "m", false],
+        ["n", "n", false],
+        ["p", "p", false],
+        ["q", "k", false],
+        ["r", "r", false],
+        ["s", "ʃ", false],
+        ["t", "t", false],
+        ["v", "v", false],
+        ["w", "v", false],
+        ["x", "ks", false],
+        ["y", "i", true],
+        ["z", "z", false],
+    ],
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words. Hungarian tens are compounds (huszon-/harminc-…); units join directly (huszonegy).
+    "numbers": {
+        "units": ["nulla", "egy", "kettő", "három", "négy", "öt", "hat", "hét", "nyolc", "kilenc"],
+        "teens": ["tíz", "tizenegy", "tizenkettő", "tizenhárom", "tizennégy", "tizenöt", "tizenhat", "tizenhét", "tizennyolc", "tizenkilenc"],
+        "tens": ["", "tíz", "húsz", "harminc", "negyven", "ötven", "hatvan", "hetven", "nyolcvan", "kilencven"],
+        "tensPrefix": { "20": "huszon", "10": "tizen" },
+        "hundred": "száz",
+        "thousand": "ezer",
+        "million": "millió",
+        "milliard": "milliárd"
+    }
+}

@@ -1,0 +1,23 @@
+// Hungarian (hu) — Uralic, Latin, a regular longest-match g2p. Referees: wikipron hun_latn narrow (PRIMARY, HUMAN,
+// 64286) + epitran hun-Latn (SECONDARY, programmatic, INDEPENDENT). Two independent sources. Length ː is REAL
+// (long vowels/consonants) and kept; stress is Hungarian-fixed first-syllable (our ˈ is folded by the backbone).
+// Folds are minimal / notational.
+{
+    "referees": [
+        {
+            "file": "hu.wikipron-hun-narrow.tsv",
+            "source": "wikipron hun_latn narrow (human)",
+            "role": "primary"
+        },
+        {
+            "file": "hu.epitran-hun-latn.tsv",
+            "source": "epitran hun-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        { "pattern": "ɡ", "replace": "g", "note": "normalise the two ⟨g⟩ codepoints (U+0261 vs U+0067) so ɡ~g don't spuriously mismatch" },
+        { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩ → [ɦ] (voiced) between vowels in the narrow referee; one phoneme, we write h" },
+        { "pattern": "ij", "replace": "i", "note": "the predictable hiatus [j]-glide the narrow referee inserts (biblia→biblijɒ) after ⟨i⟩; allophonic, we don't emit it" }
+    ]
+}
