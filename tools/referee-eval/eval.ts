@@ -28,6 +28,7 @@ import { phonemizeWord as az } from "../../src/languages/azerbaijani/azerbaijani
 import { phonemizeWord as mg } from "../../src/languages/malagasy/malagasy.ts";
 import { phonemizeWord as as_ } from "../../src/languages/assamese/assamese.ts";
 import { phonemizeWord as so } from "../../src/languages/somali/somali.ts";
+import { phonemizeWord as ceb } from "../../src/languages/cebuano/cebuano.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
@@ -117,6 +118,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     mg,
     as: as_,
     so,
+    ceb,
     cs,
     cy,
     de,
