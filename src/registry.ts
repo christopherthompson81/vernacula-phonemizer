@@ -99,6 +99,14 @@ function build(lang: string): Phonemizer {
             return createArabic("levantine");
         case "apd": // Sudanese Arabic — Sudanese variety data (authored; ق→ɡ, ج→ɟ, interdentals kept)
             return createArabic("sudanese");
+        case "acm": // Iraqi Arabic (Baghdadi gilit) — ق→ɡ, ج=d͡ʒ, interdentals kept
+            return createArabic("iraqi");
+        case "afb": // Gulf Arabic (Khaleeji) — ق→ɡ, خ→χ, ج=d͡ʒ, interdentals kept
+            return createArabic("gulf");
+        case "ary": // Moroccan Arabic (Darija) — ق kept q, ج→ʒ, interdentals→stops
+            return createArabic("moroccan");
+        case "ayl": // Libyan Arabic (Tripolitanian) — ق→ɡ, ج→ʒ, خ→χ, interdentals kept
+            return createArabic("libyan");
         case "fr":
             return createFrench();
         case "pt":

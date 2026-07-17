@@ -1,0 +1,30 @@
+// Gulf Arabic (afb — Khaleeji) — an Arabic VARIETY. Evaluated through phonemizeArabic(text, "gulf"): the MSA neural
+// diacritizer restores short vowels, the MSA g2p runs, then the Gulf shifts (ق→ɡ, خ→χ; ج and interdentals ث/ذ/ظ
+// KEPT; ay→eː, aw→oː) transform it. Referee: wikipron afb_arab_broad (HUMAN, fully-voweled DIALECTAL IPA,
+// INDEPENDENT). Same pausal + gemination folds as MSA. The short-vowel restructuring gap (MSA diacritizer restores
+// MSA vowels) is the documented tail, as for arz/apc — consonants only.
+{
+    "referees": [
+        {
+            "file": "afb.wikipron-afb-broad.tsv",
+            "source": "wikipron afb_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "No independent secondary for Gulf Arabic: wikipron afb broad is the only free dialectal-IPA source (no kaikki afb, no epitran). The consonant fingerprint (ق→ɡ, خ→χ, kept ج/interdentals) is corroborated against published Gulf phonology; the shared MSA vowels are the data-limited tail (as arz/apc).",
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}

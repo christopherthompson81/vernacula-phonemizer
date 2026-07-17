@@ -1,0 +1,30 @@
+// Iraqi Arabic (acm — Baghdadi gilit) — an Arabic VARIETY. Evaluated through the async pipeline phonemizeArabic(text,
+// "iraqi"): the MSA neural diacritizer restores the short vowels, the MSA g2p runs, then the Iraqi shifts (ق→ɡ; ج,
+// interdentals ث/ذ/ظ and خ all KEPT; ay→eː, aw→oː) transform it. Referee: wikipron acm_arab_broad (HUMAN, fully-
+// voweled DIALECTAL IPA, INDEPENDENT). Same pausal + gemination folds as MSA. The short-vowel restructuring gap (the
+// MSA diacritizer restores MSA vowels, not Iraqi) is the documented tail, as for arz/apc — consonants only.
+{
+    "referees": [
+        {
+            "file": "acm.wikipron-acm-broad.tsv",
+            "source": "wikipron acm_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "No independent secondary for Iraqi Arabic: wikipron acm broad is the only free dialectal-IPA source (no kaikki acm, no epitran). The consonant fingerprint (gilit ق→ɡ, kept ج/interdentals) is corroborated against published Iraqi phonology; the shared MSA vowels are the data-limited tail (as arz/apc).",
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}

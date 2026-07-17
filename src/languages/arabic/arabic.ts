@@ -88,6 +88,10 @@ const VARIETIES: Record<string, VarietyRules> = {
     egyptian: compileVariety(loadManifest<VarietyDef>(import.meta.url, "egyptian.jsonc")),
     levantine: compileVariety(loadManifest<VarietyDef>(import.meta.url, "levantine.jsonc")),
     sudanese: compileVariety(loadManifest<VarietyDef>(import.meta.url, "sudanese.jsonc")),
+    iraqi: compileVariety(loadManifest<VarietyDef>(import.meta.url, "iraqi.jsonc")),
+    gulf: compileVariety(loadManifest<VarietyDef>(import.meta.url, "gulf.jsonc")),
+    moroccan: compileVariety(loadManifest<VarietyDef>(import.meta.url, "moroccan.jsonc")),
+    libyan: compileVariety(loadManifest<VarietyDef>(import.meta.url, "libyan.jsonc")),
 };
 
 /** Phonemize a single diacritized Arabic word to canonical IPA (with a stress mark). `variety` (e.g. "egyptian")

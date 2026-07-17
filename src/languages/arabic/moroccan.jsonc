@@ -1,0 +1,21 @@
+// Moroccan Arabic (ary — Darija) variety data. Applied on the MSA g2p output, same shape as egyptian.jsonc. Darija
+// is the most divergent Arabic variety, and its fingerprint is the OPPOSITE of the eastern dialects on ق: Moroccan
+// KEEPS [q] (the referee is q-dominant 375:… — NOT the eastern g/ʔ), so there is no qaf shift here. Its consonant
+// shifts are the Maghrebi/Levantine-style ones: ج→[ʒ] (fricative) and the interdental merger ث→[t], ذ→[d] (the ذ→d
+// rule also turns ظ [ðˤ]→[dˤ], since ð is a substring of ðˤ). خ stays [x]. NOTE the deep, DEFERRED story is Darija's
+// vowels: MSA short a/i/u collapse to schwa [ə] or delete entirely (a wholesale restructuring, not a shift table) —
+// the same data-blocked wall as Egyptian, only larger. Historical diphthongs monophthongize (variable/lexical in
+// Darija — some registers raise to iː/uː). Referee: wikipron ary_arab_broad. See docs/investigations/ary_moroccan_bringup_investigation.md.
+{
+    "variety": "moroccan",
+    "iso": "ary",
+    "consonantShifts": [
+        ["d͡ʒ", "ʒ"], // ج → [ʒ] (Maghrebi fricative)
+        ["θ", "t"], // ث → [t] (interdental merger to stop)
+        ["ð", "d"] // ذ → [d]; also ظ [ðˤ]→[dˤ]. ق is KEPT [q] (the Maghrebi signature) — no qaf shift.
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // historical ay → [eː] (Darija-variable)
+        "aw": "oː" // historical aw → [oː]
+    }
+}

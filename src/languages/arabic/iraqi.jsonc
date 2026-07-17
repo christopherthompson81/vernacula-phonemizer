@@ -1,0 +1,18 @@
+// Iraqi Arabic (acm — Baghdadi, the gilit dialect) variety data. Applied on the MSA g2p output (the "restore MSA
+// then transform" path), same shape as egyptian.jsonc. The Iraqi fingerprint is the gilit reflex ق→[ɡ] (the
+// dialect is literally named for qultu→gilit) while it stays CONSERVATIVE elsewhere: ج is kept as the affricate
+// [d͡ʒ], خ stays [x], and the interdentals ث/ذ/ظ are KEPT as [θ ð ðˤ] (the eastern-Bedouin pattern, opposite of
+// Egyptian/Levantine which merge them to stops). Historical diphthongs monophthongize (bajt→[beːt], jawm→[joːm]).
+// [q] survives in learned/MSA-loan words — a lexical tail we don't model (default gilit ɡ). Referee: wikipron
+// acm_arab_broad. See docs/investigations/acm_iraqi_bringup_investigation.md.
+{
+    "variety": "iraqi",
+    "iso": "acm",
+    "consonantShifts": [
+        ["q", "ɡ"] // ق → [ɡ] (gilit; [q] in learned loans is a lexical tail). ج=[d͡ʒ], خ=[x], interdentals KEPT.
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // بيت bajt → beːt
+        "aw": "oː" // يوم jawm → joːm
+    }
+}
