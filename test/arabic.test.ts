@@ -91,4 +91,25 @@ describe("arabic canonical IPA — diacritized path", () => {
             });
         },
     );
+
+    // Egyptian Arabic (arz) variety — shares the engine, applies Cairene IPA shifts on the MSA g2p output.
+    describe("Egyptian variety (arz)", () => {
+        test("consonant shifts + diphthong monophthongization", () => {
+            expect(phonemizeWord("قَال", "egyptian")).toBe("ʔˈaːl"); // ق → ʔ
+            expect(phonemizeWord("جَمِيل", "egyptian")).toBe("ɡamˈiːl"); // ج → ɡ (Cairene)
+            expect(phonemizeWord("ثَلَاثَة", "egyptian")).toBe("talˈaːta"); // ث → t
+            expect(phonemizeWord("ظَرف", "egyptian")).toBe("dˤˈarf"); // ظ [ðˤ] → [dˤ]
+            expect(phonemizeWord("بَيت", "egyptian")).toBe("bˈeːt"); // ay → eː (true diphthong, glide is coda)
+            expect(phonemizeWord("يَوم", "egyptian")).toBe("jˈoːm"); // aw → oː
+        });
+        test("hiatus is NOT monophthongized (glide onsets the next syllable)", () => {
+            // طويل a·w·iː — the w onsets [wiː], not a diphthong coda; must stay tˤawiːl, not become tˤoːiːl.
+            expect(phonemizeWord("طَوِيل", "egyptian")).toBe("tˤawˈiːl");
+            expect(phonemizeWord("بَيَان", "egyptian")).toBe("bajˈaːn");
+        });
+        test("MSA output is unaffected (variety is opt-in)", () => {
+            expect(phonemizeWord("قَال")).toBe("qˈaːl");
+            expect(phonemizeWord("جَمِيل")).toBe("d͡ʒamˈiːl");
+        });
+    });
 });

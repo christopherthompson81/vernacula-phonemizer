@@ -13,6 +13,7 @@ import {
 } from "./diacritizer.ts";
 import { lexiconPrimary } from "./restore.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const isLongNucleus = (ph: string): boolean =>
@@ -57,8 +58,39 @@ function geminated(segs: Seg[], j: number): boolean {
     return /ː$/.test(segs[j]!.ph);
 }
 
-/** Phonemize a single diacritized Arabic word to canonical IPA (with a stress mark). */
-export function phonemizeWord(word: string): string {
+// Arabic VARIETIES share this engine (scanner + diacritizer + numbers) and differ only by data: ordered IPA
+// rewrites applied to the MSA g2p output ("restore MSA → transform to the variety"). Registered under distinct ISO
+// codes (arz Egyptian, apc Levantine, …), NOT a runtime flag — like hi/gu/ur sharing one abugida engine. Consonant
+// shifts + diphthong monophthongization are deterministic; short-vowel restructuring is a per-variety lexical tail.
+interface VarietyDef {
+    variety: string;
+    iso: string;
+    consonantShifts: [string, string][];
+    diphthongShifts: Record<string, string>;
+}
+interface VarietyRules {
+    consonantShifts: [string, string][]; // literal string rewrites (consonants are unambiguous)
+    diphthongShifts: [RegExp, string][]; // guarded: aj/aw only when NOT an onset of the next syllable
+}
+/** A diphthong [aj]/[aw] monophthongizes only when its glide is a CODA — i.e. NOT followed by (an optional stress
+ *  mark and) a vowel. This distinguishes the diphthong بيت bajt→beːt from the hiatus طويل tˤawiːl (a·w·iː, glide
+ *  onsets the next syllable) which must stay. Vowel onsets: a i u (MSA) + e o (dialect eː/oː) + æ (imāla). */
+function compileVariety(d: VarietyDef): VarietyRules {
+    return {
+        consonantShifts: d.consonantShifts,
+        diphthongShifts: Object.entries(d.diphthongShifts).map(([from, to]) => [
+            new RegExp(from + "(?!ˈ?[aiueoæ])", "gu"),
+            to,
+        ]),
+    };
+}
+const VARIETIES: Record<string, VarietyRules> = {
+    egyptian: compileVariety(loadManifest<VarietyDef>(import.meta.url, "egyptian.jsonc")),
+};
+
+/** Phonemize a single diacritized Arabic word to canonical IPA (with a stress mark). `variety` (e.g. "egyptian")
+ *  applies its dialectal shifts on top of the MSA output; undefined/"msa" = Modern Standard Arabic. */
+export function phonemizeWord(word: string, variety?: string): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";
     const stress = stressedNucleus(segs);
@@ -66,6 +98,11 @@ export function phonemizeWord(word: string): string {
     for (let i = 0; i < segs.length; i++) {
         if (i === stress) out += "ˈ";
         out += segs[i]!.ph;
+    }
+    const vdef = variety ? VARIETIES[variety] : undefined;
+    if (vdef) {
+        for (const [from, to] of vdef.consonantShifts) out = out.replaceAll(from, to);
+        for (const [re, to] of vdef.diphthongShifts) out = out.replace(re, to);
     }
     return out;
 }
@@ -79,9 +116,10 @@ const toAscii = (d: string): string =>
     d.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x0660));
 
 class ArabicPhonemizer implements Phonemizer {
+    constructor(private variety?: string) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], this.variety));
             else if (m[2]) sink.emit(numberToIpa(Number(toAscii(m[2]))));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -91,14 +129,14 @@ class ArabicPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Arabic phonemizer. Phase 1 expects diacritized input; a neural diacritizer pre-pass (Phase 2)
- *  will restore short vowels for bare text. Fully rule-based — no data files. */
-export function createArabic(): Phonemizer {
-    return new ArabicPhonemizer();
+/** Build the Arabic phonemizer for `variety` (undefined/"msa" = Modern Standard Arabic; "egyptian" = arz, …).
+ *  Expects diacritized input; the neural diacritizer pre-pass (phonemizeArabic) restores short vowels for bare text. */
+export function createArabic(variety?: string): Phonemizer {
+    return new ArabicPhonemizer(variety);
 }
 
 let diacritizer: Promise<ArabicDiacritizer | undefined> | undefined;
-let phonemizer: Phonemizer | undefined;
+const phonemizers = new Map<string, Phonemizer>();
 // Tashkeela-derived PAUSAL restoration lexicon (undiacritized → vocalized) — the supplement that repairs words the
 // neural diacritizer leaves as skeletons. Optional: absent → the restore pass falls back to epenthesis only.
 let restoreLexicon: ReadonlyMap<string, string> | undefined;
@@ -116,13 +154,15 @@ function restoreLex(): ReadonlyMap<string, string> {
  * model beside this module; if the model is absent it falls back to phonemizing the input as-is (which is
  * correct only for already-diacritized text). Diacritized input can use the sync `phonemize(text, "ar")`.
  */
-export async function phonemizeArabic(text: string): Promise<string> {
+export async function phonemizeArabic(text: string, variety?: string): Promise<string> {
     if (diacritizer === undefined) diacritizer = createArabicDiacritizer();
     const diac = await diacritizer;
+    // The diacritizer + Tashkeela restore lexicon are MSA (shared): they restore the MSA vocalization, which the
+    // variety g2p then transforms. Egyptian short vowels differ from MSA — a dialect vowel lexicon is Phase 2.
     const vocalized = diac ? await diac.diacritize(text) : text;
-    // Supplement-only: repair words the diacritizer left as skeletons from the Tashkeela pausal lexicon (never
-    // touches an already-voweled word) — see restore.ts. Skipped when no diacritizer ran (already-diacritized in).
     const restored = diac ? lexiconPrimary(vocalized, restoreLex()) : vocalized;
-    if (phonemizer === undefined) phonemizer = createArabic();
-    return phonemizer.text(restored);
+    const key = variety ?? "msa";
+    let phon = phonemizers.get(key);
+    if (!phon) phonemizers.set(key, (phon = createArabic(variety)));
+    return phon.text(restored);
 }
