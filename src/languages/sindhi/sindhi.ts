@@ -80,9 +80,12 @@ function scan(word: string): string {
             i++;
             continue;
         }
-        // consonants; ھ OR ه after ج/گ/a sonorant → aspiration (Sindhi uses both do-chashmi ھ and ه)
+        // consonants; do-chashmi ھ (U+06BE) after ج/گ/a sonorant → aspiration (جھ→d͡ʒʰ, لھ→lʰ). Plain ه (U+0647)
+        // is the /h/ CONSONANT, NOT an aspiration marker — the letters are contrastive (نه→nə, مهينو→məhiːnoː,
+        // NOT nʰə/mʰiːnoː). Words that spell aspiration with plain ه (گهوڙو) are orthographic variants that collide
+        // with real /h/ and can't be disambiguated from the letter alone (the abjad ambiguity — a lexicon tail).
         if (isConsonant(c)) {
-            if ((s[i + 1] === HE || s[i + 1] === "ه") && DEF.aspirateWithHe[c]) {
+            if (s[i + 1] === HE && DEF.aspirateWithHe[c]) {
                 out.push(DEF.aspirateWithHe[c]!);
                 i += 2;
             } else {

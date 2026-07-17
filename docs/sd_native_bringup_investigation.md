@@ -40,11 +40,22 @@ velar/labial/retroflex/palatal (پنج→pəɲd͡ʒ).
 
 ### Run 3 — silent gutturals + ه-aspiration + quality folds
 
-65.8% → **77.2%**. Three g2p fixes from the residual:
+65.8% → **77.0%**. Silent-guttural g2p fixes + quality folds:
 - **ع silent** — Sindhi treats ع as a vowel modifier, not a full [ʔ] (تعليم→t̪əliːm, not tʔliːm).
-- **aspiration accepts ه OR ھ** — Sindhi uses both do-chashmi ھ and plain ه for the
-  ج/گ + sonorant aspirates (سنجهو→sɲd͡ʒʰu, was d͡ʒh).
 - **word-final ح silent** — like ه/ہ, a silent carrier (روح→ruh→ru).
+
+### Run 4 — aspiration is do-chashmi ھ only (review)
+
+An adversarial review caught two bugs from a Run-3 experiment that let plain ه (U+0647)
+trigger aspiration: (1) word-final ه after a sonorant was aspirated instead of silent
+(نه → nʰə, should be nə), and (2) mid-word plain ه spelling a real /h/ was over-aspirated
+(مهينو → mʰiːnoː, should be məhiːnoː). Both share one root cause — plain ه is the **/h/
+consonant** in standard Sindhi orthography, while do-chashmi ھ (U+06BE) is the dedicated
+aspiration/breathiness marker; the two are contrastive. Restricting aspiration to ھ only
+fixes both at once (77.2% → 77.0%, a wash on the referee). The cost is the ~16 referee words that spell
+aspiration with plain ه (گهوڙو → ɡəhoːɽoː instead of ɡʱoːɽoː) — but those are orthographic
+variants that collide with real /h/ and are unrecoverable from the letter alone (the abjad
+ambiguity, a lexicon tail), so the principled do-chashmi-only rule wins at equal accuracy.
 
 Plus post-backbone quality folds for the genuinely-unrecoverable axes: the **majhūl**
 long vowels (و = [oː]~[uː], ي = [eː]~[iː] — each a single letter for two qualities),
@@ -52,7 +63,7 @@ long-ā [ɑ]~[a], and ق→[k] (Sindhi commonly de-uvularizes).
 
 ## Verdict — 🟡 Reliable + lexical tail
 
-**77.2%** folded vs a 631-word independent human referee. The consonant + long-vowel
+**77.0%** folded vs a 631-word independent human referee. The consonant + long-vowel
 backbone — including the implosive census gap, the retroflex series, aspiration, and
 nasal assimilation — is verified. The residual is the abjad short-vowel wall: quality and
 position of the unwritten short vowels, restorable in principle from a coverage lexicon
