@@ -78,3 +78,93 @@ net-negative/neutral there too; the DATA/lexicon layer was the real win.)
 - **🟡:** the verifiable consonant+long-vowel backbone is 56.8%; the coverage lexicon is reliable on attested words;
   the restoration-generalization + an independent diacritized-Urdu referee (Arabic-style prose test in a matching
   convention) is the outstanding work. That's a genuine path → 🟡, not a ceiling.
+
+## Run 3 — 2026-07-16 — restoration path: matching-convention referee CORRECTS Run 2
+
+Run 2 concluded "restoration ~0 lift, not independently verifiable." That was too pessimistic — the confound was
+real and it's fixable. Found the matching-convention independent gold already in-repo: **`silver.hindiurdu.tsv`**
+(8,593 Urdu spellings + gold IPA derived from voweled Hindi Devanagari via our own hi g2p, harmonized to our
+convention, and explicitly kept OUT of the neural training manifest). Same IPA convention as our output → no
+schwa-convention mismatch, and independent of the neural.
+
+**Neural vs this gold (n=700, majhūl folded as Urdu-script-unrecoverable, short vowels COUNT):**
+- exact: baseline 45.7% → **neural 47.9% (+2.1pp)**
+- mean edit distance: 0.996 → **0.889 (−0.11)**
+- neural changed 125/700, **68 closer vs 25 farther**
+
+So the neural DOES modestly generalize — the ~0 lift vs wikipron in Run 2 was substantially the train/referee
+convention mismatch, not neural failure. But the lift is MODEST (far from Arabic's ~98% DER): Urdu short-vowel
+restoration via this shared multilingual BiLSTM is real but weak, and the reliable restoration is still
+lexicon-dominant (the neural adds a small OOV boost).
+
+**Existing infra:** `tools/arabic-restorer/eval_combined.ts` (coverage + neural-only + combined, type-level on
+wikipron; lexicon-hit is circular by construction) and `eval_endtoend.ts` (held-out generalization on
+`eval_set.tsv`) already do this — but via the Python `predict_harakat.py` pipeline + the `.pt` model (not in this
+checkout), which is why the doc's "+18.6 held-out" couldn't be reproduced here with the shipped ONNX neural.
+
+### Does RUNNING TEXT help (as it did for Arabic)? — No, and for two verified reasons
+
+Arabic's big win was the PROSE test: its diacritizer is a SENTENCE-level context model, so isolated citation
+lemmas are OOD and running text is where it shines. Tested whether the same applies to Urdu:
+
+1. **Architecture — the rider model is WORD-LEVEL.** `riderDiacritizer.diacritize()` matches each word run and
+   calls the BiLSTM on THAT word's characters + a language token only — no cross-word input (riderDiacritizer.ts:99-109).
+   Verified empirically: phonemizeRiderNeural on a 4-word sentence produces BYTE-IDENTICAL per-word output to the
+   isolated words (4/4). So running text cannot help it — the isolated-word measurements above ARE the right metric.
+2. **Linguistics — Urdu short-vowel ambiguity is LEXICAL, not syntactic.** کتاب is [kɪt̪ɑːb] in any sentence; the
+   vowels are a property of the WORD. Arabic's context-dependence is the iʕrab CASE system (endings that genuinely
+   need the sentence). Urdu has only a thin slice of contextual ambiguity (izafat -e-, a few homographs), so even a
+   sentence-level rewrite would gain far less than Arabic — most of the signal is already inside the word.
+
+So the "running text" lever that unlocked Arabic does not exist for Urdu: the model can't use context, and the
+ambiguity mostly isn't contextual anyway.
+
+### Status → 🟡 (refined, corrects #248)
+
+Restoration IS independently verifiable (against the Hindi-Devanagari gold / eval_endtoend) — #248's "unverifiable"
+was wrong. The neural modestly generalizes (+2.1pp), so it is NOT 🟢-capped (a real path exists and is partly
+realized). It is NOT ✅ either (modest lift, lexicon-dominant, ~48% on the independent gold — short-vowel
+restoration is genuinely hard here). The remaining levers are HEAVYWEIGHT and word-level (running text won't help):
+(a) a better/retrained WORD-level diacritizer (Python ML; fa/ps show it's hard), (b) expanded lexicon coverage
+(needs the uncommitted kaikki/Hindi dumps). A real path, but an unwalked, effortful one. 🟡.
+
+## Run 4 — 2026-07-16 — the AUTHORITATIVE held-out eval (the training harness)
+
+Found and ran the training/eval harness (/mnt/data/ar-diac, ar-diac-venv). The project's OWN held-out metric is
+`predict_harakat.py` (the fp32 bilstm_multilingual.pt) → `eval_endtoend.ts` (predicted harakat → g2p vs wikipron,
+model vs bare-skeleton baseline, on the held-out `eval_set.tsv`). Ran it:
+
+```
+lang    n    baseline  model    lift
+ur     592    78.2%    75.3%    -2.9
+fa     872    73.4%    68.8%    -4.6
+pa     123    48.8%    42.3%    -6.5
+ps     112    63.4%    57.1%    -6.3
+```
+
+**The neural is NET-NEGATIVE on held-out for EVERY rider language.** This DIRECTLY contradicts the bring-up doc's
+"+18.6 held-out" claim (which must have been an older model or the "invertible IPA" subset metric — not
+reproducible with the shipped bilstm_multilingual.pt on the standard end-to-end eval).
+
+**Reconciliation with Run 3's +2.1:** eval_endtoend folds through the ur CONFIG fold, which folds short-vowel
+QUALITY (ɪ/ʊ→ə). So it credits the model ONLY for schwa POSITION, not quality — and the model's net position effect
+is NEGATIVE (it moves schwas to wrong places more than right). Run 3's Hindi-gold KEPT short-vowel quality → +2.1
+(the model does get some qualities right). So the model's true effect is **fold-dependent and marginal**: a small
+quality gain, outweighed by position errors under the backbone view. Not a reliable win either way.
+
+### Definitive resolution of the restoration path
+
+1. **Running text won't help** — the rider model is WORD-LEVEL by training (per-word char sequences + a language
+   token; train_multilingual_harakat.py) and by inference (riderDiacritizer splits per word; sentence vs isolated =
+   byte-identical, 4/4). Arabic's prose win came from a SENTENCE-level model (bilstm_sent.pt / ar_diac.onnx); the
+   riders are a different, word-level model. And Urdu's ambiguity is mostly LEXICAL (کتاب is always kitāb), not the
+   syntactic iʕrab case system that makes Arabic context-dependent.
+2. **The neural doesn't generalize** — net-NEGATIVE held-out (−2.9 ur), marginal-positive only if you credit
+   short-vowel quality. The reliable restoration is the LEXICON (exact for covered words); the neural is a liability
+   on OOV (correctly, the DEFAULT shipped phonemizeWord is lexicon-only — the neural is opt-in via phonemizeRiderNeural).
+3. **Path forward** (all heavyweight, none a running-text quick win): a SENTENCE-level model would gain little
+   (lexical ambiguity); a better WORD-level model is the fa/ps ML grind; expanded lexicon coverage (data mining)
+   is the surest but needs the uncommitted dumps.
+
+STATUS 🟡 confirmed, now fully evidenced. The restoration is lexicon-bound; the neural adds no reliable value; and
+the Arabic "running text" lever does not transfer (wrong model class + wrong ambiguity type).
