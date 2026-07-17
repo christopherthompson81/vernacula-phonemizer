@@ -84,7 +84,11 @@ function g2p(word: string): string {
         if (isVowelCarrier(ch)) {
             const glideBeforeFinalHe =
                 s[i + 1] === HE && i + 2 === n && (ch === WAW || ch === YA || ch === YA_AR);
-            if (endsInVowel(out) || glideBeforeFinalHe)
+            // ـيا: a ی before a word-final ا is the glide [j], and the ا is the [ɑ] nucleus (اسپانيا→əspɑnjɑ,
+            // دنيا→dunjɑ) — without this the ی reads as [i] and the ا wrongly glides (…nij).
+            const glideBeforeFinalAlif =
+                s[i + 1] === ALIF && i + 2 === n && (ch === YA || ch === YA_AR);
+            if (endsInVowel(out) || glideBeforeFinalHe || glideBeforeFinalAlif)
                 out += ch === WAW ? "w" : "j";
             else out += longVowel(ch);
             i++;
@@ -126,6 +130,9 @@ export function phonemizeWordCore(word: string): string {
     let ipa = g2p(word);
     if (!ipa) return "";
     ipa = deleteMedialSchwa(ipa, "ə");
+    // Homorganic nasal AFTER schwa deletion (so the nasal is adjacent to the velar): ن before a velar stop → [ŋ]
+    // (انګور→aŋɡor). The standard assimilation; runs post-deletion because the epenthetic ə is removed first.
+    ipa = ipa.replace(/n(?=[kɡq])/gu, "ŋ");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters
     // (اخښل→axʂəl), unlike Persian; deleting it there hurt the referee.
     // Stress: default to the last long vowel (ɑ/o/u/e/i), else the last nucleus.
