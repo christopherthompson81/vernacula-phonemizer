@@ -2,7 +2,7 @@
  * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA, espeak-independent. Odia is an Eastern Indo-Aryan
  * Brahmic abugida read by the generic engine (core/abugida.ts), like the Dravidian trio (Telugu/Kannada/Malayalam):
  * NO inherent-vowel deletion — every akshara is pronounced, and the inherent vowel is /ɔ/ (ଘର→ɡʱɔɾɔ), like Bengali.
- * odia.ts adds only the light post-processing: geminate → length, ଳ୍ଳ → [ɭː], the word-final anusvara ଂ → [m], and
+ * odia.ts adds only the light post-processing: geminate → length, ଳ୍ଳ → [ɭː], and
  * first-syllable (weak) stress. No intervocalic voicing (Indo-Aryan, unlike the Dravidian trio).
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -18,7 +18,7 @@ interface OdiaDef extends AbugidaDef {
 }
 const DEF = loadManifest<OdiaDef>(import.meta.url, "odia.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
-const ODIA_WORD = "଀-୯ୱ-୷"; // Odia block (digits handled separately, but kept in the word class for tokenizing)
+const ODIA_WORD = "଀-୥୰-୷"; // Odia block EXCLUDING the digits ୦-୯ (U+0B66–0B6F, matched by the digit branch)
 const ODIA_DIGITS: Record<string, string> = {
     "୦": "0", "୧": "1", "୨": "2", "୩": "3", "୪": "4",
     "୫": "5", "୬": "6", "୭": "7", "୮": "8", "୯": "9",
@@ -37,8 +37,9 @@ const GEMINATE =
 
 /** One Odia word → canonical IPA. */
 export function phonemizeWord(word: string): string {
-    // Word-final anusvara ଂ → [m]; medial ଂ is a homorganic nasal, handled by the engine.
-    const norm = word.normalize("NFC").replace(/ଂ$/u, "ମ୍");
+    // Anusvara ଂ nasalizes the vowel in ALL positions in Odia — including word-finally (ଏବଂ→ebɔ̃, NOT ebɔm;
+    // unlike Kannada's final ಂ→[m]) — so the engine's nasalizeVowel handles it directly, no override.
+    const norm = word.normalize("NFC");
     let x = g2p(norm);
     x = x.replace(GEMINATE, "$1ː").replace(/ː([ʰʱ])/gu, "$1ː");
     x = x.replace(/ɭl/gu, "ɭː"); // ଳ୍ଳ → geminate retroflex [ɭː]

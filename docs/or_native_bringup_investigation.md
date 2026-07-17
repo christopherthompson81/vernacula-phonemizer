@@ -26,16 +26,16 @@ therefore an Odia-Unicode data file (`odia.jsonc`) + a thin module (`odia.ts`).
 ## Runs (folded vs kaikki primary)
 
 - **Run 1 — first compile.** 96.3%. The generic engine + the Odia data file (inherent ɔ, no deletion, sibilant
-  merger, flap, dental series) + gemination→length + ଳ୍ଳ→ɭː + word-final anusvara→[m] + first-syllable stress.
+  merger, flap, dental series) + gemination→length + ଳ୍ଳ→ɭː + first-syllable stress (anusvara nasalizes in all positions, incl. word-finally: ଏବଂ→ebɔ̃).
   Folds: ɦ~h (ହ), gemination, dental notation t̪~t/d̪~d/n̪~n (epitran under-marks; kaikki marks — fold both), b̤~bʱ
   (epitran), tap ɾ~r.
 - **Run 2 — conjunct nasal fold.** The only real residual class was the conjunct nasal: ଞ୍ଜ/ଞ୍ଚ/ଜ୍ଞ → we write
   the homorganic palatal ɲ (ଗଞ୍ଜା→ɡɔɲd͡ʒa, correct) where kaikki normalises to n̪ — a nasal-place notation diff.
-  Folding ɲ~n (consistent with the existing n̪~n fold) → **98.3%**.
+  Folding ɲ~n → 98.3%; the final-anusvara-nasalization fix (review) → **98.4%**.
 
 ## Verdict — ✅ Referee-limited
 
-**98.3% vs kaikki** (human primary) — Odia is highly rule-derivable, like the Dravidian abugidas. The residual is
+**98.4% vs kaikki** (human primary) — Odia is highly rule-derivable, like the Dravidian abugidas. The residual is
 single-letter / lone-sign referee noise (ଌ vocalic-l, ଃ visarga, nukta ଫ଼/ଷ଼ letter entries) — no real defect.
 The independent epitran secondary corroborates only loosely (53.0%) because of its own final-vowel-deletion bug,
 which is itself confirmation that Odia *retains* the inherent vowel (kaikki and ours agree, epitran is the outlier).

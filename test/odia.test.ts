@@ -25,8 +25,13 @@ describe("Odia canonical IPA", () => {
         expect(phonemizeWord("ପାଞ୍ଚ")).toBe("pˈaɲt͡ʃɔ"); // 'five' — ଞ୍ଚ → homorganic ɲt͡ʃ
     });
 
-    test("numbers compose (units + magnitudes; 21-99 compounds deferred)", () => {
-        expect(getPhonemizer("or").text("3").trim()).toBe("t̪ˈin̪i"); // ତିନି
+    test("word-final anusvara nasalizes (not [m])", () => {
+        expect(phonemizeWord("ଏବଂ")).toBe("ˈebɔ̃"); // 'and' (common function word) — ebɔ̃, NOT ebɔm
+    });
+
+    test("numbers compose, incl. NATIVE Odia digits ୦-୯ (21-99 fused forms deferred)", () => {
+        expect(getPhonemizer("or").text("3").trim()).toBe("t̪ˈin̪i"); // ASCII → ତିନି
+        expect(getPhonemizer("or").text("୩").trim()).toBe("t̪ˈin̪i"); // NATIVE digit ୩ → ତିନି
         expect(getPhonemizer("or").text("100").trim()).toBe("ˈekɔ sˈɔɦɔ"); // ଏକ ଶହ
     });
 });
