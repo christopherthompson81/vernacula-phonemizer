@@ -18,11 +18,13 @@ import { loadSharedPhonology } from "../../core/phonology.ts";
 
 // Vowel nuclei the Hindi engine can emit (incl. long ː and nasalization ̃) — the intervocalic context for the flap.
 const V = "aəɪiʊueɛoɔɐ";
-// Saksena: intervocalic ड/ढ (ɖ/ɖʱ) → the flap ɽ/ɽʱ. Word-initial and post-nasal ɖ stay (the lookbehind requires a
-// VOWEL, so a preceding nasal or word start already blocks the flap); a geminate ɖː is not followed by a vowel.
-// The flap runs on the engine's final output, which already carries the stress mark ˈ — allow one between the
-// consonant and the following vowel (pəɖˈoːsiː → pəɽˈoːsiː) so a stressed syllable doesn't block the rule.
-const FLAP = new RegExp(`(?<=[${V}][ː̃]?)ɖ(ʱ?)(?=[ˈˌ]?[${V}])`, "gu");
+// Saksena: intervocalic ड/ढ (ɖ/ɖʱ) → the flap ɽ/ɽʱ, EXCEPT after a nasal "or after nasalisation" — post-nasal
+// ɖ stays. So the lookbehind is an ORAL vowel (optionally long) — a preceding nasal CONSONANT (अंडा→ə̃ɳɖaː, ɳ
+// blocks it) or a nasalized VOWEL (अँडा→ə̃ɖaː, the ̃ mark blocks it, NOT in the class) both keep [ɖ]; word start
+// keeps [ɖ] too. A geminate ɖː is not followed by a vowel. The flap runs on the engine's final output, which
+// already carries the stress mark ˈ — allow one between the consonant and the following vowel (pəɖˈoːsiː →
+// pəɽˈoːsiː) so a stressed syllable doesn't block the rule.
+const FLAP = new RegExp(`(?<=[${V}]ː?)ɖ(ʱ?)(?=[ˈˌ]?[${V}])`, "gu");
 const awadhify = (s: string): string => s.replace(FLAP, "ɽ$1");
 
 function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi> {

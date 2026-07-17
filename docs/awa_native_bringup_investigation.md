@@ -41,8 +41,9 @@ which, per Saksena/Bloch, is correct **by attestation**, not by defaulting.
 
 - **Whispered (voiceless) final vowels** — Saksena describes final short vowels as whispered and elided in
   connected speech; the precise realization/conditioning is not reliably extractable from the rough OCR.
-- **Short e/o quality** and the **ऐ/औ diphthong-vs-monophthong** question — kept as the eastern diphthongs
-  [ai]/[au] provisionally; Saksena's vowel chart is too garbled in OCR to pin down. Not fabricated — flagged.
+- **ऐ/औ** SHIP as the eastern diphthongs [ai]/[au] (diverging from Hindi's ɛː/ɔː, following Bhojpuri) — this is
+  asserted in the gold, not deferred; only the exact *quality* is provisional (Saksena's vowel chart is too
+  garbled in OCR to confirm a monophthong reading). **Short e/o quality** remains genuinely deferred.
 
 ## Verdict — ⛔ Cannot-verify (a sourced stub)
 

@@ -1,5 +1,5 @@
 // Native canonical-IPA definition for Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. Reuses the Hindi
-// standard Hindi phonology. A shallow abugida — pronunciation is almost entirely rule-derivable.
+// Devanagari engine (makeNativeHindi) with the Saksena-documented Awadhi divergences. A shallow abugida.
 // This file IS the language data: the native G2P engine (src/Phonemize/native/nativeG2p.ts) reads it
 // directly. Devanagari is a shallow abugida, so pronunciation is almost entirely rule-derivable; the
 // only genuinely hard part is schwa deletion (handled by a documented algorithm, not a lexicon).
@@ -9,7 +9,7 @@
     "language": "awa",
     "name": "Awadhi",
     "script": "Devanagari",
-    "provenance": "Authored from Baburam Saksena, Evolution of Awadhi (1937), Lakhimpuri dialect basis. Reuses the Hindi Devanagari engine; the DOCUMENTED Awadhi divergences implemented are the SIBILANT MERGER श/ष→[s] (Saksena §87: the dental sibilant is the only one in Awadhi; ś/ṣ of foreign words are always [s]) and the INTERVOCALIC FLAP ड/ढ→ɽ/ɽʱ except after a nasal (Saksena §, handled in awadhi.ts). Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are near-identical, so most rules are shared with Hindi/Bhojpuri BY ATTESTATION, not by defaulting. ⛔ CANNOT-VERIFY: no independent referee exists (wikipron/kaikki/epitran have no Awadhi); anchored on a hand-adjudicated gold of Saksena-transcribed forms. Deferred (documented but uncertain from source): whispered final vowels, short e/o quality, ऐ/औ diphthong-vs-monophthong.",
+    "provenance": "Authored from Baburam Saksena, Evolution of Awadhi (1937), Lakhimpuri dialect basis. Reuses the Hindi Devanagari engine; the DOCUMENTED Awadhi divergences implemented are the SIBILANT MERGER श/ष→[s] (Saksena §87: the dental sibilant is the only one in Awadhi; ś/ṣ of foreign words are always [s]) and the INTERVOCALIC FLAP ड/ढ→ɽ/ɽʱ except after a nasal or nasalisation (handled in awadhi.ts). ऐ/औ SHIP as the eastern diphthongs [ai]/[au] (diverging from Hindi ɛː/ɔː, as Bhojpuri) — provisional: the exact quality is unconfirmed in Saksena's OCR, but the value is shipped and asserted, not deferred-to-Hindi. Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are near-identical, so most rules are shared with Hindi/Bhojpuri BY ATTESTATION, not by defaulting. ⛔ CANNOT-VERIFY: no independent referee exists (wikipron/kaikki/epitran have no Awadhi); anchored on a hand-adjudicated gold of Saksena-transcribed forms. Deferred (documented but uncertain from source): whispered final vowels, short e/o quality.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -90,9 +90,9 @@
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
         },
         "ए": { "ipa": "eː", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ai", "note": "Awadhi keeps ऐ as [ai] (eastern retention; diphthong-vs-monophthong not resolvable from the source — deferred)" },
+        "ऐ": { "ipa": "ai", "note": "Awadhi ships ऐ as [ai] (eastern diphthong, as Bhojpuri; diverges from Hindi ɛː). Provisional — exact quality unconfirmed in Saksena OCR, but shipped+asserted" },
         "ओ": { "ipa": "oː", "note": "long close-mid back" },
-        "औ": { "ipa": "au", "note": "Awadhi keeps औ as [au] (eastern retention — deferred, see provenance)" },
+        "औ": { "ipa": "au", "note": "Awadhi ships औ as [au] (eastern diphthong; diverges from Hindi ɔː). Provisional, see provenance" },
         "ऍ": { "ipa": "ɛː", "note": "candra e (loans)" },
         "ऑ": { "ipa": "ɔː", "note": "candra o (loans, e.g. English 'o')" },
         "ॐ": { "ipa": "õːm", "note": "Om sign (U+0950) — a whole syllable" },

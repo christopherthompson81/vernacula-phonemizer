@@ -15,12 +15,22 @@ describe("Awadhi canonical IPA (Saksena-documented divergences vs Hindi)", () =>
         expect(phonemizeWord("देश")).toBe("d̪ˈeːs"); // 'country' (Hindi: d̪eːʃ)
     });
 
-    test("intervocalic ड → [ɽ] flap, but post-nasal and word-initial ड stay [ɖ]", () => {
+    test("intervocalic ड/ढ → [ɽ]/[ɽʱ] flap, but nasal-context and word-initial stay [ɖ]", () => {
         expect(phonemizeWord("अडा")).toBe("ˈəɽaː"); // plain ड between vowels → ɽ (Hindi keeps ɖ)
         expect(phonemizeWord("सडक")).toBe("sˈəɽək"); // 'road' — intervocalic → ɽ
         expect(phonemizeWord("पडोसी")).toBe("pəɽˈoːsiː"); // 'neighbour' — flap survives the stress mark
-        expect(phonemizeWord("अंडा")).toBe("ˈə̃ɳɖaː"); // 'egg' — POST-NASAL ड stays ɖ (Saksena)
+        expect(phonemizeWord("गढा")).toBe("ɡˈəɽʱaː"); // ढ (ɖʱ) → ɽʱ intervocalically
+        expect(phonemizeWord("अंडा")).toBe("ˈə̃ɳɖaː"); // 'egg' — after an anusvara nasal (ɳ) ड stays ɖ (Saksena)
+        expect(phonemizeWord("अँडा")).toBe("ˈə̃ɖaː"); // after NASALISATION (chandrabindu) ड stays ɖ (Saksena's other exception)
         expect(phonemizeWord("डर")).toBe("ɖˈəɾ"); // 'fear' — WORD-INITIAL ड stays ɖ
+    });
+
+    test("ऐ/औ ship as the eastern diphthongs [ai]/[au] (provisional — see provenance)", () => {
+        // NOT deferred-to-Hindi: awa ships the eastern diphthong, diverging from Hindi's monophthong ɛː/ɔː,
+        // following Bhojpuri. The exact quality is unconfirmed in Saksena's OCR, hence "provisional", but the
+        // shipped behaviour is asserted so a regression is caught.
+        expect(phonemizeWord("बैल")).toBe("bˈail"); // 'ox' (Hindi monophthong: bɛːl)
+        expect(phonemizeWord("कौन")).toBe("kˈaun"); // 'who' (Hindi: kɔːn)
     });
 
     test("shared Indo-Aryan core (Hindi-identical where Awadhi does not diverge)", () => {
