@@ -1,0 +1,29 @@
+// North Levantine Arabic (apc — Syrian/Lebanese, urban) — 2nd Arabic VARIETY. Evaluated through phonemizeArabic(text,
+// "levantine"): the MSA neural diacritizer restores short vowels, the MSA g2p runs, then the Levantine shifts
+// (ج→ʒ, ق→ʔ, ث→t, ذ/ظ→d/dˤ, ay→eː, aw→oː) transform it. Referee: wikipron apc_arab_broad (HUMAN, fully-voweled
+// DIALECTAL IPA, INDEPENDENT). Same pausal + gemination folds as MSA. The short-vowel restructuring gap (MSA
+// diacritizer restores MSA vowels; Levantine has strong imāla) is data-blocked, as for arz — consonants only.
+{
+    "referees": [
+        {
+            "file": "apc.wikipron-apc-broad.tsv",
+            "source": "wikipron apc_arab broad (human)",
+            "role": "primary"
+        }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        {
+            "pattern": "[aiu]$",
+            "replace": "",
+            "note": "PAUSAL: drop a word-final short vowel (as MSA; preFold so long aː/iː/uː/eː/oː ending in ː survive)"
+        }
+    ],
+    "folds": [
+        {
+            "pattern": "(.)\\1+",
+            "replace": "$1",
+            "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        }
+    ]
+}

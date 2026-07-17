@@ -112,4 +112,14 @@ describe("arabic canonical IPA — diacritized path", () => {
             expect(phonemizeWord("جَمِيل")).toBe("d͡ʒamˈiːl");
         });
     });
+
+    // North Levantine Arabic (apc) — same engine, differs from Egyptian mainly in ج (→ [ʒ], not [ɡ]).
+    describe("Levantine variety (apc)", () => {
+        test("consonant shifts (ج→ʒ is the signature difference from Egyptian)", () => {
+            expect(phonemizeWord("جَمِيل", "levantine")).toBe("ʒamˈiːl"); // ج → ʒ (vs Egyptian ɡ)
+            expect(phonemizeWord("قَال", "levantine")).toBe("ʔˈaːl"); // ق → ʔ (urban)
+            expect(phonemizeWord("ثَلَاثَة", "levantine")).toBe("talˈaːta"); // ث → t
+            expect(phonemizeWord("بَيت", "levantine")).toBe("bˈeːt"); // ay → eː
+        });
+    });
 });
