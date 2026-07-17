@@ -24,8 +24,12 @@ export interface Seg {
     v: boolean;
 }
 
-/** Scan Zulu orthography into IPA segments (longest-match). */
-export function toSegments(word: string): Seg[] {
+/** A longest-match orthography→IPA rule (orth, ipa, isVowelNucleus). */
+export type Rule = [string, string, boolean];
+
+/** Scan Nguni orthography into IPA segments (longest-match). `rules` defaults to the Zulu table; the sibling
+ *  Xhosa engine passes its own (near-identical) table — the scan logic is shared. */
+export function toSegments(word: string, rules: readonly Rule[] = RULES): Seg[] {
     const w = word.toLowerCase();
     const segs: Seg[] = [];
     let i = 0;
@@ -36,7 +40,7 @@ export function toSegments(word: string): Seg[] {
             i += 4;
             continue;
         }
-        for (const [orth, ipa, v] of RULES) {
+        for (const [orth, ipa, v] of rules) {
             if (w.startsWith(orth, i)) {
                 segs.push({ ph: ipa, v });
                 i += orth.length;
