@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/tagalog/tagalog.ts";
+import {
+    phonemizeWord,
+    phonemizeWordRules,
+} from "../src/languages/tagalog/tagalog.ts";
 
 // Canonical-IPA goldens for Tagalog / Filipino (tl) — shallow near-phonemic Latin orthography, rule-based g2p.
 // Digraphs ng→ŋ, ch→t͡ʃ, ny/ñ→ɲ; r→ɾ; word-initial + intervocalic glottal stops [ʔ] (tao→taʔo); hyphen → [ʔ]
@@ -19,6 +22,17 @@ describe("tagalog canonical IPA", () => {
             ["araw", "ʔˈaɾaw"], // word-initial ʔ, r→ɾ, w
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
+    });
+
+    test("word-final glottal stop set (shipped) vs rule-only (unwritten, lexical)", () => {
+        // The word-final ʔ is phonemic but unwritten (a lexical residual). The shipped path appends it for words in
+        // the wikipron-sourced set; the rule engine (used by the non-circular referee eval) does not.
+        expect(phonemizeWord("acda")).toBe("ʔˈakdaʔ");
+        expect(phonemizeWordRules("acda")).toBe("ʔˈakda");
+        expect(phonemizeWord("aguho")).toBe("ʔaɡˈuhoʔ");
+        // Words NOT in the set are unchanged (and an already-ʔ-final rule output is not doubled):
+        expect(phonemizeWord("tao")).toBe("tˈaʔo");
+        expect(phonemizeWord("araw")).toBe("ʔˈaɾaw");
     });
 
     test("hyphen → glottal stop; number", () => {
