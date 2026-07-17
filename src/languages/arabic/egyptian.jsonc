@@ -1,0 +1,24 @@
+// Egyptian Arabic (arz) variety data. Applied on the MSA g2p output (the "restore MSA then transform" path): the
+// shared Arabic engine + diacritizer produce the MSA vocalization, and these Cairene shifts make it Egyptian.
+// See docs/arz_egyptian_bringup_investigation.md.
+//
+// Two kinds, because they need different scopes:
+//   consonantShifts — unambiguous string rewrites on the joined IPA (a consonant is always a consonant).
+//   diphthongShifts — applied to a whole VOWEL SEGMENT only, NOT as a string replace: a true diphthong (fatḥa +
+//     ي/و + sukūn) is one atomic seg [aj]/[aw], but a fatḥa + a glide that ONSETS the next syllable (طَوِيل tˤawiːl,
+//     three segs a·w·iː) concatenates to the same "aw" substring — a blanket replace would wrongly monophthongize
+//     the hiatus (tˤoːiːl). Matching the seg's ph exactly restricts it to real diphthongs.
+{
+    "variety": "egyptian",
+    "iso": "arz",
+    "consonantShifts": [
+        ["d͡ʒ", "ɡ"], // ج → [ɡ] (Cairene; the signature Egyptian consonant)
+        ["q", "ʔ"], // ق → [ʔ] (urban glottal stop)
+        ["θ", "t"], // ث → [t] (native; the learned/loan [s] is a lexical tail)
+        ["ð", "d"] // ذ → [d]; also turns ظ [ðˤ]→[dˤ] (ð→d leaves the pharyngealization) — native default
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // بيت bajt → beːt (only the atomic diphthong seg, not aj-hiatus)
+        "aw": "oː" // يوم jawm → joːm
+    }
+}

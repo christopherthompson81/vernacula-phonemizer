@@ -83,6 +83,8 @@ const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
+    arz: (w: string) => ar(w, "egyptian"), // Egyptian Arabic variety — shares phonemizeArabic
+
     bn,
     ca,
     cmn,
