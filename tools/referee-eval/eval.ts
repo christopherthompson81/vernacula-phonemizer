@@ -49,6 +49,7 @@ import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts
 // it against wikipron would be circular. phonemizeWordRules bypasses it → the honest engine signal.
 import { phonemizeWordRules as tl } from "../../src/languages/tagalog/tagalog.ts";
 import { phonemizeWord as om } from "../../src/languages/oromo/oromo.ts";
+import { phonemizeWord as pl } from "../../src/languages/polish/polish.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
 import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";
@@ -129,6 +130,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     th,
     tl,
     om,
+    pl,
     tr,
     ur,
     vi,
