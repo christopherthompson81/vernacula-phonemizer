@@ -31,7 +31,7 @@ const GOLD: [string, string][] = [
     ["atrás", "atɾˈas"], ["mesmo", "mˈezmu"],
     // position-split reduction: pretonic mid (bonito NOT bunitu), final raise (e→i, o→u)
     ["você", "vosˈe"], ["professor", "pɾofesˈoɾ"], ["menino", "menˈinu"], ["bonito", "bonˈitu"], ["pequeno", "pekˈenu"],
-    ["escola", "eskˈɔlɐ"], ["doce", "dˈosi"], ["sede", "sˈed͡ʒi"], ["rede", "ʁˈed͡ʒi"], ["pobre", "pˈobɾi"],
+    ["escola", "eskˈɔlɐ"], ["doce", "dˈosi"], ["sede", "sˈed͡ʒi"], ["rede", "ʁˈed͡ʒi"], ["pobre", "pˈɔbɾi"],
     // -em → [ẽj̃] (BP), NOT the EP [ɐ̃j̃]; -am and -ãe stay [ɐ̃w̃]/[ɐ̃j̃]
     ["tem", "tˈẽj̃"], ["bem", "bˈẽj̃"], ["viagem", "vjˈaʒẽj̃"], ["também", "tɐ̃bˈẽj̃"],
     ["ontem", "ˈõtẽj̃"], ["jovem", "ʒˈɔvẽj̃"], ["mãe", "mˈɐ̃j̃"], ["pão", "pˈɐ̃w̃"], ["coração", "koɾasˈɐ̃w̃"],
@@ -51,14 +51,29 @@ describe("pt-BR (neutral BP) accent delta", () => {
     }
 });
 
+// The BP open/close override lexicon (rule-unpredictable stressed-vowel openness, mined from the BZ referee):
+// these are wrong on the rule-only path (phonemizeWordRules) and corrected on the shipped phonemizeWord.
+describe("pt-BR open/close lexicon (shipped)", () => {
+    for (const [word, ipa] of [
+        ["cheque", "ʃˈɛki"],
+        ["acerola", "aseɾˈɔlɐ"],
+        ["anedota", "anedˈɔtɐ"],
+        ["pobre", "pˈɔbɾi"],
+    ] as const) {
+        it(`${word} → ${ipa}`, () => {
+            expect(phonemizeWord(word)).toBe(ipa);
+        });
+    }
+});
+
 // The BP "dez-e-" teens (16/17/19), distinct from the EP "dez-a-" forms — spoken through text() with the BP
 // realization on top (affrication, coda-s→s). Guards the dialect-parameterized number compositor.
 describe("pt-BR numbers (dez-e- teens)", () => {
     const bp = createPortugueseBR();
     for (const [n, ipa] of [
         ["16", "dezesˈejs"],
-        ["17", "dezesˈet͡ʃi"],
-        ["19", "dezenˈovi"],
+        ["17", "dezesˈɛt͡ʃi"],
+        ["19", "dezenˈɔvi"],
         ["26", "vˈĩt͡ʃi e sˈejs"],
     ] as const) {
         it(`${n} → ${ipa}`, () => {
