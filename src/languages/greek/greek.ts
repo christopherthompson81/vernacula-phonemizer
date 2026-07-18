@@ -41,10 +41,6 @@ function matchVowel(w: string, i: number): [number, string] | null {
     if (one !== undefined && V[one] !== undefined) return [1, V[one]!];
     return null;
 }
-const frontAt = (w: string, i: number): boolean => {
-    const m = matchVowel(w, i);
-    return m !== null && (m[1] === "e" || m[1] === "i");
-};
 
 /** Phonemize a single Modern Greek word to canonical IPA (no stress mark). */
 export function phonemizeWord(word: string): string {
@@ -56,9 +52,23 @@ export function phonemizeWord(word: string): string {
     let i = 0;
     const n = w.length;
 
-    // Is the vowel grapheme of length `len` at position p UNSTRESSED and sound [i]? (a synizesis trigger)
-    const unstressedI = (p: number): [number, string] | null => {
+    // Stress-aware vowel match: a tonos on the FIRST element of a would-be digraph marks HIATUS (τσάι = t͡s+a+i,
+    // ρολόι = ɾo.lo.i), so the digraph must NOT merge — take just the single vowel there.
+    const matchV = (p: number): [number, string] | null => {
         const m = matchVowel(w, p);
+        if (m !== null && m[0] === 2 && stressed[p]) {
+            const one = w[p];
+            if (one !== undefined && V[one] !== undefined) return [1, V[one]!];
+        }
+        return m;
+    };
+    const front = (p: number): boolean => {
+        const m = matchV(p);
+        return m !== null && (m[1] === "e" || m[1] === "i");
+    };
+    // Is the vowel grapheme at p an UNSTRESSED [i]? (a synizesis trigger)
+    const unstressedI = (p: number): [number, string] | null => {
+        const m = matchV(p);
         if (m === null || m[1] !== "i") return null;
         for (let k = 0; k < m[0]; k++) if (stressed[p + k]) return null;
         return m;
@@ -70,15 +80,20 @@ export function phonemizeWord(word: string): string {
         // γ-nasal digraphs ⟨γγ γκ γχ γξ⟩ → [ŋ] + stop/fricative (palatalised before a front vowel). Word-initial
         // ⟨γκ⟩ has no [ŋ]. Before the double-consonant rule so ⟨γγ⟩ isn't taken for a geminate.
         if (two === "γγ" || two === "γκ" || two === "γχ" || two === "γξ") {
-            const front = frontAt(w, i + 2);
+            const fr = front(i + 2);
             const nasal = two === "γκ" && i === 0 ? "" : "ŋ";
-            out += nasal + (two === "γξ" ? "ks" : two === "γχ" ? (front ? "ç" : "x") : front ? "ɟ" : "ɡ");
+            out += nasal + (two === "γξ" ? "ks" : two === "γχ" ? (fr ? "ç" : "x") : fr ? "ɟ" : "ɡ");
             i += 2;
             continue;
         }
-        // ⟨μπ ντ⟩ before a VOWEL → voiced stop, word-initial [b d] / medial prenasalised [mb nd]. Before a
-        // consonant they fall through to the separate letters μ+π / ν+τ (e.g. Πέμπτη → …mpti).
-        if ((two === "μπ" || two === "ντ") && matchVowel(w, i + 2) !== null) {
+        // ⟨μπ ντ⟩ before a VOWEL or a LIQUID (ρ λ) → voiced stop: word-initial [b d] / medial prenasalised [mb nd]
+        // (μπλε→ble, άντρας→andras). Before an OBSTRUENT they fall through to the separate letters μ+π / ν+τ
+        // (Πέμπτη → …mpti).
+        const afterMpNt = w[i + 2];
+        if (
+            (two === "μπ" || two === "ντ") &&
+            (matchVowel(w, i + 2) !== null || afterMpNt === "ρ" || afterMpNt === "λ")
+        ) {
             const voiced = two === "μπ" ? "b" : "d";
             out += i === 0 ? voiced : (two === "μπ" ? "m" : "n") + voiced;
             i += 2;
@@ -94,8 +109,8 @@ export function phonemizeWord(word: string): string {
             i++;
             continue;
         }
-        // ⟨αυ ευ⟩ → a/e + [v]/[f] by the following sound.
-        if (two === "αυ" || two === "ευ") {
+        // ⟨αυ ευ⟩ → a/e + [v]/[f] by the following sound. A tonos on the α/ε is HIATUS (άυλος = a.i…), not this digraph.
+        if ((two === "αυ" || two === "ευ") && !stressed[i]) {
             const nx2 = w.slice(i + 2, i + 4);
             const nx1 = w[i + 2];
             const voiced =
@@ -106,8 +121,8 @@ export function phonemizeWord(word: string): string {
             i += 2;
             continue;
         }
-        // Vowel digraph.
-        const vm = matchVowel(w, i);
+        // Vowel digraph (stress-aware: a tonos on the first element = hiatus, no merge).
+        const vm = matchV(i);
         if (vm !== null && vm[0] === 2) {
             out += vm[1];
             i += 2;
@@ -121,7 +136,7 @@ export function phonemizeWord(word: string): string {
             // referees mostly keep the [i], e.g. Κύριος→[ˈciɾios] — so we do NOT apply it; a lexicon is the path.)
             const iv = unstressedI(i + 1);
             if (iv !== null) {
-                const nv = matchVowel(w, i + 1 + iv[0]);
+                const nv = matchV(i + 1 + iv[0]);
                 let nvStressed = false;
                 if (nv !== null) for (let k = 0; k < nv[0]; k++) if (stressed[i + 1 + iv[0] + k]) nvStressed = true;
                 if (nvStressed) {
@@ -132,7 +147,7 @@ export function phonemizeWord(word: string): string {
                 }
             }
             // Velar palatalisation before a front vowel (the [i] is kept: γίδα → ʝiða).
-            if ((ch === "κ" || ch === "γ" || ch === "χ") && frontAt(w, i + 1)) {
+            if ((ch === "κ" || ch === "γ" || ch === "χ") && front(i + 1)) {
                 out += ch === "κ" ? "c" : ch === "γ" ? "ʝ" : "ç";
                 i++;
                 continue;

@@ -53,7 +53,22 @@ Two same-tradition (Wiktionary) human referees, both ~90% → **🟡 reliable +
 lexical-tail**. Floor 0.88. Verified: Ελλάδα→[elaða], αυτό→[afto], μπύρα→[biɾa],
 πέντε→[pende], κόσμος→[kozmos], ευχαριστώ→[efxaɾisto], Άγγελος→[aŋɟelos].
 
-**Outstanding (the lexical tail, ~10%):**
+## Run 5 — 2026-07-17 — adversarial review (90.2 → 91.1%)
+
+Two systematic bugs, both confirmed by BOTH referees (the TOKEN-regex worry was a
+false alarm — `Ͽ` is U+03FF, so `[Ͱ-Ͽ]` covers the whole Greek block):
+- **⟨μπ ντ⟩ before a liquid ρ/λ** wasn't voiced (μπλε→*mple, άντρας→*antɾas). The
+  voiced-stop gate fired only before a vowel; extended it to a following ρ/λ (μπλε→
+  ble word-initial, άντρας→andɾas medial). ⟨μπ ντ⟩ before an obstruent stays μ+π
+  (Πέμπτη→pempti).
+- **A tonos on the FIRST element of a vowel digraph is HIATUS** (τσάι = t͡s+a+i,
+  ρολόι = ɾo.lo.i — a whole syllable was being dropped). Added a stress-aware vowel
+  matcher that suppresses the digraph-merge when the first element carries the
+  tonos; the diaeresis path and second-element tonos (ναύτης→naftis) were already fine.
+
+Result: wikipron **90.2 → 91.1%**, kaikki 89.2 → 90.0%.
+
+## Outstanding (the lexical tail, ~9%):
 - **Lexical synizesis** — the register-conditioned unstressed-[i]-before-any-vowel
   cases (Σκόπια→[skopça] but Κύριος→[ˈciɾios]); a synizesis lexicon is the path.
 - **Variable medial prenasalisation** (Modern Greek drops the nasal for younger
