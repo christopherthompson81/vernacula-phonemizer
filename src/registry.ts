@@ -80,6 +80,7 @@ import { createShona } from "./languages/shona/shona.ts";
 import { createKinyarwanda } from "./languages/kinyarwanda/kinyarwanda.ts";
 import { createMadurese } from "./languages/madurese/madurese.ts";
 import { createChichewa } from "./languages/chichewa/chichewa.ts";
+import { createGreek } from "./languages/greek/greek.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -282,6 +283,8 @@ function build(lang: string): Phonemizer {
             return createMadurese();
         case "nya":
             return createChichewa();
+        case "el":
+            return createGreek();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
