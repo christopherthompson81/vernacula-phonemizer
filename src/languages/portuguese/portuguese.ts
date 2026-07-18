@@ -152,6 +152,20 @@ function realize(segs: Seg[], stress: number, dialect: "ep" | "bp" = "ep"): stri
                             : (REDUCE[s.raw] ?? ph);
             }
         }
+        // BP: a stressed OPEN mid vowel (ɔ/ɛ) with no EXPLICIT accent, before a nasal-onset consonant, CLOSES —
+        // the ô/ê of Brazilian orthography where Europe keeps ó/é open (abandona→abɐ̃donɐ, acena→asenɐ; EP
+        // abɐ̃dɔnɐ/asɛnɐ). Gated on !s.accent so acute-marked ó/é stay open (afónica keeps [ɔ]).
+        if (
+            dialect === "bp" &&
+            i === stress &&
+            !s.accent &&
+            !s.nasal &&
+            (ph === "ɔ" || ph === "ɛ")
+        ) {
+            const nx = segs[i + 1];
+            if (nx && !nx.nucleus && (nx.ph === "m" || nx.ph === "n" || nx.ph === "ɲ"))
+                ph = ph === "ɔ" ? "o" : "e";
+        }
         if (s.nasal && s.nucleus) ph = NASAL[ph] ?? ph;
         if (i === stress) out += "ˈ";
         out += ph;
@@ -185,14 +199,16 @@ export function renderWord(word: string, corr?: Corr, dialect: "ep" | "bp" = "ep
     return dialect === "bp" ? bpConsonants(ipa) : ipa;
 }
 
-/** BP consonant surface rules applied to the realized string (their triggers — [i] incl. raised final ⟨e⟩, and
- *  coda [ɫ] — are unambiguous at this point): (1) affrication of /t d/ before [i]/[ĩ] (tia → t͡ʃia, dia → d͡ʒia,
- *  gente → ʒẽt͡ʃi, cidade → sidad͡ʒi); (2) coda-l vocalization ɫ → [w] (sal → saw, Brasil → bɾaziw). Coda-r stays
- *  [ɾ] and rr/initial stay [ʁ] — both attested in the BZ referee, so no contested [h]/[x]/[ɻ] choice. */
+/** BP consonant surface rules applied to the realized string (their triggers — [i] incl. raised final ⟨e⟩, the
+ *  onset glide [j] from a high front vowel, and coda [ɫ] — are unambiguous at this point): (1) affrication of
+ *  /t d/ before [i]/[ĩ]/[j] (tia → t͡ʃia, dia → d͡ʒia, gente → ʒẽt͡ʃi, cidade → sidad͡ʒi; and before the glide —
+ *  the referee palatalises categorically here: adiado → ad͡ʒjadu, ação-tipo cases); (2) coda-l vocalization ɫ →
+ *  [w] (sal → saw, Brasil → bɾaziw). Coda-r stays [ɾ] and rr/initial stay [ʁ] — both attested in the BZ referee,
+ *  so no contested [h]/[x]/[ɻ] choice. */
 function bpConsonants(ipa: string): string {
     return ipa
-        .replace(/t([ˈˌ]?[iĩ])/gu, "t͡ʃ$1")
-        .replace(/d([ˈˌ]?[iĩ])/gu, "d͡ʒ$1")
+        .replace(/t([ˈˌ]?[iĩj])/gu, "t͡ʃ$1")
+        .replace(/d([ˈˌ]?[iĩj])/gu, "d͡ʒ$1")
         .replace(/ɫ/gu, "w");
 }
 

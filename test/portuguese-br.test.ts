@@ -17,6 +17,8 @@ import {
 // word → adjudicated BP IPA. Signature features: /t d/ affrication before [i], coda-l → [w], coda-s → [s]/[z],
 // position-split reduction (pretonic mid, final raise), -em → [ẽj̃].
 const GOLD: [string, string][] = [
+    // /t d/ affrication before the onset GLIDE [j] from ⟨i⟩ too (categorical in the BZ referee)
+    ["adiado", "ad͡ʒjˈadu"], ["diamante", "d͡ʒjamˈɐ̃t͡ʃi"], ["idioma", "id͡ʒjˈomɐ"], ["tédio", "tˈɛd͡ʒju"],
     // /t d/ affrication before [i] (incl. raised final ⟨e⟩→[i])
     ["tia", "t͡ʃˈiɐ"], ["dia", "d͡ʒˈiɐ"], ["gente", "ʒˈẽt͡ʃi"], ["dente", "dˈẽt͡ʃi"], ["noite", "nˈojt͡ʃi"],
     ["cidade", "sidˈad͡ʒi"], ["verde", "vˈeɾd͡ʒi"], ["leite", "lˈejt͡ʃi"], ["quente", "kˈẽt͡ʃi"], ["forte", "fˈɔɾt͡ʃi"],
@@ -31,8 +33,10 @@ const GOLD: [string, string][] = [
     ["você", "vosˈe"], ["professor", "pɾofesˈoɾ"], ["menino", "menˈinu"], ["bonito", "bonˈitu"], ["pequeno", "pekˈenu"],
     ["escola", "eskˈɔlɐ"], ["doce", "dˈosi"], ["sede", "sˈed͡ʒi"], ["rede", "ʁˈed͡ʒi"], ["pobre", "pˈobɾi"],
     // -em → [ẽj̃] (BP), NOT the EP [ɐ̃j̃]; -am and -ãe stay [ɐ̃w̃]/[ɐ̃j̃]
-    ["tem", "tˈẽj̃"], ["bem", "bˈẽj̃"], ["homem", "ˈɔmẽj̃"], ["viagem", "vjˈaʒẽj̃"], ["também", "tɐ̃bˈẽj̃"],
+    ["tem", "tˈẽj̃"], ["bem", "bˈẽj̃"], ["viagem", "vjˈaʒẽj̃"], ["também", "tɐ̃bˈẽj̃"],
     ["ontem", "ˈõtẽj̃"], ["jovem", "ʒˈɔvẽj̃"], ["mãe", "mˈɐ̃j̃"], ["pão", "pˈɐ̃w̃"], ["coração", "koɾasˈɐ̃w̃"],
+    // stressed mid vowel CLOSES before a nasal-onset consonant in BP (the ô/ê; EP keeps ó/é open)
+    ["homem", "ˈomẽj̃"], ["fome", "fˈomi"], ["telefone", "telefˈoni"], ["abandona", "abɐ̃dˈonɐ"], ["pessoa", "pesˈoɐ"],
     // plain words (rr/initial [ʁ], coda-r [ɾ] — both attested in BZ)
     ["casa", "kˈazɐ"], ["mesa", "mˈezɐ"], ["rua", "ʁˈuɐ"], ["carro", "kˈaʁu"], ["terra", "tˈɛʁɐ"],
     ["porta", "pˈɔɾtɐ"], ["água", "ˈaɡwɐ"], ["muito", "mˈujtu"], ["trabalho", "tɾabˈaʎu"], ["falar", "falˈaɾ"],
