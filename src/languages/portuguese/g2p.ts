@@ -60,8 +60,9 @@ function nasalizedHere(w: string, vi: number): boolean {
     return after === "" || !isV(after); // m/n before a consonant or word-end → nasal coda
 }
 
-/** Scan a lowercased EP word into segments (consonants realized in place; vowels get stressed-quality IPA). */
-export function toSegments(word: string): Seg[] {
+/** Scan a lowercased word into segments (consonants realized in place; vowels get stressed-quality IPA).
+ *  `dialect` only affects the word-final -em nucleus (EP [ɐ̃j̃] vs BP [ẽj̃]); everything else is shared. */
+export function toSegments(word: string, dialect: "ep" | "bp" = "ep"): Seg[] {
     const w = word.toLowerCase();
     const n = w.length;
     const segs: Seg[] = [];
@@ -121,11 +122,13 @@ export function toSegments(word: string): Seg[] {
                 (c === "a" || c === "á" || c === "e" || c === "é")
             ) {
                 const acc = ACUTE_GRAVE.includes(c); // á/é keep the stress; plain a/e stay unstressable
+                const isE = c === "e" || c === "é";
                 segs.push({
-                    ph: "ɐ",
+                    // -am → [ɐ̃w̃] in both; -em → EP [ɐ̃j̃] but BP [ẽj̃] (tem → tẽj̃, homem → omẽj̃, viagem → viaʒẽj̃).
+                    ph: isE && dialect === "bp" ? "e" : "ɐ",
                     nucleus: true,
                     accent: acc,
-                    raw: c === "a" || c === "á" ? "a" : "e",
+                    raw: isE ? "e" : "a",
                     nasal: true,
                 });
                 pushGlide(segs, c === "a" || c === "á" ? "w̃" : "j̃", true);
@@ -277,10 +280,13 @@ export function toSegments(word: string): Seg[] {
 
 const isVowelPh = (ph: string): boolean => /[aɐɛeiɔouɨ]/.test(ph);
 
-/** s/z realization by position: a single intervocalic s → z; any coda s/z → ʃ (before voiceless / word-final)
- *  or ʒ (before a voiced consonant). ç, ss, soft-c and x are fixed /s/ or /ʃ/ (raw≠"s") and do not voice. */
+/** s/z realization by position: a single intervocalic s → z; any coda s/z → the coda sibilant (before voiceless /
+ *  word-final) or its voiced pair (before a voiced consonant). ç, ss, soft-c and x are fixed /s/ or /ʃ/ (raw≠"s")
+ *  and do not voice. The coda sibilant is postalveolar ʃ/ʒ in EP but ALVEOLAR s/z in (standard/paulistano) BP
+ *  (luz → EP luʃ / BP lus; mesmo → EP meʒmu / BP mezmu) — the `dialect` selects the pair. */
 const VOICED = new Set(MANIFEST.voicedConsonants);
-export function sibilants(segs: Seg[]): void {
+export function sibilants(segs: Seg[], dialect: "ep" | "bp" = "ep"): void {
+    const [coda, codaVoiced] = dialect === "bp" ? ["s", "z"] : ["ʃ", "ʒ"];
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;
         if (s.ph !== "s" && s.ph !== "z") continue;
@@ -293,6 +299,6 @@ export function sibilants(segs: Seg[]): void {
             if (prevV && !prev!.nasal && s.raw === "s") s.ph = "z"; // single s voices (casa → kazɐ); NOT after a
             continue; // nasal vowel (sansão → sɐ̃sɐ̃w̃) — an absorbed
         } // coda n precedes it. ç/ss/initial s stay s.
-        s.ph = !next ? "ʃ" : VOICED.has(next.ph) ? "ʒ" : "ʃ"; // coda → ʃ / ʒ (luz → luʃ, mesmo → meʒmu)
+        s.ph = !next ? coda : VOICED.has(next.ph) ? codaVoiced : coda; // coda → ʃ/ʒ (EP) or s/z (BP)
     }
 }

@@ -10,6 +10,7 @@ import { createSpanish } from "./languages/spanish/spanish.ts";
 import { createArabic } from "./languages/arabic/arabic.ts";
 import { createFrench } from "./languages/french/french.ts";
 import { createPortuguese } from "./languages/portuguese/portuguese.ts";
+import { createPortugueseBR } from "./languages/portuguese-br/portuguese-br.ts";
 import { createRussian } from "./languages/russian/russian.ts";
 import { createGerman } from "./languages/german/german.ts";
 import { createDutch } from "./languages/dutch/dutch.ts";
@@ -132,6 +133,9 @@ function build(lang: string): Phonemizer {
             return createFrench();
         case "pt":
             return createPortuguese();
+        // Brazilian Portuguese (neutral/paulistano) — the EP engine in `dialect: "bp"` mode (accent variant of `pt`).
+        case "pt-BR":
+            return createPortugueseBR();
         case "ru":
             return createRussian();
         case "de":

@@ -48,6 +48,7 @@ import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
+import { phonemizeWord as ptbr } from "../../src/languages/portuguese-br/portuguese-br.ts";
 import { phonemizeWord as ru } from "../../src/languages/russian/russian.ts";
 import { phonemizeWord as si } from "../../src/languages/sinhala/sinhala.ts";
 // RULE-ONLY for bn: the shipped phonemizeWord applies a wikipron-informed lexicon, so evaluating it against
@@ -184,6 +185,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     mr,
     pa,
     pt,
+    "pt-BR": ptbr,
     ru,
     si,
     sv,

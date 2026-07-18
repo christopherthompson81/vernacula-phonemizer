@@ -1,0 +1,13 @@
+// Brazilian Portuguese (pt-BR) — "neutral"/standard (paulistano) BP, an ACCENT VARIANT of `pt` (the EP engine in
+// dialect:"bp" mode, portuguese-br.ts). Referee: wikipron por_latn_bz broad (HUMAN, 57k merged variants; the
+// eval credits ANY variant, so the referee's regional spread — coda-r [ɾ]~[ʁ]~[ɻ]~[h], coda-s [s]~[ʃ] — is
+// tolerated). The backbone strips the ties (t͡ʃ→tʃ), stress, length, and combining nasal/quality marks.
+{
+    "referees": [
+        { "file": "pt-BR.wikipron-bz.tsv", "source": "wikipron por_latn_bz (human, broad)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "ɐ", "replace": "a", "note": "final-atonic ⟨a⟩ [ɐ] ~ [a] — the referee lists both; one phoneme" },
+        { "pattern": "ʁ", "replace": "h", "note": "rr/initial ⟨r⟩: our uvular [ʁ] ~ the referee's [h]/[x]/[ʁ] regional spread — one phoneme" }
+    ]
+}

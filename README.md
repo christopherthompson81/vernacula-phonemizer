@@ -47,7 +47,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |
 | Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
-| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt`, Spanish `es` |
+| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt` (+ `pt-BR` accent variant), Spanish `es` |
 | Sinitic | Cantonese `yue`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
 | Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Ukrainian `uk` |
 | Tai-Kadai | Thai `th` (tonal) |
@@ -57,8 +57,11 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 
 **Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):
 `en-GB` = the GenAm English engine + a Received-Pronunciation lexical-set transform (non-rhoticity, BATH,
-CLOTH, yod-retention, GOAT/NURSE/centring vowels). Legitimate because it uses the parent's community-adopted
-orthography and a verifiable delta; the pattern extends to pt-BR, es-419, en-IN.
+CLOTH, yod-retention, GOAT/NURSE/centring vowels), applied as an output post-process; `pt-BR` = the European
+Portuguese engine parameterized for Brazilian realization (position-split reduction, /t d/→t͡ʃ/d͡ʒ before [i],
+coda-l→[w], coda-s→[s]) — a deeper delta that lives inside the engine, since EP vowel reduction can't be undone
+downstream. Legitimate because each uses the parent's community-adopted orthography and a referee-verifiable
+delta; the pattern extends to es-419, en-IN.
 
 ## How it works
 
