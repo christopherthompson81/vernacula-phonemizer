@@ -1,0 +1,30 @@
+// Shona (sn) — Bantu (S10, Standard Zezuru), Latin orthography, AUTHORED beyond-espeak. Referee: epitran sna-Latn
+// (programmatic, INDEPENDENT — the ONLY substantial Shona pronunciation source; wikipron has no Shona and kaikki
+// has <25 IPA entries). A single independent source → 🔷 single-source. epitran is a rule g2p, so this measures
+// rule-agreement (a regression guard), not a human gold. The folds neutralise epitran's documented naiveties so
+// the SEGMENTAL backbone can be compared: the backbone already strips the breathy mark ̤ (U+0324) and tie bars, so
+// ⟨bh⟩=b̤→b and affricates fold for free. The remaining folds map ours (the grammar-correct, explicit forms) to
+// epitran's (naive) forms — the implosives ⟨b d⟩→ɓ ɗ (epitran writes plain b/d), the whistled ⟨sv zv⟩→ȿ ɀ
+// (epitran writes labialised sʷ/zʷ), and the prenasalisation superscripts (epitran writes full nasals).
+{
+    "referees": [
+        {
+            "file": "sn.epitran-sna.tsv",
+            "source": "epitran sna-Latn (programmatic)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "No second Shona source exists to triangulate: wikipron ships no Shona (sna), and the kaikki Shona extract has <25 IPA entries (too few for a referee). epitran sna-Latn is the sole substantial source — and it is programmatic (rule-based), so this is a rule-agreement regression guard, not a human gold. → 🔷 single-source.",
+    "folds": [
+        { "pattern": "ɓ", "replace": "b", "note": "⟨b⟩ [ɓ] implosive (grammar-confirmed) → b: epitran writes a plain b, so fold ours to match (the implosive is a real b/bh contrast we keep in output)" },
+        { "pattern": "ɗ", "replace": "d", "note": "⟨d⟩ [ɗ] implosive → d: epitran writes a plain d (we keep ɗ in output)" },
+        { "pattern": "ȿ", "replace": "s", "note": "whistled ⟨sv⟩ [ȿ] → s: epitran writes the labialised sʷ (stripped below), so both reduce to s (the whistled quality is unverifiable against this naive referee)" },
+        { "pattern": "ɀ", "replace": "z", "note": "whistled ⟨zv⟩ [ɀ] → z: epitran writes zʷ" },
+        { "pattern": "ʷ", "replace": "", "note": "epitran renders the whistled sibilants as labialised sʷ/zʷ/t͡sʷ — strip the labialisation so it matches our whistled base s/z (ours never emits ʷ; real ⟨Cw⟩ labialisation is a full w on both sides)" },
+        { "pattern": "ⁿ", "replace": "n", "note": "prenasalisation: our superscript homorganic nasal ([ⁿd]) → n (epitran writes the full nasal nd)" },
+        { "pattern": "ᵐ", "replace": "m", "note": "prenasalisation: superscript labial nasal ([ᵐb]) → m" },
+        { "pattern": "ᵑ", "replace": "ŋ", "note": "prenasalisation: superscript velar nasal ([ᵑɡ]) → ŋ (epitran writes ŋɡ)" },
+        { "pattern": "ᶬ", "replace": "m", "note": "prenasalisation: superscript labiodental nasal ([ᶬʋ], ⟨mv⟩) → m" },
+        { "pattern": "nh", "replace": "n", "note": "epitran GAP: it has ⟨mh⟩→m̤ but LACKS the parallel ⟨nh⟩→n̤ rule, emitting a literal n+h. The grammar has ⟨nh⟩=[n̤] (breathy, which the backbone strips to n) — ours is correct; fold epitran's spurious h (ours never emits a literal ⟨nh⟩ substring)" }
+    ]
+}
