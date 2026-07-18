@@ -1,19 +1,30 @@
 // Sindhi (sd) — Indo-Aryan, Perso-Arabic ABJAD. Rule g2p recovers the consonant + long-vowel skeleton (incl. the
-// implosives ٻɓ ڏɗ ڄʄ ڳɠ); SHORT vowels are UNWRITTEN → a default [ə] (folded, as for Urdu). Referee = combined
-// kaikki + wikipron snd_arab HUMAN IPA. Fold: short-vowel quality (a/i/u/ɪ/ʊ ~ ə) unrecoverable from the abjad;
-// gemination as length; tap ɾ~r; ʋ~v.
+// implosives ٻɓ ڏɗ ڄʄ ڳɠ); SHORT vowels are UNWRITTEN → a default [ə] (folded, as for Urdu). Referees: (1) combined
+// kaikki + wikipron snd_arab (both Wiktionary), (2) Grierson's Linguistic Survey of India 1928 (Vicholi + Lari,
+// via lexibank/lsi, CC-BY) — INDEPENDENT of Wiktionary, the real second tradition. Fold: short-vowel quality
+// (a/i/u/ɪ/ʊ/ʌ ~ ə) unrecoverable from the abjad; gemination as length; tap ɾ~r; ʋ~v; implosives ~ Grierson's
+// geminate-plosive notation (ɓ→bb etc., 1928 predated IPA implosive symbols).
 {
     "referees": [
-        { "file": "sd.human-combined.tsv", "source": "kaikki + wikipron snd_arab (human)", "role": "primary" }
+        { "file": "sd.human-combined.tsv", "source": "kaikki + wikipron snd_arab (human)", "role": "primary" },
+        { "file": "sd.grierson-lsi.tsv", "source": "Grierson LSI 1928 Vicholi+Lari (lexibank/lsi, CC-BY) — INDEPENDENT", "role": "secondary" }
     ],
     "segmentJoin": true,
     "preFolds": [
-        { "pattern": "[aiuɪʊɐəɛɔ](?!ː)", "replace": "", "note": "short vowels (quality AND presence) are UNWRITTEN in the abjad — strip them (BEFORE the backbone removes the length ː, so long vowels V+ː are preserved) → the eval measures the recoverable CONSONANT + long-vowel backbone (as for Urdu)" }
+        { "pattern": "[aiuɪʊɐəɛɔʌ](?!ː)", "replace": "", "note": "short vowels (quality AND presence) are UNWRITTEN in the abjad — strip them (BEFORE the backbone removes the length ː, so long vowels V+ː are preserved) → the eval measures the recoverable CONSONANT + long-vowel backbone (as for Urdu). ʌ is Grierson's short-a." }
     ],
     "folds": [
-        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination as length ː (ours) vs doubled (referee) — notation" },
+        { "pattern": "dʒdʒ", "replace": "dʒ", "note": "Grierson doubles the affricate (ʄ→dʒdʒ, and geminate ج); collapse before the implosive fold" },
+        { "pattern": "tʃtʃ", "replace": "tʃ", "note": "Grierson doubled affricate (چ geminate)" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination as length ː (ours) vs doubled (referee) — notation; also Grierson's implosive-as-geminate ɓ→bb, ɠ→gg, ɗ→ɖɖ" },
+        { "pattern": "ɓ", "replace": "b", "note": "implosive ٻ [ɓ] ~ Grierson's plain/geminate b (he had no IPA implosive symbol in 1928); symmetric — kaikki ɓ folds too, match preserved" },
+        { "pattern": "ɠ", "replace": "g", "note": "implosive ڳ [ɠ] ~ Grierson g/gg" },
+        { "pattern": "ʄ", "replace": "dʒ", "note": "implosive ڄ [ʄ] ~ Grierson dʒ(dʒ)" },
+        { "pattern": "ɗ", "replace": "ɖ", "note": "implosive ڏ [ɗ] ~ Grierson's retroflex ɖ notation" },
         { "pattern": "ɾ", "replace": "r", "note": "tap ɾ ~ referee r" },
         { "pattern": "ʋ", "replace": "v", "note": "ʋ ~ v" },
+        { "pattern": "w", "replace": "v", "note": "و-consonant: Grierson's [w] ~ our [ʋ]→v (same glide)" },
+        { "pattern": "ʌ", "replace": "a", "note": "Grierson's short-a/long-ā vowel [ʌ]/[ʌː] ~ our [a]/[ə] (transcription convention)" },
         { "pattern": "ɦ", "replace": "h", "note": "breathy [ɦ] ~ [h] (referee marks ح/ه as ɦ)" },
         { "pattern": "[ɕʂ]", "replace": "ʃ", "note": "sibilant notation ʃ~ɕ~ʂ (چ/ش place varies)" },
         { "pattern": "ʱ", "replace": "ʰ", "note": "breathy/aspiration notation [ʱ]~[ʰ]" },
