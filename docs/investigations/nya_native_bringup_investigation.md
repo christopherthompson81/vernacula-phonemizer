@@ -31,13 +31,16 @@ kaikki / 87.6% epitran. Two systematic gaps, fixed by adding cluster entries:
    nkhw→ᵑkʷʰ, thw→tʷʰ. → 96.2 / 94.8 / 91.4%.
 2. **⟨Cy⟩ palatalisation** — ⟨dy⟩ gave [ɗj] (glide) not [ɗʲ]. Listed the palatalised
    digraphs (by→ɓʲ, dy→ɗʲ, …) emitting Cʲ (fleet-consistent with Kinyarwanda) + the
-   ʲ~j fold. → 97.5 / 96.2 / 92.8%. Then nkhw/thy → **98.7 / 97.4 / 92.1%**.
+   ʲ~j fold. → 97.5 / 96.2 / 92.8%. Then nkhw/thy → 98.7 / 97.4 / 92.1%.
+3. **WHISTLED clusters** (from the PR review) — ⟨ps⟩/⟨bz⟩ are palatalised [psʲ]/[bzʲ]
+   in BOTH human referees (psa→[psʲa], bzinya→[bzʲiɲa]; prenasalised ⟨mps mbz⟩→[ᵐpsʲ ᵐbzʲ]).
+   Added those. → **99.4 / 98.2 / 92.7%**.
 
 ## Result
 
-- wikipron nya_latn (primary, human, narrow): **98.7%** (1541/1562)
-- kaikki nya (human): **97.4%** (1486/1526)
-- epitran nya-Latn (independent, broad): **92.1%** (1450/1562)
+- wikipron nya_latn (primary, human, narrow): **99.4%** (1553/1562)
+- kaikki nya (human): **98.2%** (1498/1526)
+- epitran nya-Latn (independent, broad): **92.7%** (1448/1562)
 
 Three referees, two human at ~98% + an independent programmatic at 92% → **✅**.
 Floor 0.96. The residual (~1.3% on the primary) is a clean referee-limited tail:
