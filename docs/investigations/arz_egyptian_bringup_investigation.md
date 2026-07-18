@@ -79,3 +79,27 @@ more restrictive than CC BY-NC, so it fails this repo's permissive-data policy a
 provenance. Rejected for the pipeline unless QCRI grants explicit permission. The same group's ACL-2024 paper
 ("Beyond Orthography") also warns text-based dialect diacritizers are unreliable vs speech — they went acoustic.
 kaikki (CC BY-SA) is the clean source; a larger permissive Egyptian corpus remains the real Phase-2b lever.
+
+## Phase 3 — 2026-07-18 — the Egyptian NEURAL diacritizer (calima-egy teacher → silver → student)
+
+Found the scale lever after all — CAMeL Tools `calima-egy` (GPL) diacritizes Egyptian at scale, and per ADR-0014
+a model trained on its *outputs* is clean (facts-not-expression; GPL doesn't propagate to a silver-trained
+student — the same teacher→student pattern the MSA diacritizer used with the Apache CATT teacher). Pipeline (RTX
+3090, camel-tools venv, /mnt/data/arz-diac): extract **Masri Wikipedia** (CC-BY-SA, 350k sentences) + the **MIT
+dialect-corpus** Egyptian subset (90k) → `calima_egy_silver.py` (calima-egy analyzer + MIT BERT disambiguator →
+diacritized silver, **6 parallel GPU workers**, 99% util) → OOV-filter + 90/5/5 split (222,888 train) →
+`train_bilstm_sent.py --pausal 1` (silver-only, same arch/alphabet as MSA) → int8 ONNX (15 MB). **TEST DER
+1.63% / WER 4.70%** — better than the MSA student (2.17%). Wired variety-aware (`createArabicDiacritizer(variety)`
+loads diacritizer-egy for egyptian, MSA fallback).
+
+Result: the diacritizer restores Egyptian vowels + reflexes on running text (قلب→ʔalb, رحت→ruħt, النهاردة→
+nahaːrda, مدرسة→madrasa). **NON-CIRCULAR**: the referee is wikipron, the teacher is calima-egy — different
+traditions — so the rules-only **37.3→39.5%** lift is independently anchored. The referee undercounts the model's
+true quality (1.63% DER) because it is ISOLATED citation words while the model trained on running text and hedges
+on isolated forms (مصر→miṣr, hamza-less انا→naː); the shipped path's kaikki lexicon supplements exactly those
+isolated common words. This is the MSA pattern (neural running-text model + a citation-form lexicon supplement),
+now for Egyptian, from fully permissive corpus + a GPL-offline teacher.
+
+**Farasa vs calima-egy (why calima-egy won):** both are Arabic dialect diacritizers, but Farasa's is
+research-license-only (fails the permissive-data policy even for offline silver) and API/JAR-MSA-only; calima-egy
+is GPL (not non-commercial), usable offline for silver under ADR-0014, with a clean permissive corpus.
