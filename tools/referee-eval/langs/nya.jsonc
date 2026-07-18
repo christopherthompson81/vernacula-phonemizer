@@ -1,0 +1,26 @@
+// Chichewa / Chinyanja (nya) — Bantu (N31), Latin orthography. THREE referees: wikipron nya_latn (PRIMARY, HUMAN,
+// narrow) + kaikki nya (SECONDARY, HUMAN — same Wiktionary tradition) + epitran nya-Latn (TERTIARY, INDEPENDENT,
+// broad). wikipron+kaikki are narrow (implosives, retroflex tap, prenasalisation superscript, TONE + stress);
+// epitran is broad (plain b/d, full nasals, no tone). The folds neutralise: TONE/stress (backbone) + the notation
+// gaps between the narrow and broad traditions so the SEGMENTAL backbone can be compared. Tone is deferred.
+{
+    "referees": [
+        { "file": "nya.wikipron-nya-latn.tsv", "source": "wikipron nya_latn (human, narrow)", "role": "primary" },
+        { "file": "nya.kaikki-nya.tsv", "source": "kaikki nya (human)", "role": "secondary" },
+        { "file": "nya.epitran-nya-latn.tsv", "source": "epitran nya-Latn (programmatic)", "role": "secondary" }
+    ],
+    "preFolds": [
+        { "pattern": "⁽ᵝ⁾", "replace": "", "note": "the narrow referees' optional-labialisation notation [w⁽ᵝ⁾] on ⟨w⟩ before a vowel — a bilabial-fricative colouring we don't mark" }
+    ],
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with a dot" },
+        { "pattern": "ʷ", "replace": "w", "note": "⟨Cw⟩ labialisation: the narrow referees write a superscript [ʷ]; we write the w glide" },
+        { "pattern": "ʲ", "replace": "j", "note": "⟨Cy⟩ palatalisation [Cʲ] ~ epitran's glide [Cj] — same palatalised consonant; fold to compare (we keep ʲ in output, matching the narrow referees + our Kinyarwanda convention)" },
+        { "pattern": "ɓ", "replace": "b", "note": "implosive ⟨b⟩ [ɓ] → b: epitran writes a plain b (we + wikipron/kaikki keep ɓ; fold reconciles the broad referee)" },
+        { "pattern": "ɗ", "replace": "d", "note": "implosive ⟨d⟩ [ɗ] → d (epitran plain d)" },
+        { "pattern": "ⁿ", "replace": "n", "note": "prenasalisation: superscript homorganic nasal ([ⁿd]) → n (epitran writes the full nasal nd)" },
+        { "pattern": "ᵐ", "replace": "m", "note": "prenasalisation: superscript labial nasal ([ᵐb]) → m" },
+        { "pattern": "ᵑ", "replace": "ŋ", "note": "prenasalisation: superscript velar nasal ([ᵑɡ]) → ŋ" },
+        { "pattern": "ᶬ", "replace": "m", "note": "prenasalisation: superscript labiodental nasal ([ᶬf]) → m" }
+    ]
+}
