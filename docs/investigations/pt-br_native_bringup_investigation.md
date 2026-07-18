@@ -64,8 +64,36 @@ The review confirmed the EP-regression risk (the core dialect parameterization) 
 defaults "ep", EP output byte-identical (11/11), and the bpConsonants regex, isFinal reduction on proparoxytones,
 beforeDarkL i/u, and the -em fix all verified correct.
 
+## Run 3 — 2026-07-18 — lexical-tail work (83.0 → 85.6%)
+
+Categorized the ~17% tail with a candidate-fix yield+regression harness (each fix applied to the full 57k
+referee, counting misses→hits AND hits→misses). Two systematic, dialect-gated wins (EP untouched by
+construction):
+
+1. **Palatalise /t d/ before the onset GLIDE [j] from ⟨i⟩** (+799 fixed, −0 broke). The referee palatalises
+   categorically before /i/ regardless of syllabicity (abadiado→abad͡ʒjadu, diamante→d͡ʒjamɐ̃t͡ʃi), but our
+   affrication only fired before syllabic [i] — the onglide pass had already turned the i→[j]. Extended the
+   bpConsonants class to `[iĩj]`. (My earlier "BP skips glide palatalisation" read — from the en-GB-style review
+   — was WRONG; the BZ referee is unambiguous.) Zero regressions because the only [j] right after t/d is the
+   i-onset glide.
+2. **Close a stressed mid vowel before a nasal-onset consonant** (+146 fixed, −1 broke). The BP ô/ê where Europe
+   keeps ó/é open: abandona→abɐ̃donɐ (EP abɐ̃dɔnɐ), homem→omẽj̃, fome→fomi (referee-confirmed: come/dona/sono/
+   somos/gostoso all close). Implemented in realize() gated on **!seg.accent** so acute-marked ó/é stay open
+   (afónica keeps [ɔ]) — the discriminator that turned an unrefined +148/−54 into +146/−1 (the −54 were all
+   acute-accented EP-spelled proparoxytones). The lone −1 (donas) is a likely-erroneous referee entry.
+
+Note the eval FOLDS nasalisation (backbone strips combining tildes), so a separate "nasalise before nasal-C"
+candidate scored +0 — the closing is what the eval sees; nasalisation is canonically present but invisible here.
+
+**Remaining tail (~14%, diffuse, not pursued)** — all shared-EP or genuinely lexical, no clean discriminator:
+open/close stressed-mid lexicon disagreements in BOTH directions (cheque→our [e] vs [ɛ]; contável→our [ɛ] vs
+[e]) — needs a BP open/close lexicon, deliberately NOT built (the same call as `pt`, which declined a learned-word
+lexicon to keep canonical consistency); `-ear` glide-vs-hiatus (campear→kɐ̃pjaɾ vs kɐ̃peaɾ — the shared onglide
+pass); `sc`-cluster gemination (apascentar→apassẽ- vs apasẽ-, an EP-side grapheme issue); stressed `-ol`→[ɔw]
+(andebol, shared EP); loanwords (allah, catmandu, aardvark).
+
 ## Status
 
-🟡 accent-variant. Floor 0.82 (83.0%, a genuine referee number, not noise-limited). Second accent variant after
-en-GB → the parameterized-engine pattern (vs en-GB's post-process) for deep phonological deltas. Next: es-419,
-en-IN.
+🟡 accent-variant. Floor 0.85 (85.6% after the Run 3 tail work; a genuine referee number, not noise-limited).
+Second accent variant after en-GB → the parameterized-engine pattern (vs en-GB's post-process) for deep
+phonological deltas. Next: es-419, en-IN.
