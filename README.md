@@ -41,7 +41,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Celtic | Irish `ga`, Welsh `cy` |
 | Creole (English-lexified) | Nigerian Pidgin `pcm` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
-| Germanic | Dutch `nl`, English `en`, German `de`, Swedish `sv` (tonal accent) |
+| Germanic | Dutch `nl`, English `en` (+ `en-GB` accent variant), German `de`, Swedish `sv` (tonal accent) |
 | Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
 | Iranian | Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa` |
 | Japonic | Japanese `ja` |
@@ -54,6 +54,11 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Tibeto-Burman | Burmese `my` (tonal) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
 | Uralic | Hungarian `hu` |
+
+**Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):
+`en-GB` = the GenAm English engine + a Received-Pronunciation lexical-set transform (non-rhoticity, BATH,
+CLOTH, yod-retention, GOAT/NURSE/centring vowels). Legitimate because it uses the parent's community-adopted
+orthography and a verifiable delta; the pattern extends to pt-BR, es-419, en-IN.
 
 ## How it works
 

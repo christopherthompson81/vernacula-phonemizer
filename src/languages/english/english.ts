@@ -163,7 +163,10 @@ export class EnglishPhonemizer {
         return out;
     }
 
-    text(input: string): string {
+    /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
+     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this engine's
+     *  full number/heteronym/prosody context. Clause pause marks are not passed through it. */
+    text(input: string, wordTransform?: (ipa: string, word: string) => string): string {
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
         while ((m = TOKEN_RE.exec(input)) !== null) {
@@ -293,7 +296,8 @@ export class EnglishPhonemizer {
                         ? last.citation
                         : promoteFirstVowel(last.citation);
             }
-            for (const it of c.items) parts.push(it.display);
+            for (const it of c.items)
+                parts.push(wordTransform ? wordTransform(it.display, it.word) : it.display);
             if (c.mark !== null) parts.push(c.mark);
         }
         return parts.join(" ");

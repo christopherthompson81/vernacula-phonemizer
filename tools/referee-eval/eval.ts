@@ -14,6 +14,10 @@ import { fileURLToPath } from "node:url";
 import { phonemizeArabic as ar } from "../../src/languages/arabic/arabic.ts";
 import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
+// RULE-ONLY for en-GB: the shipped phonemizeWord applies BATH/CLOTH/yod/PALM lexical-set word lists MINED FROM
+// this wikipron UK referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
+// GenAm-engine + rule-delta signal (no lexical sets) → the honest, non-circular accent-transform number.
+import { phonemizeWordRules as engb } from "../../src/languages/english-gb/english-gb.ts";
 import { phonemizeWord as ff } from "../../src/languages/fula/fula.ts";
 import { phonemizeWord as ha } from "../../src/languages/hausa/hausa.ts";
 import { createHindi } from "../../src/languages/hindi/hindi.ts";
@@ -143,6 +147,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     cy,
     de,
     en,
+    "en-GB": engb,
     es,
     fa,
     ff,
