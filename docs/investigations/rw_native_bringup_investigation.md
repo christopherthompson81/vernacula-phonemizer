@@ -81,13 +81,44 @@ the Wikipedia phonology gives ⟨cy⟩ = [c] (palatal stop) with ⟨shy⟩ = [ç
 stops vs shy=[ç] the fricative), and making cy=[ç] would merge it with ⟨shy⟩. The
 [ç] alternative is noted but not adopted.
 
+## Run 3 — 2026-07-17 — palatal REVISION from a comparative grammar (80.4→87.9%)
+
+Revisiting the sourcing (does an equivalent to the Madurese JIPA text exist?)
+surfaced the **Cox "Kirundi & Kinyarwanda Comparative Grammar"** — an independent
+reference with an explicit phonemic consonant table (Table 25). It **overturned the
+Wikipedia-based palatal analysis** we shipped:
+- It CONFIRMS the plain series ⟨c⟩=[t͡ʃ], ⟨j⟩=[ʒ], ⟨sh⟩=[ʃ] (with the coronal paper) —
+  refuting epitran there.
+- But it analyses ⟨cy⟩=**[kʲ]** ("palatalised variant of /k/"), ⟨jy⟩=**[ɡʲ]**,
+  ⟨shy⟩=**[ʃʲ]**, and the ⟨Cy⟩ class as **palatalised consonants** [Cʲ] — NOT the
+  palatal segments [c ɟ ç bɟ ɾɟ] we took from Wikipedia (a single source). The
+  grammar AND epitran (cy→kj, jy→ɡj) both back palatalisation.
+
+**This corrected an error in Run 1's own writeup:** epitran is NOT "wrong on all
+palatals." It is wrong on ⟨sh c j⟩ but *right* on ⟨cy jy⟩ (the palatalised velars).
+
+We adopted the grammar's Table 25 palatalisation analysis uniformly (cy→kʲ, jy→ɡʲ,
+shy→ʃʲ, by→bʲ, ry→ɾʲ, my→mʲ; ny→ɲ kept as the phonemic palatal nasal). Effects:
+- Measured epitran agreement **80.4 → 87.9%** — cy/jy/by/ry/my now reconcile (folded
+  ʲ~j, the grammar's secondary-articulation vs epitran's full glide).
+- The residual collapses to exactly ⟨sh c j⟩ — where the Cox grammar AND the coronal
+  paper confirm ours and epitran is wrong. Clean, honest.
+- The palatal VALUES now rest on the **Cox grammar** (an independent human source),
+  not Wikipedia alone — the 🔷 is properly earned, not papered over.
+
+The literature genuinely CONTESTS Kinyarwanda palatalisation (Table 25's [Cʲ] vs
+Kimenyi's feature-agreement C+y→Cʒy/Cʃy/Cɲy — which actually supports the old
+⟨my⟩=[mɲ] — vs Wikipedia's palatal segments). We follow the Cox grammar's own
+phonemic table (coherent, single-analysis, independently authored). The [mɲ]/[ç]
+alternatives are noted, not adopted.
+
 ## Deferred
 
 - **Tone** (H/L, phonemic but unwritten — the standard orthography marks none).
 - The noun-class **number concord** (20 = makumi *abiri*; our composer uses the
   bare unit). Numbers are unmeasured (the referee is word-only).
-- A non-palatal-blind referee would be needed to lift this beyond 🔷 / to verify
-  the palatal series independently — none exists (no wikipron/kaikki Kinyarwanda).
+- ⟨sh c j⟩ remain epitran disagreements (epitran wrong; ours grammar+phonetics
+  corroborated) — an inherent ceiling on the epitran number, not a defect.
 - **Homorganic nasal assimilation before palatals** (njye→[ɲɟe] not [nɟe],
   nshya→[ɲça]): a real but narrow Bantu allophonic process, left unmodelled — it is
   unverifiable against epitran, and the clean greedy g2p is kept rather than adding

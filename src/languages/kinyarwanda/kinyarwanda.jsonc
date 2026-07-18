@@ -18,19 +18,21 @@
     "provenance": "Authored from the Kinyarwanda orthography + phonology (Wikipedia Kinyarwanda phonology). Referee: epitran kin-Latn (corroborates the bulk; the palatal series is grammar-authored). CC0 Common Voice wordlist.",
 
     "convention": {
-        "palatals": "⟨cy⟩→c, ⟨jy⟩→ɟ, ⟨shy⟩→ç, ⟨ny⟩→ɲ; C+palatal sequences ⟨by⟩→bɟ, ⟨ry⟩→ɾɟ, ⟨my⟩→mɲ, ⟨py⟩→pc",
+        "palatals": "PALATALIZATION analysis (Cox K&KCG grammar, Table 25): ⟨Cy⟩ → Cʲ — ⟨cy⟩→kʲ (palatalized /k/), ⟨jy⟩→ɡʲ, ⟨shy⟩→ʃʲ, ⟨by⟩→bʲ, ⟨ry⟩→ɾʲ, ⟨my⟩→mʲ, ⟨py⟩→pʲ. ⟨ny⟩→ɲ is the PHONEMIC palatal nasal (kept). (Wikipedia's palatal-segment analysis c/ɟ/ç/bɟ was single-source and less supported; the grammar + epitran both back palatalization.)",
         "affricates": "⟨c⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨sh⟩→ʃ",
         "nasals": "⟨ng⟩→ŋ (plain velar nasal, NOT ŋɡ); other ⟨mb nd nz nt nk mp⟩ stay nasal+C",
         "other": "⟨r⟩→ɾ (tap), double vowels → long (aa→aː); ⟨Cw⟩ labialisation = C+w",
         "tone": "H/L tone is unwritten → DEFERRED; written vowel length IS emitted"
     },
 
-    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so trigraphs (shy) win over digraphs
-    // (cy, sh, ng) over singles. ⟨ty ky gy hy dy vy⟩ and ⟨tw kw bw gw rw⟩ need no entries — ⟨y⟩→j / ⟨w⟩→w fall
-    // out of the greedy scan as C+j / C+w.
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so the trigraph ⟨shy⟩ wins over digraphs
+    // (cy, sh, ng) over singles. The ⟨Cy⟩ palatalised consonants are listed explicitly (→ Cʲ, the Cox-grammar
+    // analysis). ⟨tw kw bw gw rw⟩ velarised consonants need no entries — ⟨w⟩→w falls out of the greedy scan as C+w.
     "graphemes": {
-        "shy": "ç",
-        "cy": "c", "jy": "ɟ", "by": "bɟ", "ry": "ɾɟ", "my": "mɲ", "py": "pc", "ny": "ɲ", "sh": "ʃ",
+        "shy": "ʃʲ",
+        "cy": "kʲ", "jy": "ɡʲ", "by": "bʲ", "ry": "ɾʲ", "my": "mʲ", "py": "pʲ",
+        "vy": "vʲ", "hy": "hʲ", "ky": "kʲ", "gy": "ɡʲ", "ty": "tʲ", "dy": "dʲ", "fy": "fʲ", "ly": "lʲ", "sy": "sʲ", "zy": "zʲ",
+        "ny": "ɲ", "sh": "ʃ",
         "ng": "ŋ",
         "aa": "aː", "ee": "eː", "ii": "iː", "oo": "oː", "uu": "uː",
 
