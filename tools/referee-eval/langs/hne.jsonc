@@ -11,6 +11,6 @@
     "script": "Devanagari",
     "provenance": "Hindi-derived Devanagari engine + the shared Eastern-Hindi divergences (श/ष→s, ऐ/औ→ai/au).",
     "referees": [],
-    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Chhattisgarhi (no wikipron, no kaikki extract, no epitran hne-Deva mapping). Because Chhattisgarhi is segmentally ~Hindi (distinguished mostly grammatically), any agreement with a Hindi-clone referee is trivial. The anchor is the hand-adjudicated gold in test/chhattisgarhi.test.ts, grading the DISTINCTIVE features (श/ष→s, ऐ/औ→ai/au, no əɦə-lowering) — the axis where a Hindi clone is demonstrably wrong. Chhattisgarhi shares these Eastern-Hindi features with Awadhi/Bhojpuri; no Chhattisgarhi-ONLY segmental feature is confidently attested beyond them.",
+    "secondaryGap": "CANNOT-VERIFY: no independent phonetic referee exists for Chhattisgarhi (no wikipron, no kaikki, no epitran hne-Deva mapping). The build is CORROBORATED (not measured) against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect of Eastern Hindi' (1921, rev. Grierson) — its phoneme inventory + the attested UDHR sample. That confirmed श/ष→[s] (the inventory has NO /ʃ/), Chhattisgarhi's SOLE confident segmental divergence from Hindi, and CORRECTED an initial error (ऐ/औ are monophthongs [ɛː]/[ɔː] as Hindi, गौरव→[ɡɔrəʋ], not the Bhojpuri diphthongs [ai]/[au]). A documented reduced-schwa-deletion feature (लोगन→[loɡən]) is noted but not modelled. Anchor: the distinctive-feature gold in test/chhattisgarhi.test.ts.",
     "folds": []
 }
