@@ -54,3 +54,28 @@ Phase 2 was meant to close the short-vowel restructuring with a dialect vowel le
 data — recoverable in principle (a dialect diacritizer/lexicon *would* work), but no independent Egyptian corpus
 exists to build or measure one. arz = consonant-correct / vowel-MSA-biased. 🟡 (a real path — more Egyptian data —
 that is simply unavailable, like Urdu's restoration wall). Phase 1 was the tractable deliverable.
+
+## Phase 2 — 2026-07-18 — the Egyptian short-vowel LEXICON (kaikki)
+
+Found the Egyptian vowel data after all, in kaikki's **Egyptian Arabic** Wiktionary extract: 1183 entries, **876
+with IPA** carrying the correct Egyptian vowels + reflexes (أنا /a.na/, مصر /masˤr/, قط /ʔʊtˤtˤ/). Built
+`egyptian-lexicon.tsv` (**554 words**, word→canonical Egyptian IPA): cleaned the IPA (strip slashes/dots),
+collapsed geminates to ⟨Cː⟩, normalized narrow→broad (æ/ɪ/ʊ→a/i/u — the notation half of the residual), and
+placed a Cairene stress mark before the stressed vowel. Validated **~88–92% against the wikipron-arz referee**
+(the residual is notation: initial-ʔ + remaining narrow marks). Wired into `phonemizeArabic` (egyptian variety):
+the tokenizer strips harakat to recover the bare key and substitutes the lexicon IPA before the g2p — works
+per-word in sentences too (أنا من مصر → ana min masˤr).
+
+**Non-circular split:** kaikki and the wikipron-arz referee share the Wiktionary tradition (95% agree on the 563
+shared words), so the eval scores the RULE path (`lexicon:false`, 37.3% unchanged); the lexicon is a SHIPPED
+refinement. It fixes the common-word core (مصر, أنا, ازاى, تلفزيون…) where the MSA diacritizer gave MSA vowels;
+the OOV Egyptian tail remains → still 🟡. This is Phase 2a (a curated common-word lexicon), not a full solution.
+
+**Farasa (evaluated, rejected on licensing).** QCRI's Farasa has a multi-variety neural diacritizer (the 2019
+"Four Varieties" system) that could diacritize large Egyptian text at scale → a Phase-2b silver corpus. But: (a)
+the dialect diacritizer is **not** in the downloadable JAR (MSA-only there; farasapy exposes only `diacritize()`),
+it's an API/demo; and (b) the Farasa license is **"research purpose only; non-research use → contact QCRI"** —
+more restrictive than CC BY-NC, so it fails this repo's permissive-data policy and would taint the training
+provenance. Rejected for the pipeline unless QCRI grants explicit permission. The same group's ACL-2024 paper
+("Beyond Orthography") also warns text-based dialect diacritizers are unreliable vs speech — they went acoustic.
+kaikki (CC BY-SA) is the clean source; a larger permissive Egyptian corpus remains the real Phase-2b lever.

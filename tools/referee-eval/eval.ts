@@ -121,7 +121,9 @@ const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
-    arz: (w: string) => ar(w, "egyptian"), // Egyptian Arabic variety — shares phonemizeArabic
+    // RULE-ONLY (lexicon:false): the shipped path adds an Egyptian short-vowel lexicon MINED FROM kaikki, which
+    // shares the Wiktionary tradition with the wikipron-arz referee → evaluating it would be circular.
+    arz: (w: string) => ar(w, "egyptian", { lexicon: false }), // Egyptian Arabic variety — shares phonemizeArabic
     apc: (w: string) => ar(w, "levantine"), // North Levantine Arabic variety
     apd: (w: string) => ar(w, "sudanese"), // Sudanese Arabic variety (no referee — gold-anchored 🔷)
     acm: (w: string) => ar(w, "iraqi"), // Iraqi Arabic variety (Baghdadi gilit)

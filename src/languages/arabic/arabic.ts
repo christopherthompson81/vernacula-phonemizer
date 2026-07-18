@@ -121,11 +121,38 @@ const TOKEN = /([ء-يٰٱً-ْـ]+)|([0-9٠-٩]+)|([۔.!؟?،,؛;:…])/gu;
 const toAscii = (d: string): string =>
     d.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x0660));
 
+// Egyptian short-vowel LEXICON (arz): word (undiacritized) → canonical Egyptian IPA, mined from kaikki (Wiktionary
+// Egyptian Arabic, CC BY-SA) — the dialect vowel data the MSA diacritizer cannot supply (Egyptian restructures the
+// short vowels: مصر MSA miṣr → BP maṣr, أنا anā → ana). Because kaikki and the wikipron-arz referee share the
+// Wiktionary tradition, the eval scores the RULE path (useLexicon:false) → this lexicon is a SHIPPED refinement.
+let egyptianLex: ReadonlyMap<string, string> | undefined;
+function egyptianLexicon(): ReadonlyMap<string, string> {
+    if (egyptianLex === undefined)
+        egyptianLex = loadTsvMap(import.meta.url, "egyptian-lexicon.tsv", undefined, {
+            optional: true,
+        });
+    return egyptianLex;
+}
+const HARAKAT = /[ً-ْٰـ]/gu; // short-vowel diacritics + dagger-alif + tatweel → bare lexicon key
+
 class ArabicPhonemizer implements Phonemizer {
-    constructor(private variety?: string) {}
+    constructor(
+        private variety?: string,
+        private useLexicon = false,
+    ) {}
     text(input: string): string {
+        // The Egyptian lexicon keys on the BARE word; the input here is diacritized (post neural-diacritizer), so
+        // strip the harakat to look it up, and only for the egyptian variety with the lexicon enabled (shipped).
+        const lex =
+            this.variety === "egyptian" && this.useLexicon
+                ? egyptianLexicon()
+                : undefined;
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1], this.variety));
+            if (m[1])
+                sink.emit(
+                    lex?.get(m[1].replace(HARAKAT, "")) ??
+                        phonemizeWord(m[1], this.variety),
+                );
             else if (m[2]) sink.emit(numberToIpa(Number(toAscii(m[2]))));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -136,9 +163,10 @@ class ArabicPhonemizer implements Phonemizer {
 }
 
 /** Build the Arabic phonemizer for `variety` (undefined/"msa" = Modern Standard Arabic; "egyptian" = arz, …).
+ *  `useLexicon` enables the Egyptian short-vowel lexicon (shipped; off for the non-circular referee eval).
  *  Expects diacritized input; the neural diacritizer pre-pass (phonemizeArabic) restores short vowels for bare text. */
-export function createArabic(variety?: string): Phonemizer {
-    return new ArabicPhonemizer(variety);
+export function createArabic(variety?: string, useLexicon = false): Phonemizer {
+    return new ArabicPhonemizer(variety, useLexicon);
 }
 
 let diacritizer: Promise<ArabicDiacritizer | undefined> | undefined;
@@ -159,16 +187,25 @@ function restoreLex(): ReadonlyMap<string, string> {
  * vowels, then the synchronous g2p. Requires the optional `onnxruntime-node` dependency and the diacritizer
  * model beside this module; if the model is absent it falls back to phonemizing the input as-is (which is
  * correct only for already-diacritized text). Diacritized input can use the sync `phonemize(text, "ar")`.
+ *
+ * `opts.lexicon` (default TRUE) enables the Egyptian short-vowel lexicon for `variety:"egyptian"` — a SHIPPED
+ * refinement over the MSA-diacritizer vowels. The referee eval passes `lexicon:false` to keep the number
+ * non-circular (the lexicon is mined from the same Wiktionary tradition as the wikipron-arz referee).
  */
-export async function phonemizeArabic(text: string, variety?: string): Promise<string> {
+export async function phonemizeArabic(
+    text: string,
+    variety?: string,
+    opts?: { lexicon?: boolean },
+): Promise<string> {
     if (diacritizer === undefined) diacritizer = createArabicDiacritizer();
     const diac = await diacritizer;
     // The diacritizer + Tashkeela restore lexicon are MSA (shared): they restore the MSA vocalization, which the
-    // variety g2p then transforms. Egyptian short vowels differ from MSA — a dialect vowel lexicon is Phase 2.
+    // variety g2p then transforms. Egyptian short vowels differ from MSA — the egyptian-lexicon.tsv supplies them.
     const vocalized = diac ? await diac.diacritize(text) : text;
     const restored = diac ? lexiconPrimary(vocalized, restoreLex()) : vocalized;
-    const key = variety ?? "msa";
+    const useLexicon = opts?.lexicon ?? true;
+    const key = `${variety ?? "msa"}${useLexicon ? "" : ":nolex"}`;
     let phon = phonemizers.get(key);
-    if (!phon) phonemizers.set(key, (phon = createArabic(variety)));
+    if (!phon) phonemizers.set(key, (phon = createArabic(variety, useLexicon)));
     return phon.text(restored);
 }
