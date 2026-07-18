@@ -88,3 +88,8 @@ stops vs shy=[ç] the fricative), and making cy=[ç] would merge it with ⟨shy�
   bare unit). Numbers are unmeasured (the referee is word-only).
 - A non-palatal-blind referee would be needed to lift this beyond 🔷 / to verify
   the palatal series independently — none exists (no wikipron/kaikki Kinyarwanda).
+- **Homorganic nasal assimilation before palatals** (njye→[ɲɟe] not [nɟe],
+  nshya→[ɲça]): a real but narrow Bantu allophonic process, left unmodelled — it is
+  unverifiable against epitran, and the clean greedy g2p is kept rather than adding
+  a place-assimilation rule with no referee to catch a mistake. Noted by the PR
+  review as a conscious convention match, not a bug.
