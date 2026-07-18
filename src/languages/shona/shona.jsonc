@@ -1,0 +1,58 @@
+// Native canonical-IPA data manifest for Shona / chiShona (sn) — Bantu (S10, Zezuru-based Standard Shona), the
+// Latin orthography, espeak-independent. A greedy longest-match scan: multi-letter graphemes (whistled sibilants,
+// prenasalized clusters, breathy digraphs, affricates) before single letters. Shona syllables are open CV with a
+// prenasalized cluster as a single onset unit, so no coda/syllabification logic is needed — a pure left-to-right
+// longest-match over the grapheme table suffices. Signature features (grammar-confirmed, Wikipedia Shona phonology):
+//   • IMPLOSIVES ⟨b⟩→ɓ, ⟨d⟩→ɗ — the plain letters are implosive; ⟨bh⟩→b̤, ⟨dh⟩→d̤ are the BREATHY-voiced plosives.
+//   • WHISTLED sibilants ⟨sv⟩→ȿ, ⟨zv⟩→ɀ (+ the affricate/prenasal series t͡ȿ d͡ɀ ⁿɀ) — a famous Shona distinctive.
+//   • PRENASALIZED ⟨mb nd ng nz nj⟩ → ᵐb ⁿd ᵑɡ ⁿz ⁿd͡ʒ (a superscript nasal marks the unit); ⟨ng'⟩ (apostrophe) → ŋ.
+//   • BREATHY ⟨mh nh vh zh⟩ → m̤ n̤ v̤ ʒ; ⟨v⟩→ʋ (approximant).
+// Tone (H/L) is unwritten and DEFERRED; there is no vowel-length/stress marking. Referee: epitran sna-Latn
+// (programmatic, INDEPENDENT — the only substantial Shona source; kaikki has <25 IPA entries) → 🔷 single-source.
+// See docs/investigations/sn_native_bringup_investigation.md.
+{
+    "language": "sn",
+    "name": "Shona (chiShona)",
+    "script": "Latin",
+    "provenance": "Authored from the Standard Shona (Zezuru) orthography + phonology (Wikipedia Shona phonology; Doke). Referee: epitran sna-Latn.",
+
+    "convention": {
+        "implosives": "⟨b⟩→ɓ, ⟨d⟩→ɗ (plain letters = implosive); ⟨bh⟩→b̤, ⟨dh⟩→d̤ (breathy plosives)",
+        "whistled": "⟨sv⟩→ȿ, ⟨zv⟩→ɀ, ⟨tsv⟩→t͡ȿ, ⟨dzv⟩→d͡ɀ, ⟨nzv⟩→ⁿɀ (whistling sibilants — a Shona signature)",
+        "prenasalized": "⟨mb nd ng nz nj mv⟩ → ᵐb ⁿd ᵑɡ ⁿz ⁿd͡ʒ ᶬʋ (superscript nasal); ⟨ng'⟩ → ŋ (plain velar nasal)",
+        "breathy": "⟨mh nh vh⟩ → m̤ n̤ v̤; ⟨v⟩→ʋ; ⟨zh⟩→ʒ",
+        "tone": "H/L tone is unwritten → DEFERRED; no length/stress marking (open CV syllables)"
+    },
+
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so trigraphs (ng', tsv, dzv, nzv) win
+    // over digraphs (ts, sv, nz) which win over single letters. ⟨sw gw kw mw…⟩ and ⟨ty dy py…⟩ need no entries —
+    // ⟨w⟩→w and ⟨y⟩→j fall out of the greedy scan as C+w / C+j (batya→batja, gwara→ɡwara).
+    "graphemes": {
+        "ng'": "ŋ", "tsv": "t͡ȿ", "dzv": "d͡ɀ", "nzv": "ⁿɀ",
+
+        "ch": "t͡ʃ", "sh": "ʃ", "zh": "ʒ", "ny": "ɲ", "ts": "t͡s", "dz": "d͡z", "pf": "p͡f", "bv": "b͡v",
+        "bh": "b̤", "dh": "d̤", "mh": "m̤", "nh": "n̤", "vh": "v̤",
+        "sv": "ȿ", "zv": "ɀ",
+        "mb": "ᵐb", "nd": "ⁿd", "ng": "ᵑɡ", "nz": "ⁿz", "nj": "ⁿd͡ʒ", "mv": "ᶬʋ",
+
+        "b": "ɓ", "d": "ɗ", "p": "p", "t": "t", "k": "k", "g": "ɡ", "f": "f", "s": "s", "z": "z",
+        "v": "ʋ", "m": "m", "n": "n", "r": "r", "l": "l", "w": "w", "y": "j", "h": "h", "j": "d͡ʒ",
+
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // Cardinal number words (Standard Shona). Units 1–10; the compositor (numbers.ts) handles the noun-class-free
+    // counting form (makumi maviri = 20, zana = 100, churu = 1000).
+    "numbers": {
+        "units": ["zero", "motsi", "piri", "tatu", "ina", "shanu", "tanhatu", "nomwe", "sere", "pfumbamwe"],
+        "ten": "gumi",
+        "tens": "makumi",
+        "hundred": "zana",
+        "thousand": "churu",
+        "and": "ne"
+    }
+}
