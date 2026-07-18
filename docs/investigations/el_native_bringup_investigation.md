@@ -68,6 +68,28 @@ false alarm — `Ͽ` is U+03FF, so `[Ͱ-Ͽ]` covers the whole Greek block):
 
 Result: wikipron **90.2 → 91.1%**, kaikki 89.2 → 90.0%.
 
+## Run 6 — 2026-07-17 — synizesis methodology study (a negative result)
+
+Question: can a better RULE refine synizesis beyond the "before a stressed vowel"
+heuristic — e.g. condition on the preceding consonant? A study of the 19k referee
+(orthographic ⟨C + unstressed-i + vowel⟩ sites, does the referee drop the [i]?):
+
+| consonant | synizesis rate |
+|---|---|
+| γ, λ, ν | ~46–57% (the LEXICAL middle — ~50/50, unpredictable) |
+| δ ρ π κ σ τ μ φ | 2–19% (reliably KEEP the [i]) |
+
+(An earlier crude test suggested γ synizes 98% — that was CONFOUNDED: γ→ʝ produces a
+palatal whether or not the [i] is absorbed, so "has a palatal" ≠ "synizes". Corrected.)
+
+**Conclusion:** no consonant reliably triggers synizesis — the middle (γ/λ/ν) is
+genuinely lexical/register. So a consonant-conditioned rule cannot help (tested γ→
+always-synize: net +0.1%, luck, reverted). The "before a stressed vowel" productive
+-ιά/-ιό rule is the RULE ceiling. The principled next step is a **cross-source
+(wikipron∩kaikki) consensus synizesis lexicon** (the Gujarati/Bengali schwa-lexicon
+pattern: the eval stays rule-only/non-circular; the shipped path adds the lexicon).
+Deferred.
+
 ## Outstanding (the lexical tail, ~9%):
 - **Lexical synizesis** — the register-conditioned unstressed-[i]-before-any-vowel
   cases (Σκόπια→[skopça] but Κύριος→[ˈciɾios]); a synizesis lexicon is the path.
