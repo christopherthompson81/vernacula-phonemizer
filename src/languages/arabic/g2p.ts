@@ -148,8 +148,9 @@ export function toSegments(word: string): Seg[] {
 
     let i = 0;
     if (s[i] === ALIF && s[i + 1] === "ل") {
-        // word-initial article الـ
-        pushCons("ʔ");
+        // word-initial article الـ — the alif is hamzat al-waṣl → a plain [a] onset, NOT [ʔa]: القمر → alqamar,
+        // الشمس → aʃːams (both referees omit the ʔ; the ʔ that follows an article, as in الأحد → alʔaħad, is the
+        // next word's own hamza, not the article's). Egyptian raises the article vowel a→i (variety shift, il-).
         pushVowel("a");
         i = emitArticle(i + 1);
     } else if (
@@ -167,7 +168,10 @@ export function toSegments(word: string): Seg[] {
         pushVowel("i");
         i = emitArticle(i + 2);
     } else if (s[i] === ALIF && HARAKAT.has(s[i + 1] ?? "")) {
-        pushCons("ʔ"); // word-initial bare alif + harakat = glottal onset
+        // word-initial BARE alif is hamzat al-waṣl (a connecting/elidable seat) → a plain VOWEL onset, NOT a
+        // glottal stop: ابتسم → ibtasam, ائتلاف → iʔtilaːf (both referees, MSA + arz, omit the ʔ here). Only the
+        // hamza-CARRIERS أ إ آ ء (CONS→ʔ, and ALIF_MADDA below) get a real [ʔ]. Emitting ʔ here was over-generating
+        // a word-initial glottal on every waṣl word (the dominant arz residual class; also wrong for MSA).
         const { hk, next } = gatherMarks(s, i + 1);
         const r = resolveVowel(hk, s, next);
         pushVowel(r.v);
@@ -175,6 +179,12 @@ export function toSegments(word: string): Seg[] {
     } else if (s[i] === ALIF_MADDA) {
         pushCons("ʔ");
         pushVowel("aː");
+        i += 1;
+    } else if (s[i] === ALIF) {
+        // word-initial bare alif with NO vowel mark: still hamzat al-waṣl, but the diacritization source left the
+        // elision vowel unwritten (the MSA Tashkeela convention — احْتَاج، اسْم). Supply the default waṣl vowel [i]
+        // (اسم → ism, استخدم → istaxdam, arz istaxdim) instead of dropping the alif (which produced sm, ħtaːɡ).
+        pushVowel("i");
         i += 1;
     }
 

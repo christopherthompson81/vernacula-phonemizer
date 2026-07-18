@@ -103,3 +103,43 @@ now for Egyptian, from fully permissive corpus + a GPL-offline teacher.
 **Farasa vs calima-egy (why calima-egy won):** both are Arabic dialect diacritizers, but Farasa's is
 research-license-only (fails the permissive-data policy even for offline silver) and API/JAR-MSA-only; calima-egy
 is GPL (not non-commercial), usable offline for silver under ADR-0014, with a clean permissive corpus.
+
+## Run — 2026-07-18 — the "unlockable" hamzat-al-waṣl fix (short-vowel restoration → a masked g2p bug)
+
+The user's memory: *once a method restores short vowels in an abjad, other findings become unlockable.* Confirmed.
+Ran `eval.ts arz --examples 45` and read the RESIDUAL DIVERGENCE CLASSES (not the headline %). The dominant
+non-lexical class was a **spurious word-initial glottal stop**: `ʔana≠an`, `ʔibtasam≠ibtasam`, `ʔitbasatˤ≠itbasatˤ`
+— the ONLY difference in a large class was a leading `ʔ` our g2p emitted and the referee omitted.
+
+Root cause (g2p.ts): word-initial **bare alif** ا is **hamzat al-waṣl** (a connecting/elidable seat), NOT a glottal
+stop — it should surface as a plain VOWEL onset. Only the hamza-CARRIERS أ إ آ ء (CONS→ʔ) and ALIF_MADDA آ carry a
+real [ʔ]. Discriminator (measured on the referee): of 50 bare-alif-initial words, 42 (84%) start with a VOWEL in
+the referee; of 45 hamza-alif words, 40 (89%) KEEP the ʔ. Clean orthographic split → a principled fix, not a heuristic.
+
+Two entangled sub-bugs, both fixed:
+1. **bare alif + harakat** (diacritizer voweled it, e.g. اِبْتَسَم) → was `ʔ`+vowel; now vowel only.
+2. **bare alif with NO harakat** — the MSA Tashkeela restore-lexicon writes the waṣl vowel UNwritten (احْتَاج، اسْم),
+   so line 169 didn't fire and the alif was DROPPED entirely (`ħtaːɡ`, `sm`). Now defaults to the waṣl vowel **[i]**
+   (اسم→ism, استخدم→istaxdam, arz istaxdim).
+3. **the definite article** الـ — the alif is also waṣl → `ʔal`→`al` (both referees: القمر→alqamar, arz→ilqaːhira; the
+   ʔ in الأحد→alʔaħad is the FOLLOWING word's hamza, not the article's).
+
+This is a SHARED g2p fix (bare-alif handling), so it helps **both** dialects — and MSA more than Egyptian:
+
+| referee | before | after | Δ |
+|---|---|---|---|
+| arz wikipron (primary) | 39.5% | **41.7%** | +2.2 |
+| ar wikipron (primary)  | 57.4% | **65.3%** | **+7.0** |
+| ar kaikki (secondary)  | 62.6% | **70.5%** | **+7.0** |
+
+**Running-text test (the user asked):** phonemized 5 connected Egyptian sentences end-to-end (the diacritizer's real
+strength is in-context, unlike the isolated-word referee). Coherent, and both fixes visibly correct in context:
+المدرسة→almadrasa, الكتاب→alkitaːb, الدرس→adːars (sun-assim, no ʔ), استخدم→istaxdam, دلوقتي→dilwaʔti (ق→ʔ),
+الجو→algoː (ج→ɡ, aw→oː), اللي→illi, احنا→iħna. Residual is the known short-vowel-QUALITY tail (انا→inaː should be
+ana; نتكلم vowel) — lexical, not structural. Floors raised ar 0.55→0.62, arz 0.35→0.40. arabic tests updated (the
+article no longer carries ʔ) + all pass.
+
+**Remaining arz tail (documented, not fixed):** Egyptian **il-** article-raising (a→i) is a real Egyptian feature but
+only 3 al-initial words in the 590-word referee → low eval-ROI and needs variety-aware g2p (the string-rewrite
+variety layer can't tell an article `a` from any other word-initial `a`); folded into the short-vowel-restructuring
+tail for now. The bigger tail is unchanged: Egyptian short-vowel QUALITY (the MSA diacritizer restores MSA vowels).
