@@ -116,6 +116,21 @@ preservation in -mente adverbs (abertamente); loanwords (allah, catmandu). Furth
 
 ## Status
 
-🟡 accent-variant. Floor 0.86 (rules-only 86.9%, non-circular; shipped phonemizeWord 89.3% with the open/close
-lexicon). A genuine referee number, not noise-limited. Second accent variant after en-GB → the
-parameterized-engine pattern (vs en-GB's post-process) for deep phonological deltas. Next: es-419, en-IN.
+✅ VERIFIED (flipped from 🟡 after Runs 3–5, 2026-07-18). Floor 0.86 (rules-only 86.9%, non-circular; shipped
+phonemizeWord 89.3% with the open/close lexicon). A genuine referee number, not noise-limited.
+
+**Why ✅ (not 🟡):** gold 100%, and after the open/close lexicon the residual composition is the ✅ profile — the
+only remaining SYSTEMATIC classes are INHERITED from the `pt` engine (which is ✅): the sc-cluster (absceder→our
+abssedeɾ, EP-side), the güe/gue u-glide (aguei→aɡej, both dialects), -mente pretonic preservation (abertamente),
+and EP -ct- spellings (abjecção) all fail identically in pt-PT. The rest of the miss is diffuse — loanwords,
+Tupí-Guaraní regionalisms (abaneenga), proper nouns, and rhotic-variant referee noise. No pt-BR-SPECIFIC gap
+remains, so pt-BR now has the same residual profile as its ✅ pt-PT parent.
+
+**Training relevance:** the OmniVoice FLEURS corpus labels its Portuguese audio as `pt_br` (data_config.json), not
+pt-PT — so pt-BR's phonemization is what the model actually consumes for Portuguese, which is why the sibling was
+targeted alongside pt-PT. (The `ɨ` primitive the coverage-set doc credits to `pt` is not emitted by BP, but Welsh
+`cy_gb` — also in the corpus — supplies it, so it stays attested.)
+
+Second accent variant after en-GB → the parameterized-engine pattern (vs en-GB's post-process) for deep
+phonological deltas. Next accent target: **es-419** (Latin-American Spanish — also a training locale, currently
+unbuilt: only generic `es` exists).
