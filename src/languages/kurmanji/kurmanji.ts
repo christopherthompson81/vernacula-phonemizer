@@ -56,8 +56,9 @@ export function phonemizeWord(word: string): string {
     return out;
 }
 
-// A word (Kurmanji Hawar letters incl. diacritics + apostrophe ayn) / number / punctuation token.
-const TOKEN = /([a-zêîûçşğ']+)|(\d+)|([.!?…,;:])/giu;
+// A word (Kurmanji Hawar letters incl. diacritics ê î û ç ş, the dotted ğ ẍ ḧ, and the apostrophe ayn) / number /
+// punctuation token. All three dotted letters that appear in the consonant map must be here or text() drops them.
+const TOKEN = /([a-zêîûçşğẍḧ']+)|(\d+)|([.!?…,;:])/giu;
 
 class KurmanjiPhonemizer implements Phonemizer {
     text(input: string): string {
