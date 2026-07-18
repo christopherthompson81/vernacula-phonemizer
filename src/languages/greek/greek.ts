@@ -13,6 +13,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -42,8 +43,11 @@ function matchVowel(w: string, i: number): [number, string] | null {
     return null;
 }
 
-/** Phonemize a single Modern Greek word to canonical IPA (no stress mark). */
-export function phonemizeWord(word: string): string {
+/**
+ * The rule engine. `forceSyn` applies synizesis at EVERY unstressed-[i]-before-vowel site (not just before a
+ * stressed vowel) — used for the lexicon words that fully synize. Otherwise the reliable stressed-vowel subset only.
+ */
+function scan(word: string, forceSyn: boolean): string {
     const raw = word.toLowerCase();
     // Which orthographic positions carry the stress tonos — needed for synizesis (unstressed i only).
     const stressed = [...raw].map((ch) => STRESSED.has(ch));
@@ -144,7 +148,7 @@ export function phonemizeWord(word: string): string {
                     // study of the 19k referee showed synizesis is otherwise genuinely LEXICAL — no consonant
                     // reliably triggers it (γ/λ/ν are ~50/50; δ ρ π κ σ τ μ mostly keep the [i]) — so a
                     // consonant-conditioned rule can't help; the middle is left to a synizesis lexicon (deferred).
-                    if (nvStressed) {
+                    if (nvStressed || forceSyn) {
                         if (SYN_PAL[ch] !== undefined) out += SYN_PAL[ch]!; // λ ν κ γ χ → palatal, [i] absorbed
                         else out += C[ch]! + (VOICELESS.has(ch) ? "ç" : "ʝ"); // other C → C + glide
                         i += 1 + iv[0];
@@ -181,6 +185,33 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Greek letters) / number / punctuation. Greek uses ; as the question mark and · as a semicolon.
+// SYNIZESIS LEXICON — words that FULLY synize (an unstressed [i] before any vowel → glide/palatal), which the rule
+// can't predict (it's lexical: Κύριος keeps the [i] but κατοικία synizes). Built from the CROSS-SOURCE CONSENSUS of
+// wikipron∩kaikki (greek-synizesis.tsv; see tools/build-greek-synizesis.ts). Applied on the SHIPPED path only, never
+// in the rule engine — so the referee eval (phonemizeWordRules) stays non-circular.
+let LEXICON: Set<string> | undefined;
+const lexicon = (): Set<string> => {
+    if (!LEXICON) {
+        LEXICON = new Set();
+        for (const [k] of loadTsvMap(import.meta.url, "greek-synizesis.tsv", (v) => v, { optional: true }))
+            LEXICON.add(k);
+    }
+    return LEXICON;
+};
+
+/** Bare word→IPA, SHIPPED path (synizesis lexicon → rule engine). For real text. */
+export function phonemizeWord(word: string): string {
+    return scan(word, lexicon().has(word.toLowerCase()));
+}
+/** Bare word→IPA, RULE-ENGINE ONLY (no lexicon) — the honest, non-circular signal for the referee eval. */
+export function phonemizeWordRules(word: string): string {
+    return scan(word, false);
+}
+/** Word→IPA with synizesis FORCED at every site — used only by the lexicon builder (tools/build-greek-synizesis.ts). */
+export function phonemizeWordForced(word: string): string {
+    return scan(word, true);
+}
+
 const TOKEN = /([Ͱ-Ͽἀ-῿]+)|(\d+)|([.!;?…,:·])/gu;
 
 class GreekPhonemizer implements Phonemizer {
