@@ -171,8 +171,8 @@
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
     // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // NOTE: Hindi-belt 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); all 80 compound spellings
+    // (21-99) + the round tens + 0-20 + magnitudes are present below (the Hindi set, shared by Eastern-Hindi).
     "numbers": {
         "units": [
             "शून्य",
