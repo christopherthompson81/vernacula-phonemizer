@@ -68,7 +68,6 @@ import { createSundanese } from "./languages/sundanese/sundanese.ts";
 import { createNepali } from "./languages/nepali/nepali.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
-import { createChittagonian } from "./languages/chittagonian/chittagonian.ts";
 import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
@@ -252,9 +251,6 @@ function build(lang: string): Phonemizer {
             return createAmharic((latin) => getPhonemizer("en").text(latin));
         case "bho":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
-        // Chittagonian (Eastern Indo-Aryan) — ⛔ cannot-verify stub on the shared Bengali engine.
-        case "ctg":
-            return createChittagonian((latin) => getPhonemizer("en").text(latin));
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.
         case "hne":
             return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));
