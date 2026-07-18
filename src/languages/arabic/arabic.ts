@@ -109,6 +109,9 @@ export function phonemizeWord(word: string, variety?: string): string {
     if (vdef) {
         for (const [from, to] of vdef.consonantShifts) out = out.replaceAll(from, to);
         for (const [re, to] of vdef.diphthongShifts) out = out.replace(re, to);
+        // A diphthong shift over a GEMINATE glide (كُوَيِّس ay+ː → eː + ː) leaves a double length; IPA length is
+        // binary, so collapse ːː → ː (kuwayyis → kuweːis, أَيَّة ayya → ʔeːa).
+        out = out.replace(/ːː/gu, "ː");
     }
     return out;
 }

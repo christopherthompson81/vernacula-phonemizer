@@ -34,3 +34,17 @@ describe("arz Egyptian short-vowel lexicon (shipped)", () => {
         });
     }
 });
+
+// g2p rules on DIACRITIZED Egyptian input (not lexicon): guards the diphthong-over-geminate ːː→ː collapse
+// surfaced by the calima-egy silver (كُوَيِّس produced eːː before the fix).
+describe("arz Egyptian g2p rules (diacritized input)", () => {
+    for (const [word, ipa] of [
+        ["أَيَّة", "ʔˈeːa"], // ayya — ay-diphthong over geminate ي; was ʔeːːa before the ːː→ː collapse
+        ["بَيت", "bˈeːt"], // ay → eː
+        ["يَوم", "jˈoːm"], // aw → oː
+    ] as const) {
+        it(`${word} → ${ipa}`, () => {
+            expect(arz.text(word)).toBe(ipa);
+        });
+    }
+});
