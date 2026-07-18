@@ -77,6 +77,7 @@ import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 import { createShona } from "./languages/shona/shona.ts";
+import { createKinyarwanda } from "./languages/kinyarwanda/kinyarwanda.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -273,6 +274,8 @@ function build(lang: string): Phonemizer {
             return createBurmese((latin) => getPhonemizer("en").text(latin));
         case "sn":
             return createShona();
+        case "rw":
+            return createKinyarwanda();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
