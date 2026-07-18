@@ -114,7 +114,8 @@ export function makeNativePunjabi(
     function word(w: string): string {
         // Raw canonical IPA, script-routed: Shahmukhi (Perso-Arabic) → the abjad scanner, else the Gurmukhi
         // abugida (with addak ੱ pre-normalized to a geminate ਪੱਕਾ → ਪਕ੍ਕਾ). Both feed the shared post-processing.
-        let x = SHAHMUKHI_WORD.test(w)
+        const isShah = SHAHMUKHI_WORD.test(w);
+        let x = isShah
             ? scanShahmukhi(w)
             : g2p(w.normalize("NFC").replace(addakRe, "$1੍$1"));
         // geminate → length + aspiration-before-length reorder.
@@ -132,6 +133,12 @@ export function makeNativePunjabi(
             .replace(/n(?=t͡ʃ|d͡ʒ)/gu, "ɲ")
             .replace(/n(?=ʈʰ|ɖʱ|[ʈɖɽ])/gu, "ɳ")
             .replace(/n(?=kʰ|ɡʱ|[kɡxɣq])/gu, "ŋ");
+        // SHAHMUKHI-ONLY: the -ਣਾ verbal infinitive/causative ending is retroflex [ɳaː] (shared by Eastern AND
+        // Western Punjabi — the wikipron pan_arab referee has it: آنا→aːɳaː, بنانا→bənaːɳaː). Shahmukhi writes it
+        // with the plain (ambiguous) ن → [n]; Gurmukhi disambiguates orthographically (ਣ vs ਨ), so this fires only
+        // for Shahmukhi input. Restricted to a LONG vowel before naː (the infinitive stem) for precision — a general
+        // n→ɳ is lexical (retroflex ɳ is etymological, not positional). +13 net vs the Shahmukhi referee.
+        if (isShah) x = x.replace(/([aeiou]ː)n(aː)$/u, "$1ɳ$2");
         // TONOGENESIS: de-aspirate the breathy markers + assign tone.
         x = tonogenesis(x);
         return applyWeightStress(x).normalize("NFC");
