@@ -72,3 +72,20 @@ phonotactic RULE (Run 5), not a heuristic. The syllabary segmental core is essen
 
 🟡: a pronunciation lexicon could close the lexical tail, but the referees are TINY (478 / 437 words) and share the
 Wiktionary source, so a mined lexicon would be near-fully circular — the honest signal is the rule engine's 86.4%.
+
+## Run N — 2026-07-18 — ɨ-epenthesis RULE refinement is a DEAD END (negative result)
+
+Re-examined whether the ɨ tail is rule-fixable (the "authoritative-phonology" treatment). The referee misses are
+71% ɨ-placement-only (oracle ceiling 96%), so it looked tractable — but every phonotactic policy change is
+NET-NEGATIVE against BOTH referees:
+- KEEP-ALL medial ɨ (conservative citation) → 86.4→**59.4%** (referee deletes far more ɨ than a keep-all predicts).
+- break ALL C+ɾ (drop the fricative exception, from ዐሥር→asɨɾ) → 86.4→**85.1%** / kaikki 83.3→81.2% (sɾ deletes
+  elsewhere too).
+- word-final ɨ kept after a 2-cluster (≥2 not ≥3, from እናንት→ɨnantɨ) → 86.4→**79.7%** / 76.4%.
+The ɨ realization is NOT cluster-predictable — the SAME cluster type keeps ɨ in one word and drops it in another,
+so it is genuinely LEXICAL, not phonotactic. Confirmed lexical (not free-variation): the two referees agree 100%
+on the ɨ of all 388 shared words. But they share the Wiktionary tradition (the 100% agreement itself flags this),
+and at ~500 words a mined lexicon is both circular and near-zero OOV coverage. **The only real path to higher am
+maturity is a LARGER, INDEPENDENT Amharic pronunciation corpus (better tail data), not rules or a tiny-referee
+lexicon.** 86.4% stands as the honest rule ceiling. Current policy (delete-in-legal-cluster, ≥3 final coda) is
+already the best-tested — left unchanged.
