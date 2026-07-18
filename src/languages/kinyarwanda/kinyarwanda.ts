@@ -1,9 +1,9 @@
 /**
  * Kinyarwanda / Ikinyarwanda (rw) phonemizer — Bantu (JD61, Rwanda-Rundi), the Latin orthography, canonical IPA,
  * espeak-independent. A pure greedy longest-match scan over the grapheme table (manifest.ts): Kinyarwanda
- * syllables are open CV, so no coda/syllabification logic is needed. The signatures (grammar-authored — the only
- * machine referee, epitran, mis-renders the palatals): PALATALS ⟨cy⟩→c, ⟨jy⟩→ɟ, ⟨shy⟩→ç, C+palatal ⟨by ry my py⟩
- * → bɟ ɾɟ mɲ pc; ⟨c⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨sh⟩→ʃ; ⟨ng⟩→ŋ; double vowels → long. Tone (H/L) is unwritten → DEFERRED.
+ * syllables are open CV, so no coda/syllabification logic is needed. Signatures: PALATALISATION ⟨Cy⟩→[Cʲ] (Cox
+ * K&KCG grammar, Table 25) — ⟨cy⟩→kʲ, ⟨jy⟩→ɡʲ, ⟨shy⟩→ʃʲ, ⟨by⟩→bʲ, ⟨ry⟩→ɾʲ, ⟨my⟩→mʲ (⟨ny⟩→ɲ phonemic); the plain
+ * ⟨c⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨sh⟩→ʃ (epitran is wrong on these three); ⟨ng⟩→ŋ; double vowels → long. Tone (H/L) unwritten → DEFERRED.
  * See docs/investigations/rw_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";

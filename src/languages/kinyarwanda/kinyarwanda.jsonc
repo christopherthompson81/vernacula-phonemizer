@@ -25,9 +25,9 @@
         "tone": "H/L tone is unwritten → DEFERRED; written vowel length IS emitted"
     },
 
-    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so trigraphs (shy) win over digraphs
-    // (cy, sh, ng) over singles. ⟨ty ky gy hy dy vy⟩ and ⟨tw kw bw gw rw⟩ need no entries — ⟨y⟩→j / ⟨w⟩→w fall
-    // out of the greedy scan as C+j / C+w.
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so the trigraph ⟨shy⟩ wins over digraphs
+    // (cy, sh, ng) over singles. The ⟨Cy⟩ palatalised consonants are listed explicitly (→ Cʲ, the Cox-grammar
+    // analysis). ⟨tw kw bw gw rw⟩ velarised consonants need no entries — ⟨w⟩→w falls out of the greedy scan as C+w.
     "graphemes": {
         "shy": "ʃʲ",
         "cy": "kʲ", "jy": "ɡʲ", "by": "bʲ", "ry": "ɾʲ", "my": "mʲ", "py": "pʲ",
