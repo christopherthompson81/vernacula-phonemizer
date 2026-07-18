@@ -3,22 +3,23 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/chhattisgarhi/chhattisgarhi.ts";
 
 // Hand-adjudicated canonical-IPA gold for Chhattisgarhi / छत्तीसगढ़ी (hne) — Eastern Indo-Aryan (Eastern-Hindi),
-// Devanagari. ⚠ CANNOT-VERIFY: NO independent referee exists (no wikipron/kaikki; epitran has NO hne mapping at
-// all). Chhattisgarhi is segmentally ~Hindi (distinguished mostly GRAMMATICALLY), so this gold deliberately
-// targets the DISTINCTIVE features — the shared Eastern-Hindi axis where Chhattisgarhi ≠ Hindi and a Hindi clone
-// is demonstrably wrong: श/ष→[s] (no /ʃ/), ऐ/औ kept as the diphthongs [ai]/[au] (Hindi monophthongised to ɛː/ɔː),
-// no Hindi əɦə-lowering. Adjudicated from Grierson LSI VI-ii (Chhattisgarhi ≈ Awadhi/Bhojpuri, Eastern Hindi).
-// See docs/investigations/hne_native_bringup_investigation.md.
-describe("chhattisgarhi canonical IPA (distinctive features vs Hindi)", () => {
-    test("श/ष → [s] — Chhattisgarhi has no /ʃ/", () => {
+// Devanagari. ⚠ CANNOT-VERIFY: NO independent phonetic referee exists (no wikipron/kaikki; epitran has NO hne
+// mapping). CORROBORATED (not measured) against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect
+// of Eastern Hindi' (1921, rev. Grierson) — its phoneme inventory + the attested UDHR Article-1 sample. That
+// confirmed श/ष→[s] (the inventory has NO /ʃ/) — Chhattisgarhi's SOLE confident segmental divergence from Hindi
+// — and CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT
+// the Bhojpuri-style diphthongs. See docs/investigations/hne_native_bringup_investigation.md.
+describe("chhattisgarhi canonical IPA (corroborated vs the 1921 grammar)", () => {
+    test("श/ष → [s] — Chhattisgarhi has no /ʃ/ (grammar inventory)", () => {
         expect(phonemizeWord("शहर")).toBe("sˈəɦəɾ"); // 'city' — श→s AND no əɦə→ɛɦɛ lowering (Hindi: ʃɛɦɛɾ)
         expect(phonemizeWord("देश")).toBe("d̪ˈeːs"); // 'country' (Hindi: d̪eːʃ)
         expect(phonemizeWord("शेर")).toBe("sˈeːɾ"); // 'lion/tiger' (Hindi: ʃeːɾ)
     });
 
-    test("ऐ → [ai], औ → [au] — Chhattisgarhi keeps the diphthongs", () => {
-        expect(phonemizeWord("बैल")).toBe("bˈail"); // 'ox' (Hindi monophthong: bɛːl)
-        expect(phonemizeWord("कौन")).toBe("kˈaun"); // 'who' (Hindi: kɔːn)
+    test("ऐ → [ɛː], औ → [ɔː] — monophthongs, as Hindi (corrected from the wrong ai/au copy)", () => {
+        expect(phonemizeWord("बैल")).toBe("bˈɛːl"); // 'ox' — ऐ → ɛː (NOT the earlier bail)
+        expect(phonemizeWord("कौन")).toBe("kˈɔːn"); // 'who' — औ → ɔː (NOT the earlier kaun)
+        expect(phonemizeWord("गौरव")).toBe("ɡˈɔːɾəʋ"); // 'dignity' — matches the attested sample's [ɡɔrəʋ] (औ→ɔ, व→ʋ)
     });
 
     test("shared Indo-Aryan core (Hindi-identical where Chhattisgarhi does not diverge)", () => {

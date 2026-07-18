@@ -9,7 +9,7 @@
     "language": "hne",
     "name": "Chhattisgarhi (छत्तीसगढ़ी)",
     "script": "Devanagari",
-    "provenance": "Authored from standard Chhattisgarhi phonology (Grierson LSI VI-ii; Chhattisgarhi is Eastern-Hindi, segmentally near-identical to Awadhi/Bhojpuri). Reuses the Hindi Devanagari engine with the documented Eastern-Hindi divergences it SHARES: श/ष→[s] (no /ʃ/), ऐ/औ kept as the diphthongs [ai]/[au] (diverging from Hindi ɛː/ɔː), no Hindi əɦə-lowering. Chhattisgarhi is distinguished from Hindi mostly GRAMMATICALLY (case markers, verb agreement), not segmentally, so beyond these shared belt features the phonology is asserted-as-Hindi BY ATTESTATION. ⛔ CANNOT-VERIFY: NO independent referee exists (no wikipron/kaikki/epitran hne) — anchored on a hand-adjudicated gold of the distinctive features.",
+    "provenance": "Authored from standard Chhattisgarhi phonology (Grierson LSI VI-ii; Chhattisgarhi is Eastern-Hindi, segmentally near-identical to Awadhi/Bhojpuri). Reuses the Hindi Devanagari engine. CORROBORATED against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect of Eastern Hindi' (1921, rev. Grierson LSI) — its phoneme inventory + the attested UDHR Article-1 sample. This CONFIRMED श/ष→[s] (the inventory has no /ʃ/) but CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT the Bhojpuri-style diphthongs [ai]/[au] — so Chhattisgarhi's SOLE confident segmental divergence from Hindi is श/ष→[s]. A further documented feature (reduced schwa deletion — लोगन→[loɡən], बरोबरी→[bərobəri]) is noted but not modelled (needs more data). ⛔ CANNOT-VERIFY: no phonetic corpus / independent referee exists — the anchor is the distinctive-feature gold, corroborated by the 1921 grammar.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
@@ -90,9 +90,9 @@
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
         },
         "ए": { "ipa": "eː", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ai", "note": "Chhattisgarhi keeps the diphthong [ai] (बैल→bail) — Hindi monophthongised to ɛː" },
+        "ऐ": { "ipa": "ɛː", "note": "Chhattisgarhi ऐ → [ɛː] (monophthong, as Hindi) — CORROBORATED by the grammar's vowel inventory + गौरव→ɡɔrəʋ in the attested UDHR sample; the earlier [ai] was a wrong Bhojpuri copy" },
         "ओ": { "ipa": "oː", "note": "long close-mid back" },
-        "औ": { "ipa": "au", "note": "Chhattisgarhi keeps the diphthong [au] (कौन→kaun) — Hindi monophthongised to ɔː" },
+        "औ": { "ipa": "ɔː", "note": "Chhattisgarhi औ → [ɔː] (monophthong, as Hindi) — CORROBORATED by गौरव→[ɡɔrəʋ] in the attested UDHR sample; the earlier [au] was a wrong Bhojpuri copy" },
         "ऍ": { "ipa": "ɛː", "note": "candra e (loans)" },
         "ऑ": { "ipa": "ɔː", "note": "candra o (loans, e.g. English 'o')" },
         "ॐ": { "ipa": "õːm", "note": "Om sign (U+0950) — a whole syllable" },
@@ -107,9 +107,9 @@
         "ू": { "ipa": "uː" },
         "ृ": { "ipa": "ɾɪ" },
         "े": { "ipa": "eː" },
-        "ै": { "ipa": "ai" },
+        "ै": { "ipa": "ɛː" },
         "ो": { "ipa": "oː" },
-        "ौ": { "ipa": "au" },
+        "ौ": { "ipa": "ɔː" },
         "ॅ": { "ipa": "ɛː" },
         "ॉ": { "ipa": "ɔː" },
     },
