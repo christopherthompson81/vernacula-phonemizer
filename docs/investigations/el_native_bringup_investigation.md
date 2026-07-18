@@ -88,7 +88,29 @@ always-synize: net +0.1%, luck, reverted). The "before a stressed vowel" product
 -ιά/-ιό rule is the RULE ceiling. The principled next step is a **cross-source
 (wikipron∩kaikki) consensus synizesis lexicon** (the Gujarati/Bengali schwa-lexicon
 pattern: the eval stays rule-only/non-circular; the shipped path adds the lexicon).
-Deferred.
+
+## Run 7 — 2026-07-17 — synizesis lexicon (BUILT)
+
+Built the lexicon (tools/build-greek-synizesis.ts → greek-synizesis.tsv). A word is
+added iff (a) wikipron and kaikki AGREE on it (consensus), (b) the rule's default
+output differs, and (c) forcing synizesis at every site EXACTLY reproduces the
+consensus. So it records the lexical fact "this word fully synizes", two-referee
+verified, expressed in OUR convention (the forced-synizesis output) — not memorised
+referee IPA. **422 words** (of 1768 rule-vs-consensus mismatches).
+
+The engine split (the Gujarati pattern): `phonemizeWordRules` = rule only (the eval
+imports this → the 91.1% stays NON-CIRCULAR); `phonemizeWord` = shipped, applies the
+lexicon (`scan(word, forceSyn = lexicon.has(word))`). Effect:
+
+| path | wikipron | kaikki |
+|---|---|---|
+| rule-only (`phonemizeWordRules`, eval) | 91.1% | 90.0% |
+| shipped (`phonemizeWord` + lexicon) | **93.2%** | **92.2%** |
+
+Discriminating correctly: άδειος→[aðʝos] (synizes, in lexicon), Κύριος→[ˈciɾios]
+(kept, not in lexicon). The lexicon covers the surface forms in the referees;
+unseen inflected forms remain the residual (deferred — a morphological synizesis
+model, or a larger dictionary, is the further path).
 
 ## Outstanding (the lexical tail, ~9%):
 - **Lexical synizesis** — the register-conditioned unstressed-[i]-before-any-vowel
