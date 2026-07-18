@@ -1,0 +1,63 @@
+// Native canonical-IPA data manifest for Chichewa / Chinyanja (nya) — Bantu (N31, Malawi/Zambia/Mozambique,
+// ~12M+), the Latin orthography, espeak-independent. A greedy longest-match scan (Shona pattern): Chichewa is
+// open CV with prenasalised clusters as single onset units, so a pure left-to-right longest match suffices.
+// Referees: wikipron nya_latn (PRIMARY, HUMAN, narrow) + kaikki nya (2nd, HUMAN — same Wiktionary tradition) +
+// epitran nya-Latn (3rd, INDEPENDENT, broad). Signatures (from the narrow Wiktionary transcription):
+//   • IMPLOSIVES ⟨b⟩→ɓ, ⟨d⟩→ɗ (word-initial/intervocalic); the stop DE-implosivises after a nasal (⟨mb⟩→ᵐb, ⟨nd⟩→ⁿd).
+//   • The single LIQUID ⟨l⟩=⟨r⟩ → [ɽ] (retroflex tap) uniformly.
+//   • PRENASALISED ⟨mb nd ng nj nz…⟩ → ᵐb ⁿd ᵑɡ ⁿd͡ʒ ⁿz (superscript nasal); ⟨ng'⟩ → ŋ (plain velar nasal).
+//   • ASPIRATED ⟨ph th kh⟩ → pʰ tʰ kʰ, ⟨tch⟩ → t͡ʃʰ; AFFRICATES ⟨ch⟩→t͡ʃ, ⟨ts⟩→t͡s, ⟨dz⟩→d͡z, ⟨j⟩→d͡ʒ.
+//   • ⟨Cw⟩ labialisation is written as the glide w (the narrow referees' [ʷ] is folded ʷ~w).
+// Tone (H/L) is phonemic but UNWRITTEN → DEFERRED (the backbone strips the referees' tone/stress marks).
+// See docs/investigations/nya_native_bringup_investigation.md.
+{
+    "language": "nya",
+    "name": "Chichewa (Chinyanja)",
+    "script": "Latin",
+    "provenance": "Authored from the Chichewa orthography + phonology. Referees: wikipron nya_latn + kaikki + epitran nya-Latn.",
+
+    "convention": {
+        "implosives": "⟨b⟩→ɓ, ⟨d⟩→ɗ; after a nasal the stop is plain (⟨mb⟩→ᵐb, ⟨nd⟩→ⁿd)",
+        "liquid": "⟨l⟩ = ⟨r⟩ → [ɽ] (one retroflex-tap liquid)",
+        "prenasalised": "⟨mb nd ng nj nz mf mv nk…⟩ → ᵐb ⁿd ᵑɡ ⁿd͡ʒ ⁿz ᶬf ᶬv ᵑk (superscript nasal); ⟨ng'⟩ → ŋ",
+        "aspirated": "⟨ph th kh⟩→pʰ tʰ kʰ, ⟨tch⟩→t͡ʃʰ; affricates ⟨ch ts dz j⟩→t͡ʃ t͡s d͡z d͡ʒ",
+        "tone": "H/L tone is unwritten → DEFERRED"
+    },
+
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC (trigraphs ng'/nkh/ndz/tch → digraphs →
+    // singles). ⟨Cw⟩ needs no entries — ⟨w⟩→w falls out of the greedy scan (labialisation folded ʷ~w in the eval).
+    "graphemes": {
+        "ng'": "ŋ",
+        "nkhw": "ᵑkʷʰ", "ntch": "ⁿt͡ʃʰ",
+        "thy": "tʲʰ", "khy": "kʲʰ", "phy": "pʲʰ",
+        "mps": "ᵐpsʲ", "mbz": "ᵐbzʲ",
+        "nkh": "ᵑkʰ", "nth": "ⁿtʰ", "mph": "ᵐpʰ", "ndz": "ⁿd͡z", "nts": "ⁿt͡s", "nch": "ⁿt͡ʃ", "tch": "t͡ʃʰ",
+        "ps": "psʲ", "bz": "bzʲ",
+        "thw": "tʷʰ", "khw": "kʷʰ", "phw": "pʷʰ",
+        "ph": "pʰ", "th": "tʰ", "kh": "kʰ",
+        "ch": "t͡ʃ", "ts": "t͡s", "dz": "d͡z", "bv": "bv", "pf": "pf",
+        "mb": "ᵐb", "mp": "ᵐp", "mf": "ᶬf", "mv": "ᶬv",
+        "nd": "ⁿd", "nt": "ⁿt", "nj": "ⁿd͡ʒ", "nz": "ⁿz", "ns": "ⁿs", "nk": "ᵑk", "ng": "ᵑɡ",
+        "ny": "ɲ", "sh": "ʃ",
+        "by": "ɓʲ", "dy": "ɗʲ", "py": "pʲ", "ty": "tʲ", "ky": "kʲ", "gy": "ɡʲ", "my": "mʲ", "fy": "fʲ", "vy": "vʲ", "sy": "sʲ", "zy": "zʲ", "ly": "ɽʲ", "ry": "ɽʲ",
+
+        "b": "ɓ", "d": "ɗ", "p": "p", "t": "t", "k": "k", "g": "ɡ", "f": "f", "v": "v", "s": "s", "z": "z",
+        "h": "h", "j": "d͡ʒ", "l": "ɽ", "r": "ɽ", "m": "m", "n": "n", "w": "w", "y": "j",
+
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // Cardinal number words (Chichewa). Simplified counting form; unmeasured (the referees are word-only).
+    "numbers": {
+        "units": ["ziro", "chimodzi", "ziwiri", "zitatu", "zinayi", "zisanu", "zisanu ndi chimodzi", "zisanu ndi ziwiri", "zisanu ndi zitatu", "zisanu ndi zinayi"],
+        "ten": "khumi",
+        "tens": "makumi",
+        "hundred": "zana",
+        "thousand": "sauzande",
+        "and": "ndi"
+    }
+}
