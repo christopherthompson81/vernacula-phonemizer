@@ -1,0 +1,17 @@
+// Chittagonian (ctg) — Eastern Indo-Aryan, Bengali-Assamese script. ⚠ CANNOT-VERIFY (referee GAP). There is NO
+// independent referee: no wikipron ctg, no epitran ctg-Beng, no kaikki extract (<10 Wiktionary IPA entries), and
+// no JIPA Illustration. The cited phonology grammars (Moniruzzaman 2007, Hai 1965) are out of reach; the one
+// obtainable source is a sociolinguistic status paper (Uddin, IIUC Studies 12). Chittagonian is a DISTINCT
+// language but described almost entirely comparatively against Bengali, so the engine reuses the Bengali G2P with
+// the DOCUMENTED divergences (spirantisation খ→x/ফ→f, loss-of-voiced-aspirates ঘ→ɡ/ভ→b, deaffrication চ/ছ→s জ/ঝ→z, স→s, nasalisation). The
+// committed anchor is a hand-adjudicated gold of those DISTINCTIVE features (test/chittagonian.test.ts) — the axis
+// that is NOT circular with a Bengali clone; the shared Bengali bulk is asserted, not measured.
+{
+    "language": "ctg",
+    "name": "Chittagonian",
+    "script": "Bengali",
+    "provenance": "Bengali-derived engine + the documented Chittagonian spirantisation/deaffrication divergences.",
+    "referees": [],
+    "secondaryGap": "CANNOT-VERIFY: no independent referee for Chittagonian (no wikipron/epitran/kaikki; no JIPA; the phonology grammars Moniruzzaman 2007 / Hai 1965 are out of reach). Only the DOCUMENTED spirantisation signature (খ→x, ফ→f, from a status paper drawing on Moniruzzaman) is verifiable, against a hand-adjudicated gold in test/chittagonian.test.ts. The shared Bengali bulk is asserted; the undocumented aspirated-dental/retroflex mapping and vowels are kept Bengali-conservative.",
+    "folds": []
+}
