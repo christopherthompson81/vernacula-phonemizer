@@ -215,6 +215,10 @@ function build(lang: string): Phonemizer {
             return createIndonesian();
         case "pa":
             return createPunjabi((latin) => getPhonemizer("en").text(latin));
+        // Western Punjabi / Lahnda (Shahmukhi, Pakistan) — the SAME Punjabi engine; the scanner auto-detects the
+        // Perso-Arabic script and applies the shared phonology (tonogenesis, gemination, nasal assimilation).
+        case "pnb":
+            return createPunjabi((latin) => getPhonemizer("en").text(latin));
         case "mr":
             return createMarathi((latin) => getPhonemizer("en").text(latin));
         case "te":
