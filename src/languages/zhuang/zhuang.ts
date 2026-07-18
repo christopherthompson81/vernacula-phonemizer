@@ -26,131 +26,159 @@ const TONE_LETTER: Record<string, string> = { z: "z", j: "j", x: "x", q: "q" };
 // Coda stop letters → PLAIN (unaspirated) stops (Zhuang codas never aspirate): b/p→p, d/t→t, g/k→k.
 const CODA: Record<string, string> = { b: "p", p: "p", d: "t", t: "t", g: "k", k: "k", m: "m", n: "n" };
 
+// The HIGH vowels {i, u, w=ɯ} form a diphthong offglide after another vowel (au→[au], oi→[oi], aw→[aɯ]);
+// a NON-high vowel {a, e, o} after a nucleus is instead VV HIATUS — a new syllable (boad→[po.ʔat]).
+const HIGH_VOWEL: Record<string, true> = { i: true, u: true, w: true };
+
 /** Phonemize one Zhuang word to canonical IPA (segments + Chao tones). Tones fold in the eval. */
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
     let out = "";
     let i = 0;
-    // Per-syllable state: whether the current syllable has a vowel and whether a tone was already placed.
+    // Per-syllable state: nucleus present? a tone already placed? an onset consonant already emitted?
     let sylVowel = false;
     let sylCoda = ""; // "" (open), or "p"/"t"/"k" (checked)
     let toneDone = false;
-    let sylStart = true;
+    let sylHasOnset = false;
 
     const closeSyllable = (): void => {
         if (sylVowel && !toneDone) out += sylCoda ? TONE.checked! : TONE["1"]!;
         sylVowel = false;
         sylCoda = "";
         toneDone = false;
+        sylHasOnset = false;
+    };
+    // A vowel opening a syllable with NO onset consonant takes a glottal onset [ʔ] — word-initial, after a coda
+    // or tone closed the previous syllable, or after a hiatus split (ajaeu→ʔa.ʔau, roegam→ɣok.ʔam).
+    const openVowel = (): void => {
+        if (!sylVowel && !sylHasOnset) out += "ʔ";
+    };
+    const emitOnset = (ipa: string): void => {
+        if (sylVowel) closeSyllable();
+        out += ipa;
+        sylHasOnset = true;
     };
 
     while (i < w.length) {
         const c = w[i]!;
-        // Tone letters z/j/x/q — always a tone; close the syllable.
+        // Tone letters z/j/x/q — always a tone; the syllable is complete (the coda, if any, precedes the tone letter).
         if (TONE_LETTER[c]) {
             if (sylVowel) {
                 out += TONE[c]!;
                 toneDone = true;
+                closeSyllable();
             }
             i++;
-            sylStart = true;
             continue;
         }
-        // h — onset [h] before a vowel; tone-6 marker otherwise.
+        // Apostrophe — an explicit syllable-boundary marker (Sih'anh→θi.ʔan); close the syllable.
+        if (c === "'") {
+            if (sylVowel) closeSyllable();
+            i++;
+            continue;
+        }
+        // h — onset [h] before a vowel; tone-6 marker otherwise (which completes the syllable).
         if (c === "h") {
             if (isVowelStart(w, i + 1)) {
-                if (sylVowel) closeSyllable();
-                out += "h";
-                sylStart = false;
+                emitOnset("h");
                 i++;
                 continue;
             }
             if (sylVowel) {
                 out += TONE.h!;
                 toneDone = true;
+                closeSyllable();
             }
             i++;
-            sylStart = true;
             continue;
+        }
+        // CODA-FIRST: a coda-capable consonant (p t k m n, or ⟨ng⟩) that is NOT the onset of a following vowel (i.e.
+        // it's before another consonant or word-end) closes the syllable as a coda — Zhuang codas are single. This
+        // runs BEFORE the onset loop so a boundary cluster like ⟨nd⟩ in Yin|du is split (n coda + d onset) instead
+        // of misread as an implosive ⟨nd⟩ onset (→ɗ). A single C *before a vowel* stays the next onset (maximal
+        // onset: Cinanz→ɕi.nan), so morpheme-final codas before a vowel (mak+it) are not recoverable and left as
+        // onsets. Only ONSET stops aspirate.
+        if (sylVowel) {
+            if (w.startsWith("ng", i) && !isVowelStart(w, i + 2)) {
+                out += "ŋ";
+                closeSyllable();
+                i += 2;
+                continue;
+            }
+            const coda = CODA[c];
+            if (coda !== undefined && !isVowelStart(w, i + 1)) {
+                out += coda;
+                if (coda === "p" || coda === "t" || coda === "k") sylCoda = coda;
+                closeSyllable();
+                i++;
+                continue;
+            }
         }
         // Multi-letter onset (mb/nd/ng/ny/gv/by/gy/ngv/mby) — a new syllable onset.
         let matched = false;
         for (const [orth, ipa] of Object.entries(ONSETS)) {
             if (w.startsWith(orth, i) && isVowelStart(w, i + orth.length)) {
-                if (sylVowel) closeSyllable();
-                out += ipa;
-                sylStart = false;
+                emitOnset(ipa);
                 i += orth.length;
                 matched = true;
                 break;
             }
         }
         if (matched) continue;
-        // Coda ⟨ng⟩ → [ŋ] (a velar nasal coda, NOT an onset — no following vowel: mwngz→mɯŋ).
-        if (w.startsWith("ng", i) && !isVowelStart(w, i + 2)) {
-            out += "ŋ";
-            i += 2;
-            continue;
-        }
         // ⟨ae⟩ → the diphthong [ai] in an OPEN syllable (bae→pai), but short [a] before a CODA (caet→ɕat, haemh→ham).
+        // A consonant after ⟨ae⟩ is only a coda if it is NOT itself an onset — i.e. ⟨ng⟩/[bdgptkmn] followed by a
+        // non-vowel. Before a consonant that starts the next syllable (baedangq→pai.taːŋ, "bae" = the morpheme "go"),
+        // ⟨ae⟩ stays the open [ai].
         if (w.startsWith("ae", i) && !w.startsWith("aeu", i)) {
             if (sylVowel) closeSyllable();
-            out += /^(ng|[bdgptkmn])/u.test(w.slice(i + 2)) ? "a" : "ai";
+            openVowel();
+            const rest = w.slice(i + 2);
+            const coda =
+                (/^ng/u.test(rest) && !isVowelStart(w, i + 4)) ||
+                (/^[bdgptkmn]/u.test(rest) && !isVowelStart(w, i + 3));
+            out += coda ? "a" : "ai";
             sylVowel = true;
-            sylStart = false;
             i += 2;
             continue;
         }
-        // Vowel digraph. A vowel starting when the syllable already has a nucleus = a new syllable (VV hiatus).
+        // Vowel digraph (aeu/ie/ue/we/oe) — a nucleus; if one is already open this is a new syllable.
         let vmatched = false;
         for (const [orth, ipa] of Object.entries(VDIGRAPH)) {
             if (w.startsWith(orth, i)) {
                 if (sylVowel) closeSyllable();
+                openVowel();
                 out += ipa;
                 sylVowel = true;
-                sylStart = false;
                 i += orth.length;
                 vmatched = true;
                 break;
             }
         }
         if (vmatched) continue;
-        // Single vowel.
+        // Single vowel — a HIGH vowel continues a diphthong; a NON-high vowel after a nucleus is a new (hiatus) syllable.
         if (VOWELS[c] !== undefined) {
-            if (sylVowel && sylStart) closeSyllable();
+            if (sylVowel && !HIGH_VOWEL[c]) closeSyllable();
+            openVowel();
             out += VOWELS[c]!;
             sylVowel = true;
-            sylStart = false;
             i++;
             continue;
         }
-        // Single consonant — onset (before a vowel) or coda.
+        // Single consonant onset (a coda would have been caught by CODA-FIRST above).
         const cp = CONS[c];
         if (cp !== undefined) {
-            if (isVowelStart(w, i + 1)) {
-                if (sylVowel) closeSyllable();
-                out += cp;
-                sylStart = false;
-            } else {
-                // Coda: the stop letters are PLAIN (unaspirated) in coda — ⟨b p⟩→p, ⟨d t⟩→t, ⟨g k⟩→k (a checked
-                // syllable); ⟨m n⟩ → nasal. Only ONSET p/t/k aspirate.
-                const coda = CODA[c] ?? cp;
-                out += coda;
-                if (coda === "p" || coda === "t" || coda === "k") sylCoda = coda;
-            }
+            emitOnset(cp);
             i++;
             continue;
         }
         i++; // unknown → skip
     }
     closeSyllable();
-    // Word-initial vowel → glottal onset.
-    if (/^[aeiouɯɵ]/u.test(out)) out = "ʔ" + out;
     return out;
 }
 
 // A word (Zhuang letters) / number / punctuation token.
-const TOKEN = /([a-z]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = /([a-z]+(?:'[a-z]+)*)|(\d+)|([.!?…,;:])/giu;
 
 class ZhuangPhonemizer implements Phonemizer {
     text(input: string): string {
