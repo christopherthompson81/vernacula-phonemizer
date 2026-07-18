@@ -6,6 +6,7 @@ import { createHindi } from "./languages/hindi/hindi.ts";
 import { createEnglish, EnglishPhonemizer } from "./languages/english/english.ts";
 import { createEnglishGB } from "./languages/english-gb/english-gb.ts";
 import { createEnglishIN } from "./languages/english-in/english-in.ts";
+import { createFrenchCA } from "./languages/french-ca/french-ca.ts";
 import { createMandarin } from "./languages/mandarin/mandarin.ts";
 import { createSpanish } from "./languages/spanish/spanish.ts";
 import { createSpanish419 } from "./languages/spanish-419/spanish-419.ts";
@@ -139,6 +140,9 @@ function build(lang: string): Phonemizer {
             return createArabic("libyan");
         case "fr":
             return createFrench();
+        // Québécois French — the France engine + a Canadian delta (affrication t/d→t͡s/d͡z, high-vowel laxing).
+        case "fr-CA":
+            return createFrenchCA();
         case "pt":
             return createPortuguese();
         // Brazilian Portuguese (neutral/paulistano) — the EP engine in `dialect: "bp"` mode (accent variant of `pt`).
