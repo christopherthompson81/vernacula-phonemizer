@@ -45,6 +45,7 @@ const HARAKAT = new Set([
 export interface Seg {
     ph: string; // IPA phoneme(s)
     vowel: boolean; // is a syllable nucleus
+    article?: boolean; // this vowel is the definite-article nucleus (الـ) — a variety may raise it (arz a→i, il-)
 }
 
 /**
@@ -152,6 +153,7 @@ export function toSegments(word: string): Seg[] {
         // الشمس → aʃːams (both referees omit the ʔ; the ʔ that follows an article, as in الأحد → alʔaħad, is the
         // next word's own hamza, not the article's). Egyptian raises the article vowel a→i (variety shift, il-).
         pushVowel("a");
+        segs[segs.length - 1]!.article = true; // tag so a variety can raise it (arz il-)
         i = emitArticle(i + 1);
     } else if (
         PROCLITIC[s[i]!] &&

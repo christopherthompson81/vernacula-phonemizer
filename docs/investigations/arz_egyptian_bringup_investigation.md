@@ -143,3 +143,34 @@ article no longer carries ʔ) + all pass.
 only 3 al-initial words in the 590-word referee → low eval-ROI and needs variety-aware g2p (the string-rewrite
 variety layer can't tell an article `a` from any other word-initial `a`); folded into the short-vowel-restructuring
 tail for now. The bigger tail is unchanged: Egyptian short-vowel QUALITY (the MSA diacritizer restores MSA vowels).
+
+## Run — 2026-07-18 — residual rounds: what's diacritizer-fixable, + the il- article + a silver scale-up
+
+**Round 2 (ar/arz residual triage).** MSA (`ar`) has hit the WALL for systematic g2p fixes: the residual is diffuse
+diacritizer vowel-QUALITY noise + pausal convention (the final `-an`~`-aː` class is the adverbial accusative — ours
+gives the correct PAUSAL [aː], the referee the context [an]; a blanket fold over-matches root -an like حسن→hasan, so
+it's not a bug). arz residual classified by whether harakat can even EXPRESS the fix (of 359 mismatches): **87 (24%)
+vowel-only a/i/u — HARAKAT-FIXABLE via the diacritizer**; **100 (28%) involve o/e — NOT expressible** (و=[o]~[uː]
+script ambiguity → lexicon territory, and a chunk is really the referee's æ notation for /a/ = a fold); 172 skeleton-
+differs (missing/extra vowels + gemination). So the vowel-quality wall is a DIACRITIZER problem, not a rule problem.
+
+**Teacher probe (decisive).** Ran calima-egy (the independent teacher) on the failing words, isolated + in context:
+استخدم→اِسْتَخْدِم=**istaxdim** ✓, امبارح→إِمْبارِح=**imbariħ** ✓ — the teacher KNOWS the right Egyptian vowel where our
+STUDENT model gave istaxda**m** / imbar**ħ**. Those words are rare/absent in the 350k-line silver we trained on → the
+student UNDER-FIT from sparsity, not teacher error. But افتكر→teacher aftikir ≠ referee iftakar (genuine teacher-vs-
+Wiktionary convention, unfixable via this teacher without going circular), and the article النهارده→النَّهارْدَه is
+written with a BARE alif (no kasra) → the teacher does NOT encode il-, so that is NOT diacritizer-learnable.
+
+**Action A — silver SCALE-UP (non-circular).** We silvered only 350k of the 2.67M-line corpus_arz.txt (7.6× headroom).
+Launched `run_pipeline_v2.sh`: 6 parallel resumable shards over the FULL 2.67M lines (~63 s/s each, GPU 99%, ~2 h) →
+`filter_split_v2.py` (dedupes vs the old silver) → retrain BiLSTM → export to `diacritizer-egy-v2.onnx` (A/B, does NOT
+clobber v1). Expected to recover the teacher-right/student-wrong chunk (istaxdim, imbariħ) NON-CIRCULARLY (teacher =
+calima-egy, referee = wikipron). REJECTED the targeted-kaikki-pairs alternative — it injects Wiktionary and makes the
+wikipron eval circular; only valid as a shipped refinement, not an eval anchor.
+
+**Action B — the il- article g2p rule (shipped this round).** Egyptian article is [il-] (assimilating: in-, iʃ-), not
+MSA [al-]. Since the teacher writes the article bare, this is a G2P VARIETY rule, not learnable from silver. Tagged the
+definite-article nucleus at emit time (`Seg.article`) and raise it per-variety (`egyptian.jsonc articleVowel:"i"`) in
+the pre-join build — a string replace can't tell an article [a] from any word-initial [a]. القمر→ilʔamar, الشمس→iʃːams;
+MSA unchanged. Eval +0.2pp (only 3 al-words in the 590-word referee, and القاهرة/النهارده still miss on ق→ʔ / no-assim
+vs the referee's conservative transcription) — the value is TTS correctness (explicitness principle), not the number.

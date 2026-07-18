@@ -11,6 +11,11 @@
 {
     "variety": "egyptian",
     "iso": "arz",
+    // Egyptian definite article is [il-] (assimilating to sun letters: in-, iʃ-), NOT MSA [al-]: النهارده → in-nahaːrda,
+    // القاهرة → il-qaːhira. Raised on the tagged article-vowel SEG (not a string replace — a word-initial [a] can't be
+    // told from an article [a] once joined). The teacher/diacritizer writes the article alif bare, so this is a g2p
+    // variety rule, not learnable from silver.
+    "articleVowel": "i",
     "consonantShifts": [
         ["d͡ʒ", "ɡ"], // ج → [ɡ] (Cairene; the signature Egyptian consonant)
         ["q", "ʔ"], // ق → [ʔ] (urban glottal stop)
