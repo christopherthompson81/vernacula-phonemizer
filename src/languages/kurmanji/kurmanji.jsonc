@@ -1,0 +1,52 @@
+// Native canonical-IPA data manifest for Kurmanji / Kurdish (kmr) — Northern Kurdish, Iranian, the LATIN (Hawar)
+// alphabet (unlike Persian/Pashto, which use the Perso-Arabic abjad — Kurmanji writes its vowels, so no
+// restoration is needed). A near-phonemic left-to-right scan: the one digraph ⟨xw⟩→[xʷ] (labialised), then single
+// letters. Signature: ⟨c⟩→d͡ʒ / ⟨ç⟩→t͡ʃ (the reverse of Romance), ⟨j⟩→ʒ, ⟨ş⟩→ʃ, ⟨q⟩→q (uvular), ⟨x⟩→x; the vowel
+// system with LONG a/ê/î/o/û (aː eː iː oː uː) vs SHORT e/i/u (ɛ ɪ ʊ). Aspiration (kʰ) and pharyngealisation (ˤ)
+// are allophonic/unwritten → not emitted. See docs/investigations/kmr_native_bringup_investigation.md.
+{
+    "language": "kmr",
+    "name": "Kurmanji (Northern Kurdish)",
+    "script": "Latin",
+    "provenance": "Authored from the Kurmanji Hawar orthography + phonology (near-phonemic). This file IS the language data — the g2p reads it directly. Referees: wikipron kmr_latn broad + epitran kmr-Latn.",
+
+    "convention": {
+        "consonants": "⟨c⟩→d͡ʒ, ⟨ç⟩→t͡ʃ (reverse of Romance); ⟨j⟩→ʒ, ⟨ş⟩→ʃ, ⟨q⟩→q (uvular), ⟨x⟩→x; ⟨xw⟩→xʷ",
+        "vowels": "LONG a/ê/î/o/û → ɑː eː iː oː uː; SHORT e/i/u → ɛ ɪ ʊ",
+        "stress": "final-syllable default (Kurmanji); unwritten → folded by the eval backbone",
+    },
+
+    // The one Latin digraph (labialised ⟨xw⟩ in xwarin/xwe).
+    "digraphs": { "xw": "xʷ" },
+
+    // Vowel letters → IPA. Long (a ê î o û) vs short (e i u).
+    "vowels": {
+        "a": "ɑː", "e": "ɛ", "ê": "eː", "i": "ɪ", "î": "iː", "o": "oː", "u": "ʊ", "û": "uː",
+    },
+
+    // Consonant letters → IPA. The Hawar alphabet is near one-to-one.
+    "consonants": {
+        "b": "b", "c": "d͡ʒ", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h",
+        "j": "ʒ", "k": "k", "l": "l", "m": "m", "n": "n", "p": "p", "q": "q",
+        "r": "r", "s": "s", "ş": "ʃ", "t": "t", "v": "v", "w": "w", "x": "x",
+        "y": "j", "z": "z", "'": "ʕ",
+        // Dotted Kurmanji letters (some orthographies): ẍ/ğ = voiced velar fricative, ḧ = pharyngeal.
+        "ẍ": "ɣ", "ğ": "ɣ", "ḧ": "ħ",
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words. Kurmanji joins with "û" (and): 21 → bîst û yek. Hundreds/thousands are multiplied
+    // (du sed, sê hezar).
+    "numbers": {
+        "units": ["sifir", "yek", "du", "sê", "çar", "pênc", "şeş", "heft", "heşt", "neh"],
+        "teens": ["deh", "yanzdeh", "donzdeh", "sêzdeh", "çardeh", "panzdeh", "şanzdeh", "hivdeh", "hijdeh", "nozdeh"],
+        "tens": ["", "deh", "bîst", "sî", "çil", "pêncî", "şêst", "heftê", "heştê", "nod"],
+        "connector": "û",
+        "hundred": "sed",
+        "thousand": "hezar",
+        "million": "milyon"
+    }
+}

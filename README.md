@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **78 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **79 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-78 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+79 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo, Romance,
 Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic, Uralic and an English-lexified creole —
 across Latin, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil, Telugu,
@@ -43,7 +43,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
 | Germanic | Dutch `nl`, English `en`, German `de`, Swedish `sv` (tonal accent) |
 | Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
-| Iranian | Pashto `ps`, Persian `fa` |
+| Iranian | Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa` |
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |
 | Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
