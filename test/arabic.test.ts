@@ -30,10 +30,10 @@ describe("arabic canonical IPA — diacritized path", () => {
         expect(phonemizeWord("بَيْت")).toBe("bˈajt"); // diphthong aj
     });
 
-    test("definite article: sun/moon assimilation + hamzat-wasl", () => {
-        expect(phonemizeWord("الْقَمَر")).toBe("ʔalqˈamar"); // moon letter → keep l
-        expect(phonemizeWord("الشَّمْس")).toBe("ʔaʃːˈams"); // sun letter → l assimilates (ʃ geminate)
-        expect(phonemizeWord("الَّذِي")).toBe("ʔalːˈaðiː"); // lam-initial → geminate ll
+    test("definite article: sun/moon assimilation, waṣl-alif = plain [a] onset (no ʔ)", () => {
+        expect(phonemizeWord("الْقَمَر")).toBe("alqˈamar"); // moon letter → keep l; waṣl alif → a (no ʔ)
+        expect(phonemizeWord("الشَّمْس")).toBe("aʃːˈams"); // sun letter → l assimilates (ʃ geminate)
+        expect(phonemizeWord("الَّذِي")).toBe("alːˈaðiː"); // lam-initial → geminate ll
     });
 
     test("proclitic + article (alif elides)", () => {
@@ -55,10 +55,10 @@ describe("arabic canonical IPA — diacritized path", () => {
 
     test("text: words + numbers + punctuation → pause", () => {
         expect(phonemize("كَتَبَ الطَّالِبُ.", "ar")).toBe(
-            "kˈataba ʔatˤːˈaːlibu .",
+            "kˈataba atˤːˈaːlibu .",
         );
         expect(phonemize("الْقَمَر وَالشَّمْس", "ar")).toBe(
-            "ʔalqˈamar waʃːˈams",
+            "alqˈamar waʃːˈams",
         );
     });
 
@@ -83,10 +83,10 @@ describe("arabic canonical IPA — diacritized path", () => {
         () => {
             test("undiacritized input restores vowels then phonemizes", async () => {
                 expect(await phonemizeArabic("كتب الطالب الدرس")).toBe(
-                    "kˈatab ʔatˤːˈaːlib ʔadːˈars",
+                    "kˈatab atˤːˈaːlib adːˈars",
                 );
                 expect(await phonemizeArabic("اللغة العربية جميلة")).toBe(
-                    "ʔalːˈuɣa ʔalʕarabˈijːa d͡ʒamˈiːla",
+                    "alːˈuɣa alʕarabˈijːa d͡ʒamˈiːla",
                 );
             });
         },
