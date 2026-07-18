@@ -45,7 +45,9 @@ describe("punjabi Shahmukhi front-end", () => {
         // when the schwa between ن and گ is deleted, which the coverage lexicon / an explicit sukun supplies.
         // vowel-agnostic on purpose: the mined vowel for this word (سُنگھی, ʊ) is a noisy referee artifact.
         expect(phonemizeWord("سنگھی")).toContain("ŋɡ"); // saṅghī: نگ → ŋɡ + medial gh high tone
-        expect(phonemizeWord("پنجابی")).toBe("pəɲd͡ʒˈaːbiː"); // panjābī: نج → ɲd͡ʒ
+        // panjābī: نج → ɲd͡ʒ. Covered by the CROSS-SCRIPT lexicon (پنجابی ⇄ ਪੰਜਾਬੀ) → the richer Gurmukhi-sourced
+        // form pˈə̃ɲd͡ʒaːbiː (with the nasal ə̃ the abjad drops); assert the assimilation property, not exact stress.
+        expect(phonemizeWord("پنجابی")).toContain("ɲd͡ʒ");
     });
 
     test("text: Shahmukhi word run + Urdu punctuation", () => {
