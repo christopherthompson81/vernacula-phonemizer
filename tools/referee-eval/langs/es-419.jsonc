@@ -1,0 +1,19 @@
+// Latin-American Spanish (es-419) — "neutral"/pan-American, an ACCENT VARIANT of Castilian `es` (the es engine +
+// seseo θ→s + yeísmo ʎ→ʝ, spanish-419.ts). Referee: wikipron spa_latn_la (HUMAN, broad, 130k). Same fold
+// conventions as `es` (allophonic spirantization β/ð/ɣ~b/d/ɡ, ʝ~j, r~ɾ, our offglides) — the referee writes the
+// broad realizations. The seseo/yeísmo mergers are the DELTA and are NOT folded (they are the point).
+{
+    "referees": [
+        { "file": "es-419.wikipron-la.tsv", "source": "wikipron spa_latn_la broad (human, Latin-American)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "β", "replace": "b", "note": "spirantization β̞~b — allophonic; referee writes either" },
+        { "pattern": "ð", "replace": "d", "note": "spirantization ð̞~d — allophonic" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "spirantization ɣ̞~ɡ — allophonic" },
+        { "pattern": "ʝ", "replace": "j", "note": "⟨y/ll⟩ ʝ~j — convention (yeísmo merges ll into this phoneme)" },
+        { "pattern": "r", "replace": "ɾ", "note": "trill/tap r~ɾ — referee inconsistent on rr vs intervocalic" },
+        { "pattern": "ᶦ", "replace": "i", "note": "our non-syllabic offglide ᶦ (aire→aᶦɾe) vs referee plain i" },
+        { "pattern": "ᶷ", "replace": "u", "note": "our non-syllabic offglide ᶷ (auto→aᶷto) vs referee plain u" }
+    ]
+}

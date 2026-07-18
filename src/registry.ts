@@ -7,6 +7,7 @@ import { createEnglish, EnglishPhonemizer } from "./languages/english/english.ts
 import { createEnglishGB } from "./languages/english-gb/english-gb.ts";
 import { createMandarin } from "./languages/mandarin/mandarin.ts";
 import { createSpanish } from "./languages/spanish/spanish.ts";
+import { createSpanish419 } from "./languages/spanish-419/spanish-419.ts";
 import { createArabic } from "./languages/arabic/arabic.ts";
 import { createFrench } from "./languages/french/french.ts";
 import { createPortuguese } from "./languages/portuguese/portuguese.ts";
@@ -113,6 +114,9 @@ function build(lang: string): Phonemizer {
             return createMandarin((latin) => getPhonemizer("en").text(latin));
         case "es":
             return createSpanish();
+        // Latin-American Spanish (neutral/pan-American) — Castilian engine + seseo (θ→s) + yeísmo (ʎ→ʝ).
+        case "es-419":
+            return createSpanish419();
         case "ar":
             return createArabic();
         case "arz": // Egyptian Arabic — shares the Arabic engine, Egyptian variety data
