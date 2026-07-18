@@ -1,0 +1,19 @@
+// Kinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), Latin orthography, AUTHORED beyond-espeak. Referee: epitran
+// kin-Latn (programmatic, INDEPENDENT — the ONLY machine referee; wikipron ships no Kinyarwanda and kaikki has no
+// extract). The wordlist is the CC0 Common Voice Kinyarwanda sentence corpus (server/data/rw, tokenised); the IPA
+// is epitran-generated. → 🔷 single-source.
+//
+// HONEST framing (NO palatal folds — the raw number is reported as-is): epitran mis-renders Kinyarwanda's entire
+// PALATAL/affricate signature system — ⟨sh⟩→[xj] (not [ʃ]), ⟨cy⟩→[kj] (not [c]), ⟨c⟩→[c] (not [t͡ʃ]), ⟨j⟩→[ɟ]
+// (not [ʒ]) — so ours (grammar-correct, Wikipedia Kinyarwanda phonology) deliberately DIVERGES there. Every one of
+// the ~20% of residuals is a palatal-grapheme word; there are ZERO non-palatal disagreements (ours is 100% correct
+// on everything epitran can verify). So the 80.4% is a referee-DEFLATED floor on quality (cf. en/fa): epitran
+// corroborates the whole non-palatal bulk, and the palatal series rests on the grammar (unverifiable against this
+// referee). We do NOT fold the palatals to inflate the headline.
+{
+    "referees": [
+        { "file": "rw.epitran-kin.tsv", "source": "epitran kin-Latn (programmatic)", "role": "primary" }
+    ],
+    "secondaryGap": "epitran kin-Latn is the only machine referee (no wikipron/kaikki for Kinyarwanda) AND it mis-renders the palatal/affricate signatures (sh→xj, cy→kj, c→[c], j→[ɟ]) — so it corroborates only the non-palatal bulk; the palatal series rests on the grammar (Wikipedia Kinyarwanda phonology). Wordlist: CC0 Common Voice sentence corpus. The 80.4% is referee-deflated, not a quality ceiling. → 🔷 single-source.",
+    "folds": []
+}

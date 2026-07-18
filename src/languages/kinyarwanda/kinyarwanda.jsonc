@@ -1,0 +1,57 @@
+// Native canonical-IPA data manifest for Kinyarwanda / Ikinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), the Latin
+// orthography, espeak-independent. A greedy longest-match scan over the grapheme table (Shona pattern): Kinyarwanda
+// syllables are open CV, so a pure left-to-right longest match suffices. The interest is the rich PALATAL series,
+// authored from the grammar (Wikipedia Kinyarwanda phonology) because the only machine referee (epitran kin-Latn)
+// mis-renders it (sh→[xj] not [ʃ], cy→[kj] not [c]):
+//   • PALATALS ⟨cy⟩→c, ⟨jy⟩→ɟ, ⟨shy⟩→ç, ⟨ny⟩→ɲ, and the C+palatal sequences ⟨by⟩→bɟ, ⟨ry⟩→ɾɟ, ⟨my⟩→mɲ, ⟨py⟩→pc.
+//   • AFFRICATE/FRICATIVE ⟨c⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨sh⟩→ʃ.
+//   • ⟨ng⟩→ŋ (a plain velar nasal — Kinyarwanda ⟨ng⟩ is NOT a prenasalised ŋɡ; the other NC stay nasal+C).
+//   • ⟨r⟩→ɾ (tap), double vowels → long (aa→aː). ⟨Cw⟩/⟨Cy⟩-not-listed fall out as C+w / C+j.
+// Tone (H/L) is unwritten → DEFERRED; the written double-vowel length IS emitted. Referee: epitran kin-Latn
+// (programmatic, INDEPENDENT) — corroborates the BULK (vowels, plain C, prenasals, labialisation, length); the
+// palatal signatures rest on the grammar (epitran is wrong there) → 🔷 single-source. See
+// docs/investigations/rw_native_bringup_investigation.md.
+{
+    "language": "rw",
+    "name": "Kinyarwanda (Ikinyarwanda)",
+    "script": "Latin",
+    "provenance": "Authored from the Kinyarwanda orthography + phonology (Wikipedia Kinyarwanda phonology). Referee: epitran kin-Latn (corroborates the bulk; the palatal series is grammar-authored). CC0 Common Voice wordlist.",
+
+    "convention": {
+        "palatals": "⟨cy⟩→c, ⟨jy⟩→ɟ, ⟨shy⟩→ç, ⟨ny⟩→ɲ; C+palatal sequences ⟨by⟩→bɟ, ⟨ry⟩→ɾɟ, ⟨my⟩→mɲ, ⟨py⟩→pc",
+        "affricates": "⟨c⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨sh⟩→ʃ",
+        "nasals": "⟨ng⟩→ŋ (plain velar nasal, NOT ŋɡ); other ⟨mb nd nz nt nk mp⟩ stay nasal+C",
+        "other": "⟨r⟩→ɾ (tap), double vowels → long (aa→aː); ⟨Cw⟩ labialisation = C+w",
+        "tone": "H/L tone is unwritten → DEFERRED; written vowel length IS emitted"
+    },
+
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC, so trigraphs (shy) win over digraphs
+    // (cy, sh, ng) over singles. ⟨ty ky gy hy dy vy⟩ and ⟨tw kw bw gw rw⟩ need no entries — ⟨y⟩→j / ⟨w⟩→w fall
+    // out of the greedy scan as C+j / C+w.
+    "graphemes": {
+        "shy": "ç",
+        "cy": "c", "jy": "ɟ", "by": "bɟ", "ry": "ɾɟ", "my": "mɲ", "py": "pc", "ny": "ɲ", "sh": "ʃ",
+        "ng": "ŋ",
+        "aa": "aː", "ee": "eː", "ii": "iː", "oo": "oː", "uu": "uː",
+
+        "b": "b", "c": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "ʒ", "k": "k", "l": "l",
+        "m": "m", "n": "n", "p": "p", "r": "ɾ", "s": "s", "t": "t", "v": "v", "w": "w", "y": "j", "z": "z",
+
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // Cardinal number words (Kinyarwanda). Units 1–10; the compositor (numbers.ts) uses the simplified counting
+    // form (makumi abiri = 20, ijana = 100, igihumbi = 1000) — the full noun-class concord is contextual (deferred).
+    "numbers": {
+        "units": ["zeru", "rimwe", "kabiri", "gatatu", "kane", "gatanu", "gatandatu", "karindwi", "umunani", "icyenda"],
+        "ten": "icumi",
+        "tens": "makumi",
+        "hundred": "ijana",
+        "thousand": "igihumbi",
+        "and": "na"
+    }
+}
