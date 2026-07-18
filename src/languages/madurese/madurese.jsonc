@@ -1,0 +1,59 @@
+// Native canonical-IPA data manifest for Madurese / Bhâsa Madhurâ (mad) — Austronesian (Malayo-Polynesian),
+// ~14M speakers (Madura, East Java). The 2008-revision Latin orthography, espeak-independent. Authored from
+// Davies (2010) "A Grammar of Madurese" + the JIPA Illustration (Misnadin & Kirby 2020), which supplies an
+// INDEPENDENT falsifiable gold (the transcribed 'North Wind and the Sun'). No machine referee exists
+// (no wikipron/epitran/kaikki). See docs/investigations/mad_native_bringup_investigation.md.
+//
+// The engine is NOT a direct map — Madurese has a signature VOWEL-REGISTER HARMONY plus glide/glottal epenthesis,
+// final devoicing, and geminate length, all handled in madurese.ts:
+//   • THREE-WAY stops: voiceless-unaspirated ⟨p t ṭ c k⟩, voiceless-ASPIRATED ⟨bh dh ḍh jh gh⟩ = /pʰ t̪ʰ ʈʰ cʰ kʰ/,
+//     VOICED ⟨b d ḍ j g⟩ = /b d̪ ɖ ɟ ɡ/. Retroflex ⟨ṭ ḍ⟩ (underdot) = /ʈ ɖ/.
+//   • VOWEL HARMONY: the 4 pairs a~ɤ, ɛ~i, ə~ɨ, ɔ~u. The HIGH member follows a voiced OR aspirated stop
+//     (the "raise" class); the LOW member elsewhere. ⟨l r w y⟩ are TRANSPARENT (carry the register through).
+//   • ⟨â⟩ / ⟨è⟩ mark quality but the height is (re)computed from the register so unmarked ⟨a e⟩ also raise.
+{
+    "language": "mad",
+    "name": "Madurese (Bhâsa Madhurâ)",
+    "script": "Latin",
+    "provenance": "Authored from Davies (2010) A Grammar of Madurese + Misnadin & Kirby (2020) JIPA Illustration. No machine referee; gold = the JIPA transcribed passage.",
+
+    // Consonants by REGISTER CLASS (longest orthographic keys first in the scan). raise = voiced+aspirated stops
+    // (a following vowel raises); low = voiceless-unaspirated + nasals + fricatives (following vowel stays low);
+    // transparent = liquids/glides (carry the current register state through to the next vowel).
+    "raiseCons": {
+        "ḍh": "ʈʰ", "bh": "pʰ", "dh": "tʰ", "jh": "cʰ", "gh": "kʰ",
+        "ḍ": "ɖ", "b": "b", "d": "d", "j": "ɟ", "g": "ɡ"
+    },
+    "lowCons": {
+        "ng": "ŋ", "ny": "ɲ", "kh": "x",
+        "ṭ": "ʈ", "p": "p", "t": "t", "c": "c", "k": "k", "m": "m", "n": "n", "s": "s", "h": "h", "'": "ʔ"
+    },
+    "transpCons": { "l": "l", "r": "ɾ", "w": "w", "y": "j" },
+
+    // Each vowel letter → [LOW, HIGH] realisation. The HIGH member is taken when the IMMEDIATELY preceding consonant
+    // is a raise-class (voiced/aspirated) stop; the LOW member otherwise. The four alternating pairs are a~ɤ, e~ɨ,
+    // o~u (and è, spelled distinctly, is the /ɛ/ whose high counterpart is /i/ written ⟨i⟩). The MARKED vowels
+    // ⟨â è é ò i u⟩ have low==high (their quality is fixed by the orthography). NB the dental series is written with
+    // plain t/d (matching the JIPA broad transcription); the retroflex ⟨ṭ ḍ⟩ carry the ʈ/ɖ contrast.
+    "vowelSpec": {
+        "a": ["a", "ɤ"], "â": ["ɤ", "ɤ"], "è": ["ɛ", "ɛ"], "e": ["ə", "ɨ"], "é": ["e", "e"],
+        "i": ["i", "i"], "o": ["ɔ", "u"], "ò": ["ɔ", "ɔ"], "u": ["u", "u"]
+    },
+
+    // Word-final voiced/aspirated stops neutralise to the voiceless-unaspirated stop (Madurese final devoicing).
+    "finalDevoice": { "b": "p", "d": "t", "ɖ": "ʈ", "ɟ": "c", "ɡ": "k", "pʰ": "p", "tʰ": "t", "ʈʰ": "ʈ", "cʰ": "c", "kʰ": "k" },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // Cardinal number words (Madurese). Simplified counting form; unmeasured (no referee for numbers).
+    "numbers": {
+        "units": ["nolla", "settong", "duwâ", "tello", "empa'", "lèma'", "ennem", "petto'", "ballu'", "sanga'"],
+        "ten": "sapolo",
+        "tens": "polo",
+        "hundred": "atos",
+        "thousand": "èbu",
+        "and": "bân"
+    }
+}
