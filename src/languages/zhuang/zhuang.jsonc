@@ -1,0 +1,57 @@
+// Native canonical-IPA data manifest for Zhuang / Vahcuengh (za) — Tai-Kadai (Kra-Dai), Standard Zhuang (Wuming
+// dialect basis), the 1982 Latin orthography. A longest-match scan (multi-letter onsets + vowel digraphs before
+// single letters), with the pinyin-style voicing convention (⟨b d g⟩ = the UNASPIRATED voiceless /p t k/, ⟨p t k⟩
+// = aspirated), the implosives ⟨mb⟩→ɓ / ⟨nd⟩→ɗ, and the fricatives ⟨s⟩→θ, ⟨r⟩→ɣ, ⟨c⟩→ɕ, ⟨v⟩→β. Tones are written
+// as syllable-FINAL letters (z j x q h = tones 2-6; none = tone 1; a p/t/k coda = a checked tone) and rendered as
+// Chao contour letters — the eval backbone strips them, so corroboration is segmental. See
+// docs/investigations/za_native_bringup_investigation.md.
+{
+    "language": "za",
+    "name": "Zhuang (Vahcuengh)",
+    "script": "Latin",
+    "provenance": "Authored from the Standard Zhuang (Wuming) 1982 Latin orthography + phonology. Referees: wikipron zha_latn broad + kaikki Zhuang.",
+
+    "convention": {
+        "stops": "⟨b d g⟩ = unaspirated /p t k/ (pinyin-style), ⟨p t k⟩ = aspirated /pʰ tʰ kʰ/; ⟨mb⟩→ɓ, ⟨nd⟩→ɗ (implosives)",
+        "fricatives": "⟨s⟩→θ, ⟨r⟩→ɣ, ⟨c⟩→ɕ, ⟨v⟩→β, ⟨h⟩→h (onset) / tone-6 (coda)",
+        "vowels": "⟨w⟩→ɯ, ⟨ae⟩→short a, ⟨oe⟩→ɵ, ⟨a e i o u⟩ long; word-initial vowel → [ʔ] onset",
+        "tones": "syllable-final ⟨z j x q h⟩ = tones 2-6 (Chao 31/55/42/35/33), none = tone 1 (24); p/t/k coda = checked",
+    },
+
+    // Multi-letter ONSETS (longest first). ⟨mb⟩/⟨nd⟩ implosives; ⟨ng ny⟩ nasals; ⟨gv ngv⟩ labialised; ⟨by gy my⟩
+    // palatalised.
+    "onsets": {
+        "ngv": "ŋʷ", "mby": "ɓʲ", "gv": "kʷ", "kv": "kʰʷ",
+        "ng": "ŋ", "ny": "ɲ", "mb": "ɓ", "nd": "ɗ", "by": "pʲ", "gy": "kʲ", "my": "mʲ"
+    },
+
+    // Single consonant letters → IPA. ⟨h⟩ is handled specially in the scanner (onset vs tone-6 coda). ⟨z j x q⟩
+    // are ONLY tone letters (never onsets) — also handled in the scanner.
+    "consonants": {
+        "b": "p", "c": "ɕ", "d": "t", "f": "f", "g": "k", "k": "kʰ", "l": "l",
+        "m": "m", "n": "n", "p": "pʰ", "r": "ɣ", "s": "θ", "t": "tʰ", "v": "β", "y": "j"
+    },
+
+    // Vowel digraphs (longest first) + single vowels. ⟨w⟩→ɯ; ⟨oe⟩→o; the ⟨e⟩ after a high vowel is a silent
+    // filler that just marks the nucleus (⟨ie⟩→iː, ⟨ue⟩→uː, ⟨we⟩→ɯ: cieng→ɕiːŋ, suen→θuːn, rwed→ɣɯt). ⟨ae⟩ is
+    // handled in the scanner (→ [ai] open / [a] before a coda).
+    "vowelDigraphs": { "aeu": "au", "ie": "iː", "ue": "uː", "we": "ɯ", "oe": "o" },
+    "vowels": { "a": "aː", "e": "eː", "i": "iː", "o": "oː", "u": "uː", "w": "ɯ" },
+
+    // Tone letter → Chao contour (Wuming Standard Zhuang: 1=24, 2=31, 3=55, 4=42, 5=35, 6=33). Checked syllables
+    // (p/t/k coda) default to a high checked tone.
+    "tones": { "1": "˨˦", "z": "˧˩", "j": "˥", "x": "˦˨", "q": "˧˥", "h": "˧", "checked": "˥" },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words (Standard Zhuang; run through the g2p). Tens: cib(10), ngeihcib(20)… units join directly.
+    "numbers": {
+        "units": ["lingz", "it", "ngeih", "sam", "seiq", "haj", "roek", "caet", "bet", "gouj"],
+        "ten": "cib",
+        "hundred": "bak",
+        "thousand": "cien",
+        "million": "fanh"
+    }
+}

@@ -33,6 +33,7 @@ import { phonemizeWord as xh } from "../../src/languages/xhosa/xhosa.ts";
 import { phonemizeWord as sr } from "../../src/languages/serbian/serbian.ts";
 import { phonemizeWord as hu } from "../../src/languages/hungarian/hungarian.ts";
 import { phonemizeWord as kmr } from "../../src/languages/kurmanji/kurmanji.ts";
+import { phonemizeWord as za } from "../../src/languages/zhuang/zhuang.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
@@ -127,6 +128,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     sr,
     hu,
     kmr,
+    za,
     cs,
     cy,
     de,

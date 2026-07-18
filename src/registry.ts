@@ -68,6 +68,7 @@ import { createSundanese } from "./languages/sundanese/sundanese.ts";
 import { createNepali } from "./languages/nepali/nepali.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
+import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
 import { createMinnan } from "./languages/minnan/minnan.ts";
@@ -248,6 +249,8 @@ function build(lang: string): Phonemizer {
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.
         case "hne":
             return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));
+        case "za":
+            return createZhuang();
         // Awadhi (Eastern Hindi) — Saksena-sourced ⛔ stub on the shared Hindi engine.
         case "awa":
             return createAwadhi((latin) => getPhonemizer("en").text(latin));
