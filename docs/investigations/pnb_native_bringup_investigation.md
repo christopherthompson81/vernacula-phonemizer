@@ -79,3 +79,29 @@ same-tradition. But the vowels come from an independent ORTHOGRAPHY (the Gurmukh
 not a guess), and it is the exact method already shipped for Urdu. Truly-independent scale = Gurmukhi Wikipedia
 (beyond kaikki) + Grierson LSI *Lahnda of Shahpur*. The mechanism ports directly to sd (Sindhi↔Devanagari) and any
 abjad with a voweled sister script.
+
+## Phase 3 — 2026-07-18 — Gurmukhi Wikipedia transliteration scaling: TESTED NEGATIVE
+
+Attempted to scale the cross-script beyond kaikki's real pairs using Gurmukhi (Punjabi) Wikipedia — the largest
+voweled Gurmukhi corpus (95 MB dump → **149,938 words** at freq≥3). Since Wikipedia gives only Gurmukhi, scaling
+requires TRANSLITERATING Gurmukhi → a canonical Shahmukhi key (the value stays the gold Gurmukhi-g2p IPA).
+
+**Transliterator fidelity, first measured, then improved:** naïve Gurmukhi→Shahmukhi transliteration exact-matched
+the real Shahmukhi spelling only **52.7%** of the time. The misses were SYSTEMATIC positional spelling rules, and
+fixing three lifted it to **76.7%**: (1) nasalization ੰ/ਂ → full ن when a consonant follows (homorganic, پنجابی),
+ں only word-finally; (2) the eː/ɛ matra ੇ/ੈ → ی medially (سیوا), ے only word-finally; (3) independent ਆ → plain ا
+mid-word (دنیا, not دنیآ). The residual 23% are ETYMOLOGICAL loan letters Gurmukhi can't distinguish (ਹ→ح/ہ,
+ਤ→ت/ط, ਸ→س/ص, ਜ਼→ز/ذ/ض/ظ) — inherently unrecoverable, and already covered by kaikki's real pairs.
+
+**Result: net NEGATIVE on the referee.** Adding 1971 transliterated+gated Wikipedia pairs moved the pan_arab
+Shahmukhi referee **49.9% → 49.1% (−0.8pp)**. Even at 76.7% fidelity, the wrong 23% plus SKELETON COLLISIONS (a
+correct synthetic key can equal a *different* referee word's consonant skeleton — inherent abjad homography) apply a
+wrong gold IPA and net-harm. This empirically CONFIRMS the codebase's prior "the synthetic transliteration sank the
+Punjabi cross-script" (`crossscript_pa.ts` header). **Reverted — crossscript.tsv stays at the 2637 real kaikki pairs
+(49.9%).**
+
+**Conclusion:** transliteration cannot scale the cross-script cleanly; the reliable ceiling is REAL dual-script
+pairs. To scale further would need MORE real (Gurmukhi, Shahmukhi) spelling pairs — e.g. Wikipedia interlanguage
+links between pa.wikipedia (Gurmukhi) and pnb.wikipedia (Shahmukhi) article titles, or Wikidata lexemes — not
+transliteration. The transliterator FIDELITY fix (52.7→76.7%) is real but unshipped (its only consumer was the sunk
+scaling). Deferred to a real-pairs data hunt if pnb is prioritized further.
