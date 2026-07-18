@@ -80,6 +80,18 @@ Neither is recoverable from spelling without a lexicon.
   single-source** (one independent human phonetic source — small (35 words) but
   genuinely independent + falsifiable, and it PASSED). No machine referee exists.
 
+## Run 2 — 2026-07-17 — adversarial review
+
+Two latent fixes (neither touches the 35-word gold, both verified):
+- **Cluster transparency was inert** — the `transp` class behaved like `low`, so
+  the documented ⟨l r w y⟩ carry-through didn't exist. Fixed: a transparent consonant
+  now passes a preceding stop's register through ONLY in an onset cluster (previous
+  segment was a consonant): bra→[bɾɤ], gra→[ɡɾɤ], but pra→[pɾa] and bâla→[bɤla] (a
+  liquid after a vowel is a fresh low onset). Gold unchanged at 33/35.
+- **Final geminate devoicing** was length-sensitive (a final ⟨…bb⟩→[bː] missed the
+  DEVOICE map); made it length-insensitive (sabb→[sapː]). Latent — Madurese has no
+  word-final geminates.
+
 **Deferred:** stress/intonation (Davies §7: "not a salient feature", no lexical
 stress → not emitted); the two lexical ambiguities above (final-ʔ, /ə/~/ɛ/) which
 need a pronunciation lexicon; morphological gemination at affix boundaries. A larger

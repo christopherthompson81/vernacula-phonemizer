@@ -94,25 +94,36 @@ function epenthesize(segs: Seg[]): Seg[] {
 /** Phonemize a single Madurese word to canonical IPA (register harmony + epenthesis + devoicing + gemination). */
 export function phonemizeWord(word: string): string {
     const segs = epenthesize(tokenize(word.toLowerCase()));
-    // A vowel's height is set by the IMMEDIATELY preceding consonant: a raise-class (voiced/aspirated) stop takes
-    // the HIGH member of the pair, anything else (voiceless stop, nasal, liquid, glide, word-initial) the LOW one.
+    // A vowel's height is set by the register carried to it: a raise-class (voiced/aspirated) stop sets HIGH, a
+    // low-class consonant sets LOW. A TRANSPARENT consonant (l r w y) is invisible to the harmony only inside an
+    // ONSET CLUSTER — it passes a preceding stop's register through (bra→bɾɤ) — but a liquid AFTER a vowel is a
+    // fresh onset and resets to low (bâla→bɤla). We approximate the cluster test as "the previous segment was a
+    // consonant" (no syllabifier).
     let prevRaise = false; // word-initial = low
+    let prevKind: "start" | "C" | "V" = "start";
     const ipa: string[] = [];
     let lastC = -1;
     for (const s of segs) {
         if (s.kind === "C") {
-            prevRaise = s.reg === "raise";
+            if (s.reg === "raise") prevRaise = true;
+            else if (s.reg === "low") prevRaise = false;
+            else if (prevKind !== "C") prevRaise = false; // transparent liquid after a vowel/start → fresh low onset
             ipa.push(s.ipa);
             lastC = ipa.length - 1;
+            prevKind = "C";
         } else {
             ipa.push(prevRaise ? s.high : s.low);
             lastC = -1; // a vowel is last, so no final-consonant devoicing
+            prevKind = "V";
         }
     }
-    // Word-final devoicing: a final voiced/aspirated stop neutralises to voiceless-unaspirated.
+    // Word-final devoicing: a final voiced/aspirated stop neutralises to voiceless-unaspirated (length-insensitive,
+    // so a final geminate ⟨…bb⟩→[pː] devoices too).
     if (lastC === ipa.length - 1 && lastC >= 0) {
-        const d = DEVOICE[ipa[lastC]!];
-        if (d) ipa[lastC] = d;
+        const seg = ipa[lastC]!;
+        const long = seg.endsWith("ː");
+        const d = DEVOICE[long ? seg.slice(0, -1) : seg];
+        if (d) ipa[lastC] = long ? d + "ː" : d;
     }
     return ipa.join("");
 }

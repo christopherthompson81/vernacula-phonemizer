@@ -9,7 +9,8 @@
 //   • THREE-WAY stops: voiceless-unaspirated ⟨p t ṭ c k⟩, voiceless-ASPIRATED ⟨bh dh ḍh jh gh⟩ = /pʰ t̪ʰ ʈʰ cʰ kʰ/,
 //     VOICED ⟨b d ḍ j g⟩ = /b d̪ ɖ ɟ ɡ/. Retroflex ⟨ṭ ḍ⟩ (underdot) = /ʈ ɖ/.
 //   • VOWEL HARMONY: the 4 pairs a~ɤ, ɛ~i, ə~ɨ, ɔ~u. The HIGH member follows a voiced OR aspirated stop
-//     (the "raise" class); the LOW member elsewhere. ⟨l r w y⟩ are TRANSPARENT (carry the register through).
+//     (the "raise" class); the LOW member elsewhere. ⟨l r w y⟩ are TRANSPARENT: inside an ONSET CLUSTER they pass
+//     a preceding stop's register through (bra→bɾɤ), but after a vowel a liquid is a fresh low onset (bâla→bɤla).
 //   • ⟨â⟩ / ⟨è⟩ mark quality but the height is (re)computed from the register so unmarked ⟨a e⟩ also raise.
 {
     "language": "mad",
