@@ -107,8 +107,16 @@ function onglides(segs: Seg[], stress: number): void {
     }
 }
 
+// BP unstressed-vowel raising is POSITION-split, unlike EP's blanket reduction: only the FINAL atonic vowel
+// raises (e→i, o→u, a→ɐ — cidade → sidad(ʒ)i, estado → estadu), while pretonic/postonic-medial vowels keep their
+// mid quality (bonito → bonitu NOT bunitu, professor → pɾofesoɾ, telefone → telefoni). This is the deepest EP→BP
+// difference and is NOT recoverable from EP surface forms (EP has already collapsed pretonic o→u), which is why
+// the dialect is a parameter of the engine rather than a post-process. There is no [ɨ] and no initial-e→i in BP.
+const REDUCE_BP_FINAL: Record<string, string> = { a: "ɐ", e: "i", o: "u" };
+const REDUCE_BP_MID: Record<string, string> = { a: "a", e: "e", o: "o" };
+
 /** Realize vowels: reduce unstressed oral vowels, nasalize nasal ones, mark the stressed nucleus with ˈ. */
-function realize(segs: Seg[], stress: number): string {
+function realize(segs: Seg[], stress: number, dialect: "ep" | "bp" = "ep"): string {
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;
@@ -121,15 +129,28 @@ function realize(segs: Seg[], stress: number): string {
             // suffix -vel → vɛɫ). Onset l still reduces (falar → fɐlaɾ). ⟨o⟩ still raises before ɫ (soldado →
             // suɫdadu — the referee corroborates the o-raise, unlike a/e). Referee-confirmed 53:0 (a), 89:0 (e).
             const beforeDarkL = segs[i + 1]?.ph === "ɫ";
-            // word-initial unstressed e → i (está → iʃta, emérico → imɛɾiku), the EP raising; else the usual reduction.
-            ph =
-                beforeDarkL && s.raw === "a"
-                    ? "a"
-                    : beforeDarkL && s.raw === "e"
-                      ? "ɛ"
-                      : i === 0 && s.raw === "e"
-                        ? "i"
-                        : (REDUCE[s.raw] ?? ph);
+            if (dialect === "bp") {
+                const isFinal = !segs.slice(i + 1).some((x) => x.nucleus); // last atonic nucleus = raises
+                ph = beforeDarkL
+                    ? s.raw === "a"
+                        ? "a"
+                        : s.raw === "e"
+                          ? "ɛ"
+                          : s.raw === "o"
+                            ? "o" // ⟨o⟩ keeps mid quality before coda-l → the l→w step gives [ow] (soldado → sowdadu)
+                            : ph // ⟨i⟩/⟨u⟩ before coda-l keep their quality (fácil → fasiw, útil → ut͡ʃiw)
+                    : ((isFinal ? REDUCE_BP_FINAL : REDUCE_BP_MID)[s.raw] ?? ph);
+            } else {
+                // EP: word-initial unstressed e → i (está → iʃta), else the blanket reduction a→ɐ, e→ɨ, o→u.
+                ph =
+                    beforeDarkL && s.raw === "a"
+                        ? "a"
+                        : beforeDarkL && s.raw === "e"
+                          ? "ɛ"
+                          : i === 0 && s.raw === "e"
+                            ? "i"
+                            : (REDUCE[s.raw] ?? ph);
+            }
         }
         if (s.nasal && s.nucleus) ph = NASAL[ph] ?? ph;
         if (i === stress) out += "ˈ";
@@ -153,33 +174,48 @@ function correct(segs: Seg[], stress: number, corr: Corr): void {
 }
 
 /** Core: EP word → canonical IPA, applying an explicit correction (used by the lexicon and its generator). */
-export function renderWord(word: string, corr?: Corr): string {
-    const segs = toSegments(word);
+export function renderWord(word: string, corr?: Corr, dialect: "ep" | "bp" = "ep"): string {
+    const segs = toSegments(word, dialect);
     if (segs.length === 0) return "";
-    sibilants(segs);
+    sibilants(segs, dialect);
     const stress = stressedNucleus(word, segs);
     onglides(segs, stress);
     if (corr) correct(segs, stress, corr);
-    return realize(segs, stress);
+    const ipa = realize(segs, stress, dialect);
+    return dialect === "bp" ? bpConsonants(ipa) : ipa;
 }
 
-/** One EP word → canonical IPA: rule engine + the lexical correction table (open/close vowels, x). */
-export function phonemizeWord(word: string): string {
-    return renderWord(word, lexicon().get(word.toLowerCase()));
+/** BP consonant surface rules applied to the realized string (their triggers — [i] incl. raised final ⟨e⟩, and
+ *  coda [ɫ] — are unambiguous at this point): (1) affrication of /t d/ before [i]/[ĩ] (tia → t͡ʃia, dia → d͡ʒia,
+ *  gente → ʒẽt͡ʃi, cidade → sidad͡ʒi); (2) coda-l vocalization ɫ → [w] (sal → saw, Brasil → bɾaziw). Coda-r stays
+ *  [ɾ] and rr/initial stay [ʁ] — both attested in the BZ referee, so no contested [h]/[x]/[ɻ] choice. */
+function bpConsonants(ipa: string): string {
+    return ipa
+        .replace(/t([ˈˌ]?[iĩ])/gu, "t͡ʃ$1")
+        .replace(/d([ˈˌ]?[iĩ])/gu, "d͡ʒ$1")
+        .replace(/ɫ/gu, "w");
+}
+
+/** One word → canonical IPA: rule engine + the lexical correction table (open/close vowels, x). `dialect` selects
+ *  European (default) or Brazilian realization; the open/close correction lexicon is shared (EP-derived, mostly
+ *  valid for BP — a small lexical tail where the dialects differ on a stressed mid vowel). */
+export function phonemizeWord(word: string, dialect: "ep" | "bp" = "ep"): string {
+    return renderWord(word, lexicon().get(word.toLowerCase()), dialect);
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14).
 const TOKEN = /([a-zà-ÿ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
 
-/** A number token (thousands-dots / decimal-comma) → spoken words. */
-function numberTokenToWords(tok: string): string {
+/** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
+ *  dez-e- vs the EP dez-a-). */
+function numberTokenToWords(tok: string, dialect: "ep" | "bp"): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
+    let words = numberToWords(Number(intRaw!.replace(/\./g, "")), dialect);
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +
-            [...frac].map((d) => numberToWords(Number(d))).join(" ");
+            [...frac].map((d) => numberToWords(Number(d), dialect)).join(" ");
     return words;
 }
 
@@ -187,18 +223,23 @@ function numberTokenToWords(tok: string): string {
 // running text (DATA: portuguese.jsonc).
 const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 
-function wordIpa(word: string): string {
-    const ipa = phonemizeWord(word);
+function wordIpa(word: string, dialect: "ep" | "bp"): string {
+    const ipa = phonemizeWord(word, dialect);
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
 class PortuguesePhonemizer implements Phonemizer {
+    constructor(private readonly dialect: "ep" | "bp" = "ep") {}
     text(input: string): string {
+        const d = this.dialect;
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(m[1]));
+            if (m[1]) sink.emit(wordIpa(m[1], d));
             else if (m[2])
                 sink.emit(
-                    numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "),
+                    numberTokenToWords(m[2], d)
+                        .split(" ")
+                        .map((w) => wordIpa(w, d))
+                        .join(" "),
                 );
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -208,7 +249,8 @@ class PortuguesePhonemizer implements Phonemizer {
     }
 }
 
-/** Build the European Portuguese phonemizer (no data files — fully rule-based). */
-export function createPortuguese(): Phonemizer {
-    return new PortuguesePhonemizer();
+/** Build the Portuguese phonemizer (no data files — fully rule-based). `dialect` selects European (default) or
+ *  Brazilian ("bp") realization; see src/languages/portuguese-br for the BP accent-variant entry points. */
+export function createPortuguese(dialect: "ep" | "bp" = "ep"): Phonemizer {
+    return new PortuguesePhonemizer(dialect);
 }
