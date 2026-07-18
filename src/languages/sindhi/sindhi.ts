@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 interface SindhiDef {
     consonants: Record<string, string>;
@@ -106,16 +107,35 @@ function scan(word: string): string {
     return out.join("");
 }
 
-/** One Sindhi word → canonical IPA. */
-export function phonemizeWord(word: string): string {
-    // homorganic nasal assimilation, across the unwritten short vowel (n·ə·C): before a velar → ŋ (انگ→əŋɡ),
-    // labial → m (انب→əmb), retroflex → ɳ (آنڊو→aːɳɖo), palatal → ɲ (پنج→pəɲd͡ʒ).
+/** Rule g2p: consonant + long-vowel skeleton with default-[ə] short vowels, then homorganic nasal assimilation
+ *  across the unwritten short vowel (n·ə·C): before a velar → ŋ (انگ→əŋɡ), labial → m (انب→əmb), retroflex → ɳ
+ *  (آنڊو→aːɳɖo), palatal → ɲ (پنج→pəɲd͡ʒ). */
+function phonemizeCore(word: string): string {
     return scan(word)
         .replace(/n(?=ə?(?:kʰ|[kɡxɠ]))/gu, "ŋ")
         .replace(/n(?=ə?[bpɓ])/gu, "m")
         .replace(/n(?=ə?[ʈɖɳɽ])/gu, "ɳ")
         .replace(/n(?=ə?(?:d͡ʒ|t͡ʃ|ʄ))/gu, "ɲ")
         .normalize("NFC");
+}
+
+// SHORT-VOWEL restoration lexicon (sindhi-lexicon.tsv): bare word → voweled IPA, mined from kaikki Sindhi
+// (Wiktionary, CC BY-SA). The Perso-Arabic abjad leaves short vowels unwritten, so the rule g2p defaults every
+// one to [ə] (زبان → zəbaːnə); this restores the attested Sindhi short vowels (zʊbaːnə), the Urdu restoreHarakat
+// pattern. The referee eval FOLDS short vowels (abjad wall) so it scores the RULE path (phonemizeWordRules,
+// non-circular); this lexicon is a SHIPPED refinement — its value is the correct vocalization for TTS.
+let LEX: ReadonlyMap<string, string> | undefined;
+const lexicon = (): ReadonlyMap<string, string> =>
+    (LEX ??= loadTsvMap(import.meta.url, "sindhi-lexicon.tsv", undefined, { optional: true }));
+
+/** One Sindhi word → canonical IPA, SHIPPED path (rule g2p + the kaikki short-vowel restoration lexicon). */
+export function phonemizeWord(word: string): string {
+    return lexicon().get(word) ?? phonemizeCore(word);
+}
+
+/** One Sindhi word → canonical IPA, RULE-ONLY (no lexicon) — the non-circular signal for the referee eval. */
+export function phonemizeWordRules(word: string): string {
+    return phonemizeCore(word);
 }
 
 const SD_WORD = "ء-ٟٮ-ۿ";

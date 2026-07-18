@@ -75,7 +75,10 @@ import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts
 import { phonemizeWordRules as tl } from "../../src/languages/tagalog/tagalog.ts";
 import { phonemizeWord as om } from "../../src/languages/oromo/oromo.ts";
 import { phonemizeWord as pl } from "../../src/languages/polish/polish.ts";
-import { phonemizeWord as sd } from "../../src/languages/sindhi/sindhi.ts";
+// RULE-ONLY for sd: the shipped phonemizeWord applies a kaikki short-vowel restoration lexicon; the referee eval
+// FOLDS short vowels (abjad wall) so it can't reward it anyway, and kaikki is in the referee → rule-only keeps it
+// honest. phonemizeWordRules is the default-schwa g2p (the consonant + long-vowel backbone the eval measures).
+import { phonemizeWordRules as sd } from "../../src/languages/sindhi/sindhi.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
 import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";

@@ -68,3 +68,28 @@ backbone — including the implosive census gap, the retroflex series, aspiratio
 nasal assimilation — is verified. The residual is the abjad short-vowel wall: quality and
 position of the unwritten short vowels, restorable in principle from a coverage lexicon
 (the Urdu/Pashto path), which is the deferred tail. Numbers deferred.
+
+## Phase 2 — 2026-07-18 — the short-vowel lexicon + a TWO-SIGNAL (multi-variety) validation
+
+Built `sindhi-lexicon.tsv` (539 words, kaikki Sindhi, CC BY-SA): bare word → voweled IPA, restoring the unwritten
+short vowels on the SHIPPED `phonemizeWord` (زبان zəbaːnə → zʊbaːnə, سنڌي → sɪndʱiː; also fixes over-epenthesis +
+ع/ه handling). The eval FOLDS short vowels (abjad wall) so it stays on `phonemizeWordRules` (default-ə, 77.0%,
+non-circular); the lexicon is a shipped refinement — its value is the correct vocalization for the FLEURS `sd_in`
+audio, not the eval number.
+
+**The validation problem (and the fix):** the sd referee is kaikki + wikipron — BOTH Wiktionary, and epitran has
+no Sindhi — so validating a kaikki lexicon against it is CIRCULAR (100% trivially; the gold cannot fail). The fix
+was a genuinely independent source + a **two-signal method**: treat the Wiktionary/standard variety (kaikki) and a
+second variety as two signals of one phonology — root on the orthography-dominant standard, use the other as
+corroborating hints. The independent source is **Nihalani, *The Phonetics of Sindhi* (1974)** (a phonetician's own
+transcriptions; the user provided the PDF, PaddleOCR-VL extracted 292 [IPA] (gloss) pairs — short vowels captured
+cleanly, implosives/retroflexes mangled by OCR). Matching kaikki ∩ Nihalani by gloss AND consonant skeleton (to
+skip synonyms — father بابو/والد — and folding OCR/implosive/length/final-ə): of 9 same-word overlaps, **7 AGREE
+on the short vowels (78%)** and 2 disagree (سالو aː~aɪ, ميز ɛ~e — genuine variety variation, not error). So the
+short vowels are largely cross-variety-STABLE, and the 7 agreements are **2-source-verified** — a FALSIFIABLE
+regression gold (`test/sindhi.test.ts`), independently corroborated rather than circular.
+
+**Honest status:** the lexicon is rooted on a single tradition (Wiktionary/standard) but no longer *unverified* —
+Nihalani independently corroborates the overlap at 78%. Unlike arz (whose calima-egy teacher enabled a neural
+diacritizer), **no Sindhi morphological analyzer / diacritizer exists**, so there is no neural scale path; the
+kaikki lexicon is the permissive ceiling. Still 🟡 (the OOV short-vowel tail remains, default-ə).
