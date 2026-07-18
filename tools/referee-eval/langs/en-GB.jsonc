@@ -1,0 +1,15 @@
+// British English (en-GB) — modern Standard Southern British / "BBC" pronunciation, an ACCENT VARIANT of `en`
+// (GenAm engine + a lexical-set delta, english-gb.ts). Referee: wikipron eng_latn_uk (HUMAN, NARROW, 76k merged
+// variants; the eval credits ANY variant). The backbone already strips the narrow combining marks (a̝, t̪, length,
+// stress); we fold aspiration (our kʰ/tʰ vs the referee's unmarked stops) and unify the NURSE/STRUT central vowels.
+{
+    "referees": [
+        { "file": "en-gb.wikipron-uk.tsv", "source": "wikipron eng_latn_uk (human, narrow)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "aspiration on p/t/k — our GenAm engine marks it, the referee doesn't" },
+        { "pattern": "ɫ", "replace": "l", "note": "DARK/velarised coda ⟨l⟩ [ɫ] — our engine marks the velarisation, the broad referee writes plain [l]; one phoneme" },
+        { "pattern": "ɐ", "replace": "ə", "note": "the near-open central [ɐ] the narrow referee uses for NURSE/STRUT/commA ~ our [ə]/[ɜ]" },
+        { "pattern": "ɜ", "replace": "ə", "note": "NURSE [ɜː] ~ [ə] after the backbone strips length — unify with the referee's [ə]/[ɐ]" }
+    ]
+}
