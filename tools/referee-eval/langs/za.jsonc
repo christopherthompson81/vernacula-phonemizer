@@ -1,0 +1,23 @@
+// Zhuang (za) — Tai-Kadai, Standard Zhuang (Wuming), the 1982 Latin orthography. Referees: wikipron zha_latn
+// broad (PRIMARY, HUMAN, 1682) + kaikki za (SECONDARY, HUMAN, 1709). Both Wiktionary-derived (same-source, a
+// breadth caveat). The comparison is SEGMENTAL: the backbone strips the Chao tone letters (˥˦˧˨˩) and length ː,
+// so tones + length are folded (correct — the tone system is real, just not what this segmental eval measures).
+{
+    "referees": [
+        {
+            "file": "za.wikipron-zha-broad.tsv",
+            "source": "wikipron zha_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "za.kaikki-za.tsv",
+            "source": "kaikki za (Wiktionary, human)",
+            "role": "secondary"
+        }
+    ],
+    "secondaryGap": "Both Zhuang referees (wikipron, kaikki) are Wiktionary-derived — the same human source parsed twice (weak same-source corroboration), not two independent referees. No non-Wiktionary Zhuang pronunciation corpus is free; epitran has no Zhuang (za/zyb) mapping.",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with a dot (min.ɕu) — strip for segmental comparison" },
+        { "pattern": "ɣ", "replace": "r", "note": "⟨r⟩ → [ɣ]~[r]~[l] — the Standard Zhuang rhotic is [ɣ] but the referee lists dialectal [r]/[l]/[n] variants; normalise ɣ→r for comparison" }
+    ]
+}
