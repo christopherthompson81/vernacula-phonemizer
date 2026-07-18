@@ -1,0 +1,13 @@
+// Modern Greek (el) — Hellenic, Greek script. TWO large HUMAN referees: wikipron ell_grek (PRIMARY, 19108) +
+// kaikki Greek (SECONDARY, 19721). Both Wiktionary-derived (same tradition) but very large. Stress is folded
+// (the backbone strips ˈ; we don't emit it — the referees mostly don't mark it either).
+{
+    "referees": [
+        { "file": "el.wikipron-ell-grek.tsv", "source": "wikipron ell_grek (human)", "role": "primary" },
+        { "file": "el.kaikki-greek.tsv", "source": "kaikki Greek (human)", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with a dot" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨ρ⟩ [r]~[ɾ] — the referees write both the trill and the tap for the one rhotic; unify" }
+    ]
+}

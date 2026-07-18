@@ -1,0 +1,46 @@
+// Native canonical-IPA data manifest for Modern Greek (el) — Hellenic (Indo-European), the Greek script,
+// espeak-independent. NOT a direct map: Greek needs a CONTEXT-SENSITIVE scan (greek.ts) — palatalisation before
+// front vowels, αυ/ευ voicing by the following consonant, σ-voicing, digraph handling, synizesis, double-consonant
+// simplification. The historical spellings all collapse to the 5-vowel system /a e i o u/. Stress (the orthographic
+// tonos) is NOT emitted — the referees (wikipron/kaikki) don't mark it, so we strip the tonos. See
+// docs/investigations/el_native_bringup_investigation.md.
+//
+//   • VOWELS: α→a; ε/αι→e; η/ι/υ/ει/οι/υι→i; ο/ω→o; ου→u. (Diaeresis ϊ/ϋ breaks the digraph: αϊ→a.i.)
+//   • PALATALISATION before a front vowel [e i]: κ→c, γ→ʝ, χ→ç, γκ/γγ→ɟ; and synizesis λ→ʎ, ν→ɲ before [i]+vowel.
+//   • VOICED DIGRAPHS: μπ→b, ντ→d, γκ/γγ→ɡ (→ɟ before front), γχ→ŋx, τσ→t͡s, τζ→d͡z.
+//   • αυ/ευ → a/e + [v] (before a voiced sound) or [f] (before a voiceless one). σ → z before a voiced consonant.
+{
+    "language": "el",
+    "name": "Greek (Ελληνικά)",
+    "script": "Greek",
+    "provenance": "Authored from Modern Greek orthography↔phonology. Referees: wikipron ell_grek + kaikki Greek.",
+
+    // Single vowel letters → sound (a/e/i/o/u). Front sounds e/i trigger velar palatalisation.
+    "vowels": { "α": "a", "ε": "e", "η": "i", "ι": "i", "ο": "o", "υ": "i", "ω": "o", "ϊ": "i", "ϋ": "i" },
+    "vowelDigraphs": { "αι": "e", "ει": "i", "οι": "i", "υι": "i", "ου": "u" },
+
+    // Single consonant letters → default IPA (context rules in greek.ts refine κ/γ/χ/σ/λ/ν).
+    "consonants": {
+        "β": "v", "γ": "ɣ", "δ": "ð", "ζ": "z", "θ": "θ", "κ": "k", "λ": "l", "μ": "m", "ν": "n",
+        "ξ": "ks", "π": "p", "ρ": "ɾ", "σ": "s", "ς": "s", "τ": "t", "φ": "f", "χ": "x", "ψ": "ps"
+    },
+    "consonantDigraphs": { "μπ": "b", "ντ": "d", "γκ": "ɡ", "γγ": "ɡ", "γχ": "ŋx", "γξ": "ŋks", "τσ": "t͡s", "τζ": "d͡z" },
+
+    // Velar palatalisation before a front vowel [e i].
+    "palatal": { "κ": "c", "γ": "ʝ", "χ": "ç", "γκ": "ɟ", "γγ": "ɟ" },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", ";": "?", "?": "?", "…": ",", ",": ",", ":": ",", "·": ","
+    },
+
+    // Cardinal number words (Modern Greek). Simplified; unmeasured (referees are word-only).
+    "numbers": {
+        "units": ["μηδέν", "ένα", "δύο", "τρία", "τέσσερα", "πέντε", "έξι", "εφτά", "οχτώ", "εννέα"],
+        "ten": "δέκα",
+        "tens": ["", "δέκα", "είκοσι", "τριάντα", "σαράντα", "πενήντα", "εξήντα", "εβδομήντα", "ογδόντα", "ενενήντα"],
+        "hundred": "εκατό",
+        "hundreds": ["", "εκατό", "διακόσια", "τριακόσια", "τετρακόσια", "πεντακόσια", "εξακόσια", "εφτακόσια", "οχτακόσια", "εννιακόσια"],
+        "thousand": "χίλια",
+        "and": "και"
+    }
+}
