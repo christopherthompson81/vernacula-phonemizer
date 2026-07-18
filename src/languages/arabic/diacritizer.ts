@@ -163,11 +163,17 @@ export async function loadArabicDiacritizer(modelBytes: Uint8Array, meta: Diacri
 }
 
 /** Load the diacritizer from the model + meta beside this file (model is gitignored — dev stand-in or the
- *  built permissive model). Returns undefined if the .onnx is absent. */
-export async function createArabicDiacritizer(): Promise<ArabicDiacritizer | undefined> {
+ *  built permissive model). Returns undefined if the .onnx is absent. `variety:"egyptian"` prefers the EGYPTIAN
+ *  student model (diacritizer-egy.onnx, restores EGYPTIAN short vowels — مصر→maṣr not the MSA miṣr); it falls
+ *  back to the MSA model (→ MSA vowels + the Cairene consonant shifts, the pre-lexicon behavior) if absent. */
+export async function createArabicDiacritizer(variety?: string): Promise<ArabicDiacritizer | undefined> {
   const dir = dirname(fileURLToPath(import.meta.url));
-  let bytes: Buffer;
-  try { bytes = readFileSync(join(dir, "diacritizer.onnx")); } catch { return undefined; }
-  const meta = JSON.parse(readFileSync(join(dir, "diacritizer.meta.json"), "utf8")) as DiacritizerMeta;
-  return loadArabicDiacritizer(new Uint8Array(bytes), meta);
+  const bases = variety === "egyptian" ? ["diacritizer-egy", "diacritizer"] : ["diacritizer"];
+  for (const base of bases) {
+    let bytes: Buffer;
+    try { bytes = readFileSync(join(dir, `${base}.onnx`)); } catch { continue; }
+    const meta = JSON.parse(readFileSync(join(dir, `${base}.meta.json`), "utf8")) as DiacritizerMeta;
+    return loadArabicDiacritizer(new Uint8Array(bytes), meta);
+  }
+  return undefined;
 }

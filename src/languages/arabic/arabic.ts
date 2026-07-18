@@ -172,7 +172,9 @@ export function createArabic(variety?: string, useLexicon = false): Phonemizer {
     return new ArabicPhonemizer(variety, useLexicon);
 }
 
-let diacritizer: Promise<ArabicDiacritizer | undefined> | undefined;
+// Per-variety diacritizer cache: egyptian gets the Egyptian student model (diacritizer-egy), everything else the
+// MSA model. Keyed so each variety's ONNX session is created once and reused.
+const diacritizers = new Map<string, Promise<ArabicDiacritizer | undefined>>();
 const phonemizers = new Map<string, Phonemizer>();
 // Tashkeela-derived PAUSAL restoration lexicon (undiacritized → vocalized) — the supplement that repairs words the
 // neural diacritizer leaves as skeletons. Optional: absent → the restore pass falls back to epenthesis only.
@@ -200,8 +202,10 @@ export async function phonemizeArabic(
     variety?: string,
     opts?: { lexicon?: boolean },
 ): Promise<string> {
-    if (diacritizer === undefined) diacritizer = createArabicDiacritizer();
-    const diac = await diacritizer;
+    const dkey = variety === "egyptian" ? "egyptian" : "msa";
+    let diacP = diacritizers.get(dkey);
+    if (!diacP) diacritizers.set(dkey, (diacP = createArabicDiacritizer(variety)));
+    const diac = await diacP;
     // The diacritizer + Tashkeela restore lexicon are MSA (shared): they restore the MSA vocalization, which the
     // variety g2p then transforms. Egyptian short vowels differ from MSA — the egyptian-lexicon.tsv supplies them.
     const vocalized = diac ? await diac.diacritize(text) : text;
