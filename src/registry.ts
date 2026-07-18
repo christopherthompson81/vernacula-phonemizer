@@ -78,6 +78,7 @@ import { createBurmese } from "./languages/burmese/burmese.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 import { createShona } from "./languages/shona/shona.ts";
 import { createKinyarwanda } from "./languages/kinyarwanda/kinyarwanda.ts";
+import { createMadurese } from "./languages/madurese/madurese.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -276,6 +277,8 @@ function build(lang: string): Phonemizer {
             return createShona();
         case "rw":
             return createKinyarwanda();
+        case "mad":
+            return createMadurese();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,
