@@ -3,8 +3,9 @@
  * Bengali-Assamese script. ⛔ CANNOT-VERIFY (no independent referee). Reuses the Bengali engine
  * (makeNativeBengali — the shared Eastern-Indic abugida scan + inherent-vowel deletion + geminate→length) with a
  * Chittagonian manifest whose phoneme values carry the DOCUMENTED divergences from Bengali: the SPIRANTISATION
- * signature খ→[x] / ঘ→[ɣ] / ফ→[f], deaffrication চ/ছ→[s] জ/ঝ/য→[z], and the [s]/[ʃ] contrast স→[s]. The
- * undocumented parts (dental/retroflex aspirates, vowels) are kept Bengali-conservative. See
+ * signature খ→[x] / ফ→[f], loss of the voiced aspirates ঘ→[ɡ]/ধ→[d̪]/ভ→[b], deaffrication চ/ছ→[s] জ/ঝ/য→[z], and
+ * the [s]/[ʃ] contrast স→[s]. The undocumented parts (voiceless dental/retroflex aspirates, vowels) are kept
+ * Bengali-conservative. See
  * docs/investigations/ctg_native_bringup_investigation.md.
  */
 import {

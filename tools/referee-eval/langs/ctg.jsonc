@@ -3,7 +3,7 @@
 // no JIPA Illustration. The cited phonology grammars (Moniruzzaman 2007, Hai 1965) are out of reach; the one
 // obtainable source is a sociolinguistic status paper (Uddin, IIUC Studies 12). Chittagonian is a DISTINCT
 // language but described almost entirely comparatively against Bengali, so the engine reuses the Bengali G2P with
-// the DOCUMENTED divergences (spirantisation খ→x/ঘ→ɣ/ফ→f, deaffrication চ/ছ→s জ/ঝ→z, স→s, nasalisation). The
+// the DOCUMENTED divergences (spirantisation খ→x/ফ→f, loss-of-voiced-aspirates ঘ→ɡ/ভ→b, deaffrication চ/ছ→s জ/ঝ→z, স→s, nasalisation). The
 // committed anchor is a hand-adjudicated gold of those DISTINCTIVE features (test/chittagonian.test.ts) — the axis
 // that is NOT circular with a Bengali clone; the shared Bengali bulk is asserted, not measured.
 {

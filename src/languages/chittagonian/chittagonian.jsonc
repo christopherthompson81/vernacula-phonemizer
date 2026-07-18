@@ -3,10 +3,11 @@
 // entries; no JIPA Illustration; no accessible phonology grammar — Moniruzzaman 2007 / Hai 1965 are cited but out of
 // reach). It IS a distinct language, but described almost entirely COMPARATIVELY against Bengali (high mutual
 // intelligibility), so — per the fleet's Assamese pattern — it REUSES the Bengali engine (makeNativeBengali) with a
-// Chittagonian override manifest carrying only the DOCUMENTED divergences. Authored from the one obtainable source,
-// a sociolinguistic status paper (Uddin, "Chittagonian Variety: Dialect, Language, or Semi-Language?", IIUC Studies
-// 12) drawing on Moniruzzaman (2007): the SPIRANTISATION signature + inventory. What is NOT documented (the full
-// aspirated-stop mapping, the vowels) is left Bengali-conservative and disclosed. See
+// Chittagonian override manifest carrying only the DOCUMENTED divergences. Authored from two COMPARATIVE sources
+// (Uddin, "Chittagonian Variety: Dialect, Language, or Semi-Language?", IIUC Studies 12; and a Wikipedia-derived
+// overview — both drawing on Moniruzzaman 2007), which independently corroborate the spirantisation signature +
+// inventory and the loss of the voiced aspirates. What is NOT documented (the voiceless dental/retroflex aspirates,
+// the vowels) is left Bengali-conservative and disclosed. See
 // docs/investigations/ctg_native_bringup_investigation.md.
 //
 // DOCUMENTED divergences applied (grounded in the paper's inventory ɸ f x ɣ z + affricate /t͡s/ + [s]/[ʃ] contrast):
