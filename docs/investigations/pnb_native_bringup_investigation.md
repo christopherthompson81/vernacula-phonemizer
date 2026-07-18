@@ -49,3 +49,33 @@ homorganic ɲ), گھر→kə˨˩ɾ (tonogenesis گھ→k + low tone), دس→d̪
 
 The engine is correct and complete for Western Punjabi; the ceiling is the Shahmukhi abjad wall, not the phonology.
 Improvement is a data (short-vowel-restoration) problem, not an engine problem.
+
+## Phase 2 — 2026-07-18 — cross-script GOLD restoration (42.7% → 48.8%)
+
+Follow-up on the "42.7% is low for all that machinery" observation. Diagnosis: the machinery existed but the WORKING
+lever was never built for Punjabi. The neural rider diacritizer (`riderDiacritizer.onnx`, multilingual, covers pa)
+runs only on the ASYNC path (`riderNeural.ts`) — the sync eval uses the lexicon path — and its pa silver was mined
+short-vowel-blind (+4.5 only). The cross-script gold that DOES work was built with REAL parallel spellings only for
+Urdu (`build_hindi_urdu.ts`, Hindi/Devanagari↔Shahmukhi, 8593 pairs → ur 56.8%); Punjabi had only a SYNTHETIC
+Gurmukhi→Shahmukhi transliteration (`crossscript_pa.ts`) which, per its own header, "sank." So pa/pnb shipped just
+158 lexicon entries + default-ə → 42.7%.
+
+**The fix (cheap, GOLD, no BiLSTM):** port the Hindi→Urdu real-parallel method to Punjabi. kaikki Punjabi records
+**4099 real dual-script pairs** (a Gurmukhi headword carries its actual Shahmukhi spelling, tagged `Shahmukhi`).
+`build_gurmukhi_shahmukhi.ts`: take the real Shahmukhi spelling as the key, the GOLD IPA from our Gurmukhi g2p as the
+value (Gurmukhi is a full abugida — it writes the short vowels, the majhūl و/ی, AND ن vs retroflex ݨ). No IPA
+harmonization (both scripts feed the same engine). A consonant-skeleton GATE (retroflex-folded, so the ن/ɳ pairs we
+WANT pass while real mispairs fail) drops 768 → **2637 gold pairs**, shipped as `src/languages/punjabi/crossscript.tsv`
+and looked up with PRECEDENCE in `phonemizeWord` (before the harakat layer). The direct word→IPA form (the arz
+`egyptianLexicon` pattern) is used, not harakat-inversion, because harakat cannot change ن→ݨ (a consonant).
+
+**Result: 48.8% vs the wikipron pan_arab referee (+6.1pp).** Concrete fixes: کتاب kət̪aːb→**kɪt̪aːb** (short vowel),
+سورج soːɾəd͡ʒ→**suːɾəd͡ʒ** (majhūl و oː→uː), and the ن/ɳ words resolve. The Gurmukhi primary (73.6%) is unchanged —
+cross-script keys are Perso-Arabic, so Gurmukhi input never matches. One test updated: پنجابی is now the richer
+Gurmukhi-sourced pˈə̃ɲd͡ʒaːbiː (with the nasal ə̃ the abjad drops) — asserted via `toContain("ɲd͡ʒ")`.
+
+**Honesty note:** kaikki-Gurmukhi and the wikipron-Shahmukhi referee are both Wiktionary, so part of +6.1pp is
+same-tradition. But the vowels come from an independent ORTHOGRAPHY (the Gurmukhi abugida), it is GOLD (real spellings,
+not a guess), and it is the exact method already shipped for Urdu. Truly-independent scale = Gurmukhi Wikipedia
+(beyond kaikki) + Grierson LSI *Lahnda of Shahpur*. The mechanism ports directly to sd (Sindhi↔Devanagari) and any
+abjad with a voweled sister script.

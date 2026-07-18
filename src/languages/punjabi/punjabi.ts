@@ -17,6 +17,7 @@ import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import {
     scanShahmukhi,
@@ -174,9 +175,22 @@ export function phonemizeWordCore(w: string): string {
     )).word(w);
 }
 
-/** Bare word→IPA (tests / referee eval): coverage-lexicon restore + the lexicon-free core. */
+// CROSS-SCRIPT layer: a direct Shahmukhi-word → GOLD-IPA lexicon whose vowels come from the VOWELED Gurmukhi
+// sister-spelling (kaikki real dual-script pairs; crossscript.tsv). It resolves ALL THREE abjad ambiguities the
+// harakat layer cannot fully reach — short vowels, the majhūl و/ی ([oː]~[uː], [iː]~[eː]), AND ن vs retroflex ݨ
+// (a consonant, not a harakat) — so it takes PRECEDENCE for a covered word. Gurmukhi input never matches (keys are
+// Perso-Arabic). See docs/investigations/pnb_native_bringup_investigation.md.
+let CROSS: ReadonlyMap<string, string> | undefined;
+export function crossScriptLexicon(): ReadonlyMap<string, string> {
+    return (CROSS ??= loadTsvMap(import.meta.url, "crossscript.tsv", undefined, { optional: true }));
+}
+
+/** Bare word→IPA (tests / referee eval): cross-script gold → coverage-lexicon restore → the lexicon-free core. */
 export function phonemizeWord(w: string): string {
-    return phonemizeWordCore(restoreHarakat(w, harakatLexicon()));
+    return (
+        crossScriptLexicon().get(w) ??
+        phonemizeWordCore(restoreHarakat(w, harakatLexicon()))
+    );
 }
 let PA: ReturnType<typeof makeNativePunjabi> | undefined;
 
