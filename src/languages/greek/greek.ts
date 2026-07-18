@@ -137,13 +137,19 @@ export function phonemizeWord(word: string): string {
             const iv = unstressedI(i + 1);
             if (iv !== null) {
                 const nv = matchV(i + 1 + iv[0]);
-                let nvStressed = false;
-                if (nv !== null) for (let k = 0; k < nv[0]; k++) if (stressed[i + 1 + iv[0] + k]) nvStressed = true;
-                if (nvStressed) {
-                    if (SYN_PAL[ch] !== undefined) out += SYN_PAL[ch]!; // λ ν κ γ χ → palatal, [i] absorbed
-                    else out += C[ch]! + (VOICELESS.has(ch) ? "ç" : "ʝ"); // other C → C + glide
-                    i += 1 + iv[0];
-                    continue;
+                if (nv !== null) {
+                    let nvStressed = false;
+                    for (let k = 0; k < nv[0]; k++) if (stressed[i + 1 + iv[0] + k]) nvStressed = true;
+                    // Only the RELIABLE subset: before a STRESSED vowel (the productive -ιά/-ιό ending). A data
+                    // study of the 19k referee showed synizesis is otherwise genuinely LEXICAL — no consonant
+                    // reliably triggers it (γ/λ/ν are ~50/50; δ ρ π κ σ τ μ mostly keep the [i]) — so a
+                    // consonant-conditioned rule can't help; the middle is left to a synizesis lexicon (deferred).
+                    if (nvStressed) {
+                        if (SYN_PAL[ch] !== undefined) out += SYN_PAL[ch]!; // λ ν κ γ χ → palatal, [i] absorbed
+                        else out += C[ch]! + (VOICELESS.has(ch) ? "ç" : "ʝ"); // other C → C + glide
+                        i += 1 + iv[0];
+                        continue;
+                    }
                 }
             }
             // Velar palatalisation before a front vowel (the [i] is kept: γίδα → ʝiða).
