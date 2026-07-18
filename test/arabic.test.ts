@@ -36,6 +36,12 @@ describe("arabic canonical IPA — diacritized path", () => {
         expect(phonemizeWord("الَّذِي")).toBe("alːˈaðiː"); // lam-initial → geminate ll
     });
 
+    test("Egyptian variety raises the definite article a→i (il-)", () => {
+        expect(phonemizeWord("الْقَمَر", "egyptian")).toBe("ilʔˈamar"); // il- + ق→ʔ (Cairene)
+        expect(phonemizeWord("الشَّمْس", "egyptian")).toBe("iʃːˈams"); // sun assimilation: iʃ-ʃams
+        expect(phonemizeWord("الْقَمَر")).toBe("alqˈamar"); // MSA unchanged (no articleVowel)
+    });
+
     test("proclitic + article (alif elides)", () => {
         expect(phonemizeWord("وَالْكُفْر")).toBe("walkˈufr"); // wa + al (moon)
         expect(phonemizeWord("لِلنَّاس")).toBe("linːˈaːs"); // li + al (sun n)

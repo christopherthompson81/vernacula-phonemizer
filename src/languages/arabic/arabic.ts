@@ -67,10 +67,12 @@ interface VarietyDef {
     iso: string;
     consonantShifts: [string, string][];
     diphthongShifts: Record<string, string>;
+    articleVowel?: string; // raise the definite-article nucleus (arz "i" → il-); omitted = keep MSA [a]
 }
 interface VarietyRules {
     consonantShifts: [string, string][]; // literal string rewrites (consonants are unambiguous)
     diphthongShifts: [RegExp, string][]; // guarded: aj/aw only when NOT an onset of the next syllable
+    articleVowel?: string; // per-variety definite-article vowel (applied to the tagged article seg, pre-join)
 }
 /** A diphthong [aj]/[aw] monophthongizes only when its glide is a CODA — i.e. NOT followed by (an optional stress
  *  mark and) a vowel. This distinguishes the diphthong بيت bajt→beːt from the hiatus طويل tˤawiːl (a·w·iː, glide
@@ -82,6 +84,7 @@ function compileVariety(d: VarietyDef): VarietyRules {
             new RegExp(from + "(?!ˈ?[aiueoæ])", "gu"),
             to,
         ]),
+        articleVowel: d.articleVowel,
     };
 }
 const VARIETIES: Record<string, VarietyRules> = {
@@ -100,12 +103,13 @@ export function phonemizeWord(word: string, variety?: string): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";
     const stress = stressedNucleus(segs);
+    const vdef = variety ? VARIETIES[variety] : undefined;
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         if (i === stress) out += "ˈ";
-        out += segs[i]!.ph;
+        // a variety may raise the definite-article nucleus (arz [a]→[i], il-); the tag survives the seg build
+        out += vdef?.articleVowel && segs[i]!.article ? vdef.articleVowel : segs[i]!.ph;
     }
-    const vdef = variety ? VARIETIES[variety] : undefined;
     if (vdef) {
         for (const [from, to] of vdef.consonantShifts) out = out.replaceAll(from, to);
         for (const [re, to] of vdef.diphthongShifts) out = out.replace(re, to);
