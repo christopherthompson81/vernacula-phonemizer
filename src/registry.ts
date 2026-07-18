@@ -35,6 +35,7 @@ import { createZulu } from "./languages/zulu/zulu.ts";
 import { createXhosa } from "./languages/xhosa/xhosa.ts";
 import { createSerbian } from "./languages/serbian/serbian.ts";
 import { createHungarian } from "./languages/hungarian/hungarian.ts";
+import { createKurmanji } from "./languages/kurmanji/kurmanji.ts";
 import { createCzech } from "./languages/czech/czech.ts";
 import { createBengali } from "./languages/bengali/bengali.ts";
 import { createUrdu } from "./languages/urdu/urdu.ts";
@@ -166,6 +167,8 @@ function build(lang: string): Phonemizer {
             return createSerbian();
         case "hu":
             return createHungarian();
+        case "kmr":
+            return createKurmanji();
         case "cs":
             return createCzech();
         // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).

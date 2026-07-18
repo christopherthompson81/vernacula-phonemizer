@@ -1,0 +1,27 @@
+// Kurmanji (kmr) — Northern Kurdish (Iranian), the Latin Hawar alphabet, a near-phonemic g2p. Referees: wikipron
+// kmr_latn broad (PRIMARY, HUMAN, 2151) + epitran kmr-Latn (SECONDARY, programmatic, INDEPENDENT). Two independent
+// sources. Folds neutralise the narrow allophony the Hawar orthography does NOT write: aspiration (kʰ/pʰ/tʰ),
+// pharyngealisation (ˤ), the single rhotic r~ɾ, and the referees' differing ⟨a⟩ (ɑː~aː) / short-⟨u⟩ (ʊ~u).
+{
+    "referees": [
+        {
+            "file": "kmr.wikipron-kmr-broad.tsv",
+            "source": "wikipron kmr_latn broad (human)",
+            "role": "primary"
+        },
+        {
+            "file": "kmr.epitran-kmr-latn.tsv",
+            "source": "epitran kmr-Latn (programmatic)",
+            "role": "secondary"
+        }
+    ],
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "allophonic aspiration (kʰ/pʰ/tʰ/t͡ʃʰ) — a contrast the Hawar orthography does not write; not emitted" },
+        { "pattern": "ˤ", "replace": "", "note": "pharyngealisation ([t͡ʃˤ] etc.) — allophonic/emphatic, unwritten; not emitted" },
+        { "pattern": "ɾ", "replace": "r", "note": "the single Kurmanji rhotic ⟨r⟩ — the referee uses both the tap ɾ and the trill r; we write r" },
+        { "pattern": "ɑ", "replace": "a", "note": "⟨a⟩: the human referee writes back [ɑː], epitran front [aː] — one long low vowel; normalise to a" },
+        { "pattern": "ʊ", "replace": "u", "note": "short ⟨u⟩ [ʊ]~[u] — the referees differ; one phoneme, normalise to u" },
+        { "pattern": "xʷ", "replace": "xw", "note": "⟨xw⟩ — the referee variably writes the labialised [xʷ] or the sequence [x w]; neutralise to x w" },
+        { "pattern": "ɣ", "replace": "x", "note": "⟨x⟩ [x]~[ɣ] (voiced between vowels in the referee: axa→ɑːɣɑː); one canonical velar fricative" }
+    ]
+}
