@@ -5,6 +5,7 @@
 import { createHindi } from "./languages/hindi/hindi.ts";
 import { createEnglish, EnglishPhonemizer } from "./languages/english/english.ts";
 import { createEnglishGB } from "./languages/english-gb/english-gb.ts";
+import { createEnglishIN } from "./languages/english-in/english-in.ts";
 import { createMandarin } from "./languages/mandarin/mandarin.ts";
 import { createSpanish } from "./languages/spanish/spanish.ts";
 import { createSpanish419 } from "./languages/spanish-419/spanish-419.ts";
@@ -109,6 +110,9 @@ function build(lang: string): Phonemizer {
         // British English (SSBE/"BBC") — the GenAm engine + an RP lexical-set delta (accent variant of `en`).
         case "en-GB":
             return createEnglishGB();
+        // General Indian English — the GenAm engine + a GIE delta (retroflexion, TH-stopping, v/w, monophthongs).
+        case "en-IN":
+            return createEnglishIN();
         // Embedded Latin in Chinese text routes to the English phonemizer (lazy — loaded only if it appears).
         case "cmn":
             return createMandarin((latin) => getPhonemizer("en").text(latin));
