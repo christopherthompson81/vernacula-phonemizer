@@ -44,6 +44,7 @@ import { phonemizeWord as mad } from "../../src/languages/madurese/madurese.ts";
 import { phonemizeWord as nya } from "../../src/languages/chichewa/chichewa.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
+import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
@@ -153,6 +154,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     en,
     "en-GB": engb,
     es,
+    "es-419": es419,
     fa,
     ff,
     fr,
