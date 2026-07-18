@@ -1,0 +1,16 @@
+// Chhattisgarhi (hne) — Eastern Indo-Aryan (Eastern-Hindi), Devanagari. ⚠ CANNOT-VERIFY (referee GAP). There is
+// NO independent referee: wikipron hne (404) and kaikki Chhattisgarhi (404) do not exist, and epitran has NO
+// hne-Deva mapping at all. Chhattisgarhi's segmental phonology is ~Hindi (its distinctiveness is grammatical —
+// case markers, verb agreement — not segmental), so an engine and any Hindi-clone referee would agree trivially,
+// measuring nothing. The committed anchor is instead a hand-adjudicated gold of the DISTINCTIVE features
+// (test/chhattisgarhi.test.ts): श/ष→s (no /ʃ/), ऐ/औ→ai/au diphthongs, no əɦə-lowering — the shared Eastern-Hindi
+// axis where a Hindi clone is demonstrably wrong. See docs/investigations/hne_native_bringup_investigation.md.
+{
+    "language": "hne",
+    "name": "Chhattisgarhi",
+    "script": "Devanagari",
+    "provenance": "Hindi-derived Devanagari engine + the shared Eastern-Hindi divergences (श/ष→s, ऐ/औ→ai/au).",
+    "referees": [],
+    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Chhattisgarhi (no wikipron, no kaikki extract, no epitran hne-Deva mapping). Because Chhattisgarhi is segmentally ~Hindi (distinguished mostly grammatically), any agreement with a Hindi-clone referee is trivial. The anchor is the hand-adjudicated gold in test/chhattisgarhi.test.ts, grading the DISTINCTIVE features (श/ष→s, ऐ/औ→ai/au, no əɦə-lowering) — the axis where a Hindi clone is demonstrably wrong. Chhattisgarhi shares these Eastern-Hindi features with Awadhi/Bhojpuri; no Chhattisgarhi-ONLY segmental feature is confidently attested beyond them.",
+    "folds": []
+}
