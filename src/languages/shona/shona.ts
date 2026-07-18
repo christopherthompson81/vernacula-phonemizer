@@ -16,7 +16,9 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
 /** Phonemize a single Shona word to canonical IPA (segmental; no tone — Shona tone is unwritten). */
 export function phonemizeWord(word: string): string {
-    const w = word.toLowerCase();
+    // Normalise the typographic apostrophe to ' so the ⟨ng'⟩→[ŋ] grapheme matches regardless of entry point
+    // (the eval calls phonemizeWord directly, not via text()).
+    const w = word.toLowerCase().replace(/’/gu, "'");
     let out = "";
     let i = 0;
     while (i < w.length) {
@@ -40,7 +42,7 @@ const TOKEN = /([a-z'’]+)|(\d+)|([.!?…,;:])/giu;
 class ShonaPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
