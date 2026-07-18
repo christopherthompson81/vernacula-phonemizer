@@ -1,19 +1,20 @@
-// Kinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), Latin orthography, AUTHORED beyond-espeak. Referee: epitran
-// kin-Latn (programmatic, INDEPENDENT — the ONLY machine referee; wikipron ships no Kinyarwanda and kaikki has no
-// extract). The wordlist is the CC0 Common Voice Kinyarwanda sentence corpus (server/data/rw, tokenised); the IPA
-// is epitran-generated. → 🔷 single-source.
+// Kinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), Latin orthography, AUTHORED beyond-espeak. Referees: epitran
+// kin-Latn (programmatic) for the BULK + the Cox "Kirundi & Kinyarwanda Comparative Grammar" (Table 25) for the
+// PALATAL series. Wordlist: CC0 Common Voice sentence corpus. → 🔷 single-source.
 //
-// HONEST framing (NO palatal folds — the raw number is reported as-is): epitran mis-renders Kinyarwanda's entire
-// PALATAL/affricate signature system — ⟨sh⟩→[xj] (not [ʃ]), ⟨cy⟩→[kj] (not [c]), ⟨c⟩→[c] (not [t͡ʃ]), ⟨j⟩→[ɟ]
-// (not [ʒ]) — so ours (grammar-correct, Wikipedia Kinyarwanda phonology) deliberately DIVERGES there. Every one of
-// the ~20% of residuals is a palatal-grapheme word; there are ZERO non-palatal disagreements (ours is 100% correct
-// on everything epitran can verify). So the 80.4% is a referee-DEFLATED floor on quality (cf. en/fa): epitran
-// corroborates the whole non-palatal bulk, and the palatal series rests on the grammar (unverifiable against this
-// referee). We do NOT fold the palatals to inflate the headline.
+// The palatal analysis was REVISED (from Wikipedia's palatal-segment c/ɟ/ç/bɟ to the grammar's PALATALIZATION
+// analysis ⟨Cy⟩→Cʲ: cy=kʲ, jy=ɡʲ, shy=ʃʲ, by=bʲ, ry=ɾʲ, my=mʲ). This is better-sourced (the Cox grammar AND
+// epitran both back palatalization) and it RECONCILES with epitran on cy/jy/by/ry/my — those are folded ʲ~j (the
+// grammar writes the secondary-articulation ʲ, epitran the full glide j; same palatalized consonant). The residual
+// disagreements are exactly ⟨sh⟩ (epitran [xj] vs ours [ʃ]), ⟨c⟩ ([c] vs [t͡ʃ]), ⟨j⟩ ([ɟ] vs [ʒ]) — where the Cox
+// grammar AND the coronal-harmony phonetics paper both confirm OURS and epitran is genuinely wrong. So epitran is
+// wrong on sh/c/j but RIGHT on cy/jy (an earlier writeup mischaracterised it as wrong on all palatals).
 {
     "referees": [
         { "file": "rw.epitran-kin.tsv", "source": "epitran kin-Latn (programmatic)", "role": "primary" }
     ],
-    "secondaryGap": "epitran kin-Latn is the only machine referee (no wikipron/kaikki for Kinyarwanda) AND it mis-renders the palatal/affricate signatures (sh→xj, cy→kj, c→[c], j→[ɟ]) — so it corroborates only the non-palatal bulk; the palatal series rests on the grammar (Wikipedia Kinyarwanda phonology). Wordlist: CC0 Common Voice sentence corpus. The 80.4% is referee-deflated, not a quality ceiling. → 🔷 single-source.",
-    "folds": []
+    "secondaryGap": "No second machine referee (no wikipron/kaikki for Kinyarwanda). epitran corroborates the bulk + the palatalized ⟨Cy⟩ series (cy/jy/by/ry/my, folded ʲ~j); it is wrong on ⟨sh c j⟩ where the Cox grammar (Table 25) + the coronal-harmony phonetics paper independently confirm ours ([ʃ t͡ʃ ʒ]). The palatal VALUES rest on the Cox grammar (an independent human source), not Wikipedia alone. Wordlist: CC0 Common Voice. → 🔷 single-source.",
+    "folds": [
+        { "pattern": "ʲ", "replace": "j", "note": "PALATALISATION ⟨Cy⟩→[Cʲ] (Cox grammar Table 25) vs epitran's full glide [Cj] — the same palatalised consonant in two notations; fold ours ʲ→j to compare (we keep ʲ, the secondary articulation, in output). Reconciles cy=kʲ~kj, jy=ɡʲ~ɡj, by=bʲ~bj, ry=ɾʲ~ɾj, my=mʲ~mj." }
+    ]
 }
