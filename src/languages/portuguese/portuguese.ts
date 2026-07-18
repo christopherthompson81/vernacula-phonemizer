@@ -135,8 +135,9 @@ function realize(segs: Seg[], stress: number, dialect: "ep" | "bp" = "ep"): stri
                     ? s.raw === "a"
                         ? "a"
                         : s.raw === "e"
-                          ? "ɛ"
-                          : s.raw === "o"
+                          ? "e" // BP keeps unstressed ⟨e⟩ CLOSE before coda-l (the -ável/-ível suffix → [avew], not
+                          : // the EP [avɛw]); the l→w step then gives [ew]. (EP opens it to [ɛ].)
+                            s.raw === "o"
                             ? "o" // ⟨o⟩ keeps mid quality before coda-l → the l→w step gives [ow] (soldado → sowdadu)
                             : ph // ⟨i⟩/⟨u⟩ before coda-l keep their quality (fácil → fasiw, útil → ut͡ʃiw)
                     : ((isFinal ? REDUCE_BP_FINAL : REDUCE_BP_MID)[s.raw] ?? ph);
@@ -239,22 +240,33 @@ function numberTokenToWords(tok: string, dialect: "ep" | "bp"): string {
 // running text (DATA: portuguese.jsonc).
 const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 
-function wordIpa(word: string, dialect: "ep" | "bp"): string {
-    const ipa = phonemizeWord(word, dialect);
+/** `postWord`, if given, refines a resolved word's IPA with its (lowercased) source word — the hook the pt-BR
+ *  variant uses to apply its BP open/close override lexicon while reusing this engine's number/clause context. */
+function wordIpa(
+    word: string,
+    dialect: "ep" | "bp",
+    postWord?: (ipa: string, word: string) => string,
+): string {
+    let ipa = phonemizeWord(word, dialect);
+    if (postWord) ipa = postWord(ipa, word.toLowerCase());
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
 class PortuguesePhonemizer implements Phonemizer {
-    constructor(private readonly dialect: "ep" | "bp" = "ep") {}
+    constructor(
+        private readonly dialect: "ep" | "bp" = "ep",
+        private readonly postWord?: (ipa: string, word: string) => string,
+    ) {}
     text(input: string): string {
-        const d = this.dialect;
+        const d = this.dialect,
+            pw = this.postWord;
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(m[1], d));
+            if (m[1]) sink.emit(wordIpa(m[1], d, pw));
             else if (m[2])
                 sink.emit(
                     numberTokenToWords(m[2], d)
                         .split(" ")
-                        .map((w) => wordIpa(w, d))
+                        .map((w) => wordIpa(w, d, pw))
                         .join(" "),
                 );
             else if (m[3]) {
@@ -266,7 +278,11 @@ class PortuguesePhonemizer implements Phonemizer {
 }
 
 /** Build the Portuguese phonemizer (no data files — fully rule-based). `dialect` selects European (default) or
- *  Brazilian ("bp") realization; see src/languages/portuguese-br for the BP accent-variant entry points. */
-export function createPortuguese(dialect: "ep" | "bp" = "ep"): Phonemizer {
-    return new PortuguesePhonemizer(dialect);
+ *  Brazilian ("bp") realization; `postWord` is an optional per-word IPA refinement (the BP open/close lexicon).
+ *  See src/languages/portuguese-br for the BP accent-variant entry points. */
+export function createPortuguese(
+    dialect: "ep" | "bp" = "ep",
+    postWord?: (ipa: string, word: string) => string,
+): Phonemizer {
+    return new PortuguesePhonemizer(dialect, postWord);
 }

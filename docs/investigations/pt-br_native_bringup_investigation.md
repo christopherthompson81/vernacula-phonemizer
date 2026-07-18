@@ -85,15 +85,37 @@ construction):
 Note the eval FOLDS nasalisation (backbone strips combining tildes), so a separate "nasalise before nasal-C"
 candidate scored +0 — the closing is what the eval sees; nasalisation is canonically present but invisible here.
 
-**Remaining tail (~14%, diffuse, not pursued)** — all shared-EP or genuinely lexical, no clean discriminator:
-open/close stressed-mid lexicon disagreements in BOTH directions (cheque→our [e] vs [ɛ]; contável→our [ɛ] vs
-[e]) — needs a BP open/close lexicon, deliberately NOT built (the same call as `pt`, which declined a learned-word
-lexicon to keep canonical consistency); `-ear` glide-vs-hiatus (campear→kɐ̃pjaɾ vs kɐ̃peaɾ — the shared onglide
-pass); `sc`-cluster gemination (apascentar→apassẽ- vs apasẽ-, an EP-side grapheme issue); stressed `-ol`→[ɔw]
-(andebol, shared EP); loanwords (allah, catmandu, aardvark).
+## Run 4 — the -vel rule (85.6 → 86.9%)
+
+Bucketed the open/close residual (3159 open/close-ONLY misses = 34% of all misses). One more clean rule:
+**BP keeps unstressed ⟨e⟩ CLOSE before coda-l** (the -ável/-ível suffix → [avew], not the EP [avɛw]; túnel→tunew,
+possível→posivew — referee-confirmed). Changed the BP beforeDarkL branch e→[e] (was [ɛ]). +743 fixed, −6 broke
+(the −6 are derivational secondary-stress cases — cruelmente/papelzinho preserving a base open-ɛ — plus loans
+like Elvis; net +737). The stressed-`-ol`→[ɔw] rule was REJECTED (+34/−32): BP opens word-final -ol
+(andebol→ɔw) but keeps close before l+consonant (bolsa→owsɐ), so no clean blanket rule.
+
+## Run 5 — the BP open/close lexicon (86.9% rules → 89.3% shipped)
+
+The remaining open/close tail is genuinely LEXICAL: stressed-vowel openness the rules can't predict (cheque [ɛ]
+vs sede [e] homographs, the -osa/-ote/verb-morphology open ɔ/ɛ, pretonic preservation). Built a BP open/close
+override lexicon (`pt-br-openclose.tsv`, **1369 entries**): word → the correct stressed mid vowel, mined from the
+BZ referee for words where the rule output matches NO attested variant (so homographs, which match one reading,
+are left untouched — safe). Applied by replacing the char after ˈ; wired through the pt engine's new per-word
+`postWord` hook so `text()` gets it too (the en-GB lesson). **Non-circular**: the referee eval scores the
+RULE-ONLY path `phonemizeWordRules` (86.9%, unchanged); the lexicon is a SHIPPED refinement → phonemizeWord 89.3%.
+Validation: the lexicon corrected three words I'd mis-adjudicated in my OWN gold (pobre→[ˈpɔbɾi], sete→[ˈsɛt͡ʃi],
+nove→[ˈnɔvi] are all genuinely open in BP).
+
+(This lexicon was initially framed as "deliberately not built per the `pt` precedent" — that was the wrong call:
+if the contrast is real and rule-unpredictable, a lexicon is the right tool, and the rules-only/shipped split
+keeps the headline honest. Mined the rules first (Runs 3–4), then the lexicon for the genuine residual.)
+
+**Remaining tail (~11%)** — shared-EP or not-yet-mined: `-ear` glide-vs-hiatus (campear→kɐ̃pjaɾ vs kɐ̃peaɾ — the
+shared onglide pass); `sc`-cluster gemination (apascentar, an EP-side grapheme issue); pretonic open-vowel
+preservation in -mente adverbs (abertamente); loanwords (allah, catmandu). Further rounds possible.
 
 ## Status
 
-🟡 accent-variant. Floor 0.85 (85.6% after the Run 3 tail work; a genuine referee number, not noise-limited).
-Second accent variant after en-GB → the parameterized-engine pattern (vs en-GB's post-process) for deep
-phonological deltas. Next: es-419, en-IN.
+🟡 accent-variant. Floor 0.86 (rules-only 86.9%, non-circular; shipped phonemizeWord 89.3% with the open/close
+lexicon). A genuine referee number, not noise-limited. Second accent variant after en-GB → the
+parameterized-engine pattern (vs en-GB's post-process) for deep phonological deltas. Next: es-419, en-IN.
