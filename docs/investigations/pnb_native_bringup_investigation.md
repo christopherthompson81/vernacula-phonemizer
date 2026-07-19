@@ -105,3 +105,33 @@ pairs. To scale further would need MORE real (Gurmukhi, Shahmukhi) spelling pair
 links between pa.wikipedia (Gurmukhi) and pnb.wikipedia (Shahmukhi) article titles, or Wikidata lexemes — not
 transliteration. The transliterator FIDELITY fix (52.7→76.7%) is real but unshipped (its only consumer was the sunk
 scaling). Deferred to a real-pairs data hunt if pnb is prioritized further.
+
+## Phase 4 — 2026-07-18 — real-pairs route (Wikidata/interwiki) + a USABILITY-FLAG principle
+
+Chased REAL dual-script pairs beyond kaikki (the transliteration route having sunk). Findings:
+
+- **Punjabi Transliteration Corpus (PTC, SLPG/HuggingFace, 6.3M parallel sentences)** — REJECTED: the HF dataset repo
+  is EMPTY and carries NO license (the model repo too). Fails the permissive-data policy; can't verify the Shahmukhi
+  side is real vs machine-transliterated. Do not use.
+- **Wikipedia pnb↔pa interlanguage links** (both CC-BY-SA) — extracted 16,990 pnb↔pa title links → 2,973 single-word
+  script-clean pairs → 1,406 after phonemize + consonant-skeleton gate + (kaikki wins). But they are almost all
+  **PROPER NOUNS / entities** (October, Akbar, Accra, place names). Measured on the general-vocab pan_arab referee:
+  only 21 overlap, and net **−1** (0 fixed, 1 broken) — at EVERY length floor (0/3/4/5). So they are referee-neutral
+  (they don't cover common vocabulary) and carry a small collision risk. NOT shipped to the referee-scored path.
+
+**The usability-FLAG principle (from the user, generalized).** Both scaling failures (transliteration, interwiki)
+share one root cause: **skeleton COLLISION** — an entry's Shahmukhi spelling equals a DIFFERENT word's spelling
+(homograph), so exact-word lookup applies the wrong gold IPA. This is worst for (a) short entries (many words share a
+short consonant skeleton) and (b) proper nouns (spelled like common words). The transliteration case ALSO added
+fidelity errors. Mitigation, for any future mined/derived cross-script lexicon:
+  1. a LENGTH FLOOR (drop ≤2-3-letter keys — highest collision density), and
+  2. a PROVENANCE/USABILITY FLAG per entry (e.g. `gold-general` [kaikki, safe as default] vs `gold-propernoun`
+     [interwiki, exact-entity lookup only, NOT a default for an ambiguous homograph] vs `derived-lowconf`), so a
+     consumer can choose which tiers to trust for exact-word vs partial/compound matching.
+The current shipped `crossscript.tsv` is exact-word-only and general-vocab (kaikki), so it needs no flag today; the
+flag matters the moment proper-noun or transliterated tiers are added. Recorded as the design rule.
+
+**Conclusion for pnb.** The permissive GENERAL-VOCABULARY real-pairs ceiling is kaikki (2637 shipped, 49.9% + the
+retroflex-infinitive rule). PTC is license-blocked; interwiki is proper-noun-only (referee-neutral). Further gains
+need either a permissive general-vocab dual-script corpus (none found) or accepting proper-noun coverage as a
+separate FLAGGED tier for TTS running text (product value, not a referee-mover).
