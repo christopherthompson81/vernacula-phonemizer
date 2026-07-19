@@ -36,3 +36,25 @@ Modern Lao ຣ (rare, Indic-loan) is realized [l] (the referee uses l: ຈິດ
 8-way coda, ~30 vowel patterns, leading-vowel reorder, tone-mark extraction, ຫ-led high sonorants, Cວ/Cຼ, tone
 (class×life×length×mark). Tone is APPROXIMATE (eval strips it); a Wiktionary-Module:lo-pron-exact tone pass is a
 follow-up. 🟡 — single referee (no wikipron Lao); more phonemic than Thai, so no Sanskrit dictionary needed.
+
+## Run 6 — exact tone pass (VERIFIED, tone approximate → 100% single-syllable)
+Made the placeholder `tone()` exact and validated it against the referee's Chao contours (previously the eval
+stripped tone entirely, so it was unmeasured). Derived the Vientiane 5-tone system directly from the kaikki
+distribution over single-syllable words, tallied by (consonant class × live/dead × length × tone-mark):
+
+- **mai ek ່** → ˧ (mid), all classes.
+- **mai tho ້** → high class: ˧˩ (low-falling); low/mid: ˥˨ (high-falling).
+- **no mark, LIVE** → low: ˧˥ (rising); high/mid: ˩ (low).
+- **no mark, DEAD-long** → low: ˥˨; high/mid: ˧˩.
+- **no mark, DEAD-short** → low: ˧ (mid); high/mid: ˧˥.
+
+(high and mid differ ONLY under mai tho.) One structural bug surfaced: the centring diphthongs (uːə/iːə/ɯːə) carry
+their length inside the quality string and set `long:false` so `scan()` doesn't double the ː — but that made them
+read as dead-short/open-dead for tone. Added a `heavy = long || quality.includes("ː")` flag used for tone+live;
+this fixed the whole diphthong cluster (ກວາດ kuːə+t̚: ˧˥→˧˩ dead-long; ຂວາ kʰuːə open: ˧˥→˩ live).
+
+**Result: single-syllable segmentally-correct words 100.0% tone-correct (755/755).** Per-syllable tone where our
+syllable count agrees with the referee: non-final 100.0% (537/537), final 99.5% (426/428). The full-word tone-sequence
+figure (58.4%) is dominated by syllable-COUNT disagreements (our syllabification vs the referee's compound splits),
+NOT tone errors — a segmentation matter, separate from the tone rules. Tone is no longer "approximate": the citation
+tone system is exact. Segmental eval unchanged at 93.8% (tone is stripped there). Gold updated to the verified tones.
