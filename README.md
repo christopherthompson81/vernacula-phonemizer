@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **100 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **101 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-100 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+101 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
 Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo
 (Bantu, Kwa, Mande, Atlantic), Romance, Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic,
 Uralic and an English-lexified creole — across Latin, Greek, Cyrillic, Devanagari, Khmer,
@@ -54,7 +54,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Ukrainian `uk` |
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
-| Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
+| Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uyghur `ug` (Arabic script), Uzbek `uz` |
 | Uralic | Hungarian `hu` |
 
 **Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):

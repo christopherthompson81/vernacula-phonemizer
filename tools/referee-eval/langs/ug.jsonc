@@ -1,0 +1,15 @@
+// Uyghur (ug) — Turkic (Karluk), the Uyghur Arabic alphabet. Referees: wikipron uig_arab_broad (PRIMARY, HUMAN,
+// 2673, space-segmented) + epitran uig-Arab (2nd, INDEPENDENT). The Uyghur Arabic script is a full phonemic
+// alphabet, so this is a near-direct letter→IPA comparison. Folds reconcile the narrow-referee notation (the
+// back-vowel a~ɑ, tie-bars) so the segmental backbone matches.
+{
+    "language": "ug", "name": "Uyghur (Uyghurche)", "script": "Arabic",
+    "provenance": "Authored greedy letter→IPA g2p from the Uyghur Arabic alphabet. Referee: wikipron uig_arab_broad.",
+    "referees": [
+        { "file": "ug.wikipron-uig-arab.tsv", "source": "wikipron uig_arab_broad (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "͡", "replace": "", "note": "our affricates carry a tie bar (t͡ʃ d͡ʒ); the referee writes plain tʃ dʒ" }
+    ]
+}
