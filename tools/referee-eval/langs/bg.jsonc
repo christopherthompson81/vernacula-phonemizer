@@ -1,0 +1,22 @@
+// Bulgarian (bg) — South Slavic, Cyrillic, "clean" (highly phonemic). Read by a native left-to-right g2p +
+// phonotactic post-rules. TWO independent HUMAN referees: wikipron bul_cyrl_narrow (PRIMARY) + kaikki bg
+// (SECONDARY) — both large (~46-48k). The single systematic fold is VOWEL REDUCTION: Bulgarian neutralises the
+// unstressed vowels ({/a/,/ɤ/}→[ɐ] and {/ɔ/,/u/}→[o]) and this is STRESS-conditioned; stress is unwritten and
+// lexical, so we emit the full phonemic vowels and the eval folds the two reduction classes together (exactly the
+// akanye/short-vowel-wall treatment). Also folds: stress marks, tie-bars (affricate notation), the ɱ~m
+// labiodental-nasal allophone, and the advancement/non-syllabic narrow diacritics (a̟, o̟, u̟, ̯).
+{
+    "referees": [
+        { "file": "bg.wikipron-bul-narrow.tsv", "source": "wikipron bul_cyrl_narrow (human)", "role": "primary" },
+        { "file": "bg.kaikki-bg.tsv", "source": "kaikki bg (Wiktionary, human)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "stress marks — kaikki marks stress, wikipron mostly doesn't; we don't emit it (lexical, unwritten)" },
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar — normalise t͡s~ts, t͡ʃ~tʃ, d͡ʒ~dʒ across the referees" },
+        { "pattern": "[̯̟]", "replace": "", "note": "narrow diacritics: non-syllabic ̯ + advancement ̟ (a̟, o̟, u̟) — allophonic detail" },
+        { "pattern": "ɱ", "replace": "m", "note": "the labiodental-nasal allophone [ɱ] (before в/ф) ~ /m/" },
+        { "pattern": "[aɐɤ]", "replace": "A", "note": "REDUCTION class: unstressed /a/ and /ɤ/ neutralise to [ɐ] — stress-conditioned, unwritten → fold {a, ɐ, ɤ}" },
+        { "pattern": "[ɔou]", "replace": "O", "note": "REDUCTION class: unstressed /ɔ/ and /u/ neutralise to [o] — stress-conditioned, unwritten → fold {ɔ, o, u}" }
+    ]
+}

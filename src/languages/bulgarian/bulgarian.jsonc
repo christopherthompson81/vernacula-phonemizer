@@ -1,0 +1,36 @@
+// Native canonical-IPA definition for Bulgarian / български (bg) — South Slavic, Cyrillic, espeak-independent.
+// Bulgarian is "clean" (highly phonemic), so a left-to-right grapheme scan + a few well-defined post-rules
+// (palatalisation, dark-l, final devoicing, regressive voicing assimilation, sibilant assimilation) recovers the
+// pronunciation. The one thing the orthography does NOT write is STRESS (lexical, unpredictable) — and Bulgarian
+// vowel reduction is stress-conditioned (unstressed /a ɤ/→[ɐ], /ɔ u/→[o]). So we emit the FULL phonemic vowels
+// (а→a, о→ɔ, у→u, ъ→ɤ) and the reduction neutralisation is folded in the referee eval (it can't be placed without
+// stress). Validated against TWO independent human referees: wikipron bul_cyrl_narrow (99.5%) + kaikki bg (98.9%).
+// See docs/investigations/bg_native_bringup_investigation.md.
+{
+    "language": "bg",
+    "name": "Bulgarian",
+    "script": "Cyrillic",
+    "provenance": "Authored from standard Bulgarian orthography→phonology; rules calibrated to wikipron bul_cyrl_narrow + kaikki bg (both human). Numbers authored from standard Bulgarian.",
+
+    // Base grapheme → phoneme (the context-sensitive letters л, я, ю, ь are handled in code).
+    "letters": {
+        "а": "a", "б": "b", "в": "v", "г": "ɡ", "д": "d", "е": "ɛ", "ж": "ʒ", "з": "z", "и": "i", "й": "j",
+        "к": "k", "м": "m", "н": "n", "о": "ɔ", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f",
+        "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃt", "ъ": "ɤ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+    },
+
+    // NUMBERS — standard (spoken) Bulgarian; canonical IPA DERIVED via the same g2p. "и" (and) precedes the final
+    // component (сто двайсет и три; сто и три). Teens/tens use the contracted spoken forms (единайсет, двайсет).
+    "numbers": {
+        "units": ["нула", "едно", "две", "три", "четири", "пет", "шест", "седем", "осем", "девет"],
+        "ten": "десет",
+        "teens": ["единайсет", "дванайсет", "тринайсет", "четиринайсет", "петнайсет", "шестнайсет", "седемнайсет", "осемнайсет", "деветнайсет"],
+        "tens": { "20": "двайсет", "30": "трийсет", "40": "четирийсет", "50": "петдесет", "60": "шейсет", "70": "седемдесет", "80": "осемдесет", "90": "деветдесет" },
+        "hundreds": { "1": "сто", "2": "двеста", "3": "триста", "4": "четиристотин", "5": "петстотин", "6": "шестстотин", "7": "седемстотин", "8": "осемстотин", "9": "деветстотин" },
+        "thousand": "хиляда", "thousands": "хиляди", "and": "и"
+    }
+}
