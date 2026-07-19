@@ -47,3 +47,46 @@ this right needs a proper Khmer SYLLABIFIER (minor-syllable detection, disyllabi
 series-in-cluster behavior the thesis confirms but does not computationally specify — cf. Huffman 1970). That is a
 dedicated Thai-scale project (Thai's syllabifier is ~1000 lines), not a few edits. The two-series core remains
 correct and wikipron-verified; the syllabifier is the next dedicated phase.
+
+## Run 3 — the Huffman (1970) sesquisyllabic syllabifier, 38.6 → 48.7%
+The user supplied **Huffman, Franklin E. (1970), _Cambodian System of Writing and Beginning Reader_** (Yale) —
+the definitive computational description of the writing system (public domain since 1975). Its Part One gives the
+exact rules the Donley thesis confirmed but did not specify. I rewrote `phonemizeWord` from the old inline scan
+into a proper unit-based syllabifier (three passes: unit scan → coda/nasal assignment → governed render).
+
+The four rules that moved the number, each straight from Huffman + verified against the referee before coding:
+
+1. **GOVERNANCE (Ch. VI, the single biggest lever).** "In any syllable which is preceded in the same word by
+   consonants of different series, the series of the vowel will be determined by the LAST PRECEDING stop or
+   spirant." Dominant = stops/spirants (p t c k q b d f s h); passive = continuants (m n ɲ ŋ w r l y). A dominant
+   always beats a passive; among dominants the last (nearest the vowel) wins; and a passive-initial syllable
+   harmonises to the last dominant tracked ACROSS THE WHOLE WORD. This replaced the Run-2 "base governs"
+   approximation and fixes both clusters (ផ្ទះ → pʰteəh — both dominant, so the subscript ទ o-series governs ះ →
+   eəh) and cross-syllable harmony (ចេតនា → ceːtɑnaː — passive ន harmonises to a-series from the preceding ត).
+
+2. **PRESYLLABLE reduction (Ch. IX.A).** A bare-vowel syllable that is NOT the last is an unstressed presyllable
+   with a SHORT inherent vowel ɑ/ɔ (referee-confirmed: កករ → k ɑ k ɑː — short presyllable + long main).
+   Stressed-open → long ɑː/ɔː; stressed-closed → short a / uə (Huffman IX.A.2; ចន្ទ → can, គណ → kuən).
+
+3. **CODA assignment.** The old greedy coda-grab was wrong (កណ្ដាល is k ɑ n ɗ aː l, not kɑn-). The last bare unit
+   supplies the coda; a silent trailing subscript is dropped (ចន្ទ → cɑn). A NASAL at the head of a MEDIAL cluster
+   closes the previous syllable and its subscript opens the next (តម្រង → tɑm.rɑŋ, the CVN- rule, Ch. V.B.6);
+   word-initial nasal clusters stay genuine onsets (ម្រាម → mriəm). A medial bare unit between two vowelled
+   syllables is its own minor syllable (ចេតនា).
+
+4. **ិ o-series → ɨ** (was i). Referee: គិត kɨt, មិន mɨn, និង nɨŋ — all ɨ.
+
+Plus a transcriber-variant fold `ɑ~a` (the short low-central vowel is written both ways: ចន្ទ can ~ cɑn).
+
+**The remaining ~51% is a genuine lexical + narrow-transcription tail**, not a missed systematic rule:
+- Pali/Sanskrit **doubled-consonant loanwords** where the 2nd-series short inherent is eə/oə not uə (ភក្ខ pʰeə,
+  វត្ត ʋoə) — Huffman's type-2/type-3 split, environmentally/lexically conditioned.
+- **special digraphs** (ហ្វ → f in French loans like ហ្វ្រង្ក 'franc').
+- **allophonic aspiration** the broad referee marks (ក្ល → kʰl — slight aspiration of a stop before a continuant).
+- **bantaq (់) vowel-shortening** (គាត់ → koət, ា+bantaq in o-series) — per-vowel irregular, currently ignored.
+- **broad-referee noise**: 441 of 7107 words carry ≥2 differing transcriptions (ɑ~a, aspiration variance,
+  presyllable ɔ~ə), so a single output can only match one variant.
+
+**Verdict: 🔵 in active development, Phase 2 (48.7%).** The sesquisyllabic core the earlier runs deferred is now
+built and Huffman-grounded. Further gains are per-loanword lexical work (a pronunciation lexicon for the Pali/French
+stratum) rather than more structure. Gold: test/khmer.test.ts now pins one word per structural rule.
