@@ -54,6 +54,7 @@ import { createTagalog } from "./languages/tagalog/tagalog.ts";
 import { createOromo } from "./languages/oromo/oromo.ts";
 import { createPolish } from "./languages/polish/polish.ts";
 import { createSindhi } from "./languages/sindhi/sindhi.ts";
+import { createSaraiki } from "./languages/saraiki/saraiki.ts";
 import { createPersian } from "./languages/persian/persian.ts";
 import { createItalian } from "./languages/italian/italian.ts";
 import { createNaija } from "./languages/naija/naija.ts";
@@ -223,6 +224,11 @@ function build(lang: string): Phonemizer {
         // Perso-Arabic script and applies the shared phonology (tonogenesis, gemination, nasal assimilation).
         case "pnb":
             return createPunjabi((latin) => getPhonemizer("en").text(latin));
+        // Saraiki (Shahmukhi, Pakistan) — the NON-tonal Lahnda sibling of Punjabi: reuses the shared Shahmukhi
+        // front-end + Lahnda phonology but keeps the voiced aspirates & aspirated sonorants (no tonogenesis) and
+        // adds the four implosives ٻɓ ڄʄ ڳɠ ݙɗ.
+        case "skr":
+            return createSaraiki((latin) => getPhonemizer("en").text(latin));
         case "mr":
             return createMarathi((latin) => getPhonemizer("en").text(latin));
         case "te":
