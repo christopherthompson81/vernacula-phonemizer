@@ -238,6 +238,12 @@ syl|397|492|0|0
 ajp|2513|1|0|0
 acw|1891|1|0|0
 apd|0|0|0|0
+mag|0|2|0|0
+"""
+
+# code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
+SERVED = """
+mag|bho
 """
 
 # Extra rows (rejected / unimplemented candidates):
@@ -251,7 +257,7 @@ aec|Sa'idi Arabic (Upper Egypt)|Semitic (Arabic)|Arabic|25||unimplemented|data s
 aeb|Tunisian Arabic|Semitic (Arabic)|Arabic|12||unimplemented|data scarcity|No wikipron, no kaikki.
 raj|Rajasthani|Indo-Aryan|Devanagari|20||unimplemented|macrolanguage umbrella|Cover term (Marwari, Dhundhari, …), not a single phonology.
 azb|South Azerbaijani|Turkic (Oghuz)|Arabic|13||unimplemented|variant without sufficient vowel-encoding|Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
-mag|Magahi|Indo-Aryan|Devanagari|14||unimplemented||Hindi-belt sibling of done bho/mai; referee availability not yet probed.
+mag|Magahi|Indo-Aryan|Devanagari|14||implemented||ALIAS to the Bhojpuri engine (served_by=bho). Referee PROBED 2026-07-19: no wikipron, no epitran mag-Deva map, kaikki only 2 IPA entries -> NO independent referee. Source reviewed: Priya (2020, IJSR, CC-BY) 'Morphophonology of Magahi' = a morphophonology paper (not a pronunciation lexicon); confirms Magahi is segmentally ~= Bhojpuri (shares श->s, विशाल->bisɑl) with no confidently-encodable Magahi-specific delta. Served via bho (nearest verified sibling) as a labelled approximation rather than an unverifiable bespoke clone.
 st|Southern Sotho (Sesotho)|Niger-Congo (Bantu)|Latin|6|8|unimplemented||SA official; Latin Bantu sibling of done tn. Good candidate.
 nso|Northern Sotho (Sepedi)|Niger-Congo (Bantu)|Latin|5|9|unimplemented||SA official; Latin Bantu.
 ilo|Ilocano|Austronesian (Philippine)|Latin|8|2|unimplemented||Sibling of done ceb/tl.
@@ -272,7 +278,7 @@ kok|Konkani|Indo-Aryan (Southern)|Devanagari|2||unimplemented||Was in espeak-por
 
 COLS = ["code","name","family","script","l1_speakers","l2_speakers",
         "wikipron_entries","kaikki_entries","epitran","espeak",
-        "decision","rejection_reason","verdict","pr","notes"]
+        "decision","rejection_reason","verdict","served_by","pr","notes"]
 
 def m(x):  # millions string → absolute int (or "")
     x=x.strip()
@@ -285,15 +291,19 @@ def rows_from_blocks():
     ref={}
     for l in REF.strip().splitlines():
         c,w,k,e,s=l.split("|"); ref[c]=(w,k,e,s)
+    served={}
+    for l in SERVED.strip().splitlines():
+        c,sb=l.split("|"); served[c]=sb
     rows=[]
     for l in IMPL.strip().splitlines():
         c,v,name=l.split("|")
         fam,scr,l1,l2=meta.get(c,("","","",""))
         w,k,e,s=ref.get(c,("","","",""))
-        rows.append([c,name,fam,scr,l1,l2,w,k,e,s,"implemented","",v,"",""])
+        rows.append([c,name,fam,scr,l1,l2,w,k,e,s,"implemented","",v,served.get(c,""),"",""])
     for l in EXTRA.strip().splitlines():
         c,name,fam,scr,l1,l2,dec,reason,notes=l.split("|")
-        rows.append([c,name,fam,scr,m(l1),m(l2),"","","","",dec,reason,"","",notes])
+        w,k,e,s=ref.get(c,("","","",""))
+        rows.append([c,name,fam,scr,m(l1),m(l2),w,k,e,s,dec,reason,"",served.get(c,""),"",notes])
     return rows
 
 def main():

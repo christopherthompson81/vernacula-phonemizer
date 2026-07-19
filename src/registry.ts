@@ -316,6 +316,12 @@ function build(lang: string): Phonemizer {
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         case "bho":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
+        // Magahi (Magadhan, Bihar) — ALIAS to the Bhojpuri engine. Magahi shares Bhojpuri's key divergences from
+        // Hindi (श→s, e.g. विशाल→bisɑl per Priya 2020) and has NO independent referee or documented Magahi-specific
+        // delta, so we serve it via `bho` (its nearest verified sibling) as a labelled approximation rather than
+        // inventing an unverifiable bespoke clone. See tools/language-catalogue (served_by='bho').
+        case "mag":
+            return createBhojpuri((latin) => getPhonemizer("en").text(latin));
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.
         case "hne":
             return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));

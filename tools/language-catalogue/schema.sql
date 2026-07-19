@@ -42,6 +42,12 @@ CREATE TABLE languages (
                        )),
 
     verdict          TEXT,                      -- for implemented rows: maturity ✅ 🟢 🟡 🔷 ⛔ (else NULL)
+
+    -- If this language is served by ANOTHER language's engine as a labelled approximation (rather than a bespoke
+    -- module), the code of that sibling — e.g. Magahi (mag) served_by 'bho'. NULL = its own bespoke module (or
+    -- not implemented). An aliased row is still `decision='implemented'` (the code works) but carries no verdict.
+    served_by        TEXT REFERENCES languages(code),
+
     pr               TEXT,                      -- PR / commit reference
     notes            TEXT,
 
