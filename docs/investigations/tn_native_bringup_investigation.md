@@ -55,3 +55,38 @@ The g2p is **correct on everything the orthography determines** (100% folded vs 
 second referee would be needed to call it ✅. **Numbers** are deferred (digits pass through).
 
 Gold: `test/setswana.test.ts` (hand-adjudicated signatures + common words). Floor `tn: 0.98`.
+
+## Run 2 — modern references: vowels corrected, numbers, tone/ejectives resolved
+
+The user supplied three modern, clean (non-OCR) references that settle the Run-1 deferrals:
+**Matlhaku (2020, MUN Occasional Papers in Linguistics)**, **Zerbian & Kügler (2021, JIPA — "Sequences of high
+tones across word boundaries in Tswana")**, and the **Wikipedia** phonology. Outcome per deferred item:
+
+- **VOWELS — corrected (real improvement).** All three sources give the standard **7-vowel system /i ɪ ɛ a ɔ ʊ u/**
+  (Cole 1955; DALL 1999; Matlhaku Table/§2.1). Orthographic **⟨e⟩→ɪ, ⟨o⟩→ʊ** (near-close), **⟨ê⟩→ɛ, ⟨ô⟩→ɔ**
+  (open-mid). Run 1 wrongly emitted close-mid e/o. Fixing this to ɪ/ʊ jumped **raw exact 22.2% → 35.9%** (folded
+  stays 100%) — the standard vowels align much better with epitran's own raising. The *further* raising to
+  close-mid [e o] before high vowels is dialectal (only some dialects have /e o/), so that finer height stays a
+  small folded class, but the near-close default is now authoritative, not a guess.
+- **⟨g⟩ → χ (uvular) — corrected.** Matlhaku §2.1: *"there is no phonemic /g/ because \*g lenited to /Ø/
+  historically. Orthographic ⟨g⟩ represents the phoneme /χ/ as in ⟨gana⟩ [χana]."* Run 1 used velar [x]; now χ
+  (uvular), with ⟨kg⟩→k͡χʰ for consistency. Folded χ~x~g against epitran's naive [g] / velar kxʰ.
+- **NUMBERS — implemented.** The Mistry Cycle 29 **bo-counting series** (bongwe … botlhano; 8/9 = the two-word
+  "bofera bobedi/bongwe" bent-finger forms), tens/hundreds via the ma- multipliers ("masome a mabedi" = 20,
+  "makgolo a mararo" = 300; 7/8/9 → participial supang/ferang), additive parts joined descending with ⟨le⟩;
+  thousands "dikete tse …". `numbers.ts` + `test/setswana.test.ts`. E.g. 2025 → dikete tse pedi le masome a
+  mabedi le botlhano. Best-effort (unmeasured — the referee is word-only).
+- **TONE — genuinely BLOCKED (not an OCR problem).** Zerbian & Kügler confirm Tswana tone is **lexical**: "only
+  high tones are assumed to be underlyingly represented", and *which* syllable bears the lexical H is a lexical
+  property (e.g. stem-initial pó-). The standard orthography does **not** mark tone, and no clean toned lexicon
+  exists (no wikipron/kaikki tsn; the Mistry OCR tone marks are too corrupt to mine reliably). So this is an
+  information gap in the writing system, identical to Chichewa (nya) — a great tone-*rule* paper (HTS, downstep,
+  OCP) doesn't help without the underlying lexical H positions. Correctly deferred.
+- **EJECTIVES — correctly PLAIN (confirmed).** Matlhaku Table 1 lists the plosives as voiceless p/t/k (aspiration
+  is the phonemic contrast, not ejection); ejective realization is a **post-nasal strengthening** allophone
+  (Gouskova, Zsiga & Boyer 2011) plus a **seNgwato-dialect** trait (footnote 8). So the citation form is plain —
+  Run 1's choice was right, now backed by a modern source rather than declined by caution.
+
+**Net:** rules 100% folded (unchanged) but **raw 35.9%** (from 22.2%) with authoritative canonical vowels + the
+⟨g⟩→χ fix; numbers added. Tone and the dialectal close-mid raising remain the only deferrals, both genuinely
+underdetermined by the orthography. Still 🔷 single-source (epitran the only machine referee).
