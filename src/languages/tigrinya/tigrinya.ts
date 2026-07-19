@@ -1,10 +1,10 @@
 /**
- * Native Amharic / አማርኛ (am) text phonemizer — canonical IPA, espeak-independent. Ethiopian Semitic, written in
- * the Ge'ez/Fidäl SYLLABARY-abugida: each codepoint is a whole CV syllable (the vowel is baked into the glyph),
- * so the g2p is a flat lookup (fidel.tsv, one Ethiopic codepoint → its CV) rather than a Brahmic matra/virama
- * engine. Two features are UNWRITTEN: GEMINATION (phonemic but unmarked — rendered single, folded vs the referee)
- * and the 6th-order vowel [ɨ], which is epenthetic and DELETED word-finally (ሁለት→hulət) and before a vowel.
- * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/am_native_bringup_investigation.md.
+ * Native Tigrinya / ትግርኛ (ti) text phonemizer — canonical IPA, espeak-independent. North Ethiosemitic (~9M,
+ * Eritrea + Tigray), written in the Ge'ez/Fidäl SYLLABARY-abugida. Reads the SHARED Ge'ez engine (core/geez.ts) —
+ * the same fidel→CV lookup + epenthetic-ɨ deletion as Amharic — over a Tigrinya fidel table. The split from
+ * Amharic is the PRESERVED SEMITIC GUTTURALS: ⟨ሐ ኀ⟩→ħ, ⟨ዐ⟩→ʕ (the pharyngeals Amharic merged to h/ʔ), ⟨አ⟩→ʔ,
+ * ⟨ኸ⟩→x, with the guttural 1st-order vowel kept central [ə]. Gemination is unwritten (folded); ejectives kʼ tʼ
+ * t͡ʃʼ pʼ t͡sʼ. See docs/investigations/ti_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -19,18 +19,18 @@ interface NumbersDef {
     hundred: string;
     thousand: string;
 }
-interface AmharicDef {
+interface TigrinyaDef {
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
 }
-const DEF = loadManifest<AmharicDef>(import.meta.url, "amharic.jsonc");
+const DEF = loadManifest<TigrinyaDef>(import.meta.url, "tigrinya.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
-/** One Amharic word → canonical IPA: fidel→CV lookup + 6th-order ɨ deletion (shared Ge'ez engine). */
+/** One Tigrinya word → canonical IPA: fidel→CV lookup + 6th-order ɨ deletion (shared Ge'ez engine). */
 export const phonemizeWord = makeGeezG2P(import.meta.url, "fidel.tsv");
 
-// ── Numbers (decimal; Amharic) ────────────────────────────────────────────────
+// ── Numbers (decimal; Tigrinya) ───────────────────────────────────────────────
 function numberToText(n: number): string {
     if (n < 0) return "";
     if (n < 10) return NUM.units[n]!;
@@ -61,7 +61,7 @@ const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
-class AmharicPhonemizer implements Phonemizer {
+class TigrinyaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
@@ -75,7 +75,7 @@ class AmharicPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Amharic phonemizer. `foreign` handles embedded Latin runs. */
-export function createAmharic(foreign?: ForeignPhonemizer): Phonemizer {
-    return new AmharicPhonemizer(foreign);
+/** Build the Tigrinya phonemizer. `foreign` handles embedded Latin runs. */
+export function createTigrinya(foreign?: ForeignPhonemizer): Phonemizer {
+    return new TigrinyaPhonemizer(foreign);
 }
