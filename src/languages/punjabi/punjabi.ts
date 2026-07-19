@@ -133,12 +133,13 @@ export function makeNativePunjabi(
             .replace(/n(?=t͡ʃ|d͡ʒ)/gu, "ɲ")
             .replace(/n(?=ʈʰ|ɖʱ|[ʈɖɽ])/gu, "ɳ")
             .replace(/n(?=kʰ|ɡʱ|[kɡxɣq])/gu, "ŋ");
-        // SHAHMUKHI-ONLY: the -ਣਾ verbal infinitive/causative ending is retroflex [ɳaː] (shared by Eastern AND
-        // Western Punjabi — the wikipron pan_arab referee has it: آنا→aːɳaː, بنانا→bənaːɳaː). Shahmukhi writes it
-        // with the plain (ambiguous) ن → [n]; Gurmukhi disambiguates orthographically (ਣ vs ਨ), so this fires only
-        // for Shahmukhi input. Restricted to a LONG vowel before naː (the infinitive stem) for precision — a general
-        // n→ɳ is lexical (retroflex ɳ is etymological, not positional). +13 net vs the Shahmukhi referee.
-        if (isShah) x = x.replace(/([aeiou]ː)n(aː)$/u, "$1ɳ$2");
+        // SHAHMUKHI-ONLY: the verbal infinitive/causative ending is RETROFLEX -ਣਾ [ɳaː] (آکھنا→aːkʰɳaː, بنانا→
+        // bənaːɳaː) EXCEPT after a rhotic /ɾ ɽ/, where it is DENTAL -ਨਾ [naː] (کرنا→kəɾnaː, مارنا→maːrnaː, پھڑنا→
+        // pʰəɽnaː) — a real Punjabi morphophonemic split that GURMUKHI spells orthographically (ਣ vs ਨ). Shahmukhi
+        // writes both with the ambiguous plain ن, so retroflex a word-final naː UNLESS a rhotic precedes; Gurmukhi
+        // is authoritative (never fire). +24 net vs the Shahmukhi referee (breaks only the 3 nouns نانا/مہینہ/انھا
+        // that also end in a non-rhotic ...aːnaː — a small lexical cost).
+        if (isShah) x = x.replace(/(?<![ɾɽ])n(aː)$/u, "ɳ$1");
         // TONOGENESIS: de-aspirate the breathy markers + assign tone.
         x = tonogenesis(x);
         // Punjabi has NO phonemic /ʔ/ — the loanword letters ع/ء are silent / hiatus carriers, not glottal stops
