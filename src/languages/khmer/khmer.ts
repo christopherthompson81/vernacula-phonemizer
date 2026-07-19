@@ -36,8 +36,9 @@ export function phonemizeWord(word: string): string {
         const c = s[i]!;
         const base = DEF.consonants[c];
         if (!base) { i += 1; continue; } // independent vowels / diacritics / unknown — skip (Phase 1)
-        let onset = base[0];
-        let ser = base[1]; // "a" | "o" — the series governing the vowel (last consonant before the vowel wins)
+        // ⟨ប⟩ is [ɓ] as a simple onset but [p] as the first member of a cluster (ប្រ → pr, per wikipron).
+        let onset = c === "ប" && s[i + 1] === COENG ? "p" : base[0];
+        const ser = base[1]; // "a" | "o" — the series governing the vowel (the BASE consonant governs, in clusters too)
         i += 1;
         // coeng subscripts (្ + consonant): a written cluster. The BASE consonant governs the vowel series here
         // (ខ្មែ → kʰmae a-series from ខ, not o-series from ម — confirmed against wikipron). (A proper sesquisyllabic
@@ -54,9 +55,11 @@ export function phonemizeWord(word: string): string {
         // trailing subscript ្ + consonant after the coda is SILENT (final cluster ⟨ន្ទ⟩ → coda n, ⟨្ទ⟩ dropped).
         let coda = "";
         const nx = s[i] ?? "";
-        if (nx in DEF.codas && !(s[i + 1]! in DEF.vowels) && s[i + 1] !== COENG) {
+        if (nx in DEF.codas && !(s[i + 1]! in DEF.vowels)) {
             coda = DEF.codas[nx]!;
             i += 1;
+            // a trailing subscript ្ + consonant on the coda is a SILENT final cluster (ចន្ទ → can, ្ទ dropped).
+            while (s[i] === COENG && DEF.consonants[s[i + 1] ?? ""] && !(s[i + 2]! in DEF.vowels)) i += 2;
         }
         // inherent vowel (no vowel sign): SHORT [ɑ/ɔ] in a closed syllable (before a coda), long open otherwise.
         if (!vs) nucleus = coda ? (ser === "a" ? "ɑ" : "ɔ") : DEF.inherent[oIdx]!;
