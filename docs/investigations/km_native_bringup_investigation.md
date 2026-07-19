@@ -32,3 +32,18 @@ effort — Thai's is 1000+ lines) that the two-series core doesn't yet have. The
 
 **Verdict: 🔵 in active development.** The defining two-series system is DONE and wikipron-verified; the
 sesquisyllabic syllabifier is the substantial next phase. Gold: test/khmer.test.ts (the two-series contrast + wikipron-matching words).
+
+## Run 2 — reference-informed structural fixes (Donley 2020), 35.6 → 38.6%
+The user supplied Donley (2020) "Khmer Phonetics and Phonology" — an ESL thesis whose Table 4 (onset cluster
+classes: Class 1 tight, Class 2 slight aspiration, Class 3 with an epenthetic [ə] = the minor syllable) and Table 2
+(word-final stops unreleased; /k/ → [ʔ]) confirm the structure. Two clear wins it enabled:
+- **silent final subscript clusters** — a trailing ្+C on a CODA consonant is dropped (ចន្ទ → cɑn, កម្សាន្ត →
+  kɑmsaːn). The earlier regression was from ALSO changing the onset loop; the coda fix alone is safe (+1.7pp).
+- **⟨ប⟩ → [p] in a cluster** (ប្រ → pr, not ɓr; +1.3pp).
+
+Still **🔵 38.6%.** The dominant remaining class is the **sesquisyllabic minor-syllable structure** — e.g. សម្រាក
+= [sɑm.raːʔ] (ស = a minor syllable with a short inherent vowel; ម្រ then splits/onsets the major syllable). Getting
+this right needs a proper Khmer SYLLABIFIER (minor-syllable detection, disyllabic parsing, and the subtle
+series-in-cluster behavior the thesis confirms but does not computationally specify — cf. Huffman 1970). That is a
+dedicated Thai-scale project (Thai's syllabifier is ~1000 lines), not a few edits. The two-series core remains
+correct and wikipron-verified; the syllabifier is the next dedicated phase.
