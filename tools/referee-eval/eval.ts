@@ -43,7 +43,10 @@ import { phonemizeWord as rw } from "../../src/languages/kinyarwanda/kinyarwanda
 import { phonemizeWord as mad } from "../../src/languages/madurese/madurese.ts";
 import { phonemizeWord as nya } from "../../src/languages/chichewa/chichewa.ts";
 import { phonemizeWord as ln } from "../../src/languages/lingala/lingala.ts";
-import { phonemizeWord as km } from "../../src/languages/khmer/khmer.ts";
+// RULE-ONLY for km: the shipped phonemizeWord consults an exceptions lexicon MINED FROM this wikipron referee
+// (the Huffman-lexical residual — inherent-vowel length, internal doubling, Pali vowels), so evaluating it here
+// would be circular. phonemizeWordRules is the non-circular signal (mirrors en-GB).
+import { phonemizeWordRules as km } from "../../src/languages/khmer/khmer.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";

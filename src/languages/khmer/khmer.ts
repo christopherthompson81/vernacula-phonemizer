@@ -21,6 +21,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 interface KhmerDef {
     consonants: Record<string, [string, string]>;
@@ -61,8 +62,23 @@ interface Unit {
     codaShort: boolean; // the coda came from a silent-subscript/doubled cluster → short inherent (ចន្ទ can)
 }
 
-/** One Khmer word → canonical IPA (segmental; two-series sesquisyllabic abugida). */
+// Exceptions lexicon (word → canonical IPA) for the RULE-UNPREDICTABLE residual — inherent-vowel length,
+// internal-doubling, Pali/Sanskrit loanword vowels. These are LEXICAL (not derivable from the spelling, per
+// Huffman 1970), so — the Romanian-stress / akan-tone pattern — a mined lexicon carries them and the shipped
+// phonemizeWord consults it dict-first. phonemizeWordRules NEVER reads it, keeping the referee eval non-circular
+// (the lexicon is derived FROM the wikipron referee). Mined by tools/gen/build-km-lexicon.mts. See
+// docs/investigations/km_native_bringup_investigation.md Run 5.
+const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon.tsv", undefined, { optional: true });
+
+/** One Khmer word → canonical IPA. SHIPPED path: the exceptions lexicon first (Huffman-lexical words the rules
+ *  cannot predict), else the rule engine. */
 export function phonemizeWord(word: string): string {
+    return LEX.get(word) ?? phonemizeWordRules(word);
+}
+
+/** One Khmer word → canonical IPA by RULE ONLY (segmental two-series sesquisyllabic abugida; no lexicon). This is
+ *  the non-circular referee-eval signal. */
+export function phonemizeWordRules(word: string): string {
     const s = [...word];
     const n = s.length;
 

@@ -122,3 +122,32 @@ the internal-doubling minor-syllable/coda ambiguity (unpredictable from spelling
 of per-loanword Pali/Sanskrit vowel irregularities each ≤2×, and remaining referee variance (ei~eː for ⟨េ⟩
 o-series; ɨ~i for ⟨ិ⟩). This IS a lexical/ambiguity tail now — but Run 4 showed most of what looked lexical at
 48.7% was in fact five systematic rules + referee noise, exactly as suspected.
+
+## Run 5 — the exceptions lexicon for the lexical residual
+Runs 3–4 established that what rules can't reach in Khmer is genuinely LEXICAL: inherent-vowel length
+(ចន្ទ can vs កង kɑːŋ — same shape, different length), the internal-doubling minor-syllable/coda split
+(ចេតនā vs គីមឈี — no spelling cue), and the Pali/Sanskrit loanword vowels. These are not rule-derivable, so —
+the Romanian-stress / akan-tone pattern — a mined lexicon carries them and the shipped `phonemizeWord` consults it
+dict-first, falling back to the rule engine for OOV.
+
+- **`src/languages/khmer/km-lexicon.tsv`** — 2822 entries (42.6% of the 6628 attested words), each a word whose
+  canonicalised modal wikipron transcription genuinely diverges from the rule output (under the scoring folds).
+  Built by `tools/gen/build-km-lexicon.mts`. Canonicalisation: modal transcription per word, breve→plain,
+  short-low a→ɑ, optional medial /ʔ/ dropped. Source: wikipron khm_khmr broad (human, from Wiktionary,
+  CC-BY-SA 3.0).
+- **`phonemizeWord`** (shipped) = lexicon lookup → `phonemizeWordRules`. **`phonemizeWordRules`** (rule-only) is
+  the referee-eval signal; eval.ts imports it so the parity number stays **non-circular at 55.0%** (the lexicon
+  is derived FROM the wikipron referee — scoring the dict-first path against wikipron would be circular, exactly
+  as the en-GB lexical-set word lists are handled).
+
+**On the circularity:** Khmer has no second large independent referee (epitran khm-Deva is thin; kaikki is the
+same Wiktionary source as wikipron). So the shipped dict-first path cannot be independently measured — it is a
+🔷 single-source situation. That is an accepted trade-off (per the user): when a language's correct output is
+irreducibly lexical and only one human source exists, shipping that source as a dictionary is the only path to
+good linguistic output, even though it forfeits an independent score on the covered vocabulary. The RULE engine
+retains its honest, independently-measured 55.0%; the lexicon adds correct human pronunciations for 2822 common
+words on top.
+
+**Net state:** rules 55.0% (independent, wikipron) + a 2822-word exceptions lexicon covering the Huffman-lexical
+residual on attested vocabulary. Regenerate the lexicon after any rule change: `npx tsx tools/gen/build-km-lexicon.mts`
+(fewer entries survive as the rules improve).
