@@ -214,13 +214,18 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
 };
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-/** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes. */
-export function makeFold(cfg: RefLang): (s: string) => string {
+/** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes, plus any
+ *  per-referee folds (`extra`) for folds valid only against one referee (e.g. a dual-script language's abjad). */
+export function makeFold(
+    cfg: RefLang,
+    extra: readonly [RegExp, string, string][] = [],
+): (s: string) => string {
     return (s: string): string => {
         let out = s.normalize("NFD");
         for (const [re, rep] of cfg.preFolds ?? []) out = out.replace(re, rep); // before backbone (needs diacritics)
         for (const [re, rep] of BACKBONE) out = out.replace(re, rep);
         for (const [re, rep] of cfg.folds) out = out.replace(re, rep);
+        for (const [re, rep] of extra) out = out.replace(re, rep);
         return out.normalize("NFC");
     };
 }
@@ -243,10 +248,10 @@ export async function evaluate(
     const cfg = CONFIG[lang],
         phon = PHON[lang];
     if (!cfg || !phon) throw new Error(`no referee config for "${lang}"`);
-    const fold = makeFold(cfg);
     const out: RefereeResult[] = [];
     for (const ref of cfg.referees) {
         if (primaryOnly && ref.role !== "primary") continue; // floor test only needs the primary (skip slow 2nd)
+        const fold = makeFold(cfg, ref.folds); // per-referee folds appended (e.g. pa's majhūl only for Shahmukhi)
         const pairs = readFileSync(join(HERE, "referees", ref.file), "utf8")
             .split("\n")
             .filter((l) => l.trim() !== "" && !l.startsWith("#"))

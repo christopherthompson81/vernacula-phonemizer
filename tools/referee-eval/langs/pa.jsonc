@@ -16,7 +16,11 @@
         {
             "file": "pa.wikipron-pan-arab-broad.tsv",
             "source": "wikipron pan_arab broad (human) — SHAHMUKHI script",
-            "role": "secondary"
+            "role": "secondary",
+            "folds": [
+                { "pattern": "[eɛ]", "replace": "i", "note": "MAJHŪL ی: [iː]~[eː]~[ɛ] are ALL written with the single letter ی/ے in the Shahmukhi ABJAD → the quality is unrecoverable from the skeleton (as for sd/ur). Per-referee: Gurmukhi writes ਈ/ਏ/ਐ distinctly, so this fold is NOT applied to the pan_guru referee." },
+                { "pattern": "[oɔ]", "replace": "u", "note": "MAJHŪL و: [uː]~[oː]~[ɔ] all written و in the abjad — unrecoverable, Shahmukhi-only (Gurmukhi writes ਊ/ਓ/ਔ)." }
+            ]
         }
     ],
     "segmentJoin": true,
