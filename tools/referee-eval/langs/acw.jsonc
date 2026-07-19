@@ -1,0 +1,17 @@
+// Hijazi Arabic (western Saudi) (acw) — an Arabic VARIETY on the shared engine, evaluated through phonemizeArabic(text, ...): the MSA
+// neural diacritizer restores short vowels, the MSA g2p runs, then the variety's consonant/diphthong shifts apply.
+// Referee: wikipron acw_arab_broad (HUMAN, fully-voweled DIALECTAL IPA, INDEPENDENT). Same pausal + gemination
+// folds as MSA. Short-vowel restructuring (the diacritizer restores MSA vowels) + learned-word interdental
+// retention are the known lexical tail — consonants + diphthongs are the measured backbone.
+{
+    "referees": [
+        { "file": "acw.wikipron-acw-broad.tsv", "source": "wikipron acw_arab broad (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "[aiu]$", "replace": "", "note": "PAUSAL: drop a word-final short vowel (long aː/iː/uː/eː/oː survive)" }
+    ],
+    "folds": [
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination (shadda): collapse doubling — length already stripped by the backbone" }
+    ]
+}

@@ -1,0 +1,21 @@
+// South Levantine Arabic (ajp — Palestinian/Jordanian, urban) variety data. Applied on the MSA g2p output, same
+// shape as the other dialect files. The southern sibling of North Levantine (apc): it shares ق→[ʔ] (urban glottal
+// stop), ج→[ʒ], and the interdental mergers ث→[t], ذ→[d] — but DIFFERS on ⟨ظ⟩, which South Levantine merges to the
+// SIBILANT [zˤ] (بوظة→buːzˤa, حافظ→ħaːfazˤ) rather than North Levantine's stop [dˤ]; ⟨ض⟩ stays [dˤ], so the two are
+// kept distinct. Historical diphthongs monophthongize (ay→eː, aw→oː). The interdental retention in learned/MSA-loan
+// words (أثاث→ʔaθaːθ) is a lexical tail. Referee: wikipron ajp_arab_broad (human). See docs/investigations/ajp_southlevantine_bringup_investigation.md.
+{
+    "variety": "southlevantine",
+    "iso": "ajp",
+    "consonantShifts": [
+        ["q", "ʔ"],   // ق → [ʔ] (urban glottal stop)
+        ["d͡ʒ", "ʒ"], // ج → [ʒ]
+        ["θ", "t"],   // ث → [t] (interdental → stop; learned words keep [θ]/[s] — lexical tail)
+        ["ðˤ", "zˤ"], // ظ → [zˤ] (SIBILANT — the South Levantine reflex, vs apc's [dˤ]); keep ض = [dˤ] distinct
+        ["ð", "d"]    // ذ → [d]
+    ],
+    "diphthongShifts": {
+        "aj": "eː", // بيت bajt → beːt
+        "aw": "oː"  // يوم jawm → joːm
+    }
+}

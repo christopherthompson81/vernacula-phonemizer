@@ -153,6 +153,8 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     afb: (w: string) => ar(w, "gulf"), // Gulf Arabic variety (Khaleeji)
     ary: (w: string) => ar(w, "moroccan"), // Moroccan Arabic variety (Darija)
     ayl: (w: string) => ar(w, "libyan"), // Libyan Arabic variety (Tripolitanian)
+    ajp: (w: string) => ar(w, "southlevantine"), // South Levantine Arabic variety (Palestinian/Jordanian)
+    acw: (w: string) => ar(w, "hijazi"), // Hijazi Arabic variety (western Saudi)
 
     bn,
     ca,

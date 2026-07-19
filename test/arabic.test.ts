@@ -119,6 +119,30 @@ describe("arabic canonical IPA — diacritized path", () => {
         });
     });
 
+    // South Levantine Arabic (ajp — Palestinian/Jordanian) — sibling of North Levantine (apc): ق→ʔ, ج→ʒ, ث/ذ→t/d,
+    // but ظ→[zˤ] (SIBILANT, vs apc's [dˤ]); ض stays [dˤ], so the two are distinct.
+    describe("South Levantine variety (ajp)", () => {
+        test("consonant shifts + ظ→zˤ (the split from North Levantine)", () => {
+            expect(phonemizeWord("قَمَر", "southlevantine")).toBe("ʔˈamar"); // ق → ʔ
+            expect(phonemizeWord("جَمَل", "southlevantine")).toBe("ʒˈamal"); // ج → ʒ
+            expect(phonemizeWord("ثَلَاثَة", "southlevantine")).toBe("talˈaːta"); // ث → t
+            expect(phonemizeWord("ظَهْر", "southlevantine")).toBe("zˤˈahr"); // ظ [ðˤ] → [zˤ] (SIBILANT)
+            expect(phonemizeWord("بَيْت", "southlevantine")).toBe("bˈeːt"); // ay → eː
+        });
+    });
+
+    // Hijazi Arabic (acw — western Saudi) — ق→ɡ but ⟨ج⟩ RETAINS the affricate [d͡ʒ] (unlike Egyptian [ɡ] /
+    // Levantine [ʒ]), and ⟨خ⟩ stays [x]; interdentals → stops/[zˤ].
+    describe("Hijazi variety (acw)", () => {
+        test("ق→ɡ, ج RETAINED as d͡ʒ (the distinctive Hijazi profile)", () => {
+            expect(phonemizeWord("قَمَر", "hijazi")).toBe("ɡˈamar"); // ق → ɡ (voiced)
+            expect(phonemizeWord("جَمَل", "hijazi")).toBe("d͡ʒˈamal"); // ج stays d͡ʒ (affricate retained)
+            expect(phonemizeWord("ثَلَاثَة", "hijazi")).toBe("talˈaːta"); // ث → t
+            expect(phonemizeWord("ظَهْر", "hijazi")).toBe("zˤˈahr"); // ظ → zˤ
+            expect(phonemizeWord("يَوْم", "hijazi")).toBe("jˈoːm"); // aw → oː
+        });
+    });
+
     // North Levantine Arabic (apc) — same engine, differs from Egyptian mainly in ج (→ [ʒ], not [ɡ]).
     describe("Levantine variety (apc)", () => {
         test("consonant shifts (ج→ʒ is the signature difference from Egyptian)", () => {
