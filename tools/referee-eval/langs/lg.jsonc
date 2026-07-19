@@ -1,0 +1,17 @@
+// Luganda (lg) — Bantu (Great Lakes, JE15), Latin orthography. Referee: epitran lug-Latn (programmatic — the ONLY
+// machine referee; no kaikki/wikipron lug). ⚠ epitran is RULE-based, so an epitran-vs-ours comparison is partly
+// CIRCULAR (both g2p the same orthography — cf. uz). The folds reconcile the CONVENTION differences: our palatal
+// STOPS ⟨c⟩=c / ⟨j⟩=ɟ (Wikipedia) vs epitran's affricates tʃ/dʒ, and the tie-bar. Phonology independently grounded
+// in Wikipedia (Luganda).
+{
+    "language": "lg", "name": "Luganda (Oluganda)", "script": "Latin",
+    "provenance": "Authored greedy g2p from the Luganda orthography (Wikipedia phonology). Referee: epitran lug-Latn (rule-based, partly circular).",
+    "referees": [
+        { "file": "lg.epitran-lug-latn.tsv", "source": "epitran lug-Latn (programmatic, partly circular)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "͡", "replace": "", "note": "tie-bar on affricates" },
+        { "pattern": "c", "replace": "tʃ", "note": "⟨c⟩: WE emit the palatal STOP [c] (Wikipedia: [tʃ] is an allophone before front vowels); epitran emits [tʃ] — fold c→tʃ on both sides" },
+        { "pattern": "ɟ", "replace": "dʒ", "note": "⟨j⟩: WE emit the palatal STOP [ɟ]; epitran emits [dʒ] — fold ɟ→dʒ" }
+    ]
+}
