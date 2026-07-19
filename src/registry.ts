@@ -155,6 +155,10 @@ function build(lang: string): Phonemizer {
             return createArabic("moroccan");
         case "ayl": // Libyan Arabic (Tripolitanian) — ق→ɡ, ج→ʒ, خ→χ, interdentals kept
             return createArabic("libyan");
+        case "ajp": // South Levantine Arabic (Palestinian/Jordanian) — ق→ʔ, ج→ʒ, ث/ذ→t/d, ظ→zˤ (sibling of apc)
+            return createArabic("southlevantine");
+        case "acw": // Hijazi Arabic (western Saudi) — ق→ɡ, ج=d͡ʒ retained, خ=x, interdentals→stops/zˤ
+            return createArabic("hijazi");
         case "fr":
             return createFrench();
         // Québécois French — the France engine + a Canadian delta (affrication t/d→t͡s/d͡z, high-vowel laxing).
