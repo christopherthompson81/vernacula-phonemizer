@@ -33,6 +33,7 @@ import { createIrish } from "./languages/irish/irish.ts";
 import { createWelsh } from "./languages/welsh/welsh.ts";
 import { createHausa } from "./languages/hausa/hausa.ts";
 import { createThai } from "./languages/thai/thai.ts";
+import { createLao } from "./languages/lao/lao.ts";
 import { createFula } from "./languages/fula/fula.ts";
 import { createSinhala } from "./languages/sinhala/sinhala.ts";
 import { createKazakh } from "./languages/kazakh/kazakh.ts";
@@ -180,6 +181,9 @@ function build(lang: string): Phonemizer {
             return createHausa();
         case "th":
             return createThai();
+        // Lao — Brahmic abugida, Thai sibling with a more phonemic orthography; leaner authored rule g2p + tone.
+        case "lo":
+            return createLao();
         case "ff":
             return createFula();
         case "si":

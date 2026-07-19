@@ -109,6 +109,7 @@ import { phonemizeWordRules as jv } from "../../src/languages/javanese/javanese.
 import { phonemizeWord as sv } from "../../src/languages/swedish/swedish.ts";
 import { phonemizeWord as ta } from "../../src/languages/tamil/tamil.ts";
 import { phonemizeWord as th } from "../../src/languages/thai/thai.ts";
+import { phonemizeWord as lo } from "../../src/languages/lao/lao.ts";
 import { phonemizeWord as tr } from "../../src/languages/turkish/turkish.ts";
 import { phonemizeWord as vi } from "../../src/languages/vietnamese/vietnamese.ts";
 import { phonemizeWord as zu } from "../../src/languages/zulu/zulu.ts";
@@ -202,6 +203,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ta,
     te,
     th,
+    lo,
     tl,
     om,
     pl,
