@@ -1,0 +1,21 @@
+// Gan Chinese / 贛語 (gan), Nanchang 南昌 dialect — canonical IPA. gan.ts reads this file. Gan is a distinct primary
+// branch of Sinitic (Jiangxi); Nanchang is its prestige/representative variety. The dict (dict.tsv) already
+// carries the Sinological IPA per syllable (segmental IPA + a superscript pitch-number tone, narrow Nanchang
+// diacritics kept verbatim); the shared Han-dict engine (hanDictIpa.ts) converts the pitch digits → Chao contour
+// letters and resolves the sandhi arrow ⁻. Its place in the Sinitic set: Nanchang Gan RETAINS the Middle Chinese
+// 入声 (entering) tones with CHECKED STOP CODAS -t̚/-ʔ (cf. Hakka's full -p̚/-t̚/-k̚, Jin's -ʔ only, Xiang's none).
+// SINGLE authoritative source (Wiktionary/kaikki Nanchang Sinological-IPA) — no independent referee (🔷).
+// See docs/investigations/gan_native_bringup_investigation.md.
+{
+    "language": "gan",
+    "name": "Gan Chinese (Nanchang)",
+    "script": "Han",
+
+    // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
+    "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },
+
+    "clausePunctuation": {
+        "。": " . ", "，": " , ", "、": " , ", "？": " ? ", "！": " ! ",
+        "；": " ; ", "：": " : ", ".": " . ", ",": " , ", "?": " ? ", "!": " ! "
+    }
+}

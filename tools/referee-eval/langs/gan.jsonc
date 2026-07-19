@@ -1,0 +1,15 @@
+// Gan Chinese / 贛語 (gan), Nanchang 南昌 dialect — a distinct Sinitic branch (Jiangxi). GAP language: NO independent
+// automated referee. No wikipron gan; epitran ships no Gan; the only machine-readable Nanchang IPA is the
+// Wiktionary Chinese dialectal data — exactly our source (kaikki.org extract), so any automated check is circular
+// with it. Recorded here (not silently omitted) so the gap is explicit; the correctness anchor is the adjudicated
+// gold in test/gan.test.ts. Single-source verified (🔷), the Jin/Hakka/Xiang pattern.
+{
+    "language": "gan",
+    "name": "Gan Chinese (Nanchang)",
+    "script": "Han",
+    "provenance": "Wiktionary Chinese Nanchang Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
+    "referees": [],
+    "secondaryGap": "No independent referee exists for Nanchang Gan: no wikipron gan and epitran ships no Gan. The only machine-readable Nanchang IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Jin/Hakka/Xiang pattern; the correctness anchor is the adjudicated gold in test/gan.test.ts.",
+    "segmentJoin": true,
+    "folds": []
+}
