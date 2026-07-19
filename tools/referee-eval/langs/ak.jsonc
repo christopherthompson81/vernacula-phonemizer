@@ -1,0 +1,24 @@
+// Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana, the fleet's FIRST Kwa language. Shallow Latin
+// orthography; a near one-to-one rule g2p (palatal ⟨ky gy hy ny⟩ + labialised ⟨tw dw kw hw⟩ digraph series, Glide
+// Formation, coda-nasal assimilation). NO wikipron/epitran Akan; the only referee is the SMALL kaikki human set
+// (22 entries, mixed Asante/Fante, tone+nasal marked, phonemic~phonetic mix). TONE (H/L) and ATR allophony are
+// UNWRITTEN in the orthography → deferred → folded here. The correctness anchor is the adjudicated gold in
+// test/akan.test.ts. 🔷 single-source (small human corroboration). See docs/investigations/ak_native_bringup_investigation.md.
+{
+    "language": "ak",
+    "name": "Akan (Twi)",
+    "script": "Latin",
+    "provenance": "Authored from the standard Akan orthography + Dolphyne (1988) / Paster (2010); anchored on the kaikki Akan human readings.",
+    "referees": [
+        { "file": "ak.kaikki-akan.tsv", "source": "kaikki Akan (Wiktionary, human, small)", "role": "primary" }
+    ],
+    "segmentJoin": false,
+    "folds": [
+        { "pattern": "[\\u0300\\u0301\\u0302\\u030b\\u0304]", "replace": "", "note": "TONE: the orthography does not mark tone (H/L) → we emit none; strip the referee's combining acute/grave/tone diacritics" },
+        { "pattern": "[˥˦˧˨˩]", "replace": "", "note": "tone letters (some referee entries use Chao) — deferred, strip" },
+        { "pattern": "\\u0303", "replace": "", "note": "NASALISATION: unwritten in the orthography (rare tilde only) → deferred; strip the referee's combining tilde" },
+        { "pattern": "\\u0308", "replace": "", "note": "centralisation diaeresis (kaikki narrow notation, e.g. ü)" },
+        { "pattern": "ʃ", "replace": "ɕ", "note": "⟨hy hw⟩: alveolo-palatal ɕ (ours, per Dolphyne) ~ postalveolar ʃ (referee) — notation" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "vowel length (huu→huː) — folded as elsewhere" }
+    ]
+}
