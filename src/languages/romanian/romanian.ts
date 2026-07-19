@@ -18,6 +18,18 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+
+/** Load the optional stress lexicon (word → stressed-nucleus position from the end). Absent → rules only. */
+function loadStressLex(): ReadonlyMap<string, number> {
+    const raw = loadTsvMap(import.meta.url, "romanian-stress.tsv", undefined, { optional: true });
+    const m = new Map<string, number>();
+    for (const [k, v] of raw) {
+        const n = Number(v);
+        if (Number.isInteger(n) && n >= 1) m.set(k, n);
+    }
+    return m;
+}
 
 interface RomanianDef {
     consonants: Record<string, string>;
@@ -157,14 +169,60 @@ function finalI(segs: string[]): string[] {
     return [...segs.slice(0, -2), prev + "ʲ"];
 }
 
-/** One Romanian word → canonical IPA. */
-export function phonemizeWord(word: string): string {
+/**
+ * Predict the stressed nucleus, as a position FROM THE END (1 = final nucleus, 2 = penult, …). Stress is UNWRITTEN
+ * and lexically unpredictable in Romanian, but strongly conditioned on the ending (derived from the kaikki
+ * distribution, 7.4k words): consonant-final → FINAL (69%, up to 94% for a final stop); vowel-final → PENULT (61%;
+ * -e/-ă/-o 78-85%). One nucleus → final. The rule-unpredictable residual is closed by the lexicon (STRESS_LEX).
+ */
+function stressFromEnd(word: string, nucleiCount: number): number {
+    if (nucleiCount <= 1) return 1;
+    const last = word[word.length - 1] ?? "";
+    // consonant-final → final (69%; -t/-s/-r 85-94%), EXCEPT ⟨-c⟩ → penult (the -ic adjective suffix dominates:
+    // politic→poˈlitik, istoric→isˈtorik; 80% penult).
+    if (!VOWEL_LETTERS.includes(last)) return last === "c" ? 2 : 1;
+    // ⟨-i⟩: after a VOWEL (glide, -ei/-ai genitives casei→ˈkasej) → PENULT; after a consonant (desyllabified
+    // plural lupi→ˈlupʲ, elevi→eˈlevʲ) → FINAL of the remaining nuclei.
+    if (last === "i") return VOWEL_LETTERS.includes(word[word.length - 2] ?? "") ? 2 : 1;
+    // other vowel-final: ⟨-a⟩ leans FINAL (feminines/verbs, 54%); -e/-ă/-o/-u lean PENULT (67-85%).
+    return last === "a" ? 1 : 2;
+}
+
+/** Word → stressed-nucleus position from the END (1=final, 2=penult…), mined from kaikki for the rule-miss tail. */
+const STRESS_LEX: ReadonlyMap<string, number> = loadStressLex();
+
+function phonemizeCore(word: string, useLex: boolean): string {
     const lw = word.toLowerCase();
-    let segs = finalI(scan(lw));
+    const segs = finalI(scan(lw));
     if (segs.length === 0) return "";
-    let out = segs.join("");
-    if (INITIAL_JE.has(lw)) out = "j" + out; // copula/pronoun word-initial e → je
+    if (INITIAL_JE.has(lw)) segs.unshift("j"); // copula/pronoun word-initial e → je (onset of syllable 1)
+    const nuclei: number[] = [];
+    for (let i = 0; i < segs.length; i++) if (VOWEL_PH.includes(segs[i]!) && segs[i]!.length === 1) nuclei.push(i);
+    let out = "";
+    if (nuclei.length > 0) {
+        const fromEnd = (useLex ? STRESS_LEX.get(lw) : undefined) ?? stressFromEnd(lw, nuclei.length);
+        const idx = nuclei[Math.max(0, nuclei.length - fromEnd)]!;
+        // place ˈ before the syllable ONSET (walk back over onset consonants + any glide to the previous
+        // nucleus), the standard convention: america→aˈmerika, floare→ˈflo̯are — not before the bare vowel.
+        const isNucleus = (p: string | undefined): boolean => p !== undefined && p.length === 1 && VOWEL_PH.includes(p);
+        let onset = idx;
+        while (onset > 0 && !isNucleus(segs[onset - 1])) onset--;
+        for (let i = 0; i < segs.length; i++) {
+            if (i === onset) out += "ˈ";
+            out += segs[i];
+        }
+    } else out = segs.join("");
     return out.normalize("NFC");
+}
+
+/** One Romanian word → canonical IPA (with primary stress ˈ); shipped path (stress rule + kaikki lexicon). */
+export function phonemizeWord(word: string): string {
+    return phonemizeCore(word, true);
+}
+
+/** Rule-only path (no stress lexicon) — the non-circular stress signal (~74.5% vs kaikki). Segments are identical. */
+export function phonemizeWordRules(word: string): string {
+    return phonemizeCore(word, false);
 }
 
 // ── Numbers (compositional) ───────────────────────────────────────────────────
