@@ -24,6 +24,21 @@
             "pattern": "(.)\\1+",
             "replace": "$1",
             "note": "gemination (shadda): collapse doubling — length already stripped by the backbone"
+        },
+        {
+            "pattern": "[oɔ]",
+            "replace": "u",
+            "note": "MAJHŪL و: [uː]~[oː] are both written with the single letter و in the Arabic ABJAD → the quality is unrecoverable from the skeleton (as for sd/ur/pa-Shahmukhi). Folds the loanword [o] (أوتوبيس otobus, أكتوبر oktobar) and the diphthong aw→oː onto [u] symmetrically on both sides."
+        },
+        {
+            "pattern": "[eɛ]",
+            "replace": "i",
+            "note": "MAJHŪL ي: [iː]~[eː] both written ي — unrecoverable from the abjad (أسانسير asanser→asansir, the ay→eː diphthong)."
+        },
+        {
+            "pattern": "æ",
+            "replace": "a",
+            "note": "Egyptian IMĀLA: the referee writes short /a/ as [æ] (انت entæ, ألو ælo); ours is [a] — allophonic notation (cf. pa [ɑ]→a)."
         }
     ]
 }
