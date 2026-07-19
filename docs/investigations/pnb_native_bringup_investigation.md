@@ -135,3 +135,26 @@ flag matters the moment proper-noun or transliterated tiers are added. Recorded 
 retroflex-infinitive rule). PTC is license-blocked; interwiki is proper-noun-only (referee-neutral). Further gains
 need either a permissive general-vocab dual-script corpus (none found) or accepting proper-noun coverage as a
 separate FLAGGED tier for TTS running text (product value, not a referee-mover).
+
+## Phase 5 — 2026-07-18 — residual rounds: rule-tractability EXHAUSTED at 52.6%
+
+Picked away at the Shahmukhi residual with per-class net-effect tests (fixed−broke, both referees, Shahmukhi-gated
+where the abjad is ambiguous but Gurmukhi is authoritative). Shipped the tractable classes:
+- **retroflex infinitive -ਣਾ [ɳaː]**, rhotic-conditioned: word-final naː→ɳaː EXCEPT after /ɾ ɽ/ (کرنا kəɾnaː,
+  مارنا maːrnaː stay dental) — a real morphophonemic split Gurmukhi spells (ਣ/ਨ); Shahmukhi-only. +24.
+- **no phonemic /ʔ/** (ع/ء silent/hiatus, not glottal): +6. **no aspirated sonorants** (نھ/لھ/مھ → n/l/m + /h/,
+  not nʱ/lʱ/mʱ): +4. Both no-ops for Gurmukhi.
+→ 42.7 → 48.8 (cross-script) → 49.9 → 50.9 → **52.6%**.
+
+**Then hit the lexical wall.** The remaining residual is abjad-inherent and NOT cleanly rule-tractable:
+- word-initial short-vowel QUALITY (ادر ə vs ʊ, اباسی ʊ) — unpredictable from the skeleton;
+- loanword o/e + epenthesis (اعتراض etɪraz, اقتصادی ɪqətɪsadi) — lexical;
+- etymological retroflex ɳ in NON-infinitive words (انکھ→əɳəkʰ, انوکھا→əɳokʰa) — lexical, not positional (an
+  intervocalic n→ɳ rule was +7/−13 earlier, i.e. net-marginal and dirty);
+- schwa-insertion INCONSISTENCY (پنج→pənəd͡ʒ unassimilated vs پنجابی→pəɲd͡ʒaːbiː) that blocks nasal assimilation —
+  a labial-nasal rule tested +0/+1 Shahmukhi but −3 GURMUKHI, so the default-schwa machinery can't be retuned
+  without regressing the authoritative Gurmukhi path.
+
+**Conclusion:** 52.6% is the rule-tractable ceiling for the Shahmukhi abjad. Further gains require COVERAGE (real
+cross-script pairs), which is capped at kaikki (permissive general-vocab). The consonant + tone backbone and the
+recoverable morphophonemics (infinitive, tonogenesis, assimilation-where-consistent) are done.
