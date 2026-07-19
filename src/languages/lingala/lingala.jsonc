@@ -1,0 +1,36 @@
+// Lingala / Lingála (ln) — Bantu (C30), Latin orthography, canonical IPA. lingala.ts reads this file. Authored
+// from Meeuwis (2020) "A Grammatical Overview of Lingála" (Revised & Extended Edition, LINCOM), describing the prestige KINSHASA variety. Lingala is canonically open-CV with
+// prenasalised consonants as SINGLE onset units (no clusters, no codas). 7 vowels a e ɛ i o ɔ u (all short + oral —
+// nasalisation is NON-phonemic, Meeuwis §2.1). Only 13 phonemic consonants b d f g k l m n p s t v z — NO native
+// /r/ or /h/ (loan graphemes). TONE (H/L, + rising/falling) is meaning-distinctive but marked only in careful
+// writing (acute=H, háček=rising, circumflex=falling, unmarked=L; Meeuwis §2.5) — handled in lingala.ts.
+{
+    "language": "ln",
+    "name": "Lingala",
+    "script": "Latin",
+    "provenance": "Authored from Meeuwis (2020) 'A Grammatical Overview of Lingála' (Revised & Extended Edition); validated against the kaikki Lingala human readings (tone + prenasalisation).",
+
+    // Consonant graphemes (the greedy scan tries digraphs before singles). Prenasalised voiced clusters →
+    // homorganic ᵐ/ⁿ/ᵑ + the stop (Meeuwis §2.3); ⟨ny⟩ → ɲ (palatal nasal). ⟨r h⟩ are non-native (loans).
+    "consonants": {
+        "mb": "ᵐb", "mp": "ᵐp", "nd": "ⁿd", "nt": "ⁿt", "nz": "ⁿz", "ns": "ⁿs",
+        "ng": "ᵑɡ", "nk": "ᵑk", "nj": "ⁿdʒ", "ny": "ɲ",
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "k": "k", "l": "l", "m": "m", "n": "n",
+        "p": "p", "s": "s", "t": "t", "v": "v", "z": "z", "w": "w", "y": "j",
+        "r": "ɾ", "h": "h", "j": "ʒ"
+    },
+    // Seven vowels → IPA (tone is applied in code from the combining accent). The ⟨e⟩=/e/~/ɛ/ and ⟨o⟩=/o/~/ɔ/
+    // collapse of CASUAL orthography is unrecoverable — when written distinctly (careful text), ɛ/ɔ are used.
+    "vowels": { "a": "a", "e": "e", "ɛ": "ɛ", "i": "i", "o": "o", "ɔ": "ɔ", "u": "u" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Meeuwis §3.6 (cardinals = the connective ya + the ordinal). Ordinals 1–10 + túkú (tens), kámá
+    // (hundred), kóto (thousand); compounds joined by na. Canonical IPA DERIVED via the same g2p.
+    "numbers": {
+        "ordinals": ["mǒkó", "míbalé", "mísáto", "mínei", "mítáno", "motóbá", "sambo", "mwambe", "libwá", "zómi"],
+        "ten": "zómi", "tens": "túkú", "hundred": "kámá", "thousand": "kóto", "and": "na", "firstCard": "libosó"
+    }
+}

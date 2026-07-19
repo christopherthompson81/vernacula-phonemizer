@@ -90,6 +90,7 @@ import { createShona } from "./languages/shona/shona.ts";
 import { createKinyarwanda } from "./languages/kinyarwanda/kinyarwanda.ts";
 import { createMadurese } from "./languages/madurese/madurese.ts";
 import { createChichewa } from "./languages/chichewa/chichewa.ts";
+import { createLingala } from "./languages/lingala/lingala.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 
 export interface Phonemizer {
@@ -326,6 +327,8 @@ function build(lang: string): Phonemizer {
             return createMadurese();
         case "nya":
             return createChichewa();
+        case "ln":
+            return createLingala();
         case "el":
             return createGreek();
         default:
