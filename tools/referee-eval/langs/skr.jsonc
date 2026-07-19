@@ -1,0 +1,27 @@
+// Saraiki (skr) — Lahnda (Greater Punjabi), Perso-Arabic ABJAD (extended Shahmukhi). The NON-tonal sibling of
+// Punjabi: it kept the voiced aspirates and the four IMPLOSIVES (ٻɓ ڄʄ ڳɠ ݙɗ) where Punjabi developed tone.
+// Rule g2p recovers the consonant + long-vowel skeleton; SHORT vowels are UNWRITTEN → a default [ə] (folded, as
+// for pnb/ur/sd). Referee: wikipron skr_arab broad (HUMAN, Wiktionary, ~348 words, vowel-ful broad transcription).
+// UNLIKE sd's 1928 Grierson referee, this one uses the IPA implosive symbols (ɓ ʄ ɗ ɠ) directly → NO
+// implosive-collapse fold. Folds mirror pnb's Shahmukhi treatment: majhūl و/ی + notation.
+{
+    "referees": [
+        { "file": "skr.wikipron-skr-broad.tsv", "source": "wikipron skr_arab broad (human, Wiktionary)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "preFolds": [
+        { "pattern": "̃", "replace": "", "note": "nasalization tilde (ں nasalizer, allophonic/variable in the referee) — strip it FIRST, before the short-vowel strip, so a nasalized LONG vowel ũː/ɑ̃ː isn't mis-stripped (the tilde between V and ː otherwise defeats the (?!ː) lookahead → نوں nũː would collapse to n)." },
+        { "pattern": "[aiuɪʊɐəɛɔʌ](?!ː)", "replace": "", "note": "short vowels (quality AND presence) are UNWRITTEN in the abjad — strip them BEFORE the backbone removes length ː (so long V+ː survive) → the eval measures the recoverable CONSONANT + long-vowel backbone (as for pnb/ur/sd)." }
+    ],
+    "folds": [
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "gemination as length ː (ours) vs doubled (referee) — notation; the eval backbone also normalizes multi-codepoint geminates" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap ɾ ~ referee r" },
+        { "pattern": "ʋ", "replace": "v", "note": "labiodental ʋ ~ referee v (و-consonant)" },
+        { "pattern": "w", "replace": "v", "note": "و-consonant glide [w] ~ our [ʋ]→v" },
+        { "pattern": "ɦ", "replace": "h", "note": "breathy [ɦ] ~ [h] (referee marks ہ/ح variably)" },
+        { "pattern": "ʱ", "replace": "ʰ", "note": "breathy/aspiration notation [ʱ]~[ʰ] (aspirated sonorants لھ→lʰ and voiced aspirates)" },
+        { "pattern": "ɑ", "replace": "a", "note": "long-ā quality [ɑ]~[a] (referee writes both ɑː and aː)" },
+        { "pattern": "[oɔ]", "replace": "u", "note": "MAJHŪL و: [oː]~[uː] both written و — abjad-unrecoverable from the skeleton (after the backbone strips ː)" },
+        { "pattern": "[eɛ]", "replace": "i", "note": "MAJHŪL ی: [eː]~[iː] both written ی — abjad-unrecoverable" }
+    ]
+}

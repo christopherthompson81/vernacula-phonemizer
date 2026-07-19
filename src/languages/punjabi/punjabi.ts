@@ -98,10 +98,16 @@ function tonogenesis(ipa: string): string {
     return out;
 }
 
+/** Variety options. Saraiki (skr) is the NON-tonal Lahnda sibling: it never underwent Punjabi's tonogenesis (it
+ *  kept the voiced aspirates AND its aspirated sonorants — لھ→lʰ), and it writes retroflex ɳ explicitly (ݨ), so
+ *  the plain-ن→ɳ infinitive heuristic must not fire. One declarative flag toggles all three (ADR-2). */
+export interface PunjabiOpts { saraiki?: boolean }
+
 export function makeNativePunjabi(
     def: PunjabiDef,
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
+    opts: PunjabiOpts = {},
 ) {
     const g2p = makeAbugidaG2P(def, phon);
     const CLAUSE_MARK = def.clausePunctuation;
@@ -139,14 +145,18 @@ export function makeNativePunjabi(
         // writes both with the ambiguous plain ن, so retroflex a word-final naː UNLESS a rhotic precedes; Gurmukhi
         // is authoritative (never fire). +24 net vs the Shahmukhi referee (breaks only the 3 nouns نانا/مہینہ/انھا
         // that also end in a non-rhotic ...aːnaː — a small lexical cost).
-        if (isShah) x = x.replace(/(?<![ɾɽ])n(aː)$/u, "ɳ$1");
-        // TONOGENESIS: de-aspirate the breathy markers + assign tone.
-        x = tonogenesis(x);
+        // (SKR skips this: Saraiki writes retroflex ɳ explicitly as ݨ, so a plain ن is unambiguously [n].)
+        if (isShah && !opts.saraiki) x = x.replace(/(?<![ɾɽ])n(aː)$/u, "ɳ$1");
+        // TONOGENESIS: de-aspirate the breathy markers + assign tone. (SKR is NON-tonal — skip it, keeping the
+        // voiced aspirates bʰ d̪ʱ ɡʱ … as segments.)
+        if (!opts.saraiki) x = tonogenesis(x);
         // Punjabi has NO phonemic /ʔ/ — the loanword letters ع/ء are silent / hiatus carriers, not glottal stops
         // (اعتراض → et̪raːz, not əʔət̪raːz) — and NO aspirated SONORANTS — نھ/لھ/مھ are the sonorant + /h/ (a tone
         // source), not [nʱ/lʱ/mʱ] (the referee writes plain n/l/m). Both are no-ops for Gurmukhi input (its scanner
-        // produces neither), so this is unscripted. +13 net vs the Shahmukhi referee.
-        x = x.replace(/([nlmɳɭɽ])ʱ/gu, "$1").replace(/ʔ/gu, "");
+        // produces neither), so this is unscripted. +13 net vs the Shahmukhi referee. (SKR KEEPS aspirated
+        // sonorants — لھ→lʰ is a real Saraiki segment the referee writes — so only the ʔ removal applies.)
+        if (!opts.saraiki) x = x.replace(/([nlmɳɭɽ])ʱ/gu, "$1");
+        x = x.replace(/ʔ/gu, "");
         return applyWeightStress(x).normalize("NFC");
     }
 
@@ -186,6 +196,12 @@ export function phonemizeWordCore(w: string): string {
     return (PA ??= makeNativePunjabi(
         loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc"),
     )).word(w);
+}
+
+/** The Punjabi manifest — reused by the Saraiki (skr) module, which shares the Shahmukhi front-end and Lahnda
+ *  phonology (Gurmukhi g2p unused; numbers deferred to a skr manifest). */
+export function loadPunjabiManifest(): PunjabiDef {
+    return loadManifest<PunjabiDef>(import.meta.url, "punjabi.jsonc");
 }
 
 // CROSS-SCRIPT layer: a direct Shahmukhi-word → GOLD-IPA lexicon whose vowels come from the VOWELED Gurmukhi
