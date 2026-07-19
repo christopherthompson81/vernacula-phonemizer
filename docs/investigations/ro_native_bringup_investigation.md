@@ -48,3 +48,26 @@ aw), foreign-name spellings, and letter-NAME referee rows (I→j, C→t͡ʃ).
 hiatus/loanword lexical tail and — the main gap — **STRESS**, deferred as a subsystem (unwritten and lexically
 unpredictable in Romanian; the broad referee marks none, so it doesn't affect this number but is real work for a
 complete canonical output). A future independent 2nd source (kaikki is same-tradition Wiktionary) would firm it up.
+
+## Run 3 — STRESS (the deferred subsystem), rule + kaikki lexicon
+wikipron ron marks NO stress (broad AND narrow — 0 ˈ), so the stress reference is **kaikki Romanian** (Wiktionary,
+CC-BY-SA) — 14,735 words WITH ˈ and syllable dots, extracted server-side from the 310 MB dump. Stress is unwritten
+and lexically unpredictable, so this is the Russian pattern: a rule + a lexicon for the tail.
+
+**Data-derived rule** (tabulated the kaikki stress-position-from-end vs word ending over 7.4k dotted words):
+penult 50% / final 40% / antepenult 9% overall, but strongly conditioned on the ending —
+- consonant-final → FINAL (69%; -t/-s 88-95%), **EXCEPT ⟨-c⟩ → PENULT** (the -ic adjective suffix: politic→poˈlitik, 80%);
+- ⟨-a⟩ → FINAL (54%), ⟨-e -ă -o -u⟩ → PENULT (67-85%);
+- ⟨-i⟩ after a vowel (glide -ei/-ai genitives casei→ˈkasej) → PENULT, after a consonant (desyllabified plural
+  lupi→ˈlupʲ) → FINAL of the remaining nuclei; one-nucleus → that nucleus.
+
+**Rule-only: 74.5%** (syllable-dotted subset) / 69.4% (full vowel-counted set) vs kaikki — the non-circular signal,
+exposed as `phonemizeWordRules`. Then the **tail method**: `romanian-stress.tsv` (3727 entries) mines ONLY the words
+the rule mispredicts (antepenults, learned words, foreign-name genitives, exceptions). Shipped `phonemizeWord`
+(rule → lexicon) reaches **96.0%** on kaikki-covered words (circular vs kaikki, so a coverage figure, not an
+independent metric). Stress is placed before the syllable ONSET (america→aˈmerika, floare→ˈflo̯are), the standard
+convention, not before the bare vowel.
+
+The segmental eval is UNCHANGED (80.9%) — ro.jsonc folds ˈ out, so the segmental score is stress-independent, and
+stress is measured separately vs kaikki. Gold updated to carry stress marks (este→ˈjeste). **Stress is now MODELED,
+not deferred** — the main outstanding subsystem from Run 2 is closed (rule + lexicon; OOV stress ~74%).

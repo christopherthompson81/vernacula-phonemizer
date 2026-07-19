@@ -12,6 +12,7 @@
     ],
     "segmentJoin": true,
     "folds": [
+        { "pattern": "ˈ", "replace": "", "note": "primary stress: we now emit it (rules + lexicon), but this broad referee marks NO stress — strip it so the SEGMENTAL score is unaffected (stress is measured separately vs kaikki, which does mark it)" },
         { "pattern": "ŋ", "replace": "n", "note": "n→ŋ before a velar k/ɡ is ALLOPHONIC (the referee marks it, we don't model it yet) — fold" },
         { "pattern": "ʲ", "replace": "j", "note": "final desyllabified ⟨i⟩: the referee writes it inconsistently as palatalisation Cʲ (lupʲ, cinci→t͡ʃʲ) OR as an offglide Cj (Aanii→…nij) — same phoneme, fold both to j" }
     ]
