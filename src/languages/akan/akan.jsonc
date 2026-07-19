@@ -1,0 +1,34 @@
+// Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana (~20M incl. L2), the fleet's FIRST Kwa language.
+// akan.ts reads this file. Akan has a shallow, well-standardised Latin orthography (Bureau of Ghana Languages;
+// Asante/Akuapem Twi + Fante share it), so a near one-to-one rule g2p. The interesting part is the CONSONANT
+// DIGRAPHS — a palatal series ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ and a LABIALISED series ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ
+// ɡʷ ɕʷ ŋʷ (the famous Akan labial-palatalisation), plus ⟨ng⟩ → ŋ. Seven written vowels a e ɛ i o ɔ u (the ATR
+// allophones ɪ/ʊ are unwritten → rendered at the phonemic level). TONE (H/L) and nasalisation are largely UNWRITTEN
+// → deferred. Small kaikki human gold; documented from Dolphyne (1988). See docs/investigations/ak_native_bringup_investigation.md.
+{
+    "language": "ak",
+    "name": "Akan (Twi)",
+    "script": "Latin",
+    "provenance": "Authored from the standard Akan (Twi-Fante) orthography + Dolphyne (1988) 'The Akan (Twi-Fante) Language: Its Sound Systems and Tonal Structure'. Validated against the kaikki Akan human readings.",
+
+    // Consonant DIGRAPHS (longest-match first) → IPA. Palatal series + labialised series + ⟨ng⟩.
+    "digraphs": {
+        "ky": "t͡ɕ", "gy": "d͡ʑ", "hy": "ɕ", "ny": "ɲ",
+        "tw": "t͡ɕʷ", "dw": "d͡ʑʷ", "kw": "kʷ", "gw": "ɡʷ", "hw": "ɕʷ", "nw": "ŋʷ",
+        "ng": "ŋ"
+    },
+    // Single consonant letters → IPA.
+    "consonants": {
+        "p": "p", "b": "b", "t": "t", "d": "d", "k": "k", "g": "ɡ",
+        "f": "f", "s": "s", "h": "h", "m": "m", "n": "n", "r": "r",
+        "l": "l", "w": "w", "y": "j"
+    },
+    // Seven written vowels → phonemic IPA (ATR ɪ/ʊ allophones are unwritten → not rendered).
+    "vowels": {
+        "a": "a", "e": "e", "ɛ": "ɛ", "i": "i", "o": "o", "ɔ": "ɔ", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
