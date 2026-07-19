@@ -119,16 +119,16 @@ function resolveVowel(
     return null; // no vowel sign → inherent vowel handled by caller
 }
 
-const TONE_CHAO: Record<string, string> = { rising: "˩˧", low: "˧", mid: "˧", high: "˥", falling: "˥˩", lowfall: "˧˩" };
-/** Approximate Vientiane Lao tone (class × live/dead × length × mark). Chao letters are stripped by the eval. */
+// Vientiane Lao tone (Wiktionary Module:lo-pron system), DERIVED empirically from the kaikki Chao contours:
+// LOW ˩ · RISING ˧˥ · MID ˧ · HIGH-FALLING ˥˨ · LOW-FALLING ˧˩. Tone = consonant class × live/dead × length × mark.
 function tone(cls: Cls, live: boolean, long: boolean, mark: string): string {
-    if (mark === "່") return cls === "low" ? TONE_CHAO.mid! : TONE_CHAO.low!; // mai ek
-    if (mark === "້") return cls === "low" ? TONE_CHAO.high! : TONE_CHAO.falling!; // mai tho
-    if (mark === "໊") return TONE_CHAO.high!;
-    if (mark === "໋") return TONE_CHAO.rising!;
-    if (live) return cls === "high" ? TONE_CHAO.rising! : cls === "mid" ? TONE_CHAO.low! : TONE_CHAO.high!;
-    // dead
-    return cls === "low" && !long ? TONE_CHAO.high! : cls === "low" ? TONE_CHAO.lowfall! : cls === "mid" ? TONE_CHAO.low! : TONE_CHAO.lowfall!;
+    if (mark === "່") return "˧"; // mai ek → mid, all classes
+    if (mark === "້") return cls === "high" ? "˧˩" : "˥˨"; // mai tho → high: low-falling; low/mid: high-falling
+    if (mark === "໊") return "˥"; // mai ti (rare) → high
+    if (mark === "໋") return "˧˥"; // mai catawa (rare) → rising
+    if (live) return cls === "low" ? "˧˥" : "˩"; // live → low: rising; high/mid: low
+    if (long) return cls === "low" ? "˥˨" : "˧˩"; // dead-long → low: high-falling; high/mid: low-falling
+    return cls === "low" ? "˧" : "˧˥"; // dead-short → low: mid; high/mid: rising
 }
 
 /** Pull the tone marks (which combine ABOVE the onset and appear BEFORE the vowel signs in the stream: ຂ່າ)
@@ -150,9 +150,12 @@ function extractTones(chars: string[]): { clean: string[]; toneAt: Map<number, s
 }
 
 /** Scan one reordered Lao word into rendered IPA syllables. */
-function scan(word: string): string {
+interface SylF { onset: string; quality: string; long: boolean; codaOut: string; cls: Cls; live: boolean; mark: string; heavy: boolean; }
+
+/** Scan a reordered Lao word into per-syllable feature records (for rendering AND tone derivation). */
+function scanFeatures(word: string): SylF[] {
     const { clean: s, toneAt } = extractTones([...word]);
-    const out: string[] = [];
+    const out: SylF[] = [];
     let i = 0;
     while (i < s.length) {
         // onset: a consonant, possibly ຫ/ໜ/ໝ-led (high) or a Cຼ / Cວ cluster
@@ -194,16 +197,32 @@ function scan(word: string): string {
             const followsVowel = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ", "ວ", "ອ"].includes(after) || LEAD.has(after);
             if (!(isCons(nx) && followsVowel)) { coda = CODA[nx] ?? ""; i++; }
         }
-        const onset = (leadHigh ? "" : "") + onsetCs.map((g) => CONS[g]?.[0] ?? "").join("") + cluster;
+        const onset = onsetCs.map((g) => CONS[g]?.[0] ?? "").join("") + cluster;
         const cls: Cls = leadHigh ? "high" : (CONS[onsetCs[0]!]?.[1] ?? "mid");
         const codaOut = coda || glide;
-        const live = codaOut === "" ? long : /[ŋnmjw]/.test(codaOut); // open-long or sonorant coda = live
-        out.push(onset + quality + (long ? "ː" : "") + tone(cls, live, long, mark) + codaOut);
+        // Centring diphthongs (uːə/iːə/ɯːə) carry their length in the quality string and set long:false so scan()
+        // doesn't append a second ː — but for tone/live they count as heavy (long) syllables.
+        const heavy = long || quality.includes("ː");
+        const live = codaOut === "" ? heavy : /[ŋnmjw]/.test(codaOut); // open-heavy or sonorant coda = live
+        out.push({ onset, quality, long, codaOut, cls, live, mark, heavy });
     }
+    return out;
+}
+
+/** Render the scanned syllables to IPA (onset + nucleus + tone + coda). */
+function scan(word: string): string {
+    const out = scanFeatures(word).map(
+        (s) => s.onset + s.quality + (s.long ? "ː" : "") + tone(s.cls, s.live, s.heavy, s.mark) + s.codaOut,
+    );
     return out.join(".");
 }
 
 const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
+
+/** Per-syllable tone-determining features (class × live/dead × length × mark) — for tone-table derivation/tests. */
+export function wordFeatures(word: string): { cls: Cls; live: boolean; long: boolean; mark: string }[] {
+    return scanFeatures(reorder(word)).map((s) => ({ cls: s.cls, live: s.live, long: s.heavy, mark: s.mark }));
+}
 
 /** One Lao word → canonical IPA. */
 export function phonemizeWord(word: string): string {
