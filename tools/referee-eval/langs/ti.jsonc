@@ -1,0 +1,28 @@
+// Tigrinya (ti) — North Ethiosemitic, the Ge'ez/Fidäl syllabary. Read by the SHARED Ge'ez engine (core/geez.ts,
+// same as Amharic). PRIMARY = kaikki tir (HUMAN, Wiktionary) — thin (26) but shows the exact contrastive features
+// (the preserved pharyngeals ħ/ʕ, the ejectives). SECONDARY = epitran tir-Ethi (an INDEPENDENT rule-based
+// implementation, 898 headwords) — corroborates the consonant map, but is cruder: it KEEPS every epenthetic 6th-
+// order ɨ (we delete it phonotactically, matching the human referee) and renders the ⟨ቀ⟩ ejective as [q] (kaikki
+// and we use [kʼ]). So the eval STRIPS ɨ on both sides (a notation/analysis difference, not a correctness one) and
+// folds q→kʼ. Also folds the UNWRITTEN gemination (referee doubles, we render single) and the central-vowel
+// narrow-transcription spread (ɐ/æ/e ~ ə) — Tigrinya writes cardinal vowels, the referee narrows them.
+{
+    "referees": [
+        { "file": "ti.kaikki-tir.tsv", "source": "kaikki tir (Wiktionary, human)", "role": "primary" },
+        { "file": "ti.epitran-tir-ethi.tsv", "source": "epitran tir-Ethi (independent rule-based)", "role": "secondary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ɨ", "replace": "", "note": "the epenthetic 6th-order [ɨ] (sadis): WE delete it phonotactically (matching human kaikki), epitran keeps every one — strip on both sides (analysis difference, not correctness)" },
+        { "pattern": "(.)\\1+", "replace": "$1", "note": "GEMINATION is UNWRITTEN in the Fidel (phonemic but unmarked) — the referee doubles (ħamːuʃtɐ), we render single; degeminate both" },
+        { "pattern": "q", "replace": "kʼ", "note": "the ⟨ቀ⟩ (qaf) ejective: kaikki (human) + we render [kʼ], epitran renders [q] — unify to kʼ" },
+        { "pattern": "[ɐæ]", "replace": "ə", "note": "central/low short-vowel narrow notation (ʔɐf, kʼæɾʃi) ~ our cardinal [ə]" },
+        { "pattern": "e", "replace": "ə", "note": "the guttural/ejective-context 1st-order vowel: referee narrows ə→[e] (semaɪ̯) — Tigrinya writes the cardinal, unify" },
+        { "pattern": "[ˈˌ.]", "replace": "", "note": "kaikki syllable dots / stress marks — not in our segmental output" },
+        { "pattern": "[()]", "replace": "", "note": "kaikki marks the optional glottal onset in parentheses ((ʔ)arbaʕtɐ) — strip the parens" },
+        { "pattern": "ʔ", "replace": "", "note": "word-initial glottal onset of a vowel-initial syllable — the referee marks it INCONSISTENTLY (አፍ→ʔɐf vs (ʔ)arbaʕtɐ); drop it on both sides" },
+        { "pattern": "ɪ̯", "replace": "j", "note": "the referee's non-syllabic [ɪ̯] offglide ~ our glide [j] (semaɪ̯~səmaj)" },
+        { "pattern": "̯", "replace": "", "note": "non-syllabic diacritic on any residual offglide" },
+        { "pattern": "r", "replace": "ɾ", "note": "Tigrinya /r/ tap — epitran writes plain r, kaikki writes ɾ; unify" }
+    ]
+}

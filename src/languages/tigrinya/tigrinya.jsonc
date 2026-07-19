@@ -1,0 +1,35 @@
+// Native canonical-IPA definition for Tigrinya / ትግርኛ (ti) — Ethiopian Semitic (North Ethiosemitic, ~9M, Eritrea +
+// Tigray), written in the Ge'ez/Fidäl SYLLABARY-abugida (each codepoint = a whole CV syllable). Read by the SHARED
+// Ge'ez engine (core/geez.ts — the same fidel→CV lookup + epenthetic-ɨ deletion as Amharic `am`); the per-language
+// difference is entirely in fidel.tsv.
+//
+// TIGRINYA'S SIGNATURE = the PRESERVED SEMITIC GUTTURALS that Amharic merged away:
+//   • ⟨ሐ ኀ⟩ series → [ħ] (voiceless pharyngeal — Amharic flattens both to [h])
+//   • ⟨ዐ⟩ series (ʕayn) → [ʕ] (voiced pharyngeal — Amharic drops it to a bare vowel)
+//   • ⟨አ⟩ series (ʔälef) → [ʔ] (glottal onset — kept, unlike Amharic's bare-vowel fix)
+//   • ⟨ኸ⟩ → [x] (spirantised k), ⟨ቀ⟩ → [kʼ] (velar ejective — the human referee's value; epitran renders it [q]).
+// The guttural 1st-order vowel stays CENTRAL [ə] (kaikki ʔɐf, ʔɐdɾi), NOT lowered to [a] as in Amharic.
+// UNWRITTEN (shared with Amharic): GEMINATION (phonemic, unmarked → single, folded) and the epenthetic 6th-order
+// [ɨ]. Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/ti_native_bringup_investigation.md.
+{
+    "language": "ti",
+    "name": "Tigrinya",
+    "script": "Ethiopic (Ge'ez / Fidäl)",
+    "provenance": "Fidel→CV syllabary adapted from the Amharic table with the Tigrinya guttural restoration (ħ/ʕ/ʔ/x) and central guttural-1st vowel, calibrated to kaikki tir (human) + epitran tir-Ethi; numbers authored from standard Tigrinya.",
+
+    "clausePunctuation": {
+        "።": " . ", "፣": " , ", "፤": " ; ", "፥": " : ", "፦": " : ", "፧": " ? ", "፨": " . ",
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Tigrinya (Fidel) spellings; canonical IPA DERIVED via the same fidel→CV g2p. The units 1–10 are all
+    // attested in the kaikki referee (ሓደ→ħadə, ክልተ→kɨltə, … ዓሰርተ→ʕasərtə). Units + teens (ዓሰርተ + unit) + round
+    // tens + magnitudes; 21-99 compose as "tens unit".
+    "numbers": {
+        "units": ["ዜሮ", "ሓደ", "ክልተ", "ሰለስተ", "ኣርባዕተ", "ሓሙሽተ", "ሽድሽተ", "ሸውዓተ", "ሸሞንተ", "ትሽዓተ"],
+        "ten": "ዓሰርተ",
+        "teenPrefix": "ዓሰርተ",
+        "tens": { "20": "ዕስራ", "30": "ሰላሳ", "40": "ኣርብዓ", "50": "ሓምሳ", "60": "ስሳ", "70": "ሰብዓ", "80": "ሰማንያ", "90": "ተስዓ" },
+        "hundred": "ሚእቲ", "thousand": "ሽሕ"
+    }
+}
