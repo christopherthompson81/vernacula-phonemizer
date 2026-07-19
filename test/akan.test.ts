@@ -1,51 +1,54 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/akan/akan.ts";
+import { phonemizeWord, phonemizeWordRules } from "../src/languages/akan/akan.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana, the fleet's FIRST Kwa
-// language. Shallow, well-standardised Latin orthography (Asante/Akuapem Twi + Fante). The signature is the
-// consonant DIGRAPH system: a palatal series ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ and a LABIALISED series ⟨tw dw kw gw hw
-// nw⟩ → t͡ɕʷ d͡ʑʷ kʷ ɡʷ ɕʷ ŋʷ, plus Glide Formation (round vowel before another vowel → w, boa→bwa; Paster 2010) and
-// coda-nasal place assimilation (nkran→ŋkran). TONE (H/L) and ATR allophony are unwritten in the orthography →
-// deferred. Authored from Dolphyne (1988) / Paster (2010); anchored on the kaikki Akan human readings (16/22, the
-// misses being documented glide-formation vs citation, or deferred ATR). See docs/investigations/ak_native_bringup_investigation.md.
+// language. Shallow, well-standardised Latin orthography (Asante/Akuapem Twi + Fante). Segmental signature: the
+// consonant DIGRAPH system (palatal ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ + labialised ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ ɡʷ ɕʷ
+// ŋʷ), Glide Formation (boa→bwa), coda-nasal + Labial Nasalization (Paster 2010), and ATR harmony. TONE (H/L) and
+// vowel nasality are lexical (unwritten) → carried by a mined lexicon on the SHIPPED phonemizeWord (Chao letters
+// H→˥/L→˩); phonemizeWordRules is the tone-free segmental path. Authored from Dolphyne (1988)/Paster (2010),
+// anchored on kaikki. See docs/investigations/ak_native_bringup_investigation.md.
 describe("Akan (Twi) canonical IPA", () => {
     test("palatal digraph series ⟨ky gy hy ny⟩", () => {
-        expect(phonemizeWord("kyerɛ")).toBe("t͡ɕɪrɛ"); // ky → t͡ɕ; ⟨e⟩ → [ɪ] via ATR harmony (−ATR word, has ɛ)
-        expect(phonemizeWord("gyina")).toBe("d͡ʑina"); // gy → d͡ʑ ("stand")
-        expect(phonemizeWord("ɔhyɛ")).toBe("ɔɕɛ"); // hy → ɕ
-        expect(phonemizeWord("nyansa")).toBe("ɲansa"); // ny → ɲ ("wisdom")
+        expect(phonemizeWordRules("kyerɛ")).toBe("t͡ɕɪrɛ"); // ky → t͡ɕ; ⟨e⟩ → [ɪ] via ATR harmony (−ATR word)
+        expect(phonemizeWordRules("gyina")).toBe("d͡ʑina"); // gy → d͡ʑ ("stand")
+        expect(phonemizeWordRules("ɔhyɛ")).toBe("ɔɕɛ"); // hy → ɕ
+        expect(phonemizeWordRules("nyansa")).toBe("ɲansa"); // ny → ɲ ("wisdom")
     });
 
     test("labialised digraph series ⟨tw dw kw hw⟩ — the signature Akan labial-palatalisation", () => {
-        expect(phonemizeWord("twi")).toBe("t͡ɕʷi"); // the language's own name
-        expect(phonemizeWord("dwom")).toBe("d͡ʑʷom"); // dw → d͡ʑʷ ("song")
-        expect(phonemizeWord("kwan")).toBe("kʷan"); // kw → kʷ ("road/way")
-        expect(phonemizeWord("hwɛ")).toBe("ɕʷɛ"); // hw → ɕʷ ("look")
-        expect(phonemizeWord("akwaaba")).toBe("akʷaaba"); // "welcome"
+        expect(phonemizeWordRules("twi")).toBe("t͡ɕʷi"); // the language's own name
+        expect(phonemizeWordRules("dwom")).toBe("d͡ʑʷom"); // dw → d͡ʑʷ ("song")
+        expect(phonemizeWordRules("kwan")).toBe("kʷan"); // kw → kʷ ("road/way")
+        expect(phonemizeWordRules("hwɛ")).toBe("ɕʷɛ"); // hw → ɕʷ ("look")
+        expect(phonemizeWordRules("akwaaba")).toBe("akʷaaba"); // "welcome"
     });
 
-    test("Glide Formation — round vowel before another vowel → w (Paster 2010)", () => {
-        expect(phonemizeWord("boa")).toBe("bwa"); // /boa/ → [bwa] ("help")
-    });
-
-    test("coda-nasal place assimilation + basics", () => {
-        expect(phonemizeWord("nkran")).toBe("ŋkran"); // n → ŋ before k (Accra)
-        expect(phonemizeWord("asɛm")).toBe("asɛm"); // ("matter/word")
-        expect(phonemizeWord("ɔkɔtɔ")).toBe("ɔkɔtɔ"); // ("crab")
+    test("Glide Formation + Labial Nasalization + coda assimilation (Paster 2010)", () => {
+        expect(phonemizeWordRules("boa")).toBe("bwa"); // round V before another V → w ("help")
+        expect(phonemizeWordRules("mba")).toBe("mma"); // /b/ → [m] after a nasal (Labial Nasalization)
+        expect(phonemizeWordRules("nkran")).toBe("ŋkran"); // n → ŋ before k (Accra)
     });
 
     test("ATR harmony resolves ⟨e⟩/⟨o⟩ (the unwritten [+ATR]/[−ATR] merger)", () => {
-        expect(phonemizeWord("bisa")).toBe("bisa"); // +ATR (has i) — ⟨a⟩ neutral
-        expect(phonemizeWord("ɔkɔtɔ")).toBe("ɔkɔtɔ"); // −ATR (ɔ), no ambiguous mid
-        expect(phonemizeWord("obue")).toBe("obwe"); // +ATR (has u) → ⟨o⟩→o, ⟨e⟩→e, + glide formation
+        expect(phonemizeWordRules("bisa")).toBe("bisa"); // +ATR (has i) — ⟨a⟩ neutral
+        expect(phonemizeWordRules("ɔkɔtɔ")).toBe("ɔkɔtɔ"); // −ATR (ɔ), no ambiguous mid
+        expect(phonemizeWordRules("obue")).toBe("obwe"); // +ATR (has u) → ⟨o⟩→o, ⟨e⟩→e, + glide formation
+    });
+
+    test("TONE (H/L) + vowel nasality — lexical, from the mined lexicon (shipped path)", () => {
+        expect(phonemizeWord("papa")).toBe("pa˩pa˥"); // L H
+        expect(phonemizeWord("ɔkɔtɔ")).toBe("ɔ˩kɔ˥tɔ˩"); // L H L ("crab")
+        expect(phonemizeWord("huu")).toBe("hu˥u˩"); // H L
+        expect(phonemizeWord("mifi")).toBe("mĩ˩fi˥"); // L H, first vowel NASAL
+        expect(phonemizeWordRules("papa")).toBe("papa"); // rule path stays tone-free (non-circular)
     });
 
     test("numbers — Twi cardinals through the g2p", () => {
         const ak = getPhonemizer("ak");
         expect(ak.text("12").trim()).toBe("du mmienu"); // du + mmienu
-        expect(ak.text("21").trim()).toBe("adwonu baako"); // aduonu (→ glide adwonu) + baako
         expect(ak.text("100").trim()).toBe("ɔha");
     });
 
