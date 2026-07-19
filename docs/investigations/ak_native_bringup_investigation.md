@@ -34,3 +34,29 @@ documented Glide Formation vs kaikki citation (dua/obue/uɔfa — Paster's rule 
 (test/akan.test.ts, 5 groups, all the digraph series + glide formation + coda assimilation). **🔷 single-source**
 (small human corroboration; no independent second referee exists). **Outstanding:** tone (H/L, unwritten — the
 Yoruba-minus-written-tone situation), ATR harmony (ɪ/ʊ allophones + a→e raising), nasalisation, and numbers.
+
+## Run 2 — the deferred parts (ATR harmony + numbers done; tone + nasalisation are data-blocked)
+Worked the four deferred items. Two were tractable and are now DONE; two are genuinely data-blocked and doing them
+would mean fabricating unverifiable output (the same principle that skipped Rajasthani).
+
+- **ATR HARMONY — DONE (documented rule).** The orthography merges the [+ATR]/[−ATR] mid pairs: ⟨e⟩ is [e]~[ɪ],
+  ⟨o⟩ is [o]~[ʊ] (Paster 2010 rule 4/5, Dolphyne 1988). `atrByIndex()` classifies each vowel — unambiguous triggers
+  ⟨i u⟩ = +ATR, ⟨ɛ ɔ⟩ = −ATR, ⟨a⟩ neutral — and spreads the nearest trigger to the ambiguous ⟨e o⟩ (default +ATR).
+  So kyerɛ→t͡ɕɪrɛ (−ATR via ɛ), bisa→bisa (+ATR via i), obue→obwe (+ATR via u). The kaikki score is unchanged (16/22,
+  since kaikki writes [ɪ] as ⟨i⟩); the win is documented explicitness, corroborated by kaikki's own aberanteɛ→abiranti
+  (⟨e⟩→[ɪ] in a −ATR word).
+- **NUMBERS — DONE.** Standard Twi cardinals (units baako…nkron, du, aduonu-tens, ɔha-hundreds, apem/mpem thousands),
+  compositional and space-joined, rendered through the same g2p (21→aduonu baako→adwonu baako, glide formation
+  applying inside the numeral). The deep number morphophonology (nasal mutation across seams, the ⟨ne⟩ connector) is
+  simplified. Also fixed a tokenizer bug the numbers surfaced: TOKEN only matched [a-z], dropping capital letters
+  (Me→e); added A-Z + Ɛ Ɔ.
+- **TONE (H/L) — DATA-BLOCKED, not done.** Unwritten in the orthography; Akan tone is lexical/grammatical (not
+  predictable from segments); the only machine-readable tone source is the 22-word kaikki set. A real tone system
+  needs a tone-marked pronunciation lexicon that does not exist here — modelling it would be invention, not derivation.
+- **NASALISATION — DATA-BLOCKED, not done.** Contrastive but unwritten (rare tilde only). No rule fits: mifi→mĩfi
+  nasalises the post-nasal vowel but soma→soma does not, same position — so it is lexical, not derivable. The tilde
+  ⟨◌̃⟩ is the only recoverable signal (already handled).
+
+Net: the segmental engine is now feature-complete for what the orthography ENCODES (digraphs, glide formation,
+coda assimilation, ATR harmony, numbers). The two remaining gaps are suprasegmentals the writing system does not
+record and for which no corpus exists — a principled ceiling, not a backlog item.

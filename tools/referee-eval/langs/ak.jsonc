@@ -19,6 +19,8 @@
         { "pattern": "\\u0303", "replace": "", "note": "NASALISATION: unwritten in the orthography (rare tilde only) → deferred; strip the referee's combining tilde" },
         { "pattern": "\\u0308", "replace": "", "note": "centralisation diaeresis (kaikki narrow notation, e.g. ü)" },
         { "pattern": "ʃ", "replace": "ɕ", "note": "⟨hy hw⟩: alveolo-palatal ɕ (ours, per Dolphyne) ~ postalveolar ʃ (referee) — notation" },
+        { "pattern": "ɪ", "replace": "i", "note": "ATR: our [ɪ] (the −ATR value of ⟨e⟩, modelled) ~ the referee's broad ⟨i⟩ (kaikki writes [ɪ] as i)" },
+        { "pattern": "ʊ", "replace": "u", "note": "ATR: our [ʊ] (the −ATR value of ⟨o⟩) ~ the referee's broad ⟨u⟩" },
         { "pattern": "(.)\\1+", "replace": "$1", "note": "vowel length (huu→huː) — folded as elsewhere" }
     ]
 }
