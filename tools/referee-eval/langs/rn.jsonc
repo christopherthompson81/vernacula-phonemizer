@@ -1,0 +1,20 @@
+// Kirundi (rn) — Bantu (JD62, Rwanda-Rundi), Latin orthography. NEAR-CLONE of Kinyarwanda (rw). Referee: epitran
+// run-Latn (programmatic — the ONLY referee; no kaikki/wikipron run). ⚠ CRUDE + partly CIRCULAR: epitran run is
+// rule-based (rule-vs-rule, like uz/lg), AND deficient — it has NO vowel length (outputs aa not aː) and no
+// ⟨ng⟩→ŋ, where WE are correct (Wikipedia confirms phonemic length; Cox gives ⟨ng⟩→ŋ). It also applies a blanket
+// NC-spirantisation (mp→mh, nt→nh, nk→ŋx) that we do NOT follow (unverified by any independent source). The folds
+// reconcile the notation + epitran's length deficiency; the spirantisation / ⟨c⟩ / ⟨ng⟩ stay as documented residuals.
+{
+    "language": "rn", "name": "Kirundi (Ikirundi)", "script": "Latin",
+    "provenance": "Near-clone of rw (Cox comparative grammar) + ⟨j⟩→d͡ʒ delta. Referee: epitran run-Latn (crude, partly circular).",
+    "referees": [
+        { "file": "rn.epitran-run-latn.tsv", "source": "epitran run-Latn (programmatic, crude, partly circular)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "ʲ", "replace": "j", "note": "PALATALISATION ⟨Cy⟩→[Cʲ] (Cox) vs epitran's full glide [Cj] — same palatalised consonant, fold ours ʲ→j" },
+        { "pattern": "͡", "replace": "", "note": "tie-bar on affricates (our d͡ʒ ~ epitran d͡ʒ; our t͡ʃ)" },
+        { "pattern": "ː", "replace": "", "note": "VOWEL LENGTH: epitran run has NO length (outputs aa); strip our length mark to compare" },
+        { "pattern": "([aeiou])\\1", "replace": "$1", "note": "collapse epitran run's double vowels (aa) to match our (now length-stripped) single vowel" },
+        { "pattern": "nɡ", "replace": "ŋ", "note": "⟨ng⟩: WE emit the velar nasal ŋ (Cox); epitran run is DEFICIENT (outputs n+ɡ, lacking the kin ⟨ng⟩→ŋ entry) — fold its nɡ→ŋ (our correction, not ours to fix)" }
+    ]
+}
