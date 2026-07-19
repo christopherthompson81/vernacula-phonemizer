@@ -1,0 +1,45 @@
+// Native canonical-IPA data manifest for Setswana / Tswana (tn) — Bantu (Sotho-Tswana, S31; Botswana + South
+// Africa, ~14M), the Latin orthography, espeak-independent. A greedy longest-match scan (Chichewa pattern):
+// Setswana is open CV with the syllabic-nasal + C clusters as onset units, so a pure left-to-right longest match
+// suffices. Referee: epitran tsn-Latn (INDEPENDENT, programmatic). Phonology from Mistry (Cole 1955) + epitran.
+// Signatures (where we AGREE with epitran): ⟨kg⟩→k͡xʰ, ⟨kh⟩→kʰ, ⟨tlh⟩→t͡ɬʰ, ⟨tl⟩→t͡ɬ, ⟨tsh⟩→t͡sʰ, ⟨tš/š⟩→t͡ʃ/ʃ,
+// ⟨ph th⟩→pʰ tʰ, ⟨ng⟩→ŋ, ⟨ny⟩→ɲ, ⟨j⟩→d͡ʒ. Where we DIVERGE (we are more correct, epitran is naive):
+//   • ⟨g⟩ → [x] — Setswana has NO /g/ phoneme; single ⟨g⟩ is the voiceless velar fricative (Mistry: only b, d are
+//     voiced stops; g is the guttural of the kg/kh series). epitran emits a plain [g] — WRONG. Folded x~g.
+// Two documented DEFERRALS (both underdetermined by / absent from the standard orthography):
+//   • VOWEL HEIGHT — orthographic ⟨e⟩ spans [e]~[ɛ]~[ɪ] and ⟨o⟩ spans [o]~[ɔ]~[ʊ] (7→9-vowel raising harmony);
+//     standard text drops the ê/ô circumflex, so height is NOT recoverable. We emit the close-mid default (e/o),
+//     circumflex → open-mid (ɛ/ɔ), and fold the mid-vowel height for scoring (a bounded 🟢 class).
+//   • TONE (H/L, lexical) and the EJECTIVE analysis of p/t/k/tl/ts (Cole) are unwritten → not emitted.
+// See docs/investigations/tn_native_bringup_investigation.md.
+{
+    "language": "tn",
+    "name": "Setswana (Tswana)",
+    "script": "Latin",
+    "provenance": "Authored from the Setswana orthography + Mistry (Cole 1955) phonology. Referee: epitran tsn-Latn.",
+
+    "convention": {
+        "g": "single ⟨g⟩ → [x] (voiceless velar fricative; NO /g/ phoneme — epitran's plain [g] is wrong, folded x~g)",
+        "dorsalAspirates": "⟨kg⟩→k͡xʰ, ⟨kh⟩→kʰ (complementary: kh before i/u, kg elsewhere — orthography already picks)",
+        "laterals": "⟨tl⟩→t͡ɬ, ⟨tlh⟩→t͡ɬʰ (lateral affricates)",
+        "sibilants": "⟨tš⟩→t͡ʃ, ⟨š⟩→ʃ, ⟨tšh⟩→t͡ʃʰ, ⟨sh⟩→ʃ (RSA/citation values; Botswana merges tš/š→ts/s)",
+        "vowelHeight": "⟨e⟩→e, ⟨o⟩→o (close-mid default); ⟨ê ô⟩→ɛ ɔ. Height underdetermined by standard spelling → folded",
+        "tone": "H/L tone is lexical but UNWRITTEN → DEFERRED",
+        "ejectives": "p/t/k/tl/ts are ejective in Cole's analysis → emitted PLAIN (epitran-corroborated; ejection deferred)"
+    },
+
+    // Orthography → canonical IPA. The scanner sorts keys by LENGTH DESC (⟨tšh tsh tlh⟩ → ⟨tš ts tl ph…⟩ → singles).
+    "graphemes": {
+        "tšh": "t͡ʃʰ", "tsh": "t͡sʰ", "tlh": "t͡ɬʰ",
+        "tš": "t͡ʃ", "ts": "t͡s", "tl": "t͡ɬ",
+        "ph": "pʰ", "th": "tʰ", "kh": "kʰ", "kg": "k͡xʰ", "sh": "ʃ", "ng": "ŋ", "ny": "ɲ",
+        "š": "ʃ", "j": "d͡ʒ", "y": "j", "g": "x",
+        "b": "b", "d": "d", "f": "f", "h": "h", "k": "k", "l": "l", "m": "m",
+        "n": "n", "p": "p", "r": "r", "s": "s", "t": "t", "v": "v", "w": "w",
+        "a": "a", "e": "e", "ê": "ɛ", "i": "i", "o": "o", "ô": "ɔ", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

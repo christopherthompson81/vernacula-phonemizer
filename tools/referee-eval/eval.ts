@@ -47,6 +47,7 @@ import { phonemizeWord as ln } from "../../src/languages/lingala/lingala.ts";
 // (the Huffman-lexical residual — inherent-vowel length, internal doubling, Pali vowels), so evaluating it here
 // would be circular. phonemizeWordRules is the non-circular signal (mirrors en-GB).
 import { phonemizeWordRules as km } from "../../src/languages/khmer/khmer.ts";
+import { phonemizeWord as tn } from "../../src/languages/setswana/setswana.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
@@ -164,6 +165,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     nya,
     ln,
     km,
+    tn,
     el,
     cs,
     cy,
