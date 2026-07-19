@@ -30,5 +30,17 @@
 
     "clausePunctuation": {
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — standard Asante Twi cardinals; canonical IPA DERIVED by running them through the same g2p.
+    // Compounds are space-joined (a counting form); the deep number morphophonology (nasal mutation across seams,
+    // the ⟨ne⟩ connector) is simplified. 0 = hwee ("nothing").
+    "numbers": {
+        "zero": "hwee",
+        "units": ["baako", "mmienu", "mmiɛnsa", "nnan", "nnum", "nsia", "nson", "nwɔtwe", "nkron"],
+        "ten": "du",
+        "tens": ["aduonu", "aduasa", "aduanan", "aduonum", "aduosia", "aduɔson", "aduɔwɔtwe", "aduɔkron"],
+        "hundreds": ["ɔha", "ahanu", "ahasa", "ahanan", "ahanum", "ahansia", "ahanson", "ahanwɔtwe", "ahankron"],
+        "thousand": "apem", "thousands": "mpem"
     }
 }

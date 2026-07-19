@@ -12,7 +12,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // misses being documented glide-formation vs citation, or deferred ATR). See docs/investigations/ak_native_bringup_investigation.md.
 describe("Akan (Twi) canonical IPA", () => {
     test("palatal digraph series ⟨ky gy hy ny⟩", () => {
-        expect(phonemizeWord("kyerɛ")).toBe("t͡ɕerɛ"); // ky → t͡ɕ ("teach/show")
+        expect(phonemizeWord("kyerɛ")).toBe("t͡ɕɪrɛ"); // ky → t͡ɕ; ⟨e⟩ → [ɪ] via ATR harmony (−ATR word, has ɛ)
         expect(phonemizeWord("gyina")).toBe("d͡ʑina"); // gy → d͡ʑ ("stand")
         expect(phonemizeWord("ɔhyɛ")).toBe("ɔɕɛ"); // hy → ɕ
         expect(phonemizeWord("nyansa")).toBe("ɲansa"); // ny → ɲ ("wisdom")
@@ -34,6 +34,19 @@ describe("Akan (Twi) canonical IPA", () => {
         expect(phonemizeWord("nkran")).toBe("ŋkran"); // n → ŋ before k (Accra)
         expect(phonemizeWord("asɛm")).toBe("asɛm"); // ("matter/word")
         expect(phonemizeWord("ɔkɔtɔ")).toBe("ɔkɔtɔ"); // ("crab")
+    });
+
+    test("ATR harmony resolves ⟨e⟩/⟨o⟩ (the unwritten [+ATR]/[−ATR] merger)", () => {
+        expect(phonemizeWord("bisa")).toBe("bisa"); // +ATR (has i) — ⟨a⟩ neutral
+        expect(phonemizeWord("ɔkɔtɔ")).toBe("ɔkɔtɔ"); // −ATR (ɔ), no ambiguous mid
+        expect(phonemizeWord("obue")).toBe("obwe"); // +ATR (has u) → ⟨o⟩→o, ⟨e⟩→e, + glide formation
+    });
+
+    test("numbers — Twi cardinals through the g2p", () => {
+        const ak = getPhonemizer("ak");
+        expect(ak.text("12").trim()).toBe("du mmienu"); // du + mmienu
+        expect(ak.text("21").trim()).toBe("adwonu baako"); // aduonu (→ glide adwonu) + baako
+        expect(ak.text("100").trim()).toBe("ɔha");
     });
 
     test("full text via the registry", () => {
