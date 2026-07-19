@@ -2,14 +2,15 @@
  * Setswana / Tswana (tn) phonemizer — Bantu (Sotho-Tswana, S31), the Latin orthography, canonical IPA,
  * espeak-independent. A pure greedy longest-match scan over the grapheme table (manifest.ts): Setswana is open CV
  * with the syllabic-nasal + C clusters as onset units, so no coda/syllabification logic is needed. Signatures:
- * the dorsal-fricative ⟨g⟩→x (NO /g/ phoneme — a beyond-epitran divergence), dorsal aspirates ⟨kg kh⟩→k͡xʰ kʰ,
- * lateral affricates ⟨tl tlh⟩→t͡ɬ t͡ɬʰ, ⟨tš š⟩→t͡ʃ ʃ, ⟨ny ng⟩→ɲ ŋ. Vowel height (⟨e⟩ [e]~[ɛ], ⟨o⟩ [o]~[ɔ]) is
- * underdetermined by the standard spelling → close-mid default, folded for scoring. Tone (H/L) is unwritten →
- * DEFERRED (segmental output only). See docs/investigations/tn_native_bringup_investigation.md.
+ * the uvular-fricative ⟨g⟩→χ (NO /g/ phoneme — a beyond-epitran divergence), dorsal aspirates ⟨kg kh⟩→k͡χʰ kʰ,
+ * lateral affricates ⟨tl tlh⟩→t͡ɬ t͡ɬʰ, ⟨tš š⟩→t͡ʃ ʃ, ⟨ny ng⟩→ɲ ŋ. Vowels are the standard 7-vowel system
+ * /i ɪ ɛ a ɔ ʊ u/ (⟨e⟩→ɪ, ⟨o⟩→ʊ, ⟨ê ô⟩→ɛ ɔ). Tone (H/L) is lexical + unwritten → DEFERRED (segmental output
+ * only). Cardinal numbers via numbers.ts. See docs/investigations/tn_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -41,7 +42,7 @@ class SetswanaPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

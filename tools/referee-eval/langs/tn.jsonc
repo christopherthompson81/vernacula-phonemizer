@@ -13,7 +13,8 @@
     ],
     "folds": [
         { "pattern": "͡", "replace": "", "note": "our affricates carry a tie bar (t͡ʃ t͡s t͡ɬ d͡ʒ k͡xʰ); epitran writes plain digraphs (tʃ ts tɬ dʒ kxʰ) — strip the tie to compare" },
-        { "pattern": "g", "replace": "x", "note": "⟨g⟩: WE emit [x] (the correct velar fricative — Setswana has no /g/), epitran naively emits plain [g]; fold g→x on both sides (this is an epitran error, not ours)" },
+        { "pattern": "χ", "replace": "x", "note": "⟨g⟩/⟨kg⟩: WE emit the UVULAR χ (Matlhaku 2020 — no /g/ phoneme); epitran uses velar [x] in kxʰ; fold χ→x to reconcile the place" },
+        { "pattern": "g", "replace": "x", "note": "⟨g⟩: epitran naively emits plain [g] (WE emit χ→folded to x above); fold epitran's g→x too so both sides meet at x (an epitran error, not ours)" },
         { "pattern": "[ɛɪ]", "replace": "e", "note": "front mid-vowel HEIGHT is underdetermined by the spelling — ⟨e⟩ spans [e]~[ɛ]~[ɪ] (raising); fold ɛ/ɪ→e both sides (high /i/ untouched)" },
         { "pattern": "[ɔʊ]", "replace": "o", "note": "back mid-vowel HEIGHT is underdetermined — ⟨o⟩ spans [o]~[ɔ]~[ʊ]; fold ɔ/ʊ→o both sides (high /u/ untouched)" },
         { "pattern": "ɲ", "replace": "nj", "note": "⟨ny⟩: WE emit the palatal nasal [ɲ] (correct — Mistry), epitran naively emits [nj] (n + glide); fold ɲ→nj on both sides (epitran limitation, not ours)" }
