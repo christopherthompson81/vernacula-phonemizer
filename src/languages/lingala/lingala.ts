@@ -1,0 +1,105 @@
+/**
+ * Lingala / Lingála (ln) text phonemizer — Bantu (C30B), Latin orthography, canonical IPA, espeak-independent.
+ * A major lingua franca of the Congo basin (~20M native + ~20-25M L2). Authored from Meeuwis (2020) "A Grammatical
+ * Overview of Lingála" (Revised & Extended Edition), which describes the prestige KINSHASA variety.
+ *
+ * A greedy longest-match g2p (the Chichewa pattern) + accent-based tone (the Yoruba pattern):
+ *   • prenasalised obstruents are SINGLE onset units — ⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz (homorganic ᵐ/ⁿ/ᵑ; Meeuwis §2.2);
+ *     ⟨ny⟩ → ɲ, semi-vowels ⟨w y⟩ → w j. Only 13 consonant phonemes; no native /r/ or /h/ (loan graphemes).
+ *   • 7 vowel graphemes a e ɛ i o ɔ u rendered as written — Kinshasa is phonemically 5-vowel (ɛ/ɔ merged into e/o;
+ *     §2.1.1), so the ⟨e⟩=/e/~/ɛ/ collapse of casual spelling is an unrecoverable gap, but ɛ/ɔ are rendered when
+ *     the (careful/northwestern) orthography writes them. NO diphthongs — vowel sequences are HIATUS, each vowel a
+ *     separate tone-bearing nucleus (mái = ma.i; §2.1.5). No vowel harmony, length, or phonemic nasalisation.
+ *   • TONE (H/L, meaning-distinctive; §2.4) is marked only in careful writing: acute → H (˥), háček → rising (˩˥),
+ *     circumflex → falling (˥˩), unmarked → L (˩). Applied per nucleus. Casual (toneless) input → default L.
+ *
+ * Referee: kaikki Lingala (small human set, tone-marked) → 🔷 single-source. See docs/investigations/ln_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface LingalaDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    clausePunctuation: Record<string, string>;
+    numbers: {
+        ordinals: string[]; ten: string; tens: string; hundred: string;
+        thousand: string; and: string; firstCard: string;
+    };
+}
+
+const DEF = loadManifest<LingalaDef>(import.meta.url, "lingala.jsonc");
+// Consonant grapheme keys, longest first (digraphs mb/nd/ny before singles).
+const CKEYS = Object.keys(DEF.consonants).sort((a, b) => b.length - a.length);
+const ACUTE = "́", GRAVE = "̀", CIRC = "̂", CARON = "̌";
+const TONE: Record<string, string> = { [ACUTE]: "˥", [GRAVE]: "˩", [CIRC]: "˥˩", [CARON]: "˩˥" };
+
+/** One Lingala word → canonical IPA (segmental + per-nucleus tone). */
+export function phonemizeWord(word: string): string {
+    const s = word.toLowerCase().normalize("NFD");
+    let out = "";
+    let i = 0;
+    while (i < s.length) {
+        // consonant graphemes (prenasalised digraphs before singles)
+        let matched = false;
+        for (const k of CKEYS) {
+            if (s.startsWith(k, i)) { out += DEF.consonants[k]; i += k.length; matched = true; break; }
+        }
+        if (matched) continue;
+        const c = s[i]!;
+        if (c in DEF.vowels) {
+            out += DEF.vowels[c];
+            const mark = s[i + 1] ?? "";
+            out += TONE[mark] ?? "˩"; // tone from the combining accent; unmarked → L
+            i += mark in TONE ? 2 : 1;
+            continue;
+        }
+        i += 1; // unknown (incl. stray combining marks) → skip
+    }
+    return out.normalize("NFC");
+}
+
+// ── Numbers (Meeuwis §3.6: cardinal = the connective ya + the ordinal; compounds joined by na) ──────────────
+const NUM = DEF.numbers;
+function cardinalWords(n: number): string {
+    if (n < 1) return "";
+    if (n <= 10) return NUM.ordinals[n - 1]!;
+    if (n < 20) return `${NUM.ten} ${NUM.and} ${NUM.ordinals[(n % 10) - 1]}`;
+    if (n < 100) {
+        const t = Math.floor(n / 10), u = n % 10;
+        const tens = `${NUM.tens} ${NUM.ordinals[t - 1]}`;
+        return u === 0 ? tens : `${tens} ${NUM.and} ${NUM.ordinals[u - 1]}`;
+    }
+    if (n < 1000) {
+        const h = Math.floor(n / 100), r = n % 100;
+        const hun = `${NUM.hundred} ${NUM.ordinals[h - 1]}`;
+        return r === 0 ? hun : `${hun} ${NUM.and} ${cardinalWords(r)}`;
+    }
+    const th = Math.floor(n / 1000), r = n % 1000;
+    const thou = `${NUM.thousand} ${NUM.ordinals[Math.min(th, 10) - 1] ?? cardinalWords(th)}`;
+    return r === 0 ? thou : `${thou} ${NUM.and} ${cardinalWords(r)}`;
+}
+
+const TOKEN = /([a-zɛɔ̀-ͯ]+)|(\d+)|([.?!,;:])/giu;
+
+/** Build the Lingala phonemizer. */
+export function createLingala(): Phonemizer {
+    return {
+        text(input: string): string {
+            // NFD so precomposed accented vowels (á í ǒ …) become base+combining and are captured by TOKEN's
+            // combining-mark range (else the accent splits the word and the vowel is dropped).
+            return assembleClauses(input.normalize("NFD"), TOKEN, (m, sink) => {
+                if (m[1]) sink.emit(phonemizeWord(m[1]));
+                else if (m[2]) {
+                    const num = Number(m[2]);
+                    if (Number.isSafeInteger(num) && num > 0) for (const w of cardinalWords(num).split(" ")) sink.emit(phonemizeWord(w));
+                    else sink.emit(m[2]);
+                } else if (m[3]) {
+                    const mk = DEF.clausePunctuation[m[3]];
+                    if (mk) sink.pause(mk);
+                }
+            });
+        },
+    };
+}

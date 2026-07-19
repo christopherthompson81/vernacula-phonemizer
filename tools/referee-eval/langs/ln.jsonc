@@ -1,0 +1,20 @@
+// Lingala / Lingála (ln) — Bantu (C30B) of the Congo. NO wikipron/epitran; the referee is the SMALL kaikki human
+// set (~55 entries, tone-marked, with prenasalisation + syllable dots). Its own module (Meeuwis 2020). TONE is
+// WRITTEN (acute=H) → we render it, so it is MEASURED here (not folded). 🔷 single-source. Correctness anchor:
+// test/lingala.test.ts. See docs/investigations/ln_native_bringup_investigation.md.
+{
+    "language": "ln",
+    "name": "Lingala",
+    "script": "Latin",
+    "provenance": "Authored from Meeuwis (2020); validated against the kaikki Lingala human readings.",
+    "referees": [
+        { "file": "ln.kaikki-lingala.tsv", "source": "kaikki Lingala (Wiktionary, human, small)", "role": "primary" }
+    ],
+    "segmentJoin": false,
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki marks syllable boundaries with a dot; we don't — strip" },
+        { "pattern": "ˈ", "replace": "", "note": "kaikki marks stress ˈ (metrical); we don't — strip" },
+        { "pattern": "ᵑ", "replace": "ⁿ", "note": "prenasalisation before a velar: our homorganic ᵑɡ ~ kaikki's ⁿɡ (it writes ⁿ for all places except labial) — notation" },
+        { "pattern": "̯", "replace": "", "note": "non-syllabic mark (glide/hiatus notation)" }
+    ]
+}
