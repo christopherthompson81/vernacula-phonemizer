@@ -19,10 +19,18 @@
     },
     // Vowel sign → [a-series reading, o-series reading] (derived from wikipron). ំ/ះ carry a nasal-m / -h coda.
     "vowels": {
-        "ា": ["aː", "iə"], "ិ": ["ə", "i"], "ី": ["əj", "iː"], "ឹ": ["ə", "ɨ"], "ឺ": ["əɨ", "ɨː"],
+        "ា": ["aː", "iə"], "ិ": ["ə", "ɨ"], "ី": ["əj", "iː"], "ឹ": ["ə", "ɨ"], "ឺ": ["əɨ", "ɨː"],
         "ុ": ["o", "u"], "ូ": ["ou", "uː"], "ួ": ["uə", "uə"], "ើ": ["aə", "əː"], "ឿ": ["ɨə", "ɨə"],
         "ៀ": ["iə", "iə"], "េ": ["eː", "eː"], "ែ": ["ae", "ɛː"], "ៃ": ["aj", "ɨj"], "ោ": ["ao", "oː"],
         "ៅ": ["aw", "ɨw"], "ំ": ["ɑm", "um"], "ះ": ["ah", "eəh"]
+    },
+    // Multi-char vowels: a base vowel sign + ⟨ះ⟩ (reahmuk, adds -h) or ⟨ំ⟩ (nikahit, adds -m). The combination
+    // shortens/re-colours the base vowel, so it needs its own [a-series, o-series] readings (derived from wikipron:
+    // កោះ kɑh / ភ្លោះ pʰluəh, ចុះ coh / លុះ luh, ចេះ ceh, ជុំ cum / ដុំ ɗom, កាំ kam).
+    "vowelCombos": {
+        "ោះ": ["ɑh", "uəh"], "ុះ": ["oh", "uh"], "េះ": ["eh", "eh"], "ិះ": ["eh", "eh"],
+        "ែះ": ["ɛh", "ɛh"], "ាះ": ["ah", "eəh"], "ុំ": ["om", "um"], "ាំ": ["am", "oəm"],
+        "ិំ": ["əm", "em"], "ើះ": ["aəh", "əːh"]
     },
     // Final consonant (coda) → IPA. Khmer final ⟨ស⟩ → [h]; final ⟨រ⟩ is silent.
     "codas": {

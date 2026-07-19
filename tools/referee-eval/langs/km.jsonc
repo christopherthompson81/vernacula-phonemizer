@@ -6,6 +6,12 @@
     "referees": [ { "file": "km.wikipron-khm-broad.tsv", "source": "wikipron khm_khmr broad (human)", "role": "primary" } ],
     "segmentJoin": true,
     "folds": [
-        { "pattern": "[ptkc]$", "replace": "ʔ", "note": "word-final voiceless stops are variably GLOTTALISED in the referee ([k]~[ʔ]); fold the word-final coda stop ~ ʔ (both sides)" }
+        { "pattern": "[ptkc]$", "replace": "ʔ", "note": "word-final voiceless stops are variably GLOTTALISED in the referee ([k]~[ʔ]); fold the word-final coda stop ~ ʔ (both sides)" },
+        { "pattern": "ɑ(?!ː)", "replace": "a", "note": "the short low-central vowel is transcribed variably ɑ~a (ចន្ទ can ~ cɑn); normalise short ɑ→a on both sides (long ɑː preserved)" },
+        { "pattern": "ʔ(?=[pbtdckɡʔszhfmnɲŋrljwʋɓɗ])", "replace": "", "note": "the unwritten minor-syllable glottal /ʔ/ is OPTIONAL medially (Huffman IX.B.2: present in reading, lost in colloquial — the referee carries both, e.g. tʰeəʔ...~tʰɔː...); drop pre-consonantal ʔ on both sides" },
+        { "pattern": "ŭ", "replace": "u", "note": "referee marks short vowels with a breve (ŭə vs uə); normalise the short-diphthong notation on both sides" },
+        { "pattern": "ŏ", "replace": "o", "note": "breve short-vowel notation → plain (ŏə → oə)" },
+        { "pattern": "ĕ", "replace": "e", "note": "breve short-vowel notation → plain (ĕə → eə)" },
+        { "pattern": "ʰ", "replace": "", "note": "aspiration is transcribed INCONSISTENTLY in the broad referee (both directions occur — កំប្លែង kampʰlaeŋ~kamplaeŋ, ខ្ញុំ kɲom deaspirated in a cluster); our output keeps canonical per-letter aspiration (ខ→kʰ), so fold ʰ off on both sides for scoring only" }
     ]
 }
