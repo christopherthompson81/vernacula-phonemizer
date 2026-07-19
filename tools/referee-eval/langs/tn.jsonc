@@ -1,0 +1,21 @@
+// Setswana / Tswana (tn) — Bantu (Sotho-Tswana, S31), Latin orthography. Referee: epitran tsn-Latn (INDEPENDENT,
+// programmatic — the only machine referee; no wikipron/kaikki tsn exists). Wordlist mined from Mistry (Cole 1955).
+// The folds reconcile (a) our tie-bar affricate notation vs epitran's plain digraphs, (b) the ⟨g⟩→x divergence
+// where WE are correct and epitran naively emits [g] (Setswana has no /g/ phoneme), and (c) the MID-VOWEL HEIGHT
+// that the standard orthography leaves underdetermined — orthographic ⟨e⟩ spans [e]~[ɛ]~[ɪ] and ⟨o⟩ spans
+// [o]~[ɔ]~[ʊ] (7→9-vowel raising); we emit the close-mid default, epitran applies its own raising, so the height
+// is folded to one class each (a bounded, characterised class — cf. the maturity legend's 🟢).
+{
+    "language": "tn", "name": "Setswana (Tswana)", "script": "Latin",
+    "provenance": "Authored greedy g2p from Setswana orthography + Mistry (Cole 1955). Referee: epitran tsn-Latn.",
+    "referees": [
+        { "file": "tn.epitran-tsn-latn.tsv", "source": "epitran tsn-Latn (programmatic, independent)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "͡", "replace": "", "note": "our affricates carry a tie bar (t͡ʃ t͡s t͡ɬ d͡ʒ k͡xʰ); epitran writes plain digraphs (tʃ ts tɬ dʒ kxʰ) — strip the tie to compare" },
+        { "pattern": "g", "replace": "x", "note": "⟨g⟩: WE emit [x] (the correct velar fricative — Setswana has no /g/), epitran naively emits plain [g]; fold g→x on both sides (this is an epitran error, not ours)" },
+        { "pattern": "[ɛɪ]", "replace": "e", "note": "front mid-vowel HEIGHT is underdetermined by the spelling — ⟨e⟩ spans [e]~[ɛ]~[ɪ] (raising); fold ɛ/ɪ→e both sides (high /i/ untouched)" },
+        { "pattern": "[ɔʊ]", "replace": "o", "note": "back mid-vowel HEIGHT is underdetermined — ⟨o⟩ spans [o]~[ɔ]~[ʊ]; fold ɔ/ʊ→o both sides (high /u/ untouched)" },
+        { "pattern": "ɲ", "replace": "nj", "note": "⟨ny⟩: WE emit the palatal nasal [ɲ] (correct — Mistry), epitran naively emits [nj] (n + glide); fold ɲ→nj on both sides (epitran limitation, not ours)" }
+    ]
+}
