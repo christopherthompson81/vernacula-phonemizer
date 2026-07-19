@@ -42,3 +42,15 @@ the MIT dialect Egyptian subset → `calima_egy_silver.py` (calima-egy + BERT di
 workers) → `filter_split.py` (OOV-filter, 90/5/5) → `train_bilstm_sent.py --pausal 1` (silver-only) →
 `export_egy2.py` (legacy ONNX export + int8 `quantize_dynamic`). `diacritizer-egy.meta.json` (char/label maps)
 is committed beside the model.
+
+## 2026-07-18 — v2 retrain on the FULL corpus (shipped)
+
+Retrained on the FULL Masri Wikipedia (all 2.67M lines silver-labelled by calima-egy, vs v1's 350k sample) + the
+MIT dialect corpus → filter/dedupe **1,322,224 kept → 1,190,002 train / 66,111 val / 66,111 test** (v1: ~222,888
+train). Same BiLSTM (emb 128, hidden 512×2, 3 layers), 25 epochs, best-val at epoch 24. **Held-out TEST DER 1.69%
+/ WER 5.00%** — NOT directly comparable to v1's 1.63% (v2's test set is the larger, more diverse full-corpus 66k).
+The honest comparison is the NON-CIRCULAR wikipron-arz referee (rules-only, lexicon:false): **v1 41.9% → v2 42.7%
+(+0.8pp)**. So 5.3× more silver gave a MARGINAL real-referee gain — the model was near-saturated at 350k
+(teacher-distillation plateaus: the ceiling is the calima-egy teacher's quality + the abjad, not silver volume).
+Shipped v2 as the full-corpus model (better on the honest metric). Pipeline: /mnt/data/arz-diac/run_pipeline_v2.sh
+(6 parallel silver shards → filter_split_v2.py → train_bilstm_sent.py → export_egy_v2.py).
