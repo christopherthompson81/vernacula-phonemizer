@@ -80,6 +80,7 @@ import { phonemizeWord as pl } from "../../src/languages/polish/polish.ts";
 // honest. phonemizeWordRules is the default-schwa g2p (the consonant + long-vowel backbone the eval measures).
 import { phonemizeWordRules as sd } from "../../src/languages/sindhi/sindhi.ts";
 import { phonemizeWordRules as skr } from "../../src/languages/saraiki/saraiki.ts";
+import { phonemizeWord as ro } from "../../src/languages/romanian/romanian.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";
 import { phonemizeWord as it } from "../../src/languages/italian/italian.ts";
 import { phonemizeWord as pcm } from "../../src/languages/naija/naija.ts";
@@ -210,6 +211,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     pl,
     sd,
     skr,
+    ro,
     tr,
     ur,
     vi,
