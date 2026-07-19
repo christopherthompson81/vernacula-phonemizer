@@ -1,0 +1,22 @@
+// Sylheti (syl) — Eastern Indo-Aryan, the SYLOTI NAGRI abugida. Referees: wikipron syl_sylo_broad (PRIMARY, HUMAN,
+// 397) + kaikki Sylheti (both Syloti Nagri). Sylheti developed a HIGH/LOW tone (from lost breathy voice) that is
+// NOT in the orthography → the fold strips the referee's tone (acute) + the narrow non-syllabic / diphthong marks
+// so the SEGMENTAL backbone (spirantisation + inherent-vowel deletion) is compared.
+{
+    "language": "syl", "name": "Sylheti (Syloti Nagri)", "script": "Syloti Nagri",
+    "provenance": "Authored Syloti Nagri abugida g2p; spirantisation derived from wikipron. Referee: wikipron syl_sylo_broad.",
+    "referees": [
+        { "file": "syl.wikipron-syl-sylo.tsv", "source": "wikipron syl_sylo_broad (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "\\u0301", "replace": "", "note": "TONE: the referee marks HIGH tone with an acute accent; Sylheti tone is unwritten (developed from lost breathy voice) → strip" },
+        { "pattern": "\\u032F", "replace": "", "note": "non-syllabic mark (e̯ in diphthongs) — a narrow detail we don't render" },
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar" },
+        { "pattern": "([bdɡʈɖnmlɾrszʃxfɸɦ])\\1", "replace": "$1ː", "note": "GEMINATE: the referee writes a doubled consonant (l l → ll); we length-mark (lː) — collapse to Cː on both sides" },
+        { "pattern": "r", "replace": "ɾ", "note": "⟨ꠞ⟩ rhotic: the referee varies trill [r] ~ tap [ɾ]; normalise to ɾ" },
+        { "pattern": "ɑ", "replace": "a", "note": "the low vowel is transcribed ɑ~a; normalise to a" },
+        { "pattern": "\\u032A", "replace": "", "note": "DENTAL bridge below (t̪ d̪ n̪): the referee marks it variably on the nasal (n~n̪); normalise the dental notation both sides" },
+        { "pattern": "ʊ", "replace": "u", "note": "the high back vowel is transcribed u~ʊ (ꠃ); normalise to u" }
+    ]
+}

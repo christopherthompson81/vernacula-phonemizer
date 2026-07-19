@@ -1,0 +1,56 @@
+// Native canonical-IPA definition for Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) — Eastern Indo-Aryan (Bengali-Assamese), written
+// in the SYLOTI NAGRI abugida (a Sylheti-specific historical script with a real puthi literature, Unicode U+A800,
+// documented by Wiktionary/wikipron — the bho/awa scope pattern, NOT the ctg no-standard case). Read by the generic
+// abugida engine (core/abugida.ts), inherent vowel /ɔ/, Bengali-style final + medial inherent-vowel deletion.
+//
+// SYLHETI'S DEFINING FEATURE = SPIRANTISATION (the split from Bengali; values DERIVED from wikipron syl_sylo):
+//   • ⟨ꠇ ꠈ⟩ (ko kho) → [x]  (Bengali /k kʰ/ → the velar fricative)
+//   • ⟨ꠌ ꠍ⟩ (co cho) → [s]  (Bengali affricates /t͡ʃ t͡ʃʰ/ → [s])
+//   • ⟨ꠎ ꠏ⟩ (jo jho) → [z]  (Bengali /d͡ʒ/ → [z])
+//   • ⟨ꠙ⟩ (po) → [ɸ], ⟨ꠚ⟩ (pho) → [f]  (Bengali /p pʰ/ → bilabial/labiodental fricative)
+//   • ⟨ꠡ⟩ (so) → [ʃ], ⟨ꠢ⟩ (ho) → [ɦ]. Aspiration is LOST on the voiced stops (ꠊ→ɡ, ꠗ→d̪, ꠜ→b).
+// TONE: Sylheti developed a HIGH/LOW tone (from lost breathy voice); it is NOT in the orthography → DEFERRED (the
+// wikipron acute accent is folded). Validated against wikipron syl_sylo_broad + kaikki Sylheti (both Syloti Nagri).
+{
+    "language": "syl",
+    "name": "Sylheti (Syloti Nagri)",
+    "script": "Syloti Nagri",
+    "provenance": "Authored from the Syloti Nagri Unicode chart; consonant values DERIVED from wikipron syl_sylo_broad (spirantisation). Referees: wikipron syl_sylo + kaikki Sylheti.",
+
+    "inherentVowel": "ɔ",
+
+    "consonants": {
+        "ꠇ": { "ipa": "x", "note": "ko → [x] (Sylheti spirantisation of /k/)" }, "ꠈ": { "ipa": "x", "note": "kho → [x]" },
+        "ꠉ": { "ipa": "ɡ" }, "ꠊ": { "ipa": "ɡ", "note": "gho → [ɡ] (aspiration lost)" },
+        "ꠌ": { "ipa": "s", "note": "co → [s] (spirantised affricate)" }, "ꠍ": { "ipa": "s", "note": "cho → [s]" },
+        "ꠎ": { "ipa": "z", "note": "jo → [z]" }, "ꠏ": { "ipa": "z", "note": "jho → [z]" },
+        "ꠐ": { "ipa": "ʈ" }, "ꠑ": { "ipa": "ʈ", "note": "ttho → [ʈ]" }, "ꠒ": { "ipa": "ɖ" }, "ꠓ": { "ipa": "ɖ", "note": "ddho → [ɖ]" },
+        "ꠔ": { "ipa": "t̪", "note": "DENTAL" }, "ꠕ": { "ipa": "t̪", "note": "tho → [t̪]" }, "ꠖ": { "ipa": "d̪" }, "ꠗ": { "ipa": "d̪", "note": "dho → [d̪]" },
+        "ꠘ": { "ipa": "n" },
+        "ꠙ": { "ipa": "ɸ", "note": "po → [ɸ] (bilabial fricative)" }, "ꠚ": { "ipa": "f", "note": "pho → [f]" },
+        "ꠛ": { "ipa": "b" }, "ꠜ": { "ipa": "b", "note": "bho → [b] (aspiration lost)" }, "ꠝ": { "ipa": "m" },
+        "ꠞ": { "ipa": "ɾ" }, "ꠟ": { "ipa": "l" }, "ꠠ": { "ipa": "ɽ", "note": "retroflex flap" },
+        "ꠡ": { "ipa": "ʃ", "note": "so → [ʃ]" }, "ꠢ": { "ipa": "ɦ", "note": "ho → [ɦ] (voiced)" },
+        "ꠋ": { "ipa": "ŋ", "note": "ANUSVARA → a plain velar nasal [ŋ] in Sylheti (aŋɡuɾ, aŋʈi), NOT homorganic / vowel-nasalising" }
+    },
+
+    "independentVowels": {
+        "ꠀ": { "ipa": "a" }, "ꠁ": { "ipa": "i" }, "ꠂ": { "ipa": "i", "note": "DVISVARA — the diphthong second vowel [i] (ꠌꠂ→sɔi)" }, "ꠃ": { "ipa": "u" }, "ꠄ": { "ipa": "e" }, "ꠅ": { "ipa": "ɔ" }
+    },
+
+    "vowelSigns": {
+        "ꠣ": { "ipa": "a" }, "ꠤ": { "ipa": "i" }, "ꠥ": { "ipa": "u" }, "ꠦ": { "ipa": "e" }, "ꠧ": { "ipa": "o" }
+    },
+
+    "signs": {
+        "virama": { "char": "꠆", "note": "HASANTA — suppresses the inherent vowel (conjuncts)" },
+        "anusvara": { "char": "ৗ", "note": "(handled as the consonant ꠋ→ŋ instead — placeholder, never appears)" },
+        "chandrabindu": { "char": "ঁ", "note": "(none in Syloti Nagri — placeholder, never appears)" },
+        "visarga": { "char": "ঃ", "note": "(none — placeholder)" },
+        "nukta": { "char": "়", "note": "(none — placeholder)" }
+    },
+
+    "clausePunctuation": {
+        "꠨": " . ", "꠩": " . ", "।": " . ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , "
+    }
+}

@@ -53,6 +53,7 @@ import { phonemizeWord as wo } from "../../src/languages/wolof/wolof.ts";
 import { phonemizeWord as lg } from "../../src/languages/luganda/luganda.ts";
 import { phonemizeWord as rn } from "../../src/languages/kirundi/kirundi.ts";
 import { phonemizeWord as ug } from "../../src/languages/uyghur/uyghur.ts";
+import { phonemizeWord as syl } from "../../src/languages/sylheti/sylheti.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
@@ -176,6 +177,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     lg,
     rn,
     ug,
+    syl,
     el,
     cs,
     cy,

@@ -98,6 +98,7 @@ import { createWolof } from "./languages/wolof/wolof.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
 import { createKirundi } from "./languages/kirundi/kirundi.ts";
 import { createUyghur } from "./languages/uyghur/uyghur.ts";
+import { createSylheti } from "./languages/sylheti/sylheti.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 
 export interface Phonemizer {
@@ -350,6 +351,8 @@ function build(lang: string): Phonemizer {
             return createKirundi();
         case "ug":
             return createUyghur();
+        case "syl":
+            return createSylheti();
         case "el":
             return createGreek();
         default:
