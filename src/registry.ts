@@ -79,6 +79,7 @@ import { createNepali } from "./languages/nepali/nepali.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createTigrinya } from "./languages/tigrinya/tigrinya.ts";
 import { createBulgarian } from "./languages/bulgarian/bulgarian.ts";
+import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
@@ -307,6 +308,8 @@ function build(lang: string): Phonemizer {
             return createTigrinya((latin) => getPhonemizer("en").text(latin));
         case "bg":
             return createBulgarian();
+        case "ckb":
+            return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         case "bho":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.

@@ -119,6 +119,7 @@ import { phonemizeWord as kn } from "../../src/languages/kannada/kannada.ts";
 import { phonemizeWord as am } from "../../src/languages/amharic/amharic.ts";
 import { phonemizeWord as ti } from "../../src/languages/tigrinya/tigrinya.ts";
 import { phonemizeWord as bg } from "../../src/languages/bulgarian/bulgarian.ts";
+import { phonemizeWord as ckb } from "../../src/languages/central-kurdish/central-kurdish.ts";
 import { phonemizeWord as yo } from "../../src/languages/yoruba/yoruba.ts";
 import { phonemizeWord as my } from "../../src/languages/burmese/burmese.ts";
 // RULE-ONLY for jv: the shipped phonemizeWord adds a cross-script ⟨e⟩ lexicon sourced from the Aksara referee;
@@ -220,6 +221,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     am,
     ti,
     bg,
+    ckb,
     yo,
     my,
     kk,
