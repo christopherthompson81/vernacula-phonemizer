@@ -1,0 +1,39 @@
+// Native canonical-IPA data manifest for Wolof / Wolof (wo) — Atlantic-Congo (Senegambian), the Latin orthography,
+// espeak-independent. The principal language of Senegal (~12M incl. L2). NON-tonal. A greedy longest-match scan
+// with two code rules (wolof.ts): CONSONANT GEMINATION (a doubled consonant → Cː: benn→bɛnː, làkk→laːkː) and
+// NASAL place assimilation (⟨n⟩→ŋ before g/k: Angale→aŋɡalɛ). Referee: kaikki Wolof (Wiktionary, HUMAN). Signatures:
+//   • ATR vowels — ⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː; DOUBLING = LENGTH (aa→aː, ée→eː, oo→ɔː).
+//   • ⟨c⟩=c, ⟨j⟩=ɟ (PALATAL STOPS, not affricates — the Wiktionary convention), ⟨x⟩=x, ⟨ñ⟩=ɲ, ⟨ŋ⟩=ŋ, ⟨q⟩=q, ⟨y⟩=j.
+// The word-initial glottal onset [ʔ] is variable in the referee → folded. Wolof is also written in Arabic (Wolofal)
+// and Garay; those scripts are deferred. See docs/investigations/wo_native_bringup_investigation.md.
+{
+    "language": "wo",
+    "name": "Wolof",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination from the Wolof Latin orthography (CLAD). Referee: kaikki Wolof (Wiktionary).",
+
+    "convention": {
+        "vowelsATR": "⟨e⟩=ɛ, ⟨é⟩=e, ⟨o⟩=ɔ, ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː, ⟨a i u⟩=a i u",
+        "length": "a doubled vowel is LONG — aa→aː, ee→ɛː, oo→ɔː, ii→iː, uu→uː, ée→eː, óo→oː",
+        "gemination": "a doubled consonant is a GEMINATE Cː (benn→bɛnː, làkk→laːkː, noppa→nɔpːa) — handled in code",
+        "palatalStops": "⟨c⟩=c, ⟨j⟩=ɟ (voiceless/voiced palatal STOPS, not affricates)",
+        "dorsals": "⟨x⟩=x (velar fricative), ⟨q⟩=q (uvular stop), ⟨g⟩=ɡ",
+        "nasalAssim": "⟨n⟩→ŋ before g/k (Angale→aŋɡalɛ); ⟨ñ⟩=ɲ, ⟨ŋ⟩=ŋ",
+        "glottalOnset": "the word-initial [ʔ] before a vowel is variable in the referee → folded (not emitted)"
+    },
+
+    // Vowel DIGRAPHS (doubling = length) + singles + consonants. Scanner sorts keys LENGTH DESC so the vowel
+    // digraphs (aa ée óo…) precede singles; consonant gemination is handled in code.
+    "graphemes": {
+        "éé": "eː", "óó": "oː", "ée": "eː", "óo": "oː", "ëë": "əː",
+        "aa": "aː", "ee": "ɛː", "oo": "ɔː", "ii": "iː", "uu": "uː",
+        "a": "a", "à": "aː", "e": "ɛ", "é": "e", "ë": "ə", "i": "i", "o": "ɔ", "ó": "o", "u": "u",
+        "b": "b", "c": "c", "d": "d", "f": "f", "g": "ɡ", "j": "ɟ", "k": "k", "l": "l", "m": "m",
+        "n": "n", "ñ": "ɲ", "ŋ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "t": "t", "w": "w",
+        "x": "x", "y": "j"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

@@ -94,6 +94,7 @@ import { createLingala } from "./languages/lingala/lingala.ts";
 import { createKhmer } from "./languages/khmer/khmer.ts";
 import { createSetswana } from "./languages/setswana/setswana.ts";
 import { createBambara } from "./languages/bambara/bambara.ts";
+import { createWolof } from "./languages/wolof/wolof.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 
 export interface Phonemizer {
@@ -338,6 +339,8 @@ function build(lang: string): Phonemizer {
             return createSetswana();
         case "bm":
             return createBambara();
+        case "wo":
+            return createWolof();
         case "el":
             return createGreek();
         default:
