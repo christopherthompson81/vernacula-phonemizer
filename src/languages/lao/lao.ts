@@ -30,6 +30,7 @@ const CODA: Record<string, string> = {
 
 // Vowel signs (combining/spacing) used by the scanner.
 const LEAD = new Set(["ເ", "ແ", "ໂ", "ໃ", "ໄ"]); // written before the consonant
+const HSON = new Set(["ງ", "ຍ", "ນ", "ມ", "ລ", "ວ"]); // the sonorants ຫ leads → HIGH class (ຫ + others is NOT a lead)
 const TONEMARK = new Set(["່", "້", "໊", "໋"]);
 const isCons = (c: string): boolean => c in CONS;
 
@@ -42,7 +43,11 @@ function reorder(w: string): string {
             // move the lead vowel past the consonant (+ a ຫ/ວ/ຼ cluster member)
             let j = i + 1;
             let cons = s[j++]!;
-            if ((cons === "ຫ" || cons === "ວ") && isCons(s[j] ?? "")) cons += s[j++]!;
+            // carry a ຫ-led cluster member across the reorder, incl. the ຼ lam-ligature (U+0EBC, not a base
+            // consonant) so ເຫຼັກ → ຫຼ|ເັກ keeps ຫຼ together → [l] HIGH (else the lead vowel splits the ligature).
+            // NOT ວ: after a lead vowel ວ is the onset itself (ເວລາ → ʋeː.laː), it must not swallow the next
+            // consonant. ຫ leads ONLY a sonorant/ຼ (ເຫດ = ຫ onset + ດ coda → heːt̚, NOT a ຫດ lead).
+            if (cons === "ຫ" && (HSON.has(s[j] ?? "") || s[j] === "ຼ")) cons += s[j++]!;
             out.push(cons, s[i]!);
             i = j - 1;
         } else out.push(s[i]!);
@@ -83,6 +88,7 @@ function resolveVowel(
         if (a0 === "ີ") return R("ɤ", true, "", 1); // ເີ → ɤː
         if (a0 === "າ" && a1 === "ະ") return R("ɔ", false, "", 2); // ເາະ → ɔ
         if (a0 === "ະ") return R("e", false, "", 1); // ເ...ະ → e
+        if (a0 === "ັ" && (a1 === "ຽ" || a1 === "ຍ")) return R("iːə", false, "", 2); // ເ◌ັຽ/ເ◌ັຍ → iːə (ເຊັຽ→siːə)
         if (a0 === "ັ") return R("e", false, "", 1); // ເັC → e (closed short)
         return R("e", true, "", 0); // ເ → eː
     }
@@ -162,19 +168,20 @@ function scanFeatures(word: string): SylF[] {
         let leadHigh = false;
         const onsetIdx = i;
         let c = s[i];
+        // ໆ (mai kan / repetition mark) repeats the preceding syllable (ຊ້າໆ → saː.saː).
+        if (c === "ໆ") { const last = out[out.length - 1]; if (last) out.push({ ...last }); i++; continue; }
         if (c === undefined || !isCons(c)) { i++; continue; }
         let onsetCs = [c];
         i++;
         // ຫ + sonorant → the sonorant, HIGH class. ຼ (U+0EBC, the lam-ligature) after ຫ is the l-form → [l];
         // it is NOT a base consonant, so it is matched explicitly.
-        if (c === "ຫ" && (s[i] === "ຼ" || (isCons(s[i] ?? "") && ["ງ", "ຍ", "ນ", "ມ", "ລ", "ວ"].includes(s[i]!)))) {
+        if (c === "ຫ" && (s[i] === "ຼ" || HSON.has(s[i] ?? ""))) {
             leadHigh = true; onsetCs = [s[i] === "ຼ" ? "ລ" : s[i]!]; i++;
         }
-        // cluster: Cຼ (Cl) or Cວຽ (kʷ, labialised — only before the ຽ diphthong). Cວ + anything else (coda, າ,
-        // or bare) is the VOWEL uːə (nwat→nuːət, ຄວາຍ→kʰuːəj), handled in resolveVowel.
+        // cluster: Cຼ (Cl). Cວ (incl. Cວຽ) is the VOWEL uːə (nwat→nuːət, ຄວາຍ→kʰuːəj, ມວຽ→muːəj), handled in
+        // resolveVowel — Cວຽ is uːə + a [j] offglide coda, NOT a labialised kʷ (the referee writes muːə̯j).
         let cluster = "";
-        if (s[i] === "ວ" && s[i + 1] === "ຽ" && !LEAD.has(s[i - 1] ?? "")) { cluster = "ʷ"; i++; }
-        else if (s[i] === "ຼ") { cluster = "l"; i++; }
+        if (s[i] === "ຼ") { cluster = "l"; i++; }
         // the reordered leading vowel (if any) sits right here
         let pre = "";
         if (LEAD.has(s[i] ?? "")) { pre = s[i]!; i++; }
@@ -192,11 +199,24 @@ function scanFeatures(word: string): SylF[] {
         let coda = "";
         const nx = s[i] ?? "";
         if (!glide && nx in CODA) {
-            // it's a coda if it's the last char OR the next char is a consonant/lead (new syllable) or nothing
-            const after = s[i + 1] ?? "";
-            const followsVowel = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ", "ວ", "ອ"].includes(after) || LEAD.has(after);
+            // nx is the onset of a NEW syllable (not a coda of this one) when it's directly followed by a vowel.
+            // ອ/ວ are BOTH vowel signs and onset consonants (ʔ/ʋ), needing a 2-char lookahead: an ອ/ວ after nx
+            // is a new onset (→ nx is THIS syllable's coda) only when it carries its OWN vowel (after2 is a vowel
+            // sign/lead) AND this syllable already has a vowel — ຄົນອັງກິດ → kʰon.ʔaŋ.kit. Otherwise the ອ/ວ is
+            // nx's own vowel (ກອນ → kɔːn, ຂະບວນ → kʰa.buːən) and nx stays the onset.
+            const after = s[i + 1] ?? "", after2 = s[i + 2] ?? "";
+            const vsigns = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ"];
+            // an ອ/ວ after nx is nx's OWN vowel (→ nx is an onset) only when that ອ/ວ has no vowel of its own
+            // after it (after2 not a vowel/lead → ກອນ=kɔːn, ຂະບວນ=kʰa.buːən); if it does, the ອ/ວ is a separate
+            // onset and nx is THIS syllable's coda (ຄົນອັງກິດ=kʰon.ʔaŋ.kit, ກັງວານ=kaŋ.ʋaːn).
+            const oIsOwnVowel = (after === "ອ" || after === "ວ")
+                && !(vsigns.includes(after2) || LEAD.has(after2) || after2 === "ອ" || after2 === "ວ");
+            const followsVowel = vsigns.includes(after) || LEAD.has(after) || oIsOwnVowel;
             if (!(isCons(nx) && followsVowel)) { coda = CODA[nx] ?? ""; i++; }
         }
+        // a ຽ AFTER a nucleus is a [j] offglide coda (ຕາຽ→taːj, ຜູ້ຮ້າຽ→…haːj, ມວຽ→muːəj), not the iːə vowel
+        // (which only fires when ຽ directly follows the onset, and is consumed by resolveVowel above).
+        if (!coda && !glide && (s[i] ?? "") === "ຽ" && (used > 0 || pre !== "")) { coda = "j"; i++; }
         const onset = onsetCs.map((g) => CONS[g]?.[0] ?? "").join("") + cluster;
         const cls: Cls = leadHigh ? "high" : (CONS[onsetCs[0]!]?.[1] ?? "mid");
         const codaOut = coda || glide;

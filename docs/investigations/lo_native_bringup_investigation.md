@@ -58,3 +58,32 @@ syllable count agrees with the referee: non-final 100.0% (537/537), final 99.5% 
 figure (58.4%) is dominated by syllable-COUNT disagreements (our syllabification vs the referee's compound splits),
 NOT tone errors — a segmentation matter, separate from the tone rules. Tone is no longer "approximate": the citation
 tone system is exact. Segmental eval unchanged at 93.8% (tone is stripped there). Gold updated to the verified tones.
+
+## Run 7 — segmental residual cleanup, 93.8 → 97.7%
+Bucketed the 145 segmental misses (they were NOT diffuse noise — the "diffuse residual" claim was wrong). Six
+clean structural classes, each fixed and measured:
+
+1. **ອ/ວ onset-vs-vowel ambiguity (biggest, ~40 words).** ອ and ວ are BOTH vowel signs (ɔː / uːə) and onset
+   consonants (ʔ / ʋ). The scanner's coda check mis-assigned the preceding consonant. Fixed with a 2-char
+   lookahead: an ອ/ວ after a coda-candidate `nx` is a NEW onset (so `nx` is this syllable's coda) only when that
+   ອ/ວ carries its OWN vowel (the char after it is a vowel sign/lead) — ຄົນອັງກິດ→kʰon.ʔaŋ.kit, ກັງວານ→kaŋ.ʋaːn;
+   otherwise the ອ/ວ is `nx`'s own vowel and `nx` stays the onset — ອຸປະກອນ→ʔu.pa.kɔːn, ຂະບວນ→kʰa.buːən,
+   ຂ້ານ້ອຍ→kʰaː.nɔːj. (First cut inverted the polarity → −1.4pp; the after2 test fixed it → +1.5pp net over the
+   naive rule.)
+2. **Final ຽ → [j] offglide (~13).** ຽ is the iːə vowel only when it directly follows the onset (consumed by
+   resolveVowel); AFTER a nucleus it's a [j] coda (ຕາຽ→taːj, ຜູ້ຮ້າຽ→…haːj). Also killed the WRONG Cວຽ→kʷ
+   labialised-cluster analysis: the referee writes muːə̯j, so ມວຽ = ມ + uːə(vowel) + j(coda) → muːəj, not mʷiːə.
+3. **ໆ repetition mark (~3).** Duplicate the preceding syllable (ຊ້າໆ→saː.saː).
+4. **ຫຼ + leading vowel (~13).** reorder() wasn't carrying the ຼ lam-ligature (U+0EBC) across the lead-vowel
+   move, so ເຫຼັກ split the ligature → "heː.ka" instead of the high-[l] "lek̚". Also Luang Prabang ຫຼວງພຣະບາງ.
+5. **reorder ວ/ຫ over-absorb (~7).** reorder() let ວ (and ຫ before a NON-sonorant) swallow the next consonant:
+   ເວລາ→"ʋa.leː" (ວ ate ລ) and ເຫດ→"ha.deː" (ຫ ate ດ). Restricted: ວ never absorbs after a lead; ຫ absorbs ONLY
+   a sonorant {ງ ຍ ນ ມ ລ ວ}/ຼ (shared HSON set with the scanner). → ເວລາ→ʋeː.laː, ເຫດ→heːt̚, ເຫດການ→heːt̚.kaːn.
+6. **ເ◌ັຽ / ເ◌ັຍ → iːə (~7).** A missing vowel pattern (ເຊັຽ→siːə, ນີວຄະເລັຽ→…liːə), was falling through to ເ◌ັ→e.
+
+**93.8% → 97.7% folded.** Tone unaffected (still 100% single-syllable; more words now segmentally-correct so the
+tone-eval denominator grew 755→765). Gold 12/12 unchanged. Floor raised 0.90→0.95. The remaining ~54 misses are a
+genuine **loanword/Sanskrit tail**, each needing lexical knowledge, not a rule: the ໌ (yamakkan) cancellation mark
++ Sanskrit codas (ວຽງຈັນທນ໌→ʋiːəŋ.t͡ɕan, ໄຟລ໌→faj), the kʷ labialised cluster with its aspiration-ordering fold
+mismatch (ຄວັນ→kʷʰan), Sanskrit ສ codas that are variably [s]~[t̚] (Alaska laːs vs ປຼະເທສ tʰeːt̚), and English
+loans (Easter, email). This is the honest ceiling for rule-only Lao without a loanword lexicon.
