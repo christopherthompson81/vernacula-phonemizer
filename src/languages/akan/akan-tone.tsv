@@ -1,0 +1,25 @@
+# Akan tone+nasality lexicon: word<TAB>tones(H/L per nucleus)<TAB>nasals(+/- per nucleus).
+# Mined from the tone/nasality-marked kaikki Akan readings + Paster (2010) attested isolated verb tones.
+# Small coverage (the OOV tail has no tone — Akan tone is lexical and no large toned corpus exists);
+# consumed by the SHIPPED phonemizeWord (rule path phonemizeWordRules stays tone-free / non-circular).
+papa	L,H
+da	H
+soma	L,H
+tɔ	H
+kofi	L,H
+huu	H,L
+mifi	L~,H
+ɔhyɛ	L,H
+ɔkɔ	L,H
+ɔsa	L,H
+obue	L,L,H
+ɔda	L,H
+odidi	L,L,H
+ɔkɔtɔ	L,H,L
+uafɔn	H,L
+nom	H
+dane	L,H
+boa	L,H
+kae	L,H
+bisa	L,H
+asɛm	L,L

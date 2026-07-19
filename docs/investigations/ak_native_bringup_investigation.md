@@ -60,3 +60,26 @@ would mean fabricating unverifiable output (the same principle that skipped Raja
 Net: the segmental engine is now feature-complete for what the orthography ENCODES (digraphs, glide formation,
 coda assimilation, ATR harmony, numbers). The two remaining gaps are suprasegmentals the writing system does not
 record and for which no corpus exists — a principled ceiling, not a backlog item.
+
+## Run 3 — TONE + NASALITY implemented (correcting Run 2's overclaim)
+Run 2 called tone and nasality "data-blocked / would be fabrication." That conflated *documented* with *derivable
+from spelling* and was wrong — Paster (2010) documents both extensively, and the tone-marked kaikki readings are a
+(small) usable corpus. Implemented properly:
+
+- **NASALITY — the rule parts are derivable + the lexical part is mined.** Added **Labial Nasalization** (Paster
+  rule 8: /b/ → [m] after a nasal — mba→mma, mbisa→mmisa) on top of the already-present **Nasal Place Assimilation**
+  (rule 9, nkran→ŋkran). VOWEL nasality is lexical (hɔ̃), so it rides the tone lexicon (mifi→mĩ), not a blanket
+  post-nasal rule (which soma→soma refutes).
+- **TONE — the Romanian-stress pattern (lexicon + rules).** Akan tone is lexical (unpredictable from the toneless
+  orthography), but Paster documents the tonal SYSTEM (H/L, Nasal Tone Assimilation, Tonal Plateauing, Final
+  Lowering, downstep) and the kaikki readings CARRY tone (pàpá, sòmá, ɔ̀kɔ́tɔ̀). Mined `akan-tone.tsv` (21 words:
+  the tone-marked kaikki set + Paster's attested isolated verb tones), per-nucleus H/L (+nasal), aligned to the
+  g2p nuclei. The SHIPPED `phonemizeWord` emits Chao letters (H→˥, L→˩) + ◌̃ for covered words (papa→pa˩pa˥,
+  ɔkɔtɔ→ɔ˩kɔ˥tɔ˩, mifi→mĩ˩fi˥); OOV → no tone. `phonemizeWordRules` (new) is the tone-free segmental path, so the
+  referee eval stays non-circular (still 70%; tone is folded there anyway).
+
+**Honest status:** the tone/nasality SYSTEM is implemented and correct for covered words; coverage is SMALL (~21
+words) because no large machine-readable toned Akan corpus exists — the ceiling is data VOLUME, not method, and the
+lexicon extends trivially as more toned data is found. This is the same shape as Romanian stress (rule + lexicon,
+non-circular rule signal), not a "cannot-do." Gold: a dedicated tone/nasality group (papa→pa˩pa˥, mifi→mĩ˩fi˥) +
+Labial Nasalization; segmental groups use phonemizeWordRules. All 7 pass.

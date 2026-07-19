@@ -91,7 +91,7 @@ import { phonemizeWord as hak } from "../../src/languages/hakka/hakka.ts";
 import { phonemizeWord as ml } from "../../src/languages/malayalam/malayalam.ts";
 import { phonemizeWord as hsn } from "../../src/languages/xiang/xiang.ts";
 import { phonemizeWord as gan } from "../../src/languages/gan/gan.ts";
-import { phonemizeWord as ak } from "../../src/languages/akan/akan.ts";
+import { phonemizeWordRules as ak } from "../../src/languages/akan/akan.ts";
 import { phonemizeWord as or } from "../../src/languages/odia/odia.ts";
 import { phonemizeWord as uz } from "../../src/languages/uzbek/uzbek.ts";
 import { phonemizeWord as mai } from "../../src/languages/maithili/maithili.ts";

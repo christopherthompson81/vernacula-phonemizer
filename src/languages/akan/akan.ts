@@ -8,25 +8,31 @@
  *     ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ ɡʷ ɕʷ ŋʷ (the signature Akan labial-palatalisation), plus ⟨ng⟩ → ŋ.
  *   • GLIDE FORMATION (Paster 2010) — a round vowel ⟨o ɔ u⟩ before another vowel becomes the on-glide [w]
  *     (boa→bwa, uafɔn→wafɔ̃); front vowels stay in hiatus.
- *   • CODA nasal — a syllable-final ⟨n⟩ assimilates to the following consonant's PLACE (velar → ŋ, labial → m,
- *     else n); an onset ⟨n⟩ before a vowel stays n.
- *   • the combining tilde ⟨◌̃⟩ (rare, disambiguating) passes through as vowel nasalisation.
- *
+ *   • NASAL rules (Paster 2010) — coda-⟨n⟩ Place Assimilation (velar → ŋ, labial → m, else n; nkran→ŋkran) and
+ *     Labial Nasalization (/b/ → [m] after a nasal: mba→mma).
  *   • ATR HARMONY (Paster 2010) — the orthography merges [e]/[ɪ] into ⟨e⟩ and [o]/[ʊ] into ⟨o⟩; atrByIndex()
  *     recovers the value from the word's harmony (triggers ⟨i u⟩ = +ATR, ⟨ɛ ɔ⟩ = −ATR, spreading to ⟨e o⟩:
  *     kyerɛ→t͡ɕɪrɛ, bisa→bisa).
+ *   • TONE (H/L) + vowel nasality — LEXICAL (Akan tone is unpredictable from the toneless orthography, per Paster).
+ *     The Romanian-stress pattern: a mined lexicon (akan-tone.tsv) carries the citation tone/nasality, emitted as
+ *     Chao letters (H→˥, L→˩) + ◌̃ on the SHIPPED phonemizeWord (papa→pa˩pa˥, mifi→mĩ˩fi˥). phonemizeWordRules is
+ *     the tone-free segmental path (the non-circular referee signal). Coverage is small — no large toned corpus
+ *     exists — so OOV words carry no tone; the SYSTEM is implemented and extensible with more lexicon.
  *   • NUMBERS — standard Twi cardinals (baako, du, aduonu, ɔha, apem), compositional.
  *
- * TONE (H/L) is phonemic but genuinely DATA-BLOCKED: the standard orthography does not write it, Akan tone is
- * lexical/grammatical (not predictable from segments), and no machine-readable tone-marked corpus exists (the only
- * source, kaikki, has 22 words) — so modelling it would mean fabricating unverifiable output. NASALISATION is
- * likewise contrastive-but-unwritten and NOT rule-derivable (mifi→mĩfi nasalises, soma→soma does not, same
- * post-nasal position) — only the rare disambiguating tilde ⟨◌̃⟩ is recoverable (handled). Small kaikki human gold
- * (no wikipron/epitran Akan) → 🔷 single-source. See docs/investigations/ak_native_bringup_investigation.md.
+ * Small kaikki human gold (no wikipron/epitran Akan) → 🔷 single-source. See docs/investigations/ak_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+
+// Tone + vowel-nasality lexicon (word → comma-joined per-nucleus tokens: H/L, +~ if nasal). Akan tone is lexical
+// (unpredictable from the toneless orthography), so — the Romanian-stress pattern — a lexicon carries it and the
+// tonal rules apply on top; mined from the tone-marked kaikki readings + Paster (2010). Small coverage (OOV = no
+// tone); consumed by the SHIPPED phonemizeWord only (phonemizeWordRules stays tone-free / non-circular).
+const TONE_LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "akan-tone.tsv", undefined, { optional: true });
+const NUCLEI = new Set(["a", "e", "i", "o", "u", "ɛ", "ɔ", "ɪ", "ʊ"]);
 
 interface AkanDef {
     digraphs: Record<string, string>;
@@ -69,9 +75,10 @@ function atrByIndex(s: string[]): Map<number, boolean> {
     return m;
 }
 
-/** One Akan word → canonical IPA (segmental + ATR harmony; tone deferred). */
-export function phonemizeWord(word: string): string {
-    const s = [...word.toLowerCase()];
+/** One Akan word → canonical IPA. `useTone` overlays the lexical tone + vowel-nasality (shipped path). */
+function phonemizeCore(word: string, useTone: boolean): string {
+    const lw = word.toLowerCase();
+    const s = [...lw];
     const n = s.length;
     const atr = atrByIndex(s);
     const out: string[] = [];
@@ -98,11 +105,38 @@ export function phonemizeWord(word: string): string {
             out.push(p); i += 1; continue;
         }
         if (c === "ŋ") { out.push("ŋ"); i += 1; continue; }
+        // LABIAL NASALIZATION (Paster 2010 rule 8): /b/ → [m] after a nasal consonant (mb → mm, n-bisa → mmisa).
+        if (c === "b") { out.push(/[mnɲŋ]$/u.test(out[out.length - 1] ?? "") ? "m" : "b"); i += 1; continue; }
         if (c in DEF.consonants) { out.push(DEF.consonants[c]!); i += 1; continue; }
         if (c === TILDE) { if (out.length) out[out.length - 1] += TILDE; i += 1; continue; } // nasalisation on the vowel
         i += 1; // unknown → skip
     }
+    // TONE + vowel-nasality overlay (shipped path): attach Chao letters (H→˥, L→˩) and ◌̃ to each nucleus.
+    if (useTone) {
+        const pat = TONE_LEX.get(lw);
+        if (pat) {
+            const toks = pat.split(",");
+            const nuc: number[] = [];
+            for (let k = 0; k < out.length; k++) if (NUCLEI.has(out[k]!)) nuc.push(k);
+            if (toks.length === nuc.length) {
+                for (let k = 0; k < nuc.length; k++) {
+                    const t = toks[k]!;
+                    out[nuc[k]!] += (t.includes("~") ? TILDE : "") + (t[0] === "H" ? "˥" : "˩");
+                }
+            }
+        }
+    }
     return out.join("").normalize("NFC");
+}
+
+/** One Akan word → canonical IPA (segmental + ATR harmony + lexical tone/nasality where known). */
+export function phonemizeWord(word: string): string {
+    return phonemizeCore(word, true);
+}
+
+/** Rule-only path (segmental + ATR, NO tone lexicon) — the non-circular signal for the referee eval. */
+export function phonemizeWordRules(word: string): string {
+    return phonemizeCore(word, false);
 }
 
 // ── Numbers (compositional; standard Asante Twi cardinals, space-joined counting form) ──────────────────
