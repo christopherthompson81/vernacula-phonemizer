@@ -1,0 +1,31 @@
+// Native canonical-IPA definition for Central Kurdish / Sorani / کوردیی ناوەندی (ckb) — Iranian (Northwestern),
+// ~8M speakers (Iraqi Kurdistan + western Iran). The SORANI alphabet: a modified Perso-Arabic script that — unlike
+// the Arabic/Persian/Urdu ABJADS — is a nearly FULL alphabet: it writes all the LONG vowels (ا→aː, ێ→eː, ۆ→oː,
+// وو→uː, ی→iː) AND the short /a/ (ە). The ONE vowel it does NOT write is the short /ɪ/ (the "bizroke"), which is
+// epenthetic in consonant clusters (ئاسن→ʔaːsɪn) — so, like the abjad short-vowel wall (sd/ur/skr) but MUCH
+// smaller, that short /ɪ/ is folded in the referee eval. Complements the Latin-script Kurmanji (kmr).
+//
+// Signatures: the PHARYNGEALS ح→ħ, ع→ʕ; the velarised ڵ→ɫ vs plain ل→l; the trill ڕ→r vs the tap ر→ɾ; ئ→ʔ (the
+// word-initial hamza/glottal onset); ق→q, غ→ɣ, x→خ; ژ→ʒ, چ→t͡ʃ, ج→d͡ʒ. Read by a left-to-right greedy scan (the وو
+// digraph, then single letters) + the و/ی glide resolution + н→ŋ before a velar. Validated against wikipron
+// ckb_arab_broad (94.1%) + kaikki ckb (93.4%), both human. See docs/investigations/ckb_native_bringup_investigation.md.
+{
+    "language": "ckb",
+    "name": "Central Kurdish (Sorani)",
+    "script": "Sorani (Perso-Arabic)",
+    "provenance": "Authored from the Sorani alphabet→phonology; calibrated to wikipron ckb_arab_broad + kaikki ckb (both human). The unwritten short /ɪ/ is folded (bizroke).",
+
+    "consonants": {
+        "ب": "b", "پ": "p", "ت": "t", "ج": "d͡ʒ", "چ": "t͡ʃ", "ح": "ħ", "خ": "x", "د": "d", "ر": "ɾ", "ڕ": "r",
+        "ز": "z", "ژ": "ʒ", "س": "s", "ش": "ʃ", "ع": "ʕ", "غ": "ɣ", "ف": "f", "ڤ": "v", "ق": "q", "ک": "k",
+        "گ": "ɡ", "ل": "l", "ڵ": "ɫ", "م": "m", "ن": "n", "ه": "h", "ھ": "h"
+    },
+
+    "vowels": {
+        "ا": "aː", "ە": "a", "ێ": "eː", "ۆ": "oː"
+    },
+
+    "clausePunctuation": {
+        "،": " , ", "؛": " ; ", "؟": " ? ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ":": " : ", "…": " . "
+    }
+}
