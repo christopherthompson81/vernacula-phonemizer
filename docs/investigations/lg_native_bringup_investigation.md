@@ -46,3 +46,34 @@ verification of the recent bring-ups (weaker than Wolof/Bambara, which had human
 - **NUMBERS** — deferred (digits pass through).
 
 Gold: `test/luganda.test.ts`. Floor `lg: 0.97`.
+
+## Run 1b — fieldwork cross-check (Leiden phonology sketch)
+
+The user supplied a second reference — a **Luganda phonology sketch** (Leiden University fieldwork course, based on
+elicitation with a native Kampala speaker). It CONFIRMS the g2p's core decisions and, importantly, offsets the
+circular-epitran weakness by grounding the key choices in a second *independent human* source:
+
+- **⟨c⟩=/c/, ⟨j⟩=/ɟ/ palatal PLOSIVES — doubly confirmed.** §2.2.3–2.2.4 explicitly argue for plosives over
+  affricates (the language has no /ʃ ʒ/; the phonemic palatal nasal /ɲ/ makes the palate an active place). So our
+  deliberate divergence from epitran's tʃ/dʒ now rests on Wikipedia + this fieldwork sketch, not one source.
+- **Prenasalisation + pre-prenasal vowel lengthening** (eembuto→ɛːmbuto, musamvu→musaːmvu, buganda→bugaːnda;
+  §1.3, §2.5), **gemination** → [Cː] (omubbi→omubːi; §1.8), **labialisation** ⟨Cw⟩→Cʷ (§1.7), **⟨ng'⟩→ŋ** distinct
+  from ⟨ng⟩→ᵑɡ (the speaker insists ŋŋamba, not *nggamba; §2.4.4), **⟨ny⟩→ɲ**, and the **l~r** allophony (written
+  in the orthography; §2.7.1) — all as we render them.
+
+**Documented deferrals the sketch reveals** (all allophonic / morphophonemic, and epitran does none of them, so no
+eval impact — noted for canonical completeness):
+- **/b/→[β] intervocalic spirantisation** (kabaka→kaβaka, okubá→okuβá — the speaker's "it sounds like Spanish");
+  blocked by gemination and after a nasal. Prominent and characteristic, but predictable/allophonic → we emit [b]
+  (matching epitran).
+- **Word-initial vowel lengthening** (V→VV on noun-class prefixes: omuntu→[oː.mu.ⁿtu]) — morphophonemic.
+- **Palatalisation glide** (prefix /i/ → [j] before a vowel: ebi-oya→ebjoːja) — epitran's i→j rule, which we skip;
+  loanword-dominant in the residual.
+
+**One convention note:** the sketch's Kampala speaker realises the mid vowels as **open-mid [ɛ ɔ]** (⟨e⟩=/ɛ/,
+⟨o⟩=/ɔ/); we emit **close-mid e/o**, matching epitran and the standard Luganda literature (Cole, Hyman). In a
+5-vowel system with no e/ɛ (or o/ɔ) contrast this is a free transcription choice — not a defect.
+
+**Net:** no code change. The bring-up is validated by an independent human source, and the pivotal c/ɟ decision is
+now well-grounded despite the circular machine referee. The verdict is unchanged (🔷 single-source for the *eval*),
+but confidence in the g2p is materially higher.
