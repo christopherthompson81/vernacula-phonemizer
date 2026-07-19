@@ -1,0 +1,133 @@
+code	name	family	script	l1_speakers	l2_speakers	wikipron_entries	kaikki_entries	epitran	espeak	decision	rejection_reason	verdict	pr	notes
+acm	Iraqi Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡		
+acw	Hijazi Arabic	Semitic (Arabic)	Arabic	11000000		1891	1	0	0	implemented		🔷		
+aeb	Tunisian Arabic	Semitic (Arabic)	Arabic	12000000						unimplemented	data scarcity			No wikipron, no kaikki.
+aec	Sa'idi Arabic (Upper Egypt)	Semitic (Arabic)	Arabic	25000000						unimplemented	data scarcity			No wikipron, no kaikki.
+afb	Gulf Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡		
+ajp	South Levantine Arabic	Semitic (Arabic)	Arabic	10000000		2513	1	0	0	implemented		🔷		
+ak	Akan (Twi)	Niger-Congo (Kwa)	Latin	11000000	9000000					implemented		🔷		
+am	Amharic	Semitic (Ethiosemitic)	Ge'ez	35000000	25000000					implemented		🟡		
+apc	North Levantine Arabic	Semitic (Arabic)	Arabic	30000000						implemented		🟡		
+apd	Sudanese Arabic	Semitic (Arabic)	Arabic	32000000		0	0	0	0	implemented		🔷		
+ar	Arabic (MSA)	Semitic (Arabic)	Arabic	0	274000000					implemented		✅		
+arq	Algerian Arabic	Semitic (Arabic)	Arabic	40000000						unimplemented	data scarcity			No wikipron, no kaikki — cannot verify (would be authored-blind, the bho trap). Largest missing Arabic dialect.
+ars	Najdi Arabic	Semitic (Arabic)	Arabic	30000000						unimplemented	data scarcity			No wikipron, no kaikki.
+ary	Moroccan Arabic	Semitic (Arabic)	Arabic	29000000						implemented		🟡		
+arz	Egyptian Arabic	Semitic (Arabic)	Arabic	78000000	25000000					implemented		🟡		
+as	Assamese	Indo-Aryan (Eastern)	Eastern Nagari (Assamese)	15000000						implemented		🟡		
+awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		⛔		
+ayl	Libyan Arabic									implemented		🟡		
+az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅		
+azb	South Azerbaijani	Turkic (Oghuz)	Arabic	13000000						unimplemented	variant without sufficient vowel-encoding			Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
+bal	Balochi	Iranian (NW)	Arabic	9000000						unimplemented				Complements done fa/ps/ckb.
+bg	Bulgarian	Slavic (South)	Cyrillic	8000000		46034	47616	0	1	implemented		✅		
+bgc	Haryanvi	Indo-Aryan	Devanagari	10000000						unimplemented				Hindi belt.
+bho	Bhojpuri	Indo-Aryan	Devanagari	52000000						implemented		⛔		
+bm	Bambara	Mande	Latin/N'Ko	14000000						implemented		🔷		
+bn	Bengali	Indo-Aryan (Eastern)	Bengali	240000000	40000000					implemented		🟡		
+bo	Tibetan	Sino-Tibetan	Tibetan	6000000						unimplemented				Large orthography-to-sound gap (historical spelling).
+ca	Catalan	Romance	Latin	4000000	5000000					implemented		✅		
+ceb	Cebuano	Austronesian (Philippine)	Latin	20000000						implemented		✅		
+cjy	Jin Chinese	Sinitic	Han	47000000						implemented		🔷		
+ckb	Central Kurdish (Sorani)	Iranian (NW)	Arabic (Sorani)	8000000		972	1037	1	1	implemented		🟡		
+cmn	Mandarin Chinese	Sinitic	Han	940000000	200000000					implemented		✅		
+cs	Czech	Slavic (West)	Latin	10000000						implemented		✅		
+ctg	Chittagonian	Indo-Aryan (Eastern)	(no standard script)	13000000						rejected	unsuitable orthography			Built then REMOVED — 3 competing scripts, no community-adopted standard. Contrast bho/awa/syl (real script tradition).
+cy	Welsh	Celtic (Brythonic)	Latin	900000						implemented		✅		
+de	German	Germanic	Latin	76000000	56000000					implemented		✅		
+ee	Ewe	Niger-Congo (Kwa)	Latin	7000000						unimplemented				Ghana/Togo.
+el	Greek	Hellenic	Greek	13000000						implemented		🟡		
+en	English	Germanic	Latin	380000000	1080000000					implemented		✅		
+es	Spanish	Romance	Latin	485000000	75000000					implemented		✅		
+es-419	Spanish (Latin American)	Romance	Latin	420000000						implemented		✅		
+fa	Persian (Iranian)	Iranian (SW)	Arabic (Persian)	60000000	50000000					implemented		🟡		
+ff	Fula	Niger-Congo (Atlantic)	Latin	25000000						implemented		✅		
+fr	French	Romance	Latin	80000000	230000000					implemented		✅		
+ga	Irish	Celtic (Goidelic)	Latin	100000	1700000					implemented		✅		
+gan	Gan Chinese	Sinitic	Han	22000000						implemented		🔷		
+gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡		
+ha	Hausa	Afro-Asiatic (Chadic)	Latin/Ajami	54000000	40000000					implemented		✅		
+hak	Hakka Chinese	Sinitic	Han	44000000						implemented		🔷		
+hi	Hindi	Indo-Aryan	Devanagari	345000000	265000000					implemented		✅		
+hil	Hiligaynon	Austronesian (Philippine)	Latin	9000000						unimplemented				Philippine Latin.
+hne	Chhattisgarhi	Indo-Aryan	Devanagari	18000000						implemented		⛔		
+hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷		
+hu	Hungarian	Uralic	Latin	13000000						implemented		✅		
+id	Indonesian	Austronesian (Malayic)	Latin	70000000	130000000					implemented		🟢		
+ig	Igbo	Niger-Congo (Volta-Niger)	Latin	31000000						implemented		🔷		
+ilo	Ilocano	Austronesian (Philippine)	Latin	8000000	2000000					unimplemented				Sibling of done ceb/tl.
+it	Italian	Romance	Latin	65000000						implemented		✅		
+ja	Japanese	Japonic	Japanese (kanji+kana)	123000000						implemented		✅		
+jv	Javanese	Austronesian	Latin/Javanese	68000000						implemented		🟡		
+ki	Kikuyu (Gikuyu)	Niger-Congo (Bantu)	Latin	8000000						unimplemented				Kenya Bantu.
+kk	Kazakh	Turkic (Kipchak)	Cyrillic/Latin	13000000						implemented		✅		
+km	Khmer	Austroasiatic	Khmer	17000000						implemented				
+kmr	Kurmanji (Northern Kurdish)	Iranian (NW)	Latin (Hawar)	15000000						implemented		✅		
+kn	Kannada	Dravidian	Kannada	44000000	15000000					implemented		✅		
+ko	Korean	Koreanic	Hangul	81000000						implemented		✅		
+kok	Konkani	Indo-Aryan (Southern)	Devanagari	2000000						unimplemented				Was in espeak-portable; small.
+kr	Kanuri	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella			Kanuri is a cover term (Yerwa, Manga, …).
+ks	Kashmiri	Indo-Aryan (Dardic)	Arabic (Kashmiri)	7000000						unimplemented				Dardic; vowel-rich abjad.
+lg	Luganda	Niger-Congo (Bantu)	Latin	6000000	5000000					implemented		🔷		
+ln	Lingala	Niger-Congo (Bantu)	Latin	20000000	20000000					implemented		🔷		
+lo	Lao	Kra-Dai	Lao	30000000						implemented		🟡		
+mad	Madurese	Austronesian	Latin	14000000						implemented		🔷		
+mag	Magahi	Indo-Aryan	Devanagari	14000000						unimplemented				Hindi-belt sibling of done bho/mai; referee availability not yet probed.
+mai	Maithili	Indo-Aryan	Devanagari	34000000						implemented		🔷		
+mg	Malagasy	Austronesian (Barito)	Latin	25000000						implemented		🔷		
+ml	Malayalam	Dravidian	Malayalam	37000000						implemented		✅		
+mn	Mongolian (Khalkha)	Mongolic	Cyrillic	6000000						unimplemented				Cyrillic (+ traditional Mongolian script).
+mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						unimplemented				Burkina Faso; new branch (Gur).
+mr	Marathi	Indo-Aryan	Devanagari	83000000	16000000					implemented		🟡		
+my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅		
+nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡		
+ne	Nepali	Indo-Aryan	Devanagari	16000000						implemented		🟡		
+nl	Dutch	Germanic	Latin	25000000						implemented		🟡		
+nso	Northern Sotho (Sepedi)	Niger-Congo (Bantu)	Latin	5000000	9000000					unimplemented				SA official; Latin Bantu.
+nya	Chichewa (Nyanja)	Niger-Congo (Bantu)	Latin	14000000						implemented		✅		
+om	Oromo	Afro-Asiatic (Cushitic)	Latin	37000000						implemented		✅		
+or	Odia	Indo-Aryan (Eastern)	Odia	35000000						implemented		✅		
+pa	Punjabi (Eastern)	Indo-Aryan	Gurmukhi	113000000						implemented		🟡		
+pcm	Nigerian Pidgin	English creole	Latin	5000000	116000000					implemented		🔷		
+pl	Polish	Slavic (West)	Latin	40000000						implemented		✅		
+pnb	Western Punjabi (Lahnda)	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	66000000						implemented		🟡		
+ps	Pashto	Iranian (Eastern)	Arabic (Pashto)	40000000						implemented		🟡		
+pt	Portuguese	Romance	Latin	240000000	25000000					implemented		✅		
+raj	Rajasthani	Indo-Aryan	Devanagari	20000000						unimplemented	macrolanguage umbrella			Cover term (Marwari, Dhundhari, …), not a single phonology.
+rn	Kirundi	Niger-Congo (Bantu)	Latin	11000000						implemented		🔷		
+ro	Romanian	Romance	Latin	24000000	4000000					implemented		🟡		
+ru	Russian	Slavic (East)	Cyrillic	150000000	110000000					implemented		✅		
+rw	Kinyarwanda	Niger-Congo (Bantu)	Latin	12000000						implemented		🔷		
+sat	Santali	Austroasiatic (Munda)	Ol Chiki	7000000						unimplemented				New script family (Ol Chiki).
+sd	Sindhi	Indo-Aryan	Arabic (Sindhi)	33000000						implemented		🟡		
+si	Sinhala	Indo-Aryan	Sinhala	16000000	2000000					implemented		✅		
+skr	Saraiki	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	26000000						implemented		🔷		
+sn	Shona	Niger-Congo (Bantu)	Latin	9000000						implemented		🔷		
+so	Somali	Afro-Asiatic (Cushitic)	Latin	22000000						implemented		✅		
+sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅		
+st	Southern Sotho (Sesotho)	Niger-Congo (Bantu)	Latin	6000000	8000000					unimplemented				SA official; Latin Bantu sibling of done tn. Good candidate.
+su	Sundanese	Austronesian	Latin	32000000						implemented		✅		
+sv	Swedish	Germanic	Latin	10000000						implemented		✅		
+sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅		
+syl	Sylheti	Indo-Aryan (Eastern)	Syloti Nagri	11000000		397	492	0	0	implemented		🔷		
+ta	Tamil	Dravidian	Tamil	79000000	8000000					implemented		✅		
+te	Telugu	Dravidian	Telugu	83000000	13000000					implemented		✅		
+tg	Tajik	Iranian (SW)	Cyrillic	8000000	4000000					unimplemented				Persian variety in Cyrillic — different script from done fa.
+th	Thai	Kra-Dai	Thai	60000000	40000000					implemented		✅		
+ti	Tigrinya	Semitic (Ethiosemitic)	Ge'ez	9000000		0	26	1	0	implemented		🔷		
+tl	Tagalog	Austronesian (Philippine)	Latin	28000000	60000000					implemented		🟢		
+tn	Setswana	Niger-Congo (Bantu)	Latin	6000000	8000000					implemented		🔷		
+tr	Turkish	Turkic (Oghuz)	Latin	84000000	6000000					implemented		✅		
+ug	Uyghur	Turkic (Karluk)	Arabic (Uyghur)	11000000						implemented		✅		
+uk	Ukrainian	Slavic (East)	Cyrillic	33000000						implemented		✅		
+ur	Urdu	Indo-Aryan	Arabic (Urdu)	70000000	160000000					implemented		🟡		
+uz	Uzbek	Turkic (Karluk)	Latin/Cyrillic	35000000						implemented		✅		
+vi	Vietnamese	Austroasiatic	Latin	85000000						implemented		✅		
+wo	Wolof	Niger-Congo (Atlantic)	Latin	5000000	7000000					implemented		🔷		
+wuu	Wu Chinese (Shanghainese)	Sinitic	Han	83000000						implemented		🔷		
+xh	Xhosa	Niger-Congo (Bantu)	Latin	8000000	11000000					implemented		✅		
+yo	Yoruba	Niger-Congo (Volta-Niger)	Latin	46000000						implemented		✅		
+yue	Cantonese (Yue)	Sinitic	Han	86000000						implemented		✅		
+za	Zhuang	Kra-Dai	Latin/Sawndip	16000000						implemented		🔷		
+zsm	Standard Malay	Austronesian (Malayic)	Latin	20000000	60000000					rejected	macrolanguage umbrella			Mutually intelligible with and covered by Indonesian (id).
+zu	Zulu	Niger-Congo (Bantu)	Latin	12000000	16000000					implemented		✅		
