@@ -90,3 +90,35 @@ Plus a transcriber-variant fold `ɑ~a` (the short low-central vowel is written b
 **Verdict: 🔵 in active development, Phase 2 (48.7%).** The sesquisyllabic core the earlier runs deferred is now
 built and Huffman-grounded. Further gains are per-loanword lexical work (a pronunciation lexicon for the Pali/French
 stratum) rather than more structure. Gold: test/khmer.test.ts now pins one word per structural rule.
+
+## Run 4 — geminates, phoneme mapping, rules, and referee normalisation, 48.7 → 55.0%
+Run 3's "the tail is lexical" was WRONG (user pushback: "That sounds like geminates, phoneme mapping, rules, and
+referee problems"). Bucketing every residual by mechanism (not eyeballing the top-12) found five systematic
+classes, each fixed by a rule or a fair referee-normalising fold:
+
+1. **Unwritten minor-syllable glottal /ʔ/ (Huffman IX.B.2)** — the referee puts a /ʔ/ after most short open
+   syllables (កថា→kaʔtʰaː), but it's OPTIONAL medially ("present in reading, lost in colloquial" — the referee
+   carries both variants, e.g. ធនាគារ tʰeəʔ…~tʰɔː…). Adding ʔ to our output NET-HURT (−1.2pp: our no-ʔ already
+   matched the colloquial variant). The right move was a FOLD dropping pre-consonantal ʔ on both sides. +1.8pp.
+2. **Multi-char vowels ⟨ះ⟩/⟨ំ⟩** — a base vowel sign + reahmuk (-h) / nikahit (-m) was dropping the coda entirely
+   (កកេះ → kakeː, should be kakeh). Added a `vowelCombos` table (ោះ→ɑh/uəh, ុះ→oh/uh, េះ→eh, ុំ→om/um, ាំ→am)
+   derived from the referee. Part of +1.3pp.
+3. **Bantaq (់)** — was ignored. It (a) marks a coda (កង់→kaŋ, not kaŋa as a spurious syllable) and (b) shortens
+   the vowel (កាត់→kat, not kaːt). Both fixed. Part of +1.3pp.
+4. **Inherent-vowel LENGTH by coda type** — the big one. A stressed CLOSED inherent is LONG on a plain coda
+   (កង→kɑːŋ, គង→kɔːŋ) but SHORT on a silent-subscript/doubled coda (ចន្ទ→cɑn, រដ្ឋ→ruət) or bantaq (ចង់→cɑŋ);
+   Run 3 wrongly made all closed syllables short. Tracked `codaShort` = "the coda came from a silent subscript".
+   This also fixed the nasal-split words (តម្រង→tɑmrɑːŋ). +0.2pp folded but +108 raw.
+5. **Epenthesis over-generation** — a medial bare consonant after a written-vowel syllable is that syllable's
+   CODA, not a minor syllable (គីមឈី→kiːmcʰiː, not kiːmɔcʰiː). +0.4pp. (Collapses the rarer internal-doubling
+   minor syllable ចេតនā→ceːtnaː — an etymological split with no spelling cue; the data favours coda-attachment.)
+6. **Phoneme mapping**: ⟨ប៉⟩ (muusikatoan) → [p] not [ɓ] (កប៉ាល់→kɑpal); ិ o-series → ɨ.
+7. **Referee notation folds**: breve short-vowel marks (ŭə~uə, ŏə~oə, ĕə~eə) and INCONSISTENT aspiration
+   (kʰ~k both directions — កំប្លែង kampʰlaeŋ~kamplaeŋ, ខ្ញុំ kɲom deaspirated). Our output keeps canonical
+   per-letter aspiration; the folds only stop the noisy referee from penalising it. +2.6pp combined.
+
+**Where the number actually sits: 55.0% folded (57.4% on unique words).** The genuine residual is now:
+the internal-doubling minor-syllable/coda ambiguity (unpredictable from spelling — cf. ចេតនā vs គីមឈី), a stack
+of per-loanword Pali/Sanskrit vowel irregularities each ≤2×, and remaining referee variance (ei~eː for ⟨េ⟩
+o-series; ɨ~i for ⟨ិ⟩). This IS a lexical/ambiguity tail now — but Run 4 showed most of what looked lexical at
+48.7% was in fact five systematic rules + referee noise, exactly as suspected.

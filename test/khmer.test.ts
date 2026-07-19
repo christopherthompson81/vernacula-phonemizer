@@ -25,14 +25,26 @@ describe("Khmer canonical IPA — two-series sesquisyllabic core (Phase 2)", () 
 
     test("governance: the vowel series is set by the last preceding dominant (stop/spirant), across the word", () => {
         expect(phonemizeWord("ផ្ទះ")).toBe("pʰteəh"); // both dominant → the SUBSCRIPT ទ (o-series) governs ះ → eəh
-        expect(phonemizeWord("ចេតនា")).toBe("ceːtɑnaː"); // passive ន harmonises to a-series from the preceding ត → naː
+        expect(phonemizeWord("ចេតនា")).toBe("ceːtnaː"); // passive ន harmonises to a-series from the preceding ត → naː (not niə)
     });
 
     test("sesquisyllabic structure: presyllable reduction, coda assignment, nasal medial-cluster split", () => {
         expect(phonemizeWord("កករ")).toBe("kɑkɑː"); // presyllable kɑ (short) + stressed kɑː (long, ⟨រ⟩ silent)
         expect(phonemizeWord("កណ្ដាល")).toBe("kɑnɗaːl"); // presyllable kɑ + main nɗaːl (ɗ governs ា; ⟨ល⟩ coda)
-        expect(phonemizeWord("តម្រង")).toBe("tɑmrɑŋ"); // nasal ⟨ម⟩ closes syllable 1, subscript ⟨រ⟩ opens syllable 2
-        expect(phonemizeWord("ចន្ទ")).toBe("cɑn"); // stressed closed short inherent; silent final subscript ⟨្ទ⟩
-        expect(phonemizeWord("គណ")).toBe("kuən"); // 2nd-series stressed-closed short inherent → uə
+        expect(phonemizeWord("តម្រង")).toBe("tɑmrɑːŋ"); // nasal ⟨ម⟩ closes syllable 1, subscript ⟨រ⟩ opens syllable 2
+    });
+
+    test("inherent-vowel length: plain coda LONG, silent-subscript/bantaq coda SHORT (Huffman IX.A)", () => {
+        expect(phonemizeWord("កង")).toBe("kɑːŋ"); // plain coda → long ɑː
+        expect(phonemizeWord("គង")).toBe("kɔːŋ"); // 2nd-series plain coda → long ɔː
+        expect(phonemizeWord("ចន្ទ")).toBe("cɑn"); // silent final subscript ⟨្ទ⟩ → short
+        expect(phonemizeWord("រដ្ឋ")).toBe("ruət"); // 2nd-series silent-subscript → short uə
+        expect(phonemizeWord("កាត់")).toBe("kat"); // bantaq shortens ⟨ា⟩ aː → a
+    });
+
+    test("multi-char vowels: base sign + ⟨ះ⟩ (-h) / ⟨ំ⟩ (-m)", () => {
+        expect(phonemizeWord("កោះ")).toBe("kɑh"); // ⟨ោះ⟩ a-series → ɑh
+        expect(phonemizeWord("ចុះ")).toBe("coh"); // ⟨ុះ⟩ a-series → oh
+        expect(phonemizeWord("ជុំ")).toBe("cum"); // ⟨ុំ⟩ o-series → um
     });
 });
