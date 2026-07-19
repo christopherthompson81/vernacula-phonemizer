@@ -31,6 +31,27 @@ data-availability verdicts** every time we pick the next language.
 row **must not**; an `unimplemented` row **may** carry one as a provisional blocker (e.g. Algerian Arabic →
 `data scarcity`). The CHECK constraints enforce this.
 
+**`served_by`** records when a language is `implemented` as a **labelled approximation on another language's
+engine** rather than a bespoke module (e.g. `mag` served_by `bho`).
+
+## Policy: shared-engine families (the Hindi belt, etc.)
+
+Several families share one engine + a thin per-language delta (the Hindi-belt languages are all `makeNativeHindi` +
+a small data file). The Hindi engine alone already reproduces a bespoke belt module ~86–90% on Devanagari text —
+the deltas are small (Bhojpuri श→s + diphthongs = 13.5%; Chhattisgarhi 9.6%; Awadhi 13.7%; Maithili is the outlier
+at 45%). This does **not** mean "just tell users to use Hindi": that degrades to Hindi on exactly the distinctive
+features, mislabels TTS training audio, and — for recognised languages (Maithili is 8th-Schedule; Bhojpuri/Magahi
+have active recognition movements) — erases identity the way the 1961 census did. So the policy is:
+
+| the language has… | ship |
+|---|---|
+| a **verifiable or documented** delta (referee, or a real grammar: Shukla/Saksena/Kavyopadhyaya) | a **bespoke** module (`bho`, `awa`, `hne`, `mai`) |
+| **no defensible** Magahi-specific delta + no referee | an **alias to the nearest verified sibling** (`served_by`), labelled — never an invented bespoke clone |
+
+Keep every belt language a **first-class code** (discoverability + dignity); tier the *implementation* by what we
+can defend. Reserve the "accent variant" mechanism (`en-GB`, `es-419`, `pt-BR`) for genuine single-language regional
+variation, **not** for distinct belt languages.
+
 ## Query
 
 ```sh
