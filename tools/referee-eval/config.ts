@@ -14,6 +14,10 @@ export interface Referee {
     file: string;
     source: string;
     role: "primary" | "secondary";
+    /** Folds applied to THIS referee only (after the shared language folds) — for a dual-script language where a
+     *  fold is valid for one script but not another (e.g. the majhūl و/ی quality is unrecoverable in the Shahmukhi
+     *  abjad but written in Gurmukhi, so pa folds it only for the pan_arab referee). Compiled from the jsonc. */
+    folds?: [RegExp, string, string][];
 }
 
 export interface RefLang {
@@ -75,7 +79,10 @@ function loadLang(code: string): RefLang {
         stripJsonc(readFileSync(join(LANGS_DIR, `${code}.jsonc`), "utf8")),
     ) as RawLang;
     return {
-        referees: raw.referees,
+        referees: raw.referees.map((r) => {
+            const rr = r as Referee & { folds?: RawFold[] };
+            return rr.folds ? { ...r, folds: compile(rr.folds) } : r;
+        }),
         ...(raw.secondaryGap ? { secondaryGap: raw.secondaryGap } : {}),
         ...(raw.segmentJoin ? { segmentJoin: true } : {}),
         ...(raw.preFolds ? { preFolds: compile(raw.preFolds) } : {}),
