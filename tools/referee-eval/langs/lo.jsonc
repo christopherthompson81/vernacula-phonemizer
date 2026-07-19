@@ -1,0 +1,17 @@
+// Lao (lo) — Brahmic abugida, authored rule g2p. kaikki Lao (Wiktionary, HUMAN, tone-marked). Tones are Chao on
+// both sides (stripped by the backbone) → pure SEGMENTAL check. Folds: syllable-dot notation, ʔ glottal, tap.
+{
+    "referees": [
+        { "file": "lo.kaikki-lao.tsv", "source": "kaikki Lao (Wiktionary, human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "secondaryGap": "no independent second source (no wikipron Lao broad); kaikki is the single referee.",
+    "folds": [
+        { "pattern": "[.]", "replace": "", "note": "kaikki marks syllable boundaries with a dot; ours joins — drop" },
+        { "pattern": "̚", "replace": "", "note": "unreleased-stop diacritic on final stops — allophonic notation" },
+        { "pattern": "[()]", "replace": "", "note": "kaikki wraps an optional secondary tone in parens ˩(˧) — after the backbone strips the Chao letters, the bare parens remain; drop them" },
+        { "pattern": "ʷ", "replace": "w", "note": "labialised onset ʷ ~ w cluster — notation" },
+        { "pattern": "̯", "replace": "", "note": "non-syllabic offglide mark on diphthong 2nd element — notation" },
+        { "pattern": "ʔ", "replace": "", "note": "glottal onset/coda on open short syllables — allophonic" }
+    ]
+}

@@ -1,0 +1,223 @@
+/**
+ * Lao (lo) phonemizer — canonical IPA, espeak-independent (authored). Lao is a Brahmic ABUGIDA, a sibling of Thai
+ * but with a MORE PHONEMIC orthography (the Lao-PDR reforms stripped most Indic etymological spelling), so a leaner
+ * rule g2p suffices — no Sanskrit-reading dictionary. Like Thai: leading vowels (ເ ແ ໂ ໃ ໄ) are written BEFORE the
+ * consonant and reordered; the vowel is a (often discontinuous) pattern of signs around the onset; tone is computed
+ * from consonant CLASS × live/dead × length × tone mark. Tones are Chao contour letters (stripped by the eval
+ * backbone). See docs/investigations/lo_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+
+type Cls = "high" | "mid" | "low";
+
+// Onset consonant → [IPA, tonal class]. ຫ/ຮ = h; ອ = glottal ʔ; ວ onset = w. The ຫ-led sonorants (ໜ ໝ, ຫຼ ຫງ …)
+// become HIGH class — handled in the scanner.
+const CONS: Record<string, [string, Cls]> = {
+    ກ: ["k", "mid"], ຂ: ["kʰ", "high"], ຄ: ["kʰ", "low"], ງ: ["ŋ", "low"],
+    ຈ: ["t͡ɕ", "mid"], ສ: ["s", "high"], ຊ: ["s", "low"], ຍ: ["ɲ", "low"],
+    ດ: ["d", "mid"], ຕ: ["t", "mid"], ຖ: ["tʰ", "high"], ທ: ["tʰ", "low"],
+    ນ: ["n", "low"], ບ: ["b", "mid"], ປ: ["p", "mid"], ຜ: ["pʰ", "high"],
+    ຝ: ["f", "high"], ພ: ["pʰ", "low"], ຟ: ["f", "low"], ມ: ["m", "low"],
+    ຢ: ["j", "mid"], ຣ: ["l", "low"], ລ: ["l", "low"], ວ: ["ʋ", "low"],
+    ຫ: ["h", "high"], ອ: ["ʔ", "mid"], ຮ: ["h", "low"],
+    ໜ: ["n", "high"], ໝ: ["m", "high"], // precomposed ຫນ/ຫມ
+};
+// Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
+const CODA: Record<string, string> = {
+    ກ: "k̚", ດ: "t̚", ບ: "p̚", ງ: "ŋ", ນ: "n", ມ: "m", ຍ: "j", ວ: "w",
+};
+
+// Vowel signs (combining/spacing) used by the scanner.
+const LEAD = new Set(["ເ", "ແ", "ໂ", "ໃ", "ໄ"]); // written before the consonant
+const TONEMARK = new Set(["່", "້", "໊", "໋"]);
+const isCons = (c: string): boolean => c in CONS;
+
+/** Reorder a leading vowel (ເ ແ ໂ ໃ ໄ) to AFTER its consonant (cluster): ເມ → ມເ, so the scanner reads L→R. */
+function reorder(w: string): string {
+    const s = [...w.normalize("NFC")];
+    const out: string[] = [];
+    for (let i = 0; i < s.length; i++) {
+        if (LEAD.has(s[i]!) && isCons(s[i + 1] ?? "")) {
+            // move the lead vowel past the consonant (+ a ຫ/ວ/ຼ cluster member)
+            let j = i + 1;
+            let cons = s[j++]!;
+            if ((cons === "ຫ" || cons === "ວ") && isCons(s[j] ?? "")) cons += s[j++]!;
+            out.push(cons, s[i]!);
+            i = j - 1;
+        } else out.push(s[i]!);
+    }
+    return out.join("");
+}
+
+interface Syl {
+    onset: string; // IPA
+    cls: Cls;
+    quality: string; // vowel IPA (no length)
+    long: boolean;
+    glide: string; // diphthong offglide or vowel-derived coda (j/w/m)
+    coda: string; // IPA coda
+    mark: string; // tone mark char
+    live: boolean;
+}
+
+// After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
+// `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
+// This is the crux of Lao g2p; extended iteratively against the kaikki referee.
+function resolveVowel(
+    pre: string,
+    after: string[],
+): { q: string; long: boolean; glide: string; used: number } | null {
+    const a0 = after[0] ?? "", a1 = after[1] ?? "";
+    const two = a0 + a1;
+    // helper
+    const R = (q: string, long: boolean, glide: string, used: number) => ({ q, long, glide, used });
+    // ---- LEADING-vowel patterns (pre set) ----
+    if (pre === "ໄ" || pre === "ໃ") return R("a", false, "j", 0); // ໄC/ໃC → aj
+    if (pre === "ເ") {
+        if (a0 === "ົ" && a1 === "າ") return R("a", false, "w", 2); // ເົາ → aw
+        if (a0 === "ຶ" && (a1 === "ອ" || true)) return R("ɯːə", false, "", a1 === "ອ" ? 2 : 1); // ເຶອ → ɯə
+        if (a0 === "ື" && a1 === "ອ") return R("ɯːə", false, "", 2); // ເືອ → ɯːə
+        if (a0 === "ຍ") return R("iːə", false, "", 1); // ເ...ຍ → iːə
+        if (a0 === "ິ") return R("ɤ", false, "", 1); // ເິ → ɤ
+        if (a0 === "ີ") return R("ɤ", true, "", 1); // ເີ → ɤː
+        if (a0 === "າ" && a1 === "ະ") return R("ɔ", false, "", 2); // ເາະ → ɔ
+        if (a0 === "ະ") return R("e", false, "", 1); // ເ...ະ → e
+        if (a0 === "ັ") return R("e", false, "", 1); // ເັC → e (closed short)
+        return R("e", true, "", 0); // ເ → eː
+    }
+    if (pre === "ແ") {
+        if (a0 === "ະ") return R("ɛ", false, "", 1);
+        if (a0 === "ັ") return R("ɛ", false, "", 1);
+        return R("ɛ", true, "", 0); // ແ → ɛː
+    }
+    if (pre === "ໂ") {
+        if (a0 === "ະ") return R("o", false, "", 1);
+        if (a0 === "ັ") return R("o", false, "", 1);
+        return R("o", true, "", 0); // ໂ → oː
+    }
+    // ---- NON-leading (signs after / above / below the consonant) ----
+    if (a0 === "ວ" && a1 === "າ") return R("uːə", false, "", 2); // ວາ → uːə (ຄວາຍ→kʰuːəj), NOT a kʷ cluster
+    if (two === "ົວ") return R("uːə", false, "", 2); // ົວ → uːə
+    if (a0 === "ົ" && a1 === "ະ") return R("o", false, "", 2); // ົະ (rare)
+    if (a0 === "ັ") return R("a", false, "", 1); // ັC → a (closed short "mai kan")
+    if (a0 === "ົ") return R("o", false, "", 1); // ົC → o (closed short "mai kong")
+    if (a0 === "ະ") return R("a", false, "", 1); // ະ → a
+    if (a0 === "າ" && a1 === "ະ") return R("a", false, "", 2);
+    if (a0 === "າ") return R("a", true, "", 1); // າ → aː
+    if (a0 === "ຳ") return R("a", false, "m", 1); // ຳ → am
+    if (a0 === "ິ") return R("i", false, "", 1);
+    if (a0 === "ີ") return R("i", true, "", 1);
+    if (a0 === "ຶ") return R("ɯ", false, "", 1);
+    if (a0 === "ື") return R("ɯ", true, "", 1);
+    if (a0 === "ຸ") return R("u", false, "", 1);
+    if (a0 === "ູ") return R("u", true, "", 1);
+    if (a0 === "ໍ") return R("ɔ", true, "", 1); // ໍ → ɔː
+    if (a0 === "ຽ") return R("iːə", false, "", 1); // ຽ → iːə
+    if (a0 === "ອ") return R("ɔ", true, "", 1); // C + ອ → ɔː (ອ as vowel)
+    if (a0 === "ວ") return R("uːə", false, "", 1); // C + ວ → uːə (open)
+    return null; // no vowel sign → inherent vowel handled by caller
+}
+
+const TONE_CHAO: Record<string, string> = { rising: "˩˧", low: "˧", mid: "˧", high: "˥", falling: "˥˩", lowfall: "˧˩" };
+/** Approximate Vientiane Lao tone (class × live/dead × length × mark). Chao letters are stripped by the eval. */
+function tone(cls: Cls, live: boolean, long: boolean, mark: string): string {
+    if (mark === "່") return cls === "low" ? TONE_CHAO.mid! : TONE_CHAO.low!; // mai ek
+    if (mark === "້") return cls === "low" ? TONE_CHAO.high! : TONE_CHAO.falling!; // mai tho
+    if (mark === "໊") return TONE_CHAO.high!;
+    if (mark === "໋") return TONE_CHAO.rising!;
+    if (live) return cls === "high" ? TONE_CHAO.rising! : cls === "mid" ? TONE_CHAO.low! : TONE_CHAO.high!;
+    // dead
+    return cls === "low" && !long ? TONE_CHAO.high! : cls === "low" ? TONE_CHAO.lowfall! : cls === "mid" ? TONE_CHAO.low! : TONE_CHAO.lowfall!;
+}
+
+/** Pull the tone marks (which combine ABOVE the onset and appear BEFORE the vowel signs in the stream: ຂ່າ)
+ *  out of the character stream so vowel-pattern matching sees contiguous vowel signs. Each mark is attached to
+ *  the most recent base consonant (its onset). Returns the mark-free chars + a map onset-index → mark. */
+function extractTones(chars: string[]): { clean: string[]; toneAt: Map<number, string> } {
+    const clean: string[] = [];
+    const toneAt = new Map<number, string>();
+    let lastCons = -1;
+    for (const c of chars) {
+        if (TONEMARK.has(c)) {
+            if (lastCons >= 0 && !toneAt.has(lastCons)) toneAt.set(lastCons, c);
+        } else {
+            if (isCons(c)) lastCons = clean.length;
+            clean.push(c);
+        }
+    }
+    return { clean, toneAt };
+}
+
+/** Scan one reordered Lao word into rendered IPA syllables. */
+function scan(word: string): string {
+    const { clean: s, toneAt } = extractTones([...word]);
+    const out: string[] = [];
+    let i = 0;
+    while (i < s.length) {
+        // onset: a consonant, possibly ຫ/ໜ/ໝ-led (high) or a Cຼ / Cວ cluster
+        let leadHigh = false;
+        const onsetIdx = i;
+        let c = s[i];
+        if (c === undefined || !isCons(c)) { i++; continue; }
+        let onsetCs = [c];
+        i++;
+        // ຫ + sonorant → the sonorant, HIGH class. ຼ (U+0EBC, the lam-ligature) after ຫ is the l-form → [l];
+        // it is NOT a base consonant, so it is matched explicitly.
+        if (c === "ຫ" && (s[i] === "ຼ" || (isCons(s[i] ?? "") && ["ງ", "ຍ", "ນ", "ມ", "ລ", "ວ"].includes(s[i]!)))) {
+            leadHigh = true; onsetCs = [s[i] === "ຼ" ? "ລ" : s[i]!]; i++;
+        }
+        // cluster: Cຼ (Cl) or Cວຽ (kʷ, labialised — only before the ຽ diphthong). Cວ + anything else (coda, າ,
+        // or bare) is the VOWEL uːə (nwat→nuːət, ຄວາຍ→kʰuːəj), handled in resolveVowel.
+        let cluster = "";
+        if (s[i] === "ວ" && s[i + 1] === "ຽ" && !LEAD.has(s[i - 1] ?? "")) { cluster = "ʷ"; i++; }
+        else if (s[i] === "ຼ") { cluster = "l"; i++; }
+        // the reordered leading vowel (if any) sits right here
+        let pre = "";
+        if (LEAD.has(s[i] ?? "")) { pre = s[i]!; i++; }
+        // collect following vowel signs / coda / tone (up to the next onset that starts a new syllable)
+        const rest = s.slice(i);
+        const rv = resolveVowel(pre, rest);
+        let quality = "a", long = false, glide = "", used = 0;
+        if (rv) { quality = rv.q; long = rv.long; glide = rv.glide; used = rv.used; }
+        else if (pre) { /* handled above */ }
+        else quality = "a"; // inherent vowel
+        i += used;
+        // tone mark was extracted up front (it combines above the onset), keyed by onset index (or the ຫ-lead).
+        const mark = toneAt.get(onsetIdx) ?? toneAt.get(onsetIdx + 1) ?? "";
+        // coda consonant (a final letter NOT starting a new vowelled syllable)
+        let coda = "";
+        const nx = s[i] ?? "";
+        if (!glide && nx in CODA) {
+            // it's a coda if it's the last char OR the next char is a consonant/lead (new syllable) or nothing
+            const after = s[i + 1] ?? "";
+            const followsVowel = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ", "ວ", "ອ"].includes(after) || LEAD.has(after);
+            if (!(isCons(nx) && followsVowel)) { coda = CODA[nx] ?? ""; i++; }
+        }
+        const onset = (leadHigh ? "" : "") + onsetCs.map((g) => CONS[g]?.[0] ?? "").join("") + cluster;
+        const cls: Cls = leadHigh ? "high" : (CONS[onsetCs[0]!]?.[1] ?? "mid");
+        const codaOut = coda || glide;
+        const live = codaOut === "" ? long : /[ŋnmjw]/.test(codaOut); // open-long or sonorant coda = live
+        out.push(onset + quality + (long ? "ː" : "") + tone(cls, live, long, mark) + codaOut);
+    }
+    return out.join(".");
+}
+
+const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
+
+/** One Lao word → canonical IPA. */
+export function phonemizeWord(word: string): string {
+    return scan(reorder(word));
+}
+
+class LaoPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[3] && ".!?…".includes(m[3])) sink.pause(" . ");
+        });
+    }
+}
+export function createLao(): Phonemizer {
+    return new LaoPhonemizer();
+}
