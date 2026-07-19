@@ -1,0 +1,17 @@
+// Wolof (wo) — Atlantic-Congo (Senegambian), Latin orthography, NON-tonal. Referee: kaikki Wolof (Wiktionary,
+// HUMAN — the only machine referee; no epitran/wikipron wol). The folds neutralise the referee's prosodic /
+// notation marks that the orthography doesn't determine: STRESS (ˈ), SYLLABLE dots, the variable word-initial
+// GLOTTAL onset [ʔ], and the geminate notation (CC ~ Cː). Vowel quality/length + gemination are compared directly.
+{
+    "language": "wo", "name": "Wolof", "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination from the Wolof Latin orthography. Referee: kaikki Wolof.",
+    "referees": [
+        { "file": "wo.kaikki-wol.tsv", "source": "kaikki Wolof (Wiktionary, human)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "ˈ", "replace": "", "note": "STRESS: the referee marks (initial-ish) stress; Wolof stress is not phonemic / not in the orthography — strip" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "ʔ", "replace": "", "note": "the word-initial GLOTTAL onset [ʔ] before a vowel is VARIABLE in the referee (aajo→ʔaːɟɔ but aada→aːda) → strip both sides (we do not emit it)" },
+        { "pattern": "([bcdfɡɟklmnpqrstwxɲŋ])\\1", "replace": "$1ː", "note": "GEMINATION: the referee occasionally writes a doubled consonant (jàmm→ɟaːmm) rather than the length mark; normalise CC→Cː" }
+    ]
+}
