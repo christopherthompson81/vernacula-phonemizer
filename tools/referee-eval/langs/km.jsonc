@@ -1,0 +1,11 @@
+// Khmer (km) — Austroasiatic, the Khmer two-series abugida. wikipron khm_khmr broad is a LARGE human referee (7107).
+// Non-tonal. The g2p renders base(series)→coeng→vowel(by series)→coda. segmentJoin joins the space-segmented IPA.
+{
+    "language": "km", "name": "Khmer", "script": "Khmer",
+    "provenance": "Authored two-series abugida; series + vowel two-readings derived from wikipron khm.",
+    "referees": [ { "file": "km.wikipron-khm-broad.tsv", "source": "wikipron khm_khmr broad (human)", "role": "primary" } ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "[ptkc]$", "replace": "ʔ", "note": "word-final voiceless stops are variably GLOTTALISED in the referee ([k]~[ʔ]); fold the word-final coda stop ~ ʔ (both sides)" }
+    ]
+}

@@ -1,0 +1,40 @@
+// Khmer / ភាសាខ្មែរ (km) — Austroasiatic (Mon-Khmer), the Khmer abugida, canonical IPA. khmer.ts reads this file.
+// Khmer's defining feature is the TWO CONSONANT SERIES: every base consonant is a-series (1st, inherent ɑː) or
+// o-series (2nd, inherent ɔː), and the SAME vowel sign is read differently by series. Non-tonal. Consonant clusters
+// are written with subscripts (coeng ្). The series values + vowel two-readings were DERIVED from wikipron khm.
+{
+    "language": "km",
+    "name": "Khmer",
+    "script": "Khmer",
+
+    // Base consonant → [onset IPA, series ("a" | "o")]. The series sets the inherent vowel and the vowel-sign reading.
+    "consonants": {
+        "ក": ["k", "a"], "ខ": ["kʰ", "a"], "គ": ["k", "o"], "ឃ": ["kʰ", "o"], "ង": ["ŋ", "o"],
+        "ច": ["c", "a"], "ឆ": ["cʰ", "a"], "ជ": ["c", "o"], "ឈ": ["cʰ", "o"], "ញ": ["ɲ", "o"],
+        "ដ": ["ɗ", "a"], "ឋ": ["tʰ", "a"], "ឌ": ["ɗ", "o"], "ឍ": ["tʰ", "o"], "ណ": ["n", "a"],
+        "ត": ["t", "a"], "ថ": ["tʰ", "a"], "ទ": ["t", "o"], "ធ": ["tʰ", "o"], "ន": ["n", "o"],
+        "ប": ["ɓ", "a"], "ផ": ["pʰ", "a"], "ព": ["p", "o"], "ភ": ["pʰ", "o"], "ម": ["m", "o"],
+        "យ": ["j", "o"], "រ": ["r", "o"], "ល": ["l", "o"], "វ": ["ʋ", "o"],
+        "ស": ["s", "a"], "ហ": ["h", "a"], "ឡ": ["l", "a"], "អ": ["ʔ", "a"]
+    },
+    // Vowel sign → [a-series reading, o-series reading] (derived from wikipron). ំ/ះ carry a nasal-m / -h coda.
+    "vowels": {
+        "ា": ["aː", "iə"], "ិ": ["ə", "i"], "ី": ["əj", "iː"], "ឹ": ["ə", "ɨ"], "ឺ": ["əɨ", "ɨː"],
+        "ុ": ["o", "u"], "ូ": ["ou", "uː"], "ួ": ["uə", "uə"], "ើ": ["aə", "əː"], "ឿ": ["ɨə", "ɨə"],
+        "ៀ": ["iə", "iə"], "េ": ["eː", "eː"], "ែ": ["ae", "ɛː"], "ៃ": ["aj", "ɨj"], "ោ": ["ao", "oː"],
+        "ៅ": ["aw", "ɨw"], "ំ": ["ɑm", "um"], "ះ": ["ah", "eəh"]
+    },
+    // Final consonant (coda) → IPA. Khmer final ⟨ស⟩ → [h]; final ⟨រ⟩ is silent.
+    "codas": {
+        "ក": "k", "ខ": "k", "គ": "k", "ង": "ŋ", "ច": "c", "ជ": "c", "ញ": "ɲ",
+        "ដ": "t", "ត": "t", "ថ": "t", "ទ": "t", "ធ": "t", "ណ": "n", "ន": "n",
+        "ប": "p", "ព": "p", "ភ": "p", "ម": "m", "យ": "j", "រ": "", "ល": "l", "វ": "w",
+        "ស": "h", "ហ": "h", "ឡ": "l"
+    },
+    // Inherent vowel [a-series, o-series] when no vowel sign is written.
+    "inherent": ["ɑː", "ɔː"],
+
+    "clausePunctuation": {
+        "។": " . ", "៕": " . ", "?": " ? ", "!": " ! ", ",": " , ", ".": " . ", "៖": " : "
+    }
+}

@@ -43,6 +43,7 @@ import { phonemizeWord as rw } from "../../src/languages/kinyarwanda/kinyarwanda
 import { phonemizeWord as mad } from "../../src/languages/madurese/madurese.ts";
 import { phonemizeWord as nya } from "../../src/languages/chichewa/chichewa.ts";
 import { phonemizeWord as ln } from "../../src/languages/lingala/lingala.ts";
+import { phonemizeWord as km } from "../../src/languages/khmer/khmer.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
@@ -159,6 +160,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     mad,
     nya,
     ln,
+    km,
     el,
     cs,
     cy,
