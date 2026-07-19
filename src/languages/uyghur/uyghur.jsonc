@@ -1,0 +1,40 @@
+// Native canonical-IPA data manifest for Uyghur / ئۇيغۇرچە (ug) — Turkic (Karluk), the UYGHUR ARABIC alphabet
+// (Ereb Yéziqi), espeak-independent. ~11M speakers, mainly Xinjiang. Unlike the Arabic/Persian/Urdu ABJADS, the
+// Uyghur Arabic script is a FULL PHONEMIC ALPHABET — it writes ALL EIGHT vowels — so there is NO short-vowel
+// restoration: a plain greedy letter→IPA scan suffices (uyghur.ts). Referees: wikipron uig_arab_broad (PRIMARY,
+// HUMAN) + epitran uig-Arab (INDEPENDENT). Signatures:
+//   • 8 vowels: ا→ɑ (BACK a), ە→ɛ (front), ې→e, ى→i, و→o, ۆ→ø, ۇ→u, ۈ→y — vowel harmony is WRITTEN, no rule needed.
+//   • ئ (hamza) → ʔ: the glottal onset carried before a word-initial or hiatus vowel (ئائىت → ʔɑʔit).
+//   • Consonants ⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ (uvular), ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ڭ⟩→ŋ, ⟨ژ⟩→ʒ, ⟨ۋ⟩→w (vs و→o vowel).
+//   • Word-final obstruent DEVOICING (د→t, etc.) is applied in code (a real Uyghur rule the referee marks).
+// The Arabic-loan letters (ص ع ذ ظ ح ط ث) are nativised to their plain Uyghur values. Tone: none (Turkic).
+// See docs/investigations/ug_native_bringup_investigation.md.
+{
+    "language": "ug",
+    "name": "Uyghur (Uyghurche)",
+    "script": "Arabic",
+    "provenance": "Authored greedy letter→IPA g2p from the Uyghur Arabic alphabet. Referees: wikipron uig_arab_broad (human) + epitran uig-Arab.",
+
+    "convention": {
+        "vowels": "ا→ɑ (back), ە→ɛ, ې→e, ى→i, و→o, ۆ→ø, ۇ→u, ۈ→y — harmony is written",
+        "hamza": "ئ → ʔ (glottal onset before a word-initial / hiatus vowel)",
+        "consonants": "⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ, ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ڭ⟩→ŋ, ⟨ژ⟩→ʒ, ⟨ھ⟩→h, ⟨ۋ⟩→w",
+        "fNativised": "⟨ف⟩ → [p] (Uyghur natively lacks /f/, so it is nativised to [p] — atmosfera → atmospera)",
+        "finalDevoicing": "word-final ⟨د⟩ /d/ → [t] only (final z/ʒ/ʁ/b stay voiced) — handled in code",
+        "arabicLoans": "ص→s, ع→ʔ, ذ→z, ظ→z, ح→h, ط→t, ث→s (nativised)"
+    },
+
+    // Orthography (Uyghur Arabic letters) → canonical IPA. Single-codepoint letters; the hamza ئ + a following
+    // bare vowel produces ʔ+V naturally (ئا → ʔ ɑ). Scanner is a greedy longest-match (all keys length 1 here).
+    "graphemes": {
+        "ب": "b", "پ": "p", "ت": "t", "ج": "d͡ʒ", "چ": "t͡ʃ", "خ": "χ", "د": "d", "ر": "r",
+        "ز": "z", "ژ": "ʒ", "س": "s", "ش": "ʃ", "غ": "ʁ", "ف": "p", "ق": "q", "ك": "k",
+        "گ": "ɡ", "ڭ": "ŋ", "ل": "l", "م": "m", "ن": "n", "ھ": "h", "ۋ": "w", "ي": "j", "ئ": "ʔ",
+        "ا": "ɑ", "ە": "ɛ", "ه": "ɛ", "ې": "e", "ى": "i", "و": "o", "ۆ": "ø", "ۇ": "u", "ۈ": "y",
+        "ة": "t", "ص": "s", "ع": "ʔ", "ذ": "z", "ظ": "z", "ح": "h", "ط": "t", "ث": "s", "ض": "z"
+    },
+
+    "clausePunctuation": {
+        "؟": " ? ", "؛": " ; ", "،": " , ", ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , "
+    }
+}
