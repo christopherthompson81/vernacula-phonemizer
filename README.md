@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **86 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **100 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,10 +23,11 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-86 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
-Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo,
-Romance, Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic, Uralic and an English-lexified
-creole — across Latin, Greek, Cyrillic, Devanagari, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
+100 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
+Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo
+(Bantu, Kwa, Mande, Atlantic), Romance, Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic,
+Uralic and an English-lexified creole — across Latin, Greek, Cyrillic, Devanagari, Khmer,
+Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
 
@@ -36,21 +37,22 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Family / area | Languages |
 |---|---|
 | Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`, Iraqi `acm`, Gulf `afb`, Moroccan `ary`, Libyan `ayl`), Hausa `ha`, Oromo `om`, Somali `so` |
-| Austroasiatic | Vietnamese `vi` (tonal) |
-| Austronesian | Cebuano `ceb`, Indonesian `id`, Javanese `jv`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
+| Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
+| Austronesian | Cebuano `ceb`, Indonesian `id`, Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Creole (English-lexified) | Nigerian Pidgin `pcm` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
 | Germanic | Dutch `nl`, English `en` (+ `en-GB` accent variant), German `de`, Swedish `sv` (tonal accent) |
-| Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi + Shahmukhi), Sindhi `sd`, Sinhala `si`, Urdu `ur` |
+| Hellenic | Greek `el` |
+| Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Urdu `ur` |
 | Iranian | Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa` |
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |
-| Niger-Congo | Fula `ff`, Igbo `ig` (tonal), Swahili `sw`, Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
-| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Spanish `es` (+ `es-419` Latin-American) |
-| Sinitic | Cantonese `yue`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
+| Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff`, Igbo `ig` (tonal), Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Setswana `tn`, Shona `sn`, Swahili `sw`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
+| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
+| Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
 | Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Ukrainian `uk` |
-| Tai-Kadai | Thai `th` (tonal) |
+| Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uzbek `uz` |
 | Uralic | Hungarian `hu` |
