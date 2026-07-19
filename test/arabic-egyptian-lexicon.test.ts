@@ -19,10 +19,10 @@ const GOLD: [string, string][] = [
     ["مصر", "mˈasˤr"], // MSA miṣr → Egyptian maṣr
     ["أنا", "ˈana"], // MSA anā → Egyptian ana (short final)
     ["قط", "ʔˈutˤː"], // MSA qaṭṭ → Egyptian ʔuṭṭ (ق→ʔ, u vowel)
-    ["ازاى", "ezzˈaːj"], // izzāy "how" — dialectal, no MSA form
+    ["ازاى", "ezːˈaːj"], // izzāy "how" — dialectal, no MSA form
     ["كتاب", "kitˈaːb"],
     ["تلفزيون", "tilifizjˈoːn"],
-    ["برتقان", "burtuʔˈaːn"], // burtuʔān "oranges"
+    ["برتقان", "bortoʔˈaːn"], // bortoʔān "oranges" (majhūl و→o per kaikki)
     ["بنطلون", "bantˤalˈoːn"], // banṭalōn "trousers"
     ["كنبة", "kˈanaba"], // kanaba "sofa"
 ];

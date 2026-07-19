@@ -174,3 +174,24 @@ definite-article nucleus at emit time (`Seg.article`) and raise it per-variety (
 the pre-join build — a string replace can't tell an article [a] from any word-initial [a]. القمر→ilʔamar, الشمس→iʃːams;
 MSA unchanged. Eval +0.2pp (only 3 al-words in the 590-word referee, and القاهرة/النهارده still miss on ق→ʔ / no-assim
 vs the referee's conservative transcription) — the value is TTS correctness (explicitness principle), not the number.
+
+## Run — 2026-07-18 — rebuild the Egyptian vocalization lexicon (554 → 714, correctness fixes)
+
+The shipped egyptian-lexicon.tsv (the short-vowel/vocalization layer, `lexicon:true`) was found to carry MSA
+ARTIFACTS: أجر → ʔad͡ʒr (MSA d͡ʒ; Egyptian is ʔaɡr), أسانسير → ʔasˤansˤeːr (spurious emphatic sˤ; should be ʔasanseːr).
+The prior 554 were built through a flawed path (partly re-phonemized rather than taken from the source IPA), and the
+lexicon value is returned DIRECTLY (no variety shift after), so those errors shipped verbatim.
+
+REBUILT cleanly from the kaikki Egyptian-Arabic IPA (the authoritative Wiktionary source, CC BY-SA) — 876 IPA-bearing
+entries → **714 shipped** (superset of the old 554, +160). Processing to the engine's convention: strip /./ and the
+optional-glottal parens, prefer a stress-marked pron, **keep the majhūl o/e** (the lexicon's value-add — the abjad
+g2p defaults و→uː/ي→iː and can't recover the loanword [o]/[e]: دكتور→duktoːr, أوتوبيس→ʔotubiːs), normalize kaikki's
+NARROW transcription (æ/ɑ/ɜ/ə→a, ɪ→i, ʊ→u, ɾ→r, ɛ→e, strip narrow combining marks) to the engine's BROAD a/i/u/r,
+gemination→length Cː, affricate ties, stress moved to the nucleus. Correct Egyptian segments throughout (ج→ɡ, ق→ʔ,
+plain s, emphatics from ص/ط/ض only).
+
+Impact: SHIPPED path (lexicon:true) covers **75.9%** of the wikipron-arz referee (circular — kaikki~wikipron; the
+value is the correct vocalization for the FLEURS `ar_eg` audio, not the number); rule-only eval UNCHANGED at 47.5%
+(non-circular). 30 arabic tests pass (2 regression-gold values updated to the new consistent convention: ازاى
+ezzaːj→ezːaːj gemination, برتقان burtuʔaːn→bortoʔaːn majhūl o per kaikki). Rebuild is deterministic from the kaikki
+dump; no build script committed (one-off from /mnt/data/kaikki-arz.jsonl).
