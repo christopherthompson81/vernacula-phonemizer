@@ -1,0 +1,38 @@
+// Native canonical-IPA definition for Romanian (ro) — Eastern Romance, a shallow near-phonemic Latin orthography
+// with diacritics (ă â î ș ț). romanian.ts reads this file. CONTEXTUAL rules (c/g softening before e/i, ⟨ci/gi⟩+V
+// silent-i, ⟨ch/gh⟩→k/ɡ, the e̯a/o̯a rising diphthongs, i/u glides, final-i palatalization) live in the g2p; this
+// file holds the plain letter→IPA maps, punctuation, and number spellings. 7-vowel system a e i o u ə ɨ.
+{
+    "language": "ro",
+    "name": "Romanian",
+    "script": "Latin",
+    "provenance": "Authored from standard Romanian orthography + phonology. Validated against wikipron ron_latn broad (human). This file IS the language data — the g2p reads it directly.",
+
+    // Simple (context-free) consonant letters → IPA. c/g are handled contextually in the g2p and are NOT here.
+    // ⟨h⟩ is pronounced [h] (unlike Italian); ⟨j⟩ → ʒ; ⟨ș⟩ → ʃ, ⟨ț⟩ → t͡s; ⟨x⟩ → ks.
+    "consonants": {
+        "b": "b", "d": "d", "f": "f", "h": "h", "j": "ʒ", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r",
+        "s": "s", "ș": "ʃ", "t": "t", "ț": "t͡s", "v": "v", "w": "v",
+        "x": "ks", "y": "i", "z": "z"
+    },
+
+    // Vowels: 7-vowel system. ă → ə (mid central), â/î → ɨ (close central; two spellings, one phoneme).
+    "vowels": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ă": "ə", "â": "ɨ", "î": "ɨ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // NUMBERS — Romanian spellings; canonical IPA DERIVED by running them through the same g2p. Teens are
+    // ⟨unit⟩+sprezece, tens are ⟨unit⟩+zeci (with the -sprezece/-zeci seam), joined by "și" (unit) and "de" (≥20).
+    "numbers": {
+        "units": ["zero", "unu", "doi", "trei", "patru", "cinci", "șase", "șapte", "opt", "nouă"],
+        "teens": ["zece", "unsprezece", "doisprezece", "treisprezece", "paisprezece", "cincisprezece", "șaisprezece", "șaptesprezece", "optsprezece", "nouăsprezece"],
+        "tens": ["", "", "douăzeci", "treizeci", "patruzeci", "cincizeci", "șaizeci", "șaptezeci", "optzeci", "nouăzeci"],
+        "hundred": "sută", "hundreds": "sute", "thousand": "mie", "thousands": "mii", "million": "milion", "millions": "milioane", "and": "și", "of": "de"
+    }
+}

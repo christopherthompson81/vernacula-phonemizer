@@ -1,0 +1,18 @@
+// Romanian (ro) — Eastern Romance, shallow near-phonemic Latin orthography (diacritics ă â î ș ț). wikipron
+// ron_latn broad is a large HUMAN referee (9285, name-heavy). We render the 7-vowel system (ə ɨ), c/g softening,
+// the e̯a/o̯a rising diphthongs, i/u glides, and final-i palatalisation. Stress is unwritten/lexical and the broad
+// referee marks none → DEFERRED (we emit none). Folds neutralise allophonic/notation axes the spelling underdetermines.
+{
+    "language": "ro",
+    "name": "Romanian",
+    "script": "Latin",
+    "provenance": "Authored from standard Romanian orthography + phonology; validated against wikipron ron_latn broad (human).",
+    "referees": [
+        { "file": "ro.wikipron-ron-broad.tsv", "source": "wikipron ron_latn broad (human)", "role": "primary" }
+    ],
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "ŋ", "replace": "n", "note": "n→ŋ before a velar k/ɡ is ALLOPHONIC (the referee marks it, we don't model it yet) — fold" },
+        { "pattern": "ʲ", "replace": "j", "note": "final desyllabified ⟨i⟩: the referee writes it inconsistently as palatalisation Cʲ (lupʲ, cinci→t͡ʃʲ) OR as an offglide Cj (Aanii→…nij) — same phoneme, fold both to j" }
+    ]
+}
