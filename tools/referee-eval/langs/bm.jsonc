@@ -1,0 +1,19 @@
+// Bambara / Bamanankan (bm) — Mande (Manding), Latin orthography. Referee: kaikki Bambara (Wiktionary, HUMAN,
+// NARROW — the only source; no epitran/wikipron bam). The narrow transcription marks TONE (à/á, level ˦/˨,
+// downstep ꜜ), NASALISATION (ã õ ũ), and VOWEL LENGTH (doubling / ː) — none of TONE or LENGTH is in the standard
+// orthography (both lexical), so the folds strip them and we compare the SEGMENTAL + NASALISATION backbone.
+{
+    "language": "bm", "name": "Bambara (Bamanankan)", "script": "Latin",
+    "provenance": "Authored greedy g2p + nasalisation from the Bambara Latin orthography. Referee: kaikki Bambara.",
+    "referees": [
+        { "file": "bm.kaikki-bam.tsv", "source": "kaikki Bambara (Wiktionary, human, narrow)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "͡", "replace": "", "note": "our affricates carry a tie bar (t͡ʃ d͡ʒ); the referee writes plain tʃ dʒ" },
+        { "pattern": "[\\u0300\\u0301\\u0302\\u030C]", "replace": "", "note": "TONE: combining grave/acute/circumflex/caron on vowels (à á â ǎ) — lexical, not in the standard orthography → strip both sides" },
+        { "pattern": "[\\u02E5\\u02E6\\u02E7\\u02E8\\u02E9\\uA71C]", "replace": "", "note": "TONE: the Chao tone-letter bars (˥˦˧˨˩) + the downstep marker (ꜜ) — deferred, strip" },
+        { "pattern": "ː", "replace": "", "note": "LENGTH: the referee's length mark — not in the orthography, folded" },
+        { "pattern": "([ieɛaɔou]\\u0303?)\\1", "replace": "$1", "note": "LENGTH: the referee doubles long / monosyllable-lengthened vowels (dúù, fã˦ã˨); collapse an identical adjacent vowel (incl. nasalised) to one" },
+        { "pattern": "y", "replace": "j", "note": "⟨y⟩ = /j/ (palatal glide); the broad referee entries keep the orthographic letter ⟨y⟩ — fold to the glide j (Bambara has no [y] vowel)" }
+    ]
+}

@@ -48,6 +48,7 @@ import { phonemizeWord as ln } from "../../src/languages/lingala/lingala.ts";
 // would be circular. phonemizeWordRules is the non-circular signal (mirrors en-GB).
 import { phonemizeWordRules as km } from "../../src/languages/khmer/khmer.ts";
 import { phonemizeWord as tn } from "../../src/languages/setswana/setswana.ts";
+import { phonemizeWord as bm } from "../../src/languages/bambara/bambara.ts";
 import { phonemizeWordRules as el } from "../../src/languages/greek/greek.ts";
 import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
@@ -166,6 +167,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ln,
     km,
     tn,
+    bm,
     el,
     cs,
     cy,
