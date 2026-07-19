@@ -141,6 +141,11 @@ export function makeNativePunjabi(
         if (isShah) x = x.replace(/([aeiou]ː)n(aː)$/u, "$1ɳ$2");
         // TONOGENESIS: de-aspirate the breathy markers + assign tone.
         x = tonogenesis(x);
+        // Punjabi has NO phonemic /ʔ/ — the loanword letters ع/ء are silent / hiatus carriers, not glottal stops
+        // (اعتراض → et̪raːz, not əʔət̪raːz) — and NO aspirated SONORANTS — نھ/لھ/مھ are the sonorant + /h/ (a tone
+        // source), not [nʱ/lʱ/mʱ] (the referee writes plain n/l/m). Both are no-ops for Gurmukhi input (its scanner
+        // produces neither), so this is unscripted. +13 net vs the Shahmukhi referee.
+        x = x.replace(/([nlmɳɭɽ])ʱ/gu, "$1").replace(/ʔ/gu, "");
         return applyWeightStress(x).normalize("NFC");
     }
 
