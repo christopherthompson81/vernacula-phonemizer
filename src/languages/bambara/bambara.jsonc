@@ -1,0 +1,39 @@
+// Native canonical-IPA data manifest for Bambara / Bamanankan (bm) — Mande (Manding), the Latin orthography,
+// espeak-independent. Mali's principal language (~14M incl. L2). A greedy longest-match scan with a NASALIZATION
+// rule (bambara.ts): Bambara is open CV; a syllable-final ⟨n⟩ nasalizes the preceding vowel (ban→bã) and is
+// dropped, while an onset ⟨n⟩ before a vowel stays [n] (na→na, kunun→kunũ — only the FINAL n nasalises). Referee:
+// kaikki Bambara (Wiktionary, HUMAN, narrow — tone + nasalisation + length). Signatures:
+//   • ⟨c⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ, ⟨ny⟩=⟨ɲ⟩→ɲ, ⟨ŋ⟩→ŋ; the 7 oral vowels i e ɛ a ɔ o u used as written.
+//   • Word-initial prenasal clusters (mb, nk, nt, ns, …) keep the spelled nasal (mburu→mburu); ⟨ng⟩→ŋɡ.
+// TONE (2-level H/L + downstep) and VOWEL LENGTH are marked in the referee but are LEXICAL / not in the standard
+// orthography → DEFERRED (the eval folds tone + length; we emit the segmental + nasalisation backbone). N'Ko is a
+// second script, deferred. See docs/investigations/bm_native_bringup_investigation.md.
+{
+    "language": "bm",
+    "name": "Bambara (Bamanankan)",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p from the Bambara Latin orthography; inventory confirmed by Vydrin (2020, IJL 32.1). Referee: kaikki Bambara (Wiktionary).",
+
+    "convention": {
+        "affricates": "⟨c⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ",
+        "palatalNasal": "⟨ny⟩ = ⟨ɲ⟩ → ɲ; ⟨ŋ⟩ → ŋ",
+        "nasalVowels": "a syllable-final ⟨n⟩ nasalises the preceding vowel (Ṽ) and drops; an onset ⟨n⟩ (before a vowel) stays [n]",
+        "prenasal": "word-initial nasal + C (mb, mp, nk, nt, ns, ng…) keeps the spelled nasal; ⟨ng⟩→ŋɡ",
+        "tone": "H/L tone + downstep are LEXICAL + unwritten → DEFERRED (folded)",
+        "length": "vowel length is not in the standard orthography → the referee's doubling is folded"
+    },
+
+    // Consonant + oral-vowel graphemes. ⟨n m⟩ are handled in code (nasalisation), NOT here. Scanner sorts keys
+    // LENGTH DESC so digraphs ⟨sh ny⟩ precede singles.
+    "graphemes": {
+        "sh": "ʃ", "ny": "ɲ",
+        "b": "b", "c": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "d͡ʒ", "k": "k",
+        "l": "l", "p": "p", "r": "r", "s": "s", "t": "t", "w": "w", "y": "j", "z": "z",
+        "ɲ": "ɲ", "ŋ": "ŋ",
+        "i": "i", "e": "e", "ɛ": "ɛ", "a": "a", "ɔ": "ɔ", "o": "o", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
