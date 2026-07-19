@@ -63,6 +63,7 @@ import { createWu } from "./languages/wu/wu.ts";
 import { createJin } from "./languages/jin/jin.ts";
 import { createHakka } from "./languages/hakka/hakka.ts";
 import { createXiang } from "./languages/xiang/xiang.ts";
+import { createGan } from "./languages/gan/gan.ts";
 import { createSwahili } from "./languages/swahili/swahili.ts";
 import { createGujarati } from "./languages/gujarati/gujarati.ts";
 import { createPashto } from "./languages/pashto/pashto.ts";
@@ -268,6 +269,8 @@ function build(lang: string): Phonemizer {
         // Xiang Chinese (Changsha) — same shared Han-dict engine; embedded Latin routes to English.
         case "hsn":
             return createXiang((latin) => getPhonemizer("en").text(latin));
+        case "gan":
+            return createGan((latin) => getPhonemizer("en").text(latin));
         case "jv":
             return createJavanese();
         case "sw":
