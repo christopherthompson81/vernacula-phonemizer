@@ -1,0 +1,38 @@
+# Persian↔Tajik↔IPA parallel corpus (running text) — Shahnameh opening (بخش ۱, آغاز کتاب).
+# Aligned CLASSIC TEXT → positional line alignment (same epic, same order) — NOT skeleton-guessed.
+# fa: Ferdowsi's Shahnameh, Perso-Arabic (Ganjoor api.ganjoor.net; Ferdowsi is public domain).
+# tg: Shahnameh in Tajik Cyrillic (HF TajikNLPWorld/shahnameh-tajik-corpus, CC-BY-SA-4.0).
+# ipa: derived from the Tajik line via our verified tg engine + the Persian remap (ɔ→ɒ, majhul ɵ→u, в→w, ʔ-onset).
+# NOTE: the ipa carries TAJIK vowel values; the classic text reveals systematic tg↔fa short-vowel shifts
+#   (Tajik izofat -и = Persian -е; connector -у = Persian -о; ба=ba vs fa be) — the correspondence this corpus is FOR.
+# fa<TAB>tg<TAB>ipa(tajik-derived)
+به نام خداوندِ جان و خرد	Ба номи худованди ҷону хирад,	ba nɒmi χudɒwandi d͡ʒɒnu χirad
+کز این برتر، اندیشه، بر نگذرد	К-аз ин бартар андеша барнагзарад:	k ʔaz ʔin bartar ʔandeʃa barnaɡzarad
+خداوندِ نام و خداوندِ جای	Худованди ному худованди ҷой,	χudɒwandi nɒmu χudɒwandi d͡ʒɒj
+خداوندِ روزی‌دِهِ رهنمای	Худованди рӯзидиҳу раҳнамой.	χudɒwandi ruzidihu rahnamɒj
+خداوندِ کیوان و گَردان‌سپهر	Худованди Кайҳону гардонсипеҳр,	χudɒwandi kajhɒnu ɡardɒnsipehr
+فروزندهٔ ماه و ناهید و مِهر	Фурӯзандаи Моҳу Ноҳиду Меҳр.	furuzandaji mɒhu nɒhidu mehr
+ز نام و نشان و گمان، برتر است	Зи ному нишону гумон бартар аст,	zi nɒmu niʃɒnu ɡumɒn bartar ʔast
+نگارندهٔ بَرشده، پیکر است	Нигорандаи баршуда гавҳар аст.	niɡɒrandaji barʃuda ɡawhar ʔast
+به بینندگان، آفریننده را	Ба бинандагон офаринандаро	ba binandaɡɒn ʔɒfarinandarɒ
+نبینی، مرنجان دو بیننده را	Набинӣ, маранҷон ду бинандаро!	nabini marand͡ʒɒn du binandarɒ
+نیابد بِدو، نیز، اندیشه، راه	Наёбад бад-ӯ низ андеша роҳ,	najɒbad bad ʔu niz ʔandeʃa rɒh
+که او برتر از نام و از جایگاه	Ки ӯ бартар аз ному аз ҷойгоҳ.	ki ʔu bartar ʔaz nɒmu ʔaz d͡ʒɒjɡɒh
+سخن، هر چه زین گوهران، بُگذرد	Сухан ҳар чи з-ин гавҳарон бигзарад,	suχan har t͡ʃi z ʔin ɡawharɒn biɡzarad
+نیابد، بِدو راه، جان و خرد	Наёбад бад-ӯ роҳ ҷону хирад.	najɒbad bad ʔu rɒh d͡ʒɒnu χirad
+خرد، گر سخن، برگزیند همی	Хирад гар сухан баргузинад ҳаме,	χirad ɡar suχan barɡuzinad hame
+همان را گزیند که بیند همی	ҳамонро гузинад, ки бинад ҳаме.	hamɒnrɒ ɡuzinad ki binad hame
+ستودن، نداند کس او را، چو هست	Ситудан надонад кас ӯро чу ҳаст,	situdan nadɒnad kas ʔurɒ t͡ʃu hast
+میانْ بندگی را، ببایدْت بست	Миён бандагиро бибояд-т баст.	mijɒn bandaɡirɒ bibɒjad t bast
+خرد را و جان را همی‌سَنجد، اوی	Хирадрову ҷонро ҳамесанҷад ӯ,	χiradrɒwu d͡ʒɒnrɒ hamesand͡ʒad ʔu
+در اندیشهٔ سَخته کِی گُنجد اوی؟	Дар андешаи сахта кай гунҷад ӯ?	dar ʔandeʃaji saχta kaj ɡund͡ʒad ʔu
+بدین آلتِ رای و جان و زبان	Бад-ин олату рою ҷону равон	bad ʔin ʔɒlatu rɒju d͡ʒɒnu rawɒn
+ستود آفریننده را، کِی توان؟	Ситуд офаринандаро кай тавон?	situd ʔɒfarinandarɒ kaj tawɒn
+به هستیش، باید که، خستو شوی	Ба ҳастиш бояд, ки хисту шавӣ,	ba hastiʃ bɒjad ki χistu ʃawi
+ز گفتار بی‌کار، یکسو، شوی	Зи гуфтори бекор яксӯ шавӣ.	zi ɡuftɒri bekɒr jaksu ʃawi
+پرستنده باشی و جوینده راه	Парастанда бошиву ҷӯяндароҳ,	parastanda bɒʃiwu d͡ʒujandarɒh
+به ژرفی، به فرمانْش، کردن نگاه	Ба фармонҳо жарф кардан нигоҳ.	ba farmɒnhɒ ʒarf kardan niɡɒh
+توانا بُوَد هر که دانا بُوَد	Тавоно бувад, ҳар кӣ доно бувад,	tawɒnɒ buwad har ki dɒnɒ buwad
+ز دانش، دل پیر، بُرنا بود	Ба дониш дили пир барно бувад.	ba dɒniʃ dili pir barnɒ buwad
+از این پرده برتر سخن‌گاه نیست	Аз ин парда бартар сухан гоҳ нест,	ʔaz ʔin parda bartar suχan ɡɒh nest
+ز هستی مر اندیشه را راه نیست	Ба ҳастиш андешаро роҳ нест.	ba hastiʃ ʔandeʃarɒ rɒh nest
