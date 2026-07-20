@@ -243,3 +243,26 @@ data-starved at this scale; raw capacity isn't the bottleneck.
 
 So the best config stays **broad + Tajik (32.2%)**; the Tajik silver remains the one augmentation that reliably
 helps. Scaling is a data-QUALITY / context / input-representation problem now, not a data-volume or model-size one.
+
+## Run 8 — the real lever was INPUT: abjad seq2seq → 45.8% (overturns Run 7) (2026-07-20)
+
+Run 7 said scaling was a quality/context/input problem, not volume. Tested lever #3 — **richer input** — and it is
+decisive. Replaced the per-position frame-tagger (which reads fa's collapsed g2p output) with a char-level
+**seq2seq over the ABJAD letters** (BiLSTM encoder + attention decoder → IPA). Same fixed broad held-out:
+
+| model | held-out exact IPA |
+|---|---|
+| baseline (fa [a] default) | 16.0% |
+| frame-tagger (IPA-frame input), gold+Tajik | 32.2% |
+| **seq2seq (ABJAD input), gold** | **41.4%** |
+| **seq2seq (ABJAD input), gold+Tajik** | **45.8%** |
+
+**Input representation was the lever, not volume.** Reading the abjad directly (vs the collapsed frame) is
++9–14pp — the model sees the و/ی/ه and word structure the frame discarded, and isn't constrained to the frame's
+slots (so it handles ezafe/insertions). **And the Tajik silver now helps MORE (+4.4pp vs +1.5pp on the tagger)** —
+the stronger model exploits the extra data better; augmentation scales with capacity. Net: **16% → 45.8% ≈ 3× the
+OOV baseline** (`tools/fa-restoration/train_ipa_seq2seq.py`, GPU).
+
+Remaining levers, now correctly ordered: (1) ship it — ONNX export + TS inference (the arabic-restorer runtime
+pattern); (2) the aligned parallel corpus (Run 4) for the ezafe/homograph CONTEXT (the shared-merger ceiling);
+(3) a convention-harmonized narrow set (raw narrow still regresses). Volume and model-size alone do not move it.
