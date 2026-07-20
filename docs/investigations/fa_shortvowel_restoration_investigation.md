@@ -266,3 +266,25 @@ OOV baseline** (`tools/fa-restoration/train_ipa_seq2seq.py`, GPU).
 Remaining levers, now correctly ordered: (1) ship it — ONNX export + TS inference (the arabic-restorer runtime
 pattern); (2) the aligned parallel corpus (Run 4) for the ezafe/homograph CONTEXT (the shared-merger ceiling);
 (3) a convention-harmonized narrow set (raw narrow still regresses). Volume and model-size alone do not move it.
+
+## Run 9 — shipping foundation: ONNX export + TS inference proven (2026-07-20)
+
+Exported the single-pass frame-tagger to **ONNX** (`tools/fa-restoration/export_tagger_onnx.py`, opset 17, 2.4 MB,
+32 input tokens × 12 labels) and ran it from TypeScript via **`onnxruntime-node`** (the repo's optional, lazy,
+degrade-to-no-op runtime — same pattern as `src/core/riderDiacritizer`). End-to-end works: fa g2p frame → tokenize
+→ ONNX → argmax → corrected IPA.
+
+**Two findings that scope the remaining production work:**
+1. **Convention gap.** The model reflects the wikipron *classical/Dari* convention, not fa's Iranian output:
+   خانه → xaːn**a** (Iranian xaːn**e**), کتاب → k**i**taːb (Iranian k**e**taːb). This is the exact final-ه / short-i·e
+   mismatch `invert_harakat.ts` already special-cases (`heFinal`, the classical-final-[a]→Iranian-[e] fix). A
+   shipped model needs that Iranian normalization layer on its output.
+2. **OOV-only + lexicon precedence.** Those examples are all common (lexicon-covered) words; the neural tier is
+   for OOV. Integration must mirror riderDiacritizer: **lexicon → neural(OOV) → default**, as an async pre-pass,
+   so the sync/C#-parity path is untouched and covered words keep their gold lexicon pronunciation.
+
+**Remaining to ship (scoped, not blocking):** (a) export the stronger **seq2seq** (45.8%) instead of the tagger
+(32.2%) — needs autoregressive ONNX (encoder graph + decoder-step + a TS greedy loop, two sessions); (b) the
+Iranian normalization layer; (c) wire into `persian.ts` as the OOV async pre-pass with lexicon precedence; (d)
+verify the folded referee eval is unchanged (short vowels folded → non-circular, as today) + tsx/tests. The
+foundation (train → ONNX → TS inference) is proven; these are the productionization steps.
