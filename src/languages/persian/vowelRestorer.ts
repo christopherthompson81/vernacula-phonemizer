@@ -87,31 +87,40 @@ export async function createFaVowelRestorer(): Promise<FaVowelRestorer | undefin
 
     return {
         async restore(word: string): Promise<string> {
-            const chars = [...word];
-            const ids = BigInt64Array.from(chars.map((c) => BigInt(meta.src[c] ?? meta.unk)));
+            const B = 5; // beam width (+~1.5pp over greedy on the held-out)
+            const ids = BigInt64Array.from([...word].map((c) => BigInt(meta.src[c] ?? meta.unk)));
             const T = ids.length;
             if (T === 0) return "";
             const eo = await enc.run({ tokens: new ortLib.Tensor("int64", ids, [1, T]) });
             const enc_o = eo.enc_o as unknown;
             const mask = new ortLib.Tensor("bool", Uint8Array.from(new Array(T).fill(1)), [1, T]);
-            let h = new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
-            let c = new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
-            let y = meta.bos;
-            const out: string[] = [];
-            for (let step = 0; step < 40; step++) {
-                const r = await dec.run({
-                    y: new ortLib.Tensor("int64", BigInt64Array.from([BigInt(y)]), [1, 1]),
-                    h, c, enc_o, mask,
-                });
-                const lo = r.logits!.data as Float32Array;
-                let best = 0, bv = -Infinity;
-                for (let l = 0; l < lo.length; l++) if (lo[l]! > bv) { bv = lo[l]!; best = l; }
-                if (best === meta.eos) break;
-                out.push(i2t[best] ?? "");
-                y = best;
-                h = r.h_out as unknown as OrtTensor;
-                c = r.c_out as unknown as OrtTensor;
+            const zero = () => new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
+            interface Beam { toks: number[]; lp: number; h: OrtTensor; c: OrtTensor; done: boolean }
+            const score = (b: Beam): number => b.lp / Math.max(b.toks.length, 1); // length-normalised
+            let beams: Beam[] = [{ toks: [meta.bos], lp: 0, h: zero(), c: zero(), done: false }];
+            for (let step = 0; step < 40 && !beams.every((b) => b.done); step++) {
+                const cand: Beam[] = [];
+                for (const b of beams) {
+                    if (b.done) { cand.push(b); continue; }
+                    const r = await dec.run({
+                        y: new ortLib.Tensor("int64", BigInt64Array.from([BigInt(b.toks[b.toks.length - 1]!)]), [1, 1]),
+                        h: b.h, c: b.c, enc_o, mask,
+                    });
+                    const lo = r.logits!.data as Float32Array;
+                    let mx = -Infinity;
+                    for (const v of lo) if (v > mx) mx = v;
+                    let sum = 0;
+                    for (const v of lo) sum += Math.exp(v - mx);
+                    const lse = mx + Math.log(sum); // log-sum-exp → log-softmax
+                    const idx = Array.from(lo.keys()).sort((i, j) => lo[j]! - lo[i]!).slice(0, B);
+                    for (const nid of idx) {
+                        cand.push({ toks: [...b.toks, nid], lp: b.lp + (lo[nid]! - lse), h: r.h_out as unknown as OrtTensor, c: r.c_out as unknown as OrtTensor, done: nid === meta.eos });
+                    }
+                }
+                beams = cand.sort((a, z) => score(z) - score(a)).slice(0, B);
             }
+            const best = beams.reduce((a, z) => (score(z) > score(a) ? z : a));
+            const out = best.toks.slice(1).filter((t) => t !== meta.eos).map((t) => i2t[t] ?? "");
             return toIranian(out.join(""), word);
         },
     };
