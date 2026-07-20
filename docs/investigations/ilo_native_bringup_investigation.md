@@ -65,3 +65,17 @@ and blocks/permits gliding on the wrong words, and the errors outnumber the fixe
 **Conclusion:** the mechanical rule is the rule-based ceiling; further gains require actual lexical stress — i.e. a
 **lexicon** (or a model trained on the stress-marked referee), not a rule. The stress model is closed as a dead end;
 the shipped module is unchanged. (Kept per the negative-results discipline.)
+
+### Run 2b — consonant-context model also tried, also rejected
+
+A second hypothesis (is the *preceding consonant* the cue, e.g. does the high vowel stay after a sibilant?) was
+tested with a precise per-slot alignment (words with exactly one C‑i/u‑V slot, glide-vs-stay read off the referee):
+
+- Most consonants glide the high vowel 70–100% (m/t/p 100%; s/r/l/b/d 75–82%).
+- The "si" intuition is the **opposite** of the data: after ⟨s⟩ the vowel **glides** 81% (siak→s**j**ak). `garcia`'s
+  i‑stay is a **lexical** exception (Spanish name, etymological stress on *í*), not a ⟨c⟩ effect (⟨c⟩ glides 71%).
+- The only outlier is ⟨k⟩ (stays 63%) — but every stay-example is one lexeme (`kua`/`kukua` "property"), and
+  blocking glide after ⟨k⟩ (or k,g,c,q) still scored **worse** than baseline (82.2–82.4% vs 83.2%).
+
+So neither dimension recoverable from spelling — stress **position** (Run 2) nor consonant **context** (2b) — beats
+the mechanical glide-all rule. The residual is confirmed **lexical**; a lexicon is the only remaining lever.
