@@ -44,14 +44,19 @@ function stressPerWord(ipa: string): string {
     }).join(" ");
 }
 
-/** Build the Persian CONTEXT restorer, or `undefined` if the model / onnxruntime-node is unavailable. */
-export async function createFaContextRestorer(): Promise<FaContextRestorer | undefined> {
+/**
+ * Build a Persian CONTEXT restorer, or `undefined` if the model / onnxruntime-node is unavailable. The inference
+ * code is identical for both trained models — only the weights/vocab differ — so `basename` selects which:
+ *   - "fa-context-restorer" (default) — CLASSICAL, aligned-Shahnameh silver, excellent on verse (see above).
+ *   - "fa-context-modern"             — MODERN, HomoRich gold (canonical IPA), homograph/ezafe on modern text.
+ */
+export async function createFaContextRestorer(basename = "fa-context-restorer"): Promise<FaContextRestorer | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
     let meta: Meta, encBytes: Uint8Array, decBytes: Uint8Array;
     try {
-        meta = JSON.parse(readFileSync(join(dir, "fa-context-restorer.meta.json"), "utf8")) as Meta;
-        encBytes = readFileSync(join(dir, "fa-context-restorer.enc.onnx"));
-        decBytes = readFileSync(join(dir, "fa-context-restorer.dec.onnx"));
+        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as Meta;
+        encBytes = readFileSync(join(dir, `${basename}.enc.onnx`));
+        decBytes = readFileSync(join(dir, `${basename}.dec.onnx`));
     } catch { return undefined; }
     let ortLib: OrtLike, enc: OrtSession, dec: OrtSession;
     try {
@@ -88,4 +93,14 @@ export async function createFaContextRestorer(): Promise<FaContextRestorer | und
             return stressPerWord(out.join(""));
         },
     };
+}
+
+/**
+ * The MODERN Persian context restorer — trained on HomoRich (CC0, 528k modern homograph-rich sentences), targeting
+ * our canonical IPA directly (gheyn-conditioned to the fa q/ɣ split). Held-out modern eval: 83.2% per-word. Unlike
+ * the classical restorer above, this one is trained on modern prose, so it does NOT hallucinate on everyday text —
+ * it is the general-purpose sentence-level path. `undefined` (no-op) if the model / onnxruntime-node is absent.
+ */
+export function createFaModernContextRestorer(): Promise<FaContextRestorer | undefined> {
+    return createFaContextRestorer("fa-context-modern");
 }
