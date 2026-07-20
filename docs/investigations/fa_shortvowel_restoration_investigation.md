@@ -332,3 +332,19 @@ and it never hurts covered words (lexicon precedence). It's modest, honestly: 49
 the **homograph/ezafe shared-merger ceiling** (Run 5) that word-level restoration can't break — the parallel-corpus
 CONTEXT model is the lever past it. (Beam(5) adds +1.5pp on the classical held-out — a cheap decode-side gain to
 port to the TS inference.) The eval is `tools/fa-restoration/eval_iranian.ts`.
+
+## Run 12 — beam search ported to the shipped inference (2026-07-20)
+
+Ported beam(5) decode into `vowelRestorer.ts` (length-normalised log-softmax over the ONNX decoder-step; ~5×
+decode calls per OOV word, still an async pre-pass). Re-ran the unfolded Iranian production eval:
+
+| | unfolded Iranian exact |
+|---|---|
+| fa CURRENT (lexicon + default [a]) | 45.6% |
+| SHIPPED greedy | 49.0% (+3.5) |
+| **SHIPPED beam(5)** | **50.1%** (+4.5) |
+| — OOV words the neural serves — | fa 43.8% → **51.3%** (+7.5) |
+
+Beam adds **+1.1pp overall / +1.7pp on OOV** over greedy and crosses 50% Iranian. The shipped model now stands at
+**+4.5pp overall, +7.5pp on served OOV**, non-regressing (lexicon precedence). The remaining ceiling is still the
+homograph/ezafe context problem (the parallel-corpus model). Suite/test/tsc green.
