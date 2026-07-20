@@ -47,3 +47,41 @@ word-level restorer below 100% regardless of source.
   Arabic-silver harakat detour. Target: move UNFOLDED up toward the skeleton ceiling.
 - **Phase 3:** Tajik parallel-text cognate mining (idea 1) to extend coverage past the wikipron gold — remapping
   Tajik→Persian (the majhul merger ō→u / ē→i, and ɔ→ɒ) — for the shared classical/frequent lexicon.
+
+## Run 2 — the lexicon ceiling, and why the answer is a model (2026-07-19)
+
+Wired-in check before wiring: **fa's eval already uses `phonemizeWord` (with the wikipron-derived harakat
+lexicon)** — non-circular *only* because the eval folds short vowels away, so the lexicon's short-vowel additions
+don't inflate the folded score. Measuring an abjad→IPA lexicon's "unfolded gain" on the wikipron gold would
+therefore be **circular** (the gold IS the lexicon's source). The honest metric is real-text **frequency
+coverage**.
+
+Measured the 9.3k gold against the committed fa frequency wordlist (`espeak-ng-portable
+tools/qa-compare/words-50000.fa.txt`, 15.8k types, frequency-ranked):
+
+| span | coverage |
+|---|---|
+| top-1000 (most frequent) | **17.5%** |
+| top-5000 | 16.4% |
+| all 15.8k | 20.5% |
+
+**A citation-form lexicon reaches only ~1 in 5 running-text tokens.** Persian is morphologically rich (ezafe,
+plurals, verb conjugation, clitics), so the lemma gold misses the inflected/clitic-attached forms that dominate
+text — and fa's existing 4.1k harakat lexicon already covers much of that same ~20%. So **expanding the lexicon
+is not the win**; the 80% tail needs something that *generalizes morphologically* and *uses context*.
+
+**→ Pivot to a sequence model (the BiLSTM Chris raised).** Two jobs a lexicon structurally cannot do:
+1. **Morphological generalization** — a char-level seq2seq (BiLSTM encoder-decoder) predicts pronunciation for
+   *unseen inflected/OOV* forms from spelling, covering the 80% tail. Trainable now on the 9.3k+ wikipron/kaikki
+   word→IPA pairs.
+2. **Context (homographs + ezafe)** — a sentence-level BiLSTM resolves مرد mard~mord and predicts the ezafe -e
+   (both context-dependent, invisible to any word-level method). This needs *contextualized* pronunciation data,
+   which word-level wikipron lacks — and which the **Tajik parallel text is uniquely good for**: Tajik running
+   text is fully voweled AND disambiguated *in context*, so aligned fa↔tg sentences yield per-token contextual
+   pronunciations, i.e. BiLSTM training data for exactly the homograph/ezafe cases (idea 1 feeds the model, not
+   just a lexicon).
+
+Revised plan: **(a) char-level BiLSTM word→IPA restorer** on wikipron/kaikki (the big coverage win) → **(b)
+sentence-level context model** for homographs/ezafe trained on Tajik-parallel + diacritized corpora → lexicon
+kept as a high-precision override. The 42pp headroom is mostly reachable by (a); (b) removes the "context-free
+ceiling" caveat from Run 1.
