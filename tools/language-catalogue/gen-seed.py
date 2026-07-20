@@ -22,7 +22,7 @@ arz|🟡|Egyptian Arabic
 ak|🔷|Akan (Twi)
 am|🟡|Amharic
 as|🟡|Assamese
-awa|⛔|Awadhi
+awa|🔷|Awadhi
 ayl|🟡|Libyan Arabic
 az|✅|Azerbaijani (North)
 bg|✅|Bulgarian

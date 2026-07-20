@@ -1,15 +1,17 @@
-// Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. ⚠ CANNOT-VERIFY (referee GAP). No independent referee
-// exists: wikipron awa (0 lines) and kaikki Awadhi (404) do not exist, and epitran ships no Awadhi (an epitran
-// clone would give the HINDI values anyway). Per Saksena/Bloch the Eastern-Indo-Aryan phonologies are
-// "perceptibly identical", so an engine and any Hindi-clone check agree trivially — measuring nothing. The
-// committed anchor is instead a hand-adjudicated gold of the DOCUMENTED divergences (test/awadhi.test.ts): the
-// sibilant merger श/ष→[s] and the intervocalic flap ड→ɽ — from Baburam Saksena, Evolution of Awadhi (1937).
+// Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. 🔷 SINGLE-SOURCE (no MACHINE referee). The divergences
+// are sourced from ONE documented grammar — Baburam Saksena, Evolution of Awadhi (1937) — which is what 🔷
+// requires. There is no *independent* machine referee: wikipron awa (0 lines) and kaikki Awadhi do not exist, and
+// epitran ships no Awadhi (a clone would give the HINDI values anyway, so it would be circular). So `referees` is
+// empty here — the 🔷 anchor lives in the hand-adjudicated gold (test/awadhi.test.ts): the sibilant merger
+// श/ष→[s], the intervocalic flap ड→ɽ, व→[w], ऐ/औ→[ʌi]/[ʌu] — all from Saksena. NOT ⛔: Saksena is a real
+// Awadhi-specific source, not a Hindi clone, so the anchor measures something. (A fuller Saksena-mined referee —
+// the bho pattern — is a documented follow-up; the OCR IPA is corrupt so it needs visual reading.)
 {
     "language": "awa",
     "name": "Awadhi",
     "script": "Devanagari",
-    "provenance": "Hindi-derived Devanagari engine + Awadhi divergences from Saksena (1937).",
+    "provenance": "Hindi-derived Devanagari engine + Awadhi divergences from Saksena (1937). 🔷 single-source.",
     "referees": [],
-    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Awadhi (wikipron awa is empty, no kaikki extract, epitran ships none). Because Awadhi is segmentally ~Hindi (Saksena, quoting Bloch: the Eastern-IA phonologies are 'perceptibly identical', distinguished chiefly by grammar), any agreement with a Hindi-clone check is trivial. The anchor is the hand-adjudicated gold in test/awadhi.test.ts, grading the documented divergences (श/ष→s, intervocalic ड→ɽ) from Baburam Saksena, Evolution of Awadhi (1937, Lakhimpuri dialect). A SOURCED stub, not a measured convergence.",
+    "secondaryGap": "SINGLE-SOURCE (🔷), no machine referee: the divergences come from ONE documented grammar (Saksena, Evolution of Awadhi, 1937, Lakhimpuri) — that single source is what 🔷 requires. There is no *independent* machine referee (wikipron awa empty, no kaikki extract, epitran ships none; and because Awadhi is segmentally ~Hindi per Saksena/Bloch, a machine Hindi-clone check would be circular). So `referees` is empty and the anchor is the hand-adjudicated gold in test/awadhi.test.ts (श/ष→s, intervocalic ड→ɽ, व→w, ऐ/औ→ʌi/ʌu). NOT ⛔ — Saksena is a real Awadhi source, not a Hindi clone. Follow-up: a Saksena-mined single-source grade (the bho pattern) would upgrade the anchor from hand-gold to a measurement.",
     "folds": []
 }

@@ -1,8 +1,15 @@
-# Awadhi (awa) native bring-up — a sourced ⛔ stub
+# Awadhi (awa) native bring-up — 🔷 single-source (Saksena)
 
 Awadhi / अवधी — Eastern Hindi (Indo-Aryan), ~38M speakers, the language of Tulsidas's *Rāmcaritmānas* and
-Jayasi's *Padmāvat*. Devanagari. This is a deliberate **⛔ cannot-verify stub** (user steer: "even ⛔ can be
-worth stubbing out") — built to *cover* a large population, not to claim a measured convergence.
+Jayasi's *Padmāvat*. Devanagari. **🔷 single-source** — the divergences and their anchoring gold both come from
+ONE documented grammar, Baburam Saksena's *Evolution of Awadhi* (1937).
+
+> **Reclassified ⛔ → 🔷 (Run 3, 2026-07-19).** Runs 1–2 below call this a "⛔ cannot-verify stub". That was a
+> mis-application of the taxonomy: **🔷 means *single-source*, not single-source *plus* independent verification.**
+> awa has a single source (Saksena), and Saksena is a real Awadhi-specific grammar with IPA — not a circular
+> Hindi clone — so grading against it measures something. The absence of an *independent* second referee keeps awa
+> *single-source*, but that is exactly what 🔷 is; it does not drop it to ⛔. (bho made the same ⛔→🔷 move earlier.)
+> The ⛔ framing in the Run 1–2 text below is left as written for the record; the current verdict is 🔷.
 
 ## Why ⛔, and why it's still worth doing
 
@@ -45,7 +52,7 @@ which, per Saksena/Bloch, is correct **by attestation**, not by defaulting.
   asserted in the gold, not deferred; only the exact *quality* is provisional (Saksena's vowel chart is too
   garbled in OCR to confirm a monophthong reading). **Short e/o quality** remains genuinely deferred.
 
-## Verdict — ⛔ Cannot-verify (a sourced stub)
+## Verdict (Runs 1–2) — ⛔ Cannot-verify [SUPERSEDED by Run 3 → 🔷; see the banner at the top]
 
 A Devanagari phonemizer for ~38M speakers, anchored on Saksena (1937), grading the two documented divergences on
 a hand-adjudicated gold (`test/awadhi.test.ts`). Correctness on the Hindi-shared bulk is **asserted from the
@@ -82,3 +89,31 @@ encoding still hold?
 upgrade (ऐ/औ→ʌi/ʌu, confirmed for Lakhimpuri), two documentable phonetic notes. Hindi + Bhojpuri tests
 unaffected (the change is awa-local); awa gold updated. Verdict stays **⛔ cannot-verify** — no independent
 referee exists; this tightens the *sourcing*, not the *verification*.
+
+## Run 3 — reclassified ⛔ → 🔷 (2026-07-19)
+
+**Trigger (user):** *"🔷 is single-source, not single-source plus independently verified."*
+
+This corrected a definitional error that ran through Runs 1–2 (and through my Run 2 note "verdict stays ⛔"). I
+had been treating 🔷 as requiring an *independent* referee on top of a source, and so parked awa at ⛔ on the
+grounds that the only conceivable machine referee (epitran) is a circular Hindi clone. But 🔷 asks only for a
+**single documented source**, and awa has one: Saksena's *Evolution of Awadhi* — a genuine Awadhi-specific
+descriptive grammar with IPA charts and transcribed forms, **not** a Hindi clone. Grading the engine's documented
+divergences against Saksena therefore measures something real; it is single-source, so **🔷**, not ⛔.
+
+This is the same ⛔→🔷 move `bho` already made (its grammar-mined gold). The distinction with `mai` also collapses
+to a within-🔷 evidence-quality difference: mai's single source happens to be an *independent* human referee
+(wikipron 167), awa's is a grammar — both 🔷.
+
+**Surfaces flipped:** `awadhi.jsonc` provenance, `awadhi.ts` header, `test/awadhi.test.ts` header,
+`tools/referee-eval/langs/awa.jsonc` (header + secondaryGap; `referees` stays `[]` — still no *machine* referee),
+`docs/language-maturity.md` (awa row + two stale ⛔ cross-references in the scope note and the mai row), and the
+catalogue (`gen-seed.py` awa|🔷, regenerated `catalogue.tsv` + `languages.db`).
+
+**Not changed:** the engine and gold are byte-identical — this is a *classification* correction, not a
+phonology change. No test values moved; Hindi/Bhojpuri unaffected.
+
+**Follow-up (unchanged from Run 2):** the anchor is still a hand-adjudicated Saksena gold, not a *mined*
+single-source grade. Building a Saksena referee (the bho pattern) would upgrade the anchor from hand-gold to a
+measurement — blocked on the corrupt OCR IPA (needs visual reading of the § example forms + the appendix
+specimen texts). Whispered final vowels (§113–119) remain deferred.
