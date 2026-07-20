@@ -210,3 +210,36 @@ seen/frequent words separately (~exact), so the shipped system is lexicon ⊕ th
 
 **Scaling levers (next):** the full 40k narrow wikipron (not just 9k broad), the aligned parallel corpus (Run 4)
 for the ezafe/homograph context, a larger model, and ONNX export to ship it (the arabic-restorer runtime pattern).
+
+## Run 7 — scaling attempt: naive volume regresses; convention + context are the real levers (2026-07-20)
+
+Tested the two obvious scaling levers — more wikipron data (add the narrow set) and a bigger model — on the GPU.
+Both underwhelmed, and the failure is diagnostic.
+
+**Fair comparison** (same fixed broad held-out, 926 unseen words; only the *added* training data varies):
+
+| added training | held-out exact IPA |
+|---|---|
+| broad only (9.3k) | 30.7% |
+| + narrow-only (+1.7k words) | **30.3%** (−0.4) |
+| + Tajik silver | **32.2%** (+1.5) |
+| + narrow + Tajik | 31.1% |
+
+**Narrow wikipron does NOT help — it slightly HURTS**, and it drags the Tajik gain down (32.2→31.1). This is a
+CONVENTION-consistency problem, not a volume one: the narrow set's fine allophony (aspiration, ä, ɦ, w-for-в,
+dental) doesn't harmonize cleanly with the broad convention even after normalization — the SAME regression the
+`arabic-restorer` documented when it added kaikki naively (that Run 17: "kaikki's conventions differ → REGRESSED").
+
+**Bigger model was neutral** (emb128/h256/3L: 25.6% vs the small model's 24.9% on the combined set) → we are NOT
+data-starved at this scale; raw capacity isn't the bottleneck.
+
+**Conclusion — the productive levers are not volume:**
+1. **Convention harmonization** — the narrow (and kaikki) data only helps after real normalization to one
+   convention (the multi-run effort the arabic-restorer spent on exactly this). Volume without it regresses.
+2. **Context, not more word-level data** — the ceiling is the shared-merger homographs/ezafe (Run 5), which need
+   the SENTENCE-level signal from the aligned parallel corpus (Run 4), a different axis from word count.
+3. **Richer input** — feed the abjad letters (char-level) rather than the collapsed fa-engine IPA frame; the
+   abjad carries structure (و/ی/ه, word shape) the frame has already thrown away.
+
+So the best config stays **broad + Tajik (32.2%)**; the Tajik silver remains the one augmentation that reliably
+helps. Scaling is a data-QUALITY / context / input-representation problem now, not a data-volume or model-size one.
