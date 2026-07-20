@@ -348,3 +348,21 @@ decode calls per OOV word, still an async pre-pass). Re-ran the unfolded Iranian
 Beam adds **+1.1pp overall / +1.7pp on OOV** over greedy and crosses 50% Iranian. The shipped model now stands at
 **+4.5pp overall, +7.5pp on served OOV**, non-regressing (lexicon precedence). The remaining ceiling is still the
 homograph/ezafe context problem (the parallel-corpus model). Suite/test/tsc green.
+
+## Run 13 — SCALED the parallel corpus: the full aligned Shahnameh (2026-07-20)
+
+The Run-4 POC was 30 aligned lines; a context model needs thousands. Scaled it: crawled the **full Ganjoor
+Shahnameh** (777 poems → 99,220 Persian hemistichs) and aligned it to the **full Tajik edition** (8 jilds →
+91,443 hemistichs, HF shahnameh-tajik-corpus).
+
+**Alignment = exact CONSONANT-skeleton match** (`tools/fa-restoration/align_shahnameh.ts`). Positional alignment
+fails (edition drift + Tajik section-headings), and hemistich exact-match on the full skeleton was 0.4% — because
+Tajik writes the short u→و and izofat -и→ی the abjad omits, so the matres diverge. Dropping the matres (ا و ی) and
+matching CONSONANTS ONLY is edition-stable and position-agnostic (a hash match, so drift is irrelevant): **5,734
+matches → 5,375 deduped clean aligned hemistichs (~31k in-context word tokens)**. Recall is ~6% (one variant word
+breaks a hemistich) but precision is high — random spot-checks are all correct (Kaykhosrow, Siyâvash, …).
+
+`tools/fa-restoration/parallel/shahnameh-aligned.fa-tg-ipa.tsv` — permissive (Ferdowsi PD + Tajik CC-BY-SA + our
+IPA). This is the **data foundation for the context model** — the sentence context is exactly what the
+homograph/ezafe shared-merger ceiling (Run 5) needs and word-level restoration structurally lacks. Recall-boost
+lever = fuzzy/anchored alignment (≤1 variant word); the next build = a sentence-level model trained on this corpus.
