@@ -314,3 +314,21 @@ neural is a separate deploy path); a proper unfolded eval of `phonemizeFaNeural`
 measurement. (c) Beam search + the parallel-corpus context model (for homographs/ezafe) remain the accuracy
 levers. But the pipeline — train → int8 ONNX → TS autoregressive inference → Iranian output → OOV runtime wiring
 — is COMPLETE and shipped, optional and non-regressing. `tsc` clean; sync persian + the restorer test pass.
+
+## Run 11 — the production number: unfolded Iranian eval of the shipped path (2026-07-20)
+
+Put a real number on `phonemizeFaNeural`. Reference = the classical wikipron gold mapped to **Iranian** (short
+i→e, u→o, final ه→e — the genuine Iranian merger, not a skeleton fold); comparison **unfolded** (a/e/o counted),
+only notation unified. On the neural's 926 held-out UNSEEN words:
+
+| | unfolded Iranian exact |
+|---|---|
+| fa CURRENT (lexicon + default [a]) | 45.6% |
+| **SHIPPED (lexicon → neural → default)** | **49.0%** (+3.5pp) |
+| — on the 559 OOV words the neural serves — | fa default 43.8% → **neural 49.6% (+5.7pp)** |
+
+So the shipped neural tier is a **real, positive** production improvement (+3.5pp overall, +5.7pp on served OOV),
+and it never hurts covered words (lexicon precedence). It's modest, honestly: 49% Iranian on the OOV tail reflects
+the **homograph/ezafe shared-merger ceiling** (Run 5) that word-level restoration can't break — the parallel-corpus
+CONTEXT model is the lever past it. (Beam(5) adds +1.5pp on the classical held-out — a cheap decode-side gain to
+port to the TS inference.) The eval is `tools/fa-restoration/eval_iranian.ts`.
