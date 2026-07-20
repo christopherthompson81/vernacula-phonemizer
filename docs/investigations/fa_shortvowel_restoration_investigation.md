@@ -179,3 +179,34 @@ teacher for the char model / the aligned-corpus training signal): it roughly *cl
 gap on cognate words. The residual ~28% is dominated by mergers Tajik shares with Persian (u/o, i/e) that neither
 Tajik nor the abjad can disambiguate context-free — that's the ceiling the *sentence-level* model must reach past
 (from context: مرد mard vs mord), which is exactly what the aligned parallel corpus (Run 4) is for.
+
+## Run 6 — the model: a BiLSTM that targets IPA DIRECTLY, not harakat (2026-07-20)
+
+Built the dataset, trained a model on the GPU (`/mnt/data/ar-diac-venv`, torch+cuda), and tested whether it aligns
+closer to the expected IPA. **Architectural pivot (Chris): target IPA, not harakat** — where we diverge from the
+mature `tools/arabic-restorer/` pipeline (skeleton→harakat→[g2p]→IPA).
+
+**The evidence for the pivot is concrete.** Feeding our Tajik-derived silver through the harness's g2p-inversion
+labeler (harakat target) labeled only **981 / 2400 (40.9%)** — the other **59% were LOST** because their true IPA
+can't be expressed as harakat the g2p reproduces (ezafe, و, final ه — exactly the harakat blind spots). Targeting
+the IPA vowel directly keeps all of it.
+
+**Model** (`tools/fa-restoration/train_ipa_bilstm.py`): a 2-layer char-level **BiLSTM per-position tagger** over
+fa's g2p skeleton (consonants + long vowels + default-[a] slots); it predicts the correct IPA vowel at each short
+slot directly. Dataset = the 9.3k wikipron abjad→IPA gold + the 2.4k Tajik-derived silver (1,335 words new beyond
+wikipron). Held-out on UNSEEN words:
+
+| model | held-out exact IPA | vs baseline |
+|---|---|---|
+| baseline (fa g2p, default [a]) | 16.0% | — |
+| BiLSTM IPA-target, **gold only** | **30.7%** | **+14.7pp** (≈ doubles the OOV baseline) |
+| BiLSTM IPA-target, **gold + Tajik** | **32.2%** | **+16.2pp** (Tajik adds +1.5pp) |
+
+**Both ideas validated in one run.** (1) The IPA target nearly doubles OOV short-vowel accuracy vs the rule
+baseline — and it's the *right* target (a bigram POC of the same signal got only +7pp; the BiLSTM's full-sequence
+context is the difference). (2) The Tajik silver measurably helps (+1.5pp) — and it only can *because* we target
+IPA; the harakat path had discarded 59% of it. This is the OOV generalization tail; the lexicon covers
+seen/frequent words separately (~exact), so the shipped system is lexicon ⊕ this model ⊕ the Tajik cognate source.
+
+**Scaling levers (next):** the full 40k narrow wikipron (not just 9k broad), the aligned parallel corpus (Run 4)
+for the ezafe/homograph context, a larger model, and ONNX export to ship it (the arabic-restorer runtime pattern).
