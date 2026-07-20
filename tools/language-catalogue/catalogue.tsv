@@ -64,9 +64,10 @@ kk	Kazakh	Turkic (Kipchak)	Cyrillic/Latin	13000000						implemented		✅
 km	Khmer	Austroasiatic	Khmer	17000000						implemented					
 kmr	Kurmanji (Northern Kurdish)	Iranian (NW)	Latin (Hawar)	15000000						implemented		✅			
 kn	Kannada	Dravidian	Kannada	44000000	15000000					implemented		✅			
+knc	Central Kanuri (Yerwa)	Nilo-Saharan (Saharan)	Latin/Ajami	4000000		0	0	0	0	unimplemented	data scarcity				"The STANDARD Kanuri variety (Borno, Nigeria) — the real target if we build ""Kanuri"" (not the kr macrolanguage umbrella). Referee PROBED 2026-07-19: no wikipron/kaikki/epitran → authored-⛔-only. See kr."
 ko	Korean	Koreanic	Hangul	81000000						implemented		✅			
 kok	Konkani	Indo-Aryan (Southern)	Devanagari	2000000						unimplemented					Was in espeak-portable; small.
-kr	Kanuri	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella				Kanuri is a cover term (Yerwa, Manga, …).
+kr	Kanuri (macrolanguage)	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella				COVER TERM — do NOT build the umbrella; target a specific variety (as with Balochi→bcc, Arabic→dialects). Individual codes: Central/Yerwa knc (~4M, the standard w/ orthography), Manga kby (~1M, Niger), Tumari krt. Referee PROBED 2026-07-19: knc/kby/krt/kr ALL have no wikipron, no kaikki page, no epitran map → also DATA-SCARCE. Revisit trigger = a referee appears OR a deliberate authored-⛔ from a grammar (the Hausa/Balochi-Run-1 path), not merely surfacing in a population list.
 ks	Kashmiri	Indo-Aryan (Dardic)	Arabic (Kashmiri)	7000000						unimplemented					Dardic; vowel-rich abjad.
 lg	Luganda	Niger-Congo (Bantu)	Latin	6000000	5000000					implemented		🔷			
 ln	Lingala	Niger-Congo (Bantu)	Latin	20000000	20000000					implemented		🔷			
