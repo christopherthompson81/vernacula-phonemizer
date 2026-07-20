@@ -1,13 +1,10 @@
 /**
  * Native Bhojpuri / भोजपुरी (bho) text phonemizer — canonical IPA, espeak-independent. Indo-Aryan, Devanagari.
- * Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress, numbers) with a Bhojpuri
- * data file whose DIVERGENCES from Hindi are the genuine segmental differences: श/ष→[s] (Bhojpuri has NO /ʃ/,
- * शहर→sahar), ऐ/औ kept as the diphthongs [ai]/[au] (Hindi monophthongised to ɛː/ɔː), and no Hindi əɦə-lowering.
- *
- * ⚠ CANNOT-VERIFY: there is NO independent referee for Bhojpuri — wikipron/kaikki have none, and epitran bho-Deva
- * is a CIRCULAR Hindi clone (it gives the Hindi values श→ʃ, ऐ→ɛː). The committed anchor is a small hand-adjudicated
- * gold of the DISTINCTIVE features (test/bhojpuri.test.ts), which grades exactly where Bhojpuri ≠ Hindi — the one
- * axis that is NOT circular with a Hindi clone. See docs/investigations/bho_native_bringup_investigation.md.
+ * Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress) with a Bhojpuri data file.
+ * REVISED from "A Grammar of Bhojpuri" (dissertation, Shukla-tradition), whose glossed forms were g2p-mined (1622
+ * Devanagari→IPA pairs) as a falsifiable anchor: Bhojpuri has an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic
+ * length, ऐ→[ɛ]/औ→[ɔ] MONOPHTHONGS (not the diphthongs earlier claimed), श/ष→[s] (only /s ɦ/ fricatives), व→[w]
+ * (not Hindi ʋ), ण/ञ→[n]. 🔷 single published source; see docs/investigations/bho_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

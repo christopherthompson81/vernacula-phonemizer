@@ -84,6 +84,7 @@ import { createBulgarian } from "./languages/bulgarian/bulgarian.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
+import { createMagahi } from "./languages/magahi/magahi.ts";
 import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
@@ -329,12 +330,11 @@ function build(lang: string): Phonemizer {
             return createBalochi((latin) => getPhonemizer("en").text(latin));
         case "bho":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
-        // Magahi (Magadhan, Bihar) — ALIAS to the Bhojpuri engine. Magahi shares Bhojpuri's key divergences from
-        // Hindi (श→s, e.g. विशाल→bisɑl per Priya 2020) and has NO independent referee or documented Magahi-specific
-        // delta, so we serve it via `bho` (its nearest verified sibling) as a labelled approximation rather than
-        // inventing an unverifiable bespoke clone. See tools/language-catalogue (served_by='bho').
+        // Magahi (Magadhan, Bihar) — BESPOKE (was a mag→bho alias). Shares the Bihari core with Bhojpuri (no vowel
+        // length, श/ष→s, ण/ञ→n) but the comparative phonology (Vinod Kumar 2026) documents a Magahi-specific GLIDE
+        // HARDENING — word-initial व→[b], य→[d͡ʒ] — that the alias got wrong, so it earns its own module.
         case "mag":
-            return createBhojpuri((latin) => getPhonemizer("en").text(latin));
+            return createMagahi((latin) => getPhonemizer("en").text(latin));
         // Haryanvi (Bangaru — Western Hindi, Haryana) — ALIAS to the Hindi engine. Haryanvi is segmentally ~Hindi
         // (same 28–30 consonants / 4-way stop contrast); its documented differences (vowel free-variation a~e,
         // a marked retroflexion tendency, intonation) are allophonic/prosodic, NOT a categorical grapheme→IPA
