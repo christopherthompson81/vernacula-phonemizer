@@ -117,3 +117,34 @@ alignment noisy, and (b) provides the SENTENCE CONTEXT a homograph/ezafe model n
 source and align a parallel classical corpus — that upgrades the silver to gold AND yields the contextualized
 training data for the sentence-level BiLSTM. The transliteration + remap built here (validated 71%/83%) is the
 per-token engine that pipeline will run.
+
+## Run 4 — the REAL parallel corpus: aligned classic text → (fa, tg, IPA) triplets (2026-07-20)
+
+Corrected framing (Chris): the parallel corpus isn't the noisy word-level skeleton match of Run 3 — it's
+**aligned classic texts** yielding **(Tajik, Farsi, IPA) triplets in running-text form**, where alignment is
+POSITIONAL (same poem, same order) so the skeleton ambiguity never arises.
+
+**Sourcing** (TajikNLPWorld org, huggingface.co/TajikNLPWorld):
+- `TajPersParallelCorpusFull` — pre-aligned tg↔fa, Apache-2.0, 100K–1M rows — **GATED (HTTP 401)**; access
+  requested, pending. This is the fast path once approved.
+- `shahnameh-tajik-corpus` — the Shahnameh in Tajik Cyrillic, **CC-BY-SA-4.0, public** — 8 volumes (jilds).
+- Persian side: **Ganjoor** (api.ganjoor.net, Ferdowsi id 4 → Shahnameh cat 33 → آغاز کتاب cat 34 → poem 1321);
+  Ferdowsi is public domain.
+
+**POC built** (`tools/fa-restoration/parallel/shahnameh-opening.fa-tg-ipa.tsv`, 30 lines): the two editions align
+line-for-line (به نام خداوندِ جان و خرد ↔ Ба номи худованди ҷону хирад), and the tg engine + remap gives the IPA
+per line → a clean running-text triplet corpus.
+
+**KEY finding the classic text reveals (the proper-noun validation missed it):** Tajik and Persian diverge
+SYSTEMATICALLY in short vowels on GRAMMATICAL morphemes — Tajik **izofat -и = Persian -е** (nɒm**i** vs nɒm**e**),
+the **connector -у = Persian -о** (ному → nɒm**u** vs nɒm o), ба=ba vs fa be, and Tajik short **и often = Persian
+е** (хирад→χirad vs xerad). So the naive remap yields *Tajik* pronunciation in the Persian phoneme set, ~correct
+on content words but shifted on exactly the morphemes Persian omits (izofat, connector). Run 3's 71% was on names
+(no grammatical morphemes), which is why it didn't surface. **This is the whole point of the parallel corpus:**
+with fa↔tg aligned, these tg→fa correspondences are learnable (rule or model), rather than guessed — and the
+izofat/connector are precisely the ezafe cases the sentence-level model needs.
+
+**Scale path:** pull the full Ganjoor Shahnameh (thousands of poems) and align to the full Tajik (8 jilds, ~100k
+hemistichs) positionally; fold in `TajPersParallelCorpusFull` when access clears. Then add a tg→fa short-vowel
+correspondence layer (izofat -и→e, connector -у→o, …), learned from the aligned pairs, to turn the Tajik-derived
+IPA into true Persian IPA.
