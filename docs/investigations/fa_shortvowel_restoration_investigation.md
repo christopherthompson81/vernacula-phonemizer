@@ -148,3 +148,34 @@ izofat/connector are precisely the ezafe cases the sentence-level model needs.
 hemistichs) positionally; fold in `TajPersParallelCorpusFull` when access clears. Then add a tg→fa short-vowel
 correspondence layer (izofat -и→e, connector -у→o, …), learned from the aligned pairs, to turn the Tajik-derived
 IPA into true Persian IPA.
+
+## Run 5 — are the divergences regular, and do they beat fa's current restorer? (2026-07-20)
+
+Two questions (Chris): do the tg↔fa divergences correspond regularly, and can Tajik predict the short vowels fa
+currently gets wrong? Measured directly (`tools/fa-restoration/divergence-analysis.ts`) on the 965 tg↔fa cognates
+— Tajik-derived IPA AND fa's current engine, both vs the true fa gold (short vowels counted, notation folded):
+
+| on the 965 cognates | == fa gold |
+|---|---|
+| **Tajik-derived** | **71.9%** |
+| **fa current engine** | **51.4%** |
+| **Tajik advantage** | **+20.5 pp** |
+
+**So yes — Tajik predicts the short vowels fa misses, by +20pp on cognate words.** That's a real restoration
+source, not a marginal one.
+
+**On regularity — partly, with a hard core:**
+- The dominant raw "mismatch" (ɒ→a, ~400) is pure NOTATION (fa writes ā as *aː*, we as ɒ) — folds away, not a
+  divergence.
+- The largest *real* divergence is **Tajik у → Persian o (64)**. It's regular in origin but **not resolvable
+  from Tajik**: Tajik у merged Persian's short-u(→o) and long-ū(→u) the same way, so Tajik carries an 87%/13%
+  (u/o) prior and nothing more. I tested whether the Persian abjad breaks the tie (و present → u): **it doesn't**
+  — both u- and o-words write و (cf. دو 'do'). So this residual is a genuine shared-merger CEILING, not a
+  data-volume or rule problem.
+- Smaller, bidirectional **i↔e** (~17 each way) — the same story on the front vowels.
+
+**Conclusion.** Tajik is a strong, usable restoration SIGNAL — integrate it (as a lexicon override / a feature or
+teacher for the char model / the aligned-corpus training signal): it roughly *closes half* the 30→72 short-vowel
+gap on cognate words. The residual ~28% is dominated by mergers Tajik shares with Persian (u/o, i/e) that neither
+Tajik nor the abjad can disambiguate context-free — that's the ceiling the *sentence-level* model must reach past
+(from context: مرد mard vs mord), which is exactly what the aligned parallel corpus (Run 4) is for.

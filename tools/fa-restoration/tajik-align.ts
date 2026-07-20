@@ -80,4 +80,5 @@ function main(): void {
     console.log(`  derived Persian IPA == fa gold (FULL, short vowels): ${full} (${((100 * full) / matched).toFixed(1)}%)`);
     console.log(`  == fa gold (SKELETON only): ${sk} (${((100 * sk) / matched).toFixed(1)}%)`);
 }
-main();
+// Run the validation only when invoked directly (importers reuse the exported translit/remap helpers).
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) main();
