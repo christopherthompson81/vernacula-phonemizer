@@ -52,3 +52,33 @@ a hand-adjudicated gold (`test/awadhi.test.ts`). Correctness on the Hindi-shared
 grammar, not measured** — there is no independent referee and (per Saksena/Bloch) there is no phonological axis
 on which one could exist for this lect. The gap is recorded in the referee-eval config (`referees: []` +
 `secondaryGap`). Contrast Maithili, which *does* have 167 human wikipron transcriptions and so clears the ⛔ bar.
+
+## Run 2 — full inventory audit against Saksena's charts (2026-07-19)
+
+**Question:** the original bring-up worked from a rough OCR of Saksena and had to defer several vowel/consonant
+decisions as "provisional". With the *chart pages themselves* now read directly (rendered from the PDF at
+`~/Books/2015.238311.Evolution-Of.pdf`, §12 consonants p.24 + §9/§90–100 vowels p.25), does the module's
+encoding still hold?
+
+**Findings (module vs Saksena §12/§9):**
+
+- ✅ **Confirmed correct:** single sibilant श/ष/स→[s] (§12/§87); intervocalic ड/ढ→ɽ/ɽʱ (§12 "Flapped");
+  nasal vowels as separate phonemes (§122); dental/retroflex + palatal-affricate system (§12).
+- ⚠ **Real drift, fixed:** `व` was [ʋ] (inherited Hindi labiodental). Saksena §12 lists the bilabial semivowel
+  as **[w]** — the same eastern reflex we set for Bhojpuri. Changed व→w.
+- 🔀 **"Provisional" flag resolved and upgraded:** ऐ/औ shipped as [ai]/[au] with a caveat that the OCR couldn't
+  confirm the quality. **§2395** settles it: *"Lakhimpuri ʌi, ʌu … are represented in the Eastern dialects by
+  ʌe, ʌo respectively."* The Lakhimpuri basis therefore genuinely keeps the diphthong (it must NOT be flattened
+  to the Bhojpuri monophthong ɛ/ɔ — that is the *Eastern* reflex). Refined the onset a→**ʌ** (central, per
+  §2395): ऐ→ʌi, औ→ʌu; dropped "provisional". Added ʌ to the flap's vowel class in `awadhi.ts`.
+- 📐 **Documented, not encoded (fine phonetic detail):** the OIA-a reflex / inherent short vowel is [ʌ]
+  (half-open central, §95/§103), not [ə]; but the engine keeps literal `ə` because schwa-deletion keys on it
+  (adopting ʌ breaks deletion — same tradeoff that kept Bhojpuri on ə). And Saksena classes र as a trill [r]
+  (§12 "Rolled") where we keep the Hindi tap [ɾ] (free variation). Both noted in the provenance.
+- 🕳 **Still deferred (larger follow-up):** whispered/voiceless final vowels (§113–119) — a real Awadhi trait
+  needing a new final-devoicing rule, not just a data flag.
+
+**Result:** the audit confirmed the module is largely Saksena-faithful; one sourced fix (व→w), one provenance
+upgrade (ऐ/औ→ʌi/ʌu, confirmed for Lakhimpuri), two documentable phonetic notes. Hindi + Bhojpuri tests
+unaffected (the change is awa-local); awa gold updated. Verdict stays **⛔ cannot-verify** — no independent
+referee exists; this tightens the *sourcing*, not the *verification*.
