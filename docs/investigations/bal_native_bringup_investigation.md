@@ -56,7 +56,7 @@ right problem.
 **The composition.** Balochi is written in BOTH the Arabic abjad and a phonemic Roman orthography. So:
 - a **Roman-script g2p** (`phonemizeRoman`) reads the phonemic Roman orthography → full IPA directly (macron→long
   vowel, háček→postalveolar, dot-below→retroflex; balōč→baloːt͡ʃ, gwāt→ɡwaːt̪);
-- a **cross-script lexicon** (`balochi-lexicon.tsv`, 55 core words compiled from Korn + J&K + ASJP, keyed by BOTH
+- a **cross-script lexicon** (`balochi-lexicon.tsv`, 399 words (55 curated core + 344 auto-mined from Korn's Etymological Index) compiled from Korn + J&K + ASJP, keyed by BOTH
   the Arabic and the Roman spelling → full-voweled IPA) lets the **Arabic** path recover the vowels the abjad loses:
   خاموش → xaːm**oː**ʃ (skeleton was xaːmuːʃ), گریب → ɡ**a**riːb (skeleton ɡriːb), روچ → roːt͡ʃ (skeleton ruːt͡ʃ).
 - OOV Arabic still falls back to the defective skeleton (بلوچستان → bluːt͡ʃst̪aːn) — the honest tail.
@@ -69,3 +69,23 @@ length or dental/retroflex). This corroborates the phoneme inventory that was pr
 Roman path that recovers the full vowel system. The Arabic-OOV skeleton remains ⛔-grade (defective abjad), but
 lexicon-covered words and all Roman input are full-voweled and cross-checked. The lexicon is a seed to grow from
 Korn's fuller vocabulary (its retroflex marks are lost in the PDF extraction — expand carefully).
+
+## Run 3 — grow the lexicon from Korn's Etymological Index (55 → 399)
+
+Bulk-mined **344 additional Balochi headwords** from Korn's Etymological Index (PDF pp. 348–419): each entry is a
+headword immediately followed by its `"gloss"` (cognates end in `-`), so `(headword → gloss)` extracts cleanly.
+Headwords convert deterministically to IPA (macron→long, háček→postalveolar; ǰ extracts as *i+caron* → fixed to
+d͡ʒ), and a **reverse-transliteration generates the Arabic key** (native-letter defaults; short vowels omitted;
+au/ai→aw/aj). The Roman g2p re-verified against ASJP holds (13/13 on the re-checked overlap).
+
+**The retroflex limitation, handled honestly.** The PDF text layer loses the retroflex dot-below entirely (no
+extractor recovers it — pdftotext/mutool/pdfminer/tesseract/PaddleOCR all fail or are inconsistent; see the
+diagnosis above). Retroflex Balochi words are Indic/European loanwords, which are RARE in an index of *inherited*
+Iranian vocabulary — only **4 of 356** mined words were flagged retroflex by PaddleOCR. Those 4 were image-verified
+against the rendered pages: **kabāṭ "cupboard"** (Europ. loanword, p. 394) is genuinely retroflex → fixed to
+kabaːʈ / کباٹ; the other three were OCR noise → dropped rather than shipped dental-wrong. The curated core + J&K
+already carry the main retroflex vocabulary (ḍākṭar, ṭikaṭṭ) correctly.
+
+**Caveat on the Arabic keys:** the reverse-transliteration is exact for native words but approximate for loanwords
+(it can't predict the etymological letters ص/ض/ط/ظ/ذ/ث/ع). A wrong Arabic key is harmless — that word simply falls
+back to the skeleton g2p for Arabic input — while the Roman key + IPA remain correct. Lexicon now **399 entries**.
