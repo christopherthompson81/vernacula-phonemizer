@@ -12,6 +12,7 @@ import { assembleClauses } from "./core/clauses.ts";
 import { getPhonemizer } from "./registry.ts";
 import { stripHarakat } from "./core/harakatLexicon.ts";
 import { createFaVowelRestorer, type FaVowelRestorer } from "./languages/persian/vowelRestorer.ts";
+import { createFaContextRestorer, type FaContextRestorer } from "./languages/persian/contextRestorer.ts";
 import { harakatLexicon, phonemizeWord } from "./languages/persian/persian.ts";
 
 const PERSO = "ء-ۿݐ-ݿ‌‍";
@@ -47,4 +48,19 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
             if (mk) sink.pause(mk);
         }
     });
+}
+
+let contextP: Promise<FaContextRestorer | undefined> | undefined;
+/**
+ * OPTIONAL: phonemize a CLASSICAL Persian hemistich/sentence via the sentence-level CONTEXT model — it resolves
+ * ezafe / homographs / connectors from context (Run 15, +18.8pp in-domain). ⚠ Classical-scoped: excellent on
+ * Shahnameh-style verse, but it can hallucinate on short/modern out-of-domain text, so this is NOT the default —
+ * use `phonemizeFaNeural` for general/modern text. Falls back to the sync path when the model is unavailable.
+ */
+export async function phonemizeFaContext(sentence: string): Promise<string> {
+    if (contextP === undefined) contextP = createFaContextRestorer();
+    const ctx = await contextP;
+    if (!ctx) return getPhonemizer("fa").text(sentence);
+    const clean = sentence.replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
+    return clean ? ctx.restore(clean) : "";
 }

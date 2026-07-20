@@ -408,3 +408,25 @@ lever past it — exactly what Run 5 predicted and the parallel corpus was built
 of the context benefit, not a shipped model. Shipping a context restorer for modern Persian needs modern
 contextualized data (the same dual-script pipeline on modern parallel text) + a production integration. But the
 core question — does context break the ceiling? — is answered: **yes, +18.8pp.**
+
+## Run 16 — SHIPPED the context model (optional, classical-scoped, non-regressing) (2026-07-20)
+
+Shipped the sentence-level context model end to end, the same pipeline as the word restorer.
+
+**Artifacts** (`src/languages/persian/`): `fa-context-restorer.{enc,dec}.onnx` (int8, ~5 MB) + meta + PROVENANCE,
+exported by `tools/fa-restoration/export_context_onnx.py`. **Inference** (`contextRestorer.ts`):
+`createFaContextRestorer()` runs the autoregressive sentence decode via the optional `onnxruntime-node`
+(no-op degrade); output is already Iranian (trained on the normalised corpus) + per-word final stress.
+**Wiring** (`faNeural.ts`): `phonemizeFaContext(sentence)` — a SEPARATE optional export.
+
+**Why optional / not the default.** The verify made the domain split concrete:
+- In-domain (Shahnameh): به نام خداوندِ جان و خرد → **bˈa nɒmˈe χodɒwandˈe d͡ʒɒnˈo χerˈad** — nails the ezafe chain
+  (nɒm**e**, χodɒwand**e**) and the -o connector (d͡ʒɒn**o**), from CONTEXT a word-level model can't see. The
+  +18.8pp made concrete.
+- Out-of-domain (short/modern): خانه بزرگ → hallucinated repetition. It is CLASSICAL-scoped, so it is NOT wired
+  into the default modern runtime (`phonemizeFaNeural` is unchanged) — shipping it as the default would regress
+  modern text.
+
+So it ships as an opt-in path — which (Chris) "at least lets us evaluate it" on real classical text. A modern
+context restorer needs modern contextualised data (the same dual-script pipeline on modern parallel text). tsc
+clean; sync persian + both restorer tests pass; the shipped word-level path is untouched.
