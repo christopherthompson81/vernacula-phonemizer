@@ -239,11 +239,13 @@ ajp|2513|1|0|0
 acw|1891|1|0|0
 apd|0|0|0|0
 mag|0|2|0|0
+bgc|0|0|0|0
 """
 
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
 SERVED = """
 mag|bho
+bgc|hi
 """
 
 # Extra rows (rejected / unimplemented candidates):
@@ -267,7 +269,7 @@ mos|Mossi (Mooré)|Niger-Congo (Gur)|Latin|9||unimplemented||Burkina Faso; new b
 bal|Balochi|Iranian (NW)|Arabic|9||unimplemented||Complements done fa/ps/ckb.
 tg|Tajik|Iranian (SW)|Cyrillic|8|4|unimplemented||Persian variety in Cyrillic — different script from done fa.
 ki|Kikuyu (Gikuyu)|Niger-Congo (Bantu)|Latin|8||unimplemented||Kenya Bantu.
-bgc|Haryanvi|Indo-Aryan|Devanagari|10||unimplemented||Hindi belt.
+bgc|Haryanvi (Bangaru)|Indo-Aryan|Devanagari|10||implemented||ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.
 sat|Santali|Austroasiatic (Munda)|Ol Chiki|7||unimplemented||New script family (Ol Chiki).
 ee|Ewe|Niger-Congo (Kwa)|Latin|7||unimplemented||Ghana/Togo.
 ks|Kashmiri|Indo-Aryan (Dardic)|Arabic (Kashmiri)|7||unimplemented||Dardic; vowel-rich abjad.
