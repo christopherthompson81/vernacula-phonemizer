@@ -25,18 +25,21 @@ describe("Awadhi canonical IPA (Saksena-documented divergences vs Hindi)", () =>
         expect(phonemizeWord("डर")).toBe("ɖˈəɾ"); // 'fear' — WORD-INITIAL ड stays ɖ
     });
 
-    test("ऐ/औ ship as the eastern diphthongs [ai]/[au] (provisional — see provenance)", () => {
-        // NOT deferred-to-Hindi: awa ships the eastern diphthong, diverging from Hindi's monophthong ɛː/ɔː,
-        // following Bhojpuri. The exact quality is unconfirmed in Saksena's OCR, hence "provisional", but the
-        // shipped behaviour is asserted so a regression is caught.
-        expect(phonemizeWord("बैल")).toBe("bˈail"); // 'ox' (Hindi monophthong: bɛːl)
-        expect(phonemizeWord("कौन")).toBe("kˈaun"); // 'who' (Hindi: kɔːn)
+    test("ऐ/औ → central-onset diphthongs [ʌi]/[ʌu] (Saksena §2395: Lakhimpuri, vs Eastern/Bhojpuri monophthong)", () => {
+        // The Lakhimpuri basis keeps the diphthong where Bhojpuri (Eastern) monophthongises to ɛ/ɔ — a real
+        // Awadhi/Bhojpuri split, so this must NOT be flattened to the Bhojpuri value. Central onset ʌ per §2395.
+        expect(phonemizeWord("बैल")).toBe("bˈʌil"); // 'ox' (Bhojpuri: bɛl; Hindi: bɛːl)
+        expect(phonemizeWord("कौन")).toBe("kˈʌun"); // 'who' (Bhojpuri: kɔn; Hindi: kɔːn)
+    });
+
+    test("व → [w] bilabial semivowel (Saksena §12: not Hindi's ʋ) — same eastern reflex as Bhojpuri", () => {
+        expect(phonemizeWord("अवधी")).toBe("ˈəwd̪ʱiː"); // 'Awadhi' — व→w (Hindi: əʋd̪ʱiː)
+        expect(phonemizeWord("विशाल")).toBe("wɪsˈaːl"); // 'huge' — व→w, श→s
     });
 
     test("shared Indo-Aryan core (Hindi-identical where Awadhi does not diverge)", () => {
         expect(phonemizeWord("पानी")).toBe("pˈaːniː"); // 'water'
         expect(phonemizeWord("तीन")).toBe("t̪ˈiːn"); // 'three'
         expect(phonemizeWord("किताब")).toBe("kɪt̪ˈaːb"); // 'book'
-        expect(phonemizeWord("अवधी")).toBe("ˈəʋd̪ʱiː"); // 'Awadhi'
     });
 });
