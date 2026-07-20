@@ -85,3 +85,35 @@ Revised plan: **(a) char-level BiLSTM word→IPA restorer** on wikipron/kaikki (
 sentence-level context model** for homographs/ezafe trained on Tajik-parallel + diacritized corpora → lexicon
 kept as a high-precision override. The 42pp headroom is mostly reachable by (a); (b) removes the "context-free
 ceiling" caveat from Run 1.
+
+## Run 3 — Tajik as a Persian pronunciation oracle: validated, but alignment is the wall (2026-07-19)
+
+Built the cross-script pipeline (`tools/fa-restoration/tajik-align.ts`): transliterate a Tajik Cyrillic word to a
+Persian consonant+long-vowel SKELETON (collapsing the Arabic letter classes Tajik merged — س ص ث / ز ذ ض ظ / ت ط /
+ه ح — so it can match the real fa spelling), and derive Persian IPA from the Tajik pronunciation by remapping the
+Persian/Tajik divergences: **Tajik ɔ→Persian ɒ** (ā), the **majhul merger ɵ→u**, **в=v→w**, ʁ→ɣ, and a
+word-initial **ʔ**.
+
+**The remap is VALIDATED** against fa's own human gold on aligned cognates:
+
+| | match |
+|---|---|
+| derived Persian IPA == fa gold (FULL, short vowels) | **71.4%** (689/965) |
+| == fa gold (SKELETON only) | **82.7%** (798/965) |
+
+So Tajik IS a viable Persian pronunciation oracle — it supplies the short vowels correctly ~71% of the time *when
+the alignment is right*. (This wordlist is proper-noun-heavy — names transliterate worse than native vocabulary —
+so native words should score higher.)
+
+**But word-level alignment is the wall.** Skeleton matching is many-to-one: a Persian skeleton matches several
+Tajik cognates, so choosing by frequency mis-selects — e.g. آخر 'last' matched ахёр instead of охир. Aligning the
+15.5k fa frequency wordlist to the tgwiki vocabulary (509k types, built via `tools/corpus/build.ts --wiki tg`)
+covered 2400 words (15.5%), of which **1342 are NOT in the wikipron gold** — a real coverage extension, but
+SILVER (~71% est., with alignment noise on top) rather than gold.
+
+**Conclusion — the two problems have one solution: real parallel text.** A shared classical work in both scripts
+(Shahnameh, Hafez) is *positionally* aligned, which (a) removes the skeleton ambiguity that makes word-level
+alignment noisy, and (b) provides the SENTENCE CONTEXT a homograph/ezafe model needs. So the next step is to
+source and align a parallel classical corpus — that upgrades the silver to gold AND yields the contextualized
+training data for the sentence-level BiLSTM. The transliteration + remap built here (validated 71%/83%) is the
+per-token engine that pipeline will run.
