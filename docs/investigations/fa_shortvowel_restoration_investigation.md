@@ -385,3 +385,26 @@ matres, not different lines). **7.3× the exact-only corpus.**
 
 `tools/fa-restoration/parallel/shahnameh-aligned.fa-tg-ipa.tsv` is now a substantial context corpus. The lesson
 (Chris's question): a scope-limited pass is what surfaced that the index — not brute force — was the lever.
+
+## Run 15 — the CONTEXT model: sentence-level beats word-level by +18.8pp (2026-07-20)
+
+The whole arc's premise (Run 5): the OOV ceiling is the homograph/ezafe shared-merger ambiguity that only SENTENCE
+CONTEXT resolves. Tested it directly on the scaled corpus (Run 14, 39k aligned hemistichs). Trained TWO char
+seq2seqs (BiLSTM enc + attention dec) on the SAME data (`train_context_model.py`) — a word-level one (one word in)
+and a sentence-level one (whole hemistich in) — so the gap IS the context benefit. Per-word eval on held-out
+sentences (1203 tokens, GPU):
+
+| model | held-out per-word IPA |
+|---|---|
+| word-level (no context) | 70.2% |
+| **sentence-level (CONTEXT)** | **89.0%** (+18.8pp) |
+
+**The context model decisively wins — the ceiling IS broken by sentence context.** The sentence model resolves the
+homographs, ezafe, and word-boundary/sandhi effects (the -у connector, ezafe chains) the context-free word model
+cannot. This closes the loop: word-level restoration plateaus (the shipped 50/51%), and CONTEXT is empirically the
+lever past it — exactly what Run 5 predicted and the parallel corpus was built for.
+
+**Honest caveats:** in-domain (Shahnameh), silver IPA (Tajik-derived ~71%), archaic vocabulary — a DEMONSTRATION
+of the context benefit, not a shipped model. Shipping a context restorer for modern Persian needs modern
+contextualized data (the same dual-script pipeline on modern parallel text) + a production integration. But the
+core question — does context break the ceiling? — is answered: **yes, +18.8pp.**
