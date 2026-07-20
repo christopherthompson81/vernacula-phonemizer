@@ -430,3 +430,43 @@ exported by `tools/fa-restoration/export_context_onnx.py`. **Inference** (`conte
 So it ships as an opt-in path — which (Chris) "at least lets us evaluate it" on real classical text. A modern
 context restorer needs modern contextualised data (the same dual-script pipeline on modern parallel text). tsc
 clean; sync persian + both restorer tests pass; the shipped word-level path is untouched.
+
+## Run 17 — 2026-07-20 — MODERN context model on HomoRich, promoted to the default
+
+The classical context model (Run 16) proved context breaks the homograph/ezafe ceiling but was Shahnameh-scoped
+(hallucinates on modern text). This run trains the MODERN analogue on **HomoRich-G2P-Persian** (CC0, ~528k modern
+homograph-rich sentences) and — because it does NOT hallucinate on everyday text — promotes it to the DEFAULT
+modern path.
+
+**Data pipeline** (`tools/fa-restoration/build_homorich_ipa.py`, `export_modern_context_onnx.py`):
+- Train on HomoRich's clean `Phoneme` column (Grapheme→phoneme). Diagnostics showed HomoRich ships TWO conventions:
+  the clean `Phoneme` column keeps the glottal onset (`?`→ʔ, 606579 vs 8) and encodes vowel length implicitly —
+  which MATCHES our fa; the `Mapped`/`IPA Homograph` columns DROP initial-ʔ (30404/31497), mark `ː` explicitly, and
+  `1`-tag the ezafe. Trusting the anchor column's char-votes would have flipped the ʔ convention. Verified the map
+  against `getPhonemizer("fa")`.
+- Deterministic Phoneme→canonical-IPA map: `A→aː i→iː u→uː S→ʃ Z→ʒ C→t͡ʃ j→d͡ʒ y→j g→ɡ r→ɾ ?→ʔ`.
+- **ق/غ**: HomoRich merges both→`q` (the Iranian phonemic merge); we **gheyn-condition** back to our fa's `q`/`ɣ`
+  split (γ-only source word → that word's `q→ɣ`; 99.2% of q-words are unambiguously ق-only or غ-only). All OTHER
+  Arabic-letter merges (ث/س/ص→s, ذ/ز/ض/ظ→z, ت/ط→t, ح/ه→h, ء/ع→ʔ) already agree with our fa.
+- **ZWNJ (the big one)**: 41.7% of HomoRich rows contain ZWNJ. Replacing ZWNJ with SPACE (first attempt) dropped
+  99.2% of them on the word-count filter (HomoRich writes می‌خوانم / کتاب‌ها as ONE phoneme word). Switching to
+  ZWNJ→CONCATENATE recovers 95.9% (dataset 197k→404k pairs) AND matches the runtime, which strips ZWNJ before the
+  model. This is what fixed میخوانم degrading to `meːxwˈaːnm`.
+
+**Measured (shipped int8 ONNX, greedy decode == contextRestorer.ts):**
+- Word-vs-sentence on the same modern held-out: **64.3%→86.2% per-word, +21.9pp** (the modern analogue of Run 16's
+  +18.8pp; context breaks the ceiling on MODERN homographs too).
+- Sentence model held-out (canonical IPA): **83.2% per-word** (int8 == fp32 == torch — quantization lossless).
+- **Default comparison (the decision):** current word-level `phonemizeFaNeural` **33.5%** vs modern context
+  **78.2%** per-word on modern held-out — **+44.8pp**. The word-level path structurally cannot do ezafe (never sees
+  the next word), and ezafe is in nearly every noun phrase → context MUST be the default. (Chris pushed on this:
+  "we worked on a modern corpus so that it could be the default.")
+
+**Shipping (this PR):** `fa-context-modern.{enc,dec}.onnx` (int8 ~5 MB) + meta + PROVENANCE.
+`createFaModernContextRestorer()` reuses the (now basename-parameterized) `contextRestorer.ts`. `phonemizeFaNeural`
+is restructured CONTEXT-FIRST: it runs the modern model over each clause (a run of Persian words; digits/punctuation
+break the run), and falls back PER-WORD to the word-level path (lexicon→OOV-seq2seq→g2p) on a degenerate decode, or
+WHOLESALE when the model is absent. **Degeneration guard** (~1% greedy runaway, e.g. ɾaft→ɾaftatmat…; NOT a
+quantization artifact): word-count mismatch OR an implausibly long token OR a repeated bigram → per-word fallback.
+Also fixed: Persian-Indic digits (۰-۹, which fall in the PERSO letter range) were being fed to the context model as
+words → now routed to the number path via ASCII folding. `phonemizeFaContext` stays the classical opt-in.
