@@ -9,11 +9,11 @@
     "language": "bho",
     "name": "Bhojpuri",
     "script": "Devanagari",
-    "provenance": "Authored from standard Bhojpuri phonology (Shukla 1981; Grierson LSI VI). Reuses the Hindi Devanagari engine with the Bhojpuri segmental divergences: श/ष→s (no /ʃ/), ऐ/औ kept as diphthongs ai/au, no Hindi əɦə-lowering. NO independent referee exists (see docs) — CANNOT-VERIFY; anchored on a hand-adjudicated gold of the DISTINCTIVE features.",
+    "provenance": "REVISED from 'A Grammar of Bhojpuri' (dissertation, Shukla-tradition), whose glossed examples were g2p-mined (1622 Devanagari→IPA pairs) as a falsifiable anchor. Reuses the Hindi Devanagari engine with the Bhojpuri divergences: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0/1622 mined length marks), ऐ→ɛ/औ→ɔ MONOPHTHONGS (the earlier 'diphthong' claim was WRONG), श/ष→s (only /s ɦ/ fricatives), व→w (not Hindi ʋ), ण/ञ→n. Single published source → 🔷.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.
-    "inherentVowel": "ə",
+    "inherentVowel": "ə",  // schwa (fleet ə convention; Bhojpuri realises it [ʌ], folded)
 
     // Consonant letters → canonical IPA. `note` documents the phonological class + any referee decision.
     "consonants": {
@@ -35,12 +35,12 @@
             "ipa": "d͡ʒʱ",
             "note": "post-alveolar affricate, voiced breathy",
         },
-        "ञ": { "ipa": "ɲ", "note": "palatal nasal" },
+        "ञ": { "ipa": "n", "note": "palatal nasal" },
         "ट": { "ipa": "ʈ", "note": "retroflex stop, voiceless" },
         "ठ": { "ipa": "ʈʰ", "note": "retroflex stop, voiceless aspirated" },
         "ड": { "ipa": "ɖ", "note": "retroflex stop, voiced" },
         "ढ": { "ipa": "ɖʱ", "note": "retroflex stop, voiced breathy" },
-        "ण": { "ipa": "ɳ", "note": "retroflex nasal" },
+        "ण": { "ipa": "n", "note": "retroflex nasal" },
         "त": {
             "ipa": "t̪",
             "note": "DENTAL stop, voiceless (t̪ vs retroflex ट=ʈ — the core coronal contrast)",
@@ -57,7 +57,7 @@
         "य": { "ipa": "j", "note": "palatal approximant" },
         "र": { "ipa": "ɾ", "note": "alveolar tap" },
         "ल": { "ipa": "l", "note": "alveolar lateral" },
-        "व": { "ipa": "ʋ", "note": "labiodental approximant" },
+        "व": { "ipa": "w", "note": "labiodental approximant" },
         "श": { "ipa": "s", "note": "Bhojpuri merges श → [s] (NO /ʃ/) — शहर→sahar (vs Hindi ʃ)" },
         "ष": { "ipa": "s", "note": "Bhojpuri ष → [s] (no /ʃ/ or /ʂ/)" },
         "स": { "ipa": "s", "note": "alveolar sibilant" },
@@ -79,39 +79,39 @@
 
     // Independent vowel letters (word-initial / standalone).
     "independentVowels": {
-        "अ": { "ipa": "ə", "note": "short central (schwa)" },
-        "आ": { "ipa": "aː", "note": "long open" },
-        "इ": { "ipa": "ɪ", "note": "short near-close front" },
-        "ई": { "ipa": "iː", "note": "long close front" },
-        "उ": { "ipa": "ʊ", "note": "short near-close back" },
-        "ऊ": { "ipa": "uː", "note": "long close back" },
+        "अ": { "ipa": "ʌ", "note": "short central (schwa)" },
+        "आ": { "ipa": "ɑ", "note": "long open" },
+        "इ": { "ipa": "i", "note": "short near-close front" },
+        "ई": { "ipa": "i", "note": "long close front" },
+        "उ": { "ipa": "u", "note": "short near-close back" },
+        "ऊ": { "ipa": "u", "note": "long close back" },
         "ऋ": {
-            "ipa": "ɾɪ",
+            "ipa": "ri",
             "note": "vocalic r (Sanskrit; realized ɾɪ in Hindi)",
         },
-        "ए": { "ipa": "eː", "note": "long close-mid front" },
-        "ऐ": { "ipa": "ai", "note": "Bhojpuri KEEPS the diphthong [ai] (बैल→bail) — Hindi monophthongised to ɛː" },
-        "ओ": { "ipa": "oː", "note": "long close-mid back" },
-        "औ": { "ipa": "au", "note": "Bhojpuri KEEPS the diphthong [au] (कौन→kaun) — Hindi monophthongised to ɔː" },
-        "ऍ": { "ipa": "ɛː", "note": "candra e (loans)" },
-        "ऑ": { "ipa": "ɔː", "note": "candra o (loans, e.g. English 'o')" },
-        "ॐ": { "ipa": "õːm", "note": "Om sign (U+0950) — a whole syllable" },
+        "ए": { "ipa": "e", "note": "long close-mid front" },
+        "ऐ": { "ipa": "ɛ", "note": "Bhojpuri KEEPS the diphthong [ai] (बैल→bail) — Hindi monophthongised to ɛː" },
+        "ओ": { "ipa": "o", "note": "long close-mid back" },
+        "औ": { "ipa": "ɔ", "note": "Bhojpuri KEEPS the diphthong [au] (कौन→kaun) — Hindi monophthongised to ɔː" },
+        "ऍ": { "ipa": "ɛ", "note": "candra e (loans)" },
+        "ऑ": { "ipa": "ɔ", "note": "candra o (loans, e.g. English 'o')" },
+        "ॐ": { "ipa": "õm", "note": "Om sign (U+0950) — a whole syllable" },
     },
 
     // Dependent vowel signs (matras) — replace the inherent vowel on the preceding consonant.
     "vowelSigns": {
-        "ा": { "ipa": "aː" },
-        "ि": { "ipa": "ɪ" },
-        "ी": { "ipa": "iː" },
-        "ु": { "ipa": "ʊ" },
-        "ू": { "ipa": "uː" },
-        "ृ": { "ipa": "ɾɪ" },
-        "े": { "ipa": "eː" },
-        "ै": { "ipa": "ai" },
-        "ो": { "ipa": "oː" },
-        "ौ": { "ipa": "au" },
-        "ॅ": { "ipa": "ɛː" },
-        "ॉ": { "ipa": "ɔː" },
+        "ा": { "ipa": "ɑ" },
+        "ि": { "ipa": "i" },
+        "ी": { "ipa": "i" },
+        "ु": { "ipa": "u" },
+        "ू": { "ipa": "u" },
+        "ृ": { "ipa": "ri" },
+        "े": { "ipa": "e" },
+        "ै": { "ipa": "ɛ" },
+        "ो": { "ipa": "o" },
+        "ौ": { "ipa": "ɔ" },
+        "ॅ": { "ipa": "ɛ" },
+        "ॉ": { "ipa": "ɔ" },
     },
 
     // Combining signs with special effects.

@@ -15,7 +15,7 @@ describe("Magahi (mag) — alias to the Bhojpuri engine", () => {
             expect(mag.text(w)).toBe(bho.text(w));
         }
     });
-    test("carries the shared eastern feature श→s (viʃaːl → ʋɪsaːl, not Hindi ʋɪʃaːl)", () => {
-        expect(mag.text("विशाल")).toBe("ʋɪsˈaːl");
+    test("carries the shared eastern features श→s + व→w (viʃaːl → wisɑl, not Hindi ʋɪʃaːl)", () => {
+        expect(mag.text("विशाल")).toBe("wˈisɑl");
     });
 });
