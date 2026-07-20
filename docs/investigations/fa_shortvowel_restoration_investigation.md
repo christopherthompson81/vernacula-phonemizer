@@ -366,3 +366,22 @@ breaks a hemistich) but precision is high — random spot-checks are all correct
 IPA). This is the **data foundation for the context model** — the sentence context is exactly what the
 homograph/ezafe shared-merger ceiling (Run 5) needs and word-level restoration structurally lacks. Recall-boost
 lever = fuzzy/anchored alignment (≤1 variant word); the next build = a sentence-level model trained on this corpus.
+
+## Run 14 — fuzzy alignment recall boost: 5,375 → 39,080 (2026-07-20)
+
+The exact consonant-match (Run 13) got 6% recall; most misses are hemistichs off by 1–2 consonants (the izofat-ی
+/ short-u→و matres residue the consonant-strip can't fully remove). Boosted recall with a fuzzy pass.
+
+**Scope-limited first (Chris's steer — verify effectiveness before scaling).** The naive anchored pass
+UNDERPERFORMED (1,654 < exact 5,375 — the exact anchors are non-monotonic: first-occurrence tg indices + edition
+reordering corrupt the position estimate). A position-agnostic length-bucket + multiset prefilter was too SLOW
+(3k lines = minutes → 99k = hours). The fix was a **trigram inverted index**: 3k lines in 10.5s, extrapolating
+cleanly — so the full run was worth it.
+
+**Full fuzzy** (`tools/fa-restoration/fuzzy_align_shahnameh.py`, trigram candidates → bounded edit-distance ≤2,
+each tg used once): **39,949 pairs → 39,080 deduped triplets (~224k in-context words)** — d=0 5,464, d=1 15,272,
+d=2 19,213. Precision stays high: random edit-2 pairs across the corpus are all correct (the residue is the
+matres, not different lines). **7.3× the exact-only corpus.**
+
+`tools/fa-restoration/parallel/shahnameh-aligned.fa-tg-ipa.tsv` is now a substantial context corpus. The lesson
+(Chris's question): a scope-limited pass is what surfaced that the index — not brute force — was the lever.
