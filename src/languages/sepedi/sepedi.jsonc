@@ -1,0 +1,31 @@
+// Native Sepedi / Northern Sotho (nso) canonical-IPA definition — Bantu (Sotho-Tswana, S32; ~5M, South Africa,
+// official). Latin orthography. Sibling of the done Setswana (tn) + Sesotho (st), but a DISTINCT language. NO
+// machine referee AT ALL (no wikipron/kaikki/epitran) → ⛔ cannot-verify; authored from standard Sepedi phonology
+// (Ziervogel & Mokgokong) as a beyond-referee module, the Setswana pattern. Greedy longest-match scan.
+//
+// Sepedi's profile among Sotho-Tswana: prominent ⟨š⟩→[ʃ] / ⟨tš⟩→[t͡ʃ], ⟨g⟩→[x] / ⟨kg⟩→[kx], the voiceless lateral
+// ⟨hl⟩→[ɬ] and lateral affricate ⟨tl⟩→[t͡ɬ]. Plain voiceless stops taken as EJECTIVE ⟨p t k⟩→[pʼ tʼ kʼ] (the
+// Sotho-Tswana pattern, per the Sesotho attestations — UNVERIFIED for Sepedi). No clicks. Vowel height (7-vowel
+// /i e ɛ a ɔ o u/) is unwritten → default mid [ɛ ɔ]. Tone (H/L) lexical + unwritten → DEFERRED. ⛔ cannot-verify.
+// See docs/investigations/nso_native_bringup_investigation.md.
+{
+    "language": "nso",
+    "name": "Sepedi (Northern Sotho)",
+    "script": "Latin",
+    "provenance": "Authored from standard Sepedi/Northern Sotho orthography + phonology (Ziervogel & Mokgokong). NO machine referee (no wikipron/kaikki/epitran) → ⛔ cannot-verify; a couple of hand examples only.",
+
+    "graphemes": {
+        "tšh": "t͡ʃʰ", "tsh": "t͡sʰ", "tlh": "t͡ɬʰ",
+        "tš": "t͡ʃʼ", "ts": "t͡sʼ", "tl": "t͡ɬʼ",
+        "ph": "pʰ", "th": "tʰ", "kh": "kʰ", "kg": "kx",
+        "sh": "ʃ", "hl": "ɬ", "ng": "ŋ", "ny": "ɲ",
+        "š": "ʃ", "j": "d͡ʒ", "y": "j",
+        "b": "b", "d": "d", "f": "f", "g": "x", "h": "ɦ", "k": "kʼ", "l": "l", "m": "m",
+        "n": "n", "p": "pʼ", "r": "r", "s": "s", "t": "tʼ", "v": "v", "w": "w", "z": "z",
+        "a": "ɑ", "e": "ɛ", "ê": "ɛ", "i": "i", "o": "ɔ", "ô": "ɔ", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
