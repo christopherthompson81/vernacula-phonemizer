@@ -43,3 +43,25 @@ equal measure, i.e. the referee itself isn't spelling-predictable here. The wiki
 (Spanish place/family names), which inflates the hiatus difficulty; the native kaikki referee scores higher (84.5%).
 The fix would be a stress model or an exceptions lexicon (deferred). Three referees corroborate the segmental
 backbone. Numbers deferred. Gold: `test/ilocano.test.ts`. Floor `ilo: 0.80`.
+
+## Run 2 — a stress model was TRIED and REJECTED (negative result)
+
+The gliding residual correlates with stress (garcia→ɡaɾˈsi**a**, the *stressed* high vowel stays syllabic, vs
+rosario→ɾoˈsaɾ**j**o, the *unstressed* one glides), so a stress model was the natural next attempt (before a
+lexicon). Two positional stress rules were tested against both human referees:
+
+| model | wikipron | kaikki |
+|---|---|---|
+| **mechanical** (glide every C‑i/u‑V; the shipped rule) | **83.2%** | **85.2%** |
+| protect the penult **vowel letter** from gliding | 77.1% | 78.1% |
+| glide-then-restore the penult **nucleus** (syllabify after provisional gliding) | 74.1% | 75.3% |
+
+**Both stress rules made it WORSE.** The reason is decisive: `garcia` (i stays) and `radio` (i glides) are the
+*identical* C‑i‑V shape — they differ **only in lexical stress**, which Ilocano does not mark in the orthography and
+which is phonemic/contrastive (not positionally predictable). Any positional heuristic therefore mis-locates stress
+and blocks/permits gliding on the wrong words, and the errors outnumber the fixes. The proper-noun-heavy referee
+(Spanish names with etymological stress like García) makes this worse.
+
+**Conclusion:** the mechanical rule is the rule-based ceiling; further gains require actual lexical stress — i.e. a
+**lexicon** (or a model trained on the stress-marked referee), not a rule. The stress model is closed as a dead end;
+the shipped module is unchanged. (Kept per the negative-results discipline.)
