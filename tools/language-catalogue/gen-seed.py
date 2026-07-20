@@ -250,6 +250,7 @@ hil|465|477|0|0
 
 # code | verdict   — verdict for an EXTRA (non-IMPL) implemented row (e.g. authored ⛔ bring-ups).
 VERDICTS_EXTRA = """
+mag|🔷
 bal|🔷
 hil|🟢
 ilo|🟡
@@ -259,7 +260,6 @@ nso|⛔
 
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
 SERVED = """
-mag|bho
 bgc|hi
 """
 
@@ -274,7 +274,7 @@ aec|Sa'idi Arabic (Upper Egypt)|Semitic (Arabic)|Arabic|25||unimplemented|data s
 aeb|Tunisian Arabic|Semitic (Arabic)|Arabic|12||unimplemented|data scarcity|No wikipron, no kaikki.
 raj|Rajasthani|Indo-Aryan|Devanagari|20||unimplemented|macrolanguage umbrella|Cover term (Marwari, Dhundhari, …), not a single phonology.
 azb|South Azerbaijani|Turkic (Oghuz)|Arabic|13||unimplemented|variant without sufficient vowel-encoding|Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
-mag|Magahi|Indo-Aryan|Devanagari|14||implemented||ALIAS to the Bhojpuri engine (served_by=bho). Referee PROBED 2026-07-19: no wikipron, no epitran mag-Deva map, kaikki only 2 IPA entries -> NO independent referee. Source reviewed: Priya (2020, IJSR, CC-BY) 'Morphophonology of Magahi' = a morphophonology paper (not a pronunciation lexicon); confirms Magahi is segmentally ~= Bhojpuri (shares श->s, विशाल->bisɑl) with no confidently-encodable Magahi-specific delta. Served via bho (nearest verified sibling) as a labelled approximation rather than an unverifiable bespoke clone.
+mag|Magahi|Indo-Aryan (Bihari)|Devanagari|14||implemented||BESPOKE (was mag→bho alias). Bhojpuri engine + phonology (shared Bihari: no length, श/ष→s, ण/ञ→n) + DOCUMENTED Magahi glide hardening (Vinod Kumar 2026 comparative study §6.2): word-initial व→b (वंश→bans), य→d͡ʒ (यन्त्र→jantar), where Bhojpuri preserves glides. No machine referee. 🔷 single-source delta on grammar-anchored base.
 st|Sesotho (Southern Sotho)|Niger-Congo (Bantu)|Latin|6|8|implemented||Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.
 nso|Sepedi (Northern Sotho)|Niger-Congo (Bantu)|Latin|5|9|implemented||Authored ⛔ cannot-verify — NO referee at all. Shared Sotho-Tswana engine; š→ʃ, kg→kx, hl→ɬ, ejective p/t/k (unverified for Sepedi). Tone deferred.
 ilo|Ilocano (Iloko)|Austronesian (Northern Philippine)|Latin|8|2|implemented||Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded (eval RULE-ONLY, non-circular) — gliding is orthography-ambiguous (stress-position + consonant-context models both tried+REJECTED as worse); the SHIPPED path adds a 973-word stress-marked-referee LEXICON (fixes lexical gliding garcia→ɡaɾsˈia + 6th vowel ⟨e⟩→ɯ + stress). Numbers deferred.
