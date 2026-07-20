@@ -11,7 +11,9 @@
  * Hindi-clone check would be circular), so awa is single-source, not multiply-verified — but it is NOT ⛔, because
  * grading against Saksena measures something real. Per Saksena (quoting Bloch) the Eastern-Indo-Aryan phonologies
  * are "perceptibly identical", distinguished chiefly by GRAMMAR, so the Hindi-shared rules hold BY ATTESTATION.
- * The committed anchor is a hand-adjudicated gold of Saksena-transcribed forms (test/awadhi.test.ts). See
+ * MEASURED: 93.9% folded against a Saksena referee (tools/referee-eval/referees/awa.saksena.tsv, 33 of his own
+ * transcribed forms; Devanagari confirmed against the Awadhi Shabd-Kosh corpus). Coverage: 99.99% of 48.6k
+ * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates). See
  * docs/investigations/awa_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
