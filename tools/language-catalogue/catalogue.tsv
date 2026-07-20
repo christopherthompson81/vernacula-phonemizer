@@ -113,7 +113,7 @@ sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅
 syl	Sylheti	Indo-Aryan (Eastern)	Syloti Nagri	11000000		397	492	0	0	implemented		🔷			
 ta	Tamil	Dravidian	Tamil	79000000	8000000					implemented		✅			
 te	Telugu	Dravidian	Telugu	83000000	13000000					implemented		✅			
-tg	Tajik	Iranian (SW)	Cyrillic	8000000	4000000					unimplemented					Persian variety in Cyrillic — different script from done fa.
+tg	Tajik	Iranian (SW)	Cyrillic	8000000	4000000					implemented		✅			
 th	Thai	Kra-Dai	Thai	60000000	40000000					implemented		✅			
 ti	Tigrinya	Semitic (Ethiosemitic)	Ge'ez	9000000		0	26	1	0	implemented		🔷			
 tl	Tagalog	Austronesian (Philippine)	Latin	28000000	60000000					implemented		🟢			
