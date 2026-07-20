@@ -288,3 +288,29 @@ degrade-to-no-op runtime — same pattern as `src/core/riderDiacritizer`). End-t
 Iranian normalization layer; (c) wire into `persian.ts` as the OOV async pre-pass with lexicon precedence; (d)
 verify the folded referee eval is unchanged (short vowels folded → non-circular, as today) + tsx/tests. The
 foundation (train → ONNX → TS inference) is proven; these are the productionization steps.
+
+## Run 10 — SHIPPED: the seq2seq restorer wired into fa's runtime (2026-07-20)
+
+Productionised the abjad→IPA seq2seq (Run 8, 45.8%) end to end.
+
+**Model artifacts** (`src/languages/persian/`): the two graphs exported to ONNX (encoder + decoder-step) and
+**int8-quantised** — `fa-vowel-restorer.enc.onnx` (2.3 MB) + `.dec.onnx` (2.6 MB) + `.meta.json` + `.PROVENANCE.md`.
+Exported by `tools/fa-restoration/export_s2s_onnx.py` on the GPU venv; int8 output is byte-identical to fp32.
+
+**TS inference** (`vowelRestorer.ts`): `createFaVowelRestorer()` loads the graphs via the OPTIONAL `onnxruntime-node`
+(the riderDiacritizer pattern — resolves to `undefined`, i.e. a clean no-op, if the dep or model is absent). It
+runs the autoregressive decode (encode once, greedy-loop the decoder-step) and post-normalises the training set's
+classical/Dari convention to **Iranian** (short i→e, u→o, final ه→e) + adds **Persian final stress**. Verified:
+خانه→xaːnˈe, گل→ɡˈol, کتاب→ketˈaːb, بلبل→bolbˈol, دانشگاه→daːneʃɡˈaːh — correct Iranian, including OOV words.
+
+**Runtime wiring** (`faNeural.ts`): `phonemizeFaNeural(text)` — a SEPARATE async path (like riderNeural), so the
+sync engine + its C#-parity + referee-eval are untouched. Precedence **lexicon → neural → default**: it neural-
+restores only lexicon-OOV words of ≥3 letters (the seq2seq is unreliable on 1–2 letter function words like و/به,
+which the lexicon/g2p handles), everything else on the sync path. Degrades to `phonemize(text,"fa")` with no model.
+
+**Honest limitations:** (a) 2-letter content words (گل) are guarded to the sync path and keep its default-vowel
+error — a small tail; a lexicon-completeness pass would fix it. (b) The eval stays the folded sync referee (the
+neural is a separate deploy path); a proper unfolded eval of `phonemizeFaNeural` vs the Iranian gold is the next
+measurement. (c) Beam search + the parallel-corpus context model (for homographs/ezafe) remain the accuracy
+levers. But the pipeline — train → int8 ONNX → TS autoregressive inference → Iranian output → OOV runtime wiring
+— is COMPLETE and shipped, optional and non-regressing. `tsc` clean; sync persian + the restorer test pass.
