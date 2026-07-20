@@ -1,0 +1,23 @@
+// Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin, near-phonemic. Rule g2p with the
+// Ilocano hiatus (high vowel i/u glides before a vowel; non-high hiatus → glottal). THREE referees: wikipron
+// ilo_latn (PRIMARY, human, proper-noun-heavy) + kaikki ilo (SECONDARY, human, native) + epitran ilo-Latn
+// (programmatic). Folds: STRESS (unwritten penult), the 6TH VOWEL [ɯ]~[ɛ]~[e] (⟨e⟩, native [ɯ] vs loan [ɛ] not
+// spelling-predictable → all folded), the unwritten word-final glottal (deferred), ⟨ng⟩ [ŋ]~[ŋɡ] (referee adds ɡ),
+// ɾ~r, and the inconsistently-marked word-initial ʔ.
+{
+    "referees": [
+        { "file": "ilo.wikipron-ilo-broad.tsv", "source": "wikipron ilo_latn broad (human)", "role": "primary" },
+        { "file": "ilo.kaikki-ilo.tsv", "source": "kaikki ilo (Wiktionary, human)", "role": "secondary" },
+        { "file": "ilo.epitran-ilo-latn.tsv", "source": "epitran ilo-Latn (programmatic)", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "STRESS is phonemic but unwritten — default penultimate; fold out" },
+        { "pattern": "[ɯɛe]", "replace": "E", "note": "the 6th vowel ⟨e⟩: native [ɯ] ~ loan [ɛ] ~ referee [e] — not spelling-predictable, fold together" },
+        { "pattern": "ʔ$", "replace": "", "note": "the unwritten word-final glottal stop (phonemic-lexical) — deferred; strip referee's" },
+        { "pattern": "^ʔ", "replace": "", "note": "word-initial glottal onset — referee marks it inconsistently; drop on both sides" },
+        { "pattern": "ŋɡ", "replace": "ŋ", "note": "⟨ng⟩: referee variably [ŋ]~[ŋɡ] (Aringay→ʔaɾiŋɡaj) — unify to ŋ" },
+        { "pattern": "nɡ", "replace": "ŋ", "note": "⟨ng⟩ is orthographically ambiguous — digraph [ŋ] vs [n]+[ɡ] across a boundary (domingo→dominɡo, a Spanish loan); unify n+ɡ→ŋ" },
+        { "pattern": "ɾ", "replace": "r", "note": "the ⟨r⟩ tap ɾ ~ r — unify" },
+        { "pattern": "d͡ʒ", "replace": "j", "note": "the ⟨y⟩ glide j~d͡ʒ — non-contrastive, fold" }
+    ]
+}

@@ -1,0 +1,29 @@
+// Native Ilocano / Iloko (ilo) canonical-IPA definition — Austronesian (NORTHERN Luzon, Ilocano subgroup — NOT
+// Bisayan; ~8M, the lingua franca of northern Philippines). Near-phonemic Latin. The g2p reads this file directly.
+// Ilocano shares the Philippine core (⟨ng⟩→ŋ, word-initial glottal, penultimate stress) but differs from the
+// Bisayan langs (Cebuano/Hiligaynon) in its HIATUS: a HIGH vowel ⟨i u⟩ before another vowel GLIDES (dua→dwa,
+// radio→ɾadjo, dies→djes) rather than taking a glottal, while non-high hiatus keeps the glottal (tao→taʔo). Its
+// signature vowel is the CLOSE BACK UNROUNDED ⟨e⟩→[ɯ]~[ɛ] (the 6th vowel; not predictable native-vs-loan from
+// spelling → default [ɛ], folded). ⟨ll⟩ is a native GEMINATE [lː] (not the Spanish [lj]). Validated against
+// wikipron ilo_latn + kaikki ilo + epitran ilo-Latn. See docs/investigations/ilo_native_bringup_investigation.md.
+{
+    "language": "ilo",
+    "name": "Ilocano (Iloko)",
+    "script": "Latin",
+    "provenance": "Authored from standard Ilocano orthography + phonology (Philippine near-phonemic pattern; high-vowel gliding hiatus + geminates). Calibrated to wikipron ilo_latn + kaikki ilo + epitran ilo-Latn.",
+
+    "digraphs": { "ng": "ŋ", "ts": "t͡s", "gui": "ɡi", "gue": "ɡe", "qui": "ki", "que": "ke" },
+
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "m": "m", "n": "n", "s": "s", "h": "h", "l": "l", "r": "ɾ",
+        "w": "w", "y": "j", "ñ": "ɲ", "'": "ʔ", "ʼ": "ʔ",
+        "c": "k", "q": "k", "z": "s", "f": "p", "v": "b", "j": "h", "x": "ks"
+    },
+
+    "vowels": { "a": "a", "e": "ɛ", "i": "i", "o": "o", "u": "u" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

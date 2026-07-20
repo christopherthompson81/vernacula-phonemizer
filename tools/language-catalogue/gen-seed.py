@@ -242,6 +242,7 @@ mag|0|2|0|0
 bgc|0|0|0|0
 bal|0|0|0|0
 knc|0|0|0|0
+ilo|926|973|1|0
 hil|465|477|0|0
 """
 
@@ -249,6 +250,7 @@ hil|465|477|0|0
 VERDICTS_EXTRA = """
 bal|🔷
 hil|🟢
+ilo|🟡
 """
 
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
@@ -271,7 +273,7 @@ azb|South Azerbaijani|Turkic (Oghuz)|Arabic|13||unimplemented|variant without su
 mag|Magahi|Indo-Aryan|Devanagari|14||implemented||ALIAS to the Bhojpuri engine (served_by=bho). Referee PROBED 2026-07-19: no wikipron, no epitran mag-Deva map, kaikki only 2 IPA entries -> NO independent referee. Source reviewed: Priya (2020, IJSR, CC-BY) 'Morphophonology of Magahi' = a morphophonology paper (not a pronunciation lexicon); confirms Magahi is segmentally ~= Bhojpuri (shares श->s, विशाल->bisɑl) with no confidently-encodable Magahi-specific delta. Served via bho (nearest verified sibling) as a labelled approximation rather than an unverifiable bespoke clone.
 st|Southern Sotho (Sesotho)|Niger-Congo (Bantu)|Latin|6|8|unimplemented||SA official; Latin Bantu sibling of done tn. Good candidate.
 nso|Northern Sotho (Sepedi)|Niger-Congo (Bantu)|Latin|5|9|unimplemented||SA official; Latin Bantu.
-ilo|Ilocano|Austronesian (Philippine)|Latin|8|2|unimplemented||Sibling of done ceb/tl.
+ilo|Ilocano (Iloko)|Austronesian (Northern Philippine)|Latin|8|2|implemented||Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded — gliding/hiatus is orthography-ambiguous. Numbers deferred.
 hil|Hiligaynon (Ilonggo)|Austronesian (Western Bisayan)|Latin|9||implemented||Sibling of done Cebuano/Tagalog. Bespoke rule g2p (Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO human referees: wikipron hil_latn (465, proper-noun-heavy) 94.4% + kaikki hil (477, native) 94.1%. Folds: stress/final-glottal/lax-vowels. Residual = Spanish rising diphthongs (origin-ambiguous). Numbers deferred. 🟢.
 kr|Kanuri (macrolanguage)|Nilo-Saharan (Saharan)|Latin/Ajami|9||unimplemented|macrolanguage umbrella|COVER TERM — do NOT build the umbrella; target a specific variety (as with Balochi→bcc, Arabic→dialects). Individual codes: Central/Yerwa knc (~4M, the standard w/ orthography), Manga kby (~1M, Niger), Tumari krt. Referee PROBED 2026-07-19: knc/kby/krt/kr ALL have no wikipron, no kaikki page, no epitran map → also DATA-SCARCE. Revisit trigger = a referee appears OR a deliberate authored-⛔ from a grammar (the Hausa/Balochi-Run-1 path), not merely surfacing in a population list.
 knc|Central Kanuri (Yerwa)|Nilo-Saharan (Saharan)|Latin/Ajami|4||unimplemented|data scarcity|The STANDARD Kanuri variety (Borno, Nigeria) — the real target if we build "Kanuri" (not the kr macrolanguage umbrella). Referee PROBED 2026-07-19: no wikipron/kaikki/epitran → authored-⛔-only. See kr.
