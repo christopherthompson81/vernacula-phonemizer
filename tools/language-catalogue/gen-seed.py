@@ -241,11 +241,13 @@ apd|0|0|0|0
 mag|0|2|0|0
 bgc|0|0|0|0
 bal|0|0|0|0
+hil|465|477|0|0
 """
 
 # code | verdict   — verdict for an EXTRA (non-IMPL) implemented row (e.g. authored ⛔ bring-ups).
 VERDICTS_EXTRA = """
 bal|🔷
+hil|🟢
 """
 
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
@@ -269,7 +271,7 @@ mag|Magahi|Indo-Aryan|Devanagari|14||implemented||ALIAS to the Bhojpuri engine (
 st|Southern Sotho (Sesotho)|Niger-Congo (Bantu)|Latin|6|8|unimplemented||SA official; Latin Bantu sibling of done tn. Good candidate.
 nso|Northern Sotho (Sepedi)|Niger-Congo (Bantu)|Latin|5|9|unimplemented||SA official; Latin Bantu.
 ilo|Ilocano|Austronesian (Philippine)|Latin|8|2|unimplemented||Sibling of done ceb/tl.
-hil|Hiligaynon|Austronesian (Philippine)|Latin|9||unimplemented||Philippine Latin.
+hil|Hiligaynon (Ilonggo)|Austronesian (Western Bisayan)|Latin|9||implemented||Sibling of done Cebuano/Tagalog. Bespoke rule g2p (Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO human referees: wikipron hil_latn (465, proper-noun-heavy) 94.4% + kaikki hil (477, native) 94.1%. Folds: stress/final-glottal/lax-vowels. Residual = Spanish rising diphthongs (origin-ambiguous). Numbers deferred. 🟢.
 kr|Kanuri|Nilo-Saharan (Saharan)|Latin/Ajami|9||unimplemented|macrolanguage umbrella|Kanuri is a cover term (Yerwa, Manga, …).
 mos|Mossi (Mooré)|Niger-Congo (Gur)|Latin|9||unimplemented||Burkina Faso; new branch (Gur).
 bal|Balochi (Southern)|Iranian (NW)|Arabic (Balochi)|9||implemented||Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from Jahani & Korn (2009) + Korn (2005a). Cross-script LEXICON (balochi-lexicon.tsv, 399 words: 55 curated + 344 from Korn Etymological Index; ASJP-corroborated) recovers the vowels the Arabic abjad loses (short a/i/u unwritten + و/ی conflate uː/oː, iː/eː); Roman orthography is phonemic. Independent referee = ASJP Southern-Balochi bcc (CC0, coarse ~40w) corroborates the inventory ~97%. Fills the RETROFLEX-Iranian gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated). Arabic-OOV still skeleton-defective (⛔ tail); lexicon+Roman full-voweled. 🔷 single-referee-family.

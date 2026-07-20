@@ -1,0 +1,24 @@
+// Hiligaynon / Ilonggo (hil) — Austronesian (Western Bisayan), Latin, near-phonemic. Rule g2p (Cebuano core +
+// Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO independent HUMAN referees: wikipron hil_latn (PRIMARY, proper-noun-heavy)
+// + kaikki hil (SECONDARY, native vocabulary). Folds: STRESS (phonemic but unwritten → penultimate default, folded),
+// the UNWRITTEN word-final glottal (mango→[maŋoʔ], phonemic-lexical → deferred), the ⟨r⟩ tap ɾ~r, the ⟨y⟩ glide
+// j~d͡ʒ, and ⟨ñ⟩ ɲ~nj (the referee spells Spanish ñ both ways). Deferred (residual): the Spanish rising diphthongs
+// ⟨ue/ua/ie⟩→[we/wa/je] which the native hiatus-glottal rule renders [uʔe] — origin-ambiguous from spelling alone.
+{
+    "referees": [
+        { "file": "hil.wikipron-hil-broad.tsv", "source": "wikipron hil_latn broad (human)", "role": "primary" },
+        { "file": "hil.kaikki-hil.tsv", "source": "kaikki hil (Wiktionary, human)", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "STRESS is phonemic but unwritten — we default to penultimate; fold it out for the segmental comparison" },
+        { "pattern": "ʔ$", "replace": "", "note": "the UNWRITTEN word-final glottal stop (phonemic but lexical) — we don't emit it (deferred); strip the referee's" },
+        { "pattern": "ɾ", "replace": "r", "note": "the single Hiligaynon rhotic ⟨r⟩ — referee uses the tap ɾ; unify" },
+        { "pattern": "d͡ʒ", "replace": "j", "note": "the ⟨y⟩ glide: referee variably [j]~[d͡ʒ] — non-contrastive, fold to j" },
+        { "pattern": "ɲ", "replace": "nj", "note": "⟨ñ⟩: referee spells it [ɲ]~[nj] (Española→ʔespanjola) — unify to nj" },
+        { "pattern": "[ɔ]", "replace": "o", "note": "the ⟨o⟩ lax allophone [ɔ] (3-vowel Bisayan: o~ɔ) — unify" },
+        { "pattern": "[ɛ]", "replace": "e", "note": "the ⟨e⟩ lax allophone [ɛ] — unify" },
+        { "pattern": "[ʊ]", "replace": "u", "note": "the ⟨u⟩ lax allophone [ʊ] — unify" },
+        { "pattern": "[ɪ]", "replace": "i", "note": "the ⟨i⟩ lax allophone [ɪ] — unify" },
+        { "pattern": "^ʔ", "replace": "", "note": "word-initial glottal onset before a vowel — the referee marks it INCONSISTENTLY (isa→iˈsa vs ʔisa); drop on both sides" }
+    ]
+}

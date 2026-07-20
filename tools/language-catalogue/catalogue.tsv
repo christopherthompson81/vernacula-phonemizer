@@ -49,7 +49,7 @@ gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡
 ha	Hausa	Afro-Asiatic (Chadic)	Latin/Ajami	54000000	40000000					implemented		✅			
 hak	Hakka Chinese	Sinitic	Han	44000000						implemented		🔷			
 hi	Hindi	Indo-Aryan	Devanagari	345000000	265000000					implemented		✅			
-hil	Hiligaynon	Austronesian (Philippine)	Latin	9000000						unimplemented					Philippine Latin.
+hil	Hiligaynon (Ilonggo)	Austronesian (Western Bisayan)	Latin	9000000		465	477	0	0	implemented		🟢			Sibling of done Cebuano/Tagalog. Bespoke rule g2p (Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO human referees: wikipron hil_latn (465, proper-noun-heavy) 94.4% + kaikki hil (477, native) 94.1%. Folds: stress/final-glottal/lax-vowels. Residual = Spanish rising diphthongs (origin-ambiguous). Numbers deferred. 🟢.
 hne	Chhattisgarhi	Indo-Aryan	Devanagari	18000000						implemented		⛔			
 hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷			
 hu	Hungarian	Uralic	Latin	13000000						implemented		✅			

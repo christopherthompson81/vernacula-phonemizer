@@ -1,0 +1,30 @@
+// Native Hiligaynon / Ilonggo (hil) canonical-IPA definition — Austronesian (Western Bisayan, ~9M, Panay + Negros
+// Occidental, Philippines). The g2p reads this file directly (same shallow near-phonemic engine as Cebuano/Tagalog).
+// Hiligaynon shares the Bisayan core with Cebuano — ⟨ng⟩→ŋ, word-initial + hiatus glottal stop [ʔ], penultimate
+// stress — and differs mainly in its SPANISH-LOAN orthography (this referee is proper-noun-heavy): ⟨j⟩→[h] (the
+// Spanish jota, NOT Cebuano's [d͡ʒ]; Bermejo→beɾmeho) and ⟨f⟩→[p] (nativised; Fuentes→puentes, Demafeliz→demapelis).
+// Validated against wikipron hil_latn (human) + kaikki hil (human). Number words deferred. See
+// docs/investigations/hil_native_bringup_investigation.md.
+{
+    "language": "hil",
+    "name": "Hiligaynon (Ilonggo)",
+    "script": "Latin",
+    "provenance": "Authored from standard Hiligaynon orthography + phonology (the Bisayan/Tagalog near-phonemic pattern; Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). Calibrated to wikipron hil_latn + kaikki hil (both human).",
+
+    "digraphs": { "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "ts": "t͡s", "ll": "lj", "rr": "ɾ", "gui": "ɡi", "gue": "ɡe", "qui": "ki", "que": "ke" },
+
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "m": "m", "n": "n", "s": "s", "h": "h", "l": "l", "r": "ɾ",
+        "w": "w", "y": "j", "ñ": "ɲ", "'": "ʔ", "ʼ": "ʔ",
+        "c": "k", "q": "k", "z": "s", "f": "p", "v": "b", "j": "h", "x": "ks"
+    },
+
+    "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
+
+    "specialWords": { "mga": "manga" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
