@@ -45,3 +45,27 @@ Table 11.1 mapping, the dental/retroflex contrast (ڈاکٹر→ɖaːkʈr, کت�
 word-level Arabic spellings are author-supplied (no independent corpus), and the vowel encoding is defective →
 **⛔** (fills the retroflex-Iranian census gap; the consonant inventory is sourced and falsifiable, the vowels are
 script-limited). Numbers deferred. If a Balochi pronunciation corpus/wikipron ever appears, re-grade.
+
+## Run 2 — cross-script lexical composition (⛔ → 🔷)
+
+The user supplied two more sources, which resolve the referee problem: **ASJP Southern-Balochi (bcc)** (Lexibank,
+CC0, an INDEPENDENT ~40-word Swadesh list by a different transcriber) and **Korn (2005a), *Towards a Historical
+Grammar of Balochi*** (a rich romanised lexicon). Neither pairs Arabic-script with IPA — but together they fix the
+right problem.
+
+**The composition.** Balochi is written in BOTH the Arabic abjad and a phonemic Roman orthography. So:
+- a **Roman-script g2p** (`phonemizeRoman`) reads the phonemic Roman orthography → full IPA directly (macron→long
+  vowel, háček→postalveolar, dot-below→retroflex; balōč→baloːt͡ʃ, gwāt→ɡwaːt̪);
+- a **cross-script lexicon** (`balochi-lexicon.tsv`, 55 core words compiled from Korn + J&K + ASJP, keyed by BOTH
+  the Arabic and the Roman spelling → full-voweled IPA) lets the **Arabic** path recover the vowels the abjad loses:
+  خاموش → xaːm**oː**ʃ (skeleton was xaːmuːʃ), گریب → ɡ**a**riːb (skeleton ɡriːb), روچ → roːt͡ʃ (skeleton ruːt͡ʃ).
+- OOV Arabic still falls back to the defective skeleton (بلوچستان → bluːt͡ʃst̪aːn) — the honest tail.
+
+**Independent verification.** The Roman g2p was measured against the ASJP transcriptions (a *different* transcriber →
+genuinely independent) on the overlapping core vocabulary: **~97% (29-30/30)** folded (coarse — ASJP has no vowel
+length or dental/retroflex). This corroborates the phoneme inventory that was previously only author-supplied.
+
+**Verdict upgraded to 🔷.** Balochi now has an independent (if coarse) referee + a multi-source lexicon + a phonemic
+Roman path that recovers the full vowel system. The Arabic-OOV skeleton remains ⛔-grade (defective abjad), but
+lexicon-covered words and all Roman input are full-voweled and cross-checked. The lexicon is a seed to grow from
+Korn's fuller vocabulary (its retroflex marks are lost in the PDF extraction — expand carefully).

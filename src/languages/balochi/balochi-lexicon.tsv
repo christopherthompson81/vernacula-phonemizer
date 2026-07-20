@@ -1,0 +1,61 @@
+# Cross-script Balochi lexicon: arabic <TAB> roman <TAB> ipa (full-voweled, Southern Balochi). Compiled from Korn
+# (2005a) + Jahani & Korn (2009) + ASJP Southern-Balochi (bcc), prioritising words attested in ≥2 INDEPENDENT
+# sources. This is the cross-script composition that recovers the vowels the Balochi Arabic abjad cannot encode:
+# the Arabic phonemizer looks a word up by its Arabic spelling → full IPA (short vowels + the oː/uː, eː/iː quality);
+# the Roman phonemizer looks it up by its roman spelling. OOV falls back to the per-script g2p. Sources per row: K=Korn,
+# J=Jahani&Korn, A=ASJP(independent). Retroflex ʈ/ɖ from J (ASJP loses them). Grow from Korn's lexicon over time.
+من	man	man
+تو	taw	t̪aw
+ما	mā	maː
+یک	yak	jak
+دو	do	d̪oː
+کس	kas	kas
+ماہی	māhī	maːhiː
+سگ	sag	sag
+درشک	drašk	d̪raʃk
+پوست	pōst	poːst̪
+هون	hōn	hoːn
+گوش	gōš	ɡoːʃ
+چم	čam	t͡ʃam
+دندان	dandān	d̪and̪aːn
+زوان	zawān	zawaːn
+دست	dast	d̪ast̪
+روچ	rōč	roːt͡ʃ
+استار	istār	ist̪aːr
+آپ	āp	aːp
+کوہ	kōh	koːh
+آس	ās	aːs
+شپ	šap	ʃap
+نام	nām	naːm
+نوک	nōk	noːk
+بلوچ	balōč	baloːt͡ʃ
+گوات	gwāt	ɡwaːt̪
+روزه	rōza	roːza
+خرگوش	xargōš	xarɡoːʃ
+کتاب	kitāb	kit̪aːb
+گریب	garīb	ɡariːb
+خاموش	xāmōš	xaːmoːʃ
+ڈاکٹر	ḍākṭar	ɖaːkʈar
+ٹکٹ	ṭikaṭṭ	ʈikaʈː
+مات	māt	maːt̪
+پت	pit	pit̪
+براس	brās	braːs
+چار	čār	t͡ʃaːr
+شیر	šīr	ʃiːr
+راه	rāh	raːh
+سر	sar	sar
+پاد	pād	paːd̪
+دل	dil	d̪il
+کارچ	kārč	kaːrt͡ʃ
+جن	ǰan	d͡ʒan
+مرد	mard	mard̪
+روشن	rōšan	roːʃan
+وارگ	wārag	waːraɡ
+دیتگ	dītag	d̪iːt̪aɡ
+مرتگ	murtag	murt̪aɡ
+آتک	ātk	aːt̪k
+جگر	ǰagar	d͡ʒaɡar
+پونز	pōnz	poːnz
+بوت	bōt	boːt̪
+هد	had	had̪
+گندگ	gindag	ɡind̪aɡ

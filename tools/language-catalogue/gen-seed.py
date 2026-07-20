@@ -245,7 +245,7 @@ bal|0|0|0|0
 
 # code | verdict   — verdict for an EXTRA (non-IMPL) implemented row (e.g. authored ⛔ bring-ups).
 VERDICTS_EXTRA = """
-bal|⛔
+bal|🔷
 """
 
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
@@ -272,7 +272,7 @@ ilo|Ilocano|Austronesian (Philippine)|Latin|8|2|unimplemented||Sibling of done c
 hil|Hiligaynon|Austronesian (Philippine)|Latin|9||unimplemented||Philippine Latin.
 kr|Kanuri|Nilo-Saharan (Saharan)|Latin/Ajami|9||unimplemented|macrolanguage umbrella|Kanuri is a cover term (Yerwa, Manga, …).
 mos|Mossi (Mooré)|Niger-Congo (Gur)|Latin|9||unimplemented||Burkina Faso; new branch (Gur).
-bal|Balochi (Southern)|Iranian (NW)|Arabic (Balochi)|9||implemented||Southern Balochi authored from Jahani & Korn (2009) in the Balochi Arabic alphabet. NO machine referee (no wikipron/kaikki/epitran for bal/bcc/bgn/bgp); hand-gold on the sourced inventory (test/balochi.test.ts). Fills the RETROFLEX-Iranian census gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated) that fa/ps/ckb lack. Script DEFECTIVE (variant without sufficient vowel-encoding): short a/i/u unwritten AND و/ی conflate uː/oː, iː/eː -> consonant + long-vowel backbone only. ISO macrolanguage (targeting Southern bcc). Verdict ⛔.
+bal|Balochi (Southern)|Iranian (NW)|Arabic (Balochi)|9||implemented||Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from Jahani & Korn (2009) + Korn (2005a). Cross-script LEXICON (balochi-lexicon.tsv, Korn/J&K/ASJP) recovers the vowels the Arabic abjad loses (short a/i/u unwritten + و/ی conflate uː/oː, iː/eː); Roman orthography is phonemic. Independent referee = ASJP Southern-Balochi bcc (CC0, coarse ~40w) corroborates the inventory ~97%. Fills the RETROFLEX-Iranian gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated). Arabic-OOV still skeleton-defective (⛔ tail); lexicon+Roman full-voweled. 🔷 single-referee-family.
 tg|Tajik|Iranian (SW)|Cyrillic|8|4|unimplemented||Persian variety in Cyrillic — different script from done fa.
 ki|Kikuyu (Gikuyu)|Niger-Congo (Bantu)|Latin|8||unimplemented||Kenya Bantu.
 bgc|Haryanvi (Bangaru)|Indo-Aryan|Devanagari|10||implemented||ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.
