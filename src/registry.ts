@@ -80,6 +80,7 @@ import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createTigrinya } from "./languages/tigrinya/tigrinya.ts";
 import { createBulgarian } from "./languages/bulgarian/bulgarian.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
+import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
 import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
@@ -314,6 +315,10 @@ function build(lang: string): Phonemizer {
             return createBulgarian();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
+        // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
+        // encoding: short vowels unwritten + و/ی conflate uː/oː, iː/eː). Fills the retroflex-Iranian census gap.
+        case "bal":
+            return createBalochi((latin) => getPhonemizer("en").text(latin));
         case "bho":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
         // Magahi (Magadhan, Bihar) — ALIAS to the Bhojpuri engine. Magahi shares Bhojpuri's key divergences from
