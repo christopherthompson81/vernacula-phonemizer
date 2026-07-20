@@ -22,6 +22,7 @@ import { phonemizeWord as ff } from "../../src/languages/fula/fula.ts";
 import { phonemizeWord as ha } from "../../src/languages/hausa/hausa.ts";
 import { createHindi } from "../../src/languages/hindi/hindi.ts";
 import { phonemizeWord as bho } from "../../src/languages/bhojpuri/bhojpuri.ts";
+import { phonemizeWord as awa } from "../../src/languages/awadhi/awadhi.ts";
 import { phonemizeWord as ja } from "../../src/languages/japanese/japanese.ts";
 import { phonemizeWord as ko } from "../../src/languages/korean/korean.ts";
 import { createPinyinPhonemizer } from "../../src/languages/mandarin/mandarin.ts";
@@ -150,6 +151,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     // RULE-ONLY (lexicon:false): the shipped path adds an Egyptian short-vowel lexicon MINED FROM kaikki, which
     // shares the Wiktionary tradition with the wikipron-arz referee → evaluating it would be circular.
     bho,
+    awa, // Awadhi — single-source (Saksena 1937) referee; Devanagari confirmed against the Awadhi Shabd-Kosh corpus
     arz: (w: string) => ar(w, "egyptian", { lexicon: false }), // Egyptian Arabic variety — shares phonemizeArabic
     apc: (w: string) => ar(w, "levantine"), // North Levantine Arabic variety
     apd: (w: string) => ar(w, "sudanese"), // Sudanese Arabic variety (no referee — gold-anchored 🔷)

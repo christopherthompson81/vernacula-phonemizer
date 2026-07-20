@@ -117,3 +117,108 @@ phonology change. No test values moved; Hindi/Bhojpuri unaffected.
 single-source grade. Building a Saksena referee (the bho pattern) would upgrade the anchor from hand-gold to a
 measurement — blocked on the corrupt OCR IPA (needs visual reading of the § example forms + the appendix
 specimen texts). Whispered final vowels (§113–119) remain deferred.
+
+## Run 4 — visual page reading to attempt a Saksena-mined gold (2026-07-19)
+
+**Goal:** upgrade awa's anchor from a hand-gold to a *mined* single-source grade (the bho pattern), by visually
+reading the PDF (the PaddleOCR IPA is corrupt).
+
+**Key structural finding (blocks the literal bho pattern):** *Saksena's book contains no Devanagari.* The entire
+linguistic content is in Saksena's own roman/IPA transcription (the only Devanagari in the 620-page OCR is the
+library bookplate). The bho gold was mined as Devanagari→IPA *pairs* straight from a grammar that printed both;
+Saksena prints only the IPA. So there is nothing to mine into a Devanagari→IPA gold directly — any such gold
+needs the Devanagari supplied from a *second* source.
+
+**Sources read:**
+- §12 consonant chart (p.24), §9/§90–100 vowel charts (p.25) — clean, already used in Run 2.
+- Modern Awadhi specimen "gulgulāwālī kathā" (Texts No. I, **Lakhimpuri** — the module's exact basis), with a
+  full English translation. This is the ideal *content* (real connected Lakhimpuri), but its IPA is the
+  worst-OCR'd part of the book (Greek + LaTeX fragments); only scattered words survive (razjaz 'king', razniz
+  'queen', mAːtariː 'mother', dijaː 'daughter-in-law', tarwariː 'sword'). Word-by-word alignment needs slow
+  visual reading of the raw pages.
+
+**The unlock (user):** the *Awadhi dictionary* (अवधी शब्द-कोश, ~/Books/dli.language.0102.pdf) supplies the missing
+Devanagari side — a large, independent corpus of real Awadhi **headwords in Devanagari**. Tie-back design:
+propose a Devanagari spelling from a Saksena IPA form, then *confirm it exists as a dictionary headword* → a
+(Devanagari, IPA) pair where the Devanagari is independently attested (not reverse-engineered by us) and the IPA
+is Saksena's. Non-circular by construction; the dictionary lookup also filters transliteration errors. It still
+catches engine-vs-Saksena divergences (the point), because our engine is compared to Saksena's IPA, not to the
+Devanagari we fed it.
+
+**Blocker:** the tie-back needs a **Devanagari OCR of the dictionary**, and this environment has none — tesseract
+ships only `eng` data, and paddleocr is not installed. The dictionary is a clean print scan (unlike Saksena's
+corrupt IPA), so Devanagari OCR would work well *if* the tooling were available (the user's PaddleOCR workflow,
+which produced the Saksena .md, is the natural route). Decision surfaced to the user: PaddleOCR the dictionary to
+unlock a scalable tie-back gold, vs. hand-build a smaller (dozens-of-words) gold from the legible Saksena forms +
+manual dictionary confirmation.
+
+## Run 5 — dictionary tie-back proven; Devanagari OCR works (2026-07-19)
+
+**User steer:** *"the Devanagari headword corpus from the dictionary might give us something to tie the IPA back
+to."* This is the unlock — it supplies the independent **Devanagari** side that Saksena lacks.
+
+**Tooling cleared:** fetched tesseract `hin` (tessdata_best) — Devanagari OCR of the dictionary (अवधी शब्द-कोश,
+a clean print scan) works well. One page (p.40) yielded 51 clean headwords (a few conjunct/nukta slips:
+खइँतड़→खदट्ूँतड़). Extraction = the Devanagari run before each `– (POS)` marker, both columns.
+
+**Pipeline proven end-to-end** on that 51-word sample:
+- OCR → headword extraction → `phonemizeWord`: **51/51 phonemize, 0 failures** (real Awadhi vocab, not Hindi
+  cognates — a first).
+- Divergence rules fire on real words: **16** intervocalic flaps ड→ɽ, **9** व→w, **6** श/ष→s. (ऐ/औ→ʌi/ʌu: 0 on
+  this page.) So the Awadhi rules are exercised by genuine vocabulary, not just the test set.
+
+**Two distinct products this enables:**
+1. *Coverage* (dictionary alone, LOCAL): run the engine over the whole headword corpus → does it parse real
+   Awadhi without dropping graphemes / leaking Latin. A robustness metric, not correctness.
+2. *Correctness gold* (dictionary × Saksena): (Devanagari from dict, IPA from Saksena) pairs — non-circular,
+   because neither side is derived from the other.
+
+**LICENSING CONSTRAINT (user's standing rule: committed referee/training data must be permissive).** The
+dictionary is a University of Lucknow publication (not permissive); Saksena (1937) is not cleanly public-domain
+either (author d. 1971 → India life+60). So the **bulk** headword corpus and any 1000+-row mine **cannot be
+committed** — that would be a data dump of copyrighted works. The dictionary is therefore used **locally only**
+(coverage measurement + confirming that a Devanagari spelling is a real attested Awadhi word). The *committable*
+artifact stays a **modest hand-adjudicated gold of individual word→IPA facts** (dozens, with attribution) — the
+same kind of artifact test/awadhi.test.ts already holds, just larger and dictionary-confirmed. That caps the
+"mined grade" at a bounded hand-built gold, not a bho-scale mine — but it still upgrades the anchor from ~10 to
+~several-dozen dictionary-confirmed, Saksena-sourced pairs plus a local coverage %.
+
+## Run 6 — modern-text corpus via the corpus engine (2026-07-19)
+
+**User steer:** *"Can we tokenize some modern Awadhi, like news articles or something?"* — the dictionary is
+*ठेठ देशज* (rare native words) and omits common vocabulary, and it's rights-restricted. A modern, **permissive**
+corpus fixes both. **User steer 2:** *"we have tools for this action in espeak-ng-portable — for building
+wordlists."* → use the existing corpus engine, not an ad-hoc scraper.
+
+My first instinct (live MediaWiki `allpages` + `extracts` API) hit exactly the failure its docstring warns about:
+alphabetical `allpages` front-loads number/stub pages, and the extracts API returned mostly empty bodies. The
+committed engine `espeak-ng-portable/tools/corpus/build.ts` streams the **Wikipedia dump** instead — clean, fast,
+rate-limit-free. Ran (Awadhi is Devanagari, so gate on that; no data/awa/meta.json needed):
+
+    npx tsx tools/corpus/build.ts --lang awa --wiki awa --alphabet Devanagari --sources dump --out awa-wiki-words.txt
+
+→ **6,800 awawiki pages → 525,563 gated tokens → 48,558 frequency-ranked types.** Top words are the real modern
+Awadhi function words the dictionary lacks (के, से, है, में, अउर 'and', होय 'is', अऊर). CC-BY-SA → permissive.
+
+**Coverage** (vernacula awa engine over the corpus): **48,554/48,558 = 99.99%** phonemize; **top-1000 most-frequent
+= 100%**; the 4 empties are rare Sanskrit signs (ऽ ॠ ऌ ॡ). Divergences fire heavily on real text: श/ष→s 14923,
+व→w 8022, ऐ/औ→ʌi/ʌu 2698, ड/ढ→ɽ 1898, nasal 7674. (Dictionary corpus corroborates: 6570/6575 = 100%.)
+
+## Run 7 — the measured single-source grade (2026-07-19)
+
+Built the referee `tools/referee-eval/referees/awa.saksena.tsv`: **33 (Devanagari, IPA) pairs**, IPA hand-read
+from Saksena's §41-52/§90-136 origin-of-sounds forms (the PaddleOCR IPA is corrupt), Devanagari supplied from his
+English glosses — **non-circular** (neither side derived from the other). The user's dictionary tie-back was the
+key idea; in practice the dictionary is used LOCALLY to *confirm* a spelling is a real attested Awadhi word (the
+Saksena↔dictionary intersection is small because the two cover different vocabulary strata).
+
+Wired into the referee harness (`langs/awa.jsonc` folds, `eval.ts`, floor 0.9): **93.9% folded (31/33).** Folds
+are notation-only (ʌ→ə, ɪ→i, ʊ→u, ɾ→r trill~tap, ɦ→h, ɡ→g; length/dental/nasal/tie auto-stripped). The 2
+residuals (पसार pəsaːr~pasaːr, अपन əpən~apʌn) are Saksena's variable short-[a] vs our ə — notation, not error.
+**कैथा→kʌitʰaː independently validates ऐ→ʌi**; जेठ/आज/राजा/साँझ/टाँग/काँटा/खेत/तेल confirm the shared core and the
+व→w / श→s / flap fixes on forms the module was not built from.
+
+**Net:** awa is now a *measured* 🔷 (93.9%) with real-corpus coverage (99.99%), up from a ~10-word hand-gold.
+Licensing: the Saksena referee is a compiled fact-set (his transcriptions + standard Devanagari) — a new work;
+the awawiki corpus is CC-BY-SA (regeneratable, not committed); the Awadhi Shabd-Kosh stays LOCAL (spelling
+confirmation only). Verdict unchanged (🔷) — the tier is right; this makes the evidence a measurement.
