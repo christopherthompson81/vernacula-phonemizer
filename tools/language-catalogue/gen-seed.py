@@ -26,7 +26,7 @@ awa|⛔|Awadhi
 ayl|🟡|Libyan Arabic
 az|✅|Azerbaijani (North)
 bg|✅|Bulgarian
-bho|⛔|Bhojpuri
+bho|🔷|Bhojpuri
 bm|🔷|Bambara
 bn|🟡|Bengali
 ca|✅|Catalan

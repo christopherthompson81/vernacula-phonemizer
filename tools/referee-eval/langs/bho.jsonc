@@ -1,15 +1,21 @@
-// Bhojpuri (bho) — Indo-Aryan, Devanagari. ⚠ CANNOT-VERIFY (referee GAP). There is NO independent referee:
-// wikipron bho (404) and kaikki Bhojpuri (404) do not exist, and epitran bho-Deva is a CIRCULAR Hindi clone
-// (same Devanagari→IPA map: श→ʃ, ऐ→æː — the HINDI values, wrong for Bhojpuri). Since Bhojpuri's segmental
-// phonology is very close to Hindi, an engine and a Hindi-clone referee agree trivially — measuring nothing.
-// The committed anchor is instead a hand-adjudicated gold of the DISTINCTIVE Bhojpuri features (test/bhojpuri.
-// test.ts): श/ष→s (no /ʃ/), ऐ/औ→ai/au diphthongs, no əɦə-lowering — the axis that is NOT circular with a Hindi clone.
+// Bhojpuri (bho) — Indo-Aryan, Devanagari. The referee is a g2p-MINE of "A Grammar of Bhojpuri" (dissertation,
+// Shukla-tradition): 1622 Devanagari→IPA example pairs auto-extracted from the grammar's glossed forms. Single
+// published source (🔷). The module was REVISED to match it: 8-vowel /i e ɛ a ʌ ɔ o u/ NO length, ऐ→ɛ/औ→ɔ
+// MONOPHTHONGS, श/ष→s, व→w, ण/ञ→n. Folds are NOTATION only (the grammar writes j for ज, c for च, y for य, r for
+// the tap, ʌ for schwa, drops the breathy diacritic). Residual = the grammar's schwa-deletion granularity +
+// tatsama vowel epenthesis (istiri, iskul) + mining fragments/misalignments — a bounded, documented tail.
 {
-    "language": "bho",
-    "name": "Bhojpuri",
-    "script": "Devanagari",
-    "provenance": "Hindi-derived Devanagari engine + Bhojpuri divergences.",
-    "referees": [],
-    "secondaryGap": "CANNOT-VERIFY: no independent referee exists for Bhojpuri (no wikipron, no kaikki extract; epitran bho-Deva is a circular Hindi clone giving the HINDI values श→ʃ / ऐ→æː). Because Bhojpuri is segmentally ~Hindi, any agreement with a Hindi-clone referee is trivial. The anchor is the hand-adjudicated gold in test/bhojpuri.test.ts, grading the DISTINCTIVE features (श/ष→s, ऐ/औ→ai/au, no əɦə-lowering) where a Hindi clone is demonstrably wrong.",
-    "folds": []
+    "referees": [
+        { "file": "bho.grammar-mined.tsv", "source": "A Grammar of Bhojpuri (mined, 1622 pairs)", "role": "primary" }
+    ],
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "stress — not in the grammar's segmental transcriptions" },
+        { "pattern": "j", "replace": "y", "note": "the ⟨य⟩ glide: grammar writes [y] (before ज d͡ʒ→j below)" },
+        { "pattern": "dʒ", "replace": "j", "note": "⟨ज⟩ [d͡ʒ] (tie stripped by the backbone): grammar writes [j]" },
+        { "pattern": "tʃ", "replace": "c", "note": "⟨च⟩ [t͡ʃ]: grammar writes [c]" },
+        { "pattern": "ɾ", "replace": "r", "note": "the ⟨र⟩ tap [ɾ] ~ the grammar's [r]" },
+        { "pattern": "ʱ", "replace": "", "note": "breathy voice: the grammar's diaeresis notation is stripped by the backbone → drop ours too" },
+        { "pattern": "[ɳɲ]", "replace": "n", "note": "⟨ण ञ⟩ retroflex/palatal nasals — allophones of /n/ (Grammar Table 4.13)" },
+        { "pattern": "ə", "replace": "ʌ", "note": "the schwa: fleet ə ~ the grammar's [ʌ]" }
+    ]
 }

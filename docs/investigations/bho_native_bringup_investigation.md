@@ -38,3 +38,31 @@ nor independently checkable.
 the distinctive features (gold-confirmed) and Hindi-derived elsewhere; correctness on the Hindi-shared bulk is
 ASSERTED, not measured. If an independent Bhojpuri transcription source ever appears (a wikipron scrape, a
 narrow-transcribed corpus), this can be promoted; until then it stays ⛔.
+
+## Run 2 — revised against a reference grammar (⛔ → 🔷)
+
+The user supplied *A Grammar of Bhojpuri* (a dissertation in the Shukla tradition). Rather than hand-pick examples,
+its glossed forms were **g2p-mined**: a regex over the pdftotext extraction pulled **1759 Devanagari↔IPA pairs**
+(1622 after cleaning misalignments) — a real falsifiable anchor, the Korn/Balochi method.
+
+**The mining settled the open questions and corrected the module** (the original ⛔ module was authored from Shukla's
+*rules* and got two things wrong):
+- **No phonemic vowel length** — 0 of 1622 mined transcriptions carry a length mark. Bhojpuri has an 8-vowel
+  /i e ɛ a ʌ ɔ o u/ system (length is contrastive only in the अ/आ = ʌ/a pair). The module's Hindi-inherited
+  iː/aː/uː were wrong → ई/इ→i, ऊ/उ→u, ा→ɑ.
+- **⟨ऐ⟩→[ɛ], ⟨औ⟩→[ɔ] are MONOPHTHONGS** (ऐस→ɛs, गैर→ger, बैल→bɛl) — the original module's headline claim that
+  Bhojpuri *keeps* them as diphthongs [ai]/[au] was **contradicted by every mined example**. Corrected.
+- **⟨व⟩→[w]** (67 mined [w] vs 10 [b]) — not Hindi's [ʋ]; the [b] cases are a word-initial minority (वर्ष→bʌrs).
+- **⟨ण ञ⟩→[n]** (allophones of /n/; Grammar Table 4.13) and the confirmed **श/ष→s** (only /s ɦ/ fricatives).
+
+**Result.** With the module revised, `npx tsx tools/referee-eval/eval.ts bho` scores **62.1% folded (1008/1623)**
+against the mined referee — folds are notation only (j for य, j/c for ज/च, r for the tap, ʌ for schwa, the breathy
+diacritic). The ~38% residual is a bounded, documented tail: the grammar's finer **schwa-deletion** granularity
+(our shared Hindi rule keeps some medial schwas the grammar drops), **tatsama vowel epenthesis** (स्त्री→istiri,
+स्कूल→iskul — an insertion the module doesn't do), and **auto-mining noise** (roots/fragments and a fraction of
+misaligned pairs the regex captured).
+
+**Verdict: ⛔ → 🔷.** The module is now grammar-correct on the vowel system + the key consonants, and anchored on a
+1622-pair mine of a published grammar (single source, falsifiable) instead of a self-authored hand gold. Bug fixed
+en route: setting the inherent vowel to [ʌ] broke the shared schwa-deletion rule (which keys on [ə]) — reverted to
+[ə] with an ə~ʌ fold. The alias `mag`→`bho` inherits all of this (Magahi shares the phonology).
