@@ -1,0 +1,32 @@
+// Native Sesotho / Southern Sotho (st) canonical-IPA definition — Bantu (Sotho-Tswana, S33; ~6M, Lesotho +
+// South Africa, official in both). Latin orthography. Sibling of the done Setswana (tn) but a DISTINCT language:
+// authored from standard Sesotho orthography + phonology (Doke & Mofokeng), NOT aliasable to Setswana (systematic
+// vowel + ejective differences). NO usable machine referee (kaikki "Sotho" = 3 IPA entries; no wikipron/epitran) →
+// hand-gold anchored, verdict 🔷 single-source. The g2p is the greedy longest-match scan shared with Setswana.
+//
+// SIGNATURE (confirmed by the 3 kaikki attestations motswalle→mʊt͡sʼʷɑl̩lɛ, phuputso→pʰupʼut͡sʼɔ, peo→pe(w)):
+// the plain voiceless stops are EJECTIVE ⟨p t k⟩→[pʼ tʼ kʼ] (vs aspirated ⟨ph th kh⟩→[pʰ tʰ kʰ]), ⟨ts⟩→[t͡sʼ]
+// ejective affricate, ⟨hl⟩→[ɬ] voiceless lateral fricative, ⟨h⟩→[ɦ] voiced, ⟨a⟩→[ɑ] back. Vowel HEIGHT is
+// unwritten (7-vowel /i e ɛ a ɔ o u/ spelled with 5) → default the mid values [ɛ ɔ]; the [i]/[ʊ] raisings are a
+// documented residual. Tone (H/L) is lexical + unwritten → DEFERRED. See docs/investigations/st_native_bringup_investigation.md.
+{
+    "language": "st",
+    "name": "Sesotho (Southern Sotho)",
+    "script": "Latin",
+    "provenance": "Authored from standard Sesotho orthography + phonology (Doke & Mofokeng 1957). No machine referee (kaikki Sotho = 3 IPA entries); hand-gold anchored. 🔷 single-source.",
+
+    "graphemes": {
+        "tšh": "t͡ʃʰ", "tsh": "t͡sʰ", "tlh": "t͡ɬʰ",
+        "tš": "t͡ʃʼ", "ts": "t͡sʼ", "tl": "t͡ɬʼ", "tj": "t͡ʃʼ",
+        "ph": "pʰ", "th": "tʰ", "kh": "kʰ", "kg": "kχ", "qh": "!ʰ",
+        "sh": "ʃ", "hl": "ɬ", "ng": "ŋ", "ny": "ɲ",
+        "š": "ʃ", "j": "d͡ʒ", "y": "j", "q": "!",
+        "b": "b", "d": "d", "f": "f", "g": "x", "h": "ɦ", "k": "kʼ", "l": "l", "m": "m",
+        "n": "n", "p": "pʼ", "r": "r", "s": "s", "t": "tʼ", "v": "v", "w": "w", "z": "z",
+        "a": "ɑ", "e": "ɛ", "ê": "ɛ", "i": "i", "o": "ɔ", "ô": "ɔ", "u": "u"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

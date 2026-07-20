@@ -84,7 +84,7 @@ my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅
 nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡			
 ne	Nepali	Indo-Aryan	Devanagari	16000000						implemented		🟡			
 nl	Dutch	Germanic	Latin	25000000						implemented		🟡			
-nso	Northern Sotho (Sepedi)	Niger-Congo (Bantu)	Latin	5000000	9000000					unimplemented					SA official; Latin Bantu.
+nso	Sepedi (Northern Sotho)	Niger-Congo (Bantu)	Latin	5000000	9000000	0	0	0	0	implemented		⛔			Authored ⛔ cannot-verify — NO referee at all. Shared Sotho-Tswana engine; š→ʃ, kg→kx, hl→ɬ, ejective p/t/k (unverified for Sepedi). Tone deferred.
 nya	Chichewa (Nyanja)	Niger-Congo (Bantu)	Latin	14000000						implemented		✅			
 om	Oromo	Afro-Asiatic (Cushitic)	Latin	37000000						implemented		✅			
 or	Odia	Indo-Aryan (Eastern)	Odia	35000000						implemented		✅			
@@ -106,7 +106,7 @@ skr	Saraiki	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	26000000						implemented		�
 sn	Shona	Niger-Congo (Bantu)	Latin	9000000						implemented		🔷			
 so	Somali	Afro-Asiatic (Cushitic)	Latin	22000000						implemented		✅			
 sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅			
-st	Southern Sotho (Sesotho)	Niger-Congo (Bantu)	Latin	6000000	8000000					unimplemented					SA official; Latin Bantu sibling of done tn. Good candidate.
+st	Sesotho (Southern Sotho)	Niger-Congo (Bantu)	Latin	6000000	8000000	0	3	0	0	implemented		🔷			Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.
 su	Sundanese	Austronesian	Latin	32000000						implemented		✅			
 sv	Swedish	Germanic	Latin	10000000						implemented		✅			
 sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅			

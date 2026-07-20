@@ -99,6 +99,8 @@ import { createChichewa } from "./languages/chichewa/chichewa.ts";
 import { createLingala } from "./languages/lingala/lingala.ts";
 import { createKhmer } from "./languages/khmer/khmer.ts";
 import { createSetswana } from "./languages/setswana/setswana.ts";
+import { createSesotho } from "./languages/sesotho/sesotho.ts";
+import { createSepedi } from "./languages/sepedi/sepedi.ts";
 import { createBambara } from "./languages/bambara/bambara.ts";
 import { createWolof } from "./languages/wolof/wolof.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
@@ -378,6 +380,10 @@ function build(lang: string): Phonemizer {
             return createKhmer();
         case "tn":
             return createSetswana();
+        case "st":
+            return createSesotho();
+        case "nso":
+            return createSepedi();
         case "bm":
             return createBambara();
         case "wo":
