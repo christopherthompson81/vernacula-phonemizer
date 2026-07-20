@@ -25,6 +25,7 @@ import { createAssamese } from "./languages/assamese/assamese.ts";
 import { createSomali } from "./languages/somali/somali.ts";
 import { createCebuano } from "./languages/cebuano/cebuano.ts";
 import { createHiligaynon } from "./languages/hiligaynon/hiligaynon.ts";
+import { createIlocano } from "./languages/ilocano/ilocano.ts";
 import { createVietnamese } from "./languages/vietnamese/vietnamese.ts";
 import { createTamil } from "./languages/tamil/tamil.ts";
 import { createKorean } from "./languages/korean/korean.ts";
@@ -237,6 +238,8 @@ function build(lang: string): Phonemizer {
             return createCebuano();
         case "hil":
             return createHiligaynon();
+        case "ilo":
+            return createIlocano();
         case "ur":
             return createUrdu((latin) => getPhonemizer("en").text(latin));
         case "id":
