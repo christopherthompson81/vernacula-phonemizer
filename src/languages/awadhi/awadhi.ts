@@ -5,11 +5,13 @@
  * Awadhi (1937): the SIBILANT MERGER श/ष→[s] (data file) and the INTERVOCALIC FLAP ड/ढ→[ɽ]/[ɽʱ] except after a
  * nasal (this module — Saksena: intervocalically ḍ/ḍh become ṛ/ṛh; they stay only after a nasal).
  *
- * ⚠ CANNOT-VERIFY (⛔): there is NO independent referee for Awadhi — wikipron/kaikki/epitran ship none. Per
- * Saksena (quoting Bloch) the Eastern-Indo-Aryan phonologies are "perceptibly identical" and the lects are
- * distinguished chiefly by GRAMMAR, so most rules are shared with Hindi BY ATTESTATION, not by defaulting to the
- * parent. The committed anchor is a small hand-adjudicated gold of Saksena-transcribed forms (test/awadhi.test.ts),
- * which grades where Awadhi is documented to diverge. This is a SOURCED stub, not a measured convergence. See
+ * 🔷 SINGLE-SOURCE: the divergences are drawn from ONE documented source, Baburam Saksena's Evolution of Awadhi
+ * (1937) — a real Awadhi-specific grammar with IPA, not a circular Hindi clone. That single source is what 🔷
+ * requires; there is no *independent* second referee (wikipron/kaikki/epitran ship no Awadhi, and a machine
+ * Hindi-clone check would be circular), so awa is single-source, not multiply-verified — but it is NOT ⛔, because
+ * grading against Saksena measures something real. Per Saksena (quoting Bloch) the Eastern-Indo-Aryan phonologies
+ * are "perceptibly identical", distinguished chiefly by GRAMMAR, so the Hindi-shared rules hold BY ATTESTATION.
+ * The committed anchor is a hand-adjudicated gold of Saksena-transcribed forms (test/awadhi.test.ts). See
  * docs/investigations/awa_native_bringup_investigation.md.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";

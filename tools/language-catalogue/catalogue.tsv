@@ -15,7 +15,7 @@ ars	Najdi Arabic	Semitic (Arabic)	Arabic	30000000						unimplemented	data scarci
 ary	Moroccan Arabic	Semitic (Arabic)	Arabic	29000000						implemented		🟡			
 arz	Egyptian Arabic	Semitic (Arabic)	Arabic	78000000	25000000					implemented		🟡			
 as	Assamese	Indo-Aryan (Eastern)	Eastern Nagari (Assamese)	15000000						implemented		🟡			
-awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		⛔			
+awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		🔷			
 ayl	Libyan Arabic									implemented		🟡			
 az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅			
 azb	South Azerbaijani	Turkic (Oghuz)	Arabic	13000000						unimplemented	variant without sufficient vowel-encoding				Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
