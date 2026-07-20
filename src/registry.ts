@@ -322,6 +322,13 @@ function build(lang: string): Phonemizer {
         // inventing an unverifiable bespoke clone. See tools/language-catalogue (served_by='bho').
         case "mag":
             return createBhojpuri((latin) => getPhonemizer("en").text(latin));
+        // Haryanvi (Bangaru — Western Hindi, Haryana) — ALIAS to the Hindi engine. Haryanvi is segmentally ~Hindi
+        // (same 28–30 consonants / 4-way stop contrast); its documented differences (vowel free-variation a~e,
+        // a marked retroflexion tendency, intonation) are allophonic/prosodic, NOT a categorical grapheme→IPA
+        // delta, and there is NO referee to verify one. So we serve it via `hi` (its nearest verified sibling —
+        // Western Hindi) as a labelled approximation. See tools/language-catalogue (served_by='hi').
+        case "bgc":
+            return createHindi((latin) => getPhonemizer("en").text(latin));
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.
         case "hne":
             return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));

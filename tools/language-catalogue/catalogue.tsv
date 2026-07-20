@@ -21,7 +21,7 @@ az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅
 azb	South Azerbaijani	Turkic (Oghuz)	Arabic	13000000						unimplemented	variant without sufficient vowel-encoding				Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
 bal	Balochi	Iranian (NW)	Arabic	9000000						unimplemented					Complements done fa/ps/ckb.
 bg	Bulgarian	Slavic (South)	Cyrillic	8000000		46034	47616	0	1	implemented		✅			
-bgc	Haryanvi	Indo-Aryan	Devanagari	10000000						unimplemented					Hindi belt.
+bgc	Haryanvi (Bangaru)	Indo-Aryan	Devanagari	10000000		0	0	0	0	implemented			hi		ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.
 bho	Bhojpuri	Indo-Aryan	Devanagari	52000000						implemented		⛔			
 bm	Bambara	Mande	Latin/N'Ko	14000000						implemented		🔷			
 bn	Bengali	Indo-Aryan (Eastern)	Bengali	240000000	40000000					implemented		🟡			
