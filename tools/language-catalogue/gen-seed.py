@@ -100,6 +100,7 @@ sw|✅|Swahili
 syl|🔷|Sylheti
 ta|✅|Tamil
 te|✅|Telugu
+tg|✅|Tajik
 th|✅|Thai
 ti|🔷|Tigrinya
 tl|🟢|Tagalog
@@ -210,6 +211,7 @@ sw|Niger-Congo (Bantu)|Latin|16|70
 syl|Indo-Aryan (Eastern)|Syloti Nagri|11|
 ta|Dravidian|Tamil|79|8
 te|Dravidian|Telugu|83|13
+tg|Iranian (SW)|Cyrillic|8|4
 th|Kra-Dai|Thai|60|40
 ti|Semitic (Ethiosemitic)|Ge'ez|9|
 tl|Austronesian (Philippine)|Latin|28|60
@@ -283,7 +285,6 @@ kr|Kanuri (macrolanguage)|Nilo-Saharan (Saharan)|Latin/Ajami|9||unimplemented|ma
 knc|Central Kanuri (Yerwa)|Nilo-Saharan (Saharan)|Latin/Ajami|4||unimplemented|data scarcity|The STANDARD Kanuri variety (Borno, Nigeria) — the real target if we build "Kanuri" (not the kr macrolanguage umbrella). Referee PROBED 2026-07-19: no wikipron/kaikki/epitran → authored-⛔-only. See kr.
 mos|Mossi (Mooré)|Niger-Congo (Gur)|Latin|9||unimplemented||Burkina Faso; new branch (Gur).
 bal|Balochi (Southern)|Iranian (NW)|Arabic (Balochi)|9||implemented||Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from Jahani & Korn (2009) + Korn (2005a). Cross-script LEXICON (balochi-lexicon.tsv, 399 words: 55 curated + 344 from Korn Etymological Index; ASJP-corroborated) recovers the vowels the Arabic abjad loses (short a/i/u unwritten + و/ی conflate uː/oː, iː/eː); Roman orthography is phonemic. Independent referee = ASJP Southern-Balochi bcc (CC0, coarse ~40w) corroborates the inventory ~97%. Fills the RETROFLEX-Iranian gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated). Arabic-OOV still skeleton-defective (⛔ tail); lexicon+Roman full-voweled. 🔷 single-referee-family.
-tg|Tajik|Iranian (SW)|Cyrillic|8|4|unimplemented||Persian variety in Cyrillic — different script from done fa.
 ki|Kikuyu (Gikuyu)|Niger-Congo (Bantu)|Latin|8||unimplemented||Kenya Bantu.
 bgc|Haryanvi (Bangaru)|Indo-Aryan|Devanagari|10||implemented||ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.
 sat|Santali|Austroasiatic (Munda)|Ol Chiki|7||unimplemented||New script family (Ol Chiki).

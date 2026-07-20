@@ -1,0 +1,28 @@
+// Tajik (tg) — Iranian (SW), a Persian variety in the CYRILLIC alphabet (writes all vowels → near-phonemic
+// g2p, no short-vowel restoration). THREE referees: wikipron tgk_cyrl BROAD (PRIMARY, human/Wiktionary, ~3245)
+// + wikipron tgk_cyrl NARROW (human, corroborating) + epitran tgk-Cyrl (programmatic, corroborating). The folds
+// neutralise NOTATION only: the low vowel а (our a ~ broad a ~ narrow ä ~ epitran æ), о (our ɔ ~ broad's o),
+// в (our v ~ narrow's allophonic w), ҳ (our h ~ narrow's intervocalic ɦ), х (χ~x), narrow aspiration kʰ/pʰ/tʰ,
+// and narrow's automatic glottal onset ʔ before initial vowels. Length/dental/acute-stress/tie stripped by the
+// shared backbone. See docs/investigations/tg_native_bringup_investigation.md.
+{
+    "segmentJoin": true,
+    "referees": [
+        { "file": "tg.wikipron-tgk-cyrl-broad.tsv", "source": "wikipron tgk_cyrl broad (human)", "role": "primary" },
+        { "file": "tg.wikipron-tgk-cyrl-narrow.tsv", "source": "wikipron tgk_cyrl narrow (human)", "role": "secondary" },
+        { "file": "tg.epitran-tgk-Cyrl.tsv", "source": "epitran tgk-Cyrl (programmatic)", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "our primary-stress mark — the broad/epitran referees carry none; narrow's acute is stripped by the backbone" },
+        { "pattern": "ʰ", "replace": "", "note": "narrow aspiration kʰ/pʰ/tʰ — allophonic, not carried by broad/epitran or us" },
+        { "pattern": "ä", "replace": "a", "note": "the low vowel а: narrow writes central ä ~ our a" },
+        { "pattern": "æ", "replace": "a", "note": "the low vowel а: epitran writes æ ~ our a" },
+        { "pattern": "o", "replace": "ɔ", "note": "о: broad writes half-open o ~ our ɔ (narrow/epitran agree ɔ)" },
+        { "pattern": "w", "replace": "v", "note": "в: narrow writes the allophonic labial approximant w ~ our v (broad/epitran v)" },
+        { "pattern": "ɦ", "replace": "h", "note": "ҳ: narrow writes voiced ɦ intervocalically ~ our h" },
+        { "pattern": "ɾ", "replace": "r", "note": "the single rhotic р: narrow writes the tap ɾ ~ broad/epitran/our r" },
+        { "pattern": "ʁ", "replace": "ɣ", "note": "ғ: our/epitran uvular ʁ ~ broad's velar ɣ — one voiced back fricative" },
+        { "pattern": "χ", "replace": "x", "note": "х: uvular χ ~ velar x convention across referees" },
+        { "pattern": "ʔ", "replace": "", "note": "narrow marks an automatic glottal onset before word-initial vowels; we (and broad/epitran) do not — also folds our ъ=ʔ symmetrically, so it never spuriously mismatches" }
+    ]
+}
