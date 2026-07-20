@@ -1,28 +1,33 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/ilocano/ilocano.ts";
+import { phonemizeWord, phonemizeWordRules } from "../src/languages/ilocano/ilocano.ts";
 
-// Canonical-IPA goldens for Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin,
-// near-phonemic. A shallow rule g2p validated against wikipron ilo_latn (82.7%) + kaikki ilo (84.5%) + epitran
-// ilo-Latn (75.9%). The Ilocano-distinctive HIATUS: a HIGH vowel ⟨i u⟩ before another vowel GLIDES (dua→dwa,
-// radio→ɾadjo) — unlike Bisayan's uniform glottal hiatus — while non-high hiatus keeps the glottal (tao→taʔo).
-// ⟨e⟩→[ɛ] (the 6th vowel [ɯ]~[ɛ], not spelling-predictable → folded). Stress + word-final glottal deferred.
+// Canonical-IPA goldens for Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin. TWO paths:
+// phonemizeWordRules = the non-circular RULE g2p (what the referee eval measures, ~83%); phonemizeWord = the shipped
+// path (a stress-marked-referee lexicon first, then the rule). The rule's Ilocano-distinctive HIATUS: a HIGH vowel
+// ⟨i u⟩ before a vowel GLIDES (dua→dwa, radio→ɾadjo). Whether a high vowel glides vs stays syllabic is LEXICAL
+// (garcia stays but radio glides — identical C-i-V, differ only in lexical stress); the lexicon carries that.
 // See docs/investigations/ilo_native_bringup_investigation.md.
-describe("Ilocano canonical IPA — Northern Philippine rule g2p", () => {
-    test("high-vowel GLIDING hiatus (the split from Bisayan): i→j, u→w before a vowel", () => {
-        expect(phonemizeWord("dua")).toBe("dwˈa"); // ⟨u⟩ before a vowel → w
-        expect(phonemizeWord("radio")).toBe("ɾˈadjo"); // ⟨i⟩ before o → j
-        expect(phonemizeWord("dies")).toBe("djˈɛs"); // ⟨i⟩ before e → j; ⟨e⟩→ɛ
+describe("Ilocano — the RULE g2p (phonemizeWordRules; the non-circular eval path)", () => {
+    test("high-vowel GLIDING hiatus: i→j, u→w before a vowel (the split from Bisayan)", () => {
+        expect(phonemizeWordRules("dua")).toBe("dwˈa"); // ⟨u⟩ before a → w
+        expect(phonemizeWordRules("radio")).toBe("ɾˈadjo"); // ⟨i⟩ before o → j
+        expect(phonemizeWordRules("dies")).toBe("djˈɛs"); // ⟨i⟩ before e → j; ⟨e⟩→ɛ
     });
-
-    test("non-high hiatus keeps the glottal; word-initial glottal; ⟨ng⟩→ŋ", () => {
-        expect(phonemizeWord("tao")).toBe("tˈaʔo"); // a+o hiatus → glottal (o does not glide word-finally)
-        expect(phonemizeWord("naimbag")).toBe("naʔˈimbaɡ"); // "good" — a+i hiatus glottal (i after a vowel)
-        expect(phonemizeWord("agtutubo")).toBe("ʔaɡtutˈubo"); // word-initial glottal
+    test("non-high hiatus keeps the glottal; word-initial glottal", () => {
+        expect(phonemizeWordRules("tao")).toBe("tˈaʔo"); // a+o hiatus → glottal
+        expect(phonemizeWordRules("naimbag")).toBe("naʔˈimbaɡ"); // a+i hiatus glottal
+        expect(phonemizeWordRules("agtutubo")).toBe("ʔaɡtutˈubo"); // word-initial glottal
     });
+});
 
-    test("native vocabulary (plain CV)", () => {
-        expect(phonemizeWord("balik")).toBe("bˈalik");
-        expect(phonemizeWord("dakami")).toBe("dakˈami"); // "we/us"
+describe("Ilocano — the shipped LEXICON path (phonemizeWord) fixes the lexical residual", () => {
+    test("lexical gliding: the stressed high vowel STAYS syllabic (what the rule can't derive)", () => {
+        expect(phonemizeWord("garcia")).toBe("ɡaɾsˈia"); // i STAYS (rule wrongly glides → ɡaɾkja)
+        expect(phonemizeWord("kua")).toBe("kuˈa"); // u STAYS (rule → kwa)
+        expect(phonemizeWord("biblioteka")).toBe("bibliotˈɛka"); // io STAYS (rule → bibljo…)
+    });
+    test("OOV falls back to the rule g2p", () => {
+        expect(phonemizeWord("zzqx")).toBe(phonemizeWordRules("zzqx"));
     });
 });

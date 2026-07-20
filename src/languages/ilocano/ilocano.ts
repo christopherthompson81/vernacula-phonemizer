@@ -10,6 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 
 interface IlocanoDef {
     digraphs: Record<string, string>;
@@ -70,11 +71,23 @@ function stressed(units: string[]): string {
     return out;
 }
 
-/** One Ilocano word → canonical IPA (penultimate stress; numbers + final-glottal deferred). */
-export function phonemizeWord(word: string): string {
+/** One Ilocano word → canonical IPA by the RULE g2p only (high-vowel gliding hiatus + penult stress). This is the
+ *  NON-CIRCULAR path the referee eval measures — it does NOT consult the referee-derived lexicon. */
+export function phonemizeWordRules(word: string): string {
     const units = scan(word.toLowerCase());
     if (units.length === 0) return "";
     return stressed(units).normalize("NFC");
+}
+
+// Pronunciation lexicon (word → IPA), mined from the stress-marked referees. Fixes the LEXICAL residual the rule
+// cannot derive from spelling: gliding (garcia→ɡaɾsˈia stays, kua→kuˈa), the 6th vowel ⟨e⟩→[ɯ], and lexical stress.
+let LEX: Map<string, string> | undefined;
+const lexicon = (): Map<string, string> => (LEX ??= loadTsvMap(import.meta.url, "ilo-lexicon.tsv"));
+
+/** One Ilocano word → canonical IPA. The shipped path: the pronunciation lexicon first (fixes the lexical
+ *  gliding/stress/6th-vowel), then the rule g2p for OOV. */
+export function phonemizeWord(word: string): string {
+    return lexicon().get(word.toLowerCase().normalize("NFC")) ?? phonemizeWordRules(word);
 }
 
 // A word (Ilocano letters + hyphen + apostrophe glottal) / number / punctuation token.

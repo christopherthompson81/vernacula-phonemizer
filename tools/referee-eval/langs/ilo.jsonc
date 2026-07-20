@@ -1,4 +1,4 @@
-// Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin, near-phonemic. Rule g2p with the
+// Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin, near-phonemic. RULE-ONLY eval: the
 // Ilocano hiatus (high vowel i/u glides before a vowel; non-high hiatus → glottal). THREE referees: wikipron
 // ilo_latn (PRIMARY, human, proper-noun-heavy) + kaikki ilo (SECONDARY, human, native) + epitran ilo-Latn
 // (programmatic). Folds: STRESS (unwritten penult), the 6TH VOWEL [ɯ]~[ɛ]~[e] (⟨e⟩, native [ɯ] vs loan [ɛ] not

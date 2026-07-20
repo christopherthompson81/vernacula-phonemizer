@@ -55,7 +55,7 @@ hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷
 hu	Hungarian	Uralic	Latin	13000000						implemented		✅			
 id	Indonesian	Austronesian (Malayic)	Latin	70000000	130000000					implemented		🟢			
 ig	Igbo	Niger-Congo (Volta-Niger)	Latin	31000000						implemented		🔷			
-ilo	Ilocano (Iloko)	Austronesian (Northern Philippine)	Latin	8000000	2000000	926	973	1	0	implemented		🟡			Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded — gliding/hiatus is orthography-ambiguous. Numbers deferred.
+ilo	Ilocano (Iloko)	Austronesian (Northern Philippine)	Latin	8000000	2000000	926	973	1	0	implemented		🟡			Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded (eval RULE-ONLY, non-circular) — gliding is orthography-ambiguous (stress-position + consonant-context models both tried+REJECTED as worse); the SHIPPED path adds a 973-word stress-marked-referee LEXICON (fixes lexical gliding garcia→ɡaɾsˈia + 6th vowel ⟨e⟩→ɯ + stress). Numbers deferred.
 it	Italian	Romance	Latin	65000000						implemented		✅			
 ja	Japanese	Japonic	Japanese (kanji+kana)	123000000						implemented		✅			
 jv	Javanese	Austronesian	Latin/Javanese	68000000						implemented		🟡			

@@ -79,3 +79,17 @@ tested with a precise per-slot alignment (words with exactly one C‑i/u‑V slo
 
 So neither dimension recoverable from spelling — stress **position** (Run 2) nor consonant **context** (2b) — beats
 the mechanical glide-all rule. The residual is confirmed **lexical**; a lexicon is the only remaining lever.
+
+## Run 3 — the lexicon (the only remaining lever)
+
+With both rule-based predictors falsified, the residual is lexical, so the fix is a **pronunciation lexicon** —
+the en-GB/km/bn pattern. `ilo-lexicon.tsv` (973 words) is mined from the stress-marked human referees (kaikki ilo +
+wikipron ilo_latn), normalized to our conventions, and carries exactly what the rule cannot derive from spelling:
+the **lexical gliding** (garcia→ɡaɾsˈia *stays*, kua→kuˈa, biblioteka→bibliotˈɛka — vs the rule's ɡaɾkja/kwa/bibljo),
+the **6th vowel** ⟨e⟩→[ɯ] where the referee attests it, and **lexical stress** (balik→balˈik, final).
+
+The shipped `phonemizeWord` consults the lexicon first, then the rule g2p for OOV. Crucially, `phonemizeWordRules`
+(the rule-only path) is what the **referee eval measures** — so the eval stays **non-circular** (the lexicon is
+referee-derived) and the floor is unchanged at the rule backbone (82.7% wikipron / 84.5% kaikki). The lexicon is the
+*shipped* improvement, covering ~973 common words + proper names at referee fidelity. Verdict stays 🟡 (the eval
+number is the honest non-circular rule backbone); the shipped output is materially better on covered vocabulary.
