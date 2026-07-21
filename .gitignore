@@ -4,3 +4,4 @@ node_modules/
 
 # (Arabic diacritizer model is now COMMITTED — the permissive silver-only build, 15 MB, CPU-fine: it ships in
 #  every distribution so it's part of the tested product, not an optional dev stand-in. Provenance in the module.)
+tools/fa-restoration/__pycache__/

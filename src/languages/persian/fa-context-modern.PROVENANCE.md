@@ -20,15 +20,24 @@ the 42% ZWNJ rows; 197k→404k pairs) AND matches the runtime, which strips ZWNJ
 to 250k for training, 90/10 split. Built by tools/fa-restoration/build_homorich_ipa.py +
 export_modern_context_onnx.py (offline, GPU).
 
-**Measured:** held-out MODERN eval (canonical IPA, verified on the *shipped int8 ONNX* with the same greedy decode
-as `contextRestorer.ts`) — **85.3% per-word** (int8 ≈ fp32 84.8% ≈ torch 85.6%; quantization lossless). Context
-beats a word-level baseline by **+21.9pp** on modern held-out (the modern analogue of the classical model's
-+18.8pp), and beats the *previous* word-level default (`phonemizeFaNeural`, no context) by **+44.8pp** (33.5%→78.2%
-per-word) — sentence context breaks the homograph/ezafe ceiling on modern text (بچه‌ها در خانه‌های بزرگ زندگی
-می‌کنند → bat͡ʃehaː daɾ xaːnehaːjˈe bozorɡ zendeɡˈiː miːkonand), which is why it is the default.
+**Training (Run F/G):** warm-started from a teacher-forced base, then fine-tuned with SCHEDULED SAMPLING to cure
+free-running EOS-failure degeneration (the model feeds its own predictions back during training so it learns to
+recover instead of looping; loss stays anchored to the gold token). Two modes: per-token (independent substitution)
+then ROLLOUT (sticky contiguous spans, `FA_SS_MODE=rollout`) which lets sustained loops form and be corrected —
+rollout roughly halved the residual degeneration again. Model selection is on a FREE-RUNNING metric
+(`score = per-word − 0.03·excess-words`), not teacher-forced val loss (which is blind to degeneration).
 
-**Limitations / guard:** greedy decode degenerates on ~0.2% of sentences (a runaway final token, e.g. ɾaft→ɾaftat…;
-NOT a quantization artifact — fp32 is marginally worse). The default path guards against it: word-count mismatch, an
-implausibly long token, or a repeated bigram → fall back PER-WORD to the word-level path; a lone-word clause (no
-context to exploit) also uses the word-level path. So a malformed result never surfaces. The sync engine (C#-parity,
-referee-eval) is untouched — this is a separate async path. See docs/investigations/fa_shortvowel_restoration_investigation.md.
+**Measured:** held-out MODERN eval (canonical IPA, verified on the *shipped int8 ONNX*, BEAM decode as in
+`contextRestorer.ts`) — **90.5% per-word, 80.4% on the annotated homograph word** (int8 ≈ fp32 ≈ torch; quantization
+lossless). Context beats the *previous* word-level default (`phonemizeFaNeural`, no context) by **+44.8pp**
+(33.5%→78.2%) — sentence context breaks the homograph/ezafe ceiling on modern text (بچه‌ها در خانه‌های بزرگ زندگی
+می‌کنند → bat͡ʃehaː daɾ xaːnehaːjˈe bozorɡ zendeɡˈiː miːkonand). End-to-end the deployed pipeline
+(`phonemizeFaNeural`, beam + guard + length-chunker) reaches **90.5% per-word** with raw degeneration down to ~1.4%.
+
+**Limitations / guard:** the char-level decoder still degenerates on ~1.4% of sentences (a runaway/looping tail,
+mostly short imperative endings کن/بده and OOV proper names) — reduced ~5× from the pre-SS model but not eliminated
+(an architectural floor). `contextRestorer.ts` uses BEAM decode; the default pipeline guards the residual: a
+word-count mismatch falls back PER-WORD to the word-level path, a lone-word clause uses the word-level path, and
+runs longer than the training sentence length (~120 chars) are chunked at word boundaries to stay in-distribution.
+So a malformed result never surfaces. The sync engine (C#-parity, referee-eval) is untouched — this is a separate
+async path. See docs/investigations/fa_shortvowel_restoration_investigation.md.
