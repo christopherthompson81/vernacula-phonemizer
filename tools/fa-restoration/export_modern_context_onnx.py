@@ -31,7 +31,8 @@ WARM_START = sys.argv[3] if len(sys.argv) > 3 else None
 # spans (mean length SS_SPAN) so multi-char loops actually FORM during training and the gt-anchored loss teaches
 # breaking them — targeting the sustained mid-sequence/tail loops per-token SS is too fragmentary to reach.
 SS_MODE = os.environ.get("FA_SS_MODE", "token"); SS_SPAN = int(os.environ.get("FA_SS_SPAN", 8))
-CKPT = f"{SP}/{os.path.splitext(INPUT)[0]}{'.warm' if WARM_START else ''}{'.'+SS_MODE if SS_MODE != 'token' else ''}.ckpt.pt"
+HOM_OVERSAMPLE = int(os.environ.get("FA_HOM_OVERSAMPLE", 1))  # duplicate homograph-labelled train rows N× (target the homograph slice)
+CKPT = f"{SP}/{os.path.splitext(INPUT)[0]}{'.warm' if WARM_START else ''}{'.'+SS_MODE if SS_MODE != 'token' else ''}{'.hx'+str(HOM_OVERSAMPLE) if HOM_OVERSAMPLE > 1 else ''}.ckpt.pt"
 W_HOM = 4.0          # loss weight on the homograph word's target chars
 MAX_EPOCHS = int(os.environ.get("FA_MAX_EPOCHS", 25)); PATIENCE = 3
 # FA_NO_EARLYSTOP=1 runs to MAX_EPOCHS regardless of patience (and, on resume, clears a prior early-stop) — for
@@ -40,6 +41,7 @@ NO_EARLYSTOP = bool(os.environ.get("FA_NO_EARLYSTOP"))
 # scheduled sampling: teacher-force WARMUP epochs then ramp own-prediction rate to SS_MAX. A warm start is ALREADY
 # converged, so skip the warmup (SS from epoch 1) and fine-tune at a reduced LR.
 WARMUP, SS_MAX = (0, 0.30) if WARM_START else (4, 0.30)
+SS_MAX = float(os.environ.get("FA_SS_MAX", SS_MAX))   # override (e.g. 0.22 — full 0.30 rollout overshoots)
 LR = 3e-4 if WARM_START else 1e-3
 
 rows = []
@@ -50,6 +52,8 @@ for l in open(f"{SP}/{INPUT}", encoding="utf8"):
 random.shuffle(rows)
 n = len(rows); n_test = n // 10; n_val = n // 10
 test_r = rows[:n_test]; val_r = rows[n_test:n_test+n_val]; train_r = rows[n_test+n_val:]
+# NOTE: oversampling is applied AFTER the vocab is built (below) — the vocab is first-seen-order dependent, so
+# reshuffling train_r here would remap char→id and misalign a warm-start's weights. See HOM_OVERSAMPLE block later.
 PAD, BOS, EOS, UNK = 0, 1, 2, 3; H = 256
 def mkv(seqs):
     v = {"<pad>": 0, "<bos>": 1, "<eos>": 2, "<unk>": 3}
@@ -86,9 +90,9 @@ def free_run_score(k=300):
     """FREE-RUNNING selection metric: greedy-decode k val sentences (as inference does) and score per-word +
     degeneration SEVERITY (total excess words). Teacher-forced val loss is blind to free-running degeneration —
     the whole point of scheduled sampling — so selection/stopping must use THIS, not the val loss."""
-    m.eval(); W = ok = 0; excess = 0
+    m.eval(); W = ok = 0; excess = 0; hW = hOk = 0
     with torch.no_grad():
-        for g, gold, _ in val_r[:k]:
+        for g, gold, hidx in val_r[:k]:
             X = torch.tensor([es(g)], device=dev); mask = (X != 0); eo = m.encode(X); aeo = m.att(eo)
             h = torch.zeros(1, 1, 2*H, device=dev); c = torch.zeros(1, 1, 2*H, device=dev); y = torch.tensor([[BOS]], device=dev); o = []
             for _ in range(len(g)*3+5):
@@ -100,12 +104,20 @@ def free_run_score(k=300):
             for j, gg in enumerate(gw):
                 W += 1
                 if j < len(p) and p[j] == gg: ok += 1
-    return 100*ok/max(W, 1), excess   # (free-running per-word %, total excess words = degeneration severity)
+            if 0 <= hidx < len(gw):   # homograph-word accuracy
+                hW += 1
+                if hidx < len(p) and p[hidx] == gw[hidx]: hOk += 1
+    return 100*ok/max(W, 1), excess, 100*hOk/max(hW, 1)  # (per-word %, excess severity, homograph-word %)
 
 m = S2S(len(sv), len(tv), h=H).to(dev); opt = torch.optim.Adam(m.parameters(), LR)
 crit = nn.CrossEntropyLoss(ignore_index=PAD, reduction="none")
 def prep(rs):
     return [es(a) for a, _, _ in rs], [et(b) for _, b, _ in rs], [tgt_weights(b, h) for _, b, h in rs]
+# Oversample homograph-labelled TRAIN rows NOW — AFTER the vocab (sv/tv) is fixed from the original order, so a
+# warm-start's char→id mapping is preserved (test/val untouched). Duplicating rows can't add chars, so vocab is safe.
+if HOM_OVERSAMPLE > 1:
+    train_r = train_r + [r for r in train_r if r[2] >= 0] * (HOM_OVERSAMPLE - 1)
+    random.shuffle(train_r)
 Strn, Ttrn, Wtrn = prep(train_r); Sval, Tval, Wval = prep(val_r)
 print(f"# dev={dev} train={len(train_r)} val={len(val_r)} test={len(test_r)} src={len(sv)} tgt={len(tv)}", file=sys.stderr, flush=True)
 
@@ -151,7 +163,10 @@ def run_batch(b, S, T, Wt, ss=0.0):
 # Selection SCORE = free-running per-word − SEV_PEN·(degeneration severity). frr alone is noisy/flat and lenient to
 # degeneration (prefix-aligned); severity (excess words) carries the signal scheduled sampling actually improves.
 # The combined score rewards accuracy AND penalises severe/loopy output, so it selects the model we'd ship.
-SEV_PEN = 0.03
+SEV_PEN = 0.03; HOM_W = float(os.environ.get("FA_HOM_W", 0.0))   # score = per-word − SEV_PEN·excess + HOM_W·homograph%
+# HOM_W defaults 0 (the PROVEN selection that produced the shipped model): a homograph-in-selection experiment
+# (FA_HOM_W=0.1 + FA_HOM_OVERSAMPLE) over-rewarded the homograph slice and selected a model with WORSE pipeline
+# degeneration (+1pp homograph but 1.4%→2.6% degeneration, pipeline 90.5%→90.3%) — Tier-1 tuning did not beat ep3.
 best_score = -1e9; best_state = None; bad = 0; start_epoch = 0; stopped = False
 sig = (len(sv), len(tv), len(train_r), W_HOM, WARMUP, SS_MAX, bool(WARM_START), SS_MODE, SS_SPAN)  # data + CONFIG fp —
 # refuse to resume across a different dataset OR a different training config (W_HOM / scheduled-sampling schedule),
@@ -197,9 +212,9 @@ for e in range(start_epoch, MAX_EPOCHS):
         for b in batches(len(Sval), shuffle=False):
             vl += run_batch(b, Sval, Tval, Wval).item(); vnb += 1  # val teacher-forced (ss=0) for a comparable signal
     vloss = vl/max(vnb, 1)
-    frr, excess = free_run_score()  # FREE-RUNNING per-word % + degeneration severity (total excess words)
-    score = frr - SEV_PEN * excess  # combined selection metric (accuracy − severity)
-    print(f"# epoch {e+1}/{MAX_EPOCHS} ss={ss:.2f} train={tl/max(nb,1):.3f} val={vloss:.3f} frr={frr:.1f}% excess={excess} score={score:.2f} {time.time()-te:.0f}s", file=sys.stderr, flush=True)
+    frr, excess, hom = free_run_score()  # FREE-RUNNING per-word %, degeneration severity, homograph-word %
+    score = frr - SEV_PEN * excess + HOM_W * hom  # combined selection metric (accuracy − severity + homograph)
+    print(f"# epoch {e+1}/{MAX_EPOCHS} ss={ss:.2f} train={tl/max(nb,1):.3f} val={vloss:.3f} frr={frr:.1f}% excess={excess} hom={hom:.1f}% score={score:.2f} {time.time()-te:.0f}s", file=sys.stderr, flush=True)
     if score > best_score + 0.02:   # select on accuracy − severity (what inference ships), not teacher-forced val
         best_score = score; best_state = copy.deepcopy(m.state_dict()); bad = 0
     else:
