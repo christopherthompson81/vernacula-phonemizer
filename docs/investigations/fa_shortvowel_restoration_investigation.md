@@ -549,3 +549,23 @@ WHOLE-INVESTIGATION ARC (deployed pipeline per-word): 82.0% → 85.6% (training-
 7.2% → 1.4% (5×). Residual (short imperatives, OOV names) is an architectural floor of the char BiLSTM-attention
 decoder, caught by the pipeline fallback. Decode: contextRestorer.ts BEAM (greedy was near-identical pre-SS but beam
 is kept). GPU inference opt-in (FA_ORT_EP) exists but is SLOWER for this autoregressive decode — CPU is the default.
+
+## Run 21 — 2026-07-21 — Tier-1 tuning (SS_MAX=0.22 + homograph oversampling): NEGATIVE, ep3 stands
+
+Cheap "Tier-1" attempt to push past the rollout ep3 floor (pipeline 90.5%, degeneration 1.4%). Added reusable
+trainer knobs: FA_SS_MAX (the ss=0.30 rollout overshoot suggested 0.22), FA_HOM_OVERSAMPLE (duplicate homograph-
+labelled rows to target the ~18% homograph slice), FA_HOM_W (add homograph-word% to the selection score). Warm-start
+from ep3, keep-best.
+
+BUG caught early (Chris: "epoch 1 numbers look awful?"): oversampling did `random.shuffle(train_r)` BEFORE the vocab
+was built — vocab is first-seen-order dependent, so 35 chars got remapped and the warm-start weights loaded
+misaligned → epoch 1 frr 4.1% / train-loss 2.6 (fresh-model level). FIX: build vocab from the ORIGINAL train order,
+oversample AFTER. (Keep-best would have protected us regardless.)
+
+RESULT: the tune did NOT beat ep3 on the metric that ships. Best epoch (2): held-out per-word 90.7% (+0.2), homograph
+81.4% (+1.0) — BUT end-to-end degeneration 1.4%→**2.6%** (doubled) and PIPELINE 90.5%→**90.3%** (worse). The
+homograph oversampling traded degeneration for the slice gain; FA_HOM_W=0.1 over-rewarded homograph in selection and
+picked a pipeline-worse model (the excess 54-58 at ss=0.22 was the tell). CONCLUSION: rollout ep3 is at the practical
+FLOOR of this char BiLSTM-attention architecture; Tier-1 model-side tuning is exhausted. Real remaining levers are
+architectural (attention coverage / Transformer decode) or an independent modern-Persian corpus. Reverted to ep3
+(shipped PR #393); kept the knobs (HOM_W defaults 0 = proven selection) as reusable infra + a documented hazard.
