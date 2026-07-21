@@ -22,6 +22,8 @@ const WORD = new RegExp(`[${PERSO}]+`, "gu");
 // path instead of being fed to the word/context model. Groups: 1=digits, 2=word, 3=punctuation.
 const TOKEN = new RegExp(`([\\d\\u06F0-\\u06F9]+)|([${PERSO}]+)|([۔؟،؛.?!,;:])`, "gu");
 const ZWNJ = /[‌‍]/gu;
+// The context model was trained on ≤120-char sentences (p99≈97). Chunk longer runs to stay in-distribution.
+const MAX_CLAUSE_CHARS = 100;
 const MARK: Record<string, string> = { "۔": ".", "؟": "?", "،": ",", "؛": ",", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": "," };
 /** The sync number path only reads ASCII digits; fold Persian-Indic digits (۰-۹) to ASCII first. */
 const toAsciiDigits = (s: string): string => s.replace(/[۰-۹]/gu, (d) => String(d.charCodeAt(0) - 0x06f0));
@@ -56,13 +58,26 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
         if (run.length === 1) { ipaQueue.push(await wordLevel(run[0]!)); run = []; return; }
         const out = await ctx.restore(run.join(" "));
         const ow = out.split(" ");
-        if (ow.length === run.length && !ow.some(isDegenerate)) ipaQueue.push(...ow);
+        // Mirror training: the model was trained + evaluated on whole sentences, output used directly. So when the
+        // output aligns 1:1 with the input words, TRUST it — even if a word looks long. Only a word-COUNT mismatch
+        // (genuine tail degeneration the beam didn't resolve, ~5%) can't be aligned, so that alone falls back.
+        if (ow.length === run.length) ipaQueue.push(...ow);
         else for (const w of run) ipaQueue.push(await wordLevel(w));
         run = [];
     };
     for (const m of text.matchAll(TOKEN)) {
-        if (m[2]) run.push(m[2].replace(ZWNJ, ""));
-        else await flush(); // a digit or punctuation break ends the clause run
+        if (m[2]) {
+            const w = m[2].replace(ZWNJ, "");
+            // LENGTH-CAP CHUNKER: the model was trained on sentence-length units (≤120 chars, p99≈97); a longer run
+            // is out-of-distribution and degenerates. So before a run would exceed MAX_CLAUSE_CHARS, flush it and
+            // start a fresh chunk at this word boundary. Alignment is preserved (each word still yields one IPA);
+            // only cross-chunk context is lost, which is unavoidable for input longer than the model can hold.
+            const curLen = run.reduce((a, x) => a + [...x].length + 1, 0);
+            if (run.length && curLen + [...w].length > MAX_CLAUSE_CHARS) await flush();
+            run.push(w);
+        } else {
+            await flush(); // a digit or punctuation break ends the clause run
+        }
     }
     await flush();
 

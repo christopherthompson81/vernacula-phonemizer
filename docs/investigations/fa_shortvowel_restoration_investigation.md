@@ -470,3 +470,82 @@ WHOLESALE when the model is absent. **Degeneration guard** (~1% greedy runaway, 
 quantization artifact): word-count mismatch OR an implausibly long token OR a repeated bigram → per-word fallback.
 Also fixed: Persian-Indic digits (۰-۹, which fall in the PERSO letter range) were being fed to the context model as
 words → now routed to the number path via ASCII folding. `phonemizeFaContext` stays the classical opt-in.
+
+## Run 18 — 2026-07-20 — error-composition analysis (the "are we capped?" tiebreaker)
+
+Bucketed every per-word miss on 500 held-out sentences (shipped int8 ONNX, greedy) — `tools/fa-restoration`
+throwaway `analyze_errors.py` + a homograph lookup mined from HomoRich's `Homograph Grapheme`/`Phoneme` columns.
+87.6% ok / 12.4% miss on this slice; composition of the MISS tail:
+
+- **consonant/other 38.5%** — but LARGELY not real error: hiatus notation (ʔ vs j vs bare between vowels:
+  tad͡ʒɾobeiː vs tad͡ʒɾobeʔiː, ʃabahhaːʔiː vs ʃabahhaːjiː) + spurious ezafe-ye (honaɾiː→honaɾiːje). Convention, not quality.
+- **lexical-vowel 23.2%** — vowel a/e/o; partly GOLD-INCONSISTENT (تأثیرش→aʃ vs رفتارش→eʃ — the -aš/-eš enclitic
+  transcribed both ways in the gold) + dialect (xejliː/xajliː).
+- **ezafe 19.9%** — clean missed/spurious ezafe -e (context-dependent, improvable).
+- **homograph 17.8%** — errors on the annotated homograph word (شوم šavam~šum) — exactly what HomoRich's labels target.
+- **degeneration 0.6%** — greedy runaway (beam fixes).
+
+**Verdict: NOT capped, and not a big-transformer problem.** ~38% of the tail is directly improvable (homograph
+labels + more context for ezafe + beam); a large part of the 38.5% "consonant/other" is hiatus CONVENTION (fold ʔ/j
+→ free accuracy, no model change); a sliver is irreducible gold noise. Real quality > the 85% headline. The
+"transformer for world-knowledge" idea is RETRACTED (a small from-scratch transformer ≈ BiLSTM, no world knowledge;
+the world-knowledge version is a big pretrained dependency, out of scope). Bounded levers, model-size-neutral.
+
+**Next (Run 19):** retrain with (1) HomoRich homograph-column LOSS-WEIGHTING (the labels we ignored — the homograph
+word's gradient was diluted ~10×) + a homograph-specific eval so we can SEE it move; (2) uncapped data (404k) +
+more epochs with PATIENCE early-stopping (Chris: loss was still dropping at epoch 7); (3) BEAM decode in inference.
+Hiatus-convention normalization flagged as a follow-up (its own careful pass — pick ʔ/j/bare vs getPhonemizer("fa")).
+
+## Run 19 — 2026-07-21 — scheduled sampling for EOS/degeneration; measurement lessons
+
+The modern context model degenerates (free-running EOS-failure loops) on ~7% of sentences (greedy) / ~5% (beam),
+MASKED by prefix-aligned per-word scoring (looked like 86-88% while whole-sentence was ~30% = 0.87^9). Diagnosis:
+exposure bias (low teacher-forced loss, free-running spirals). Fix = SCHEDULED SAMPLING (feed the model its own
+argmax back at rate ss; loss stays anchored to gt → can only teach recovery). Training-only, no ONNX/inference change.
+
+MEASUREMENT LESSONS (both were my errors, caught by Chris):
+- Teacher-forced val loss is BLIND to free-running degeneration — selecting/stopping on it exports the WRONG (low-ss)
+  model. Fixed: select + patience on a FREE-RUNNING metric (greedy-decode a val subset each epoch).
+- A BINARY degeneration rate (word-count mismatch y/n) hides SEVERITY: SS turns a ×10 loop into a ×2 without changing
+  the binary count. Fixed: log `excess` (total excess words) and select on combined `score = frr − 0.03·excess`.
+- Don't delete a checkpoint to relaunch — kill, edit, RESUME (per-epoch checkpoints + resume-tolerant-of-metric-rename).
+- WARM-START from the converged base (Run A best, val 0.072) + SS from epoch 1 at reduced LR (3e-4) — no re-warmup.
+
+RESULTS (warm-start + SS, combined-score selection, uncapped epochs, no-earlystop past a plateau):
+excess (severity, /300 val) fell 130→48 at the good troughs; per-word (frr) climbed 87→90%. Selected epoch 16
+(frr 90.4%, excess 48, score 88.93). END-TO-END on the shipped int8: RAW restore(beam) 90.5% (degeneration wc-mismatch
+7.2%→2.8%), PIPELINE `phonemizeFaNeural` 82.0%→89.8% across the whole investigation (guard+chunker got 82→85.6; SS
+model + reduced degeneration got 85.6→89.8). SS REDUCED but did NOT eliminate degeneration — it floors ~2.8% (short
+imperatives کن/بده, OOV proper names), caught by the pipeline fallback.
+
+NEXT (Chris, post-epoch-25): ROLLOUT scheduled sampling — the floor is because per-token independent substitution
+(reroll every step) never lets a SUSTAINED loop form in training, so the model never practices breaking one. Two
+targeted variants: (1) STICKY/contiguous substitution (own-prediction spans, length ramping) → mid-sequence loops
+form + get corrected; (2) TAIL free-running (teacher-force prefix, free-run the tail incl. the final EOS target) →
+learns to terminate from its own drifted state. A/B vs per-token SS on the same excess/frr, warm-started from this
+run's best epoch. Still training-only.
+
+## Run 20 — 2026-07-21 — ROLLOUT scheduled sampling breaks the per-token floor
+
+Per-token SS floored at excess≈48 (severity) / degeneration 2.8% because independent per-step substitution (reroll
+every step) never lets a SUSTAINED loop form in training — the model can't practise breaking a loop it never enters.
+ROLLOUT SS (`FA_SS_MODE=rollout`, sticky contiguous substitution spans of mean length SS_SPAN=8) fixes that: a span
+of own-predictions lets a multi-char loop develop and the gt-anchored loss corrects it; spans reaching the tail =
+tail free-running (learns to emit EOS from its own drifted state).
+
+Warm-started from the per-token best (epoch 16), rollout dropped straight through the floor: excess 71→41→**32** by
+epoch 3 (ss only 0.22), frr holding ~90.5% — score 89.59 beat the entire per-token run. NOTE: full ss=0.30 rollout
+OVERSHOT (epochs 4-6 excess 84/53/95, noisier/worse) — big contiguous free-run chunks destabilise; the sweet spot
+was ss≈0.22. Best = epoch 3.
+
+FINAL (rollout epoch 3, shipped int8, beam):
+- held-out per-word **90.5%**, homograph **80.4%** (best of every run; per-token ep16 was 90.0/78.9).
+- RAW restore(beam) 90.8%, degeneration (wc-mismatch) **1.4%** (halved again from per-token's 2.8%).
+- PIPELINE `phonemizeFaNeural` **90.5%** — nearly == raw (fallback barely fires now).
+- sad-path: نمیتوانسته/بیدار fixed; به سمت loop SHORTENED (konanakat×5 → konand×2); OOV names (امیرخسرو) still loop.
+
+WHOLE-INVESTIGATION ARC (deployed pipeline per-word): 82.0% → 85.6% (training-faithful guard + length chunker) →
+89.8% (per-token SS, once measured/selected on free-running severity) → **90.5%** (rollout SS). Raw degeneration
+7.2% → 1.4% (5×). Residual (short imperatives, OOV names) is an architectural floor of the char BiLSTM-attention
+decoder, caught by the pipeline fallback. Decode: contextRestorer.ts BEAM (greedy was near-identical pre-SS but beam
+is kept). GPU inference opt-in (FA_ORT_EP) exists but is SLOWER for this autoregressive decode — CPU is the default.

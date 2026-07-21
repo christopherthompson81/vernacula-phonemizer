@@ -20,7 +20,7 @@ import { fileURLToPath } from "node:url";
 interface OrtTensor { data: Float32Array | BigInt64Array | Uint8Array }
 interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>> }
 interface OrtLike {
-    InferenceSession: { create(path: string | Uint8Array): Promise<OrtSession> };
+    InferenceSession: { create(path: string | Uint8Array, options?: { executionProviders: string[] }): Promise<OrtSession> };
     Tensor: new (type: string, data: BigInt64Array | Float32Array | Uint8Array, dims: number[]) => OrtTensor;
 }
 let ortPromise: Promise<OrtLike> | undefined;
@@ -61,8 +61,12 @@ export async function createFaContextRestorer(basename = "fa-context-restorer"):
     let ortLib: OrtLike, enc: OrtSession, dec: OrtSession;
     try {
         ortLib = await ort();
-        enc = await ortLib.InferenceSession.create(encBytes);
-        dec = await ortLib.InferenceSession.create(decBytes);
+        // Shipping default is CPU (no CUDA dependency). Opt into a GPU execution provider — e.g. for fast
+        // test/eval iteration — with FA_ORT_EP=cuda (or webgpu); needs the CUDA runtime libs on LD_LIBRARY_PATH.
+        const ep = process.env.FA_ORT_EP;
+        const opts = ep ? { executionProviders: ep.split(",") } : undefined;
+        enc = await ortLib.InferenceSession.create(encBytes, opts);
+        dec = await ortLib.InferenceSession.create(decBytes, opts);
     } catch { return undefined; }
     const i2t: Record<number, string> = {};
     for (const [k, v] of Object.entries(meta.tgt)) i2t[v] = k;
@@ -77,20 +81,37 @@ export async function createFaContextRestorer(basename = "fa-context-restorer"):
             const mask = new ortLib.Tensor("bool", Uint8Array.from(new Array(T).fill(1)), [1, T]);
             let h = new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
             let c = new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
-            let y = meta.bos;
-            const out: string[] = [];
-            for (let step = 0; step < T * 3 + 5; step++) {
-                const r = await dec.run({ y: new ortLib.Tensor("int64", BigInt64Array.from([BigInt(y)]), [1, 1]), h, c, enc_o: eo, mask });
-                const lo = r.logits!.data as Float32Array;
-                let best = 0, bv = -Infinity;
-                for (let l = 0; l < lo.length; l++) if (lo[l]! > bv) { bv = lo[l]!; best = l; }
-                if (best === meta.eos) break;
-                out.push(i2t[best] ?? "");
-                y = best;
-                h = r.h_out as unknown as OrtTensor;
-                c = r.c_out as unknown as OrtTensor;
+            // BEAM decode (width B) with length-normalised scoring. The char-level greedy decoder runs away into
+            // tail repetition on ~19% of sentences (کن → konaket konaket…) because once it enters a loop it never
+            // scores EOS highest. Beam keeps the EOS-terminating hypothesis alive alongside the looping one and
+            // (length-normalised) usually prefers it — without the collateral damage a hard n-gram block does to
+            // legit repeats. Ported from the word-level vowelRestorer beam.
+            const B = 5;
+            const zero = () => new ortLib.Tensor("float32", new Float32Array(Z), [1, 1, Z]);
+            interface Beam { toks: number[]; lp: number; h: OrtTensor; c: OrtTensor; done: boolean }
+            const score = (b: Beam): number => b.lp / Math.max(b.toks.length, 1);
+            let beams: Beam[] = [{ toks: [meta.bos], lp: 0, h: zero(), c: zero(), done: false }];
+            for (let step = 0; step < T * 3 + 5 && !beams.every((b) => b.done); step++) {
+                const cand: Beam[] = [];
+                for (const b of beams) {
+                    if (b.done) { cand.push(b); continue; }
+                    const r = await dec.run({ y: new ortLib.Tensor("int64", BigInt64Array.from([BigInt(b.toks[b.toks.length - 1]!)]), [1, 1]), h: b.h, c: b.c, enc_o: eo, mask });
+                    const lo = r.logits!.data as Float32Array;
+                    let mx = -Infinity;
+                    for (const v of lo) if (v > mx) mx = v;
+                    let sum = 0;
+                    for (const v of lo) sum += Math.exp(v - mx);
+                    const lse = mx + Math.log(sum);
+                    const idx = Array.from(lo.keys()).sort((i, j) => lo[j]! - lo[i]!).slice(0, B);
+                    for (const nid of idx) {
+                        cand.push({ toks: [...b.toks, nid], lp: b.lp + (lo[nid]! - lse), h: r.h_out as unknown as OrtTensor, c: r.c_out as unknown as OrtTensor, done: nid === meta.eos });
+                    }
+                }
+                beams = cand.sort((a, z) => score(z) - score(a)).slice(0, B);
             }
-            return stressPerWord(out.join(""));
+            const best = beams.reduce((a, z) => (score(z) > score(a) ? z : a));
+            const outToks = best.toks.slice(1).filter((t) => t !== meta.eos).map((t) => i2t[t] ?? "");
+            return stressPerWord(outToks.join(""));
         },
     };
 }
