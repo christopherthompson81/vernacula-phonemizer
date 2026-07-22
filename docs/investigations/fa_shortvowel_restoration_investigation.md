@@ -740,3 +740,36 @@ fas is not a modern-Iranian referee with noise on top — it is a different-regi
 DECISION: do not attempt to salvage wikipron; a non-circular referee must be purpose-sourced modern Iranian
 (Tihu/PersianG2P/GE2PE/ManaTTS) or the hand-adjudicated gold expanded — the only paths that yield right-register,
 non-circular validation.
+
+## Run 27 — 2026-07-21 — sourcing a modern-Iranian non-circular referee (external-data spike)
+
+Run 26 killed wikipron-fas (wrong register, uncleanable). Sourcing a purpose-built modern-Iranian G2P referee. Vet
+gate: (1) modern Iranian register (short /e/ not classical /i/, NO majhul eː/oː), (2) has short vowels (phonemic,
+not bare abjad), (3) INDEPENDENT of HomoRich — avoid the MahtaFetrat ecosystem (HomoRich/KaamelDict/SentenceBench
+share annotation lineage → circular), (4) permissive license (committed referee must be shareable). Candidates:
+PersianG2P/Tihu dict (AzamRabiee), GE2PE (Sharif SLPL), ManaTTS. Probing reachability + convention below.
+
+**RESULT — FOUND a valid non-circular referee (GE2PE) + it caught a real bug.** GE2PE (github.com/Sharif-SLPL/GE2PE,
+MIT, (c) 2025 Elnaz Rahmati) ships Kasre_test (ezafe) + Homograph_test — SENTENCE-level, MODERN IRANIAN (0 majhul
+vowels), and a DIFFERENT lineage from HomoRich (MahtaFetrat) → non-circular. It targets EXACTLY our two residual
+classes. Committed as tools/referee-eval/referees/fa.ge2pe-ezafe-homograph.tsv (321 sentences, converted to our IPA)
++ build/eval harness (ge2pe_referee.py / ge2pe-eval.ts).
+
+BUG CAUGHT (the multi-referee method paying off, like the Welsh y-vowel): GE2PE uses the ARABIC yeh ي (U+064A, 1207×)
+and Arabic kaf ك, while HomoRich trained the tagger on FARSI yeh ی (U+06CC) — distinct base letters NFC does NOT
+unify. The tagger had never seen Arabic yeh → it emitted <unk> garbage (کسي→kˈasv vs Farsi کسی→kasˈiː). Real
+production gap: Arabic-script Persian (very common) garbled. FIX: normalizePersianOrthography (ي→ی ك→ک ى→ی ة→ه)
+folded at every fa text entry (persian.ts text() + faNeural.ts phonemizeFaNeural/ModernContext/Context) + regression
+test. Before the fix the referee read 56%; after, the true numbers emerged.
+
+INDEPENDENT NUMBERS (adversarial hard-case sets, ق/غ folded to GE2PE's merge; word-level):
+      plain 84.2% full / 89.7% BACKBONE  |  ezafe 67.6% / 82.3%  |  homograph 54.7% / 85.9%  |  overall 79.4% / 87.8%
+TWO findings: (1) plain-word BACKBONE ~90% on an INDEPENDENT modern-Iranian source CORROBORATES the tagger — the
+93.5% HomoRich number is NOT merely self-referential; the segmental skeleton is independently confirmed solid. (2)
+ezafe (82% backbone / 68% full) and homograph (86% backbone / 55% full): the skeleton is right but the short-vowel /
+sense decision fails on the hard cases — INDEPENDENT confirmation of Runs 24–25 (ezafe + homographs are the residual,
+the vowel is sense/context-determined). Caveats: adversarial sets (lower bound, not representative), some GE2PE noise
+(ژنده gold drops ʒ), a minor hiatus-glide convention diff (niːjaːz vs niːaːz). NET: the non-circular referee both
+validates the backbone and confirms the residual is the irreducible ezafe/homograph disambiguation — and it earned
+its keep by surfacing the Arabic-orthography normalization bug. fa stays 🟡 (contextual layer still not certifiable),
+but the "is 93.5% even real?" doubt is now answered: the backbone is independently corroborated.

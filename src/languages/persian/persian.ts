@@ -186,10 +186,21 @@ const TOKEN = new RegExp(
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+// Real-world Persian text frequently uses ARABIC-script letter variants — Arabic yeh ي (U+064A), Arabic kaf ك
+// (U+0643), alef maksura ى (U+0649), teh marbuta ة (U+0629) — instead of their Farsi forms (ی U+06CC, ک U+06A9).
+// NFC does NOT unify them (distinct base letters, not canonical-equivalent), so the harakat lexicon and the neural
+// tagger — both keyed on Farsi orthography — treat Arabic yeh as unknown and GARBLE the word (کسي→kˈasv vs Farsi
+// کسی→kasˈiː). Fold them to Farsi at every fa text entry. Surfaced by the independent GE2PE referee (1207 Arabic
+// yehs in its test set); see docs/investigations/fa_shortvowel_restoration_investigation.md Run 27.
+const FA_ORTHO: Record<string, string> = { "ي": "ی", "ك": "ک", "ى": "ی", "ة": "ه" };
+export function normalizePersianOrthography(text: string): string {
+    return text.replace(/[يكىة]/gu, (c) => FA_ORTHO[c] ?? c);
+}
+
 class PersianPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizePersianOrthography(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

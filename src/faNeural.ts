@@ -16,7 +16,7 @@ import { stripHarakat } from "./core/harakatLexicon.ts";
 import { createFaVowelRestorer, type FaVowelRestorer } from "./languages/persian/vowelRestorer.ts";
 import { createFaContextRestorer, type FaContextRestorer } from "./languages/persian/contextRestorer.ts";
 import { createFaTagger } from "./languages/persian/faTagger.ts";
-import { harakatLexicon, phonemizeWord } from "./languages/persian/persian.ts";
+import { harakatLexicon, normalizePersianOrthography, phonemizeWord } from "./languages/persian/persian.ts";
 
 const PERSO = "ء-ۿݐ-ݿ‌‍";
 const WORD = new RegExp(`[${PERSO}]+`, "gu");
@@ -38,6 +38,7 @@ let modernCtxP: Promise<FaContextRestorer | undefined> | undefined;
  * Async because the ONNX pass is.
  */
 export async function phonemizeFaNeural(text: string): Promise<string> {
+    text = normalizePersianOrthography(text); // fold Arabic yeh/kaf → Farsi so the tagger doesn't garble (Run 27)
     if (restorerP === undefined) restorerP = createFaVowelRestorer();
     if (modernCtxP === undefined) modernCtxP = createFaTagger();
     const [restorer, ctx] = await Promise.all([restorerP, modernCtxP]);
@@ -128,7 +129,7 @@ export async function phonemizeFaContext(sentence: string): Promise<string> {
     if (contextP === undefined) contextP = createFaContextRestorer();
     const ctx = await contextP;
     if (!ctx) return getPhonemizer("fa").text(sentence);
-    const clean = sentence.replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
+    const clean = normalizePersianOrthography(sentence).replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
     return clean ? ctx.restore(clean) : "";
 }
 
@@ -145,6 +146,6 @@ export async function phonemizeFaModernContext(sentence: string): Promise<string
     if (modernCtxP === undefined) modernCtxP = createFaTagger();
     const ctx = await modernCtxP;
     if (!ctx) return getPhonemizer("fa").text(sentence);
-    const clean = sentence.replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
+    const clean = normalizePersianOrthography(sentence).replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
     return clean ? ctx.restore(clean) : "";
 }
