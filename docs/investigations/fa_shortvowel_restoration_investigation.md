@@ -954,3 +954,29 @@ alignment, normalization offset-preserving). Three real issues found and FIXED:
    the committed file BYTE-IDENTICAL (idempotent). Reproducibility restored.
 Noted-not-fixed (benign): UNITS/ANCH tables duplicated across scripts (shared-constant refactor); export meta allows
 pad tag-id in charTags (model never picks it). Full suite green. PR #396 ready to merge.
+
+## Run 36 — 2026-07-22 — agreement-gold residual character: lexical, and the tractable vs untractable split
+
+Asked whether the residual on the 708 cross-source AGREEMENT items (unambiguous words) is the irreducible floor or
+fresh signal. Measured on the shipped model + correction: **86% correct, 96 misses, ZERO homographs** — the
+agreement items exclude the sense/context floor by construction, so the residual is a different, LEXICAL animal:
+later-syllable vowel / over-epenthesis (41; آبنبات ʔaːbenebaːt≠ʔaːbnabaːt), first-vowel-beyond-pin (23), gemination /
+spurious-ʔ (12; است ʔastʔ), long-V (10), and **آ-vowel DROPPED** (9; آنان ʔnaːn≠ʔaːnaːn — the آ produced no vowel).
+53/96 misses are on words already in the pin (we KNOW the word; the error is a LATER vowel the first-vowel pin
+doesn't reach). So there IS signal, but it splits into tractable and not:
+
+**LANDED — آ-INSERT fix (cheap, deterministic, 0 breaks).** The آ rule only PROMOTED a short first vowel; when the
+tagger drops the آ vowel entirely (آنان→ʔnaːn) there was nothing to promote. Extended it to also INSERT aː after the
+leading ʔ (آنان→ʔaːnaːn, آنچه ʔnt͡ʃaː→ʔaːnt͡ʃe). آ = ʔ+aː deterministically so it can't break a correct آ word.
+
+**REJECTED — full-word lexicon (net-NEGATIVE in production).** The natural generalization — extend the pin from
+first-vowel to full citation — lifts the agreement CITATION slice 81→87%, BUT applied to GE2PE SENTENCES with an
+ezafe-aware (backbone-matched) override it is a disaster: **80.0%→75.1%, fixed 21 / BROKE 202**. A full-word override
+destroys the tagger's contextual ezafe (the backbone detection catches only a fraction), and HomoRich modal
+citations diverge from sentence forms. This VALIDATES the original pin design decision — first-vowel-only precisely
+to avoid the ezafe-bearing end of the word. The later-vowel/epenthesis residual is real signal but NOT safely
+lexicon-addressable in production; it is the model-capacity limit (the tagger over-epenthesizes / mis-vocalizes
+interior syllables of Arabic-loan words), which a lightweight fix can't reach without breaking ezafe. Net: the
+agreement residual is mostly lexical (not the homograph floor), but only the deterministic آ-drop slice is safely
+fixable; the rest is a characterized, bounded, production-unaddressable tail. Genuinely-hard remainder = ~25 rare
+loanword names (freq<30) + ~15 HomoRich-inconsistent words.

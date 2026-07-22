@@ -41,20 +41,21 @@ const SHORT_V = new Set(["a", "e", "o"]);
  * Post-tagger FIRST-VOWEL correction — targets the tagger's /a/-prior default on the lexically-fixed first syllable
  * (Run 32: the correct vowel is in the clean training data, but the lightweight BiLSTM can't memorise every lexical
  * exception, so it falls back to the majority /a/). Two parts: (1) a DETERMINISTIC rule — word-initial آ (alef madda)
- * is always long aː, so a short first vowel there is promoted (آزاد ʔazaːd→ʔaːzaːd); (2) a PIN transplant — replace
- * the first short vowel with the value pinned for frequent, consistent (non-homograph) words. Only the first
- * vowel is touched; consonants, later vowels, and ezafe are left to the tagger. Validated fix-only (0 breaks) on the
- * GE2PE + cross-source referees; no HomoRich-canonical regression.
+ * is always ʔ + long aː, so after the leading ʔ we force a long aː: promote a short vowel (آزاد ʔazaːd→ʔaːzaːd) OR
+ * INSERT aː when the tagger dropped the vowel entirely (آنان ʔnaːn→ʔaːnaːn); (2) a PIN transplant — replace the first
+ * short vowel with the value pinned for frequent, consistent (non-homograph) words. Only the first vowel is touched;
+ * consonants, later vowels, and ezafe are left to the tagger. Validated fix-only (0 breaks) on the GE2PE +
+ * cross-source referees; no HomoRich-canonical regression.
  */
 function correctFirstVowel(word: string, ipa: string, pin: Map<string, string>): string {
     const cp = [...ipa];
-    if (word.startsWith("آ")) { // deterministic: آ → long aː
-        for (let i = 0; i < cp.length; i++) {
-            if (SHORT_V.has(cp[i]!) && cp[i + 1] !== "ː") return cp.slice(0, i).join("") + "aː" + cp.slice(i + 1).join("");
-            if ("aeiou".includes(cp[i]!) && cp[i + 1] === "ː") break; // first vowel already long
-        }
-        return ipa;
+    if (word.startsWith("آ") && cp[0] === "ʔ") { // deterministic: آ = ʔ + long aː
+        if (cp[1] === "a" && cp[2] === "ː") return ipa;                             // already ʔaː → correct
+        if (cp[1] !== undefined && SHORT_V.has(cp[1])) return "ʔaː" + cp.slice(2).join(""); // ʔa/ʔe/ʔo → ʔaː
+        if (cp[1] === "i" || cp[1] === "u") return ipa;                             // ʔiː/ʔuː — not our target, leave
+        return "ʔaː" + cp.slice(1).join("");                                        // consonant/dropped vowel → insert aː
     }
+    if (word.startsWith("آ")) return ipa;
     const v = pin.get(word);
     if (v) {
         for (let i = 0; i < cp.length; i++) {

@@ -25,4 +25,12 @@ describe("Persian MODERN restorer — structural tagger (homograph/ezafe from co
         expect(out.split(" ").every((w) => [...w].length <= 12)).toBe(true); // no runaway token
         expect(out.split(" ").at(-1)).toContain("aft"); // clean رفت
     });
+
+    test.skipIf(!restorer)("word-initial آ (alef madda) is always long ʔaː — promote or INSERT", async () => {
+        // آ = ʔ + long aː deterministically. The correction promotes a short first vowel AND inserts aː when the
+        // tagger dropped it entirely (آنان → ʔnaːn without the fix).
+        const strip = (s: string) => s.replace(/[ˈˌ]/gu, "");
+        expect(strip(await restorer!.restore("آنان"))).toBe("ʔaːnaːn"); // dropped-vowel → inserted
+        expect(strip(await restorer!.restore("آزاد"))).toBe("ʔaːzaːd"); // short → promoted
+    });
 });
