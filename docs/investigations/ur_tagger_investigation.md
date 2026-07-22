@@ -194,3 +194,94 @@ forced to ɑː (10). Fixed at the build tool by factoring the tail into a shared
 (applied full to the harakat branch — raw g2p output with default schwas + ̲ marks — and as
 ̲-strip + nasal-assim only to the schwa-resolved Hindi gold, to avoid over-deleting a phonemic
 schwa), plus an `initialMadda` invariant. All three defect counts → 0; e2e rose 62.3→**65.0%**.
+
+## Run 6 — 2026-07-22 — anatomy of the remaining 28% (register divergence — a true but non-separable factor)
+
+Goal: attack the covered-word miss tail (1,128 of 4,440 covered = 25% miss vs wikipron),
+starting with Hindi/Urdu **register divergence** — "if a true factor" (user).
+
+**Register divergence is real and systematic** (`ur_register_probe.py`): 296 misses (26% of all
+misses) carry a Perso-Arabic-only consonant (ع ح ذ ض ظ ط ص ث ق). The pattern is textbook — Hindi
+reads Arabic-template loanwords with eː/ə where Urdu takes the Arabic ɪ/ʊ (احساس eːɦsɑːs→ɪɦsɑːs)
+and inserts epenthetic schwas in Arabic clusters Urdu keeps tight (حرف ɦərəf→ɦərf).
+
+**But it is NOT cheaply/separately fixable — all three factors interplay** (validates the user's
+framing):
+- The old harakat lexicon (the would-be Urdu-native oracle) cleanly fixes only **14/296**
+  (`ur_register_fix_probe.ts`) — its entries for these words are incomplete (احساس bare, احترام
+  only a sukun; they never encoded the ɪ).
+- Simple transforms (schwa-collapse, eː/ə→ɪ) fix only ~15%; 84% differ by schwa **movement**
+  (احترام ours eːɦət̪rɑːm vs wiki eːɦt̪əɾɑːm) or by wikipron **free variation** (احترام has 4
+  attested variants eː/ɪ × two schwa positions).
+
+**Clean decomposition of ALL 1,128 covered misses** (by whether a wikipron variant shares our
+consonant+long-vowel backbone):
+- **52% (592) — short-vowel layer only**: right backbone, wrong ə/ɪ/ʊ quality/placement. Register
+  divergence lives here, unified with general schwa-placement. Short-vowel quality is LEXICAL
+  (Run 4) → fixable only by a better lexical short-vowel SOURCE, not a rule.
+- **45% (515) — backbone divergence**: consonant/long-vowel differences = genuine Hindi/Urdu word
+  divergence + majhūl + wikipron transcription noise (the irreducible floor).
+
+**Sourcing blocker for the 52%.** An independent Urdu short-vowel source is needed (non-circular).
+On disk: the Hindi kaikki "sounds" are Hindi phonology (`/ʋɪʃ.ʋə/` — same as ours, not
+independent); no Urdu kaikki dump present; Persian (`/tmp/fa_kaikki.jsonl`) is independent but uses
+e- where Urdu has ɪ- (imperfect). So the fix needs either (a) fetching an Urdu Wiktionary/kaikki
+dump (independent → non-circular), or (b) using wikipron as a lexicon SOURCE (circular for the
+wikipron eval, but consistent with the repo's existing lexicon+lexicon-free-backbone pattern),
+or (c) the Perso-Arabic subset from Persian, accepting the e/ɪ imperfection. **Awaiting steer on
+the source before building.**
+
+## Run 7 — 2026-07-22 — the independent source is high-quality but too small
+
+User chose the clean path: fetch the independent Urdu Wiktionary (kaikki-urd) extraction. Fetched
+`/tmp/ur_kaikki.jsonl` (10,278 entries, 32 MB). The IPA is exactly what we want — human Urdu with
+the correct Arabic-template short vowels (امام ɪmɑːm, اسلام ɪslɑːm, مؤذن mʊəzzɪn) — and INDEPENDENT
+of wikipron.
+
+**First extraction had a REGEX BUG (corrected).** The harakat-strip `[ؐ-ًؚ-ٰٟۖ-ۭـ]` spans
+U+0610–U+064B, which **includes the base Arabic letters** (ا=U+0627, م=U+0645) — so it ate the
+letters, leaving garbled/empty skeletons (امام → ""). That made kaikki-urd *look* tiny (885) and
+useless (fixed 2). Fixed by using the canonical narrow strip from `core/harakatLexicon.ts`
+(`stripHarakat`, U+064B–U+0652 + U+0670). NOTE: `build_hindi_urdu.ts` carries the same wide regex —
+it happened to survive because Devanagari drives that pipeline, but it should be corrected too.
+
+**Corrected: kaikki-urd is LARGE and fixes the tail** (`build_kaikki_urd.ts`): **6,387 skeletons**,
+overlaps 6,190 wikipron types at **98%**, **fixes 1,057/1,128 (94%) of our covered-misses**, and
+adds **1,795** new-to-lexicon words that are in wikipron.
+
+**But it is NOT independent of wikipron.** Both kaikki and WikiPron scrape en.wiktionary — the 98%
+agreement is *shared provenance*, not corroboration. So this is exactly the **wikipron-as-source**
+path (chosen by the user), via a cleaner structured parse — correct for the product, but the
+wikipron eval is circular for kaikki-sourced entries. The genuine **non-circular** headline stays
+the **Hindi cross-script** derivation (independent of Wiktionary): 71.7% on the Hindi-sourced
+expansion. Plan: prefer kaikki-urd (Urdu-native, best short vowels) → Hindi (majhūl + independent
+fill) → harakat → default; report the Hindi-only non-circular number as the honest measure and
+label the full (kaikki-corrected) wikipron score as same-source.
+
+Built: lexicon-ipa.tsv **11,356** entries (kaikki 6,387 + Hindi 4,958 + harakat 11). End-to-end vs wikipron:
+full pipeline **95.4%** (CIRCULAR — kaikki is Wiktionary), lexicon-free floor 35.1%, **NON-CIRCULAR Hindi
+cross-script derivation 77.1%** (measured directly, independent of Wiktionary).
+
+## Run 8 — 2026-07-22 — the search for an INDEPENDENT referee (epitran ✗, HF ✗, CLE ✓)
+
+The 95.4% is circular; we needed a non-Wiktionary source WITH short vowels to corroborate. Swept the options:
+
+- **epitran urd-Arab** (rule-based, independent): DROPS unwritten short vowels entirely (احساس→ɑːhsɑːs, علم→lm) —
+  a rule g2p can't restore lexical vowels (Run 4), so zero signal on the layer we care about. ✗
+- **HF datasets** (outside the usual pattern, could be independent): `Zuhri` (humairmunirawn/UrduG2P, 14k) — LLM-
+  generated, only 43% short-vowel agreement, real errors → ✗. `mahwizzzz/urdu-g2p` (30k) — independent (3% raw-
+  identical) and 71% agreement, BUT a non-Urdu inventory (ʂ/ɟ/c for s/d͡ʒ/t͡ʃ) and frequent vowel-drops (طالبان→
+  taːlbaːn) → too noisy to trust. ✗
+- **CLE Lahore "Phonetically Rich Urdu Speech Corpus"** — HUMAN read-speech, CISAMPA-transcribed, CC-licensed,
+  fully independent of Wiktionary. Word-aligned Arabic↔CISAMPA (## bounds) → **5,679-word** lexicon
+  (`build_cle_referee.ts` → `ur.cle-speech.tsv`). ✓
+
+**CLE corroborates the whole approach** (after fixing a short-vowel-extractor bug that appended ə for every
+consonant): **87% short-vowel / 75% full-IPA** agreement with wikipron (vs mahwizzzz's noisy 71%). vs our shipped
+kaikki readings: **84%**. And on the register fixes (kaikki-vs-Hindi disagreements), the independent human corpus
+sides **kaikki 55% / Hindi 30%** — ~2:1 that the fixes are right. This is the non-circular validation we lacked;
+wired as the **secondary referee** in `ur.jsonc`, closing its own "no independent diacritized-Urdu referee" gap.
+
+**Bottom line for ur:** IPA coverage lexicon (kaikki-primary, Hindi-independent-fill), 95.4% vs wikipron with a
+77.1% non-circular Hindi backbone and an **87% independent CLE corroboration**. The BiLSTM tagger stays shelved
+(Runs 1–4); the lexicon + independent referee are the deliverable.

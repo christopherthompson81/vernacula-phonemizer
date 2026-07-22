@@ -2,11 +2,12 @@
  * Build the Urdu IPA COVERAGE lexicon — `skeleton ⇥ canonical IPA` (unstressed; weight-stress is applied at
  * lookup). Replaces the harakat lexicon for Urdu: harakat cannot encode majhūl (ی=iː~eː, و=oː~uː) — the g2p only
  * fakes it with adapted-word diacritics — whereas the cross-script Hindi gold carries it natively (Devanagari
- * writes ई vs ए, ऊ vs ओ). Two sources, precedence in this order:
- *   1. silver.hindiurdu.tsv — real Urdu spellings, gold IPA from the hi g2p (independent of wikipron → non-circular),
- *      carries short vowels AND majhūl.
- *   2. the existing harakat lexicon (src/languages/urdu/lexicon.tsv), converted to IPA via our g2p, to fill the
- *      Urdu-native / Perso-Arabic-register words the Hindi source lacks or reads with a Hindi register (شعر ʃeːr→ʃɪʔr).
+ * writes ई vs ए, ऊ vs ओ). Three sources, precedence in this order:
+ *   1. silver.kaikki-urd.tsv — Urdu Wiktionary IPA (correct Arabic-template short vowels). SAME source family as the
+ *      wikipron referee (both parse Wiktionary; verified 91% raw-string identical) → NOT non-circular vs wikipron.
+ *   2. silver.hindiurdu.tsv — real Urdu spellings, gold IPA from the hi g2p (independent of Wiktionary → the
+ *      non-circular backbone), carries short vowels AND majhūl. Fills kaikki gaps.
+ *   3. the existing harakat lexicon (src/languages/urdu/lexicon.tsv), converted to IPA via our g2p, for the tail.
  * Canonical-convention normalisation: strip stress; drop the redundant vowel-nasalisation our Hindi source emits
  * before a full nasal consonant (ə̃nd̪→ənd̪), matching our own g2p (which nasalises via the n→ŋ/m rule, not the vowel)
  * and wikipron; g→ɡ. See docs/investigations/ur_tagger_investigation.md.
@@ -51,40 +52,48 @@ function finalize(skel: string, ipa: string, full: boolean): string {
 }
 
 const lex = new Map<string, string>();
-let fromHindi = 0,
-    fromHarakat = 0;
+let fromKaikki = 0, fromHindi = 0, fromHarakat = 0;
 
-// 1. Hindi-derived IPA (primary)
+// 1. kaikki-urd (Urdu Wiktionary) — highest-quality Urdu-native readings (correct Arabic-template short vowels).
+//    SAME source family as the wikipron referee (both scrape Wiktionary) → these entries are NOT non-circular vs
+//    wikipron; the honest non-circular number comes from the Hindi-sourced entries (independent of Wiktionary).
+for (const line of readFileSync(`${HERE}/silver.kaikki-urd.tsv`, "utf8").split("\n")) {
+    const p = line.split("\t");
+    if (p.length < 3 || p[1] !== "urd" || !p[0] || !p[2]) continue;
+    const skel = p[0].normalize("NFC");
+    const ipa = finalize(skel, p[2], false); // human IPA, schwa-resolved → no deleteMedialSchwa
+    if ([...skel].length < 2 || !ipa || ipa.includes(" ") || lex.has(skel)) continue;
+    lex.set(skel, ipa); fromKaikki++;
+}
+
+// 2. Hindi-derived IPA — cross-script, INDEPENDENT of Wiktionary (the non-circular backbone); fills kaikki gaps + majhūl.
 for (const line of readFileSync(`${HERE}/silver.hindiurdu.tsv`, "utf8").split("\n")) {
     const p = line.split("\t");
     if (p.length < 3 || p[1] !== "urd" || !p[0] || !p[2]) continue;
     const skel = p[0].normalize("NFC");
     const ipa = finalize(skel, p[2], false); // Hindi gold: schwa already resolved → no deleteMedialSchwa
-    if ([...skel].length < 2 || !ipa || lex.has(skel)) continue;
-    lex.set(skel, ipa);
-    fromHindi++;
+    if ([...skel].length < 2 || !ipa || ipa.includes(" ") || lex.has(skel)) continue;
+    lex.set(skel, ipa); fromHindi++;
 }
 
-// 2. existing harakat lexicon → IPA via g2p (fills NEW skeletons only)
-const HARAKAT = /[ؐ-ًؚ-ٰٟۖ-ۭـ]/gu;
+// 3. existing harakat lexicon → IPA via g2p (fills the Urdu-native tail the above two lack)
 for (const line of readFileSync(`${HERE}/../../src/languages/urdu/lexicon.tsv`, "utf8").split("\n")) {
     if (line.startsWith("#") || !line.includes("\t")) continue;
     const [skelRaw, voc] = line.split("\t");
     if (!skelRaw || !voc) continue;
     const skel = skelRaw.normalize("NFC");
-    if (lex.has(skel)) continue; // Hindi wins
+    if (lex.has(skel)) continue;
     const ipa = finalize(skel, g2p(voc.normalize("NFC")), true); // raw g2p output: full finalize (schwa + ̲ + nasal)
-    if (!ipa) continue;
-    lex.set(skel, ipa);
-    fromHarakat++;
+    if (!ipa || ipa.includes(" ")) continue;
+    lex.set(skel, ipa); fromHarakat++;
 }
 
 const rows = [...lex.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 const header = [
     "# Urdu IPA COVERAGE lexicon — undiacritized skeleton ⇥ canonical IPA (UNSTRESSED; weight-stress applied at lookup).",
-    "# Replaces the harakat lexicon for Urdu: harakat can't encode majhūl (ی=iː~eː, و=oː~uː); the cross-script Hindi",
-    "# gold carries it. Source: silver.hindiurdu.tsv (real Urdu spellings, IPA from the hi g2p — independent of wikipron)",
-    "# then the g2p-converted harakat lexicon for the Urdu-native tail. Regenerate: tools/arabic-restorer/build_ur_ipa_lexicon.ts.",
+    "# Replaces the harakat lexicon for Urdu: harakat can't encode majhūl (ی=iː~eː, و=oː~uː). Precedence: kaikki-urd",
+    "# (Urdu Wiktionary, Urdu-native short vowels) → silver.hindiurdu.tsv (cross-script, independent of Wiktionary,",
+    "# majhūl) → g2p-converted harakat lexicon. Regenerate: tools/arabic-restorer/build_ur_ipa_lexicon.ts.",
 ];
 writeFileSync(OUT, header.join("\n") + "\n" + rows.map(([k, v]) => `${k}\t${v}`).join("\n") + "\n");
-process.stderr.write(`wrote ${rows.length} IPA entries (${fromHindi} Hindi-derived + ${fromHarakat} harakat-filled) → lexicon-ipa.tsv\n`);
+process.stderr.write(`wrote ${rows.length} IPA entries (${fromKaikki} kaikki-urd + ${fromHindi} Hindi-derived + ${fromHarakat} harakat-filled) → lexicon-ipa.tsv\n`);
