@@ -14,6 +14,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { phonemizeWord as g2p } from "../../src/languages/urdu/g2p.ts";
+import { finalizeUrduIpa } from "../../src/languages/urdu/urdu.ts";
 
 const HERE = import.meta.dirname;
 const OUT = `${HERE}/../../src/languages/urdu/lexicon-ipa.tsv`;
@@ -34,6 +35,21 @@ function finalHe(skel: string, ipa: string): string {
     return skel.endsWith("ہ") && ipa.endsWith("ɑː") ? ipa.slice(0, -2) + "ɑ" : ipa;
 }
 
+/** Word-initial آ (alef madda) is ALWAYS long ɑː (the g2p enforces this); the cross-script Hindi cognate sometimes
+ *  reads a short/other vowel (آذربائیجان→əz…, آسٹریا→ɔːs…). Force a leading non-ɑː vowel to ɑː for آ-initial skeletons. */
+function initialMadda(skel: string, ipa: string): string {
+    return skel.startsWith("آ") ? ipa.replace(/^(?:ɑ(?!ː)|ə|ɔː?|ɛː?|[aeiouɪʊ]ː?)/u, "ɑː") : ipa;
+}
+
+/** Post-g2p canonicalisation before storing: enforce the آ→ɑː and final-ہ→ɑ invariants, strip the ̲ protection mark
+ *  and assimilate nasals (n→m/ŋ). `full` also runs deleteMedialSchwa (via finalizeUrduIpa) — for the harakat branch,
+ *  whose raw g2p output still carries default schwas + ̲ marks; the Hindi gold is already schwa-resolved, so it gets
+ *  only the ̲-strip (a no-op) + nasal assimilation to avoid over-deleting a phonemic schwa. */
+function finalize(skel: string, ipa: string, full: boolean): string {
+    const v = finalHe(skel, initialMadda(skel, canon(ipa)));
+    return full ? finalizeUrduIpa(v) : v.replace(/̲/gu, "").replace(/n(?=[bp])/gu, "m").replace(/n(?=[kɡ])/gu, "ŋ");
+}
+
 const lex = new Map<string, string>();
 let fromHindi = 0,
     fromHarakat = 0;
@@ -43,7 +59,7 @@ for (const line of readFileSync(`${HERE}/silver.hindiurdu.tsv`, "utf8").split("\
     const p = line.split("\t");
     if (p.length < 3 || p[1] !== "urd" || !p[0] || !p[2]) continue;
     const skel = p[0].normalize("NFC");
-    const ipa = finalHe(skel, canon(p[2]));
+    const ipa = finalize(skel, p[2], false); // Hindi gold: schwa already resolved → no deleteMedialSchwa
     if ([...skel].length < 2 || !ipa || lex.has(skel)) continue;
     lex.set(skel, ipa);
     fromHindi++;
@@ -57,7 +73,7 @@ for (const line of readFileSync(`${HERE}/../../src/languages/urdu/lexicon.tsv`, 
     if (!skelRaw || !voc) continue;
     const skel = skelRaw.normalize("NFC");
     if (lex.has(skel)) continue; // Hindi wins
-    const ipa = canon(g2p(voc.normalize("NFC")));
+    const ipa = finalize(skel, g2p(voc.normalize("NFC")), true); // raw g2p output: full finalize (schwa + ̲ + nasal)
     if (!ipa) continue;
     lex.set(skel, ipa);
     fromHarakat++;

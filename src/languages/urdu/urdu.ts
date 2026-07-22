@@ -46,23 +46,31 @@ export function coverageLexicon(): ReadonlyMap<string, string> {
     return ipaLexicon();
 }
 
-/** Lexicon-FREE core: g2p + default-schwa deletion + weight stress. Used by the number path and the mining tool,
- *  which must NOT consult the content lexicon (number words / mining candidates would collide with content homographs). */
+/**
+ * Post-g2p canonicalisation (UNSTRESSED): turn raw g2p output into final canonical IPA. Shared by the core and the
+ * IPA-lexicon BUILDER (tools/arabic-restorer/build_ur_ipa_lexicon.ts) so a stored lexicon value is byte-identical to
+ * what the core would emit — the lexicon short-circuit then only needs weight-stress, not this whole tail.
+ *   - deleteMedialSchwa: the g2p inserts a default [ə] for every unwritten short vowel; Urdu (like Hindi) DELETES it
+ *     in a medial V·C·ə·C·V context so clusters surface bare (پاکستان → pɑːkst̪ɑːn). Explicit vowels are marked with
+ *     ̲ and survive.
+ *   - strip ̲ (U+0332): the explicit-fatḥa protection mark is an internal marker, never part of the output.
+ *   - nasal PLACE assimilation: /n/ → [m] before a labial (b/p), [ŋ] before a velar (k/ɡ) — انبار→əmbɑːɾ, انگور→əŋɡuːɾ.
+ */
+export function finalizeUrduIpa(ipa: string): string {
+    return deleteMedialSchwa(ipa)
+        .replace(/̲/gu, "")
+        .replace(/n(?=[bp])/gu, "m")
+        .replace(/n(?=[kɡ])/gu, "ŋ");
+}
+
+/** Lexicon-FREE core: g2p + finalize + weight stress. Used by the number path and the mining tool, which must NOT
+ *  consult the content lexicon (number words / mining candidates would collide with content homographs).
+ *  NOTE: word-final ـیہ (ی+ہ) is deliberately NOT rewritten — the ending is genuinely ambiguous (feminine -iyya
+ *  حاشیہ→[jɑ] vs masculine Arabic -īh فقیہ→[iːh]) with no orthographic signal, so it is a per-word lexicon matter. */
 export function phonemizeWordCore(word: string): string {
-    let ipa = g2p(word);
+    const ipa = g2p(word);
     if (!ipa) return "";
-    // The g2p inserts a default [ə] for every unwritten short vowel; Urdu (like Hindi) then DELETES the schwa
-    // in a medial V·C·ə·C·V context, so consonant clusters surface bare (پاکستان → pɑːkɪst̪ɑːn-skeleton pɑːkst̪ɑːn,
-    // not pɑːkəsət̪ɑːn). The correct ɪ/ʊ quality needs the deferred restoration layer; the STRUCTURE is right.
-    ipa = deleteMedialSchwa(ipa);
-    ipa = ipa.replace(/̲/gu, ""); // strip the explicit-fatḥa protection mark (see g2p.ts) — deletion is done
-    // Nasal PLACE assimilation: /n/ → [m] before a labial (b/p), [ŋ] before a velar (k/ɡ) — انبار→əmbɑːɾ,
-    // انگور→əŋɡuːɾ. Standard Hindustani (and matches the referee).
-    ipa = ipa.replace(/n(?=[bp])/gu, "m").replace(/n(?=[kɡ])/gu, "ŋ");
-    // NOTE: word-final ـیہ (ی+ہ) is NOT rewritten here — the ending is genuinely ambiguous (feminine -iyya حاشیہ→[jɑ]
-    // vs masculine Arabic -īh فقیہ→[iːh]), identical in spelling with no orthographic signal, so a blanket rule
-    // corrupts common loanwords. It is a per-word restoration/lexicon matter. See docs/investigations/ur_convergence_investigation.md.
-    return applyWeightStress(ipa).normalize("NFC");
+    return applyWeightStress(finalizeUrduIpa(ipa)).normalize("NFC");
 }
 
 /** One Urdu word → canonical IPA. If the writer supplied harakat, respect it (g2p reads the explicit vowels);

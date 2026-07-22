@@ -176,13 +176,21 @@ retired for ur (fa/ps/pa unchanged; `coverageLexicon()` feeds the neural rider's
 | pipeline | exact-match |
 |---|---|
 | lexicon-free default-ə core (non-circular floor) | 35.1% |
-| **IPA-lexicon pipeline** | **62.3%** |
-| …on the non-circular expansion (Hindi-sourced, never in old lexicon) | **71.8%** |
+| **IPA-lexicon pipeline** | **65.0%** |
+| …on the non-circular expansion (Hindi-sourced, never in old lexicon) | **71.7%** |
 
-Nearly **doubles** the non-circular exact-match (35→62%); the newly-covered words land at 71.8%
+Nearly **doubles** the non-circular exact-match (35→65%); the newly-covered words land at 71.7%
 where the default gets ~all wrong. Coverage of wikipron types rose 27%→~88% (union of sources).
 The residual gap is the established floor (genuine Hindi/Urdu register divergence شعر ʃeːr~ʃɪʔr,
 wikipron transcription noise, the rare true homograph) — not addressable by more data. All 107
 referee-eval + urdu tests pass; added a majhūl test case (نکیل eːl, کھجور uːɾ) that harakat could
 not represent. **This is the Urdu deliverable — the tagger is shelved (negative, Runs 1–4); the
 lexicon is the win (Run 5).**
+
+**Review fixes (PR #400).** Adversarial review caught that the lexicon short-circuit bypassed
+`phonemizeWordCore`'s post-g2p tail, so stored values shipped raw: the ̲ (U+0332) protection
+mark leaked (221 entries), nasal assimilation n→m/ŋ was dropped (43), and word-initial آ was not
+forced to ɑː (10). Fixed at the build tool by factoring the tail into a shared `finalizeUrduIpa`
+(applied full to the harakat branch — raw g2p output with default schwas + ̲ marks — and as
+̲-strip + nasal-assim only to the schwa-resolved Hindi gold, to avoid over-deleting a phonemic
+schwa), plus an `initialMadda` invariant. All three defect counts → 0; e2e rose 62.3→**65.0%**.
