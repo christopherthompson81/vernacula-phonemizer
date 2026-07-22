@@ -809,3 +809,17 @@ residual, not rule- or training-fixable. A frequency-anchored curated lexicon fo
 
 NEXT: implement #1 (aligner hiatus candidates + retrain), verify on HomoRich canonical + GE2PE (both should hold/
 improve), reship if net-positive. #2/#3 are softer (rebalance/lexicon), #4 is the characterized floor.
+
+**IMPLEMENTED #1 (hiatus aligner fix + retrain) — SHIPPED, net-positive on both gates.** Added `iːj/eːj` to ی and
+`uːv/oːv` to و in the aligner (train_tagger.py ANCH) + multi-token candidate matching, retrained from scratch (12
+epochs, tag vocab 1209→1169, alignment 89→91%), re-exported int8. A/B on the SAME (hiatus-inclusive) canonical
+definition (N=11860):
+
+    HomoRich canonical:  old 92.5% → NEW 93.7%   (+1.2pp)
+    GE2PE full/backbone: old 79.4%/87.8% → NEW 80.2%/88.4%   (+0.8 / +0.6pp, INDEPENDENT referee)
+
+No regression on either gate — the fix does everything the old model did PLUS the hiatus class (نیاز niːaːz→niːjaːz,
+زیاد zjaːd→ziːjaːd, کیفیت→kejfiːjat). TS port verified byte-identical to python (GE2PE 80.2/88.4). Shipped the new
+int8 + meta + provenance. This is the validated "improved training data" outcome — a silent training blind spot
+(1.8% of words never seen) closed at the source, confirmed by an independent referee. #2 (/a/ over-default) and #3
+(epenthesis) remain softer training signals; #4 (ezafe/homograph ~45%) is the characterized floor.

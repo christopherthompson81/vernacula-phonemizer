@@ -18,10 +18,13 @@ enc/dec).
 modern homograph-rich Persian sentences — the same source and same cleaning as the former modern seq2seq
 (`build_homorich_ipa.py`: train on the `Phoneme` column, keep the glottal onset `?`→ʔ, gheyn-condition ق/غ back to
 the fa `q`/`ɣ` split, ZWNJ→concatenate so word-counts align). A **monotonic char→IPA-chunk aligner** then derives
-the per-char training tags (each abjad char ↦ its consonant + trailing short vowel/ezafe); it round-trips ~93% of
-words. Non-alignable words (colloquial fusions/elisions, rare anomalies) are **masked out of the loss, not dropped**
-— the whole sentence is kept for context and only the alignable words carry a gold tag, so training uses ~all of the
-corpus while the aligner's canonical convention defines the target.
+the per-char training tags (each abjad char ↦ its consonant + trailing short vowel/ezafe); it round-trips ~91% of
+words. The ی/و candidates include the **vowel+glide hiatus realization** (`iːj`/`uːv`, e.g. نیاز→niːjaːz, زیاد→
+ziːjaːd) — one written char producing two IPA units; without these, every hiatus word failed to align and was masked
+out of training (7185 words, 1.8%; the tagger then dropped the glide — Run 28). Non-alignable words (colloquial
+fusions/elisions, rare anomalies) are **masked out of the loss, not dropped** — the whole sentence is kept for
+context and only the alignable words carry a gold tag, so training uses ~all of the corpus while the aligner's
+canonical convention defines the target.
 
 **Consonant-consistency mask:** each char may only emit tags whose consonant it *produced in training* (ص→s, never
 ʃ; غ→ɣ, never the colloquial ɡ). The char fixes the consonant; the model only picks the vowel decoration. Applied at
@@ -35,13 +38,19 @@ Built offline (GPU) by `tools/fa-restoration/train_tagger.py` (writes `fa_tagger
 skeleton-level leakage guard.
 
 **Measured** (on the *shipped int8 ONNX*, argmax + consonant mask as in `faTagger.ts`; int8 ≈ pytorch, quantization
-lossless — 93.5% vs 93.6%):
+lossless):
 
 | gold | tagger | (former seq2seq, same subset) |
 |---|---|---|
-| **canonical held-out** (the fair measure) | **93.6%** per-word | 92.5% |
-| all held-out words | 86.8% | 90.6% |
+| **HomoRich canonical held-out** (the fair self-measure) | **93.7%** per-word | 92.5% |
+| all held-out words | 87.9% | 90.6% |
 | catastrophic degeneration | **0% (structural)** | ~1.4% |
+
+**Independent referee** (non-circular): vs GE2PE Kasre+Homograph (tools/referee-eval/referees/fa.ge2pe-ezafe-
+homograph.tsv; modern Iranian, MIT, Sharif — adversarial hard-case sets), word-level **80.2% full / 88.4% backbone**
+(consonants + long vowels). The ~90% plain-word backbone independently corroborates the segmental skeleton; the
+ezafe/homograph gap is the sense/context residual (see the investigation doc). The hiatus retrain lifted this from
+79.4%/87.8%.
 
 The **canonical** subset is the fair measuring stick: the ~11% of held-out words the aligner rejects are colloquial
 fusions/elisions (e.g. کاغذهای gold `kaːɡaʒaːje`, fusing ذه→ʒ and dropping the h) — forms a *careful/canonical*

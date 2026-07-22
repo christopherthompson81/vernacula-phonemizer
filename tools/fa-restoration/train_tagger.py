@@ -28,7 +28,11 @@ def toks(s):
 CONS={"ب":"b","پ":"p","ت":"t","ث":"s","ج":"d͡ʒ","چ":"t͡ʃ","ح":"h","خ":"x","د":"d","ذ":"z","ر":"ɾ","ز":"z","ژ":"ʒ","س":"s","ش":"ʃ","ص":"s","ض":"z","ط":"t","ظ":"z","ع":"ʔ","غ":"ɣ","ف":"f","ق":"q","ک":"k","ك":"k","گ":"ɡ","ل":"l","م":"m","ن":"n"}
 ANCH={c:[p] for c,p in CONS.items()}
 ANCH["ا"]=["aː","ʔ","ɑː",""]; ANCH["آ"]=["aː","ʔ","ɑː"]; ANCH["ٰ"]=["aː"]
-ANCH["و"]=["uː","oː","v","w",""]; ANCH["ی"]=["iː","eː","j",""]; ANCH["ي"]=["iː","eː","j",""]
+# HIATUS: ی/و before a vowel are realized as vowel+GLIDE (نیاز niːjaːz, زیاد ziːjaːd, بسیار besiːjaːɾ) — one written
+# char producing TWO IPA units (iːj/uːv). Without these candidates every hiatus word fails to align and is masked
+# out of training (7185 words, 1.8%), so the tagger never learns the class and drops the glide (Run 28). Multi-token
+# candidates are listed LONGEST-FIRST so the aligner prefers iːj over iː (greedy longest match).
+ANCH["و"]=["uːv","oːv","uː","oː","v","w",""]; ANCH["ی"]=["iːj","eːj","iː","eː","j",""]; ANCH["ي"]=ANCH["ی"]
 ANCH["ه"]=["h","e",""]; ANCH["ء"]=["ʔ",""]; ANCH["ئ"]=["ʔ","j",""]; ANCH["ۀ"]=["e","h"]
 def align(graph, ipa):
     ip=toks(ipa); j=0; tags=[]
@@ -40,7 +44,8 @@ def align(graph, ipa):
         matched=False
         for a in cand:
             if a=="": matched=True; break
-            if j<len(ip) and ip[j]==a: tag+=ip[j]; j+=1; matched=True; break
+            u=toks(a)  # candidate may be MULTI-token (iːj = [iː, j]); match a slice of the IPA stream
+            if ip[j:j+len(u)]==u: tag+="".join(u); j+=len(u); matched=True; break
         if not matched: return None
         while j<len(ip) and ip[j] in SHORT: tag+=ip[j]; j+=1
         tags.append((c,tag))
