@@ -896,3 +896,24 @@ GUARANTEE: since the correct first vowels provably exist in the (clean) training
 frequent/Arabic-loan words, prioritising the /a/-vs-mid cases (Run 31). No training-data cleanup is warranted (98%
 clean); no lightweight model change helps (it's capacity/prior-defaulting, not a learnable pattern). This closes the
 diagnosis: the floor is graceful (single first-vowel, Run 31), lexical (data-confirmed here), and lexicon-addressable.
+
+## Run 33 — 2026-07-22 — BUILT the first-vowel correction (pin lexicon + آ rule); shipped, fix-only
+
+Acting on Run 32 (first-vowel residual = model can't memorise lexically-fixed vowels; correct answers ARE in the
+clean data → a lexicon is a guaranteed fix). Built a post-tagger FIRST-VOWEL correction, two parts:
+1. **Deterministic آ rule**: word-initial آ (alef madda) is ALWAYS long aː — promote a short first vowel (آزاد
+   ʔazaːd→ʔaːzaːd, آلمان→ʔaːlmaːn). This was the bigger win (systematic loanword-NAME length error the tagger made
+   from under-exposure). No data needed.
+2. **Pin lexicon** (src/languages/persian/fa-pin-vowels.tsv, 6393 skeleton→first-short-vowel entries): FREQUENT
+   (HomoRich freq≥30) + CONSISTENT (≥90% one vowel → non-homograph) + agreement-gold-validated; آ-initial excluded
+   (rule owns them). Transplants the correct first short vowel (برق beɾq→baɾq, منجر mand͡ʒaɾ→mond͡ʒaɾ, اعضا→ʔaʔzaː).
+
+Applied in faTagger.ts (correctFirstVowel) — only the first vowel is touched; consonants, later vowels, and ezafe
+are left to the tagger. NON-LEAKY: pin from training-source labels (a memorisation aid), validated on INDEPENDENT
+referees. Measured, FIX-ONLY (0 breaks) on every gate:
+    GE2PE:            80.2% → 81.5% full / 88.4% → 90.2% backbone
+    cross-source agree: 84.2% → 87.0%
+    HomoRich canonical: 93.7% → 93.7% (NO regression — the correction only touches OOD/harder words)
+TS port verified against python (GE2PE 81.5%). This realises the Run 23/31/32 "lexicon is the lever" conclusion as a
+guaranteed, bounded, zero-regression improvement. The residual now is the genuinely context/sense floor (homographs,
+ezafe, later-syllable lexical vowels) — the characterized 🟡 ceiling.

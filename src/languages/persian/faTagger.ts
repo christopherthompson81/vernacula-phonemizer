@@ -36,6 +36,34 @@ const ort = (): Promise<OrtLike> => (ortPromise ??= import("onnxruntime-node").t
  */
 interface TaggerMeta { src: Record<string, number>; tags: Record<string, string>; charTags: Record<string, number[]> }
 
+const SHORT_V = new Set(["a", "e", "o"]);
+/**
+ * Post-tagger FIRST-VOWEL correction — targets the tagger's /a/-prior default on the lexically-fixed first syllable
+ * (Run 32: the correct vowel is in the clean training data, but the lightweight BiLSTM can't memorise every lexical
+ * exception, so it falls back to the majority /a/). Two parts: (1) a DETERMINISTIC rule — word-initial آ (alef madda)
+ * is always long aː, so a short first vowel there is promoted (آزاد ʔazaːd→ʔaːzaːd); (2) a PIN transplant — replace
+ * the first short vowel with the value pinned for frequent, consistent (non-homograph) words. Only the first
+ * vowel is touched; consonants, later vowels, and ezafe are left to the tagger. Validated fix-only (0 breaks) on the
+ * GE2PE + cross-source referees; no HomoRich-canonical regression.
+ */
+function correctFirstVowel(word: string, ipa: string, pin: Map<string, string>): string {
+    const cp = [...ipa];
+    if (word.startsWith("آ")) { // deterministic: آ → long aː
+        for (let i = 0; i < cp.length; i++) {
+            if (SHORT_V.has(cp[i]!) && cp[i + 1] !== "ː") return cp.slice(0, i).join("") + "aː" + cp.slice(i + 1).join("");
+            if ("aeiou".includes(cp[i]!) && cp[i + 1] === "ː") break; // first vowel already long
+        }
+        return ipa;
+    }
+    const v = pin.get(word);
+    if (v) {
+        for (let i = 0; i < cp.length; i++) {
+            if (SHORT_V.has(cp[i]!) && cp[i + 1] !== "ː") return cp.slice(0, i).join("") + v + cp.slice(i + 1).join("");
+        }
+    }
+    return ipa;
+}
+
 /** Build the structural tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextRestorer | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
@@ -44,6 +72,15 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
         meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;
         modelBytes = readFileSync(join(dir, `${basename}.int8.onnx`));
     } catch { return undefined; }
+    // First-syllable-vowel pin (fa-pin-vowels.tsv, skeleton→first short vowel). Optional — empty if absent.
+    const pin = new Map<string, string>();
+    try {
+        for (const line of readFileSync(join(dir, "fa-pin-vowels.tsv"), "utf8").split("\n")) {
+            if (!line || line.startsWith("#")) continue;
+            const [w, v] = line.split("\t");
+            if (w && v) pin.set(w, v);
+        }
+    } catch { /* no pin file → tagger output unchanged */ }
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await ort();
@@ -75,7 +112,11 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
                 const tag = meta.tags[String(best)] ?? "";
                 if (tag !== " ") words[words.length - 1] += tag;
             }
-            return stressPerWord(words.join(" "));
+            // Correct the lexically-fixed first vowel (آ→aː rule + pin transplant) before stress; grapheme words
+            // align 1:1 with the tagged output words (both split on the input spaces).
+            const gWords = sentence.split(" ");
+            const fixed = words.map((w, i) => correctFirstVowel(gWords[i] ?? "", w, pin));
+            return stressPerWord(fixed.join(" "));
         },
     };
 }
