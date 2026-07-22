@@ -773,3 +773,39 @@ the vowel is sense/context-determined). Caveats: adversarial sets (lower bound, 
 validates the backbone and confirms the residual is the irreducible ezafe/homograph disambiguation — and it earned
 its keep by surfacing the Arabic-orthography normalization bug. fa stays 🟡 (contextual layer still not certifiable),
 but the "is 93.5% even real?" doubt is now answered: the backbone is independently corroborated.
+
+## Run 28 — 2026-07-21 — mining the INDEPENDENT (GE2PE) misses: actionable insights
+
+Mined the 766 GE2PE word-level misses (20% of 3718; adversarial sets) by nature + direction, separating convention
+diffs from real errors. Actionable findings, prioritized:
+
+**#1 (VALIDATED, training-data ROOT CAUSE) — HIATUS GLIDE.** 59 misses (+ much of the 22 long-vowel + some
+consonant-sub), 100% one-directional: the tagger DROPS the glide Persian inserts between adjacent vowels (نیاز gold
+niːjaːz / pred niːaːz; زیاد ziːjaːd / zjaːd; بسیار besiːjaːɾ / besjaːɾ). ROOT CAUSE: the monotonic aligner's ی
+candidates are [iː,eː,j,""] and و's are [uː,oː,v,w,""] — neither can emit the vowel+glide realization iːj / uːv, so
+EVERY hiatus word fails to align → is MASKED out of training → the tagger never learns the class. Measured: adding
+[iːj,eːj]/[uːv,oːv] candidates recovers **7,185 word occurrences (1.8% of all words; alignment 89%→91%)** currently
+masked. FIX = add those candidates to the aligner (train_tagger.py ANCH + multi-token match) and RETRAIN — teaches
+the class at the source. A post-process hiatus rule (insert j after front-V, v after back-V, adjacent-vowel only) is
+a safe interim: +8 / 0-break on GE2PE, but only catches the simple adjacent-vowel subset; the aligner fix is the
+real solution.
+
+**#2 (training-data signal) — /a/ OVER-DEFAULT.** Of the 109 short-vowel-quality misses, the dominant direction is
+the tagger emitting /a/ where gold has /o/ or /e/ (مفلس mofles/pred mafles; ربود ɾobuːd/ɾabuːd; مرد moɾd/maɾd). The
+tagger biases the first short vowel to /a/ — a training-distribution prior. Partly the homograph residual (sense),
+partly a rebalance/lexicon opportunity for frequent lexically-fixed words.
+
+**#3 (training-data signal) — EPENTHESIS under-production.** 31 misses, directional: the tagger drops the epenthetic
+short vowel that breaks Persian consonant clusters (پروردگار paɾvaɾdeɡaːɾ/pred paɾvaɾdɡaːɾ; گرسنگی ɡoɾosneɡiː/
+ɡoɾsneɡiː). Under-produces cluster epenthesis — a training signal (vowel quality is lexical; presence is
+partly phonotactic).
+
+**#4 (IRREDUCIBLE, confirmed) — ezafe + homograph.** ezafe missing 84 + spurious 74 + spurious-je 52 ≈ 210, and the
+sense-driven short-vowel homographs — together ~45% of misses. INDEPENDENTLY confirms Runs 24–25: the sense/context
+residual, not rule- or training-fixable. A frequency-anchored curated lexicon for the top-missed homographs (آن، و،
+آب، زند، اتفاق، جرم…) could pin the dominant reading of a few, but is context-limited.
+
+**Not a miss:** ق/غ — GE2PE merges to /q/; we deliberately split q/ɣ (more precise), folded in the eval.
+
+NEXT: implement #1 (aligner hiatus candidates + retrain), verify on HomoRich canonical + GE2PE (both should hold/
+improve), reship if net-positive. #2/#3 are softer (rebalance/lexicon), #4 is the characterized floor.
