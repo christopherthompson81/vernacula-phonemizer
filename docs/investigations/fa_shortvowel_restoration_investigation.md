@@ -646,3 +646,38 @@ leakage. So this is a data-curation follow-up, not a same-PR change.
 hiatus long vowel (خیلی→xeiːliː) and the tagger's glide form (xejliː) is correct — the canon() skeleton check can't
 see vowel-quality noise. Minor; nudges the true number up a hair. Net: 93.5% raw ≈ 94.8% production-effective is
 close to the ceiling of this lightweight approach; the residual is genuine floor + hard-core, not low-hanging fruit.
+
+## Run 24 — 2026-07-21 — perceptron POS → ezafe spike (does syntactic signal crack the ezafe residual?)
+
+Run 23 established mid-sentence ezafe is SYNTACTIC (NP-internal dependency), not lexical/homograph — the char BiLSTM
+infers it from letters only. Hypothesis: word-level POS context (POS of w_i and especially w_i+1) predicts ezafe
+better, mirroring the English UD-EWT perceptron posTagger (the disambiguation logic is ours). Plan: (1) train a
+pure-perceptron POS tagger on UD Persian (reuse english/posTagger.ts feature templates; also unlocks the stubbed
+#680 fa stress work); (2) derive ezafe labels from HomoRich statistically (modal pron + -e/-je clitic); (3) POS-tag
+HomoRich, train an ezafe classifier on POS-bigram + shape features, eval ezafe accuracy on the SAME held-out vs the
+BiLSTM tagger. Go/no-go = does POS-context beat the tagger's ezafe error. UD_Persian-PerDT (CC BY-SA 4.0, ~29k sents,
+shippable) + Seraji fetched. NOTE: neither treebank marks Ezafe as a FEAT (PerDT writes the glide into the surface
+token), so gold-ezafe must come from HomoRich, not the treebank.
+
+**RESULT — NEGATIVE for POS→ezafe; the BiLSTM already beats it.** Built the perceptron POS tagger (UD PerDT,
+95.8% test token acc — a genuinely reusable artifact, it unlocks the stubbed #680 fa nominal/verbal stress). Derived
+ezafe labels from HomoRich (modal-pron + -e/-je clitic), POS-tagged the corpus, trained an averaged-perceptron ezafe
+classifier on POS-bigram + shape features. In ISOLATION the POS classifier looked good — ezafe-decision accuracy on
+the held-out: majority-per-word 93.8%, POS 94.7%, and on the AMBIGUOUS words (seen both ways, where syntax must
+decide) POS 92.1% vs majority 88.8% (+3.3pp) — real syntactic signal. BUT integrating it as an ezafe OVERRIDE on the
+BiLSTM output is net-NEGATIVE at every setting:
+
+    canonical held-out word acc:  BiLSTM 93.5%
+      blind override            → 91.3% (helped 96, hurt 352)
+      confidence-gated (disagree-only, keep BiLSTM on agree): 92.1 / 92.7 / 93.4 / 93.5% as the gate rises to
+      break-even — never a net win (at gate>4: helped 53, hurt 62).
+
+On the ~448 words where POS disagrees with the BiLSTM, the BiLSTM is right ~3.7:1 (352 vs 96). The isolated
+"94.7 POS > 90.7 BiLSTM" gap was an ARTIFACT: the BiLSTM's 90.7 counted its non-ezafe errors (bl=None) as ezafe
+wrong; on clean ezafe reads it is already better than the perceptron. ROOT CAUSE: the char-level BIDIRECTIONAL
+BiLSTM sees the following word's CHARACTERS — which encode the morphology that UPOS only coarsely summarizes — so
+coarse POS is largely REDUNDANT with what the tagger already learned. A POS-FEATURE RETRAIN (vs override) could
+extract marginally more, but the 3.7:1 dominance says the expected gain is small and not worth POS-tagging 400k
+sentences + shipping/integrating a POS model. CONCLUSION: the ezafe residual is NOT tractable via a POS perceptron;
+the char-BiLSTM is already near the input-determined ceiling for ezafe. Reinforces Run 23. The POS tagger is parked
+as reusable infra for #680 (fa stress), a SEPARATE use, not committed here.
