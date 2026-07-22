@@ -50,6 +50,18 @@ for w,c in hr.items():
     pin[w]=dom
 byv=Counter(pin.values())
 print(f"PIN lexicon: {len(pin)} words (freq≥{FREQ}, consistency≥{CONS}, agreement-validated). first-V mix: {dict(byv)}")
+# --- WRITE the shipped lexicon (this IS the canonical builder; path derived from the script location) ---
+import os
+_OUT=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src/languages/persian/fa-pin-vowels.tsv")
+_HDR=["# fa first-syllable-vowel PIN — skeleton <TAB> correct first SHORT vowel (a/e/o). Corrects the tagger's",
+      "# /a/-prior default on lexically-fixed first vowels (Run 32): the vowel is in the clean training data but",
+      "# the lightweight BiLSTM can't memorise every lexical exception. FREQUENT (HomoRich freq≥30) + CONSISTENT",
+      "# (≥90% one vowel, non-homograph) + agreement-validated. آ-initial words excluded (the deterministic",
+      "# word-initial آ→long aː rule in faTagger.ts owns them). Applied as a first-vowel transplant. Build: tools/fa-restoration/build_pin.py"]
+with open(_OUT, "w", encoding="utf8") as _f:
+    _f.write("\n".join(_HDR)+"\n")
+    for w in sorted(pin): _f.write(f"{w}\t{pin[w]}\n")
+print(f"wrote {len(pin)} entries → {_OUT}")
 # --- transplant + measure ---
 meta=json.load(open(f"{SP}/fa-tagger.meta.json"));cv={k:int(v) for k,v in meta["src"].items()};tags=meta["tags"];ctg=meta["charTags"]
 sess=ort.InferenceSession(f"{SP}/fa-tagger.int8.onnx")

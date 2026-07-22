@@ -8,10 +8,10 @@ assembles the tags into words on the space chars. Because output length == input
 and **cannot break the consonant skeleton** — a single forward pass, no beam, no autoregressive decode loop, no
 degeneration guard.
 
-**Architecture:** char embedding (128) → 2-layer **bidirectional** LSTM (hidden 256) → linear → 1209 tag logits.
-Input: abjad char-ids `[1, L]`. Output: tag logits `[1, L, 1209]`. The per-char **consonant-consistency mask**,
+**Architecture:** char embedding (128) → 2-layer **bidirectional** LSTM (hidden 256) → linear → 1169 tag logits.
+Input: abjad char-ids `[1, L]`. Output: tag logits `[1, L, 1169]`. The per-char **consonant-consistency mask**,
 argmax, and tag-assembly happen in TS (`faTagger.ts`) from `fa-tagger.meta.json` (char→id, id→tag, and per-char
-permitted tag-ids). Char vocab 42, tag vocab 1209. One int8 ONNX graph, **~3 MB** (vs the seq2seq's ~5 MB two-graph
+permitted tag-ids). Char vocab 42, tag vocab 1169. One int8 ONNX graph, **~3 MB** (vs the seq2seq's ~5 MB two-graph
 enc/dec).
 
 **Training data:** [HomoRich](https://huggingface.co/datasets/MahtaFetrat/HomoRich-G2P-Persian) — **CC0**, ~528k
@@ -20,7 +20,7 @@ modern homograph-rich Persian sentences — the same source and same cleaning as
 the fa `q`/`ɣ` split, ZWNJ→concatenate so word-counts align). A **monotonic char→IPA-chunk aligner** then derives
 the per-char training tags (each abjad char ↦ its consonant + trailing short vowel/ezafe); it round-trips ~91% of
 words. The ی/و candidates include the **vowel+glide hiatus realization** (`iːj`/`uːv`, e.g. نیاز→niːjaːz, زیاد→
-ziːjaːd) — one written char producing two IPA units; without these, every hiatus word failed to align and was masked
+ziːjaːd) — one written char producing two IPA units (a boundary guard refuses over-consuming a glide the next grapheme owns, e.g. یئن); without these, every hiatus word failed to align and was masked
 out of training (7185 words, 1.8%; the tagger then dropped the glide — Run 28). Non-alignable words (colloquial
 fusions/elisions, rare anomalies) are **masked out of the loss, not dropped** — the whole sentence is kept for
 context and only the alignable words carry a gold tag, so training uses ~all of the corpus while the aligner's
@@ -42,12 +42,12 @@ lossless):
 
 | gold | tagger | (former seq2seq, same subset) |
 |---|---|---|
-| **HomoRich canonical held-out** (the fair self-measure) | **93.7%** per-word | 92.5% |
-| all held-out words | 87.9% | 90.6% |
+| **HomoRich canonical held-out** (the fair self-measure) | **93.6%** per-word | 92.5% |
+| all held-out words | 87.7% | 90.6% |
 | catastrophic degeneration | **0% (structural)** | ~1.4% |
 
 **Independent referee** (non-circular): vs GE2PE Kasre+Homograph (tools/referee-eval/referees/fa.ge2pe-ezafe-
-homograph.tsv; modern Iranian, MIT, Sharif — adversarial hard-case sets), word-level **80.2% full / 88.4% backbone**
+homograph.tsv; modern Iranian, MIT, Sharif — adversarial hard-case sets), word-level **80.0% full / 88.4% backbone** (raw tagger; **81.4% / 90.2%** with the first-vowel correction)
 (consonants + long vowels). The ~90% plain-word backbone independently corroborates the segmental skeleton; the
 ezafe/homograph gap is the sense/context residual (see the investigation doc). The hiatus retrain lifted this from
 79.4%/87.8%.

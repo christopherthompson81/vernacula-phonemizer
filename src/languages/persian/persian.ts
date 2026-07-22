@@ -194,7 +194,10 @@ export type ForeignPhonemizer = (latin: string) => string;
 // yehs in its test set); see docs/investigations/fa_shortvowel_restoration_investigation.md Run 27.
 const FA_ORTHO: Record<string, string> = { "ي": "ی", "ك": "ک", "ى": "ی", "ة": "ه" };
 export function normalizePersianOrthography(text: string): string {
-    return text.replace(/[يكىة]/gu, (c) => FA_ORTHO[c] ?? c);
+    // NFC first so decomposed input (e.g. NFD آ = bare alef + combining madda U+0653) composes to the single
+    // codepoint the tagger vocab + the آ→aː rule key on — the sync g2p already NFC-normalizes, the neural path must
+    // too. Then fold the Arabic-script letter variants to their Farsi forms.
+    return text.normalize("NFC").replace(/[يكىة]/gu, (c) => FA_ORTHO[c] ?? c);
 }
 
 class PersianPhonemizer implements Phonemizer {

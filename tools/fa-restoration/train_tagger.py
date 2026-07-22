@@ -45,7 +45,15 @@ def align(graph, ipa):
         for a in cand:
             if a=="": matched=True; break
             u=toks(a)  # candidate may be MULTI-token (iːj = [iː, j]); match a slice of the IPA stream
-            if ip[j:j+len(u)]==u: tag+="".join(u); j+=len(u); matched=True; break
+            if ip[j:j+len(u)]==u:
+                # GUARD: a multi-token candidate (iːj/uːv) must NOT over-consume a trailing glide that the NEXT
+                # grapheme actually owns (e.g. یئن: the j belongs to ئ, not the ی). If the next grapheme can produce
+                # that final token, refuse this candidate and fall through to the shorter one (ی→iː, ئ→j). Without
+                # this the toothless j==len(ip) reconstruction check would let the boundary-shifted mis-tag pass.
+                if len(u)>1 and ci+1<len(graph):
+                    nxt=ANCH.get(graph[ci+1])
+                    if nxt and any(x and toks(x)[0]==u[-1] for x in nxt): continue
+                tag+="".join(u); j+=len(u); matched=True; break
         if not matched: return None
         while j<len(ip) and ip[j] in SHORT: tag+=ip[j]; j+=1
         tags.append((c,tag))
