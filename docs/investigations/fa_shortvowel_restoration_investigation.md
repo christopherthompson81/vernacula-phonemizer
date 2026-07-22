@@ -727,3 +727,16 @@ in the broad file). This is a scoped data-acquisition + vetting project, worth i
 ✅ (independent validation is the #1 ✅-blocker) — but the naive path is a trap and must be avoided. Interim: the
 segmental BACKBONE is at least loosely corroborated (even hostile-register wikipron shares 63% of skeletons); the
 modern-Iranian-specific residual (short vowels / homographs / ezafe) is exactly what needs the modern referee.
+
+**Can wikipron-fas be CLEANED into a usable referee? NO.** Tested a register-invariant COARSE mapping (collapse
+i↔e, u↔o, and the majhul iː/eː + uː/oː merges on BOTH sides, so no classical-vs-modern vowel choice can cause a
+miss) plus dropping majhul-only entries. Results: raw full 24.6% / backbone 63.0% / coarse 40.3%; majhul-dropped
+full 27.0% / backbone 69.1% / coarse 39.9%. The coarse (register-invariant) agreement sits at ~40% and dropping
+majhul does NOT move it — so the divergence is NOT a removable contamination layer; it is pervasive and STRUCTURAL:
+epenthesis (ʔabaɾaʃ vs ʔabɾaʃ), gemination, hamza placement, a-vs-e/i short-vowel DISTRIBUTION, and an inventory
+heavy with archaic/Arabic entries our modern tagger vocalizes differently. Cleaning would require discarding most of
+the set (and by what independent modern yardstick?), leaving something tiny and still not verified-modern. wikipron-
+fas is not a modern-Iranian referee with noise on top — it is a different-register, different-inventory resource.
+DECISION: do not attempt to salvage wikipron; a non-circular referee must be purpose-sourced modern Iranian
+(Tihu/PersianG2P/GE2PE/ManaTTS) or the hand-adjudicated gold expanded — the only paths that yield right-register,
+non-circular validation.
