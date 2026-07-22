@@ -29,26 +29,24 @@ for (const l of readFileSync(`${HERE}/../../tools/referee-eval/referees/ur.wikip
     if (p.length < 2 || !p[0]) continue;
     (wiki.get(p[0]) ?? wiki.set(p[0], new Set()).get(p[0])!).add(cfold(p[1].replace(/ /gu, "")));
 }
-// skeletons that were NOT in the OLD shipped harakat lexicon → the Hindi-sourced (non-circular) expansion
-const shipped = new Set<string>();
-for (const l of readFileSync(`${HERE}/../../src/languages/urdu/lexicon.tsv`, "utf8").split("\n")) {
-    if (!l.startsWith("#") && l.includes("\t")) shipped.add(l.split("\t")[0]!.normalize("NFC"));
-}
 
-let N = 0, newOk = 0, baseOk = 0, covered = 0, covOk = 0, nc = 0, ncOk = 0;
+let N = 0, newOk = 0, baseOk = 0;
 for (const [skel, prons] of wiki) {
     if ([...skel].length < 2) continue;
     N++;
-    const np = cfold(phonemizeWord(skel));
-    const bp = cfold(phonemizeWordCore(skel));
-    if (prons.has(np)) newOk++;
-    if (prons.has(bp)) baseOk++;
-    if (np !== bp) { covered++; if (prons.has(np)) covOk++; }        // lexicon changed the output
-    if (np !== bp && !shipped.has(skel.normalize("NFC"))) { nc++; if (prons.has(np)) ncOk++; } // non-circular expansion
+    if (prons.has(cfold(phonemizeWord(skel)))) newOk++;
+    if (prons.has(cfold(phonemizeWordCore(skel)))) baseOk++;
+}
+// NON-CIRCULAR headline: the Hindi cross-script derivation measured DIRECTLY (independent of Wiktionary, full
+// sample) — this is what we can derive WITHOUT the referee's own source. Read silver.hindiurdu, cfold, vs wikipron.
+let hiN = 0, hiOk = 0;
+for (const l of readFileSync(`${HERE}/silver.hindiurdu.tsv`, "utf8").split("\n")) {
+    const p = l.split("\t"); if (p.length < 3 || p[1] !== "urd") continue;
+    const w = wiki.get(p[0]!); if (!w) continue;
+    hiN++; if (w.has(cfold(p[2]!))) hiOk++;
 }
 const pct = (a: number, b: number) => `${a}/${b} (${((100 * a) / Math.max(b, 1)).toFixed(1)}%)`;
 console.log(`wikipron types scored: ${N}`);
-console.log(`  NEW pipeline (IPA lexicon)   : ${pct(newOk, N)}`);
-console.log(`  OLD baseline (default-ə core): ${pct(baseOk, N)}`);
-console.log(`  on lexicon-COVERED words (${covered}): ${pct(covOk, covered)}  [default gets these ~wrong]`);
-console.log(`  NON-CIRCULAR subset (Hindi-sourced, not in old shipped lexicon): ${pct(ncOk, nc)}`);
+console.log(`  full pipeline (kaikki+Hindi+harakat lexicon): ${pct(newOk, N)}  ← kaikki=Wiktionary=referee's source (CIRCULAR)`);
+console.log(`  lexicon-free default-ə core (floor)         : ${pct(baseOk, N)}`);
+console.log(`  → NON-CIRCULAR: Hindi cross-script derivation, measured directly (independent of Wiktionary): ${pct(hiOk, hiN)}`);

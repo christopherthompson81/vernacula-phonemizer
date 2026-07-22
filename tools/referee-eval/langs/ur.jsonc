@@ -10,10 +10,14 @@
             "file": "ur.wikipron-urd-broad.tsv",
             "source": "wikipron urd_arab broad (human)",
             "role": "primary"
+        },
+        {
+            "file": "ur.cle-speech.tsv",
+            "source": "CLE Lahore Phonetically Rich Urdu Speech Corpus (human read-speech, CISAMPA→IPA) — INDEPENDENT of Wiktionary",
+            "role": "secondary"
         }
     ],
     "segmentJoin": true,
-    "secondaryGap": "no independent diacritized-Urdu referee wired; the eval measures the non-circular consonant+long-vowel backbone (short vowels + majhūl quality folded as abjad-unrecoverable). Short-vowel restoration ships (coverage lexicon + neural) but its accuracy is not measured here (the lexicon is wikipron-mined → circular).",
     "folds": [
         {
             "pattern": "(.)\\1",
