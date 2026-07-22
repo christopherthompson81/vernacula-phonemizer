@@ -9,7 +9,7 @@
  */
 import { getPhonemizer } from "./registry.ts";
 import { createRiderDiacritizer, type RiderDiacritizer } from "./core/riderDiacritizer.ts";
-import { harakatLexicon as ur } from "./languages/urdu/urdu.ts";
+import { coverageLexicon as ur } from "./languages/urdu/urdu.ts";
 import { harakatLexicon as fa } from "./languages/persian/persian.ts";
 import { harakatLexicon as ps } from "./languages/pashto/pashto.ts";
 import { harakatLexicon as pa } from "./languages/punjabi/punjabi.ts";

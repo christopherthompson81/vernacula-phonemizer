@@ -31,10 +31,18 @@ describe("urdu canonical IPA", () => {
         expect(phonemize("میرا نام", "ur")).toContain("nɑːm");
     });
 
-    // COVERAGE layer (core/harakatLexicon.ts): an undiacritized skeleton we've mined is vocalized before g2p, so
-    // the real short/long vowel surfaces instead of the default schwa. Miss → unchanged; user harakat → respected.
-    test("coverage lexicon restores mined short/long vowels", () => {
-        expect(phonemizeWord("آبرو")).toBe("ɑːbɾˈuː"); // ābrū: و→uː from the lexicon (آبرُو), not default oː
+    // COVERAGE layer (lexicon-ipa.tsv): an undiacritized skeleton we've mined is returned as canonical IPA directly,
+    // short-circuiting the g2p's default schwa. Miss → default-ə core; caller-supplied harakat → respected.
+    test("IPA coverage lexicon restores mined short/long vowels", () => {
+        expect(phonemizeWord("آبرو")).toBe("ɑːbɾˈuː"); // ābrū: و→uː from the lexicon, not default oː
         expect(phonemizeWord("آبرُو")).toBe("ɑːbɾˈuː"); // caller-supplied damma is respected (not clobbered)
+    });
+
+    // MAJHŪL long-vowel quality — the distinction harakat CANNOT encode (no diacritic for ی=iː~eː or و=oː~uː);
+    // the IPA lexicon carries it from the cross-script Hindi gold (Devanagari writes ई/ए, ऊ/ओ). The g2p default
+    // would give iː/oː for every ی/و.
+    test("IPA lexicon resolves majhūl long-vowel quality (beyond harakat)", () => {
+        expect(phonemizeWord("نکیل")).toBe("nəkˈeːl"); // nakel: ی→eː (default would be iː)
+        expect(phonemizeWord("کھجور")).toBe("kʰəd͡ʒˈuːɾ"); // khajūr: و→uː (default would be oː)
     });
 });
