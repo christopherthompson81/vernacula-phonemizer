@@ -703,3 +703,27 @@ ezafe → the BULK of the residual is the irreducible sense/context disambiguati
 predictable vowels. The tagger is at/near ceiling on its actual job (character-determined vocalization); the residual
 is where the input does not carry the answer. Confirms the 🟡 call and closes the "is any of it tractable" question:
 no lightweight lever (lexicon/POS/more-model) recovers a homograph whose sense the characters do not encode.
+
+## Run 26 — 2026-07-21 — non-circular referee hunt: wikipron-fas is register-mismatched (a trap, not a referee)
+
+Every Run 22–25 number is measured on HomoRich's OWN gold (circular: HomoRich trains AND evaluates). Looked for a
+non-circular referee. The repo already ships one — fa.wikipron-fas-broad.tsv (10.3k Wiktionary entries, independent
+of HomoRich, and it WRITES short vowels). Ran the shipped tagger against it (citation forms, convention-mapped):
+FULL agreement 24.6%, BACKBONE (consonants + long vowels) 63.0%. But the disagreements are REGISTER, not error —
+the tagger is right: ابتدا tagger ʔebtedaː vs wikipron ʔibtidaː; ابتکار ʔebtekaːɾ vs ʔibtikaːɾ; ابراهیم Ebrahim vs
+Ibrahim. Every one is the modern-Iranian /e/ vs classical-Arabic /i/ split. Vowel inventory confirms: 523 oː + 513
+eː — the MAJHUL vowels modern Iranian merged into uː/iː; their presence means wikipron-fas is classical/literary/Dari
+register (+2–3 dialect variants per word). Our target is modern Iranian (what HomoRich provides). So the obvious
+independent referee FAILS the quality/register vet — comparing to it manufactures ~75% phantom divergences where we
+are correct (the "vet referee QUALITY" + bho circular-referee lessons). Even backbone 63% is degraded by wikipron's
+majhul long-vowels/epenthesis/variant noise, so it isn't clean even for the skeleton.
+
+CONCLUSION + PATH: a valid non-circular referee for fa must be MODERN IRANIAN with short vowels. wikipron-fas is not
+it. Real options, in order of effort: (a) source a modern-Iranian G2P set — Tihu lexicon / PersianG2P (Sharif) /
+GE2PE / ManaTTS phoneme transcripts — and vet independence + register before trusting it; (b) EXPAND the 21-word
+hand-adjudicated modern gold (fa.gold-adjudicated.tsv) WITH short vowels into a few-hundred-word referee (small but
+correct + right-register + non-circular); (c) filter wikipron to Iranian-only readings (hard, lossy, no dialect tags
+in the broad file). This is a scoped data-acquisition + vetting project, worth it IF the goal is to certify fa toward
+✅ (independent validation is the #1 ✅-blocker) — but the naive path is a trap and must be avoided. Interim: the
+segmental BACKBONE is at least loosely corroborated (even hostile-register wikipron shares 63% of skeletons); the
+modern-Iranian-specific residual (short vowels / homographs / ezafe) is exactly what needs the modern referee.
