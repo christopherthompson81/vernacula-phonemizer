@@ -56,9 +56,11 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
     let run: string[] = [];
     const flush = async (): Promise<void> => {
         if (!run.length) return;
-        // A 1-word run gives the context model NO context to exploit and it is less reliable on isolated words
-        // (من → mannˈan); route it to the authoritative word-level path instead.
-        if (run.length === 1) { ipaQueue.push(await wordLevel(run[0]!)); run = []; return; }
+        // Route EVERY run — including 1-word — through the tagger. It labels each char, so it is reliable on
+        // ISOLATED words too (دیوار→diːvaːɾ), unlike the seq2seq it replaced (which garbled 1-word input, من→mannˈan,
+        // and motivated a word-level detour here). Sending isolated words to the sync g2p instead both garbled
+        // uncovered words (دیوار→djuːjɾ) and made the SAME word inconsistent isolated-vs-in-clause (مدرسه madɾase vs
+        // madɾese). wordLevel now remains only the model-absent fallback (phonemizeFaWordLevel) + degeneration guard.
         const out = await ctx.restore(run.join(" "));
         const ow = out.split(" ");
         // The tagger emits one tag per char and only the input's space chars start a new word, so the output aligns

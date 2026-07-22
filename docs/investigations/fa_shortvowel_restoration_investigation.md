@@ -917,3 +917,20 @@ referees. Measured, FIX-ONLY (0 breaks) on every gate:
 TS port verified against python (GE2PE 81.5%). This realises the Run 23/31/32 "lexicon is the lever" conclusion as a
 guaranteed, bounded, zero-regression improvement. The residual now is the genuinely context/sense floor (homographs,
 ezafe, later-syllable lexical vowels) — the characterized 🟡 ceiling.
+
+## Run 34 — 2026-07-22 — retiring the harakat-lexicon detour for fa: route 1-word runs through the tagger
+
+Architectural audit (prompted by "the harakat lexicon predates the IPA tagger — is it still in the pipeline?"). The
+harakat lexicon (skeleton→harakat, then sync g2p→IPA) is SHARED across the whole abjad family (ar/ps/pa/skr/sd/ur —
+their primary path), so it can't be IPA-ified for fa alone; and it's a different representation than the tagger's
+direct IPA. In fa's DEFAULT path it now fires ONLY on 1-word runs (multi-word clauses are all tagger). That detour is
+a HOLDOVER from the seq2seq era (the comment: 1-word input gave من→mannˈan), and it caused two real defects: (1) the
+sync g2p garbles uncovered isolated words (دیوار→djuːjɾ, کشور→kaʃuːɾ, دولت→duːlt — no short vowels), and (2) the SAME
+word is inconsistent isolated-vs-in-clause (مدرسه sync madɾase vs tagger madɾese). The structural tagger is reliable
+AND more accurate on isolated words (من→man, دیوار→diːvaːɾ, دولت→dolat) — it labels each char, no context needed. FIX:
+route every run (incl. 1-word) through the tagger in faNeural.ts flush(); wordLevel/harakat stays only the
+model-absent fallback + degeneration guard. Now isolated fa words match their in-clause form and avoid the sync
+garble. Full suite green. ANSWER to the question: don't IPA-ify the shared harakat lexicon — the fa forward path is
+already all-IPA (tagger + pin); the harakat lexicon is correctly a fallback-only legacy for fa and the primary path
+for the other abjads. FOLLOW-UP (noted, not done): the OOV vowelRestorer seq2seq is now unused in fa's default path
+too (only the no-onnx fallback needs it) — its eager load could be made lazy.
