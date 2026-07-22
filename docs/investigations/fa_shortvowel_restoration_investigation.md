@@ -846,3 +846,29 @@ certification: a clean "trust the output" ✅ number can't be produced from conf
 genuine error (loanword names, ezafe, sense homographs) not notation/noise. So fa is "multiply corroborated but not
 certifiable" — the strongest 🟡, one materially improved by having independent referees at all (the old #1 blocker),
 but ✅ is blocked by referee AVAILABILITY, not tagger quality. This is the honest ceiling.
+
+## Run 30 — 2026-07-22 — SYNTHESIZING a clean referee from cross-source agreement (the multi-referee method, formalized)
+
+Since every single referee is convention-confounded (Runs 26/29), synthesized a CLEAN one by cross-source AGREEMENT:
+pool citation pronunciations from 3 INDEPENDENT sources (wikipron-fas / GE2PE Kasre+Homograph / FarsDat), normalize
+each to our IPA (strip stress, ɣ→q, r→ɾ; keep ː and ʔ), drop ezafe-tagged occurrences, and keep a word's
+pronunciation ONLY where ≥2 sources AGREE. Agreement filters each source's idiosyncratic convention noise (a
+classical-register or speech-corpus error in ONE source isn't corroborated by another) → convention-neutral truth,
+non-circular (defined without our tagger). 755 words (708 ≥3-char); committed as
+tools/referee-eval/referees/fa.synth-agreement.tsv + build/eval tools/fa-restoration/synth_referee.py.
+
+TAGGER on the clean agreement gold: **BACKBONE (cons+long-V) 90.5% | FULL 80.8%**. Two conclusions: (1) the
+segmental BACKBONE is now INDEPENDENTLY and CLEANLY certified at 90.5% (cross-corroborated, convention-neutral) —
+the strongest evidence yet that the tagger isn't self-referential. (2) The ~10pp full-vs-backbone gap is the
+short-vowel-quality residual — misses are برق beɾq/baɾq, منجر mand͡ʒaɾ/mond͡ʒaɾ, اعضا, مقدس (the /a/-bias of Run 28
+#2 + epenthesis/gemination on Arabic-loan common words), i.e. real error. CAVEAT: the agreement gold skews toward
+HARD common Arabic-loan words (the source overlap is formal vocabulary with lexically-fixed vocalization), so 80.8%
+full is a conservative FLOOR, not representative accuracy (which sits between this and the 93.7% in-distribution
+canonical).
+
+VERDICT (unchanged, now maximally grounded): fa is a strong 🟡. The synthesis SUCCEEDED — we can and did build a
+clean non-circular referee — and it CONFIRMS rather than flips: backbone independently certified ~90%, but the
+FULL-word residual is real short-vowel/ezafe/homograph error, not the notation/noise ✅ tolerates. fa is "multiply
+and cleanly corroborated but not certifiable to ✅" because the residual is genuine sense/lexical error the input
+under-specifies for a lightweight model — the honest ceiling. Referee availability is no longer the blocker (we
+synthesized one); the blocker is that the residual is real error at ~10-19%, which is the 🟡 definition.
