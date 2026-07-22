@@ -1,20 +1,22 @@
 /**
- * Async neural entry for Persian (fa). The DEFAULT modern path runs the sentence-level MODERN CONTEXT model
- * (contextRestorer.ts, HomoRich-trained ONNX) over each clause, because on modern running text context beats the
- * word-level path by +44.8pp (33.5%→78.2% per-word held-out) — it can resolve ezafe and homographs, which a
- * word-at-a-time model structurally cannot. It falls back PER-WORD to the word-level restorer (lexicon → OOV
- * seq2seq → g2p) when the context decode degenerates (~1% of clauses), and falls back WHOLESALE to that word-level
- * path when the context model / `onnxruntime-node` is absent.
+ * Async neural entry for Persian (fa). The DEFAULT modern path runs the sentence-level STRUCTURAL TAGGER
+ * (faTagger.ts, a BiLSTM sequence-labeller) over each clause, because on modern running text sentence context beats
+ * the word-level path — it resolves ezafe and homographs, which a word-at-a-time model structurally cannot. The
+ * tagger emits one IPA-chunk tag per abjad char, so its output length == input length: it CANNOT degenerate and
+ * word counts always align, unlike the seq2seq it replaced. It falls back WHOLESALE to the word-level restorer
+ * (lexicon → OOV seq2seq → g2p) when the tagger model / `onnxruntime-node` is absent; the per-word guard below is
+ * retained as defence but the tagger's structural word-count invariance means it effectively never fires.
  *
- * This is a SEPARATE async path — the sync engine (and its C#-parity + referee-eval) is untouched. The seq2seq
- * emits IPA DIRECTLY, so this assembles IPA itself. See docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * This is a SEPARATE async path — the sync engine (and its C#-parity + referee-eval) is untouched. The tagger emits
+ * IPA DIRECTLY, so this assembles IPA itself. See docs/investigations/fa_shortvowel_restoration_investigation.md.
  */
 import { assembleClauses } from "./core/clauses.ts";
 import { getPhonemizer } from "./registry.ts";
 import { stripHarakat } from "./core/harakatLexicon.ts";
 import { createFaVowelRestorer, type FaVowelRestorer } from "./languages/persian/vowelRestorer.ts";
-import { createFaContextRestorer, createFaModernContextRestorer, type FaContextRestorer } from "./languages/persian/contextRestorer.ts";
-import { harakatLexicon, phonemizeWord } from "./languages/persian/persian.ts";
+import { createFaContextRestorer, type FaContextRestorer } from "./languages/persian/contextRestorer.ts";
+import { createFaTagger } from "./languages/persian/faTagger.ts";
+import { harakatLexicon, normalizePersianOrthography, phonemizeWord } from "./languages/persian/persian.ts";
 
 const PERSO = "ء-ۿݐ-ݿ‌‍";
 const WORD = new RegExp(`[${PERSO}]+`, "gu");
@@ -32,12 +34,13 @@ let restorerP: Promise<FaVowelRestorer | undefined> | undefined;
 let modernCtxP: Promise<FaContextRestorer | undefined> | undefined;
 
 /**
- * Default modern Persian phonemization: MODERN CONTEXT model per clause, word-level fallback on degeneration /
- * absence. Async because the ONNX passes are.
+ * Default modern Persian phonemization: structural TAGGER per clause, word-level fallback when the model is absent.
+ * Async because the ONNX pass is.
  */
 export async function phonemizeFaNeural(text: string): Promise<string> {
+    text = normalizePersianOrthography(text); // fold Arabic yeh/kaf → Farsi so the tagger doesn't garble (Run 27)
     if (restorerP === undefined) restorerP = createFaVowelRestorer();
-    if (modernCtxP === undefined) modernCtxP = createFaModernContextRestorer();
+    if (modernCtxP === undefined) modernCtxP = createFaTagger();
     const [restorer, ctx] = await Promise.all([restorerP, modernCtxP]);
     if (!ctx) return phonemizeFaWordLevel(text, restorer); // no context model → word-at-a-time path
 
@@ -53,14 +56,16 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
     let run: string[] = [];
     const flush = async (): Promise<void> => {
         if (!run.length) return;
-        // A 1-word run gives the context model NO context to exploit and it is less reliable on isolated words
-        // (من → mannˈan); route it to the authoritative word-level path instead.
-        if (run.length === 1) { ipaQueue.push(await wordLevel(run[0]!)); run = []; return; }
+        // Route EVERY run — including 1-word — through the tagger. It labels each char, so it is reliable on
+        // ISOLATED words too (دیوار→diːvaːɾ), unlike the seq2seq it replaced (which garbled 1-word input, من→mannˈan,
+        // and motivated a word-level detour here). Sending isolated words to the sync g2p instead both garbled
+        // uncovered words (دیوار→djuːjɾ) and made the SAME word inconsistent isolated-vs-in-clause (مدرسه madɾase vs
+        // madɾese). wordLevel now remains only the model-absent fallback (phonemizeFaWordLevel) + degeneration guard.
         const out = await ctx.restore(run.join(" "));
         const ow = out.split(" ");
-        // Mirror training: the model was trained + evaluated on whole sentences, output used directly. So when the
-        // output aligns 1:1 with the input words, TRUST it — even if a word looks long. Only a word-COUNT mismatch
-        // (genuine tail degeneration the beam didn't resolve, ~5%) can't be aligned, so that alone falls back.
+        // The tagger emits one tag per char and only the input's space chars start a new word, so the output aligns
+        // 1:1 with the input words by construction — this branch always holds. The word-COUNT fallback is retained
+        // as cheap defence (e.g. if a future model file broke that invariant) but does not fire for the tagger.
         if (ow.length === run.length) ipaQueue.push(...ow);
         else for (const w of run) ipaQueue.push(await wordLevel(w));
         run = [];
@@ -126,44 +131,23 @@ export async function phonemizeFaContext(sentence: string): Promise<string> {
     if (contextP === undefined) contextP = createFaContextRestorer();
     const ctx = await contextP;
     if (!ctx) return getPhonemizer("fa").text(sentence);
-    const clean = sentence.replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
+    const clean = normalizePersianOrthography(sentence).replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
     return clean ? ctx.restore(clean) : "";
 }
 
 /**
- * MODERN single-sentence context API — the HomoRich-trained restorer (83.2% held-out per-word, canonical IPA)
+ * MODERN single-sentence context API — the structural tagger (canonical IPA, 93.6% on the canonical held-out)
  * applied to one clean sentence, no digit/punctuation handling. `phonemizeFaNeural` is the full DEFAULT path (this
  * model, per clause, with digits/punctuation); use this when you have a single already-clean sentence.
  *
- * Greedy seq2seq degenerates on ~1% of sentences (a runaway final token). GUARD: if the output word-count differs
- * from the input's, or any token is implausibly long, fall back to `phonemizeFaNeural` so a malformed result can
- * never surface. Falls back to the sync path when the model / onnxruntime-node is unavailable.
+ * No degeneration guard: the tagger emits one tag per char, so output word-count == input word-count by
+ * construction and no token can run away — the malformed outputs the seq2seq needed guarding against cannot occur.
+ * Falls back to the sync path when the model / onnxruntime-node is unavailable.
  */
 export async function phonemizeFaModernContext(sentence: string): Promise<string> {
-    if (modernCtxP === undefined) modernCtxP = createFaModernContextRestorer();
+    if (modernCtxP === undefined) modernCtxP = createFaTagger();
     const ctx = await modernCtxP;
     if (!ctx) return getPhonemizer("fa").text(sentence);
-    const clean = sentence.replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
-    if (!clean) return "";
-    const out = await ctx.restore(clean);
-    const inWords = clean.split(" ").length;
-    const outWords = out.split(" ");
-    // degeneration guard: word-count mismatch, a runaway token, or a repeated bigram (the seq2seq loop
-    // signature, e.g. ɾaft→ɾaftatmatnatft where "at" recurs) → fall back to the word-level neural path.
-    if (outWords.length !== inWords || outWords.some(isDegenerate)) return phonemizeFaNeural(sentence);
-    return out;
-}
-
-/** A restored word is degenerate if it is implausibly long or contains a bigram repeated ≥3× (greedy-decode loop). */
-function isDegenerate(w: string): boolean {
-    const chars = [...w];
-    if (chars.length > 20) return true;
-    const bigrams = new Map<string, number>();
-    for (let i = 0; i + 1 < chars.length; i++) {
-        const bg = chars[i]! + chars[i + 1]!;
-        const n = (bigrams.get(bg) ?? 0) + 1;
-        if (n >= 3) return true;
-        bigrams.set(bg, n);
-    }
-    return false;
+    const clean = normalizePersianOrthography(sentence).replace(/[^ء-ۿٰ-ۓ ]/gu, " ").replace(/\s+/gu, " ").trim();
+    return clean ? ctx.restore(clean) : "";
 }

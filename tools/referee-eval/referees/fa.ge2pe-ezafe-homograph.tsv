@@ -1,0 +1,328 @@
+# fa INDEPENDENT referee — GE2PE Kasre(ezafe) + Homograph test sets, converted to our canonical IPA.
+# SOURCE: GE2PE (github.com/Sharif-SLPL/GE2PE), MIT License, (c) 2025 Elnaz Rahmati, Sharif Speech Lab.
+# NON-CIRCULAR: different lineage from HomoRich (our training data, by MahtaFetrat). Modern Iranian register
+# (0 majhul vowels). ADVERSARIAL: every sentence stresses ezafe (kasre) or a homograph — a hard slice, not a
+# representative corpus. Format: grapheme_sentence <TAB> our-IPA_sentence <TAB> category(ezafe|homograph).
+# Word-level ezafe is marked in GE2PE by a trailing kasre; homograph target by a sense tag. Build/eval:
+# tools/fa-restoration/ge2pe_referee.py. Graphemes normalized Arabic→Farsi (ي→ی ك→ک).
+چنگال بدطینت مرگ او را ربود	t͡ʃanɡaːle badtiːnate maɾɡ ʔuː ɾaː ɾobuːd	ezafe
+زبان تندش سرانجام مرگ او را حاصل شد	zabaːne tondaʃ saɾand͡ʒaːm maɾɡe ʔuː ɾaː haːsel ʃod	ezafe
+از سرانجام من مفلس کسی خبر نداشت	ʔaz saɾand͡ʒaːme mane mofles kasiː xabaɾ nadaːʃt	ezafe
+مرد همسایه سخت مقرراتی است	maɾde hamsaːje saxt moqaɾɾaɾaːtiː ʔast	ezafe
+با ناسپاسان نیکی کردن از خیرگی باشد	baː naːsepaːsaːn niːkiː kaɾdan ʔaz xiːɾeɡiː baːʃad	ezafe
+مردم جمله بدخواه بداندیشند	maɾdom d͡ʒomle badxaːhe badandiːʃand	ezafe
+مردم همه بدخواه بداندیشند	maɾdom hame badxaːhe badandiːʃand	ezafe
+در کنار آن مرد مرد ژندهپوش سالخوردهای ایستاده بود	daɾ kenaːɾe ʔaːn maɾd maɾde endepuːʃe saːlxoɾdeʔiː ʔiːstaːde buːd	ezafe
+ریشسفیدان محل زیر بازارچه دور هم جمع شدند	ɾiːʃsefiːdaːne mahal ziːɾe baːzaːɾt͡ʃe doɾe ham d͡ʒamʔ ʃodand	ezafe
+چترباز در اثر برخورد به زمین سفت درجا مرد	t͡ʃatɾbaːz daɾ ʔasaɾe baɾxoɾd be zamiːne seft daɾd͡ʒaː moɾd	ezafe
+آن مرد روزهای سخت پاییز عازم جنگ بین ایران و عراق شد	ʔaːn maɾde ɾuːzhaːje saxt paːjiːz ʔaːzeme d͡ʒanɡe bejne ʔiːɾaːn va ʔaɾaːq ʃod	ezafe
+زیاد از روزگار سختی کشیدهایم	ziːjaːd ʔaz ɾuːzeɡaːɾ saxtiː keʃiːdeʔiːm	ezafe
+از فرزند نیک پدر شاددل میشود	ʔaz faɾzande niːk pedaɾ ʃaːddel miːʃavad	ezafe
+جمشید شاه بر چشمه بر سنگی نشست	d͡ʒamʃiːd ʃaːh baɾe t͡ʃeʃme baɾ sanɡiː neʃast	ezafe
+سیستم تحملپذیر اشکال طراحی پیچیدهای نیاز دارد	siːsteme tahammolpaziːɾe ʔeʃkaːl taɾɾaːhiːje piːt͡ʃiːdeʔiː niːjaːz daːɾad	ezafe
+سیستم تحملپذیر اشکال تکنولوژی روز است	siːsteme tahammolpaziːɾe ʔeʃkaːl teknoloiːje ɾuːz ʔast	ezafe
+زیرساخت مستحکم اینترنت ملی امسال به افزایش مراجعهکنندگان به شبکههای داخلی کمک میکند	ziːɾsaːxte mostahkame ʔiːnteɾnete melliː ʔemsaːl be ʔafzaːjeʃe moɾaːd͡ʒeʔekonandeɡaːn be ʃabakehaːje daːxeliː komak miːkonad	ezafe
+پایان شب سیاه سفید است	paːjaːne ʃabe siːjaːh sefiːd ʔast	ezafe
+دیروز من خدمت به خلق بود امروز من کاهلی است	diːɾuːze man xedmate be xalq buːd ʔemɾuːze man kaːheliː ʔast	ezafe
+دیروز مشتاقانه به استقبال فرزندش رفت	diːɾuːz moʃtaːqaːne be ʔesteqbaːle faɾzandaʃ ɾaft	ezafe
+پادشاه کی عادل است	paːdeʃaːh kej ʔaːdel ʔast	ezafe
+از پی سود خویش دینگریزی پیش گرفتند	ʔaz peje suːde xiːʃ diːnɡoɾiːziː piːʃ ɡeɾeftand	ezafe
+نیم تن گندم درخواست کرد	niːm ton ɡandom daɾxaːst kaɾd	ezafe
+برف موجب کاهش میدان دید رانندگان در بعضی از جادهها شد	baɾf mod͡ʒebe kaːheʃe mejdaːne diːde ɾaːnandeɡaːn daɾ baʔziː ʔaz d͡ʒaːddehaː ʃod	ezafe
+بارش برف در نقاط مختلف استان اصفهان مصرانه از بامداد دیروز تا بامداد امروز ادامه داشت	baːɾeʃe baɾf daɾ noqaːte moxtalefe ʔostaːne ʔesfahaːn moseɾɾaːne ʔaz baːmdaːde diːɾuːz taː baːmdaːde ʔemɾuːz ʔedaːme daːʃt	ezafe
+امروز مهمترین مسئله در دنیای اسلام وحدت است	ʔemɾuːz mohemtaɾiːn masʔale daɾ donjaːje ʔeslaːm vahdat ʔast	ezafe
+جریان تکفیری دستور صریح پروردگار را نادیده میگیرد	d͡ʒaɾjaːne takfiːɾiː dastuːɾe saɾiːhe paɾvaɾdeɡaːɾ ɾaː naːdiːde miːɡiːɾad	ezafe
+ذکر گفتن مدام او دردی دوا نکرد	zekɾ ɡoftane modaːme ʔuː daɾdiː davaː nakaɾd	ezafe
+امروز او در جمع سخنران است	ʔemɾuːz ʔuː daɾ d͡ʒamʔ soxanɾaːn ʔast	ezafe
+هیدروکینون قشر خارجی پوست را نازک میکند و مصرف بلند مدت کرم حاوی این هیدروکربن اثرات جانبی دارد	hiːdɾuːkiːnuːn qeʃɾe xaːɾed͡ʒiːje puːst ɾaː naːzok miːkonad va masɾafe boland moddate keɾeme haːviːje ʔiːn hiːdɾokaɾbon ʔasaɾaːte d͡ʒaːnebiː daːɾad	ezafe
+ولع خوردن شیرینی و با فاصله کم احساس گرسنگی کردن از علائم بیماری دیابت است	valaʔe xoɾdane ʃiːɾiːniː va baː faːseleje kam ʔehsaːse ɡoɾosneɡiː kaɾdan ʔaz ʔalaːʔeme biːmaːɾiːje diːjaːbet ʔast	ezafe
+انصراف او از پست دبیرکلی انجمن بسیار محتمل است	ʔenseɾaːfe ʔuː ʔaz poste dabiːɾkolliːje ʔand͡ʒoman besiːjaːɾ mohtamal ʔast	ezafe
+اواخر دی زمان دیری برای ارائه لایحه بودجه است	ʔavaːxeɾe dej zamaːne diːɾiː baɾaːje ʔeɾaːʔeje laːjeheje buːdd͡ʒe ʔast	ezafe
+این سبک زندگی سرعت افسردگی را افزایش میدهد	ʔiːn sabke zendeɡiː soɾʔate ʔafsoɾdeɡiː ɾaː ʔafzaːjeʃ miːdahad	ezafe
+هنر این است و نه آنچه شما میپندارید	honaɾ ʔiːn ʔast va na ʔaːnt͡ʃe ʃomaː miːpendaːɾiːd	ezafe
+در شهر کوچکی چون جهرم روابط اجتماعی نزدیک است	daɾ ʃahɾe kuːt͡ʃakiː t͡ʃon d͡ʒahɾom ɾavaːbete ʔed͡ʒtemaːʔiː nazdiːk ʔast	ezafe
+در کلانشهرها از این نوع زندگی دوری میشود	daɾ kalaːnʃahɾhaː ʔaz ʔiːn noʔ zendeɡiː duːɾiː miːʃavad	ezafe
+کیفیت غذا در ایسلند بهترین و در ماداگاسکار بدترین است	kejfiːjjate qazaː daɾ ʔiːsland behtaɾiːn va daɾ maːdaːɡaːskaːɾ badtaɾiːn ʔast	ezafe
+اجرای توافق ژنو در روز سیدی ماه همزمان از سوی ایران با تعلیق غنیسازی بیست درصدی و آغاز روند رقیقسازی نیمیاز ذخایر اورانیوم بیست درصد و از سوی پنج + یک با تعلیق تحریمهای نفتی پتروشیمی خودرو تجارت طلا و فلزات و بخشی از تحریمهای هوایی آغاز میشود	ʔed͡ʒɾaːje tavaːfoqe enev daɾ ɾuːze siːje dej maːh hamzamaːn ʔaz suːje ʔiːɾaːn baː taʔliːqe qaniːsaːziːje biːst daɾsadiː va ʔaːqaːze ɾavande ɾaqiːqsaːziːje niːmiː ʔaz zaxaːjeɾe ʔoɾaːniːjome biːst daɾsad va ʔaz suːje beʔalaːve baː taʔliːqe tahɾiːmhaːje naftiː petɾoʃiːmiː xodɾo ted͡ʒaːɾate talaː va felezzaːt va baxʃiː ʔaz tahɾiːmhaːje havaːjiː ʔaːqaːz miːʃavad	ezafe
+در خجسته سالروز میلاد تاریخساز نبی مکرم اسلام جلسهای صورت گرفت	daɾ xod͡ʒaste saːlɾuːze miːlaːde taːɾiːxsaːze nabiːje mokaɾɾame ʔeslaːm d͡ʒalaseʔiː suːɾat ɡeɾeft	ezafe
+حضرت آیتالله خامنهای با تبریک عید سعید میلاد پیامبر اعظم حضرت محمد مصطفی ص آزادی از ظلم و ستم حکومتهای مستبد و ظالم و ایجاد حکومت عادلانه را روش اساسی اسلام برای آزادی بشر برشمردند	hazɾate ʔaːjatollaːh xaːmeneʔiː baː tabɾiːke ʔejde saʔiːde miːlaːde pajaːmbaɾe ʔaʔzam hazɾate mohammade mostafaː saːd ʔaːzaːdiː ʔaz zolm va setame hokuːmathaːje mostabed va zaːlem va ʔiːd͡ʒaːde hokuːmate ʔaːdelaːne ɾaː ɾaveʃe ʔasaːsiːje ʔeslaːm baɾaːje ʔaːzaːdiːje baʃaɾ baɾʃomoɾdand	ezafe
+جورج بوش پدر دوکاکیس فرماندار ماساچوست را در انتخابات شکست داد	d͡ʒoɾd͡ʒ buːʃe pedaɾ dokaːkiːs faɾmaːndaːɾe maːsaːt͡ʃoset ɾaː daɾ ʔentexaːbaːt ʃekast daːd	ezafe
+سرعتگیر خیابان شهید مسلم حسین مردی ناایمن ارزیابیشده است	soɾʔatɡiːɾe xiːjaːbaːne ʃahiːd mosleme hosejnmaɾdiː naːʔiːmen ʔaɾzjaːbiː ʃode ʔast	ezafe
+مهرماه مهر مادری بدرقه راهم به مدرسه بود	mehɾmaːh mehɾe maːdaɾiː badɾaqeje ɾaːham be madɾese buːd	ezafe
+اطلاعرسانی لازم درباره ثبتنام و پیشفروش خودروی جدید برند سایپا صورت خواهد گرفت	ʔettelaːʔɾesaːniːje laːzem daɾbaːɾeje sabtenaːm va piːʃfoɾuːʃe xodɾoje d͡ʒadiːde beɾande saːjpaː suːɾat xaːhad ɡeɾeft	ezafe
+میوهها و سبزیجات با آب فراوان جلوی پرخوری و دریافت خوراکی بیشتر را میگیرند	miːvehaː va sabziːd͡ʒaːt baː ʔaːbe faɾaːvaːn d͡ʒeloje poɾxoɾiː va daɾjaːfte xoɾaːkiːje biːʃtaɾ ɾaː miːɡiːɾand	ezafe
+پروتئین موجود در ماست یونانی ساخت ایران دو برابر ماستهای معمولی میباشد	poɾoteʔiːne mod͡ʒuːd daɾ maːste juːnaːniːje saːxte ʔiːɾaːn do baɾaːbaɾe maːsthaːje maʔmuːliː miːbaːʃad	ezafe
+لزوماً با تلاش دو برابر نتیجه دو برابر بهتری نخواهی گرفت	lozuːman baː talaːʃe do baɾaːbaɾ natiːd͡ʒeje do baɾaːbaɾ behtaɾiː naxaːhiː ɡeɾeft	ezafe
+طبق قولم دو برابر سهم اولیهاش را خواهد گرفت	tebqe qolam do baɾaːbaɾe sahme ʔavvaliːjjeʔaʃ ɾaː xaːhad ɡeɾeft	ezafe
+در قهوهخانه حاجقاسم میتوانی چای تازه دم سر بکشی	daɾ qahvexaːneje haːd͡ʒ qaːsem miːtavaːniː t͡ʃaːje taːzedam saɾ bekeʃiː	ezafe
+روند سنتز هلیم سه از نظر زیستمحیطی بسیار پاک و بازدهی این ماده بسیار بالا است	ɾavande santeze heliːjome se ʔaz nazaɾe ziːstmohiːtiː besiːjaːɾ paːk va baːzdehiːje ʔiːn maːdde besiːjaːɾ baːlaː ʔast	ezafe
+اصطلاحات مهجور بهکاررفته در این مقاله بیش از حد زیاد است	ʔestelaːhaːte mahd͡ʒuːɾe bekaːɾɾafte daɾ ʔiːn maqaːle biːʃ ʔaz had ziːjaːd ʔast	ezafe
+وی گفت بهتر بود آقای ظریف با این ادبیات وزیر دولت بازرگان میشد	vej ɡoft behtaɾ buːd ʔaːqaːje zaɾiːf baː ʔiːn ʔadabiːjaːt vaziːɾe dolate baːzaɾɡaːn miːʃod	ezafe
+قرار شد در جلسات بعد پیشینه و چون و چند تولید فضا به بحث گذاشته شود	qaɾaːɾ ʃod daɾ d͡ʒalasaːte baʔd piːʃiːne va t͡ʃon va t͡ʃande toliːde fazaː be bahs ɡozaːʃte ʃavad	ezafe
+بیاطلاع از قسمت دیگر طرح مشغول برطرف کردن ایرادات کار نهایی خودم شدم	biːʔettelaːʔ ʔaz qesmate diːɡaɾe taɾh maʃquːle baɾtaɾaf kaɾdane ʔiːɾaːdaːte kaːɾe nahaːjiːje xodam ʃodam	ezafe
+تضاد سرمایه کار میدان و عرصه کلی دو جنبش اجتماعی با دو افق متضاد است	tazaːdde saɾmaːje kaːɾ mejdaːn va ʔaɾseje kolliːje do d͡ʒonbeʃe ʔed͡ʒtemaːʔiː baː do ʔofoqe motazaːd ʔast	ezafe
+انسان در آن واحد بعد روحانی و جسمانی دارد	ʔensaːn daɾ ʔaːne vaːhed boʔde ɾuːhaːniː va d͡ʒesmaːniː daːɾad	ezafe
+آرامش درون قلبی بامحبت به شما خواهد بخشید	ʔaːɾaːmeʃe daɾuːn qalbiː baːmohabbat be ʃomaː xaːhad baxʃiːd	ezafe
+در نهایت چاپ سوم کتاب را به اوج شهرت رساند	daɾ nahaːjat t͡ʃaːppe sevvom ketaːb ɾaː be ʔod͡ʒe ʃohɾat ɾesaːnad	ezafe
+از صورتگرفته و رنگ و روی زردش به خبر ناگفته پی بردیم	ʔaz suːɾate ɡeɾefte va ɾanɡ va ɾuːje zaɾdaʃ be xabaɾe naːɡofte pejboɾdiːm	ezafe
+شامگاه همه خاندان را دور هم جمع کرد تا خبر ناگفته نماند	ʃaːmɡaːh hameje xaːndaːn ɾaː doɾe ham d͡ʒamʔ kaɾd taː xabaɾ naːɡofte namaːnad	ezafe
+با تلاشهای صورتگرفته در حوزه فعالیتهای قرآنی شاهد افزایش جلسات و محافل قرآنی در سراسر کشور هستیم	baː talaːʃhaːje suːɾatɡeɾefte daɾ hozeje faʔʔaːliːjjathaːje qoɾʔaːniː ʃaːhede ʔafzaːjeʃe d͡ʒalasaːt va mahaːfele qoɾʔaːniː daɾ saɾaːsaɾe keʃvaɾ hastiːm	ezafe
+همیشه در هنگام نقد آثار سینمایی مسعود کیمیایی در دسته آثار معناگرا قرار میگیرند	hamiːʃe daɾ henɡaːme naqd ʔaːsaːɾe siːnemaːjiːje masʔuːde kiːmiːjaːjiː daɾ dasteje ʔaːsaːɾe maʔnaːɡaɾaː qaɾaːɾ miːɡiːɾand	ezafe
+چنین ساختاری مخاطب را در احساس دو جهان سنتی و مدرن سرگردان میکند	t͡ʃeniːn saːxtaːɾiː moxaːtab ɾaː daɾ ʔehsaːse do d͡ʒahaːne sonnatiː va modeɾn saɾɡaɾdaːn miːkonad	ezafe
+در این خط عبور ماشینهای سنگین ممنوع میباشد	daɾ ʔiːn xat ʔobuːɾe maːʃiːnhaːje sanɡiːn mamnuːʔ miːbaːʃad	ezafe
+در این نوع خط نسخ الف انحنایی ندارد	daɾ ʔiːn noʔ xate nasx ʔalef ʔenhenaːjiː nadaːɾad	ezafe
+این دیوار تنها قسمت بازمانده از هیکل سلیمان است	ʔiːn diːvaːɾ tanhaː qesmate baːzmaːnde ʔaz hejkale solejmaːn ʔast	ezafe
+این دیوار تنها سالها در برابر باد و باران ایستادگی کرده است	ʔiːn diːvaːɾe tanhaː saːlhaː daɾ baɾaːbaɾe baːd va baːɾaːn ʔiːstaːdeɡiː kaɾde ʔast	ezafe
+جمعیتهای جانوری در این استان روال رو به رشدی داشته است	d͡ʒamʔiːjjathaːje d͡ʒaːnevaɾiː daɾ ʔiːn ʔostaːn ɾevaːle ɾuː be ɾoʃdiː daːʃte ʔast	ezafe
+چاپ اول این اثر مصور در شمارگان هزار نسخه و تمام گلاسه با قیمت چهار هزار تومان در اختیار علاقهمندان قرار گرفته است	t͡ʃaːppe ʔavvale ʔiːn ʔasaɾe mosavvaɾ daɾ ʃomaːɾeɡaːne hezaːɾ nosxe va tamaːm ɡelaːse baː qejmate t͡ʃaːhaːɾ hezaːɾ tuːmaːn daɾ ʔextiːjaːɾe ʔalaːqemandaːn qaɾaːɾ ɡeɾefte ʔast	ezafe
+داستانهای این کتاب همه به روایت رابطههای غریب انسانی میپردازند خواه این روابط دوستانه باشند خواه خصمانه	daːstaːnhaːje ʔiːn ketaːb hame be ɾevaːjate ɾaːbetehaːje qaɾiːbe ʔensaːniː miːpaɾdaːzand xaːh ʔiːn ɾavaːbet duːstaːne baːʃand xaːh xasmaːne	ezafe
+با فریادهای سرشار از خشم آزردگی عمیق خود را خالی میکرد	baː faɾjaːdhaːje saɾʃaːɾ ʔaz xaʃm ʔaːzoɾdeɡiːje ʔamiːqe xod ɾaː xaːliː miːkaɾd	ezafe
+اعضای مراکز کانون پرورش فکری کودکان و نوجوانان یک نشان و همچنین دوازده دیپلم افتخار نهمین مسابقه بینالمللی نقاشی کشور بلاروس را امسال از آن خود کردند	ʔaʔzaːje maɾaːkeze kaːnuːne paɾvaɾeʃe fekɾiːje kuːdakaːn va nod͡ʒavaːnaːn jek neʃaːn va hamt͡ʃeniːn davaːzdah diːplome ʔeftexaːɾe nohomiːn mosaːbeqeje bejnolmelaliːje naqqaːʃiːje keʃvaɾe belaːɾuːs ɾaː ʔemsaːl ʔaz ʔaːne xod kaɾdand	ezafe
+ضعف ما در کار قبلی مقداری به عدم اطلاعرسانی مربوط است	zaʔfe maː daɾ kaːɾe qabliː meqdaːɾiː be ʔadame ʔettelaːʔɾesaːniː maɾbuːt ʔast	ezafe
+وی عنوان کرد که قشر بیکار بیشتر صاحبان مدرک لیسانس به بالا را شامل میشود	vej ʔonvaːn kaɾd ke qeʃɾe biːkaːɾ biːʃtaɾ saːhebaːne madɾake liːsaːns be baːlaː ɾaː ʃaːmel miːʃavad	ezafe
+بازیهای سایهروشن حرفه عکاس آلمانی زاده بود	baːziːhaːje saːje ɾoʃan heɾfeje ʔakkaːse ʔaːlmaːniːzaːde buːd	ezafe
+چند تن از شاعران در محضر رهبر انقلاب با موضوع وقایع روز شعر گفتند	t͡ʃand tan ʔaz ʃaːʔeɾaːn daɾ mahzaɾe ɾahbaɾe ʔenqelaːb baː mozuːʔe vaqaːjeʔe ɾuːz ʃeʔɾ ɡoftand	ezafe
+اما من هر چه خواستهام همه از خدا بوده و از غیر طلب استعانت نکردهام	ʔammaː man haɾ t͡ʃe xaːsteʔam hame ʔaz xodaː buːde va ʔaz qejɾ talabe ʔesteʔaːnat nakaɾdeʔam	ezafe
+مهمان خوانده و ناخواندهاش هم محترم است و حبیب خداست	mehmaːn xaːnde va naːxaːndeʔaʃ ham mohtaɾam ʔast va habiːbe xodaːst	ezafe
+به شرف نداشتهاش قسم میخورد که جز راست چیزی نگفته است	be ʃaɾafe nadaːʃteʔaʃ qasam miːxoɾad ke d͡ʒoz ɾaːst t͡ʃiːziː naɡofte ʔast	ezafe
+در نهایت یک مشت دروغ تحویل شما خواهد داد	daɾ nahaːjat jek moʃt doɾuːq tahviːle ʃomaː xaːhad daːd	ezafe
+این موضعگیری اگر چه با اما و اگر این ژنرال همراه بود اما با توجه به گزارشها و اخبار رسیده از تلاشهای گسترده برای روی کار آمدن وی میتوان هماکنون نتیجه را پیشبینی کرد	ʔiːn mozeʔɡiːɾiː ʔaɡaɾ t͡ʃe baː ʔammaː va ʔaɡaɾe ʔiːn eneɾaːl hamɾaːh buːd ʔammaː baː tavad͡ʒd͡ʒoh be ɡozaːɾeʃhaː va ʔaxbaːɾe ɾesiːde ʔaz talaːʃhaːje ɡostaɾde baɾaːje ɾuːje kaːɾ ʔaːmadane vej miːtavaːn hamaknuːn natiːd͡ʒe ɾaː piːʃbiːniː kaɾd	ezafe
+ابریشم صنعت رو به زوال کشور است	ʔabɾiːʃam sanʔate ɾuː be zavaːle keʃvaɾ ʔast	ezafe
+بیمار ناخوشاحوال رو به قبله خوابیده بود و به کسی اعتنایی نداشت	biːmaːɾe naːxoʃahvaːl ɾuː be qeble xaːbiːde buːd va be kasiː ʔeʔtenaːjiː nadaːʃt	ezafe
+جشنواره موسیقی محلی چند شب پیش برگزار شد	d͡ʒaʃnvaːɾeje muːsiːqiːje mahalliː t͡ʃand ʃab piːʃ baɾɡozaːɾ ʃod	ezafe
+خوشبختانه پلو خورشت چند شب پیش هنوز در یخچال بود و امشب را هم میتوانستیم با دل سیر سر کنیم	xoʃbaxtaːne polo xoɾeʃte t͡ʃand ʃab piːʃ hanuːz daɾ jaxt͡ʃaːl buːd va ʔemʃab ɾaː ham miːtavaːnestiːm baː dele siːɾ saɾ koniːm	ezafe
+با وجود طی مسافت زیاد هر چه پیش میرفتیم نمیرسیدیم	baː vod͡ʒuːde teje masaːfate ziːjaːd haɾ t͡ʃe piːʃ miːɾaftiːm nemiːɾesiːdiːm	ezafe
+با گذشت چند ماه از شروع مذاکرات شاهد شکستن تحریمها بودیم	baː ɡozaʃte t͡ʃand maːh ʔaz ʃoɾuːʔe mozaːkeɾaːt ʃaːhede ʃekastane tahɾiːmhaː buːdiːm	ezafe
+دپارتمان زبانها در آکادمی علوم که مسئولیت تحقیق زبانهای کشور را بر عهده دارد به اعتراف عضو آکادمی علوم تاکنون نتوانسته کاری تاثیرگذار به انجام برساند	depaːɾtemaːne zabaːnhaː daɾ ʔaːkaːdemiːje ʔoluːm ke masʔuːliːjjate tahqiːqe zabaːnhaːje keʃvaɾ ɾaː baɾ ʔohde daːɾad be ʔeʔteɾaːfe ʔozve ʔaːkaːdemiːje ʔoluːm taːkonuːn natavaːneste kaːɾiː taʔsiːɾɡozaːɾ be ʔand͡ʒaːm beɾasaːnad	ezafe
+در این متن چند عامل برای جلوگیری از چاقی ناشی از استرس را میتوانید مشاهده کنید	daɾ ʔiːn matn t͡ʃand ʔaːmel baɾaːje d͡ʒeloɡiːɾiː ʔaz t͡ʃaːqiːje naːʃiː ʔaz ʔesteɾes ɾaː miːtavaːniːd moʃaːhede koniːd	ezafe
+باور داشته باشید که خود شما قهرمان یک داستان حقیقی هستید	baːvaɾ daːʃte baːʃiːd ke xode ʃomaː qahɾemaːne jek daːstaːne haqiːqiː hastiːd	ezafe
+باور داشته باشید که شما خود قهرمان یک داستان حقیقی هستید	baːvaɾ daːʃte baːʃiːd ke ʃomaː xod qahɾemaːne jek daːstaːne haqiːqiː hastiːd	ezafe
+آخرین پرتوهای غروب خورشید پشت حجابی از ابر پنهان شد	ʔaːxaɾiːn paɾtohaːje qoɾuːbe xoɾʃiːd poʃte hed͡ʒaːbiː ʔaz ʔabɾ penhaːn ʃod	ezafe
+الان بدون آن که زیاد به مغزم فشار بیاورم راحت دویست سیصد تا از کلمات را به یاد میآورم	ʔalʔaːn beduːne ʔaːn ke ziːjaːd be maqzam feʃaːɾ biːjaːvaɾam ɾaːhat deviːst siːsad taː ʔaz kalemaːt ɾaː be jaːd miːʔaːvaɾam	ezafe
+سرانجام جمشید سخن از سر گرفت	saɾand͡ʒaːm d͡ʒamʃiːd soxan ʔaz saɾ ɡeɾeft	ezafe
+سرانجام جمشید جز پشیمانی و حسرت عمر ازدسترفته نیست	saɾand͡ʒaːme d͡ʒamʃiːd d͡ʒoz paʃiːmaːniː va hasɾate ʔomɾe ʔazdastɾafte niːst	ezafe
+اگر با هم دوست نیستید دستکم دشمن خونی نباشید	ʔaɡaɾ baː ham duːst niːstiːd dastekam doʃmane xuːniː nabaːʃiːd	ezafe
+هیچکس در افق دید نبود	hiːt͡ʃkas daɾ ʔofoqe diːd nabuːd	ezafe
+هیچکس در افق پیدا نبود	hiːt͡ʃkas daɾ ʔofoq pejdaː nabuːd	ezafe
+اگر به سبب وقایع اضطرابآور شب پیش نبود از این بخش سفر بیشتر از بخشهای دیگر آن لذت میبردند	ʔaɡaɾ be sababe vaqaːjeʔe ʔezteɾaːbaːvaɾe ʃabe piːʃ nabuːd ʔaz ʔiːn baxʃe safaɾ biːʃtaɾ ʔaz baxʃhaːje diːɡaɾe ʔaːn lezzat miːboɾdand	ezafe
+روز بعد اندکی بهتر بود و شب نسبتاً راحت	ɾuːze baʔd ʔandakiː behtaɾ buːd va ʃab nesbatan ɾaːhat	ezafe
+هر چند هدف انجمن تالاسمی ایران جمعآوری اعانه نیست اما امید آن داریم که با همیاری همگان وسایل پیشگیری و درمان و معالجه قطعی این بیماران را در ایران فراهم آوریم	haɾ t͡ʃand hadafe ʔand͡ʒomane taːlaːsemiːje ʔiːɾaːn d͡ʒamʔʔaːvaɾiːje ʔeʔaːne niːst ʔammaː ʔomiːde ʔaːn daːɾiːm ke baː hamjaːɾiːje hameɡaːn vasaːjele piːʃɡiːɾiː va daɾmaːn va moʔaːled͡ʒeje qatʔiːje ʔiːn biːmaːɾaːn ɾaː daɾ ʔiːɾaːn faɾaːham ʔaːvaɾiːm	ezafe
+مرد تازه ماشین دار شدهبود که بانک خانهاش را به مزایده گذاشت	maɾd taːze maːʃiːndaːɾ ʃode buːd ke baːnk xaːneʔaʃ ɾaː be mozaːjede ɡozaːʃt	ezafe
+افراد کمظرفیت با مختصر گرفتاری یاس و ناامیدی شدیدی بر آنان حکمفرما میشود	ʔafɾaːde kamzaɾfiːjjat baː moxtasaɾ ɡeɾeftaːɾiː jaʔs va naːʔomiːdiːje ʃadiːdiː baɾ ʔaːnaːn hokmfaɾmaː miːʃavad	ezafe
+غرور منبع بیگانگی از خدا و آلودگی به انواع گناهان است	qoɾuːɾ manbaʔe biːɡaːneɡiː ʔaz xodaː va ʔaːluːdeɡiː be ʔanvaːʔe ɡonaːhaːn ʔast	ezafe
+فرمانده از روی اضطرار حمله نظامی به کشور همسایه را به عقب انداخت	faɾmaːnde ʔaz ɾuːje ʔezteɾaːɾ hamleje nezaːmiː be keʃvaɾe hamsaːje ɾaː be ʔaqab ʔandaːxt	ezafe
+خدا خود را به بشر آشکار ساخته است	xodaː xod ɾaː be baʃaɾ ʔaːʃkaːɾ saːxte ʔast	ezafe
+پرویز سینهخیز تا حاشیه رود پیش رفت	paɾviːz siːnexiːz taː haːʃiːjeje ɾuːd piːʃ ɾaft	ezafe
+آتش کوچک درخشانی در بخاری روشن بود	ʔaːtaʃe kuːt͡ʃake deɾaxʃaːniː daɾ boxaːɾiː ɾoʃan buːd	ezafe
+عملکرد محفظههای سلولی مذکور در تعامل با هم است	ʔamalkaɾde mahfazehaːje selluːliːje mazkuːɾ daɾ taʔaːmol baː ham ʔast	ezafe
+در بعضی موارد نادر تهوع ادامه یافته و بیمار مجبور است از سرم استفاده کند	daɾ baʔziː mavaːɾede naːdeɾ tahavvoʔ ʔedaːme jaːfte va biːmaːɾ mad͡ʒbuːɾ ʔast ʔaz seɾom ʔestefaːde konad	ezafe
+جوان داشت خود را از پل پایین میانداخت	d͡ʒavaːn daːʃt xod ɾaː ʔaz pol paːjiːn miːʔandaːxt	ezafe
+برای معلوم شدن اصل داستان صبر پیشه میکنیم	baɾaːje maʔluːm ʃodane ʔasle daːstaːn sabɾ piːʃe miːkoniːm	ezafe
+نمیتوان با اطمینان در این مورد خاص صحبت کرد و قطعی نظر داد	nemiːtavaːn baː ʔetmiːnaːn daɾ ʔiːn moɾede xaːs sohbat kaɾd va qatʔiː nazaɾ daːd	ezafe
+همیشه مقداری شیرینی ساده مثل آبنبات همراه خود داشته باشید	hamiːʃe meqdaːɾiː ʃiːɾiːniːje saːde mesle ʔaːbnabaːt hamɾaːhe xod daːʃte baːʃiːd	ezafe
+این خوراکی سرشار از آب با مهار تولید رادیکالهای آزاد فرآیند پیری را به تاخیر میاندازد	ʔiːn xoɾaːkiːje saɾʃaːɾ ʔaz ʔaːb baː mahaːɾe toliːde ɾaːdiːkaːlhaːje ʔaːzaːd faɾaːjande piːɾiː ɾaː be taʔxiːɾ miːʔandaːzad	ezafe
+عاقبت یک نفر هم به داد من نرسید	ʔaːqebat jek nafaɾ ham be daːde man naɾesiːd	ezafe
+از هر چهار فرد بزرگسال یک نفر به فشار خون بالا مبتلا میباشد	ʔaz haɾ t͡ʃaːhaːɾ faɾde bozoɾɡsaːl jek nafaɾ be feʃaːɾe xuːne baːlaː mobtalaː miːbaːʃad	ezafe
+از طرفی باید قبل از استفاده از تست تشخیصی سریع ایدز در خصوص چگونگی استفاده و تفسیر صحیح نتیجه آزمایش آموزشهای لازم را دید	ʔaz taɾafiː baːjad qabl ʔaz ʔestefaːde ʔaz teste taʃxiːsiːje saɾiːʔe ʔejdz daɾ xosuːse t͡ʃeɡuːneɡiːje ʔestefaːde va tafsiːɾe sahiːhe natiːd͡ʒeje ʔaːzmaːjeʃ ʔaːmuːzeʃhaːje laːzem ɾaː diːd	ezafe
+سیگنالهای وایرلس از مودم شروع و به دستگاه کاربر ختم میشود	siːɡnaːlhaːje vaːjeɾles ʔaz modem ʃoɾuːʔ va be dastɡaːhe kaːɾbaɾ xatm miːʃavad	ezafe
+بالا رفتن میزان آسم به میزان کلر آب استخر مرتبط است	baːlaː ɾaftane miːzaːne ʔaːsm be miːzaːne koloɾe ʔaːbe ʔestaxɾ moɾtabet ʔast	ezafe
+این موضوع گاه در بعضی ادیان مانند ادیان شرق دور فرد را به خودکشی وا میدارد	ʔiːn mozuːʔ ɡaːh daɾ baʔziː ʔadjaːn maːnande ʔadjaːne ʃaɾqe duːɾ faɾd ɾaː be xodkoʃiː vaː miːdaːɾad	ezafe
+اهرمهای نظارتی و چرخه مصرف دارو در حوزه درمان همگی سبب میشود که مواد دارویی خودسرانه مصرف نشود	ʔahɾomhaːje nezaːɾatiː va t͡ʃaɾxeje masɾafe daːɾuː daɾ hozeje daɾmaːn hameɡiː sabab miːʃavad ke mavaːdde daːɾuːjiː xodsaɾaːne masɾaf naʃavad	ezafe
+مثل روز روشن است که این مسئله برای بهروز چندان ارزشی ندارد	mesle ɾuːz ɾoʃan ʔast ke ʔiːn masʔale baɾaːje behɾuːz t͡ʃandaːn ʔaɾzeʃiː nadaːɾad	ezafe
+وقتی او را دیدم صورتش مثل خورشید مشرق بود	vaqtiː ʔuː ɾaː diːdam suːɾataʃ mesle xoɾʃiːde maʃɾeq buːd	ezafe
+اگر من نوعی نسبت به اطرافیانم مقداری بالاتر باشم و گاهگداری در دل دچار خودبرتربینی شوم دچار عجب و خودپسندی شدهام	ʔaɡaɾ mane noʔiː nesbat be ʔatɾaːfiːjaːnam meqdaːɾiː baːlaːtaɾ baːʃam va ɡaːhɡodaːɾiː daɾ del dot͡ʃaːɾe xodbaɾtaɾbiːniː ʃavam dot͡ʃaːɾe ʔod͡ʒb va xodpasandiː ʃodeʔam	ezafe
+من نوعی از فیلمساز زیرزمینی نیستم و به اکران فیلمم در ایران فکر میکنم	man noʔiː ʔaz fiːlmsaːze ziːɾzamiːniː niːstam va be ʔekɾaːne fiːlmam daɾ ʔiːɾaːn fekɾ miːkonam	ezafe
+یک کارتن مقوایی و چهار قوطی فلزی کنار هم گذاشته بود و میگفت ماشین ساخته است	jek kaːɾtone moqavvaːjiː va t͡ʃaːhaːɾ quːtiːje felezziː kenaːɾe ham ɡozaːʃte buːd va miːɡoft maːʃiːn saːxte ʔast	ezafe
+در شبانهروز هر فرد به هشت ساعت خواب نیاز دارد	daɾ ʃabaːneɾuːz haɾ faɾd be haʃt saːʔat xaːb niːjaːz daːɾad	ezafe
+نور ساطع شده از وسایل الکترونیکی قبل از خواب فرد را از خواب آرام محروم میسازد	nuːɾe saːteʔ ʃode ʔaz vasaːjele ʔelekteɾoniːkiː qabl ʔaz xaːb faɾd ɾaː ʔaz xaːbe ʔaːɾaːm mahɾuːm miːsaːzad	ezafe
+با توجه به وضعیت ترافیک تهران مترو در سطح شهر بهترین وسیله نقلیه محسوب میشود	baː tavad͡ʒd͡ʒoh be vazʔiːjjate teɾaːfiːke tehɾaːn metɾo daɾ sathe ʃahɾ behtaɾiːn vasiːleje naqliːje mahsuːb miːʃavad	ezafe
+اکثر مردم قسمت سبز سیبزمینی را دور نمیاندازند که ناشی از عدم آگاهی آنهاست	ʔaksaɾe maɾdom qesmate sabze siːbzamiːniː ɾaː duːɾ nemiːʔandaːzand ke naːʃiː ʔaz ʔadame ʔaːɡaːhiːje ʔaːnhaːst	ezafe
+هیچوقت فکر نمیکردم که آخر یک لبخند زندگی من را نجات خواهد داد	hiːt͡ʃvaqt fekɾ nemiːkaɾdam ke ʔaːxaɾ jek labxand zendeɡiːje man ɾaː ned͡ʒaːt xaːhad daːd	ezafe
+در فرزندان صاحب والدین مضطرب شیوع این اختلال بیشتر است	daɾ faɾzandaːne saːhebe vaːledejne moztaɾeb ʃojuːʔe ʔiːn ʔextelaːl biːʃtaɾ ʔast	ezafe
+این نمایشگاه در گالری شماره یک این نگارخانه با حدود سی اثر حجم و مجسمه برپا خواهد شد	ʔiːn namaːjeʃɡaːh daɾ ɡaːleɾiːje ʃomaːɾeje jeke ʔiːn neɡaːɾxaːne baː hoduːde siː ʔasaɾe had͡ʒm va mod͡ʒassame baɾpaː xaːhad ʃod	ezafe
+سخنان رئیسجمهور باید سراسر امید و نشاط باشد	soxanaːne ɾaʔiːsd͡ʒomhuːɾ baːjad saɾaːsaɾ ʔomiːd va neʃaːt baːʃad	ezafe
+مردم سراسر ایران و جهان عمل زشت اسرائیل را مذموم میشمرند	maɾdom saɾaːsaɾe ʔiːɾaːn va d͡ʒahaːn ʔamale zeʃte ʔesɾaːʔiːl ɾaː mazmuːm miːʃomoɾand	ezafe
+به مترسکهای برتر در راهپیمایی روز جهانی قدس جوایزی اهدا میشود	be mataɾsakhaːje baɾtaɾ daɾ ɾaːhpejmaːjiːje ɾuːze d͡ʒahaːniːje qods d͡ʒavaːjeziː ʔehdaː miːʃavad	ezafe
+اگر این شیئ اکنون در سردابههای پنهان این ارگ در اختیار من بود در این تاریکی هراسان از عاقبت کار وحشتزده بر خود نمیلرزیدیم	ʔaɡaɾ ʔiːn ʃejʔ ʔaknuːn daɾ saɾdaːbehaːje penhaːne ʔiːn ʔaɾɡ daɾ ʔextiːjaːɾe man buːd daɾ ʔiːn taːɾiːkiː haɾaːsaːn ʔaz ʔaːqebate kaːɾe vahʃatzade baɾ xod nemiːlaɾziːdiːm	ezafe
+بعد از درگذشت پیرمرد پیرزن چند صباحی تنها در خانه ماند	baʔd ʔaz daɾɡozaʃte piːɾemaɾd piːɾezan t͡ʃand sabaːhiː tanhaː daɾ xaːne maːnd	ezafe
+با امید ایستادن و نپذیرفتن شکست چیزی است که همه باید یاد بگیرند	baː ʔomiːd ʔiːstaːdan va napaziːɾoftane ʃekast t͡ʃiːziː ʔast ke hame baːjad jaːd beɡiːɾand	ezafe
+یکی از روشهای عمل آوردن زیتون خواباندن آن در محلول قلیاست	jekiː ʔaz ɾaveʃhaːje ʔamal ʔaːvaɾdane zejtuːn xaːbaːndane ʔaːn daɾ mahluːle qaljaːst	ezafe
+کودک چند ماهه بود که دست تقدیر او را از والدینش جدا کرد	kuːdak t͡ʃand maːhe buːd ke daste taqdiːɾ ʔuː ɾaː ʔaz vaːledejnaʃ d͡ʒodaː kaɾd	ezafe
+دزد کودک چند ماهه را ربود	dozd kuːdake t͡ʃand maːhe ɾaː ɾobuːd	ezafe
+در نظر نگرفتن اصطکاک فرضی برای آسانتر شدن این سوال است	daɾ nazaɾ naɡeɾeftane ʔestekaːk faɾziː baɾaːje ʔaːsaːntaɾ ʃodane ʔiːn soʔaːl ʔast	ezafe
+سربازان خط مقدم به ردیف صف بسته بودند تا فرمانده فرمان شروع عملیات را صادر کند	saɾbaːzaːne xate moqaddam be ɾadiːf saf baste buːdand taː faɾmaːnde faɾmaːne ʃoɾuːʔe ʔamaliːjjaːt ɾaː saːdeɾ konad	ezafe
+مهمترین ویژگی یک سرویس وب امکان استفاده مجدد آن در کاربردهای جدید میباشد	mohemtaɾiːn viːeɡiːje jek seɾviːse veb ʔemkaːne ʔestefaːdeje mod͡ʒaddade ʔaːn daɾ kaːɾboɾdhaːje d͡ʒadiːd miːbaːʃad	ezafe
+مدل دسترسی نقش مبنا بهدلیل کاستیهایی از قبیل عدم انعطافپذیری برای کنترل دسترسی در سرویسهای وب ترکیبی مناسب نمیباشد	modele dastɾesiːje naqʃmabnaː be daliːle kaːstiːhaːjiː ʔaz qabiːle ʔadame ʔenʔetaːfpaziːɾiː baɾaːje kontoɾole dastɾesiː daɾ seɾviːshaːje vebe taɾkiːbiː monaːseb nemiːbaːʃad	ezafe
+هر سرویس میتواند عضو دقیقاً یک فراهمکننده باشد	haɾ seɾviːs miːtavaːnad ʔozve daqiːqan jek faɾaːhamkonande baːʃad	ezafe
+در این فرمول عبارات یک قانون همگی با هم عطف میشوند	daɾ ʔiːn foɾmuːl ʔebaːɾaːte jek qaːnuːn hameɡiː baː ham ʔatf miːʃavand	ezafe
+این سهم از همه لحاظ مناسب خرید و سرمایهگذاری میباشد	ʔiːn sahm ʔaz hame lahaːz monaːsebe xaɾiːd va saɾmaːjeɡozaːɾiː miːbaːʃad	ezafe
+تصویر از شدت سیل حکایت دارد	tasviːɾ ʔaz ʃeddate sejl hekaːjat daːɾad	ezafe
+جلوی پرندهای که بالش شکسته از پرواز گفتن گناه است	d͡ʒeloje paɾandeʔiː ke baːlaʃ ʃekaste ʔaz paɾvaːz ɡoftan ɡonaːh ʔast	homograph
+هماکنون چند هزار نفر در کارگاه بافندگی در بخش دوخت بالش مشغول بهکار هستند	hamaknuːn t͡ʃand hezaːɾ nafaɾ daɾ kaːɾɡaːhe baːfandeɡiː daɾ baxʃe duːxte baːleʃ maʃquːlbe kaːɾ hastand	homograph
+قبل از خرید دستگاه بخور باید بدانید که آن را به چه منظور میخواهید تهیه کنید	qabl ʔaz xaɾiːde dastɡaːhe boxuːɾ baːjad bedaːniːd ke ʔaːn ɾaː be t͡ʃe manzuːɾ miːxaːhiːd tahiːjje koniːd	homograph
+میدانیم حقوق تو بخور نمیر است اما در ایران بمان	miːdaːniːm hoquːqe to boxoɾ namiːɾ ʔast ʔammaː daɾ ʔiːɾaːn bemaːn	homograph
+چند بخور نخور ورزشی برای داشتن اندامی متناسب در پایگاه اطلاعرسانی سلامت منتشر شد	t͡ʃand boxoɾ naxoɾe vaɾzeʃiː baɾaːje daːʃtane ʔandaːmiː motanaːseb daɾ paːjɡaːhe ʔettelaːʔɾesaːniːje salaːmat montaʃeɾ ʃod	homograph
+تنها راه رهایی از چرخه بازی من بدو آهو بدو تسلط به حسابداری و سرمایهگذاری است	tanhaː ɾaːhe ɾahaːjiː ʔaz t͡ʃaɾxeje baːziːje man bodo ʔaːhuː bodo tasallot be hesaːbdaːɾiː va saɾmaːjeɡozaːɾiː ʔast	homograph
+در این زمانه باید بدوی و تلاش بیوقفه کنی تا عقب نمانی	daɾ ʔiːn zamaːne baːjad bedaviː va talaːʃe biːvaqfe koniː taː ʔaqab namaːniː	homograph
+پدر که بیاحترامی را برنمیتابید براق شد و من را از خانه بیرون کرد	pedaɾ ke biːʔehteɾaːmiː ɾaː baɾnemiːtaːbiːd boɾaːq ʃod va man ɾaː ʔaz xaːne biːɾuːn kaɾd	homograph
+پیرزن ظرف نقره را آنقدر سابید تا براق شد	piːɾezan zaɾfe noqɾe ɾaː ʔaːnqadɾ saːbiːd taː baɾɾaːq ʃod	homograph
+تغییر بردار مکان میان دو لحظه متفاوت را بردار جابجایی میگویند	taqjiːɾe boɾdaːɾe makaːn miːjaːne do lahzeje motafaːvet ɾaː boɾdaːɾe d͡ʒaːbed͡ʒaːjiː miːɡuːjand	homograph
+به کارت برس و وقت را هدر نده	be kaːɾat beɾes va vaqt ɾaː hadaɾ nade	homograph
+برگ برنده انسانهای موفق این است که برای کارهایشان دلیل و هدف دارند	baɾɡe baɾandeje ʔensaːnhaːje movaffaq ʔiːn ʔast ke baɾaːje kaːɾhaːjeʃaːn daliːl va hadaf daːɾand	homograph
+هیئت داوران برنده این سری مسابقات طراحی را اعلام کردند	hejʔate daːvaɾaːn baɾandeje ʔiːn seɾiː mosaːbeqaːte taɾɾaːhiː ɾaː ʔeʔlaːm kaɾdand	homograph
+در فیزیک کوانتوم فضای بینهایت بعدی پیوسته به فضای هیلبرت معروف است	daɾ fiːziːke kuːaːntom fazaːje biːnahaːjat boʔdiːe pejvaste be fazaːje hiːlbeɾt maʔɾuːf ʔast	homograph
+چند روز بعد اتفاق عجیبی افتاد	t͡ʃand ɾuːz baʔd ʔettefaːqe ʔad͡ʒiːbiː ʔoftaːd	homograph
+نفر بعدی من بودم	nafaɾe baʔdiː man buːdam	homograph
+لوبیا از اصلیترین منابع کربوهیدراتهای پیچیده و پر فیبر و پروتئین است	luːbiːjaː ʔaz ʔasliːtaɾiːn manaːbeʔe kaɾbohiːdɾaːthaːje piːt͡ʃiːde va poɾ fiːbɾ va poɾoteʔiːn ʔast	homograph
+معمولاً بدن جوجه از کرک و پر غیردائمی پوشیده شده که با بزرگتر شدن پرنده ریخته و پر دائمی جایگزین آن میشود	maʔmuːlan badane d͡ʒuːd͡ʒe ʔaz koɾk va paɾe qejɾedaːʔemiː puːʃiːde ʃode ke baː bozoɾɡtaɾ ʃodane paɾande ɾiːxte va paɾe daːʔemiː d͡ʒaːjɡoziːne ʔaːn miːʃavad	homograph
+نماینده مردم قم در مجلس شورای اسلامی خواست که آثار دفاع مقدس بدون فوت وقت حفظ شود	namaːjandeje maɾdome qom daɾ mad͡ʒlese ʃoɾaːje ʔeslaːmiː xaːst ke ʔaːsaːɾe defaːʔe moqaddas beduːne fote vaqt hefz ʃavad	homograph
+به شاگردش گفت چشمهایت را باز کن تا فوت و فن کار را یاد بگیری	be ʃaːɡeɾdaʃ ɡoft t͡ʃaʃmhaːjat ɾaː baːz kon taː fuːt va fanne kaːɾ ɾaː jaːd beɡiːɾiː	homograph
+استاد هنگام گذاشتن کاسهها در کوره بهآن ها چند فوت میکرد	ʔostaːd henɡaːme ɡozaːʃtane kaːsehaː daɾ kuːɾe be ʔaːnhaː t͡ʃand fuːt miːkaɾd	homograph
+جرم دندان باعث تخریب لثه و بافتهای نگهدارنده دندان میشود	d͡ʒeɾme dandaːne baːʔese taxɾiːbe lase va baːfthaːje neɡahdaːɾandeje dandaːn miːʃavad	homograph
+درمان معتادان در زندان منجر به کاهش جرم میشود	daɾmaːne moʔtaːdaːn daɾ zendaːn mond͡ʒaɾ be kaːheʃe d͡ʒoɾm miːʃavad	homograph
+کاهش جرم و بزه مهمترین هدف تشکیل معاونت فرهنگی قوه قضاییه اعلام شد	kaːheʃe d͡ʒoɾm va bezeh mohemtaɾiːn hadafe taʃkiːle moʔaːvenate faɾhanɡiːje qovveje qazaːjiːje ʔeʔlaːm ʃod	homograph
+امسال میانگین دستمزد بنا و کارگر ساختمانی پانزده درصد افزایش یافت	ʔemsaːl miːjaːnɡiːne dastmozde bannaː va kaːɾɡaɾe saːxtemaːniː paːnzdah daɾsad ʔafzaːjeʃ jaːft	homograph
+معتادانی که به افسردگی و اختلال شخصیت دو قطبی مبتلا هستند سختتر قادر به ترک خواهند بود	moʔtaːdaːniː ke be ʔafsoɾdeɡiː va ʔextelaːle ʃaxsiːjjate do qotbiː mobtalaː hastand saxttaɾ qaːdeɾ be taɾk xaːhand buːd	homograph
+پس از ترک سیگار میتوانید مزه غذاها را بهتر درک کنید	pas ʔaz taɾke siːɡaːɾ miːtavaːniːd mazzeje qazaːhaː ɾaː behtaɾ daɾk koniːd	homograph
+مادر تنگ بلور را روی طاقچه گذاشت	maːdaɾ tonɡe boluːɾ ɾaː ɾuːje taːqt͡ʃe ɡozaːʃt	homograph
+شلواری که مغازهدار آورد کمی تنگ بود	ʃalvaːɾiː ke maqaːzedaːɾ ʔaːvaɾd kamiː tanɡ buːd	homograph
+علیزاده دور نخست با قرعه استراحت مواجه شد و سپس در دیدار با تکواندوکاری از کشور آلمان مغلوب وی شد و از دور مسابقات کنار رفت	ʔaliːzaːde doɾe naxost baː qoɾʔeje ʔesteɾaːhat movaːd͡ʒeh ʃod va sepas daɾ diːdaːɾ baː tekvaːndokaːɾiː ʔaz keʃvaɾe ʔaːlmaːn maqluːbe vej ʃod va ʔaz doɾe mosaːbeqaːt kenaːɾ ɾaft	homograph
+کدخدای ده ما هرچه بگوید حق است	kadxodaːje dehe maː haɾt͡ʃe beɡuːjad haqq ʔast	homograph
+استفاده از ده انگشت در تایپ شیوه سریع و صحیح تایپ کردن است	ʔestefaːde ʔaz dah ʔanɡoʃt daɾ taːjp ʃiːveje saɾiːʔ va sahiːhe taːjp kaɾdan ʔast	homograph
+امروزه شش گروه از خزندگان در دنیا زیست میکنند که همگی با شش تنفس میکنند	ʔemɾuːze ʃeʃ ɡoɾuːh ʔaz xazandeɡaːn daɾ donjaː ziːst miːkonand ke hameɡiː baː ʃoʃ tanaffos miːkonand	homograph
+تولهسگها تنها شش هفته شیر میخورند	tuːlesaɡhaː tanhaː ʃeʃ hafte ʃiːɾ miːxoɾand	homograph
+در فرهنگ عامیانه گل رز نشانه عشق و دوستی میباشد	daɾ faɾhanɡe ʔaːmiːjaːne ɡole ɾoz neʃaːneje ʔeʃq va duːstiː miːbaːʃad	homograph
+کردار شخص میتواند نشانه خرد او باشد	keɾdaːɾe ʃaxs miːtavaːnad neʃaːneje xeɾade ʔuː baːʃad	homograph
+میتوانید میوههای خرد شده را نیز به مخلوط سالاد اضافه کنید	miːtavaːniːd miːvehaːje xoɾd ʃode ɾaː niːz be maxluːte saːlaːd ʔezaːfe koniːd	homograph
+یکی از موانع سقوط انسان که از نظر قرآن کریم در ردیف نماز است خدمت به خلق خداست	jekiː ʔaz mavaːneʔe soquːte ʔensaːn ke ʔaz nazaɾe qoɾʔaːne kaɾiːm daɾ ɾadiːfe namaːz ʔast xedmat be xalqe xodaːst	homograph
+غذاها بر روی خلق و خو و حالات روحی افراد اثر دارند	qazaːhaː baɾ ɾuːje xolq va xuː va haːlaːte ɾuːhiːje ʔafɾaːd ʔasaɾ daːɾand	homograph
+نان تست فرانسوی یک صبحانه کامل است	naːne toste faɾaːnsaviː jek sobhaːneje kaːmel ʔast	homograph
+مطالعه موضع ساختار و چگونگی تحول از آغاز تا پایان اجرام آسمانی تعریفی از علم ستارهشناسی نوین است	motaːleʔeje mozeʔ saːxtaːɾ va t͡ʃeɡuːneɡiːje tahavvol ʔaz ʔaːqaːz taː paːjaːn ʔad͡ʒɾaːme ʔaːsemaːniː taʔɾiːfiː ʔaz ʔelme setaːɾeʃenaːsiːje noviːn ʔast	homograph
+عرق پیشانیاش را با آستین پاک کرد	ʔaɾaqe piːʃaːniːjaʃ ɾaː baː ʔaːstiːn paːk kaɾd	homograph
+ادای دین و پرداخت قرض مومن از سوی او مایه برکت در رزق و روزی شماست	ʔadaːje dejn va paɾdaːxte qaɾze moʔmen ʔaz suːje ʔuː maːjeje baɾekat daɾ ɾezq va ɾuːziːje ʃomaːst	homograph
+نیروهای امنیتی افغانستان چندین تن مواد منفجره کشف و ضبط کردند	niːɾuːhaːje ʔamniːjjatiːje ʔafqaːnestaːn t͡ʃandiːn ton mavaːdde monfad͡ʒeɾe kaʃf va zabt kaɾdand	homograph
+در شرایط مذکور بانک نسبت به رفع سوئاثر از سابقه چک برگشتی اقدام مینماید	daɾ ʃaɾaːjete mazkuːɾ baːnk nesbat be ɾafʔe suːʔasaɾ ʔaz saːbeqeje t͡ʃeke baɾɡaʃtiː ʔeqdaːm miːnemaːjad	homograph
+مادر در عوض اینکه جویای حال فرزند شود یک چک به بچه زد	maːdaɾ daɾ ʔavaze ʔiːnke d͡ʒuːjaːje haːle faɾzand ʃavad jek t͡ʃak be bat͡ʃt͡ʃe zad	homograph
+چکچک باران روی شیشه مانند آوازی آرامشبخش بود	t͡ʃekt͡ʃeke baːɾaːn ɾuːje ʃiːʃe maːnande ʔaːvaːziː ʔaːɾaːmeʃbaxʃ buːd	homograph
+هیچ در و گوهری نمیتواند با نعمت پدر و مادر برابری نماید	hiːt͡ʃ doɾ va ɡohaɾiː nemiːtavaːnad baː neʔmate pedaɾ va maːdaɾ baɾaːbaɾiː namaːjad	homograph
+نتیجه این کاوش زنجیرهای از پدیدههای شکلگیری ستارهای را نشان میدهد و مانند گردنبندی از درهای خیرهکننده در عمق کهکشان راه شیری میدرخشد	natiːd͡ʒeje ʔiːn kaːvoʃ zand͡ʒiːɾeʔiː ʔaz padiːdehaːje ʃeklɡiːɾiːje setaːɾeʔiː ɾaː neʃaːn miːdahad va maːnande ɡaɾdanbandiː ʔaz doɾhaːje xiːɾekonande daɾ ʔomqe kahkeʃaːne ɾaːhe ʃiːɾiː miːdeɾaxʃad	homograph
+در را باز کن	daɾ ɾaː baːz kon	homograph
+نها حسن این کار صدا و سیما آن است که باعث شده عدهای از هنرمندان در بازی منچ دوز و شطرنج تبحر پیدا کنند	tanhaː hosne ʔiːn kaːɾe sedaː va siːmaː ʔaːn ʔast ke baːʔes ʃode ʔeddeʔiː ʔaz honaɾmandaːn daɾ baːziːje ment͡ʃ duːz va ʃatɾand͡ʒ tabahhoɾ pejdaː konand	homograph
+امام حسن در شب نیمه ماه رمضان سال سوم هجرت در مدینه متولد شد	ʔemaːm hasan daɾ ʃabe niːmeje maːhe ɾamezaːne saːle sevvome hed͡ʒɾat daɾ madiːne motevalled ʃod	homograph
+برای تهیه سوپ جو ابتدا بلغور جو را به مدت دو ساعت میخیسانیم	baɾaːje tahiːjjeje suːpe d͡ʒo ʔebtedaː balquːɾe d͡ʒo ɾaː be moddate do saːʔat miːxiːsaːniːm	homograph
+نقشه این بود که از جلوی مدافعان تیم حریف جم نخورد	naqʃe ʔiːn buːd ke ʔaz d͡ʒeloje modaːfeʔaːne tiːme haɾiːf d͡ʒom naxoɾd	homograph
+مدیریت کنونی در تهیه حتی یک پرس غذای مناسب برای ملیپوشان ناتوان است	modiːɾiːjjate konuːniː daɾ tahiːjjeje hattaː jek poɾs qazaːje monaːseb baɾaːje melliːpuːʃaːn naːtavaːn ʔast	homograph
+رد پای مافیای موسیقی را کجا باید جست	ɾadde paːje maːfiːjaːje muːsiːqiː ɾaː kod͡ʒaː baːjad d͡ʒost	homograph
+مرد مجنون ناگهان از جای جست	maɾde mad͡ʒnuːn naːɡahaːn ʔaz d͡ʒaːj d͡ʒast	homograph
+سعدی حافظ و مولانا در اشعارشان از جفای خلق و جور زمانه بسیار گفتهاند	saʔdiː haːfez va molaːnaː daɾ ʔaʃʔaːɾeʃaːn ʔaz d͡ʒafaːje xalq va d͡ʒoɾe zamaːne besiːjaːɾ ɡofteʔand	homograph
+جور دیگر باید دید	d͡ʒuːɾe diːɡaɾ baːjad diːd	homograph
+امروز میتوان با چون و چرا سانسورها را شکست و این مهمترین مبارزه است	ʔemɾuːz miːtavaːn baː t͡ʃon va t͡ʃeɾaː saːnsoɾhaː ɾaː ʃekast va ʔiːn mohemtaɾiːn mobaːɾeze ʔast	homograph
+در آنسوی پرچین گوسفندان در حال چرا بودند	daɾ ʔaːnsuːje paɾt͡ʃiːn ɡuːsfandaːn daɾ haːle t͡ʃaɾaː buːdand	homograph
+خسته شدم از نیرنگ زمانه و این بازی شوم	xaste ʃodam ʔaz nejɾanɡe zamaːne va ʔiːn baːziːje ʃuːm	homograph
+او بسته را دیروز پست کرد	ʔuː baste ɾaː diːɾuːz post kaɾd	homograph
+از مرام این مردم پست در حیرتم	ʔaz maɾaːme ʔiːn maɾdome past daɾ hejɾatam	homograph
+بیت رهبری نام سازمانی حکومتی در جمهوری اسلامی ایران است که زیر نظر رهبر ایران اداره میشود	bejte ɾahbaɾiː naːme saːzmaːniː hokuːmatiː daɾ d͡ʒomhuːɾiːje ʔeslaːmiːje ʔiːɾaːn ʔast ke ziːɾe nazaɾe ɾahbaɾe ʔiːɾaːn ʔedaːɾe miːʃavad	homograph
+یادگیری این درس مثل آب خوردن است	jaːdɡiːɾiːje ʔiːn daɾs mesle ʔaːb xoɾdan ʔast	homograph
+لطفعلیخان زند واپسین فرمانروای زند بود	lotfʔaliːxaːne zand vaːpasiːn faɾmaːnɾavaːje zand buːd	homograph
+زبان چون درندهای است که اگر آن را واگذارند بگزد و زخم زند	zabaːn t͡ʃon daɾandeʔiː ʔast ke ʔaɡaɾ ʔaːn ɾaː vaːɡozaːɾand beɡazad va zaxm zanad	homograph
+تاریخ در سرنوشت ما و تهذیب نفس ما فوقالعاده تاثیر دارد	taːɾiːx daɾ saɾneveʃte maː va tahziːbe nafse maː foqolaːde taʔsiːɾ daːɾad	homograph
+نفس عمیق بکشید	nafase ʔamiːq bekeʃiːd	homograph
+به فرزند خود کمک کنید تا حتی اولین پک را به سیگار نزند	be faɾzande xod komak koniːd taː hattaː ʔavvaliːn pok ɾaː be siːɡaːɾ nazanad	homograph
+در قرعهکشی شرکت کنید تا برنده یک پک وسایل بازی شوید	daɾ qoɾʔekeʃiː ʃeɾkat koniːd taː baɾandeje jek pak vasaːjele baːziː ʃaviːd	homograph
+خاستگاه تمدن و امپراطوری روم شهر باستانی رم در ایتالیا است	xaːstɡaːhe tamaddon va ʔempeɾaːtuːɾiːje ɾuːm ʃahɾe baːstaːniːje ɾom daɾ ʔiːtaːliːjaː ʔast	homograph
+شستش خبردار شد که رقیب چیزی برای خوردن پیدا کرده است	ʃastaʃ xabaɾdaːɾ ʃod ke ɾaqiːb t͡ʃiːziː baɾaːje xoɾdan pejdaː kaɾde ʔast	homograph
+لباسها را شست و روی طناب پهن کرد	lebaːshaː ɾaː ʃost va ɾuːje tanaːb pahn kaɾd	homograph
+درخت بنه بیشتر در استانهای کهگیلویه و بویراحمد ایلام و کردستان میروید	deɾaxte bane biːʃtaɾ daɾ ʔostaːnhaːje kohɡiːluːje va bojeɾahmad ʔiːlaːm va koɾdestaːn miːɾuːjad	homograph
+بر حسب اتفاق با آن گروه آشنا شدم	baɾ hasbe ʔettefaːq baː ʔaːn ɡoɾuːh ʔaːʃnaː ʃodam	homograph
+حاکم باید مراد همه را بجوید و حاجات هر کس را به حسب مراد برآورده گرداند	haːkem baːjad moɾaːde hame ɾaː bed͡ʒuːjad va haːd͡ʒaːte haɾ kas ɾaː be hasabe moɾaːd baɾʔaːvaɾde ɡaɾdaːnad	homograph
+رونق این خطه به حسب مراد زیاد گشت	ɾonaqe ʔiːn xette be hasabe moɾaːd ziːjaːd ɡaʃt	homograph
+نمودار وزن بر حسب جرم را بکشید	nemuːdaːɾe vazn baɾ hasbe d͡ʒeɾm ɾaː bekeʃiːd	homograph
+هر دو روی پارچه کاملاً ضخیم زبر و پشمی مانند الیاف مصنوعی است	haɾ do ɾuːje paːɾt͡ʃe kaːmelan zaxiːm zebɾ va paʃmiː maːnande ʔaljaːfe masnuːʔiː ʔast	homograph
+دستهای زبر و زمختی داشت	dasthaːje zebɾ va zomoxtiː daːʃt	homograph
+این زیر و زبر شدن نه اتفاق نامیمونی است و نه نشانه شکست	ʔiːn ziːɾ va zebaɾ ʃodan na ʔettefaːqe naːmejmuːniː ʔast va na neʃaːneje ʃekast	homograph
+استخوان زند زبرین در سمت خارجی ساعد موازی زند زیرین میباشد و مچ دست را به آرنج متصل مینماید	ʔostoxaːne zande zebaɾiːn daɾ samte xaːɾed͡ʒiːje saːʔed movaːziːje zande ziːɾiːn miːbaːʃad va mot͡ʃe dast ɾaː be ʔaːɾand͡ʒ mottasel miːnemaːjad	homograph
+راهبها و راهبهها در یک دیر تحت سرپرستی یک رئیس مرد یا زن زندگی میکنند	ɾaːhebhaː va ɾaːhebehaː daɾ jek dejɾ tahte saɾpaɾastiːje jek ɾaʔiːse maɾd jaː zan zendeɡiː miːkonand	homograph
+درون دیوارهای دیر باغچههای صیفیجات ایجاد میشد	daɾuːne diːvaːɾhaːje dejɾ baːqt͡ʃehaːje sejfiːd͡ʒaːt ʔiːd͡ʒaːd miːʃod	homograph
+استقلال نتایج خوب خود در آسیا را دیر شروع کرد	ʔesteqlaːl nataːjed͡ʒe xuːbe xod daɾ ʔaːsiːjaː ɾaː diːɾ ʃoɾuːʔ kaɾd	homograph
+شمش در اقتصاد بسیار قوی است	ʃammaʃ daɾ ʔeqtesaːd besiːjaːɾ qaviː ʔast	homograph
+داوطلب ریاست مجلس میشوم ولو اینکه غیر خودم کسی به من رای ندهد	daːvtalabe ɾiːjaːsate mad͡ʒles miːʃavam valo ʔiːnke qejɾe xodam kasiː be man ɾaʔj nadahad	homograph
+نفسش را با حرص بیرون داد و روی صندلی ولو شد	nafasaʃ ɾaː baː heɾs biːɾuːn daːd va ɾuːje sandaliː velo ʃod	homograph
+به میوهای خوشطعم و عطر از خانواده سیب است	beh miːveʔiː xoʃtaʔm va ʔatɾ ʔaz xaːnevaːdeje siːb ʔast	homograph
+به سرزمین کهن خوش آمدید	be saɾzamiːne kohan xoʃ ʔaːmadiːd	homograph
+این حیوان فاقد دم میباشد	ʔiːn hejvaːn faːqede dom miːbaːʃad	homograph
+دمش گرم و سرش خوش باشد	damaʃ ɡaɾm va saɾaʃ xoʃ baːʃad	homograph
+گرچه دم از مردانگی میزد ولی بعدها معلوم شد که نامرد بود	ɡaɾt͡ʃe dam ʔaz maɾdaːneɡiː miːzad valiː baʔdhaː maʔluːm ʃod ke naːmaɾd buːd	homograph
+برنامهریزی جهت نظافت و رفت و روب معابر از جمله وظایف سازمان مدیریت پسماند است	baɾnaːmeɾiːziː d͡ʒahate nezaːfat va ɾoft va ɾuːbe maʔaːbeɾ ʔaz d͡ʒomle vazaːjefe saːzmaːne modiːɾiːjjate pasmaːnd ʔast	homograph
+سرانجام رفت و پشت سرش را هم نگاه نکرد	saɾand͡ʒaːm ɾaft va poʃte saɾaʃ ɾaː ham neɡaːh nakaɾd	homograph
+فرعون با سخنی که از موسی و هارون شنید تعجب کرد زیرا اگر منظورشان از رب عالمیان خدای واجبالوجود است که او رب عالمیان نیست بلکه تنها رب یک عالم است	feɾʔon baː soxaniː ke ʔaz muːsaː va haːɾuːn ʃeniːd taʔad͡ʒd͡ʒob kaɾd ziːɾaː ʔaɡaɾ manzuːɾeʃaːn ʔaz ɾabbe ʔaːlamiːjaːn xodaːje vaːd͡ʒebolvod͡ʒuːd ʔast ke ʔuː ɾabbe ʔaːlamiːjaːn niːst balke tanhaː ɾabbe jek ʔaːlam ʔast	homograph
+برای تهیه رب انار اگر دانههای انار تحت فشار بیش از حد قرار گیرند آب انار تلخ میشود	baɾaːje tahiːjjeje ɾobe ʔanaːɾ ʔaɡaɾ daːnehaːje ʔanaːɾ tahte feʃaːɾe biːʃ ʔaz had qaɾaːɾ ɡiːɾand ʔaːbe ʔanaːɾ talx miːʃavad	homograph
+طرز مصرف این دارو بدین شکل است که هر پنج دقیقه یک حب زیر زبان گذاشته میشود و حداکثر تا سه حب مورد استفاده قرار میگیرد	taɾze masɾafe ʔiːn daːɾuː bediːn ʃekl ʔast ke haɾ pand͡ʒ daqiːqe jek hab ziːɾe zabaːn ɡozaːʃte miːʃavad va haddeʔaksaɾ taː se hab moɾede ʔestefaːde qaɾaːɾ miːɡiːɾad	homograph
+طباطبایی حب خدا به بنده را احسان خاص او دانسته است که از صفات فعل الهی اوست	tabaːtabaːjiː hobbe xodaː be bande ɾaː ʔehsaːne xaːsse ʔuː daːneste ʔast ke ʔaz sefaːte feʔle ʔelaːhiːje ʔuːst	homograph
+سعی کن درست را درست و اصولی بخوانی	saʔj kon daɾsat ɾaː doɾost va ʔosuːliː bexaːniː	homograph
+هفت پیشگویی بزرگ و مشهور تاریخ درست از آب در آمدند	haft piːʃɡuːjiːje bozoɾɡ va maʃhuːɾe taːɾiːx doɾost ʔaz ʔaːb daɾ ʔaːmadand	homograph
+نود درصد جوابهای سوالات مربوط به فصل آخر درست بودهاند	navad daɾsade d͡ʒavaːbhaːje soʔaːlaːte maɾbuːt be fasle ʔaːxaɾ doɾost buːdeʔand	homograph
+نامهای که امروز از معلمتان دریافت کردم مربوط به وضعیت درست بود	naːmeʔiː ke ʔemɾuːz ʔaz moʔallemetaːn daɾjaːft kaɾdam maɾbuːt be vazʔiːjjate daɾsat buːd	homograph
+امشب ماه از کنار زهره عبور میکند	ʔemʃab maːh ʔaz kenaːɾe zohɾe ʔobuːɾ miːkonad	homograph
+با شنیدن خبر حمله سپاه دشمن زهرهاش آب شد	baː ʃeniːdane xabaɾe hamleje sepaːhe doʃman zahɾeʔaʃ ʔaːb ʃod	homograph
+یکی از بلمها که فرمانده داخل آن بود به سمت کمین دشمن حرکت کرد	jekiː ʔaz balamhaː ke faɾmaːnde daːxele ʔaːn buːd be samte kamiːne doʃman haɾekat kaɾd	homograph
+جنرال ارشد به سمت فرماندهی نیروهای ناتو منصوب شد	d͡ʒeneɾaːle ʔaɾʃad be semate faɾmaːndehiːje niːɾuːhaːje naːto mansuːb ʃod	homograph
+رحم بر پلنگ تیزدندان ستمکاری بر گوسفندان است	ɾahm baɾ palanɡe tiːzdandaːn setamkaːɾiː baɾ ɡuːsfandaːn ʔast	homograph
+از روز شنبه به مدت یک هفته میتوانی کارت ورود به جلسه دریافت کنی	ʔaz ɾuːze ʃanbe be moddate jek hafte miːtavaːniː kaːɾte voɾuːd be d͡ʒalase daɾjaːf tkoniː	homograph
+گروههای کر هم توانایی خواندن با همراهی ساز را دارند و هم بدون آن	ɡoɾuːhhaːje koɾ ham tavaːnaːjiːe xaːndan baː hamɾaːhiːje saːz ɾaː daːɾand va ham beduːne ʔaːn	homograph
+مراسم تشییع پیکر فلورانس لیپت خواننده و مدرس آواز کر در مقابل تالار وحدت برگزار شد	maɾaːseme taʃjiːʔe pejkaɾe feloɾaːnse liːpt xaːnande va modaɾɾese ʔaːvaːze koɾ daɾ moqaːbele taːlaːɾe vahdat baɾɡozaːɾ ʃod	homograph
+تعیین محل اردوگاه و نحوه رفتار با اسرای جنگی را به شور گذاشت	taʔjiːne mahalle ʔoɾduːɡaːh va nahveje ɾaftaːɾ baː ʔosaɾaːje d͡ʒanɡiː ɾaː be ʃoɾ ɡozaːʃt	homograph
+باید به شور و شعف مردم برای حمایت از نظام و انقلاب احترام گذاشت	baːjad be ʃuːɾ va ʃaʔafe maɾdom baɾaːje hemaːjat ʔaz nezaːm va ʔenqelaːb ʔehteɾaːm ɡozaːʃt	homograph
+رود کابل پس از پیوستن به رود سند پاکستان به اقیانوس هند میریزد	ɾuːde kaːbol pas ʔaz pejvastan be ɾuːde sende paːkestaːn be ʔoqjaːnuːse hend miːɾiːzad	homograph
+در نُه ماهگی نوزاد هنوز غذای نسبتاً سفت نمیتواند بخورد و باید همه غذاها بسیار آبکی و شل باشند	daɾ noh maːheɡiː nozaːd hanuːz qazaːje nesbatan seft nemiːtavaːnad bexoɾad va baːjad hameje qazaːhaː besiːjaːɾ ʔaːbakiː va ʃol baːʃand	homograph
+خدمت سرکار علیه بانو ژاکلین رفتم	xedmate saɾkaːɾ ʔelliːje baːnuː aːkliːn ɾaftam	homograph
+استفاده از قوه نظامی علیه مردم در اوکراین جنایت است	ʔestefaːde ʔaz qovveje nezaːmiː ʔalajhe maɾdom daɾ ʔokɾaːjn d͡ʒenaːjat ʔast	homograph
+مرد عیارپیشه باید جوانمرد باشد و حاضرجواب	maɾde ʔajjaːɾpiːʃe baːjad d͡ʒavaːnmaɾd baːʃad va haːzeɾd͡ʒavaːb	homograph
+یک مرد تمامعیار پشتکار دارد و متواضع است	jek maɾde tamaːmʔajaːɾ poʃtekaːɾ daːɾad va motavaːzeʔ ʔast	homograph
+وی مردی نیکوکار بود که شکم کودکان یتیم را سیر میکرد	vej maɾdiː niːkuːkaːɾ buːd ke ʃekame kuːdakaːne jatiːm ɾaː siːɾ miːkaɾd	homograph
+در گذشته شکر قهوهای یا همان شکر سرخ را برای درمان برخی بیماریها استفاده میکردند	daɾ ɡozaʃte ʃekaɾe qahveʔiː jaː hamaːn ʃekaɾe soɾx ɾaː baɾaːje daɾmaːne baɾxiː biːmaːɾiːhaː ʔestefaːde miːkaɾdand	homograph
+شکر خدا که زندگیام با اندک حقوقی میگذرد و محتاج کسی نیستم	ʃokɾe xodaː ke zendeɡiːjam baː ʔandak hoquːqiː miːɡozaɾad va mohtaːd͡ʒe kasiː niːstam	homograph
+همانا راستی فرخنده و بابرکت است و دروغ شوم و نامبارک است	hamaːnaː ɾaːstiː faɾxonde va baːbaɾekat ʔast va doɾuːq ʃuːm va naːmobaːɾak ʔast	homograph
+اگر تنهاترین تنها شوم باز هم خدا هست	ʔaɡaɾ tanhaːtaɾiːn tanhaː ʃavam baːz ham xodaː hast	homograph
+اگر دوباره رئیسجمهور شوم و رای بیاورم قانون اساسی را اصلاح میکنم	ʔaɡaɾ dobaːɾe ɾaʔiːsd͡ʒomhuːɾ ʃavam va ɾaʔj biːjaːvaɾam qaːnuːne ʔasaːsiː ɾaː ʔeslaːh miːkonam	homograph
+چند روز پیش داستانی نقل کردم	t͡ʃand ɾuːz piːʃ daːstaːniː naql kaɾdam	homograph
+حتی نقل به مضمون نیز باید با حفظ امانت در رساندن منظور نویسنده باشد	hattaː naql be mazmuːn niːz baːjad baː hefze ʔamaːnat daɾ ɾesaːndane manzuːɾe neviːsande baːʃad	homograph
+مادر داماد روی سر زوج جوان نقل و نبات میپاشید	maːdaɾe daːmaːd ɾuːje saɾe zod͡ʒe d͡ʒavaːn noql va nabaːt miːpaːʃiːd	homograph
+اگر میخواهی به خدا نزدیک شوی از خود دور باش	ʔaɡaɾ miːxaːhiː be xodaː nazdiːk ʃaviː ʔaz xod duːɾ baːʃ	homograph
+زن با خشم با شوی خود سخن میگفت	zan baː xaʃm baː ʃuːje xod soxan miːɡoft	homograph
+جمال و کمال خدا عرضی و عاریهای نیست	d͡ʒamaːl va kamaːle xodaː ʔaɾaziː va ʔaːɾiːjeʔiː niːst	homograph
+قبل از شروع نبرد در برلین ارتش شوروی موفق شد با پیروزی در نبردهای کوچکتر برلین را محاصره کند	qabl ʔaz ʃoɾuːʔe nabaɾd daɾ beɾliːn ʔaɾteʃe ʃoɾaviː movaffaq ʃod baː piːɾuːziː daɾ nabaɾdhaːje kuːt͡ʃaktaɾ beɾliːn ɾaː mohaːseɾe konad	homograph
+امتیاز مهم خط نسخ در رعایت نسبت است که یکی از قواعد مهم خوشنویسی میباشد و موجب زیبایی خط است	ʔemtiːjaːze mohemme xate nasx daɾ ɾaʔaːjate nesbat ʔast ke jekiː ʔaz qavaːʔede mohemme xoʃneviːsiː miːbaːʃad va mod͡ʒebe ziːbaːjiːe xat ʔast	homograph
+قدمت روی چشم	qadamat ɾuːje t͡ʃeʃm	homograph
+سعی کن قدمت را بلند و متین برداری	saʔj kon qadamat ɾaː boland va matiːn baɾdaːɾiː	homograph
+با استفاده از سنگنگارههای واقع در پاسارگاد میتوان قدمت آن را به تقریب حدس زد	baː ʔestefaːde ʔaz sanɡneɡaːɾehaːje vaːqeʔ daɾ paːsaːɾɡaːd miːtavaːn qedmate ʔaːn ɾaː be taqɾiːb hads zad	homograph
+زمین سر بود و شرایط سختی داشتیم	zamiːn soɾ buːd va ʃaɾaːjete saxtiː daːʃtiːm	homograph
+در یکی از روستاهای دورافتاده کودکی متولد شد که دو سر داشت	daɾ jekiː ʔaz ɾuːstaːhaːje duːɾʔoftaːde kuːdakiː motevalled ʃod ke do saɾ daːʃt	homograph
+مشخص بود که حقهای زیر سر داشت	moʃaxxas buːd ke hoqqeʔiː ziːɾe saɾ daːʃt	homograph
+بازار تاریخی تهران هر دم از هرم آتش تب میکند	baːzaːɾe taːɾiːxiːje tehɾaːn haɾ dam ʔaz hoɾme ʔaːtaʃ tab miːkonad	homograph
+فکهای دریای خزر مهاجرت سالانه منظمی دارند	fokhaːje daɾjaːje xazaɾ mohaːd͡ʒeɾate saːlaːneje monazzamiː daːɾand	homograph
+دندان عقل فک پایین باید قبل از جراحی فک کشیده شود	dandaːne ʔaqle fakke paːjiːn baːjad qabl ʔaz d͡ʒaɾɾaːhiːje fak keʃiːde ʃavad	homograph
+بررسی حساب بانکی افراد نیازمند حکم قضایی است	baɾɾesiːje hesaːbe baːnkiːje ʔafɾaːd niːjaːzmande hokme qazaːjiː ʔast	homograph
+از درد مردم و کسی به دادم نرسید	ʔaz daɾd moɾdam va kasiː be daːdam naɾesiːd	homograph
+از درد مردم غمی بزرگ در سینه دارم	ʔaz daɾde maɾdom qamiː bozoɾɡ daɾ siːne daːɾam	homograph
+از درد مردم و جور ظالم سینهای مالامال از غم دارم	ʔaz daɾde maɾdom va d͡ʒoɾe zaːlem siːneʔiː maːlaːmaːl ʔaz qam daːɾam	homograph
+سهممان را بستان و با دستی پر به وطن بازگرد	sahmemaːn ɾaː besetaːn va baː dastiː poɾ be vatan baːzɡaɾd	homograph
+برای گردش و تفریح به باغ و بستان برو	baɾaːje ɡaɾdeʃ va tafɾiːh be baːq va bostaːn boɾo	homograph
+چاهی که بهر دیگری کند در نهایت به ضرر خودش شد	t͡ʃaːhiː ke bahɾe diːɡaɾiː kand daɾ nahaːjat be zaɾaɾe xodaʃ ʃod	homograph
+کی در شلوغترین ساعات روز جرئت کرد به بانک دستبرد بزند	kiː daɾ ʃoluːqtaɾiːn saːʔaːte ɾuːz d͡ʒoɾʔat kaɾd be baːnk dastboɾd bezanad	homograph
+مادر شهید مذکور کی متوجه شد که پسرش به شهادت رسیده است	maːdaɾe ʃahiːde mazkuːɾ kej motevad͡ʒd͡ʒeh ʃod ke pesaɾaʃ be ʃahaːdat ɾesiːde ʔast	homograph
+صاحبخانه تکههای کیک را میبرد درون پیشدستی قرار میدهد و به سر میزها میبرد	saːhebxaːne tekkehaːje kejk ɾaː miːboɾad daɾuːne piːʃdastiː qaɾaːɾ miːdahad va be saɾe miːzhaː miːbaɾad	homograph
+بعضی صور فلکی شبیه آن نامی که برایشان گذاشتهاند هستند	baʔziː sovaɾe falakiː ʃabiːhe ʔaːn naːmiː ke baɾaːjeʃaːn ɡozaːʃteʔand hastand	homograph
+پیرمرد هنوز با گل سرش را میشست	piːɾemaɾd hanuːz baː ɡel saɾaʃ ɾaː miːʃost	homograph
+غلام مشک را از آب پر کرد و به خانه بازگشت	qolaːm maʃk ɾaː ʔaz ʔaːb poɾ kaɾd va be xaːne baːzɡaʃt	homograph
+همیشه حواسش جمع بود که سحر برای نماز بیدار شود	hamiːʃe havaːssaʃ d͡ʒamʔ buːd ke sahaɾ baɾaːje namaːz biːdaːɾ ʃavad	homograph
+صدای سم حیواناتی که میتاختند از دوردستها شنیده میشد	sedaːje somme hejvaːnaːtiː ke miːtaːxtand ʔaz duːɾdasthaː ʃeniːde miːʃod	homograph
+جونز از سرمربیگری تیم کشتی آزاد آمریکا کنارهگیری کرد	d͡ʒonz ʔaz saɾmoɾabbiːɡaɾiːje tiːme koʃtiːje ʔaːzaːde ʔaːmɾiːkaː kenaːɾeɡiːɾiː kaɾd	homograph
+کشتی فرنگی ایران مقام چهارم را در جهان داراست	koʃtiːje faɾanɡiːje ʔiːɾaːn maqaːme t͡ʃaːhaːɾom ɾaː daɾ d͡ʒahaːn daːɾaːst	homograph
+انعام نامی برای چهارپایان دامی میباشد	ʔanʔaːm naːmiː baɾaːje t͡ʃaːhaːɾpaːjaːne daːmiː miːbaːʃad	homograph
+انعام پیشخدمت را زیادتر از حد معمول حساب میکرد	ʔenʔaːme piːʃxedmat ɾaː ziːjaːdtaɾ ʔaz hadde maʔmuːl hesaːb miːkaɾd	homograph
+حقیقت نماز که همان کرنش و تعظیم در برابر ذات خداوند است به اشکال دیگری در سایر ادیان الهی وجود دارد	haqiːqate namaːz ke hamaːn koɾneʃ va taʔziːm daɾ baɾaːbaɾe zaːte xodaːvand ʔast be ʔaʃkaːle diːɡaɾiː daɾ saːjeɾe ʔadjaːne ʔelaːhiː vod͡ʒuːd daːɾad	homograph
+اشکال دیگری نیز وجود دارند که دارای محور تقارن چرخشی میباشند	ʔaʃkaːle diːɡaɾiː niːz vod͡ʒuːd daːɾand ke daːɾaːje mehvaɾe taqaːɾone t͡ʃaɾxeʃiː miːbaːʃand	homograph
+چین با اعمال تحریمها علیه روسیه مخالفت کرد	t͡ʃiːn baː ʔeʔmaːle tahɾiːmhaː ʔalajhe ɾuːsiːje moxaːlefat kaɾd	homograph
+وی عضو کنوانسیون مقابله با اعمال غیرقانونی علیه ایمنی دریانوردی است	vej ʔozve konvaːnsiːjone moqaːbele baː ʔaʔmaːle qejɾeqaːnuːniː ʔalajhe ʔiːmeniːje daɾjaːnavaɾdiː ʔast	homograph
+در اینجا سخنی از اعمال دیگر ایشان که منجر به سستشدن پایههای اقتصاد شده به میان نیامده است	daɾ ʔiːnd͡ʒaː soxaniː ʔaz ʔaʔmaːle diːɡaɾe ʔiːʃaːn ke mond͡ʒaɾ be sostʃodane paːjehaːje ʔeqtesaːd ʃode be miːjaːn najaːmade ʔast	homograph
+قوه قضاییه در صدد است از افزایش زندانها جلوگیری و اعمال دیگر مجازاتها را جایگزین حبس کند	qovveje qazaːjiː daɾ sadad ʔast ʔaz ʔafzaːjeʃe zendaːnhaː d͡ʒeloɡiːɾiː va ʔeʔmaːle diːɡaɾ mod͡ʒaːzaːthaː ɾaː d͡ʒaːjɡoziːne habs konad	homograph

@@ -569,3 +569,388 @@ picked a pipeline-worse model (the excess 54-58 at ss=0.22 was the tell). CONCLU
 FLOOR of this char BiLSTM-attention architecture; Tier-1 model-side tuning is exhausted. Real remaining levers are
 architectural (attention coverage / Transformer decode) or an independent modern-Persian corpus. Reverted to ep3
 (shipped PR #393); kept the knobs (HOM_W defaults 0 = proven selection) as reusable infra + a documented hazard.
+
+## Run 22 — 2026-07-21 — the STRUCTURAL TAGGER: degeneration is architectural → shipped as the default
+
+Run 21 concluded the char seq2seq is at its floor and the real levers are architectural. This run took the
+architectural lever and it **won** — the tagger is now the shipped default (replacing `fa-context-modern`).
+
+**Origin (the Urdu detour).** Applying the fa lessons to Urdu, a free direct-IPA seq2seq broke the *consonant
+skeleton* (آنا→ɑːnɑːnɑː; 214/288 backbone errors were phoneme-count mismatches). Diagnosis: an abjad's consonants
+are WRITTEN — a free-generation model wastes capacity re-deriving them and loops. That reframed fa's degeneration as
+**architectural**, not a training-tuning problem. Test of the hypothesis: a model that *cannot* regenerate
+consonants should have 0% degeneration.
+
+**The model.** A monotonic char→IPA-chunk aligner derives a per-char TAG (consonant, copied, + trailing short
+vowel/ezafe). A sentence-level BiLSTM labels each abjad char with one tag; assembling on the space chars gives one
+output word per input word. Output length == input length → **cannot degenerate, cannot break the skeleton**. A
+per-char consonant-consistency mask restricts each char to the tags whose consonant it produced in training (ص→s
+never ʃ). `train_tagger.py` + `export_tagger_onnx.py`; non-alignable words masked out of the loss (not dropped) so
+~all of HomoRich is used. Confirmed 0% catastrophic degeneration by construction.
+
+**The apparent negative, then the confound.** Clean no-leakage eval: tagger 86.8% per-word vs seq2seq 90.6% on ALL
+held-out words → the tagger "loses." BUT the gold has **colloquial fusions/elisions** (کاغذهای gold `kaːɡaʒaːje`,
+fusing ذه→ʒ and dropping the h) that a canonical phonemizer should NEVER produce. Chris: "when would those be
+something we would produce?" — never. So all-words is a *bad measuring stick*: the seq2seq's edge is fitting gold
+NOISE. The colloquial words are exactly the ones the strict aligner rejects → filter to the **canonical subset**
+(gold decomposes canonically, 11608/13021 words; the excluded 1413 are colloquial/anomalous).
+
+**The fair measure (the flip).** On the canonical subset — both models, same words:
+
+    canonical held-out : TAGGER 93.6%  >  seq2seq 92.5%
+    all held-out words :        86.8%     seq2seq 90.6%   (seq2seq fitting colloquial noise)
+
+The tagger WINS on the gold that reflects our goal, AND is degeneration-proof, AND emits canonical output
+(کاغذهای → `kaːɣazhaːje`), AND is smaller (3 MB int8 vs ~5 MB). Caveat: the tagger trained only on canonical-aligned
+words (a feature — canonical-only training is the right choice), so a fully fair rematch would retrain the seq2seq
+canonical-only; the structural 0%-degen + lightness advantages hold regardless.
+
+**Shipped.** Exported int8 (93.5% ≈ 93.6% pytorch, lossless); TS port (`faTagger.ts`) verified byte-identical to the
+python ONNX. Wired as the default modern restorer in `faNeural.ts` (`createFaTagger`), removed the `fa-context-modern`
+seq2seq (models + factory) and its now-dead degeneration guard (`isDegenerate`, word-count fallback) — the tagger's
+word-count invariance retired them. `بچه → bat͡ʃt͡ʃe` (geminate چّ) is correct, not a bug.
+
+**Maturity.** fa stays **🟡**. The tagger closes the degeneration/robustness concern and raises the canonical floor
+to 93.6%, but the two ✅ blockers are untouched by a better model: (1) the eval is in-distribution HomoRich gold, not
+an independent human referee; (2) the ~6.4% residual is the abjad short-vowel/ezafe wall — a genuine information
+floor, though now uniformly *graceful* (wrong vowel, consonants intact) rather than ever catastrophic.
+
+## Run 23 — 2026-07-21 — residual-miss anatomy: floor + hard-core, no cheap model win; lexicon is the lever
+
+Re-examined the shipped int8 tagger's 758 CANONICAL-held-out misses (the 969 NON-canonical misses are confirmed
+colloquial gold noise — consonant subst 28% e.g. کاغذهای→kaːɡaʒaːje, a↔aː 23%, gemination — already excluded by the
+canonical filter, nothing to do). Failure-mode taxonomy of the REAL residual:
+
+    36%  short-vowel quality (a/e/o)   کشتی keʃtiː≠kaʃtiː    — the abjad information FLOOR (unwritten, not in input)
+    28%  ezafe (spurious 18% + missing 8%)                   — the hard CONTEXTUAL core
+     6%  aː/a length on ا                                     — minor
+     4%  glide↔vowel (خیلی xeiːliː≠xejliː)                    — GOLD mis-syllabification: the TAGGER is right
+     ~   long-vowel quality, final ه, hamza, و=va~o          — small tails (و is a prod non-issue: sync path owns ≤2-char)
+
+**No cheap model win — the one promising lead was refuted.** The ezafe-spurious skew (144 spurious vs 68 missing,
+2:1) looked like a suppressible bias, and a clause-final word provably cannot take ezafe. But **0 of 144 spurious-
+ezafe misses are on the sentence-final word** — the bidirectional pass already learned the boundary; every spurious
+ezafe is mid-sentence where it is genuinely context-ambiguous. So ezafe is the hard core of the task, not a
+post-process. The short-vowel-quality 36% is the abjad floor (the vowel is not in the input). Both walls are known
+and neither is cheaply movable — consistent with Run 21 (model-side tuning exhausted).
+
+**The tractable lever is the LEXICON, and it is already partly working.** In production the fa lexicon fires BEFORE
+the tagger; **137/758 (18%) of the residual-miss words are already IN the lexicon** → not production misses at all.
+Crediting those + the ~14 glide-hiatus gold errors the tagger gets right, production-effective canonical accuracy is
+**~94.8%**, not the raw 93.5%. Expanding the 4132-entry lexicon toward the frequent, lexically-fixed short-vowel
+words (the 36% bucket is exactly the class a lexicon pins) is the documented 🟡 path. CAVEAT: expand from an
+INDEPENDENT frequency list + referee (wikipron/kaikki), NOT by mining these held-out misses — that would be eval
+leakage. So this is a data-curation follow-up, not a same-PR change.
+
+**Also confirmed noise leaking into "canonical":** ~14–35 glide-hiatus words where gold mis-syllabifies ی/و as a
+hiatus long vowel (خیلی→xeiːliː) and the tagger's glide form (xejliː) is correct — the canon() skeleton check can't
+see vowel-quality noise. Minor; nudges the true number up a hair. Net: 93.5% raw ≈ 94.8% production-effective is
+close to the ceiling of this lightweight approach; the residual is genuine floor + hard-core, not low-hanging fruit.
+
+## Run 24 — 2026-07-21 — perceptron POS → ezafe spike (does syntactic signal crack the ezafe residual?)
+
+Run 23 established mid-sentence ezafe is SYNTACTIC (NP-internal dependency), not lexical/homograph — the char BiLSTM
+infers it from letters only. Hypothesis: word-level POS context (POS of w_i and especially w_i+1) predicts ezafe
+better, mirroring the English UD-EWT perceptron posTagger (the disambiguation logic is ours). Plan: (1) train a
+pure-perceptron POS tagger on UD Persian (reuse english/posTagger.ts feature templates; also unlocks the stubbed
+#680 fa stress work); (2) derive ezafe labels from HomoRich statistically (modal pron + -e/-je clitic); (3) POS-tag
+HomoRich, train an ezafe classifier on POS-bigram + shape features, eval ezafe accuracy on the SAME held-out vs the
+BiLSTM tagger. Go/no-go = does POS-context beat the tagger's ezafe error. UD_Persian-PerDT (CC BY-SA 4.0, ~29k sents,
+shippable) + Seraji fetched. NOTE: neither treebank marks Ezafe as a FEAT (PerDT writes the glide into the surface
+token), so gold-ezafe must come from HomoRich, not the treebank.
+
+**RESULT — NEGATIVE for POS→ezafe; the BiLSTM already beats it.** Built the perceptron POS tagger (UD PerDT,
+95.8% test token acc — a genuinely reusable artifact, it unlocks the stubbed #680 fa nominal/verbal stress). Derived
+ezafe labels from HomoRich (modal-pron + -e/-je clitic), POS-tagged the corpus, trained an averaged-perceptron ezafe
+classifier on POS-bigram + shape features. In ISOLATION the POS classifier looked good — ezafe-decision accuracy on
+the held-out: majority-per-word 93.8%, POS 94.7%, and on the AMBIGUOUS words (seen both ways, where syntax must
+decide) POS 92.1% vs majority 88.8% (+3.3pp) — real syntactic signal. BUT integrating it as an ezafe OVERRIDE on the
+BiLSTM output is net-NEGATIVE at every setting:
+
+    canonical held-out word acc:  BiLSTM 93.5%
+      blind override            → 91.3% (helped 96, hurt 352)
+      confidence-gated (disagree-only, keep BiLSTM on agree): 92.1 / 92.7 / 93.4 / 93.5% as the gate rises to
+      break-even — never a net win (at gate>4: helped 53, hurt 62).
+
+On the ~448 words where POS disagrees with the BiLSTM, the BiLSTM is right ~3.7:1 (352 vs 96). The isolated
+"94.7 POS > 90.7 BiLSTM" gap was an ARTIFACT: the BiLSTM's 90.7 counted its non-ezafe errors (bl=None) as ezafe
+wrong; on clean ezafe reads it is already better than the perceptron. ROOT CAUSE: the char-level BIDIRECTIONAL
+BiLSTM sees the following word's CHARACTERS — which encode the morphology that UPOS only coarsely summarizes — so
+coarse POS is largely REDUNDANT with what the tagger already learned. A POS-FEATURE RETRAIN (vs override) could
+extract marginally more, but the 3.7:1 dominance says the expected gain is small and not worth POS-tagging 400k
+sentences + shipping/integrating a POS model. CONCLUSION: the ezafe residual is NOT tractable via a POS perceptron;
+the char-BiLSTM is already near the input-determined ceiling for ezafe. Reinforces Run 23. The POS tagger is parked
+as reusable infra for #680 (fa stress), a SEPARATE use, not committed here.
+
+## Run 25 — 2026-07-21 — the short-vowel residual is HOMOGRAPHS, not missed predictable vowels
+
+"Why are short-vowel misses (کشتی keʃti≠kaʃti) residual when restoring short vowels IS the tagger's job?" Measured
+the 155 short-vowel-quality misses (consonants + long vowels right, only a/e/o differs): **79% are HOMOGRAPHS** (the
+word has ≥2 distinct short-vowel readings in the corpus), median corpus freq **687** (common words, NOT the rare
+tail — only 10% freq<5), and **52% are cases where the gold is a NON-majority sense** (the tagger predicted the
+corpus-majority reading just 40% of the time — it IS using context, it just lands on the wrong sense). Examples:
+کشتی = koʃti wrestling / keʃti ship / kaʃti; برنده = baɾande carrying / boɾande winner; بردار = baɾdaːɾ pick-up! /
+boɾdaːɾ vector; بر = baɾ / beɾ / boɾ.
+
+KEY DISTINCTION: for a normal word the consonant skeleton DETERMINES the short vowel (کتاب can only be ketaːb) — the
+tagger reads the chars and restores it, its actual job, at ~93.5%. For these the SAME skeleton maps to multiple
+sense-dependent vocalizations, so the disambiguating info is NOT in the characters the tagger reads — it is in the
+semantics. They are the sub-word analogue of English read/read. Splits into (a) same-POS sense homographs (کشتی
+ship/wrestling, both nouns) — POS cannot help even in principle, a near-🟢 floor needing the topic/referent; and (b)
+cross-POS homographs (بردار verb/noun) — POS could disambiguate, but Run 24 showed the char-BiLSTM already captures
+that context better than a POS override. Net: ~28% of the canonical residual is short-vowel homographs + ~28% is
+ezafe → the BULK of the residual is the irreducible sense/context disambiguation problem, not the tagger missing
+predictable vowels. The tagger is at/near ceiling on its actual job (character-determined vocalization); the residual
+is where the input does not carry the answer. Confirms the 🟡 call and closes the "is any of it tractable" question:
+no lightweight lever (lexicon/POS/more-model) recovers a homograph whose sense the characters do not encode.
+
+## Run 26 — 2026-07-21 — non-circular referee hunt: wikipron-fas is register-mismatched (a trap, not a referee)
+
+Every Run 22–25 number is measured on HomoRich's OWN gold (circular: HomoRich trains AND evaluates). Looked for a
+non-circular referee. The repo already ships one — fa.wikipron-fas-broad.tsv (10.3k Wiktionary entries, independent
+of HomoRich, and it WRITES short vowels). Ran the shipped tagger against it (citation forms, convention-mapped):
+FULL agreement 24.6%, BACKBONE (consonants + long vowels) 63.0%. But the disagreements are REGISTER, not error —
+the tagger is right: ابتدا tagger ʔebtedaː vs wikipron ʔibtidaː; ابتکار ʔebtekaːɾ vs ʔibtikaːɾ; ابراهیم Ebrahim vs
+Ibrahim. Every one is the modern-Iranian /e/ vs classical-Arabic /i/ split. Vowel inventory confirms: 523 oː + 513
+eː — the MAJHUL vowels modern Iranian merged into uː/iː; their presence means wikipron-fas is classical/literary/Dari
+register (+2–3 dialect variants per word). Our target is modern Iranian (what HomoRich provides). So the obvious
+independent referee FAILS the quality/register vet — comparing to it manufactures ~75% phantom divergences where we
+are correct (the "vet referee QUALITY" + bho circular-referee lessons). Even backbone 63% is degraded by wikipron's
+majhul long-vowels/epenthesis/variant noise, so it isn't clean even for the skeleton.
+
+CONCLUSION + PATH: a valid non-circular referee for fa must be MODERN IRANIAN with short vowels. wikipron-fas is not
+it. Real options, in order of effort: (a) source a modern-Iranian G2P set — Tihu lexicon / PersianG2P (Sharif) /
+GE2PE / ManaTTS phoneme transcripts — and vet independence + register before trusting it; (b) EXPAND the 21-word
+hand-adjudicated modern gold (fa.gold-adjudicated.tsv) WITH short vowels into a few-hundred-word referee (small but
+correct + right-register + non-circular); (c) filter wikipron to Iranian-only readings (hard, lossy, no dialect tags
+in the broad file). This is a scoped data-acquisition + vetting project, worth it IF the goal is to certify fa toward
+✅ (independent validation is the #1 ✅-blocker) — but the naive path is a trap and must be avoided. Interim: the
+segmental BACKBONE is at least loosely corroborated (even hostile-register wikipron shares 63% of skeletons); the
+modern-Iranian-specific residual (short vowels / homographs / ezafe) is exactly what needs the modern referee.
+
+**Can wikipron-fas be CLEANED into a usable referee? NO.** Tested a register-invariant COARSE mapping (collapse
+i↔e, u↔o, and the majhul iː/eː + uː/oː merges on BOTH sides, so no classical-vs-modern vowel choice can cause a
+miss) plus dropping majhul-only entries. Results: raw full 24.6% / backbone 63.0% / coarse 40.3%; majhul-dropped
+full 27.0% / backbone 69.1% / coarse 39.9%. The coarse (register-invariant) agreement sits at ~40% and dropping
+majhul does NOT move it — so the divergence is NOT a removable contamination layer; it is pervasive and STRUCTURAL:
+epenthesis (ʔabaɾaʃ vs ʔabɾaʃ), gemination, hamza placement, a-vs-e/i short-vowel DISTRIBUTION, and an inventory
+heavy with archaic/Arabic entries our modern tagger vocalizes differently. Cleaning would require discarding most of
+the set (and by what independent modern yardstick?), leaving something tiny and still not verified-modern. wikipron-
+fas is not a modern-Iranian referee with noise on top — it is a different-register, different-inventory resource.
+DECISION: do not attempt to salvage wikipron; a non-circular referee must be purpose-sourced modern Iranian
+(Tihu/PersianG2P/GE2PE/ManaTTS) or the hand-adjudicated gold expanded — the only paths that yield right-register,
+non-circular validation.
+
+## Run 27 — 2026-07-21 — sourcing a modern-Iranian non-circular referee (external-data spike)
+
+Run 26 killed wikipron-fas (wrong register, uncleanable). Sourcing a purpose-built modern-Iranian G2P referee. Vet
+gate: (1) modern Iranian register (short /e/ not classical /i/, NO majhul eː/oː), (2) has short vowels (phonemic,
+not bare abjad), (3) INDEPENDENT of HomoRich — avoid the MahtaFetrat ecosystem (HomoRich/KaamelDict/SentenceBench
+share annotation lineage → circular), (4) permissive license (committed referee must be shareable). Candidates:
+PersianG2P/Tihu dict (AzamRabiee), GE2PE (Sharif SLPL), ManaTTS. Probing reachability + convention below.
+
+**RESULT — FOUND a valid non-circular referee (GE2PE) + it caught a real bug.** GE2PE (github.com/Sharif-SLPL/GE2PE,
+MIT, (c) 2025 Elnaz Rahmati) ships Kasre_test (ezafe) + Homograph_test — SENTENCE-level, MODERN IRANIAN (0 majhul
+vowels), and a DIFFERENT lineage from HomoRich (MahtaFetrat) → non-circular. It targets EXACTLY our two residual
+classes. Committed as tools/referee-eval/referees/fa.ge2pe-ezafe-homograph.tsv (321 sentences, converted to our IPA)
++ build/eval harness (ge2pe_referee.py / ge2pe-eval.ts).
+
+BUG CAUGHT (the multi-referee method paying off, like the Welsh y-vowel): GE2PE uses the ARABIC yeh ي (U+064A, 1207×)
+and Arabic kaf ك, while HomoRich trained the tagger on FARSI yeh ی (U+06CC) — distinct base letters NFC does NOT
+unify. The tagger had never seen Arabic yeh → it emitted <unk> garbage (کسي→kˈasv vs Farsi کسی→kasˈiː). Real
+production gap: Arabic-script Persian (very common) garbled. FIX: normalizePersianOrthography (ي→ی ك→ک ى→ی ة→ه)
+folded at every fa text entry (persian.ts text() + faNeural.ts phonemizeFaNeural/ModernContext/Context) + regression
+test. Before the fix the referee read 56%; after, the true numbers emerged.
+
+INDEPENDENT NUMBERS (adversarial hard-case sets, ق/غ folded to GE2PE's merge; word-level):
+      plain 84.2% full / 89.7% BACKBONE  |  ezafe 67.6% / 82.3%  |  homograph 54.7% / 85.9%  |  overall 79.4% / 87.8%
+TWO findings: (1) plain-word BACKBONE ~90% on an INDEPENDENT modern-Iranian source CORROBORATES the tagger — the
+93.5% HomoRich number is NOT merely self-referential; the segmental skeleton is independently confirmed solid. (2)
+ezafe (82% backbone / 68% full) and homograph (86% backbone / 55% full): the skeleton is right but the short-vowel /
+sense decision fails on the hard cases — INDEPENDENT confirmation of Runs 24–25 (ezafe + homographs are the residual,
+the vowel is sense/context-determined). Caveats: adversarial sets (lower bound, not representative), some GE2PE noise
+(ژنده gold drops ʒ), a minor hiatus-glide convention diff (niːjaːz vs niːaːz). NET: the non-circular referee both
+validates the backbone and confirms the residual is the irreducible ezafe/homograph disambiguation — and it earned
+its keep by surfacing the Arabic-orthography normalization bug. fa stays 🟡 (contextual layer still not certifiable),
+but the "is 93.5% even real?" doubt is now answered: the backbone is independently corroborated.
+
+## Run 28 — 2026-07-21 — mining the INDEPENDENT (GE2PE) misses: actionable insights
+
+Mined the 766 GE2PE word-level misses (20% of 3718; adversarial sets) by nature + direction, separating convention
+diffs from real errors. Actionable findings, prioritized:
+
+**#1 (VALIDATED, training-data ROOT CAUSE) — HIATUS GLIDE.** 59 misses (+ much of the 22 long-vowel + some
+consonant-sub), 100% one-directional: the tagger DROPS the glide Persian inserts between adjacent vowels (نیاز gold
+niːjaːz / pred niːaːz; زیاد ziːjaːd / zjaːd; بسیار besiːjaːɾ / besjaːɾ). ROOT CAUSE: the monotonic aligner's ی
+candidates are [iː,eː,j,""] and و's are [uː,oː,v,w,""] — neither can emit the vowel+glide realization iːj / uːv, so
+EVERY hiatus word fails to align → is MASKED out of training → the tagger never learns the class. Measured: adding
+[iːj,eːj]/[uːv,oːv] candidates recovers **7,185 word occurrences (1.8% of all words; alignment 89%→91%)** currently
+masked. FIX = add those candidates to the aligner (train_tagger.py ANCH + multi-token match) and RETRAIN — teaches
+the class at the source. A post-process hiatus rule (insert j after front-V, v after back-V, adjacent-vowel only) is
+a safe interim: +8 / 0-break on GE2PE, but only catches the simple adjacent-vowel subset; the aligner fix is the
+real solution.
+
+**#2 (training-data signal) — /a/ OVER-DEFAULT.** Of the 109 short-vowel-quality misses, the dominant direction is
+the tagger emitting /a/ where gold has /o/ or /e/ (مفلس mofles/pred mafles; ربود ɾobuːd/ɾabuːd; مرد moɾd/maɾd). The
+tagger biases the first short vowel to /a/ — a training-distribution prior. Partly the homograph residual (sense),
+partly a rebalance/lexicon opportunity for frequent lexically-fixed words.
+
+**#3 (training-data signal) — EPENTHESIS under-production.** 31 misses, directional: the tagger drops the epenthetic
+short vowel that breaks Persian consonant clusters (پروردگار paɾvaɾdeɡaːɾ/pred paɾvaɾdɡaːɾ; گرسنگی ɡoɾosneɡiː/
+ɡoɾsneɡiː). Under-produces cluster epenthesis — a training signal (vowel quality is lexical; presence is
+partly phonotactic).
+
+**#4 (IRREDUCIBLE, confirmed) — ezafe + homograph.** ezafe missing 84 + spurious 74 + spurious-je 52 ≈ 210, and the
+sense-driven short-vowel homographs — together ~45% of misses. INDEPENDENTLY confirms Runs 24–25: the sense/context
+residual, not rule- or training-fixable. A frequency-anchored curated lexicon for the top-missed homographs (آن، و،
+آب، زند، اتفاق، جرم…) could pin the dominant reading of a few, but is context-limited.
+
+**Not a miss:** ق/غ — GE2PE merges to /q/; we deliberately split q/ɣ (more precise), folded in the eval.
+
+NEXT: implement #1 (aligner hiatus candidates + retrain), verify on HomoRich canonical + GE2PE (both should hold/
+improve), reship if net-positive. #2/#3 are softer (rebalance/lexicon), #4 is the characterized floor.
+
+**IMPLEMENTED #1 (hiatus aligner fix + retrain) — SHIPPED, net-positive on both gates.** Added `iːj/eːj` to ی and
+`uːv/oːv` to و in the aligner (train_tagger.py ANCH) + multi-token candidate matching, retrained from scratch (12
+epochs, tag vocab 1209→1169, alignment 89→91%), re-exported int8. A/B on the SAME (hiatus-inclusive) canonical
+definition (N=11860):
+
+    HomoRich canonical:  old 92.5% → NEW 93.7%   (+1.2pp)
+    GE2PE full/backbone: old 79.4%/87.8% → NEW 80.2%/88.4%   (+0.8 / +0.6pp, INDEPENDENT referee)
+
+No regression on either gate — the fix does everything the old model did PLUS the hiatus class (نیاز niːaːz→niːjaːz,
+زیاد zjaːd→ziːjaːd, کیفیت→kejfiːjat). TS port verified byte-identical to python (GE2PE 80.2/88.4). Shipped the new
+int8 + meta + provenance. This is the validated "improved training data" outcome — a silent training blind spot
+(1.8% of words never seen) closed at the source, confirmed by an independent referee. #2 (/a/ over-default) and #3
+(epenthesis) remain softer training signals; #4 (ezafe/homograph ~45%) is the characterized floor.
+
+## Run 29 — 2026-07-22 — the ✅ test: representative independent referee (FarsDat) — ✅ NOT cleanly reachable
+
+To settle 🟡 vs ✅, evaluated the tagger on FarsDat (GE2PE Data/FarsDat.csv) — a REPRESENTATIVE independent
+modern-Iranian corpus (running news text, not adversarial), decoding its own ASCII scheme (]=ʔ /=aː .=ʃ ,=d͡ʒ '=t͡ʃ
+q=merged-ق/غ y=j-glide). Raw: **69% full / 75% backbone** — BELOW the adversarial GE2PE (80/88), which only happens
+if FarsDat is a NOISIER referee. Apportioning the backbone mismatches: 21% ≤2-char words (sync path in prod, NOT the
+tagger — an eval artifact), 8% ʔ-presence + 5% hamza↔glide (FarsDat speech-corpus CONVENTIONS: it writes jodaːʔiː
+where modern Iranian says jodaːjiː), 11% ezafe-glide (the residual), 26% aː/a (largely OOV loanword NAMES — Atlantic/
+April/Indonesia, a real but domain-specific weakness), 26% consonant/other. De-confounded (drop artifacts +
+convention) backbone ≈ 84%.
+
+VERDICT — fa stays **🟡** (strong, independently corroborated, at its lightweight ceiling). NOT 🟢: the residual info
+IS in the input for the bulk (ezafe=syntax, most homographs=clause context) — 🟢 requires the info be ABSENT. NOT ✅,
+for a now-DEEPER reason than "residual is real error": **no clean, convention-matched, representative independent
+referee exists** for modern Iranian Persian G2P. Every available one is confounded — wikipron (classical/Dari
+register, Run 26), GE2PE (adversarial hard cases), FarsDat (speech-corpus conventions + loanword-heavy news). Where
+we can see THROUGH the convention noise (backbone), TWO independent sources corroborate the tagger (GE2PE 88%,
+FarsDat ~84% de-confounded) — real corroboration that the 93.7% self-measure is not fabricated. But corroboration ≠
+certification: a clean "trust the output" ✅ number can't be produced from confounded referees, and the residual is
+genuine error (loanword names, ezafe, sense homographs) not notation/noise. So fa is "multiply corroborated but not
+certifiable" — the strongest 🟡, one materially improved by having independent referees at all (the old #1 blocker),
+but ✅ is blocked by referee AVAILABILITY, not tagger quality. This is the honest ceiling.
+
+## Run 30 — 2026-07-22 — SYNTHESIZING a clean referee from cross-source agreement (the multi-referee method, formalized)
+
+Since every single referee is convention-confounded (Runs 26/29), synthesized a CLEAN one by cross-source AGREEMENT:
+pool citation pronunciations from 3 INDEPENDENT sources (wikipron-fas / GE2PE Kasre+Homograph / FarsDat), normalize
+each to our IPA (strip stress, ɣ→q, r→ɾ; keep ː and ʔ), drop ezafe-tagged occurrences, and keep a word's
+pronunciation ONLY where ≥2 sources AGREE. Agreement filters each source's idiosyncratic convention noise (a
+classical-register or speech-corpus error in ONE source isn't corroborated by another) → convention-neutral truth,
+non-circular (defined without our tagger). 755 words (708 ≥3-char); committed as
+tools/referee-eval/referees/fa.synth-agreement.tsv + build/eval tools/fa-restoration/synth_referee.py.
+
+TAGGER on the clean agreement gold: **BACKBONE (cons+long-V) 90.5% | FULL 80.8%**. Two conclusions: (1) the
+segmental BACKBONE is now INDEPENDENTLY and CLEANLY certified at 90.5% (cross-corroborated, convention-neutral) —
+the strongest evidence yet that the tagger isn't self-referential. (2) The ~10pp full-vs-backbone gap is the
+short-vowel-quality residual — misses are برق beɾq/baɾq, منجر mand͡ʒaɾ/mond͡ʒaɾ, اعضا, مقدس (the /a/-bias of Run 28
+#2 + epenthesis/gemination on Arabic-loan common words), i.e. real error. CAVEAT: the agreement gold skews toward
+HARD common Arabic-loan words (the source overlap is formal vocabulary with lexically-fixed vocalization), so 80.8%
+full is a conservative FLOOR, not representative accuracy (which sits between this and the 93.7% in-distribution
+canonical).
+
+VERDICT (unchanged, now maximally grounded): fa is a strong 🟡. The synthesis SUCCEEDED — we can and did build a
+clean non-circular referee — and it CONFIRMS rather than flips: backbone independently certified ~90%, but the
+FULL-word residual is real short-vowel/ezafe/homograph error, not the notation/noise ✅ tolerates. fa is "multiply
+and cleanly corroborated but not certifiable to ✅" because the residual is genuine sense/lexical error the input
+under-specifies for a lightweight model — the honest ceiling. Referee availability is no longer the blocker (we
+synthesized one); the blocker is that the residual is real error at ~10-19%, which is the 🟡 definition.
+
+## Run 32 — 2026-07-22 — auditing training AND eval data for the first-vowel mistake: the DATA is clean, it's model capacity
+
+Run 31 found the residual is a first-syllable short-vowel error on the /a/-axis. Audited whether it originates in our
+TRAINING data (HomoRich) or EVAL gold, tagger-independently, on the clean cross-source agreement gold (N=552 words
+seen ≥3× in HomoRich):
+
+- **HomoRich's modal first-vowel AGREES with the 2-source truth 98% (545/552)**; only 3% self-inconsistent. The
+  training data is NOT the culprit.
+- The 7 disagreements adjudicate as: mostly HOMOGRAPHS (کنی koni/kani — both valid) and EVAL-side artifacts (مینماید
+  "truth e" is a source reducing می→me so it measured the prefix, not the stem — HomoRich `a` is right), with only a
+  rare genuine HomoRich slip (رای→ɾej vs ɾaj). So neither the training data nor a systematic eval error explains it.
+- MECHANISM: HomoRich's first-short-vowel PRIOR is a 52% / e 31% / o 17%. The tagger's error signature — 61% of its
+  first-vowel misses are "predicted /a/" — is DEFAULTING TO THE PRIOR when the lexically-fixed first vowel isn't
+  inferable from the consonant skeleton (Arabic templates qatl/qetl/qotl etc.). The correct answer IS in the training
+  data; the lightweight BiLSTM just can't MEMORISE every word's lexical first vowel, so it falls back to /a/.
+
+CONCLUSION: the first-vowel residual is a MODEL-CAPACITY limit, not a data-quality problem — the data is 98% correct
+and consistent. This CONFIRMS Run 23's "lexicon is the lever" from the data side, and upgrades it from speculation to
+GUARANTEE: since the correct first vowels provably exist in the (clean) training data, an explicit lexicon
+(memorising what the model can't store) is a sound, bounded fix — a targeted first-syllable-vowel lexicon for
+frequent/Arabic-loan words, prioritising the /a/-vs-mid cases (Run 31). No training-data cleanup is warranted (98%
+clean); no lightweight model change helps (it's capacity/prior-defaulting, not a learnable pattern). This closes the
+diagnosis: the floor is graceful (single first-vowel, Run 31), lexical (data-confirmed here), and lexicon-addressable.
+
+## Run 33 — 2026-07-22 — BUILT the first-vowel correction (pin lexicon + آ rule); shipped, fix-only
+
+Acting on Run 32 (first-vowel residual = model can't memorise lexically-fixed vowels; correct answers ARE in the
+clean data → a lexicon is a guaranteed fix). Built a post-tagger FIRST-VOWEL correction, two parts:
+1. **Deterministic آ rule**: word-initial آ (alef madda) is ALWAYS long aː — promote a short first vowel (آزاد
+   ʔazaːd→ʔaːzaːd, آلمان→ʔaːlmaːn). This was the bigger win (systematic loanword-NAME length error the tagger made
+   from under-exposure). No data needed.
+2. **Pin lexicon** (src/languages/persian/fa-pin-vowels.tsv, 6393 skeleton→first-short-vowel entries): FREQUENT
+   (HomoRich freq≥30) + CONSISTENT (≥90% one vowel → non-homograph) + agreement-gold-validated; آ-initial excluded
+   (rule owns them). Transplants the correct first short vowel (برق beɾq→baɾq, منجر mand͡ʒaɾ→mond͡ʒaɾ, اعضا→ʔaʔzaː).
+
+Applied in faTagger.ts (correctFirstVowel) — only the first vowel is touched; consonants, later vowels, and ezafe
+are left to the tagger. NON-LEAKY: pin from training-source labels (a memorisation aid), validated on INDEPENDENT
+referees. Measured, FIX-ONLY (0 breaks) on every gate:
+    GE2PE:            80.2% → 81.5% full / 88.4% → 90.2% backbone
+    cross-source agree: 84.2% → 87.0%
+    HomoRich canonical: 93.7% → 93.7% (NO regression — the correction only touches OOD/harder words)
+TS port verified against python (GE2PE 81.5%). This realises the Run 23/31/32 "lexicon is the lever" conclusion as a
+guaranteed, bounded, zero-regression improvement. The residual now is the genuinely context/sense floor (homographs,
+ezafe, later-syllable lexical vowels) — the characterized 🟡 ceiling.
+
+## Run 34 — 2026-07-22 — retiring the harakat-lexicon detour for fa: route 1-word runs through the tagger
+
+Architectural audit (prompted by "the harakat lexicon predates the IPA tagger — is it still in the pipeline?"). The
+harakat lexicon (skeleton→harakat, then sync g2p→IPA) is SHARED across the whole abjad family (ar/ps/pa/skr/sd/ur —
+their primary path), so it can't be IPA-ified for fa alone; and it's a different representation than the tagger's
+direct IPA. In fa's DEFAULT path it now fires ONLY on 1-word runs (multi-word clauses are all tagger). That detour is
+a HOLDOVER from the seq2seq era (the comment: 1-word input gave من→mannˈan), and it caused two real defects: (1) the
+sync g2p garbles uncovered isolated words (دیوار→djuːjɾ, کشور→kaʃuːɾ, دولت→duːlt — no short vowels), and (2) the SAME
+word is inconsistent isolated-vs-in-clause (مدرسه sync madɾase vs tagger madɾese). The structural tagger is reliable
+AND more accurate on isolated words (من→man, دیوار→diːvaːɾ, دولت→dolat) — it labels each char, no context needed. FIX:
+route every run (incl. 1-word) through the tagger in faNeural.ts flush(); wordLevel/harakat stays only the
+model-absent fallback + degeneration guard. Now isolated fa words match their in-clause form and avoid the sync
+garble. Full suite green. ANSWER to the question: don't IPA-ify the shared harakat lexicon — the fa forward path is
+already all-IPA (tagger + pin); the harakat lexicon is correctly a fallback-only legacy for fa and the primary path
+for the other abjads. FOLLOW-UP (noted, not done): the OOV vowelRestorer seq2seq is now unused in fa's default path
+too (only the no-onnx fallback needs it) — its eager load could be made lazy.
+
+## Run 35 — 2026-07-22 — pre-merge review of PR #396; fixed 3 issues
+
+Ran a 3-angle adversarial review (tagger/correction TS, faNeural routing, Python data-gen) before merge. faNeural
+routing + the correctFirstVowel port were clean (verified: no long-vowel stranding, affricate-safe, 1:1 word
+alignment, normalization offset-preserving). Three real issues found and FIXED:
+1. **NFC gap (persian.ts)**: the fa NEURAL path didn't NFC-normalize, so NFD input (آ = bare alef + combining madda
+   U+0653) silently skipped the آ→aː rule + mis-keyed the tagger vocab. FIX: `normalizePersianOrthography` now does
+   `.normalize("NFC")` first (the sync g2p already did). Verified NFD آزاد→ʔaːzaːd == NFC.
+2. **Aligner over-consumption (train_tagger.py)**: the new multi-token iːj/uːv candidates could over-consume a glide
+   the NEXT grapheme owns (یئن: the j belongs to ئ), and the `j==len(ip)` reconstruction guard was toothless (it
+   re-checks an invariant align() already guarantees). FIX: refuse a multi-token match when the next grapheme can
+   produce the trailing glide token (یئن now ی→iː, ئ→ja). RETRAINED with the guard — aligned count unchanged
+   (400161, confirming the class was vanishingly rare); model reproduces the numbers (HomoRich canonical 93.6%,
+   GE2PE corrected 81.4%/90.2%, no regression).
+3. **build_pin.py didn't write its file**: the committed "builder" only printed stats — the shipped pin TSV was
+   generated by an unversioned inline script. FIX: build_pin.py now writes fa-pin-vowels.tsv; verified it reproduces
+   the committed file BYTE-IDENTICAL (idempotent). Reproducibility restored.
+Noted-not-fixed (benign): UNITS/ANCH tables duplicated across scripts (shared-constant refactor); export meta allows
+pad tag-id in charTags (model never picks it). Full suite green. PR #396 ready to merge.

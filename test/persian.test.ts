@@ -32,4 +32,12 @@ describe("persian canonical IPA", () => {
         expect(phonemizeWord("مدرسه")).toBe("madɾasˈe"); // madrase: sukun on د from the lexicon (مدْرسه)
         expect(phonemizeWord("مدْرسه")).toBe("madɾasˈe"); // caller-supplied sukun is respected (not clobbered)
     });
+
+    // Arabic-script orthographic variants (Arabic yeh ي U+064A, kaf ك U+0643) are common in real Persian text but
+    // are NOT canonically NFC-equal to the Farsi forms (ی U+06CC, ک U+06A9); they are folded at the fa entry so the
+    // lexicon + tagger (keyed on Farsi orthography) don't treat them as unknown. Surfaced by the GE2PE referee (#27).
+    test("Arabic yeh/kaf fold to Farsi (identical output)", () => {
+        expect(phonemize("کسي", "fa")).toBe(phonemize("کسی", "fa")); // Arabic ي vs Farsi ی
+        expect(phonemize("ملك", "fa")).toBe(phonemize("ملک", "fa")); // Arabic ك vs Farsi ک
+    });
 });

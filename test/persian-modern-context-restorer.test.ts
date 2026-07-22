@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 
-import { createFaModernContextRestorer } from "../src/languages/persian/contextRestorer.ts";
+import { createFaTagger } from "../src/languages/persian/faTagger.ts";
 import { phonemizeFaModernContext } from "../src/faNeural.ts";
 
-// The MODERN Persian context restorer (sentence-level seq2seq, int8 ONNX, HomoRich-trained, 85.6% held-out
-// per-word). Optional at runtime: if onnxruntime-node or the model is absent, the factory is undefined and these
-// skip. Assertions go through the GUARDED path (phonemizeFaModernContext), not the raw restore() — the guard is
-// part of the contract (it catches the ~0.2% greedy-decode degeneration). See fa-context-modern.PROVENANCE.md.
-describe("Persian MODERN context restorer (homograph/ezafe from context on modern text)", async () => {
-    const restorer = await createFaModernContextRestorer();
+// The MODERN Persian sentence-level restorer is the STRUCTURAL TAGGER (faTagger.ts, int8 ONNX, HomoRich-trained,
+// 93.6% on the canonical held-out). It emits one IPA-chunk tag per abjad char, so output length == input length:
+// it cannot degenerate and word counts always align. Optional at runtime: if onnxruntime-node or the model is
+// absent, the factory is undefined and these skip. See fa-tagger.PROVENANCE.md.
+describe("Persian MODERN restorer — structural tagger (homograph/ezafe from context on modern text)", async () => {
+    const restorer = await createFaTagger();
 
     test.skipIf(!restorer)("resolves رو + ezafe -ye from context", async () => {
         // روی here is ru + ezafe -ye (ɾuːje), which only sentence context fixes — a word-level model cannot see it.
@@ -16,11 +16,13 @@ describe("Persian MODERN context restorer (homograph/ezafe from context on moder
         expect(out).toContain("ɾuːjˈe");
     });
 
-    test.skipIf(!restorer)("guard keeps output clean when greedy decode degenerates", async () => {
-        // This sentence trips the greedy-decode degeneration on the raw model (a runaway final token). The guard
-        // (word-count mismatch / repeated-bigram) must fall back so no token is a runaway string.
-        const out = await phonemizeFaModernContext("کودک با مادرش به مدرسه رفت");
-        expect(out.split(" ").every((w) => [...w].length <= 12)).toBe(true); // no runaway
+    test.skipIf(!restorer)("output word-count equals input by construction (no degeneration possible)", async () => {
+        // The tagger tags each char; only the input's spaces start a new word, so the counts must match exactly and
+        // no token can run away — the structural guarantee that retired the seq2seq's degeneration guard.
+        const sentence = "کودک با مادرش به مدرسه رفت";
+        const out = await phonemizeFaModernContext(sentence);
+        expect(out.split(" ").length).toBe(sentence.split(" ").length);
+        expect(out.split(" ").every((w) => [...w].length <= 12)).toBe(true); // no runaway token
         expect(out.split(" ").at(-1)).toContain("aft"); // clean رفت
     });
 });

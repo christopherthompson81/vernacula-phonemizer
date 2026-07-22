@@ -34,8 +34,8 @@ export interface FaContextRestorer {
 }
 
 const VOWEL_G = /[aeiouɒæ]ː?/gu;
-/** Mark Persian final stress on the last vowel of each space-separated word. */
-function stressPerWord(ipa: string): string {
+/** Mark Persian final stress on the last vowel of each space-separated word. Shared with the structural tagger. */
+export function stressPerWord(ipa: string): string {
     return ipa.split(" ").map((w) => {
         const vs = [...w.matchAll(VOWEL_G)];
         if (!vs.length) return w;
@@ -45,10 +45,10 @@ function stressPerWord(ipa: string): string {
 }
 
 /**
- * Build a Persian CONTEXT restorer, or `undefined` if the model / onnxruntime-node is unavailable. The inference
- * code is identical for both trained models — only the weights/vocab differ — so `basename` selects which:
- *   - "fa-context-restorer" (default) — CLASSICAL, aligned-Shahnameh silver, excellent on verse (see above).
- *   - "fa-context-modern"             — MODERN, HomoRich gold (canonical IPA), homograph/ezafe on modern text.
+ * Build the CLASSICAL Persian CONTEXT restorer ("fa-context-restorer", aligned-Shahnameh silver, excellent on
+ * verse), or `undefined` if the model / onnxruntime-node is unavailable. The MODERN sentence-level path is now the
+ * structural tagger (faTagger.ts), which superseded the former "fa-context-modern" seq2seq — this factory is
+ * classical-only. `basename` is retained for symmetry / test overrides.
  */
 export async function createFaContextRestorer(basename = "fa-context-restorer"): Promise<FaContextRestorer | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
@@ -114,14 +114,4 @@ export async function createFaContextRestorer(basename = "fa-context-restorer"):
             return stressPerWord(outToks.join(""));
         },
     };
-}
-
-/**
- * The MODERN Persian context restorer — trained on HomoRich (CC0, 528k modern homograph-rich sentences), targeting
- * our canonical IPA directly (gheyn-conditioned to the fa q/ɣ split). Held-out modern eval: 83.2% per-word. Unlike
- * the classical restorer above, this one is trained on modern prose, so it does NOT hallucinate on everyday text —
- * it is the general-purpose sentence-level path. `undefined` (no-op) if the model / onnxruntime-node is absent.
- */
-export function createFaModernContextRestorer(): Promise<FaContextRestorer | undefined> {
-    return createFaContextRestorer("fa-context-modern");
 }
