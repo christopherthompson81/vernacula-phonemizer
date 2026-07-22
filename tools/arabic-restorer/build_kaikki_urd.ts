@@ -1,7 +1,8 @@
 /**
  * Extract an INDEPENDENT Urdu short-vowel source from the kaikki Urdu (Wiktionary) dump. Urdu Wiktionary gives human
- * Urdu IPA with the correct Arabic-template short vowels (امام ɪmɑːm, اسلام ɪslɑːm) — independent of wikipron, so it
- * both fills coverage and cross-validates wikipron (Run 7: 98% agreement). Small (~885 skeletons) but high quality.
+ * Urdu IPA with the correct Arabic-template short vowels (امام ɪmɑːm, اسلام ɪslɑːm). ~6.4k skeletons. NOTE: kaikki
+ * and the wikipron referee BOTH parse en.Wiktionary (91% raw-string identical) → this is NOT independent of wikipron;
+ * the honest non-circular check is the Hindi cross-script source + the CLE referee (Run 7–8).
  *   curl -sL https://kaikki.org/dictionary/Urdu/kaikki.org-dictionary-Urdu.jsonl -o /tmp/ur_kaikki.jsonl
  *   npx tsx tools/arabic-restorer/build_kaikki_urd.ts   # → silver.kaikki-urd.tsv (skeleton ⇥ urd ⇥ ipa)
  */

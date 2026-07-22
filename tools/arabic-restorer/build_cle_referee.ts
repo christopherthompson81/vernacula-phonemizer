@@ -24,17 +24,25 @@ const MAP: Record<string, string> = {
     D_D: "d̪", D_D_H: "d̪ʱ", DD: "ɖ", DD_H: "ɖʱ", T_SH: "t͡ʃ", T_SH_H: "t͡ʃʰ", D_ZZ: "d͡ʒ", D_ZZ_H: "d͡ʒʱ",
     K: "k", K_H: "kʰ", G: "ɡ", G_H: "ɡʱ", Q: "q", F: "f", V: "ʋ", V_H: "ʋʱ", S: "s", Z: "z",
     SH: "ʃ", ZZ: "ʒ", X: "x", "7": "ɣ", H: "ɦ", M: "m", N: "n", N_H: "nʱ", NG: "ŋ",
-    L: "l", R: "r", R_H: "ɾʱ", RR: "ɽ", RR_H: "ɽʱ", J: "j", Y: "j", SIL: "",
+    L: "l", R: "ɾ", R_H: "ɾʱ", RR: "ɽ", RR_H: "ɽʱ", J: "j", Y: "j", SIL: "",
 };
 
-function cisampaToIpa(phones: string): string {
-    return phones.split(/\s+/).map((p) => (p in MAP ? MAP[p] : "")).join("");
+/** Convert a space-separated CISAMPA word to IPA. Returns null (→ word skipped) if it contains a phone the MAP
+ *  doesn't cover — never silently drop a phone and ship a truncated "human" reading. */
+function cisampaToIpa(phones: string): string | null {
+    const out: string[] = [];
+    for (const p of phones.split(/\s+/)) {
+        if (!(p in MAP)) return null;
+        out.push(MAP[p]!);
+    }
+    return out.join("");
 }
 
 if (!existsSync(SRC)) { console.error(`missing ${SRC} — fetch + extract the CLE corpus first (see header)`); process.exit(1); }
 
 const ar = readFileSync(`${SRC}/Transcription-UNICODE-Arabic.txt`, "utf8").split("\n").filter((l) => l.trim() && !l.startsWith("<Format"));
 const ci = readFileSync(`${SRC}/Transcription-CISAMPA.txt`, "utf8").split("\n").filter((l) => l.trim().startsWith("<s>"));
+if (ar.length !== ci.length) process.stderr.write(`WARN: sentence-line counts differ (arabic ${ar.length} vs cisampa ${ci.length}) — index alignment may skew\n`);
 
 const best = new Map<string, Map<string, number>>(); // skeleton → CISAMPA-string → count
 for (let i = 0; i < Math.min(ar.length, ci.length); i++) {
@@ -53,7 +61,7 @@ const rows: string[] = [];
 for (const [skel, m] of best) {
     const phones = [...m.entries()].sort((a, b) => b[1] - a[1])[0]![0];
     const ipa = cisampaToIpa(phones);
-    if (ipa) rows.push(`${skel}\t${ipa}`);
+    if (ipa) rows.push(`${skel}\t${ipa}`); // null (unknown phone) or "" (all-SIL) → skip
 }
 rows.sort();
 writeFileSync(OUT, "# CLE Lahore Phonetically Rich Urdu Speech Corpus (human read-speech, CISAMPA→IPA) — INDEPENDENT of\n" +
