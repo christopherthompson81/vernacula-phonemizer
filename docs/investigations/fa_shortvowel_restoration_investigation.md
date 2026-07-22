@@ -614,3 +614,35 @@ word-count invariance retired them. `بچه → bat͡ʃt͡ʃe` (geminate چّ) i
 to 93.6%, but the two ✅ blockers are untouched by a better model: (1) the eval is in-distribution HomoRich gold, not
 an independent human referee; (2) the ~6.4% residual is the abjad short-vowel/ezafe wall — a genuine information
 floor, though now uniformly *graceful* (wrong vowel, consonants intact) rather than ever catastrophic.
+
+## Run 23 — 2026-07-21 — residual-miss anatomy: floor + hard-core, no cheap model win; lexicon is the lever
+
+Re-examined the shipped int8 tagger's 758 CANONICAL-held-out misses (the 969 NON-canonical misses are confirmed
+colloquial gold noise — consonant subst 28% e.g. کاغذهای→kaːɡaʒaːje, a↔aː 23%, gemination — already excluded by the
+canonical filter, nothing to do). Failure-mode taxonomy of the REAL residual:
+
+    36%  short-vowel quality (a/e/o)   کشتی keʃtiː≠kaʃtiː    — the abjad information FLOOR (unwritten, not in input)
+    28%  ezafe (spurious 18% + missing 8%)                   — the hard CONTEXTUAL core
+     6%  aː/a length on ا                                     — minor
+     4%  glide↔vowel (خیلی xeiːliː≠xejliː)                    — GOLD mis-syllabification: the TAGGER is right
+     ~   long-vowel quality, final ه, hamza, و=va~o          — small tails (و is a prod non-issue: sync path owns ≤2-char)
+
+**No cheap model win — the one promising lead was refuted.** The ezafe-spurious skew (144 spurious vs 68 missing,
+2:1) looked like a suppressible bias, and a clause-final word provably cannot take ezafe. But **0 of 144 spurious-
+ezafe misses are on the sentence-final word** — the bidirectional pass already learned the boundary; every spurious
+ezafe is mid-sentence where it is genuinely context-ambiguous. So ezafe is the hard core of the task, not a
+post-process. The short-vowel-quality 36% is the abjad floor (the vowel is not in the input). Both walls are known
+and neither is cheaply movable — consistent with Run 21 (model-side tuning exhausted).
+
+**The tractable lever is the LEXICON, and it is already partly working.** In production the fa lexicon fires BEFORE
+the tagger; **137/758 (18%) of the residual-miss words are already IN the lexicon** → not production misses at all.
+Crediting those + the ~14 glide-hiatus gold errors the tagger gets right, production-effective canonical accuracy is
+**~94.8%**, not the raw 93.5%. Expanding the 4132-entry lexicon toward the frequent, lexically-fixed short-vowel
+words (the 36% bucket is exactly the class a lexicon pins) is the documented 🟡 path. CAVEAT: expand from an
+INDEPENDENT frequency list + referee (wikipron/kaikki), NOT by mining these held-out misses — that would be eval
+leakage. So this is a data-curation follow-up, not a same-PR change.
+
+**Also confirmed noise leaking into "canonical":** ~14–35 glide-hiatus words where gold mis-syllabifies ی/و as a
+hiatus long vowel (خیلی→xeiːliː) and the tagger's glide form (xejliː) is correct — the canon() skeleton check can't
+see vowel-quality noise. Minor; nudges the true number up a hair. Net: 93.5% raw ≈ 94.8% production-effective is
+close to the ceiling of this lightweight approach; the residual is genuine floor + hard-core, not low-hanging fruit.
