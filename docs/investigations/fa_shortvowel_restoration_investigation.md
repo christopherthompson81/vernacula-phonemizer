@@ -823,3 +823,26 @@ No regression on either gate — the fix does everything the old model did PLUS 
 int8 + meta + provenance. This is the validated "improved training data" outcome — a silent training blind spot
 (1.8% of words never seen) closed at the source, confirmed by an independent referee. #2 (/a/ over-default) and #3
 (epenthesis) remain softer training signals; #4 (ezafe/homograph ~45%) is the characterized floor.
+
+## Run 29 — 2026-07-22 — the ✅ test: representative independent referee (FarsDat) — ✅ NOT cleanly reachable
+
+To settle 🟡 vs ✅, evaluated the tagger on FarsDat (GE2PE Data/FarsDat.csv) — a REPRESENTATIVE independent
+modern-Iranian corpus (running news text, not adversarial), decoding its own ASCII scheme (]=ʔ /=aː .=ʃ ,=d͡ʒ '=t͡ʃ
+q=merged-ق/غ y=j-glide). Raw: **69% full / 75% backbone** — BELOW the adversarial GE2PE (80/88), which only happens
+if FarsDat is a NOISIER referee. Apportioning the backbone mismatches: 21% ≤2-char words (sync path in prod, NOT the
+tagger — an eval artifact), 8% ʔ-presence + 5% hamza↔glide (FarsDat speech-corpus CONVENTIONS: it writes jodaːʔiː
+where modern Iranian says jodaːjiː), 11% ezafe-glide (the residual), 26% aː/a (largely OOV loanword NAMES — Atlantic/
+April/Indonesia, a real but domain-specific weakness), 26% consonant/other. De-confounded (drop artifacts +
+convention) backbone ≈ 84%.
+
+VERDICT — fa stays **🟡** (strong, independently corroborated, at its lightweight ceiling). NOT 🟢: the residual info
+IS in the input for the bulk (ezafe=syntax, most homographs=clause context) — 🟢 requires the info be ABSENT. NOT ✅,
+for a now-DEEPER reason than "residual is real error": **no clean, convention-matched, representative independent
+referee exists** for modern Iranian Persian G2P. Every available one is confounded — wikipron (classical/Dari
+register, Run 26), GE2PE (adversarial hard cases), FarsDat (speech-corpus conventions + loanword-heavy news). Where
+we can see THROUGH the convention noise (backbone), TWO independent sources corroborate the tagger (GE2PE 88%,
+FarsDat ~84% de-confounded) — real corroboration that the 93.7% self-measure is not fabricated. But corroboration ≠
+certification: a clean "trust the output" ✅ number can't be produced from confounded referees, and the residual is
+genuine error (loanword names, ezafe, sense homographs) not notation/noise. So fa is "multiply corroborated but not
+certifiable" — the strongest 🟡, one materially improved by having independent referees at all (the old #1 blocker),
+but ✅ is blocked by referee AVAILABILITY, not tagger quality. This is the honest ceiling.
