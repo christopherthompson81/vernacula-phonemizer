@@ -10,7 +10,8 @@ import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
+import { HARAKAT } from "../../core/harakatLexicon.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { phonemizeWord as g2p } from "./g2p.ts";
 
 interface UrduTextDef {
@@ -31,12 +32,18 @@ const DIGIT_CLASS = "0-9" + Object.keys(EASTERN_DIGITS).join("");
 // Arabic-script word range (U+0600–06FF + U+0750–077F extensions), excluding the digits/punctuation handled below.
 const URDU_WORD = "ء-ٟٮ-ۓە-ۜ۞-ۿ";
 
-// COVERAGE layer: an undiacritized skeleton whose short vowels we've mined is looked up here and vocalized
-// before g2p, so the g2p reads the real ɪ/ʊ instead of a default schwa (see core/harakatLexicon.ts). Loaded
-// LAZILY (registry.ts imports every rider eagerly; the ~2.6k-line TSV is only read on first Urdu use).
+// COVERAGE layer: an undiacritized skeleton whose vocalization we've mined is looked up here and returned as
+// canonical IPA DIRECTLY, short-circuiting the g2p's default-schwa guess. Urdu stores IPA (not harakat) because
+// harakat can't encode the majhūl ی=iː~eː / و=oː~uː distinction the cross-script Hindi gold provides; see
+// tools/arabic-restorer/build_ur_ipa_lexicon.ts. Entries are UNSTRESSED (weight-stress applied at lookup).
+// Loaded LAZILY (registry.ts imports every rider eagerly; the TSV is only read on first Urdu use).
 let LEXICON: ReadonlyMap<string, string> | undefined;
-export function harakatLexicon(): ReadonlyMap<string, string> {
-    return (LEXICON ??= loadHarakatLexicon(import.meta.url));
+function ipaLexicon(): ReadonlyMap<string, string> {
+    return (LEXICON ??= loadTsvMap(import.meta.url, "lexicon-ipa.tsv", undefined, { optional: true }));
+}
+/** The coverage lexicon's key set (covered skeletons), for the neural rider pre-pass to leave covered words bare. */
+export function coverageLexicon(): ReadonlyMap<string, string> {
+    return ipaLexicon();
 }
 
 /** Lexicon-FREE core: g2p + default-schwa deletion + weight stress. Used by the number path and the mining tool,
@@ -58,9 +65,15 @@ export function phonemizeWordCore(word: string): string {
     return applyWeightStress(ipa).normalize("NFC");
 }
 
-/** One Urdu word → canonical IPA (coverage-lexicon restore + the lexicon-free core). */
+/** One Urdu word → canonical IPA. If the writer supplied harakat, respect it (g2p reads the explicit vowels);
+ *  else consult the IPA coverage lexicon (short-circuit straight to canonical IPA + weight-stress); else the
+ *  lexicon-free default-schwa core. */
 export function phonemizeWord(word: string): string {
-    return phonemizeWordCore(restoreHarakat(word, harakatLexicon()));
+    if (!HARAKAT.test(word)) {
+        const ipa = ipaLexicon().get(word.normalize("NFC"));
+        if (ipa) return applyWeightStress(ipa).normalize("NFC");
+    }
+    return phonemizeWordCore(word);
 }
 
 const TOKEN = new RegExp(
