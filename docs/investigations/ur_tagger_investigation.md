@@ -285,3 +285,28 @@ wired as the **secondary referee** in `ur.jsonc`, closing its own "no independen
 **Bottom line for ur:** IPA coverage lexicon (kaikki-primary, Hindi-independent-fill), 95.4% vs wikipron with a
 77.1% non-circular Hindi backbone and an **87% independent CLE corroboration**. The BiLSTM tagger stays shelved
 (Runs 1–4); the lexicon + independent referee are the deliverable.
+
+## Run 9 — 2026-07-22 — mining the referee misses (multi-referee method)
+
+With two referees (wikipron + independent CLE), mine where **both agree against us** =
+strong real-error signal (`ur_referee_mine.py`). Key methodological catch: matching CLE
+against *any* wikipron variant inflated the signal (173 candidates) via free variation;
+using wikipron's **majority** reading is the honest filter (93 candidates).
+
+Buckets of the 93: ain-ʔ 44, majhūl/long 25, short-vowel 15, consonant 8. Reading them, the
+result is mostly **validation, not bugs**:
+- **Free variation dominates.** Final-ہ length: wikipron 304 short ɑ / 131 long ɑː, CLE ~all
+  long — the referees disagree with *each other*; our short ɑ matches wikipron's majority.
+  ain-ʔ: wikipron keeps the glottal 75% of the time, CLE drops it — again our marking tracks
+  wikipron's majority. Neither is our error.
+- **Homographs** (علم *ilm*/*alam*, بری *barī*/*burī*) — the two sources pick different senses
+  of an unvoweled skeleton; neither wrong.
+- **Bidirectional epenthesis** — we add ə in some Arabic clusters (جشن d͡ʒəʃən), the referees add
+  it in others (منشی mʊnəʃiː) → no clean rule.
+- **A few genuine lexical errors** (گوشت→ɡoːʃ drops the final ت; فون fuːn should be foːn) — lone
+  kaikki-entry mistakes, not systematic; spot-fixable but low value.
+
+The one real *decision* surfaced: the **ain-ʔ convention** — we render ع as a glottal stop; both
+referees (and actual Urdu) often drop it. Dropping matches CLE + human pronunciation; keeping
+matches wikipron's 75% majority + the explicitness principle. Judgment call, not a clear bug.
+**Net: the multi-referee mining validated the lexicon — no large systematic defect remains.**
