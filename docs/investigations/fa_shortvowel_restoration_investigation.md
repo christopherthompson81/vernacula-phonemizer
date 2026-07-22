@@ -569,3 +569,48 @@ picked a pipeline-worse model (the excess 54-58 at ss=0.22 was the tell). CONCLU
 FLOOR of this char BiLSTM-attention architecture; Tier-1 model-side tuning is exhausted. Real remaining levers are
 architectural (attention coverage / Transformer decode) or an independent modern-Persian corpus. Reverted to ep3
 (shipped PR #393); kept the knobs (HOM_W defaults 0 = proven selection) as reusable infra + a documented hazard.
+
+## Run 22 — 2026-07-21 — the STRUCTURAL TAGGER: degeneration is architectural → shipped as the default
+
+Run 21 concluded the char seq2seq is at its floor and the real levers are architectural. This run took the
+architectural lever and it **won** — the tagger is now the shipped default (replacing `fa-context-modern`).
+
+**Origin (the Urdu detour).** Applying the fa lessons to Urdu, a free direct-IPA seq2seq broke the *consonant
+skeleton* (آنا→ɑːnɑːnɑː; 214/288 backbone errors were phoneme-count mismatches). Diagnosis: an abjad's consonants
+are WRITTEN — a free-generation model wastes capacity re-deriving them and loops. That reframed fa's degeneration as
+**architectural**, not a training-tuning problem. Test of the hypothesis: a model that *cannot* regenerate
+consonants should have 0% degeneration.
+
+**The model.** A monotonic char→IPA-chunk aligner derives a per-char TAG (consonant, copied, + trailing short
+vowel/ezafe). A sentence-level BiLSTM labels each abjad char with one tag; assembling on the space chars gives one
+output word per input word. Output length == input length → **cannot degenerate, cannot break the skeleton**. A
+per-char consonant-consistency mask restricts each char to the tags whose consonant it produced in training (ص→s
+never ʃ). `train_tagger.py` + `export_tagger_onnx.py`; non-alignable words masked out of the loss (not dropped) so
+~all of HomoRich is used. Confirmed 0% catastrophic degeneration by construction.
+
+**The apparent negative, then the confound.** Clean no-leakage eval: tagger 86.8% per-word vs seq2seq 90.6% on ALL
+held-out words → the tagger "loses." BUT the gold has **colloquial fusions/elisions** (کاغذهای gold `kaːɡaʒaːje`,
+fusing ذه→ʒ and dropping the h) that a canonical phonemizer should NEVER produce. Chris: "when would those be
+something we would produce?" — never. So all-words is a *bad measuring stick*: the seq2seq's edge is fitting gold
+NOISE. The colloquial words are exactly the ones the strict aligner rejects → filter to the **canonical subset**
+(gold decomposes canonically, 11608/13021 words; the excluded 1413 are colloquial/anomalous).
+
+**The fair measure (the flip).** On the canonical subset — both models, same words:
+
+    canonical held-out : TAGGER 93.6%  >  seq2seq 92.5%
+    all held-out words :        86.8%     seq2seq 90.6%   (seq2seq fitting colloquial noise)
+
+The tagger WINS on the gold that reflects our goal, AND is degeneration-proof, AND emits canonical output
+(کاغذهای → `kaːɣazhaːje`), AND is smaller (3 MB int8 vs ~5 MB). Caveat: the tagger trained only on canonical-aligned
+words (a feature — canonical-only training is the right choice), so a fully fair rematch would retrain the seq2seq
+canonical-only; the structural 0%-degen + lightness advantages hold regardless.
+
+**Shipped.** Exported int8 (93.5% ≈ 93.6% pytorch, lossless); TS port (`faTagger.ts`) verified byte-identical to the
+python ONNX. Wired as the default modern restorer in `faNeural.ts` (`createFaTagger`), removed the `fa-context-modern`
+seq2seq (models + factory) and its now-dead degeneration guard (`isDegenerate`, word-count fallback) — the tagger's
+word-count invariance retired them. `بچه → bat͡ʃt͡ʃe` (geminate چّ) is correct, not a bug.
+
+**Maturity.** fa stays **🟡**. The tagger closes the degeneration/robustness concern and raises the canonical floor
+to 93.6%, but the two ✅ blockers are untouched by a better model: (1) the eval is in-distribution HomoRich gold, not
+an independent human referee; (2) the ~6.4% residual is the abjad short-vowel/ezafe wall — a genuine information
+floor, though now uniformly *graceful* (wrong vowel, consonants intact) rather than ever catastrophic.
