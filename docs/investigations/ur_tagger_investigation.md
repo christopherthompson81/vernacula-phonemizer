@@ -310,3 +310,34 @@ The one real *decision* surfaced: the **ain-ʔ convention** — we render ع as 
 referees (and actual Urdu) often drop it. Dropping matches CLE + human pronunciation; keeping
 matches wikipron's 75% majority + the explicitness principle. Judgment call, not a clear bug.
 **Net: the multi-referee mining validated the lexicon — no large systematic defect remains.**
+
+## Run 10 — 2026-07-22 — honest independent accuracy (correcting the circular/mislabeled numbers)
+
+Prompted by the right question: 56.8% is the lexicon-FREE backbone vs wikipron — a config that
+ships nowhere. So measure the DEPLOYED pipeline (`phonemizeWord`) against an INDEPENDENT referee.
+This surfaced two corrections to earlier claims:
+
+1. **The 95.4% (shipped vs wikipron) is CIRCULAR** — wikipron and our kaikki source both scrape
+   Wiktionary, so it is not a real accuracy.
+2. **The "87% CLE" was mislabeled** — that was CLE-vs-wikipron (both Wiktionary-family), NOT the
+   shipped pipeline vs CLE.
+
+**Metric granularity is the crux.** Full-word-exact `phonemizeWord` vs CLE is only ~40% — but CLE
+is a *speech* corpus (records speaker epenthesis/reduction/placement), so full-word-exact
+unfairly penalizes realization, not lexical error. Reconciling notation buys only ~4pp (raw 35.6
+→ +notation 36.1 → +convention[ain,final-ہ] 39.4 → +majhūl 49.2 → +short-V 59.5) — proving the
+disagreement is CONTENT, not notation. The register-FAIR metric is **short-vowel CHOICE** (which
+ə/ɪ/ʊ each syllable takes, abstracting placement):
+
+| shipped `phonemizeWord` vs CLE (independent) | short-vowel choice |
+|---|---|
+| **kaikki (Wiktionary)-covered core** | **80.6%** |
+| Hindi-fill / default-ə OOV tail | 50.3% |
+| overall | ~60% |
+
+So the honest independent picture: the Wiktionary-covered core restores short vowels **80.6%**
+correctly per an independent human referee (non-circular); the Hindi/OOV tail (50%) drags the
+overall to ~60%. Neither referee is "wrong" — for covered words they agree ~80% on lexical
+content; the apparent conflict was full-word-exact (wrong metric for speech-vs-citation) + the
+weak OOV tail. Maturity row corrected to these numbers; the 56.8% referee-eval floor stays as the
+lexicon-free backbone regression guard (fine for that, not the deployment accuracy).
