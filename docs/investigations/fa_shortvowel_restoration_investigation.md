@@ -681,3 +681,25 @@ extract marginally more, but the 3.7:1 dominance says the expected gain is small
 sentences + shipping/integrating a POS model. CONCLUSION: the ezafe residual is NOT tractable via a POS perceptron;
 the char-BiLSTM is already near the input-determined ceiling for ezafe. Reinforces Run 23. The POS tagger is parked
 as reusable infra for #680 (fa stress), a SEPARATE use, not committed here.
+
+## Run 25 — 2026-07-21 — the short-vowel residual is HOMOGRAPHS, not missed predictable vowels
+
+"Why are short-vowel misses (کشتی keʃti≠kaʃti) residual when restoring short vowels IS the tagger's job?" Measured
+the 155 short-vowel-quality misses (consonants + long vowels right, only a/e/o differs): **79% are HOMOGRAPHS** (the
+word has ≥2 distinct short-vowel readings in the corpus), median corpus freq **687** (common words, NOT the rare
+tail — only 10% freq<5), and **52% are cases where the gold is a NON-majority sense** (the tagger predicted the
+corpus-majority reading just 40% of the time — it IS using context, it just lands on the wrong sense). Examples:
+کشتی = koʃti wrestling / keʃti ship / kaʃti; برنده = baɾande carrying / boɾande winner; بردار = baɾdaːɾ pick-up! /
+boɾdaːɾ vector; بر = baɾ / beɾ / boɾ.
+
+KEY DISTINCTION: for a normal word the consonant skeleton DETERMINES the short vowel (کتاب can only be ketaːb) — the
+tagger reads the chars and restores it, its actual job, at ~93.5%. For these the SAME skeleton maps to multiple
+sense-dependent vocalizations, so the disambiguating info is NOT in the characters the tagger reads — it is in the
+semantics. They are the sub-word analogue of English read/read. Splits into (a) same-POS sense homographs (کشتی
+ship/wrestling, both nouns) — POS cannot help even in principle, a near-🟢 floor needing the topic/referent; and (b)
+cross-POS homographs (بردار verb/noun) — POS could disambiguate, but Run 24 showed the char-BiLSTM already captures
+that context better than a POS override. Net: ~28% of the canonical residual is short-vowel homographs + ~28% is
+ezafe → the BULK of the residual is the irreducible sense/context disambiguation problem, not the tagger missing
+predictable vowels. The tagger is at/near ceiling on its actual job (character-determined vocalization); the residual
+is where the input does not carry the answer. Confirms the 🟡 call and closes the "is any of it tractable" question:
+no lightweight lever (lexicon/POS/more-model) recovers a homograph whose sense the characters do not encode.
