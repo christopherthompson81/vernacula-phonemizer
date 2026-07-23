@@ -312,3 +312,21 @@ no cross-word context is needed. Implication: unlike Urdu, a neural G2P is the R
 Bengali's ɔ/o OOV tail (rule 62.6% → 86%). Diagnostic /tmp/bn_g2p_diag.py; measured vs Google (the
 reliable source), not the 147-word Kolkata gold. Productionisation (ONNX + TS runtime, fa-tagger
 pattern) is the open next step.
+
+## Run 15 — 2026-07-22 — productionisation BLOCKED: the model generalises GOOGLE, not Kolkata
+
+Before shipping the neural G2P, tested the prerequisite: does the Google-trained model match our
+147-word hand-adjudicated KOLKATA gold? It does NOT — it REGRESSES it:
+  - vs gold: MODEL full 76.9% / ɔ/o 90.5%  |  RULE full 93.2% / ɔ/o 94.6%.
+The model is worse than the rule on our own gold. Three causes: (1) DIALECT DRIFT — it faithfully
+learned Google's ɔ/o (বছর→bɔt͡ʃʰoɾ) which differs from Kolkata gold (bɔt͡ʃʰɔɾ); the Run 14 86% "win"
+was vs GOOGLE, the wrong target. (2) seq2seq DEGENERATION (এক→ækok, পাহাড়→paɦaɖoɾ — hallucinated
+material, the failure the fa structural-tagger avoids). (3) glide errors (য়→e not j).
+
+**Conclusion: do NOT productionise.** The ɔ/o IS learnable (Run 14 holds), but the only large
+training source (Google) carries dialect drift from our Kolkata standard, so a model trained on it
+generalises the wrong convention + adds degeneration → net-negative vs the gold-validated rule
+engine. The CORRECT use of Google is the already-merged cross-source CONSENSUS lexicon (pins only
+where Google∩wikipron agree — filtering Google's dialect — and excludes gold words). A Kolkata-
+convention model would work, but no large Kolkata training set exists (the 147-word gold is too
+small). Net Bengali gains this session: two rule fixes (ম্ব, reph) + 161 consensus lexicon entries.
