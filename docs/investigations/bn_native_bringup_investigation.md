@@ -272,4 +272,4 @@ consensus lexicon, not a rule: +134 entries where Google language-resources/bn (
 source, retroflex-correct) AND wikipron ben agree on the ɔ/o + deletion, differ from the engine (vowel-only,
 consonant-matched), and are NOT gold words. Lexicon 168→302; gold shipped unchanged 98.6%% (no regression). This
 breaks Run 10's ~168 ceiling using the third source Run 10 said didn't exist. The one clean RULE win this
-session was the ম্ব cluster fix (Run 11, merged).
+session was the ম্ব cluster fix (Run 11, merged). Review hardened the builder: ABSTAIN on Google POS heteronyms (>1 distinct pron, e.g. উত্তর noun utːɔr / verb utːor) and fail on an unmapped phone (0 heteronyms in the current 134, so no data change).
