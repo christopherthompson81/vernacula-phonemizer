@@ -12,26 +12,10 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { phonemizeWordRules as R } from "../../src/languages/bengali/bengali.ts";
+import { googleToIpa as g2ipa, isBengaliWord } from "./googlePhoneMap.ts";
 
 const DUMP = "/tmp/google_bn_lexicon.tsv";
 const HERE = import.meta.dirname;
-// Google phone-code → our canonical IPA (Bengali c/ɟ realized as affricates; offglides → plain vowels).
-const MAP: Record<string, string> = {
-    O: "ɔ", a: "a", i: "i", u: "u", e: "e", E: "æ", o: "o", "i^": "i", "u^": "u", "e^": "e", "o^": "o",
-    k: "k", kh: "kʰ", g: "ɡ", gh: "ɡʱ", N: "ŋ", c: "t͡ʃ", ch: "t͡ʃʰ", j: "d͡ʒ", jh: "d͡ʒʱ",
-    T: "ʈ", Th: "ʈʰ", D: "ɖ", Dh: "ɖʱ", t: "t̪", th: "t̪ʰ", d: "d̪", dh: "d̪ʱ", n: "n", p: "p",
-    f: "f", b: "b", bh: "bʱ", m: "m", r: "ɾ", l: "l", sh: "ʃ", s: "s", h: "ɦ",
-};
-// Returns null on an UNMAPPED phone (a future upstream refresh could add one) — never silently drop a segment.
-function g2ipa(t: string): string | null {
-    const out: string[] = [];
-    for (const x of t.split(/\s+/)) {
-        if (x === ".") continue;
-        if (!(x in MAP)) return null;
-        out.push(MAP[x]!);
-    }
-    return out.join("");
-}
 // COMMON comparison fold — neutralise convention (retroflex↔dental, ɾ/r, ties, æ/e, ɕ/ʃ, pʰ/f, geminate) so two
 // independent sources can "agree" on the substance (vowels incl. ɔ/o + rough consonants).
 const cf = (s: string): string =>
@@ -71,7 +55,7 @@ const gold = new Set([...load(`${HERE}/../referee-eval/referees/bn.gold-adjudica
 const out: [string, string][] = [];
 for (const [w, gi] of G) {
     const wi = W.get(w); if (!wi) continue;
-    if ([...w].length < 2 || !/^[ঀ-৿]+$/u.test(w) || existing.has(w) || gold.has(w)) continue;
+    if (!isBengaliWord(w) || existing.has(w) || gold.has(w)) continue;
     const e = R(w); if (!e) continue;
     const ec = e.replace(/[ˈˌ]/gu, "");
     if (cf(gi) === cf(wi) && cf(gi) !== cf(e) && CS(gi) === CS(ec)) out.push([w, gi.replace(/[ˈˌ]/gu, "")]);
