@@ -12,7 +12,7 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { phonemizeWordRules as R } from "../../src/languages/bengali/bengali.ts";
-import { googleToIpa as g2ipa } from "./googlePhoneMap.ts";
+import { googleToIpa as g2ipa, isBengaliWord } from "./googlePhoneMap.ts";
 
 const DUMP = "/tmp/google_bn_lexicon.tsv";
 const HERE = import.meta.dirname;
@@ -55,7 +55,7 @@ const gold = new Set([...load(`${HERE}/../referee-eval/referees/bn.gold-adjudica
 const out: [string, string][] = [];
 for (const [w, gi] of G) {
     const wi = W.get(w); if (!wi) continue;
-    if ([...w].length < 2 || !/^[ঀ-৿]+$/u.test(w) || existing.has(w) || gold.has(w)) continue;
+    if (!isBengaliWord(w) || existing.has(w) || gold.has(w)) continue;
     const e = R(w); if (!e) continue;
     const ec = e.replace(/[ˈˌ]/gu, "");
     if (cf(gi) === cf(wi) && cf(gi) !== cf(e) && CS(gi) === CS(ec)) out.push([w, gi.replace(/[ˈˌ]/gu, "")]);

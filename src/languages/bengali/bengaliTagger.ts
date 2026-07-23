@@ -54,26 +54,37 @@ export async function createBengaliTagger(basename = "bn-g2p-tagger"): Promise<B
         const ep = process.env.BN_ORT_EP;
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
-    const UNK = meta.src["<unk>"] ?? 1;
     const nTags = Object.keys(meta.tags).length;
 
     return {
         async tag(word: string): Promise<string> {
-            const chars = [...word];
+            // NFC-normalize so the graphemes match the training vocab (the sync lexicon/rule paths also NFC).
+            const chars = [...word.normalize("NFC")];
             const T = chars.length;
             if (T === 0) return "";
-            const ids = BigInt64Array.from(chars.map((c) => BigInt(meta.src[c] ?? UNK)));
-            const r = await sess.run({ chars: new ortLib.Tensor("int64", ids, [1, T]) });
+            // DECLINE (return "") on any grapheme outside the training vocab: its consonant is not in the mask, so
+            // tagging it would emit an arbitrary consonant and override the correct rule-engine reading. The caller
+            // treats "" as "defer to the rule engine" for the whole word.
+            const ids = new Array<number>(T);
+            for (let i = 0; i < T; i++) {
+                const id = meta.src[chars[i]!];
+                if (id === undefined) return "";
+                ids[i] = id;
+            }
+            const r = await sess.run({ chars: new ortLib.Tensor("int64", BigInt64Array.from(ids, (x) => BigInt(x)), [1, T]) });
             const logits = r.logits!.data as Float32Array; // flat [T * nTags], row-major (t·nTags + tag)
             let out = "";
             for (let k = 0; k < T; k++) {
-                const id = meta.src[chars[k]!] ?? UNK;
-                // Argmax over ONLY this grapheme's permitted tags (the consonant mask): keeps every consonant
-                // canonical and makes the choice a cheap scan of ~3 candidates instead of all ~160 tags.
-                const valid = meta.charTags[String(id)];
+                // Argmax over ONLY this grapheme's permitted tags (the consonant mask, pad-excluded): keeps every
+                // consonant canonical and makes the choice a cheap scan of ~3 candidates instead of all ~160 tags.
+                const valid = meta.charTags[String(ids[k])];
+                if (!valid || valid.length === 0) return ""; // no permitted tag → decline (defer to rules)
                 const base = k * nTags;
-                let best = valid?.[0] ?? 0, bestLo = logits[base + best]!;
-                for (const t of valid ?? []) { const v = logits[base + t]!; if (v > bestLo) { bestLo = v; best = t; } }
+                let best = valid[0]!, bestLo = logits[base + best]!;
+                for (let j = 1; j < valid.length; j++) {
+                    const t = valid[j]!, v = logits[base + t]!;
+                    if (v > bestLo) { bestLo = v; best = t; }
+                }
                 out += meta.tags[String(best)] ?? "";
             }
             return out;

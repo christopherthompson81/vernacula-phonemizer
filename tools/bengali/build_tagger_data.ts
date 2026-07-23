@@ -11,7 +11,7 @@
  *   /home/chris/base/bin/python3 tools/bengali/train_bn_tagger.py /tmp/bn_tagger_train.tsv src/languages/bengali
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { googleToIpa } from "./googlePhoneMap.ts";
+import { googleToIpa, isBengaliWord } from "./googlePhoneMap.ts";
 
 const DUMP = "/tmp/google_bn_lexicon.tsv";
 const OUT = process.argv[2] ?? "/tmp/bn_tagger_train.tsv";
@@ -26,7 +26,7 @@ for (const l of readFileSync(DUMP, "utf8").split("\n")) {
     if (l.startsWith("#") || !l.includes("\t")) continue;
     const p = l.split("\t");
     const w = p[0]!;
-    if (seen.has(w) || [...w].length < 2 || !/^[ঀ-৿]+$/u.test(w)) continue;
+    if (seen.has(w) || !isBengaliWord(w)) continue;
     seen.add(w);
     const ipa = googleToIpa(p[1]!);
     if (ipa) rows.push(`${w}\t${ipa}`);

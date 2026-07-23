@@ -420,3 +420,21 @@ determined inherent vowels (কলসি→klsi); the tagger gets কলসি�
 (ক→k/kɔ/ko, never ʃ) → consonant skeleton always canonical, the model's only job is the vowel. The tagger is the OOV
 tier; the Kolkata gold + consensus lexicon still take precedence, so Google's Dhaka convention only touches OOV.
 Runtime contract: onnxruntime-node optional → absent ⇒ exact sync fallback, no throw. Async path, C# untouched.
+
+### Run 18 addendum — 8-angle code review (PR #412) fixes
+
+Adversarial review surfaced two real correctness bugs + one perf/altitude issue in the neural path, all fixed:
+- **Embedded Latin dropped** (A-1): `phonemizeBnNeural` built `createBengali()` WITHOUT the English `foreign`
+  phonemizer the registry wires for bn, so "Google" emitted "" instead of ɡˈuːɡəɫ. Fixed: the cached neural engine
+  is built with the same `(latin)=>getPhonemizer("en").text(latin)` foreign phonemizer.
+- **Out-of-vocab grapheme → garbage consonant** (A-2): a grapheme outside the 61-grapheme vocab (e.g. ঽ avagraha)
+  mapped to <unk>, whose mask permitted ALL tags incl. <pad>, so the tagger emitted an arbitrary consonant
+  (ঽমন→bʱɔmon) that OVERRODE the correct rule reading. Fixed: `tag()` NFC-normalizes then DECLINES (returns "")
+  on any out-of-vocab grapheme → the word defers to the rule engine (ঽমন→mɔn == sync); export excludes <pad> from
+  every mask (defence-in-depth); empty tagger result is not stored.
+- **Per-call engine rebuild** (perf/altitude): `oovOverride` moved from a construction-time param to a per-CALL
+  `.text(input, oovOverride?)` argument, so the engine is built ONCE (module singleton) and reused — matching the
+  sync path's `BN ??=` caching instead of re-reading/parsing the manifest + rebuilding g2p per sentence.
+- Cleanup: shared `isBengaliWord` predicate extracted to googlePhoneMap.ts (used by both build tools); argmax init
+  de-duplicated. Deferred (pre-existing 6-file pattern, separate refactor): a shared core/onnx.ts + structural-
+  tagger harness that faTagger.ts/bengaliTagger.ts/vowelRestorer.ts could all share. Full suite 936/936.

@@ -73,14 +73,16 @@ const GEMINATE =
 // অকলুষ→ɔkoluʃ stays), so the trigger is i/u only — not [iueo].
 const HIGH = /[iu]/; // vowels that trigger ɔ→o raising in the preceding syllable
 
+/** Per-call OOV resolver: word → IPA, or undefined to defer to the rule engine. Consulted by `word()`/`text()`
+ *  BETWEEN the lexicon and the rule engine (lexicon → oovOverride → rules). Used only by the async neural path
+ *  (bengaliNeural.ts) to inject pre-computed tagger readings; the sync path passes nothing, so behaviour is
+ *  unchanged. It is per-CALL (a `.text()` argument), not a construction option, so one built engine is reused. */
+export type OovResolver = (w: string) => string | undefined;
+
 export function makeNativeBengali(
     def: BengaliDef,
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
-    // OOV resolver consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride → rules). Used only by
-    // the async neural path (bengaliNeural.ts) to inject pre-computed tagger readings; the sync path passes nothing
-    // so behaviour is unchanged. Returns undefined to defer to the rule engine.
-    oovOverride?: (w: string) => string | undefined,
 ) {
     // ্যা (ya-phôla + aa-matra) and word-initial অ্যা spell the vowel [æ] in Bengali (mostly loanwords:
     // ক্যান্ডি→kænɖi, গ্যাস→ɡæʃ, ব্যাগ→bæɡ). There is no [æ] matra, so we rewrite the sequence to a private-use
@@ -201,13 +203,13 @@ export function makeNativeBengali(
     /** SHIPPED word→IPA: a whole-word lexicon override (for the proven-lexical tail) then the rule engine. The
      *  lexicon is Bengali-specific (bengali-lexicon.tsv), so a reusing language (Assamese) sets skipLexicon:true
      *  to avoid Bengali overrides (এক→æk) leaking onto its shared spellings. */
-    function word(w: string): string {
+    function word(w: string, oov?: OovResolver): string {
         if (!def.skipLexicon) {
             const hit = lexicon().get(w.normalize("NFC"));
             if (hit !== undefined) return hit;
         }
-        if (oovOverride) {
-            const o = oovOverride(w);
+        if (oov) {
+            const o = oov(w);
             if (o !== undefined) return o;
         }
         return wordRules(w);
@@ -219,37 +221,34 @@ export function makeNativeBengali(
             .map((d) => BENGALI_DIGITS[d] ?? d)
             .join("");
 
-    function number(digits: string): string {
+    function number(digits: string, oov?: OovResolver): string {
+        const w = (x: string): string => word(x, oov);
         const ascii = toAscii(digits);
         const dot = ascii.indexOf(".");
         if (dot >= 0 && def.numbers.decimalWord) {
             const intN = Number(ascii.slice(0, dot) || "0");
             if (!Number.isSafeInteger(intN)) return ascii;
-            const frac = [...ascii.slice(dot + 1)].map((d) =>
-                word(def.numbers.units[Number(d)]!),
-            );
-            return [
-                renderNumber(intN, def.numbers, word),
-                word(def.numbers.decimalWord),
-                ...frac,
-            ].join(" ");
+            const frac = [...ascii.slice(dot + 1)].map((d) => w(def.numbers.units[Number(d)]!));
+            return [renderNumber(intN, def.numbers, w), w(def.numbers.decimalWord), ...frac].join(" ");
         }
         const n = Number(ascii);
         if (!Number.isSafeInteger(n)) return ascii;
-        return renderNumber(n, def.numbers, word);
+        return renderNumber(n, def.numbers, w);
     }
 
-    function text(input: string): string {
+    // `oovOverride` (neural path only) resolves OOV words between the lexicon and the rule engine; the sync path
+    // passes nothing → unchanged. Per-CALL so one engine instance is reused across calls (no per-call rebuild).
+    function text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, tokenRe, (m, sink) => {
-            if (m[1]) sink.emit(word(m[1]));
+            if (m[1]) sink.emit(word(m[1], oovOverride));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
-            else if (m[3]) sink.emit(number(m[3]));
+            else if (m[3]) sink.emit(number(m[3], oovOverride));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             } else if (m[5]) {
                 if (!strip.includes(m[5]) && symbols[m[5]])
-                    sink.emit(word(symbols[m[5]]!));
+                    sink.emit(word(symbols[m[5]]!, oovOverride));
             }
         });
     }
@@ -257,19 +256,16 @@ export function makeNativeBengali(
     return { word, wordRules, number, text };
 }
 
-/** Load bengali.jsonc (beside this file) and build the Bengali phonemizer. `foreign` handles embedded Latin;
- *  `oovOverride` (neural path only) injects tagger readings for OOV words (lexicon → oovOverride → rules). */
-export function createBengali(
-    foreign?: ForeignPhonemizer,
-    oovOverride?: (w: string) => string | undefined,
-): {
-    text(input: string): string;
+/** Load bengali.jsonc (beside this file) and build the Bengali phonemizer. `foreign` handles embedded Latin; the
+ *  returned `text` takes an optional per-call `oovOverride` (neural path only) that injects tagger readings for OOV
+ *  words (lexicon → oovOverride → rules). */
+export function createBengali(foreign?: ForeignPhonemizer): {
+    text(input: string, oovOverride?: OovResolver): string;
 } {
     return makeNativeBengali(
         loadManifest<BengaliDef>(import.meta.url, "bengali.jsonc"),
         loadSharedPhonology(),
         foreign,
-        oovOverride,
     );
 }
 

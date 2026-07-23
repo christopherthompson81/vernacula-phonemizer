@@ -20,6 +20,12 @@ describe("bengali neural OOV tagger", () => {
         }
     });
 
+    // Embedded Latin must be transliterated by the same English `foreign` phonemizer the registry wires for "bn"
+    // (the neural engine is built WITH it), not dropped. Runs model-present or not (English is a sync dep).
+    test("embedded Latin: transliterated identically to the sync path, not dropped", async () => {
+        expect(await phonemizeBnNeural("আমি Google করি।")).toBe(phonemize("আমি Google করি।", "bn"));
+    });
+
     describe.skipIf(!haveModel)("with the ONNX model present", () => {
         // An OOV word the lexicon misses: the rule engine mis-defaults the inherent vowel to ɔ, but Bengali raises
         // it to [o] (a whole-word, non-rule-derivable decision the tagger's bidirectional pass reads). বক্তরা →
@@ -34,6 +40,13 @@ describe("bengali neural OOV tagger", () => {
         // punctuation stream — only OOV inherent vowels move.
         test("mixed text: numbers + punctuation unchanged, only the OOV word retagged", async () => {
             expect(await phonemizeBnNeural("১৯৯৯ সালে বক্তরা।")).toBe("æk ɦad͡ʒaɾ nɔj ekʃo nɔj nɔbːoi ʃale bɔkt̪oɾa  । ");
+        });
+
+        // An OOV word containing an out-of-vocab grapheme (ঽ avagraha, outside the 61-grapheme training set): the
+        // tagger DECLINES (returns "") rather than emit an arbitrary consonant, so the word defers to the rule
+        // engine and the output equals the sync path — the tagger never corrupts a word it cannot fully read.
+        test("out-of-vocab grapheme: tagger declines, word defers to the rule engine", async () => {
+            expect(await phonemizeBnNeural("ঽমন।")).toBe(phonemize("ঽমন।", "bn"));
         });
     });
 });

@@ -11,6 +11,11 @@ export const GOOGLE_BN_PHONES: Record<string, string> = {
     f: "f", b: "b", bh: "bʱ", m: "m", r: "ɾ", l: "l", sh: "ʃ", s: "s", h: "ɦ",
 };
 
+/** Shared eligibility filter for a Google-lexicon headword: ≥2 graphemes and entirely within the Bengali Unicode
+ *  block. Used by BOTH build_google_consensus.ts (lexicon) and build_tagger_data.ts (tagger corpus) so they select
+ *  the same word set — if the accepted script range ever changes, the two stay in lockstep. */
+export const isBengaliWord = (w: string): boolean => [...w].length >= 2 && /^[ঀ-৿]+$/u.test(w);
+
 /** A Google phone string (space-separated codes, `.` = syllable break) → our IPA, or `null` on an UNMAPPED phone
  *  (a future upstream refresh could add one) — never silently drop a segment. */
 export function googleToIpa(t: string): string | null {

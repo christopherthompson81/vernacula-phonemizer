@@ -25,10 +25,12 @@ fp32 = f"{OUT}/bn-g2p-tagger.onnx"
 # dummy length and breaks variable-length inference).
 torch.onnx.export(m, dummy, fp32, input_names=["chars"], output_names=["logits"],
     dynamic_axes={"chars": {0: "B", 1: "L"}, "logits": {0: "B", 1: "L"}}, opset_version=17, dynamo=False)
-# meta: grapheme→id, tag-id→IPA chunk, per-grapheme valid tag-ids (the consonant mask)
+# meta: grapheme→id, tag-id→IPA chunk, per-grapheme valid tag-ids (the consonant mask). Exclude tag 0 (<pad>): it
+# is never a real emission, and leaving it in <unk>'s all-permitted mask would let an out-of-vocab grapheme argmax
+# to the literal "<pad>" (the TS runtime also declines out-of-vocab words, so this is defence-in-depth).
 charTags = {}
 for c, ci in cv.items():
-    charTags[str(ci)] = [i for i in range(cm.shape[1]) if cm[ci, i].item() > -1e8]
+    charTags[str(ci)] = [i for i in range(cm.shape[1]) if cm[ci, i].item() > -1e8 and i != 0]
 meta = {"src": cv, "tags": {str(i): t for i, t in ilv.items()}, "charTags": charTags}
 json.dump(meta, open(f"{OUT}/bn-g2p-tagger.meta.json", "w"), ensure_ascii=False)
 
