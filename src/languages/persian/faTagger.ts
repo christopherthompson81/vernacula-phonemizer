@@ -20,21 +20,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stressPerWord, type FaContextRestorer } from "./contextRestorer.ts";
 
-interface OrtTensor { data: Float32Array | BigInt64Array }
-interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>> }
-interface OrtLike {
-    InferenceSession: { create(model: Uint8Array, options?: { executionProviders: string[] }): Promise<OrtSession> };
-    Tensor: new (type: string, data: BigInt64Array, dims: number[]) => OrtTensor;
-}
-let ortPromise: Promise<OrtLike> | undefined;
-const ort = (): Promise<OrtLike> => (ortPromise ??= import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike));
+import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
+import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 
-/**
- * `src`: char → id (includes `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk (the space tag `" "` marks a word
- * boundary, dropped in assembly). `charTags`: char-id → the tag-ids that char may emit (the consonant mask; an
- * unseen char maps to all tag-ids). Emitted by tools/fa-restoration/export_tagger_onnx.py.
- */
-interface TaggerMeta { src: Record<string, number>; tags: Record<string, string>; charTags: Record<string, number[]> }
 
 const SHORT_V = new Set(["a", "e", "o"]);
 /**
@@ -84,7 +72,7 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
     } catch { /* no pin file → tagger output unchanged */ }
     let ortLib: OrtLike, sess: OrtSession;
     try {
-        ortLib = await ort();
+        ortLib = await loadOrt("Persian neural tagging");
         // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) with FA_ORT_EP=cuda.
         const ep = process.env.FA_ORT_EP;
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
@@ -104,13 +92,10 @@ export async function createFaTagger(basename = "fa-tagger"): Promise<FaContextR
             for (let k = 0; k < T; k++) {
                 if (chars[k] === " ") { words.push(""); continue; } // word boundary → new word, no tag emitted
                 const id = meta.src[chars[k]!] ?? UNK;
-                // Argmax over ONLY this char's permitted tags (the consonant mask): keeps every consonant canonical
-                // and makes the choice a cheap scan of ~8 candidates instead of all ~1200 tags.
-                const valid = meta.charTags[String(id)];
-                const base = k * nTags;
-                let best = valid?.[0] ?? 0, bestLo = logits[base + best]!;
-                for (const t of valid ?? []) { const v = logits[base + t]!; if (v > bestLo) { bestLo = v; best = t; } }
-                const tag = meta.tags[String(best)] ?? "";
+                // Masked argmax over ONLY this char's permitted tags (the consonant mask): keeps every consonant
+                // canonical, a cheap scan of ~8 candidates. UNK permits all tags, so `best` is never -1 here.
+                const best = maskedArgmax(logits, k * nTags, meta.charTags[String(id)]);
+                const tag = best < 0 ? "" : meta.tags[String(best)] ?? "";
                 if (tag !== " ") words[words.length - 1] += tag;
             }
             // Correct the lexically-fixed first vowel (آ→aː rule + pin transplant) before stress; grapheme words

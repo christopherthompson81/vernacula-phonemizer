@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { MANIFEST } from "./manifest.ts";
+import { loadOrt } from "../../core/onnx.ts";
 
 const SHADDA = MANIFEST.marks.shadda;
 const LABEL_VOWEL_MARK = MANIFEST.diacritizer.labelMarks; // label → combining mark
@@ -87,25 +88,9 @@ function pausalize(text: string): string {
 export interface DiacritizerMeta { chars: Record<string, number>; labels: Record<string, number>; }
 export interface ArabicDiacritizer { diacritize(text: string): Promise<string>; }
 
-interface OrtLike {
-  InferenceSession: { create(path: string | Uint8Array): Promise<OrtSession> };
-  Tensor: new (type: "int64", data: BigInt64Array, dims: number[]) => unknown;
-}
-interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, { data: unknown }>>; }
-
-let ortPromise: Promise<OrtLike> | undefined;
-async function loadOrt(): Promise<OrtLike> {
-  if (!ortPromise) {
-    ortPromise = import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike).catch(() => {
-      throw new Error("Arabic diacritization needs the optional dependency `onnxruntime-node`. Install it with `npm install onnxruntime-node`.");
-    });
-  }
-  return ortPromise;
-}
-
 /** Load a neural Arabic diacritizer from ONNX model bytes + sidecar meta. Session created once and reused. */
 export async function loadArabicDiacritizer(modelBytes: Uint8Array, meta: DiacritizerMeta): Promise<ArabicDiacritizer> {
-  const ort = await loadOrt();
+  const ort = await loadOrt("Arabic diacritization");
   const session = await ort.InferenceSession.create(modelBytes);
   const ilabels: string[] = [];
   for (const [lab, idx] of Object.entries(meta.labels)) ilabels[idx] = lab;

@@ -16,23 +16,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-interface OrtTensor {
-    data: Float32Array | BigInt64Array | Uint8Array;
-}
-interface OrtSession {
-    run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>>;
-}
-interface OrtLike {
-    InferenceSession: { create(path: string | Uint8Array): Promise<OrtSession> };
-    Tensor: new (type: string, data: BigInt64Array | Float32Array | Uint8Array, dims: number[]) => OrtTensor;
-}
-let ortPromise: Promise<OrtLike> | undefined;
-function ort(): Promise<OrtLike> {
-    if (ortPromise === undefined) {
-        ortPromise = import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike);
-    }
-    return ortPromise;
-}
+import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
 
 interface Meta {
     src: Record<string, number>;
@@ -75,7 +59,7 @@ export async function createFaVowelRestorer(): Promise<FaVowelRestorer | undefin
     }
     let ortLib: OrtLike, enc: OrtSession, dec: OrtSession;
     try {
-        ortLib = await ort();
+        ortLib = await loadOrt("Persian neural restoration");
         enc = await ortLib.InferenceSession.create(encBytes);
         dec = await ortLib.InferenceSession.create(decBytes);
     } catch {

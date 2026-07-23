@@ -17,14 +17,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-interface OrtTensor { data: Float32Array | BigInt64Array | Uint8Array }
-interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>> }
-interface OrtLike {
-    InferenceSession: { create(path: string | Uint8Array, options?: { executionProviders: string[] }): Promise<OrtSession> };
-    Tensor: new (type: string, data: BigInt64Array | Float32Array | Uint8Array, dims: number[]) => OrtTensor;
-}
-let ortPromise: Promise<OrtLike> | undefined;
-const ort = (): Promise<OrtLike> => (ortPromise ??= import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike));
+import { loadOrt, type OrtLike, type OrtSession, type OrtTensor } from "../../core/onnx.ts";
 
 interface Meta { src: Record<string, number>; tgt: Record<string, number>; H: number; bos: number; eos: number; unk: number }
 
@@ -60,7 +53,7 @@ export async function createFaContextRestorer(basename = "fa-context-restorer"):
     } catch { return undefined; }
     let ortLib: OrtLike, enc: OrtSession, dec: OrtSession;
     try {
-        ortLib = await ort();
+        ortLib = await loadOrt("Persian neural restoration");
         // Shipping default is CPU (no CUDA dependency). Opt into a GPU execution provider — e.g. for fast
         // test/eval iteration — with FA_ORT_EP=cuda (or webgpu); needs the CUDA runtime libs on LD_LIBRARY_PATH.
         const ep = process.env.FA_ORT_EP;

@@ -18,21 +18,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-interface OrtTensor { data: Float32Array | BigInt64Array }
-interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>> }
-interface OrtLike {
-    InferenceSession: { create(model: Uint8Array, options?: { executionProviders: string[] }): Promise<OrtSession> };
-    Tensor: new (type: string, data: BigInt64Array, dims: number[]) => OrtTensor;
-}
-let ortPromise: Promise<OrtLike> | undefined;
-const ort = (): Promise<OrtLike> => (ortPromise ??= import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike));
-
-/**
- * `src`: grapheme → id (includes `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk. `charTags`: grapheme-id → the
- * tag-ids that grapheme may emit (the consonant mask; an unseen grapheme maps to all tag-ids). Emitted by
- * tools/bengali/export_bn_tagger_onnx.py.
- */
-interface TaggerMeta { src: Record<string, number>; tags: Record<string, string>; charTags: Record<string, number[]> }
+import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
+import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 
 export interface BengaliTagger {
     /** A bare Bengali word → canonical IPA (no stress mark; matches the sync engine's default render). */
@@ -49,7 +36,7 @@ export async function createBengaliTagger(basename = "bn-g2p-tagger"): Promise<B
     } catch { return undefined; }
     let ortLib: OrtLike, sess: OrtSession;
     try {
-        ortLib = await ort();
+        ortLib = await loadOrt("Bengali neural tagging");
         // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) with BN_ORT_EP=cuda.
         const ep = process.env.BN_ORT_EP;
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
@@ -75,16 +62,10 @@ export async function createBengaliTagger(basename = "bn-g2p-tagger"): Promise<B
             const logits = r.logits!.data as Float32Array; // flat [T * nTags], row-major (t·nTags + tag)
             let out = "";
             for (let k = 0; k < T; k++) {
-                // Argmax over ONLY this grapheme's permitted tags (the consonant mask, pad-excluded): keeps every
-                // consonant canonical and makes the choice a cheap scan of ~3 candidates instead of all ~160 tags.
-                const valid = meta.charTags[String(ids[k])];
-                if (!valid || valid.length === 0) return ""; // no permitted tag → decline (defer to rules)
-                const base = k * nTags;
-                let best = valid[0]!, bestLo = logits[base + best]!;
-                for (let j = 1; j < valid.length; j++) {
-                    const t = valid[j]!, v = logits[base + t]!;
-                    if (v > bestLo) { bestLo = v; best = t; }
-                }
+                // Masked argmax over ONLY this grapheme's permitted tags (the consonant mask, pad-excluded): keeps
+                // every consonant canonical. A -1 (no permitted tag) means decline the whole word → defer to rules.
+                const best = maskedArgmax(logits, k * nTags, meta.charTags[String(ids[k])]);
+                if (best < 0) return "";
                 out += meta.tags[String(best)] ?? "";
             }
             return out;
