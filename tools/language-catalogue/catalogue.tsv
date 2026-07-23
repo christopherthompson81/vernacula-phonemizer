@@ -64,6 +64,7 @@ gan	Gan Chinese	Sinitic	Han	22000000						implemented		🔷
 gd	Scottish Gaelic	Indo-European (Celtic)	Latin	57000					1	unimplemented					Not yet tracked; covered by espeak.
 gl	Galician	Indo-European (Romance)	Latin	2400000					0	unimplemented					Not yet tracked; covered by FLEURS.
 gn	Guarani	Tupian	Latin	6500000					1	unimplemented					Not yet tracked; covered by espeak.
+grc	Ancient Greek	Indo-European (Hellenic)	Greek (polytonic)	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical (Attic/Koine) — a dead language with a large written corpus, in scope (excludes only constructed languages).
 gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡			
 ha	Hausa	Afro-Asiatic (Chadic)	Latin/Ajami	54000000	40000000					implemented		✅			
 hak	Hakka Chinese	Sinitic	Han	44000000						implemented		🔷			
@@ -101,6 +102,7 @@ kok	Konkani	Indo-Aryan (Southern)	Devanagari	2000000						unimplemented					Was 
 kr	Kanuri (macrolanguage)	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella				COVER TERM — do NOT build the umbrella; target a specific variety (as with Balochi→bcc, Arabic→dialects). Individual codes: Central/Yerwa knc (~4M, the standard w/ orthography), Manga kby (~1M, Niger), Tumari krt. Referee PROBED 2026-07-19: knc/kby/krt/kr ALL have no wikipron, no kaikki page, no epitran map → also DATA-SCARCE. Revisit trigger = a referee appears OR a deliberate authored-⛔ from a grammar (the Hausa/Balochi-Run-1 path), not merely surfacing in a population list.
 ks	Kashmiri	Indo-Aryan (Dardic)	Arabic (Kashmiri)	7000000						unimplemented					Dardic; vowel-rich abjad.
 ky	Kyrgyz	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
+la	Latin	Indo-European (Italic)	Latin	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical — a dead language with a large written corpus, in scope (excludes only constructed languages).
 lb	Luxembourgish	Indo-European (Germanic)	Latin	390000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
 lg	Luganda	Niger-Congo (Bantu)	Latin	6000000	5000000					implemented		🔷			
 ln	Lingala	Niger-Congo (Bantu)	Latin	20000000	20000000					implemented		🔷			
@@ -120,6 +122,7 @@ mn	Mongolian (Khalkha)	Mongolic	Cyrillic	6000000						unimplemented					Cyrillic
 mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						implemented		🔷			FIRST Gur language in the fleet. Wolof-shaped greedy g2p + gemination + nasal assimilation from the Latin (Burkinabé) orthography. DUAL-GROUNDED: 94.9% folded vs en.wiktionary Moore (39w, single numeric referee, loanword-heavy) + the FSI Moré Basic Course (Lehr/Redden/Balima 1966) phonology (corroborates ⟨r⟩=flap-of-/d/, ⟨o⟩=/o/ no ⟨ɔ⟩, ⟨ny⟩=ɲ, /n/=[n,ŋ], H/L tone). Signatures: ATR letters ⟨ɛ ɩ ʋ⟩, doubling=length, tilde=nasal, ⟨r⟩=ɾ, ⟨y⟩=j, geminate Cː, ⟨n⟩→ŋ before g/k. Tone (2-tone H/L) unwritten→not emitted. Numbers deferred.
 mr	Marathi	Indo-Aryan	Devanagari	83000000	16000000					implemented		🟡			
 mt	Maltese	Afro-Asiatic (Semitic)	Latin	520000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
+mto	Totontepec Mixe	Mixe-Zoquean	Latin	6000					1	unimplemented					Not yet tracked; covered by espeak (full data/mto engine).
 my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅			
 nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡			
 naq	Nama (Khoekhoe)	Khoe-Kwadi	Latin	250000					1	unimplemented					Not yet tracked; covered by espeak.
