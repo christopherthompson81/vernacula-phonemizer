@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Hebrew PHASE-2 tagger — a per-consonant BiLSTM that RESTORES the vowels of UNVOCALIZED Hebrew directly to IPA
-(the fa faTagger pattern; the Arabic-diacritizer analogue). Each skeleton consonant → an IPA-chunk tag
-(consonant + restored vowel). Output length == input length → CANNOT degenerate. The whole-word bidirectional pass
-supplies the context that disambiguates the unwritten vowels (e.g. sheva na/nach, homographs). A
-consonant-consistency mask constrains each letter to only the tags it produced in training.
+"""Hebrew PHASE-2 tagger — a SENTENCE-LEVEL per-consonant BiLSTM that RESTORES the NIQQUD of unvocalized Hebrew
+(the ar/nakdan approach; deterministic Phase-1 g2p then renders IPA). Each skeleton consonant → its niqqud tag,
+plus a space tag at word boundaries. Output length == input length → CANNOT degenerate. The bidirectional pass over
+the whole CLAUSE supplies the cross-word context that disambiguates the unwritten vowels (sheva na/nach, homographs
+ילד = jeled/jaled). A consonant-consistency mask constrains each letter to only the tags it produced in training.
 
-Unlike the Bengali tagger this needs NO aligner — the training tags are already 1:1 with the skeleton (from the
-Phase-1 g2p's per-consonant chunks, tools/hebrew/build_tagger_data.ts).
+Reads three TAB columns from build_tagger_data.ts — skeleton, niqqud tags, and a per-consonant TRAIN/IGNORE mask
+(the register-balancing suppression). Masked positions cast no vote: excluded from the vocab/allow-set and ignored
+by the loss. No aligner needed — the tags are already 1:1 with the skeleton.
 
   npx tsx tools/hebrew/build_tagger_data.ts /tmp/hebrew_diacritized /tmp/he_tagger_train.tsv
   python tools/hebrew/train_he_tagger.py /tmp/he_tagger_train.tsv src/languages/hebrew   # writes he_tagger.pt
@@ -22,23 +23,26 @@ OUTDIR = sys.argv[2] if len(sys.argv) > 2 else "."
 rows = []
 for l in open(SRC, encoding="utf8"):
     l = l.rstrip("\n")
-    if "\t" not in l: continue
-    skel, tags = l.split("\t")
-    tags = tags.split("|")
-    if len(skel) != len(tags):  # skeleton is 1 codepoint per consonant (BMP) → char count == tag count
+    p = l.split("\t")
+    if len(p) != 3: continue
+    skel, tags, mask = p[0], p[1].split("|"), p[2].split("|")
+    if len(skel) != len(tags) or len(skel) != len(mask):  # 1 BMP codepoint per consonant → aligned columns
         continue
-    rows.append((list(skel), tags))
+    rows.append((list(skel), tags, [c == "1" for c in mask]))
 random.shuffle(rows)
 nh = len(rows) // 10; hold = rows[:nh]; train = rows[nh:]
 print(f"# train {len(train)} | held-out {len(hold)} | dev={dev}", file=sys.stderr, flush=True)
 
+# masked positions (register-balancing suppression, build_tagger_data.ts) cast NO vote: excluded from the char→tag
+# allow-set / vocab here and ignored by the loss (label → pad id 0) below.
 cv = {"<pad>": 0, "<unk>": 1}
 lv = {"<pad>": 0}
 allowed = {}  # char id → set of tag ids seen with it
-for skel, tags in train:
-    for c, t in zip(skel, tags):
-        cv.setdefault(c, len(cv)); lv.setdefault(t, len(lv))
-        allowed.setdefault(cv[c], set()).add(lv[t])
+for skel, tags, msk in train:
+    for c, t, keep in zip(skel, tags, msk):
+        cv.setdefault(c, len(cv))
+        if not keep: continue
+        lv.setdefault(t, len(lv)); allowed.setdefault(cv[c], set()).add(lv[t])
 ilv = {i: t for t, i in lv.items()}
 print(f"# char vocab={len(cv)} tag vocab={len(lv)}", file=sys.stderr, flush=True)
 genc = lambda s: [cv.get(c, 1) for c in s]
@@ -52,7 +56,8 @@ class Tagger(nn.Module):
 
 m = Tagger(len(cv), len(lv)).to(dev); opt = torch.optim.Adam(m.parameters(), 1e-3)
 crit = nn.CrossEntropyLoss(ignore_index=0)
-enc = [(genc(sk), [lv[t] for t in tg]) for sk, tg in train]
+# masked position → label pad id 0 → skipped by ignore_index (also catches a masked-only tag absent from lv)
+enc = [(genc(sk), [lv[t] if keep and t in lv else 0 for t, keep in zip(tg, msk)]) for sk, tg, msk in train]
 for ep in range(15):
     m.train(); random.shuffle(enc)
     for k in range(0, len(enc), 256):
@@ -72,7 +77,7 @@ with torch.no_grad():
         b = hold[k:k + 512]; mx = max(len(r[0]) for r in b); X = torch.zeros(len(b), mx, dtype=torch.long)
         for r, row in enumerate(b): X[r, :len(row[0])] = torch.tensor(genc(row[0]))
         lo = m(X.to(dev)).cpu()
-        for r, (sk, tg) in enumerate(b):
+        for r, (sk, tg, _msk) in enumerate(b):
             pred = []
             for i, c in enumerate(sk):
                 valid = mask_of.get(cv.get(c, 1))

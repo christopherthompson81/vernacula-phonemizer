@@ -138,3 +138,32 @@ Sweep (modern-holdout word-exact):
 Folded ×5 oversampling into build_tagger_data.ts (SOURCES reps); made export_he_tagger_onnx.py tolerant of the
 `dynamo` kwarg (older torch). Shipped model retrained + swapped. Remaining lever unchanged: the licensed modern
 corpus (policy-blocked) + a running-text human-IPA referee. 🔵🔷.
+
+## Run 6 — 2026-07-23 16:xx — targeted suppression of pre-modern CONFLICTING readings (user's idea)
+
+Question (user): instead of GLOBAL oversampling, suppress pre-modern readings only in the conflicting cases?
+
+More surgical: oversampling reweights everything (incl. the 80% agreeing skeletons + rare vocab pre-modern
+uniquely covers). Implemented as a per-consonant LOSS MASK (build emits a 3rd column; train sets masked labels →
+pad id 0 → ignore_index, and excludes them from the char→tag allow-set): pre-modern trains context + agreeing +
+rare words but casts NO vote on conflicting words.
+
+RISK flagged up front: many conflicts are GENUINE homographs where the "pre-modern" reading is a valid MODERN
+reading too (שנים = šnayim AND šanim) — blanket suppression would bias to the modern-modal sense and HURT homograph
+resolution (the thing sentence-level is for). So the eval tracks the homograph-bucket miss count, not just aggregate.
+
+Arms (modern-holdout word-exact / homograph-bucket misses):
+- baseline (no balancing): 84.5%
+- mask-only (≠modal, no oversample): **85.1%** — beats baseline but < oversample; suppression removes archaic votes
+  but doesn't ADD modern weight.
+- oversample ×5 (shipped #424): 85.6% / 131
+- **modal-mask + ×5** (mask if reading ≠ modern MODAL): 86.1% / **152** — aggregate up but homographs REGRESSED, as
+  predicted (killed the valid minority reading).
+- **set-mask + ×5** (mask if reading ABSENT from modern reading-SET — genuinely archaic only): **86.4% / 138** ✅ —
+  the refinement recovered 14 of the 21 lost homographs (138 ≈ 131 baseline) AND lifted the aggregate highest.
+
+The refinement (absent-from-set, not ≠-modal) is the key: it spares homograph minority readings that modern still
+uses, suppressing only obsolete vocalizations (3.6% of consonants masked). SHIPPED (supersedes the ×5-only #424):
+folded the mask into build_tagger_data.ts (3rd column, phonemizeWord-derived modern reading-sets) + train_he_tagger.py
+(honors it); retrained via the shipped pipeline → identical 86.4%/138. +1.9pp over baseline, +0.8pp over
+oversample-alone; per-consonant 94.0%→95.6%. 🔵🔷.

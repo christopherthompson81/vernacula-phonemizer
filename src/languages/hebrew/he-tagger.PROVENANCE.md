@@ -33,25 +33,34 @@ model (the permissive-data policy; the licensed modern corpus is the remaining l
 vocalized clause → the unvocalized skeleton + the per-consonant niqqud, via `tools/hebrew/build_tagger_data.ts`.
 No aligner needed.
 
-**Register-balancing the sources (the data lever).** The permissive corpus is ~89% pre-modern by token count
-(258k clause rows) vs only ~7% CC-BY-SA `modern/wiki` (9.9k rows) — but the deployment target is MODERN running
-text (full ktiv-male spelling). Residual-miss mining showed the two biggest buckets are modern-OOD: vav/yod mater
-(ktiv-male) and reduced-vowel/dagesh on modern vocabulary. Crucially, on the **~20% of skeletons shared by both
-registers the modal reading CONFLICTS** (שנים = *šnayim* / *šanim*, ביום = *bjom* / *bajom*) — so a 12:1 pre-modern
-majority drags the net's prior toward the archaic reading. `build_tagger_data.ts` therefore **oversamples
-`modern/wiki` + `validation` ×5** (→ 334k rows, modern share ~7%→23%) WITHOUT discarding pre-modern coverage.
-Measured **+1.1pp** on held-out modern running text (84.5%→85.6%); per-consonant 94.0%→95.9%. Downsampling
-pre-modern instead lost data and REGRESSED (81.5%); ×10 oversampling overfit `modern/wiki` (85.2%) — ×5 is the
-sweet spot. The g2p is uniform across both registers, so the conflict is purely in the human niqqud labels
-(genuine register/sense homographs), which the bidirectional context pass is built to disambiguate.
+**Register-balancing the sources (the data lever, two mechanisms).** The permissive corpus is ~89% pre-modern by
+token count (258k clause rows) vs only ~7% CC-BY-SA `modern/wiki` (9.9k rows) — but the deployment target is MODERN
+running text (full ktiv-male spelling). Residual-miss mining showed the biggest buckets are modern-OOD (vav/yod
+mater, reduced-vowel/dagesh) and that on the **~20% of skeletons shared by both registers the modal reading
+CONFLICTS** (שנים = *šnayim* / *šanim*, ביום = *bjom* / *bajom*) — so a 12:1 pre-modern majority drags the net's
+prior toward the archaic reading. The g2p is uniform across both registers, so the conflict is purely in the human
+niqqud labels (genuine register/sense homographs). `build_tagger_data.ts` applies two complementary fixes:
+
+1. **Oversample** `modern/wiki` + `validation` **×5** (→ 334k rows, modern share ~7%→23%), no pre-modern discarded
+   — adds modern weight. Alone: 84.5%→85.6%. (Downsampling pre-modern instead REGRESSED to 81.5% — data loss
+   dominates; ×10 oversampling overfit `modern/wiki` at 85.2% — ×5 is the sweet spot.)
+2. **Targeted suppression** (the third mask column): on the pre-modern source, a word whose reading is ABSENT from
+   the modern reading-SET for its skeleton (a genuinely-archaic vocalization modern never uses) is masked out of the
+   loss — pre-modern still trains context, agreeing words, and the rare vocab it uniquely covers, but casts no vote
+   on obsolete readings (3.6% of consonants). The *absent-from-modern* test (not merely "≠ the modern MODAL") spares
+   the valid MINORITY reading of a real homograph: an earlier "≠ modal" mask lifted the aggregate but REGRESSED the
+   homograph bucket 131→152; the set-based mask keeps it at 138 (≈ the 131 baseline).
+
+Stacked (oversample ×5 + suppression): **84.5% → 86.4% word-exact** on held-out modern running text (+1.9pp over
+baseline, +0.8pp over oversample-alone); per-consonant 94.0%→95.6%.
 
 **Training:** 15 epochs, Adam 1e-3, cross-entropy `ignore_index=pad`, seed 0 (GPU). `train_he_tagger.py` (writes
 `he_tagger.pt`) → `export_he_tagger_onnx.py` (int8 ONNX + meta; `dynamo=False`).
 
 **Measured:**
-- **Diacritization: 95.9% per-consonant niqqud** on the corpus held-out (the standard nakdan metric).
+- **Diacritization: 95.6% per-consonant niqqud** on the corpus held-out (the standard nakdan metric).
 - **End-to-end on held-out MODERN RUNNING TEXT** (news/blogs/test_modern/dictaTest — none in training) vs the
-  ground-truth vocalization: **85.6% word-exact**. The residual (mined): ~19% sheva/reduced-vowel free variation
+  ground-truth vocalization: **86.4% word-exact**. The residual (mined): ~19% sheva/reduced-vowel free variation
   (the gold itself is inconsistent) + ~10% context-free homographs + modern-vocab mater/dagesh — all data- or
   ambiguity-bound, none rule-tractable (prefix-particle and glottal misses are already ~0). The sync engine alone
   gives only a vowel-less consonant skeleton (ʃlvm ʔvlm) → this makes unvocalized Hebrew phonemizable.
