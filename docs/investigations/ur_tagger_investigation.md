@@ -341,3 +341,26 @@ overall to ~60%. Neither referee is "wrong" — for covered words they agree ~80
 content; the apparent conflict was full-word-exact (wrong metric for speech-vs-citation) + the
 weak OOV tail. Maturity row corrected to these numbers; the 56.8% referee-eval floor stays as the
 lexicon-free backbone regression guard (fine for that, not the deployment accuracy).
+
+## Run 11 — 2026-07-22 — two levers for the residual, both declined (tested, not assumed)
+
+Revisit: would a tagger help short vowels on the residual, and would CLE-as-source help?
+
+**Tagger — no (re-confirmed, information ceiling).** The residual IS the OOV/tail boundary,
+which is exactly where Run 4 showed the tagger fails: short-vowel quality has ~0 mutual
+information with the skeleton (dev 63.8% < the 71.5% always-ə prior — worse than guessing ə),
+and more data widened the gap (Run 3). The tagger's one win was majhūl (+13pp, word-shape signal)
+— long vowels, not short, and we already declined the 3 MB model for it.
+
+**CLE-as-source — prototyped, marginal, declined.** CLE has 3,535 words new to the lexicon, ALL
+in the weak Hindi-fill/OOV tail (a real mix: inflections پہاڑوں, loanwords انجکشن/انشورنس,
+proper nouns). But: (1) only **14** overlap wikipron, so ~3,520 are OUTSIDE Wiktionary and
+independently unvalidatable (CLE would be their sole authority); on the 14 checkable, CLE beats
+current +7pp — too thin to extrapolate. (2) CLE is a SPEECH corpus → importing it seeds the
+citation lexicon with realization artifacts. (3) It spends our ONLY independent referee (the
+80.6%-core corroboration) to buy unvalidatable coverage. Net negative — keep CLE as the referee.
+
+**Close:** both levers tested and declined. The residual (Hindi/OOV tail, ~50% short-vowel
+choice) stands as a genuine information floor — not an engineering gap. The Urdu deliverable is
+the kaikki-primary IPA lexicon (80.6% independent on its covered core) + the CLE independent
+referee; the tagger and CLE-as-source are documented negatives.
