@@ -1,0 +1,44 @@
+// Native canonical-IPA data manifest for Mossi / Mooré (mos) — Niger-Congo GUR (Oti-Volta), the Latin (Burkinabé)
+// orthography, espeak-independent. The largest language of Burkina Faso (~8M) and the FIRST Gur language in the
+// fleet. A greedy longest-match scan (mossi.ts) with one code rule: CONSONANT GEMINATION (a doubled consonant →
+// Cː: yelle→jélːé). Referee: en.wiktionary Moore (Wiktionary, HUMAN). Signatures:
+//   • ATR-ish 9-vowel system with dedicated letters — ⟨ɛ⟩=ɛ, ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ (alongside plain e i o u a); ⟨o⟩=o
+//     ALWAYS (there is no ⟨ɔ⟩ letter — /ɔ/ is written as the hiatus ⟨oa⟩, laloa→laloa).
+//   • DOUBLING = LENGTH (aa→aː, ee→eː, ɛɛ→ɛː, oo→oː, uu→uː, ʋʋ→ʊː, ii→iː, ɩɩ→ɪː).
+//   • NASAL vowels = TILDE (ã ẽ ĩ õ ũ, + ɛ̃ ɩ̃ ʋ̃); the nasal-long digraph ⟨ãa⟩→ãː (esãase→esãːse).
+//   • ⟨r⟩=ɾ (tap), ⟨y⟩=j, ⟨ny⟩=ɲ, ⟨ŋ⟩=ŋ, ⟨g⟩=ɡ, ⟨ʼ⟩=ʔ (glottal stop).
+// TONE (2-tone H/L) is NOT written in the orthography (it is contextual) → not emitted; the referee's tone marks +
+// syllable dots are folded. Numbers deferred. See docs/investigations/mos_native_bringup_investigation.md.
+{
+    "language": "mos",
+    "name": "Mooré",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination + nasal assimilation from the Mooré Latin (Burkinabé) orthography, grounded on TWO independent authorities: the en.wiktionary Moore referee (modern orthography, human) + the FSI Moré Basic Course (Lehr, Redden & Balima 1966) phonology — which corroborates ⟨r⟩=flap-allophone-of-/d/, ⟨o⟩=/o/ (no ⟨ɔ⟩), ⟨ny⟩=ɲ, /n/=[n,ŋ], and the H/L tone (unwritten in the modern orthography).",
+
+    "convention": {
+        "vowels": "⟨a e ɛ i ɩ o u ʋ⟩ = a e ɛ i ɪ o u ʊ — dedicated ATR letters ⟨ɛ ɩ ʋ⟩; ⟨o⟩=o always (no ⟨ɔ⟩; /ɔ/ = hiatus ⟨oa⟩)",
+        "length": "a doubled vowel is LONG — aa→aː, ee→eː, ɛɛ→ɛː, oo→oː, uu→uː, ʋʋ→ʊː, ii→iː, ɩɩ→ɪː",
+        "nasal": "a tilde vowel is NASAL — ã ẽ ĩ õ ũ, ɛ̃ ɩ̃ ʋ̃; the nasal-long digraph ⟨ãa⟩→ãː (esãase→esãːse)",
+        "gemination": "a doubled consonant is a GEMINATE Cː (yelle→jélːé) — handled in code",
+        "nasalAssim": "⟨n⟩→[ŋ] before a velar g/k (tenga→teŋɡa) — FSI /n/=[n,ŋ]; handled in code",
+        "consonants": "⟨r⟩=ɾ (tap; the flap allophone of /d/ per FSI), ⟨y⟩=j, ⟨ny⟩=ɲ, ⟨sh⟩=ʃ, ⟨ŋ⟩=ŋ, ⟨g⟩=ɡ, ⟨ʼ⟩=ʔ (glottal stop); b d f h k l m n p s t v w z direct",
+        "tone": "2-tone (H/L) NOT written in the orthography (contextual) → not emitted; the referee marks it (á/à) → folded"
+    },
+
+    // Vowel NASAL-LONG + LENGTH digraphs first (scanner sorts keys LENGTH DESC), then nasal singles, oral singles,
+    // then consonants (incl. the ⟨ny⟩ digraph). Consonant gemination is handled in code.
+    "graphemes": {
+        "ãa": "ãː",
+        "aa": "aː", "ee": "eː", "ɛɛ": "ɛː", "ii": "iː", "ɩɩ": "ɪː", "oo": "oː", "uu": "uː", "ʋʋ": "ʊː",
+        "ã": "ã", "ẽ": "ẽ", "ĩ": "ĩ", "õ": "õ", "ũ": "ũ", "ɛ̃": "ɛ̃", "ɩ̃": "ɪ̃", "ʋ̃": "ʊ̃",
+        "a": "a", "e": "e", "ɛ": "ɛ", "i": "i", "ɩ": "ɪ", "o": "o", "u": "u", "ʋ": "ʊ",
+        "ny": "ɲ", "sh": "ʃ",
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k", "l": "l", "m": "m",
+        "n": "n", "ŋ": "ŋ", "p": "p", "r": "ɾ", "s": "s", "t": "t", "v": "v", "w": "w",
+        "y": "j", "z": "z", "ʼ": "ʔ", "'": "ʔ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}

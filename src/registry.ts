@@ -105,6 +105,7 @@ import { createSesotho } from "./languages/sesotho/sesotho.ts";
 import { createSepedi } from "./languages/sepedi/sepedi.ts";
 import { createBambara } from "./languages/bambara/bambara.ts";
 import { createWolof } from "./languages/wolof/wolof.ts";
+import { createMossi } from "./languages/mossi/mossi.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
 import { createKirundi } from "./languages/kirundi/kirundi.ts";
 import { createUyghur } from "./languages/uyghur/uyghur.ts";
@@ -391,6 +392,8 @@ function build(lang: string): Phonemizer {
             return createBambara();
         case "wo":
             return createWolof();
+        case "mos":
+            return createMossi();
         case "lg":
             return createLuganda();
         case "rn":
