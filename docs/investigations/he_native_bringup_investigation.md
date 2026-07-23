@@ -68,3 +68,16 @@ alone yields only a vowel-less consonant skeleton).
 src/hebrewNeural.ts, tools/hebrew/{build_tagger_data.ts, train_he_tagger.py, export_he_tagger_onnx.py},
 test/hebrewNeural.test.ts. Still 🔵🔷 (Phase 2 modest on isolated words; single-source). Next: more MODERN training
 data (licensed) + a running-text referee + the sheva-na morphology.
+
+## Run 3 — 2026-07-23 — Phase-2 RUNNING-TEXT metric (the fair number)
+
+The Run-2 48.0% was vs the HUMAN a=IL referee on ISOLATED CITATION words — the worst case on both axes (no context
+for homographs + human-convention gap). Measured the fair number on held-out MODERN RUNNING TEXT (20k words from
+modern/news + modern/blogs + test_modern + dictaTestCorpus — NONE in training) vs the ground-truth vocalization
+(the corpus's correct niqqud → Phase-1 g2p): **72.1% word-exact / 86.8% char-agreement** (char is a positional
+floor). That is the meaningful restoration metric — "given bare text, did the tagger recover the same reading as
+the correct pointing?" The residual 28% is dominated by (a) genuine HOMOGRAPH ambiguity (needs SENTENCE context —
+the tagger is word-at-a-time like bn; a sentence-level pass à la fa would help), (b) pre-modern vocab skew, (c) the
+sheva-na convention gap. Published Hebrew diacritizers (Nakdimon/MenakBERT) reach ~90%+ char with transformers +
+sentence context; this 830k-word word-level BiLSTM at ~87% char is a reasonable point on that curve. Levers: a
+sentence-level tagger, the licensed modern corpus, and a running-text HUMAN-IPA referee.
