@@ -1,0 +1,20 @@
+// Mooré (mos) — Niger-Congo GUR (Oti-Volta), Latin (Burkinabé) orthography, the FIRST Gur language in the fleet.
+// Referee: en.wiktionary Moore (Wiktionary, HUMAN) — the only source (no kaikki dump / epitran / wikipron mos),
+// loanword-heavy → single-source, recorded as a secondaryGap. The backbone folds neutralise the referee's marks the
+// orthography does NOT determine: TONE (H á / L à — Mooré tone is contextual, unwritten → we emit none), SYLLABLE
+// dots, and the geminate notation (CC ~ Cː). Vowel quality/length (⟨ɛ ɩ ʋ⟩, doubling) and NASALISATION (tilde) ARE
+// written and emitted, so they are compared directly — NOT folded. See docs/investigations/mos_native_bringup_investigation.md.
+{
+    "language": "mos", "name": "Mooré", "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination from the Mooré Latin (Burkinabé) orthography. Referee: en.wiktionary Moore (Wiktionary, human).",
+    "referees": [
+        { "file": "mos.wiktionary-mos.tsv", "source": "en.wiktionary Moore (Wiktionary, human)", "role": "primary" }
+    ],
+    "secondaryGap": "No second orthography-matched NUMERIC referee for Mooré: kaikki has no per-language dump, and epitran mos-Latn / wikipron mos are absent, so the only word-list referee is the en.wiktionary Moore IPA category (human, loanword-heavy). The phonology IS independently corroborated by the FSI Moré Basic Course (Lehr, Redden & Balima 1966) — ⟨r⟩=flap allophone of /d/, ⟨o⟩=/o/, ⟨ny⟩=ɲ, /n/=[n,ŋ], H/L tone — but its 1966 pedagogical transcription (tone-marked, e/ɛ collapsed) is not a drop-in referee in the modern orthography. The anchor is the adjudicated common-word gold in test/mossi.test.ts.",
+    "folds": [
+        { "pattern": "[\\u0300\\u0301\\u0302\\u0304\\u030b]", "replace": "", "note": "TONE: Mooré orthography does not mark tone (H/L is contextual) → we emit none; strip the referee's combining acute/grave/other tone diacritics" },
+        { "pattern": "[˥˦˧˨˩]", "replace": "", "note": "tone letters (if any referee entry uses Chao) — deferred, strip" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "([bdfɡhklmnprɾstvzjɲŋ])\\1", "replace": "$1ː", "note": "GEMINATION: the referee occasionally writes a doubled consonant (lekolle→lékolle) rather than the length mark; normalise CC→Cː (we emit Cː)" }
+    ]
+}

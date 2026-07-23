@@ -78,7 +78,7 @@ mai	Maithili	Indo-Aryan	Devanagari	34000000						implemented		🔷
 mg	Malagasy	Austronesian (Barito)	Latin	25000000						implemented		🔷			
 ml	Malayalam	Dravidian	Malayalam	37000000						implemented		✅			
 mn	Mongolian (Khalkha)	Mongolic	Cyrillic	6000000						unimplemented					Cyrillic (+ traditional Mongolian script).
-mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						unimplemented					Burkina Faso; new branch (Gur).
+mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						implemented		🔷			FIRST Gur language in the fleet. Wolof-shaped greedy g2p + gemination + nasal assimilation from the Latin (Burkinabé) orthography. DUAL-GROUNDED: 94.9% folded vs en.wiktionary Moore (39w, single numeric referee, loanword-heavy) + the FSI Moré Basic Course (Lehr/Redden/Balima 1966) phonology (corroborates ⟨r⟩=flap-of-/d/, ⟨o⟩=/o/ no ⟨ɔ⟩, ⟨ny⟩=ɲ, /n/=[n,ŋ], H/L tone). Signatures: ATR letters ⟨ɛ ɩ ʋ⟩, doubling=length, tilde=nasal, ⟨r⟩=ɾ, ⟨y⟩=j, geminate Cː, ⟨n⟩→ŋ before g/k. Tone (2-tone H/L) unwritten→not emitted. Numbers deferred.
 mr	Marathi	Indo-Aryan	Devanagari	83000000	16000000					implemented		🟡			
 my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅			
 nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡			
