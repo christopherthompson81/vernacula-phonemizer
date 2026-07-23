@@ -231,3 +231,25 @@ dialect-ambiguous (Dhaka-only raising we can't confirm for Kolkata) or low-frequ
 hundred more" reliable Kolkata entries is NOT achievable from the available sources — it would require a
 comprehensive Kolkata pronunciation dictionary that no public resource provides. Bengali is a **strong 🟡**: rule
 engine 93.9% + a 168-entry cross-source-verified lexicon (shipped 98.0% on the gold), honestly bounded. Suite green.
+
+## Run 11 — 2026-07-22 — ম্ব cluster rule fix + a THIRD independent source (Google language-resources/bn)
+
+Revisiting the tail. Two findings.
+
+**1. Rule fix — ম্ব geminated instead of clustering (was mis-filed as "lexical").** The phôla-gemination rule
+`([ক-হড়-য়])্[যবম]` geminated the preceding consonant for any য/ব/ম 2nd member — correct for obstruents
+(ত্ব→t̪ːo) but WRONG after a nasal, where ব is a homorganic CLUSTER: লম্বা→lɔmːa (should be lɔmba), কম্বল→kɔmːɔl,
+চুম্বন→t͡ʃumːɔn, ডিম্ব→ɖimːo. (ম্ভ escaped only because ভ isn't in the phôla set.) Fix: exclude nasal+ব from
+gemination (`p2==="ব" && "ঙঞণনম".includes(c)` → leave the conjunct for g2p to cluster). Every geminate case
+preserved (মহত্ব, বিদ্যা, কন্যা, অকাট্য); fixes লম্বা on the gold AND all OOV ম্ব words. Gold rules 92.5→93.2%,
+shipped 98.0→98.6%; full suite (931) green. NOT lexical — a genuine engine bug the prior runs lumped into the tail.
+
+**2. Found the third independent source Run 10 said didn't exist: Google `language-resources/bn`** (65,036 words,
+CC-BY-4.0, non-Wiktionary). Its phone set keeps the distinctions wikipron collapses — **retroflex ʈ/ɖ: 100%
+agreement** with us (the fix for wikipron's 46% ceiling). NOT a clean drop-in referee, though: even folding notation
++ the whole inherent-vowel class, agreement is only ~46–56%, because Google uses a different vowel-deletion + ɔ→o
+convention (retains inherent vowels we delete; raises ɔ→o more broadly incl. word-initial অংশু oŋʃu; encodes a RULE
+not the Kolkata lexical raising — মন mɔn vs our gold mon). So it's a systematic independent variety (FST-ish), not a
+Kolkata gold. Its value: (a) independent confirmation of our consonants, and (b) a THIRD leg for the cross-source
+consensus lexicon — where Google agrees with wikipron/BengaliAI on a word's ɔ/o, that is scaled consensus that can
+push the ɔ→o tail past the 168 ceiling. Next: prototype that consensus expansion.
