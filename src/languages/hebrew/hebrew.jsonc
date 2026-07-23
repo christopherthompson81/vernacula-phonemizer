@@ -1,8 +1,9 @@
 // Native canonical-IPA data manifest for Hebrew (he) — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI
 // pronunciation, espeak-independent. PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the
-// deterministic core. Unvocalized restoration (a neural nakdan) is PHASE 2, deferred. Referee: en.wiktionary
-// vocalized-form → Modern-Israeli IPA (a=IL). The scan logic (dagesh/bgdkpt, shin/sin, vav specials, sheva,
-// patach-genuvah) is in hebrew.ts. See docs/investigations/he_native_bringup_investigation.md.
+// deterministic core. Unvocalized restoration (a sentence-level neural nakdan) is PHASE 2 (done, hebrewNeural.ts);
+// the `numbers` block feeds the cardinal compositor (numbers.ts). Referee: en.wiktionary vocalized-form →
+// Modern-Israeli IPA (a=IL). The scan logic (dagesh/bgdkpt, shin/sin, vav specials, sheva, patach-genuvah) is in
+// hebrew.ts. See docs/investigations/he_native_bringup_investigation.md.
 {
     "language": "he",
     "name": "Hebrew",

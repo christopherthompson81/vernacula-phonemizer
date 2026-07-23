@@ -6,8 +6,9 @@
  * male וֹ→o, else consonant v), quiescent alef / silent final he / mater yod, and patach genuvah (a final guttural's
  * patach surfaces [a] BEFORE the consonant). Stress is phonemic but unwritten → not emitted (folded).
  *
- * PHASE 2 (deferred): unvocalized restoration — a neural nakdan that supplies the niqqud for bare consonantal text
- * (the Arabic-diacritizer analogue). See docs/investigations/he_native_bringup_investigation.md.
+ * PHASE 2 (done, hebrewNeural.ts): unvocalized restoration — a sentence-level neural nakdan that supplies the niqqud
+ * for bare consonantal text (the reconstructed words come back through this g2p). Digit tokens route to numbers.ts.
+ * See docs/investigations/he_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
