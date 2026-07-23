@@ -27,7 +27,7 @@ Bengali tagger). Built by `tools/hebrew/build_tagger_data.ts` → 891k (skeleton
 **Training:** 15 epochs, Adam 1e-3, cross-entropy `ignore_index=pad`, seed 0 (GPU). `tools/hebrew/train_he_tagger.py`
 (writes `he_tagger.pt`) → `export_he_tagger_onnx.py` (int8 ONNX + meta; `dynamo=False`).
 
-**Measured:** **48.0% folded** on the FULL unvocalized→IPA task vs the human en.wiktionary a=IL referee (strip
+**Measured:** on held-out MODERN RUNNING TEXT (20k words never trained on) vs the ground-truth vocalization (the correct niqqud → Phase-1 g2p), **72.1% word-exact / 86.8% char-agreement** — the meaningful restoration metric ("given bare text, did it recover the correct reading?"). The lower **48.0% folded** is the worst-case corner: vs the HUMAN a=IL referee on ISOLATED CITATION words (strip
 niqqud → tag → compare). The consonants are near-perfect; the ceiling is (a) the referee is **isolated citation
 forms** — the hardest case, where the tagger's whole-word context is wasted and homographs (ילד = jeled/jaled) are
 unresolvable; on RUNNING TEXT it is markedly better (שלום עולם→ʃalom ʔolam, אני אוהב אותך→ʔani ohav otχa); (b)
