@@ -2,7 +2,7 @@
 # cannot derive (closed-syllable ɔ→o, medial-ɔ retention, final-[o] retention; PROVEN lexical by the minimal
 # pair মন[mon] vs কম[kɔm], identical shape, opposite outcome — an etymological tatsama/tadbhava split).
 #
-# PROVENANCE: 302 entries = (a) 156 CROSS-SOURCE CONSENSUS — our engine's own consonant skeleton with the
+# PROVENANCE: 329 entries = (a) 156 CROSS-SOURCE CONSENSUS — our engine's own consonant skeleton with the
 # vowel(s) set to the sequence that TWO independent human references AGREE on: wikipron ben (CC BY-SA, Kolkata)
 # AND Bengali.AI DUAL-IPA (Dhaka; used OFFLINE for validation only, not redistributed). Two dialects agreeing
 # filters out both wikipron noise and dialect-specific forms (it correctly ABSTAINS on জীবন→d͡ʒibɔn). Plus
@@ -29,24 +29,31 @@
 অগণিত	ɔɡonit̪o
 অগ্নি	oɡni
 অগ্নিকাণ্ড	oɡnikanɖo
+অগ্নিগর্ভ	oɡniɡɔɾbʱo
+অগ্নিদগ্ধ	oɡnid̪ɔɡd̪ʱo
 অগ্নিশিখা	oɡniʃikʰa
 অগ্রগতি	ɔɡɾoɡot̪i
 অগ্রবর্তী	ɔɡɾoboɾt̪i
+অগ্রভাগ	ɔɡɾobʱaɡ
 অগ্রিম	oɡɾim
 অঙ্গন	ɔŋɡon
 অজগর	ɔd͡ʒoɡɔɾ
 অথবা	ɔt̪ʰoba
 অন্ধকার	ɔnd̪ʱokaɾ
+অপভ্রংশ	ɔpobʱɾɔŋʃo
 অপরাধ	ɔpoɾad̪ʱ
 অপারেশন	ɔpaɾeʃon
+অপিনিহিতি	ɔpiniɦit̪i
 অফিস	ɔpʰiʃ
 অবতার	ɔbot̪aɾ
+অভীষ্ট	ɔbʱiʃʈo
 অমন	ɔmon
 অমিত	ɔmit̪
 অমিতাভ	ɔmit̪abʱ
 অরিজিনাল	ɔɾid͡ʒinal
 অরিন্দম	ɔɾind̪ɔm
 অর্ণব	ɔɾnob
+অর্ধমৃত	ɔɾd̪ʱomɾit̪o
 অলস	ɔloʃ
 অসি	ɔʃi
 অসুখ	ɔʃukʰ
@@ -67,6 +74,7 @@
 আলপনা	alpona
 আলভী	albʱi
 আলম	alom
+আশ্চর্যজনকভাবে	aʃt͡ʃoɾd͡ʒod͡ʒɔnokbʱabe
 আসর	aʃoɾ
 আসল	aʃol
 ইনকিলাব	inkilab
@@ -124,9 +132,13 @@
 গহনা	ɡɔɦona
 গাজর	ɡad͡ʒoɾ
 গিয়ে	ɡie
+গৃহ	ɡɾiɦo
 গোসল	ɡoʃol
 গ্রন্থাগার	ɡɾont̪ʰaɡaɾ
+গ্রহ	ɡɾoɦo
 ঘোষণা	ɡʱoʃona
+চট্টগ্রাম	t͡ʃɔʈʈoɡɾam
+চর্বি	t͡ʃoɾbi
 চাকরী	t͡ʃakɾi
 চাটনি	t͡ʃaʈni
 চাতক	t͡ʃat̪ok
@@ -176,6 +188,7 @@
 নরম	nɔɾom
 নাটক	naʈok
 নাতনী	nat̪ni
+নামহীন	namɦin
 নাসরিন	naʃɾin
 নিয়ে	nie
 নেপাল	nepal
@@ -185,6 +198,7 @@
 পরশু	poɾʃu
 পরিকল্পনা	poɾikɔlpona
 পর্ন	pɔɾn
+পর্যন্ত	poɾd͡ʒont̪o
 পহেলা	pɔɦela
 পাথর	pat̪ʰoɾ
 পারমাণবিক	paɾomanobik
@@ -214,6 +228,7 @@
 বর্ণনা	bɔɾnona
 বর্ণমালা	bɔɾnomala
 বর্তমান	bɔɾt̪oman
+বর্ধমান	bɔɾd̪ʱoman
 বলদ	bɔlod̪
 বলে	bole
 বসন্ত	bɔʃont̪o
@@ -225,6 +240,7 @@
 বাসনা	baʃona
 বাসন্তী	baʃont̪i
 বিজলী	bid͡ʒli
+বিধবা	bid̪ʱoba
 বিবাহ	bibaɦo
 বুলবুল	bulbul
 বেগম	beɡom
@@ -235,9 +251,12 @@
 ব্যবসা	bæbʃa
 ব্যবহার	bæboɦaɾ
 ব্রোঞ্জ	bɾond͡ʒ
+ভগবান	bʱɔɡoban
+ভদ্রলোক	bʱɔd̪ɾolok
 ভরসা	bʱɔɾoʃa
 ভারত	bʱaɾot̪
 ভাল	bʱalo
+ভালবাসা	bʱalɔbaʃa
 ভিত	bʱit̪o
 ভিতরে	bʱit̪ɔɾe
 মগজ	mɔɡod͡ʒ
@@ -252,6 +271,7 @@
 মম	mɔmo
 মমতাজ	mɔmot̪ad͡ʒ
 মরহুম	moɾɦum
+মরহুমা	moɾɦuma
 মলম	mɔlom
 মসজিদ	moʃd͡ʒid̪
 মাখন	makʰon
@@ -292,9 +312,11 @@
 শত্রু	ʃot̪ɾu
 শরবত	ʃɔɾbot̪
 শরম	ʃɔɾom
+শর্মিষ্ঠা	ʃoɾmiʃʈʰa
 শরৎ	ʃɔɾot̪
 শহর	ʃɔɦoɾ
 শুঁটকি	ʃũʈki
+শুভ	ʃubʱo
 শেখা	ʃekʰa
 শেখানো	ʃekʰano
 শ্রাবণ	ʃɾabon
@@ -305,8 +327,10 @@
 সবকিছু	ʃɔbkit͡ʃʰu
 সবজি	ʃobd͡ʒi
 সমন	ʃɔmon
+সরবরাহ	ʃɔɾboɾaɦo
 সরল	ʃɔɾol
 সরষে	ʃoɾʃe
+সর্বদা	ʃɔɾbod̪a
 সাবরিনা	ʃabɾina
 সিংহাসন	ʃiŋɦaʃon
 সুন্দরবন	ʃund̪oɾbon
@@ -316,6 +340,9 @@
 সেখান	ʃekʰan
 সেনগুপ্ত	ʃenɡupt̪o
 স্বপন	ʃɔpon
+স্বাধীনতা	ʃad̪ʱinɔt̪a
 স্মরণ	ʃɔɾon
+হজরত	ɦɔd͡ʒɾot̪
 হয়ে	ɦɔe
+হরিজন	ɦɔɾid͡ʒɔn
 হলে	ɦole

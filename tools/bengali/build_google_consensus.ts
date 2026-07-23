@@ -18,9 +18,9 @@ const HERE = import.meta.dirname;
 // Google phone-code → our canonical IPA (Bengali c/ɟ realized as affricates; offglides → plain vowels).
 const MAP: Record<string, string> = {
     O: "ɔ", a: "a", i: "i", u: "u", e: "e", E: "æ", o: "o", "i^": "i", "u^": "u", "e^": "e", "o^": "o",
-    k: "k", kh: "kʰ", g: "ɡ", gh: "ɡʰ", N: "ŋ", c: "t͡ʃ", ch: "t͡ʃʰ", j: "d͡ʒ", jh: "d͡ʒʰ",
-    T: "ʈ", Th: "ʈʰ", D: "ɖ", Dh: "ɖʰ", t: "t̪", th: "t̪ʰ", d: "d̪", dh: "d̪ʰ", n: "n", p: "p",
-    f: "f", b: "b", bh: "bʰ", m: "m", r: "ɾ", l: "l", sh: "ʃ", s: "s", h: "h",
+    k: "k", kh: "kʰ", g: "ɡ", gh: "ɡʱ", N: "ŋ", c: "t͡ʃ", ch: "t͡ʃʰ", j: "d͡ʒ", jh: "d͡ʒʱ",
+    T: "ʈ", Th: "ʈʰ", D: "ɖ", Dh: "ɖʱ", t: "t̪", th: "t̪ʰ", d: "d̪", dh: "d̪ʱ", n: "n", p: "p",
+    f: "f", b: "b", bh: "bʱ", m: "m", r: "ɾ", l: "l", sh: "ʃ", s: "s", h: "ɦ",
 };
 // Returns null on an UNMAPPED phone (a future upstream refresh could add one) — never silently drop a segment.
 function g2ipa(t: string): string | null {
@@ -37,7 +37,7 @@ function g2ipa(t: string): string | null {
 const cf = (s: string): string =>
     s.normalize("NFD").replace(/[ˈˌ]/gu, "").replace(/[ʈɖ]/gu, (m) => (m === "ʈ" ? "t" : "d")).replace(/̪/gu, "")
         .replace(/[ɾɹr]/gu, "r").replace(/d͡?[ʒʑ]/gu, "j").replace(/t͡?[ʃɕ]/gu, "c").replace(/[ɕʃ]/gu, "s")
-        .replace(/[æɛe]/gu, "e").replace(/pʰ/gu, "f").replace(/(.)\1/gu, "$1");
+        .replace(/[æɛe]/gu, "e").replace(/pʰ/gu, "f").replace(/ː/gu, "").replace(/(.)\1/gu, "$1");
 // STRICT consonant skeleton — drop only vowels + offglide mark; everything else must match EXACTLY (vowel-only diff).
 const CS = (s: string): string => s.normalize("NFD").replace(/[ˈˌ]/gu, "").replace(/[aiueoɔæɛ̯]/gu, "");
 
