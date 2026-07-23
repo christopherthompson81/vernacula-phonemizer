@@ -1,0 +1,30 @@
+// Kikuyu / Gĩkũyũ (ki) — Niger-Congo BANTU (E51), Latin orthography. Referee: en.wiktionary Kikuyu (Wiktionary,
+// HUMAN, 1062 words — the only source; no kaikki dump / epitran kik-Latn / wikipron). The backbone folds neutralise
+// the referee's marks the orthography does NOT determine: TONE (H á / L à / rising ǎ — Kikuyu tone is contextual,
+// unwritten → we emit none), DOWNSTEP (ꜜ), SYLLABLE dots, the optional-realisation PARENS ((ː)(ꜜ)(w)), the
+// doubled-vowel length notation (VV ~ Vː), and the prenasal notation (full ŋ before ɡ ~ our superscript ᵑ). Vowel
+// quality/length (⟨ĩ⟩=e/⟨ũ⟩=o, doubling) and the fricativized/prenasalized consonants ARE compared directly.
+// See docs/investigations/ki_native_bringup_investigation.md.
+{
+    "language": "ki", "name": "Kikuyu (Gĩkũyũ)", "script": "Latin",
+    "provenance": "Authored greedy g2p from the Kikuyu orthography; mapping derived from the 1062-word en.wiktionary Kikuyu IPA referee.",
+    "referees": [
+        { "file": "ki.wiktionary-ki.tsv", "source": "en.wiktionary Kikuyu (Wiktionary, human, 1062)", "role": "primary" }
+    ],
+    "secondaryGap": "No independent second source for Kikuyu: kaikki has no per-language dump, and epitran kik-Latn / wikipron kik are absent. The only referee is the en.wiktionary Kikuyu IPA category (human, 1062). Phonology corroborated by the Englebretson Gĩkũyũ sketch grammar (not a numeric referee). The anchor is the adjudicated common-word gold in test/kikuyu.test.ts.",
+    "preFolds": [
+        { "pattern": "\\([^)]*\\)", "replace": "", "note": "OPTIONAL realisations: the referee parenthesises optional length/downstep/glide ((ː)(ꜜ)(w)) — strip the whole optional group before backbone comparison" }
+    ],
+    "folds": [
+        { "pattern": "[\\u0300\\u0301\\u0302\\u030c\\u0304]", "replace": "", "note": "TONE: Kikuyu orthography does not mark tone (H/L + rising is contextual) → we emit none; strip the referee's combining acute/grave/circumflex/caron/macron" },
+        { "pattern": "\\uA71C", "replace": "", "note": "DOWNSTEP: the referee marks downstep with ꜜ (U+A71C); unwritten + not emitted → strip" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "ŋ(?=ɡ)", "replace": "ᵑ", "note": "PRENASAL notation: the referee occasionally writes a full ŋ before ɡ (bangiri→βàŋɡírí) where we (and it, elsewhere) use the superscript ᵑ — normalise ŋɡ→ᵑɡ" },
+        { "pattern": "ʃ", "replace": "ɕ", "note": "SIBILANT notation: ⟨c⟩ is alveolo-palatal [ɕ] (ᶮtɕ prenasalised); the referee writes it [ʃ]~[ɕ] inconsistently (ɕuβa~ʃuβa) — non-contrastive, fold to ɕ" },
+        { "pattern": "([iu])[jw](?=[aeiouɛɔ])", "replace": "$1", "note": "GLIDE: the referee epenthesises a [j]/[w] in a high-vowel + vowel HIATUS (iria→iɾija, kũhũra→…) that we write as plain hiatus — strip the referee's glide so the backbone matches (the Tagalog ij/uw offglide fold)" },
+        { "pattern": "[wou](?=[aeiɛɔ])", "replace": "w", "note": "LABIAL GLIDE notation: ⟨w⟩ before a vowel is the phonemic labial glide (mũ-class prefix, mwana→mwana); the referee transcribes it vocalically [o]/[u] (moana), and inversely writes our ⟨u/ũ⟩+V as [w] — non-contrastive in glide position, so normalise {w,o,u}+V → w+V on both sides (the explicitness principle: we keep the glide in output)" },
+        { "pattern": "r", "replace": "ɾ", "note": "tap~trill: Kikuyu /r/ is a tap [ɾ] (which we emit); the referee occasionally writes the trill [r] — non-contrastive, fold to ɾ" },
+        { "pattern": "ː", "replace": "", "note": "LENGTH: Kikuyu phonemic vowel length is UNRELIABLY written (orthographic doubling and the referee's length disagree BOTH ways — kana~kaːna, kahĩĩ~kahee) → fold length out; we still emit it from the doubling per the explicitness principle" },
+        { "pattern": "([aeiouɛɔ])\\1", "replace": "$1", "note": "LENGTH (doubled-vowel form): collapse a referee/our doubled vowel to a single after the ː strip, so VV ~ Vː ~ V all compare equal" }
+    ]
+}

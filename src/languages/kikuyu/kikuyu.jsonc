@@ -1,0 +1,44 @@
+// Native canonical-IPA data manifest for Kikuyu / Gĩkũyũ (ki) — Niger-Congo BANTU (E51), the Latin orthography,
+// espeak-independent. The largest language of Kenya (~8M). A pure greedy longest-match scan (kikuyu.ts) — no code
+// rules; the fricativization + prenasalization live entirely in the grapheme table. Referee: en.wiktionary Kikuyu
+// (Wiktionary, HUMAN, 1062 words). Signatures:
+//   • 7-vowel ATR system — the TILDE marks vowel QUALITY, not nasalization: ⟨i⟩=i, ⟨ĩ⟩=e, ⟨e⟩=ɛ, ⟨a⟩=a, ⟨o⟩=ɔ,
+//     ⟨u⟩=u, ⟨ũ⟩=o. DOUBLING = LENGTH (aa→aː, ĩĩ→eː, ũũ→oː, ee→ɛː, oo→ɔː, ii→iː, uu→uː).
+//   • FRICATIVIZATION: ⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ (alveolo-palatal), ⟨r⟩=ɾ, ⟨y⟩=j.
+//   • PRENASALIZED as single onset units (post-nasal is a STOP, not the fricative): ⟨mb⟩=ᵐb, ⟨mp⟩=ᵐp, ⟨nd⟩=ⁿd,
+//     ⟨nt⟩=ⁿt, ⟨nj⟩=ᶮdʑ, ⟨nc⟩=ᶮtɕ, ⟨nk⟩=ᵑk, ⟨ng⟩=ᵑɡ; ⟨ng'⟩=ŋ (velar nasal, distinct from ⟨ng⟩); ⟨ny⟩=ɲ.
+//   • DAHL'S LAW is ORTHOGRAPHIC (baked into the spelling: a dissimilated k is written ⟨g⟩→ɣ) → no live rule.
+// TONE (2-tone H/L + downstep) is NOT written (contextual) → not emitted; the referee's tone marks + downstep ꜜ +
+// syllable dots + optional-parens are folded. Numbers deferred. See docs/investigations/ki_native_bringup_investigation.md.
+{
+    "language": "ki",
+    "name": "Kikuyu (Gĩkũyũ)",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p from the Kikuyu Latin orthography; mapping derived directly from the 1062-word en.wiktionary Kikuyu IPA referee. Phonology per Wikipedia + the Englebretson Gĩkũyũ sketch grammar.",
+
+    "convention": {
+        "vowels": "7-vowel ATR; TILDE = QUALITY not nasal — ⟨i⟩=i, ⟨ĩ⟩=e, ⟨e⟩=ɛ, ⟨a⟩=a, ⟨o⟩=ɔ, ⟨u⟩=u, ⟨ũ⟩=o",
+        "length": "a doubled vowel is LONG — aa→aː, ĩĩ→eː, ũũ→oː, ee→ɛː, oo→ɔː, ii→iː, uu→uː",
+        "fricativization": "⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ (Bantu spirantisation); ⟨c⟩=ɕ, ⟨r⟩=ɾ, ⟨y⟩=j",
+        "prenasal": "⟨mb mp nd nt nj nc nk ng⟩ → ᵐb ᵐp ⁿd ⁿt ᶮdʑ ᶮtɕ ᵑk ᵑɡ (single onset units; post-nasal is a stop)",
+        "velarNasal": "⟨ng'⟩ → ŋ (distinct from ⟨ng⟩ → ᵑɡ); ⟨ny⟩ → ɲ",
+        "dahlsLaw": "ORTHOGRAPHIC — a k dissimilated by Dahl's Law is spelled ⟨g⟩ (→ɣ); no live rule",
+        "tone": "2-tone (H/L) + downstep NOT written (contextual) → not emitted; the referee marks it (á/à/ꜜ) → folded"
+    },
+
+    // Scanner sorts keys LENGTH DESC: ⟨ng'⟩ (3) → prenasal/⟨th ny⟩ (2) + vowel-length digraphs → singles.
+    "graphemes": {
+        "ng'": "ŋ",
+        "ĩĩ": "eː", "ũũ": "oː", "aa": "aː", "ee": "ɛː", "ii": "iː", "oo": "ɔː", "uu": "uː",
+        "mb": "ᵐb", "mp": "ᵐp", "nd": "ⁿd", "nt": "ⁿt", "nj": "ᶮdʑ", "nc": "ᶮtɕ", "nk": "ᵑk", "ng": "ᵑɡ",
+        "ny": "ɲ", "th": "ð",
+        "ĩ": "e", "ũ": "o", "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u",
+        "b": "β", "c": "ɕ", "d": "d", "f": "f", "g": "ɣ", "h": "h", "j": "ʑ", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "r": "ɾ", "s": "s", "t": "t",
+        "v": "v", "w": "w", "y": "j", "z": "z"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
