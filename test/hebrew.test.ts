@@ -35,15 +35,15 @@ describe("Hebrew canonical IPA — Phase-1 niqqud→IPA (Modern Israeli)", () =>
     test("numbers → IPA (feminine citation, gender/dual magnitudes, decimals)", () => {
         expect(phonemize("7", "he")).toBe("ʃevaʔ");
         expect(phonemize("15", "he")).toBe("χameʃ ʔesʁe");
-        expect(phonemize("21", "he")).toBe("ʔesʁim vʔaχat"); // tens · וְ+unit
+        expect(phonemize("21", "he")).toBe("ʔesʁim veʔaχat"); // tens · proclitic וְ (sheva-na realised [ve]) + unit
         expect(phonemize("100", "he")).toBe("meʔa");
         expect(phonemize("200", "he")).toBe("matajim"); // dual
         expect(phonemize("300", "he")).toBe("ʃloʃ meot"); // fem unit + מֵאוֹת
         expect(phonemize("2000", "he")).toBe("ʔalpajim"); // dual
-        expect(phonemize("2025", "he")).toBe("ʔalpajim ʔesʁim vχameʃ");
+        expect(phonemize("2025", "he")).toBe("ʔalpajim ʔesʁim veχameʃ");
         expect(phonemize("3000", "he")).toBe("ʃloʃet ʔalafim"); // construct + אֲלָפִים
         expect(phonemize("100000", "he")).toBe("meʔa ʔelef"); // no vav before a magnitude word
-        expect(phonemize("21000", "he")).toBe("ʔesʁim vʔeχad ʔelef"); // masc multiplier, internal vav
+        expect(phonemize("21000", "he")).toBe("ʔesʁim veʔeχad ʔelef"); // masc multiplier, internal vav
         expect(phonemize("2000000", "he")).toBe("ʃne miljon"); // construct שְׁנֵי
         expect(phonemize("3.14", "he")).toBe("ʃaloʃ nkuda ʔaχat ʔaʁbaʔ"); // decimal → נְקֻדָּה + digits
     });

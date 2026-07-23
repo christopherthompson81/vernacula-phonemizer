@@ -8,9 +8,9 @@
  * their MULTIPLIER agrees masculine (2× → dual/construct, 3-10× thousand → `thousandsConstruct` + אֲלָפִים, ≥11× → a
  * masculine sub-1000 multiplier + the singular magnitude word; 3-10× million → `unitsM`); 200/2000 are the duals.
  *
- * The connector וְ is INTERNAL — it prefixes the final small cardinal of a group (עֶשְׂרִים וְאַחַת; מֵאָה וְעֶשֶׂר)
- * and NEVER a magnitude word (מֵאָה אֶלֶף has no vav; עֶשְׂרִים וְאֶחָד אֶלֶף carries it inside the multiplier). The u-/va-
- * morphophonology before labials/sheva is not modelled (a documented simplification; sheva-na also elides → [v]).
+ * The connector וְ is INTERNAL — it prefixes the final small cardinal of a group (עֶשְׂרִים וְאַחַת → …veʔaχat; מֵאָה
+ * וְעֶשֶׂר) and NEVER a magnitude word (מֵאָה אֶלֶף has no vav; עֶשְׂרִים וְאֶחָד אֶלֶף carries it inside the multiplier). The
+ * proclitic וְ realises its sheva-na → [ve] (hebrew.ts). The u-/va- morphophonology before labials is not modelled.
  * Fully correct across 0–9999 + round magnitudes + millions/milliards; very large MIXED numbers (a single-term
  * hundreds remainder after a magnitude, or an 11-19× teen multiplier) may carry a minor extra vav / feminine teen.
  * Handles 0 … 10¹²-1; beyond that (or an unsafe int) it falls back to reading the digits one-by-one. Decimals
