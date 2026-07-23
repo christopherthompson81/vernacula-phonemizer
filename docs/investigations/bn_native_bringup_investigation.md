@@ -348,3 +348,75 @@ The model's REAL blocker is (a) seq2seq DEGENERATION (এক→ækok, পাহ�
 STRUCTURAL tagger avoids. So productionisation is NOT cleanly dead: a structural-tagger version (no
 degeneration), measured against the corrected gold, may be viable — the remaining real drift is smaller
 than Run 15 claimed. Reopened as the next question.
+
+## Run 17 — 2026-07-22 — Model refinement sweep + joint-n-gram ARCHITECTURE test
+
+Two questions from the Run 15/16 reopening: (a) can the seq2seq be refined past its 86.1% held-out
+ɔ/o, and (b) does the model *architecture* (word-level neural seq2seq vs the joint-sequence n-gram the
+English divestment ships) matter? Both evaluated on the SAME seed-0 20% held-out split (~12k OOV words),
+GPU (RTX 3090). ɔ/o = the ɔ/o realization pattern (quality+presence); full = exact string.
+
+**(a) Seq2seq sweep — 86% is a firm ceiling, refinement does NOT move it.** Fixed the decoder init
+(from encoder final state, not zeros) and swept capacity/epochs; batched-greedy decode (beam was the only
+non-GPU step — a sequential Python loop — so it was dropped for the sweep):
+
+| config | ɔ/o | full |
+|---|---|---|
+| baseline (1L h256, 18ep, zeros-init) | **86.1%** | 79.4% |
+| +decoder-init emb160 h256 20ep | 84.7 | 75.8 |
+| +decoder-init 32ep | 83.7 | 74.0 |
+| +decoder-init 2L emb192 28ep | 85.0 | 76.4 |
+| +decoder-init wider emb224 h352 30ep | 85.9 | 77.5 |
+
+Nothing beat baseline; the "principled" decoder-init slightly hurt, and more epochs/capacity OVERFIT the
+Kolkata... (Google) dialect and hurt. Flat-and-declining response to capacity = a DATA ceiling, not an
+architecture-tuning ceiling. The model already extracts ~all the generalizable ɔ/o signal.
+
+**(b) Joint n-gram (Bisani-Ney: EM many-to-many align → order-6 joint n-gram, stupid-backoff → beam
+decode), same held-out split: ɔ/o 59.3% | full 55.7% | consonant-skeleton 93.5%.** Far BELOW the seq2seq
+(86.1/79.4) and below even the rule engine (62.6% ɔ/o OOV). Decomposition tells the story: the consonant
+skeleton is fine (93.5%) — the decoder is not broken — but the misses are almost all inherent-vowel
+**deletion** (কলসি kolʃi→klsi, অন্যমনস্ক ɔnnomɔnosko→ɔnomnsk, ধর্মনিরপেক্ষতার d̪ʱɔɾmoni…→d̪ʱɾt̪oni…). The
+n-gram systematically DROPS the inherent vowel where it should surface.
+
+**Conclusion — architecture matters, in the seq2seq's FAVOR.** Whether a Bengali inherent vowel surfaces
+(ɔ/o) or deletes is a NON-LOCAL, whole-word decision (syllable count, position, morphology). The seq2seq's
+bidirectional encoder sees the whole word → captures it. A left-to-right joint n-gram decides each grapheme
+from ~6 preceding joint tokens → cannot see whole-word structure → defaults to deletion, losing 27pp.
+Direct productionisation consequence: **English ships a joint n-gram because English OOV is
+compositional/LOCAL (morphology/compounds) — a perfect n-gram fit. Bengali's hard part is the OPPOSITE
+(non-local vowel realization), so the English shipping pattern does NOT transfer.** Bengali needs the
+neural model (heavier to ship) OR the lexicon (the path already merged). This also reframes the 86%
+ceiling: the seq2seq wins *because* of whole-word context, so its residual ~14% is the genuinely-lexical
+core (the মন/কম etymology split) that no grapheme-only model — neural or n-gram — reaches without a lexicon.
+
+## Run 18 — 2026-07-22 — PRODUCTIONISED the neural OOV tier as a BiLSTM TAGGER (not the seq2seq)
+
+Decision after Run 17: productionise a neural model for the OOV ɔ/o tail. First instinct was the seq2seq (86.1%),
+but tested the fa pattern — a per-grapheme **BiLSTM tagger** (fa's faNeural.ts makes the tagger DEFAULT over its own
+seq2seq precisely because it can't degenerate). It **beat** the seq2seq on the same seed-0 held-out: **ɔ/o 90.5% |
+full 86.4%** vs 86.1/79.4, and degeneration is structurally impossible (output length == input length). It beats
+rather than matches because the monotone one-tag-per-grapheme constraint is a correct inductive bias — the ɔ/o
+decision IS a per-consonant labeling task, and the BiLSTM's bidirectional pass gives the same whole-word context
+that made the seq2seq beat the n-gram (59.3%) by 27pp. The joint n-gram, being left-to-right, drops non-locally-
+determined inherent vowels (কলসি→klsi); the tagger gets কলসি→kolʃi right.
+
+**Shipped** (all on branch `bn-neural-tagger`):
+- `tools/bengali/googlePhoneMap.ts` — shared Google-phone→IPA map (extracted from build_google_consensus.ts, DRY).
+- `tools/bengali/build_tagger_data.ts` — Google `language-resources/bn` (CC-BY-4.0, 59965 words) → training TSV.
+- `tools/bengali/train_bn_tagger.py` — monotone 1-grapheme→0..2-unit EM aligner → per-grapheme tags + consonant
+  mask → 2-layer BiLSTM (emb128/h256) → reports held-out 90.5%/86.4% → `bn_tagger.pt`.
+- `tools/bengali/export_bn_tagger_onnx.py` — int8 ONNX + meta (src/tags/charTags), `dynamo=False` legacy exporter.
+- `src/languages/bengali/bn-g2p-tagger.int8.onnx` (2.4 MB) + `.meta.json` (grapheme vocab 61, tag vocab 158).
+- `src/languages/bengali/bengaliTagger.ts` — TS loader: single forward pass + consonant-masked argmax per grapheme.
+- `src/bengaliNeural.ts` — `phonemizeBnNeural`: pre-tag OOV words, then run the SYNC engine with them injected as
+  `oovOverride` (lexicon → tagger → rules). Numbers/punctuation/clause-assembly/lexicon words stay byte-identical to
+  `phonemize(text,"bn")`; only OOV word readings change (বক্তরা bɔkt̪ɔɾa→bɔkt̪oɾa, নামকরা namɔkɾa→namokɾa).
+- `bengali.ts` — added optional `oovOverride` to makeNativeBengali/createBengali (sync path passes nothing →
+  unchanged) + `bengaliLexicon()` accessor. `test/bengaliNeural.test.ts` (3 tests, model-gated like riderNeural).
+- `bn-g2p-tagger.PROVENANCE.md`.
+
+**Consonant-consistency mask** (from fa): each grapheme may only emit tags whose consonant it produced in training
+(ক→k/kɔ/ko, never ʃ) → consonant skeleton always canonical, the model's only job is the vowel. The tagger is the OOV
+tier; the Kolkata gold + consensus lexicon still take precedence, so Google's Dhaka convention only touches OOV.
+Runtime contract: onnxruntime-node optional → absent ⇒ exact sync fallback, no throw. Async path, C# untouched.

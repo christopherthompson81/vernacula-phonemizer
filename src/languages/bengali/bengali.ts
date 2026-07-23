@@ -77,6 +77,10 @@ export function makeNativeBengali(
     def: BengaliDef,
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
+    // OOV resolver consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride → rules). Used only by
+    // the async neural path (bengaliNeural.ts) to inject pre-computed tagger readings; the sync path passes nothing
+    // so behaviour is unchanged. Returns undefined to defer to the rule engine.
+    oovOverride?: (w: string) => string | undefined,
 ) {
     // ্যা (ya-phôla + aa-matra) and word-initial অ্যা spell the vowel [æ] in Bengali (mostly loanwords:
     // ক্যান্ডি→kænɖi, গ্যাস→ɡæʃ, ব্যাগ→bæɡ). There is no [æ] matra, so we rewrite the sequence to a private-use
@@ -202,6 +206,10 @@ export function makeNativeBengali(
             const hit = lexicon().get(w.normalize("NFC"));
             if (hit !== undefined) return hit;
         }
+        if (oovOverride) {
+            const o = oovOverride(w);
+            if (o !== undefined) return o;
+        }
         return wordRules(w);
     }
 
@@ -249,15 +257,26 @@ export function makeNativeBengali(
     return { word, wordRules, number, text };
 }
 
-/** Load bengali.jsonc (beside this file) and build the Bengali phonemizer. `foreign` handles embedded Latin. */
-export function createBengali(foreign?: ForeignPhonemizer): {
+/** Load bengali.jsonc (beside this file) and build the Bengali phonemizer. `foreign` handles embedded Latin;
+ *  `oovOverride` (neural path only) injects tagger readings for OOV words (lexicon → oovOverride → rules). */
+export function createBengali(
+    foreign?: ForeignPhonemizer,
+    oovOverride?: (w: string) => string | undefined,
+): {
     text(input: string): string;
 } {
     return makeNativeBengali(
         loadManifest<BengaliDef>(import.meta.url, "bengali.jsonc"),
         loadSharedPhonology(),
         foreign,
+        oovOverride,
     );
+}
+
+/** The whole-word pronunciation lexicon (cross-source consensus + Kolkata gold). Exposed so the neural OOV path
+ *  (bengaliNeural.ts) can skip lexicon-covered words — they are served authoritatively by the sync path. */
+export function bengaliLexicon(): ReadonlyMap<string, string> {
+    return lexicon();
 }
 
 /** Bare word→IPA, SHIPPED path (lexicon override → rule engine). For tests and real text. */
