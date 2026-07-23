@@ -28,6 +28,11 @@ const HOLAM = "ֹ";
 const PATACH = "ַ";
 const POINT = /[֑-ׇ]/u; // any Hebrew cantillation/point/mark
 const FINAL_GUTTURAL = new Set(["ח", "ע", "ה"]);
+// Word-initial sheva under a one-letter PROCLITIC prefix (וְ/לְ/בְּ/כְּ/מְ) is sheva-na → realised [e] in spoken
+// Modern Hebrew (veʁaʔa, leʔeveʁ, bejisʁaʔel) — two independent audio-grounded referees (Phonikud, ReNikud) agree.
+// Restricted to these prefixes so word-initial STEM clusters stay elided (שְׁלוֹשִׁים→ʃloʃim, תְּשַׁע→tʃaʔ). Other
+// sheva → ∅ (Modern Hebrew elides sheva-na pervasively; a full na/nach rule needs morphology). See Run 8.
+const PROCLITIC = new Set(["ו", "ל", "ב", "כ", "מ"]);
 
 /** One consonant of the (unvocalized) skeleton and the IPA chunk its points resolved to (chunk "" = silent mater). */
 export interface HebrewChunk { cons: string; ipa: string }
@@ -55,11 +60,12 @@ export function phonemizeAligned(word: string): HebrewChunk[] {
         const sheva = has(SHEVA);
         const emit = (ipa: string, v: string): void => { chunks.push({ cons: c, ipa }); prevVowel = v; k = j; };
 
-        // ⟨ו⟩ vav: shuruk (וּ) = [u], holam male (וֹ) = [o], else consonant [v] (+ its vowel)
+        // ⟨ו⟩ vav: shuruk (וּ) = [u], holam male (וֹ) = [o], else consonant [v] (+ its vowel, or [e] for proclitic וְ)
         if (c === "ו") {
             if (has(DAGESH) && !vowel) { emit("u", "u"); continue; }
             if (has(HOLAM)) { emit("o", "o"); continue; }
-            const vv = vowel ? VOW[vowel]! : ""; emit("v" + vv, vv); continue;
+            const vv = vowel ? VOW[vowel]! : (chunks.length === 0 && sheva ? "e" : ""); // word-initial וְ → [ve]
+            emit("v" + vv, vv); continue;
         }
         // ⟨י⟩ with no vowel/dagesh is a SILENT mater ONLY as a hiriq/tsere male (preceded by [i]/[e] — the vowel is
         // already out: בִּיב→biv); ELSEWHERE a consonant/glide [j] — onset (יוּם→jum) or offglide after [a o u] (avoj).
@@ -78,8 +84,9 @@ export function phonemizeAligned(word: string): HebrewChunk[] {
         // patach genuvah: a word-final guttural ח/ע/ה with patach → [a] BEFORE the consonant (maʃiaχ)
         if (atEnd && FINAL_GUTTURAL.has(c) && vowel === PATACH) { emit("a" + ci, ""); continue; }
 
-        // SHEVA → ∅ by default (Modern Hebrew elides sheva-na pervasively; a reliable na/nach rule needs morphology).
-        emit(ci + (vowel ? VOW[vowel]! : ""), vowel ? VOW[vowel]! : "");
+        // Vowel: the niqqud, else [e] for a word-initial PROCLITIC sheva-na (realised), else ∅ (sheva elided).
+        const v = vowel ? VOW[vowel]! : (chunks.length === 0 && sheva && PROCLITIC.has(c) ? "e" : "");
+        emit(ci + v, v);
     }
     return chunks;
 }

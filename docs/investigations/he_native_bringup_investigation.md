@@ -188,3 +188,45 @@ Built the Hebrew number→IPA compositor (numbers.ts + a niqqud `numbers` block 
 **Validation:** 40 composed forms vs standard grammar (self-authored table) + **Wikipedia "Hebrew numerals"
 independently confirms every base form** (units m/f, tens, 100/200 dual, 1000/2000 dual, 1M) — a second source
 distinct from the Wiktionary g2p referee. Wired into both the sync (hebrew.ts) and neural (hebrewNeural.ts) paths.
+
+## Run 8 — 2026-07-23 17:xx — an INDEPENDENT referee (the 🔷→✅ hunt) reveals the sheva-na elision is wrong
+
+Found genuinely independent modern-Hebrew IPA referees (NOT Wiktionary-derived): **Phonikud** (rule-FST G2P,
+CC-BY-4.0, arXiv 2506.12311) and **ReNikud** (audio-supervised neural G2P, arXiv 2606.20179), both Modern Israeli,
+plus Phonikud's hand-curated **heb-g2p-benchmark `gt.tsv`** (250 sentences, sentence→IPA with homograph minimal
+pairs) and the expert-corrected **ILSpeech** IPA gold (237MB 7z, deferred). Licensing is irrelevant — a referee is
+offline-eval, never shipped. wikipron-heb correctly excluded (Wiktionary-derived → circular); epitran has no Hebrew.
+
+Ran our Phase-2 (phonemizeHebrewNeural) over gt.tsv, word-level, folding stress ˈ (we don't emit) + tie-bar. Result
+over 2529 aligned words:
+- **exact 55.4%** (70.0% folding conventions) — vs our 86.4% self-measured (against our OWN vocalization). The gap
+  IS the point: a single source hid systematic divergence.
+- **ref REALIZES a word-initial/prefix sheva-na as [e] that we ELIDE: 11.9%** — veʁaʔa/vʁaʔa, leʔeveʁ/lʔeveʁ,
+  bejisʁaʔel/bjisʁaʔel, jeʁuʃalajim/jʁuʃalajim, vehikdima/vhikdima. A single systematic cause.
+- optional glottal ʔ: 2.7%.
+- **other genuine tagger/g2p errors on modern vocab: 30.0%** — boʁkas/buʁekas, ʔaflikatsja/ʔaplikatsja (p/f dagesh),
+  uʁz/ʔoʁez, bvet/babajit — the modern-OOD bucket already mined (the licensed-corpus ceiling).
+
+**★ FINDING (a documented-decision reversal candidate):** Phase-1's `sheva→∅` (the [[hebrew_vernacula_bringup]]
+"hard ceiling") was calibrated against WIKTIONARY, which marks realized-na as optional (e) that our fold dropped →
+"word-initial→e net-hurt". But TWO independent audio-grounded referees (Phonikud + ReNikud) both REALIZE the
+word-initial/prefix sheva as [e]. So the Wiktionary evidence was biased; the elision diverges from spoken Modern
+Hebrew, and per the OmniVoice explicitness principle we should emit the realized vowel. Candidate fix: realize
+word-initial sheva (the ve-/le-/be-/ke-/me-/she- prefixes + word-initial clusters) as [e] — would lift agreement
+~55→67%+; the remaining ~30% is the modern-OOD tagger bucket (data-bound). Outcome: `he` does NOT reach ✅ (the
+independent referee shows real divergence) — but the hunt delivered a concrete, high-value Phase-1 target. 🔷.
+
+## Run 9 — 2026-07-23 17:xx — implemented the proclitic sheva-na fix (user: realize word-initial [e])
+
+Realized word-initial sheva-na under the one-letter PROCLITIC prefixes {ו ל ב כ מ} → [e] (hebrew.ts: the ⟨ו⟩ branch
++ the general emit, gated on `chunks.length === 0` and PROCLITIC membership). Restricted to those prefixes so
+word-initial STEM clusters stay elided (שְׁלוֹשִׁים→ʃloʃim, תְּשַׁע→tʃaʔ — the numbers survive); the she- relativizer uses
+segol so it's already [e]. PURE Phase-1 change — the tagger predicts the same niqqud, only the g2p rendering changes,
+so NO retrain.
+
+Result vs the independent Phonikud gt.tsv: **word-exact 55.4% → 62.8%** (+7.4pp); the sheva-realize divergence
+bucket collapsed 11.9% → 3.4% (residual = stem-initial cases like jeʁuʃalajim, outside the proclitic rule by
+design). Spot-checks confirm veʁaʔa/bejisʁaʔel/leʔeveʁ/meod now realise [e] while ʃalom/ʃloʃ/ʃloʃim/tʃaʔ stay elided;
+numbers now use the correct connector (עֶשְׂרִים וְאַחַת → ʔesʁim veʔaχat). Remaining ~30% is the modern-OOD tagger
+bucket (the data-bound ceiling — the licensed corpus). `he` still 🔷 (single independent referee, real residual), but
+the sheva "hard ceiling" from Phase-1 is now correctly reversed on unbiased evidence — [[multi_referee_method]].
