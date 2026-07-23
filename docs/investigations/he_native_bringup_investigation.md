@@ -81,3 +81,60 @@ the tagger is word-at-a-time like bn; a sentence-level pass à la fa would help)
 sheva-na convention gap. Published Hebrew diacritizers (Nakdimon/MenakBERT) reach ~90%+ char with transformers +
 sentence context; this 830k-word word-level BiLSTM at ~87% char is a reasonable point on that curve. Levers: a
 sentence-level tagger, the licensed modern corpus, and a running-text HUMAN-IPA referee.
+
+## Run 4 — 2026-07-23 — Phase-2 ARCHITECTURE decision + sentence-level rebuild: 72→84.4%
+
+The Run-2 tagger was WORD-LEVEL and predicted IPA directly (the fa faTagger applied naively). Two problems: it
+can't resolve homographs (no context), and it makes the net RELEARN the deterministic Phase-1 g2p. Reconsidered
+the architecture (fa vs ar vs other):
+- **Sentence-level** (the dominant lever): homographs (ילד=jeled/jaled, אוהב=ohav/ohev, היא=hi) need CROSS-WORD
+  context → run the BiLSTM over a whole CLAUSE (words joined by spaces, a space char = boundary tag), the faTagger
+  pattern.
+- **Predict NIQQUD, not IPA** (the ar/nakdan structure): the net learns ONLY the context-dependent diacritization;
+  the deterministic g2p (bgdkpt, patach genuvah, mater lectionis) stays in the already-validated Phase-1 rather than
+  being relearned. Clean human-annotation labels, a standard comparable metric, decoupled g2p. Rejected seq2seq
+  (degenerates) + pretrained transformer (no fleet encoder, heavy). Future SOTA: wrap Nakdimon's MIT model.
+
+Rebuilt: build_tagger_data.ts → 273k CLAUSE rows with per-consonant NIQQUD tags (74 classes); train unchanged;
+hebrewTagger.restore(clause) predicts niqqud → reconstructs vocalized words → phonemizeWord (Phase-1);
+hebrewNeural groups bare words into clause runs (faNeural pattern), vocalized words → Phase-1 inline.
+
+**Result: diacritization 94.0% per-consonant niqqud** (corpus held-out, the standard nakdan metric; 54.2%
+whole-CLAUSE exact — compounds over ~5 words per clause, which is what "word-exact" measures on a clause row).
+**End-to-end held-out running text 84.4% word-exact / 91.2% char** (vs the word-level 72.1% / 86.8%) — a +12.3pp
+jump, all from the sentence context: ילד קטן הלך→jeled katan halaχ (was jlad katan halχa), אני אוהב→ʔani ohev (was
+ohav), ירושלים היא→jʁuʃalajim hi (was ha). (A stale-meta bug — the export raced the save and shipped the old
+word-level meta — first read as 0.1%; re-export fixed it.) Residual: homographs with no local cue, pre-modern vocab
+skew, sheva-na convention. Levers: the licensed modern corpus, a running-text human-IPA referee. 🔵🔷.
+
+## Run 5 — 2026-07-23 15:xx — mine the residual, then close the modern-OOD gap by register-balancing
+
+Question: with sentence-level at 84.4%, is any of the residual TRACTABLE (rule- or data-wise)?
+
+**Mined 1242 misses / 8004 modern-holdout words (84.5% exact).** Since pred and gold both go through the SAME
+Phase-1 g2p, every IPA miss IS a niqqud-prediction error. Categorised:
+- **sheva / reduced-vowel** (e ↔ full vowel): 232 (19%) — largely IRREDUCIBLE; Modern sheva-na is free variation,
+  the gold itself is inconsistent (mkom AND makom both appear). Every pointing-only rule already net-hurt (Phase-1
+  ceiling).
+- **vav/yod mater** (ktiv-male u/o/v/j): 154 (12%) — DATA (modern full-spelling OOD).
+- **bgdkpt dagesh + sin/shin** (p/f, k/χ, s/ʃ): ~60 in the "other" 103 — DATA, loanword-heavy (aplikatsia→
+  aflikatsia); dagesh presence isn't skeleton-derivable → NOT a deterministic rule.
+- **homographs** (>1 corpus reading): 128 (10%) — irreducible without context/lexicon.
+- prefix-particle vowel: **5**; glottal ʔ/ʕ/h: **0** — i.e. the two things that WOULD be rule-tractable are
+  already handled. **Verdict: nothing rule-tractable; the one lever is data.**
+
+**The data lever — register imbalance.** Training corpus is 89% pre-modern (2.86M tokens, defective ktiv-haser,
+archaic vocab) vs 7% modern/wiki; eval is 100% modern. Measured the label-conflict directly: of 7539 skeletons in
+BOTH sources, the modal reading **CONFLICTS 20.4%** (שנים pre=ʃnajim/mod=ʃanim, ביום pre=bjom/mod=bajom) — so the
+pre-modern majority pulls the prior toward the archaic reading on 1-in-5 shared spellings. NOT a clean distribution
+shift; genuine register/sense disagreement in the human niqqud labels (g2p is uniform).
+
+Sweep (modern-holdout word-exact):
+- baseline 12:1 pre:modern → **84.5%**
+- downsample pre-modern ×7 (2.2:1) → 81.5% (data loss dominates — REGRESSED)
+- **oversample modern/wiki+validation ×5 (~3:1), no data discarded → 85.6%** ✅ (+1.1pp; per-consonant 94.0→95.9%)
+- oversample ×10 (~2.3:1) → 85.2% (overfits modern/wiki)
+
+Folded ×5 oversampling into build_tagger_data.ts (SOURCES reps); made export_he_tagger_onnx.py tolerant of the
+`dynamo` kwarg (older torch). Shipped model retrained + swapped. Remaining lever unchanged: the licensed modern
+corpus (policy-blocked) + a running-text human-IPA referee. 🔵🔷.

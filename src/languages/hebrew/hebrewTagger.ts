@@ -1,16 +1,17 @@
 /**
- * Hebrew PHASE-2 tagger — the neural VOWEL RESTORER for UNVOCALIZED Hebrew. A per-consonant BiLSTM (ONNX) that
- * labels each skeleton letter of bare consonantal Hebrew with its IPA-chunk TAG (consonant + the restored vowel),
- * run as a SINGLE forward pass. Because output length == input length it CANNOT degenerate; the whole-word
- * bidirectional pass supplies the context that disambiguates the unwritten vowels. A per-consonant
- * consonant-consistency MASK constrains each letter to only the tags it produced in training (⟨ב⟩ → b… or v…,
- * never a ⟨ק⟩ tag), so the consonant skeleton stays canonical and the model only restores the vowels.
+ * Hebrew PHASE-2 restorer — the neural NAKDAN for UNVOCALIZED Hebrew. A SENTENCE-LEVEL per-consonant BiLSTM (ONNX)
+ * that RESTORES THE NIQQUD of a bare consonantal clause; the deterministic Phase-1 g2p (hebrew.ts) then converts
+ * the reconstructed vocalized words to IPA. This is the ar/nakdan architecture (predict diacritics, then a fixed
+ * g2p) with the fa `faTagger` sentence-context (the bidirectional pass over the WHOLE clause resolves homographs —
+ * ספר = sefer/safar/siper — that a word-at-a-time model cannot). The net learns ONLY the context-dependent
+ * diacritization; the g2p rules (bgdkpt, patach genuvah, mater lectionis) stay in the already-validated Phase-1.
  *
- * This is the Phase-2 counterpart to the Phase-1 niqqud→IPA g2p (hebrew.ts): Phase 1 reads VOCALIZED (pointed)
- * Hebrew deterministically; this reads UNVOCALIZED Hebrew (everyday text). Shares core/onnx.ts + the masked-argmax
- * decode with the fa/bn taggers (core/structuralTagger.ts). See src/hebrewNeural.ts + he-tagger.PROVENANCE.md.
+ * One forward pass over the clause; each char gets a niqqud TAG (a space char → the space tag, a word boundary). A
+ * per-consonant consonant-consistency MASK constrains each letter to only the niqqud it took in training. Output
+ * length == input length → cannot degenerate. Shares core/onnx.ts + core/structuralTagger.ts (maskedArgmax) with
+ * the fa/bn taggers. See src/hebrewNeural.ts + he-tagger.PROVENANCE.md.
  *
- * `onnxruntime-node` is OPTIONAL (lazy import); if it — or the model — is absent, createHebrewTagger() resolves to
+ * `onnxruntime-node` is OPTIONAL (lazy); if it — or the model — is absent, createHebrewTagger() resolves to
  * `undefined` and the caller falls back to the sync (vocalized-only) engine.
  */
 import { readFileSync } from "node:fs";
@@ -19,13 +20,17 @@ import { fileURLToPath } from "node:url";
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
+import { phonemizeWord } from "./hebrew.ts";
+
+const BARE = "∅"; // the tag for a consonant with no niqqud
+const SPACE = " "; // the tag for a space char (word boundary)
 
 export interface HebrewTagger {
-    /** A bare (unvocalized) Hebrew word → restored Modern Israeli IPA (no stress). "" if the model declines. */
-    tag(word: string): Promise<string>;
+    /** Restore + phonemize a CLAUSE of bare Hebrew words (space-separated) → Modern Israeli IPA. "" if declined. */
+    restore(clause: string): Promise<string>;
 }
 
-/** Build the Hebrew OOV/unvocalized tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
+/** Build the Hebrew nakdan tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createHebrewTagger(basename = "he-tagger"): Promise<HebrewTagger | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
     let meta: TaggerMeta, modelBytes: Uint8Array;
@@ -36,17 +41,17 @@ export async function createHebrewTagger(basename = "he-tagger"): Promise<Hebrew
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await loadOrt("Hebrew neural restoration");
-        const ep = process.env.HE_ORT_EP; // shipping default CPU; opt into a GPU EP for fast eval
+        const ep = process.env.HE_ORT_EP;
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
     } catch { return undefined; }
     const nTags = Object.keys(meta.tags).length;
 
     return {
-        async tag(word: string): Promise<string> {
-            const chars = [...word.normalize("NFC")];
+        async restore(clause: string): Promise<string> {
+            const chars = [...clause.normalize("NFC")];
             const T = chars.length;
             if (T === 0) return "";
-            // Every char must be a known skeleton letter; a stray/foreign char → decline (defer to the sync engine).
+            // Every char must be a known symbol (letters + space); a stray/foreign char → decline (defer to sync).
             const ids = new Array<number>(T);
             for (let i = 0; i < T; i++) {
                 const id = meta.src[chars[i]!];
@@ -54,14 +59,17 @@ export async function createHebrewTagger(basename = "he-tagger"): Promise<Hebrew
                 ids[i] = id;
             }
             const r = await sess.run({ chars: new ortLib.Tensor("int64", BigInt64Array.from(ids, (x) => BigInt(x)), [1, T]) });
-            const logits = r.logits!.data as Float32Array; // flat [T·nTags], row-major
-            let out = "";
+            const logits = r.logits!.data as Float32Array;
+            // Predict the niqqud per char, reassembling one VOCALIZED word per space-delimited run, then g2p each.
+            const words: string[] = [""];
             for (let k = 0; k < T; k++) {
+                if (chars[k] === " ") { words.push(""); continue; } // word boundary
                 const best = maskedArgmax(logits, k * nTags, meta.charTags[String(ids[k])]);
-                if (best < 0) return "";
-                out += meta.tags[String(best)] ?? "";
+                const tag = best < 0 ? BARE : meta.tags[String(best)] ?? BARE;
+                if (tag === SPACE) { words.push(""); continue; }
+                words[words.length - 1] += chars[k] + (tag === BARE ? "" : tag); // consonant + restored niqqud
             }
-            return out;
+            return words.filter((w) => w.length > 0).map((w) => phonemizeWord(w)).join(" ");
         },
     };
 }
