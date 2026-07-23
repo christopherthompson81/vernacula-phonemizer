@@ -59,7 +59,7 @@ ilo	Ilocano (Iloko)	Austronesian (Northern Philippine)	Latin	8000000	2000000	926
 it	Italian	Romance	Latin	65000000						implemented		✅			
 ja	Japanese	Japonic	Japanese (kanji+kana)	123000000						implemented		✅			
 jv	Javanese	Austronesian	Latin/Javanese	68000000						implemented		🟡			
-ki	Kikuyu (Gikuyu)	Niger-Congo (Bantu)	Latin	8000000						unimplemented					Kenya Bantu.
+ki	Kikuyu (Gikuyu)	Niger-Congo (Bantu)	Latin	8000000						implemented		🔷			Largest language of Kenya. Pure greedy g2p from the Latin orthography (no code rules — fricativization + prenasalization in the table). 99.4% folded vs en.wiktionary Kikuyu (1062w — LARGE human referee, the fleet's highest folded score), single-source. Signatures: 7-vowel ATR (TILDE=quality not nasal: ⟨ĩ⟩=e, ⟨ũ⟩=o, ⟨e⟩=ɛ, ⟨o⟩=ɔ), fricativization ⟨b⟩=β/⟨th⟩=ð/⟨g⟩=ɣ/⟨c⟩=ɕ, prenasal ⟨mb nd nj ng⟩, ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. Dahl's Law orthographic (no rule). Tone (H/L+downstep) unwritten→not emitted. Numbers deferred. Referee built by tools/corpus/build-referee.ts (batched). Englebretson sketch grammar corroborates.
 kk	Kazakh	Turkic (Kipchak)	Cyrillic/Latin	13000000						implemented		✅			
 km	Khmer	Austroasiatic	Khmer	17000000						implemented					
 kmr	Kurmanji (Northern Kurdish)	Iranian (NW)	Latin (Hawar)	15000000						implemented		✅			

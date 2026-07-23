@@ -1,0 +1,56 @@
+/**
+ * Kikuyu / Gĩkũyũ (ki) phonemizer — Niger-Congo BANTU (E51), the Latin orthography, canonical IPA,
+ * espeak-independent. The largest language of Kenya (~8M). A PURE greedy longest-match scan over the grapheme
+ * table (manifest.ts) — no code rules; the Bantu fricativization and prenasalization live entirely in the table.
+ * Signatures: 7-vowel ATR system where the TILDE marks vowel QUALITY not nasalization (⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ);
+ * FRICATIVIZATION ⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ; PRENASALIZED digraphs ⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ᶮdʑ, ⟨ng⟩=ᵑɡ;
+ * ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. DAHL'S LAW is orthographic (a dissimilated k is spelled ⟨g⟩→ɣ). TONE (2-tone H/L +
+ * downstep) is not written → not emitted. Numbers deferred. See docs/investigations/ki_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+
+const G = MANIFEST.graphemes;
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
+
+/** Phonemize a single Kikuyu word to canonical IPA (segmental; non-tonal — tone is not in the orthography). */
+export function phonemizeWord(word: string): string {
+    const w = word.normalize("NFC").toLowerCase();
+    let out = "";
+    let i = 0;
+    while (i < w.length) {
+        let matched = false;
+        for (const key of GRAPHEME_KEYS) {
+            if (w.startsWith(key, i)) {
+                out += G[key]!;
+                i += key.length;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) i += 1; // unknown char → skip
+    }
+    return out;
+}
+
+// A word (Kikuyu Latin letters incl. ĩ ũ and the ⟨ng'⟩ apostrophe) / number / punctuation token.
+const TOKEN = /([\p{L}\p{M}'’]+)|(\d+)|([.!?…,;:])/gu;
+
+class KikuyuPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
+            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Kikuyu phonemizer (greedy g2p; tone + numbers deferred). */
+export function createKikuyu(): Phonemizer {
+    return new KikuyuPhonemizer();
+}
