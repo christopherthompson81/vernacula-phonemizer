@@ -173,8 +173,8 @@ export function makeNativeBengali(
             // Phôla gemination — য/ব/ম as the 2nd member of a conjunct GEMINATE the preceding consonant
             // medially (jôphôla বিদ্যা→bid̪d̪a, অকাট্য→ɔkaʈːo; bôphôla মহত্ব→mɔhɔt̪t̪o; môphôla পদ্ম→pɔd̪d̪o), and
             // word-INITIALLY just drop (the phôla member is silent: ব্যথা→bæt̪ʰa, দ্বিতীয়→d̪it̪io).
-            .replace(/([ক-হড়-য়])্[যবম]/gu, (_m, c: string, off: number) =>
-                off === 0 ? c : c + "্" + c,
+            .replace(/([ক-হড়-য়])্([যবম])/gu, (_m: string, c: string, p2: string, off: number) =>
+                p2 === "ব" && "ঙঞণনম".includes(c) ? _m : off === 0 ? c : c + "্" + c,
             );
         // 2. akshara → IPA (inherent ɔ intact).
         let x = g2p(norm);
