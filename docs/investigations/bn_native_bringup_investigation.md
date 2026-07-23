@@ -292,3 +292,23 @@ Also fixed the build-script's copy of the conversion map (aspirate/ɦ words were
 the consensus by the CS mismatch) → +27 more consensus lexicon entries (অগ্নিগর্ভ, গৃহ, বর্ধমান …).
 Remaining Google misses: ~50% is the intricate ɔ/o + deletion (lexical, per Run 12); the residual
 consonant gap is the final-য়/ওয়া glide vs hiatus (অতুলনীয় nij/nio) + notation (ড়→ɽ/r, visarga h).
+
+## Run 14 — 2026-07-22 — word-level neural G2P GENERALISES the ɔ/o (unlike Urdu)
+
+The ɔ/o is ~60% of the Google miss set (21% quality + 38% deletion). Tested whether a WORD-LEVEL
+model generalises it to OOV or just memorises (the Urdu failure mode). Char-level seq2seq (Bengali
+word → IPA, attention, emb128/h256), trained on 80% of Google's 65k, evaluated on 20% HELD-OUT.
+
+**Result — strongly positive, opposite of Urdu:**
+- HELD-OUT (OOV) ɔ/o-pattern: **model 86.1% vs rule 62.6% (+23.5pp)**; full-word 79.4% vs 42.8%.
+- TRAIN 89.0% ≈ held-out 86.1% (2.9pp gap) → GENUINE GENERALISATION, not memorisation.
+
+Urdu contrast: there the tagger memorised (train 92.6%, dev 63.8% BELOW the always-ə prior) because
+short-vowel quality had ~0 mutual information with the skeleton. **Bengali ɔ/o carries strong
+learnable sub-word signal** — it correlates with word-shape/etymology (tatsama/tadbhava/loan strata
+have phonotactic traces), so a char model predicts unseen words' ɔ/o at 86%. NOTE: this is
+WORD-level (the ɔ/o is word-lexical but sub-word-PREDICTABLE) — the sentence-BiLSTM was unnecessary;
+no cross-word context is needed. Implication: unlike Urdu, a neural G2P is the RIGHT mechanism for
+Bengali's ɔ/o OOV tail (rule 62.6% → 86%). Diagnostic /tmp/bn_g2p_diag.py; measured vs Google (the
+reliable source), not the 147-word Kolkata gold. Productionisation (ONNX + TS runtime, fa-tagger
+pattern) is the open next step.
