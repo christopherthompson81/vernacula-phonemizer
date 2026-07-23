@@ -15,6 +15,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { HARAKAT, HARAKAT_G, stripHarakat } from "./harakatLexicon.ts";
+import { loadOrt } from "./onnx.ts";
 
 // label → the combining harakat to append after a base letter. Mirrors the training VOWELS map (invert_harakat.ts /
 // train_multilingual_harakat.py): a fatḥa, u damma, i kasra, o sukūn, F/N/K tanwīn, ^ dagger-alif (U+0670); a "~"
@@ -44,25 +45,9 @@ export interface RiderDiacritizer {
     diacritize(text: string, lang: string, lexicon: ReadonlyMap<string, string>): Promise<string>;
 }
 
-interface OrtLike {
-    InferenceSession: { create(path: string | Uint8Array): Promise<OrtSession> };
-    Tensor: new (type: "int64", data: BigInt64Array, dims: number[]) => unknown;
-}
-interface OrtSession { run(feeds: Record<string, unknown>): Promise<Record<string, { data: unknown }>>; }
-
-let ortPromise: Promise<OrtLike> | undefined;
-async function loadOrt(): Promise<OrtLike> {
-    if (!ortPromise) {
-        ortPromise = import("onnxruntime-node").then((m) => (m.default ?? m) as unknown as OrtLike).catch(() => {
-            throw new Error("Rider neural diacritization needs the optional dependency `onnxruntime-node`. Install it with `npm install onnxruntime-node`.");
-        });
-    }
-    return ortPromise;
-}
-
 /** Load a rider diacritizer from ONNX model bytes + sidecar meta. Session created once and reused. */
 export async function loadRiderDiacritizer(modelBytes: Uint8Array, meta: RiderDiacritizerMeta): Promise<RiderDiacritizer> {
-    const ort = await loadOrt();
+    const ort = await loadOrt("Rider neural diacritization");
     const session = await ort.InferenceSession.create(modelBytes);
     const ilabels: string[] = [];
     for (const [lab, idx] of Object.entries(meta.labels)) ilabels[idx] = lab;
