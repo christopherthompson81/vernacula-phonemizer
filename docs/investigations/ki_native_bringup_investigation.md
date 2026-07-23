@@ -54,3 +54,30 @@ corroborates the phonology). TONE (2-tone H/L + downstep, lexical + grammatical)
 (MediaWiki generator, 50 pages/call) + cached Wiktionary word→IPA builder, ported from the espeak-ng-portable
 `tools/corpus` "dumps/batching ≫ sequential live API" lesson. 1062 words in ~11s (the old per-word scraper was
 minutes at ~57% coverage). Replaces the throwaway per-language /tmp scrapers.
+
+## Run 3 — 2026-07-23 — second authority (Wahome & Subiyanto 2023) — pure corroboration
+
+A user-supplied second authority: **Wahome & Subiyanto (2023), "Phonological Processes of the Kikuyu Dialectical
+Words" (IJIRD 12(3))** — a distinctive-features phonology paper with an explicit phoneme/orthography table. It
+**independently confirms the Run-1 mapping** and required NO engine change:
+- **Table 3 (Vowel Phoneme/Orthography) matches EXACTLY:** ⟨i⟩→i, ⟨ĩ⟩→e (mid-high), ⟨e⟩→ɛ (mid-low), ⟨a⟩→a,
+  ⟨o⟩→ɔ (mid-low), ⟨ũ⟩→o (mid-high), ⟨u⟩→u — the counterintuitive tilde-is-QUALITY finding, corroborated by a
+  second source. (The paper's prose loosely calls the tilde "nasalization", but its authoritative TABLE is the
+  quality mapping we use; the referee agreed.)
+- **Table 2 (Consonants) matches:** ⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨ng⟩=ᵑɡ, ⟨ny⟩=ɲ, ⟨ng'⟩=ŋ, ⟨r⟩=ɾ, ⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨h⟩,
+  ⟨w⟩, ⟨y⟩=j. Notational-only difference: the paper writes ⟨c⟩=ʃ / ⟨nj⟩=ⁿdʒ (postalveolar) where the Wiktionary
+  referee + our output use ɕ / ᶮdʑ (alveolo-palatal) — the same sound; already folded (ʃ~ɕ). We keep the
+  referee-matched ɕ.
+- **All the paper's phonological PROCESSES are MORPHOPHONEMIC** (consonant strengthening /n+koma/→gome, consonant/
+  nasal coalescence /n+ruta/→nduti·, /n+ʃuha/→njuhe, glide formation /mo+ona/→mwonere, insertion hitha→hithia,
+  final-a deletion) — they operate at morpheme boundaries during word FORMATION and are reflected in the SURFACE
+  spelling (the paper's "word" column), which our greedy scan reads correctly → none is a within-word g2p rule we
+  lack. This validates the pure-surface-orthography approach.
+- **Validates two judgment calls:** the glide-formation section confirms ⟨mw⟩=[mw] (mwonere, mwethere) — so our
+  [mw] output is the standard and the referee's vocalic [mo] was the broad variant (our glide fold was right); and
+  the 2-tone (low grave / high acute), unwritten-in-the-orthography analysis matches our tone deferral.
+
+Net: the phonology is now **dual-authority-grounded** (Englebretson sketch grammar + Wahome & Subiyanto 2023) on
+top of the 1062-word Wiktionary referee. Verdict stays **🔷** (still one orthography-matched NUMERIC referee; the
+paper corroborates but is not a second word→IPA referee — the ak-cites-Dolphyne / mos-cites-FSI pattern). No code
+change; 99.4% unchanged.

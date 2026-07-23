@@ -11,7 +11,7 @@
     "referees": [
         { "file": "ki.wiktionary-ki.tsv", "source": "en.wiktionary Kikuyu (Wiktionary, human, 1062)", "role": "primary" }
     ],
-    "secondaryGap": "No independent second source for Kikuyu: kaikki has no per-language dump, and epitran kik-Latn / wikipron kik are absent. The only referee is the en.wiktionary Kikuyu IPA category (human, 1062). Phonology corroborated by the Englebretson Gĩkũyũ sketch grammar (not a numeric referee). The anchor is the adjudicated common-word gold in test/kikuyu.test.ts.",
+    "secondaryGap": "No independent second source for Kikuyu: kaikki has no per-language dump, and epitran kik-Latn / wikipron kik are absent. The only referee is the en.wiktionary Kikuyu IPA category (human, 1062). Phonology corroborated by TWO authorities (not numeric referees): the Englebretson Gĩkũyũ sketch grammar + Wahome & Subiyanto (2023) 'Phonological Processes of the Kikuyu Dialectical Words', whose phoneme/orthography tables independently confirm the vowel mapping (⟨ĩ⟩=e, ⟨ũ⟩=o) and consonants. The anchor is the adjudicated common-word gold in test/kikuyu.test.ts.",
     "preFolds": [
         { "pattern": "\\([^)]*\\)", "replace": "", "note": "OPTIONAL realisations: the referee parenthesises optional length/downstep/glide ((ː)(ꜜ)(w)) — strip the whole optional group before backbone comparison" }
     ],
