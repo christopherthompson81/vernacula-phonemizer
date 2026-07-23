@@ -1,0 +1,40 @@
+// Native canonical-IPA data manifest for Hebrew (he) — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI
+// pronunciation, espeak-independent. PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the
+// deterministic core. Unvocalized restoration (a neural nakdan) is PHASE 2, deferred. Referee: en.wiktionary
+// vocalized-form → Modern-Israeli IPA (a=IL). The scan logic (dagesh/bgdkpt, shin/sin, vav specials, sheva,
+// patach-genuvah) is in hebrew.ts. See docs/investigations/he_native_bringup_investigation.md.
+{
+    "language": "he",
+    "name": "Hebrew",
+    "script": "Hebrew",
+    "provenance": "Authored niqqud→IPA g2p for MODERN ISRAELI Hebrew from the pointed orthography. Referee: en.wiktionary vocalized-form → a=IL Modern-Israeli IPA.",
+
+    "convention": {
+        "consonants": "Modern Israeli values; the bgdkpt ⟨בכפ⟩ take a DAGESH-hard b/k/p vs soft v/χ/f (גדת lost the split → always ɡ/d/t)",
+        "gutturals": "⟨א⟩,⟨ע⟩ = optional glottal ʔ (Modern Hebrew often ∅ — folded); ⟨ה⟩ = h (silent word-final / mater)",
+        "specials": "⟨ו⟩ = v (consonant) / u (shuruk וּ) / o (holam male וֹ); ⟨ש⟩ = ʃ (shin-dot ׁ) / s (sin-dot ׂ); ⟨צ⟩ = t͡s; ⟨ק⟩,⟨כּ⟩ = k; ⟨ר⟩ = ʁ; ⟨ח⟩,⟨כ⟩ = χ",
+        "vowels": "patach/kamatz ַ ָ = a, tsere/segol ֵ ֶ = e, hiriq ִ = i, holam ֹ = o, kubutz/shuruk ֻ וּ = u; chataf ֱ ֲ ֳ = e a o; SHEVA ְ = ∅ (nach) or e (na)",
+        "stress": "phonemic but UNWRITTEN → not emitted; the referee marks it (ˈ) → folded"
+    },
+
+    // Base (SOFT / default) consonant → IPA. Finals ⟨ךםןףץ⟩ = their base soft value. The dagesh-hard overrides
+    // (בכפ → b k p) and the shin/sin split live in code (hebrew.ts).
+    "consonants": {
+        "א": "ʔ", "ב": "v", "ג": "ɡ", "ד": "d", "ה": "h", "ו": "v", "ז": "z", "ח": "χ", "ט": "t",
+        "י": "j", "כ": "χ", "ך": "χ", "ל": "l", "מ": "m", "ם": "m", "נ": "n", "ן": "n", "ס": "s",
+        "ע": "ʔ", "פ": "f", "ף": "f", "צ": "t͡s", "ץ": "t͡s", "ק": "k", "ר": "ʁ", "ש": "ʃ", "ת": "t"
+    },
+    // Dagesh (ּ U+05BC) HARDENS only these three in Modern Hebrew (bgdkpt residue); the rest take a dagesh with no
+    // pronunciation change (gemination is not realised in Modern Hebrew).
+    "dageshHard": { "ב": "b", "כ": "k", "ך": "k", "פ": "p", "ף": "p" },
+
+    // Niqqud (vowel points) → IPA. Sheva (ְ) is context-dependent → handled in code (default ∅).
+    "vowels": {
+        "ַ": "a", "ָ": "a", "ֵ": "e", "ֶ": "e", "ִ": "i", "ֹ": "o", "ֺ": "o", "ֻ": "u",
+        "ֱ": "e", "ֲ": "a", "ֳ": "o", "ׇ": "o"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "׃": " . "
+    }
+}
