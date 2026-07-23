@@ -2,7 +2,7 @@
 # cannot derive (closed-syllable ɔ→o, medial-ɔ retention, final-[o] retention; PROVEN lexical by the minimal
 # pair মন[mon] vs কম[kɔm], identical shape, opposite outcome — an etymological tatsama/tadbhava split).
 #
-# PROVENANCE: 329 entries = (a) 156 CROSS-SOURCE CONSENSUS — our engine's own consonant skeleton with the
+# PROVENANCE: 331 entries = (a) 156 CROSS-SOURCE CONSENSUS — our engine's own consonant skeleton with the
 # vowel(s) set to the sequence that TWO independent human references AGREE on: wikipron ben (CC BY-SA, Kolkata)
 # AND Bengali.AI DUAL-IPA (Dhaka; used OFFLINE for validation only, not redistributed). Two dialects agreeing
 # filters out both wikipron noise and dialect-specific forms (it correctly ABSTAINS on জীবন→d͡ʒibɔn). Plus
@@ -148,6 +148,7 @@
 চিমনি	t͡ʃimni
 জংলি	d͡ʒoŋli
 জলদি	d͡ʒold̪i
+জীবন	d͡ʒibon
 জীবিত	d͡ʒibit̪o
 জ্বালাতন	d͡ʒalat̪on
 টরন্টো	ʈɔɾonʈo
@@ -221,6 +222,7 @@
 ফেসবুক	pʰeʃbuk
 বকশিশ	bokʃiʃ
 বগল	bɔɡol
+বছর	bɔt͡ʃʰoɾ
 বড়	bɔɽo
 বন্ধু	bond̪ʱu
 বরকত	bɔɾkot̪

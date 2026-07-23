@@ -330,3 +330,21 @@ engine. The CORRECT use of Google is the already-merged cross-source CONSENSUS l
 where Google∩wikipron agree — filtering Google's dialect — and excludes gold words). A Kolkata-
 convention model would work, but no large Kolkata training set exists (the 147-word gold is too
 small). Net Bengali gains this session: two rule fixes (ম্ব, reph) + 161 consensus lexicon entries.
+
+## Run 16 — 2026-07-22 — VALIDATING the self-authored gold (it had 2 shared-blind-spot errors)
+
+Challenge (correct): the 147-word gold is hand-authored — is it right, or does using it to reject the
+model beg the question? Validated it against the INDEPENDENT sources: all 147 appear in Google/wikipron,
+and **145/147 (98%) of the gold's ɔ/o is independently corroborated** — so it is mostly cross-source, not
+opinion. But **2 are wrong**: জীবন (gold d͡ʒibɔn) and বছর (gold bɔt͡ʃʰɔɾ) — Google AND wikipron BOTH say [o]
+(d͡ʒibon, bɔt͡ʃʰoɾ). These were engine-DEFAULT abstentions the gold inherited, so the RULE shares the same
+error → the gold's high rule-agreement was partly CIRCULAR. Fixed both (gold + lexicon); the rule's gold
+score correctly drops 93.2→91.8% (revealing the shared blind spot), shipped stays 98.6%.
+
+**This corrects Run 15.** Both fixed words were among the model's "dialect-drift" regressions — so on
+জীবন/বছর the MODEL was RIGHT and our gold WRONG; the drift argument was partly measuring our own errors.
+The model's REAL blocker is (a) seq2seq DEGENERATION (এক→ækok, পাহাড়→paɦaɖoɾ) and (b) য়-glide errors
+(য়→e not j) — model/architecture failures, NOT Kolkata drift. Degeneration is exactly what the fa
+STRUCTURAL tagger avoids. So productionisation is NOT cleanly dead: a structural-tagger version (no
+degeneration), measured against the corrected gold, may be viable — the remaining real drift is smaller
+than Run 15 claimed. Reopened as the next question.
