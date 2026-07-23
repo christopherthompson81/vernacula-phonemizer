@@ -21,9 +21,14 @@ class Tagger(nn.Module):
 m = Tagger(len(cv), len(lv)); m.load_state_dict(ck["model"]); m.eval()
 dummy = torch.ones(1, 8, dtype=torch.long)
 fp32 = f"{OUT}/he-tagger.onnx"
-# dynamo=False → legacy exporter keeps the length axis dynamic
-torch.onnx.export(m, dummy, fp32, input_names=["chars"], output_names=["logits"],
-    dynamic_axes={"chars": {0: "B", 1: "L"}, "logits": {0: "B", 1: "L"}}, opset_version=17, dynamo=False)
+# dynamo=False → legacy exporter keeps the length axis dynamic (the kwarg only exists on newer torch; older
+# torch defaults to the same legacy exporter, so fall back without it)
+_export_kw = dict(input_names=["chars"], output_names=["logits"],
+    dynamic_axes={"chars": {0: "B", 1: "L"}, "logits": {0: "B", 1: "L"}}, opset_version=17)
+try:
+    torch.onnx.export(m, dummy, fp32, **_export_kw, dynamo=False)
+except TypeError:
+    torch.onnx.export(m, dummy, fp32, **_export_kw)
 # meta: char→id, tag-id→IPA chunk, per-char valid tag-ids (the consonant mask, pad excluded)
 charTags = {str(ci): [i for i in range(cm.shape[1]) if cm[ci, i].item() > -1e8 and i != 0] for _, ci in cv.items()}
 meta = {"src": cv, "tags": {str(i): t for i, t in ilv.items()}, "charTags": charTags}
