@@ -77,9 +77,10 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("করে")).toBe("koɾe");
         expect(phonemizeWord("ঘোষণা")).toBe("ɡʱoʃona"); // medial-ɔ retention (consensus insert/delete class)
         expect(phonemizeWord("বলে")).toBe("bole"); // verb ô→o before -e (hand supplement)
-        // ABSTAINS where the two dialects disagree — leaves the (correct) rule form:
-        expect(phonemizeWord("কম")).toBe("kɔm"); // minimal-pair partner of মন — stays ɔ
-        expect(phonemizeWord("জীবন")).toBe("d͡ʒibɔn");
+        expect(phonemizeWord("কম")).toBe("kɔm"); // minimal-pair partner of মন — genuinely stays ɔ
+        // জীবন: Run 16 corrected — the gold+rule had mis-defaulted it to d͡ʒibɔn (a shared blind spot), but
+        // Google AND wikipron independently corroborate [o]; the lexicon now pins the correct d͡ʒibon.
+        expect(phonemizeWord("জীবন")).toBe("d͡ʒibon");
         // the rule engine is the honest, lexicon-free signal:
         expect(phonemizeWordRules("মন")).toBe("mɔn");
         expect(phonemizeWordRules("কলম")).toBe("kɔlɔm");
