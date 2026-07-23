@@ -5,6 +5,28 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
+/** Cardinal number words (niqqud-authored) — composed by numbers.ts, rendered by the Phase-1 g2p. */
+export interface HebrewNumbers {
+    point: string;
+    and: string;
+    unitsF: string[];
+    unitsM: string[];
+    teensOnes: string[];
+    ten: string;
+    teenSuffix: string;
+    tens: string[];
+    hundred: string;
+    twoHundred: string;
+    hundredsPlural: string;
+    thousand: string;
+    twoConstruct: string;
+    twoThousand: string;
+    thousandsPlural: string;
+    thousandsConstruct: string[];
+    million: string;
+    milliard: string;
+}
+
 export interface HebrewManifest {
     language: string;
     name: string;
@@ -13,6 +35,7 @@ export interface HebrewManifest {
     dageshHard: Record<string, string>;
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    numbers: HebrewNumbers;
 }
 
 /** The consolidated hand-authored Hebrew data tables (see hebrew.jsonc). */

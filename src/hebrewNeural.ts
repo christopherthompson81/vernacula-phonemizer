@@ -13,9 +13,10 @@ import { assembleClauses } from "./core/clauses.ts";
 import { phonemizeWord } from "./languages/hebrew/hebrew.ts";
 import { createHebrewTagger, type HebrewTagger } from "./languages/hebrew/hebrewTagger.ts";
 import { MANIFEST } from "./languages/hebrew/manifest.ts";
+import { numberToIpa } from "./languages/hebrew/numbers.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([א-ת][֑-ׇ־']*(?:[א-ת][֑-ׇ]*)*)|(\d+)|([.!?…,;:׃])/gu;
+const TOKEN = /([א-ת][֑-ׇ־']*(?:[א-ת][֑-ׇ]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
 const NIQQUD = /[֑-ׇ]/u;
 const MAX_CHARS = 200; // keep clauses in-distribution (the tagger trained on ≤220-char runs)
 
@@ -52,7 +53,7 @@ export async function phonemizeHebrewNeural(text: string): Promise<string> {
     let wi = 0;
     return assembleClauses(text, TOKEN, (m, sink) => {
         if (m[1]) sink.emit(queue[wi++] ?? "");
-        else if (m[2]) sink.emit(m[2]);
+        else if (m[2]) sink.emit(numberToIpa(m[2]));
         else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
     });
 }
@@ -61,7 +62,7 @@ export async function phonemizeHebrewNeural(text: string): Promise<string> {
 function sync(text: string): string {
     return assembleClauses(text, TOKEN, (m, sink) => {
         if (m[1]) sink.emit(phonemizeWord(m[1]));
-        else if (m[2]) sink.emit(m[2]);
+        else if (m[2]) sink.emit(numberToIpa(m[2]));
         else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
     });
 }
