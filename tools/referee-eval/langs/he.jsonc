@@ -1,0 +1,26 @@
+// Hebrew (he) — Afro-Asiatic (Semitic), Hebrew abjad, MODERN ISRAELI. PHASE-1 niqqud→IPA g2p over VOCALIZED input
+// (unvocalized restoration is Phase 2, deferred). Referee: en.wiktionary vocalized-form → a=IL Modern-Israeli IPA.
+// The backbone folds neutralise marks the (pointed) orthography does not determine: STRESS (ˈ, phonemic but
+// unwritten), SYLLABLE dots, the OPTIONAL-realisation parens ((ʔ)(h)(ʕ) — keep the content, drop the parens), and
+// the variable GLOTTAL (⟨א⟩/⟨ע⟩ = ʔ, Modern Hebrew drops it inconsistently → fold). Vowel quality + the consonant
+// skeleton (dagesh/bgdkpt, shin/sin) are compared directly. See docs/investigations/he_native_bringup_investigation.md.
+{
+    "language": "he", "name": "Hebrew", "script": "Hebrew",
+    "provenance": "Authored niqqud→IPA g2p (Modern Israeli) from the pointed orthography. Referee: en.wiktionary vocalized-form → a=IL IPA.",
+    "referees": [
+        { "file": "he.wiktionary-he.tsv", "source": "en.wiktionary vocalized→Modern-Israeli IPA (human, 2561)", "role": "primary" }
+    ],
+    "secondaryGap": "No independent second source probed for Modern Hebrew IPA yet (wikipron heb / kaikki not wired). The only referee is the en.wiktionary vocalized-form → a=IL IPA set. The anchor is the adjudicated gold in test/hebrew.test.ts. PHASE 1 (segmental niqqud→IPA) only; unvocalized restoration deferred.",
+    "preFolds": [
+        { "pattern": "\\(([hʔʕ])\\)", "replace": "$1", "note": "optional GLOTTAL/H: unwrap (ʔ)(h)(ʕ) keeping the content — we EMIT ⟨א⟩/⟨ע⟩=ʔ and ⟨ה⟩=h, so the referee's optional marking must match our segment (the ʔ is then folded)" },
+        { "pattern": "\\([^)]*\\)", "replace": "", "note": "other OPTIONAL segments — (e) an elided sheva-na, (j) a glide, etc.: we do NOT emit these, so drop the whole group" }
+    ],
+    "folds": [
+        { "pattern": "[ˈˌ]", "replace": "", "note": "STRESS: phonemic but UNWRITTEN in the (pointed) orthography → we emit none; strip the referee's stress marks" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "[rʀ]", "replace": "ʁ", "note": "RESH: Modern Hebrew ⟨ר⟩ is a uvular [ʁ] (which we emit); the referee writes it [r]~[ʀ] inconsistently — non-contrastive, fold to ʁ" },
+        { "pattern": "ŋ", "replace": "n", "note": "VELAR NASAL: ⟨נ⟩ before a velar ɡ/k is [ŋ] allophonically (aŋɡli); the orthography writes plain ⟨נ⟩ and we emit [n] → fold the referee's [ŋ] to n" },
+        { "pattern": "ʕ", "replace": "ʔ", "note": "⟨ע⟩: a few referee entries give the pharyngeal [ʕ] (older/careful) vs our glottal [ʔ] — normalise, then the glottal fold strips both" },
+        { "pattern": "ʔ", "replace": "", "note": "GLOTTAL: ⟨א⟩/⟨ע⟩ = ʔ is variably realised in Modern Hebrew (the referee marks it (ʔ) or omits it) → fold out (we emit it per the explicitness principle)" }
+    ]
+}
