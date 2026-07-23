@@ -273,3 +273,22 @@ source, retroflex-correct) AND wikipron ben agree on the ɔ/o + deletion, differ
 consonant-matched), and are NOT gold words. Lexicon 168→302; gold shipped unchanged 98.6%% (no regression). This
 breaks Run 10's ~168 ceiling using the third source Run 10 said didn't exist. The one clean RULE win this
 session was the ম্ব cluster fix (Run 11, merged). Review hardened the builder: ABSTAIN on Google POS heteronyms (>1 distinct pron, e.g. উত্তর noun utːɔr / verb utːor) and fail on an unmapped phone (0 heteronyms in the current 134, so no data change).
+
+## Run 13 — 2026-07-22 — more from Google: fixed my conversion, found the REPH gemination bug
+
+User: "Google 42.5% — still lots of misses." Re-mining the consonant-skeleton disagreements (which
+should NOT be lexical) showed most were MY conversion artifacts, not engine bugs: voiced aspirates
+(our bʱ/d̪ʱ/ɡʱ vs my map's plain bʰ/d̪ʰ — 5,135), হ (our ɦ vs my h — 4,446), and geminate ː vs
+Google-doubling (4,709). Correcting the Google→IPA map (voiced aspirates→ʱ, h→ɦ) + folding geminate
+lifted the honest agreement: full 42.5→49.7%, consonant-skeleton 61→81%.
+
+The remaining consonant misses then exposed a SECOND systematic rule bug (same class as ম্ব):
+**reph র্ + [যবম] geminated instead of clustering** — the phôla rule read র্ম as র+ম-phôla and
+geminated (ধর্ম→d̪ʱɔɾːo) when reph র্ is a coda-r CLUSTER (ধর্ম→d̪ʱɔɾmo, নির্বাপক→niɾbapɔk,
+কার্য→kaɾd͡ʒo, গর্ব→ɡɔɾbo). Fix: exclude c==র from the gemination (~1,300 র্ম/র্ব/র্য words + OOV).
+Gold unchanged 98.6%; every geminate case preserved; Google consonant-skeleton 79.5→81.2%.
+
+Also fixed the build-script's copy of the conversion map (aspirate/ɦ words were being excluded from
+the consensus by the CS mismatch) → +27 more consensus lexicon entries (অগ্নিগর্ভ, গৃহ, বর্ধমান …).
+Remaining Google misses: ~50% is the intricate ɔ/o + deletion (lexical, per Run 12); the residual
+consonant gap is the final-য়/ওয়া glide vs hiatus (অতুলনীয় nij/nio) + notation (ড়→ɽ/r, visarga h).
