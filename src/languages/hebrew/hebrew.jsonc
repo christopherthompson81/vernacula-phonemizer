@@ -36,5 +36,34 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "׃": " . "
+    },
+
+    // Cardinal number words, authored WITH NIQQUD so the Phase-1 g2p (phonemizeWord) renders them — the deterministic
+    // path, consistent with the rest of Hebrew's canonical IPA (numbers.ts composes; hebrew.ts routes digit tokens).
+    // Bare numbers read in the FEMININE citation forms (the abstract counting register). Gender/construct specifics:
+    // מֵאָה hundred is feminine (3-9×100 use the reduced fem `teensOnes` + מֵאוֹת); אֶלֶף/מִילְיוֹן are masculine
+    // (2× = dual אַלְפַּיִם / construct שְׁנֵי; 3-10× thousand use the construct `thousandsConstruct` + אֲלָפִים;
+    // 3-10× million use masculine `unitsM`). 200/2000 are the duals מָאתַיִם/אַלְפַּיִם. The vav-conjunction is the
+    // plain וְ prefix on the last term (the u-/va- morphophonology before labials/sheva is not modelled — a documented
+    // simplification; our sheva-na also elides, so וְ surfaces as [v]). Beyond 10¹²-1 or unsafe → digit-by-digit.
+    "numbers": {
+        "point": "נְקֻדָּה",
+        "and": "וְ",
+        "unitsF": ["אֶפֶס", "אַחַת", "שְׁתַּיִם", "שָׁלוֹשׁ", "אַרְבַּע", "חָמֵשׁ", "שֵׁשׁ", "שֶׁבַע", "שְׁמוֹנֶה", "תֵּשַׁע"],
+        "unitsM": ["אֶפֶס", "אֶחָד", "שְׁנַיִם", "שְׁלוֹשָׁה", "אַרְבָּעָה", "חֲמִשָּׁה", "שִׁשָּׁה", "שִׁבְעָה", "שְׁמוֹנָה", "תִּשְׁעָה"],
+        "teensOnes": ["", "אַחַת", "שְׁתֵּים", "שְׁלוֹשׁ", "אַרְבַּע", "חֲמֵשׁ", "שֵׁשׁ", "שְׁבַע", "שְׁמוֹנֶה", "תְּשַׁע"],
+        "ten": "עֶשֶׂר",
+        "teenSuffix": "עֶשְׂרֵה",
+        "tens": ["", "", "עֶשְׂרִים", "שְׁלוֹשִׁים", "אַרְבָּעִים", "חֲמִשִּׁים", "שִׁשִּׁים", "שִׁבְעִים", "שְׁמוֹנִים", "תִּשְׁעִים"],
+        "hundred": "מֵאָה",
+        "twoHundred": "מָאתַיִם",
+        "hundredsPlural": "מֵאוֹת",
+        "thousand": "אֶלֶף",
+        "twoConstruct": "שְׁנֵי",
+        "twoThousand": "אַלְפַּיִם",
+        "thousandsPlural": "אֲלָפִים",
+        "thousandsConstruct": ["", "", "", "שְׁלוֹשֶׁת", "אַרְבַּעַת", "חֲמֵשֶׁת", "שֵׁשֶׁת", "שִׁבְעַת", "שְׁמוֹנַת", "תִּשְׁעַת", "עֲשֶׂרֶת"],
+        "million": "מִילְיוֹן",
+        "milliard": "מִילְיַארְד"
     }
 }

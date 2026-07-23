@@ -12,6 +12,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST } from "./manifest.ts";
+import { numberToIpa } from "./numbers.ts";
 
 const CONS = MANIFEST.consonants;
 const HARD = MANIFEST.dageshHard;
@@ -87,8 +88,9 @@ export function phonemizeWord(word: string): string {
     return phonemizeAligned(word).map((c) => c.ipa).join("");
 }
 
-// A Hebrew word (letters U+05D0–05EA + points U+0591–05C7 + maqaf ־) / number / punctuation token.
-const TOKEN = /([א-ת][֑-ׇ־־]*(?:[א-ת][֑-ׇ]*)*)|(\d+)|([.!?…,;:׃])/gu;
+// A Hebrew word (letters U+05D0–05EA + points U+0591–05C7 + maqaf ־) / number (integer or decimal) / punctuation
+// token. The number group precedes punctuation so "3.14" is one token while a trailing "." stays a clause mark.
+const TOKEN = /([א-ת][֑-ׇ־־]*(?:[א-ת][֑-ׇ]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
 
 /** Per-call OOV resolver: word → IPA, or undefined to fall back to the Phase-1 g2p. Used by the async neural path
  *  (hebrewNeural.ts) to inject the Phase-2 tagger's reading for UNVOCALIZED words. */
@@ -98,7 +100,7 @@ class HebrewPhonemizer implements Phonemizer {
     text(input: string, oovOverride?: HebrewOovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(oovOverride?.(m[1]) ?? phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) sink.emit(numberToIpa(m[2])); // cardinal → IPA (numbers.ts)
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

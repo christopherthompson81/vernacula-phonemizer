@@ -167,3 +167,24 @@ uses, suppressing only obsolete vocalizations (3.6% of consonants masked). SHIPP
 folded the mask into build_tagger_data.ts (3rd column, phonemizeWord-derived modern reading-sets) + train_he_tagger.py
 (honors it); retrained via the shipped pipeline → identical 86.4%/138. +1.9pp over baseline, +0.8pp over
 oversample-alone; per-consonant 94.0%→95.6%. 🔵🔷.
+
+## Run 7 — 2026-07-23 17:xx — cardinal numbers (the missing core layer)
+
+Built the Hebrew number→IPA compositor (numbers.ts + a niqqud `numbers` block in hebrew.jsonc). Design:
+- **Persian pattern for rendering** (words authored WITH niqqud → phonemizeWord), not Arabic's author-IPA-directly —
+  so numbers stay consistent with the rest of Hebrew's canonical g2p (probed 60+ forms: ʔ for א/ע, χ for ח, ʁ, sheva
+  elided → וְ surfaces [v]). **Arabic pattern for composition** (bespoke, Semitic gender/construct).
+- **Feminine citation forms** (the abstract counting register). Gender handled where obligatory: מֵאָה fem
+  (3-9×100 = reduced-fem `teensOnes` + מֵאוֹת) vs אֶלֶף/מִילְיוֹן masc (multiplier agrees masc; 2× = dual/construct;
+  3-10× thousand = construct + אֲלָפִים; ≥11× = masc sub-1000 multiplier + singular magnitude); 200/2000 duals.
+- **Connector וְ is INTERNAL** — before the last small cardinal of a group, NEVER a magnitude word. First cut used a
+  global "vav on last term" rule → two bugs (100000→*meʔa vʔelef* should be *meʔa ʔelef*; 21000→fem+vav-on-elef
+  should be *ʔesʁim vʔeχad ʔelef*). Fixed by moving the vav inside sub100/joinRem and giving multipliers masc agreement.
+  999999 then composes correctly with the gender split (masc *tiʃʔa* in the thousands multiplier, fem *teʃa* in the
+  remainder). Documented residual: the u-/va- morphophonology before labials/sheva isn't modelled, and 11-19× teen
+  multipliers stay feminine — minor, only in large mixed numbers.
+- Decimals: extended TOKEN to `\d+(?:\.\d+)?`; "3.14" → integer · נְקֻדָּה · fractional digits one-by-one.
+
+**Validation:** 40 composed forms vs standard grammar (self-authored table) + **Wikipedia "Hebrew numerals"
+independently confirms every base form** (units m/f, tens, 100/200 dual, 1000/2000 dual, 1M) — a second source
+distinct from the Wiktionary g2p referee. Wired into both the sync (hebrew.ts) and neural (hebrewNeural.ts) paths.
