@@ -253,3 +253,23 @@ not the Kolkata lexical raising — মন mɔn vs our gold mon). So it's a syst
 Kolkata gold. Its value: (a) independent confirmation of our consonants, and (b) a THIRD leg for the cross-source
 consensus lexicon — where Google agrees with wikipron/BengaliAI on a word's ɔ/o, that is scaled consensus that can
 push the ɔ→o tail past the 168 ceiling. Next: prototype that consensus expansion.
+
+## Run 12 — 2026-07-22 — Google reveals SYSTEMATIC engine errors (not a lexical tail)
+
+User pushback (correct): Google is a reputable source; when the consensus (Google + wikipron,
+two independent sources) disagrees with our engine, OUR ENGINE is likely wrong. Classifying the
+403 consensus disagreements: UNDER-raised ɔ→o **37%** (consensus [o], we keep ɔ), OVER-deleted a
+medial vowel **11%** (অবতার engine ɔbt̪aɾ vs consensus ɔbot̪aɾ; আচরণ at͡ʃɾɔn vs at͡ʃoɾon), over-raised
+2%, other 47%. Root cause is in our own code comment: the medial-deletion is *"the same algorithm
+as Hindi's schwa deletion but on /ɔ/"* and the ɔ→o raising only fires before an *immediately*
+following high [i u]. **Bengali is not Hindi** — it retains many medial inherent vowels (as [o])
+and raises ɔ→o more broadly. So a large part of what Runs 6–10 filed as "proven-lexical tail" is
+actually a systematic RULE error the 65k reliable Google source exposes. Tested two rule re-derivations (positional ɔ→o raising; medial-deletion OFF) — BOTH crash the gold
+(93.2→45.6%% and 93.2→90.5%%): the raising is not positional and Bengali DOES delete some medial vowels, so the
+conditioning is genuinely intricate (partly lexical/morphological — no clean rule, confirming Runs 6–10 and the
+existence of 135k-entry research G2P dicts). So Google's reliability is applied PER-WORD via the cross-source
+consensus lexicon, not a rule: +134 entries where Google language-resources/bn (CC-BY-4.0, third independent
+source, retroflex-correct) AND wikipron ben agree on the ɔ/o + deletion, differ from the engine (vowel-only,
+consonant-matched), and are NOT gold words. Lexicon 168→302; gold shipped unchanged 98.6%% (no regression). This
+breaks Run 10's ~168 ceiling using the third source Run 10 said didn't exist. The one clean RULE win this
+session was the ম্ব cluster fix (Run 11, merged).
