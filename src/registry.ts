@@ -90,6 +90,7 @@ import { createZhuang } from "./languages/zhuang/zhuang.ts";
 import { createChhattisgarhi } from "./languages/chhattisgarhi/chhattisgarhi.ts";
 import { createAwadhi } from "./languages/awadhi/awadhi.ts";
 import { createMinnan } from "./languages/minnan/minnan.ts";
+import { createMongolian } from "./languages/mongolian/mongolian.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
@@ -375,6 +376,8 @@ function build(lang: string): Phonemizer {
             return createNepali((latin) => getPhonemizer("en").text(latin));
         case "nan":
             return createMinnan((latin) => getPhonemizer("en").text(latin));
+        case "mn":
+            return createMongolian();
         case "yo":
             return createYoruba((latin) => getPhonemizer("en").text(latin));
         case "ig":
