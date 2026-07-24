@@ -3,7 +3,7 @@
  * posTagger precedent). Each grapheme is tagged with a phoneme CHUNK ("" / one / two phonemes) from a ±4-grapheme
  * context window; the chunks concatenate to the word's IPA. Trained on the Danish lexicon (tools/danish/
  * da_tagger_prototype.py → da-g2p.tsv), it recovers the context-conditioned vowel quality / reduction / soft-C that
- * the hand rules miss — held-out OOV 42.0% vs the rule engine's 25.8% (folded). The MODEL FEATURES here must byte-match the
+ * the hand rules miss — held-out OOV 45.5% vs the rule engine's 30.5% on the same split (folded). The MODEL FEATURES here must byte-match the
  * Python `feats()`. Used as the middle tier: lexicon → tagger → rules (danish.ts). See docs/investigations/da_native_bringup_investigation.md.
  */
 import { readFileSync } from "node:fs";
@@ -14,7 +14,9 @@ const VOWELS = new Set([..."aeiouyæøå"]);
 
 interface Model {
     labels: string[];
-    weights: Map<string, number>; // "feature\tlabel" → weight
+    // feature → [labelIndex, weight] postings (only non-zero, pruned weights). Inference sums postings into a
+    // per-label score array, so it touches a handful of entries per feature instead of every label × feature.
+    postings: Map<string, Array<[number, number]>>;
 }
 
 let MODEL: Model | null | undefined;
@@ -22,16 +24,22 @@ function model(): Model | null {
     if (MODEL === undefined) {
         try {
             const path = join(dirname(fileURLToPath(import.meta.url)), "da-g2p.tsv");
-            const lines = readFileSync(path, "utf8").split("\n");
+            const lines = readFileSync(path, "utf8").split(/\r?\n/); // CRLF-robust (a CRLF checkout would else zero every lookup)
             const labels = lines[0]!.split("\t");
-            const weights = new Map<string, number>();
+            const labelIdx = new Map(labels.map((l, i) => [l, i] as const));
+            const postings = new Map<string, Array<[number, number]>>();
             for (let i = 1; i < lines.length; i++) {
                 const l = lines[i]!;
                 if (!l) continue;
-                const t = l.lastIndexOf("\t"); // last field = weight; the rest = "feature\tlabel" key
-                weights.set(l.slice(0, t), Number(l.slice(t + 1)));
+                const t = l.lastIndexOf("\t"); // "feature\tlabel\tweight" — split last field (weight) off the "feature\tlabel" key
+                const k = l.lastIndexOf("\t", t - 1);
+                const feat = l.slice(0, k);
+                const li = labelIdx.get(l.slice(k + 1, t));
+                if (li === undefined) continue; // weight for an unknown label → skip
+                const w = Number(l.slice(t + 1));
+                (postings.get(feat) ?? postings.set(feat, []).get(feat)!).push([li, w]);
             }
-            MODEL = { labels, weights };
+            MODEL = { labels, postings };
         } catch { MODEL = null; } // model absent → tagger disabled (fall through to rules)
     }
     return MODEL;
@@ -57,16 +65,19 @@ export function taggerPhonemize(word: string): string | null {
     const m = model();
     if (!m) return null;
     const chars = [...word.toLowerCase()];
+    const scores = new Float64Array(m.labels.length);
     let out = "";
     for (let i = 0; i < chars.length; i++) {
-        const f = feats(chars, i);
-        let best = m.labels[0]!, bestScore = -Infinity;
-        for (const lab of m.labels) {
-            let s = 0;
-            for (const ff of f) s += m.weights.get(`${ff}\t${lab}`) ?? 0;
-            if (s > bestScore) { bestScore = s; best = lab; }
+        scores.fill(0);
+        for (const ff of feats(chars, i)) {
+            const posts = m.postings.get(ff);
+            if (posts) for (const [li, w] of posts) scores[li]! += w;
         }
-        out += best;
+        // argmax with the SAME tie-break as the dense scan: iterate labels in order, strict >, first wins (label 0 =
+        // the empty deletion tag, so an all-zero grapheme predicts "" exactly as before).
+        let best = 0, bestScore = scores[0]!;
+        for (let li = 1; li < scores.length; li++) if (scores[li]! > bestScore) { bestScore = scores[li]!; best = li; }
+        out += m.labels[best]!;
     }
     return out;
 }

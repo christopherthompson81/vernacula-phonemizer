@@ -8,7 +8,7 @@ Pipeline (framework-free — torch is unavailable; averaged perceptron, the repo
   4. predict IPA for each held-out word; write /tmp/da_holdout.tsv (word, reference, tagger_pred)
      — the TS side (da_tagger_eval.mts) then folds all three and reports tagger% vs rules% on the SAME held-out.
 """
-import os, re, math, random
+import os, re, math, random, hashlib
 from collections import defaultdict, Counter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -30,9 +30,13 @@ def load():
     return rows
 
 def split(rows):
+    # STABLE hash (md5), NOT Python's builtin hash() — the latter is per-process salted (PYTHONHASHSEED), which would
+    # make the "deterministic 90/10 split" (and the held-out numbers derived from it) change every run.
+    def bucket(w):
+        return int(hashlib.md5(("da:" + w).encode("utf-8")).hexdigest(), 16) % 10
     tr, te = [], []
     for w, p in rows:
-        (te if (hash(("da", w)) % 10 == 0) else tr).append((w, p))
+        (te if bucket(w) == 0 else tr).append((w, p))
     return tr, te
 
 # ---- hard-EM many-to-{0,1,2} monotonic alignment ----
@@ -179,7 +183,9 @@ def main():
         for w, ph in te:
             f.write(f"{w}\t{''.join(ph)}\t{predict(model_tr, labels_tr, w)}\n")
     print(f"held-out predictions → {OUT} (run tools/danish/da_tagger_eval for the folded %)")
-    # (2) SHIPPED model: train on the FULL lexicon for max real-world OOV coverage.
+    # (2) SHIPPED model: train on the FULL lexicon for max real-world OOV coverage. RESEED so the exported model is
+    # reproducible independent of phase (1)'s split (which consumes RNG state via shuffle).
+    random.seed(0)
     aligned, _ = align_all(rows)
     print(f"aligned {len(aligned)}/{len(rows)} full-lexicon words")
     model, labels = train_perceptron(aligned)

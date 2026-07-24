@@ -100,12 +100,36 @@ export function phonemizeWordRules(word: string): string {
     return segs.map((s) => (s.stress ? "ˈ" : "") + s.ph).join("");
 }
 
+// IPA vowels the tagger can emit; the two REDUCED ones (‑e schwa, ‑er) never carry primary stress.
+const IPA_VOWELS = new Set([..."aɑeɛioɔuyøœəɐʌæ"]);
+const IPA_REDUCED = new Set([..."əɐ"]);
+
+/** Place ONE primary ˈ on the tagger's IPA (which is stress-less — the training data drops ˈ/ˌ), mirroring the rule
+ *  engine: first full (non-reduced) vowel, shifted to the vowel AFTER an unstressed prefix; monosyllables unmarked.
+ *  Keeps OOV output stress-consistent with the lexicon + rule tiers (a canonical-IPA target — stress is a real axis). */
+function applyStress(word: string, ipa: string): string {
+    if (ipa.includes("ˈ")) return ipa;
+    const chars = [...ipa];
+    const vowelIdx: number[] = [];
+    for (let i = 0; i < chars.length; i++) if (IPA_VOWELS.has(chars[i]!)) vowelIdx.push(i);
+    if (vowelIdx.length < 2) return ipa; // monosyllable → no mark (matches the rule engine)
+    const firstFull = vowelIdx.find((i) => !IPA_REDUCED.has(chars[i]!));
+    if (firstFull === undefined) return ipa; // all-reduced → nothing to stress
+    const ord = UNSTRESSED_PREFIX.test(word) ? 1 : 0;
+    const cand = vowelIdx[ord];
+    const target = cand !== undefined && !IPA_REDUCED.has(chars[cand]!) ? cand : firstFull;
+    chars.splice(target, 0, "ˈ");
+    return chars.join("");
+}
+
 /** One Danish word → canonical IPA. THREE tiers for the deep orthography: (1) the LEXICON (known words, reference
  *  quality), (2) the perceptron TAGGER (OOV — recovers the context-conditioned vowel quality/reduction the rules miss:
- *  held-out 42.0% vs the rule engine's 25.8%, folded), (3) the RULE engine (fallback when the tagger model is absent). */
+ *  held-out 45.5% vs the rule engine's 30.5% on the same split, folded; re-stressed by applyStress since the tagger is stress-less),
+ *  (3) the RULE engine (fallback when the tagger model is absent OR returns empty). */
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
-    return lexicon().get(w) ?? taggerPhonemize(w) ?? phonemizeWordRules(w);
+    const tagged = taggerPhonemize(w); // string | null; "" (all-deletion) must also fall through → coerce to null
+    return lexicon().get(w) ?? (tagged ? applyStress(w, tagged) : null) ?? phonemizeWordRules(w);
 }
 
 // A Danish word (Latin incl. æ ø å + accents) / number / punctuation token.

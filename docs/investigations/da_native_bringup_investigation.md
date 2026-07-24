@@ -90,16 +90,20 @@ engine only, never the lexicon; the lexicon's tie-bar concern was moot — 0 tie
 
 ## Run 5 — 2026-07-24 — OOV tagger tier + rule mining + the lexical ceiling
 
-The Run 3 "path past the floor" (a neural OOV g2p) — built and measured honestly. Deterministic 90/10 split
-(`hash(("da",w))%10==0`), aligned by hard-EM Viterbi (many-to-{0,1,2} monotonic), held-out folded:
+The Run 3 "path past the floor" (a neural OOV g2p) — built and measured honestly. Reproducible 90/10 split (STABLE
+md5 bucket, not Python's per-process-salted `hash()`), aligned by hard-EM Viterbi (many-to-{0,1,2} monotonic). All
+numbers below are on the SAME held-out 770-word OOV sample, folded (a fair head-to-head):
 
-| Path | Held-out OOV (folded) | Deps |
+| Path | Held-out OOV (folded, 770 words) | Deps |
 |---|---|---|
-| Rule engine (`phonemizeWordRules`) | 25.8% | none |
-| + mined contextual rules + noise folds | ~27.4% (rule-floor) | none |
-| **Averaged perceptron** (`tagger.ts`, sync) | **42.0%** | none |
-| BiLSTM (2-layer, GPU, ONNX) | ~50.1% | onnxruntime |
-| Collapse EVERY vowel-quality distinction | **55.7%** | — (ceiling probe) |
+| Rule engine (`phonemizeWordRules`) | 30.5% | none |
+| **Averaged perceptron** (`tagger.ts`, sync) | **45.5%** | none |
+| BiLSTM (2-layer, GPU, ONNX) | ~50% | onnxruntime |
+| Collapse EVERY vowel-quality distinction | ~56% | — (ceiling probe) |
+
+(The BiLSTM/ceiling rows were measured on an earlier split → approximate; the point is the ~56% ceiling, not the
+digits. The full-referee rule floor — `phonemizeWordRules` over all 7699 referee words, the floor test — is **27.4%**
+folded; the held-out 30.5% is the same engine on the smaller OOV-only sample.)
 
 **The ceiling is LEXICAL, not model capacity.** The last row is a probe: a hypothetical perfect model blind only to
 `a/ɑ e/ɛ o/ɔ ø/œ` quality still tops out at ~56%. So the ~44% no model can reach is genuine deep-orthography depth —
@@ -119,13 +123,19 @@ folding (same phoneme/context written two ways, like the `r/ʁ` we already folde
 - `ɡ$→k`, `b$→p` — final-stop voicing (voiceless-diacritic stripped) written both ways (alk→alɡ).
 
 These are now folds in `da.jsonc` (rule floor 24.7%→27.4%, BiLSTM 46.7%→50.1%). The rest of the misses are NOT
-noise/fixable-data — the 55.7% collapse ceiling proves it. Danish is just hard; cleaning the referee won't rescue it.
+noise/fixable-data — the ~56% collapse ceiling proves it. Danish is just hard; cleaning the referee won't rescue it.
 
 **Mined RULES (rules > neural for the common case, the user's steer).** `mine_da_rules.py` aligns the lexicon and ranks
 (prev,g,next)→tag contexts whose dominant tag differs from the grapheme default, weighted by appearance in words the
 rule engine gets wrong. Three high-purity, high-impact contexts became fast scan rules in `phonemizeWordRules`: final
 ⟨g⟩-after-vowel silent (rolig→roli), ⟨i⟩→[e] before ⟨n⟩+C (ind→en), ⟨o⟩→[ʌ] before ⟨ld⟩ (hold→hʌl). Rule floor
 24.7%→25.8% before folds.
+
+**What the 45.5% measures (caveat):** it's the held-out accuracy of the perceptron trained on the 90% split (unpruned,
+Python `predict`). The SHIPPED `da-g2p.tsv` is a *different* model — trained on the FULL lexicon (so held-out words are
+seen) and pruned to |w|≥0.75 — so 45.5% is the honest OOV *proxy*, not a direct measurement of the shipped artifact
+(which can't be held-out-tested without excluding its own training data). The split is a STABLE md5 bucket (not Python's
+per-process-salted `hash()`), and phase-2 reseeds, so both numbers and the exported model are reproducible run-to-run.
 
 **Tooling (committed, reproducible):** `tools/danish/da_tagger_prototype.py` (loader + hard-EM aligner + perceptron +
 export), `train_da_bilstm.py` (GPU BiLSTM → ONNX; the async upgrade path, pipeline committed but the 2.5MB artifact is

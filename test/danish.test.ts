@@ -5,8 +5,8 @@ import { phonemizeWordRules } from "../src/languages/danish/danish.ts";
 
 // Danish (da) — North Germanic, Latin, the DEEPEST European orthography. Vowel quality / soft-d,g / reduction /
 // stress are largely LEXICAL, so the SHIPPED path is a PRONUNCIATION LEXICON (da-lexicon.tsv, from the Wiktionary
-// data, canonical IPA + stress) → a perceptron TAGGER (OOV, held-out 42.0%) → the RULE engine (phonemizeWordRules) as
-// the last-tier fallback. The referee-eval measures the rule engine non-circularly (25.8% folded, the honest novel-word
+// data, canonical IPA + stress) → a perceptron TAGGER (OOV, held-out 45.5%) → the RULE engine (phonemizeWordRules) as
+// the last-tier fallback. The referee-eval measures the rule engine non-circularly (27.4% folded, the honest novel-word
 // floor; the vowel-quality ceiling is lexical). See docs/investigations/da_native_bringup_investigation.md.
 describe("Danish canonical IPA", () => {
     test("lexicon path: known words at reference quality (soft-d, stress, loan/prefix stress)", () => {
@@ -27,8 +27,9 @@ describe("Danish canonical IPA", () => {
 
     test("tagger tier (OOV, not in lexicon): the perceptron recovers context vowel quality the rules miss", () => {
         // These words are NOT in da-lexicon.tsv, so phonemize() routes lexicon → TAGGER (tier 2). The perceptron
-        // recovers the ⟨u⟩→o / ⟨e⟩→ɛ / ⟨ø⟩→œ quality that the rule engine can't (held-out OOV 42.0% vs 25.8%).
-        expect(phonemize("snurretop", "da").trim()).toBe("snorɛtop"); // ⟨u⟩→o, ⟨e⟩→ɛ (perceptron, not rules)
-        expect(phonemize("fladbrød", "da").trim()).toBe("flaðbrœð"); // soft-d ð + ⟨ø⟩→œ
+        // recovers the ⟨u⟩→o / ⟨e⟩→ɛ / ⟨ø⟩→œ quality that the rule engine can't (held-out OOV 45.5% vs 30.5%, same split).
+        expect(phonemize("snurretop", "da").trim()).toBe("snˈorɛtop"); // ⟨u⟩→o, ⟨e⟩→ɛ (perceptron) + applyStress ˈ
+        expect(phonemize("fladbrød", "da").trim()).toBe("flˈaðbrœð"); // soft-d ð + ⟨ø⟩→œ + first-syllable stress
+        expect(phonemize("forsinkelse", "da").trim()).toBe("fʌrsˈeŋɡəlsə"); // unstressed ⟨for-⟩ → stress the 2nd vowel
     });
 });
