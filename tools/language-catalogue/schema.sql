@@ -26,6 +26,7 @@ CREATE TABLE languages (
     kaikki_entries   INTEGER,                   -- kaikki (Wiktionary) IPA entry count
     epitran          INTEGER,                   -- 1 = an epitran mapping exists
     espeak           INTEGER,                   -- 1 = espeak-ng ships a voice (legacy reference only)
+    fleurs           INTEGER,                   -- 1 = in the FLEURS-102 speech benchmark, 0 = not, NULL = unknown
 
     -- The disposition.
     decision         TEXT NOT NULL

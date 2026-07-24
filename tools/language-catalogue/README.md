@@ -21,6 +21,7 @@ data-availability verdicts** every time we pick the next language.
 | `l1_speakers`, `l2_speakers` | estimated speakers, **absolute** (NULL = unknown, 0 = ~none e.g. MSA) |
 | `wikipron_entries`, `kaikki_entries` | referee size: count if probed, 0 = confirmed absent, NULL = not probed |
 | `epitran`, `espeak` | 1 = exists, 0 = none, NULL = unknown |
+| `fleurs` | 1 = in the **FLEURS-102** speech benchmark, 0 = not (NULL = unknown) |
 | `decision` | `implemented` \| `rejected` \| `unimplemented` |
 | `rejection_reason` | one of the fixed set below (NULL for implemented) |
 | `verdict` | for implemented rows: maturity `✅ 🟢 🟡 🔷 ⛔` |
@@ -69,6 +70,12 @@ sqlite3 languages.db "SELECT code,name FROM languages WHERE rejection_reason='da
 
 # Coverage summary.
 sqlite3 -header -column languages.db "SELECT decision, COUNT(*) FROM languages GROUP BY decision;"
+
+# FLEURS-102 coverage: which benchmark languages are still unbuilt (top build targets by speakers)?
+sqlite3 -header -column languages.db "
+  SELECT code, name, l1_speakers/1000000 AS l1_m,
+         COALESCE(rejection_reason,'(buildable)') AS blocker
+  FROM languages WHERE fleurs=1 AND decision!='implemented' ORDER BY l1_speakers DESC;"
 ```
 
 ## Update workflow
