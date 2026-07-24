@@ -286,3 +286,29 @@ path it HELD the human holdout (86.5%) and LIFTED the independent gt.tsv **62.8%
 three measures. Numbers improved too (7 שֶׁבַע→ʃeva not ʃevaʔ; 4→ʔaʁba). Shipped `tools/hebrew/{consensus-gold.tsv,
 validate-consensus.ts, build-consensus-gold.py}` so the gate is repeatable. `he` stays 🔷 (still single independent
 referee *family*, but now cross-validated 3 ways on the g2p).
+
+## Run 12 — 2026-07-23 21:xx — consensus LEXICON (the convention-normalized win)
+
+The distillation dead-end (#429) and the raw-IPA lexicon both failed on the SAME thing: importing the
+Phonikud/ReNikud IPA convention (medial glottal meʔod, realized sheva) conflicts with the human Nakdimon labels.
+Insight: that regression was NOTATION, not error — the referees' READING (loanword vowels/dagesh) is right, only
+their IPA convention differs. So: import the READING, render it in OUR convention.
+
+**The working recipe:** lexicon entry = Phonikud's NIQQUD for a word, rendered at runtime through OUR g2p
+(phonemizeWord) — so output is always our convention (auto-tracks the glottal rule etc.). Keep an entry only where
+(a) our-g2p(PK-niqqud) independently AGREES with ReNikud (drops PK errors AND convention-divergent words), and
+(b) the skeleton is NOT a homograph (those stay with the context tagger). Lookup layer in hebrewTagger.restore():
+known non-homograph skeleton → lexicon reading; else tagger.
+
+Measured (lexicon override, both referees):
+- raw PK IPA lexicon: gt.tsv +6.5 but HUMAN −3.5 (convention import — the #429 failure mode).
+- RN-validated, OUR convention: gt.tsv 64.8→67.5, HUMAN 86.5→**87.2** (+0.7 — net-positive on the honest arbiter).
+- **+ homograph-excluded (SHIPPED, 7800 entries): gt.tsv 64.8→66.7, HUMAN 86.5→87.8 (+1.3)** — homograph exclusion
+  trades a little gt.tsv (Phonikud-adjacent) for more human holdout (honest), by leaving homographs to the tagger.
+- PK-only, UNVALIDATED: gt.tsv −4.2, HUMAN −8.4 — confirms the ReNikud second-vote is load-bearing.
+
+Shipped `src/languages/hebrew/{he-lexicon.tsv (skeleton→niqqud), lexicon.ts}` + `tools/hebrew/{build-lexicon.py,
+finalize-lexicon.ts}`. Live: human holdout 87.8%, gt.tsv 66.2%. `he` stays 🔷 (the restorer's OOV tail shrank but the
+conversational-corpus gap remains). ENG NOTE: re-persist the RIGHT intermediate — I'd stored PK's IPA, not its
+niqqud, so the normalized rebuild needed a fresh add_diacritics pass (niq_infer). Convention-target flip DEFERRED as a
+deliberate fleet decision, not chased reactively.
