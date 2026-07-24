@@ -1,0 +1,47 @@
+// Native canonical-IPA data manifest for Umbundu (umb) — Bantu (R11, Benguela/Angola, ~6M), the Latin orthography,
+// espeak-independent. A greedy longest-match scan (the Chichewa/Shona pattern): Umbundu is open CV with prenasalised
+// clusters as single onset units, so a pure left-to-right longest match suffices. Referee-SCARCE (no wikipron /
+// kaikki / epitran / Wiktionary-IPA); authored from the documented phonology (Wikipedia/Schadeberg) + an ASJP-
+// corroborated curated gold — 🔷 single-source. Signatures:
+//   • VOICED obstruents occur ONLY PRENASALISED: ⟨mb nd nj ng⟩ → ᵐb ⁿd ᶮd͡ʒ ᵑɡ (there is no plain /b d d͡ʒ ɡ/).
+//   • ⟨c⟩ → [t͡ʃ] (the affricate), ⟨v⟩ → [v], ⟨ñ⟩/⟨ny⟩ → [ɲ], ⟨ng'⟩ → [ŋ] (plain velar nasal, ≠ ⟨ng⟩=ᵑɡ), ⟨l⟩ → [l].
+//   • plain stops p t k; fricatives f s h (voiceless) + v (voiced); nasals m n ɲ ŋ; approximants w l j.
+// Tone (H á / L à + downstep) is often unwritten and the accents are STRIPPED (tone deferred; segmental output).
+// Nasal vowels (tilde) are kept. See docs/investigations/umb_native_bringup_investigation.md.
+{
+    "language": "umb",
+    "name": "Umbundu",
+    "script": "Latin",
+    "provenance": "Authored from Schadeberg (1982) 'Nasalization in UMbundu' (J. African Langs & Linguistics) — the primary R11 phonology, Table 1 systematic-phonetic inventory — + the Umbundu orthography; ASJP Umbundu-3 corroborated. Referee-scarce (no wikipron/kaikki/epitran/Wiktionary-IPA) → 🔷 single-source, grammar-grounded gold-anchored.",
+
+    "convention": {
+        "prenasalised": "the voiced stops b/d/j/g occur ONLY after a homorganic nasal (Schadeberg 1982 rule (1): b/d/j/g /N_ ~ v/l/y/∅ elsewhere), written ⟨mb nd nj ng⟩ → ᵐb ⁿd ᶮd͡ʒ ᵑɡ (also ⟨mp nt nc nk ns⟩ → ᵐp ⁿt ᶮt͡ʃ ᵑk ⁿs); ⟨ng'⟩ → ŋ",
+        "affricate": "⟨c⟩ → t͡ʃ (a palatal obstruent in Schadeberg's Table 1, NOT the fricative [ʃ] that Omniglot's chart gives; ASJP-corroborated); ⟨v⟩ → v (labiodental, not [β]); ⟨ñ⟩/⟨ny⟩ → ɲ",
+        "liquid": "⟨l⟩ → l; Umbundu has NO native /r/ (Schadeberg's inventory lists only /l/), so ⟨r⟩ (loanwords) → l",
+        "vowels": "/a e i o u/, mid vowels CLOSE-mid [e o] (Schadeberg; not the [ɛ ɔ]/[ɔ] some charts give). NO length; nasal vowels (tilde) ã ẽ ĩ õ ũ kept",
+        "tone": "H (á) / L (à) + downstepped-H — often unwritten; accents STRIPPED → tone DEFERRED",
+        "deferred": "Schadeberg's rare NASALIZED continuant consonants (ṽ l̃ h̃ ỹ w̃) are not orthographically distinguished in a clean way → not emitted; morphophonological N+C rules (N+k→h in the class-9 prefix, etc.) deferred"
+    },
+
+    // Orthography → canonical IPA (scanner sorts keys LENGTH DESC: trigraph ng' → prenasal digraphs → singles).
+    "graphemes": {
+        "ng'": "ŋ",
+        "mb": "ᵐb", "nd": "ⁿd", "nj": "ᶮd͡ʒ", "ng": "ᵑɡ",
+        "mp": "ᵐp", "nt": "ⁿt", "nc": "ᶮt͡ʃ", "nk": "ᵑk", "ns": "ⁿs",
+        "ny": "ɲ",
+
+        "p": "p", "t": "t", "k": "k", "c": "t͡ʃ",
+        "f": "f", "v": "v", "s": "s", "h": "h",
+        "m": "m", "n": "n", "ñ": "ɲ", "l": "l", "r": "l",
+        "w": "w", "y": "j",
+        // fallbacks for loanwords / proper nouns (native Umbundu has these voiced obstruents only prenasalised):
+        "b": "b", "d": "d", "g": "ɡ", "j": "d͡ʒ", "z": "z",
+
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ã": "ã", "ẽ": "ẽ", "ĩ": "ĩ", "õ": "õ", "ũ": "ũ"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    }
+}

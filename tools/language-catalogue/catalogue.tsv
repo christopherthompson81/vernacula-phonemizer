@@ -180,7 +180,7 @@ tr	Turkish	Turkic (Oghuz)	Latin	84000000	6000000					implemented		✅				1
 tt	Tatar	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by espeak.	0
 ug	Uyghur	Turkic (Karluk)	Arabic (Uyghur)	11000000						implemented		✅				0
 uk	Ukrainian	Slavic (East)	Cyrillic	33000000						implemented		✅				1
-umb	Umbundu	Niger-Congo (Bantu)	Latin	6000000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+umb	Umbundu	Niger-Congo (Bantu)	Latin	6000000				0	0	implemented		🔷			Bantu (R11, Angola). Greedy Latin g2p (Chichewa/Shona pattern, open CV) authored from the Schadeberg (1982) 'Nasalization in UMbundu' (primary R11 phonology): VOICED obstruents ONLY prenasalised (mb/nd/nj/ng->ᵐb/ⁿd/ᶮd͡ʒ/ᵑɡ), c->t͡ʃ (palatal, not [ʃ]), v->v, no native /r/ (r->l), ñ/ny->ɲ, ng'->ŋ, l->l, plain p/t/k + f/s/h. 5 oral + 5 nasal vowels (no length). REFEREE-SCARCE: no wikipron/kaikki/epitran/Wiktionary-IPA; the ASJP Umbundu-3 wordlist (coarse, orthography-free) corroborates the inventory only. Hand-adjudicated gold in test/umbundu.test.ts (Igbo/Naija no-referee pattern — a distinct documented language, not a clone). Tone (H/L+downstep, unwritten) + cardinal numbers DEFERRED. 🔷 single-source. See docs/investigations/umb_native_bringup_investigation.md	1
 ur	Urdu	Indo-Aryan	Arabic (Urdu)	70000000	160000000					implemented		🟡				1
 uz	Uzbek	Turkic (Karluk)	Latin/Cyrillic	35000000						implemented		✅				1
 vi	Vietnamese	Austroasiatic	Latin	85000000						implemented		✅				1
