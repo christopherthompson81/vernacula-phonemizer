@@ -230,3 +230,31 @@ design). Spot-checks confirm veʁaʔa/bejisʁaʔel/leʔeveʁ/meod now realise [e
 numbers now use the correct connector (עֶשְׂרִים וְאַחַת → ʔesʁim veʔaχat). Remaining ~30% is the modern-OOD tagger
 bucket (the data-bound ceiling — the licensed corpus). `he` still 🔷 (single independent referee, real residual), but
 the sheva "hard ceiling" from Phase-1 is now correctly reversed on unbiased evidence — [[multi_referee_method]].
+
+## Run 10 — 2026-07-23 19:xx — Phonikud distillation to satisfy BOTH referees: NEGATIVE result
+
+Goal: lift the neural restorer's modern coverage (the ~30% gt.tsv "other" bucket = OOD loanwords/brands + be/ba
+definiteness) so BOTH referees improve. Lever: **distill** modern diacritization from the permissive CC-BY Phonikud
+model (it correctly diacritizes אפליקציה→ʔaplikatsja, ספוטיפיי, אינסטגרם where our tagger fails) onto permissive
+modern text, then retrain. Contamination guard: validate on the HUMAN Nakdimon holdout (news/blogs, NOT Phonikud)
+as the honest arbiter alongside gt.tsv.
+
+Data: cached he-wiki (espeak-ng-portable tools/corpus/.cache/he — 1.1GB dump + 606k-word freq). Two attempts:
+- **word-level** (top 30k wiki words → Phonikud niqqud): human 86.4→86.8 (+0.4), gt.tsv flat. Isolated words don't
+  transfer to the sentence-level tagger.
+- **sentence-level** (30k wiki sentences → 91k Phonikud-diacritized clauses, real context): human **86.4→85.2 (↓)**,
+  gt.tsv **62.8→62.4 (↓)**. REGRESSED BOTH.
+
+**Verdict: distillation does not work here, for principled reasons.** (1) Register mismatch — formal Wikipedia ≠ the
+conversational gt.tsv / news-blog holdout, so the OOD conversational loanwords aren't even in the wiki distill.
+(2) CONVENTION CONFLICT — Phonikud's diacritization conventions differ from the human Nakdimon labels (tag vocab
+exploded 74→118: full-spelling dagesh/matres combos Nakdimon doesn't mark); training on Phonikud pulls toward its
+conventions AWAY from the human referee. The two referees genuinely disagree on conventions, so a single
+Phonikud-derived training target can't satisfy both. The real blocker for the conversational OOD gap remains the
+copyright-locked human conversational corpus. Shipped model restored (86.5/62.8). `he` stays 🔷.
+
+**★ Engineering lessons (reusable):** (a) PERSIST RAW MODEL OUTPUT — decouple expensive inference (Phonikud ~30min)
+from cheap parsing; two post-processing bugs were then fixed by a 3-second re-parse, not a re-inference (diac_raw.py
++ parse_raw.py, resumable sharded). (b) The niqqud STRIP **visual-range trap**: `[֑-ֽ]` = U+0591-05BD SWALLOWS the
+niqqud vowels U+05B0-05BC — use explicit `֑-ֽ֯...` escapes, never the visual range. Cost two invalid
+training runs (85% ∅ tags) before the honest-arbiter eval caught it.
