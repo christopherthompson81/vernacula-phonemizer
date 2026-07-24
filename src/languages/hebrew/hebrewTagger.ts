@@ -21,9 +21,11 @@ import { fileURLToPath } from "node:url";
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { phonemizeWord } from "./hebrew.ts";
+import { lexiconLookup } from "./lexicon.ts";
 
 const BARE = "∅"; // the tag for a consonant with no niqqud
 const SPACE = " "; // the tag for a space char (word boundary)
+const NIQQUD = /[֑-ׇ]/gu; // strip the restored niqqud back to the skeleton for a lexicon lookup
 
 export interface HebrewTagger {
     /** Restore + phonemize a CLAUSE of bare Hebrew words (space-separated) → Modern Israeli IPA. "" if declined. */
@@ -69,7 +71,8 @@ export async function createHebrewTagger(basename = "he-tagger"): Promise<Hebrew
                 if (tag === SPACE) { words.push(""); continue; }
                 words[words.length - 1] += chars[k] + (tag === BARE ? "" : tag); // consonant + restored niqqud
             }
-            return words.filter((w) => w.length > 0).map((w) => phonemizeWord(w)).join(" ");
+            // A known non-homograph skeleton takes its lexicon reading (in our convention); else the tagger's g2p.
+            return words.filter((w) => w.length > 0).map((w) => lexiconLookup(w.replace(NIQQUD, "")) ?? phonemizeWord(w)).join(" ");
         },
     };
 }
