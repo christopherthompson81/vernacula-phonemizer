@@ -1,0 +1,35 @@
+{
+    "referees": [
+        {
+            "file": "mn.wiktionary-mn.tsv",
+            "source": "en.wiktionary Mongolian IPA (human, narrow/phonetic)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "single-source (en.wiktionary, 1342 Cyrillic words; 118 traditional-Mongolian-script entries dropped). wikipron mon_cyrl and epitran mon-Cyrl are candidate second referees; the Wiktionary transcription is very NARROW (aspiration, half-long, voiceless sonorants, syllable dots) so much of the divergence is convention folded here.",
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "aspiration: Mongolian voiceless stops/affricates are aspirated (tʰ/kʰ/pʰ/t͡sʰ/t͡ʃʰ); the contrast is aspirated-vs-unaspirated, non-contrastive detail for the segmental backbone → fold" },
+        { "pattern": "ˑ", "replace": "", "note": "half-long: the narrow referee marks half-length on some vowels; not a length contrast → fold" },
+        { "pattern": "\\.", "replace": "", "note": "syllable dots in the narrow referee" },
+        { "pattern": "ɮ", "replace": "l", "note": "л is the voiced lateral fricative ɮ (ours); the referee also writes ɬ/l — fold the lateral to l for the backbone" },
+        { "pattern": "ɬ", "replace": "l", "note": "voiceless lateral fricative (final-devoiced л in the narrow referee) → fold to l" },
+        { "pattern": "χ", "replace": "x", "note": "х back-harmony uvular χ vs velar x — the referee mixes them; non-contrastive → fold" },
+        { "pattern": "[ɡɢq]", "replace": "k", "note": "velar/uvular stop: Mongolian's stop contrast is ASPIRATION (к=kʰ vs г=ɡ), which the backbone already folds (ʰ stripped) — so the residual voiced/voiceless г realization (the referee writes both ɡ and k: аагаар→akar, хаг→xaɡ) must fold too, exactly as б=п=p and д=т=t already collapse" },
+        { "pattern": "b", "replace": "p", "note": "unaspirated б written voiced [b] intervocalically vs voiceless [p] — fold (aspiration is the real contrast, already folded)" },
+        { "pattern": "d(?![ʒʑ])", "replace": "t", "note": "unaspirated д written voiced [d] (аадар→adər) vs voiceless [t] — fold (not the d͡ʒ/d͡ʑ affricate)" },
+        { "pattern": "ɴ", "replace": "ŋ", "note": "final н uvular nasal ɴ (narrow, next to back vowels) vs velar ŋ — fold" },
+        { "pattern": "w̜", "replace": "w", "note": "в lowered/weak w̜ in the narrow referee → w" },
+        { "pattern": "ʍ", "replace": "w", "note": "devoiced в before a voiceless consonant (narrow) → w" },
+        { "pattern": "e", "replace": "ɛ", "note": "э/е mid-front e~ɛ — the referee mixes; fold to one height" },
+        { "pattern": "æ", "replace": "a", "note": "first-syllable а centralises to æ~ä before some contexts; fold the front/back a" },
+        { "pattern": "ä", "replace": "a", "note": "centralised a (narrow) → a" },
+        { "pattern": "ɐ", "replace": "ə", "note": "near-open central ɐ = a reduced non-initial vowel (алах→alɐx) → our ə" },
+        { "pattern": "ɪ", "replace": "ə", "note": "lax ɪ = a reduced non-initial и (алим→alɪm, ажилтан→atʃɪltəŋ) → our reduced ə" },
+        { "pattern": "ɵ", "replace": "o", "note": "ө mid-front-round ɵ~œ~o convention — fold to o" },
+        { "pattern": "œ", "replace": "o", "note": "ө/fronted о → o (fold the rounding-front)" },
+        { "pattern": "ʉ", "replace": "u", "note": "ү close-central-round ʉ (narrow) vs u — fold" },
+        { "pattern": "β", "replace": "w", "note": "в bilabial fricative β vs approximant w — non-contrastive, fold" },
+        { "pattern": "ɕ", "replace": "ʃ", "note": "ч/ж alveolo-palatal t͡ɕ/d͡ʑ vs postalveolar t͡ʃ/d͡ʒ — the referee mixes both; fold the place" },
+        { "pattern": "ʑ", "replace": "ʒ", "note": "voiced alveolo-palatal ʑ → ʒ (same ч/ж place fold)" }
+    ]
+}

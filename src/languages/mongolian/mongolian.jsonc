@@ -1,0 +1,55 @@
+// Native canonical-IPA data manifest for Standard Khalkha Mongolian (mn) — Cyrillic, espeak-independent.
+// This file IS the hand-authored language DATA: the vowel / long-vowel / diphthong / consonant letter→IPA tables,
+// the back-harmony trigger set, and clause punctuation. The ALGORITHMS that read it stay in code:
+//   g2p.ts        — greedy longest-match Cyrillic scan (diphthongs/long vowels before singles), harmony (г/х/reduced-
+//                   vowel quality), final н→ŋ, palatalizing ь, iotated е/ё/я/ю; tags each nucleus short/long/diphthong
+//   mongolian.ts  — the DEEP-orthography rules: non-initial SHORT-vowel reduction→ə / word-final deletion, final
+//                   obstruent devoicing (в→f, г→k, ж→t͡ʃ, з→t͡s), tokenizer
+// Cyrillic Khalkha is a DEEP orthography: written short vowels in non-first syllables are reduced/deleted in speech,
+// so this is NOT a 1:1 scan. Referee: en.wiktionary Mongolian IPA (narrow). See docs/investigations/mn_native_bringup_investigation.md.
+{
+    "language": "mn",
+    "name": "Mongolian",
+    "script": "Cyrillic",
+    "provenance": "Authored from Khalkha Mongolian Cyrillic orthography + Svantesson et al. (2005) 'The Phonology of Mongolian'. Beyond-espeak canonical IPA. Referee: en.wiktionary Mongolian IPA (1460 words, narrow/phonetic).",
+
+    "convention": {
+        "stops": "the stop/affricate contrast is ASPIRATED vs UNASPIRATED, not voiced/voiceless: б=[p] п=[pʰ], д=[t] т=[tʰ], г=[ɡ~ɢ] к=[kʰ], ж=[t͡ʃ] ч=[t͡ʃʰ], з=[t͡s] ц=[t͡sʰ] — the unaspirated affricates ж/з are emitted VOICELESS [t͡ʃ]/[t͡s] in every position (like б=p, д=t), contrasting with the aspirated ч/ц",
+        "harmony": "back (pharyngeal) а/о/у vs front э/ө/ү; и neutral. г→ɢ / х→χ next to back harmony, ɡ / x next to front",
+        "l": "л → the voiced lateral fricative ɮ (the Mongolian signature)",
+        "finalN": "н → ŋ word-finally and before a velar/uvular",
+        "reduction": "DEEP orthography: only the first-syllable vowel is full; a non-initial SHORT vowel reduces to ə, or DELETES word-finally (Дани→tän, Сири→sir). Long vowels (doubled) and diphthongs stay full everywhere",
+        "devoicing": "the only word-final devoicing emitted is в→f (Женев→dʒɛnɛf); в→w elsewhere. The unaspirated series is already voiceless in the table (б=p, ж=t͡ʃ, з=t͡s) and final г stays voiced (хаг→xaɡ)",
+        "soft": "ь palatalizes the preceding consonant and FRONTS the preceding vowel (а→æ, о→œ)"
+    },
+
+    // Single (short) vowel letters → their FULL first-syllable IPA quality. Reduction/deletion in non-first syllables
+    // is applied in mongolian.ts. я/е/ё/ю are iotated (expand to j + vowel); handled in g2p.ts.
+    "vowels": {
+        "а": "a", "э": "e", "и": "i", "о": "ɔ", "ө": "ɵ", "у": "ʊ", "ү": "u", "ы": "i"
+    },
+
+    // Doubled vowels → one long vowel (always full, never reduced).
+    "longVowels": {
+        "аа": "aː", "ээ": "eː", "оо": "ɔː", "өө": "ɵː", "уу": "ʊː", "үү": "uː", "ии": "iː"
+    },
+
+    // Diphthongs (vowel + й, and the ий→iː long). Always full.
+    "diphthongs": {
+        "ай": "ai", "ой": "ɔi", "уй": "ui", "үй": "ui", "эй": "ei", "ой": "ɔi", "ый": "iː", "ий": "iː"
+    },
+
+    // Consonant letters → IPA (context-free part; г/х harmony, final н→ŋ, devoicing done in code).
+    "consonants": {
+        "б": "p", "в": "w", "г": "ɡ", "д": "t", "ж": "t͡ʃ", "з": "t͡s", "й": "j", "к": "kʰ",
+        "л": "ɮ", "м": "m", "н": "n", "п": "pʰ", "р": "r", "с": "s", "т": "tʰ", "ф": "f",
+        "х": "x", "ц": "t͡sʰ", "ч": "t͡ʃʰ", "ш": "ʃ", "щ": "ʃt͡ʃ", "к": "kʰ"
+    },
+
+    // Back-harmony vowel letters: their presence makes the word back (pharyngeal) → г→ɢ, х→χ, reduced vowel backs.
+    "backVowels": "аоуяёы",
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
