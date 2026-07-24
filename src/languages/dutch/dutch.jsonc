@@ -130,4 +130,20 @@
         "million": { "sg": "een miljoen", "pl": "miljoen" },
         "milliard": { "sg": "een miljard", "pl": "miljard" },
     },
+
+    // Morphology for the shared West-Germanic compound engine (core/germanicMorphology.ts). Dutch compounds heavily
+    // (stadhuis, voetbalveld). The g2p (g2p.ts) already handles a word's OWN prefix reduction (ge-/be-/ver-/te-) and
+    // suffix schwa (-ig/-lijk/-isch) internally, so dutch.ts splits ONLY at compound (stem·stem) boundaries and
+    // phonemizes each element with the existing engine — giving each its own stress + boundary devoicing
+    // (stad·huis → stɑt·ɦœys, not stɑdɦœys). Affixes longest-first; the stem lexicon is hunspell nl.dic base forms.
+    "morphology": {
+        "prefixUnstressed": ["ver", "ont", "her", "be", "ge", "te"],
+        "prefixStressed": ["achter", "binnen", "buiten", "onder", "tegen", "terug", "tussen", "samen", "over", "voor", "door", "mee", "aan", "af", "bij", "in", "om", "op", "na", "toe", "uit", "weg"],
+        "ambiguousPrefixes": ["be", "ge", "te"],
+        "suffixes": ["heid", "teit", "isme", "achtig", "baar", "loos", "zaam", "schap", "ling", "ende", "ing", "end", "lijk", "isch", "nis", "dom"],
+        "vowelInitialSuffixes": ["achtig", "isme", "isch", "ende", "end"],
+        "linkingElements": ["", "s", "en", "e"],
+        "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "sch", "schr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "zw", "kl"],
+        "stKeep": []
+    },
 }
