@@ -87,3 +87,49 @@ engine only, never the lexicon; the lexicon's tie-bar concern was moot — 0 tie
   IPA_VOWEL/WORD_VOWELS. The monosyllable fix recovered the 0.2pp → **honest 24.7%** with correct function words.
 - af-glide over-applies to the mono-morpheme "aften" (→awtən) — lexically governed / unrecoverable; the lexicon
   covers the common cases, accepted as an OOV residual.
+
+## Run 5 — 2026-07-24 — OOV tagger tier + rule mining + the lexical ceiling
+
+The Run 3 "path past the floor" (a neural OOV g2p) — built and measured honestly. Deterministic 90/10 split
+(`hash(("da",w))%10==0`), aligned by hard-EM Viterbi (many-to-{0,1,2} monotonic), held-out folded:
+
+| Path | Held-out OOV (folded) | Deps |
+|---|---|---|
+| Rule engine (`phonemizeWordRules`) | 25.8% | none |
+| + mined contextual rules + noise folds | ~27.4% (rule-floor) | none |
+| **Averaged perceptron** (`tagger.ts`, sync) | **42.0%** | none |
+| BiLSTM (2-layer, GPU, ONNX) | ~50.1% | onnxruntime |
+| Collapse EVERY vowel-quality distinction | **55.7%** | — (ceiling probe) |
+
+**The ceiling is LEXICAL, not model capacity.** The last row is a probe: a hypothetical perfect model blind only to
+`a/ɑ e/ɛ o/ɔ ø/œ` quality still tops out at ~56%. So the ~44% no model can reach is genuine deep-orthography depth —
+Danish stressed-vowel quality is not a function of the spelling+context, it's decided lexically. Neural learning got us
+"about halfway" precisely because half the information isn't in the input. Only the lexicon carries it.
+
+**Shipped architecture (three tiers):** `phonemizeWord` = lexicon → **perceptron tagger** → rule fallback. The
+perceptron is chosen over the BiLSTM: sync (no torch/onnxruntime, the repo's `posTagger` precedent), +16pp over rules,
+and the BiLSTM's extra +8pp tops out against the 56% wall anyway. `tagger.ts` byte-matches the Python `feats()`
+(verified: snurretop→snorɛtop, fladbrød→flaðbrœð). Model = `da-g2p.tsv` (perceptron weights, |w|≥0.75 pruned).
+
+**Miss-mining → referee noise (the user's ask "corrections to training data, or referee noise").** Mining the
+held-out misses separated clean notation noise from real depth. Found **~3.4pp of genuine referee inconsistency** worth
+folding (same phoneme/context written two ways, like the `r/ʁ` we already folded):
+- `[nŋ][ɡk]→ŋ` — the velar-nasal cluster's post-nasal stop presence+voicing is written inconsistently (-ing→eŋ but
+  arving→arvenɡ; bank→baŋɡ).
+- `ɡ$→k`, `b$→p` — final-stop voicing (voiceless-diacritic stripped) written both ways (alk→alɡ).
+
+These are now folds in `da.jsonc` (rule floor 24.7%→27.4%, BiLSTM 46.7%→50.1%). The rest of the misses are NOT
+noise/fixable-data — the 55.7% collapse ceiling proves it. Danish is just hard; cleaning the referee won't rescue it.
+
+**Mined RULES (rules > neural for the common case, the user's steer).** `mine_da_rules.py` aligns the lexicon and ranks
+(prev,g,next)→tag contexts whose dominant tag differs from the grapheme default, weighted by appearance in words the
+rule engine gets wrong. Three high-purity, high-impact contexts became fast scan rules in `phonemizeWordRules`: final
+⟨g⟩-after-vowel silent (rolig→roli), ⟨i⟩→[e] before ⟨n⟩+C (ind→en), ⟨o⟩→[ʌ] before ⟨ld⟩ (hold→hʌl). Rule floor
+24.7%→25.8% before folds.
+
+**Tooling (committed, reproducible):** `tools/danish/da_tagger_prototype.py` (loader + hard-EM aligner + perceptron +
+export), `train_da_bilstm.py` (GPU BiLSTM → ONNX; the async upgrade path, pipeline committed but the 2.5MB artifact is
+NOT shipped — regenerable, doesn't justify onnxruntime for +8pp against the lexical wall), `mine_da_rules.py`,
+`da_rule_probe.mts`, `da_tagger_eval.mts` (folded held-out eval). GPU training runs in a gitignored `.venv/` (torch
+cu124). All numbers above are the folded held-out eval, non-circular (the eval scores the rule engine / tagger, never
+the lexicon).
