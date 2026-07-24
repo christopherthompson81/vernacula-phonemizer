@@ -258,3 +258,31 @@ from cheap parsing; two post-processing bugs were then fixed by a 3-second re-pa
 + parse_raw.py, resumable sharded). (b) The niqqud STRIP **visual-range trap**: `[֑-ֽ]` = U+0591-05BD SWALLOWS the
 niqqud vowels U+05B0-05BC — use explicit `֑-ֽ֯...` escapes, never the visual range. Cost two invalid
 training runs (85% ∅ tags) before the honest-arbiter eval caught it.
+
+## Run 11 — 2026-07-23 20:xx — CONSENSUS methodology (3 referees) + validated glottal rule
+
+A repeatable, objective way to decide Phase-1 rule/convention changes without guessing: vote across THREE
+independent methodologies and treat their UNANIMOUS agreement as gold. Referees: Wiktionary a=IL (lexicographic) +
+Phonikud (rule-FST, CC-BY) + ReNikud (audio-supervised, CC-BY — the third source, finally stood up via
+`git+.../renikud-onnx`). Canonicalise (strip stress/tie, unwrap Wiktionary optional-parens); keep words where all
+three agree → **933-word unanimous gold** (tools/hebrew/consensus-gold.tsv, eval-only). Validate the Phase-1 g2p on
+the VOCALIZED form (isolates deterministic rules from the neural tagger's isolated-word noise, which had inflated
+apparent error 20%→48%). **Decision rule: a change is accepted iff it RAISES agreement on the gold; where the three
+disagree (24% of words) it's convention/ambiguity — hold, don't build a rule.**
+
+Baseline: Phase-1 vs gold **91.1%**. The 83 misses (highest-confidence corrections) categorised:
+- **glottal 42%** — SYSTEMATIC + unanimous: word-initial א/ע we DROP but all three KEEP (ʔot/ot, ʔoʁ/oʁ,
+  ɡeʔoɡʁafja); word-final ע we ADD but all three DROP (ʔetsba/ʔetsbaʔ, ʔaʁba/ʔaʁbaʔ). Each direction consistent → a
+  clean rule. **VALIDATED FIX.**
+- **sheva 43%** — BIDIRECTIONAL/lexical: the shipped proclitic rule OVER-realises stems (bʁit/beʁit, bχiʁot/beχirot
+  — ברית is *brit*), under-realises elsewhere (zeʔev/zʔev). Consensus proves sheva is lexical, not rule-derivable →
+  do NOT extend it (the other candidate idea would move AWAY from consensus). Documents a real running-text (helps)
+  vs isolated-stem (hurts) tradeoff in #428.
+- ejGlide was a red herring (1 word); vowel/struct 15% lexical residue.
+
+**Implemented the glottal rule** (hebrew.ts): word-initial vowelless א → [ʔ] onset (was silenced); word-final
+vowelless ע → ∅; patach-genuvah on final ע → [a] not [aʔ]. Result: gold **91.1%→94.1% (+3.0)**; and on the neural
+path it HELD the human holdout (86.5%) and LIFTED the independent gt.tsv **62.8%→64.8% (+2.0)** — a win across all
+three measures. Numbers improved too (7 שֶׁבַע→ʃeva not ʃevaʔ; 4→ʔaʁba). Shipped `tools/hebrew/{consensus-gold.tsv,
+validate-consensus.ts, build-consensus-gold.py}` so the gate is repeatable. `he` stays 🔷 (still single independent
+referee *family*, but now cross-validated 3 ways on the g2p).
