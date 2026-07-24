@@ -107,6 +107,7 @@ import { createBambara } from "./languages/bambara/bambara.ts";
 import { createWolof } from "./languages/wolof/wolof.ts";
 import { createMossi } from "./languages/mossi/mossi.ts";
 import { createKikuyu } from "./languages/kikuyu/kikuyu.ts";
+import { createAfrikaans } from "./languages/afrikaans/afrikaans.ts";
 import { createHebrew } from "./languages/hebrew/hebrew.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
 import { createKirundi } from "./languages/kirundi/kirundi.ts";
@@ -398,6 +399,8 @@ function build(lang: string): Phonemizer {
             return createMossi();
         case "ki":
             return createKikuyu();
+        case "af":
+            return createAfrikaans();
         case "he":
             return createHebrew();
         case "lg":

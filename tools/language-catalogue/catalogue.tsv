@@ -4,7 +4,7 @@ acm	Iraqi Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡
 acw	Hijazi Arabic	Semitic (Arabic)	Arabic	11000000		1891	1	0	0	implemented		🔷			
 aeb	Tunisian Arabic	Semitic (Arabic)	Arabic	12000000						unimplemented	data scarcity				No wikipron, no kaikki.
 aec	Sa'idi Arabic (Upper Egypt)	Semitic (Arabic)	Arabic	25000000						unimplemented	data scarcity				No wikipron, no kaikki.
-af	Afrikaans	Indo-European (Germanic)	Latin	7000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
+af	Afrikaans	Indo-European (Germanic)	Latin	7000000					1	implemented		🔷	native		Standard Afrikaans, Latin + diacritics. GREEDY digraph-first g2p + Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (single vowel LONG in open syll V.CV, SHORT in closed VC#/VCC — engine lookahead) + word-final DEVOICING (b→p,d→t) + geminate collapse + first-syllable stress past unstressed prefixes. Signatures: g=[χ] fricative, w=[v], v=[f], h=[ɦ]; long mids = CENTERING DIPHTHONGS ee/open-e=iə, oo/open-o=uə; y=[əi], ui=[œy], dim -tjie=[ki]. 71.2% FOLDED vs en.wiktionary Afrikaans (2220, HUMAN; 86% short-native, 91% monosyllabic — full-set drag = proper-noun/loan lexical + stress reduction on polysyllables). 🔷 single-source (Wiktionary; wikipron afr a candidate 2nd). DEFERRED: stress/syllable model + proper-noun lexicon, numbers, nasalization.
 afb	Gulf Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡			
 ajp	South Levantine Arabic	Semitic (Arabic)	Arabic	10000000		2513	1	0	0	implemented		🔷			
 ak	Akan (Twi)	Niger-Congo (Kwa)	Latin	11000000	9000000					implemented		🔷			

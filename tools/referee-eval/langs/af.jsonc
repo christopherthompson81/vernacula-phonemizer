@@ -1,0 +1,27 @@
+// Afrikaans (af) — Indo-European (West Germanic), Latin orthography. Referee: en.wiktionary Afrikaans IPA
+// (Wiktionary, HUMAN, 2220 words). Beyond-espeak canonical IPA. The backbone strips the marks the orthography does
+// not determine: STRESS (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː
+// (the open/closed length is realised by our vowel choice; the referee's ː is redundant), NASALIZATION (ɛ̃ before
+// nasal+C — allophonic, deferred), and the diphthong OFFGLIDE tie ( ̯ ). The language folds below neutralise the
+// referee's syllable dots, the r~ɾ tap/trill, and the optional-schwa parens. NOT folded: the ə~ɛ/ɪ schwa-reduction of
+// UNSTRESSED vowels — that is a real stress-conditioned residual we do not yet model (kept visible, like the Hebrew
+// sheva). See docs/investigations/af_afrikaans_bringup_investigation.md.
+{
+    "language": "af", "name": "Afrikaans", "script": "Latin",
+    "provenance": "Authored greedy g2p + open/closed vowel-length rule + final devoicing, from the 2220-word en.wiktionary Afrikaans IPA referee.",
+    "referees": [
+        { "file": "af.wiktionary-af.tsv", "source": "en.wiktionary Afrikaans (Wiktionary, human, 2220)", "role": "primary" }
+    ],
+    "secondaryGap": "No independent second numeric source wired yet: wikipron afr exists (a candidate 2nd referee) but is not yet imported; kaikki has no convenient per-language Afrikaans IPA dump and epitran lacks af. The primary is the en.wiktionary Afrikaans IPA category (human, 2220). Standard-Afrikaans phonology (open/closed vowel length, centering diphthongs ee=iə/oo=uə, g=[χ], final devoicing) is corroborated by published descriptions (Donaldson, Afrikaans reference grammar). Anchor: the adjudicated common-word gold in test/afrikaans.test.ts.",
+    "preFolds": [
+        { "pattern": "\\([^)]*\\)", "replace": "", "note": "OPTIONAL schwa: the referee parenthesises an optional epenthetic schwa (arm→ˈɑr(ə)m, alles→ˈal(ə)s) — strip the optional group before comparison" }
+    ],
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "ɾ", "replace": "r", "note": "tap~trill: Afrikaans /r/ is written [r]~[ɾ] freely by the referee; non-contrastive → fold to the trill [r] we emit" },
+        { "pattern": "x", "replace": "χ", "note": "⟨g⟩/⟨ch⟩ fricative: the referee writes it [χ]~[x] (uvular~velar) inconsistently; non-contrastive → fold to [χ]" },
+        { "pattern": "ɪ", "replace": "i", "note": "the centering-diphthong onset ⟨ee⟩/open-e is written [ɪə]~[iə]; non-contrastive height → fold [ɪ]→[i] (we emit iə)" },
+        { "pattern": "ʊ", "replace": "u", "note": "the centering-diphthong onset ⟨oo⟩/open-o is written [ʊə]~[uə]; non-contrastive height → fold [ʊ]→[u] (we emit uə)" },
+        { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" }
+    ]
+}

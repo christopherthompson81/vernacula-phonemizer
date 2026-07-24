@@ -1,0 +1,45 @@
+// Native canonical-IPA data manifest for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), ~7M,
+// South Africa/Namibia, Latin script + diacritics. espeak-INDEPENDENT (beyond-espeak canonical IPA). Fairly regular
+// orthography, but with the Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (a single vowel is long/tense in an open
+// syllable, short/lax in a closed one) → the engine (afrikaans.ts) does the length lookahead; this file holds the
+// declarative tables. Referee: en.wiktionary Afrikaans IPA. See docs/investigations/af_afrikaans_bringup_investigation.md.
+{
+    "language": "af",
+    "name": "Afrikaans",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p for Standard Afrikaans, beyond-espeak canonical IPA. Referee: en.wiktionary Afrikaans IPA (2220 words).",
+
+    "convention": {
+        "vowelLength": "single vowel: LONG/tense in an open syllable (V.CV: ape→ɑː), SHORT/lax in a closed one (VC#/VCC: al→a) — engine lookahead",
+        "longMids": "the long mid vowels are CENTERING DIPHTHONGS: ee / open-e = iə, oo / open-o = uə; long a = ɑː; ie = i, oe = u",
+        "signatures": "⟨g⟩ = velar/uvular fricative [χ] (not [ɡ]); ⟨w⟩ = [v]; ⟨v⟩ = [f]; ⟨h⟩ = [ɦ]; final obstruent DEVOICING (b→p, d→t); ⟨y⟩ = diphthong [əi]",
+        "folded": "stress (unwritten) + syllable dots not emitted; r~ɾ one symbol [r]; nasalization before nasal+C and unstressed-vowel schwa-reduction DEFERRED"
+    },
+
+    // Fixed multi-letter graphemes + ⟨y⟩ + consonants (the greedy length-desc table; bare a/e/i/o/u go through the
+    // open/closed length code instead). Long vowels here are the doubled/di-graph spellings (always long).
+    "fixed": {
+        "aai": "ɑːi", "ooi": "oːi", "oei": "ui", "eeu": "iːu", "aau": "ɑːu",
+        "aa": "ɑː", "ee": "iə", "oo": "uə", "uu": "yː", "ie": "i", "oe": "u", "eu": "øː",
+        "ei": "əi", "ui": "œy", "ou": "œu", "au": "œu", "y": "əi",
+        "tjie": "ki", "djie": "ki", "jie": "ki", "tz": "ts", "sj": "ʃ", "tj": "c", "dj": "dʒ", "ch": "ʃ", "gh": "χ",
+        "ng": "ŋ", "nk": "ŋk",
+        "b": "b", "d": "d", "f": "f", "g": "χ", "h": "ɦ", "j": "j", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t",
+        "v": "f", "w": "v", "x": "ks", "z": "z"
+    },
+
+    // Bare single vowels — the engine picks long (open syllable) or short (closed) per the length rule.
+    "vowelsLong": { "a": "ɑː", "e": "iə", "i": "i", "o": "uə", "u": "yː" },
+    "vowelsShort": { "a": "a", "e": "ɛ", "i": "ə", "o": "ɔ", "u": "œ" },
+
+    // Diacritic vowels: circumflex = long (ê ô û î); diaeresis ë ï = syllable-break, base value; acute/grave = loan stress.
+    "diacriticVowels": {
+        "ê": "ɛː", "ô": "ɔː", "û": "œː", "î": "əː",
+        "ë": "ə", "ï": "i", "é": "eː", "è": "ɛ", "á": "ɑː", "à": "a", "ó": "oː", "ú": "y", "ü": "y", "ö": "ø"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
