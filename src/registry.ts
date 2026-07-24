@@ -93,6 +93,7 @@ import { createMinnan } from "./languages/minnan/minnan.ts";
 import { createMongolian } from "./languages/mongolian/mongolian.ts";
 import { createUmbundu } from "./languages/umbundu/umbundu.ts";
 import { createCroatian } from "./languages/croatian/croatian.ts";
+import { createDanish } from "./languages/danish/danish.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
@@ -238,6 +239,8 @@ function build(lang: string): Phonemizer {
         // referee is wikipron hbs_latn (the Serbo-Croatian macrolanguage, which contains the Croatian words).
         case "hr":
             return createCroatian();
+        case "da":
+            return createDanish();
         case "hu":
             return createHungarian();
         case "kmr":

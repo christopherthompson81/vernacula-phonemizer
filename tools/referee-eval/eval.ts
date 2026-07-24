@@ -70,6 +70,7 @@ import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as mn } from "../../src/languages/mongolian/mongolian.ts";
+import { phonemizeWordRules as da } from "../../src/languages/danish/danish.ts";
 import { phonemizeWord as pt } from "../../src/languages/portuguese/portuguese.ts";
 // RULE-ONLY for pt-BR: the shipped phonemizeWord applies a BP open/close override lexicon MINED FROM this
 // wikipron BZ referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
@@ -247,6 +248,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     my,
     kk,
     mn,
+    da,
     ko,
     mr,
     pa,

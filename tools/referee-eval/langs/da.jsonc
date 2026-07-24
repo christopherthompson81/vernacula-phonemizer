@@ -1,0 +1,31 @@
+{
+    "referees": [
+        {
+            "file": "da.wiktionary-da.tsv",
+            "source": "en.wiktionary Danish IPA (human, narrow)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "single-source (en.wiktionary, 7699 words). wikipron dan is a candidate 2nd. The transcription is very NARROW (stød, aspiration/affrication, voiceless diacritics, half-length, syllable dots) — much of the divergence is that suprasegmental layer, folded here; Danish is a deep orthography so a real segmental ceiling remains.",
+    "folds": [
+        { "pattern": "ˀ", "replace": "", "note": "STØD (glottalisation/creaky voice) — suprasegmental, not predictable from spelling → deferred, fold" },
+        { "pattern": "ˑ", "replace": "", "note": "half-length in the narrow referee → fold" },
+        { "pattern": "\\.", "replace": "", "note": "syllable dots" },
+        { "pattern": "\\(", "replace": "", "note": "optional-segment parens in the narrow referee" },
+        { "pattern": "\\)", "replace": "", "note": "optional-segment parens" },
+        { "pattern": "ʰ", "replace": "", "note": "aspiration on initial p/t/k — folded (we emit unaspirated)" },
+        { "pattern": "ˢ", "replace": "", "note": "the ⟨t⟩ affrication [tˢ] — folded to t" },
+        { "pattern": "ʁ", "replace": "r", "note": "⟨r⟩ uvular ʁ ~ alveolar r — the referee mixes them freely (abrikos→r, afbryde→ʁ); fold to r" },
+        { "pattern": "ɐ̯", "replace": "r", "note": "the vocalised coda-r offglide ɐ̯ — the referee varies coda-r between ɐ̯ and kept r; fold to r (we emit r everywhere)" },
+        { "pattern": "ʊ̯", "replace": "v", "note": "non-syllabic u-offglide (⟨af⟩→aʊ̯, vocalised g/v) → v" },
+        { "pattern": "w", "replace": "v", "note": "the ⟨af-⟩ glide + vocalised labials — the referee writes it aw~av~aʊ̯ inconsistently; fold to v" },
+        { "pattern": "i̯", "replace": "j", "note": "non-syllabic i-offglide → j" },
+        { "pattern": "ð̠", "replace": "ð", "note": "retracted soft-d diacritic → ð" },
+        { "pattern": "œ", "replace": "ø", "note": "⟨ø⟩ open-mid allophone [œ] → fold to ø" },
+        { "pattern": "ɶ", "replace": "ø", "note": "⟨ø⟩ open front-round allophone → ø" },
+        { "pattern": "ʌ", "replace": "ɐ", "note": "reduced/back unrounded ʌ (⟨-er⟩ variants) → our ɐ" },
+        { "pattern": "e̝", "replace": "e", "note": "raised e diacritic → e" },
+        { "pattern": "ɑ", "replace": "a", "note": "⟨a⟩ front/back allophones [a]~[ɑ] — the referee varies them freely for the same context (MODELLING a→ɑ by context was tested and LOST, confirming notation noise, not real structure) → fold. (Contrast: ⟨æ⟩→ɛ, ⟨å⟩→ɔ are KEPT distinct — different letters, not folded.)" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "soft-g [ɣ] (age→aɣə) ~ kept [ɡ] (agere→aɡeə) — MODELLING intervocalic g→ɣ was tested and LOST (24.5→23.8%), confirming the referee applies it inconsistently for the same context → allophonic notation noise, fold (like a~ɑ). NOT a phonemic contrast." }
+    ]
+}

@@ -1,0 +1,36 @@
+// Native canonical-IPA data manifest for Danish (da) — North Germanic, Latin, ~6M, espeak-independent. Danish is a
+// DEEP orthography: this file holds the base letter→IPA tables; the CONTEXT RULES (soft-d→ð, coda-r→ɐ, final-t→d,
+// er/et/e reduction, hv/hj silent-h, soft-g) live in g2p.ts. Length + STØD (ˀ) + aspiration are suprasegmental and
+// FOLDED (deferred). Referee: en.wiktionary Danish IPA (7699, narrow). See docs/investigations/da_native_bringup_investigation.md.
+{
+    "language": "da",
+    "name": "Danish",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p for Standard Danish (rigsdansk) with context rules, espeak-independent canonical IPA. Referee: en.wiktionary Danish IPA (7699 words, narrow). Length/stød/aspiration folded (deferred).",
+
+    "convention": {
+        "softD": "⟨d⟩ after a vowel → [ð] (soft d: mad→mað); after ⟨n⟩/⟨l⟩ it is SILENT (and→an, guld→ɡul); initial / after other C → [d]",
+        "r": "onset ⟨r⟩ → uvular [ʁ]; coda ⟨r⟩ (after a vowel, before C or #) → vocalic [ɐ] (fold of ɐ̯)",
+        "finalT": "word-final ⟨t⟩ → [d] (the voiceless-d̥ of Danish: absolut→…lud)",
+        "reduction": "unstressed final ⟨e⟩ → [ə]; ⟨-er⟩ → [ɐ]; ⟨-et⟩ → [əð]",
+        "silentH": "⟨h⟩ is silent before ⟨j⟩/⟨v⟩ (hjul→jul, hvad→vað)",
+        "folded": "vowel LENGTH, STØD (ˀ), aspiration/affrication (pʰ tˢ kʰ), and voiceless diacritics (b̥ ɡ̊ d̥) are deferred → folded in the referee eval"
+    },
+
+    // Base vowel letter → IPA QUALITY (length folded). Context (unstressed reduction, before-r colouring) in g2p.ts.
+    "vowels": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "y": "y",
+        "æ": "ɛ", "ø": "ø", "å": "ɔ", "é": "e", "ö": "ø", "ä": "ɛ", "ü": "y"
+    },
+
+    // Base consonant letter → IPA (plain; aspiration folded). d/g/r/h are overridden by context rules in g2p.ts.
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
+        "f": "f", "v": "v", "s": "s", "h": "h", "j": "j", "l": "l",
+        "m": "m", "n": "n", "r": "ʁ", "c": "k", "z": "s", "q": "k", "w": "v", "x": "ks"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    }
+}
