@@ -30,7 +30,7 @@ describe("hebrew neural vowel restoration (Phase 2)", () => {
         });
 
         test("a common unvocalized phrase restores correctly", async () => {
-            expect(await phonemizeHebrewNeural("אני אוהב אותך")).toBe("ʔani ohev otχa"); // sentence context → present-tense ohev; אותך masc. "you" = otχa
+            expect(await phonemizeHebrewNeural("אני אוהב אותך")).toBe("ʔani ʔohev ʔotχa"); // sentence context → present-tense ohev; אותך masc. "you" = otχa
         });
     });
 });

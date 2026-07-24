@@ -73,16 +73,21 @@ export function phonemizeAligned(word: string): HebrewChunk[] {
             if (prevVowel === "i" || prevVowel === "e") { chunks.push({ cons: c, ipa: "" }); k = j; continue; } // silent mater
             emit("j", ""); continue;
         }
-        if (c === "א" && !vowel && !sheva) { chunks.push({ cons: c, ipa: "" }); k = j; continue; } // quiescent alef
+        // ⟨א⟩ with no vowel: a silent mater MID-WORD (רֹאשׁ→ʁoʃ), but a glottal ONSET [ʔ] word-initially (אוֹר→ʔoʁ)
+        // — the 3-referee consensus keeps the initial glottal we used to drop. Word-initial → fall through to [ʔ].
+        if (c === "א" && !vowel && !sheva && chunks.length > 0) { chunks.push({ cons: c, ipa: "" }); k = j; continue; }
         if (c === "ה" && atEnd && !vowel) { chunks.push({ cons: c, ipa: "" }); k = j; continue; }  // silent final he
+        // word-FINAL ⟨ע⟩ with no vowel is dropped (Modern Hebrew; אֶצְבַּע→ʔetsba not ʔetsbaʔ) — consensus drops it
+        if (c === "ע" && atEnd && !vowel) { chunks.push({ cons: c, ipa: "" }); k = j; continue; }
 
         // consonant IPA: bgdkpt dagesh-hard override + ⟨ש⟩ shin/sin split
         let ci = CONS[c]!;
         if (has(DAGESH) && c in HARD) ci = HARD[c]!;
         if (c === "ש") ci = has(SIN) ? "s" : "ʃ";
 
-        // patach genuvah: a word-final guttural ח/ע/ה with patach → [a] BEFORE the consonant (maʃiaχ)
-        if (atEnd && FINAL_GUTTURAL.has(c) && vowel === PATACH) { emit("a" + ci, ""); continue; }
+        // patach genuvah: a word-final guttural ח/ע/ה with patach → [a] BEFORE the consonant (maʃiaχ); ⟨ע⟩ itself
+        // then contributes nothing (jodˈea, not jodeaʔ) — the consensus drops final-ayin glottal.
+        if (atEnd && FINAL_GUTTURAL.has(c) && vowel === PATACH) { emit("a" + (c === "ע" ? "" : ci), ""); continue; }
 
         // Vowel: the niqqud, else [e] for a word-initial PROCLITIC sheva-na (realised), else ∅ (sheva elided).
         const v = vowel ? VOW[vowel]! : (chunks.length === 0 && sheva && PROCLITIC.has(c) ? "e" : "");
