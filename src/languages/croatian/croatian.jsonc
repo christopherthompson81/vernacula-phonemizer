@@ -1,0 +1,26 @@
+// Croatian (hr) data manifest — Indo-European (South Slavic), Gaj's Latin, ~5M. Croatian shares the Serbo-Croatian
+// SEGMENTAL g2p with Serbian (identical grapheme→IPA; the Serbian engine's phonemizeWord is reused directly, see
+// croatian.ts). The ONLY Croatian-specific delta is the CARDINAL NUMBER WORDS (Croatian tisuća / milijun / dvjesto
+// vs Serbian hiljada / milion / dvesta) — the agreement grammar is shared (serbian/numbers.ts composeSlavicNumber),
+// so this file supplies just the Croatian number-word table + clause punctuation. Pitch accent is deferred (as in
+// Serbian). See docs/investigations/hr_native_bringup_investigation.md.
+{
+    "language": "hr",
+    "name": "Croatian",
+    "script": "Latin",
+
+    // Croatian cardinal number words. units/teens/tens are identical to Serbian; the deltas are: hundreds
+    // dvjesto/tristo (vs dvesta/trista), thousand tisuća (vs hiljada), million milijun (vs milion).
+    "numbers": {
+        "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
+        "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
+        "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
+        "hundreds": ["", "sto", "dvjesto", "tristo", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
+        "thousand": { "standalone": "tisuću", "one": "tisuća", "few": "tisuće", "many": "tisuća" },
+        "million": { "one": "milijun", "few": "milijuna", "many": "milijuna" }
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    }
+}
