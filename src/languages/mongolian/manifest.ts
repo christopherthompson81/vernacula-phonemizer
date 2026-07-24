@@ -16,6 +16,18 @@ export interface MongolianManifest {
     consonants: Record<string, string>;
     backVowels: string;
     clausePunctuation: Record<string, string>;
+    numbers: {
+        units: string[];
+        unitsAttr: string[];
+        tens: string[];
+        tensAttr: string[];
+        hundred: string;
+        hundredAttr: string;
+        thousand: string;
+        thousandAttr: string;
+        million: string;
+        billion: string;
+    };
 }
 
 /** The consolidated hand-authored Mongolian data tables (see mongolian.jsonc). */

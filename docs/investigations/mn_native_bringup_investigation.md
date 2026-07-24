@@ -68,3 +68,30 @@ Two review agents on the PR. Fixes applied:
 Refuted (kept as-is): the ь vowel-fronting (морь→mœr) is REFEREE-BACKED (Говь→ɢœw̜, аль→æɮ, амь→æm all front the
 vowel), not a bug. The `bound` (-suffix) path being reachable only via direct phonemizeWord (not text()) is by design
 — it exists for the referee's -suffix entries. Landed **🔷 51.9%**.
+
+## Run 5 — 2026-07-24 — deferred follow-ups: numbers + loanword heuristic + Mongol-bichig front-end
+
+Landed the three deferred items.
+
+**Cardinal numbers** (numbers.ts): a Khalkha absolute/attributive compositor. Numerals inflect — absolute utterance-
+finally, attributive when another number word follows (гурав→гурван, хорь→хорин, зуу→зуун); we build the word list
+and render every word attributive except the last. A place word is bare for 1× (100=зуу) and takes a multiplier for
+≥2 (200=хоёр зуу). Verified: 25=хорин тав, 234=хоёр зуун гучин дөрөв, 25000=хорин таван мянга, 2340567 correct.
+Routed through the g2p so numbers stay in convention (25→χɔrəŋ tʰaf).
+
+**Loanword heuristic** (the path past the reduction ceiling, done PRINCIPLED not lexical): a word mixing BACK
+(а/о/у/я/ё/ю) and FRONT (э/ө/ү/е) vowels violates Mongolian vowel harmony → it is a loanword, and its non-initial
+vowels stay FULL rather than reducing (Герман→ɡermaŋ, not ɡerməŋ). Native words obey harmony so the rule never fires
+on them. **+0.6pp (51.9→52.5%), FIXED 9 / BROKE 2** (the 2 breaks are the front -гүй caritive suffix spuriously
+flagging a native word). A full loanword LEXICON is **data-blocked**: the only referee is Wiktionary, so a lexicon
+built from it would be circular memorization (100% on covered words, zero real capability) — the harmony heuristic is
+the honest generalizing signal.
+
+**Mongol-bichig (traditional-script) front-end** (mongolBichig.ts): the classical vertical script is a DEEP
+HISTORICAL orthography (deeper than Cyrillic). Rather than a second engine, transliterate each glyph to its Cyrillic
+base reading and reuse the Cyrillic pipeline, + the ONE big systematic classical→modern rule: intervocalic ⟨г⟩
+(classical ɣ/g) deletes with long-vowel contraction (ᠠᠭᠤᠯᠠ aɣula→уул, ᠮᠣᠩᠭᠣᠯ→монгол→mɔŋɢʊɮ). ⟨х⟩ (classical q) does
+NOT delete (restricting the rule to г-only: +2 words). **33.1% on a 118-word SECONDARY referee** (the traditional-
+script entries dropped from the primary at bring-up). The ceiling is the *lexical* classical→modern changes (ablative
+ча→с, intervocalic б→w, word-specific contractions) — not rule-derivable. Wired: TOKEN regex accepts U+1800–U+18AF,
+phonemizeWord transliterates bichig first. Goldens added; primary Cyrillic referee unchanged at 52.5%.

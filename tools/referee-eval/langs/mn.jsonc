@@ -4,6 +4,11 @@
             "file": "mn.wiktionary-mn.tsv",
             "source": "en.wiktionary Mongolian IPA (human, narrow/phonetic)",
             "role": "primary"
+        },
+        {
+            "file": "mn.wiktionary-bichig.tsv",
+            "source": "en.wiktionary Mongolian TRADITIONAL SCRIPT (Mongol bichig) IPA (human) — the bichig front-end (transliterate→Cyrillic→engine); ~33%, ceiling is the lexical classical→modern sound changes",
+            "role": "secondary"
         }
     ],
     "secondaryGap": "single-source (en.wiktionary, 1342 Cyrillic words; 118 traditional-Mongolian-script entries dropped). wikipron mon_cyrl and epitran mon-Cyrl are candidate second referees; the Wiktionary transcription is very NARROW (aspiration, half-long, voiceless sonorants, syllable dots) so much of the divergence is convention folded here.",

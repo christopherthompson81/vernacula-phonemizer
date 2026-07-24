@@ -51,5 +51,20 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // Cardinal number words (Cyrillic; the compositor in numbers.ts phonemizes each through the g2p so they stay in
+    // our convention). Khalkha numerals have an ABSOLUTE form (utterance-final) and an ATTRIBUTIVE form used when a
+    // smaller unit or a place word follows (гурав→гурван, хорь→хорин, зуу→зуун): the compositor uses the attributive
+    // form for every word EXCEPT the last (арван тав = 15, хорин таван мянга = 25000). 1× a place word is bare
+    // (100=зуу, 1000=мянга), a multiplier ≥2 precedes it (200=хоёр зуу).
+    "numbers": {
+        "units":     ["тэг", "нэг",   "хоёр", "гурав",  "дөрөв",  "тав",   "зургаа",  "долоо",  "найм",   "ес"],
+        "unitsAttr": ["тэг", "нэгэн",  "хоёр", "гурван", "дөрвөн", "таван", "зургаан", "долоон", "найман", "есөн"],
+        "tens":      ["", "арав",  "хорь",  "гуч",   "дөч",   "тавь",  "жар",   "дал",   "ная",  "ер"],
+        "tensAttr":  ["", "арван", "хорин", "гучин", "дөчин", "тавин", "жаран", "далан", "наян", "ерэн"],
+        "hundred": "зуу", "hundredAttr": "зуун",
+        "thousand": "мянга", "thousandAttr": "мянган",
+        "million": "сая", "billion": "тэрбум"
     }
 }

@@ -35,4 +35,20 @@ describe("Mongolian (Khalkha) canonical IPA", () => {
     test("sentence: clause punctuation", () => {
         expect(phonemize("Сайн байна уу?", "mn").trim()).toBe("saiŋ pain ʊː  ?"); // уу→ʊː long
     });
+
+    test("loanword (mixed vowel harmony) keeps non-initial vowels full", () => {
+        expect(phonemizeWord("Герман")).toBe("ɡermaŋ"); // е(front)+а(back) → loanword: а stays full, not reduced ə
+    });
+
+    test("traditional Mongolian script (Mongol bichig) front-end → transliterate → engine", () => {
+        expect(phonemizeWord("ᠮᠣᠩᠭᠣᠯ")).toBe("mɔŋɢʊɮ"); // classical mongɣol → монгол → mɔŋɢʊɮ (same as Cyrillic Монгол)
+    });
+
+    test("cardinal numbers (absolute/attributive: гурав→гурван, хорь→хорин)", () => {
+        expect(phonemize("1", "mn").trim()).toBe("neɡ"); // нэг
+        expect(phonemize("10", "mn").trim()).toBe("arəf"); // арав
+        expect(phonemize("25", "mn").trim()).toBe("χɔrəŋ tʰaf"); // хорин тав (attr 20 + abs 5)
+        expect(phonemize("100", "mn").trim()).toBe("t͡sʊː"); // зуу
+        expect(phonemize("2000", "mn").trim()).toBe("χɔjʊr maŋəɢ"); // хоёр мянга
+    });
 });
