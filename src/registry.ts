@@ -92,6 +92,7 @@ import { createAwadhi } from "./languages/awadhi/awadhi.ts";
 import { createMinnan } from "./languages/minnan/minnan.ts";
 import { createMongolian } from "./languages/mongolian/mongolian.ts";
 import { createUmbundu } from "./languages/umbundu/umbundu.ts";
+import { createCroatian } from "./languages/croatian/croatian.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
@@ -231,6 +232,12 @@ function build(lang: string): Phonemizer {
             return createXhosa();
         case "sr":
             return createSerbian();
+        // Croatian (hrvatski) — a THIN module that REUSES the Serbian engine's Serbo-Croatian g2p (identical
+        // grapheme→IPA: č=t͡ʃ, ć=t͡ɕ, đ=d͡ʑ, dž=d͡ʒ, lj=ʎ, nj=ɲ, h=x, v=ʋ; same deferred pitch accent) and overrides only
+        // the CARDINAL NUMBER WORDS (Croatian tisuća/milijun/dvjesto vs Serbian hiljada/milion/dvesta). The segmental
+        // referee is wikipron hbs_latn (the Serbo-Croatian macrolanguage, which contains the Croatian words).
+        case "hr":
+            return createCroatian();
         case "hu":
             return createHungarian();
         case "kmr":
