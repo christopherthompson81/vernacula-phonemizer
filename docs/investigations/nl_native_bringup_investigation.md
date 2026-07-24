@@ -68,3 +68,35 @@ correction lexicon (the clear German path). Numbers (cardinals, units-before-ten
 trema, honderd/duizend/miljoen/miljard) and reduced clitics are done. Not ✅ because the loanword vowel-quality/
 stress tail is still rule-mispredicted (the lexicon is the known, unbuilt path); not lower because the core is
 reliable for native vocabulary and cross-referee-stable.
+
+## Run N — 2026-07-24 — morphological decomposition on the shared West-Germanic engine
+
+Brought Dutch onto `src/core/germanicMorphology.ts` (the shared engine extracted for German/Afrikaans). Dutch's g2p
+(g2p.ts) already handles a word's OWN prefix reduction (ge-/be-/ver-/te-) and suffix schwa (-ig/-lijk/-isch)
+internally, so the integration splits ONLY at COMPOUND (stem·stem) boundaries and phonemizes each element with the
+existing engine — each element keeps its own stress + boundary devoicing (stad·huis → stˈɑtɦœy̯s). `stressGroups`
+reconstructs stem-headed chunks (a prefix attaches to the following element, a suffix to the preceding), so an
+over-stripped affix simply rejoins its stem — only genuine stem·stem splits survive. The stem lexicon is
+`nl-stems.txt` (152,722 hunspell nl.dic base forms, an INDEPENDENT source vs the kaikki/wikipron referees).
+
+**64.5% → 66.9% (+2.4pp), net +1132 words (kaikki), 10.7:1 fix:break** — measured by A/B toggling decomposition
+per-word. The path was a sequence of concentrated-regression fixes, each measured:
+- Naive "phonemize each morpheme independently" (like Afrikaans) → +1.0pp but 2029 regressions. The Dutch g2p bakes
+  suffix/prefix handling into toSegments, so splitting suffixes off broke them → switched to STEM·STEM-only chunks.
+- **Whole-word guard** (`isLexicalWord`): a word that is itself a dictionary entry is monomorphemic → don't split
+  (minister ✗ mini·ster, spelling ✗ spel·ling, drinken ✗ drin·ken). Regressions 2029→629, net +719.
+- **minTrailingConstituent: 4** (new shared-engine config, default 3 → German byte-identical): rejects the 3-letter
+  inflectional-lookalike tails that are real words but not compound heads (af·slui·ten, druk·ken, dring·end,
+  be·stan·den). Regressions 629→237, net +1073.
+- **Seam degemination** (joinChunks) + **-end/-ende suffixes**: Dutch collapses a doubled consonant across a compound
+  seam (voedings+stof → vudɪŋstɔf, knoop+punt → knoːpʏnt); -end/-ende participles merge back (volg·ende ✗). → +1124.
+- **dontSplitKnownWords** (new flag, recursive): a lexicalised word isn't torn into two coincidental sub-words at ANY
+  depth (schakelen ✗ scha·kelen, both "scha"=damage + "kelen"=throats real) — generalises the depth-0 guard through
+  the recursion. German keeps it OFF (its lexicon flags constituents, not whole compounds). → net +1132.
+
+LESSON (fleet, no-constituent-flags languages): with a flat frequency wordlist (every entry is both isWord AND
+isConstituent), the compound splitter over-fires on common short words and coincidental sub-word pairs. Three cheap
+guards recover almost all of it — (1) don't split a whole known word, (2) raise the trailing-constituent floor, (3)
+don't split a known word recursively. The remaining ~117 regressions are a diffuse tail (feminine -in, plural
+-ers/-en with medial schwa→full, g→x on a leaked participle) with no dominant class. German stayed byte-identical
+(the two new config knobs default to its prior behaviour). Goldens in test/dutch.test.ts; floor nl:0.62→0.65.

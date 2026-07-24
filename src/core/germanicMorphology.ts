@@ -42,6 +42,10 @@ export interface MorphologyConfig {
     suffixDigraphGuard?: (suffix: string, stem: string) => boolean; // reject a suffix strip that shatters a digraph
     seamElementInitial?: RegExp; // a non-first constituent starting like this resets element-initial (German st/sp/sch)
     wholeVerbSuffix?: string; // keep a whole known verb lexeme ending in this suffix un-split (German -en)
+    minTrailingConstituent?: number; // min letters for a compound's trailing part (default 3; nl/af use 4 to reject
+    // 3-letter inflectional-lookalike tails — ten/ken/den/end — that are real words but not compound heads)
+    dontSplitKnownWords?: boolean; // never split a word that is itself a lexicon entry (nl/af; German splits known
+    // compounds so it stays off — its lexicon flags constituents, not whole compounds)
 }
 
 /** Build a `decompose(word)` for a language from its morphology config. */
@@ -65,13 +69,18 @@ export function makeDecompose(cfg: MorphologyConfig): (word: string) => Decomp {
     /** Split a run into compound constituents (longest-leading, ≤3 parts). null = not a compound. */
     function splitCompound(w: string, depth = 0): string[] | null {
         if (depth > 2) return null;
-        for (let i = w.length - 3; i >= 4; i--) {
+        // A lexicalised word must not be torn into two coincidental sub-words (nl schakelen ✗ scha·kelen, af
+        // amandel ✗). German (flag off) keeps splitting known compounds — its lexicon flags constituents, not whole
+        // compounds. nl/af have no such flags, so a whole dictionary entry is the signal that it's ONE morpheme.
+        if (cfg.dontSplitKnownWords && cfg.isWord(w)) return null;
+        const minTail = cfg.minTrailingConstituent ?? 3;
+        for (let i = w.length - minTail; i >= 4; i--) {
             const head = w.slice(0, i);
             if (!cfg.isConstituent(head)) continue;
             for (const lk of cfg.linksFor(head)) {
                 if (!w.slice(i).startsWith(lk)) continue;
                 const rest = w.slice(i + lk.length);
-                if (rest.length < 3) continue;
+                if (rest.length < minTail) continue;
                 if (cfg.isConstituent(rest)) {
                     const deeper = splitCompound(rest, depth + 1) ?? splitPrefixedStem(rest, depth + 1);
                     return deeper ? [head + lk, ...deeper] : [head + lk, rest];

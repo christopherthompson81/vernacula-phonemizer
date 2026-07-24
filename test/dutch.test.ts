@@ -67,6 +67,15 @@ describe("Dutch canonical IPA", () => {
         expect(phonemizeWord("poëzie")).toBe("pˈoːeːzi"); // stressed ë keeps eː (more material after)
     });
 
+    test("compound morphology: split at stem·stem, each element own stress + seam devoicing/degemination", () => {
+        expect(phonemizeWord("voetbalveld")).toBe("vˈutbɑlvˈɛlt"); // voetbal·veld → each element stressed
+        expect(phonemizeWord("huisdeur")).toBe("ɦˈœy̯sdˈøːr"); // huis·deur
+        expect(phonemizeWord("knooppunt")).toBe("knˈoːpˈʏnt"); // knoop·punt → seam degemination p|p → p
+        expect(phonemizeWord("voedingsstof")).toBe("vˈudɪŋstˈɔf"); // voedings·stof → linking-s + seam s|s → s
+        expect(phonemizeWord("minister")).toBe("mˈinɪstər"); // NOT split (mini·ster rejected: known dictionary word)
+        expect(phonemizeWord("drinken")).toBe("drˈɪŋkən"); // NOT split (drin·ken rejected: known word, -en verb)
+    });
+
     test("function words + numbers", () => {
         const d = createDutch();
         expect(d.text("de kat").trim()).toBe("də kˈɑt"); // de → də (reduced clitic)

@@ -6,8 +6,10 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import type { Kind } from "../../core/germanicMorphology.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { decompose, isLexicalWord } from "./morphology.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Unstressed prefixes that shift stress off the first syllable (verkópen, gelóven, begín, ontslág, herhálen).
@@ -41,10 +43,9 @@ function placeStress(segs: Seg[], word: string): number {
     return nuclei.find((k) => segs[k]!.ph !== "ə") ?? nuclei[0]!;
 }
 
-/** Phonemize a single Dutch word to canonical IPA (with a stress mark). */
-export function phonemizeWord(word: string): string {
-    const reduced = FUNCTION_WORDS[word.toLowerCase()];
-    if (reduced !== undefined) return reduced;
+/** Phonemize a single stress group (a stem plus its own prefixes/suffixes) — the existing g2p handles its internal
+ *  prefix reduction (ge-/be-/ver-/te-) and suffix schwa (-ig/-lijk/-isch). */
+function phonemizeChunk(word: string): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";
     const stress = placeStress(segs, word);
@@ -52,6 +53,58 @@ export function phonemizeWord(word: string): string {
     for (let k = 0; k < segs.length; k++) {
         if (k === stress) out += "ˈ";
         out += segs[k]!.ph;
+    }
+    return out;
+}
+
+/** Merge a decomposition into stem-headed STRESS GROUPS: a prefix attaches to the following element, a suffix to
+ *  the preceding, and a second stem starts a new group. So only COMPOUND (stem·stem) boundaries survive — the g2p
+ *  already reduces each group's own prefix/suffix internally, and an over-stripped affix simply rejoins its stem. */
+function stressGroups(parts: string[], kinds: Kind[]): string[] {
+    const groups: string[] = [];
+    let cur = "";
+    let hasStem = false;
+    for (let i = 0; i < parts.length; i++) {
+        if (kinds[i] === "stem" && hasStem) { groups.push(cur); cur = ""; hasStem = false; }
+        cur += parts[i];
+        if (kinds[i] === "stem") hasStem = true;
+    }
+    if (cur) groups.push(cur);
+    return groups;
+}
+
+/** Phonemize a single Dutch word to canonical IPA (with a stress mark). A compound is split at its stem·stem
+ *  boundaries and each element phonemized independently, so each keeps its own stressed vowel and devoices at its
+ *  own boundary (stad·huis → ˈstɑtˈɦœys); a non-compound (or a prefix/suffix-only word) takes the direct path. */
+export function phonemizeWord(word: string): string {
+    const reduced = FUNCTION_WORDS[word.toLowerCase()];
+    if (reduced !== undefined) return reduced;
+    const w = word.toLowerCase();
+    // A word that is itself a dictionary entry is monomorphemic-or-lexicalised → phonemize whole (skip splitting).
+    // Guards minister→mini·ster, spelling→spel·ling, drinken→drin·ken (no constituent flags to reject those tails).
+    if (isLexicalWord(w)) return phonemizeChunk(word);
+    const d = decompose(w);
+    if (d.parts.length > 1) {
+        const groups = stressGroups(d.parts, d.kinds);
+        if (groups.length > 1) return joinChunks(groups.map(phonemizeChunk));
+    }
+    return phonemizeChunk(word);
+}
+
+// IPA consonant symbols a Dutch chunk can end/start with (for seam degemination). Vowels/offglides excluded.
+const CONS_IPA = new Set(["p", "t", "k", "b", "d", "f", "s", "x", "ʃ", "ɣ", "v", "z", "ŋ", "n", "m", "l", "r", "ɦ", "j", "ʋ", "ɡ"]);
+
+/** Join compound chunks, DEGEMINATING at each seam: Dutch collapses a doubled consonant across a compound boundary
+ *  (voedings+stof → vudɪŋstɔf, knoop+punt → knoːpʏnt, gras+spriet → ɣraspriːt). The next chunk's leading stress mark
+ *  is skipped when comparing the seam consonant. */
+function joinChunks(chunks: string[]): string {
+    let out = chunks[0] ?? "";
+    for (let i = 1; i < chunks.length; i++) {
+        const g = chunks[i]!;
+        const onset = g.startsWith("ˈ") ? g[1] : g[0]; // first phoneme (skip a leading stress mark)
+        const coda = out[out.length - 1];
+        if (coda && onset === coda && CONS_IPA.has(coda)) out = out.slice(0, -1); // drop the duplicated coda
+        out += g;
     }
     return out;
 }

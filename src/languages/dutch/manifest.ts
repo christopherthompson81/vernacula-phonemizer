@@ -23,6 +23,16 @@ export interface DutchManifest {
         million: { sg: string; pl: string };
         milliard: { sg: string; pl: string };
     };
+    morphology: {
+        prefixUnstressed: string[];
+        prefixStressed: string[];
+        ambiguousPrefixes: string[];
+        suffixes: string[];
+        vowelInitialSuffixes: string[];
+        linkingElements: string[];
+        validOnsets: string[];
+        stKeep: string[];
+    };
 }
 
 /** The consolidated hand-authored Dutch data tables (see dutch.jsonc). */
