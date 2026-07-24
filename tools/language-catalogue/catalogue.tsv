@@ -1,194 +1,194 @@
-code	name	family	script	l1_speakers	l2_speakers	wikipron_entries	kaikki_entries	epitran	espeak	decision	rejection_reason	verdict	served_by	pr	notes
-ab	Abkhaz	Northwest Caucasian	Cyrillic	190000					1	unimplemented					Not yet tracked; covered by espeak.
-acm	Iraqi Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡			
-acw	Hijazi Arabic	Semitic (Arabic)	Arabic	11000000		1891	1	0	0	implemented		🔷			
-aeb	Tunisian Arabic	Semitic (Arabic)	Arabic	12000000						unimplemented	data scarcity				No wikipron, no kaikki.
-aec	Sa'idi Arabic (Upper Egypt)	Semitic (Arabic)	Arabic	25000000						unimplemented	data scarcity				No wikipron, no kaikki.
-af	Afrikaans	Indo-European (Germanic)	Latin	7000000					1	implemented		🔷	native		Standard Afrikaans, Latin + diacritics. GREEDY digraph-first g2p + Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (single vowel LONG in open syll V.CV, SHORT in closed VC#/VCC — engine lookahead) + word-final DEVOICING (b→p,d→t) + geminate collapse + first-syllable stress past unstressed prefixes. Signatures: g=[χ] fricative, w=[v], v=[f], h=[ɦ]; long mids = CENTERING DIPHTHONGS ee/open-e=iə, oo/open-o=uə; y=[əi], ui=[œy], dim -tjie=[ki]. 71.2% FOLDED vs en.wiktionary Afrikaans (2220, HUMAN; 86% short-native, 91% monosyllabic — full-set drag = proper-noun/loan lexical + stress reduction on polysyllables). 🔷 single-source (Wiktionary; wikipron afr a candidate 2nd). DEFERRED: stress/syllable model + proper-noun lexicon, numbers, nasalization.
-afb	Gulf Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡			
-ajp	South Levantine Arabic	Semitic (Arabic)	Arabic	10000000		2513	1	0	0	implemented		🔷			
-ak	Akan (Twi)	Niger-Congo (Kwa)	Latin	11000000	9000000					implemented		🔷			
-am	Amharic	Semitic (Ethiosemitic)	Ge'ez	35000000	25000000					implemented		🟡			
-an	Aragonese	Indo-European (Romance)	Latin	25000					1	unimplemented					Not yet tracked; covered by espeak.
-apc	North Levantine Arabic	Semitic (Arabic)	Arabic	30000000						implemented		🟡			
-apd	Sudanese Arabic	Semitic (Arabic)	Arabic	32000000		0	0	0	0	implemented		🔷			
-ar	Arabic (MSA)	Semitic (Arabic)	Arabic	0	274000000					implemented		✅			
-arq	Algerian Arabic	Semitic (Arabic)	Arabic	40000000						unimplemented	data scarcity				No wikipron, no kaikki — cannot verify (would be authored-blind, the bho trap). Largest missing Arabic dialect.
-ars	Najdi Arabic	Semitic (Arabic)	Arabic	30000000						unimplemented	data scarcity				No wikipron, no kaikki.
-ary	Moroccan Arabic	Semitic (Arabic)	Arabic	29000000						implemented		🟡			
-arz	Egyptian Arabic	Semitic (Arabic)	Arabic	78000000	25000000					implemented		🟡			
-as	Assamese	Indo-Aryan (Eastern)	Eastern Nagari (Assamese)	15000000						implemented		🟡			
-ast	Asturian	Indo-European (Romance)	Latin	110000					0	unimplemented					Not yet tracked; covered by FLEURS.
-awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		🔷			
-ayl	Libyan Arabic									implemented		🟡			
-az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅			
-azb	South Azerbaijani	Turkic (Oghuz)	Arabic	13000000						unimplemented	variant without sufficient vowel-encoding				Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.
-ba	Bashkir	Turkic (Kipchak)	Cyrillic	1400000					1	unimplemented					Not yet tracked; covered by espeak.
-bal	Balochi (Southern)	Iranian (NW)	Arabic (Balochi)	9000000		0	0	0	0	implemented		🔷			Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from Jahani & Korn (2009) + Korn (2005a). Cross-script LEXICON (balochi-lexicon.tsv, 399 words: 55 curated + 344 from Korn Etymological Index; ASJP-corroborated) recovers the vowels the Arabic abjad loses (short a/i/u unwritten + و/ی conflate uː/oː, iː/eː); Roman orthography is phonemic. Independent referee = ASJP Southern-Balochi bcc (CC0, coarse ~40w) corroborates the inventory ~97%. Fills the RETROFLEX-Iranian gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated). Arabic-OOV still skeleton-defective (⛔ tail); lexicon+Roman full-voweled. 🔷 single-referee-family.
-be	Belarusian	Indo-European (East Slavic)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-bg	Bulgarian	Slavic (South)	Cyrillic	8000000		46034	47616	0	1	implemented		✅			
-bgc	Haryanvi (Bangaru)	Indo-Aryan	Devanagari	10000000		0	0	0	0	implemented			hi		ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.
-bho	Bhojpuri	Indo-Aryan	Devanagari	52000000						implemented		🔷			
-bm	Bambara	Mande	Latin/N'Ko	14000000						implemented		🔷			
-bn	Bengali	Indo-Aryan (Eastern)	Bengali	240000000	40000000					implemented		✅		#412/#414	Native rule engine + cross-source-consensus lexicon + neural per-grapheme BiLSTM OOV tagger (lexicon→tagger→rules); OOV ɔ/o 90.5% held-out (beats seq2seq 86.1% / n-gram 59.3%). 46% referee is wikipron noise (retroflex→dental), corroborated by epitran+Google; 98% shipped gold. Verdict 🟡→✅ post-tagger: the unwritten ɔ/o contrast is mostly recoverable (not a 🟢 coin-flip).
-bo	Tibetan	Sino-Tibetan	Tibetan	6000000						unimplemented					Large orthography-to-sound gap (historical spelling).
-bpy	Bishnupriya Manipuri	Indo-European (Indo-Aryan)	Bengali	120000					1	unimplemented					Not yet tracked; covered by espeak.
-bs	Bosnian	Indo-European (South Slavic)	Latin	2500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-ca	Catalan	Romance	Latin	4000000	5000000					implemented		✅			
-ceb	Cebuano	Austronesian (Philippine)	Latin	20000000						implemented		✅			
-chr	Cherokee	Iroquoian	Cherokee syllabary	2000					1	unimplemented					Not yet tracked; covered by espeak.
-cjy	Jin Chinese	Sinitic	Han	47000000						implemented		🔷			
-ckb	Central Kurdish (Sorani)	Iranian (NW)	Arabic (Sorani)	8000000		972	1037	1	1	implemented		🟡			
-cmn	Mandarin Chinese	Sinitic	Han	940000000	200000000					implemented		✅			
-crh	Crimean Tatar	Turkic (Kipchak)	Latin/Cyrillic	540000					1	unimplemented					Not yet tracked; covered by espeak.
-cs	Czech	Slavic (West)	Latin	10000000						implemented		✅			
-ctg	Chittagonian	Indo-Aryan (Eastern)	(no standard script)	13000000						rejected	unsuitable orthography				Built then REMOVED — 3 competing scripts, no community-adopted standard. Contrast bho/awa/syl (real script tradition).
-cv	Chuvash	Turkic (Oghur)	Cyrillic	1000000					1	unimplemented					Not yet tracked; covered by espeak.
-cy	Welsh	Celtic (Brythonic)	Latin	900000						implemented		✅			
-da	Danish	Indo-European (North Germanic)	Latin	5500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-de	German	Germanic	Latin	76000000	56000000					implemented		✅			
-ee	Ewe	Niger-Congo (Kwa)	Latin	7000000						unimplemented					Ghana/Togo.
-el	Greek	Hellenic	Greek	13000000						implemented		🟡			
-en	English	Germanic	Latin	380000000	1080000000					implemented		✅			
-es	Spanish	Romance	Latin	485000000	75000000					implemented		✅			
-es-419	Spanish (Latin American)	Romance	Latin	420000000						implemented		✅			
-et	Estonian	Uralic (Finnic)	Latin	1100000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-eu	Basque	Language isolate	Latin	750000					1	unimplemented					Not yet tracked; covered by espeak.
-fa	Persian (Iranian)	Iranian (SW)	Arabic (Persian)	60000000	50000000					implemented		🟡			
-ff	Fula	Niger-Congo (Atlantic)	Latin	25000000						implemented		✅			
-fi	Finnish	Uralic (Finnic)	Latin	5400000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-fo	Faroese	Indo-European (North Germanic)	Latin	72000					1	unimplemented					Not yet tracked; covered by espeak.
-fr	French	Romance	Latin	80000000	230000000					implemented		✅			
-ga	Irish	Celtic (Goidelic)	Latin	100000	1700000					implemented		✅			
-gan	Gan Chinese	Sinitic	Han	22000000						implemented		🔷			
-gd	Scottish Gaelic	Indo-European (Celtic)	Latin	57000					1	unimplemented					Not yet tracked; covered by espeak.
-gl	Galician	Indo-European (Romance)	Latin	2400000					0	unimplemented					Not yet tracked; covered by FLEURS.
-gn	Guarani	Tupian	Latin	6500000					1	unimplemented					Not yet tracked; covered by espeak.
-grc	Ancient Greek	Indo-European (Hellenic)	Greek (polytonic)	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical (Attic/Koine) — a dead language with a large written corpus, in scope (excludes only constructed languages).
-gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡			
-ha	Hausa	Afro-Asiatic (Chadic)	Latin/Ajami	54000000	40000000					implemented		✅			
-hak	Hakka Chinese	Sinitic	Han	44000000						implemented		🔷			
-haw	Hawaiian	Austronesian (Polynesian)	Latin	24000					1	unimplemented					Not yet tracked; covered by espeak.
-he	Hebrew	Afro-Asiatic (Semitic)	Hebrew (abjad)	9000000					1	implemented		✅			Modern Israeli Hebrew, the abjad. Normally written UNVOCALIZED → full task is vowel restoration; all three core layers now in place. PHASE 1: niqqud→IPA segmental g2p on VOCALIZED input, 87.1% folded vs en.wiktionary vocalized→a=IL IPA (2561w, single-source) — bgdkpt dagesh (בּ=b/ב=v…), ⟨ש⟩ shin/sin, ⟨ו⟩ shuruk/holam-male, patach genuvah, mater lectionis. PHASE 2: a SENTENCE-LEVEL neural nakdan (phonemizeHebrewNeural) restoring niqqud→Phase-1 g2p, register-balanced for modern text (×5 oversample of the CC-BY-SA modern subset + targeted archaic-suppression mask) — 86.4% word-exact / 95.6% per-consonant on held-out modern running text; trained on the permissive Nakdimon subset. NUMBERS: gendered cardinal compositor (feminine citation, מֵאָה fem vs אֶלֶף/מִילְיוֹן masc multipliers, duals, decimals). Restoration ceiling (sheva-na free variation, context-free homographs, modern mater/dagesh OOD) is a characterized cap. Outstanding: an INDEPENDENT modern-Hebrew IPA referee (distinct from Wiktionary) to reach ✅.
-hi	Hindi	Indo-Aryan	Devanagari	345000000	265000000					implemented		✅			
-hil	Hiligaynon (Ilonggo)	Austronesian (Western Bisayan)	Latin	9000000		465	477	0	0	implemented		🟢			Sibling of done Cebuano/Tagalog. Bespoke rule g2p (Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO human referees: wikipron hil_latn (465, proper-noun-heavy) 94.4% + kaikki hil (477, native) 94.1%. Folds: stress/final-glottal/lax-vowels. Residual = Spanish rising diphthongs (origin-ambiguous). Numbers deferred. 🟢.
-hne	Chhattisgarhi	Indo-Aryan	Devanagari	18000000						implemented		⛔			
-hr	Croatian	Indo-European (South Slavic)	Latin	5600000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷			
-ht	Haitian Creole	Creole (French-lexified)	Latin	12000000					1	unimplemented					Not yet tracked; covered by espeak.
-hu	Hungarian	Uralic	Latin	13000000						implemented		✅			
-hy	Armenian	Indo-European (Armenian)	Armenian	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-hyw	Western Armenian	Indo-European (Armenian)	Armenian	1000000					1	unimplemented					Not yet tracked; covered by espeak.
-id	Indonesian	Austronesian (Malayic)	Latin	70000000	130000000					implemented		🟢			
-ig	Igbo	Niger-Congo (Volta-Niger)	Latin	31000000						implemented		🔷			
-ilo	Ilocano (Iloko)	Austronesian (Northern Philippine)	Latin	8000000	2000000	926	973	1	0	implemented		🟡			Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded (eval RULE-ONLY, non-circular) — gliding is orthography-ambiguous (stress-position + consonant-context models both tried+REJECTED as worse); the SHIPPED path adds a 973-word stress-marked-referee LEXICON (fixes lexical gliding garcia→ɡaɾsˈia + 6th vowel ⟨e⟩→ɯ + stress). Numbers deferred.
-is	Icelandic	Indo-European (North Germanic)	Latin	330000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-it	Italian	Romance	Latin	65000000						implemented		✅			
-ja	Japanese	Japonic	Japanese (kanji+kana)	123000000						implemented		✅			
-jv	Javanese	Austronesian	Latin/Javanese	68000000						implemented		🟡			
-ka	Georgian	Kartvelian	Georgian (Mkhedruli)	3700000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-kaa	Karakalpak	Turkic (Kipchak)	Latin/Cyrillic	600000					1	unimplemented					Not yet tracked; covered by espeak.
-kam	Kamba	Niger-Congo (Bantu)	Latin	4000000					0	unimplemented					Not yet tracked; covered by FLEURS.
-kea	Kabuverdianu	Creole (Portuguese-lexified)	Latin	870000					0	unimplemented					Not yet tracked; covered by FLEURS.
-ki	Kikuyu (Gikuyu)	Niger-Congo (Bantu)	Latin	8000000						implemented		🔷			Largest language of Kenya. Pure greedy g2p from the Latin orthography (no code rules — fricativization + prenasalization in the table). 99.4% folded vs en.wiktionary Kikuyu (1062w — LARGE human referee, the fleet's highest folded score), single-source. Signatures: 7-vowel ATR (TILDE=quality not nasal: ⟨ĩ⟩=e, ⟨ũ⟩=o, ⟨e⟩=ɛ, ⟨o⟩=ɔ), fricativization ⟨b⟩=β/⟨th⟩=ð/⟨g⟩=ɣ/⟨c⟩=ɕ, prenasal ⟨mb nd nj ng⟩, ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. Dahl's Law orthographic (no rule). Tone (H/L+downstep) unwritten→not emitted. Numbers deferred. Referee built by tools/corpus/build-referee.ts (batched). Englebretson sketch grammar + Wahome & Subiyanto (2023) corroborate (both phoneme tables confirm ⟨ĩ⟩=e/⟨ũ⟩=o).
-kk	Kazakh	Turkic (Kipchak)	Cyrillic/Latin	13000000						implemented		✅			
-kl	Kalaallisut (Greenlandic)	Eskimo-Aleut	Latin	56000					1	unimplemented					Not yet tracked; covered by espeak.
-km	Khmer	Austroasiatic	Khmer	17000000						implemented					
-kmr	Kurmanji (Northern Kurdish)	Iranian (NW)	Latin (Hawar)	15000000						implemented		✅			
-kn	Kannada	Dravidian	Kannada	44000000	15000000					implemented		✅			
-knc	Central Kanuri (Yerwa)	Nilo-Saharan (Saharan)	Latin/Ajami	4000000		0	0	0	0	unimplemented	data scarcity				"The STANDARD Kanuri variety (Borno, Nigeria) — the real target if we build ""Kanuri"" (not the kr macrolanguage umbrella). Referee PROBED 2026-07-19: no wikipron/kaikki/epitran → authored-⛔-only. See kr."
-ko	Korean	Koreanic	Hangul	81000000						implemented		✅			
-kok	Konkani	Indo-Aryan (Southern)	Devanagari	2000000						unimplemented					Was in espeak-portable; small.
-kr	Kanuri (macrolanguage)	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella				COVER TERM — do NOT build the umbrella; target a specific variety (as with Balochi→bcc, Arabic→dialects). Individual codes: Central/Yerwa knc (~4M, the standard w/ orthography), Manga kby (~1M, Niger), Tumari krt. Referee PROBED 2026-07-19: knc/kby/krt/kr ALL have no wikipron, no kaikki page, no epitran map → also DATA-SCARCE. Revisit trigger = a referee appears OR a deliberate authored-⛔ from a grammar (the Hausa/Balochi-Run-1 path), not merely surfacing in a population list.
-ks	Kashmiri	Indo-Aryan (Dardic)	Arabic (Kashmiri)	7000000						unimplemented					Dardic; vowel-rich abjad.
-ky	Kyrgyz	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-la	Latin	Indo-European (Italic)	Latin	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical — a dead language with a large written corpus, in scope (excludes only constructed languages).
-lb	Luxembourgish	Indo-European (Germanic)	Latin	390000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-lg	Luganda	Niger-Congo (Bantu)	Latin	6000000	5000000					implemented		🔷			
-ln	Lingala	Niger-Congo (Bantu)	Latin	20000000	20000000					implemented		🔷			
-lo	Lao	Kra-Dai	Lao	30000000						implemented		🟡			
-lt	Lithuanian	Indo-European (Baltic)	Latin	3000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-ltg	Latgalian	Indo-European (Baltic)	Latin	150000					1	unimplemented					Not yet tracked; covered by espeak.
-luo	Luo (Dholuo)	Nilotic	Latin	4200000					0	unimplemented					Not yet tracked; covered by FLEURS.
-lv	Latvian	Indo-European (Baltic)	Latin	1500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-mad	Madurese	Austronesian	Latin	14000000						implemented		🔷			
-mag	Magahi	Indo-Aryan (Bihari)	Devanagari	14000000		0	2	0	0	implemented		🔷			BESPOKE (was mag→bho alias). Bhojpuri engine + phonology (shared Bihari: no length, श/ष→s, ण/ञ→n) + DOCUMENTED Magahi glide hardening (Vinod Kumar 2026 comparative study §6.2): word-initial व→b (वंश→bans), य→d͡ʒ (यन्त्र→jantar), where Bhojpuri preserves glides. No machine referee. 🔷 single-source delta on grammar-anchored base.
-mai	Maithili	Indo-Aryan	Devanagari	34000000						implemented		🔷			
-mg	Malagasy	Austronesian (Barito)	Latin	25000000						implemented		🔷			
-mi	Maori	Austronesian (Polynesian)	Latin	185000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-mk	Macedonian	Indo-European (South Slavic)	Cyrillic	1400000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-ml	Malayalam	Dravidian	Malayalam	37000000						implemented		✅			
-mn	Mongolian (Khalkha)	Mongolic	Cyrillic	6000000						unimplemented					Cyrillic (+ traditional Mongolian script).
-mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						implemented		🔷			FIRST Gur language in the fleet. Wolof-shaped greedy g2p + gemination + nasal assimilation from the Latin (Burkinabé) orthography. DUAL-GROUNDED: 94.9% folded vs en.wiktionary Moore (39w, single numeric referee, loanword-heavy) + the FSI Moré Basic Course (Lehr/Redden/Balima 1966) phonology (corroborates ⟨r⟩=flap-of-/d/, ⟨o⟩=/o/ no ⟨ɔ⟩, ⟨ny⟩=ɲ, /n/=[n,ŋ], H/L tone). Signatures: ATR letters ⟨ɛ ɩ ʋ⟩, doubling=length, tilde=nasal, ⟨r⟩=ɾ, ⟨y⟩=j, geminate Cː, ⟨n⟩→ŋ before g/k. Tone (2-tone H/L) unwritten→not emitted. Numbers deferred.
-mr	Marathi	Indo-Aryan	Devanagari	83000000	16000000					implemented		🟡			
-mt	Maltese	Afro-Asiatic (Semitic)	Latin	520000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-mto	Totontepec Mixe	Mixe-Zoquean	Latin	6000					1	unimplemented					Not yet tracked; covered by espeak (full data/mto engine).
-my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅			
-nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡			
-naq	Nama (Khoekhoe)	Khoe-Kwadi	Latin	250000					1	unimplemented					Not yet tracked; covered by espeak.
-nb	Norwegian Bokmål	Indo-European (North Germanic)	Latin	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-nci	Classical Nahuatl	Uto-Aztecan	Latin	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/historical (modern Nahuatl varieties differ).
-ne	Nepali	Indo-Aryan	Devanagari	16000000						implemented		🟡			
-nl	Dutch	Germanic	Latin	25000000						implemented		🟡			
-nog	Nogai	Turkic (Kipchak)	Cyrillic	90000					1	unimplemented					Not yet tracked; covered by espeak.
-nso	Sepedi (Northern Sotho)	Niger-Congo (Bantu)	Latin	5000000	9000000	0	0	0	0	implemented		⛔			Authored ⛔ cannot-verify — NO referee at all. Shared Sotho-Tswana engine; š→ʃ, kg→kx, hl→ɬ, ejective p/t/k (unverified for Sepedi). Tone deferred.
-nya	Chichewa (Nyanja)	Niger-Congo (Bantu)	Latin	14000000						implemented		✅			
-oc	Occitan	Indo-European (Romance)	Latin	200000					0	unimplemented					Not yet tracked; covered by FLEURS.
-om	Oromo	Afro-Asiatic (Cushitic)	Latin	37000000						implemented		✅			
-or	Odia	Indo-Aryan (Eastern)	Odia	35000000						implemented		✅			
-pa	Punjabi (Eastern)	Indo-Aryan	Gurmukhi	113000000						implemented		🟡			
-pap	Papiamento	Creole (Iberian-lexified)	Latin	340000					1	unimplemented					Not yet tracked; covered by espeak.
-pcm	Nigerian Pidgin	English creole	Latin	5000000	116000000					implemented		🔷			
-pl	Polish	Slavic (West)	Latin	40000000						implemented		✅			
-pnb	Western Punjabi (Lahnda)	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	66000000						implemented		🟡			
-ps	Pashto	Iranian (Eastern)	Arabic (Pashto)	40000000						implemented		🟡			
-pt	Portuguese	Romance	Latin	240000000	25000000					implemented		✅			
-qu	Quechua	Quechuan	Latin	7500000					1	unimplemented					Not yet tracked; covered by espeak.
-quc	K'iche'	Mayan	Latin	1100000					1	unimplemented					Not yet tracked; covered by espeak.
-raj	Rajasthani	Indo-Aryan	Devanagari	20000000						unimplemented	macrolanguage umbrella				Cover term (Marwari, Dhundhari, …), not a single phonology.
-rn	Kirundi	Niger-Congo (Bantu)	Latin	11000000						implemented		🔷			
-ro	Romanian	Romance	Latin	24000000	4000000					implemented		🟡			
-ru	Russian	Slavic (East)	Cyrillic	150000000	110000000					implemented		✅			
-rup	Aromanian	Indo-European (Romance)	Latin	250000					1	unimplemented					Not yet tracked; covered by espeak.
-rw	Kinyarwanda	Niger-Congo (Bantu)	Latin	12000000						implemented		🔷			
-sat	Santali	Austroasiatic (Munda)	Ol Chiki	7000000						unimplemented					New script family (Ol Chiki).
-sd	Sindhi	Indo-Aryan	Arabic (Sindhi)	33000000						implemented		🟡			
-shn	Shan	Tai-Kadai (Tai)	Shan (Myanmar)	3300000					1	unimplemented					Not yet tracked; covered by espeak.
-si	Sinhala	Indo-Aryan	Sinhala	16000000	2000000					implemented		✅			
-sk	Slovak	Indo-European (West Slavic)	Latin	5200000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-skr	Saraiki	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	26000000						implemented		🔷			
-sl	Slovenian	Indo-European (South Slavic)	Latin	2100000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.
-smj	Lule Sami	Uralic (Sami)	Latin	2000					1	unimplemented					Not yet tracked; covered by espeak.
-sn	Shona	Niger-Congo (Bantu)	Latin	9000000						implemented		🔷			
-so	Somali	Afro-Asiatic (Cushitic)	Latin	22000000						implemented		✅			
-sq	Albanian	Indo-European (Albanian)	Latin	6000000					1	unimplemented					Not yet tracked; covered by espeak.
-sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅			
-st	Sesotho (Southern Sotho)	Niger-Congo (Bantu)	Latin	6000000	8000000	0	3	0	0	implemented		🔷			Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.
-su	Sundanese	Austronesian	Latin	32000000						implemented		✅			
-sv	Swedish	Germanic	Latin	10000000						implemented		✅			
-sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅			
-syl	Sylheti	Indo-Aryan (Eastern)	Syloti Nagri	11000000		397	492	0	0	implemented		🔷			
-ta	Tamil	Dravidian	Tamil	79000000	8000000					implemented		✅			
-te	Telugu	Dravidian	Telugu	83000000	13000000					implemented		✅			
-tg	Tajik	Iranian (SW)	Cyrillic	8000000	4000000					implemented		✅			
-th	Thai	Kra-Dai	Thai	60000000	40000000					implemented		✅			
-ti	Tigrinya	Semitic (Ethiosemitic)	Ge'ez	9000000		0	26	1	0	implemented		🔷			
-tk	Turkmen	Turkic (Oghuz)	Latin	5000000					1	unimplemented					Not yet tracked; covered by espeak.
-tl	Tagalog	Austronesian (Philippine)	Latin	28000000	60000000					implemented		🟢			
-tn	Setswana	Niger-Congo (Bantu)	Latin	6000000	8000000					implemented		🔷			
-tr	Turkish	Turkic (Oghuz)	Latin	84000000	6000000					implemented		✅			
-tt	Tatar	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by espeak.
-ug	Uyghur	Turkic (Karluk)	Arabic (Uyghur)	11000000						implemented		✅			
-uk	Ukrainian	Slavic (East)	Cyrillic	33000000						implemented		✅			
-umb	Umbundu	Niger-Congo (Bantu)	Latin	6000000					0	unimplemented					Not yet tracked; covered by FLEURS.
-ur	Urdu	Indo-Aryan	Arabic (Urdu)	70000000	160000000					implemented		🟡			
-uz	Uzbek	Turkic (Karluk)	Latin/Cyrillic	35000000						implemented		✅			
-vi	Vietnamese	Austroasiatic	Latin	85000000						implemented		✅			
-wo	Wolof	Niger-Congo (Atlantic)	Latin	5000000	7000000					implemented		🔷			
-wuu	Wu Chinese (Shanghainese)	Sinitic	Han	83000000						implemented		🔷			
-xh	Xhosa	Niger-Congo (Bantu)	Latin	8000000	11000000					implemented		✅			
-yo	Yoruba	Niger-Congo (Volta-Niger)	Latin	46000000						implemented		✅			
-yue	Cantonese (Yue)	Sinitic	Han	86000000						implemented		✅			
-za	Zhuang	Kra-Dai	Latin/Sawndip	16000000						implemented		🔷			
-zsm	Standard Malay	Austronesian (Malayic)	Latin	20000000	60000000					rejected	macrolanguage umbrella				Mutually intelligible with and covered by Indonesian (id).
-zu	Zulu	Niger-Congo (Bantu)	Latin	12000000	16000000					implemented		✅			
+code	name	family	script	l1_speakers	l2_speakers	wikipron_entries	kaikki_entries	epitran	espeak	decision	rejection_reason	verdict	served_by	pr	notes	fleurs
+ab	Abkhaz	Northwest Caucasian	Cyrillic	190000					1	unimplemented					Not yet tracked; covered by espeak.	0
+acm	Iraqi Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡				0
+acw	Hijazi Arabic	Semitic (Arabic)	Arabic	11000000		1891	1	0	0	implemented		🔷				0
+aeb	Tunisian Arabic	Semitic (Arabic)	Arabic	12000000						unimplemented	data scarcity				No wikipron, no kaikki.	0
+aec	Sa'idi Arabic (Upper Egypt)	Semitic (Arabic)	Arabic	25000000						unimplemented	data scarcity				No wikipron, no kaikki.	0
+af	Afrikaans	Indo-European (Germanic)	Latin	7000000					1	implemented		🔷	native		Standard Afrikaans, Latin + diacritics. GREEDY digraph-first g2p + Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (single vowel LONG in open syll V.CV, SHORT in closed VC#/VCC — engine lookahead) + word-final DEVOICING (b→p,d→t) + geminate collapse + first-syllable stress past unstressed prefixes. Signatures: g=[χ] fricative, w=[v], v=[f], h=[ɦ]; long mids = CENTERING DIPHTHONGS ee/open-e=iə, oo/open-o=uə; y=[əi], ui=[œy], dim -tjie=[ki]. 71.2% FOLDED vs en.wiktionary Afrikaans (2220, HUMAN; 86% short-native, 91% monosyllabic — full-set drag = proper-noun/loan lexical + stress reduction on polysyllables). 🔷 single-source (Wiktionary; wikipron afr a candidate 2nd). DEFERRED: stress/syllable model + proper-noun lexicon, numbers, nasalization.	1
+afb	Gulf Arabic	Semitic (Arabic)	Arabic	15000000						implemented		🟡				0
+ajp	South Levantine Arabic	Semitic (Arabic)	Arabic	10000000		2513	1	0	0	implemented		🔷				0
+ak	Akan (Twi)	Niger-Congo (Kwa)	Latin	11000000	9000000					implemented		🔷				0
+am	Amharic	Semitic (Ethiosemitic)	Ge'ez	35000000	25000000					implemented		🟡				1
+an	Aragonese	Indo-European (Romance)	Latin	25000					1	unimplemented					Not yet tracked; covered by espeak.	0
+apc	North Levantine Arabic	Semitic (Arabic)	Arabic	30000000						implemented		🟡				0
+apd	Sudanese Arabic	Semitic (Arabic)	Arabic	32000000		0	0	0	0	implemented		🔷				0
+ar	Arabic (MSA)	Semitic (Arabic)	Arabic	0	274000000					implemented		✅				0
+arq	Algerian Arabic	Semitic (Arabic)	Arabic	40000000						unimplemented	data scarcity				No wikipron, no kaikki — cannot verify (would be authored-blind, the bho trap). Largest missing Arabic dialect.	0
+ars	Najdi Arabic	Semitic (Arabic)	Arabic	30000000						unimplemented	data scarcity				No wikipron, no kaikki.	0
+ary	Moroccan Arabic	Semitic (Arabic)	Arabic	29000000						implemented		🟡				0
+arz	Egyptian Arabic	Semitic (Arabic)	Arabic	78000000	25000000					implemented		🟡				1
+as	Assamese	Indo-Aryan (Eastern)	Eastern Nagari (Assamese)	15000000						implemented		🟡				1
+ast	Asturian	Indo-European (Romance)	Latin	110000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		🔷				0
+ayl	Libyan Arabic									implemented		🟡				0
+az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅				1
+azb	South Azerbaijani	Turkic (Oghuz)	Arabic	13000000						unimplemented	variant without sufficient vowel-encoding				Arabic-script (abjad) sibling of the done Latin `az`; under-writes vowels.	0
+ba	Bashkir	Turkic (Kipchak)	Cyrillic	1400000					1	unimplemented					Not yet tracked; covered by espeak.	0
+bal	Balochi (Southern)	Iranian (NW)	Arabic (Balochi)	9000000		0	0	0	0	implemented		🔷			Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from Jahani & Korn (2009) + Korn (2005a). Cross-script LEXICON (balochi-lexicon.tsv, 399 words: 55 curated + 344 from Korn Etymological Index; ASJP-corroborated) recovers the vowels the Arabic abjad loses (short a/i/u unwritten + و/ی conflate uː/oː, iː/eː); Roman orthography is phonemic. Independent referee = ASJP Southern-Balochi bcc (CC0, coarse ~40w) corroborates the inventory ~97%. Fills the RETROFLEX-Iranian gap (ʈ ɖ ɽ vs dental t̪ d̪; ق->k; unaspirated). Arabic-OOV still skeleton-defective (⛔ tail); lexicon+Roman full-voweled. 🔷 single-referee-family.	0
+be	Belarusian	Indo-European (East Slavic)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+bg	Bulgarian	Slavic (South)	Cyrillic	8000000		46034	47616	0	1	implemented		✅				1
+bgc	Haryanvi (Bangaru)	Indo-Aryan	Devanagari	10000000		0	0	0	0	implemented			hi		ALIAS to the Hindi engine (served_by=hi). Referee PROBED 2026-07-19: no wikipron, no kaikki page, no epitran bgc-Deva map -> NO independent referee. Western Hindi (Hindustani group), segmentally ~= Hindi (28-30 consonants, same 4-way stop contrast); documented differences (vowel free-variation a~e/i~e, a marked retroflexion tendency r/n/l, intonation) are ALLOPHONIC/prosodic, not a categorical grapheme->IPA delta. Served via hi (nearest verified sibling) as a labelled approximation.	0
+bho	Bhojpuri	Indo-Aryan	Devanagari	52000000						implemented		🔷				0
+bm	Bambara	Mande	Latin/N'Ko	14000000						implemented		🔷				0
+bn	Bengali	Indo-Aryan (Eastern)	Bengali	240000000	40000000					implemented		✅		#412/#414	Native rule engine + cross-source-consensus lexicon + neural per-grapheme BiLSTM OOV tagger (lexicon→tagger→rules); OOV ɔ/o 90.5% held-out (beats seq2seq 86.1% / n-gram 59.3%). 46% referee is wikipron noise (retroflex→dental), corroborated by epitran+Google; 98% shipped gold. Verdict 🟡→✅ post-tagger: the unwritten ɔ/o contrast is mostly recoverable (not a 🟢 coin-flip).	1
+bo	Tibetan	Sino-Tibetan	Tibetan	6000000						unimplemented					Large orthography-to-sound gap (historical spelling).	0
+bpy	Bishnupriya Manipuri	Indo-European (Indo-Aryan)	Bengali	120000					1	unimplemented					Not yet tracked; covered by espeak.	0
+bs	Bosnian	Indo-European (South Slavic)	Latin	2500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+ca	Catalan	Romance	Latin	4000000	5000000					implemented		✅				1
+ceb	Cebuano	Austronesian (Philippine)	Latin	20000000						implemented		✅				1
+chr	Cherokee	Iroquoian	Cherokee syllabary	2000					1	unimplemented					Not yet tracked; covered by espeak.	0
+cjy	Jin Chinese	Sinitic	Han	47000000						implemented		🔷				0
+ckb	Central Kurdish (Sorani)	Iranian (NW)	Arabic (Sorani)	8000000		972	1037	1	1	implemented		🟡				1
+cmn	Mandarin Chinese	Sinitic	Han	940000000	200000000					implemented		✅				1
+crh	Crimean Tatar	Turkic (Kipchak)	Latin/Cyrillic	540000					1	unimplemented					Not yet tracked; covered by espeak.	0
+cs	Czech	Slavic (West)	Latin	10000000						implemented		✅				1
+ctg	Chittagonian	Indo-Aryan (Eastern)	(no standard script)	13000000						rejected	unsuitable orthography				Built then REMOVED — 3 competing scripts, no community-adopted standard. Contrast bho/awa/syl (real script tradition).	0
+cv	Chuvash	Turkic (Oghur)	Cyrillic	1000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+cy	Welsh	Celtic (Brythonic)	Latin	900000						implemented		✅				1
+da	Danish	Indo-European (North Germanic)	Latin	5500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+de	German	Germanic	Latin	76000000	56000000					implemented		✅				1
+ee	Ewe	Niger-Congo (Kwa)	Latin	7000000						unimplemented					Ghana/Togo.	0
+el	Greek	Hellenic	Greek	13000000						implemented		🟡				1
+en	English	Germanic	Latin	380000000	1080000000					implemented		✅				1
+es	Spanish	Romance	Latin	485000000	75000000					implemented		✅				0
+es-419	Spanish (Latin American)	Romance	Latin	420000000						implemented		✅				1
+et	Estonian	Uralic (Finnic)	Latin	1100000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+eu	Basque	Language isolate	Latin	750000					1	unimplemented					Not yet tracked; covered by espeak.	0
+fa	Persian (Iranian)	Iranian (SW)	Arabic (Persian)	60000000	50000000					implemented		🟡				1
+ff	Fula	Niger-Congo (Atlantic)	Latin	25000000						implemented		✅				1
+fi	Finnish	Uralic (Finnic)	Latin	5400000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+fo	Faroese	Indo-European (North Germanic)	Latin	72000					1	unimplemented					Not yet tracked; covered by espeak.	0
+fr	French	Romance	Latin	80000000	230000000					implemented		✅				1
+ga	Irish	Celtic (Goidelic)	Latin	100000	1700000					implemented		✅				1
+gan	Gan Chinese	Sinitic	Han	22000000						implemented		🔷				0
+gd	Scottish Gaelic	Indo-European (Celtic)	Latin	57000					1	unimplemented					Not yet tracked; covered by espeak.	0
+gl	Galician	Indo-European (Romance)	Latin	2400000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+gn	Guarani	Tupian	Latin	6500000					1	unimplemented					Not yet tracked; covered by espeak.	0
+grc	Ancient Greek	Indo-European (Hellenic)	Greek (polytonic)	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical (Attic/Koine) — a dead language with a large written corpus, in scope (excludes only constructed languages).	0
+gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡				1
+ha	Hausa	Afro-Asiatic (Chadic)	Latin/Ajami	54000000	40000000					implemented		✅				1
+hak	Hakka Chinese	Sinitic	Han	44000000						implemented		🔷				0
+haw	Hawaiian	Austronesian (Polynesian)	Latin	24000					1	unimplemented					Not yet tracked; covered by espeak.	0
+he	Hebrew	Afro-Asiatic (Semitic)	Hebrew (abjad)	9000000					1	implemented		✅			Modern Israeli Hebrew, the abjad. Normally written UNVOCALIZED → full task is vowel restoration; all three core layers now in place. PHASE 1: niqqud→IPA segmental g2p on VOCALIZED input, 87.1% folded vs en.wiktionary vocalized→a=IL IPA (2561w, single-source) — bgdkpt dagesh (בּ=b/ב=v…), ⟨ש⟩ shin/sin, ⟨ו⟩ shuruk/holam-male, patach genuvah, mater lectionis. PHASE 2: a SENTENCE-LEVEL neural nakdan (phonemizeHebrewNeural) restoring niqqud→Phase-1 g2p, register-balanced for modern text (×5 oversample of the CC-BY-SA modern subset + targeted archaic-suppression mask) — 86.4% word-exact / 95.6% per-consonant on held-out modern running text; trained on the permissive Nakdimon subset. NUMBERS: gendered cardinal compositor (feminine citation, מֵאָה fem vs אֶלֶף/מִילְיוֹן masc multipliers, duals, decimals). Restoration ceiling (sheva-na free variation, context-free homographs, modern mater/dagesh OOD) is a characterized cap. Outstanding: an INDEPENDENT modern-Hebrew IPA referee (distinct from Wiktionary) to reach ✅.	1
+hi	Hindi	Indo-Aryan	Devanagari	345000000	265000000					implemented		✅				1
+hil	Hiligaynon (Ilonggo)	Austronesian (Western Bisayan)	Latin	9000000		465	477	0	0	implemented		🟢			Sibling of done Cebuano/Tagalog. Bespoke rule g2p (Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). TWO human referees: wikipron hil_latn (465, proper-noun-heavy) 94.4% + kaikki hil (477, native) 94.1%. Folds: stress/final-glottal/lax-vowels. Residual = Spanish rising diphthongs (origin-ambiguous). Numbers deferred. 🟢.	0
+hne	Chhattisgarhi	Indo-Aryan	Devanagari	18000000						implemented		⛔				0
+hr	Croatian	Indo-European (South Slavic)	Latin	5600000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷				0
+ht	Haitian Creole	Creole (French-lexified)	Latin	12000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+hu	Hungarian	Uralic	Latin	13000000						implemented		✅				1
+hy	Armenian	Indo-European (Armenian)	Armenian	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+hyw	Western Armenian	Indo-European (Armenian)	Armenian	1000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+id	Indonesian	Austronesian (Malayic)	Latin	70000000	130000000					implemented		🟢				1
+ig	Igbo	Niger-Congo (Volta-Niger)	Latin	31000000						implemented		🔷				1
+ilo	Ilocano (Iloko)	Austronesian (Northern Philippine)	Latin	8000000	2000000	926	973	1	0	implemented		🟡			Northern Luzon lingua franca (NOT Bisayan). Bespoke rule g2p — Philippine core + Ilocano HIATUS (high vowel i/u glides before a vowel: dua→dwa) + 6th vowel ⟨e⟩→ɯ~ɛ + geminate ⟨ll⟩. THREE referees: wikipron 82.7% + kaikki 84.5% + epitran 75.9%. 🟡 bounded (eval RULE-ONLY, non-circular) — gliding is orthography-ambiguous (stress-position + consonant-context models both tried+REJECTED as worse); the SHIPPED path adds a 973-word stress-marked-referee LEXICON (fixes lexical gliding garcia→ɡaɾsˈia + 6th vowel ⟨e⟩→ɯ + stress). Numbers deferred.	0
+is	Icelandic	Indo-European (North Germanic)	Latin	330000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+it	Italian	Romance	Latin	65000000						implemented		✅				1
+ja	Japanese	Japonic	Japanese (kanji+kana)	123000000						implemented		✅				1
+jv	Javanese	Austronesian	Latin/Javanese	68000000						implemented		🟡				1
+ka	Georgian	Kartvelian	Georgian (Mkhedruli)	3700000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+kaa	Karakalpak	Turkic (Kipchak)	Latin/Cyrillic	600000					1	unimplemented					Not yet tracked; covered by espeak.	0
+kam	Kamba	Niger-Congo (Bantu)	Latin	4000000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+kea	Kabuverdianu	Creole (Portuguese-lexified)	Latin	870000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+ki	Kikuyu (Gikuyu)	Niger-Congo (Bantu)	Latin	8000000						implemented		🔷			Largest language of Kenya. Pure greedy g2p from the Latin orthography (no code rules — fricativization + prenasalization in the table). 99.4% folded vs en.wiktionary Kikuyu (1062w — LARGE human referee, the fleet's highest folded score), single-source. Signatures: 7-vowel ATR (TILDE=quality not nasal: ⟨ĩ⟩=e, ⟨ũ⟩=o, ⟨e⟩=ɛ, ⟨o⟩=ɔ), fricativization ⟨b⟩=β/⟨th⟩=ð/⟨g⟩=ɣ/⟨c⟩=ɕ, prenasal ⟨mb nd nj ng⟩, ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. Dahl's Law orthographic (no rule). Tone (H/L+downstep) unwritten→not emitted. Numbers deferred. Referee built by tools/corpus/build-referee.ts (batched). Englebretson sketch grammar + Wahome & Subiyanto (2023) corroborate (both phoneme tables confirm ⟨ĩ⟩=e/⟨ũ⟩=o).	0
+kk	Kazakh	Turkic (Kipchak)	Cyrillic/Latin	13000000						implemented		✅				1
+kl	Kalaallisut (Greenlandic)	Eskimo-Aleut	Latin	56000					1	unimplemented					Not yet tracked; covered by espeak.	0
+km	Khmer	Austroasiatic	Khmer	17000000						implemented						1
+kmr	Kurmanji (Northern Kurdish)	Iranian (NW)	Latin (Hawar)	15000000						implemented		✅				0
+kn	Kannada	Dravidian	Kannada	44000000	15000000					implemented		✅				1
+knc	Central Kanuri (Yerwa)	Nilo-Saharan (Saharan)	Latin/Ajami	4000000		0	0	0	0	unimplemented	data scarcity				"The STANDARD Kanuri variety (Borno, Nigeria) — the real target if we build ""Kanuri"" (not the kr macrolanguage umbrella). Referee PROBED 2026-07-19: no wikipron/kaikki/epitran → authored-⛔-only. See kr."	0
+ko	Korean	Koreanic	Hangul	81000000						implemented		✅				1
+kok	Konkani	Indo-Aryan (Southern)	Devanagari	2000000						unimplemented					Was in espeak-portable; small.	0
+kr	Kanuri (macrolanguage)	Nilo-Saharan (Saharan)	Latin/Ajami	9000000						unimplemented	macrolanguage umbrella				COVER TERM — do NOT build the umbrella; target a specific variety (as with Balochi→bcc, Arabic→dialects). Individual codes: Central/Yerwa knc (~4M, the standard w/ orthography), Manga kby (~1M, Niger), Tumari krt. Referee PROBED 2026-07-19: knc/kby/krt/kr ALL have no wikipron, no kaikki page, no epitran map → also DATA-SCARCE. Revisit trigger = a referee appears OR a deliberate authored-⛔ from a grammar (the Hausa/Balochi-Run-1 path), not merely surfacing in a population list.	0
+ks	Kashmiri	Indo-Aryan (Dardic)	Arabic (Kashmiri)	7000000						unimplemented					Dardic; vowel-rich abjad.	0
+ky	Kyrgyz	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+la	Latin	Indo-European (Italic)	Latin	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical — a dead language with a large written corpus, in scope (excludes only constructed languages).	0
+lb	Luxembourgish	Indo-European (Germanic)	Latin	390000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+lg	Luganda	Niger-Congo (Bantu)	Latin	6000000	5000000					implemented		🔷				1
+ln	Lingala	Niger-Congo (Bantu)	Latin	20000000	20000000					implemented		🔷				1
+lo	Lao	Kra-Dai	Lao	30000000						implemented		🟡				1
+lt	Lithuanian	Indo-European (Baltic)	Latin	3000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+ltg	Latgalian	Indo-European (Baltic)	Latin	150000					1	unimplemented					Not yet tracked; covered by espeak.	0
+luo	Luo (Dholuo)	Nilotic	Latin	4200000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+lv	Latvian	Indo-European (Baltic)	Latin	1500000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+mad	Madurese	Austronesian	Latin	14000000						implemented		🔷				0
+mag	Magahi	Indo-Aryan (Bihari)	Devanagari	14000000		0	2	0	0	implemented		🔷			BESPOKE (was mag→bho alias). Bhojpuri engine + phonology (shared Bihari: no length, श/ष→s, ण/ञ→n) + DOCUMENTED Magahi glide hardening (Vinod Kumar 2026 comparative study §6.2): word-initial व→b (वंश→bans), य→d͡ʒ (यन्त्र→jantar), where Bhojpuri preserves glides. No machine referee. 🔷 single-source delta on grammar-anchored base.	0
+mai	Maithili	Indo-Aryan	Devanagari	34000000						implemented		🔷				0
+mg	Malagasy	Austronesian (Barito)	Latin	25000000						implemented		🔷				0
+mi	Maori	Austronesian (Polynesian)	Latin	185000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+mk	Macedonian	Indo-European (South Slavic)	Cyrillic	1400000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+ml	Malayalam	Dravidian	Malayalam	37000000						implemented		✅				1
+mn	Mongolian (Khalkha)	Mongolic	Cyrillic	6000000						unimplemented					Cyrillic (+ traditional Mongolian script).	1
+mos	Mossi (Mooré)	Niger-Congo (Gur)	Latin	9000000						implemented		🔷			FIRST Gur language in the fleet. Wolof-shaped greedy g2p + gemination + nasal assimilation from the Latin (Burkinabé) orthography. DUAL-GROUNDED: 94.9% folded vs en.wiktionary Moore (39w, single numeric referee, loanword-heavy) + the FSI Moré Basic Course (Lehr/Redden/Balima 1966) phonology (corroborates ⟨r⟩=flap-of-/d/, ⟨o⟩=/o/ no ⟨ɔ⟩, ⟨ny⟩=ɲ, /n/=[n,ŋ], H/L tone). Signatures: ATR letters ⟨ɛ ɩ ʋ⟩, doubling=length, tilde=nasal, ⟨r⟩=ɾ, ⟨y⟩=j, geminate Cː, ⟨n⟩→ŋ before g/k. Tone (2-tone H/L) unwritten→not emitted. Numbers deferred.	0
+mr	Marathi	Indo-Aryan	Devanagari	83000000	16000000					implemented		🟡				1
+mt	Maltese	Afro-Asiatic (Semitic)	Latin	520000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+mto	Totontepec Mixe	Mixe-Zoquean	Latin	6000					1	unimplemented					Not yet tracked; covered by espeak (full data/mto engine).	0
+my	Burmese	Sino-Tibetan	Burmese	33000000	10000000					implemented		✅				1
+nan	Min Nan Chinese	Sinitic	Han	49000000						implemented		🟡				0
+naq	Nama (Khoekhoe)	Khoe-Kwadi	Latin	250000					1	unimplemented					Not yet tracked; covered by espeak.	0
+nb	Norwegian Bokmål	Indo-European (North Germanic)	Latin	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+nci	Classical Nahuatl	Uto-Aztecan	Latin	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/historical (modern Nahuatl varieties differ).	0
+ne	Nepali	Indo-Aryan	Devanagari	16000000						implemented		🟡				1
+nl	Dutch	Germanic	Latin	25000000						implemented		🟡				1
+nog	Nogai	Turkic (Kipchak)	Cyrillic	90000					1	unimplemented					Not yet tracked; covered by espeak.	0
+nso	Sepedi (Northern Sotho)	Niger-Congo (Bantu)	Latin	5000000	9000000	0	0	0	0	implemented		⛔			Authored ⛔ cannot-verify — NO referee at all. Shared Sotho-Tswana engine; š→ʃ, kg→kx, hl→ɬ, ejective p/t/k (unverified for Sepedi). Tone deferred.	1
+nya	Chichewa (Nyanja)	Niger-Congo (Bantu)	Latin	14000000						implemented		✅				1
+oc	Occitan	Indo-European (Romance)	Latin	200000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+om	Oromo	Afro-Asiatic (Cushitic)	Latin	37000000						implemented		✅				1
+or	Odia	Indo-Aryan (Eastern)	Odia	35000000						implemented		✅				1
+pa	Punjabi (Eastern)	Indo-Aryan	Gurmukhi	113000000						implemented		🟡				1
+pap	Papiamento	Creole (Iberian-lexified)	Latin	340000					1	unimplemented					Not yet tracked; covered by espeak.	0
+pcm	Nigerian Pidgin	English creole	Latin	5000000	116000000					implemented		🔷				0
+pl	Polish	Slavic (West)	Latin	40000000						implemented		✅				1
+pnb	Western Punjabi (Lahnda)	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	66000000						implemented		🟡				0
+ps	Pashto	Iranian (Eastern)	Arabic (Pashto)	40000000						implemented		🟡				1
+pt	Portuguese	Romance	Latin	240000000	25000000					implemented		✅				1
+qu	Quechua	Quechuan	Latin	7500000					1	unimplemented					Not yet tracked; covered by espeak.	0
+quc	K'iche'	Mayan	Latin	1100000					1	unimplemented					Not yet tracked; covered by espeak.	0
+raj	Rajasthani	Indo-Aryan	Devanagari	20000000						unimplemented	macrolanguage umbrella				Cover term (Marwari, Dhundhari, …), not a single phonology.	0
+rn	Kirundi	Niger-Congo (Bantu)	Latin	11000000						implemented		🔷				0
+ro	Romanian	Romance	Latin	24000000	4000000					implemented		🟡				1
+ru	Russian	Slavic (East)	Cyrillic	150000000	110000000					implemented		✅				1
+rup	Aromanian	Indo-European (Romance)	Latin	250000					1	unimplemented					Not yet tracked; covered by espeak.	0
+rw	Kinyarwanda	Niger-Congo (Bantu)	Latin	12000000						implemented		🔷				0
+sat	Santali	Austroasiatic (Munda)	Ol Chiki	7000000						unimplemented					New script family (Ol Chiki).	0
+sd	Sindhi	Indo-Aryan	Arabic (Sindhi)	33000000						implemented		🟡				1
+shn	Shan	Tai-Kadai (Tai)	Shan (Myanmar)	3300000					1	unimplemented					Not yet tracked; covered by espeak.	0
+si	Sinhala	Indo-Aryan	Sinhala	16000000	2000000					implemented		✅				0
+sk	Slovak	Indo-European (West Slavic)	Latin	5200000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+skr	Saraiki	Indo-Aryan (Lahnda)	Arabic (Shahmukhi)	26000000						implemented		🔷				0
+sl	Slovenian	Indo-European (South Slavic)	Latin	2100000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+smj	Lule Sami	Uralic (Sami)	Latin	2000					1	unimplemented					Not yet tracked; covered by espeak.	0
+sn	Shona	Niger-Congo (Bantu)	Latin	9000000						implemented		🔷				1
+so	Somali	Afro-Asiatic (Cushitic)	Latin	22000000						implemented		✅				1
+sq	Albanian	Indo-European (Albanian)	Latin	6000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅				1
+st	Sesotho (Southern Sotho)	Niger-Congo (Bantu)	Latin	6000000	8000000	0	3	0	0	implemented		🔷			Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.	0
+su	Sundanese	Austronesian	Latin	32000000						implemented		✅				0
+sv	Swedish	Germanic	Latin	10000000						implemented		✅				1
+sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅				1
+syl	Sylheti	Indo-Aryan (Eastern)	Syloti Nagri	11000000		397	492	0	0	implemented		🔷				0
+ta	Tamil	Dravidian	Tamil	79000000	8000000					implemented		✅				1
+te	Telugu	Dravidian	Telugu	83000000	13000000					implemented		✅				1
+tg	Tajik	Iranian (SW)	Cyrillic	8000000	4000000					implemented		✅				1
+th	Thai	Kra-Dai	Thai	60000000	40000000					implemented		✅				1
+ti	Tigrinya	Semitic (Ethiosemitic)	Ge'ez	9000000		0	26	1	0	implemented		🔷				0
+tk	Turkmen	Turkic (Oghuz)	Latin	5000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+tl	Tagalog	Austronesian (Philippine)	Latin	28000000	60000000					implemented		🟢				1
+tn	Setswana	Niger-Congo (Bantu)	Latin	6000000	8000000					implemented		🔷				0
+tr	Turkish	Turkic (Oghuz)	Latin	84000000	6000000					implemented		✅				1
+tt	Tatar	Turkic (Kipchak)	Cyrillic	5000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+ug	Uyghur	Turkic (Karluk)	Arabic (Uyghur)	11000000						implemented		✅				0
+uk	Ukrainian	Slavic (East)	Cyrillic	33000000						implemented		✅				1
+umb	Umbundu	Niger-Congo (Bantu)	Latin	6000000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+ur	Urdu	Indo-Aryan	Arabic (Urdu)	70000000	160000000					implemented		🟡				1
+uz	Uzbek	Turkic (Karluk)	Latin/Cyrillic	35000000						implemented		✅				1
+vi	Vietnamese	Austroasiatic	Latin	85000000						implemented		✅				1
+wo	Wolof	Niger-Congo (Atlantic)	Latin	5000000	7000000					implemented		🔷				1
+wuu	Wu Chinese (Shanghainese)	Sinitic	Han	83000000						implemented		🔷				0
+xh	Xhosa	Niger-Congo (Bantu)	Latin	8000000	11000000					implemented		✅				1
+yo	Yoruba	Niger-Congo (Volta-Niger)	Latin	46000000						implemented		✅				1
+yue	Cantonese (Yue)	Sinitic	Han	86000000						implemented		✅				1
+za	Zhuang	Kra-Dai	Latin/Sawndip	16000000						implemented		🔷				0
+zsm	Standard Malay	Austronesian (Malayic)	Latin	20000000	60000000					implemented			id		ALIAS to the Indonesian engine (served_by=id) — a labelled approximation, like bgc->hi. Malay and Indonesian are mutually intelligible standardisations of the same Malayic language, sharing the reformed Latin orthography and ~the same grapheme->IPA phonology; NO independent Malay referee wired, and the documented differences (Malaysian final open <a> -> [ə], some vowel realisations) are accent-level, not a categorical delta. Locked by test/malay-alias.test.ts. If a referee + documented delta appear, replace with a bespoke module.	1
+zu	Zulu	Niger-Congo (Bantu)	Latin	12000000	16000000					implemented		✅				1

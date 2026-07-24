@@ -11,7 +11,7 @@ import csv, os, sqlite3
 HERE = os.path.dirname(os.path.abspath(__file__))
 DB   = os.path.join(HERE, "languages.db")
 
-INT_COLS = {"l1_speakers","l2_speakers","wikipron_entries","kaikki_entries","epitran","espeak"}
+INT_COLS = {"l1_speakers","l2_speakers","wikipron_entries","kaikki_entries","epitran","espeak","fleurs"}
 
 def main():
     with open(os.path.join(HERE,"schema.sql")) as f:

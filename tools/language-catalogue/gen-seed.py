@@ -263,13 +263,14 @@ nso|⛔
 # code | served_by   — a language served by ANOTHER language's engine as a labelled approximation (not bespoke).
 SERVED = """
 bgc|hi
+zsm|id
 """
 
 # Extra rows (rejected / unimplemented candidates):
 # code | name | family | script | L1m | L2m | decision | rejection_reason | notes
 EXTRA = """
 ctg|Chittagonian|Indo-Aryan (Eastern)|(no standard script)|13||rejected|unsuitable orthography|Built then REMOVED — 3 competing scripts, no community-adopted standard. Contrast bho/awa/syl (real script tradition).
-zsm|Standard Malay|Austronesian (Malayic)|Latin|20|60|rejected|macrolanguage umbrella|Mutually intelligible with and covered by Indonesian (id).
+zsm|Standard Malay|Austronesian (Malayic)|Latin|20|60|implemented||ALIAS to the Indonesian engine (served_by=id) — a labelled approximation, like bgc->hi. Malay and Indonesian are mutually intelligible standardisations of the same Malayic language, sharing the reformed Latin orthography and ~the same grapheme->IPA phonology; NO independent Malay referee wired, and the documented differences (Malaysian final open <a> -> [ə], some vowel realisations) are accent-level, not a categorical delta. Locked by test/malay-alias.test.ts.
 arq|Algerian Arabic|Semitic (Arabic)|Arabic|40||unimplemented|data scarcity|No wikipron, no kaikki — cannot verify (would be authored-blind, the bho trap). Largest missing Arabic dialect.
 ars|Najdi Arabic|Semitic (Arabic)|Arabic|30||unimplemented|data scarcity|No wikipron, no kaikki.
 aec|Sa'idi Arabic (Upper Egypt)|Semitic (Arabic)|Arabic|25||unimplemented|data scarcity|No wikipron, no kaikki.
@@ -295,9 +296,24 @@ bo|Tibetan|Sino-Tibetan|Tibetan|6||unimplemented||Large orthography-to-sound gap
 kok|Konkani|Indo-Aryan (Southern)|Devanagari|2||unimplemented||Was in espeak-portable; small.
 """
 
+# The FLEURS-102 speech-benchmark language set, mapped to our codes by the benchmark's ACTUAL recorded variety (not
+# the dataset-card English name): Arabic = ar_eg → arz (Egyptian, not MSA); Spanish = es_419 → es-419 (Latin
+# American, not European); Malay = ms_my → zsm; Norwegian = nb_no → nb; Filipino = fil_ph → tl; Armenian = hy_am → hy
+# (Eastern); Northern-Sotho = nso_za → nso; Nyanja = ny_mw → nya. (Portuguese is pt_br/Brazilian, but we have only a
+# single `pt` row, so it maps there.)
+FLEURS = set("""
+ast bs ca hr da nl en fi fr gl de el hu is ga it kea lb mt nb oc pt es-419 sv cy
+hy be bg cs et ka lv lt mk pl ro ru sr sk sl uk
+arz az he kk ky mn ps fa ckb tg tr uz
+af am ff lg ha ig kam ln luo nso nya om sn so sw umb wo xh yo zu
+as bn gu hi kn ml mr ne or pa sd ta te ur
+my ceb tl id jv km lo zsm mi th vi
+yue cmn ja ko
+""".split())
+
 COLS = ["code","name","family","script","l1_speakers","l2_speakers",
         "wikipron_entries","kaikki_entries","epitran","espeak",
-        "decision","rejection_reason","verdict","served_by","pr","notes"]
+        "decision","rejection_reason","verdict","served_by","pr","notes","fleurs"]
 
 def m(x):  # millions string → absolute int (or "")
     x=x.strip()
@@ -317,15 +333,16 @@ def rows_from_blocks():
     for l in SERVED.strip().splitlines():
         c,sb=l.split("|"); served[c]=sb
     rows=[]
+    fl=lambda c: "1" if c in FLEURS else "0"
     for l in IMPL.strip().splitlines():
         c,v,name=l.split("|")
         fam,scr,l1,l2=meta.get(c,("","","",""))
         w,k,e,s=ref.get(c,("","","",""))
-        rows.append([c,name,fam,scr,l1,l2,w,k,e,s,"implemented","",v,served.get(c,""),"",""])
+        rows.append([c,name,fam,scr,l1,l2,w,k,e,s,"implemented","",v,served.get(c,""),"","",fl(c)])
     for l in EXTRA.strip().splitlines():
         c,name,fam,scr,l1,l2,dec,reason,notes=l.split("|")
         w,k,e,s=ref.get(c,("","","",""))
-        rows.append([c,name,fam,scr,m(l1),m(l2),w,k,e,s,dec,reason,vext.get(c,""),served.get(c,""),"",notes])
+        rows.append([c,name,fam,scr,m(l1),m(l2),w,k,e,s,dec,reason,vext.get(c,""),served.get(c,""),"",notes,fl(c)])
     return rows
 
 def main():
@@ -333,7 +350,7 @@ def main():
     rows=rows_from_blocks()
     rows.sort(key=lambda r: r[0])
     with open(os.path.join(here,"catalogue.tsv"),"w",newline="") as f:
-        w=csv.writer(f,delimiter="\t")
+        w=csv.writer(f,delimiter="\t",lineterminator="\n")  # LF, not the csv default CRLF (repo is LF)
         w.writerow(COLS)
         w.writerows(rows)
     print(f"wrote catalogue.tsv — {len(rows)} rows")

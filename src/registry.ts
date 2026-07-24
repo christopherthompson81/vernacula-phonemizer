@@ -254,6 +254,14 @@ function build(lang: string): Phonemizer {
             return createUrdu((latin) => getPhonemizer("en").text(latin));
         case "id":
             return createIndonesian();
+        // Standard Malay (Malaysian/Bruneian) — ALIAS to the Indonesian engine as a labelled approximation. Malay and
+        // Indonesian are mutually intelligible standardisations of the same Malayic language, sharing the reformed
+        // Latin orthography and largely the same grapheme→IPA phonology. There is no independent Malay referee wired,
+        // and the documented differences (Malaysian final open ⟨a⟩ leaning to [ə], some vowel realisations) are
+        // accent-level, not a categorical grapheme→IPA delta — so `id` is its nearest verified sibling. First-class
+        // code, transparent that no Malay-specific phonology is claimed. See tools/language-catalogue (served_by='id').
+        case "zsm":
+            return createIndonesian();
         case "pa":
             return createPunjabi((latin) => getPhonemizer("en").text(latin));
         // Western Punjabi / Lahnda (Shahmukhi, Pakistan) — the SAME Punjabi engine; the scanner auto-detects the
