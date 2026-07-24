@@ -1,0 +1,16 @@
+// Umbundu (umb) — Bantu (R11, Angola). Referee GAP: no independent machine referee EXISTS (en.wiktionary Umbundu
+// IPA = 0; no kaikki umb; no epitran umb-Latn; no wikipron umb). The one independent datum is the ASJP Umbundu-3
+// wordlist (40 Swadesh concepts, Segerer & Wichmann) — coarse ASJP-code, no orthography/tone/length, so it
+// CORROBORATES the phoneme inventory + rough sound values (⟨c⟩=t͡ʃ, prenasalised voiced stops, ⟨v⟩=v, ⟨l⟩=l) but
+// cannot serve as an orthography→IPA referee. Unlike Bhojpuri this is NOT circular (Umbundu is a distinct, well-
+// documented language, not a clone), so the hand-adjudicated gold in test/umbundu.test.ts is a MEANINGFUL correctness
+// anchor — the Igbo/Naija no-referee pattern. 🔷 single-source.
+{
+    "language": "umb",
+    "name": "Umbundu",
+    "script": "Latin",
+    "provenance": "Authored from the Umbundu orthography + documented phonology (Wikipedia Umbundu_language; Schadeberg-consistent), ASJP Umbundu-3 corroborated.",
+    "referees": [],
+    "secondaryGap": "No independent machine referee for Umbundu (wikipron umb, epitran umb-Latn, kaikki umb, en.wiktionary Umbundu IPA all absent). The ASJP Umbundu-3 wordlist (coarse, orthography-free) corroborates the inventory only. The anchor is the adjudicated common-word gold in test/umbundu.test.ts. Tone (H/L + downstep) is often unwritten → accents stripped, tone DEFERRED; cardinal numbers DEFERRED.",
+    "folds": []
+}
