@@ -8,6 +8,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
+import { numberToWords } from "./numbers.ts";
+import { bichigToCyrillic, isBichig } from "./mongolBichig.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Word-final obstruent devoicing: only в→f (Женев→dʒɛnɛf). Final г stays voiced (хаг→xaɡ, хурга→xʊrəɢ).
@@ -21,7 +23,7 @@ const isCons = (s: Seg | undefined): boolean => s !== undefined && !s.nucleus;
  *  reduces (quality by the original letter's rounding); a word-final short vowel DELETES (Дани→tän, хаана→xaːn). If
  *  deleting a final vowel leaves a final consonant CLUSTER, an epenthetic reduced vowel breaks it (хурга→xʊrəɢ). Long
  *  vowels / diphthongs stay full. */
-function reduce(segs: Seg[], initialFull = true): Seg[] {
+function reduce(segs: Seg[], initialFull = true, keepNonFinal = false): Seg[] {
     let seen = !initialFull; // a bound morpheme (a -suffix entry) has NO full first vowel — everything reduces
     const out: Seg[] = [];
     let epenthesis: string | null = null; // reduced quality of a deleted final vowel, to break a resulting cluster
@@ -32,7 +34,8 @@ function reduce(segs: Seg[], initialFull = true): Seg[] {
         if (!s.short) { out.push(s); continue; } // long vowel / diphthong stays full
         const reduced = REDUCED_OF[s.ph] ?? "ə";
         if (i === segs.length - 1) { epenthesis = reduced; continue; } // word-final short vowel → delete
-        out.push({ ph: reduced, nucleus: true, short: true }); // non-initial short → reduced
+        // A mixed-harmony (loanword) word keeps its non-final vowels FULL — reduction is a native-word process.
+        out.push(keepNonFinal ? s : { ph: reduced, nucleus: true, short: true });
     }
     // Epenthesis: a deleted final vowel that leaves a final consonant cluster surfaces as a reduced vowel inside it.
     if (epenthesis && out.length >= 2 && isCons(out[out.length - 1]) && isCons(out[out.length - 2])) {
@@ -41,8 +44,10 @@ function reduce(segs: Seg[], initialFull = true): Seg[] {
     return out;
 }
 
-/** One Mongolian word → canonical IPA. */
+/** One Mongolian word → canonical IPA. A word in the traditional Mongolian script (Mongol bichig) is transliterated
+ *  to Cyrillic first (mongolBichig.ts) and then run through the same pipeline. */
 export function phonemizeWord(word: string): string {
+    if (isBichig(word)) word = bichigToCyrillic(word);
     const w = word.toLowerCase();
     const raw = toSegments(w);
     if (!raw.some((s) => s.nucleus)) return raw.map((s) => s.ph).join(""); // vowelless (a letter name) — no rules
@@ -54,7 +59,10 @@ export function phonemizeWord(word: string): string {
         if (next === undefined || /^[ɡɢkxχq]/u.test(next)) raw[i]!.ph = "ŋ";
     }
     const bound = /^[-­]/u.test(word); // a -suffix entry (hyphen / soft-hyphen): its leading vowel is non-initial
-    let segs = reduce(raw, !bound);
+    // A word mixing BACK (а/о/у/я/ё/ю) and FRONT (э/ө/ү/е) vowels violates Mongolian vowel harmony → it is a loanword
+    // (Герман, Австри), whose non-initial vowels stay FULL rather than reducing. (и/ы are neutral.)
+    const loan = /[аоуяёю]/u.test(w) && /[эөүе]/u.test(w);
+    let segs = reduce(raw, !bound, loan);
     // Final obstruent devoicing on the last segment — but NOT when the written word ends in ь (the soft sign was
     // dropped, so the obstruent isn't truly final: Говь → ɢow, not ɢof).
     const last = segs[segs.length - 1];
@@ -63,13 +71,13 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = /([Ѐ-ӿᠠ-ᡂ᠋-᠎‌‍ ]+)|(\d+)|([.!?…,;:])/gu;
 
 class MongolianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            // numbers deferred (Mongolian cardinal compositor not yet authored)
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // cardinal → words → IPA
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
