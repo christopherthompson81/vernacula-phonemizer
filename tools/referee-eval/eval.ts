@@ -301,6 +301,9 @@ export interface RefereeResult {
 export async function evaluate(
     lang: string,
     primaryOnly = false,
+    sampleCap = 0, // >0 → evaluate only a deterministic stride sample of this many rows (the floor test uses it to
+    // stay fast on huge referees run through slow phonemizers, e.g. en-GB's 76k words × the neural English G2P; the
+    // CLI leaves it 0 = full). A uniform stride keeps the folded% a faithful estimate of the whole.
 ): Promise<RefereeResult[]> {
     const cfg = CONFIG[lang],
         phon = PHON[lang];
@@ -309,11 +312,15 @@ export async function evaluate(
     for (const ref of cfg.referees) {
         if (primaryOnly && ref.role !== "primary") continue; // floor test only needs the primary (skip slow 2nd)
         const fold = makeFold(cfg, ref.folds); // per-referee folds appended (e.g. pa's majhūl only for Shahmukhi)
-        const pairs = readFileSync(join(HERE, "referees", ref.file), "utf8")
+        let pairs = readFileSync(join(HERE, "referees", ref.file), "utf8")
             .split("\n")
             .filter((l) => l.trim() !== "" && !l.startsWith("#"))
             .map((l) => l.split("\t"))
             .filter((a) => a.length >= 2 && a[0] && a[1]);
+        if (sampleCap > 0 && pairs.length > sampleCap) {
+            const stride = Math.ceil(pairs.length / sampleCap);
+            pairs = pairs.filter((_, i) => i % stride === 0);
+        }
         let raw = 0,
             folded = 0;
         const diffClass: Record<string, number> = {};
