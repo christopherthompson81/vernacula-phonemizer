@@ -121,9 +121,15 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
         yo: 0.86, // wikipron yor_latn broad (HUMAN, 4937) — 89.6% FOLDED; kaikki yor (2nd, HUMAN, 4055) 88.8%. Volta-Niger, highly phonemic three-tone Latin orthography. Labial-velars ⟨gb⟩→ɡ͡b / ⟨p⟩→k͡p, ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→ɾ, gh→ɣ, Cʷ labialisation; dotted vowels ẹ→ɛ ọ→ɔ; coda-⟨n⟩ nasalisation (ọdún→ɔdũ) vs onset n; syllabic m̩/n̩; THREE level tones as Chao letters (backbone strips them + the referee's tone-accent diacritics, so this grades the SEGMENTAL backbone). Folds r~ɾ. Residual is referee noise (single-letter/letter-name entries B→bí, IPA-glyph headwords Ɔ̀, syllabic-nasal place). Two independent human referees corroborate.
         zu: 0.99, // epitran zul-Latn — clicks/implosives/ejectives/laterals corroborated (measured 100%)
     };
+    // Sample-cap the floor check so huge referees don't dominate the suite. A uniform stride keeps folded% faithful.
+    // Cheap rule-g2p langs are capped at 5000 (enough that even a tight floor like km's 54% is stable); the NEURAL
+    // phonemizers (English G2P beam search, the Arabic ONNX diacritizer) are the slow ones and get a tighter 3000 —
+    // their floors (en 30%, en-GB 38%, ar 62%) have ample headroom for the extra sampling variance.
+    // (it.concurrent does not help: the neural G2P is synchronous CPU work Node can't parallelise within a worker.)
+    const NEURAL = new Set(["en", "en-GB", "ar"]);
     for (const [lang, floor] of Object.entries(floors)) {
         it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
-            const primary = (await evaluate(lang, true)).find(
+            const primary = (await evaluate(lang, true, NEURAL.has(lang) ? 3000 : 5000)).find(
                 (r) => r.role === "primary",
             );
             expect(
