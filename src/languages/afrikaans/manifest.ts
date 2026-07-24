@@ -14,6 +14,25 @@ export interface AfrikaansManifest {
     vowelsShort: Record<string, string>;
     diacriticVowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    numbers: {
+        units: string[];
+        teens: string[];
+        tens: string[];
+        en: string;
+        hundred: string;
+        thousand: string;
+        million: string;
+    };
+    morphology: {
+        prefixUnstressed: string[];
+        prefixStressed: string[];
+        ambiguousPrefixes: string[];
+        suffixes: string[];
+        vowelInitialSuffixes: string[];
+        linkingElements: string[];
+        validOnsets: string[];
+        stKeep: string[];
+    };
 }
 
 export const MANIFEST = loadManifest<AfrikaansManifest>(import.meta.url, "afrikaans.jsonc");

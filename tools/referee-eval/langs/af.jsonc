@@ -22,6 +22,7 @@
         { "pattern": "x", "replace": "χ", "note": "⟨g⟩/⟨ch⟩ fricative: the referee writes it [χ]~[x] (uvular~velar) inconsistently; non-contrastive → fold to [χ]" },
         { "pattern": "ɪ", "replace": "i", "note": "the centering-diphthong onset ⟨ee⟩/open-e is written [ɪə]~[iə]; non-contrastive height → fold [ɪ]→[i] (we emit iə)" },
         { "pattern": "ʊ", "replace": "u", "note": "the centering-diphthong onset ⟨oo⟩/open-o is written [ʊə]~[uə]; non-contrastive height → fold [ʊ]→[u] (we emit uə)" },
+        { "pattern": "o(?![ː])", "replace": "ɔ", "note": "short ⟨o⟩ height: the referee writes it [o]~[ɔ] freely; non-contrastive → fold plain [o]→[ɔ] (we emit ɔ; long/diphthong oː untouched)" },
         { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" }
     ]
 }

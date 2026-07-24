@@ -10,6 +10,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, FIXED_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { decompose } from "./morphology.ts";
 
 const FIXED = MANIFEST.fixed;
 const LONG = MANIFEST.vowelsLong;
@@ -39,12 +41,23 @@ const REDUCE: Record<string, string> = { a: "a", e: "ə", i: "ə", o: "ɔ", u: "
 
 // Unstressed one-syllable prefixes: stress falls on the following syllable (begín, gemáák, verstáán, ontdék, herháál).
 const UNSTRESSED_PREFIX = /^(be|ge|ver|ont|her|er)[^aeiouyêôûîëïéèáàóúü]*[aeiouyêôûîëïéèáàóúü]/u;
+const VOWEL_GROUP = /[aeiouyêôûîëïéèáàóúü]+/gu;
 
-/** Phonemize one Afrikaans word to canonical IPA. */
-export function phonemizeWord(word: string): string {
+/** The (0-based) nucleus that carries primary stress. Native default = the first syllable (past an unstressed
+ *  prefix); loan suffixes shift it: -ie/-sie/-asie → penultimate (aborsie→a·BOR·sie), -eer/-eur/-teit → final. */
+function stressedNucleus(w: string): number {
+    const n = (w.match(VOWEL_GROUP) ?? []).length;
+    if (n <= 1) return 0;
+    if (/(eer|eur|oor|oon|yn|ees|teit|siteit|isme)$/u.test(w)) return n - 1; // stress-final loan suffixes
+    if (/ie$/u.test(w)) return n - 2; // -ie / -sie / -asie / -osie → penultimate
+    return UNSTRESSED_PREFIX.test(w) ? 1 : 0;
+}
+
+/** Phonemize a single MORPHEME (a whole non-compound word, or one element of a compound) — its own first-syllable
+ *  stress, open/closed length, and word-/morpheme-final devoicing. */
+function phonemizeMorpheme(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
-    if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
-    const stressNucleus = UNSTRESSED_PREFIX.test(w) ? 1 : 0; // stress ≈ first syllable, past an unstressed prefix
+    const stressNucleus = stressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
     let out = "";
     let i = 0;
     let nucleus = 0; // count of vowel nuclei emitted so far
@@ -57,8 +70,11 @@ export function phonemizeWord(word: string): string {
         let matched = false;
         for (const key of FIXED_KEYS) {
             if (w.startsWith(key, i)) {
-                const final = i + key.length === w.length;
-                out += (final && DEVOICE[key]) ? DEVOICE[key]! : FIXED[key]!; // word-final devoicing
+                const next = w[i + key.length];
+                // devoicing: a voiced obstruent devoices word-finally OR before a VOICELESS consonant (aandklok→ɑnt);
+                // it stays voiced before a vowel or a voiced consonant.
+                const devoiceHere = next === undefined || "ptksfcgx".includes(next);
+                out += (devoiceHere && DEVOICE[key]) ? DEVOICE[key]! : FIXED[key]!;
                 if (VOWEL_LETTER.has(key[0]!)) nucleus += 1; // a vowel digraph is a nucleus
                 i += key.length;
                 matched = true;
@@ -81,13 +97,32 @@ export function phonemizeWord(word: string): string {
     return out;
 }
 
+// Reduced IPA for the UNSTRESSED (inseparable) prefixes — phonemised standalone they'd wrongly stress their vowel
+// (ver→fɛr), but as a prefix the vowel reduces (ver·staan → fər·stɑːn). Separable prefixes (aan/af…) carry stress and
+// take the normal morpheme path.
+const PREFIX_IPA: Record<string, string> = { be: "bə", ge: "χə", ver: "fər", ont: "ɔnt", her: "ɦər", er: "ər" };
+
+/** Phonemize one Afrikaans word to canonical IPA. Compounds/affixed words are DECOMPOSED (shared morphology) and
+ *  each morpheme phonemized independently — so each element keeps its OWN stressed vowel (no cross-element reduction:
+ *  aand·ete → ɑnt·iətə) and devoices at its own boundary; an unstressed prefix reduces. Single morpheme → direct. */
+export function phonemizeWord(word: string): string {
+    const w = word.normalize("NFC").toLowerCase();
+    if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
+    const d = decompose(w);
+    if (d.parts.length <= 1) return phonemizeMorpheme(w);
+    return d.parts
+        .map((p, idx) => (d.kinds[idx] === "prefix" && idx < d.stressPart ? (PREFIX_IPA[p] ?? phonemizeMorpheme(p)) : phonemizeMorpheme(p)))
+        .join("");
+}
+
 const TOKEN = /([\p{L}\p{M}'’]+)|(\d+)|([.!?…,;:])/gu;
 
 class AfrikaansPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // cardinal → words → IPA
+
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
