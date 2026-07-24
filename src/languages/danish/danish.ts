@@ -11,6 +11,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { taggerPhonemize } from "./tagger.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const V = MANIFEST.vowels;
@@ -63,10 +64,20 @@ export function phonemizeWordRules(word: string): string {
         if (c === "h" && (next === "j" || next === "v")) continue; // silent h before j/v
         if (c === "t" && next === "h") continue; // th → t (silent h)
         if (c === "d" && (prev === "n" || prev === "l")) continue; // silent d in nd/ld
+        if (c === "g" && isV(prev) && final) continue; // MINED: final ⟨g⟩ after a vowel → silent (rolig→roli, dig→di)
         if (!isV(c) && next === c) continue; // doubled consonant → single
 
         // ── vowels ──
-        if (isV(c)) { const fin = c === "e" && final; V_(fin ? "ə" : V[c]!, fin); continue; }
+        if (isV(c)) {
+            if (c === "e" && final) { V_("ə", true); continue; } // final unstressed ⟨e⟩ → schwa
+            // MINED contextual vowel rules (from the aligned lexicon): ⟨i⟩→[e] before ⟨n⟩+consonant (ind→en,
+            // -ning→neŋ), ⟨o⟩→[ʌ] before ⟨ld⟩ (hold→hʌl).
+            const nn = chars[i + 2] ?? "";
+            if (c === "i" && next === "n" && nn !== "" && !isV(nn)) { V_("e"); continue; }
+            if (c === "o" && next === "l" && nn === "d") { V_("ʌ"); continue; }
+            V_(V[c]!);
+            continue;
+        }
 
         // ── context consonants ──
         // soft d: ⟨d⟩ → ð only INTERVOCALICALLY or word-finally after a vowel; before a consonant it stays [d].
@@ -89,9 +100,36 @@ export function phonemizeWordRules(word: string): string {
     return segs.map((s) => (s.stress ? "ˈ" : "") + s.ph).join("");
 }
 
-/** One Danish word → canonical IPA: LEXICON first (the primary path for the deep orthography), else the rule engine. */
+// IPA vowels the tagger can emit; the two REDUCED ones (‑e schwa, ‑er) never carry primary stress.
+const IPA_VOWELS = new Set([..."aɑeɛioɔuyøœəɐʌæ"]);
+const IPA_REDUCED = new Set([..."əɐ"]);
+
+/** Place ONE primary ˈ on the tagger's IPA (which is stress-less — the training data drops ˈ/ˌ), mirroring the rule
+ *  engine: first full (non-reduced) vowel, shifted to the vowel AFTER an unstressed prefix; monosyllables unmarked.
+ *  Keeps OOV output stress-consistent with the lexicon + rule tiers (a canonical-IPA target — stress is a real axis). */
+function applyStress(word: string, ipa: string): string {
+    if (ipa.includes("ˈ")) return ipa;
+    const chars = [...ipa];
+    const vowelIdx: number[] = [];
+    for (let i = 0; i < chars.length; i++) if (IPA_VOWELS.has(chars[i]!)) vowelIdx.push(i);
+    if (vowelIdx.length < 2) return ipa; // monosyllable → no mark (matches the rule engine)
+    const firstFull = vowelIdx.find((i) => !IPA_REDUCED.has(chars[i]!));
+    if (firstFull === undefined) return ipa; // all-reduced → nothing to stress
+    const ord = UNSTRESSED_PREFIX.test(word) ? 1 : 0;
+    const cand = vowelIdx[ord];
+    const target = cand !== undefined && !IPA_REDUCED.has(chars[cand]!) ? cand : firstFull;
+    chars.splice(target, 0, "ˈ");
+    return chars.join("");
+}
+
+/** One Danish word → canonical IPA. THREE tiers for the deep orthography: (1) the LEXICON (known words, reference
+ *  quality), (2) the perceptron TAGGER (OOV — recovers the context-conditioned vowel quality/reduction the rules miss:
+ *  held-out 45.5% vs the rule engine's 30.5% on the same split, folded; re-stressed by applyStress since the tagger is stress-less),
+ *  (3) the RULE engine (fallback when the tagger model is absent OR returns empty). */
 export function phonemizeWord(word: string): string {
-    return lexicon().get(word.toLowerCase()) ?? phonemizeWordRules(word);
+    const w = word.toLowerCase();
+    const tagged = taggerPhonemize(w); // string | null; "" (all-deletion) must also fall through → coerce to null
+    return lexicon().get(w) ?? (tagged ? applyStress(w, tagged) : null) ?? phonemizeWordRules(w);
 }
 
 // A Danish word (Latin incl. æ ø å + accents) / number / punctuation token.

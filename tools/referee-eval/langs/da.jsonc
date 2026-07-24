@@ -9,6 +9,9 @@
     "secondaryGap": "single-source (en.wiktionary, 7699 words). wikipron dan is a candidate 2nd. The transcription is very NARROW (stød, aspiration/affrication, voiceless diacritics, half-length, syllable dots) — much of the divergence is that suprasegmental layer, folded here; Danish is a deep orthography so a real segmental ceiling remains.",
     "folds": [
         { "pattern": "ˀ", "replace": "", "note": "STØD (glottalisation/creaky voice) — suprasegmental, not predictable from spelling → deferred, fold" },
+        { "pattern": "[nŋ][ɡk]", "replace": "ŋ", "note": "velar-nasal cluster: the referee writes ⟨ng⟩/⟨nk⟩ inconsistently as ŋ ~ ŋɡ ~ nɡ ~ ŋk (arving→arvenɡ but -ing→eŋ; bank→baŋɡ) — a genuine notation inconsistency (the post-nasal velar stop's presence + voicing) → collapse to ŋ (miss-mining: +3.4pp with final-stop voicing, confirmed noise)" },
+        { "pattern": "ɡ$", "replace": "k", "note": "final ⟨g⟩ voicing: Danish final unaspirated velar is [k]~[ɡ̊]; the referee (voiceless-diacritic stripped) writes it k or ɡ inconsistently (alk→alɡ) → fold final ɡ→k" },
+        { "pattern": "b$", "replace": "p", "note": "final ⟨b⟩ voicing: [p]~[b̥] written inconsistently → fold final b→p (companion to the final velar/aspiration folds)" },
         { "pattern": "ˑ", "replace": "", "note": "half-length in the narrow referee → fold" },
         { "pattern": "\\.", "replace": "", "note": "syllable dots" },
         { "pattern": "\\(", "replace": "", "note": "optional-segment parens in the narrow referee" },
