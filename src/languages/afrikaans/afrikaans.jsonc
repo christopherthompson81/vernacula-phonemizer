@@ -22,7 +22,7 @@
         "aai": "ɑːi", "ooi": "oːi", "oei": "ui", "eeu": "iːu", "aau": "ɑːu",
         "aa": "ɑː", "ee": "iə", "oo": "uə", "uu": "yː", "ie": "i", "oe": "u", "eu": "øː",
         "ei": "əi", "ui": "œy", "ou": "œu", "au": "œu", "y": "əi",
-        "tjie": "ki", "djie": "ki", "jie": "ki", "tz": "ts", "sj": "ʃ", "tj": "c", "dj": "dʒ", "ch": "ʃ", "gh": "χ",
+        "tjie": "ki", "djie": "ki", "jie": "ki", "tz": "ts", "sj": "ʃ", "tj": "c", "dj": "dʒ", "ch": "ʃ",
         "ng": "ŋ", "nk": "ŋk",
         "b": "b", "d": "d", "f": "f", "g": "χ", "h": "ɦ", "j": "j", "k": "k",
         "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t",
@@ -41,5 +41,28 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // Cardinal number words (authored spelling; the compositor in numbers.ts phonemizes each through the g2p, so
+    // they stay in our convention). Afrikaans uses the Dutch-style UNIT-en-TEN order: 21 = een-en-twintig.
+    "numbers": {
+        "units": ["nul", "een", "twee", "drie", "vier", "vyf", "ses", "sewe", "agt", "nege"],
+        "teens": ["tien", "elf", "twaalf", "dertien", "veertien", "vyftien", "sestien", "sewentien", "agtien", "negentien"],
+        "tens": ["", "", "twintig", "dertig", "veertig", "vyftig", "sestig", "sewentig", "tagtig", "negentig"],
+        "en": "en", "hundred": "honderd", "thousand": "duisend", "million": "miljoen"
+    },
+
+    // Morphology for the shared West-Germanic compound engine (core/germanicMorphology.ts). Afrikaans is heavily
+    // compounding like Dutch/German; splitting a word into its morphemes lets each element be phonemized with its own
+    // stress + coda devoicing (aand·ete → ɑnt·iətə). Affixes longest-first. The stem lexicon is a frequency wordlist.
+    "morphology": {
+        "prefixUnstressed": ["ver", "ont", "her", "be", "ge", "er"],
+        "prefixStressed": ["agter", "binne", "buite", "onder", "terug", "deur", "voor", "saam", "teen", "aan", "af", "by", "in", "om", "oor", "op", "uit", "weg", "mee", "toe", "na"],
+        "ambiguousPrefixes": ["be", "ge", "er"],
+        "suffixes": ["likheid", "heid", "teit", "asie", "isie", "isme", "agtig", "baar", "loos", "saam", "lik"],
+        "vowelInitialSuffixes": ["agtig", "asie", "isie"],
+        "linkingElements": ["", "s", "e"],
+        "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "skr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "gn", "ts", "kl"],
+        "stKeep": []
     }
 }

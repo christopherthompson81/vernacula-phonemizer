@@ -66,3 +66,33 @@ Both need what's DEFERRED: a real stress/syllable model + a proper-noun lexicon.
 Goldens in test/afrikaans.test.ts; floor af:0.68. LESSON: code rules must run BEFORE the greedy fixed table (else
 they're dead code — the geminate/n/c rules initially never fired); and a "linguistically correct" rule (n-deletion)
 can still be net-negative vs the referee → always measure.
+
+## Run 3 — 2026-07-24 — deferred improvements + morphological decomposition
+
+Picked up the deferred Afrikaans work (stress/numbers/nasalization) then pivoted to the real lever: **morphology**.
+Accuracy falls off with syllable count (1syl 89%, 2syl 76%, 3syl 60%, 4syl 33%, 5syl 17%) — the drag is COMPOUNDS,
+not proper nouns (measured: names are 117/2220 = 5%, only 32.5% accurate, but lowercase native is 73.4%).
+
+**Engine tuning (73.4% baseline):** pre-voiceless coda devoicing (b/d/z devoice word-finally OR before p/t/k/s/f/c/g/x —
+aandklok→ɑːntklɔk); loan-suffix stress overrides (-eer/-eur/-teit final, -ie penult); geminate collapse + soft-⟨c⟩
+moved BEFORE the fixed table (were dead code after `if(matched)continue`); ei→əi; removed gh→χ (over-applied at the
+lig+heid seam) and c→k default. Numbers (numbers.ts, Dutch-style unit-en-ten: 234→twee honderd en vier en dertig)
+wired through the g2p. Nasalization attempted as n-before-fricative deletion → NET-NEGATIVE (over-deletes native
+monosyllables), left folded.
+
+**Morphological decomposition (73.4% → 74.7%):** extracted German's compound/affix logic to a shared West-Germanic
+engine `src/core/germanicMorphology.ts` (German rewritten as a thin config wrapper, verified BYTE-IDENTICAL — 39 tests,
+78.2%/76.7% unchanged). Afrikaans built on it via `morphology.ts` (config) + `af-stems.txt` (42,743-word frequency
+lexicon from the Leipzig/afwiki corpus). `phonemizeWord` decomposes then phonemizes each morpheme independently so each
+element keeps its own stressed vowel and devoices at its own boundary (aand·ete→ɑːntiətə, huis·deur→ɦœysdøːr,
+kerk·diens→kɛrkdins, staats·president via Fugen-s).
+
+TWO over-split bugs fixed by CONSERVATIVE config: (1) dropped the inflectional suffixes -e/-s/-er/-en/-ig from the
+strip list (they match monomorphemes: water→wat·er where "wat"=what is a real word) — kept only clearly-derivational
+-heid/-lik/-teit/-asie/-isme/-agtig/-baar/-loos/-saam; (2) `realWordStressedPrefixes: all separable prefixes` so a
+prefix only peels when the remainder is a real word (aandete stays aand·ete, not aan·det·e). LESSON: with no
+constituent flags in the lexicon (every wordlist word is both isWord AND isConstituent), suffix/prefix stripping needs
+tight gates or it corrupts monomorphemes. And phonemizing morphemes independently STRESSES unstressed prefixes
+(ver·staan→fɛrstɑːn wrong) → a small PREFIX_IPA reduction table (ver→fər, be→bə, ge→χə…) for prefixes before the stress
+part. **74.7% full (512 raw), floor bumped 0.68→0.73.** 504/2220 referee words decompose (23%). Residual is now 1×
+long-tail: onset-cluster length (Afrika→afrika, "fr" onset should keep the A open→ɑː) + proper nouns + phrase schwa.
