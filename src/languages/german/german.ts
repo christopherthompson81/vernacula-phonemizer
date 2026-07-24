@@ -249,6 +249,35 @@ function placeStress(ipa: string, ordinal: number): string {
     return ipa;
 }
 
+/** Compose an OOV compound morpheme-by-morpheme, each stem corrected by its OWN morpheme-keyed dict entry with LOCAL
+ *  ordinals — so the length/quality/consonant/er corrections generalize to compounds ABSENT from the whole-word dicts
+ *  (Kanzler, Haus, freundlich… are standalone kaikki entries even when the whole compound is not). Re-normalised to a
+ *  single primary stress at the stress-part morpheme. Holdout-measured +7.7pp vs the no-correction fallback on OOV
+ *  compounds (docs/investigations/de_morpheme_keyed_investigation.md). */
+function composeMorphemeKeyed(merged: { text: string; kind: string }[], stressPart: number): string {
+    const pieces = merged.map((m) => {
+        if (m.kind === "prefix" && PREFIX_IPA[m.text]) return PREFIX_IPA[m.text]!;
+        if (m.kind === "suffix" && SUFFIX_IPA[m.text]) return SUFFIX_IPA[m.text]!;
+        return phonemizeWord(m.text); // recurse: each stem gets the FULL pipeline (its own dicts + prefix reduction)
+    });
+    // Collapse the per-morpheme stress marks to ONE primary at the stress-part morpheme (German emits a single ˈ).
+    const sp = Math.min(stressPart, pieces.length - 1);
+    const before = pieces.slice(0, sp).join("").replace(/[ˈˌ]/gu, "");
+    const spPiece = pieces[sp] ?? "";
+    const markIdx = spPiece.search(/[ˈˌ]/u);
+    const localOrd = markIdx < 0 ? 0 : countNuclei(spPiece.slice(0, markIdx));
+    return placeStress(pieces.join("").replace(/[ˈˌ]/gu, ""), countNuclei(before) + localOrd);
+}
+
+// ── Exposed for the morpheme-keyed experiment (docs/investigations/de_morpheme_keyed_investigation.md). These are
+// the whole-word correction stages + dict accessors; the experiment re-applies them keyed per MORPHEME. ──
+export const _internal = {
+    stressDict, lengthDict, qualityDict, consonantDict, erDict,
+    applyLength, applyQuality, applyConsonant, applyErRestore,
+    fixStressedSchwa, restoreStressedIe, restoreStressedEr, placeStress, countNuclei,
+    composeMorphemeKeyed,
+};
+
 /** One German word → canonical IPA. Words that decompose into ≥2 morphemes are composed morpheme-by-morpheme,
  *  so each stem is element-initial (sp/st→ʃ), devoices at its own boundary, and doesn't assimilate across it. */
 export function phonemizeWord(word: string): string {
@@ -268,6 +297,11 @@ export function phonemizeWord(word: string): string {
         else merged.push({ text: p, kind: k });
     }
     if (merged.length > 1) {
+        // HYBRID: a word with ANY whole-word correction (in-kaikki) uses its exact whole-word entry (unchanged); an
+        // OOV compound — absent from every dict — falls back to MORPHEME-KEYED corrections that compose per stem
+        // (see de_morpheme_keyed_investigation.md). Known words are byte-identical; only novel compounds change.
+        const known = stressDict().has(w) || lengthDict().has(w) || qualityDict().has(w) || consonantDict().has(w) || erDict().has(w);
+        if (!known) return composeMorphemeKeyed(merged, d.stressPart);
         const pieces = merged.map((m) => {
             if (m.kind === "prefix" && PREFIX_IPA[m.text])
                 return PREFIX_IPA[m.text]!;
