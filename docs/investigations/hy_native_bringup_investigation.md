@@ -42,3 +42,16 @@ shows real-word ≈ overall (~81%); the single-letter + all-caps-acronym "letter
 Armenian is a separate dialect, not a corroborating referee. Floor 0.79. Wired: registry (`case "hy"`), eval PHON,
 `langs/hy.jsonc` (no folds), `test/armenian.test.ts` (5 tests), catalogue row, maturity row. **Outstanding — the path
 up:** native-vs-loan discrimination for medial epenthesis (a lexicon, the cs/sk precedent) + the name voicing tail.
+
+## Run 2 — 2026-07-24 — code review fixes
+
+3-agent review found two referee-confirmed correctness fixes:
+- **Final schwa over-inserted before /m/** — the word-final rising-sonority rule fired for obstruent+m (կոմունիզմ→
+  komunizəm), but the productive -իզմ/-թմ class keeps a bare coda (referee 75:1 bare). Excluded /m/ from the final
+  sonorant test; obstruent+n and obstruent+liquid still take ə (եզр→jezəɾ kept).
+- **Word-initial ⟨ո⟩→vo over-applied to the ов exceptions** — ов→vov but the referee has ov; ⟨ո⟩ before ⟨վ⟩=v is [o]
+  (haplology, avoiding *vov: ov→ov, ovasis→ovɑsis). որдi→voɾdi is unaffected (next is ր, not վ).
+
+**→ 81.1% folded** (+0.5pp). Goldens added (կոմունիզմ, ов). Full suite passes. Noted-but-not-changed (consistent with
+the uk/be fleet, no number referee): 1000→"мek հазар" (vs bare "հազар"); and the Slavic/Western number composer is now
+a 3rd copy (be/uk/hy) — a candidate for extraction to core/numbers.ts in a dedicated refactor.

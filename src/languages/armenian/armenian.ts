@@ -34,10 +34,12 @@ const isSonorant = (p: string): boolean => /^[lmnɾrj]/u.test(p); // sonorants (
  *  keeps the pair (սկս→skəs). Word-final: a RISING-sonority pair (obstruent+sonorant: եզր zɾ→zəɾ) gets [ə]; a falling
  *  coda (sonorant+obstruent: ...ɑɾtʰ) is valid → no ə. */
 function epenthesize(out: string[]): void {
-    // word-final cluster (after the last vowel)
+    // word-final cluster (after the last vowel): a RISING pair (obstruent + a final sonorant) gets [ə] — but NOT
+    // before /m/, which stays a bare coda (the productive -իզմ / -թմ class: կոմունիզմ→komunizm, ռիթմ→ritʰm).
     let lv = -1;
     for (let i = out.length - 1; i >= 0; i--) if (isVowelPh(out[i]!)) { lv = i; break; }
-    if (out.length - 1 - lv >= 2 && !isSonorant(out[out.length - 2]!) && isSonorant(out[out.length - 1]!)) {
+    const last = out[out.length - 1]!;
+    if (out.length - 1 - lv >= 2 && !isSonorant(out[out.length - 2]!) && isSonorant(last) && last !== "m") {
         out.splice(out.length - 1, 0, "ə");
     }
     // word-initial cluster (before the first vowel)
@@ -67,7 +69,8 @@ export function phonemizeWord(word: string): string {
         // WORD-INITIAL glides: ⟨ե⟩→[je], ⟨ո⟩→[vo], ⟨և⟩→[jev]
         if (i === 0) {
             if (c === "ե") { out.push("je"); continue; }
-            if (c === "ո") { out.push("vo"); continue; }
+            // ⟨ո⟩ → [vo] word-initially, but [o] before ⟨վ⟩=v (haplology, avoiding *vov: ov→o, ovasis→ovɑsis)
+            if (c === "ո") { out.push(chars[i + 1] === "վ" ? "o" : "vo"); continue; }
             if (c === "և") { out.push("jev"); continue; }
         }
         // the ligature ⟨և⟩ elsewhere → [ev] (Երևան→jeɾevɑn)
