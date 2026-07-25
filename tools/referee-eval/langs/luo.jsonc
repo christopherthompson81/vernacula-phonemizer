@@ -1,0 +1,34 @@
+// Luo / Dholuo (luo) — Western Nilotic (Luo group), Latin orthography. Referee: en.wiktionary Luo (Wiktionary, HUMAN,
+// 17 words — the ONLY source; no kaikki dump, no epitran luo-Latn, no wikipron). Single-source (🔷); consonants
+// corroborated by Tucker (1994) 'A Grammar of Kenya Luo (Dholuo)'. The backbone (config.ts) already strips the
+// referee's combining TONE + ATR diacritics (à̀ e̙ o̘) and the affricate tie bar; these folds neutralise the rest of
+// what the orthography does NOT determine: the PRECOMPOSED tone-marked citation vowels (à ó ê í), syllable dots, the
+// ±ATR vowel QUALITY (ɪ~i ɛ~e ɔ~o ʊ~u — unwritten harmony, we emit the +ATR default), the one-palatal notation
+// (c ~ t͡ʃ ~ t͡ɕ), the palatalisation glide (ʲ~j), released-final aspiration (ʰ), the low-vowel fronting (æ~a), and the
+// tap notation (r~ɾ). See docs/investigations/luo_native_bringup_investigation.md.
+{
+    "language": "luo", "name": "Luo (Dholuo)", "script": "Latin",
+    "provenance": "Authored greedy g2p from the Dholuo orthography; mapping from the 17-word en.wiktionary Luo IPA referee + Tucker (1994) / Okoth-Okombo (1982).",
+    "referees": [
+        { "file": "luo.wiktionary-luo.tsv", "source": "en.wiktionary Luo (Wiktionary, human, 17)", "role": "primary" }
+    ],
+    "secondaryGap": "No independent second source for Dholuo: kaikki has no per-language dump (kaikki.org/dictionary/Luo → 404), and epitran luo-Latn / wikipron luo are absent. The only referee is the 17-word en.wiktionary Luo IPA category (human). Phonology corroborated by published authorities (not a numeric referee): Tucker (1994) 'A Grammar of Kenya Luo (Dholuo)' + Okoth-Okombo (1982) 'Dholuo Morphophonemics', which confirm the dental/alveolar contrast, the prenasalised voiced stops, the palatals, and the 9-vowel ±ATR system. The anchor is the adjudicated gold in test/luo.test.ts.",
+    "folds": [
+        { "pattern": "[àáâãä]", "replace": "a", "note": "TONE: precomposed tone-marked citation vowels (the referee lemmatises with acute/grave/circumflex — chíeng', à.dêk); the orthography proper is unaccented + tone is unwritten, so strip to the base vowel (the combining forms are handled by the backbone)" },
+        { "pattern": "[èéêë]", "replace": "e", "note": "TONE: precomposed é/ê/è/ë → base e" },
+        { "pattern": "[ìíîï]", "replace": "i", "note": "TONE: precomposed í/î/ì/ï → base i" },
+        { "pattern": "[òóôõö]", "replace": "o", "note": "TONE: precomposed ó/ô/ò/õ/ö → base o" },
+        { "pattern": "[ùúûü]", "replace": "u", "note": "TONE: precomposed ú/û/ù/ü → base u" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot (à.dêk, có.ɡó)" },
+        { "pattern": "ɕ", "replace": "ʃ", "note": "PALATAL notation: the referee writes ⟨ch⟩ as the alveolo-palatal [t͡ɕ]~[ɕ] inconsistently (rech→ré̙t͡ɕ); one palatal, fold ɕ→ʃ (so t͡ɕ→tʃ = our t͡ʃ after the backbone tie-strip)" },
+        { "pattern": "c", "replace": "tʃ", "note": "PALATAL notation: the referee also writes ⟨ch⟩ as the bare palatal stop [c] (chogo→có.ɡó, ich→ɪ̀c); we emit the affricate t͡ʃ (tie stripped by the backbone → tʃ) for the one Dholuo palatal — fold c→tʃ" },
+        { "pattern": "ɪ", "replace": "i", "note": "±ATR: the 9-vowel ATR distinction is UNWRITTEN (the orthography has one ⟨i⟩); the referee shows both ɪ (ich→ɪc) and i (kidi) → we emit the +ATR default, fold −ATR ɪ→i" },
+        { "pattern": "ɛ", "replace": "e", "note": "±ATR: ⟨e⟩ is unwritten ɛ~e (kelo→kɛlɔ vs rech→re̙) → fold ɛ→e" },
+        { "pattern": "ɔ", "replace": "o", "note": "±ATR: ⟨o⟩ is unwritten ɔ~o (kuno→kʊnɔ vs chogo→coɡo) → fold ɔ→o" },
+        { "pattern": "ʊ", "replace": "u", "note": "±ATR: ⟨u⟩ is unwritten ʊ~u (kuno→kʊnɔ) → fold ʊ→u" },
+        { "pattern": "æ", "replace": "a", "note": "the referee fronts ⟨a⟩ to [æ] next to a palatal glide (dhiang'→ðjæŋ); non-contrastive, fold æ→a" },
+        { "pattern": "ʲ", "replace": "j", "note": "GLIDE: the referee writes the high-vowel-before-vowel glide as palatalisation [Cʲ] (chíeng'→t͡ʃʲeŋ) where we emit the segmental glide [j] (t͡ʃjeŋ) — fold ʲ→j" },
+        { "pattern": "ʰ", "replace": "", "note": "ASPIRATION: a released word-final voiceless stop is aspirated (ot→o̘tʰ); phonetic, not phonemic → strip" },
+        { "pattern": "r", "replace": "ɾ", "note": "tap~trill: Dholuo /r/ is a tap [ɾ] (which we emit); the referee writes the plain [r] (rech, nyaroya) — non-contrastive, fold r→ɾ" }
+    ]
+}

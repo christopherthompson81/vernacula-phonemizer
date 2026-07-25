@@ -120,6 +120,7 @@ import { createKikuyu } from "./languages/kikuyu/kikuyu.ts";
 import { createAfrikaans } from "./languages/afrikaans/afrikaans.ts";
 import { createHebrew } from "./languages/hebrew/hebrew.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
+import { createLuo } from "./languages/luo/luo.ts";
 import { createKirundi } from "./languages/kirundi/kirundi.ts";
 import { createUyghur } from "./languages/uyghur/uyghur.ts";
 import { createSylheti } from "./languages/sylheti/sylheti.ts";
@@ -447,6 +448,8 @@ function build(lang: string): Phonemizer {
             return createHebrew();
         case "lg":
             return createLuganda();
+        case "luo":
+            return createLuo();
         case "rn":
             return createKirundi();
         case "ug":
