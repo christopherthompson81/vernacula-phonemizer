@@ -1,0 +1,39 @@
+// Native canonical-IPA definition for Armenian / հայերեն (hy) — Indo-European (independent branch), Armenian alphabet.
+// EASTERN Armenian (Yerevan standard, the wikipron hye_armn_e referee). armenian.ts reads this file. Armenian is very
+// nearly one letter ↔ one phoneme; the work is: the three-way STOP/affricate system (voiced / voiceless / aspirated —
+// բ պ փ = b p pʰ; ձ ծ ց = d͡z t͡s t͡sʰ; ջ ճ չ = d͡ʒ t͡ʃ t͡ʃʰ), the UVULARS ⟨խ⟩→χ / ⟨ղ⟩→ʁ, the tap ⟨ր⟩→ɾ vs trill ⟨ռ⟩→r,
+// the ⟨ու⟩→u digraph, and the WORD-INITIAL glides ⟨ե⟩→je / ⟨ո⟩→vo / ⟨և⟩→jev (bare e / o / ev elsewhere). Validated vs
+// wikipron hye_armn_e broad. See docs/investigations/hy_native_bringup_investigation.md.
+{
+    "language": "hy",
+    "name": "Armenian",
+    "script": "Armenian",
+    "provenance": "Authored from the Eastern Armenian alphabet + standard phonology; cross-checked vs wikipron hye_armn_e broad (18090).",
+
+    // Vowels. ⟨ե⟩→e and ⟨ո⟩→o here are the BARE (non-initial) values; the word-initial [j]/[v] onset is added in code.
+    // ⟨ու⟩ (ո+ւ) → u is a digraph handled in code. ⟨է⟩→e, ⟨ը⟩→ə (schwa), ⟨օ⟩→o.
+    "vowels": { "ա": "ɑ", "ե": "e", "է": "e", "ը": "ə", "ի": "i", "ո": "o", "օ": "o" },
+
+    // Consonants → Eastern Armenian IPA. Three-way stops/affricates; uvular χ/ʁ; tap ɾ (ր) vs trill r (ռ); ⟨ւ⟩→v
+    // (standalone; in ⟨ու⟩ it forms the u digraph, handled in code).
+    "consonants": {
+        "բ": "b", "գ": "ɡ", "դ": "d", "զ": "z", "թ": "tʰ", "ժ": "ʒ", "լ": "l", "խ": "χ", "ծ": "t͡s",
+        "կ": "k", "հ": "h", "ձ": "d͡z", "ղ": "ʁ", "ճ": "t͡ʃ", "մ": "m", "յ": "j", "ն": "n", "շ": "ʃ",
+        "ո": "o", "չ": "t͡ʃʰ", "պ": "p", "ջ": "d͡ʒ", "ռ": "r", "ս": "s", "վ": "v", "տ": "t", "ր": "ɾ",
+        "ց": "t͡sʰ", "ւ": "v", "փ": "pʰ", "ք": "kʰ", "ֆ": "f"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "՝": " , ", "՞": " ? ", "։": " . "
+    },
+
+    // NUMBERS — Eastern Armenian cardinal spellings; canonical IPA DERIVED via the same g2p. Slavic-style decimal
+    // composition (units + teens + tens + hundreds + magnitudes), space-separated.
+    "numbers": {
+        "units": ["զրո", "մեկ", "երկու", "երեք", "չորս", "հինգ", "վեց", "յոթ", "ութ", "ինը"],
+        "teens": ["տասը", "տասնմեկ", "տասներկու", "տասներեք", "տասնչորս", "տասնհինգ", "տասնվեց", "տասնյոթ", "տասնութ", "տասնինը"],
+        "tens": { "20": "քսան", "30": "երեսուն", "40": "քառասուն", "50": "հիսուն", "60": "վաթսուն", "70": "յոթանասուն", "80": "ութսուն", "90": "իննսուն" },
+        "hundreds": ["", "հարյուր", "երկուհարյուր", "երեքհարյուր", "չորսհարյուր", "հինգհարյուր", "վեցհարյուր", "յոթհարյուր", "ութհարյուր", "իննհարյուր"],
+        "magnitudes": { "thousand": "հազար", "million": "միլիոն", "billion": "միլիարդ" }
+    }
+}

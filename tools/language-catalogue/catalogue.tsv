@@ -77,7 +77,7 @@ hr	Croatian	Indo-European (South Slavic)	Latin	5600000					1	implemented		🟢		
 hsn	Xiang Chinese	Sinitic	Han	37000000						implemented		🔷				0
 ht	Haitian Creole	Creole (French-lexified)	Latin	12000000					1	unimplemented					Not yet tracked; covered by espeak.	0
 hu	Hungarian	Uralic	Latin	13000000						implemented		✅				1
-hy	Armenian	Indo-European (Armenian)	Armenian	5000000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+hy	Armenian	Indo-European (Armenian)	Armenian	5000000					1	implemented		🔷			Indo-European (own branch), OWN ALPHABET, EASTERN Armenian (Yerevan). Cleanroom left-to-right greedy g2p (src/languages/armenian/). THREE-WAY stops/affricates (բ պ փ=b/p/pʰ; ձ ծ ց=d͡z/t͡s/t͡sʰ; ջ ճ չ=d͡ʒ/t͡ʃ/t͡ʃʰ), uvulars խ→χ/ղ→ʁ, tap ր→ɾ vs trill ռ→r, ⟨ու⟩=u digraph, word-initial glides ե→je/ո→vo/և→jev, and Eastern SCHWA EPENTHESIS (Vaux; word-initial գն→gən + s+stop-onset սպ→sp/սկս→skəs, word-final rising-sonority եզр→jezəɾ). Slavic-style numbers. 80.6% FOLDED vs wikipron hye_armn_e_broad (HUMAN, 18090); REFEREE-BOUNDED (proper-noun/foreign-name heavy → medial epenthesis net-negative, name voicing irregular). Real-word ~81%. Western Armenian = separate dialect, not a 2nd referee. See docs/investigations/hy_native_bringup_investigation.md	1
 hyw	Western Armenian	Indo-European (Armenian)	Armenian	1000000					1	unimplemented					Not yet tracked; covered by espeak.	0
 id	Indonesian	Austronesian (Malayic)	Latin	70000000	130000000					implemented		🟢				1
 ig	Igbo	Niger-Congo (Volta-Niger)	Latin	31000000						implemented		🔷				1
