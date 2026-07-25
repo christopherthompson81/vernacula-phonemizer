@@ -32,3 +32,28 @@ with an opt-in ASYNC BiLSTM (onnxruntime + ~2MB model) for +1.1% symbol is a poo
 **The real lever for Danish is DATA, not the model** — a larger Danish pronunciation lexicon (the current one is a
 small Wiktionary scrape) would lift both tiers and help the BiLSTM more. Revisit if such data appears. The POS
 perceptron (`english/posTagger.ts`) is a DIFFERENT task (heteronym disambiguation, not OOV G2P) and out of scope here.
+
+## Run 2 — 2026-07-25 — training-data coverage gaps + a 32× bigger corpus (NST, CC0)
+
+Characterised the current da-lexicon (7,476 words, single-pron, from Wiktionary) — three systemic gaps:
+1. **Small** → the BiLSTM is data-starved (the Run 1 finding).
+2. **Poor common-word coverage** — only **54% of the top-2,000** most-frequent Danish words are in the lexicon (29% of
+   top-10k, 11% of top-50k). So even common words routinely hit the OOV path (unlike en/fr, where the lexicon covers
+   the common core). The OOV tier carries far more traffic than 7.5k suggests.
+3. **Compounds under-represented + NO splitter.** Only **4%** of entries are ≥12 letters, yet Danish is a heavy
+   compounding language → real-text OOV is dominated by compounds (sundhedsforsikring = sundheds+forsikring). And unlike
+   English (compound-split→morph→n-gram) Danish has NO compositional decomposition — a train/serve distribution
+   mismatch on the dominant OOV class.
+
+**The lever is DATA, not the model — and a much bigger, license-clean corpus exists.** The **NST Danish pronunciation
+lexicon** (Nasjonalbiblioteket / Språkbanken, `sbr-26`): **~238,000 words** (32× the current 7,476), **CC0 / public
+domain**, SAMPA (semicolon-separated, 51 fields), **and it carries compound-decomposition + morphology annotation** —
+which fixes all three gaps at once (size, common-word coverage, AND compounds/the splitter). Same source + license as
+the Norwegian NST lexicon already shipped for nb. Verified downloadable: `da_leksikon.tar.gz` (5.7 MB, HTTP 200) at
+`https://www.nb.no/sbfil/leksikalske_databaser/leksikon/`. NST also offers Norwegian (~814k) and **Swedish (~800k)**
+lexica (both CC0) + speech corpora — so sv (which is NOT data-starved) is a strong future BiLSTM candidate too.
+
+**Next step (deferred):** ingest the NST Danish lexicon (adapt the nb `nst_sampa.py` SAMPA→IPA converter to the Danish
+SAMPA / stød), which would (a) massively improve the sync lexicon coverage, (b) feed a compound splitter from the NST
+compound field, and (c) give a BiLSTM enough data to finally justify the swap. Re-measure the perceptron/BiLSTM
+decision after ingest.
