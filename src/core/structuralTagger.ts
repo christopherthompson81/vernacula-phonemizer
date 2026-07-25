@@ -1,16 +1,24 @@
 /**
- * Shared core for the per-position STRUCTURAL TAGGERS (fa faTagger.ts, bn bengaliTagger.ts). Both are a single
- * BiLSTM forward pass emitting one IPA-chunk TAG per input symbol, decoded by a CONSONANT-CONSISTENCY MASK: each
- * symbol may only choose among the tags it produced in training, so the consonant skeleton is always canonical and
- * the model only picks the vowel decoration. The mask + argmax are the load-bearing invariant both files advertise
- * ("cannot break the consonant skeleton"); keeping the decode kernel here means a fix to it can't drift between the
- * two languages. Each tagger still owns its language-specific assembly (fa: space→word split + first-vowel fix;
- * bn: NFC + decline on out-of-vocab grapheme).
+ * Shared core for the per-position STRUCTURAL TAGGERS (bn bengaliTagger.ts, nb norwegianTagger.ts). A tagger is a
+ * single BiLSTM forward pass emitting one IPA-chunk TAG per input symbol, decoded by a CONSONANT-CONSISTENCY MASK:
+ * each symbol may only choose among the tags it produced in training, so the consonant skeleton is always canonical
+ * and the model only picks the vowel/stress decoration. This module owns the three pieces both languages share so a
+ * fix to any of them can't drift between them:
+ *   1. the decode kernel — `maskedArgmax` (the mask + argmax invariant "cannot break the consonant skeleton");
+ *   2. the word-level tagger — `createWordStructuralTagger` (lazy ONNX load + the per-word decode loop);
+ *   3. the async serving pre-pass — `wordLevelNeuralPrepass` (tag each OOV word once, inject into the sync engine).
+ * Each language still owns its language-specific bits via the options (bn: NFC preprocess; nb: lowercase+NFC preprocess
+ * plus a single-primary-stress postprocess). fa's faTagger.ts is a DIFFERENT (sentence-level, UNK-permits-all) shape
+ * and intentionally does not use this factory.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import { loadOrt, type OrtLike, type OrtSession } from "./onnx.ts";
 
 /** `src`: symbol → id (incl. `<pad>`=0, `<unk>`=1). `tags`: tag-id → IPA chunk. `charTags`: symbol-id → the tag-ids
  *  that symbol may emit (the consonant mask). Emitted by the train/export tools (export_tagger_onnx.py /
- *  export_bn_tagger_onnx.py). */
+ *  export_bn_tagger_onnx.py / train_nb_bilstm.py). */
 export interface TaggerMeta {
     src: Record<string, number>;
     tags: Record<string, string>;
@@ -33,4 +41,103 @@ export function maskedArgmax(logits: Float32Array, rowOffset: number, valid: num
         }
     }
     return best;
+}
+
+/** A bare word → canonical IPA, or "" to defer to the rule engine (an out-of-vocab grapheme). */
+export interface WordStructuralTagger {
+    tag(word: string): Promise<string>;
+}
+
+export interface WordTaggerOptions {
+    /** the calling module's directory (`dirname(fileURLToPath(import.meta.url))`) — the model + meta live beside it */
+    dir: string;
+    /** meta filename stem; loads `${basename}.meta.json` */
+    basename: string;
+    /** the ONNX filename (varies: `nb-g2p-tagger.onnx`, `bn-g2p-tagger.int8.onnx`) */
+    modelFile: string;
+    /** loadOrt context string for the missing-dependency error (e.g. "Norwegian neural tagging") */
+    context: string;
+    /** env var naming an ONNX execution provider (e.g. "NB_ORT_EP"); CPU default when unset */
+    epEnv: string;
+    /** normalize a word to the training vocab (e.g. NFC, or lowercase+NFC) before it is split into graphemes */
+    preprocess: (word: string) => string;
+    /** optional final pass over the assembled IPA (e.g. nb's single-primary-stress normalizer); identity if absent */
+    postprocess?: (ipa: string) => string;
+}
+
+/**
+ * Build a word-level structural tagger from an ONNX model + its `TaggerMeta`, or `undefined` if the model /
+ * onnxruntime-node is unavailable (callers fall back to their sync path; no throw). The `tag()` loop is the single
+ * shared implementation: preprocess → decline on any out-of-vocab grapheme → one forward pass → masked argmax per
+ * position → optional postprocess.
+ */
+export async function createWordStructuralTagger(opts: WordTaggerOptions): Promise<WordStructuralTagger | undefined> {
+    let meta: TaggerMeta, modelBytes: Uint8Array;
+    try {
+        meta = JSON.parse(readFileSync(join(opts.dir, `${opts.basename}.meta.json`), "utf8")) as TaggerMeta;
+        modelBytes = readFileSync(join(opts.dir, opts.modelFile));
+    } catch { return undefined; }
+    let ortLib: OrtLike, sess: OrtSession;
+    try {
+        ortLib = await loadOrt(opts.context);
+        // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) via the env var.
+        const ep = process.env[opts.epEnv];
+        sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
+    } catch { return undefined; }
+    const nTags = Object.keys(meta.tags).length;
+    const post = opts.postprocess ?? ((s) => s);
+
+    return {
+        async tag(word: string): Promise<string> {
+            const chars = [...opts.preprocess(word)];
+            const T = chars.length;
+            if (T === 0) return "";
+            // DECLINE (return "") on any grapheme outside the training vocab: its symbol is not in the mask, so tagging
+            // it would emit an arbitrary tag and override the correct rule reading. "" = "defer to the rule engine".
+            const ids = new Array<number>(T);
+            for (let i = 0; i < T; i++) {
+                const id = meta.src[chars[i]!];
+                if (id === undefined) return "";
+                ids[i] = id;
+            }
+            const r = await sess.run({ chars: new ortLib.Tensor("int64", BigInt64Array.from(ids, (x) => BigInt(x)), [1, T]) });
+            const logits = r.logits!.data as Float32Array; // flat [T * nTags], row-major (t·nTags + tag)
+            let out = "";
+            for (let k = 0; k < T; k++) {
+                // Masked argmax over ONLY this symbol's permitted tags (the consonant mask, pad-excluded). A -1 (no
+                // permitted tag) means decline the whole word → defer to rules.
+                const best = maskedArgmax(logits, k * nTags, meta.charTags[String(ids[k])]);
+                if (best < 0) return "";
+                out += meta.tags[String(best)] ?? "";
+            }
+            return post(out);
+        },
+    };
+}
+
+export interface NeuralPrepassOptions {
+    /** GLOBAL word regex over the input text */
+    word: RegExp;
+    /** is this word served authoritatively by the sync lexicon? → skip the tagger */
+    lexHas: (word: string) => boolean;
+    /** the tagger; "" means it declined (out-of-vocab grapheme) → leave the word to the rule engine */
+    tag: (word: string) => Promise<string>;
+    /** run the sync engine over the full text with the tagger readings injected as its per-word oovOverride */
+    render: (text: string, oov: (word: string) => string | undefined) => string;
+}
+
+/**
+ * The shared async neural serving pre-pass (bn, nb): tag each DISTINCT out-of-lexicon word ONCE, then run the ordinary
+ * sync engine with those readings injected between the lexicon and the rule engine (lexicon → tagger → rules). Numbers,
+ * punctuation, and clause assembly stay the sync engine's, so only OOV word readings change vs the plain sync path.
+ */
+export async function wordLevelNeuralPrepass(text: string, opts: NeuralPrepassOptions): Promise<string> {
+    const tagged = new Map<string, string>();
+    for (const m of text.matchAll(opts.word)) {
+        const w = m[0]!;
+        if (tagged.has(w) || opts.lexHas(w)) continue;
+        const out = await opts.tag(w);
+        if (out) tagged.set(w, out); // "" = declined → leave to the rule engine
+    }
+    return opts.render(text, (w) => tagged.get(w));
 }

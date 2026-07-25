@@ -17,6 +17,7 @@ import { createBengali, bengaliLexicon } from "./languages/bengali/bengali.ts";
 import { createBengaliTagger, type BengaliTagger } from "./languages/bengali/bengaliTagger.ts";
 import { getPhonemizer } from "./registry.ts";
 import { BENGALI_WORD } from "./core/unicode.ts";
+import { wordLevelNeuralPrepass } from "./core/structuralTagger.ts";
 
 const WORD = new RegExp(`[${BENGALI_WORD}]+`, "gu");
 let taggerP: Promise<BengaliTagger | undefined> | undefined;
@@ -35,19 +36,11 @@ export async function phonemizeBnNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createBengaliTagger();
     const tagger = await taggerP;
     if (!tagger) return bnEngine().text(text); // no model → sync path
-
-    // PRE-PASS: tag every distinct OOV word once (lexicon-covered words are served by the sync lexicon path, so
-    // skip them). The tagger emits final IPA directly; an empty result means it DECLINED (an out-of-vocab grapheme)
-    // — leave the word out of the map so the sync rule engine handles it.
     const lex = bengaliLexicon();
-    const tagged = new Map<string, string>();
-    for (const m of text.matchAll(WORD)) {
-        const w = m[0];
-        if (tagged.has(w) || lex.has(w.normalize("NFC"))) continue;
-        const out = await tagger.tag(w);
-        if (out) tagged.set(w, out);
-    }
-    // Run the SYNC engine with the tagger readings injected between lexicon and rules — everything else (numbers,
-    // Latin, punctuation, clause assembly) is the sync path, so only OOV word readings differ.
-    return bnEngine().text(text, (w) => tagged.get(w));
+    return wordLevelNeuralPrepass(text, {
+        word: WORD,
+        lexHas: (w) => lex.has(w.normalize("NFC")), // lexicon-covered words are served by the sync lexicon path
+        tag: (w) => tagger.tag(w),
+        render: (t, oov) => bnEngine().text(t, oov),
+    });
 }

@@ -1,74 +1,37 @@
 /**
  * Bengali G2P STRUCTURAL tagger — the neural OOV reader. A per-grapheme BiLSTM (ONNX) that labels each Bengali
- * grapheme with its IPA-chunk TAG (the consonant, COPIED, plus the following inherent vowel ɔ/o or its deletion),
- * run as a SINGLE forward pass. Because output length == input length it CANNOT degenerate and CANNOT break the
- * consonant skeleton — no beam, no autoregressive decode, no degeneration guard. The whole-word ɔ/o realization
- * comes from the bidirectional pass; a per-grapheme CONSONANT-CONSISTENCY MASK constrains each grapheme to only the
- * tags it produced in training (ক → k/kɔ/ko, never ʃ), so the model only ever decides the vowel.
+ * grapheme with its IPA-chunk TAG (the consonant, COPIED, plus the following inherent vowel ɔ/o or its deletion), run
+ * as a SINGLE forward pass. Because output length == input length it CANNOT degenerate and CANNOT break the consonant
+ * skeleton — no beam, no autoregressive decode, no degeneration guard. The whole-word ɔ/o realization comes from the
+ * bidirectional pass; a per-grapheme CONSONANT-CONSISTENCY MASK constrains each grapheme to only the tags it produced
+ * in training (ক → k/kɔ/ko, never ʃ), so the model only ever decides the vowel.
  *
- * This is the OOV GENERALISATION tier: it fills the words the authoritative Kolkata gold + cross-source consensus
- * lexicon (bengali-lexicon.tsv) miss. A lexicon-covered word is served by the sync lexicon path instead
- * (precedence: lexicon → tagger → rule engine). On the seed-0 held-out (OOV) split it reads ɔ/o 90.5% | full 86.4%
- * vs the rule engine's 62.6% ɔ/o. See bn-g2p-tagger.PROVENANCE.md and bn_native_bringup_investigation.md Run 17-18.
+ * The lazy-load + masked decode loop is the shared `createWordStructuralTagger` (core/structuralTagger.ts); this file
+ * supplies only the bn-specific bit: an NFC preprocess (no postprocess — Bengali tags carry no stress). This is the
+ * OOV GENERALISATION tier: the words the authoritative Kolkata gold + cross-source consensus lexicon
+ * (bengali-lexicon.tsv) miss. A lexicon-covered word is served by the sync lexicon path instead (precedence:
+ * lexicon → tagger → rule engine). On the seed-0 held-out (OOV) split it reads ɔ/o 90.5% | full 86.4% vs the rule
+ * engine's 62.6% ɔ/o. See bn-g2p-tagger.PROVENANCE.md and bn_native_bringup_investigation.md Run 17-18.
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx model — is absent,
  * createBengaliTagger() resolves to `undefined` and callers fall back to the sync rule engine (no throw).
  */
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
-import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
+import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 
-export interface BengaliTagger {
-    /** A bare Bengali word → canonical IPA (no stress mark; matches the sync engine's default render). */
-    tag(word: string): Promise<string>;
-}
+export type BengaliTagger = WordStructuralTagger;
 
 /** Build the Bengali OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
-export async function createBengaliTagger(basename = "bn-g2p-tagger"): Promise<BengaliTagger | undefined> {
-    const dir = dirname(fileURLToPath(import.meta.url));
-    let meta: TaggerMeta, modelBytes: Uint8Array;
-    try {
-        meta = JSON.parse(readFileSync(join(dir, `${basename}.meta.json`), "utf8")) as TaggerMeta;
-        modelBytes = readFileSync(join(dir, `${basename}.int8.onnx`));
-    } catch { return undefined; }
-    let ortLib: OrtLike, sess: OrtSession;
-    try {
-        ortLib = await loadOrt("Bengali neural tagging");
-        // Shipping default is CPU. Opt into a GPU execution provider (fast eval iteration) with BN_ORT_EP=cuda.
-        const ep = process.env.BN_ORT_EP;
-        sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
-    } catch { return undefined; }
-    const nTags = Object.keys(meta.tags).length;
-
-    return {
-        async tag(word: string): Promise<string> {
-            // NFC-normalize so the graphemes match the training vocab (the sync lexicon/rule paths also NFC).
-            const chars = [...word.normalize("NFC")];
-            const T = chars.length;
-            if (T === 0) return "";
-            // DECLINE (return "") on any grapheme outside the training vocab: its consonant is not in the mask, so
-            // tagging it would emit an arbitrary consonant and override the correct rule-engine reading. The caller
-            // treats "" as "defer to the rule engine" for the whole word.
-            const ids = new Array<number>(T);
-            for (let i = 0; i < T; i++) {
-                const id = meta.src[chars[i]!];
-                if (id === undefined) return "";
-                ids[i] = id;
-            }
-            const r = await sess.run({ chars: new ortLib.Tensor("int64", BigInt64Array.from(ids, (x) => BigInt(x)), [1, T]) });
-            const logits = r.logits!.data as Float32Array; // flat [T * nTags], row-major (t·nTags + tag)
-            let out = "";
-            for (let k = 0; k < T; k++) {
-                // Masked argmax over ONLY this grapheme's permitted tags (the consonant mask, pad-excluded): keeps
-                // every consonant canonical. A -1 (no permitted tag) means decline the whole word → defer to rules.
-                const best = maskedArgmax(logits, k * nTags, meta.charTags[String(ids[k])]);
-                if (best < 0) return "";
-                out += meta.tags[String(best)] ?? "";
-            }
-            return out;
-        },
-    };
+export function createBengaliTagger(basename = "bn-g2p-tagger"): Promise<BengaliTagger | undefined> {
+    return createWordStructuralTagger({
+        dir: dirname(fileURLToPath(import.meta.url)),
+        basename,
+        modelFile: `${basename}.int8.onnx`,
+        context: "Bengali neural tagging",
+        epEnv: "BN_ORT_EP",
+        // NFC-normalize so the graphemes match the training vocab (the sync lexicon/rule paths also NFC).
+        preprocess: (w) => w.normalize("NFC"),
+    });
 }
