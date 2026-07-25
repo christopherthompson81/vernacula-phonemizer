@@ -34,6 +34,12 @@ const isCons = (c: string): boolean => c in DEF.consonants;
 /** Palatalise a hard-consonant IPA: dark ɫ → lʲ (loses velarisation), everything else appends ʲ. */
 const palatalise = (ipa: string): string => (ipa === "ɫ" ? "lʲ" : ipa + "ʲ");
 
+// Regressive-palatalisation triggers (a palatalised coronal or labial or soft l — NOT a velar) + compiled regexes,
+// hoisted to module scope (compiled once, not per word).
+const PALC = "(?:t͡s|d͡z|[tdsznbpvfml])ʲ";
+const RE_DARKL_SOFT = new RegExp(`ɫ(?=${PALC}|lʲ)`, "gu"); // dark l softens before a palatalised coronal/labial or soft l
+const RE_SIB_SOFT = new RegExp(`(t͡s|d͡z|[sz])(?=${PALC})`, "gu"); // с з ц дз soften before a palatalised coronal/labial
+
 /** Regressive voicing assimilation + word-final devoicing over the phoneme list (right-to-left). ⟨в⟩=v does not
  *  TRIGGER voicing on a preceding obstruent (Slavic), but is itself a target (final/pre-voiceless в→f). */
 function applyVoicing(out: string[]): void {
@@ -112,13 +118,12 @@ export function phonemizeWord(word: string): string {
     applyVoicing(out);
     let x = out.join("");
     // REGRESSIVE PALATALISATION: a SIBILANT/affricate ⟨с з ц дз⟩ (+ dark л) directly before a palatalised CORONAL or
-    // LABIAL assimilates and softens (везці→vʲesʲt͡sʲi, Боснія→bosʲnʲija, Зміцер→zʲmʲit͡sʲer, Мацвей→mat͡sʲvʲej). The
-    // referee is inconsistent for the stops/nasal as TARGETS (Пенсільванія→pʲensʲilʲvanʲija keeps hard н; Гародня→
-    // ɣarodnʲa keeps hard д), so ⟨т д н⟩ are excluded as targets; and a palatalised VELAR does not trigger it (the
-    // -скі ending keeps hard с: Заборскі→zaborskʲi).
-    const PALC = "(?:t͡s|d͡z|[tdsznbpvfm])ʲ";
-    x = x.replace(new RegExp(`ɫ(?=${PALC}|lʲ)`, "gu"), "lʲ"); // dark l softens before a palatalised coronal/labial or a soft l (Наталля→natalʲːa)
-    x = x.replace(new RegExp(`(t͡s|d͡z|[sz])(?=${PALC})`, "gu"), "$1ʲ");
+    // LABIAL (or soft л) assimilates and softens (везці→vʲesʲt͡sʲi, Боснія→bosʲnʲija, Зміцер→zʲmʲit͡sʲer, абразлівы→
+    // abrazʲlʲivɨ, Наталля→natalʲːa). The referee is inconsistent for the stops/nasal as TARGETS (Пенсільванія→
+    // pʲensʲilʲvanʲija keeps hard н; Гародня→ɣarodnʲa keeps hard д), so ⟨т д н⟩ are excluded as targets; and a
+    // palatalised VELAR does not trigger it (the -скі ending keeps hard с: Заборскі→zaborskʲi).
+    x = x.replace(RE_DARKL_SOFT, "lʲ");
+    x = x.replace(RE_SIB_SOFT, "$1ʲ");
     // ⟨н⟩ softens before a palatalised AFFRICATE (the -нцін/-нць cluster: Аргенціна→arɣʲenʲt͡sʲina) — reliable, unlike
     // н before a plain palatalised sibilant (Пенсільванія keeps hard н).
     x = x.replace(/n(?=(?:t͡s|d͡z)ʲ)/gu, "nʲ");

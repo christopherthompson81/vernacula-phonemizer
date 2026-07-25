@@ -5,7 +5,7 @@ import { phonemizeWord, createBelarusian } from "../src/languages/belarusian/bel
 // Belarusian (be) — East Slavic, Cyrillic. Rule g2p mirroring Ukrainian's iotated/palatalisation machinery, plus
 // Belarusian signatures: г→ɣ, retroflex ж/ш/ч→ʐ/ʂ/t͡ʂ, ⟨і⟩ iotated (Іван→jivan), ⟨ў⟩→u̯/w, дз/дж affricates, dark
 // л→ɫ, and — unlike Ukrainian — regressive voicing + final devoicing (akanne is spelled → no stress dict). Scored
-// 96.6% folded on wikipron bel_cyrl narrow (HUMAN, 7259). See docs/investigations/be_native_bringup_investigation.md.
+// 97.2% folded on wikipron bel_cyrl narrow (HUMAN, 7259). See docs/investigations/be_native_bringup_investigation.md.
 describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
     test("core segments: г→ɣ, dark л→ɫ, ы→ɨ, retroflex ч→t͡ʂ", () => {
         expect(phonemizeWord("вада")).toBe("vada"); // akanne spelled → no reduction
@@ -32,6 +32,8 @@ describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
         expect(phonemizeWord("хлеб")).toBe("xlʲep"); // final б → p
         expect(phonemizeWord("снег")).toBe("sʲnʲex"); // regressive с→sʲ before nʲ; final г→x
         expect(phonemizeWord("везці")).toBe("vʲesʲt͡sʲi"); // с softens before the palatalised affricate t͡sʲ
+        expect(phonemizeWord("абразлівы")).toBe("abrazʲlʲivɨ"); // з softens before soft л
+        expect(phonemizeWord("нерв")).toBe("nʲerv"); // в does NOT devoice to [f] (it vocalises, unlike Russian)
     });
 
     test("cardinal numbers", () => {

@@ -28,9 +28,11 @@
     },
 
     // Voicing assimilation pairs (IPA ↔ IPA). Regressive within obstruent clusters + word-final devoicing (belarusian.ts).
+    // ⟨в⟩=v is DELIBERATELY absent — Belarusian /v/ vocalises to [u̯]/⟨ў⟩, it never devoices to [f] (нерв→nʲerv, not nʲerf,
+    // unlike Russian); it is inert (neither a target nor a trigger). ⟨ф⟩ likewise stays hard (rare, loanwords only).
     "voicing": {
-        "toVoiceless": { "b": "p", "v": "f", "ɣ": "x", "ɡ": "k", "d": "t", "ʐ": "ʂ", "z": "s", "d͡z": "t͡s", "d͡ʐ": "t͡ʂ" },
-        "toVoiced": { "p": "b", "f": "v", "x": "ɣ", "k": "ɡ", "t": "d", "ʂ": "ʐ", "s": "z", "t͡s": "d͡z", "t͡ʂ": "d͡ʐ" }
+        "toVoiceless": { "b": "p", "ɣ": "x", "ɡ": "k", "d": "t", "ʐ": "ʂ", "z": "s", "d͡z": "t͡s", "d͡ʐ": "t͡ʂ" },
+        "toVoiced": { "p": "b", "x": "ɣ", "k": "ɡ", "t": "d", "ʂ": "ʐ", "s": "z", "t͡s": "d͡z", "t͡ʂ": "d͡ʐ" }
     },
 
     "clausePunctuation": {

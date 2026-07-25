@@ -43,3 +43,17 @@ correlated / rule-based). Floor 0.95. Wired: registry (`case "be"`), eval PHON, 
 `test/belarusian.test.ts` (6 tests), catalogue row, maturity row. NB: the `belarusian_convergence` memory note is the
 OTHER repo (espeak-ng-portable, shim-parity) — this is a fresh vernacula bring-up; the phonology hints (і→ji,
 geminate→length, referee-inconsistent assimilation) transferred, the approach did not.
+
+## Run 2 — 2026-07-24 — code review fixes
+
+3-agent review found two clean correctness fixes (both referee-confirmed) + a cleanup:
+- **Sibilants weren't softening before a soft л** — PALC omitted `l`, so абразлівы→abrazlʲivɨ where the referee has
+  abrazʲlʲivɨ (44 softened / 0 hard — 100% consistent). Added `l` to the trigger class.
+- **⟨в⟩ was wrongly devoicing to [f]** — нерв→nʲerf but the referee keeps [v] (2/2): Belarusian /v/ vocalises to
+  [u̯]/⟨ў⟩, it never devoices like Russian. Removed ⟨в ф⟩ from the voicing maps (both inert now).
+- Hoisted the two per-word `new RegExp(...)` (the regressive-palatalisation patterns) to module constants — they were
+  recompiling on every word.
+- **→ 97.2% folded** (+0.6pp). Goldens added (абразлівы, нерв). Full suite 1009/1009.
+
+Not changed (out of scope / acknowledged): the shared Slavic number compositor renders 1000→"адзін тысяча" (masculine)
+where Belarusian wants feminine "адна тысяча" — inherited from the uk path, fleet-wide, numbers aren't referee-scored.
