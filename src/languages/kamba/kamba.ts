@@ -1,0 +1,56 @@
+/**
+ * Kamba / Kikamba (kam) phonemizer — Niger-Congo BANTU (E55), the Latin orthography, canonical IPA,
+ * espeak-independent. Kenya (~4M). A PURE greedy longest-match scan over the grapheme table (manifest.ts) — no code
+ * rules; the Bantu fricativization/prenasalization live entirely in the table (the Kikuyu pattern). The 7-vowel ATR
+ * system has the TILDE marking vowel QUALITY not nasalization (⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ). TONE (H/L) is not
+ * written → not emitted. Numbers deferred. See docs/investigations/kam_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+
+const G = MANIFEST.graphemes;
+const CLAUSE_MARK = MANIFEST.clausePunctuation;
+
+/** Phonemize a single Kamba word to canonical IPA (segmental; non-tonal — tone is not in the orthography). */
+export function phonemizeWord(word: string): string {
+    const w = word.normalize("NFC").toLowerCase();
+    let out = "";
+    let i = 0;
+    while (i < w.length) {
+        let matched = false;
+        for (const key of GRAPHEME_KEYS) {
+            if (w.startsWith(key, i)) {
+                out += G[key]!;
+                i += key.length;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) i += 1; // unknown char → skip
+    }
+    return out;
+}
+
+// A word (Kamba Latin letters incl. ĩ ũ and the ⟨ng'⟩ apostrophe) / number / punctuation token. The word class admits
+// the three apostrophe variants that spell ⟨ng'⟩ in the wild: straight ', curly ’ (U+2019), and modifier-letter ʼ
+// (U+02BC, common in Kenyan Bantu orthographies).
+const TOKEN = /([\p{L}\p{M}'’ʼ]+)|(\d+)|([.!?…,;:])/gu;
+
+class KambaPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1].replace(/[’ʼ]/gu, "'"))); // normalise ’ / ʼ → ' so the ⟨ng'⟩ key matches
+            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Kamba phonemizer (greedy g2p; tone + numbers deferred). */
+export function createKamba(): Phonemizer {
+    return new KambaPhonemizer();
+}

@@ -1,0 +1,24 @@
+// Kamba / Kikamba (kam) — Niger-Congo BANTU (E55), Latin orthography, Kenya (~4M). Referee: en.wiktionary Kamba
+// (Wiktionary, HUMAN) — only **5 words**, a THIN single source (no kaikki dump / epitran kam-Latn / wikipron). The
+// backbone folds neutralise the referee's marks the orthography does NOT determine: TONE (H á / L à — Kamba tone is
+// contextual, unwritten → we emit none), SYLLABLE dots, the prenasal notation (referee plain m/n/ŋ+stop ~ our
+// superscript ᵐ/ⁿ/ᵑ), and doubled-vowel length. Vowel quality (⟨ĩ⟩=e/⟨ũ⟩=o) and the ⟨v⟩=β / ⟨ny⟩=ɲ / prenasalized
+// consonants ARE compared directly. Phonology corroborated by the Omniglot Kikamba chart + Wikipedia (Roberts-Kohno
+// 2000), not a second numeric referee → honest status 🔷. See docs/investigations/kam_bringup_investigation.md.
+{
+    "language": "kam", "name": "Kamba (Kikamba)", "script": "Latin",
+    "provenance": "Authored greedy g2p from the Kikamba orthography; vowels anchored on the 5-word en.wiktionary Kamba IPA referee (mũtĩ→mòté ⇒ ⟨ĩ⟩=e/⟨ũ⟩=o), consonants from the Omniglot Kikamba alphabet chart + Wikipedia Kamba table.",
+    "referees": [
+        { "file": "kam.wiktionary-kam.tsv", "source": "en.wiktionary Kamba (Wiktionary, human, 5)", "role": "primary" }
+    ],
+    "secondaryGap": "THIN single source — en.wiktionary Kamba has only 5 IPA words; no kaikki per-language dump, no epitran kam-Latn, no wikipron. IMPORTANT: those 5 words exercise ONLY the vowel mapping (ĩ=e/ũ=o, the mũtĩ→mòté anchor) + the prenasals ᵐb/ᵑɡ + ɲ — they do NOT touch the divergent/contested Kamba consonants (⟨v⟩/⟨b⟩=β, ⟨sy⟩=ʃ, ⟨ky⟩=tʃ, ⟨th⟩=ð, ⟨nth⟩=ⁿð, ⟨ng'⟩=ŋ), so 5/5 folded verifies the vowels + prenasals, NOT the consonant inventory. Those rest on TWO curated authorities (not numeric referees): the Omniglot Kikamba alphabet chart + the Wikipedia Kamba consonant table (Roberts-Kohno 2000), and the adjudicated gold in test/kamba.test.ts. CONTESTED: ⟨th⟩ voicing [ð]~[θ]; ⟨sy⟩=ʃ/⟨ky⟩=tʃ single-sourced.",
+    "folds": [
+        { "pattern": "[\\u0300\\u0301\\u0302\\u030c\\u0304]", "replace": "", "note": "TONE: Kamba orthography does not mark tone (H/L is contextual) → we emit none; strip the referee's combining acute/grave/circumflex/caron/macron" },
+        { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
+        { "pattern": "ᵐ", "replace": "m", "note": "PRENASAL notation: we write the labial prenasal as superscript ᵐb; the referee writes it plain mb — fold our ᵐ→m so both compare equal" },
+        { "pattern": "ⁿ", "replace": "n", "note": "PRENASAL notation: our ⁿd/ⁿz/ⁿð vs the referee's plain nd/nz/nð — fold ⁿ→n" },
+        { "pattern": "ᵑ", "replace": "ŋ", "note": "PRENASAL notation: our ᵑɡ vs the referee's plain ŋɡ (ngingo→ŋɡíŋɡɔ́) — fold ᵑ→ŋ" },
+        { "pattern": "ː", "replace": "", "note": "LENGTH: Kamba phonemic length (doubled vowel) is unreliably written by the referee → fold length out; we still emit it from the doubling per the explicitness principle" },
+        { "pattern": "([aeiouɛɔ])\\1", "replace": "$1", "note": "LENGTH (doubled-vowel form): collapse a doubled vowel to a single after the ː strip, so VV ~ Vː ~ V all compare equal" }
+    ]
+}
