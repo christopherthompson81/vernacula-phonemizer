@@ -44,6 +44,8 @@ describe("Finnish canonical IPA — greedy g2p (Standard Finnish)", () => {
         expect(fi.text("234").trim()).toBe("kɑksisɑtɑːkolmekymːentæneljæ");
         expect(fi.text("1234").trim()).toBe("tuhɑt kɑksisɑtɑːkolmekymːentæneljæ");
         expect(fi.text("2000000").trim()).toBe("kɑksi miljoːnɑː");
+        // >9 digits: read the raw string digit-by-digit (no float precision loss / exponential leak)
+        expect(fi.text("10000000000").trim()).toBe("yksi nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ nolːɑ");
     });
 
     test("text: words + clause punctuation", () => {

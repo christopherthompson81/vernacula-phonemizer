@@ -13,7 +13,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -50,7 +50,12 @@ class FinnishPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                // ≤9 digits fits a safe integer (<1e9) → compose; longer → read the raw string digit-by-digit so the
+                // float conversion can't lose precision or go exponential (1e21 → "1e+21").
+                const words = m[2].length <= 9 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

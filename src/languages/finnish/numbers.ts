@@ -28,12 +28,16 @@ function below1000(n: number): string {
     return hundred + (r ? below100(r) : "");
 }
 
-/** A non-negative integer → its Finnish cardinal reading (space-separated at the tuhat/miljoona magnitude joints). */
+/** Read a raw digit STRING digit-by-digit (nolla / yksi / …) — the fallback for out-of-range or over-long numbers.
+ *  Operates on the string (not a float) so no precision is lost and an exponential String(Number) can't leak e/+. */
+export function readDigits(digits: string): string {
+    return digits.split("").map((d) => (Number(d) === 0 ? N.zero : N.units[Number(d)] ?? d)).join(" ");
+}
+
+/** A non-negative integer → its Finnish cardinal reading (space-separated at the tuhat/miljoona magnitude joints).
+ *  Callers with a raw digit string longer than 9 digits should use readDigits directly (a float would already be lossy). */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) {
-        // out of range → read digit by digit (nolla / yksi / …)
-        return String(n).split("").map((d) => (Number(d) === 0 ? N.zero : N.units[Number(d)]!)).join(" ");
-    }
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9) return readDigits(String(n)); // out of range → digit-by-digit
     if (n === 0) return N.zero;
     const parts: string[] = [];
     const mil = Math.floor(n / 1e6);

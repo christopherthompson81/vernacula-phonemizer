@@ -67,3 +67,15 @@ than special-cased; a per-morpheme number phonemization would remove it if wante
 there is no *independent* 2nd referee — but Finnish's transparency means low referee-error risk, and 96.0% on 173k
 human entries is a strong, honest result. Floor 0.94. Wired: registry (`case "fi"`), eval PHON, `langs/fi.jsonc`,
 `test/finnish.test.ts` (6 tests), catalogue row, maturity row.
+
+## Run 3 — 2026-07-24 — code review
+
+3-agent review (Finnish path solid; wiring + Danish-golden change verified clean). One real fix:
+- **Large digit strings** — `numberToWords(Number(m[2]))` lost precision / went exponential for very long numbers
+  (`1e21`→`"1e+21"`), and the `String(n)` digit fallback then read `e`/`+` as `units[NaN]=undefined` → empty tokens.
+  Fixed: `text()` composes only for ≤9-digit numbers (a safe integer <1e9) and otherwise reads the raw digit STRING
+  via the new `readDigits` (no float), so 10¹¹+ reads digit-by-digit correctly. Golden added.
+- Loosened the floor 0.94→0.93 (the tightest in the file at 0.02; a transparent orthography is low-variance but a
+  referee refresh shouldn't surprise). Deferred (reviewer-endorsed): the composed-number seam diphthong (a real
+  per-morpheme-phonemization fix, not the "cheap" boundary-marker hack) and the 6.5 MB referee (precedent: full
+  wikipron referees are committed). Full suite 995/995.
