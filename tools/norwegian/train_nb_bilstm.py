@@ -9,7 +9,7 @@ nb-g2p-tagger.onnx + nb-g2p-tagger.meta.json (src / tags / charTags mask) for on
 
     NB_LEX=/tmp/nb_train_stress.tsv NB_KEEP_STRESS=1 NB_SUBSAMPLE=0 .venv/bin/python -u tools/norwegian/train_nb_bilstm.py
 """
-import os, json, random
+import os, re, json, random
 import torch, torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
 from nb_tagger_prototype import load, split  # env-configurable loader (NB_LEX / NB_KEEP_STRESS / NB_SUBSAMPLE)
@@ -73,19 +73,60 @@ def train(model, X, Y, epochs=40):
             print(f"  epoch {ep}: loss {tot/max(1,len(idx)//128):.3f}  lr {sched.get_last_lr()[0]:.2e}", flush=True)
     return model
 
-@torch.no_grad()
-def predict(model, chars, itag, word):
-    model.eval()
-    x = torch.tensor([[chars.get(c, 1) for c in word]]).to(DEV)
-    ids = model(x)[0].argmax(-1).tolist()
-    return "".join(itag[i] for i in ids)
+_VOWEL = set("ɑaeɛiɪoɔuʉʊyʏøœæ")
 
-def heldout_eval(model, chars, itag, te):
+
+def one_stress(ipa):
+    """Mirror of norwegianTagger.ts oneStress(): exactly one primary ˈ (keep the first, drop later ones; promote a
+    secondary or place ˈ before the first vowel's onset if none), collapse adjacent stress marks. Held-out accuracy
+    must be measured with the SAME normalization the serving path applies, or it doesn't characterize the deployed
+    decode."""
+    ipa = re.sub(r'[ˈˌ]{2,}', lambda m: 'ˈ' if 'ˈ' in m.group() else 'ˌ', ipa)
+    seen = [False]
+    def keep_first(_):
+        if seen[0]:
+            return ''
+        seen[0] = True
+        return 'ˈ'
+    ipa = re.sub('ˈ', keep_first, ipa)
+    if seen[0]:
+        return ipa
+    if 'ˌ' in ipa:
+        return ipa.replace('ˌ', 'ˈ', 1)
+    idx = next((i for i, c in enumerate(ipa) if c in _VOWEL), -1)
+    if idx < 0:
+        return ipa
+    o = idx
+    while o > 0 and ipa[o - 1] not in _VOWEL:
+        o -= 1
+    return ipa[:o] + 'ˈ' + ipa[o:]
+
+
+@torch.no_grad()
+def predict(model, chars, itag, char_tags, word):
+    """The SHIPPED decode (matches norwegianTagger.ts): MASKED argmax over each letter's charTags, decline ("") on an
+    out-of-vocab grapheme, then one_stress()."""
+    model.eval()
+    ids = [chars.get(c) for c in word]
+    if any(i is None for i in ids):  # OOV grapheme → decline, exactly as serving does
+        return ""
+    logits = model(torch.tensor([ids]).to(DEV))[0]  # [T, nTags]
+    out = []
+    for k, cid in enumerate(ids):
+        permitted = char_tags.get(cid)
+        if not permitted:
+            return ""
+        row = logits[k]
+        best = max(permitted, key=lambda t: row[t].item())
+        out.append(itag[best])
+    return one_stress("".join(out))
+
+def heldout_eval(model, chars, itag, char_tags, te):
     ok = 0
     with open("/tmp/nb_holdout_bilstm.tsv", "w", encoding="utf-8") as f:
         for w, ph in te:
             ref = "".join(ph)
-            pred = predict(model, chars, itag, w)
+            pred = predict(model, chars, itag, char_tags, w)
             if pred == ref:
                 ok += 1
             f.write(f"{w}\t{ref}\t{pred}\n")
@@ -98,12 +139,12 @@ def main():
     tr, te = split(rows)
     # (1) honest held-out: align+train on 90%, predict the 10%
     aln_tr = align_parallel(tr)
-    chars, tags, _ = build(aln_tr)
+    chars, tags, char_tags = build(aln_tr)
     itag = {v: k for k, v in tags.items()}
     Xtr, Ytr = encode(aln_tr, chars, tags)
     print(f"train {len(Xtr)} words, {len(chars)} chars, {len(tags)} tags")
     model = train(Tagger(len(chars), len(tags)), Xtr, Ytr)
-    heldout_eval(model, chars, itag, te)
+    heldout_eval(model, chars, itag, char_tags, te)
     # (2) SHIPPED: align+train on the FULL lexicon, export ONNX + meta.json (the structuralTagger contract)
     aln = align_parallel(rows)
     chars, tags, char_tags = build(aln)

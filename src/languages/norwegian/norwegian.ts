@@ -161,10 +161,12 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
 
 const TOKEN = /([A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+)|(\d+)|([.?!,;:…—])/gu;
 
-function number(digits: string, oovOverride?: OovResolver): string {
+// Number words (en, hundre, tusen, …) are all in the lexicon, so they never reach the oovOverride tier — the sync
+// phonemizeWord is correct here and the neural path's tagged map (populated only from input tokens) never holds them.
+function number(digits: string): string {
     const nn = Number(digits);
     if (!Number.isSafeInteger(nn)) return digits;
-    return renderNumber(nn, MANIFEST.numbers, (w) => phonemizeWord(w, oovOverride), westernNumberWords);
+    return renderNumber(nn, MANIFEST.numbers, phonemizeWord, westernNumberWords);
 }
 
 class NorwegianPhonemizer implements Phonemizer {
@@ -173,7 +175,7 @@ class NorwegianPhonemizer implements Phonemizer {
     text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
-            else if (m[2]) sink.emit(number(m[2], oovOverride));
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

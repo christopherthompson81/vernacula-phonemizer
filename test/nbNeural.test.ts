@@ -30,6 +30,18 @@ describe("norwegian neural OOV tagger", () => {
             expect(await phonemizeNbNeural(s)).not.toBe(phonemize(s, "nb"));
         });
 
+        // Convention invariant: the tag alphabet embeds ˈ and per-position argmax has no global stress constraint, so
+        // raw output can carry doubled/zero/multiple primary marks (paella→pɑˈˈɛlɑ). oneStress() must normalize every
+        // word to EXACTLY ONE primary ˈ and no adjacent stress marks — the same invariant the lexicon + rule tiers hold.
+        test("tagger output always has exactly one primary stress, no doubled marks", async () => {
+            const tagger = await createNorwegianTagger();
+            for (const w of ["paella", "entrepreneur", "desentraliseringsreform", "cappuccino", "kroppsøving"]) {
+                const out = await tagger!.tag(w);
+                expect(out.match(/ˈ/gu)?.length, `${w} → ${out}`).toBe(1); // exactly one primary
+                expect(/[ˈˌ]{2}/u.test(out), `${w} → ${out}`).toBe(false); // no adjacent stress marks
+            }
+        });
+
         // The mask-decline safety net: the training vocab covers every letter the nb TOKEN regex admits, so a decline
         // can't be reached through phonemizeNbNeural — but the tagger.tag() contract must still return "" (not an
         // arbitrary tag) for a grapheme outside the vocab, so a caller that hands it foreign text defers cleanly.

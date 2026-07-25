@@ -63,8 +63,9 @@ comparison):
 The perceptron loses ~27 points — the per-grapheme classifier can't model Norwegian's long-range stress-conditioned
 vowel quality the way a BiLSTM's recurrent state can (mirrors the Danish precedent). So the sync-simplicity of a
 pure-JS perceptron isn't worth 27 points on the names/novel-compounds the OOV tail is made of. The shipped model is the
-**stress-included** BiLSTM — held-out **89.7%** full-word exact-match INCLUDING the stress mark (56376/62838; the
-segmental table above drops stress for the perceptron comparison, so this is the harder complete-output number).
+**stress-included** BiLSTM — held-out **89.8%** full-word exact-match INCLUDING the stress mark (56456/62838, measured
+with the shipped masked-argmax + oneStress decode; the segmental table above drops stress for the perceptron
+comparison, so this is the harder complete-output number).
 Trained with a **cosine LR decay** (2e-3→0): a fixed lr overshot the minimum in late epochs (loss climbed ~50% past
 its epoch-10 bottom, held-out 75.1% on the last-epoch weights); annealing made the loss monotonic and lifted held-out
 to 89.7%. `onnxruntime-node` is an optional dependency

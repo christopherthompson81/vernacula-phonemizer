@@ -27,6 +27,30 @@ export interface NorwegianTagger {
     tag(word: string): Promise<string>;
 }
 
+const VOWEL = /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u; // the same vowel-phoneme set the rule engine uses for stress placement
+
+/**
+ * Enforce EXACTLY ONE primary stress on the concatenated per-letter tags. The tag alphabet embeds ˈ, but the
+ * per-position argmax has no global stress constraint, so the raw output can carry adjacent-doubled (`ˈˈ`), zero, or
+ * two primary marks (paella→`pɑˈˈɛlɑ`, entrepreneur→no ˈ, cappuccino→two). The lexicon and rule tiers both guarantee a
+ * single ˈ; this makes the tagger output convention-consistent so the shipped OOV IPA never violates it. Keep the
+ * FIRST primary and drop later ones (over-emitted; legitimately-emitted secondary ˌ are kept); if none survives,
+ * promote the first secondary, else place ˈ before the first vowel's onset (the rule-engine default).
+ */
+function oneStress(ipa: string): string {
+    // collapse any run of adjacent stress marks to one (primary wins): ˈˈ / ˈˌ / ˌˈ → ˈ, ˌˌ → ˌ
+    ipa = ipa.replace(/[ˈˌ]{2,}/gu, (m) => (m.includes("ˈ") ? "ˈ" : "ˌ"));
+    let seen = false;
+    ipa = ipa.replace(/ˈ/gu, () => (seen ? "" : ((seen = true), "ˈ"))); // keep the first ˈ, drop the rest
+    if (seen) return ipa;
+    if (ipa.includes("ˌ")) return ipa.replace("ˌ", "ˈ"); // no primary → promote the first secondary
+    const m = VOWEL.exec(ipa); // still none → ˈ before the first vowel's onset (matches phonemizeWordRules)
+    if (!m) return ipa;
+    let onset = m.index;
+    while (onset > 0 && !VOWEL.test(ipa[onset - 1]!)) onset--;
+    return ipa.slice(0, onset) + "ˈ" + ipa.slice(onset);
+}
+
 /** Build the Norwegian OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise<NorwegianTagger | undefined> {
     const dir = dirname(fileURLToPath(import.meta.url));
@@ -52,6 +76,9 @@ export async function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise
             if (T === 0) return "";
             // DECLINE (return "") on any grapheme outside the training vocab: its letter is not in the mask, so tagging
             // it would emit an arbitrary tag and override the correct rule reading. "" = "defer to the rule engine".
+            // (Coverage contract: meta.src covers every letter the nb TOKEN/WORD class admits, so this is unreachable
+            // via phonemizeNbNeural today — it's the defensive guard for a caller passing tag() foreign graphemes, and
+            // the net if that letter class is ever widened.)
             const ids = new Array<number>(T);
             for (let i = 0; i < T; i++) {
                 const id = meta.src[chars[i]!];
@@ -68,7 +95,7 @@ export async function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise
                 if (best < 0) return "";
                 out += meta.tags[String(best)] ?? "";
             }
-            return out;
+            return oneStress(out); // guarantee exactly one primary ˈ (the lexicon/rule tiers' invariant)
         },
     };
 }

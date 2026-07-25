@@ -13,6 +13,8 @@ describe("Norwegian Bokmål canonical IPA", () => {
         expect(phonemizeWordRules("hus")).toBe("ˈhʉːs"); // u → ʉː
         expect(phonemizeWordRules("norsk")).toBe("ˈnɔʂk"); // short o → ɔ, rs → retroflex ʂ
         expect(phonemizeWordRules("hånd")).toBe("ˈhɔn"); // å short (nd closes), final d silent
+        expect(phonemizeWordRules("år")).toBe("ˈoːɾ"); // å LONG (open syllable) → oː — the other branch of the å split
+        expect(phonemizeWordRules("fôr")).toBe("ˈfuːɾ"); // ô circumflex vowel → uː (loanword vowel letter)
     });
 
     test("rule engine — digraphs/softening: sj/skj→ʃ, kj/tj→ç, gj/hj→j, hv→ʋ, sk before front", () => {
@@ -40,6 +42,7 @@ describe("Norwegian Bokmål canonical IPA", () => {
     test("cardinal numbers (via the lexicon)", () => {
         const nb = createNorwegian();
         expect(nb.text("0").trim()).toBe("ˈnʊl"); // null
+        expect(nb.text("7").trim()).toBe("ˈʃʉː"); // sju (sj → ʃ) — routes through the lexicon as a number word
         expect(nb.text("100").trim()).toBe("ˈhʊndɾə"); // hundre
         expect(nb.text("1000").trim()).toBe("ˈtʉːsn"); // tusen (syllabic n)
     });

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Danish OOV g2p PROTOTYPE — does a data-driven tagger beat the ~24.7% rule floor on held-out words?
+"""Norwegian OOV g2p PROTOTYPE — the averaged-perceptron COMPARISON BASELINE (the BiLSTM ships; this quantifies how
+far a per-grapheme perceptron falls short: ~56.6% held-out vs the BiLSTM's 89.7%). Framework-free (averaged
+perceptron, the repo's posTagger precedent). This module also provides load()/split()/feats()/VOWELS, which
+train_nb_bilstm.py and nb_tagger_parallel.py import.
 
-Pipeline (framework-free — torch is unavailable; averaged perceptron, the repo's posTagger precedent):
-  1. deterministic 90/10 split of da-lexicon.tsv (train / held-out)
+Pipeline:
+  1. deterministic 90/10 split of the NST training tsv (train / held-out)
   2. hard-EM (Viterbi) many-to-{0,1,2} monotonic alignment of the training words → per-grapheme tags
   3. averaged-perceptron per-grapheme tagger (±4 grapheme window features)
-  4. predict IPA for each held-out word; write /tmp/da_holdout.tsv (word, reference, tagger_pred)
-     — the TS side (da_tagger_eval.mts) then folds all three and reports tagger% vs rules% on the SAME held-out.
+  4. predict IPA for each held-out word; write /tmp/nb_holdout.tsv (word, reference, tagger_pred)
+NOTE: for the FULL-corpus baseline use the multiprocess nb_tagger_parallel.py (this serial file is slow on 630k).
 """
 import os, re, math, random, hashlib
 from collections import defaultdict, Counter
@@ -171,7 +174,9 @@ def predict(model, labels, word):
     chars = list(word)
     return "".join(_argmax(model, feats(chars, i), labels) for i in range(len(chars)))
 
-MODEL = os.path.join(HERE, "..", "..", "src", "languages", "danish", "nb-g2p.tsv")
+# the perceptron baseline model (NOT shipped — the BiLSTM's nb-g2p-tagger.onnx is what serving loads); kept only so
+# the ~56.6% comparison number is reproducible. Written under a tmp path, never into a language dir.
+MODEL = "/tmp/nb-g2p-perceptron.tsv"
 
 def export_model(model, labels, path):
     # Compact TSV: line 1 = labels (tab-joined); then feature<TAB>label<TAB>weight (pruned |w|<0.75 to shrink).
@@ -192,7 +197,7 @@ def main():
     with open(OUT, "w", encoding="utf-8") as f:
         for w, ph in te:
             f.write(f"{w}\t{''.join(ph)}\t{predict(model_tr, labels_tr, w)}\n")
-    print(f"held-out predictions → {OUT} (run tools/danish/da_tagger_eval for the folded %)")
+    print(f"held-out predictions → {OUT} (word, reference, tagger_pred — exact-match % vs the reference)")
     # (2) SHIPPED model: train on the FULL lexicon for max real-world OOV coverage. RESEED so the exported model is
     # reproducible independent of phase (1)'s split (which consumes RNG state via shuffle).
     random.seed(0)

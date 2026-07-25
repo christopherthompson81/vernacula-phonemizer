@@ -7,8 +7,12 @@ Two embarrassingly-/near-parallel stages, sharded across a Pool:
      one averaged-perceptron pass on its shard from the shared weights, then the driver averages the shards' weights
      and broadcasts. Converges to ~the serial accuracy while keeping all cores busy.
 
-feats()/viterbi decode are imported from nb_tagger_prototype so the model stays byte-compatible with the JS serving
-(src/languages/norwegian/tagger.ts). Run UNBUFFERED for live logs:  .venv/bin/python -u tools/norwegian/nb_tagger_parallel.py
+load()/split()/feats()/VOWELS are imported from nb_tagger_prototype (shared with the serial baseline). The Viterbi
+(_viterbi/_lp/_smooth below) is REIMPLEMENTED here rather than imported: the worker version reads `prob` as a plain
+dict via .get() so it pickles across the Pool, whereas the prototype's uses a defaultdict — same DP, pickling-safe.
+align_parallel is what train_nb_bilstm.py imports for the SHIPPED model; the perceptron trainer here is the
+comparison baseline (writes a tmp perceptron tsv, not shipped). Run UNBUFFERED for live logs:
+  .venv/bin/python -u tools/norwegian/nb_tagger_parallel.py
 """
 import os, sys, math, time, random
 from collections import defaultdict
@@ -16,11 +20,12 @@ from multiprocessing import Pool, cpu_count
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from nb_tagger_prototype import load, split, feats, VOWELS  # loader + features (kept in sync with tagger.ts)
+from nb_tagger_prototype import load, split, feats, VOWELS  # loader + features (shared with the serial prototype)
 
 N_PROC = max(1, cpu_count() - 1)
 OUT = "/tmp/nb_holdout.tsv"
-MODEL = os.path.join(HERE, "..", "..", "src", "languages", "norwegian", "nb-g2p.tsv")
+# the perceptron baseline model — NOT shipped (serving loads the BiLSTM's nb-g2p-tagger.onnx); tmp path, not a lang dir
+MODEL = "/tmp/nb-g2p-perceptron.tsv"
 
 
 def chunks(seq, n):
@@ -186,9 +191,12 @@ def train_ipm(aligned, epochs=10):
     w = {}
     for ep in range(epochs):
         t = time.time()
-        # each task = (this worker's shard, the shared weights, a per-epoch seed); worker trains one averaged pass
+        # each task = (this worker's shard, the GLOBAL label set, the shared weights, a per-epoch seed); worker trains
+        # one averaged pass. The label universe MUST be the global `labels`, not each shard's own — a worker that
+        # (re)processes a 2nd shard would otherwise keep the first shard's labels, and even 1:1 a shard-local label set
+        # lets _argmax never predict a gold tag absent from that shard, corrupting the averaged weights.
         with Pool(N_PROC) as p:
-            results = p.map(_epoch_bound, [(shards[i], w, ep * 100 + i) for i in range(len(shards))])
+            results = p.map(_epoch_bound, [(shards[i], labels, w, ep * 100 + i) for i in range(len(shards))])
         # average the shards' weights (missing key = 0)
         keys = set()
         for r in results:
@@ -199,11 +207,10 @@ def train_ipm(aligned, epochs=10):
 
 
 def _epoch_bound(args):
-    shard, w0, seed = args
+    shard, labels, w0, seed = args
     global _SHARD, _LABELS
     _SHARD = shard
-    if _LABELS is None:
-        _LABELS = sorted({t for _, tags in shard for t in tags})
+    _LABELS = labels  # the GLOBAL label universe (set every task — never a stale per-shard subset)
     return _epoch((w0, seed))
 
 

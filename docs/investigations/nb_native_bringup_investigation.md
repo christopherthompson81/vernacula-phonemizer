@@ -156,8 +156,9 @@ pass predicts **stress POSITION** (the thing that's actually wrong for OOV loanw
 stress) plus the vowel quality, in one pass. Exported to the shared structuralTagger contract
 (`nb-g2p-tagger.onnx` + `.meta.json` = src/tags/charTags mask), served by `norwegianTagger.ts` (mirrors
 `bengaliTagger.ts`, reuses `core/onnx.ts` + `core/structuralTagger.ts` masked-argmax) via the async
-`phonemizeNbNeural` (lexicon → tagger → rules). **Held-out (631k, full-word exact-match INCLUDING stress): 89.7%**
-(56376/62838) — i.e. ~90% of OOV words get both the vowel quality AND the stress position right, the second being
+`phonemizeNbNeural` (lexicon → tagger → rules). **Held-out (631k, full-word exact-match INCLUDING stress, measured
+with the SHIPPED masked-argmax + oneStress decode): 89.8%** (56456/62838) — i.e. ~90% of OOV words get both the vowel
+quality AND the stress position right, the second being
 exactly what the rule engine gets wrong on loanwords. (The 83.4% above was the segmental-only metric, for the
 apples-to-apples perceptron comparison; 89.7% is the harder complete-output number the shipped model is judged on.)
 
@@ -165,7 +166,7 @@ apples-to-apples perceptron comparison; 89.7% is the harder complete-output numb
 Adam lr=2e-3 and its training loss bottomed ~epoch 10 (0.091) then climbed ~50% to 0.138 by epoch 39 — the optimizer
 overshooting the minimum once close, and we were exporting those last, past-the-minimum weights (held-out 75.1%).
 Adding a **cosine LR decay** (2e-3→0 over the 40 epochs) made the loss decrease monotonically (0.283→0.039) and lifted
-held-out **75.1%→89.7%**. Concretely the tagger reads what a single-first-syllable rule can't:
+held-out **~75%→~90%**. Concretely the tagger reads what a single-first-syllable rule can't:
 `absorbsjonskoeffisient`→`ɑbsɔɾbˈʃuːnskʊəfɪsɪˌɛnt` (primary stress on `-ʃuːn`, not the first syllable; a secondary
 stress; the compound-internal sk→ʃ softening) vs the rule reading `ˈɑbsɔɾbʃuːnskɔəfːɪsɪənt`.
 
@@ -177,3 +178,23 @@ mixing (McDonald 2010) — ~11 cores busy, alignment 8-iter dropped from ~7 min 
 **Architecture:** sync default = lexicon → rules (90.7% freq-weighted, C#-parity-irrelevant since nb is TS-only);
 async premium = lexicon → BiLSTM → rules (OOV names). The perceptron/IPM tooling stays in-tree as the comparison
 baseline but no perceptron model ships.
+
+### Post-review fixes (8-angle code review of PR #454)
+
+The review found the runtime TS path clean (precedence, case, ONNX contract, fallbacks all verified) and surfaced a
+handful of real issues, fixed here:
+- **Single-primary-stress (shipped defect, the important one).** Because the tag alphabet embeds ˈ and per-position
+  argmax has no global constraint, raw tagger output could carry doubled `ˈˈ` (paella→`pɑˈˈɛlɑ`), zero, or two primary
+  marks (~4 of 6 tricky OOV words) — violating the one-primary invariant the lexicon + rule tiers hold. Added
+  `oneStress()` in norwegianTagger.ts (keep the first ˈ, drop later ones, collapse adjacent marks, default to the
+  first-vowel onset if none), guarded by a test.
+- **Dropped test coverage** restored: `år`→oː (long-å), `fôr`→ô circumflex, `7`→sju.
+- **Tooling correctness:** the IPM perceptron passed a per-shard label subset to workers (could corrupt averaged
+  weights) → now passes the global label universe; the BiLSTM held-out eval decoded with UNMASKED argmax while serving
+  uses the charTags mask + oneStress → `predict()` now mirrors the shipped decode; stale Danish copy-paste in
+  nb_tagger_prototype.py (docstring + a `MODEL` path writing into `src/languages/danish/`) and a misleading
+  "viterbi imported" header in nb_tagger_parallel.py corrected; the dead `oovOverride` threading through `number()`
+  removed (number words are always lexicon-covered).
+- **Deferred (follow-up):** norwegianTagger.ts / nbNeural.ts are near-verbatim of the Bengali versions; a shared
+  `createWordStructuralTagger` factory in `core/structuralTagger.ts` could own both. Deferred because it touches the
+  shipped bn path and nb now diverges (the oneStress post-process), so it wants its own PR with bn re-verified.
