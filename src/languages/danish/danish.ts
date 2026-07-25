@@ -1,17 +1,18 @@
 /**
  * Danish (da) phonemizer — Standard rigsdansk, canonical IPA, espeak-independent. Danish is the DEEPEST European
- * orthography: stressed-vowel QUALITY, soft-d/g realisation, reduction, and stress are largely LEXICAL / not
- * recoverable from spelling by rule. So the primary path is a PRONUNCIATION LEXICON (da-lexicon.tsv, from the
- * Wiktionary data, normalised to canonical IPA); the rule g2p (phonemizeWordRules) is the OOV FALLBACK. The rule
- * engine is a left-to-right scan with Danish context rules (soft-d ⟨d⟩→ð intervocalic/final; af-→aw glide; coda
- * handling; final-⟨t⟩-after-vowel→d; -er/-et/-en/-el reductions; silent-h before j/v/…; ng→ŋ) + a first-syllable
- * (unstressed-prefix-aware) STRESS model. Length + STØD + aspiration are suprasegmental → not emitted (folded in the
- * referee eval, which measures the RULE engine — non-circular). See docs/investigations/da_native_bringup_investigation.md.
+ * orthography: stressed-vowel QUALITY, soft-d/g realisation, reduction, length, and stød are largely LEXICAL / not
+ * recoverable from spelling by rule. So the primary path is a PRONUNCIATION LEXICON (da-lexicon.tsv, ~37k = the NST
+ * lexicon ∩ the top-50k OpenSubtitles-da frequency head, Nasjonalbiblioteket / Språkbanken CC0 — the NARROW convention:
+ * r-vocalisation ɐ, stop lenition, soft-d ð, length ː, stød ˀ); the neural BiLSTM tagger (async path, daNeural.ts,
+ * trained on the full 199k NST) then the rule g2p
+ * (phonemizeWordRules) are the OOV fallbacks. The rule engine is a left-to-right scan with Danish context rules
+ * (soft-d ⟨d⟩→ð intervocalic/final; af-→aw glide; coda handling; final-⟨t⟩-after-vowel→d; -er/-et/-en/-el reductions;
+ * silent-h before j/v/…; ng→ŋ) + a first-syllable (unstressed-prefix-aware) STRESS model; it folds length/stød/
+ * aspiration (the referee eval measures THIS engine — non-circular). See docs/investigations/da_nst_ingest_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { taggerPhonemize } from "./tagger.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const V = MANIFEST.vowels;
@@ -19,12 +20,18 @@ const C = MANIFEST.consonants;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const isV = (ch: string): boolean => ch !== "" && ch in V;
 
-// Pronunciation lexicon (word → canonical IPA, from the Wiktionary data via tools/gen/build-da-lexicon.mts). The
-// PRIMARY path: Danish vowel quality/reduction is unrecoverable by rule, so a known word is looked up here.
+// Pronunciation lexicon (word → canonical IPA, ~37k = NST ∩ top-50k freq, via tools/danish/build_da_nst.py). The
+// PRIMARY path: Danish vowel quality/reduction/length/stød is unrecoverable by rule, so a known word is looked up here.
 let LEX: Map<string, string> | undefined;
 function lexicon(): Map<string, string> {
     if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "da-lexicon.tsv", undefined, { optional: true });
     return LEX;
+}
+
+/** The NST pronunciation lexicon (lowercased word → IPA). Exposed so the async neural path (daNeural.ts) can skip
+ *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
+export function danishLexicon(): Map<string, string> {
+    return lexicon();
 }
 
 // Unstressed prefixes (Danish): stress falls on the following syllable (beˈɡønə, foˈʁsdɔ, undˈskyl).
@@ -100,52 +107,40 @@ export function phonemizeWordRules(word: string): string {
     return segs.map((s) => (s.stress ? "ˈ" : "") + s.ph).join("");
 }
 
-// IPA vowels the tagger can emit; the two REDUCED ones (‑e schwa, ‑er) never carry primary stress.
-const IPA_VOWELS = new Set([..."aɑeɛioɔuyøœəɐʌæ"]);
-const IPA_REDUCED = new Set([..."əɐ"]);
+/** Per-call OOV resolver: the raw word (as tokenized, NOT lowercased) → IPA, or undefined to defer to the rule engine.
+ *  Consulted BETWEEN the lexicon and the rule g2p (lexicon → oovOverride → rule); used only by the async neural path
+ *  (daNeural.ts), which keys by the raw match so it can share the fleet `wordLevelNeuralPrepass` (nb/bn pattern). */
+export type OovResolver = (word: string) => string | undefined;
 
-/** Place ONE primary ˈ on the tagger's IPA (which is stress-less — the training data drops ˈ/ˌ), mirroring the rule
- *  engine: first full (non-reduced) vowel, shifted to the vowel AFTER an unstressed prefix; monosyllables unmarked.
- *  Keeps OOV output stress-consistent with the lexicon + rule tiers (a canonical-IPA target — stress is a real axis). */
-function applyStress(word: string, ipa: string): string {
-    if (ipa.includes("ˈ")) return ipa;
-    const chars = [...ipa];
-    const vowelIdx: number[] = [];
-    for (let i = 0; i < chars.length; i++) if (IPA_VOWELS.has(chars[i]!)) vowelIdx.push(i);
-    if (vowelIdx.length < 2) return ipa; // monosyllable → no mark (matches the rule engine)
-    const firstFull = vowelIdx.find((i) => !IPA_REDUCED.has(chars[i]!));
-    if (firstFull === undefined) return ipa; // all-reduced → nothing to stress
-    const ord = UNSTRESSED_PREFIX.test(word) ? 1 : 0;
-    const cand = vowelIdx[ord];
-    const target = cand !== undefined && !IPA_REDUCED.has(chars[cand]!) ? cand : firstFull;
-    chars.splice(target, 0, "ˈ");
-    return chars.join("");
-}
-
-/** One Danish word → canonical IPA. THREE tiers for the deep orthography: (1) the LEXICON (known words, reference
- *  quality), (2) the perceptron TAGGER (OOV — recovers the context-conditioned vowel quality/reduction the rules miss:
- *  held-out 45.5% vs the rule engine's 30.5% on the same split, folded; re-stressed by applyStress since the tagger is stress-less),
- *  (3) the RULE engine (fallback when the tagger model is absent OR returns empty). */
-export function phonemizeWord(word: string): string {
+/** One Danish word → canonical IPA. THREE tiers for the deep orthography: (1) the LEXICON (NST ∩ top-50k freq, ~37k
+ *  known words at reference quality — the narrow convention: r-vocalisation, lenition, soft-d, length, stød), (2) the
+ *  neural TAGGER via `oovOverride` (the BiLSTM, async path only — trained on the full 199k NST, ~96% symbol held-out), (3) the
+ *  RULE engine (fallback when the tagger is absent OR declines). The old averaged-perceptron tier was dropped — it was
+ *  trained on the small broad-convention lexicon and is superseded by the NST lexicon + BiLSTM. */
+export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const w = word.toLowerCase();
-    const tagged = taggerPhonemize(w); // string | null; "" (all-deletion) must also fall through → coerce to null
-    return lexicon().get(w) ?? (tagged ? applyStress(w, tagged) : null) ?? phonemizeWordRules(w);
+    return lexicon().get(w) ?? oovOverride?.(word) ?? phonemizeWordRules(word);
 }
 
-// A Danish word (Latin incl. æ ø å + accents) / number / punctuation token.
-const TOKEN = /([a-zæøåéöäü]+)|(\d+)|([.!?…,;:])/giu;
+// A Danish word (Latin incl. æ ø å + loanword accents é ö ä ü ó è ã à) / number / punctuation token. The accent set
+// must cover every letter that appears in a da-lexicon.tsv key, else that entry is unreachable and the word is split
+// at the missing char (voilà → "voil"); it also feeds the neural WORD regex in daNeural.ts (keep the two in sync).
+const TOKEN = /([a-zæøåéöäüóèãà]+)|(\d+)|([.!?…,;:])/giu;
 
 class DanishPhonemizer implements Phonemizer {
-    text(input: string): string {
+    // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
+    // path omits it, so behaviour is byte-identical to phonemize(text, "da").
+    text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
             // numbers deferred (Danish vigesimal compositor not yet authored)
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
 }
 
-/** Build the Danish phonemizer (lexicon → rule fallback + first-syllable stress; length/stød deferred). */
-export function createDanish(): Phonemizer {
+/** Build the Danish phonemizer (NST lexicon → rule fallback). The returned `text` takes an optional per-call
+ *  `oovOverride` (neural path only) injecting BiLSTM readings for OOV words; still assignable to Phonemizer. */
+export function createDanish(): { text(input: string, oovOverride?: OovResolver): string } {
     return new DanishPhonemizer();
 }

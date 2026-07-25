@@ -44,6 +44,32 @@ export function maskedArgmax(logits: Float32Array, rowOffset: number, valid: num
     return best;
 }
 
+/** The default vowel set for `oneStress`'s no-stress fallback — the union across the fleet's tagger languages
+ *  (Norwegian + Danish add ə/ɐ/ɒ). Only consulted when a reading carries NEITHER a primary nor a secondary mark. */
+const DEFAULT_STRESS_VOWEL = /[ɑaeɛiɪoɔuʉʊyʏøœæəɐɒ]/u;
+
+/**
+ * Enforce EXACTLY ONE primary stress on a per-letter-tag concatenation. The tag alphabet embeds ˈ/ˌ but the
+ * per-position argmax has no global stress constraint, so a raw reading can carry adjacent-doubled (`ˈˈ`/`ˌˌ`), zero,
+ * or two primary marks. The lexicon and rule tiers both guarantee a single ˈ; this makes the tagger output
+ * convention-consistent so the shipped OOV IPA never violates it. Keep the FIRST primary and drop later ones
+ * (legitimate secondary ˌ are kept); if none survives, promote the first secondary, else place ˈ before the first
+ * vowel's onset (the rule-engine default). `vowel` overrides the fallback vowel class for languages beyond the default.
+ */
+export function oneStress(ipa: string, vowel: RegExp = DEFAULT_STRESS_VOWEL): string {
+    // collapse any run of adjacent stress marks to one (primary wins): ˈˈ / ˈˌ / ˌˈ → ˈ, ˌˌ → ˌ
+    ipa = ipa.replace(/[ˈˌ]{2,}/gu, (m) => (m.includes("ˈ") ? "ˈ" : "ˌ"));
+    let seen = false;
+    ipa = ipa.replace(/ˈ/gu, () => (seen ? "" : ((seen = true), "ˈ"))); // keep the first ˈ, drop the rest
+    if (seen) return ipa;
+    if (ipa.includes("ˌ")) return ipa.replace("ˌ", "ˈ"); // no primary → promote the first secondary
+    const m = vowel.exec(ipa); // still none → ˈ before the first vowel's onset (matches the rule engines)
+    if (!m) return ipa;
+    let onset = m.index;
+    while (onset > 0 && !vowel.test(ipa[onset - 1]!)) onset--;
+    return ipa.slice(0, onset) + "ˈ" + ipa.slice(onset);
+}
+
 /** A bare word → canonical IPA, or "" to defer to the rule engine (an out-of-vocab grapheme). */
 export interface WordStructuralTagger {
     tag(word: string): Promise<string>;
