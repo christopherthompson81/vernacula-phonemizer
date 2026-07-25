@@ -34,3 +34,19 @@ Düsseldorf, the compound Карасуубазар where б→β wrongly crosses
 larger/2nd referee (kaikki ky) would tighten the one loose end: the back-⟨г⟩ ɡ~ʁ~ɢ notation (the referee mixes the
 velar stop, uvular fricative, and uvular stop for back г; we emit ʁ). Floor 0.89. Wired: registry (`case "ky"`), eval
 PHON, `langs/ky.jsonc`, `test/kyrgyz.test.ts` (5 tests), catalogue row, maturity row.
+
+## Run 2 — 2026-07-24 — code review fixes
+
+3-agent review (harmony/folds/wiring all verified clean — the c→k / ɑ→a folds confirmed as honest one-phoneme
+allophony, not score inflation). One correctness fix + a schema cleanup:
+- **Numbers ≥1e9 had no миллиард (billion) tier** — the composer topped out at million, so 1000000000 rendered as
+  "миң миллион" (thousand-million). Added the billion tier (бир миллиард).
+- **Number schema conformance** — the manifest used a bespoke shape (top-level hundred/thousand/million, tens as an
+  array) while the interface claimed `NumbersDef`; the intersection type was a lie (magnitudes was undefined at
+  runtime, only safe because a `compose` fn is passed). Fixed by conforming to the canonical `NumbersDef` (tens as a
+  Record incl. "10", magnitudes{hundred,thousand,million,billion}). Golden added (1e9→bir milliɑrd). Referee unchanged
+  (90.7%; numbers aren't refereed). Full suite passes.
+
+Considered-but-declined: counting the iotated я/ю/ё as vowels for the intervocalic-б and harmony context — тарбия→
+referee tarbija keeps [b] before ⟨я⟩, so NOT counting them is correct there; adding it would regress. The negative sign
+in text (-5) is dropped, consistent with the whole fleet (no minus word) — left as-is.

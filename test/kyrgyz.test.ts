@@ -33,6 +33,7 @@ describe("Kyrgyz canonical IPA — rule g2p (Standard Kyrgyz)", () => {
         expect(ky.text("21").trim()).toBe("d͡ʒɯjɯrmɑ bir"); // жыйырма бир
         expect(ky.text("100").trim()).toBe("d͡ʒyz"); // жүз (omits leading 1)
         expect(ky.text("1000").trim()).toBe("miŋ"); // миң
+        expect(ky.text("1000000000").trim()).toBe("bir milliɑrd"); // бир миллиард (billion tier)
     });
 
     test("text: words + clause punctuation", () => {

@@ -18,7 +18,7 @@ interface KyrgyzDef {
     backVowels: string;
     iotated: Record<string, string>;
     consonants: Record<string, string>;
-    numbers: NumbersDef & { tens: string[]; hundred: string; thousand: string; million: string };
+    numbers: NumbersDef; // canonical schema: units[], tens{"10".."90"}, magnitudes{hundred,thousand,million,billion}
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<KyrgyzDef>(import.meta.url, "kyrgyz.jsonc");
@@ -63,27 +63,33 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-/** Turkic decimal composition: tens + units + hundred/thousand/million, all SPACE-separated (жыйырма бир = 21). */
-function kyrgyzNumberWords(n: number, d: KyrgyzDef["numbers"]): (string | null)[] {
+/** Turkic decimal composition: tens + units + hundred/thousand/million/billion, all SPACE-separated (жыйырма бир =
+ *  21; the hundred/thousand-multiplier omits a leading 1: жүз, миң). */
+function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
     if (n < 10) return [d.units[n]!];
     if (n < 100) {
-        const t = Math.floor(n / 10);
+        const t = Math.floor(n / 10) * 10;
         const u = n % 10;
-        return [d.tens[t]!, ...(u ? [d.units[u]!] : [])];
+        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])]; // tens includes "10" (он)
     }
     if (n < 1000) {
         const h = Math.floor(n / 100);
         const r = n % 100;
-        return [...(h > 1 ? [d.units[h]!] : []), d.hundred, ...(r ? kyrgyzNumberWords(r, d) : [])];
+        return [...(h > 1 ? [d.units[h]!] : []), d.magnitudes.hundred, ...(r ? kyrgyzNumberWords(r, d) : [])];
     }
     if (n < 1_000_000) {
         const th = Math.floor(n / 1000);
         const r = n % 1000;
-        return [...(th > 1 ? kyrgyzNumberWords(th, d) : []), d.thousand, ...(r ? kyrgyzNumberWords(r, d) : [])];
+        return [...(th > 1 ? kyrgyzNumberWords(th, d) : []), d.magnitudes.thousand, ...(r ? kyrgyzNumberWords(r, d) : [])];
     }
-    const m = Math.floor(n / 1_000_000);
-    const r = n % 1_000_000;
-    return [...kyrgyzNumberWords(m, d), d.million, ...(r ? kyrgyzNumberWords(r, d) : [])];
+    if (n < 1_000_000_000) {
+        const m = Math.floor(n / 1_000_000);
+        const r = n % 1_000_000;
+        return [...kyrgyzNumberWords(m, d), d.magnitudes.million!, ...(r ? kyrgyzNumberWords(r, d) : [])];
+    }
+    const b = Math.floor(n / 1_000_000_000);
+    const r = n % 1_000_000_000;
+    return [...kyrgyzNumberWords(b, d), d.magnitudes.billion!, ...(r ? kyrgyzNumberWords(r, d) : [])];
 }
 
 function number(digits: string): string {

@@ -29,13 +29,12 @@
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
     },
 
-    // NUMBERS — Kyrgyz Cyrillic cardinal spellings; canonical IPA DERIVED via the same g2p. Turkic decimal: tens and
-    // units are SPACE-separated (жыйырма бир = 21), as are magnitude groups.
+    // NUMBERS — Kyrgyz Cyrillic cardinal spellings (canonical NumbersDef schema); canonical IPA DERIVED via the same
+    // g2p. Turkic decimal: tens and units are SPACE-separated (жыйырма бир = 21), as are magnitude groups. ⟨tens⟩
+    // includes "10" (он), Turkic-style.
     "numbers": {
         "units": ["нөл", "бир", "эки", "үч", "төрт", "беш", "алты", "жети", "сегиз", "тогуз"],
-        "tens": ["", "он", "жыйырма", "отуз", "кырк", "элүү", "алтымыш", "жетимиш", "сексен", "токсон"],
-        "hundred": "жүз",
-        "thousand": "миң",
-        "million": "миллион"
+        "tens": { "10": "он", "20": "жыйырма", "30": "отуз", "40": "кырк", "50": "элүү", "60": "алтымыш", "70": "жетимиш", "80": "сексен", "90": "токсон" },
+        "magnitudes": { "hundred": "жүз", "thousand": "миң", "million": "миллион", "billion": "миллиард" }
     }
 }
