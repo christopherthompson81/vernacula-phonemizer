@@ -1,0 +1,11 @@
+{
+    "language": "hy",
+    "name": "Armenian",
+    "script": "Armenian",
+    "provenance": "Authored Eastern Armenian rule g2p (three-way stops + uvulars + tap/trill + ու digraph + word-initial glides) scored against the wikipron hye_armn_e_broad HUMAN referee.",
+    "referees": [
+        { "file": "hy.wikipron-hye-e-broad.tsv", "source": "wikipron hye_armn_e_broad (Wiktionary, HUMAN, 18090 — Eastern Armenian)", "role": "primary" }
+    ],
+    "secondaryGap": "single-source (wikipron hye_armn_e). Western Armenian (hye_armn_w) is a separate dialect (different stop voicing) — NOT a second referee. kaikki hy is a candidate. The residual is largely the schwa-epenthesis layer (unwritten ə in clusters) + word-initial ե/ո glide exceptions.",
+    "folds": []
+}
