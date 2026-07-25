@@ -1,0 +1,20 @@
+{
+    "language": "ky",
+    "name": "Kyrgyz",
+    "script": "Cyrillic",
+    "provenance": "Authored Kyrgyz Cyrillic rule g2p (velar/uvular + dark-l harmony, long vowels, ж→d͡ʒ) scored against the wikipron kir_cyrl_broad HUMAN referee.",
+    "referees": [
+        { "file": "ky.wikipron-kir-broad.tsv", "source": "wikipron kir_cyrl_broad (Wiktionary, HUMAN, 888)", "role": "primary" }
+    ],
+    "secondaryGap": "single-source AND SMALL (wikipron kir, only 888 — proper-noun heavy). kaikki ky is a candidate 2nd. The residual is largely the ɫ~l / q~χ narrow-notation layer + Russian-loanword letters.",
+    "folds": [
+        { "pattern": "ɫ", "replace": "l", "note": "dark ⟨л⟩: we emit [ɫ] by back-harmony (canonical), but the referee writes it inconsistently ɫ~l (Аалым→ɑːlɯm plain, Балык→bɑɫɯq dark) — allophones of /l/ → fold ɫ→l" },
+        { "pattern": "ɑ", "replace": "a", "note": "the low vowel ⟨а⟩: the referee mixes ɑ ~ a for the same context (дарыс→dɑɾɯs but жатыш→dʒatɯʃ) — one phoneme, notation-inconsistent → fold ɑ→a" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨р⟩ tap ɾ ~ trill r written inconsistently (дарыс→dɑɾɯs but чабарман→tɕɑβɑrmɑn) → fold" },
+        { "pattern": "ʂ", "replace": "ʃ", "note": "⟨ш⟩ narrow retroflex [ʂ] ~ postalveolar [ʃ] → fold" },
+        { "pattern": "t͡ɕ", "replace": "t͡ʃ", "note": "⟨ч⟩ narrow alveolo-palatal [t͡ɕ] ~ [t͡ʃ] → fold" },
+        { "pattern": "ɕ", "replace": "ʃ", "note": "narrow alveolo-palatal [ɕ] ~ [ʃ] → fold" },
+        { "pattern": "c", "replace": "k", "note": "front ⟨к⟩: the referee inconsistently palatalises it [c] ~ [k] (эстелик→estelic ~ китеп→kitep — the -лик/-лык suffix class) — allophones of front /k/ → fold c→k" },
+        { "pattern": "ɟ", "replace": "ɡ", "note": "front ⟨г⟩: the palatalised allophone [ɟ] ~ [ɡ] → fold" }
+    ]
+}
