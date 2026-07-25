@@ -8,13 +8,13 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, westernNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface ArmenianDef {
     vowels: Record<string, string>;
     consonants: Record<string, string>;
-    numbers: NumbersDef & { hundreds: string[] };
+    numbers: NumbersDef; // includes the optional `hundreds` field read by westernNumberWords
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<ArmenianDef>(import.meta.url, "armenian.jsonc");
@@ -83,39 +83,10 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-// Slavic-style decimal composition: units + teens + tens + hundreds + thousand/million/billion (space-separated).
-function armenianNumberWords(n: number, d: NumbersDef & { hundreds: string[] }): (string | null)[] {
-    if (n < 10) return [d.units[n]!];
-    if (n < 20) return [d.teens![n - 10]!];
-    if (n < 100) {
-        const t = Math.floor(n / 10) * 10;
-        const u = n % 10;
-        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
-    }
-    if (n < 1000) {
-        const h = Math.floor(n / 100);
-        const r = n % 100;
-        return [d.hundreds[h]!, ...(r ? armenianNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000) {
-        const th = Math.floor(n / 1000);
-        const r = n % 1000;
-        return [...armenianNumberWords(th, d), d.magnitudes.thousand!, ...(r ? armenianNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000_000) {
-        const m = Math.floor(n / 1_000_000);
-        const r = n % 1_000_000;
-        return [...armenianNumberWords(m, d), d.magnitudes.million!, ...(r ? armenianNumberWords(r, d) : [])];
-    }
-    const b = Math.floor(n / 1_000_000_000);
-    const r = n % 1_000_000_000;
-    return [...armenianNumberWords(b, d), d.magnitudes.billion!, ...(r ? armenianNumberWords(r, d) : [])];
-}
-
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord, (m) => armenianNumberWords(m, DEF.numbers));
+    return renderNumber(n, DEF.numbers, phonemizeWord, westernNumberWords); // shared Slavic/Western composer
 }
 
 // Armenian letters (U+0530–058F) + the ligature և; number; Armenian + ASCII punctuation.

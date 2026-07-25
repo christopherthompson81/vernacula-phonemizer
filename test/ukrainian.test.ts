@@ -33,6 +33,7 @@ describe("Ukrainian canonical IPA", () => {
 
     test("numbers compose (Slavic decimal)", () => {
         expect(getPhonemizer("uk").text("100").trim()).toBe("stɔ"); // сто
+        expect(getPhonemizer("uk").text("1000").trim()).toBe("tɪsʲat͡ʃa"); // тисяча — bare (no leading "один"), via westernNumberWords
         expect(getPhonemizer("uk").text("2").trim()).toBe("dʋa"); // два
     });
 });
