@@ -317,6 +317,26 @@ export interface RefereeResult {
     // (which over-samples rare inflections). `freqCovered` = how many referee words carry a frequency.
     freqWeighted?: number;
     freqCovered?: number;
+    // SYMBOL accuracy = 1 − phone-error-rate: 1 − (Σ min edit-distance(fold(ours), fold(ref)) / Σ symbols). A
+    // partial-credit metric that (unlike word-exact `folded`) does not amplify a single-symbol variant into a whole
+    // wrong word — the honest measure where the residual is pervasive 1-phone variation (English reduced vowels /
+    // dialect / proper-noun anglicisation). Best-matching variant per word (credits any attested pronunciation).
+    symbolAcc: number;
+}
+
+/** Levenshtein distance over two symbol arrays (IPA characters after folding). */
+function editDistance(a: string[], b: string[]): number {
+    const d = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+        let prev = d[0]!;
+        d[0] = i;
+        for (let j = 1; j <= b.length; j++) {
+            const tmp = d[j]!;
+            d[j] = Math.min(d[j]! + 1, d[j - 1]! + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+            prev = tmp;
+        }
+    }
+    return d[b.length]!;
 }
 
 /** Load `freq/<lang>.txt` (a "word count" list, desc) → word→count, or null if the language has no frequency list. */
@@ -363,6 +383,8 @@ export async function evaluate(
         let freqNum = 0,
             freqDen = 0,
             freqCovered = 0;
+        let editSum = 0, // Σ min symbol edit-distance (for the phone-error-rate / symbol-accuracy metric)
+            symTot = 0; // Σ symbols (max of ours / best-matching ref)
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
         for (const row of pairs) {
@@ -380,13 +402,23 @@ export async function evaluate(
             const ours = cfg.segmentJoin ? rawOurs.replace(/\s+/g, "") : rawOurs;
             if (refIpas.some((rf) => ours === rf)) raw++;
             const of = fold(ours);
-            const hit = refIpas.some((rf) => fold(rf) === of);
+            const foldedRefs = refIpas.map(fold);
+            const hit = foldedRefs.includes(of);
+            // SYMBOL accuracy: best-matching variant's edit distance (0 on a hit), summed as a phone-error-rate.
+            const oSyms = [...of];
+            let bestEdit = Infinity, bestLen = 1;
+            for (const fr of foldedRefs) {
+                const d = editDistance(oSyms, [...fr]);
+                if (d < bestEdit) { bestEdit = d; bestLen = [...fr].length || 1; }
+            }
+            editSum += bestEdit;
+            symTot += Math.max(bestLen, oSyms.length);
             if (wCount > 0) { freqDen += wCount; freqCovered++; if (hit) freqNum += wCount; }
             if (hit) {
                 folded++;
                 continue;
             }
-            const key = `${of}  ≠  ${fold(refIpas[0]!)}`;
+            const key = `${of}  ≠  ${foldedRefs[0]!}`;
             diffClass[key] = (diffClass[key] ?? 0) + 1;
             example[key] ??= `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
         }
@@ -400,6 +432,7 @@ export async function evaluate(
             raw,
             folded,
             residual,
+            symbolAcc: symTot ? 1 - editSum / symTot : 0,
             ...(freq ? { freqWeighted: freqDen ? freqNum / freqDen : 0, freqCovered } : {}),
         });
     }
@@ -425,6 +458,9 @@ async function main(): Promise<void> {
         );
         console.log(
             `folded backbone:${r.folded}/${r.total} (${((100 * r.folded) / r.total).toFixed(1)}%)  — after the config folds`,
+        );
+        console.log(
+            `symbol accuracy:${(100 * r.symbolAcc).toFixed(1)}%  — 1 − phone-error-rate (partial credit; a 1-symbol variant is not a whole wrong word)`,
         );
         if (r.freqWeighted !== undefined)
             console.log(
