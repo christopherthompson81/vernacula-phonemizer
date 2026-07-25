@@ -93,8 +93,10 @@ export class EnglishPhonemizer {
         return this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
     }
 
-    /** One orthographic word → canonical IPA, given its POS expectation. */
-    private resolveWord(word: string, e: PosExpectation | undefined): string {
+    /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
+     *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
+     *  the sync path passes nothing, so behaviour is byte-identical. */
+    private resolveWord(word: string, e: PosExpectation | undefined, oovOverride?: (g2pKey: string) => string | undefined): string {
         const lower = word.toLowerCase();
 
         // Heteronym (direct or a regular -s/-es plural of a stress-shift heteronym).
@@ -141,9 +143,12 @@ export class EnglishPhonemizer {
 
         let over = this.lexicon.get(lookupKey);
         if (over === undefined) {
-            // OOV → native G2P (strip any apostrophes so contractions/loanwords G2P their letters). No espeak fallback.
+            // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
+            // so contractions/loanwords G2P their letters). No espeak fallback.
             const g2pKey = lookupKey.replace(/'/g, "");
-            over = /^[a-z]+$/.test(g2pKey) ? this.g2p.g2p(g2pKey) : g2pKey;
+            over =
+                oovOverride?.(g2pKey) ??
+                (/^[a-z]+$/.test(g2pKey) ? this.g2p.g2p(g2pKey) : g2pKey);
         }
         if (possAllomorph) over += sibilantAllomorph(over);
         return over;
@@ -166,7 +171,11 @@ export class EnglishPhonemizer {
     /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
      *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this engine's
      *  full number/heteronym/prosody context. Clause pause marks are not passed through it. */
-    text(input: string, wordTransform?: (ipa: string, word: string) => string): string {
+    text(
+        input: string,
+        wordTransform?: (ipa: string, word: string) => string,
+        oovOverride?: (g2pKey: string) => string | undefined,
+    ): string {
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
         while ((m = TOKEN_RE.exec(input)) !== null) {
@@ -253,7 +262,7 @@ export class EnglishPhonemizer {
                 continue;
             }
             for (const w of u.words) {
-                const citation = this.resolveWord(w.text, expect[wi]);
+                const citation = this.resolveWord(w.text, expect[wi], oovOverride);
                 wi++;
                 if (citation === "") continue;
                 const lw = w.text.toLowerCase();

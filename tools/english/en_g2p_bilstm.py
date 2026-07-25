@@ -9,13 +9,15 @@ per-position tag) on 90% of g2p-dict.tsv (117k words, public-domain CMUdict) and
 
     .venv/bin/python -u tools/english/en_g2p_bilstm.py
 """
-import os, sys, math, time, random, hashlib
+import os, sys, math, time, random, hashlib, json
 import torch, torch.nn as nn
 from torch.nn.utils.rnn import pad_sequence
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "norwegian"))
-from nb_tagger_parallel import align_parallel  # multiprocess hard-EM aligner (generic over phone-token lists)
+import nb_tagger_parallel  # multiprocess hard-EM aligner (generic over phone-token lists)
+from nb_tagger_parallel import align_parallel
+nb_tagger_parallel.SEP = " "  # ARPABET phones are multi-char tokens → join 2-phone chunks with a space (K S, not KS)
 
 DICT = os.path.join(HERE, "..", "..", "src", "languages", "english", "g2p-dict.tsv")
 DEV = "cuda" if torch.cuda.is_available() else "cpu"
@@ -164,6 +166,25 @@ def main():
     print(f"  WORD exact (incl. stress):   {exact}/{n} = {100*exact/n:.1f}%", flush=True)
     print(f"  WORD exact (stress-indep):   {stressless}/{n} = {100*stressless/n:.1f}%", flush=True)
     print(f"  declined (oov char): {declined}   (total {time.time()-t0:.0f}s)  → /tmp/en_bilstm_holdout.tsv", flush=True)
+
+    # PRODUCTION: retrain on the FULL CMUdict and export the shipped ONNX + meta (the structuralTagger contract).
+    if os.environ.get("EN_PRODUCTION"):
+        print("\n[production] aligning + training on the FULL CMUdict…", flush=True)
+        aln = align_parallel(rows)
+        chars, tags, char_tags = build(aln)
+        itag = {v: k for k, v in tags.items()}
+        Xf, Yf = encode(aln, chars, tags)
+        full = train(Tagger(len(chars), len(tags)), Xf, Yf)
+        full.eval().cpu()
+        SRC = os.path.join(HERE, "..", "..", "src", "languages", "english")
+        dummy = torch.tensor([[1, 2, 3, 4]])
+        torch.onnx.export(full, dummy, os.path.join(SRC, "en-g2p-tagger.onnx"),
+                          input_names=["chars"], output_names=["logits"],
+                          dynamic_axes={"chars": {0: "batch", 1: "len"}, "logits": {0: "batch", 1: "len"}}, opset_version=17)
+        meta = {"src": chars, "tags": {str(i): itag[i] for i in range(len(tags))},
+                "charTags": {str(ci): sorted(ti) for ci, ti in char_tags.items()}}
+        json.dump(meta, open(os.path.join(SRC, "en-g2p-tagger.meta.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        print(f"[production] exported → {SRC}/en-g2p-tagger.onnx + .meta.json ({len(chars)} chars, {len(tags)} tags)", flush=True)
 
 
 if __name__ == "__main__":
