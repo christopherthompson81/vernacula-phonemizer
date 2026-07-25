@@ -23,7 +23,7 @@ const CONS = MANIFEST.consonants;
 const RETRO = MANIFEST.retroflex;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
-const VOWEL_LETTERS = "aeiouyæøå";
+const VOWEL_LETTERS = "aeiouyæøåéèêëàâôü";
 const isV = (c: string): boolean => c !== "" && VOWEL_LETTERS.includes(c);
 const FRONT = MANIFEST.frontVowels.toLowerCase();
 const isFront = (c: string): boolean => c !== "" && FRONT.includes(c);
@@ -58,7 +58,8 @@ function toSegments(word: string): string[] {
         const three = w.slice(i, i + 3);
 
         // -sjon / -tion suffix → ʃuːn (nasjon, stasjon, pensjon), gated to i>0 (a stem precedes it)
-        if (i > 0 && (three === "sjo" || three === "tio") && w.slice(i, i + 4) === c + w[i + 1] + "on") {
+        const four = w.slice(i, i + 4);
+        if (i > 0 && (four === "sjon" || four === "tion")) {
             out.push("ʃ", "uː", "n");
             vowelOrd++;
             i += 4;
@@ -126,7 +127,7 @@ export function phonemizeWord(word: string): string {
     return segs.slice(0, onset).join("") + "ˈ" + segs.slice(onset).join("");
 }
 
-const TOKEN = /([A-Za-zÆØÅæøå]+)|(\d+)|([.?!,;:…—])/gu;
+const TOKEN = /([A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+)|(\d+)|([.?!,;:…—])/gu;
 
 function number(digits: string): string {
     const nn = Number(digits);

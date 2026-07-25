@@ -7,7 +7,6 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import type { NumbersDef } from "../../core/numbers.ts";
 
 export interface NorwegianManifest {
-    vowelChars: string;
     frontVowels: string;
     vowels: {
         long: Record<string, string>;

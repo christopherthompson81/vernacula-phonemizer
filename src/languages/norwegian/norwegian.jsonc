@@ -19,13 +19,14 @@
         "numbers": "tens-first compounds (tjueen = 21, modern Bokmål); split at hundre/tusen/million.",
     },
 
-    "vowelChars": "ɑaeɛiɪoɔuʉʊyʏøœæə",
     // Orthographic front vowels — trigger ʃ/ç/j softening on a preceding sk / k / g.
     "frontVowels": "eiyøæEIYØÆ",
 
     "vowels": {
-        "long": { "a": "ɑː", "e": "eː", "i": "iː", "o": "uː", "u": "ʉː", "y": "yː", "æ": "æː", "ø": "øː", "å": "oː" },
-        "short": { "a": "ɑ", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʉ", "y": "ʏ", "æ": "æ", "ø": "œ", "å": "ɔ" },
+        // é is an always-long loanword vowel (idé, kafé, allé → eː); ô marks a long o (fôr→fuːr); the other accents
+        // (à â è ê ë ü) are rare loanword letters mapped to their base-vowel quality so the tokenizer keeps them.
+        "long": { "a": "ɑː", "e": "eː", "i": "iː", "o": "uː", "u": "ʉː", "y": "yː", "æ": "æː", "ø": "øː", "å": "oː", "é": "eː", "è": "ɛː", "ê": "ɛː", "ë": "eː", "à": "ɑː", "â": "ɑː", "ô": "uː", "ü": "ʉː" },
+        "short": { "a": "ɑ", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʉ", "y": "ʏ", "æ": "æ", "ø": "œ", "å": "ɔ", "é": "eː", "è": "ɛ", "ê": "ɛ", "ë": "ɛ", "à": "ɑ", "â": "ɑ", "ô": "ʊ", "ü": "ʉ" },
         // Before /r/ the mid-front ⟨e⟩ lowers to æ (Bergen→bærɡən, er→æːɾ). ⟨ø⟩ stays øː (gjøre→jøːɾə).
         "longBeforeR": { "e": "æː" },
         "shortBeforeR": { "e": "æ" }
@@ -51,8 +52,8 @@
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
     },
 
-    // NUMBERS — Norwegian Bokmål cardinal spellings; canonical IPA DERIVED via the same g2p. Modern tens-first
-    // (tjueen = 21), space-separated at the hundre/tusen/million boundaries.
+    // NUMBERS — Norwegian Bokmål cardinal spellings (canonical NumbersDef); canonical IPA DERIVED via the same g2p,
+    // through the shared westernNumberWords composer (tens + unit space-separated, magnitudes split).
     "numbers": {
         "units": ["null", "en", "to", "tre", "fire", "fem", "seks", "sju", "åtte", "ni"],
         "teens": ["ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten"],

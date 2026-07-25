@@ -49,3 +49,20 @@ loanword stress, not native error. **The path past the ceiling** is the same as 
 a stress lexicon (the Swedish NST pattern — drives length/quality from lexical stress) or a pronunciation lexicon (the
 Danish pattern). Pitch accent (tonelag 1/2) is a separate deferred layer. Floor 0.25. Wired: registry (`case "nb"`),
 eval PHON, `langs/nb.jsonc`, `test/norwegian.test.ts` (5 tests), catalogue row, maturity row.
+
+## Run 2 — 2026-07-24 — code review fixes
+
+3-agent review (wiring + folds verified clean — ɑ~a / r~ɾ folds confirmed honest, no over-crediting; no Swedish
+symbol leftover). One real bug + cleanups:
+- **Accented vowels were dropped by the tokenizer** — the TOKEN class `[A-Za-zÆØÅæøå]` excluded é/ô/à/… so common
+  Bokmål words split and lost their vowel (fôr→"f ɾ", idé→"iː", kafé→"kɑːf"). Added é è ê ë à â ô ü to the tokenizer +
+  the vowel tables (é = always-long [eː]: idé→iːdeː; ô = long o: fôr→fuːɾ; others → base-vowel quality). +0.2pp → 27.7%.
+- Verified the r+coronal-as-one-coda length rule empirically: counting it as 1 (long, current) scores 27.5% vs 27.2%
+  as 2 (short) — the referee's lexical length is ~50/50 but as-1 is net-better; kept (barn→bɑːɳ, jord→juːr right; the
+  bort/førti over-lengthening is the documented lexical tail).
+- Cleanups: removed the dead `vowelChars` manifest field (code uses a local orthographic set), simplified the -sjon/
+  -tion suffix check to `four === "sjon" || "tion"`, and corrected the jsonc "tjueen" number comment (the shared
+  composer space-separates tens+unit). Golden added (idé, fôr). Full suite 1027/1027.
+
+Acknowledged loanword-tail residue (documented, deferred): silent-⟨d⟩ over-applies to loans/names (David→dɑːʋɪ,
+milliard→mɪlːɪɑɾ) — the same class as the stress ceiling, needs a lexicon.
