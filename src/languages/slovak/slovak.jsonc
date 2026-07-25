@@ -1,8 +1,9 @@
 // Native canonical-IPA MANIFEST for Slovak (sk) — West Slavic, Latin script, espeak-independent. Sibling of Czech
 // (cs) but with its own signatures: palatalisation of d/t/n/l → ɟ/c/ɲ/ʎ before the SOFT vowels i/í (y/ý are HARD,
-// like Czech), the rising diphthongs ⟨ia ie iu⟩ → i̯a i̯e i̯u and ⟨ô⟩ → u̯ɔ, ⟨ä⟩ → æ, the syllabic liquids l̩/r̩
-// (long ⟨ĺ ŕ⟩ → l̩ː/r̩ː), ⟨ľ⟩ = ʎ, ⟨h⟩ = ɦ, ⟨ch⟩ = x, and regressive voicing assimilation + word-final devoicing —
-// EXCEPT ⟨v⟩, which is inert (stays [v] everywhere: stav→stav, dievča→ɟi̯evt͡ʃa — unlike Czech v→f).
+// like Czech), the rising diphthongs ⟨ia ie iu⟩ → ɪ̯a ɪ̯e ɪ̯u and ⟨ô⟩ → u̯ɔ, ⟨ä⟩ → æ, the syllabic liquids l̩/r̩
+// (long ⟨ĺ ŕ⟩ → l̩ː/r̩ː), ⟨ľ⟩ = ʎ, ⟨h⟩ = ɦ, ⟨ch⟩ = x, and regressive voicing assimilation + word-final devoicing.
+// ⟨v⟩ is a LIMITED target: it devoices to [f] before a voiceless obstruent (vták→ftaːk) but stays [v] word-finally
+// (stav→stav — unlike Czech v→f) and before voiced/sonorant (dievča→ɟɪ̯evt͡ʃa); v never triggers voicing.
 //
 // LOAD-BEARING blocks (read via manifest.ts): "vowels", "palatalisation", "consonants", "voicing",
 // "clausePunctuation", "numbers". "convention" / "provenance" are self-describing documentation.
@@ -13,9 +14,9 @@
 
     "convention": {
         "vowels": "short a e i/y o u → a e i ɔ u; long á é í/ý ó ú → aː eː iː ɔː uː; ⟨ä⟩ → æ",
-        "diphthongs": "⟨ia ie iu⟩ → i̯a i̯e i̯u (rising, palatalise a preceding d/t/n/l); ⟨ô⟩ → u̯ɔ",
+        "diphthongs": "⟨ia ie iu⟩ → ɪ̯a ɪ̯e ɪ̯u (rising, palatalise a preceding d/t/n/l); ⟨ô⟩ → u̯ɔ",
         "palatalisation": "d/t/n/l → ɟ/c/ɲ/ʎ before i, í (and the i-diphthongs). y/ý are HARD (milý→miliː). Before ⟨e⟩ it is LEXICAL (deti→ɟeci but ten→ten) → not modelled by rule; the majority default is set from the referee.",
-        "voicing": "regressive assimilation + word-final devoicing; ⟨v⟩ is INERT (never devoices/assimilates — stav→stav); ⟨h⟩=ɦ pairs with ⟨ch⟩=x",
+        "voicing": "regressive assimilation + word-final devoicing; ⟨v⟩ devoices to [f] only before a voiceless obstruent (vták→ftaːk), stays [v] word-finally (stav→stav, unlike Czech) + before voiced/sonorant, never triggers; ⟨h⟩=ɦ pairs with ⟨ch⟩=x",
         "syllabic": "r/l between consonants → syllabic r̩/l̩; long ⟨ĺ ŕ⟩ → l̩ː/r̩ː",
         "stress": "fixed first-syllable ˈ, with ˌ on even non-final nuclei (folded in the referee eval)"
     },
@@ -41,8 +42,9 @@
         "z": "z", "ž": "ʒ"
     },
 
-    // Voicing assimilation pairs (IPA phoneme ↔ IPA phoneme). ⟨v⟩ is DELIBERATELY absent (inert — neither devoices
-    // nor is a valid target). ɦ↔x is the Slovak glottal/velar voiced-voiceless pair.
+    // Voicing assimilation pairs (IPA phoneme ↔ IPA phoneme). ⟨v⟩ is DELIBERATELY absent from the maps — its limited
+    // devoicing (→f before a voiceless obstruent, never final, never triggering) is a special case in g2p.ts.
+    // ɦ↔x is the Slovak glottal/velar voiced-voiceless pair.
     "voicing": {
         "toVoiceless": { "b": "p", "d": "t", "ɟ": "c", "ɡ": "k", "z": "s", "ʒ": "ʃ", "ɦ": "x", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ" },
         "toVoiced": { "p": "b", "t": "d", "c": "ɟ", "k": "ɡ", "s": "z", "ʃ": "ʒ", "x": "ɦ", "f": "v", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ" }
@@ -56,7 +58,7 @@
         "tens": ["", "", "dvadsať", "tridsať", "štyridsať", "päťdesiat", "šesťdesiat", "sedemdesiat", "osemdesiat", "deväťdesiat"],
         "hundreds": ["", "sto", "dvesto", "tristo", "štyristo", "päťsto", "šesťsto", "sedemsto", "osemsto", "deväťsto"],
         "magnitudes": {
-            "thousand": { "sg": "tisíc", "paucal": "tisíc", "plural": "tisíc" },
+            "thousand": { "sg": "tisíc", "paucal": "tisíce", "plural": "tisíc" },
             "million": { "sg": "milión", "paucal": "milióny", "plural": "miliónov" }
         }
     },

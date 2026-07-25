@@ -3,11 +3,11 @@
  * fairly phonemic; the context systems handled here:
  *   - palatalisation: d/t/n/l → ɟ/c/ɲ/ʎ before i, í and the i-diphthongs ⟨ia ie iu⟩ (deti→ɟeci, list→ʎist). y/ý are
  *     HARD (milý→miliː). Palatalisation before ⟨e⟩ is LEXICAL (deti vs ten) → not modelled by rule.
- *   - diphthongs: ⟨ia ie iu⟩ → i̯a i̯e i̯u (rising; the leading i palatalises a preceding d/t/n/l), ⟨ô⟩ → u̯ɔ.
+ *   - diphthongs: ⟨ia ie iu⟩ → ɪ̯a ɪ̯e ɪ̯u (rising; the leading i palatalises a preceding d/t/n/l), ⟨ô⟩ → u̯ɔ.
  *   - syllabic liquids: r/l between consonants → r̩/l̩ (vlk→vl̩k, krv→kr̩v); long ⟨ĺ ŕ⟩ → l̩ː/r̩ː.
- *   - voicing assimilation: regressive within obstruent clusters + word-final devoicing (chlieb→xʎi̯ep, kde→ɡde).
- *     ⟨v⟩ is INERT — never a target and never a trigger (stav→stav, dievča→ɟi̯evt͡ʃa); ⟨h⟩=ɦ pairs with ⟨ch⟩=x.
- *   - n → ŋ before a velar k/ɡ (banka→baŋka).
+ *   - voicing assimilation: regressive within obstruent clusters + word-final devoicing (chlieb→xʎɪ̯ep, kde→ɡde).
+ *     ⟨v⟩ is a LIMITED target — it devoices to [f] before a voiceless obstruent (vták→ftaːk) but stays [v] word-finally
+ *     (stav→stav, unlike Czech v→f) and before voiced/sonorant (dievča→ɟɪ̯evt͡ʃa); v never triggers. ⟨h⟩=ɦ pairs with ⟨ch⟩=x.
  * Vowels short a e i/y o u → a e i ɔ u, long á é í/ý ó ú → aː eː iː ɔː uː, ⟨ä⟩ → æ. Stress (first-syllable) is
  * applied in slovak.ts. See docs/investigations/sk_native_bringup_investigation.md.
  */
@@ -15,7 +15,7 @@ import { MANIFEST } from "./manifest.ts";
 
 const VOWEL = MANIFEST.vowels;
 const PALAT = MANIFEST.palatalisation.map;
-const PALAT_TRIGGER = new Set(MANIFEST.palatalisation.triggers); // d/t/n/l palatalise before these (+ i-diphthongs, in code)
+const PALAT_TRIGGER = new Set(MANIFEST.palatalisation.triggers); // d/t/n/l palatalise before these (i/í/e; i-diphthongs via their leading "i")
 const CONS = MANIFEST.consonants;
 const TO_VOICELESS = MANIFEST.voicing.toVoiceless;
 const TO_VOICED = MANIFEST.voicing.toVoiced;
@@ -52,8 +52,9 @@ function scan(word: string): Seg[] {
         if (ch === "ŕ") { segs.push({ ph: "r̩ː", nucleus: true }); continue; }
         // plain vowel (incl. ä)
         if (ch in VOWEL) { segs.push({ ph: VOWEL[ch]!, nucleus: true }); continue; }
-        // d/t/n/l palatalise before i/í (and before an i-diphthong: next === "i")
-        if (ch in PALAT && (PALAT_TRIGGER.has(next) || (next === "i" && "aeu".includes(c[i + 2] ?? "")))) {
+        // d/t/n/l palatalise before a trigger (i/í/e); an i-diphthong ⟨ia ie iu⟩ is covered because its leading "i"
+        // is itself a trigger (deti→ɟeci, diabol→ɟɪ̯abɔl).
+        if (ch in PALAT && PALAT_TRIGGER.has(next)) {
             segs.push({ ph: PALAT[ch]!, nucleus: false });
             continue;
         }
@@ -78,11 +79,21 @@ function markSyllabic(segs: Seg[]): void {
     }
 }
 
-/** Regressive voicing assimilation + word-final devoicing, right-to-left over obstruent clusters. ⟨v⟩ is inert. */
+/** Regressive voicing assimilation + word-final devoicing, right-to-left over obstruent clusters. ⟨v⟩ is a limited
+ *  target: it devoices to [f] before a voiceless obstruent (onset clusters — vták→ftaːk, včera→ft͡ʃera) but stays [v]
+ *  word-finally (stav→stav, NOT staf — the Slovak difference from Czech) and before voiced/sonorant; v never triggers. */
 function applyVoicing(segs: Seg[]): void {
     for (let i = segs.length - 1; i >= 0; i--) {
         const p = segs[i]!.ph;
-        if (p === "v" || !isObstruent(p)) continue; // v never devoices/assimilates
+        if (p === "v") {
+            const nx = segs[i + 1];
+            // ONSET v (not preceded by a vowel) devoices to [f] before a voiceless obstruent (vták→ftaːk, včera→ft͡ʃera).
+            // POST-VOCALIC (coda) v stays [v] (dievča→ɟɪ̯evt͡ʃa, stav→stav) — it is [u̯]-like, never [f].
+            const codaV = segs[i - 1]?.nucleus ?? false;
+            if (!codaV && nx !== undefined && isObstruent(nx.ph) && nx.ph !== "v" && !isVoiced(nx.ph)) segs[i]!.ph = "f";
+            continue; // otherwise v is inert; and it never triggers voicing on a preceding obstruent
+        }
+        if (!isObstruent(p)) continue;
         const nx = segs[i + 1];
         let target: "voiced" | "voiceless" | null = null;
         if (nx === undefined) target = "voiceless"; // word-final devoicing
@@ -106,8 +117,8 @@ function geminate(segs: Seg[]): void {
     }
 }
 
-/** Slovak word → IPA phoneme segments (scan + syllabic + voicing). NOTE: n→ŋ velar assimilation is NOT applied — the
- *  broad referee keeps [n] before k/ɡ (Danka→danka; ŋ appears in only ~0.1% of rows), so nasalAssim stays unused. */
+/** Slovak word → IPA phoneme segments (scan + syllabic + gemination + voicing). NOTE: n→ŋ velar assimilation is
+ *  deliberately NOT applied — the broad referee keeps [n] before k/ɡ (Danka→danka; ŋ appears in only ~0.1% of rows). */
 export function toSegments(word: string): Seg[] {
     const segs = scan(word);
     markSyllabic(segs);

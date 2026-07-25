@@ -40,3 +40,18 @@ correlated / rule-based). The palatalisation-before-e lexicality is why Slovak r
 rules-only (97.7% — Czech simply doesn't palatalise before e, a cleaner rule). **The path past the floor** is the Czech
 precedent: a kaikki/exception lexicon for the loanword non-palatalisation. Floor 0.87. Wired: registry (`case "sk"`),
 eval PHON, `langs/sk.jsonc`, `test/slovak.test.ts` (6 tests), catalogue row, maturity row.
+
+## Run 2 — 2026-07-24 — code review fixes
+
+3-agent review found two HIGH bugs + agreement fixes:
+- **⟨v⟩ is NOT fully inert** — the "inert" thesis was overgeneralised from CODA examples (stav, dievča). In an ONSET
+  cluster before a voiceless obstruent, Slovak v regressively devoices to [f] (vták→ftaːk, včera→ft͡ʃera, všetko→fʃetkɔ —
+  26/26 in the referee, common words). Fixed: v→f only when NOT preceded by a vowel (onset) AND the next segment is a
+  voiceless obstruent; post-vocalic/final v stays [v] (the real Slovak difference from Czech, which devoices v→f always).
+  A first attempt that devoiced ALL pre-voiceless v regressed dievča→ɟɪ̯eft͡ʃa (−1pp); the onset guard fixed it. **88.8%→89.0%.**
+- **Numbers ≥1e9 emitted the literal "undefined"** (no miliarda tier → sub1000 indexed HUNDREDS[≥10]) — the same class
+  as the Finnish PR-#445 bug. Fixed with a readDigits digit-by-digit fallback + a text() ≤9-digit guard (float precision).
+- **Number agreement**: thousand paucal tisíc→**tisíce** (2–4: tri tisíce), and **dve** (not dva) before a magnitude
+  (2000→dve tisíce). Numbers aren't referee-scored, so these slipped the gate.
+- Cleanups: removed a dead palatalisation sub-clause (the i-diphthong is covered by the plain "i" trigger), the stale
+  nasalAssim comment, and the i̯→ɪ̯ glide-notation drift in the g2p/jsonc docstrings. Full suite 1002/1002.
