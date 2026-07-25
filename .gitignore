@@ -9,3 +9,6 @@ tools/fa-restoration/__pycache__/
 # Python training env (BiLSTM taggers) — not shipped
 .venv/
 __pycache__/
+
+# fp32 intermediate from the English G2P trainer (EN_PRODUCTION); only the int8-quantised model is shipped
+src/languages/english/en-g2p-tagger.onnx

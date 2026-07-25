@@ -3,7 +3,8 @@
  * — those the CMUdict lexicon misses — and leaves everything else (dict, heteronym POS disambiguation, numbers,
  * possessives, clause assembly) to the SYNC engine. Precedence per word: heteronym → lexicon → possessive → BiLSTM
  * tagger → n-gram engine. On a clean CMUdict held-out the tagger roughly HALVES the OOV phone-error-rate vs the n-gram
- * (9.3% vs 18.2%). Integration is a pre-pass: resolve each OOV word to IPA with the tagger, then run the ordinary sync
+ * (7.4% vs 18.2%; 92.6% vs 81.8% phone-accuracy). Integration is a pre-pass: resolve each OOV word to IPA with the
+ * tagger, then run the ordinary sync
  * `createEnglish().text()` with those readings injected as its `oovOverride` — so ONLY OOV word readings change;
  * numbers, heteronyms, and punctuation are byte-identical to `phonemize(text, "en")`. When `onnxruntime-node` or the
  * model is absent the tagger is `undefined` and this returns exactly the sync path (no throw).
