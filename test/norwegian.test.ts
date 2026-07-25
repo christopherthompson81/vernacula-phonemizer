@@ -5,8 +5,8 @@ import { phonemizeWord, createNorwegian } from "../src/languages/norwegian/norwe
 // Norwegian Bokmål (nb) — North Germanic, Latin, Urban East Norwegian. Rule g2p with complementary vowel length
 // (which picks quality: ⟨o⟩→uː/ɔ, ⟨u⟩→ʉː/ʉ, ⟨å⟩→oː/ɔ, short ⟨i⟩=ɪ), front-vowel softening (sk/k/g→ʃ/ç/j), the
 // digraphs sj/skj→ʃ, kj/tj→ç, hv→ʋ, retroflex r+coronal→ʈ/ɳ/ɭ/ʂ, silent final ⟨d⟩, and unstressed ⟨e⟩→ə. First-
-// syllable stress; pitch accent + length folded in the referee (27.7% folded on wikipron nob, referee-limited by
-// loanword stress). See docs/investigations/nb_native_bringup_investigation.md.
+// syllable stress; pitch accent + length folded. Referee-limited: raw 23% on the dictionary-shaped kaikki referee but
+// 63.4% FREQUENCY-WEIGHTED (real-text). See docs/investigations/nb_native_bringup_investigation.md.
 describe("Norwegian Bokmål canonical IPA — rule g2p", () => {
     test("vowel quality via complementary length: ⟨o⟩→uː, ⟨u⟩→ʉː, ⟨å⟩→oː", () => {
         expect(phonemizeWord("bok")).toBe("ˈbuːk"); // o → uː (long, open)

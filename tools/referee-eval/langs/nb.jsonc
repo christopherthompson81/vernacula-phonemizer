@@ -4,9 +4,10 @@
     "script": "Latin",
     "provenance": "Cleanroom rule g2p (complementary length + front-vowel softening + retroflex + silent-d) scored against the wikipron nob_latn_broad HUMAN referee.",
     "referees": [
-        { "file": "nb.wikipron-nob-broad.tsv", "source": "wikipron nob_latn_broad (Wiktionary, HUMAN, 3432 — Bokmål)", "role": "primary" }
+        { "file": "nb.kaikki-nb.tsv", "source": "kaikki nb (Wiktionary-derived, HUMAN, 5943 — the COMPLETE Bokmål set, not the alphabetically-truncated wikipron scrape)", "role": "primary" },
+        { "file": "nb.wikipron-nob-broad.tsv", "source": "wikipron nob_latn_broad (Wiktionary, HUMAN, 3432 — same source, the truncated subset)", "role": "secondary" }
     ],
-    "secondaryGap": "single-source (wikipron nob). kaikki nb is a candidate 2nd. The broad transcription carries the pitch accent (tonelag 1/2) + length + a mixed rhotic (East retroflex vs West/Bergen uvular) — the suprasegmental/dialect layer, folded here; a real deep-orthography vowel-quality ceiling remains (the ⟨o⟩→u/o split spelling underdetermines).",
+    "secondaryGap": "single-SOURCE (kaikki + wikipron are both Wiktionary-derived → correlated, not independent). The referee is DICTIONARY-shaped: it over-samples rare Latinate inflections (absorberende…) whose non-initial lexical stress a first-syllable rule engine can't recover, so the raw uniform % is deflated — the FREQUENCY-WEIGHTED metric (freq/nb.txt) is the real-text signal (~62%, in line with sv/nl). The broad transcription also carries pitch accent + length + a mixed rhotic (East retroflex ~ West/Bergen uvular), folded here.",
     "folds": [
         { "pattern": "[¹²]", "replace": "", "note": "PITCH ACCENT (tonelag 1 / 2) — the referee's superscript tone marker; lexical + unwritten → deferred, fold" },
         { "pattern": "ʁ", "replace": "ɾ", "note": "⟨r⟩: the referee mixes the East-Norwegian tap ɾ with the West/Bergen uvular ʁ (Arendal→ɑːɳ̩dɑːl ~ ɑːʁn̩dɑːl); we emit the tap → fold ʁ→ɾ" },
