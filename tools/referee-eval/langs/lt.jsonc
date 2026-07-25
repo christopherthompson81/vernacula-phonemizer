@@ -1,0 +1,30 @@
+// Lithuanian (lt) — Baltic, Latin script. Referee: wikipron lit_latn_narrow (HUMAN, CUNY-CL/wikipron, 15,513 words),
+// a LARGE narrow-phonetic set. `segmentJoin` strips its per-phone spaces. Lithuanian STRESS is lexical + pitch-accented
+// (unpredictable from spelling), and vowel LENGTH + the stressed ɑː/æː quality are stress-conditioned — so we emit the
+// phonemic short quality and FOLD: the referee's ¹/² pitch marks, length (ː ˑ), and the stressed/allophonic vowel
+// qualities (ɑ→ɐ, æ→ɛ, ɔ→o loan-⟨o⟩, u-family→ʊ). The BACKBONE already strips the fronting ̟. The PALATALIZATION (ʲ),
+// every consonant place, and the segment skeleton ARE compared directly — that is the real signal here. See
+// docs/investigations/lt_bringup_investigation.md.
+{
+    "language": "lt", "name": "Lithuanian (lietuvių)", "script": "Latin",
+    "provenance": "Authored rule-based g2p (palatalization + voicing) from Lithuanian phonology; validated against the wikipron lit_latn_narrow referee (15,513 human words).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "lt.wikipron-lit-narrow.tsv", "source": "wikipron lit_latn_narrow (Wiktionary-scraped, human, 15513)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron lit_latn_narrow, human, 15513) — LARGE. No kaikki per-language dump / epitran lit referee committed. The vowel/consonant inventory + the palatalization rule are the standard Lithuanian phonology (Wikipedia / Cambridge JIPA), attested across thousands of aligned tokens.",
+    "folds": [
+        { "pattern": "[¹²]", "replace": "", "note": "PITCH ACCENT: Lithuanian's two lexical pitch accents (acute ¹ / circumflex ²) are unpredictable from spelling → we emit none; strip the referee's marks" },
+        { "pattern": "[ːˑ]", "replace": "", "note": "LENGTH: vowel length is STRESS-conditioned (a stressed syllable lengthens) and stress is lexical → fold the full-length ː and half-length ˑ" },
+        { "pattern": "[aɑɒ]", "replace": "ɐ", "note": "⟨a⟩/⟨ą⟩ quality: unstressed [ɐ] vs stressed [ɑ(ː)]/[ɒ] is stress-conditioned, and ⟨ą⟩=[aː]→a after the ː strip — fold the plain/back a-qualities to our [ɐ]" },
+        { "pattern": "ɫ", "replace": "l", "note": "hard ⟨l⟩: the referee writes it [l]~[ɫ] (velarised dark-l before back vowels: blogai→bɫoɡɐj); we emit plain l → fold ɫ→l" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨r⟩: Lithuanian /r/ is a trill [r] (we emit r), realised as a tap [ɾ] intervocalically (ežere→ɛʒʲɛɾʲɛ) — allophonic, same class as ɫ→l / v→ʋ; fold ɾ→r" },
+        { "pattern": "æ", "replace": "ɛ", "note": "⟨e⟩ quality: unstressed [ɛ] vs stressed long [æ(ː)] is stress-conditioned — fold [æ] to our [ɛ]" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩: native ⟨o⟩ is [oː], loan ⟨o⟩ is [ɔ] — the split is lexical/unrecoverable from spelling, so we emit the native [oː] default and fold ɔ→o. CAVEAT: this masks a real quality+length miss on the ~9% of referee words that are loans with short [ɔ] (Adolfas, Bankokas) — a loanword ⟨o⟩ lexicon (deferred) is the honest fix; without this fold the folded score would be ~77%" },
+        { "pattern": "u", "replace": "ʊ", "note": "⟨u⟩ family: short ⟨u⟩=[ʊ], long ⟨ū ų⟩=[uː] (→u after ː strip), fronted [u̟] (→u after BACKBONE strips ̟) — fold all to ʊ (length is already stripped)" },
+        { "pattern": "v", "replace": "ʋ", "note": "⟨v⟩ = the labiodental approximant [ʋ] (we emit ʋ); the referee writes it [v]~[ʋ] inconsistently (kova→kovɐ) — fold v→ʋ" },
+        { "pattern": "ɕ", "replace": "ʃʲ", "note": "soft ⟨š⟩ (and ⟨č⟩'s t͡ɕ after the tie-strip): the referee occasionally uses the alveolo-palatal [ɕ] (Mažeikiai→…ɕ) for the palatalised sibilant we write [ʃʲ] — fold ɕ→ʃʲ" },
+        { "pattern": "ʑ", "replace": "ʒʲ", "note": "soft ⟨ž⟩ (and ⟨dž⟩'s d͡ʑ): the referee's rare alveolo-palatal [ʑ] → our [ʒʲ]" },
+        { "pattern": "j", "replace": "ɪ", "note": "the palatal glide: the referee writes a diphthong offglide / ⟨j⟩ inconsistently as [j] ~ [ɪ̯] (→ɪ after BACKBONE strips ̯); blogai→bloɡɐj vs our bloɡɐɪ — fold both j and our ⟨j⟩/⟨i⟩-glide to ɪ so they compare equal" }
+    ]
+}
