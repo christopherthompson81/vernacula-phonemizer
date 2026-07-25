@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **131 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **132 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,8 +23,8 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-131 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
-Austronesian, Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic,
+132 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
+Austronesian, Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
@@ -48,6 +48,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Haryanvi `bgc`, Hindi `hi`, Magahi `mag`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Sylheti `syl`, Urdu `ur` |
 | Iranian | Balochi `bal`, Central Kurdish `ckb` (Sorani), Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa`, Tajik `tg` |
 | Japonic | Japanese `ja` |
+| Kartvelian | Georgian `ka` (its own family; Mkhedruli script, three-way ejective/aspirated/voiced stops) |
 | Koreanic | Korean `ko` |
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |

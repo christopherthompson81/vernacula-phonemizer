@@ -1,0 +1,26 @@
+// Georgian / ქართული (ka) — Kartvelian, Mkhedruli script. Referee: wikipron kat_geor_narrow (HUMAN, CUNY-CL/wikipron,
+// 20,894 words) — a LARGE narrow-phonetic set. `segmentJoin` strips its per-phone spaces. The shared BACKBONE already
+// removes the combining diacritics (ä→a, e̞→e, o̞→o, the devoicing rings b̥/ɡ̊/d̥) and the affricate ties; the folds
+// below neutralise the remaining NARROW allophony the phonemic g2p does not model: the mid-vowel symbol (e/o→ɛ/ɔ),
+// dark ɫ→l, pre-velar n→ŋ, the ვ labialisation glide ʷ→v, ⟨ყ⟩'s narrow [χʼ]→/qʼ/, and final devoicing (v→f, …). The
+// three-way stop contrast (ejective ◌ʼ / aspirate ◌ʰ / voiced) and every consonant place ARE compared directly. See
+// docs/investigations/ka_bringup_investigation.md.
+{
+    "language": "ka", "name": "Georgian (ქართული)", "script": "Mkhedruli",
+    "provenance": "Authored greedy g2p from the Mkhedruli alphabet; the 33-letter table was DERIVED from the wikipron kat_geor_narrow referee (18,350 1:1-aligned words).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "ka.wikipron-kat-narrow.tsv", "source": "wikipron kat_geor_narrow (Wiktionary-scraped, human, 20894)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron kat_geor_narrow, human, 20894) — but LARGE, and Georgian's one-letter-one-phoneme orthography means low referee-error risk. No kaikki per-language dump / epitran kat referee committed. The mapping is additionally the standard Georgian alphabet→IPA (any grammar), and the 33 letters were each derived from hundreds–thousands of aligned referee tokens, so the segmental inventory is strongly attested even from the one source.",
+    "folds": [
+        { "pattern": "χʼ", "replace": "qʼ", "note": "⟨ყ⟩: the referee renders the uvular ejective narrowly as [χʼ]; we emit the standard phonemic /qʼ/ — fold χʼ→qʼ (our χ from ⟨ხ⟩ carries no ʼ, so unaffected)" },
+        { "pattern": "e", "replace": "ɛ", "note": "mid-vowel symbol: ⟨ე⟩ is [e̞] (BACKBONE strips the ̞ → e); we emit the standard phonemic ɛ — fold e→ɛ (we emit no bare e, and referee e only comes from ⟨ე⟩)" },
+        { "pattern": "o", "replace": "ɔ", "note": "mid-vowel symbol: ⟨ო⟩ is [o̞]→o; we emit ɔ — fold o→ɔ" },
+        { "pattern": "ɫ", "replace": "l", "note": "dark [ɫ] (⟨ლ⟩ before back vowels / in coda) is allophonic — we emit plain l → fold" },
+        { "pattern": "ŋ", "replace": "n", "note": "⟨ნ⟩→[ŋ] before a velar is nasal-place assimilation (allophonic) — we emit n → fold" },
+        { "pattern": "ʷ", "replace": "v", "note": "⟨ვ⟩ in a consonant cluster is realised as labialisation [ʷ] (ʃʷ, mʷ); we emit the full v everywhere → fold ʷ→v" },
+        { "pattern": "x", "replace": "χ", "note": "⟨ხ⟩ has a velar allophone [x] before a front vowel (the referee writes it ~3×, vs χ ~1664×); we emit the uvular χ everywhere → fold the referee's x→χ (our output carries no bare x)" },
+        { "pattern": "f", "replace": "v", "note": "⟨ვ⟩ devoices to [f] before a voiceless consonant or word-finally (regressive/final, e.g. ავთანდილ); Georgian has no phonemic /f/ (⟨ფ⟩ is pʰ) — we emit the phonemic v → fold f→v" }
+    ]
+}
