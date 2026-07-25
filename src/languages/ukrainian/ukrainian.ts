@@ -9,14 +9,14 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, westernNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface UkrainianDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
     consonants: Record<string, string>;
-    numbers: NumbersDef & { hundreds: string[] };
+    numbers: NumbersDef; // includes the optional `hundreds` field read by westernNumberWords
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<UkrainianDef>(import.meta.url, "ukrainian.jsonc");
@@ -98,39 +98,10 @@ export function phonemizeWord(word: string): string {
     return x.normalize("NFC");
 }
 
-// Slavic decimal composition: units + teens + tens + hundreds + thousand/million/billion (space-separated).
-function slavicNumberWords(n: number, d: NumbersDef & { hundreds: string[] }): (string | null)[] {
-    if (n < 10) return [d.units[n]!];
-    if (n < 20) return [d.teens![n - 10]!];
-    if (n < 100) {
-        const t = Math.floor(n / 10) * 10,
-            u = n % 10;
-        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
-    }
-    if (n < 1000) {
-        const h = Math.floor(n / 100),
-            r = n % 100;
-        return [d.hundreds[h]!, ...(r ? slavicNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000) {
-        const th = Math.floor(n / 1000),
-            r = n % 1000;
-        return [...slavicNumberWords(th, d), d.magnitudes.thousand!, ...(r ? slavicNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000_000) {
-        const m = Math.floor(n / 1_000_000),
-            r = n % 1_000_000;
-        return [...slavicNumberWords(m, d), d.magnitudes.million!, ...(r ? slavicNumberWords(r, d) : [])];
-    }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...slavicNumberWords(b, d), d.magnitudes.billion!, ...(r ? slavicNumberWords(r, d) : [])];
-}
-
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord, (m) => slavicNumberWords(m, DEF.numbers));
+    return renderNumber(n, DEF.numbers, phonemizeWord, westernNumberWords); // shared Slavic/Western composer
 }
 
 const CYRILLIC = "\\u0400-\\u04FF";

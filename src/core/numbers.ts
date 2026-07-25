@@ -15,6 +15,7 @@ export interface NumbersDef {
     units: string[]; // 0..9 spellings
     teens?: string[]; // 10..19 spellings (Indic irregular teens; omitted by systems that compose them, e.g. Turkic oʻn+unit)
     tens: Record<string, string>; // "20".."90" (round) spellings (Turkic includes "10")
+    hundreds?: string[]; // 0..9 → the irregular round-hundred spellings (Western/Slavic: сто, двісті, триста…), read by westernNumberWords
     // Magnitude words. hundred/thousand are universal; Indic adds lakh/crore, Western/Turkic adds million/billion.
     // (ADR-0002: the data-schema lift lands with the 2nd numbering system — Uzbek's Turkic composer.)
     magnitudes: {
@@ -85,6 +86,43 @@ export const indicNumberWords: NumberComposer = (n, d) => {
         d.magnitudes.crore!,
         ...(r ? indicNumberWords(r, d) : []),
     ];
+};
+
+/**
+ * WESTERN / Slavic decimal composition (units + teens + tens + hundreds + thousand/million/billion, space-separated).
+ * Shared by the East-Slavic (uk, be) and Armenian (hy) engines — they differ only in their DATA (`d.units` etc.),
+ * routed through each language's own G2P by `renderNumber`. Needs the irregular round-hundred spellings in
+ * `d.hundreds` (сто, двісті, …; Armenian հարюр, երկուհարюр, …). The leading "one" is OMITTED for a bare thousand
+ * (тисяча / հазар, matching the bare hundred сто), but KEPT for million/billion (один мільйон — grammatical).
+ */
+export const westernNumberWords: NumberComposer = (n, d) => {
+    const H = d.hundreds!; // Western systems carry the irregular round-hundred spellings
+    if (n < 10) return [d.units[n]!];
+    if (n < 20) return [d.teens![n - 10]!];
+    if (n < 100) {
+        const t = Math.floor(n / 10) * 10,
+            u = n % 10;
+        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
+    }
+    if (n < 1000) {
+        const h = Math.floor(n / 100),
+            r = n % 100;
+        return [H[h]!, ...(r ? westernNumberWords(r, d) : [])];
+    }
+    if (n < 1_000_000) {
+        const th = Math.floor(n / 1000),
+            r = n % 1000;
+        // omit the leading "one" for exactly 1000 (тисяча, not *один тисяча — a bare magnitude like the hundred сто)
+        return [...(th === 1 ? [] : westernNumberWords(th, d)), d.magnitudes.thousand, ...(r ? westernNumberWords(r, d) : [])];
+    }
+    if (n < 1_000_000_000) {
+        const m = Math.floor(n / 1_000_000),
+            r = n % 1_000_000;
+        return [...westernNumberWords(m, d), d.magnitudes.million!, ...(r ? westernNumberWords(r, d) : [])];
+    }
+    const b = Math.floor(n / 1_000_000_000),
+        r = n % 1_000_000_000;
+    return [...westernNumberWords(b, d), d.magnitudes.billion!, ...(r ? westernNumberWords(r, d) : [])];
 };
 
 /** Render an integer to canonical IPA: compose it to number words (`compose`, default Indic), then map
