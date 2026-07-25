@@ -59,6 +59,7 @@ import { phonemizeWord as mos } from "../../src/languages/mossi/mossi.ts";
 import { phonemizeWord as ki } from "../../src/languages/kikuyu/kikuyu.ts";
 import { phonemizeWord as kam } from "../../src/languages/kamba/kamba.ts";
 import { phonemizeWord as ka } from "../../src/languages/georgian/georgian.ts";
+import { phonemizeWord as lt } from "../../src/languages/lithuanian/lithuanian.ts";
 import { phonemizeWord as luo } from "../../src/languages/luo/luo.ts";
 import { phonemizeWord as af } from "../../src/languages/afrikaans/afrikaans.ts";
 import { phonemizeWord as fi } from "../../src/languages/finnish/finnish.ts";
@@ -208,6 +209,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ki,
     kam,
     ka,
+    lt,
     af,
     he,
     lg,

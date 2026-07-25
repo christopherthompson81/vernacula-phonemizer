@@ -1,0 +1,49 @@
+// Native canonical-IPA data manifest for Lithuanian (lt) — Baltic (Indo-European), Latin script, ~3M. espeak-
+// independent. A RULE-based g2p (g2p.ts, the Czech pattern): a left-to-right scan + PALATALIZATION (the load-bearing
+// rule: consonants → Cʲ before front vowels / the softening ⟨i⟩, spreading leftward through a cluster) + regressive
+// VOICING assimilation + n→ŋ before velars. Derived + validated against wikipron lit_latn_narrow (HUMAN, 15,513
+// words). Signatures:
+//   • The hard/soft (palatalized ʲ) consonant contrast is pervasive (the referee marks ʲ on 90% of words).
+//   • Vowels: short ⟨a e i u⟩ = ɐ ɛ ɪ ʊ, native ⟨o⟩ = oː (loan ⟨o⟩ = ɔ). The always-long letters ⟨ą ę ė į y ų ū⟩ =
+//     aː ɛː eː iː iː uː uː — the ogonek nosinės ⟨ą ę į ų⟩ are NOT nasal in standard Lithuanian, just LONG.
+//   • Vowel LENGTH + the stressed ɑː/æː quality are STRESS-conditioned (stress is lexical/unpredictable) → we emit
+//     the phonemic/short quality and FOLD the length + stressed variants; the referee's ¹/² pitch accents are folded.
+//   • Digraphs: ⟨ch⟩=x, ⟨dz⟩=d͡z, ⟨dž⟩=d͡ʒ; the rising diphthongs ⟨ie⟩=i ɛ, ⟨uo⟩=u ɔ.
+// See docs/investigations/lt_bringup_investigation.md.
+{
+    "language": "lt",
+    "name": "Lithuanian (lietuvių)",
+    "script": "Latin",
+    "provenance": "Authored rule-based g2p from Lithuanian orthography (Wikipedia Lithuanian phonology / Help:IPA/Lithuanian + Cambridge JIPA Standard Lithuanian); vowel values + the palatalization/voicing rules validated against the wikipron lit_latn_narrow referee (HUMAN, 15,513 words).",
+
+    // Vowels → phonemic IPA (short quality; the stressed-long ɑː/æː realisations are folded in the eval).
+    "vowels": {
+        "a": "ɐ", "e": "ɛ", "i": "ɪ", "o": "oː", "u": "ʊ", "y": "iː",
+        "ą": "aː", "ę": "ɛː", "ė": "eː", "į": "iː", "ų": "uː", "ū": "uː"
+    },
+    // Rising diphthongs (special digraphs). ⟨ie⟩ opens on a front [i] → it DOES palatalize a preceding consonant
+    // (Dievas → dʲiɛʋɐs); ⟨uo⟩ opens on a back [u] → it does NOT. (Handled in g2p.ts triggers().)
+    "vowelDigraphs": { "ie": "iɛ", "uo": "uɔ" },
+
+    // Consonants → hard IPA. The soft (palatalized) form is the hard value + ʲ, applied by the rule engine.
+    "consonants": {
+        "b": "b", "c": "t͡s", "č": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j",
+        "k": "k", "l": "l", "m": "m", "n": "n", "p": "p", "r": "r", "s": "s", "š": "ʃ",
+        "t": "t", "v": "ʋ", "z": "z", "ž": "ʒ"
+    },
+    "consonantDigraphs": { "ch": "x", "dz": "d͡z", "dž": "d͡ʒ" },
+
+    // Front-vowel LETTERS that trigger palatalization of a preceding consonant.
+    "frontVowels": "eęėiįy",
+    // Back-vowel LETTERS after which a softening ⟨i⟩ is silent (⟨Cia⟩ → Cʲa, i dropped).
+    "backVowels": "aouąųū",
+    // Voicing-assimilation pairs (regressive; sonorants + j/ʋ are transparent).
+    "voicing": {
+        "toVoiceless": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", "ʑ": "ɕ" },
+        "toVoiced": { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", "x": "ɣ", "f": "v" }
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
