@@ -17,11 +17,23 @@ function lexicon(): Map<string, string> {
     return LEXICON;
 }
 
+/** The Lexique pronunciation lexicon (lowercased word → IPA). Exposed so the async neural path (frNeural.ts) can skip
+ *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
+export function frenchLexicon(): Map<string, string> {
+    return lexicon();
+}
+
 const VOWEL_IPA = /[aeiouyɛɔøœəɑ]/;
 
-/** One French word → IPA: lexicon lookup first, then the g2p engine for out-of-vocabulary words. */
-export function phonemizeWord(word: string): string {
-    return lexicon().get(word.toLowerCase()) ?? toIpa(word);
+/** Per-call OOV resolver: lowercased word → IPA, or undefined to defer to the rule engine. Consulted BETWEEN the
+ *  lexicon and the rule g2p (lexicon → oovOverride → toIpa); used only by the async neural path (frNeural.ts). */
+export type OovResolver = (lowerWord: string) => string | undefined;
+
+/** One French word → IPA: lexicon lookup first, then the neural tagger (oovOverride, async path only), then the g2p
+ *  engine for out-of-vocabulary words. */
+export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
+    const lower = word.toLowerCase();
+    return lexicon().get(lower) ?? oovOverride?.(lower) ?? toIpa(word);
 }
 
 /** Add a phrase-final accent: ˈ before the last vowel of the last IPA token (rhythmic-group stress). */
@@ -65,7 +77,9 @@ function stripLatent(ipa: string, c: string): string {
 class FrenchPhonemizer implements Phonemizer {
     constructor(private readonly foreign?: (latin: string) => string) {}
 
-    text(input: string): string {
+    // `oovOverride` (neural path only, frNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
+    // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
+    text(input: string, oovOverride?: OovResolver): string {
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
         type Item = { word: string } | { pause: string };
@@ -107,7 +121,7 @@ class FrenchPhonemizer implements Phonemizer {
                 if (group.length || out) flush(it.pause);
                 continue;
             } // liaison never crosses a pause
-            let ipa = carry + phonemizeWord(it.word);
+            let ipa = carry + phonemizeWord(it.word, oovOverride);
             carry = "";
             const next = items[k + 1]; // liaison only onto an immediately adjacent word
             if (next && "word" in next) {
@@ -121,7 +135,11 @@ class FrenchPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the French phonemizer. `foreign` handles embedded non-French (unused for now). No data files. */
-export function createFrench(foreign?: (latin: string) => string): Phonemizer {
+/** Build the French phonemizer. `foreign` handles embedded non-French (unused for now). No data files. The returned
+ *  `text` takes an optional per-call `oovOverride` (neural path only) injecting tagger readings for OOV words
+ *  (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. */
+export function createFrench(
+    foreign?: (latin: string) => string,
+): { text(input: string, oovOverride?: OovResolver): string } {
     return new FrenchPhonemizer(foreign);
 }
