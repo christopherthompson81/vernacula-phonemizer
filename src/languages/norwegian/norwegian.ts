@@ -11,6 +11,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, westernNumberWords } from "../../core/numbers.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const V = MANIFEST.vowels;
@@ -115,8 +116,10 @@ function toSegments(word: string): string[] {
     return out;
 }
 
-/** One Norwegian word → canonical IPA with a single first-syllable primary stress (ˈ before the first vowel/onset). */
-export function phonemizeWord(word: string): string {
+/** One Norwegian word → canonical IPA by RULE (the OOV fallback + the non-circular eval floor): first-syllable stress
+ *  over the segmental scan. Deep-orthography stress/vowel-quality that spelling underdetermines is not recoverable
+ *  here — that is what the lexicon tier covers. */
+export function phonemizeWordRules(word: string): string {
     const segs = toSegments(word);
     // place ˈ before the onset of the first syllable (before the first vowel phoneme, incl. its onset consonants)
     const firstV = segs.findIndex((p) => /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u.test(p));
@@ -127,19 +130,50 @@ export function phonemizeWord(word: string): string {
     return segs.slice(0, onset).join("") + "ˈ" + segs.slice(onset).join("");
 }
 
+// TIER-1 PRONUNCIATION LEXICON (nb-lexicon.tsv, from the NST National-Library lexicon, CC0, frequency-filtered to the
+// ~38k common word forms → 98% of real-text tokens). NST carries the LEXICAL stress + vowel quality the deep
+// orthography underdetermines (absorbere→ɑbsɔɾˈbeːɾə), so a known word is looked up at reference quality; the rule
+// engine is the OOV fallback. NST is independent of Wiktionary (the referee) → non-circular.
+let LEX: Map<string, string> | undefined;
+function lexicon(): Map<string, string> {
+    if (LEX === undefined) LEX = loadTsvMap(import.meta.url, "nb-lexicon.tsv", undefined, { optional: true });
+    return LEX;
+}
+
+/** The NST pronunciation lexicon (lowercased word → canonical IPA). Exposed so the async neural path (nbNeural.ts)
+ *  can skip lexicon-covered words — they are served authoritatively by the sync lexicon path. */
+export function norwegianLexicon(): Map<string, string> {
+    return lexicon();
+}
+
+/** Per-call OOV resolver: word → IPA, or undefined to defer to the rule engine. Consulted BETWEEN the lexicon and the
+ *  rule engine (lexicon → oovOverride → rules). Used only by the async neural path (nbNeural.ts) to inject the BiLSTM
+ *  tagger's OOV readings; the sync path passes nothing, so behaviour is unchanged. */
+export type OovResolver = (word: string) => string | undefined;
+
+/** One Norwegian word → canonical IPA. TIER 1 lexicon (NST, known words at reference quality) → TIER 2 oovOverride
+ *  (neural tagger, async path only) → TIER 3 rule fallback. */
+export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
+    const hit = lexicon().get(word.toLowerCase());
+    if (hit !== undefined) return hit;
+    return oovOverride?.(word) ?? phonemizeWordRules(word);
+}
+
 const TOKEN = /([A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+)|(\d+)|([.?!,;:…—])/gu;
 
-function number(digits: string): string {
+function number(digits: string, oovOverride?: OovResolver): string {
     const nn = Number(digits);
     if (!Number.isSafeInteger(nn)) return digits;
-    return renderNumber(nn, MANIFEST.numbers, phonemizeWord, westernNumberWords);
+    return renderNumber(nn, MANIFEST.numbers, (w) => phonemizeWord(w, oovOverride), westernNumberWords);
 }
 
 class NorwegianPhonemizer implements Phonemizer {
-    text(input: string): string {
+    // `oovOverride` (neural path only) resolves OOV words between the lexicon and the rule engine; the sync path omits
+    // it, so tokenizer / numbers / clause assembly are byte-identical to phonemize(text, "nb").
+    text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
+            else if (m[2]) sink.emit(number(m[2], oovOverride));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -148,7 +182,8 @@ class NorwegianPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Norwegian Bokmål phonemizer. */
-export function createNorwegian(): Phonemizer {
+/** Build the Norwegian Bokmål phonemizer. The returned `text` takes an optional per-call `oovOverride` (neural path
+ *  only) that injects tagger readings for OOV words (lexicon → oovOverride → rules); still assignable to Phonemizer. */
+export function createNorwegian(): { text(input: string, oovOverride?: OovResolver): string } {
     return new NorwegianPhonemizer();
 }
