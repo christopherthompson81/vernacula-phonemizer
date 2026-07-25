@@ -32,6 +32,34 @@ const dropStress = (p: string): string => p.replace(/[0-2]$/, "");
 const stressDown = (ph: string[]): string[] =>
     ph.map((p) => p.replace(/1$/, "2"));
 
+/** Collapse a doubled CONSONANT (bus+sin seam → bʌssɪn → bʌsɪn; CMUdict has no consonant geminates). Does NOT
+ *  collapse identical adjacent VOWELS — that would delete a nucleus/syllable (AA1 AA1 → AA1). Exported so the neural
+ *  OOV reader (englishTagger.ts) finishes its ARPABET the SAME way as the n-gram path. */
+export function collapseGeminates(ph: string[], vowels: ReadonlySet<string>): string[] {
+    const out: string[] = [];
+    for (const p of ph)
+        if (out[out.length - 1] !== p || vowels.has(dropStress(p))) out.push(p);
+    return out;
+}
+
+/** A word has exactly ONE primary stress. A per-position predictor (n-gram OR the BiLSTM tagger) can emit several
+ *  `1`s (keep the FIRST, demote the rest to `2`) OR — for a short/odd word — ZERO `1`s (then PROMOTE the first vowel
+ *  to primary so every content word carries a tonic). Exported so englishTagger.ts shares the exact stress invariant. */
+export function enforceSinglePrimary(ph: string[], vowels: ReadonlySet<string>): string[] {
+    let seen = false;
+    const out = ph.map((p) => {
+        if (!/1$/.test(p)) return p;
+        if (seen) return p.replace(/1$/, "2");
+        seen = true;
+        return p;
+    });
+    if (!seen) {
+        const vi = out.findIndex((p) => vowels.has(dropStress(p)));
+        if (vi >= 0) out[vi] = out[vi]!.replace(/[0-2]$/, "1");
+    }
+    return out;
+}
+
 /** ARPABET phonetic-class sets injected into the OOV G2P (from english.jsonc's `g2pClasses`). */
 export interface G2pClasses {
     vowelLetters: string[];
@@ -74,32 +102,6 @@ export function createEnglishG2p(
     const SIBILANT = new Set(classes.sibilants);
     const STOP_PIECE = new Set(classes.stopPieces);
 
-    function collapseGeminates(ph: string[]): string[] {
-        const out: string[] = [];
-        // Collapse a doubled CONSONANT (bus+sin seam → bʌssɪn → bʌsɪn; CMUdict has no consonant geminates).
-        // Do NOT collapse identical adjacent VOWELS — that would delete a nucleus/syllable (AA1 AA1 → AA1).
-        for (const p of ph)
-            if (out[out.length - 1] !== p || VOWEL.has(dropStress(p)))
-                out.push(p);
-        return out;
-    }
-    /** A word has exactly ONE primary stress. The n-gram predicts each vowel's stress semi-independently, so
-     *  it can emit several `1`s (keep the FIRST, demote the rest to `2`) OR — for a short/odd word — ZERO `1`s
-     *  (then PROMOTE the first vowel to primary so every content word carries a tonic). */
-    function enforceSinglePrimary(ph: string[]): string[] {
-        let seen = false;
-        const out = ph.map((p) => {
-            if (!/1$/.test(p)) return p;
-            if (seen) return p.replace(/1$/, "2");
-            seen = true;
-            return p;
-        });
-        if (!seen) {
-            const vi = out.findIndex((p) => VOWEL.has(dropStress(p)));
-            if (vi >= 0) out[vi] = out[vi]!.replace(/[0-2]$/, "1");
-        }
-        return out;
-    }
 
     // --- joint n-gram: stupid-backoff score + order matched (for the guessed-silence penalty) ---
     function scoreTokAt(hist: string[], tok: string): [number, number] {
@@ -322,17 +324,17 @@ export function createEnglishG2p(
         const c = compoundSplit(w);
         if (c)
             return {
-                phones: enforceSinglePrimary(collapseGeminates(c)),
+                phones: enforceSinglePrimary(collapseGeminates(c, VOWEL), VOWEL),
                 source: "C",
             };
         const m = morphDecode(w);
         if (m)
             return {
-                phones: enforceSinglePrimary(collapseGeminates(m)),
+                phones: enforceSinglePrimary(collapseGeminates(m, VOWEL), VOWEL),
                 source: "M",
             };
         return {
-            phones: enforceSinglePrimary(collapseGeminates(ngramDecode(w))),
+            phones: enforceSinglePrimary(collapseGeminates(ngramDecode(w), VOWEL), VOWEL),
             source: "N",
         };
     }

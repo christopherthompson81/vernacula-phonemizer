@@ -23,6 +23,10 @@ sys.path.insert(0, HERE)
 from nb_tagger_prototype import load, split, feats, VOWELS  # loader + features (shared with the serial prototype)
 
 N_PROC = max(1, cpu_count() - 1)
+# Separator joining a 2-phone chunk. "" works for SINGLE-CHAR phones (Norwegian IPA: "e"+"ɪ"="eɪ"); a multi-CHAR
+# phone alphabet (English ARPABET: "K"+"S") needs " " to preserve token boundaries. Callers set it before aligning
+# (inherited by the fork()ed Pool workers on Linux).
+SEP = ""
 OUT = "/tmp/nb_holdout.tsv"
 # the perceptron baseline model — NOT shipped (serving loads the BiLSTM's nb-g2p-tagger.onnx); tmp path, not a lang dir
 MODEL = "/tmp/nb-g2p-perceptron.tsv"
@@ -55,7 +59,7 @@ def _viterbi(w, ph, prob):
                 if dp[i - 1][j - 1] + _lp(prob, g, c) > dp[i][j]:
                     dp[i][j] = dp[i - 1][j - 1] + _lp(prob, g, c); bp[i][j] = (j - 1, c)
             if j >= 2:
-                c = ph[j - 2] + ph[j - 1]
+                c = ph[j - 2] + SEP + ph[j - 1]
                 if dp[i - 1][j - 2] + _lp(prob, g, c) > dp[i][j]:
                     dp[i][j] = dp[i - 1][j - 2] + _lp(prob, g, c); bp[i][j] = (j - 2, c)
     if dp[G][P] <= NEG / 2:
@@ -126,7 +130,7 @@ def align_parallel(rows, iters=8):
             for k in range(len(ph)):
                 prob[g][ph[k]] += 1.0
                 if k + 1 < len(ph):
-                    prob[g][ph[k] + ph[k + 1]] += 0.3
+                    prob[g][ph[k] + SEP + ph[k + 1]] += 0.3
     prob = {g: dict(d) for g, d in prob.items()}
     for g, d in prob.items():
         s = sum(d.values()) or 1.0

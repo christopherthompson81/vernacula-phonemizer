@@ -205,3 +205,27 @@ proper-noun pronunciation variance, not fixable notation. (2) The reliable measu
 crediting** (now in the harness), not more folds and not word-exact. (3) A **BiLSTM OOV reader roughly halves the OOV
 phone-error-rate** (18.2→9.3%) — a large, real win, still pending the production/C#-parity decision. Full suite
 1040/1040.
+
+## Run 7 — 2026-07-25 — PRODUCTIONIZED the BiLSTM OOV tier
+
+Built the production neural OOV path (TS-only — no C# mirror exists in vernacula-phonemizer, and the language is
+independently portable, so no port needed):
+- **`englishTagger.ts`** — `createEnglishTagger()`: BiLSTM (ONNX) per-letter → ARPABET chunk (masked argmax, decline
+  on out-of-vocab letter), finished with the SHARED `enforceSinglePrimary` + `collapseGeminates` + `arpabetToIpa`
+  (extracted from `englishG2p.ts` as exported pure fns) so there is no seam with the dict. Self-contained in the
+  English module (reuses only the generic `core/onnx.ts` + `maskedArgmax`).
+- **`enNeural.ts`** — async `phonemizeEnNeural`: pre-pass tags each distinct OOV word once, injects the readings as the
+  sync engine's new `oovOverride` (threaded through `english.ts` resolveWord: lexicon → heteronym → possessive →
+  **tagger** → n-gram). Dict/heteronym/number/punctuation output is byte-identical to `phonemize(text, "en")`.
+- **Model:** trained on the full 117k CMUdict, dynamic-int8 quantised (9.4MB→2.4MB). 28 chars, 212 tags.
+
+**Bug found + fixed (the aligner separator):** the hard-EM aligner concatenated a 2-phone chunk without a delimiter —
+fine for single-char IPA (Norwegian `e`+`ɪ`=`eɪ`) but for multi-char ARPABET it fused tokens (`K`+`S`=`KS`), which
+leaked as raw uppercase into the IPA (Zorplex→…plɛ**KS**). Added a configurable `SEP` to `align_parallel` (`" "` for
+ARPABET, `""` default for IPA — Norwegian unaffected). Beyond fixing the leak, proper token boundaries **raised
+held-out** 59.1→68.4% word-exact and PER 90.7→92.6%. Guarded by a test (OOV output must be all-lowercase IPA).
+
+**Shipped-model held-out (clean CMUdict, stress-independent phones):** pipeline 42.7% word / 81.8% phone-acc vs BiLSTM
+**68.4% word / 92.6% phone-acc — 59% fewer phone errors (7.4% vs 18.2%).** Full suite 1044/1044, tsc 0 errors.
+`phonemizeEnNeural` is opt-in (import from `src/enNeural.ts`, the bn/nb pattern); the sync `phonemize(text, "en")` is
+unchanged.
