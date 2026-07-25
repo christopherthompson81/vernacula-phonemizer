@@ -1,0 +1,16 @@
+{
+    "language": "sk",
+    "name": "Slovak",
+    "script": "Latin",
+    "provenance": "Cleanroom rule-based g2p (palatalisation + diphthongs + syllabic liquids + voicing assimilation) scored against the wikipron slk_latn_broad HUMAN referee.",
+    "referees": [
+        { "file": "sk.wikipron-slk-broad.tsv", "source": "wikipron slk_latn_broad (Wiktionary, HUMAN, 15950)", "role": "primary" }
+    ],
+    "secondaryGap": "single-source (wikipron slk, Wiktionary-derived). kaikki sk / epitran slk-Latn are candidate 2nd sources (correlated / rule-based). The residual is chiefly LEXICAL palatalisation before ⟨e⟩ (deti vs ten — unpredictable from spelling) + loanwords.",
+    "folds": [
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ short: the referee mixes e ~ ɛ for the same context (les→ʎes but džem→d͡ʒɛm); plain e dominates → fold ɛ→e" },
+        { "pattern": "ɫ", "replace": "l", "note": "narrow velarised [ɫ] for ⟨l⟩ before back vowels (slovo→sɫɔvɔ) — a non-phonemic narrow variant of /l/ → fold" },
+        { "pattern": "ɪ", "replace": "i", "note": "the ⟨ie/ia/iu⟩ glide is written inconsistently ɪ̯ (chlieb→xʎɪ̯ep) ~ i̯ (miest→mi̯est), and short loan ⟨i⟩ as ɪ; ɪ/i are not contrastive in Slovak → fold ɪ→i" },
+        { "pattern": "ʊ", "replace": "u", "note": "lax [ʊ] for unstressed loan ⟨u⟩ (nobelium→nɔbelɪjʊm) — not contrastive with /u/ → fold" }
+    ]
+}
