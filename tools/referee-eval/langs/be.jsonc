@@ -1,0 +1,11 @@
+{
+    "language": "be",
+    "name": "Belarusian",
+    "script": "Cyrillic",
+    "provenance": "Authored East Slavic Cyrillic rule g2p (palatalisation + iotated vowels + ў + дз/дж + voicing assimilation) scored against the wikipron bel_cyrl_narrow HUMAN referee.",
+    "referees": [
+        { "file": "be.wikipron-bel-narrow.tsv", "source": "wikipron bel_cyrl_narrow (Wiktionary, HUMAN, 7259)", "role": "primary" }
+    ],
+    "secondaryGap": "single-source (wikipron bel narrow). kaikki be / epitran bel-Cyrl are candidate 2nd sources. Narrow transcription → the residual is largely the palatalisation/assimilation layer (which the referee marks inconsistently) + stress-conditioned detail.",
+    "folds": []
+}

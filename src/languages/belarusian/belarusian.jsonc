@@ -1,0 +1,50 @@
+// Native canonical-IPA definition for Belarusian / беларуская (be) — East Slavic, Cyrillic. belarusian.ts reads this
+// file. Belarusian orthography is PHONETIC — it WRITES akanne (unstressed о→а, е→я: вада not вода), so unlike Russian
+// there is no stress-conditioned reduction to model: ⟨о⟩ is only ever stressed → [o]. Signatures vs Ukrainian:
+// ⟨г⟩→[ɣ] (voiced velar fricative), the RETROFLEX hushers ⟨ж ш ч⟩→[ʐ ʂ t͡ʂ] (+ ⟨дж⟩→[d͡ʐ], ⟨дз⟩→[d͡z]), the unique
+// ⟨ў⟩→[u̯]/[w], ⟨і⟩ is IOTATED (word-initial/after-vowel → [ji]: Іван→jivan), ⟨э⟩→[ɛ] (hard) vs soft ⟨е⟩→[(j)e],
+// dark ⟨л⟩→[ɫ], PALATALISATION (Cʲ) before ь/і/iotated, and — unlike Ukrainian — regressive VOICING assimilation +
+// word-final devoicing (горад→ɣorat, хлеб→xlʲep). Validated vs wikipron bel_cyrl narrow.
+{
+    "language": "be",
+    "name": "Belarusian",
+    "script": "Cyrillic",
+    "provenance": "Authored from Belarusian Cyrillic orthography + standard phonology (akanne is spelled → no stress dict); cross-checked vs wikipron bel_cyrl narrow (7259). See docs/investigations/be_native_bringup_investigation.md.",
+
+    // Plain (hard) vowels — no stress reduction (akanne is orthographic). а→a, о→o, у→u, ы→ɨ, э→ɛ.
+    "vowels": { "а": "a", "о": "o", "у": "u", "ы": "ɨ", "э": "ɛ" },
+
+    // Iotated / soft vowels: after a consonant they PALATALISE it and contribute the base vowel; word-initially or
+    // after a vowel / apostrophe they are [j] + the base vowel. ⟨і⟩ is iotated in Belarusian (Іван→jivan), unlike
+    // Ukrainian. (я→a, е→e, ё→o, ю→u, і→i.)
+    "iotated": { "я": "a", "е": "e", "ё": "o", "ю": "u", "і": "i" },
+
+    // Consonants → their HARD IPA. Palatalisation appends ʲ (ɫ→lʲ is special: dark l loses velarisation). г→ɣ (velar
+    // fricative), retroflex hushers ж→ʐ ш→ʂ ч→t͡ʂ, в→v, dark л→ɫ. ⟨ў⟩ and the ⟨дз/дж⟩ digraphs are handled in code.
+    "consonants": {
+        "б": "b", "в": "v", "г": "ɣ", "ґ": "ɡ", "д": "d", "ж": "ʐ", "з": "z", "й": "j", "к": "k",
+        "л": "ɫ", "м": "m", "н": "n", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x",
+        "ц": "t͡s", "ч": "t͡ʂ", "ш": "ʂ"
+    },
+
+    // Voicing assimilation pairs (IPA ↔ IPA). Regressive within obstruent clusters + word-final devoicing (belarusian.ts).
+    // ⟨в⟩=v is DELIBERATELY absent — Belarusian /v/ vocalises to [u̯]/⟨ў⟩, it never devoices to [f] (нерв→nʲerv, not nʲerf,
+    // unlike Russian); it is inert (neither a target nor a trigger). ⟨ф⟩ likewise stays hard (rare, loanwords only).
+    "voicing": {
+        "toVoiceless": { "b": "p", "ɣ": "x", "ɡ": "k", "d": "t", "ʐ": "ʂ", "z": "s", "d͡z": "t͡s", "d͡ʐ": "t͡ʂ" },
+        "toVoiced": { "p": "b", "x": "ɣ", "k": "ɡ", "t": "d", "ʂ": "ʐ", "s": "z", "t͡s": "d͡z", "t͡ʂ": "d͡ʐ" }
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+    },
+
+    // NUMBERS — Belarusian Cyrillic spellings; canonical IPA DERIVED via the same g2p. Slavic decimal.
+    "numbers": {
+        "units": ["нуль", "адзін", "два", "тры", "чатыры", "пяць", "шэсць", "сем", "восем", "дзевяць"],
+        "teens": ["дзесяць", "адзінаццаць", "дванаццаць", "трынаццаць", "чатырнаццаць", "пятнаццаць", "шаснаццаць", "сямнаццаць", "васямнаццаць", "дзевятнаццаць"],
+        "tens": { "20": "дваццаць", "30": "трыццаць", "40": "сорак", "50": "пяцьдзесят", "60": "шэсцьдзесят", "70": "семдзесят", "80": "восемдзесят", "90": "дзевяноста" },
+        "hundreds": ["", "сто", "дзвесце", "трыста", "чатырыста", "пяцьсот", "шэсцьсот", "семсот", "восемсот", "дзевяцьсот"],
+        "magnitudes": { "thousand": "тысяча", "million": "мільён", "billion": "мільярд" }
+    }
+}
