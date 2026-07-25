@@ -57,3 +57,25 @@ ngano→ᵑɡano), ⟨ng'⟩→ŋ (ng'ato→ŋato) vs ⟨ng⟩→ᵑɡ, the pala
 published phonology, but there is no independent SECOND numeric referee (no kaikki/epitran/wikipron Dholuo). The
 adjudicated anchor is test/luo.test.ts. **Deferred (documented caps):** ±ATR harmony (unwritten — a lexicon would be
 needed, like Akan tone), register TONE (H/L, unwritten + lexical), and numbers.
+
+## Run 3 — 2026-07-25 — 3-agent review: two real fixes + an honesty caveat
+
+The review found the g2p sound against the referee but surfaced two real issues (fixed) and one framing correction.
+
+**Fixes:**
+1. **⟨ng'⟩ apostrophe — U+02BC bug.** The tokenizer + normaliser handled ASCII `'` and `’` (U+2019) but NOT `ʼ`
+   (U+02BC MODIFIER LETTER APOSTROPHE) — the Unicode-canonical letter-apostrophe used for ng' in African Latin
+   orthographies. `angʼo` ("what") split into `ang`+`o` → `aᵑɡo` + a spurious gap. Fixed: all three forms normalise to
+   `'` (in phonemizeWord, so direct callers are covered too) → ang'o/ang'o/angʼo all → `aŋo`. Guarded by a test.
+2. **Glide over-generalisation.** The rule glided ⟨i u⟩ before ANY vowel, but the referee attests only ⟨i⟩+{a,e}
+   (dhiang', chieng'). ⟨u⟩→w had zero support and mis-rendered the endonym **dholuo→ðolwo** (it is the trisyllabic
+   /ðoluo/). Narrowed to ⟨i⟩+{a,e}→j only; ⟨u⟩+V and ⟨i⟩+high are left as HIATUS (Dholuo has genuine VV) pending a
+   second source. dholuo→ðoluo, guok→ɡuok now; dhiang'/chieng' unchanged; eval still 17/17.
+
+**Honesty caveat (framing, not a bug).** The 100% is 17/17 on a THIN referee whose 17 words do NOT exercise the
+signatures the bring-up foregrounds: the prenasalised stops (⟨mb nd nj ng⟩ — ZERO referee words), ⟨th⟩→θ (ZERO; only
+one ⟨dh⟩→ð word), ⟨j⟩→d͡ʒ (ZERO), and the ⟨u⟩-glide (ZERO). Those rest on **test/luo.test.ts + Tucker (1994)**, not the
+referee number. Raw agreement is 1/17; after folding tone + ±ATR (both unwritten) the segmental comparison is real but
+narrow. The floor was loosened to 0.8 (a loose tripwire for a 17-word human-editable referee; the gold test is the real
+anchor) and the manifest's inaccurate "folded θ~t̪" note corrected (no such fold exists — we match the referee's ð). The
+🔷 verdict already reflects this: correct on every referee word + grammar-corroborated, but single-source and thin.

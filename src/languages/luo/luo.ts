@@ -14,22 +14,24 @@ import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const VOWEL_LETTERS = new Set(["a", "e", "i", "o", "u"]);
 
 /** Phonemize a single Dholuo word to canonical IPA (segmental; +ATR/toneless default — ATR + tone are unwritten). A
  *  tone-marked citation spelling (chíeng', à) is normalised to its base letters first — the orthography proper is
  *  unaccented, and we emit no tone. */
 export function phonemizeWord(word: string): string {
-    const w = word.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/gu, "");
+    // normalise the \u27e8ng'\u27e9 apostrophe (\u2019 U+2019 / \u02bc U+02BC \u2192 ASCII ') and strip tone-marked citation accents
+    const w = word.toLowerCase().replace(/[\u2019\u02bc]/gu, "'").normalize("NFD").replace(/[\u0300-\u036f]/gu, "");
     let out = "";
     let i = 0;
     while (i < w.length) {
         const c = w[i]!;
-        // GLIDE: a high vowel ⟨i u⟩ immediately before a DIFFERENT vowel letter is the glide [j]/[w] (dhiang'→ðjaŋ).
-        // Guarded to a different following vowel so a doubled ⟨ii⟩/⟨uu⟩ (hiatus/length) is not glided.
+        // GLIDE: ⟨i⟩ before a following ⟨a⟩/⟨e⟩ is the palatal glide [j] (dhiang'→ðjaŋ, chieng'→t͡ʃjeŋ — the only
+        // environment the referee attests). Deliberately CONSERVATIVE: ⟨u⟩+V (would give dholuo→ðolwo — but the endonym
+        // is the trisyllabic /ðoluo/) and ⟨i⟩ before a high/back vowel are left as HIATUS pending a second source, since
+        // Dholuo's 9-vowel system has genuine VV sequences and the 17-word referee has no ⟨u⟩-glide / ⟨i⟩+{o,u} data.
         const nx = w[i + 1] ?? "";
-        if ((c === "i" || c === "u") && VOWEL_LETTERS.has(nx) && nx !== c) {
-            out += c === "i" ? "j" : "w";
+        if (c === "i" && (nx === "a" || nx === "e")) {
+            out += "j";
             i += 1;
             continue;
         }
@@ -41,14 +43,15 @@ export function phonemizeWord(word: string): string {
     return out;
 }
 
-// A word (Dholuo letters + the ⟨ng'⟩ apostrophe; also accented citation vowels, normalised away in phonemizeWord) /
-// number / punctuation token.
-const TOKEN = /([a-zàáâãäèéêëìíîïòóôõöùúûü'’]+)|(\d+)|([.!?…,;:])/giu;
+// A word (Dholuo letters + the ⟨ng'⟩ apostrophe in all three common forms — ASCII ', ’ U+2019, ʼ U+02BC MODIFIER
+// LETTER APOSTROPHE, the Unicode-canonical letter-apostrophe for ng' in African Latin orthographies; also accented
+// citation vowels, normalised away in phonemizeWord) / number / punctuation token.
+const TOKEN = /([a-zàáâãäèéêëìíîïòóôõöùúûü'’ʼ]+)|(\d+)|([.!?…,;:])/giu;
 
 class LuoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
+            if (m[1]) sink.emit(phonemizeWord(m[1])); // phonemizeWord normalises the ’/ʼ apostrophe + citation accents
             else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

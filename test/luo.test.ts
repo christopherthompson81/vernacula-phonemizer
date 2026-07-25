@@ -33,11 +33,20 @@ describe("Luo (Dholuo) canonical IPA — greedy g2p (Nilotic: dental contrast + 
         expect(phonemizeWord("ngano")).toBe("ᵑɡano"); // "story" — ⟨ng⟩→ᵑɡ (prenasalized, vs ⟨ng'⟩→ŋ)
     });
 
-    test("high-vowel GLIDE ⟨i u⟩ + V → j/w; +ATR/toneless default (ATR + tone unwritten)", () => {
+    test("⟨i⟩+{a,e} GLIDE only (conservative — ⟨u⟩+V + ⟨i⟩+high left as hiatus)", () => {
         expect(phonemizeWord("dhiang'")).toBe("ðjaŋ"); // "cow" — ⟨i⟩+a → j glide, after dental ð
+        expect(phonemizeWord("chíeng'")).toBe("t͡ʃjeŋ"); // "sun/day" — ⟨i⟩+e → j (tone-marked citation → base)
+        expect(phonemizeWord("dholuo")).toBe("ðoluo"); // the endonym — ⟨u⟩+o is HIATUS (/ðoluo/), NOT glided to ðolwo
+        expect(phonemizeWord("guok")).toBe("ɡuok"); // "dog" — ⟨u⟩+o kept as a vowel sequence (no ⟨u⟩→w glide)
+    });
+
+    test("+ATR/toneless default (ATR + tone unwritten); ⟨ng'⟩ apostrophe robust to ' / ’ / ʼ", () => {
         expect(phonemizeWord("kelo")).toBe("kelo"); // ⟨e⟩,⟨o⟩ emitted +ATR by default (referee kɛlɔ, folded)
         expect(phonemizeWord("kuno")).toBe("kuno"); // ⟨u⟩,⟨o⟩ +ATR default (referee kʊnɔ, folded)
-        expect(phonemizeWord("chíeng'")).toBe("t͡ʃjeŋ"); // "sun/day" — a tone-marked citation spelling normalizes to base
+        // ang'o "what" — the ⟨ng'⟩ digraph resolves to ŋ for ASCII ', ’ (U+2019), and ʼ (U+02BC, the letter apostrophe)
+        expect(phonemizeWord("ang'o")).toBe("aŋo");
+        expect(phonemizeWord("ang’o")).toBe("aŋo");
+        expect(phonemizeWord("angʼo")).toBe("aŋo");
     });
 
     test("text: words + clause punctuation; numbers deferred", () => {
