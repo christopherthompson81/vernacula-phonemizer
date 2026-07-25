@@ -8,8 +8,9 @@
  *   2. the word-level tagger — `createWordStructuralTagger` (lazy ONNX load + the per-word decode loop);
  *   3. the async serving pre-pass — `wordLevelNeuralPrepass` (tag each OOV word once, inject into the sync engine).
  * Each language still owns its language-specific bits via the options (bn: NFC preprocess; nb: lowercase+NFC preprocess
- * plus a single-primary-stress postprocess). fa's faTagger.ts is a DIFFERENT (sentence-level, UNK-permits-all) shape
- * and intentionally does not use this factory.
+ * plus a single-primary-stress postprocess). fa's faTagger.ts and he's hebrewTagger.ts are a DIFFERENT (sentence-level,
+ * UNK-permits-all) shape and intentionally do NOT use the word-level factory — but they DO still consume `maskedArgmax`
+ * + `TaggerMeta` below, so a change to that decode kernel or the meta shape must keep those two compiling too.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
