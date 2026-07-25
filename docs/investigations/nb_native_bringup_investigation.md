@@ -66,3 +66,38 @@ symbol leftover). One real bug + cleanups:
 
 Acknowledged loanword-tail residue (documented, deferred): silent-⟨d⟩ over-applies to loans/names (David→dɑːʋɪ,
 milliard→mɪlːɪɑɾ) — the same class as the stress ceiling, needs a lexicon.
+
+## Run 3 — 2026-07-24 — the referee was the problem: frequency-weighting + a complete dump
+
+Re-examined the 27% headline after the question "is this English code-switching / should we narrow the referee?".
+Two findings reframed everything:
+- **The "hard" words are NATIVIZED Latinate loans read with FULL Norwegian phonology, not English** — abandon→abandɔŋ
+  (Norwegian final n→ŋ, ɔ; NOT English əˈbændən), abdikasjon→abdɪkaʃuːn (sj→ʃ). So language-switching them to English
+  would be WRONG. The problem is Norwegian LEXICAL (non-initial) stress, not language.
+- **The wikipron referee is the alphabetical HEAD of the scrape** — drowning in ab-/abs- Latinate families (97 "absor-"
+  forms, 96 "abort-", 82 "absol-"). It is NOT representative of Norwegian; it over-samples exactly the loans that need
+  lexical stress. It doesn't even contain the most-common words (jeg/det/er/du — not "a"-words).
+
+**Fixes (this run):**
+1. **A complete dump** — pulled kaikki nb (76k entries → 5943 words with usable IPA, vs wikipron's 3432 truncated
+   subset), made it the primary referee. Same source (Wiktionary, correlated) but representative, and it PRESERVES
+   stress (absorbere→absɔrˈbeːrə).
+2. **Frequency-weighting the eval** — the honest version of "narrow to native words". Added a token-weighted metric to
+   the referee-eval harness (`tools/referee-eval/freq/<lang>.txt`, OpenSubtitles no_50k, CC BY-SA): each referee word
+   contributes its corpus frequency, so common (native, correct) words count and rare inflections don't. Reusable
+   fleet-wide (Dutch/German are similarly deflated).
+
+**The reframe:**
+
+| referee | raw uniform | FREQUENCY-WEIGHTED (real text) | top-100 |
+|---|---|---|---|
+| wikipron (truncated) | 27.7% | 46.2% | — |
+| **kaikki (complete)** | 23.0% | **63.4%** | 65.0% |
+
+The engine was never "a 27% engine". On real-text token weighting it is **63.4%** — in line with Swedish (55.7%) and
+Dutch (64.5%). The raw uniform number was a dictionary-shape artifact all along. The floor test now guards the raw
+(≥0.20) AND a dedicated frequency-weighted floor (≥0.55, the meaningful regression guard for real-text quality).
+
+**The path up (unchanged, now measurable):** a pronunciation/stress lexicon (the da/sv pattern) + an OOV per-grapheme
+tagger (the da perceptron/BiLSTM pattern — Norwegian is the same deep-orthography problem where a tagger learns the
+stress-conditioned vowel quality DIRECTLY from spelling, bypassing explicit stress). Re-measure frequency-weighted.

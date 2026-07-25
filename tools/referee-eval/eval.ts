@@ -310,6 +310,24 @@ export interface RefereeResult {
     raw: number;
     folded: number;
     residual: { key: string; count: number; example: string }[];
+    // When a word-frequency list exists (tools/referee-eval/freq/<lang>.txt), the TOKEN-weighted folded accuracy over
+    // the referee words that appear in the corpus — the real-text quality, unbiased by a dictionary-shaped referee
+    // (which over-samples rare inflections). `freqCovered` = how many referee words carry a frequency.
+    freqWeighted?: number;
+    freqCovered?: number;
+}
+
+/** Load `freq/<lang>.txt` (a "word count" list, desc) → word→count, or null if the language has no frequency list. */
+function loadFreq(lang: string): Map<string, number> | null {
+    try {
+        const map = new Map<string, number>();
+        for (const l of readFileSync(join(HERE, "freq", `${lang}.txt`), "utf8").split("\n")) {
+            if (!l || l.startsWith("#")) continue;
+            const sp = l.indexOf(" ");
+            if (sp > 0) map.set(l.slice(0, sp).toLowerCase(), Number(l.slice(sp + 1)));
+        }
+        return map.size ? map : null;
+    } catch { return null; }
 }
 
 /** Score a language's phonemizer against each of its independent referees (segmental backbone). Async because
@@ -324,6 +342,7 @@ export async function evaluate(
     const cfg = CONFIG[lang],
         phon = PHON[lang];
     if (!cfg || !phon) throw new Error(`no referee config for "${lang}"`);
+    const freq = loadFreq(lang); // token weights for the real-text (frequency-weighted) metric, when available
     const out: RefereeResult[] = [];
     for (const ref of cfg.referees) {
         if (primaryOnly && ref.role !== "primary") continue; // floor test only needs the primary (skip slow 2nd)
@@ -339,10 +358,14 @@ export async function evaluate(
         }
         let raw = 0,
             folded = 0;
+        let freqNum = 0,
+            freqDen = 0,
+            freqCovered = 0;
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
         for (const row of pairs) {
             const w = row[0]!;
+            const wCount = freq?.get(w.toLowerCase()) ?? 0; // corpus token count (0 = not a common word)
             // A word may carry MULTIPLE reference pronunciations (kaikki/ca dictionaries list variants) as extra
             // tab-separated fields — credit the word if ANY of them matches (folded). Single-pron files (one field)
             // are the length-1 case, unchanged.
@@ -355,7 +378,9 @@ export async function evaluate(
             const ours = cfg.segmentJoin ? rawOurs.replace(/\s+/g, "") : rawOurs;
             if (refIpas.some((rf) => ours === rf)) raw++;
             const of = fold(ours);
-            if (refIpas.some((rf) => fold(rf) === of)) {
+            const hit = refIpas.some((rf) => fold(rf) === of);
+            if (wCount > 0) { freqDen += wCount; freqCovered++; if (hit) freqNum += wCount; }
+            if (hit) {
                 folded++;
                 continue;
             }
@@ -373,6 +398,7 @@ export async function evaluate(
             raw,
             folded,
             residual,
+            ...(freq ? { freqWeighted: freqDen ? freqNum / freqDen : 0, freqCovered } : {}),
         });
     }
     return out;
@@ -398,6 +424,10 @@ async function main(): Promise<void> {
         console.log(
             `folded backbone:${r.folded}/${r.total} (${((100 * r.folded) / r.total).toFixed(1)}%)  — after the config folds`,
         );
+        if (r.freqWeighted !== undefined)
+            console.log(
+                `frequency-weighted:${(100 * r.freqWeighted).toFixed(1)}%  — token-weighted real-text quality (${r.freqCovered} referee words have a frequency; unbiased by a dictionary-shaped referee)`,
+            );
         console.log(
             `residual divergence classes (top ${nEx}, count × folded-form; investigate, don't auto-fix):`,
         );
