@@ -62,6 +62,7 @@ import { phonemizeWord as fi } from "../../src/languages/finnish/finnish.ts";
 import { phonemizeWord as sk } from "../../src/languages/slovak/slovak.ts";
 import { phonemizeWord as be } from "../../src/languages/belarusian/belarusian.ts";
 import { phonemizeWord as hy } from "../../src/languages/armenian/armenian.ts";
+import { phonemizeWord as ky } from "../../src/languages/kyrgyz/kyrgyz.ts";
 import { phonemizeWord as he } from "../../src/languages/hebrew/hebrew.ts";
 import { phonemizeWord as lg } from "../../src/languages/luganda/luganda.ts";
 import { phonemizeWord as rn } from "../../src/languages/kirundi/kirundi.ts";
@@ -257,6 +258,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     sk,
     be,
     hy,
+    ky,
     ko,
     mr,
     pa,

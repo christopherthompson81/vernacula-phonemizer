@@ -1,0 +1,40 @@
+// Native canonical-IPA data manifest for Kyrgyz / кыргызча (ky) — Turkic (Kipchak), Cyrillic, espeak-independent.
+// Kyrgyz Cyrillic is a shallow near-1:1 orthography with STRICT vowel harmony that is SPELLED (so no harmony needs
+// predicting). kyrgyz.ts reads this file. The context work: (1) the VELAR/UVULAR harmony — ⟨к⟩→[q]/⟨г⟩→[ʁ] next to a
+// BACK vowel (а о у ы), [k]/[ɡ] next to a FRONT vowel (е ө ү и); Kyrgyz does NOT spell this (unlike Kazakh қ/ғ). (2)
+// dark ⟨л⟩→[ɫ] by the same back-harmony, clear [l] by front. (3) LONG vowels — a doubled vowel is [Vː] (тоо→toː,
+// Айсулуу→ɑjsuluː). Signatures: ⟨ж⟩→[d͡ʒ] (affricate, not [ʒ]), ⟨ң⟩→[ŋ], back ⟨а⟩=ɑ, ⟨ы⟩=ɯ, front ⟨ө⟩=ø / ⟨ү⟩=y.
+// Cross-checked vs wikipron kir_cyrl broad. See docs/investigations/ky_native_bringup_investigation.md.
+{
+    "language": "ky",
+    "name": "Kyrgyz",
+    "script": "Cyrillic",
+    "provenance": "Authored from the Kyrgyz Cyrillic orthography + standard phonology (a shallow near-1:1 script; harmony is spelled). Cross-checked vs wikipron kir_cyrl broad (888).",
+
+    // Plain vowel letters → IPA. BACK: а о у ы. FRONT: е э ө ү и. (A doubled vowel → [Vː], handled in code.)
+    "vowels": { "а": "ɑ", "о": "o", "у": "u", "ы": "ɯ", "е": "e", "э": "e", "ө": "ø", "ү": "y", "и": "i" },
+    "backVowels": "аоуы",
+
+    // Iotated letters (Russian loans) → a fixed IPA sequence. ⟨й⟩ is the plain glide [j].
+    "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
+
+    // Consonant letters → IPA (context-free). ⟨к г л⟩ are handled in code (velar/uvular + dark-l harmony). ⟨ж⟩→d͡ʒ
+    // (the Kyrgyz affricate). Russian-loan letters в ф х ц щ kept at their loan values; ъ/ь are dropped.
+    "consonants": {
+        "б": "b", "в": "v", "д": "d", "ж": "d͡ʒ", "з": "z", "й": "j", "м": "m", "н": "n", "ң": "ŋ",
+        "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃ"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+    },
+
+    // NUMBERS — Kyrgyz Cyrillic cardinal spellings (canonical NumbersDef schema); canonical IPA DERIVED via the same
+    // g2p. Turkic decimal: tens and units are SPACE-separated (жыйырма бир = 21), as are magnitude groups. ⟨tens⟩
+    // includes "10" (он), Turkic-style.
+    "numbers": {
+        "units": ["нөл", "бир", "эки", "үч", "төрт", "беш", "алты", "жети", "сегиз", "тогуз"],
+        "tens": { "10": "он", "20": "жыйырма", "30": "отуз", "40": "кырк", "50": "элүү", "60": "алтымыш", "70": "жетимиш", "80": "сексен", "90": "токсон" },
+        "magnitudes": { "hundred": "жүз", "thousand": "миң", "million": "миллион", "billion": "миллиард" }
+    }
+}
