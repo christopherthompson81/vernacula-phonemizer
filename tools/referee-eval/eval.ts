@@ -57,6 +57,7 @@ import { phonemizeWord as bm } from "../../src/languages/bambara/bambara.ts";
 import { phonemizeWord as wo } from "../../src/languages/wolof/wolof.ts";
 import { phonemizeWord as mos } from "../../src/languages/mossi/mossi.ts";
 import { phonemizeWord as ki } from "../../src/languages/kikuyu/kikuyu.ts";
+import { phonemizeWord as luo } from "../../src/languages/luo/luo.ts";
 import { phonemizeWord as af } from "../../src/languages/afrikaans/afrikaans.ts";
 import { phonemizeWord as fi } from "../../src/languages/finnish/finnish.ts";
 import { phonemizeWord as sk } from "../../src/languages/slovak/slovak.ts";
@@ -206,6 +207,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     af,
     he,
     lg,
+    luo, // Luo (Dholuo) — Western Nilotic; single-source 17-word Wiktionary referee (tone/ATR unwritten → folded)
     rn,
     ug,
     syl,
