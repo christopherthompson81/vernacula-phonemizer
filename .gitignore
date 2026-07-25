@@ -12,3 +12,6 @@ __pycache__/
 
 # fp32 intermediate from the English G2P trainer (EN_PRODUCTION); only the int8-quantised model is shipped
 src/languages/english/en-g2p-tagger.onnx
+
+# fp32 intermediate from the French G2P trainer (FR_PRODUCTION); only the int8-quantised model is shipped
+src/languages/french/fr-g2p-tagger.onnx
