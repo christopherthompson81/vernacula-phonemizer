@@ -1,0 +1,46 @@
+// Native canonical-IPA data manifest for Georgian / ქართული (ka) — Kartvelian, the Mkhedruli script,
+// espeak-independent. Georgia (~4M). Georgian orthography is essentially ONE-LETTER-ONE-PHONEME (a transparent
+// alphabet, NO digraphs), so the g2p is a greedy longest-match scan (georgian.ts) over the 33-letter table + ONE
+// context rule (word-final voiced-stop devoicing).
+// Referee: wikipron kat_geor_narrow (HUMAN, 20,894 words). The table was DERIVED empirically from 18,350 1:1-aligned
+// referee words. Signatures:
+//   • the three-way STOP/AFFRICATE contrast VOICED / ASPIRATED / EJECTIVE:
+//       labial   ბ b · ფ pʰ · პ pʼ            velar    გ ɡ · ქ kʰ · კ kʼ
+//       dental   დ d · თ tʰ · ტ tʼ            affr.(s) ძ d͡z · ც t͡sʰ · წ t͡sʼ
+//       uvular            ყ qʼ (ejective)      affr.(ʃ) ჯ d͡ʒ · ჩ t͡ʃʰ · ჭ t͡ʃʼ
+//   • UVULAR fricatives ღ=ʁ (voiced), ხ=χ (voiceless) — NOT velar ɣ/x (the referee confirms uvular).
+//   • 5 vowels a ɛ i ɔ u (the referee's narrow ä/e̞/o̞ are folded to a/ɛ/ɔ).
+// Stress is weak / non-contrastive → not marked. WORD-FINAL VOICED STOPS devoice to aspirated (ბ/დ/გ→pʰ/tʰ/kʰ) — the
+// ONE context rule, MODELLED in georgian.ts (kʼaɾɡatʰ), not folded. The referee's other narrow ALLOPHONY IS folded
+// (config): ä→a, e̞→ɛ, o̞→ɔ, dark ɫ→l, n→ŋ (pre-velar), the devoicing ring (b̥/ɡ̊/d̥), the ⟨ვ⟩ devoicing (f→v, before
+// a voiceless C / final), and ⟨ყ⟩'s narrow [χʼ]→ the standard phonemic /qʼ/ we emit. Numbers deferred. See
+// docs/investigations/ka_bringup_investigation.md.
+{
+    "language": "ka",
+    "name": "Georgian (ქართული)",
+    "script": "Mkhedruli",
+    "provenance": "Authored greedy g2p from the Mkhedruli alphabet; the 33-letter table was derived empirically from the wikipron kat_geor_narrow referee (HUMAN, 18,350 1:1-aligned words), cross-checked against standard Georgian phonology. Beyond-espeak.",
+
+    "convention": {
+        "stops": "three-way VOICED / ASPIRATED / EJECTIVE at labial ბ/ფ/პ, dental დ/თ/ტ, velar გ/ქ/კ; the ejective is marked ◌ʼ, the aspirate ◌ʰ, the voiced plain",
+        "affricates": "ძ=d͡z / ც=t͡sʰ / წ=t͡sʼ (alveolar) and ჯ=d͡ʒ / ჩ=t͡ʃʰ / ჭ=t͡ʃʼ (post-alveolar), same voiced/aspirated/ejective three-way; tie-barred",
+        "uvulars": "ღ=ʁ (voiced uvular fricative), ხ=χ (voiceless uvular fricative), ყ=qʼ (uvular ejective — the referee's narrow [χʼ] is folded)",
+        "vowels": "5 vowels ა=a, ე=ɛ, ი=i, ო=ɔ, უ=u (the referee's narrow ä/e̞/o̞ centralised/lowered variants are folded)",
+        "otherC": "ვ=v, ზ=z, ჟ=ʒ, შ=ʃ, ს=s, ლ=l (dark [ɫ] before back vowels/coda is allophonic → folded), რ=ɾ (tap), მ=m, ნ=n (→[ŋ] pre-velar, folded), ჰ=h",
+        "stress": "weak / non-contrastive (no phonemic stress) → not marked",
+        "finalDevoicing": "word-final voiced STOPS ბ/დ/გ devoice to aspirated pʰ/tʰ/kʰ — MODELLED in georgian.ts (kʼaɾɡatʰ), categorical in the referee. The voiced fricative ⟨ვ⟩→[f] (before a voiceless C / final) is NOT modelled → folded (f→v); the other voiced fricatives/affricates do not devoice"
+    },
+
+    // All keys are single Mkhedruli letters (no digraphs). Sorted length-desc by the loader (a no-op here).
+    "graphemes": {
+        "ა": "a", "ბ": "b", "გ": "ɡ", "დ": "d", "ე": "ɛ", "ვ": "v", "ზ": "z", "თ": "tʰ",
+        "ი": "i", "კ": "kʼ", "ლ": "l", "მ": "m", "ნ": "n", "ო": "ɔ", "პ": "pʼ", "ჟ": "ʒ",
+        "რ": "ɾ", "ს": "s", "ტ": "tʼ", "უ": "u", "ფ": "pʰ", "ქ": "kʰ", "ღ": "ʁ", "ყ": "qʼ",
+        "შ": "ʃ", "ჩ": "t͡ʃʰ", "ც": "t͡sʰ", "ძ": "d͡z", "წ": "t͡sʼ", "ჭ": "t͡ʃʼ", "ხ": "χ", "ჯ": "d͡ʒ",
+        "ჰ": "h"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "჻": " . "
+    }
+}
