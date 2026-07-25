@@ -1,0 +1,14 @@
+{
+    "language": "fi",
+    "name": "Finnish",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination + velar-nasal rules from the Finnish Latin orthography (near-perfectly phonemic). Scored against the wikipron fin_latn_broad HUMAN referee.",
+    "referees": [
+        { "file": "fi.wikipron-fin-broad.tsv", "source": "wikipron fin_latn_broad (Wiktionary, HUMAN, 173449 — template-expanded {{fi-pronunciation}})", "role": "primary" }
+    ],
+    "secondaryGap": "single-source (wikipron fin_latn, template-expanded from Wiktionary). kaikki fi (also Wiktionary-derived → correlated) is a candidate; the en.wiktionary {{IPA|fi}} scraper finds ~nothing because Finnish entries use the auto-generating {{fi-pronunciation}} template. Finnish is near-perfectly phonemic so the ceiling is high; the residual is loanword letters + morpheme-boundary hiatus (a diphthong digraph reading a cross-syllable vowel pair).",
+    "folds": [
+        { "pattern": "ˣ", "replace": "", "note": "BOUNDARY GEMINATION / loppukahdennus (the referee's word-final ˣ, e.g. suo→suo̯ˣ) — a sandhi/suprasegmental that only surfaces before a following word → fold" },
+        { "pattern": "ʔ", "replace": "", "note": "glottal stop in a handful of loan/interjection entries — not part of the native inventory → fold (8 rows)" }
+    ]
+}
