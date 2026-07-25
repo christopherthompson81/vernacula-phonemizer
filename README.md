@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **101 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **129 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,11 +23,11 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-101 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Austroasiatic, Austronesian,
-Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic, Niger-Congo
-(Bantu, Kwa, Mande, Atlantic), Romance, Sinitic, Slavic, Tai-Kadai, Tibeto-Burman, Turkic,
-Uralic and an English-lexified creole — across Latin, Greek, Cyrillic, Devanagari, Khmer,
-Gurmukhi, Gujarati, Bengali, Odia, Tamil,
+129 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
+Austronesian, Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Koreanic,
+Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Romance, Sinitic, Slavic, Tai-Kadai,
+Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
+Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
 
@@ -36,26 +36,28 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 
 | Family / area | Languages |
 |---|---|
-| Afroasiatic | Amharic `am`, Arabic `ar` (+ Egyptian `arz`, Levantine `apc`, Sudanese `apd`, Iraqi `acm`, Gulf `afb`, Moroccan `ary`, Libyan `ayl`), Hausa `ha`, Oromo `om`, Somali `so` |
+| Afroasiatic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hausa `ha`, Hebrew `he`, Oromo `om`, Somali `so` |
+| Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
-| Austronesian | Cebuano `ceb`, Indonesian `id`, Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
+| Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Creole (English-lexified) | Nigerian Pidgin `pcm` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
-| Germanic | Dutch `nl`, English `en` (+ `en-GB` accent variant), German `de`, Swedish `sv` (tonal accent) |
+| Germanic | Afrikaans `af`, Danish `da`, Dutch `nl`, English `en` (+ `en-GB` accent variant), German `de`, Swedish `sv` (tonal accent) |
 | Hellenic | Greek `el` |
-| Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Hindi `hi`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Urdu `ur` |
-| Iranian | Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa` |
+| Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Haryanvi `bgc`, Hindi `hi`, Magahi `mag`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Sylheti `syl`, Urdu `ur` |
+| Iranian | Balochi `bal`, Central Kurdish `ckb` (Sorani), Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa`, Tajik `tg` |
 | Japonic | Japanese `ja` |
 | Koreanic | Korean `ko` |
-| Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff`, Igbo `ig` (tonal), Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Setswana `tn`, Shona `sn`, Swahili `sw`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
+| Mongolic | Mongolian `mn` (Khalkha) |
+| Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic), Igbo `ig` (tonal), Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
 | Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
-| Slavic | Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Ukrainian `uk` |
+| Slavic | Belarusian `be`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Ukrainian `uk` |
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
-| Turkic | Azerbaijani `az`, Kazakh `kk`, Turkish `tr`, Uyghur `ug` (Arabic script), Uzbek `uz` |
-| Uralic | Hungarian `hu` |
+| Turkic | Azerbaijani `az`, Kazakh `kk`, Kyrgyz `ky`, Turkish `tr`, Uyghur `ug` (Arabic script), Uzbek `uz` |
+| Uralic | Finnish `fi`, Hungarian `hu` |
 
 **Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):
 `en-GB` = the GenAm English engine + a Received-Pronunciation lexical-set transform (non-rhoticity, BATH,
@@ -97,8 +99,8 @@ Five G2P paradigms, chosen per language by how its orthography relates to its ph
   substrate loans phonemically.
 
 These sit on a small **shared core**: the abugida engine, quantity-sensitive weight stress,
-Ohala schwa/inherent-vowel deletion, pluggable number compositors (Indic, Turkic, Slavic,
-Western), clause assembly, and the canonical-IPA notation primitives. A per-language `*.jsonc`
+Ohala schwa/inherent-vowel deletion, pluggable number compositors (Indic, Turkic, and a shared
+Western/Slavic composer), clause assembly, and the canonical-IPA notation primitives. A per-language `*.jsonc`
 manifest holds the hand-authored data so the code stays a thin, portable interpreter.
 
 ## Correctness is measured, not asserted
