@@ -1,0 +1,64 @@
+// Native canonical-IPA MANIFEST for Norwegian Bokmål (nb) — Urban East Norwegian (standard østnorsk), broad IPA.
+// Same shape as the Swedish/German manifests: the DATA (vowel length/quality tables, consonant digraphs, front-vowel
+// set, silent-d contexts, clause punctuation, cardinal number words) lives here; the ALGORITHMS (the g2p scan, the
+// complementary-length rule, retroflex assimilation, silent-d, first-syllable stress, number composition) stay in the
+// sibling code (g2p.ts, norwegian.ts, numbers.ts). SEGMENTAL + first-syllable stress; PITCH ACCENT (tonelag 1 vs 2,
+// the referee's ² / circumflex) is lexical + unwritten → DEFERRED (folded in the eval, like Swedish).
+// See docs/investigations/nb_native_bringup_investigation.md.
+{
+    "language": "nb",
+    "name": "Norwegian Bokmål (Urban East Norwegian)",
+    "provenance": "Cleanroom rule-based g2p authored from Urban East Norwegian phonology (Kristoffersen, The Phonology of Norwegian). espeak-independent; the referee (wikipron nob) is a fallible cross-check.",
+
+    "convention": {
+        "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) or short-V + long-C (takk→tɑkː). Nine long/short pairs; ⟨o⟩→[uː]/[ʊ] (the o/u split spelling underdetermines), ⟨u⟩→[ʉː]/[ʉ], ⟨å⟩→[oː]/[ɔ].",
+        "softening": "sj/skj, and sk before a front vowel → ʃ; kj/tj, and k before a front vowel → ç; g before a front vowel → j.",
+        "retroflex": "r + coronal → retroflex, absorbing the r: rt→ʈ rn→ɳ rl→ɭ rs→ʂ (East Norwegian). The broad referee mixes these with an uvular-r reading → folded.",
+        "silentD": "word-initial hj/gj/lj/dj → j; a word-final ⟨d⟩ after a vowel or l/n/r is silent (god→ɡuː, land→lɑn, jord→juːr); hv→ʋ.",
+        "stress": "first syllable (native default). Pitch accent deferred.",
+        "numbers": "tens-first compounds (tjueen = 21, modern Bokmål); split at hundre/tusen/million.",
+    },
+
+    // Orthographic front vowels — trigger ʃ/ç/j softening on a preceding sk / k / g.
+    "frontVowels": "eiyøæEIYØÆ",
+
+    "vowels": {
+        // é is an always-long loanword vowel (idé, kafé, allé → eː); ô marks a long o (fôr→fuːr); the other accents
+        // (à â è ê ë ü) are rare loanword letters mapped to their base-vowel quality so the tokenizer keeps them.
+        "long": { "a": "ɑː", "e": "eː", "i": "iː", "o": "uː", "u": "ʉː", "y": "yː", "æ": "æː", "ø": "øː", "å": "oː", "é": "eː", "è": "ɛː", "ê": "ɛː", "ë": "eː", "à": "ɑː", "â": "ɑː", "ô": "uː", "ü": "ʉː" },
+        "short": { "a": "ɑ", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʉ", "y": "ʏ", "æ": "æ", "ø": "œ", "å": "ɔ", "é": "eː", "è": "ɛ", "ê": "ɛ", "ë": "ɛ", "à": "ɑ", "â": "ɑ", "ô": "ʊ", "ü": "ʉ" },
+        // Before /r/ the mid-front ⟨e⟩ lowers to æ (Bergen→bærɡən, er→æːɾ). ⟨ø⟩ stays øː (gjøre→jøːɾə).
+        "longBeforeR": { "e": "æː" },
+        "shortBeforeR": { "e": "æ" }
+    },
+
+    // Special consonant graphemes → IPA, matched longest-first. Context-dependent ones (sk/k/g before a front vowel)
+    // are handled in code. Word-initial hj/gj/lj/dj → j and the silent-d rule are also in code.
+    "digraphs": {
+        "skj": "ʃ", "sj": "ʃ", "kj": "ç", "tj": "ç", "hv": "ʋ", "ng": "ŋ", "gn": "ŋn", "ck": "kː"
+    },
+
+    // Consonant letter → IPA (context-free singles).
+    "consonants": {
+        "b": "b", "c": "s", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k", "l": "l",
+        "m": "m", "n": "n", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t", "v": "ʋ", "w": "ʋ",
+        "x": "ks", "z": "s"
+    },
+
+    // r + coronal → a single retroflex (the r is absorbed). ⟨rd⟩ is NOT here — its d is silent (jord→juːr).
+    "retroflex": { "rt": "ʈ", "rn": "ɳ", "rl": "ɭ", "rs": "ʂ" },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+    },
+
+    // NUMBERS — Norwegian Bokmål cardinal spellings (canonical NumbersDef); canonical IPA DERIVED via the same g2p,
+    // through the shared westernNumberWords composer (tens + unit space-separated, magnitudes split).
+    "numbers": {
+        "units": ["null", "en", "to", "tre", "fire", "fem", "seks", "sju", "åtte", "ni"],
+        "teens": ["ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten"],
+        "tens": { "20": "tjue", "30": "tretti", "40": "førti", "50": "femti", "60": "seksti", "70": "sytti", "80": "åtti", "90": "nitti" },
+        "hundreds": ["", "hundre", "tohundre", "trehundre", "firehundre", "femhundre", "sekshundre", "sjuhundre", "åttehundre", "nihundre"],
+        "magnitudes": { "hundred": "hundre", "thousand": "tusen", "million": "million", "billion": "milliard" }
+    }
+}
