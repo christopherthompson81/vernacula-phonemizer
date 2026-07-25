@@ -1,47 +1,53 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord, createNorwegian } from "../src/languages/norwegian/norwegian.ts";
+import { phonemizeWord, phonemizeWordRules, createNorwegian } from "../src/languages/norwegian/norwegian.ts";
 
-// Norwegian Bokmål (nb) — North Germanic, Latin, Urban East Norwegian. Rule g2p with complementary vowel length
-// (which picks quality: ⟨o⟩→uː/ɔ, ⟨u⟩→ʉː/ʉ, ⟨å⟩→oː/ɔ, short ⟨i⟩=ɪ), front-vowel softening (sk/k/g→ʃ/ç/j), the
-// digraphs sj/skj→ʃ, kj/tj→ç, hv→ʋ, retroflex r+coronal→ʈ/ɳ/ɭ/ʂ, silent final ⟨d⟩, and unstressed ⟨e⟩→ə. First-
-// syllable stress; pitch accent + length folded. Referee-limited: raw 23% on the dictionary-shaped kaikki referee but
-// 63.4% FREQUENCY-WEIGHTED (real-text). See docs/investigations/nb_native_bringup_investigation.md.
-describe("Norwegian Bokmål canonical IPA — rule g2p", () => {
-    test("vowel quality via complementary length: ⟨o⟩→uː, ⟨u⟩→ʉː, ⟨å⟩→oː", () => {
-        expect(phonemizeWord("bok")).toBe("ˈbuːk"); // o → uː (long, open)
-        expect(phonemizeWord("hus")).toBe("ˈhʉːs"); // u → ʉː
-        expect(phonemizeWord("norsk")).toBe("ˈnɔʂk"); // short o → ɔ, rs → retroflex ʂ
-        expect(phonemizeWord("år")).toBe("ˈoːɾ"); // å → oː
-        expect(phonemizeWord("hånd")).toBe("ˈhɔn"); // å short (nd closes), final d silent
+// Norwegian Bokmål (nb) — North Germanic, Latin, Urban East Norwegian. TWO tiers: an NST pronunciation lexicon
+// (nb-lexicon.tsv, National-Library CC0, ~38k common forms → 98% of real-text tokens, with correct LEXICAL stress)
+// → a rule g2p fallback (phonemizeWordRules: complementary vowel length picks quality, front-vowel softening,
+// retroflexes, silent-d, unstressed ⟨e⟩→ə). Shipped path (lexicon→rules) = 90.4% frequency-weighted vs kaikki
+// (non-circular, NST≠Wiktionary); rules-only floor 63.4%. See docs/investigations/nb_native_bringup_investigation.md.
+describe("Norwegian Bokmål canonical IPA", () => {
+    test("rule engine — vowel quality via complementary length: ⟨o⟩→uː, ⟨u⟩→ʉː, ⟨å⟩→oː", () => {
+        expect(phonemizeWordRules("bok")).toBe("ˈbuːk"); // o → uː (long, open)
+        expect(phonemizeWordRules("hus")).toBe("ˈhʉːs"); // u → ʉː
+        expect(phonemizeWordRules("norsk")).toBe("ˈnɔʂk"); // short o → ɔ, rs → retroflex ʂ
+        expect(phonemizeWordRules("hånd")).toBe("ˈhɔn"); // å short (nd closes), final d silent
+        expect(phonemizeWordRules("år")).toBe("ˈoːɾ"); // å LONG (open syllable) → oː — the other branch of the å split
+        expect(phonemizeWordRules("fôr")).toBe("ˈfuːɾ"); // ô circumflex vowel → uː (loanword vowel letter)
     });
 
-    test("digraphs + softening: sj/skj→ʃ, kj/tj→ç, gj/hj→j, hv→ʋ, sk/k before front", () => {
-        expect(phonemizeWord("sjø")).toBe("ˈʃøː"); // sj → ʃ
-        expect(phonemizeWord("kjøre")).toBe("ˈçøːɾə"); // kj → ç, unstressed e → ə
-        expect(phonemizeWord("gjøre")).toBe("ˈjøːɾə"); // gj → j (word-initial)
-        expect(phonemizeWord("hva")).toBe("ˈʋɑː"); // hv → ʋ
-        expect(phonemizeWord("ski")).toBe("ˈʃiː"); // sk before front i → ʃ
+    test("rule engine — digraphs/softening: sj/skj→ʃ, kj/tj→ç, gj/hj→j, hv→ʋ, sk before front", () => {
+        expect(phonemizeWordRules("sjø")).toBe("ˈʃøː"); // sj → ʃ
+        expect(phonemizeWordRules("kjøre")).toBe("ˈçøːɾə"); // kj → ç, unstressed e → ə
+        expect(phonemizeWordRules("gjøre")).toBe("ˈjøːɾə"); // gj → j (word-initial)
+        expect(phonemizeWordRules("hva")).toBe("ˈʋɑː"); // hv → ʋ
+        expect(phonemizeWordRules("ski")).toBe("ˈʃiː"); // sk before front i → ʃ
     });
 
-    test("retroflex, silent-d, unstressed schwa", () => {
-        expect(phonemizeWord("barn")).toBe("ˈbɑːɳ"); // rn → retroflex ɳ
-        expect(phonemizeWord("god")).toBe("ˈɡuː"); // final d silent
-        expect(phonemizeWord("jord")).toBe("ˈjuːɾ"); // rd → r (d silent), o long
-        expect(phonemizeWord("Bergen")).toBe("ˈbæɾɡən"); // e→æ before r; unstressed e → ə
-        expect(phonemizeWord("idé")).toBe("ˈiːdeː"); // é is an always-long loan vowel (tokenizer keeps it)
-        expect(phonemizeWord("fôr")).toBe("ˈfuːɾ"); // ô → long o
+    test("rule engine — retroflex, silent-d, unstressed schwa, é always-long", () => {
+        expect(phonemizeWordRules("barn")).toBe("ˈbɑːɳ"); // rn → retroflex ɳ
+        expect(phonemizeWordRules("god")).toBe("ˈɡuː"); // final d silent
+        expect(phonemizeWordRules("jord")).toBe("ˈjuːɾ"); // rd → r (d silent), o long
+        expect(phonemizeWordRules("Bergen")).toBe("ˈbæɾɡən"); // e→æ before r; unstressed e → ə
+        expect(phonemizeWordRules("idé")).toBe("ˈiːdeː"); // é always-long (rule form; the lexicon has the true stress)
     });
 
-    test("cardinal numbers", () => {
+    test("lexicon tier — NST pronunciations with correct lexical stress (phonemizeWord)", () => {
+        expect(phonemizeWord("absorbere")).toBe("ɑbsɔɾˈbeːɾə"); // stress on -béː- (the rule engine guesses 1st syllable)
+        expect(phonemizeWord("stasjon")).toBe("stɑˈʃuːn"); // stress on -sjón
+        expect(phonemizeWord("er")).toBe("ˈæːɾ"); // the common verb reading (not the letter-name variant)
+    });
+
+    test("cardinal numbers (via the lexicon)", () => {
         const nb = createNorwegian();
-        expect(nb.text("0").trim()).toBe("ˈnʉlː"); // null
-        expect(nb.text("7").trim()).toBe("ˈʃʉː"); // sju
-        expect(nb.text("100").trim()).toBe("ˈhʉndɾə"); // hundre
-        expect(nb.text("1000").trim()).toBe("ˈtʉːsən"); // tusen
+        expect(nb.text("0").trim()).toBe("ˈnʊl"); // null
+        expect(nb.text("7").trim()).toBe("ˈʃʉː"); // sju (sj → ʃ) — routes through the lexicon as a number word
+        expect(nb.text("100").trim()).toBe("ˈhʊndɾə"); // hundre
+        expect(nb.text("1000").trim()).toBe("ˈtʉːsn"); // tusen (syllabic n)
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈeːt ˈspɾoːk  . ");
+        expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk  . ");
     });
 });
