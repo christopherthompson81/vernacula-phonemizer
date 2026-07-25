@@ -94,6 +94,7 @@ import { createMongolian } from "./languages/mongolian/mongolian.ts";
 import { createUmbundu } from "./languages/umbundu/umbundu.ts";
 import { createCroatian } from "./languages/croatian/croatian.ts";
 import { createDanish } from "./languages/danish/danish.ts";
+import { createFinnish } from "./languages/finnish/finnish.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
@@ -241,6 +242,8 @@ function build(lang: string): Phonemizer {
             return createCroatian();
         case "da":
             return createDanish();
+        case "fi":
+            return createFinnish();
         case "hu":
             return createHungarian();
         case "kmr":

@@ -1,0 +1,64 @@
+// Native canonical-IPA data manifest for Finnish / suomi (fi) — Uralic (Finnic), the Latin orthography,
+// espeak-independent. The national language of Finland (~5.4M). Finnish is one of the most PHONEMICALLY TRANSPARENT
+// orthographies in the world — very nearly one grapheme ↔ one phoneme — so this is a greedy longest-match scan over
+// the grapheme table (finnish.ts) with a small set of code rules: CONSONANT GEMINATION (a doubled consonant → Cː:
+// kukka→kukːɑ, tullut→tulːut), ⟨ng⟩ → ŋː (a long velar nasal: kengät→keŋːæt) and ⟨nk⟩ → ŋk (kunnigas… n→ŋ before k).
+// Signatures:
+//   • 8 vowels — ⟨a⟩=ɑ (BACK), ⟨o⟩=o, ⟨u⟩=u, ⟨y⟩=y, ⟨ä⟩=æ, ⟨ö⟩=ø, ⟨e⟩=e, ⟨i⟩=i; DOUBLING = LENGTH (aa→ɑː, ää→æː …).
+//   • ⟨v⟩=ʋ (labiodental APPROXIMANT, not the fricative), ⟨r⟩=r (alveolar TRILL), ⟨d⟩=d, ⟨j⟩=j, ⟨h⟩=h.
+//   • ⟨g⟩ only in the ⟨ng⟩ digraph (=ŋː) natively; the loan letters b d g f are kept; c q w x z å š ž map to loan values.
+// Consonant GRADATION (kk~k, tt~t, pp~p, nt~nn …) is MORPHOLOGICAL but is already spelled out in the orthography, so
+// the surface g2p needs no gradation logic — it phonemizes the written (graded) form directly. Fixed word-INITIAL
+// primary stress is unwritten and predictable (folded in the referee eval). See docs/investigations/fi_native_bringup_investigation.md.
+{
+    "language": "fi",
+    "name": "Finnish",
+    "script": "Latin",
+    "provenance": "Authored greedy g2p + gemination from the Finnish Latin orthography (near-perfectly phonemic). Referee: en.wiktionary Finnish (HUMAN).",
+
+    "convention": {
+        "vowels": "⟨a⟩=ɑ (BACK), ⟨e⟩=e, ⟨i⟩=i, ⟨o⟩=o, ⟨u⟩=u, ⟨y⟩=y, ⟨ä⟩=æ, ⟨ö⟩=ø",
+        "length": "a doubled vowel is LONG — aa→ɑː, ee→eː, ii→iː, oo→oː, uu→uː, yy→yː, ää→æː, öö→øː",
+        "gemination": "a doubled consonant is a GEMINATE Cː (kukka→kukːɑ, tullut→tulːut, mummo→mumːo) — handled in code",
+        "velarNasal": "⟨ng⟩ = ŋː (a LONG velar nasal: kengät→keŋːæt); ⟨nk⟩ = ŋk (⟨n⟩→ŋ before k) — handled in code",
+        "approximant": "⟨v⟩=ʋ (labiodental approximant), ⟨r⟩=r (alveolar trill), ⟨j⟩=j",
+        "loanLetters": "⟨b d g f⟩ kept as-is; ⟨c⟩=k, ⟨q⟩=k, ⟨w⟩=ʋ, ⟨x⟩=ks, ⟨z⟩=ts, ⟨å⟩=o, ⟨š⟩=ʃ, ⟨ž⟩=ʒ (loanword values)",
+        "stress": "fixed word-INITIAL primary stress — predictable, unwritten → folded in the referee eval (not emitted)"
+    },
+
+    // Vowel DIGRAPHS first (scanner sorts keys LENGTH DESC so they precede singles): long vowels (doubling = length)
+    // + the 18 Finnish DIPHTHONGS (two different vowels in one syllable → the 2nd is the NON-SYLLABIC offglide V̯, per
+    // the wikipron referee: au→ɑu̯, ie→ie̯). Then the 8 vowel singles, then consonants. Gemination + ⟨ng⟩/⟨nk⟩ = code
+    // rules (finnish.ts). (The offglide ̯ and length ː are folded by the eval backbone, so they don't move the score —
+    // they are emitted for canonical-IPA fidelity, which the referee confirms.)
+    "graphemes": {
+        "aa": "ɑː", "ee": "eː", "ii": "iː", "oo": "oː", "uu": "uː", "yy": "yː", "ää": "æː", "öö": "øː",
+        "ai": "ɑi̯", "ei": "ei̯", "oi": "oi̯", "ui": "ui̯", "yi": "yi̯", "äi": "æi̯", "öi": "øi̯",
+        "au": "ɑu̯", "eu": "eu̯", "iu": "iu̯", "ou": "ou̯",
+        "äy": "æy̯", "öy": "øy̯", "ey": "ey̯", "iy": "iy̯",
+        "ie": "ie̯", "uo": "uo̯", "yö": "yø̯",
+        "a": "ɑ", "e": "e", "i": "i", "o": "o", "u": "u", "y": "y", "ä": "æ", "ö": "ø", "å": "o",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k", "l": "l",
+        "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "ʋ", "w": "ʋ",
+        "x": "ks", "z": "ts", "š": "ʃ", "ž": "ʒ"
+    },
+
+    // Cardinal number words (Standard Finnish). units[n] = n-word; partitive magnitude stems for composition.
+    "numbers": {
+        "zero": "nolla",
+        "units": ["", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän"],
+        "ten": "kymmenen",
+        "tensStem": "kymmentä",
+        "teenSuffix": "toista",
+        "hundred": "sata",
+        "hundredStem": "sataa",
+        "thousand": "tuhat",
+        "thousandStem": "tuhatta",
+        "million": "miljoona",
+        "millionStem": "miljoonaa"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    }
+}
