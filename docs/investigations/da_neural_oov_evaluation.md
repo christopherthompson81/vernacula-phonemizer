@@ -1,5 +1,10 @@
 # Danish OOV — should the shipped perceptron become a BiLSTM? (the referee-noise re-evaluation)
 
+> **SUPERSEDED (2026-07-25).** The "keep the perceptron" verdict below was correct *for the 7.5k Wiktionary lexicon*
+> (data-starved BiLSTM). It **flipped** once the ~199k NST lexicon (CC0) removed the data starvation: the BiLSTM now
+> scores 73.4% word / 95.7% symbol held-out and ships as the OOV tier (the perceptron is deleted). See
+> `da_nst_ingest_investigation.md`.
+
 Context: bn/nb/en/fr all replaced their OOV tier (rule / joint-n-gram / perceptron) with a per-grapheme BiLSTM and
 roughly HALVED the phone-error-rate. Danish is the ONE language still shipping an averaged-perceptron OOV tier
 (`danish/tagger.ts`, `da-g2p.tsv`, SYNC, in the default path: lexicon → perceptron → rule). Prompt: the perceptron's

@@ -15,33 +15,13 @@
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createWordStructuralTagger, type WordStructuralTagger } from "../../core/structuralTagger.ts";
+import { createWordStructuralTagger, oneStress, type WordStructuralTagger } from "../../core/structuralTagger.ts";
 
 export type NorwegianTagger = WordStructuralTagger;
 
-const VOWEL = /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u; // the same vowel-phoneme set the rule engine uses for stress placement
-
-/**
- * Enforce EXACTLY ONE primary stress on the concatenated per-letter tags. The tag alphabet embeds ˈ, but the
- * per-position argmax has no global stress constraint, so the raw output can carry adjacent-doubled (`ˈˈ`), zero, or
- * two primary marks (paella→`pɑˈˈɛlɑ`, entrepreneur→no ˈ, cappuccino→two). The lexicon and rule tiers both guarantee a
- * single ˈ; this makes the tagger output convention-consistent so the shipped OOV IPA never violates it. Keep the
- * FIRST primary and drop later ones (over-emitted; legitimately-emitted secondary ˌ are kept); if none survives,
- * promote the first secondary, else place ˈ before the first vowel's onset (the rule-engine default).
- */
-export function oneStress(ipa: string): string {
-    // collapse any run of adjacent stress marks to one (primary wins): ˈˈ / ˈˌ / ˌˈ → ˈ, ˌˌ → ˌ
-    ipa = ipa.replace(/[ˈˌ]{2,}/gu, (m) => (m.includes("ˈ") ? "ˈ" : "ˌ"));
-    let seen = false;
-    ipa = ipa.replace(/ˈ/gu, () => (seen ? "" : ((seen = true), "ˈ"))); // keep the first ˈ, drop the rest
-    if (seen) return ipa;
-    if (ipa.includes("ˌ")) return ipa.replace("ˌ", "ˈ"); // no primary → promote the first secondary
-    const m = VOWEL.exec(ipa); // still none → ˈ before the first vowel's onset (matches phonemizeWordRules)
-    if (!m) return ipa;
-    let onset = m.index;
-    while (onset > 0 && !VOWEL.test(ipa[onset - 1]!)) onset--;
-    return ipa.slice(0, onset) + "ˈ" + ipa.slice(onset);
-}
+// The vowel-phoneme set the rule engine uses for stress placement — passed to the shared `oneStress` so its no-stress
+// fallback places ˈ before the first Norwegian vowel (unchanged from the pre-shared behaviour).
+const VOWEL = /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u;
 
 /** Build the Norwegian OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise<NorwegianTagger | undefined> {
@@ -55,6 +35,6 @@ export function createNorwegianTagger(basename = "nb-g2p-tagger"): Promise<Norwe
         // covers every letter the nb TOKEN/WORD class admits, so the decline is unreachable via phonemizeNbNeural — it
         // is the defensive guard for a caller handing tag() foreign graphemes, and the net if that class is widened.
         preprocess: (w) => w.toLowerCase().normalize("NFC"),
-        postprocess: oneStress, // guarantee exactly one primary ˈ (the lexicon/rule tiers' invariant)
+        postprocess: (ipa) => oneStress(ipa, VOWEL), // guarantee exactly one primary ˈ (the lexicon/rule tiers' invariant)
     });
 }
