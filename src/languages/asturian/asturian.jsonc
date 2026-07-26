@@ -1,0 +1,27 @@
+// Native canonical-IPA data manifest for Asturian (ast) — asturianu, Astur-Leonese (Ibero-Romance), Asturias/NW Spain
+// (~110k). espeak-independent, beyond-espeak (added for FLEURS). Close to Spanish/Galician (distinción c/z→[θ]). The
+// Asturian hallmark: ⟨x⟩→[ʃ] (Asturian writes ⟨x⟩ for the fricative → ⟨g⟩ stays [ɡ], ⟨j⟩→[h]). ⟨ll⟩→ʎ, ⟨ñ⟩→ɲ,
+// ⟨ch⟩→t͡ʃ, ⟨y⟩→ʝ. Stress + spirantization folded. Engine: asturian.ts. See docs/investigations/ast_native_bringup_investigation.md.
+{
+    "language": "ast",
+    "name": "Asturian (asturianu)",
+    "script": "Latin",
+
+    // Digraphs, scanned LONGEST-FIRST: ⟨ll⟩→[ʎ], ⟨ch⟩→[t͡ʃ], ⟨rr⟩→[r] (trill). ⟨qu gu gü⟩ are handled in code
+    // (context-dependent), as are the ⟨c⟩→[θ] softening and the ⟨i u⟩ rising glides.
+    "digraphs": { "ll": "ʎ", "ch": "t͡ʃ", "rr": "r", "ḷḷ": "t͡ʂ" },
+
+    // Single grapheme → canonical IPA (BASE values; ⟨c⟩→[θ], the ⟨qu gu⟩ clusters, and the glides are applied in
+    // code). ⟨x⟩→ʃ, ⟨j⟩→h, ⟨z⟩→θ, ⟨ñ⟩→ɲ, ⟨y⟩→ʝ, ⟨v⟩→b (betacism), ⟨h⟩ silent. Accented vowels á é í ó ú → a e i o u.
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ï": "i",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "", "j": "h", "k": "k",
+        "l": "l", "m": "m", "n": "n", "ñ": "ɲ", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
+        "v": "b", "w": "w", "x": "ʃ", "y": "ʝ", "z": "θ", "ḥ": "h"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
