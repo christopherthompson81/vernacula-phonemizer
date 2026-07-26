@@ -1,0 +1,29 @@
+// Native canonical-IPA data manifest for Occitan (oc) — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance) of
+// southern France (~200k). Targets LANGUEDOCIEN (the central reference standard). espeak-independent, beyond-espeak.
+// Signature: final unstressed ⟨a⟩→[ɔ], unstressed ⟨o⟩→[u], ⟨u⟩→[y]; ⟨lh⟩→ʎ, ⟨nh⟩→ɲ, ⟨ch⟩→t͡ʃ. Spirantization +
+// stress folded. Engine: occitan.ts. See docs/investigations/oc_native_bringup_investigation.md.
+{
+    "language": "oc",
+    "name": "Occitan (occitan)",
+    "script": "Latin",
+
+    // Multi-letter graphemes, scanned LONGEST-FIRST. Digraphs ⟨lh nh ch⟩; ⟨qu gu⟩ before a front vowel = [k ɡ];
+    // diphthong offglides ⟨u⟩→[w] and ⟨i⟩→[j] are handled in code (context-dependent).
+    "digraphs": {
+        "lh": "ʎ", "nh": "ɲ", "ch": "t͡ʃ", "tg": "d͡ʒ", "tj": "d͡ʒ", "tz": "t͡s", "rr": "r", "ss": "s"
+    },
+
+    // Single grapheme → canonical IPA (BASE values; the ⟨c g⟩ softening, ⟨o⟩→[u], final-⟨a⟩→[ɔ], intervocalic ⟨s⟩→[z],
+    // and the offglides are applied in code). ⟨v⟩→b (betacism), ⟨u⟩→y, accented vowels á→a é→e í→i ó→u ú→y à→a è→ɛ ò→ɔ.
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "u", "u": "y",
+        "á": "a", "é": "e", "í": "i", "ó": "u", "ú": "y", "à": "a", "è": "ɛ", "ò": "ɔ", "ï": "i", "ü": "y",
+        "b": "b", "c": "k", "ç": "s", "d": "d", "f": "f", "g": "ɡ", "h": "", "j": "d͡ʒ",
+        "k": "k", "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
+        "v": "b", "w": "w", "x": "ks", "y": "i", "z": "z"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
