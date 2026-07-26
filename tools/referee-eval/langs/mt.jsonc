@@ -1,0 +1,22 @@
+// Maltese (mt) — Semitic (Central), Latin script. Referee: wikipron mlt_latn_broad (HUMAN, CUNY-CL/wikipron, 15,837
+// headwords — LARGE). `segmentJoin` strips the per-phone spaces. Maltese is fairly phonemic at the SEGMENT level (the
+// distinctive consonants ċ→t͡ʃ ġ→d͡ʒ ħ→ħ q→ʔ x→ʃ z→t͡s ż→z + final devoicing are compared directly), but the vowel
+// LENGTH (~half the referee's lines carry ː) is STRESS-CONDITIONED (Arabic-style weight) + comes from the silent
+// letters ⟨għ h⟩ — a full model needs the weight-based stress rule (deferred) → we emit the short-vowel skeleton and
+// FOLD the length. The ⟨-ija⟩ hiatus/glide + ⟨għ⟩-pharyngealization variants are merged per-headword. See docs/investigations/mt_native_bringup_investigation.md.
+{
+    "language": "mt", "name": "Maltese (Malti)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (q→ʔ, ċ/ġ/ħ/x/z/ż, silent għ/h + final [ħ], final devoicing + regressive voicing + n→m) from Maltese phonology; validated against the wikipron mlt_latn_broad referee (15,837 human headwords, variants merged).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "mt.wikipron-mlt-broad.tsv", "source": "wikipron mlt_latn_broad (Wiktionary-scraped, human, 15837 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron mlt_latn_broad, human) — LARGE. No kaikki per-language dump / epitran mlt referee committed. The consonant map (q→ʔ, ċ/ġ/ħ, z/ż, final devoicing, silent għ/h) is the standard Maltese phonology (Borg & Azzopardi-Alexander 1997 / Wikipedia), attested across thousands of aligned tokens; the vowel LENGTH (stress-conditioned + weight-based) is deferred → folded.",
+    "folds": [
+        { "pattern": "ː", "replace": "", "note": "vowel LENGTH: ~half the referee carries ː — it is STRESS-CONDITIONED (a stressed vowel lengthens in an open syllable, the Arabic-style weight rule) + from the silent ⟨għ h⟩ + ⟨ie⟩; a full model needs the deferred weight-based stress → we emit the short-vowel skeleton and strip length on both sides" },
+        { "pattern": "ˤ", "replace": "", "note": "PHARYNGEALIZATION: ⟨għ⟩ (historically /ʕ/) leaves a pharyngealized colouring [aˤ] in the careful/narrow referee variants (għamel→aˤːmɛl); we emit għ silent → strip the ˤ" },
+        { "pattern": "ɣ", "replace": "", "note": "⟨għ⟩ realized as [ɣ] in the most careful referee variants (belgħa→bɛlɣa); we emit it silent → strip (the vowel-length + ˤ variants are the norm)" },
+        { "pattern": "ɪ", "replace": "i", "note": "short ⟨i⟩ = [ɪ] ~ [i]: the referee writes both (Abdilla→abdɪlla vs some [i]); fold to compare — the long ⟨ie/iː⟩ is already length-stripped" },
+        { "pattern": "ʊ", "replace": "u", "note": "short ⟨u⟩ = [ʊ] ~ [u]: the referee writes both" }
+    ]
+}

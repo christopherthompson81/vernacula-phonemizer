@@ -89,6 +89,7 @@ import { createTigrinya } from "./languages/tigrinya/tigrinya.ts";
 import { createBulgarian } from "./languages/bulgarian/bulgarian.ts";
 import { createMacedonian } from "./languages/macedonian/macedonian.ts";
 import { createKabuverdianu } from "./languages/kabuverdianu/kabuverdianu.ts";
+import { createMaltese } from "./languages/maltese/maltese.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -389,6 +390,9 @@ function build(lang: string): Phonemizer {
         // Kabuverdianu (kriolu) — Portuguese-lexified creole of Cape Verde; ALUPEC phonemic g2p + nasalization.
         case "kea":
             return createKabuverdianu();
+        // Maltese (Malti) — Semitic in the Latin alphabet; grapheme g2p + q→ʔ + final devoicing + silent għ/h.
+        case "mt":
+            return createMaltese();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
