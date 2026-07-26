@@ -1,0 +1,31 @@
+// Native canonical-IPA data manifest for Kabuverdianu (kea) — kriolu, a Portuguese-lexified creole of Cape Verde
+// (~870k), espeak-independent. Written in the ALUPEC/AK unified orthography (a standardized PHONEMIC alphabet), so
+// the engine (kabuverdianu.ts) is a greedy grapheme scan (digraphs first) + Portuguese-creole NASALIZATION + stress
+// (accent-or-penult). Targets the SANTIAGO (Sotavento/Badiu) variety (what the anchor pronunciations attest). No
+// machine referee exists → authored from ALUPEC + the 7 kaikki IPA words (test/kabuverdianu.test.ts). Format: plain
+// JSONC. See docs/investigations/kea_native_bringup_investigation.md.
+{
+    "language": "kea",
+    "name": "Kabuverdianu (kriolu)",
+    "script": "Latin",
+
+    // Digraphs (matched before single letters): ⟨dj tx nh lh⟩ + ⟨rr⟩ trill + ⟨ch⟩ (Portuguese-spelling loans).
+    "digraphs": { "dj": "d͡ʒ", "tx": "t͡ʃ", "nh": "ɲ", "lh": "ʎ", "rr": "r", "ch": "t͡ʃ" },
+
+    // Single grapheme → canonical IPA. The acute marks the OPEN mid quality (é→ɛ, ó→ɔ) + stress; ⟨h⟩ is silent ("");
+    // ⟨s⟩ is always [s] (ALUPEC writes ⟨z⟩ for [z]); ⟨r⟩ is the tap [ɾ]. Non-ALUPEC loan letters (c q w y) nativized.
+    "graphemes": {
+        "a": "ɐ", "á": "ɐ", "à": "ɐ", "â": "ɐ",
+        "e": "e", "é": "ɛ", "è": "ɛ", "ê": "e",
+        "i": "i", "í": "i", "î": "i",
+        "o": "o", "ó": "ɔ", "ò": "ɔ", "ô": "o",
+        "u": "u", "ú": "u", "û": "u",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "", "j": "ʒ", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
+        "v": "v", "w": "v", "x": "ʃ", "y": "i", "z": "z",
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
