@@ -23,9 +23,9 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-136 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
-Austronesian, Baltic, Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
-Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Sinitic, Slavic, Tai-Kadai,
+136 languages spanning Armenian, Austroasiatic,
+Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
+Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
@@ -36,15 +36,16 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 
 | Family / area | Languages |
 |---|---|
-| Afroasiatic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hausa `ha`, Hebrew `he`, Oromo `om`, Somali `so` |
 | Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
 | Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
 | Baltic | Lithuanian `lt` (palatalization + lexical pitch accent) |
 | Celtic | Irish `ga`, Welsh `cy` |
+| Chadic | Hausa `ha` |
 | Creole (English-lexified) | Nigerian Pidgin `pcm` |
+| Cushitic | Oromo `om`, Somali `so` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
-| Germanic | Afrikaans `af`, Danish `da`, Dutch `nl`, English `en` (+ `en-GB` accent variant), German `de`, Swedish `sv` (tonal accent) |
+| Germanic | Afrikaans `af`, Danish `da`, Dutch `nl`, English `en` (+ `en-GB`, `en-IN` accent variants), German `de`, Norwegian `nb` (Bokmål), Swedish `sv` (tonal accent) |
 | Hellenic | Greek `el` |
 | Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Chhattisgarhi `hne`, Gujarati `gu`, Haryanvi `bgc`, Hindi `hi`, Magahi `mag`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Sylheti `syl`, Urdu `ur` |
 | Iranian | Balochi `bal`, Central Kurdish `ckb` (Sorani), Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa`, Tajik `tg` |
@@ -54,7 +55,8 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
-| Romance | Catalan `ca`, French `fr`, Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
+| Romance | Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
+| Semitic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hebrew `he` |
 | Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
 | Slavic | Belarusian `be`, Bosnian `bs`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Slovenian `sl`, Ukrainian `uk` |
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
@@ -68,7 +70,7 @@ CLOTH, yod-retention, GOAT/NURSE/centring vowels), applied as an output post-pro
 Portuguese engine parameterized for Brazilian realization (position-split reduction, /t d/→t͡ʃ/d͡ʒ before [i],
 coda-l→[w], coda-s→[s]) — a deeper delta that lives inside the engine, since EP vowel reduction can't be undone
 downstream. Legitimate because each uses the parent's community-adopted orthography and a referee-verifiable
-delta; the pattern extends to en-IN.
+delta; the same pattern covers `en-IN` (General Indian English) and `fr-CA` (Québécois French).
 
 ## How it works
 
