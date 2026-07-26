@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **139 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **140 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,10 +23,10 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-139 languages spanning Armenian, Austroasiatic,
+140 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
-Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
+Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
@@ -42,7 +42,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Chadic | Hausa `ha` |
-| Creole (English-lexified) | Nigerian Pidgin `pcm` |
+| Creole | Kabuverdianu `kea` (Portuguese-lexified), Nigerian Pidgin `pcm` (English-lexified) |
 | Cushitic | Oromo `om`, Somali `so` |
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
 | Germanic | Afrikaans `af`, Danish `da`, Dutch `nl`, English `en` (+ `en-GB`, `en-IN` accent variants), German `de`, Norwegian `nb` (Bokmål), Swedish `sv` (tonal accent) |
