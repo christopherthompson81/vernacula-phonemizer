@@ -18,7 +18,7 @@ ars	Najdi Arabic	Semitic (Arabic)	Arabic	30000000						unimplemented	data scarci
 ary	Moroccan Arabic	Semitic (Arabic)	Arabic	29000000						implemented		🟡				0
 arz	Egyptian Arabic	Semitic (Arabic)	Arabic	78000000	25000000					implemented		🟡				1
 as	Assamese	Indo-Aryan (Eastern)	Eastern Nagari (Assamese)	15000000						implemented		🟡				1
-ast	Asturian	Romance	Latin	110000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+ast	Asturian	Romance	Latin	110000					0	implemented		🔷			Astur-Leonese (Ibero-Romance), Asturias/NW Spain (~110k), beyond-espeak, added for FLEURS. Close to Spanish/Galician (distinción c/z→[θ]). Greedy Ibero-Romance scan: the Asturian hallmark ⟨x⟩→[ʃ] (Asturian writes ⟨x⟩ for the fricative → ⟨g⟩ stays [ɡ], ⟨j⟩→[h]); ⟨ll⟩→ʎ ⟨ñ⟩→ɲ ⟨ch⟩→t͡ʃ ⟨y⟩→ʝ(onset)/[i](coda) ⟨v⟩→b; ⟨qu gu⟩→[k ɡ]/[ɡw]; rising glides i→j u→w; ⟨pt ct⟩→[t]; Western dialect letters ⟨ḥ⟩→h ⟨ḷḷ⟩→t͡ʂ (che vaqueira); tap ⟨r⟩→ɾ vs trill ⟨rr⟩/initial→r. NO final-consonant deletion. 99.0% FOLDED / 99.8% symbol vs wikipron ast_latn_broad (4170 human; 97.6% first pass). Folds: stress (unmarked), spirantization β/ð/ɣ→b/d/ɡ, rhotic tap/trill. Residual = stress-conditioned hiatus glides (Llión→ʎion) + loan finals + letter-name rows. 🔷 single source. Deferred: stress/hiatus model, numbers. See docs/investigations/ast_native_bringup_investigation.md.	1
 awa	Awadhi	Indo-Aryan	Devanagari	38000000						implemented		🔷				0
 ayl	Libyan Arabic									implemented		🟡				0
 az	Azerbaijani (North)	Turkic (Oghuz)	Latin	23000000						implemented		✅				1

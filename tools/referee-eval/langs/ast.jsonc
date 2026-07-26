@@ -1,0 +1,20 @@
+// Asturian (ast) — Astur-Leonese (Ibero-Romance), Latin script. Referee: wikipron ast_latn_broad (HUMAN, 4170
+// headwords, variants merged). `segmentJoin` strips the per-phone spaces. Close to Spanish/Galician (distinción
+// c/z→[θ]); the Asturian hallmark ⟨x⟩→[ʃ]. STRESS (written accents + the Ibero rule) is folded — the referee marks
+// none; SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ) is folded to the stops. See docs/investigations/ast_native_bringup_investigation.md.
+{
+    "language": "ast", "name": "Asturian (asturianu)", "script": "Latin",
+    "provenance": "Authored Ibero-Romance grapheme→IPA g2p (⟨x⟩→ʃ, distinción ⟨c z⟩→θ, ⟨ll⟩→ʎ ⟨ñ⟩→ɲ ⟨ch⟩→t͡ʃ ⟨y⟩→ʝ ⟨j⟩→h ⟨v⟩→b, ⟨qu gu gü⟩, the i/u rising glides, tap/trill r) from Asturian phonology; validated against the wikipron ast_latn_broad (4170) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "ast.wikipron-ast-broad.tsv", "source": "wikipron ast_latn_broad (Wiktionary-scraped, human, 4170 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron ast_latn_broad, human, 4170). kaikki Asturian is a candidate 2nd but not committed. The map is the standard Asturian phonology (Academia de la Llingua Asturiana norm); stress + spirantization are folded.",
+    "folds": [
+        { "pattern": "β", "replace": "b", "note": "SPIRANTIZATION: intervocalic ⟨b v⟩→[β] is allophonic; we emit the stop [b], fold if the referee marks it" },
+        { "pattern": "ð", "replace": "d", "note": "intervocalic ⟨d⟩→[ð] spirantization → fold to [d]" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "intervocalic ⟨g⟩→[ɣ] spirantization → fold to [ɡ]" },
+        { "pattern": "r", "replace": "ɾ", "note": "the tap [ɾ] vs trill [r] — the broad referee is inconsistent on the trill (rr/word-initial); fold to one rhotic" },
+        { "pattern": "ʂ", "replace": "s", "note": "the Western-Asturian ⟨ḷḷ⟩ = the che vaqueira [t͡ʂ]~[ts]; we emit [t͡ʂ], fold the retroflex ʂ→s to compare (referee writes both)" }
+    ]
+}
