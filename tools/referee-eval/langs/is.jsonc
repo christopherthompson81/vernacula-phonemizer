@@ -1,0 +1,25 @@
+// Icelandic (is) — North Germanic (Insular), Latin script. Referee: wikipron isl_latn_broad (HUMAN, 10,093 headwords
+// — LARGE, variants merged). `segmentJoin` strips the per-phone spaces. Icelandic has NO voicing contrast in stops —
+// the contrast is ASPIRATION (pre- and post-), which is FOLDED in run 1 (the ʰ modifier + the neutralized ⟨b d g⟩/
+// ⟨p t k⟩ → [p t k]); vowel LENGTH (ː, syllable-quantity) is folded (the Germanic call); DEVOICED SONORANTS (r̥ l̥ n̥,
+// the combining ring) auto-strip in the backbone. Segments (vowels, the epenthetic-stop clusters ⟨ll⟩→tl etc., þ/ð,
+// f→v/p) are compared directly. See docs/investigations/is_native_bringup_investigation.md.
+{
+    "language": "is", "name": "Icelandic (íslenska)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (fortis/lenis neutralization ⟨b d g⟩/⟨p t k⟩→[p t k], ⟨k g⟩→[c] before a front vowel, intervocalic ⟨g⟩→[ɣ], the epenthetic-stop clusters ⟨ll⟩→tl ⟨rl⟩→rtl ⟨rn⟩→rtn, ⟨nn⟩→tn after a long vowel, ⟨f⟩→v/p, the vowels á→au é→jɛ ó→ou u→ʏ æ→ai au→øy) from Icelandic phonology; validated against the wikipron isl_latn_broad (10,093) human referee. Aspiration + length folded.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "is.wikipron-isl-broad.tsv", "source": "wikipron isl_latn_broad (Wiktionary-scraped, human, 10093 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron isl_latn_broad, human) — LARGE. No kaikki isl / epitran committed. The consonant + vowel maps are the standard Icelandic phonology (Árnason 2011 / Wikipedia); ASPIRATION (the phonemic pre/post-aspiration) + vowel LENGTH are folded in run 1 → the segment skeleton is compared.",
+    "folds": [
+        { "pattern": "ː", "replace": "", "note": "vowel LENGTH: syllable-quantity-conditioned (a stressed vowel is long in an open syllable) — the Germanic weight rule, deferred → strip ː on both sides" },
+        { "pattern": "ʰ", "replace": "", "note": "ASPIRATION (post-aspirated [tʰ] + PRE-aspirated [ʰt]): phonemic in Icelandic but positional; folded in run 1 so the neutralized stops ⟨b d g⟩/⟨p t k⟩→[p t k] compare — the deferred aspiration model is the main outstanding work" },
+        { "pattern": "ɛ", "replace": "e", "note": "the short/long mid ⟨e⟩ is written [ɛ]~[e]; fold" },
+        { "pattern": "ɔ", "replace": "o", "note": "the short ⟨o⟩ is written [ɔ]~[o]; fold (⟨ó⟩→[ou] is a separate diphthong)" },
+        { "pattern": "ʏ", "replace": "y", "note": "the short ⟨u⟩ = [ʏ]~[y]; fold" },
+        { "pattern": "r̥", "replace": "r", "note": "DEVOICED ⟨r⟩ (before a voiceless stop / word-final): the ring is a combining mark (auto-stripped), listed for clarity" },
+        { "pattern": "⁽", "replace": "", "note": "the referee marks OPTIONAL preaspiration on the epenthetic-cluster stop with superscript parens ⁽ʰ⁾ (Örn→œrt⁽ʰ⁾n); strip the paren (the ʰ inside is already folded)" },
+        { "pattern": "⁾", "replace": "", "note": "closing half of the optional-preaspiration superscript parens" }
+    ]
+}
