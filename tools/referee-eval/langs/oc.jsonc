@@ -1,0 +1,27 @@
+// Occitan (oc) — Occitano-Romance (Gallo-Romance), Latin script. Referee: wikipron oci_latn_broad (HUMAN, 675
+// headwords — SMALL + DIALECT-MIXED, variants merged). `segmentJoin` strips the per-phone spaces. We target
+// LANGUEDOCIEN; the referee mixes dialects (final-⟨a⟩ o~ɔ~o̞~ɒ~a, rhotic ɾ~r~ʁ, ch t͡ʃ~t͡s) → folded. SPIRANTIZATION
+// (intervocalic b/d/g→β/ð/ɣ, allophonic + dialect-variable) is folded to the stops. See docs/investigations/oc_native_bringup_investigation.md.
+{
+    "language": "oc", "name": "Occitan (occitan)", "script": "Latin",
+    "provenance": "Authored Languedocien grapheme→IPA g2p (unstressed ⟨o⟩→[u], final ⟨a⟩→[ɔ], ⟨u⟩→[y]/[w], ⟨c g⟩ softening, ⟨lh⟩→ʎ ⟨nh⟩→ɲ ⟨ch⟩→t͡ʃ ⟨j⟩→d͡ʒ ⟨v⟩→b, intervocalic ⟨s⟩→z) from Occitan phonology; validated against the wikipron oci_latn_broad (675, dialect-mixed) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "oc.wikipron-oci-broad.tsv", "source": "wikipron oci_latn_broad (Wiktionary-scraped, human, 675 headwords, dialect-mixed, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single SMALL + DIALECT-MIXED source (wikipron oci_latn_broad, 675). kaikki Occitan (1136 IPA) is explicitly Béarn/Niçard dialect-tagged → NOT a clean Languedocien referee. The g2p is the standard Languedocien phonology (Wheeler / Wikipedia); the dialect vowel/rhotic spread + spirantization are folded.",
+    "folds": [
+        { "pattern": "o̞", "replace": "ɔ", "note": "final unstressed ⟨a⟩ is realized [o]~[ɔ]~[o̞]~[ɒ]~[a] across dialects; we emit [ɔ], fold the spread" },
+        { "pattern": "o", "replace": "ɔ", "note": "same final-⟨a⟩ / mid-o spread → [ɔ]; ⟨o⟩→[u] is handled separately so mid [o] here is the dialect final-a" },
+        { "pattern": "ɒ", "replace": "ɔ", "note": "final-⟨a⟩ dialect variant → [ɔ]" },
+        { "pattern": "ʁ", "replace": "ɾ", "note": "the rhotic is written ɾ ~ r ~ ʁ across dialects (Marròc→marɔk ~ maʁɔk); fold to the tap [ɾ]" },
+        { "pattern": "r", "replace": "ɾ", "note": "trill ⟨rr⟩/initial [r] vs tap [ɾ] — the referee is inconsistent; fold to one rhotic" },
+        { "pattern": "β", "replace": "b", "note": "SPIRANTIZATION: intervocalic ⟨b v⟩→[β] (Estève→estɛβe) is allophonic + dialect-variable; we emit the stop [b], fold" },
+        { "pattern": "ð", "replace": "d", "note": "intervocalic ⟨d⟩→[ð] (vida→bið-) spirantization → fold to [d]" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "intervocalic ⟨g⟩→[ɣ] (Lengadòc→…ɣ-) spirantization → fold to [ɡ]" },
+        { "pattern": "t͡s", "replace": "t͡ʃ", "note": "⟨ch⟩ = [t͡ʃ]~[t͡s] across dialects (Charanta→t͡saɾantɔ); fold to [t͡ʃ]" },
+        { "pattern": "ʎ", "replace": "j", "note": "⟨lh⟩ = [ʎ]~[j] (Marselha→maɾsejɔ, yod in many dialects); fold ʎ→j" },
+        { "pattern": "d͡ʒ", "replace": "ʒ", "note": "⟨j⟩/⟨g⟩ before front = [d͡ʒ]~[ʒ] across dialects; fold the affricate → the fricative [ʒ] on BOTH sides (folding ʒ→d͡ʒ instead would corrupt an existing d͡ʒ into dd͡ʒ)" },
+        { "pattern": "ə", "replace": "e", "note": "unstressed ⟨e⟩ = [e]~[ə] in some dialects; fold" }
+    ]
+}
