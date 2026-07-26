@@ -15,6 +15,7 @@
     "folds": [
         { "pattern": "ː", "replace": "", "note": "vowel LENGTH: Luxembourgish length is largely open/closed-syllable-conditioned (Kaz→kaːts) + from vowel doubling (aa/ee/oo) — a full model needs the deferred syllable-weight rule → emit the segment skeleton, strip ː on both sides" },
         { "pattern": "ʀ", "replace": "r", "note": "the rhotic is written [r]~[ʀ] freely in the referee (Aarmut→aːrmut ~ aːʀmut); fold to one" },
+        { "pattern": "ʁ", "replace": "r", "note": "the rhotic is ALSO written [ʁ] (uvular fricative) — the same phoneme, referee-inconsistent (r ~ ʀ ~ ʁ); fold all to r" },
         { "pattern": "ɑ", "replace": "a", "note": "short ⟨a⟩ = [a]~[ɑ]: the referee writes both (Hand→hant vs Matt→mɑt), and the ⟨ei/ai⟩ diphthong nucleus is [a]~[ɑ] (Leit→lɑɪ̯t); fold to one" },
         { "pattern": "ɪ", "replace": "i", "note": "the ⟨ei/ai⟩ diphthong offglide + short ⟨i⟩ = [i]~[ɪ] (Leit→lɑɪ̯t); fold" },
         { "pattern": "ʊ", "replace": "u", "note": "the ⟨au/ou⟩ diphthong offglide = [u]~[ʊ] (Schoul→ʃəʊ̯l); fold" },

@@ -46,6 +46,12 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
         expect(phonemizeWord("Alg")).toBe("alk"); // final ⟨g⟩ → k after a consonant ("alga")
     });
 
+    test("⟨n⟩→[ŋ] before a velar + intervocalic g-spirantization ⟨g⟩→[ʁ]", () => {
+        expect(phonemizeWord("Bankrott")).toBe("baŋkrot"); // n→ŋ before [k] ("bankruptcy")
+        expect(phonemizeWord("Lager")).toBe("laʁər"); // intervocalic ⟨g⟩ → [ʁ] ("camp/store")
+        expect(phonemizeWord("Dag")).toBe("daχ"); // word-final ⟨g⟩ still → [χ] (not spirantized)
+    });
+
     test("clause assembly", () => {
         expect(lb.text("Ech schwätzen Lëtzebuergesch.").trim()).toBe("æχ ʃvæt͡sən lət͡səbuərɡəʃ .");
     });
