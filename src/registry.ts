@@ -99,6 +99,7 @@ import { createMongolian } from "./languages/mongolian/mongolian.ts";
 import { createUmbundu } from "./languages/umbundu/umbundu.ts";
 import { createCroatian } from "./languages/croatian/croatian.ts";
 import { createBosnian } from "./languages/bosnian/bosnian.ts";
+import { createSlovenian } from "./languages/slovenian/slovenian.ts";
 import { createDanish } from "./languages/danish/danish.ts";
 import { createFinnish } from "./languages/finnish/finnish.ts";
 import { createSlovak } from "./languages/slovak/slovak.ts";
@@ -257,6 +258,10 @@ function build(lang: string): Phonemizer {
             return createCroatian();
         case "bs":
             return createBosnian();
+        // Slovenian (slovenščina) — South Slavic, its OWN engine (not the BCS shared g2p): l-vocalization (coda ⟨l⟩→ʋ),
+        // ⟨lj/nj⟩ coda-j-drop, syllabic-r→ər, voicing/devoicing; vowel quality/length/pitch/schwa unwritten → folded.
+        case "sl":
+            return createSlovenian();
         case "da":
             return createDanish();
         case "fi":

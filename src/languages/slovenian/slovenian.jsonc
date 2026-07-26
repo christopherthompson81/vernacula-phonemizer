@@ -1,0 +1,73 @@
+// Native canonical-IPA data manifest for Slovenian (sl) — slovenščina, South Slavic (~2.5M), espeak-independent.
+// Slovene is NOT part of the Serbo-Croatian shared engine — it has its own phonology (l-vocalization, schwa,
+// no ć/đ/lj-nj palatal phonemes). The engine reuses the SLOVAK shape (scan → syllabic → voicing pipeline: regressive
+// voicing assimilation + word-final devoicing are the shared Slavic machinery), dropping Slovak's palatalization and
+// vowel-length letters. Slovene-specific rules (in g2p.ts): ⟨l⟩-vocalization (coda ⟨l⟩→ʋ), ⟨lj/nj⟩ (→l+j/n+j before a
+// vowel, →l/n in coda), syllabic ⟨r⟩→ər, ⟨v⟩→ʋ.
+//   g2p.ts       — the scan (digraphs, l-vocalization, lj/nj, syllabic-r), then voicing/devoicing
+//   slovenian.ts — assembly (NO stress mark: Slovene stress is free/lexical → deferred), tokenizer
+//   numbers.ts   — the cardinal compositor (Germanic-style unit-in-ten inversion: 21 = enaindvajset)
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/sl_native_bringup_investigation.md.
+{
+    "language": "sl",
+    "name": "Slovenian (slovenščina)",
+    "script": "Latin",
+    "provenance": "Authored rule-based g2p (Slovak-shaped scan + Slovene l-vocalization / lj-nj / syllabic-r + voicing) from Slovene phonology; the rules derived empirically from the wikipron slv_latn_broad referee (5,177 headwords). No lexicon.",
+
+    "convention": {
+        "vowels": "a e i o u → a ɛ i ɔ u (open-mid ɛ/ɔ default; the close+long [eː oː] are stress-conditioned + unwritten → folded)",
+        "schwa": "morphological [ə] is unwritten (the same ⟨e⟩ is [e]/[ɛ]/[ə] by stress+morphology) → we emit ɛ and fold; only the syllabic-r schwa (prst→pərst) is rule-emitted",
+        "lVocalization": "DEFERRED — coda ⟨l⟩-vocalization (bel→bɛʋ) is LEXICAL (native vocalizes, loans keep [l]: Balkan→balkan); a blanket rule was net -2pp on the name-heavy referee → ⟨l⟩=[l] default, vocalization needs a lexicon",
+        "ljnj": "⟨lj⟩/⟨nj⟩ → l+j / n+j before a vowel (polje→pɔljɛ); the j drops in coda/final (kralj→kral, konj→kɔn)",
+        "v": "⟨v⟩ → ʋ everywhere (the coda [w]/[u̯] realization is narrow → folded); ʋ is sonorant-inert to voicing",
+        "syllabicR": "⟨r⟩ with no vowel neighbour → ər (prst→pərst, vrt→ʋərt)",
+        "voicing": "regressive assimilation within obstruent clusters + word-final devoicing (grad→ɡrat, glasba→ɡlazba)",
+        "stress": "free/lexical + unwritten → NOT emitted (deferred; a stress lexicon is the future fix). Pitch accent likewise unwritten.",
+    },
+
+    // Vowels: the five orthographic vowels → open-mid quality default (no length letters — Slovene writes none).
+    // Foreign ⟨y⟩ → the vowel [i] (Sydney→sidni).
+    "vowels": { "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u", "y": "i" },
+
+    // Single consonants (before the lj/nj + syllabic-r passes). ⟨v/w⟩→ʋ, ⟨h⟩→x, ⟨c⟩→t͡s etc. ⟨ć/đ⟩ (Serbo-Croatian
+    // loans/names: Đorđe, ćevapčiči) → the affricates t͡ʃ/d͡ʒ; foreign ⟨q⟩→k.
+    "consonants": {
+        "b": "b", "p": "p", "d": "d", "t": "t", "g": "ɡ", "k": "k",
+        "c": "t͡s", "č": "t͡ʃ", "s": "s", "z": "z", "š": "ʃ", "ž": "ʒ",
+        "f": "f", "h": "x", "m": "m", "n": "n", "l": "l", "r": "r",
+        "v": "ʋ", "j": "j", "w": "ʋ", "q": "k", "ć": "t͡ʃ", "đ": "d͡ʒ",
+    },
+
+    // Voicing assimilation pairs. toVoiceless = final devoicing + before a voiceless obstruent; toVoiced = before a
+    // voiced obstruent (Afganistan f→ʋ before ɡ). ʋ is NOT listed → sonorant-inert (coda ⟨v⟩ is [w], never [f]).
+    "voicing": {
+        "toVoiceless": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡ʒ": "t͡ʃ", "d͡z": "t͡s", "ɣ": "x" },
+        "toVoiced": { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡ʃ": "d͡ʒ", "t͡s": "d͡z", "f": "ʋ", "x": "ɣ" },
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words. Slovene uses the Germanic-style unit-IN-ten inversion (21 = enaindvajset "one-and-twenty");
+    // tens+units concatenate into one word, hundreds/thousands are space-separated. No numeric referee → standard forms.
+    "numbers": {
+        "units": ["nič", "ena", "dva", "tri", "štiri", "pet", "šest", "sedem", "osem", "devet"],
+        "teens": ["deset", "enajst", "dvanajst", "trinajst", "štirinajst", "petnajst", "šestnajst", "sedemnajst", "osemnajst", "devetnajst"],
+        "tens": ["", "", "dvajset", "trideset", "štirideset", "petdeset", "šestdeset", "sedemdeset", "osemdeset", "devetdeset"],
+        "hundreds": ["", "sto", "dvesto", "tristo", "štiristo", "petsto", "šeststo", "sedemsto", "osemsto", "devetsto"],
+        "and": "in", // the unit-in-ten infix (ena + in + dvajset)
+        "thousand": "tisoč",
+        // Slovene numerals 2–4 AGREE with the gender of the counted magnitude noun (m: dva/trije/štirje; f: dve/tri/
+        // štiri). milijon is masculine (trije milijoni), milijarda is feminine (dve milijardi). tisoč takes the plain
+        // sub-1000 form (dva tisoč, tri tisoč). Compound counts (22 milijonov) use the plain form + the plural noun.
+        "countForms": {
+            "m": { "2": "dva", "3": "trije", "4": "štirje" },
+            "f": { "2": "dve", "3": "tri", "4": "štiri" },
+        },
+        "magnitudes": {
+            "million": { "gender": "m", "sg": "milijon", "dual": "milijona", "paucal": "milijoni", "plural": "milijonov" },
+            "milliard": { "gender": "f", "sg": "milijarda", "dual": "milijardi", "paucal": "milijarde", "plural": "milijard" },
+        },
+    },
+}

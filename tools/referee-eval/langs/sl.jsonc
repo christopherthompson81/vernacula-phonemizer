@@ -1,0 +1,35 @@
+// Slovenian (sl) — South Slavic, Latin script. Referee: wikipron slv_latn_broad (HUMAN, CUNY-CL/wikipron, 5,177
+// headwords). The raw dump lists each pronunciation VARIANT on its own line; we merged them per-headword into
+// tab-separated alternates (credit-any-attested, the eval's documented mechanism, like the sibling sr). UNLIKE the
+// Galician dialect-merge, the sl variants differ only on the SUPRASEGMENTAL axes already folded below (length/pitch/
+// open-close quality/schwa) — so the merge dedupes double-counted rows + credits letter-name junk variants; it does
+// NOT fold a new segmental contrast. `segmentJoin` strips the per-phone spaces. Slovene orthography is shallow at the CONSONANT level but
+// UNDERSPECIFIES the vowels — quality (open/close), length, pitch accent, and the morphological schwa are ALL
+// unwritten and stress/lexically conditioned. So the vowel axis is heavily FOLDED and the measured signal is the
+// CONSONANT skeleton + the Slovene rules (lj/nj coda-j-drop, syllabic-r→ər, voicing/devoicing). NB: coda ⟨l⟩-
+// vocalization (bel→bɛʋ) is LEXICAL (native vocalizes, loans keep [l]) — a blanket rule measured net -2pp on this
+// name-heavy referee, so ⟨l⟩=[l] and vocalization is deferred to a lexicon. The measured axes:
+//   - LENGTH ː: stressed vowels lengthen (unwritten) → strip.
+//   - QUALITY e→ɛ, o→ɔ: STRESSED mids are close [eː oː], UNSTRESSED open [ɛ ɔ]; stress is free + unwritten → we emit
+//     the open ɛ/ɔ default and fold the close variant into it (the Galician ɛ/ɔ treatment).
+//   - SCHWA ə→ɛ: morphological [ə] (dober→dɔbər, Albanec→albanəts) is the same ⟨e⟩ letter, not spelling-predictable
+//     (devet's final ⟨e⟩ is stressed [eː], dober's is [ə]) → we emit ɛ and fold. Only syllabic-r schwa is rule-emitted.
+//   - PITCH ACCENT (tonemic àáâ / ɛ̀ ɔ́): unwritten → the combining tone diacritics are BACKBONE-stripped; we emit none.
+// The consonant skeleton + the l/lj/nj/r rules + voicing ARE compared directly — that is the real signal.
+// See docs/investigations/sl_native_bringup_investigation.md.
+{
+    "language": "sl", "name": "Slovenian (slovenščina)", "script": "Latin",
+    "provenance": "Authored rule-based g2p (Slovak-shaped scan + Slovene l-vocalization / lj-nj / syllabic-r + voicing) from Slovene phonology; validated against the wikipron slv_latn_broad referee (5,177 human headwords). The vowel quality/length/pitch/schwa are unwritten → folded (see the header note).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "sl.wikipron-slv-broad.tsv", "source": "wikipron slv_latn_broad (Wiktionary-scraped, human, 5177)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron slv_latn_broad, human, 5177, name-heavy). No kaikki per-language dump / epitran slv referee committed. The consonant inventory + the lj-nj / syllabic-r / voicing rules are the standard Slovene phonology (Wikipedia / Toporišič), attested across thousands of aligned tokens; the vowel prosody (quality/length/pitch/schwa) is unwritten in Slovene and folded, and the lexical l-vocalization is deferred. The residual is dominated by letter-name/glyph junk headwords + foreign-name source pronunciations.",
+    "folds": [
+        { "pattern": "ː", "replace": "", "note": "LENGTH: stressed vowels lengthen (unwritten in Slovene) → strip the referee's ː" },
+        { "pattern": "e", "replace": "ɛ", "note": "⟨e⟩ quality: STRESSED close [e(ː)] vs UNSTRESSED open [ɛ] is stress-conditioned + unwritten → we emit ɛ and fold close e into it" },
+        { "pattern": "o", "replace": "ɔ", "note": "⟨o⟩ quality: STRESSED close [o(ː)] vs UNSTRESSED open [ɔ] — same as ⟨e⟩; we emit ɔ and fold" },
+        { "pattern": "ə", "replace": "ɛ", "note": "morphological SCHWA (dober→dɔbər, Albanec→albanəts): the same ⟨e⟩ letter, not spelling-predictable (stress-dependent) → we emit ɛ and fold. A schwa/stress lexicon is the deferred fix" },
+        { "pattern": "ɐ", "replace": "a", "note": "⟨a⟩ quality: the referee's occasional reduced/stressed [ɐ] ~ our [a]" }
+    ]
+}
