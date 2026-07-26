@@ -91,6 +91,7 @@ import { createMacedonian } from "./languages/macedonian/macedonian.ts";
 import { createKabuverdianu } from "./languages/kabuverdianu/kabuverdianu.ts";
 import { createMaltese } from "./languages/maltese/maltese.ts";
 import { createLuxembourgish } from "./languages/luxembourgish/luxembourgish.ts";
+import { createIcelandic } from "./languages/icelandic/icelandic.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -397,6 +398,9 @@ function build(lang: string): Phonemizer {
         // Luxembourgish (Lëtzebuergesch) — West Germanic; grapheme g2p + the diphthong system + German-style rules.
         case "lb":
             return createLuxembourgish();
+        // Icelandic (íslenska) — North Germanic; deep orthography, fortis/lenis neutralization + epenthetic clusters.
+        case "is":
+            return createIcelandic();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel

@@ -1,0 +1,196 @@
+/**
+ * Icelandic (is) phonemizer — íslenska, North Germanic (Insular), Latin script + ⟨þ ð æ ö⟩, canonical IPA,
+ * espeak-independent. One of the deepest orthographies in the fleet. A greedy longest-match grapheme scan (vowel
+ * digraphs + the epenthetic-stop / devoiced-sonorant clusters) + code rules:
+ *   - NO voicing contrast: ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k] (aspiration folded); ⟨k g gj kj⟩ → PALATAL [c]
+ *     before a front vowel ⟨i í y ý æ j⟩ (kýr→ciːr, Bylgja→pɪlca); intervocalic ⟨g⟩ → [ɣ] (dagur→taɣʏr);
+ *   - the DEVOICED-SONORANT onsets ⟨hr hl hn⟩ → [r l n] (the ring folds; Hrafn→rapn), ⟨hj⟩ → [ç], ⟨hv⟩ → [kv];
+ *   - the EPENTHETIC-STOP clusters ⟨ll⟩→[tl], ⟨rl⟩→[rtl], ⟨rn⟩→[rtn]; ⟨nn⟩→[tn] after a long/accented vowel or a
+ *     diphthong (Steinn→steitn) but [n] after a short vowel (Anna→ana); geminate stops collapse;
+ *   - a glide [j] between a high front ⟨í i ý y⟩ and a following vowel (Biblía→pɪplija); ⟨f⟩→[v]/[p]/[f].
+ * Vowel LENGTH, ASPIRATION (pre/post), and DEVOICED SONORANTS are folded/deferred. See
+ * docs/investigations/is_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface IcelandicDef {
+    digraphs: Record<string, string>;
+    graphemes: Record<string, string>;
+    clausePunctuation: Record<string, string>;
+}
+const DEF = loadManifest<IcelandicDef>(import.meta.url, "icelandic.jsonc");
+const DIGRAPHS = DEF.digraphs;
+const G = DEF.graphemes;
+const CLAUSE_MARK = DEF.clausePunctuation;
+const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
+const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
+// Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
+// ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
+// the minority we over-palatalize to ceir).
+const FRONT_V = new Set([..."eéiíyýæj"]);
+const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
+const HIGH_FRONT = new Set([..."iíyý"]); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
+const LONG_NUCLEUS = new Set([..."áéíóúýæ"]); // a doubled ⟨nn⟩ → [tn] only after one of these (or ⟨au ei ey⟩)
+const STOPS = new Set(["p", "t", "k"]);
+const OTHER_DOUBLE = new Set([..."sfmrvþð"]); // non-stop doubled consonants collapse to a single phone (Sviss→svɪs)
+
+/** One scan token: the IPA phones for a grapheme + flags (⟨g⟩-origin → intervocalic spirantization; a high-front
+ *  vowel → the glide rule; FORTIS ⟨p t k⟩ → preaspiration). */
+interface Tok { ph: string; gVar?: boolean; highFront?: boolean; fortis?: boolean }
+
+/** Scan a lowercased Icelandic word into phone tokens: longest-match digraphs (incl. the sonorant clusters), the
+ *  geminate stops, and the ⟨k g⟩→[c] palatalization + the context-dependent ⟨nn⟩. */
+function scan(word: string): Tok[] {
+    const w = word.normalize("NFC").toLowerCase();
+    const toks: Tok[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        const c = w[i]!, next = w[i + 1] ?? "";
+        // Context-dependent ⟨nn⟩: [tn] after a long/accented vowel or a diphthong, else a plain [n].
+        if (c === "n" && next === "n") {
+            const prev2 = w.slice(Math.max(0, i - 2), i);
+            const afterLong = LONG_NUCLEUS.has(w[i - 1] ?? "") || prev2 === "au" || prev2 === "ei" || prev2 === "ey";
+            toks.push({ ph: afterLong ? "tn" : "n" });
+            i += 2;
+            continue;
+        }
+        const prevVowel = toks.length > 0 && endsWithVowel(toks[toks.length - 1]!.ph);
+        // Geminate stops: fortis ⟨pp tt kk⟩ PREASPIRATE to [h]+stop; lenis ⟨bb dd gg⟩ collapse to a bare stop
+        // (⟨kk gg⟩→[c] palatal before a front V — the trigger ⟨j⟩ is absorbed: drekkja→trɛhca).
+        if (c === next && (STOPS.has(c) || c === "b" || c === "d" || c === "g")) {
+            const fortis = STOPS.has(c);
+            const afterPair = w[i + 2] ?? "";
+            let consumed = 2;
+            let ph = G[c]!;
+            if ((c === "k" || c === "g") && FRONT_V.has(afterPair)) {
+                ph = "c";
+                if (afterPair === "j") consumed = 3;
+            }
+            if (fortis) toks.push({ ph: "h" });
+            toks.push({ ph, fortis });
+            i += consumed;
+            continue;
+        }
+        // Other doubled consonants collapse to a single phone (Sviss→svɪs, the length folds).
+        if (c === next && OTHER_DOUBLE.has(c)) {
+            toks.push({ ph: G[c]! });
+            i += 2;
+            continue;
+        }
+        for (const key of ORDER) {
+            if (w.startsWith(key, i)) {
+                toks.push({ ph: DIGRAPHS[key]! });
+                i += key.length;
+                continue outer;
+            }
+        }
+        // ⟨k g⟩ → PALATAL [c] before a front vowel ⟨e é i í y ý æ⟩ or ⟨j⟩ (the ⟨j⟩ absorbed); an INTERVOCALIC ⟨g⟩
+        // before a front vowel is the approximant [j] instead (deigja→teija, Logi→lɔjɪ vs word-initial gelda→cɛlta).
+        if ((c === "k" || c === "g") && FRONT_V.has(next)) {
+            toks.push({ ph: c === "g" && prevVowel ? "j" : "c", fortis: c === "k" });
+            i += next === "j" ? 2 : 1;
+            continue;
+        }
+        const ph = G[c];
+        if (ph !== undefined) toks.push({ ph, gVar: c === "g", highFront: HIGH_FRONT.has(c), fortis: STOPS.has(c) });
+        i += 1;
+    }
+    return toks;
+}
+
+function startsWithVowel(ph: string): boolean { return VOWEL_PH.has([...ph][0]!); }
+function endsWithVowel(ph: string): boolean { const a = [...ph]; return VOWEL_PH.has(a[a.length - 1]!); }
+
+/** Intervocalic ⟨g⟩ [k] → the voiced velar fricative [ɣ] (dagur→taɣʏr), or [j] before a front vowel (Logi→lɔjɪ) —
+ *  only underlying ⟨g⟩, not ⟨k⟩ (Gaukur→køykʏr). */
+function spirantizeG(toks: Tok[]): void {
+    for (let i = 0; i < toks.length; i++) {
+        if (toks[i]!.ph !== "k") continue;
+        const next = toks[i + 1]?.ph;
+        if (next === "t" || next === "s") { toks[i]!.ph = "x"; continue; } // ⟨k g⟩ → [x] before a voiceless stop (lukt→lʏxt)
+        if (!toks[i]!.gVar || i === 0 || !endsWithVowel(toks[i - 1]!.ph)) continue;
+        // post-vocalic ⟨g⟩ → [ɣ] before a voiced sound or word-finally (lag→laɣ, ég→jɛɣ, Sigmar→sɪɣmar), [j] before front.
+        if (next === undefined || !VOICELESS_PH.has([...next][0]!)) {
+            toks[i]!.ph = next !== undefined && FRONT_PH.has([...next][0]!) ? "j" : "ɣ";
+        }
+    }
+}
+
+// Before the velar nasal (⟨ng nk⟩), a short vowel DIPHTHONGIZES (bang→pauŋk, gengur→ceiŋkʏr, ungur→uːŋkʏr).
+const PRENASAL_V: Record<string, string> = { a: "au", ɛ: "ei", ɔ: "ou", œ: "øy", ɪ: "i", ʏ: "u" };
+/** ⟨ng nk⟩ → [ŋk]: ⟨n⟩ → [ŋ] before a velar [k] or a palatal [c] (Alþingi→alθiŋcɪ), and the preceding short vowel
+ *  diphthongizes (the pre-velar-nasal change). */
+function velarNasal(toks: Tok[]): void {
+    for (let i = 0; i < toks.length - 1; i++) {
+        if (toks[i]!.ph === "n" && (toks[i + 1]!.ph === "k" || toks[i + 1]!.ph === "c")) {
+            toks[i]!.ph = "ŋ";
+            const prev = toks[i - 1];
+            if (prev && prev.ph in PRENASAL_V) prev.ph = PRENASAL_V[prev.ph]!;
+        }
+    }
+}
+
+/** PREASPIRATION: a single fortis ⟨p t k⟩ before a sonorant ⟨l m n⟩ → [h] + stop (Hekla→hɛhkla, vatn→vahtn). The
+ *  fortis GEMINATES already preaspirated in scan. */
+function preaspirate(toks: Tok[]): void {
+    for (let i = toks.length - 2; i >= 0; i--) {
+        const nph = toks[i + 1]!.ph;
+        const alreadyPre = i > 0 && toks[i - 1]!.ph === "h"; // a fortis GEMINATE already carries its [h] from scan
+        if (toks[i]!.fortis && !alreadyPre && (nph === "l" || nph === "m" || nph === "n" || nph === "tl" || nph === "tn")) {
+            toks.splice(i, 0, { ph: "h" });
+        }
+    }
+}
+
+/** A glide [j] appears between a high front vowel ⟨í i ý y⟩ and a following vowel (Biblía→pɪplija, María→maːrija). */
+function glideJ(toks: Tok[]): void {
+    for (let i = toks.length - 2; i >= 0; i--) {
+        if (toks[i]!.highFront && startsWithVowel(toks[i + 1]!.ph)) toks.splice(i + 1, 0, { ph: "j" });
+    }
+}
+
+/** ⟨f⟩ realization: [v] before a voiced sound or intervocalic (lofa→lɔːva), [p] before a nasal ⟨m n⟩ (höfn→hœpn),
+ *  [f] otherwise (word-final / before a voiceless obstruent). */
+const VOICELESS_PH = new Set([..."ptksθfhc"]);
+function realizeF(toks: Tok[]): void {
+    for (let i = 0; i < toks.length; i++) {
+        if (toks[i]!.ph !== "f") continue;
+        const next = toks[i + 1]?.ph;
+        if (next === "n" || next === "m") toks[i]!.ph = "p";
+        else if (i > 0 && (next === undefined || !VOICELESS_PH.has([...next][0]!))) toks[i]!.ph = "v"; // voiced / word-final
+    }
+}
+
+/** Phonemize a single Icelandic word to canonical IPA (segmental; length + aspiration + sonorant-devoicing folded). */
+export function phonemizeWord(word: string): string {
+    const toks = scan(word);
+    velarNasal(toks);
+    spirantizeG(toks);
+    preaspirate(toks);
+    glideJ(toks);
+    realizeF(toks);
+    return toks.map((t) => t.ph).join("");
+}
+
+// A word (Icelandic Latin letters incl. á é í ó ú ý þ ð æ ö) / number / punctuation token. Numbers deferred.
+const TOKEN = /([a-záéíóúýþðæöA-ZÁÉÍÓÚÝÞÐÆÖ'-]+)|(\d+)|([.!?…,;:])/gu;
+
+class IcelandicPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Icelandic phonemizer (grapheme g2p + fortis/lenis neutralization + the epenthetic clusters). */
+export function createIcelandic(): Phonemizer {
+    return new IcelandicPhonemizer();
+}
