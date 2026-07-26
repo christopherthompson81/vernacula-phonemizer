@@ -87,6 +87,7 @@ import { createNepali } from "./languages/nepali/nepali.ts";
 import { createAmharic } from "./languages/amharic/amharic.ts";
 import { createTigrinya } from "./languages/tigrinya/tigrinya.ts";
 import { createBulgarian } from "./languages/bulgarian/bulgarian.ts";
+import { createMacedonian } from "./languages/macedonian/macedonian.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -377,6 +378,9 @@ function build(lang: string): Phonemizer {
             return createTigrinya((latin) => getPhonemizer("en").text(latin));
         case "bg":
             return createBulgarian();
+        // Macedonian (македонски) — South Slavic, Cyrillic; phonemic g2p + fixed antepenultimate stress.
+        case "mk":
+            return createMacedonian();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel

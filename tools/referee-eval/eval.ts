@@ -16,6 +16,7 @@ import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
 import { phonemizeWord as gl } from "../../src/languages/galician/galician.ts";
 import { phonemizeWord as sl } from "../../src/languages/slovenian/slovenian.ts";
 import { phonemizeWord as lv } from "../../src/languages/latvian/latvian.ts";
+import { phonemizeWord as mk } from "../../src/languages/macedonian/macedonian.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
 // RULE-ONLY for en-GB: the shipped phonemizeWord applies BATH/CLOTH/yod/PALM lexical-set word lists MINED FROM
 // this wikipron UK referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
@@ -188,6 +189,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     gl,
     sl,
     lv,
+    mk,
     cmn,
     nl,
     az,

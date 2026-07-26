@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **137 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **138 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-137 languages spanning Armenian, Austroasiatic,
+138 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
@@ -58,7 +58,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Romance | Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
 | Semitic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hebrew `he` |
 | Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
-| Slavic | Belarusian `be`, Bosnian `bs`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Slovenian `sl`, Ukrainian `uk` |
+| Slavic | Belarusian `be`, Bosnian `bs`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Macedonian `mk`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Slovenian `sl`, Ukrainian `uk` |
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Kyrgyz `ky`, Turkish `tr`, Uyghur `ug` (Arabic script), Uzbek `uz` |
