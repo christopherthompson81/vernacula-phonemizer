@@ -1,0 +1,38 @@
+// Galician (gl) — Ibero-Romance, Latin script. Referee: wikipron glg_latn_broad (HUMAN, CUNY-CL/wikipron), a LARGE
+// broad-phonemic set. `segmentJoin` strips its per-phone spaces.
+//
+// VARIANT MERGE + WHAT THAT MEANS FOR THE SCORE (read before trusting the number): the raw wikipron dump lists EACH
+// dialectal transcription of a headword on a SEPARATE line — seseo (⟨z/c⟩ as s) vs distinción (θ), gheada (⟨g⟩ as ħ)
+// vs plain ɡ, yeísmo (⟨ll⟩ as ɟ) vs ʎ, plus stress/reduction variants — 10,237 lines over 8,091 unique headwords. We
+// MERGED duplicate headwords into tab-separated variants so the eval (which credits a word if ANY variant matches —
+// its documented multi-pron support, the same mechanism kaikki variant-referees use) does not double-count dialect
+// variation as failing words. HONEST CONSEQUENCE: because both poles of each dialect axis are present as alternates,
+// the merge EFFECTIVELY FOLDS the seseo/gheada/yeísmo axes — our standard-RAG θ/ʎ/plain-ɡ is an attested pole so it
+// always matches, but the referee therefore CANNOT independently validate that choice. So the folded % is "matches
+// ≥1 attested Galician pronunciation", NOT "matches the one canonical pron" — a MORE LENIENT metric than the
+// single-canonical es/ca referees, NOT directly comparable to es 92.5%. What the merge does NOT fold, and IS real
+// signal: the consonant skeleton (x/j→ʃ, nh→ŋ, nasal velarization, ch/ll/ñ), the 7-vowel handling, the glides, and
+// segment count — none vary across the merged alternates, so a match there is genuine. The open-mids ɛ/ɔ (lexical +
+// unmarked) are folded explicitly below; symbol accuracy is the partial-credit cross-check. See docs/investigations/gl_native_bringup_investigation.md.
+{
+    "language": "gl", "name": "Galician (galego)", "script": "Latin",
+    "provenance": "Authored rule-based g2p (Spanish-shaped Ibero-Romance scan + Galician deltas: x/j→ʃ, g→ɡ, nh→ŋ, nasal velarization) from Galician phonology; validated against the wikipron glg_latn_broad referee (8,091 headwords, dialect variants merged per-headword — see the header note on what that folds).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "gl.wikipron-glg-broad.tsv", "source": "wikipron glg_latn_broad (Wiktionary-scraped, human; 8091 headwords, dialect variants merged into tab-separated alternates)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron glg_latn_broad, human) — LARGE but ONE tradition, and it MIXES dialects (seseo/distinción, gheada, yeísmo) as per-headword variant lines. No kaikki per-language dump / epitran glg referee is committed to adjudicate the standard-vs-dialect choice, so the merged-variant scoring credits any attested pole (see the header note) — the dialect axes are effectively folded, not validated. The consonant skeleton + nasal-velarization + x/j→ʃ rules are the standard RAG/Wikipedia phonology, attested across thousands of aligned tokens.",
+    "folds": [
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ open-mid: the ɛ/e split is LEXICAL + unmarked in Galician spelling (xénero→ʃɛneɾo vs xente→ʃente) — unrecoverable → we emit close-mid e and fold. A mid-vowel lexicon is the honest future fix (deferred)" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩ open-mid: the ɔ/o split is LEXICAL + unmarked (Grixó→ɡɾiʃɔ vs pouco→powko) — unrecoverable → we emit close-mid o and fold" },
+        { "pattern": "ɐ", "replace": "a", "note": "unstressed ⟨a⟩ reduction [ɐ] — allophonic + referee-inconsistent (only 118/8091 lines, same weak-reduction class as the raising ̝ the BACKBONE strips); we emit the broad /a/ → fold" },
+        { "pattern": "β", "replace": "b", "note": "spirantization β̞~b — allophonic; the broad referee writes either (libro→libɾo vs Albor→alβoɾ)" },
+        { "pattern": "ð", "replace": "d", "note": "spirantization ð̞~d — allophonic" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "spirantization ɣ̞~ɡ — allophonic" },
+        { "pattern": "ħ", "replace": "ɡ", "note": "GHEADA: the dialectal ⟨g⟩→[ħ] (gato→ħato); we emit the standard velar ɡ → fold the referee's gheada variant" },
+        { "pattern": "ʝ", "replace": "j", "note": "⟨y/i⟩ glide ʝ~j — convention" },
+        { "pattern": "r", "replace": "ɾ", "note": "trill/tap r~ɾ — referee inconsistent on rr vs intervocalic + our coda-r" },
+        { "pattern": "ᶦ", "replace": "j", "note": "our non-syllabic offglide ᶦ (peixe→peᶦʃe) vs the referee's plain glide j (peixe→pejʃe)" },
+        { "pattern": "ᶷ", "replace": "w", "note": "our non-syllabic offglide ᶷ (cousa→coᶷsa) vs the referee's plain glide w (cousa→kowsa)" }
+    ]
+}

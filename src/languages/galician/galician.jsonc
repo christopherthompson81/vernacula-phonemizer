@@ -1,0 +1,76 @@
+// Native canonical-IPA data manifest for Galician (gl) — galego, Ibero-Romance (~2.4M), espeak-independent.
+// Galician shares the shallow near-phonemic Ibero-Romance orthography of its sibling Spanish, so the ENGINE reuses
+// the Spanish shape (left-to-right scan + vowel-run glide classifier + spirantization + rule-based stress); this
+// file IS the hand-authored context-free DATA. The Galician-specific grapheme mappings live in g2p.ts (⟨x⟩/⟨j⟩→ʃ,
+// ⟨g⟩ before e/i→ɡ NOT jota, ⟨nh⟩→ŋ) and the nasal velarization (final/pre-velar ⟨n⟩→ŋ) in galician.ts.
+//   g2p.ts      — the scan (digraphs ch/ll/rr/nh/qu/gu, context-sensitive c/z→θ, x/j→ʃ), glide classifier
+//   galician.ts — nasal velarization, spirantization, rule-based stress, tokenizer + function-word de-accenting
+//   numbers.ts  — the mil/cento cardinal compositor (connector "e": trinta e un)
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/gl_native_bringup_investigation.md.
+{
+    "language": "gl",
+    "name": "Galician (galego)",
+    "script": "Latin",
+    "provenance": "Authored from Galician orthography + phonology (shallow, near-deterministic); the Galician-specific graphemes (x/j→ʃ, g→ɡ, nh→ŋ, nasal velarization) derived empirically from the wikipron glg_latn_broad referee (10,237 human words). No lexicon.",
+
+    "convention": {
+        "sibilant": "⟨x⟩ and ⟨j⟩ → ʃ (the Galician signature: peixe→pejʃe, xente→ʃente)",
+        "g": "⟨g⟩ is always the velar stop ɡ (spirantized ɣ intervocalically) — NO Castilian jota; ⟨ge/gi⟩→ɡe/ɡi",
+        "theta": "⟨z⟩ and ⟨c⟩ before e/i → θ (standard RAG distinción; seseo ⟨s⟩ variants are a dialect not targeted)",
+        "nasalVelar": "coda/word-final ⟨n⟩ → ŋ (Alén→alɛŋ) and ⟨n⟩ before a velar → ŋ (cinco→siŋko); ⟨nh⟩→ŋ (unha→uŋa)",
+        "spirantization": "b d ɡ → β ð ɣ except utterance-initial, after a nasal, or d after l",
+        "vowels": "7-vowel /a e ɛ i o ɔ u/; the open-mids ɛ/ɔ are lexical + unmarked in spelling → we emit close-mid e/o",
+        "stress": "written accent wins; else penult (word ends vowel/n/s) or final",
+        "glides": "onglides consonantal j/w; offglides non-syllabic ᶦ/ᶷ (peixe→peᶦʃe, cousa→coᶷsa)",
+    },
+
+    // Vowel classes (same as Spanish). STRONG = each its own nucleus (two adjacent = hiatus); WEAK unaccented = glide
+    // beside another vowel; WEAK accented = always a nucleus. FRONT = the vowels that soften c (→θ).
+    "vowels": {
+        "strong": "aeoáéó",
+        "weakUnaccented": "iuü",
+        "weakAccented": "íú",
+        "front": "eiéí",
+    },
+    // Accented vowel → its base (unaccented) letter. (Galician written accents: á é í ó ú + the diaeresis ü on güe/güi.)
+    "accents": { "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u" },
+
+    // Nasal phonemes (a following nasal blocks spirantization) and the stop→fricative spirantization pairs.
+    "nasals": ["m", "n", "ɲ", "ŋ"],
+    "spirantize": { "b": "β", "d": "ð", "ɡ": "ɣ" },
+
+    // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in
+    // running text. Galician articles o/a/os/as, contractions, and clitics.
+    "functionWords": [
+        "o", "a", "os", "as", "un", "unha", "uns", "unhas",
+        "e", "ou", "nin", "que", "se", "de", "do", "da", "dos", "das",
+        "en", "no", "na", "nos", "nas", "con", "por", "sen", "ao", "ó",
+        "me", "te", "che", "lle", "lles", "nos", "vos", "meu", "seu",
+    ],
+
+    // Clause / phrase punctuation → canonical inline pause marks (¿¡ openers are silent → absent here).
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words (standard RAG forms). Read through the g2p like any word. ones 0..19; tens juxtapose
+    // with the connector "e" (vinte e un, trinta e dous). No numeric referee exists → these are the normative forms.
+    "numbers": {
+        "ones": [
+            "cero", "un", "dous", "tres", "catro", "cinco", "seis", "sete", "oito", "nove",
+            "dez", "once", "doce", "trece", "catorce", "quince", "dezaseis", "dezasete", "dezaoito", "dezanove",
+        ],
+        "tens": ["", "", "vinte", "trinta", "corenta", "cincuenta", "sesenta", "setenta", "oitenta", "noventa"],
+        "hundreds": [
+            "", "cento", "douscentos", "trescentos", "catrocentos", "cincocentos",
+            "seiscentos", "setecentos", "oitocentos", "novecentos",
+        ],
+        "hundredExact": "cen", // exactly 100 (not cento)
+        "thousand": "mil",
+        "connector": "e", // tens + units (trinta e un)
+        "decimalConnector": "coma", // 3,14 → tres coma un catro
+        // Long scale (like Spanish/Portuguese): millón = 10⁶, billón = 10¹²; 10⁹ reads "mil millóns".
+        "million": { "one": "un millón", "many": "millóns" },
+        "billion": { "one": "un billón", "many": "billóns" },
+    },
+}
