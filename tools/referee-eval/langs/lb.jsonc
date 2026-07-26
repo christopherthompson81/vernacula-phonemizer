@@ -1,0 +1,27 @@
+// Luxembourgish (lb) — West Germanic (Moselle Franconian), Latin script. Referees: wikipron ltz_latn_broad (HUMAN,
+// 3893 headwords, variants merged) PRIMARY + ltz_latn_narrow (SECONDARY, independent). `segmentJoin` strips the
+// per-phone spaces. Luxembourgish is a German-derived orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) with a
+// distinctive DIPHTHONG system (⟨ei ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨é éi⟩→ei̯) — the diphthongs are compared at the
+// SEGMENT level (the offglide diacritic folds in the backbone). Vowel LENGTH (ː) is open/closed-syllable-conditioned
+// (deferred) → folded. See docs/investigations/lb_native_bringup_investigation.md.
+{
+    "language": "lb", "name": "Luxembourgish (Lëtzebuergesch)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (the diphthong system ei/ai→ai̯ au→æu̯ ou→əu̯ éi→ei̯ [é alone→eː] ie→iə ue→uə + German-style w→v v→f z→t͡s ch→χ, initial st/sp→ʃt/ʃp, s→z onset, short stressed ⟨e⟩→æ, geminate collapse, final + regressive devoicing, final g→χ after a vowel / k after a consonant) from Luxembourgish phonology; validated against the wikipron ltz_latn_broad (3893) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "lb.wikipron-ltz-broad.tsv", "source": "wikipron ltz_latn_broad (Wiktionary-scraped, human, 3893 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Two independent human referees exist (wikipron ltz_latn_broad + ltz_latn_narrow); the broad is wired as primary. The narrow adds the ach/ich split (χ~ɕ) + finer schwa notation, both folded here. Vowel LENGTH (open/closed-syllable-conditioned + doubling) is deferred → folded.",
+    "folds": [
+        { "pattern": "ː", "replace": "", "note": "vowel LENGTH: Luxembourgish length is largely open/closed-syllable-conditioned (Kaz→kaːts) + from vowel doubling (aa/ee/oo) — a full model needs the deferred syllable-weight rule → emit the segment skeleton, strip ː on both sides" },
+        { "pattern": "ʀ", "replace": "r", "note": "the rhotic is written [r]~[ʀ] freely in the referee (Aarmut→aːrmut ~ aːʀmut); fold to one" },
+        { "pattern": "ɑ", "replace": "a", "note": "short ⟨a⟩ = [a]~[ɑ]: the referee writes both (Hand→hant vs Matt→mɑt), and the ⟨ei/ai⟩ diphthong nucleus is [a]~[ɑ] (Leit→lɑɪ̯t); fold to one" },
+        { "pattern": "ɪ", "replace": "i", "note": "the ⟨ei/ai⟩ diphthong offglide + short ⟨i⟩ = [i]~[ɪ] (Leit→lɑɪ̯t); fold" },
+        { "pattern": "ʊ", "replace": "u", "note": "the ⟨au/ou⟩ diphthong offglide = [u]~[ʊ] (Schoul→ʃəʊ̯l); fold" },
+        { "pattern": "ɜ", "replace": "e", "note": "the ⟨é/éi⟩ front-closing-diphthong nucleus is written [e]~[ɜ] in the referee (Méi→mei̯ ~ mɜɪ̯); fold ɜ→e (then e→ə below)" },
+        { "pattern": "ɕ", "replace": "χ", "note": "the ACH/ICH split: ⟨ch⟩ is [χ] after back vowels, [ɕ] after front vowels / in ⟨-chen⟩; the broad referee writes both — we emit χ, fold ɕ→χ" },
+        { "pattern": "ç", "replace": "χ", "note": "same ich-laut, sometimes written [ç] — fold to χ" },
+        { "pattern": "ɐ", "replace": "ə", "note": "the r-vocalized / reduced vowel is written [ɐ]~[ə]~[e] in the referee (Dokter→doktɐ ~ dokter); fold ɐ→ə (and e→ə below) to compare the reduction skeleton" },
+        { "pattern": "e", "replace": "ə", "note": "unstressed ⟨e⟩ / ⟨ë⟩ = [ə]~[e]: the referee writes both (Frënd→frent ~ frənt); fold to compare. NOTE: this also collapses the long mid /eː/ from ⟨é ee⟩ into ə (both engine + referee sides move together, since ː is stripped first) — a stressed contrast folded away, but low false-credit risk because ⟨é ee⟩ are dedicated graphemes the engine handles explicitly; the STRESSED short ⟨e⟩→[æ] is NOT folded, so the æ/ə contrast survives" }
+    ]
+}

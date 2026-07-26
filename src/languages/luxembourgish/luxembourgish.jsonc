@@ -1,0 +1,37 @@
+// Native canonical-IPA data manifest for Luxembourgish (lb) — Lëtzebuergesch, a Moselle-Franconian (West Central
+// German) variety standardized in Luxembourg (~390k), Latin script with a German-derived orthography + French loans.
+// espeak-independent. The engine (luxembourgish.ts) is a greedy longest-match grapheme scan (digraphs/diphthongs
+// first) + German-style rules: initial st/sp→ʃt/ʃp, s→z (voiced onset), short stressed ⟨e⟩→æ, geminate collapse,
+// final + regressive devoicing, final g→χ (after a vowel) / k (after a consonant). Vowel LENGTH is folded
+// (open/closed-syllable-conditioned, deferred). See docs/investigations/lb_native_bringup_investigation.md.
+{
+    "language": "lb",
+    "name": "Luxembourgish (Lëtzebuergesch)",
+    "script": "Latin",
+
+    // Multi-letter graphemes — scanned LONGEST-FIRST (see ORDER in luxembourgish.ts). Diphthongs map to the two vowel
+    // SEGMENTS (the offglide diacritic folds in the backbone). ⟨ei ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨éi⟩→ei̯ (the front
+    // closing diphthong; ⟨é⟩ ALONE→eː below), ⟨ie⟩→iə, ⟨ue⟩→uə. ⟨sch⟩→ʃ, ⟨ch⟩→χ, ⟨qu⟩→kv, ⟨ck⟩→k, ⟨ng⟩→ŋ.
+    "digraphs": {
+        "sch": "ʃ", "tsch": "t͡ʃ",
+        "ch": "χ", "ck": "k", "qu": "kv", "ng": "ŋ", "ph": "f", "tz": "t͡s", "th": "t",
+        "éi": "ei̯", "ei": "ai̯", "ai": "ai̯", "ay": "ai̯", "ey": "ai̯",
+        "au": "æu̯", "äu": "æu̯", "ou": "əu̯",
+        "ie": "iə", "ue": "uə",
+        "aa": "aː", "ee": "eː", "oo": "oː", "uu": "uː", "ii": "iː", "ää": "æː",
+        "ss": "s"
+    },
+
+    // Single grapheme → canonical IPA. ⟨é⟩→eː (the long mid; only ⟨éi⟩ is the diphthong), ⟨ë⟩→ə, ⟨ä⟩→æ; ⟨w⟩→v, ⟨v⟩→f, ⟨z⟩→t͡s,
+    // ⟨s⟩→s (→z as an onset in code), ⟨g⟩→ɡ (→χ word-final in code), ⟨c⟩→k, ⟨x⟩→ks, ⟨y⟩→i.
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "é": "eː", "ë": "ə", "ä": "æ", "y": "i",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "r": "r", "s": "s", "t": "t",
+        "v": "f", "w": "v", "x": "ks", "z": "t͡s"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

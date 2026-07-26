@@ -20,6 +20,7 @@ import { phonemizeWord as mk } from "../../src/languages/macedonian/macedonian.t
 import { phonemizeWord as et } from "../../src/languages/estonian/estonian.ts";
 import { phonemizeWord as kea } from "../../src/languages/kabuverdianu/kabuverdianu.ts";
 import { phonemizeWord as mt } from "../../src/languages/maltese/maltese.ts";
+import { phonemizeWord as lb } from "../../src/languages/luxembourgish/luxembourgish.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
 // RULE-ONLY for en-GB: the shipped phonemizeWord applies BATH/CLOTH/yod/PALM lexical-set word lists MINED FROM
 // this wikipron UK referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
@@ -196,6 +197,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     et,
     kea,
     mt,
+    lb,
     cmn,
     nl,
     az,
