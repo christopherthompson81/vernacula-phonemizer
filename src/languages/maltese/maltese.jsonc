@@ -1,0 +1,30 @@
+// Native canonical-IPA data manifest for Maltese (mt) — Malti, the only Semitic language in the LATIN alphabet
+// (Siculo-Arabic core + Sicilian/Italian + English), Malta (~520k), espeak-independent. Maltese orthography is fairly
+// phonemic, so the engine (maltese.ts) is a greedy grapheme scan (digraphs ⟨ie għ⟩ + the silent-letter rules) + final
+// devoicing + regressive voicing assimilation + n→m before a labial. Vowel LENGTH (stress-conditioned, ~50% of the
+// referee) is folded. Format: plain JSONC. See docs/investigations/mt_native_bringup_investigation.md.
+{
+    "language": "mt",
+    "name": "Maltese (Malti)",
+    "script": "Latin",
+
+    // Single grapheme → canonical IPA. ⟨h⟩ (silent medial / [ħ] final), ⟨għ⟩ (silent), ⟨ie⟩ (long ɪ) are handled in
+    // maltese.ts. The distinctive Maltese letters: ⟨ċ⟩→t͡ʃ, ⟨ġ⟩→d͡ʒ, ⟨ħ⟩→ħ, ⟨q⟩→ʔ, ⟨x⟩→ʃ, ⟨z⟩→t͡s vs ⟨ż⟩→z.
+    "graphemes": {
+        "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "u",
+        // Grave-accented vowels (final stressed, esp. the productive ⟨-tà⟩ nominalizer: attività, università): same quality.
+        "à": "a", "è": "ɛ", "ì": "ɪ", "ò": "ɔ", "ù": "u",
+        "b": "b", "ċ": "t͡ʃ", "c": "k", "d": "d", "f": "f", "ġ": "d͡ʒ", "g": "ɡ", "ħ": "ħ", "j": "j",
+        "k": "k", "l": "l", "m": "m", "n": "n", "p": "p", "q": "ʔ", "r": "r", "s": "s", "t": "t",
+        "v": "v", "w": "w", "x": "ʃ", "y": "j", "z": "t͡s", "ż": "z",
+    },
+    // Voicing pairs: final devoicing + regressive assimilation. voiceless = the DEVOICE values + the always-voiceless.
+    "voicing": {
+        "devoice": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "d͡ʒ": "t͡ʃ", "v": "f" },
+        "voice": { "p": "b", "t": "d", "k": "ɡ", "s": "z", "t͡ʃ": "d͡ʒ", "f": "v" },
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
