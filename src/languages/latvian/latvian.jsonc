@@ -1,0 +1,60 @@
+// Native canonical-IPA data manifest for Latvian (lv) — latviešu, Baltic (~1.5M), espeak-independent. Sister of
+// Lithuanian (lt) but a SEPARATE engine: Latvian writes what Lithuanian leaves contextual/prosodic — palatalization
+// is WRITTEN (ģ ķ ļ ņ), vowel LENGTH is WRITTEN (macrons ā ē ī ū), and STRESS is FIXED on the first syllable. So the
+// engine is a direct grapheme→IPA scan + diphthong/offglide handling + voicing, with first-syllable stress emitted.
+//   g2p.ts     — the scan (digraphs, native ⟨o⟩→[uɔ̯], falling diphthongs, palatals), then voicing/devoicing
+//   latvian.ts — first-syllable stress, the tokenizer, numbers
+//   numbers.ts — the cardinal compositor (tens+units space-separated; -padsmit teens)
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/lv_native_bringup_investigation.md.
+{
+    "language": "lv",
+    "name": "Latvian (latviešu)",
+    "script": "Latin",
+    "provenance": "Authored rule-based g2p (grapheme→IPA scan + written palatals/length + diphthongs + voicing) from Latvian phonology; the rules derived empirically from the wikipron lav_latn_narrow referee (1,657 headwords). No lexicon.",
+
+    "convention": {
+        "length": "WRITTEN — the macron ā ē ī ū → [aː eː iː uː]; emitted, not folded",
+        "palatals": "WRITTEN — ⟨ģ ķ ļ ņ⟩ → ɟ c ʎ ɲ (direct, no contextual Cʲ-spread unlike Lithuanian)",
+        "o": "native ⟨o⟩ → [uɔ̯] (falling diphthong: loks→luɔ̯ks); loans/names keep [o] (Monako) — LEXICAL, see the investigation",
+        "eQuality": "⟨e/ē⟩ open [æ] vs close [ɛ]/[e] is lexical/positional (not spelling-predictable) → we emit ɛ and fold",
+        "diphthongs": "the falling pairs ⟨ai ei ui / au iu⟩ → vowel + offglide [i]/[u]; ⟨ie⟩ → [iɛ] (i nucleus); other V+i/u is hiatus",
+        "v": "⟨v⟩ → [v] before a vowel, [w] in the coda (dievs→diɛws) — the Latvian v-vocalization",
+        "voicing": "regressive DEVOICING within obstruent clusters (draugs→drauks, g→k before s); NO word-final devoicing (a truly final voiced obstruent stays voiced: daudz→dauʣ), NO reverse voicing (atgriezt keeps atɡ)",
+        "stress": "FIXED first-syllable → ˈ emitted before the first nucleus (predictable; folded vs the referee's tone)",
+    },
+
+    // Short vowels. ⟨o⟩ is handled specially in g2p (native diphthong [uɔ̯]). ⟨e⟩ → ɛ (open [æ] folded).
+    "vowels": { "a": "a", "e": "ɛ", "i": "i", "u": "u" },
+    // Long vowels (macron = length). ⟨ō⟩ is a loan-only long [oː].
+    "longVowels": { "ā": "aː", "ē": "ɛː", "ī": "iː", "ū": "uː", "ō": "oː" },
+
+    // Single consonants. Palatals ģ ķ ļ ņ are written; ⟨h⟩→x, ⟨c⟩→t͡s, ⟨v⟩→v.
+    "consonants": {
+        "b": "b", "c": "t͡s", "d": "d", "f": "f", "g": "ɡ", "h": "x", "j": "j", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "r": "r", "s": "s", "t": "t", "v": "v", "z": "z",
+        "š": "ʃ", "ž": "ʒ", "č": "t͡ʃ", "ģ": "ɟ", "ķ": "c", "ļ": "ʎ", "ņ": "ɲ",
+    },
+    // Consonant digraphs.
+    "consonantDigraphs": { "dz": "d͡z", "dž": "d͡ʒ" },
+
+    // Voicing assimilation pairs (regressive + word-final devoicing). Palatals pair ģ↔ķ (ɟ↔c). ⟨v⟩ is sonorant-inert.
+    "voicing": {
+        "toVoiceless": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", "ɟ": "c", "ɣ": "x" },
+        "toVoiced": { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", "c": "ɟ", "f": "v", "x": "ɣ" },
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words. Tens+units are space-separated (divdesmit viens); teens take -padsmit (vienpadsmit).
+    // No numeric referee → standard Latvian forms.
+    "numbers": {
+        "units": ["nulle", "viens", "divi", "trīs", "četri", "pieci", "seši", "septiņi", "astoņi", "deviņi"],
+        "teens": ["desmit", "vienpadsmit", "divpadsmit", "trīspadsmit", "četrpadsmit", "piecpadsmit", "sešpadsmit", "septiņpadsmit", "astoņpadsmit", "deviņpadsmit"],
+        "tens": ["", "", "divdesmit", "trīsdesmit", "četrdesmit", "piecdesmit", "sešdesmit", "septiņdesmit", "astoņdesmit", "deviņdesmit"],
+        "hundred": { "one": "simts", "many": "simti" },
+        "thousand": { "one": "tūkstotis", "many": "tūkstoši" },
+        "million": { "one": "miljons", "many": "miljoni" },
+    },
+}

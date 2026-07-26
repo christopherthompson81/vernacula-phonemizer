@@ -123,6 +123,7 @@ import { createKikuyu } from "./languages/kikuyu/kikuyu.ts";
 import { createKamba } from "./languages/kamba/kamba.ts";
 import { createGeorgian } from "./languages/georgian/georgian.ts";
 import { createLithuanian } from "./languages/lithuanian/lithuanian.ts";
+import { createLatvian } from "./languages/latvian/latvian.ts";
 import { createAfrikaans } from "./languages/afrikaans/afrikaans.ts";
 import { createHebrew } from "./languages/hebrew/hebrew.ts";
 import { createLuganda } from "./languages/luganda/luganda.ts";
@@ -464,6 +465,9 @@ function build(lang: string): Phonemizer {
             return createGeorgian();
         case "lt":
             return createLithuanian();
+        // Latvian (latviešu) — Baltic sibling of Lithuanian; written palatals/length + fixed first-syllable stress.
+        case "lv":
+            return createLatvian();
         case "af":
             return createAfrikaans();
         case "he":

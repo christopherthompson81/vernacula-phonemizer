@@ -1,0 +1,27 @@
+// Latvian (lv) — Baltic, Latin script. Referee: wikipron lav_latn_narrow (HUMAN, CUNY-CL/wikipron, 1,657 headwords;
+// the broad set is 404). `segmentJoin` strips the per-phone spaces. The narrow set is heavily marked — it carries
+// syllable TONE (level/falling/broken: àáâ), the open/close ⟨e⟩ quality, and inconsistent glide notation. What
+// Latvian orthography DOES encode we emit directly (and do NOT fold): vowel LENGTH (macron ā ē ī ū → ː), the written
+// PALATALS (ģ ķ ļ ņ → ɟ c ʎ ɲ), and the FIXED first-syllable stress (ˈ — predictable, folded here only because the
+// referee marks it as tone on the vowel, not a plain ˈ). Folded: the syllable TONE (combining àáâ, BACKBONE-
+// stripped), the lexical ⟨e⟩ quality æ→ɛ, the glide notation (referee j~i̯, w~u̯), v~w. See docs/investigations/lv_native_bringup_investigation.md.
+{
+    "language": "lv", "name": "Latvian (latviešu)", "script": "Latin",
+    "provenance": "Authored rule-based g2p (grapheme→IPA scan + written palatals/length + diphthongs + regressive voicing) from Latvian phonology; validated against the wikipron lav_latn_narrow referee (1,657 human headwords).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "lv.wikipron-lav-narrow.tsv", "source": "wikipron lav_latn_narrow (Wiktionary-scraped, human, 1657)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron lav_latn_narrow, human, 1657; the broad set is 404). No kaikki per-language dump / epitran lav referee committed. The consonant + written-palatal + length + diphthong rules are the standard Latvian phonology (Wikipedia / standard grammars), attested across the aligned tokens; the syllable tone the narrow referee carries is unwritten in Latvian and folded, and the lexical ⟨o⟩=[uɔ]/[o] + ⟨e⟩ quality are the residual.",
+    "folds": [
+        { "pattern": "ˈ", "replace": "", "note": "STRESS: Latvian stress is FIXED first-syllable (we emit ˈ, predictable); the referee marks it as tone on the stressed vowel, not a plain ˈ → strip ours for comparison" },
+        { "pattern": "æ", "replace": "ɛ", "note": "⟨e/ē⟩ open [æ] vs close [ɛ] is lexical/positional + not spelling-predictable (cena→t͡sæna vs ceļš→t͡sɛʎʃ) → we emit ɛ and fold" },
+        { "pattern": "e", "replace": "ɛ", "note": "close [e] ~ our [ɛ] — the same ⟨e⟩ quality axis (the referee writes [e] and [ɛ] both)" },
+        { "pattern": "o", "replace": "ɔ", "note": "loan ⟨o⟩ [o(ː)] ~ [ɔ] quality (Kolka→kɔlka vs Andora→andoːɾa) — referee-inconsistent, fold" },
+        { "pattern": "j", "replace": "i", "note": "the i-offglide + ⟨j⟩: the referee writes it [j] ~ [i̯] ~ [î] (maize→majzɛ vs vai→vaî) → fold to the vowel [i] we emit" },
+        { "pattern": "w", "replace": "u", "note": "the u-offglide + coda-⟨v⟩ (our engine vocalizes coda-v→w): the referee writes it [w] ~ [u̯] ~ [û] (aušana→awʃana, dievs→diɛws) → fold to the vowel [u]. Onset ⟨v⟩ stays [v] and IS compared directly (not folded)" },
+        { "pattern": "r", "replace": "ɾ", "note": "⟨r⟩ trill [r] ~ tap [ɾ] — the referee writes both" },
+        { "pattern": "h", "replace": "x", "note": "⟨h⟩ = [x] (standard Latvian) ~ [h] (loans/names: Hercegovina→hɛr~xɛr) — we emit x and fold" },
+        { "pattern": "ə", "replace": "ɔ", "note": "the native ⟨o⟩ = [uɔ̯] offglide: the referee writes the second element [ɔ̯] ~ [ə̯] ~ [o] — fold the schwa variant to our ɔ" }
+    ]
+}
