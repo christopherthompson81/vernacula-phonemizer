@@ -7,7 +7,8 @@
  *   - initial ⟨st sp⟩→ʃt/ʃp (German), single ⟨s⟩→z as a syllable onset (Sonn→zon, Iesel→iəzel) but ⟨ss⟩→s;
  *   - short ⟨e⟩→[æ] stressed / [ə] reduced (Belsch→bælʃ, Decken→dækən), geminate collapse (Flott→flot);
  *   - DEVOICING: word-final + regressive before a voiceless obstruent (Hand→hant, Abt→apt), final ⟨g⟩→[χ] after a
- *     vowel (Dag→daːχ) / [k] after a consonant (Alg→alk).
+ *     vowel (Dag→daːχ) / [k] after a consonant (Alg→alk); ⟨n⟩→[ŋ] before a velar (Bankrott→baŋkrot);
+ *   - intervocalic g-spirantization ⟨g⟩→[ʁ] (Lager→laʁər).
  * Vowel LENGTH (open/closed-syllable-conditioned) is folded/deferred; the French-loan tail (Aubergine, Avion) + the
  * Romance penult-stress class are not modelled. See docs/investigations/lb_native_bringup_investigation.md.
  */
@@ -115,6 +116,21 @@ function applyDevoicing(toks: Tok[]): void {
     }
 }
 
+/** ⟨n⟩ → [ŋ] before a velar [k]/[ɡ] (Bankrott→baŋkrot, and the ⟨-ng⟩ that scans as n+ɡ). */
+function velarNasal(toks: Tok[]): void {
+    for (let i = 0; i < toks.length - 1; i++) {
+        if (toks[i]!.ph === "n" && (toks[i + 1]!.ph === "k" || toks[i + 1]!.ph === "ɡ")) toks[i]!.ph = "ŋ";
+    }
+}
+
+/** INTERVOCALIC g-spirantization: a single ⟨g⟩ [ɡ] between two vowels → the voiced uvular fricative [ʁ]
+ *  (Lëtzebuergesch/German g-lenition). Word-final ⟨g⟩ (→χ/k) and the ⟨ng⟩ velar are handled elsewhere. */
+function spirantizeG(toks: Tok[]): void {
+    for (let i = 1; i < toks.length - 1; i++) {
+        if (toks[i]!.ph === "ɡ" && endsWithVowel(toks[i - 1]!.ph) && startsWithVowel(toks[i + 1]!.ph)) toks[i]!.ph = "ʁ";
+    }
+}
+
 /** Geminate collapse: a doubled consonant letter (⟨tt ll nn dd mm pp ff rr bb gg kk⟩) surfaces as a single phone
  *  (Flott→flot, Bidden→bidən, Capellen→kapælən) — Luxembourgish has no phonemic length contrast in the coda. */
 function degeminate(toks: Tok[]): void {
@@ -131,6 +147,8 @@ export function phonemizeWord(word: string): string {
     voiceS(toks);
     initialSCluster(toks);
     degeminate(toks);
+    velarNasal(toks);
+    spirantizeG(toks);
     applyDevoicing(toks);
     return toks.map((t) => t.ph).join("");
 }

@@ -27,7 +27,7 @@ final ⟨-er⟩→[ɐ] (Dokter→doktɐ; broad also writes -er, so fold).
 open/closed-syllable-conditioned (Kaz→kaːts) + from vowel doubling; a full model needs the syllable-weight rule
 (deferred) → emit the segment skeleton, FOLD ː. Also fold: the ʀ~r rhotic variants, and the schwa notation.
 
-## Run 2 — 2026-07-26 — iterating the g2p against the referee → 69.8% folded / 92.3% symbol
+## Run 2 — 2026-07-26 — iterating the g2p against the referee → 69.3% folded / 92.2% symbol
 
 Built the greedy scan + rules and iterated against wikipron `ltz_latn_broad` (3893 headwords, variants merged).
 Progression (folded backbone): baseline 38.7% → **69.3%**. The wins, each measured:
@@ -54,6 +54,27 @@ r-vocalization (Verhalen→fəhalən, ~4 words); and referee NOTATION inconsiste
 **FOLDED:** vowel LENGTH (ː, open/closed-syllable + doubling — deferred weight rule), the ʀ~r rhotic, the ach/ich
 split ɕ/ç→χ, the diphthong nuclei/offglides ɑ/ɪ/ʊ/ɜ, and unstressed ⟨e⟩ e→ə. Run-2 plateau: **69.3%**. 🔷
 single-source-FAMILY (broad + narrow are the same Wiktionary scrape at two transcription depths → correlated).
+
+## Run 4 — 2026-07-26 — cheap rule/fold pass (the "is it BiLSTM-shaped?" follow-up) → 72.1% folded / 93.0% symbol
+
+Prompted by "how are OOVs working / would a BiLSTM help": characterized the residual by edit-distance. Of the 1176
+folded misses, **88% are 1–2 phones off** (notation/allophone), only 12% are 3+ (the French-loan structural tail,
+~140 words / 3.6%). The dominant single-substitution pairs: **æ↔ə (~108) + æ→a (29)** — the stress-conditioned
+vowel-quality decision (the one genuinely BiLSTM-shaped sub-problem, like bn's ɔ/o, but blocked by thin single-source
+data = the eval referee); then a batch of **cheap rule/fold gaps** left on the table. Landed the clean ones:
+
+- **ʁ→r fold** (eval): the referee writes the rhotic as r ~ ʀ ~ **ʁ** (uvular fricative) — I only folded ʀ. +0.5pp.
+- **⟨n⟩→[ŋ] before a velar [k/ɡ]** (`velarNasal`): Bankrott→baŋkrot. +1.2pp.
+- **intervocalic g-spirantization ⟨g⟩→[ʁ]** (`spirantizeG`): Lager→laʁər — real Luxembourgish g-lenition; [ʁ] is a
+  distinct sound (underlyingly /g/) so it doesn't muddy the /r/ inventory. +0.4pp.
+
+**REJECTED on canonical-correctness grounds (not score):** medial ⟨st/sp⟩→[ʃt/ʃp]. It scored +0.5pp HIGHER without
+a coda guard, but only because it also fires on VstV MONOMORPHEMES (Muster→muʃtɐ, Poster→poʃtɐ) where [st] is a
+coda-onset split, not an onset — [ʃt] belongs only at a true morpheme boundary we can't detect without morphology.
+Shipping a known-wrong rule for +0.5pp is the referee-score-vs-canonical-consistency trap; kept word-initial only.
+
+**Total cheap pass: 69.8 → 72.1% (+2.3pp), symbol 92.3 → 93.0%.** The remaining headroom is the æ/ə/a stress class
+(needs a stress model / tagger + a 2nd data source) + the French-loan lexicon tail — neither a cheap rule.
 
 ## Run 3 — 2026-07-26 — 2-agent review fixes → 69.8% folded / 92.3% symbol
 
