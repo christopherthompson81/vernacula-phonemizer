@@ -97,6 +97,7 @@ import { createMaori } from "./languages/maori/maori.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
+import { createBavarian } from "./languages/bavarian/bavarian.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -421,6 +422,9 @@ function build(lang: string): Phonemizer {
         // Rangpuri (KRNB) — Eastern Indo-Aryan, Devanagari; reuses the Hindi abugida engine + a KRNB manifest.
         case "rkt":
             return createRangpuri((latin) => getPhonemizer("en").text(latin));
+        // Bavarian (Boarisch) — Upper German (Austro-Bavarian), Latin; greedy scan + falling diphthongs + r-vocalization.
+        case "bar":
+            return createBavarian();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
