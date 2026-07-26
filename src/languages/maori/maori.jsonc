@@ -1,0 +1,24 @@
+// Native canonical-IPA data manifest for Māori (mi) — te reo Māori, Eastern Polynesian, New Zealand (~185k).
+// espeak-independent. One of the simplest orthographies in the fleet: a near-1:1 phonemic map + the macron = LENGTH
+// + two digraphs (⟨wh⟩→ɸ, ⟨ng⟩→ŋ). Strict CV syllables — no codas, no clusters, no glide formation. Stress
+// (mora-based, unmarked) is not emitted. Engine: maori.ts. See docs/investigations/mi_native_bringup_investigation.md.
+{
+    "language": "mi",
+    "name": "Māori (te reo Māori)",
+    "script": "Latin",
+
+    // The two digraphs, scanned LONGEST-FIRST: ⟨wh⟩→[ɸ] (a bilabial fricative), ⟨ng⟩→[ŋ] (a velar nasal).
+    "digraphs": { "wh": "ɸ", "ng": "ŋ" },
+
+    // Single grapheme → canonical IPA. The 5 vowels + their MACRON (long) forms, and the 8 simple consonants
+    // (⟨r⟩→[ɾ] tap). ⟨wh ng⟩ are the digraphs above; there is no ⟨g⟩ alone (only ⟨ng⟩).
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː",
+        "p": "p", "t": "t", "k": "k", "m": "m", "n": "n", "r": "ɾ", "h": "h", "w": "w"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

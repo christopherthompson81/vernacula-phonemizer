@@ -93,6 +93,7 @@ import { createMaltese } from "./languages/maltese/maltese.ts";
 import { createLuxembourgish } from "./languages/luxembourgish/luxembourgish.ts";
 import { createIcelandic } from "./languages/icelandic/icelandic.ts";
 import { createOccitan } from "./languages/occitan/occitan.ts";
+import { createMaori } from "./languages/maori/maori.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -405,6 +406,9 @@ function build(lang: string): Phonemizer {
         // Occitan (lenga d'òc) — Occitano-Romance; Languedocien g2p (o→u, final-a→ɔ).
         case "oc":
             return createOccitan();
+        // Māori (te reo Māori) — Eastern Polynesian; a near-1:1 phonemic g2p (macron length, wh→ɸ, ng→ŋ).
+        case "mi":
+            return createMaori();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel

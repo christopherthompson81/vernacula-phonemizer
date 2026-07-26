@@ -1,0 +1,17 @@
+// Māori (mi) — Eastern Polynesian, Latin script. Referee: wikipron mri_latn_broad (HUMAN, 1005 headwords, variants
+// merged). `segmentJoin` strips the per-phone spaces. Māori is a near-1:1 phonemic orthography (macron = length, ⟨wh⟩
+// →ɸ, ⟨ng⟩→ŋ), so the segments are compared DIRECTLY; only the rhotic r~ɾ and the ⟨wh⟩ ɸ~f dialect variants are
+// folded. Stress (mora-based, unwritten) is not emitted (the referee marks none). See docs/investigations/mi_native_bringup_investigation.md.
+{
+    "language": "mi", "name": "Māori (te reo Māori)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (5 vowels + macron length, ⟨p t k m n h w⟩, ⟨r⟩→ɾ, ⟨wh⟩→ɸ, ⟨ng⟩→ŋ) from Māori phonology; validated against the wikipron mri_latn_broad (1005) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "mi.wikipron-mri-broad.tsv", "source": "wikipron mri_latn_broad (Wiktionary-scraped, human, 1005 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron mri_latn_broad, human, 1005) — the narrow (1012) is the same Wiktionary scrape at a finer phonetic depth (a→ɐ, e→ɛ, o→ɔ, u→ʉ), correlated, not independent. No kaikki mi. The map is the standard Māori phonology (Bauer / Harlow); the orthography is near-1:1 so little can diverge.",
+    "folds": [
+        { "pattern": "r", "replace": "ɾ", "note": "the rhotic is a TAP [ɾ] — the broad referee writes it r ~ ɾ inconsistently; fold to [ɾ]" },
+        { "pattern": "f", "replace": "ɸ", "note": "⟨wh⟩ = [ɸ] (bilabial) ~ [f] (labiodental) ~ [ʍ] across dialects; we emit [ɸ], fold [f]→[ɸ]" }
+    ]
+}
