@@ -31,6 +31,7 @@ import { createTamil } from "./languages/tamil/tamil.ts";
 import { createKorean } from "./languages/korean/korean.ts";
 import { createSwedish } from "./languages/swedish/swedish.ts";
 import { createCatalan } from "./languages/catalan/catalan.ts";
+import { createGalician } from "./languages/galician/galician.ts";
 import { createIrish } from "./languages/irish/irish.ts";
 import { createWelsh } from "./languages/welsh/welsh.ts";
 import { createHausa } from "./languages/hausa/hausa.ts";
@@ -217,6 +218,10 @@ function build(lang: string): Phonemizer {
             return createSwedish();
         case "ca":
             return createCatalan();
+        // Galician (galego) — Ibero-Romance sister of Portuguese; the Spanish-shaped engine + Galician deltas
+        // (⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ no jota, ⟨nh⟩→ŋ, coda/pre-velar ⟨n⟩→ŋ).
+        case "gl":
+            return createGalician();
         case "ga":
             return createIrish();
         case "cy":

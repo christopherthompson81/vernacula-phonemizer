@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **134 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **135 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-134 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
+135 languages spanning Afroasiatic (Semitic, Cushitic, Chadic), Armenian, Austroasiatic,
 Austronesian, Baltic, Celtic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
@@ -54,7 +54,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
-| Romance | Catalan `ca`, French `fr`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
+| Romance | Catalan `ca`, French `fr`, Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American) |
 | Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
 | Slavic | Belarusian `be`, Bosnian `bs`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Ukrainian `uk` |
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |

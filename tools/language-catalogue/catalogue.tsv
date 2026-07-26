@@ -62,7 +62,7 @@ fr	French	Romance	Latin	80000000	230000000					implemented		✅				1
 ga	Irish	Celtic (Goidelic)	Latin	100000	1700000					implemented		✅				1
 gan	Gan Chinese	Sinitic	Han	22000000						implemented		🔷				0
 gd	Scottish Gaelic	Indo-European (Celtic)	Latin	57000					1	unimplemented					Not yet tracked; covered by espeak.	0
-gl	Galician	Indo-European (Romance)	Latin	2400000					0	unimplemented					Not yet tracked; covered by FLEURS.	1
+gl	Galician	Romance	Latin	2400000		8091			0	implemented		🔷			Ibero-Romance g2p (Spanish-shaped + gl deltas x/j→ʃ, g→ɡ, nh→ŋ, nasal velarization); wikipron glg_latn_broad 91.8% folded / 98.6% symbol.	1
 gn	Guarani	Tupian	Latin	6500000					1	unimplemented					Not yet tracked; covered by espeak.	0
 grc	Ancient Greek	Indo-European (Hellenic)	Greek (polytonic)	0					1	unimplemented					Not yet tracked; covered by espeak. Classical/liturgical (Attic/Koine) — a dead language with a large written corpus, in scope (excludes only constructed languages).	0
 gu	Gujarati	Indo-Aryan	Gujarati	57000000						implemented		🟡				1
