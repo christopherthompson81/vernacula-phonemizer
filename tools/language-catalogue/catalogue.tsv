@@ -54,7 +54,7 @@ en-GB	English (British SSBE)	Germanic (West)	Latin							implemented		🟡			Acc
 en-IN	English (Indian)	Germanic (West)	Latin							implemented		🟡			Accent variant of en (General Indian English): retroflexion, TH-stopping, v/w merger, monophthongs.	0
 es	Spanish	Romance	Latin	485000000	75000000					implemented		✅				0
 es-419	Spanish (Latin American)	Romance	Latin	420000000						implemented		✅				1
-et	Estonian	Uralic (Finnic)	Latin	1100000					1	unimplemented					Not yet tracked; covered by FLEURS + espeak.	1
+et	Estonian	Uralic (Finnic)	Latin	1100000		2773			1	implemented		🔷			Uralic Finnic, sibling of Finnish: greedy phonemic scan + gemination (compound-cluster aware) + fixed first-syllable stress; b/d/g=voiceless-lenis, 9 vowels incl õ→ɤ. wikipron est_latn_broad 94.1% folded / 98.5% symbol (3-way QUANTITY folded — only partially orthographic).	1
 eu	Basque	Language isolate	Latin	750000					1	unimplemented					Not yet tracked; covered by espeak.	0
 fa	Persian (Iranian)	Iranian (SW)	Arabic (Persian)	60000000	50000000					implemented		🟡				1
 ff	Fula	Niger-Congo (Atlantic)	Latin	25000000						implemented		✅				1

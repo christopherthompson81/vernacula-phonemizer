@@ -1,0 +1,37 @@
+// Native canonical-IPA data manifest for Estonian (et) — eesti keel, Uralic (Finnic, ~1.1M), espeak-independent.
+// Estonian is nearly as phonemic as its sibling Finnish at the SEGMENT level, so the engine (estonian.ts) is a greedy
+// grapheme scan + gemination (double letter → [Cː]/[Vː]) + fixed first-syllable stress. The hard, only-partially-
+// orthographic axes — PALATALIZATION and the three-way QUANTITY (half-long) — are emitted where written and folded
+// in the referee eval where not. Format: plain JSONC. See docs/investigations/et_native_bringup_investigation.md.
+{
+    "language": "et",
+    "name": "Estonian (eesti keel)",
+    "script": "Latin",
+
+    // Grapheme → canonical IPA. ⟨b d g⟩ are the VOICELESS-LENIS stops (Estonian has no true voiced stops); the referee
+    // writes the devoicing ring b̥/d̥/ɡ̊ which the BACKBONE strips, so we emit plain b/d/ɡ. The 9 vowels incl. õ→ɤ.
+    "graphemes": {
+        "a": "ɑ", "e": "e", "i": "i", "o": "o", "u": "u", "õ": "ɤ", "ä": "æ", "ö": "ø", "ü": "y",
+        "á": "ɑ", "é": "e", "í": "i", "ó": "o", "ú": "u", // accented loan/name vowels (Aragón→ɑrɑɡon)
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k", "l": "l", "m": "m", "n": "n",
+        "p": "p", "r": "r", "s": "s", "t": "t", "v": "v", "z": "z", "š": "ʃ", "ž": "ʒ",
+        "c": "k", "q": "k", "w": "v", "x": "ks", "y": "i", // non-native letters (loans/names): nativized
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+
+    // Cardinal number words. Tens (unit+kümmend) and hundreds (unit+sada) are single words; the sub-parts join with a
+    // space (kakskümmend üks = 21). No numeric referee → standard Estonian forms.
+    "numbers": {
+        "units": ["null", "üks", "kaks", "kolm", "neli", "viis", "kuus", "seitse", "kaheksa", "üheksa"],
+        "ten": "kümme",
+        "teens": ["üksteist", "kaksteist", "kolmteist", "neliteist", "viisteist", "kuusteist", "seitseteist", "kaheksateist", "üheksateist"],
+        "tensSuffix": "kümmend",
+        "hundred": "sada",
+        "thousand": "tuhat",
+        "million": "miljon",
+        "millions": "miljonit",
+    },
+}

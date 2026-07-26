@@ -1,0 +1,22 @@
+// Estonian (et) — Uralic (Finnic), Latin script. Referee: wikipron est_latn_broad (HUMAN, CUNY-CL/wikipron, 2,773
+// headwords). `segmentJoin` strips the per-phone spaces. Estonian is nearly as phonemic as Finnish at the SEGMENT
+// level (b/d/ɡ, the 9 vowels incl. õ→ɤ, gemination), so the segment skeleton is compared almost directly. The two
+// folded axes are Estonian's only-partially-orthographic parts: PALATALIZATION (ʲ, phonemic but not reliably written)
+// and the three-way QUANTITY (the half-long ˑ = the Q2/Q3 grade the orthography does not encode). The devoicing ring
+// on ⟨b d g⟩ (b̥ d̥ ɡ̊) and the diphthong offglide ̯ are combining diacritics the BACKBONE strips automatically. Stress
+// (fixed first-syllable) is emitted + folded (predictable; the referee marks none). See docs/investigations/et_native_bringup_investigation.md.
+{
+    "language": "et", "name": "Estonian (eesti keel)", "script": "Latin",
+    "provenance": "Authored greedy phonemic g2p (grapheme scan + gemination) + fixed first-syllable stress; validated against the wikipron est_latn_broad referee (2,773 human headwords).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "et.wikipron-est-broad.tsv", "source": "wikipron est_latn_broad (Wiktionary-scraped, human, 2773)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron est_latn_broad, human, 2773). No kaikki per-language dump / epitran est referee committed (a narrow wikipron set exists but adds only palatalization/half-length detail we fold). The grapheme map + gemination are the standard Estonian phonology (Wikipedia / EKI), attested across the aligned tokens; palatalization + the Q2/Q3 quantity grade are only partially orthographic → folded.",
+    "folds": [
+        { "pattern": "ʲ", "replace": "", "note": "PALATALIZATION: ⟨t d n s l⟩→Cʲ around i / in lexical contexts (külm→kylʲm, kass→kɑsʲː) — phonemic but NOT reliably written → we don't emit it, strip the referee's ʲ" },
+        { "pattern": "ː", "replace": "", "note": "LENGTH (Q3 long) — see the ˑ note: Estonian's three-way quantity is only partially orthographic AND the referee's notation is inconsistent (long written ɑː~ɑˑ~ɑɑ, single ⟨p t k⟩ realized half-long) → we strip ALL length on both sides and compare the segment + vowel-quality skeleton" },
+        { "pattern": "ˑ", "replace": "", "note": "the HALF-LONG (Q2) grade — stripped with ː (see above): the Q2/Q3 distinction is unwritten + the referee marks it inconsistently, so length is folded and the segment skeleton (b/d/ɡ, the 9 vowel qualities incl. õ→ɤ, palatalization aside) is the measured signal" },
+        { "pattern": "ˈ", "replace": "", "note": "STRESS: fixed first-syllable (we emit ˈ, predictable); the referee marks none → strip ours for comparison" }
+    ]
+}

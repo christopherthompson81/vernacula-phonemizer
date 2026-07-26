@@ -103,6 +103,7 @@ import { createBosnian } from "./languages/bosnian/bosnian.ts";
 import { createSlovenian } from "./languages/slovenian/slovenian.ts";
 import { createDanish } from "./languages/danish/danish.ts";
 import { createFinnish } from "./languages/finnish/finnish.ts";
+import { createEstonian } from "./languages/estonian/estonian.ts";
 import { createSlovak } from "./languages/slovak/slovak.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
@@ -268,6 +269,9 @@ function build(lang: string): Phonemizer {
             return createDanish();
         case "fi":
             return createFinnish();
+        // Estonian (eesti keel) — Uralic/Finnic sibling of Finnish; phonemic scan + gemination + first-syllable stress.
+        case "et":
+            return createEstonian();
         case "sk":
             return createSlovak();
         case "hu":
