@@ -96,6 +96,7 @@ import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
+import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -417,6 +418,9 @@ function build(lang: string): Phonemizer {
         // Haitian Creole (kreyòl ayisyen) — French-lexified creole; phonemic IPN g2p + nasal-vowel rule.
         case "ht":
             return createHaitian();
+        // Rangpuri (KRNB) — Eastern Indo-Aryan, Devanagari; reuses the Hindi abugida engine + a KRNB manifest.
+        case "rkt":
+            return createRangpuri((latin) => getPhonemizer("en").text(latin));
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel

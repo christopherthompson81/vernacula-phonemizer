@@ -76,3 +76,39 @@ referee-validated bring-up.
 - Per-lect **`dialect` deltas**, each validated against its ~300 Toulmin forms; Rajbanshi cross-checked vs Wilde.
 - Target **Devanagari** orthography (cleanest-extracting + Nepal-Rajbanshi/Kamtapuri-activist script); Bengali-Assamese
   script a deferred 2nd front-end.
+
+## Run 2 — 2026-07-26 — Rangpuri (rkt) engine → 63.8% folded / 86.8% symbol
+
+Built `rkt` (Rangpur point) as the template: reuse `makeNativeHindi` + a KRNB manifest (the Marathi/Nepali pattern).
+KRNB deltas, read off the RP referee and MEASURED (15.7% → 48.6% → 55.1% → **63.8%** after the 2-agent review):
+
+- **DEAFFRICATION** च/छ→[s], ज→[d͡z], झ→[d͡zʱ] (काचे→kase, गाजोर→gad͡zor — the Assamese-area feature);
+- **ASPIRATION (the review's big correction — I first got this backwards):** VOICED aspirates are **RETAINED**
+  (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ: घर→ɡʱɔr, धार→d̪ʱar, भात→bʱat̪) — NOT deaspirated. VOICELESS aspirates (ख ठ थ फ) are
+  **POSITIONAL**: kept word-INITIALLY (ठीक→ʈʰik, खलान→kʰɔlan) but deaspirated elsewhere (आठ→aʈ, पाथर→pat̪or, हाथ→hat̪)
+  — a postRule `(?<!^)(t̪|[kʈp])ʰ→$1` that strips voiceless `ʰ` off non-initial stops (leaving voiced `ʱ` intact);
+- **inherent vowel [ɔ]** — kept `ə` in the manifest so the shared schwa-DELETION fires (आगोन→agon, final deleted;
+  खलान→kʰɔlan, initial retained), then a finalRule `ə→ɔ`;
+- **no phonemic vowel length** (आ→a, ई→i…), **व→[w]**, **ण→[n]**, ◌ॉ→[æ], श/ष→ʃ.
+
+**Wins, in order:** fold the shared engine's weight-stress `ˈ` (KRNB stress is prosodic per Wilde) + `ɡ→g`/`ʣ→dz`/`ɦ→h`
+(Toulmin's ASCII/ligature notation) → 48.6%; the ि-matra visual-reorder fix (िबष→बिष, +6.5pp) → 55.1%; the
+**aspiration correction + ɦ→h** (2-agent review) → **63.8% folded / 86.8% symbol**.
+
+**Residual — an HONEST mix** (the review corrected my first over-optimistic "it's all extraction noise" framing):
+(a) genuine two-column-PDF **extraction noise** (trailing ref-marker vowels ɔmona/alo, misalignments aŋgul); (b) real
+remaining **engine/fold divergences** — च→[s] vs the referee's occasional [ʃ] (आधाचेर→…ʃer), the vowel-quality
+folds ɔ~o / æ~e (Eastern-Indic raising; a genuine but folded contrast — ~7pp of the lift, disclosed not hidden), and
+the anusvara limitation (KRNB wants plain [ŋ]: आंटी→aŋʈi, but the Hindi engine does vowel-nasalization+homorganic and
+the `effect` field isn't dispatched — ~5 words). The 86.8% symbol accuracy shows the segmental core is solid, but the
+folded number is a *mix* of referee noise and these residual gaps, not pure noise. 🔷 single-source (Toulmin RP).
+
+## Run 3 — 2026-07-26 — 2-agent review
+
+The review caught a real correctness error and an overclaim: (1) **aspiration was backwards** — I had deaspirated the
+VOICED aspirates (घ→ɡ etc.), but the referee retains them (घर→ɡʱɔr, 33/370 words carry ʱ) and instead deaspirates the
+VOICELESS aspirates POSITIONALLY (initial kept, else stripped). Fixed (voiced retained + the non-initial-`ʰ` postRule);
+**+8.7pp (55.1→63.8)**. (2) The "residual is all extraction noise / every clean spot-check matches" framing was an
+**overclaim** — reframed above as an honest mix. Also fixed the ⟨ह⟩ ɦ→h fold and the stale "voiceless aspirates kept"
+wording. Kamta/Rajbanshi/NDB (the other 3 lects) follow as `dialect` deltas off this core — referees staged in
+`tools/krnb/referees/`.
