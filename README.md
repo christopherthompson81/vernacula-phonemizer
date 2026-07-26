@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **138 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **139 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-138 languages spanning Armenian, Austroasiatic,
+139 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and an English-lexified creole — across Latin, Greek, Cyrillic,
@@ -62,7 +62,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Tai-Kadai | Lao `lo` (tonal), Thai `th` (tonal), Zhuang `za` (tonal) |
 | Tibeto-Burman | Burmese `my` (tonal) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Kyrgyz `ky`, Turkish `tr`, Uyghur `ug` (Arabic script), Uzbek `uz` |
-| Uralic | Finnish `fi`, Hungarian `hu` |
+| Uralic | Estonian `et`, Finnish `fi`, Hungarian `hu` |
 
 **Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):
 `en-GB` = the GenAm English engine + a Received-Pronunciation lexical-set transform (non-rhoticity, BATH,
