@@ -37,7 +37,7 @@ bo	Tibetan	Tibeto-Burman	Tibetan	6000000						unimplemented					Large orthograph
 bpy	Bishnupriya Manipuri	Indo-Aryan	Bengali	120000					1	unimplemented					Not yet tracked; covered by espeak.	0
 bs	Bosnian	Slavic (South)	Latin	2500000					1	implemented		🟢			Third Serbo-Croatian standard: reuses the Serbian shared BCS g2p + Bosnian deltas (retained ⟨h⟩, ijekavian, dual-script) + numbers. Verified transitively vs wikipron hbs_latn 98.4%.	1
 ca	Catalan	Romance	Latin	4000000	5000000					implemented		✅				1
-cdo	Min Dong (Eastern Min)	Sinitic	Han	9000000						unimplemented					Eastern Min / Fuzhounese (Fuzhou), Fujian (~9M) — the only absent major Sinitic branch. Han characters + Foochow Romanized (Bang-ua-ce). Just under 10M.	0
+cdo	Min Dong (Eastern Min)	Sinitic	Han	9000000		9099				implemented		🔷			Eastern Min / Fuzhounese (Fuzhou), Fujian (~9M) — the only absent major Sinitic branch. Phase-1 Bàng-uâ-cê (BUC / Foochow Romanized) → IPA converter (missionary convention b/d/g=[p t k], p/t/k=[pʰ tʰ kʰ]; 68 rimes; 7 tones). 95.4% folded / 98.5% symbol vs BUC↔IPA pairs from the kaikki Chinese dump — but the referee is Wiktionary Module:cdo-pron OUTPUT (rule-generated) → 🔷 reference-implementation parity, NOT independent. Han front-end + 韻變 rime-alternation + sandhi deferred (no independent Han→reading dict; Wiktionary is circular).	0
 ceb	Cebuano	Austronesian (Philippine)	Latin	20000000						implemented		✅				1
 chr	Cherokee	Iroquoian	Cherokee syllabary	2000					1	unimplemented					Not yet tracked; covered by espeak.	0
 cjy	Jin Chinese	Sinitic	Han	47000000						implemented		🔷				0
