@@ -1,0 +1,26 @@
+// Native canonical-IPA data manifest for Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti
+// (~12M). espeak-independent. The IPN orthography (Pressoir-Faublas 1979) is PHONEMIC, so the engine is a greedy scan
+// + the nasal-vowel rule (⟨an en on⟩→[ã ɛ̃ ɔ̃] syllable-finally). Signatures: ⟨ou⟩→u, ⟨r⟩→ɣ, ⟨j⟩→ʒ, ⟨ch⟩→ʃ, ⟨y⟩→j.
+// Stress not emitted. Engine: haitian.ts. See docs/investigations/ht_native_bringup_investigation.md.
+{
+    "language": "ht",
+    "name": "Haitian Creole (kreyòl ayisyen)",
+    "script": "Latin",
+
+    // Digraphs, scanned LONGEST-FIRST: ⟨ou⟩→[u], ⟨ui⟩→[ɥi], ⟨ch⟩→[ʃ]. The nasal ⟨an en on⟩ are handled in code
+    // (context-dependent — nasal only syllable-finally).
+    "digraphs": { "ou": "u", "ui": "ɥi", "ch": "ʃ" },
+
+    // Single grapheme → canonical IPA. ⟨è⟩→ɛ, ⟨ò⟩→ɔ; the Haitian ⟨r⟩→[ɣ] (velar fricative), ⟨j⟩→ʒ, ⟨y⟩→j, ⟨w⟩→w.
+    // Plain ⟨a e o⟩ nasalize before a syllable-final ⟨n⟩ (in code); ⟨u⟩ alone is rare (loans) → [u].
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "è": "ɛ", "ò": "ɔ", "é": "e", "à": "a",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "ʒ", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "ɣ", "s": "s", "t": "t",
+        "v": "v", "w": "w", "x": "ks", "y": "j", "z": "z"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

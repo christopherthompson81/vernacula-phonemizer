@@ -95,6 +95,7 @@ import { createIcelandic } from "./languages/icelandic/icelandic.ts";
 import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
+import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -413,6 +414,9 @@ function build(lang: string): Phonemizer {
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
+        // Haitian Creole (kreyòl ayisyen) — French-lexified creole; phonemic IPN g2p + nasal-vowel rule.
+        case "ht":
+            return createHaitian();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel

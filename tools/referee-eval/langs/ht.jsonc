@@ -1,0 +1,19 @@
+// Haitian Creole (ht) — French-lexified creole, Latin script (the phonemic IPN orthography). Referee: wikipron
+// hat_latn_broad (HUMAN, 1691 headwords, variants merged). `segmentJoin` strips the per-phone spaces. The IPN
+// orthography is near-phonemic, so segments are compared DIRECTLY; only the rhotic ɣ~ʁ~ɰ~w and a few rare loan-nasal
+// variants are folded. Stress (final-syllable) is not emitted. See docs/investigations/ht_native_bringup_investigation.md.
+{
+    "language": "ht", "name": "Haitian Creole (kreyòl ayisyen)", "script": "Latin",
+    "provenance": "Authored IPN-orthography grapheme→IPA g2p (⟨ou⟩→u, ⟨r⟩→ɣ, ⟨j⟩→ʒ, ⟨ch⟩→ʃ, ⟨y⟩→j, ⟨è ò⟩→ɛ ɔ, and the nasal-vowel rule ⟨an en on⟩→[ã ɛ̃ ɔ̃] syllable-finally) from Haitian Creole phonology; validated against the wikipron hat_latn_broad (1691) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "ht.wikipron-hat-broad.tsv", "source": "wikipron hat_latn_broad (Wiktionary-scraped, human, 1691 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron hat_latn_broad, human, 1691). kaikki Haitian Creole is a candidate 2nd but not committed. The map is the standard IPN phonology (Valdman; Pressoir-Faublas 1979); the orthography is near-phonemic so little diverges.",
+    "folds": [
+        { "pattern": "ʁ", "replace": "ɣ", "note": "the Haitian rhotic is [ɣ]~[ʁ]~[ɰ]~[w] (velar/uvular fricative or glide, position + register variable); we emit [ɣ], fold the variants" },
+        { "pattern": "ɰ", "replace": "ɣ", "note": "the rhotic realized as the velar approximant [ɰ] (before a rounded vowel) → fold to [ɣ]" },
+        { "pattern": "õ", "replace": "ɔ̃", "note": "⟨on⟩ = [ɔ̃] ~ [õ] (the referee writes both for the nasal o); fold to [ɔ̃]" },
+        { "pattern": "ũ", "replace": "u", "note": "⟨oun⟩ occasionally marked nasal [ũ] in the referee (we emit oral [un]); fold — Haitian ⟨ou⟩ before ⟨n⟩ is not phonemically nasal" }
+    ]
+}
