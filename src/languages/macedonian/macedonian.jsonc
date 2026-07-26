@@ -1,0 +1,38 @@
+// Native canonical-IPA data manifest for Macedonian (mk) — македонски, South Slavic (~2M), espeak-independent.
+// Macedonian is fully phonemic Cyrillic with NO vowel reduction, so the engine (macedonian.ts) is a left-to-right
+// grapheme scan + the shared South-Slavic phonotactics (the Bulgarian `bg` pattern: dark-l, final devoicing,
+// regressive voicing, n→ŋ). Two Macedonian specifics: the palatals are DISTINCT LETTERS (ѓ ќ љ њ ѕ џ ј — no ь/я/ю
+// palatalization), and STRESS is FIXED on the ANTEPENULT syllable (predictable → emitted). ⟨л⟩ + syllabic ⟨р⟩ are
+// handled in code; every other letter maps here. Format: plain JSONC. See docs/investigations/mk_native_bringup_investigation.md.
+{
+    "language": "mk",
+    "name": "Macedonian (македонски)",
+    "script": "Cyrillic",
+
+    // Cyrillic letter → canonical IPA. ⟨л⟩ (dark-l rule) and syllabic ⟨р⟩ are handled in macedonian.ts, not here.
+    "letters": {
+        "а": "a", "б": "b", "в": "v", "г": "ɡ", "д": "d", "ѓ": "ɟ", "е": "ɛ", "ж": "ʒ", "з": "z", "ѕ": "d͡z",
+        "и": "i", "ј": "j", "к": "k", "љ": "ʎ", "м": "m", "н": "n", "њ": "ɲ", "о": "ɔ", "п": "p", "р": "r",
+        "с": "s", "т": "t", "ќ": "c", "у": "u", "ф": "f", "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "џ": "d͡ʒ", "ш": "ʃ",
+        "ѐ": "ɛ", "ѝ": "i", // the disambiguating grave-accented spellings (сѐ "all", ѝ "her")
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "—": ",",
+    },
+
+    // Cardinal number words. Tens+units and hundreds+remainder join with the connector "и" (дваесет и еден = 21).
+    // No numeric referee → standard Macedonian forms.
+    "numbers": {
+        "units": ["нула", "еден", "два", "три", "четири", "пет", "шест", "седум", "осум", "девет"],
+        "ten": "десет",
+        "teens": ["единаесет", "дванаесет", "тринаесет", "четиринаесет", "петнаесет", "шеснаесет", "седумнаесет", "осумнаесет", "деветнаесет"],
+        "tens": { "20": "дваесет", "30": "триесет", "40": "четириесет", "50": "педесет", "60": "шеесет", "70": "седумдесет", "80": "осумдесет", "90": "деведесет" },
+        "hundreds": { "1": "сто", "2": "двесте", "3": "триста", "4": "четиристотини", "5": "петстотини", "6": "шестотини", "7": "седумстотини", "8": "осумстотини", "9": "деветстотини" },
+        "thousand": "илјада",
+        "thousands": "илјади",
+        "million": "милион",
+        "millions": "милиони",
+        "and": "и",
+    },
+}

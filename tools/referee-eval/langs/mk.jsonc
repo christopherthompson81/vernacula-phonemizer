@@ -1,0 +1,20 @@
+// Macedonian (mk) — South Slavic, Cyrillic. Referee: wikipron mkd_cyrl_narrow (HUMAN, CUNY-CL/wikipron, 63,024
+// headwords — one of the fleet's LARGEST; the broad set is 404). Despite the "narrow" label it is a clean
+// broad-phonemic transcription with NO stress marks and NO tone. `segmentJoin` strips the per-phone spaces. Macedonian
+// is fully phonemic with no vowel reduction, so the segment skeleton is compared almost directly; the only folds are
+// the predictable STRESS (we emit the fixed antepenult ˈ; the referee marks none) and minor notation. The referee's
+// ⟨-ија⟩ hiatus/glide variants (Италија → itali(j)a) were merged per-headword (credit-any, a suprasegmental axis).
+// See docs/investigations/mk_native_bringup_investigation.md.
+{
+    "language": "mk", "name": "Macedonian (македонски)", "script": "Cyrillic",
+    "provenance": "Authored phonemic grapheme→IPA scan (dark-l, syllabic-r, final devoicing, regressive voicing, n→ŋ) + fixed antepenultimate stress; validated against the wikipron mkd_cyrl_narrow referee (63,024 human headwords).",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "mk.wikipron-mkd-narrow.tsv", "source": "wikipron mkd_cyrl_narrow (Wiktionary-scraped, human, 63024 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron mkd_cyrl_narrow, human) — but VERY LARGE (63,024 headwords). No kaikki per-language dump / epitran mkd referee committed. The phonemic letter map + dark-l + syllabic-r + devoicing/voicing rules are the standard Macedonian phonology (Wikipedia / Lunt grammar), attested across tens of thousands of aligned tokens.",
+    "folds": [
+        { "pattern": "ˈ", "replace": "", "note": "STRESS: Macedonian stress is FIXED on the antepenult (we emit ˈ, predictable); the referee marks none → strip ours for comparison" },
+        { "pattern": "r", "replace": "ɾ", "note": "⟨р⟩ trill [r] ~ tap [ɾ] — the referee writes both (Ѓеро→ɟɛɾɔ vs Ѓер→ɟɛr)" }
+    ]
+}
