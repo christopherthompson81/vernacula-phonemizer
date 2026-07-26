@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **144 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **145 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,7 +23,7 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-144 languages spanning Armenian, Austroasiatic,
+145 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Greek, Cyrillic,
@@ -38,7 +38,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 |---|---|
 | Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
-| Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl` |
+| Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Chadic | Hausa `ha` |
