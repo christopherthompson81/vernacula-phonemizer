@@ -1,0 +1,44 @@
+// Native canonical-IPA data manifest for Bavarian (bar) — Boarisch, an Upper-German (Austro-Bavarian) group of
+// dialects (~14M, Bavaria/Austria/South Tyrol), Latin script. There is NO codified state orthography, but the
+// Bavarian Wikipedia / Wiktionary uses a de-facto German-derived convention (⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩) —
+// that convention is what the wikipron referee transcribes, so the g2p is well-defined against it. espeak-independent.
+// The engine (bavarian.ts) is a greedy longest-match grapheme scan (digraphs/diphthongs first) + code rules the table
+// can't express: r-vocalization (coda r→[ɐ̯], -er→[ɐ]), ch→[ç]/[x] (front/back split), n→[ŋ] before a velar, initial
+// st/sp→ʃt/ʃp, geminate collapse. The referee is a NARROW transcription (lenis under-ring b̥ d̥ ɡ̥, fine vowel qualities,
+// offglides) with ~1.29 dialect variants/headword → heavy folding + the backbone strip. See the investigation doc.
+{
+    "language": "bar",
+    "name": "Bavarian (Boarisch)",
+    "script": "Latin",
+
+    // Multi-letter graphemes — scanned LONGEST-FIRST (see ORDER in bavarian.ts). The DIPHTHONGS map to two vowel
+    // SEGMENTS (the offglide ◌̯ folds in the backbone). Bavarian's distinctive FALLING diphthongs ⟨ia ua oa⟩→[iɐ̯ uɐ̯ oɐ̯]
+    // (Biaschtl→biɐ̯ʃ…, Duafa→duɐ̯fɐ, Boarisch→boɐ̯rɪʃ) — a hallmark that separates it from Standard German. The closing
+    // diphthongs ⟨ei⟩→[ɑɛ̯], ⟨ai⟩→[ai̯], ⟨au⟩→[ɑɔ̯], ⟨eu äu⟩→[ɔy̯]; ⟨ie⟩→[i] (a length/quality digraph, Diensdåg→dinsdɔɡ).
+    "digraphs": {
+        "sch": "ʃ", "tsch": "d̥ʃ",
+        "ch": "x", "ck": "k", "ng": "ŋ", "ph": "f", "tz": "t͡s", "qu": "kv", "th": "t", "dt": "t",
+        "ia": "iɐ̯", "ua": "uɐ̯", "oa": "oɐ̯",
+        "ei": "ɑɛ̯", "ai": "ai̯", "ay": "ai̯", "ey": "ai̯",
+        "au": "ɑɔ̯", "eu": "ɔy̯", "äu": "ɔy̯", "oi": "oe",
+        "ie": "i",
+        "aa": "aː", "ee": "eː", "oo": "oː", "åå": "ɔ",
+        "ss": "s"
+    },
+
+    // Single grapheme → canonical IPA. ⟨å⟩→[ɔ] (the dark a, the Bavarian orthography's signature letter), ⟨a⟩→[ɑ],
+    // ⟨e⟩→[e], ⟨ä⟩→[ɛ], ⟨ö⟩→[œ], ⟨ü⟩→[y], ⟨é⟩→[e], ⟨y⟩→[y]. The stops ⟨b d g⟩ are the Bavarian voiceless-LENIS [b̥ d̥ ɡ̥]
+    // (under-ring; folds/backbone-strips to b d ɡ); ⟨p t k⟩ fortis. ⟨w⟩→[ʋ], ⟨v⟩→[f], ⟨z⟩→[t͡s], ⟨s⟩→[s] (Bavarian does
+    // NOT voice s→z), ⟨c⟩→[k], ⟨x⟩→[ks], ⟨j⟩→[j], ⟨r⟩→[r] (→[ɐ̯]/[ɐ] in coda, in code), ⟨h⟩→[h].
+    "graphemes": {
+        "a": "ɑ", "å": "ɔ", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ä": "ɛ", "ö": "œ", "ü": "y", "é": "e", "è": "ɛ", "á": "ɑ", "à": "ɑ", "â": "ɑ", "y": "y",
+        "b": "b̥", "c": "k", "d": "d̥", "f": "f", "g": "ɡ̥", "h": "h", "j": "j", "k": "k",
+        "l": "l", "m": "m", "n": "n", "p": "b̥", "r": "r", "s": "s", "t": "d̥",
+        "v": "f", "w": "ʋ", "x": "ks", "z": "t͡s", "ß": "s"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

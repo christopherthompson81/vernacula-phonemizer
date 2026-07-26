@@ -1,0 +1,31 @@
+// Bavarian (bar) — Upper German (Austro-Bavarian), Latin script (the de-facto Bavarian-Wikipedia orthography).
+// Referee: wikipron bar_latn_broad (HUMAN, 1380 headwords, variants merged tab-separated). `segmentJoin` strips the
+// per-phone spaces. This is a NARROW transcription with ~1.29 dialect variants/headword — the eval credits ANY
+// variant, and the backbone strips the combining diacritics (lenis under-ring ◌̥, offglides ◌̯, vowel-quality tacks
+// e̞/o̞, nasal ◌̃). The remaining folds harmonize what the backbone does NOT strip: the fine vowel-QUALITY spread the
+// dialect variation opens up (ɑ~a~ɒ, ɛ~e, ɔ~o~ɒ, ʋ~v~β) and the rhotic. Vowel length + prosody are deferred.
+{
+    "language": "bar", "name": "Bavarian (Boarisch)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p over the de-facto Bavarian-Wikipedia orthography (⟨å⟩→ɔ, the falling diphthongs ⟨ia ua oa⟩→iɐ̯ uɐ̯ oɐ̯, lenis ⟨b d g⟩→b̥ d̥ ɡ̥, r-vocalization, ch front/back split); validated against the wikipron bar_latn_broad (1380) human referee.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "bar.wikipron-bar-broad.tsv", "source": "wikipron bar_latn_broad (Wiktionary-scraped, human, 1380 headwords, variants merged)", "role": "primary" }
+    ],
+    "secondaryGap": "Single source (wikipron bar_latn_broad, human, 1380). kaikki Bavarian is a candidate 2nd but not committed. Bavarian is a dialect CONTINUUM with no codified state orthography — the referee reflects Bavarian-Wikipedia usage across sub-dialects (~1.29 transcription variants/headword), so a single g2p targets the central realization and the eval credits any variant.",
+    "folds": [
+        { "pattern": "ɑ", "replace": "a", "note": "the open vowel ⟨a⟩ = [ɑ]~[a]~[ɒ] across the referee's sub-dialects; fold to [a]" },
+        { "pattern": "ɒ", "replace": "a", "note": "the ⟨å⟩/⟨a⟩ dark realization [ɒ] varies with [ɑ]/[a]; fold" },
+        { "pattern": "ɔ", "replace": "o", "note": "the ⟨å⟩/⟨o⟩ back vowel = [ɔ]~[o]; fold to [o]" },
+        { "pattern": "ɛ", "replace": "e", "note": "the ⟨e⟩/⟨ä⟩ front vowel = [ɛ]~[e]~[e̞] (backbone strips the e̞ tack); fold to [e]" },
+        { "pattern": "ʊ", "replace": "u", "note": "lax [ʊ] vs tense [u] for ⟨u⟩; fold" },
+        { "pattern": "ɪ", "replace": "i", "note": "lax [ɪ] vs tense [i] for ⟨i⟩; fold" },
+        { "pattern": "œ", "replace": "ø", "note": "⟨ö⟩ = [œ]~[ø] (lax/tense); fold to one front rounded" },
+        { "pattern": "ʋ", "replace": "v", "note": "⟨w⟩ realized [ʋ]~[v]~[β]; fold the labial approximant/fricative spread" },
+        { "pattern": "β", "replace": "v", "note": "intervocalic lenition ⟨b/w⟩→[β] vs [ʋ]/[v]; fold" },
+        { "pattern": "ʁ", "replace": "r", "note": "the rhotic is [r]~[ʁ]~[ʀ] (onset); fold to [r] (coda-r vocalizes to ɐ̯ in the engine)" },
+        { "pattern": "ʀ", "replace": "r", "note": "the uvular trill variant of the onset rhotic; fold to [r]" },
+        { "pattern": "ɫ", "replace": "l", "note": "velarized coda [ɫ] vs plain [l]; fold" },
+        { "pattern": "χ", "replace": "x", "note": "the dorsal fricative ⟨ch⟩ = [x]~[χ] (velar/uvular, back context); fold to [x]" },
+        { "pattern": "ʰ", "replace": "", "note": "initial-fortis aspiration [kʰ tʰ] (a spacing modifier, NOT backbone-stripped) is allophonic in Bavarian; strip it (kʰ→k)" }
+    ]
+}
