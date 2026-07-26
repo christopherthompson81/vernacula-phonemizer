@@ -1,0 +1,29 @@
+// Bosnian (bs) data manifest — Indo-European (South Slavic), the third Serbo-Croatian standard, ~2.5M. Bosnian shares
+// the Serbo-Croatian SEGMENTAL g2p with Serbian + Croatian (IDENTICAL grapheme→IPA — the same 30-phoneme system, a
+// linguistic fact; the Serbian engine's phonemizeWord is reused directly, see bosnian.ts). Bosnian is written in BOTH
+// Gaj's Latin (predominant) and Cyrillic, so — unlike Latin-only Croatian — the dual-script tokenizer is exposed. The
+// ONLY Bosnian-specific delta is the CARDINAL NUMBER WORDS: Bosnian uses the SERBIAN lexemes hiljada/milion (NOT the
+// Croatian tisuća/milijun) but the IJEKAVIAN reflex dvjesta (NOT the ekavian Serbian dvesta) — the agreement grammar
+// is shared (serbian/numbers.ts composeSlavicNumber). Pitch accent (4-way) + length are unwritten → deferred (as in
+// Serbian/Croatian). See docs/investigations/bs_native_bringup_investigation.md.
+{
+    "language": "bs",
+    "name": "Bosnian",
+    "script": "Latin + Cyrillic",
+
+    // Bosnian cardinal number words. units/teens/tens are identical to Serbian/Croatian; the deltas from Serbian are
+    // just the ijekavian hundreds dvjesta (vs ekavian dvesta) — Bosnian keeps the Serbian hiljada/milion (vs Croatian
+    // tisuća/milijun) and the -sta hundreds (dvjesta/trista, vs Croatian -sto).
+    "numbers": {
+        "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
+        "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
+        "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
+        "hundreds": ["", "sto", "dvjesta", "trista", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
+        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada" },
+        "million": { "one": "milion", "few": "miliona", "many": "miliona" }
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    }
+}
