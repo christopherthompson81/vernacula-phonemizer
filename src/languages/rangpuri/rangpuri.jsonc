@@ -1,0 +1,132 @@
+// Native canonical-IPA manifest for Rangpuri (rkt) — the Eastern-Indo-Aryan KRNB lect of Rangpur (Bangladesh) +
+// adjacent India. Devanagari abugida (the Kamtapuri/Nepali-activist script; Toulmin's comparative transcription).
+// REUSES the shared Hindi abugida engine (makeNativeHindi) + these KRNB values. Validated against the Toulmin (2006)
+// Appendix-A RP (Rangpur) referee. KRNB deltas from Hindi: DEAFFRICATION (च/छ→s, ज→d͡z, झ→d͡zʱ); VOICED aspirates
+// RETAINED (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ); VOICELESS aspirates positional (ख ठ थ फ keep [ʰ] word-INITIALLY, deaspirate
+// elsewhere — a postRule); inherent vowel [ɔ] (Eastern-Indic), NO phonemic vowel length, ◌ॉ→[æ], व→w, ण→n.
+// See docs/investigations/rkt_krnb_bringup_investigation.md.
+{
+    "language": "rkt",
+    "name": "Rangpuri (KRNB)",
+    "script": "Devanagari",
+    "provenance": "Authored from Toulmin (2006) Appendix A comparative KRNB reflexes (Rangpur/RP point) + standard Eastern-NIA phonology; reuses the shared Devanagari abugida engine. KRNB deltas: deaffrication, voiced-aspirate retention + positional voiceless deaspiration, inherent [ɔ], no vowel length.",
+
+    // Inherent vowel kept as ⟨ə⟩ so the shared schwa-DELETION algorithm fires, then a finalRule maps the survivors to
+    // the Eastern-Indic [ɔ] (खलान→kʰɔlan retains the initial inherent; आगोन→agon deletes the final).
+    "inherentVowel": "ə",
+
+    "consonants": {
+        "क": { "ipa": "k", "note": "velar voiceless" },
+        "ख": { "ipa": "kʰ", "note": "velar voiceless aspirated (KEPT — KRNB keeps voiceless aspiration)" },
+        "ग": { "ipa": "ɡ", "note": "velar voiced" },
+        "घ": { "ipa": "ɡʱ", "note": "voiced aspirate RETAINED (घर→ɡʱɔr)" },
+        "ङ": { "ipa": "ŋ", "note": "velar nasal" },
+        "च": { "ipa": "s", "note": "DEAFFRICATED → [s] (काँच→ka˜s, काचे→kase)" },
+        "छ": { "ipa": "s", "note": "deaffricated" },
+        "ज": { "ipa": "d͡z", "note": "DEAFFRICATED → [d͡z] (गाजोर→gad͡zor)" },
+        "झ": { "ipa": "d͡zʱ", "note": "voiced aspirate: DEAFFRICATED + breathy retained → d͡zʱ (झोल→d͡zʱol)" },
+        "ञ": { "ipa": "ɲ", "note": "palatal nasal" },
+        "ट": { "ipa": "ʈ", "note": "retroflex voiceless" },
+        "ठ": { "ipa": "ʈʰ", "note": "retroflex voiceless aspirated (KEPT initially ठीक→ʈʰik; deaspirated non-initially आठ→aʈ by postRule)" },
+        "ड": { "ipa": "ɖ", "note": "retroflex voiced" },
+        "ढ": { "ipa": "ɖʱ", "note": "voiced aspirate RETAINED → ɖʱ" },
+        "ण": { "ipa": "n", "note": "retroflex nasal merged to alveolar [n] (Eastern-Indic)" },
+        "त": { "ipa": "t̪", "note": "DENTAL voiceless" },
+        "थ": { "ipa": "t̪ʰ", "note": "dental voiceless aspirated (kept)" },
+        "द": { "ipa": "d̪", "note": "dental voiced" },
+        "ध": { "ipa": "d̪ʱ", "note": "voiced aspirate RETAINED → d̪ʱ (धार→d̪ʱar)" },
+        "न": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "प": { "ipa": "p", "note": "labial voiceless" },
+        "फ": { "ipa": "pʰ", "note": "labial voiceless aspirated (kept)" },
+        "ब": { "ipa": "b", "note": "labial voiced" },
+        "भ": { "ipa": "bʱ", "note": "voiced aspirate RETAINED → bʱ (भात→bʱat̪)" },
+        "म": { "ipa": "m", "note": "labial nasal" },
+        "य": { "ipa": "j", "note": "palatal approximant" },
+        "र": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ल": { "ipa": "l", "note": "alveolar lateral" },
+        "व": { "ipa": "w", "note": "labiovelar glide [w] (जुवॉन→d͡zuwæn, जवाब→d͡zɔwap)" },
+        "श": { "ipa": "ʃ", "note": "post-alveolar sibilant" },
+        "ष": { "ipa": "ʃ", "note": "merged to ʃ" },
+        "स": { "ipa": "s", "note": "alveolar sibilant (आकाश→akaʃ but स→s)" },
+        "ह": { "ipa": "ɦ", "note": "voiced glottal fricative" },
+        "ड़": { "ipa": "ɽ", "note": "retroflex flap (nukta ड)" },
+        "ढ़": { "ipa": "ɽ", "note": "retroflex flap (nukta ढ)" },
+        "ज़": { "ipa": "d͡z", "note": "nukta ज" },
+        "फ़": { "ipa": "pʰ", "note": "nukta फ" },
+    },
+
+    // Vowels — NO phonemic length (KRNB lost the Hindi long/short distinction). ◌ॉ / ऑ → [æ] (Toulmin's notation).
+    "independentVowels": {
+        "अ": { "ipa": "ɔ", "note": "inherent-quality short (Eastern-Indic)" },
+        "आ": { "ipa": "a", "note": "open" },
+        "इ": { "ipa": "i", "note": "close front" },
+        "ई": { "ipa": "i", "note": "close front (no length contrast)" },
+        "उ": { "ipa": "u", "note": "close back" },
+        "ऊ": { "ipa": "u", "note": "close back (no length)" },
+        "ऋ": { "ipa": "ɾi", "note": "vocalic r" },
+        "ए": { "ipa": "e", "note": "close-mid front (e ~ æ ~ ei, folded)" },
+        "ऐ": { "ipa": "ɔi", "note": "diphthong" },
+        "ओ": { "ipa": "o", "note": "close-mid back" },
+        "औ": { "ipa": "ɔu", "note": "diphthong" },
+        "ऑ": { "ipa": "æ", "note": "candra-o → [æ] (Toulmin notation for KRNB æ)" },
+    },
+    "vowelSigns": {
+        "ा": { "ipa": "a" },
+        "ि": { "ipa": "i" },
+        "ी": { "ipa": "i" },
+        "ु": { "ipa": "u" },
+        "ू": { "ipa": "u" },
+        "ृ": { "ipa": "ɾi" },
+        "े": { "ipa": "e" },
+        "ै": { "ipa": "ɔi" },
+        "ो": { "ipa": "o" },
+        "ौ": { "ipa": "ɔu" },
+        "ॉ": { "ipa": "æ" },
+        "ॅ": { "ipa": "æ" },
+    },
+
+    "signs": {
+        "virama": { "char": "्", "effect": "suppressInherentVowel", "note": "halant" },
+        "anusvara": { "char": "ं", "effect": "nasalizeVowel", "note": "shared engine does vowel-nasalization + homorganic-nasal-before-a-stop. KRNB actually wants a plain [ŋ] (Eastern-Indic: आंटी→aŋʈi, आंरा→aŋra) — a shared-engine limitation (the effect field isn't dispatched), deferred (~5 words)." },
+        "chandrabindu": { "char": "ँ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel (काँच→ka˜s)" },
+        "visarga": { "char": "ः", "effect": "appendH", "note": "→ [h]" },
+        "nukta": { "char": "़", "effect": "composeNukta", "note": "combines with the preceding consonant" },
+    },
+
+    "schwaDeletion": {
+        "deleteWordFinal": true,
+        "retainInMonosyllable": true,
+        "medialRule": "ohala-VCaCV",
+        "note": "the inherent [ɔ] deletes word-finally (agon: न final bare) and medially in VCɔCV; monosyllables retain.",
+    },
+
+    "postRules": [
+        {
+            "from": "(?<!^)(t̪|[kʈp])ʰ",
+            "to": "$1",
+            "note": "POSITIONAL deaspiration: a voiceless aspirate ⟨ख ठ थ फ⟩ keeps [ʰ] word-INITIALLY (ठीक→ʈʰik) but deaspirates elsewhere (आठ→aʈ, पाथर→pat̪or, हाथ→hat̪). Only ʰ (voiceless) — voiced ʱ (घ झ ढ ध भ) is always retained.",
+        },
+        {
+            "from": "((?:t̪ʰ|d͡z|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪|ʈ|ɖ))\\1(?!͡)",
+            "to": "$1ː",
+            "note": "geminate → single + length (fleet Indic convention)",
+        },
+    ],
+    "finalRules": [
+        { "from": "ə", "to": "ɔ", "note": "surviving inherent schwa → Eastern-Indic [ɔ] (after schwa-deletion)" },
+    ],
+
+    // Numbers deferred (the word referee doesn't exercise them). Minimal placeholder structure.
+    "numbers": {
+        "units": ["शून्य", "एक", "दुइ", "तिन", "चाइर", "पाँच", "छय", "सात", "आठ", "नय"],
+        "teens": ["दस", "एगारो", "बारो", "तेरो", "चौद्द", "पन्द्र", "षोल", "सतारो", "आठारो", "उनैस"],
+        "tens": { "20": "बिस", "30": "तिस", "40": "चाइलिस", "50": "पचास", "60": "षाइठ", "70": "सत्तइर", "80": "आइस", "90": "नब्बइ" },
+        "compound": {},
+        "magnitudes": { "hundred": "सय", "thousand": "हाजार", "lakh": "लाख", "crore": "कोटि" },
+        "grouping": "indian-lakh-crore",
+        "decimalWord": "दशमिक",
+    },
+
+    "clausePunctuation": { "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": "," },
+    "nasalVowelsAreShort": true,
+}

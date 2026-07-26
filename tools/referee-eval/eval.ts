@@ -26,6 +26,7 @@ import { phonemizeWord as oc } from "../../src/languages/occitan/occitan.ts";
 import { phonemizeWord as mi } from "../../src/languages/maori/maori.ts";
 import { phonemizeWord as ast } from "../../src/languages/asturian/asturian.ts";
 import { phonemizeWord as ht } from "../../src/languages/haitian/haitian.ts";
+import { phonemizeWord as rkt } from "../../src/languages/rangpuri/rangpuri.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
 // RULE-ONLY for en-GB: the shipped phonemizeWord applies BATH/CLOTH/yod/PALM lexical-set word lists MINED FROM
 // this wikipron UK referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
@@ -208,6 +209,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     mi,
     ast,
     ht,
+    rkt,
     cmn,
     nl,
     az,
