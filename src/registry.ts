@@ -101,6 +101,7 @@ import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
 import { createSantali } from "./languages/santali/santali.ts";
+import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -454,6 +455,9 @@ function build(lang: string): Phonemizer {
         // Santali (ᱥᱟᱱᱛᱟᱲᱤ) — Munda (Austroasiatic), the Ol Chiki alphabet; ᱷ aspiration, ᱹ→ə, ᱸ nasal, word-final CHECKED stops.
         case "sat":
             return createSantali();
+        // K'iche' (Qatzijob'al) — the fleet's first MAYAN language; ejective series b'→ɓ k'/q'/tz'/ch', aspirated plain stops, x→ʃ j→x.
+        case "quc":
+            return createKichee();
         // Bashkir (Башҡорт теле) — Kipchak Turkic; interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, vowel shift; Russian loans routed to ru.
         case "ba":
             return createBashkir();

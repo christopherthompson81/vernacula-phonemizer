@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **163 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **164 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,9 +60,9 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-163 languages spanning Albanian, Armenian, Austroasiatic,
+164 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Koreanic,
-Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
+Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
 Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
@@ -93,6 +93,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Japonic | Japanese `ja` |
 | Kartvelian | Georgian `ka` (its own family; Mkhedruli script, three-way ejective/aspirated/voiced stops) |
 | Koreanic | Korean `ko` |
+| Mayan | K'iche' `quc` (Qatzijob'al; the ejective/glottalized series b'/k'/q'/tz'/ch' vs the aspirated plain stops, uvular q) |
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande; Latin + N'Ko), Chichewa `nya`, Ewe `ee` (Gbe, Kwa; labial-velars, ƒ/ʋ bilabials, toneless), Fula `ff` (Atlantic; Latin + Adlam), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
