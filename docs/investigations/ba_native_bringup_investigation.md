@@ -56,3 +56,23 @@ Russian~Bashkir HYBRID — Russian palatalization but LESS vowel reduction, ukra
 behaviour is correct for real text. The heuristic catches the harmony-violating loans
 (~90 in the referee) but misses HARMONIC loans (автобус all-back) — a loan lexicon is
 the deferred fix. 🔷 single-source-family; referee-limited.
+
+## Run 3 — 2-agent review
+
+- **CODE (HIGH): stress dropped on words ending in ⟨и⟩/⟨ү⟩** — `IPA_VOWEL` (the stress
+  placer's vowel set) was populated from the DOC values, missing the code's emitted [i]
+  and the ⟨ү⟩ onset, so биш→biʃ / ил→il got no stress (invisible: stress is folded). FIX:
+  reconcile IPA_VOWEL to the actually-emitted vowels.
+- **PHONOLOGY (HIGH): ⟨и⟩ is harmonically NEUTRAL** — it occurs freely in back-vowel
+  Arabic/Persian loans (тарих, иман, ислам), so "back + и" is NOT a harmony violation.
+  `isRussianLoan` was false-positiving this whole class (33 of 90 flagged words are read
+  NATIVE by the referee). FIX: drop ⟨и⟩ from FRONT_V (keep only е/э — genuinely front,
+  never in native back words). Tradeoff: all-back+neutral loans like Украина now slip the
+  heuristic (the harmonic-loan class a lexicon must catch — already deferred). Internally
+  consistent now (the dark-л BACK set already treated и as neutral).
+- **PHONOLOGY (MED): ⟨ү⟩→[y]** (was [ɵ], which inverted the height vs ⟨ө⟩); **⟨ө⟩→[ø]**;
+  **⟨ш ж⟩→[ʃ ʒ]** (plain post-alveolar, not retroflex). Canonical-output fixes (folded in
+  eval). Symbol accuracy 80.9→81.1%. Docstring и→[e]/у→[o] corrected to и→[i]/у→[u].
+
+All native-g2p corrections; the referee-limited framing stands (40.8% folded, loan-noisy).
+Native goldens updated + a stress golden pinned (биш→ˈbiʃ). All 1278 repo tests pass.
