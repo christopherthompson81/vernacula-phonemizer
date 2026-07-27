@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **151 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **152 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -23,8 +23,8 @@ phonemize("Україна", "uk");       // ukrajina
 
 ## Languages
 
-151 languages spanning Armenian, Austroasiatic,
-Austronesian, Baltic, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
+152 languages spanning Armenian, Austroasiatic,
+Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
@@ -40,6 +40,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
 | Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
+| Berber (Amazigh) | Tashelhit `shi` (Shilha; Berber Latin alphabet) |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Chadic | Hausa `ha` |
 | Creole | Haitian Creole `ht` (French-lexified), Kabuverdianu `kea` (Portuguese-lexified), Nigerian Pidgin `pcm` (English-lexified) |

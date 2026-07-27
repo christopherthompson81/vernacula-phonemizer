@@ -1,0 +1,20 @@
+// Tashelhit / Shilha (shi) — Berber (Amazigh), SW Morocco. Input = the Berber Latin alphabet. Referees: wikipron
+// shi_latn_broad (PRIMARY, segment-tokenized, 500) + kaikki Tashelhit (SECONDARY, 601) — but BOTH are
+// Wiktionary-derived → CORRELATED (single-source-family, not independent), so 🔷 not ✅. `segmentJoin` strips the
+// referee's per-phone spaces. The Berber-Latin orthography is near-1:1 phonemic → compared almost directly; the
+// folds harmonize the geminate-emphatic notation (CˤCˤ vs Cˤː) + a couple of rhotic/gemination conventions.
+{
+    "language": "shi", "name": "Tashelhit (Shilha / Taclḥit)", "script": "Latin (Berber Latin alphabet)",
+    "provenance": "Authored Berber-Latin→IPA grapheme converter (emphatics ḍ→dˤ etc., ɣ, x→χ, ɛ→ʕ, c→ʃ; labialisation C+ʷ→Cʷ; gemination doubling→Cː) from the Berber Latin orthography; validated against wikipron shi_latn + kaikki Tashelhit.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "shi.wikipron-shi-latn.tsv", "source": "wikipron shi_latn_broad (Wiktionary-scraped, human, Latin, variants merged, 500)", "role": "primary" },
+        { "file": "shi.kaikki-tashelhit.tsv", "source": "kaikki Tashelhit (Wiktionary, Latin, variants merged, 601) — CORRELATED with the primary (both Wiktionary)", "role": "secondary" }
+    ],
+    "secondaryGap": "Both referees are Wiktionary-derived (wikipron scrapes Wiktionary; kaikki IS Wiktionary) → CORRELATED single-source-family, not an independent triangulation. So 🔷 (a systematic Wiktionary error would go undetected), despite two files. No epitran shi. The Berber Latin orthography is deterministic/phonemic, so the converter generalises past the ~600 referee words.",
+    "folds": [
+        { "pattern": "(.)ˤ\\1ˤ", "replace": "$1ˤ", "note": "geminate emphatic: the referee writes a long emphatic as CˤCˤ (two segments); we emit Cˤː (length backbone-stripped → Cˤ). Collapse the referee's doubled emphatic → Cˤ so tˤtˤ~tˤː match" },
+        { "pattern": "ʁ", "replace": "ɣ", "note": "the voiced uvular ⟨ɣ⟩ = [ʁ]~[ɣ] (fricative, speaker/position-variable); we emit [ɣ], fold the uvular variant" },
+        { "pattern": "ʢ", "replace": "ʕ", "note": "the pharyngeal ⟨ɛ⟩ = [ʕ]~[ʢ] (voiced pharyngeal fricative ~ epiglottal); we emit [ʕ], fold" }
+    ]
+}
