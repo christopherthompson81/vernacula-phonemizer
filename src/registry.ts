@@ -99,6 +99,7 @@ import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
 import { createBavarian } from "./languages/bavarian/bavarian.ts";
 import { createFoochow } from "./languages/foochow/foochow.ts";
+import { createHmong } from "./languages/hmong/hmong.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -429,6 +430,9 @@ function build(lang: string): Phonemizer {
         // Min Dong / Eastern Min (Fuzhou) — Sinitic, tonal; Bàng-uâ-cê (BUC) → IPA converter (Phase 1: segmental + citation tone).
         case "cdo":
             return createFoochow();
+        // Hmong (White Hmong / Hmoob Dawb) — Hmong-Mien, tonal; RPA → IPA (final consonant letter = tone).
+        case "hmn":
+            return createHmong();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
