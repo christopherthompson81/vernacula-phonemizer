@@ -1,0 +1,18 @@
+// Santali / ᱥᱟᱱᱛᱟᱲᱤ (sat) — Munda (Austroasiatic), the OL CHIKI alphabet. Referee: kaikki Santali (HUMAN, Wiktionary,
+// 490 Ol Chiki headwords with IPA — the ONLY machine referee; no wikipron/epitran sat). See docs/investigations/sat_native_bringup_investigation.md.
+{
+    "language": "sat", "name": "Santali (ᱥᱟᱱᱛᱟᱲᱤ)", "script": "Ol Chiki",
+    "provenance": "Authored Ol Chiki→IPA grapheme scan (6 vowels, palatal ⟨ᱪ ᱡ⟩→c/ɟ, retroflex ⟨ᱴ ᱰ ᱬ ᱲ⟩; ⟨ᱷ⟩ aspiration, ⟨ᱹ⟩ vowel-mod ə, ⟨ᱸ⟩ nasal, ⟨ᱼ ᱽ⟩ + word-final checked stops) from Santali phonology; validated against kaikki.",
+    "referees": [
+        { "file": "sat.kaikki-santali.tsv", "source": "kaikki Santali (Wiktionary, HUMAN, 490 Ol Chiki)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source — kaikki Santali (490 Ol Chiki IPA headwords) is the ONLY machine referee (no wikipron/epitran sat). Phrase- and loan-heavy (Bengali/Hindi/English).",
+    "folds": [
+        { "pattern": "‿", "replace": "", "note": "word-LINKING undertie (U+203F) the referee puts between the words of a multi-word phrase — prosodic, not segmental" },
+        { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the referee transcription (san.ta.ɽi)" },
+        { "pattern": "ʱ", "replace": "ʰ", "note": "voiced-aspirate NOTATION: our breathy [bʱ dʱ] (Munda/Indic-correct) ~ the referee's [bʰ dʰ]" },
+        { "pattern": "d͡?ʒ", "replace": "ɟ", "note": "⟨ᱡ⟩ AAJ: the palatal STOP [ɟ] (ours) ~ the affricate [d͡ʒ] (referee) — the /ɟ/~/d͡ʒ/ realization" },
+        { "pattern": "t͡?ʃ", "replace": "c", "note": "⟨ᱪ⟩ UC: the palatal STOP [c] (ours) ~ the affricate [t͡ʃ] (referee)" },
+        { "pattern": "[ʼʔ̚]", "replace": "", "note": "the CHECKED/glottalized-final NOTATION — the referee writes it wildly inconsistently ([kʼ]~[k̚ʔ]~[kˈ]), so fold the glottal marker on both sides and compare the reliable signal (the final DEVOICING ɡ→k, d→t, which our rule still applies)" }
+    ]
+}

@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **160 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **161 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -59,14 +59,14 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-160 languages spanning Albanian, Armenian, Austroasiatic,
+161 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
 Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
 Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Myanmar, Khmer, Thai, Lao,
-Han, Hiragana/Katakana/Kanji, Hangul, Javanese (Aksara Jawa), Aksara Sunda and Tibetan scripts.
+Han, Hiragana/Katakana/Kanji, Hangul, Javanese (Aksara Jawa), Aksara Sunda, Ol Chiki and Tibetan scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
 outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md).
@@ -75,7 +75,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 |---|---|
 | Albanian | Albanian `sq` (Shqip, Tosk-based standard; its own Indo-European branch — digraph-rich `dh th sh zh xh`, the palatals `gj q`, 7 vowels incl. `ë`→ə) |
 | Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
-| Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
+| Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal), Santali `sat` (Munda; Ol Chiki script, word-final checked stops) |
 | Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su` (Latin + Aksara Sunda), Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
 | Berber (Amazigh) | Tashelhit `shi` (Shilha; Berber Latin + Tifinagh ⵜⵉⴼⵉⵏⴰⵖ) |
