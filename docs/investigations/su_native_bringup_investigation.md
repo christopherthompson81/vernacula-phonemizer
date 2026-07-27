@@ -40,3 +40,23 @@ script single letters ᮊ→ka; we have a Latin-only front-end), the loanword �
 inconsistent hiatus glides (siam→sijam), and final-obstruent devoicing in Arabic loans (sujud). Deferred: an
 Aksara Sunda front-end (the Javanese Aksara-Jawa pattern), and the loan-⟨e⟩ quality (unrecoverable from spelling,
 as in Indonesian).
+
+## Aksara Sunda front-end (2026-07-26)
+
+Added **Aksara Sunda** (ᮃᮊ᮪ᮞᮛ, U+1B80–1BBF) as a second input script — the revived traditional Sundanese abugida
+(Sunda Baku, standardised 1990s; official in West Java). The Tashelhit/Fula pattern extended to a Brahmic ABUGIDA
+(cf. the Javanese Aksara-Jawa front-end): `sundaAksara.ts` **assembles the abugida back into the Latin orthography**
+and reuses the existing su g2p (digraphs eu/ng/ny, glottal insertion, penult stress, numbers) → identical IPA.
+
+Abugida model handled: a base consonant (ngalagéna) carries an inherent /a/, replaced by a vowel sign (rarangkén —
+panghulu→i, panyuku→u, panaélaéng→é [e], panolong→o, **pamepet→e [ə]**, **paneuleung→eu [ɨ]**) or suppressed by
+pamaéh/virama (a bare consonant, e.g. a final /n/ written NA+pamaéh); medial signs (panyakra→ -r-, pamingkal→ -y-,
+panyiku→ -l-) insert a glide; final signs close the syllable (panyecek→ -ng, panglayar→ -r, pangwisad→ -h, the
+final-k/final-m letters). Aksara Sunda digits (U+1BB0–1BB9) normalise to ASCII so the number path fires.
+
+**Validation = self-consistency** (no Aksara-Sunda referee — kaikki has only ~7 native-script entries): a
+9-mechanism feature test (each vowel sign, virama coda, each final, a medial) + 10 real Sundanese words hand-encoded
+to Aksara Sunda **all produce IPA byte-identical to their Latin spelling** (basa, sunda, aksara, wilujeng, urang,
+kuring, hadé, cai, leutik, imah, beureum, ngaran, miring). The Aksara-Sunda path thus inherits the Latin path's
+kaikki-validated accuracy. Aksara Sunda is the 4th fleet second-script and the 2nd abugida front-end (after
+Aksara Jawa).
