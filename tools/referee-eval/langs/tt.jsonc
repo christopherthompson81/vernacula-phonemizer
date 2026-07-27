@@ -1,0 +1,22 @@
+// Tatar / Татар теле (tt) — Kipchak Turkic, CYRILLIC (official). ONLY referee: kaikki Tatar (HUMAN, Wiktionary, 69
+// Cyrillic headwords with IPA) — THIN, single-source (no wikipron tt, no epitran tat mapping). Vowel-harmony backing
+// of ⟨к г⟩→[q ʁ] (back) / [k ɡ] (front). See docs/investigations/tt_native_bringup_investigation.md.
+{
+    "language": "tt", "name": "Tatar (Татар теле)", "script": "Cyrillic",
+    "provenance": "Authored Cyrillic→IPA g2p (harmony-driven ⟨к⟩→q/k ⟨г⟩→ʁ/ɡ; ⟨ә⟩→æ ⟨ө⟩→ø ⟨ү⟩→y ⟨ы⟩→ɨ; ⟨җ⟩→d͡ʑ ⟨ң⟩→ŋ ⟨һ⟩→h ⟨ч⟩→t͡ɕ; iotated ⟨я ю ё⟩; final stress) from Standard Tatar phonology; validated against the thin kaikki set.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "tt.kaikki-tatar.tsv", "source": "kaikki Tatar (Wiktionary, HUMAN, 69 Cyrillic)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 THIN single-source — kaikki Tatar (69 Cyrillic IPA headwords) is the ONLY machine referee (no wikipron tt/tat, no epitran tat-Cyrl mapping). Some entries are Russian-loan pronunciations (адрес→ˈädrʲɪs — palatalized, front ä). The map is the standard Tatar phonology.",
+    "folds": [
+        { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the kaikki transcription — not segmental" },
+        { "pattern": "ɵ", "replace": "ø", "note": "⟨ө⟩: [ø] (ours) ~ [ɵ] (referee) — mid front/central rounded notation" },
+        { "pattern": "[ɪɤ]", "replace": "ɨ", "note": "⟨ы⟩: [ɨ] (ours) ~ [ɪ]/[ɤ] (referee) — the high central/back unrounded reduced vowel" },
+        { "pattern": "d͡?[ʑʒ]", "replace": "ʑ", "note": "⟨җ⟩: fricative [ʑ] (ours, Kazan standard) ~ affricate [d͡ʑ]/[d͡ʒ] (Mishar/referee, tie stripped by the backbone) — the /ʑ/~/d͡ʑ/ dialect realization" },
+        { "pattern": "ʲ", "replace": "", "note": "consonant palatalization — a RUSSIAN-loan phonetic detail the referee marks (адрес→adrʲɪs) that native Tatar lacks; not a native contrast" },
+        { "pattern": "ä", "replace": "a", "note": "⟨а⟩: the referee's front [ä] in Russian-loan/mixed-harmony words ~ our [a]" },
+        { "pattern": "χ", "replace": "x", "note": "⟨х⟩: [x] (ours) ~ [χ] (uvular, referee near back vowels) — dorsal fricative backness" },
+        { "pattern": "t͡?ʃ", "replace": "ɕ", "note": "⟨ч⟩: the Kazan-standard fricative [ɕ] (ours, consistent with ⟨җ⟩→ʑ) ~ the affricate [t͡ʃ] (Mishar/referee) — the /ɕ/~/t͡ɕ/ dialect realization" }
+    ]
+}
