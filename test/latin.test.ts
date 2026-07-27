@@ -34,6 +34,7 @@ describe("Latin (Classical) canonical IPA", () => {
         expect(phonemizeWord("aquam")).toBe("ˈakʷãː"); // final ⟨-am⟩→[ãː]
         expect(phonemizeWord("Iūlius")).toBe("ˈjuːliʊs"); // word-initial ⟨I⟩+V→[j]
         expect(phonemizeWord("nātiō")).toBe("ˈnaːtioː"); // light penult (⟨ti⟩ hiatus) → antepenult stress
+        expect(phonemizeWord("coëunda")).toBe("koeˈʊnda"); // diaeresis ⟨ë⟩ marks hiatus → TENSE [e] (not lax ɛ)
     });
 
     test("weight stress with nasalized nuclei, diphthongs, and muta-cum-liquida", () => {

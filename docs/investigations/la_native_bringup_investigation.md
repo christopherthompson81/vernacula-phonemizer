@@ -53,7 +53,7 @@ array → post-processing (nasal assimilation, dark-l, weight stress). First pas
 LAX (alia→alɪa) — the referee has TENSE [i e] before a vowel (Allen's close-in-
 hiatus rule) → added hiatus tensing (short V before a vowel letter → tense). Also
 `rh→rʰ` (aspirated, not plain r) and nasalizeLong must use the TENSE base
-(-em→ẽː not ɛ̃ː). → **91.7% folded / 98.9% symbol**.
+(-em→ẽː not ɛ̃ː). → **92.1% folded / 98.9% symbol**.
 
 Five more clean systematic fixes (each mined from the top residual classes):
 - word-initial `gn`→[n] (g silent; gnātus→naːtʊs)
@@ -65,10 +65,22 @@ Five more clean systematic fixes (each mined from the top residual classes):
   short variants (matrī̆ma appears as iː AND ɪ) → a wash; keep the macron's LONG
   citation form, drop the breve.
 
-**Final: 91.7% folded / 98.9% symbol** vs wikipron Classical (44,907). Residual =
+**Final: 92.1% folded / 98.9% symbol** vs wikipron Classical (44,907). Residual =
 referee QUANTITY inconsistency (Casīna macron-but-short; common-quantity marks) +
 intervocalic `h`-drop variants (both in the referee) + rare Greek/Hebrew loans
 (ou→uː acoustica, Iō, mahomētāna) + in-/con- prefix assimilation. All 1254 repo
 tests pass; typecheck clean. Verdict 🔷 human single-source-FAMILY (see Run 1).
 Deferred: the Ecclesiastical tradition (a future `tradition` param), numbers
 (Roman numerals + cardinals), a lexical macron-quantity source.
+
+## Run 3 — final review (pre-merge)
+
+Adversarial review before merge found one real low-severity bug: the DIAERESIS
+vowels ⟨ë ï ö ü ÿ⟩ never received hiatus tensing (they were keyed only in SHORT,
+not TENSE) → coëunda→koɛʊnda, poëta→poɛta. But a diaeresis EXISTS to mark hiatus,
+so those vowels are TENSE by definition (referee: coëunda→koeʊnda). Fix: add the
+diaeresis vowels to TENSE + tense them unconditionally (not gated on the next char,
+since the hiatus is with the PRECEDING vowel). → **91.7% → 92.1% folded**. Floor
+nudged 0.90→0.88 (the reviewer flagged 1.7pp headroom as tight). Everything else
+(robustness on empty/all-consonant/uppercase/stray-mark input, the placeStress
+fixes, the 2 non-circular folds, wiring) verified clean and merge-ready.

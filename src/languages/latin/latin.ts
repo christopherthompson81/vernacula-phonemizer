@@ -16,7 +16,8 @@ import { assembleClauses } from "../../core/clauses.ts";
 const SHORT: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", y: "y", ë: "ɛ", ï: "ɪ", ö: "ɔ", ü: "ʊ", ÿ: "y" };
 const LONG: Record<string, string> = { "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː", "ȳ": "yː" };
 // A short vowel in HIATUS (immediately before another vowel) is TENSE/close, not lax (Allen: alia→alia, creātūra→kreaːtuːra).
-const TENSE: Record<string, string> = { a: "a", e: "e", i: "i", o: "o", u: "u", y: "y" };
+// The diaeresis vowels ⟨ë ï ö ü ÿ⟩ EXIST to mark hiatus (coëunda, poëta), so they tense on the same rule.
+const TENSE: Record<string, string> = { a: "a", e: "e", i: "i", o: "o", u: "u", y: "y", "ë": "e", "ï": "i", "ö": "o", "ü": "u", "ÿ": "y" };
 // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ handled below (dark/clear).
 const CONS: Record<string, string> = {
     b: "b", c: "k", d: "d", f: "f", g: "ɡ", h: "h", k: "k", m: "m", n: "n",
@@ -99,8 +100,10 @@ export function phonemizeWord(word: string): string {
         if (SHORT[c] !== undefined) {
             // Hiatus tensing — but NOT before an ⟨i j⟩ that will itself surface as a GLIDE (eius→ɛjjʊs, not ejjʊs):
             // a following intervocalic ⟨i j⟩ (vowel after it) is a consonant [j], so the syllable is closed, not open.
+            // A DIAERESIS vowel (ë ï ö ü ÿ) is post-hiatus by definition (poëta), so it tenses unconditionally.
             const nextGlide = (n1 === "i" || n1 === "j") && isVowelLetter(at(i + 2));
-            segs.push(TENSE[c] !== undefined && isVowelLetter(n1) && !nextGlide ? TENSE[c]! : SHORT[c]!);
+            const hiatus = "ëïöüÿ".includes(c) || (isVowelLetter(n1) && !nextGlide);
+            segs.push(TENSE[c] !== undefined && hiatus ? TENSE[c]! : SHORT[c]!);
             i += 1; continue;
         }
         // ── Single consonants ───────────────────────────────────────────────
