@@ -1,0 +1,30 @@
+// Native canonical-IPA data manifest for Standard Albanian (sq) — Shqip (Tosk-based standard), Latin (36 letters).
+// espeak-independent. Indo-European, its OWN branch (the fleet's first). Fairly phonemic, with a rich DIGRAPH system:
+// ⟨dh⟩→ð, ⟨th⟩→θ, ⟨sh⟩→ʃ, ⟨zh⟩→ʒ, ⟨xh⟩→d͡ʒ, ⟨gj⟩→ɟ (voiced palatal stop), ⟨nj⟩→ɲ, ⟨ll⟩→ɫ (dark l), ⟨rr⟩→r (trill).
+// Singles: ⟨q⟩→c (voiceless palatal), ⟨c⟩→t͡s, ⟨ç⟩→t͡ʃ, ⟨x⟩→d͡z, ⟨j⟩→j, ⟨r⟩→ɾ (tap), ⟨l⟩→l. Seven vowels
+// ⟨a e i o u y ë⟩ with ⟨e⟩→[ɛ], ⟨y⟩→[y] (front rounded), ⟨ë⟩→[ə] (schwa). A longest-match scan + penultimate stress.
+// Engine: albanian.ts. See docs/investigations/sq_native_bringup_investigation.md.
+{
+    "language": "sq",
+    "name": "Albanian (Shqip)",
+    "script": "Latin",
+
+    // Scanned LONGEST-FIRST (all two-letter). The fricative/affricate/palatal/liquid digraphs.
+    "digraphs": {
+        "dh": "ð", "th": "θ", "sh": "ʃ", "zh": "ʒ", "xh": "d͡ʒ",
+        "gj": "ɟ", "nj": "ɲ", "ll": "ɫ", "rr": "r"
+    },
+
+    // Single graphemes. The 7 vowels (⟨e⟩→ɛ, ⟨y⟩→y, ⟨ë⟩→ə) + the consonants (⟨q⟩→c palatal, ⟨c⟩→t͡s, ⟨ç⟩→t͡ʃ,
+    // ⟨x⟩→d͡z, ⟨r⟩→ɾ tap, ⟨l⟩→l).
+    "graphemes": {
+        "a": "a", "e": "ɛ", "i": "i", "o": "o", "u": "u", "y": "y", "ë": "ə",
+        "b": "b", "c": "t͡s", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j",
+        "k": "k", "l": "l", "m": "m", "n": "n", "p": "p", "q": "c", "r": "ɾ", "s": "s",
+        "t": "t", "v": "v", "x": "d͡z", "z": "z"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

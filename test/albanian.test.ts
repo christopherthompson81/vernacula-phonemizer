@@ -1,0 +1,37 @@
+import { describe, expect, test } from "vitest";
+
+import { phonemizeWord } from "../src/languages/albanian/albanian.ts";
+
+// Canonical-IPA goldens for Standard Albanian (sq) — Shqip (Tosk-based), Latin, the fleet's first Albanian-branch
+// (Indo-European) language. Signature: a rich DIGRAPH system — ⟨dh th sh zh xh⟩→[ð θ ʃ ʒ d͡ʒ], the PALATALS ⟨gj⟩→[ɟ]
+// / ⟨q⟩→[c], ⟨nj⟩→[ɲ], ⟨ll⟩→[ɫ] (dark l), ⟨rr⟩→[r] (trill) vs ⟨r⟩→[ɾ] (tap); ⟨c⟩→[t͡s], ⟨ç⟩→[t͡ʃ], ⟨x⟩→[d͡z];
+// the 7-vowel system ⟨e⟩→[ɛ], ⟨y⟩→[y], ⟨ë⟩→[ə]. Penultimate stress. Validated at 97.3% symbol (87.8% folded) vs
+// kaikki + 98.5% / 90.2% vs epitran sqi-Latn. See docs/investigations/sq_native_bringup_investigation.md.
+describe("Albanian (Shqip) canonical IPA", () => {
+    test("the digraph fricatives ⟨dh th sh zh xh⟩", () => {
+        expect(phonemizeWord("dhe")).toBe("ˈðɛ"); // 'and/earth' — ⟨dh⟩→ð, ⟨e⟩→ɛ
+        expect(phonemizeWord("thikë")).toBe("ˈθikə"); // 'knife' — ⟨th⟩→θ, ⟨ë⟩→ə
+        expect(phonemizeWord("xhaxha")).toBe("ˈd͡ʒad͡ʒa"); // 'uncle' — ⟨xh⟩→d͡ʒ
+    });
+
+    test("the palatals ⟨gj⟩→ɟ, ⟨q⟩→c, ⟨nj⟩→ɲ; ⟨ll⟩→ɫ, ⟨rr⟩→r", () => {
+        expect(phonemizeWord("gjuha")).toBe("ˈɟuha"); // 'the tongue/language' — ⟨gj⟩→ɟ (voiced palatal stop)
+        expect(phonemizeWord("shqip")).toBe("ˈʃcip"); // 'Albanian' — ⟨sh⟩→ʃ, ⟨q⟩→c; stress before the whole ⟨ʃc⟩ onset
+        expect(phonemizeWord("rrugë")).toBe("ˈruɡə"); // 'street' — ⟨rr⟩→r (trill)
+        expect(phonemizeWord("llullë")).toBe("ˈɫuɫə"); // 'pipe' — ⟨ll⟩→ɫ (dark l)
+    });
+
+    test("the affricates ⟨c ç x⟩ and the 7-vowel system", () => {
+        expect(phonemizeWord("çaj")).toBe("ˈt͡ʃaj"); // 'tea' — ⟨ç⟩→t͡ʃ
+        expect(phonemizeWord("xixë")).toBe("ˈd͡zid͡zə"); // 'spark' — ⟨x⟩→d͡z
+        expect(phonemizeWord("gjysh")).toBe("ˈɟyʃ"); // 'grandfather' — ⟨y⟩→y (front rounded)
+        expect(phonemizeWord("ëmbël")).toBe("ˈəmbəl"); // 'sweet' — ⟨ë⟩→ə (schwa)
+    });
+
+    test("penultimate stress + maximal-onset syllabification", () => {
+        expect(phonemizeWord("Shqipëri")).toBe("ʃciˈpəɾi"); // 'Albania' — stress on the penult ⟨ë⟩→ə, single ⟨r⟩→ɾ tap
+        expect(phonemizeWord("qumësht")).toBe("ˈcuməʃt"); // 'milk'
+        expect(phonemizeWord("flamur")).toBe("ˈflamuɾ"); // 'flag' — ˈ before the whole ⟨fl⟩ onset, not fˈl
+        expect(phonemizeWord("vendlindja")).toBe("vɛndˈlindja"); // 'birthplace' — ⟨dl⟩ is not an onset, so ˈ before ⟨l⟩ (nd is coda)
+    });
+});
