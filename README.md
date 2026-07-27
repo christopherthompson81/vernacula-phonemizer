@@ -40,9 +40,11 @@ phonemize("አማርኛ", "am");           // Geʽez        → amaɾɲa
 phonemize("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
 phonemize("ខ្មែរ", "km");          // Khmer        → kʰmae
 phonemize("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
-phonemize("世界", "cmn");          // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
-phonemize("日本語", "ja");          // Kana/Kanji   → niho̞ŋɡo̞
-phonemize("한국어", "ko");          // Hangul       → hˈɐnɡuɡɘ
+phonemize("世界", "cmn");            // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
+phonemize("ひらがな", "ja");           // Hiragana     → çiɾäɡäꜜnä
+phonemize("カタカナ", "ja");           // Katakana     → kätäkänä
+phonemize("日本語", "ja");            // Kanji        → niho̞ŋɡo̞
+phonemize("한국어", "ko");            // Hangul       → hˈɐnɡuɡɘ
 phonemize("ꦗꦮ", "jv");            // Javanese     → d͡ʒˈɔwɔ
 ```
 
@@ -54,7 +56,7 @@ Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semi
 Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Arabic and the extended Perso-Arabic (Persian, Urdu/Shahmukhi, Sindhi), Geʽez, Myanmar,
-Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
+Han, Hiragana/Katakana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
 outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md).
@@ -65,7 +67,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
 | Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
-| Berber (Amazigh) | Tashelhit `shi` (Shilha; Berber Latin alphabet) |
+| Berber (Amazigh) | Tashelhit `shi` (Shilha; Berber Latin + Tifinagh ⵜⵉⴼⵉⵏⴰⵖ) |
 | Celtic | Irish `ga`, Welsh `cy` |
 | Chadic | Hausa `ha` |
 | Creole | Haitian Creole `ht` (French-lexified), Kabuverdianu `kea` (Portuguese-lexified), Nigerian Pidgin `pcm` (English-lexified) |
