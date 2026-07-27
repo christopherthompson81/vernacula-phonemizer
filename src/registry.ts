@@ -100,6 +100,7 @@ import { createGuarani } from "./languages/guarani/guarani.ts";
 import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
+import { createLatin } from "./languages/latin/latin.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
@@ -440,6 +441,9 @@ function build(lang: string): Phonemizer {
         // Tatar (Татар теле) — Kipchak Turkic, Cyrillic; vowel-harmony backing of к/г→q/ʁ, ә→æ ө→ø ү→y җ→ʑ, final stress.
         case "tt":
             return createTatar();
+        // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.
+        case "la":
+            return createLatin();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();

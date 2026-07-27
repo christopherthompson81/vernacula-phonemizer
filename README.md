@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **158 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **159 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -56,8 +56,8 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-158 languages spanning Albanian, Armenian, Austroasiatic,
-Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
+159 languages spanning Albanian, Armenian, Austroasiatic,
+Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
