@@ -1,0 +1,70 @@
+/**
+ * K'iche' (quc) phonemizer — Qatzijob'al, the largest MAYAN language (~1.1M, Guatemala), Latin script (ALMG
+ * orthography), canonical IPA, espeak-independent. The fleet's first Mayan family. ALMG is near-1:1 phonemic, so a
+ * longest-match grapheme scan. The Mayan hallmark is the EJECTIVE/glottalized series ⟨b'⟩→[ɓ] (implosive), ⟨t'⟩→[tʼ],
+ * ⟨k'⟩→[kʼ], ⟨q'⟩→[qʼ], ⟨tz'⟩→[t͡sʼ], ⟨ch'⟩→[t͡ʃʼ]; the plain voiceless stops are ASPIRATED ⟨p t k q tz ch⟩→[pʰ tʰ kʰ qʰ
+ * t͡sʰ t͡ʃʰ]. Uvular ⟨q q'⟩; ⟨x⟩→[ʃ], ⟨j⟩→[x], ⟨w⟩→[ʋ], ⟨r⟩→[ɻ], ⟨'⟩→[ʔ]; the sixth vowel ⟨ä⟩→[ə]. Vowel LENGTH is phonemic but
+ * UNWRITTEN (folded); FINAL stress. 🔷 single-source (English Wiktionary, 127). See docs/investigations/quc_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+
+// Multi-char units (longest-match first): the glottalized series (C + ʼ), then the plain aspirated affricates.
+const UNIT: Record<string, string> = {
+    "chʼ": "t͡ʃʼ", "tzʼ": "t͡sʼ", "bʼ": "ɓ", "tʼ": "tʼ", "kʼ": "kʼ", "qʼ": "qʼ", "pʼ": "pʼ",
+    "ch": "t͡ʃʰ", "tz": "t͡sʰ",
+};
+// Single letters. Plain voiceless stops are ASPIRATED; ⟨b⟩ is the implosive [ɓ]; ⟨r⟩→[ɻ], ⟨w⟩→[ʋ], ⟨j⟩→[x], ⟨x⟩→[ʃ].
+const G: Record<string, string> = {
+    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ä": "ə",
+    "ü": "u", "ö": "o", "ë": "e", "ï": "i", "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", // accent/diaeresis → base vowel
+    "p": "pʰ", "t": "tʰ", "k": "kʰ", "q": "qʰ", "b": "ɓ", "s": "s", "l": "l", "m": "m", "n": "n",
+    "r": "ɻ", "w": "ʋ", "x": "ʃ", "j": "x", "y": "j", "ʼ": "ʔ",
+    "d": "d", "g": "ɡ", "f": "f", "v": "b", "z": "s", "c": "k", // Spanish-loan consonants (kept, not silently dropped; ⟨h⟩ is silent per Spanish)
+};
+const ORDER = Object.keys(UNIT).sort((a, b) => b.length - a.length);
+const VOWEL = new Set(["a", "e", "i", "o", "u", "ə"]);
+
+/** Phonemize a K'iche' word → canonical IPA: longest-match scan + glottal onset + final stress (length not emitted).
+ *  A multi-word phrase (some referee headwords) is split so each word gets its own glottal onset + stress. */
+export function phonemizeWord(word: string): string {
+    if (/\s/u.test(word.trim())) return word.trim().split(/\s+/u).map(phonemizeWord).join(" ");
+    // Normalise the apostrophe glyphs (ASCII ' / curly ’ / modifier ʼ) so the glottalized units + glottal stop match.
+    const w = word.normalize("NFC").toLowerCase().replace(/['’`]/gu, "ʼ");
+    const segs: string[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        for (const key of ORDER) {
+            if (w.startsWith(key, i)) { segs.push(UNIT[key]!); i += key.length; continue outer; }
+        }
+        const ph = G[w[i]!];
+        if (ph !== undefined) segs.push(ph);
+        i += 1;
+    }
+    // FINAL (oxytone) stress — the K'iche' default: ˈ before the onset of the last syllable (folded in eval).
+    const vidx = segs.map((s, idx) => (VOWEL.has(s) ? idx : -1)).filter((x) => x >= 0);
+    if (vidx.length) {
+        const nucleus = vidx[vidx.length - 1]!;
+        const at = nucleus > 0 && !VOWEL.has(segs[nucleus - 1]!) ? nucleus - 1 : nucleus;
+        segs.splice(at, 0, "ˈ");
+    }
+    return segs.join("").normalize("NFC");
+}
+
+// A K'iche' word (Latin + ä + the apostrophe glyphs) / number / punctuation. Numbers deferred.
+const TOKEN = /([a-zäöëïüáéíóúÄÖËÏÜÁÉÍÓÚA-Z'’ʼ`-]+)|(\d+)|([.!?…,;:])/gu;
+
+class KicheePhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
+        });
+    }
+}
+
+/** Build the K'iche' phonemizer (ALMG grapheme scan + ejective series + aspirated plain stops + final stress). */
+export function createKichee(): Phonemizer {
+    return new KicheePhonemizer();
+}
