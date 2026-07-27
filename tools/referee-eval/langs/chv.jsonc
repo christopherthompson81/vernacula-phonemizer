@@ -1,0 +1,28 @@
+// Chuvash / Чӑвашла (chv) — the SOLE surviving Oghur (Bulgaric) Turkic language, CYRILLIC. Referee: English Wiktionary
+// 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs; no wikipron/epitran chv). Single-source.
+// See docs/investigations/chv_native_bringup_investigation.md.
+{
+    "language": "chv", "name": "Chuvash (Чӑвашла)", "script": "Cyrillic",
+    "provenance": "Authored Cyrillic→IPA scan: allophonic intervocalic/post-nasal voicing (п т к ч с ҫ ш х → b d ɡ d͡ʑ z ʑ ʐ ɣ), geminate-blocking → [Cː], two reduced vowels ӑ→ə ӗ→ɘ with reduced-vowel-sensitive stress (last full vowel, else first), iotation, е→je initial. Validated against the Wiktionary human referee.",
+    "referees": [
+        { "file": "chv.wiktionary-chuvash.tsv", "source": "English Wiktionary 'Chuvash terms with IPA pronunciation' (literal human {{IPA|cv|…}}, 84)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source — one Wiktionary category (84 HUMAN pairs, literal IPA not module-generated). No wikipron chv, no epitran chv-Cyrl, no independent kaikki (kaikki chv is the same-source 73-pair subset). Thin but human and phonologically consistent → the % is a real quality signal on a small sample.",
+    "preFolds": [
+        { "pattern": "[oɔɤ]̆", "replace": "ə", "note": "the REDUCED back vowel ⟨ӑ⟩ — the referee writes it [ŏ]/[ɔ̆]/[ɤ̆] (a back vowel + BREVE U+0306, the reduction mark); we emit [ə]. Must run in preFolds, BEFORE the backbone strips the breve (NFD-decomposition turns the precomposed ŏ into o+◌̆)" },
+        { "pattern": "[øĕeə]̆", "replace": "ɘ", "note": "the REDUCED front vowel ⟨ӗ⟩ — referee [ø̆]/[ĕ]/[ə̆] (front/central vowel + breve) ~ our [ɘ]" },
+        { "pattern": "[()]", "replace": "", "note": "the referee's parenthetical OPTIONAL-segment notation (vunː(ə), k(ə)ʋa…, χʲø̆rʲ(ɘ)χʲ) — strip the PARENTHESES but KEEP the segment (it is a written ⟨ӑ⟩/⟨ӗ⟩ we do emit: вуннӑ→ʋunːə, хӗрӗх→χɘrɘχ)" },
+        { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots (uk.ɕa→ukɕa, ɯ.wɤ̆l→ɯwɤ̆l)" }
+    ],
+    "folds": [
+        { "pattern": "ɔ", "replace": "o", "note": "⟨о⟩ [ɔ]~[o] backness (also the Viryal ⟨у⟩→[ɔ] dialect variant)" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨е⟩ [ɛ]~[e] height" },
+        { "pattern": "ʲ", "replace": "", "note": "PALATALIZATION — the referee marks ⟨C⟩ before a front vowel / after ⟨ь⟩ as [Cʲ] INCONSISTENTLY (выльӑх→ʋɯlʲəχ and чӗрпӗк→t͡ɕʲø̆rʲpʲɘkʲ mark it, пӗр→pɘr does not); allophonic, we don't emit it" },
+        { "pattern": "[wv]", "replace": "ʋ", "note": "⟨в⟩ — the referee writes the labial approximant as [v] (often word-initial: вӑкӑр→vəɡər) and [w] (coda: шыв→ʂɯw) inconsistently; we emit [ʋ] throughout" },
+        { "pattern": "ʂ", "replace": "ʃ", "note": "⟨ш⟩ [ʂ] (retroflex, ours) ~ [ʃ] (referee) — sibilant place" },
+        { "pattern": "ʐ", "replace": "ʑ", "note": "intervocalic ⟨ш⟩/⟨ҫ⟩ voiced — the referee writes [ʐ] and [ʑ] inconsistently; neutralise to one voiced post-alveolar" },
+        { "pattern": "x", "replace": "χ", "note": "⟨х⟩ [x] (velar, referee near front vowels) ~ [χ] (uvular, ours) — backness of the voiceless dorsal fricative" },
+        { "pattern": "q", "replace": "k", "note": "⟨к⟩ [q] (uvular, referee before back vowels in clusters) ~ [k] — backness allophony; Chuvash has no phonemic /q/" },
+        { "pattern": "ɑ", "replace": "a", "note": "⟨а⟩ [ɑ] (referee, back) ~ [a] — the low vowel's backness (хыпар→χɯˈbɑr)" }
+    ]
+}

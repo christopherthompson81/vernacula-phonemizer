@@ -103,6 +103,7 @@ import { createTatar } from "./languages/tatar/tatar.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
+import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
@@ -461,6 +462,9 @@ function build(lang: string): Phonemizer {
         // Bashkir (Башҡорт теле) — Kipchak Turkic; interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, vowel shift; Russian loans routed to ru.
         case "ba":
             return createBashkir();
+        // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
+        case "chv":
+            return createChuvash();
         // Ewe (Eʋegbe) — Gbe (Niger-Congo, Kwa); labial-velars gb/kp, bilabial ƒ→ɸ/ʋ→β, w/ɰ + r/l allophony, toneless.
         case "ee":
             return createEwe();
