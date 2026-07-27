@@ -55,9 +55,10 @@ await phonemizeAsync("ꦗꦮ", "jv");             // Javanese     → d͡ʒˈɔw
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Greek, Cyrillic,
-Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
-Telugu, Kannada, Malayalam, Sinhala, Arabic and the extended Perso-Arabic (Persian, Urdu/Shahmukhi, Sindhi), Geʽez, Myanmar,
-Han, Hiragana/Katakana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
+Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
+Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
+Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Myanmar, Khmer, Thai, Lao,
+Han, Hiragana/Katakana/Kanji, Hangul and Javanese (Aksara Jawa) scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
 outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md).
