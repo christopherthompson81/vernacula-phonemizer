@@ -1,0 +1,21 @@
+// Bashkir / Башҡорт теле (ba) — Kipchak Turkic (sibling of Tatar), CYRILLIC. Referee: kaikki Bashkir (HUMAN, Wiktionary,
+// 2395 pairs, native + Russian loans). Single-source-family. See docs/investigations/ba_native_bringup_investigation.md.
+{
+    "language": "ba", "name": "Bashkir (Башҡорт теле)", "script": "Cyrillic",
+    "provenance": "Authored Cyrillic→IPA scan: interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, the Bashkir vowel shift (и→e о→ʊ у→o~u е→ɪ ы→ɯ ө→ʏ ү→ɵ ә→æ), iotation, final stress. Validated against kaikki Bashkir.",
+    "referees": [
+        { "file": "ba.kaikki-bashkir.tsv", "source": "kaikki Bashkir (Wiktionary, HUMAN, 2395)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source-FAMILY — kaikki Bashkir + wikipron bak_cyrl both Wiktionary (correlated). No epitran bak. Russian-LOAN-heavy (palatalization ʲ, akanye, vowel ä) → referee-noisy.",
+    "folds": [
+        { "pattern": "̞", "replace": "", "note": "the referee's vowel-LOWERING diacritic (U+031E) — it marks the near-close ⟨о ы е и ө⟩ as [ʊ̞ ɯ̞ ɪ̞], we emit the base [ʊ ɯ ɪ] (allophonic detail)" },
+        { "pattern": "β", "replace": "b", "note": "intervocalic ⟨б⟩ LENITION [b]→[β] (arba→arβa) — allophonic; we emit [b]" },
+        { "pattern": "ɫ", "replace": "l", "note": "dark ⟨л⟩ [ɫ]~[l] — the velarisation is back-harmony allophony (folded to compare)" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨р⟩ tap [ɾ] ~ trill [r] — the referee writes both inconsistently (batyr→ɾ but aryθlan→r); fold the rhotic" },
+        { "pattern": "ʂ", "replace": "ʃ", "note": "⟨ш⟩ [ʂ] (retroflex, ours) ~ [ʃ] (referee) — sibilant place" },
+        { "pattern": "ʐ", "replace": "ʒ", "note": "⟨ж⟩ [ʐ] (ours) ~ [ʒ] (referee)" },
+        { "pattern": "̆", "replace": "", "note": "the referee's BREVE (U+0306) on reduced vowels (ɪ̆ ɵ̆) — a length/reduction detail we don't emit" },
+        { "pattern": "[ʉyʏ]", "replace": "ɵ", "note": "the FRONT-ROUNDED vowels ⟨ө ү⟩ — the referee writes them inconsistently [ø ʏ ɵ ʉ y]; neutralise the front-rounded quality" },
+        { "pattern": "ø", "replace": "ɵ", "note": "⟨ө⟩ front-rounded [ø]~[ɵ]" }
+    ]
+}
