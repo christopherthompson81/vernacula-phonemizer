@@ -18,7 +18,7 @@ import { phonemizeAsync } from "vernacula-phonemizer";
 // (Hebrew עברית via the neural NAKDAN, Arabic العربية via the diacritizer) and uses each language's neural OOV
 // model where one exists (English's BiLSTM, bn/da/nb/fr taggers, the Perso-Arabic riders). Worst input, best
 // output. A language written in two scripts yields ONE canonical IPA either way (Tashelhit in Latin/Tifinagh,
-// Fula's Adlam, Bambara's N'Ko, Sundanese's Aksara Sunda). (A sync `phonemize` covers the simple cases.)
+// Fula's Adlam, Bambara's N'Ko, Sundanese's Aksara Sunda, Zhuang's Sawndip). (A sync `phonemize` covers the simple cases.)
 await phonemizeAsync("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
 await phonemizeAsync("Taclḥit", "shi");       // Berber Latin → taʃlħit
 await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
