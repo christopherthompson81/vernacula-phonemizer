@@ -1,6 +1,7 @@
 // Native canonical-IPA data manifest for Tashelhit / Shilha (shi) — Taclḥit, a Berber (Amazigh) language of
 // SW Morocco (Souss), ~7–9M. Consumed by tashelhit.ts. Input = the Berber Latin alphabet (the academic/community
-// Latin orthography; Tifinagh + Arabic are the other scripts). The orthography is near-1:1 PHONEMIC: a greedy
+// Latin orthography) AND Neo-Tifinagh (ⵜⵉⴼⵉⵏⴰⵖ, the official IRCAM script; `tifinagh` map) — same phonemes,
+// auto-detected per word. (Arabic script deferred.) The orthography is near-1:1 PHONEMIC: a greedy
 // grapheme scan + two rules — LABIALISATION (a consonant + ⟨ʷ⟩ → Cʷ) and GEMINATION (a doubled letter → a long
 // consonant Cː, phonemic in Berber). Emphatics = pharyngealised (dot-below): ḍ→dˤ ṭ→tˤ ṣ→sˤ ẓ→zˤ ṛ→rˤ; pharyngeals
 // ḥ→ħ ɛ→ʕ; uvulars ɣ→ʁ~ɣ, x→χ, q; ⟨c⟩→ʃ, ⟨j⟩→ʒ, ⟨y⟩→j, ⟨e⟩→ə. Maps derived from wikipron shi_latn + kaikki
@@ -50,6 +51,44 @@
         "ḷ": "lˤ",
         "ṇ": "nˤ"
     },
+    "tifinagh": {
+        "ⴰ": "a",
+        "ⵉ": "i",
+        "ⵓ": "u",
+        "ⴻ": "ə",
+        "ⴱ": "b",
+        "ⴳ": "ɡ",
+        "ⴷ": "d",
+        "ⴼ": "f",
+        "ⴽ": "k",
+        "ⵀ": "h",
+        "ⵊ": "ʒ",
+        "ⵍ": "l",
+        "ⵎ": "m",
+        "ⵏ": "n",
+        "ⵇ": "q",
+        "ⵔ": "r",
+        "ⵙ": "s",
+        "ⵛ": "ʃ",
+        "ⵜ": "t",
+        "ⵡ": "w",
+        "ⵢ": "j",
+        "ⵣ": "z",
+        "ⵒ": "p",
+        "ⵠ": "v",
+        "ⴹ": "dˤ",
+        "ⵟ": "tˤ",
+        "ⵚ": "sˤ",
+        "ⵥ": "zˤ",
+        "ⵕ": "rˤ",
+        "ⵃ": "ħ",
+        "ⵄ": "ʕ",
+        "ⵅ": "χ",
+        "ⵖ": "ɣ",
+        "ⵞ": "t͡ʃ",
+        "ⴶ": "d͡ʒ",
+        "ⴵ": "d͡ʒ"
+    },
     "clausePunctuation": {
         "।": " . ",
         ".": " . ",
@@ -59,6 +98,7 @@
         ";": " ; ",
         ":": " : ",
         "،": " , ",
-        "؟": " ? "
+        "؟": " ? ",
+        "⵰": " . "
     }
 }

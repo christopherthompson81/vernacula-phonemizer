@@ -43,3 +43,20 @@ every emphatic — `text("aḍaṛ")` NFD → `"ad ar"` instead of `"adˤarˤ"`.
 marks (U+0300–036F) in the tokenizer class defensively; added an NFD regression test. **Systemic lesson:** any
 converter whose `text()` tokenizer uses a literal grapheme class MUST normalise the input before tokenizing —
 `phonemizeWord`/the eval hide the bug by normalising internally.
+
+## Run 4 — Tifinagh front-end
+
+Added the **Neo-Tifinagh** (ⵜⵉⴼⵉⵏⴰⵖ) script — Morocco's constitutionally-official IRCAM script. Tifinagh is a
+fully phonemic *alphabet* (one letter = one phoneme, vowels included), so it's the cheap high-value follow-on: a
+second grapheme table (`tifinagh`, U+2D30–2D7F → the same shi phonemes) feeding the SAME engine, with the script
+**auto-detected per word** by codepoint (no param) and the labialisation marker switched (Latin ⟨ʷ⟩ → Tifinagh ⵯ
+Tamatart U+2D6F). The Tifinagh letter→IPA values were sanity-checked against wikipron `tzm_tfng_broad` (Central Atlas
+Tamazight — same pan-Berber Tifinagh↔phoneme correspondence).
+
+**Validation = self-consistency, not a separate referee.** Tifinagh and Latin are two spellings of the same phonemic
+system, so the honest check is that they produce the same IPA: transliterating all 500 Latin referee words → Tifinagh
+and phonemizing both paths gives **500/500 = 100% identical IPA**. So the Tifinagh path *inherits* the Latin path's
+validated 97.4% folded / 99.4% symbol — it's not a second number, it's the same phonology via a second input script.
+(tzm_tfng is NOT used as the referee: it's a different variety with spirantization β/ð/θ + a no-length gemination
+convention, so it would mismatch on variety features, not table errors.) **Arabic** remains deferred (defective
+non-standard abjad, no referee — the fa/ur/sd wall).
