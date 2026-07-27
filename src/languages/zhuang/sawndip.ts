@@ -9,8 +9,10 @@
  *  - Coverage is the ~2412 Wiktionary-documented single-codepoint glyphs; real manuscripts use idiosyncratic/unencoded
  *    (PUA / Ideographic-Description) forms → OOV, which are dropped (unreadable).
  *  - Sawndip is POLYPHONIC (~8% of covered glyphs have >1 reading — mostly tonal variants of one root). We ship a
- *    MOST-COMMON DEFAULT (no context disambiguation — Sawndip has no labelled corpus, unlike the cmn homograph case);
- *    a text relying on an alternative reading silently gets the default (the Han-homograph 行 xíng/háng situation).
+ *    DEFAULT reading chosen by a SALIENCE PROXY (the most-SENSE reading — NOT measured corpus frequency, which we
+ *    don't have; so it can miss the iconic reading, e.g. 那→naj not naz), with no context disambiguation — Sawndip
+ *    has no labelled corpus, unlike the cmn homograph case. A text relying on an alternative reading silently gets
+ *    the default (the Han-homograph 行 xíng/háng situation).
  * See docs/investigations/za_sawndip_investigation.md.
  */
 import { loadTsvMap } from "../../core/loadTsv.ts";
