@@ -24,6 +24,7 @@ import { phonemizeWord as lb } from "../../src/languages/luxembourgish/luxembour
 import { phonemizeWord as is } from "../../src/languages/icelandic/icelandic.ts";
 import { phonemizeWord as oc } from "../../src/languages/occitan/occitan.ts";
 import { phonemizeWord as mi } from "../../src/languages/maori/maori.ts";
+import { phonemizeWord as qu } from "../../src/languages/quechua/quechua.ts";
 import { phonemizeWord as ast } from "../../src/languages/asturian/asturian.ts";
 import { phonemizeWord as ht } from "../../src/languages/haitian/haitian.ts";
 import { phonemizeWord as rkt } from "../../src/languages/rangpuri/rangpuri.ts";
@@ -211,6 +212,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     is,
     oc,
     mi,
+    qu,
     ast,
     ht,
     rkt,
