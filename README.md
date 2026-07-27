@@ -17,10 +17,13 @@ import { phonemizeAsync } from "vernacula-phonemizer";
 // phonemizeAsync is the unified best-output entry: it restores the abjads' unwritten vowels from BARE input
 // (Hebrew עברית via the neural NAKDAN, Arabic العربية via the diacritizer) and uses each language's neural OOV
 // model where one exists (English's BiLSTM, bn/da/nb/fr taggers, the Perso-Arabic riders). Worst input, best
-// output. Tashelhit shows two scripts, same word → identical IPA. (A sync `phonemize` covers the simple cases.)
+// output. A language written in two scripts yields ONE canonical IPA either way (Tashelhit in Latin/Tifinagh,
+// Fula's Adlam, Bambara's N'Ko, Sundanese's Aksara Sunda). (A sync `phonemize` covers the simple cases.)
 await phonemizeAsync("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
 await phonemizeAsync("Taclḥit", "shi");       // Berber Latin → taʃlħit
 await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
+await phonemizeAsync("𞤆𞤵𞤤𞤢𞥄𞤪", "ff");        // Adlam        → pˈulaːɾ
+await phonemizeAsync("ߓߊߡߊߣߊ߲", "bm");         // N'Ko         → bamanã
 await phonemizeAsync("Ελληνικά", "el");       // Greek        → elinika
 await phonemizeAsync("Україна", "uk");        // Cyrillic     → ukrajina
 await phonemizeAsync("Հայերեն", "hy");        // Armenian     → hɑjeɾen
@@ -47,6 +50,7 @@ await phonemizeAsync("カタカナ", "ja");           // Katakana     → kätä
 await phonemizeAsync("日本語", "ja");            // Kanji        → niho̞ŋɡo̞
 await phonemizeAsync("한국어", "ko");            // Hangul       → hˈɐnɡuɡɘ
 await phonemizeAsync("ꦗꦮ", "jv");             // Javanese     → d͡ʒˈɔwɔ
+await phonemizeAsync("ᮞᮥᮔ᮪ᮓ", "su");           // Aksara Sunda → sˈunda
 ```
 
 ## Languages
