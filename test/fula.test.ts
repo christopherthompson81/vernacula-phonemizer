@@ -17,4 +17,12 @@ describe("Fula g2p (authored)", () => {
         expect(phonemizeWord("tati")).toBe("tˈati"); // 2 syllables → first (penult)
         expect(phonemizeWord("gorko")).toBe("ɡˈoɾko"); // r→ɾ
     });
+
+    it("Adlam (𞤀𞤁𞤂𞤃) front-end — transliterates to Boko, IDENTICAL IPA to the Latin path", () => {
+        expect(phonemizeWord("𞤊𞤵𞤤𞤩𞤫")).toBe("fˈulɓe"); // Fulɓe (the people); bhe→ɓ
+        expect(phonemizeWord("𞤊𞤵𞤤𞤩𞤫")).toBe(phonemizeWord("Fulɓe")); // Adlam ≡ Latin
+        expect(phonemizeWord("𞤆𞤵𞤤𞤢𞥄𞤪")).toBe("pˈulaːɾ"); // Pulaar — the ALIF LENGTHENER (𞥄) → long aː
+        expect(phonemizeWord("𞤂𞤢𞥄𞤥𞤯𞤮")).toBe("lˈaːmɗo"); // laamɗo "chief" — lengthener + implosive ɗ (dha)
+        expect(phonemizeWord("𞤁𞤫𞤦𞥆𞤮")).toBe("dˈebːo"); // debbo — the GEMINATION MARK (𞥆) → long bː
+    });
 });

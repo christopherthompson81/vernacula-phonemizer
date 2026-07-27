@@ -54,7 +54,7 @@ await phonemizeAsync("ꦗꦮ", "jv");             // Javanese     → d͡ʒˈɔw
 152 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
-Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Greek, Cyrillic,
+Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
 Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
 Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Myanmar, Khmer, Thai, Lao,
@@ -84,7 +84,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Kartvelian | Georgian `ka` (its own family; Mkhedruli script, three-way ejective/aspirated/voiced stops) |
 | Koreanic | Korean `ko` |
 | Mongolic | Mongolian `mn` (Khalkha) |
-| Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
+| Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande), Chichewa `nya`, Fula `ff` (Atlantic; Latin + Adlam), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
 | Romance | Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro`, Spanish `es` (+ `es-419` Latin-American), Occitan `oc` (Languedocien), Asturian `ast` |
 | Semitic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hebrew `he`, Maltese `mt` |
