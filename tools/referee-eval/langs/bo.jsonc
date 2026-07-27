@@ -1,0 +1,28 @@
+// Tibetan (bo) — Standard / Lhasa Tibetan, Tibetan script. One of the DEEPEST orthographies in the world: a
+// syllable-stack RULE ENGINE (prefix·superscript·root·subscript·vowel·suffix → tonogenetic tone + onset-cluster
+// realization + suffix-driven vowel umlaut/length/nasalization). PRIMARY = hand-curated JIPA "Central Tibetan
+// (Lhasa)" illustration (INDEPENDENT, CC-BY, 40 pairs). SECONDARY = kaikki Lhasa (1281) which is MODULE-GENERATED
+// (Module:bo-pron) → REFERENCE-PARITY, disclosed. Independent COVERAGE separately validated at 100% of tokens on
+// 300k TIBMD@MUC Lhasa syllables (numerals aside). Tone (2-level ˥/˩), length, ties, combining accents are stripped
+// by the shared BACKBONE (segmental cf, like hmn/cdo/yue); tone is asserted in test/tibetan.test.ts. See
+// docs/investigations/bo_native_bringup_investigation.md.
+{
+    "language": "bo", "name": "Tibetan (Standard/Lhasa)", "script": "Tibetan",
+    "provenance": "Authored syllable-stack g2p from Tournadre's Standard Spoken Tibetan + the JIPA Lhasa illustration (Zhang 2024): tonogenesis (voiceless→HIGH; voiced-obstruent→LOW+aspiration-by-head; sonorant raised by prefix/superscript), ya-btags→palatal / ra-btags→retroflex-affricate, suffix umlaut (a→ɛ o→ø u→y) / length / nasalization / glottalization, Lhasa word-tone template (non-initial syllables default HIGH).",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "bo.jipa-lhasa.tsv", "source": "JIPA 'Central Tibetan (Lhasa)' illustration (Zhang 2024, CC-BY), hand-curated onset/coda/vowel word lists (40, HUMAN, INDEPENDENT of Wiktionary)", "role": "primary" },
+        { "file": "bo.kaikki-lhasa.tsv", "source": "kaikki Tibetan, Lhasa-tagged (Wiktionary Module:bo-pron OUTPUT — reference-parity, 1281)", "role": "secondary" }
+    ],
+    "secondaryGap": "The PRIMARY is the small INDEPENDENT JIPA human anchor (40). The large kaikki secondary (1281) is MODULE-GENERATED (Module:bo-pron) → reference-parity, NOT independent, so it is reported not floored. It is further DEFLATED (~raw 22%) by principled divergence we do NOT chase: (a) the -d/-g/-s CHECKED coda — we emit ʔ (the JIPA careful register) vs the module's colloquial vowel-LENGTH; (b) per-syllable contour-tone notation. Independent breadth instead comes from TIBMD@MUC (OpenSLR 124, Minzu Univ., non-Wiktionary): 100% of 299,733 Lhasa syllable tokens phonemize cleanly (coverage, not IPA-accuracy — TIBMD ships transcripts, no pron-dict).",
+    "folds": [
+        { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the module output — not segmental" },
+        { "pattern": "\\(.*?\\)", "replace": "", "note": "the module's optional/parenthesised codas e.g. (ɹ)" },
+        { "pattern": "ˑ", "replace": "", "note": "half-long (module reduction notation on non-initial syllables) — not contrastive" },
+        { "pattern": "kʲʰ", "replace": "cʰ", "note": "the palatalized velar: we write kʲʰ (JIPA), the module writes cʰ — notation" },
+        { "pattern": "kʲ", "replace": "c", "note": "the palatalized velar: kʲ (JIPA) ~ c (module) — notation" },
+        { "pattern": "[ɻʐʂ]", "replace": "ʐ", "note": "the rhotic /ɻ/ has realizations [ɻ ʐ ʂ ɾ r] (JIPA) — fold to one" },
+        { "pattern": "ȵ", "replace": "ɲ", "note": "the palatal nasal: we write ɲ (JIPA inventory), the module writes ȵ — notation" },
+        { "pattern": "ʔ", "replace": "", "note": "the checked coda from -d/-g/-s/-b: we emit ʔ (JIPA careful register), the module drops it with vowel length (already stripped) — fold the register split" }
+    ]
+}
