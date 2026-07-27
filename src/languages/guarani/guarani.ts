@@ -1,0 +1,97 @@
+/**
+ * Paraguayan Guaraní (gn) phonemizer — Avañe'ẽ, Tupian, Latin script (the achegety), canonical IPA,
+ * espeak-independent. The fleet's first Tupian language. Near-phonemic: a longest-match scan over the prenasalized
+ * prenasalized digraphs ⟨mb nd nt⟩→[ᵐb ⁿd ⁿt] (⟨ng⟩→plain [ŋ]), ⟨ch⟩→[ʃ], ⟨gu⟩→[w], then single graphemes — the 12-vowel system (⟨y⟩→[ɨ],
+ * the six nasal vowels ⟨ã ẽ ĩ õ ũ ỹ⟩), ⟨g⟩→[ɰ], ⟨j⟩→[d͡ʒ], ⟨ñ⟩→[ɲ], ⟨'⟩ (puso)→[ʔ]. Stress is final-syllable
+ * (oxytone) by default, overridden to an acute-accented vowel; a nasal vowel attracts it otherwise. See
+ * docs/investigations/gn_native_bringup_investigation.md.
+ */
+import type { Phonemizer } from "../../registry.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+
+interface GuaraniDef {
+    digraphs: Record<string, string>;
+    graphemes: Record<string, string>;
+    clausePunctuation: Record<string, string>;
+}
+const DEF = loadManifest<GuaraniDef>(import.meta.url, "guarani.jsonc");
+const DIGRAPHS = DEF.digraphs;
+const G = DEF.graphemes;
+const CLAUSE_MARK = DEF.clausePunctuation;
+const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
+const ACUTE = new Set(["á", "é", "í", "ó", "ú", "ý"]);
+const NASAL = new Set(["ã", "ẽ", "ĩ", "õ", "ũ", "ỹ"]);
+const VOWEL = new Set(["a", "e", "i", "o", "u", "ɨ", "ã", "ẽ", "ĩ", "õ", "ũ", "ɨ̃"]);
+
+const FRONT = new Set(["e", "i", "é", "í", "ẽ", "ĩ", "y", "ý", "ỹ"]); // ⟨gu⟩ is u-silent [ɰ] before a front OR central vowel
+const GLIDE: Record<string, string> = { i: "j", u: "w", ɨ: "j" };
+const GLIDE_OUT = new Set(["j", "w"]);
+
+/** Phonemize one Guaraní word → canonical IPA: longest-match scan + ⟨gu⟩ context + glide formation + stress. */
+export function phonemizeWord(word: string): string {
+    const w = word.normalize("NFC").toLowerCase().replace(/[’ʼ]/gu, "'"); // normalise the puso apostrophe glyphs → U+0027
+    const segs: string[] = [];
+    // Per emitted vowel segment: its segment index + whether its source grapheme was acute-accented / nasal.
+    const vseg: { at: number; acute: boolean; nasal: boolean }[] = [];
+    let i = 0;
+    outer: while (i < w.length) {
+        // ⟨gu⟩ is Spanish-style: before a back vowel → [w] (gua→wa), before a front vowel → [ɰ] (gue→ɰe, u silent).
+        if (w[i] === "g" && w[i + 1] === "u" && i + 2 < w.length && G[w[i + 2]!] !== undefined && VOWEL.has(G[w[i + 2]!]!)) {
+            segs.push(FRONT.has(w[i + 2]!) ? "ɰ" : "w");
+            i += 2;
+            continue;
+        }
+        for (const key of ORDER) {
+            if (w.startsWith(key, i)) {
+                segs.push(DIGRAPHS[key]!);
+                i += key.length;
+                continue outer;
+            }
+        }
+        const ch = w[i]!;
+        const ph = G[ch];
+        if (ph !== undefined) {
+            if (VOWEL.has(ph)) vseg.push({ at: segs.length, acute: ACUTE.has(ch), nasal: NASAL.has(ch) });
+            segs.push(ph);
+        }
+        i += 1;
+    }
+    // Stress nucleus: an acute-accented vowel, else the last nasal vowel (nasality attracts stress), else the final
+    // vowel (oxytone). (A word-initial vowel's phonetic glottal onset is NOT emitted — the broad referee omits it.)
+    const nucleus = vseg.length ? (vseg.find((v) => v.acute) ?? [...vseg].reverse().find((v) => v.nasal) ?? vseg[vseg.length - 1]!).at : -1;
+    // Glide formation: a non-nucleus HIGH vowel (i/u/y) immediately before another vowel → a glide (j/w).
+    for (const v of vseg) {
+        if (v.at !== nucleus && GLIDE[segs[v.at]!] !== undefined && VOWEL.has(segs[v.at + 1] ?? "")) segs[v.at] = GLIDE[segs[v.at]!]!;
+    }
+    // Stress before the onset of the nuclear syllable: back up over the onset consonant, and over a preceding glide
+    // too (a C+glide onset like ⟨ku⟩→[kw] is one syllable: kuéra→ˈkweɾa, not kˈweɾa).
+    if (nucleus >= 0) {
+        let at = nucleus;
+        if (at > 0 && !VOWEL.has(segs[at - 1]!)) at--; // over the glide or onset consonant
+        if (at > 0 && GLIDE_OUT.has(segs[at]!) && !VOWEL.has(segs[at - 1]!)) at--; // if that was a glide, over its consonant too
+        segs.splice(at, 0, "ˈ");
+    }
+    return segs.join("").normalize("NFC");
+}
+
+// A word (Guaraní achegety letters incl. the nasal/accented vowels + the puso ⟨'⟩) / number / punctuation. Numbers deferred.
+const TOKEN = /([a-zãẽĩõũỹáéíóúýñA-ZÃẼĨÕŨỸÁÉÍÓÚÝÑ'’]+)|(\d+)|([.!?…,;:])/giu;
+
+class GuaraniPhonemizer implements Phonemizer {
+    text(input: string): string {
+        return assembleClauses(input, TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
+                if (mk) sink.pause(mk);
+            }
+        });
+    }
+}
+
+/** Build the Guaraní phonemizer (direct near-phonemic g2p + prenasalized digraphs + oxytone/accent stress). */
+export function createGuarani(): Phonemizer {
+    return new GuaraniPhonemizer();
+}
