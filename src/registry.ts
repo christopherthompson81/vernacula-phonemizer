@@ -98,6 +98,7 @@ import { createQuechua } from "./languages/quechua/quechua.ts";
 import { createTibetan } from "./languages/tibetan/tibetan.ts";
 import { createGuarani } from "./languages/guarani/guarani.ts";
 import { createAlbanian } from "./languages/albanian/albanian.ts";
+import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
@@ -432,6 +433,9 @@ function build(lang: string): Phonemizer {
         // Albanian (Shqip) — Indo-European (own branch); digraph-rich (dh th sh zh xh, palatals gj/q), 7 vowels, penult stress.
         case "sq":
             return createAlbanian();
+        // Turkmen (Türkmençe) — Oghuz Turkic; the interdental hallmark s→θ/z→ð, 9 vowels (a→ɑ, ä→æ, ü→y, y→ɯ), final stress.
+        case "tk":
+            return createTurkmen();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();

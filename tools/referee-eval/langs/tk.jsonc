@@ -1,0 +1,29 @@
+// Turkmen / Türkmençe (tk) — Standard, Oghuz Turkic, Latin. PRIMARY: kaikki Turkmen (HUMAN, Wiktionary, 530).
+// SECONDARY: wikipron tuk_latn_broad (HUMAN, 424, per-phone spaces joined — same Wiktionary tradition, correlated).
+// TERTIARY: epitran tuk-Latn (INDEPENDENT rule-based G2P) — NAIVE on the interdentals (s/z not θ/ð), so we CORRECT
+// it there (the Shona pattern). The HALLMARK: ⟨s⟩→[θ], ⟨z⟩→[ð]. Phonemic vowel LENGTH is UNWRITTEN → not emitted
+// (BACKBONE strips the referees' ː). See docs/investigations/tk_native_bringup_investigation.md.
+{
+    "language": "tk", "name": "Turkmen (Türkmençe)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (the interdentals ⟨s⟩→θ ⟨z⟩→ð; 9 vowels ⟨ä⟩→æ ⟨ö⟩→ø ⟨ü⟩→y ⟨y⟩→ɯ; ⟨ç⟩→t͡ʃ ⟨j⟩→d͡ʒ ⟨ž⟩→ʒ ⟨ş⟩→ʃ ⟨ň⟩→ŋ ⟨ý⟩→j ⟨h⟩→x ⟨w⟩→w ⟨r⟩→ɾ; final stress; unwritten length folded) from Standard Turkmen phonology; validated against kaikki + wikipron + epitran.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "tk.kaikki-turkmen.tsv", "source": "kaikki Turkmen (Wiktionary, HUMAN, 530)", "role": "primary" },
+        { "file": "tk.wikipron-tuk-broad.tsv", "source": "wikipron tuk_latn_broad (Wiktionary-scraped, HUMAN, 424)", "role": "secondary" },
+        { "file": "tk.epitran-tuk.tsv", "source": "epitran tuk-Latn OUTPUT (independent rule-based G2P, 530)", "role": "secondary" }
+    ],
+    "secondaryGap": "🔷 — kaikki human primary + wikipron (correlated, same Wiktionary) + epitran (INDEPENDENT rule-based, but NAIVE on the interdentals s/z and w→β). We CORRECT epitran on s→θ/z→ð (the Shona pattern). Phonemic vowel LENGTH is unwritten/unrecoverable → folded.",
+    "folds": [
+        { "pattern": "a", "replace": "ɑ", "note": "⟨a⟩ is the BACK low vowel [ɑ] (ours + Wiktionary); epitran writes [a] — fold" },
+        { "pattern": "[ɢʁɣ]", "replace": "ɡ", "note": "⟨g⟩: the /ɡ/ phoneme spirantizes/backs to [ɣ ʁ ɢ] (intervocalic/back-harmony) — allophonic, not contrastive; fold to [ɡ]" },
+        { "pattern": "h", "replace": "x", "note": "⟨h⟩→[x] (ours) ~ [h]/[x]/[χ] (referees vary) — the /h/→dorsal-fricative realization" },
+        { "pattern": "β", "replace": "w", "note": "⟨w⟩→[w] (ours) ~ [β] (bilabial approximant/fricative, referees) — notation" },
+        { "pattern": "ɫ", "replace": "l", "note": "⟨l⟩: [l] (ours) ~ [ɫ] (dark l near back vowels, referees) — allophonic, not contrastive" },
+        { "pattern": "ʊ", "replace": "u", "note": "⟨u⟩: [u] (ours) ~ [ʊ] (lax, referees) — notation" },
+        { "pattern": "r", "replace": "ɾ", "note": "the single rhotic: [ɾ] (ours + kaikki) ~ [r] (epitran) — Turkmen has one /r/, no tap/trill contrast" },
+        { "pattern": "χ", "replace": "x", "note": "⟨h⟩→[x] (front) ~ [χ] (back, uvular) — the dorsal fricative backness allophony" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩: [e] (ours) ~ [ɛ] (referee) — mid front vowel notation" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩: [o] (ours) ~ [ɔ] (referee) — mid back vowel notation" },
+        { "pattern": "œ", "replace": "ø", "note": "⟨ö⟩: [ø] (ours) ~ [œ] (referee) — mid front rounded notation" }
+    ]
+}
