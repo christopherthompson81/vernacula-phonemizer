@@ -1,0 +1,17 @@
+// Latin / Latina (la) — CLASSICAL Latin (the reconstructed pronunciation, Allen *Vox Latina*), Italic. Referee: wikipron
+// lat_latn_clas_narrow (HUMAN, Wiktionary, 44,907 — LARGE, space-segmented). Single-source-FAMILY: no independent 2nd
+// (kaikki = same Wiktionary source; epitran has no lat mapping; espeak's `la` is an authored impl of the same Allen
+// reconstruction). Ecclesiastical (lat_latn_eccl) deferred. See docs/investigations/la_native_bringup_investigation.md.
+{
+    "language": "la", "name": "Latin (Latina) — Classical", "script": "Latin",
+    "provenance": "Authored Classical Latin g2p (Allen, Vox Latina): macron length, short-vowel laxing ⟨e i o u⟩→ɛ ɪ ɔ ʊ, ⟨c⟩→k, ⟨v⟩→w, ⟨qu⟩→kʷ, ⟨x⟩→ks, ⟨gn⟩→ŋn, aspirates ⟨ph th ch⟩, ⟨i j⟩→glide, dark ⟨l⟩, n→ŋ before velars, final ⟨-Vm⟩→Ṽː; penult/antepenult weight stress. Validated against wikipron Classical.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "la.wikipron-lat-clas-narrow.tsv", "source": "wikipron lat_latn_clas_narrow (Wiktionary, HUMAN, 44,907)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 human single-source-FAMILY — wikipron Classical Latin (44,907) is LARGE and robust but its only corroboration is the SAME Wiktionary source (kaikki) or an authored implementation of the same Allen reconstruction (espeak `la_rules`); no independent human attestation and no epitran lat mapping.",
+    "folds": [
+        { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩: [h] (ours) ~ intervocalic voiced [ɦ] (referee, nihila→niɦɪɫa) — allophonic voicing; the referee also has [h]-dropped variants (residual)" },
+        { "pattern": "̯", "replace": "", "note": "non-syllabic offglide U+032F on the diphthong second element (⟨ae au oe⟩ → a e̯ …) — a diacritic, not a segment" }
+    ]
+}
