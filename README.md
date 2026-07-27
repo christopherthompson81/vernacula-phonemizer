@@ -40,6 +40,7 @@ await phonemizeAsync("తెలుగు", "te");         // Telugu       → t�
 await phonemizeAsync("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
 await phonemizeAsync("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
 await phonemizeAsync("සිංහල", "si");          // Sinhala      → sˈiŋhələ
+await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat");     // Ol Chiki     → santaɽi
 await phonemizeAsync("العربية", "ar");        // Arabic       → alʕarabˈijːa
 await phonemizeAsync("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
 await phonemizeAsync("አማርኛ", "am");           // Geʽez        → amaɾɲa
