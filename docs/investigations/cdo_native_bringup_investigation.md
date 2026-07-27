@@ -27,7 +27,7 @@ fleet. The user asked to bring it up; the feasibility gate + the honest-scope ch
   independent dict), tone sandhi (連讀變調), initial assimilation (聲母類化 l→l̃, etc.), and rime alternation (韻變,
   the 松/緊 tight/loose split). Label **🔷 reference-implementation parity** (not independent human verification).
 - **BUC signature (missionary convention):** the plain stop letters are ASPIRATED — ⟨p t k⟩ = [pʰ tʰ kʰ], ⟨b d g⟩ =
-  [p t k]; ⟨c⟩ = [tsʰ], ⟨z⟩ = [ts]; tone marked by a vowel diacritic (macron etc.). Maps derived empirically from the
+  [p t k]; ⟨c⟩ = [t͡s], ⟨ch⟩ = [t͡sʰ]; tone marked by a vowel diacritic (macron etc.). (The Run-1 guess ⟨c⟩=[tsʰ]/⟨z⟩=[ts] was corrected to the derived values in Run 2.) Maps derived empirically from the
   extracted BUC↔IPA pairs (reference-parity), cross-checked against the documented Foochow-Romanized tables.
 
 ## Run 2 — engine build + result
@@ -67,3 +67,25 @@ route through `phonemizeWord`, which `.normalize("NFD")`s, so it was masked. **F
 `text()` and match base-letter + combining-marks (`[a-zŋ][…̀-ͯ…]*`) instead of precomposed literals →
 robust to both NFC and NFD. Added a `text()`-path ṳ regression test. Everything else — converter logic, the 95.4%
 number, the folds, the 🔷 reference-parity honesty framing — the review confirmed sound.
+
+## Run 4 — Phase 2: modelling 韻變 (rime alternation)
+
+Asked "is Phase 2 tractable?" — probed the four deferred pieces against the extracted data:
+- **韻變 (rime alternation): fully tractable, done here.** (rime, tone) → IPA is near-deterministic (201/212
+  single-syllable keys), and the tight/loose partition is clean by the tone diacritic: **breve/grave/macron
+  (陰平/陽平/上聲) → TIGHT** (aŋ, a, ie, o), **acute/circumflex (陰去/陰入/陽去) → LOOSE** (ɑŋ, ɑ, iɛ, ɔ). The 11
+  `iong`/`io` ambiguities resolve **by initial place**: medial [y] after a velar/laryngeal/zero onset (g/k/h/ng/∅),
+  [u] after a coronal/labial. Derived a tight rime map (50) + a loose-variant map (48) + the io-family map (16).
+- **連讀變調 (tone sandhi): tractable but UNMEASURABLE here** — 3128/3630 two-char referee entries carry sandhi, but
+  our eval folds tones (segmental backbone), so modelling it wouldn't move the number; it's also connected-speech.
+- **聲母類化 (initial assimilation): tractable but needs a multi-syllable referee** (affects non-final segments).
+- **Han front-end: circular** — the Han→reading dict would be Wiktionary-derived (= the referee's source).
+
+**Implemented 韻變** (manifest `rimes`/`rimesLoose`/`ioFamily` + `looseMarks`; engine picks the register from the
+tone diacritic). **Removed the a~ɑ/o~ɔ/e~ɛ folds** (the alternation is now emitted, not folded). **Result: 99.9%
+folded / 100.0% symbol** (was 95.4/98.5 with the folds). One review-style bug fixed mid-build: `validRime` checked
+only the tight map, so a rime that appears *only* with loose tones (e.g. bare `e`) failed the initial-strip and fell
+to the raw-base fallback (`nê`→"ne" not "nɛi"); fixed by also consulting `rimesLoose`. As a side benefit cdo now has
+**no collapse folds**, so it is clean on the fold-masking axis too. Still 🔷 reference-parity (the referee is
+rule-generated); 99.9% now means "our converter — including the 韻變 rule — reproduces Module:cdo-pron almost
+exactly." Still deferred: tone sandhi, initial assimilation, the Han front-end.
