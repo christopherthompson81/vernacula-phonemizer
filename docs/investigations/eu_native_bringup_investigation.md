@@ -72,3 +72,19 @@ only 8 rows (+0.04pp) → correctly deferred; (d) the sibilant DIRECTION (z=lami
 
 **Final: 84.8% folded / 98.0% symbol** (broad primary). Floor 0.82. Goldens (4 tests incl. the zu/su
 minimal pair), the 150-test referee floor, and typecheck all green.
+
+## Run 5 — deferred follow-up: NUMBERS + resolving the other two (2026-07-27)
+
+**Numbers DONE — the Basque VIGESIMAL (base-20) system.** 0-19 listed; the tens are scores of
+20 (20 hogei, 40 berrogei=2×20, 60 hirurogei=3×20, 80 laurogei=4×20) with the ⟨-ta⟩ connective
+for a remainder (30=hogeita hamar); hundreds prefix the system (ehun, berrehun…) + the free
+⟨eta⟩ connective (once, before the final sub-100 group), then ⟨mila⟩/⟨milioi⟩. 20→hogei,
+40→berroɡei (⟨rr⟩→[r] trill), 60→hiɾuɾoɡei (single ⟨r⟩→[ɾ] tap), 234→berehun eta hoɡeita hamalau,
+2025→bi mila eta hoɡeita bos̺t. The composition isn't referee-validated (no composed numbers in
+the wikipron dump) but every COMPONENT word is (bat→bat, hiru→hiɾu, hogei→hoɡei̯…). Goldens added.
+
+**i-palatalization + letter-names — evaluated and REJECTED (not genuine deferrals).** Re-measured
+first-hand: intervocalic ⟨il in⟩→[iʎ iɲ] nets **−14 rows (17065→17051)** — the referee lists BOTH
+forms per word and the non-palatalized is the majority, and it's non-canonical for Standard Batua.
+The alphabet letter-names (B→[be], ~27 citation rows) are citation artifacts with no real-text value
+and a single-letter→name rule would misfire on real one-letter tokens. Both correctly NOT implemented.

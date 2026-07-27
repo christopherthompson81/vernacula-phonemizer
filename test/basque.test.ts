@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/basque/basque.ts";
+import { phonemizeWord, createBasque } from "../src/languages/basque/basque.ts";
 
 // Canonical-IPA goldens for Basque (eu) — euskara, a LANGUAGE ISOLATE, Latin script. The hallmark is the THREE-WAY
 // SIBILANT / affricate system: laminal ⟨z⟩→[s̻] / ⟨tz⟩→[t͡s̻], apical ⟨s⟩→[s̺] / ⟨ts⟩→[t͡s̺], postalveolar ⟨x⟩→[ʃ] /
@@ -33,5 +33,18 @@ describe("Basque (euskara) canonical IPA", () => {
         expect(phonemizeWord("jan")).toBe("xan"); // ⟨j⟩→[x]
         expect(phonemizeWord("gizon")).toContain("ɡ"); // ⟨g⟩→[ɡ] always (no soft g)
         expect(phonemizeWord("euskara")).toBe("eus̺kaɾa"); // the endonym — ⟨s⟩→[s̺], intervocalic ⟨r⟩→[ɾ]
+    });
+
+    test("★ the VIGESIMAL (base-20) number system", () => {
+        const eu = createBasque();
+        expect(eu.text("20")).toBe("hoɡei"); // one score
+        expect(eu.text("30")).toBe("hoɡeita hamar"); // 20 + connective -ta + 10
+        expect(eu.text("40")).toBe("beroɡei"); // 2×20 — ⟨rr⟩→[r] trill
+        expect(eu.text("60")).toBe("hiɾuɾoɡei"); // 3×20 — single ⟨r⟩→[ɾ] tap (contrast with 40's trill)
+        expect(eu.text("80")).toBe("lauɾoɡei"); // 4×20
+        expect(eu.text("99")).toBe("lauɾoɡeita hemeɾet͡s̻i"); // 4×20 + 19
+        expect(eu.text("101")).toBe("ehun eta bat"); // hundreds take the free connective ⟨eta⟩
+        expect(eu.text("234")).toBe("berehun eta hoɡeita hamalau"); // 200 eta (20+14)
+        expect(eu.text("2025")).toBe("bi mila eta hoɡeita bos̺t"); // 2 thousand eta (20+5)
     });
 });
