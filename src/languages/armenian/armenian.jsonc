@@ -11,8 +11,12 @@
     "provenance": "Authored from the Eastern Armenian alphabet + standard phonology; cross-checked vs wikipron hye_armn_e broad (18090).",
 
     // Vowels. ⟨ե⟩→e and ⟨ո⟩→o here are the BARE (non-initial) values; the word-initial [j]/[v] onset is added in code.
-    // ⟨ու⟩ (ո+ւ) → u is a digraph handled in code. ⟨է⟩→e, ⟨ը⟩→ə (schwa), ⟨օ⟩→o.
+    // ⟨է⟩→e, ⟨ը⟩→ə (schwa), ⟨օ⟩→o.
     "vowels": { "ա": "ɑ", "ե": "e", "է": "e", "ը": "ə", "ի": "i", "ո": "o", "օ": "o" },
+
+    // Multi-character grapheme sequences (resolved greedily, longest-first, before the single-letter map). Eastern has
+    // just the ⟨ու⟩ (ո+ւ) → [u] digraph.
+    "digraphs": { "ու": "u" },
 
     // Consonants → Eastern Armenian IPA. Three-way stops/affricates; uvular χ/ʁ; tap ɾ (ր) vs trill r (ռ); ⟨ւ⟩→v
     // (standalone; in ⟨ու⟩ it forms the u digraph, handled in code).

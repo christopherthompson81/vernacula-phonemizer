@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **165 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **166 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,7 +60,7 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-165 languages spanning Albanian, Armenian, Austroasiatic,
+166 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
@@ -75,7 +75,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Family / area | Languages |
 |---|---|
 | Albanian | Albanian `sq` (Shqip, Tosk-based standard; its own Indo-European branch — digraph-rich `dh th sh zh xh`, the palatals `gj q`, 7 vowels incl. `ë`→ə) |
-| Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
+| Armenian | Armenian `hy` (Eastern) and Western Armenian `hyw` (Istanbul/diaspora; the **consonant shift** — classical ⟨պ տ կ⟩→b d ɡ, classical ⟨բ դ գ⟩→pʰ tʰ kʰ), its own Indo-European branch |
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal), Santali `sat` (Munda; Ol Chiki script, word-final checked stops) |
 | Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su` (Latin + Aksara Sunda), Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |

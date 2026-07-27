@@ -79,6 +79,7 @@ import { createUzbek } from "./languages/uzbek/uzbek.ts";
 import { createMaithili } from "./languages/maithili/maithili.ts";
 import { createBelarusian } from "./languages/belarusian/belarusian.ts";
 import { createArmenian } from "./languages/armenian/armenian.ts";
+import { createWestArmenian } from "./languages/westarmenian/westarmenian.ts";
 import { createKyrgyz } from "./languages/kyrgyz/kyrgyz.ts";
 import { createNorwegian } from "./languages/norwegian/norwegian.ts";
 import { createUkrainian } from "./languages/ukrainian/ukrainian.ts";
@@ -525,6 +526,9 @@ function build(lang: string): Phonemizer {
             return createBelarusian();
         case "hy":
             return createArmenian();
+        // Western Armenian (արեւմտահայերէն) — the Istanbul/diaspora standard; the CONSONANT SHIFT (classical voiced/aspirate ⟨բ դ գ⟩→pʰ tʰ kʰ, classical voiceless ⟨պ տ կ⟩→b d ɡ).
+        case "hyw":
+            return createWestArmenian();
         case "ky":
             return createKyrgyz();
         case "nb":

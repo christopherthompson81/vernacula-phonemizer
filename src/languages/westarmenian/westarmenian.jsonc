@@ -1,0 +1,54 @@
+// Native canonical-IPA definition for WESTERN Armenian / արեւմտահայերէն (hyw) — Indo-European (independent branch),
+// Armenian alphabet. The Istanbul/diaspora standard (the wikipron hye_armn_w referee). Reuses the shared Armenian
+// engine (armenian.ts makeArmenianEngine); the ONLY differences from Eastern (hy) are in the consonant table:
+//
+//   ★★ THE WESTERN CONSONANT SHIFT — the classical three-way stop/affricate system collapses to a TWO-way one:
+//      · classical VOICED     ⟨բ դ գ ձ ջ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]  (DEVOICED + aspirated)
+//      · classical ASPIRATED  ⟨փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]  (unchanged) — MERGES with the voiced column
+//      · classical VOICELESS  ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]        (VOICED)
+//      (պատ→bɑd, բարի→pʰɑɾi, փակ→pʰɑɡ, գործ→kʰoɾd͡z, կով→ɡov.)
+//   ★ RHOTIC NEUTRALISATION — Eastern's tap ⟨ր⟩→[ɾ] vs trill ⟨ռ⟩→[r] both become a single tap [ɾ] in Western.
+//   ★ FRONT-ROUNDED vowels from the palatal sequences ⟨յու⟩/⟨իւ⟩→[ʏ] and ⟨յո⟩→[œ] (loan-heavy: Turkish/French names,
+//      and the classical ⟨իւ⟩ spelling kept in Western orthography) — handled as digraphs.
+//
+// Validated vs wikipron hye_armn_w broad (17211) + narrow (17584). See docs/investigations/hyw_native_bringup_investigation.md.
+{
+    "language": "hyw",
+    "name": "Western Armenian",
+    "script": "Armenian",
+    "provenance": "Authored Western Armenian rule g2p — the CONSONANT SHIFT (classical voiced+aspirate ⟨բ դ գ ձ ջ / փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]), rhotic neutralisation ⟨ր ռ⟩→[ɾ], the ⟨յու/իւ⟩→[ʏ] ⟨յո⟩→[œ] digraphs — reusing the shared Armenian engine. Cross-checked vs wikipron hye_armn_w broad + narrow.",
+
+    // Vowels — identical to Eastern (the shift is consonantal). ⟨ե⟩→e / ⟨ո⟩→o are the BARE values; the initial [j]/[v]
+    // onset is added in code.
+    "vowels": { "ա": "ɑ", "ե": "e", "է": "e", "ը": "ə", "ի": "i", "ո": "o", "օ": "o" },
+
+    // Digraphs (longest-first): ⟨ու⟩→u shared with Eastern; the classical ⟨իւ⟩→ʏ spelling (always front-rounded,
+    // Իւսկիւտար→ʏsɡʏdɑɾ). ⟨յու⟩→ʏ is POST-CONSONANT ONLY (below) — word-initial/post-vowel ⟨յու⟩ is the glide [ju]
+    // (յուղ→juʁ). ⟨յո⟩ is NOT a digraph: it falls out as ⟨յ⟩→j + ⟨ո⟩→o = [jo] (յոթ→jotʰ 'seven'); the rare [œ] cases
+    // are Turkish-loan surnames (lexical, not modelled).
+    "digraphs": { "իւ": "ʏ", "ու": "u" },
+    "postConsonantDigraphs": { "յու": "ʏ" },
+
+    // Consonants → WESTERN Armenian IPA (the shift is applied here). Non-stops (զ ժ լ խ հ ղ մ յ ն շ ս վ ֆ) are as Eastern;
+    // ⟨ռ⟩→ɾ neutralised with ⟨ր⟩→ɾ; ⟨ւ⟩→v (standalone).
+    "consonants": {
+        "բ": "pʰ", "գ": "kʰ", "դ": "tʰ", "զ": "z", "թ": "tʰ", "ժ": "ʒ", "լ": "l", "խ": "χ", "ծ": "d͡z",
+        "կ": "ɡ", "հ": "h", "ձ": "t͡sʰ", "ղ": "ʁ", "ճ": "d͡ʒ", "մ": "m", "յ": "j", "ն": "n", "շ": "ʃ",
+        "ո": "o", "չ": "t͡ʃʰ", "պ": "b", "ջ": "t͡ʃʰ", "ռ": "ɾ", "ս": "s", "վ": "v", "տ": "d", "ր": "ɾ",
+        "ց": "t͡sʰ", "ւ": "v", "փ": "pʰ", "ք": "kʰ", "ֆ": "f"
+    },
+
+    "clausePunctuation": {
+        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "՝": " , ", "՞": " ? ", "։": " . "
+    },
+
+    // NUMBERS — Western Armenian cardinal spellings; canonical IPA DERIVED via the same g2p (so the shift applies:
+    // մեկ→[meɡ], երկու→[jeɾku]). Slavic-style decimal composition, space-separated.
+    "numbers": {
+        "units": ["զրօ", "մէկ", "երկու", "երեք", "չորս", "հինգ", "վեց", "եօթ", "ութ", "ինը"],
+        "teens": ["տասը", "տասնմէկ", "տասներկու", "տասներեք", "տասնչորս", "տասնհինգ", "տասնվեց", "տասնեօթ", "տասնութ", "տասնինը"],
+        "tens": { "20": "քսան", "30": "երեսուն", "40": "քառասուն", "50": "յիսուն", "60": "վաթսուն", "70": "եօթանասուն", "80": "ութսուն", "90": "իննսուն" },
+        "hundreds": ["", "հարիւր", "երկուհարիւր", "երեքհարիւր", "չորսհարիւր", "հինգհարիւր", "վեցհարիւր", "եօթհարիւր", "ութհարիւր", "իննհարիւր"],
+        "magnitudes": { "thousand": "հազար", "million": "միլիոն", "billion": "միլիառ" }
+    }
+}
