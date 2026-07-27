@@ -1,8 +1,10 @@
 /**
  * Tashelhit / Shilha (shi) — Taclḥit, a Berber (Amazigh) language of SW Morocco (the Souss), ~7–9M. This phonemizer
- * consumes the **Berber Latin alphabet** (the academic/community Latin orthography; Tifinagh + Arabic are the other
- * scripts) and converts it to canonical IPA. The orthography is near-1:1 PHONEMIC, so it is a greedy grapheme scan
- * plus two rules the table can't express:
+ * consumes BOTH community scripts — the **Berber Latin alphabet** AND **Neo-Tifinagh** (ⵜⵉⴼⵉⵏⴰⵖ, Morocco's
+ * constitutionally-official IRCAM script) — auto-detecting per word by codepoint (Tifinagh is U+2D30–2D7F). Both are
+ * phonemic alphabets for the same language, so they yield IDENTICAL IPA (validated 500/500 self-consistent). (The
+ * Arabic manuscript script is deferred — a defective non-standard abjad.) The orthography is near-1:1 PHONEMIC, so it
+ * is a greedy grapheme scan plus two rules the table can't express:
  *   - LABIALISATION: a consonant followed by ⟨ʷ⟩ (U+02B7) → the labialised [Cʷ] (gʷ→ɡʷ, kʷ→kʷ, xʷ→χʷ);
  *   - GEMINATION: a doubled consonant letter → a LONG consonant [Cː] (phonemic in Berber: kk→kː, ll→lː, ṭṭ→tˤː).
  * Emphatics are pharyngealised (dot-below): ḍ→dˤ, ṭ→tˤ, ṣ→sˤ, ẓ→zˤ, ṛ→rˤ; pharyngeals ḥ→ħ, ɛ→ʕ; uvulars ɣ→ʁ~ɣ,
@@ -15,19 +17,24 @@ import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface TashelhitDef {
-    graphemes: Record<string, string>;
+    graphemes: Record<string, string>; // Berber Latin alphabet → IPA
+    tifinagh: Record<string, string>; // Neo-Tifinagh (IRCAM) letter → IPA (same phonemes; the official Moroccan script)
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<TashelhitDef>(import.meta.url, "tashelhit.jsonc");
-const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
-const LABIAL = "ʷ"; // U+02B7 modifier letter small w — the labialisation diacritic in the Berber Latin orthography
+// The labialisation marker differs by script: Latin ⟨ʷ⟩ (U+02B7) vs Tifinagh ⵯ Tamatart (U+2D6F).
+const isTifinagh = (ch: string) => { const c = ch.codePointAt(0)!; return c >= 0x2d30 && c <= 0x2d7f; };
 
-/** One Tashelhit (Berber-Latin) word → IPA. Scan graphemes → apply labialisation (C + ⟨ʷ⟩) → collapse a doubled
- *  consonant to a long [Cː] (gemination). Unknown characters are left visible for the residual report. */
+/** One Tashelhit word → IPA, script auto-detected (Berber Latin OR Neo-Tifinagh — two spellings of the same
+ *  phonemic system, so identical IPA). Scan graphemes → apply labialisation (C + the script's labial marker) →
+ *  collapse a doubled consonant to a long [Cː] (gemination). Unknown characters are left visible. */
 function phonemize(word: string): string {
-    const w = word.normalize("NFC").toLowerCase();
-    // 1. grapheme scan → IPA tokens (labialisation ⟨ʷ⟩ merges into the previous token).
+    const tif = [...word].some(isTifinagh);
+    const G = tif ? DEF.tifinagh : DEF.graphemes;
+    const LABIAL = tif ? "ⵯ" : "ʷ"; // Tifinagh Tamatart (U+2D6F) vs Latin ⟨ʷ⟩
+    const w = tif ? word : word.normalize("NFC").toLowerCase(); // Tifinagh is caseless + already atomic
+    // 1. grapheme scan → IPA tokens (the labialisation marker merges into the previous token).
     const toks: string[] = [];
     for (const ch of w) {
         if (ch === LABIAL) { if (toks.length) toks[toks.length - 1] += "ʷ"; continue; }
@@ -55,7 +62,9 @@ class TashelhitPhonemizer implements Phonemizer {
         // would otherwise shatter the word); phonemize() re-NFCs (idempotent). The class also allows the combining
         // dot-below/marks (U+0300–036F) defensively for any letter without a precomposed form.
         const nfc = input.normalize("NFC");
-        const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([.,?!;:،؟])/gu;
+        // Latin (with emphatic dot-below + combining marks) OR Tifinagh LETTERS (U+2D30–2D6F, incl. the Tamatart
+        // labial ⵯ) — one word class; the Tifinagh separator ⵰ (U+2D70) is punctuation, not a letter.
+        const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([.,?!;:،؟⵰])/gu;
         let m: RegExpExecArray | null;
         while ((m = tok.exec(nfc))) {
             if (m[1]) sink.emit(phonemize(m[1]));

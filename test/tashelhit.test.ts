@@ -38,4 +38,13 @@ describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", 
         const nfd = "aḍaṛ".normalize("NFD");
         expect(createTashelhit().text(nfd).trim()).toBe("adˤarˤ"); // not "ad ar"
     });
+
+    test("Tifinagh (ⵜⵉⴼⵉⵏⴰⵖ) front-end — script auto-detected, IDENTICAL IPA to the Latin path", () => {
+        // Neo-Tifinagh (Morocco's official IRCAM script) is a phonemic alphabet → same phonology, same IPA.
+        expect(phonemizeWord("ⵜⴰⵛⵍⵃⵉⵜ")).toBe("taʃlħit"); // = Taclḥit (the endonym)
+        expect(phonemizeWord("ⴰⴹⴰⵕ")).toBe("adˤarˤ"); // = aḍaṛ (emphatics ⴹ→dˤ, ⵕ→rˤ)
+        expect(phonemizeWord("ⴰⵎⴰⵣⵉⵖ")).toBe("amaziɣ"); // = amaziɣ
+        expect(phonemizeWord("ⵜⴰⵛⵍⵃⵉⵜ")).toBe(phonemizeWord("Taclḥit")); // Tifinagh ≡ Latin
+        expect(createTashelhit().text("ⵜⴰⵛⵍⵃⵉⵜ ⴷ ⴰⵡⴰⵍ").trim()).toBe("taʃlħit d awal"); // mixed clause
+    });
 });
