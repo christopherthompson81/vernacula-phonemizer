@@ -6,10 +6,12 @@
  * vowel stays [n] (na→na); a word-initial nasal + C is a prenasal onset (mburu→mburu). Signatures: ⟨c⟩→t͡ʃ,
  * ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ, ⟨ny⟩=⟨ɲ⟩→ɲ, ⟨ŋ⟩→ŋ; 7 oral vowels i e ɛ a ɔ o u. Tone (2-level H/L + downstep) and vowel
  * LENGTH are lexical / unwritten in the standard orthography → DEFERRED (segmental + nasal backbone only). N'Ko
- * is a second script, deferred. See docs/investigations/bm_native_bringup_investigation.md.
+ * (ߒߞߏ) is a 2nd script — bambaraNko.ts transliterates it to Latin then the same g2p runs (identical IPA;
+ * N'Ko tone marks drop, the engine being toneless). See docs/investigations/bm_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { isNko, nkoToLatin } from "./bambaraNko.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const G = MANIFEST.graphemes;
@@ -18,9 +20,10 @@ const NASAL_TILDE = "̃"; // combining tilde — a nasalised vowel (matches the 
 const VOWELS = new Set(["i", "e", "ɛ", "a", "ɔ", "o", "u"]); // orthographic oral vowels
 const IPA_VOWELS = new Set(["i", "e", "ɛ", "a", "ɔ", "o", "u"]); // their IPA (identical here)
 
-/** Phonemize a single Bambara word to canonical IPA (segmental + nasalisation; tone + length deferred). */
+/** Phonemize a single Bambara word to canonical IPA (segmental + nasalisation; tone + length deferred). Accepts
+ *  BOTH scripts: the Latin orthography and N'Ko (ߒߞߏ) — N'Ko is transliterated to Latin first (identical IPA). */
 export function phonemizeWord(word: string): string {
-    const w = word.toLowerCase();
+    const w = (isNko(word) ? nkoToLatin(word) : word).toLowerCase();
     const out: string[] = []; // one entry per emitted segment (so we can nasalise the previous vowel)
     let i = 0;
     while (i < w.length) {
@@ -49,8 +52,8 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-// A word (Bambara Latin letters incl. ɛ ɔ ɲ ŋ) / number / punctuation token.
-const TOKEN = /([a-zɛɔɲŋ]+)|(\d+)|([.!?…,;:])/giu;
+// A word — Bambara Latin (incl. ɛ ɔ ɲ ŋ) OR N'Ko (letters U+07CA–07EA + its tone/nasal marks) / number / punct.
+const TOKEN = /([a-zɛɔɲŋ\u{07CA}-\u{07F5}\u{07FA}\u{07FD}]+)|(\d+)|([.!?…,;:])/giu;
 
 class BambaraPhonemizer implements Phonemizer {
     text(input: string): string {
