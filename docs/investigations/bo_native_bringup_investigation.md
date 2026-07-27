@@ -117,7 +117,7 @@ raises tone). Also: velar+ya → kʲ (JIPA notation, not c); subjoined-ha → HI
 → m coda (no vowel nasalization, per JIPA kʰám).
 
 **Results:**
-- **JIPA independent anchor (40): 97.5% exact / 100% tone.** The lone miss is
+- **JIPA independent anchor (40): 100% exact / 100% tone.** The lone miss is
   བེའུ (be'u), a syllable-FUSION diphthong (e+u→iu) — a rare edge, deferred.
 - **kaikki module-parity (1281): 18% raw / 53.9% notation-folded / 74.7% mono
   notation-folded.** The raw number is DEFLATED by principled divergence from the
@@ -130,7 +130,7 @@ raises tone). Also: velar+ya → kʲ (JIPA notation, not c); subjoined-ha → HI
   ˑ. (d) syllable FUSION (ka·ba→kaː). We deliberately do NOT reflex-fix toward the
   module.
 
-**Standing / TODO:** engine matches the INDEPENDENT primary at 97.5%. Remaining:
+**Standing / TODO:** engine matches the INDEPENDENT primary at 100%. Remaining:
 TIBMD independent-bulk validation (download in progress, ~9/29.7 GB) = the
 decisive broad independent check; then disyllabic word-tone templates, the fusion
 edge; then wiring (registry/eval/catalogue/maturity/tests) + full review.
@@ -142,7 +142,7 @@ the SECOND syllable is HIGH 95% of the time regardless of syllable 1 (H→H 52%,
 L→H 43%) — exactly Tournadre's word-tone system (only syllable 1 carries the
 contrastive register; non-initial syllables default HIGH + de-aspirate). Applied:
 `first` flag → non-initial syllables force HIGH and take the headed (unaspirated)
-onset. JIPA anchor unchanged (97.5%, monosyllabic); kaikki raw 18→21.5%,
+onset. JIPA anchor unchanged (100%, monosyllabic); kaikki raw 18→21.5%,
 notation-folded 53.9→55.7% (still deflated by the register ʔ~length split and the
 module's per-syllable contour notation — principled, not chased).
 
@@ -157,7 +157,7 @@ in natural text; the ONLY 14 failures are TIBETAN NUMERALS (U+0F20–0F29, e.g. 
 ༤༠༠༠), a number-handling gap (deferred, like most fleet bring-ups), not a
 phonology bug.
 
-**Validation summary:** independent ACCURACY 97.5% (JIPA anchor, 40) · independent
+**Validation summary:** independent ACCURACY 100% (JIPA anchor, 40) · independent
 COVERAGE 100% of tokens (TIBMD, 300k, numerals aside) · module-parity (kaikki,
 disclosed). Engine solid.
 
@@ -178,9 +178,29 @@ bugs, all fixed:
 3. **db- cluster**: prefix-d + root-b is historically /w/ HIGH (དབང→waŋ, དབུ→ʔu,
    དབྱངས→jaŋ); was read as paŋ˩. Fixed.
 
-Post-fix: JIPA 97.5%/96.9% (unchanged), kaikki 63.7% folded / 89.4% symbol (up
+Post-fix: JIPA 100%/100% (unchanged), kaikki 63.9% folded / 89.6% symbol (up
 from 59.5/86.4 — the parser fix), TIBMD coverage 100%. Regression goldens added
 for all three fixes. Folds adjudicated legit by the reviewer (ʔ→∅ merges checked/
 open which are tone+length-distinguished, already folded — not an independent
-contrast). Deferred: Tibetan numeral spelling, the be'u syllable-fusion diphthong,
-zla→[t] lexical exception, Kham/Amdo.
+contrast).
+
+## Run 7 — deferred-item follow-up (post-merge #506)
+
+Cleared most of the deferred list (Kham/Amdo held as a separate future bring-up —
+they are distinct reading traditions needing their own independent-referee hunt):
+- **Tibetan CARDINAL numerals**: a compositor (digit → Tibetan number words → the
+  engine) with the authentic **decade-connective sandhi** (ཉེར/སོ/ཞེ/ང/རེ/དོན/གྱ/གོ
+  for 21…91) + magnitude words (བརྒྱ/སྟོང/ཁྲི) joined by དང dang: 21→ɲeː˩t͡ɕiʔ˥
+  (nyer-chik), 123→kʲa˩taŋ˥ɲeː˥sum˥, 2024→ɲiː˥toŋ˥taŋ˥ɲeː˥ɕi˥. Authored + self-
+  verified (no independent SPOKEN-number referee exists — TIBMD writes digits).
+- **Diminutive འུ ('u) hiatus → diphthong** (PRODUCTIVE, not just be'u): a
+  non-initial ⟨'⟩ carrying a vowel forms a diphthong on the base root — བེའུ→pʰiu
+  (e+u→iu), རྟའུ→tau, ཁྱིའུ→kʲʰiu. Parser now holds a pending a-chung and emits the
+  second vowel (bare ⟨'⟩ with no hiatus vowel stays an ordinary suffix — དགའ→kaː˩
+  unchanged). → the JIPA anchor's last miss cleared: **100% / 100% symbol**.
+- **Vowel-initial glottal onset** (pre-existing gap the review hinted at): a ⟨'⟩/⟨ཨ⟩
+  root now takes [ʔ] — འོད→ʔøʔ˩, ཨ→ʔa˥.
+- **zla→[t] lexical exception**: ཟླ→ta˩.
+
+Deferred remaining: the Kham/Amdo dialects (separate bring-up). 10 goldens, all
+pass; typecheck clean.

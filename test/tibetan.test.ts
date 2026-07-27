@@ -54,7 +54,23 @@ describe("Tibetan (Standard/Lhasa) canonical IPA", () => {
         expect(phonemizeWord("དབུ")).toBe("ʔu˥"); // dbu 'head (H)' — db- before /u/ → [ʔ]
     });
 
-    test("text: shad → clause break, Tibetan numerals → digits (spelling deferred)", () => {
-        expect(getPhonemizer("bo").text("བོད་སྐད། ༢༠").trim()).toBe("pʰøʔ˩kɛʔ˥ , 20"); // 'Tibetan language', shad, ༢༠→20
+    test("text: shad → clause break, Tibetan numerals spelled out", () => {
+        expect(getPhonemizer("bo").text("བོད་སྐད། ༢༠").trim()).toBe("pʰøʔ˩kɛʔ˥ , ɲi˩ɕu˥"); // 'Tibetan language', shad, ༢༠→ɲishu (nyishu '20')
+    });
+
+    test("numeral composition: units, teens, decade connectives, magnitudes + dang", () => {
+        const num = (n: string): string => getPhonemizer("bo").text(n).trim();
+        expect(num("༥")).toBe("ŋa˥"); // 5 lnga
+        expect(num("༡༠")).toBe("t͡ɕu˥"); // 10 bcu
+        expect(num("༢༡")).toBe("ɲeː˩t͡ɕiʔ˥"); // 21 — decade connective ཉེར nyer + gcig
+        expect(num("༡༠༠")).toBe("kʲa˩"); // 100 brgya
+        expect(num("༡༢༣")).toBe("kʲa˩taŋ˥ɲeː˥sum˥"); // 123 — brgya དང dang nyer gsum
+    });
+
+    test("diminutive འུ ('u) hiatus → diphthong; vowel-initial glottal onset", () => {
+        expect(phonemizeWord("བེའུ")).toBe("pʰiu˩"); // be'u 'calf' — e+u fusion → [iu]
+        expect(phonemizeWord("རྟའུ")).toBe("tau˥"); // rta'u 'pony' — a+u → [au]
+        expect(phonemizeWord("འོད")).toBe("ʔøʔ˩"); // 'od 'light' — vowel-initial → glottal onset
+        expect(phonemizeWord("ཟླ")).toBe("ta˩"); // zla 'moon' — zl- lexical exception → [t]
     });
 });
