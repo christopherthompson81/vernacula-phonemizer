@@ -95,6 +95,7 @@ import { createIcelandic } from "./languages/icelandic/icelandic.ts";
 import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
 import { createQuechua } from "./languages/quechua/quechua.ts";
+import { createTibetan } from "./languages/tibetan/tibetan.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
@@ -420,6 +421,9 @@ function build(lang: string): Phonemizer {
         // Quechua (Runasimi) — Southern Quechua; 3 vowels, overt 3-way stop series (plain/aspirate/ejective), penult stress.
         case "qu":
             return createQuechua();
+        // Tibetan (Standard/Lhasa) — deep orthography; syllable-stack rule engine (tonogenesis, cluster realization, suffix umlaut/length/nasalization).
+        case "bo":
+            return createTibetan();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
