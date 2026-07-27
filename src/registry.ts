@@ -100,6 +100,7 @@ import { createGuarani } from "./languages/guarani/guarani.ts";
 import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
+import { createSantali } from "./languages/santali/santali.ts";
 import { createLatin } from "./languages/latin/latin.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
@@ -448,6 +449,9 @@ function build(lang: string): Phonemizer {
         // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.
         case "la":
             return createLatin();
+        // Santali (ᱥᱟᱱᱛᱟᱲᱤ) — Munda (Austroasiatic), the Ol Chiki alphabet; ᱷ aspiration, ᱹ→ə, ᱸ nasal, word-final CHECKED stops.
+        case "sat":
+            return createSantali();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
