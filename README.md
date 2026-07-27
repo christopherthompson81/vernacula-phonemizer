@@ -11,41 +11,42 @@ referees — human transcriptions (wikipron, kaikki) and independent G2Ps (epitr
 away only notation and allophony, never a real phonemic contrast.
 
 ```ts
-import { phonemize } from "vernacula-phonemizer";
+import { phonemizeAsync } from "vernacula-phonemizer";
 
-// One line per script we ingest — every language resolves to the same canonical IPA notation.
-// (Tashelhit shows two scripts for the SAME word → identical IPA. Hebrew and Arabic are shown VOCALIZED
-//  (niqqud / ḥarakāt) — the sync API's designed input for those abjads; UNPOINTED Hebrew/Arabic restore
-//  their unwritten short vowels via async neural restorers — the Hebrew NAKDAN + the Arabic diacritizer.)
-phonemize("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
-phonemize("Taclḥit", "shi");       // Berber Latin → taʃlħit
-phonemize("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
-phonemize("Ελληνικά", "el");       // Greek        → elinika
-phonemize("Україна", "uk");        // Cyrillic     → ukrajina
-phonemize("Հայերեն", "hy");        // Armenian     → hɑjeɾen
-phonemize("עִבְרִית", "he");       // Hebrew       → ʔivʁit
-phonemize("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
-phonemize("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
-phonemize("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
-phonemize("বাংলাদেশ", "bn");       // Bengali      → baŋlad̪eʃ
-phonemize("ଓଡ଼ିଆ", "or");          // Odia         → ˈoɽia
-phonemize("தமிழ்", "ta");          // Tamil        → t̪ˈɐmɪɻ
-phonemize("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
-phonemize("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
-phonemize("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
-phonemize("සිංහල", "si");          // Sinhala      → sˈiŋhələ
-phonemize("الْعَرَبِيَّة", "ar");  // Arabic       → alʕarabˈijːa
-phonemize("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
-phonemize("አማርኛ", "am");           // Geʽez        → amaɾɲa
-phonemize("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
-phonemize("ខ្មែរ", "km");          // Khmer        → kʰmae
-phonemize("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
-phonemize("世界", "cmn");            // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
-phonemize("ひらがな", "ja");           // Hiragana     → çiɾäɡäꜜnä
-phonemize("カタカナ", "ja");           // Katakana     → kätäkänä
-phonemize("日本語", "ja");            // Kanji        → niho̞ŋɡo̞
-phonemize("한국어", "ko");            // Hangul       → hˈɐnɡuɡɘ
-phonemize("ꦗꦮ", "jv");            // Javanese     → d͡ʒˈɔwɔ
+// One line per script we ingest — real-world text (including UNDIACRITIZED abjads) → the same canonical IPA.
+// phonemizeAsync is the unified best-output entry: it restores the abjads' unwritten vowels from BARE input
+// (Hebrew עברית via the neural NAKDAN, Arabic العربية via the diacritizer) and uses each language's neural OOV
+// model where one exists (English's BiLSTM, bn/da/nb/fr taggers, the Perso-Arabic riders). Worst input, best
+// output. Tashelhit shows two scripts, same word → identical IPA. (A sync `phonemize` covers the simple cases.)
+await phonemizeAsync("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
+await phonemizeAsync("Taclḥit", "shi");       // Berber Latin → taʃlħit
+await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
+await phonemizeAsync("Ελληνικά", "el");       // Greek        → elinika
+await phonemizeAsync("Україна", "uk");        // Cyrillic     → ukrajina
+await phonemizeAsync("Հայերեն", "hy");        // Armenian     → hɑjeɾen
+await phonemizeAsync("עברית", "he");          // Hebrew       → ʔivʁit
+await phonemizeAsync("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
+await phonemizeAsync("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
+await phonemizeAsync("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
+await phonemizeAsync("বাংলাদেশ", "bn");       // Bengali      → baŋlad̪eʃ
+await phonemizeAsync("ଓଡ଼ିଆ", "or");          // Odia         → ˈoɽia
+await phonemizeAsync("தமிழ்", "ta");          // Tamil        → t̪ˈɐmɪɻ
+await phonemizeAsync("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
+await phonemizeAsync("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
+await phonemizeAsync("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
+await phonemizeAsync("සිංහල", "si");          // Sinhala      → sˈiŋhələ
+await phonemizeAsync("العربية", "ar");        // Arabic       → alʕarabˈijːa
+await phonemizeAsync("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
+await phonemizeAsync("አማርኛ", "am");           // Geʽez        → amaɾɲa
+await phonemizeAsync("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
+await phonemizeAsync("ខ្មែរ", "km");          // Khmer        → kʰmae
+await phonemizeAsync("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
+await phonemizeAsync("世界", "cmn");            // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
+await phonemizeAsync("ひらがな", "ja");           // Hiragana     → çiɾäɡäꜜnä
+await phonemizeAsync("カタカナ", "ja");           // Katakana     → kätäkänä
+await phonemizeAsync("日本語", "ja");            // Kanji        → niho̞ŋɡo̞
+await phonemizeAsync("한국어", "ko");            // Hangul       → hˈɐnɡuɡɘ
+await phonemizeAsync("ꦗꦮ", "jv");             // Javanese     → d͡ʒˈɔwɔ
 ```
 
 ## Languages
