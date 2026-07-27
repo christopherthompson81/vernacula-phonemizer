@@ -58,7 +58,7 @@ Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — acr
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
 Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
 Odia, Tamil, Telugu, Kannada, Malayalam, Sinhala, Myanmar, Khmer, Thai, Lao,
-Han, Hiragana/Katakana/Kanji, Hangul and Javanese (Aksara Jawa) scripts.
+Han, Hiragana/Katakana/Kanji, Hangul, Javanese (Aksara Jawa) and Aksara Sunda scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
 outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.md).
@@ -67,7 +67,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 |---|---|
 | Armenian | Armenian `hy` (Eastern; its own Indo-European branch) |
 | Austroasiatic | Khmer `km`, Vietnamese `vi` (tonal) |
-| Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su`, Tagalog `tl`, Māori `mi` (Polynesian) |
+| Austronesian | Cebuano `ceb`, Hiligaynon `hil`, Ilocano `ilo`, Indonesian `id` (+ Standard Malay `zsm`), Javanese `jv`, Madurese `mad`, Malagasy `mg`, Sundanese `su` (Latin + Aksara Sunda), Tagalog `tl`, Māori `mi` (Polynesian) |
 | Baltic | Latvian `lv` (written palatals + fixed first-syllable stress), Lithuanian `lt` (palatalization + lexical pitch accent) |
 | Berber (Amazigh) | Tashelhit `shi` (Shilha; Berber Latin + Tifinagh ⵜⵉⴼⵉⵏⴰⵖ) |
 | Celtic | Irish `ga`, Welsh `cy` |

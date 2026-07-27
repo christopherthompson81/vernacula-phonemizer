@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Sundanese / Basa Sunda (su) — Austronesian (West Java), modern Latin orthography.
 // Shallow, near-phonemic (the id/jv pattern), so a flat scan. Signature: the SEVEN-vowel system with the central
 // vowel ⟨eu⟩→[ɨ] alongside ⟨e⟩→[ə] (schwa) and ⟨é⟩→[e]; c→[t͡ʃ], j→[d͡ʒ], ng→[ŋ], ny→[ɲ]; glottal at a
-// word-initial vowel and same-vowel hiatus. Validated at 86.5% vs kaikki su (465, the only referee). See
+// word-initial vowel and same-vowel hiatus. Validated at 91.2% vs kaikki su (465, the only referee). See
 // docs/investigations/su_native_bringup_investigation.md.
 describe("Sundanese canonical IPA", () => {
     test("the seven-vowel system: ⟨eu⟩→ɨ, ⟨e⟩→ə, ⟨é⟩→e", () => {
@@ -27,5 +27,16 @@ describe("Sundanese canonical IPA", () => {
         expect(getPhonemizer("su").text("12").trim()).toBe("dˈua bəlˈas"); // dua belas
         expect(getPhonemizer("su").text("25").trim()).toBe("dˈua pˈuluh lˈima"); // dua puluh lima
         expect(getPhonemizer("su").text("100").trim()).toBe("sarˈatus"); // saratus
+    });
+
+    test("Aksara Sunda (ᮃᮊ᮪ᮞᮛ) front-end — abugida transliterated to Latin, IDENTICAL IPA", () => {
+        expect(phonemizeWord("ᮃᮊ᮪ᮞᮛ")).toBe("ʔaksˈara"); // "aksara" — indep A + KA + pamaéh (virama) + SA + RA
+        expect(phonemizeWord("ᮃᮊ᮪ᮞᮛ")).toBe(phonemizeWord("aksara")); // Aksara ≡ Latin
+        expect(phonemizeWord("ᮊᮨ")).toBe("kə"); // KA + pamepet → ⟨e⟩ [ə] (the pepet)
+        expect(phonemizeWord("ᮊᮦ")).toBe("ke"); // KA + panaélaéng → ⟨é⟩ [e]
+        expect(phonemizeWord("ᮊᮩ")).toBe("kɨ"); // KA + paneuleung → ⟨eu⟩ [ɨ]
+        expect(phonemizeWord("ᮊᮀ")).toBe("kaŋ"); // KA + panyecek → final -ng
+        expect(phonemizeWord("ᮝᮤᮜᮥᮏᮨᮀ")).toBe("wilˈud͡ʒəŋ"); // "wilujeng" (welcome)
+        expect(getPhonemizer("su").text("᮱᮱").trim()).toBe("sabəlˈas"); // "11" in Aksara Sunda digits → sabelas
     });
 });

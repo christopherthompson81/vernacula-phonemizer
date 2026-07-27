@@ -1,6 +1,6 @@
 /**
  * Native Sundanese / Basa Sunda (su) text phonemizer — canonical IPA, espeak-independent. Austronesian (West
- * Java), modern LATIN orthography. Shallow and near-phonemic (the id/jv pattern), so a flat left-to-right scan:
+ * Java), modern LATIN orthography (+ the revived Aksara Sunda abugida, transliterated to Latin by sundaAksara.ts — identical IPA). Shallow and near-phonemic (the id/jv pattern), so a flat left-to-right scan:
  * digraphs (the central vowel ⟨eu⟩→[ɨ], ng→[ŋ], ny→[ɲ]) then single letters, ⟨e⟩→schwa [ə] / ⟨é⟩→[e], c→[t͡ʃ],
  * j→[d͡ʒ]. Glottal stop is inserted at a word-initial vowel (awi→ʔawi) and in a same-vowel hiatus (naam→naʔam).
  * Penultimate (weak) stress, skipping a schwa nucleus. Validated against kaikki su. See
@@ -9,6 +9,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { aksaraToLatin, isAksaraSunda, normalizeSundaDigits } from "./sundaAksara.ts";
 
 interface NumbersDef {
     units: string[];
@@ -33,9 +34,11 @@ const NUM = DEF.numbers;
 const VOWEL_PH = "aeiouəɨ";
 const isVowelPh = (s: string): boolean => VOWEL_PH.includes(s);
 
-/** One Sundanese word → canonical IPA. Returns the segment array joined, then stress + glottal post-processing. */
+/** One Sundanese word → canonical IPA. Accepts BOTH scripts: the Latin orthography and Aksara Sunda (ᮃᮊ᮪ᮞᮛ) —
+ *  Aksara Sunda is transliterated to Latin first (identical IPA), then the shared g2p + glottal + stress runs. */
 export function phonemizeWord(word: string): string {
-    const s = [...word.toLowerCase().normalize("NFC")];
+    const latin = isAksaraSunda(word) ? aksaraToLatin(word) : word;
+    const s = [...latin.toLowerCase().normalize("NFC")];
     const segs: string[] = [];
     for (let i = 0; i < s.length; ) {
         const two = s[i]! + (s[i + 1] ?? "");
@@ -99,13 +102,14 @@ function number(digits: string): string {
         .join(" ");
 }
 
-const TOKEN = /([a-zéÉ]+)|(\d+)|([.?!,;:…])/giu;
+// A word — Latin (incl. é) OR Aksara Sunda (letters + signs U+1B80–1BAF, 1BBA–1BBF; digits normalised to ASCII).
+const TOKEN = /([a-zéÉ\u{1B80}-\u{1BAF}\u{1BBA}-\u{1BBF}]+)|(\d+)|([.?!,;:…])/giu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
 class SundanesePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeSundaDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

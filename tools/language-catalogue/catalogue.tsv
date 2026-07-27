@@ -180,7 +180,7 @@ so	Somali	Cushitic	Latin	22000000						implemented		✅				1
 sq	Albanian	Albanian	Latin	6000000					1	unimplemented					Not yet tracked; covered by espeak.	0
 sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅				1
 st	Sesotho (Southern Sotho)	Niger-Congo (Bantu)	Latin	6000000	8000000	0	3	0	0	implemented		🔷			Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.	0
-su	Sundanese	Austronesian	Latin	32000000						implemented		✅				0
+su	Sundanese	Austronesian	Latin/Aksara Sunda	32000000						implemented		✅				0
 sv	Swedish	Germanic (North)	Latin	10000000						implemented		✅				1
 sw	Swahili	Niger-Congo (Bantu)	Latin	16000000	70000000					implemented		✅				1
 syl	Sylheti	Indo-Aryan (Eastern)	Syloti Nagri	11000000		397	492	0	0	implemented		🔷				0
