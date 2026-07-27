@@ -11,6 +11,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { sawndipToReadings } from "./sawndip.ts";
 
 const ONSETS = MANIFEST.onsets;
 const CONS = MANIFEST.consonants;
@@ -177,8 +178,8 @@ export function phonemizeWord(word: string): string {
     return out;
 }
 
-// A word (Zhuang letters) / number / punctuation token.
-const TOKEN = /([a-z]+(?:'[a-z]+)*)|(\d+)|([.!?…,;:])/giu;
+// A word (Zhuang Latin letters) / number / SAWNDIP run (CJK ideographs — the logographic script) / punctuation token.
+const TOKEN = /([a-z]+(?:'[a-z]+)*)|(\d+)|([㐀-䶿一-鿿豈-﫿\u{20000}-\u{2ebef}\u{2f800}-\u{2fa1f}\u{30000}-\u{323af}]+)|([.!?…,;:])/giu;
 
 class ZhuangPhonemizer implements Phonemizer {
     text(input: string): string {
@@ -186,8 +187,10 @@ class ZhuangPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
-            else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+            else if (m[3]) // Sawndip: one glyph = one syllable → look up its reading, phonemize each through the za g2p.
+                for (const reading of sawndipToReadings(m[3])) sink.emit(phonemizeWord(reading));
+            else if (m[4]) {
+                const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
         });
