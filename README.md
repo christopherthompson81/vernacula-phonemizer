@@ -27,6 +27,7 @@ await phonemizeAsync("ߓߊߡߊߣߊ߲", "bm");         // N'Ko         → baman�
 await phonemizeAsync("Ελληνικά", "el");       // Greek        → elinika
 await phonemizeAsync("Україна", "uk");        // Cyrillic     → ukrajina
 await phonemizeAsync("Հայերեն", "hy");        // Armenian     → hɑjeɾen
+await phonemizeAsync("ქართული", "ka");        // Georgian     → kʰaɾtʰuli
 await phonemizeAsync("עברית", "he");          // Hebrew       → ʔivʁit
 await phonemizeAsync("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
 await phonemizeAsync("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
