@@ -1,0 +1,20 @@
+// Western Armenian / արեւմտահայերէն (hyw) — Indo-European (independent Armenian branch), Armenian alphabet. The
+// Istanbul/diaspora standard. Reuses the shared Armenian engine; the signature is the WESTERN CONSONANT SHIFT.
+// Referees: wikipron hye_armn_w broad (primary, 17211) + narrow (secondary, 17584). Both HUMAN (Wiktionary).
+// See docs/investigations/hyw_native_bringup_investigation.md.
+{
+    "language": "hyw",
+    "name": "Western Armenian (արեւմտահայերէն)",
+    "script": "Armenian",
+    "provenance": "Authored Western Armenian rule g2p — the CONSONANT SHIFT (classical voiced ⟨բ դ գ ձ ջ⟩ + aspirate ⟨փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]), rhotic neutralisation ⟨ր ռ⟩→[ɾ], ⟨յու/իւ⟩→[ʏ] ⟨յո⟩→[œ] — reusing the shared Armenian engine (makeArmenianEngine). Scored against wikipron hye_armn_w broad + narrow.",
+    "referees": [
+        { "file": "hyw.wikipron-hyw-broad.tsv", "source": "wikipron hye_armn_w_broad (Wiktionary, HUMAN, 17211)", "role": "primary" },
+        { "file": "hyw.wikipron-hyw-narrow.tsv", "source": "wikipron hye_armn_w_narrow (Wiktionary, HUMAN, 17584 — marks aspiration + stress)", "role": "secondary" }
+    ],
+    "secondaryGap": "🔷 single-source-FAMILY — broad + narrow are both wikipron (Wiktionary), correlated not independent. No epitran hye. But the two transcription DEPTHS corroborate the shift: broad drops aspiration (պատ→bɑd, բարի→pɑɾi), narrow marks it (բարի→pʰɑɾí) — so the aspirated-voiceless vs voiced TWO-way contrast is attested at both depths.",
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "ASPIRATION — the BROAD primary referee does not transcribe it (բարի→pɑɾi, not pʰɑɾi), while our canonical output and the NARROW referee mark it (pʰɑɾí). Fold it away for the broad comparison; the voiced/voiceless TWO-way contrast (⟨պ⟩→b vs ⟨բ⟩→pʰ→p) survives the fold" },
+        { "pattern": "ʏ̆", "replace": "ʏ", "note": "the referee's non-syllabic diacritic on the front-rounded ⟨յու⟩→[ʏ] in a diphthong-like context — we emit the plain vowel" },
+        { "pattern": "ə́", "replace": "ə", "note": "residual acute-stressed schwa if any survives the backbone strip (the narrow referee marks stress on the epenthetic schwa)" }
+    ]
+}
