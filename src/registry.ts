@@ -127,6 +127,7 @@ import { createSlovak } from "./languages/slovak/slovak.ts";
 import { createYoruba } from "./languages/yoruba/yoruba.ts";
 import { createIgbo } from "./languages/igbo/igbo.ts";
 import { createBurmese } from "./languages/burmese/burmese.ts";
+import { createShan } from "./languages/shan/shan.ts";
 import { createJavanese } from "./languages/javanese/javanese.ts";
 import { createShona } from "./languages/shona/shona.ts";
 import { createKinyarwanda } from "./languages/kinyarwanda/kinyarwanda.ts";
@@ -255,6 +256,9 @@ function build(lang: string): Phonemizer {
             return createHausa();
         case "th":
             return createThai();
+        // Shan (Tai Long) — Southwestern Tai in the SHAN ABUGIDA (Myanmar-script variant); syllable scan + EXPLICIT lexical tone marks.
+        case "shn":
+            return createShan();
         // Lao — Brahmic abugida, Thai sibling with a more phonemic orthography; leaner authored rule g2p + tone.
         case "lo":
             return createLao();
