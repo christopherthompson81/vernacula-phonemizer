@@ -102,6 +102,7 @@ import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
+import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
@@ -456,6 +457,9 @@ function build(lang: string): Phonemizer {
         // Bashkir (Башҡорт теле) — Kipchak Turkic; interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, vowel shift; Russian loans routed to ru.
         case "ba":
             return createBashkir();
+        // Ewe (Eʋegbe) — Gbe (Niger-Congo, Kwa); labial-velars gb/kp, bilabial ƒ→ɸ/ʋ→β, w/ɰ + r/l allophony, toneless.
+        case "ee":
+            return createEwe();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
