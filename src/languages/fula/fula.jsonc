@@ -4,7 +4,7 @@
 // stress) stays in code and reads these tables.
 //
 // LOAD-BEARING blocks (read via manifest.ts): "rules", "clausePunctuation". "convention" / "provenance" are
-// self-describing documentation.
+// self-describing documentation. The Adlam script (𞤀𞤁𞤂𞤃) is handled by fulaAdlam.ts, which transliterates Adlam→Boko before this g2p (identical IPA).
 {
     "language": "ff",
     "name": "Fula (Fulfulde)",
