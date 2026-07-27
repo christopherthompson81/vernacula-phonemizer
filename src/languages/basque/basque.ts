@@ -59,6 +59,45 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
+// ── NUMBERS (the Basque VIGESIMAL / base-20 system) ────────────────────────────────────────────────────────────────
+// 0-19 are listed; the tens are built on scores of 20 — 20 hogei, 40 berrogei (2×20), 60 hirurogei (3×20), 80 laurogei
+// (4×20) — with the connective ⟨-ta⟩ suffixed for a remainder (hogeita hamar = 20+10 = 30). Hundreds prefix the score
+// system (ehun, berrehun…) and take the free connective ⟨eta⟩; likewise ⟨mila⟩ (thousand), ⟨milioi⟩ (million). ⟨eta⟩
+// is placed once, before the final sub-100 group (the common Euskaltzaindia convention). Not referee-validated (the
+// wikipron dump has no composed numbers) — the component words ARE (bat→bat, hiru→hiɾu, hogei→hoɡei̯…).
+const ONES = ["zero", "bat", "bi", "hiru", "lau", "bost", "sei", "zazpi", "zortzi", "bederatzi",
+    "hamar", "hamaika", "hamabi", "hamahiru", "hamalau", "hamabost", "hamasei", "hamazazpi", "hemezortzi", "hemeretzi"];
+const SCORES = ["", "hogei", "berrogei", "hirurogei", "laurogei"]; // multiples of 20
+const HUNDREDS = ["", "ehun", "berrehun", "hirurehun", "laurehun", "bostehun", "seiehun", "zazpiehun", "zortziehun", "bederatziehun"];
+
+/** Basque cardinal 0 ≤ n < 10⁹ → the spelled-out words (space-separated). */
+function cardinalWords(n: number): string {
+    if (n < 20) return ONES[n]!;
+    if (n < 100) {
+        const score = Math.floor(n / 20), rem = n % 20;
+        return rem === 0 ? SCORES[score]! : `${SCORES[score]}ta ${ONES[rem]}`; // hogeita hamar
+    }
+    if (n < 1000) {
+        const h = Math.floor(n / 100), rem = n % 100;
+        return rem === 0 ? HUNDREDS[h]! : `${HUNDREDS[h]} eta ${cardinalWords(rem)}`; // ehun eta bat
+    }
+    if (n < 1_000_000) {
+        const th = Math.floor(n / 1000), rem = n % 1000;
+        const thWord = th === 1 ? "mila" : `${cardinalWords(th)} mila`;
+        return rem === 0 ? thWord : `${thWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+    }
+    const mil = Math.floor(n / 1_000_000), rem = n % 1_000_000;
+    const milWord = mil === 1 ? "milioi bat" : `${cardinalWords(mil)} milioi`;
+    return rem === 0 ? milWord : `${milWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+}
+
+/** A digit string → canonical IPA of its Basque cardinal (each word phonemized, space-joined). Out-of-range → raw. */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000) return digits;
+    return cardinalWords(n).split(" ").map(phonemizeWord).join(" ");
+}
+
 // Basque uses the basic Latin alphabet + ⟨ñ ç⟩. Word / number / punctuation.
 const TOKEN = /([a-zñçA-ZÑÇ]+)|(\d+)|([.?!,;:…])/gu;
 
@@ -68,7 +107,7 @@ class BasquePhonemizer implements Phonemizer {
         // [a-zñçA-ZÑÇ] token class → NFD input would shatter words and drop the letter.
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2])); // Basque vigesimal cardinals
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }
