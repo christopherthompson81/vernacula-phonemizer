@@ -29,6 +29,7 @@ import { phonemizeWord as bo } from "../../src/languages/tibetan/tibetan.ts";
 import { phonemizeWord as gn } from "../../src/languages/guarani/guarani.ts";
 import { phonemizeWord as sq } from "../../src/languages/albanian/albanian.ts";
 import { phonemizeWord as tk } from "../../src/languages/turkmen/turkmen.ts";
+import { phonemizeWord as tt } from "../../src/languages/tatar/tatar.ts";
 import { phonemizeWord as ast } from "../../src/languages/asturian/asturian.ts";
 import { phonemizeWord as ht } from "../../src/languages/haitian/haitian.ts";
 import { phonemizeWord as rkt } from "../../src/languages/rangpuri/rangpuri.ts";
@@ -221,6 +222,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     gn,
     sq,
     tk,
+    tt,
     ast,
     ht,
     rkt,
