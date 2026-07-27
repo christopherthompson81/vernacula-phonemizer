@@ -36,4 +36,12 @@ describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
         expect(phonemizeWord("ala")).toBe("ala".normalize("NFC")); // "God"
         expect(phonemizeWord("kelen")).toBe("kelẽ".normalize("NFC")); // "one" — final n → nasal ẽ
     });
+
+    test("N'Ko (ߒߞߏ) front-end — transliterates to Latin, IDENTICAL IPA (the vowel-naming trap + nasal mark)", () => {
+        expect(phonemizeWord("ߒߞߏ")).toBe("ŋko".normalize("NFC")); // N + KA + OO(=/o/); the standalone N → ŋ before k
+        expect(phonemizeWord("ߘߋߣ")).toBe("dẽ".normalize("NFC")); // da + EE(=/e/) + na → nasal ẽ ("child")
+        expect(phonemizeWord("ߖߐ߲")).toBe("d͡ʒɔ̃".normalize("NFC")); // ja + O(=/ɔ/) + NASALIZATION MARK → d͡ʒɔ̃
+        expect(phonemizeWord("ߓߊ߲")).toBe("bã".normalize("NFC")); // ba + a + NASALIZATION MARK → nasal ã
+        expect(phonemizeWord("ߓߊ߲")).toBe(phonemizeWord("ban")); // N'Ko ≡ the Latin spelling
+    });
 });

@@ -68,3 +68,22 @@ The user supplied **Vydrin, "Vowel elision and reduction in Bambara" (Italian Jo
 **Net:** the g2p is expert-confirmed by Vydrin (2020); the ~10 folded residuals are the referee's broad entries +
 Vydrin's own documented variable processes (foot-internal g-lenition), not g2p defects. Verdict unchanged: 🔷
 single-source, 86.5% folded, tone/length/numbers/N'Ko deferred.
+
+## N'Ko front-end (2026-07-26)
+
+Added **N'Ko** (ߒߞߏ, U+07C0–07FF) as a second input script — the modern (1949, Solomana Kanté) RTL phonemic
+alphabet for the Manding languages. The Tashelhit/Fula pattern: `bambaraNko.ts` transliterates N'Ko → the Latin
+orthography and the existing greedy g2p + nasalisation rule runs unchanged (N'Ko codepoints are stored in logical
+order, so a left-to-right scan is correct). Auto-detected per word (U+07CA–07FF).
+
+Handled: the **vowel-naming trap** (LETTER EE = /e/, LETTER E = /ɛ/, LETTER OO = /o/, LETTER O = /ɔ/); the
+**NASALIZATION MARK** (U+07F2) → a syllable-final ⟨n⟩, so the engine's existing "final-n nasalises the preceding
+vowel" rule fires (ߖߐ߲ → jɔn → d͡ʒɔ̃); the standalone LETTER N assimilating before a velar (ߒߞߏ → nko → ŋko). The
+**7 combining tone marks + the tone apostrophes are DROPPED** — Bambara's Latin orthography and this engine are
+toneless, so this matches the Latin path (tone stays a documented deferral). LAJANYALAN (lengthener) and DAGBASINNA
+(carrier) are dropped.
+
+**Validation = self-consistency:** transliterating the Latin referee words → N'Ko → back gives **72/74 = 97.3%
+identical IPA**; the 2 misses are LOANWORDS (`Zanga` /z/, `shinye` /ʃ/) — phonemes N'Ko has **no dedicated letter
+for** (unlike Fula-Adlam, which covers every Fula phoneme). **Native Bambara is 100% consistent**, so the N'Ko path
+inherits the Latin path's kaikki-validated accuracy for the core phonology; the /z ʃ/ loans are the honest edge.
