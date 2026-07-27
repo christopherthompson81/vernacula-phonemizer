@@ -42,6 +42,7 @@ await phonemizeAsync("العربية", "ar");        // Arabic       → alʕara
 await phonemizeAsync("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
 await phonemizeAsync("አማርኛ", "am");           // Geʽez        → amaɾɲa
 await phonemizeAsync("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
+await phonemizeAsync("လိၵ်ႈတႆး", "shn");        // Shan         → lik̚˧˧˨taj˥
 await phonemizeAsync("ខ្មែរ", "km");          // Khmer        → kʰmae
 await phonemizeAsync("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
 await phonemizeAsync("世界", "cmn");            // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
