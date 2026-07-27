@@ -13,12 +13,35 @@ away only notation and allophony, never a real phonemic contrast.
 ```ts
 import { phonemize } from "vernacula-phonemizer";
 
-phonemize("I read a book", "en"); // aᶦ ɹˈɛd ə bˈʊk
-phonemize("भारत", "hi");          // bʱˈaːɾət̪
-phonemize("বাংলাদেশ", "bn");      // baŋlad̪eʃ
-phonemize("世界", "cmn");         // ʂʐ̩˥˩ t͡ɕiɛ˥˩
-phonemize("Türkçe", "tr");        // tˈyɾct͡ʃe
-phonemize("Україна", "uk");       // ukrajina
+// One line per script we ingest — every language resolves to the same canonical IPA notation.
+// (Tashelhit shows two scripts for the SAME word → identical IPA; the Hebrew/Arabic abjads render
+//  the consonant skeleton, where short vowels are unwritten.)
+phonemize("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
+phonemize("Taclḥit", "shi");       // Berber Latin → taʃlħit
+phonemize("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
+phonemize("Ελληνικά", "el");       // Greek        → elinika
+phonemize("Україна", "uk");        // Cyrillic     → ukrajina
+phonemize("Հայերեն", "hy");        // Armenian     → hɑjeɾen
+phonemize("עברית", "he");          // Hebrew       → ʔvʁjt
+phonemize("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
+phonemize("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
+phonemize("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
+phonemize("বাংলাদেশ", "bn");       // Bengali      → baŋlad̪eʃ
+phonemize("ଓଡ଼ିଆ", "or");          // Odia         → ˈoɽia
+phonemize("தமிழ்", "ta");          // Tamil        → t̪ˈɐmɪɻ
+phonemize("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
+phonemize("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
+phonemize("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
+phonemize("සිංහල", "si");          // Sinhala      → sˈiŋhələ
+phonemize("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
+phonemize("አማርኛ", "am");           // Geʽez        → amaɾɲa
+phonemize("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
+phonemize("ខ្មែរ", "km");          // Khmer        → kʰmae
+phonemize("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
+phonemize("世界", "cmn");          // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
+phonemize("日本語", "ja");          // Kana/Kanji   → niho̞ŋɡo̞
+phonemize("한국어", "ko");          // Hangul       → hˈɐnɡuɡɘ
+phonemize("ꦗꦮ", "jv");            // Javanese     → d͡ʒˈɔwɔ
 ```
 
 ## Languages
@@ -26,7 +49,7 @@ phonemize("Україна", "uk");       // ukrajina
 152 languages spanning Armenian, Austroasiatic,
 Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Japonic, Kartvelian, Koreanic,
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
-Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Greek, Cyrillic,
+Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
 Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
