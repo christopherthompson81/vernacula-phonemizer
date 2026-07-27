@@ -177,7 +177,7 @@ sl	Slovenian	Slavic (South)	Latin	2100000		5177			1	implemented		🔷			Own engi
 smj	Lule Sami	Uralic (Sami)	Latin	2000					1	unimplemented					Not yet tracked; covered by espeak.	0
 sn	Shona	Niger-Congo (Bantu)	Latin	9000000						implemented		🔷				1
 so	Somali	Cushitic	Latin	22000000						implemented		✅				1
-sq	Albanian	Albanian	Latin	6000000					1	unimplemented					Not yet tracked; covered by espeak.	0
+sq	Albanian	Albanian	Latin	6000000			6002	1	1	implemented		🔷			Standard Albanian (Shqip, Tosk-based), Latin (36 letters), ~6M — Indo-European, its OWN branch (fleet's FIRST Albanian-branch). Fairly phonemic, rich DIGRAPH system: ⟨dh th sh zh xh⟩→[ð θ ʃ ʒ d͡ʒ], PALATALS ⟨gj⟩→[ɟ] ⟨q⟩→[c], ⟨nj⟩→[ɲ] ⟨ll⟩→[ɫ] ⟨rr⟩→[r] trill vs ⟨r⟩→[ɾ] tap; ⟨c⟩→[t͡s] ⟨ç⟩→[t͡ʃ] ⟨x⟩→[d͡z]; 7 vowels ⟨e⟩→[ɛ] ⟨y⟩→[y] ⟨ë⟩→[ə]. Longest-match scan + penultimate stress. TWO INDEPENDENT sources: kaikki Albanian (HUMAN, 6002) 87.8% folded / 97.3% symbol; epitran sqi-Latn (independent rule-based G2P) 90.2%/98.5%. Residual = variable word-final ⟨ë⟩ (Tosk keeps [ə], some drop+lengthen — lexical) + proper-noun/loan oddities. 🔷 human primary + independent epitran G2P 2nd. Deferred: numbers, ⟨ë⟩-drop dialect variant. See docs/investigations/sq_native_bringup_investigation.md.	0
 sr	Serbian	Slavic (South)	Cyrillic/Latin	12000000						implemented		✅				1
 st	Sesotho (Southern Sotho)	Niger-Congo (Bantu)	Latin	6000000	8000000	0	3	0	0	implemented		🔷			Authored beyond-referee (Setswana pattern, Doke & Mofokeng); anchored on the clean kaikki attestation phuputso→pʰupʼut͡sʼɔ (EXACT). EJECTIVE p/t/k→pʼ/tʼ/kʼ, ts→t͡sʼ, hl→ɬ, kg→kχ. NOT aliasable to tn. Vowel height unwritten. 🔷.	0
 su	Sundanese	Austronesian	Latin/Aksara Sunda	32000000						implemented		✅				0

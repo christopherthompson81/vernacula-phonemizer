@@ -1,0 +1,23 @@
+// Albanian / Shqip (sq) — Standard (Tosk-based), Latin. PRIMARY: kaikki Albanian (HUMAN, Wiktionary, 6002).
+// SECONDARY: epitran sqi-Latn OUTPUT (INDEPENDENT rule-based G2P, generated over the same wordlist). Two INDEPENDENT
+// sources (the Quechua situation). Digraph-rich but phonemic. Stress (penultimate, unwritten) folded (epitran marks
+// none; kaikki varies). See docs/investigations/sq_native_bringup_investigation.md.
+{
+    "language": "sq", "name": "Albanian (Shqip)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (digraphs ⟨dh th sh zh xh⟩→ð θ ʃ ʒ d͡ʒ, palatals ⟨gj q⟩→ɟ c, ⟨nj⟩→ɲ ⟨ll⟩→ɫ ⟨rr⟩→r; ⟨c⟩→t͡s ⟨ç⟩→t͡ʃ ⟨x⟩→d͡z; 7 vowels ⟨e⟩→ɛ ⟨y⟩→y ⟨ë⟩→ə; penultimate stress) from Standard Albanian phonology; validated against kaikki + epitran.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "sq.kaikki-albanian.tsv", "source": "kaikki Albanian (Wiktionary, HUMAN, 6002)", "role": "primary" },
+        { "file": "sq.epitran-sqi.tsv", "source": "epitran sqi-Latn OUTPUT (independent rule-based G2P, 6002)", "role": "secondary" }
+    ],
+    "secondaryGap": "🔷 — the PRIMARY is the human kaikki (6002, large); the SECONDARY, epitran sqi-Latn, is an INDEPENDENT rule-based G2P (an independent implementation, not a second human attestation) that corroborates strongly at 90.2%/98.5% but drops some contrasts (⟨ll⟩→[l] not [ɫ], no stress). Same footing as qu/bo (human primary + epitran 2nd = 🔷).",
+    "folds": [
+        { "pattern": "c͡?ç", "replace": "c", "note": "⟨q⟩: palatal stop [c] (ours + epitran) ~ palatal affricate [c͡ç] (kaikki) — the standard notation variant" },
+        { "pattern": "ɟ͡?ʝ", "replace": "ɟ", "note": "⟨gj⟩: palatal stop [ɟ] (ours + epitran) ~ palatal affricate [ɟ͡ʝ] (kaikki)" },
+        { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the kaikki transcription — not segmental" },
+        { "pattern": "[()]", "replace": "", "note": "kaikki's optional-segment parentheses, chiefly the droppable word-final ⟨ë⟩: (ə)→ə (we keep the Tosk-standard [ə])" },
+        { "pattern": "r", "replace": "ɾ", "note": "the rhotic: the ⟨r⟩[ɾ] tap / ⟨rr⟩[r] trill contrast is real (and our engine + epitran keep it), but KAIKKI neutralizes it inconsistently (writes single ⟨r⟩ as r~ɾ) → fold to one (no-op on the consistent epitran secondary, so the contrast stays independently validated there)" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩: [ɛ] (ours + referees) ~ [e] (some kaikki entries) — mid front vowel notation" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨o⟩: [o] (ours) ~ [ɔ] (kaikki phonetic) — mid back vowel notation" }
+    ]
+}

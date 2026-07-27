@@ -97,6 +97,7 @@ import { createMaori } from "./languages/maori/maori.ts";
 import { createQuechua } from "./languages/quechua/quechua.ts";
 import { createTibetan } from "./languages/tibetan/tibetan.ts";
 import { createGuarani } from "./languages/guarani/guarani.ts";
+import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
@@ -428,6 +429,9 @@ function build(lang: string): Phonemizer {
         // Guaraní (Avañe'ẽ) — Tupian; 12 vowels (6 nasal + ⟨y⟩→ɨ), prenasalized ⟨mb nd⟩, glottal ⟨'⟩, glide formation.
         case "gn":
             return createGuarani();
+        // Albanian (Shqip) — Indo-European (own branch); digraph-rich (dh th sh zh xh, palatals gj/q), 7 vowels, penult stress.
+        case "sq":
+            return createAlbanian();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
