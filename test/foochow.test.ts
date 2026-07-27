@@ -5,9 +5,9 @@ import { createFoochow, phonemizeWord } from "../src/languages/foochow/foochow.t
 // Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal (~9M). A Bàng-uâ-cê (BUC / Foochow Romanized) → IPA
 // converter (the only major Sinitic branch otherwise absent). BUC missionary convention: plain ⟨p t k⟩ = [pʰ tʰ kʰ],
 // ⟨b d g⟩ = [p t k], ⟨c⟩=[t͡s], ⟨ch⟩=[t͡sʰ], ⟨ng⟩=[ŋ]. Validated against BUC↔IPA pairs from the kaikki Chinese dump
-// (Wiktionary Module:cdo-pron output) — 95.4% FOLDED / 98.5% symbol, 🔷 reference-implementation parity (the referee
-// is rule-generated, not human). Phase 1: segmental + citation tone; 韻變 (rime alternation), sandhi, Han front-end
-// deferred. See docs/investigations/cdo_native_bringup_investigation.md.
+// (Wiktionary Module:cdo-pron output) — 99.9% FOLDED / 100.0% symbol, 🔷 reference-implementation parity (the referee
+// is rule-generated, not human). Segmental + citation tone, with the 韻變 (rime alternation) MODELLED (tight/loose
+// by tone register); tone sandhi, initial assimilation, and the Han front-end deferred. See docs/investigations/cdo_native_bringup_investigation.md.
 describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", () => {
     const cdo = createFoochow();
 
@@ -19,9 +19,16 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
     });
 
     test("tones: the five diacritics → the 7 Fuzhou categories (checked bump on ʔ-final)", () => {
-        expect(phonemizeWord("gáng")).toBe("kaŋ˨˩˧"); // acute → 陰去 213 (間)
         expect(phonemizeWord("nguŏk")).toBe("ŋuoʔ˥"); // breve + checked coda → 陽入 5 (月 "moon")
         expect(phonemizeWord("siŏh")).toBe("suoʔ˥"); // ⟨-h⟩ checked, breve → 陽入 5
+    });
+
+    test("韻變 rime alternation: the SAME rime is TIGHT under 陰平/陽平/上聲, LOOSE under 陰去/陽去/陰入", () => {
+        expect(phonemizeWord("găng")).toBe("kaŋ˥˥"); // 間 ⟨ang⟩ TIGHT [aŋ] (breve = 陰平 55)
+        expect(phonemizeWord("gáng")).toBe("kɑŋ˨˩˧"); // 間 ⟨ang⟩ LOOSE [ɑŋ] (acute = 陰去 213)
+        expect(phonemizeWord("să̤")).toBe("sɛ˥˥"); // ⟨a̤⟩ TIGHT [ɛ] (breve)
+        expect(phonemizeWord("dá̤")).toBe("tɑ˨˩˧"); // ⟨a̤⟩ LOOSE [ɑ] (acute)
+        expect(phonemizeWord("iông")).toBe("yɔŋ˨˦˨"); // ⟨iong⟩ y-medial (zero onset) + LOOSE (circumflex = 陽去)
     });
 
     test("syllabic nasal + the vowel-quality rimes ⟨ṳ e̤ o̤⟩ → [y øy o]", () => {

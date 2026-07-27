@@ -2,8 +2,9 @@
 // BUC↔IPA pairs extracted from the kaikki Chinese dump (Wiktionary Module:cdo-pron OUTPUT, single-syllable
 // citation). ⚠ The referee is RULE-GENERATED, not human transcription → this is 🔷 REFERENCE-IMPLEMENTATION
 // PARITY (does our spec-derived BUC→IPA converter match Wiktionary's converter?), NOT independent attestation.
-// Phase 1 = segmental + citation tone. The eval strips tones (both sides) and folds the 韻變 (rime alternation)
-// vowel-quality axis + the referee's narrow initial notation; it validates the SEGMENTAL backbone.
+// Segmental + citation tone, with the 韻變 (rime alternation) now MODELLED in the engine (so its a~ɑ/o~ɔ/e~ɛ folds
+// are GONE — only the tone strip + the narrow initial notation remain). The eval strips tones (both sides) and
+// validates the SEGMENTAL backbone.
 {
     "language": "cdo", "name": "Min Dong (Fuzhou / Eastern Min)", "script": "Latin (Bàng-uâ-cê)",
     "provenance": "Authored BUC (Foochow-Romanized)→IPA converter (initial/rime/tone maps derived from the Wiktionary Module:cdo-pron BUC↔IPA correspondence + the documented Foochow-Romanized tables); validated against the kaikki-extracted BUC↔IPA pairs.",
@@ -13,9 +14,8 @@
     "secondaryGap": "Single source, and it is RULE-GENERATED (Wiktionary Module:cdo-pron), not human — so the % is reference-implementation PARITY, not independent verification. No independent human Fuzhou referee is machine-available (wikipron cdo is the same Wiktionary source; the only Han→reading dict is circular). 🔷 (near the ⛔ boundary).",
     "folds": [
         { "pattern": "[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁽⁾]", "replace": "", "note": "referee tone = superscript Chao digits (³³ ⁵⁵ ²¹³ + sandhi arrows ⁻); ours = Chao letters (backbone-stripped). Strip the digit tones → segmental comparison (tone/sandhi is Phase-2)" },
-        { "pattern": "ˡ", "replace": "", "note": "the referee writes the l/n initial with a superscript-l release (nˡ); we emit plain [n] → strip the modifier (the l̃ tilde variant is already backbone-stripped)" },
-        { "pattern": "ɑ", "replace": "a", "note": "韻變 (rime alternation): the open ⟨a⟩-rimes alternate [a]~[ɑ] by tone (ang→aŋ~ɑŋ); we emit the citation [a], fold the loose [ɑ] (Phase-2)" },
-        { "pattern": "ɔ", "replace": "o", "note": "韻變: the ⟨o⟩/⟨o̤⟩-rimes alternate [o]~[ɔ] (o̤→o~ɔ, uong→uoŋ~uɔŋ); fold to the citation [o]" },
-        { "pattern": "ɛ", "replace": "e", "note": "韻變: the ⟨e⟩/⟨ie⟩-rimes alternate [e]~[ɛ] (ie→ie~iɛ); fold to [e] (note eng→ɛiŋ folds consistently on both sides)" }
+        { "pattern": "ˡ", "replace": "", "note": "the referee writes the l/n initial with a superscript-l release (nˡ); we emit plain [n] → strip the modifier (the l̃ tilde variant is already backbone-stripped)" }
     ]
+    // NOTE (Phase 2): the 韻變 (rime alternation) a~ɑ / o~ɔ / e~ɛ folds were REMOVED — the tight/loose register is now
+    // MODELLED in the engine (rimesLoose + the tone register), so the loose forms are emitted directly, not folded.
 }
