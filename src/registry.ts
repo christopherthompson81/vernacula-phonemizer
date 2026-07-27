@@ -100,6 +100,7 @@ import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
 import { createBavarian } from "./languages/bavarian/bavarian.ts";
 import { createFoochow } from "./languages/foochow/foochow.ts";
 import { createHmong } from "./languages/hmong/hmong.ts";
+import { createTashelhit } from "./languages/tashelhit/tashelhit.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
 import { createBalochi } from "./languages/balochi/balochi.ts";
 import { createBhojpuri } from "./languages/bhojpuri/bhojpuri.ts";
@@ -433,6 +434,9 @@ function build(lang: string): Phonemizer {
         // Hmong (White Hmong / Hmoob Dawb) — Hmong-Mien, tonal; RPA → IPA (final consonant letter = tone).
         case "hmn":
             return createHmong();
+        // Tashelhit / Shilha — Berber (Amazigh), Latin; near-1:1 phonemic grapheme scan + gemination + labialisation.
+        case "shi":
+            return createTashelhit();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
