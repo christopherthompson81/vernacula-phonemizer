@@ -1,0 +1,25 @@
+// Guaraní / Paraguayan Guaraní (gn) — Avañe'ẽ, Tupian, Latin (the achegety). PRIMARY: wikipron gug_latn_broad
+// (HUMAN, 348, space-separated → segmentJoin strips the per-phone spaces). SECONDARY: kaikki Paraguayan Guarani
+// (432) — the SAME Wiktionary tradition (correlated, not independent) → 🔷 single-source-family. Near-phonemic:
+// the 12-vowel system + prenasalized ⟨mb nd ng⟩ + the glottal ⟨'⟩. Stress (final-syllable/accent) is folded (the
+// broad referee marks none). See docs/investigations/gn_native_bringup_investigation.md.
+{
+    "language": "gn", "name": "Guaraní (Avañe'ẽ)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (12 vowels incl. ⟨y⟩→ɨ + 6 nasal; prenasalized ⟨mb nd ng⟩→ᵐb ⁿd ᵑɡ; ⟨ch⟩→ʃ ⟨j⟩→d͡ʒ ⟨g⟩→ɰ ⟨gu⟩→w ⟨ñ⟩→ɲ ⟨'⟩→ʔ ⟨v⟩→ʋ ⟨r⟩→ɾ; oxytone/accent stress) from Paraguayan Guaraní phonology; validated against wikipron gug_latn_broad.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "gn.wikipron-gug-broad.tsv", "source": "wikipron gug_latn_broad (Wiktionary-scraped, HUMAN, 348)", "role": "primary" },
+        { "file": "gn.kaikki-guarani.tsv", "source": "kaikki Paraguayan Guarani (Wiktionary, HUMAN, 432)", "role": "secondary" }
+    ],
+    "secondaryGap": "Both referees are Wiktionary-derived (wikipron scrapes it; kaikki IS it) → CORRELATED, not independent — 🔷 single-source-family (the Tashelhit/Māori situation). No epitran grn-Latn mapping exists. The map is the standard Paraguayan Guaraní phonology.",
+    "folds": [
+        { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the kaikki secondary — not segmental" },
+        { "pattern": "ɕ", "replace": "ʃ", "note": "⟨ch⟩: postalveolar [ʃ] (ours) ~ alveolo-palatal [ɕ] (the broad referee) — notation" },
+        { "pattern": "ʋ", "replace": "v", "note": "⟨v⟩: [ʋ] (ours) ~ [v] (referee) — notation" },
+        { "pattern": "ᵐ", "replace": "m", "note": "prenasalized ⟨mb⟩: our superscript [ᵐb] ~ the referee's [m b] — notation" },
+        { "pattern": "ⁿ", "replace": "n", "note": "prenasalized ⟨nd nt⟩: our [ⁿd] ~ the referee's [n d] — notation" },
+        { "pattern": "ʷ", "replace": "w", "note": "a post-consonantal ⟨u⟩ glide: labialized [kʷ] ~ the referee's [k w] — notation" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩: [e] (ours) ~ [ɛ] (referee) — the mid front vowel realization" },
+        { "pattern": "ʝ", "replace": "d͡ʒ", "note": "⟨j⟩: affricate [d͡ʒ] (ours) ~ fricative [ʝ] (referee) — the /d͡ʒ/~/ʝ/~/j/ realization" }
+    ]
+}

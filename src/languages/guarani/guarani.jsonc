@@ -1,0 +1,32 @@
+// Native canonical-IPA data manifest for Paraguayan Guaraní (gn) — Avañe'ẽ, Tupian, co-official in Paraguay (~6.5M).
+// espeak-independent. Near-phonemic Latin orthography (the achegety): 12 vowels — 6 oral ⟨a e i o u y⟩ + 6 NASAL
+// ⟨ã ẽ ĩ õ ũ ỹ⟩, with ⟨y⟩ = the high central /ɨ/. PRENASALIZED voiced stops ⟨mb nd⟩→[ᵐb ⁿd] (⟨ng⟩→plain [ŋ]), the GLOTTAL STOP
+// ⟨'⟩ (puso)→[ʔ], ⟨ch⟩→[ʃ], ⟨j⟩→[d͡ʒ], ⟨g⟩→[ɰ] (velar approximant) / ⟨gu⟩→[w], ⟨ñ⟩→[ɲ], ⟨v⟩→[ʋ], ⟨r⟩→[ɾ].
+// A longest-match scan + final-syllable (oxytone) stress, overridden by an acute accent / drawn to a nasal vowel.
+// Engine: guarani.ts. See docs/investigations/gn_native_bringup_investigation.md.
+{
+    "language": "gn",
+    "name": "Guaraní (Avañe'ẽ)",
+    "script": "Latin",
+
+    // Scanned LONGEST-FIRST. Prenasalized stops ⟨mb nd nt⟩; ⟨ng⟩→plain [ŋ]; ⟨ch⟩→ʃ; ⟨gu⟩→w (labiovelar); ⟨rr⟩ trill.
+    "digraphs": {
+        "mb": "ᵐb", "nd": "ⁿd", "ng": "ŋ", "nt": "ⁿt",
+        "ch": "ʃ", "rr": "r"
+    },
+
+    // Single graphemes. Oral + nasal vowels (⟨y⟩→ɨ), the achegety consonants, and loan letters ⟨b d f c q w x z⟩.
+    // Acute-accented vowels map to their plain quality (the accent marks stress, handled in the engine).
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "y": "ɨ",
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ý": "ɨ",
+        "ã": "ã", "ẽ": "ẽ", "ĩ": "ĩ", "õ": "õ", "ũ": "ũ", "ỹ": "ɨ̃",
+        "p": "p", "t": "t", "k": "k", "s": "s", "h": "h", "g": "ɰ", "j": "d͡ʒ",
+        "v": "ʋ", "r": "ɾ", "l": "l", "m": "m", "n": "n", "ñ": "ɲ", "'": "ʔ",
+        "b": "b", "d": "d", "f": "f", "c": "k", "q": "k", "w": "w", "x": "ks", "z": "s"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

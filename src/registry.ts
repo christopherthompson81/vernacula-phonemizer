@@ -96,6 +96,7 @@ import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
 import { createQuechua } from "./languages/quechua/quechua.ts";
 import { createTibetan } from "./languages/tibetan/tibetan.ts";
+import { createGuarani } from "./languages/guarani/guarani.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
@@ -424,6 +425,9 @@ function build(lang: string): Phonemizer {
         // Tibetan (Standard/Lhasa) — deep orthography; syllable-stack rule engine (tonogenesis, cluster realization, suffix umlaut/length/nasalization).
         case "bo":
             return createTibetan();
+        // Guaraní (Avañe'ẽ) — Tupian; 12 vowels (6 nasal + ⟨y⟩→ɨ), prenasalized ⟨mb nd⟩, glottal ⟨'⟩, glide formation.
+        case "gn":
+            return createGuarani();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
         case "ast":
             return createAsturian();
