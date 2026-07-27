@@ -25,4 +25,12 @@ describe("phonemizeAsync — unified async best-output entry", () => {
         expect(out.length).toBeGreaterThan(0);
         expect(out).toContain("kəmpj"); // the BiLSTM reading of the OOV onset
     });
+
+    test("the Perso-Arabic RIDERS route without throwing (incl. pnb→the rider's `pa` key)", async () => {
+        // Regression: pnb (Shahmukhi Punjabi) must map to the rider's Punjabi key `pa`, not the invalid "pnb".
+        for (const [w, l] of [["اردو", "ur"], ["پښتو", "ps"], ["پنجابی", "pnb"]] as [string, string][]) {
+            const out = await phonemizeAsync(w, l);
+            expect(out.length).toBeGreaterThan(0); // resolves (does not throw)
+        }
+    });
 });

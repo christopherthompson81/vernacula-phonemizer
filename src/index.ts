@@ -45,7 +45,9 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     he: phonemizeHebrewNeural, // the NAKDAN — restores niqqud on bare Hebrew
     ur: (t) => phonemizeRiderNeural(t, "ur"),
     ps: (t) => phonemizeRiderNeural(t, "ps"),
-    pnb: (t) => phonemizeRiderNeural(t, "pnb"),
+    // Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic Punjabi as `pa`
+    // (the Gurmukhi `pa` is fully voweled → not a rider; it passes through sync).
+    pnb: (t) => phonemizeRiderNeural(t, "pa"),
 };
 
 /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for the
