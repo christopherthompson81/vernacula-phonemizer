@@ -14,16 +14,16 @@ away only notation and allophony, never a real phonemic contrast.
 import { phonemize } from "vernacula-phonemizer";
 
 // One line per script we ingest — every language resolves to the same canonical IPA notation.
-// (Tashelhit shows two scripts for the SAME word → identical IPA. The Hebrew line and BARE Perso-Arabic
-//  render the consonant skeleton where short vowels are unwritten; Arabic here is diacritized — bare
-//  Arabic restores its vowels via the async neural diacritizer, `phonemizeArabic`.)
+// (Tashelhit shows two scripts for the SAME word → identical IPA. Hebrew and Arabic are shown VOCALIZED
+//  (niqqud / ḥarakāt) — the sync API's designed input for those abjads; UNPOINTED Hebrew/Arabic restore
+//  their unwritten short vowels via async neural restorers — the Hebrew NAKDAN + the Arabic diacritizer.)
 phonemize("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
 phonemize("Taclḥit", "shi");       // Berber Latin → taʃlħit
 phonemize("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
 phonemize("Ελληνικά", "el");       // Greek        → elinika
 phonemize("Україна", "uk");        // Cyrillic     → ukrajina
 phonemize("Հայերեն", "hy");        // Armenian     → hɑjeɾen
-phonemize("עברית", "he");          // Hebrew       → ʔvʁjt
+phonemize("עִבְרִית", "he");       // Hebrew       → ʔivʁit
 phonemize("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
 phonemize("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
 phonemize("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
