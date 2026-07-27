@@ -14,8 +14,9 @@ away only notation and allophony, never a real phonemic contrast.
 import { phonemize } from "vernacula-phonemizer";
 
 // One line per script we ingest — every language resolves to the same canonical IPA notation.
-// (Tashelhit shows two scripts for the SAME word → identical IPA; the Hebrew/Arabic abjads render
-//  the consonant skeleton, where short vowels are unwritten.)
+// (Tashelhit shows two scripts for the SAME word → identical IPA. The Hebrew line and BARE Perso-Arabic
+//  render the consonant skeleton where short vowels are unwritten; Arabic here is diacritized — bare
+//  Arabic restores its vowels via the async neural diacritizer, `phonemizeArabic`.)
 phonemize("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
 phonemize("Taclḥit", "shi");       // Berber Latin → taʃlħit
 phonemize("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
@@ -33,6 +34,7 @@ phonemize("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
 phonemize("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
 phonemize("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
 phonemize("සිංහල", "si");          // Sinhala      → sˈiŋhələ
+phonemize("الْعَرَبِيَّة", "ar");  // Arabic       → alʕarabˈijːa
 phonemize("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
 phonemize("አማርኛ", "am");           // Geʽez        → amaɾɲa
 phonemize("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
@@ -51,7 +53,7 @@ Austronesian, Baltic, Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hel
 Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Greek, Cyrillic,
 Armenian, Hebrew, Devanagari, Khmer, Gurmukhi, Gujarati, Bengali, Odia, Tamil,
-Telugu, Kannada, Malayalam, Sinhala, Perso-Arabic (incl. Sindhi and Shahmukhi), Geʽez, Myanmar,
+Telugu, Kannada, Malayalam, Sinhala, Arabic and the extended Perso-Arabic (Persian, Urdu/Shahmukhi, Sindhi), Geʽez, Myanmar,
 Han, Kana/Kanji, Hangul, Thai and Javanese (Aksara Jawa) scripts.
 
 Per-language reliability — *is the output trustworthy, and what (if anything) is
