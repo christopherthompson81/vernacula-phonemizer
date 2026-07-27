@@ -104,6 +104,7 @@ import { createTatar } from "./languages/tatar/tatar.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
+import { createBasque } from "./languages/basque/basque.ts";
 import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -463,6 +464,9 @@ function build(lang: string): Phonemizer {
         // Bashkir (Башҡорт теле) — Kipchak Turkic; interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, vowel shift; Russian loans routed to ru.
         case "ba":
             return createBashkir();
+        // Basque (euskara) — a LANGUAGE ISOLATE; the three-way sibilant/affricate system ⟨z s x⟩→[s̻ s̺ ʃ], ⟨tz ts tx⟩→[t͡s̻ t͡s̺ t͡ʃ]; r tap/trill.
+        case "eu":
+            return createBasque();
         // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
         case "chv":
             return createChuvash();
