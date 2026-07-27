@@ -1,0 +1,22 @@
+// Quechua (qu) — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao + Ayacucho), Latin script. Referee: the kaikki
+// Quechua human set (English Wiktionary, 171 headwords after filtering loans/affix-stubs). Near-phonemic 3-vowel
+// orthography with an overt 3-way stop series (plain / aspirated ⟨h⟩ / ejective ⟨'⟩). Wiktionary writes the phonemic
+// /i u/ PHONETICALLY as [ɪ ʊ] and marks syllable dots + penultimate stress (both folded/stripped). epitran quy-Latn
+// is an independent programmatic SECONDARY (fold-heavy — it emits English-ish lax [æ ɪ ʊ]). See
+// docs/investigations/qu_native_bringup_investigation.md.
+{
+    "language": "qu", "name": "Quechua (Runasimi)", "script": "Latin",
+    "provenance": "Authored grapheme→IPA g2p (3 vowels ⟨a i u⟩; plain/aspirated/ejective stops ⟨p t k q ch⟩ · ⟨ph th kh qh chh⟩ · ⟨p' t' k' q' ch'⟩; uvular ⟨q⟩; ⟨ll⟩→ʎ ⟨ñ⟩→ɲ ⟨r⟩→ɾ; penultimate stress) from Southern Quechua phonology; validated against the kaikki Quechua human referee.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "qu.kaikki-quechua.tsv", "source": "kaikki Quechua (English Wiktionary, human, 171 headwords, loans/affix-stubs filtered)", "role": "primary" }
+    ],
+    "secondaryGap": "Primary is the kaikki Quechua human set (171). No wikipron Quechua exists. epitran quy-Latn is an INDEPENDENT programmatic secondary but fold-heavy (English-ish lax vowels [æ ɪ ʊ], drops the aspirate/ejective contrast) — used as a cross-check, not floored (reproducible via tools/referee-eval/qu-epitran-crosscheck.ts — 88.3% skeleton agreement). The map is the standard Southern Quechua phonology (Cusihuamán / the trilingual norm).",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "syllable-boundary dots in the Wiktionary transcription — not segmental" },
+        { "pattern": "ɪ", "replace": "i", "note": "Wiktionary writes the phonemic /i/ phonetically as [ɪ] — allophonic laxing, not a contrast (Quechua has 3 vowels)" },
+        { "pattern": "ʊ", "replace": "u", "note": "Wiktionary writes the phonemic /u/ phonetically as [ʊ] — allophonic laxing, not a contrast" },
+        { "pattern": "r", "replace": "ɾ", "note": "the rhotic is a TAP [ɾ]; the referee writes it r ~ ɾ inconsistently — fold to [ɾ]" },
+        { "pattern": "χ", "replace": "q", "note": "uvular /q/ is realised as the fricative [χ] in codas (suqta→[suχta]) — allophony, fold to /q/" }
+    ]
+}

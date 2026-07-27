@@ -1,0 +1,35 @@
+// Native canonical-IPA data manifest for Quechua (qu) — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao +
+// Ayacucho), the standardised trilingual Latin orthography. espeak-independent. Quechuan family (the fleet's first).
+// Near-phonemic: a 3-vowel system ⟨a i u⟩, and a THREE-WAY stop series written overtly — plain ⟨p t k q ch⟩,
+// ASPIRATED with ⟨h⟩ (⟨ph th kh qh chh⟩), EJECTIVE with an apostrophe (⟨p' t' k' q' ch'⟩). Uvular ⟨q⟩→[q].
+// A longest-match scan (tri/digraphs before singles) + regular PENULTIMATE stress. Engine: quechua.ts.
+// See docs/investigations/qu_native_bringup_investigation.md.
+{
+    "language": "qu",
+    "name": "Quechua (Runasimi)",
+    "script": "Latin",
+
+    // Scanned LONGEST-FIRST. Trigraphs: aspirated/ejective affricate ⟨chh ch'⟩. Digraphs: the plain affricate
+    // ⟨ch⟩, the aspirated stops ⟨ph th kh qh⟩, the ejective stops ⟨p' t' k' q'⟩, the palatals ⟨ll⟩→ʎ and the
+    // fricative ⟨sh⟩→ʃ. (Apostrophes are normalised to U+0027 before the scan.)
+    "digraphs": {
+        "chh": "t͡ʃʰ", "ch'": "t͡ʃʼ",
+        "ch": "t͡ʃ", "ll": "ʎ", "sh": "ʃ",
+        "ph": "pʰ", "th": "tʰ", "kh": "kʰ", "qh": "qʰ",
+        "p'": "pʼ", "t'": "tʼ", "k'": "kʼ", "q'": "qʼ"
+    },
+
+    // Single graphemes. Three vowels ⟨a i u⟩ (⟨e o⟩ kept for loans / lowered spellings); the uvular ⟨q⟩→[q];
+    // ⟨ñ⟩→ɲ, ⟨ll⟩ is the digraph above, ⟨r⟩→[ɾ] (tap), ⟨w⟩→w, ⟨y⟩→j. ⟨j⟩→[h] (a spelling variant of ⟨h⟩).
+    "graphemes": {
+        "a": "a", "i": "i", "u": "u", "e": "e", "o": "o",
+        "p": "p", "t": "t", "k": "k", "q": "q",
+        "s": "s", "h": "h", "j": "h", "ş": "ʃ", "c": "k",
+        "m": "m", "n": "n", "ñ": "ɲ",
+        "l": "l", "r": "ɾ", "w": "w", "y": "j"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
