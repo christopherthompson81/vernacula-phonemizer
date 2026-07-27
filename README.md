@@ -33,6 +33,7 @@ await phonemizeAsync("भारत", "hi");           // Devanagari   → bʱˈa
 await phonemizeAsync("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
 await phonemizeAsync("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
 await phonemizeAsync("বাংলাদেশ", "bn");       // Bengali      → baŋlad̪eʃ
+await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl");       // Syloti Nagri → silʈi
 await phonemizeAsync("ଓଡ଼ିଆ", "or");          // Odia         → ˈoɽia
 await phonemizeAsync("தமிழ்", "ta");          // Tamil        → t̪ˈɐmɪɻ
 await phonemizeAsync("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
