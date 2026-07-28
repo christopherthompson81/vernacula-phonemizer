@@ -37,6 +37,21 @@ describe("Sindhi canonical IPA", () => {
         expect(phonemizeWord("سنڌ")).toBe("sˈənd̪ʰə"); // dental: nd̪ʰ, not nəd̪ʰ
         expect(phonemizeWord("انب")).toBe("ˈəmbə"); // labial: mb, not məb
     });
+
+    // ...but only the DEFAULT-inserted ə may be swallowed. A vowel the writer actually spelled with a harakat
+    // must survive, and it also blocks the assimilation (n and b are then in different syllables). The rules
+    // are written against a private-use sentinel for exactly this reason; matching a bare ə ate written vowels
+    // (نَب → mb, losing the fatha).
+    test("a WRITTEN harakat vowel is never swallowed by nasal assimilation", () => {
+        expect(phonemizeWord("نَب")).toBe("nˈəbə"); // fatha survives; n stays n (no cluster to assimilate in)
+        expect(phonemizeWord("سنَڌ")).toBe("sˈənəd̪ʰə"); // cf. سنڌ → sˈənd̪ʰə, where the ə is only a default
+    });
+
+    test("the default-schwa sentinel never leaks into output", () => {
+        for (const w of ["نَب", "سنڌ", "پنج", "انب", "ڪتاب", "ٻارو"]) {
+            expect(phonemizeWord(w), w).not.toMatch(/[\uE000-\uF8FF]/u);
+        }
+    });
 });
 
 // Quantity-sensitive weight stress (the shared hi/ur/pa Indo-Aryan rule): rightmost superheavy,

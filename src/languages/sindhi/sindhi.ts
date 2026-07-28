@@ -25,6 +25,11 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 export type ForeignPhonemizer = (latin: string) => string;
 
 const HE = "ھ";
+// The scan marks its DEFAULT-inserted [ə] with a private-use sentinel so the nasal-assimilation pass can consume
+// that ə without touching an ə the writer actually spelled with a harakat. Without this, نَب (explicit fatha)
+// lost its written vowel: `nə?(?=[bpɓ])` ate it and the word came out mb. Stripped back to ə at the end of
+// phonemizeCore, so the sentinel never escapes this module.
+const DEFAULT_SCHWA = "\uE000";
 const NOON_GHUNNA = "ں"; // nasalization
 const isConsonant = (c: string): boolean => c in DEF.consonants;
 const isVowelLetter = (c: string): boolean => c in DEF.longVowels;
@@ -110,7 +115,7 @@ function scan(word: string, vocalized = false): string {
             // insert a default short [ə] when no vowel is written before the next consonant / word-end (abjad).
             const nx = s[i] ?? "";
             if (!vocalized && (nx === "" || (isConsonant(nx) && !(nx === HE)))) {
-                out.push("ə");
+                out.push(DEFAULT_SCHWA);
                 prevNucleus = true;
             }
             continue;
@@ -128,19 +133,21 @@ function scan(word: string, vocalized = false): string {
  *  nasal + stop is a single tautosyllabic cluster in Sindhi — it is never broken by a vowel — so the scan's
  *  blanket "consonant before consonant → ə" is wrong here. The lexicon goldens show this directly: انب is əmb
  *  (not əməb) and سنڌي is sɪndʱiː (not sɪnədʱiː). Measured over the 539-word lexicon, dropping the ə here fixes
- *  16 of the 53 places where the rule path split a cluster the attested form keeps.
+ *  12 of the 53 places where the rule path split a cluster the attested form keeps (53 → 41).
  *
- *  The other 37 (sC- st/sp/sk, obstruent+liquid kɾ/kl/pɾ, and assorted codas lm/ɾs/kt) are deliberately left
+ *  The other 41 (sC- st/sp/sk, obstruent+liquid kɾ/kl/pɾ, and assorted codas lm/ɾs/kt) are deliberately left
  *  alone: unlike the homorganic nasal they are not categorically un-splittable in Sindhi, and the lexicon does
- *  not carry enough same-shape pairs to tell a real cluster from a genuine epenthesis word-by-word.
- *  Net effect measured over the lexicon: 53 → 41 split clusters. */
+ *  not carry enough same-shape pairs to tell a real cluster from a genuine epenthesis word-by-word. Re-measured
+ *  later on the full 9,920-word lexicon, only 8.9% of ALL default-ə insertions are wrong, so this is a narrow
+ *  correction rather than a large one. */
 function phonemizeCore(word: string, vocalized = false): string {
     return scan(word, vocalized)
-        .replace(/nə?(?=(?:kʰ|[kɡxɠ]))/gu, "ŋ")
-        .replace(/nə?(?=[bpɓ])/gu, "m")
-        .replace(/nə?(?=[ʈɖɳɽ])/gu, "ɳ")
-        .replace(/nə?(?=(?:d͡ʒ|t͡ʃ|ʄ))/gu, "ɲ")
-        .replace(/nə(?=t̪|d̪)/gu, "n")
+        .replace(/n\uE000?(?=(?:kʰ|[kɡxɠ]))/gu, "ŋ")
+        .replace(/n\uE000?(?=[bpɓ])/gu, "m")
+        .replace(/n\uE000?(?=[ʈɖɳɽ])/gu, "ɳ")
+        .replace(/n\uE000?(?=(?:d͡ʒ|t͡ʃ|ʄ))/gu, "ɲ")
+        .replace(/n\uE000(?=t̪|d̪)/gu, "n")
+        .replace(/\uE000/gu, "ə")
         .normalize("NFC");
 }
 
@@ -163,14 +170,6 @@ export function phonemizeWord(word: string): string {
 /** One Sindhi word → canonical IPA, RULE-ONLY (no lexicon) — the non-circular signal for the referee eval. */
 export function phonemizeWordRules(word: string): string {
     return stress(phonemizeCore(word));
-}
-
-/** One FULLY HARAKAT-MARKED Sindhi word → canonical IPA. The diacritics are treated as authoritative: no
- *  default-[ə] is inserted, so an unmarked cluster stays a cluster. For diacritized dictionary headwords
- *  (سنڌي لغات "airab" forms), not for running text — running text is only sporadically marked, where the
- *  default-ə of `phonemizeWordRules` is the right behaviour. */
-export function phonemizeVocalized(word: string): string {
-    return stress(phonemizeCore(word, true));
 }
 
 /** Quantity-sensitive word stress — the shared Indo-Aryan weight rule already used by hi/ur/pa
@@ -209,7 +208,10 @@ function phonemizeWordWith(word: string, oov?: OovResolver): string {
     return o ? stress(o) : stress(phonemizeCore(word));
 }
 
-/** True when the shipped lexicon covers `word` — the neural path uses this to skip covered words. */
+/** True when the shipped lexicon covers `word` — the neural path uses this to skip covered words.
+ *  Deliberately the SAME lookup the engine performs (`lexicon().get(word)`, no normalisation): if the two
+ *  disagreed, a word could be judged "covered" here, skipped by the tagger, and then miss in the engine —
+ *  silently falling through to default-ə instead of the neural reading. */
 export function sindhiLexiconHas(word: string): boolean {
     return lexicon().has(word);
 }

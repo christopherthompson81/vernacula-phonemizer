@@ -24,7 +24,7 @@ export async function phonemizeSdNeural(text: string): Promise<string> {
     if (!tagger) return sdEngine().text(text);
     return wordLevelNeuralPrepass(text, {
         word: WORD,
-        lexHas: (w) => sindhiLexiconHas(w.normalize("NFC")),
+        lexHas: (w) => sindhiLexiconHas(w), // same lookup the engine does — see sindhiLexiconHas
         tag: (w) => tagger.tag(w),
         render: (t, oov) => sdEngine().text(t, oov),
     });
