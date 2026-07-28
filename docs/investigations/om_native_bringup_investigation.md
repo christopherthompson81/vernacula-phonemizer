@@ -27,47 +27,47 @@ CC~Cː gemination, stress/tone stripped). Two corroborating sources.
 referee-limitation). Deferred: **tone** (Oromo has grammatical pitch-accent, UNWRITTEN in Qubee and not in epitran/
 the target — a suprasegmental ceiling) and **numbers** (digit tokens; the number WORDS phonemize fine).
 
-## Addendum — 2026-07-28 — Stress/tone: re-confirmed deferred (issue #548, closed invalid)
+## Addendum — 2026-07-28 — Stress IMPLEMENTED from a phonetic reference (#548)
 
-An espeak-diff over FLEURS flagged "Oromo emits no stress marks" (#548). **Rejected — this repeats the
-Run-1 finding** already recorded above ("No stress (non-phonemic, epitran omits it)"; tone "Deferred").
+**This supersedes an addendum I wrote earlier the same day** which concluded, from 39 kaikki entries
+alone, that Oromo prominence was tone and "not rule-derivable". A print reference was then supplied and
+it refutes that. Recording the correction rather than quietly replacing it.
 
-What espeak calls stress, the human source marks as **pitch accent**: in `om.human-kaikki.tsv` every `ˈ`
-co-occurs with an acute high tone (ˈlɐ́mɐ, bɪˈʃɑ́ːn, sɐˈɡɐ́l). Three reasons it stays deferred:
+**The reference.** Dejene Geshe, *Kamisee Oromo Phonology*, Addis Ababa University MA thesis, 2010
+(81 pp., text-extractable). §5.3.1 states plainly that Oromo stress is **phonetic and predictable** —
+"there is no lexical contrast by making use of stress, and it could be predictable from the environment
+of the utterance" — and §5.4.3 argues the dialect is a **stress language employing pitch, not a tone
+language** (explicitly against Habte 2003). Waqo (1981:44) and Gragg (1976:175) report the SAME patterns
+for the MECHA dialect, so this is corroborated across two dialects, not one variety's quirk.
 
-1. **The primary referee marks none.** epitran orm-Latn (5,337 entries) has zero; only the 51-entry human
-   secondary carries accent, and `om.jsonc` already folds that narrow/allophonic layer to the phonemic backbone.
-2. **Not rule-derivable.** Across the 39 accented entries the accent is on the first syllable 19 times and
-   later 20 times — an even split. Weight-based placement does not fit either (halkan `ˈhɐ́lkɐn` accents the
-   first of two closed syllables, sagal `sɐˈɡɐ́l` the second).
-3. **Not recoverable at all.** Oromo pitch accent is grammatical and **UNWRITTEN in Qubee** — the
-   information is absent from the input text, so no rule and no model over the orthography can restore it.
-   It would need a tone-annotated lexicon; 39 words is not one.
+**The rules** (§5.3.1, verbatim): monosyllables stressed · disyllabic short-final → penult "whatever the
+length of the preceding vowel" · polysyllabic with no long vowel → penult · long-final → ultimate ·
+consonant-final → ultimate unless another syllable has a long vowel, which then takes it · (fn16) a
+non-ultimate long vowel with a short ultimate attracts the stress.
 
-### Is it stress or tone? — TONE, and the distinction matters
-Oromo is **tonic, not stressed**. Every `ˈ` in the human source co-occurs with an acute (high) tone, and
-Oromo's tone is **grammatical** — it participates in case/number marking. So the Run-1 note "no stress
-(non-phonemic)" is right about STRESS but must not be read as "no tone": tone here IS phonemic. What
-makes it undeliverable is availability plus conditioning, not irrelevance.
+**Validation — two independent checks, neither circular:**
 
-### Source availability — checked 2026-07-28, there is no reference to build from
-| source | Oromo IPA | with tone |
-|---|---|---|
-| kaikki Oromo (5,810 entries) | **53** | **40** |
-| wikipron `orm_latn_*` / `gax_latn_*` | **absent (404)** | — |
-| epitran orm-Latn (5,337) | programmatic | 0 — omits tone by design |
+| gold | result |
+|---|---|
+| the thesis's own 24 worked examples | **24/24 = 100%** |
+| kaikki human accent placement (39 marked entries, Wiktionary — never saw the thesis) | **36/39 = 92.3%** |
 
-The 40 tone-marked words ARE the 51-entry referee we already have; there is no larger open set. Compare
-Sindhi, where a 29K-word vocalized dictionary existed and changed the answer — here it does not.
+The kaikki check is the meaningful one: a print reference from one dialect predicting Wiktionary
+transcriptions it has no connection to.
 
-### And a lexicon alone would not be enough
-Because Oromo tone is **grammatical**, the same lexeme carries different tone by syntactic role
-(nominative vs absolutive). A word-level phonemizer cannot resolve that from the word alone — it is a
-sentence-level problem, like homograph disambiguation. So the path would be a tone-annotated lexicon
-**plus** morphological/syntactic context, not a lexicon lookup.
+**One refinement beyond the thesis, data-driven.** As written the rules score 76.9% on kaikki; 7 of the 9
+misses end in **-uu**, the INFINITIVE suffix (ˈdɪ́duː, ˈbɐ́nuː, ʔɐdʒˈdʒeːsuː). The thesis's rule-4 examples
+are all nouns/adjectives in -aa/-oo/-ii — never infinitives — so the suffix appears to be extrametrical.
+Treating it so takes 76.9% → **92.3%**. KNOWN LIMIT: a NOUN in -uu is then misread the same way (tiruu
+'liver' is tɪˈrúː, we predict the penult); separating them needs morphology we do not have.
 
-**Realistic path if ever wanted:** a print reference — Gragg's *Oromo Dictionary* (1982) or Owens' *A
-Grammar of Harar Oromo* (1985) — via the OCR route used for Nihalani in the Sindhi bring-up, plus a case
-analyzer. Documented here as a known deferral rather than left as an open issue.
+**Residual 3 misses:** halkan and afur (consonant-final, all-short — kaikki marks the initial syllable,
+the thesis rule says the ultimate; plausibly a dialect difference) and tiruu (the -uu noun above).
 
-Same lesson as the Amharic addendum: an espeak diff flags *difference*, not *defect*.
+**Effect:** `phonemizeWord` now carries exactly one primary stress; `phonemizeWordSegmental` exposes the
+unstressed form for the referee eval and the segmental goldens. Referee eval unchanged at **100.0%**
+folded backbone (the backbone strips stress by construction), so this cannot inflate the eval.
+
+**Tone remains deferred** and that part of the earlier addendum stands: what other scholars analyse as
+lexical tone is not recoverable from Qubee, which writes no tone. But the PROMINENCE that espeak was
+marking is stress, it is predictable, and it is now implemented.
