@@ -109,6 +109,7 @@ import { createTatar } from "./languages/tatar/tatar.ts";
 import { createTotontepecMixe } from "./languages/totontepecmixe/totontepecmixe.ts";
 import { createCherokee } from "./languages/cherokee/cherokee.ts";
 import { createLuleSami } from "./languages/lulesami/lulesami.ts";
+import { createNahuatl } from "./languages/nahuatl/nahuatl.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
@@ -488,6 +489,9 @@ function build(lang: string): Phonemizer {
         // Lule Sami (julevsámegiella) — Uralic (Saami); transparent segmental scan, North-Saami-style VOICELESS ⟨b d g⟩→[p t k], ⟨sj tj⟩→ʃ/t͡ʃ, diphthongs ie/uo/oa; first-syllable stress; morphophonology deferred.
         case "smj":
             return createLuleSami();
+        // Classical Nahuatl (nāhuatlahtōlli) — Uto-Aztecan; position-aware scan of the Spanish-based orthography: ⟨c⟩→k/s, ⟨cu/uc⟩→kʷ, ⟨hu/uh⟩→w, saltillo ⟨h⟩→ʔ, ⟨tz tl ch⟩ affricates, the ⟨chu⟩=kw trap; length unwritten.
+        case "nci":
+            return createNahuatl();
         case "nog":
             return createNogai();
         // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.

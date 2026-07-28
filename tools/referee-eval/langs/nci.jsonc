@@ -1,0 +1,28 @@
+// Classical Nahuatl (nci) — Uto-Aztecan, the traditional Spanish-based Latin orthography. AUTHORED from Andrews,
+// *Introduction to Classical Nahuatl* (§2). WELL-RESOURCED: wikipron nci_latn_broad (886) primary + kaikki
+// (2329) secondary. The engine emits the SEGMENTAL skeleton; vowel LENGTH is unwritten in the traditional
+// orthography (macron-less) so we emit short vowels — the eval backbone strips the referee's ː. The folds below
+// neutralise the remaining coarse/allophonic differences.
+{
+    "language": "nci", "name": "Classical Nahuatl (nāhuatlahtōlli)", "script": "Latin",
+    "provenance": "Authored from Andrews §2.4: the Spanish-orthography context rules ⟨c⟩→[k]/[s], ⟨qu⟩→[k], ⟨z⟩→[s], ⟨cu⟩/⟨uc⟩→[kʷ], ⟨hu⟩/⟨uh⟩→[w], saltillo ⟨h⟩→[ʔ], ⟨x⟩→ʃ, ⟨tz tl ch⟩→[t͡s t͡ɬ t͡ʃ], the ⟨chu⟩=[kw] trap; 8 vowels (length unwritten → short). Penultimate stress + syllable-final l→ɬ / n→ŋ / coda-w allophony are deferred/folded.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "nci.wikipron-broad.tsv", "source": "wikipron nci_latn_broad (886, HUMAN, broad, space-separated) — INDEPENDENT PRIMARY", "role": "primary" },
+        { "file": "nci.kaikki.tsv", "source": "kaikki Classical Nahuatl (2329, HUMAN, Wiktionary /.../ with stress + syllable dots) — INDEPENDENT SECONDARY", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "kaikki syllable dot" },
+        { "pattern": "([ptkmnlsʃjw])\\1", "replace": "$1", "note": "GEMINATION: both referees write geminates inconsistently (ll as [lː] or [l l], nn etc.); we emit doubled phones — collapse doubled → single on both sides (the backbone strips our ː too)" },
+        { "pattern": "ɬ", "replace": "l", "note": "syllable-final /l/→voiceless [l̥] (Andrews §2.3.1 — a voiceless lateral APPROXIMANT, not the fricative; kaikki writes it [ɬ], wikipron keeps [l]); we emit [l] — fold the referee's coda ɬ to l. (After the backbone strips the tie bar, the affricate t͡ɬ→tɬ→tl on BOTH sides symmetrically, so scoring is unaffected — every t͡ɬ is just compared as tl.)" },
+        { "pattern": "n̥", "replace": "n", "note": "utterance-final devoiced /n/ (Andrews §2.3.1) — allophonic" },
+        { "pattern": "ŋ", "replace": "n", "note": "/n/→[ŋ] before /k/ (Andrews §2.3.1) — allophonic, unwritten" },
+        { "pattern": "ɸ", "replace": "w", "note": "coda /w/→voiceless [ɸ]~[w̥] (Andrews §2.3.1) — allophonic" },
+        { "pattern": "ʍ", "replace": "w", "note": "coda /w/→voiceless [ʍ] — allophonic" },
+        { "pattern": "s̻", "replace": "s", "note": "Nahuatl /s/ is laminal [s̻] (Andrews §2.3.2) — the backbone keeps the diacritic; fold to plain s" },
+        { "pattern": "ɑ", "replace": "a", "note": "notation: /a/ ~ [ɑ]" },
+        { "pattern": "ɪ", "replace": "i", "note": "notation: reduced /i/ ~ [ɪ]" },
+        { "pattern": "ɛ", "replace": "e", "note": "notation: /e/ ~ [ɛ]" },
+        { "pattern": "ɔ", "replace": "o", "note": "notation: /o/ ~ [ɔ]" }
+    ]
+}
