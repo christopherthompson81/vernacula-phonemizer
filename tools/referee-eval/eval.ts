@@ -121,6 +121,7 @@ import { phonemizeWord as es } from "../../src/languages/spanish/spanish.ts";
 import { phonemizeWord as es419 } from "../../src/languages/spanish-419/spanish-419.ts";
 import { phonemizeWord as fr } from "../../src/languages/french/french.ts";
 import { phonemizeWord as ga } from "../../src/languages/irish/irish.ts";
+import { phonemizeWord as gd } from "../../src/languages/scottishgaelic/scottishgaelic.ts";
 import { phonemizeWord as kk } from "../../src/languages/kazakh/kazakh.ts";
 import { phonemizeWord as mn } from "../../src/languages/mongolian/mongolian.ts";
 import { phonemizeWordRules as da } from "../../src/languages/danish/danish.ts";
@@ -314,6 +315,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ff,
     fr,
     ga,
+    gd,
     ha,
     hi,
     id,
