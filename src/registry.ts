@@ -94,6 +94,7 @@ import { createKabuverdianu } from "./languages/kabuverdianu/kabuverdianu.ts";
 import { createMaltese } from "./languages/maltese/maltese.ts";
 import { createLuxembourgish } from "./languages/luxembourgish/luxembourgish.ts";
 import { createIcelandic } from "./languages/icelandic/icelandic.ts";
+import { createFaroese } from "./languages/faroese/faroese.ts";
 import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
 import { createQuechua } from "./languages/quechua/quechua.ts";
@@ -437,6 +438,8 @@ function build(lang: string): Phonemizer {
         case "lb":
             return createLuxembourgish();
         // Icelandic (íslenska) — North Germanic; deep orthography, fortis/lenis neutralization + epenthetic clusters.
+        case "fo":
+            return createFaroese();
         case "is":
             return createIcelandic();
         // Occitan (lenga d'òc) — Occitano-Romance; Languedocien g2p (o→u, final-a→ɔ).
