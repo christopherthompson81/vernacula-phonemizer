@@ -109,6 +109,7 @@ import { createKarakalpak } from "./languages/karakalpak/karakalpak.ts";
 import { createCrimeanTatar } from "./languages/crimeantatar/crimeantatar.ts";
 import { createPapiamento } from "./languages/papiamento/papiamento.ts";
 import { createNama } from "./languages/nama/nama.ts";
+import { createAromanian } from "./languages/aromanian/aromanian.ts";
 import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -483,6 +484,9 @@ function build(lang: string): Phonemizer {
         // Nama (Khoekhoe) — Khoe-Kwadi; the fleet.s FIRST CLICK language: 4 click types ǀ ǁ ǂ ǃ × accompaniments (bare/g/kh/h/n).
         case "naq":
             return createNama();
+        // Aromanian (armãneashti) — Eastern/Balkan Romance, sibling of Romanian; digraphs ts/dz/sh/nj/lj, dh/th interdentals, ã→ə.
+        case "rup":
+            return createAromanian();
         // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
         case "chv":
             return createChuvash();

@@ -1,0 +1,21 @@
+// Aromanian / armãneashti (rup) — Eastern (Balkan) Romance, sibling of Romanian, Latin (Cunia/DIARO orthography).
+// Referees: wikipron rup_latn narrow (primary, 196) + kaikki Aromanian (secondary, 201). Both HUMAN (Wiktionary).
+// See docs/investigations/rup_native_bringup_investigation.md.
+{
+    "language": "rup",
+    "name": "Aromanian (armãneashti)",
+    "script": "Latin",
+    "provenance": "Authored Cunia-orthography→IPA scan: Aromanian digraphs ts→t͡s dz→d͡z sh→ʃ nj→ɲ lj/ll→ʎ dh→ð th→θ gh→ɣ, ã→ə, Romance c/g softening before e/i, rising diphthongs ea/oa, i/u glides. Validated against wikipron + kaikki.",
+    "referees": [
+        { "file": "rup.wikipron-rup-narrow.tsv", "source": "wikipron rup_latn_narrow (Wiktionary, HUMAN, 196)", "role": "primary" },
+        { "file": "rup.kaikki-rup.tsv", "source": "kaikki Aromanian (Wiktionary, HUMAN, 201)", "role": "secondary" }
+    ],
+    "secondaryGap": "🔷 single-source-FAMILY — wikipron + kaikki both Wiktionary (correlated). No epitran rup. The ⟨ã⟩ central vowel is transcribed BOTH [ə] and [ɨ] (the orthography doesn't distinguish them) → folded.",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "the kaikki referee's syllable-boundary dots (ˈu.ne, ka.le)" },
+        { "pattern": "ɨ", "replace": "ə", "note": "⟨ã⟩ central vowel — the referee writes it BOTH [ə] and [ɨ] (alumtã→alumtə AND alumtɨ); the Cunia orthography has ONE ⟨ã⟩ letter for both, so neutralise" },
+        { "pattern": "ɾ", "replace": "r", "note": "⟨r⟩ tap [ɾ] ~ trill [r] — the referee writes both inconsistently; we emit [r]" },
+        { "pattern": "ʷ", "replace": "", "note": "the WORD-FINAL desyllabified ⟨-u⟩ realised as labialization [Cʷ] (acatsu→akat͡sʷ); we drop the desyllabified -u, strip the referee's labialization mark" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "⟨gh⟩ [ɣ] (fricative) ~ [ɡ] (stop) — the referee writes both inconsistently (ghine→ɣine but ghini→ɡini); neutralise the dorsal" }
+    ]
+}
