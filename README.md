@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **182 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **183 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,8 +60,8 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-182 languages spanning Albanian, Armenian, Austroasiatic,
-Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Eskimo-Aleut (Kalaallisut — the first Inuit language), Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Koreanic,
+183 languages spanning Albanian, Armenian, Austroasiatic,
+Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Eskimo-Aleut (Kalaallisut — the first Inuit language), Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Mixe-Zoquean (Totontepec Mixe — the first, Oaxaca), Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Northwest Caucasian (Abkhaz — huge consonant inventory), Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
@@ -97,6 +97,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Khoe-Kwadi | Nama `naq` (Khoekhoe/Khoekhoegowab; the fleet's **first click language** — 4 click types ⟨ǀ ǁ ǂ ǃ⟩ × accompaniments) |
 | Koreanic | Korean `ko` |
 | Mayan | K'iche' `quc` (Qatzijob'al; the ejective/glottalized series b'/k'/q'/tz'/ch' vs the aspirated plain stops, uvular q) |
+| Mixe-Zoquean | Totontepec Mixe `mto` (ayöök; the fleet's **first Mixe-Zoquean** — authored from Crawford 1963; 9 vowels + length, post-nasal voicing p/t/ts/k→b/d/dz/ɡ, palatalized `cy`→t͡ʃ) |
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande; Latin + N'Ko), Chichewa `nya`, Ewe `ee` (Gbe, Kwa; labial-velars, ƒ/ʋ bilabials, toneless), Fula `ff` (Atlantic; Latin + Adlam), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |

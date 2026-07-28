@@ -1,0 +1,21 @@
+// Totontepec Mixe (mto) — Mixe-Zoquean, the modern SIL orthography. AUTHORED from Crawford, *Totontepec Mixe
+// Phonotagmemics* (SIL 1963) — a published phonology (the bho/Balochi mold). SEVERELY referee-limited: no
+// wikipron/kaikki/Wiktionary-IPA. The ONLY independent phonetic data is the ASJP North-Highland-Mixe Swadesh
+// list (coarse, Wichmann) — and only ~3 concepts overlap the 65 modern-orthography Wiktionary lemmas (dog, I,
+// tree). ASJP COLLAPSES the central-vowel contrasts (ɨ ʌ ʊ → u/ə), so this is an INVENTORY check on the coarse
+// skeleton, NOT a quality signal. The engine's real gate is the phonology (consonants + allophony) vs Crawford.
+{
+    "language": "mto", "name": "Totontepec Mixe (ayöök)", "script": "Latin",
+    "provenance": "Authored from Crawford 1963 (SIL) — the 9-vowel + length system, the consonants /p t k d g ʔ v s š z h m n c y/, post-nasal voicing, /d g/→[ð ɣ], /Cy/ palatalization, n→ŋ. The modern-orthography vowel mapping (ä ö ë ü) is reconstructed from Crawford's example words (kääm=/kæːm/, këp=/kɨp/); the underline diacritic is unresolved (disclosed).",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "mto.asjp-swadesh.tsv", "source": "ASJP North_Highland_Mixe (Lexibank, CC0, coarse — INDEPENDENT), the ~3 Wiktionary-orthography overlaps", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 authored from a published grammar (Crawford 1963), SEVERELY referee-limited. No wikipron/kaikki/Wiktionary-IPA mto. The ASJP corroboration is 3 coarse words (dog/I/tree) — inventory-only. The g2p rests on Crawford's phonology; the central-vowel orthography + the underline are the disclosed residual.",
+    "folds": [
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar (ASJP has none)" },
+        { "pattern": "ʊ", "replace": "u", "note": "ASJP COARSENESS: the central/back special vowel ⟨ö⟩ [ʊ] is rendered [u] (ök→uk); our [ʊ] is Crawford's value, folded for the coarse referee" },
+        { "pattern": "ɨ", "replace": "u", "note": "ASJP COARSENESS: ⟨ë⟩ [ɨ] rendered [u] (këp→kup)" },
+        { "pattern": "ʌ", "replace": "ə", "note": "ASJP COARSENESS: ⟨ü⟩ [ʌ] rendered [ə] (üts→əts)" }
+    ]
+}

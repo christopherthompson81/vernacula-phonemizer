@@ -106,6 +106,7 @@ import { createGuarani } from "./languages/guarani/guarani.ts";
 import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
+import { createTotontepecMixe } from "./languages/totontepecmixe/totontepecmixe.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
@@ -477,6 +478,8 @@ function build(lang: string): Phonemizer {
         // Tatar (Татар теле) — Kipchak Turkic, Cyrillic; vowel-harmony backing of к/г→q/ʁ, ә→æ ө→ø ү→y җ→ʑ, final stress.
         case "tt":
             return createTatar();
+        case "mto":
+            return createTotontepecMixe();
         case "nog":
             return createNogai();
         // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.
