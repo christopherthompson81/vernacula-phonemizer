@@ -1,0 +1,127 @@
+// Native canonical-IPA definition for Bishnupriya Manipuri / বিষ্ণুপ্রিয়া মণিপুরী (bpy) — Eastern Indo-Aryan,
+// Bengali / Eastern-Nagari script, ~120k (Assam/Tripura + Sylhet, Bangladesh). Contact-shaped by Meitei but
+// structurally Eastern Indic — close to Bengali/Sylheti/Assamese. Reuses the Bengali engine (makeNativeBengali —
+// the shared abugida scan + inherent-vowel deletion + geminate→length) with BENGALI consonant values (the
+// referee is Bengali-like, NOT Assamese-like):
+//   - the three sibilants শ ষ স → [ʃ] (Bengali's [ʃ], NOT the Assamese velar [x]).
+//   - affricates চ ছ জ → [t͡ʃ t͡ʃʰ d͡ʒ] preserved (the referee writes them retroflex-tinged ʈʃ; folded).
+//   - the retroflex/dental split KEPT: ট ঠ ড ঢ → ʈ… vs ত থ দ ধ → t̪… (Bengali, not the Assamese merger).
+// The ONE divergence from Bengali proper: NO ɔ→o HEIGHT HARMONY (সমুদ্র→ʃɔmudɾo, not ʃomudɾo) → heightHarmony:false.
+// See docs/investigations/bpy_native_bringup_investigation.md.
+{
+    "language": "bpy",
+    "name": "Bishnupriya Manipuri",
+    "script": "Bengali",
+    "provenance": "Authored from the Unicode Bengali chart + the English-Wiktionary bpy IPA attestations. Reuses the Bengali G2P engine (shared Eastern-Indic inherent-vowel deletion) with Bengali phoneme values; the one divergence is no ɔ→o height harmony. Referee: English Wiktionary 'Bishnupriya Manipuri terms with IPA pronunciation' (human).",
+
+    // Inherent vowel /ɔ/ (as Bengali). Bishnupriya does NOT share Bengali's ɔ→o height harmony (the referee
+    // keeps ɔ before a following high/mid vowel: সমুদ্র→ʃɔmudɾo, খরগোশ→kʰɔrɡoʃ) → disabled. Medial + final
+    // inherent-vowel deletion behave as Bengali (খরগোশ→kʰɔrɡoʃ; ফল→pʰɔl; cluster retains [o]: সমুদ্র→ʃɔmudɾo).
+    "inherentVowel": "ɔ",
+    "heightHarmony": false,
+    "skipLexicon": true,
+
+    "consonants": {
+        "ক": { "ipa": "k", "note": "velar stop, voiceless" },
+        "খ": { "ipa": "kʰ", "note": "velar stop, voiceless aspirated" },
+        "গ": { "ipa": "ɡ", "note": "velar stop, voiced" },
+        "ঘ": { "ipa": "ɡʱ", "note": "velar stop, voiced breathy" },
+        "ঙ": { "ipa": "ŋ", "note": "velar nasal" },
+        "চ": { "ipa": "t͡ʃ", "note": "post-alveolar affricate, voiceless (referee writes retroflex ʈʃ; folded)" },
+        "ছ": { "ipa": "t͡ʃʰ", "note": "post-alveolar affricate, voiceless aspirated (referee ʈʃʰ; folded)" },
+        "জ": { "ipa": "d͡ʒ", "note": "post-alveolar affricate, voiced" },
+        "ঝ": { "ipa": "d͡ʒʱ", "note": "post-alveolar affricate, voiced breathy" },
+        "ঞ": { "ipa": "n", "note": "palatal nasal → [n] (only in conjuncts)" },
+        "ট": { "ipa": "ʈ", "note": "retroflex stop, voiceless (আট→aʈ, মাটি→maʈi)" },
+        "ঠ": { "ipa": "ʈʰ", "note": "retroflex stop, voiceless aspirated" },
+        "ড": { "ipa": "ɖ", "note": "retroflex stop, voiced" },
+        "ঢ": { "ipa": "ɖʱ", "note": "retroflex stop, voiced breathy" },
+        "ণ": { "ipa": "n", "note": "retroflex nasal → [n]" },
+        "ত": { "ipa": "t̪", "note": "DENTAL stop, voiceless (সাত→ʃat̪, তিন→t̪in)" },
+        "থ": { "ipa": "t̪ʰ", "note": "dental stop, voiceless aspirated" },
+        "দ": { "ipa": "d̪", "note": "dental stop, voiced (দশ→d̪ɔʃ, দুই→d̪ui)" },
+        "ধ": { "ipa": "d̪ʱ", "note": "dental stop, voiced breathy (ধুলা→d̪ʱula)" },
+        "ন": { "ipa": "n", "note": "dental/alveolar nasal" },
+        "প": { "ipa": "p", "note": "labial stop, voiceless" },
+        "ফ": { "ipa": "pʰ", "note": "labial stop, voiceless aspirated (ফল→pʰɔl)" },
+        "ব": { "ipa": "b", "note": "labial stop, voiced" },
+        "ভ": { "ipa": "bʱ", "note": "labial stop, voiced breathy (ভালবাসা→bʱalobaʃa)" },
+        "ম": { "ipa": "m", "note": "labial nasal" },
+        "য": { "ipa": "d͡ʒ", "note": "ôntôsthô ja → [d͡ʒ]" },
+        "র": { "ipa": "ɾ", "note": "alveolar tap" },
+        "ল": { "ipa": "l", "note": "alveolar lateral" },
+        "শ": { "ipa": "ʃ", "note": "sibilant → [ʃ] (all three sibilants merge, as Bengali)" },
+        "ষ": { "ipa": "ʃ", "note": "sibilant → [ʃ]" },
+        "স": { "ipa": "ʃ", "note": "sibilant → [ʃ] (সাত→ʃat̪, সমুদ্র→ʃɔmudɾo)" },
+        "হ": { "ipa": "ɦ", "note": "voiced glottal fricative" },
+        "ড়": { "ipa": "ɽ", "note": "retroflex flap (পাহাড়→pahaɽ)" },
+        "ঢ়": { "ipa": "ɽʱ", "note": "breathy retroflex flap" },
+        "য়": { "ipa": "j", "note": "ya with nukta → glide [j]" },
+        "ৎ": { "ipa": "t̪", "note": "khanda ta → final dental [t̪], no inherent vowel" },
+    },
+
+    "independentVowels": {
+        "অ": { "ipa": "ɔ", "note": "short open-mid back (inherent)" },
+        "আ": { "ipa": "a", "note": "open" },
+        "ই": { "ipa": "i", "note": "close front" },
+        "ঈ": { "ipa": "i", "note": "close front (length merged)" },
+        "উ": { "ipa": "u", "note": "close back" },
+        "ঊ": { "ipa": "u", "note": "close back (length merged)" },
+        "ঋ": { "ipa": "ɾi", "note": "vocalic r → [ɾi]" },
+        "এ": { "ipa": "e", "note": "close-mid front" },
+        "ঐ": { "ipa": "ɔi", "note": "diphthong (referee ঐ→ɔiː)" },
+        "ও": { "ipa": "o", "note": "close-mid back" },
+        "ঔ": { "ipa": "ou", "note": "diphthong (নৌকা→nouka)" },
+    },
+
+    "vowelSigns": {
+        "া": { "ipa": "a" },
+        "ি": { "ipa": "i" },
+        "ী": { "ipa": "i" },
+        "ু": { "ipa": "u" },
+        "ূ": { "ipa": "u" },
+        "ৃ": { "ipa": "ɾi" },
+        "ে": { "ipa": "e" },
+        "ৈ": { "ipa": "ɔi" },
+        "ো": { "ipa": "o" },
+        "ৌ": { "ipa": "ou" },
+    },
+
+    "signs": {
+        "virama": { "char": "্", "effect": "suppressInherentVowel", "note": "hôsôntô — conjuncts" },
+        "anusvara": { "char": "ং", "effect": "velarNasal", "note": "ং → [ŋ]" },
+        "chandrabindu": { "char": "ঁ", "effect": "nasalizeVowel", "note": "nasalizes the preceding vowel (বাঁশ→bãʃ)" },
+        "visarga": { "char": "ঃ", "effect": "appendH", "note": "→ [h] (rare)" },
+        "nukta": { "char": "়", "effect": "composeNukta", "note": "combines with ড়/ঢ়/য়" },
+    },
+
+    // NUMBERS — Bishnupriya numerals (near-identical to Bengali; the referee attests দুই/তিন/চার/পাঁচ/ছয়/সাত/
+    // আট/নয়/দশ/বারো/বিশ/হাজার). Canonical IPA is DERIVED by running the spellings through the same G2P.
+    "numbers": {
+        "units": ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়"],
+        "teens": ["দশ", "এগারো", "বারো", "তেরো", "চোদ্দো", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ"],
+        "tens": {
+            "20": "বিশ",
+            "30": "ত্রিশ",
+            "40": "চল্লিশ",
+            "50": "পঞ্চাশ",
+            "60": "ষাট",
+            "70": "সত্তর",
+            "80": "আশি",
+            "90": "নব্বই"
+        },
+        "magnitudes": { "hundred": "একশো", "thousand": "হাজার", "lakh": "লাখ", "crore": "কোটি" },
+        "decimalWord": "দশমিক"
+    },
+
+    "clausePunctuation": {
+        "।": " । ",
+        "॥": " ॥ ",
+        ".": " . ",
+        "?": " ? ",
+        "!": " ! ",
+        ",": " , ",
+        ";": " ; ",
+        ":": " : "
+    }
+}

@@ -22,6 +22,7 @@ import { createTurkish } from "./languages/turkish/turkish.ts";
 import { createAzerbaijani } from "./languages/azerbaijani/azerbaijani.ts";
 import { createMalagasy } from "./languages/malagasy/malagasy.ts";
 import { createAssamese } from "./languages/assamese/assamese.ts";
+import { createBishnupriya } from "./languages/bishnupriya/bishnupriya.ts";
 import { createSomali } from "./languages/somali/somali.ts";
 import { createCebuano } from "./languages/cebuano/cebuano.ts";
 import { createHiligaynon } from "./languages/hiligaynon/hiligaynon.ts";
@@ -325,6 +326,8 @@ function build(lang: string): Phonemizer {
             return createBengali((latin) => getPhonemizer("en").text(latin));
         case "as":
             return createAssamese((latin) => getPhonemizer("en").text(latin));
+        case "bpy":
+            return createBishnupriya((latin) => getPhonemizer("en").text(latin));
         case "so":
             return createSomali();
         case "ceb":
