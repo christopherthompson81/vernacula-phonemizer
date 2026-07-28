@@ -106,6 +106,7 @@ import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
 import { createBasque } from "./languages/basque/basque.ts";
 import { createKarakalpak } from "./languages/karakalpak/karakalpak.ts";
+import { createCrimeanTatar } from "./languages/crimeantatar/crimeantatar.ts";
 import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -471,6 +472,9 @@ function build(lang: string): Phonemizer {
         // Karakalpak (qaraqalpaq tili) — Kipchak Turkic (close to Kazakh), 2016 Latin; written uvulars q/x/ǵ, front acute vowels á ó ú, ı→ɯ, final stress.
         case "kaa":
             return createKarakalpak();
+        // Crimean Tatar (qırımtatar tili) — Kipchak+Oghuz Turkic, Turkish-based Latin; written uvular q/ğ, front-back harmony, c→d͡ʒ, ñ→ŋ, final stress.
+        case "crh":
+            return createCrimeanTatar();
         // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
         case "chv":
             return createChuvash();
