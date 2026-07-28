@@ -1,0 +1,22 @@
+// Crimean Tatar / qırımtatar tili (crh) — Kipchak+Oghuz Turkic, Turkish-based LATIN alphabet. Referee: English
+// Wiktionary "Crimean Tatar terms with IPA pronunciation" (thin, ~18 Latin pairs; no wikipron/kaikki/epitran).
+// See docs/investigations/crh_native_bringup_investigation.md.
+{
+    "language": "crh",
+    "name": "Crimean Tatar (qırımtatar tili)",
+    "script": "Latin",
+    "provenance": "Authored Latin→IPA grapheme scan: written uvular q→q/ğ→ɣ (vs velar k/g), front-back harmony vowels (a→ɑ o→o u→u ı→ɯ vs e ö→ø ü→y i), c→d͡ʒ ç→t͡ʃ ş→ʃ ñ→ŋ, gemination, final stress. Validated against the thin Wiktionary referee.",
+    "referees": [
+        { "file": "crh.wiktionary-crh.tsv", "source": "English Wiktionary 'Crimean Tatar terms with IPA pronunciation' (literal human {{IPA|crh|…}}, ~18 Latin)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 THIN single-source (~18 Latin pairs) — no wikipron crh, no kaikki, no epitran crh. The % is on a small sample; the g2p is well-defined by the phonemic Latin orthography and verified on goldens.",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots (qu.vɛtˈsɪz, sɑ.lɯn…)" },
+        { "pattern": "ɑ", "replace": "a", "note": "⟨a⟩ [ɑ] (back, ours) ~ [a] — the referee writes the low vowel BOTH ways inconsistently (qara→qɑrɑ but añlamaq→aŋlamaq); neutralise the backness" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨e⟩ [ɛ] (referee, lax) ~ [e] — vowel height" },
+        { "pattern": "ɪ", "replace": "i", "note": "⟨i⟩ [ɪ] (referee, lax) ~ [i] — vowel height" },
+        { "pattern": "ɫ", "replace": "l", "note": "dark ⟨l⟩ [ɫ] (back-harmony velarised) ~ [l] — the referee writes both inconsistently (yollamaq→ɫ but yol→l); we emit [l]" },
+        { "pattern": "c", "replace": "k", "note": "⟨k⟩ FRONTING to palatal [c] (the referee's -lik→lic) ~ [k] — allophonic before/after a front vowel; we emit [k]" },
+        { "pattern": "ʁ", "replace": "ɣ", "note": "⟨ğ⟩ [ʁ] (uvular) ~ [ɣ] (velar) — the voiced dorsal fricative's backness" }
+    ]
+}
