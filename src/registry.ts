@@ -42,6 +42,7 @@ import { createLao } from "./languages/lao/lao.ts";
 import { createFula } from "./languages/fula/fula.ts";
 import { createSinhala } from "./languages/sinhala/sinhala.ts";
 import { createKazakh } from "./languages/kazakh/kazakh.ts";
+import { createKalaallisut } from "./languages/kalaallisut/kalaallisut.ts";
 import { createTajik } from "./languages/tajik/tajik.ts";
 import { createZulu } from "./languages/zulu/zulu.ts";
 import { createXhosa } from "./languages/xhosa/xhosa.ts";
@@ -287,6 +288,8 @@ function build(lang: string): Phonemizer {
             return createFula();
         case "si":
             return createSinhala();
+        case "kl":
+            return createKalaallisut();
         case "kk":
             return createKazakh();
         case "tg":

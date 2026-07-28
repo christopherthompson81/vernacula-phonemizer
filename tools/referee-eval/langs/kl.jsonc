@@ -1,0 +1,18 @@
+// Kalaallisut / West Greenlandic (kl) — Eskimo-Aleut (Inuit), the 1973 PHONEMIC Latin orthography → a near-1:1
+// scan. Referee: wikipron kal_latn_broad (HUMAN, 1581). The referee writes length as a DOUBLED segment (a a) and
+// the uvular fricative coarsely as [r]; we emit canonical [Vː]/[Cː] and [ʁ] → the folds reconcile the notation.
+{
+    "language": "kl", "name": "Kalaallisut (Greenlandic)", "script": "Latin",
+    "provenance": "Authored from the 1973 Greenlandic phonemic orthography: three-vowel /a i u/ (⟨e o⟩ = the uvular-lowered allophones → /i u/), uvular ⟨q⟩/⟨r⟩, ng/nng, doubled letter → length. Referee: wikipron kal_latn_broad.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "kl.wikipron-broad.tsv", "source": "wikipron kal_latn_broad (human)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki Greenlandic same Wiktionary source). The narrow referee's phonetic detail (regressive assimilation rp→pp, uvular vowel-lowering [ɜ ɔ ɑ], ll→ɬ) is deferred — we target the broad/phonemic level.",
+    "folds": [
+        { "pattern": "([aiu])\\1", "replace": "$1", "note": "LENGTH: the referee writes a long vowel as a DOUBLED segment (a a → aa); we emit [Vː], but the eval BACKBONE strips ː first → collapse the referee's doubling to a single to match" },
+        { "pattern": "([ptkqbdɡɣfjlmnsvʁŋr])\\1", "replace": "$1", "note": "GEMINATE: the referee writes a long consonant as a doubled segment (l l → ll); our [Cː] is backbone-stripped → collapse the referee's doubling to a single. Includes ⟨r⟩ — a long uvular is written doubled as [rr] (nirrivik), which our ʁː → r must meet as a single [r]" },
+        { "pattern": "ʁ", "replace": "r", "note": "⟨r⟩ is the uvular fricative [ʁ] (our canonical value); the BROAD referee writes it coarsely as [r] — normalise" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "⟨g⟩ is the voiced velar fricative [ɣ] (our canonical value, the continuant parallel to ⟨r⟩→[ʁ]); the BROAD referee coarsens it to the stop [ɡ] (the same coarsening as ʁ→r) — normalise" }
+    ]
+}
