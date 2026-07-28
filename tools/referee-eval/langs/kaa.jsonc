@@ -1,0 +1,16 @@
+// Karakalpak / qaraqalpaq tili (kaa) — Kipchak Turkic (close to Kazakh), LATIN (2016 reform). Referee: English
+// Wiktionary "Karakalpak terms with IPA pronunciation" (thin, ~11 usable Latin pairs; no wikipron/kaikki/epitran).
+// See docs/investigations/kaa_native_bringup_investigation.md.
+{
+    "language": "kaa",
+    "name": "Karakalpak (qaraqalpaq tili)",
+    "script": "Latin",
+    "provenance": "Authored 2016-Latin→IPA scan: written uvulars q→q/x→χ/ǵ→ʁ (vs velar k/h/g), front acute vowels á→æ ó→ø ú→y (vs a o u), dotless ı→ɯ, ń→ŋ, j→ʒ, digraphs sh→ʃ ch→t͡ʃ, final stress. Validated against the thin Wiktionary referee.",
+    "referees": [
+        { "file": "kaa.wiktionary-kaa.tsv", "source": "English Wiktionary 'Karakalpak terms with IPA pronunciation' (literal human {{IPA|kaa|…}}, ~11 Latin)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 THIN single-source (~11 usable Latin pairs) — no wikipron kaa, no kaikki Karakalpak, no epitran kaa. The % is on a small sample; the g2p is well-defined by the phonemic 2016 Latin orthography and verified on goldens.",
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots (øz.bek, tu.wuw)" }
+    ]
+}
