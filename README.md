@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **170 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **171 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,8 +60,8 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-170 languages spanning Albanian, Armenian, Austroasiatic,
-Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Koreanic,
+171 languages spanning Albanian, Armenian, Austroasiatic,
+Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
@@ -93,6 +93,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Isolate | Basque `eu` (euskara; the **three-way sibilant** contrast ⟨z s x⟩→s̻/s̺/ʃ, ⟨tz ts tx⟩→t͡s̻/t͡s̺/t͡ʃ — a language isolate with no living relatives) |
 | Japonic | Japanese `ja` |
 | Kartvelian | Georgian `ka` (its own family; Mkhedruli script, three-way ejective/aspirated/voiced stops) |
+| Khoe-Kwadi | Nama `naq` (Khoekhoe/Khoekhoegowab; the fleet's **first click language** — 4 click types ⟨ǀ ǁ ǂ ǃ⟩ × accompaniments) |
 | Koreanic | Korean `ko` |
 | Mayan | K'iche' `quc` (Qatzijob'al; the ejective/glottalized series b'/k'/q'/tz'/ch' vs the aspirated plain stops, uvular q) |
 | Mongolic | Mongolian `mn` (Khalkha) |
