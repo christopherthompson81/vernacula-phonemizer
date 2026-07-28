@@ -176,6 +176,7 @@ import { createKirundi } from "./languages/kirundi/kirundi.ts";
 import { createUyghur } from "./languages/uyghur/uyghur.ts";
 import { createSylheti } from "./languages/sylheti/sylheti.ts";
 import { createGreek } from "./languages/greek/greek.ts";
+import { createAncientGreek } from "./languages/ancientgreek/ancientgreek.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -653,6 +654,8 @@ function build(lang: string): Phonemizer {
             return createSylheti();
         case "el":
             return createGreek();
+        case "grc":
+            return createAncientGreek();
         default:
             throw new Error(
                 `vernacula-phonemizer: no phonemizer registered for "${lang}"`,

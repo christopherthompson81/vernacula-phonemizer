@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **181 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **182 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,7 +60,7 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-181 languages spanning Albanian, Armenian, Austroasiatic,
+182 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Eskimo-Aleut (Kalaallisut — the first Inuit language), Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Northwest Caucasian (Abkhaz — huge consonant inventory), Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
@@ -87,7 +87,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Dravidian | Kannada `kn`, Malayalam `ml`, Tamil `ta`, Telugu `te` |
 | Eskimo-Aleut | Kalaallisut `kl` (West Greenlandic; the fleet's first Inuit language — the three-vowel /a i u/ system, uvular `q`/`r`, `ng`→ŋ, gemination=length) |
 | Germanic | Afrikaans `af`, Bavarian `bar`, Danish `da`, Dutch `nl`, English `en` (+ `en-GB`, `en-IN` accent variants), German `de`, Norwegian `nb` (Bokmål), Swedish `sv` (tonal accent), Luxembourgish `lb`, Icelandic `is`, Faroese `fo` (deep Insular orthography; length-conditioned vowel quality + skerping) |
-| Hellenic | Greek `el` |
+| Hellenic | Greek `el` (Modern), Ancient Greek `grc` (reconstructed 5th-c. BCE Attic, Allen Vox Graeca; polytonic — aspirates θφχ→tʰpʰkʰ, ζ→zd, rough breathing→h, pitch accent) |
 | Hmong-Mien | Hmong `hmn` (White Hmong / Hmoob Dawb, RPA; tonal) |
 | Indo-Aryan | Assamese `as`, Awadhi `awa`, Bengali `bn`, Bhojpuri `bho`, Bishnupriya Manipuri `bpy`, Chhattisgarhi `hne`, Gujarati `gu`, Haryanvi `bgc`, Hindi `hi`, Magahi `mag`, Maithili `mai`, Marathi `mr`, Nepali `ne`, Odia `or`, Rangpuri `rkt` (KRNB), Punjabi `pa` (tonal; Gurmukhi) + Western Punjabi `pnb` (Shahmukhi), Saraiki `skr`, Sindhi `sd`, Sinhala `si`, Sylheti `syl`, Urdu `ur` |
 | Iranian | Balochi `bal`, Central Kurdish `ckb` (Sorani), Kurmanji `kmr` (N. Kurdish), Pashto `ps`, Persian `fa`, Tajik `tg` |
