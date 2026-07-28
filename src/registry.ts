@@ -120,6 +120,7 @@ import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
 import { createAsturian } from "./languages/asturian/asturian.ts";
+import { createAragonese } from "./languages/aragonese/aragonese.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
 import { createBavarian } from "./languages/bavarian/bavarian.ts";
@@ -514,6 +515,8 @@ function build(lang: string): Phonemizer {
         case "ee":
             return createEwe();
         // Asturian (asturianu) — Astur-Leonese (Ibero-Romance); x→ʃ, distinción, no final deletion.
+        case "an":
+            return createAragonese();
         case "ast":
             return createAsturian();
         // Haitian Creole (kreyòl ayisyen) — French-lexified creole; phonemic IPN g2p + nasal-vowel rule.

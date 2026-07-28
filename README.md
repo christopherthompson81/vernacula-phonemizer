@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **179 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **180 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,7 +60,7 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-179 languages spanning Albanian, Armenian, Austroasiatic,
+180 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Eskimo-Aleut (Kalaallisut — the first Inuit language), Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Northwest Caucasian (Abkhaz — huge consonant inventory), Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
@@ -102,7 +102,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
 | Northwest Caucasian | Abkhaz `ab` (аҧсуа; the fleet's **first NW-Caucasian language** — one of the world's largest consonant inventories with ~58 consonants, only 2 vowels; ⟨ь⟩ palatalizes / ⟨ә⟩ labializes / ⟨'⟩ pharyngealizes) |
 | Quechuan | Quechua `qu` (Southern Quechua / Runasimi; 3-vowel system, overt three-way stop series plain/aspirated/ejective, uvular `q`, penultimate stress) |
-| Romance | Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro` + Aromanian `rup` (Balkan Romance; digraphs ts/dz/sh/nj/lj, dh/th interdentals, ã→ə), Spanish `es` (+ `es-419` Latin-American), Occitan `oc` (Languedocien), Asturian `ast` |
+| Romance | Aragonese `an` (Pyrenean; ⟨ch⟩→t͡ʃ, ⟨ny⟩→ɲ, ⟨x⟩→ʃ, seseo, final-r apocope), Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro` + Aromanian `rup` (Balkan Romance; digraphs ts/dz/sh/nj/lj, dh/th interdentals, ã→ə), Spanish `es` (+ `es-419` Latin-American), Occitan `oc` (Languedocien), Asturian `ast` |
 | Semitic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hebrew `he`, Maltese `mt` |
 | Sinitic | Cantonese `yue`, Gan `gan`, Hakka `hak`, Jin `cjy`, Mandarin `cmn`, Min Dong `cdo` (Fuzhou, Bàng-uâ-cê input), Min Nan `nan`, Wu `wuu`, Xiang `hsn` — all tonal |
 | Slavic | Belarusian `be`, Bosnian `bs`, Bulgarian `bg`, Croatian `hr`, Czech `cs`, Macedonian `mk`, Polish `pl`, Russian `ru`, Serbian `sr` (Cyrillic + Latin), Slovak `sk`, Slovenian `sl`, Ukrainian `uk` |
