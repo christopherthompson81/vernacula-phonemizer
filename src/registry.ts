@@ -108,6 +108,7 @@ import { createBashkir } from "./languages/bashkir/bashkir.ts";
 import { createBasque } from "./languages/basque/basque.ts";
 import { createKarakalpak } from "./languages/karakalpak/karakalpak.ts";
 import { createCrimeanTatar } from "./languages/crimeantatar/crimeantatar.ts";
+import { createNogai } from "./languages/nogai/nogai.ts";
 import { createPapiamento } from "./languages/papiamento/papiamento.ts";
 import { createNama } from "./languages/nama/nama.ts";
 import { createAromanian } from "./languages/aromanian/aromanian.ts";
@@ -462,6 +463,8 @@ function build(lang: string): Phonemizer {
         // Tatar (Татар теле) — Kipchak Turkic, Cyrillic; vowel-harmony backing of к/г→q/ʁ, ә→æ ө→ø ү→y җ→ʑ, final stress.
         case "tt":
             return createTatar();
+        case "nog":
+            return createNogai();
         // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.
         case "la":
             return createLatin();

@@ -1,0 +1,23 @@
+// Nogai (nog) — Kipchak Turkic (Kipchak-Nogai), CYRILLIC. SEVERELY referee-limited: no wikipron, no epitran, and
+// kaikki Nogai carries exactly ONE IPA (туькен→/ty.ken/, asserted in the golden test). The only independent
+// pronunciation corpus is the ASJP Nogai Swadesh list (Lexibank, CC0, André Müller) — a COARSE, orthography-free
+// phonetic transcription by a different transcriber (the bal/umb avenue). It corroborates the segmental INVENTORY,
+// NOT the orthographic detail: ASJP has no front-rounded [y ø], no back-unrounded [ɯ], and renders /w/ as v — all
+// REAL Nogai distinctions our g2p keeps and the goldens assert, but which the referee physically cannot encode, so
+// they are folded to compare the skeleton. The % here is an inventory check, NOT an orthographic-accuracy signal.
+{
+    "language": "nog", "name": "Nogai (ногай тили)", "script": "Cyrillic",
+    "provenance": "Authored Cyrillic→IPA g2p from documented Kipchak-Nogai phonology (explicit-uvular orthography: къ→q, гъ→ʁ, нъ→ŋ; front-vowel digraphs аь→æ, оь→ø, уь→y; ы→ɯ; final stress). Corroborated coarsely by the ASJP Nogai Swadesh list + the one kaikki IPA (туькен).",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "nog.asjp-swadesh.tsv", "source": "ASJP Nogai (Lexibank, CC0, coarse Swadesh — INDEPENDENT transcriber)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 authored, REFEREE-LIMITED (the st/umb/bal mold). No wikipron nog, no epitran nog; kaikki Nogai has ONE IPA entry (туькен, in the golden). The ASJP Swadesh list (~24 usable pairs) is COARSE and orthography-free — it corroborates the inventory only. The g2p rests on documented Nogai phonology + the transparent explicit-uvular orthography.",
+    "folds": [
+        { "pattern": "y", "replace": "i", "note": "ASJP COARSENESS: ASJPcode has no front-rounded high vowel — ⟨уь⟩ [y] is transcribed as [i] (муьйиз→miyiz). Our [y] is correct (kaikki туькен→tyken keeps it, asserted in the golden); folded ONLY to compare against the coarse referee." },
+        { "pattern": "ø", "replace": "e", "note": "ASJP COARSENESS: no front-rounded mid vowel — ⟨оь⟩ [ø] is transcribed [e] (коьз→kez). Our [ø] is correct; folded only for the coarse referee." },
+        { "pattern": "ɯ", "replace": "u", "note": "ASJP COARSENESS: no back-unrounded high vowel — ⟨ы⟩ [ɯ] is transcribed [u] (бурын→burun). Our [ɯ] is correct; folded only for the coarse referee." },
+        { "pattern": "w", "replace": "v", "note": "ASJP renders the native Turkic coda /w/ (⟨в⟩ in сув→suw) as [v] — normalise the labial to compare." },
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar" }
+    ]
+}
