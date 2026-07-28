@@ -1,0 +1,29 @@
+// Lule Sami (smj) — Uralic (Saami), the 1983 Latin orthography. AUTHORED from Ylikoski, "Lule Saami" (a
+// published reference chapter). REFEREE-POOR: no wikipron, no kaikki-IPA (970 bare forms), no Wiktionary-IPA.
+// The ONLY independent phonetic data is the ASJP LULE_SAAMI Swadesh list (Lexibank, CC0, Wichmann), joined with
+// kaikki (gloss→standard orthography) = 43 curated pairs (the Nogai method). ASJP is COARSE — it folds vowel
+// length + quality (ɐ/e/o), simplifies geminates, marks palatalisation ʲ — so this is an INVENTORY/segmental
+// check, NOT a quality signal. The engine's real gate is the grammar phonology + the goldens.
+{
+    "language": "smj", "name": "Lule Sami (julevsámegiella)", "script": "Latin",
+    "provenance": "Authored from Ylikoski §9.2: vowels /i u e o ɑ/ + diphthongs ie/uo/oa, the North-Saami-style VOICELESS ⟨b d g⟩→[p t k] (aspiration-not-voicing), ⟨sj tj ts dtj dts nj lj ŋ⟩ digraphs, doubled→geminate, first-syllable stress. The complex morphophonology (3-grade consonant gradation, epenthetic vowels, labial harmony, unwritten length) is the disclosed DEFERRED residual.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "smj.asjp-swadesh.tsv", "source": "ASJP LULE_SAAMI + LULE_SAAMI_2 (Lexibank, CC0, coarse — INDEPENDENT) × kaikki gloss→orthography, 43 curated pairs", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 authored from a published grammar (Ylikoski), REFEREE-LIMITED. No wikipron/kaikki-IPA/Wiktionary-IPA smj. The ASJP corroboration is 43 coarse Swadesh words (inventory-level: ASJP folds length/quality/gemination). The g2p rests on the grammar phonology; the morphophonology (gradation/epenthesis/harmony/length) is the disclosed deferred residual.",
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "ASPIRATION: the marginal ⟨p t k⟩→[pʰ tʰ kʰ] and pre-stop pre-aspiration — ASJP transcribes plain stops" },
+        { "pattern": "ʲ", "replace": "", "note": "ASJP palatalisation mark (tʃʲ, dʲ) — we emit plain t͡ʃ / ɟ" },
+        { "pattern": "h(?=[ptk])", "replace": "", "note": "PRE-STOP h: the gradation/pre-aspiration marker ⟨hk hp ht⟩ (phonetic [ʰ]) — ASJP omits it (giehta→kietɐ, dihkke→tike); folded on both sides after ʰ-strip" },
+        { "pattern": "ɐ", "replace": "ɑ", "note": "ASJP COARSENESS: the low vowel [ɐ] renders our /ɑ/ (grammar Table 9.1 /ɑ/)" },
+        { "pattern": "ə", "replace": "ɑ", "note": "ASJP/grammar: reduced non-initial /ɑ/~[ə] (bena /peːnə/)" },
+        { "pattern": "ɔ", "replace": "o", "note": "notation: /o/ ~ [ɔ]" },
+        { "pattern": "w", "replace": "v", "note": "syllable-final /v/ is a semivowel [w] (grammar §9.2.2); ASJP writes [w], we emit [v]" },
+        { "pattern": "b", "replace": "p", "note": "VOICING: the grammar analyses native ⟨b d g⟩ as VOICELESS [p t k] (§9.2.2); ASJP LULE_SAAMI_2 transcribes them voiced (the younger-speaker/loan variant) — fold to the grammar's voiceless value (our side emits only [p t k])" },
+        { "pattern": "g", "replace": "k", "note": "VOICING: ⟨g⟩→[k] (voiceless, per grammar; ASJP uses regular U+0067 g)" },
+        { "pattern": "d(?![ʒz])", "replace": "t", "note": "VOICING: ⟨d⟩→[t] (voiceless, per grammar) — the negative lookahead protects the affricates d͡ʒ/d͡z (⟨dtj dts⟩)" },
+        { "pattern": "([ɑeiouyæø])\\1", "replace": "$1", "note": "ASJP LULE_SAAMI_2 doubles the stressed vowel (vuuoppto, juuolgga) — collapse to single (coarse transcription convention, not phonemic length)" },
+        { "pattern": "([ptkmnŋrlvfsʃɲʎ])\\1", "replace": "$1", "note": "GEMINATION: ASJP transcribes geminates inconsistently (nissun kept, but tike/kuole simplified); we emit [Cː] (backbone strips ː → single) — collapse the referee's kept doubles to single too" }
+    ]
+}

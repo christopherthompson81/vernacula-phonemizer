@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **184 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **185 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,7 +60,7 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-184 languages spanning Albanian, Armenian, Austroasiatic,
+185 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Eskimo-Aleut (Kalaallisut — the first Inuit language), Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Iroquoian (Cherokee — the first, in the Sequoyah syllabary), Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Mixe-Zoquean (Totontepec Mixe — the first, Oaxaca), Koreanic,
 Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Northwest Caucasian (Abkhaz — huge consonant inventory), Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
@@ -112,7 +112,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Tibeto-Burman | Burmese `my` (tonal), Tibetan `bo` (Standard/Lhasa; Bodish — deep orthography, syllable-stack rule engine: tonogenesis, silent prefixes/superscripts, suffix umlaut/length/nasalization) |
 | Tupian | Guaraní `gn` (Paraguayan / Avañe'ẽ; 12 vowels incl. 6 nasal, prenasalized `mb nd`, the glottal `'` puso, glide formation) |
 | Turkic | Azerbaijani `az`, Kazakh `kk`, Kyrgyz `ky`, Turkish `tr`, Turkmen `tk` (Oghuz; the interdental `s`→θ / `z`→ð hallmark), Tatar `tt`, Bashkir `ba` (Kipchak, Cyrillic; harmony-backing к/г→q/ʁ), Crimean Tatar `crh` (Kipchak+Oghuz, Turkish-based Latin), Chuvash `chv` (Oghur — the **sole surviving Bulgaric** branch, the deepest split in Turkic, Cyrillic; allophonic intervocalic/post-nasal voicing + reduced-vowel `ӑ ӗ` stress), Karakalpak `kaa` (Kipchak, 2016 Latin; written uvulars q/x/ǵ + acute front vowels á ó ú), Nogai `nog` (Kipchak-Nogai, Cyrillic; written-uvular digraphs къ/гъ/нъ + front-vowel digraphs аь/оь/уь), Uyghur `ug` (Arabic script), Uzbek `uz` |
-| Uralic | Estonian `et`, Finnish `fi`, Hungarian `hu` |
+| Uralic | Estonian `et`, Finnish `fi`, Hungarian `hu`, Lule Sami `smj` (julevsámegiella; the fleet's **first Saami** — North-Saami-style voiceless ⟨b d g⟩→[p t k], diphthongs ie/uo/oa; authored from Ylikoski) |
 
 **Accent variants** ride on a parent language's engine + a documented phoneme delta (not counted above):
 `en-GB` = the GenAm English engine + a Received-Pronunciation lexical-set transform (non-rhoticity, BATH,
