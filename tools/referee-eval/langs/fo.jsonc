@@ -1,0 +1,21 @@
+// Faroese (fo) — North Germanic (Insular Scandinavian, sibling of Icelandic), Latin, one of the deepest
+// orthographies in the fleet. Referee: wikipron fao_latn_broad (HUMAN, 3024). The folds strip the SUPRASEGMENTAL
+// detail the broad referee marks but our v1 does not model precisely: PRE-ASPIRATION [ʰ] and vowel LENGTH [ː]
+// (both pervasive, position-conditioned), plus the geminate/retroflex notation — so the comparison is the
+// segmental + vowel-quality skeleton (the real signal in a length-conditioned-quality orthography).
+{
+    "language": "fo", "name": "Faroese (føroyskt)", "script": "Latin",
+    "provenance": "Authored Faroese g2p: length-conditioned vowel quality + the deep-orthography consonant rules (b/d/g→p/t/k, intervocalic ð/g deletion, g/k→t͡ʃ before front vowels, retroflex r-clusters, ll→tl). Referee: wikipron fao_latn_broad.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "fo.wikipron-broad.tsv", "source": "wikipron fao_latn_broad (human)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki fao is the same Wiktionary source). The broad referee marks pre-aspiration + length our v1 folds.",
+    "folds": [
+        { "pattern": "ʰ", "replace": "", "note": "PRE-ASPIRATION: the broad referee marks the pervasive Faroese pre-aspiration ([ʰp ʰt ʰk], aʰksal); position-conditioned, folded (the Icelandic aspiration treatment)" },
+        { "pattern": "ː", "replace": "", "note": "vowel/consonant LENGTH: folded — the vowel QUALITY (which our engine picks by the length rule) is the real signal; the ː mark itself is stripped both sides" },
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar" },
+        { "pattern": "w", "replace": "v", "note": "the ⟨g ð⟩ round-glide is transcribed [v]~[w] (bága→pɔːwa~pɔːva) — one labial glide, normalise to v" },
+        { "pattern": "ɑ", "replace": "a", "note": "the referee is INCONSISTENT between [ɑ] and [a] in the ⟨a á⟩ diphthongs (Ári→ɔɑ but kráka→ɔa) — normalise the low-vowel backness both sides" }
+    ]
+}
