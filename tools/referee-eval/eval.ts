@@ -36,6 +36,7 @@ import { phonemizeWord as tt } from "../../src/languages/tatar/tatar.ts";
 import { phonemizeWord as mto } from "../../src/languages/totontepecmixe/totontepecmixe.ts";
 import { phonemizeWord as chr } from "../../src/languages/cherokee/cherokee.ts";
 import { phonemizeWord as smj } from "../../src/languages/lulesami/lulesami.ts";
+import { phonemizeWord as nci } from "../../src/languages/nahuatl/nahuatl.ts";
 import { phonemizeWord as nog } from "../../src/languages/nogai/nogai.ts";
 import { phonemizeWord as sat } from "../../src/languages/santali/santali.ts";
 import { phonemizeWord as quc } from "../../src/languages/kiche/kiche.ts";
@@ -256,6 +257,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     mto,
     chr,
     smj,
+    nci,
     nog,
     shn,
     la,
