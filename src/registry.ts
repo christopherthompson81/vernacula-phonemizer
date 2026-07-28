@@ -99,6 +99,7 @@ import { createIcelandic } from "./languages/icelandic/icelandic.ts";
 import { createFaroese } from "./languages/faroese/faroese.ts";
 import { createOccitan } from "./languages/occitan/occitan.ts";
 import { createMaori } from "./languages/maori/maori.ts";
+import { createHawaiian } from "./languages/hawaiian/hawaiian.ts";
 import { createQuechua } from "./languages/quechua/quechua.ts";
 import { createTibetan } from "./languages/tibetan/tibetan.ts";
 import { createGuarani } from "./languages/guarani/guarani.ts";
@@ -453,6 +454,8 @@ function build(lang: string): Phonemizer {
         case "oc":
             return createOccitan();
         // Māori (te reo Māori) — Eastern Polynesian; a near-1:1 phonemic g2p (macron length, wh→ɸ, ng→ŋ).
+        case "haw":
+            return createHawaiian();
         case "mi":
             return createMaori();
         // Quechua (Runasimi) — Southern Quechua; 3 vowels, overt 3-way stop series (plain/aspirate/ejective), penult stress.

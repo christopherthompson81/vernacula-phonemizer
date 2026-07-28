@@ -1,0 +1,16 @@
+// Hawaiian / ʻŌlelo Hawaiʻi (haw) — Austronesian (Eastern Polynesian, sibling of Māori), a near-1:1 phonemic map
+// (5 vowels + macron length, 8 consonants + the ʻokina). Referee: wikipron haw_latn_broad (HUMAN, 2152). The
+// referee writes a long vowel as a DOUBLED segment (a a) — no, it uses [ː] — and marks the diphthong offglide
+// non-syllabic; the folds normalise those narrow marks.
+{
+    "language": "haw", "name": "Hawaiian (ʻŌlelo Hawaiʻi)", "script": "Latin",
+    "provenance": "Authored from the Hawaiian phonemic orthography (5 vowels + macron=length, 8 consonants + ʻokina→[ʔ], loan-letter adaptation t→k/s→k/r→l/…). Referee: wikipron haw_latn_broad.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "haw.wikipron-broad.tsv", "source": "wikipron haw_latn_broad (human)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki Hawaiian same Wiktionary source) — but a trivially-phonemic orthography means low referee-error risk.",
+    "folds": [
+        { "pattern": "\\u032F", "replace": "", "note": "non-syllabic OFFGLIDE mark (the 2nd vowel of a falling diphthong: alawai→alawai̯) — a narrow detail; we emit the plain vowel" }
+    ]
+}
