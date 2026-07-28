@@ -1,0 +1,33 @@
+// Native canonical-IPA data manifest for Aragonese (an) — aragonés, Ibero-Romance (Pyrenean), Aragon/NE Spain
+// (~25k). espeak-independent. Close to Spanish/Catalan/Occitan. A Spanish-shaped shallow g2p (the Asturian/Galician
+// pattern) with the Aragonese hallmarks:
+//   - ⟨ch⟩→[t͡ʃ] (very common — Aragonese writes ⟨ch⟩ where Spanish has [x]: Chesús, chuego), ⟨ny⟩→[ɲ] (Catalan-style
+//     digraph: Espanya), ⟨x⟩→[ʃ] (baxo→baʃo), ⟨v⟩→[b] (betacism);
+//   - DISTINCIÓN (standard/literary Aragonese, per the Academia): ⟨z⟩ and ⟨c⟩ before e/i → [θ] (seseo [s] is the
+//     marked minority — Benasquese/Ribagorçan — so [θ] is emitted and the fold normalises the axis); ⟨j⟩/⟨g+e,i⟩→[x];
+//   - WORD-FINAL ⟨-r⟩ APOCOPE: a final ⟨-r⟩ after a vowel is DROPPED (the categorical Aragonese trait, shared with
+//     Catalan/Occitan — cantar→[kanˈta], flor→[flo], sur→[su]; the referee attests the dropped form throughout).
+// Engine: aragonese.ts. See docs/investigations/an_native_bringup_investigation.md.
+{
+    "language": "an",
+    "name": "Aragonese (aragonés)",
+    "script": "Latin",
+
+    // Digraphs, scanned LONGEST-FIRST: ⟨ny⟩→[ɲ], ⟨ll⟩→[ʎ], ⟨ch⟩→[t͡ʃ], ⟨tz⟩→[t͡s], ⟨rr⟩→[r] (trill). ⟨qu gu gü⟩,
+    // the ⟨c⟩/⟨g⟩ softening, and the ⟨i u⟩ rising glides are handled in code.
+    "digraphs": { "ny": "ɲ", "ll": "ʎ", "ch": "t͡ʃ", "tz": "t͡s", "rr": "r" },
+
+    // Single grapheme → canonical IPA (BASE values; ⟨c g⟩ softening, ⟨qu gu⟩ clusters, glides, final-r drop in code).
+    // ⟨x⟩→ʃ, ⟨j⟩→x (jota, loans), ⟨z⟩→θ (distinción), ⟨ñ⟩→ɲ, ⟨y⟩→ʝ, ⟨v⟩→b (betacism), ⟨h⟩ silent. Accents → plain vowel.
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u", "ï": "i",
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "", "j": "x", "k": "k",
+        "l": "l", "m": "m", "n": "n", "ñ": "ɲ", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t",
+        "v": "b", "w": "w", "x": "ʃ", "y": "ʝ", "z": "θ"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}

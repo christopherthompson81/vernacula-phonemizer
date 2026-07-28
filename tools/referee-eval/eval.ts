@@ -48,6 +48,7 @@ import { phonemizeWord as ee } from "../../src/languages/ewe/ewe.ts";
 import { phonemizeWord as shn } from "../../src/languages/shan/shan.ts";
 import { phonemizeWord as la } from "../../src/languages/latin/latin.ts";
 import { phonemizeWord as ast } from "../../src/languages/asturian/asturian.ts";
+import { phonemizeWord as an } from "../../src/languages/aragonese/aragonese.ts";
 import { phonemizeWord as ht } from "../../src/languages/haitian/haitian.ts";
 import { phonemizeWord as rkt } from "../../src/languages/rangpuri/rangpuri.ts";
 import { phonemizeWord as bar } from "../../src/languages/bavarian/bavarian.ts";
@@ -262,6 +263,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     chv,
     ee,
     ast,
+    an,
     ht,
     rkt,
     bar,

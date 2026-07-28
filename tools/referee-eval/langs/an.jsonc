@@ -1,0 +1,21 @@
+// Aragonese (an) — Ibero-Romance (Pyrenean), a Spanish-shaped shallow g2p (the Asturian/Galician pattern).
+// Referee: wikipron arg_latn_broad (HUMAN, 1320). The folds are the standard Ibero-Romance notational set:
+// SESEO/distinción (s~θ — both attested: Francia→fɾansja~fɾanθja), the intervocalic SPIRANTIZATION allophony
+// (b/d/ɡ~β/ð/ɣ), the rhotic tap/trill notation, and the offglide mark.
+{
+    "language": "an", "name": "Aragonese (aragonés)", "script": "Latin",
+    "provenance": "Authored Spanish-shaped g2p (ch→t͡ʃ, ny→ɲ, x→ʃ, v→b, seseo, final-r drop) from Aragonese orthography + the wikipron arg_latn_broad phonology.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "an.wikipron-broad.tsv", "source": "wikipron arg_latn_broad (human)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki Aragonese same Wiktionary source). Seseo vs distinción is dialect-variable (both attested) → folded.",
+    "folds": [
+        { "pattern": "θ", "replace": "s", "note": "DISTINCIÓN/seseo: ⟨z⟩/⟨c+e,i⟩ is [θ] (distinción — standard Aragonese, OUR default) ~ [s] (seseo, the Benasquese/Ribagorçan minority) — both attested (Francia→fɾanθja~fɾansja); normalise the axis to [s]" },
+        { "pattern": "β", "replace": "b", "note": "intervocalic ⟨b/v⟩ SPIRANTIZATION [β]~[b] — one phoneme, allophonic (we emit the stop, folded/deferred)" },
+        { "pattern": "ð", "replace": "d", "note": "intervocalic ⟨d⟩ [ð]~[d] — allophonic" },
+        { "pattern": "ɣ", "replace": "ɡ", "note": "intervocalic ⟨g⟩ [ɣ]~[ɡ] — allophonic" },
+        { "pattern": "r", "replace": "ɾ", "note": "the rhotic tap/trill: the referee writes single ⟨r⟩ as [r]~[ɾ] variably — normalise to the tap [ɾ] (⟨rr⟩/word-initial trill folds together with it)" },
+        { "pattern": "\\u032F", "replace": "", "note": "non-syllabic offglide mark (e i̯ in ⟨ei⟩/⟨au⟩ diphthongs: abadeixo→abadei̯ʃo) — a narrow detail we render as the plain vowel" }
+    ]
+}
