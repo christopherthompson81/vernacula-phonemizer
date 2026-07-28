@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 // The RULE g2p (default-schwa short vowels) is phonemizeWordRules; the shipped phonemizeWord adds the kaikki
 // short-vowel restoration lexicon. The rule tests below exercise the g2p, so they use phonemizeWordRules.
+import { readFileSync, existsSync } from "node:fs";
 import {
     phonemizeWord as phonemizeWordShipped,
     phonemizeWordRules as phonemizeWord,
@@ -12,20 +13,49 @@ import {
 // جھ d͡ʒʰ, لھ lʰ). SHORT vowels are unwritten → a default [ə] (the abjad wall). See docs/investigations/sd_native_bringup_investigation.md.
 describe("Sindhi canonical IPA", () => {
     test("the four implosives ٻɓ ڏɗ ڄʄ ڳɠ (the census gap)", () => {
-        expect(phonemizeWord("ٻارو")).toBe("ɓaːɾoː"); // ٻ → ɓ
-        expect(phonemizeWord("ڏاڏو")).toBe("ɗaːɗoː"); // ڏ → ɗ
-        expect(phonemizeWord("ڄاڻ")).toBe("ʄaːɳə"); // ڄ → ʄ, ڻ → ɳ (retroflex)
-        expect(phonemizeWord("ڳالھ")).toBe("ɠaːlʰə"); // ڳ → ɠ, لھ → lʰ (aspirated sonorant)
+        expect(phonemizeWord("ٻارو")).toBe("ɓˈaːɾoː"); // ٻ → ɓ
+        expect(phonemizeWord("ڏاڏو")).toBe("ɗˈaːɗoː"); // ڏ → ɗ
+        expect(phonemizeWord("ڄاڻ")).toBe("ʄˈaːɳə"); // ڄ → ʄ, ڻ → ɳ (retroflex)
+        expect(phonemizeWord("ڳالھ")).toBe("ɠˈaːlʰə"); // ڳ → ɠ, لھ → lʰ (aspirated sonorant)
     });
 
     test("consonants, aspiration, retroflex, long vowels", () => {
-        expect(phonemizeWord("ڪتاب")).toBe("kət̪aːbə"); // ڪ→k, ت→t̪ (dental), ا→aː
-        expect(phonemizeWord("سنڌ")).toBe("sənəd̪ʰə"); // ڌ → d̪ʰ (aspirated dental)
-        expect(phonemizeWord("پنج")).toBe("pəɲəd͡ʒə"); // ن → ɲ before ج (palatal nasal assimilation)
+        expect(phonemizeWord("ڪتاب")).toBe("kət̪ˈaːbə"); // ڪ→k, ت→t̪ (dental), ا→aː
+        expect(phonemizeWord("سنڌ")).toBe("sˈənd̪ʰə"); // ڌ → d̪ʰ (aspirated dental)
+        expect(phonemizeWord("پنج")).toBe("pˈəɲd͡ʒə"); // ن → ɲ before ج (palatal nasal assimilation)
     });
 
     test("word-final ه silent (vowel-carrier), ع silent", () => {
-        expect(phonemizeWord("ٻه")).toBe("ɓə"); // final ه silent → ɓ + default ə
+        expect(phonemizeWord("ٻه")).toBe("ɓˈə"); // final ه silent → ɓ + default ə
+    });
+
+    // A homorganic nasal + stop is one tautosyllabic cluster — the abjad scan's blanket
+    // "consonant before consonant → default ə" must not split it. Cross-checked against the
+    // lexicon, where the attested forms are انب əmb and سنڌي sɪndʱiː (no ə inside the cluster).
+    test("no default-ə inside a homorganic nasal + stop cluster", () => {
+        expect(phonemizeWord("پنج")).toBe("pˈəɲd͡ʒə"); // palatal: ɲd͡ʒ, not ɲəd͡ʒ
+        expect(phonemizeWord("سنڌ")).toBe("sˈənd̪ʰə"); // dental: nd̪ʰ, not nəd̪ʰ
+        expect(phonemizeWord("انب")).toBe("ˈəmbə"); // labial: mb, not məb
+    });
+});
+
+// Quantity-sensitive weight stress (the shared hi/ur/pa Indo-Aryan rule): rightmost superheavy,
+// else rightmost NON-FINAL heavy, else initial. Sindhi previously emitted no stress at all.
+describe("Sindhi weight stress", () => {
+    test("every word carries exactly one primary stress", () => {
+        for (const w of ["ٻارو", "ڪتاب", "سنڌ", "پنج", "ٻه", "زبان"]) {
+            const ipa = phonemizeWord(w);
+            expect(ipa.match(/ˈ/gu)?.length, `${w} → ${ipa}`).toBe(1);
+        }
+    });
+
+    test("stress lands on the rightmost non-final heavy syllable", () => {
+        expect(phonemizeWord("ڪتاب")).toBe("kət̪ˈaːbə"); // kə(L) t̪aː(H) bə(L) → the long aː
+        expect(phonemizeWord("زبان")).toBe("zəbˈaːnə"); // zə(L) baː(H) nə(L) → the long aː
+    });
+
+    test("a monosyllable is still marked", () => {
+        expect(phonemizeWord("ٻه")).toBe("ɓˈə");
     });
 });
 
@@ -44,8 +74,38 @@ describe("Sindhi short-vowel restoration — 2-source-verified (kaikki ∩ Nihal
         ["رات", "raːt̪ɪ"], // night
         ["صوف", "suːfə"], // wool
     ] as const) {
+        // Stress is stripped before comparing ON PURPOSE. These goldens are the SEGMENTAL forms the two
+        // independent sources agree on; neither kaikki nor the Nihalani transcriptions we extracted mark
+        // stress. Baking our own weight-stress layer into them would make the gold partly a copy of our
+        // own output, which is exactly the circularity this test exists to avoid. Stress is covered
+        // separately in "Sindhi weight stress" above.
         test(`${word} → ${ipa}`, () => {
-            expect(phonemizeWordShipped(word)).toBe(ipa);
+            expect(phonemizeWordShipped(word).replace(/[ˈˌ]/gu, "")).toBe(ipa);
         });
     }
+});
+
+// The neural OOV tagger's "cannot break the consonant skeleton" property holds for consonants (they never take
+// the empty tag) but NOT automatically for the glide/vowel letters: a few stray training alignments put the
+// empty chunk in their mask, and the decoder then deleted them outright (دنيا → d̪ʊnaː, the ي gone).
+// export_sd_tagger_onnx.py prunes the empty tag from any letter that took it in <5% of >=20 observations.
+// This asserts the shipped MASK directly, so it runs without onnxruntime and cannot silently regress.
+describe("Sindhi tagger mask — glide-deletion guard", () => {
+    const META = new URL("../src/languages/sindhi/sd-g2p-tagger.meta.json", import.meta.url);
+    test("glide/vowel letters cannot emit the empty chunk; genuine silent carriers still can", () => {
+        if (!existsSync(META)) return; // model not built in this checkout
+        const meta = JSON.parse(readFileSync(META, "utf8")) as {
+            src: Record<string, number>;
+            tags: Record<string, string>;
+            charTags: Record<string, number[]>;
+        };
+        const emptyId = Number(Object.entries(meta.tags).find(([, v]) => v === "")![0]);
+        const permits = (ch: string): boolean =>
+            (meta.charTags[String(meta.src[ch])] ?? []).includes(emptyId);
+
+        // would be DELETED if empty were permitted — these carry sound
+        for (const ch of ["و", "ي", "ئ", "آ"]) expect(permits(ch), `${ch} must not delete`).toBe(false);
+        // legitimately silent: ھ is absorbed into the preceding aspirate digraph, ه/ع are silent carriers
+        for (const ch of ["ھ", "ه", "ع"]) expect(permits(ch), `${ch} may be silent`).toBe(true);
+    });
 });
