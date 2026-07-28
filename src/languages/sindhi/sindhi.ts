@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { applyWeightStress } from "../../core/weightStress.ts";
 
 interface SindhiDef {
     consonants: Record<string, string>;
@@ -24,12 +25,22 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 export type ForeignPhonemizer = (latin: string) => string;
 
 const HE = "ھ";
+// The scan marks its DEFAULT-inserted [ə] with a private-use sentinel so the nasal-assimilation pass can consume
+// that ə without touching an ə the writer actually spelled with a harakat. Without this, نَب (explicit fatha)
+// lost its written vowel: `nə?(?=[bpɓ])` ate it and the word came out mb. Stripped back to ə at the end of
+// phonemizeCore, so the sentinel never escapes this module.
+const DEFAULT_SCHWA = "\uE000";
 const NOON_GHUNNA = "ں"; // nasalization
 const isConsonant = (c: string): boolean => c in DEF.consonants;
 const isVowelLetter = (c: string): boolean => c in DEF.longVowels;
 
-/** Scan a Sindhi (Perso-Arabic) word → IPA. Consonants + long vowels are recoverable; short vowels default to [ə]. */
-function scan(word: string): string {
+/** Scan a Sindhi (Perso-Arabic) word → IPA. Consonants + long vowels are recoverable; short vowels default to [ə].
+ *
+ *  `vocalized`: the word is FULLY harakat-marked (a diacritized dictionary headword rather than running text).
+ *  Then the diacritics are authoritative and the default-[ə] insertion must be OFF — an unmarked consonant cluster
+ *  means there is NO vowel there, not an unwritten one. Reading اُستادُ with insertion on gives ʊsət̪aːd̪ʊ; the
+ *  attested form is ʊst̪aːd̪ʊ. */
+function scan(word: string, vocalized = false): string {
     const s = [...word];
     const out: string[] = [];
     let prevNucleus = false; // was the last emitted unit a vowel nucleus?
@@ -51,7 +62,14 @@ function scan(word: string): string {
         // long-vowel / glide letters: a long vowel after a consonant, a glide word-initially or in hiatus
         if (isVowelLetter(c)) {
             if (out.length === 0) {
-                // word-initial vowel carrier: آ (madda) is [aː]; bare ا is a short [ə] carrier; و/ي → glide
+                // word-initial vowel carrier: آ (madda) is [aː]; bare ا is a short [ə] carrier; و/ي → glide.
+                // If a harakat FOLLOWS the bare alif it is the carrier's vowel (اِجازت ɪd͡ʒaːzət̪ə, اُستاد ʊst̪aːd̪ʊ) —
+                // emit nothing here and let the harakat supply it, or the two stack into a spurious əi/əu.
+                if (c === "ا" && DEF.harakat[s[i + 1] ?? ""]) {
+                    prevNucleus = false;
+                    i++;
+                    continue;
+                }
                 out.push(c === "آ" ? "aː" : c === "ا" ? "ə" : (DEF.glides[c] ?? DEF.longVowels[c]!));
                 prevNucleus = c === "و" || c === "ي" || c === "ی" || c === "ے" ? false : true;
             } else if (prevNucleus) {
@@ -96,8 +114,8 @@ function scan(word: string): string {
             prevNucleus = false;
             // insert a default short [ə] when no vowel is written before the next consonant / word-end (abjad).
             const nx = s[i] ?? "";
-            if (nx === "" || (isConsonant(nx) && !(nx === HE))) {
-                out.push("ə");
+            if (!vocalized && (nx === "" || (isConsonant(nx) && !(nx === HE)))) {
+                out.push(DEFAULT_SCHWA);
                 prevNucleus = true;
             }
             continue;
@@ -108,14 +126,28 @@ function scan(word: string): string {
 }
 
 /** Rule g2p: consonant + long-vowel skeleton with default-[ə] short vowels, then homorganic nasal assimilation
- *  across the unwritten short vowel (n·ə·C): before a velar → ŋ (انگ→əŋɡ), labial → m (انب→əmb), retroflex → ɳ
- *  (آنڊو→aːɳɖo), palatal → ɲ (پنج→pəɲd͡ʒ). */
-function phonemizeCore(word: string): string {
-    return scan(word)
-        .replace(/n(?=ə?(?:kʰ|[kɡxɠ]))/gu, "ŋ")
-        .replace(/n(?=ə?[bpɓ])/gu, "m")
-        .replace(/n(?=ə?[ʈɖɳɽ])/gu, "ɳ")
-        .replace(/n(?=ə?(?:d͡ʒ|t͡ʃ|ʄ))/gu, "ɲ")
+ *  before a velar → ŋ (انگ→əŋɡ), labial → m (انب→əmb), retroflex → ɳ (آنڊو→aːɳɖo), palatal → ɲ (پنج→pəɲd͡ʒ),
+ *  dental → plain n (سنڌ→sənd̪ʰ).
+ *
+ *  Each rule also CONSUMES the default [ə] the abjad scan inserted between the nasal and the stop. A homorganic
+ *  nasal + stop is a single tautosyllabic cluster in Sindhi — it is never broken by a vowel — so the scan's
+ *  blanket "consonant before consonant → ə" is wrong here. The lexicon goldens show this directly: انب is əmb
+ *  (not əməb) and سنڌي is sɪndʱiː (not sɪnədʱiː). Measured over the 539-word lexicon, dropping the ə here fixes
+ *  12 of the 53 places where the rule path split a cluster the attested form keeps (53 → 41).
+ *
+ *  The other 41 (sC- st/sp/sk, obstruent+liquid kɾ/kl/pɾ, and assorted codas lm/ɾs/kt) are deliberately left
+ *  alone: unlike the homorganic nasal they are not categorically un-splittable in Sindhi, and the lexicon does
+ *  not carry enough same-shape pairs to tell a real cluster from a genuine epenthesis word-by-word. Re-measured
+ *  later on the full 9,920-word lexicon, only 8.9% of ALL default-ə insertions are wrong, so this is a narrow
+ *  correction rather than a large one. */
+function phonemizeCore(word: string, vocalized = false): string {
+    return scan(word, vocalized)
+        .replace(/n\uE000?(?=(?:kʰ|[kɡxɠ]))/gu, "ŋ")
+        .replace(/n\uE000?(?=[bpɓ])/gu, "m")
+        .replace(/n\uE000?(?=[ʈɖɳɽ])/gu, "ɳ")
+        .replace(/n\uE000?(?=(?:d͡ʒ|t͡ʃ|ʄ))/gu, "ɲ")
+        .replace(/n\uE000(?=t̪|d̪)/gu, "n")
+        .replace(/\uE000/gu, "ə")
         .normalize("NFC");
 }
 
@@ -128,24 +160,37 @@ let LEX: ReadonlyMap<string, string> | undefined;
 const lexicon = (): ReadonlyMap<string, string> =>
     (LEX ??= loadTsvMap(import.meta.url, "sindhi-lexicon.tsv", undefined, { optional: true }));
 
-/** One Sindhi word → canonical IPA, SHIPPED path (rule g2p + the kaikki short-vowel restoration lexicon). */
+/** One Sindhi word → canonical IPA, SHIPPED path (rule g2p + the kaikki short-vowel restoration lexicon).
+ *  Lexicon entries are stored UNSTRESSED (as for Urdu), so weight stress is applied at lookup — one stress
+ *  policy for both the lexicon and the rule path. */
 export function phonemizeWord(word: string): string {
-    return lexicon().get(word) ?? phonemizeCore(word);
+    return stress(lexicon().get(word) ?? phonemizeCore(word));
 }
 
 /** One Sindhi word → canonical IPA, RULE-ONLY (no lexicon) — the non-circular signal for the referee eval. */
 export function phonemizeWordRules(word: string): string {
-    return phonemizeCore(word);
+    return stress(phonemizeCore(word));
+}
+
+/** Quantity-sensitive word stress — the shared Indo-Aryan weight rule already used by hi/ur/pa
+ *  (rightmost superheavy, else rightmost non-final heavy, else initial). Sindhi is the same stress family;
+ *  this module simply never had the layer, so every word came out unstressed. */
+function stress(ipa: string): string {
+    return applyWeightStress(ipa).normalize("NFC");
 }
 
 const SD_WORD = "ء-ٟٮ-ۿ";
 const TOKEN = new RegExp(`([${SD_WORD}]+)|(\\d+)|([۔؟،؛.?,])`, "gu");
 
+/** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride →
+ *  rules); used only by the async neural path (`sindhiNeural.ts`), so the sync engine is unchanged. */
+export type OovResolver = (word: string) => string | undefined;
+
 class SindhiPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
-    text(input: string): string {
+    text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWordWith(m[1], oovOverride));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -155,7 +200,28 @@ class SindhiPhonemizer implements Phonemizer {
     }
 }
 
+/** Lexicon → oovOverride → rules. The lexicon still wins any word it covers; the override only fills the tail. */
+function phonemizeWordWith(word: string, oov?: OovResolver): string {
+    const hit = lexicon().get(word);
+    if (hit) return stress(hit);
+    const o = oov?.(word);
+    return o ? stress(o) : stress(phonemizeCore(word));
+}
+
+/** True when the shipped lexicon covers `word` — the neural path uses this to skip covered words.
+ *  Deliberately the SAME lookup the engine performs (`lexicon().get(word)`, no normalisation): if the two
+ *  disagreed, a word could be judged "covered" here, skipped by the tagger, and then miss in the engine —
+ *  silently falling through to default-ə instead of the neural reading. */
+export function sindhiLexiconHas(word: string): boolean {
+    return lexicon().has(word);
+}
+
 /** Build the Sindhi phonemizer. */
 export function createSindhi(): Phonemizer {
+    return new SindhiPhonemizer();
+}
+
+/** Build the Sindhi engine with a per-call `oovOverride` hook (the async neural path). */
+export function createSindhiEngine(): { text: (input: string, oov?: OovResolver) => string } {
     return new SindhiPhonemizer();
 }

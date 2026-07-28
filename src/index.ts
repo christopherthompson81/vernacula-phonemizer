@@ -14,6 +14,7 @@ import { phonemizeFrNeural } from "./frNeural.ts";
 import { phonemizeFaNeural } from "./faNeural.ts";
 import { phonemizeHebrewNeural } from "./hebrewNeural.ts";
 import { phonemizeRiderNeural } from "./riderNeural.ts";
+import { phonemizeSdNeural } from "./sindhiNeural.ts";
 
 export { getPhonemizer, type Phonemizer } from "./registry.ts";
 
@@ -37,6 +38,7 @@ const ARABIC_VARIETY: Record<string, string | undefined> = {
 // (ur/ps/pnb) share the multilingual harakat diacritizer via phonemizeRiderNeural(text, lang).
 const NEURAL: Record<string, (text: string) => Promise<string>> = {
     en: phonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
+    sd: phonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
     bn: phonemizeBnNeural,
     da: phonemizeDaNeural,
     nb: phonemizeNbNeural,
