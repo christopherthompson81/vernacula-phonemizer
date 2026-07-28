@@ -102,8 +102,15 @@ function nuclei(units: string[]): Array<{ at: number; long: boolean }> {
     return out;
 }
 
+// §5.3.1 rule 7 — "The following open mono syllabic words are unstressed": the focus marker and the short
+// object pronouns. They are high-frequency in running text, so leaving them stressed would put a spurious
+// prominence on a clitic-like particle in almost every sentence. Matched on the ORTHOGRAPHY (the scan
+// lowercases), which is where the thesis states them.
+const UNSTRESSED_WORDS = new Set(["tu", "nu", "na", "si"]);
+
 /** Index of the syllable carrying primary stress, or -1 to leave the word unmarked. */
-function stressIndex(units: string[]): number {
+function stressIndex(units: string[], word: string): number {
+    if (UNSTRESSED_WORDS.has(word.toLowerCase())) return -1; // rule 7
     const nu = nuclei(units);
     const n = nu.length;
     if (n === 0) return -1;
@@ -116,7 +123,7 @@ function stressIndex(units: string[]): number {
     // tɪˈrúː, we predict the penult) — telling the two apart needs morphology we do not have here.
     const last = nu[n - 1]!;
     const endsWithVowel = last.at === units.length - 1;
-    if (endsWithVowel && last.long && units[last.at]!.startsWith("u") && n >= 2) {
+    if (endsWithVowel && last.long && units[last.at]!.startsWith("u")) {
         const head = nu.slice(0, -1);
         for (let k = head.length - 1; k >= 0; k--) if (head[k]!.long) return k;
         return head.length - 1;
@@ -134,8 +141,8 @@ function stressIndex(units: string[]): number {
 }
 
 /** Insert the primary-stress mark before the nucleus of the selected syllable (the fleet convention: kˈiː). */
-function applyStress(units: string[]): string[] {
-    const idx = stressIndex(units);
+function applyStress(units: string[], word: string): string[] {
+    const idx = stressIndex(units, word);
     if (idx < 0) return units;
     const nu = nuclei(units);
     const at = nu[idx]!.at;
@@ -144,7 +151,7 @@ function applyStress(units: string[]): string[] {
 
 /** One Oromo word → canonical IPA. */
 export function phonemizeWord(word: string): string {
-    return applyStress(scan(word)).join("").normalize("NFC");
+    return applyStress(scan(word), word).join("").normalize("NFC");
 }
 
 /** One Oromo word → canonical IPA, WITHOUT the stress layer (the referee eval's segmental signal). */

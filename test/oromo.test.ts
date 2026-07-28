@@ -72,6 +72,13 @@ describe("Oromo stress (Dejene 2010 §5.3.1)", () => {
         });
     }
 
+    // §5.3.1 rule 7 — the focus marker and short object pronouns are UNSTRESSED. They are frequent enough
+    // that stressing them would put a spurious prominence on a clitic in nearly every sentence.
+    test("rule 7: open monosyllabic function words are unstressed", () => {
+        for (const w of ["tu", "nu", "na", "si"]) expect(phonemizeWord(w), w).not.toContain("ˈ");
+        expect(phonemizeWord("shan")).toContain("ˈ"); // a CONTENT monosyllable is still stressed
+    });
+
     test("exactly one primary stress per word", () => {
         for (const w of ["nama", "bishaan", "dargaggoo", "sanbata", "shan", "obboleessa"]) {
             expect(phonemizeWord(w).match(/ˈ/gu)?.length, w).toBe(1);
