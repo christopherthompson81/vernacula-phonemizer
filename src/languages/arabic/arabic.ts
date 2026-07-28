@@ -137,12 +137,36 @@ const toAscii = (d: string): string =>
 let egyptianLex: ReadonlyMap<string, string> | undefined;
 function egyptianLexicon(): ReadonlyMap<string, string> {
     if (egyptianLex === undefined)
-        egyptianLex = loadTsvMap(import.meta.url, "egyptian-lexicon.tsv", undefined, {
+        egyptianLex = loadTsvMap(import.meta.url, "egyptian-lexicon.tsv", ipaOnly, {
             optional: true,
         });
     return egyptianLex;
 }
 const HARAKAT = /[ً-ْٰـ]/gu; // short-vowel diacritics + dagger-alif + tatweel → bare lexicon key
+
+// The lexicon is MINED from kaikki, and the extraction once emitted a Wiktionary entry's phonemic and
+// phonetic transcriptions glued together — كتب → "katab/[kˈatab" — which reached the output verbatim as a
+// "phoneme" (issue #550). The data is repaired; this guard keeps a re-mine from reintroducing it.
+//
+// It REPAIRS rather than drops. Dropping would be wrong here specifically: this lexicon exists to supply
+// EGYPTIAN short vowels, and without a hit the word falls back to the abjad rule path or the MSA neural
+// diacritizer — which restores MSA vowels that are wrong for Egyptian (مصر MSA miṣr vs Egyptian maṣr).
+// So a dropped row does not degrade to "unrefined", it degrades to "incorrect vowels". Recovering an
+// alternant keeps the vocalization.
+//
+// Selection mirrors the one used to repair the data: of the alternants, prefer the single stressed one
+// (the file header states entries carry "stress on the nucleus"), else the first. Only a value still
+// holding a delimiter after that is unusable and dropped.
+const VARIANT_SPLIT = /\/~\/|\/\/|\/\[/u;
+const NOT_IPA = /[/[\]~()|\\]/u;
+/** Exported for tests: the load-time repair rule for a mined lexicon value (see the note above). */
+export const ipaOnly = (value: string): string | undefined => {
+    if (!NOT_IPA.test(value)) return value;
+    const parts = value.split(VARIANT_SPLIT).filter(Boolean);
+    const stressed = parts.filter((p) => p.includes("ˈ"));
+    const pick = stressed.length === 1 ? stressed[0]! : parts[0];
+    return pick !== undefined && !NOT_IPA.test(pick) ? pick : undefined;
+};
 
 class ArabicPhonemizer implements Phonemizer {
     constructor(

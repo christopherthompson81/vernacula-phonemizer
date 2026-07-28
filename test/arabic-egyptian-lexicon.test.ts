@@ -10,8 +10,10 @@
  * `createArabic("egyptian", true).text(word)` resolves a lexicon hit synchronously (no ONNX diacritizer needed),
  * so these assertions are deterministic.
  */
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
-import { createArabic } from "../src/languages/arabic/arabic.ts";
+import { createArabic, ipaOnly } from "../src/languages/arabic/arabic.ts";
 
 const arz = createArabic("egyptian", true);
 // word → shipped Egyptian IPA (from the lexicon). Egyptian vowels the MSA path gets wrong.
@@ -47,4 +49,43 @@ describe("arz Egyptian g2p rules (diacritized input)", () => {
             expect(arz.text(word)).toBe(ipa);
         });
     }
+});
+
+// #550 — the mined lexicon once glued a Wiktionary entry's phonemic and phonetic transcriptions together
+// (كتب → "katab/[kˈatab"), and the raw "/[" reached the IPA output as if it were a phoneme. Two layers now:
+// the DATA is repaired, and the loader DROPS any row carrying a structural delimiter, so a re-mine cannot
+// reintroduce it — such a word falls through to the rule g2p instead (unrefined, but never punctuation).
+describe("Egyptian lexicon — no annotation artifacts (#550)", () => {
+    const DELIMITER = /[/[\]~()|\\]/u;
+
+    it("ships no entry carrying a structural delimiter", () => {
+        const path = new URL("../src/languages/arabic/egyptian-lexicon.tsv", import.meta.url);
+        const bad: string[] = [];
+        for (const line of readFileSync(path, "utf8").split("\n")) {
+            if (!line || line.startsWith("#")) continue;
+            const [w, ipa] = line.split("\t");
+            if (ipa && DELIMITER.test(ipa)) bad.push(`${w} → ${ipa}`);
+        }
+        expect(bad, `malformed rows:\n${bad.join("\n")}`).toEqual([]);
+    });
+
+    // The guard REPAIRS rather than drops, and that distinction matters here: this lexicon exists to supply
+    // EGYPTIAN short vowels. A dropped row falls back to the abjad rule path or the MSA diacritizer, which
+    // restores MSA vowels that are WRONG for Egyptian — so dropping would degrade to "incorrect vowels",
+    // not merely "unrefined". Recovering an alternant keeps the vocalization.
+    it("repairs a malformed value at load instead of dropping the vocalization", () => {
+        expect(ipaOnly("katab/[kˈatab")).toBe("kˈatab"); // prefer the single stressed alternant
+        expect(ipaOnly("ʃˈarː/[ʃar")).toBe("ʃˈarː"); // ...whichever side it is on
+        expect(ipaOnly("sakːˈiːna//saˈkːiːna")).toBe("sakːˈiːna"); // both stressed → first
+        expect(ipaOnly("p/~/b")).toBe("p"); // neither stressed → first
+        expect(ipaOnly("kˈatab")).toBe("kˈatab"); // a clean value is untouched
+        expect(ipaOnly("x(y)")).toBeUndefined(); // genuinely unusable → dropped
+    });
+
+    it("emits a single clean transcription for the reported words", () => {
+        expect(arz.text("كتب")).toBe("kˈatab"); // was "katab/[kˈatab"
+        for (const w of ["كتب", "دلوقتي", "شلتة", "كمترة", "عيل", "نسر"]) {
+            expect(arz.text(w), w).not.toMatch(DELIMITER);
+        }
+    });
 });
