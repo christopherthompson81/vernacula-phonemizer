@@ -1,0 +1,17 @@
+// Ancient Greek (grc) — Hellenic, POLYTONIC Greek script, targeting the reconstructed 5th-BCE CLASSICAL ATTIC
+// pronunciation (Allen, Vox Graeca). Referee: wikipron grc_grek, filtered to the {{grc-IPA}} 5th-BCE ATTIC row
+// (the one carrying a PITCH ACCENT; the module also emits Koine/Byzantine/Constantinopolitan rows we skip).
+// No per-language folds are needed: the shared eval BACKBONE already strips the whole U+0300–U+036F combining
+// block (so the PITCH ACCENT — acute/grave/circumflex — and the voiceless-ring on ⟨ῥ⟩→[r̥] fold out fleet-wide,
+// on both sides), which is exactly the right treatment (pitch is suprasegmental; the r̥ ring is a voicelessness
+// diacritic). We EMIT the canonical accent + [r̥] and let the backbone normalise them for the referee.
+{
+    "language": "grc", "name": "Ancient Greek (Attic)", "script": "Greek (polytonic)",
+    "provenance": "Authored polytonic-Greek → 5th-BCE Attic IPA (Allen Vox Graeca): aspirates θφχ→tʰpʰkʰ, ζ→zd, η/ω long mid, υ→y, diphthongs, γ-nasal, rough-breathing h, ῥ→r̥. Referee: wikipron grc_grek Attic row.",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "grc.wikipron-attic.tsv", "source": "wikipron grc_grek (human, {{grc-IPA}} 5th-BCE Attic)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki grc same {{grc-IPA}} module). The referee is MODULE-GENERATED (the Wiktionary grc-IPA converter from the standard reconstruction) → reference-parity-adjacent, but the reconstruction is the scholarly Allen standard.",
+    "folds": []
+}
