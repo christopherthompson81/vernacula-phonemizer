@@ -1,0 +1,23 @@
+// Abkhaz / аҧсуа бызшәа (ab) — NORTHWEST CAUCASIAN, Cyrillic. Huge consonant inventory + 2 vowels. Referees: wikipron
+// abk_cyrl broad (primary, 205) + kaikki Abkhaz (secondary). See docs/investigations/ab_native_bringup_investigation.md.
+{
+    "language": "ab", "name": "Abkhaz (аҧсуа бызшәа)", "script": "Cyrillic",
+    "provenance": "Authored Cyrillic base+modifier scan for the NW-Caucasian consonant system: ь palatalizes, ә labializes, ' pharyngealizes; three-way voiced/aspirated/ejective stops+affricates; 2 vowels а→a ы→ə. Validated vs wikipron + kaikki.",
+    "referees": [
+        { "file": "ab.wikipron-abk-broad.tsv", "source": "wikipron abk_cyrl_broad (Wiktionary, HUMAN, 205)", "role": "primary" },
+        { "file": "ab.kaikki-ab.tsv", "source": "kaikki Abkhaz (Wiktionary, HUMAN)", "role": "secondary" }
+    ],
+    "secondaryGap": "🔷 single-source-family (wikipron + kaikki both Wiktionary). The primary is ~90 letter/digraph DEFINITIONS (near reference-parity on the alphabet spec) + ~115 real words; the narrow transcriptions are internally inconsistent (х~χ, ə~ɨ, tie-bar notation).",
+    "folds": [
+        { "pattern": "ɨ", "replace": "ə", "note": "⟨ы⟩ [ə]~[ɨ] — the referee writes both" },
+        { "pattern": "ɑ", "replace": "a", "note": "⟨а⟩ [a]~[ɑ] backness" },
+        { "pattern": "x", "replace": "χ", "note": "⟨х⟩ [x] (velar) ~ [χ] (uvular) — referee-inconsistent (аха→axa AND aχa)" },
+        { "pattern": "ʍ", "replace": "χʷ", "note": "⟨хә⟩ [ʍ] (voiceless labial-velar approximant, the referee-def) ~ [χʷ] (voiceless labialized uvular, the word-transcriptions) — the same voiceless labialized dorsal" },
+        { "pattern": "ɛ", "replace": "e", "note": "⟨е⟩ [ɛ]/[e̞]~[e] height (the referee lowers it; we emit [e])" },
+        { "pattern": "ɔ", "replace": "o", "note": "⟨о⟩ [ɔ]/[o̞]~[o] height" },
+        { "pattern": "aː", "replace": "aa", "note": "⟨аа⟩ — the kaikki referee writes the long vowel [aː] where wikipron (and we) write [aa] (two segments); neutralise" },
+        { "pattern": "cʰ", "replace": "kʰʲ", "note": "⟨қь⟩ — the wikipron letter-def uses the PALATAL-place [cʰ]; the 979-word corpus (and we) use dorsal+[ʲ] = [kʰʲ]. Notation-only (place)" },
+        { "pattern": "cʼ", "replace": "kʼʲ", "note": "⟨кь⟩ palatal [cʼ] ~ dorsal [kʼʲ] — place notation" },
+        { "pattern": "ç", "replace": "χʲ", "note": "⟨хь⟩ palatal [ç] ~ dorsal [χʲ] — place notation" }
+    ]
+}

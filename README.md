@@ -1,6 +1,6 @@
 # vernacula-phonemizer
 
-A **canonical-IPA** phonemizer for **172 languages** — native, cleanroom, and self-contained.
+A **canonical-IPA** phonemizer for **173 languages** — native, cleanroom, and self-contained.
 One output mode: consistent canonical IPA, tuned for speech-synthesis / TTS training. No
 dual rendering, no runtime fallback — every language resolves to the same notation.
 
@@ -60,9 +60,9 @@ await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      �
 
 ## Languages
 
-172 languages spanning Albanian, Armenian, Austroasiatic,
+173 languages spanning Albanian, Armenian, Austroasiatic,
 Austronesian, Baltic, Basque (isolate), Berber, Celtic, Chadic, Cushitic, Dravidian, Germanic, Hellenic, Hmong-Mien, Indo-Aryan, Iranian, Italic, Japonic, Kartvelian, Khoe-Kwadi (Nama — the first CLICK language), Koreanic,
-Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
+Mayan, Mongolic, Niger-Congo (Bantu, Kwa, Mande, Gur, Atlantic), Nilotic, Northwest Caucasian (Abkhaz — huge consonant inventory), Quechuan, Romance, Semitic, Sinitic, Slavic, Tai-Kadai,
 Tibeto-Burman, Tupian, Turkic, Uralic and Portuguese- & English-lexified creoles — across Latin, Tifinagh, Adlam, N'Ko, Greek, Cyrillic,
 Mongolian (Mongol bichig), Georgian (Mkhedruli), Armenian, Hebrew, Arabic and the extended Perso-Arabic (Persian,
 Urdu/Shahmukhi, Sindhi), Geʽez, Devanagari, Bengali (+ Assamese Eastern-Nagari), Syloti Nagri, Gurmukhi, Gujarati,
@@ -99,6 +99,7 @@ outstanding?* — lives in [`docs/language-maturity.md`](docs/language-maturity.
 | Mongolic | Mongolian `mn` (Khalkha) |
 | Niger-Congo | Akan `ak` (tonal, Kwa), Bambara `bm` (Mande; Latin + N'Ko), Chichewa `nya`, Ewe `ee` (Gbe, Kwa; labial-velars, ƒ/ʋ bilabials, toneless), Fula `ff` (Atlantic; Latin + Adlam), Igbo `ig` (tonal), Kamba `kam`, Kikuyu `ki`, Kinyarwanda `rw`, Kirundi `rn`, Lingala `ln` (tonal), Luganda `lg`, Mossi `mos` (Gur), Sepedi `nso`, Sesotho `st`, Setswana `tn`, Shona `sn`, Swahili `sw`, Umbundu `umb`, Wolof `wo` (Atlantic), Xhosa `xh`, Yoruba `yo` (tonal), Zulu `zu` |
 | Nilotic | Luo `luo` (Dholuo; Western Nilotic — the dental/alveolar contrast, prenasalised stops; ±ATR + tone unwritten) |
+| Northwest Caucasian | Abkhaz `ab` (аҧсуа; the fleet's **first NW-Caucasian language** — one of the world's largest consonant inventories with ~58 consonants, only 2 vowels; ⟨ь⟩ palatalizes / ⟨ә⟩ labializes / ⟨'⟩ pharyngealizes) |
 | Quechuan | Quechua `qu` (Southern Quechua / Runasimi; 3-vowel system, overt three-way stop series plain/aspirated/ejective, uvular `q`, penultimate stress) |
 | Romance | Catalan `ca`, French `fr` (+ `fr-CA` Québécois), Galician `gl`, Italian `it`, Portuguese `pt` (+ `pt-BR`), Romanian `ro` + Aromanian `rup` (Balkan Romance; digraphs ts/dz/sh/nj/lj, dh/th interdentals, ã→ə), Spanish `es` (+ `es-419` Latin-American), Occitan `oc` (Languedocien), Asturian `ast` |
 | Semitic | Amharic `am`, Tigrinya `ti`, Arabic `ar` (MSA) + Egyptian `arz`, N. Levantine `apc`, S. Levantine `ajp`, Iraqi `acm`, Gulf `afb`, Hijazi `acw`, Sudanese `apd`, Moroccan `ary`, Libyan `ayl`, Hebrew `he`, Maltese `mt` |
