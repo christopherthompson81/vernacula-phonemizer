@@ -144,13 +144,29 @@ function egyptianLexicon(): ReadonlyMap<string, string> {
 }
 const HARAKAT = /[ً-ْٰـ]/gu; // short-vowel diacritics + dagger-alif + tatweel → bare lexicon key
 
-// Structural delimiters that can never occur in an IPA value. The lexicon is MINED from kaikki, and the
-// extraction once emitted a Wiktionary entry's phonemic and phonetic transcriptions glued together —
-// كتب → "katab/[kˈatab" — which then reached the output verbatim as a "phoneme" (issue #550). The data is
-// repaired, but a re-mine could reintroduce it, so a malformed row is now DROPPED at load: the word simply
-// falls through to the rule g2p, which is a correct-if-unrefined reading rather than punctuation in the IPA.
+// The lexicon is MINED from kaikki, and the extraction once emitted a Wiktionary entry's phonemic and
+// phonetic transcriptions glued together — كتب → "katab/[kˈatab" — which reached the output verbatim as a
+// "phoneme" (issue #550). The data is repaired; this guard keeps a re-mine from reintroducing it.
+//
+// It REPAIRS rather than drops. Dropping would be wrong here specifically: this lexicon exists to supply
+// EGYPTIAN short vowels, and without a hit the word falls back to the abjad rule path or the MSA neural
+// diacritizer — which restores MSA vowels that are wrong for Egyptian (مصر MSA miṣr vs Egyptian maṣr).
+// So a dropped row does not degrade to "unrefined", it degrades to "incorrect vowels". Recovering an
+// alternant keeps the vocalization.
+//
+// Selection mirrors the one used to repair the data: of the alternants, prefer the single stressed one
+// (the file header states entries carry "stress on the nucleus"), else the first. Only a value still
+// holding a delimiter after that is unusable and dropped.
+const VARIANT_SPLIT = /\/~\/|\/\/|\/\[/u;
 const NOT_IPA = /[/[\]~()|\\]/u;
-const ipaOnly = (value: string): string | undefined => (NOT_IPA.test(value) ? undefined : value);
+/** Exported for tests: the load-time repair rule for a mined lexicon value (see the note above). */
+export const ipaOnly = (value: string): string | undefined => {
+    if (!NOT_IPA.test(value)) return value;
+    const parts = value.split(VARIANT_SPLIT).filter(Boolean);
+    const stressed = parts.filter((p) => p.includes("ˈ"));
+    const pick = stressed.length === 1 ? stressed[0]! : parts[0];
+    return pick !== undefined && !NOT_IPA.test(pick) ? pick : undefined;
+};
 
 class ArabicPhonemizer implements Phonemizer {
     constructor(

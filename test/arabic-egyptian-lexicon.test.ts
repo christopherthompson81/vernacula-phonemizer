@@ -13,7 +13,7 @@
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
-import { createArabic } from "../src/languages/arabic/arabic.ts";
+import { createArabic, ipaOnly } from "../src/languages/arabic/arabic.ts";
 
 const arz = createArabic("egyptian", true);
 // word → shipped Egyptian IPA (from the lexicon). Egyptian vowels the MSA path gets wrong.
@@ -67,6 +67,19 @@ describe("Egyptian lexicon — no annotation artifacts (#550)", () => {
             if (ipa && DELIMITER.test(ipa)) bad.push(`${w} → ${ipa}`);
         }
         expect(bad, `malformed rows:\n${bad.join("\n")}`).toEqual([]);
+    });
+
+    // The guard REPAIRS rather than drops, and that distinction matters here: this lexicon exists to supply
+    // EGYPTIAN short vowels. A dropped row falls back to the abjad rule path or the MSA diacritizer, which
+    // restores MSA vowels that are WRONG for Egyptian — so dropping would degrade to "incorrect vowels",
+    // not merely "unrefined". Recovering an alternant keeps the vocalization.
+    it("repairs a malformed value at load instead of dropping the vocalization", () => {
+        expect(ipaOnly("katab/[kˈatab")).toBe("kˈatab"); // prefer the single stressed alternant
+        expect(ipaOnly("ʃˈarː/[ʃar")).toBe("ʃˈarː"); // ...whichever side it is on
+        expect(ipaOnly("sakːˈiːna//saˈkːiːna")).toBe("sakːˈiːna"); // both stressed → first
+        expect(ipaOnly("p/~/b")).toBe("p"); // neither stressed → first
+        expect(ipaOnly("kˈatab")).toBe("kˈatab"); // a clean value is untouched
+        expect(ipaOnly("x(y)")).toBeUndefined(); // genuinely unusable → dropped
     });
 
     it("emits a single clean transcription for the reported words", () => {
