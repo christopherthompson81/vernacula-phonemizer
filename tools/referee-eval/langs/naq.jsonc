@@ -1,0 +1,16 @@
+// Nama / Khoekhoe (naq) — Khoe-Kwadi, the Khoekhoegowab LATIN orthography (with the Unicode click letters). The
+// fleet's FIRST click language. Referee: English Wiktionary "Khoekhoe terms with IPA pronunciation" (46; dominated
+// by the click-letter definitions). See docs/investigations/naq_native_bringup_investigation.md.
+{
+    "language": "naq",
+    "name": "Nama (Khoekhoe)",
+    "script": "Latin",
+    "provenance": "Authored Khoekhoegowab→IPA click scan: 4 click TYPES ǀ ǁ ǂ ǃ × ACCOMPANIMENTS (bare→ᵑ̊_ˀ glottalised nasal, g→ᵏ_ tenuis, kh→ᵏ_ʰ aspirated, h→ᵑ̊_ʰ, n→ᵑ_ voiced nasal), kh→kʰ, final -b→p devoicing. Validated against the Wiktionary referee.",
+    "referees": [
+        { "file": "naq.wiktionary-khoekhoe.tsv", "source": "English Wiktionary 'Khoekhoe terms with IPA pronunciation' (literal human {{IPA|naq|…}}, 46 — mostly click-letter definitions)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 THIN + largely REFERENCE-PARITY — the 46-entry referee is DOMINATED by the click-letter DEFINITIONS (ǀ, ǀG, ǀh, ǀKh, ǀN… = the orthography→IPA spec we implement), so those matches are near-circular; the ~7 real words (ǀgama, ǀhao, ǁaub, ǂkhoab, ǃkhās, kharob, taras) are the independent check. No wikipron/kaikki/epitran naq. Nama's TONE is unwritten → folded.",
+    "folds": [
+        { "pattern": "-", "replace": "", "note": "the referee's morpheme/syllable hyphen (tàra̋-s)" }
+    ]
+}
