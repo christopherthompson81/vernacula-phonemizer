@@ -110,6 +110,7 @@ import { createCrimeanTatar } from "./languages/crimeantatar/crimeantatar.ts";
 import { createPapiamento } from "./languages/papiamento/papiamento.ts";
 import { createNama } from "./languages/nama/nama.ts";
 import { createAromanian } from "./languages/aromanian/aromanian.ts";
+import { createAbkhaz } from "./languages/abkhaz/abkhaz.ts";
 import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -487,6 +488,9 @@ function build(lang: string): Phonemizer {
         // Aromanian (armãneashti) — Eastern/Balkan Romance, sibling of Romanian; digraphs ts/dz/sh/nj/lj, dh/th interdentals, ã→ə.
         case "rup":
             return createAromanian();
+        // Abkhaz (аҧсуа) — NW Caucasian; huge consonant inventory (labialized/palatalized/ejective/pharyngealized), 2 vowels.
+        case "ab":
+            return createAbkhaz();
         // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
         case "chv":
             return createChuvash();
