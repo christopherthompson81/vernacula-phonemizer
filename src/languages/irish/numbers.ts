@@ -18,6 +18,13 @@
  * decimal is what modern written Irish uses for bare figures, and every word here is attested in the wikipron
  * referee (ga.wikipron-gle-broad.tsv). See docs/investigations/ga_native_bringup_investigation.md.
  *
+ * KNOWN LIMITATION — a magnitude count in the TEENS. Idiomatic Irish puts `déag` after the counted noun:
+ * 11,000 is `aon mhíle dhéag`, not the `a haon déag míle` this emits. Implementing it needs the lenition
+ * rule for `déag` after each magnitude (mhíle dhéag, but chéad déag?), which the wikipron referee cannot
+ * corroborate — it has no `mhíle` entry and no multi-word numerals at all. Rather than guess at mutation
+ * rules with nothing to check them against, the composed-count form is emitted: unambiguous and
+ * understandable, just not idiomatic. Wants a native check or a grammar reference before changing.
+ *
  * NOT handled, deliberately: YEAR reading. 1998 as a year is colloquially `naoi déag nócha a hocht`
  * (pair-wise), but nothing in a bare digit string distinguishes a year from a quantity, so this always
  * produces the unambiguous cardinal `míle naoi gcéad nócha a hocht`, which is correct for both.
@@ -37,7 +44,8 @@ function lenite(w: string): string {
 const ECLIPSE: Record<string, string> = { c: "g", p: "b", t: "d", b: "m", d: "n", g: "n", f: "bhf" };
 function eclipse(w: string): string {
     const e = ECLIPSE[w[0]!.toLowerCase()];
-    return e === undefined ? w : (w[0]!.toLowerCase() === "g" ? "n" : e) + w;
+    return e === undefined ? w : e + w; // g → "n" + gcéad-style prefix, i.e. ng-
+
 }
 
 /** Mutate a magnitude word after the numeral `k`: 2–6 lenite, 7–10 eclipse, 1 (bare magnitude) unchanged. */
@@ -96,7 +104,11 @@ function compose(n: number): string {
 
 /** Non-negative integer → Irish words. Out-of-range/non-integer input falls back to digit-by-digit. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0) return [...String(n)].map((d) => ONES[Number(d)] ?? d).join(" ");
+    // Out of range → digit-by-digit over the DIGITS only; a stray "-" or "." must not reach the g2p as a word.
+    // (Unreachable from the text path — the tokenizer matches \d+ — but this is an exported entry point.)
+    if (!Number.isSafeInteger(n) || n < 0) {
+        return [...String(n)].filter((c) => c >= "0" && c <= "9").map((d) => ONES[Number(d)]!).join(" ");
+    }
     if (n === 0) return ONES[0]!; // náid — a bare zero takes no "a" particle
     return compose(n).replace(/\s+/g, " ").trim();
 }
