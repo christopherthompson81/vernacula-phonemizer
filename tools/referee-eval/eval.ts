@@ -16,6 +16,7 @@ import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
 import { phonemizeWord as gl } from "../../src/languages/galician/galician.ts";
 import { phonemizeWord as sl } from "../../src/languages/slovenian/slovenian.ts";
 import { phonemizeWord as lv } from "../../src/languages/latvian/latvian.ts";
+import { phonemizeWord as ltg } from "../../src/languages/latgalian/latgalian.ts";
 import { phonemizeWord as mk } from "../../src/languages/macedonian/macedonian.ts";
 import { phonemizeWord as et } from "../../src/languages/estonian/estonian.ts";
 import { phonemizeWord as kea } from "../../src/languages/kabuverdianu/kabuverdianu.ts";
@@ -224,6 +225,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     gl,
     sl,
     lv,
+    ltg,
     mk,
     et,
     kea,
