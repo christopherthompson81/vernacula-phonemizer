@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+import { numberToWords } from "../src/languages/irish/numbers.ts";
 import { phonemizeWord } from "../src/languages/irish/irish.ts";
 
 // Canonical-IPA goldens for Irish Gaelic (ga) — Standard/Connacht-leaning, espeak-independent. The defining
@@ -79,5 +81,50 @@ describe("irish canonical IPA", () => {
         expect(phonemizeWord("fada")).toBe("fˠˈad̪ˠə");
         expect(phonemizeWord("cara")).toBe("kˈaɾˠə");
         expect(phonemizeWord("obair")).toBe("ˈɔbˠəɾʲ"); // stress first syllable; 2nd (ai) → ə
+    });
+});
+
+// Irish numeral composition (#549). The Run-1 stub read every multi-digit number digit-by-digit
+// (25 → "dó cúig"). Irish needs a bespoke compositor: two numeral series (counting ceathair vs
+// attributive ceithre), the `a` particle, h-prefix on vowel-initial counting forms, and initial
+// mutation of the magnitude word (2–6 lenite, 7–10 eclipse). Every word below is attested in
+// ga.wikipron-gle-broad.tsv, including the mutated shapes céad/chéad/gcéad and déag/dhéag.
+describe("Irish numbers", () => {
+    for (const [n, expected] of [
+        [0, "náid"],                      // bare zero takes no particle
+        [1, "a haon"],                    // h-prefix on the vowel-initial counting form
+        [4, "a ceathair"],                // COUNTING series (not attributive ceithre)
+        [8, "a hocht"],
+        [11, "a haon déag"],
+        [12, "a dó dhéag"],               // déag lenites after dó ONLY
+        [13, "a trí déag"],
+        [20, "fiche"],
+        [25, "fiche a cúig"],             // the issue's headline case
+        [40, "daichead"],
+        [98, "nócha a hocht"],
+        [100, "céad"],                    // bare magnitude — no "aon"
+        [101, "céad a haon"],
+        [200, "dhá chéad"],               // 2–6 LENITE: céad → chéad
+        [400, "ceithre chéad"],           // ATTRIBUTIVE series before a magnitude
+        [700, "seacht gcéad"],            // 7–10 ECLIPSE: céad → gcéad
+        [1000, "míle"],
+        [2000, "dhá mhíle"],
+        [7000, "seacht míle"],            // m has no eclipsed form → bare
+        [1998, "míle naoi gcéad nócha a hocht"],
+        [999999, "naoi gcéad nócha a naoi míle naoi gcéad nócha a naoi"], // 3-digit magnitude count
+    ] as const) {
+        test(`${n} → ${expected}`, () => expect(numberToWords(n)).toBe(expected));
+    }
+
+    test("no digit-by-digit fallback, and no gaps, across 0..20000", () => {
+        for (let n = 0; n <= 20000; n++) {
+            const w = numberToWords(n);
+            expect(w, `n=${n}`).not.toMatch(/undefined|NaN|[0-9]/);
+        }
+    });
+
+    test("end-to-end: the numeral is phonemized, not spelled out digit-wise", () => {
+        expect(phonemize("25", "ga")).toBe("fʲˈɪçə ˈa kˈuːɟ"); // fiche a cúig
+        expect(phonemize("1998", "ga")).toContain("ɟˈeːd̪ˠ"); // gcéad — the ECLIPSED hundred
     });
 });

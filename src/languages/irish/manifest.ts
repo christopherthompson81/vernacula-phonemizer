@@ -14,7 +14,13 @@ export interface IrishManifest {
     lenition: Record<string, [string, string]>;
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
-    numbers: { ones: string[] };
+    numbers: {
+        ones: string[];
+        attributive: string[];
+        tens: Record<string, string>;
+        teenWord: string;
+        magnitudes: { hundred: string; thousand: string; million: string; billion: string };
+    };
 }
 
 /** The consolidated hand-authored Irish data tables (see irish.jsonc). */

@@ -43,7 +43,20 @@
     "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
 
     // Cardinal number words (0–10 + tens; the counting system is complex — Phase 2).
+    // Irish numerals. Two series are needed because Irish distinguishes the COUNTING form (used standalone and
+    // after the particle "a": a haon, a dó, a ceathair) from the ATTRIBUTIVE form used before a counted noun
+    // (aon, dhá, ceithre) — cf. ceathair vs ceithre, both attested in the wikipron referee. Magnitude words are
+    // counted attributively (dhá chéad, not *a dó chéad), which is why both lists exist.
     "numbers": {
         "ones": ["náid", "aon", "dó", "trí", "ceathair", "cúig", "sé", "seacht", "ocht", "naoi", "deich"],
+        "attributive": ["", "aon", "dhá", "trí", "ceithre", "cúig", "sé", "seacht", "ocht", "naoi", "deich"],
+        // Round tens. Decimal (an córas nua) rather than the traditional VIGESIMAL system (dhá fhichead etc.):
+        // the decimal series is what modern written Irish and school usage employ for bare figures.
+        "tens": {
+            "20": "fiche", "30": "tríocha", "40": "daichead", "50": "caoga",
+            "60": "seasca", "70": "seachtó", "80": "ochtó", "90": "nócha",
+        },
+        "teenWord": "déag",
+        "magnitudes": { "hundred": "céad", "thousand": "míle", "million": "milliún", "billion": "billiún" },
     },
 }
