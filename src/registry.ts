@@ -107,6 +107,7 @@ import { createAlbanian } from "./languages/albanian/albanian.ts";
 import { createTurkmen } from "./languages/turkmen/turkmen.ts";
 import { createTatar } from "./languages/tatar/tatar.ts";
 import { createTotontepecMixe } from "./languages/totontepecmixe/totontepecmixe.ts";
+import { createCherokee } from "./languages/cherokee/cherokee.ts";
 import { createSantali } from "./languages/santali/santali.ts";
 import { createKichee } from "./languages/kiche/kiche.ts";
 import { createBashkir } from "./languages/bashkir/bashkir.ts";
@@ -480,6 +481,9 @@ function build(lang: string): Phonemizer {
             return createTatar();
         case "mto":
             return createTotontepecMixe();
+        // Cherokee (ᏣᎳᎩ ᎦᏬᏂᎯᏍᏗ) — Iroquoian, the Cherokee syllabary; deterministic 85-char CV lookup, phonemically voiceless obstruents (aspiration-not-voicing), ⟨v⟩→ə̃; tone/length/aspiration/glottal unwritten (folded).
+        case "chr":
+            return createCherokee();
         case "nog":
             return createNogai();
         // Latin (Classical, Vox Latina) — Italic; macron length, short-vowel laxing, c→k, v→w, qu→kʷ, x→ks, final -Vm→Ṽː.

@@ -1,0 +1,39 @@
+// Cherokee (chr) — Iroquoian, the CHEROKEE SYLLABARY (Sequoyah). AUTHORED from Montgomery-Anderson, *Cherokee,
+// A Reference Grammar of Oklahoma* (the falsifiable published phonology). The syllabary is a SHALLOW PHONEMIC
+// SKELETON (grammar §4): it does NOT differentiate aspiration (EXCEPT the split cells ga/ka, da/ta, de/te,
+// di/ti, dla/tla), and never marks tone, vowel length, the glottal stop, or the intrusive /h/. So the engine
+// recovers the SEGMENTAL melody only; the 6 tones, length, most aspiration, glottalisation and intrusive-h are
+// the folded residual — SYMBOL accuracy is the honest headline (the Scottish-Gaelic / Faroese pattern in the
+// extreme). The eval BACKBONE already strips tone accents (U+0300–036F), length, tie-bars, the nasal tilde and
+// the voiceless ring on both sides; the folds below neutralise what remains.
+{
+    "language": "chr", "name": "Cherokee (ᏣᎳᎩ)", "script": "Cherokee",
+    "provenance": "Authored from Montgomery-Anderson (A Reference Grammar of Oklahoma): the 85-char syllabary Table 13, 6 vowels a e i o u + ⟨v⟩→[ə̃], 23 consonants with PHONEMICALLY VOICELESS obstruents (aspiration-not-voicing contrast) — g/d/ts/tl/qu series → unaspirated [k t t͡s t͡ɬ kʷ], aspirated split-cells (Ꭷ→kʰ, Ꮤ/Ꮦ/Ꮨ→tʰ) → the richer form. The syllabary marks no tone/length/aspiration/glottal/intrusive-h.",
+    "segmentJoin": true,
+    "referees": [
+        { "file": "chr.wikipron-broad.tsv", "source": "wikipron chr_cher_broad (183, HUMAN, broad, space-separated segments, full prosody) — INDEPENDENT PRIMARY", "role": "primary" },
+        { "file": "chr.kaikki.tsv", "source": "kaikki Cherokee (179, HUMAN, Wiktionary /.../ with tone+length) — INDEPENDENT SECONDARY", "role": "secondary" }
+    ],
+    "folds": [
+        { "pattern": "⁽", "replace": "", "note": "wikipron parenthesised-optional aspiration bracket" },
+        { "pattern": "⁾", "replace": "", "note": "wikipron parenthesised-optional aspiration bracket" },
+        { "pattern": "ʰ", "replace": "", "note": "ASPIRATION: unwritten in the syllabary (our kʰ/tʰ split-cells + the referee's aspiration) — the aspiration/unaspiration contrast is not recoverable from the syllabary" },
+        { "pattern": "ʔ", "replace": "", "note": "GLOTTAL STOP: never written in the syllabary (grammar §4) — folded on both sides" },
+        { "pattern": "h", "replace": "", "note": "INTRUSIVE/ONSET h: the syllabary marks only onset h, folded together with the unpredictable intrusive/coda h — symmetric, so onset-h words still align; the h signal is sacrificed (disclosed)" },
+        { "pattern": "dʒ", "replace": "ts", "note": "VOICING (allophonic, unwritten): the unaspirated affricate is phonemically voiceless /t͡s/; kaikki + wikipron voice it intervocalically to [d͡ʒ] (tie-bar already stripped by the backbone)" },
+        { "pattern": "ɡʷ", "replace": "kʷ", "note": "VOICING: labialised velar [ɡʷ]→/kʷ/" },
+        { "pattern": "ɡ", "replace": "k", "note": "VOICING: velar [ɡ]→/k/ (phonemically voiceless)" },
+        { "pattern": "d", "replace": "t", "note": "VOICING: alveolar [d]→/t/ (phonemically voiceless)" },
+        { "pattern": "b", "replace": "p", "note": "VOICING: [b]→/p/ (rare, loans)" },
+        { "pattern": "z", "replace": "s", "note": "VOICING: [z]→/s/" },
+        { "pattern": "ʒ", "replace": "s", "note": "VOICING: [ʒ]→/s/" },
+        { "pattern": "ɮ", "replace": "ɬ", "note": "VOICING: voiced lateral affricate/fricative [d͡ɮ ɮ]→voiceless /t͡ɬ ɬ/ (the ⟨dla⟩ series, Ꮬ→d͡ɮa)" },
+        { "pattern": "tɬ", "replace": "ɬ", "note": "OKLAHOMA DEAFFRICATION (systematic, grammar Table 1/2 + ex.12): the aspirated lateral affricate [t͡ɬ] has shifted to the lateral fricative [ɬ] for most Oklahoma speakers; we emit a uniform [t͡ɬ] for the dla/tla row (the syllabary can't recover the split) and fold to [ɬ] (tie-bar already stripped by the backbone; runs after d→t and ɮ→ɬ so d͡ɮ→ɬ too)" },
+        { "pattern": "ʌ", "replace": "ə", "note": "the 6th vowel ⟨v⟩: wikipron transcribes it [ʌ], the grammar [ɔ̃] (nasalized mid-central, Table 3) — one phoneme, notation variant; our [ə̃] reaches [ə] via the backbone tilde-strip. NOTE: the ɔ→o fold below is for the /o/ vowel; a referee that wrote ⟨v⟩ the grammar's way as [ɔ̃] would collide with it (→[o] vs our [ə]) — harmless today (wikipron/kaikki use [ʌ]/[ə]) but a latent trap if the referee set changes" },
+        { "pattern": "ɰ", "replace": "w", "note": "wikipron notation: the /w/ glide is transcribed [ɰ]" },
+        { "pattern": "ʃ", "replace": "s", "note": "wikipron notation: /s/ palatalised before front vowels → [ʃ] (Cherokee has no /ʃ/ phoneme)" },
+        { "pattern": "ɔ", "replace": "o", "note": "wikipron notation: /o/ ~ [ɔ]" },
+        { "pattern": "ɑ", "replace": "a", "note": "kaikki notation: /a/ ~ [ɑ]" },
+        { "pattern": "\\.", "replace": "", "note": "kaikki syllable dot" }
+    ]
+}
