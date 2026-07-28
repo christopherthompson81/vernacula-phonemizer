@@ -89,3 +89,20 @@ and at ~500 words a mined lexicon is both circular and near-zero OOV coverage. *
 maturity is a LARGER, INDEPENDENT Amharic pronunciation corpus (better tail data), not rules or a tiny-referee
 lexicon.** 86.4% stands as the honest rule ceiling. Current policy (delete-in-legal-cluster, ≥3 final coda) is
 already the best-tested — left unchanged.
+
+## Addendum — 2026-07-28 — Stress: espeak marks it, we correctly do NOT (issue #548, closed invalid)
+
+A corpus-wide diff against espeak-ng over FLEURS flagged "Amharic emits no stress marks" (0% of `am_et`
+utterances vs espeak's 100%) and it was filed as #548. **Investigated and rejected — the omission is correct.**
+
+1. **Both human referees mark ZERO stress.** `am.wikipron-amh-broad.tsv` (478) and `am.kaikki-amh.tsv`
+   (437) — 915 independently transcribed entries, not one `ˈ`.
+2. **Amharic has no contrastive stress.** It is standardly described as having only weak, non-phonemic
+   prominence; there are no minimal pairs distinguished by stress.
+3. **espeak's marks carry no information.** Measured over the 53,447 stressed word-tokens in espeak's
+   `am_et` output, the mark is on the **first syllable 99.1%** of the time (syllable 1: 0.5%, 2: 0.4%).
+   That is a fixed positional default, not lexical knowledge — espeak is emitting a filler.
+
+Adding stress here would mean copying espeak's initial-syllable default into our output and contradicting
+915 human transcriptions. Recorded so this is not re-litigated the next time an espeak diff flags it:
+**espeak marking a feature is not evidence the feature exists.**
