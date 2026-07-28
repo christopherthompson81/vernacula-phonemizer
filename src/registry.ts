@@ -107,6 +107,7 @@ import { createBashkir } from "./languages/bashkir/bashkir.ts";
 import { createBasque } from "./languages/basque/basque.ts";
 import { createKarakalpak } from "./languages/karakalpak/karakalpak.ts";
 import { createCrimeanTatar } from "./languages/crimeantatar/crimeantatar.ts";
+import { createPapiamento } from "./languages/papiamento/papiamento.ts";
 import { createChuvash } from "./languages/chuvash/chuvash.ts";
 import { createEwe } from "./languages/ewe/ewe.ts";
 import { createLatin } from "./languages/latin/latin.ts";
@@ -475,6 +476,9 @@ function build(lang: string): Phonemizer {
         // Crimean Tatar (qırımtatar tili) — Kipchak+Oghuz Turkic, Turkish-based Latin; written uvular q/ğ, front-back harmony, c→d͡ʒ, ñ→ŋ, final stress.
         case "crh":
             return createCrimeanTatar();
+        // Papiamentu (pap) — Iberian-lexified creole of the ABC islands; coda-n vowel nasalization, digraphs ch/sh/dj, open vowels è ò ù.
+        case "pap":
+            return createPapiamento();
         // Chuvash (Чӑвашла) — the sole surviving Oghur Turkic; allophonic intervocalic/post-nasal voicing, geminate-blocking, reduced-vowel ⟨ӑ ӗ⟩ stress.
         case "chv":
             return createChuvash();
