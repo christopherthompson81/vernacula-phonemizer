@@ -137,12 +137,20 @@ const toAscii = (d: string): string =>
 let egyptianLex: ReadonlyMap<string, string> | undefined;
 function egyptianLexicon(): ReadonlyMap<string, string> {
     if (egyptianLex === undefined)
-        egyptianLex = loadTsvMap(import.meta.url, "egyptian-lexicon.tsv", undefined, {
+        egyptianLex = loadTsvMap(import.meta.url, "egyptian-lexicon.tsv", ipaOnly, {
             optional: true,
         });
     return egyptianLex;
 }
 const HARAKAT = /[ً-ْٰـ]/gu; // short-vowel diacritics + dagger-alif + tatweel → bare lexicon key
+
+// Structural delimiters that can never occur in an IPA value. The lexicon is MINED from kaikki, and the
+// extraction once emitted a Wiktionary entry's phonemic and phonetic transcriptions glued together —
+// كتب → "katab/[kˈatab" — which then reached the output verbatim as a "phoneme" (issue #550). The data is
+// repaired, but a re-mine could reintroduce it, so a malformed row is now DROPPED at load: the word simply
+// falls through to the rule g2p, which is a correct-if-unrefined reading rather than punctuation in the IPA.
+const NOT_IPA = /[/[\]~()|\\]/u;
+const ipaOnly = (value: string): string | undefined => (NOT_IPA.test(value) ? undefined : value);
 
 class ArabicPhonemizer implements Phonemizer {
     constructor(
