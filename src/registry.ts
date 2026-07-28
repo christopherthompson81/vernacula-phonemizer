@@ -34,6 +34,7 @@ import { createSwedish } from "./languages/swedish/swedish.ts";
 import { createCatalan } from "./languages/catalan/catalan.ts";
 import { createGalician } from "./languages/galician/galician.ts";
 import { createIrish } from "./languages/irish/irish.ts";
+import { createScottishGaelic } from "./languages/scottishgaelic/scottishgaelic.ts";
 import { createWelsh } from "./languages/welsh/welsh.ts";
 import { createHausa } from "./languages/hausa/hausa.ts";
 import { createThai } from "./languages/thai/thai.ts";
@@ -264,6 +265,8 @@ function build(lang: string): Phonemizer {
         // (⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ no jota, ⟨nh⟩→ŋ, coda/pre-velar ⟨n⟩→ŋ).
         case "gl":
             return createGalician();
+        case "gd":
+            return createScottishGaelic();
         case "ga":
             return createIrish();
         case "cy":

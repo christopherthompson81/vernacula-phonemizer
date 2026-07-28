@@ -1,0 +1,28 @@
+// Scottish Gaelic (gd) — Goidelic Celtic (sibling of Irish), the broad/slender axis + SG pre-aspiration. Referee:
+// wikipron gla_latn_broad (HUMAN, 6000) — but MULTI-DIALECT (4+ transcriptions per headword), so the folded % is
+// deflated (our single output matches only one variant) → the SYMBOL accuracy is the honest signal (the Irish
+// situation). Following the Irish convention, the broad/slender marks (ˠ ʲ) are KEPT (the core contrast); the
+// folds normalise the multi-dialect VOWEL-quality noise + the lenis-stop devoicing-ring notation.
+{
+    "language": "gd", "name": "Scottish Gaelic (Gàidhlig)", "script": "Latin",
+    "provenance": "Authored broad/slender g2p + pre-aspiration, from SG orthography + the wikipron gla_latn_broad phonology. Multi-dialect referee cross-check (the Irish situation).",
+    "segmentJoin": false,
+    "referees": [
+        { "file": "gd.wikipron-broad.tsv", "source": "wikipron gla_latn_broad (human, multi-dialect)", "role": "primary" }
+    ],
+    "secondaryGap": "🔷 single-source family (wikipron; kaikki gd same Wiktionary source). The referee is MULTI-DIALECT (4+ transcriptions per word) → the folded % has a low ceiling (like Irish's ~34%); symbol accuracy is the honest signal.",
+    "folds": [
+        { "pattern": "ˠ", "replace": "", "note": "VELARIZATION of the broad coronals (l̪ˠ n̪ˠ rˠ): the multi-dialect referee marks it very variably — strip it; the broad/slender CONTRAST survives via the dental/ʲ/segment identity (s̪ vs ʃ, kʲ vs k, ɲ vs n̪, ɾʲ vs r)" },
+        { "pattern": "\\u0325", "replace": "", "note": "voiceless RING (b̥ d̪̊ ɡ̊): the referee writes the lenis stops with a devoicing ring — strip it before the voiced→voiceless fold below" },
+        { "pattern": "ɡ", "replace": "k", "note": "⟨b d g⟩ are UNASPIRATED LENIS [p t̪ k] in SG — the referee writes them voiced (ɡ̊) or voiceless (k) variably; we emit [p t̪ k] and never a voiced stop, so fold the referee's voiced series down" },
+        { "pattern": "b", "replace": "p", "note": "lenis ⟨b⟩ → [p] (see ɡ→k)" },
+        { "pattern": "d", "replace": "t", "note": "lenis ⟨d⟩ → [t̪] (see ɡ→k); with the dental bridge this matches our [t̪]" },
+        { "pattern": "\\u0303", "replace": "", "note": "NASALIZATION tilde (ã õ ũ near a nasal): a narrow allophonic detail marked variably — strip both sides" },
+        { "pattern": "[ɪi]", "replace": "i", "note": "short i/ɪ — the referee's coarse i vs our i (dialect + lax notation)" },
+        { "pattern": "[ʊu]", "replace": "u", "note": "short u/ʊ — coarse vs lax" },
+        { "pattern": "[əɐɤʌ]", "replace": "ə", "note": "reduced/unstressed vowel notation (ə/ɐ/ɤ/ʌ dialect variation)" },
+        { "pattern": "[ɑaæ]", "replace": "a", "note": "the multi-dialect a/ɑ/æ variation" },
+        { "pattern": "[ɛe]", "replace": "e", "note": "short e/ɛ dialect variation (the Irish ga.jsonc precedent). CAVEAT: SG /e/~/ɛ/ is arguably phonemic, so this fold DOES merge two short-vowel outputs the engine produces (⟨ea⟩→ɛ vs ⟨ei⟩→e) → it modestly inflates BOTH the folded and symbol %; the long counterparts (eː/ɛː) keep ː and survive the fold" },
+        { "pattern": "[ɔo]", "replace": "o", "note": "short o/ɔ dialect variation (Irish precedent). Same caveat as [ɛe]→e: merges the arguably-phonemic short /o/~/ɔ/ the engine emits → a modest inflation; the long oː/ɔː survive" }
+    ]
+}

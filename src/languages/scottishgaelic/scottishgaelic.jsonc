@@ -1,0 +1,46 @@
+// Native canonical-IPA data manifest for Scottish Gaelic / Gàidhlig (gd) — Goidelic Celtic (sibling of Irish),
+// ~57k (Scotland), Latin. espeak-independent. Shares Irish's BROAD/SLENDER axis ("caol le caol": a consonant is
+// velarized [Cˠ]/dental next to a/o/u, palatalized [Cʲ] next to e/i), but with the Scottish hallmarks:
+//   - PRE-ASPIRATION: medial/final fortis ⟨p t c⟩ → [hp ht̪ xk] (mac→maxk); initial → aspirated [pʰ t̪ʰ kʰ].
+//   - ⟨b d g⟩ → the UNASPIRATED lenis [p t̪ k] (NOT Irish's voiced [bˠ d̪ˠ ɡ]).
+//   - ⟨ao⟩ → [ɯː] (the signature vowel), ⟨eu⟩→[iaː].
+// ALGORITHMS in scottishgaelic.ts (scan + broad/slender + pre-aspiration + stress). See
+// docs/investigations/gd_native_bringup_investigation.md.
+{
+    "language": "gd",
+    "name": "Scottish Gaelic (Gàidhlig)",
+    "script": "Latin",
+    "provenance": "Authored from Scottish Gaelic orthography + the broad/slender system + the SG pre-aspiration/lenis-stop phonology (read off wikipron gla_latn_broad). Rule engine; the multi-dialect wikipron gla referee is a cross-check, not a tight guard (the Irish situation).",
+
+    // Slender-marking vowel LETTERS (e, i + accents) vs broad-marking (a, o, u + accents).
+    "slenderVowels": "eièéìí",
+    "broadVowels": "aouàòóùáú",
+
+    // Consonant → IPA, by quality. ⟨b d g⟩ = unaspirated lenis [p t̪ k]; ⟨p t c⟩ = fortis (aspirated ʰ →
+    // pre-aspirated medially, done in code). Labials do NOT palatalize (slender b/m/f/p same as broad).
+    "broad": {
+        "b": "p", "c": "kʰ", "d": "t̪", "f": "f", "g": "k", "h": "h", "l": "l̪ˠ", "m": "m",
+        "n": "n̪ˠ", "p": "pʰ", "r": "rˠ", "s": "s̪", "t": "t̪ʰ"
+    },
+    "slender": {
+        "b": "p", "c": "kʲʰ", "d": "tʲ", "f": "f", "g": "kʲ", "h": "h", "l": "lʲ", "m": "m",
+        "n": "ɲ", "p": "pʰ", "r": "ɾʲ", "s": "ʃ", "t": "tʲʰ"
+    },
+    // Lenited digraphs (séimhichte): [broad, slender]. "" = silent.
+    "lenition": {
+        "bh": ["v", "v"], "mh": ["v", "v"], "ch": ["x", "ç"], "dh": ["ɣ", "j"], "gh": ["ɣ", "j"],
+        "fh": ["", ""], "ph": ["f", "f"], "sh": ["h", "h"], "th": ["h", "h"]
+    },
+
+    // Vowel-cluster → IPA, matched LONGEST-first (the pronounced nucleus; consonant quality is set separately).
+    // Semi-lexical / dialect-variable — the Run-2+ residual.
+    "vowels": {
+        "aoi": "ɯː", "ao": "ɯː", "eu": "iaː", "èa": "iaː", "eòi": "jɔː", "eò": "jɔː", "eói": "joː",
+        "ia": "iə", "ua": "uə", "iu": "u", "io": "i", "eo": "jɔ", "iai": "iə",
+        "ai": "a", "ea": "ɛ", "ei": "e", "oi": "ɔ", "ui": "u", "ìo": "iː", "aidh": "ɤj",
+        "à": "aː", "è": "ɛː", "é": "eː", "ì": "iː", "ò": "ɔː", "ó": "oː", "ù": "uː", "á": "aː", "í": "iː", "ú": "uː",
+        "a": "a", "e": "e", "i": "i", "o": "ɔ", "u": "u"
+    },
+
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" }
+}
