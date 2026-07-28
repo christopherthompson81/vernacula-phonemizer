@@ -1,0 +1,27 @@
+// Native canonical-IPA data manifest for Hawaiian / ʻŌlelo Hawaiʻi (haw) — Austronesian (Eastern Polynesian,
+// sibling of Māori), Hawaiʻi (~24k). espeak-independent. ONE OF THE SIMPLEST phonologies in the world: 5 vowels
+// /a e i o u/ + the MACRON (kahakō) = LENGTH, and 8 consonants ⟨p k m n l h w⟩ + the ʻokina ⟨ʻ⟩→[ʔ]. A near-1:1
+// phonemic grapheme map, no digraphs. Loanwords adapt the non-Hawaiian letters to the nearest phoneme (t→k, s→k,
+// r→l, b→p, d/g→k, v→w …). Stress (penultimate, mora-based, unmarked) is not emitted. Engine: hawaiian.ts.
+// See docs/investigations/haw_native_bringup_investigation.md.
+{
+    "language": "haw",
+    "name": "Hawaiian (ʻŌlelo Hawaiʻi)",
+    "script": "Latin",
+
+    // Single grapheme → canonical IPA. The 5 vowels + their MACRON (long) forms; the 8 native consonants; the
+    // ʻOKINA ⟨ʻ⟩ (and its ASCII/Unicode variants ' ʼ ‘ `) → the glottal stop [ʔ]; and the LOAN-LETTER adaptations
+    // (t/s/g/d/c/j/q/x/z→k, r→l, b/f→p, v→w, y→i) for foreign words.
+    "graphemes": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː",
+        "p": "p", "k": "k", "m": "m", "n": "n", "l": "l", "h": "h", "w": "w",
+        "ʻ": "ʔ", "'": "ʔ", "ʼ": "ʔ", "‘": "ʔ", "`": "ʔ", "ʔ": "ʔ",
+        "b": "p", "c": "k", "d": "k", "f": "p", "g": "k", "j": "k", "q": "k",
+        "r": "l", "s": "k", "t": "k", "v": "w", "x": "k", "y": "i", "z": "k"
+    },
+
+    "clausePunctuation": {
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
+    },
+}
