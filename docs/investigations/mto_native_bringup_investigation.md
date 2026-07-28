@@ -90,3 +90,26 @@ tocu̱nágu̱c→tokunaɣuk). Deleted a dead no-op branch.
 **Final: 🔷 authored from Crawford (SIL 1963), the fleet's FIRST Mixe-Zoquean. Severely referee-limited (3
 coarse ASJP words, inventory-only). The phonology (9 vowels + 6 allophonic rules) is Crawford-verified.** Full
 suite green, typecheck clean. Deferred: the underline phonation value, unmarked stress, numbers, an IPA referee.
+
+## Run 5 — Wikipedia cross-check (2026-07-28)
+
+User asked whether https://en.wikipedia.org/wiki/Totontepec_Mixe helps. It CORROBORATES and ADDS but does NOT
+overturn the Crawford engine, and it CONFLICTS with the referee's orthography on one letter (so it must not be
+blindly adopted). No code change warranted; two disclosures sharpened.
+- ★ **Underline residual RESOLVED (corroborated).** The article documents a **PHONATION contrast** — glottalized
+  / creaky vowels (/ḭ ə̰ o̰/) beside modal — exactly the reviewer's hypothesis for the underline (a̱ o̱ u̱). The
+  strip-and-disclose stays the conservative choice (we have no referee to place the creaky diacritic, and the
+  backbone folds U+0300–036F anyway), but the disclosure is now upgraded "likely" → "corroborated."
+- ★ **THREE-WAY LENGTH** (short / long-doubled / **OVERLONG**, written V'V). We model short vs long only; overlong
+  is a now-documented DEFERRAL (in our engine V'V currently parses as V + ʔ + V — a known limitation).
+- **Confirms ⟨ä⟩=/æ/.**
+- ⚠ **ORTHOGRAPHY-CONVENTION DIVERGENCE (do NOT adopt).** Wikipedia describes a DIFFERENT, modern 8-vowel
+  orthography+analysis: ⟨ï⟩=/ɨ/, ⟨ë⟩=/ə/, no ⟨ü ö⟩. Our Wiktionary referee lemmas use the Crawford-aligned
+  9-vowel convention where ⟨ë⟩=/ɨ/ — HARD-anchored by *këp* 'tree' = Crawford /kɨp/. Flipping ë→ə to match
+  Wikipedia would desync the engine from its own referee + goldens (*këp* breaks). Kept ours; disclosed.
+- **Wikipedia's intervocalic /p t k/→[β d ɡ] lenition** is a modern analysis that conflicts with Crawford's
+  narrower /d g/→[ð ɣ] (our endorsed anchor). Deferred, not adopted — it would rewrite unattested output we
+  cannot validate against any referee. Recorded as a 1963-vs-modern-analysis divergence.
+
+Deferred (updated): overlong (3rd) length, the underline creaky-phonation emission, the modern voiceless-stop
+lenition analysis, unmarked stress, numbers, an IPA referee.

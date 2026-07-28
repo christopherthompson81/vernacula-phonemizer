@@ -36,8 +36,10 @@ interface Seg { ph: string; vowel: boolean }
 
 /** One Totontepec Mixe word → canonical IPA. */
 export function phonemizeWord(word: string): string {
-    // Strip the UNDERLINE diacritic (U+0331/U+0332 — a modern orthographic mark absent from Crawford; its
-    // phonation value is unresolved → treated as the plain vowel, disclosed) AND the ACUTE/GRAVE stress marks
+    // Strip the UNDERLINE diacritic (U+0331/U+0332 — a modern orthographic mark absent from Crawford; it most
+    // likely marks a GLOTTALIZED/CREAKY phonation, corroborated by Wikipedia's documented glottalized-vowel
+    // series /ḭ ə̰ o̰/ — but with no referee to place the creaky diacritic we conservatively read it as the plain
+    // vowel, disclosed) AND the ACUTE/GRAVE stress marks
     // (U+0301/U+0300 — the orthography marks stress, which we do not emit; strip so the accented vowel is read,
     // not dropped), then re-compose (NFC).
     const t = word.normalize("NFD").toLowerCase().replace(/[̱̲́̀]/gu, "").normalize("NFC");
