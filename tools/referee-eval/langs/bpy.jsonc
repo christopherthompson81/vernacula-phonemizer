@@ -1,0 +1,33 @@
+// Bishnupriya Manipuri (bpy) — Eastern Indo-Aryan, Bengali / Eastern-Nagari script; the Bengali engine + Bengali
+// phoneme values, minus the ɔ→o height harmony. Referee: English Wiktionary "Bishnupriya Manipuri terms with IPA
+// pronunciation" (the ONLY source — no wikipron/kaikki/epitran bpy), 38 pairs, ~29 real words + ~9 single-letter
+// vowel definitions. 🔷 single-source, THIN — the % is a real signal on a small human sample, not a breadth claim.
+// Folds are notational: the referee's retroflex-tinged affricate ⟨ʈʃ⟩ for চ (we write t͡ʃ), diphthong offglide
+// marks, the dental bridge, ɪ~i / ʊ~u, and the ɔ~o mid-back inconsistency the thin referee shows.
+{
+    "referees": [
+        {
+            "file": "bpy.wiktionary-bpy.tsv",
+            "source": "English Wiktionary 'Bishnupriya Manipuri terms with IPA pronunciation' (human, MediaWiki API)",
+            "role": "primary"
+        }
+    ],
+    "secondaryGap": "There is no independent second Bishnupriya pronunciation corpus: wikipron ships no bpy, kaikki has no standalone extract, epitran has no bpy. The single referee is one English-Wiktionary category (38 pairs, ~9 of them single-letter vowel definitions = reference-parity). Thin but HUMAN.",
+    "segmentJoin": true,
+    "folds": [
+        { "pattern": "\\.", "replace": "", "note": "syllable-boundary dots (dil.li) — strip for segmental comparison" },
+        { "pattern": "\\u200d", "replace": "", "note": "stray ZWJ" },
+        { "pattern": "\\u032F", "replace": "", "note": "non-syllabic offglide mark (ɔɪ̯, u̯) — a narrow diphthong detail we don't render" },
+        { "pattern": "\\u032A", "replace": "", "note": "DENTAL bridge below (t̪ d̪): we mark the dental series, the referee doesn't — normalise both sides" },
+        { "pattern": "͡", "replace": "", "note": "affricate tie-bar" },
+        { "pattern": "ʈʃ", "replace": "tʃ", "note": "চ/ছ: the referee writes a RETROFLEX-tinged affricate ⟨ʈʃ ʈʃʰ⟩; the Bishnupriya affricate is post-alveolar [t͡ʃ] (Bengali) — normalise the place notation" },
+        { "pattern": "r", "replace": "ɾ", "note": "⟨র⟩ rhotic: the referee writes the plain trill [r] (and [r] for vocalic ঋ→ri); our tap is [ɾ] — one phoneme, normalise" },
+        { "pattern": "([lmnptkɡbʃɾd])\\1", "replace": "$1", "note": "GEMINATE: the referee writes a doubled consonant (দিল্লী dil.li → ll); our length mark (lː) is stripped by the backbone → collapse the referee's doubling to a single consonant to match" },
+        { "pattern": "([bdɡ])ʰ", "replace": "$1ʱ", "note": "the VOICED aspirates ⟨ঘ ঝ ধ ভ⟩ are breathy-voiced [ʱ]; the referee marks the breath with the voiceless ʰ (dʰula) — normalise to the breathy ʱ" },
+        { "pattern": "([aeɔou])j", "replace": "$1i", "note": "a word-medial/final ⟨য়⟩/⟨ই⟩ after a vowel is a diphthong OFFGLIDE (ছয়→t͡ʃʰɔi, নয়→nɔi); we render the glide [j] — normalise the post-vocalic glide to the offglide vowel [i]" },
+        { "pattern": "h", "replace": "ɦ", "note": "⟨হ⟩ is the VOICED glottal fricative [ɦ]; the referee writes the plain [h] (pahaɽ) — one phoneme" },
+        { "pattern": "ɪ", "replace": "i", "note": "the close front vowel ⟨ই⟩/offglide [i]~[ɪ] (tɪn~tin) — one phoneme" },
+        { "pattern": "ʊ", "replace": "u", "note": "the close back vowel [u]~[ʊ] — one phoneme" },
+        { "pattern": "ɑ", "replace": "a", "note": "the low vowel [a]~[ɑ] (makorʃɑ) — normalise" }
+    ]
+}
