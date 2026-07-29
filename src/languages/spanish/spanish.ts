@@ -3,6 +3,7 @@
  * spirantization + rule-based stress; no lexicon. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -81,9 +82,18 @@ function wordIpa(word: string): string {
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
+// #562 symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["por ciento"],
+    currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"] },
+    units: { km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
+        kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
+    magnitudes: ["millones", "millón"],
+});
+
 class SpanishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1]));
             else if (m[2])
                 sink.emit(

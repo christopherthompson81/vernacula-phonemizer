@@ -4,6 +4,7 @@
  * text() tokenizes words / numbers / punctuation. See docs/investigations/cs_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments } from "./g2p.ts";
@@ -52,9 +53,18 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([A-Za-zÁáČčĎďÉéĚěÍíŇňÓóŘřŠšŤťÚúŮůÝýŽž]+)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Czech, with the Slavic three-way agreement (1 procento / 2 procenta / 5 procent).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["procento", "procenta", "procent"],
+    currency: { "€": ["euro", "eura", "eur"], "$": ["dolar", "dolary", "dolarů"], "£": ["libra", "libry", "liber"] },
+    units: { km: ["kilometr", "kilometry", "kilometrů"], cm: ["centimetr", "centimetry", "centimetrů"],
+        mm: ["milimetr", "milimetry", "milimetrů"], kg: ["kilogram", "kilogramy", "kilogramů"] },
+    countForm: slavicCountForm,
+});
+
 class CzechPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

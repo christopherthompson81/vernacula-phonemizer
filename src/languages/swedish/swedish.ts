@@ -7,6 +7,7 @@
  * validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts). See docs/investigations/sv_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Compound } from "./g2p.ts";
@@ -115,10 +116,18 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([a-zåäöéA-ZÅÄÖÉ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["procent"],
+    currency: { "€": ["euro"], "$": ["dollar"], "£": ["pund"] },
+    units: { km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], kg: ["kilogram"] },
+    magnitudes: ["miljoner", "miljon", "miljarder", "miljard"],
+});
+
 class SwedishPhonemizer implements Phonemizer {
     text(input: string): string {
         // NFC first so decomposed å/ä/ö/é tokenize as single letters (the TOKEN class matches only precomposed).
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input).normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);

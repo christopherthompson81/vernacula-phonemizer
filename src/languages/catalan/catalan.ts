@@ -5,6 +5,7 @@
  * default (lexical ceiling). See docs/investigations/ca_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Seg } from "./g2p.ts";
@@ -208,9 +209,18 @@ function wordIpa(word: string): string {
     return phonemizeWord(word, true);
 }
 
+// #562 symbol normalization — Catalan.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["per cent"],
+    currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"] },
+    units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],
+        kg: ["quilogram", "quilograms"] },
+    magnitudes: ["milions", "milió"],
+});
+
 class CatalanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1]));
             else if (m[2]) sink.emit(numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "));
             else if (m[3]) {

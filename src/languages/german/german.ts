@@ -5,6 +5,7 @@
  * punctuation. See docs/investigations/de_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
@@ -381,9 +382,17 @@ function guessUnstressedPrefix(w: string): boolean {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — German words (Prozent/Euro/Kilometer are invariant plurals).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["Prozent"],
+    currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
+    units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"] },
+    magnitudes: ["Millionen", "Million", "Milliarden", "Milliarde"],
+});
+
 class GermanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
