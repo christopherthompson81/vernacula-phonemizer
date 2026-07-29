@@ -1,4 +1,6 @@
 # Hebrew (he) pronunciation lexicon — skeleton (unvocalized) <TAB> niqqud (vocalized). A LOOKUP layer for the
+# Phase-A wordlist: a Hebrew Wikipedia frequency ranking (hewiki dump, CC-BY-SA — ranking only; the niqqud
+# content is Phonikud output validated by ReNikud, both CC-BY — see tools/hebrew/build-lexicon.py).
 # neural path: a known skeleton renders via phonemizeWord(niqqud) — i.e. through OUR g2p, so it auto-tracks our
 # canonical convention (the glottal rule etc.). OOV words + HOMOGRAPHS fall through to the context tagger.
 # Built (tools/hebrew/build-lexicon.py): Phonikud's diacritization of the frequency list, VALIDATED where our

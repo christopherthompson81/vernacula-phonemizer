@@ -10,7 +10,7 @@ each source raises token-coverage.
 Layers (cumulative): wikipron reference → +kaikki → +Hindi→Urdu · and the LABELED lexicon (what we can vocalize
 today = harakat.<lang>.silver.tsv). Reports TOKEN coverage (freq-weighted, = production reality) and TYPE coverage.
 
-  curl OpenSubtitles freq lists → /tmp/freq_{ur,fa}.txt ; python3 coverage_eval.py
+  curl hermitdave FrequencyWords (OpenSubtitles token-frequency lists, CC-BY-SA) → /tmp/freq_{ur,fa}.txt ; python3 coverage_eval.py
 """
 import os
 import re

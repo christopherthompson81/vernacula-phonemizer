@@ -1,6 +1,6 @@
 # Arabic diacritizer model — provenance
 
-The neural Arabic diacritizer (`diacritizer.onnx`, gitignored) restores short vowels on bare Arabic as an
+The neural Arabic diacritizer (`diacritizer.onnx`, tracked in git) restores short vowels on bare Arabic as an
 async pre-pass before the g2p. It is a **permissively-sourced** model, built to avoid any non-commercial or
 copyleft encumbrance at the source.
 
@@ -28,7 +28,7 @@ unlearn. So the maximally-clean model is also the best one — no provenance-vs-
 
 Offline GPU pipeline (not in CI), staged on `/mnt/data/ar-diac`: download the arwiki dump → extract Arabic
 sentences → `catt_silver.py` (CATT → silver) → `train_bilstm_sent.py --pausal 1` (silver-only, no `--resume`)
-→ `export_onnx.py` → int8 `quantize_dynamic`. The `.onnx` is gitignored; `diacritizer.meta.json` (char/label
+→ `export_onnx.py` → int8 `quantize_dynamic`. The `.onnx` is tracked in git alongside `diacritizer.meta.json` (char/label
 maps) is committed beside it.
 
 ## Licence posture

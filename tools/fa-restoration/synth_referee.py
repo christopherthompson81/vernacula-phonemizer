@@ -2,7 +2,12 @@
 """Synthesize a CLEAN non-circular referee by cross-source AGREEMENT: pool citation pronunciations from 3 INDEPENDENT
 sources (wikipron-fas / GE2PE Kasre+Homograph / FarsDat), each normalized to our IPA, and keep a word's pronunciation
 only where >=2 independent sources agree. Agreement filters each source's idiosyncratic convention noise (classical
-register, speech-corpus hamza, ق/غ) — what survives is convention-neutral truth. Then eval the tagger on it."""
+register, speech-corpus hamza, ق/غ) — what survives is convention-neutral truth. Then eval the tagger on it.
+PROVENANCE NOTE (2026-07-29): the FarsDat voter's acquisition path and license are unrecorded — the
+derived fa.synth-agreement.tsv is EVAL-ONLY (validation gold for build_pin.py; not wired into
+referee-eval; no shipped content derives from it). Do not promote it to a content source or referee
+without resolving the FarsDat terms.
+"""
 import sys, csv
 from collections import defaultdict, Counter
 import onnxruntime as ort, numpy as np, json
