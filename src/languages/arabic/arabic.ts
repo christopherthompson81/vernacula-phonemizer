@@ -242,6 +242,10 @@ function restoreLex(): ReadonlyMap<string, string> {
 //   selected by measuring both documented templates (Broselow's after-first vs after-second) against 57
 //   attested loanword transcriptions; after-first scored higher (booking → bukinɡ, not bukniɡ).
 // Both passes no-op on any legally-syllabified word, so native output is untouched by construction.
+// CAVEAT for future variety work: Moroccan (ary) legitimately allows heavy clusters in real Darija (ktbt).
+// Today that is moot — every variety runs the MSA diacritizer first, so ary output arrives vocalized and
+// the repair never fires on it (كتبت → kutˈibat). If ary ever gains true schwa-deletion, gate this repair
+// per variety (or raise its run threshold for ary) BEFORE shipping that change.
 const REPAIR_VOWELS = new Set([..."aeiouɑɐæəɛɔʊɪ"]);
 const REPAIR_SKIP = new Set([..."ˈˌːˤ\u0651\u0640"]);
 
