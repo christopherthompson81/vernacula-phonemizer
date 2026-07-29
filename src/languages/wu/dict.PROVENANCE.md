@@ -10,9 +10,13 @@ Han → Wugniu (zaonhe romanization) readings, 101,308 entries: **11,714 single-
 - **Tones are derived, not sourced** (the zaonhe dict carries no tone digits): citation tone from onset register
   + checked coda, with the 陰平/陰去 split recovered from each character's Middle Chinese tone category (via Unihan
   `kCantonese`); sandhi melody from the 廣用式 register 2-melody (compositional on σ1's register + syllable count).
-- **License:** rime-wugniu carries **no license**. Used as functionally-reliable data (the same basis as the
-  espeak-ng-portable `wuu` bring-up, which ships it publicly). Simplified↔traditional folds via OpenCC
-  `STCharacters` (Apache-2.0).
+- **License:** **GPL-3.0** (CORRECTED 2026-07-29 — the bring-up note "rime-wugniu carries no license" was
+  wrong: github.com/rime/rime-wugniu has carried a GPL-3.0 LICENSE since 2012-07-26; it was missed during
+  authoring). This derived `dict.tsv` is therefore distributed under **GPL-3.0** — the file is its own
+  source, satisfying the source-availability condition. The runtime that reads it is not thereby GPL
+  (data consumption at runtime is not linking/derivation); see docs/PROVENANCE.md §4.5 for the fence and
+  the kaikki-rebuild fallback if a GPL data file is unwanted in the shipped set. Simplified↔traditional
+  folds via OpenCC `STCharacters` (Apache-2.0).
 
 Format: `<han-word>\t<wugniu-syllable+tonedigit> [<syllable+tonedigit> …]`. The runtime (`wu.ts`) segments Han by
 greedy longest match over these keys and maps each Wugniu syllable → IPA via `wu.jsonc`.

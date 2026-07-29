@@ -143,9 +143,14 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
    list (CC-BY-NC) was replaced by a 53,344-word union rebuilt from afwiki (freq ≥ 25) +
    hermitdave OpenSubtitles + kaikki headwords — all CC-BY-SA (→ §3 fence). Referee eval
    unchanged (74.7% folded backbone); see `src/languages/afrikaans/af-stems.PROVENANCE.md`.
-5. **rime-wugniu → `wu/dict.tsv` (101k entries)** — upstream has **no license**; "espeak-ng-portable
-   ships it" is precedent, not a grant. **Blocker for clean publication**: open an issue upstream
-   asking for a license (rime siblings are CC-BY/LGPL), or drop/replace the Wu dictionary.
+5. **rime-wugniu → `wu/dict.tsv` (101k entries)** — **RECLASSIFIED 2026-07-29**: the "no license"
+   note was an authoring-era miss; github.com/rime/rime-wugniu has been **GPL-3.0 since 2012**.
+   So there IS a grant, under copyleft: the derived `dict.tsv` is distributed under GPL-3.0
+   (per-file fence; the TSV is its own source). The engine reading it stays MIT — runtime data
+   consumption is not linking. Options if a GPL data file is unwanted in the shipped set:
+   rebuild from kaikki Wu readings (CC-BY-SA fence, gan/hakka/jin/xiang pattern, coverage drops
+   101k → ~10-20k), or ask Wugniu for a permissive grant of the dictionary data (now a friendly
+   relicensing ask). Alongside Tashkeela (§4.1) this is one of two GPL-lineage data files.
 6. **MOE Taiwan dictionaries → `minnan/dict.tsv`, `dict-chars.tsv` (ChhoeTaigi components)** — MOE
    dictionary licenses are typically CC-BY-**ND** 3.0 TW; ChhoeTaigi mixes sources. **Verify per
    component**; ND would block redistribution of a transformed table.
