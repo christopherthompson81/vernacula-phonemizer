@@ -6,10 +6,11 @@ per-file `*.PROVENANCE.md` files, data-file headers, `tools/` collector scripts,
 bringup investigation docs. Per-file provenance stays where it is; this document is the index and
 the licensing verdict.
 
-**Posture doc:** several provenance files cite ADR-0014 (facts-not-expression; *Feist*; *CCH
-Canadian* 2004 SCC 13). Brought forward 2026-07-29 into this repo as
-`docs/adr/0014-licensing-gplv3.md` (verbatim from espeak-ng-portable, with an applicability
-preface: the GPL decision was that project's; this repo inherits the ANALYSIS only).
+**Posture doc:** `docs/adr/0001-data-licensing-facts-posture.md` — this repo's NATIVE licensing
+ADR (2026-07-29): the project is an original work (not an espeak derivative); own work MIT;
+third-party data fenced per this map; the facts-not-expression line (*Feist*; *CCH Canadian*
+2004 SCC 13) stated with its conditions. Older provenance files' "ADR-0014" citations refer to
+the espeak-ng-portable ADR where the analysis was first developed; they resolve to ADR-0001 here.
 
 **Shipped vs tools-only:** "shipped" = under `src/`, loaded by the runtime. "tools-only" = under
 `tools/` (referees, collectors, experiments); excluded from any npm package but still distributed
@@ -96,7 +97,7 @@ CC-BY-SA 4.0 — EDRDG requires **specific named attribution**, add to NOTICE).
 `french/fr-g2p-tagger.int8.onnx` (Lexique 3.83, CC BY-SA 4.0 verified — §5.2). These **cannot ship
 in an MIT-only package**; they stay fenced like the data.
 
-**Models with share-alike training inputs but a stated training-as-use posture (ADR-0014):**
+**Models with share-alike training inputs but a stated training-as-use posture (ADR-0001):**
 `arabic/diacritizer.onnx` (arwiki CC-BY-SA silver), `arabic/diacritizer-egy.onnx` (arzwiki
 CC-BY-SA silver + MIT dialect corpus), `hebrew/he-tagger.int8.onnx` (small CC-BY-SA modern/wiki
 slice), `english/pos-model.json` (**UD-EWT CC-BY-SA 4.0 — currently unrecorded in the repo; record
@@ -118,7 +119,7 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
 ## 4. Copyleft & problem cases
 
 1. **Tashkeela → `arabic/diacritization.tsv` (shipped).** Compilation tagged **GPL-2.0**;
-   underlying classical texts PD. Shipped under the ADR-0014 facts-not-expression posture, by
+   underlying classical texts PD. Shipped under the ADR-0001 facts-not-expression posture, by
    explicit maintainer direction, Tashkeela credited. This is the only GPL-tagged upstream whose
    derivative ships. Keep the posture statement verbatim in NOTICE; it is the repo's highest-risk
    single call and should be re-affirmed (or the file regenerated from PD sources directly) before
@@ -141,11 +142,11 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
        Turkish mine (2,103 non-final-stress lemmas, CC-BY-SA) + 8 adjudicated entries (PR #574).
      - `vietnamese/rhymes.tsv` (375) — **owner determination 2026-07-29: linguistic fact**
        (exhaustive closed-class inventory of Vietnamese rhymes; merger — one way to enumerate a
-       complete system). Keep; MIT-safe under the ADR-0014 posture (now in docs/adr/).
+       complete system). Keep; MIT-safe under the ADR-0001 posture.
      - `catalan/mid-vowels.tsv` + `bl-gl-geminate.tsv` (10.4k) — **owner determination
        2026-07-29: linguistic fact** (per-word mid-vowel quality / geminate class — dictionary
        facts of Central Catalan, DCVB-verifiable; word selection is the external frequency
-       corpus, not espeak's). Keep; ADR-0014 posture.
+       corpus, not espeak's). Keep; ADR-0001 posture.
      - `mandarin/syllable-ipa.tsv` (424) — **kept after re-derivation test 2026-07-29**: the
        full table was compared row-by-row against epitran cmn-Latn (MIT; the committed
        `cmn.epitran-cmn-Latn.tsv` referee, same 424-syllable inventory). ~95% of rows are
@@ -159,7 +160,7 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
        derivative.** espeak 1.52's `ga` was broken before the espeak-ng-portable work; the
        engine that generated this lexicon is substantially the owner's own (unpublished) repair
        work, and the per-word entries are mechanically-generated pronunciation facts over an
-       external frequency wordlist (Tashkeela-shaped ADR-0014 posture besides). Keep.
+       external frequency wordlist (Tashkeela-shaped ADR-0001 posture besides). Keep.
      - ja/thai/wu conduit data: parent licenses govern (kanjium/OpenJTalk/UniDic, ICU/PyThaiNLP,
        rime-wugniu) — already classified above.
 4. **Leipzig Corpora → `afrikaans/af-stems.txt`** — **RESOLVED 2026-07-29.** The Leipzig-derived
@@ -232,7 +233,8 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
 4. **Package fencing**: the npm/dist package ships `src/` only; if a fully-MIT distributable is
    ever wanted, a `--permissive` build profile that excludes §3-fenced data files (engines fall
    back to rules/taggers) is mechanically derivable from this map.
-5. **Copy ADR-0014 into this repo** (`docs/adr/`) — four shipped artifacts cite it.
+5. ~~Copy ADR-0014 into this repo~~ — superseded: the posture is stated natively as ADR-0001
+   (this repo is not an espeak derivative; importing the GPL-decision ADR misdescribed it).
 
 ---
 *Maintenance rule: any new data file or model lands with either a `*.PROVENANCE.md` or a header

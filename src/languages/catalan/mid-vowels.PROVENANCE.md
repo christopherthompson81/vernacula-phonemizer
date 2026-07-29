@@ -8,6 +8,6 @@ output over an external 50k frequency wordlist, with ONLY the abstract per-word 
 
 **Owner determination 2026-07-29 (docs/PROVENANCE.md §4.3): linguistic fact.** A word's
 mid-vowel openness / geminate class is a dictionary fact of Central Catalan (DCVB/GDLC-
-verifiable); the word selection is the external frequency corpus. ADR-0014 facts-not-expression
-posture (docs/adr/0014-licensing-gplv3.md). The files are headerless because the loader takes
+verifiable); the word selection is the external frequency corpus. ADR-0001 facts-not-expression
+posture (docs/adr/0001-data-licensing-facts-posture.md). The files are headerless because the loader takes
 every line as data.
