@@ -12,7 +12,7 @@ char-level, the same 19-label pausal alphabet as the MSA model. Trained `--pausa
 our pausal-TTS target). **TEST DER 1.63% / WER 4.70%** vs the held-out teacher silver (better than the MSA
 student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
 
-## Provenance — teacher→student distillation (the MSA pattern, ADR-0014)
+## Provenance — teacher→student distillation (the MSA pattern, ADR-0001)
 
 - **Teacher:** CAMeL Tools `calima-egy-r13` Egyptian morphological analyzer + `disambig-bert-unfactored-egy`
   (MIT) in-context disambiguator (NYU Abu Dhabi / Habash). The morphology DB is **GPL-2.0** and was used
@@ -26,7 +26,7 @@ student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
 - **No Wiktionary in the model** — the kaikki lexicon is a separate shipped supplement (egyptian-lexicon.tsv),
   not part of this model's training.
 
-## Licence posture (per ADR-0014, project author's reasoned posture, not legal advice)
+## Licence posture (per ADR-0001 — docs/adr/0001-data-licensing-facts-posture.md — project author's reasoned posture, not legal advice)
 
 A model trained on silver retains none of the teacher's or corpus's selection/arrangement — only the
 orthographic regularities of Egyptian Arabic, which are facts (Feist). GPL is a copyright license on the teacher

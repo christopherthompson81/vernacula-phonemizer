@@ -33,7 +33,7 @@ maps) is committed beside it.
 
 ## Licence posture
 
-This is the project author's reasoned posture (per ADR-0014), not legal advice: a model trained on
+This is the project author's reasoned posture (per ADR-0001 (docs/adr/0001-data-licensing-facts-posture.md; analysis originally developed in espeak-ng-portable ADR-0014)), not legal advice: a model trained on
 CATT-labelled public Wikipedia retains none of any source corpus's selection/arrangement — only the
 orthographic regularities of the language, which are facts (Feist). The chosen inputs are permissive by
 their own terms regardless (Apache-2.0 teacher, CC-BY-SA text), so the question is moot at the source.
