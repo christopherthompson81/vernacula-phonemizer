@@ -56,8 +56,17 @@ const STRIPS = [
     ),
 ];
 
+const PARTICLE_TOKENS = new Set([
+    "は", "が", "を", "に", "で", "と", "の", "も", "や", "へ", "わ", "え",
+    "から", "まで", "など", "には", "では", "でわ", "とは", "とわ", "への", "からの", "までの", "にわ",
+]);
+
 /** Resolve the accent nucleus (mora index, 0 = heiban) for a bunsetsu: surface first, then reading. */
 export function accentNucleus(surface: string, reading: string): number {
+    // A bare PARTICLE token is always unaccented (heiban). Particles reach here as their own tokens when
+    // the preceding content is digits or katakana (二時に, ビザを) — the pitch dictionary must not put a
+    // downstep on them (85 で → de̞ꜜ was audible nonsense in the corpus).
+    if (PARTICLE_TOKENS.has(surface)) return 0;
     let n = get(surface); // 1. exact surface (disambiguates homographs the reading collapses)
     if (n === undefined) {
         for (const re of STRIPS) {
