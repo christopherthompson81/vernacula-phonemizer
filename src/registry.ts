@@ -385,8 +385,7 @@ function build(lang: string): Phonemizer {
         case "tl":
             return createTagalog();
         case "om":
-            // digits read via English pending a proper Oromo numeral compositor (attested-word gap; see issues)
-            return createOromo((latin) => getPhonemizer("en").text(latin));
+            return createOromo(); // digits: native compositor (#562); no foreign needed — om is Latin-script
         case "pl":
             return createPolish();
         case "sd":

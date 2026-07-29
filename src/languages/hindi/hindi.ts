@@ -8,6 +8,7 @@
  * Latin runs → an injected foreign (en) phonemizer.
  */
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
@@ -148,7 +149,7 @@ export function makeNativeHindi(
     }
 
     function text(input: string): string {
-        return assembleClauses(input, tokenRe, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
@@ -166,6 +167,13 @@ export function makeNativeHindi(
 }
 
 /** Load hindi.jsonc (beside this file) and build the Hindi phonemizer. `foreign` handles embedded Latin. */
+// #562 symbol normalization — Hindi (प्रतिशत is invariant; units after the number).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["प्रतिशत"],
+    currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"] },
+    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
+});
+
 export function createHindi(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {

@@ -4,6 +4,7 @@
  * words / numbers / punctuation. No lexicon (yet). See docs/investigations/pt_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -252,6 +253,15 @@ function wordIpa(
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
+// #562 symbol normalization — Portuguese (quilômetro: the BR spelling; pt-BR is the corpus variety).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["por cento"],
+    currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["iene", "ienes"] },
+    units: { km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
+        kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"] },
+    magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
+});
+
 class PortuguesePhonemizer implements Phonemizer {
     constructor(
         private readonly dialect: "ep" | "bp" = "ep",
@@ -260,7 +270,7 @@ class PortuguesePhonemizer implements Phonemizer {
     text(input: string): string {
         const d = this.dialect,
             pw = this.postWord;
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1], d, pw));
             else if (m[2])
                 sink.emit(

@@ -1,0 +1,106 @@
+/**
+ * Shared SYMBOL normalization (#562) — the language-independent machinery for rewriting %, currency
+ * signs, and unit abbreviations into that language's words, BEFORE its tokenizer. The per-language part
+ * is pure data (`SymbolData`); the engine here owns the matching, the number-magnitude hop for currency
+ * ($5 million → "5 million dollars"-shaped), and COUNT AGREEMENT — which for Slavic needs more than
+ * singular/plural, so forms are selected by an overridable `countForm(n)` (Russian: 1 процент /
+ * 2 процента / 5 процентов, keyed on the numeral's final digits).
+ *
+ * English's normalize.ts predates this seam and keeps its own implementation (it also handles dates,
+ * times, years and romans, which are NOT shared — their rules are language-specific by nature). The
+ * contract everywhere: emit plain words and digits the language's EXISTING pipeline already speaks.
+ */
+
+/** Word forms for one countable noun. Index 0 = singular; further indices per the language's
+ *  `countForm`. A language with no agreement uses a 1-element array. */
+export type CountForms = string[];
+
+export interface SymbolData {
+    /** The word for %, e.g. "percent", "Prozent", "por ciento", or count forms for Slavic. */
+    percent: CountForms;
+    /** Currency sign → count forms. The sign may precede or follow the number in text; the word is
+     *  always emitted AFTER the number (with any magnitude word hopping along). */
+    currency?: Record<string, CountForms>;
+    /** Unit abbreviation (lowercase) → count forms. Matched only AFTER a number. */
+    units?: Record<string, CountForms>;
+    /** Magnitude words that hop with a currency sign ("million" etc., in the language's spelling as it
+     *  appears in running text). Omit if the language writes magnitudes after the currency word anyway. */
+    magnitudes?: string[];
+    /** n → index into a CountForms array. Default: n===1 → 0, else last index. Override for Slavic. */
+    countForm?: (n: number) => number;
+    /** The percent word PRECEDES the number (Turkish yüzde kırk, Mandarin 百分之四十). Text may write the
+     *  sign on either side (%40 or 40%); both rewrite to prefix order. */
+    percentPrefix?: boolean;
+}
+
+const defaultCountForm = (n: number): number => (n === 1 ? 0 : 1);
+
+/** The Slavic three-way selector (ru, cs): 1→0 (sg), 2–4→1 (paucal), else→2 — keyed on the final
+ *  digits, with 11–14 always plural (21 процент, 22 процента, 25 процентов, 12 процентов). */
+export const slavicCountForm = (n: number): number => {
+    const mod100 = Math.abs(n) % 100;
+    const mod10 = mod100 % 10;
+    if (mod100 >= 11 && mod100 <= 14) return 2;
+    if (mod10 === 1) return 0;
+    if (mod10 >= 2 && mod10 <= 4) return 1;
+    return 2;
+};
+
+function pick(forms: CountForms, n: number, countForm: (n: number) => number): string {
+    const i = Math.min(countForm(n), forms.length - 1);
+    return forms[Math.max(0, i)]!;
+}
+
+/** Leading integer value of a possibly grouped/decimal numeral string ("1,234.5" → 1234; agreement is
+ *  driven by the integer part, matching how the languages themselves resolve it). A decimal number
+ *  always takes the plural/genitive form (1.5 процента… — close enough; decimals are rare in prose). */
+function numValue(num: string): number {
+    const cleaned = num.replace(/[  ]/gu, ""); // thin/regular space grouping
+    // Grouping separators come in 3-digit blocks; a trailing 1–2 digit block after . or , is a decimal.
+    const m = /^(\d+(?:[.,]\d{3})*)(?:[.,](\d+))?$/.exec(cleaned);
+    if (!m) return NaN;
+    const int = Number(m[1]!.replace(/[.,]/g, ""));
+    return m[2] !== undefined && m[2].length !== 3 ? int + 0.5 : int; // a real fraction ⇒ never "one" ⇒ plural
+}
+
+const NUM = "\\d+(?:[  .,]\\d+)*";
+
+/** Build the text→text symbol normalizer for one language's data. */
+export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
+    const cf = d.countForm ?? defaultCountForm;
+    const magAlt = d.magnitudes?.length ? `(\\s+(?:${d.magnitudes.join("|")}))?` : "()?";
+    const curSigns = d.currency ? Object.keys(d.currency).map((s) => s.replace(/[$]/g, "\\$")).join("") : "";
+    const curBefore = d.currency
+        ? new RegExp(`([${curSigns}])\\s?(${NUM})${magAlt}`, "gu")
+        : null;
+    const curAfter = d.currency
+        ? new RegExp(`(${NUM})\\s?([${curSigns}])`, "gu")
+        : null;
+    const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
+    const unitRe = d.units ? new RegExp(`(${NUM})\\s?(${unitAlt})(?![\\p{L}\\p{M}])`, "giu") : null;
+    const pctRe = new RegExp(`(${NUM})\\s?%`, "gu");
+    const pctPreRe = new RegExp(`%\\s?(${NUM})`, "gu");
+
+    return (text: string): string => {
+        let s = text;
+        if (curBefore)
+            s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => {
+                const w = pick(d.currency![sym]!, mag ? 2 : numValue(num), cf);
+                return `${num}${mag ?? ""} ${w}`;
+            });
+        if (curAfter)
+            s = s.replace(curAfter, (_m, num: string, sym: string) =>
+                `${num} ${pick(d.currency![sym]!, numValue(num), cf)}`);
+        if (d.percentPrefix) {
+            s = s.replace(pctPreRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
+            s = s.replace(pctRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
+        } else {
+            s = s.replace(pctPreRe, (_m, num: string) => `${num} ${pick(d.percent, numValue(num), cf)}`);
+            s = s.replace(pctRe, (_m, num: string) => `${num} ${pick(d.percent, numValue(num), cf)}`);
+        }
+        if (unitRe)
+            s = s.replace(unitRe, (_m, num: string, u: string) =>
+                `${num} ${pick(d.units![u.toLowerCase()]!, numValue(num), cf)}`);
+        return s;
+    };
+}

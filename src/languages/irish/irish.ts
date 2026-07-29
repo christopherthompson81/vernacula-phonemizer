@@ -5,6 +5,7 @@
  * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/investigations/ga_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
@@ -93,9 +94,16 @@ export function g2pWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([a-záéíóúA-ZÁÉÍÓÚ]+(?:['’-][a-záéíóúA-ZÁÉÍÓÚ]+)*)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Irish: % is "faoin gcéad" (after the number, as written).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["faoin gcéad"],
+    currency: { "€": ["euro"], "$": ["dollar", "dollair"], "£": ["punt"] },
+    units: { km: ["ciliméadar"], cm: ["ceintiméadar"], mm: ["milliméadar"], kg: ["cileagram"] },
+});
+
 class IrishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }

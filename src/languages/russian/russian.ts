@@ -5,6 +5,7 @@
  * tokenizes words / numbers / punctuation. See docs/investigations/ru_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -95,9 +96,18 @@ function adjectiveStress(w: string): number | undefined {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["процент", "процента", "процентов"],
+    currency: { "€": ["евро"], "$": ["доллар", "доллара", "долларов"], "£": ["фунт", "фунта", "фунтов"] },
+    units: { "км": ["километр", "километра", "километров"], "см": ["сантиметр", "сантиметра", "сантиметров"],
+        "мм": ["миллиметр", "миллиметра", "миллиметров"], "кг": ["килограмм", "килограмма", "килограммов"] },
+    countForm: slavicCountForm,
+});
+
 class RussianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);

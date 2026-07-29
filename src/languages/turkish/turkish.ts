@@ -4,6 +4,7 @@
  * tokenizes words / numbers / punctuation. See docs/investigations/tr_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -94,9 +95,17 @@ function numberTokenToWords(tok: string): string {
     return words;
 }
 
+// #562 symbol normalization — Turkish: the percent word PRECEDES the number (yüzde kırk, written %40).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["yüzde"],
+    percentPrefix: true,
+    currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"] },
+    units: { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"] },
+});
+
 class TurkishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberTokenToWords(m[2]).split(" "))
