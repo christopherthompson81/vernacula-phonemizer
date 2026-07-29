@@ -96,3 +96,13 @@ tight gates or it corrupts monomorphemes. And phonemizing morphemes independentl
 (ver·staan→fɛrstɑːn wrong) → a small PREFIX_IPA reduction table (ver→fər, be→bə, ge→χə…) for prefixes before the stress
 part. **74.7% full (512 raw), floor bumped 0.68→0.73.** 504/2220 referee words decompose (23%). Residual is now 1×
 long-tail: onset-cluster length (Afrika→afrika, "fr" onset should keep the A open→ɑː) + proper nouns + phrase schwa.
+
+## Licensing follow-up — 2026-07-29 — af-stems.txt re-sourced (Leipzig CC-BY-NC removed)
+
+The 42,743-word Leipzig-derived stems list was the repo's only CC-BY-NC input (provenance audit,
+docs/PROVENANCE.md §4.4). Rebuilt as a 53,344-word union of afwiki (tokenized dump, freq ≥ 25;
+47,476), hermitdave OpenSubtitles af (9,044), and kaikki Afrikaans headwords (8,612) — all
+CC-BY-SA. Covers 89.7% of the old list. Gate: referee eval IDENTICAL (74.7% folded backbone,
+23.1% raw exact; symbol accuracy 93.1% vs 93.2%), afrikaans tests 5/5. The stems set is
+membership-only (isWord/isConstituent), so the 10.3% dropped Leipzig tail had no measurable
+effect on decomposition quality. Details: src/languages/afrikaans/af-stems.PROVENANCE.md.

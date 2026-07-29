@@ -2,8 +2,8 @@
  * Afrikaans morphological decomposition — a config over the shared West-Germanic engine
  * (core/germanicMorphology.ts). Afrikaans compounds like Dutch/German (aandete, afwesigheid); splitting into
  * morphemes lets afrikaans.ts phonemize each element with its own stress + coda devoicing. The affix lists + linking
- * elements + onsets come from afrikaans.jsonc; the stem lexicon is a frequency wordlist (af-stems.txt, from the
- * Afrikaans Wikipedia/Leipzig corpus). Afrikaans has no per-stem Fugen flags → a static linking-element order, and
+ * elements + onsets come from afrikaans.jsonc; the stem lexicon is a wordlist (af-stems.txt — afwiki + OpenSubtitles
+ * + kaikki union, see af-stems.PROVENANCE.md). Afrikaans has no per-stem Fugen flags → a static linking-element order, and
  * none of German's language-specific quirks (un-/mit-/sch/seams/-en) apply. See the af investigation doc.
  */
 import { readFileSync } from "node:fs";
