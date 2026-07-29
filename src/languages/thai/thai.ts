@@ -12,10 +12,47 @@ export { phonemizeWord };
 const TOKEN = /([฀-๿]+)|(\d+)|([.!?…,;:])/gu;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
+// ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
+// The tokenizer matched (\d+) but NO branch consumed it — every digit run in Thai text was silently
+// dropped (23.4% of FLEURS th_th utterances contain digits; all lost their numbers). The compositor emits
+// THAI-SCRIPT words (each kaikki-attested with IPA) and reads them through the ordinary g2p, so no IPA is
+// authored here. Grammar: 20 is ยี่สิบ (not สองสิบ); a FINAL 1 in any compound ≥11 is เอ็ด (สิบเอ็ด,
+// ยี่สิบเอ็ด); magnitudes 10⁴ หมื่น and 10⁵ แสน are their own words.
+const TH_UNITS = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+const TH_MAG: [number, string][] = [[1e6, "ล้าน"], [1e5, "แสน"], [1e4, "หมื่น"], [1e3, "พัน"], [100, "ร้อย"]];
+
+function numberToThaiWords(n: number): string[] {
+    if (!Number.isSafeInteger(n) || n < 0) {
+        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => TH_UNITS[Number(d)]!);
+    }
+    if (n === 0) return [TH_UNITS[0]!];
+    const out: string[] = [];
+    let r = n;
+    for (const [v, w] of TH_MAG) {
+        if (r >= v) {
+            const q = Math.floor(r / v);
+            out.push(...numberToThaiWords(q), w);
+            r %= v;
+        }
+    }
+    if (r >= 10) {
+        const t = Math.floor(r / 10);
+        if (t === 2) out.push("ยี่สิบ");
+        else if (t === 1) out.push("สิบ");
+        else out.push(TH_UNITS[t]!, "สิบ");
+        r %= 10;
+        if (r === 1) { out.push("เอ็ด"); r = 0; } // final 1 after a ten is เอ็ด
+    }
+    if (r > 0) out.push(TH_UNITS[r]!);
+    return out;
+}
+
 class ThaiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2])
+                for (const wd of numberToThaiWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

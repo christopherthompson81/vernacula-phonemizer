@@ -37,3 +37,14 @@ describe("amharic canonical IPA", () => {
         expect(phonemize("100", "am")).toBe("məto"); // mäto
     });
 });
+
+// Tens (found by the #562 impact audit): NUM.tens is keyed "20".."90" but the lookup used String(t) —
+// "2".."9" — so EVERY ten was silently dropped: 25 → "amɨst", 1998 → thousand-nine-hundred-EIGHT.
+// 21.7% of FLEURS am_et utterances contain digits.
+describe("Amharic tens", () => {
+    test("tens are read", () => {
+        expect(phonemize("25", "am")).toBe("haja amɨst"); // ሃያ አምስት
+        expect(phonemize("90", "am")).toBe("zətʼəna");
+        expect(phonemize("1998", "am")).toBe("ʃi zətʼəɲ məto zətʼəna sɨmɨnt"); // the 90 is back
+    });
+});

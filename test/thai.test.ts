@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { phonemizeWord } from "../src/languages/thai/thai.ts";
+import { phonemize } from "../src/index.ts";
 
 describe("Thai g2p (ported syllabifier + native IPA render)", () => {
     it("monosyllables: onset, vowel length, coda, computed tone", () => {
@@ -39,5 +40,18 @@ describe("Thai g2p (ported syllabifier + native IPA render)", () => {
         expect(phonemizeWord("ตรงนั้น")).toBe("trˈo˧ŋna˦˥n"); // troŋ·nan (was ton·ŋa·nan)
         expect(phonemizeWord("ผลกระทบ")).toBe("pʰˈo˩˩˦nkra˨˩tʰˌo˦˥p"); // ผล→pʰon (ל coda) but กร→kra cluster
         expect(phonemizeWord("ผลงาน")).toBe("pʰˈo˩˩˦nŋaː˧n"); // ל stays a coda (pʰon), NOT clustered
+    });
+});
+
+// Numbers (found by the #562 impact audit): the tokenizer matched (\d+) but NO branch consumed it — every
+// digit run in Thai text was silently dropped, and 23.4% of FLEURS th_th utterances contain digits. The
+// compositor emits Thai-script words (each kaikki-attested with IPA) through the ordinary g2p.
+describe("Thai numbers", () => {
+    test("digits are read, not dropped", () => {
+        expect(phonemize("5", "th")).toBe("hˈaː˥˩");
+        expect(phonemize("25", "th")).toBe("jˈiː˥˩si˨˩p hˈaː˥˩"); // ยี่สิบ, not สองสิบ
+        expect(phonemize("21", "th")).toContain("ʔˈe˨˩t"); // final 1 = เอ็ด
+        expect(phonemize("1998", "th")).toBe("nˈɯ˨˩ŋ pʰˈa˧n kˈaː˥˩w rˈɔː˦˥j kˈaː˥˩w sˈi˨˩p pˈɛː˨˩t");
+        expect(phonemize("10000", "th")).toContain("mˈɯː˨˩n"); // หมื่น 10⁴ is its own word
     });
 });
