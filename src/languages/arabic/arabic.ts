@@ -227,6 +227,94 @@ function restoreLex(): ReadonlyMap<string, string> {
  * refinement over the MSA-diacritizer vowels. The referee eval passes `lexicon:false` to keep the number
  * non-circular (the lexicon is mined from the same Wiktionary tradition as the wikipron-arz referee).
  */
+
+// ── Foreign-cluster repair (Run 28: سنترال → sntrˈaːl) ──────────────────────────────────────────────────────
+// The neural diacritizer vocalizes native words and FREQUENT loans (كمبيوتر → kumbijuːtar), but rare
+// transliterations come back with few or no diacritics, and the g2p then emits consonant runs no Arabic
+// syllable allows — (C)V(C)(C) permits at most CC, so a 3+-consonant run is always a vocalization failure
+// (2.4% of FLEURS arz tokens: Carolyn kˈaːrwljn, Booking bwknɡ, microwave mjkrwwjf). Two repairs, applied
+// word-wise to the ASYNC path's final IPA (the sync path expects vocalized input and is left alone):
+//   Tier 1 — mater lectionis: inside an illegal run, و/ي were written AS VOWEL CARRIERS (o/u, e/i) but were
+//   read as consonants w/j. Re-reading them as u/i fixes most words outright: bwknɡ → buknɡ → (tier 2)
+//   bukinɡ; ˈiwtwbjs → utubiːs-shaped (autobus). The letter itself marks where the vowel goes — no guessing.
+//   Tier 2 — epenthesis: residual 3+ runs get the variety's epenthetic vowel INSIDE the run, the repair
+//   Arabic speakers themselves apply to foreign clusters. Insertion after the FIRST consonant of the run —
+//   selected by measuring both documented templates (Broselow's after-first vs after-second) against 57
+//   attested loanword transcriptions; after-first scored higher (booking → bukinɡ, not bukniɡ).
+// Both passes no-op on any legally-syllabified word, so native output is untouched by construction.
+const REPAIR_VOWELS = new Set([..."aeiouɑɐæəɛɔʊɪ"]);
+const REPAIR_SKIP = new Set([..."ˈˌːˤ\u0651\u0640"]);
+
+interface RUnit { text: string; vowel: boolean }
+function repairUnits(word: string): RUnit[] {
+    const out: RUnit[] = [];
+    for (const ch of word.normalize("NFD")) {
+        if (/\p{M}/u.test(ch) || REPAIR_SKIP.has(ch) || ch === "͡") {
+            if (out.length) out[out.length - 1]!.text += ch;
+            else out.push({ text: ch, vowel: false });
+            continue;
+        }
+        out.push({ text: ch, vowel: REPAIR_VOWELS.has(ch) });
+    }
+    return out;
+}
+
+/** One word of final IPA → repaired IPA. `epenthetic` is the variety's cluster-repair vowel. */
+export function repairForeignClusters(word: string, epenthetic = "i"): string {
+    const units = repairUnits(word);
+    // maximal consonant runs (stress marks travel with their unit; a unit whose BASE is a vowel ends a run)
+    const runAt = (i: number): number => {
+        let n = 0;
+        while (i + n < units.length && !units[i + n]!.vowel) n++;
+        return n;
+    };
+    let changed = false;
+    // Tier 1: w/j inside an illegal run become u/i (leftmost first; re-scan, since each conversion splits a run)
+    for (let guard = 0; guard < 8; guard++) {
+        let acted = false;
+        for (let i = 0; i < units.length; i++) {
+            if (units[i]!.vowel) continue;
+            const n = runAt(i);
+            if (n < 3) { i += n; continue; }
+            for (let k = i; k < i + n; k++) {
+                const base = units[k]!.text[0];
+                if (base === "w" || base === "j") {
+                    units[k] = { text: (base === "w" ? "u" : "i") + units[k]!.text.slice(1), vowel: true };
+                    acted = changed = true;
+                    break;
+                }
+            }
+            if (acted) break;
+            i += n;
+        }
+        if (!acted) break;
+    }
+    // Tier 2: epenthesis after the FIRST consonant of each remaining 3+ run
+    for (let guard = 0; guard < 8; guard++) {
+        let acted = false;
+        for (let i = 0; i < units.length; i++) {
+            if (units[i]!.vowel) continue;
+            const n = runAt(i);
+            if (n >= 3) {
+                units.splice(i + 1, 0, { text: epenthetic, vowel: true });
+                acted = changed = true;
+                break;
+            }
+            i += n;
+        }
+        if (!acted) break;
+    }
+    return changed ? units.map((u) => u.text).join("").normalize("NFC") : word;
+}
+
+/** Sentence-level wrapper: repair each word token, leave pause marks alone. */
+function repairSentence(ipa: string, epenthetic = "i"): string {
+    return ipa
+        .split(" ")
+        .map((t) => (/^[.,!?;:…]+$/.test(t) ? t : repairForeignClusters(t, epenthetic)))
+        .join(" ");
+}
+
 export async function phonemizeArabic(
     text: string,
     variety?: string,
@@ -244,5 +332,5 @@ export async function phonemizeArabic(
     const key = `${variety ?? "msa"}${useLexicon ? "" : ":nolex"}`;
     let phon = phonemizers.get(key);
     if (!phon) phonemizers.set(key, (phon = createArabic(variety, useLexicon)));
-    return phon.text(restored);
+    return repairSentence(phon.text(restored));
 }

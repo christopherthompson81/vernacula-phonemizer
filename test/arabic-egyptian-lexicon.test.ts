@@ -13,7 +13,7 @@
 import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
-import { createArabic, ipaOnly } from "../src/languages/arabic/arabic.ts";
+import { createArabic, ipaOnly, repairForeignClusters } from "../src/languages/arabic/arabic.ts";
 
 const arz = createArabic("egyptian", true);
 // word → shipped Egyptian IPA (from the lexicon). Egyptian vowels the MSA path gets wrong.
@@ -87,5 +87,33 @@ describe("Egyptian lexicon — no annotation artifacts (#550)", () => {
         for (const w of ["كتب", "دلوقتي", "شلتة", "كمترة", "عيل", "نسر"]) {
             expect(arz.text(w), w).not.toMatch(DELIMITER);
         }
+    });
+});
+
+// Foreign-cluster repair (Run 28: سنترال → sntrˈaːl). The diacritizer vocalizes native words and frequent
+// loans but returns rare transliterations bare; the g2p then emits consonant runs no Arabic syllable
+// permits — (C)V(C)(C) allows at most CC, so a 3+ run is always a vocalization failure. Tier 1 re-reads
+// و/ي inside an illegal run as the vowels they carry in loan spellings; tier 2 breaks residual runs with
+// the epenthetic vowel, after the run's FIRST consonant (selected against 57 attested loanword
+// transcriptions: booking → bukinɡ, not bukniɡ). Pure function — no ONNX needed to test it.
+describe("Arabic foreign-cluster repair (#560 follow-up)", () => {
+    it("tier 1: mater lectionis — و/ي in an illegal run become u/i", () => {
+        expect(repairForeignClusters("bwknɡ")).toBe("bukinɡ"); // بوكنج Booking (tier 2 finishes knɡ)
+        expect(repairForeignClusters("kˈaːrwljn")).toBe("kˈaːrulin"); // Carolyn
+    });
+
+    it("tier 2: epenthesis after the first consonant of a residual run", () => {
+        expect(repairForeignClusters("sntrˈaːl")).toBe("sinitrˈaːl"); // سنترال Central
+    });
+
+    it("no-ops on legally syllabified words — native output is untouched by construction", () => {
+        for (const w of ["mˈaktab", "madrˈasa", "kumbijˈuːtar", "muʕtaʔˈalaː", "ʔˈatˤlaʔ"]) {
+            expect(repairForeignClusters(w)).toBe(w);
+        }
+    });
+
+    it("word-final CC (legal CVCC) is not broken", () => {
+        expect(repairForeignClusters("ʃˈabt")).toBe("ʃˈabt");
+        expect(repairForeignClusters("kˈalb")).toBe("kˈalb");
     });
 });
