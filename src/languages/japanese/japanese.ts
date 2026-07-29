@@ -7,8 +7,8 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { kanaToIpa, kanaToMorae } from "./kana.ts";
-import { applyReadings, segmentText, headsCompound } from "./kanji.ts";
+import { kanaToIpa, kanaToMorae, segmentsToMorae } from "./kana.ts";
+import { applyReadingSegments, applyReadings, segmentText, headsCompound } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
 import { readCounter } from "./counters.ts";
 
@@ -48,8 +48,9 @@ class JapanesePhonemizer implements Phonemizer {
         // segmentText inserts bunsetsu spaces first, then assembleClauses runs the standard clause skeleton.
         return assembleClauses(segmentText(input), TOKEN, (m, sink) => {
             if (m[1]) {
-                const reading = applyReadings(m[1]).replace(KANA_ONLY, ""); // kanji → kana, drop the unresolvable tail
-                const morae = kanaToMorae(reading);
+                const segments = readingSegments(m[1]); // kanji → kana per morpheme (boundaries kept, #552)
+                const reading = segments.join("");
+                const morae = segmentsToMorae(segments);
                 if (morae)
                     sink.emit(
                         placeDownstep(morae, accentNucleus(m[1], reading)),
@@ -67,11 +68,25 @@ class JapanesePhonemizer implements Phonemizer {
 
 /** One Japanese word/token → canonical IPA (kanji readings + pitch downstep, so kanji tokens work too). */
 export function phonemizeWord(word: string): string {
-    const reading = applyReadings(word).replace(KANA_ONLY, "");
-    const morae = kanaToMorae(reading);
+    const segments = readingSegments(word);
+    const reading = segments.join("");
+    const morae = segmentsToMorae(segments);
     return morae === null
         ? ""
         : placeDownstep(morae, accentNucleus(word, reading));
+}
+
+/** Reading segments for a word, with the unresolvable tail dropped from each.
+ *
+ *  No exception list is needed for compounds that legitimately DO coalesce across the boundary: those are
+ *  exactly the ones whose stored reading is NOT the sum of their characters' readings, so
+ *  `alignCompoundReading` finds no split and leaves them as a single segment. 小売 こうり stays koːri because
+ *  売 has no reading うり; 子牛 こうし splits こ|うし because both parts are attested readings. The mechanism
+ *  decides it from the data instead of a hand-maintained list. */
+function readingSegments(word: string): string[] {
+    return applyReadingSegments(word)
+        .map((s) => s.replace(KANA_ONLY, ""))
+        .filter((s) => s !== "");
 }
 
 /** One Japanese word/token → canonical IPA, SEGMENTAL only (no pitch downstep) — for segmental validation. */

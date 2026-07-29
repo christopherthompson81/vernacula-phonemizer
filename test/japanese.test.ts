@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import {
     phonemizeWord,
@@ -106,5 +106,50 @@ describe("Japanese pitch accent (Phase 3)", () => {
         expect(phonemize("今日は天気がいい", "ja")).toBe(
             "kʲo̞ꜜːhä te̞ꜜŋkiɡä iꜜː",
         );
+    });
+});
+
+// #552 — long-vowel coalescence used to run across MORPHEME boundaries, absorbing the next morpheme's initial
+// vowel into the previous one's length (経営 けい|えい → ke̞ːːː instead of ke̞ːe̞ː). Readings now carry their
+// boundaries (applyReadingSegments) and coalescence is confined to a segment. A compound whose stored reading
+// is NOT the sum of its characters' readings finds no alignment and stays fused — which is exactly the set
+// that legitimately DOES coalesce, so no exception list is needed.
+describe("Japanese morpheme-boundary coalescence (#552)", () => {
+    test("a boundary vowel is no longer absorbed into the preceding length", () => {
+        expect(phonemizeWord("経営")).toBe("ke̞ːe̞ː"); // けい|えい — was ke̞ːːː
+        expect(phonemizeWord("聖域")).toBe("se̞ːiki"); // せい|いき — was se̞ːːki
+        expect(phonemizeWord("東欧")).toBe("to̞ːo̞ː"); // とう|おう — was to̞ːːː
+    });
+
+    test("compounds whose reading is NOT the sum of their parts stay fused", () => {
+        expect(phonemizeWord("小売")).toBe("ko̞ːɾi"); // 売 has no reading うり → no split → kōri, correct
+        expect(phonemizeWord("大人")).toBe("o̞to̞nä"); // おとな ≠ おお+ひと
+        expect(phonemizeWord("今日")).toBe("kʲo̞ꜜː"); // きょう ≠ いま+ひ (accent on mora 1, hence the ꜜ)
+    });
+
+    test("EXPRESSIVE lengthening is preserved — it is author intent, not an artifact", () => {
+        expect(phonemizeWord("ああああ")).toBe("äːːː");
+        expect(phonemizeWord("スーーパー")).toBe("sɯᵝːːpäː");
+    });
+
+    test("sokuon っ still geminates ACROSS a segment boundary", () => {
+        // same shape as the ん case: per-segment conversion hid the next onset from a segment-final っ,
+        // degrading gemination to a glottal stop (吹っ切れ ふ|っ|き|れ → ɸɯᵝʔkiɾe̞).
+        expect(phonemizeWord("吹っ切れ")).toBe("ɸɯᵝkkiɾe̞");
+        expect(phonemizeWord("引っ越し")).toBe("çikko̞ɕi");
+        expect(phonemizeWord("学校")).toBe("ɡäkko̞ː"); // within one segment — unchanged
+    });
+
+    test("moraic ん still assimilates ACROSS a segment boundary", () => {
+        // per-segment conversion hid the next onset from a segment-final ん (健康 けん|こう → ke̞ɴko̞ː);
+        // assimilation re-runs over the joined morae.
+        expect(phonemizeWord("健康")).toBe("ke̞ŋko̞ː");
+        expect(phonemizeWord("日本語")).toBe("niho̞ŋɡo̞");
+        expect(phonemizeWord("散歩")).toBe("sämpo̞");
+    });
+
+    test("coalescence still fires WITHIN a kana run", () => {
+        expect(phonemizeWord("おおさか")).toBe("o̞ːsäkä");
+        expect(phonemizeWord("とうきょう")).toBe("to̞ːkʲo̞ː");
     });
 });

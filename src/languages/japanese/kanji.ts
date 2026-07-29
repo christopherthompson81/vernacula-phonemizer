@@ -75,13 +75,65 @@ function longestKeyMatch(
     return null;
 }
 
-/** Longest-match kanji→kana substitution over a single token. Kana passes through; an uncovered kanji falls
- *  back to its on/kun reading (kun when okurigana follows, else on), with rendaku when non-initial in a compound. */
-export function applyReadings(word: string): string {
+/** Longest-match kanji→kana substitution over a single token, returned as SEGMENTS — one element per
+ *  kanji reading, with a run of literal kana kept together as a single element.
+ *
+ *  The segmentation matters downstream: long-vowel coalescence (kanaToMorae) must not run ACROSS a reading
+ *  boundary, or the next morpheme's initial vowel is absorbed into the previous one's length — 経営 けい|えい
+ *  became ke̞ːːː instead of ke̞ːe̞ː, 聖域 せい|いき became se̞ːːki (issue #552). Flattening to one string here
+ *  destroyed the only evidence of where a morpheme ended. A literal-kana RUN stays one segment so genuine
+ *  within-run coalescence still fires (おおさか → o̞ːsäkä). */
+/**
+ * Split a dictionary compound's reading at its MORPHEME boundaries, by aligning the stored flat reading
+ * against each character's own known readings (fallback.tsv on/kun/rendaku; a kana must match literally).
+ *
+ * readings.tsv stores 経営 ⇥ けいえい with no internal boundary, but 経's on-reading is けい and 営's is えい, so
+ * the split けい|えい is recoverable and provable — the concatenation reproduces the stored reading exactly.
+ * Returns null when NO alignment exists, which is the conservative and correct outcome for a compound whose
+ * reading is not the sum of its parts (大人 おとな, 今日 きょう) and for one that genuinely coalesces across the
+ * boundary (小売 こうり — 売 has no reading うり, so it stays fused and keeps giving koːri). Issue #552.
+ */
+function alignCompoundReading(
+    unit: string,
+    reading: string,
+    fallback: ReadonlyMap<string, { on?: string; kun?: string; rendaku?: string }>,
+): string[] | null {
+    const chars = [...unit];
+    if (chars.length < 2) return null;
+    const solve = (ci: number, ri: number): string[] | null => {
+        if (ci === chars.length) return ri === reading.length ? [] : null;
+        const ch = chars[ci]!;
+        const cands: string[] = [];
+        if (isKanji(ch)) {
+            const fb = fallback.get(ch);
+            for (const r of [fb?.on, fb?.kun, fb?.rendaku]) if (r) cands.push(r);
+        } else cands.push(ch); // kana (okurigana) must match itself
+        for (const cand of cands) {
+            if (cand === "" || !reading.startsWith(cand, ri)) continue;
+            const rest = solve(ci + 1, ri + cand.length);
+            if (rest !== null) return [cand, ...rest];
+        }
+        return null;
+    };
+    return solve(0, 0);
+}
+
+export function applyReadingSegments(word: string): string[] {
     const { map, maxKeyLength, fallback } = readings();
     const chars = [...word];
-    let out = "",
-        i = 0,
+    const segs: string[] = [];
+    let kanaRun = "";
+    const flushKana = (): void => {
+        if (kanaRun !== "") {
+            segs.push(kanaRun);
+            kanaRun = "";
+        }
+    };
+    const pushReading = (r: string): void => {
+        flushKana();
+        segs.push(r);
+    };
+    let i = 0,
         prevKanjiReading = "",
         prevWasKanji = false;
     while (i < chars.length) {
@@ -90,7 +142,7 @@ export function applyReadings(word: string): string {
             (chars[i] === "々" || chars[i] === "〻") &&
             prevKanjiReading !== ""
         ) {
-            out += prevKanjiReading;
+            pushReading(prevKanjiReading);
             i++;
             continue;
         }
@@ -103,7 +155,9 @@ export function applyReadings(word: string): string {
                 if (fb?.rendaku !== undefined && reading === fb.kun)
                     reading = fb.rendaku;
             }
-            out += reading;
+            const parts = single ? null : alignCompoundReading(m.unit, reading, fallback);
+            if (parts === null) pushReading(reading);
+            else for (const part of parts) pushReading(part);
             prevKanjiReading = single ? reading : "";
             prevWasKanji = [...m.unit].some(isKanji);
             i += m.len;
@@ -120,18 +174,24 @@ export function applyReadings(word: string): string {
                     (wantKun ? (fb.kun ?? fb.on) : (fb.on ?? fb.kun)) ??
                     chars[i]!;
             }
-            out += reading;
+            pushReading(reading);
             prevKanjiReading = reading;
             prevWasKanji = true;
             i++;
             continue;
         }
-        out += chars[i];
+        kanaRun += chars[i];
         prevKanjiReading = "";
         prevWasKanji = false;
         i++;
     }
-    return out;
+    flushKana();
+    return segs;
+}
+
+/** The flattened reading (segments joined) — unchanged behaviour for callers that do not need boundaries. */
+export function applyReadings(word: string): string {
+    return applyReadingSegments(word).join("");
 }
 
 /** True if a whole-word reading entry of length ≥2 starts at the head of `text` — i.e. the leading kanji heads a
