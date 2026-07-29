@@ -119,6 +119,23 @@ export function kanaToMorae(word: string): string[] | null {
 }
 
 /**
+ * Sokuon っ geminates the FOLLOWING mora's initial consonant. Like the ん pass below, this is split out so it
+ * can run again over CONCATENATED segments: per-morpheme conversion (segmentsToMorae, #552) leaves a
+ * segment-final っ unable to see the next segment's onset, so it fell back to the glottal ʔ — 吹っ切れ came
+ * out ɸɯᵝʔkiɾe̞ instead of ɸɯᵝkkiɾe̞. Idempotent: an already-geminated mora is no longer "ʔ".
+ */
+export function geminateSokuon(morae: string[]): string[] {
+    for (let k = 0; k < morae.length; k++) {
+        if (morae[k] !== "ʔ") continue;
+        const onset = morae[k + 1]?.[0];
+        // Only a CONSONANT-initial next mora geminates. A word-final っ, or one before a vowel-onset mora,
+        // is a genuine glottal stop and must stay ʔ.
+        if (onset !== undefined && !isVowelChar(onset)) morae[k] = onset;
+    }
+    return morae;
+}
+
+/**
  * Moraic ん assimilates to the FOLLOWING onset's place: n before coronals, ŋ before velars, m before labials,
  * else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
  *
@@ -167,7 +184,8 @@ export function segmentsToMorae(segments: readonly string[]): string[] | null {
         if (m === null) return null;
         out.push(...m);
     }
-    // Re-run place assimilation over the JOINED morae: a ん ending one segment could not see the next
-    // segment's onset during per-segment conversion (健康 けん|こう → ke̞ɴko̞ː without this).
-    return assimilateMoraicN(out);
+    // Re-run the two rules that depend on the FOLLOWING onset over the JOINED morae: per-segment conversion
+    // hides the next segment's onset from a segment-final ん (健康 けん|こう → ke̞ɴko̞ː) and から a segment-final
+    // っ (吹っ切れ ふ|っ|き|れ → ɸɯᵝʔkiɾe̞). Both are idempotent, so within-segment results are unaffected.
+    return assimilateMoraicN(geminateSokuon(out));
 }

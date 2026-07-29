@@ -132,6 +132,14 @@ describe("Japanese morpheme-boundary coalescence (#552)", () => {
         expect(phonemizeWord("スーーパー")).toBe("sɯᵝːːpäː");
     });
 
+    test("sokuon っ still geminates ACROSS a segment boundary", () => {
+        // same shape as the ん case: per-segment conversion hid the next onset from a segment-final っ,
+        // degrading gemination to a glottal stop (吹っ切れ ふ|っ|き|れ → ɸɯᵝʔkiɾe̞).
+        expect(phonemizeWord("吹っ切れ")).toBe("ɸɯᵝkkiɾe̞");
+        expect(phonemizeWord("引っ越し")).toBe("çikko̞ɕi");
+        expect(phonemizeWord("学校")).toBe("ɡäkko̞ː"); // within one segment — unchanged
+    });
+
     test("moraic ん still assimilates ACROSS a segment boundary", () => {
         // per-segment conversion hid the next onset from a segment-final ん (健康 けん|こう → ke̞ɴko̞ː);
         // assimilation re-runs over the joined morae.
