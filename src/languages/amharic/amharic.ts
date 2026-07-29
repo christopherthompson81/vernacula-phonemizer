@@ -38,7 +38,10 @@ function numberToText(n: number): string {
     if (n < 20) return `${NUM.teenPrefix} ${NUM.units[n - 10]}`;
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return NUM.tens[String(t)]! + (u ? ` ${NUM.units[u]}` : "");
+        // tens are keyed "20".."90" — String(t) looked up "2".."9", got undefined, and every ten in the
+        // corpus was silently dropped (25 → "amɨst", 1998 → thousand-nine-hundred-EIGHT). 21.7% of FLEURS
+        // am_et utterances contain digits, so this was the single largest Amharic corpus defect.
+        return NUM.tens[String(t * 10)]! + (u ? ` ${NUM.units[u]}` : "");
     }
     if (n < 1000) {
         const h = Math.floor(n / 100), r = n % 100;
