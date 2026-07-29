@@ -13,3 +13,7 @@ PD + Tajik CC-BY-SA + our Tajik-derived silver IPA). Trained offline on the GPU
 nails ezafe (به نام خداوندِ جان و خرد → ba nɒme χodɒwande d͡ʒɒno χerad). ⚠ OUT-OF-DOMAIN (short/modern text) it can
 HALLUCINATE (خانه بزرگ → repetition) — it is **CLASSICAL-Persian scoped**, an OPTIONAL path that does NOT touch the
 default modern runtime. See docs/investigations/fa_shortvowel_restoration_investigation.md.
+
+**Digitization note:** the Persian Shahnameh text is public domain (Ferdowsi, d. 1020); the digital
+edition was obtained via Ganjoor (ganjoor.net), whose own digitization terms are unstated — treated
+as a faithful transcription of a PD work (no new copyright under the ADR-0001 analysis).

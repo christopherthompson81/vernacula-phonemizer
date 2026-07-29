@@ -20,8 +20,7 @@ by the git repo itself, so the repo-level license must account for them.
 
 The repo is structured as **MIT for the code and own-work data, with fenced data files that carry
 their parent licenses** (CC-BY-SA, CC-BY, CC0, and two GPL-lineage files), declared per file in
-this map. Remaining pre-publication work is §5 (small documentation/regeneration items) and §6
-(the license-file architecture itself).
+this map. Remaining pre-publication work is §5 — the license-file architecture itself.
 
 ---
 
@@ -32,6 +31,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | Artifact (shipped unless noted) | Upstream / basis | Status |
 |---|---|---|
 | `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.json` | CMUdict | Public domain |
+| `english/g2p-common.txt` | CMUdict ∩ Norvig count_1w frequency ranking | PD + facts (header) |
 | `danish/da-lexicon.tsv`, `da-g2p-tagger.int8.onnx` | NST Danish (Språkbanken sbr-26) | CC0 |
 | `norwegian/nb-lexicon.tsv`, `nb-g2p-tagger.onnx` | NST Norwegian (Nasjonalbiblioteket) | CC0 |
 | `swedish/accent-stress.tsv` | NST Swedish (abstract accent/stress features only) | CC0 |
@@ -97,13 +97,15 @@ data): `core/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
 **Models with share-alike training inputs under the training-as-use posture (ADR-0001):**
 `arabic/diacritizer.onnx` (arwiki silver), `arabic/diacritizer-egy.onnx` (arzwiki silver + MIT
 dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
-(UD-EWT → §5). Flagged individually in NOTICE with their training-data statements.
+(UD-EWT CC-BY-SA 4.0; sidecar). Flagged individually in NOTICE with their training-data statements.
 
 **tools-only:** the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
 CC-CEDICT check (all CC-BY-SA); 32 epitran outputs (epitran code MIT; wordlists often kaikki);
 hermitdave FrequencyWords lists (CC-BY-SA), used as **filters** for the CC0 NST lexica — the
 shipped intersections keep only NST content; the external ranking is the sole FrequencyWords
-contribution and is not reproduced (stated in NOTICE).
+contribution and is not reproduced (stated in NOTICE). `fa.synth-agreement.tsv` is EVAL-ONLY
+(one voter, FarsDat, has unrecorded terms — noted in `synth_referee.py`; no shipped content
+derives from it and it is not wired into referee-eval).
 
 ## 4. Copyleft — fenced under GPL
 
@@ -120,22 +122,7 @@ contribution and is not reproduced (stated in NOTICE).
 3. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
    in NOTICE; nothing distributed derives from it.
 
-## 5. Open items — identify, record, or regenerate
-
-1. `english/g2p-common.txt` — frequency-ordered common-word list of unknown origin. Regenerate
-   from CMUdict ∩ a PD frequency ranking and add a header.
-2. `english/pos-model.json` — trained on UD-EWT (CC-BY-SA 4.0), currently unrecorded. Record it
-   and either state the training-as-use posture or retrain on a permissive treebank.
-3. FarsDat (synth-referee voter, tools-only) — no acquisition path or license on record.
-   Document or drop the synth referee.
-4. `hebrew/he-lexicon.tsv` — name the Phase-A frequency list + license in the header.
-5. `tools/referee-eval/freq/nb.txt` and the arabic-restorer OpenSubtitles list — add
-   source+license notes (hermitdave CC-BY-SA presumed).
-6. Ganjoor (Shahnameh digitization, tools-only) — text PD; digitization terms unstated. Note it.
-7. `awa.saksena.tsv` / `bho.grammar-mined.tsv` — complete the citations (edition, pages).
-8. `arabic/diacritizer.PROVENANCE.md` says the .onnx is gitignored; it is tracked. Correct it.
-
-## 6. License architecture (to implement at publication)
+## 5. License architecture (to implement at publication)
 
 1. **Repo license: MIT** — covers all code, jsonc manifests, hand-authored tables, in-repo gold
    referees, and the §1 artifacts; the default for everything not fenced.
