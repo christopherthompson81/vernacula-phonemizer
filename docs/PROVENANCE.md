@@ -7,9 +7,9 @@ bringup investigation docs. Per-file provenance stays where it is; this document
 the licensing verdict.
 
 **Posture doc:** several provenance files cite ADR-0014 (facts-not-expression; *Feist*; *CCH
-Canadian* 2004 SCC 13). That ADR lives in the sibling repo
-(`espeak-ng-portable/docs/adr/0014-licensing-gplv3.md`), not here — it must be copied into this
-repo before publication, since four shipped artifacts lean on it.
+Canadian* 2004 SCC 13). Brought forward 2026-07-29 into this repo as
+`docs/adr/0014-licensing-gplv3.md` (verbatim from espeak-ng-portable, with an applicability
+preface: the GPL decision was that project's; this repo inherits the ANALYSIS only).
 
 **Shipped vs tools-only:** "shipped" = under `src/`, loaded by the runtime. "tools-only" = under
 `tools/` (referees, collectors, experiments); excluded from any npm package but still distributed
@@ -139,13 +139,27 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
      the output-level fact tables (none reproduces espeak's rules):
      - `turkish/stress.tsv` — **RESOLVED 2026-07-29**: espeak-seeded list replaced by a kaikki
        Turkish mine (2,103 non-final-stress lemmas, CC-BY-SA) + 8 adjudicated entries (PR #574).
-     - `vietnamese/rhymes.tsv` (375), `mandarin/syllable-ipa.tsv` (424) — exhaustive CLOSED-CLASS
-       inventories (every vi rhyme / every pinyin syllable): strongest facts posture (merger —
-       one way to enumerate a complete system); keep, with this statement. Optional lineage-cut:
-       re-derive the cmn table from epitran (MIT).
-     - `irish/lexicon.tsv` (7,572) — per-word facts, mechanically generated over an external
-       frequency wordlist, wikipron-normalized; Tashkeela-shaped facts posture (ADR-0014); keep.
-       (Re-mining wikipron gle would be fully circular with the ga referee.)
+     - `vietnamese/rhymes.tsv` (375) — **owner determination 2026-07-29: linguistic fact**
+       (exhaustive closed-class inventory of Vietnamese rhymes; merger — one way to enumerate a
+       complete system). Keep; MIT-safe under the ADR-0014 posture (now in docs/adr/).
+     - `catalan/mid-vowels.tsv` + `bl-gl-geminate.tsv` (10.4k) — **owner determination
+       2026-07-29: linguistic fact** (per-word mid-vowel quality / geminate class — dictionary
+       facts of Central Catalan, DCVB-verifiable; word selection is the external frequency
+       corpus, not espeak's). Keep; ADR-0014 posture.
+     - `mandarin/syllable-ipa.tsv` (424) — **kept after re-derivation test 2026-07-29**: the
+       full table was compared row-by-row against epitran cmn-Latn (MIT; the committed
+       `cmn.epitran-cmn-Latn.tsv` referee, same 424-syllable inventory). ~95% of rows are
+       convention-isomorphic (ɑ/a, superscript offglides vs i̯/u̯, ə/ɤ); residuals are standard
+       alternative ANALYSES (apical ɹ̩/z̩, er = ər/ɻ̩, labial+o = o/u̯ɔ, -iong = yŋ/i̯ʊŋ) plus
+       four outright epitran defects we do NOT share (bong→pu̯ɔnk, hng→xnk, fou→fu̯ɔu).
+       Re-deriving would change conventions the corpus depends on and import those bugs — so the
+       table stays, with epitran as row-level independent corroboration of the closed-class
+       facts posture.
+     - `irish/lexicon.tsv` (7,572) — **owner determination 2026-07-29: NOT an espeak-1.52
+       derivative.** espeak 1.52's `ga` was broken before the espeak-ng-portable work; the
+       engine that generated this lexicon is substantially the owner's own (unpublished) repair
+       work, and the per-word entries are mechanically-generated pronunciation facts over an
+       external frequency wordlist (Tashkeela-shaped ADR-0014 posture besides). Keep.
      - ja/thai/wu conduit data: parent licenses govern (kanjium/OpenJTalk/UniDic, ICU/PyThaiNLP,
        rime-wugniu) — already classified above.
 4. **Leipzig Corpora → `afrikaans/af-stems.txt`** — **RESOLVED 2026-07-29.** The Leipzig-derived
