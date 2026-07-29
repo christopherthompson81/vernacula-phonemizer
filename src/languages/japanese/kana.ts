@@ -115,8 +115,19 @@ export function kanaToMorae(word: string): string[] | null {
         lastVowel = vowelOf(m);
         i++;
     }
-    // Moraic ん assimilates to the following onset's place: n before coronals, ŋ before velars, m before labials,
-    // else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
+    return assimilateMoraicN(morae);
+}
+
+/**
+ * Moraic ん assimilates to the FOLLOWING onset's place: n before coronals, ŋ before velars, m before labials,
+ * else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
+ *
+ * Split out so it can run a second time over CONCATENATED segments: when a word is moraised per morpheme
+ * (segmentsToMorae, #552), a ん ending one segment cannot see the next segment's onset, and 健康 けん|こう
+ * came out ke̞ɴko̞ː instead of ke̞ŋko̞ː. Re-running over the joined morae fixes that, and is idempotent —
+ * an already-assimilated mora is no longer "ɴ", so the loop skips it.
+ */
+export function assimilateMoraicN(morae: string[]): string[] {
     for (let k = 0; k < morae.length; k++) {
         if (morae[k] !== "ɴ") continue;
         const o = morae[k + 1]?.[0] ?? "";
@@ -134,4 +145,29 @@ export function kanaToMorae(word: string): string[] | null {
 export function kanaToIpa(word: string): string | null {
     const morae = kanaToMorae(word);
     return morae === null ? null : morae.join("");
+}
+
+/**
+ * Morae for a word given as READING SEGMENTS (one per kanji reading; a literal-kana run is one segment).
+ *
+ * Long-vowel coalescence is confined to a segment, so the first vowel of one morpheme can never be absorbed
+ * into the previous morpheme's length: 経営 けい|えい → ke̞ːe̞ː (not ke̞ːːː), 聖域 せい|いき → se̞ːiki (not
+ * se̞ːːki), 子牛 こ|うし → ko̞ɯᵝɕi (not ko̞ːɕi). Issue #552.
+ *
+ * The mora COUNT is unchanged by this — a coalesced ː was already one mora — so accent-nucleus indices from
+ * the pitch dictionary keep pointing at the same mora. Only the vowel QUALITY is corrected.
+ *
+ * Returns null if any segment is not kana, matching kanaToMorae's contract.
+ */
+export function segmentsToMorae(segments: readonly string[]): string[] | null {
+    const out: string[] = [];
+    for (const seg of segments) {
+        if (seg === "") continue;
+        const m = kanaToMorae(seg);
+        if (m === null) return null;
+        out.push(...m);
+    }
+    // Re-run place assimilation over the JOINED morae: a ん ending one segment could not see the next
+    // segment's onset during per-segment conversion (健康 けん|こう → ke̞ɴko̞ː without this).
+    return assimilateMoraicN(out);
 }
