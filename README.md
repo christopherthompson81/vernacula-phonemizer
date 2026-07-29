@@ -15,47 +15,47 @@ import { phonemizeAsync } from "vernacula-phonemizer";
 
 // One line per script we ingest — real-world text (including UNDIACRITIZED abjads) → the same canonical IPA.
 // phonemizeAsync is the unified best-output entry: it restores the abjads' unwritten vowels from BARE input
-// (Hebrew עברית via the neural NAKDAN, Arabic العربية via the diacritizer) and uses each language's neural OOV
-// model where one exists (English's BiLSTM, bn/da/nb/fr taggers, the Perso-Arabic riders). Worst input, best
-// output. A language written in two scripts yields ONE canonical IPA either way (Tashelhit in Latin/Tifinagh,
-// Fula's Adlam, Bambara's N'Ko, Sundanese's Aksara Sunda, Zhuang's Sawndip). (A sync `phonemize` covers the simple cases.)
-await phonemizeAsync("I read a book", "en");  // Latin        → aᶦ ɹˈɛd ə bˈʊk
-await phonemizeAsync("Taclḥit", "shi");       // Berber Latin → taʃlħit
-await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi");       // Tifinagh     → taʃlħit
-await phonemizeAsync("𞤆𞤵𞤤𞤢𞥄𞤪", "ff");        // Adlam        → pˈulaːɾ
-await phonemizeAsync("ߓߊߡߊߣߊ߲", "bm");         // N'Ko         → bamanã
-await phonemizeAsync("Ελληνικά", "el");       // Greek        → elinika
-await phonemizeAsync("Україна", "uk");        // Cyrillic     → ukrajina
-await phonemizeAsync("Հայերեն", "hy");        // Armenian     → hɑjeɾen
-await phonemizeAsync("ქართული", "ka");        // Georgian     → kʰaɾtʰuli
-await phonemizeAsync("עברית", "he");          // Hebrew       → ʔivʁit
-await phonemizeAsync("भारत", "hi");           // Devanagari   → bʱˈaːɾət̪
-await phonemizeAsync("ਪੰਜਾਬੀ", "pa");         // Gurmukhi     → pˈə̃ɲd͡ʒaːbiː
-await phonemizeAsync("ગુજરાતી", "gu");        // Gujarati     → ɡˈud͡ʒɾat̪i
-await phonemizeAsync("বাংলাদেশ", "bn");       // Bengali      → baŋlad̪eʃ
-await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl");       // Syloti Nagri → silʈi
-await phonemizeAsync("ଓଡ଼ିଆ", "or");          // Odia         → ˈoɽia
-await phonemizeAsync("தமிழ்", "ta");          // Tamil        → t̪ˈɐmɪɻ
-await phonemizeAsync("తెలుగు", "te");         // Telugu       → t̪ˈeluɡu
-await phonemizeAsync("ಕನ್ನಡ", "kn");          // Kannada      → kˈanːaɖa
-await phonemizeAsync("മലയാളം", "ml");         // Malayalam    → mˈalajaːɭam
-await phonemizeAsync("සිංහල", "si");          // Sinhala      → sˈiŋhələ
-await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat");     // Ol Chiki     → santaɽi
-await phonemizeAsync("العربية", "ar");        // Arabic       → alʕarabˈijːa
-await phonemizeAsync("فارسی", "fa");          // Perso-Arabic → faːɾsˈiː
-await phonemizeAsync("አማርኛ", "am");           // Geʽez        → amaɾɲa
-await phonemizeAsync("မြန်မာ", "my");         // Myanmar      → mja˨ɴma˨
-await phonemizeAsync("လိၵ်ႈတႆး", "shn");        // Shan         → lik̚˧˧˨taj˥
-await phonemizeAsync("ខ្មែរ", "km");          // Khmer        → kʰmae
-await phonemizeAsync("ภาษาไทย", "th");        // Thai         → pʰˈaː˧saː˩˩˦tʰˌa˧j
-await phonemizeAsync("世界", "cmn");            // Han          → ʂʐ̩˥˩ t͡ɕiɛ˥˩
-await phonemizeAsync("ひらがな", "ja");           // Hiragana     → çiɾäɡäꜜnä
-await phonemizeAsync("カタカナ", "ja");           // Katakana     → kätäkänä
-await phonemizeAsync("日本語", "ja");            // Kanji        → niho̞ŋɡo̞
-await phonemizeAsync("한국어", "ko");            // Hangul       → hˈɐnɡuɡɘ
-await phonemizeAsync("ꦗꦮ", "jv");             // Javanese     → d͡ʒˈɔwɔ
-await phonemizeAsync("ᮞᮥᮔ᮪ᮓ", "su");           // Aksara Sunda → sˈunda
-await phonemizeAsync("བོད་སྐད", "bo");          // Tibetan      → pʰøʔ˩kɛʔ˥
+// (Hebrew עברית via the neural NAKDAN, Arabic العربية via the diacritizer) and uses each language's neural model
+// where one exists (English's BiLSTM, the bn/da/nb/fr/sd taggers, the Persian restorers, the Perso-Arabic riders).
+// Worst input, best output. A language written in two scripts yields ONE canonical IPA either way (Tashelhit in
+// Latin/Tifinagh, Fula's Adlam, Bambara's N'Ko, Sundanese's Aksara Sunda, Zhuang's Sawndip).
+await phonemizeAsync("I read a book", "en"); // Latin → aᶦ ɹˈɛd ə bˈʊk
+await phonemizeAsync("Taclḥit", "shi"); // Berber Latin → taʃlħit
+await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi"); // Tifinagh → taʃlħit
+await phonemizeAsync("𞤆𞤵𞤤𞤢𞥄𞤪", "ff"); // Adlam → pˈulaːɾ
+await phonemizeAsync("ߓߊߡߊߣߊ߲", "bm"); // N'Ko → bamanã
+await phonemizeAsync("Ελληνικά", "el"); // Greek → elinika
+await phonemizeAsync("Україна", "uk"); // Cyrillic → ukrajina
+await phonemizeAsync("Հայերեն", "hy"); // Armenian → hɑjeɾen
+await phonemizeAsync("ქართული", "ka"); // Georgian → kʰaɾtʰuli
+await phonemizeAsync("עברית", "he"); // Hebrew → ʔivʁit
+await phonemizeAsync("भारत", "hi"); // Devanagari → bʱˈaːɾət̪
+await phonemizeAsync("ਪੰਜਾਬੀ", "pa"); // Gurmukhi → pˈə̃ɲd͡ʒaːbiː
+await phonemizeAsync("ગુજરાતી", "gu"); // Gujarati → ɡˈud͡ʒɾat̪i
+await phonemizeAsync("বাংলাদেশ", "bn"); // Bengali → baŋlad̪eʃ
+await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl"); // Syloti Nagri → silʈi
+await phonemizeAsync("ଓଡ଼ିଆ", "or"); // Odia → ˈoɽia
+await phonemizeAsync("தமிழ்", "ta"); // Tamil → t̪ˈɐmɪɻ
+await phonemizeAsync("తెలుగు", "te"); // Telugu → t̪ˈeluɡu
+await phonemizeAsync("ಕನ್ನಡ", "kn"); // Kannada → kˈanːaɖa
+await phonemizeAsync("മലയാളം", "ml"); // Malayalam → mˈalajaːɭam
+await phonemizeAsync("සිංහල", "si"); // Sinhala → sˈiŋhələ
+await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat"); // Ol Chiki → santaɽi
+await phonemizeAsync("العربية", "ar"); // Arabic → alʕarabˈijːa
+await phonemizeAsync("فارسی", "fa"); // Perso-Arabic → faːɾsˈiː
+await phonemizeAsync("አማርኛ", "am"); // Geʽez → amaɾɲa
+await phonemizeAsync("မြန်မာ", "my"); // Myanmar → mja˨ɴma˨
+await phonemizeAsync("လိၵ်ႈတႆး", "shn"); // Shan → lik̚˧˧˨taj˥
+await phonemizeAsync("ខ្មែរ", "km"); // Khmer → kʰmae
+await phonemizeAsync("ภาษาไทย", "th"); // Thai → pʰˈaː˧saː˩˩˦tʰˌa˧j
+await phonemizeAsync("世界", "cmn"); // Han → ʂʐ̩˥˩ t͡ɕiɛ˥˩
+await phonemizeAsync("ひらがな", "ja"); // Hiragana → çiɾäɡäꜜnä
+await phonemizeAsync("カタカナ", "ja"); // Katakana → kätäkänä
+await phonemizeAsync("日本語", "ja"); // Kanji → niho̞ŋɡo̞
+await phonemizeAsync("한국어", "ko"); // Hangul → hˈɐnɡuɡɘ
+await phonemizeAsync("ꦗꦮ", "jv"); // Javanese → d͡ʒˈɔwɔ
+await phonemizeAsync("ᮞᮥᮔ᮪ᮓ", "su"); // Aksara Sunda → sˈunda
+await phonemizeAsync("བོད་སྐད", "bo"); // Tibetan → pʰøʔ˩kɛʔ˥
 ```
 
 ## Languages
@@ -137,27 +137,44 @@ Five G2P paradigms, chosen per language by how its orthography relates to its ph
   Odia, Telugu, Kannada, Malayalam, Tamil, Sinhala, …). It handles the inherent vowel, matras,
   virama/conjuncts, anusvara and nukta; each language layers on its own inherent-vowel
   deletion (or, for the Dravidian family, *no* deletion), gemination, and script specifics
-  (Malayalam's samvritokaram, Odia's retroflex flap, …). Devanagari relatives (Gujarati,
-  Marathi, Bhojpuri, Awadhi, Maithili) reuse the Hindi orchestration on top.
-- **Dictionary front-end** — where the script doesn't encode the reading. The seven Sinitic
+  (Malayalam's samvritokaram, Odia's retroflex flap, …). The Devanagari languages (Marathi,
+  Bhojpuri, Awadhi, Maithili, …) and Gujarati reuse the Hindi orchestration on top.
+- **Dictionary front-end** — where the script doesn't encode the reading. The nine Sinitic
   languages map Han → reading → IPA: Mandarin/Cantonese via pinyin/Jyutping dictionaries, Wu
-  and Min Nan via a romanization layer, and Jin/Hakka/Xiang via a shared engine
-  (`sinitic/hanDictIpa.ts`) over Wiktionary Sinological-IPA dictionaries with tone-sandhi.
+  and Min Nan via a romanization layer (Wugniu, Tâi-lô), and Gan/Hakka/Jin/Xiang via a shared
+  engine (`sinitic/hanDictIpa.ts`) over Wiktionary Sinological-IPA dictionaries with tone-sandhi.
   Japanese resolves kanji readings and pitch accent the same way.
 - **Abjad + vowel restoration** — for Arabic and the Perso-Arabic abjads (Urdu, Persian,
   Pashto, Sindhi), where short vowels are usually unwritten. Arabic ships a neural diacritizer
   that restores them; the others recover the consonant + long-vowel skeleton and restore short
   vowels from a coverage lexicon (+ a shared neural tier).
 - **Lexicon + statistical OOV** — where the orthography is irregular. English is a
-  CMUdict-derived lexicon + a cleanroom joint n-gram OOV model + a POS perceptron for
-  heteronyms; French is a Lexique-derived lexicon over a *loi-de-position* rule engine;
-  Nigerian Pidgin (an English-lexified creole) nativises known English words and reads the
-  substrate loans phonemically.
+  CMUdict-derived lexicon + a POS perceptron for heteronyms, with the OOV tail read by a BiLSTM
+  (or a cleanroom joint n-gram when the model is absent); French is a Lexique-derived lexicon
+  over a *loi-de-position* rule engine; Nigerian Pidgin (an English-lexified creole) nativises
+  known English words and reads the substrate loans phonemically.
+
+Nine languages have an **optional neural tier** on top of their engine (`languages/<lang>/<lang>Neural.ts`,
+dispatched by `neuralRegistry.ts`): a per-grapheme BiLSTM reading the OOV tail (English, Bengali,
+Danish, Norwegian, French, Sindhi), a niqqud restorer for Hebrew, the Persian restorers, and one
+multilingual harakat model shared by the Perso-Arabic riders (`languages/perso-arabic/`). Each is an
+ONNX model behind an *optional* `onnxruntime-node`; when the runtime or the model is absent the path
+degrades to the sync engine, so `phonemizeAsync` is always safe to call.
+
+Before any of that runs, a **text-normalization layer** rewrites what isn't lexical into words the
+engine can already pronounce, so no symbol reaches the phonemizer unspoken. Numbers go through
+per-language compositors (50 languages); percent, currency and unit abbreviations become each
+language's *own* words in the 25 languages wired so far (`40%` → "في المئة" / "yüzde kırk" /
+"百分之四十", `$5 million` → "5 million dollars"), with count agreement where the language needs it
+(the Slavic three-way, Welsh mutation, Irish counting-vs-attributive series). Dates, times, years
+and roman numerals are English-only — their rules are language-specific by nature, and the rest of
+the fleet is unwired.
 
 These sit on a small **shared core**: the abugida engine, quantity-sensitive weight stress,
 Ohala schwa/inherent-vowel deletion, pluggable number compositors (Indic, Turkic, and a shared
-Western/Slavic composer), clause assembly, and the canonical-IPA notation primitives. A per-language `*.jsonc`
-manifest holds the hand-authored data so the code stays a thin, portable interpreter.
+Western/Slavic composer), the symbol/unit normalizer, the shared structural-tagger runtime, clause
+assembly, and the canonical-IPA notation primitives. A per-language `*.jsonc` manifest holds the
+hand-authored data so the code stays a thin, portable interpreter.
 
 ## Correctness is measured, not asserted
 
@@ -192,24 +209,60 @@ flapping `t̬` and the weak vowel `ᵻ`. The notation primitives (`src/core/unic
 ## Usage
 
 ```ts
-import { phonemize, getPhonemizer } from "vernacula-phonemizer";
+import { phonemizeAsync, phonemize, getPhonemizer } from "vernacula-phonemizer";
 
-phonemize("नमस्ते", "hi");              // one-shot: text → IPA
-const ur = getPhonemizer("ur");         // reusable per-language instance
+await phonemizeAsync("نمسته", "ur"); // preferred: each language's best path
+phonemize("नमस्ते", "hi"); // synchronous: rules + lexicons only
+const ur = getPhonemizer("ur"); // reusable per-language instance
 ur.text("میرا نام");
 ```
 
-`phonemize(text, lang)` tokenises words, numbers (native number compositors) and clause
-punctuation, routes embedded Latin runs through the English phonemizer, and returns canonical
-IPA.
+Both entries tokenise words, numbers (native number compositors) and clause punctuation, route
+embedded Latin runs through the English phonemizer, and return canonical IPA.
+
+**Which entry to use.** `phonemizeAsync` is the unified best-output path and what you want for
+real text: it adds the neural tier where one exists and restores unwritten vowels in the abjads
+from bare input. `phonemize` is synchronous and complete for every language, with two caveats —
+the unpointed abjads (Arabic + dialects, Hebrew) expect *vocalized* input, and the nine
+neural-tier languages fall back to their rule/lexicon path.
 
 ## Repository layout
 
 ```
-src/languages/<lang>/   per-language module + *.jsonc manifest
-src/core/               shared engine (abugida, Sinitic dict, stress, schwa, numbers, notation)
-tools/referee-eval/     independent-referee validation harness + referees/
-docs/                   language-maturity.md
-docs/investigations/    per-language bring-up logs
-test/                   golden IPA tests
+src/index.ts            the public API (phonemize / phonemizeAsync)
+src/registry.ts         sync dispatch — one explicit row per language
+src/neuralRegistry.ts   async dispatch — the neural/restoration best paths
+src/core/               shared engine (abugida, Sinitic dict, stress, schwa, numbers,
+                        symbol normalizer, tagger runtime, notation) — code only
+src/languages/<lang>/   per-language module + *.jsonc manifest + data + any model/tagger
+                        + <lang>Neural.ts where a neural tier exists
+src/languages/perso-arabic/  the harakat model shared by the ur/ps/pa riders
+
+tools/gen/              generators that BUILD shipped data under src/languages/
+tools/referee-eval/     the independent-referee harness + referees/ + regression floors
+tools/eval/             one-off per-language validation vs an external source/benchmark
+tools/<lang>/           that language's model train/export pipeline (mirrors src/languages/)
+tools/corpus/           reusable wordlist/referee fetchers
+
+docs/language-maturity.md    per-language reliability + what's outstanding
+docs/PROVENANCE.md           every data artifact → upstream source → parent license
+docs/adr/                    licensing posture and other architecture decisions
+docs/investigations/         per-language bring-up logs
+test/                        golden IPA tests
 ```
+
+Nothing under `tools/` ships — `src/` is self-contained at runtime; `tools/` is the provenance
+and reproducibility record plus the measurement harnesses ([`tools/README.md`](tools/README.md)).
+
+## License & provenance
+
+The engine and this project's own work are **MIT**. Third-party-derived data keeps its parent
+license, declared per file — CC0/public-domain (CMUdict, the NST lexicons, HomoRich), permissive
+with attribution (pypinyin, rime-cantonese, Google language-resources, the Sindhi Open Lexicon),
+CC-BY-SA for the Wiktionary-family lexica, and two GPL-lineage data files. Every artifact is
+mapped to its source and license in [`docs/PROVENANCE.md`](docs/PROVENANCE.md); the reasoning —
+including when a mechanical table of linguistic facts does *not* inherit an upstream license — is
+[`docs/adr/0001-data-licensing-facts-posture.md`](docs/adr/0001-data-licensing-facts-posture.md).
+
+This project is **not** an espeak derivative: it is an original engine, and only linguistic facts
+were carried forward from the author's earlier espeak-based work.
