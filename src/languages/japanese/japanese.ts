@@ -6,6 +6,7 @@
  * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3. See docs/investigations/ja_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { kanaToIpa, kanaToMorae, segmentsToMorae } from "./kana.ts";
 import { applyReadingSegments, applyReadings, segmentText, headsCompound } from "./kanji.ts";
@@ -27,8 +28,15 @@ const TOKEN =
     /([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])/gu;
 const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass left un-converted (unresolved kanji)
 
+// #562 symbol normalization — Japanese: katakana loans, read by the ordinary kana engine.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["パーセント"],
+    units: { km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"] },
+});
+
 class JapanesePhonemizer implements Phonemizer {
     text(input: string): string {
+        input = SYMBOLS(input); // #562
         // Normalise full-width digits ０-９ → ASCII so the number path fires (３個 → さんこ, ２０２４年 → …); the \d
         // token and numberToKana are ASCII-only.
         input = input.replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));

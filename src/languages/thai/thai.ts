@@ -3,6 +3,7 @@
  * words in the frequency corpus are pre-segmented. text() tokenizes Thai runs / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeWord } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -47,9 +48,12 @@ function numberToThaiWords(n: number): string[] {
     return out;
 }
 
+// #562 symbol normalization — Thai: เปอร์เซ็นต์ (kaikki-attested /pɤː˧.sen˧/), read by the Thai g2p.
+const SYMBOLS = makeSymbolNormalizer({ percent: ["เปอร์เซ็นต์"] });
+
 class ThaiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToThaiWords(Number(m[2]))) sink.emit(phonemizeWord(wd));

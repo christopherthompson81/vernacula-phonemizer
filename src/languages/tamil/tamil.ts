@@ -6,6 +6,7 @@
  * context-sensitive and cannot be declarative. See docs/investigations/ta_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
@@ -116,9 +117,16 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([஀-௿]+)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Tamil: சதவீதம் (percent), standard loans for currency/units.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["சதவீதம்"],
+    currency: { "$": ["டாலர்"] },
+    units: { km: ["கிலோமீட்டர்"], cm: ["சென்டிமீட்டர்"], mm: ["மில்லிமீட்டர்"] },
+});
+
 class TamilPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

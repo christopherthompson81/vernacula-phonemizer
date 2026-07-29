@@ -6,6 +6,7 @@
  * See docs/investigations/zu_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -72,9 +73,17 @@ export function phonemizeWord(word: string, toneCodes?: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Zulu: loan plurals (amaphesenti, amadola, amakhilomitha).
+// mm/cm/mi/mph/kg units are NOT wired — no attested Zulu forms to hand; see #562.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["amaphesenti"],
+    currency: { "$": ["amadola"], "£": ["amaphawundi"] },
+    units: { km: ["amakhilomitha"] },
+});
+
 class ZuluPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
             if (m[1]) for (const part of phonemizeCompound(m[1])) sink.emit(part);

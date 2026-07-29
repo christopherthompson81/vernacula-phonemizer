@@ -7,6 +7,7 @@
  * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/am_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeGeezG2P } from "../../core/geez.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -64,10 +65,19 @@ const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+// #562 symbol normalization — Amharic: በመቶ "in a hundred" is THE standard percent construction
+// (Amharic media universal, after the number); currency/unit words are the standard loans, emitted in
+// Ge'ez script and read by the ordinary fidel g2p.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["በመቶ"],
+    currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
+    units: { kg: ["ኪሎግራም"] },
+});
+
 class AmharicPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

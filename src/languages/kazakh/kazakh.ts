@@ -7,6 +7,7 @@
  * See docs/investigations/kk_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
@@ -71,9 +72,17 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Kazakh: пайыз (percent), CYRILLIC unit abbreviations (the corpus writes
+// км/кг, not km/kg — the same trap as Russian).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["пайыз"],
+    currency: { "$": ["доллар"] },
+    units: { "км": ["километр"], "кг": ["килограмм"] },
+});
+
 class KazakhPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             // camelCase compound (proper-noun abbreviations like ҚазМұнайГаз) splits on internal capitals.
             if (m[1])
                 for (const part of m[1].split(/(?<=\p{Ll})(?=\p{Lu})/u))
