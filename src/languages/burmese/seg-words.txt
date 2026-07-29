@@ -1,5 +1,5 @@
 # Burmese word-segmentation set — MULTI-SYLLABLE headwords from kaikki + wikipron mya (CC-BY-SA), one per line.
-# Built by tools/build-my-segwords.ts. Used by burmese.ts (segmentByDag over syllable boundaries) to split the
+# Built by tools/gen/build-my-segwords.ts. Used by burmese.ts (segmentByDag over syllable boundaries) to split the
 # spaceless script into words so the voicing lexicon can fire. Single-syllable words are excluded on purpose.
 ကကတစ်
 ကကုသန်

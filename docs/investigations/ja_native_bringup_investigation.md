@@ -132,7 +132,7 @@ validated vs OpenJTalk (semi-circular anyway — we merged its data).
 
 Fair per-CHARACTER reading accuracy vs OpenJTalk (5684 non-number Tatoeba sentences, long-vowel-folded, after the
 は/へ fix): **97.7%** (whole-sentence exact 83.3% — harsh: one homograph fails a whole sentence). Comparable to cmn's
-CC-CEDICT 97.3%. Reusable tool: tools/ja-openjtalk-validate.mts. So the kanji reading front-end is ✅-level.
+CC-CEDICT 97.3%. Reusable tool: tools/eval/ja-openjtalk-validate.mts. So the kanji reading front-end is ✅-level.
 Fixed: full-width digits ０-９ were dropped (３個 → こ, the 3 lost) → normalise to ASCII in text() (３個 → さんこ,
 ２０２４年 → …). The residual ~2.3% per-char is homograph context (人 ひと/じん, 彼 かれ/あの, 気に入る→きにいる),
 は in fixed greetings (今日は/今晩は matched as whole words → は not converted), and the ゅう long-vowel convention.
@@ -152,7 +152,7 @@ Built `src/languages/japanese/counters.ts` (`readCounter(n, counter)`): number+c
 (broad by default: さん AND せん both rendaku, e.g. 本→ぼん, 軒→げん, 足→ぞく); `narrowThree` restricts it to digit-3
 (階: 3階さんがい but 1000階せんかい); `four` = post-よん handaku (分→ぷん, 泊→ぱく); `n4/n7/n9` Sino overrides; `irr`/`table`.
 
-Validated vs an OpenJTalk gold of 980 num×counter combos (`tools/ja-counter-validate.mts`, long-vowel-notation-folded,
+Validated vs an OpenJTalk gold of 980 num×counter combos (`tools/eval/ja-counter-validate.mts`, long-vowel-notation-folded,
 impossible combos like 13月/32日 skipped): **99.9% (941/942)**. The one "miss" is 1日 ついたち (calendar date) vs
 OpenJTalk's いちにち (one-day duration) — both correct, a semantic not a phonological divergence, so kept ついたち.
 Iterations that got there: 35.8% → 96.8% (data: 日/人 Sino 7/9, 分/泊 handaku four-form; algorithm: generalize the
@@ -206,7 +206,7 @@ Kyōto/Kagoshima DIALECTAL accents, not standard Tokyo; the note-less default is
 fully-independent scale referee does not exist. Per the user's steer, validate against OpenJTalk with the honest
 semi-circular caveat (OJT is one of the three voters).
 
-Ported the OpenJTalk eval into this repo: `tools/ja-pitch-eval.mts` + committed gold `tools/ja_pitch_reference.tsv`
+Ported the OpenJTalk eval into this repo: `tools/eval/ja-pitch-eval.mts` + committed gold `tools/eval/ja_pitch_reference.tsv`
 (2500 complete content words, OJT nucleus/mora/reading — OJT integers only, facts-not-expression). The eval computes
 OUR nucleus (accentNucleus) + morae (kanaToMorae), restricts to reading-matched + mora-aligned words (so it measures
 ACCENT not reading), and DISCOUNTS OOV-heiban coincidences (a word absent from the lexicon defaults to flat 0).

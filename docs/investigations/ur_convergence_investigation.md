@@ -97,7 +97,7 @@ convention mismatch, not neural failure. But the lift is MODEST (far from Arabic
 restoration via this shared multilingual BiLSTM is real but weak, and the reliable restoration is still
 lexicon-dominant (the neural adds a small OOV boost).
 
-**Existing infra:** `tools/arabic-restorer/eval_combined.ts` (coverage + neural-only + combined, type-level on
+**Existing infra:** `tools/perso-arabic/eval_combined.ts` (coverage + neural-only + combined, type-level on
 wikipron; lexicon-hit is circular by construction) and `eval_endtoend.ts` (held-out generalization on
 `eval_set.tsv`) already do this — but via the Python `predict_harakat.py` pipeline + the `.pt` model (not in this
 checkout), which is why the doc's "+18.6 held-out" couldn't be reproduced here with the shipped ONNX neural.

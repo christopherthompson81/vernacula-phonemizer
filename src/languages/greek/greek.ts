@@ -187,7 +187,7 @@ function scan(word: string, forceSyn: boolean): string {
 // A word (Greek letters) / number / punctuation. Greek uses ; as the question mark and · as a semicolon.
 // SYNIZESIS LEXICON — words that FULLY synize (an unstressed [i] before any vowel → glide/palatal), which the rule
 // can't predict (it's lexical: Κύριος keeps the [i] but κατοικία synizes). Built from the CROSS-SOURCE CONSENSUS of
-// wikipron∩kaikki (greek-synizesis.tsv; see tools/build-greek-synizesis.ts). Applied on the SHIPPED path only, never
+// wikipron∩kaikki (greek-synizesis.tsv; see tools/gen/build-el-synizesis.ts). Applied on the SHIPPED path only, never
 // in the rule engine — so the referee eval (phonemizeWordRules) stays non-circular.
 let LEXICON: Set<string> | undefined;
 const lexicon = (): Set<string> => {
@@ -207,7 +207,7 @@ export function phonemizeWord(word: string): string {
 export function phonemizeWordRules(word: string): string {
     return scan(word, false);
 }
-/** Word→IPA with synizesis FORCED at every site — used only by the lexicon builder (tools/build-greek-synizesis.ts). */
+/** Word→IPA with synizesis FORCED at every site — used only by the lexicon builder (tools/gen/build-el-synizesis.ts). */
 export function phonemizeWordForced(word: string): string {
     return scan(word, true);
 }

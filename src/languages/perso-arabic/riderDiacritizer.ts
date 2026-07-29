@@ -8,7 +8,7 @@
  * per-word restorer (one language TOKEN prepended, char sequence, argmax harakat per position). The int8 model
  * ships in-repo (like the Arabic diacritizer) but is optional at RUNTIME: if it — or `onnxruntime-node` — is
  * absent, the pre-pass degrades to a no-op and callers get the lexicon+default path. See
- * docs/investigations/arabic_script_restorer_investigation.md and tools/arabic-restorer/export_onnx.py.
+ * docs/investigations/arabic_script_restorer_investigation.md and tools/perso-arabic/export_onnx.py.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

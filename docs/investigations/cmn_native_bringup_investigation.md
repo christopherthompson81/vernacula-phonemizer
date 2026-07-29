@@ -135,7 +135,7 @@ loader parsing, code-point walk. LOW direct-API-only (negative int, "3." danglin
 
 The epitran referee (84.7%) only scores SYLLABLE→IPA segment quality — it never tests the Hanzi front-end
 (segmentation + polyphone choice), which is the substantive Phase-2 work. Validated it against CC-CEDICT (CC-BY-SA,
-124k entries) — INDEPENDENT of our pypinyin-derived dicts, so not circular. Tool: tools/cmn-cedict-validate.mts
+124k entries) — INDEPENDENT of our pypinyin-derived dicts, so not circular. Tool: tools/eval/cmn-cedict-validate.mts
 (regenerable; CC-CEDICT is a download, not committed). Compares segment(word) base pinyin vs CC-CEDICT citation
 pinyin, per syllable, over 103,760 Han-only words:
 
@@ -157,7 +157,7 @@ would test that, same lesson as the Arabic isolated-vs-prose axis.
 
 The CC-CEDICT check (Run 7) is isolated words; the untested axis was CROSS-WORD context polyphones. Validated against
 the g2pM CPP benchmark (10,254 real sentences, each a marked target polyphone ▁X▁ + gold pinyin) — the standard
-published context-polyphone test. Tool: tools/cmn-g2pm-context.mts (regenerable; g2pM + Unihan are downloads).
+published context-polyphone test. Tool: tools/eval/cmn-g2pm-context.mts (regenerable; g2pM + Unihan are downloads).
 
 - **plain (balanced): 87.9%** — better than pypinyin (~85%), below g2pM's neural (~97.5%).
 - **NATURAL-frequency-weighted: 97.7%** (each example weighted by Unihan kHanyuPinlu's real corpus count for its

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateAccent } from "../tools/sv-accent-eval.mts";
+import { evaluateAccent } from "../tools/eval/sv-accent-eval.mts";
 
 /**
  * Swedish tonal word-accent (1/2) regression floor vs wikipron — an INDEPENDENT source (English Wiktionary) of our

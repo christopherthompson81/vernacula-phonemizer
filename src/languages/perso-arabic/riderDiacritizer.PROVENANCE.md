@@ -10,7 +10,7 @@ Char-level BiLSTM (emb 128, hidden 512×2, 3 layers, 15.3M params), per-word: a 
 skeleton char sequence and the net emits one harakat label per position (19-label pausal scheme). **Warm-started**
 from the Arabic diacritizer checkpoint (`bilstm_pausal.pt`; the Arabic rows of the char/label maps are preserved by
 index) and fine-tuned on the mined rider labels. Trained on the GPU box:
-`tools/arabic-restorer/train_multilingual_harakat.py`.
+`tools/perso-arabic/train_multilingual_harakat.py`.
 
 ## Training data — MINED silver, permissively sourced
 The riders have no diacritized corpus, so harakat labels are MINED by g2p-inversion (`invert_harakat.ts`): for each
@@ -20,7 +20,7 @@ reproduces the reference IPA under the referee-eval fold. Reference IPA is from 
 a permissive CATT-teacher → Arabic-Wikipedia silver model (see `src/languages/arabic/diacritizer.PROVENANCE.md`).
 
 ## Build
-`tools/arabic-restorer/export_onnx.py` — loads `/mnt/data/ar-diac/bilstm_multilingual.pt`, exports fp32 ONNX,
+`tools/perso-arabic/export_onnx.py` — loads `/mnt/data/ar-diac/bilstm_multilingual.pt`, exports fp32 ONNX,
 verifies argmax parity vs PyTorch (must be exact), int8 dynamic-quantizes (≈4× smaller → 15.3 MB, on par with the
 Arabic model; 98.9% word-level argmax agreement with fp32 on the held-out set), and writes this file +
 `riderDiacritizer.meta.json` (char/label/lang-token maps). The fp32↔int8 gap is ≈1% of words.
@@ -35,7 +35,7 @@ bare default-schwa baseline: **+23.5 overall** (fa +29.0, ur +18.6, ps +4.1, pa 
 (lexicon → neural → default) the exact lexicon wins any word it covers; the neural handles the OOV tail.
 
 ## 2026-07-16 — fa silver regenerated FULL-DIACRITIZATION (model retrain pending)
-`tools/arabic-restorer/harakat.fa.silver.tsv` was re-mined with `FA_FULL_FOLD` (two-pass: full-diacritization —
+`tools/perso-arabic/harakat.fa.silver.tsv` was re-mined with `FA_FULL_FOLD` (two-pass: full-diacritization —
 a/e/o kept distinct, classical→Iranian i→e/u→o, final-ه a→e — then loose fallback). Diacritization density
 31%→48% (the old labels were short-vowel-blind: mined under the referee-eval fold that collapses a~e~o~i~u, so
 کتاب was labeled bare → the model learned to under-vocalize). The coverage LEXICON

@@ -18,13 +18,13 @@ Env: training runs under `/home/chris/base/bin/python3` (torch 2.9.1+cu128, CUDA
 1.23 w/ quantization). System `python3` has a broken `~/.local` torch — do not use it.
 
 Data on hand:
-- `tools/arabic-restorer/silver.hindiurdu.tsv` — 8,593 (skeleton, `urd`, **IPA**) from kaikki
+- `tools/perso-arabic/silver.hindiurdu.tsv` — 8,593 (skeleton, `urd`, **IPA**) from kaikki
   Hindi entries carrying a real Urdu-spelling form; gold IPA from the hi g2p (Devanagari
   writes the vowels), harmonized aː→ɑː. Real spellings, not synthetic (synthetic
   transliteration "sank Punjabi"). Regenerable — `/tmp/hi_kaikki.jsonl` (158 MB) is present.
-- `tools/arabic-restorer/harakat.ur.silver.tsv` — 5,304 (skeleton, `ur`, **vowelized Urdu**);
+- `tools/perso-arabic/harakat.ur.silver.tsv` — 5,304 (skeleton, `ur`, **vowelized Urdu**);
   needs g2p to become IPA.
-- `tools/arabic-restorer/lexicon.ur.tsv` — 8,120 (skeleton, `ur`, vowelized Urdu).
+- `tools/perso-arabic/lexicon.ur.tsv` — 8,120 (skeleton, `ur`, vowelized Urdu).
 - Referee: `tools/referee-eval/referees/ur.wikipron-urd-broad.tsv` — 7,709 human fully-voweled
   words. NON-CIRCULAR for the tagger (tagger trains on Hindi-derived + harakat silver, NOT
   wikipron). The shipped backbone eval (`ur.jsonc`) folds `[ɪʊ]→ə` and majhūl oː/eː quality —
@@ -39,7 +39,7 @@ vowel actually ɪ/ʊ (not the default ə), and how often is a majhūl long vowel
 default? If the gold is mostly plain ə anyway, the tagger has little to add; if it is rich
 in ɪ/ʊ/quality distinctions, that is the opportunity the default-ə baseline forfeits.
 
-**Finding — clear go.** Probe `tools/arabic-restorer/ur_tagger_probe.py`:
+**Finding — clear go.** Probe `tools/perso-arabic/ur_tagger_probe.py`:
 
 - **(a) training pool**: 8,593 (skeleton, IPA) pairs from the Hindi-derived silver (IPA
   direct, no g2p round-trip needed). Two more vowelized-Urdu sources (harakat 5,304 +
@@ -65,7 +65,7 @@ Hindi-derived IPA pool at a usable rate? (fa reached ~93% of words; masked the r
 Aspiration handled by giving ھ its own tag (ʰ/ʱ + following short vowel) so each char keeps
 one consonant; short vowels ə/ɪ/ʊ attach to the preceding consonant's tag as in fa.
 
-**Finding.** `tools/arabic-restorer/ur_train_tagger.py align` reaches **95%** aligned
+**Finding.** `tools/perso-arabic/ur_train_tagger.py align` reaches **95%** aligned
 (8,235/8,593) after adding: dental `n̪` / retroflex `ɳ` / palatal `ɲ` nasal-place
 assimilation to ن, gemination-as-doubling (ɾɾ, qq), and short `ɛ`/`ɔ` epenthetics (بحر
 bɛɦɛɾ). The 5% residual is foreign-loanword spellings (moritania→ʈ, doctor→ɔː), correctly

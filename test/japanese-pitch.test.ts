@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluatePitch } from "../tools/ja-pitch-eval.mts";
+import { evaluatePitch } from "../tools/eval/ja-pitch-eval.mts";
 
 /**
  * Japanese pitch-accent (downstep ꜜ) regression floor vs OpenJTalk. OpenJTalk is one of the three voters behind
