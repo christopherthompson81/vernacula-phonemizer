@@ -92,8 +92,9 @@ CC-BY-SA 4.0 — EDRDG requires **specific named attribution**, add to NOTICE).
 
 **Shipped model weights that the repo itself declares CC-BY-SA-inheriting:**
 `core/riderDiacritizer.onnx` (explicit "inherits CC-BY-SA 4.0"); `persian/fa-vowel-restorer.*.onnx`;
-`persian/fa-context-restorer.*.onnx` (Tajik CC-BY-SA component). These **cannot ship in an
-MIT-only package**; they stay fenced like the data.
+`persian/fa-context-restorer.*.onnx` (Tajik CC-BY-SA component); `french/lexicon.tsv` +
+`french/fr-g2p-tagger.int8.onnx` (Lexique 3.83, CC BY-SA 4.0 verified — §5.2). These **cannot ship
+in an MIT-only package**; they stay fenced like the data.
 
 **Models with share-alike training inputs but a stated training-as-use posture (ADR-0014):**
 `arabic/diacritizer.onnx` (arwiki CC-BY-SA silver), `arabic/diacritizer-egy.onnx` (arzwiki
@@ -172,10 +173,14 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
 
 1. `english/g2p-common.txt` — frequency-ordered common-word list, no header, no doc statement.
    Trivially regenerable from CMUdict ∩ any PD frequency ranking; do that and header it.
-2. **Lexique 3.83** (`french/lexicon.tsv`, fr tagger training) — license never stated in-repo.
-   Lexique's published terms have varied (research-use wording historically; recent versions
-   CC-licensed). **Verify against lexique.org for 3.83 specifically** before publication; if
-   restricted, the French lexicon needs a re-source (kaikki fr → CC-BY-SA fence).
+2. **Lexique 3.83** (`french/lexicon.tsv`, fr tagger training) — **VERIFIED 2026-07-29:
+   CC BY-SA 4.0.** Two corroborating sources: lexique.org states "licence Creative Commons
+   Attribution – Partage dans les mêmes conditions 4.0" (for the current Lexique 4.00), and
+   the openlexicon `Lexique383` distribution bundles `LICENSE-CC-BY-SA4.0.txt` for the 3.83
+   vintage specifically. Not a blocker — moves to the §3 share-alike fence; attribution
+   (New & Pallier, Lexique) added to the NOTICE list. `french/lexicon.tsv` header and
+   `fr-g2p-tagger.PROVENANCE.md` updated. The tagger, which reproduces Lexique pronunciations,
+   is classified with the CC-BY-SA-inheriting models in §3 (same reasoning as riderDiacritizer).
 3. `english/pos-model.json` — UD-EWT (CC-BY-SA 4.0) unrecorded; record + posture or retrain (§3).
 4. **FarsDat** (synth referee voter, tools-only) — no acquisition path or license on record.
    Document or drop the synth referee.

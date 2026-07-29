@@ -1,5 +1,7 @@
 # French pronunciation lexicon — word<TAB>IPA. Derived from Lexique 3.83 (lexique.org; New/Pallier),
-# a flat type-level pronunciation table (linguistic facts). The g2p engine (g2p.ts) handles OOV words.
+# licensed CC BY-SA 4.0 (verified 2026-07-29: lexique.org states CC BY-SA 4.0; openlexicon's Lexique383
+# distribution bundles LICENSE-CC-BY-SA4.0.txt). Derived work inherits CC BY-SA 4.0; attribution: New &
+# Pallier, Lexique. The g2p engine (g2p.ts) handles OOV words.
 a	a
 aa	aa
 abaca	abaka

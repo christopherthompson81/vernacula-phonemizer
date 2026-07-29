@@ -25,7 +25,8 @@ somewhat smaller than 76.6→94.9.
 
 ## Data + training
 
-- **Corpus:** Lexique 3.83 (lexique.org; New/Pallier) — `lexicon.tsv`, ~125k word→IPA forms (the same table the sync
+- **Corpus:** Lexique 3.83 (lexique.org; New/Pallier) — **CC BY-SA 4.0** (verified 2026-07-29: lexique.org's
+  license statement + openlexicon's bundled LICENSE-CC-BY-SA4.0.txt for Lexique383) — `lexicon.tsv`, ~125k word→IPA forms (the same table the sync
   engine ships). Cleanroom, no espeak.
 - **Alignment:** hard-EM many-to-{0,1,2} monotonic, parallelised (`tools/norwegian/nb_tagger_parallel.py`, `SEP=""` —
   French IPA is single-codepoint, nasal ɔ̃ = ɔ + combining tilde, so no separator needed).
