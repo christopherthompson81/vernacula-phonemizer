@@ -132,14 +132,22 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
      also small and *replaceable* — the DCVB/GDLC open-mid facts could be re-mined from the kaikki
      Catalan dump (→ CC-BY-SA fence) or hand-adjudicated (→ MIT). **Recommend replacement over
      defence.**
-   - *espeak-ng-portable* (our sibling repo, GPL-3.0-or-later as an espeak-ng derivative):
-     `irish/lexicon.tsv` (oracle-distilled from its `ga`), `turkish/stress.tsv`,
-     `vietnamese/rhymes.tsv`, `mandarin/syllable-ipa.tsv`, ja/thai/wu conduit data. **Decision
-     needed per artifact: was the espeak-ng-portable source data authored fresh there (you own it,
-     dual-license at will) or inherited from espeak-ng's GPL dictionaries (GPL taint)?** Where the
-     true parent is a third source (ja pitch = kanjium/OpenJTalk/UniDic; thai = ICU/PyThaiNLP;
-     wu = rime-wugniu), the parent license governs and espeak-ng-portable is only a conduit —
-     already classified above.
+   - *espeak-ng-portable* (our sibling repo, GPL-3.0-or-later as an espeak-ng derivative).
+     **Checked 2026-07-29: its `authoring/` dirs for espeak-supported languages are PATCHED espeak
+     dictsource files (authoring/ga/ga_rules carries espeak's "Ronan McGuirk 2013" header), not
+     cleanroom** — so nothing in the flagged set is unpublished own-authoring. Classification of
+     the output-level fact tables (none reproduces espeak's rules):
+     - `turkish/stress.tsv` — **RESOLVED 2026-07-29**: espeak-seeded list replaced by a kaikki
+       Turkish mine (2,103 non-final-stress lemmas, CC-BY-SA) + 8 adjudicated entries (PR #574).
+     - `vietnamese/rhymes.tsv` (375), `mandarin/syllable-ipa.tsv` (424) — exhaustive CLOSED-CLASS
+       inventories (every vi rhyme / every pinyin syllable): strongest facts posture (merger —
+       one way to enumerate a complete system); keep, with this statement. Optional lineage-cut:
+       re-derive the cmn table from epitran (MIT).
+     - `irish/lexicon.tsv` (7,572) — per-word facts, mechanically generated over an external
+       frequency wordlist, wikipron-normalized; Tashkeela-shaped facts posture (ADR-0014); keep.
+       (Re-mining wikipron gle would be fully circular with the ga referee.)
+     - ja/thai/wu conduit data: parent licenses govern (kanjium/OpenJTalk/UniDic, ICU/PyThaiNLP,
+       rime-wugniu) — already classified above.
 4. **Leipzig Corpora → `afrikaans/af-stems.txt`** — **RESOLVED 2026-07-29.** The Leipzig-derived
    list (CC-BY-NC) was replaced by a 53,344-word union rebuilt from afwiki (freq ≥ 25) +
    hermitdave OpenSubtitles + kaikki headwords — all CC-BY-SA (→ §3 fence). Referee eval
