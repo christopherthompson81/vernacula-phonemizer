@@ -108,6 +108,35 @@ describe("catalan canonical IPA", () => {
     });
 
     test("text: reduction + function-word destressing + punctuation", () => {
-        expect(phonemize("El gat menja peix.", "ca")).toBe("ɛɫ ɡˈat mˈeɲʒə pˈeʃ .");
+        expect(phonemize("El gat menja peix.", "ca")).toBe("əɫ ɡˈat mˈeɲʒə pˈeʃ ."); // el reduces: proclitic [ə] (was ɛɫ before the Run-27 fix)
+    });
+});
+
+// Proclitic vowel reduction (found by the FLEURS engine diff, Run 27). De-stressing a function word used to be
+// a post-hoc ˈ strip, applied AFTER reduce() had run with the word's only nucleus at the stress index — the
+// mark vanished but the vowel kept its stressed quality (el → ɛɫ). Central Catalan proclitics are [ə]; the
+// human referee attests em → "ə m", and espeak agrees (əl). Now the whole word reduces (stress = -1).
+describe("Catalan proclitic reduction", () => {
+    test("clitics reduce in running text", () => {
+        expect(phonemize("el gat", "ca")).toBe("əɫ ɡˈat");
+        expect(phonemize("del mar", "ca")).toBe("dəɫ mˈaɾ");
+        expect(phonemize("es posa", "ca")).toBe("əs pˈɔzə");
+        expect(phonemize("que ve", "ca")).toBe("kə bˈe");
+        expect(phonemize("ho fa", "ca")).toBe("u fˈa"); // ho — the famously [u] pronoun
+    });
+
+    test("keep-vowel function words lose only the mark", () => {
+        // the conjunction "o" resists reduction (contrast with u; referee: o → "o"), as do no/com.
+        expect(phonemize("blanc o negre", "ca")).toBe("bɫˈaŋ o nˈɛɣɾə");
+        expect(phonemize("no ve", "ca")).toBe("no bˈe");
+    });
+
+    test("content monosyllables keep their stressed vowel", () => {
+        expect(phonemize("mel", "ca")).toBe("mˈɛɫ");
+        expect(phonemize("tren", "ca")).toBe("tɾˈɛn");
+    });
+
+    test("citation form (phonemizeWord) is unchanged — stress + full vowel", () => {
+        expect(phonemizeWord("el")).toBe("ˈɛɫ");
     });
 });

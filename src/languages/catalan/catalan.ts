@@ -151,11 +151,17 @@ function finalPass(segs: Seg[], nucleiCount: number): void {
     if (dev !== undefined && !newLast.nucleus) newLast.ph = dev;
 }
 
-/** Phonemize a single Catalan word to canonical IPA (with a stress mark). */
-export function phonemizeWord(word: string): string {
+/** Phonemize a single Catalan word to canonical IPA (with a stress mark).
+ *
+ *  `unstressed`: treat the word as a PROCLITIC — no stress mark AND no stressed nucleus, so vowel
+ *  reduction covers every syllable (el→əɫ, del→dəɫ, em→əm). The old approach stripped the ˈ from the
+ *  finished IPA, which removed the mark but left the vowel with its stressed quality (ɛɫ) — reduction
+ *  had already run with the word's only nucleus at the stress index. The human referee attests the
+ *  reduced form (em → "ə m"); espeak agrees (əl). */
+export function phonemizeWord(word: string, unstressed = false): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";
-    const stress = stressedNucleus(word, segs);
+    const stress = unstressed ? -1 : stressedNucleus(word, segs);
     reduce(segs, stress);
     // lexical mid-vowel height: the stressed open default (ɛ/ɔ) → close (e/o) for flagged words (pedra→pˈeðɾə).
     if (stress >= 0) {
@@ -188,10 +194,18 @@ function numberTokenToWords(tok: string): string {
     return words;
 }
 
-/** Phonemize one running-text word, de-stressing unstressed monosyllabic function words. */
+// Function words that resist REDUCTION even though they are de-stressed: the conjunction "o" keeps [o]
+// (contrast with the vowel u — the referee attests o → "o"), and the adverbs no/com keep their vowel in
+// standard Central Catalan. They lose the stress MARK only.
+const KEEP_VOWEL = new Set(["o", "no", "com"]);
+
+/** Phonemize one running-text word; an unstressed monosyllabic function word is both de-stressed AND
+ *  vowel-reduced (el → əɫ, not ɛɫ), except the KEEP_VOWEL words, which only lose the mark. */
 function wordIpa(word: string): string {
-    const ipa = phonemizeWord(word);
-    return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
+    const lower = word.toLowerCase();
+    if (!FUNCTION_WORDS.has(lower)) return phonemizeWord(word);
+    if (KEEP_VOWEL.has(lower)) return phonemizeWord(word).replace("ˈ", "");
+    return phonemizeWord(word, true);
 }
 
 class CatalanPhonemizer implements Phonemizer {
