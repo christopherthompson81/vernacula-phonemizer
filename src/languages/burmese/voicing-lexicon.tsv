@@ -1,5 +1,5 @@
 # Burmese intervocalic-voicing lexicon — undiacritized word ⇥ per-syllable voicing flags ('1' = voice onset).
-# Mined from the kaikki gold by tools/build-my-voicing.ts (CC-BY-SA). Applied in burmese.ts; OOV → voiceless.
+# Mined from the kaikki gold by tools/gen/build-my-voicing.ts (CC-BY-SA). Applied in burmese.ts; OOV → voiceless.
 ကင်ပွန်း	01
 ကင်ပွန်းချဉ်	011
 ကင်းပုံ	01
@@ -1067,6 +1067,7 @@
 သရေစာ	001
 သရော်စာ	001
 သာဂူပူတင်း	0001
+သာမန်ကာလျှံကာ	00101
 သာယာဝတီ	0001
 သာသနာ	010
 သားကောင်	01

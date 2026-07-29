@@ -91,7 +91,7 @@ pattern: the eval stays rule-only/non-circular; the shipped path adds the lexico
 
 ## Run 7 — 2026-07-17 — synizesis lexicon (BUILT)
 
-Built the lexicon (tools/build-greek-synizesis.ts → greek-synizesis.tsv). A word is
+Built the lexicon (tools/gen/build-el-synizesis.ts → greek-synizesis.tsv). A word is
 added iff (a) wikipron and kaikki AGREE on it (consensus), (b) the rule's default
 output differs, and (c) forcing synizesis at every site EXACTLY reproduces the
 consensus. So it records the lexical fact "this word fully synizes", two-referee

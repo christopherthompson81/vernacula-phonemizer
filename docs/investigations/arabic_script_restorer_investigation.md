@@ -57,7 +57,7 @@ IPA-aligned data, how much, and what does that imply for a joint training set.
 
 ## Run 2 — 2026-07-15 — build the silver training set
 
-`tools/arabic-restorer/build_silver.py` (+ PROVENANCE.md, cache/ gitignored). Fetches the `broad` scrape for each
+`tools/perso-arabic/build_silver.py` (+ PROVENANCE.md, cache/ gitignored). Fetches the `broad` scrape for each
 of the 19 abjad-beneficiary languages, strips orthographic diacritics to the undiacritized SKELETON (the model's
 runtime input), pairs it with the vowel-bearing IPA, dedups → `silver.tsv` (`skeleton⇥lang⇥ipa`, ~1.5 MB).
 
@@ -76,7 +76,7 @@ not an eval reference. Curate a held-out per-language eval slice separately; don
 
 ## Run 3 — 2026-07-15 — normalize the IPA target inventory
 
-`tools/arabic-restorer/normalize_ipa.py` → `silver.normalized.tsv` + `inventory.txt`. The raw wikipron IPA had
+`tools/perso-arabic/normalize_ipa.py` → `silver.normalized.tsv` + `inventory.txt`. The raw wikipron IPA had
 **411 distinct phone tokens** over 297k occurrences — a long tail of per-editor notation drift. Harmonized to a
 single canonical alphabet the same way the referee-eval folds work: **strip notation, never a real contrast.**
 
@@ -255,7 +255,7 @@ contradictory supervision. Fix (before enabling `--crossscript`): give the inver
 for default-ə, matching real undiacritized text. Silver-only retrain (99-char vocab) reconfirms the working model:
 end-to-end **+18.4** (fa +26.4, ps +8.0, ur +5.4; pa noisy on n=37).
 
-**Durable docs (the training knowledge was being lost).** `tools/arabic-restorer/MODEL_NOTES.md` now captures the
+**Durable docs (the training knowledge was being lost).** `tools/perso-arabic/MODEL_NOTES.md` now captures the
 whole thing — GPU-box env (`/mnt/data/ar-diac-venv`), checkpoints (`bilstm_pausal.pt` = the warm-start), the 19-label
 scheme, the fine-tune recipe, every pipeline script, results, the cross-script mechanism + open issue, and how to
 extend to a new language. Memory note `harakat_restorer_training` points to it.

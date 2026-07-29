@@ -5,9 +5,9 @@ to IPA — the CONTEXT restorer. Unlike the word-level `fa-vowel-restorer` (whic
 whole sentence, so it resolves the homograph / ezafe / connector ambiguities that only context fixes (Run 5). Two
 int8 graphs, autoregressive; output is already Iranian (trained on the Iranian-normalised corpus).
 
-**Training data:** the aligned-Shahnameh parallel corpus (tools/fa-restoration/parallel/, 39k hemistichs; Ferdowsi
+**Training data:** the aligned-Shahnameh parallel corpus (tools/persian/parallel/, 39k hemistichs; Ferdowsi
 PD + Tajik CC-BY-SA + our Tajik-derived silver IPA). Trained offline on the GPU
-(tools/fa-restoration/export_context_onnx.py).
+(tools/persian/export_context_onnx.py).
 
 **Measured:** IN-DOMAIN (Shahnameh) it beats the word-level model by **+18.8pp** on held-out sentences (Run 15) and
 nails ezafe (به نام خداوندِ جان و خرد → ba nɒme χodɒwande d͡ʒɒno χerad). ⚠ OUT-OF-DOMAIN (short/modern text) it can

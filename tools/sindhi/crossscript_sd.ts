@@ -6,7 +6,7 @@
  * Sindhi retains (اسلام → इस्लामु islāmu). Wiktionary links the two forms of the SAME word, so this is not cognate
  * transfer (the Urdu←Hindi "Hindi-fill" path, which scored only 50.3%): it is the same lexeme in two scripts.
  *
- * This is the mechanism `tools/arabic-restorer/crossscript_pa.ts` built for Punjabi (Gurmukhi→Shahmukhi) and
+ * This is the mechanism `tools/perso-arabic/crossscript_pa.ts` built for Punjabi (Gurmukhi→Shahmukhi) and
  * explicitly named "sd↔Devanagari" as a generalization target.
  *
  * Method, mirroring crossscript_pa.ts:

@@ -39,7 +39,7 @@ letter), inserted after the nucleus (before a ɴ/ʔ coda). Rules: explicit marks
 bare-inherent / short `ိ`/`ု`→creaky, else (long `ီ`/`ူ`, `ာ`, `ေ`, `ို`) low. Minor `ə` syllables are toneless.
 The dot-below can sit between the coda letter and its asat (`ကန့်`) — handled in the coda scan.
 
-**Tone eval** (`tools/my-tone-eval.ts`, tone-category sequence ours-Chao ↔ referee-diacritics): **99.6% mono
+**Tone eval** (`tools/eval/my-tone-eval.ts`, tone-category sequence ours-Chao ↔ referee-diacritics): **99.6% mono
 (2010/2019), 97.6% per-syllable aligned** vs kaikki (same vs wikipron) — beats the prior bring-up's 92.2%. The
 whole-word sequence is 79.9%, deflated almost entirely by syllable-count mismatch (1340 length vs 290 tone), i.e.
 the still-deferred minor-syllable-reduction problem, not the tone rules. The segmental eval folds the creaky `ˀ`
@@ -53,7 +53,7 @@ allow onset-voicing substitutions) said **+14.1 pts recoverable** (55.9→70.0% 
 Voicing is LEXICAL (compound-boundary governed, ~68% rule-predictable → over-applies as a rule), so it is a
 per-word lexicon like the old espeak-ng-portable bring-up. Refactored the g2p into `syllabify()` (onset + body) so
 voicing can target an onset without re-parsing, added a `voicing` map (k→ɡ, t→d, s→z, t͡ɕ→d͡ʑ, θ→ð, aspirates→plain
-voiced) + `voicing-lexicon.tsv` (word → per-syllable '0'/'1' flags). `tools/build-my-voicing.ts` mines it: syllabify
+voiced) + `voicing-lexicon.tsv` (word → per-syllable '0'/'1' flags). `tools/gen/build-my-voicing.ts` mines it: syllabify
 each kaikki word, greedily align our syllables to the folded gold allowing each onset to voice; if the whole gold is
 reproduced and ≥1 onset voiced, emit the flag string. **Word-INITIAL voicing is refused unless the syllable is a
 minor ə** (ကစား→ɡəza ok; ကား→ɡá is a compound-sandhi citation artifact, wrong in isolation → skipped). The pass only
@@ -67,7 +67,7 @@ ADDS voicing; OOV words keep the careful voiceless reading, so it can't regress 
 
 ## Result — ✅ (reliable) — the hardest script, all layers built
 **SHIPPED 95.7% wikipron / 99.8% kaikki** FOLDED (pronunciation lexicon + rules). Every layer is built: TONES
-(99.6% mono, `tools/my-tone-eval.ts`), VOICING sandhi (per-word lexicon), WORD SEGMENTATION (DAG over syllable
+(99.6% mono, `tools/eval/my-tone-eval.ts`), VOICING sandhi (per-word lexicon), WORD SEGMENTATION (DAG over syllable
 boundaries, 100%/99.7% recovery; voicing fires on running text), the rule-based SEGMENTAL core (rime chart,
 stacked-conjunct codas, ⟨ွ⟩ glide, medial ှ/ျ ordering), and the LEXICAL layer (dictionary.tsv, 2110 mined
 corrections). Trust the output. Moved 🟡→✅ on the same basis as **cs/cy** (a pronunciation lexicon closes the
@@ -93,7 +93,7 @@ Burmese is SPACELESS: a text run is one token, so the per-word voicing lexicon c
 - **Boundaries = syllable starts.** `syllabify()` now returns each syllable's `start` (code-point index, handling
   the stacked-conjunct case where the upper member ကမ္ဘာ`မ` belongs to the next syllable). A word may begin/end
   only at a syllable start, so the DAG never splits mid-syllable.
-- **seg-words.txt** = 6687 MULTI-syllable headwords from kaikki + wikipron (`tools/build-my-segwords.ts`). Single-σ
+- **seg-words.txt** = 6687 MULTI-syllable headwords from kaikki + wikipron (`tools/gen/build-my-segwords.ts`). Single-σ
   words are excluded (they'd shatter unknown runs and beat correct longer words in the fewest-tokens DAG). Every
   ≥2-σ referee headword is therefore in the set → segments to ITSELF, so the per-word eval is unaffected.
 - **Wiring.** `phonemizeWord(token)` = `segment(token).map(phonemizeSubword).join(" ")` (the Thai pattern);
@@ -106,7 +106,7 @@ Segmental eval UNCHANGED (69.0/71.4% — referee words segment to themselves; +1
 ## Run — 2026-07-16 (cont.) — PRONUNCIATION LEXICON — the 🟡→✅ lexical layer
 
 The rule engine was correct for the derivable bulk; the residual was a per-word LEXICAL tail. Added a pronunciation
-lexicon (the Thai `dictionary.tsv` pattern) mined from the kaikki gold: `tools/build-my-dict.ts` stores the CORRECT
+lexicon (the Thai `dictionary.tsv` pattern) mined from the kaikki gold: `tools/gen/build-my-dict.ts` stores the CORRECT
 pronunciation IN OUR CONVENTION for every word the rule g2p gets wrong (2110 entries). Conversion is clean —
 kaikki marks tone with a combining diacritic exactly where our Chao letter goes (`mjàɴmà` → NFD → replace `̀→˨` →
 `mja˨ɴma˨`). Applied in `phonemizeSubword` as an authoritative exact-word override before the rules; OOV → rules.

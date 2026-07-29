@@ -35,7 +35,7 @@ const URDU_WORD = "ء-ٟٮ-ۓە-ۜ۞-ۿ";
 // COVERAGE layer: an undiacritized skeleton whose vocalization we've mined is looked up here and returned as
 // canonical IPA DIRECTLY, short-circuiting the g2p's default-schwa guess. Urdu stores IPA (not harakat) because
 // harakat can't encode the majhūl ی=iː~eː / و=oː~uː distinction the cross-script Hindi gold provides; see
-// tools/arabic-restorer/build_ur_ipa_lexicon.ts. Entries are UNSTRESSED (weight-stress applied at lookup).
+// tools/perso-arabic/build_ur_ipa_lexicon.ts. Entries are UNSTRESSED (weight-stress applied at lookup).
 // Loaded LAZILY (registry.ts imports every rider eagerly; the TSV is only read on first Urdu use).
 let LEXICON: ReadonlyMap<string, string> | undefined;
 function ipaLexicon(): ReadonlyMap<string, string> {
@@ -48,7 +48,7 @@ export function coverageLexicon(): ReadonlyMap<string, string> {
 
 /**
  * Post-g2p canonicalisation (UNSTRESSED): turn raw g2p output into final canonical IPA. Shared by the core and the
- * IPA-lexicon BUILDER (tools/arabic-restorer/build_ur_ipa_lexicon.ts) so a stored lexicon value is byte-identical to
+ * IPA-lexicon BUILDER (tools/perso-arabic/build_ur_ipa_lexicon.ts) so a stored lexicon value is byte-identical to
  * what the core would emit — the lexicon short-circuit then only needs weight-stress, not this whole tail.
  *   - deleteMedialSchwa: the g2p inserts a default [ə] for every unwritten short vowel; Urdu (like Hindi) DELETES it
  *     in a medial V·C·ə·C·V context so clusters surface bare (پاکستان → pɑːkst̪ɑːn). Explicit vowels are marked with

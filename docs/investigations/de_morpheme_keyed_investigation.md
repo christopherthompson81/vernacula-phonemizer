@@ -25,7 +25,7 @@ whereas morpheme-keying would still correct each known morpheme. The in-corpus r
 (b) morpheme-keyed = compose morphemes each with its OWN dict entry + local ordinals, vs (c) whole-word = the exact
 in-corpus ceiling. If (b) ≫ (a), the morpheme form generalizes better; the referee number just won't show it.
 
-## Run 2 — 2026-07-24 — holdout experiment (tools/de-morpheme-holdout.mts)
+## Run 2 — 2026-07-24 — holdout experiment (tools/eval/de-morpheme-holdout.mts)
 
 Held out the whole-word dict entry for the 1163 in-corpus COMPOUNDS (≥2 stems, whole word known in stress.tsv) and
 phonemized three ways:

@@ -19,9 +19,9 @@ HUMAN, fully-voweled abjad→IPA source: **9,257 unique words (broad)** / 10,712
 It is currently wired only as a *folded* eval referee (the short vowels are folded away as "unrecoverable"), and
 fa's restorer trains on Arabic Tashkeela silver instead of this Persian human gold.
 
-Built the cleaned gold `tools/fa-restoration/fa-abjad-ipa-gold.tsv` (broad, deduped, homograph variants kept as
+Built the cleaned gold `tools/persian/fa-abjad-ipa-gold.tsv` (broad, deduped, homograph variants kept as
 tab fields, single-letter name citations dropped) and measured fa's CURRENT output through the *same* normalization
-pipeline twice (`tools/fa-restoration/measure.ts`):
+pipeline twice (`tools/persian/measure.ts`):
 
 | metric | score | meaning |
 |---|---|---|
@@ -88,7 +88,7 @@ ceiling" caveat from Run 1.
 
 ## Run 3 — Tajik as a Persian pronunciation oracle: validated, but alignment is the wall (2026-07-19)
 
-Built the cross-script pipeline (`tools/fa-restoration/tajik-align.ts`): transliterate a Tajik Cyrillic word to a
+Built the cross-script pipeline (`tools/persian/tajik-align.ts`): transliterate a Tajik Cyrillic word to a
 Persian consonant+long-vowel SKELETON (collapsing the Arabic letter classes Tajik merged — س ص ث / ز ذ ض ظ / ت ط /
 ه ح — so it can match the real fa spelling), and derive Persian IPA from the Tajik pronunciation by remapping the
 Persian/Tajik divergences: **Tajik ɔ→Persian ɒ** (ā), the **majhul merger ɵ→u**, **в=v→w**, ʁ→ɣ, and a
@@ -131,7 +131,7 @@ POSITIONAL (same poem, same order) so the skeleton ambiguity never arises.
 - Persian side: **Ganjoor** (api.ganjoor.net, Ferdowsi id 4 → Shahnameh cat 33 → آغاز کتاب cat 34 → poem 1321);
   Ferdowsi is public domain.
 
-**POC built** (`tools/fa-restoration/parallel/shahnameh-opening.fa-tg-ipa.tsv`, 30 lines): the two editions align
+**POC built** (`tools/persian/parallel/shahnameh-opening.fa-tg-ipa.tsv`, 30 lines): the two editions align
 line-for-line (به نام خداوندِ جان و خرد ↔ Ба номи худованди ҷону хирад), and the tg engine + remap gives the IPA
 per line → a clean running-text triplet corpus.
 
@@ -152,7 +152,7 @@ IPA into true Persian IPA.
 ## Run 5 — are the divergences regular, and do they beat fa's current restorer? (2026-07-20)
 
 Two questions (Chris): do the tg↔fa divergences correspond regularly, and can Tajik predict the short vowels fa
-currently gets wrong? Measured directly (`tools/fa-restoration/divergence-analysis.ts`) on the 965 tg↔fa cognates
+currently gets wrong? Measured directly (`tools/persian/divergence-analysis.ts`) on the 965 tg↔fa cognates
 — Tajik-derived IPA AND fa's current engine, both vs the true fa gold (short vowels counted, notation folded):
 
 | on the 965 cognates | == fa gold |
@@ -184,14 +184,14 @@ Tajik nor the abjad can disambiguate context-free — that's the ceiling the *se
 
 Built the dataset, trained a model on the GPU (`/mnt/data/ar-diac-venv`, torch+cuda), and tested whether it aligns
 closer to the expected IPA. **Architectural pivot (Chris): target IPA, not harakat** — where we diverge from the
-mature `tools/arabic-restorer/` pipeline (skeleton→harakat→[g2p]→IPA).
+mature `tools/perso-arabic/` pipeline (skeleton→harakat→[g2p]→IPA).
 
 **The evidence for the pivot is concrete.** Feeding our Tajik-derived silver through the harness's g2p-inversion
 labeler (harakat target) labeled only **981 / 2400 (40.9%)** — the other **59% were LOST** because their true IPA
 can't be expressed as harakat the g2p reproduces (ezafe, و, final ه — exactly the harakat blind spots). Targeting
 the IPA vowel directly keeps all of it.
 
-**Model** (`tools/fa-restoration/train_ipa_bilstm.py`): a 2-layer char-level **BiLSTM per-position tagger** over
+**Model** (`tools/persian/train_ipa_bilstm.py`): a 2-layer char-level **BiLSTM per-position tagger** over
 fa's g2p skeleton (consonants + long vowels + default-[a] slots); it predicts the correct IPA vowel at each short
 slot directly. Dataset = the 9.3k wikipron abjad→IPA gold + the 2.4k Tajik-derived silver (1,335 words new beyond
 wikipron). Held-out on UNSEEN words:
@@ -261,7 +261,7 @@ decisive. Replaced the per-position frame-tagger (which reads fa's collapsed g2p
 +9–14pp — the model sees the و/ی/ه and word structure the frame discarded, and isn't constrained to the frame's
 slots (so it handles ezafe/insertions). **And the Tajik silver now helps MORE (+4.4pp vs +1.5pp on the tagger)** —
 the stronger model exploits the extra data better; augmentation scales with capacity. Net: **16% → 45.8% ≈ 3× the
-OOV baseline** (`tools/fa-restoration/train_ipa_seq2seq.py`, GPU).
+OOV baseline** (`tools/persian/train_ipa_seq2seq.py`, GPU).
 
 Remaining levers, now correctly ordered: (1) ship it — ONNX export + TS inference (the arabic-restorer runtime
 pattern); (2) the aligned parallel corpus (Run 4) for the ezafe/homograph CONTEXT (the shared-merger ceiling);
@@ -269,7 +269,7 @@ pattern); (2) the aligned parallel corpus (Run 4) for the ezafe/homograph CONTEX
 
 ## Run 9 — shipping foundation: ONNX export + TS inference proven (2026-07-20)
 
-Exported the single-pass frame-tagger to **ONNX** (`tools/fa-restoration/export_tagger_onnx.py`, opset 17, 2.4 MB,
+Exported the single-pass frame-tagger to **ONNX** (`tools/persian/export_tagger_onnx.py`, opset 17, 2.4 MB,
 32 input tokens × 12 labels) and ran it from TypeScript via **`onnxruntime-node`** (the repo's optional, lazy,
 degrade-to-no-op runtime — same pattern as `src/core/riderDiacritizer`). End-to-end works: fa g2p frame → tokenize
 → ONNX → argmax → corrected IPA.
@@ -295,7 +295,7 @@ Productionised the abjad→IPA seq2seq (Run 8, 45.8%) end to end.
 
 **Model artifacts** (`src/languages/persian/`): the two graphs exported to ONNX (encoder + decoder-step) and
 **int8-quantised** — `fa-vowel-restorer.enc.onnx` (2.3 MB) + `.dec.onnx` (2.6 MB) + `.meta.json` + `.PROVENANCE.md`.
-Exported by `tools/fa-restoration/export_s2s_onnx.py` on the GPU venv; int8 output is byte-identical to fp32.
+Exported by `tools/persian/export_s2s_onnx.py` on the GPU venv; int8 output is byte-identical to fp32.
 
 **TS inference** (`vowelRestorer.ts`): `createFaVowelRestorer()` loads the graphs via the OPTIONAL `onnxruntime-node`
 (the riderDiacritizer pattern — resolves to `undefined`, i.e. a clean no-op, if the dep or model is absent). It
@@ -331,7 +331,7 @@ So the shipped neural tier is a **real, positive** production improvement (+3.5p
 and it never hurts covered words (lexicon precedence). It's modest, honestly: 49% Iranian on the OOV tail reflects
 the **homograph/ezafe shared-merger ceiling** (Run 5) that word-level restoration can't break — the parallel-corpus
 CONTEXT model is the lever past it. (Beam(5) adds +1.5pp on the classical held-out — a cheap decode-side gain to
-port to the TS inference.) The eval is `tools/fa-restoration/eval_iranian.ts`.
+port to the TS inference.) The eval is `tools/persian/eval_iranian.ts`.
 
 ## Run 12 — beam search ported to the shipped inference (2026-07-20)
 
@@ -355,14 +355,14 @@ The Run-4 POC was 30 aligned lines; a context model needs thousands. Scaled it: 
 Shahnameh** (777 poems → 99,220 Persian hemistichs) and aligned it to the **full Tajik edition** (8 jilds →
 91,443 hemistichs, HF shahnameh-tajik-corpus).
 
-**Alignment = exact CONSONANT-skeleton match** (`tools/fa-restoration/align_shahnameh.ts`). Positional alignment
+**Alignment = exact CONSONANT-skeleton match** (`tools/persian/align_shahnameh.ts`). Positional alignment
 fails (edition drift + Tajik section-headings), and hemistich exact-match on the full skeleton was 0.4% — because
 Tajik writes the short u→و and izofat -и→ی the abjad omits, so the matres diverge. Dropping the matres (ا و ی) and
 matching CONSONANTS ONLY is edition-stable and position-agnostic (a hash match, so drift is irrelevant): **5,734
 matches → 5,375 deduped clean aligned hemistichs (~31k in-context word tokens)**. Recall is ~6% (one variant word
 breaks a hemistich) but precision is high — random spot-checks are all correct (Kaykhosrow, Siyâvash, …).
 
-`tools/fa-restoration/parallel/shahnameh-aligned.fa-tg-ipa.tsv` — permissive (Ferdowsi PD + Tajik CC-BY-SA + our
+`tools/persian/parallel/shahnameh-aligned.fa-tg-ipa.tsv` — permissive (Ferdowsi PD + Tajik CC-BY-SA + our
 IPA). This is the **data foundation for the context model** — the sentence context is exactly what the
 homograph/ezafe shared-merger ceiling (Run 5) needs and word-level restoration structurally lacks. Recall-boost
 lever = fuzzy/anchored alignment (≤1 variant word); the next build = a sentence-level model trained on this corpus.
@@ -378,12 +378,12 @@ reordering corrupt the position estimate). A position-agnostic length-bucket + m
 (3k lines = minutes → 99k = hours). The fix was a **trigram inverted index**: 3k lines in 10.5s, extrapolating
 cleanly — so the full run was worth it.
 
-**Full fuzzy** (`tools/fa-restoration/fuzzy_align_shahnameh.py`, trigram candidates → bounded edit-distance ≤2,
+**Full fuzzy** (`tools/persian/fuzzy_align_shahnameh.py`, trigram candidates → bounded edit-distance ≤2,
 each tg used once): **39,949 pairs → 39,080 deduped triplets (~224k in-context words)** — d=0 5,464, d=1 15,272,
 d=2 19,213. Precision stays high: random edit-2 pairs across the corpus are all correct (the residue is the
 matres, not different lines). **7.3× the exact-only corpus.**
 
-`tools/fa-restoration/parallel/shahnameh-aligned.fa-tg-ipa.tsv` is now a substantial context corpus. The lesson
+`tools/persian/parallel/shahnameh-aligned.fa-tg-ipa.tsv` is now a substantial context corpus. The lesson
 (Chris's question): a scope-limited pass is what surfaced that the index — not brute force — was the lever.
 
 ## Run 15 — the CONTEXT model: sentence-level beats word-level by +18.8pp (2026-07-20)
@@ -414,7 +414,7 @@ core question — does context break the ceiling? — is answered: **yes, +18.8p
 Shipped the sentence-level context model end to end, the same pipeline as the word restorer.
 
 **Artifacts** (`src/languages/persian/`): `fa-context-restorer.{enc,dec}.onnx` (int8, ~5 MB) + meta + PROVENANCE,
-exported by `tools/fa-restoration/export_context_onnx.py`. **Inference** (`contextRestorer.ts`):
+exported by `tools/persian/export_context_onnx.py`. **Inference** (`contextRestorer.ts`):
 `createFaContextRestorer()` runs the autoregressive sentence decode via the optional `onnxruntime-node`
 (no-op degrade); output is already Iranian (trained on the normalised corpus) + per-word final stress.
 **Wiring** (`faNeural.ts`): `phonemizeFaContext(sentence)` — a SEPARATE optional export.
@@ -438,7 +438,7 @@ The classical context model (Run 16) proved context breaks the homograph/ezafe c
 homograph-rich sentences) and — because it does NOT hallucinate on everyday text — promotes it to the DEFAULT
 modern path.
 
-**Data pipeline** (`tools/fa-restoration/build_homorich_ipa.py`, `export_modern_context_onnx.py`):
+**Data pipeline** (`tools/persian/build_homorich_ipa.py`, `export_modern_context_onnx.py`):
 - Train on HomoRich's clean `Phoneme` column (Grapheme→phoneme). Diagnostics showed HomoRich ships TWO conventions:
   the clean `Phoneme` column keeps the glottal onset (`?`→ʔ, 606579 vs 8) and encodes vowel length implicitly —
   which MATCHES our fa; the `Mapped`/`IPA Homograph` columns DROP initial-ʔ (30404/31497), mark `ː` explicitly, and
@@ -473,7 +473,7 @@ words → now routed to the number path via ASCII folding. `phonemizeFaContext` 
 
 ## Run 18 — 2026-07-20 — error-composition analysis (the "are we capped?" tiebreaker)
 
-Bucketed every per-word miss on 500 held-out sentences (shipped int8 ONNX, greedy) — `tools/fa-restoration`
+Bucketed every per-word miss on 500 held-out sentences (shipped int8 ONNX, greedy) — `tools/persian`
 throwaway `analyze_errors.py` + a homograph lookup mined from HomoRich's `Homograph Grapheme`/`Phoneme` columns.
 87.6% ok / 12.4% miss on this slice; composition of the MISS tail:
 
@@ -855,7 +855,7 @@ each to our IPA (strip stress, ɣ→q, r→ɾ; keep ː and ʔ), drop ezafe-tagge
 pronunciation ONLY where ≥2 sources AGREE. Agreement filters each source's idiosyncratic convention noise (a
 classical-register or speech-corpus error in ONE source isn't corroborated by another) → convention-neutral truth,
 non-circular (defined without our tagger). 755 words (708 ≥3-char); committed as
-tools/referee-eval/referees/fa.synth-agreement.tsv + build/eval tools/fa-restoration/synth_referee.py.
+tools/referee-eval/referees/fa.synth-agreement.tsv + build/eval tools/persian/synth_referee.py.
 
 TAGGER on the clean agreement gold: **BACKBONE (cons+long-V) 90.5% | FULL 80.8%**. Two conclusions: (1) the
 segmental BACKBONE is now INDEPENDENTLY and CLEANLY certified at 90.5% (cross-corroborated, convention-neutral) —

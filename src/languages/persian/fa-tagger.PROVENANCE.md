@@ -33,7 +33,7 @@ values that appear in a minority of the gold.
 
 **Training:** 12 epochs from scratch, Adam 1e-3, cross-entropy with `ignore_index=pad` (masked words contribute no
 loss). `FA_WARM=1` warm-starts from a saved checkpoint for 4 epochs when iterating a single vocab-preserving change.
-Built offline (GPU) by `tools/fa-restoration/train_tagger.py` (writes `fa_tagger.pt`) →
+Built offline (GPU) by `tools/persian/train_tagger.py` (writes `fa_tagger.pt`) →
 `export_tagger_onnx.py` (writes this int8 ONNX + meta). Held-out = a 1500-sentence slice excluded from training by a
 skeleton-level leakage guard.
 

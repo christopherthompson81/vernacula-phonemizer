@@ -8,8 +8,8 @@ training data). Two graphs (encoder + decoder-step) run autoregressively (beam-5
 final ه→e).
 
 **Training data (permissive):** wikipron `fas_arab` broad (human, CC-BY-SA) abjad→IPA + a Tajik-derived
-cross-script silver (tools/fa-restoration/fa-tg-silver.tsv; wikipron/tgwiki CC-BY-SA, IPA ours). Trained offline on
-the GPU (`/mnt/data/ar-diac-venv`, torch+cuda) via `tools/fa-restoration/export_s2s_onnx.py`.
+cross-script silver (tools/persian/fa-tg-silver.tsv; wikipron/tgwiki CC-BY-SA, IPA ours). Trained offline on
+the GPU (`/mnt/data/ar-diac-venv`, torch+cuda) via `tools/persian/export_s2s_onnx.py`.
 
 **Measured (held-out UNSEEN words, vs the fold-normalised wikipron reference):** 45.8% exact — ≈3× the fa g2p
 default-[a] baseline (16%). See docs/investigations/fa_shortvowel_restoration_investigation.md.

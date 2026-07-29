@@ -44,7 +44,7 @@ CONSISTENCY: does `za(reading)` reproduce the glyph's kaikki Standard-Zhuang IPA
 
 ## Run 2 — build (glyph→reading dict + front-end)
 
-Generator `tools/zhuang-sawndip/build-sawndip.ts` reads the kaikki extract → glyph→reading
+Generator `tools/gen/build-za-sawndip.ts` reads the kaikki extract → glyph→reading
 TSV (`src/languages/zhuang/sawndip-readings.tsv`), polyphonic default = most-senses.
 Two data-cleaning findings:
 - **Filter Ideographic Description Sequences** (⿰⿱… U+2FF0–2FFF) — Wiktionary's notation

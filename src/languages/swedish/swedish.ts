@@ -4,7 +4,7 @@
  * primary-stressed vowel) + non-initial stress, falling to first-syllable stress + shape-based accent for OOV
  * words + NST secondary stress for compounds (ˌ + boundary-safe vowel length/quality + 2nd-onset softening). A
  * small exception map covers irregular function words. text() tokenizes words / numbers / punctuation. Accent
- * validated at ~96% vs the independent wikipron ¹/² markers (tools/sv-accent-eval.mts). See docs/investigations/sv_bringup_investigation.md.
+ * validated at ~96% vs the independent wikipron ¹/² markers (tools/eval/sv-accent-eval.mts). See docs/investigations/sv_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

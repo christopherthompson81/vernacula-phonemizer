@@ -181,7 +181,7 @@ export function syllabify(word: string): Syllable[] {
 
 // Intervocalic voicing sandhi (LEXICAL): the per-word `voicing-lexicon.tsv` maps an undiacritized word to a
 // per-syllable flag string ('1' = voice this syllable's onset, via DEF.voicing). Built from the kaikki gold
-// (tools/build-my-voicing.ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing.
+// (tools/gen/build-my-voicing.ts); OOV words keep the careful (voiceless) reading — the pass only ADDS voicing.
 // The flags are POSITIONAL (index-aligned to syllabify()), so a change to syllabify() requires REBUILDING the
 // lexicon — a misalignment surfaces as a referee-eval drop (guarded by the my floor in referee-eval.test.ts).
 const VOICE = DEF.voicing;
@@ -192,14 +192,14 @@ function voicingLexicon(): ReadonlyMap<string, string> {
 }
 // Pronunciation lexicon (the LEXICAL layer): a per-word canonical-IPA override for words the rule g2p can't derive
 // — lexical rime (ည→i~ɛ), colloquial forms, Pali gemination, loanword ⟨ရ⟩→ɹ. Mined from the kaikki gold
-// (tools/build-my-dict.ts), authoritative over the rules; OOV words fall through to the rule g2p. See docs.
+// (tools/gen/build-my-dict.ts), authoritative over the rules; OOV words fall through to the rule g2p. See docs.
 let DICTIONARY: ReadonlyMap<string, string> | undefined;
 function dictionary(): ReadonlyMap<string, string> {
     return (DICTIONARY ??= loadTsvMap(import.meta.url, "dictionary.tsv", undefined, { optional: true }));
 }
 
 /** RULE-only word → IPA (syllabify + orthographic tone + voicing sandhi), WITHOUT the pronunciation-lexicon
- *  override. Exposed for tools/build-my-dict.ts: the dict miner must compare the gold against the RULES (else it
+ *  override. Exposed for tools/gen/build-my-dict.ts: the dict miner must compare the gold against the RULES (else it
  *  reads the dict it is rebuilding and drops every covered entry). */
 export function phonemizeWordRules(word: string): string {
     const nfc = word.normalize("NFC");

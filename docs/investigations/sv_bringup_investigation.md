@@ -152,7 +152,7 @@ The maturity note ("pitch accent deferred") was STALE: accent 1/2 is already ren
 combining grave on the primary-stressed vowel, accent-1 = plain ˈ, from the NST lexicon's accent column; OOV falls
 to oovAccent by shape). Validated it against an INDEPENDENT source: wikipron swe marks accent before the stressed
 syllable (² = accent 2, ¹ = accent 1) — from English Wiktionary, independent of our NST-derived lexicon. New
-committed eval `tools/sv-accent-eval.mts` + floor `test/swedish-accent.test.ts`.
+committed eval `tools/eval/sv-accent-eval.mts` + floor `test/swedish-accent.test.ts`.
 
 RESULT (excluding 21 homographs wikipron lists with both ¹/², e.g. anden 'duck'/'spirit', buren 'carried'/'cage' —
 our single reading can't match both): **1073/1111 = 96.6%** accent agreement. Accent-2 recall (the reliably-marked

@@ -1,7 +1,7 @@
 // Burmese (my) — Sino-Tibetan, Mon-Burmese abugida. wikipron mya (human) PRIMARY + kaikki mya (human) SECONDARY.
 // This grades the SEGMENTAL backbone: the BACKBONE strips the Chao tone letters + the referee's à/á/a̰ tone
 // diacritics, and the ˀ fold below drops OUR creaky-tone glottal marker (the checked ʔ coda is kept — it is
-// segmental in Burmese). TONE is now IMPLEMENTED and measured separately (tools/my-tone-eval.ts: 99.6% mono);
+// segmental in Burmese). TONE is now IMPLEMENTED and measured separately (tools/eval/my-tone-eval.ts: 99.6% mono);
 // the segmental score is still deflated by the DEFERRED voicing-sandhi lexicon + minor-syllable reduction. Folds:
 // ɴ~n nasal-coda notation, ˀ creaky-tone marker.
 {
