@@ -7,12 +7,12 @@
  * is a no-op and you get exactly the sync `phonemize(text, lang)` (lexicon + default). Bare Arabic uses the
  * separate `phonemizeArabic`; this is its rider analogue. See docs/investigations/arabic_script_restorer_investigation.md.
  */
-import { getPhonemizer } from "./registry.ts";
-import { createRiderDiacritizer, type RiderDiacritizer } from "./core/riderDiacritizer.ts";
-import { coverageLexicon as ur } from "./languages/urdu/urdu.ts";
-import { harakatLexicon as fa } from "./languages/persian/persian.ts";
-import { harakatLexicon as ps } from "./languages/pashto/pashto.ts";
-import { harakatLexicon as pa } from "./languages/punjabi/punjabi.ts";
+import { getPhonemizer } from "../../registry.ts";
+import { createRiderDiacritizer, type RiderDiacritizer } from "./riderDiacritizer.ts";
+import { coverageLexicon as ur } from "../urdu/urdu.ts";
+import { harakatLexicon as fa } from "../persian/persian.ts";
+import { harakatLexicon as ps } from "../pashto/pashto.ts";
+import { harakatLexicon as pa } from "../punjabi/punjabi.ts";
 
 // The model's language token codes (train_multilingual_harakat.py LANGS) → each rider's coverage-lexicon ACCESSOR.
 // Lazy (functions, not eager Maps) so a single-language neural call loads only that rider's lexicon, not all four.

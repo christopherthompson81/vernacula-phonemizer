@@ -13,11 +13,11 @@
  * this returns exactly the sync path (no throw). This is a SEPARATE async path; the sync engine and its C#-parity
  * are untouched. See src/languages/bengali/bn-g2p-tagger.PROVENANCE.md.
  */
-import { createBengali, bengaliLexicon } from "./languages/bengali/bengali.ts";
-import { createBengaliTagger, type BengaliTagger } from "./languages/bengali/bengaliTagger.ts";
-import { getPhonemizer } from "./registry.ts";
-import { BENGALI_WORD } from "./core/unicode.ts";
-import { wordLevelNeuralPrepass } from "./core/structuralTagger.ts";
+import { createBengali, bengaliLexicon } from "./bengali.ts";
+import { createBengaliTagger, type BengaliTagger } from "./bengaliTagger.ts";
+import { getPhonemizer } from "../../registry.ts";
+import { BENGALI_WORD } from "../../core/unicode.ts";
+import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
 const WORD = new RegExp(`[${BENGALI_WORD}]+`, "gu");
 let taggerP: Promise<BengaliTagger | undefined> | undefined;

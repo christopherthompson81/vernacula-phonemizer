@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeNbNeural } from "../src/nbNeural.ts";
+import { phonemizeNbNeural } from "../src/languages/norwegian/norwegianNeural.ts";
 import { createNorwegianTagger } from "../src/languages/norwegian/norwegianTagger.ts";
 
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to

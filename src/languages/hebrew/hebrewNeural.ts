@@ -9,11 +9,11 @@
  * (Phase-1, vocalized-only) path — no throw. Separate async path; the sync engine and its tests are untouched.
  * See src/languages/hebrew/he-tagger.PROVENANCE.md.
  */
-import { assembleClauses } from "./core/clauses.ts";
-import { phonemizeWord } from "./languages/hebrew/hebrew.ts";
-import { createHebrewTagger, type HebrewTagger } from "./languages/hebrew/hebrewTagger.ts";
-import { MANIFEST } from "./languages/hebrew/manifest.ts";
-import { numberToIpa } from "./languages/hebrew/numbers.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { phonemizeWord } from "./hebrew.ts";
+import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
+import { MANIFEST } from "./manifest.ts";
+import { numberToIpa } from "./numbers.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([א-ת][֑-ׇ־']*(?:[א-ת][֑-ׇ]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;

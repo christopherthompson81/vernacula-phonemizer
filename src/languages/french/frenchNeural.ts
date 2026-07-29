@@ -9,8 +9,9 @@
  * `undefined` and this returns exactly the sync path (no throw). This is a SEPARATE async path; the sync engine is
  * untouched.
  */
-import { createFrench, frenchLexicon } from "./languages/french/french.ts";
-import { createFrenchTagger, type FrenchTagger } from "./languages/french/frenchTagger.ts";
+import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
+import { createFrench, frenchLexicon } from "./french.ts";
+import { createFrenchTagger, type FrenchTagger } from "./frenchTagger.ts";
 
 const WORD = /[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?/giu;
 const IN_VOCAB = /^[a-zà-ÿœæ-]+$/u; // the tagger's a–z + accented + hyphen training vocab (no apostrophe/elision)
@@ -28,16 +29,15 @@ export async function phonemizeFrNeural(text: string): Promise<string> {
     const E = frEngine();
     if (!tagger) return E.text(text); // no model → sync path
 
-    // PRE-PASS: tag each distinct OOV word once (keyed by the lowercased form the sync resolver consults oovOverride
-    // with). Lexicon-covered words are served by the sync lexicon path (skip); an empty tag ("") means the tagger
-    // DECLINED (an out-of-vocab letter, e.g. an elision apostrophe) → leave it out so the sync rule g2p handles it.
+    // Shared pre-pass, keyed by the LOWERCASED form (the key the sync resolver consults oovOverride with).
+    // Lexicon-covered words are served by the sync lexicon path; a word outside the tagger's training vocab
+    // (e.g. an elision apostrophe) is skipped so the sync rule g2p handles it.
     const lex = frenchLexicon();
-    const tagged = new Map<string, string>();
-    for (const m of text.matchAll(WORD)) {
-        const lower = m[0].toLowerCase();
-        if (tagged.has(lower) || lex.has(lower) || !IN_VOCAB.test(lower)) continue;
-        const ipa = await tagger.tag(lower);
-        if (ipa) tagged.set(lower, ipa);
-    }
-    return E.text(text, (lower) => tagged.get(lower));
+    return wordLevelNeuralPrepass(text, {
+        word: WORD,
+        key: (w) => w.toLowerCase(),
+        lexHas: (lower) => lex.has(lower) || !IN_VOCAB.test(lower),
+        tag: (lower) => tagger.tag(lower),
+        render: (t, oov) => E.text(t, oov),
+    });
 }

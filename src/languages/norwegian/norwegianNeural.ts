@@ -7,9 +7,9 @@
  * word readings change. When `onnxruntime-node` or the model is absent the tagger is `undefined` and this returns
  * exactly the sync path (no throw). This is a SEPARATE async path; the sync engine is untouched.
  */
-import { createNorwegian, norwegianLexicon } from "./languages/norwegian/norwegian.ts";
-import { createNorwegianTagger, type NorwegianTagger } from "./languages/norwegian/norwegianTagger.ts";
-import { wordLevelNeuralPrepass } from "./core/structuralTagger.ts";
+import { createNorwegian, norwegianLexicon } from "./norwegian.ts";
+import { createNorwegianTagger, type NorwegianTagger } from "./norwegianTagger.ts";
+import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
 const WORD = /[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+/gu;
 let taggerP: Promise<NorwegianTagger | undefined> | undefined;

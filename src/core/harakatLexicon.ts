@@ -10,7 +10,7 @@
 import { loadTsvMap } from "./loadTsv.ts";
 
 // Arabic harakat block (U+064B tanwīn … U+0652 sukūn) + U+0670 dagger alif — the diacritics an abjad may carry.
-// Shared by the lexicon layer (this file) and the neural pre-pass (riderDiacritizer.ts) so the two agree on what a
+// Shared by the lexicon layer (this file) and the neural pre-pass (../languages/perso-arabic/riderDiacritizer.ts) so the two agree on what a
 // "skeleton" is; the `g` variant strips them, the non-`g` variant tests for their presence.
 export const HARAKAT = /[ً-ْٰ]/u;
 export const HARAKAT_G = /[ً-ْٰ]/gu;
