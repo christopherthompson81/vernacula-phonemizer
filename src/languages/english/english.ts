@@ -26,6 +26,7 @@ import {
     type PosModel,
 } from "./posTagger.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
+import { normalizeEnglish } from "./normalize.ts";
 
 /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
  *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
@@ -176,6 +177,7 @@ export class EnglishPhonemizer {
         wordTransform?: (ipa: string, word: string) => string,
         oovOverride?: (g2pKey: string) => string | undefined,
     ): string {
+        input = normalizeEnglish(input); // #562 text normalization: %, $, units, dates, times, years, romans
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
         while ((m = TOKEN_RE.exec(input)) !== null) {
