@@ -207,6 +207,15 @@ export function headsCompound(text: string): boolean {
 }
 
 /** Insert spaces at bunsetsu boundaries in a spaceless Japanese run (see module header). */
+// Single-kana case particles boundary-split after a KANJI (see the comment at the use site).
+const SINGLE_PARTICLES = new Set(["が", "を", "に", "の", "と", "も", "や", "で"]);
+// Multi-kana particles split after a kanji content word (東京から → とうきょう から). After-kanji only:
+// inside a kana run から may be word-internal (からだ, からあげ), where splitting would be wrong.
+const MULTI_PARTICLES = ["から", "まで", "など"];
+// The の-demonstratives, recognised only at a RUN START (start of text or right after a boundary): そのうち →
+// その うち, blocking the のう → [noː] fold. Never mid-run — きのこのスープ must not split at its internal この.
+const DEMONSTRATIVES = ["この", "その", "あの", "どの"];
+
 export function segmentText(text: string): string {
     const { map, adverbs, maxUnitLength } = readings();
     const chars = [...text];
@@ -232,18 +241,55 @@ export function segmentText(text: string): string {
             2,
             (k) => map.has(k) || adverbs.has(k),
         );
-        const unit = m?.unit ?? ch;
+        let unit = m?.unit ?? ch;
+        let forcedParticle = false;
+        if (m === null) {
+            // multi-kana particle after kanji or KATAKANA content → its own bunsetsu-final unit
+            if (prev !== undefined && (isKanji(prev) || /^[\u30a1-\u30fc]$/.test(prev))) {
+                for (const mp of MULTI_PARTICLES) {
+                    if (chars.slice(i, i + mp.length).join("") === mp) {
+                        unit = mp;
+                        forcedParticle = true;
+                        break;
+                    }
+                }
+            }
+            // demonstrative at a run start → boundary after it (blocks そのうち → [so̞no̞ːt͡ɕi])
+            if (!forcedParticle && (prev === undefined || prevParticle || out === "" || out.endsWith(" "))) {
+                for (const dm of DEMONSTRATIVES) {
+                    if (chars.slice(i, i + dm.length).join("") === dm) {
+                        unit = dm;
+                        forcedParticle = true; // reuse the boundary-after mechanism
+                        break;
+                    }
+                }
+            }
+        }
+        // A multi-kana particle can also arrive as a DICTIONARY match (から is in the unit maps): treat it as
+        // the particle whenever it follows kanji or katakana content. Longest-match protects word-internal
+        // hits — からだ matches as its own longer unit before から can.
+        const KATAKANA = /^[\u30a1-\u30fc]$/;
+        if (!forcedParticle && prev !== undefined && (isKanji(prev) || KATAKANA.test(prev)) && MULTI_PARTICLES.includes(unit)) {
+            forcedParticle = true;
+        }
+        // を is the ONLY use of that kana in modern Japanese — always the particle, after any content.
+        if (!forcedParticle && unit === "を" && prev !== undefined) forcedParticle = true;
         const isAdv = adverbs.has(unit);
         const u = [...unit];
         const isKanaAdverb = isAdv && u.every(isKana);
         const headKanji = isKanji(unit[0]!);
         const teFormAux = unit[0] === "い" && (prev === "て" || prev === "で");
+        // NOTE: the "current unit is itself a particle" check must run BEFORE the boundary decision so a
+        // particle CHAIN (では, での, までは, などを) stays attached — see `particle` below for the classification.
+        const chainedParticle =
+            (SINGLE_PARTICLES.has(unit) || unit === "は" || unit === "へ" || MULTI_PARTICLES.includes(unit)) &&
+            u.every(isKana);
         const boundary =
             (prev !== undefined &&
                 ((isKana(prev) && headKanji) ||
                     (prevAdv && headKanji && u.length >= 2) ||
                     isKanaAdverb)) ||
-            prevParticle ||
+            (prevParticle && !chainedParticle) ||
             teFormAux;
         if (boundary) out += " ";
         // Case particles: a single-mora particle after a content word ends a bunsetsu. は/へ as particles are
@@ -251,12 +297,23 @@ export function segmentText(text: string): string {
         // とうきょう え). を is already handled in kana.ts; が/を/に pass through unchanged (unambiguous kana). は/へ
         // that START a dictionary word (はな, へや) are matched as a ≥2-mora unit above, so single-char は/へ after
         // content is the particle. が/を/に keep the stricter isKanji(prev) gate the segmenter already relied on.
-        const particle =
-            u.length === 1 &&
-            prev !== undefined &&
-            (((unit === "が" || unit === "を" || unit === "に") && isKanji(prev)) ||
-                ((unit === "は" || unit === "へ") &&
-                    (isKanji(prev) || isKana(prev))));
+        // の/と/も/や/で joined the single-particle set for #552's residual: they are the O/E/A-vowel carriers
+        // whose kana can trigger long-vowel coalescence across the bunsetsu boundary when left fused — 東京のうち
+        // read のう as [noː] instead of の うち. Safe under the isKanji(prev) gate: no verb okurigana begins with
+        // の/と/も/や, and the て-form で (飲んで) is preceded by ん (kana), which the gate excludes.
+        // で directly before す/し/き is NOT the case particle: です/でした/でしょう (copula) and できる/できます
+        // ("can") — 学生です and 増減できます must stay whole, not 学生 で + orphaned す. (と before し stays a
+        // particle: 彼として → 彼と して.)
+        const copulaDe = unit === "で" && (chars[i + 1] === "す" || chars[i + 1] === "し" || chars[i + 1] === "き");
+        const particle: boolean =
+            forcedParticle ||
+            (prevParticle && chainedParticle) ||
+            (u.length === 1 &&
+                !copulaDe &&
+                prev !== undefined &&
+                ((SINGLE_PARTICLES.has(unit) && isKanji(prev)) ||
+                    ((unit === "は" || unit === "へ") &&
+                        (isKanji(prev) || isKana(prev)))));
         out += particle && unit === "は"
             ? "わ"
             : particle && unit === "へ"

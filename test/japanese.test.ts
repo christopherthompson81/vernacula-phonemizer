@@ -1,5 +1,7 @@
 import { describe, expect, it, test } from "vitest";
 import { phonemize } from "../src/index.ts";
+
+const phonemizeText = (t: string): string => phonemize(t, "ja");
 import {
     phonemizeWord,
     phonemizeWordSegmental,
@@ -151,5 +153,40 @@ describe("Japanese morpheme-boundary coalescence (#552)", () => {
     test("coalescence still fires WITHIN a kana run", () => {
         expect(phonemizeWord("おおさか")).toBe("o̞ːsäkä");
         expect(phonemizeWord("とうきょう")).toBe("to̞ːkʲo̞ː");
+    });
+});
+
+// #552 residual — particle-boundary segmentation. Particles left fused to a following word let long-vowel
+// coalescence fire across the bunsetsu boundary (東京のうち read のう as [noː]); stranded particles split the
+// other way picked up pitch accents from the dictionary (85 で → de̞ꜜ). Three mechanisms: the extended
+// single/multi particle sets in segmentText, particle CHAINING (では/での stay attached to their content
+// word), and a pitch-layer guard (a bare particle token is always heiban).
+describe("Japanese particle segmentation (#552 residual)", () => {
+    test("coalescence no longer crosses a particle boundary", () => {
+        expect(phonemizeText("そのうち")).toBe("so̞no̞ ɯᵝt͡ɕi"); // was so̞no̞ːt͡ɕi
+        expect(phonemizeText("東京のうち")).toBe("to̞ːkʲo̞ːno̞ ɯᵝt͡ɕi"); // was …no̞ːt͡ɕi
+        expect(phonemizeText("彼とうちに行く")).toContain("ɯᵝt͡ɕini"); // とう not folded
+    });
+
+    test("copula and できる forms stay whole", () => {
+        expect(phonemizeText("私は学生です")).toBe("wätäɕiwä ɡäkɯᵝse̞ːde̞sɯᵝ");
+        expect(phonemizeText("増減できます")).toBe("zo̞ːɡe̞nde̞kimäsɯᵝ");
+    });
+
+    test("particle chains attach to their content word — no stranded accented particle", () => {
+        expect(phonemizeText("端では")).toBe("häɕide̞wä"); // not häɕide̞ wäꜜ
+        expect(phonemizeText("警察での申請")).toBe("ke̞ːsät͡sɯᵝde̞no̞ ɕinse̞ː");
+        expect(phonemizeText("本などを読む")).toBe("ho̞nnädo̞o̞ jo̞ꜜmɯᵝ");
+    });
+
+    test("a bare particle token is heiban even when isolated by digits/katakana", () => {
+        for (const t of ["二時に", "85 で", "ビザ を"]) {
+            expect(phonemizeText(t), t).not.toMatch(/(?:^| )(?:no̞|to̞|mo̞|de̞|wä|o̞|ni)ꜜ(?: |$)/u);
+        }
+    });
+
+    test("word-internal lookalikes never split", () => {
+        expect(phonemizeText("きのこのスープ")).toBe("kino̞ko̞no̞sɯᵝːpɯᵝ"); // internal この
+        expect(phonemizeText("飲んで")).toBe("no̞ꜜnde̞"); // て-form で after ん
     });
 });
