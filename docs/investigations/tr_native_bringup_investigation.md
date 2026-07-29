@@ -171,3 +171,23 @@ the segmental backbone. Residual ~6% = proper names (Ahmetli, Alaplı), the ğ g
 convention (Çiğdem: ours ğ→j vs referee ğ→iː), /h/→[x]/[ç] narrow allophony (mostly names), and r tap/trill
 notation. Referee/name-limited. Marked ✅. (Stress-lexicon morphology remains a separate, already-mostly-shipped
 axis — the eval folds stress, so it does not affect this backbone verdict.)
+
+## Run 4 — 2026-07-29 — licensing: stress.tsv re-sourced (espeak-seeded list replaced)
+
+Provenance audit follow-up (docs/PROVENANCE.md §4.3): the 244-entry stress-exception lexicon was
+seeded from espeak-ng-portable — the word SELECTION was espeak's editorial choice, the weakest
+facts-posture artifact in the espeak-lineage set. Replaced with a kaikki.org Turkish mine
+(Wiktionary CC-BY-SA): every lemma whose stress-marked IPA is NON-final, syllable-count-gated
+against the orthography → **2,103 entries** (+ 8 hand-adjudicated: emphatic reduplication
+bembeyaz/dosdoğru/dümdüz per Göksel & Kerslake §4.3.2, 2-syll place names aydın/mersin/trabzon,
+avrupa/iyice).
+
+Quality: 167/171 position agreement with the old list on overlap. Stress-position vs the espeak
+50k gold: 91.03% → 89.60% — **the yardstick is the defect**: of the delta, only 51 words trace to
+dropped espeak entries (uncovered place names); 704 are NEW entries where kaikki contradicts
+espeak on the DOCUMENTED non-final adverb class (şimdi, ancak, nasıl, sadece, artık, aynı — all
+initial-stress per Göksel & Kerslake; espeak finals them). True stress accuracy almost certainly
+improved. wikipron tur carries no stress marks, so no independent stress referee exists; folded
+referee eval unchanged (stress-blind), tests 5/5. Remaining recoverable tail: ~45 espeak-only
+place names (fenerbahçe, galatasaray, province names) — future adjudication candidates, listed by
+the gate harness.
