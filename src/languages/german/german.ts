@@ -324,13 +324,22 @@ export function phonemizeWord(word: string): string {
         .map((s, i) => (s.vowel ? i : -1))
         .filter((i) => i >= 0);
     if (vowelIdx.length === 0) return segs.map((s) => s.ph).join("");
-    const dictOrd = stressDict().get(w);
-    const ord = dictOrd ?? ruleStress();
+    // Dict stress, extended to INFLECTED forms: the 68k dict stores lemmas, so bedeutet/genutzten/behörden
+    // missed while bedeuten/genutzt/behörde carry the answer. Suffix stripping cannot shift the ordinal —
+    // an inflectional ending never adds a nucleus BEFORE the stress. This also protects roots: beiden finds
+    // beide (ord 0) and stays unreduced.
+    const dictOrd = stressDict().get(w) ?? inflectedStressOrd(w);
+    // Dict-missing prefix fallback (gegangen, gebracht — ablaut participles have no lemma the stripper can
+    // reach): a word STARTING with an unstressed prefix whose remainder looks like a stem (legal onset,
+    // its own vowel) is read as prefix + stem. Safe because any common ROOT is in the 68k dict and roots
+    // resolve above; this only fires on derived forms the dict has never seen.
+    const prefixGuess = dictOrd === undefined && guessUnstressedPrefix(w);
+    const ord = dictOrd ?? (prefixGuess ? 1 : ruleStress());
     const stressPos = vowelIdx[Math.min(ord, vowelIdx.length - 1)]!;
 
-    // An undecomposed be-/ge-/ver-… word whose DICTIONARY stress isn't on the first syllable has a real unstressed
+    // An undecomposed be-/ge-/ver-… word whose stress isn't on the first syllable has a real unstressed
     // prefix (bestimmt ord 1 → bə), whereas a be-/ge- ROOT is dict-stressed on the first (beiden ord 0 → no ə).
-    if (dictOrd !== undefined && ord > 0) {
+    if ((dictOrd !== undefined || prefixGuess) && ord > 0) {
         const first = segs[vowelIdx[0]!]!;
         if (w.startsWith("be") || w.startsWith("ge")) first.ph = "ə";
         else if (/^(ver|zer|ent|emp|er)/.test(w)) first.ph = "ɛ";
@@ -342,6 +351,31 @@ export function phonemizeWord(word: string): string {
         out += segs[i]!.ph;
     }
     return restoreStressedEr(restoreStressedIe(applyConsonant(applyErRestore(applyQuality(applyLength(fixStressedSchwa(out), lengthDict().get(w)), qualityDict().get(w)), erDict().get(w)), consonantDict().get(w))));
+}
+
+
+// German inflectional endings, longest first. Stripping (and the -et→-en / -t→-en swaps) reaches the lemma
+// the stress dict stores. The base must keep ≥3 letters so short roots don't dissolve.
+const INFLECT = ["esten", "sten", "eten", "ten", "est", "en", "et", "em", "es", "er", "e", "n", "st", "t", "s"];
+function inflectedStressOrd(w: string): number | undefined {
+    const dict = stressDict();
+    for (const suf of INFLECT) {
+        if (!w.endsWith(suf) || w.length - suf.length < 3) continue;
+        const base = w.slice(0, -suf.length);
+        const hit = dict.get(base) ?? dict.get(base + "e") ?? dict.get(base + "en");
+        if (hit !== undefined) return hit;
+    }
+    return undefined;
+}
+
+// The single-nucleus unstressed prefixes (their reduction targets are set in the caller). ver/zer/ent/emp
+// before er, so er never shadows them. The remainder must be ≥4 letters, start with a LEGAL German onset
+// (≤3 consonants then a vowel — rejects be+rlin-style accidents), and contain a vowel of its own.
+const PREFIX_GUESS = /^(?:be|ge|ver|zer|ent|emp|er)(?=([a-zäöüß]{4,})$)/;
+const LEGAL_ONSET = /^[bcdfghjklmnpqrstvwxzß]{0,3}[aeiouäöüy]/;
+function guessUnstressedPrefix(w: string): boolean {
+    const m = PREFIX_GUESS.exec(w);
+    return m !== null && LEGAL_ONSET.test(m[1]!);
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/vietnamese/vietnamese.ts";
 
@@ -33,5 +33,20 @@ describe("Vietnamese g2p (Northern)", () => {
         expect(phonemize("5", "vi")).toBe("nˈa˧m");
         expect(phonemize("25", "vi")).toBe("hˈaː˧j mˈɨə˧j lˈa˧m"); // 5-after-ten → lăm
         expect(phonemize("21", "vi")).toBe("hˈaː˧j mˈɨə˧j mˈo˧˥t̪"); // 1-after-ten → mốt
+    });
+});
+
+// Foreign proper nouns are code-switched constantly in Vietnamese text; a token that is not a valid
+// Vietnamese syllable used to phonemize to "" and vanish (paris sofia → nothing, Run 28). Now routed
+// through the English phonemizer — a missing word is worse than an English-phoneme one.
+describe("Vietnamese: foreign tokens are not dropped", () => {
+    test("invalid syllables route through foreign", () => {
+        const ipa = phonemize("tại paris và sofia", "vi");
+        expect(ipa.split(" ").length).toBe(4);
+        expect(ipa).toContain("pʰˈɛɹɪs");
+    });
+
+    test("native syllables and numbers unaffected", () => {
+        expect(phonemize("có 25 người", "vi")).toBe("kˈɔ˧˥ hˈaː˧j mˈɨə˧j lˈa˧m ŋˈɨə˨˩j");
     });
 });

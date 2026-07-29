@@ -262,7 +262,7 @@ function build(lang: string): Phonemizer {
         case "mg":
             return createMalagasy();
         case "vi":
-            return createVietnamese();
+            return createVietnamese((latin) => getPhonemizer("en").text(latin));
         case "ta":
             return createTamil();
         case "sv":
@@ -385,11 +385,12 @@ function build(lang: string): Phonemizer {
         case "tl":
             return createTagalog();
         case "om":
-            return createOromo();
+            // digits read via English pending a proper Oromo numeral compositor (attested-word gap; see issues)
+            return createOromo((latin) => getPhonemizer("en").text(latin));
         case "pl":
             return createPolish();
         case "sd":
-            return createSindhi();
+            return createSindhi((latin) => getPhonemizer("en").text(latin));
         case "fa":
             return createPersian((latin) => getPhonemizer("en").text(latin));
         case "it":

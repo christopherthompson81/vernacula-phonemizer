@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 // The RULE g2p (default-schwa short vowels) is phonemizeWordRules; the shipped phonemizeWord adds the kaikki
 // short-vowel restoration lexicon. The rule tests below exercise the g2p, so they use phonemizeWordRules.
 import { readFileSync, existsSync } from "node:fs";
+
+import { phonemize } from "../src/index.ts";
 import {
     phonemizeWord as phonemizeWordShipped,
     phonemizeWordRules as phonemizeWord,
@@ -122,5 +124,22 @@ describe("Sindhi tagger mask — glide-deletion guard", () => {
         for (const ch of ["و", "ي", "ئ", "آ"]) expect(permits(ch), `${ch} must not delete`).toBe(false);
         // legitimately silent: ھ is absorbed into the preceding aspirate digraph, ه/ع are silent carriers
         for (const ch of ["ھ", "ه", "ع"]) expect(permits(ch), `${ch} may be silent`).toBe(true);
+    });
+});
+
+// The two Sindhi-specific single-codepoint PARTICLES were silently dropped — no lexicon entry, not in the
+// consonant map, so scan() emitted nothing. Between them ~1,900 FLEURS tokens vanished: ۾ "in" (U+06FE,
+// kaikki-attested [mẽ]) and ۽ "and" (U+06FD, espeak-corroborated aẽ). Latin runs and digits also dropped —
+// no tokenizer group / no foreign phonemizer wired (now the ur/hi English route).
+describe("Sindhi: no silent content loss (Run 28)", () => {
+    test("the particles ۾ and ۽ are pronounced", () => {
+        expect(phonemizeWordShipped("۾").replace(/[ˈˌ]/gu, "")).toBe("mẽ");
+        expect(phonemizeWordShipped("۽").replace(/[ˈˌ]/gu, "")).toBe("aẽ");
+    });
+
+    test("Latin words and digits route through the foreign phonemizer", () => {
+        const ipa = phonemize("facebook تي 45", "sd");
+        expect(ipa).toContain("fˈeᶦsbʊk"); // was: dropped (no Latin token group)
+        expect(ipa).toContain("fˈɔːɹt̬i"); // was: dropped (no foreign wired for digits)
     });
 });

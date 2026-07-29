@@ -180,7 +180,10 @@ function stress(ipa: string): string {
 }
 
 const SD_WORD = "ء-ٟٮ-ۿ";
-const TOKEN = new RegExp(`([${SD_WORD}]+)|(\\d+)|([۔؟،؛.?,])`, "gu");
+// Latin runs and digits BOTH route through `foreign` (the English phonemizer, wired in the registry — the
+// ur/hi pattern). They used to be dropped outright: Latin matched no group at all, and digits emitted ""
+// because createSindhi() never passed a foreign phonemizer — 7% of FLEURS sd_in tokens silently vanished.
+const TOKEN = new RegExp(`([${SD_WORD}]+)|([A-Za-z]+)|(\\d+)|([۔؟،؛.?,])`, "gu");
 
 /** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride →
  *  rules); used only by the async neural path (`sindhiNeural.ts`), so the sync engine is unchanged. */
@@ -191,9 +194,9 @@ class SindhiPhonemizer implements Phonemizer {
     text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWordWith(m[1], oovOverride));
-            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
-            else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+            else if (m[2] || m[3]) sink.emit(this.foreign ? this.foreign((m[2] ?? m[3])!) : "");
+            else if (m[4]) {
+                const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
         });
@@ -216,9 +219,10 @@ export function sindhiLexiconHas(word: string): boolean {
     return lexicon().has(word);
 }
 
-/** Build the Sindhi phonemizer. */
-export function createSindhi(): Phonemizer {
-    return new SindhiPhonemizer();
+/** Build the Sindhi phonemizer. `foreign` reads embedded Latin words and digit runs (wired to English in
+ *  the registry, as for ur/hi — code-switching is normal in Sindhi text; silence is not). */
+export function createSindhi(foreign?: ForeignPhonemizer): Phonemizer {
+    return new SindhiPhonemizer(foreign);
 }
 
 /** Build the Sindhi engine with a per-call `oovOverride` hook (the async neural path). */
