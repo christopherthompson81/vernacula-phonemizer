@@ -56,6 +56,24 @@ describe("English text normalization (#562)", () => {
         expect(normalizeEnglish("x marks")).toBe("x marks");
     });
 
+    test("abbreviations: st/dr disambiguated by neighbor, dot consumed (no phrase break)", () => {
+        // saint: abbreviation PRECEDES a name (content word follows)
+        expect(normalizeEnglish("the st. james gate brewery")).toBe("the saint james gate brewery");
+        expect(normalizeEnglish("st petersburg is in russia")).toBe("saint petersburg is in russia");
+        expect(normalizeEnglish("mount st. helens erupted")).toBe("mount saint helens erupted");
+        // street/drive: abbreviation FOLLOWS the name (function word or phrase end next)
+        expect(normalizeEnglish("main st. in dublin")).toBe("main street in dublin");
+        expect(normalizeEnglish("we walked down main st.")).toBe("we walked down main street");
+        expect(normalizeEnglish("elm dr. in town")).toBe("elm drive in town");
+        // titles
+        expect(normalizeEnglish("dr. tony was here")).toBe("doctor tony was here");
+        expect(normalizeEnglish("mr. smith met mrs. jones at mt. fuji"))
+            .toBe("mister smith met missus jones at mount fuji");
+        // untouched: ordinal 1st, bare undotted st before a function word (dict street reading is right)
+        expect(normalizeEnglish("the 1st of may")).toBe("the 1st of may");
+        expect(normalizeEnglish("main st in dublin")).toBe("main st in dublin");
+    });
+
     test("end-to-end: the classes that used to be dropped or garbled", () => {
         expect(phonemize("40% of people", "en")).toContain("pɚsˈɛnt");
         expect(phonemize("$5 million", "en")).toContain("dˈɑːlɚz");
