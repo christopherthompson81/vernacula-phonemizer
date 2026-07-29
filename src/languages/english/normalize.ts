@@ -57,7 +57,7 @@ const MONTH_ALT = "january|february|march|april|may|june|july|august|september|o
 // function word or phrase end means it follows one (main st. in dublin = street). FLEURS text is
 // lowercased, so capitalization can't be the signal — the neighbor test is the whole heuristic.
 const ABBREV_FUNCTION_NEXT =
-    /^(?:in|on|at|and|or|but|the|a|an|is|was|were|are|to|for|with|of|from|by|near|that|this|it|he|she|they|we|you|i|as|his|her|its|their|there|then|when|where|which|who|had|has|have)$/;
+    /^(?:in|on|at|and|or|but|the|a|an|is|was|were|are|to|for|with|of|from|by|near|that|this|it|he|she|they|we|you|i|as|his|her|its|their|there|then|when|where|which|who|had|has|have)$/i;
 const DOTTED_ABBREV: Record<string, (next: string) => string> = {
     st: (next) => (ABBREV_FUNCTION_NEXT.test(next) ? "street" : "saint"),
     dr: (next) => (ABBREV_FUNCTION_NEXT.test(next) ? "drive" : "doctor"),
