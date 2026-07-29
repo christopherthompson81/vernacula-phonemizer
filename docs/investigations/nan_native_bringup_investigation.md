@@ -130,3 +130,23 @@ chars read correctly (丘→kʰi̯u, 互→hɔ, 仲→ti̯ɔŋ, 些→ɕi̯a). T
 STATUS: the two Run-3 limitations are now down to ONE — cross-word **phrase-level tone sandhi** (each dict word
 is one tone group; true tone-group boundaries need syntactic parsing). Segmental converter validated, tone
 sandhi (word-internal) validated, coverage 96%. Suite 6/6; typecheck clean.
+
+## Run 5 — 2026-07-29 — licensing rebuild: MOE/Kam/Taijit out, ChhoeTaigi-permissive + kaikki in
+
+The provenance audit (docs/PROVENANCE.md §4.6) verified the whole dictionary layer was encumbered:
+MOE dict CC BY-ND 3.0 TW (NoDerivatives — a deliberate MOE choice), 甘字典/台日大辭典 CC BY-NC-SA.
+Rebuilt from clean sources (`tools/gen/build-nan-chhoetaigi.mts` + `build-nan-kaikki-chars.mts`):
+台華線頂對照典 (CC BY-SA 4.0, 80,687 usable rows) + iTaigi (CC0, 17,656) + kaikki Wiktionary
+Hokkien single-char citations (CC BY-SA, 2,124 chars, lowest tier).
+
+The hard part was single-char coverage (the referee is 5,535 single chars; word dictionaries are
+thin there — 甘字典 was a CHARACTER dictionary): ChhoeTaigi-only scored 67.4→73.0% (vs 90.7%
+encumbered baseline) at 72.2% char coverage. Three fixes: (1) mixed Han-Lo row mining (roman runs
+anchor exact char↔syllable alignment), (2) the kaikki citation tier, (3) usage-weighted citation
+override (≥5 votes, ≥60%: the explicit literary entry loses to the running-text reading — 一 =
+tsi̍t not i̍t; 292 overrides). **Final: 95.3% folded / 97.4% symbol — BETTER than the encumbered
+baseline (90.7%/93.0%) — with 63,561 words (4.2×).** Stated caveat: the kaikki tier shares
+Wiktionary parentage with the referee (independent-only floor: 73.0%); its quality check is the
+ChhoeTaigi cross-validation (75.1% tone-insensitive agreement, residual mostly 文/白 variants).
+Bonus correctness: 食飯 is now a covered word so 食 takes real within-word sandhi (test updated).
+Suite 1504/1504.

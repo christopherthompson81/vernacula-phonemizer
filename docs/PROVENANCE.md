@@ -151,8 +151,12 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
    rebuild from kaikki Wu readings (CC-BY-SA fence, gan/hakka/jin/xiang pattern, coverage drops
    101k → ~10-20k), or ask Wugniu for a permissive grant of the dictionary data (now a friendly
    relicensing ask). Alongside Tashkeela (§4.1) this is one of two GPL-lineage data files.
-6. **MOE Taiwan dictionaries → `minnan/dict.tsv`, `dict-chars.tsv`** — **VERIFIED 2026-07-29
-   against ChhoeTaigi's license table; all three components are encumbered. BLOCKER.**
+6. **MOE Taiwan dictionaries → `minnan/dict.tsv`, `dict-chars.tsv`** — **RESOLVED 2026-07-29:
+   fully rebuilt from clean sources** (台華線頂對照典 CC BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien
+   chars CC BY-SA; `tools/gen/build-nan-chhoetaigi.mts`). Referee eval improved to 95.3% folded
+   (from 90.7%), 4.2× word coverage; circularity caveat for the kaikki char tier stated in
+   `src/languages/minnan/dict.PROVENANCE.md`. Original verification record follows.
+   Verified against ChhoeTaigi's license table; all three prior components were encumbered:
    教育部台語辭典 = **CC BY-ND 3.0 TW** (NoDerivatives — our transformed extractions are
    derivatives, so redistribution is prohibited, and this is a deliberate MOE choice, not an
    oversight); 甘字典 (1913) and 台日大辭典 台譯版 = **CC BY-NC-SA 3.0 TW** (NonCommercial).
