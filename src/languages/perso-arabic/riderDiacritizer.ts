@@ -14,8 +14,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { HARAKAT, HARAKAT_G, stripHarakat } from "./harakatLexicon.ts";
-import { loadOrt } from "./onnx.ts";
+import { HARAKAT, HARAKAT_G, stripHarakat } from "../../core/harakatLexicon.ts";
+import { loadOrt } from "../../core/onnx.ts";
 
 // label → the combining harakat to append after a base letter. Mirrors the training VOWELS map (invert_harakat.ts /
 // train_multilingual_harakat.py): a fatḥa, u damma, i kasra, o sukūn, F/N/K tanwīn, ^ dagger-alif (U+0670); a "~"

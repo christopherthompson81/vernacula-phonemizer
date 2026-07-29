@@ -8,9 +8,9 @@
  * sync engine's, byte-identical to `phonemize(text, "sd")` — ONLY the OOV word readings change. When
  * `onnxruntime-node` or the model is absent the tagger is `undefined` and this is exactly the sync path (no throw).
  */
-import { createSindhiEngine, sindhiLexiconHas } from "./languages/sindhi/sindhi.ts";
-import { createSindhiTagger, type SindhiTagger } from "./languages/sindhi/sindhiTagger.ts";
-import { wordLevelNeuralPrepass } from "./core/structuralTagger.ts";
+import { createSindhiEngine, sindhiLexiconHas } from "./sindhi.ts";
+import { createSindhiTagger, type SindhiTagger } from "./sindhiTagger.ts";
+import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
 const WORD = /[؀-ۿݐ-ݿ]+/gu;
 let taggerP: Promise<SindhiTagger | undefined> | undefined;

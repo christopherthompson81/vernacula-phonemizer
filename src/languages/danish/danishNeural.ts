@@ -9,9 +9,9 @@
  * `phonemize(text, "da")`. When `onnxruntime-node` or the model is absent the tagger is `undefined` and this returns
  * exactly the sync path (no throw). This is a SEPARATE async path; the sync engine is untouched.
  */
-import { wordLevelNeuralPrepass } from "./core/structuralTagger.ts";
-import { createDanish, danishLexicon } from "./languages/danish/danish.ts";
-import { createDanishTagger, type DanishTagger } from "./languages/danish/danishTagger.ts";
+import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
+import { createDanish, danishLexicon } from "./danish.ts";
+import { createDanishTagger, type DanishTagger } from "./danishTagger.ts";
 
 // The da TOKEN word class (danish.ts) — the pre-pass keys the tagged map by the raw match, which is what the sync
 // engine hands `oovOverride`, so precedence lexicon → tagger → rule is preserved for capitalised OOV words too.

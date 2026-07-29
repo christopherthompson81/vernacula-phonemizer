@@ -90,7 +90,7 @@ entries, per header); `afrikaans/af-stems.txt` (afwiki + OpenSubtitles + kaikki 
 CC-BY-SA 4.0 — EDRDG requires **specific named attribution** in NOTICE).
 
 **Shipped model weights declared CC-BY-SA-inheriting** (they reproduce licensed pronunciation
-data): `core/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
+data): `languages/perso-arabic/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
 `persian/fa-context-restorer.*.onnx` (Tajik component); `french/fr-g2p-tagger.int8.onnx`
 (Lexique). These cannot ship in an MIT-only package; they are fenced like the data.
 

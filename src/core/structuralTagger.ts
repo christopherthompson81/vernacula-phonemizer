@@ -145,7 +145,10 @@ export async function createWordStructuralTagger(opts: WordTaggerOptions): Promi
 export interface NeuralPrepassOptions {
     /** GLOBAL word regex over the input text */
     word: RegExp;
-    /** is this word served authoritatively by the sync lexicon? → skip the tagger */
+    /** canonical form the sync engine's oovOverride is keyed by (e.g. lowercase); default: identity */
+    key?: (word: string) => string;
+    /** is this word (canonical form) served authoritatively by the sync lexicon — or otherwise
+     *  outside the tagger's remit? → skip the tagger */
     lexHas: (word: string) => boolean;
     /** the tagger; "" means it declined (out-of-vocab grapheme) → leave the word to the rule engine */
     tag: (word: string) => Promise<string>;
@@ -159,9 +162,10 @@ export interface NeuralPrepassOptions {
  * punctuation, and clause assembly stay the sync engine's, so only OOV word readings change vs the plain sync path.
  */
 export async function wordLevelNeuralPrepass(text: string, opts: NeuralPrepassOptions): Promise<string> {
+    const key = opts.key ?? ((w: string): string => w);
     const tagged = new Map<string, string>();
     for (const m of text.matchAll(opts.word)) {
-        const w = m[0]!;
+        const w = key(m[0]!);
         if (tagged.has(w) || opts.lexHas(w)) continue;
         const out = await opts.tag(w);
         if (out) tagged.set(w, out); // "" = declined → leave to the rule engine

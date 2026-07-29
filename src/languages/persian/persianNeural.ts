@@ -10,13 +10,13 @@
  * This is a SEPARATE async path — the sync engine (and its C#-parity + referee-eval) is untouched. The tagger emits
  * IPA DIRECTLY, so this assembles IPA itself. See docs/investigations/fa_shortvowel_restoration_investigation.md.
  */
-import { assembleClauses } from "./core/clauses.ts";
-import { getPhonemizer } from "./registry.ts";
-import { stripHarakat } from "./core/harakatLexicon.ts";
-import { createFaVowelRestorer, type FaVowelRestorer } from "./languages/persian/vowelRestorer.ts";
-import { createFaContextRestorer, type FaContextRestorer } from "./languages/persian/contextRestorer.ts";
-import { createFaTagger } from "./languages/persian/faTagger.ts";
-import { harakatLexicon, normalizePersianOrthography, phonemizeWord } from "./languages/persian/persian.ts";
+import { assembleClauses } from "../../core/clauses.ts";
+import { getPhonemizer } from "../../registry.ts";
+import { stripHarakat } from "../../core/harakatLexicon.ts";
+import { createFaVowelRestorer, type FaVowelRestorer } from "./vowelRestorer.ts";
+import { createFaContextRestorer, type FaContextRestorer } from "./contextRestorer.ts";
+import { createFaTagger } from "./faTagger.ts";
+import { harakatLexicon, normalizePersianOrthography, phonemizeWord } from "./persian.ts";
 
 const PERSO = "ء-ۿݐ-ݿ‌‍";
 const WORD = new RegExp(`[${PERSO}]+`, "gu");

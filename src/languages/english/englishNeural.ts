@@ -9,8 +9,8 @@
  * numbers, heteronyms, and punctuation are byte-identical to `phonemize(text, "en")`. When `onnxruntime-node` or the
  * model is absent the tagger is `undefined` and this returns exactly the sync path (no throw).
  */
-import { createEnglish } from "./languages/english/english.ts";
-import { createEnglishTagger, type EnglishTagger } from "./languages/english/englishTagger.ts";
+import { createEnglish } from "./english.ts";
+import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
 const WORD = /[A-Za-z][A-Za-z']*/gu;
 let taggerP: Promise<EnglishTagger | undefined> | undefined;

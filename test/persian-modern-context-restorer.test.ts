@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createFaTagger } from "../src/languages/persian/faTagger.ts";
-import { phonemizeFaModernContext } from "../src/faNeural.ts";
+import { phonemizeFaModernContext } from "../src/languages/persian/persianNeural.ts";
 
 // The MODERN Persian sentence-level restorer is the STRUCTURAL TAGGER (faTagger.ts, int8 ONNX, HomoRich-trained,
 // 93.6% on the canonical held-out). It emits one IPA-chunk tag per abjad char, so output length == input length:

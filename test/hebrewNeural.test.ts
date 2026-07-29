@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeHebrewNeural } from "../src/hebrewNeural.ts";
+import { phonemizeHebrewNeural } from "../src/languages/hebrew/hebrewNeural.ts";
 
 // The Phase-2 neural VOWEL RESTORER for UNVOCALIZED Hebrew is gated on the (optional) ONNX model + onnxruntime-node.
 // When absent the path falls back to the sync Phase-1 engine (vocalized-only), so the fallback contract is testable
