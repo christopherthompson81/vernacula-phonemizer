@@ -7,6 +7,7 @@
  * See docs/investigations/cy_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
@@ -98,9 +99,19 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN =
     /([a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]+(?:['’-][a-zâêîôûŵŷA-Z]+)*)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
+// nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri).
+// cant/doler/punt/cilogram are referee-attested; cilometr/milimetr/centimetr are the standard
+// borrowings, read by rule.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["y cant"],
+    currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
+    units: { km: ["cilometr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"] },
+});
+
 class WelshPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

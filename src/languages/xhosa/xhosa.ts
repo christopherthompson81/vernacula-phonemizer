@@ -6,6 +6,7 @@
  * docs/investigations/xh_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "../zulu/g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -31,9 +32,17 @@ export function phonemizeWord(word: string): string {
 
 const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
 
+// #562 symbol normalization — Xhosa: class-10 loan plurals (iipesenti, iidola, iikhilomitha).
+// ¥ and the mm/cm/mi/mph units are NOT wired — no attested Xhosa forms to hand; see #562.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["iipesenti"],
+    currency: { "$": ["iidola"], "£": ["iiponti"] },
+    units: { km: ["iikhilomitha"] },
+});
+
 class XhosaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

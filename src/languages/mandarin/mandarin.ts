@@ -5,6 +5,7 @@
  * tone system, sandhi) lives beside this file; this module wires it into the Phonemizer interface.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
@@ -25,6 +26,13 @@ const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/i;
 
 /** Embedded Latin → foreign (en) phonemizer, injected by the registry (lazy, like Hindi). */
 export type ForeignPhonemizer = (latin: string) => string;
+
+// #562 symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["百分之"],
+    percentPrefix: true,
+    units: { mm: ["毫米"], cm: ["厘米"] },
+});
 
 class MandarinPhonemizer implements Phonemizer {
     private readonly pinyinToIpa: (pinyin: string) => string;
@@ -111,6 +119,7 @@ class MandarinPhonemizer implements Phonemizer {
     }
 
     text(input: string): string {
+        input = SYMBOLS(input); // #562
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
         if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
             return this.pinyinToIpa(input);

@@ -82,3 +82,33 @@ describe("Oromo number compositor", () => {
         expect(phonemize("dhibbentaa 25 ta'a", "om")).toBe("ᶑibːentˈaː diɡdamˈiː ʃˈan tˈaʔa");
     });
 });
+
+// Round 3 (#562): the FLEURS-priority languages. Data is orthographic — each engine reads its own script,
+// so no IPA was authored; attestation per word is in each language file's comment.
+describe("symbol normalization — FLEURS-priority round", () => {
+    test("percent across the newly wired languages", () => {
+        expect(phonemize("88%", "am")).toBe("səmanja sɨmɨnt bəməto"); // በመቶ after the number
+        expect(phonemize("93%", "cmn")).toContain("paⁱ˨˩˦ fən˥˥ ʈ͡ʂʐ̩˥˥"); // 百分之 PREFIX
+        expect(phonemize("90%", "ja")).toContain("päːse̞ꜜnto̞"); // its own token → carries its pitch accent
+        expect(phonemize("93%", "kk")).toContain("pˈɑjəz");
+        expect(phonemize("88%", "ko")).toContain("pʰɘsˈentʰɯ");
+        expect(phonemize("88%", "th")).toContain("pˈɤː˧se˧n"); // เปอร์เซ็นต์, kaikki-attested
+        expect(phonemize("93%", "ta")).toContain("t͡ɕˈɐd̪ɐʋˌiːd̪ɐm"); // சதவீதம்
+        expect(phonemize("88%", "vi")).toContain("fˈə˨˩n t͡ɕˈa˧m"); // phần trăm
+        expect(phonemize("93%", "xh")).toContain("iipʼɛsˈɛːntʼi");
+        expect(phonemize("93%", "zu")).toContain("amapʰɛsˈɛːntʼi");
+        expect(phonemize("88%", "cy")).toContain("ˈə kˈant"); // y cant (referee-attested cant)
+    });
+
+    test("Cyrillic Kazakh units and Vietnamese syllable-split units", () => {
+        expect(phonemize("17 км", "kk")).toContain("kəjlomˈetr");
+        expect(phonemize("22 km", "vi")).toContain("kˈi˧ lˈo˧ mˈɛ˧˥t̪"); // ki lô mét, per syllable
+    });
+
+    test("engine regressions from this round stay fixed", () => {
+        // space-grouping only fuses exact 3-digit blocks: "30 9" must stay two numbers
+        expect(phonemize("$30 9 km", "ko")).toContain("kʰˈiɭɭomitʰɘ");
+        // the %-prefix fallback must not glue a currency remnant onto a preceding percent
+        expect(phonemize("88% $2", "cy")).toContain("ˈuːᶤθ dˈeːɡ ˈuːᶤθ ˈə kˈant"); // 88 y cant, not 882
+    });
+});

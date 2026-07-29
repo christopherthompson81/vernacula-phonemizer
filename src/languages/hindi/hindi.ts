@@ -170,7 +170,7 @@ export function makeNativeHindi(
 // #562 symbol normalization — Hindi (प्रतिशत is invariant; units after the number).
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["प्रतिशत"],
-    currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"] },
+    currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
     units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
 });
 

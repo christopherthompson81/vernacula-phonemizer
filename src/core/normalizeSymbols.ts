@@ -63,7 +63,9 @@ function numValue(num: string): number {
     return m[2] !== undefined && m[2].length !== 3 ? int + 0.5 : int; // a real fraction ⇒ never "one" ⇒ plural
 }
 
-const NUM = "\\d+(?:[  .,]\\d+)*";
+// Space-grouping is only real grouping when the block is EXACTLY three digits (3 850 = 3850); otherwise
+// "30 9" would fuse two separate numbers and eat the association between a number and its unit.
+const NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
 
 /** Build the text→text symbol normalizer for one language's data. */
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
@@ -79,7 +81,9 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
     const unitRe = d.units ? new RegExp(`(${NUM})\\s?(${unitAlt})(?![\\p{L}\\p{M}])`, "giu") : null;
     const pctRe = new RegExp(`(${NUM})\\s?%`, "gu");
-    const pctPreRe = new RegExp(`%\\s?(${NUM})`, "gu");
+    // The %-before-number form (%40). The lookbehind stops a misfire after other rules run: currency turns
+    // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.
+    const pctPreRe = new RegExp(`(?<!\\d)%\\s?(${NUM})`, "gu");
 
     return (text: string): string => {
         let s = text;
