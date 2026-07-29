@@ -6,7 +6,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
-import { numberToIpa } from "./numbers.ts";
+import { numberToIpa, type ArabicNumberData } from "./numbers.ts";
 import {
     createArabicDiacritizer,
     type ArabicDiacritizer,
@@ -68,11 +68,13 @@ interface VarietyDef {
     consonantShifts: [string, string][];
     diphthongShifts: Record<string, string>;
     articleVowel?: string; // raise the definite-article nucleus (arz "i" → il-); omitted = keep MSA [a]
+    numbers?: ArabicNumberData; // per-variety numeral tables (#561: arz 80 is tamaniːn, not MSA θamaːnuːn)
 }
 interface VarietyRules {
     consonantShifts: [string, string][]; // literal string rewrites (consonants are unambiguous)
     diphthongShifts: [RegExp, string][]; // guarded: aj/aw only when NOT an onset of the next syllable
     articleVowel?: string; // per-variety definite-article vowel (applied to the tagged article seg, pre-join)
+    numbers?: ArabicNumberData; // per-variety numerals; absent → the MSA compositor tables
 }
 /** A diphthong [aj]/[aw] monophthongizes only when its glide is a CODA — i.e. NOT followed by (an optional stress
  *  mark and) a vowel. This distinguishes the diphthong بيت bajt→beːt from the hiatus طويل tˤawiːl (a·w·iː, glide
@@ -85,6 +87,7 @@ function compileVariety(d: VarietyDef): VarietyRules {
             to,
         ]),
         articleVowel: d.articleVowel,
+        numbers: d.numbers,
     };
 }
 const VARIETIES: Record<string, VarietyRules> = {
@@ -186,7 +189,13 @@ class ArabicPhonemizer implements Phonemizer {
                     lex?.get(m[1].replace(HARAKAT, "")) ??
                         phonemizeWord(m[1], this.variety),
                 );
-            else if (m[2]) sink.emit(numberToIpa(Number(toAscii(m[2]))));
+            else if (m[2])
+                sink.emit(
+                    numberToIpa(
+                        Number(toAscii(m[2])),
+                        this.variety ? VARIETIES[this.variety]?.numbers : undefined,
+                    ),
+                );
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

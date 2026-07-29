@@ -25,5 +25,35 @@
     "diphthongShifts": {
         "aj": "eː", // بيت bajt → beːt (only the atomic diphthong seg, not aj-hiatus)
         "aw": "oː" // يوم jawm → joːm
-    }
+    },
+
+    // ── Numerals (#561) — Egyptian, not MSA (80 was θamaːnuːn, with a θ the dialect does not have).
+    // PROVENANCE per form: [k] = kaikki arz IPA; [w] = shipped wikipron arz referee; [t] = en.wiktionary
+    // {{arz-numeral|tr=…}} transliteration; [p] = pedagogical literature only (Egyptian colloquial references;
+    // the fused hundreds 300–900 have no kaikki/wikipron/Wiktionary-arz attestation — flagged, lowest confidence).
+    // Notation matches the shipped egyptian-lexicon.tsv (rˤ, ʃ, ː).
+    "numbers": {
+        // [k] throughout; 0 sˤifr [k] (NOT the lexicon's sˤafːar, which is the verb "whistled" — a homograph).
+        "ones": ["sˤifr", "waːħid", "itneːn", "talaːta", "ʔarbaʕa", "xamsa", "sitta", "sabʕa", "tamanja", "tisʕa"],
+        // 10–19. 10–15 [k]; 16 sittaːʃarˤ [t]; 17 sabaʕtaːʃarˤ [t]; 18 tamantaːʃarˤ [t]; 19 tisʕataːʃarˤ [t].
+        "teens": ["ʕaʃarˤa", "ħidaːʃarˤ", "itnaːʃarˤ", "talattaːʃarˤ", "ʔarbaʕtaːʃarˤ", "xamastaːʃarˤ",
+            "sittaːʃarˤ", "sabaʕtaːʃarˤ", "tamantaːʃarˤ", "tisʕataːʃarˤ"],
+        // 20 ʕiʃriːn [t]; 30 talatiːn [k]; 40 ʔarbiʕiːn [k]; 50 xamsiːn [k]; 60 sittiːn [k]; 70 sabʕiːn [w];
+        // 80 tamaniːn [k] — the issue's headline; 90 tisʔiːn [k] (ʕ→ʔ is attested, not a typo).
+        "tens": ["", "", "ʕiʃriːn", "talatiːn", "ʔarbiʕiːn", "xamsiːn", "sittiːn", "sabʕiːn", "tamaniːn", "tisʔiːn"],
+        // Fused hundreds replace MSA's construct+dual composition. 100 mijːa [k]; 200 miteːn [t] (NOT wikipron's
+        // majjitiːn — that is ميّتين "dead people", a homograph); 300–900 [p].
+        "hundredsFused": ["", "mijːa", "miteːn", "tultumijːa", "rubʕumijːa", "xumsumijːa", "suttumijːa",
+            "subʕumijːa", "tumnumijːa", "tusʕumijːa"],
+        // wi — the Egyptian conjunction (MSA wa).
+        "connector": "wi",
+        // thousand ʔalf [k] (NOT the lexicon's ʔalːif, the letter name); dual ʔalfeːn [k]. 3–10 thousand use the
+        // compositional unit + plural (talaːta ʔalaːf) — every word attested, slightly formal, chosen over the
+        // fused colloquial talat-talaːf which lacks attestation. Millions: MSA-shaped with Egyptian phonology.
+        "magnitudes": {
+            "hundred": "mijːa", "hundredDual": "miteːn",
+            "thousand": "ʔalf", "thousandDual": "ʔalfeːn", "thousandsPlural": "ʔalaːf",
+            "million": "miljoːn", "millionDual": "miljoːneːn", "millionsPlural": "malajiːn",
+        },
+    },
 }

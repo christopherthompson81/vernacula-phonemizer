@@ -16,6 +16,7 @@ import { describe, expect, it } from "vitest";
 import { createArabic, ipaOnly, repairForeignClusters } from "../src/languages/arabic/arabic.ts";
 
 const arz = createArabic("egyptian", true);
+const msa = createArabic(undefined, false);
 // word → shipped Egyptian IPA (from the lexicon). Egyptian vowels the MSA path gets wrong.
 const GOLD: [string, string][] = [
     ["مصر", "mˈasˤr"], // MSA miṣr → Egyptian maṣr
@@ -115,5 +116,32 @@ describe("Arabic foreign-cluster repair (#560 follow-up)", () => {
     it("word-final CC (legal CVCC) is not broken", () => {
         expect(repairForeignClusters("ʃˈabt")).toBe("ʃˈabt");
         expect(repairForeignClusters("kˈalb")).toBe("kˈalb");
+    });
+});
+
+// #561 — Egyptian numerals. arz used to read digits with the MSA compositor, producing forms the dialect
+// does not have: 80 → θamaːnuːn, with a /θ/ Egyptian lacks (Egyptian folds it to t/s), and the MSA
+// connector wa. The variety now carries its own attested tables (kaikki arz IPA, wikipron, and
+// en.wiktionary {{arz-numeral}} transliterations; the fused hundreds 300–900 are pedagogical-literature
+// forms, flagged as such in egyptian.jsonc). Composition (units-before-tens, fused hundreds) rides the
+// shared algorithm. Sync path — numberToIpa needs no diacritizer.
+describe("Egyptian numerals (#561)", () => {
+    it("dialect forms, not MSA", () => {
+        expect(arz.text("80")).toBe("tamaniːn"); // the issue's headline — was θamaːnuːn
+        expect(arz.text("25")).toBe("xamsa wi ʕiʃriːn"); // wi, not wa
+        expect(arz.text("90")).toBe("tisʔiːn"); // attested ʕ→ʔ
+        expect(arz.text("200")).toBe("miteːn");
+        expect(arz.text("1998")).toBe("ʔalf wi tusʕumijːa wi tamanja wi tisʔiːn");
+    });
+
+    it("no MSA-only phonemes anywhere in 0..2000", () => {
+        for (let n = 0; n <= 2000; n++) {
+            expect(arz.text(String(n)), `n=${n}`).not.toMatch(/[θð]|wa /u);
+        }
+    });
+
+    it("MSA is untouched", () => {
+        expect(msa.text("80")).toBe("θamaːnuːn");
+        expect(msa.text("25")).toBe("xamsa wa ʕiʃruːn");
     });
 });
