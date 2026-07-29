@@ -49,6 +49,23 @@ const CURRENCY: Record<string, [string, string]> = {
 
 const MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
 
+// ── Title/place abbreviations (st, dr, mt, mr, mrs) ─────────────────────────────────────────────────
+// Two defects (FLEURS listening, Run 30): the CMU dict reads bare "st" as STREET and "dr" as DRIVE, so
+// "st. james" came out "street . james" — wrong word AND the abbreviation's period survived into the
+// clause segmenter as a phrase break. The dot must be consumed here, and st/dr disambiguated: a
+// following CONTENT word means the abbreviation precedes a name (saint james, doctor tony); a following
+// function word or phrase end means it follows one (main st. in dublin = street). FLEURS text is
+// lowercased, so capitalization can't be the signal — the neighbor test is the whole heuristic.
+const ABBREV_FUNCTION_NEXT =
+    /^(?:in|on|at|and|or|but|the|a|an|is|was|were|are|to|for|with|of|from|by|near|that|this|it|he|she|they|we|you|i|as|his|her|its|their|there|then|when|where|which|who|had|has|have)$/i;
+const DOTTED_ABBREV: Record<string, (next: string) => string> = {
+    st: (next) => (ABBREV_FUNCTION_NEXT.test(next) ? "street" : "saint"),
+    dr: (next) => (ABBREV_FUNCTION_NEXT.test(next) ? "drive" : "doctor"),
+    mt: () => "mount",
+    mr: () => "mister",
+    mrs: () => "missus",
+};
+
 /** A 4-digit year in its English pair-wise reading, emitted as tokens the number path already handles:
  *  1998 → "19 98" (nineteen ninety-eight), 1905 → "19 oh 5", 1900 → "19 hundred", 2000 → "2 thousand",
  *  2007 → "2 thousand 7", 2011 → "20 11" (twenty eleven). */
@@ -63,6 +80,18 @@ function yearWords(y: number): string {
 /** Normalize one English input string. Pure text→text; no IPA. */
 export function normalizeEnglish(input: string): string {
     let s = input;
+
+    // 0) ABBREVIATIONS: dotted forms first (the dot is consumed so it can't become a phrase break),
+    //    then the undotted saint pattern ("st petersburg" — FLEURS drops the dot). An undotted "st"
+    //    before a function word stays as-is: the dict's street reading is correct there ("main st in
+    //    dublin"). A dotted abbreviation at phrase end is the trailing use (street/drive), keeping the
+    //    punctuation that follows it.
+    s = s.replace(/\b(st|dr|mt|mr|mrs)\.\s+([a-z']+)/gi,
+        (_m, abbr: string, next: string) => `${DOTTED_ABBREV[abbr.toLowerCase()]!(next)} ${next}`);
+    s = s.replace(/\b(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))/gi,
+        (_m, abbr: string) => ({ st: "street", dr: "drive", mt: "mount" })[abbr.toLowerCase()]!);
+    s = s.replace(/\bst\s+([a-z']+)/gi,
+        (m0, next: string) => (ABBREV_FUNCTION_NEXT.test(next) ? m0 : `saint ${next}`));
 
     // 1) CURRENCY before anything else touches the digits: the symbol precedes but is SPOKEN after, and a
     //    magnitude word hops with it ($5 million → "5 million dollars"). Decimal cents ($5.50) stay a
