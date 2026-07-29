@@ -284,3 +284,28 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("Naturschutzgebiet")).toBe("natˈuːɐ̯ʃʊt͡sɡəbiːt"); // gebiet: ge-→ɡə reduction survives
     });
 });
+
+// Prefix destressing for words the 68k stress dict has never seen (found by close-reading the FLEURS corpus,
+// Run 28). The dict stores LEMMAS, so inflected forms (bedeutet, genutzten) missed the be-/ge- reduction and
+// came out with a stressed long prefix (bˈeːdɔʏ̯tət). Two extensions: inflection-aware lookup (suffix
+// strip/swap to the lemma entry — which also PROTECTS roots: beiden → beide ord 0), and a guarded fallback
+// for dict-missing prefix words (ablaut participles like gegangen, which no suffix trick can reach).
+describe("German unstressed prefixes on dict-missing forms", () => {
+    test("inflected forms reach the lemma's stress entry", () => {
+        expect(phonemize("bedeutet", "de")).toBe("bədˈɔʏ̯tət"); // ← bedeuten (ord 1); was bˈeːdɔʏ̯tət
+        expect(phonemize("genutzten", "de")).toBe("ɡənˈʊt͡stən"); // ← genutzt
+        expect(phonemize("behörden", "de")).toBe("bəhˈœɐ̯dən"); // ← behörde
+    });
+
+    test("ablaut participles via the prefix fallback", () => {
+        expect(phonemize("gegangen", "de")).toBe("ɡəɡˈaŋən");
+        expect(phonemize("gebracht", "de")).toBe("ɡəbʁˈaxt");
+    });
+
+    test("ge-/be-/er- ROOTS keep first-syllable stress", () => {
+        expect(phonemize("beiden", "de")).toBe("bˈaɪ̯dən"); // beide — inflected lookup protects it
+        expect(phonemize("gestern", "de")).toBe("ɡˈɛstɐn");
+        expect(phonemize("gegen", "de")).toBe("ɡˈɛɡən");
+        expect(phonemize("erste", "de")).toBe("ˈeːɐ̯stə");
+    });
+});

@@ -15,14 +15,25 @@ export function phonemizeWord(word: string): string {
     return phonemizeSyllable(word);
 }
 
+export type ForeignPhonemizer = (latin: string) => string;
+
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Vietnamese syllable (letters incl. precomposed diacritics + combining marks), a number, or clause punctuation.
 const TOKEN = /([a-zà-ỹăâđêôơưÀ-Ỹ̀-̣]+)|(\d+)|([.!?…,;:])/giu;
 
 class VietnamesePhonemizer implements Phonemizer {
+    constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeSyllable(m[1]));
+            if (m[1]) {
+                // A token that is not a valid Vietnamese syllable (paris, sofia, facebook) used to return ""
+                // and vanish from the output. Route it through `foreign` (English) instead — code-switched
+                // proper nouns are pervasive in Vietnamese text, and a missing word is worse than an
+                // English-phoneme one.
+                const ipa = phonemizeSyllable(m[1]);
+                if (ipa !== "") sink.emit(ipa);
+                else if (this.foreign) sink.emit(this.foreign(m[1]));
+            }
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
                     sink.emit(phonemizeSyllable(wd));
@@ -34,7 +45,8 @@ class VietnamesePhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Vietnamese phonemizer (rule g2p over the closed rhyme set). */
-export function createVietnamese(): Phonemizer {
-    return new VietnamesePhonemizer();
+/** Build the Vietnamese phonemizer (rule g2p over the closed rhyme set). `foreign` reads tokens that are
+ *  not valid Vietnamese syllables — foreign proper nouns — instead of dropping them. */
+export function createVietnamese(foreign?: ForeignPhonemizer): Phonemizer {
+    return new VietnamesePhonemizer(foreign);
 }

@@ -175,7 +175,8 @@ class OromoPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Oromo phonemizer. */
-export function createOromo(): Phonemizer {
-    return new OromoPhonemizer();
+/** Build the Oromo phonemizer. `foreign` reads digit runs (English, wired in the registry) — a stopgap
+ *  pending a proper Oromo numeral compositor; digits used to be dropped from the output entirely. */
+export function createOromo(foreign?: ForeignPhonemizer): Phonemizer {
+    return new OromoPhonemizer(foreign);
 }
