@@ -151,9 +151,18 @@ open-access Toulmin 2006 / Wilde 2008 — cite), `awa.saksena.tsv` + `bho.gramma
    rebuild from kaikki Wu readings (CC-BY-SA fence, gan/hakka/jin/xiang pattern, coverage drops
    101k → ~10-20k), or ask Wugniu for a permissive grant of the dictionary data (now a friendly
    relicensing ask). Alongside Tashkeela (§4.1) this is one of two GPL-lineage data files.
-6. **MOE Taiwan dictionaries → `minnan/dict.tsv`, `dict-chars.tsv` (ChhoeTaigi components)** — MOE
-   dictionary licenses are typically CC-BY-**ND** 3.0 TW; ChhoeTaigi mixes sources. **Verify per
-   component**; ND would block redistribution of a transformed table.
+6. **MOE Taiwan dictionaries → `minnan/dict.tsv`, `dict-chars.tsv`** — **VERIFIED 2026-07-29
+   against ChhoeTaigi's license table; all three components are encumbered. BLOCKER.**
+   教育部台語辭典 = **CC BY-ND 3.0 TW** (NoDerivatives — our transformed extractions are
+   derivatives, so redistribution is prohibited, and this is a deliberate MOE choice, not an
+   oversight); 甘字典 (1913) and 台日大辭典 台譯版 = **CC BY-NC-SA 3.0 TW** (NonCommercial).
+   The 1913/1932 originals are PD by age, but ChhoeTaigi's claims attach to the digitization +
+   romanization conversion actually used. **Escape hatch, same database:** rebuild both files
+   from ChhoeTaigi's clean components — 台華線頂對照典 (91,339 entries, **CC BY-SA 4.0**) +
+   iTaigi 華台對照典 (19,046, **CC0**) + optionally 台灣白話基礎語句 (5,429, CC BY-SA 4.0) —
+   dropping MOE/Kam/Taijit entirely; wikipron referee stays non-circular. Gate the rebuild on
+   the nan referee eval (single-char coverage is the risk: dict-chars.tsv currently lifts it
+   58.3%→~96%).
 
 ## 5. Unknown / unresolved — identify, verify, or regenerate
 
