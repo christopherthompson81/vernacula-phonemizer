@@ -372,6 +372,18 @@ export function normalizeHungarian(input: string): string {
     //     period". This is that pre-pass. Every Hungarian ordinal ends in `-dik` except *első*, and the
     //     same lowercase-continuation licence applies, so a sentence-final ordinal keeps its period.
     s = s.replace(new RegExp(`(?<=dik|első)\\.(?=\\s+[${LOWER}])`, "gu"), "");
+    //     NOT extended to a CAPITALISED follower, though the regnal shape wants it: `II. Erzsébet`
+    //     becomes *második. Erzsébet* and that period survives as a phrase break. Tried, and reverted.
+    //     The guard would have to distinguish a regnal ordinal from a sentence that merely ENDS in an
+    //     ordinal, and "something precedes it on the same line" does not: `Ez a második. Erzsébet jött`
+    //     has exactly that shape and lost its sentence boundary.
+    //
+    //     THE CORPUS CANNOT SETTLE THIS, which is the point. Its census reported 0 terminal marks lost,
+    //     but only 12% of hu_hu utterances contain a sentence boundary at all — FLEURS is largely one
+    //     sentence per utterance — so the shape needs a boundary the corpus mostly does not have. And it
+    //     is not contrived: Hungarian uses ordinals PREDICATIVELY (*a csapat lett a harmadik* — "the team
+    //     came third"), so an ordinal-final sentence is ordinary prose. A spurious pause is not worth
+    //     gambling a sentence boundary on evidence this corpus is structurally unable to provide.
 
     // 10) NUMERAL + HYPHEN SUFFIX → WORDS. LAST of the number rules, because it is the only one that
     //     leaves digits behind: steps 3–9 all need digits still present to match on. `1848-ban` was

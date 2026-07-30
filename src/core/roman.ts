@@ -157,6 +157,18 @@ export function normalizeRomans(text: string, policy: RomanPolicy = {}): string 
         const inContext =
             (prevW !== undefined && policy.ordinalBefore?.test(prevW) === true) ||
             (nextW !== undefined && policy.ordinalAfter?.test(nextW) === true);
+        // A CONTIGUOUS RUN OF SINGLE CAPITALS IS INITIALS, not numerals — the same contiguity principle
+        // core/initialisms.ts uses, generalised: there the run was recognised by its periods (`J. S.
+        // Bach`), but the dots are incidental and `D K Arya` is the same thing. Two adjacent single
+        // capitals are unambiguous, because no numeral is written that way; a LONE capital stays
+        // ambiguous and is left to the rules below.
+        //
+        // This is what let `D K Arya főfelügyelő-helyettes` read as *ötszázadik K Arya* once a regnal
+        // rule licensed a following capitalised word — D is Roman 500.
+        const isSingleCap = (w: string | undefined): boolean =>
+            w !== undefined && w.length === 1 && w === w.toUpperCase() && /\p{Lu}/u.test(w);
+        if (isSingleCap(tok) && (isSingleCap(prevW) || isSingleCap(nextW))) return tok;
+
         const licensed = inContext && allCaps && hasLower;
         if (!licensed) {
             if (tok.length < 2) return tok; // single letters are never worth the risk (I, V, X, C, D, M, L)

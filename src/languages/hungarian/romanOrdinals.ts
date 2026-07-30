@@ -41,26 +41,23 @@ const NOUN_ALT = NOUNS.map(bothCases).join("|");
 const CONTEXT = new RegExp(`^(?:${NOUN_ALT})`, "u");
 
 /**
- * THE REGNAL PATTERN IS STILL NOT COVERED, and the attempt has now been made TWICE, for two different
- * reasons. Recorded properly so it is not tried a third time.
+ * THE REGNAL PATTERN, covered on the third attempt. `II. Erzsébet` / `XVI. Lajos` are *második Erzsébet* /
+ * *tizenhatodik Lajos* — 3 instances in hu_hu, previously read as cardinals — and the licenser is "the
+ * FOLLOWING word is capitalised". Two earlier attempts are recorded because each failed differently and
+ * each fix is now load-bearing:
  *
- * `II. Erzsébet` / `XVI. Lajos` are *második Erzsébet* / *tizenhatodik Lajos* — 3 instances in hu_hu,
- * read as cardinals today — and the obvious licenser is "the FOLLOWING word is capitalised".
+ *   1. `A JAS 39C Gripen` → *századik*: an ordinal context licenses a single-letter numeral, and the `C`
+ *      of `39C` is one. core/roman.ts now refuses any candidate glued to a digit.
+ *   2. `D K Arya főfelügyelő-helyettes` → *ötszázadik K Arya*: `D` is Roman 500, all-caps, followed by a
+ *      capitalised word — which is what PERSONAL INITIALS look like. core/roman.ts now refuses a single
+ *      capital sitting in a contiguous run of them, the same contiguity principle core/initialisms.ts
+ *      uses for `J. S. Bach`, generalised to the form without periods.
  *
- * FIRST ATTEMPT broke `A JAS 39C Gripen`: an ordinal context licenses a single-letter numeral, so the `C`
- * of `39C` became *századik*. That cause is now fixed in core/roman.ts, which refuses any candidate glued
- * to a digit — generally true of Roman numerals, not a Hungarian concern.
+ * A minimum-numeral-length constraint, the other option considered, would NOT have worked: Hungarian
+ * regnal names are routinely single letters (I. István, V. László, X. Leó).
  *
- * SECOND ATTEMPT, with that fixed, broke something else: `D K Arya főfelügyelő-helyettes` read as
- * *ötszázadik K Arya*. `D` is Roman 500, all-caps, and followed by a capitalised word — which is
- * indistinguishable from a regnal numeral by the licenser alone, because those are PERSONAL INITIALS.
- *
- * The real discriminator is the PERIOD: a regnal ordinal is written `I. István`, initials are `D K Arya`.
- * `RomanPolicy` gets the next WORD, with punctuation already stripped, so it cannot see the period and
- * cannot express the rule. A minimum-numeral-length constraint would not help either — Hungarian regnal
- * names are routinely single letters (I. István, V. László, X. Leó).
- *
- * 3 gained against 1 confidently-wrong loss, twice over. Not a trade worth taking.
+ * RESIDUAL: the ordinal period survives as a phrase break (*második. Erzsébet*). Extending normalize.ts
+ * step 9d to swallow it before a capitalised word was tried and reverted — see the note there.
  */
 
 /** Integer → Hungarian ordinal (see numbers.ts). Named locally so the policy's shape stays readable. */
@@ -73,5 +70,8 @@ type Policy = RomanPolicy & { ordinal(n: number): string | undefined };
 export const ROMAN_POLICY: Policy = {
     ordinal,
     ordinalBefore: CONTEXT,
-    ordinalAfter: CONTEXT,
+    // …plus a capitalised word, which is the REGNAL pattern (II. Erzsébet, XVI. Lajos). Safe only
+    // because core/roman.ts now refuses both a digit-glued candidate and a single capital sitting in a
+    // run of them; the two attempts that failed without those are recorded above.
+    ordinalAfter: new RegExp(`^(?:${NOUN_ALT}|\\p{Lu})`, "u"),
 };

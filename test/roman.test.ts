@@ -128,3 +128,25 @@ describe("digit-glued candidates are never numerals", () => {
         expect(normalizeRomans("el siglo XIX")).toBe("el siglo 19");
     });
 });
+
+/** #562 — a contiguous run of single capitals is INITIALS, not numerals. */
+describe("initial runs are not numerals", () => {
+    test("two adjacent single capitals are left alone", () => {
+        // `D` is Roman 500; a regnal rule licensing a following capitalised word turned
+        // `D K Arya` into "five-hundredth K Arya". Same contiguity principle as J. S. Bach.
+        expect(normalizeRomans("D K Arya")).toBe("D K Arya");
+        expect(normalizeRomans("M C Escher")).toBe("M C Escher");
+        expect(normalizeRomans("X Y Z")).toBe("X Y Z");
+    });
+
+    test("…a lone capital stays ambiguous and a real numeral still converts", () => {
+        expect(normalizeRomans("Louis XVI")).toBe("Louis 16");
+        expect(normalizeRomans("el siglo XIX")).toBe("el siglo 19");
+    });
+
+    test("the Hungarian regnal ordinal now lands", () => {
+        expect(phonemize("II. Erzsébet", "hu")).toContain("maːʃodik");
+        expect(phonemize("XVI. Lajos", "hu")).toContain("tizɛnhɒtodik");
+        expect(phonemize("A JAS 39C Gripen", "hu")).not.toContain("saːzɒdik");
+    });
+});
