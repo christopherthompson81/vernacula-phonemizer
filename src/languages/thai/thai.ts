@@ -6,6 +6,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeWord } from "./g2p.ts";
+import { normalizeThai, THAI_DIGIT_WORDS } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 export { phonemizeWord };
@@ -19,7 +20,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // THAI-SCRIPT words (each kaikki-attested with IPA) and reads them through the ordinary g2p, so no IPA is
 // authored here. Grammar: 20 is ยี่สิบ (not สองสิบ); a FINAL 1 in any compound ≥11 is เอ็ด (สิบเอ็ด,
 // ยี่สิบเอ็ด); magnitudes 10⁴ หมื่น and 10⁵ แสน are their own words.
-const TH_UNITS = ["ศูนย์", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
+const TH_UNITS = THAI_DIGIT_WORDS;
 const TH_MAG: [number, string][] = [[1e6, "ล้าน"], [1e5, "แสน"], [1e4, "หมื่น"], [1e3, "พัน"], [100, "ร้อย"]];
 
 function numberToThaiWords(n: number): string[] {
@@ -53,7 +54,10 @@ const SYMBOLS = makeSymbolNormalizer({ percent: ["เปอร์เซ็นต
 
 class ThaiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // SYMBOLS (%, the shared tier) runs FIRST: it needs the raw `80%`, which step 5/7 of
+        // normalizeThai would otherwise have rewritten out from under it. normalizeThai then owns
+        // everything Thai-script and Thai-specific — see normalize.ts for the ordered steps.
+        return assembleClauses(normalizeThai(SYMBOLS(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToThaiWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
