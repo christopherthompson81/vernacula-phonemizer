@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { attachSuffix, normalizeTurkish, ordinalWords } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress exceptions: word → 1-based stressed syllable (default is the final syllable).
@@ -81,8 +82,17 @@ export function phonemizeWord(word: string, finalStress = false): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// A word (Turkish letters), a number, or clause punctuation. Turkish uses . as thousands sep and , as decimal.
-const TOKEN = /([a-zçğıiöşüâîû]+)|(\d+(?:\.\d{3})*(?:,\d+)?)|([.!?…,;:])/giu;
+// A word (Turkish letters), an ORDINAL numeral, a number with an optional apostrophe-attached suffix, or
+// clause punctuation. Turkish uses . as thousands sep and , as decimal.
+//
+// #562: the two numeral-attached forms are matched HERE rather than rewritten in normalize.ts because their
+// spoken words must go through phonemizeWord(w, /*finalStress*/ true) — the word path mis-stresses sekiz /
+// dokuz / otuz via the -Iz person-ending rule (see normalize.ts's header). Ordering inside the alternation
+// matters: the ordinal branch precedes the number branch, and its lookahead (whitespace + another token) is
+// exactly the corpus-derived detector — it declines inside `1.234` and `802.11a`, where no space follows the
+// dot, and at end of input, which is the one sentence-final `N.` the corpus contains (`rekoru 7-2.`).
+const TOKEN =
+    /([a-zçğıiöşüâîû]+)|(\d+)\.(?=[^\S\n]+\S)|(\d+(?:\.\d{3})*(?:,\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])/giu;
 
 /** A number token (Turkish thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
@@ -95,23 +105,40 @@ function numberTokenToWords(tok: string): string {
     return words;
 }
 
-// #562 symbol normalization — Turkish: the percent word PRECEDES the number (yüzde kırk, written %40).
+// #562 symbol normalization — Turkish: the percent word PRECEDES the number (yüzde kırk, written %40); both
+// %40 and 40% occur in the wild and both rewrite to prefix order. `m` → metre is claimed here rather than in
+// normalize.ts so the shared tier's "only after a number" guard applies (4892 m, 100m); the `m/s` compound is
+// consumed earlier, in normalize.ts step 4, before this tier can break the adjacency.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["yüzde"],
     percentPrefix: true,
-    currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"] },
-    units: { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"] },
+    currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },
+    units: { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] },
 });
 
 class TurkishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's `/`-unit step needs the number and
+        // the unit still adjacent, which the symbol tier would break (83 km/s → 83 kilometre/s).
+        return assembleClauses(SYMBOLS(normalizeTurkish(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2])
-                for (const wd of numberTokenToWords(m[2]).split(" "))
+            else if (m[2] !== undefined) {
+                const ord = ordinalWords(Number(m[2]));
+                if (ord !== undefined)
+                    for (const wd of ord.split(" ")) sink.emit(phonemizeWord(wd, true));
+                else {
+                    // Not expressible as an ordinal — fall back to the previous reading (cardinal + pause).
+                    for (const wd of numberTokenToWords(m[2]).split(" "))
+                        sink.emit(phonemizeWord(wd, true));
+                    const mk = CLAUSE_MARK["."];
+                    if (mk) sink.pause(mk);
+                }
+            } else if (m[3]) {
+                const words = numberTokenToWords(m[3]).split(" ");
+                for (const wd of m[4] ? attachSuffix(words, m[4]) : words)
                     sink.emit(phonemizeWord(wd, true));
-            else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+            } else if (m[5]) {
+                const mk = CLAUSE_MARK[m[5]];
                 if (mk) sink.pause(mk);
             }
         });
