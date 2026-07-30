@@ -26,6 +26,7 @@ import {
     type PosModel,
 } from "./posTagger.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
+import { foldLatinDiacritics } from "../../core/unicode.ts";
 import { normalizeEnglish } from "./normalize.ts";
 
 /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
@@ -69,8 +70,12 @@ type Token =
     | { kind: "clause"; text: string };
 
 // number (grouped + decimal) with optional ordinal suffix · word (letters + internal/trailing apostrophes) · clause punct
+// The word class is LATIN-SCRIPT, not [A-Za-z]: an ASCII-only class split accented loanwords at the
+// accent, so "naïve" tokenized as "na"+"ve" -> [nˈɑː vˈiː] and "résumé" as "r"+"sum" -> [ˈɑːɹ sˈʌm].
+// resolveWord folds the diacritics away for lookup (foldLatinDiacritics). Non-Latin scripts stay
+// unmatched, as before — English is not the engine for them.
 const TOKEN_RE =
-    /(\d[\d,]*(?:\.\d+)?)(st|nd|rd|th)?|([A-Za-z]+(?:'[A-Za-z]+)*'?)|([.?!,;:])/g;
+    /(\d[\d,]*(?:\.\d+)?)(st|nd|rd|th)?|([\p{Script=Latin}\p{M}]+(?:['’][\p{Script=Latin}\p{M}]+)*['’]?)|([.?!,;:])/gu;
 
 export class EnglishPhonemizer {
     constructor(
@@ -98,7 +103,10 @@ export class EnglishPhonemizer {
      *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
      *  the sync path passes nothing, so behaviour is byte-identical. */
     private resolveWord(word: string, e: PosExpectation | undefined, oovOverride?: (g2pKey: string) => string | undefined): string {
-        const lower = word.toLowerCase();
+        // Fold Latin diacritics before any lookup: the lexicon and the n-gram G2P are ASCII-keyed
+        // (CMUdict has `cafe`/`naive`/`jalapeno`, never the accented spellings), and the curly
+        // apostrophe is normalised so "don’t" resolves like "don't".
+        const lower = foldLatinDiacritics(word.toLowerCase()).replace(/’/gu, "'");
 
         // Heteronym (direct or a regular -s/-es plural of a stress-shift heteronym).
         let het = this.heteronyms.get(lower);

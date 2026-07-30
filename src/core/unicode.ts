@@ -82,3 +82,25 @@ export const BENGALI_DIGITS: Record<string, string> = {
     "৮": "8",
     "৯": "9",
 };
+
+/** Latin letters that have no combining-mark decomposition, so NFD alone cannot fold them. */
+const LATIN_ATOMIC: Record<string, string> = {
+    ø: "o", æ: "ae", œ: "oe", ß: "ss", ł: "l", đ: "d", ð: "d", þ: "th", ħ: "h", ı: "i", ŋ: "ng",
+};
+
+/**
+ * Fold Latin diacritics to the ASCII base letters an English-style lexicon and G2P are trained on:
+ * café → cafe, naïve → naive, jalapeño → jalapeno, résumé → resume.
+ *
+ * Needed because a dictionary keyed on ASCII has no entry for the accented spelling — CMUdict has
+ * `cafe`, `naive`, `jalapeno` and `resume` but none of their accented forms — so without folding, a
+ * loanword either misses the lexicon or (worse) is split at the accent by an ASCII-only tokenizer.
+ *
+ * Lossy by design where the accent is the only distinction: résumé and resume fold together, so the
+ * noun inherits the verb's reading. That is a documented conflation, and far better than the
+ * alternative of mangling the word.
+ */
+export function foldLatinDiacritics(s: string): string {
+    const stripped = s.normalize("NFD").replace(/\p{M}+/gu, "");
+    return stripped.replace(/[øæœßłđðþħıŋ]/gu, (c) => LATIN_ATOMIC[c] ?? c);
+}

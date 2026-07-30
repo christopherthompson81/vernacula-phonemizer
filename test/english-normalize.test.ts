@@ -74,6 +74,23 @@ describe("English text normalization (#562)", () => {
         expect(normalizeEnglish("main st in dublin")).toBe("main st in dublin");
     });
 
+    test("accented Latin loanwords fold to their ASCII lexicon entry", () => {
+        // The tokenizer's word class was [A-Za-z], so an accented word was SPLIT at the accent:
+        // "naïve" tokenized as "na"+"ve" → [nˈɑː vˈiː], "résumé" as "r"+"sum" → [ˈɑːɹ sˈʌm].
+        // CMUdict is ASCII-keyed (it has cafe/naive/jalapeno/resume, never the accented spellings),
+        // so the fix is to accept the letters and fold the diacritics for lookup.
+        expect(phonemize("café", "en")).toBe(phonemize("cafe", "en"));
+        expect(phonemize("naïve", "en")).toBe(phonemize("naive", "en"));
+        expect(phonemize("jalapeño", "en")).toBe(phonemize("jalapeno", "en"));
+        // one token, not two
+        expect(phonemize("naïve", "en").split(" ")).toHaveLength(1);
+        expect(phonemize("résumé", "en").split(" ")).toHaveLength(1);
+        // documented conflation: the accent is the only distinction, so the noun takes the verb reading
+        expect(phonemize("résumé", "en")).toBe(phonemize("resume", "en"));
+        // the curly apostrophe normalises too
+        expect(phonemize("don’t", "en")).toBe(phonemize("don't", "en"));
+    });
+
     test("end-to-end: the classes that used to be dropped or garbled", () => {
         expect(phonemize("40% of people", "en")).toContain("pɚsˈɛnt");
         expect(phonemize("$5 million", "en")).toContain("dˈɑːlɚz");
