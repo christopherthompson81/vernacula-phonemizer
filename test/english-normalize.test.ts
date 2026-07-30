@@ -167,3 +167,47 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("5 000 years", "en")).toBe("fˈaᶦv θˈaᶷzənd jˈɪɹz");
     });
 });
+
+describe("english normalization: alphanumeric codes, money, signs, numeric dates", () => {
+    test("all-caps letters attached to digits are a code, not a word", () => {
+        // There is no word boundary between the letters and the digits, so these letters reached the g2p
+        // raw: "CG4684" came out [kɡ]. A single letter counts here too — English read the bare A of A380
+        // as the reduced article [ə].
+        expect(phonemize("Flight CG4684", "en")).toBe("flˈaᶦt sˈiː d͡ʒˈiː fˈɔːɹ θˈaᶷzənd sˈɪks hˈʌndɹəd ˈeᶦt̬i fˈɔːɹ");
+        expect(phonemize("the A380", "en")).toContain("ˈeᶦ"); // the letter name, not the article
+    });
+
+    test("money reads as currency-plus-cents, not as a decimal", () => {
+        expect(phonemize("it cost $5.50", "en")).toBe("ɪt kʰˈɑːst fˈaᶦv dˈɑːlɚz fˈɪfti");
+        expect(phonemize("$1.99", "en")).toBe("wˈʌn dˈɑːlɚ nˈaᶦnti nˈaᶦn"); // singular at 1
+        expect(phonemize("£2.50 each", "en")).toBe("tʰˈuː pʰˈaᶷndz fˈɪfti ˈiːt͡ʃ");
+    });
+
+    test("a plus sign is spoken, like the minus", () => {
+        // A dropped sign is silent content loss in both directions; "+5" read as "five" is as wrong as
+        // "-5" was. The attached form occurs in the corpus as a timezone offset.
+        expect(phonemize("a +5 gain", "en")).toBe("ə plˈʌs fˈaᶦv ɡˈeᶦn");
+        expect(phonemize("UTC+1 zone", "en")).toBe("jˈuː tʰˈiː sˈiː plˈʌs wˈʌn zˈoᶷn");
+    });
+
+    test("numeric dates read as dates", () => {
+        // Both forms emit "march 14th 2011", which the ordinal-day and pair-wise-year rules then speak.
+        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvən ɪt bᵻɡˈæn");
+        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvən ɪt bᵻɡˈæn");
+    });
+
+    test("the lexicalization threshold: long+pronounceable is a word, short is letters", () => {
+        // Measured on the 40 all-caps entries of the wikipron referee: every acronym it records with a
+        // WORD reading is 4+ letters and pronounceable; every one it records as LETTERS is 2-3 letters or
+        // has an illegal cluster. Without this, spelling out was net WORSE on that list (8 better / 14
+        // worse); with it, net better (7 / 4).
+        expect(phonemize("SNES", "en")).toBe("snˈɛs"); // 4, pronounceable → word
+        expect(phonemize("BAMF", "en")).toBe("bˈæmf");
+        expect(phonemize("the NHS", "en")).toBe("ðə ˈɛn ˈeᶦt͡ʃ ˈɛs"); // 3 → letters
+        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbəɫjuː tʰˈiː ˈoᶷ"); // 3 → letters
+        expect(phonemize("DSLR", "en")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ"); // 4 but no vowel → letters
+        // Convention still overrides the threshold where the two disagree. The referee records the
+        // near-identical USAR as a WORD, which is why this can only be listed, not derived.
+        expect(phonemize("a USAF base", "en")).toBe("ə jˈuː ˈɛs ˈeᶦ ˈɛf bˈeᶦs");
+    });
+});

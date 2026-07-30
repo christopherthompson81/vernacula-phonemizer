@@ -17,6 +17,7 @@ export interface FrenchManifest {
     yodFinal: [string, string][];
     clausePunctuation: Record<string, string>;
     liaison: Record<string, string>;
+    acronymLetters: string[];
     hAspire: string[];
     numbers: {
         small: string[];

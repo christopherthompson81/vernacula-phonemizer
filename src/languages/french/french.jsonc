@@ -166,6 +166,16 @@
 
     // h aspiré (+ vowel-initial words that block liaison, e.g. huit/onze/y-): looks vowel-initial but forbids
     // liaison — les héros → le eʁo, not le zeʁo.
+    // ACRONYMS read letter-by-letter although their lowercase form is an attested French word, so Lexique
+    // cannot express the distinction ("usa" is in it as the passé simple of *user*). A LEXICAL fact.
+    // Also listed here: the acronyms attested in the corpus whose reading is letters rather than a word —
+    // the OOV rule can only catch the ones that are UNPRONOUNCEABLE (SNCF, TGV, PDG), and these are
+    // perfectly pronounceable, so nothing but recorded knowledge can decide them.
+    "acronymLetters": [
+        "usa", "ong", "pib", "rer", "vtt", "jo", "cd", "dvd", "aol", "cio", "oha", "tda", "acma",
+        "irm", "adn", "gps", "utc", "pbs", "nba", "gp", "cnrs", "hjr", "ratp", "edf", "tva", "sncb",
+    ],
+
     "hAspire": [
         "hache",
         "haie",

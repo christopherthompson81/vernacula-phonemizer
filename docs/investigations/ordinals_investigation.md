@@ -397,3 +397,66 @@ shadowed by `km` and adding a unit is a one-line data change.
 - Money decimals (`£2.50` → "two point five zero pounds" rather than "two pounds fifty") in both languages.
 - A lone all-caps token is exempted from the all-caps-document gate so `NYC` typed alone still spells out;
   a multi-word all-caps HEADLINE is still left alone, which is the intended behaviour.
+
+## Run 6 — 2026-07-29 — closing the gaps, and an architecture correction
+
+Fixed the four gaps from Run 5 that were real problems (the fifth, an all-caps headline being left alone,
+is intended behaviour and was left):
+
+| gap | before | after |
+|---|---|---|
+| alphanumeric codes | en `CG4684` → `[kɡ]`; **fr dropped the G entirely** → `[k]`; en `A380` → `[ə]`, the reduced article | letters + number |
+| money | `$5.50` → "five point five zero dollars"; `2,50 €` → "deux virgule cinquante euro" | "five dollars fifty"; "deux euros cinquante" |
+| plus sign | `+5` → "five" / "cinq" — **the sign silently DROPPED**, mirror of the minus bug | "plus five" / "plus cinq" |
+| numeric dates (en) | `2011-03-14` → "two thousand eleven three fourteen" | "march fourteenth twenty eleven" |
+
+French `plus` needed a respelling: it is a heteronym ([ply] "more" vs [plys] the operator) and Lexique
+carries only the first. The supplement cannot help, being additive-only for words Lexique LACKS, and
+overriding `plus` outright would break the far commoner reading — so the rule emits the attested informal
+spelling `plusse`, with a supplement entry pinning it to [plys]. The clean fix is a French heteronym tier.
+
+### A stale claim of mine, corrected
+
+I reported the English referee as "byte-identical" for Run 5. It was not. I ran that comparison mid-stream
+and then kept editing (the relaxed all-caps gate and the FORCE_LETTERS trim came after), so the claim was
+stale rather than wrong-when-made. The real movement in `d7d4dc2` was 1644 → 1647 folded and 78.1% → 78.0%
+symbol. Chasing it down is what produced the rest of this entry, so it was worth catching.
+
+### The referee and the corpus disagreed, because they sample different populations
+
+Scoring the 40 all-caps entries of the English wikipron referee by phone-content closeness, spelling-out
+as the default was net WORSE there: **8 better, 14 worse**. Every WORSE case was a 4+ letter, pronounceable,
+lexicalized acronym (BAMF, SNES, CUPE, TESDA, CAGR, USAR, VUSA, CODBLOPS, POSIC); every BETTER case was
+2–3 letters or had an illegal cluster (BJ, EEE, IPA, SSR, ZRA, LNAV).
+
+That is a real regularity, and a length-based "lexicalization threshold" (4+ and pronounceable ⇒ word)
+exploited it: 7 better / 4 worse, and the referee rose to 1650/4558.
+
+### …but the threshold was the wrong kind of answer
+
+It was logic guessing at lexical facts, and it guessed wrong in the same breath — it read `USAF` as a word
+(the referee records the near-identical `USAR` as a word and `USAF` as letters, which shows spelling cannot
+decide it). Restructured on the principle that **a known acronym's pronunciation is lexical and the
+unpronounceable case is OOV**:
+
+    lexical   → listed exception (`acronymLetters`, in the language's own manifest)
+              → recorded in the pronunciation dictionary (leave the token; the lexicon owns it)
+    OOV       → unpronounceable ⇒ spell out; pronounceable ⇒ leave it, the OOV g2p reads it as a word
+
+`core/initialisms.ts` lost the word-acronym list and the threshold; `acronymLetters` moved out of code and
+into `english.jsonc` / `french.jsonc`, beside each language's other hand-authored facts. The dictionary tier
+is load-bearing and was briefly missing: without it `CD` (no vowel) fell to the OOV rule and got spelled
+out, when CMUdict already has it as one token [siːdˈiː] — a recorded pronunciation is not the OOV tier's
+business.
+
+Honest cost of the simplification: a pronounceable, unrecorded acronym that IS spelled out in speech now
+needs a data entry — found `ROV`, `NYC`, `LATAM`, `MINAE` that way and recorded them. The referee sits at
+1648 versus the threshold's 1650: two words, for a rule that could not be justified. Both beat the 1644
+the engine started at, and symbol accuracy is back to 78.1%.
+
+### Verification
+
+- 198 files / 2100 tests pass (14 new across the two languages); `tsc --noEmit` clean.
+- Referee: en 1648/4558 (36.2%) folded, 78.1% symbol — both above the pre-work baseline. fr byte-identical
+  at 79.3% / 96.0% (second set 91.3% / 97.6%).
+- Corpus sweeps: 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray symbols in either language, both columns.

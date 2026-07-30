@@ -18,6 +18,7 @@ export interface HeteronymEntry {
 
 export interface EnglishManifest {
     heteronyms: Record<string, HeteronymEntry>;
+    acronymLetters: string[];
     unstressedWords: string[];
     clausePunctuation: Record<string, string>;
     nonTonicFinal: string[];

@@ -155,6 +155,18 @@ describe("french canonical IPA", () => {
         expect(phonemize("3 Go", "fr")).toBe("tʁwa ʒiɡaɔktˈɛ"); // read as the word "go"
     });
 
+    test("money, plus sign, and alphanumeric codes", () => {
+        // A price read as a decimal is wrong in a way listeners notice.
+        expect(phonemize("il coûte 2,50 €", "fr")).toBe("il kut dø zøʁo sɛ̃kˈɑ̃t"); // deux euros cinquante
+        expect(phonemize("5,99 €", "fr")).toBe("sɛ̃k øʁo katʁəvɛ̃diznˈœf");
+        // The plus is spelled "plusse" deliberately: `plus` is a heteronym ([ply] "more" vs [plys] the
+        // operator) and Lexique carries only the [ply] reading.
+        expect(phonemize("un +5", "fr")).toBe("œ̃ plys sˈɛ̃k");
+        expect(phonemize("utc+1", "fr")).toBe("ytk plys ˈœ̃");
+        // Letters attached to digits are a code; French previously DROPPED the G of CG entirely.
+        expect(phonemize("le vol CG4684", "fr")).toContain("se ʒe");
+    });
+
     test("supplement.tsv covers the words Lexique lacks", () => {
         // normalize.ts emits words the corpus never contained, so words that were previously unreachable
         // are now on the hot path. These three are absent from Lexique and the rule g2p got them wrong.
