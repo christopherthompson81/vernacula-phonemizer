@@ -191,10 +191,18 @@ export function normalizeEnglish(input: string): string {
     //     `No.` before a DIGIT is the number sign — the rule above needs a following letter, and this is
     //     the form that actually occurs ("No. 1", ×2 in the cased column), where it read as the word "no".
     s = s.replace(/\bnos?\.\s*(?=\d)/gi, "number ");
-    //     The two Latin abbreviations are read as their LETTERS in speech, and must be handled before the
-    //     generic dot-stripping below, which would leave "eg"/"ie" to be read as words.
-    s = s.replace(/\be\.\s?g\./gi, "ee gee");
-    s = s.replace(/\bi\.\s?e\./gi, "eye ee");
+    //     `e.g.` and `i.e.` — the ENGLISH GLOSS, which is a CHOICE among readings that are genuinely
+    //     interchangeable in speech ("for example" / "ee gee" / "exempli gratia"). The gloss is the most
+    //     common spoken form for e.g., and the project's preference for i.e. as well. Both must be handled
+    //     before the generic dot-stripping below, which would otherwise leave "eg"/"ie" to be read as
+    //     words. Two branches, as everywhere: the dot is consumed mid-sentence so it cannot become a
+    //     phrase break, and kept where it really is the sentence end.
+    //     The lookahead admits a DIGIT: the corpus writes "i.e. 0 or 1", and a letter-only lookahead let
+    //     that fall through to the generic dot-stripping, which read the bare "ie" as the word [iː].
+    s = s.replace(/\be\.\s?g\.(\s+)(?=[\p{L}\d])/giu, "for example$1");
+    s = s.replace(/\be\.\s?g\.(?=\s*(?:[,;:!?)]|$))/giu, "for example.");
+    s = s.replace(/\bi\.\s?e\.(\s+)(?=[\p{L}\d])/giu, "that is$1");
+    s = s.replace(/\bi\.\s?e\.(?=\s*(?:[,;:!?)]|$))/giu, "that is.");
     //     a.m./p.m. likewise: dot-stripping alone leaves lowercase "am", which reads as the verb. The
     //     initialism pass cannot rescue it because that pass only claims all-caps runs.
     s = s.replace(/\b([ap])\.\s?m\./gi, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));

@@ -139,8 +139,11 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("Dr. Who", "en")).toBe("dˈɑːktɚ hˈuː"); // was "drive who" — "who" is a function word
         expect(phonemize("Prof. Jones", "en")).toBe("pɹəfˈɛsɚ d͡ʒˈoᶷnz");
         expect(phonemize("vs. them", "en")).toBe("vˈɝsəs ðˈɛm");
-        expect(phonemize("e.g. this", "en")).toBe("ˈiː d͡ʒˈiː ðˈɪs"); // dots were two pause marks
-        expect(phonemize("i.e. that", "en")).toBe("ˈaᶦ ˈiː ðˈæt");
+        // The dots were two pause marks. The reading is now the ENGLISH GLOSS rather than the letter
+        // names — a choice among interchangeable readings; see the Latin-abbreviation block below.
+        expect(phonemize("e.g. this", "en")).toBe("fɔːɹ ɪɡzˈæmpəɫ ðˈɪs");
+        expect(phonemize("i.e. that", "en")).toBe("ðæt ɪz ðˈæt");
+        expect(phonemize("i.e. 0 or 1", "en")).toContain("ðæt ɪz zˈɪɹoᶷ"); // a DIGIT may follow
         expect(phonemize("at 3 a.m.", "en")).toBe("æt θɹˈiː ˈeᶦ ˈɛm"); // stripping dots alone left the verb "am"
         expect(phonemize("the U.S. team", "en")).toBe("ðə jˈuː ˈɛs tʰˈiːm");
     });
@@ -240,8 +243,13 @@ describe("Latin abbreviations and phrases", () => {
     });
 
     test("the ones that were already correct are unchanged", () => {
-        expect(p("the rules, i.e. these ones")).toContain("ˈaᶦ ˈiː");
-        expect(p("some fruit, e.g. apples")).toContain("ˈiː d͡ʒˈiː");
+        // i.e./e.g. take the ENGLISH GLOSS. All three readings are interchangeable in speech
+        // ("for example" / "ee gee" / "exempli gratia"); this is the project's stated preference, and
+        // the gloss is the commonest spoken form for e.g. Same two-branch dot handling as the rest.
+        expect(p("the rules, i.e. these ones")).toContain("ðæt ɪz");
+        expect(p("some fruit, e.g. apples")).toContain("fɔːɹ ɪɡzˈæmpəɫ");
+        expect(p("many things, e.g.")).toMatch(/ \.$/u);  // sentence-final dot survives
+        expect(p("fruit, e.g. apples, are good")).not.toContain("ɡzˈæmpəɫ . ");
         expect(p("N.B. this matters")).toContain("ˈɛn bˈiː");
         expect(p("at 5 p.m. today")).toContain("pʰˈiː ˈɛm");
         expect(p("he wrote (sic) there")).toContain("sˈɪk");
