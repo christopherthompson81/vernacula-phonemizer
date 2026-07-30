@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizePortuguese, normalizePortugueseInitialisms } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexical CORRECTION table (Approach A): the engine gets reduction/stress/glides right on its own; the lexicon
@@ -257,8 +258,12 @@ function wordIpa(
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["por cento"],
     currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["iene", "ienes"] },
-    units: { km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
-        kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"] },
+    // Longest keys match first, so km/h beats km. The slash unit was dropping its /h entirely.
+    units: { "km/h": ["quilômetro por hora", "quilômetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
+        km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
+        kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"], m: ["metro", "metros"],
+        l: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
+        t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
     magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
 });
 
@@ -270,7 +275,11 @@ class PortuguesePhonemizer implements Phonemizer {
     text(input: string): string {
         const d = this.dialect,
             pw = this.postWord;
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // #562 order: Portuguese rewrites (abbreviations, era markers, ordinal indicators, clock, R$) →
+        // INITIALISMS → the shared symbol tier last, since the clock rule has already claimed the hour.
+        // Roman numerals arrive already converted from the registry seam (pt is not in ROMAN_NATIVE).
+        const normalized = SYMBOLS(normalizePortugueseInitialisms(normalizePortuguese(input, this.dialect === "bp")));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1], d, pw));
             else if (m[2])
                 sink.emit(

@@ -876,3 +876,47 @@ diff showed it — which is the standing argument for making that diff a require
 - Referee byte-identical for both varieties: ar 3082/4758 (64.8%) folded / 91.3% symbol; arz 48.8% / 83.1%.
 - ar_eg corpus, both columns: 65 of 2,104 changed, 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray symbols.
   Sampled review found them all improvements.
+
+## Run 14 — 2026-07-30 — Portuguese (and the º/ª leak finally closed)
+
+Eighth language, and structurally the closest to Spanish: same ordinal indicators, same dot-thousands /
+comma-decimal conventions, same era markers. One layer serves both varieties, since pt-BR is the same
+engine with `dialect: "bp"` plus an open/close lexicon rather than a fork.
+
+This closes the **`º`/`ª` leak** first recorded in Run 1 — the raw U+00BA/U+00AA reaching the phoneme
+string. It was found in es-419, it, ca, gl, ro and pt; Spanish was fixed in Run 9 and Portuguese now here,
+13 corpus utterances. The remaining four (it, ca, gl, ro) are still open.
+
+### Already correct and untouched
+
+Dot-thousands (1.000 → mil) and comma-decimals were already in the number tokenizer; % and the metric units
+work through the shared symbol tier; dates take a plain cardinal day; and Roman numerals arrive already
+converted from the registry seam (pt is not in ROMAN_NATIVE), so `século XV` was right and the
+roman-vs-initialism ordering hazard cannot arise — the same structural relief Spanish and Hindi got.
+
+### What was broken
+
+| class | before | after |
+|---|---|---|
+| ordinal | `1º` → `ũ º` — raw º in the OUTPUT | `pɾimˈejɾu` |
+| clock | `07h19` → `sˈɛt͡ʃi dezenˈɔvi` — the h marker DROPPED (×28) | `sˈɛt͡ʃi ˈɔɾɐs e dezanˈovi` |
+| clock | `8:46` → colon became a PAUSE (×17); `11:00` → a spurious "zero" | fixed, `hora` feminine at 1 |
+| currency | `R$ 50` → a stray [ʁ] plus "dólares" — the shared tier saw only the $ | `sĩkˈẽtɐ ʁjˈajs` |
+| abbrev | `Sr.` → `[zʁ]` + pause; `Dr.` → `[dɾ]`; `etc.` → `[ˈetk]`; `a.C.` → two pauses | expanded |
+| initialism | `EUA` → the word `[ˈewɐ]`; `TV` → `[tv]`; `FBI` → `[fbˈi]`; `GMT` → `[ɡmt]`; `HJR` → `[ʒɾ]`; `GP` → `[ɡp]` | spelled out |
+| units | `km/h` lost its /h; `20 °C` → `[k]`; `35°` → the sign dropped | expanded |
+
+### A claim of mine that was wrong, and corrected
+
+I first wrote the date rule with a comment saying Brazil and Portugal agree on the first of the month.
+They do not: Brazil says *primeiro de julho*, Portugal normally *um de julho*. Dialect-gated now, the same
+way Spanish was — and the plumbing already existed, since `createPortuguese` takes the dialect. An explicit
+`1º` is honoured in BOTH, because there the writer marked it.
+
+### Verification
+
+- 198 files / 2133 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical for both varieties: pt 3857/4749 (81.2%) folded / 96.4% symbol; pt-BR 86.9% / 97.7%.
+- pt_br corpus, both columns: 198 of 2,793 changed on the cased column, 69 on the lowercased; the 13
+  stray-mark defects are now **zero**, with no digit leaks, sentinels or slot-gaps. Sampled review found
+  them all improvements.

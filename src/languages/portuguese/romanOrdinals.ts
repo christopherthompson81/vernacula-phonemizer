@@ -42,7 +42,8 @@ const HUNDREDS = ["", "centésimo", "ducentésimo", "trecentésimo", "quadringen
     "quingentésimo", "seiscentésimo", "septingentésimo", "octingentésimo", "noningentésimo"];
 
 /** Portuguese masculine ordinal, 1 … 1000; `undefined` above that (a Roman-numeral year reads as a cardinal). */
-function portugueseOrdinal(n: number): string | undefined {
+/** Exported so normalize.ts can reuse it for the ordinal INDICATORS (1º/5ª) and for fractions. */
+export function portugueseOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 1000) return undefined;
     if (n === 1000) return "milésimo";
     if (n < 10) return UNITS[n];

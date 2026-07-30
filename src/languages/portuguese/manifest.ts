@@ -10,6 +10,8 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface PortugueseManifest {
+    /** Acronyms read letter-by-letter; see portuguese.jsonc. */
+    acronymLetters: string[];
     accents: {
         toBase: Record<string, string>;
         acuteGrave: string;
