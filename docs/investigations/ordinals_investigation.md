@@ -920,3 +920,59 @@ way Spanish was — and the plumbing already existed, since `createPortuguese` t
 - pt_br corpus, both columns: 198 of 2,793 changed on the cased column, 69 on the lowercased; the 13
   stray-mark defects are now **zero**, with no digit leaks, sentinels or slot-gaps. Sampled review found
   them all improvements.
+
+## Run 15 — 2026-07-30 — Russian, and an ASCII-only boundary inside core itself
+
+Ninth language, and the first CYRILLIC one to reach the shared initialism pass — which is how it found a
+bug in `core/initialisms.ts` that had been latent since Run 5.
+
+### The core bug: `\b` in the shared initialism pass
+
+`core/initialisms.ts` matched all-caps runs with `/\b\p{Lu}{2,}\b/`. `\b` is defined on ASCII word
+characters, so it finds no boundary against Cyrillic and **the entire pass was a no-op for Russian**:
+`США` (×47 in the corpus) came out as the unpronounceable cluster [sʂa], `ДНК` [dnk], `ВМС` [vms],
+`ТВ` [tf]. Now an explicit lookaround. This is the fifth appearance of the same trap — French matching
+INSIDE an accented word, Hindi and Bengali matching nothing before their scripts, Mandarin's whitespace
+lookahead, and now core itself — and it will hit every remaining non-Latin language, so it is worth
+treating as a checklist item rather than a discovery each time.
+
+Fixing it also improved the Latin-script languages slightly, in a way worth recording: the old pattern
+could not match a letter run ADJACENT TO A DIGIT either, so `A1GP` read as [ɡp] in English and Portuguese.
+Two utterances each, both now letter-spelled. Verified by re-running those corpora: exactly 2 changed, both
+improvements, and the referee is byte-identical for en, fr, es, pt-BR and ru.
+
+### The hard part: ordinal notation is CASE, not ordinality
+
+Russian writes `5-е`, `1-й`, `1970-х`, `3-м`, and the suffix is the CASE ENDING, not an appendable ordinal
+marker: `5-е` is пятое (neuter nom), `5-го` пятого (gen), `1970-х` семидесятых (gen pl). So the rule reads
+the ending off the text and INFLECTS the ordinal to match — the written form shows the last letters of the
+full word, so concatenating would produce nonsense. Previously each spoke the bare letter: `5-е` → [pʲætʲ je].
+
+Two extensions were needed. The existing former (`russian/romanOrdinals.ts`) is masculine-nominative and
+stops at 100, so `1970-х` needed the "only the last element inflects" split — cardinal head plus the
+ordinal of the final ≤100 part — and a stem/ending substitution table, with третий as the single soft stem.
+
+### What else was broken
+
+| class | before | after |
+|---|---|---|
+| grouping | `5 000 лет` → "пять ноль лет" | `pʲætʲ tˈɨsʲət͡ɕ lʲet` |
+| clock | `11:00` → a PAUSE plus "ноль" | `ɐdʲˈinːət͡sətʲ t͡ɕɪsˈof`, with час/часа/часов agreement |
+| abbrev | `г.` → a bare [k]; `н. э.` and `т. е.` → interior dots as phrase breaks | expanded |
+| № | dropped outright | `nˈomʲɪr` |
+| units | `км/ч` → the ч as a letter; `°C` → the English letter C | expanded |
+
+`г.` is case-sensitive to its governor: `в 2007 г.` is *в 2007 году* (prepositional), not *года*. Checking
+the contexts first showed all three corpus instances are year senses, none the city sense of `г.`.
+
+### A misfire this run introduced, caught by the corpus diff
+
+The clock rule matched `2:11,60 минуты` — a SPORTS time (2 min 11.60 s), not two o'clock — and read it as
+"два часа одиннадцать минут". Guarded on a following comma-plus-digit. That is now twice (with Arabic's
+doubled الساعة) that the before/after corpus diff caught something every unit probe passed.
+
+### Verification
+
+- 198 files / 2138 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical for ru (94.8%) AND for en, fr, es and pt-BR, confirming the core change is safe.
+- ru corpus, both columns: 170 of 2,562 changed, zero defects. Sampled review found them all improvements.

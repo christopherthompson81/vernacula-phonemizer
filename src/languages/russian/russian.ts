@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeRussian, normalizeRussianInitialisms } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed vowel. Loaded once, lazily.
@@ -107,7 +108,11 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class RussianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // #562 order: Russian rewrites (abbreviations, ordinal notation, clock, units) → INITIALISMS →
+        // the shared symbol tier last. Roman numerals arrive already converted from the registry seam,
+        // with romanOrdinals.ts supplying the ordinal a century wants, so no ordering hazard here.
+        const normalized = SYMBOLS(normalizeRussianInitialisms(normalizeRussian(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);

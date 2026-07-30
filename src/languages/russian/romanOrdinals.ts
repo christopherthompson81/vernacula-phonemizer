@@ -44,7 +44,7 @@ const ORD_TENS: readonly string[] = [
  * `undefined` above 100 — Roman numerals in running text do not reach there in an ordinal context, and the
  * caller then falls back to the cardinal.
  */
-function ordinal(n: number): string | undefined {
+export function russianOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 100) return undefined;
     if (n === 100) return "сотый";
     if (n < 20) return ORD_1_19[n];
@@ -67,7 +67,7 @@ const CONTEXT = /^(век(а|е|у|ом|ов|ам|ах|ами)?|столети(�
 type Policy = RomanPolicy & { ordinal(n: number): string | undefined };
 
 export const ROMAN_POLICY: Policy = {
-    ordinal,
+    ordinal: russianOrdinal,
     ordinalBefore: CONTEXT,
     ordinalAfter: CONTEXT,
 };

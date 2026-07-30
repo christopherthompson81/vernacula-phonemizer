@@ -12,6 +12,17 @@
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/ru_native_bringup_investigation.md.
 {
+    // ACRONYMS read letter-by-letter that the OOV phonotactic rule would leave alone. A LEXICAL fact:
+    // США (x47 in the corpus) and ДНК are spelled out while СМИ and ООН are said as words, and nothing in
+    // the spelling distinguishes them. Russian's lexicon is a STRESS dictionary, not a wordlist, so it
+    // cannot serve as the "is this recorded" test the way CMUdict or Lexique do.
+    "acronymLetters": [
+        "сша", "днк", "тв", "вмс", "мвд", "фсб", "ссср", "рф", "мчс", "гибдд", "ржд",
+        "мид", "пцр", "ввп", "цру"
+    ],
+    // Deliberately NOT listed, because they are said as WORDS and the OOV rule already leaves them alone:
+    // СМИ [smʲi], ООН [ɐon], НАТО, ВУЗ, ГЭС, АЭС, ЛЭП.
+
     "language": "ru",
     "name": "Russian (Standard, Moscow)",
     "script": "Cyrillic",
