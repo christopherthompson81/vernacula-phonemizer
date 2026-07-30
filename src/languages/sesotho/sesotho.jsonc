@@ -28,5 +28,51 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series for a bare numeral, and the "metso" DUMMY-NOUN
+    // construction for compounds. Sesotho numerals 1–5 are adjectival and require noun-class concord, so there
+    // is no class-neutral form; what a Mosotho says counting aloud is the bare stem series nngwe, pedi, tharo,
+    // nne, hlano, tshelela, supa, robedi, robong. For compounds the language supplies its OWN noun-free device:
+    // motso (cl. 3) / metso (cl. 4) "unit, digit" — leshome le metso e mmedi = "ten and two units" = 12. That is
+    // exactly the right target for a TTS reading a bare integer: it is nounless yet fully grammatical.
+    // SOURCES: Omniglot "Numbers in Southern Sotho" (omniglot.com/language/numbers/sesotho.htm) — ngwe, pedi,
+    // tharo, nne, hlano, tshelela, supa, robedi, robong, leshome, "leshome le motso o mong" (11), "leshome le
+    // metso e mmedi" (12), "mashome a mabedi" (20), "mashome a mararo/mane/mahlano/tsheletseng/supileng/robedi/
+    // robong", lekgolo (100), sekete (1 000), milione (10⁶); the 11/21 forms and the 13–15 series cross-checked
+    // against the Wits "Counting and Numbers in Sesotho" tutorial material (leshome le motso o le mong, leshome
+    // le metso e meraro/mene/mehlano, mashome a mabedi le motso o le mong, mashome a mabedi le metso e mmedi) and
+    // salanguages.com/sesotho. Zero = lefeela (the standard Sesotho "nothing, nil"; Bukantswe / SA-language
+    // wordlists). SA (not Lesotho) orthography throughout — ⟨kg⟩, ⟨w⟩ — matching this manifest's grapheme table.
+    // NOTE the SOTHO 6–9 stems are RELATIVE verb forms (tsheletseng, supileng, robedi, robong) and do NOT take a
+    // class prefix, which is why they appear unchanged in the cl.4 / cl.6 / cl.8 multiplier series.
+    // SIMPLIFIED / EXTRAPOLATED: the thousands/millions/billions plurals (dikete tse …, dimilione tse …,
+    // dibilione tse …) use the regular cl.8 "tse" concord — the concord is regular but these exact strings are
+    // extrapolated, not quoted. Above 9 as a multiplier the concord word is dropped (dikete leshome le metso e
+    // mmedi = 12 000) since "tse" agrees with a numeral stem, not with a composed number.
+    "numbers": {
+        "zero": "lefeela",
+        // bare counting stems 1–9 (what you say counting aloud); index 0 unused.
+        "units": ["", "nngwe", "pedi", "tharo", "nne", "hlano", "tshelela", "supa", "robedi", "robong"],
+        // the units slot of a COMPOUND: 1 = "motso o le mong"; 2–9 = "metso e " + the cl.4 stem below.
+        "unitOne": "motso o le mong",
+        "unitNoun": "metso e",
+        "class4": ["", "", "mmedi", "meraro", "mene", "mehlano", "tsheletseng", "supileng", "robedi", "robong"],
+        // cl.6 concord, used after mashome ("tens") and makgolo ("hundreds").
+        "class6": ["", "", "mabedi", "mararo", "mane", "mahlano", "tsheletseng", "supileng", "robedi", "robong"],
+        // cl.8 concord, used after dikete / dimilione / dibilione.
+        "class8": ["", "", "pedi", "tharo", "nne", "hlano", "tsheletseng", "supileng", "robedi", "robong"],
+        "ten": "leshome",
+        "tens": "mashome a",
+        "hundredOne": "lekgolo",
+        "hundreds": "makgolo a",
+        "thousandOne": "sekete",
+        "thousands": "dikete",
+        "millionOne": "milione",
+        "millions": "dimilione",
+        "billionOne": "bilione",
+        "billions": "dibilione",
+        "class8Concord": "tse",
+        "and": "le"
     }
 }

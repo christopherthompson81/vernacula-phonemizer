@@ -4,6 +4,7 @@
  * prenasal digraphs) + clause punctuation. There is NO algorithm — the whole g2p is the greedy longest-match scan.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { E5xNumberTable } from "./e5xNumbers.ts";
 
 export interface KikuyuManifest {
     language: string;
@@ -11,6 +12,8 @@ export interface KikuyuManifest {
     script: string;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** The cardinal number words (the citation/counting series) — the composer is the shared E5x algorithm. */
+    numbers: E5xNumberTable;
 }
 
 /** The consolidated hand-authored Kikuyu data tables (see kikuyu.jsonc). */

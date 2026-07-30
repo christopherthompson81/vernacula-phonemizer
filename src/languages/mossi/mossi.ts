@@ -7,11 +7,12 @@
  * Basic Course (Lehr, Redden & Balima 1966) phonology. Signatures: ATR-ish 9-vowel system with dedicated letters ⟨ɛ⟩=ɛ,
  * ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ (⟨o⟩=o always — no ⟨ɔ⟩ letter); DOUBLING = LENGTH (aa→aː, ʋʋ→ʊː); NASAL = TILDE (ã ẽ ĩ õ ũ);
  * ⟨r⟩=ɾ (tap), ⟨y⟩=j, ⟨ny⟩=ɲ, ⟨ʼ⟩=ʔ. TONE (2-tone H/L) is not written in the orthography (contextual) → not
- * emitted. Numbers deferred. See docs/investigations/mos_native_bringup_investigation.md.
+ * emitted. Numbers are composed in numbers.ts. See docs/investigations/mos_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -62,7 +63,8 @@ class MossiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // numbers: composed to Mooré words (numbers.ts: decimal, short-stem compounds), then the same g2p
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -71,7 +73,7 @@ class MossiPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Mooré phonemizer (greedy g2p + gemination; tone + numbers deferred). */
+/** Build the Mooré phonemizer (greedy g2p + gemination; decimal numbers; tone deferred). */
 export function createMossi(): Phonemizer {
     return new MossiPhonemizer();
 }

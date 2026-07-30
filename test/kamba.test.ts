@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createKamba } from "../src/languages/kamba/kamba.ts";
+import { phonemize } from "../src/index.ts";
+import { numberToWords } from "../src/languages/kamba/numbers.ts";
 
 // Canonical-IPA goldens for Kamba / Kikamba (kam) — Niger-Congo BANTU (E55), Latin orthography, Kenya (~4M). A pure
 // greedy g2p (kamba.ts). The referee is THIN (en.wiktionary Kamba, HUMAN, only 5 words), so these golds are
@@ -55,5 +57,41 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
         // straight ', curly ’ (U+2019), and modifier-letter ʼ (U+02BC) all spell the velar nasal in the wild
         for (const w of ["ng'ombe", "ng’ombe", "ngʼombe"]) expect(createKamba().text(w).trim()).toBe("ŋɔᵐbɛ");
         expect(createKamba().text("'mũtĩ'").trim()).toBe("mote"); // a quoted word → no phantom ʔ (Kamba has no glottal)
+    });
+});
+
+// CARDINAL NUMBERS (kam). The compositor emits the CITATION / COUNTING series — literally the Peace Corps Kikamba
+// Self-Instruction Manual's kũtala ("to count") list (ĩmwe, ĩlĩ, itatũ …) — because the manual states 1–5 take the
+// prefix agreeing with the noun modified, and a bare integer has no such noun. The ALGORITHM is shared with
+// Kikuyu (../kikuyu/e5xNumbers.ts); the words + citations are in kamba.jsonc "numbers".
+describe("Kamba cardinal numbers — the manual's counting series", () => {
+    test("units + the additive teens", () => {
+        expect(numberToWords(0)).toBe("noti");
+        expect(numberToWords(7)).toBe("mũonza");
+        expect(numberToWords(11)).toBe("ĩkũmi na ĩmwe");
+    });
+    test("tens are miongo + their own multiplier series", () => {
+        expect(numberToWords(20)).toBe("miongo ĩlĩ");
+        expect(numberToWords(40)).toBe("miongo ina"); // ina here, but inya as the bare numeral 4
+        expect(numberToWords(4)).toBe("inya");
+        expect(numberToWords(90)).toBe("miongo keenda");
+    });
+    // These four strings are quoted VERBATIM from the manual's running text — they pin both the hundreds concord
+    // series (maana + cl.6 a-) and the composition rule ("na" before the LAST component only).
+    test("attested compounds reproduce the manual exactly", () => {
+        expect(numberToWords(100)).toBe("ĩana yĩmwe");
+        expect(numberToWords(150)).toBe("ĩana na miongo ĩtano"); // bare Ĩana before a remainder
+        expect(numberToWords(250)).toBe("maana elĩ na miongo ĩtano");
+        expect(numberToWords(1957)).toBe("ngili ĩmwe maana keenda miongo ĩtano na mũonza");
+    });
+    test("thousands + millions; 10⁹ is a THOUSAND MILLION (extends the manual's ngili ĩkũmi = 10 000)", () => {
+        expect(numberToWords(1000)).toBe("ngili ĩmwe");
+        expect(numberToWords(10000)).toBe("ngili ĩkũmi");
+        expect(numberToWords(1000000)).toBe("milioni ĩmwe");
+        expect(numberToWords(1000000000)).toBe("milioni ngili ĩmwe");
+    });
+    test("end-to-end through the g2p", () => {
+        expect(phonemize("20", "kam").trim()).toBe("miɔᵑɡɔ ele");
+        expect(phonemize("250", "kam").trim()).toBe("maːna ɛle na miɔᵑɡɔ etanɔ"); // ⟨aa⟩→aː
     });
 });

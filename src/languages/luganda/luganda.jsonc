@@ -44,5 +44,44 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series (emu, bbiri, ssatu, nnya, ttaano …). Luganda numerals
+    // 1–5 are adjectival and take noun-class concord (bbiri ~ abiri ~ bibiri ~ bubiri …); the counting series is
+    // the class-III/VII shape, which Wikipedia's Luganda numerals note describes as the form "used when counting"
+    // — that is what a TTS reading a bare integer must say, since there is no noun to agree with. 6–9 (mukaaga,
+    // musanvu, munaana, mwenda) are NOUNS and never inflect, which is why they recur unchanged in every slot.
+    // SOURCES: Wikivoyage "Luganda phrasebook" §Numbers (1–20, amakumi abiri/asatu/ana/ataano, the SINGLE-WORD
+    // tens nkaaga 60 / nsanvu 70 / kinaana 80 / kyenda 90, kikumi 100, bikumi bibiri 200, lukumi 1 000,
+    // nkumi bbiri 2 000, kakadde kamu 1 000 000, akawumbi kamu 1 000 000 000) cross-checked against
+    // "How to count in Luganda" (eggsforeducation.wordpress.com, 2011-05-09) and Omniglot "Numbers in Luganda".
+    // CONNECTIVES (two of them, both attested): "na"/"n'" inside the teens — kkumi n'emu (11), kkumi na bbiri
+    // (12) — and "mu" between magnitude components — amakumi abiri mu emu (21), kikumi mu amakumi abiri mu bbiri
+    // (122), bikumi bibiri mu amakumi abiri mu bbiri (222).
+    // SIMPLIFIED / EXTRAPOLATED (a reviewer should know): only the ×1 forms of million/billion are attested
+    // ("kakadde kamu", "akawumbi kamu"); the plural multipliers obukadde/obuwumbi + the class-14 bu- concord
+    // (bubiri, busatu, buna, butaano) are extrapolated from the regular concord series. Luganda also has the
+    // higher unit omutwalo (10 000); it is NOT modelled — 10 000 composes as nkumi kkumi ("ten thousands"),
+    // which is the ordinary decimal reading.
+    "numbers": {
+        "zero": "ziro",
+        "units": ["", "emu", "bbiri", "ssatu", "nnya", "ttaano", "mukaaga", "musanvu", "munaana", "mwenda"],
+        "ten": "kkumi",
+        // the round tens: 20–50 are the multiplicative amakumi + class-6 a- concord, 60–90 are SINGLE nouns.
+        "tens": ["", "kkumi", "amakumi abiri", "amakumi asatu", "amakumi ana", "amakumi ataano",
+                 "nkaaga", "nsanvu", "kinaana", "kyenda"],
+        "hundredOne": "kikumi",
+        "hundreds": "bikumi",
+        "hundredsMult": ["", "", "bibiri", "bisatu", "bina", "bitaano", "mukaaga", "musanvu", "munaana", "mwenda"],
+        "thousandOne": "lukumi",
+        "thousands": "nkumi",
+        "millionOne": "kakadde kamu",
+        "millions": "obukadde",
+        "billionOne": "akawumbi kamu",
+        "billions": "obuwumbi",
+        "buMult": ["", "", "bubiri", "busatu", "buna", "butaano", "mukaaga", "musanvu", "munaana", "mwenda"],
+        "andTeen": "na",
+        "andTeenElided": "n'",
+        "mu": "mu"
     }
 }

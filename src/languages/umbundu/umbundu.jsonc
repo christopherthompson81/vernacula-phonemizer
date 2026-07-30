@@ -43,5 +43,52 @@
 
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series for a bare numeral (mosi, vali, tatu, kwãla, tãlo,
+    // epandu, epandu vali, ecelãla, ecea). Umbundu numerals 1–5 are adjectival and take noun-class concord, so
+    // there is no class-neutral numeral; the counting series is what a speaker recites, and a TTS reading a bare
+    // integer has no noun to agree with.
+    // QUINARY RESIDUE: 6–9 are NOT concording adjectives but nouns built on a "hand/group" base — epandu (6),
+    // epandu vali (7), ecelãla (8), ecea (9) — which is why they appear UNCHANGED in every multiplier slot below
+    // (akwi epandu = 60, ovita epandu = 600). That is correct, not a copy-paste slip.
+    // SOURCES: Filomena Camacho, "Números em Umbundo" (aeppea.wordpress.com, 2013-02-21) — the fullest list
+    // found: the units, the teens (ekui la mosi, ekui la vali, ekui la vitatu, ekui la kuãla, ekui la vitãlo,
+    // ekui l'epandu, ekui l'epandu vali, ekui l'ecelãla, ekui l'ecea), the tens (akui avali, akui atatu, akui
+    // akuãla, akui atãlo, akui epandu, akui epandu vali, akui ecelãla, akui ecea), the hundreds (ocita, ovita
+    // vivali, ovita vitatu, ovita vikuãla, ovita vitãlo, ovita epandu, ovita epandu vali, ovita ecelãla, ovita
+    // ecea), ohulukãi (1 000) and ohulua (1 000 000); cross-checked against Omniglot "Numbers in Umbundu"
+    // (which gives ekwí / akwí / kwãla / tãlo / ohulukãyi with ⟨w⟩ and the tone accent).
+    // ORTHOGRAPHIC NORMALISATION (deliberate, documented): the ⟨w⟩ spellings are used (kwãla, ekwi, akwi,
+    // ohulukãyi) rather than Camacho's ⟨u⟩ hiatus spellings (kuãla, ekui, ohulukãi), because standard Umbundu
+    // orthography — and this manifest's grapheme table — writes the labialised onset with ⟨w⟩; Omniglot's tone
+    // accents are dropped since umbundu.ts strips tone anyway.
+    // THREE SEPARATE MULTIPLIER SERIES, one per magnitude (collapsing them is the classic Bantu numeral bug):
+    // `units` (bare citation), `additive` (the slot after the connective "la" — note it is IRREGULAR in the
+    // source: 3 and 5 take the vi- prefix, 2 and 4 do not), `tensMult` (cl.6 a- after akwi) and `hundredsMult`
+    // (cl.8 vi- after ovita).
+    // CONNECTIVE: "la" ("and"), ELIDED to "l'" before a vowel-initial word — attested in Camacho's
+    // "ekui l'epandu" / "ekui l'ecelãla" / "ekui l'ecea"; applied to every vowel-initial follower (so 555 is
+    // "ovita vitãlo l'akwi atãlo la vitãlo").
+    // SIMPLIFIED / EXTRAPOLATED (a reviewer should know): (a) the PLURAL of ohulukãyi is not attested in any
+    // source I could reach, so multi-thousands use the noun INVARIANT with a cl.8 multiplier
+    // ("ohulukãyi vivali" = 2 000) rather than inventing a plural prefix; (b) 10⁹ has no word — it composes as
+    // "ohulua ohulukãyi" ("a thousand million"), and multi-millions likewise take the cl.8 multiplier;
+    // (c) zero is not in any source reached — "zero" is entered as the Portuguese loan universally used for
+    // arithmetic in Angola, and it is flagged as a loan rather than dressed up as a native term.
+    "numbers": {
+        "zero": "zero",
+        "units": ["", "mosi", "vali", "tatu", "kwãla", "tãlo", "epandu", "epandu vali", "ecelãla", "ecea"],
+        "additive": ["", "mosi", "vali", "vitatu", "kwãla", "vitãlo", "epandu", "epandu vali", "ecelãla", "ecea"],
+        "ten": "ekwi",
+        "tens": "akwi",
+        "tensMult": ["", "", "avali", "atatu", "akwãla", "atãlo", "epandu", "epandu vali", "ecelãla", "ecea"],
+        "hundredOne": "ocita",
+        "hundreds": "ovita",
+        "hundredsMult": ["", "", "vivali", "vitatu", "vikwãla", "vitãlo", "epandu", "epandu vali", "ecelãla", "ecea"],
+        "thousand": "ohulukãyi",
+        "million": "ohulua",
+        "and": "la",
+        "andElided": "l'"
     }
 }

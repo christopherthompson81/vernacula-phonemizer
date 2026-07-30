@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/umbundu/umbundu.ts";
+import { numberToWords } from "../src/languages/umbundu/numbers.ts";
 
 // Canonical-IPA goldens for Umbundu (umb) — Bantu (R11, Angola), Latin orthography, espeak-independent. Authored from
 // Schadeberg (1982) "Nasalization in UMbundu" (the primary R11 phonology, Table 1 inventory) + the orthography —
@@ -46,5 +47,43 @@ describe("Umbundu canonical IPA", () => {
 
     test("sentence: clause punctuation", () => {
         expect(phonemize("Ndapandula calwa.", "umb").trim()).toBe("ⁿdapaⁿdula t͡ʃalwa .");
+    });
+});
+
+// CARDINAL NUMBERS (umb). The compositor emits the CITATION / COUNTING series (mosi, vali, tatu, kwãla, tãlo …):
+// 1–5 are adjectival and take class concord, so a bare integer — with no noun to agree with — must use the
+// counting shape. 6–9 (epandu, epandu vali, ecelãla, ecea) are QUINARY-BASED NOUNS and never inflect, which is
+// why they are identical in every multiplier slot. Sources + the extrapolations are cited in umbundu.jsonc
+// "numbers" (Camacho, "Números em Umbundo", 2013 + Omniglot "Numbers in Umbundu").
+describe("Umbundu cardinal numbers — citation series, quinary 6–9, la/l' connective", () => {
+    test("units: the quinary residue in 6–9", () => {
+        expect(numberToWords(5)).toBe("tãlo");
+        expect(numberToWords(6)).toBe("epandu");
+        expect(numberToWords(7)).toBe("epandu vali");
+        expect(numberToWords(9)).toBe("ecea");
+    });
+    test("teens use 'la', elided to l'' before a vowel (attested)", () => {
+        expect(numberToWords(11)).toBe("ekwi la mosi");
+        expect(numberToWords(13)).toBe("ekwi la vitatu"); // the post-'la' series is irregular: 3 takes vi-
+        expect(numberToWords(16)).toBe("ekwi l'epandu"); // elision
+    });
+    test("tens take the cl.6 a- series, hundreds the cl.8 vi- series (two DIFFERENT tables)", () => {
+        expect(numberToWords(20)).toBe("akwi avali");
+        expect(numberToWords(21)).toBe("akwi avali la mosi");
+        expect(numberToWords(60)).toBe("akwi epandu"); // 6 never inflects
+        expect(numberToWords(100)).toBe("ocita");
+        expect(numberToWords(200)).toBe("ovita vivali");
+        expect(numberToWords(555)).toBe("ovita vitãlo l'akwi atãlo la vitãlo");
+    });
+    test("thousands + millions; 10⁹ is a THOUSAND MILLION (no attested word for it)", () => {
+        expect(numberToWords(1000)).toBe("ohulukãyi");
+        expect(numberToWords(2000)).toBe("ohulukãyi vivali");
+        expect(numberToWords(1000000)).toBe("ohulua");
+        expect(numberToWords(1000000000)).toBe("ohulua ohulukãyi");
+    });
+    test("end-to-end through the g2p", () => {
+        expect(phonemize("21", "umb").trim()).toBe("akwi avali la mosi");
+        expect(phonemize("16", "umb").trim()).toBe("ekwi lepaⁿdu"); // the elided l'' glues into one word
+        expect(phonemize("200", "umb").trim()).toBe("ovita vivali");
     });
 });

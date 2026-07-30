@@ -27,5 +27,53 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series, and Sepedi's own CONJUNCTIVE compound orthography.
+    // ⚠ Sepedi is NOT Sesotho with a spelling shift: the numeral stems and the compound morphology both differ,
+    // and this table was authored from Northern Sotho sources only (verified, not copied from st):
+    //   1 tee (st nngwe) · 6 tshela (st tshelela) · 7 šupa (st supa) · 8 seswai (st robedi) ·
+    //   9 senyane (st robong) · 10 lesome (st leshome) · and 11–99 are written CONJUNCTIVELY as one word
+    //   (lesometee, masomepedi) where Sesotho is fully disjunctive with the motso/metso dummy noun.
+    // SOURCES: the UNISA free online Northern Sotho course, "Theme 3: Numbers, days, months, seasons", Track 7 +
+    // Video 3 — which gives the COUNTING list verbatim ("Tee, pedi, tharo, nne, hlano, tšhela, tšhupa, seswai,
+    // senyane, lesome, diranta tše lekgolo, diranta tše makgolopedi" = "one – two – three – four – five – six –
+    // seven – eight – nine – ten – one hundred Rand – two hundred Rand"), the hundreds series (makgolopedi,
+    // makgolotharo, makgolonne, makgolohlano, makgolotshela, makgološupa, makgoloseswai, makgolosenyane),
+    // sekete (1 000) and the cl.8 concord particle "tše"; plus Omniglot "Numbers in Northern Sotho"
+    // (omniglot.com/language/numbers/northernsotho.htm) for lesometee…lesomesenyane, masomepedi…masomesenyane and
+    // the tens+unit compounds (masomepedi-tee, masomepedi-pedi, …); Wiktionary Category:Northern Sotho numerals
+    // corroborates the stem set (hlano, lekgolo, lesome, nne, pedi, sekete, senyane, seswai, tharo, tshela, šupa).
+    // Zero = lefeela (Northern Sotho "nothing/nil"; DBE 2019 Northern Sotho Wordlist).
+    // ORTHOGRAPHIC NORMALISATIONS (documented, deliberate): Omniglot's HYPHEN in the tens+unit compounds
+    // ("masomepedi-tee") is rendered as a SPACE, because the engine's word tokenizer treats a hyphen as a word
+    // break and gluing two numerals into one phonemic word would remove a real TTS word boundary; and Omniglot's
+    // variant spellings "thlano/tlhano" + "seswae" are normalised to the standard "hlano" / "seswai" (the forms
+    // the UNISA course and Wiktionary use).
+    // SIMPLIFIED / EXTRAPOLATED: the multi-thousand / million / billion plurals (dikete tše pedi, dimilione tše
+    // pedi, dibilione tše pedi) apply the cl.8 "tše" concord that the UNISA course attests for "diranta tše
+    // sekete"; the exact strings are extrapolated. The magnitude components are joined with the standard Sotho
+    // conjunction "le" (lekgolo le masomehlano hlano = 155).
+    "numbers": {
+        "zero": "lefeela",
+        // The counting/citation stems 1–9; also the multiplier after lesome/masome/makgolo in the conjunctive
+        // compounds (Northern Sotho glues the bare stem on: lesome+tee, masome+pedi, makgolo+tharo).
+        "units": ["", "tee", "pedi", "tharo", "nne", "hlano", "tshela", "šupa", "seswai", "senyane"],
+        // cl.8 concord stems, indices 2–9 (after dikete / dimilione / dibilione).
+        "class8": ["", "", "pedi", "tharo", "nne", "hlano", "tshela", "šupa", "seswai", "senyane"],
+        "ten": "lesome",
+        // the CONJUNCTIVE heads: 11–19 = "lesome"+unit, 20–90 = "masome"+unit, 200–900 = "makgolo"+unit.
+        "teenHead": "lesome",
+        "tensHead": "masome",
+        "hundredOne": "lekgolo",
+        "hundredsHead": "makgolo",
+        "thousandOne": "sekete",
+        "thousands": "dikete",
+        "millionOne": "milione",
+        "millions": "dimilione",
+        "billionOne": "bilione",
+        "billions": "dibilione",
+        "class8Concord": "tše",
+        "and": "le"
     }
 }
