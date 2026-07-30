@@ -93,19 +93,92 @@ function bucToIpa(word: string): string {
         .join(" ");
 }
 
+// ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
+// Digit runs were dropped entirely (the tokenizer had no (\d+) branch). Min Dong is Sinitic, so the composition is
+// the shared Chinese one — myriad grouping with 萬 10⁴ and 億 10⁸, an internal zero spoken as 零 — but UNLIKE
+// cantonese.ts/minnan.ts the numerals CANNOT be routed through a Han reading dictionary: cdo has no independent
+// Han→reading dict (the only source is Wiktionary, which is this engine's referee → circular; see the module
+// header). So the compositor emits BÀNG-UÂ-CÊ words, the engine's own orthography, and the ordinary BUC→IPA
+// converter reads them — no IPA is authored here.
+//
+// Fuzhou specifics encoded below:
+//  • a magnitude multiplier of 1 is 蜀 siŏh, not 一 ék (蜀百 siŏh-báik 100, 蜀千 siŏh-chiĕng, 蜀萬 siŏh-uâng,
+//    蜀億 siŏh-é); ék is the bare/final unit digit (十一 sék-ék);
+//  • a multiplier of 2 is 兩 lâng before 百/千/萬/億 (兩百 lâng-báik, 兩千 lâng-chiĕng) but 二 nê before 十
+//    (二十 nê-sék);
+//  • 八 báik (8) and 百 báik (100) are homophones — that is correct, not a copy-paste slip.
+// Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers section (https://en.wikivoyage.org/wiki/Fuzhou_dialect_phrasebook)
+// — 0 lìng, 1 ék/蜀 siŏh, 2 nê/兩 lâng, 3 săng, 4 sé, 5 ngô, 6 lĕ̤k, 7 chék, 8 báik, 9 gāu, 10 sék, 11 sék-ék,
+// 20 nê-sék, 21 niék-ék, 100 siŏh-báik, 200 lâng-báik, 1000 siŏh-chiĕng, 2000 lâng-chiĕng, 10⁴ siŏh-uâng,
+// 10⁸ siŏh-é. JUDGMENT CALLS: (a) the phrasebook leaves 30–90 blank — they are composed unit+sék on the attested
+// 二十 nê-sék pattern; (b) 20 is composed as the counting form 二十 nê-sék rather than the counter-word form 廿 niék,
+// which the phrasebook says is used with classifiers.
+const BUC_DIGITS = ["lìng", "ék", "nê", "săng", "sé", "ngô", "lĕ̤k", "chék", "báik", "gāu"];
+const BUC_SMALL = ["", "sék", "báik", "chiĕng"]; // 10¹ 十 · 10² 百 · 10³ 千
+const BUC_MYRIAD = "uâng"; // 萬 10⁴
+const BUC_YI = "é"; // 億 10⁸
+
+/** The multiplier form of a digit before the magnitude at power `p`: 1 → 蜀 siŏh, 2 → 兩 lâng (but 二 nê before 十). */
+function bucMultiplier(unit: number, p: number): string {
+    if (p === 0) return BUC_DIGITS[unit]!;
+    if (unit === 1) return "siŏh";
+    if (unit === 2 && p >= 2) return "lâng";
+    return BUC_DIGITS[unit]!;
+}
+
+/** 1…9999 → BUC syllables (an internal zero becomes 零 lìng; a leading 一十 is the bare sék). */
+function bucUnder10000(n: number): string[] {
+    const out: string[] = [];
+    let zero = false;
+    for (let p = 3; p >= 0; p--) {
+        const unit = Math.floor(n / 10 ** p) % 10;
+        if (unit === 0) {
+            if (out.length) zero = true;
+            continue;
+        }
+        if (zero) out.push(BUC_DIGITS[0]!);
+        zero = false;
+        if (p === 1 && unit === 1 && !out.length) out.push(BUC_SMALL[1]!); // leading 一十 → 十 sék
+        else out.push(bucMultiplier(unit, p), ...(p > 0 ? [BUC_SMALL[p]!] : []));
+    }
+    return out;
+}
+
+/** An integer → the ordered Bàng-uâ-cê number words that speak it (myriad grouping 萬/億). */
+export function numberToBucWords(n: number): string[] {
+    if (!Number.isSafeInteger(n) || n < 0) {
+        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => BUC_DIGITS[Number(d)]!);
+    }
+    if (n === 0) return [BUC_DIGITS[0]!];
+    const yi = Math.floor(n / 1_0000_0000);
+    const wan = Math.floor((n % 1_0000_0000) / 10000);
+    const rest = n % 10000;
+    const out: string[] = [];
+    // A bare 1 / 2 multiplying 萬 or 億 takes the same 蜀 siŏh / 兩 lâng forms as before 百/千 (蜀萬, 蜀億).
+    const group = (q: number): string[] => (q === 1 || q === 2 ? [bucMultiplier(q, 2)] : bucUnder10000(q));
+    if (yi) out.push(...(yi < 10000 ? group(yi) : numberToBucWords(yi)), BUC_YI);
+    if (wan) out.push(...group(wan), BUC_MYRIAD);
+    if (rest) {
+        if ((yi || wan) && rest < 1000) out.push(BUC_DIGITS[0]!);
+        out.push(...bucUnder10000(rest));
+    }
+    return out;
+}
+
 class FoochowPhonemizer implements Phonemizer {
     text(input: string): string {
         const { sink, finish } = clauseSink();
         // NFD so a syllable is a base letter + trailing combining marks (tone diacritics U+0300–036F + the quality
         // diaeresis-below U+0324) — robust to NFC input, where precomposed vowels (ā, and esp. ṳ = U+1E73) are single
         // codepoints a literal class would miss. Syllables join by - or ·. bucToIpa re-NFDs (idempotent).
-        const tok = /([a-zŋ][a-zŋ\u0300-\u036f\u207f]*(?:[-·][a-zŋ\u0300-\u036f\u207f]*)*)|([。，、？！；：.,?!;:])/giu;
+        const tok = /([a-zŋ][a-zŋ\u0300-\u036f\u207f]*(?:[-·][a-zŋ\u0300-\u036f\u207f]*)*)|(\d+)|([。，、？！；：.,?!;:])/giu;
         const nfd = input.normalize("NFD");
         let m: RegExpExecArray | null;
         while ((m = tok.exec(nfd))) {
             if (m[1]) sink.emit(bucToIpa(m[1]));
-            else if (m[2]) {
-                const mk = CLAUSE_MARK[m[2]];
+            else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2])).join("-")));
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
         }

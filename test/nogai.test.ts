@@ -35,6 +35,19 @@ describe("Nogai (ногай тили) canonical IPA", () => {
         expect(phonemizeWord("аье")).toBe("æˈje"); // ⟨аь⟩[æ] + post-vocalic ⟨е⟩→[je] (constructed probe)
     });
 
+    test("NUMBERS — Turkic decimal; Nogai's own lexemes, NOT Karakalpak's", () => {
+        const nog = getPhonemizer("nog");
+        // Data + provenance: src/languages/nogai/numbers.ts (Wiktionary Category:Nogai numerals + Omniglot).
+        expect(nog.text("7").trim()).toBe("jeˈti"); // ети — j- lost (Karakalpak keeps it: jeti); word-initial ⟨е⟩→[je]
+        expect(nog.text("11").trim()).toBe("ˈon ˈbir"); // он бир — teens are two words
+        expect(nog.text("25").trim()).toBe("jɯrˈma ˈbes"); // йырма бес — ⟨йырма⟩ 20, the contracted Nogai form
+        expect(nog.text("100").trim()).toBe("ˈjuz"); // юз — the multiplier "бир" is dropped
+        expect(nog.text("555").trim()).toBe("ˈbes ˈjuz elˈli ˈbes"); // бес юз элли бес — ⟨элли⟩ 50 with the plain [e] of ⟨э⟩
+        expect(nog.text("1984").trim()).toBe("ˈmɯŋ toˈɡɯz ˈjuz sekˈsen ˈdørt"); // мынъ тогыз юз сексен доьрт — ⟨нъ⟩→[ŋ], ⟨оь⟩→[ø]
+        expect(nog.text("12345").trim()).toBe("ˈon eˈki ˈmɯŋ ˈyʃ ˈjuz ˈkɯrk ˈbes"); // он эки мынъ уьш юз кырк бес — ⟨уь⟩→[y]
+        expect(nog.text("1000000").trim()).toBe("ˈbir milliˈon"); // бир миллион
+    });
+
     test("registry wiring", () => {
         expect(getPhonemizer("nog").text("кан").trim()).toBe("ˈkan");
     });

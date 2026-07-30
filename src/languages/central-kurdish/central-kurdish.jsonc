@@ -25,6 +25,30 @@
         "ا": "aː", "ە": "a", "ێ": "eː", "ۆ": "oː"
     },
 
+    // NUMBERS — Sorani spellings; canonical IPA is DERIVED by running them through the same g2p (no hand IPA).
+    // Central Kurdish is a DECIMAL IRANIAN system (like Persian, unlike its Turkic neighbours): units + irregular
+    // teens + a distinct word per round ten, and every magnitude group is linked by the ENCLITIC CONNECTIVE ⟨و⟩
+    // -u (bîst-u-yek = 21, sed-u-yek = 101, hezar-u-du-sed-u-sî-u-çwar = 1234). The connective is stored on its own
+    // here and ATTACHED BY THE COMPOSER to the END of the preceding word (central-kurdish.ts), because that is what
+    // it is phonologically — an enclitic, not a free word: بیست+و → [biːstu] (kaikki gives بیست و یەک = /biːstujak/),
+    // and after a final vowel it glides, پەنجا+و → [pandʒaːw]. Writing it as a separate token would instead yield a
+    // bare [w] syllable. Round سەد / هەزار take NO leading "yek" (sed, hezar); ملیۆن / ملیار DO (یەک ملیۆن).
+    // SOURCES: units + teens + 20/100/1000 from kaikki ckb (Wiktionary Central Kurdish numerals, with IPA:
+    // یەک /jɛk/, یانزە /jaːnza/, بیست و یەک /biːstujak/, سەد /sad/, هەزار /hazaːɾ/); the round tens 30-90 and the
+    // compound pattern from Omniglot "Kurdish (Soranî) numbers" (omniglot.com/language/numbers/kurdish_sorani.htm).
+    // ملیار (milyar) 10⁹ is the regional (Persian/Turkish-contact) form. ZERO سفر per kaikki ckb ("zero; 0").
+    "numbers": {
+        "units": ["سفر", "یەک", "دوو", "سێ", "چوار", "پێنج", "شەش", "حەوت", "هەشت", "نۆ"],
+        "teens": ["دە", "یانزە", "دوانزە", "سیانزە", "چواردە", "پانزە", "شانزە", "حەڤدە", "هەژدە", "نۆزدە"],
+        "tens": {
+            "20": "بیست", "30": "سی", "40": "چل", "50": "پەنجا",
+            "60": "شەست", "70": "حەفتا", "80": "هەشتا", "90": "نەوەد"
+        },
+        "magnitudes": { "hundred": "سەد", "thousand": "هەزار", "million": "ملیۆن", "billion": "ملیار" },
+        // The enclitic connective -u that links number groups; the composer appends it to the preceding word.
+        "connective": "و"
+    },
+
     "clausePunctuation": {
         "،": " , ", "؛": " ; ", "؟": " ? ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ":": " : ", "…": " . "
     }

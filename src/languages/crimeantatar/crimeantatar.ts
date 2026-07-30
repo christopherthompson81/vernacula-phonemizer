@@ -13,6 +13,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel; the
 // palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature — deferred). ⟨v⟩ is
@@ -56,6 +57,13 @@ export function phonemizeWord(word: string): string {
     return segs.join("");
 }
 
+/** A digit run → spoken Crimean Tatar, phonemized through the same g2p (data + provenance in numbers.ts). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
 // Crimean Tatar Latin — a-z + the Turkish-style letters. Word / number / punctuation.
 const TOKEN = /([a-zâçğıiñöşüA-ZÂÇĞIİÑÖŞÜ]+)|(\d+)|([.?!,;:…])/gu;
 
@@ -63,7 +71,7 @@ class CrimeanTatarPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

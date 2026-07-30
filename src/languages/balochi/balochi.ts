@@ -6,17 +6,21 @@
  * its rule g2p recovers only a consonant + long-vowel skeleton; the Roman orthography is phonemic (writes every
  * vowel). A CROSS-SCRIPT LEXICON (balochi-lexicon.tsv: arabic↔roman↔full-IPA, from Korn/J&K/ASJP) bridges them —
  * a word looked up by EITHER spelling returns the full-voweled IPA the abjad loses; OOV falls back to the per-script
- * g2p. SIGNATURE: retroflex ٹ→ʈ ڈ→ɖ ڑ→ɽ (Indic contact) vs dental ت→t̪ د→d̪; ق→k; unaspirated. See
+ * g2p. SIGNATURE: retroflex ٹ→ʈ ڈ→ɖ ڑ→ɽ (Indic contact) vs dental ت→t̪ د→d̪; ق→k; unaspirated. Cardinals use
+ * the Iranian-core / lakh-crore-magnitude compositor in numbers.ts (Jahani & Korn Table 11.19). See
  * docs/investigations/bal_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { renderNumber } from "../../core/numbers.ts";
+import { balochiNumberWords, encliticWord, type BalNumbersDef } from "./numbers.ts";
 
 interface BalochiDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
+    numbers: BalNumbersDef;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<BalochiDef>(import.meta.url, "balochi.jsonc");
@@ -110,6 +114,13 @@ export function phonemizeWord(word: string): string {
     return ar.get(word) ?? phonemizeArabic(word);
 }
 
+/** A run of ASCII digits → the spoken Balochi cardinal in canonical IPA (out-of-range integers pass through). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return renderNumber(n, DEF.numbers, encliticWord(phonemizeWord, DEF.numbers), balochiNumberWords);
+}
+
 // A word (Arabic Balochi letters OR Roman incl. diacritics) / number / punctuation token.
 const TOKEN = /([ؠ-ۿ‌]+|[a-zāēīōūšžčǰṭḍṛġ]+)|(\d+)|([،؛؟.!?…,:])/giu;
 
@@ -120,7 +131,7 @@ class BalochiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -129,7 +140,7 @@ class BalochiPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Balochi (Southern) phonemizer — cross-script (Arabic + Roman), lexicon-composed; numbers deferred. */
+/** Build the Balochi (Southern) phonemizer — cross-script (Arabic + Roman), lexicon-composed; numbers.ts cardinals. */
 export function createBalochi(foreign?: ForeignPhonemizer): Phonemizer {
     return new BalochiPhonemizer(foreign);
 }

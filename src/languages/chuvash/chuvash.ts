@@ -15,6 +15,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Onset (default, pre-voicing) consonants. ⟨в⟩→[ʋ] (labial approximant; ~[w] in a coda), ⟨х⟩→[χ] (uvular), ⟨ҫ⟩→[ɕ].
 const ONSET: Record<string, string> = {
@@ -99,7 +100,14 @@ export function phonemizeWord(word: string): string {
     return segs.map((s) => s.ipa).join("").normalize("NFC");
 }
 
-// A Chuvash Cyrillic word / number / punctuation. Numbers deferred.
+/** A digit run → spoken Chuvash, phonemized through the same Cyrillic g2p (data + provenance in numbers.ts). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
+// A Chuvash Cyrillic word / number / punctuation.
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class ChuvashPhonemizer implements Phonemizer {
@@ -109,7 +117,7 @@ class ChuvashPhonemizer implements Phonemizer {
         // drop the reduction mark (чӑваш → "t͡ɕa ʋaʂ"). phonemizeWord re-normalizes, but the split has already happened.
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

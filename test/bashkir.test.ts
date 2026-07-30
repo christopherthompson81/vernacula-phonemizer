@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, phonemizeWordNative, isRussianLoan } from "../src/languages/bashkir/bashkir.ts";
+import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Bashkir (ba) — Башҡорт теле, Kipchak Turkic (sibling of Tatar), CYRILLIC. Signatures:
 // the INTERDENTAL fricatives ⟨ҫ⟩→[θ], ⟨ҙ⟩→[ð] (Bashkir's hallmark); the WRITTEN uvulars ⟨ҡ⟩→[q], ⟨ғ⟩→[ʁ] (no harmony
@@ -22,6 +23,19 @@ describe("Bashkir (Башҡорт теле) canonical IPA", () => {
         expect(phonemizeWordNative("йәшел")).toBe("jæˈʃɪl"); // 'green' — ⟨ә⟩→æ, ⟨е⟩→[ɪ]
         expect(phonemizeWordNative("биш")).toBe("ˈbiʃ"); // 'five' — a word ending in ⟨и⟩→[i] still gets stress
         expect(phonemizeWordNative("үҙ")).toBe("ˈyð"); // 'self' — ⟨ү⟩→[y] onset counts as a vowel for stress
+    });
+
+    test("NUMBERS — Turkic decimal; Bashkir's own lexemes, NOT Tatar's", () => {
+        const ba = getPhonemizer("ba");
+        // Data + provenance: src/languages/bashkir/numbers.ts (Wiktionary Module:number list/data/ba + Omniglot).
+        expect(ba.text("7").trim()).toBe("jɪˈtɪ"); // ете — Bashkir ⟨ете⟩, not Tatar ⟨җиде⟩
+        expect(ba.text("11").trim()).toBe("ˈun ˈbɪɾ"); // ун бер — TWO words in Bashkir (Tatar fuses: унбер)
+        expect(ba.text("25").trim()).toBe("jɪɡɪɾˈmɪ ˈbiʃ"); // егерме биш — the 21-99 compound
+        expect(ba.text("100").trim()).toBe("ˈjøð"); // йөҙ — the ⟨ҙ⟩ interdental hallmark inside a numeral
+        expect(ba.text("555").trim()).toBe("ˈbiʃ ˈjøð ilˈlɪ ˈbiʃ"); // биш йөҙ илле биш
+        expect(ba.text("1984").trim()).toBe("ˈmɪŋ tuˈʁɯð ˈjøð hikˈhæn ˈdyɾt"); // мең туғыҙ йөҙ һикһән дүрт — ⟨һикһән⟩ 80, not Tatar ⟨сиксән⟩
+        expect(ba.text("12345").trim()).toBe("ˈun iˈkɪ ˈmɪŋ ˈøs ˈjøð ˈqɯɾq ˈbiʃ"); // ун ике мең өс йөҙ ҡырҡ биш
+        expect(ba.text("1000000").trim()).toBe("ˈbɪɾ miɫɫiˈʊn"); // бер миллион
     });
 
     test("Russian-loan detection routes to the Russian g2p (a reality of Bashkir text)", () => {

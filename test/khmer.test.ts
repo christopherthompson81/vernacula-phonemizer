@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 // The goldens exercise the RULE engine (phonemizeWordRules); the shipped phonemizeWord is dict-first (exceptions
 // lexicon → rules), tested separately below.
+import { phonemize as phonemizeText } from "../src/index.ts";
 import { phonemizeWord, phonemizeWordRules as phonemize } from "../src/languages/khmer/khmer.ts";
 
 // Canonical-IPA goldens for Khmer / ភាសាខ្មែរ (km) — Austroasiatic (Mon-Khmer), the Khmer abugida, non-tonal.
@@ -62,4 +63,28 @@ describe("Khmer — shipped phonemizeWord (exceptions lexicon dict-first)", () =
     test("an OOV word falls through to the rule engine (dict == rule)", () => {
         expect(phonemizeWord("ស្រុក")).toBe(phonemize("ស្រុក")); // not in the lexicon → rules
     });
+});
+
+// Cardinal numbers — Khmer is the fleet's BI-QUINARY case: 6–9 are overtly 5+n (ប្រាំមួយ = ប្រាំ 5 + មួយ 1), and
+// the bi-quinary unit is reused whole inside the teens (16 = ដប់ + ប្រាំមួយ). Above that the system is decimal, with
+// native ដប់ 10 / ម្ភៃ 20 and a Thai-derived 30–90 overlay. Numerals from Wikipedia "Khmer numerals" (see numbers.ts).
+describe("Khmer (km) cardinal numbers — bi-quinary 6–9", () => {
+    for (const [n, ipa] of [
+        [5, "pram"], // ប្រាំ — the quinary base
+        [6, "prammuəj"], // ប្រាំមួយ = 5 + 1
+        [7, "prampiː"], // ប្រាំពីរ = 5 + 2
+        [9, "pramɓuən"], // ប្រាំបួន = 5 + 4
+        [16, "ɗɑp prammuəj"], // ដប់ប្រាំមួយ = 10 + (5+1) — the bi-quinary unit reused whole
+        [20, "mpʰɨj"], // ម្ភៃ — not unit+សិប
+        [21, "mpʰɨj muəj"], // ម្ភៃមួយ
+        [42, "saesəp piː"], // សែសិបពីរ — the Thai-derived decade សែសិប
+        [100, "muəj rɔːj"], // មួយរយ — a magnitude always carries its multiplier, incl. "one"
+        [1000, "muəj poən"], // មួយពាន់
+        [12345, "muəj məɨn piː poən ɓəj rɔːj saesəp pram"], // ម៉ឺន 10⁴ magnitude
+        [1000000, "muəj liən"], // មួយលាន
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(phonemizeText(String(n), "km")).toBe(ipa);
+        });
+    }
 });

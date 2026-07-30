@@ -22,6 +22,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { numberToKhmerWords } from "./numbers.ts";
 
 interface KhmerDef {
     consonants: Record<string, [string, string]>;
@@ -213,7 +214,7 @@ export function phonemizeWordRules(word: string): string {
     return out.normalize("NFC");
 }
 
-const TOKEN = /([ក-៝]+)|(\d[\d០-៩]*)|([។៕?!,.៖])/gu;
+const TOKEN = /([ក-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
 
 /** Build the Khmer phonemizer. */
 export function createKhmer(): Phonemizer {
@@ -221,7 +222,11 @@ export function createKhmer(): Phonemizer {
         text(input: string): string {
             return assembleClauses(input, TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
-                else if (m[2]) sink.emit(m[2]); // numbers deferred
+                else if (m[2]) {
+                    // Khmer digits ០–៩ (U+17E0–17E9) → ASCII, then compose (see numbers.ts).
+                    const ascii = [...m[2]].map((d) => (d >= "០" && d <= "៩" ? String(d.codePointAt(0)! - 0x17e0) : d)).join("");
+                    for (const wd of numberToKhmerWords(Number(ascii))) sink.emit(phonemizeWord(wd));
+                }
                 else if (m[3]) {
                     const mk = DEF.clausePunctuation[m[3]];
                     if (mk) sink.pause(mk);

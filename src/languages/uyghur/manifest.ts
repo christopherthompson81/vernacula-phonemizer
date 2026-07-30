@@ -4,12 +4,15 @@
  * punctuation. The word-final obstruent-devoicing ALGORITHM stays in code.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { NumbersDef } from "../../core/numbers.ts";
 
 export interface UyghurManifest {
     language: string;
     name: string;
     script: string;
     graphemes: Record<string, string>;
+    /** Turkic cardinal number spellings (Uyghur Arabic); composed by uyghur.ts, phonemized by the same g2p. */
+    numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
 }
 

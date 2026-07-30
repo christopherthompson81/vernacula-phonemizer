@@ -50,6 +50,45 @@
         "nukta": { "char": "়", "note": "(none — placeholder)" }
     },
 
+    // NUMBERS — Syloti Nagri spellings; canonical IPA is DERIVED by running them through the same abugida g2p.
+    // Sylheti is INDO-ARYAN, so the INDIC system applies (core/numbers.ts indicNumberWords): 2-2-3 grouping with
+    // ꠟꠣꠈ lax = 10^5 and ꠇꠥꠐꠤ kuţi = 10^7 (NOT million/billion), irregular teens, and FUSED (non-compositional)
+    // 21-99 forms in `compound` — the Bengali/Hindi shape, as expected for the closest sibling of Bengali.
+    // SOURCE: Omniglot "Numbers in Sylheti" (omniglot.com/language/numbers/sylheti.htm), which gives the Syloti
+    // Nagri column for 0-50 plus the round tens 60-90 and the magnitudes ꠡꠅ / ꠢꠣꠎꠣꠞ / ꠟꠣꠈ / ꠇꠥꠐꠤ. The tens series
+    // (kuri, tirish, sollish, fonsash, shaiţ, shottor, ashi, nobboi) and the 21-49 compounds are corroborated by
+    // Wikiversity "Sylheti language/Numbers" (which is romanisation-only, so Omniglot is the spelling authority).
+    // JUDGMENT CALLS:
+    //  • hundred is stored as the bare ꠡꠅ "sho": Omniglot's 100 = ꠄꠇꠡꠅ "exsho" is ꠄꠇ ex + ꠡꠅ sho, and the Indic
+    //    composer already prefixes the multiplier, so ꠡꠅ gives ex sho (100) AND dui sho (200). Storing "exsho"
+    //    whole (as bengali.jsonc unfortunately does) would render 200 as *"dui exsho".
+    //  • 51-99 compounds are NOT authored: no source gives them in Syloti Nagri (Wikiversity has the Roman forms
+    //    only, and transliterating them back would be invention). Those fall through to the documented Indic
+    //    degradation in core/numbers.ts — UNIT + TENS in the Indic order, which is in fact the right shape for
+    //    much of the range (61 ekhshait = ex + shaiţ, 81 ekhashi = ex + ashi) though not for the fused -anno /
+    //    -attor / -annobboi types (51 ekhanno, 71 ekattor, 91 ekhannobboi). Extend `compound` when a Syloti
+    //    Nagri source for 51-99 turns up.
+    // TONE (H/L) is unwritten and deferred language-wide, numbers included.
+    "numbers": {
+        "units": ["ꠡꠥꠘ꠆ꠘ", "ꠄꠇ", "ꠖꠥꠁ", "ꠔꠤꠘ", "ꠌꠣꠞ", "ꠙꠣꠌ", "ꠍꠄ", "ꠡꠣꠔ", "ꠀꠐ", "ꠘꠄ"],
+        "teens": ["ꠖꠡ", "ꠄꠉꠣꠞꠅ", "ꠛꠣꠞꠅ", "ꠔꠦꠞꠅ", "ꠌꠂꠖ꠆ꠖ", "ꠙꠘꠦꠞꠅ", "ꠡꠥꠟꠅ", "ꠡꠔꠦꠞꠅ", "ꠀꠑꠣꠞꠅ", "ꠃꠘꠤꠡ"],
+        "tens": {
+            "20": "ꠇꠥꠠꠤ", "30": "ꠔꠤꠞꠤꠡ", "40": "ꠌꠟ꠆ꠟꠤꠡ", "50": "ꠙꠘ꠆ꠌꠣꠡ",
+            "60": "ꠡꠣꠁꠐ", "70": "ꠡꠔ꠆ꠔꠞ", "80": "ꠀꠡꠤ", "90": "ꠘꠛ꠆ꠛꠁ"
+        },
+        "magnitudes": { "hundred": "ꠡꠅ", "thousand": "ꠢꠣꠎꠣꠞ", "lakh": "ꠟꠣꠈ", "crore": "ꠇꠥꠐꠤ" },
+        // Fused 21-50 (Omniglot). 21-29 end in -ish/-ash, 31-38 in -tirish, 41-48 in -sollish/-allish, and the
+        // x9 members are the "one-less-than-the-next-ten" un- forms (29 untirish, 39 unsollish, 49 unfonsash).
+        "compound": {
+            "21": "ꠄꠇꠥꠡ", "22": "ꠛꠣꠁꠡ", "23": "ꠔꠦꠁꠡ", "24": "ꠌꠛ꠆ꠛꠤꠡ", "25": "ꠙꠌꠤꠡ",
+            "26": "ꠍꠣꠛ꠆ꠛꠤꠡ", "27": "ꠡꠣꠔꠣꠡ", "28": "ꠀꠑꠣꠡ", "29": "ꠃꠘꠔꠤꠞꠤꠡ",
+            "31": "ꠄꠇꠔꠤꠞꠤꠡ", "32": "ꠛꠔꠔꠤꠞꠤꠡ", "33": "ꠔꠦꠔꠔꠤꠞꠤꠡ", "34": "ꠌꠃꠔꠤꠞꠤꠡ", "35": "ꠙꠄꠔꠤꠞꠤꠡ",
+            "36": "ꠍꠄꠔꠤꠞꠤꠡ", "37": "ꠡꠣꠔꠔꠤꠞꠤꠡ", "38": "ꠀꠐꠔꠤꠞꠤꠡ", "39": "ꠃꠘꠌꠟ꠆ꠟꠤꠡ",
+            "41": "ꠄꠇꠌꠟ꠆ꠟꠤꠡ", "42": "ꠛꠤꠀꠟ꠆ꠟꠤꠡ", "43": "ꠔꠤꠔꠣꠟ꠆ꠟꠤꠡ", "44": "ꠌꠥꠀꠟ꠆ꠟꠤꠡ", "45": "ꠙꠄꠔꠣꠟ꠆ꠟꠤꠡ",
+            "46": "ꠍꠄꠌꠟ꠆ꠟꠤꠡ", "47": "ꠡꠣꠔꠌꠟ꠆ꠟꠤꠡ", "48": "ꠀꠐꠌꠟ꠆ꠟꠤꠡ", "49": "ꠃꠘꠙꠘ꠆ꠌꠣꠡ"
+        }
+    },
+
     "clausePunctuation": {
         "꠨": " . ", "꠩": " . ", "।": " . ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , "
     }

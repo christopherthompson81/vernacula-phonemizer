@@ -406,3 +406,37 @@
 و	wa	wa
 خوا	xwāi	xwaːi
 واردف	wārdaf	waːrd̪af
+# NUMERALS — Jahani & Korn (2009), "Balochi", in *The Iranian Languages*, TABLE 11.19 (CARDINAL NUMBERS), first
+# (= most common) variant taken for each slot; magnitudes sad '100', hazār '1,000', lak(k) '100,000', kurōr
+# '10,000,000', arab '1,000,000,000' from the same table (arab = 10^9 per FBB / Sayad Hashmi 2000, the reading J&K
+# list first; BMC has 10^8). Roman → IPA by the standard Southern-Balochi correspondences already used above
+# (dental t̪/d̪, unaspirated, r not ɽ). Read by balochi/numbers.ts; the Arabic abjad cannot recover these vowels on
+# its own (هپت → *hpt̪), which is exactly what this lexicon exists for. NOT in J&K: sifr '0' (a Perso-Arabic loan —
+# Table 11.19 starts at 1). Forms already present above are not repeated (yak, do, panč, šiš '6', duwāzdah '12',
+# čārdah '14', nawad '90'); bīst '20' and sī '30' need no row (the g2p already yields biːst̪ / siː).
+# HOMOGRAPH NOTE: ⟨سد⟩ is re-asserted here as sad '100' — it appears above BOTH as sad and (later, so previously
+# winning) as sud 'profit'; the numeral is the commoner reading and the lexicon has no POS disambiguation. ⟨چل⟩ was
+# left alone for the same reason and 40 uses the J&K variant čihil ⟨چهل⟩ instead of čil.
+صفر	sifr	sifr
+سئے	sai	sai
+هپت	hapt	hapt̪
+هشت	hašt	haʃt̪
+نو	nō	noː
+ده	dah	d̪ah
+یازده	yāzdah	jaːzd̪ah
+سیزده	sēzdah	seːzd̪ah
+پنزده	panzdah	panzd̪ah
+شنزده	šanzdah	ʃanzd̪ah
+هبده	habdah	habd̪ah
+هژده	haždah	haʒd̪ah
+نوزده	nōzdah	noːzd̪ah
+چهل	čihil	t͡ʃihil
+پنجاه	panjāh	pand͡ʒaːh
+شست	šast	ʃast̪
+هپتاد	haptād	hapt̪aːd̪
+هشتاد	haštād	haʃt̪aːd̪
+سد	sad	sad̪
+هزار	hazār	hazaːr
+لک	lakk	lakk
+کرور	kurōr	kuroːr
+ارب	arab	arab

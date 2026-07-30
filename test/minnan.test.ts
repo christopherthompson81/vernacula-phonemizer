@@ -70,3 +70,27 @@ describe("min nan (Taiwanese Hokkien) canonical IPA", () => {
         expect(phonemize("我食飯", "nan")).toBe("ɡu̯a˥˩ t͡ɕi̯aʔ˨˩ pŋ̍˧"); // guá tsia̍h-pn̄g (飯 → syllabic ŋ̍)
     });
 });
+
+// Cardinal numbers — Min Nan is Sinitic, so (exactly as in cantonese.ts) an integer is composed into the shared
+// Chinese numeral string 零一二三四五六七八九 + 十百千萬億 and READ THROUGH THE SHIPPED HAN DICT: no numeral readings
+// are authored, every character's Tâi-lô comes from dict-chars.tsv/dict.tsv. Two departures: the numeral string is
+// read char-by-char (the word dict's 一百 entry is tsi̍t-pà, not the numeral tsi̍t-pah), and 一 is /it/ as a final
+// unit digit vs /tsi̍t/ as a magnitude multiplier (十一 tsa̍p-it, cf. 十一叔 tsa̍p-it-tsik in dict.tsv).
+describe("min nan (nan) cardinal numbers — composed Han, read through the shipped dict", () => {
+    for (const [n, ipa] of [
+        [0, "liə̯ŋ˨˦"], // 零 lîng
+        [7, "t͡ɕʰit̚˧˨"], // 七 tshit
+        [10, "t͡sap̚˥"], // 十 tsa̍p
+        [11, "t͡sap̚˧˨ it̚˧˨"], // 十一 tsa̍p-it — final 一 is /it/, not /tsi̍t/
+        [21, "d͡ʑi˨˩ t͡sap̚˧˨ it̚˧˨"], // 二十一 jī-tsa̍p-it (word-internal sandhi across the numeral)
+        [42, "ɕi˥˩ t͡sap̚˧˨ d͡ʑi˧"], // 四十二 sì-tsa̍p-jī
+        [100, "t͡ɕit̚˧˨ paʔ˧˨"], // 一百 tsi̍t-pah — 一 as a multiplier is /tsi̍t/
+        [1000, "t͡ɕit̚˧˨ t͡ɕʰi̯ɛn˥"], // 一千
+        [12345, "t͡ɕit̚˧˨ ban˨˩ d͡ʑi˨˩ t͡ɕʰi̯ɛn˧ sã˧ paʔ˥˩ ɕi˥˩ t͡sap̚˧˨ ɡɔ˧"], // 一萬二千三百四十五 — myriad grouping
+        [1000000, "t͡ɕit̚˧˨ paʔ˥˩ ban˧"], // 一百萬 — no "million" word; 萬 10⁴ grouping
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(phonemize(String(n), "nan")).toBe(ipa);
+        });
+    }
+});

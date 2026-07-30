@@ -34,6 +34,24 @@
         "ة": "t", "ص": "s", "ع": "ʔ", "ذ": "z", "ظ": "z", "ح": "h", "ط": "t", "ث": "s", "ض": "z"
     },
 
+    // NUMBERS — Uyghur Arabic spellings; canonical IPA is DERIVED by running them through the same greedy g2p
+    // (so no hand-written IPA here). Uyghur is a plain TURKIC decimal system, like Uzbek/Kazakh/Turkish and NOT
+    // like its Iranian neighbours: units + a distinct word per round ten, JUXTAPOSED with no connective particle
+    // (11 = ئون بىر "on bir", 25 = يىگىرمە بەش "yigirme besh", 42 = قىرىق ئىككى). The round hundred/thousand drop
+    // the leading "bir" (100 = يۈز yüz, 1000 = مىڭ ming) but million/billion keep it (بىر مىليون "bir milyon").
+    // SOURCE: Omniglot "Uyghur numbers" (omniglot.com/language/numbers/uyghur.htm) — 0-20, the round tens 30-90,
+    // 100, 1000, 1000000. مىليارد (milyard) 10⁹ follows the Turkic/Russian-contact norm shared with Uzbek's
+    // milliard / Kazakh миллиард. ZERO: نۆل (nol) is the everyday form; Omniglot lists the Arabic loan سىفىر
+    // (sipir, ف nativised to [p]) — نۆل chosen as the unmarked modern spelling.
+    "numbers": {
+        "units": ["نۆل", "بىر", "ئىككى", "ئۈچ", "تۆت", "بەش", "ئالتە", "يەتتە", "سەككىز", "توققۇز"],
+        "tens": {
+            "10": "ئون", "20": "يىگىرمە", "30": "ئوتتۇز", "40": "قىرىق", "50": "ئەللىك",
+            "60": "ئاتمىش", "70": "يەتمىش", "80": "سەكسەن", "90": "توقسان"
+        },
+        "magnitudes": { "hundred": "يۈز", "thousand": "مىڭ", "million": "مىليون", "billion": "مىليارد" }
+    },
+
     "clausePunctuation": {
         "؟": " ? ", "؛": " ; ", "،": " , ", ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , "
     }
