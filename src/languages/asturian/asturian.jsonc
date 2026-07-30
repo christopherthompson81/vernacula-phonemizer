@@ -24,4 +24,34 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // CARDINAL NUMBER WORDS (masculine). Composition logic in numbers.ts.
+    // SOURCE: Academia de la Llingua Asturiana, "Gramática de la Llingua Asturiana", cap. XII "Los numberales",
+    // §2.2 "Formes y emplegu" (pp. 127–129) — the normative table, verbatim. It also fixes the three composition
+    // rules this engine needs:
+    //   - DECENES + UNIDAES: "Nel casu d'unidaes con 20, síguese l'esquema venti + unidá, escrito nuna sola
+    //     pallabra: ventiún, ventidós… Nel casu de les otres decenes, síguese l'esquema decena + y + unidá,
+    //     escrito en pallabres separaes: trenta y un, cuarenta y dos…"
+    //   - CENTENES: "Namái 100 tien nome específicu: cien, que nun estrema xéneru." 200+ = unidá + cientos.
+    //   - CENTENA Y OTRU NÚMBERU: 100 alone is ⟨cien⟩, but 101–199 use ⟨cientu⟩ + the rest (cientu un, cientu
+    //     trenta y un) — the cien/cientu alternation, cf. Spanish cien/ciento.
+    // Gender is FOLDED to the masculine (doscientos, not doscientes) — the numeral itself carries no gender cue.
+    "numbers": {
+        // 0–19 (ALLA gives doce~dolce, trece~trelce, dieciséis~selce; the first/central variant is taken).
+        "ones": ["cero", "un", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "once",
+            "doce", "trece", "catorce", "quince", "dieciséis", "diecisiete", "dieciocho", "diecinueve"],
+        "tens": ["", "", "venti", "trenta", "cuarenta", "cincuenta", "sesenta", "setenta", "ochenta", "noventa"],
+        // 21–29 fuse into ONE word (venti- + unit); ventiún is invariable for gender (ALLA: "ventiún muyeres").
+        "twenties": ["", "ventiún", "ventidós", "ventitrés", "venticuatro", "venticinco", "ventiséis", "ventisiete",
+            "ventiocho", "ventinueve"],
+        // hundreds[1] is unused — 100 alone is `hundredExact`, 101–199 take `hundredCombining` (see numbers.ts).
+        "hundreds": ["", "cien", "doscientos", "trescientos", "cuatrocientos", "quinientos", "seiscientos",
+            "setecientos", "ochocientos", "novecientos"],
+        "hundredExact": "cien", // 100 (and the multiplier in "cien mil" — ALLA: 100.000 cien mil)
+        "hundredCombining": "cientu", // 101–199: cientu un, cientu diez, cientu noventa y cinco
+        "thousand": "mil", // invariable: "ensin que mil garre forma plural" (dos mil, diez mil)
+        "and": "y",
+        // millón is a COLLECTIVE NOUN (un millón / dos millones); 10⁹ falls out as the Ibero "mil millones".
+        "scales": [{ "value": 1000000, "one": "un millón", "many": "millones" }],
+    },
 }

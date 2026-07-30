@@ -29,4 +29,31 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ── CARDINAL NUMBER WORDS ────────────────────────────────────────────────────────────────────────────────────
+    // Source: Wiktionary "Appendix:Icelandic numerals" (the cardinal table, the gender paradigms for 1–4, and the
+    // magnitude words hundrað / hundruð / þúsund / milljón / milljarður), cross-checked against
+    // languagesandnumbers.com/how-to-count-in-icelandic. Icelandic is tens-FIRST and joins the final unit with "og":
+    // tuttugu og einn = 21, fjörutíu og fimm = 45.
+    //
+    // GENDER. Icelandic 1–4 inflect (einn/ein/eitt, tveir/tvær/tvö, þrír/þrjár/þrjú, fjórir/fjórar/fjögur) and a
+    // bare numeral has no noun to agree with. The citation form used for counting aloud is the MASCULINE (einn,
+    // tveir, þrír, fjórir) — that is the `ones` table. The other two genders are needed anyway, because a
+    // multiplier agrees with its MAGNITUDE NOUN: hundrað and þúsund are NEUTER (tvö hundruð, þrjú þúsund), milljón
+    // is FEMININE (ein milljón, tvær milljónir) and milljarður is MASCULINE (einn milljarður). numbers.ts selects
+    // the right column per position; only 1–4 have entries, everything from fimm up is invariant.
+    "numbers": {
+        "ones": [
+            "núll", "einn", "tveir", "þrír", "fjórir", "fimm", "sex", "sjö", "átta", "níu",
+            "tíu", "ellefu", "tólf", "þrettán", "fjórtán", "fimmtán", "sextán", "sautján", "átján", "nítján"
+        ],
+        "onesFeminine": ["", "ein", "tvær", "þrjár", "fjórar"],
+        "onesNeuter": ["", "eitt", "tvö", "þrjú", "fjögur"],
+        "tens": ["", "", "tuttugu", "þrjátíu", "fjörutíu", "fimmtíu", "sextíu", "sjötíu", "áttatíu", "níutíu"],
+        "connector": "og",
+        "hundred": { "one": "eitt hundrað", "plural": "hundruð" },
+        "thousand": { "one": "eitt þúsund", "word": "þúsund" },
+        "million": { "one": "ein milljón", "plural": "milljónir" },
+        "billion": { "one": "einn milljarður", "plural": "milljarðar" }
+    },
 }

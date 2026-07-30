@@ -18,6 +18,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 const DIGRAPHS: [string, string][] = [["ch", "t͡ʃ"], ["sh", "ʃ"], ["dj", "d͡ʒ"], ["zj", "ʒ"]];
 // Single letters. Open-vowel letters ⟨è ò ù⟩; acute ⟨á é í ó ú⟩ = stressed base vowel (stress found separately).
@@ -95,7 +96,8 @@ class PapiamentoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // A digit run reads as Papiamentu number WORDS, each phonemized like any other word.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

@@ -15,6 +15,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface LuxDef {
     digraphs: Record<string, string>;
@@ -153,14 +154,15 @@ export function phonemizeWord(word: string): string {
     return toks.map((t) => t.ph).join("");
 }
 
-// A word (Luxembourgish Latin letters incl. é ë ä + the loan vowels) / number / punctuation token. Numbers deferred.
+// A word (Luxembourgish Latin letters incl. é ë ä + the loan vowels) / number / punctuation token.
 const TOKEN = /([a-zéëäàáâôûüöA-ZÉËÄÀÁÂÔÛÜÖ'-]+)|(\d+)|([.!?…,;:])/gu;
 
 class LuxembourgishPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

@@ -30,4 +30,28 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // CARDINAL NUMBER WORDS. Composition logic in numbers.ts.
+    // SOURCE: "Los números en aragonés: cardinales", Mal de Lenguas (maldelenguas.blogspot.com/2012/05/
+    // los-numeros-en-aragones-los-cardinales.html) — the fullest published Aragonese cardinal table (0–900,
+    // 21–29, the ⟨y⟩ connector) — cross-checked against omniglot.com/language/numbers/aragonese.htm and
+    // europeminoritylanguages.wordpress.com/2016/10/31/aragonese-os-numeros.
+    // DIALECT NOTE: Aragonese numerals vary a lot east↔west (quatro~quatre, vinte~vint~vente, sixanta~sesenta,
+    // diez~deu). This table takes the FIRST-LISTED (central/literary) variant of each entry in the source, which
+    // is the set the two secondary sources agree on. Decimal throughout — no vigesimal residue.
+    "numbers": {
+        // 0–19. 16–19 are the analytic deci- series (decisiéis … decinueu), NOT the Spanish dieci- forms.
+        "ones": ["zero", "un", "dos", "tres", "quatro", "cinco", "seis", "siete", "ueito", "nueu", "diez", "once",
+            "dotze", "tretze", "catorce", "quince", "decisiéis", "decisiete", "deciueito", "decinueu"],
+        "tens": ["", "", "vinte", "trenta", "quaranta", "cinquanta", "sixanta", "setanta", "uitanta", "novanta"],
+        // 21–29 fuse into ONE word (vinti- + unit) — the source's primary series; 30–90 take the ⟨y⟩ connector.
+        "twenties": ["", "vintiun", "vintidós", "vintitrés", "vintiquatro", "vinticinco", "vintiséis", "vintisiete",
+            "vintiueito", "vintinueu"],
+        "hundreds": ["", "cient", "docientos", "trecientos", "quatrecientos", "cincocientos", "seicientos",
+            "sietecientos", "uitcientos", "noucientos"],
+        "thousand": "mil",
+        "and": "y", // 31 trenta y un, 42 quaranta y dos (the source's primary form; "trenta-un" is the variant)
+        // millón is a NOUN (un millón / dos millons); 10⁹ falls out as the Ibero-Romance "mil millons".
+        "scales": [{ "value": 1000000, "one": "un millón", "many": "millons" }],
+    },
 }

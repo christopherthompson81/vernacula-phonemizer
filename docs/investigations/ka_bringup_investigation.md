@@ -50,3 +50,34 @@ Table values + folds verified sound (no over-fold inflates the 99.8%; all 33 let
   fricative ⟨ვ⟩→f is folded). A maintainer could otherwise have deleted FINAL_DEVOICE thinking it was an eval fold.
 - **Known limitation (deferred):** the archaic Mkhedruli letters ჱ ჲ ჳ ჴ ჵ ჶ ჷ ჸ ჹ ჺ (U+10F1–10FA, dropped from the
   modern 33-letter alphabet) are not in the table → skipped; out of scope for modern Georgian text.
+
+## Run 3 — 2026-07-28 18:00 — VIGESIMAL cardinal number compositor (numbers were deferred)
+
+Question: `phonemize("<int>", "ka")` passed the digits through. Probe: 110/110 DIGIT-LEAK.
+
+**Pattern B mandatory** (`src/languages/georgian/numbers.ts` + a `numbers` block in `georgian.jsonc`). Georgian is
+not decimal below 100 — the shared `westernNumberWords` reads round TENS, and Georgian **has none**.
+
+★ Score construction (20–99): the four score words are 20 ოცი, 40 ორმოცი (2×20), 60 სამოცი (3×20),
+80 ოთხმოცი (4×20). Any other 21–99 is the score's stem + -და- ("and") + the plain **1–19** numeral as ONE word,
+so the teens attach into the same slot. There is no ten digit: 50 = 2×20+10, 70 = 3×20+10, 90 = 4×20+10.
+Implementation: score index = floor(n/20) ∈ 1..4, remainder = n − 20·index ∈ 0..19 by construction.
+
+★ Truncation (≥ 100): groups are separate words, and a numeral FOLLOWED by a smaller number drops its final ⟨ი⟩.
+This is LOCAL — the hundred truncates iff its own sub-hundred remainder is non-zero; a magnitude noun truncates
+iff any remainder follows. A multiplier never truncates. Stored as bare/comb pairs in the jsonc.
+
+Sources: ka.wikipedia `N (რიცხვი)` articles for 0–20, the round tens and the hundreds (0 ნული, 8 რვა,
+19 ცხრამეტი, 30 ოცდაათი, 50 ორმოცდაათი, 70 სამოცდაათი, 90 ოთხმოცდაათი, 100 ასი, 300 სამასი, 700 შვიდასი,
+1000 ათასი); ka.wikipedia YEAR articles as the compound/truncation referee; Wikipedia "Georgian numerals" for the
+two rule statements. Note Omniglot's Georgian page mis-OCRs 300 as *ამასი — ka.wikipedia's სამასი is correct.
+
+Verification against the year-article referee — every one an exact match: 101 ას ერთი · 1101 ათას ას ერთი ·
+1300 ათას სამასი · 1500 ათას ხუთასი · 1800 ათას რვაასი · 1900 ათას ცხრაასი · 1959 ათას ცხრაას ორმოცდაცხრამეტი ·
+1999 ათას ცხრაას ოთხმოცდაცხრამეტი · 2001 ორი ათას ერთი · 2101 ორი ათას ას ერთი. Spot checks required by the
+task: 30 ოცდაათი · 45 ორმოცდახუთი · 67 სამოცდაშვიდი · 89 ოთხმოცდაცხრა · 99 ოთხმოცდაცხრამეტი.
+
+Judgment call: 1000 → bare ათასი (no *ერთი ათასი — every ka.wikipedia 1000s year spells it that way), but
+10^6/10^9 keep it (ერთი მილიონი / ერთი მილიარდი, both attested in running text) since those are borrowed nouns.
+
+Result: probe **CLEAN** across the required range. Tests in test/georgian.test.ts.

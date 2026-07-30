@@ -4,12 +4,14 @@
  * is a greedy longest-match scan over the 33-letter grapheme table (manifest.ts) + ONE context rule (word-final voiced
  * stop devoicing ბ/დ/გ→pʰ/tʰ/kʰ). Signatures: the
  * three-way stop/affricate contrast VOICED / ASPIRATED / EJECTIVE (ბ b · ფ pʰ · პ pʼ; …), uvulars ღ=ʁ, ხ=χ, ყ=qʼ, and
- * 5 vowels a ɛ i ɔ u. Stress is weak/non-contrastive → not marked. Numbers deferred. See
+ * 5 vowels a ɛ i ɔ u. Stress is weak/non-contrastive → not marked. Numbers are VIGESIMAL and composed by
+ * numbers.ts (30 = ოცდაათი 20+10, 40 = ორმოცი 2×20, 99 = ოთხმოცდაცხრამეტი 4×20+19). See
  * docs/investigations/ka_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -51,7 +53,9 @@ class GeorgianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" "))
+                    sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -60,7 +64,7 @@ class GeorgianPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Georgian phonemizer (greedy g2p; stress + numbers deferred). */
+/** Build the Georgian phonemizer (greedy g2p + the vigesimal number compositor; stress not marked). */
 export function createGeorgian(): Phonemizer {
     return new GeorgianPhonemizer();
 }

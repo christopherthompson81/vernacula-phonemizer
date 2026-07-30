@@ -14,6 +14,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const V = MANIFEST.vowels;
 const C = MANIFEST.consonants;
@@ -133,7 +134,8 @@ class DanishPhonemizer implements Phonemizer {
     text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
-            // numbers deferred (Danish vigesimal compositor not yet authored)
+            // Numbers: the vigesimal/units-first compositor (numbers.ts) → each word through the same 3-tier g2p.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd, oovOverride));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }

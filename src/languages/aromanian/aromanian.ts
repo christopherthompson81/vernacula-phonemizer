@@ -16,6 +16,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Digraphs, longest-first (2 letters). ⟨ch gh⟩ are the HARD/fricative dorsals; ⟨ll⟩ = ⟨lj⟩ = [ʎ].
 const DIGRAPHS: [string, string][] = [
@@ -101,7 +102,8 @@ class AromanianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // A digit run reads as Aromanian number WORDS, each phonemized like any other word.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

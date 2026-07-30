@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/latgalian/latgalian.ts";
+import { phonemizeWord, createLatgalian } from "../src/languages/latgalian/latgalian.ts";
 
 // Canonical-IPA goldens for Latgalian (ltg) — latgaļu volūda, an Eastern Baltic sibling of Latvian. The signature is
 // the ⟨i⟩/⟨y⟩ soft/hard split: front ⟨i ī e ē⟩ palatalize the preceding consonant, but ⟨y⟩→[ɨ] (a hard central vowel
@@ -33,5 +33,27 @@ describe("Latgalian (latgaļu volūda) canonical IPA", () => {
         expect(phonemizeWord("volūda")).toBe("vɔluːda"); // ⟨o⟩→[ɔ], macron ⟨ū⟩→[uː]
         expect(phonemizeWord("Latgola")).toBe("ladɡɔla"); // ⟨tg⟩→[dɡ] regressive voicing
         expect(phonemizeWord("atzeit")).toBe("ad͡zʲæit"); // ⟨tz⟩→[d͡z] affricate, palatalized before ⟨ei⟩
+    });
+
+    // Cardinal numbers (numbers.ts). East-Baltic concord as in Latvian — SINGULAR after a count ending in …1
+    // (except …11), plural otherwise — but with the Latgalian twist that "tyukstūša" is FEMININE (Latvian's
+    // tūkstotis is masculine), so the thousands multiplier takes the FEMININE unit series (sešys, vīna).
+    test("cardinal numbers: -padsmit teens + the FEMININE tyukstūša multiplier", () => {
+        const ltg = createLatgalian();
+        expect(ltg.text("7").trim()).toBe("sʲæpʲtʲænʲi"); // septeni
+        expect(ltg.text("15").trim()).toBe("pʲiːt͡spatʲsʲmʲit"); // pīcpadsmit (the -padsmit teen)
+        expect(ltg.text("21").trim()).toBe("dʲiwʲdʲæsʲmʲit vʲiːnt͡s"); // divdesmit vīns (coda ⟨v⟩→w; final ⟨-ns⟩→[nt͡s])
+        expect(ltg.text("101").trim()).toBe("sɨmts vʲiːnt͡s"); // symts vīns
+        expect(ltg.text("555").trim()).toBe("pʲiːt͡sʲi sɨmʲtʲi pʲiːd͡zʲdʲæsʲmʲit pʲiːt͡sʲi"); // pīci symti pīcdesmit pīci
+        expect(ltg.text("1000").trim()).toBe("tɨukstuːʃa"); // tyukstūša — the numeral is dropped
+        expect(ltg.text("2000").trim()).toBe("dʲivʲi tɨukstuːʃɨs"); // divi tyukstūšys → plural
+        expect(ltg.text("6000").trim()).toBe("sʲæʃɨs tɨukstuːʃɨs"); // ★ sešys tyukstūšys — FEMININE multiplier
+        expect(ltg.text("21000").trim()).toBe("dʲiwʲdʲæsʲmʲit vʲiːna tɨukstuːʃa"); // ★ divdesmit vīna tyukstūša (fem sg)
+        expect(ltg.text("100000").trim()).toBe("sɨmts tɨukstuːʃɨs"); // symts tyukstūšys (masc symts + fem noun)
+        expect(ltg.text("12345").trim()).toBe(
+            "dʲiwpatʲsʲmʲit tɨukstuːʃɨs træis sɨmʲtʲi t͡ʃʲætrudʲæsʲmʲit pʲiːt͡sʲi",
+        ); // divpadsmit tyukstūšys treis symti četrudesmit pīci
+        expect(ltg.text("1000000").trim()).toBe("vʲiːnt͡s mʲilʲjɔnt͡s"); // vīns miļjons (masculine, keeps the numeral)
+        expect(ltg.text("1000000000").trim()).toBe("vʲiːnt͡s mʲilʲjarts"); // vīns miļjards
     });
 });

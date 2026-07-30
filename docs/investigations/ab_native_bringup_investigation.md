@@ -63,3 +63,46 @@ bug class). All else correct (the scan i-advances, TOKEN coverage incl. ⟨ԥ⟩
 phonologically correct per the review; the folded % remains depressed by the referee's own inconsistency
 (defs vs words) + the complex glide/schwa + numeral behaviour (the ~92-93% SYMBOL is the truer signal).
 Floor 0.78. Goldens (4 tests incl. the гь/у/и/curly-apostrophe fixes), the 154-test floor, typecheck green.
+
+## Run 5 — 2026-07-28 18:00 — VIGESIMAL cardinal number compositor (numbers were deferred)
+
+Question: `phonemize("<int>", "ab")` passed the digits through. Probe: 110/110 DIGIT-LEAK.
+
+**Pattern B mandatory**, data + logic both in `src/languages/abkhaz/numbers.ts` (Abkhaz has no `.jsonc` manifest).
+Abkhaz's traditional system is base-20, so the shared decimal composer cannot express it.
+
+Source hunt: languagesandnumbers.com would not load (socket hang up, repeatedly) and en.wiktionary's Abkhaz
+cardinal category has only 22 entries with no compounds. What actually settled it was **ab.wikipedia**:
+- «Иԥсабаратәу ахыԥхьаӡара» (Natural number) — a complete 0–99 table + the hundreds list + the thousands list,
+  cited there to Хәарцкиа Ҳ. И. & Џьонуа Б. Гь., «АУРЫС-АԤСУА, АԤСУА-АУРЫС акомпиутертә терминқәа ржәар», Аҟәа 2012.
+- its per-number articles «21 (ахыԥхьаӡара)» … «99 (ахыԥхьаӡара)», which confirm the whole table word-for-word.
+- its YEAR articles, which are the only source found for the compounds ABOVE 100 and were decisive: 101 шәи акы ·
+  105 шәи хәба · 111 шәи жәеиза · 120 шәи ҩажәа · 135 шәи ҩажәи жәохә · 155 шәи ҩынҩажәи жәохә ·
+  199 шәи ԥшьынҩажәи зеижә · 201 ҩышәи акы · 555 хәшәи ҩынҩажәи жәохә · 999 жәшәи ԥшьынҩажәи зеижә ·
+  1001 зқьы акы · 1100 зқьы шәкы · 1101 зқьы шәи акы · 1234 зқьы ҩышәи ҩажәи жәиԥшь · 1500 зқьы хәшә ·
+  1900 зқьы жәшәы · 1989 зқьы жәшәи ԥшьынҩажәи жәба · 2001 ҩнызқь акы · 2020 ҩнызқь ҩажәа.
+- «Аноль» for zero: «0 (аноль; алаҭ. nullus — акгьы)».
+
+★ Structure recovered from that evidence. Scores: 20 ҩажәа, 40 ҩынҩажәа (2×20), 60 хынҩажәа, 80 ԥшьынҩажәа; a
+non-final score takes the **-и connective** (final -а → -и) + a SPACE + the plain 1–19 word (30 = ҩажәи жәаба,
+99 = ԥшьынҩажәи зеижә). The same -и marks a non-final HUNDRED (шәкы → шәи акы; ҩышә → ҩышәи акы) but the thousand
+does NOT (1001 зқьы акы, 2001 ҩнызқь акы) — that asymmetry is only visible in the year articles. Thousands are
+**fused** for a multiplier of 1–10 (зқьы, ҩнызқь … жәанызқь) and for exactly 100 (шәнызқь); any other multiplier
+is spelled out + the separate word нызқь (20 000 ҩажәа нызқь).
+
+★ **Citation form / class agreement** — the judgment call the task asked to document. Abkhaz numerals agree with
+the HUMAN vs NON-HUMAN class of the counted noun: the human series is built with -ҩык/-џьара (аӡәы "one person",
+ҩыџьа "two people", хҩык "three people"), the non-human/abstract series is акы, ҩба, хԥа … A bare numeral in a TTS
+input has NO counted noun and therefore no class to agree with, so the compositor emits the **non-human /
+abstract counting series** throughout — which is also the series ab.wikipedia's own number articles use to NAME
+the numbers, i.e. the form a speaker reads a bare digit string with. Human concord needs the noun → out of scope.
+
+Other contested forms, flagged in the module: **7** is authored быжьба (year articles + Omniglot) while the
+dictionary-cited table writes the syncopated бжьба — which also survives in the derived 7000 бжьнызқь, so both
+stems are kept where their own source has them. **500** is authored хәышә per the dictionary-cited hundreds list,
+though the 555/1500 year articles write the syncopated хәшә(и) (a bare ⟨ы⟩/∅ alternation → [ə] or nothing).
+10^6/10^9 use the Russian loans миллион / миллиард (attested in running ab.wikipedia text: "140 миллион",
+"750 миллион шықәса"); a count of 1 reads as the bare noun, parallel to зқьы for 1000.
+
+Result: probe **CLEAN** across the required range; every year-article form above reproduced exactly except the
+noted 500 variant. Tests in test/abkhaz.test.ts.

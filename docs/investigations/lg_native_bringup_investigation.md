@@ -77,3 +77,37 @@ eval impact — noted for canonical completeness):
 **Net:** no code change. The bring-up is validated by an independent human source, and the pivotal c/ɟ decision is
 now well-grounded despite the circular machine referee. The verdict is unchanged (🔷 single-source for the *eval*),
 but confidence in the g2p is materially higher.
+
+## Run — cardinal number compositor — 2026-07-29
+
+Question: same digit leak. Luganda 1–5 are adjectival with class concord (bbiri ~ abiri ~ bibiri ~ bubiri) — which
+series does a bare integer take?
+
+**Decision: the CITATION / COUNTING series** (emu, bbiri, ssatu, nnya, ttaano), i.e. the class-III/VII shape that
+the descriptive sources call "the form used when counting". 6–9 (mukaaga, musanvu, munaana, mwenda) are NOUNS and
+never inflect.
+
+Sources: Wikivoyage "Luganda phrasebook" §Numbers (1–20, amakumi abiri/asatu/ana/ataano, the single-word tens
+nkaaga 60 / nsanvu 70 / kinaana 80 / kyenda 90, kikumi 100, bikumi bibiri 200, lukumi 1 000, nkumi bbiri 2 000,
+kakadde kamu 10⁶, akawumbi kamu 10⁹) cross-checked against eggsforeducation.wordpress.com "How to count in
+Luganda" and Omniglot.
+
+Raw findings that shaped the code:
+- TWO connectives, both attested and NOT interchangeable: `na`/`n'` inside the teens (kkumi n'emu, kkumi na
+  bbiri) but `mu` between magnitude components (amakumi abiri mu emu 21; **kikumi mu amakumi abiri mu bbiri** 122;
+  **bikumi bibiri mu amakumi abiri mu bbiri** 222 — those last two are verbatim attestations and the composer
+  reproduces them exactly).
+- 60–90 are SINGLE NOUNS, not `amakumi` multiples. Getting this wrong is the obvious failure mode here.
+- Three separate multiplier series are required: cl.6 a- after amakumi, cl.8 bi- after bikumi, cl.14 bu- after
+  obukadde/obuwumbi. Kept as three tables.
+- Only the ×1 forms of million/billion are attested; the obukadde/obuwumbi + bu- plurals are extrapolated (flagged).
+- Luganda's higher unit `omutwalo` (10 000) is deliberately NOT modelled — 10 000 renders as the ordinary decimal
+  "nkumi kkumi". Noted in the jsonc.
+
+Implementation: Pattern B — `src/languages/luganda/numbers.ts` + a `numbers` block in luganda.jsonc. Probe CLEAN.
+Tests added to test/luganda.test.ts (incl. 60 = nkaaga and the two attested hundreds compounds).
+
+**Source-hunt dead ends (kept per the negative-results rule):** languagesandnumbers.com repeatedly
+`socket hang up` (never retrievable this session); salanguages.com + sesotho.web.za `ECONNREFUSED`; Quizlet 403;
+the Peace Corps *Sepedi* PDF 403. WebFetch's summariser also silently truncated the Omniglot tables on the first
+pass — asking for an explicit "N = form" list per numeral was what finally got verbatim rows out of it.

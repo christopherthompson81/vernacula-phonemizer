@@ -42,5 +42,33 @@
         "a": "a", "e": "e", "i": "i", "o": "ɔ", "u": "u"
     },
 
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" }
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+
+    // ── CARDINAL NUMERALS ────────────────────────────────────────────────────────────────────────────────
+    // SOURCE: Colin Mark, *The Gaelic-English Dictionary* (Routledge, 2003), the numeral headwords
+    // (aon, dhà, trì … fichead, trithead, ceathrad, caogad, seasgad, seachdad, ochdad, naochad; ceud, mìle);
+    // cross-checked against the LearnGaelic Dictionary (learngaelic.scot/dictionary) and Wiktionary's
+    // Scottish Gaelic numeral entries. Composition rules in numbers.ts.
+    //
+    // Like Irish, Scottish Gaelic has TWO numeral series: the COUNTING form (standalone / after the particle
+    // ⟨a⟩ — a h-aon, a dhà, a trì) and the ATTRIBUTIVE form used before a counted noun (aon, dà, trì). The
+    // magnitude words are counted attributively (dà cheud "200", never *a dhà ceud), hence both lists.
+    "numbers": {
+        // Counting series 0–10. ⟨dhà⟩ is lenited in the series itself (the citation counting form of ⟨dà⟩).
+        "ones": ["neoni", "aon", "dhà", "trì", "ceithir", "còig", "sia", "seachd", "ochd", "naoi", "deich"],
+        // Attributive series 1–10 (used before a magnitude word). ⟨dà⟩ unlenited; it LENITES what follows.
+        "attributive": ["", "aon", "dà", "trì", "ceithir", "còig", "sia", "seachd", "ochd", "naoi", "deich"],
+        // Round tens — the MODERN DECIMAL series, not the traditional vigesimal one (dà fhichead "40",
+        // trì fichead "60"): decimal is what school Gaelic and modern written Gaelic use for bare figures,
+        // and it is the only series that reads unambiguously out of a digit string.
+        "tens": {
+            "20": "fichead", "30": "trithead", "40": "ceathrad", "50": "caogad",
+            "60": "seasgad", "70": "seachdad", "80": "ochdad", "90": "naochad"
+        },
+        "teenWord": "deug",
+        // The tens↔units link. Written Gaelic normally elides this to ⟨'s⟩ (fichead 's a h-aon); the full
+        // ⟨agus⟩ is emitted instead because a leading apostrophe is not part of a word token here.
+        "connector": "agus",
+        "magnitudes": { "hundred": "ceud", "thousand": "mìle", "million": "muillean", "billion": "billean" }
+    }
 }

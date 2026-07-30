@@ -45,5 +45,37 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // Cardinal number words (composition logic in numbers.ts). SOURCE: lt.wikipedia's per-number articles
+    // ("0 (skaičius)" → nulis, "1 (skaičius)" → vienas, … "11 (skaičius)" → vienuolika … "20 (skaičius)" →
+    // dvidešimt, "60 (skaičius)" → šešiasdešimt, "80 (skaičius)" → aštuoniasdešimt, "90 (skaičius)" →
+    // devyniasdešimt), plus the standard Baltic paradigm for the remaining round tens and the magnitude nouns.
+    //   • Teens take the -lika suffix as ONE word (vienuolika, dvylika, trylika, then unit + -olika).
+    //   • Tens are unit-stem + -dešimt (dvidešimt, trisdešimt, keturiasdešimt …); tens+units are SPACE-separated.
+    //   • Magnitudes are COUNTED NOUNS with the Lithuanian 3-way concord — see `agree()` in numbers.ts:
+    //       sg (nom sg)  after a count ending in 1 but not 11        → dvidešimt vienas tūkstantis
+    //       pl (nom pl)  after a count ending in 2–9 (not 12–19)     → du tūkstančiai, penki tūkstančiai
+    //       gen (gen pl) after a count ending in 0, or 11–19         → dvidešimt tūkstančių, šimtas tūkstančių
+    //     This is exactly the CLDR lt one/few/other split; "dvidešimt tūkstančių" and "šimtas tūkstančių" are
+    //     attested on lt.wikipedia, as are "du tūkstančiai" and "penki šimtai".
+    //   • "vienas / du" are the MASCULINE citation forms (Lithuanian 1/2 also inflect for gender: viena, dvi);
+    //     a bare numeral has no counted noun to agree with → masculine, as in the sibling Latvian engine.
+    "numbers": {
+        "units": ["nulis", "vienas", "du", "trys", "keturi", "penki", "šeši", "septyni", "aštuoni", "devyni"],
+        "teens": [
+            "dešimt", "vienuolika", "dvylika", "trylika", "keturiolika",
+            "penkiolika", "šešiolika", "septyniolika", "aštuoniolika", "devyniolika"
+        ],
+        "tens": [
+            "", "", "dvidešimt", "trisdešimt", "keturiasdešimt",
+            "penkiasdešimt", "šešiasdešimt", "septyniasdešimt", "aštuoniasdešimt", "devyniasdešimt"
+        ],
+        "magnitudes": {
+            "hundred": { "sg": "šimtas", "pl": "šimtai", "gen": "šimtų" },
+            "thousand": { "sg": "tūkstantis", "pl": "tūkstančiai", "gen": "tūkstančių" },
+            "million": { "sg": "milijonas", "pl": "milijonai", "gen": "milijonų" },
+            "billion": { "sg": "milijardas", "pl": "milijardai", "gen": "milijardų" }
+        }
     }
 }

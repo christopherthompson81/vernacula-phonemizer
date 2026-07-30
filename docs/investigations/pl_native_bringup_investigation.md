@@ -26,3 +26,28 @@ carries a flag distinguishing it from ⟨ż⟩, which DOES trigger regressive vo
 before fricatives, n→ŋ before velars, au→aw, ŋ~n fold). epitran stays 84.5% — its ą-final [ɔ̃] and simpler
 nasal-fricative convention diverge from wikipron's standard; wikipron (human) is the authority. Residual ≈ 1.8% is
 loanword/proper-noun noise (dubbing, bravissimo, altocumulus, degeminated banner). **✅.** Numbers deferred.
+
+## Run 2 — 2026-07-28 18:00 — cardinal number compositor (numbers were deferred)
+
+Question: `phonemize("<int>", "pl")` spoke nothing (the number branch emitted `""` unless a `foreign`
+phonemizer was injected, and none ever was). Probe: `npx tsx probe.mts pl` → 110/110 EMPTY.
+
+**Pattern B** (`src/languages/polish/numbers.ts` + a `numbers` block in `polish.jsonc`). Pattern A was
+rejected: the shared `westernNumberWords` stores ONE string per magnitude, and a Slavic magnitude noun agrees
+with its count.
+
+Source: pl.wikipedia per-number articles (`1 (liczba)` … `1000 (liczba)`) for every unit / teen / round ten /
+round hundred; the standard paradigm for tysiąc·tysiące·tysięcy, milion·miliony·milionów, miliard·miliardy·miliardów.
+
+**Finding that changed the implementation:** Polish does NOT follow the shared `slavicCountForm` (ru/cs) on
+compounds ending in "jeden". Corpus check on pl.wikipedia: `"dwadzieścia jeden tysięcy"` 3 hits,
+`"dwadzieścia jeden tysiąc"` **0 hits**; `"sto jeden tysięcy"` 1 hit. So the singular is reserved for an EXACT
+count of 1 and the compound takes the genitive plural — a Polish-specific `agree()` rather than the shared
+selector (which would have emitted the Russian-shaped *dwadzieścia jeden tysiąc). Compare ru двадцать одна тысяча.
+
+Judgment calls: 1000 / 10^6 / 10^9 are read as the bare tysiąc / milion / miliard (no *jeden), parallel to the
+bare hundred "sto". "jeden/dwa" are the MASCULINE citation forms (a bare numeral has no counted noun to agree
+with) — same deferral as the ru/lv engines. n ≥ 10^12 falls back to digit-by-digit.
+
+Result: probe **CLEAN** for 0–100, 101, 111, 555, 999, 1000, 1001, 12345, 10^6, 10^9. Tests in test/polish.test.ts.
+Also removed the now-dead `ForeignPhonemizer` seam (it existed only to render digits and was never wired).

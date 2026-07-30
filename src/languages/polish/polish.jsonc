@@ -38,5 +38,39 @@
 
     "clausePunctuation": {
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // Cardinal number words (composition logic in numbers.ts). SOURCE: pl.wikipedia's per-number articles
+    // ("1 (liczba)" → jeden … "1000 (liczba)" → tysiąc, tys.), which spell every unit / teen / round ten /
+    // round hundred used below; the magnitude agreement forms are the standard Polish paradigm (tysiąc ·
+    // tysiące · tysięcy; milion · miliony · milionów; miliard · miliardy · miliardów).
+    //   • Everything is SPACE-separated (dwadzieścia jeden, unlike Czech dvacetjeden).
+    //   • Round hundreds are irregular and must be listed (sto, dwieście, trzysta, czterysta, then -set).
+    //   • Magnitude agreement is the Slavic three-way sg / paucal / gen-pl, but Polish differs from Russian on
+    //     compounds ending in "jeden": Polish takes the GENITIVE PLURAL there (dwadzieścia jeden tysięcy —
+    //     attested on pl.wikipedia; *dwadzieścia jeden tysiąc has zero hits), so the singular is used ONLY for
+    //     an exact count of 1. See the countForm note in numbers.ts.
+    //   • "jeden" is the masculine citation form (Polish 1/2 also inflect for gender: jedna/jedno, dwie) —
+    //     gender concord needs a counted noun, which a bare numeral does not have → masculine, as in the
+    //     Latvian/Russian engines.
+    "numbers": {
+        "units": ["zero", "jeden", "dwa", "trzy", "cztery", "pięć", "sześć", "siedem", "osiem", "dziewięć"],
+        "teens": [
+            "dziesięć", "jedenaście", "dwanaście", "trzynaście", "czternaście",
+            "piętnaście", "szesnaście", "siedemnaście", "osiemnaście", "dziewiętnaście"
+        ],
+        "tens": [
+            "", "", "dwadzieścia", "trzydzieści", "czterdzieści",
+            "pięćdziesiąt", "sześćdziesiąt", "siedemdziesiąt", "osiemdziesiąt", "dziewięćdziesiąt"
+        ],
+        "hundreds": [
+            "", "sto", "dwieście", "trzysta", "czterysta",
+            "pięćset", "sześćset", "siedemset", "osiemset", "dziewięćset"
+        ],
+        "magnitudes": {
+            "thousand": { "sg": "tysiąc", "paucal": "tysiące", "plural": "tysięcy" },
+            "million": { "sg": "milion", "paucal": "miliony", "plural": "milionów" },
+            "billion": { "sg": "miliard", "paucal": "miliardy", "plural": "miliardów" }
+        }
     }
 }

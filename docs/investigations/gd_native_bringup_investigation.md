@@ -80,3 +80,40 @@ Wiring/counts/columns all correct.
 **Final: 15.1% folded / 67.0% symbol. 🔷 single-source family, REFEREE-LIMITED (multi-dialect). Floor 0.12.**
 Full suite green, typecheck clean. The path to higher is a pronunciation lexicon (the Irish Connacht-lexicon
 path) for the semi-lexical vowel detail.
+
+## Run 5 — cardinal numbers (2026-07-29)
+
+**Question.** `phonemize("<int>", "gd")` leaked the digit string (numbers deferred at bring-up). What numeral
+system should a gd compositor emit, and do the numeral words survive the rule engine?
+
+**Command.** `npx tsx <scratch>/numwords.mts gd` (every candidate numeral standalone), then
+`npx tsx <scratch>/probe.mts gd` (0–100 + 101/111/555/999/1000/1001/12345/1e6/1e9).
+
+**Raw findings.**
+- All 34 candidate numeral words phonemize non-empty through the existing engine. Spot values: `ceud`→[kʲʰˈiaːt̪],
+  `cheud`→[çˈiaːt̪], `mìle`→[mˈiːlʲə], `mhìle`→[vˈiːlʲə], `dhà`→[ɣˈaː], `dà`→[t̪ˈaː], `deug`→[tʲˈiaːk],
+  `dheug`→[jˈiaːk], `h-aon`→[hˈɯːn̪ˠ] (the hyphen is stripped by phonemizeWord, so `a h-aon` reaches the g2p as
+  h+vowel — no special casing needed). `neoni`→[ɲˈjɔɲə] (engine's ⟨eo⟩→jɔ; acceptable).
+- The elided written connector ⟨'s⟩ does NOT survive tokenization: the gd TOKEN regex requires a word to START
+  with a letter, so a leading apostrophe is dropped and a bare `s` would be emitted as [s̪]. → emit the full
+  ⟨agus⟩ instead. Same lexical content, no stray segment.
+- **DECIMAL vs VIGESIMAL (the judgment call).** Gaelic keeps a live vigesimal series (dà fhichead 40, trì fichead
+  60). Rejected for a TTS: it changes base mid-number, and `fhichead` is lenited-silent-f, so 40 would read as
+  [ɣaː içət̪]-shaped and be hard to reconstruct as a figure. The modern decimal series (ceathrad, seasgad,
+  naochad) maps one round ten to one word. Decimal only; the vigesimal option is never emitted.
+- **The ga/gd mutation divergence, confirmed as the substantive difference from the Irish compositor.** Irish
+  eclipses a magnitude after 7–10 (naoi gcéad); Gaelic has no eclipsis, so 900 = `naoi ceud` bare, and only ⟨dà⟩
+  lenites (dà cheud, dà mhìle). This is now the pinned test case.
+- First composition pass emitted `ceud a h-aon` for 101 (Irish-style, no connector) while 21 used ⟨agus⟩ —
+  inconsistent. Fixed with an `attach` rule: the connector appears iff the remainder is a bare counting numeral
+  (starts with the ⟨a⟩ particle) — `ceud agus a h-aon`, `mìle agus a naoi`, but `mìle naoi ceud naochad agus a
+  h-ochd` (the remainder opens with its own hundreds word).
+
+**Result.** Probe CLEAN for the whole target set. Implementation: `src/languages/scottishgaelic/numbers.ts`
+(Pattern B — bespoke, Goidelic two-series + mutation), data in `scottishgaelic.jsonc` `numbers`, cited to Colin
+Mark, *The Gaelic-English Dictionary* (2003) + LearnGaelic.
+
+**Implication / left open.** Same known limitation as the Irish compositor: a magnitude count in the TEENS is
+composed (`a h-aon deug mìle` for 11,000) rather than idiomatic (`aon mhìle deug`). The multi-dialect wikipron
+gla referee has no multi-word numerals, so the lenition rule for a magnitude sitting between the numeral and
+⟨deug⟩ cannot be corroborated. Wants a native check before changing.

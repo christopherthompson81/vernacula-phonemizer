@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWordRules } from "../src/languages/danish/danish.ts";
+import { numberToWords } from "../src/languages/danish/numbers.ts";
 
 // Danish (da) — North Germanic, Latin, the DEEPEST European orthography. Vowel quality / soft-d,g / reduction / stress
 // / length / stød are largely LEXICAL, so the SHIPPED path is a PRONUNCIATION LEXICON (da-lexicon.tsv, ~37k = the NST
@@ -33,4 +34,41 @@ describe("Danish canonical IPA", () => {
         expect(phonemizeWordRules("lang")).toBe("laŋ"); // ng → ŋ
         expect(phonemizeWordRules("rolig")).toBe("ʁˈoli"); // final ⟨g⟩ after vowel → silent
     });
+
+    // CARDINAL NUMBERS — Danish is the fleet's VIGESIMAL (base-20) outlier above 40 AND units-first with "og".
+    // The 50–90 tens are the lexicalised contractions of the base-20 multiplicatives: halvtreds = halvtredje-sinds-
+    // tyve "half-third × 20", tres = "three × 20", halvfjerds "half-fourth × 20", firs "four × 20", halvfems
+    // "half-fifth × 20". Source: Wiktionary Appendix:Danish numerals + Dansk Sprognævn for the "og" between
+    // magnitude groups. See src/languages/danish/numbers.ts.
+    test("numbers: the vigesimal tens + units-first og-compounds", () => {
+        expect(numberToWords(0)).toBe("nul");
+        expect(numberToWords(7)).toBe("syv");
+        expect(numberToWords(21)).toBe("enogtyve"); // units FIRST, fused with "og"
+        expect(numberToWords(50)).toBe("halvtreds"); // ← vigesimal: "half-third × 20"
+        expect(numberToWords(60)).toBe("tres"); // "three × 20"
+        expect(numberToWords(70)).toBe("halvfjerds"); // "half-fourth × 20"
+        expect(numberToWords(75)).toBe("femoghalvfjerds"); // five-and-half-fourth(-times-twenty)
+        expect(numberToWords(80)).toBe("firs"); // "four × 20"
+        expect(numberToWords(90)).toBe("halvfems"); // "half-fifth × 20"
+        expect(numberToWords(99)).toBe("nioghalvfems");
+        expect(numberToWords(40)).toBe("fyrre"); // 40 is NOT vigesimal
+    });
+
+    test("numbers: hundreds / thousands / millions chain with og", () => {
+        expect(numberToWords(100)).toBe("et hundrede"); // the neuter "et" before the magnitude noun
+        expect(numberToWords(101)).toBe("et hundrede og en");
+        expect(numberToWords(555)).toBe("fem hundrede og femoghalvtreds");
+        expect(numberToWords(1000)).toBe("et tusind");
+        expect(numberToWords(12345)).toBe("tolv tusind og tre hundrede og femogfyrre");
+        expect(numberToWords(2538)).toBe("to tusind og fem hundrede og otteogtredive"); // the DSN worked example
+        expect(numberToWords(1000000)).toBe("en million");
+        expect(numberToWords(1000000000)).toBe("en milliard");
+    });
+
+    test("numbers: wired into the phonemizer (each word through the lexicon → tagger → rule tiers)", () => {
+        expect(phonemize("21", "da").trim()).toBe("ˈeˀnɐwˌtyːvə"); // enogtyve, from the NST lexicon
+        expect(phonemize("90", "da").trim()).toBe("halˈfɛmˀs"); // halvfems
+        expect(phonemize("1000", "da").trim()).toBe("ˈɛd ˈtuːˀsen"); // et tusind
+    });
+
 });

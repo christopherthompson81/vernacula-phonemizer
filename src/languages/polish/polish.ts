@@ -1,16 +1,16 @@
 /**
  * Polish (pl) phonemizer — canonical IPA, espeak-independent. Rule g2p (g2p.ts) + fixed PENULTIMATE stress
- * (the near-universal Polish pattern). text() tokenizes words / numbers / punctuation. Numbers are deferred (the
- * number WORDS phonemize fine). See docs/investigations/pl_native_bringup_investigation.md.
+ * (the near-universal Polish pattern). text() tokenizes words / numbers / punctuation; numbers are
+ * composed by numbers.ts (Slavic three-way magnitude agreement) and re-phonemized as Polish words.
+ * See docs/investigations/pl_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-
-export type ForeignPhonemizer = (latin: string) => string;
 
 /** One Polish word → canonical IPA with penultimate primary stress. */
 export function phonemizeWord(word: string): string {
@@ -29,11 +29,12 @@ export function phonemizeWord(word: string): string {
 const TOKEN = /([A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ]+)|(\d+)|([.?!,;:])/gu;
 
 class PolishPhonemizer implements Phonemizer {
-    constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" "))
+                    sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

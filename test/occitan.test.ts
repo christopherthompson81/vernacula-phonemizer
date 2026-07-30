@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createOccitan, phonemizeWord } from "../src/languages/occitan/occitan.ts";
+import { numberToWords } from "../src/languages/occitan/numbers.ts";
 
 // Occitan (oc) — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance) of southern France (~200k). The classical
 // orthography is PAN-DIALECTAL (one spelling, dialect-specific readings), so this g2p targets LANGUEDOCIEN (the
@@ -43,5 +44,25 @@ describe("Occitan (Languedocien) canonical IPA — Gallo-Romance g2p", () => {
 
     test("clause assembly", () => {
         expect(oc.text("Parli occitan.").trim()).toBe("paɾli uksita .");
+    });
+
+    // NUMBERS — Languedocien decimal cardinals (setanta/ochanta/nonanta, no vigesimal ⟨quatre-vint⟩); the ⟨e⟩
+    // connector joins the TWENTIES only, 30–90 juxtapose. Source: omniglot + languagesandnumbers (occitan.jsonc).
+    test("numbers: units, the ⟨vint e …⟩ twenties, hundreds, thousands, millions", () => {
+        expect(numberToWords(7)).toBe("sèt");
+        expect(numberToWords(16)).toBe("setze"); // irregular 16 (not *dètz e sièis)
+        expect(numberToWords(21)).toBe("vint e un"); // the ⟨e⟩ connector — twenties only
+        expect(numberToWords(31)).toBe("trenta un"); // 30–90 juxtapose (cf. Catalan trenta-un)
+        expect(numberToWords(90)).toBe("nonanta"); // DECIMAL 90, not *quatre-vint-dètz
+        expect(numberToWords(555)).toBe("cinc cents cinquanta cinc");
+        expect(numberToWords(12345)).toBe("dotze mila tres cents quaranta cinc");
+        expect(numberToWords(1000000)).toBe("un milion");
+        expect(numberToWords(1000000000)).toBe("un miliard");
+    });
+
+    test("numbers read through the g2p", () => {
+        expect(oc.text("21").trim()).toBe("bint e y"); // ⟨v⟩→b (betacism), final ⟨n⟩ drops
+        expect(oc.text("100").trim()).toBe("sent"); // cent
+        expect(oc.text("1000").trim()).toBe("milɔ"); // mila — final ⟨a⟩ → ɔ
     });
 });

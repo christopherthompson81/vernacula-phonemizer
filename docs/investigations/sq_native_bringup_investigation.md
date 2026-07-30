@@ -40,3 +40,32 @@ kaikki entries drop it + lengthen the preceding vowel: Gresë→[ɡɾɛːs] vs o
 [ɡɾɛsə] — dialectal/lexical, not rule-predictable) + proper-noun/loan oddities
 (Daniel→daɲeɫ). A clean, high-scoring bring-up. Deferred: numbers, the ⟨ë⟩-drop
 dialect variant.
+
+## Run 3 — cardinal numbers (2026-07-29)
+
+**Question.** `phonemize("<int>", "sq")` leaked the digit string. Albanian is decimal and regular — can it use
+Pattern A (a `numbers` data block + the shared `westernNumberWords`)?
+
+**Command.** `npx tsx <scratch>/numwords.mts sq` (43 candidate numerals standalone), then
+`npx tsx <scratch>/probe.mts sq`.
+
+**Raw findings.**
+- All 43 numerals phonemize non-empty; nothing surprising in the g2p (`njëzet`→[ˈɲəzɛt], `dhjetë`→[ˈðjɛtə],
+  `njëqind`→[ˈɲəcind], `mijë`→[ˈmijə], `e`→[ˈɛ]).
+- **Pattern A does NOT suffice — one blocker.** Standard Albanian requires the connector ⟨e⟩ "and" between the
+  groups of a composed numeral: njëzet **e** një "21", njëqind **e** një "101", një mijë **e** dyqind **e**
+  tridhjetë **e** katër "1234". `westernNumberWords` has no connector slot, and faking it via a `compound` map
+  would fuse the connector into one lookup string, which the per-word renderer would then phonemize as a single
+  word (losing the [ˈɛ] as its own token and mis-stressing the whole phrase). → Pattern B, bespoke composer;
+  everything else about the system is plain decimal, so the composer is short.
+- Other calls: 3 has masculine ⟨tre⟩ / feminine ⟨tri⟩ — MASCULINE chosen as the citation form (the headword,
+  and the counting form when no noun is present, which is exactly the digit-string case). Compounds on 3 are
+  gender-fixed anyway (trembëdhjetë, tridhjetë, treqind). ⟨njëzet⟩ 20 / ⟨dyzet⟩ 40 are vigesimal fossils
+  ("one twenty" / "two twenties") but modelled as plain round-ten words — 30/50/60/70/80/90 are all
+  unit+dhjetë, so there is no base change to represent. The "one" is KEPT before a magnitude (`një mijë`,
+  `një milion` — Albanian has no bare *mijë the way Latin has bare mīlle); ⟨mijë⟩ is invariant while
+  ⟨milion⟩/⟨miliard⟩ take the plural ⟨-ë⟩ above one.
+
+**Result.** Probe CLEAN for the whole target set. Implementation: `src/languages/albanian/numbers.ts`
+(Pattern B), data in `albanian.jsonc` `numbers`, cited to Newmark, Hubbard & Prifti, *Standard Albanian: A
+Reference Grammar for Students* (1982).

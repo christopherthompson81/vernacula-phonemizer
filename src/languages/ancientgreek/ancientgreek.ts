@@ -13,6 +13,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Combining marks (NFD): breathings, accents, iota subscript, diaeresis, length.
 const ROUGH = "̔", SMOOTH = "̓";
@@ -123,7 +124,8 @@ class AncientGreekPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // Numbers: compose the Greek numeral phrase (καὶ-linked, myriad-grouped), then phonemize each word.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === ";" || m[3] === ";" ? "." : ",");
         });
     }

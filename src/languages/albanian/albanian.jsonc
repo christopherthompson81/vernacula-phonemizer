@@ -27,4 +27,40 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ── CARDINAL NUMERALS ────────────────────────────────────────────────────────────────────────────────
+    // SOURCE: Newmark, Hubbard & Prifti, *Standard Albanian: A Reference Grammar for Students* (Stanford,
+    // 1982), the cardinal-numeral section; cross-checked against Wiktionary's Albanian numeral entries and
+    // the FGJSH (Fjalor i gjuhës shqipe) headwords. Tosk-based standard. Composition rules in numbers.ts.
+    //
+    // Decimal and regular. ⟨njëzet⟩ "20" and ⟨dyzet⟩ "40" are etymologically "one twenty" / "two twenties"
+    // (a vigesimal fossil), but the system as a whole is decimal — 30/50/60/70/80/90 are all unit+dhjetë —
+    // so they are stored as plain round-ten words, not as a base change.
+    "numbers": {
+        // 0–9. ⟨tre⟩ (masculine) is the CITATION form; the feminine ⟨tri⟩ is not emitted (see numbers.ts).
+        "units": ["zero", "një", "dy", "tre", "katër", "pesë", "gjashtë", "shtatë", "tetë", "nëntë"],
+        // 10–19: unit + ⟨mbë⟩ + dhjetë ("on ten"). ⟨tre⟩ appears as ⟨tre-⟩ in trembëdhjetë.
+        "teens": [
+            "dhjetë", "njëmbëdhjetë", "dymbëdhjetë", "trembëdhjetë", "katërmbëdhjetë",
+            "pesëmbëdhjetë", "gjashtëmbëdhjetë", "shtatëmbëdhjetë", "tetëmbëdhjetë", "nëntëmbëdhjetë"
+        ],
+        "tens": {
+            "20": "njëzet", "30": "tridhjetë", "40": "dyzet", "50": "pesëdhjetë",
+            "60": "gjashtëdhjetë", "70": "shtatëdhjetë", "80": "tetëdhjetë", "90": "nëntëdhjetë"
+        },
+        // Round hundreds — FUSED (unit + qind), written as one word: njëqind, dyqind, treqind, …
+        "hundreds": [
+            "", "njëqind", "dyqind", "treqind", "katërqind",
+            "pesëqind", "gjashtëqind", "shtatëqind", "tetëqind", "nëntëqind"
+        ],
+        // ⟨mijë⟩ is invariant; ⟨milion⟩/⟨miliard⟩ take the plural ⟨-ë⟩ above one.
+        "magnitudes": {
+            "thousand": "mijë",
+            "million": "milion", "millionPlural": "milionë",
+            "billion": "miliard", "billionPlural": "miliardë"
+        },
+        // The connector ⟨e⟩ "and", obligatory between the groups of a composed numeral: njëzet e një "21",
+        // njëqind e një "101", një mijë e dyqind e tridhjetë e katër "1234".
+        "connector": "e"
+    },
 }

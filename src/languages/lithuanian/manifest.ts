@@ -6,6 +6,13 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
+/** A Lithuanian counted noun's three concord forms: nom sg (…1), nom pl (…2–9), gen pl (…0 / …11–19). */
+export interface LithuanianAgreement {
+    sg: string;
+    pl: string;
+    gen: string;
+}
+
 export interface LithuanianManifest {
     language: string;
     name: string;
@@ -18,6 +25,17 @@ export interface LithuanianManifest {
     backVowels: string;
     voicing: { toVoiceless: Record<string, string>; toVoiced: Record<string, string> };
     clausePunctuation: Record<string, string>;
+    numbers: {
+        units: string[];
+        teens: string[];
+        tens: string[];
+        magnitudes: {
+            hundred: LithuanianAgreement;
+            thousand: LithuanianAgreement;
+            million: LithuanianAgreement;
+            billion: LithuanianAgreement;
+        };
+    };
 }
 
 /** The consolidated hand-authored Lithuanian data tables (see lithuanian.jsonc). */

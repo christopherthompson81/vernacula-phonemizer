@@ -46,4 +46,24 @@ describe("Polish canonical IPA", () => {
     test("text", () => {
         expect(phonemize("dzień dobry", "pl")).toBe("d͡ʑˈɛɲ dˈɔbrɨ");
     });
+
+    // Cardinal numbers (numbers.ts + the polish.jsonc table): space-separated words, irregular round hundreds,
+    // and the Slavic three-way magnitude agreement with the POLISH twist — a compound ending in "jeden" takes the
+    // genitive plural (dwadzieścia jeden tysięcy), unlike Russian двадцать одна тысяча.
+    test("cardinal numbers: irregular hundreds + Polish magnitude agreement", () => {
+        expect(phonemize("7", "pl").trim()).toBe("ɕˈɛdɛm"); // siedem
+        expect(phonemize("15", "pl").trim()).toBe("pjɛntnˈaɕt͡ɕɛ"); // piętnaście
+        expect(phonemize("21", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn"); // dwadzieścia jeden (space-separated)
+        expect(phonemize("101", "pl").trim()).toBe("stˈɔ jˈɛdɛn"); // sto jeden
+        expect(phonemize("555", "pl").trim()).toBe("pjˈɛɲt͡ɕsɛt pjɛɲd͡ʑd͡ʑˈɛɕɔnt pjˈɛɲt͡ɕ"); // pięćset pięćdziesiąt pięć
+        expect(phonemize("1000", "pl").trim()).toBe("tˈɨɕɔnt͡s"); // tysiąc — the numeral "jeden" is dropped
+        expect(phonemize("2000", "pl").trim()).toBe("dvˈa tɨɕˈɔnt͡sɛ"); // 2–4 → PAUCAL tysiące
+        expect(phonemize("5000", "pl").trim()).toBe("pjˈɛɲt͡ɕ tɨɕˈɛnt͡sɨ"); // 5+ → GEN-PL tysięcy
+        expect(phonemize("21000", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn tɨɕˈɛnt͡sɨ"); // ★ …jeden → GEN-PL, not sg
+        expect(phonemize("100000", "pl").trim()).toBe("stˈɔ tɨɕˈɛnt͡sɨ"); // sto tysięcy
+        expect(phonemize("12345", "pl").trim()).toBe("dvanˈaɕt͡ɕɛ tɨɕˈɛnt͡sɨ tʂˈɨsta t͡ʂtɛrd͡ʑˈɛɕt͡ɕi pjˈɛɲt͡ɕ");
+        expect(phonemize("1000000", "pl").trim()).toBe("mˈiljɔn"); // milion
+        expect(phonemize("2000000", "pl").trim()).toBe("dvˈa miljˈɔnɨ"); // dwa miliony (paucal)
+        expect(phonemize("1000000000", "pl").trim()).toBe("mˈiljart"); // miliard (final ⟨d⟩ devoices)
+    });
 });

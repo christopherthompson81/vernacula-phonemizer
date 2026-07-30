@@ -23,4 +23,40 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // CARDINAL NUMBER WORDS. Composition logic in numbers.ts.
+    // SOURCE: "HAITIAN CREOLE — Language Specific Peculiarities Document", LDC2017S03 (Linguistic Data
+    // Consortium / Appen), §8.1 "Table of Digits" + §8.2 "Other Numbers" — a complete 0–99 table plus 100 /
+    // 10,000 / 100,000 / 1,000,000 / 1 billion, in the standard IPN orthography and referencing Valdman et al.
+    // 2007 "Haitian Creole–English Bilingual Dictionary". Cross-checked 0–79 against
+    // en.wikibooks.org/wiki/Haitian_Creole/Numbers.
+    // ★ THE FRENCH VIGESIMAL RESIDUE IS KEPT (see numbers.ts): 70 swasanndis (60+10), 80 katreven (4×20),
+    //   90 katrevendis (4×20+10). The Belgian/Swiss-French decimal ⟨septante / octante / nonante⟩ forms are NOT
+    //   Haitian and are deliberately absent.
+    "numbers": {
+        "ones": ["zewo", "en", "de", "twa", "kat", "senk", "sis", "sèt", "uit", "nèf"],
+        "teens": ["dis", "onz", "douz", "trèz", "katòz", "kenz", "sèz", "disèt", "dizuit", "diznèf"],
+        // The DECADES 20–60, in the three stem shapes the LSP table uses. `bare` stands alone (20 ven, 30 trant);
+        // `t` precedes the unit 1 (+ eyen) and the units 8/9 (ventuit, trantnèf); `nn` precedes the units 2–7
+        // (vennde, trannsenk) — the doubled ⟨nn⟩ spelling that keeps the nasal vowel AND a following [n].
+        "decades": [
+            { "bare": "ven", "t": "vent", "nn": "venn" },
+            { "bare": "trant", "t": "trant", "nn": "trann" },
+            { "bare": "karant", "t": "karant", "nn": "karann" },
+            { "bare": "senkant", "t": "senkant", "nn": "senkann" },
+            { "bare": "swasant", "t": "swasant", "nn": "swasann" },
+        ],
+        "one": "eyen", // the unit 1 inside a decade: venteyen, tranteyen, karanteyen (< French et-un)
+        // The two VIGESIMAL stems. 70–79 = ⟨swasann⟩ + the teen (swasanndis 70, swasannonz 71, swasanndiznèf 79);
+        // 80 = ⟨katreven⟩, 81 = katrevenen, 82–89 = katreven + unit; 90–99 = ⟨katreven⟩ + the teen.
+        "sixtyTen": "swasann",
+        "fourScore": "katreven",
+        "fourScoreOne": "katrevenen", // 81 — irregular (⟨en⟩, not the ⟨eyen⟩ the decades take)
+        "hundred": "san", // 100 san, 200 de san, 800 uit san
+        "thousand": "mil", // 1000 mil, 2000 de mil, 10,000 di mil, 100,000 san mil
+        "million": { "one": "en milyon", "word": "milyon" }, // LSP: 1,000,000 en milyon / 10 million di milyon
+        "billion": { "one": "en milya", "word": "milya" }, // LSP: 1 billion en milya
+        // ⟨dis⟩ (10) elides its ⟨s⟩ before a magnitude noun: LSP "10,000 di mil", "10 million di milyon".
+        "tenElided": "di",
+    },
 }

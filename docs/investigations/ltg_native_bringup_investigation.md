@@ -60,3 +60,29 @@ referees, 65.6→77.7% / 64.7→76.0%):
 
 **Final: wikipron 77.7% folded / 93.3% symbol; kaikki 76.0% / 93.1% symbol.** Floor 0.72. Goldens (4
 tests incl. the epenthesis/r-cluster/final-v fixes), the 154-test floor, typecheck green.
+
+## Run 5 — 2026-07-28 18:00 — cardinal number compositor (numbers were deferred)
+
+Question: `phonemize("<int>", "ltg")` leaked the digits through. Probe: 110/110 DIGIT-LEAK.
+
+**Pattern B**, data + logic both in `src/languages/latgalian/numbers.ts` — Latgalian has no `.jsonc` manifest
+(the engine is a single .ts), so the numeral table is authored in the module, the Somali/Irish shape.
+
+Sources: the Latgalian school grammar's numeral chapter, "SKAITĻA VĀRDS", Latgalīšu daslēdzis škola
+(lynuojs.wordpress.com/gramatika/skaitla-vards/) — masculine series, teens, round tens, symts / tyukstūša /
+miļjons / miļjards, **and the separate feminine series**; cross-checked against Omniglot "Numbers in Latgalian"
+(which independently confirms "divdesmit vīns" 21, "div(i) symti" 200, "pīci symti pīcdesmit pīci" 555).
+
+**Finding that changed the implementation:** unlike Latvian, whose *tūkstotis* is masculine, Latgalian
+**tyukstūša is FEMININE** (grammar: a 4th-declension noun, example "sešys tyukstūšys"). A numeral agrees with its
+counted noun, so the thousands multiplier had to be switched to the feminine unit series (sešys, not *seši;
+21000 → divdesmit vīna tyukstūša) while symts/miļjons/miļjards, being masculine, keep the masculine one. Naively
+copying the Latvian compositor would have emitted the wrong gender on every thousands group.
+
+Contested / unattested, flagged in the module: **40 and 14** — the grammar gives četrudesmit / četrupadsmit (with
+the genitive-plural stem četru-), Omniglot gives četrdesmit; ltg.wikipedia's corpus is too small to settle it
+(1 hit for četrdesmit, 0 for četrudesmit). The prescriptive grammar is followed since it is internally consistent
+across both the ten and the teen. **0** is in neither source; "nulle" is used (the Latvian form) and marked
+UNATTESTED for Latgalian. CASE concord beyond the nominative is deferred, as in the Latvian engine.
+
+Result: probe **CLEAN** across the required range. Tests in test/latgalian.test.ts.

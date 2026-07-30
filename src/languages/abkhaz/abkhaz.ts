@@ -7,11 +7,15 @@
  *   ★ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
  *     ⟨б ҧ п⟩→[b pʰ pʼ], ⟨ӡ ц ҵ⟩→[d͡z t͡sʰ t͡sʼ], ⟨џ ч ҷ⟩→[d͡ʐ t͡ʃʰ t͡ʃʼ]; the uvular ⟨ҟ⟩→[qʼ], the pharyngeal ⟨ҳ⟩→[ħ].
  *
+ * Numbers are VIGESIMAL (base-20) and composed by numbers.ts — 30 = ҩажәи жәаба (20+10), 40 = ҩынҩажәа (2×20),
+ * 99 = ԥшьынҩажәи зеижә (4×20+19); the NON-HUMAN/abstract class series is used as the bare-numeral citation form.
+ *
  * 🔷 well-referenced (wikipron abk_cyrl broad + kaikki Abkhaz) BUT the referee is partly the letter/digraph DEFINITIONS
  * (near reference-parity), and its narrow transcriptions are internally inconsistent. See docs/investigations/ab_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Base letter + MODIFIER (⟨ь⟩ palatal / ⟨ә⟩ labial / ⟨'⟩ pharyngeal) → the specific IPA cluster (from the Wiktionary
 // letter-definitions). Longest-match: trigraphs (х'ә) before 2-char before base. Any base+ь/ә not here falls back to
@@ -82,7 +86,9 @@ class AbkhazPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" "))
+                    sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

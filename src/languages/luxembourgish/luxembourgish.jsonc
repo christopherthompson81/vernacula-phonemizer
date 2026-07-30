@@ -34,4 +34,32 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ── CARDINAL NUMBER WORDS ────────────────────────────────────────────────────────────────────────────────────
+    // Source: omniglot.com/language/numbers/luxembourgish.htm (the 0–20 / tens / honnert / dausend / Millioun
+    // table), plus en.wikipedia.org/wiki/Luxembourgish for the EIFELER REGEL evidence — that article's own numeral
+    // examples "fënnefandrësseg" (35) vs "fënnefavéierzeg" (45) are exactly the pair that pins the n-deletion
+    // condition on the unit→tens connector. Luxembourgish is units-FIRST like German: eenanzwanzeg = 21.
+    //
+    // The EIFELER REGEL (implemented in numbers.ts, not expressible as a table): a word-final ⟨n⟩ is DROPPED before
+    // a following consonant, but RETAINED before ⟨n d t z h⟩ and before a vowel. Applied to the connector "an" this
+    // gives an- before zwanzeg (z), drësseg (d), achtzeg (vowel) and nonzeg (n), but a- before véierzeg (v),
+    // fofzeg (f), siechzeg (s) and siwwenzeg (s).
+    //
+    // JUDGMENT CALL: bare 1 is "eent" (the counting form, as in the source table) while the unit inside a tens
+    // compound is "een-" (eenanzwanzeg) — hence the separate `compoundOnes` entry. Millioun / Milliard are
+    // feminine, so their bare-one spelling carries the article-like "eng".
+    "numbers": {
+        "ones": [
+            "null", "eent", "zwee", "dräi", "véier", "fënnef", "sechs", "siwen", "aacht", "néng",
+            "zéng", "eelef", "zwielef", "dräizéng", "véierzéng", "fofzéng", "siechzéng", "siwwenzéng", "uechtzéng", "nonzéng"
+        ],
+        "tens": ["", "", "zwanzeg", "drësseg", "véierzeg", "fofzeg", "siechzeg", "siwwenzeg", "achtzeg", "nonzeg"],
+        "compoundOnes": ["", "een"],
+        "connector": "an",
+        "hundred": { "one": "honnert", "word": "honnert" },
+        "thousand": { "one": "dausend", "word": "dausend" },
+        "million": { "one": "eng Millioun", "plural": "Milliounen" },
+        "billion": { "one": "eng Milliard", "plural": "Milliarden" }
+    },
 }
