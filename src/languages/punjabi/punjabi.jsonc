@@ -90,12 +90,68 @@
         "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
-    // NUMBERS — Gurmukhi spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes
-    // (21-99 irregular like the other Indic languages — a bounded authoring task).
+    // NUMBERS — Gurmukhi spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes,
+    // plus the fused 21-59 (Punjabi's 21-99 are single words: ਇੱਕੀ, not *ਇੱਕ ਵੀਹ).
+    //
+    // SOURCES for the `compound` spellings, in precedence order (nothing here is invented):
+    //   1. tools/referee-eval/referees/pa.wikipron-pan-broad.tsv — this repo's own Punjabi arbiter. All 36
+    //      spellings below appear in it VERBATIM (grep-verified, one row each).
+    //   2. espeak-ng dictsource/pa_list `_21`.._99` — the hand-authored Punjabi voice. It is PHONETIC
+    //      (X-SAMPA), so it cannot supply a spelling, but it confirms 29 of the 36 exactly. Where the two
+    //      disagree the REFEREE WINS: 25 ਪੰਝੀ (espeak: paccī), 29 ਉਣੱਤੀ (espeak has plain n, not ਣ),
+    //      34 ਚੌਤੀ (espeak nasalises, ਚੌਂਤੀ), 42 ਬਤਾਲ਼ੀ (espeak: beāḷī), 46 ਛਤਾਲ਼ੀ (espeak: chiāḷī),
+    //      48 ਅਠਤਾਲ਼ੀ (espeak: aṛtāḷī), and 45 where the referee carries BOTH ਪੰਤਾਲ਼ੀ and ਪੰਜਤਾਲੀ —
+    //      espeak's p@nt'ali picks ਪੰਤਾਲ਼ੀ.
+    //
+    // 61-99 IS A GAP, and it stays one — but only after being ATTACKED with the Kannada/Nepali method
+    // (derive from espeak, round-trip through our own G2P, arbitrate against a third source). The
+    // attempt is recorded here so the next reader does not repeat it. Source used:
+    // espeak-ng-portable/data/pa/fragments.jsonl (the parsed dictsource; `phonemes` is byte-identical to
+    // dictsource/pa_list and all 100 keys 0-99 are present), plus pa.wikipron-pan-arab-broad.tsv
+    // (Shahmukhi — an independent human source in this repo, same language, other script).
+    //
+    // The generator was VALIDATED by running it against the 36 referee-attested 21-59 spellings, which it
+    // never sees: 19/36 (53%) reproduced exactly. Of the 17 misses, 5 are one systematic espeak
+    // UNDER-specification (it writes plain `l` where the referee has retroflex ਲ਼ — ਇਕਤਾਲ਼ੀ, ਤਰਤਾਲ਼ੀ,
+    // ਚੁਤਾਲ਼ੀ, ਪੰਤਾਲ਼ੀ, ਸੰਤਾਲ਼ੀ) and 4 are the bindi-ਂ/tippi-ੰ choice, which is settleable by the standard
+    // orthographic rule. That leaves 8/36 = 22% where espeak is simply WRONG about the word, and not by
+    // a variant spelling: 25 ਪੱਚੀ vs ਪੰਝੀ, 42 ਬੇਆਲੀ vs ਬਤਾਲ਼ੀ, 46 ਛਿਆਲੀ vs ਛਤਾਲ਼ੀ, 48 ਅੜਤਾਲ਼ੀ vs ਅਠਤਾਲ਼ੀ,
+    // 29/49 n vs ɳ, 33 a spurious geminate, 58 ਜ vs ਝ, 59 a dropped ਹ. Over 39 entries with no referee to
+    // catch it, that rate ships ~8-9 confidently-wrong number words.
+    //
+    // Corroboration for 61-99 from the Shahmukhi referee: essentially NONE. Skeleton matching (exact,
+    // then edit-distance 1) returns ordinary words for 75/76/77/79/88 (پتر "son", چھتر "umbrella",
+    // ستارہ "star", ماسی "aunt") and exactly one real numeral hit, 71 اکہتر — which turns out to
+    // DISAGREE with espeak: its ˥˩ high tone is the residue of the ہ, implying a Gurmukhi ਇਕਹੱਤਰ, while
+    // espeak's `Ik'Vt:@R` has no H at all and implies ਇਕੱਤਰ. Not settleable either way.
+    //
+    // The exercise did earn one hard finding: espeak's 61-68 coda is REFUTED. It writes `t.` (ʈ, →ਟ) in
+    // all eight, but its OWN 59 `Un.'at.#` and 60 `s'Vt.#:` use `t.#` (ʈʰ, →ਠ), and every Shahmukhi
+    // referee entry in that family ends ٹھ = ʈʰ (ترہٹھ ×2, تنہٹھ, تہٹھ, پینہٹھ). Taking espeak literally
+    // would have shipped all 8 with the wrong final consonant — which is precisely why the corroboration
+    // bar is set where it is. The onsets are espeak-only and land in the 22% band (66 ਛੇਆ- rests on the
+    // same ਛ- vowel espeak already got wrong at 46), so 61-68 cannot be rescued by the coda alone.
+    //
+    // Net: 0 of 39 reach the bar the 21-59 set met. 54 of the corpus's 143 compound readings stay on the
+    // two-word fallback ("ਛੇ ਸੱਤਰ" for 76). The 89 that are fixed are fixed here.
+    //
+    // `bareMagnitude` is deliberately NOT set: espeak pa_list renders 100 as 'Ik: s'O and 1000 as
+    // 'Ik: H@J'aR, so Punjabi genuinely says ਇੱਕ ਸੌ / ਇੱਕ ਹਜ਼ਾਰ. The current output is already correct.
     "numbers": {
         "units": ["ਸਿਫ਼ਰ", "ਇੱਕ", "ਦੋ", "ਤਿੰਨ", "ਚਾਰ", "ਪੰਜ", "ਛੇ", "ਸੱਤ", "ਅੱਠ", "ਨੌਂ"],
         "teens": ["ਦਸ", "ਗਿਆਰਾਂ", "ਬਾਰਾਂ", "ਤੇਰਾਂ", "ਚੌਦਾਂ", "ਪੰਦਰਾਂ", "ਸੋਲਾਂ", "ਸਤਾਰਾਂ", "ਅਠਾਰਾਂ", "ਉੱਨੀ"],
         "tens": { "20": "ਵੀਹ", "30": "ਤੀਹ", "40": "ਚਾਲੀ", "50": "ਪੰਜਾਹ", "60": "ਸੱਠ", "70": "ਸੱਤਰ", "80": "ਅੱਸੀ", "90": "ਨੱਬੇ" },
-        "magnitudes": { "hundred": "ਸੌ", "thousand": "ਹਜ਼ਾਰ", "lakh": "ਲੱਖ", "crore": "ਕਰੋੜ" }
+        "magnitudes": { "hundred": "ਸੌ", "thousand": "ਹਜ਼ਾਰ", "lakh": "ਲੱਖ", "crore": "ਕਰੋੜ" },
+        // Fused 21-59 (see the SOURCES note above). Round tens live in `tens`; 61-99 is the documented gap.
+        "compound": {
+            "21": "ਇੱਕੀ", "22": "ਬਾਈ", "23": "ਤੇਈ", "24": "ਚੌਵੀ", "25": "ਪੰਝੀ",
+            "26": "ਛੱਬੀ", "27": "ਸਤਾਈ", "28": "ਅਠਾਈ", "29": "ਉਣੱਤੀ",
+            "31": "ਇਕੱਤੀ", "32": "ਬੱਤੀ", "33": "ਤੇਤੀ", "34": "ਚੌਤੀ", "35": "ਪੈਂਤੀ",
+            "36": "ਛੱਤੀ", "37": "ਸੈਂਤੀ", "38": "ਅਠੱਤੀ", "39": "ਉਣਤਾਲ਼ੀ",
+            "41": "ਇਕਤਾਲ਼ੀ", "42": "ਬਤਾਲ਼ੀ", "43": "ਤਰਤਾਲ਼ੀ", "44": "ਚੁਤਾਲ਼ੀ", "45": "ਪੰਤਾਲ਼ੀ",
+            "46": "ਛਤਾਲ਼ੀ", "47": "ਸੰਤਾਲ਼ੀ", "48": "ਅਠਤਾਲ਼ੀ", "49": "ਉਣੰਜਾ",
+            "51": "ਇਕਵੰਜਾ", "52": "ਬਵੰਜਾ", "53": "ਤਰਵੰਜਾ", "54": "ਚੁਰੰਜਾ", "55": "ਪਚਵੰਜਾ",
+            "56": "ਛਪੰਜਾ", "57": "ਸਤਵੰਜਾ", "58": "ਅਠਵੰਝਾ", "59": "ਉਣਾਹਠ"
+        }
     }
 }

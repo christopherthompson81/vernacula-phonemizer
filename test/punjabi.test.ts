@@ -54,3 +54,74 @@ describe("punjabi Shahmukhi front-end", () => {
         expect(phonemize("پنجابی بولی۔", "pa")).toBe("pəɲd͡ʒˈaːbiː bˈoːliː");
     });
 });
+
+// #562 TEXT NORMALIZATION. Counts in the comments are measured over the pa_in FLEURS corpus (1,589 unique
+// utterances); "before" is what the engine produced at 6621b5a. See src/languages/punjabi/normalize.ts.
+describe("punjabi text normalization (#562)", () => {
+    test("fused 21-59 cardinals (compound map) — the corpus's largest defect, ×143", () => {
+        // 21 was [ˈɪkː ʋˈiːɦ], "one twenty": core/numbers.ts's unit-then-tens fallback. Punjabi's 21-99 are
+        // single words, sourced from pa.wikipron-pan-broad.tsv (see punjabi.jsonc).
+        expect(phonemize("21", "pa")).toBe("ˈɪkːiː"); // ਇੱਕੀ
+        expect(phonemize("36", "pa")).toBe("t͡ʃʰˈət̪ːiː"); // ਛੱਤੀ
+        expect(phonemize("56", "pa")).toBe("t͡ʃʰəpˈə̃ɲd͡ʒaː"); // ਛਪੰਜਾ
+        expect(phonemize("1947", "pa")).toContain("sˈə̃n̪t̪aːɭiː"); // …ਸੰਤਾਲ਼ੀ, was "…ਸੱਤ ਚਾਲੀ"
+        // 61-99 is a MEASURED gap, not an unexamined one: deriving it from espeak and round-tripping
+        // through our own G2P reproduces only 19/36 of the referee-attested 21-59 forms (53%), with an
+        // irreducible 22% where espeak is wrong about the WORD, and the Shahmukhi referee corroborates
+        // none of the 39. See punjabi.jsonc for the full record. The fallback still stands there; pinned
+        // so that a future source for these spellings shows up as a failing test.
+        expect(phonemize("76", "pa")).toBe("t͡ʃʰˈeː sˈət̪ːəɾ");
+        // Round tens and bare magnitudes were already right; `bareMagnitude` stays OFF (espeak pa_list
+        // renders 100 as 'Ik: s'O — Punjabi genuinely says ਇੱਕ ਸੌ).
+        expect(phonemize("100", "pa")).toBe("ˈɪkː sˈɔː");
+        expect(phonemize("1000", "pa")).toBe("ˈɪkː ɦəzˈaːɾ");
+    });
+
+    test("digit de-grouping ×35 — the comma was a phrase break AND truncated the numeral", () => {
+        expect(phonemize("1,000", "pa")).toBe("ˈɪkː ɦəzˈaːɾ"); // was [ˈɪkː , sˈɪfəɾ] — "one, zero"
+        expect(phonemize("2,500", "pa")).toBe("d̪ˈoː ɦəzˈaːɾ pˈə̃ɲd͡ʒ sˈɔː");
+        expect(phonemize("5,000,000", "pa")).toBe("pə̃ɲd͡ʒˈaːɦ lˈəkʰː"); // 50 lakh, the Indic grouping
+        expect(phonemize("1,00,000", "pa")).toBe("ˈɪkː lˈəkʰː"); // Indian 2-2-3 grouping too
+        // A list separator is NOT grouping: the final 3-digit group is required and a space breaks the match.
+        expect(phonemize("1990, 1991", "pa")).toContain(",");
+    });
+
+    test("percent and currency through the shared symbol tier", () => {
+        expect(phonemize("80%", "pa")).toBe("ˈəsːiː pɾət̪ˈiːʃət̪"); // ਪ੍ਰਤੀਸ਼ਤ; the sign was DROPPED
+        expect(phonemize("$5", "pa")).toBe("pˈə̃ɲd͡ʒ ɖˈaːləɾ"); // ਡਾਲਰ, postposed as the corpus writes it
+    });
+
+    test("clock ×9 — the colon was a comma pause, and :00 read as ਸਿਫ਼ਰ", () => {
+        expect(phonemize("11:20 ਵਜੇ", "pa")).toBe("ɡɪˈaːɾã ʋˈiːɦ ʋˈəd͡ʒeː");
+        expect(phonemize("10:00 ਵਜੇ", "pa")).toBe("d̪ˈəs ʋˈəd͡ʒeː"); // minutes drop out, not "ten zero"
+        // A ratio is not a time: the corpus writes 3:2 and 2:2, and the 2-digit minute guard rejects both.
+        expect(phonemize("3:2", "pa")).toContain(","); // still a pause, i.e. untouched by the clock rule
+    });
+
+    test("ordinal suffix ×24 joins to the cardinal instead of becoming its own word", () => {
+        expect(phonemize("15ਵੀਂ", "pa")).toBe("pˈə̃n̪d̪əɾãʋĩ"); // was [pˈə̃n̪d̪əɾã ʋˈĩ] — two words
+        expect(phonemize("18 ਵੀਂ", "pa")).toBe("əʈʰaːɾˈãʋĩ"); // a space may intervene in the corpus
+        // THE TRAILING BOUNDARY: a following letter means this is an ordinary word, not a suffix.
+        expect(phonemize("10 ਵਾਪਸ", "pa")).toBe("d̪ˈəs ʋˈaːpəs");
+    });
+
+    test("Gurmukhi unit abbreviations, era marker, degree and ਡਾ.", () => {
+        expect(phonemize("83 ਕਿਮੀ", "pa")).toContain("kɪloːmˈiːʈəɾ"); // was read as the word [kˈɪmiː]
+        expect(phonemize("6 ਸੈ.ਮੀ", "pa")).toContain("sɛ̃ʈiːmˈiːʈəɾ"); // the interior dot was a phrase break
+        expect(phonemize("35 ਮਿਮੀ", "pa")).toContain("mɪliːmˈiːʈəɾ");
+        expect(phonemize("1000 ਈ.ਪੂ. ਵਿੱਚ", "pa")).toContain("ˈiːsaː pˈuːɾəʋ"); // corpus's own expansion
+        expect(phonemize("35°", "pa")).toBe("pˈɛ̃t̪iː ɖˈɪɡɾiː"); // the sign was dropped
+        expect(phonemize("ਡਾ. ਸਿੰਘ", "pa")).toContain("ɖˈaːkʈəɾ");
+        // ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys — every corpus occurrence is ਸੈਮੀਫਾਈਨਲ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ, and
+        // requiring a preceding digit is what keeps them out (playbook trap #2, live in this corpus).
+        expect(phonemize("ਸੈਮੀਫਾਈਨਲ", "pa")).not.toContain("ʈiːmˈiːʈəɾ");
+    });
+
+    test("decimals ×13: the dot is neutralised, not spoken", () => {
+        // The defect was the SENTENCE BREAK mid-number ([d̪ˈoː . t̪ˈɪ̃n]). The decimal-point WORD is left
+        // unset: espeak pa_list gives only its pronunciation and the corpus never spells it, so there is
+        // no sourceable Gurmukhi form — dropping the sign beats speaking a word we cannot source.
+        expect(phonemize("2.3", "pa")).toBe("d̪ˈoː t̪ˈɪ̃n");
+        expect(phonemize("2.3 ਅਰਬ ਡਾਲਰ", "pa")).not.toContain(".");
+    });
+});

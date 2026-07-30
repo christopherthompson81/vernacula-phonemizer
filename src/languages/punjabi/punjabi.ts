@@ -20,6 +20,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makePunjabiNormalizer } from "./normalize.ts";
 import {
     scanShahmukhi,
     SHAHMUKHI_CLASS,
@@ -169,11 +170,26 @@ export function makeNativePunjabi(
         return renderNumber(n, def.numbers, word);
     }
 
+    // #562 normalization: Punjabi-specific rewrites (the shared symbol tier, digit de-grouping, decimals,
+    // the clock, ordinal suffixes, Gurmukhi unit abbreviations, the era marker and degrees) BEFORE
+    // tokenization. Roman numerals need no ordering care: `pa` is not in the registry's ROMAN_NATIVE set,
+    // so the shared roman→digit pass has already run at the registry seam. See normalize.ts for the
+    // corpus counts and the step-by-step ordering couplings.
+    //
+    // GATED OFF FOR SARAIKI. skr builds on this same factory (saraiki.ts) and would inherit the whole pass,
+    // but the pass EMITS PUNJABI WORDS — ਪ੍ਰਤੀਸ਼ਤ, ਡਾਲਰ, ਡਿਗਰੀ, ਈਸਾ ਪੂਰਵ — each sourced from the pa_in
+    // corpus and espeak's pa voice, and none of them evidence about Saraiki. Its Gurmukhi-keyed rules
+    // (ordinal suffix, unit abbreviations) could never match Shahmukhi text anyway. Giving skr this layer
+    // is a separate run with its own corpus; putting Punjabi vocabulary in its mouth on no evidence is the
+    // "confidently wrong beats merely missing" failure the playbook warns about.
+    const normalize = opts.saraiki ? (s: string) => s : makePunjabiNormalizer(def.numbers);
+
     function text(input: string): string {
         // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
         // defines as ASCII-only, so a numeral written in native digits matched NO token and was
-        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
-        return assembleClauses(foldNativeDigits(input), tokenRe, (m, sink) => {
+        // dropped entirely — the engine returned an empty string for it (core/unicode.ts). It runs
+        // BEFORE `normalize`, whose patterns are all written against ASCII digits.
+        return assembleClauses(normalize(foldNativeDigits(input)), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
