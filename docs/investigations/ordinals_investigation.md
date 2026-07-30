@@ -1039,3 +1039,49 @@ time reading contexts first prevented a rule that would have damaged ordinary te
 `AU` (×3) reads as the English word rather than letters, because CMUdict carries `au` and the dictionary
 branch wins. That is a pre-existing English lexical call reached through the Latin-run delegation, not an
 Urdu defect, and is left alone.
+
+## Run 17 — 2026-07-30 — Indonesian (one separator, two meanings)
+
+Eleventh language. Three defects were outside the normalization layer again — the pattern from Bengali and
+Urdu — and the language file itself is small.
+
+### Outside the layer
+
+1. **`clausePunctuation` mapped every mark to a PADDED copy of itself.** Third time (Bengali, Urdu, here).
+   2,575 of 2,579 cased-column utterances had a slot-gap; now zero.
+2. **The number token was a bare `\d+`**, so BOTH Indonesian separators became clause pauses: dot-thousands
+   `9.000` → "sembilan . nol" (×67, the largest class) and comma-decimals `1,5` → "satu , lima" (×28).
+3. **No decimal word at all** — `koma` added.
+
+### The ambiguity that shapes the language file
+
+Indonesian writes the thousands separator AND the clock with a period: `9.000` (×67) and `11.00` (×29).
+They are separable by digit count — grouping always takes exactly three digits after the dot, a clock
+exactly two — so the clock is claimed in normalize.ts BEFORE the number tokenizer, and everything the
+tokenizer then sees with a dot is real grouping.
+
+That rule needed **two** guards, and the second only showed up in testing. The trailing guard keeps a RACE
+time out (`4:41.30, 2:11.60 menit` is minutes:seconds.hundredths; the corpus has three). The LEADING guard
+stops the scan restarting inside one: with only the trailing guard, `1:09.02` correctly rejected `1:09` and
+then matched `09.02` as a clock in its own right.
+
+### Already correct, and worth stating
+
+Indonesian ordinals need NOTHING: `ke-16` is genuinely "ke" plus the cardinal, which is what the engine
+already produced — the only language so far where the ordinal notation was already right. The manifest also
+carries a `letterNames` map, so initialisms already spell out (PBB → pe-be-be, GPS → ge-pe-es); they are
+joined without spaces, which is fine prosodically. Roman numerals arrive converted from the registry seam.
+
+### What the layer added
+
+Indonesian had **no symbol tier at all** (% and every currency sign dropped, `30 km` read as `[ʔm]`), no
+abbreviations, no degrees, no signs, no fractions. `Rp` needed its own rule: it is a two-LETTER prefix,
+which the shared tier — keyed on single-character signs — cannot express, and it was read as `[rp]`.
+Indonesian says the unit after the amount, so the prefix is moved.
+
+### Verification
+
+- 198 files / 2149 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical: 17639/18590 (94.9%) folded, 98.9% symbol.
+- id corpus, both columns: 2,575 of 2,579 changed on the cased column; **2,575 slot-gaps → zero**, no digit
+  leaks, sentinels or stray marks. Sampled review found them all improvements.

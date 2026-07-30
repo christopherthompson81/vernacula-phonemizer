@@ -40,13 +40,15 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Indonesian spellings; canonical IPA DERIVED by running them through the same g2p. Indonesian
     // numbers are regular and compositional (belas teens, puluh tens, ratus/ribu/juta), unlike the Indic irregulars.
     "numbers": {
         "units": ["nol", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"],
-        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "ribu": "ribu", "juta": "juta", "seprefix": "se"
+        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "ribu": "ribu", "juta": "juta", "seprefix": "se",
+        // Indonesian reads the decimal comma as "koma"; without it "1,5" ran the two numbers together.
+        "decimalWord": "koma"
     }
 }
