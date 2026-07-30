@@ -52,6 +52,24 @@ export const slavicCountForm = (n: number): number => {
     return 2;
 };
 
+/**
+ * The form a currency noun takes after a MAGNITUDE word ("5 million dollars").
+ *
+ * A magnitude always governs the most-plural form a language has, so this takes the LAST entry outright
+ * rather than routing a count through `countForm`. The previous code passed the literal 2 as a *count*,
+ * which for the Slavic selector means the paucal — so a Slavic language declaring magnitudes would read
+ * "5 миллионов долларА" instead of the required genitive plural "долларов". Found by the Polish run,
+ * reading the code rather than probing; it is latent only because Russian declared no magnitudes at all.
+ */
+function withMagnitude(
+    forms: CountForms,
+    mag: string | undefined,
+    n: number,
+    countForm: (n: number) => number,
+): string {
+    return mag !== undefined && mag !== "" ? forms[forms.length - 1]! : pick(forms, n, countForm);
+}
+
 function pick(forms: CountForms, n: number, countForm: (n: number) => number): string {
     const i = Math.min(countForm(n), forms.length - 1);
     return forms[Math.max(0, i)]!;
@@ -76,24 +94,44 @@ const NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
 /** Build the text→text symbol normalizer for one language's data. */
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const cf = d.countForm ?? defaultCountForm;
-    const magAlt = d.magnitudes?.length ? `(\\s+(?:${d.magnitudes.join("|")}))?` : "()?";
-    const curSigns = d.currency ? Object.keys(d.currency).map((s) => s.replace(/[$]/g, "\\$")).join("") : "";
+    // LONGEST FIRST, because a shorter magnitude is often a prefix of a longer inflected one. Russian
+    // lists both миллион and миллионов; in declaration order the short form matched first and stranded
+    // the suffix, giving *пять миллион долларовов*. Same discipline as the currency keys below.
+    const magAlt = d.magnitudes?.length
+        ? `(\\s+(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")}))?`
+        : "()?";
+    // Currency keys are an ALTERNATION, not a character class. As a class, a key could only ever be one
+    // character, so a letter-code currency — Polish `zł`, and `PLN`/`USD`/`CHF` generally — could not be
+    // expressed as currency data at all; the Polish run hit this and had to omit its own złoty. Longest
+    // first so a two-letter code is not shadowed by a one-letter one, and letter-bounded on both sides so
+    // a bare code cannot match inside a word.
+    const curKeys = d.currency
+        ? Object.keys(d.currency)
+            .sort((a, b) => b.length - a.length)
+            .map((s) => s.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&"))
+            .join("|")
+        : "";
+    const CUR = `(?<![\\p{L}\\p{M}])(?:${curKeys})(?![\\p{L}\\p{M}])`;
     const curBefore = d.currency
-        ? new RegExp(`([${curSigns}])\\s?(${NUM})${magAlt}`, "gu")
+        ? new RegExp(`(${CUR})\\s?(${NUM})${magAlt}`, "gu")
         : null;
     // The magnitude is matched on BOTH sides of the number. Without it on the postposed form, "5 millions $"
     // matched nothing at all and the sign was DROPPED — silent content loss, found while fixing the
     // connective below. `magAlt` is `()?` when a language declares no magnitudes, so the group indices
     // stay fixed either way.
     const curAfter = d.currency
-        ? new RegExp(`(${NUM})${magAlt}\\s?([${curSigns}])`, "gu")
+        ? new RegExp(`(${NUM})${magAlt}\\s?(${CUR})`, "gu")
         : null;
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
     const unitRe = d.units ? new RegExp(`(${NUM})\\s?(${unitAlt})(?![\\p{L}\\p{M}])`, "giu") : null;
-    const pctRe = new RegExp(`(${NUM})\\s?%`, "gu");
+    // BOTH percent signs. U+066A ٪ is the Arabic-script one, and the tier used to know only ASCII `%`, so
+    // ar, ur and fa each pre-folded it in their own normalize.ts before this tier could see it. Accepting
+    // it here makes those folds harmless no-ops and means the next Arabic-script language gets it free.
+    const PCT = "[%\u066a]";
+    const pctRe = new RegExp(`(${NUM})\\s?${PCT}`, "gu");
     // The %-before-number form (%40). The lookbehind stops a misfire after other rules run: currency turns
     // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.
-    const pctPreRe = new RegExp(`(?<!\\d)%\\s?(${NUM})`, "gu");
+    const pctPreRe = new RegExp(`(?<!\\d)${PCT}\\s?(${NUM})`, "gu");
 
     return (text: string): string => {
         let s = text;
@@ -104,12 +142,12 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 : "";
         if (curBefore)
             s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => {
-                const w = pick(d.currency![sym]!, mag ? 2 : numValue(num), cf);
+                const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
                 return `${num}${mag ?? ""} ${join(mag)}${w}`;
             });
         if (curAfter)
             s = s.replace(curAfter, (_m, num: string, mag: string | undefined, sym: string) => {
-                const w = pick(d.currency![sym]!, mag ? 2 : numValue(num), cf);
+                const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
                 return `${num}${mag ?? ""} ${join(mag)}${w}`;
             });
         if (d.percentPrefix) {

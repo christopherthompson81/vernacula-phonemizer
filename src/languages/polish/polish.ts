@@ -46,6 +46,10 @@ const SYMBOLS = makeSymbolNormalizer({
         "€": ["euro"],
         "£": ["funt", "funty", "funtów"],
         "¥": ["jen", "jeny", "jenów"],
+        // Polish's own currency, which could not be declared while the tier keyed currencies as single
+        // characters — the Polish run reported exactly this gap and had to omit złoty.
+        "zł": ["złoty", "złote", "złotych"],
+        "PLN": ["złoty", "złote", "złotych"],
     },
     magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
     units: UNITS,

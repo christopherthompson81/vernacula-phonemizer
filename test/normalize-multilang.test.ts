@@ -143,4 +143,37 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("5 millones $", "es")).toContain("miʎˈones de dˈolaɾes");
         expect(phonemize("5 milhões $", "pt")).toContain("miʎˈõj̃ʃ de dˈɔlɐɾɨʃ");
     });
+
+    /**
+     * Three shared-tier defects reported by the nl/vi/pl/fa fan-out, all found by agents READING core
+     * they were not permitted to edit. Each was live or wrong-by-construction, not merely awkward.
+     */
+    test("a magnitude governs the most-plural form, which for Slavic is the genitive plural", () => {
+        // The tier passed the literal 2 as a COUNT, so the Slavic selector returned the paucal.
+        // Polish shipped this (dolary for dolarów); Russian was spared only by declaring no magnitudes.
+        expect(phonemize("$5 milionów", "pl")).toContain("miljˈɔnuf dɔlˈaruf");
+        expect(phonemize("$5 миллионов", "ru")).toContain("mʲɪlʲːɪˈonəf dˈoɫːərəf");
+        // Bare amounts still take ordinary count agreement.
+        expect(phonemize("$2", "ru")).toContain("dˈoɫːərə");   // paucal
+        expect(phonemize("$21", "ru")).toContain("dˈoɫːər");   // singular after 21
+    });
+
+    test("magnitudes and currency keys match longest-first", () => {
+        // "миллион" is a prefix of "миллионов"; in declaration order it matched first and stranded the
+        // suffix onto the currency word — *пять миллион долларовОВ*.
+        expect(phonemize("$5 миллионов", "ru")).not.toContain("dˈoɫːərəvəf");
+    });
+
+    test("a multi-character currency code is expressible", () => {
+        // Keys were a character class, so a letter code could not be declared at all and Polish had to
+        // omit its own currency.
+        expect(phonemize("20 zł", "pl")).toContain("zwˈɔtɨx");
+        expect(phonemize("100 PLN", "pl")).toContain("zwˈɔtɨx");
+    });
+
+    test("the Arabic percent sign reaches the shared tier", () => {
+        // U+066A was invisible to the tier, so ar/ur/fa each pre-folded it independently.
+        expect(phonemize("80٪", "fa")).toContain("daɾsˈed");
+        expect(phonemize("50٪", "ar")).toContain("fˈiː almˈiʔa");
+    });
 });

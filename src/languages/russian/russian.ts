@@ -103,6 +103,10 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { "€": ["евро"], "$": ["доллар", "доллара", "долларов"], "£": ["фунт", "фунта", "фунтов"] },
     units: { "км": ["километр", "километра", "километров"], "см": ["сантиметр", "сантиметра", "сантиметров"],
         "мм": ["миллиметр", "миллиметра", "миллиметров"], "кг": ["килограмм", "килограмма", "килограммов"] },
+    // Without these the magnitude never matched, so "$5 миллионов" hopped the currency word to the WRONG
+    // side and read *пять долларов миллионов*. The inflected forms are listed because running text writes
+    // the one its numeral governs (5 миллионов, 2 миллиона).
+    magnitudes: ["тысячи", "тысяч", "миллион", "миллиона", "миллионов", "миллиард", "миллиарда", "миллиардов"],
     countForm: slavicCountForm,
 });
 
