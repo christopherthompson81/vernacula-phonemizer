@@ -758,3 +758,65 @@ the canonical one.** Three of the five languages had a rule that was correct in 
 nothing in practice — French `\b` inside an accented word, Hindi `\b` before Devanagari, Mandarin a
 lookahead that met a space the canonical form does not contain. In every case the output stayed plausible,
 so only a corpus diff exposed it.
+
+## Run 12 — 2026-07-30 — Bengali (the normalization layer was the smallest problem)
+
+Sixth language. The audit found three defects, and **two of them were not in the normalization layer at
+all** — they were in the language's data, and both were large.
+
+### 1. `clausePunctuation` mapped every mark to ITSELF, padded
+
+`"।": " । "` where Hindi has `"।": "."`. So the raw danda — a non-IPA character — reached the phoneme
+output, wrapped in spaces that also produced a double-space slot-gap. The block's own comment said
+"canonical inline pause marks", so the data contradicted its stated intent. Measured: **2,949 of 3,006
+corpus utterances had a stray mark and 2,995 had a slot-gap. Both are now zero.**
+
+### 2. Bengali numbers 21–99 were all wrong
+
+Bengali, unlike a decimal-compositional language, has a fused word for every number to 100. The shared
+composer has a `compound` map for exactly this, with a documented "not authored → degrade to unit+tens"
+fallback — Hindi has it authored, Bengali did not. So 21 read as "এক বিশ", *one twenty*. 161 corpus numbers
+land in the range, and it also corrupted every year (1956 → "নয় একশো ছয় পঞ্চাশ").
+
+Authoring 72 numerals needed a corroboration source, and finding one took two attempts:
+- `bengali-lexicon.tsv` looked like the obvious check and is **not usable** — the control showed it is a
+  349-entry EXCEPTIONS list containing only 1 of the 23 numerals the manifest already shipped, so its
+  silence proves nothing. Recorded because the negative result is the useful part.
+- `tools/referee-eval/referees/bn.wikipron-ben-broad.tsv` attests **10 of the 72**, spread across the
+  20s/30s/40s/50s/70s/80s, matching my forms exactly with zero contradictions. Better still, running each
+  attested spelling through the engine reproduces the referee's own phone sequence (পঞ্চান্ন → `pɔnt͡ʃanːo`
+  vs `p ɔ n t ɕ a nː o`), which checks the spelling and the g2p together. The rows are marked in the data.
+
+Also fixed there: `magnitudes.hundred` was `"একশো"`, which already contains its own এক, so the composer's
+unit+hundred gave "এক একশো" for 100. Changed to `"শত"`.
+
+### 3. What the normalization layer itself needed
+
+Bengali had **no symbol tier at all**, so `%` and every currency sign were dropped outright and Latin unit
+abbreviations were unexpanded. Added, plus a Bengali-abbreviation table (কিমি → কিলোমিটার), the clock, signs,
+fractions ("denominator ভাগের numerator"), and ordinals.
+
+Ordinals have TWO suffix series here, both suppletive at the bottom: the CLASSICAL one (৮ম = অষ্টম, not
+*আটম, suppletive through ten, regular তম above) and the DATE one, which is what the corpus actually
+contains — শে ×10 (২৬শে নভেম্বর), ই ×8 (৮ই জুলাই) — with its own suppletives (১লা পহেলা, ২রা দোসরা).
+
+**A measurement error of mine, worth recording:** my first ordinal regex counted 147 occurrences, which
+would have made this the dominant class. It was matching `ম` *inside* words like মিটার. With a proper
+trailing lookaround the real figure is ~31, and the composition of the class changed completely — it is
+dominated by date suffixes, not the classical series. Loose regexes over-count; check the contexts.
+
+### 4. First language with MIXED digit systems
+
+The corpus writes ASCII ×1299 AND Bengali digits ×483, including inside times (১১:২০), decimals (২.৩) and
+fractions (১/৫). Step 0 folds Bengali digits to ASCII so there is one representation downstream — which
+also repairs the shared symbol tier, whose number pattern is ASCII-only and was therefore dropping the
+percent sign of "৮%".
+
+### Verification
+
+- 198 files / 2123 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical (47.4%/87.5% and 93.2%/98.4%) — expected, since it evaluates word-level
+  pronunciation rather than the compositor or the normalizer.
+- bn corpus: 2,995 of 3,006 cased-column utterances changed; **defects went from 2,995 slot-gaps and 2,949
+  stray marks to zero**. Two existing tests had PINNED the bugs (the padded danda, and 1999 as
+  "নয় একশো নয় নব্বই") and were corrected.

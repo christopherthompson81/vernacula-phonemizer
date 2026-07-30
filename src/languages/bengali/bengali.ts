@@ -23,6 +23,8 @@ import { BENGALI_DIGITS, BENGALI_WORD, IPA_VOWELS } from "../../core/unicode.ts"
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeBengaliNormalizer } from "./normalize.ts";
 
 // Whole-word pronunciation lexicon for the PROVEN-lexical vowel tail (closed-syllable ɔ→o, final-[o] retention)
 // that no rule can derive — see bengali-lexicon.tsv for the cross-source-consensus provenance. Loaded once; the
@@ -91,6 +93,16 @@ export function makeNativeBengali(
     def.vowelSigns[AE] = { ipa: "æ" };
     def.independentVowels[AE] = { ipa: "æ" };
     const g2p = makeAbugidaG2P(def, phon);
+    // #562 Bengali had NO symbol tier at all, so % and every currency sign were DROPPED outright ("3%"
+    // read as just "তিন") and the Latin unit abbreviations were unexpanded. শতাংশ follows the number.
+    const SYMBOLS = makeSymbolNormalizer({
+        percent: ["শতাংশ"],
+        currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"] },
+        units: { km: ["কিলোমিটার"], cm: ["সেন্টিমিটার"], mm: ["মিলিমিটার"], kg: ["কিলোগ্রাম"],
+            m: ["মিটার"], g: ["গ্রাম"], "km/h": ["কিলোমিটার প্রতি ঘন্টা"] },
+    });
+    const normalize = makeBengaliNormalizer(def.numbers);
+
     const CLAUSE_MARK = def.clausePunctuation;
     const symbols = def.symbols ?? {};
     const strip = def.stripSymbols ?? "";
@@ -239,7 +251,9 @@ export function makeNativeBengali(
     // `oovOverride` (neural path only) resolves OOV words between the lexicon and the rule engine; the sync path
     // passes nothing → unchanged. Per-CALL so one engine instance is reused across calls (no per-call rebuild).
     function text(input: string, oovOverride?: OovResolver): string {
-        return assembleClauses(input, tokenRe, (m, sink) => {
+        // Bengali-specific rewrites (ordinals, clock, unit abbreviations, signs, fractions) BEFORE the
+        // shared symbol tier, whose unit keys are Latin.
+        return assembleClauses(SYMBOLS(normalize(input)), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1], oovOverride));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3], oovOverride));

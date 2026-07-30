@@ -33,13 +33,18 @@ describe("bengali neural OOV tagger", () => {
         test("OOV word: tagger raises the inherent vowel the rule engine gets wrong", async () => {
             const neural = await phonemizeBnNeural("বক্তরা নামকরা।");
             expect(neural).not.toBe(phonemize("বক্তরা নামকরা।", "bn"));
-            expect(neural).toBe("bɔkt̪oɾa namokɾa  । ");
+            // The danda is a canonical pause mark now. This expectation previously pinned "  ।  " — the RAW
+            // danda padded with spaces — because clausePunctuation mapped every mark to itself.
+            expect(neural).toBe("bɔkt̪oɾa namokɾa .");
         });
 
         // The consonant-consistency mask guarantees the tagger never alters the consonant skeleton or the number/
         // punctuation stream — only OOV inherent vowels move.
         test("mixed text: numbers + punctuation unchanged, only the OOV word retagged", async () => {
-            expect(await phonemizeBnNeural("১৯৯৯ সালে বক্তরা।")).toBe("æk ɦad͡ʒaɾ nɔj ekʃo nɔj nɔbːoi ʃale bɔkt̪oɾa  । ");
+            // 1999 = এক হাজার নয় শত নিরানব্বই. This expectation previously pinned the broken reading
+            // "নয় একশো নয় নব্বই" — "nine one-hundred, nine ninety" — from the missing fused 21-99 forms
+            // and from `hundred` being "একশো", which already contains its own এক.
+            expect(await phonemizeBnNeural("১৯৯৯ সালে বক্তরা।")).toBe("æk ɦad͡ʒaɾ nɔj ʃɔt̪ niɾanɔbːoi ʃale bɔkt̪oɾa .");
         });
 
         // An OOV word containing an out-of-vocab grapheme (ঽ avagraha, outside the 61-grapheme training set): the

@@ -90,3 +90,63 @@ describe("bengali canonical IPA", () => {
         expect(phonemize("আমি বাংলা বলি।", "bn")).toContain("baŋla");
     });
 });
+
+// #562 — the sixth language. Two of the three defects were NOT in the normalization layer: the numbers
+// data was missing its fused 21-99 forms, and clausePunctuation mapped every mark to ITSELF padded with
+// spaces, so raw dandas reached the output on 2,949 of 3,006 corpus utterances.
+describe("bengali normalization", () => {
+    test("21-99 are fused words, not unit+tens", () => {
+        // Bengali, unlike a decimal-compositional language, has its own word for every number to 100. The
+        // shared composer's documented fallback was emitting "এক বিশ" ("one twenty") for 21. 161 corpus
+        // numbers land in this range. Ten of the authored forms are attested in the wikipron referee.
+        expect(phonemize("21", "bn")).toBe("ekuʃ"); // একুশ — referee-attested
+        expect(phonemize("24", "bn")).toBe("t͡ʃobːiʃ"); // চব্বিশ — referee-attested
+        expect(phonemize("39", "bn")).toBe("unt͡ʃolːiʃ"); // উনচল্লিশ
+        expect(phonemize("66", "bn")).toBe("t͡ʃʰeʃɔʈʈi"); // ছেষট্টি
+        expect(phonemize("99", "bn")).toBe("niɾanɔbːoi"); // নিরানব্বই
+        // `hundred` was "একশো", which already contains its own এক, so 100 came out as "এক একশো".
+        expect(phonemize("100", "bn")).toBe("æk ʃɔt̪");
+        expect(phonemize("1956", "bn")).toBe("æk ɦad͡ʒaɾ nɔj ʃɔt̪ t͡ʃʰapːanːo"); // was "নয় একশো ছয় পঞ্চাশ"
+        expect(phonemize("১৮১৯", "bn")).toBe("æk ɦad͡ʒaɾ aʈ ʃɔt̪ uniʃ"); // Bengali digits read identically
+    });
+
+    test("punctuation is a canonical pause, not a raw mark", () => {
+        // clausePunctuation mapped "।" to " । " — the danda itself, padded — so a non-IPA character and a
+        // double space reached the output. 3,327 dandas in the corpus.
+        expect(phonemize("এটি বাক্য। দুই।", "bn")).toBe("eʈi bakːo . d̪ui .");
+    });
+
+    test("ordinals: two suffix series, both suppletive at the bottom", () => {
+        // The CLASSICAL series is suppletive through ten — ৮ম is অষ্টম, not *আটম.
+        expect(phonemize("৮ম", "bn")).toBe("ɔʃʈɔm");
+        expect(phonemize("২ ম", "bn")).toBe("d̪it̪ij"); // দ্বিতীয়, with the space the corpus writes
+        expect(phonemize("৪র্থ", "bn")).toBe("t͡ʃot̪uɾt̪ʰo");
+        expect(phonemize("১৭তম", "bn")).toBe("ʃɔt̪eɾot̪ɔm"); // regular above ten: suffix JOINED
+        // The DATE series is what the corpus actually contains (শে ×10, ই ×8), with its own suppletives.
+        expect(phonemize("২৬ শে নভেম্বর", "bn")).toBe("t͡ʃʰabːiʃʃe nɔbʱembɔɾ");
+        expect(phonemize("৮ই জুলাই", "bn")).toBe("aʈoi d͡ʒulai"); // was [aʈ i], the suffix as its own word
+        expect(phonemize("১লা জানুয়ারি", "bn")).toBe("pɔɦela d͡ʒanujaɾi"); // পহেলা
+    });
+
+    test("symbols: Bengali had no symbol tier at all", () => {
+        // % and every currency sign were DROPPED outright, and the digit fold is what lets the shared
+        // ASCII-keyed tier see a Bengali-digit amount.
+        expect(phonemize("3%", "bn")).toBe("t̪in ʃɔt̪aŋʃo");
+        expect(phonemize("৮%", "bn")).toBe("aʈ ʃɔt̪aŋʃo"); // Bengali digits — the sign was dropped
+        expect(phonemize("৳৫০০", "bn")).toBe("pãt͡ʃ ʃɔt̪ ʈaka");
+        expect(phonemize("৫ কিমি", "bn")).toBe("pãt͡ʃ kilomiʈaɾ"); // was read as the word [kimi]
+        expect(phonemize("5 mm", "bn")).toBe("pãt͡ʃ milimiʈaɾ");
+        expect(phonemize("20 °C", "bn")).toBe("biʃ ɖiɡɾi ʃeloʃijaʃ"); // was the English letter name
+    });
+
+    test("abbreviations, clock, signs and fractions", () => {
+        expect(phonemize("ডঃ শর্মা", "bn")).toBe("ɖɔkʈɔɾ ʃɔɾma"); // the VISARGA was read as a syllable
+        expect(phonemize("ড. শর্মা", "bn")).toBe("ɖɔkʈɔɾ ʃɔɾma"); // the dotted form left a phrase break
+        expect(phonemize("১১:২০", "bn")).toBe("æɡaɾoʈa biʃ miniʈ"); // the colon reached the output raw
+        expect(phonemize("11:00", "bn")).toBe("æɡaɾoʈa"); // :00 was read as শূন্য
+        expect(phonemize("-5 ডিগ্রি", "bn")).toBe("ɾinat̪ːɔk pãt͡ʃ ɖiɡɾi"); // both signs occur in this corpus
+        expect(phonemize("+3 ডিগ্রি", "bn")).toBe("d͡ʒoɡ t̪in ɖiɡɾi");
+        expect(phonemize("১/৫", "bn")).toBe("pãt͡ʃ bʱaɡeɾ æk"); // "of five parts, one"
+        expect(phonemize("1/2", "bn")).toBe("ɔɾd̪ʱek"); // অর্ধেক
+    });
+});
