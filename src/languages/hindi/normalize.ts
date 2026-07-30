@@ -99,7 +99,13 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
 
         // 2) ORDINAL SUFFIXES. The suffix is attached to the numeral in writing (16वीं) but was tokenized
         //    apart from it, so it was spoken as its own word. A space may intervene in the corpus.
-        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})`, "gu"),
+        //
+        //    THE TRAILING BOUNDARY IS LOAD-BEARING. Without it the suffix matched the START of an ordinary
+        //    word: `10 वापस` became one glued token (*dasvāpas*) with a stress lost, and the same for वायु,
+        //    वाहन and — in the eight languages that inherit this normalizer — वाजता, वादळे, वाईल्ड. The
+        //    Marathi run measured 13 live corruptions of that shape in its own corpus. This is trap #1 in
+        //    the playbook: never a bare match where a letter may follow.
+        s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);
 

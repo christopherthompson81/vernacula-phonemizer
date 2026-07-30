@@ -80,3 +80,20 @@ describe("hindi normalization", () => {
         expect(phonemize("चंद्रयान -1", "hi")).toBe("t͡ʃə̃n̪d̪ɾəjˈaːn ˈeːk");
     });
 });
+
+/** #562 — the ordinal suffix must not match the START of an ordinary word. */
+describe("Hindi ordinal suffix boundary", () => {
+    test("a number before a वा- word stays two words", () => {
+        // Was one glued token with a stress lost — dasvāpas. The Marathi run measured 13 live corruptions
+        // of this shape (वाजता, वादळे, वाईल्ड) in its own corpus, since it inherits this normalizer.
+        expect(phonemize("10 वापस", "hi")).toBe("d̪ˈəs ʋˈaːpəs");
+        expect(phonemize("5 वायु", "hi")).toBe("pˈaː̃t͡ʃ ʋˈaːjʊ");
+        expect(phonemize("20 वाहन", "hi")).toBe("bˈiːs ʋˈaːɦən");
+    });
+
+    test("…and genuine ordinals still compose", () => {
+        expect(phonemize("16वीं सदी", "hi")).toBe("soːlˈəɦʋiː̃ sˈəd̪iː");
+        expect(phonemize("5वा दिन", "hi")).toBe("pˈaː̃t͡ʃʋaː d̪ˈɪn");
+        expect(phonemize("21वें", "hi")).toBe("ɪkːˈiːsʋeː̃");
+    });
+});
