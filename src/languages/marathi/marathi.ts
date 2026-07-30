@@ -11,6 +11,7 @@
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeMarathiNormalizer } from "./normalize.ts";
 
 let MR: ReturnType<typeof makeNativeHindi> | undefined;
@@ -22,19 +23,26 @@ function engine(foreign?: ForeignPhonemizer) {
     );
 }
 
-/** #562 normalization. Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, and
- *  `makeNativeHindi` hard-wires Hindi's normalizer and Hindi's symbol tier — there is no parameter for a
- *  different one. So the Marathi pass is applied HERE, ahead of `text()`, and is written to consume its
- *  input completely so that the Hindi pass inside `text()` finds nothing left to claim. See the header
- *  of normalize.ts, and steps 6b / 7a / 12, for the three places that coupling is visible. */
+/** #562 normalization. Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
+ *  supplies its OWN normalizer and its OWN symbol words through `makeNativeHindi`'s overrides rather than
+ *  inheriting Hindi's. Before that parameter existed the Marathi pass had to run AHEAD of `text()` and be
+ *  written to consume its input completely, so the Hindi pass inside would find nothing left to claim —
+ *  a coupling that was load-bearing in three separate steps. Verified byte-identical over the whole
+ *  mr_in corpus when moved onto the seam. */
+const MR_SYMBOLS = makeSymbolNormalizer({
+    percent: ["टक्के"], // Hindi's प्रतिशत is not Marathi
+    currency: { "$": ["डॉलर"], "€": ["युरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
+    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलिमीटर"], kg: ["किलोग्रॅम"] },
+});
+
 export function createMarathi(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {
-    const mr = engine(foreign);
-    const normalize = makeMarathiNormalizer(
-        loadManifest<HindiDef>(import.meta.url, "marathi.jsonc").numbers,
-    );
-    return { text: (input: string) => mr.text(normalize(input)) };
+    const def = loadManifest<HindiDef>(import.meta.url, "marathi.jsonc");
+    return makeNativeHindi(def, loadSharedPhonology(), foreign, undefined, undefined, {
+        normalize: makeMarathiNormalizer(def.numbers),
+        symbols: MR_SYMBOLS,
+    });
 }
 
 /** Bare word→IPA (tests / referee eval). */

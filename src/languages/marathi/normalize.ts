@@ -206,8 +206,14 @@ export function makeMarathiNormalizer(
         //    first, and before anything that reads a dot as a phrase break: इ.स.पू. was producing three
         //    of them ([ˈɪ . sˈə . pˈuː .]). The corpus writes both पू. and पु.; इ. ×5, स. ×4 and पू. ×3
         //    occur ONLY inside these markers (checked — no bare-letter false positives).
-        s = s.replace(/(?<![\p{L}\p{M}])इ\.?\s?स\.?\s?प[ूु]\.?/gu, "इसवी सन पूर्व");
-        s = s.replace(/(?<![\p{L}\p{M}])इ\.?\s?स\./gu, "इसवी सन");
+        //    BOTH इ and ई occur — the corpus writes ई.पू. once as well as इ.स.पू. ×4. That single instance
+        //    used to be caught by HINDI's era rule running after this pass, which expanded it to Hindi's
+        //    ईसा पूर्व; once Marathi supplied its own normalizer through the engine's override the Hindi
+        //    rule no longer ran and the dots reached the output as two spurious pauses. Claimed here now,
+        //    with Marathi's own wording rather than Hindi's.
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\.?\s?प[ूु]\.?/gu, "इसवी सन पूर्व");
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?प[ूु]\.?/gu, "इसवी सन पूर्व");
+        s = s.replace(/(?<![\p{L}\p{M}])[इई]\.?\s?स\./gu, "इसवी सन");
 
         // 5) ABBREVIATIONS. डॉ. is the only one in this corpus (×6, always with the dot). The dot is
         //    consumed so it cannot become a phrase break.

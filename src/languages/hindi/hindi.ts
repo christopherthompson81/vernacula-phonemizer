@@ -77,6 +77,23 @@ export function makeNativeHindi(
     foreign?: ForeignPhonemizer,
     script: AbugidaScript = { word: DEVANAGARI_WORD, digits: DEVANAGARI_DIGITS },
     lexicon?: ReadonlyMap<string, string>,
+    /**
+     * PER-LANGUAGE OVERRIDES for the two things that are Hindi's LEXICAL choices rather than its engine.
+     *
+     * Nine languages reuse this engine, and until this parameter existed they also inherited Hindi's
+     * normalizer and Hindi's symbol words — so Marathi spoke प्रतिशत, बजकर and मिनट, none of which are
+     * Marathi. That is the same principle the acronym work settled one layer up: a lexical fact belongs in
+     * the language's own data, not in shared machinery.
+     *
+     * Both default to Hindi's, so a language that supplies neither is byte-identical to before. Six of the
+     * nine (bho, mai, mag, awa, hne, rkt) have no FLEURS corpus and so will never come through a
+     * normalization batch; leaving them on the Hindi defaults is the honest outcome for them until
+     * someone has evidence, and this parameter is how that evidence gets applied without touching Hindi.
+     */
+    overrides: {
+        normalize?: (input: string) => string;
+        symbols?: (input: string) => string;
+    } = {},
 ) {
     const g2p = makeAbugidaG2P(def, phon);
     const DIGIT_CLASS = "0-9" + Object.keys(script.digits).join("");
@@ -153,10 +170,11 @@ export function makeNativeHindi(
     // abbreviations, clock, signs, fractions) BEFORE the shared symbol tier, whose unit keys are Latin.
     // Roman numerals need no ordering care: `hi` is not in the registry's ROMAN_NATIVE set, so the shared
     // pass has already run at the registry seam.
-    const normalize = makeHindiNormalizer(def.numbers);
+    const normalize = overrides.normalize ?? makeHindiNormalizer(def.numbers);
+    const symbolTier = overrides.symbols ?? SYMBOLS;
 
     function text(input: string): string {
-        return assembleClauses(SYMBOLS(normalize(input)), tokenRe, (m, sink) => {
+        return assembleClauses(symbolTier(normalize(input)), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
