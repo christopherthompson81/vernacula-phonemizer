@@ -97,6 +97,7 @@ const SYMBOLS = makeSymbolNormalizer({
         gb: ["gigabyte", "gigabytes"], mb: ["megabyte", "megabytes"],
         km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
+    exponentWords: { squared: ["cuadrado", "cuadrados"], cubed: ["cúbico", "cúbicos"] },
     magnitudes: ["millones", "millón"],
     magnitudeConnective: "de", // cinco millones DE dólares
 });

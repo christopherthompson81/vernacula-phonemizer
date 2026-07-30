@@ -120,7 +120,11 @@ const TOKEN = /([a-zåäöéA-ZÅÄÖÉ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["procent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pund"] },
-    units: { km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], kg: ["kilogram"] },
+    units: { km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], kg: ["kilogram"],
+        h: ["timme"], s: ["sekund"] },
+    unitPer: "per", // the /h was reaching the g2p as a bare letter
+    // Swedish COMPOUNDS the measure word onto the unit: kvadratkilometer, one word — hence "before".
+    exponentWords: { squared: ["kvadrat"], cubed: ["kubik"], position: "compound" },
     magnitudes: ["miljoner", "miljon", "miljarder", "miljard"],
 });
 

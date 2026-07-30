@@ -61,8 +61,40 @@ export interface InitialismData {
  * EX-EYE-VEE. `II` occurs 8 times in the English cased column, so the collision is real, not a
  * hypothetical. Likewise it must run after abbreviation expansion, or French `MM.` becomes EM-EM.
  */
+/**
+ * PERSONAL INITIALS — `J. S. Bach`, `George W. Bush`. A single capital plus a period, which the run above
+ * cannot claim because it requires two letters, so the bare letter reached the g2p as an unpronounceable
+ * consonant plus a spurious phrase break: es `w .`, pt `v .`, ru `u .`, de `f .`. English got the letter
+ * name but kept the break. Reported by the Dutch run, which could only work around it locally.
+ *
+ * The disambiguation is CONTIGUITY, which is what makes this safe. A run of two or more is unambiguous —
+ * no abbreviation appears twice in a row — so it is claimed outright. A LONE initial is genuinely
+ * ambiguous with a real abbreviation (German `S.` is *Seite*, and `S. 42` must stay that), so it is
+ * claimed only when it sits BETWEEN two capitalised words. That excludes the dangerous case, a sentence
+ * ending in a single capital before a new one ("…ist A. Der Rest…"), because there the preceding word is
+ * lowercase.
+ *
+ * The periods are consumed, since they are abbreviation dots rather than sentence ends.
+ */
+const INITIAL_RUN = /(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]*){2,}/gu;
+const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
+
 export function makeInitialismNormalizer(d: InitialismData): (text: string) => string {
-    return (text: string): string => {
+    const spellInitials = (run: string): string =>
+        [...run.matchAll(/\p{Lu}/gu)]
+            .map((m) => d.letterName(m[0]!.toLowerCase()) ?? m[0]!)
+            .join(" ");
+
+    return (rawText: string): string => {
+        // Initials are resolved BEFORE the all-caps rule, so `J. S.` is never seen as two separate
+        // one-letter tokens, and after the caller's abbreviation pass for the usual reason.
+        const text = rawText
+            .replace(INITIAL_RUN, (run) => `${spellInitials(run)} `)
+            .replace(LONE_INITIAL, (_m, letter: string) => d.letterName(letter.toLowerCase()) ?? letter);
+        return inner(text);
+    };
+
+    function inner(text: string): string {
         // Gated on the text containing lowercase: in an all-caps DOCUMENT the capitals carry no signal
         // and spelling out every word would be absurd. A lone all-caps token is exempt — there is no
         // shouting document to misread, and it is the "user typed an acronym" case.

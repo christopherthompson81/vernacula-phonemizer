@@ -264,6 +264,7 @@ const SYMBOLS = makeSymbolNormalizer({
         kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"], m: ["metro", "metros"],
         l: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
         t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
+    exponentWords: { squared: ["quadrado", "quadrados"], cubed: ["cúbico", "cúbicos"] },
     magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
     magnitudeConnective: "de", // cinco milhões DE dólares
 });

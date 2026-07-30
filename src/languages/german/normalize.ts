@@ -126,7 +126,13 @@ export function normalizeGerman(input: string): string {
 
     // 3) DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    //    NOT AFTER ANOTHER INITIAL. `s.` is *Seite*, so `J. S. Bach` expanded to "J Seite Bach" — the
+    //    single-letter entries in this table collide with personal initials, and contiguity is what tells
+    //    them apart (core/initialisms.ts claims a run of two on the same reasoning). A lone `S. Bach` at a
+    //    sentence start stays ambiguous and is left to the table, as before.
+    //    The lookahead admits a DIGIT as well as a letter: `S. 42` and `Nr. 5` are the ordinary forms and
+    //    neither matched before, so both leaked a raw letter plus a spurious pause.
+    s = s.replace(new RegExp(`(?<!\\p{Lu}\\.[  ])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
         (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
     s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);

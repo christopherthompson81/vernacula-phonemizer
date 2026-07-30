@@ -176,4 +176,35 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("80٪", "fa")).toContain("daɾsˈed");
         expect(phonemize("50٪", "ar")).toContain("fˈiː almˈiʔa");
     });
+
+    /** Markup renders to the text it stands for; the tag is never spoken (core/markup.ts). */
+    test("HTML tags and entities are rendered, not read", () => {
+        expect(phonemize("20 km<sup>2</sup>", "vi")).not.toMatch(/sup/u); // was spoken as "sup … sup"
+        expect(phonemize("<i>teks</i> ini", "id")).toBe(phonemize("teks ini", "id"));
+        expect(phonemize("&#65;&#x42;C", "en")).toBe(phonemize("ABC", "en")); // numeric references
+        // Ordinary prose must survive: a comparison is not a tag, and an escaped tag stays literal text.
+        expect(phonemize("5 < 6 and a < b", "en")).toContain("sˈɪks");
+        expect(phonemize("&lt;i&gt; is a tag", "en")).toContain("tʰˈæɡ");
+    });
+
+    /** Personal initials — claimed by contiguity, which is what makes a lone one safe to leave. */
+    test("initials are spelled, and the abbreviation dot is not a pause", () => {
+        expect(phonemize("George W. Bush", "es")).toContain("dˈoβle ˈuβe"); // was the raw letter "w ."
+        expect(phonemize("George W. Bush", "de")).toContain("veː");         // was "f ."
+        expect(phonemize("J. R. R. Tolkien", "en")).not.toContain(" . ");
+        expect(phonemize("J. S. Bach", "de")).toContain("jɔt ɛs");          // was "J Seite Bach"
+        // …but a real abbreviation still expands, and a sentence-final capital stays a sentence end.
+        expect(phonemize("Band 3, S. 42", "de")).toContain("zˈaɪ̯tə");
+        expect(phonemize("Die Note ist A. Der Rest folgt", "de")).toContain(" . ");
+    });
+
+    /** Rate and exponent units, lifted into the shared tier (#562). */
+    test("rate units compose, and exponents take the language's position", () => {
+        expect(phonemize("120 km/h", "ca")).toContain("pəɾ ˈɔɾə");   // the /h used to be dropped
+        expect(phonemize("120 km/h", "sv")).toContain("peːr tˈɪ̀mːɛ"); // the h leaked as a letter
+        expect(phonemize("120 km/h", "ru")).toContain("f t͡ɕas");     // was [ˈʊkm] + the ENGLISH letter H
+        expect(phonemize("50 km²", "es")).toContain("kwaðɾˈaðos");    // after
+        expect(phonemize("50 km²", "ru")).toContain("kvɐdrˈatnɨx kʲɪɫɐmʲˈetrəf"); // before, SPACED
+        expect(phonemize("50 km²", "sv")).toContain("kvadrˈɑ̀ːtkiːlɔmˌeːtɛr");     // compound, one word
+    });
 });

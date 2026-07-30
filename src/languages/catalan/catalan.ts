@@ -214,7 +214,9 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["per cent"],
     currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"] },
     units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],
-        kg: ["quilogram", "quilograms"] },
+        kg: ["quilogram", "quilograms"], h: ["hora", "hores"], s: ["segon", "segons"] },
+    unitPer: "per", // 120 km/h -> cent vint quilòmetres per hora; the /h used to be dropped outright
+    exponentWords: { squared: ["quadrat", "quadrats"], cubed: ["cúbic", "cúbics"] },
     magnitudes: ["milions", "milió"],
     magnitudeConnective: "de", // cinc milions DE dòlars
 });

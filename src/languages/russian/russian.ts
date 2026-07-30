@@ -102,7 +102,14 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["процент", "процента", "процентов"],
     currency: { "€": ["евро"], "$": ["доллар", "доллара", "долларов"], "£": ["фунт", "фунта", "фунтов"] },
     units: { "км": ["километр", "километра", "километров"], "см": ["сантиметр", "сантиметра", "сантиметров"],
-        "мм": ["миллиметр", "миллиметра", "миллиметров"], "кг": ["килограмм", "килограмма", "килограммов"] },
+        "мм": ["миллиметр", "миллиметра", "миллиметров"], "кг": ["килограмм", "килограмма", "килограммов"],
+        // LATIN aliases. The corpus writes Cyrillic км, but Latin `km` occurs in foreign-sourced text and
+        // reached the g2p raw — "120 km/h" came out as the cluster [ˈʊkm] plus the ENGLISH letter H.
+        "km": ["километр", "километра", "километров"], "cm": ["сантиметр", "сантиметра", "сантиметров"],
+        "mm": ["миллиметр", "миллиметра", "миллиметров"], "kg": ["килограмм", "килограмма", "килограммов"],
+        "ч": ["час", "часа", "часов"], "h": ["час", "часа", "часов"] },
+    unitPer: "в",
+    exponentWords: { squared: ["квадратный", "квадратных"], cubed: ["кубический", "кубических"], position: "before" },
     // Without these the magnitude never matched, so "$5 миллионов" hopped the currency word to the WRONG
     // side and read *пять долларов миллионов*. The inflected forms are listed because running text writes
     // the one its numeral governs (5 миллионов, 2 миллиона).

@@ -37,6 +37,30 @@ export interface SymbolData {
     /** The percent word PRECEDES the number (Turkish yüzde kırk, Mandarin 百分之四十). Text may write the
      *  sign on either side (%40 or 40%); both rewrite to prefix order. */
     percentPrefix?: boolean;
+    /**
+     * The word joining two units in a RATE — `km/h` → "kilometres PER hour". Composition is shared; only
+     * the word is language data ("per", "pro", "par"). Both units must be declared in `units`, since the
+     * denominator needs its own noun (`h` → hour/Stunde/heure).
+     *
+     * NOT universal, which is why it is opt-in: Korean writes the rate as a PREFIX (시속 = "hour-speed"),
+     * and Japanese/Vietnamese/Thai already resolve their own rate units locally for ordering reasons. Those
+     * keep doing so; this serves the majority "A per B" idiom.
+     */
+    unitPer?: string;
+    /**
+     * Squared and cubed units — `km²` → "square kilometres". The measure word is language data and so is
+     * its POSITION, which needs three values, not two:
+     *   `after`    (default) — Italian, Vietnamese, Polish: *chilometri quadrati*, *kilometr kwadratowy*
+     *   `before`   — Russian: *квадратных километров*, an agreeing adjective with a space
+     *   `compound` — Swedish and Japanese, which fuse it into one word: *kvadratkilometer*, 平方キロメートル
+     * `before` and `compound` were one value at first, which silently produced Russian
+     * *квадратныхкилометров* as a single unreadable token.
+     */
+    exponentWords?: {
+        squared?: CountForms;
+        cubed?: CountForms;
+        position?: "before" | "after" | "compound";
+    };
 }
 
 const defaultCountForm = (n: number): number => (n === 1 ? 0 : 1);
@@ -123,7 +147,15 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         ? new RegExp(`(${NUM})${magAlt}\\s?(${CUR})`, "gu")
         : null;
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
-    const unitRe = d.units ? new RegExp(`(${NUM})\\s?(${unitAlt})(?![\\p{L}\\p{M}])`, "giu") : null;
+    // The unit may carry a RATE denominator (`km/h`) or an EXPONENT (`km²`, `km2`). Both are consumed in
+    // the same match so neither can be stranded after the unit word is substituted — the exponent was
+    // being left behind as an unreadable character, and the `/h` read as the letter H.
+    const unitRe = d.units
+        ? new RegExp(
+            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${unitAlt})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}])`,
+            "giu",
+        )
+        : null;
     // BOTH percent signs. U+066A ٪ is the Arabic-script one, and the tier used to know only ASCII `%`, so
     // ar, ur and fa each pre-folded it in their own normalize.ts before this tier could see it. Accepting
     // it here makes those folds harmless no-ops and means the next Arabic-script language gets it free.
@@ -158,8 +190,27 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             s = s.replace(pctRe, (_m, num: string) => `${num} ${pick(d.percent, numValue(num), cf)}`);
         }
         if (unitRe)
-            s = s.replace(unitRe, (_m, num: string, u: string) =>
-                `${num} ${pick(d.units![u.toLowerCase()]!, numValue(num), cf)}`);
+            s = s.replace(unitRe, (whole, num: string, u: string, denom?: string, exp?: string) => {
+                const head = pick(d.units![u.toLowerCase()]!, numValue(num), cf);
+                if (denom !== undefined) {
+                    // A rate needs both nouns and the connective; without any of them leave the text
+                    // alone rather than emit half a reading.
+                    const dForms = d.units![denom.toLowerCase()];
+                    if (d.unitPer === undefined || dForms === undefined) return whole;
+                    return `${num} ${head} ${d.unitPer} ${dForms[0]!}`;
+                }
+                if (exp !== undefined) {
+                    const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
+                    if (forms === undefined) return whole; // not declared ⇒ untouched, as before
+                    // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
+                    // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".
+                    const word = pick(forms, numValue(num), cf);
+                    const pos = d.exponentWords?.position ?? "after";
+                    if (pos === "compound") return `${num} ${word}${head}`;
+                    return pos === "before" ? `${num} ${word} ${head}` : `${num} ${head} ${word}`;
+                }
+                return `${num} ${head}`;
+            });
         return s;
     };
 }

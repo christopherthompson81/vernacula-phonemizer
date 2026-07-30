@@ -198,6 +198,7 @@ import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
 import { setDefaultForeign } from "./core/foreign.ts";
+import { stripMarkup } from "./core/markup.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -243,6 +244,18 @@ export function getPhonemizer(lang: string): Phonemizer {
         // point rather than in 190 engines — and so it runs BEFORE the engine's tokenizer, which is what
         // lets it work in the engines that drop Latin runs (`XIX век` would otherwise lose the numeral).
         // It rewrites to DIGITS, so each language's own cardinal compositor does the pronouncing.
+        // MARKUP first, and for EVERY language including the ROMAN_NATIVE ones: a tag is not text in any
+        // of them. Without it `km<sup>2</sup>` was spoken as "sup … sup" (core/markup.ts).
+        //
+        // This SHADOWS `text` on the engine instance rather than wrapping it in a fresh `{ text }` object,
+        // because some engines expose more than the interface — the registry itself casts the English
+        // phonemizer to reach `knownWord` for Naija — and a wrapper object silently drops those members.
+        // Binding the original keeps private state resolving against the real instance.
+        {
+            const engine = p;
+            const original = engine.text.bind(engine);
+            (engine as { text: (input: string) => string }).text = (input) => original(stripMarkup(input));
+        }
         if (!ROMAN_NATIVE.has(lang)) {
             const engine = p;
             // A language's own policy wins; otherwise it still gets its homograph exclusions.
