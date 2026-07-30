@@ -11,6 +11,7 @@ import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeMandarin } from "./normalize.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -31,7 +32,12 @@ export type ForeignPhonemizer = (latin: string) => string;
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["百分之"],
     percentPrefix: true,
-    units: { mm: ["毫米"], cm: ["厘米"] },
+    // Currency: the sign was DROPPED outright ($50 read as 五十, losing 美元). Mandarin says the unit after
+    // the number, which is what the shared tier emits. Degrees likewise: °C was falling through to the
+    // English reading of the bare letter C.
+    currency: { "$": ["美元"], "€": ["欧元"], "£": ["英镑"], "¥": ["元"], "₤": ["英镑"] },
+    units: { mm: ["毫米"], cm: ["厘米"], km: ["公里"], m: ["米"], kg: ["千克"], g: ["克"],
+        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"] },
 });
 
 class MandarinPhonemizer implements Phonemizer {
@@ -79,6 +85,7 @@ class MandarinPhonemizer implements Phonemizer {
             push(MANIFEST.numbers.two, false);
             return;
         } // 2个 → 两个
+        num = num.replace(/,/gu, ""); // grouping commas are not part of the value
         const dot = num.indexOf(".");
         const intStr = dot < 0 ? num : num.slice(0, dot);
         const intN = Number(intStr || "0");
@@ -99,7 +106,10 @@ class MandarinPhonemizer implements Phonemizer {
         const cp: string[] = [],
             exempt: boolean[] = [];
         let last = 0;
-        const re = /\d+(?:\.\d+)?/g;
+        // Comma grouping is part of the number, not a clause boundary. Without this, "783,562" was read as
+        // two numbers with a PAUSE between them (七百八十三 , 五百六十二) instead of 七十八万三千五百六十二.
+        // 61 occurrences in the corpus.
+        const re = /\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?/g;
         let m: RegExpExecArray | null;
         while ((m = re.exec(input)) !== null) {
             if (m.index > last)
@@ -107,7 +117,13 @@ class MandarinPhonemizer implements Phonemizer {
                     cp.push(c);
                     exempt.push(false);
                 }
-            this.appendNumber(cp, exempt, m[0], input[m.index + m[0].length]);
+            // The following character must be found ACROSS WHITESPACE. The corpus writes "2009 年" and
+            // "2 个人" with a space — 272 years and every 两 case — and taking the literal next character
+            // saw the space, so the year rule and the 两 rule both silently failed: 2009 年 came out as the
+            // cardinal 两千零九年 instead of the digit-by-digit 二零零九年.
+            const rest = input.slice(m.index + m[0].length);
+            const after = /^\s*(\S)/u.exec(rest)?.[1];
+            this.appendNumber(cp, exempt, m[0], after);
             last = m.index + m[0].length;
         }
         if (last < input.length)
@@ -119,7 +135,8 @@ class MandarinPhonemizer implements Phonemizer {
     }
 
     text(input: string): string {
-        input = SYMBOLS(input); // #562
+        // #562: the Mandarin-specific rewrite (fraction order) before the shared symbol tier.
+        input = SYMBOLS(normalizeMandarin(input));
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
         if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
             return this.pinyinToIpa(input);
