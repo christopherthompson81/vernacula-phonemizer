@@ -108,3 +108,43 @@ describe("mandarin canonical IPA — pinyin path", () => {
         expect(phonemize("一个", "cmn")).toBe("ji˧˥ kɤ˥˩"); // yí gè unchanged
     });
 });
+
+// #562 text normalization — the fifth language. Mandarin already had more of this tier than any other
+// audited (digit-by-digit years, full dates, 世纪, 点/分, 第N, the 百分之 prefix, full-width punctuation,
+// Latin-run delegation), so the defects were in the ENGINE's number handling rather than in a new pass.
+describe("mandarin normalization", () => {
+    test("the following-character test must skip whitespace", () => {
+        // The corpus writes "2009 年" and "2 个人" WITH a space (272 years, and every 两 case), and the
+        // literal next character was the space — so the year rule and the 两 rule both silently failed and
+        // 2009 年 came out as the CARDINAL 两千零九年 instead of the digit-by-digit 二零零九年.
+        expect(phonemize("2009 年", "cmn")).toBe("ər˥˩ liŋ˧˥ liŋ˧˥ t͡ɕioᵘ˨˩˦ niɛn˧˥"); // 二零零九年
+        expect(phonemize("2009年", "cmn")).toBe("ər˥˩ liŋ˧˥ liŋ˧˥ t͡ɕioᵘ˨˩˦ niɛn˧˥"); // unspaced, unchanged
+        expect(phonemize("10 年", "cmn")).toBe("ʂʐ̩˧˥ niɛn˧˥"); // a DURATION stays a cardinal, 十年
+        expect(phonemize("2 个人", "cmn")).toBe("liɑŋ˨˩˦ kɤ˥˩ ʐən˧˥"); // 两个人, not 二个人
+    });
+
+    test("comma grouping is part of the number, not a clause boundary", () => {
+        // "783,562" was read as two numbers with a PAUSE between them. 61 occurrences in the corpus.
+        expect(phonemize("1,000", "cmn")).toBe("ji˥˩ t͡ɕʰiɛn˥˥"); // 一千
+        expect(phonemize("783,562", "cmn"))
+            .toBe("t͡ɕʰi˥˥ ʂʐ̩˧˥ pɑ˥˥ wɑn˥˩ san˥˥ t͡ɕʰiɛn˥˥ wu˧˥ paⁱ˨˩˦ lioᵘ˥˩ ʂʐ̩˧˥ ər˥˩"); // 七十八万三千五百六十二
+    });
+
+    test("currency and degrees were dropped or read as English letters", () => {
+        expect(phonemize("$50", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ meⁱ˨˩˦ jyæn˧˥"); // 五十美元 — the sign was dropped
+        expect(phonemize("20 °C", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度, was the letter C
+        expect(phonemize("35°", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ wu˨˩˦ tu˥˩"); // 度
+        expect(phonemize("120 km/h", "cmn")).toBe("ji˥˩ paⁱ˨˩˦ ər˥˩ ʂʐ̩˧˥ koŋ˥˥ li˧˥ meⁱ˧˥ ɕjɑᵘ˨˩˦ ʂʐ̩˧˥");
+    });
+
+    test("fractions are stated in the opposite order from the notation", () => {
+        expect(phonemize("1/5", "cmn")).toBe("wu˨˩˦ fən˥˥ ʈ͡ʂʐ̩˥˥ ji˥˥"); // 五分之一, "of five parts, one"
+        expect(phonemize("3/4", "cmn")).toBe("sɹ̩˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ san˥˥"); // 四分之三
+    });
+
+    test("what already worked is unchanged", () => {
+        expect(phonemize("2011年3月14日", "cmn"))
+            .toBe("ər˥˩ liŋ˧˥ ji˥˥ ji˥˥ niɛn˧˥ san˥˥ jyɛ˥˩ ʂʐ̩˧˥ sɹ̩˥˩ ʐʐ̩˥˩"); // year digit-wise, month/day cardinal
+        expect(phonemize("20世纪", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂʐ̩˥˩ t͡ɕi˥˩"); // a century is a CARDINAL
+    });
+});

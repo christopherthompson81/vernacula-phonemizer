@@ -709,3 +709,52 @@ depend on whether the language resolves Romans itself (en, fr) or gets them at t
 Per language: a numbered pipeline plus data. Each language has contributed exactly one thing no other
 needed — English pair-wise years, French a heteronym tier, Spanish a variety flag, Hindi suffix-joining
 ordinals and the non-ASCII boundary discipline.
+
+## Run 11 — 2026-07-29 — Mandarin normalization (the defects were in the engine)
+
+Fifth language. Mandarin already had more of this tier than anything else audited, so the new file
+`src/languages/mandarin/normalize.ts` is **eight lines of rule** — and that is the finding, not an omission.
+The real defects were in the engine's own number handling.
+
+### Already correct, and untouched
+
+Years read DIGIT-BY-DIGIT (2009年 → 二零零九年), which is right and is not the cardinal reading. Full dates
+compose (2011年3月14日 → year digit-wise, month and day cardinal). A century takes the cardinal (20世纪).
+点/分 clock readings, 第N ordinals, 万/亿 myriad grouping (10⁴ → 一万, 10⁸ → 一亿), the 百分之 PREFIX from the
+shared symbol tier, full-width punctuation as clause marks, and Latin-run delegation to English — which is
+the right reading for UTC / NBA / GPS as Chinese speakers say them.
+
+### The three engine defects, all found by probing the corpus form rather than the canonical form
+
+1. **The "following character" test did not skip whitespace — and the corpus always has the space.**
+   `2009 年` and `2 个人` are how the corpus writes them (272 years; every 两 case), so the literal next
+   character was a space and BOTH rules silently failed. Years came out as the cardinal 两千零九年 instead
+   of 二零零九年, and `2 个人` as 二个人 instead of 两个人. This is the same class of failure as Hindi's `\b`
+   problem: a rule that looks correct, matches nothing, and leaves output that is wrong but plausible.
+2. **The number pattern did not accept comma grouping** (×61): `783,562` was read as two numbers with a
+   PAUSE between them — 七百八十三, 五百六十二 — rather than 七十八万三千五百六十二.
+3. **Currency signs were dropped outright** (`$50` → 五十, losing 美元) and `°C` fell through to the English
+   reading of the bare letter C. Both are now data in the shared symbol tier, along with km/公里, m/米,
+   kg/千克 and km/h.
+
+### The one genuinely Mandarin rewrite
+
+Chinese states a fraction in the OPPOSITE order from the western notation: 1/5 is 五分之一, "of five parts,
+one". The rule reorders it and leaves it in DIGITS, so the engine's own numeral substitution reads it.
+Boundaries are explicit lookarounds again — `\b` finds no boundary against Han script either.
+
+### Verification
+
+- 198 files / 2118 tests pass (5 new); `tsc --noEmit` clean.
+- Referee eval byte-identical: 359/424 (84.7%) folded, 94.9% symbol.
+- cmn corpus, both columns: 224–240 of 3,246 changed, 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray
+  symbols. Sampled review found them all improvements — 2016年, 2004年, 1639年, 1965年, 1993年, 1957年 all
+  moving from the cardinal to the correct digit-by-digit reading.
+
+### Pattern status after five languages
+
+The recurring lesson is now clear enough to state as a rule: **probe the corpus's actual surface form, not
+the canonical one.** Three of the five languages had a rule that was correct in principle and matched
+nothing in practice — French `\b` inside an accented word, Hindi `\b` before Devanagari, Mandarin a
+lookahead that met a space the canonical form does not contain. In every case the output stayed plausible,
+so only a corpus diff exposed it.
