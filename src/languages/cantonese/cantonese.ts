@@ -9,12 +9,14 @@ import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { DIGITS, normalizeCantonese } from "./normalize.ts";
 
 interface CantoneseDef {
     initials: Record<string, string>;
     finals: Record<string, string>;
     tones: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    measureWords: string;
 }
 const DEF = loadManifest<CantoneseDef>(import.meta.url, "cantonese.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
@@ -86,9 +88,28 @@ function hanRun(run: string): string {
     return out.join(" ");
 }
 
+/**
+ * A SYNTHESIZED numeral string → IPA, read one character at a time.
+ *
+ * #562: it must NOT go through hanRun(). Greedy longest-match segmentation looks up whole words, and the
+ * rime-cantonese dict carries a colloquial lexical entry 十九 = "sap1 gau1" — so every composed number
+ * containing 十九 was mis-toned: 29 → 二十九 segmented as 二 + 十九 and came out ji6 sap1 gau1 instead of
+ * ji6 sap6 gau2. 18 of the 208 distinct integers in the corpus were hit, all from that one entry, including
+ * every cardinal year ending in 9 with a non-zero tens digit (1469, 1759, 1889, 1989 …). A number the engine
+ * itself composed has no lexical word boundaries to discover — its characters are digits — so per-character
+ * lookup is both the fix and the honest model. Text the AUTHOR wrote in Han numerals still goes through
+ * hanRun and keeps whatever lexical reading the dict has for it.
+ */
+function numeralRun(han: string): string {
+    return [...han]
+        .map((c) => hanRun(c))
+        .filter((s) => s !== "")
+        .join(" ");
+}
+
 // Han numeral composition (shared Chinese system): 零一二三四五六七八九 + 十百千萬億. The Han string is then
-// phonemized through the same dict→jyutping→IPA path, so no separate number IPA is authored.
-const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+// phonemized through the same dict→jyutping→IPA path, so no separate number IPA is authored. DIGITS is owned
+// by normalize.ts so the digit-string reading (years, decimals) and this cardinal reading cannot drift apart.
 const SMALL = ["", "十", "百", "千"];
 function under10000(n: number): string {
     if (n === 0) return "";
@@ -129,14 +150,27 @@ class CantonesePhonemizer implements Phonemizer {
     text(input: string): string {
         // Whole-string Jyutping input (tone digits present) → direct path.
         if (JYUTPING.test(input.trim())) return jyutpingToIpa(input);
+        // #562: the Cantonese normalization pass runs first, so what reaches the tokenizer is either a word
+        // the dict speaks or a number whose CARDINAL reading is the correct one.
+        input = normalizeCantonese(input, DEF.measureWords);
         const { sink, finish } = clauseSink();
-        const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
+        // The clause-mark alternation is the manifest's keys, so adding a mark to the data is enough (…, ─,
+        // the ﹑ variant comma). The Latin run is \p{Script=Latin} + combining marks, not [A-Za-z]: the ASCII
+        // class split every accented name into fragments — Müslüm Gürses reached the English phonemizer as
+        // M / sl / m / G / rses ("ˈɛm sɫ ˈɛm …") instead of two words. 9 tokens in the corpus.
+        const marks = Object.keys(CLAUSE_MARK)
+            .map((k) => k.replace(/[.*+?^${}()|[\]\\-]/gu, "\\$&"))
+            .join("");
+        const tok = new RegExp(
+            `(\\p{Script=Han}+)|(\\d+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${marks}])`,
+            "gu",
+        );
         let m: RegExpExecArray | null;
         while ((m = tok.exec(input))) {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);
-                if (Number.isSafeInteger(n)) sink.emit(hanRun(integerToHan(n)));
+                if (Number.isSafeInteger(n)) sink.emit(numeralRun(integerToHan(n)));
             } else if (m[3]) sink.emit(this.foreign ? this.foreign(m[3]) : "");
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
