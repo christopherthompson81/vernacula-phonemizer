@@ -8,6 +8,14 @@ next one reused.
 which is not already a pronounceable word into words the existing pipeline speaks. Pure text→text, no IPA.
 It runs inside the engine's `text()`, before tokenization.
 
+**The one allowed exception to "pure text→text."** If a rewrite's output words must reach the word path
+under different options than plain text would give them, the rule may be matched in the engine's `TOKEN`
+and routed into an exported function — but **the rule itself still lives in `normalize.ts`**. Turkish is
+the worked example: its number words need `phonemizeWord(w, /*finalStress*/ true)`, because the word path's
+pre-accenting morphology mis-stresses exactly the `-Iz` cardinals (`sekiz`, `dokuz`, `otuz`), and emitting
+them as plain text regressed ~60 corpus years in the 1900s. Take the exception only with that kind of
+measured evidence, and document the coupling at the `TOKEN` definition.
+
 **The premise this rests on.** Every language's orthographic conventions are its own. There is no shared
 "normalize dates" function, because Japanese writes 3月14日, German writes `14. März`, and Urdu writes the
 ordinal suffix ویں. What *is* shared is the procedure, the failure modes, and the verification. That is
@@ -156,6 +164,17 @@ Then emit "before" from that worktree and "after" from your own tree, and compar
 (cd ../norm-baseline && npx tsx tools/normalization-corpus-diff.ts emit --lang xx --corpus xx_yy --out /tmp/xx.before)
 npx tsx tools/normalization-corpus-diff.ts emit --lang xx --corpus xx_yy --out /tmp/xx.after
 npx tsx tools/normalization-corpus-diff.ts compare --before /tmp/xx.before --after /tmp/xx.after
+```
+
+**0. Confirm you are in the right repository before anything else.** In the first fan-out all four agents
+were handed a worktree of a *different* project entirely — one with no `src/languages/`, no `tools/`, no
+playbook. Three noticed and built their own worktree of this repo; one worked directly in the main
+checkout. Check for `docs/normalization_playbook.md` and `src/languages/`; if they are absent, you are in
+the wrong tree. Create your own:
+
+```sh
+git -C /path/to/vernacula-phonemizer worktree add <dir> -b norm-<lang>-562 main
+ln -s /path/to/vernacula-phonemizer/node_modules <dir>/node_modules   # gitignored, so not in the worktree
 ```
 
 **3. One language, one commit, and touch only that language.** The only shared files are `src/core/*` and
