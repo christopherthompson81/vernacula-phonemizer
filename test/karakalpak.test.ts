@@ -28,6 +28,19 @@ describe("Karakalpak (qaraqalpaq tili) canonical IPA", () => {
         expect(phonemizeWord("ISHAN")).toBe("ɯˈʃɑn"); // all-caps too
     });
 
+    test("NUMBERS — Turkic decimal in the 2016 Latin orthography", () => {
+        const kaa = createKarakalpak();
+        // Data + provenance: src/languages/karakalpak/numbers.ts (Karakalpak Wikipedia "Sanlıq" + Omniglot).
+        expect(kaa.text("7").trim()).toBe("ʒeˈti"); // jeti — the Kipchak j- Nogai has lost
+        expect(kaa.text("11").trim()).toBe("ˈon ˈbir"); // on bir — teens are two words
+        expect(kaa.text("25").trim()).toBe("ʒiɡirˈmɑ ˈbes"); // jigirma bes — ⟨jigirma⟩ 20, not Nogai's contracted йырма
+        expect(kaa.text("100").trim()).toBe("ˈʒyz"); // júz — the multiplier "bir" is dropped
+        expect(kaa.text("555").trim()).toBe("ˈbes ˈʒyz eˈliw ˈbes"); // bes júz eliw bes — ⟨eliw⟩ 50 (the -w form, cf. Kazakh елу)
+        expect(kaa.text("1984").trim()).toBe("ˈmɯŋ toˈʁɯz ˈʒyz sekˈsen ˈtørt"); // mıń toǵız júz seksen tórt
+        expect(kaa.text("12345").trim()).toBe("ˈon eˈki ˈmɯŋ ˈyʃ ˈʒyz ˈqɯrq ˈbes"); // on eki mıń úsh júz qırq bes
+        expect(kaa.text("1000000").trim()).toBe("ˈbir milliˈon"); // bir million
+    });
+
     test("text() tokenizes both capital ⟨I⟩ (dotless) and ⟨İ⟩ (dotted)", () => {
         const kaa = createKarakalpak();
         // ⟨İ⟩ (U+0130) is the Karakalpak capital of ⟨i⟩ — it must survive tokenization (not drop the /i/).

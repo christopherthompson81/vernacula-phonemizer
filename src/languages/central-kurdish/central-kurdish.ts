@@ -5,15 +5,19 @@
  * clusters) → not emitted here, and folded in the eval. A left-to-right greedy scan (وو digraph, then single
  * letters) resolves the و/ی matres lectionis (glide [w]/[j] next to a vowel, else the vowel [u]/[iː]); ئ→ʔ is the
  * word-initial glottal onset; н→ŋ before a velar. Signatures: pharyngeals ħ/ʕ, velarised ڵ→ɫ, trill ڕ→r vs tap
- * ر→ɾ. Complements the Latin-script Kurmanji (kmr). See docs/investigations/ckb_native_bringup_investigation.md.
+ * ر→ɾ. Cardinals use the Iranian decimal compositor with the enclitic -u connective (numbers.ts).
+ * Complements the Latin-script Kurmanji (kmr). See docs/investigations/ckb_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { renderNumber } from "../../core/numbers.ts";
+import { iranianNumberWords, type CkbNumbersDef } from "./numbers.ts";
 
 interface CkbDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
+    numbers: CkbNumbersDef;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<CkbDef>(import.meta.url, "central-kurdish.jsonc");
@@ -46,6 +50,13 @@ export function phonemizeWord(word: string): string {
     return toks.join("");
 }
 
+/** A run of ASCII digits → the spoken Sorani cardinal in canonical IPA (out-of-range integers pass through). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return renderNumber(n, DEF.numbers, phonemizeWord, iranianNumberWords);
+}
+
 // A word (Sorani Perso-Arabic letters, U+0600–U+06FF incl. ZWNJ) / number / punctuation token.
 const TOKEN = /([ؠ-ۿ‌]+)|(\d+)|([،؛؟.!?…,:])/gu;
 
@@ -56,7 +67,7 @@ class CentralKurdishPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (dialect-variable orthography — digits passed through)
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -65,7 +76,7 @@ class CentralKurdishPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Central Kurdish (Sorani) phonemizer. `foreign` handles embedded Latin runs; numbers deferred. */
+/** Build the Central Kurdish (Sorani) phonemizer. `foreign` handles embedded Latin runs; numbers via numbers.ts. */
 export function createCentralKurdish(foreign?: ForeignPhonemizer): Phonemizer {
     return new CentralKurdishPhonemizer(foreign);
 }

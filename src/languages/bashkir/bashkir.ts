@@ -9,6 +9,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeWord as russianWord } from "../russian/russian.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Context-free consonants. ⟨ҡ⟩/⟨ғ⟩ are the written uvulars; ⟨ҫ⟩/⟨ҙ⟩ the interdentals; ⟨р⟩→[ɾ] tap; ⟨л⟩ dark/clear below.
 const CONS: Record<string, string> = {
@@ -74,14 +75,22 @@ export function phonemizeWordNative(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A Bashkir Cyrillic word / number / punctuation. Numbers deferred.
+/** A digit run → spoken Bashkir, phonemized through the same g2p (data + provenance in numbers.ts). The number words
+ *  go through the public `phonemizeWord`, so миллион/миллиард get the same loan treatment they would in running text. */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
+// A Bashkir Cyrillic word / number / punctuation.
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class BashkirPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

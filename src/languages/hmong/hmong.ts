@@ -12,6 +12,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToHmongWords } from "./numbers.ts";
 
 interface HmongDef {
     initials: Record<string, string>;
@@ -54,12 +55,13 @@ class HmongPhonemizer implements Phonemizer {
     text(input: string): string {
         const { sink, finish } = clauseSink();
         // RPA syllables are space/hyphen-separated Latin letter-runs.
-        const tok = /([a-zA-Z]+)|([。，、？！；：.,?!;:])/gu;
+        const tok = /([a-zA-Z]+)|(\d+)|([。，、？！；：.,?!;:])/gu;
         let m: RegExpExecArray | null;
         while ((m = tok.exec(input))) {
             if (m[1]) sink.emit(syllableToIpa(m[1]));
-            else if (m[2]) {
-                const mk = CLAUSE_MARK[m[2]];
+            else if (m[2]) for (const wd of numberToHmongWords(Number(m[2]))) sink.emit(syllableToIpa(wd));
+            else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
         }

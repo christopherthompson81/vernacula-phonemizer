@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/shan/shan.ts";
 
 // Canonical-IPA goldens for Shan / Tai Long (shn) — လိၵ်ႈတႆး, Southwestern Tai (Tai-Kadai), the SHAN ABUGIDA (a
@@ -34,4 +35,27 @@ describe("Shan (Tai Long) canonical IPA", () => {
         expect(phonemizeWord("ၸႂ်")).toBe("t͡ɕaɰ˨˦"); // 'heart/mind' — ⟨ႂ⟩ coda → [ɰ] offglide
         expect(phonemizeWord("ၵျေႃး")).toBe("d͡ʑɔː˥"); // palatalised ⟨ၵျ⟩→[d͡ʑ] + ⟨ေႃ⟩→[ɔː]
     });
+});
+
+// Cardinal numbers — Shan is Southwestern Tai, so the system is structurally Thai's: 20 is သၢဝ်း (replacing the
+// whole "twenty"), a final 1 in a compound is ဢဵတ်း (not ၼိုင်ႈ), tens 30–90 are unit+သိပ်း, and 10⁴/10⁵ are their
+// own words (မိုၼ်ႇ / သႅၼ်). Numerals from Wiktionary "Category:Shan numerals" + Omniglot "Numbers in Shan".
+// NOTE 10⁶: neither source attests a word for a million, so it composes on သႅၼ် — သိပ်းသႅၼ် (see shan.ts).
+describe("Shan (shn) cardinal numbers", () => {
+    for (const [n, ipa] of [
+        [0, "sʰun˨˦"], // သုၼ်
+        [7, "t͡ɕet̚˥"], // ၸဵတ်း
+        [11, "sʰip̚˥ ʔet̚˥"], // သိပ်းဢဵတ်း — final 1 is ဢဵတ်း
+        [20, "sʰaːw˥"], // သၢဝ်း — the irregular twenty (no သိပ်း)
+        [21, "sʰaːw˥ ʔet̚˥"], // သၢဝ်းဢဵတ်း
+        [42, "sʰiː˩ sʰip̚˥ sʰɔŋ˨˦"], // သီႇသိပ်းသွင် — unit-first decade
+        [100, "nɯŋ˧˧˨ paːk̚˩"], // ၼိုင်ႈပၢၵ်ႇ
+        [1000, "nɯŋ˧˧˨ heŋ˨˦"], // ၼိုင်ႈႁဵင်
+        [12345, "nɯŋ˧˧˨ mɯn˩ sʰɔŋ˨˦ heŋ˨˦ sʰaːm˨˦ paːk̚˩ sʰiː˩ sʰip̚˥ haː˧˧˨"], // မိုၼ်ႇ myriad magnitude
+        [1000000, "sʰip̚˥ sʰɛn˨˦"], // သိပ်းသႅၼ် — 10 × 10⁵ (no attested 10⁶ word)
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(phonemize(String(n), "shn")).toBe(ipa);
+        });
+    }
 });

@@ -74,3 +74,26 @@ describe("Tibetan (Standard/Lhasa) canonical IPA", () => {
         expect(phonemizeWord("ཟླ")).toBe("ta˩"); // zla 'moon' — zl- lexical exception → [t]
     });
 });
+
+// ASCII digit runs are now composed too (previously only the Tibetan digits ༠–༩ were tokenized, so "21" was
+// dropped), and the magnitude ladder runs to 10⁹: བརྒྱ 10² · སྟོང 10³ · ཁྲི 10⁴ · འབུམ 10⁵ · ས་ཡ 10⁶ · བྱེ་བ 10⁷ ·
+// དུང་ཕྱུར 10⁸ · ཐེར་འབུམ 10⁹ (Wikipedia "Tibetan numerals"). Every numeral below is phonemized by the ordinary
+// syllable-stack engine — these goldens are what that engine actually reads out of the spellings.
+describe("Tibetan (bo) cardinal numbers — ASCII digits + the full magnitude ladder", () => {
+    const num = (n: number): string => getPhonemizer("bo").text(String(n)).trim();
+    for (const [n, ipa] of [
+        [0, "lɛʔ˥koː˥"], // ཀླད་ཀོར klad kor
+        [7, "ty\u0303ː˩"], // བདུན bdun
+        [10, "t͡ɕu˥"], // བཅུ bcu
+        [21, "ɲeː˩t͡ɕiʔ˥"], // ཉེར་གཅིག — the 20s connective ཉེར
+        [42, "ɕe˩ɲiː˥"], // ཞེ་གཉིས — the 40s connective ཞེ
+        [100, "kʲa˩"], // བརྒྱ — multiplier 1 unspoken
+        [1000, "toŋ˥"], // སྟོང
+        [12345, "ʈ͡ʂʰi˥taŋ˥ɲiː˥toŋ˥taŋ˥sum˥kʲa˥taŋ˥ɕe˥ŋa˥"], // ཁྲི 10⁴, remainders joined with དང dang
+        [1000000, "sa˥ja˥"], // ས་ཡ sa ya 10⁶ — previously fell back to leaking the digits
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(num(n)).toBe(ipa);
+        });
+    }
+});

@@ -248,32 +248,40 @@ function numToTibetan(n: number): string | null {
             u = n % 10;
         return u === 0 ? DECADE[t]! : CONNECT[t]! + "་" + UNITS[u]!;
     }
-    const join = (head: string, r: number): string => (r === 0 ? head : head + "་དང་" + numToTibetan(r));
-    if (n < 1000) {
-        const h = Math.floor(n / 100);
-        return join((h === 1 ? "" : UNITS[h]! + "་") + "བརྒྱ", n % 100);
-    }
-    if (n < 10000) {
-        const th = Math.floor(n / 1000);
-        return join((th === 1 ? "" : UNITS[th]! + "་") + "སྟོང", n % 1000);
-    }
-    if (n < 100000) {
-        const tt = Math.floor(n / 10000);
-        return join((tt === 1 ? "" : UNITS[tt]! + "་") + "ཁྲི", n % 10000);
+    // Magnitudes, largest first. Tibetan names every decimal power up to 10⁹: བརྒྱ 10², སྟོང 10³, ཁྲི 10⁴,
+    // འབུམ 10⁵, ས་ཡ 10⁶, བྱེ་བ 10⁷, དུང་ཕྱུར 10⁸, ཐེར་འབུམ 10⁹ (Wikipedia "Tibetan numerals": gya, tong, thri,
+    // bum, sa ya, che wa, dung chur, ther pum). A multiplier of 1 is left unspoken (བརྒྱ = "a hundred") and the
+    // remainder is joined with དང dang.
+    for (const [v, w] of MAGNITUDE) {
+        if (n >= v) {
+            const q = Math.floor(n / v);
+            const head = (q === 1 ? "" : numToTibetan(q) + "་") + w;
+            const r = n % v;
+            return r === 0 ? head : head + "་དང་" + numToTibetan(r);
+        }
     }
     return null;
 }
+const MAGNITUDE: [number, string][] = [
+    [1e9, "ཐེར་འབུམ"], [1e8, "དུང་ཕྱུར"], [1e7, "བྱེ་བ"], [1e6, "ས་ཡ"],
+    [1e5, "འབུམ"], [1e4, "ཁྲི"], [1e3, "སྟོང"], [100, "བརྒྱ"],
+];
 
-/** A numeral run → Tibetan number words → IPA (spelling deferred beyond the safe-integer range; digits then pass through). */
+/** A numeral run → Tibetan number words → IPA. Beyond the named 10⁹ ladder (or a non-safe integer) the digits are
+ *  read one by one as number words rather than leaked as digits. */
 function number(digits: string): string {
     const n = Number(digits);
     const words = Number.isSafeInteger(n) ? numToTibetan(n) : null;
-    return words === null ? [...digits].map((d) => TNUM[d] ?? d).join("") : phonemizeWord(words);
+    if (words !== null) return phonemizeWord(words);
+    return [...digits]
+        .filter((c) => c >= "0" && c <= "9")
+        .map((d) => phonemizeWord(d === "0" ? "ཀླད་ཀོར" : UNITS[Number(d)]!))
+        .join(" ");
 }
 
 // A Tibetan numeral run, then a word (Tibetan letters/signs + intra-word tsheg), then clause punctuation
 // (shad ། and Latin .?! break clauses).
-const TOKEN = /([༠-༩]+)|([ༀ-࿿]+)|([.!?])|([།༎ ,;:])/gu;
+const TOKEN = /([༠-༩\d]+)|([ༀ-࿿]+)|([.!?])|([།༎ ,;:])/gu;
 
 class TibetanPhonemizer implements Phonemizer {
     text(input: string): string {

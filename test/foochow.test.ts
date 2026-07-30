@@ -46,3 +46,28 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
         expect(createFoochow().text("dṳ̆ng").trim()).toBe("tyŋ˥˥"); // ⟨ṳng⟩→yŋ, not truncated to "t ŋ̍"
     });
 });
+
+// Cardinal numbers — Min Dong is Sinitic (myriad grouping 萬 10⁴ / 億 10⁸, internal zero spoken 零 lìng), but unlike
+// cantonese/minnan the numerals CANNOT route through a Han reading dict (cdo has none that is not this engine's own
+// referee), so the compositor emits BÀNG-UÂ-CÊ and the converter above reads it. Fuzhou specifics: a magnitude
+// multiplier of 1 is 蜀 siŏh (not 一 ék), of 2 is 兩 lâng before 百/千/萬/億 but 二 nê before 十; 八 báik (8) and
+// 百 báik (100) really are homophones. Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers (see foochow.ts).
+describe("Min Dong (cdo) cardinal numbers — Bàng-uâ-cê composition", () => {
+    const cdo = createFoochow();
+    for (const [n, ipa] of [
+        [0, "liŋ˥˧"], // 零 lìng
+        [7, "t͡sʰɛiʔ˨˦"], // 七 chék
+        [10, "sɛiʔ˨˦"], // 十 sék
+        [11, "sɛiʔ˨˦ ɛiʔ˨˦"], // 十一 sék-ék — the bare unit digit is ék
+        [20, "nɛi˨˦˨ sɛiʔ˨˦"], // 二十 nê-sék — 二 nê before 十
+        [21, "nɛi˨˦˨ sɛiʔ˨˦ ɛiʔ˨˦"], // 廿一/二十一
+        [100, "suoʔ˥ paiʔ˨˦"], // 蜀百 siŏh-báik — multiplier 1 is 蜀, not 一
+        [1000, "suoʔ˥ t͡sʰieŋ˥˥"], // 蜀千 siŏh-chiĕng
+        [12345, "suoʔ˥ uɑŋ˨˦˨ lɑŋ˨˦˨ t͡sʰieŋ˥˥ saŋ˥˥ paiʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ ŋou˨˦˨"], // 蜀萬兩千… — 兩 lâng before 千
+        [1000000, "suoʔ˥ paiʔ˨˦ uɑŋ˨˦˨"], // 蜀百萬 — myriad grouping, no "million" word
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(cdo.text(String(n)).trim()).toBe(ipa);
+        });
+    }
+});

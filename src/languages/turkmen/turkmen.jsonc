@@ -23,4 +23,21 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // NUMBERS — Turkmen Latin spellings; canonical IPA DERIVED via the same grapheme scan above (never hand-written
+    // IPA). Turkic decimal system: a distinct word for each round ten (10 = on lives in `tens`), then juxtaposition
+    // with NO connector — 11 = on bir, 25 = ýigrimi bäş, 121 = ýüz ýigrimi bir. Compounds are written as SEPARATE
+    // words ("Goşma sanlar goşulyp ýazylman, aýry-aýry ýazylýarlar"), unlike Tatar's fused unbér.
+    //
+    // SOURCE: enedilim.com "Sanlar" (Türkmen dili / Morfologiýa we orfografiýa) for the composition rule and the
+    // worked example "bir müň dokuz ýüz togsan iki" (1992); Wiktionary "Appendix:Turkmen numerals" (Module:number
+    // list/data/tk) + Omniglot "Numbers in Turkmen" for the lexemes.
+    // JUDGMENT CALL — 90: Omniglot spells it ⟨dogsan⟩, Wiktionary's data module ⟨togsan⟩. Taken as "dogsan": it
+    // matches Turkmen's initial-d in ⟨dokuz⟩ 9 (vs Kipchak тоғыз/тоқсан), and it is the form in the Turkmen
+    // orthographic tradition Omniglot follows. The enedilim example writes "togsan", so both circulate.
+    "numbers": {
+        "units": ["nol", "bir", "iki", "üç", "dört", "bäş", "alty", "ýedi", "sekiz", "dokuz"],
+        "tens": { "10": "on", "20": "ýigrimi", "30": "otuz", "40": "kyrk", "50": "elli", "60": "altmyş", "70": "ýetmiş", "80": "segsen", "90": "dogsan" },
+        "magnitudes": { "hundred": "ýüz", "thousand": "müň", "million": "million", "billion": "milliard" }
+    },
 }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord } from "../src/languages/tatar/tatar.ts";
+import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Standard Tatar (tt) — Татар теле, Kipchak Turkic, CYRILLIC (official), the fleet's first
 // Tatar. Signature: VOWEL-HARMONY backing of ⟨к г⟩ — [q]/[ʁ] next to a BACK vowel (ак→ɑq) but [k]/[ɡ] next to a
@@ -26,6 +27,19 @@ describe("Tatar (Татар теле) canonical IPA", () => {
         expect(phonemizeWord("татар")).toBe("tɑˈtɑr"); // 'Tatar' — BACK word: ⟨а⟩→ɑ
         expect(phonemizeWord("ана")).toBe("ɑˈnɑ"); // 'mother' — BACK: ⟨а⟩→ɑ
         expect(phonemizeWord("китап")).toBe("kiˈtap"); // 'book' — FRONT word (⟨и⟩): ⟨а⟩→a, ⟨к⟩→k
+    });
+
+    test("NUMBERS — Turkic decimal with Tatar's FUSED teens", () => {
+        const tt = getPhonemizer("tt");
+        // Data + provenance: src/languages/tatar/numbers.ts (Wiktionary Module:number list/data/tt + Omniglot).
+        expect(tt.text("7").trim()).toBe("ʑiˈde"); // җиде — a bare unit
+        expect(tt.text("11").trim()).toBe("unˈber"); // унбер — ★ ONE word (one stress domain), Tatar's deviation
+        expect(tt.text("25").trim()).toBe("jeɡerˈme ˈbiʃ"); // егерме биш — 21-99 stay TWO words
+        expect(tt.text("100").trim()).toBe("ˈjøz"); // йөз — the multiplier "бер" is dropped
+        expect(tt.text("555").trim()).toBe("ˈbiʃ ˈjøz ilˈle ˈbiʃ"); // биш йөз илле биш
+        expect(tt.text("1984").trim()).toBe("ˈmeŋ tuˈʁɨz ˈjøz sikˈsæn ˈdyrt"); // мең тугыз йөз сиксән дүрт
+        expect(tt.text("12345").trim()).toBe("uniˈke ˈmeŋ ˈøɕ ˈjøz qɨˈrɨq ˈbiʃ"); // унике мең өч йөз кырык биш — fused teen as a thousands multiplier
+        expect(tt.text("1000000").trim()).toBe("ˈber milliˈon"); // бер миллион — the leading "бер" IS kept here
     });
 
     test("⟨ч⟩→[ɕ] (Kazan deaffrication), ⟨г⟩ neutral-⟨а⟩, initial ⟨е⟩→[je], loan-cluster stress", () => {

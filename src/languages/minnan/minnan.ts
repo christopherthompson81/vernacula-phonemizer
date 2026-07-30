@@ -131,6 +131,74 @@ function hanRun(run: string): string {
     return out.join(" ");
 }
 
+// ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
+// Digit runs were dropped entirely (the tokenizer had no (\d+) branch). Min Nan is Sinitic, so — exactly as in
+// cantonese.ts — an integer is composed into the shared Chinese numeral string 零一二三四五六七八九 + 十百千萬億
+// (myriad grouping: 萬 10⁴, 億 10⁸) and READ THROUGH THE SHIPPED HAN DICTIONARY. No numeral readings are authored
+// here: every character's Tâi-lô comes from dict() (dict-chars.tsv, the ChhoeTaigi single-char supplement, overlaid
+// by the MOE word dict — see dict.PROVENANCE.md), and the Tâi-lô→IPA converter does the rest.
+//
+// Two deliberate departures from cantonese.ts's plain hanRun():
+//  1. the numeral string is read CHARACTER BY CHARACTER rather than by greedy longest word match, because the word
+//     dict carries numeral-shaped multi-char entries whose readings are not the numeral reading (e.g. 一百 is
+//     entered as tsi̍t-pà, whereas the numeral is tsi̍t-pah — cf. 一百箍 tsi̍t-pah-khoo in the same dict);
+//  2. ONE positional rule: 一 is /it/ as a final unit digit but /tsi̍t/ as a magnitude multiplier — 十一 tsa̍p-it,
+//     二十一 jī-tsa̍p-it (attested in dict.tsv as 十一叔 tsa̍p-it-tsik) vs 一百 tsi̍t-pah. The dict's single-char entry
+//     is the multiplier form tsi̍t, so only the final-unit case needs the override.
+// The characters are hyphen-joined into one Tâi-lô token so the existing word-internal tone sandhi applies across
+// the numeral, as it does in speech.
+const HAN_DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const HAN_SMALL = ["", "十", "百", "千"];
+const HAN_MAG = new Set(["十", "百", "千", "萬", "億"]);
+
+function under10000(n: number): string {
+    if (n === 0) return "";
+    let out = "";
+    let zero = false;
+    for (let p = 3; p >= 0; p--) {
+        const unit = Math.floor(n / 10 ** p) % 10;
+        if (unit === 0) {
+            if (out) zero = true;
+        } else {
+            if (zero) out += HAN_DIGITS[0];
+            zero = false;
+            out += (p === 1 && unit === 1 && !out ? "" : HAN_DIGITS[unit]!) + HAN_SMALL[p]!; // leading 一十 → 十
+        }
+    }
+    return out;
+}
+
+/** An integer → the Chinese numeral string (myriad grouping 萬/億), as in cantonese.ts. */
+function integerToHan(n: number): string {
+    if (n === 0) return HAN_DIGITS[0]!;
+    if (n < 0) return "";
+    const yi = Math.floor(n / 1_0000_0000);
+    const wan = Math.floor((n % 1_0000_0000) / 10000);
+    const rest = n % 10000;
+    let out = "";
+    if (yi) out += integerToHan(yi) + "億";
+    if (wan) out += under10000(wan) + "萬";
+    if (rest) {
+        if ((yi || wan) && rest < 1000) out += HAN_DIGITS[0];
+        out += under10000(rest);
+    }
+    return out;
+}
+
+/** A Chinese numeral string → IPA: per-character dict readings (+ the 一 it/tsi̍t rule), hyphen-joined so tone
+ *  sandhi runs across the numeral. */
+function hanNumeralRun(han: string): string {
+    const chars = [...han];
+    const tailo = chars
+        .map((c, i) => {
+            if (c === "一" && !HAN_MAG.has(chars[i + 1] ?? "")) return "it"; // final unit digit, not a multiplier
+            return dict().get(c) ?? "";
+        })
+        .filter(Boolean)
+        .join("-");
+    return tailoToIpa(tailo);
+}
+
 export type ForeignPhonemizer = (latin: string) => string;
 
 class MinnanPhonemizer implements Phonemizer {
@@ -138,13 +206,16 @@ class MinnanPhonemizer implements Phonemizer {
     text(input: string): string {
         const { sink, finish } = clauseSink();
         const tok =
-            /(\p{Script=Han}+)|([A-Za-zàáâāǎ̀-̍]+(?:-[A-Za-zàáâāǎ̀-̍]+)*)|([。，、？！；：.,?!;:])/gu;
+            /(\p{Script=Han}+)|(\d+)|([A-Za-zàáâāǎ̀-̍]+(?:-[A-Za-zàáâāǎ̀-̍]+)*)|([。，、？！；：.,?!;:])/gu;
         let m: RegExpExecArray | null;
         while ((m = tok.exec(input))) {
             if (m[1]) sink.emit(hanRun(m[1]));
-            else if (m[2]) sink.emit(tailoToIpa(m[2]));
-            else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+            else if (m[2]) {
+                const n = Number(m[2]);
+                if (Number.isSafeInteger(n)) sink.emit(hanNumeralRun(integerToHan(n)));
+            } else if (m[3]) sink.emit(tailoToIpa(m[3]));
+            else if (m[4]) {
+                const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
         }

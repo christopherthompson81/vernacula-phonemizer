@@ -36,3 +36,28 @@ describe("Hmong (White Hmong) canonical IPA — RPA → IPA converter", () => {
             .toBe("ku˧˦ hai̯˩ lu˩ m̥ɒ̃˥ ."); // "I speak Hmong"
     });
 });
+
+// Cardinal numbers — decimal and analytic. 11–19 are kaum + unit; 20 is the irregular two-word nees nkaum; 30–90 are
+// unit + caug (30/40/50) or caum (60–90), a real tone alternation. A magnitude ALWAYS carries its multiplier, incl.
+// "one" (ib puas, ib txhiab, ib roob), and thousands group Western-style, so 10⁵ is ib puas txhiab. Source: Wikivoyage
+// "Hmong phrasebook" Numbers + Wiktionary "Category:White Hmong numerals" (see numbers.ts).
+describe("Hmong (hmn) cardinal numbers", () => {
+    const hmn = createHmong();
+    for (const [n, ipa] of [
+        [0, "sɒ̃˩̰"], // xoom
+        [7, "ça˧"], // xya
+        [10, "kau̯˩̰"], // kaum
+        [11, "kau̯˩̰ ʔi˥"], // kaum ib
+        [20, "nẽ˩ ᵑɡau̯˩̰"], // nees nkaum — the irregular two-word twenty
+        [21, "nẽ˩ ᵑɡau̯˩̰ ʔi˥"], // nees nkaum ib
+        [42, "pˡau̯˥ cau̯˧˩̤ ʔɒ˥"], // plaub caug ob — the caug decade
+        [100, "ʔi˥ puə̯˩"], // ib puas — multiplier always spoken
+        [1000, "ʔi˥ t͡sʰiə̯˥"], // ib txhiab
+        [12345, "kau̯˩̰ ʔɒ˥ t͡sʰiə̯˥ pe˥ puə̯˩ pˡau̯˥ cau̯˧˩̤ t͡ʂi˥"], // kaum ob txhiab peb puas plaub caug tsib
+        [1000000, "ʔi˥ ʈɒ̃˥"], // ib roob
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(hmn.text(String(n)).trim()).toBe(ipa);
+        });
+    }
+});

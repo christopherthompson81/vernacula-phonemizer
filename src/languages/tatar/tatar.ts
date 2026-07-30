@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Plain (context-free) consonants. ⟨к г⟩ are harmony-conditioned (handled below); ⟨я ю е ё⟩ are iotated.
 const CONS: Record<string, string> = {
@@ -89,14 +90,21 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A word (Tatar Cyrillic letters) / number / punctuation token. Numbers deferred.
+/** A digit run → spoken Tatar, phonemized through the same Cyrillic g2p (see numbers.ts for the data + provenance). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
+// A word (Tatar Cyrillic letters) / number / punctuation token.
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class TatarPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

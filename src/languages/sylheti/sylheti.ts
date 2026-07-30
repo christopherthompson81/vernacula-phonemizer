@@ -3,17 +3,20 @@
  * (Bengali-Assamese), written in the SYLOTI NAGRI abugida. Read by the generic engine (core/abugida.ts) with the
  * inherent vowel /ɔ/ and Bengali-style inherent-vowel deletion (final drop after a single coda, retain [o] after a
  * cluster; medial Ohala deletion). Sylheti's signature is SPIRANTISATION (ꠇ/ꠈ→x, ꠌ/ꠍ→s, ꠎ→z, ꠙ→ɸ, ꠚ→f, ꠡ→ʃ,
- * ꠢ→ɦ; aspiration lost on the voiced stops) — the split from Bengali, encoded in the grapheme table. Tone (H/L,
+ * ꠢ→ɦ; aspiration lost on the voiced stops) — the split from Bengali, encoded in the grapheme table. Cardinal
+ * numbers use the INDIC composer (2-2-3 lakh/crore grouping, fused 21-99). Tone (H/L,
  * developed from lost breathy voice) is UNWRITTEN → deferred. See docs/investigations/syl_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
+import { renderNumber, indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface SylhetiDef extends AbugidaDef {
+    numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<SylhetiDef>(import.meta.url, "sylheti.jsonc");
@@ -45,6 +48,13 @@ export function phonemizeWord(word: string): string {
     return x.normalize("NFC");
 }
 
+/** A run of ASCII digits → the spoken Sylheti cardinal in canonical IPA (Indic 2-2-3 lakh/crore grouping). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return renderNumber(n, DEF.numbers, phonemizeWord, indicNumberWords);
+}
+
 // A word (Syloti Nagri block U+A800–A82C) / number / punctuation token.
 const TOKEN = /([ꠀ-꠬]+)|(\d+)|([꠨꠩।.?!,])/gu;
 
@@ -52,7 +62,7 @@ class SylhetiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (Syloti Nagri has no digits — Bengali/Arabic used)
+            else if (m[2]) sink.emit(number(m[2])); // Syloti Nagri has no digits of its own — ASCII/Bengali used
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -61,7 +71,7 @@ class SylhetiPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Sylheti phonemizer (Syloti Nagri abugida; tone + numbers deferred). */
+/** Build the Sylheti phonemizer (Syloti Nagri abugida + Indic cardinals; tone deferred). */
 export function createSylheti(): Phonemizer {
     return new SylhetiPhonemizer();
 }

@@ -29,6 +29,20 @@ describe("Crimean Tatar (qırımtatar tili) canonical IPA", () => {
         expect(phonemizeWord("vatan")).toBe("vɑˈtɑn"); // onset ⟨v⟩ STAYS [v]
     });
 
+    test("NUMBERS — Turkic decimal, Kipchak lexemes under an Oghuz-shaped tens series", () => {
+        const crh = createCrimeanTatar();
+        // Data + provenance: src/languages/crimeantatar/numbers.ts (Wiktionary Module:number list/data/crh +
+        // Category:Crimean Tatar numerals for biñ/the round hundreds + Omniglot).
+        expect(crh.text("7").trim()).toBe("jeˈdi"); // yedi
+        expect(crh.text("11").trim()).toBe("ˈon ˈbir"); // on bir
+        expect(crh.text("42").trim()).toBe("ˈqɯrq eˈki"); // qırq eki — ⟨eki⟩ 2 (Kipchak), not Turkish iki; uvular ⟨qırq⟩ 40
+        expect(crh.text("100").trim()).toBe("ˈjyz"); // yüz — the multiplier "bir" is dropped
+        expect(crh.text("555").trim()).toBe("ˈbeʃ ˈjyz eˈlːi ˈbeʃ"); // beş yüz elli beş — ⟨ll⟩ geminates in elli
+        expect(crh.text("1984").trim()).toBe("ˈbiŋ doˈquz ˈjyz sekˈsen ˈdørt"); // biñ doquz yüz seksen dört — ⟨biñ⟩ 1000 with the velar nasal
+        expect(crh.text("12345").trim()).toBe("ˈon eˈki ˈbiŋ ˈyt͡ʃ ˈjyz ˈqɯrq ˈbeʃ"); // on eki biñ üç yüz qırq beş
+        expect(crh.text("1000000").trim()).toBe("ˈbir milːiˈon"); // bir million
+    });
+
     test("gemination (doubled letter → [Cː]/[Vː]) + the Turkish-I casing", () => {
         expect(phonemizeWord("yollamaq")).toBe("jolːɑˈmɑq"); // ⟨ll⟩→[lː]
         expect(phonemizeWord("şeer")).toBe("ˈʃeːr"); // ⟨ee⟩→[eː]

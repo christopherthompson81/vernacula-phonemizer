@@ -31,6 +31,30 @@
         "ا": "aː", "آ": "aː", "ے": "eː"
     },
 
+    // NUMBERS — Balochi Arabic spellings; the canonical IPA is resolved through the cross-script lexicon
+    // (balochi-lexicon.tsv now carries these headwords with their full vowels — the defective abjad cannot recover
+    // them: ⟨هپت⟩ alone scans to *hpt̪). Composed by balochi/numbers.ts.
+    // SOURCE: Jahani & Korn (2009), "Balochi", in *The Iranian Languages*, §3.1.6 / TABLE 11.19 (Cardinal Numbers),
+    // first (= most common) variant per slot, Southern-Balochi reference variety. The system is IRANIAN in its
+    // 1-999 core (units + irregular teens + round-ten words, groups linked by the enclitic connective -u, exactly
+    // as in Persian: bīst-u-yak '21', do-sad '200') but INDIC in its MAGNITUDES: J&K give sad '100', hazār
+    // '1,000', lak(k) '100,000', kurōr '10,000,000', arab '1,000,000,000' and NO word for 10^6 — so 1,000,000 is
+    // dah lakk 'ten lakh'. NOT in J&K: sifr '0' (a Perso-Arabic loan; Table 11.19 starts at 1). 40 uses the
+    // J&K variant čihil ⟨چهل⟩ (not čil ⟨چل⟩, which is a lexicon homograph of čul).
+    "numbers": {
+        "units": ["صفر", "یک", "دو", "سئے", "چار", "پنچ", "شش", "هپت", "هشت", "نو"],
+        "teens": ["ده", "یازده", "دوازده", "سیزده", "چارده", "پنزده", "شنزده", "هبده", "هژده", "نوزده"],
+        "tens": {
+            "20": "بیست", "30": "سی", "40": "چهل", "50": "پنجاه",
+            "60": "شست", "70": "هپتاد", "80": "هشتاد", "90": "نود"
+        },
+        "magnitudes": { "hundred": "سد", "thousand": "هزار", "lakh": "لک", "crore": "کرور", "arab": "ارب" },
+        // The enclitic connective -u (J&K bīst-u-yak). Given as IPA, not orthography: written ⟨و⟩ it would be
+        // misread by the abjad g2p (⟨و⟩ → uː, and ⟨سیو⟩ would reparse the ⟨ی⟩ as a glide), so numbers.ts appends
+        // this single segment to the preceding word AFTER that word has been phonemized.
+        "connectiveIpa": "u"
+    },
+
     "clausePunctuation": {
         "،": " , ", "؛": " ; ", "؟": " ? ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ":": " : ", "…": " . "
     }

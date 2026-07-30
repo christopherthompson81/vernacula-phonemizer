@@ -18,6 +18,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Plain (context-free) single-letter consonants. ⟨в⟩ (coda-w) and the digraphs are handled in the scan.
 const CONS: Record<string, string> = {
@@ -105,14 +106,21 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A word (Cyrillic letters) / number / punctuation token. Numbers deferred.
+/** A digit run → spoken Nogai, phonemized through the same Cyrillic g2p (data + provenance in numbers.ts). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
+// A word (Cyrillic letters) / number / punctuation token.
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class NogaiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

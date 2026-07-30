@@ -8,10 +8,12 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 
 interface TurkmenDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    numbers: NumbersDef; // units[0..9], tens{"10".."90"} (Turkic: 10 IS a tens entry), magnitudes{}
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<TurkmenDef>(import.meta.url, "turkmen.jsonc");
@@ -63,14 +65,55 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A word (Turkmen Latin letters incl. ä ç ž ň ö ş ü ý) / number / punctuation token. Numbers deferred.
+/**
+ * TURKMEN number composition (Oghuz Turkic, thousands-scaled decimal). Every round ten is its own lexeme (10 = on
+ * sits in `tens`), and the parts are simply JUXTAPOSED with no connector: on bir (11), ýigrimi bäş (25),
+ * ýüz ýigrimi bir (121). The multiplier "bir" is DROPPED before ýüz (100 = ýüz) but KEPT before müň and
+ * million/milliard — the cited grammar's worked example is "bir müň dokuz ýüz togsan iki" (1992), the same
+ * asymmetry Kazakh shows (жүз vs бір мың). Data + provenance: turkmen.jsonc `numbers`.
+ */
+function turkmenNumberWords(n: number, d: NumbersDef): (string | null)[] {
+    if (n < 10) return [d.units[n]!];
+    if (n < 100) {
+        const t = Math.floor(n / 10) * 10,
+            u = n % 10;
+        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
+    }
+    if (n < 1000) {
+        const h = Math.floor(n / 100),
+            r = n % 100;
+        return [...(h > 1 ? [d.units[h]!] : []), d.magnitudes.hundred, ...(r ? turkmenNumberWords(r, d) : [])];
+    }
+    if (n < 1_000_000) {
+        const th = Math.floor(n / 1000),
+            r = n % 1000;
+        return [...turkmenNumberWords(th, d), d.magnitudes.thousand, ...(r ? turkmenNumberWords(r, d) : [])];
+    }
+    if (n < 1_000_000_000) {
+        const m = Math.floor(n / 1_000_000),
+            r = n % 1_000_000;
+        return [...turkmenNumberWords(m, d), d.magnitudes.million!, ...(r ? turkmenNumberWords(r, d) : [])];
+    }
+    const b = Math.floor(n / 1_000_000_000),
+        r = n % 1_000_000_000;
+    return [...turkmenNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkmenNumberWords(r, d) : [])];
+}
+
+/** A digit run → spoken Turkmen, phonemized through the same grapheme scan. */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return renderNumber(n, DEF.numbers, phonemizeWord, turkmenNumberWords);
+}
+
+// A word (Turkmen Latin letters incl. ä ç ž ň ö ş ü ý) / number / punctuation token.
 const TOKEN = /([a-zäçžňöşüýA-ZÄÇŽŇÖŞÜÝ]+)|(\d+)|([.!?…,;:])/giu;
 
 class TurkmenPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

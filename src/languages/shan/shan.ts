@@ -125,15 +125,65 @@ export function phonemizeWord(word: string): string {
     return out.normalize("NFC");
 }
 
+// ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
+// Digit runs were previously emitted RAW (a digit leak into the IPA). Shan is Southwestern Tai, so the system is
+// structurally Thai's (see thai.ts) with the cognate irregulars: 20 is သၢဝ်း (sao) and REPLACES the whole "twenty"
+// (no သိပ်း), and a FINAL 1 in any compound ≥11 is ဢဵတ်း (et) rather than ၼိုင်ႈ (nueng) — သိပ်းဢဵတ်း 11,
+// သၢဝ်းဢဵတ်း 21. Tens 30–90 are unit-first (သၢမ်သိပ်း = 3×10). SHAN-SCRIPT words only; the abugida scan reads them.
+// Sources: Wiktionary "Category:Shan numerals" (ၼိုင်ႈ … ၵဝ်ႈ, သိပ်း, သၢဝ်း, ဢဵတ်း, the 30–90 unit+သိပ်း forms,
+// ပၢၵ်ႇ 100, ႁဵင် 1000, မိုၼ်ႇ 10⁴, သႅၼ် 10⁵) — https://en.wiktionary.org/wiki/Category:Shan_numerals — cross-checked
+// against Omniglot "Numbers in Shan" (https://www.omniglot.com/language/numbers/shan.htm), which agrees on all of
+// 0–100 + ပၢၵ်ႇ/ႁဵင်/မိုၼ်ႇ/သႅၼ်.
+// JUDGMENT CALL: neither source attests a word for 10⁶. Rather than invent one (the expected Tai cognate လၢၼ်ႉ is
+// unattested in both), the magnitude ladder STOPS at သႅၼ် (10⁵) and larger values are composed as multiples of it
+// (10⁶ = သိပ်းသႅၼ် "ten hundred-thousand", 10⁹ = ၼိုင်ႈမိုၼ်ႇသႅၼ်) — compositional from cited words only.
+const SHN_UNITS = ["သုၼ်", "ၼိုင်ႈ", "သွင်", "သၢမ်", "သီႇ", "ႁႃႈ", "ႁူၵ်း", "ၸဵတ်း", "ပႅတ်ႇ", "ၵဝ်ႈ"];
+const SHN_MAG: [number, string][] = [[1e5, "သႅၼ်"], [1e4, "မိုၼ်ႇ"], [1e3, "ႁဵင်"], [100, "ပၢၵ်ႇ"]];
+
+function numberToShanWords(n: number): string[] {
+    if (!Number.isSafeInteger(n) || n < 0) {
+        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => SHN_UNITS[Number(d)]!);
+    }
+    if (n === 0) return [SHN_UNITS[0]!];
+    const out: string[] = [];
+    let r = n;
+    for (const [v, w] of SHN_MAG) {
+        if (r >= v) {
+            const q = Math.floor(r / v);
+            out.push(...numberToShanWords(q), w);
+            r %= v;
+        }
+    }
+    if (r >= 10) {
+        const t = Math.floor(r / 10);
+        if (t === 2) out.push("သၢဝ်း"); // 20 = သၢဝ်း alone (သၢဝ်းသွင် = 22)
+        else if (t === 1) out.push("သိပ်း");
+        else out.push(SHN_UNITS[t]!, "သိပ်း");
+        r %= 10;
+    }
+    if (r === 1 && n >= 11) out.push("ဢဵတ်း"); // final 1 in a compound → ဢဵတ်း
+    else if (r > 0) out.push(SHN_UNITS[r]!);
+    return out;
+}
+
+// Shan digits U+1090–1099 → ASCII, so a Shan-digit run composes like an ASCII one.
+const SHN_DIGIT: Record<string, string> = {
+    "႐": "0", "႑": "1", "႒": "2", "႓": "3", "႔": "4", "႕": "5", "႖": "6", "႗": "7", "႘": "8", "႙": "9",
+};
+
+
 // A Shan word (Myanmar-block letters/signs, EXCLUDING the dandas U+104A/104B and the Shan digits U+1090–99) / number
-// (ASCII or Shan digits, passed through — numbers deferred) / punctuation (incl. the Myanmar dandas). Space-separated.
+// (ASCII or Shan digits) / punctuation (incl. the Myanmar dandas). Space-separated.
 const TOKEN = /([က-၉၌-ႏႚ-႟ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…,;:])/gu;
 
 class ShanPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) {
+                const ascii = [...m[2]].map((d) => SHN_DIGIT[d] ?? d).join("");
+                for (const wd of numberToShanWords(Number(ascii))) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }

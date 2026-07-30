@@ -15,6 +15,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 const DIGRAPHS: [string, string][] = [["sh", "ʃ"], ["ch", "t͡ʃ"]];
 // Single letters. Vowels: the acute letters ⟨á ó ú⟩ are the front counterparts of ⟨a o u⟩; ⟨ı⟩ (dotless) is [ɯ].
@@ -53,6 +54,13 @@ export function phonemizeWord(word: string): string {
     return segs.join("");
 }
 
+/** A digit run → spoken Karakalpak, phonemized through the same g2p (data + provenance in numbers.ts). */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return digits;
+    return numberToWords(n).map(phonemizeWord).join(" ");
+}
+
 // Karakalpak Latin (2016) — a-z + the acute/dotless letters. Both capital ⟨I⟩ (dotless, U+0049 → [ɯ]) and ⟨İ⟩ (dotted,
 // U+0130 → [i]) must be in the class (İ is the Karakalpak capital of ⟨i⟩; omitting it drops the letter and splits the
 // word). ⟨ç⟩ is NOT Karakalpak (the affricate is the ⟨ch⟩ digraph), so it's excluded. Word / number / punctuation.
@@ -62,7 +70,7 @@ class KarakalpakPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/turkmen/turkmen.ts";
+import { phonemizeWord, createTurkmen } from "../src/languages/turkmen/turkmen.ts";
 
 // Canonical-IPA goldens for Standard Turkmen (tk) — Türkmençe, Oghuz Turkic, Latin, the fleet's first Turkmen.
 // THE HALLMARK: the INTERDENTAL fricatives ⟨s⟩→[θ] and ⟨z⟩→[ð] (shared with Bashkir — söz→θøð). 9 vowels with
@@ -28,6 +28,19 @@ describe("Turkmen (Türkmençe) canonical IPA", () => {
         expect(phonemizeWord("jaň")).toBe("ˈd͡ʒɑŋ"); // 'bell' — ⟨j⟩→d͡ʒ, ⟨ň⟩→ŋ
         expect(phonemizeWord("žurnal")).toBe("ʒuɾˈnɑl"); // 'journal' — ⟨ž⟩→ʒ
         expect(phonemizeWord("äheň")).toBe("æˈxeŋ"); // 'melody' — ⟨ä⟩→æ, ⟨h⟩→x, ⟨ň⟩→ŋ
+    });
+
+    test("NUMBERS — Turkic decimal: one lexeme per round ten, juxtaposed with no connector", () => {
+        const tk = createTurkmen();
+        // Data + provenance: turkmen.jsonc `numbers` (enedilim.com "Sanlar" + Wiktionary Appendix:Turkmen numerals).
+        expect(tk.text("7").trim()).toBe("jeˈdi"); // ýedi — a bare unit
+        expect(tk.text("11").trim()).toBe("ˈon ˈbiɾ"); // on bir — teens are TWO words in Turkmen (unlike Tatar's fused унбер)
+        expect(tk.text("25").trim()).toBe("jiɡɾiˈmi ˈbæʃ"); // ýigrimi bäş — the 21-99 compound, no connector
+        expect(tk.text("100").trim()).toBe("ˈjyð"); // ýüz — the multiplier "bir" is DROPPED before ýüz
+        expect(tk.text("555").trim()).toBe("ˈbæʃ ˈjyð elˈli ˈbæʃ"); // bäş ýüz elli bäş
+        expect(tk.text("1984").trim()).toBe("ˈbiɾ ˈmyŋ doˈkuð ˈjyð θeɡˈθen ˈdøɾt"); // bir müň dokuz ýüz segsen dört — "bir" IS kept before müň
+        expect(tk.text("12345").trim()).toBe("ˈon iˈki ˈmyŋ ˈyt͡ʃ ˈjyð ˈkɯɾk ˈbæʃ"); // on iki müň üç ýüz kyrk bäş
+        expect(tk.text("1000000").trim()).toBe("ˈbiɾ milliˈon"); // bir million
     });
 
     test("final stress with maximal-onset syllabification (loanword clusters)", () => {
