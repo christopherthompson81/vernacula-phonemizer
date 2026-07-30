@@ -27,7 +27,8 @@ what this document is; the rules themselves are bespoke every time.
 
 ### 1. Read the corpus before writing any rule
 
-The corpora are FLEURS transcripts under `/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/<dir>/`.
+The corpora are FLEURS transcripts under `$FLEURS/<dir>/` (this checkout's are at
+`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data`; set `FLEURS` to wherever yours live).
 **Column 3 (0-indexed 2) is the original cased text. Column 4 is lowercased and stripped of exactly the
 punctuation this layer exists to read** — never judge normalization on column 4.
 
@@ -92,9 +93,9 @@ The audio is available and Vernacula ships Parakeet, so ask it:
 ```sh
 # the wav name is column 2 of the FLEURS tsv; extract ONLY what you need (the archive is ~1.4 GB)
 tar -xzf .../audio_cache/data/<lang>/audio/train.tar.gz train/<id>.wav
-cd /mnt/data/Programming/vernacula/src/Vernacula.CLI
+cd $VERNACULA/src/Vernacula.CLI   # the sibling Vernacula repo
 dotnet run -c Release -p:EP=Cpu -p:Platform=x64 --no-build -- \
-    --audio <wav> --model /home/chris/.local/share/Parakeet/models --output <out>.txt --export-format txt
+    --audio <wav> --model $PARAKEET_MODELS --output <out>.txt --export-format txt
 ```
 
 Parakeet emits normalized orthography, which is what makes it usable as an arbiter: it wrote `E.g.` where
@@ -121,9 +122,9 @@ usual fallback, with two rules:
 files are better anyway. Read them:
 
 ```
-/home/chris/Programming/espeak-ng-portable/data/<lang>/fragments.jsonl   # numerals, keyed "0".."99"
-/home/chris/Programming/espeak-ng-portable/data/<lang>/dictionary.jsonl  # word entries
-/home/chris/Programming/espeak-ng/dictsource/<lang>_list                 # the raw upstream form
+$ESPEAK_PORTABLE/data/<lang>/fragments.jsonl   # numerals, keyed "0".."99", with phonemeTokens
+$ESPEAK_PORTABLE/data/<lang>/dictionary.jsonl  # word entries
+$ESPEAK_NG/dictsource/<lang>_list              # the raw upstream form
 ```
 
 The `espeak-ng-portable` JSONL is the better source: decimal keys instead of `_NN` grepping, and a
@@ -243,8 +244,8 @@ the wrong tree. Create your own:
 ```sh
 # NOT under /tmp — a batch lost a worktree and its branch to /tmp cleanup on a date rollover, and the
 # commit survived only because the object was in the shared .git. Use a persistent location.
-git -C /path/to/vernacula-phonemizer worktree add ~/Programming/tmp/<lang>-work -b norm-<lang>-562 main
-ln -s /path/to/vernacula-phonemizer/node_modules ~/Programming/tmp/<lang>-work/node_modules  # gitignored
+git -C "$REPO" worktree add "$WORK/<lang>-work" -b norm-<lang>-562 main
+ln -s "$REPO/node_modules" "$WORK/<lang>-work/node_modules"   # gitignored, absent from a fresh worktree
 ```
 
 **3. One language, one commit, and touch only that language.** The only shared files are `src/core/*` and
