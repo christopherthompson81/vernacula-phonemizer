@@ -73,4 +73,26 @@ describe("burmese canonical IPA", () => {
         // voicing now fires across the segmented run (စကား → zəɡa)
         expect(phonemize("မြန်မာစကား", "my")).toBe("mja˨ɴma˨ zəɡa˥˩");
     });
+
+    test("cardinal numbers (#562)", () => {
+        // Burmese names every power of ten from 10¹ to 10⁷, read place by place — and writes the
+        // numeral SOLID, so the composed form must equal the single-word spelling (which is what
+        // lets the engine compound voicing apply: 100 is [təja˨], not [tɪʔ ja˨]).
+        expect(phonemize("0", "my")).toBe(phonemize("သုည", "my"));
+        expect(phonemize("5", "my")).toBe(phonemize("ငါး", "my")); // was read in ENGLISH before
+        expect(phonemize("၅", "my")).toBe(phonemize("ငါး", "my")); // Burmese digits were DROPPED before
+        expect(phonemize("၂၅", "my")).toBe(phonemize("25", "my"));
+        // The multiplier တစ် is omitted at ဆယ် but spoken at ရာ and above.
+        expect(phonemize("10", "my")).toBe(phonemize("ဆယ်", "my"));
+        expect(phonemize("100", "my")).toBe(phonemize("တစ်ရာ", "my"));
+        expect(phonemize("1000", "my")).toBe(phonemize("တစ်ထောင်", "my"));
+        // A place word is CREAKY when a nonzero remainder follows, plain when the number ends there.
+        expect(phonemize("20", "my")).toBe(phonemize("နှစ်ဆယ်", "my"));
+        expect(phonemize("25", "my")).toBe(phonemize("နှစ်ဆယ့်ငါး", "my"));
+        expect(phonemize("101", "my")).toBe(phonemize("တစ်ရာ့တစ်", "my"));
+        expect(phonemize("12345", "my")).toBe(phonemize("တစ်သောင်းနှစ်ထောင့်သုံးရာ့လေးဆယ့်ငါး", "my"));
+        // Above 10⁷ the places repeat: 10⁹ is "a hundred crore".
+        expect(phonemize("1000000", "my")).toBe(phonemize("တစ်သန်း", "my"));
+        expect(phonemize("1000000000", "my")).toBe(phonemize("တစ်ရာကုဋေ", "my"));
+    });
 });

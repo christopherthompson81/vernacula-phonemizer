@@ -70,5 +70,24 @@
     // nasal → the palatal nasal (ငြိမ်→ɲeɪɴ).
     "palatal": { "k": "t͡ɕ", "kʰ": "t͡ɕʰ", "ɡ": "d͡ʑ", "ŋ": "ɲ", "ŋ̥": "ɲ̥", "sʰ": "sʰ", "h": "ʃ", "l̥": "ʃ" },
 
+    // Cardinal numerals. Burmese names EVERY power of ten from 10¹ to 10⁷, so `places` is that series in
+    // order, each as [plain, creaky] — the creaky form is used when a nonzero remainder follows (ဆယ်→ဆယ့်,
+    // ရာ→ရာ့, ထောင်→ထောင့်). Sources: Wikipedia "Burmese numerals" (place inventory + both tone rules,
+    // quoted in numbers.ts); Omniglot "Numbers in Burmese" (the 0–10 and tens lists).
+    "numbers": {
+        "zero": "သုည",
+        "one": "တစ်",
+        "units": ["", "တစ်", "နှစ်", "သုံး", "လေး", "ငါး", "ခြောက်", "ခုနစ်", "ရှစ်", "ကိုး"],
+        "places": [
+            ["ဆယ်", "ဆယ့်"],       // 10¹
+            ["ရာ", "ရာ့"],         // 10²
+            ["ထောင်", "ထောင့်"],   // 10³
+            ["သောင်း", "သောင်း"],  // 10⁴ — no creaky counterpart attested; plain in both positions
+            ["သိန်း", "သိန်း"],    // 10⁵
+            ["သန်း", "သန်း"],      // 10⁶
+            ["ကုဋေ", "ကုဋေ"]       // 10⁷
+        ]
+    },
+
     "clausePunctuation": { "။": " . ", "၊": " , ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , " }
 }
