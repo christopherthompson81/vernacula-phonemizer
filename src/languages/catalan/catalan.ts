@@ -216,6 +216,7 @@ const SYMBOLS = makeSymbolNormalizer({
     units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],
         kg: ["quilogram", "quilograms"] },
     magnitudes: ["milions", "milió"],
+    magnitudeConnective: "de", // cinc milions DE dòlars
 });
 
 class CatalanPhonemizer implements Phonemizer {

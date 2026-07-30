@@ -98,6 +98,7 @@ const SYMBOLS = makeSymbolNormalizer({
         km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
     magnitudes: ["millones", "millón"],
+    magnitudeConnective: "de", // cinco millones DE dólares
 });
 
 class SpanishPhonemizer implements Phonemizer {

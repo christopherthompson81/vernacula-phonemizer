@@ -26,6 +26,12 @@ export interface SymbolData {
     /** Magnitude words that hop with a currency sign ("million" etc., in the language's spelling as it
      *  appears in running text). Omit if the language writes magnitudes after the currency word anyway. */
     magnitudes?: string[];
+    /** The word joining a magnitude to the currency noun: Spanish/Portuguese/French/Catalan "de", Italian
+     *  "di" — *cinco millones **de** dólares*. Omit for the languages that take none (German "fünf
+     *  Millionen Dollar", Swedish "fem miljoner dollar"). Only ever emitted when a magnitude was matched,
+     *  so a bare "$5" is unaffected. Found by the Italian fan-out run; it was silently missing in es, pt,
+     *  fr and ca, all of which were reading *cinco millones dólares*. */
+    magnitudeConnective?: string;
     /** n → index into a CountForms array. Default: n===1 → 0, else last index. Override for Slavic. */
     countForm?: (n: number) => number;
     /** The percent word PRECEDES the number (Turkish yüzde kırk, Mandarin 百分之四十). Text may write the
@@ -75,8 +81,12 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const curBefore = d.currency
         ? new RegExp(`([${curSigns}])\\s?(${NUM})${magAlt}`, "gu")
         : null;
+    // The magnitude is matched on BOTH sides of the number. Without it on the postposed form, "5 millions $"
+    // matched nothing at all and the sign was DROPPED — silent content loss, found while fixing the
+    // connective below. `magAlt` is `()?` when a language declares no magnitudes, so the group indices
+    // stay fixed either way.
     const curAfter = d.currency
-        ? new RegExp(`(${NUM})\\s?([${curSigns}])`, "gu")
+        ? new RegExp(`(${NUM})${magAlt}\\s?([${curSigns}])`, "gu")
         : null;
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
     const unitRe = d.units ? new RegExp(`(${NUM})\\s?(${unitAlt})(?![\\p{L}\\p{M}])`, "giu") : null;
@@ -87,14 +97,21 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
 
     return (text: string): string => {
         let s = text;
+        // "cinco millones DE dólares" — emitted only when a magnitude was actually matched.
+        const join = (mag: string | undefined): string =>
+            mag !== undefined && mag !== "" && d.magnitudeConnective !== undefined
+                ? `${d.magnitudeConnective} `
+                : "";
         if (curBefore)
             s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => {
                 const w = pick(d.currency![sym]!, mag ? 2 : numValue(num), cf);
-                return `${num}${mag ?? ""} ${w}`;
+                return `${num}${mag ?? ""} ${join(mag)}${w}`;
             });
         if (curAfter)
-            s = s.replace(curAfter, (_m, num: string, sym: string) =>
-                `${num} ${pick(d.currency![sym]!, numValue(num), cf)}`);
+            s = s.replace(curAfter, (_m, num: string, mag: string | undefined, sym: string) => {
+                const w = pick(d.currency![sym]!, mag ? 2 : numValue(num), cf);
+                return `${num}${mag ?? ""} ${join(mag)}${w}`;
+            });
         if (d.percentPrefix) {
             s = s.replace(pctPreRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
             s = s.replace(pctRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);

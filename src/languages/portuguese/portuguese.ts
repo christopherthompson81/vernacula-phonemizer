@@ -265,6 +265,7 @@ const SYMBOLS = makeSymbolNormalizer({
         l: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
         t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
     magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
+    magnitudeConnective: "de", // cinco milhões DE dólares
 });
 
 class PortuguesePhonemizer implements Phonemizer {

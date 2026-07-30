@@ -171,6 +171,7 @@ const SYMBOLS = makeSymbolNormalizer({
         go: ["gigaoctet", "gigaoctets"], mo: ["mégaoctet", "mégaoctets"], ko: ["kilooctet", "kilooctets"],
         min: ["minute", "minutes"] },
     magnitudes: ["millions", "million", "milliards", "milliard"],
+    magnitudeConnective: "de", // cinq millions DE dollars
 });
 
 

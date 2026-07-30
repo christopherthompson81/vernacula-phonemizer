@@ -116,4 +116,31 @@ describe("symbol normalization — FLEURS-priority round", () => {
         // the %-prefix fallback must not glue a currency remnant onto a preceding percent
         expect(phonemize("88% $2", "cy")).toContain("ˈuːᶤθ dˈeːɡ ˈuːᶤθ ˈə kˈant"); // 88 y cant, not 882
     });
+
+    /**
+     * The magnitude hop, both defects found by the it/ko/th/tr fan-out (#562).
+     *
+     * The Italian run flagged that the shared tier emits "5 milioni dollari" where Italian needs the
+     * partitive. Probing the languages that already ship a currency+magnitude pair showed it was not
+     * latent at all: es, pt, fr and ca were ALL reading "cinco millones dolares". And the POSTPOSED form
+     * matched nothing whatsoever, so "5 millions $" dropped the sign outright -- silent content loss.
+     */
+    test("a magnitude takes its connective, in the languages that need one", () => {
+        expect(phonemize("$5 millones", "es")).toContain("miʎˈones de dˈolaɾes");
+        expect(phonemize("$5 milhões", "pt")).toContain("miʎˈõj̃ʃ de dˈɔlɐɾɨʃ");
+        expect(phonemize("$5 millions", "fr")).toContain("miljɔ̃ də dɔlˈaʁ");
+        expect(phonemize("$5 milions", "ca")).toContain("miɫiˈons də dˈɔɫəɾs");
+        // …and NOT in the languages that take none.
+        expect(phonemize("$5 Millionen", "de")).toContain("mɪli̯ˈoːnən dˈɔlaɐ̯");
+        expect(phonemize("$5 miljoner", "sv")).toContain("mɪljˈuːnɛr dˈɔlːar");
+        // A bare amount never gains a connective, because no magnitude was matched.
+        expect(phonemize("5 $", "fr")).toContain("sɛ̃k dɔlˈaʁ");
+    });
+
+    test("a postposed currency sign survives a magnitude word", () => {
+        // Was dropped entirely: the postposed pattern had no magnitude slot, so it matched nothing.
+        expect(phonemize("5 millions $", "fr")).toContain("miljɔ̃ də dɔlˈaʁ");
+        expect(phonemize("5 millones $", "es")).toContain("miʎˈones de dˈolaɾes");
+        expect(phonemize("5 milhões $", "pt")).toContain("miʎˈõj̃ʃ de dˈɔlɐɾɨʃ");
+    });
 });
