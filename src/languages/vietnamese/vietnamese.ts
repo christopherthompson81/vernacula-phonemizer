@@ -9,6 +9,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeSyllable } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeVietnamese } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 /** One Vietnamese syllable/word → IPA. */
@@ -27,13 +28,21 @@ const TOKEN = /([a-zà-ỹăâđêôơưÀ-Ỹ̀-̣]+)|(\d+)|([.!?…,;:])/giu;
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["phần trăm"],
     currency: { "$": ["đô la"], "¥": ["yên"] },
-    units: { km: ["ki lô mét"], mm: ["mi li mét"], cm: ["xen ti mét"], kg: ["ki lô gam"] },
+    // `m` = mét is safe here because the tier requires a NUMBER immediately to the left and no letter to
+    // the right; the longer keys are matched first, so km/mm/cm are never split. Attested after a digit
+    // in the corpus as "(30 m)" and "133 m/giây".
+    units: {
+        km: ["ki lô mét"], mm: ["mi li mét"], cm: ["xen ti mét"], kg: ["ki lô gam"], m: ["mét"],
+    },
 });
 
 class VietnamesePhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // #562 ORDER: normalize.ts FIRST, then the shared symbol tier. Every rewrite in normalize.ts is
+        // written to preserve the digits↔unit adjacency the symbol tier matches on (783.562 km² becomes
+        // 783.562 km vuông, not 783.562 vuông km), so the tier still sees "<number> km" afterwards.
+        return assembleClauses(SYMBOLS(normalizeVietnamese(input)), TOKEN, (m, sink) => {
             if (m[1]) {
                 // A token that is not a valid Vietnamese syllable (paris, sofia, facebook) used to return ""
                 // and vanish from the output. Route it through `foreign` (English) instead — code-switched
