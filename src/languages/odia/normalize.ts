@@ -1,0 +1,260 @@
+/**
+ * Odia (or) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ *
+ * MEASURED over the or_in FLEURS corpus (1,327 unique utterances, column 3 — the cased, punctuated text):
+ *
+ *   defect                                       count   what the engine produced BEFORE
+ *   ------------------------------------------   -----   ---------------------------------------------
+ *   fused 21–99 cardinals (see odia.jsonc)         113    21 → [ˈekɔ kˈoɽie] "one twenty";
+ *     (96 of the 113 covered by the authored map)          56 → "ଛଅ ପଚାଶ", six fifty;
+ *                                                         1947 → "…ସାତ ଚାଳିଶ", seven forty
+ *   Latin `I` used as a DANDA                       23    "…ହୋଇଛି I" → [ˈaᶦ] — the ENGLISH LETTER, and the
+ *                                                         sentence break lost. Confidently wrong ×23.
+ *   grouped numerals 1,234                          22    7,000 → [sˈat̪ɔ , sˈun̪jɔ] "seven, zero"
+ *   decimals N.M                                    20    1.2 → [ˈekɔ . d̪ˈui] — a SENTENCE BREAK mid-number
+ *   ordinal suffixes ଶ / ତମ / ମ                     19    18ଶ → [ˈɔʈʰɔɾɔ sˈɔ] — suffix as its own word
+ *   times h:mm                                      11    10:00 → [d̪ˈɔsɔ , sˈun̪jɔ] — colon as a comma pause
+ *   Latin units km / mm / mi / mph / kph            13    "2-3 km" → [ˈʊkm]; "3136 mm2" left the 2 stranded
+ *   Odia unit abbreviations କିମି / ମିମି / କି.ମି.      7    1600 କି.ମି. → [kˈi . mˈi .] — two phrase breaks
+ *   rate slash ଏକକ/ଘଣ୍ଟା                             5    480 କିଲୋମିଟର/ଘଣ୍ଟା — the slash silently dropped
+ *   percent %                                        4    93% → [t̪ˈin̪i n̪ˈɔbe] — the sign DROPPED
+ *   currency $ / US$                               3/1    $5 → [pˈaɲt͡ʃɔ] — the sign DROPPED
+ *   dotted Latin initialisms a.m. / U.S. / A.D.      7    "07:19 a.m. ରେ" → two spurious sentence breaks
+ *   ଡଃ. / ଡାଃ. / ନଂ.                                 3    a spurious sentence break each
+ *   degree °                                         1    35°W → the sign DROPPED
+ *
+ * ODIA DIGITS ୦-୯ ARE LIVE HERE — 52 of them across 23 runs (୨୦୦୮, ୧୪୦୦, ୬.୫, ୩:୨, ୩୫ମିମି). The same lead
+ * failed for fa/ta/te and held for mr (×597); for Odia it holds. `foldNativeDigits` runs in `text()` BEFORE
+ * this pass, because every pattern below is written against ASCII digits — and `number()` already folded
+ * them for the bare-numeral path, so the fold changes no reading, it only lets these rules see them.
+ *
+ * `\b` IS NOT USED ANYWHERE IN THIS FILE. It is ASCII-defined and matches nothing against Odia script
+ * (playbook trap #1), so every boundary is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])` lookaround.
+ *
+ * SOURCES. Every Odia word emitted below is attested, and where it is, it is attested TWICE:
+ *   ପ୍ରତିଶତ    corpus ×9, always POSTPOSED ("20 ପ୍ରତିଶତ", "ଅଶୀ ପ୍ରତିଶତ") — hence no `percentPrefix`.
+ *              Confirmed independently on or.wiktionary: "ଶତକଡ଼ା; ପ୍ରତିଶହ — Per cent."
+ *   ଡଲାର       corpus ×3 ("କିଛି ବିଲିୟନ୍ US ଡଲାର", "10 ଆମେରିକୀୟ ଡଲାର୍"), postposed. THE ONLY WORD HERE
+ *              WITH NO SECOND WITNESS: neither Wiktionary carries it (the Odia wiki is a Purnachandra
+ *              import that predates the loan; the complete ଡଲ- prefix is ଡଲା and ଡଲ୍ଲକ). Kept anyway,
+ *              because three independent modern utterances of the spelling is itself attestation and one
+ *              of them writes the sign's own semantics beside it — but flagged so nobody assumes parity
+ *              with the rest of this list.
+ *   କିଲୋମିଟର   corpus ×13 + kaikki-ori referee      ଡାକ୍ତର corpus ×7 + referee
+ *   ମିଟର ×23, ମାଇଲ ×21, ଘଣ୍ଟା ×16 (+referee), ବର୍ଗ ×14 (+referee), ପ୍ରତି ×100 (+referee),
+ *   ନମ୍ବର ×6 (+referee), ମିଲିମିଟର ×1, ସେକେଣ୍ଡ ×1, ଡିଗ୍ରୀ ×3, ଖ୍ରୀଷ୍ଟପୂର୍ବ ×2 — all corpus spellings.
+ *
+ * DELIBERATELY NOT DONE, each after measuring (a wrong word is worse than a dropped sign):
+ *   - DECIMAL POINT WORD. espeak's or/fragments.jsonl carries `dpt → _d@s@ml` — the PRONUNCIATION only —
+ *     and neither the corpus (ଦଶମିକ ×0) nor the kaikki referee spells the word. Step 5 therefore only
+ *     NEUTRALISES the dot; the defect being fixed is the SENTENCE BREAK it produced mid-number.
+ *     `numbers.decimalWord` is left unset.
+ *   - ¥ (×3) and £ (×1). ୟେନ is attested nowhere in this repo. ପାଉଣ୍ଡ is attested ×5 but every one of them
+ *     is the WEIGHT ("200 ପାଉଣ୍ଡ (90 କି.ଗ୍ରା.)"), so declaring it as £'s currency noun would be inferring
+ *     the sense, not sourcing it. Both signs stay dropped, as they were.
+ *   - କି.ଗ୍ରା. (×2) EXPANDS TO NOTHING. କିଲୋଗ୍ରାମ appears in neither the corpus nor the referee, and the
+ *     corpus's four ଗ୍ରାମ are all ପ୍ରୋଗ୍ରାମ or ଗ୍ରାମ "village" (playbook trap #2, live here). Step 6 only
+ *     strips its interior dots, which kills the two phrase breaks without inventing a word.
+ *   - RANGES `a-b` (×8). A blanket ରୁ connective is wrong for FIVE of them: 1995-96 ×2, 1894-1895 and
+ *     AD 1000–1300 are year spans and 6-6 is a sports score; only 2-3 km, 100-200 ମାଇଲ and 10–60 ମିନିଟ୍
+ *     are true ranges. Separating them needs a measure-noun list this repo has no source for. The hyphen
+ *     is already silent, which is the honest reading.
+ *   - ODIA DOTTED INITIALISMS ଏମ.ଇ.ଟି, ଏଫ୍. ବି.ଆଇ. (×3). Unlike the Latin ones (step 9), a dot after a
+ *     short Odia syllable is indistinguishable from a sentence period without a lexicon of Odia
+ *     abbreviations, which this repo does not carry.
+ *   - A BLANKET slash→ପ୍ରତି RULE. 14 of the corpus's 17 slashes sit between Odia words and only FIVE are
+ *     rates; the other nine are ଏବଂ/କିମ୍ବା ("and/or"), ନୀତି/ଯୋଗାଯୋଗ, and the place name ଜାକର/ବୁମଥାଙ୍ଗ.
+ *     Step 4 is therefore keyed on a closed list of measure nouns on both sides.
+ */
+import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/**
+ * The SHARED symbol tier, with Odia's data. Odia count nouns do not inflect after a numeral
+ * (ଏକ ଡଲାର / ପାଞ୍ଚ ଡଲାର), so every `CountForms` here is a 1-element array. No `magnitudeConnective`:
+ * Odia takes none — the corpus writes "2.3 ମିଲିୟନ୍ ଗ୍ୟାଲନ୍" and "10 ବିଲିଅନ୍ ଯୁରୋ" with nothing between.
+ *
+ * `US$` IS ITS OWN CURRENCY KEY. The corpus writes "US$14.7 ବିଲିଅନ୍", and with only `$` declared the
+ * letter-code prefix was left stranded as a Latin run. The tier matches currency keys as an ALTERNATION
+ * sorted longest-first, so declaring the multi-character key is the intended fix rather than a limitation.
+ *
+ * `unitPer: ପ୍ରତି` IS CORPUS-ORDERED, not guessed. Odia writes exactly the seam's "A per B" shape:
+ * "ଏଗାର କିଲୋମିଟର ପ୍ରତି ଘଣ୍ଟା" and "ପ୍ରତି ସେକେଣ୍ଡରେ ପ୍ରାୟ 12.8 କିଲୋମିଟର" both occur. `h` and `s` are
+ * `rateDenominators`, never standalone units — a bare `76s` must not become seventy-six seconds.
+ *
+ * `exponentWords` position is `before`: ବର୍ଗ is a SPACED PREFIX in Odia ("19,500 ବର୍ଗ କିଲୋମିଟର",
+ * "3,850 ବର୍ଗ କିଲୋମିଟର" — corpus ×14), not a suffix and not fused. The corpus's `3136 mm2` was leaving
+ * the ASCII 2 stranded to be read as the numeral ଦୁଇ.
+ *
+ * `mph` / `kph` are declared as WHOLE units with a multi-word expansion rather than composed through
+ * `unitPer`, because they are written as one token with no slash for the rate machinery to find.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["ପ୍ରତିଶତ"],
+    currency: { "US$": ["ଡଲାର"], "$": ["ଡଲାର"] },
+    magnitudes: ["ହଜାର", "ଲକ୍ଷ", "କୋଟି", "ନିୟୁତ", "ମିଲିୟନ୍", "ମିଲିୟନ", "ବିଲିଅନ୍", "ବିଲିଅନ"],
+    units: {
+        km: ["କିଲୋମିଟର"],
+        mm: ["ମିଲିମିଟର"],
+        mi: ["ମାଇଲ"],
+        mph: ["ମାଇଲ ପ୍ରତି ଘଣ୍ଟା"],
+        kph: ["କିଲୋମିଟର ପ୍ରତି ଘଣ୍ଟା"],
+    },
+    rateDenominators: { h: "ଘଣ୍ଟା", s: "ସେକେଣ୍ଡ" },
+    unitPer: "ପ୍ରତି",
+    exponentWords: { squared: ["ବର୍ଗ"], cubed: ["ଘନ"], position: "before" },
+});
+
+/**
+ * Odia unit abbreviations → the full word, matched only AFTER a number. Longest first so କି.ମି. beats
+ * ମି — the playbook's "multi-dot abbreviations before single-dot" coupling, expressed as alternation
+ * order (an interior dot that survives becomes a phrase break).
+ *
+ * Attested: କିମି ×2 (both in `160କିମି/ଘଣ୍ଟା`), ମିମି ×2, କି.ମି. ×1, କି.ଗ୍ରା. ×2. କି.ଗ୍ରା. maps to the
+ * DOT-STRIPPED form, not to an expansion — see the header.
+ */
+const UNIT_WORD: Readonly<Record<string, string>> = {
+    "କି.ମି.": "କିଲୋମିଟର", "କି.ମି": "କିଲୋମିଟର", "କିମି": "କିଲୋମିଟର",
+    "ମି.ମି.": "ମିଲିମିଟର", "ମି.ମି": "ମିଲିମିଟର", "ମିମି": "ମିଲିମିଟର",
+    "କି.ଗ୍ରା.": "କିଗ୍ରା", "କି.ଗ୍ରା": "କିଗ୍ରା",
+};
+const UNIT_ALT = Object.keys(UNIT_WORD)
+    .sort((a, b) => b.length - a.length)
+    .map((k) => k.replace(/\./gu, "\\."))
+    .join("|");
+
+/** Measure nouns that may stand either side of a rate slash. A CLOSED LIST on both sides, because only
+ *  five of the corpus's fourteen Odia-to-Odia slashes are rates (see the header). */
+const RATE_NUM = ["କିଲୋମିଟର", "ମିଲିମିଟର", "ମିଟର", "ମାଇଲ୍", "ମାଇଲ"];
+const RATE_DEN = ["ଘଣ୍ଟା", "ସେକେଣ୍ଡ", "ମିନିଟ୍", "ମିନିଟ"];
+
+/** Ordinal suffixes, written attached to the numeral. All three occur: ଶ ×11 (11ଶ, 18ଶ ଶତାବ୍ଦୀ),
+ *  ତମ ×5 (60 ତମ, 1000ତମ), ମ ×3 (9ମ, 1ମ). Longest first so ତମ is not split by ମ. */
+const ORDINAL_SUFFIXES = ["ତମ", "ଶ", "ମ"];
+
+/** Build the Odia normalizer. Takes the numbers definition so the ordinal rule composes its cardinal
+ *  from exactly the data the engine's own number path uses. */
+export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => string {
+    /**
+     * The ordinal: the cardinal with the suffix JOINED to its final word. Joining in the DIGITS is not
+     * enough — the tokenizer splits a digit run from an adjacent Odia letter, so "18ଶ" still emitted the
+     * suffix as its own stressed word. The cardinal therefore has to be composed here, which is why this
+     * function takes `numbers`. Bails out (leaving the text alone) on any un-authored 21–99 gap rather
+     * than gluing a suffix onto a "?" placeholder.
+     */
+    const ordinal = (n: number, suffix: string): string | undefined => {
+        const words = indicNumberWords(n, numbers);
+        if (words.length === 0 || words.some((w) => w === null || w === "")) return undefined;
+        const out = words as string[];
+        out[out.length - 1] = `${out[out.length - 1]}${suffix}`;
+        return out.join(" ");
+    };
+
+    return (input: string): string => {
+        // 1) THE SHARED SYMBOL TIER FIRST. It matches a sign only when a NUMBER is ADJACENT, and its own
+        //    numeral pattern reads "19,500" / "14.7" as ONE token. Steps 5 and 7 below split exactly those
+        //    into two tokens, so running them first would strand every sign on half a numeral. (This is
+        //    the playbook's "units before decimals" coupling, one layer up: the sign tier before both.)
+        let s = SYMBOLS(input);
+
+        // 2) ODIA UNIT ABBREVIATIONS, only after a number — which is what keeps ordinary words out, and
+        //    why no bare-syllable key is declared at all. Longest first (see UNIT_ALT). The trailing
+        //    guard stops ମିମି biting into a longer word. Before step 4 so `160କିମି/ଘଣ୍ଟା` has a
+        //    recognisable measure noun on the left of its slash by the time that rule runs.
+        s = s.replace(new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
+            (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`);
+
+        // 3) LATIN DOTTED INITIALISMS — a.m., p.m., U.S., A.D. Every interior dot was surviving as a
+        //    PHRASE BREAK ("07:19 a.m. ରେ" → two of them). The dots are stripped rather than expanded:
+        //    the letters then reach the Latin/foreign path as one run, which is what they are.
+        //    Two or more single letters, so `802.11a` (a digit on the left) cannot match.
+        s = s.replace(/(?<![\p{L}\p{M}\d])([A-Za-z](?:\.[A-Za-z])+)\.?(?![\p{L}\p{M}])/gu,
+            (_m, run: string) => run.replace(/\./gu, ""));
+
+        // 4) RATE SLASH between two Odia measure nouns → ପ୍ରତି. Runs after step 2 so the abbreviated
+        //    left-hand side has already become a full noun. Closed lists on BOTH sides: nine of the
+        //    fourteen Odia-to-Odia slashes in this corpus are ଏବଂ/କିମ୍ବା and the like, and a blanket
+        //    rule would read "and per or".
+        s = s.replace(
+            new RegExp(`(?<![\\p{L}\\p{M}])(${RATE_NUM.join("|")})\\s?/\\s?(${RATE_DEN.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
+            (_m, a: string, b: string) => `${a} ପ୍ରତି ${b}`);
+
+        // 5) DIGIT DE-GROUPING, before anything else that reads punctuation. A grouping comma is otherwise
+        //    claimed by `clausePunctuation` as a phrase break AND it truncates the numeral: "7,000" was
+        //    read as [sˈat̪ɔ , sˈun̪jɔ] — "seven, zero" — because the tokenizer's number class carries no
+        //    separators, so the trailing "000" became its own number, 0.
+        //    Both groupings: Indian 2-2-3 (1,00,000) and Western 3-3 (5,000,000). A final 3-digit group is
+        //    REQUIRED, which keeps a list separator ("1990, 1991" — a space follows) out of the match.
+        //    Indian grouping is unattested in THIS corpus (0 instances) and is carried anyway: it costs
+        //    one line and Indic sources write it.
+        s = s.replace(/(?<![\d,])(\d{1,2}(?:,\d{2})+,\d{3})(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+        s = s.replace(/(?<![\d,])(\d{1,3}(?:,\d{3})+)(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+
+        // 6) ODIA DOT-ABBREVIATION LEFTOVERS whose expansion is not sourceable — କି.ଗ୍ରା. after a number
+        //    is handled in step 2; this catches the standalone-with-trailing-dot shape so the final dot
+        //    cannot survive as a break. Kept separate from step 2 so the "expand" and "merely de-dot"
+        //    cases stay visibly different.
+        s = s.replace(/(?<![\p{L}\p{M}])କି\.ଗ୍ରା\.?/gu, "କିଗ୍ରା");
+
+        // 7) DECIMALS — after de-grouping (a grouped numeral may carry a decimal tail) and before the
+        //    clock, so a stray dot cannot survive into a time match. The dot is NEUTRALISED, not spoken:
+        //    there is no sourceable Odia spelling of the decimal-point word in this repo (see the header),
+        //    and the defect being fixed is the SENTENCE BREAK the dot produced mid-number ("1.2 ମିଲିୟନ"
+        //    → [ˈekɔ . d̪ˈui]). Dropping a sign beats speaking a word we cannot source.
+        //    This also neutralises 802.11n, which was being read as a sentence boundary inside a standard's
+        //    name; "802 11n" is not the right register but it is not a false full stop either.
+        s = s.replace(/(\d)\.(?=\d)/gu, "$1 ");
+
+        // 8) TIMES, before the ordinal rule so a bare-number rule cannot claim 11:30 first. The colon was
+        //    becoming a COMMA PAUSE ("ten, zero"). Odia reads the clock as bare juxtaposition plus ଟା,
+        //    which the corpus already writes ("ରାତି 11:35ଟା", "10:00ଟା - 11:00ଟା"), so the colon becomes a
+        //    space. At :00 the minutes DROP OUT — otherwise "10:00ଟା" reads "ଦଶ ଶୂନ୍ୟ ଟା", ten zero —
+        //    and the corpus's own bare form is then exactly what is left.
+        //    THE TWO-DIGIT MINUTE GUARD IS LOAD-BEARING: the corpus also writes the ratio ୩:୨ (folded to
+        //    3:2), which is not a time and does not match. The `(?<![\d:])` guard keeps the sports splits
+        //    "4: 41.30" and "2: 11.60" out too — those write a SPACE after the colon, which `:([0-5]\d)`
+        //    already rejects, and the playbook records a Russian clock that claimed exactly that shape.
+        s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+            (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`));
+
+        // 9) ORDINAL SUFFIXES. Written attached to the numeral (18ଶ, 1000ତମ) but tokenized apart from it,
+        //    so the suffix was spoken as its own stressed word — 18ଶ came out [ˈɔʈʰɔɾɔ sˈɔ]. The suffix is
+        //    JOINED to the cardinal's last word instead of being expanded into a distinct ordinal lexeme,
+        //    and Odia's own orthography is the warrant: the corpus writes the fully spelled ordinal as ONE
+        //    word, "ଚବିଶତମ ସ୍ଥାନ" (24th place). Joining to the DIGITS is not enough — the tokenizer splits
+        //    a digit run from an adjacent Odia letter — so the cardinal is composed here (see `ordinal`).
+        //    A space may intervene ("60 ତମ", "7 ମ" — corpus).
+        //    KNOWN LIMIT, stated rather than papered over: this yields the transparent cardinal+suffix
+        //    form, so 1ମ reads ଏକମ where the suppletive Odia ordinal is ପ୍ରଥମ. Authoring the suppletive
+        //    1–4 forms is not sourceable here, and one stray syllable removed beats a wrong lexeme added.
+        //    THE TRAILING BOUNDARY IS LOAD-BEARING. Without it the single-letter ଶ matches the START of an
+        //    ordinary word; in particular "18ଶହ ଶତାବ୍ଦୀ" (×2) is ଶହ, the HUNDRED word, and must be left
+        //    alone to read "eighteen hundred". `\b` cannot express this — see the header.
+        s = s.replace(
+            new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
+            (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);
+
+        // 10) ABBREVIATIONS. The DOT IS REQUIRED, and so is the visarga: ଡଃ / ଡାଃ are unambiguous, but a
+        //     dot-optional rule would also fire on ordinary word-final ଡା. ଡାକ୍ତର is the corpus's own
+        //     spelling (×7, plus the kaikki referee). ନଂ. → ନମ୍ବର, likewise corpus-attested (×6).
+        s = s.replace(/(?<![\p{L}\p{M}])(?:ଡଃ|ଡାଃ)\.(\s*)(?=[\p{L}])/gu, (_m, sp: string) => `ଡାକ୍ତର${sp || " "}`);
+        s = s.replace(/(?<![\p{L}\p{M}])ନଂ\.(\s*)(?=[\d\p{L}])/gu, (_m, sp: string) => `ନମ୍ବର${sp || " "}`);
+
+        // 11) LATIN `I` USED AS A DANDA. Twenty-three of them, every one sentence-final after Odia text
+        //     ("…ହୋଇଛି I", "…ପାଇଥିଲେI") — a keyboard artifact for ।, and the single worst defect by
+        //     confidence: the Latin branch handed it to the foreign phonemizer and it was SPOKEN as the
+        //     English pronoun [ˈaᶦ], while the sentence break vanished. The guard is only against other
+        //     LATIN letters and digits, not against Odia ones, because the artifact is frequently glued
+        //     to the preceding Odia word with no space. Zero non-danda standalone `I` in this corpus.
+        //     Last, so no earlier rule (step 3's initialisms in particular) can be starved of it.
+        s = s.replace(/(?<![A-Za-z\d])I(?![A-Za-z\d])/gu, "।");
+
+        // 12) DEGREES. The bare sign was dropped outright. ଡିଗ୍ରୀ is the corpus's own spelling (×3,
+        //     including "90(F)-ଡିଗ୍ରୀ" where the text writes the word itself). The corpus's single ° is
+        //     the longitude "35°W", for which "35 ଡିଗ୍ରୀ W" is the right reading.
+        s = s.replace(/(\d)\s?°/gu, "$1 ଡିଗ୍ରୀ");
+
+        return s;
+    };
+}

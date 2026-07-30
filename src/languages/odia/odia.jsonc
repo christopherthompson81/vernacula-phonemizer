@@ -51,11 +51,78 @@
     },
 
     // NUMBERS — Odia spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes
-    // (Indic lakh/crore); 21-99 compound spellings are a bounded remaining task.
+    // (Indic lakh/crore) + the FUSED 21-99 compounds.
+    //
+    // NO `bareMagnitude`, and the reason is more interesting than "the lead failed".
+    // Odia HAS a suppletive bare hundred: or.wiktionary glosses ଶହେ as "ଏକ ଶତ — One hundred", against ଶହ
+    // "hundred; many". But `bareMagnitude` cannot express that — it only OMITS the leading "one", so
+    // declaring it would yield ଶହ, the wrong word, and changing `magnitudes.hundred` to ଶହେ would break
+    // every non-bare hundred (*ଦୁଇ ଶହେ). A suppletive round hundred needs `NumbersDef.hundreds`, which
+    // only `westernNumberWords` reads — the same limitation Kannada worked around with a private
+    // composer. Reported, not worked around: this corpus does not pay for a fourth private composer.
+    // Corpus evidence also runs the other way — it writes "ଏକ ଶହ ରନ୍" ("a hundred runs") in full and ଶହେ
+    // zero times — so the status quo is defensible and this stays a documented limitation, not a defect.
+    //
+    // `compound` — Odia's 21-99 are FUSED SINGLE WORDS (ଏକୋଇଶ, not *ଏକ କୋଡ଼ିଏ). Without them
+    // indicNumberWords' fallback emitted two words in the Hindi-belt unit-then-tens shape, so 21 read
+    // [ˈekɔ kˈoɽie] — "one twenty" — and 1947 ended "…seven forty". 536 ASCII digit runs in the corpus.
+    //
+    // SOURCING — 60 of the 72 values. TWO AGREEING WITNESSES ARE REQUIRED FOR EVERY ENTRY, from two
+    // separate pipelines; the 12 that could not get two are left out and listed at the end of this block.
+    //
+    // Pipeline A (37 values, 21-29 / 31-39 / 41-49 / 51-59 / 61). SPELLING from this repo's own
+    // kaikki-ori referee; VALUE from espeak-ng's or/fragments.jsonl, read AS DATA (the binary is never
+    // invoked — it synthesises to the speakers), matched on a coarse phoneme skeleton.
+    //   CALIBRATED BEFORE USE against the 28 numerals already authored above: with an abstention rule
+    //   (best skeleton distance ≤ 2 and strictly better than the runner-up) it fired on 20 of 28 and was
+    //   right 20/20 — 100% precision at 71% recall. That figure FLATTERED it, because the calibration set
+    //   always had its answer present in the referee: run un-guarded over 62-99, where the referee has
+    //   nothing, it confidently proposed ଚବିଶି (24) for 36, ଅଣଷଠି (59) for 68, ଡାକ୍ତରି "doctor's" for 72
+    //   and ବନାରସୀ "Banarasi" for 82. Hence the second guard: an accepted match must also carry its
+    //   decade's own suffix AND its unit digit's own prefix, which Odia builds transparently
+    //   (ଅଣ- = one-less-than-the-next-decade: 29, 39, 49, 59).
+    //
+    // Pipeline B (23 values, 62-67 / 73-77 / 82-87 / 92-97). VALUE from or.wiktionary.org, which carries
+    // a bot import of the Purnachandra Odia Bhashakosha and glosses each of these with its numeral
+    // ("ଷାଠିଏ ଅପେକ୍ଷା ଦୁଇ ଅଧିକ — Sixty-two"); SPELLING cross-checked by running it through THIS repo's own
+    // G2P and matching the result against espeak's fragment for the same value (all 23 at skeleton
+    // distance ≤ 2). en.wiktionary is NOT usable for this range — its Odia cardinal category stops at 20
+    // and every candidate 404s. Hit rate 23 accepted / 35 attempted = 66%.
+    //   NINE of the 23 needed a spelling correction against the phonetic hypothesis, nearly all ି↔ୀ vowel
+    //   length (65 ପଅଁଷଠୀ, 67 ସତଷଠୀ, 73 ତେସ୍ତରୀ, 84-87 -ଅଶି not -ଅଶୀ, 97 ସତାଁନବେ), which is exactly the
+    //   class of error espeak cannot see. The 80s take BOTH lengths in the source (82/83 ଅଶୀ, 84-87 ଅଶି)
+    //   and are deliberately not normalised to one. For 94 the dictionary headword is ଚଉରାଁଲବେ, but its
+    //   own page lists ଚଉରାନବେ as an ଅନ୍ୟରୂପ and espeak agrees with the variant (d=1 vs d=3) — so the two
+    //   witnesses pick the variant, not the headword.
+    //
+    // LEFT OUT, 12 values: 68, 69, 71, 72, 78, 79, 81, 88, 89, 91, 98, 99. or.wiktionary's import has no
+    // main-namespace pages beginning ଏକ-, ଅଠ- or ଉଣ- at all (verified by enumerating list=allpages), so
+    // these are UNVERIFIABLE HERE rather than disproven — and 72 is a genuine gap: the complete ବାସ-
+    // prefix (~140 pages) contains ବାସ୍ତ / ବାସ୍ତବ / ବାସ୍ତା / ବାସ୍ତୁ and no ବାସ୍ତରି. espeak alone is one
+    // witness and the Punjabi run measured espeak wrong about the WORD in 22% of the cases it could check,
+    // so shipping on it alone is not warranted. These 12 degrade to indicNumberWords' readable two-word
+    // fallback (62 → ଦୁଇ ଷାଠିଏ), which is approximate but not a "?" leak.
     "numbers": {
         "units": ["ଶୂନ୍ୟ", "ଏକ", "ଦୁଇ", "ତିନି", "ଚାରି", "ପାଞ୍ଚ", "ଛଅ", "ସାତ", "ଆଠ", "ନଅ"],
         "teens": ["ଦଶ", "ଏଗାର", "ବାର", "ତେର", "ଚଉଦ", "ପନ୍ଦର", "ଷୋହଳ", "ସତର", "ଅଠର", "ଊଣେଇଶ"],
         "tens": { "20": "କୋଡ଼ିଏ", "30": "ତିରିଶ", "40": "ଚାଳିଶ", "50": "ପଚାଶ", "60": "ଷାଠିଏ", "70": "ସତୁରି", "80": "ଅଶୀ", "90": "ନବେ" },
-        "magnitudes": { "hundred": "ଶହ", "thousand": "ହଜାର", "lakh": "ଲକ୍ଷ", "crore": "କୋଟି" }
+        "magnitudes": { "hundred": "ଶହ", "thousand": "ହଜାର", "lakh": "ଲକ୍ଷ", "crore": "କୋଟି" },
+        "compound": {
+            "21": "ଏକୋଇଶ", "22": "ବାଇଶି", "23": "ତେଇଶି", "24": "ଚବିଶି", "25": "ପଚିଶି",
+            "26": "ଛବିଶ", "27": "ସତାଇଶ", "28": "ଅଠାଇଶ", "29": "ଅଣତିରିଶ",
+            "31": "ଏକତିରିଶ", "32": "ବତିଶ", "33": "ତେତିଶ", "34": "ଚଉତିରିଶ", "35": "ପଇଁତିରିଶ",
+            "36": "ଛତିଶ", "37": "ସତିରିଶ", "38": "ଅଟତିରିଶ", "39": "ଅଣଚାଳିଶ",
+            "41": "ଏକଚାଳିଶ", "42": "ବୟାଳିଶ", "43": "ତେୟାଳିଶ", "44": "ଚଉରାଳିଶ", "45": "ପଇଞ୍ଚାଳିଶ",
+            "46": "ଛୟାଳିଶ", "47": "ସତଚାଳିଶ", "48": "ଅଟଚାଳିଶ", "49": "ଅଣଚାଶ",
+            "51": "ଏକାବନ", "52": "ବାଆନ", "53": "ତେପନ", "54": "ଚଉବନ", "55": "ପଞ୍ଚାବନ",
+            "56": "ଛପନ", "57": "ସତାବନ", "58": "ଅଠାବନ", "59": "ଅଣଷଠି",
+            "61": "ଏକଷଠୀ", "62": "ବାଷଠି", "63": "ତେଷଠି", "64": "ଚଉଷଠି", "65": "ପଅଁଷଠୀ",
+            "66": "ଛଅଷଠି", "67": "ସତଷଠୀ",
+            "73": "ତେସ୍ତରୀ", "74": "ଚଉସ୍ତରି", "75": "ପଞ୍ଚସ୍ତରି", "76": "ଛଅସ୍ତରି", "77": "ସତସ୍ତରି",
+            "82": "ବୟାଅଶୀ", "83": "ତେୟାଅଶୀ", "84": "ଚଉରାଅଶି", "85": "ପଞ୍ଚାଅଶି", "86": "ଛୟାଅଶି",
+            "87": "ସତାଅଶି",
+            "92": "ବୟାନବେ", "93": "ତେୟାନବେ", "94": "ଚଉରାନବେ", "95": "ପଞ୍ଚାନବେ", "96": "ଛୟାନବେ",
+            "97": "ସତାଁନବେ"
+        }
     }
 }

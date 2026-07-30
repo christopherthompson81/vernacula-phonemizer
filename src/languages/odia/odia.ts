@@ -11,6 +11,8 @@ import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { foldNativeDigits } from "../../core/unicode.ts";
+import { makeOdiaNormalizer } from "./normalize.ts";
 
 interface OdiaDef extends AbugidaDef {
     numbers: NumbersDef;
@@ -64,10 +66,15 @@ const TOKEN = new RegExp(
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+const normalize = makeOdiaNormalizer(DEF.numbers);
+
 class OdiaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NATIVE DIGITS FIRST: the corpus writes ୦-୯ (52 of them), and every pattern in normalize.ts is
+        // written against ASCII digits. `number()` folds them for the bare-numeral path anyway, so this
+        // changes no reading — it only lets the normalization rules see them. See normalize.ts's header.
+        return assembleClauses(normalize(foldNativeDigits(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
