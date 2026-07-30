@@ -14,6 +14,7 @@ import {
 } from "./diacritizer.ts";
 import { lexiconPrimary } from "./restore.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { normalizeArabic } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -129,7 +130,10 @@ export function phonemizeWord(word: string, variety?: string): string {
 // Clause / phrase punctuation (Arabic + ASCII) → canonical inline pause marks (authored data in arabic.jsonc).
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Arabic letters + harakat) / number (Arabic-Indic or ASCII digits) / punctuation token.
-const TOKEN = /([ء-يٰٱً-ْـ]+)|([0-9٠-٩]+)|([۔.!؟?،,؛;:…])/gu;
+// The number class accepts GROUPING and DECIMAL separators. Without them "1,000" tokenized as 1 | , | 000
+// and the separator became a clause PAUSE ("واحد , صفر"); "1.5" likewise. Arabic-Indic digits are folded to
+// ASCII by normalizeArabic before this runs, so only the ASCII forms need matching here.
+const TOKEN = /([ء-يٰٱً-ْـ]+)|(\d+(?:,\d{3})*(?:\.\d+)?)|([۔.!؟?،,؛;:…])/gu;
 /** Arabic-Indic digits ٠..٩ → ASCII. */
 const toAscii = (d: string): string =>
     d.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x0660));
@@ -175,7 +179,15 @@ export const ipaOnly = (value: string): string | undefined => {
 // #562 symbol normalization — % is the only symbol in the Arabic FLEURS text. في المئة (the standard
 // written form, matching FLEURS' MSA-leaning register) reads cleanly through the diacritizer as
 // fi ilmiʔa; the Egyptian colloquial المية spelling vocalized worse. Shared path — only arz has corpus %.
-const SYMBOLS = makeSymbolNormalizer({ percent: ["في المئة"] });
+const SYMBOLS = makeSymbolNormalizer({
+    // Every emitted word carries HARAKAT: the engine reads undiacritized Arabic as a consonant skeleton,
+    // so "في المئة" came out [fj almʔ] where "فِي الْمِئَة" gives [fˈiː almˈiʔa].
+    percent: ["فِي الْمِئَة"],
+    // Absent entirely before: a currency sign was DROPPED ($50 read as just "خمسون").
+    currency: { $: ["دُولَار"], "€": ["يُورُو"], "£": ["جُنَيْه"], "¥": ["يِن"] },
+    units: { km: ["كِيلُومِتْر"], cm: ["سِنْتِيمِتْر"], mm: ["مِلِّيمِتْر"], kg: ["كِيلُوجِرَام"],
+        m: ["مِتْر"], g: ["جِرَام"], "km/h": ["كِيلُومِتْر فِي السَّاعَة"] },
+});
 
 class ArabicPhonemizer implements Phonemizer {
     constructor(
@@ -183,7 +195,8 @@ class ArabicPhonemizer implements Phonemizer {
         private useLexicon = false,
     ) {}
     text(input: string): string {
-        input = SYMBOLS(input); // #562
+        // #562: Arabic-specific rewrites (٪/٫/٬ folding, units, clock, signs) then the shared tier.
+        input = SYMBOLS(normalizeArabic(input));
         // The Egyptian lexicon keys on the BARE word; the input here is diacritized (post neural-diacritizer), so
         // strip the harakat to look it up, and only for the egyptian variety with the lexicon enabled (shipped).
         const lex =
@@ -196,13 +209,17 @@ class ArabicPhonemizer implements Phonemizer {
                     lex?.get(m[1].replace(HARAKAT, "")) ??
                         phonemizeWord(m[1], this.variety),
                 );
-            else if (m[2])
-                sink.emit(
-                    numberToIpa(
-                        Number(toAscii(m[2])),
-                        this.variety ? VARIETIES[this.variety]?.numbers : undefined,
-                    ),
-                );
+            else if (m[2]) {
+                const nums = this.variety ? VARIETIES[this.variety]?.numbers : undefined;
+                const [intPart, frac] = toAscii(m[2]).replace(/,/gu, "").split(".");
+                const parts = [numberToIpa(Number(intPart), nums)];
+                if (frac !== undefined) {
+                    // A decimal is read "فاصلة" then the fractional digits one by one.
+                    parts.push(phonemizeWord("فَاصِلَة", this.variety));
+                    for (const d of frac) parts.push(numberToIpa(Number(d), nums));
+                }
+                sink.emit(parts.join(" "));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

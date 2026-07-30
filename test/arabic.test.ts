@@ -214,3 +214,48 @@ describe("arabic canonical IPA — diacritized path", () => {
         });
     });
 });
+
+// #562 — the seventh language. Arabic arrived with its punctuation already right (، ؛ ؟ are clause marks)
+// and Arabic-Indic digits already folding, so the work was narrower: the Arabic-specific SYMBOL
+// characters, grouped/decimal number tokenization, and the clock.
+describe("arabic normalization", () => {
+    test("the Arabic percent sign is no longer dropped", () => {
+        // ٪ is U+066A, a different character from ASCII %, and every shared rule is written against the
+        // ASCII one — so the percentage simply vanished. Folding the Arabic symbol characters to their
+        // ASCII equivalents lets the shared tier work unchanged.
+        expect(phonemize("93٪ من السكان", "ar")).toBe("θalaːθa wa tisʕuːn fˈiː almˈiʔa mn askˈaːn");
+    });
+
+    test("grouped and decimal numbers are one token, not three", () => {
+        // The separators were CLAUSE MARKS, so "1,000" read as "واحد , صفر" — one, pause, zero.
+        expect(phonemize("1,000", "ar")).toBe("ʔalf");
+        expect(phonemize("24,000", "ar")).toBe("ʔarbaʕa wa ʕiʃruːn ʔalf");
+        expect(phonemize("1.5", "ar")).toBe("waːħid fˈaːsˤila xamsa"); // فاصلة, was a pause
+    });
+
+    test("clock: الساعة is supplied only when the text lacks it", () => {
+        // The colon was a clause mark and :00 read as صفر. Adding الساعة unconditionally produced
+        // "الساعة الساعة" — a defect this rule introduced, caught by the corpus diff, since in this corpus
+        // a clock time is essentially always already preceded by it.
+        expect(phonemize("الساعة 11:00", "ar")).toBe("asˈaːʕ ʔaħada ʕaʃar");
+        expect(phonemize("11:00", "ar")).toBe("asːˈaːʕa ʔaħada ʕaʃar"); // bare: supplied, diacritized
+        expect(phonemize("الساعة ١٠:٠٨", "ar")).toBe("asˈaːʕ ʕaʃara wˈa θamaːnija daqˈiːqa");
+    });
+
+    test("emitted words carry harakat, or they read as a consonant skeleton", () => {
+        // The engine reads undiacritized Arabic as bare consonants, so an unvocalized emission gives
+        // [drd͡ʒ] / [kjlwmtr] rather than [dˈarad͡ʒa] / [kiːluːmˈitr]. Avoidable for words WE insert.
+        expect(phonemize("5 كم", "ar")).toBe("xamsa kiːluːmˈitr");
+        expect(phonemize("20 °C", "ar")).toBe("ʕiʃruːn dˈarad͡ʒa miʔawˈijːa"); // was the English letter C
+        expect(phonemize("$50", "ar")).toBe("xamsuːn duːlˈaːr"); // the sign was dropped entirely
+        expect(phonemize("-5", "ar")).toBe("nˈaːqisˤ xamsa");
+        expect(phonemize("1/5", "ar")).toBe("waːħid ʕˈalaː xamsa");
+    });
+
+    test("a word ending in م or د before a period is NOT an abbreviation", () => {
+        // A naive scan reports م. ×97 and د. ×3, which looks like the dominant abbreviation class. They are
+        // ordinary words followed by a sentence period, and a table keyed on those letters would have
+        // mangled 100 sentence endings.
+        expect(phonemize("يهضمونها بداخلهم. يمكن", "ar")).toBe("jhdˤmwnhˈaː bdˈaːxlhm . jmkn");
+    });
+});
