@@ -30,17 +30,37 @@ import { ordinalWords } from "./numbers.ts";
  * (Budapest districts — "XIII. kerület" is one of the highest-frequency ordinal Romans in Hungarian text),
  * kongresszus, fejezet, olimpia, világháború (`az I. és a II. világháború` ×3 in the hu_hu corpus).
  */
-const CONTEXT = /^((év)?század|évezred|évfordul|kerület|kongresszus|fejezet|olimpi|világháború)/iu;
+/** The nouns that license an ordinal reading. Written CASE-SENSITIVELY, with both initial cases spelled
+ *  out, because `ordinalAfter` below must also test for a capitalised word and `\p{Lu}` under the `i`
+ *  flag matches lowercase too — case-insensitive matching case-folds property escapes, so the two cannot
+ *  share one pattern and JavaScript has no inline modifier to scope the flag. */
+const NOUNS = ["század", "évszázad", "évezred", "évfordul", "kerület", "kongresszus", "fejezet",
+    "olimpi", "világháború"];
+const bothCases = (w: string): string => `[${w[0]!.toUpperCase()}${w[0]!}]${w.slice(1)}`;
+const NOUN_ALT = NOUNS.map(bothCases).join("|");
+const CONTEXT = new RegExp(`^(?:${NOUN_ALT})`, "u");
 
 /**
- * THE REGNAL PATTERN IS NOT COVERED, and the attempt is recorded because it looked safe and was not.
- * `II. Erzsébet` / `XVI. Lajos` are *második Erzsébet* / *tizenhatodik Lajos* (3 instances in the hu_hu
- * corpus, all read as cardinals today), and the obvious licenser is "the FOLLOWING word is capitalised".
- * Adding `^\p{Lu}` to `ordinalAfter` does fix those three — and breaks `A JAS 39C Gripen`, because an
- * ordinal context also LICENSES a single-letter numeral in core/roman.ts, so the `C` of `39C` became
- * *századik*. `RomanPolicy` cannot see that the letter is glued to digits, and cannot ask for a minimum
- * numeral length, so there is no way to express the regnal rule here without that cost. 3 gained against
- * 1 confidently-wrong loss is not a trade worth taking; reported rather than worked around.
+ * THE REGNAL PATTERN IS STILL NOT COVERED, and the attempt has now been made TWICE, for two different
+ * reasons. Recorded properly so it is not tried a third time.
+ *
+ * `II. Erzsébet` / `XVI. Lajos` are *második Erzsébet* / *tizenhatodik Lajos* — 3 instances in hu_hu,
+ * read as cardinals today — and the obvious licenser is "the FOLLOWING word is capitalised".
+ *
+ * FIRST ATTEMPT broke `A JAS 39C Gripen`: an ordinal context licenses a single-letter numeral, so the `C`
+ * of `39C` became *századik*. That cause is now fixed in core/roman.ts, which refuses any candidate glued
+ * to a digit — generally true of Roman numerals, not a Hungarian concern.
+ *
+ * SECOND ATTEMPT, with that fixed, broke something else: `D K Arya főfelügyelő-helyettes` read as
+ * *ötszázadik K Arya*. `D` is Roman 500, all-caps, and followed by a capitalised word — which is
+ * indistinguishable from a regnal numeral by the licenser alone, because those are PERSONAL INITIALS.
+ *
+ * The real discriminator is the PERIOD: a regnal ordinal is written `I. István`, initials are `D K Arya`.
+ * `RomanPolicy` gets the next WORD, with punctuation already stripped, so it cannot see the period and
+ * cannot express the rule. A minimum-numeral-length constraint would not help either — Hungarian regnal
+ * names are routinely single letters (I. István, V. László, X. Leó).
+ *
+ * 3 gained against 1 confidently-wrong loss, twice over. Not a trade worth taking.
  */
 
 /** Integer → Hungarian ordinal (see numbers.ts). Named locally so the policy's shape stays readable. */

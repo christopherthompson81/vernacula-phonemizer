@@ -136,6 +136,14 @@ export function normalizeRomans(text: string, policy: RomanPolicy = {}): string 
     return text.replace(TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();
         if (policy.exclude?.has(lower)) return tok; // this language's own homograph — never a numeral
+        // GLUED TO DIGITS ⇒ not a numeral but part of an alphanumeric code: the C of `39C`, the B of
+        // `2B`, the X of `X5`. core/initialisms.ts already encodes the same fact from the other side,
+        // claiming `\p{Lu}+(?=\d)` as a code rather than an acronym. This is checked BEFORE everything
+        // else because the numeral-context licence below deliberately bypasses the single-letter guard,
+        // so without it an ordinal context turns the `C` of `JAS 39C Gripen` into "hundredth". Found by
+        // the Hungarian run, which measured a regnal-ordinal rule gaining 3 instances and losing that one
+        // — and reverted the rule rather than ship a confidently wrong reading.
+        if (/\d/u.test(text[offset - 1] ?? "") || /\d/u.test(text[offset + tok.length] ?? "")) return tok;
         const n = romanToInt(tok);
         if (n === null) return tok;
         const allCaps = tok === tok.toUpperCase() && /\p{Lu}/u.test(tok);

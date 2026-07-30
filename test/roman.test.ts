@@ -111,3 +111,20 @@ describe("Roman numerals (core/roman.ts)", () => {
         expect(phonemize("vii", "ro")).toBe("ˈvij"); // Romanian "alive", not 7
     });
 });
+
+/** #562 — a Roman-looking letter glued to a digit is part of an alphanumeric code, not a numeral. */
+describe("digit-glued candidates are never numerals", () => {
+    test("a letter touching a digit is left alone", () => {
+        // The numeral-context licence deliberately bypasses the single-letter guard, so without this an
+        // ordinal context turned the C of `JAS 39C Gripen` into "hundredth". Found by the Hungarian run.
+        expect(normalizeRomans("A JAS 39C Gripen")).toBe("A JAS 39C Gripen");
+        expect(normalizeRomans("B2 vitamin")).toBe("B2 vitamin");
+        expect(normalizeRomans("Boeing 747X")).toBe("Boeing 747X");
+        expect(normalizeRomans("X5 BMW")).toBe("X5 BMW");
+    });
+
+    test("…and a free-standing numeral still converts", () => {
+        expect(normalizeRomans("Louis XVI")).toBe("Louis 16");
+        expect(normalizeRomans("el siglo XIX")).toBe("el siglo 19");
+    });
+});
