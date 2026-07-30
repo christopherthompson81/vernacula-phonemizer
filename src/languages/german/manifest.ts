@@ -8,6 +8,8 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface GermanManifest {
+    /** Acronyms read letter-by-letter; see german.jsonc. */
+    acronymLetters: string[];
     vowelChars: string;
     vowels: {
         long: Record<string, string>;

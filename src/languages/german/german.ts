@@ -11,6 +11,7 @@ import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeGerman, normalizeGermanInitialisms } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed syllable nucleus (loanwords / exceptions).
@@ -380,7 +381,10 @@ function guessUnstressedPrefix(w: string): boolean {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
+// German groups thousands with a PERIOD and takes a COMMA decimal. The old class accepted either as a
+// decimal, so "1.000" read as *eins komma null null null*. Times are claimed by normalize.ts first, so a
+// dot reaching here is grouping.
+const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — German words (Prozent/Euro/Kilometer are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({
@@ -392,10 +396,15 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class GermanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // #562 order: German rewrites (era, abbreviations, ORDINALS, clock, units) → INITIALISMS →
+        // the shared symbol tier. The clock and the ordinals must precede the number tokenizer.
+        const normalized = SYMBOLS(normalizeGermanInitialisms(normalizeGerman(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
-                const [intPart, frac] = m[2].split(/[.,]/);
+                // The PERIOD is thousands grouping in German and the COMMA is the decimal point. Splitting
+                // on either made "1.000" a decimal — *eins komma null null null*.
+                const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
                 for (const wd of numberToWords(Number(intPart)).split(" "))
                     sink.emit(phonemizeWord(wd));
                 if (frac !== undefined) {

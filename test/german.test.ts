@@ -309,3 +309,52 @@ describe("German unstressed prefixes on dict-missing forms", () => {
         expect(phonemize("erste", "de")).toBe("ˈeːɐ̯stə");
     });
 });
+
+// #562 — the twelfth language, and the one the ordinal work was building towards: German writes the
+// ordinal as a numeral plus a bare PERIOD, the class Run 1 flagged as needing a detector.
+describe("german normalization", () => {
+    test("ordinal N. is detected and DECLINED, without eating a sentence period", () => {
+        // Every one of these previously read as a cardinal plus a PAUSE ("sechzehn . Jahrhundert"). The
+        // detector fires on the FOLLOWING word (a month or Jahrhundert), or on a licensing article plus a
+        // capitalised noun. The governing word picks the ending: am/im/des/dem take weak -en, das/der -e.
+        expect(phonemize("im 16. Jahrhundert", "de")).toBe("ɪm zˈɛçt͡seːntən jaːɐ̯hˈʊndɐt");
+        expect(phonemize("das 16. Jahrhundert", "de")).toBe("das zˈɛçt͡seːntə jaːɐ̯hˈʊndɐt"); // -e, not -en
+        expect(phonemize("des 16. Jahrhunderts", "de")).toBe("dəs zˈɛçt͡seːntən jaːɐ̯hˈʊndɐts");
+        expect(phonemize("am 1. Januar", "de")).toBe("am ˈɛɐ̯stən jˈanuaːɐ̯"); // suppletive stem erst-
+        expect(phonemize("am 26. November", "de")).toBe("am zˈɛçzʊntt͡svant͡sɪkstən nofˈɛmbɐ"); // -st above 20
+        // …and a sentence-final digit-period must stay a PAUSE. Verified across the corpus: 109 utterances
+        // contain a digit-period and no sentence-final pause was lost.
+        expect(phonemize("Er kam 1958. Der Rest", "de")).toContain(" . ");
+        expect(phonemize("genau 500. Dann", "de")).toContain(" . ");
+    });
+
+    test("the period is thousands grouping, the comma is the decimal", () => {
+        // The number token accepted either as a DECIMAL, so "1.000" read as *eins komma null null null*.
+        expect(phonemize("1.000 Menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt mˈɛnʃən");
+        expect(phonemize("22.500", "de")).toBe("t͡svaɪ̯ʊntt͡svˈant͡sɪçtaʊ̯zənt fˈʏnfhʊndɐt");
+        expect(phonemize("1,5 Meter", "de")).toBe("aɪ̯ns kˈɔma fʏnf mˈeːtɐ"); // …and the comma still works
+    });
+
+    test("clock: both written forms, neither of which worked", () => {
+        // The colon became a PAUSE with a spurious "null"; the dot form was read as a decimal.
+        expect(phonemize("11:00 Uhr", "de")).toBe("ɛlf uːɐ̯");
+        expect(phonemize("8:46", "de")).toBe("axt uːɐ̯ zˈɛçsʊntfɪɐ̯t͡sɪç");
+    });
+
+    test("abbreviations, which were consonant clusters plus pauses", () => {
+        expect(phonemize("z. B. das", "de")).toBe("t͡suːm bˈaɪ̯ʃpiːl das"); // was [t͡s . p .]
+        expect(phonemize("bzw. auch", "de")).toBe("bət͡sˈiːʊŋsvaɪ̯zə aʊ̯x"); // ×13, was [pt͡sf .]
+        expect(phonemize("Dr. Meier", "de")).toBe("dˈɔktoːɐ̯ mˈaɪ̯ɐ");
+        expect(phonemize("usw.", "de")).toBe("ʊnt zoː vˈaɪ̯tɐ ."); // sentence-final dot kept
+        expect(phonemize("356 v. Chr.", "de")).toBe("dʁˈaɪ̯ʊndɐtzɛçzʊntfʏnft͡sɪç foːɐ̯ kʁˈɪstʊs");
+    });
+
+    test("initialisms, units, signs and fractions", () => {
+        expect(phonemize("die USA", "de")).toBe("diː uː ɛs aː"); // was the word [ˈuːzaː]
+        expect(phonemize("AOL", "de")).toBe("aː oː ɛl");
+        expect(phonemize("120 km/h", "de")).toBe("ˈaɪ̯nhʊndɐtt͡svant͡sɪç kilomˈeːtɐ pʁoː ʃtˈʊndə"); // /h was a letter
+        expect(phonemize("20 °C", "de")).toBe("t͡svˈant͡sɪç ɡʁaːt kˈɛlzi̯ʊs");
+        expect(phonemize("+3 Grad", "de")).toBe("plʊs dʁaɪ̯ ɡʁaːt");
+        expect(phonemize("1/5", "de")).toBe("aɪ̯n fˈʏnftəl"); // ordinal stem + -el
+    });
+});

@@ -1145,3 +1145,55 @@ Two of the three recurring classes were mechanical all along and could have been
 the first sighting. The one that could not — the symbol tier — is the one that needs a human-sourced word
 per language. That is a useful split to remember before starting language twelve: sweep what is
 formatting, hand-author only what is linguistic.
+
+## Run 19 — 2026-07-30 — German, and the `N.` ordinal detector Run 1 deferred
+
+Twelfth language, and the one the ordinal thread has been building towards. German writes the ordinal as a
+numeral plus a bare PERIOD — `16. Jahrhundert`, `am 17. September` — which Run 1 excluded from its counts
+with the note that "a regex cannot distinguish it from a sentence-final digit or a list marker". It is the
+largest single defect here (×109), and every instance read as a cardinal followed by a PAUSE:
+`im 16. Jahrhundert` came out as *sechzehn . Jahrhundert*.
+
+### The detector, built from the corpus rather than intuition
+
+Tabulating what surrounds `N.` across the 2,987 de_de utterances settled it:
+
+| position | evidence |
+|---|---|
+| AFTER | `Jahrhundert(s)` ×34, month names ×66, a few regiment names — and **79 with NOTHING after**, the sentence-final periods that must not be claimed |
+| BEFORE | am ×54, im ×14, des ×9, dem ×8, das ×7, zum ×5, vom ×2, bis ×2, ins ×1, den ×1 |
+
+So the rule fires on the FOLLOWING word being a month or Jahrhundert — which alone covers ~100 of the 109 —
+or on a preceding date/ordinal-licensing article plus a capitalised noun, which picks up the regiments. A
+sentence-final `N.` satisfies neither: nothing follows it, and the word before is a content word.
+
+**Verified on the corpus, which is the only check that matters here: 109 utterances contain a digit-period
+and ZERO sentence-final pauses were lost.**
+
+### Declension from the same evidence
+
+The governing word decides the ending: `am/im/vom/zum/dem/des/den/ins/seit/bis` take the weak **-en**
+(*am siebzehnten September*, *des sechzehnten Jahrhunderts*), `das/der/die` take **-e** (*das sechzehnte
+Jahrhundert*). That is not full case agreement — it is the two forms the corpus actually needs, and the
+distinction is stated as such rather than overclaimed. Stems are the cardinal plus -t below 20 and -st above,
+with four suppletive stems (erst, dritt, siebt, acht).
+
+### The separators were backwards
+
+German groups thousands with a PERIOD and takes a COMMA decimal, but both the token class and the number
+handler treated either as a decimal — so `1.000` read as *eins komma null null null* (×55). Fixed in both
+places. The clock was broken in both its written forms too: `11:00` made the colon a pause with a spurious
+"null", and `11.00 Uhr` was read as a decimal.
+
+### What else
+
+Abbreviations were consonant clusters plus pauses (`bzw.` ×13 → [pt͡sf .], `z. B.` ×11 → [t͡s . p .],
+`v. Chr.` ×11); initialisms were read as words (`USA` → [ˈuːzaː], `US` ×30 → [uːs], `PBS` → [pps]); `km/h`
+and `°C` lost their tails; the plus sign was dropped.
+
+### Verification
+
+- 198 files / 2154 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical: 3711/4744 (78.2%) folded, 96.1% symbol.
+- de corpus, both columns: 378 of 2,987 changed on the cased column, 129 on the lowercased; zero digit
+  leaks, sentinels, slot-gaps or stray marks, and zero sentence-final pauses lost.
