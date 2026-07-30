@@ -82,17 +82,7 @@ const DOTTED: readonly (readonly [string, string])[] = [
     ["B\\.C\\.E", BCE_WORD], ["A\\.D", AD_WORD], ["B\\.C", BCE_WORD], ["n\\.k", "na kadhalika"],
 ];
 
-/** Currency signs, emitted PREFIXED — the order the corpus proves for every measure noun it writes out
- *  ("dola 30 za Kimarekani", "dola 11,000 hadi dola 22,500"). The shared symbol tier cannot be used for
- *  this: it always emits the currency word AFTER the number, and has no `currencyPrefix` counterpart to
- *  its `percentPrefix`. Zero currency signs occur in this corpus; the words are ordinary Swahili
- *  (dola / euro / pauni / yeni / shilingi) and a dropped sign is silent content loss wherever one does. */
-const CURRENCY: Readonly<Record<string, string>> = {
-    "$": "dola", "€": "euro", "£": "pauni", "¥": "yeni", "KSh": "shilingi", "TSh": "shilingi",
-};
-const CUR_ALT = Object.keys(CURRENCY).sort((a, b) => b.length - a.length)
-    .map((s) => s.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&")).join("|");
-const CUR_RE = new RegExp(`(?<![\\p{L}\\p{M}])(${CUR_ALT})\\s?(\\d[\\d,. ]*\\d|\\d)`, "gu");
+/* Currency moved to the SHARED tier (currencyPrefix in swahili.ts) — see the note there. */
 
 /** Fold Latin diacritics to their base letter. Swahili's orthography has none, so `á ü õ ç` are always
  *  foreign spellings — and without this they are not matched by the engine's ASCII tokenizer, fall into
@@ -128,10 +118,10 @@ export function normalizeSwahili(input: string): string {
     //    could never be swallowed.
     s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?![\d.,])/gu, (whole) => whole.replace(/,/gu, ""));
 
-    // 4) CURRENCY, prefixed. After de-grouping so the amount is one token, and BEFORE step 6 for the same
-    //    reason the playbook gives for units-before-decimals: the decimal rewrite destroys the
-    //    sign↔number adjacency this matches on.
-    s = s.replace(CUR_RE, (_m, sym: string, num: string) => `${CURRENCY[sym]!} ${num}`);
+    // 4) CURRENCY is the SHARED tier's now (`currencyPrefix` in swahili.ts). Safe to move because
+    //    swahili.ts runs SYMBOLS *before* this pass, so the tier still sees the sign adjacent to its
+    //    number — the decimal rewrite at step 6 has not happened yet. Verified byte-identical on the
+    //    whole corpus.
 
     // 5) DEGREES. `nyuzi joto` precedes the number and the scale name follows it — the form Swahili
     //    Wikipedia uses throughout ("nyuzi joto 45°C", "nyuzi joto +4 Selsiasi", "nyuzi joto 2.9 za

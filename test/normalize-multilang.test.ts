@@ -281,4 +281,12 @@ describe("symbol normalization — FLEURS-priority round", () => {
             expect(phonemize(native, lang), lang).toBe(phonemize("50", lang));
         }
     });
+
+    /** `currencyPrefix`, the counterpart to `percentPrefix`, reported missing by the Swahili run. */
+    test("a prefix-currency language emits the noun before the number", () => {
+        expect(phonemize("$30", "sw")).toBe("ɗˈɔlɑ θɛlɑθˈini");   // dola thelathini
+        expect(phonemize("KSh 500", "sw")).toBe("ʃilˈiᵑɡi mˈiɑ tˈɑnɔ");
+        // …and the postfix languages must not move.
+        expect(phonemize("$5", "fr")).toContain("sɛ̃k dɔlˈaʁ");
+    });
 });

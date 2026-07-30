@@ -38,6 +38,12 @@ export interface SymbolData {
      *  sign on either side (%40 or 40%); both rewrite to prefix order. */
     percentPrefix?: boolean;
     /**
+     * The currency noun PRECEDES the number — Swahili "dola 30", where the tier's default is to emit it
+     * after. The magnitude and its connective, if any, stay with the number: "dola milioni 5". Reported by
+     * the Swahili run, which had to claim currency locally for want of this.
+     */
+    currencyPrefix?: boolean;
+    /**
      * The word joining two units in a RATE — `km/h` → "kilometres PER hour". Composition is shared; only
      * the word is language data ("per", "pro", "par"). Both units must be declared in `units`, since the
      * denominator needs its own noun (`h` → hour/Stunde/heure).
@@ -196,16 +202,19 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             mag !== undefined && mag !== "" && d.magnitudeConnective !== undefined
                 ? `${d.magnitudeConnective} `
                 : "";
+        // Both orders emit through one shape so the magnitude and its connective travel with the number
+        // whichever side the noun goes on.
+        const money = (num: string, mag: string | undefined, sym: string): string => {
+            const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
+            return d.currencyPrefix
+                ? `${w}${mag ?? ""} ${join(mag)}${num}`.replace(/\s+/gu, " ")
+                : `${num}${mag ?? ""} ${join(mag)}${w}`;
+        };
         if (curBefore)
-            s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => {
-                const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
-                return `${num}${mag ?? ""} ${join(mag)}${w}`;
-            });
+            s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => money(num, mag, sym));
         if (curAfter)
-            s = s.replace(curAfter, (_m, num: string, mag: string | undefined, sym: string) => {
-                const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
-                return `${num}${mag ?? ""} ${join(mag)}${w}`;
-            });
+            s = s.replace(curAfter, (_m, num: string, mag: string | undefined, sym: string) =>
+                money(num, mag, sym));
         if (d.percentPrefix) {
             s = s.replace(pctPreRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
             s = s.replace(pctRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);

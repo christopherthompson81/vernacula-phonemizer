@@ -162,7 +162,19 @@ const TOKEN = /([a-zA-Z']+)|(\d+)|([.?!,;:])/gu;
  *   *dola 30*. Swahili therefore handles currency locally in normalize.ts. Recorded as a core limitation
  *   rather than worked around in core.
  */
-const SYMBOLS = makeSymbolNormalizer({ percent: ["asilimia"], percentPrefix: true });
+// MIGRATION (#562): currency moved off the local rule onto the shared tier, now that `currencyPrefix`
+// exists. Swahili puts the measure noun BEFORE the number for every measure it writes out — "dola 30 za
+// Kimarekani", "kilomita 70 kwa saa" — which is why the local rule existed. Verified byte-identical over
+// the whole sw_ke corpus.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["asilimia"],
+    percentPrefix: true,
+    currency: {
+        "$": ["dola"], "€": ["euro"], "£": ["pauni"], "¥": ["yeni"],
+        "KSh": ["shilingi"], "TSh": ["shilingi"],
+    },
+    currencyPrefix: true,
+});
 
 class SwahiliPhonemizer implements Phonemizer {
     text(input: string): string {
@@ -187,6 +199,19 @@ class SwahiliPhonemizer implements Phonemizer {
 }
 
 /** Build the Swahili phonemizer (no data files beyond the manifest — the engine is rule-based). */
+/**
+ * NO FOREIGN PHONEMIZER IS WIRED, and that is deliberate rather than an oversight.
+ *
+ * Languages in a non-Latin script (gu, ps, kn, ml, ak …) take `(latin) => english.text(latin)` because
+ * embedded Latin there really is foreign text. Swahili is Latin-script, so `GPS` is not foreign — it is an
+ * acronym IN Swahili, and routing it to English would put English phonemes in a Swahili stream, which is
+ * the exact defect the Japanese, Thai and Greek runs each worked to remove.
+ *
+ * The correct reading is Swahili letter names, which `core/initialisms.ts` would supply given an
+ * `acronymLetters` table — but the Swahili run found no source for them, so none is authored. Until one
+ * exists an unreadable acronym stays a cluster (GPS → [ɠps]). That is a MISSING reading rather than a
+ * confidently wrong one, which is the trade the playbook's standing rule on data asks for.
+ */
 export function createSwahili(): Phonemizer {
     return new SwahiliPhonemizer();
 }
