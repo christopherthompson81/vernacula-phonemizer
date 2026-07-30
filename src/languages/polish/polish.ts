@@ -40,24 +40,24 @@ export function phonemizeWord(word: string): string {
  * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["procent", "procenty", "procent"],
+    percent: ["procent", "procenty", "procent", "procenta"],
     currency: {
-        "$": ["dolar", "dolary", "dolarów"],
+        "$": ["dolar", "dolary", "dolarów", "dolara"],
         "€": ["euro"],
-        "£": ["funt", "funty", "funtów"],
-        "¥": ["jen", "jeny", "jenów"],
+        "£": ["funt", "funty", "funtów", "funta"],
+        "¥": ["jen", "jeny", "jenów", "jena"],
         // Polish's own currency, which could not be declared while the tier keyed currencies as single
         // characters — the Polish run reported exactly this gap and had to omit złoty.
-        "zł": ["złoty", "złote", "złotych"],
-        "PLN": ["złoty", "złote", "złotych"],
+        "zł": ["złoty", "złote", "złotych", "złotego"],
+        "PLN": ["złoty", "złote", "złotych", "złotego"],
     },
     magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
     units: UNITS,
     // MIGRATION TEST (#562): km²/mm² composed by the shared tier. The adjective agrees, so it carries the
     // same three count forms the unit nouns do.
     exponentWords: {
-        squared: ["kwadratowy", "kwadratowe", "kwadratowych"],
-        cubed: ["sześcienny", "sześcienne", "sześciennych"],
+        squared: ["kwadratowy", "kwadratowe", "kwadratowych", "kwadratowego"],
+        cubed: ["sześcienny", "sześcienne", "sześciennych", "sześciennego"],
     },
     countForm: plCountForm,
 });

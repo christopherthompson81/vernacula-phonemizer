@@ -56,10 +56,13 @@ const GROUP_SPACE = "  ";
  */
 export const plCountForm = (n: number): number => {
     if (n === 1) return 0;
-    // A decimal count never takes the singular or the paucal: *2,3 miliardy is wrong (Polish wants the
-    // genitive singular *miliarda* there, which these three-form tables cannot express — the genitive
-    // plural is the nearer of the two forms available).
-    if (!Number.isInteger(n)) return 2;
+    // A decimal count takes the GENITIVE SINGULAR — 2,3 miliarda, 2,4 procenta — which is index 3. The
+    // note that used to sit here said a three-form table could not express it and settled for the
+    // genitive plural as "the nearer of the two available". That was wrong on the mechanism: `CountForms`
+    // is a plain string[] and `pick` clamps to the array length, so a fourth entry is local data. The
+    // tables that need one now carry it; a table with only three forms still clamps to index 2, i.e. the
+    // old behaviour.
+    if (!Number.isInteger(n)) return 3;
     const m100 = Math.abs(n) % 100;
     if (m100 >= 12 && m100 <= 14) return 2;
     const m10 = m100 % 10;
@@ -67,8 +70,11 @@ export const plCountForm = (n: number): number => {
 };
 
 /** Pick the count form of a counted noun written [sg, paucal, gen-pl]. */
-function counted(n: number, forms: readonly [string, string, string]): string {
-    return forms[plCountForm(n)]!;
+function counted(n: number, forms: readonly string[]): string {
+    // CLAMPED, exactly as core's `pick` is: plCountForm returns 3 for a decimal (the genitive singular)
+    // and not every table carries a fourth form. Without the clamp this indexed past the end and emitted
+    // the literal string "undefined".
+    return forms[Math.min(plCountForm(n), forms.length - 1)]!;
 }
 
 /**
@@ -166,14 +172,14 @@ const DOTTED: Readonly<Record<string, string>> = {
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
 
 /** Units the shared symbol tier can express (matched only when a NUMBER is adjacent). [sg, paucal, gen-pl]. */
-export const UNITS: Readonly<Record<string, [string, string, string]>> = {
-    km: ["kilometr", "kilometry", "kilometrów"],
-    m: ["metr", "metry", "metrów"],
-    cm: ["centymetr", "centymetry", "centymetrów"],
-    mm: ["milimetr", "milimetry", "milimetrów"],
-    kg: ["kilogram", "kilogramy", "kilogramów"],
-    mln: ["milion", "miliony", "milionów"],
-    mld: ["miliard", "miliardy", "miliardów"],
+export const UNITS: Readonly<Record<string, string[]>> = {
+    km: ["kilometr", "kilometry", "kilometrów", "kilometra"],
+    m: ["metr", "metry", "metrów", "metra"],
+    cm: ["centymetr", "centymetry", "centymetrów", "centymetra"],
+    mm: ["milimetr", "milimetry", "milimetrów", "milimetra"],
+    kg: ["kilogram", "kilogramy", "kilogramów", "kilograma"],
+    mln: ["milion", "miliony", "milionów", "miliona"],
+    mld: ["miliard", "miliardy", "miliardów", "miliarda"],
 };
 
 /** Clock hour → masculine-nominative ordinal, later inflected to feminine. Hour 0 returns undefined: it is
@@ -181,8 +187,8 @@ export const UNITS: Readonly<Record<string, [string, string, string]>> = {
  *  czwarta*. No `0:MM` occurs in the corpus. */
 const HOUR_ORD = (h: number): string | undefined => (h === 0 ? undefined : ordinal(h));
 const DEGREE: readonly [string, string, string] = ["stopień", "stopnie", "stopni"];
-const KMH: readonly [string, string, string] = ["kilometr", "kilometry", "kilometrów"];
-const MILE: readonly [string, string, string] = ["mila", "mile", "mil"];
+const KMH: readonly string[] = ["kilometr", "kilometry", "kilometrów", "kilometra"];
+const MILE: readonly string[] = ["mila", "mile", "mil", "mili"];
 
 /**
  * Case of `godzina` / of the clock ordinal, from the governing preposition immediately before it.

@@ -122,41 +122,45 @@ function number(digits: string): string {
  * standard dictionary paradigms, not invented.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["відсоток", "відсотки", "відсотків"],
+    percent: ["відсоток", "відсотки", "відсотків", "відсотка"],
     currency: {
         "€": ["євро"], // indeclinable
-        "$": ["долар", "долари", "доларів"],
-        "£": ["фунт", "фунти", "фунтів"],
+        "$": ["долар", "долари", "доларів", "долара"],
+        "£": ["фунт", "фунти", "фунтів", "фунта"],
     },
     units: {
-        "км": ["кілометр", "кілометри", "кілометрів"],
-        "см": ["сантиметр", "сантиметри", "сантиметрів"],
-        "мм": ["міліметр", "міліметри", "міліметрів"],
-        "кг": ["кілограм", "кілограми", "кілограмів"],
-        "ггц": ["гігагерц", "гігагерци", "гігагерців"],
+        "км": ["кілометр", "кілометри", "кілометрів", "кілометра"],
+        "см": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
+        "мм": ["міліметр", "міліметри", "міліметрів", "міліметра"],
+        "кг": ["кілограм", "кілограми", "кілограмів", "кілограма"],
+        "ггц": ["гігагерц", "гігагерци", "гігагерців", "гігагерца"],
         "мбіт": ["мегабіт", "мегабіти", "мегабіт"],
         // LATIN aliases. uk_ua writes the Cyrillic abbreviation throughout, but the engine's TOKEN drops
         // Latin runs outright, so a foreign-sourced `120 km` loses the unit entirely rather than merely
         // mispronouncing it. Same reasoning as Russian's aliases; bare `m` is excluded for the same
         // apostrophe reason as `м`.
-        "km": ["кілометр", "кілометри", "кілометрів"],
-        "cm": ["сантиметр", "сантиметри", "сантиметрів"],
-        "mm": ["міліметр", "міліметри", "міліметрів"],
-        "kg": ["кілограм", "кілограми", "кілограмів"],
+        "km": ["кілометр", "кілометри", "кілометрів", "кілометра"],
+        "cm": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
+        "mm": ["міліметр", "міліметри", "міліметрів", "міліметра"],
+        "kg": ["кілограм", "кілограми", "кілограмів", "кілограма"],
     },
     unitPer: "на", // км/год → кілометрів НА годину; the denominator is accusative
     rateDenominators: { "год": "годину", "ч": "годину", "h": "годину", "с": "секунду", "s": "секунду" },
     // Ukrainian puts the measure adjective BEFORE the noun as a separate agreeing word — квадратних
     // кілометрів — the same shape as Russian, not Swedish's fused compound.
     exponentWords: {
-        squared: ["квадратний", "квадратні", "квадратних"],
-        cubed: ["кубічний", "кубічні", "кубічних"],
+        squared: ["квадратний", "квадратні", "квадратних", "квадратного"],
+        cubed: ["кубічний", "кубічні", "кубічних", "кубічного"],
         position: "before",
     },
     // Inflected forms too, because running text writes the one its numeral governs (2 мільйони, 5 мільйонів).
     magnitudes: ["тисячі", "тисяч", "мільйон", "мільйона", "мільйони", "мільйонів",
         "мільярд", "мільярда", "мільярди", "мільярдів"],
-    countForm: slavicCountForm,
+    // A DECIMAL governs the GENITIVE SINGULAR in Ukrainian — 2,4 відсотка — which is a fourth form,
+    // because unlike Russian the 2–4 slot here is the NOMINATIVE PLURAL (два відсотки) and so cannot
+    // serve. `CountForms` is a plain string[] and `pick` clamps to the array length, so the extra entry
+    // is local data, not a schema change; the three-form languages are untouched.
+    countForm: (n) => (Number.isInteger(n) ? slavicCountForm(n) : 3),
 });
 
 const CYRILLIC = "\\u0400-\\u04FF";

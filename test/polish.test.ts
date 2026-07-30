@@ -126,7 +126,7 @@ describe("Polish text normalization", () => {
         // Handled in polish.ts's TOKEN so the number stays adjacent to its unit for the symbol tier.
         // A DECIMAL count takes neither the singular nor the paucal — 3,5 metra, so the genitive plural
         // (the nearer of the two forms a three-form table can hold) rather than *3,5 metry.
-        expect(phonemize("3,5 m", "pl").trim()).toBe("tʂˈɨ pʂɛt͡ɕˈinɛk pjˈɛɲt͡ɕ mˈɛtruf");
+        expect(phonemize("3,5 m", "pl").trim()).toBe("tʂˈɨ pʂɛt͡ɕˈinɛk pjˈɛɲt͡ɕ mˈɛtra");
     });
 
     test("multi-dot abbreviations are claimed before the single-dot rule (×6)", () => {

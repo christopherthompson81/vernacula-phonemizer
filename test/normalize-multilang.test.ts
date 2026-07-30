@@ -224,4 +224,26 @@ describe("symbol normalization — FLEURS-priority round", () => {
     test("the full-width percent sign reaches the shared tier", () => {
         expect(phonemize("80％", "ja")).toBe(phonemize("80%", "ja")); // U+FF05, ordinary CJK typography
     });
+
+    /**
+     * A DECIMAL governs the GENITIVE SINGULAR in Slavic. Whether that is already expressible depends on
+     * the language: Russian and Czech put the genitive singular in the 2–4 slot, so they were right by
+     * coincidence, while Ukrainian and Polish put the NOMINATIVE PLURAL there and had no slot for it.
+     * `CountForms` is a plain string[] and `pick` clamps, so the fix is a fourth entry in those two
+     * languages' tables — local data, not a schema change. Measured: 57 decimal+counted-noun instances
+     * across nine Slavic corpora, so this was wrong on every one of them in the affected languages.
+     */
+    test("a Slavic decimal takes the genitive singular", () => {
+        expect(phonemize("2,4%", "uk")).toContain("ʋʲidsɔtka");   // was відсотки, nom. pl.
+        expect(phonemize("2,4%", "pl")).toContain("prɔt͡sˈɛnta"); // was procent, gen. pl.
+        // …and the languages that were already right must not move.
+        expect(phonemize("2,4%", "ru")).toContain("prɐt͡sˈɛntə");
+        // Integer agreement is untouched in all of them.
+        expect(phonemize("2%", "uk")).toContain("ʋʲidsɔtkɪ");
+        expect(phonemize("5%", "uk")).toContain("ʋʲidsɔtʲkʲiu̯");
+        // A MAGNITUDE still takes the genitive plural. Adding a fourth form broke this once, because
+        // `withMagnitude` took the last entry and "last" stopped meaning "most plural".
+        expect(phonemize("$5 milionów", "pl")).toContain("dɔlˈaruf");
+        expect(phonemize("$5 миллионов", "ru")).toContain("dˈoɫːərəf");
+    });
 });

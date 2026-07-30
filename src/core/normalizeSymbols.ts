@@ -89,19 +89,22 @@ export const slavicCountForm = (n: number): number => {
 /**
  * The form a currency noun takes after a MAGNITUDE word ("5 million dollars").
  *
- * A magnitude always governs the most-plural form a language has, so this takes the LAST entry outright
- * rather than routing a count through `countForm`. The previous code passed the literal 2 as a *count*,
- * which for the Slavic selector means the paucal — so a Slavic language declaring magnitudes would read
- * "5 миллионов долларА" instead of the required genitive plural "долларов". Found by the Polish run,
- * reading the code rather than probing; it is latent only because Russian declared no magnitudes at all.
+ * A magnitude governs the same form a LARGE COUNT does — "5 million dollars" agrees like "5 dollars" —
+ * so it is resolved by asking the language's own `countForm` for a many-count rather than by picking a
+ * fixed index. The first version passed the literal 2 as a count, which for the Slavic selector means the
+ * PAUCAL, so Polish read "5 milionów dolary" instead of the genitive plural. The second took the LAST
+ * entry outright, which was right until a fourth form (the Slavic genitive singular, for decimals) was
+ * appended and "last" stopped meaning "most plural" — it then read "5 milionów dolara". Asking countForm
+ * is stable under both, because it is the language that knows.
  */
+const MANY = 5; // any count that selects a language's plural/genitive-plural slot
 function withMagnitude(
     forms: CountForms,
     mag: string | undefined,
     n: number,
     countForm: (n: number) => number,
 ): string {
-    return mag !== undefined && mag !== "" ? forms[forms.length - 1]! : pick(forms, n, countForm);
+    return pick(forms, mag !== undefined && mag !== "" ? MANY : n, countForm);
 }
 
 function pick(forms: CountForms, n: number, countForm: (n: number) => number): string {
