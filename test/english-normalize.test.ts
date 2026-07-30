@@ -98,3 +98,72 @@ describe("English text normalization (#562)", () => {
         expect(phonemize("henry viii", "en")).toContain("ˈeᶦtθ");
     });
 });
+
+// #562 parity sweep against the French normalization layer: the classes English was missing or getting
+// wrong. Measured over the CASED column of the FLEURS transcripts (228 all-caps tokens), which is what
+// real input looks like — the lowercased column the rest of the suite uses cannot exercise these.
+describe("english normalization: initialisms", () => {
+    test("unpronounceable or dictionary-absent acronyms are spelled out", () => {
+        // These were relying on CMUdict happening to contain each acronym. Where it did not, the OOV g2p
+        // produced garbage or dropped letters outright — the same silent-loss class as French TGV/PDG.
+        expect(phonemize("the NHS trust", "en")).toBe("ðə ˈɛn ˈeᶦt͡ʃ ˈɛs tɹˈʌst"); // was [ns] — H gone
+        expect(phonemize("an MP said", "en")).toBe("æn ˈɛm pʰˈiː sˈɛd"); // was [mp]
+        expect(phonemize("NYC", "en")).toBe("ˈɛn wˈaᶦ sˈiː"); // was [niːk]
+        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbəɫjuː tʰˈiː ˈoᶷ"); // was [uːt]
+        expect(phonemize("DSLR", "en")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ"); // was [ʌdslɚ]
+    });
+
+    test("convention beats the dictionary where the dictionary has the WORD", () => {
+        // CMUdict reads "us" as the pronoun [ʌs]; US occurs 18× in the cased column.
+        expect(phonemize("the US economy", "en")).toBe("ðə jˈuː ˈɛs ɪkʰˈɑːnəmi");
+    });
+
+    test("a dictionary letter-reading is trusted, not re-spelled", () => {
+        // CMUdict has cd as ONE token with one stress. Spelling it out would be the same phonemes with
+        // worse prosody, so the dictionary branch is deliberately not readability-guarded.
+        expect(phonemize("the CD player", "en")).toBe("ðə siːdˈiː plˈeᶦɚ");
+    });
+
+    test("lexicalized acronyms stay words; Roman numerals get first refusal", () => {
+        expect(phonemize("NASA", "en")).toBe("nˈæsə");
+        expect(phonemize("UNESCO", "en")).toBe("juːnˈɛskoᶷ");
+        expect(phonemize("HELLO", "en")).toBe("həlˈoᶷ"); // an ordinary word in caps is not an initialism
+        expect(phonemize("THE QUICK BROWN FOX", "en")).toBe("ðə kwˈɪk bɹˈaᶷn fˈɑːks"); // all-caps document
+        expect(phonemize("Louis XIV", "en")).toBe("lˈuːɪs ðə fˈɔːɹtˈiːnθ"); // not EX-EYE-VEE
+    });
+});
+
+describe("english normalization: abbreviations, eras, fractions, units", () => {
+    test("abbreviations expand and the dot never becomes a pause", () => {
+        expect(phonemize("No. 11", "en")).toBe("nˈʌmbɚ ɪlˈɛvən"); // was the word "no" plus a pause
+        expect(phonemize("Dr. Who", "en")).toBe("dˈɑːktɚ hˈuː"); // was "drive who" — "who" is a function word
+        expect(phonemize("Prof. Jones", "en")).toBe("pɹəfˈɛsɚ d͡ʒˈoᶷnz");
+        expect(phonemize("vs. them", "en")).toBe("vˈɝsəs ðˈɛm");
+        expect(phonemize("e.g. this", "en")).toBe("ˈiː d͡ʒˈiː ðˈɪs"); // dots were two pause marks
+        expect(phonemize("i.e. that", "en")).toBe("ˈaᶦ ˈiː ðˈæt");
+        expect(phonemize("at 3 a.m.", "en")).toBe("æt θɹˈiː ˈeᶦ ˈɛm"); // stripping dots alone left the verb "am"
+        expect(phonemize("the U.S. team", "en")).toBe("ðə jˈuː ˈɛs tʰˈiːm");
+    });
+
+    test("era markers", () => {
+        expect(phonemize("5000 BC", "en")).toBe("fˈaᶦv θˈaᶷzənd bˈiː sˈiː");
+        expect(phonemize("356 BCE", "en")).toBe("θɹˈiː hˈʌndɹəd fˈɪfti sˈɪks bˈiː sˈiː ˈiː"); // was [bsiː]
+        expect(phonemize("in 1066 AD", "en")).toBe("ɪn wˈʌn θˈaᶷzənd sˈɪksti sˈɪks ˈeᶦ dˈiː"); // not "ad"
+    });
+
+    test("fractions and negatives", () => {
+        expect(phonemize("1/2", "en")).toBe("wˈʌn hˈæf"); // was "one two"
+        expect(phonemize("3/4", "en")).toBe("θɹˈiː kwˈɔːɹt̬ɚz");
+        expect(phonemize("2/5", "en")).toBe("tʰˈuː fˈɪfθs"); // ordinal denominator, pluralized
+        // A dropped minus INVERTS the meaning — the worst class of silent error for a temperature.
+        expect(phonemize("-5 degrees", "en")).toBe("mˈaᶦnəs fˈaᶦv dᵻɡɹˈiːz");
+    });
+
+    test("units that were dropped or read as letter names", () => {
+        expect(phonemize("20 °C", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs"); // was "twenty see"
+        expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
+        expect(phonemize("30 m", "en")).toBe("θˈɝd̬iː mˈiːt̬ɚz"); // was "thirty em"
+        // Space-grouped thousands: the number token cannot span a space, so the thousand was lost.
+        expect(phonemize("5 000 years", "en")).toBe("fˈaᶦv θˈaᶷzənd jˈɪɹz");
+    });
+});

@@ -27,7 +27,7 @@ import {
 } from "./posTagger.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
 import { foldLatinDiacritics } from "../../core/unicode.ts";
-import { normalizeEnglish } from "./normalize.ts";
+import { normalizeEnglish, normalizeEnglishInitialisms } from "./normalize.ts";
 
 /** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
  *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
@@ -185,7 +185,10 @@ export class EnglishPhonemizer {
         wordTransform?: (ipa: string, word: string) => string,
         oovOverride?: (g2pKey: string) => string | undefined,
     ): string {
-        input = normalizeEnglish(input); // #562 text normalization: %, $, units, dates, times, years, romans
+        // #562 text normalization: %, $, units, dates, times, years, romans. INITIALISMS run after, so
+        // the Roman-numeral rules get first refusal on all-caps letter runs (II occurs 8× in the cased
+        // corpus column; run earlier this would spell "Louis XIV" as EX-EYE-VEE).
+        input = normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
         while ((m = TOKEN_RE.exec(input)) !== null) {
