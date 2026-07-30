@@ -9,6 +9,32 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
 
+/**
+ * The Tamil cardinal tables. Tamil numerals are SANDHI-FUSED, so every level needs two forms: the free
+ * form (exact multiple — இருபது, நூறு, ஆயிரம்) and the COMBINING/oblique form used when a remainder
+ * follows it (இருபத்தி, நூற்றி, ஆயிரத்து). 11–19 are suppletive and listed outright.
+ */
+export interface TamilNumbers {
+    units: string[];
+    tens: string[];
+    teens: string[];
+    tensCombining: string[];
+    hundreds: string[];
+    hundredsCombining: string[];
+    thousands: string[];
+    thousandsCombining: string[];
+    magnitudes: {
+        hundred: string;
+        thousand: string;
+        thousandCombining: string;
+        lakh: string;
+        lakhCombining: string;
+        crore: string;
+        croreCombining: string;
+        one: string;
+    };
+}
+
 export interface TamilManifest extends AbugidaDef {
     voicing: {
         voice: Record<string, string>;
@@ -16,16 +42,7 @@ export interface TamilManifest extends AbugidaDef {
         voicelessBlock: string[];
     };
     clausePunctuation: Record<string, string>;
-    numbers: {
-        units: string[];
-        tens: string[];
-        magnitudes: {
-            hundred: string;
-            thousand: string;
-            lakh: string;
-            crore: string;
-        };
-    };
+    numbers: TamilNumbers;
 }
 
 /** The consolidated Tamil data (abugida def + post-pass tables; see tamil.jsonc). */

@@ -88,6 +88,13 @@
     },
 
     // Cardinal number words (Indian grouping: ஆயிரம் 10³ / லட்சம் 10⁵ / கோடி 10⁷). Phonemized by the g2p.
+    //
+    // #562 — Tamil numerals are SANDHI-FUSED, not concatenated. Every multi-part numeral changes shape at
+    // the joint, so a compositor with only `units`/`tens`/`hundred` produced readings no Tamil speaker
+    // uses: 11 was *பத்து ஒன்று (பதினொன்று), 200 was *இரண்டு நூறு (இருநூறு), 1000 was *ஒன்று ஆயிரம்
+    // (ஆயிரம்), and 1995 was *ஒன்று ஆயிரம் ஒன்பது நூறு தொண்ணூறு ஐந்து where Tamil says ஆயிரத்து
+    // தொள்ளாயிரத்து தொண்ணூற்றி ஐந்து. Hence the four extra tables below: the irregular TEENS, and a
+    // COMBINING (oblique) form of each ten / hundred / thousand used when a remainder follows it.
     "numbers": {
         "units": [
             "பூஜ்ஜியம்",
@@ -113,11 +120,97 @@
             "எண்பது",
             "தொண்ணூறு",
         ],
+        // 11–19. Suppletive: not பத்து + unit but a fused stem (பன்னிரண்டு, not *பத்து இரண்டு).
+        "teens": [
+            "பதினொன்று",
+            "பன்னிரண்டு",
+            "பதிமூன்று",
+            "பதினான்கு",
+            "பதினைந்து",
+            "பதினாறு",
+            "பதினேழு",
+            "பதினெட்டு",
+            "பத்தொன்பது",
+        ],
+        // Oblique form of each ten, used for 21–99 (இருபத்தி ஒன்று = 21). Index 0/1 unused: 1–9 are the
+        // units and 11–19 are the suppletive teens above.
+        "tensCombining": [
+            "",
+            "",
+            "இருபத்தி",
+            "முப்பத்தி",
+            "நாற்பத்தி",
+            "ஐம்பத்தி",
+            "அறுபத்தி",
+            "எழுபத்தி",
+            "எண்பத்தி",
+            "தொண்ணூற்றி",
+        ],
+        // Exact multiples of 100. Fused, and 900 is suppletive (தொள்ளாயிரம், lit. "nine-hundred" but
+        // built on ஆயிரம்).
+        "hundreds": [
+            "",
+            "நூறு",
+            "இருநூறு",
+            "முந்நூறு",
+            "நானூறு",
+            "ஐந்நூறு",
+            "அறுநூறு",
+            "எழுநூறு",
+            "எண்ணூறு",
+            "தொள்ளாயிரம்",
+        ],
+        // Oblique form of each hundred, used when a 1–99 remainder follows (நூற்றி ஒன்று = 101).
+        "hundredsCombining": [
+            "",
+            "நூற்றி",
+            "இருநூற்றி",
+            "முந்நூற்றி",
+            "நானூற்றி",
+            "ஐந்நூற்றி",
+            "அறுநூற்றி",
+            "எழுநூற்றி",
+            "எண்ணூற்றி",
+            "தொள்ளாயிரத்து",
+        ],
+        // Exact multiples of 1000, index 1–10 (பத்தாயிரம் = 10,000 is fused too, so it is listed).
+        "thousands": [
+            "",
+            "ஆயிரம்",
+            "இரண்டாயிரம்",
+            "மூவாயிரம்",
+            "நான்காயிரம்",
+            "ஐயாயிரம்",
+            "ஆறாயிரம்",
+            "ஏழாயிரம்",
+            "எட்டாயிரம்",
+            "ஒன்பதாயிரம்",
+            "பத்தாயிரம்",
+        ],
+        // Oblique form of each thousand, used when a 1–999 remainder follows (ஆயிரத்து ஒன்று = 1001).
+        "thousandsCombining": [
+            "",
+            "ஆயிரத்து",
+            "இரண்டாயிரத்து",
+            "மூவாயிரத்து",
+            "நான்காயிரத்து",
+            "ஐயாயிரத்து",
+            "ஆறாயிரத்து",
+            "ஏழாயிரத்து",
+            "எட்டாயிரத்து",
+            "ஒன்பதாயிரத்து",
+            "பத்தாயிரத்து",
+        ],
         "magnitudes": {
             "hundred": "நூறு",
             "thousand": "ஆயிரம்",
+            "thousandCombining": "ஆயிரத்து",
             "lakh": "லட்சம்",
+            "lakhCombining": "லட்சத்து",
             "crore": "கோடி",
+            "croreCombining": "கோடியே",
+            // The attributive "one" before a magnitude noun: ஒரு லட்சம், never *ஒன்று லட்சம்.
+            "one": "ஒரு",
         },
     },
 }
