@@ -11,6 +11,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { CURRENCY, normalizeItalian, normalizeItalianDecimals, normalizeItalianInitialisms } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -302,9 +304,50 @@ export function numberWords(n: number): string {
 
 const TOKEN = /([a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]+)|(\d+)|([.?!,;:])/gu;
 
+/**
+ * #562 symbol normalization — Italian. Percent is *per cento*, invariable, so a one-element form list.
+ * Currency and unit names are the standard Italian ones; the corpus writes the currency sign AFTER the
+ * amount ("banconote da 5 $"), which the shared tier already handles.
+ *
+ * `ha` (hectare) is deliberately ABSENT. It is a valid SI-adjacent abbreviation, but in Italian running
+ * text `<number> ha` is overwhelmingly the verb *avere* — all four occurrences in the it_it corpus are
+ * ("Chandrayaan-1 ha sganciato la sonda"), and admitting it would read them as *ettari*. Likewise `g`,
+ * `l` and `t` are omitted: none is attested here, `802.11g` shows the letter-after-digit collision is
+ * real, and `l'` before a vowel would be claimed as *litri* since an apostrophe is not a letter.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["per cento"],
+    // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
+    // which needs the partitive *di* the shared magnitude hop cannot insert. Hence no `magnitudes` list.
+    currency: Object.fromEntries(Object.entries(CURRENCY).map(([sign, forms]) => [sign, [...forms]])),
+    // Longest keys match first (the builder sorts by length), so km² beats km and km/h beats km.
+    units: {
+        "km/h": ["chilometro orario", "chilometri orari"],
+        "km/s": ["chilometro al secondo", "chilometri al secondo"],
+        "m/s": ["metro al secondo", "metri al secondo"],
+        "km²": ["chilometro quadrato", "chilometri quadrati"],
+        "m²": ["metro quadrato", "metri quadrati"],
+        mph: ["miglio orario", "miglia orarie"],
+        km: ["chilometro", "chilometri"], cm: ["centimetro", "centimetri"],
+        mm: ["millimetro", "millimetri"], m: ["metro", "metri"],
+        kg: ["chilogrammo", "chilogrammi"], mg: ["milligrammo", "milligrammi"],
+        gb: ["gigabyte"], mb: ["megabyte"], tb: ["terabyte"],
+        kw: ["chilowatt"], mw: ["megawatt"], hz: ["hertz"],
+    },
+});
+
 class ItalianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 normalization order: general text normalization (de-grouping, era markers, abbreviations,
+        // degrees, ordinals, clock, signs, fractions) → INITIALISMS (after abbreviation expansion, so
+        // `a.C.` is already words) → SYMBOLS (%, currency, units) → the DECIMAL COMMA last of all, because
+        // the symbol tier matches a unit only against an ADJACENT number and "1,5 km/s" must reach it
+        // intact. Roman numerals need no ordering care: `it` is not in the registry's ROMAN_NATIVE set, so
+        // the shared pass converted them before text() was called.
+        const normalized = normalizeItalianDecimals(
+            SYMBOLS(normalizeItalianInitialisms(normalizeItalian(input))),
+        );
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const num = Number(m[2]);
