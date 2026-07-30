@@ -62,16 +62,100 @@
 
     // Danda / ASCII → canonical inline pause marks.
     "clausePunctuation": {
-        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ",
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        "۔": ".", "؟": "?", "،": ",", "؛": ",",
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Urdu spellings; canonical IPA DERIVED by running them through the same g2p (with harakat so the
     // short vowels are correct). Units + round tens + magnitudes; 21-99 irregular (bounded authoring task).
     "numbers": {
+        // 21-99 are NOT compositional in Urdu — each is a fused word — so the shared composer's unit+tens
+        // fallback produced "ایک بیس" ("one twenty") for 21. 23 of these 72 are independently attested
+        // across three sources (the CLE-speech referee x20, wikipron x7, the FLEURS corpus x4), spread over
+        // every decade with no contradictions; the engine reproduces the referee's phone sequence exactly
+        // for the ones it prices (اکیس -> ɪkkˈiːs vs ɪ k k iː s). Written WITHOUT harakat on purpose: the
+        // undiacritized forms read correctly here and in places better than diacritized ones would.
+        // NOTE: 72 بہتر is a genuine homograph — bahattar "72" vs behtar "better" — so the referee entry
+        // for that string attests the adjective, not the numeral.
+        "compound": {
+            "21": "اکیس",  // attested
+            "22": "بائیس",  // attested
+            "23": "تیئیس",
+            "24": "چوبیس",  // attested
+            "25": "پچیس",
+            "26": "چھببیس",
+            "27": "ستائیس",
+            "28": "اٹھائیس",  // attested
+            "29": "انتیس",
+            "31": "اکتیس",
+            "32": "بتیس",
+            "33": "تینتیس",
+            "34": "چونتیس",  // attested
+            "35": "پینتیس",
+            "36": "چھتیس",
+            "37": "سینتیس",
+            "38": "اڑتیس",
+            "39": "انتالیس",
+            "41": "اکتالیس",
+            "42": "بیالیس",
+            "43": "تینتالیس",
+            "44": "چوالیس",  // attested
+            "45": "پینتالیس",
+            "46": "چھیالیس",
+            "47": "سینتالیس",
+            "48": "اڑتالیس",  // attested
+            "49": "انچاس",
+            "51": "اکیاون",
+            "52": "باون",  // attested
+            "53": "ترپن",
+            "54": "چون",  // attested
+            "55": "پچپن",
+            "56": "چھپن",  // attested
+            "57": "ستاون",
+            "58": "اٹھاون",  // attested
+            "59": "انسٹھ",  // attested
+            "61": "اکسٹھ",
+            "62": "باسٹھ",
+            "63": "تریسٹھ",
+            "64": "چوسٹھ",
+            "65": "پینسٹھ",  // attested
+            "66": "چھیاسٹھ",
+            "67": "سڑسٹھ",
+            "68": "اڑسٹھ",  // attested
+            "69": "انہتر",
+            "71": "اکہتر",
+            "72": "بہتر",  // attested
+            "73": "تہتر",  // attested
+            "74": "چوہتر",
+            "75": "پچہتر",
+            "76": "چھہتر",  // attested
+            "77": "ستتر",
+            "78": "اٹھہتر",
+            "79": "اناسی",  // attested
+            "81": "اکیاسی",
+            "82": "بیاسی",
+            "83": "تراسی",
+            "84": "چوراسی",
+            "85": "پچاسی",
+            "86": "چھیاسی",  // attested
+            "87": "ستاسی",
+            "88": "اٹھاسی",  // attested
+            "89": "نواسی",
+            "91": "اکانوے",  // attested
+            "92": "بانوے",
+            "93": "ترانوے",
+            "94": "چورانوے",
+            "95": "پچانوے",
+            "96": "چھیانوے",  // attested
+            "97": "ستانوے",
+            "98": "اٹھانوے",
+            "99": "ننانوے",  // attested
+        },
         "units": ["صِفْر", "ایک", "دو", "تِین", "چار", "پانچ", "چھے", "سات", "آٹھ", "نَو"],
         "teens": ["دَس", "گِیارہ", "بارہ", "تیرہ", "چودہ", "پَندرہ", "سولہ", "سَترہ", "اَٹھارہ", "اُنِیس"],
         "tens": { "20": "بِیس", "30": "تِیس", "40": "چالِیس", "50": "پَچاس", "60": "ساٹھ", "70": "سَتَّر", "80": "اَسّی", "90": "نَوے" },
-        "magnitudes": { "hundred": "سَو", "thousand": "ہَزار", "lakh": "لاکھ", "crore": "کَروڑ" }
+        "magnitudes": { "hundred": "سَو", "thousand": "ہَزار", "lakh": "لاکھ", "crore": "کَروڑ" },
+        // Urdu reads a decimal point as اعشاریہ; without it "1.5" ran the two numbers together.
+        "decimalWord": "اعشاریہ"
     }
 }

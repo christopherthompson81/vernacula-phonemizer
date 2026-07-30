@@ -976,3 +976,66 @@ doubled الساعة) that the before/after corpus diff caught something every u
 - 198 files / 2138 tests pass (5 new); `tsc --noEmit` clean.
 - Referee byte-identical for ru (94.8%) AND for en, fr, es and pt-BR, confirming the core change is safe.
 - ru corpus, both columns: 170 of 2,562 changed, zero defects. Sampled review found them all improvements.
+
+## Run 16 — 2026-07-30 — Urdu (four defects, three of them outside the normalization layer)
+
+Tenth language, and the pattern from Bengali repeated almost exactly: the largest problems were in the
+manifest and the engine, not in a missing normalization pass.
+
+### 1. A DIGIT LEAK — ASCII digits reaching the IPA
+
+`number()` returned the raw string whenever the value was not a safe INTEGER, so every decimal leaked:
+`1.5 میٹر` came out as literally `1.5 mˈiːʈəɾ`. 19 corpus utterances. The manifest also had **no decimal
+word at all**, so even once parsed there was nothing to say — اعشاریہ added.
+
+### 2. `clausePunctuation` mapped every mark to a PADDED copy of itself
+
+`"۔": " . "` — canonical marks, but wrapped in spaces, producing double-space slot-gaps on the full stop
+that ends almost every utterance. **2,021 of 2,109 cased-column utterances had a slot-gap; now zero.**
+Identical to the Bengali defect two runs ago, which suggests checking this block is worth doing eagerly for
+the remaining languages rather than discovering it per-language.
+
+### 3. Urdu numbers 21–99 were all wrong
+
+No `compound` map, so the shared composer's unit+tens fallback gave "ایک بیس" (*one twenty*) for 21 and
+corrupted every year (1959 → "نو پچاس"). Corroboration was much better than Bengali's: **23 of 72 attested**
+across three independent sources — the CLE-speech referee ×20, wikipron ×7, the FLEURS corpus itself ×4 —
+spread over every decade with no contradictions, and the engine reproduces the referee's phone sequence
+exactly for those it prices (اکیس → `ɪkkˈiːs` vs `ɪ k k iː s`; باون, اکانوے likewise).
+
+Two things worth recording from that work. The forms are authored WITHOUT harakat, because the
+undiacritized spellings read correctly here and in places better than diacritized ones. And **72 بہتر is a
+genuine homograph** — *bahattar* "72" versus *behtar* "better" — so the referee entry for that string
+attests the adjective. That homograph is also the reason the engine's number path deliberately bypasses
+the content lexicon: consulting it would read the numeral as the adjective.
+
+### 4. What the normalization layer itself needed
+
+Urdu had **no symbol tier at all** (% and every currency sign dropped), no ordinal-suffix handling
+(واں/ویں spoken as their own syllable, ×27), no clock (the colon reached the output raw), and no handling
+for the SPACED unit spelling `کلو میٹر`, which read as two words.
+
+One find the corpus diff produced after the main fixes: the **Arabic comma doubles as a thousands
+separator** in Urdu (`11،000`, ×20 instances). Between digits it is grouping, not punctuation — left alone
+it was a clause break and the number read as "eleven … zero". Only the digit-flanked case is folded, so ،
+as real punctuation is untouched.
+
+### A fourth over-count, and the standing rule holding
+
+A naive abbreviation scan reports `قم` ×5, which looks like the BC marker قبل مسیح. Reading the contexts
+shows it is the start of قمری "lunar" — the regex matched the first two letters of a longer word. This is
+the fourth time (Bengali ম inside মিটার, Arabic م. as a word-final letter, Hindi's suffix scan), and each
+time reading contexts first prevented a rule that would have damaged ordinary text.
+
+### Verification
+
+- 198 files / 2144 tests pass (6 new); `tsc --noEmit` clean.
+- Referee byte-identical: 4382/7709 (56.8%) folded / 87.4% symbol, second set 59.4% / 88.1%.
+- ur corpus, both columns: 2,029 of 2,109 changed on the cased column; **19 digit leaks and 2,021
+  slot-gaps → zero**, no sentinels or stray marks. Sampled review found them all improvements.
+
+### Known gap left
+
+`AU` (×3) reads as the English word rather than letters, because CMUdict carries `au` and the dictionary
+branch wins. That is a pre-existing English lexical call reached through the Latin-run delegation, not an
+Urdu defect, and is left alone.
