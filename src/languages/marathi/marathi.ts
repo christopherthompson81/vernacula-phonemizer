@@ -11,6 +11,7 @@
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { makeMarathiNormalizer } from "./normalize.ts";
 
 let MR: ReturnType<typeof makeNativeHindi> | undefined;
 function engine(foreign?: ForeignPhonemizer) {
@@ -21,11 +22,19 @@ function engine(foreign?: ForeignPhonemizer) {
     );
 }
 
-/** Build the Marathi phonemizer. `foreign` handles embedded Latin runs. */
+/** #562 normalization. Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, and
+ *  `makeNativeHindi` hard-wires Hindi's normalizer and Hindi's symbol tier — there is no parameter for a
+ *  different one. So the Marathi pass is applied HERE, ahead of `text()`, and is written to consume its
+ *  input completely so that the Hindi pass inside `text()` finds nothing left to claim. See the header
+ *  of normalize.ts, and steps 6b / 7a / 12, for the three places that coupling is visible. */
 export function createMarathi(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {
-    return engine(foreign);
+    const mr = engine(foreign);
+    const normalize = makeMarathiNormalizer(
+        loadManifest<HindiDef>(import.meta.url, "marathi.jsonc").numbers,
+    );
+    return { text: (input: string) => mr.text(normalize(input)) };
 }
 
 /** Bare word→IPA (tests / referee eval). */

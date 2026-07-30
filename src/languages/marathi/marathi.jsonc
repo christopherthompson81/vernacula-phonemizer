@@ -189,10 +189,26 @@
     "finalRules": [],
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
-    // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // running these through the same native G2P (no hand-written phonemes). The compositor
+    // (core/numbers.ts `indicNumberWords`) assembles them with Indian lakh/crore grouping.
+    //
+    // #562: the `compound` 21-99 map below was MISSING, and Marathi 21-99 are irregular/fused exactly as
+    // Hindi's are (पंचवीस ≠ पाच+वीस). The compositor's documented fallback is a best-effort UNIT+TENS
+    // reading, so over the mr_in FLEURS corpus every two-digit number was read as two words: 25 → "पाच
+    // वीस", 93 → "तीन नव्वद", 1894 → "…आठ शे चार नव्वद". 233 bare two-digit numbers + 171 four-digit
+    // years + 76 three-digit numbers were affected — the single largest defect in the language.
+    //
+    // SOURCES for the 21-99 spellings, in precedence order (nothing here is invented):
+    //   1. tools/referee-eval/referees/mr.wikipron-mar-broad.tsv — this repo's own Marathi arbiter. It
+    //      contains 26 of the 21-49 forms verbatim, plus नव्व्याण्णव (99). Where it disagrees with
+    //      espeak it wins: 41 एकेचाळीस (espeak: एक्केचाळीस), 46 शेहेचाळीस (espeak: सेहेचाळीस).
+    //   2. espeak-ng dictsource/mr_list `_21`.._99` — the hand-authored Marathi voice, an independent
+    //      source that confirms all 26 referee forms phonetically and supplies 50-98, which the referee
+    //      wordlist does not contain.
+    // The `_0C S'e:` entry in that same espeak list is also why `hundred` is शे and not शंभर: Marathi
+    // forms the hundreds as N+शे (दोनशे, आठशे), never *दोन शंभर. See normalize.ts step 9 for the bare-100
+    // case (शंभर), which the compositor cannot express, and the report on the fusion the compositor
+    // cannot do (it emits "दोन शे", two words, where Marathi writes one).
     "numbers": {
         "units": ["शून्य", "एक", "दोन", "तीन", "चार", "पाच", "सहा", "सात", "आठ", "नऊ"],
         "teens": ["दहा", "अकरा", "बारा", "तेरा", "चौदा", "पंधरा", "सोळा", "सतरा", "अठरा", "एकोणीस"],
@@ -206,8 +222,32 @@
             "80": "ऐंशी",
             "90": "नव्वद"
         },
+        // Irregular fused 21-99 (see the SOURCES note above). Round tens live in `tens`.
+        "compound": {
+            "21": "एकवीस",  "22": "बावीस",  "23": "तेवीस",  "24": "चोवीस",  "25": "पंचवीस",
+            "26": "सव्वीस", "27": "सत्तावीस", "28": "अठ्ठावीस", "29": "एकोणतीस",
+            "31": "एकतीस",  "32": "बत्तीस", "33": "तेहतीस", "34": "चौतीस",  "35": "पस्तीस",
+            "36": "छत्तीस", "37": "सदतीस",  "38": "अडतीस",  "39": "एकोणचाळीस",
+            "41": "एकेचाळीस", "42": "बेचाळीस", "43": "त्रेचाळीस", "44": "चव्वेचाळीस", "45": "पंचेचाळीस",
+            "46": "शेहेचाळीस", "47": "सत्तेचाळीस", "48": "अठ्ठेचाळीस", "49": "एकोणपन्नास",
+            "51": "एक्कावन्न", "52": "बावन्न", "53": "त्रेपन्न", "54": "चोपन्न", "55": "पंचावन्न",
+            "56": "छप्पन्न", "57": "सत्तावन्न", "58": "अठ्ठावन्न", "59": "एकोणसाठ",
+            "61": "एकसष्ट", "62": "बासष्ट", "63": "त्रेसष्ट", "64": "चौसष्ट", "65": "पासष्ट",
+            "66": "सहासष्ट", "67": "सदुसष्ट", "68": "अडुसष्ट", "69": "एकोणसत्तर",
+            "71": "एक्काहत्तर", "72": "बाहत्तर", "73": "त्र्याहत्तर", "74": "चौऱ्याहत्तर",
+            "75": "पंच्याहत्तर", "76": "शहात्तर", "77": "सत्त्याहत्तर", "78": "अठ्ठ्याहत्तर",
+            "79": "एकोणऐंशी",
+            "81": "एक्याऐंशी", "82": "ब्याऐंशी", "83": "त्र्याऐंशी", "84": "चौऱ्याऐंशी",
+            "85": "पंच्याऐंशी", "86": "शहाऐंशी", "87": "सत्त्याऐंशी", "88": "अठ्ठ्याऐंशी",
+            "89": "एकोणनव्वद",
+            "91": "एक्याण्णव", "92": "ब्याण्णव", "93": "त्र्याण्णव", "94": "चौऱ्याण्णव",
+            "95": "पंच्याण्णव", "96": "शहाण्णव", "97": "सत्त्याण्णव", "98": "अठ्ठ्याण्णव",
+            "99": "नव्व्याण्णव"
+        },
         "magnitudes": {
-            "hundred": "शंभर",
+            // शे, not शंभर: Marathi forms the hundreds as N+शे (दोनशे, आठशे). शंभर is the BARE hundred
+            // only, which normalize.ts step 9 supplies for a standalone 100.
+            "hundred": "शे",
             "thousand": "हजार",
             "lakh": "लाख",
             "crore": "कोटी"
