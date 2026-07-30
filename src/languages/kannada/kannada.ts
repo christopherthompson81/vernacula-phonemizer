@@ -6,16 +6,13 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { normalizeKannada } from "./normalize.ts";
 
-interface KannadaDef extends AbugidaDef {
-    numbers: NumbersDef;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<KannadaDef>(import.meta.url, "kannada.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const KANNADA_WORD = "ಀ-೥೰-೿"; // Kannada block minus the digit range
 const KANNADA_DIGITS: Record<string, string> = {
@@ -49,10 +46,16 @@ export function phonemizeWord(word: string): string {
 
 const toAscii = (d: string): string =>
     [...d].map((c) => KANNADA_DIGITS[c] ?? c).join("");
+/**
+ * Digits → IPA. The compositor is Kannada's OWN (numbers.ts), not the shared `indicNumberWords`:
+ * Kannada fuses 21-99 into one word, has suppletive round hundreds (ಇನ್ನೂರು, ಮುನ್ನೂರು, ಐನೂರು,
+ * ಒಂಬೈನೂರು) and takes combining magnitude forms before a remainder (ನೂರಾ, ಸಾವಿರದ, ಲಕ್ಷದ). The shared
+ * composer expresses the last two not at all — see the numbers.ts header for the evidence and counts.
+ */
 function number(digits: string): string {
     const n = Number(toAscii(digits));
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord);
+    return numberToWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 
 const TOKEN = new RegExp(
@@ -65,7 +68,8 @@ export type ForeignPhonemizer = (latin: string) => string;
 class KannadaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION runs first, before tokenization — it is pure text→text (see normalize.ts).
+        return assembleClauses(normalizeKannada(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

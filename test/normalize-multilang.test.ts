@@ -252,7 +252,11 @@ describe("symbol normalization — FLEURS-priority round", () => {
      * it fixed the same two defects in its own private composer and then measured its relatives.
      */
     test("Dravidian reads tens-then-unit, and a bare hundred has no 'one'", () => {
-        expect(phonemize("21", "kn")).toBe("ˈipːat̪ːu ˈõn̪d̪u"); // was "one twenty"
+        // kn has since moved OFF this composer entirely (#562, the Kannada run): it fuses 21-99 into one
+        // word and has suppletive hundreds, neither of which `indicNumberWords` can express, so it now
+        // composes in src/languages/kannada/numbers.ts. The assertion is kept because the READING it
+        // pins — tens-then-unit, and a bare hundred with no "one" — is still the thing under test.
+        expect(phonemize("21", "kn")).toBe("ˈipːat̪ːõn̪d̪u"); // was "one twenty", then two words
         expect(phonemize("21", "ml")).toBe("ˈiɾubat̪ɨ ˈonːɨ");
         expect(phonemize("100", "kn")).toBe("nˈuːɾu");   // was "one hundred"
         expect(phonemize("1000", "ml")).toBe("ˈaːjiɾam");
