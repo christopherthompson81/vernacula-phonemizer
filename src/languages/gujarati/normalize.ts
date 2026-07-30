@@ -1,0 +1,319 @@
+/**
+ * Gujarati (gu) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
+ * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ *
+ * Gujarati reuses HINDI'S ENGINE (`makeNativeHindi`) and, until this file existed, also inherited HINDI'S
+ * NORMALIZER and HINDI'S SYMBOL WORDS. Those words are written in DEVANAGARI, which is not in
+ * `core/unicode.ts` GUJARATI_WORD, so the tokenizer never emitted them at all: the inherited tier was not
+ * merely saying the wrong word, it was **silently deleting the symbol**. Measured before the change —
+ *     "45%"          → [pˈistalis]                  (the percent word vanished entirely)
+ *     "$45 મિલિયન"    → [pˈistalis mˈilijən]         (so did the currency word)
+ *     "11:00 વાગતાજ"  → [ˈəɡijaɾ ʋˈaɡt̪ad͡ʒ]           (Hindi's बजे vanished; :00 was simply dropped)
+ *     "9:30 ના"       → [nˈəʋ t̪ɾˈis nˈa]            (बजकर/मिनट vanished — two bare numbers)
+ * Every symbol tier in this file therefore replaces an inherited Hindi one, and each replacement word is
+ * sourced from the corpus itself wherever the corpus contains it.
+ *
+ * Measured over the gu_in FLEURS corpus (1,996 unique utterances, column 3):
+ *   digits+ATTACHED Gujarati suffix .. 120  (માં 44, ના 24, મી 20, થી 11, ની 11, નાં 2, મો 2, મા 1,
+ *                                            નું 1, માંથી 1, લી 1, જી 1 — the largest defect class)
+ *   spaced ordinal `N મી` ............   6  ("15 મી સદી")
+ *   four-digit years ................. 171
+ *   two-digit numbers ................ 227
+ *   three-digit numbers ..............  81
+ *   grouped numbers (1,234 / 1,04,500)  48  (already correct — the Indic compositor reads both groupings)
+ *   decimals .........................  30  (read as RAW DIGITS — the manifest had no `decimalWord`)
+ *   ranges N-M .......................  17  (13 ascending = real ranges, 4 sports scores — see step 11)
+ *   Gujarati dotted initialisms ......  18  (યુ.એસ. ×7, ઈ.સ. ×3, દા.ત. ×2, કિ.મી./કી.મી. ×2, યુ.એન.,
+ *                                            એફ.ટી.એ., એ.એફ.સી.એફ.ટી.એ. — every interior dot a pause)
+ *   clock times h:mm .................  15  (3 of which are SPORTS times 4:41.30 — not clocks)
+ *   ASCII ':' written for visarga ....   9  (પુન: ×5, સંભવત: ×2, ક્રમશ: ×1, અંત: ×1)
+ *   currency signs ...................  11  ($ ×5 incl. US$/AUD$, ¥ ×3, and the rest)
+ *   percent ..........................   4
+ *   Gujarati unit abbreviations ......  21  (કિમી ×15, મીમી/મિમી ×3, એમએમ ×1, કિમી/ક ×1, માઇલ/કલાક ×1)
+ *   fractions ........................   3  (only ONE is a real fraction — see step 12)
+ *   degrees ° ........................   1
+ *   ડો./ડૉ. ..........................   6
+ *   Gujarati digits ૦-૯ ..............  11  (NEGATIVE RESULT — see step 1)
+ *   danda ।/॥ ........................   0  (NEGATIVE RESULT: this corpus punctuates with ASCII `.`)
+ *   ZWJ/ZWNJ .........................   0  (NEGATIVE RESULT: the Marathi ZWJ defect does not occur here)
+ *
+ * WORDS AND THEIR SOURCES. Everything this file emits is attested in the gu_in corpus in the same
+ * function, except where noted: ટકા ×40, ડોલર ×4 / ડૉલર ×2, યુરો ×37, પાઉન્ડ ×8, યેન ×3, કિલોમીટર ×15,
+ * મીલીમીટર ×3, પ્રતિ ×6 (as the rate connective, "8 માઇલ પ્રતિ સેકંડ"), કલાક ×30, વાગ્યે ×9, ડિગ્રી ×2
+ * (in the degree sense, "35 ડિગ્રી પશ્ચિમ"), ઈસવીસન ×2, ડૉક્ટર ×2, આશરે ×5, થી ×737 (as the range
+ * connective, "2 થી 3 મિલિયન"), અડધો ×2, and the ordinal paradigm પહેલ-/બીજ-/ત્રીજ-/ચોથ-/છઠ્ઠ- plus the
+ * regular cardinal+મ- (પાંચમો, સાતમો, નવમા, દસમા, અગિયારમાં, સોળમુ). NOT corpus-attested and taken as
+ * transparent international/arithmetic vocabulary: સેલ્સિયસ, ફેરનહીટ, સેન્ટીમીટર, કિલોગ્રામ, રૂપિયા,
+ * ભાગ્યા, and દશાંશ (the manifest's new `decimalWord`, the exact cognate of the दशांश this repo already
+ * ships for Marathi). DELIBERATELY OMITTED for want of a source: a word for `+` — espeak-ng's gu_list
+ * gives the Hindi પ્રતિશત for `%`, so it is not a usable arbiter here, and the corpus's two `+` signs
+ * (`+30°C`, `UTC+1`) lose almost nothing by staying silent. A wrong word is worse than a dropped sign.
+ */
+import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+
+/**
+ * SUPPLETIVE ORDINALS 1-4 and 6, indexed [masc sg, fem, neut sg, oblique/plural]. Gujarati writes these
+ * with their own consonant — ૧લી, ૨જી, ૩જી, ૪થો, ૬ઠ્ઠો — not with the regular -મ-, which is why they are
+ * keyed by (number, consonant) rather than guessed. Corpus: "1લી અને 3જી ન્યૂ હૅમ્પશાયર" ×1 each; the
+ * spelled-out members of the paradigm are attested throughout (પહેલી, બીજા, ત્રીજું, ચોથો, છઠ્ઠો).
+ */
+const IRREGULAR: Readonly<Record<number, readonly [string, string, string, string]>> = {
+    1: ["પહેલો", "પહેલી", "પહેલું", "પહેલા"],
+    2: ["બીજો", "બીજી", "બીજું", "બીજા"],
+    3: ["ત્રીજો", "ત્રીજી", "ત્રીજું", "ત્રીજા"],
+    4: ["ચોથો", "ચોથી", "ચોથું", "ચોથા"],
+    6: ["છઠ્ઠો", "છઠ્ઠી", "છઠ્ઠું", "છઠ્ઠા"],
+};
+/** The written vowel of an ordinal suffix → the agreement slot it marks. Read off the text, never
+ *  guessed: the suffix itself carries the gender/number in Gujarati (પંદરમી / પંદરમો / પંદરમા). */
+const FORM: Readonly<Record<string, 0 | 1 | 2 | 3>> = { "ો": 0, "ી": 1, "ું": 2, "ા": 3, "ે": 3 };
+/** The suppletive consonant each of 1-4/6 takes. 4's is થ, which is ALSO the ablative postposition થી —
+ *  so `4થી` is ambiguous between "fourth" and "from four". The corpus contains no `4થી`, so the pairing
+ *  is excluded at the call site (step 13) rather than resolved by guesswork. */
+const IRREGULAR_CONSONANT: Readonly<Record<number, string>> = {
+    1: "લ", 2: "જ", 3: "જ", 4: "થ", 6: "ઠ્ઠ",
+};
+
+/**
+ * POSTPOSITIONS written ATTACHED to a numeral — the corpus's single largest defect class, 120 instances.
+ * "1537માં" tokenized as a number plus a separate word and came out [… saɽˈət̪ɾis mˈã], a stressed stray
+ * syllable, where the orthography says one word, સાડત્રીસમાં → [… saɽət̪ɾˈismã]. NO SPACED FORM is in
+ * this list: a postposition written with a space genuinely IS a separate word and the engine already
+ * stresses it correctly. `ને` is deliberately absent — it is also the colloquial "and", and the corpus's
+ * "1 ને 6 જુલાઈએ" means "the 1st and the 6th". Longest first (માંથી must beat માં).
+ */
+const POSTPOSITION = ["માંથી", "માં", "નાં", "ના", "ની", "નું", "નો", "થી"]
+    .sort((a, b) => b.length - a.length)
+    .join("|");
+
+/**
+ * Gujarati DOTTED abbreviations that are not initialisms and must be claimed before the generic
+ * dotted-initialism rule in step 5 would spell them out letter by letter.
+ */
+const DOTTED: Readonly<Record<string, string>> = {
+    "કિ.મી.": "કિલોમીટર", "કી.મી.": "કિલોમીટર",
+    "દા.ત.": "દાખલા તરીકે",
+    "ફે.": "ફેરનહીટ",
+};
+const DOTTED_ALT = Object.keys(DOTTED)
+    .sort((a, b) => b.length - a.length)
+    .map((k) => k.replace(/\./gu, "\\."))
+    .join("|");
+
+/**
+ * The -તઃ / -નઃ adverbs and prefixes, written in this corpus with an ASCII colon for the visarga:
+ * પુન: ×5 (પુન:સ્થાપિત, પુન:સ્થાપન, પુન:સર્જન, પુન: પ્રતિકૃતિ, પુન: પ્રાપ્ત), સંભવત: ×2, ક્રમશ: ×1,
+ * અંત: ×1. A CLOSED LIST, not the pattern `ત:` — the corpus's "લાંચ: રુશવત" is the compound લાંચ-રુશવત
+ * and its 40-odd genuine list colons ("કહ્યું: …", "છે: …") must stay the phrase break the manifest
+ * maps them to. Same over-counting trap the playbook records for Bengali's ম.
+ */
+const VISARGA_WORD = ["પુન", "સંભવત", "ક્રમશ", "અંત", "વિશેષત", "મુખ્યત", "સામાન્યત", "અંશત"].join("|");
+
+/** Build the Gujarati normalizer. Takes the numbers definition so the ordinal and join rules compose
+ *  their cardinals from the same data the engine's own number path uses. */
+export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => string {
+    /** Integer → its Gujarati cardinal words, exactly as the engine's number path would render them. */
+    const cardinal = (n: number): string[] => indicNumberWords(n, numbers).map((w) => w ?? "");
+    const cardinalText = (n: number): string => cardinal(n).join(" ");
+
+    /** Spell `digits` (possibly comma-grouped) and GLUE `suffix` to the final word — the whole point of
+     *  the join: સાડત્રીસ + માં is one word in the orthography and must be one token here. */
+    const glue = (digits: string, suffix: string): string | undefined => {
+        const n = Number(digits.replace(/,/gu, ""));
+        if (!Number.isSafeInteger(n)) return undefined;
+        const words = cardinal(n);
+        if (words.length === 0 || words.some((w) => w === "")) return undefined;
+        words[words.length - 1] = `${words[words.length - 1]!}${suffix}`;
+        return words.join(" ");
+    };
+
+    return (input: string): string => {
+        let s = input;
+
+        // 1) GUJARATI DIGITS ૦-૯ → ASCII. First, because every rule below — and the shared symbol tier,
+        //    whose NUM is `\d+…` — is ASCII-defined.
+        //    NEGATIVE RESULT, recorded because the lead was worth checking: this corpus contains only 11
+        //    Gujarati digits, in TWO utterances, where Marathi's had 597. The Marathi finding does NOT
+        //    generalise to Gujarati. The fold is kept anyway because it costs nothing (the engine's own
+        //    number() already folds them, so this is loss-free) and because both instances happen to be
+        //    exactly the forms steps 7 and 8 exist for: "રાત્રે ૧૦.૦૦-૧૧:૦૦" and "સવારે ૮.૪૬ વાગ્યે".
+        s = s.replace(/[૦-૯]/gu, (d) => String(d.charCodeAt(0) - 0x0ae6));
+
+        // 2) ASCII ':' written where a VISARGA ઃ was meant. Before the clock rules in step 7, which
+        //    compete for the same character. GUJARATI_WORD ("઀-૥૰-૿") already covers U+0A83 ઃ, so the
+        //    folded form is a single token; unfolded, પુન:સ્થાપિત was split into two words by a comma
+        //    pause, [pˈun , st̪ʰˈapit̪].
+        s = s.replace(
+            new RegExp(`(?<![\\p{L}\\p{M}])(${VISARGA_WORD}):`, "gu"),
+            "$1ઃ",
+        );
+
+        // 3) ERA MARKERS, before the dotted-initialism rule in step 5 (which would otherwise spell ઈ.સ.
+        //    as two letter names) and before anything that reads a dot as a phrase break: "ઇ.સ. પૂર્વે"
+        //    was producing two of them, [ˈi . sˈə . pˈuɾʋe]. Both ઇ and ઈ occur. પૂર્વે is already an
+        //    ordinary word and needs no rewriting, so only the abbreviation itself is claimed — which is
+        //    also what makes the bare "ઈ.સ. 1000-1300" case fall out for free. The expansion ઈસવીસન is
+        //    the corpus's own spelling ("ઈસવીસન પૂર્વે 21 જુલાઈ, 356ના રોજ").
+        s = s.replace(/(?<![\p{L}\p{M}])[ઇઈ]\.\s?સ\./gu, "ઈસવીસન");
+
+        // 4) DOTTED ABBREVIATIONS that are not initialisms (કિ.મી., દા.ત., ફે.), before step 5 for the
+        //    same reason. Longest key first.
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})`, "gu"), (_m, k: string) =>
+            DOTTED[k]!);
+
+        // 5) GUJARATI DOTTED INITIALISMS — યુ.એસ. ×7, યુ.એન., એફ.ટી.એ., એ.એફ.સી.એફ.ટી.એ. Each interior
+        //    dot was surviving as a phrase break: "યુ.એસ." → [jˈu . ˈes .], a three-way split of one
+        //    word. The letters are already the right reading (they are Gujarati transliterations of the
+        //    English letter names), so all this has to do is drop the dots and keep the letters apart.
+        //
+        //    THE SHAPE IS EVIDENCE, NOT CAUTION. Components are capped at TWO codepoints and no space is
+        //    permitted between them, because a laxer pattern would claim ordinary sentence-final periods
+        //    ("…છે. તે…" is two short tokens either side of a dot). Run over the whole corpus, this
+        //    pattern matches 18 times and every one of the 18 is a real abbreviation — zero false
+        //    positives. The cost of the strictness is the one instance written with spaces,
+        //    "(યુ. ટી. સી.+1)", which is left alone.
+        s = s.replace(/(?:[઀-૿]{1,2}\.){2,}/gu, (m) =>
+            `${m.slice(0, -1).split(".").join(" ")} `);
+
+        // 6) SINGLE-DOT ABBREVIATIONS. ડો./ડૉ. ×6, always written with the dot, which is consumed so it
+        //    cannot become a phrase break. ડૉક્ટર is the corpus's own spelling.
+        s = s.replace(/(?<![\p{L}\p{M}])ડ[ોૉ]\.(\s+)(?=[\p{L}])/gu, "ડૉક્ટર$1");
+
+        // 7) TIMES. Four rules, and the guards between them are the point.
+        //    7a) The clock written with a DOT rather than a colon, which happens beside વાગ્યે / કલાકે
+        //        ("સવારે ૮.૪૬ વાગ્યે", "રાત્રે ૧૦.૦૦-૧૧:૦૦"). Folded to a colon so 7d claims it; left
+        //        alone it would be read by the decimal path added in this change as "આઠ દશાંશ ચાર છ".
+        s = s.replace(
+            /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,])(?=\s?[-–]\s?\d{1,2}[:.]\d{2}|\s*(?:વાગ|કલાક))/gu,
+            "$1:$2",
+        );
+        //    7b) SPORTS times mm:ss.hh — 4:41.30, 2:11.60, 1:09.02 (×3, all swimming/athletics, all
+        //        followed by મિનિટ). These are NOT clocks. The inherited Hindi clock rule claimed them
+        //        (its `(?![\d:])` permits a following dot) and produced [t͡ʃˈaɾ ˈekt̪alis . t̪ɾˈis] — a
+        //        bogus clock plus a spurious phrase break. Dropping the colon leaves two plain numbers,
+        //        which is the honest reading and which nothing downstream can re-claim.
+        s = s.replace(/(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
+        //    7c) h:mm:ss, which occurs once as "(શુક્રવારે 09: 19: 00 જીએમટી)". Before 7d so that 7d's
+        //        `(?![\s\d.:])` cannot claim its first two fields.
+        s = s.replace(/(?<![\d.,:])(\d{1,2}):\s?([0-5]\d):\s?([0-5]\d)(?![\d.,:])/gu, "$1 $2 $3");
+        //    7d) The clock proper. A space after the colon is permitted — the corpus writes "1: 15",
+        //        "07: 19".
+        //
+        //        THE READING IS DELIBERATELY MINIMAL. Hindi's inherited rule builds a full
+        //        "H બજકર M મિનટ" phrase; Gujarati's equivalent construction would be "H વાગીને M મિનિટે",
+        //        and વાગીને/મિનિટે appear NOWHERE in this corpus. Rather than invent the phrase, this rule
+        //        fixes the two defects that are actually measurable — the colon became a phrase break, and
+        //        a :00 was read as શૂન્ય — by removing the colon and, at :00 only, supplying the corpus's
+        //        own વાગ્યે (×9). Every other word in the sentence survives, so "11:29 ની આસપાસ" reads
+        //        "અગિયાર ઓગણત્રીસ ની આસપાસ" and "8:30 વાગ્યે" keeps its own વાગ્યે.
+        //
+        //        વાગ્યે is NOT supplied when the sentence already carries a clock word or a timezone
+        //        after the time — "12:00 GMT વાગ્યે" and "11:00 (યુ. ટી. સી.+1) કલાકે" would otherwise
+        //        each have said it twice.
+        s = s.replace(
+            /(?<![\d.,:])([01]?\d|2[0-3]):\s?([0-5]\d)(?![\d.:])/gu,
+            (m, h: string, min: string, offset: number, whole: string) => {
+                if (Number(min) !== 0) return `${h} ${min}`;
+                const rest = whole.slice(offset + m.length, offset + m.length + 40);
+                return /વાગ|કલાક|GMT|UTC|જીએમટી|યુટીસી|યુ\.?\s?ટી/u.test(rest) ? h : `${h} વાગ્યે`;
+            },
+        );
+
+        // 8) DEGREES, before any rule that would separate the sign from its digit. ડિગ્રી, not Marathi's
+        //    અંશ and not Hindi's inherited डिग्री: the corpus writes the word itself in exactly this
+        //    function ("35 ડિગ્રી પશ્ચિમ", "90 (ફે.) - ડિગ્રી ગરમીમાં"), where its અંશ ×7 all mean
+        //    "extent/portion" instead. The only ° in the corpus is "+30°C થી વધુ".
+        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી સેલ્સિયસ");
+        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી ફેરનહીટ");
+        s = s.replace(/(\d)\s?°/gu, "$1 ડિગ્રી");
+
+        // 9) TILDE. આશરે ("approximately") is the corpus's own word, ×5. Before step 13, which would
+        //    otherwise leave the sign stranded against a spelled-out number.
+        s = s.replace(/~\s?(?=\d)/gu, "આશરે ");
+
+        // 10) (no step 10 — units, percent and currency are DATA, in gujarati.ts's symbol tier, which the
+        //     engine runs AFTER this pass. That ordering is why step 13 must not eat a currency-adjacent
+        //     numeral; see the guard there.)
+
+        // 11) RANGES N-M → "N થી M". THE ASCENDING GUARD IS EVIDENCE, NOT CAUTION, and it reproduces the
+        //     Marathi finding exactly. Of the 17 hyphenated number pairs here, 4 are sports results —
+        //     5-3 (an ice-hockey win), 26 - 00 (a rugby scoreline), 6-6 (a tennis tie-break), 7-2 (a
+        //     head-to-head record) — where "થી" ("from…to") is simply wrong and the silent hyphen the
+        //     engine already produces is correct. Every one of those 4 is descending or equal, and 13 of
+        //     the 13 genuine ranges (1644-1912, 1469-1539, 10-60 મિનિટ, 100-200 માઇલ/કલાક, 120-160,
+        //     35-40, 56-64, 2-5 દિવસ, 1418 - 1450 …) are ascending. So the rule fires only when b > a:
+        //     13 gained, 0 broken, 2 real ranges deliberately missed (1995-96, an abbreviated year span,
+        //     and 4.2-3.9, a descending "million years ago" span). થી as the range connective is the
+        //     corpus's own ("2 થી 3 મિલિયન", "10થી 15 લોકો", "100થી 250 મીટર" — 737 થી in all).
+        s = s.replace(
+            /(?<![\d.,])(\d+(?:\.\d+)?)\s?[-–—]\s?(\d+(?:\.\d+)?)(?![\d.,])/gu,
+            (m, a: string, b: string) => (Number(b) > Number(a) ? `${a} થી ${b}` : m),
+        );
+
+        // 12) FRACTIONS. Only ONE of the corpus's three digit/digit forms is a fraction: "5 મીમી (1/5
+        //     ઇંચ)". The other two are "293/4 ઇંચથી 241/2 ઇંચ" — mixed numbers, 29¾ and 24½, written
+        //     without the space. Hence `num < den`, which admits 1/5 and refuses both of those; without
+        //     it they would have become "બસો ત્રાણું ભાગ્યા ચાર". અડધો is corpus-attested; ભાગ્યા is the
+        //     ordinary spoken division form (and replaces Hindi's inherited બટા-equivalent, which would
+        //     have been emitted in Devanagari and so dropped outright).
+        s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+            const num = Number(a), den = Number(b);
+            if (num >= den) return m0;
+            if (num === 1 && den === 2) return "અડધો";
+            const nw = cardinalText(num), dw = cardinalText(den);
+            return nw === "" || dw === "" ? m0 : `${nw} ભાગ્યા ${dw}`;
+        });
+
+        // 13) ORDINALS AND ATTACHED POSTPOSITIONS — one rule, because in Gujarati they are the same
+        //     operation. The regular ordinal is the cardinal plus -મ- plus the agreeing vowel, and it is
+        //     spelled as ONE word (પંદર + મી = પંદરમી); an attached postposition is likewise one word
+        //     (સાડત્રીસ + માં = સાડત્રીસમાં). For every non-suppletive number the two are literally the
+        //     same string, so "10માં સ્થાન" (10th place) and "1537માં" (in 1537) need no disambiguation
+        //     at all — which is what makes a single join rule correct rather than a compromise.
+        //
+        //     13a) The SUPPLETIVE ordinals, first, because 1/2/3/4/6 are the only numbers for which the
+        //          ordinal is not the cardinal. 4+થ is excluded: થી is also the ablative postposition and
+        //          `4થી` would be ambiguous between "fourth" and "from four"; the corpus has no instance,
+        //          so it is left to 13b (→ ચારથી) rather than resolved by guessing.
+        s = s.replace(
+            /(?<![\d.,])(\d)(લ|જ|થ|ઠ્ઠ)(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
+            (m, d: string, cons: string, vowel: string) => {
+                const n = Number(d);
+                if (IRREGULAR_CONSONANT[n] !== cons) return m;
+                if (n === 4 && cons === "થ" && vowel === "ી") return m;
+                return IRREGULAR[n]![FORM[vowel]!];
+            },
+        );
+        //     13b) The suppletive numbers written with the REGULAR -મ- suffix (1મી, 6ઠ્ઠ- aside). Not
+        //          attested here — included because it is reachable and "એકમી" would be plainly wrong —
+        //          and kept off the postposition path by requiring a bare vowel, never માં.
+        s = s.replace(
+            /(?<![\d.,])([12346])\s?મ(ો|ી|ું|ા|ે)(?![\p{L}\p{M}])/gu,
+            (_m, d: string, vowel: string) => IRREGULAR[Number(d)]![FORM[vowel]!],
+        );
+        //     13c) The general join, for every other numeral. A SPACE is permitted only before the
+        //          ordinal -મ- ("15 મી સદી" ×6, "11 મી, 12 મી, અને 13 મી સદી") — a postposition written
+        //          with a space genuinely IS a separate word and already reads correctly.
+        //
+        //          THE TRAILING BOUNDARY IS THE WHOLE RULE. Without `(?![\p{L}\p{M}])` the મ- alternative
+        //          matches the first character of મીટર, મીલીમીટર, મીમી, મિનિટ, મહિના and મુકામ — the same
+        //          over-counting trap the playbook records for Bengali's ম, and live in this corpus at
+        //          "35 મીલીમીટર", "83 મીટરની", "45 મિનિટમાં", "3 મહિનામાં".
+        //
+        //          THE CURRENCY LOOKBEHIND IS ALSO LOAD-BEARING, and it is an ORDERING coupling with the
+        //          shared symbol tier rather than a boundary: the tier runs AFTER this pass and matches
+        //          `SIGN NUM`, so spelling out the digits of "US$11,000થી" here would have destroyed the
+        //          adjacency and dropped the currency word entirely. Left alone, the tier rewrites it to
+        //          "11,000 ડોલરથી", which is the right Gujarati and needs no join.
+        s = s.replace(
+            new RegExp(
+                `(?<![\\d.,$€£¥₹])(\\d+(?:,\\d+)*)(?:\\s?(મ[ોીાે]|મું)|(${POSTPOSITION}))(?![\\p{L}\\p{M}])`,
+                "gu",
+            ),
+            (m, digits: string, ord: string | undefined, post: string | undefined) =>
+                glue(digits, ord ?? post!) ?? m,
+        );
+
+        return s.replace(/ {2,}/gu, " ");
+    };
+}

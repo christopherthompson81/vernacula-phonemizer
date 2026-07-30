@@ -12,7 +12,9 @@ import {
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { GUJARATI_WORD, GUJARATI_DIGITS } from "../../core/unicode.ts";
+import { makeGujaratiNormalizer } from "./normalize.ts";
 
 // Whole-word lexicon for the proven-lexical medial-schwa tail (cross-source consensus of wikipron+kaikki; see
 // gujarati-lexicon.tsv). NFC-normalized keys; applied on the SHIPPED path only, never in the rule engine.
@@ -26,16 +28,53 @@ const lexicon = (): Map<string, string> => {
     return LEXICON;
 };
 
+/**
+ * #562 normalization. Gujarati shares Hindi's ENGINE but not Hindi's orthographic conventions or its
+ * SCRIPT, so it supplies its own normalizer and its own symbol words through `makeNativeHindi`'s
+ * overrides rather than inheriting Hindi's. The inheritance was not merely saying the wrong word: Hindi's
+ * tier emits DEVANAGARI, which `core/unicode.ts` GUJARATI_WORD excludes, so the tokenizer dropped it —
+ * "45%" came out [pˈistalis] with the percent word gone and "$45 મિલિયન" lost its currency outright.
+ *
+ * Every word here is attested in the gu_in FLEURS corpus in the same function (ટકા ×40, ડોલર ×4/ડૉલર ×2,
+ * યુરો ×37, પાઉન્ડ ×8, યેન ×3, કિલોમીટર ×15, મીલીમીટર ×3, માઇલ, કલાક ×30, સેકંડ ×2, and પ્રતિ ×6 as the
+ * rate connective, "8 માઇલ પ્રતિ સેકંડ" / "240 કિલોમીટર પ્રતિ કલાક") except રૂપિયા, સેન્ટીમીટર and
+ * કિલોગ્રામ, which are transparent international units and whose signs/abbreviations do not occur here.
+ *
+ * `US$` and `AUD$` are declared because the corpus writes both ("US$30", "US$11,000થી", "AUD$45 મિલિયન")
+ * and the tier's currency lookbehind `(?<![\p{L}\p{M}])` would otherwise refuse the bare `$` after a
+ * letter and drop the sign silently. `ક` (for કલાક, in "165 કિમી/ક") is a rateDenominator rather than a
+ * unit precisely for the reason the playbook records for Dutch `s`: a one-letter key matchable standalone
+ * is confidently wrong far more often than it is right.
+ */
+const GU_SYMBOLS = makeSymbolNormalizer({
+    percent: ["ટકા"], // Hindi's प्रतिशत is not Gujarati — and in Devanagari it was not even audible
+    currency: {
+        "US$": ["ડોલર"], "AUD$": ["ડોલર"], "$": ["ડોલર"],
+        "€": ["યુરો"], "£": ["પાઉન્ડ"], "¥": ["યેન"], "₹": ["રૂપિયા"],
+    },
+    magnitudes: ["મિલિયન", "બિલિયન", "ટ્રિલિયન", "કરોડ", "લાખ", "અબજ", "હજાર"],
+    units: {
+        "કિમી": ["કિલોમીટર"], "કિમિ": ["કિલોમીટર"],
+        "મીમી": ["મીલીમીટર"], "મિમી": ["મીલીમીટર"], "એમએમ": ["મીલીમીટર"],
+        "માઇલ": ["માઇલ"], "માઈલ": ["માઈલ"], // identity — declared so the RATE form માઇલ/કલાક composes
+        km: ["કિલોમીટર"], cm: ["સેન્ટીમીટર"], mm: ["મીલીમીટર"], kg: ["કિલોગ્રામ"],
+    },
+    unitPer: "પ્રતિ",
+    rateDenominators: { "ક": "કલાક", "કલાક": "કલાક", "સેકંડ": "સેકંડ", h: "કલાક", s: "સેકંડ" },
+});
+
 /** Load gujarati.jsonc (beside this file) and build the Gujarati phonemizer. `foreign` handles embedded Latin. */
 export function createGujarati(foreign?: ForeignPhonemizer): {
     text(input: string): string;
 } {
+    const def = loadManifest<HindiDef>(import.meta.url, "gujarati.jsonc");
     return makeNativeHindi(
-        loadManifest<HindiDef>(import.meta.url, "gujarati.jsonc"),
+        def,
         loadSharedPhonology(),
         foreign,
         { word: GUJARATI_WORD, digits: GUJARATI_DIGITS },
         lexicon(),
+        { normalize: makeGujaratiNormalizer(def.numbers), symbols: GU_SYMBOLS },
     );
 }
 
