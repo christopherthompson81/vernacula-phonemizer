@@ -48,3 +48,18 @@ describe("Amharic tens", () => {
         expect(phonemize("1998", "am")).toBe("ʃi zətʼəɲ məto zətʼəna sɨmɨnt"); // the 90 is back
     });
 });
+
+// Scales above ሺ (thousand) were missing entirely — nothing above 999 999 was composed, so 10⁶+ fell through to
+// the digit string and the fidel g2p rendered it as EMPTY IPA. ሚሊዮን / ቢሊዮን are the European loans Amharic uses
+// (Omniglot "Numbers in Amharic" cites 10⁶ as አንድ ሚሊዮን; Abyssinica dictionary for ቢሊዮን) — see amharic.jsonc.
+describe("Amharic magnitudes above thousand", () => {
+    test("ሚሊዮን / ቢሊዮን keep their multiplier at 1 (unlike the bare መቶ / ሺ)", () => {
+        expect(phonemize("7", "am")).toBe("səbat"); // ሰባት — a units case
+        expect(phonemize("42", "am")).toBe("aɾba hulət"); // አርባ ሁለት — a compound 21-99 case
+        expect(phonemize("101", "am")).toBe("məto and"); // መቶ አንድ — a hundreds case
+        expect(phonemize("12345", "am")).toBe("asɾa hulət ʃi sost məto aɾba amɨst"); // a thousands case
+        expect(phonemize("1000000", "am")).toBe("and milijon"); // አንድ ሚሊዮን — was EMPTY
+        expect(phonemize("2000000", "am")).toBe("hulət milijon"); // ሁለት ሚሊዮን
+        expect(phonemize("1000000000", "am")).toBe("and bilijon"); // አንድ ቢሊዮን — was EMPTY
+    });
+});

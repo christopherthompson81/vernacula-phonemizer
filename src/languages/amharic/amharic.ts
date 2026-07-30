@@ -19,6 +19,8 @@ interface NumbersDef {
     tens: Record<string, string>;
     hundred: string;
     thousand: string;
+    million: string;
+    billion: string;
 }
 interface AmharicDef {
     clausePunctuation: Record<string, string>;
@@ -52,11 +54,20 @@ function numberToText(n: number): string {
         const th = Math.floor(n / 1000), r = n % 1000;
         return `${th > 1 ? numberToText(th) + " " : ""}${NUM.thousand}${r ? " " + numberToText(r) : ""}`;
     }
+    // Scales above ሺ are European loans (ሚሊዮን / ቢሊዮን) and, unlike the bare ሺ / መቶ, KEEP their multiplier at 1 —
+    // Omniglot cites 10⁶ as አንድ ሚሊዮን. Nothing above 999 999 was composed before, so 10⁶+ emitted the digit string
+    // and the fidel g2p then rendered it as EMPTY IPA.
+    for (const [value, scale] of [[1_000_000_000, NUM.billion], [1_000_000, NUM.million]] as const) {
+        if (n >= value) {
+            const q = Math.floor(n / value), r = n % value;
+            return `${numberToText(q)} ${scale}${r ? " " + numberToText(r) : ""}`;
+        }
+    }
     return String(n);
 }
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n)) return digits;
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return digits;
     return numberToText(n).split(" ").map(phonemizeWord).join(" ");
 }
 

@@ -22,6 +22,8 @@ interface NumbersDef {
     tens: string[];
     hundred: string;
     thousand: string;
+    million: string;
+    billion: string;
     and: string;
 }
 interface NaijaDef {
@@ -119,6 +121,15 @@ function numberWords(n: number): string {
         const th = Math.floor(n / 1000),
             r = n % 1000;
         return `${numberWords(th)} ${NUM.thousand}${r ? " " + numberWords(r) : ""}`;
+    }
+    // The chain stopped at tauzin, so 10⁶+ leaked the raw digits into the IPA. English-lexified, so the scales are
+    // the English ones read in Naija phonology (miliọn / biliọn — see naija.jsonc).
+    for (const [value, scale] of [[1_000_000_000, NUM.billion], [1_000_000, NUM.million]] as const) {
+        if (n >= value) {
+            const q = Math.floor(n / value),
+                r = n % value;
+            return `${numberWords(q)} ${scale}${r ? " " + numberWords(r) : ""}`;
+        }
     }
     return String(n); // beyond the compositor → leave as digits
 }

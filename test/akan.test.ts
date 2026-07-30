@@ -52,6 +52,23 @@ describe("Akan (Twi) canonical IPA", () => {
         expect(ak.text("100").trim()).toBe("ɔha");
     });
 
+    // Source for the magnitude words: Omniglot "Numbers in Twi" (omniglot.com/language/numbers/twi.htm) —
+    // apem 10³, ɔpepem 10⁶, ɔpepepem 10⁹; the plurals take the regular ɔ-/a- → m- change (ɔha→aha, apem→mpem).
+    test("numbers — units, 21–99 compounds, hundreds, thousands, millions, billions", () => {
+        const ak = getPhonemizer("ak");
+        expect(ak.text("4").trim()).toBe("nnan"); // ennan/nnan — the ⟨nn⟩ unit
+        expect(ak.text("40").trim()).toBe("adwanan"); // aduanan
+        expect(ak.text("44").trim()).toBe("adwanan nnan");
+        expect(ak.text("21").trim()).toBe("adwonu baako"); // aduonu baako
+        expect(ak.text("555").trim()).toBe("ahanum adwonum nnum"); // ahanum aduonum nnum
+        expect(ak.text("1000").trim()).toBe("apem");
+        expect(ak.text("2000").trim()).toBe("mpem mmienu");
+        // REGRESSION: numberWords had no 10⁶/10⁹ branch, so the multiplier hit hundreds[9] and 1000000 came out
+        // as the stringified sentinel "mpem undefined".
+        expect(ak.text("1000000").trim()).toBe("ɔpɪpɪm"); // ɔpepem (⟨e⟩ → ɪ by −ATR harmony)
+        expect(ak.text("1000000000").trim()).toBe("ɔpɪpɪpɪm"); // ɔpepepem
+    });
+
     test("full text via the registry", () => {
         expect(getPhonemizer("ak").text("Akwaaba, wo ho te sɛn?")).toBeTruthy();
     });

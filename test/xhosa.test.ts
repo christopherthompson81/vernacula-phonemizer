@@ -31,4 +31,19 @@ describe("Xhosa canonical IPA", () => {
         expect(d.text("6").trim()).toBe("isitʰand̤ˈaːtʰu"); // isithandathu
         expect(d.text("10").trim()).toBe("iʃˈuːmi"); // ishumi
     });
+
+    // As Zulu: three distinct unit series — standalone ku-, connective na-, multiplier ama-. Source: xhosa.jsonc
+    // "numbers". Regression note: 13/15/23/25/… were once reported as failures by a number-audit probe whose
+    // sentinel regex was case-insensitive and matched the legitimate na- forms "NANtathu"/"NANhlanu" as "NaN".
+    test("numbers — the na- connective series (units 3 and 5) is intact, plus magnitudes", () => {
+        const d = createXhosa();
+        expect(d.text("3").trim()).toBe("kʼutʰˈaːtʰu"); // kuthathu — standalone ku-
+        expect(d.text("5").trim()).toBe("kʼuɬˈaːnu"); // kuhlanu
+        expect(d.text("13").trim()).toBe("iʃˈuːmi nantʼˈaːtʰu"); // ishumi nantathu — connective na-
+        expect(d.text("15").trim()).toBe("iʃˈuːmi nanɬˈaːnu"); // ishumi nanhlanu
+        expect(d.text("21").trim()).toBe("amaʃˈuːmi amaɓˈiːni nˈaːɲɛ"); // amashumi amabini nanye
+        expect(d.text("555").trim()).toBe("amakʰˈuːlu amaɬˈaːnu amaʃˈuːmi amaɬˈaːnu nanɬˈaːnu");
+        expect(d.text("2000").trim()).toBe("amawˈaːkʼa amaɓˈiːni"); // amawaka amabini
+        expect(d.text("1000000").trim()).toBe("isiɡ̤ˈiːd̤i"); // isigidi
+    });
 });

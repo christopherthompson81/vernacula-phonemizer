@@ -18,11 +18,16 @@
 
     // NUMBERS — Amharic (Fidel) spellings; canonical IPA DERIVED via the same fidel→CV g2p. Units + teens
     // (አስራ + unit) + round tens + magnitudes; 21-99 compose as "tens unit".
+    //
+    // SOURCE for the scales above thousand: Omniglot "Numbers in Amharic"
+    // (omniglot.com/language/numbers/amharic.htm) gives 10⁶ as አንድ ሚሊዮን "and miliyon"; ቢሊዮን (10⁹) is the
+    // corresponding loan, per the Abyssinica Amharic dictionary (dictionary.abyssinica.com) and amharicteacher.com.
+    // Both are European loans — Amharic has no native word above ሺ (thousand).
     "numbers": {
         "units": ["ዜሮ", "አንድ", "ሁለት", "ሦስት", "አራት", "አምስት", "ስድስት", "ሰባት", "ስምንት", "ዘጠኝ"],
         "ten": "አስር",
         "teenPrefix": "አስራ",
         "tens": { "20": "ሃያ", "30": "ሰላሳ", "40": "አርባ", "50": "ሃምሳ", "60": "ስልሳ", "70": "ሰባ", "80": "ሰማንያ", "90": "ዘጠና" },
-        "hundred": "መቶ", "thousand": "ሺ"
+        "hundred": "መቶ", "thousand": "ሺ", "million": "ሚሊዮን", "billion": "ቢሊዮን"
     }
 }

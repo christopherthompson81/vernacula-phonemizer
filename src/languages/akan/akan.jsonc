@@ -41,6 +41,11 @@
         "ten": "du",
         "tens": ["aduonu", "aduasa", "aduanan", "aduonum", "aduosia", "aduɔson", "aduɔwɔtwe", "aduɔkron"],
         "hundreds": ["ɔha", "ahanu", "ahasa", "ahanan", "ahanum", "ahansia", "ahanson", "ahanwɔtwe", "ahankron"],
-        "thousand": "apem", "thousands": "mpem"
+        "thousand": "apem", "thousands": "mpem",
+        // 10⁶ / 10⁹. Source: Omniglot "Numbers in Twi" (omniglot.com/language/numbers/twi.htm) — ɔpepem = 1,000,000
+        // ("thousand of thousands"), ɔpepepem = 1,000,000,000; the plurals take the regular ɔ- → m- class change
+        // (as ɔha → aha, apem → mpem), so mpepem / mpepepem carry a multiplier.
+        "million": "ɔpepem", "millions": "mpepem",
+        "billion": "ɔpepepem", "billions": "mpepepem"
     }
 }

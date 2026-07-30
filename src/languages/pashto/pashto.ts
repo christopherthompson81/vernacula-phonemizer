@@ -15,10 +15,13 @@ import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts
 interface NumbersDef {
     units: string[];
     ten: string;
+    teens: string[];
     tens: Record<string, string>;
+    compound: Record<string, string>;
     hundred: string;
     thousand: string;
     million: string;
+    billion: string;
     and: string;
 }
 interface PashtoDef {
@@ -188,29 +191,43 @@ const DIGIT_CLASS = "0-9" + Object.keys(EASTERN_DIGITS).join("");
 const PERSO_ARABIC_WORD = "ء-ٟٮ-ۿ";
 const toAscii = (d: string): string => [...d].map((c) => EASTERN_DIGITS[c] ?? c).join("");
 const NUM = DEF.numbers;
-/** Non-negative integer → Pashto numeral spelling (decimal; و-joined). 21-99 compose as tens+unit (bounded gap). */
+/**
+ * Non-negative integer → Pashto numeral spelling (decimal; ⟨و⟩ joins the magnitude groups). Three distinct
+ * sub-100 patterns, per the sources cited in pashto.jsonc: irregular fused `teens`, the bound-⟨ویشت⟩ `compound`
+ * series for 21-29, and UNITS-FIRST composition (یو دېرش) for 31-99.
+ */
 function numberToText(nn: number): string {
     if (nn < 0) return "";
     if (nn < 10) return NUM.units[nn]!;
-    if (nn === 10) return NUM.ten;
-    if (nn < 20) return `${NUM.units[nn - 10]} ${NUM.ten}`;
+    if (nn < 20) return NUM.teens[nn - 10]!; // irregular fused forms — NOT unit+لس
     if (nn < 100) {
-        const t = Math.floor(nn / 10), u = nn % 10;
-        return NUM.tens[String(t)]! + (u ? ` ${NUM.and} ${NUM.units[u]}` : "");
+        // `tens` is keyed by the ROUND value ("20".."90"); the lookup used Math.floor(nn/10) → "2".."9" → undefined,
+        // so 20-90 rendered EMPTY and 21-99 lost their tens slot entirely (SLOT-GAP: " ˈo ˈiʊ" for 21).
+        const t = Math.floor(nn / 10) * 10, u = nn % 10;
+        if (u === 0) return NUM.tens[String(t)]!;
+        return NUM.compound[String(nn)] ?? `${NUM.units[u]} ${NUM.tens[String(t)]}`; // units-first, no connector
     }
     if (nn < 1000) {
         const h = Math.floor(nn / 100), r = nn % 100;
         return `${h > 1 ? NUM.units[h] + " " : ""}${NUM.hundred}${r ? ` ${NUM.and} ${numberToText(r)}` : ""}`;
     }
-    if (nn < 1_000_000) {
-        const th = Math.floor(nn / 1000), r = nn % 1000;
-        return `${th > 1 ? numberToText(th) + " " : ""}${NUM.thousand}${r ? ` ${NUM.and} ${numberToText(r)}` : ""}`;
+    // The magnitude chain: زر (10³) · میلیون (10⁶) · میلیارد (10⁹). The million branch was previously unreachable —
+    // the data existed but nothing above 999 999 was composed, so 10⁶+ fell through to the digits (→ EMPTY IPA).
+    for (const [value, scale] of MAGNITUDES) {
+        if (nn >= value) {
+            const q = Math.floor(nn / value), r = nn % value;
+            return `${q > 1 ? numberToText(q) + " " : ""}${scale}${r ? ` ${NUM.and} ${numberToText(r)}` : ""}`;
+        }
     }
     return String(nn);
 }
+/** Magnitude words, largest first (the descending scan `numberToText` walks). */
+const MAGNITUDES: [number, string][] = [
+    [1_000_000_000, NUM.billion], [1_000_000, NUM.million], [1000, NUM.thousand],
+];
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
-    if (!Number.isSafeInteger(nn)) return digits;
+    if (!Number.isSafeInteger(nn) || nn < 0 || nn >= 1e12) return digits;
     return numberToText(nn).split(" ").map(phonemizeWordCore).join(" "); // numbers bypass the content lexicon
 }
 const TOKEN = new RegExp(

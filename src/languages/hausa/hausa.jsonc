@@ -118,5 +118,10 @@
         "connector": "da",
         "hundred": "ɗari",
         "thousand": "dubu",
+        // Scales above dubu. Source: Omniglot "Numbers in Hausa" (omniglot.com/language/numbers/hausa.htm) — 10⁶
+        // miliyan, 10⁹ biliyan, both English loans; the page also confirms the MAGNITUDE-FIRST multiplier order
+        // ("dubu biyu" = 2 000, so "miliyan biyu" = 2 000 000). 100 000 stays native: "dubu ɗari" (thousand-hundred).
+        "million": "miliyan",
+        "billion": "biliyan",
     },
 }

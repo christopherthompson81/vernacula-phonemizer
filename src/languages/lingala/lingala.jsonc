@@ -29,8 +29,23 @@
 
     // NUMBERS — Meeuwis §3.6 (cardinals = the connective ya + the ordinal). Ordinals 1–10 + túkú (tens), kámá
     // (hundred), kóto (thousand); compounds joined by na. Canonical IPA DERIVED via the same g2p.
+    //
+    // ZERO + THE SCALES ABOVE kóto. Lingala's higher magnitudes are NOT decimal powers of a thousand — they are
+    // native class-5/7 nouns on a myriad-ish ladder, each with a singular (multiplier 1) and a plural (multiplier
+    // ≥ 2) form: 10⁴ mokoko/mikoko · 10⁵ elúndu/bilúndu · 10⁶ efúku/bifúku · 10⁹ epúná/bipúná. Zero is libungutúlu
+    // ("nothingness"). SOURCE: lingalavision.com "How to count in Lingala from 0 to millions" (the singular/plural
+    // table and the examples 100 000 → Elúndu, 2 000 000 → Bifúku míbalé, 1 000 000 000 → Epúná), cross-checked
+    // against Omniglot "Numbers in Lingala" (libungutulu = 0, "efúku (mókó)" = 10⁶, mokoko/mikoko, elúndu/bilúndu).
+    // JUDGMENT CALL: the French loan zeló is also current in Kinshasa speech, but libungutúlu is the form both
+    // sources give, so it is used here. kámá / kóto stay INVARIANT (no plural is attested for them) and keep the
+    // existing "scale + multiplier" shape, so nothing below 10 000 changes.
     "numbers": {
         "ordinals": ["mǒkó", "míbalé", "mísáto", "mínei", "mítáno", "motóbá", "sambo", "mwambe", "libwá", "zómi"],
-        "ten": "zómi", "tens": "túkú", "hundred": "kámá", "thousand": "kóto", "and": "na", "firstCard": "libosó"
+        "zero": "libungutúlu",
+        "ten": "zómi", "tens": "túkú", "hundred": "kámá", "thousand": "kóto", "and": "na", "firstCard": "libosó",
+        "tenThousand": "mokoko", "tenThousands": "mikoko",
+        "hundredThousand": "elúndu", "hundredThousands": "bilúndu",
+        "million": "efúku", "millions": "bifúku",
+        "billion": "epúná", "billions": "bipúná"
     }
 }

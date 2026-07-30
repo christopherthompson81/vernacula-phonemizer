@@ -115,8 +115,14 @@ alternatives are noted, not adopted.
 ## Deferred
 
 - **Tone** (H/L, phonemic but unwritten — the standard orthography marks none).
-- The noun-class **number concord** (20 = makumi *abiri*; our composer uses the
-  bare unit). Numbers are unmeasured (the referee is word-only).
+- ~~The noun-class **number concord** (20 = makumi *abiri*; our composer uses the
+  bare unit).~~ **RESOLVED** — see
+  `niger_congo_number_compositor_investigation.md` Run 2: each magnitude now
+  carries its own multiplier series (mirongo i-, magana a-, ibihumbi bi-, 20 =
+  makumyabiri), sourced from languagesandnumbers/Omniglot/mofeko + Harvard ELIAS.
+  What remains simplified: thousand-multipliers ≥ 10 fall back to the citation
+  series, and the `na` connector is not elided before a vowel (icumi na umunani,
+  not icumi n'umunani). Numbers are still unmeasured (the referee is word-only).
 - ⟨sh c j⟩ remain epitran disagreements (epitran wrong; ours grammar+phonetics
   corroborated) — an inherent ceiling on the epitran number, not a defect.
 - **Homorganic nasal assimilation before palatals** (njye→[ɲɟe] not [nɟe],

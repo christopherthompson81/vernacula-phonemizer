@@ -5,6 +5,8 @@
  * (kinyarwanda.ts / numbers.ts).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+// Kirundi shares Kinyarwanda's numeral system, so it reuses that table's type (and its compositor).
+import type { RwandaRundiNumbers } from "../kinyarwanda/manifest.ts";
 
 export interface KirundiManifest {
     language: string;
@@ -12,14 +14,7 @@ export interface KirundiManifest {
     script: string;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
-    numbers: {
-        units: string[];
-        ten: string;
-        tens: string;
-        hundred: string;
-        thousand: string;
-        and: string;
-    };
+    numbers: RwandaRundiNumbers;
 }
 
 /** The consolidated hand-authored Kirundi data tables (see kirundi.jsonc). */

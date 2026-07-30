@@ -18,6 +18,8 @@ export interface HausaManifest {
         connector: string;
         hundred: string;
         thousand: string;
+        million: string;
+        billion: string;
     };
 }
 
