@@ -181,6 +181,7 @@ import { createUyghur } from "./languages/uyghur/uyghur.ts";
 import { createSylheti } from "./languages/sylheti/sylheti.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 import { createAncientGreek } from "./languages/ancientgreek/ancientgreek.ts";
+import { normalizeRomans, ROMAN_EXCLUSIONS } from "./core/roman.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -189,11 +190,25 @@ export interface Phonemizer {
 
 const cache = new Map<string, Phonemizer>();
 
+/** Languages whose own normalization already resolves Roman numerals, with more context than a shared
+ *  pass can have — English distinguishes regnal ("henry viii" → the eighth) from cardinal ("world war
+ *  ii" → two); French reads the ordinal `XIVe`. The shared pass must not pre-empt them. */
+const ROMAN_NATIVE: ReadonlySet<string> = new Set(["en", "en-GB", "en-IN", "fr", "fr-CA"]);
+
 /** Get (and memoize) the phonemizer for a language code. */
 export function getPhonemizer(lang: string): Phonemizer {
     let p = cache.get(lang);
     if (p === undefined) {
         p = build(lang);
+        // Shared ROMAN NUMERAL pass (core/roman.ts), wrapped here so it applies at the single dispatch
+        // point rather than in 190 engines — and so it runs BEFORE the engine's tokenizer, which is what
+        // lets it work in the engines that drop Latin runs (`XIX век` would otherwise lose the numeral).
+        // It rewrites to DIGITS, so each language's own cardinal compositor does the pronouncing.
+        if (!ROMAN_NATIVE.has(lang)) {
+            const engine = p;
+            const policy = { exclude: ROMAN_EXCLUSIONS[lang] };
+            p = { text: (input) => engine.text(normalizeRomans(input, policy)) };
+        }
         cache.set(lang, p);
     }
     return p;
