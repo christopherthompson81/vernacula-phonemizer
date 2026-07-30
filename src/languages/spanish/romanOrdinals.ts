@@ -48,8 +48,9 @@ const TENS = ["", "", "vigésimo", "trigésimo", "cuadragésimo", "quincuagésim
 const HUNDREDS = ["", "centésimo", "ducentésimo", "tricentésimo", "cuadringentésimo",
     "quingentésimo", "sexcentésimo", "septingentésimo", "octingentésimo", "noningentésimo"];
 
-/** Spanish masculine ordinal, 1 … 1000; `undefined` above that (a Roman-numeral year reads as a cardinal). */
-function spanishOrdinal(n: number): string | undefined {
+/** Spanish masculine ordinal, 1 … 1000; `undefined` above that (a Roman-numeral year reads as a cardinal).
+ *  Exported so normalize.ts can reuse it for the ordinal INDICATORS (1º/1ª/1er) and for fractions. */
+export function spanishOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 1000) return undefined;
     if (n === 1000) return "milésimo";
     if (n < 10) return UNITS[n];

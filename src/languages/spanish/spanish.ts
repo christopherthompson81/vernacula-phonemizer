@@ -8,6 +8,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeSpanish, normalizeSpanishInitialisms } from "./normalize.ts";
 
 const NASALS = new Set(MANIFEST.nasals);
 const STOP_TO_FRIC = MANIFEST.spirantize;
@@ -86,14 +87,29 @@ function wordIpa(word: string): string {
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["por ciento"],
     currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"] },
-    units: { km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
+    // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.
+    units: { "km/h": ["kilómetro por hora", "kilómetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
+        "°c": ["grado Celsius", "grados Celsius"], "°f": ["grado Fahrenheit", "grados Fahrenheit"],
+        "°": ["grado", "grados"],
+        m: ["metro", "metros"], l: ["litro", "litros"], ml: ["mililitro", "mililitros"],
+        g: ["gramo", "gramos"], t: ["tonelada", "toneladas"], ha: ["hectárea", "hectáreas"],
+        kw: ["kilovatio", "kilovatios"], w: ["vatio", "vatios"], hz: ["hercio", "hercios"],
+        gb: ["gigabyte", "gigabytes"], mb: ["megabyte", "megabytes"],
+        km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
     magnitudes: ["millones", "millón"],
 });
 
 class SpanishPhonemizer implements Phonemizer {
+    constructor(private readonly americas = false) {}
+
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // #562 normalization order: general text normalization (abbreviations, era markers, ordinal
+        // indicators, times, dates) → INITIALISMS → SYMBOLS (%, currency, units) last, since the time rule
+        // upstream has already claimed the hour. Roman numerals need no ordering care here: `es` is not in
+        // the registry's ROMAN_NATIVE set, so the shared pass has already converted them before text().
+        const normalized = SYMBOLS(normalizeSpanishInitialisms(normalizeSpanish(input, { americas: this.americas })));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1]));
             else if (m[2])
                 sink.emit(
@@ -108,6 +124,8 @@ class SpanishPhonemizer implements Phonemizer {
 }
 
 /** Build the Spanish phonemizer (no data files — the engine is fully rule-based). */
-export function createSpanish(): Phonemizer {
-    return new SpanishPhonemizer();
+/** `americas` selects Latin-American usage in the normalization layer — currently just the first of the
+ *  month, an ordinal in America and a cardinal in Spain. es-419 passes it; `es` (Castilian) does not. */
+export function createSpanish(americas = false): Phonemizer {
+    return new SpanishPhonemizer(americas);
 }

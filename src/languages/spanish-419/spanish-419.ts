@@ -32,6 +32,6 @@ export function phonemizeWord(word: string): string {
 
 /** Build the Latin-American Spanish phonemizer (Castilian engine + the seseo/yeísmo mergers). */
 export function createSpanish419(): Phonemizer {
-    const e = createSpanish();
+    const e = createSpanish(true); // Latin-American usage in the normalization layer (el primero de enero)
     return { text: (input: string): string => toLatinAmerican(e.text(input)) };
 }

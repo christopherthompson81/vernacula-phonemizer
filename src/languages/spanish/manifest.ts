@@ -14,6 +14,8 @@ export interface SpanishManifest {
         weakAccented: string;
         front: string;
     };
+    /** Acronyms read letter-by-letter; see spanish.jsonc. */
+    acronymLetters: string[];
     accents: Record<string, string>;
     nasals: string[];
     spirantize: Record<string, string>;
