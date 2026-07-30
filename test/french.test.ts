@@ -155,6 +155,16 @@ describe("french canonical IPA", () => {
         expect(phonemize("3 Go", "fr")).toBe("tʁwa ʒiɡaɔktˈɛ"); // read as the word "go"
     });
 
+    test("supplement.tsv covers the words Lexique lacks", () => {
+        // normalize.ts emits words the corpus never contained, so words that were previously unreachable
+        // are now on the hot path. These three are absent from Lexique and the rule g2p got them wrong.
+        // They live in a separate file from lexicon.tsv, which is CC-BY-SA Lexique data.
+        expect(phonemize("20 °C", "fr")).toBe("vɛ̃ dəɡʁe sɛlsjˈys"); // final s sounded, was [sɛlsjy]
+        expect(phonemize("50 kW", "fr")).toBe("sɛ̃kɑ̃t kilowˈat"); // was [kilɔva] — w voiced, tt dropped
+        expect(phonemize("cf. page 12", "fr")).toBe("kɔ̃fɛʁ paʒ dˈuz"); // confer, was [kɔ̃fe]
+        expect(phonemize("68 °F", "fr")).toBe("swasɑ̃tɥit dəɡʁe faʁɛnˈajt"); // fahrenheit IS in Lexique
+    });
+
     test("isUnreadableFrench decides the unrecorded acronyms", () => {
         // The signal it exists for: no vowel means nothing can be syllabified, which is exactly the case
         // that produced an unpronounceable cluster or an empty reading.

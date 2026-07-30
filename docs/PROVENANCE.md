@@ -42,6 +42,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable; own word selection) | Facts (ADR-0001; sidecar) |
 | `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist (owner determination in header: not an espeak-1.52 derivative) | Facts (ADR-0001) |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
+| `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
 | tools: ASJP/Lexibank Swadesh referees (`mto`, `nog`, `smj`) | Lexibank | CC0 |
 | tools: the 11 `gold-adjudicated`/`gold-freq` referees, `fa-abjad-ipa-gold.tsv`, KRNB tables | in-repo human adjudication / facts hand-read from open-access scholarship | Own work |
 | `persian/fa-context-restorer.*.onnx` (text component) | Ferdowsi Shahnameh | PD (Tajik edition → §3) |
