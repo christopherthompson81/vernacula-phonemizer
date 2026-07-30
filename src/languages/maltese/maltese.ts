@@ -12,10 +12,12 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { type MalteseNumbers, numberToWords, readDigits } from "./numbers.ts";
 
 interface MalteseDef {
     graphemes: Record<string, string>;
     voicing: { devoice: Record<string, string>; voice: Record<string, string> };
+    numbers: MalteseNumbers;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<MalteseDef>(import.meta.url, "maltese.jsonc");
@@ -23,6 +25,7 @@ const G = DEF.graphemes;
 const DEVOICE = DEF.voicing.devoice;
 const VOICE = DEF.voicing.voice;
 const CLAUSE_MARK = DEF.clausePunctuation;
+const NUM = DEF.numbers;
 const VOWELS = new Set([..."aɛɪɔu"]);
 const VOICELESS = new Set([...Object.values(DEVOICE), "t͡s", "ʃ", "ħ", "ʔ", "f", "k", "p", "t", "s"]);
 
@@ -94,15 +97,21 @@ export function phonemizeWord(word: string): string {
     return toks.join("");
 }
 
-// A word (Maltese Latin letters incl. ċ ġ ħ ż) / number / punctuation token. Numbers are deferred (passed through).
+// A word (Maltese Latin letters incl. ċ ġ ħ ż) / number / punctuation token.
 const TOKEN = /([a-zċġħżàèìòùA-ZĊĠĦŻÀÈÌÒÙ']+)|(\d+)|([.!?…,;:])/gu;
 
 class MaltesePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
-            else if (m[3]) {
+            else if (m[2]) {
+                // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the
+                // Number() conversion can't lose precision or go exponential. See numbers.ts for the sources.
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2]), NUM) : readDigits(m[2], NUM);
+                // "tnax-il" is one WORD whose hyphen the grapheme scan simply skips (→ ħdaxil), which is the
+                // correct Maltese pronunciation of the linker; it is not a token boundary.
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }

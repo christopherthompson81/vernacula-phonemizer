@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord, phonemizeWordRules } from "../src/languages/ilocano/ilocano.ts";
+import { createIlocano, phonemizeWord, phonemizeWordRules } from "../src/languages/ilocano/ilocano.ts";
 
 // Canonical-IPA goldens for Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin. TWO paths:
 // phonemizeWordRules = the non-circular RULE g2p (what the referee eval measures, ~83%); phonemizeWord = the shipped
@@ -29,5 +29,39 @@ describe("Ilocano — the shipped LEXICON path (phonemizeWord) fixes the lexical
     });
     test("OOV falls back to the rule g2p", () => {
         expect(phonemizeWord("zzqx")).toBe(phonemizeWordRules("zzqx"));
+    });
+});
+
+// Native Ilocano cardinal numbers (numbers.ts): composed MORPHOLOGICALLY — "sanga-" for a multiplier of 1
+// (sangapulo, sangagasut, sangaribo, sangariwriw), a fused vowel-final digit (duapulo) vs. the "a" ligature after a
+// consonant-final one (uppat a pulo), and the places chained by "ket". The NATIVE set, not the co-current Spanish
+// loans (onse, beinte, mil), following the tagalog/cebuano precedent. Sources cited in ilocano.jsonc + numbers.ts.
+describe("Ilocano cardinal numbers", () => {
+    const ilo = createIlocano();
+    const say = (n: number): string => ilo.text(String(n)).trim();
+
+    test("units and the tens (fused vs. the 'a' ligature)", () => {
+        expect(say(0)).toBe("sˈɛɾo"); // sero (Spanish loan; native "awan" is 'none', not a numeral)
+        expect(say(5)).toBe("lˈima"); // lima
+        expect(say(20)).toBe("dwapˈulo"); // duapulo — vowel-final dua FUSES (⟨u⟩ glides → dw)
+        expect(say(40)).toBe("ʔˈuppat ʔˈa pˈulo"); // uppat a pulo — consonant-final → ligature
+    });
+
+    test("compounds 11-99 chain with ket", () => {
+        expect(say(11)).toBe("saŋapˈulo kˈɛt mˈajsa"); // sangapulo ket maysa
+        expect(say(25)).toBe("dwapˈulo kˈɛt lˈima"); // duapulo ket lima
+        expect(say(99)).toBe("sjˈam ʔˈa pˈulo kˈɛt sjˈam"); // siam a pulo ket siam
+    });
+
+    test("hundreds / thousands / millions (sanga- for 1)", () => {
+        expect(say(100)).toBe("saŋaɡˈasut"); // sangagasut
+        expect(say(101)).toBe("saŋaɡˈasut kˈɛt mˈajsa"); // sangagasut ket maysa
+        expect(say(555)).toBe("limaɡˈasut kˈɛt limapˈulo kˈɛt lˈima"); // limagasut ket limapulo ket lima
+        expect(say(1000)).toBe("saŋaɾˈibo"); // sangaribo
+        expect(say(1000000)).toBe("saŋaɾˈiwɾiw"); // sangariwriw
+    });
+
+    test("the native series tops out at riwriw → ≥10⁹ reads digit-by-digit", () => {
+        expect(say(1000000000).split(" ")).toHaveLength(10); // maysa sero sero … (documented fallback)
     });
 });

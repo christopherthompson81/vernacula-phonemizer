@@ -16,6 +16,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // The 85 syllabary values in U+13A0 order (the standard chart). Bare "s" (U+13CD) and the obsolete "nah"
 // (U+13C0) are the only non-CV entries. The Cherokee Supplement lowercase block folds here via toUpperCase().
@@ -74,7 +75,7 @@ class CherokeePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

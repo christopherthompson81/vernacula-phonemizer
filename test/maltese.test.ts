@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createMaltese, phonemizeWord } from "../src/languages/maltese/maltese.ts";
+import { getPhonemizer } from "../src/registry.ts";
 
 // Maltese (mt) — Malti, the ONLY Semitic language written in the Latin alphabet (a Siculo-Arabic core + Sicilian/
 // Italian/English superstrate), Malta (~520k). Maltese orthography is fairly phonemic, so the engine is a greedy
@@ -68,5 +69,33 @@ describe("Maltese canonical IPA — grapheme g2p + silent-letter rules + devoici
 
     test("clause assembly (the article ⟨il-⟩ splits on the hyphen)", () => {
         expect(mt.text("Il-Malti ħelu.").trim()).toBe("ɪl maltɪ ħɛlu .");
+    });
+
+    // ═══ CARDINAL NUMBERS — the NATIVE Semitic series (Maltese has no rival borrowed one). Composition + sources
+    // live in src/languages/maltese/numbers.ts (GF-RGL NumeralMlt.gf + Wiktionary). The judgment call: a bare
+    // digit reads with the ABSOLUTE/COUNTING form (tnejn 2), not the pre-nominal attributive (żewġ).
+    test("★ cardinals: the ABSOLUTE counting series + units-first ⟨u⟩ + the DUAL magnitudes", () => {
+        const mt = getPhonemizer("mt");
+        expect(mt.text("0").trim()).toBe("zɛrɔ"); // żero
+        expect(mt.text("2").trim()).toBe("tnɛjn"); // tnejn — the COUNTING form, not attributive żewġ
+        expect(mt.text("10").trim()).toBe("aʃra"); // għaxra (⟨għ⟩ silent → aʃra)
+        expect(mt.text("21").trim()).toBe("wɪħɛt u ɔʃrɪn"); // wieħed u għoxrin — UNITS-FIRST, Semitic order
+        expect(mt.text("45").trim()).toBe("ħamsa u ɛrbɪn"); // ħamsa u erbgħin
+        expect(mt.text("100").trim()).toBe("mɪja"); // mija
+        expect(mt.text("200").trim()).toBe("mɪtɛjn"); // mitejn — the DUAL, never *żewġ mija
+        expect(mt.text("555").trim()).toBe("ħamɛs mɪja u ħamsa u ħamsɪn"); // ħames mija u ħamsa u ħamsin
+        expect(mt.text("1000").trim()).toBe("ɛlf"); // elf — bare, no leading wieħed
+        expect(mt.text("2000").trim()).toBe("ɛlfɛjn"); // elfejn — the DUAL again
+        expect(mt.text("3000").trim()).toBe("tlɪt ɛlɛf"); // tlitt elef — the -t attributive + PLURAL elef
+    });
+
+    test("cardinals: the ⟨-il⟩ teen linker, group juxtaposition, and miljun's MISSING dual", () => {
+        const mt = getPhonemizer("mt");
+        // 12 345 = tnax-il elf tliet mija u ħamsa u erbgħin. `u` marks only the FINAL constituent; the ⟨-il⟩
+        // hyphen is not a token boundary (the grapheme scan skips it: ħdaxil).
+        expect(mt.text("12345").trim()).toBe("tnaʃɪl ɛlf tlɪt mɪja u ħamsa u ɛrbɪn");
+        expect(mt.text("1000000").trim()).toBe("mɪljun"); // miljun
+        // miljun is a Romance loan with NO dual, so 2× takes the ordinary attributive żewġ + PLURAL miljuni.
+        expect(mt.text("2000000").trim()).toBe("zɛwt͡ʃ mɪljunɪ"); // żewġ miljuni, never *miljunejn
     });
 });

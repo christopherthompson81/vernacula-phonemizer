@@ -27,4 +27,37 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ═══ NUMBERS — Maltese cardinal spellings; canonical IPA DERIVED by running each word through the same g2p.
+    // SYSTEM: the NATIVE Semitic (Siculo-Arabic) series throughout, with the Romance-loan magnitudes miljun/biljun
+    // that Maltese itself has fully naturalised. There is NO competing borrowed series to choose between here —
+    // Maltese counts in Maltese. Composition (units-first "u", construct/dual) lives in numbers.ts; see that
+    // file's header for the sources and for the counting-vs-attributive decision.
+    "numbers": {
+        // ABSOLUTE (counting) series — the form used when counting aloud or reading a bare digit. This is the
+        // series this engine emits. 2 = tnejn (NOT the attributive żewġ); 3 = tlieta (not tliet), etc.
+        "units": ["żero", "wieħed", "tnejn", "tlieta", "erbgħa", "ħamsa", "sitta", "sebgħa", "tmienja", "disgħa"],
+        "ten": "għaxra", // 10 absolute
+        "teens": ["ħdax", "tnax", "tlettax", "erbatax", "ħmistax", "sittax", "sbatax", "tmintax", "dsatax"], // 11–19
+        "tens": { "20": "għoxrin", "30": "tletin", "40": "erbgħin", "50": "ħamsin", "60": "sittin", "70": "sebgħin", "80": "tmenin", "90": "disgħin" },
+
+        // ATTRIBUTIVE / construct series, needed only as MULTIPLIERS of a magnitude word (never as a bare count).
+        // SHORT form, used before mija/mitt and miljuni: żewġ, tliet, erba', ħames, sitt, seba', tmien, disa', għaxar.
+        "attributiveShort": ["", "", "żewġ", "tliet", "erba'", "ħames", "sitt", "seba'", "tmien", "disa'", "għaxar"],
+        // LONG (-t) form, used before the monosyllabic elf/elef: żewġt, tlitt, erbat, ħamest, sitt, sebat, tmint,
+        // disat, għaxart. (Maltese picks the -t form before a monosyllable: tlitt elef, not *tliet elef.)
+        "attributiveLong": ["", "", "żewġt", "tlitt", "erbat", "ħamest", "sitt", "sebat", "tmint", "disat", "għaxart"],
+
+        // Magnitudes, each with its Semitic singular / DUAL / plural. The dual is what makes "2×" irregular:
+        // 200 = mitejn (not *żewġ mija), 2000 = elfejn (not *żewġt elef). miljun/biljun are Romance loans and
+        // have no dual — they take the ordinary attributive żewġ (żewġ miljuni).
+        "magnitudes": {
+            "hundred": "mija", "hundredConstruct": "mitt", "hundredDual": "mitejn",
+            "thousand": "elf", "thousandDual": "elfejn", "thousandPlural": "elef",
+            "million": "miljun", "millionPlural": "miljuni",
+            "billion": "biljun", "billionPlural": "biljuni"
+        },
+        "connector": "u", // "and" — units-first inside 21–99 (wieħed u għoxrin) and before the FINAL constituent
+        "teenLinker": "-il" // 11–19 as a magnitude multiplier take the linker: tnax-il elf (12 000)
+    },
 }

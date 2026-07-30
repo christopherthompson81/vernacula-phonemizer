@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Multi-char units (longest-match first): the glottalized series (C + ʼ), then the plain aspirated affricates.
 const UNIT: Record<string, string> = {
@@ -51,14 +52,14 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A K'iche' word (Latin + ä + the apostrophe glyphs) / number / punctuation. Numbers deferred.
+// A K'iche' word (Latin + ä + the apostrophe glyphs) / number / punctuation.
 const TOKEN = /([a-zäöëïüáéíóúÄÖËÏÜÁÉÍÓÚA-Z'’ʼ`-]+)|(\d+)|([.!?…,;:])/gu;
 
 class KicheePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

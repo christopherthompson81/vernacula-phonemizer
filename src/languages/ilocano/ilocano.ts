@@ -5,12 +5,13 @@
  * PENULTIMATE stress (unwritten, folded by the eval). The Ilocano-distinctive HIATUS: a HIGH vowel ⟨i u⟩ before
  * another vowel GLIDES (dua→dwa, radio→ɾadjo) — unlike Bisayan's uniform glottal hiatus — while a non-high hiatus
  * keeps the glottal (tao→taʔo). ⟨e⟩→[ɛ] (the 6th vowel is [ɯ]~[ɛ], not spelling-predictable → default ɛ, folded);
- * ⟨ll⟩ is a native geminate [lː]. See docs/investigations/ilo_native_bringup_investigation.md.
+ * ⟨ll⟩ is a native geminate [lː]. Cardinal numbers use the NATIVE Austronesian set (numbers.ts). See docs/investigations/ilo_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface IlocanoDef {
     digraphs: Record<string, string>;
@@ -97,7 +98,8 @@ class IlocanoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // Native cardinal numbers (numbers.ts): one word per token so each takes its own penult stress.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -106,7 +108,7 @@ class IlocanoPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Ilocano phonemizer (rule g2p + penultimate stress; numbers deferred). */
+/** Build the Ilocano phonemizer (rule g2p + penultimate stress + native cardinal numbers). */
 export function createIlocano(): Phonemizer {
     return new IlocanoPhonemizer();
 }

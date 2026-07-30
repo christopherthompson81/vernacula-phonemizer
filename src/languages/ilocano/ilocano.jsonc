@@ -23,6 +23,23 @@
 
     "vowels": { "a": "a", "e": "ɛ", "i": "i", "o": "o", "u": "u" },
 
+    // NATIVE Austronesian cardinal numerals (composed morphologically by numbers.ts — see that file for the
+    // sanga-/ligature/ket rules). Ilocano, like Tagalog and Cebuano, has BOTH a native set and a nativised SPANISH
+    // loan set (onse, beinte, mil …) which dominates clock time, dates and money; Wikipedia calls the two "virtually
+    // used interchangeably". We speak the NATIVE set, following the precedent already set by tagalog.jsonc
+    // (isa/dalawa/sampu) and cebuano.jsonc (usa/duha/napulo): it is what the dictionaries lemmatise for a bare
+    // numeral, and a written-out Spanish loan is just a word the g2p already handles. Sources: Wikipedia "Ilocano
+    // numbers"; HandWiki "Ilocano numbers"; Wiktionary "Category:Ilocano cardinal numbers". Zero is the Spanish
+    // loan "sero" (the native "awan" is 'none', not a numeral; matches tl/ceb). The native series tops out at
+    // riwriw 10⁶ → ≥10⁹ reads digit-by-digit.
+    "numbers": {
+        "units": ["sero", "maysa", "dua", "tallo", "uppat", "lima", "innem", "pito", "walo", "siam"],
+        "onePrefix": "sanga",
+        "ligature": "a",
+        "connector": "ket",
+        "magnitudes": { "ten": "pulo", "hundred": "gasut", "thousand": "ribo", "million": "riwriw" }
+    },
+
     "clausePunctuation": {
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
     }

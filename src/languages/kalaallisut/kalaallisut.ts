@@ -11,9 +11,12 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 // Single vowel graphemes → IPA. ⟨e o⟩ are the orthographic lowered-before-uvular allophones of /i u/ → [i]/[u].
-const VOWEL: Record<string, string> = { a: "a", i: "i", u: "u", e: "i", o: "u", æ: "ɛ", ø: "ø", å: "ɔ" };
+// ⟨y⟩ joins æ ø å as a Danish-loan vowel letter: it is unavoidable once Danish numerals are read (tyve, fyrre,
+// sytten — see numbers.ts), and without it the scan silently deleted it (tyve → *[tvi]).
+const VOWEL: Record<string, string> = { a: "a", i: "i", u: "u", e: "i", o: "u", æ: "ɛ", ø: "ø", å: "ɔ", y: "y" };
 // Single consonant graphemes → IPA. ⟨r⟩ is the uvular fricative [ʁ]; ⟨g⟩→[ɡ].
 // ⟨b d⟩ are loan letters — Greenlandic has no voiced stops, so they DEVOICE to [p t] (Biina→piːna, Bolatta→
 // pulatːa). ⟨g⟩ is the voiced velar FRICATIVE [ɣ] (isigak→isiɣak) — the continuant parallel to the stop ⟨k⟩,
@@ -53,7 +56,12 @@ class KalaallisutPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) {
+                // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the
+                // Number() conversion can't lose precision. Native 0–12, Danish above — see numbers.ts.
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

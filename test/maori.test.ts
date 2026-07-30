@@ -33,3 +33,35 @@ describe("Māori canonical IPA — direct phonemic g2p + macron length + the ⟨
         expect(mi.text("Kia ora, e te whānau.").trim()).toBe("kia oɾa , e te ɸaːnau .");
     });
 });
+
+// Māori cardinal numbers (numbers.ts): the MODERN STANDARD tekau series (tekau mā tahi 11, rua tekau 20 — not the
+// older ngahuru decade forms), with the additive particle mā introducing a bare unit digit and kotahi as the
+// multiplier "one" before a magnitude (kotahi rau, kotahi mano). Sources cited in maori.jsonc + numbers.ts.
+describe("Māori cardinal numbers", () => {
+    const mi2 = createMaori();
+    const say = (n: number): string => mi2.text(String(n)).trim();
+
+    test("units and the tekau decades", () => {
+        expect(say(0)).toBe("koɾe"); // kore
+        expect(say(5)).toBe("ɾima"); // rima
+        expect(say(20)).toBe("ɾua tekau"); // rua tekau
+        expect(say(40)).toBe("ɸaː tekau"); // whā tekau (⟨wh⟩→ɸ, macron = length)
+    });
+
+    test("11-99: the additive particle mā (modern tekau mā tahi, not ngahuru)", () => {
+        expect(say(11)).toBe("tekau maː tahi"); // tekau mā tahi
+        expect(say(25)).toBe("ɾua tekau maː ɾima"); // rua tekau mā rima
+        expect(say(99)).toBe("iwa tekau maː iwa"); // iwa tekau mā iwa
+    });
+
+    test("rau / mano / miriona — kotahi for a multiplier of 1; mā only before a bare unit", () => {
+        expect(say(100)).toBe("kotahi ɾau"); // kotahi rau
+        expect(say(101)).toBe("kotahi ɾau maː tahi"); // kotahi rau mā tahi (no tens → mā)
+        expect(say(111)).toBe("kotahi ɾau tekau maː tahi"); // kotahi rau tekau mā tahi
+        expect(say(555)).toBe("ɾima ɾau ɾima tekau maː ɾima"); // rima rau rima tekau mā rima
+        expect(say(1000)).toBe("kotahi mano"); // kotahi mano
+        expect(say(12345)).toBe("tekau maː ɾua mano toɾu ɾau ɸaː tekau maː ɾima"); // 12 345
+        expect(say(1000000)).toBe("kotahi miɾiona"); // kotahi miriona
+        expect(say(1000000000)).toBe("kotahi piɾiona"); // kotahi piriona
+    });
+});

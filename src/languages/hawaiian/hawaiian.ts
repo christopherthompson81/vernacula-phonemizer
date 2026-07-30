@@ -4,12 +4,13 @@
  * = LENGTH, and 8 consonants ⟨p k m n l h w⟩ + the ʻokina ⟨ʻ⟩→[ʔ] (a full glottal-stop consonant). A near-1:1
  * phonemic grapheme scan (no digraphs). Loanwords adapt the non-Hawaiian letters to the nearest phoneme (t→k, s→k,
  * r→l, b→p, d/g→k, v→w). A falling diphthong's 2nd vowel is a non-syllabic offglide [i̯ u̯ …] in the narrow — we
- * emit plain vowels (folded). Stress (penultimate, mora-based, unmarked) is not emitted. Referee: wikipron
+ * emit plain vowels (folded). Stress (penultimate, mora-based, unmarked) is not emitted. Cardinal numbers: numbers.ts (kūmā compounds). Referee: wikipron
  * haw_latn_broad (human, 2152). See docs/investigations/haw_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface HawaiianDef {
     graphemes: Record<string, string>;
@@ -39,13 +40,14 @@ class HawaiianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // Cardinal numbers (numbers.ts) — emitted one word at a time, as for ordinary text.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
 }
 
-/** Build the Hawaiian phonemizer (direct phonemic g2p + macron length + ʻokina glottal + loan adaptation). */
+/** Build the Hawaiian phonemizer (direct phonemic g2p + macron length + ʻokina glottal + loan adaptation + numbers). */
 export function createHawaiian(): Phonemizer {
     return new HawaiianPhonemizer();
 }

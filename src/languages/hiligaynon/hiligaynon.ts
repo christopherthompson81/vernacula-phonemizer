@@ -5,11 +5,12 @@
  * vowel, a HIATUS glottal between two vowels (daan→daʔan), and a hyphen → [ʔ]. Stress defaults to PENULTIMATE
  * (phonemic but unwritten, folded by the referee eval). Shares the Bisayan core with Cebuano; the deltas are the
  * Spanish-loan letters ⟨j⟩→[h] and ⟨f⟩→[p] (see hiligaynon.jsonc). The unwritten word-final glottal (mango→[maŋoʔ])
- * is phonemic but lexical → a deferred residual. See docs/investigations/hil_native_bringup_investigation.md.
+ * is phonemic but lexical → a deferred residual. Cardinal numbers use the NATIVE Austronesian set (numbers.ts). See docs/investigations/hil_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface HiligaynonDef {
     digraphs: Record<string, string>;
@@ -82,7 +83,8 @@ class HiligaynonPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // Native cardinal numbers (numbers.ts): one word per emitted token so each takes its own penult stress.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -91,7 +93,7 @@ class HiligaynonPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Hiligaynon phonemizer (rule g2p + penultimate stress; numbers + final-glottal deferred). */
+/** Build the Hiligaynon phonemizer (rule g2p + penultimate stress + native cardinal numbers; final-glottal deferred). */
 export function createHiligaynon(): Phonemizer {
     return new HiligaynonPhonemizer();
 }

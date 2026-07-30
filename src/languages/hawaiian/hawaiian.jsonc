@@ -21,6 +21,23 @@
         "r": "l", "s": "k", "t": "k", "v": "w", "x": "k", "y": "i", "z": "k"
     },
 
+    // Cardinal numerals (composed by numbers.ts — see that file for the ʻe-/stem, kana-, kūmā and multiplier rules
+    // and the source list). Note the ʻOKINA is part of the spelling: ʻekahi, ʻumi, ʻole, hoʻokahi — it is a full
+    // consonant [ʔ] here, so these must be written with U+02BB (or one of the variants the grapheme map accepts),
+    // never with a bare vowel. The KAHAKŌ (macron) is likewise phonemic length: ʻehā [ʔehaː], iwakālua, kūmā.
+    // The powers of ten are English loans (precontact Hawaiian counted in fours: kāuna 4, kaʻau 40, lau 400).
+    "numbers": {
+        "zero": "ʻole",
+        "units": ["", "ʻekahi", "ʻelua", "ʻekolu", "ʻehā", "ʻelima", "ʻeono", "ʻehiku", "ʻewalu", "ʻeiwa"],
+        "stems": ["", "kahi", "lua", "kolu", "hā", "lima", "ono", "hiku", "walu", "iwa"],
+        "ten": "ʻumi",
+        "twenty": "iwakālua",
+        "tensPrefix": "kana",
+        "kuma": "kūmā",
+        "one": "hoʻokahi",
+        "magnitudes": { "hundred": "haneli", "thousand": "kaukani", "million": "miliona", "billion": "biliona" }
+    },
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
