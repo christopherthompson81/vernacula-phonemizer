@@ -8,6 +8,8 @@ import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeFrenchOrdinalDigits, normalizeFrenchOrdinalRomans } from "./ordinals.ts";
+import { normalizeRomans } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -34,7 +36,17 @@ export type OovResolver = (lowerWord: string) => string | undefined;
  *  engine for out-of-vocabulary words. */
 export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const lower = word.toLowerCase();
-    return lexicon().get(lower) ?? oovOverride?.(lower) ?? toIpa(word);
+    const direct = lexicon().get(lower) ?? oovOverride?.(lower);
+    if (direct !== undefined) return direct;
+    // Hyphenated compound that Lexique does not attest: resolve each element and join WITHOUT a space.
+    // A French hyphen is not a word boundary for pronunciation — quarante-et-un is [kaʁɑ̃teœ̃], one
+    // phonological word — so concatenating the parts is right where a space would insert a break and
+    // suppress the join. Parts contain no hyphen, so the recursion is one level deep.
+    if (lower.includes("-")) {
+        const parts = lower.split("-").filter((p) => p !== "");
+        if (parts.length > 1) return parts.map((p) => phonemizeWord(p, oovOverride)).join("");
+    }
+    return toIpa(word);
 }
 
 /** Add a phrase-final accent: ˈ before the last vowel of the last IPA token (rhythmic-group stress). */
@@ -50,8 +62,13 @@ function accentFinal(tokens: string[]): void {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
+// The word class admits an internal HYPHEN as well as an apostrophe, so a hyphenated compound arrives as
+// one token and can resolve against Lexique's ~4.2k attested compounds (dix-septième → [disɛtjɛm],
+// peut-être → [pøtɛtʁ]). Splitting at the hyphen phonemized each half in isolation, which lost exactly
+// the compound-internal liaison the hyphen marks. The hyphen must sit BETWEEN letters, so a dash between
+// words ("Paris — Lyon") and a digit range ("1918-1939") are unaffected.
 const TOKEN =
-    /([a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/giu;
+    /([a-zà-ÿœæ]+(?:[-'’][a-zà-ÿœæ]+)*)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/giu;
 
 // Obligatory liaison: a normally-silent final consonant of a function word / number is pronounced as the
 // onset of a following vowel-initial word. z after plural determiners/pronouns & the -x/-s numbers; n after
@@ -85,27 +102,21 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 
-// #562 roman numerals, French — the corpus pattern is the CENTURY ordinal (xviie siècle → dix-septième
-// siècle, written with an -e/-ème suffix); a BARE roman (louis xiv) is read as a cardinal, which is how
-// French speaks name-attached numerals (louis quatorze) — no context wordlist needed, unlike English.
-// Same closed 2–20 set as English, same exclusions (vi/xi and single letters are words/too ambiguous).
-const FR_ROMAN: Record<string, number> = {
-    ii: 2, iii: 3, iv: 4, vii: 7, viii: 8, ix: 9, xii: 12, xiii: 13, xiv: 14,
-    xv: 15, xvi: 16, xvii: 17, xviii: 18, xix: 19, xx: 20,
-};
-const FR_ORDINAL: Record<number, string> = {
-    2: "deuxième", 3: "troisième", 4: "quatrième", 7: "septième", 8: "huitième", 9: "neuvième",
-    12: "douzième", 13: "treizième", 14: "quatorzième", 15: "quinzième", 16: "seizième",
-    17: "dix septième", 18: "dix huitième", 19: "dix neuvième", 20: "vingtième",
-};
-function normalizeFrenchRomans(text: string): string {
-    // suffixed → ordinal word (xviie / xviième / xviieme siècle)
-    let s = text.replace(/\b(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)(e|ème|eme|è)\b/gi,
-        (_m, rom: string) => FR_ORDINAL[FR_ROMAN[rom.toLowerCase()]!]!);
-    // bare → cardinal digits (louis xiv → louis 14), spoken by the existing number path
-    s = s.replace(/\b(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\b/gi,
-        (_m, rom: string) => String(FR_ROMAN[rom.toLowerCase()]!));
-    return s;
+/**
+ * #562 — numeral normalization, run before tokenization. Three passes, in this order:
+ *   1. ROMAN ORDINALS (XVIIe siècle → dix-septième siècle). Must precede pass 3, or the bare-Roman pass
+ *      would rewrite XVII to digits and leave a stranded "e" to be spoken as a word.
+ *   2. DIGIT ORDINALS (1er → premier, 37e → trente-septième). This is what the corpus actually contains:
+ *      no Roman ordinal occurs in fr FLEURS at all, while 1er/37e/190e/60e/5e/3e/11e/15e occur 48 times.
+ *   3. BARE ROMANS → digits (louis XIV → louis 14), spoken by the cardinal path. French reads a
+ *      name-attached numeral as a CARDINAL (louis quatorze), so no context wordlist is needed here,
+ *      unlike English. Delegated to the shared pass, which supplies the case discipline and the
+ *      cross-language homograph stoplist (dix, mi, di, ci, li, vi, xi, mm/cm/ml …).
+ * Ordinal formation itself lives in ordinals.ts; it is unbounded, replacing a hardcoded 2–20 table.
+ */
+function normalizeFrenchNumerals(text: string): string {
+    const s = normalizeFrenchOrdinalRomans(text, (w) => lexicon().has(w));
+    return normalizeRomans(normalizeFrenchOrdinalDigits(s));
 }
 
 class FrenchPhonemizer implements Phonemizer {
@@ -114,7 +125,7 @@ class FrenchPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, frNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
     // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
     text(input: string, oovOverride?: OovResolver): string {
-        input = normalizeFrenchRomans(SYMBOLS(input)); // #562
+        input = normalizeFrenchNumerals(SYMBOLS(input)); // #562
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
         type Item = { word: string } | { pause: string };
