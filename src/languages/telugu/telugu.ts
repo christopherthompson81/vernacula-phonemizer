@@ -6,16 +6,13 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { normalizeTelugu } from "./normalize.ts";
 
-interface TeluguDef extends AbugidaDef {
-    numbers: NumbersDef;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<TeluguDef>(import.meta.url, "telugu.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const TELUGU_WORD = "ఀ-౯ౠ-ౣ";
 const TELUGU_DIGITS: Record<string, string> = {
@@ -49,10 +46,15 @@ export function phonemizeWord(word: string): string {
 
 const toAscii = (d: string): string =>
     [...d].map((c) => TELUGU_DIGITS[c] ?? c).join("");
+/**
+ * Digits → IPA. The compositor is Telugu's OWN (numbers.ts), not the shared `indicNumberWords`: Telugu
+ * orders 21-99 tens-first and INFLECTS its magnitude nouns for count and for a following remainder, and
+ * the shared composer expresses neither — see the numbers.ts header for the corpus/audio evidence.
+ */
 function number(digits: string): string {
     const n = Number(toAscii(digits));
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord);
+    return numberToWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 
 const TOKEN = new RegExp(
@@ -65,7 +67,8 @@ export type ForeignPhonemizer = (latin: string) => string;
 class TeluguPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION runs first, before tokenization — it is pure text→text (see normalize.ts).
+        return assembleClauses(normalizeTelugu(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

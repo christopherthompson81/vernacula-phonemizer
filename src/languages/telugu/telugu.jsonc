@@ -96,12 +96,29 @@
         "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
-    // NUMBERS — Telugu spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes
-    // (21-99 partly irregular; a bounded authoring task).
+    // NUMBERS — Telugu spellings; canonical IPA DERIVED via the same G2P.
+    //
+    // 21-99 are REGULAR in Telugu (tens then unit: ఇరవై ఒకటి), unlike Hindi — so there is no `compound`
+    // map. What Telugu does have, and what the shared `indicNumberWords` composer cannot express, is
+    // MAGNITUDE AGREEMENT: a magnitude noun takes a bare form for a count of one (వంద, వెయ్యి, లక్ష,
+    // కోటి — never *ఒకటి వంద), a PLURAL for a higher count (రెండు వందలు, ముప్పై వేలు), and an OBLIQUE
+    // plural when a remainder follows (రెండు వందల యాభై, రెండు వేల పదకొండు). 100 additionally has a
+    // suppletive combining stem నూట used for 101-199 (నూట యాభై = 150).
+    //
+    // All four alternations are corroborated in this corpus and in its audio (see numbers.ts).
     "numbers": {
         "units": ["సున్నా", "ఒకటి", "రెండు", "మూడు", "నాలుగు", "అయిదు", "ఆరు", "ఏడు", "ఎనిమిది", "తొమ్మిది"],
         "teens": ["పది", "పదకొండు", "పన్నెండు", "పదమూడు", "పద్నాలుగు", "పదిహేను", "పదహారు", "పదిహేడు", "పద్దెనిమిది", "పంతొమ్మిది"],
         "tens": { "20": "ఇరవై", "30": "ముప్పై", "40": "నలభై", "50": "యాభై", "60": "అరవై", "70": "డెబ్బై", "80": "ఎనభై", "90": "తొంభై" },
-        "magnitudes": { "hundred": "వంద", "thousand": "వెయ్యి", "lakh": "లక్ష", "crore": "కోటి" }
+        "magnitudes": { "hundred": "వంద", "thousand": "వెయ్యి", "lakh": "లక్ష", "crore": "కోటి" },
+
+        // one / oneCombining (a remainder follows) / plural / pluralOblique (a remainder follows).
+        // Only 100 has a distinct combining stem; వెయ్యి / లక్ష / కోటి are unchanged before a remainder.
+        "magnitudeForms": {
+            "hundred": { "one": "వంద", "oneCombining": "నూట", "plural": "వందలు", "pluralOblique": "వందల" },
+            "thousand": { "one": "వెయ్యి", "oneCombining": "వెయ్యి", "plural": "వేలు", "pluralOblique": "వేల" },
+            "lakh": { "one": "లక్ష", "oneCombining": "లక్ష", "plural": "లక్షలు", "pluralOblique": "లక్షల" },
+            "crore": { "one": "కోటి", "oneCombining": "కోటి", "plural": "కోట్లు", "pluralOblique": "కోట్ల" }
+        }
     }
 }
