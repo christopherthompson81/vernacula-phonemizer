@@ -49,9 +49,14 @@ describe("language-level symbol normalization", () => {
 
 describe("French roman numerals", () => {
     test("century ordinals and regnal cardinals", () => {
-        expect(phonemize("au xviie siècle", "fr")).toBe("o dis sɛtjɛm sjˈɛkl"); // dix-septième
+        expect(phonemize("au xviie siècle", "fr")).toBe("o disɛtjɛm sjˈɛkl"); // dix-septième, per Lexique disɛtjɛm
         expect(phonemize("louis xiv", "fr")).toBe("lwi katˈɔʁz"); // louis quatorze — French regnal is CARDINAL
         expect(phonemize("un vieux livre", "fr")).toBe("œ̃ vjø lˈivʁ"); // no false positive
+        // Unbounded now: the closed 2–20 table let anything past XX fall through and be letter-spelled
+        // ("xxxe siècle" → [ksksksə]). Uppercase unlocks any value, as elsewhere in the fleet.
+        expect(phonemize("xxxe siècle", "fr")).toBe("tʁɑ̃tjɛm sjˈɛkl"); // trentième
+        expect(phonemize("XIe siècle", "fr")).toBe("ɔ̃zjɛm sjˈɛkl"); // onzième — XI is a global collision, but
+        expect(phonemize("Ve siècle", "fr")).toBe("sɛ̃kjɛm sjˈɛkl"); // cinquième — the -e suffix licenses both
     });
 });
 

@@ -40,8 +40,54 @@ describe("french canonical IPA", () => {
     });
 
     test("numbers (vigesimal 70/80/90)", () => {
-        expect(phonemize("21", "fr")).toBe("vɛ̃ e ˈœ̃"); // vingt et un
-        expect(phonemize("342", "fr")).toBe("tʁwa sɑ̃ kaʁɑ̃t dˈø"); // trois cent quarante deux
+        // The sub-100 group is ONE hyphenated word, so it resolves against the Lexique compounds and
+        // the compound-internal liaison survives. These two expectations previously pinned the
+        // space-separated readings, which phonemized each piece in isolation and lost it.
+        expect(phonemize("21", "fr")).toBe("vɛ̃teˈœ̃"); // vingt-et-un — the t liaison, per Lexique vɛ̃teœ̃
+        expect(phonemize("342", "fr")).toBe("tʁwa sɑ̃ kaʁɑ̃tdˈø"); // trois cent quarante-deux
+    });
+
+    test("compound numerals join as Lexique attests them", () => {
+        // 17/18/19 were the clearest defect: as "dix sept" the pieces gave [dis sɛt] with a doubled s,
+        // and 18/19 came out VOICELESS where French voices the compound-internal x.
+        expect(phonemize("17", "fr")).toBe("disˈɛt"); // dix-sept    disɛt
+        expect(phonemize("18", "fr")).toBe("dizɥˈit"); // dix-huit   dizɥit — z, not s
+        expect(phonemize("19", "fr")).toBe("diznˈœf"); // dix-neuf   diznœf
+        expect(phonemize("90", "fr")).toBe("katʁəvɛ̃dˈis"); // quatre-vingt-dix katʁəvɛ̃dis
+        expect(phonemize("97", "fr")).toBe("katʁəvɛ̃disˈɛt"); // quatre-vingt-dix-sept
+        // A compound Lexique does NOT attest falls to per-part concatenation, which gives the same shape
+        // as the attested trente-et-un (tʁɑ̃teœ̃) — a hyphen is not a word boundary for pronunciation.
+        expect(phonemize("41", "fr")).toBe("kaʁɑ̃teˈœ̃"); // quarante-et-un
+        // ...and the same tokenizer change makes ordinary hyphenated words resolve as one word.
+        expect(phonemize("peut-être", "fr")).toBe("pøtˈɛtʁ"); // the t liaison, lost when split
+    });
+
+    test("ordinals from digit notation", () => {
+        // What the corpus actually contains: 1er, 37e, 190e, 60e, 5e, 3e, 11e, 15e. Each of these used to
+        // read the bare suffix as a stray word ("37e" → [tʁɑ̃t sɛt ø], "thirty-seven uh").
+        expect(phonemize("le 1er janvier", "fr")).toBe("lə pʁømje ʒɑ̃vjˈe"); // premier
+        expect(phonemize("la 1re fois", "fr")).toBe("la pʁømjɛʁ fwˈa"); // première — feminine indicator
+        expect(phonemize("les 1ers jours", "fr")).toBe("le pʁømje ʒˈuʁ"); // premiers
+        expect(phonemize("le 2e jour", "fr")).toBe("lə døzjɛm ʒˈuʁ"); // deuxième
+        expect(phonemize("le 2ème jour", "fr")).toBe("lə døzjɛm ʒˈuʁ"); // the -ème spelling
+        // Unbounded: the old table stopped at 20, so anything past it fell through entirely.
+        expect(phonemize("le 37e", "fr")).toBe("lə tʁɑ̃tsɛtjˈɛm"); // trente-septième
+        expect(phonemize("le 21e siècle", "fr")).toBe("lə vɛ̃teynjɛm sjˈɛkl"); // vingt-et-unième (unième, not premier)
+        expect(phonemize("le 190e", "fr")).toBe("lə sɑ̃ katʁəvɛ̃dizjˈɛm"); // cent quatre-vingt-dixième
+        // second/seconde is licensed only at 2 — "3d" is 3-D and must stay a cardinal + letter.
+        expect(phonemize("le 2d violon", "fr")).toBe("lə səɡɔ̃ vjɔlˈɔ̃");
+        expect(phonemize("le 3d", "fr")).not.toContain("tʁwazjɛm");
+    });
+
+    test("ordinal notation does not fire on homographs", () => {
+        // "Roman letters + ordinal suffix" matches de/les/le/des/ce/vie/dire/lire thousands of times in
+        // the corpus; the veto is Lexique membership, so each of these stays an ordinary word.
+        expect(phonemize("la vie", "fr")).toBe("la vˈi"); // not VI = 6
+        expect(phonemize("de la mie de pain", "fr")).toBe("də la mi də pˈɛ̃"); // not DI / MI
+        expect(phonemize("un vieux livre", "fr")).toBe("œ̃ vjø lˈivʁ");
+        // ...and an accented word must not be split at the accent: siècle parses as siè + cle (CL = 150)
+        // for any pattern that trusts \b, which is defined on ASCII word characters.
+        expect(phonemize("le siècle", "fr")).toBe("lə sjˈɛkl");
     });
 
     test("text: phrase-final stress + punctuation, monosyllable le → lə", () => {

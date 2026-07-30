@@ -84,3 +84,89 @@ sign `°` U+00B0 is *not* affected; it is already dropped.
   sentence-final `.` is the hard part and is where de/tr/pl/cs/sk/fi/nb/da demand sits.
 - Extending the 7 formers that stop at 100 is small (they already compose regularly); es/pt
   stopping below 1988 matters less, since four-digit ordinals are rare outside year-as-ordinal.
+
+## Run 2 — 2026-07-29 — fix French ordinals
+
+Implemented. Three defects, all confirmed by probe before the change.
+
+### D1: the ordinal former was a hardcoded 2–20 table, reachable only from the Roman rule
+
+`FR_ORDINAL` in `french.ts` covered 2,3,4,7,8,9,12–20 and nothing else, and only
+`normalizeFrenchRomans` ever called it. Replaced by `src/languages/french/ordinals.ts`, an unbounded
+former built on the cardinal compositor: cardinal + `-ième` with the four standard adjustments
+(final ⟨e⟩ dropped, cinq→cinqu-, neuf→neuv-, plural ⟨s⟩ of vingts/cents/millions dropped), only the
+final element of a compound inflecting, and 1 suppletive (premier/première standalone, unième in
+compound). Verified defect-free for ordinals 1…20 000.
+
+### D2: digit notation was entirely unhandled — this is what the corpus actually contains
+
+**No Roman-numeral ordinal occurs in fr FLEURS at all.** The digit forms do: `1er` ×18, `37e` ×6,
+`190e` ×6, `60e` ×4, `5e` ×4, `3e` ×4, `11e` ×2, `15e` ×2 — 48 hits. All of them spoke the bare
+suffix as a stray word:
+
+| input | before | after |
+|---|---|---|
+| `le 1er janvier` | `lə œ̃ nɛʁ ʒɑ̃vjˈe` (un + "er", with a spurious n-liaison) | `lə pʁømje ʒɑ̃vjˈe` |
+| `la 1re fois` | `la œ̃ ʁø fwˈa` | `la pʁømjɛʁ fwˈa` |
+| `le 2ème jour` | `lə dø zɛm ʒˈuʁ` | `lə døzjɛm ʒˈuʁ` |
+| `le 37e plus grand` | `lə tʁɑ̃t sɛt ø ply…` ("thirty-seven uh") | `lə tʁɑ̃tsɛtjɛm ply…` |
+| `le 21e siècle` | `lə vɛ̃ e œ̃ nø sjˈɛkl` | `lə vɛ̃teynjɛm sjˈɛkl` |
+
+`second/seconde` is licensed only at n=2, so `le 3d` stays a cardinal — unrestricted it would read 3-D
+as an ordinal.
+
+### D3 (found here, not in the brief): the space-joined cardinals were phonemically WRONG
+
+`numbers.ts` emitted the sub-100 group space-separated "so each reads through the g2p", which
+phonemized each piece in isolation and lost the compound-internal liaison. Lexique attests all these
+compounds; the engine was never reaching them:
+
+| n | before | Lexique / after |
+|---|---|---|
+| 17 | `dis sˈɛt` (doubled s) | `disˈɛt` |
+| 18 | `dis ɥˈit` (**voiceless**) | `dizɥˈit` |
+| 19 | `dis nˈœf` (**voiceless**) | `diznˈœf` |
+| 21 | `vɛ̃ e ˈœ̃` (no t-liaison) | `vɛ̃teˈœ̃` |
+| 90 | `katʁ vɛ̃ dˈis` | `katʁəvɛ̃dˈis` |
+
+Fixed by hyphenating the sub-100 group (also the 1990 reform's orthography) and admitting an internal
+hyphen into the tokenizer word class, so Lexique's ~4.2k attested compounds resolve. Compounds Lexique
+lacks (quarante-et-un, cinquante-et-un, soixante-et-un) fall to per-part concatenation in
+`phonemizeWord`, which reproduces the attested shape (cf. trente-et-un `tʁɑ̃teœ̃`). The same change fixes
+ordinary hyphenated words: `peut-être` `pø ˈɛtʁ` → `pøtˈɛtʁ`, `c'est-à-dire` → `sɛtadˈiʁ`.
+
+Two test expectations had PINNED this bug (`phonemize("21")` = `vɛ̃ e ˈœ̃`, `xviie siècle` =
+`dis sɛtjɛm`) and were corrected against Lexique.
+
+### Homograph control
+
+The naive pattern "Roman letters + ordinal suffix" matches `de` 8,411×, `les` 3,512×, `le` 3,497×,
+`des` 3,234×, `ce` 411×, plus `vie`, `dire`, `lire`, `mer`, `ville`, `livre` in the fr corpus — all
+decode as numerals (LE = 50+…, DI = 501, LI = 51). **The veto is Lexique membership**: an attested
+French word is not a numeral. That blocks every case above while leaving `XVIIe`, `XIe`, `Ve`, `XXXe`,
+`LVIIIe` free, and it stays correct as the lexicon grows. Three tokens absent from Lexique are
+stoplisted explicitly (`cie` the abbreviation, `cive`, `clive`).
+
+Accepted cost of the veto: `la Ire République` (Ire = première) does not convert, because *ire*
+(= wrath) is a real French word. Rare enough to prefer the safe direction.
+
+**Bug found and fixed mid-implementation, worth recording:** widening the Roman base from a closed set
+to `[ivxlcdm]+` made `siècle` convert. `\b` is defined on ASCII word characters, so it finds a boundary
+at the accent — `siè` | `cle` — and `cle` parses as CL + the `-e` suffix = 150th. Adding the `u` flag
+does *not* fix this. Both patterns now use explicit French-letter lookarounds instead of `\b`.
+
+### Verification
+
+- Full suite 198 files / 2078 tests pass; `tsc --noEmit` clean.
+- Referee eval **byte-identical** to baseline (79.3% folded / 96.0% symbol; second set 91.3% / 97.6%),
+  so the tokenizer change regressed nothing.
+- fr FLEURS sweep, 3,193 utterances: 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray ordinal marks.
+- Cardinals 0…20 000 and ordinals 1…20 000: 0 defects.
+
+### Two PRE-EXISTING bugs found, not fixed (verified identical before the change via git stash)
+
+1. `MM. les députés` → `milimˈɛtʁ …` — "MM." reads as *millimètre*. Source is Lexique itself, which
+   carries `mm → milimɛtʁ` as an abbreviation entry; the unit normalizer is not involved (it requires a
+   preceding number). Any capitalized abbreviation colliding with a unit entry will do this.
+2. `1e9 joules` → `œ̃ nø nœf` — a stray letter between digits is spoken. Not French prose; noted only
+   because the ordinal guard correctly declines to claim it.

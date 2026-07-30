@@ -1,6 +1,22 @@
 /**
- * French number → words (standard/France, vigesimal 70/80/90). Output is space-separated words (no hyphens)
- * so each reads through the g2p. Covers 0 … <10⁹. Decimals read "virgule" + digits.
+ * French number → words (standard/France, vigesimal 70/80/90). Covers 0 … <10⁹. Decimals read
+ * "virgule" + digits.
+ *
+ * TOKENIZATION: the sub-100 group is emitted as ONE hyphenated orthographic word (dix-sept,
+ * vingt-et-un, quatre-vingt-dix-sept) and the magnitude groups are space-separated
+ * ("mille neuf cent quatre-vingt-huit"). The hyphens are not cosmetic — they are what makes the
+ * numeral resolve against the Lexique compounds, and the space-separated form was phonemically WRONG
+ * at the joins because each piece was phonemized in isolation:
+ *     17  dix sept      → [dis sɛt]   but dix-sept      is [disɛt]    (one [s], not two)
+ *     18  dix huit      → [dis ɥit]   but dix-huit      is [dizɥit]   (voiced — huit blocks liaison
+ *                                     as a separate word, but not compound-internally)
+ *     19  dix neuf      → [dis nœf]   but dix-neuf      is [diznœf]
+ *     21  vingt et un   → [vɛ̃ e œ̃]    but vingt-et-un   is [vɛ̃teœ̃]    (the t liaison was lost)
+ *     90  quatre vingt dix → [katʁ vɛ̃ dis] but quatre-vingt-dix is [katʁəvɛ̃dis]
+ * Lexique attests the compounds (including soixante-dix-sept, quatre-vingt-dix-sept, trente-sept), so
+ * they are served as data; the few it lacks (quarante-et-un, cinquante-et-un, soixante-et-un) fall to
+ * the per-part concatenation in french.ts, which reproduces the same result. Hyphenating throughout
+ * also matches the 1990 orthographic reform.
  */
 
 import { MANIFEST } from "./manifest.ts";
@@ -15,19 +31,19 @@ function below100(n: number): string {
         const t = Math.floor(n / 10),
             u = n % 10;
         if (u === 0) return TENS[t]!;
-        if (u === 1) return `${TENS[t]} et un`;
-        return `${TENS[t]} ${SMALL[u]}`;
+        if (u === 1) return `${TENS[t]}-et-un`;
+        return `${TENS[t]}-${SMALL[u]}`;
     }
     if (n < 80) {
         // 60–79: soixante + 0..19
         const r = n - 60;
         if (r === 0) return MAG.sixty;
-        if (r === 1) return `${MAG.sixty} et un`;
-        if (r === 11) return `${MAG.sixty} et onze`;
-        return `${MAG.sixty} ${SMALL[r]}`;
+        if (r === 1) return `${MAG.sixty}-et-un`;
+        if (r === 11) return `${MAG.sixty}-et-onze`;
+        return `${MAG.sixty}-${SMALL[r]}`;
     }
     const r = n - 80; // 80–99: quatre-vingt(s) + 0..19
-    return r === 0 ? `${MAG.eighty}s` : `${MAG.eighty} ${SMALL[r]}`;
+    return r === 0 ? `${MAG.eighty}s` : `${MAG.eighty}-${SMALL[r]}`;
 }
 
 /** 1 ≤ n < 1000 */
