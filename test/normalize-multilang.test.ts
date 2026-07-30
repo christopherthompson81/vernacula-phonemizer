@@ -320,4 +320,10 @@ describe("symbol normalization — FLEURS-priority round", () => {
     test("a compound currency key matches a letter-code prefix", () => {
         expect(phonemize("US$30", "gu")).not.toContain("30");
     });
+
+    /** The percent word is suppressed on whichever side the language puts it (#562). */
+    test("a written-out percent word is not doubled", () => {
+        expect(phonemize("93% ശതമാനം", "ml")).toBe(phonemize("93%", "ml"));   // suffix, Malayalam
+        expect(phonemize("yüzde 40%", "tr")).toBe(phonemize("40%", "tr"));     // prefix, Turkish
+    });
 });

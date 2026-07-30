@@ -74,8 +74,14 @@ export const indicNumberWords: NumberComposer = (n, d) => {
     if (n < 1000) {
         const h = Math.floor(n / 100),
             r = n % 100;
+        // A SUPPLETIVE round hundred wins outright where the language declares one — Odia ଶହେ for 100,
+        // which `bareMagnitude` cannot express because that only OMITS the leading "one" and would leave
+        // the wrong word (ଶହ). `NumbersDef.hundreds` already existed for this but only westernNumberWords
+        // and the Dravidian composer read it. Reported by the Odia run, and by Kannada before it.
+        const sup = d.hundreds?.[h];
+        if (sup !== undefined && sup !== "") return [sup, ...(r ? indicNumberWords(r, d) : [])];
         return [
-            // A bare hundred is just the magnitude word in the languages that declare it.
+            // Otherwise a bare hundred is just the magnitude word in the languages that declare it.
             ...(h === 1 && d.bareMagnitude ? [] : [d.units[h]!]),
             d.magnitudes.hundred,
             ...(r ? indicNumberWords(r, d) : []),

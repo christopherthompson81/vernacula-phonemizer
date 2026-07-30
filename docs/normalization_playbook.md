@@ -140,6 +140,12 @@ its referee lacked, then validated it against the 36 the referee *does* carry: 1
 basis. Two by-products worth having: espeak's Punjabi 61–68 coda is refuted by its own 59/60 entries, and
 a hand-rolled phoneme segmenter had a silent bug that `phonemeTokens` removed.
 
+**…and beware a calibration set drawn from the source you are validating.** The Odia run calibrated the
+same way and scored 20/20 — then noticed the figure flattered it, *because the calibration set always had
+its answer in the referee*. Unguarded on the values the referee lacked, that pipeline proposed ଚବିଶି (24)
+for 36, ଅଣଷଠି (59) for 68, and ଡାକ୍ତରି "doctor's" for 72. A hit rate measured where the answer is already
+present says nothing about where it is absent. Add an independent guard, or state the limit.
+
 A validated refusal is a result. Record the rate and the failure taxonomy so nobody repeats the attempt.
 
 ### 6. Commit — one language, one commit

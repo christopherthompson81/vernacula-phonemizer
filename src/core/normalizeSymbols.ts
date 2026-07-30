@@ -18,8 +18,22 @@ export type CountForms = string[];
 export interface SymbolData {
     /** The word for %, e.g. "percent", "Prozent", "por ciento", or count forms for Slavic. */
     percent: CountForms;
-    /** Currency sign → count forms. The sign may precede or follow the number in text; the word is
-     *  always emitted AFTER the number (with any magnitude word hopping along). */
+    /**
+     * Currency sign → count forms. The sign may precede or follow the number in text; the word is emitted
+     * after the number by default, or before it with `currencyPrefix`.
+     *
+     * A KEY MAY BE MORE THAN ONE CHARACTER, and this is the answer to a question three separate runs
+     * reported as a core limitation. A bare `$` cannot match in `US$30` or `AUD$45`, because the pattern
+     * is letter-bounded on the left so a code prefix would otherwise be split — that guard is deliberate.
+     * The fix is to DECLARE the compound key:
+     *
+     *     currency: { "US$": ["US dollar"], "AUD$": ["Australian dollar"], "$": ["dollar"] }
+     *
+     * Keys are matched longest-first, so the compound wins over the bare sign. Likewise, a language whose
+     * noun has non-concatenative plurals should declare them as further CountForms entries — the
+     * "already said it" suppression below tests every declared form, so `$100 ዶላሮች` only stays quiet if
+     * ዶላሮች is one of them.
+     */
     currency?: Record<string, CountForms>;
     /** Unit abbreviation (lowercase) → count forms. Matched only AFTER a number. */
     units?: Record<string, CountForms>;
@@ -51,8 +65,12 @@ export interface SymbolData {
      * NOT universal, which is why it is opt-in: Korean writes the rate as a PREFIX (시속 = "hour-speed"),
      * and Japanese/Vietnamese/Thai already resolve their own rate units locally for ordering reasons. Those
      * keep doing so; this serves the majority "A per B" idiom.
+     *
+     * MAY BE KEYED BY DENOMINATOR, because the preposition is not always one word: Serbian writes
+     * `километара НА сат` but `километара У секунди`, and had to compose `/s` locally for want of this.
+     * A plain string applies to every denominator; a record selects on the denominator key.
      */
-    unitPer?: string;
+    unitPer?: string | Readonly<Record<string, string>>;
     /**
      * Nouns available ONLY as a rate DENOMINATOR — `h`, `u`, `s` — never matched as a standalone unit.
      *
@@ -195,6 +213,23 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.
     const pctPreRe = new RegExp(`(?<!\\d)${PCT}\\s?(${NUM})`, "gu");
 
+    const esc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    /**
+     * "Does the text right AFTER the match already spell this noun?" — used to stay quiet rather than say
+     * it twice. The magnitude connective may sit between, so "…millones de dólares" counts as already
+     * said. Shared by currency and percent: the guard was currency-only at first and Malayalam's
+     * `93% ശതമാനം` read as *ശതമാനം ശതമാനം*.
+     */
+    const saidAfter = (forms: CountForms): RegExp => {
+        const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[  ]+)?`;
+        return new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "u");
+    };
+    /** The mirror, for a PREFIX word: Turkish `yüzde 40%` was reading *yüzde yüzde kırk*. */
+    const saidBefore = (forms: CountForms): RegExp =>
+        new RegExp(`(?:${forms.map(esc).join("|")})[  ]*$`, "u");
+    const PCT_AFTER = saidAfter(d.percent);
+    const PCT_BEFORE = saidBefore(d.percent);
+
     return (text: string): string => {
         let s = text;
         // "cinco millones DE dólares" — emitted only when a magnitude was actually matched.
@@ -212,10 +247,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         // whose corpus writes `$1000 डलर`.
         const money = (num: string, mag: string | undefined, sym: string, rest: string): string => {
             const forms = d.currency![sym]!;
-            const esc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-            // The magnitude CONNECTIVE may sit between, so "…millones de dólares" counts as already said.
-            const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[  ]+)?`;
-            const already = new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "u");
+            const already = saidAfter(forms);
             const body = `${num}${mag ?? ""}`;
             if (already.test(rest)) return body; // the text says it; do not say it twice
             const w = withMagnitude(forms, mag, numValue(num), cf);
@@ -229,13 +261,16 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (curAfter)
             s = s.replace(curAfter, (m: string, num: string, mag: string | undefined, sym: string,
                 offset: number, full: string) => money(num, mag, sym, full.slice(offset + m.length)));
-        if (d.percentPrefix) {
-            s = s.replace(pctPreRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
-            s = s.replace(pctRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
-        } else {
-            s = s.replace(pctPreRe, (_m, num: string) => `${num} ${pick(d.percent, numValue(num), cf)}`);
-            s = s.replace(pctRe, (_m, num: string) => `${num} ${pick(d.percent, numValue(num), cf)}`);
-        }
+        // The percent word is suppressed when the text already carries it — on whichever side this
+        // language puts it. `93% ശതമാനം` doubled the suffix; `yüzde 40%` doubled the prefix.
+        const pct = (num: string, offset: number, full: string, matchLen: number): string => {
+            const before = full.slice(0, offset), after = full.slice(offset + matchLen);
+            const w = pick(d.percent, numValue(num), cf);
+            if (d.percentPrefix) return PCT_BEFORE.test(before) ? num : `${w} ${num}`;
+            return PCT_AFTER.test(after) ? num : `${num} ${w}`;
+        };
+        s = s.replace(pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+        s = s.replace(pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
         if (unitRe)
             s = s.replace(unitRe, (whole, num: string, u: string, denom?: string, exp?: string) => {
                 const head = pick(d.units![u.toLowerCase()]!, numValue(num), cf);
@@ -244,8 +279,9 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     // alone rather than emit half a reading.
                     const dl = denom.toLowerCase();
                     const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
-                    if (d.unitPer === undefined || dWord === undefined) return whole;
-                    return `${num} ${head} ${d.unitPer} ${dWord}`;
+                    const per = typeof d.unitPer === "string" ? d.unitPer : d.unitPer?.[dl];
+                    if (per === undefined || dWord === undefined) return whole;
+                    return `${num} ${head} ${per} ${dWord}`;
                 }
                 if (exp !== undefined) {
                     const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
