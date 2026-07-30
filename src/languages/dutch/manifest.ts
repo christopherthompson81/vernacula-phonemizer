@@ -14,6 +14,9 @@ export interface DutchManifest {
     consonants: Record<string, string>;
     voicedFinal: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** Acronyms read LETTER-BY-LETTER although their lowercase form is readable, so neither a dictionary
+     *  nor a phonotactic test can express it (#562). Lowercase keys; consumed by core/initialisms.ts. */
+    acronymLetters: string[];
     numbers: {
         ones: string[];
         tens: string[];

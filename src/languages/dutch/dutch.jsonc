@@ -87,6 +87,35 @@
         ":": ",",
     },
 
+    // #562 — acronyms Dutch SPELLS OUT even though the letter run is phonotactically readable, so the OOV
+    // rule in core/initialisms.ts would otherwise hand them to the g2p as a word (CEO → seːoː, VOC → vɔk).
+    // Lexical facts, one per attested convention; runs that are already unreadable (VS, VN, GMT, DNA, FBI,
+    // MRI, NBA, PBS, NSA) need no entry because the phonotactic rule catches them. Entries marked ✓ occur in
+    // the nl_nl corpus. Acronyms Dutch reads as WORDS (UNESCO, NAVO, NASA, FIFA, ISIS, COVID, ACTA, OPEC) are
+    // deliberately ABSENT — listing them would spell out a word.
+    "acronymLetters": [
+        "us", // ✓ ×1 — US Corps of Engineers
+        "usa", // ✓ ×2 — uu-es-aa
+        "ussr", // ✓ ×1
+        "ceo", // ✓ ×2
+        "aol", // ✓ ×2
+        "ehbo", // ✓ ×2 — eerste hulp bij ongelukken
+        "voc", // ✓ ×2 — Vereenigde Oostindische Compagnie
+        "ai", // ✓ ×1
+        "it", // ✓ ×1
+        "pa", // ✓ ×2 — only ALL-CAPS runs reach this pass, so the Dutch word "pa" is unaffected
+        "bbp", // ✓ ×1 — bruto binnenlands product
+        "eu", // Europese Unie — ee-uu
+        "vk", // ✓ ×1 — Verenigd Koninkrijk
+        "btw", // belasting toegevoegde waarde
+        "cd",
+        "dvd",
+        "sms",
+        "wc",
+        "tv", // ✓ ×1
+        "pc", // ✓ ×1
+    ],
+
     // Cardinal number words. Units precede tens, compounded with the connector -en- (eenentwintig); composition
     // logic is in numbers.ts. Tens index 0/1 are unused (0-19 come from `ones`).
     "numbers": {

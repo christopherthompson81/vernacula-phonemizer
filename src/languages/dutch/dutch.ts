@@ -11,6 +11,8 @@ import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { decompose, isLexicalWord } from "./morphology.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeDutch, normalizeDutchInitialisms } from "./normalize.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 // Unstressed prefixes that shift stress off the first syllable (verkópen, gelóven, begín, ontslág, herhálen).
 const UNSTRESSED_PREFIX = /^(ver|ge|be|ont|her|te)/u;
@@ -112,17 +114,45 @@ function joinChunks(chunks: string[]): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Latin letters incl. Dutch diacritics) / number / punctuation token. An optional LEADING apostrophe
 // captures the reduced clitics 't 'n 'k 'm 's (informal Dutch); medial apostrophes handle zo'n, auto's.
-const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d+)|([.!?…,;:])/giu;
+//
+// #562 — Dutch groups thousands with a PERIOD and takes a COMMA decimal. The old class was a bare `(\d+)`, so
+// BOTH separators fell through to clausePunctuation: "400.000" read as *vierhonderd . nul* (a phrase break
+// plus a lost magnitude) and "6,5" as *zes , vijf*. Clocks are claimed by normalize.ts first, so a period
+// reaching here is grouping and a comma is the decimal point.
+const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/giu;
+
+// #562 symbol normalization — Dutch measure and currency nouns are INVARIANT after a numeral ("vijf euro",
+// "83 kilometer", "27 miljoen pond"), so each entry is a single form and no count agreement is needed. `g` is
+// deliberately NOT a unit: the corpus writes the Wi-Fi standards "802.11a/b/g", and "11g" is not 11 grams.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["procent"],
+    currency: { "€": ["euro"], $: ["dollar"], "£": ["pond"], "¥": ["yen"] },
+    units: {
+        km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], m: ["meter"],
+        kg: ["kilogram"], mg: ["milligram"], ha: ["hectare"], mi: ["mijl"],
+    },
+    magnitudes: ["miljoen", "miljard", "biljoen"],
+});
 
 class DutchPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: the Dutch rewrites (era/abbreviations, dotted capital runs, ORDINALS, clock, units,
+        // signs) → INITIALISMS → the shared symbol tier. The initialism pass must follow the abbreviation
+        // rewrites (else `V.S.` never becomes the caps run it spells out), and the symbol tier must follow
+        // the local unit rules (which own the ratio and squared forms it cannot express).
+        const normalized = SYMBOLS(normalizeDutchInitialisms(normalizeDutch(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2])
-                sink.emit(
-                    numberToWords(Number(m[2])).split(" ").map(phonemizeWord).join(" "),
-                );
-            else if (m[3]) {
+            else if (m[2]) {
+                // The PERIOD is thousands grouping and the COMMA is the decimal point (see TOKEN).
+                const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    sink.emit(phonemizeWord("komma"));
+                    for (const d of frac)
+                        for (const wd of numberToWords(Number(d)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
