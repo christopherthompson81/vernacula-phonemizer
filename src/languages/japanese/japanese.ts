@@ -12,6 +12,7 @@ import { kanaToIpa, kanaToMorae, segmentsToMorae } from "./kana.ts";
 import { applyReadingSegments, applyReadings, segmentText, headsCompound } from "./kanji.ts";
 import { numberToKana } from "./numbers.ts";
 import { readCounter } from "./counters.ts";
+import { normalizeJapanese } from "./normalize.ts";
 
 // Fold hiragana → katakana (kanaToIpa treats them identically). Counter readings are injected as katakana so
 // segmentText's hiragana-specific は→わ / を particle heuristic can't corrupt an internal は/へ (2泊→にはく → にわく).
@@ -29,14 +30,23 @@ const TOKEN =
 const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass left un-converted (unresolved kanji)
 
 // #562 symbol normalization — Japanese: katakana loans, read by the ordinary kana engine.
+// UNITS moved to normalize.ts, which must resolve them before its decimal and exponent rules break the
+// number-adjacency this tier matches on; see UNIT_KANA there. Percent stays, because nothing reorders it.
+// Currency closes the CUR-DROP that tools/normalization-audit.ts flags for ja: the sign was dropped
+// outright, so "$5" and "5" read identically. No sign occurs in this corpus (it writes 円 and ドル as
+// words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["パーセント"],
-    units: { km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"] },
+    currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
 });
 
 class JapanesePhonemizer implements Phonemizer {
     text(input: string): string {
-        input = SYMBOLS(input); // #562
+        // #562 — SYMBOLS first, because its % rule matches a NUMBER directly before the sign and
+        // normalization's decimal rewrite (1.5 → 1点ゴ) removes that adjacency. Normalization then folds
+        // the widths, resolves the remaining numeric surface forms, and nativizes embedded Latin so it
+        // never reaches the English fallback in core/foreign.ts.
+        input = normalizeJapanese(SYMBOLS(input));
         // Normalise full-width digits ０-９ → ASCII so the number path fires (３個 → さんこ, ２０２４年 → …); the \d
         // token and numberToKana are ASCII-only.
         input = input.replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
