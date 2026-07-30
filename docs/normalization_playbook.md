@@ -80,6 +80,36 @@ duplicate الساعة, a Russian clock that claimed a sports time `2:11,60`, an
 inside `1:09.02`, and a Japanese rule that corrupted twelve instances of 自分の. **None of those were
 visible in unit probes.** Read the sampled changes; do not just check the counts.
 
+### 5b. When a reading is genuinely ambiguous, ask the audio
+
+Most normalization questions are settled by the corpus text. A few are not: where a form has several
+interchangeable spoken readings (English `i.e.`, an acronym that may be spelled or said as a word, a range
+that may take a connective), the transcript cannot tell you which one the speaker used — and for a TTS
+target, *what the speaker used* is the thing that matters.
+
+The audio is available and Vernacula ships Parakeet, so ask it:
+
+```sh
+# the wav name is column 2 of the FLEURS tsv; extract ONLY what you need (the archive is ~1.4 GB)
+tar -xzf .../audio_cache/data/<lang>/audio/train.tar.gz train/<id>.wav
+cd /mnt/data/Programming/vernacula/src/Vernacula.CLI
+dotnet run -c Release -p:EP=Cpu -p:Platform=x64 --no-build -- \
+    --audio <wav> --model /home/chris/.local/share/Parakeet/models --output <out>.txt --export-format txt
+```
+
+Parakeet emits normalized orthography, which is what makes it usable as an arbiter: it wrote `E.g.` where
+the reader said the letter names and `For example` where they said the words. It is NOT a phonetic
+transcription — it cannot distinguish reduced from full forms, and a dropped token may have been said
+quickly rather than skipped, so prefer two independent readers over one.
+
+**Expect the answer to sometimes be "neither".** Asked this of `i.e.`/`e.g.`, the result was three
+different readings across four recordings, and `i.e.` omitted outright by both readers of its sentence —
+so no rendering matched the audio and the choice was free. See
+`docs/investigations/asr_transcript_divergence_investigation.md`, which also records the larger implication:
+**the transcript is the script the reader was given, not a record of what they said**, and where those
+diverge the phonemized output teaches the fine-tune an alignment that is simply wrong. Every check in this
+playbook compares the engine against the transcript, so none of them would catch it.
+
 ### 6. Commit — one language, one commit
 
 The commit message carries the evidence: the counts, what the defect produced before, and why the rule is
