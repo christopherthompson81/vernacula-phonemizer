@@ -253,6 +253,25 @@ ls src/languages/*/normalize.ts
 
 ---
 
+## When several languages write the same private code
+
+Three Dravidian engines — Tamil, Telugu, Kannada — each carry their own number composer (101, 127 and 119
+lines), written independently for overlapping reasons: the shared `indicNumberWords` cannot express a
+fused 21–99, a suppletive round hundred (Kannada ಇನ್ನೂರು, not "two hundred"), or a combining magnitude
+form (ನೂರಾ before a following ten). `NumbersDef.hundreds` exists for the first of those but only
+`westernNumberWords` reads it.
+
+**Not consolidated, deliberately.** There is no live defect: all three are correct today, and a shared
+composer would have to satisfy three corpus diffs to prove it changed nothing. The right moment is when a
+FOURTH language would otherwise become a fourth copy — Malayalam is the likely one, since it is Dravidian
+and still on `indicNumberWords`. Consolidate then, with Malayalam's corpus as the gate, rather than
+refactoring three working languages against no measurement.
+
+The general rule this instantiates: **duplication is evidence, not yet a reason.** Wait for the consumer
+that makes the shared thing testable.
+
+---
+
 ## Migrating a local rule to a shared seam
 
 When a capability is lifted into `core/`, the languages that already solved it privately should be

@@ -204,17 +204,31 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 : "";
         // Both orders emit through one shape so the magnitude and its connective travel with the number
         // whichever side the noun goes on.
-        const money = (num: string, mag: string | undefined, sym: string): string => {
-            const w = withMagnitude(d.currency![sym]!, mag, numValue(num), cf);
+        //
+        // `rest` is the text immediately after the whole match. When it ALREADY spells the currency noun
+        // the sign is redundant and emitting the word again doubles it: `$1000 dollar` read as
+        // "1000 dollar dollar", and `$45 million dollars` as "45 dollar million dollars" — the word
+        // inserted before the magnitude while the written one stayed put. Reported by the Nepali run,
+        // whose corpus writes `$1000 डलर`.
+        const money = (num: string, mag: string | undefined, sym: string, rest: string): string => {
+            const forms = d.currency![sym]!;
+            const esc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+            // The magnitude CONNECTIVE may sit between, so "…millones de dólares" counts as already said.
+            const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[  ]+)?`;
+            const already = new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "u");
+            const body = `${num}${mag ?? ""}`;
+            if (already.test(rest)) return body; // the text says it; do not say it twice
+            const w = withMagnitude(forms, mag, numValue(num), cf);
             return d.currencyPrefix
                 ? `${w}${mag ?? ""} ${join(mag)}${num}`.replace(/\s+/gu, " ")
-                : `${num}${mag ?? ""} ${join(mag)}${w}`;
+                : `${body} ${join(mag)}${w}`;
         };
         if (curBefore)
-            s = s.replace(curBefore, (_m, sym: string, num: string, mag?: string) => money(num, mag, sym));
+            s = s.replace(curBefore, (m: string, sym: string, num: string, mag: string | undefined,
+                offset: number, full: string) => money(num, mag, sym, full.slice(offset + m.length)));
         if (curAfter)
-            s = s.replace(curAfter, (_m, num: string, mag: string | undefined, sym: string) =>
-                money(num, mag, sym));
+            s = s.replace(curAfter, (m: string, num: string, mag: string | undefined, sym: string,
+                offset: number, full: string) => money(num, mag, sym, full.slice(offset + m.length)));
         if (d.percentPrefix) {
             s = s.replace(pctPreRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);
             s = s.replace(pctRe, (_m, num: string) => `${pick(d.percent, numValue(num), cf)} ${num}`);

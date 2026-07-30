@@ -298,4 +298,25 @@ describe("symbol normalization — FLEURS-priority round", () => {
         // …and the postfix languages must not move.
         expect(phonemize("$5", "fr")).toContain("sɛ̃k dɔlˈaʁ");
     });
+
+    /**
+     * A currency noun the TEXT already spells out must not be said twice. Reported by the Nepali run,
+     * whose corpus writes `$1000 डलर`. The magnitude connective may sit between, so "…millones de
+     * dólares" counts as already said.
+     */
+    test("a written-out currency noun is not doubled", () => {
+        expect(phonemize("$1000 डलर", "ne")).toBe(phonemize("$1000", "ne"));
+        expect(phonemize("$45 dólares", "es")).toBe(phonemize("$45", "es"));
+        expect(phonemize("$5 millones de dólares", "es")).toBe(phonemize("$5 millones", "es"));
+        expect(phonemize("$5 millions de dollars", "fr")).toBe(phonemize("$5 millions", "fr"));
+    });
+
+    /**
+     * A LETTER-CODE currency prefix is not a core limitation, though one run reported it as one: `$`
+     * alone cannot match after a letter (the tier's lookbehind), and declaring the compound key is the
+     * intended fix. Recorded because two runs disagreed about it.
+     */
+    test("a compound currency key matches a letter-code prefix", () => {
+        expect(phonemize("US$30", "gu")).not.toContain("30");
+    });
 });
