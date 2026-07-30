@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeSerbian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const DIGRAPHS = MANIFEST.digraphs;
@@ -38,7 +39,11 @@ const TOKEN = /([а-шђјљњћџa-zčćšžđ]+)|(\d+)|([.!?…,;:])/giu;
 
 class SerbianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: normalize.ts owns the whole sequence, INCLUDING the shared symbol tier — its step 9
+        // has to sit between the clock (which needs the colon) and the decimal fold (which destroys the
+        // number the tier's count agreement reads), so the tier cannot be applied around this call the
+        // way most engines do it. See the ordering comments there.
+        return assembleClauses(normalizeSerbian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
