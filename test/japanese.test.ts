@@ -190,3 +190,56 @@ describe("Japanese particle segmentation (#552 residual)", () => {
         expect(phonemizeText("飲んで")).toBe("no̞ꜜnde̞"); // て-form で after ん
     });
 });
+
+/**
+ * #562 TEXT NORMALIZATION. Each expectation below is a defect the ja_jp corpus (3,208 utterances) proved
+ * was there, with its count; the "was" comment is what the engine actually produced before normalize.ts.
+ */
+describe("Japanese text normalization (#562)", () => {
+    test("comma-grouped thousands were a phrase break plus a second number", () => {
+        // ×56, the largest numeric defect: the comma is clause punctuation, so 3,850 read as "さん , 850".
+        expect(phonemizeText("3,850")).toBe("sänze̞ɴhäppʲäkɯᵝɡo̞d͡ʑɯᵝː");
+        expect(phonemizeText("1,000,000")).toBe("çäkɯᵝmäɴ"); // both separators collapse
+        expect(phonemizeText("1,2")).toContain(" , "); // …and a non-grouping comma stays a pause
+    });
+
+    test("embedded Latin is nativized instead of read as English", () => {
+        // The English fallback (core/foreign.ts) injects phonemes Japanese has no inventory for:
+        // NASA was [nˈæsə], WHO [dˈʌbəɫjuː ˈeᶦt͡ʃ ˈoᶷ], SNS [ˈɛs ˈɛn ˈɛs]. Corpus-wide this took the
+        // utterances carrying a foreign phoneme from 257 to 96 — the rest are mixed-case loanwords.
+        expect(phonemizeText("FBI")).toBe("e̞ɸɯᵝbiːäꜜi"); // one accentual phrase, not three
+        expect(phonemizeText("SNS")).toBe("e̞sɯᵝe̞nɯᵝe̞ꜜsɯᵝ");
+        expect(phonemizeText("NASA")).toBe("näꜜsä"); // the listed word reading, not letters
+        // Joining the letter names runs them into kana.ts's long-vowel coalescence, which is a
+        // word-INTERNAL rule: CEO as シーイーオー gave [ɕiːːː], a four-mora vowel. A boundary goes in
+        // exactly where the next name's bare vowel matches the vowel before it.
+        expect(phonemizeText("CEO")).toBe("ɕiꜜː iːo̞ː");
+        // …and the same coalescence crossed into the surrounding Japanese: た + ア ran together as [täːi].
+        expect(phonemizeText("とらえられたISIS")).toBe("to̞ɾäe̞ɾäɾe̞tä äie̞sɯᵝäie̞ꜜsɯᵝ");
+    });
+
+    test("分の is a fraction only between two digits", () => {
+        // The counter fusion read 3分 as the MINUTES counter, so 3分の1 was さん*ぷん*の ("three minutes
+        // of"). Of the 26 分の in the corpus only 5 are fractions, which is why both digits are required.
+        expect(phonemizeText("3分の1")).toBe("säɴ bɯᵝnno̞ it͡ɕi");
+        expect(phonemizeText("1/2")).toBe("ni bɯᵝnno̞ it͡ɕi"); // the slash was dropped outright
+        expect(phonemizeText("自分の限界")).toBe("d͡ʑibɯᵝnno̞ ɡe̞ŋkäi"); // 自分の — not a fraction
+        expect(phonemizeText("7時30分の間")).toBe("ɕit͡ɕid͡ʑisänd͡ʑɯᵝppɯᵝnno̞ äidä"); // real minutes
+    });
+
+    test("units, degrees and the squared unit", () => {
+        expect(phonemizeText("5kg")).toBe("ɡo̞ kiɾo̞ɡɯᵝꜜɾämɯᵝ"); // was the raw letters [kɡ]
+        expect(phonemizeText("3m")).toBe("säɴ me̞ːto̞ɾɯᵝ"); // was the English letter M
+        expect(phonemizeText("3,850 km²")).toBe("sänze̞ɴhäppʲäkɯᵝɡo̞d͡ʑɯᵝː he̞ːho̞ːkiɾo̞me̞ꜜto̞ɾɯᵝ");
+        expect(phonemizeText("30℃")).toBe("sänd͡ʑɯᵝːdo̞"); // ℃ is one character the symbol tier can't see
+    });
+
+    test("decimals, ranges and the clock", () => {
+        // The point was clause punctuation too. Japanese reads the fractional digits ONE AT A TIME.
+        expect(phonemizeText("6.34")).toBe("ɾo̞kɯᵝ te̞nsäɴjo̞ɴ"); // was "ろく . さんじゅうよん"
+        expect(phonemizeText("2～3回")).toBe("ni käɾäsäŋkäi"); // ×37, the mark was silently dropped
+        expect(phonemizeText("11:00")).toBe("d͡ʑɯᵝːit͡ɕid͡ʑi"); // :00 drops the minutes
+        // The corpus's other colons are a ratio and a UK degree class; two digits of minutes excludes both.
+        expect(phonemizeText("3:2")).toBe("säɴ ni");
+    });
+});
