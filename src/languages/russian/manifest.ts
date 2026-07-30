@@ -10,6 +10,8 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface RussianManifest {
+    /** Acronyms read letter-by-letter; see russian.jsonc. */
+    acronymLetters: string[];
     vowelLetters: string;
     consonants: Record<string, [string, string]>;
     alwaysHard: string[];

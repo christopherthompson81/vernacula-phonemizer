@@ -144,3 +144,57 @@ describe("Russian roman-numeral ordinals", () => {
         expect(phonemize("xix", "ru").trim()).toBe("dʲɪvʲɪtnˈat͡sətʲ"); // девятнадцать, not девятнадцатый
     });
 });
+
+// #562 — the ninth language, and the first Cyrillic one to reach the shared initialism pass, which
+// exposed an ASCII-only boundary inside core/initialisms.ts itself.
+describe("russian normalization", () => {
+    test("ordinal notation: the suffix is the CASE ending, not an appendable marker", () => {
+        // 5-е is пятое (neuter nom), 5-го пятого (gen), 1970-х семидесятых (gen pl). Each previously spoke
+        // the bare letter as a word — 5-е came out [pʲætʲ je], "five ye". The rule reads the ending off the
+        // text and inflects the ordinal to match.
+        expect(phonemize("1-й день", "ru")).toBe("pʲˈervɨj dʲenʲ"); // первый
+        expect(phonemize("5-е место", "ru")).toBe("pʲˈatəje mʲˈestə"); // пятое
+        expect(phonemize("3-м", "ru")).toBe("trʲˈetʲjɪm"); // третьем — the one soft stem
+        expect(phonemize("7-му флоту", "ru")).toBe("sʲɪdʲmˈomʊ fɫˈotʊ"); // седьмому
+        // Past the former's 1-100 range: only the LAST element inflects, the head stays cardinal.
+        expect(phonemize("1970-х годов", "ru")).toBe("ɐdnˈa tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof");
+    });
+
+    test("Cyrillic initialisms — the core pass was silently doing nothing", () => {
+        // core/initialisms.ts matched on \b, which is defined on ASCII word characters and finds no
+        // boundary against Cyrillic, so the whole pass was a no-op for Russian.
+        expect(phonemize("США", "ru")).toBe("ɛs ʂa a"); // was the cluster [sʂa]; ×47 in the corpus
+        expect(phonemize("ДНК", "ru")).toBe("dɛ ɛn ka"); // was [dnk]
+        expect(phonemize("ТВ", "ru")).toBe("tɛ vɛ"); // was [tf]
+        // ...while a lexicalized acronym stays a word, decided by the OOV rule with no list entry needed.
+        expect(phonemize("СМИ", "ru")).toBe("smʲi");
+        expect(phonemize("ООН", "ru")).toBe("ɐˈon");
+    });
+
+    test("abbreviations, with г. case-sensitive to its preposition", () => {
+        // These also used \b and so matched nothing: г. read as a bare [k], н. э. and т. е. left their
+        // interior dots as phrase breaks.
+        expect(phonemize("в 2007 г.", "ru")).toBe("f dvʲe tˈɨsʲət͡ɕɪ sʲemʲ ɡˈodʊ"); // в governs году
+        expect(phonemize("с 1970-х гг.", "ru")).toBe("s ɐdnˈa tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof .");
+        expect(phonemize("до н. э.", "ru")).toBe("do nˈaʂɨj ˈɛrɨ");
+        expect(phonemize("т. е.", "ru")).toBe("to jesʲtʲ");
+        expect(phonemize("№ 1", "ru")).toBe("nˈomʲɪr ɐdʲˈin"); // the sign was dropped outright
+    });
+
+    test("clock, with count agreement and a guard against sports times", () => {
+        expect(phonemize("11:00", "ru")).toBe("ɐdʲˈinːət͡sətʲ t͡ɕɪsˈof"); // часов, and no spurious "ноль"
+        expect(phonemize("22:08", "ru")).toBe("dvˈat͡sətʲ dva t͡ɕˈasə vˈosʲɪmʲ mʲɪnˈut"); // часа — paucal
+        // "2:11,60 минуты" is 2 min 11.60 s, not two o'clock. The corpus contains one.
+        expect(phonemize("На 2:11,60 минуты", "ru")).not.toContain("t͡ɕˈasə");
+    });
+
+    test("grouping, units, fractions and signs", () => {
+        expect(phonemize("5 000 лет", "ru")).toBe("pʲætʲ tˈɨsʲət͡ɕ lʲet"); // was "пять ноль"
+        expect(phonemize("120 км/ч", "ru")).toBe("sto dvˈat͡sətʲ kʲɪɫɐmʲˈetrəf f t͡ɕas"); // /ч was a letter
+        expect(phonemize("20 °C", "ru")).toBe("dvˈat͡sətʲ ɡrˈadʊsəf t͡sˈɛlʲsʲɪjə");
+        expect(phonemize("1/5", "ru")).toBe("ɐdnˈa pʲˈatəjə"); // feminine, agreeing with the elided часть
+        expect(phonemize("+3 градуса", "ru")).toBe("plʲus trʲi ɡrˈadʊsə");
+        // Roman numerals arrive already converted, with the ordinal a century wants.
+        expect(phonemize("XV век", "ru")).toBe("pʲɪtnˈat͡sətɨj vʲek");
+    });
+});

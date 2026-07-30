@@ -1,0 +1,209 @@
+/**
+ * Russian (ru) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ *
+ * Ninth language. Already correct and untouched: dates take a plain cardinal day, decimals read with
+ * *целых* (1,5 → одна целых пять), % carries proper Slavic count agreement through the shared symbol tier
+ * (процент / процента / процентов), and Roman numerals arrive already converted at the registry seam — with
+ * `russian/romanOrdinals.ts` supplying the ORDINAL reading a century wants, so `XV век` was already
+ * *пятнадцатый век*. That also means the roman-vs-initialism ordering hazard cannot arise here.
+ *
+ * THE HARD PART IS ORDINAL NOTATION. Russian writes `5-е`, `1-й`, `1970-х`, `3-м`, and the suffix is not an
+ * ordinal marker — it is the CASE ending. `5-е` is пятое (neuter nominative), `5-го` пятого (genitive),
+ * `1970-х` семидесятых (genitive plural). So the rule reads the ending off the text and inflects the
+ * ordinal to match, rather than concatenating: the suffix is the last letters of the full form, not a
+ * suffix that can be appended. Previously each of these spoke the bare letter as a word — `5-е` came out
+ * [pʲætʲ je], "five ye".
+ *
+ * Measured over the ru_ru corpus (2,562 utterances): dates ×55, units ×40, space-thousands ×38, ordinal
+ * notation ×32, comma-decimals ×29, percent ×26, times ×26, час/минут ×19, Cyrillic all-caps ×118
+ * (США ×47, СМИ ×10, ООН ×6, ВМС ×5, ДНК ×5, ТВ ×5), Latin all-caps ×88, Roman ×25, № ×7.
+ */
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { slavicCountForm } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { russianOrdinal } from "./romanOrdinals.ts";
+
+const GROUP_SPACE = "    ";
+
+/**
+ * Written case ending → the ordinal's full ending, for a HARD-stem ordinal (пятый, шестой, сороковой) and
+ * for the one soft stem among them (третий). The written form shows only the last letters, so this maps
+ * back to the whole ending rather than appending.
+ */
+const CASE_ENDING: Readonly<Record<string, readonly [string, string]>> = {
+    // written    hard      soft (третий)
+    "й": ["", "ий"], // masculine nominative — the base form already
+    "е": ["ое", "ье"], "ое": ["ое", "ье"],
+    "я": ["ая", "ья"], "ая": ["ая", "ья"],
+    "го": ["ого", "ьего"], "ого": ["ого", "ьего"],
+    "м": ["ом", "ьем"], "ом": ["ом", "ьем"],
+    "му": ["ому", "ьему"], "ому": ["ому", "ьему"],
+    "х": ["ых", "ьих"], "ых": ["ых", "ьих"],
+    "ю": ["ую", "ью"], "ую": ["ую", "ью"],
+    "ой": ["ой", "ьей"], "ей": ["ой", "ьей"],
+    "ые": ["ые", "ьи"], "ие": ["ые", "ьи"],
+    "ым": ["ым", "ьим"], "ыми": ["ыми", "ьими"],
+};
+/** Longest first, so `ого` is not matched as `го`. */
+const CASE_ALT = Object.keys(CASE_ENDING).sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * Integer → the masculine-nominative ordinal, extended past the former's 1–100 range. Only the LAST element
+ * inflects in Russian, so a larger number is its cardinal head plus the ordinal of its final ≤100 part:
+ * 1970 → "тысяча девятьсот" + семидесятый. That is what `1970-х` needs, and the bare former returns
+ * undefined there.
+ */
+function ordinalBase(n: number): string | undefined {
+    const direct = russianOrdinal(n);
+    if (direct !== undefined) return direct;
+    const rest = n % 100;
+    if (rest === 0) return undefined; // a round hundred/thousand needs сотый/тысячный — not attempted
+    const tail = russianOrdinal(rest);
+    if (tail === undefined) return undefined;
+    return `${numberToWords(n - rest)} ${tail}`;
+}
+
+/** Inflect a masculine-nominative ordinal to the case the written suffix marks. */
+function inflectOrdinal(base: string, written: string): string | undefined {
+    const forms = CASE_ENDING[written];
+    if (forms === undefined) return undefined;
+    const words = base.split(" ");
+    const last = words[words.length - 1]!;
+    const soft = last.endsWith("ий"); // третий is the only soft stem in the 1–19 table
+    const stem = last.replace(/(ый|ой|ий)$/u, "");
+    words[words.length - 1] = stem + (soft ? forms[1] : forms[0] || last.slice(stem.length));
+    return words.join(" ");
+}
+
+/** Cyrillic letter names, for initialisms. США is [эс ша а], ДНК [дэ эн ка], ТВ [тэ вэ]. */
+const LETTER_NAME: Readonly<Record<string, string>> = {
+    а: "а", б: "бэ", в: "вэ", г: "гэ", д: "дэ", е: "е", ё: "ё", ж: "жэ", з: "зэ", и: "и",
+    й: "и краткое", к: "ка", л: "эль", м: "эм", н: "эн", о: "о", п: "пэ", р: "эр", с: "эс",
+    т: "тэ", у: "у", ф: "эф", х: "ха", ц: "цэ", ч: "че", ш: "ша", щ: "ща", ы: "ы",
+    э: "э", ю: "ю", я: "я",
+};
+
+/** NOTE: every boundary in this file is an explicit lookaround, never `\b` — `\b` is defined on ASCII
+ *  word characters and finds none against Cyrillic, so a rule written with it silently matches nothing.
+ *  The same trap has now appeared in French, Hindi, Bengali, Mandarin and here, including inside
+ *  core/initialisms.ts itself, which this run had to fix. */
+
+/** Russian phonotactics, for the OOV rule in core/initialisms.ts. */
+export const isUnreadableRussian = makeUnreadableTest({
+    vowels: /[аеёиоуыэюя]/u,
+    legalOnsets: new Set([
+        "бл", "бр", "вл", "вр", "гл", "гр", "дв", "др", "жд", "зв", "зд", "кл", "кр", "пл", "пр",
+        "сл", "см", "сн", "сп", "ст", "тр", "фл", "фр", "хл", "хр", "цв", "шк", "шл", "шп", "шт", "щи",
+    ]),
+    legalCodas: new Set([
+        "ст", "сть", "нт", "нд", "нс", "рт", "рд", "рс", "рн", "рм", "лт", "лд", "лс", "кт", "кс",
+        "пт", "фт", "зд", "зн", "сн", "см", "тр", "др", "бр", "вр", "гр", "пр", "кр", "нк", "нг",
+    ]),
+});
+
+/** LEXICAL: acronyms spelled out. Authored in russian.jsonc beside the other hand-authored facts. */
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
+
+/** Russian's lexicon is a STRESS dictionary, not a wordlist of attested forms, so it cannot serve as the
+ *  "is this recorded" test. Acronyms are decided by the lexical list plus the OOV rule alone. */
+export function normalizeRussianInitialisms(text: string): string {
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        acronymLetters: ACRONYM_LETTERS,
+        isRecorded: () => false,
+        isUnreadable: isUnreadableRussian,
+    })(text);
+}
+
+/** Slavic count agreement for a counted noun: [nominative sg, paucal, genitive pl]. */
+function counted(n: number, forms: readonly [string, string, string]): string {
+    return forms[Math.min(slavicCountForm(n), 2)]!;
+}
+const HOUR = ["час", "часа", "часов"] as const;
+const MINUTE = ["минута", "минуты", "минут"] as const;
+
+/** Abbreviations. `г.`/`гг.` are the frequent ones (×10) and were reading as a bare [k]. */
+const DOTTED_ABBREV: Readonly<Record<string, string>> = {
+    "г": "года", "гг": "годов", "в": "века", "вв": "веков",
+    "ул": "улица", "им": "имени", "стр": "страница", "проф": "профессор", "акад": "академик",
+    "руб": "рублей", "тыс": "тысяч", "млн": "миллионов", "млрд": "миллиардов",
+};
+const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/** Normalize one Russian input string. Pure text→text. */
+export function normalizeRussian(input: string): string {
+    let s = input;
+
+    // 0) DIGIT GROUPING with a space — the Russian convention, and the number token cannot span a space, so
+    //    "5 000 лет" read as "пять ноль лет".
+    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(/[   ]/gu, " ");
+
+    // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —
+    //    their interior dots were becoming phrase breaks.
+    s = s.replace(/(?<![\p{L}\p{M}])до\s+н\.\s?э\./giu, "до нашей эры");
+    s = s.replace(/(?<![\p{L}\p{M}])н\.\s?э\./giu, "нашей эры");
+    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?е\./giu, "то есть");
+    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?д\./giu, "так далее");
+    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?п\./giu, "тому подобное");
+
+    // 2) НОМЕР. The sign was dropped outright.
+    s = s.replace(/№\s?(?=\d)/gu, "номер ");
+
+    // 3) ORDINAL NOTATION. The suffix is the CASE ending, not an appendable marker (see the file header).
+    s = s.replace(new RegExp(`\\b(\\d+)\\s?-\\s?(${CASE_ALT})(?![а-яё])`, "giu"),
+        (whole, digits: string, written: string) => {
+            const base = ordinalBase(Number(digits));
+            if (base === undefined) return whole;
+            return inflectOrdinal(base, written.toLowerCase()) ?? whole;
+        });
+
+    // 3b) `г.` after a year is года, EXCEPT after the preposition в, which governs the prepositional
+    //     году ("в 2007 г." = в 2007 году). All three corpus instances are year contexts — none is the
+    //     city sense of г., which would need a different expansion and does not occur here.
+    s = s.replace(/(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\./giu, "$1 $2 году");
+
+    // 4) DOTTED ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+
+    // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
+    s = s.replace(/(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");
+    s = s.replace(/(\d)\s?м\/с(?![а-яё])/giu, "$1 метров в секунду");
+    s = s.replace(/(\d)\s?°\s?[CСc](?![а-яё])/gu, "$1 градусов Цельсия");
+    s = s.replace(/(\d)\s?°\s?[FФf](?![а-яё])/gu, "$1 градусов Фаренгейта");
+    s = s.replace(/(\d)\s?°/gu, "$1 градусов");
+
+    // 6) CLOCK. The colon was a clause mark, so "11:00" read as "одиннадцать , ноль". час and минута take
+    //    Slavic count agreement (1 час / 2 часа / 5 часов).
+    //    Guarded against a SPORTS time: "2:11,60 минуты" is 2 minutes 11.60 seconds, not two o'clock, and
+    //    the corpus contains one. A comma-plus-digit after the minutes marks decimal seconds.
+    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu, (_m, h: string, min: string) => {
+        const hv = Number(h), mv = Number(min);
+        const head = `${numberToWords(hv)} ${counted(hv, HOUR)}`;
+        return mv === 0 ? head : `${head} ${numberToWords(mv)} ${counted(mv, MINUTE)}`;
+    });
+
+    // 7) SIGNS.
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1минус $2");
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 плюс $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1плюс $2");
+
+    // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
+    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
+        const num = Number(a), den = Number(b);
+        if (num === 1 && den === 2) return "одна вторая";
+        const base = ordinalBase(den);
+        if (base === undefined) return m0;
+        const fem = inflectOrdinal(base, "я");
+        const numWord = numberToWords(num).replace(/один$/u, "одна").replace(/два$/u, "две");
+        return fem === undefined ? m0 : `${numWord} ${fem}`;
+    });
+
+    return s;
+}

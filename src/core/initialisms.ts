@@ -73,7 +73,11 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // find — so those letters reached the g2p raw and came out as an unpronounceable cluster ([kɡ])
         // or, in French, with a letter silently DROPPED. A single letter counts in the attached case only:
         // `A380` must be the letter name, and English read the bare `A` as the reduced article [ə].
-        return text.replace(/\b\p{Lu}{2,}\b|\p{Lu}+(?=\d)/gu, (tok) => {
+        // Boundaries are explicit lookarounds, NOT `\b`: `\b` is defined on ASCII word characters, so it
+        // finds no boundary against Cyrillic (or Greek, Armenian, Georgian …) and the whole pass silently
+        // did nothing for them — США came out as the cluster [sʂa]. Russian was the first non-Latin script
+        // to reach this pass and exposed it.
+        return text.replace(/(?<![\p{L}\p{M}])\p{Lu}{2,}(?![\p{L}\p{M}])|(?<![\p{L}\p{M}])\p{Lu}+(?=\d)/gu, (tok) => {
             const lower = tok.toLowerCase();
             const spelled = spellOut(lower, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word
