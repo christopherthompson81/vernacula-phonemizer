@@ -7,6 +7,15 @@
 // LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "vowels", "voicedFinal", "shortMonosyllables",
 // "longCh", "clausePunctuation", "morphology", "numbers". "convention" / "provenance" are documentation.
 {
+    // ACRONYMS read letter-by-letter that the OOV phonotactic rule would leave alone, being pronounceable
+    // German letter strings. A LEXICAL fact: USA (x14) and US (x30) are spelled out, not said as words.
+    // German's lexicon is a stress/length CORRECTION table, not a wordlist, so it cannot serve as the
+    // "is this recorded" test the way CMUdict or Lexique do.
+    "acronymLetters": [
+        "usa", "us", "aol", "eu", "brd", "ddr", "zdf", "ard", "bmw", "vw", "dna", "gps", "utc",
+        "pbs", "bbc", "cnn", "fbi", "tv", "pkw", "lkw", "akw", "who", "uno", "bip", "mwst"
+    ],
+
     "language": "de",
     "name": "German (standard / Hochdeutsch)",
     "provenance": "Cleanroom, rule-based g2p + a pronunciation lexicon (lexicon.tsv) + morphological compound/affix analysis + a vigesimal-free number compositor. espeak-independent. The affix IPA, the exception word-lists, and the number words are language facts.",
