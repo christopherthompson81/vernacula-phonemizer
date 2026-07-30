@@ -14,6 +14,8 @@
  * pattern it matches.
  */
 
+import { romanToInt } from "../../core/roman.ts";
+
 // ── Roman numerals ──────────────────────────────────────────────────────────────────────────────────
 // A closed, conservative set (2–20, minus vi and xi): FLEURS text is lowercased, so "VI"/"vi" cannot be
 // told apart, and vi (the editor) / xi (the name/letter) are real words. Single letters (i, v, x) are
@@ -28,7 +30,7 @@ const ROMAN: Record<string, number> = {
 // read as a REGNAL ordinal (henry viii → "henry the 8th"), the reading English gives name-attached
 // numerals. Known limit, stated: a bare medical "iv" or list-marker "(ii)" gets the regnal reading.
 const ROMAN_CARDINAL_CTX =
-    /\b(war|chapter|part|act|section|volume|book|phase|stage|grade|class|type|level|apollo|rocky)$/i;
+    /\b(war|chapter|part|act|section|volume|book|phase|stage|grade|class|type|level|apollo|rocky|bowl|wrestlemania|olympiad|super)$/i;
 
 // ── Units and symbols ───────────────────────────────────────────────────────────────────────────────
 // Only unambiguous multi-character abbreviations, and only AFTER a number ("40 km"); bare "km" in prose
@@ -145,6 +147,24 @@ export function normalizeEnglish(input: string): string {
             const [sg, pl] = UNITS[u.toLowerCase()]!;
             return `${num} ${/^1(?:\.0+)?$/.test(num.replace(/,/g, "")) ? sg : pl}`;
         });
+
+    // 7a) ALL-CAPS romans of ANY value, when the text distinguishes case — "Super Bowl LVIII" (58),
+    //     "WrestleMania XL" (40), "Louis XVI". The closed lowercase set below stops at 20 and cannot
+    //     express these. Case makes them unambiguous, but an acronym is also all-caps ("the CD player"),
+    //     so the preceding word must itself be evidence: a known numbered-event noun, or Capitalized as
+    //     a name would be. That keeps "size XL" and "a CD" out while letting the real numerals through.
+    if (/[a-z]/.test(s)) {
+        s = s.replace(/\b([A-Za-z][A-Za-z']*)\s+([IVXLCDM]{2,})\b/g, (m0, prev: string, rom: string) => {
+            const n = romanToInt(rom);
+            if (n === null) return m0;
+            const evidence = ROMAN_CARDINAL_CTX.test(prev) || /^[A-Z]/.test(prev);
+            if (!evidence) return m0;
+            if (ROMAN_CARDINAL_CTX.test(prev)) return `${prev} ${n}`;
+            const suf = n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd"
+                : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th";
+            return `${prev} the ${n}${suf}`;
+        });
+    }
 
     // 7) ROMAN NUMERALS, the closed 2–20 set: cardinal after a context word, else the regnal ordinal.
     s = s.replace(/\b([a-z']+)\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\b/gi,

@@ -59,7 +59,7 @@ const COLLISIONS: ReadonlySet<string> = new Set([
     "xl", "xxl", // clothing sizes
     "cd", // compact disc
     "mi", "di", "ci", "li", "vi", "xi", // short words across Romance/Slavic/Nordic/Turkic; `xi` is also a name
-    "mix", "div", "civ", "liv", "lix", "dix", // words/abbreviations: mix, div, civ, Nordic "liv", French "dix"
+    "mix", "div", "civ", "liv", "dix", // words/abbreviations: mix, div, civ, Nordic "liv", French "dix"
 ]);
 
 /** For LOWERCASED input the case signal is gone, so only these shapes convert — the numeral forms that
@@ -74,6 +74,26 @@ const LOWERCASE_SAFE: ReadonlySet<string> = new Set([
 export interface RomanPolicy {
     /** Extra tokens this language must never read as a numeral — its own homographs. Lowercase. */
     exclude?: ReadonlySet<string>;
+    /**
+     * Integer → ORDINAL word, or `undefined` where this language cannot form one. A FUNCTION rather than
+     * a table on purpose: ordinal contexts are not bounded by the century range. Anniversaries,
+     * editions, congresses and Olympiads reach L (50th), and a fixed 1–30 table would silently fall back
+     * to a cardinal there. Most languages form ordinals regularly above ten (Italian: cardinal minus its
+     * final vowel + -esimo), so the implementation is usually a small irregular table for the low values
+     * plus a rule — and the policy lives in the language's own directory precisely so it can import that
+     * language's cardinal compositor and build on it. Returns a word in the language's own orthography,
+     * emitted verbatim for the engine to phonemize.
+     */
+    ordinal?: (n: number) => string | undefined;
+    /**
+     * Fires the ORDINAL reading when it matches the text immediately BEFORE the numeral — the century
+     * noun ("siglo", "secolul", "wiek", "век") or a regnal title. Without a match the numeral stays a
+     * cardinal, which is the right default for enumeration and for the languages (es, pt) that read
+     * centuries as cardinals natively. Tested against the preceding word only.
+     */
+    ordinalBefore?: RegExp;
+    /** As `ordinalBefore`, but matched against the word FOLLOWING the numeral ("xix secolo", "xix век"). */
+    ordinalAfter?: RegExp;
 }
 
 /** Per-language homographs of a Roman numeral, beyond the global collision list. */
@@ -90,19 +110,41 @@ const TOKEN = /\p{L}+/gu;
  * it identifiable — ALL-CAPS in text that has lowercase elsewhere (so the capitals are meaningful), or
  * a member of the lowercase-safe closed set.
  */
+const PREV_WORD = /(\p{L}+)[^\p{L}]*$/u;
+const NEXT_WORD = /^[^\p{L}]*(\p{L}+)/u;
+
 export function normalizeRomans(text: string, policy: RomanPolicy = {}): string {
     if (!/[ivxlcdmIVXLCDM]{2}/u.test(text)) return text; // fast path: nothing plausible
     const hasLower = /\p{Ll}/u.test(text);
-    return text.replace(TOKEN, (tok) => {
-        if (tok.length < 2) return tok; // single letters are never worth the risk (I, V, X, C, D, M, L)
+    return text.replace(TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();
-        if (COLLISIONS.has(lower) || policy.exclude?.has(lower)) return tok;
+        if (policy.exclude?.has(lower)) return tok; // this language's own homograph — never a numeral
         const n = romanToInt(tok);
         if (n === null) return tok;
         const allCaps = tok === tok.toUpperCase() && /\p{Lu}/u.test(tok);
-        // ALL-CAPS is only a signal when the surrounding text actually distinguishes case.
-        if (allCaps && hasLower) return String(n);
-        if (LOWERCASE_SAFE.has(lower)) return String(n);
-        return tok;
+        // A NUMERAL CONTEXT (an adjacent century noun / ordinal trigger) is strong evidence, and it
+        // licenses what the conservative rules would otherwise refuse: a stoplisted token (`XL
+        // aniversario` is the 40th, not a clothing size) and a single letter (`L aniversario` is the
+        // 50th). It is gated on ALL-CAPS deliberately — without that, Spanish `mi aniversario` ("my
+        // anniversary", MI = 1001) would be read as a numeral, and lowercase Catalan `i` means "and".
+        const prevW = PREV_WORD.exec(text.slice(0, offset))?.[1];
+        const nextW = NEXT_WORD.exec(text.slice(offset + tok.length))?.[1];
+        const inContext =
+            (prevW !== undefined && policy.ordinalBefore?.test(prevW) === true) ||
+            (nextW !== undefined && policy.ordinalAfter?.test(nextW) === true);
+        const licensed = inContext && allCaps && hasLower;
+        if (!licensed) {
+            if (tok.length < 2) return tok; // single letters are never worth the risk (I, V, X, C, D, M, L)
+            if (COLLISIONS.has(lower)) return tok;
+            // ALL-CAPS is only a signal when the surrounding text actually distinguishes case.
+            if (!(allCaps && hasLower) && !LOWERCASE_SAFE.has(lower)) return tok;
+        }
+        // ORDINAL reading, when this language asks for one in this context ("siglo XIX", "XIX век").
+        // The ordinal word is emitted verbatim; anything else becomes digits for the cardinal path.
+        if (inContext) {
+            const ord = policy.ordinal?.(n);
+            if (ord !== undefined && ord !== "") return ord;
+        }
+        return String(n);
     });
 }

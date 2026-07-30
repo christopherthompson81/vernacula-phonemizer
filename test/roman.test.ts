@@ -77,6 +77,21 @@ describe("Roman numerals (core/roman.ts)", () => {
         expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitrˈe");
     });
 
+    test("large values: numbered events and regnal names beyond the closed set", () => {
+        // The closed lowercase set stops at 20, so these need the case-gated any-value branch.
+        // Super Bowls are read as CARDINALS ("Super Bowl fifty-eight"), regnal names as ordinals.
+        expect(phonemize("Super Bowl LVIII", "en")).toContain("fˈɪfti ˈeᶦt");
+        expect(phonemize("Super Bowl LIX", "en")).toContain("fˈɪfti nˈaᶦn");
+        expect(phonemize("WrestleMania XL", "en")).toContain("fˈɔːɹt̬i");
+        expect(phonemize("Louis XVI", "en")).toContain("sɪkstˈiːnθ");
+        expect(phonemize("Pope John XXIII", "en")).toContain("twˈɛnti θˈɝd");
+        // ...while an all-caps ACRONYM after a non-evidence word must stay an acronym.
+        expect(phonemize("the CD player", "en")).toContain("siːdˈiː");
+        expect(phonemize("a size XL shirt", "en")).not.toContain("fˈɔːɹt̬i");
+        // Non-English keeps the shared pass, which handles any value via the cardinal path.
+        expect(phonemize("Super Bowl LVIII", "es")).toContain("θinkwˈenta i ˈot͡ʃo");
+    });
+
     test("languages that resolve Romans themselves are not pre-empted", () => {
         // English keeps its regnal-vs-cardinal context rule (the shared pass would flatten both to a cardinal)
         expect(phonemize("henry viii", "en")).toContain("ˈeᶦtθ"); // "the eighth", an ordinal
