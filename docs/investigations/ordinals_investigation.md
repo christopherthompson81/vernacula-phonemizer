@@ -460,3 +460,69 @@ the engine started at, and symbol accuracy is back to 78.1%.
 - Referee: en 1648/4558 (36.2%) folded, 78.1% symbol — both above the pre-work baseline. fr byte-identical
   at 79.3% / 96.0% (second set 91.3% / 97.6%).
 - Corpus sweeps: 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray symbols in either language, both columns.
+
+## Run 7 — 2026-07-29 — a French heteronym map
+
+Started the tier the `plus` respelling was standing in for. Data in `french.jsonc` (`heteronyms`),
+resolution in `french.ts`.
+
+### Why it has to be context-word based
+
+French has **no POS tagger** — `frenchTagger.ts` is the OOV g2p reader, not a POS model — so the
+English mechanism (POS-keyed heteronyms) is unavailable. And Lexique carries **exactly one reading per
+spelling**: verified there are no duplicate keys in `lexicon.tsv`, so the alternate reading is genuinely
+absent rather than being collapsed by the loader. That leaves neighbouring words as the only signal.
+
+Checking which reading Lexique picked, per candidate, showed the alternate that is missing — and that
+Lexique is not consistent about which member it keeps:
+
+| word | Lexique has | missing alternate |
+|---|---|---|
+| plus | `ply` (more / negation) | `plys` (operator) |
+| tous | `tus` (pronoun) | `tu` (determiner, "tous les jours") |
+| os | `ɔs` (singular) | `o` (plural, "des os") |
+| as | `a` ("tu as") | `ɑs` (the noun) |
+| sens | `sɑ̃` ("je sens") | `sɑ̃s` (the noun) |
+| vis | `vi` ("je vis") | `vis` (screw) |
+| portions | `pɔʁsjɔ̃` (noun) | `pɔʁtjɔ̃` ("nous portions") |
+| content, président, résident, parent, violent, excellent, négligent, couvent | the `-ɑ̃` noun/adj | the verb, `-ɑ̃` dropped |
+| **ferment, affluent** | **the VERB** (`fɛʁm`, `afly`) | the noun (`fɛʁmɑ̃`, `aflyɑ̃`) |
+
+### Two classes carry almost all of it
+
+1. **Silent 3pl `-ent`.** Every `-ent` noun/adjective is a homograph of a verb, and the verb reading is
+   systematically Lexique's minus the final `ɑ̃`. Gated on `ils`/`elles` ONLY — deliberately precision over
+   recall, because reading "le président" as a verb is far worse than missing "les enfants content". A
+   clitic may intervene ("ils **ne** content pas", "ils **se** couvent"), so the pronoun test looks one word
+   further back past a known clitic; without that it missed every negated or reflexive clause.
+2. **Latent final consonant**, selected by a determiner or subject pronoun: plus, tous, os, as, sens, vis.
+
+Not attempted, with reasons recorded: `fils` ([fis] son / [fil] threads) is genuinely ambiguous after
+"les", and `est` (copula / east) is unreachable because the tokenizer keeps `l'est` as one token.
+
+### A bug this surfaced — heteronyms and liaison interact
+
+`utc+1` came out `ytk ply zˈœ̃` instead of `ytk plys ˈœ̃`. `plus` is a liaison trigger, so the machinery
+moved a `z` onto the next word AND `stripLatent` removed the final consonant to avoid doubling it — which
+is right for a genuinely latent consonant (six → `sis` + z-liaison → `si`+`z`) but wrong here: the
+operator's `s` is SOUNDED, and arithmetic "plus un" has no liaison at all. A context-selected heteronym
+reading now does not participate in liaison as the left member. `de plus en plus` still gets its liaison
+(`də ply zɑ̃ plˈy`) because no case fires there.
+
+The `plusse` respelling and its supplement entry are retired; `normalize.ts` emits the ordinary spelling
+and the heteronym map supplies `[plys]`, selected by the number that follows.
+
+### Verification
+
+- 198 files / 2102 tests pass (2 new); `tsc --noEmit` clean.
+- Referee eval byte-identical: 79.3% folded / 96.0% symbol (second set 91.3% / 97.6%).
+- fr corpus: **59 of 3,193 utterances changed, 0 defects**. Tally of what fired: `tous` 49, `sens` 8,
+  `os` 2 — and every one inspected is correct (`tous les jours` → `tu`, `les os` → `le zo` with the plural
+  s silent, `un sens distinct` → `sɑ̃s`). `tous les` is common enough that this alone is a real gain.
+
+### Where to take it next
+
+The `-ent` class is open — any `-ent` noun/adjective can be extended the same way, mechanically, since the
+verb reading is the entry minus `ɑ̃`. Worth generating candidates from Lexique rather than hand-listing.
+`ferment`/`affluent` show the generation must read Lexique's actual entry rather than assume the noun
+reading is the one recorded.

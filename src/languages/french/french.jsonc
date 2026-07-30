@@ -166,6 +166,40 @@
 
     // h aspiré (+ vowel-initial words that block liaison, e.g. huit/onze/y-): looks vowel-initial but forbids
     // liaison — les héros → le eʁo, not le zeʁo.
+    // HETERONYMS — one spelling, two pronunciations, disambiguated by NEIGHBOURING WORDS. French has no
+    // POS tagger (frenchTagger.ts is the OOV g2p reader, not a POS model), and Lexique carries exactly one
+    // reading per spelling, so the alternate reading has to be supplied here with the context that selects
+    // it. `default` is Lexique's reading; each case's `ipa` wins when its `prev`/`next` matches.
+    //
+    // Two classes carry most of it:
+    //  1. The 3rd-person-plural -ENT ending is SILENT, so every -ent noun/adjective is a homograph of a
+    //     verb: content [kɔ̃tɑ̃] vs "ils content" [kɔ̃t]. The verb reading is systematically Lexique's minus
+    //     the final ɑ̃. Gated on ils/elles ONLY — deliberately high precision over recall, since reading
+    //     "le président" as a verb would be far worse than missing "les enfants content".
+    //  2. A latent FINAL CONSONANT that one reading sounds and the other does not: plus, tous, os, as,
+    //     sens, vis. Here the selecting context is a determiner or a subject pronoun.
+    // Not attempted: `fils` ([fis] son / [fil] threads) is genuinely ambiguous after "les"; `est` is
+    // unreachable because the tokenizer keeps "l'est" as one token.
+    "heteronyms": {
+        "plus": { "default": "ply", "cases": [{ "ipa": "plys", "nextIsNumber": true }] },
+        "tous": { "default": "tus", "cases": [{ "ipa": "tu", "next": ["les", "ces", "mes", "tes", "ses", "nos", "vos", "leurs"] }] },
+        "os": { "default": "ɔs", "cases": [{ "ipa": "o", "prev": ["les", "des", "aux", "ces", "mes", "tes", "ses", "nos", "vos", "leurs", "quelques", "plusieurs"] }] },
+        "as": { "default": "a", "cases": [{ "ipa": "ɑs", "prev": ["un", "cet", "ce", "le", "son", "mon"] }] },
+        "sens": { "default": "sɑ̃", "cases": [{ "ipa": "sɑ̃s", "prev": ["le", "du", "un", "ce", "dans", "au", "mon", "son", "bon", "dernier", "premier", "double"] }] },
+        "vis": { "default": "vi", "cases": [{ "ipa": "vis", "prev": ["une", "la", "cette", "des", "les", "deux", "trois", "quatre"] }] },
+        "portions": { "default": "pɔʁsjɔ̃", "cases": [{ "ipa": "pɔʁtjɔ̃", "prev": ["nous"] }] },
+        "ferment": { "default": "fɛʁm", "cases": [{ "ipa": "fɛʁmɑ̃", "prev": ["le", "du", "un", "ce", "son"] }] },
+        "affluent": { "default": "afly", "cases": [{ "ipa": "aflyɑ̃", "prev": ["un", "le", "ce", "son", "grand", "petit"] }] },
+        "content": { "default": "kɔ̃tɑ̃", "cases": [{ "ipa": "kɔ̃t", "prev": ["ils", "elles"] }] },
+        "président": { "default": "pʁezidɑ̃", "cases": [{ "ipa": "pʁezid", "prev": ["ils", "elles"] }] },
+        "résident": { "default": "ʁezidɑ̃", "cases": [{ "ipa": "ʁezid", "prev": ["ils", "elles"] }] },
+        "parent": { "default": "paʁɑ̃", "cases": [{ "ipa": "paʁ", "prev": ["ils", "elles"] }] },
+        "violent": { "default": "vjɔlɑ̃", "cases": [{ "ipa": "vjɔl", "prev": ["ils", "elles"] }] },
+        "excellent": { "default": "eksɛlɑ̃", "cases": [{ "ipa": "eksɛl", "prev": ["ils", "elles"] }] },
+        "négligent": { "default": "neɡliʒɑ̃", "cases": [{ "ipa": "neɡliʒ", "prev": ["ils", "elles"] }] },
+        "couvent": { "default": "kuvɑ̃", "cases": [{ "ipa": "kuv", "prev": ["ils", "elles"] }] },
+    },
+
     // ACRONYMS read letter-by-letter although their lowercase form is an attested French word, so Lexique
     // cannot express the distinction ("usa" is in it as the passé simple of *user*). A LEXICAL fact.
     // Also listed here: the acronyms attested in the corpus whose reading is letters rather than a word —

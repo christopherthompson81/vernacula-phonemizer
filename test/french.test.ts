@@ -167,6 +167,43 @@ describe("french canonical IPA", () => {
         expect(phonemize("le vol CG4684", "fr")).toContain("se ʒe");
     });
 
+    // HETERONYMS (french.jsonc + the resolver in french.ts): one spelling, two readings, selected by the
+    // neighbouring words. French has no POS tagger and Lexique carries a single reading per spelling.
+    test("heteronyms: latent final consonant", () => {
+        // The case that motivated the map: the arithmetic operator sounds its s, "more" does not.
+        expect(phonemize("un +5", "fr")).toBe("œ̃ plys sˈɛ̃k");
+        expect(phonemize("il n'y en a plus", "fr")).toBe("il ni ɑ̃ na plˈy");
+        // ...and a word with no case matching keeps its liaison, which the operator reading suppresses.
+        expect(phonemize("de plus en plus", "fr")).toBe("də ply zɑ̃ plˈy");
+        expect(phonemize("tous les jours", "fr")).toBe("tu le ʒˈuʁ"); // determiner
+        expect(phonemize("ils sont tous venus", "fr")).toBe("il sɔ̃ tus vənˈy"); // pronoun
+        expect(phonemize("un os", "fr")).toBe("œ̃ nˈɔs"); // singular
+        expect(phonemize("des os", "fr")).toBe("de zˈo"); // plural — the s goes silent
+        expect(phonemize("un as", "fr")).toBe("œ̃ nˈɑs"); // the noun
+        expect(phonemize("tu as vu", "fr")).toBe("ty a vˈy"); // the verb
+        expect(phonemize("le sens du mot", "fr")).toBe("lə sɑ̃s dy mˈo");
+        expect(phonemize("je sens", "fr")).toBe("ʒə sˈɑ̃");
+        expect(phonemize("une vis", "fr")).toBe("yn vˈis");
+        expect(phonemize("je vis ici", "fr")).toBe("ʒə vi isˈi");
+        expect(phonemize("nous portions", "fr")).toBe("nu pɔʁtjˈɔ̃"); // verb
+        expect(phonemize("des portions", "fr")).toBe("de pɔʁsjˈɔ̃"); // noun
+    });
+
+    test("heteronyms: the silent 3rd-person-plural -ent", () => {
+        // Every -ent noun/adjective is a homograph of a verb, because the 3pl ending is silent. Gated on
+        // ils/elles only — high precision on purpose, since reading "le président" as a verb is far worse
+        // than missing a full-NP subject.
+        expect(phonemize("ils content les points", "fr")).toBe("il kɔ̃t le pwˈɛ̃");
+        expect(phonemize("il est content", "fr")).toBe("il e kɔ̃tˈɑ̃");
+        expect(phonemize("ils ne content pas", "fr")).toBe("il nə kɔ̃t pˈa"); // past an intervening clitic
+        expect(phonemize("ils président la séance", "fr")).toBe("il pʁezid la seˈɑ̃s");
+        expect(phonemize("le président", "fr")).toBe("lə pʁezidˈɑ̃");
+        expect(phonemize("ils couvent les œufs", "fr")).toBe("il kuv le zˈœf");
+        expect(phonemize("le couvent", "fr")).toBe("lə kuvˈɑ̃");
+        expect(phonemize("ils violent la loi", "fr")).toBe("il vjɔl la lwˈa");
+        expect(phonemize("un homme violent", "fr")).toBe("œ̃ nɔm vjɔlˈɑ̃");
+    });
+
     test("supplement.tsv covers the words Lexique lacks", () => {
         // normalize.ts emits words the corpus never contained, so words that were previously unreachable
         // are now on the hot path. These three are absent from Lexique and the rule g2p got them wrong.
