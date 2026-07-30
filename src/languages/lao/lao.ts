@@ -239,6 +239,45 @@ function scan(word: string): string {
 
 const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
 
+// ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
+// The tokenizer matched (\d+) but NO branch consumed it — every digit run was silently dropped. The
+// compositor emits LAO-SCRIPT words and reads them through the ordinary g2p, so no IPA is authored here.
+// Lao is Tai, structurally the Thai system (see thai.ts) with the cognate irregulars: 20 is ຊາວ — and it
+// REPLACES the whole "twenty" (ຊາວສອງ = 22, no ສິບ), unlike Thai ຢີ່ສິບ; a FINAL 1 in any compound ≥11 is
+// ເອັດ (ສິບເອັດ, ຊາວເອັດ); 10⁴ ໝື່ນ and 10⁵ ແສນ are their own magnitude words.
+// Source: Wiktionary "Category:Lao numerals" (the full 0–99 + ຮ້ອຍ / ພັນ / ໝື່ນ / ແສນ / ລ້ານ inventory,
+// incl. ຊາວ, ຊາວເອັດ, ສິບເອັດ) — https://en.wiktionary.org/wiki/Category:Lao_numerals.
+const LO_UNITS = ["ສູນ", "ໜຶ່ງ", "ສອງ", "ສາມ", "ສີ່", "ຫ້າ", "ຫົກ", "ເຈັດ", "ແປດ", "ເກົ້າ"];
+const LO_MAG: [number, string][] = [[1e6, "ລ້ານ"], [1e5, "ແສນ"], [1e4, "ໝື່ນ"], [1e3, "ພັນ"], [100, "ຮ້ອຍ"]];
+
+function numberToLaoWords(n: number): string[] {
+    if (!Number.isSafeInteger(n) || n < 0) {
+        return [...String(Math.abs(n))].filter((c) => c >= "0" && c <= "9").map((d) => LO_UNITS[Number(d)]!);
+    }
+    if (n === 0) return [LO_UNITS[0]!];
+    const out: string[] = [];
+    let r = n;
+    for (const [v, w] of LO_MAG) {
+        if (r >= v) {
+            const q = Math.floor(r / v);
+            out.push(...numberToLaoWords(q), w);
+            r %= v;
+        }
+    }
+    if (r >= 10) {
+        const t = Math.floor(r / 10);
+        if (t === 2) out.push("ຊາວ"); // 20 is ຊາວ alone — no ສິບ (ຊາວສອງ = 22)
+        else if (t === 1) out.push("ສິບ");
+        else out.push(LO_UNITS[t]!, "ສິບ");
+        r %= 10;
+    }
+    // A FINAL 1 in ANY compound ≥11 is ເອັດ, not ໜຶ່ງ: ສິບເອັດ 11, ຊາວເອັດ 21, ຮ້ອຍເອັດ 101, ພັນເອັດ 1001.
+    if (r === 1 && n >= 11) out.push("ເອັດ");
+    else if (r > 0) out.push(LO_UNITS[r]!);
+    return out;
+}
+
+
 /** Per-syllable tone-determining features (class × live/dead × length × mark) — for tone-table derivation/tests. */
 export function wordFeatures(word: string): { cls: Cls; live: boolean; long: boolean; mark: string }[] {
     return scanFeatures(reorder(word)).map((s) => ({ cls: s.cls, live: s.live, long: s.heavy, mark: s.mark }));
@@ -253,6 +292,7 @@ class LaoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
+            else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             else if (m[3] && ".!?…".includes(m[3])) sink.pause(" . ");
         });
     }
