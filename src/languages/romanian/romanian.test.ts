@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "./romanian.ts";
+import { ROMAN_EXCLUSIONS } from "../../core/roman.ts";
+import { phonemize } from "../../index.ts";
+import { ROMAN_POLICY } from "./romanOrdinals.ts";
 
 // Diagnostic gold for the Romanian (ro) g2p — common words, one per signature feature. These are OUR canonical
 // output; they match the wikipron ron_latn referee on the shared backbone (stress is deferred, unwritten). The
@@ -27,4 +30,52 @@ describe("Romanian (ro) g2p — diagnostic gold", () => {
             expect(phonemizeWord(word)).toBe(ipa);
         });
     }
+});
+
+// ── Roman-numeral ORDINAL policy (src/languages/romanian/romanOrdinals.ts) ────────────────────────────────
+// Romanian reads a century as an ordinal in the `al …-lea` construction — the orthography spells it out
+// ("secolul al XIX-lea", ro.wikipedia Date și numere). The article is INSIDE the emitted word because the
+// input we can rewrite is the article-less "secolul XVIII", where nothing else supplies the `al`.
+describe("Romanian Roman-numeral ordinal policy", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("century context fires the al …-lea ordinal", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("secolul")).toBe(true);
+        expect(ROMAN_POLICY.ordinalBefore?.test("secolele")).toBe(true); // inflected forms
+        expect(ROMAN_POLICY.ordinalBefore?.test("secolelor")).toBe(true);
+        expect(ord(19)).toBe("al nouăsprezecelea");
+        expect(ord(18)).toBe("al optsprezecelea");
+        expect(phonemize("secolul al nouăsprezecelea", "ro")).toBe("sekoˈlul ˈal ˈnowəsprezet͡ʃele̯a");
+    });
+
+    test("the article is NOT re-added after an explicit `al` (no *al al …*)", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("al")).toBe(false);
+        expect(ROMAN_POLICY.ordinalBefore?.test("a")).toBe(false);
+    });
+
+    test("regnal name before the numeral fires the ordinal (Carol II → al doilea)", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("carol")).toBe(true);
+        expect(ord(2)).toBe("al doilea");
+        expect(ord(8)).toBe("al optulea"); // -ulea after a consonant
+        expect(ord(28)).toBe("al douăzeci și optulea");
+        expect(ord(1)).toBe("întâi"); // irregular: never *al unulea*
+    });
+
+    test("ordinal is unbounded — XL / L / above L", () => {
+        expect(ord(40)).toBe("al patruzecilea");
+        expect(ord(50)).toBe("al cincizecilea");
+        expect(ord(60)).toBe("al șaizecilea");
+        expect(ord(100)).toBe("al sutălea");
+        expect(phonemize("al cincizecilea aniversar", "ro")).toBe("ˈal t͡ʃint͡ʃizet͡ʃiˈle̯a aniveˈrsar");
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("în")).toBe(false);
+        expect(phonemize("secolul 19", "ro")).toBe("sekoˈlul ˈnowəsprezet͡ʃe"); // the pre-existing reading
+    });
+
+    test("the per-language `vii` exclusion (= alive/vines) is carried through, not restated", () => {
+        expect(ROMAN_POLICY.exclude).toBe(ROMAN_EXCLUSIONS.ro);
+        expect(ROMAN_POLICY.exclude?.has("vii")).toBe(true); // so `secolul VII` is left alone entirely
+    });
 });

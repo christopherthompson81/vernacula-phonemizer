@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/italian/italian.ts";
+import { ROMAN_POLICY } from "../src/languages/italian/romanOrdinals.ts";
 
 // Canonical-IPA goldens for Italian (it) — a shallow, near-phonemic Latin orthography, rule-based G2P. Hand-
 // verified standard pronunciations, in OUR convention: close-mid default for stressed ⟨e⟩/⟨o⟩ (the /e/~/ɛ/,
@@ -64,5 +65,51 @@ describe("italian canonical IPA", () => {
             "ɡˈatto",
         );
         expect(phonemize("Il gatto mangia il pesce.", "it")).toContain("pˈeʃʃe");
+    });
+});
+
+// ── Roman-numeral ORDINAL policy (src/languages/italian/romanOrdinals.ts) ─────────────────────────────────
+// Italian reads a Roman numeral as an ORDINAL (Treccani, Enciclopedia dell'Italiano s.v. «numerali»): XIX
+// secolo = diciannovesimo secolo, papa Giovanni XXIII = ventitreesimo — no switch to the cardinal above ten,
+// unlike es/pt/ca. The reading is context-gated, so a BARE numeral must stay a cardinal.
+describe("italian Roman-numeral ordinal policy", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("century context fires the ordinal (XIX secolo → diciannovesimo secolo)", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("secolo")).toBe(true); // "XIX secolo" (dominant order)
+        expect(ROMAN_POLICY.ordinalBefore?.test("secolo")).toBe(true); // "nel secolo XIX"
+        expect(ord(19)).toBe("diciannovesimo");
+        expect(ord(18)).toBe("diciottesimo");
+        expect(phonemize("diciannovesimo secolo", "it")).toBe("dit͡ʃannovezˈimo sekˈolo");
+    });
+
+    test("regnal name before the numeral fires the ordinal (papa Giovanni XXIII)", () => {
+        // The word immediately before the numeral is the NAME, not the title — so the names are the trigger.
+        expect(ROMAN_POLICY.ordinalBefore?.test("giovanni")).toBe(true);
+        expect(ROMAN_POLICY.ordinalBefore?.test("luigi")).toBe(true);
+        expect(ord(23)).toBe("ventitreesimo"); // -tré keeps its vowel: ventitreesimo, not *ventitresimo
+        expect(ord(14)).toBe("quattordicesimo");
+        expect(phonemize("papa giovanni ventitreesimo", "it")).toBe("pˈapa d͡ʒovˈanni ventitreezˈimo");
+    });
+
+    test("ordinal is unbounded — XL / L / above L (anniversaries, congresses)", () => {
+        expect(ord(40)).toBe("quarantesimo");
+        expect(ord(50)).toBe("cinquantesimo");
+        expect(ord(60)).toBe("sessantesimo");
+        expect(ord(100)).toBe("centesimo");
+        expect(ROMAN_POLICY.ordinalAfter?.test("anniversario")).toBe(true);
+        expect(phonemize("cinquantesimo anniversario", "it")).toBe("t͡ʃinkwantezˈimo anniversˈarjo");
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("il")).toBe(false);
+        expect(ROMAN_POLICY.ordinalAfter?.test("anni")).toBe(false);
+        expect(phonemize("xix", "it")).toBe("dit͡ʃannˈove"); // diciannove, not diciannovesimo
+    });
+
+    test("feminine heads are deliberately NOT triggered (the table is masculine)", () => {
+        expect(ROMAN_POLICY.ordinalBefore?.test("elisabetta")).toBe(false); // would need *seconda*
+        expect(ROMAN_POLICY.ordinalAfter?.test("guerra")).toBe(false); // would need *seconda guerra*
+        expect(ROMAN_POLICY.ordinalAfter?.test("olimpiade")).toBe(false); // would need *venticinquesima*
     });
 });

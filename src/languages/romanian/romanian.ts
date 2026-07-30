@@ -248,8 +248,10 @@ function under1000(n: number): string {
     return rest === 0 ? head : `${head} ${under100(rest)}`;
 }
 
-/** Romanian cardinal for a non-negative integer (up to the millions). */
-function numberWords(n: number): string {
+/** Romanian cardinal for a non-negative integer (up to the millions).
+ *  Exported so `romanOrdinals.ts` can wrap it in the `al …-lea` ordinal construction rather than
+ *  re-authoring the numeral data. */
+export function numberWords(n: number): string {
     if (n === 0) return NUM.units[0]!;
     const parts: string[] = [];
     const mil = Math.floor(n / 1_000_000), th = Math.floor((n % 1_000_000) / 1000), rest = n % 1000;

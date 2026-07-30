@@ -72,9 +72,14 @@ describe("Roman numerals (core/roman.ts)", () => {
         // Russian dropped the Latin run entirely before this pass existed
         expect(phonemize("xix век", "ru")).toContain("vʲek");
         expect(phonemize("xix век", "ru").split(" ").length).toBeGreaterThan(1);
-        // Spanish/Italian read centuries as cardinals — the correct register for them
+        // Spanish reads centuries as CARDINALS (RAE: "del siglo XI en adelante, solo es normal su
+        // lectura como cardinales"), so this is the correct register for it — not a fallback.
         expect(phonemize("siglo xix", "es")).toContain("djeθinwˈeβe");
-        expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitrˈe");
+        // Italian reads them as ORDINALS, including regnal names, per its own policy (Treccani).
+        expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitreezˈimo");
+        expect(phonemize("xix secolo", "it")).toContain("dit͡ʃannovezˈimo");
+        // ...while a BARE Italian numeral has no ordinal context and stays a cardinal.
+        expect(phonemize("xix", "it")).toContain("dit͡ʃannˈove");
     });
 
     test("large values: numbered events and regnal names beyond the closed set", () => {

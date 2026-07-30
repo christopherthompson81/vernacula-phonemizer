@@ -181,13 +181,45 @@ import { createUyghur } from "./languages/uyghur/uyghur.ts";
 import { createSylheti } from "./languages/sylheti/sylheti.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 import { createAncientGreek } from "./languages/ancientgreek/ancientgreek.ts";
-import { normalizeRomans, ROMAN_EXCLUSIONS } from "./core/roman.ts";
+import { normalizeRomans, ROMAN_EXCLUSIONS, type RomanPolicy } from "./core/roman.ts";
+import { ROMAN_POLICY as romanEs } from "./languages/spanish/romanOrdinals.ts";
+import { ROMAN_POLICY as romanEs419 } from "./languages/spanish-419/romanOrdinals.ts";
+import { ROMAN_POLICY as romanPt } from "./languages/portuguese/romanOrdinals.ts";
+import { ROMAN_POLICY as romanPtBr } from "./languages/portuguese-br/romanOrdinals.ts";
+import { ROMAN_POLICY as romanIt } from "./languages/italian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanRo } from "./languages/romanian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanCa } from "./languages/catalan/romanOrdinals.ts";
+import { ROMAN_POLICY as romanRu } from "./languages/russian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanPl } from "./languages/polish/romanOrdinals.ts";
+import { ROMAN_POLICY as romanUk } from "./languages/ukrainian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanHu } from "./languages/hungarian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.ts";
+import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
+import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
+
 import { setDefaultForeign } from "./core/foreign.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
     text(input: string): string;
 }
+
+
+/**
+ * Per-language ROMAN NUMERAL policy: how this language reads a Roman numeral, including whether a
+ * century is a cardinal or an ordinal. The data lives in each language's own directory (so it can build
+ * on that language's cardinal compositor) and is assembled here because the pass runs ABOVE the engines.
+ *
+ * Only the languages where Roman numerals measurably occur are wired — evidence from the FLEURS corpora,
+ * which is also why es/pt/ca supply an ordinal for anniversaries but leave CENTURIES cardinal, the
+ * reading those languages actually use.
+ */
+const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
+    es: romanEs, "es-419": romanEs419, pt: romanPt, "pt-BR": romanPtBr,
+    it: romanIt, ro: romanRo, ca: romanCa,
+    ru: romanRu, pl: romanPl, uk: romanUk, hu: romanHu,
+    az: romanAz, kk: romanKk, uz: romanUz,
+};
 
 // Embedded FOREIGN runs (a brand name, acronym or code-switched phrase in a script the engine does not
 // own) are read as English — the same choice the engines that already handle Latin make. Registered
@@ -213,7 +245,9 @@ export function getPhonemizer(lang: string): Phonemizer {
         // It rewrites to DIGITS, so each language's own cardinal compositor does the pronouncing.
         if (!ROMAN_NATIVE.has(lang)) {
             const engine = p;
-            const policy = { exclude: ROMAN_EXCLUSIONS[lang] };
+            // A language's own policy wins; otherwise it still gets its homograph exclusions.
+            const own = ROMAN_POLICIES[lang];
+            const policy: RomanPolicy = own ?? { exclude: ROMAN_EXCLUSIONS[lang] };
             p = { text: (input) => engine.text(normalizeRomans(input, policy)) };
         }
         cache.set(lang, p);
