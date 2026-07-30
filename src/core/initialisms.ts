@@ -75,6 +75,14 @@ export interface InitialismData {
  * lowercase.
  *
  * The periods are consumed, since they are abbreviation dots rather than sentence ends.
+ *
+ * KNOWN FALSE POSITIVE, measured rather than assumed. A sentence that ENDS in a lone capital and is
+ * followed by a new capitalised sentence has the same shape — "Vitamin C. It helps" loses its sentence
+ * boundary. Counting the shape across the en_us corpus: 4 matches, and all 4 are genuine personal
+ * initials (John F. Kennedy, Lyndon B. Johnson, George W. Bush ×2) with no sentence-end among them. The
+ * fix would be a list of sentence-opening function words, which is language-specific lexical knowledge and
+ * does not belong in shared code — so the limit is recorded here instead. A language that finds this
+ * costly can pre-empt it in its own normalize.ts.
  */
 const INITIAL_RUN = /(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]*){2,}/gu;
 const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;

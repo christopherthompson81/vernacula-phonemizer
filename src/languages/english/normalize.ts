@@ -100,6 +100,16 @@ const PLAIN_ABBREV: Readonly<Record<string, string>> = {
     dept: "department", est: "established", approx: "approximately", vs: "versus",
     vol: "volume", ch: "chapter", fig: "figure", pp: "pages", ed: "edition", eds: "editors",
     inc: "incorporated", ltd: "limited", corp: "corporation", univ: "university",
+    // LATIN SCHOLARLY ABBREVIATIONS. Each was reaching the g2p with its dot intact, so mid-sentence the
+    // dot became a phrase break — and two of them were not words at all: `cf.` came out as the
+    // unpronounceable cluster [kf] and `viz.` as the nonsense word [vɪts]. `ibid` maps to itself purely
+    // to consume the dot; it is already read as written. `i.e.`/`e.g.`/`N.B.`/`a.m.`/`p.m.` are handled
+    // separately below because they are read as LETTERS rather than expanded.
+    // `etc` and `ibid` map to THEMSELVES: the dictionary already reads both correctly as single tokens
+    // ([ɛtsˈɛt̬ɚə], [ˈɪbɪd]), so the entry exists only to consume the dot. Expanding etc to "et cetera"
+    // was tried and rejected — it fixed the two mid-sentence instances but needlessly re-stressed the four
+    // sentence-final ones as two words, changing output that was already right.
+    etc: "etc", ibid: "ibid", cf: "compare", viz: "namely",
 };
 const PLAIN_ABBREV_ALT = Object.keys(PLAIN_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
@@ -171,6 +181,13 @@ export function normalizeEnglish(input: string): string {
         (_m, ab: string, sp: string) => `${PLAIN_ABBREV[ab.toLowerCase()]!}${sp}`);
     s = s.replace(new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (_m, ab: string) => `${PLAIN_ABBREV[ab.toLowerCase()]!}.`);
+    //     `et al.` is TWO tokens, so it precedes the single-token rule above having already run; its dot
+    //     is consumed mid-sentence for the same reason. Same two-branch shape.
+    s = s.replace(/\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
+    s = s.replace(/\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
+    //     `c.`/`ca.` is circa ONLY before a year — a bare `c.` is the letter (or an initial) and must be
+    //     left to the initials rule, so the digit lookahead is what makes this safe.
+    s = s.replace(/\bca?\.\s*(?=\d{3,4}(?!\d))/gi, "circa ");
     //     `No.` before a DIGIT is the number sign — the rule above needs a following letter, and this is
     //     the form that actually occurs ("No. 1", ×2 in the cased column), where it read as the word "no".
     s = s.replace(/\bnos?\.\s*(?=\d)/gi, "number ");

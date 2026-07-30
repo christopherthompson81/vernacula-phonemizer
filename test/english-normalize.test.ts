@@ -211,3 +211,43 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         expect(phonemize("a USAF base", "en")).toBe("ə jˈuː ˈɛs ˈeᶦ ˈɛf bˈeᶦs");
     });
 });
+
+/**
+ * LATIN SCHOLARLY ABBREVIATIONS (#562). `i.e.`, `e.g.`, `N.B.`, `a.m.`/`p.m.` and `(sic)` were already
+ * right — they are read as LETTERS or as an ordinary word. These were not: mid-sentence their dot became
+ * a phrase break, and two of them were not words at all.
+ */
+describe("Latin abbreviations and phrases", () => {
+    const p = (t: string): string => phonemize(t, "en");
+
+    test("the dot is consumed mid-sentence and kept at a sentence end", () => {
+        expect(p("apples, etc. and pears")).not.toContain(" . ");   // was a spurious break
+        expect(p("and so on, etc.")).toMatch(/ \.$/u);              // …but a real sentence end stays
+        expect(p("Smith et al. found that")).not.toContain(" . ");  // `et al.` is TWO tokens
+        expect(p("Smith et al.")).toMatch(/ \.$/u);
+        expect(p("see ibid. page 5")).not.toContain(" . ");
+    });
+
+    test("cf. and viz. were not words at all", () => {
+        expect(p("cf. Smith 1990")).toContain("kəmpˈɛɹ");  // was the cluster [kf] plus a break
+        expect(p("viz. the third case")).toContain("nˈeᶦmli"); // was the nonsense word [vɪts]
+    });
+
+    test("c. before a year is circa; a bare initial is not", () => {
+        expect(p("c. 1500 the town grew")).toContain("sˈɝkə");
+        expect(p("John C. Smith wrote")).toContain("sˈiː");  // the letter, via the initials rule
+        expect(p("a grade of C. Next term")).toContain(" . "); // a real sentence end survives
+    });
+
+    test("the ones that were already correct are unchanged", () => {
+        expect(p("the rules, i.e. these ones")).toContain("ˈaᶦ ˈiː");
+        expect(p("some fruit, e.g. apples")).toContain("ˈiː d͡ʒˈiː");
+        expect(p("N.B. this matters")).toContain("ˈɛn bˈiː");
+        expect(p("at 5 p.m. today")).toContain("pʰˈiː ˈɛm");
+        expect(p("he wrote (sic) there")).toContain("sˈɪk");
+        expect(p("Ali vs. Frazier")).toContain("vˈɝsəs");
+        // Latin PHRASES spelled in full are ordinary dictionary words and need no rule.
+        expect(p("ad hoc committee")).toContain("ˈæd hˈɑːk");
+        expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹaᶦ");
+    });
+});
