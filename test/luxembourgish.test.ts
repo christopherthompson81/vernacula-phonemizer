@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createLuxembourgish, phonemizeWord } from "../src/languages/luxembourgish/luxembourgish.ts";
+import { numberToWords } from "../src/languages/luxembourgish/numbers.ts";
 
 // Luxembourgish (lb) — Lëtzebuergesch, West Germanic (Moselle Franconian), Latin script (~390k). A German-derived
 // orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) + a distinctive diphthong system + French loans. The engine is a
@@ -55,4 +56,35 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
     test("clause assembly", () => {
         expect(lb.text("Ech schwätzen Lëtzebuergesch.").trim()).toBe("æχ ʃvæt͡sən lət͡səbuərɡəʃ .");
     });
+
+    // CARDINAL NUMBERS — units-FIRST and fused like German, with the EIFELER REGEL on the connector: "an" survives
+    // before ⟨n d t z h⟩ and vowels, but reduces to "a" before other consonants. Wikipedia's own numeral pair
+    // fënnefandrësseg (35) / fënnefavéierzeg (45) is what pins the rule. See luxembourgish/numbers.ts.
+    test("numbers: units-first compounds + the Eifeler Regel on the an/a connector", () => {
+        expect(numberToWords(0)).toBe("null");
+        expect(numberToWords(21)).toBe("eenanzwanzeg"); // before ⟨z⟩ → "an" kept
+        expect(numberToWords(31)).toBe("eenandrësseg"); // before ⟨d⟩ → kept
+        expect(numberToWords(35)).toBe("fënnefandrësseg"); // the Wikipedia example
+        expect(numberToWords(45)).toBe("fënnefavéierzeg"); // before ⟨v⟩ → n DELETED
+        expect(numberToWords(55)).toBe("fënnefafofzeg"); // before ⟨f⟩ → deleted
+        expect(numberToWords(65)).toBe("fënnefasiechzeg"); // before ⟨s⟩ → deleted
+        expect(numberToWords(85)).toBe("fënnefanachtzeg"); // before a VOWEL → kept
+        expect(numberToWords(95)).toBe("fënnefannonzeg"); // before ⟨n⟩ → kept
+    });
+
+    test("numbers: closed German-style magnitudes", () => {
+        expect(numberToWords(100)).toBe("honnert");
+        expect(numberToWords(101)).toBe("honnerteent");
+        expect(numberToWords(555)).toBe("fënnefhonnertfënnefafofzeg");
+        expect(numberToWords(1000)).toBe("dausend");
+        expect(numberToWords(12345)).toBe("zwielefdausend dräihonnertfënnefavéierzeg");
+        expect(numberToWords(1000000)).toBe("eng Millioun");
+        expect(numberToWords(1000000000)).toBe("eng Milliard");
+    });
+
+    test("numbers: wired into the phonemizer", () => {
+        expect(lb.text("21").trim()).toBe("eːnant͡svant͡səχ"); // eenanzwanzeg
+        expect(lb.text("45").trim()).toBe("fənəfafei̯ərt͡səχ"); // fënnefavéierzeg (n-deleted)
+    });
+
 });

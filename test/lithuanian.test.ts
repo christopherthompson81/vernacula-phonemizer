@@ -42,4 +42,26 @@ describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () 
     test("clause assembly: words + punctuation", () => {
         expect(createLithuanian().text("Labas, Lietuva!").trim()).toBe("lɐbɐs  ,  lʲiɛtʊʋɐ  !");
     });
+
+    // Cardinal numbers (numbers.ts + the lithuanian.jsonc table). Lithuanian has NO round-hundred words — the
+    // hundred is a counted noun (šimtas / du šimtai) — and every magnitude noun takes the Baltic three-way concord:
+    // …1 (not 11) → nom sg, …2–9 (not 12–19) → nom pl, …0 / 11–19 → gen pl.
+    test("cardinal numbers: -lika teens + the three-way counted-noun concord", () => {
+        const lt = createLithuanian();
+        expect(lt.text("7").trim()).toBe("sʲɛpʲtʲiːnʲɪ"); // septyni
+        expect(lt.text("15").trim()).toBe("pʲɛŋʲkʲoːlʲɪkɐ"); // penkiolika (the -lika teen, one word)
+        expect(lt.text("21").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs"); // dvidešimt vienas
+        expect(lt.text("101").trim()).toBe("ʃʲɪmtɐs ʋʲiɛnɐs"); // šimtas vienas
+        expect(lt.text("555").trim()).toBe("pʲɛŋʲkʲɪ ʃʲɪmtɐɪ pʲɛŋʲkʲɛzʲdʲɛʃʲɪmt pʲɛŋʲkʲɪ"); // penki šimtai penkiasdešimt penki
+        expect(lt.text("1000").trim()).toBe("tuːkstɐnʲtʲɪs"); // tūkstantis — the numeral "vienas" is dropped
+        expect(lt.text("2000").trim()).toBe("dʊ tuːkstɐnʲt͡ʃʲɛɪ"); // du tūkstančiai → NOM PL
+        expect(lt.text("10000").trim()).toBe("dʲɛʃʲɪmt tuːkstɐnʲt͡ʃʲuː"); // dešimt tūkstančių → …0 ⇒ GEN PL
+        expect(lt.text("21000").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs tuːkstɐnʲtʲɪs"); // ★ …1 ⇒ NOM SG tūkstantis
+        expect(lt.text("100000").trim()).toBe("ʃʲɪmtɐs tuːkstɐnʲt͡ʃʲuː"); // šimtas tūkstančių
+        expect(lt.text("12345").trim()).toBe(
+            "dʲʋʲiːlʲɪkɐ tuːkstɐnʲt͡ʃʲuː tʲrʲiːs ʃʲɪmtɐɪ kʲɛtʊrʲɛzʲdʲɛʃʲɪmt pʲɛŋʲkʲɪ",
+        ); // dvylika tūkstančių (12 ⇒ GEN PL) trys šimtai keturiasdešimt penki
+        expect(lt.text("1000000").trim()).toBe("ʋʲiɛnɐs mʲɪlʲɪjoːnɐs"); // vienas milijonas (keeps the numeral)
+        expect(lt.text("1000000000").trim()).toBe("ʋʲiɛnɐs mʲɪlʲɪjɛrdɐs"); // vienas milijardas
+    });
 });

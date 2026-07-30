@@ -32,5 +32,33 @@
 
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
+    },
+
+    // ── CARDINAL NUMBER WORDS ────────────────────────────────────────────────────────────────────────────────────
+    // Source: Wiktionary "Appendix:Danish numerals" (the numeral table + the vigesimal etymologies) and Dansk
+    // Sprognævn / Retskrivningsordbogen for the multi-word spelling of values above 100 (the DSN example "to tusind
+    // og fem hundrede og otteogtredive" = 2538 is what fixes the "og" between magnitude groups). Cross-checked
+    // against omniglot.com/language/numbers/danish.htm.
+    //
+    // Danish is the fleet's VIGESIMAL outlier: 50–90 are contractions of base-20 multiplicatives —
+    // halvtreds(indstyve) "half-third × 20" = 50, tres(indstyve) "three × 20" = 60, halvfjerds "half-fourth × 20"
+    // = 70, firs "four × 20" = 80, halvfems "half-fifth × 20" = 90. The contracted forms below are the ONLY ones
+    // used in modern speech (the -sindstyve long forms are archaic), so the vigesimal arithmetic is fully absorbed
+    // into the lexicon and the composer just needs a tens table. What the composer DOES need is the units-FIRST
+    // order with "og": enogtyve (21), femoghalvfjerds (75), nioghalvfems (99).
+    //
+    // 1 is "en" both bare and in compounds (the neuter "et" appears only before the magnitude nouns hundrede /
+    // tusind, which is why those carry their own "one" spellings). 40 is the non-vigesimal "fyrre".
+    "numbers": {
+        "ones": [
+            "nul", "en", "to", "tre", "fire", "fem", "seks", "syv", "otte", "ni",
+            "ti", "elleve", "tolv", "tretten", "fjorten", "femten", "seksten", "sytten", "atten", "nitten"
+        ],
+        "tens": ["", "", "tyve", "tredive", "fyrre", "halvtreds", "tres", "halvfjerds", "firs", "halvfems"],
+        "connector": "og",
+        "hundred": { "one": "et hundrede", "word": "hundrede" },
+        "thousand": { "one": "et tusind", "word": "tusind" },
+        "million": { "one": "en million", "plural": "millioner" },
+        "billion": { "one": "en milliard", "plural": "milliarder" }
     }
 }

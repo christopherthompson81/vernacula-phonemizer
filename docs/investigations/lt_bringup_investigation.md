@@ -63,3 +63,25 @@ Rule engine verified phonetically sound (no output bug); fixes:
   ~77%) — now stated in the config note + maturity row.
 - README: fixed the Baltic family ordering (alphabetical, after Austronesian). Verified the ʋ-spread is correct
   (Latvija→tʲʋʲ, referee-confirmed) and the n-spread matches the referee majority (penki→ŋʲkʲ).
+
+## Run 3 — 2026-07-28 18:00 — cardinal number compositor (numbers were deferred)
+
+Question: `phonemize("<int>", "lt")` leaked the digits through. Probe: 110/110 issues (DIGIT-LEAK).
+
+**Pattern B** (`src/languages/lithuanian/numbers.ts` + a `numbers` block in `lithuanian.jsonc`). Pattern A does
+not fit for TWO independent reasons: (a) Lithuanian has no irregular round-hundred WORDS at all — the hundred is
+a counted noun (šimtas / du šimtai), so the shared `hundreds` array has nothing to hold; and (b) every magnitude
+noun agrees with its count.
+
+Source: lt.wikipedia per-number articles (`0 (skaičius)` nulis … `20 (skaičius)` dvidešimt, `60` šešiasdešimt,
+`80` aštuoniasdešimt, `90` devyniasdešimt) + the standard paradigm for the remaining round tens and magnitudes.
+
+Agreement: the Lithuanian THREE-WAY concord (= the CLDR lt one/few/other split), **not** the Slavic paucal rule —
+…1 (not 11) → nom sg, …2–9 (not 12–19) → nom pl, …0 / 11–19 → gen pl. Corpus-confirmed on lt.wikipedia:
+"dvidešimt tūkstančių", "šimtas tūkstančių", "du tūkstančiai", "penki šimtai" all attested. Note this makes
+21000 = dvidešimt vienas tūkstantis (SINGULAR) — the opposite of the Polish rule decided in the same fan-out.
+
+Judgment calls: 1000 → bare "tūkstantis" but 10^6/10^9 keep the numeral ("vienas milijonas"), matching the
+sibling Latvian engine's tūkstotis-vs-viens-miljons split. Masculine citation forms (vienas/du, not viena/dvi).
+
+Result: probe **CLEAN** across the required range. Tests in test/lithuanian.test.ts.

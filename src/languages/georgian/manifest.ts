@@ -6,12 +6,32 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
+/** A Georgian numeral that has two shapes: `bare` (group-final) and `comb` — the final ⟨ი⟩-less form used when a
+ *  smaller number FOLLOWS it (ასი → ას ერთი, ათასი → ათას ცხრაას …). */
+export interface GeorgianNumeralPair {
+    bare: string;
+    comb: string;
+}
+
 export interface GeorgianManifest {
     language: string;
     name: string;
     script: string;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    numbers: {
+        units: string[];
+        teens: string[];
+        /** Vigesimal score words indexed by the score count 1–4 (20, 40, 60, 80). */
+        scores: { bare: string[]; comb: string[] };
+        /** Round-hundred words indexed by the hundreds digit 1–9. */
+        hundreds: { bare: string[]; comb: string[] };
+        magnitudes: {
+            thousand: GeorgianNumeralPair;
+            million: GeorgianNumeralPair;
+            billion: GeorgianNumeralPair;
+        };
+    };
 }
 
 /** The consolidated hand-authored Georgian data tables (see georgian.jsonc). */

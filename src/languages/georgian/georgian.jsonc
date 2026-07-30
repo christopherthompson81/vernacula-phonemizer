@@ -42,5 +42,47 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "჻": " . "
+    },
+
+    // ★ VIGESIMAL cardinal numbers (composition logic in numbers.ts). Georgian counts 20–99 in SCORES:
+    //   20 ოცი · 40 ორმოცი (ორ-"2" × ოც-"20") · 60 სამოცი (3×20) · 80 ოთხმოცი (4×20); any other 21–99 takes the
+    //   score's stem + -და- ("and") + the plain 1–19 word, as ONE word:
+    //     30 ოცდაათი (20+10) · 45 ორმოცდახუთი (2×20+5) · 67 სამოცდაშვიდი (3×20+7) · 89 ოთხმოცდაცხრა (4×20+9)
+    //     99 ოთხმოცდაცხრამეტი (4×20+19)
+    // From 100 up the units are written as SEPARATE words, and a numeral that is FOLLOWED by a smaller number
+    // TRUNCATES — it drops its final ⟨ი⟩: ასი→ას, ორასი→ორას, ათასი→ათას, მილიონი→მილიონ. Hence
+    //   101 ას ერთი · 250 ორას ორმოცდაათი · 1300 ათას სამასი · 1959 ათას ცხრაას ორმოცდაცხრამეტი ·
+    //   2001 ორი ათას ერთი · 2101 ორი ათას ას ერთი
+    // The two forms are therefore stored as PAIRS: "bare" (group-final) and "comb" (something follows).
+    //
+    // SOURCES: ka.wikipedia's per-number articles "N (რიცხვი)" for 0–20, the round tens, and the hundreds
+    // (0 ნული · 8 რვა · 19 ცხრამეტი · 30 ოცდაათი · 50 ორმოცდაათი · 70 სამოცდაათი · 90 ოთხმოცდაათი · 100 ასი ·
+    // 300 სამასი · 700 შვიდასი · 1000 ათასი); ka.wikipedia year articles for the compound/truncation evidence
+    // above (101, 1101, 1300, 1500, 1800, 1900, 1959, 1999, 2001, 2101) and for ერთი მილიონი / ერთი მილიარდი;
+    // and Wikipedia "Georgian numerals" for the rule statements ("Any other number between 21 and 99 is formed
+    // using 20, 40, 60, or 80, dropping the final i, then adding da … followed by the appropriate number from 1
+    // to 19"; "The final i is dropped when a smaller number is added to a multiple of 100").
+    "numbers": {
+        "units": ["ნული", "ერთი", "ორი", "სამი", "ოთხი", "ხუთი", "ექვსი", "შვიდი", "რვა", "ცხრა"],
+        "teens": [
+            "ათი", "თერთმეტი", "თორმეტი", "ცამეტი", "თოთხმეტი",
+            "თხუთმეტი", "თექვსმეტი", "ჩვიდმეტი", "თვრამეტი", "ცხრამეტი"
+        ],
+        // Indexed by the SCORE count 1–4 (= 20, 40, 60, 80); index 0 is unused padding.
+        "scores": {
+            "bare": ["", "ოცი", "ორმოცი", "სამოცი", "ოთხმოცი"],
+            "comb": ["", "ოცდა", "ორმოცდა", "სამოცდა", "ოთხმოცდა"]
+        },
+        // Indexed by the hundreds digit 1–9; index 0 is unused padding. ⟨რვა/ცხრა⟩ have no final ⟨ი⟩ to drop, so
+        // their hundreds are რვაასი/ცხრაასი → რვაას/ცხრაას like the rest.
+        "hundreds": {
+            "bare": ["", "ასი", "ორასი", "სამასი", "ოთხასი", "ხუთასი", "ექვსასი", "შვიდასი", "რვაასი", "ცხრაასი"],
+            "comb": ["", "ას", "ორას", "სამას", "ოთხას", "ხუთას", "ექვსას", "შვიდას", "რვაას", "ცხრაას"]
+        },
+        "magnitudes": {
+            "thousand": { "bare": "ათასი", "comb": "ათას" },
+            "million": { "bare": "მილიონი", "comb": "მილიონ" },
+            "billion": { "bare": "მილიარდი", "comb": "მილიარდ" }
+        }
     }
 }

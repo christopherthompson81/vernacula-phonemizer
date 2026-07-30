@@ -11,6 +11,15 @@ export interface DanishManifest {
     vowels: Record<string, string>;
     consonants: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    numbers: {
+        ones: string[];
+        tens: string[];
+        connector: string;
+        hundred: { one: string; word: string };
+        thousand: { one: string; word: string };
+        million: { one: string; plural: string };
+        billion: { one: string; plural: string };
+    };
 }
 
 /** The consolidated hand-authored Danish data tables (see danish.jsonc). */

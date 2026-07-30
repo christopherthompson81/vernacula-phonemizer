@@ -14,6 +14,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeNumberToWords, type GaelicNumbers } from "./numbers.ts";
 
 interface GaelicManifest {
     slenderVowels: string;
@@ -22,6 +23,7 @@ interface GaelicManifest {
     slender: Record<string, string>;
     lenition: Record<string, [string, string]>;
     vowels: Record<string, string>;
+    numbers: GaelicNumbers;
     clausePunctuation: Record<string, string>;
 }
 const M = loadManifest<GaelicManifest>(import.meta.url, "scottishgaelic.jsonc");
@@ -134,13 +136,16 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = M.clausePunctuation;
+/** Integer → Scottish Gaelic numeral words (counting/attributive series + lenition; see numbers.ts). */
+export const numberToWords = makeNumberToWords(M.numbers);
 const TOKEN = /([a-zàèìòùáéíóúA-ZÀÈÌÒÙÁÉÍÓÚ]+(?:['’-][a-zàèìòùáéíóúA-ZÀÈÌÒÙÁÉÍÓÚ]+)*)|(\d+)|([.!?…,;:])/gu;
 
 class ScottishGaelicPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // Numbers: compose the Gaelic numeral phrase, then phonemize each word through the same g2p.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }

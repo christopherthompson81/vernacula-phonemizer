@@ -26,4 +26,28 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // CARDINAL NUMBER WORDS (Languedocien reference forms). Composition logic in numbers.ts.
+    // SOURCE: omniglot.com/language/numbers/occitan.htm + languagesandnumbers.com/how-to-count-in-occitan
+    // (mirrored at occitan-foss.blogspot.com/2025/04/numbers-in-occitan.html), cross-checked against
+    // Alibèrt's Gramatica occitana forms. Occitan is DECIMAL throughout — the tens are setanta / ochanta /
+    // nonanta, NOT the Provençal-style vigesimal ⟨quatre-vint⟩ (the Languedocien reference variety this
+    // engine targets). The orthographic hyphens of ⟨dètz-e-sèt⟩ / ⟨vint-e-un⟩ are written as SPACES so each
+    // element reads through the g2p as its own word.
+    "numbers": {
+        // 0–19. 17–19 are the analytic ⟨dètz e …⟩ series (stored pre-split into words).
+        "ones": ["zèro", "un", "dos", "tres", "quatre", "cinc", "sièis", "sèt", "uèch", "nòu", "dètz", "onze",
+            "dotze", "tretze", "catòrze", "quinze", "setze", "dètz e sèt", "dètz e uèch", "dètz e nòu"],
+        "tens": ["", "", "vint", "trenta", "quaranta", "cinquanta", "seissanta", "setanta", "ochanta", "nonanta"],
+        "hundreds": ["", "cent", "dos cents", "tres cents", "quatre cents", "cinc cents", "sièis cents",
+            "sèt cents", "uèch cents", "nòu cents"],
+        "thousand": "mila", // 1000 = mila, 2000 = dos mila (invariable)
+        // The ⟨e⟩ connector joins ONLY the twenties (vint e un, vint e dos); 30–90 juxtapose (trenta un).
+        "and": "e",
+        // Long-scale-free French-shaped chain: milion = 10⁶, miliard = 10⁹.
+        "scales": [
+            { "value": 1000000000, "one": "un miliard", "many": "miliards" },
+            { "value": 1000000, "one": "un milion", "many": "milions" },
+        ],
+    },
 }

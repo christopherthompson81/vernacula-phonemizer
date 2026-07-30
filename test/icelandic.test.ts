@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createIcelandic, phonemizeWord } from "../src/languages/icelandic/icelandic.ts";
+import { numberToWords } from "../src/languages/icelandic/numbers.ts";
 
 // Icelandic (is) — íslenska, North Germanic (Insular), Latin + ⟨þ ð æ ö⟩ (~330k). One of the deepest orthographies
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
@@ -59,4 +60,38 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
     test("clause assembly", () => {
         expect(is.text("Ég tala íslensku.").trim()).toBe("jɛɣ tala islɛnskʏ ."); // ⟨g⟩ word-final after a vowel → [ɣ]
     });
+
+    // CARDINAL NUMBERS — tens-FIRST with "og" before the final unit, plus GENDER CONCORD on 1–4: a multiplier
+    // agrees with its magnitude noun (hundrað/þúsund neuter, milljón feminine, milljarður masculine), while a bare
+    // numeral takes the MASCULINE citation series used for counting aloud. Source: Wiktionary Appendix:Icelandic
+    // numerals. See src/languages/icelandic/numbers.ts.
+    test("numbers: tens-first with og, and the 1–4 gender concord", () => {
+        expect(numberToWords(0)).toBe("núll");
+        expect(numberToWords(7)).toBe("sjö");
+        expect(numberToWords(2)).toBe("tveir"); // bare numeral → MASCULINE citation form
+        expect(numberToWords(21)).toBe("tuttugu og einn"); // tens first, "og" before the unit
+        expect(numberToWords(45)).toBe("fjörutíu og fimm");
+        expect(numberToWords(99)).toBe("níutíu og níu");
+        expect(numberToWords(100)).toBe("eitt hundrað");
+        expect(numberToWords(101)).toBe("eitt hundrað og einn"); // single-word remainder takes "og"
+        expect(numberToWords(121)).toBe("eitt hundrað tuttugu og einn"); // …but a tens+unit pair does NOT get a 2nd
+        expect(numberToWords(200)).toBe("tvö hundruð"); // hundrað is NEUTER → tvö, not tveir
+        expect(numberToWords(555)).toBe("fimm hundruð fimmtíu og fimm");
+    });
+
+    test("numbers: magnitudes impose their own gender on the multiplier", () => {
+        expect(numberToWords(1000)).toBe("eitt þúsund");
+        expect(numberToWords(1001)).toBe("eitt þúsund og einn");
+        expect(numberToWords(12345)).toBe("tólf þúsund þrjú hundruð fjörutíu og fimm");
+        expect(numberToWords(1000000)).toBe("ein milljón"); // milljón is FEMININE → ein
+        expect(numberToWords(2000000)).toBe("tvær milljónir"); // …→ tvær
+        expect(numberToWords(1000000000)).toBe("einn milljarður"); // milljarður is MASCULINE → einn
+        expect(numberToWords(2000000000)).toBe("tveir milljarðar"); // …→ tveir
+    });
+
+    test("numbers: wired into the phonemizer", () => {
+        expect(is.text("21").trim()).toBe("tʏhtʏɣʏ ɔɣ eitn"); // tuttugu og einn
+        expect(is.text("1000000").trim()).toBe("ein mɪtljoun"); // ein milljón
+    });
+
 });

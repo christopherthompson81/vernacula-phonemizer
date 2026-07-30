@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createBavarian, phonemizeWord } from "../src/languages/bavarian/bavarian.ts";
+import { numberToWords } from "../src/languages/bavarian/numbers.ts";
 
 // Bavarian (bar) — Boarisch, Upper German (Austro-Bavarian, ~14M), Latin script over the de-facto Bavarian-Wikipedia
 // orthography (⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩). A greedy scan + the falling diphthongs + German-style rules.
@@ -39,4 +40,29 @@ describe("Bavarian canonical IPA — greedy g2p + falling diphthongs + fortis/le
     test("clause assembly", () => {
         expect(bar.text("I bin a Boar.").trim()).toBe("i b̥in ɑ b̥oɐ̯ɐ̯ .");
     });
+
+    // CARDINAL NUMBERS — units-FIRST like German but with the connector reduced from ⟨und⟩ to a bare linking ⟨-a-⟩
+    // (oanazwånzg = 21, zwoarazwånzg = 22 with the hiatus-breaking ⟨r⟩). Source: omniglot Bairisch cardinals; since
+    // Bavarian has no codified orthography, the ⟨å⟩ Bavarian-Wikipedia variants and the ⟨-e⟩-less stems were chosen,
+    // and magnitudes are written OPEN (a closed *dreihundad would lose its ⟨h⟩ to the silent post-vocalic-h rule).
+    // See src/languages/bavarian/numbers.ts.
+    test("numbers: units-first with the reduced ⟨-a-⟩ linker", () => {
+        expect(numberToWords(0)).toBe("null");
+        expect(numberToWords(21)).toBe("oanazwånzg"); // compound stem oan- (not oans-)
+        expect(numberToWords(22)).toBe("zwoarazwånzg"); // compound stem zwoar- (hiatus ⟨r⟩)
+        expect(numberToWords(45)).toBe("fimfafiazg");
+        expect(numberToWords(99)).toBe("neinaneinzg");
+        expect(numberToWords(100)).toBe("hundad");
+        expect(numberToWords(555)).toBe("fimf hundad fimfafuchzg");
+        expect(numberToWords(1000)).toBe("dausnd");
+        expect(numberToWords(12345)).toBe("zwöif dausnd drei hundad fimfafiazg");
+        expect(numberToWords(1000000)).toBe("oa Million");
+        expect(numberToWords(1000000000)).toBe("oa Milliarde");
+    });
+
+    test("numbers: wired into the phonemizer", () => {
+        expect(bar.text("21").trim()).toBe("oɐ̯nɑt͡sʋɔnt͡sɡ̥"); // oanazwånzg
+        expect(bar.text("555").trim()).toBe("fimf hund̥ɑd̥ fimfɑfuxt͡sɡ̥");
+    });
+
 });

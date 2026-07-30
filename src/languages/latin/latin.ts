@@ -11,6 +11,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Short vowels LAX to open-mid/near-close (Allen); ⟨a⟩ stays open. Long vowels (macron) are tense + [ː].
 const SHORT: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", y: "y", ë: "ɛ", ï: "ɪ", ö: "ɔ", ü: "ʊ", ÿ: "y" };
@@ -172,14 +173,15 @@ function placeStress(segs: string[]): void {
 }
 
 // A word (Latin letters incl. macrons/diaeresis + editorial ⟨v j⟩ + combining marks like the U+0306 "common-quantity"
-// breve, which phonemizeWord strips) / number / punctuation. The combining range keeps ū̆/ī̆ inside one token. Numbers deferred.
+// breve, which phonemizeWord strips) / number / punctuation. The combining range keeps ū̆/ī̆ inside one token.
 const TOKEN = /([a-zāēīōūȳëïöüÿA-ZĀĒĪŌŪȲËÏÖÜŸ̀-ͯ]+)|(\d+)|([.!?…,;:])/gu;
 
 class LatinPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // Numbers: compose the Latin cardinal phrase (subtractive x8/x9, mīlle/mīlia), then phonemize each word.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

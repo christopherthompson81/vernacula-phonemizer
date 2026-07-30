@@ -10,11 +10,14 @@
  *     ⟨č⟩→[t͡ʃ], ⟨š⟩→[ʃ], ⟨ž⟩→[ʒ], ⟨dz⟩→[d͡z], ⟨dž⟩→[d͡ʒ], the written palatals ⟨ļ ņ ģ ķ ř⟩→[lʲ nʲ ɡʲ kʲ rʲ], ⟨v⟩→[w]
  *     in a coda. Baltic VOICING assimilation in obstruent clusters (Latgola→[ladɡɔla]).
  *
+ * Numbers are composed by numbers.ts (the East-Baltic counted-noun concord + the FEMININE "tyukstūša").
+ *
  * Latgalian's pitch ACCENT (level/falling/broken, marked in the narrow referee) is not written → not emitted (folds).
  * Referee: wikipron ltg_latn narrow (488) + kaikki Latgalian (516). See docs/investigations/ltg_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Multi-char graphemes (longest-first): the affricate digraphs.
 const DIGRAPHS: [string, string][] = [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]];
@@ -101,7 +104,9 @@ class LatgalianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" "))
+                    sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

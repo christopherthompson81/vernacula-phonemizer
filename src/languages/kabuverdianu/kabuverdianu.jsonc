@@ -28,4 +28,26 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // CARDINAL NUMBER WORDS (Santiago / Badiu, ALUPEC). Composition logic in numbers.ts.
+    // SOURCE: en.wiktionary.org Category:Kabuverdianu_cardinal_numbers — the attested ALUPEC lemmas ⟨zéru, un,
+    // dos, tres, kuátu, sinku, sais, seti, oitu, novi, dés, onzi, treizi, vinti, trinta, korenta, sinkuenta,
+    // sasenta, setenta, oitenta, noventa, sen, mil, milion⟩ plus the hundreds ⟨duzentus, trezentus, kuátusentus,
+    // kinhentus⟩ (⟨duzentus⟩ is explicitly tagged "Badiú or Santiago", the variety this engine targets).
+    // Cross-checked against omniglot.com/language/numbers/kriol.htm and
+    // languagesandnumbers.com/how-to-count-in-cape-verdean-creole (both of which print the accented
+    // Barlavento-flavoured spellings ⟨sunkuénta, sasénta, saténta⟩ — NOT used here; ALUPEC Santiago forms win).
+    // 12/14/15 and 16–19 are the de-accented ALUPEC readings of the Omniglot forms (duzi, katorzi, kinzi;
+    // the analytic ⟨diza-⟩ series dizasais … dizanovi). 600–900 are extrapolated on the attested
+    // ⟨unit + -sentus⟩ pattern of ⟨kuátusentus⟩ — see the note in numbers.ts.
+    "numbers": {
+        "ones": ["zéru", "un", "dos", "tres", "kuátu", "sinku", "sais", "seti", "oitu", "novi"],
+        "teens": ["dés", "onzi", "duzi", "treizi", "katorzi", "kinzi", "dizasais", "dizaseti", "dizaoitu",
+            "dizanovi"],
+        "tens": ["", "", "vinti", "trinta", "korenta", "sinkuenta", "sasenta", "setenta", "oitenta", "noventa"],
+        "hundreds": ["", "sen", "duzentus", "trezentus", "kuátusentus", "kinhentus", "saisentus", "setisentus",
+            "oitusentus", "novisentus"],
+        "thousand": "mil",
+        "million": { "one": "un milion", "word": "milion" },
+    },
 }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createHaitian, phonemizeWord } from "../src/languages/haitian/haitian.ts";
+import { numberToWords } from "../src/languages/haitian/numbers.ts";
 
 // Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti (~12M). The 3rd creole in the fleet (after
 // Kabuverdianu). The IPN orthography is phonemic, so a greedy scan + the nasal-vowel rule nails it. Validated against
@@ -39,5 +40,44 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
 
     test("clause assembly", () => {
         expect(ht.text("Mwen pale kreyòl.").trim()).toBe("mwɛ̃ pale kɣejɔl .");
+    });
+
+    // NUMBERS — ★ the FRENCH VIGESIMAL RESIDUE is kept: 70 swasanndis (60+10), 80 katreven (4×20), 90 katrevendis
+    // (4×20+10). The Belgian/Swiss decimal ⟨septante/octante/nonante⟩ forms are NOT Haitian. Source: LDC2017S03
+    // "Haitian Creole LSP" §8.1–8.2 (citing Valdman et al. 2007). See haitian.jsonc.
+    test("numbers: units, the decade stem alternation, hundreds, thousands, millions", () => {
+        expect(numberToWords(7)).toBe("sèt");
+        expect(numberToWords(16)).toBe("sèz");
+        expect(numberToWords(21)).toBe("venteyen"); // the ⟨t⟩ stem + ⟨eyen⟩ (< French et-un)
+        expect(numberToWords(22)).toBe("vennde"); // the ⟨nn⟩ stem before units 2–7
+        expect(numberToWords(29)).toBe("ventnèf"); // the ⟨t⟩ stem before units 8–9
+        expect(numberToWords(31)).toBe("tranteyen");
+        expect(numberToWords(555)).toBe("senk san senkannsenk");
+        expect(numberToWords(12345)).toBe("douz mil twa san karannsenk");
+        expect(numberToWords(1000000)).toBe("en milyon");
+        expect(numberToWords(1000000000)).toBe("en milya");
+    });
+
+    test("★ numbers: the vigesimal 70/80/90 band (NOT septante/octante/nonante)", () => {
+        expect(numberToWords(70)).toBe("swasanndis"); // 60 + 10
+        expect(numberToWords(71)).toBe("swasannonz"); // 60 + 11
+        expect(numberToWords(79)).toBe("swasanndiznèf"); // 60 + 19
+        expect(numberToWords(80)).toBe("katreven"); // kat × ven = four twenties
+        expect(numberToWords(81)).toBe("katrevenen"); // irregular ⟨en⟩, not *katreveneyen
+        expect(numberToWords(90)).toBe("katrevendis"); // 4×20 + 10
+        expect(numberToWords(91)).toBe("katrevenonz"); // 4×20 + 11
+        expect(numberToWords(99)).toBe("katrevendiznèf"); // 4×20 + 19
+    });
+
+    test("numbers: ⟨dis⟩ elides before a magnitude noun (LSP 'di mil', 'di milyon')", () => {
+        expect(numberToWords(10000)).toBe("di mil");
+        expect(numberToWords(100000)).toBe("san mil");
+        expect(numberToWords(10000000)).toBe("di milyon");
+    });
+
+    test("numbers read through the g2p", () => {
+        expect(ht.text("70").trim()).toBe("swasãndis"); // ⟨ann⟩ → nasal vowel + [n]
+        expect(ht.text("99").trim()).toBe("katɣevɛ̃diznɛf"); // ⟨r⟩→ɣ, ⟨en⟩→ɛ̃
+        expect(ht.text("22").trim()).toBe("vɛ̃nde"); // ⟨enn⟩ → [ɛ̃n] (contrast a bare ⟨en⟩ → [ɛ̃])
     });
 });

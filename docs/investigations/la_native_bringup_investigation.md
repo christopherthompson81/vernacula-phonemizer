@@ -84,3 +84,32 @@ since the hiatus is with the PRECEDING vowel). → **91.7% → 92.1% folded**. F
 nudged 0.90→0.88 (the reviewer flagged 1.7pp headroom as tight). Everything else
 (robustness on empty/all-consonant/uppercase/stray-mark input, the placeStress
 fixes, the 2 non-circular folds, wiring) verified clean and merge-ready.
+
+## Run 4 — cardinal numbers (2026-07-29)
+
+**Question.** `phonemize("<int>", "la")` leaked the digit string. Do MACRONIZED numeral spellings survive the
+g2p, and does the subtractive (duodē-/ūndē-) pattern compose mechanically?
+
+**Command.** `npx tsx <scratch>/numwords.mts la` (49 candidate numerals standalone), then
+`npx tsx <scratch>/probe.mts la`.
+
+**Raw findings.**
+- All 49 numerals phonemize non-empty and macron length lands correctly: `ūnus`→[ˈuːnʊs] (an unmacronized
+  ⟨unus⟩ would have surfaced [ˈʊnʊs], so macronized spellings are mandatory in the table),
+  `duodēvīgintī`→[duɔdeːwiːˈɡɪntiː], `centum`→[ˈkɛntũː] (the final ⟨-um⟩ nasalization applies to numerals too),
+  `mīlle`→[ˈmiːllɛ], `mīlia`→[ˈmiːlia].
+- **The subtractive pattern is fully mechanical**: `duodē`/`ūndē` + the NEXT round ten. Only wrinkle: the "next
+  ten" after 90 is `centum`, so `TENS` needs a "100" entry to produce duodēcentum / ūndēcentum (A&G §133).
+  Without it, 98/99 hit a `tens[String(100)]` miss — the exact SLOT-GAP signature the spec warns about.
+- **Inflection.** Citation form chosen = masculine nominative throughout (ūnus, duo, trēs, ducentī). ONE
+  structural override kept: a count of `mīlia` takes neuter agreement, and only three word shapes differ
+  (ūnus→ūna, trēs→tria, -ntī→-nta), so a 3-case `neuter()` map buys `tria mīlia` / `ducenta mīlia` cheaply.
+  Everything else in the table is indeclinable.
+- **Two documented departures from Classical usage** (unavoidable for arbitrary digit strings): 0 → `nihil`
+  (no Classical zero cardinal); 10⁶ → neo-Latin `mīlliō`/`mīlliōnēs`, 10⁹ → `mīlliardum`. The Classical
+  million is the numeral-adverb periphrasis `deciēs centēna mīlia` (A&G §138.b), which does NOT generalise —
+  2,000,000 needs `vīciēs`, 3,000,000 `triciēs`, and the adverb series runs out. Rejected on those grounds.
+
+**Result.** Probe CLEAN for the whole target set. Implementation: `src/languages/latin/numbers.ts` (Pattern B —
+la has no `.jsonc`, so the table lives in the numbers module beside the g2p tables in `latin.ts`), cited to
+Allen & Greenough §§132–138.

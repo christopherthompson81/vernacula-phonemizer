@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord } from "../src/languages/aragonese/aragonese.ts";
+import { numberToWords } from "../src/languages/aragonese/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Aragonese / aragonés (an) — Ibero-Romance (Pyrenean), a Spanish-shaped shallow g2p.
@@ -30,5 +31,23 @@ describe("Aragonese (aragonés) canonical IPA", () => {
 
     test("registry wiring", () => {
         expect(getPhonemizer("an").text("Chesús").trim()).toBe("t͡ʃesus");
+    });
+
+    // NUMBERS — decimal; the twenties FUSE (vintiun) while 30–90 take the ⟨y⟩ connector; 16–19 are the analytic
+    // deci- series. Source: Mal de Lenguas "Los números en aragonés" + omniglot (aragonese.jsonc).
+    test("numbers: units, the fused twenties, the ⟨y⟩ connector, hundreds, thousands, millions", () => {
+        expect(numberToWords(7)).toBe("siete");
+        expect(numberToWords(16)).toBe("decisiéis"); // the deci- series, not Spanish dieciséis
+        expect(numberToWords(21)).toBe("vintiun"); // fused, one word
+        expect(numberToWords(31)).toBe("trenta y un"); // the ⟨y⟩ connector from 30 up
+        expect(numberToWords(555)).toBe("cincocientos cinquanta y cinco");
+        expect(numberToWords(12345)).toBe("dotze mil trecientos quaranta y cinco");
+        expect(numberToWords(1000000)).toBe("un millón");
+        expect(numberToWords(1000000000)).toBe("mil millons"); // Ibero long scale
+    });
+
+    test("numbers read through the g2p", () => {
+        expect(getPhonemizer("an").text("21").trim()).toBe("bintjun"); // ⟨v⟩→b (betacism)
+        expect(getPhonemizer("an").text("100").trim()).toBe("θjent"); // cient — distinción ⟨c⟩+i → θ
     });
 });

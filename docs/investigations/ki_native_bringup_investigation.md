@@ -81,3 +81,34 @@ Net: the phonology is now **dual-authority-grounded** (Englebretson sketch gramm
 top of the 1062-word Wiktionary referee. Verdict stays **🔷** (still one orthography-matched NUMERIC referee; the
 paper corroborates but is not a second word→IPA referee — the ak-cites-Dolphyne / mos-cites-FSI pattern). No code
 change; 99.4% unchanged.
+
+## Run — cardinal number compositor — 2026-07-29
+
+Question: same digit leak. Kikuyu and Kamba were both in scope — do they share a formation?
+
+**Answer: yes, the same E5x shape with different words**, so the ALGORITHM was written once in
+`src/languages/kikuyu/e5xNumbers.ts` and `src/languages/kamba/numbers.ts` imports it (a cross-language import
+inside src/languages/, the existing house pattern — src/core/ was NOT touched, per the task's hard constraint).
+
+**Decision: the CITATION / COUNTING series** (ĩmwe, igĩrĩ, ithatũ …) — the class-5/8 i-/ĩ- shape used counting
+aloud. A bare integer gives the adjectival 1–5 no noun to agree with.
+
+Sources: Omniglot "Numbers in Kikuyu (Ndari cia Gĩgĩkũyũ)" (1–20, mĩrongo tens, igana rĩmwe, ngiri ĩmwe);
+lughayangu.com "Numbers in Gikuyu" (zero = kĩbũgũ, the magana hundreds series, mĩrioni ĩmwe).
+
+Raw findings that shaped the code:
+- The composition rule ("components juxtaposed, `na` only before the LAST one") is pinned by the Kamba side, not
+  the Kikuyu side — see the kam log. Kikuyu's two-component numerals (ikũmi na ĩmwe, mĩrongo ĩrĩ na ĩmwe) are
+  consistent with it; the multi-component behaviour is extrapolated from the Kamba attestations.
+- The tens and hundreds multiplier series are DIFFERENT tables: mĩrongo takes ĩrĩ (only 2 changes), magana takes
+  the cl.6 ma- series (meerĩ, matatũ attested; mana/matano extrapolated). 6–9 never inflect.
+- No word for "billion" was found and none was invented: 10⁹ composes as **mĩrioni ngiri ĩmwe** ("a thousand
+  million"), which follows the attested multiplicative pattern ngiri igana rĩmwe = 100 000.
+
+Implementation: Pattern B — `numbers.ts` + `e5xNumbers.ts` + a `numbers` block in kikuyu.jsonc. Probe CLEAN.
+Tests added to test/kikuyu.test.ts.
+
+**Source-hunt dead ends (kept per the negative-results rule):** languagesandnumbers.com repeatedly
+`socket hang up` (never retrievable this session); salanguages.com + sesotho.web.za `ECONNREFUSED`; Quizlet 403;
+the Peace Corps *Sepedi* PDF 403. WebFetch's summariser also silently truncated the Omniglot tables on the first
+pass — asking for an explicit "N = form" list per numeral was what finally got verbatim rows out of it.

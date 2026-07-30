@@ -41,4 +41,31 @@
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
+
+    // ── CARDINAL NUMBER WORDS ────────────────────────────────────────────────────────────────────────────────────
+    // Source: omniglot.com/language/numbers/bavarian.htm (the Bairisch cardinal table). Bavarian is units-FIRST
+    // like German but the connector has reduced from ⟨und⟩ to a bare linking ⟨-a-⟩: the source gives 21 as
+    // "oana-zwånzg" and 22 as "zwoara-zwånzg", i.e. unit-stem + a + tens, fused into one word.
+    //
+    // JUDGMENT CALLS (Bavarian has NO codified orthography, and the source lists 2–4 spellings per numeral):
+    //   1. The ⟨å⟩-using Bavarian-Wikipedia convention is picked wherever the source offers a choice (åcht, åchzg,
+    //      zwånzg) — that is the convention the rest of this manifest and the wikipron referee are written in.
+    //   2. The optional emphatic/counting ⟨-e⟩ (fiare, seggse, zwånzge, dreißge) is DROPPED: the bare stem is the
+    //      figure-reading form. Likewise "oans" not "oas/àns", "zwoa" not "zwà", "fimf" not "fümf".
+    //   3. Teens: the source's ⟨-zea⟩ series (dreizea, fiazea, fuchzea …) is used over the ⟨-zen⟩ variant.
+    //   4. `compoundOnes` carries the linking stems the source shows for 1 and 2 — "oan-" (oanazwånzg, not
+    //      *oansazwånzg) and "zwoar-" (zwoarazwånzg, with the hiatus-breaking ⟨r⟩); 3–9 link on their bare stem.
+    "numbers": {
+        "ones": [
+            "null", "oans", "zwoa", "drei", "fiar", "fimf", "sechs", "siem", "åcht", "nein",
+            "zeah", "öif", "zwöif", "dreizea", "fiazea", "fuchzea", "sechzea", "sibzea", "åchzea", "neizea"
+        ],
+        "tens": ["", "", "zwånzg", "dreißg", "fiazg", "fuchzg", "sechzg", "sibzg", "åchtzg", "neinzg"],
+        "compoundOnes": ["", "oan", "zwoar"],
+        "connector": "a",
+        "hundred": { "one": "hundad", "word": "hundad" },
+        "thousand": { "one": "dausnd", "word": "dausnd" },
+        "million": { "one": "oa Million", "plural": "Millionen" },
+        "billion": { "one": "oa Milliarde", "plural": "Milliardn" }
+    },
 }

@@ -46,6 +46,38 @@ describe("Georgian canonical IPA — greedy g2p (Mkhedruli, three-way stop contr
         expect(createGeorgian().text("სახლი჻ ბაღი").trim()).toBe("saχli  .  baʁi"); // ჻ → sentence pause
     });
 
+    // ★ VIGESIMAL cardinal numbers (numbers.ts + the georgian.jsonc table). 20–99 is score·20 + a 1–19 remainder
+    // joined by -და- as ONE word; from 100 up the groups are separate words and a numeral followed by a smaller
+    // number drops its final ⟨ი⟩ (ასი→ას, ათასი→ათას).
+    test("★ cardinal numbers are VIGESIMAL: score·20 + remainder joined by -და-", () => {
+        const ka = createGeorgian();
+        expect(ka.text("20").trim()).toBe("ɔt͡sʰi"); // ოცი — the bare score
+        expect(ka.text("21").trim()).toBe("ɔt͡sʰdaɛɾtʰi"); // ოცდაერთი = 20 + 1
+        expect(ka.text("30").trim()).toBe("ɔt͡sʰdaatʰi"); // ოცდაათი = 20 + 10 (there is no "thirty" word)
+        expect(ka.text("45").trim()).toBe("ɔɾmɔt͡sʰdaχutʰi"); // ორმოცდახუთი = 2×20 + 5
+        expect(ka.text("50").trim()).toBe("ɔɾmɔt͡sʰdaatʰi"); // ორმოცდაათი = 2×20 + 10
+        expect(ka.text("67").trim()).toBe("samɔt͡sʰdaʃvidi"); // სამოცდაშვიდი = 3×20 + 7
+        expect(ka.text("70").trim()).toBe("samɔt͡sʰdaatʰi"); // სამოცდაათი = 3×20 + 10
+        expect(ka.text("89").trim()).toBe("ɔtʰχmɔt͡sʰdat͡sʰχɾa"); // ოთხმოცდაცხრა = 4×20 + 9
+        expect(ka.text("90").trim()).toBe("ɔtʰχmɔt͡sʰdaatʰi"); // ოთხმოცდაათი = 4×20 + 10
+        expect(ka.text("99").trim()).toBe("ɔtʰχmɔt͡sʰdat͡sʰχɾamɛtʼi"); // ოთხმოცდაცხრამეტი = 4×20 + 19 (a TEEN attaches too)
+    });
+
+    test("cardinal numbers: units, hundreds with ⟨ი⟩-truncation, thousands, millions", () => {
+        const ka = createGeorgian();
+        expect(ka.text("7").trim()).toBe("ʃvidi"); // შვიდი
+        expect(ka.text("8").trim()).toBe("ɾva"); // რვა (no final ⟨ი⟩)
+        expect(ka.text("100").trim()).toBe("asi"); // ასი — group-final, keeps ⟨ი⟩
+        expect(ka.text("101").trim()).toBe("as ɛɾtʰi"); // ★ ას ერთი — the hundred TRUNCATES before a remainder
+        expect(ka.text("555").trim()).toBe("χutʰas ɔɾmɔt͡sʰdatʰχutʰmɛtʼi"); // ხუთას ორმოცდათხუთმეტი (2×20+15)
+        expect(ka.text("999").trim()).toBe("t͡sʰχɾaas ɔtʰχmɔt͡sʰdat͡sʰχɾamɛtʼi"); // ცხრაას ოთხმოცდაცხრამეტი
+        expect(ka.text("1000").trim()).toBe("atʰasi"); // ათასი — no *ერთი ათასი
+        expect(ka.text("1001").trim()).toBe("atʰas ɛɾtʰi"); // ★ ათას ერთი — the thousand truncates
+        expect(ka.text("12345").trim()).toBe("tʰɔɾmɛtʼi atʰas samas ɔɾmɔt͡sʰdaχutʰi"); // თორმეტი ათას სამას ორმოცდახუთი
+        expect(ka.text("1000000").trim()).toBe("ɛɾtʰi miliɔni"); // ერთი მილიონი (borrowed noun — keeps ერთი)
+        expect(ka.text("1000000000").trim()).toBe("ɛɾtʰi miliaɾdi"); // ერთი მილიარდი
+    });
+
     test("Mtavruli titlecase (all-caps) lowercases to Mkhedruli — not silently dropped", () => {
         expect(phonemizeWord("ᲓᲐᲕᲔ")).toBe(phonemizeWord("დავე")); // U+1C90-block → the U+10D0 table keys
         expect(phonemizeWord("ᲡᲐᲥᲐᲠᲗᲕᲔᲚᲝ")).toBe("sakʰaɾtʰvɛlɔ"); // all-caps "Georgia"

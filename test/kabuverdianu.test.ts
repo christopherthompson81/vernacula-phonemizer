@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createKabuverdianu, phonemizeWord } from "../src/languages/kabuverdianu/kabuverdianu.ts";
+import { numberToWords } from "../src/languages/kabuverdianu/numbers.ts";
 
 // Kabuverdianu / kriolu (kea) — Cape Verdean Creole (Portuguese-lexified, ~870k), the ALUPEC/AK phonemic orthography,
 // Santiago variety. The FIRST creole with a bespoke engine in the fleet. No machine referee exists (wikipron has no
@@ -49,5 +50,26 @@ describe("Kabuverdianu canonical IPA — ALUPEC g2p + nasalization (anchored on 
 
     test("clause assembly", () => {
         expect(kea.text("Bon dia, Kabu Verdi!").trim()).toBe("bˈõ dˈiɐ , kˈɐbu vˈeɾdi !");
+    });
+
+    // NUMBERS — Santiago/Badiu ALUPEC. Fully decimal; the tens JUXTAPOSE with their unit (the sources write the
+    // link as a hyphen: vinti-un, sunkuénti-sax) so there is no ⟨i⟩ connector word; 16–19 are the analytic
+    // Portuguese-style ⟨diza-⟩ series. Source: Wiktionary kea cardinals + omniglot (kabuverdianu.jsonc).
+    test("numbers: units, the juxtaposed tens, hundreds, thousands, millions", () => {
+        expect(numberToWords(7)).toBe("seti");
+        expect(numberToWords(16)).toBe("dizasais"); // the ⟨diza-⟩ series (Pt dezasseis, not Es dieciséis)
+        expect(numberToWords(21)).toBe("vinti un"); // juxtaposed — no connector
+        expect(numberToWords(31)).toBe("trinta un");
+        expect(numberToWords(100)).toBe("sen");
+        expect(numberToWords(555)).toBe("kinhentus sinkuenta sinku");
+        expect(numberToWords(12345)).toBe("duzi mil trezentus korenta sinku");
+        expect(numberToWords(1000000)).toBe("un milion");
+        expect(numberToWords(1000000000)).toBe("mil milion"); // Pt-style "mil milhões"
+    });
+
+    test("numbers read through the g2p (nasalization + accent-or-penult stress)", () => {
+        expect(kea.text("21").trim()).toBe("vˈĩti ˈũ"); // coda ⟨n⟩ nasalizes and is absorbed
+        expect(kea.text("100").trim()).toBe("sˈẽ"); // sen
+        expect(kea.text("0").trim()).toBe("zˈɛɾu"); // zéru — the acute marks the OPEN ⟨é⟩ [ɛ] + stress
     });
 });

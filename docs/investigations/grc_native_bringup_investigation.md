@@ -73,3 +73,36 @@ EMIT [r̥], canonical, backbone-folded for the referee like the digamma).
 referee) but the Allen-standard reconstruction, authored independently. Floor 0.95.** Full suite green, typecheck
 clean. Deferred: the Koine/Byzantine reading traditions (a period param), alphabetic numerals, unmarked-macron
 length on α ι υ, the archaic digamma ϝ (emitted [w], the referee drops it).
+
+## Run 5 — cardinal numbers (2026-07-29)
+
+**Question.** `phonemize("<int>", "grc")` leaked the digit string. Do fully-accented POLYTONIC numerals survive
+the g2p, and what magnitude structure should a Greek compositor use above 10,000?
+
+**Command.** `npx tsx <scratch>/numwords.mts grc` (48 candidate numerals standalone), then
+`npx tsx <scratch>/probe.mts grc`.
+
+**Raw findings.**
+- All 48 numerals phonemize non-empty and the diacritics do real work: `εἷς`→[heː́s] — the rough breathing sits
+  on the SECOND element of the ⟨ει⟩ diphthong and the engine's "rough on the 2nd vowel of an initial diphthong"
+  branch catches it, so the [h] is not lost. A bare unaccented ⟨εις⟩ would have. `μυριάς`→[myriás],
+  `χίλιοι`→[kʰílioi̯], `καὶ`→[kaí̯] (grave and acute are the same emitted mark, so the pre-word grave costs
+  nothing phonetically). Fully-accented polytonic spellings are therefore mandatory in the table.
+- **★ Compound order (the judgment call).** Smyth §347 lists BOTH `εἷς καὶ εἴκοσι` (units-first) and
+  `εἴκοσι καὶ εἷς` (tens-first) for 21–99. Chose TENS-FIRST/descending and applied it uniformly at every
+  magnitude: one rule then covers 25, 555 and 12,345 alike, and the spoken order tracks the written digit
+  order — the property that matters when reading figures aloud. Units-first would invert only the last two
+  elements and read against the digits. EXCEPTION kept: 13/14 use Smyth's own units-first phrases
+  `τρεῖς καὶ δέκα` / `τέτταρες καὶ δέκα`, which are the attested forms there (15–19 are fused -καίδεκα).
+- **★ Magnitude structure: MYRIAD (10⁴) grouping, not a thousands ladder.** Greek's top simple magnitude is
+  μύριοι/μυριάς = 10,000, and the nesting is genitive (Archimedes' μυριὰς μυριάδων = 10⁸). So the compositor
+  decomposes in base 10,000, composes each 4-digit group with the <10,000 machinery (which uses the
+  multiplicative χίλιοι series: δισχίλιοι, τετρακισχίλιοι…), and tags each group `μυριάδες` + one `μυριάδων`
+  per extra level. Consequences: 10⁶ = `ἑκατόν μυριάδες`, 10⁹ = `δέκα μυριάδες μυριάδων`. A Western
+  million/billion ladder was rejected as an anachronism for a 5th-c. Attic engine.
+- 0 → `οὐδέν` (no Classical zero cardinal); flagged in the module header, not naturalised silently.
+- Citation form for the inflecting 1–4 and the -κόσιοι/-χίλιοι adjectives: masculine nominative
+  (εἷς, δύο, τρεῖς, τέτταρες). ATTIC `τέτταρες`, not Ionic/koine `τέσσαρες`, matching the engine's target.
+
+**Result.** Probe CLEAN for the whole target set. Implementation: `src/languages/ancientgreek/numbers.ts`
+(Pattern B — grc has no `.jsonc`), cited to Smyth §§347–354.

@@ -59,3 +59,43 @@ had flagged as contested, and upgrades this from Wikipedia/ASJP-grounded to GRAM
 DEFERRED (documented): Schadeberg's rare NASALIZED continuant consonants ṽ/l̃/h̃/ỹ/w̃ (no clean orthographic marking)
 and the morphophonological N+C rules (N+k→h in the class-9 prefix). Provenance/convention/maturity updated to cite
 Schadeberg as the primary source. Engine review found no code bugs. 🔷 single-source, now grammar-grounded.
+
+## Run — cardinal number compositor — 2026-07-29
+
+Question: Umbundu was WORSE than a digit leak — the TOKEN handler had no `m[2]` branch at all, so digits were
+silently SWALLOWED (probe: EMPTY). Also: is the traditional system quinary?
+
+**Yes, partly.** 1–5 are adjectival concording numerals (mosi, vali, tatu, kwãla, tãlo) but 6–9 are NOUNS on a
+"hand/group" base — epandu (6), **epandu vali** (7), ecelãla (8), ecea (9) — and therefore never inflect. That is
+why they recur unchanged in every multiplier slot (akwi epandu = 60, ovita epandu = 600); the apparent repetition
+is correct, not a collapsed table.
+
+**Decision: the CITATION / COUNTING series** for a bare integer, with a separate post-`la` additive series for
+the units slot of a compound.
+
+Sources: Filomena Camacho, "Números em Umbundo" (aeppea.wordpress.com, 2013-02-21) — by far the fullest list
+reached: units, teens (ekui la mosi … ekui l'ecea), tens (akui avali … akui ecea), hundreds (ocita, ovita vivali …
+ovita ecea), ohulukãi (1 000), ohulua (10⁶); cross-checked against Omniglot "Numbers in Umbundu".
+
+Raw findings / judgement calls:
+- FOUR distinct multiplier series, kept as four tables: bare citation; the post-`la` additive series, which is
+  IRREGULAR in the source (3 and 5 take vi- — "ekui la vitatu", "ekui la vitãlo" — but 2 and 4 do not); cl.6 a-
+  after akwi; cl.8 vi- after ovita.
+- The connective `la` ELIDES to `l'` before a vowel — attested in Camacho's "ekui l'epandu / l'ecelãla / l'ecea".
+  Generalised to every vowel-initial follower, so 555 = "ovita vitãlo l'akwi atãlo la vitãlo". Through the g2p the
+  apostrophe drops and the elided form glues into one phonological word (`l'epandu` → `lepaⁿdu`), which is right.
+- ORTHOGRAPHY: used the ⟨w⟩ spellings (kwãla, ekwi, akwi, ohulukãyi) over Camacho's ⟨u⟩-hiatus spellings (kuãla,
+  ekui, ohulukãi), matching standard Umbundu orthography and this manifest's grapheme table; Omniglot's tone
+  accents dropped (umbundu.ts strips tone anyway).
+- GAPS, disclosed rather than papered over: (a) no plural of `ohulukãyi` found in any reachable source, so
+  multi-thousands use the noun invariant with a cl.8 multiplier ("ohulukãyi vivali" = 2 000) rather than inventing
+  a prefix; (b) no word for 10⁹ — composes as "ohulua ohulukãyi"; (c) NO source reached has a word for zero, so
+  `zero` is entered as the Portuguese loan universally used for arithmetic in Angola and is flagged as a loan.
+
+Implementation: Pattern B — `src/languages/umbundu/numbers.ts` + a `numbers` block in umbundu.jsonc + the missing
+number branch wired into umbundu.ts. Probe CLEAN. Tests added to test/umbundu.test.ts.
+
+**Source-hunt dead ends (kept per the negative-results rule):** languagesandnumbers.com repeatedly
+`socket hang up` (never retrievable this session); salanguages.com + sesotho.web.za `ECONNREFUSED`; Quizlet 403;
+the Peace Corps *Sepedi* PDF 403. WebFetch's summariser also silently truncated the Omniglot tables on the first
+pass — asking for an explicit "N = form" list per numeral was what finally got verbatim rows out of it.

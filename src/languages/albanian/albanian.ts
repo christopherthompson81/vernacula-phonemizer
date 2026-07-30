@@ -8,16 +8,20 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeNumberToWords, type AlbanianNumbers } from "./numbers.ts";
 
 interface AlbanianDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    numbers: AlbanianNumbers;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<AlbanianDef>(import.meta.url, "albanian.jsonc");
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
+/** Integer → Standard Albanian numeral words (decimal + the obligatory ⟨e⟩ connector; see numbers.ts). */
+export const numberToWords = makeNumberToWords(DEF.numbers);
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 const VOWEL = new Set(["a", "ɛ", "i", "o", "u", "y", "ə"]);
 const SIBILANT = new Set(["s", "z", "ʃ", "ʒ"]);
@@ -69,14 +73,15 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A word (Albanian Latin letters incl. ç ë) / number / punctuation token. Numbers deferred.
+// A word (Albanian Latin letters incl. ç ë) / number / punctuation token.
 const TOKEN = /([a-zçëA-ZÇË]+)|(\d+)|([.!?…,;:])/giu;
 
 class AlbanianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // Numbers: compose the Albanian numeral phrase, then phonemize each word through the same g2p.
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
