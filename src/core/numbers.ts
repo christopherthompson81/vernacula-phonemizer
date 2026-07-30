@@ -145,6 +145,130 @@ export const westernNumberWords: NumberComposer = (n, d) => {
     return [...westernNumberWords(b, d), d.magnitudes.billion!, ...(r ? westernNumberWords(r, d) : [])];
 };
 
+/**
+ * A Dravidian magnitude/hundred word's forms. `bare` and `combining` are the minimum — the combining
+ * ("oblique") form is the one used when a remainder follows, and it is the joint that holds an Indian
+ * numeral together: Kannada ಸಾವಿರದ, Malayalam ആയിരത്തി, Telugu నూట. `plural`/`pluralOblique` exist for
+ * the languages that ALSO inflect the noun for a count above one (Telugu రెండు వందలు / రెండు వందల);
+ * where they are absent the bare/combining pair is used at every count, which is Kannada and Malayalam.
+ */
+export interface DravidianForms {
+    bare: string;
+    combining: string;
+    plural?: string;
+    pluralOblique?: string;
+}
+
+/**
+ * The data a Dravidian numeral needs beyond `indicNumberWords`. See `dravidianNumberWords` for why the
+ * three extra fields exist; each of them is a thing `indicNumberWords` structurally cannot say.
+ */
+export interface DravidianNumbersDef {
+    units: string[]; // 0..9
+    teens: string[]; // 10..19
+    tens: Record<string, string>; // "20".."90"
+    /** Fused 21-99, keyed by the number. Absent ⇒ the two-word ten+unit reading (Telugu). */
+    compound?: Record<string, string>;
+    /** Suppletive round hundreds, keyed by the COUNT of hundreds (kn ಇನ್ನೂರು, ml ഇരുന്നൂറ്). */
+    hundredForms?: Record<string, DravidianForms>;
+    /** Suppletive round thousands, keyed by the COUNT of thousands (ml രണ്ടായിരം, മൂവായിരം). */
+    thousandForms?: Record<string, DravidianForms>;
+    magnitudeForms: {
+        hundred: DravidianForms;
+        thousand: DravidianForms;
+        lakh: DravidianForms;
+        crore: DravidianForms;
+    };
+}
+
+type MagnitudeKey = keyof DravidianNumbersDef["magnitudeForms"];
+
+/** The form a noun takes at this count, with this much following it. */
+const dravidianForm = (f: DravidianForms, count: number, hasRemainder: boolean): string =>
+    count === 1
+        ? (hasRemainder ? f.combining : f.bare)
+        : (hasRemainder ? (f.pluralOblique ?? f.combining) : (f.plural ?? f.bare));
+
+/** 1-99. The fused `compound` spelling wins; without one, the ten and the unit are two words. */
+function dravidianBelow100(n: number, d: DravidianNumbersDef): string[] {
+    if (n <= 0) return [];
+    if (n < 10) return [d.units[n]!];
+    if (n < 20) return [d.teens[n - 10]!];
+    const t = Math.floor(n / 10) * 10,
+        u = n % 10;
+    if (u === 0) return [d.tens[String(t)]!];
+    const fused = d.compound?.[String(n)];
+    return fused !== undefined ? [fused] : [d.tens[String(t)]!, d.units[u]!];
+}
+
+/** 1-999. A suppletive hundred is ONE word; a count of exactly one is never spelled out. */
+function dravidianBelow1000(n: number, d: DravidianNumbersDef): string[] {
+    const h = Math.floor(n / 100),
+        r = n % 100;
+    if (h === 0) return dravidianBelow100(r, d);
+    const sup = d.hundredForms?.[String(h)];
+    if (sup !== undefined) return [r > 0 ? sup.combining : sup.bare, ...dravidianBelow100(r, d)];
+    const mag = dravidianForm(d.magnitudeForms.hundred, h, r > 0);
+    return h === 1
+        ? [mag, ...dravidianBelow100(r, d)]
+        : [d.units[h]!, mag, ...dravidianBelow100(r, d)];
+}
+
+/** One magnitude group: its count, then the noun in the form that count and that remainder select. */
+function dravidianGroup(
+    key: MagnitudeKey,
+    count: number,
+    hasRemainder: boolean,
+    d: DravidianNumbersDef,
+): string[] {
+    const sup = key === "thousand" ? d.thousandForms?.[String(count)] : undefined;
+    if (sup !== undefined) return [hasRemainder ? sup.combining : sup.bare];
+    const mag = dravidianForm(d.magnitudeForms[key], count, hasRemainder);
+    return count === 1 ? [mag] : [...dravidianBelow1000(count, d), mag];
+}
+
+/**
+ * DRAVIDIAN number composition — Indian 2-2-3 grouping like `indicNumberWords`, but able to say the
+ * three things that composer structurally cannot, each of which made a whole language's numerals wrong:
+ *
+ *   1. FUSION. 21-99 is ONE word (kn ಇಪ್ಪತ್ತೊಂದು, ml ഇരുപത്തിയൊന്ന്), not two. `indicNumberWords` has a
+ *      `compound` map for this, so this reason alone would not need a new composer; the next two do.
+ *   2. SUPPLETIVE ROUND HUNDREDS/THOUSANDS. 200 is kn ಇನ್ನೂರು / ml ഇരുന്നൂറ്, 900 is ml തൊള്ളായിരം, and
+ *      2000 is ml രണ്ടായിരം — single fused stems, not "two hundred"/"two thousand".
+ *      `NumbersDef.hundreds` exists but only `westernNumberWords` reads it, and nothing expresses the
+ *      thousands at all.
+ *   3. COMBINING (oblique) MAGNITUDE FORMS. When a remainder follows, the noun changes: kn 1976 is
+ *      ಸಾವಿರದ ಒಂಬೈನೂರಾ ಎಪ್ಪತ್ತಾರು, ml ആയിരത്തി തൊള്ളായിരത്തി എഴുപത്തിയാറ്. `indicNumberWords` emits the
+ *      bare noun everywhere, so ml 1976 read ആയിരം ഒമ്പത് നൂറ് എഴുപത് ആറ് — five words for three, with
+ *      the wrong hundred and no linkage.
+ *
+ * WHY IT IS HERE AND NOT A FOURTH PRIVATE COPY. Tamil, Telugu and Kannada each wrote their own composer
+ * for overlapping subsets of the above; the playbook recorded that duplication as evidence and named
+ * Malayalam as the trigger to consolidate. It is, so this is that consolidation — te, kn and ml all read
+ * it, and each of their corpus diffs is byte-identical across the migration.
+ *
+ * TAMIL DOES NOT MIGRATE, and the reason is recorded in tamil/numbers.ts: it fuses the COUNT into the
+ * thousand for counts of 21-99 (23,000 = இருபத்தி மூவாயிரம், the ten's oblique plus a fused thousand),
+ * and it spells a count of one as an attributive ஒரு before லட்சம்/கோடி. Neither is expressible here,
+ * and inventing knobs for one consumer is what this consolidation exists to avoid.
+ */
+export function dravidianNumberWords(n: number, d: DravidianNumbersDef): string[] {
+    if (!Number.isFinite(n) || n < 0) return [];
+    if (n === 0) return [d.units[0]!];
+    const parts: string[] = [];
+    const crore = Math.floor(n / 10000000);
+    n %= 10000000;
+    const lakh = Math.floor(n / 100000);
+    n %= 100000;
+    const thou = Math.floor(n / 1000);
+    n %= 1000;
+    if (crore > 0) parts.push(...dravidianGroup("crore", crore, lakh + thou + n > 0, d));
+    if (lakh > 0) parts.push(...dravidianGroup("lakh", lakh, thou + n > 0, d));
+    if (thou > 0) parts.push(...dravidianGroup("thousand", thou, n > 0, d));
+    parts.push(...dravidianBelow1000(n, d));
+    return parts;
+}
+
 /** Render an integer to canonical IPA: compose it to number words (`compose`, default Indic), then map
  *  each word through `word` (a native G2P word→IPA renderer). The generic, system-agnostic seam. */
 export function renderNumber(

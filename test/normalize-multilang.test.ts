@@ -252,12 +252,13 @@ describe("symbol normalization — FLEURS-priority round", () => {
      * it fixed the same two defects in its own private composer and then measured its relatives.
      */
     test("Dravidian reads tens-then-unit, and a bare hundred has no 'one'", () => {
-        // kn has since moved OFF this composer entirely (#562, the Kannada run): it fuses 21-99 into one
-        // word and has suppletive hundreds, neither of which `indicNumberWords` can express, so it now
-        // composes in src/languages/kannada/numbers.ts. The assertion is kept because the READING it
-        // pins — tens-then-unit, and a bare hundred with no "one" — is still the thing under test.
+        // kn and ml have since moved OFF this composer entirely (#562): both fuse 21-99 into one word
+        // and have suppletive hundreds, neither of which `indicNumberWords` can express, so both now
+        // compose through the SHARED Dravidian composer in core/numbers.ts. The assertions are kept
+        // because the READING they pin — tens-then-unit, and a bare magnitude with no "one" — is still
+        // the thing under test; the ml one was asserting the two-word defect and is corrected here.
         expect(phonemize("21", "kn")).toBe("ˈipːat̪ːõn̪d̪u"); // was "one twenty", then two words
-        expect(phonemize("21", "ml")).toBe("ˈiɾubat̪ɨ ˈonːɨ");
+        expect(phonemize("21", "ml")).toBe("ˈiɾubat̪ːijonːɨ"); // was ˈiɾubat̪ɨ ˈonːɨ, two words
         expect(phonemize("100", "kn")).toBe("nˈuːɾu");   // was "one hundred"
         expect(phonemize("1000", "ml")).toBe("ˈaːjiɾam");
         // …and lakh/crore too. The flag applied to hundred and thousand ONLY when first added, so a

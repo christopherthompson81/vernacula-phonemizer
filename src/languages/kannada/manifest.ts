@@ -9,13 +9,11 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
-import type { NumbersDef } from "../../core/numbers.ts";
+import type { DravidianForms, NumbersDef } from "../../core/numbers.ts";
 
-/** A magnitude noun's two forms: bare (nothing follows) and combining (a remainder follows). */
-export interface MagnitudeForms {
-    bare: string;
-    combining: string;
-}
+/** A magnitude noun's two forms: bare (nothing follows) and combining (a remainder follows).
+ *  Now the shared `DravidianForms` — the composer moved to core/numbers.ts (see numbers.ts). */
+export type MagnitudeForms = DravidianForms;
 
 export interface KannadaNumbers extends NumbersDef {
     teens: string[];

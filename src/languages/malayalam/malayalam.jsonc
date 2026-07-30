@@ -51,17 +51,104 @@
         "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
-    // NUMBERS — Malayalam spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes
-    // (Indic lakh/crore); 21-99 compound spellings are a bounded remaining task.
+    // NUMBERS — Malayalam spellings; canonical IPA DERIVED via the same G2P.
+    //
+    // The composer is the SHARED `dravidianNumberWords` (core/numbers.ts), not `indicNumberWords`:
+    // Malayalam is the fourth Dravidian language and the one the playbook named as the trigger to
+    // consolidate rather than write a fourth private composer. It needs all three things
+    // `indicNumberWords` cannot say — a fused 21-99, suppletive round hundreds AND thousands, and a
+    // combining magnitude form before a remainder.
+    //
+    // PROVENANCE. The units, teens and round tens were already here. Everything added below is derived
+    // from espeak-ng dictsource/ml_list, which spells the Malayalam numeral system out explicitly:
+    // `_2X`.._9X` (the tens' combining stems), `_0C0`.._9C0` / `_0C`.._9C` (round hundreds, bare and
+    // combining), `_1f`.._9f` (the unit stems that fuse into a thousand) and `_0M1x`/`_0M1`,
+    // `_0M2x`/`_0M2`, `_0M3` (the magnitude nouns). espeak is a PHONEME source and cannot hand over
+    // orthography, so every derived spelling was round-tripped back through this repo's own G2P and
+    // compared with espeak's own reading. Calibrated on the 28 spellings this file ALREADY shipped,
+    // that comparison agrees 27/28 — the one failure is espeak writing ഇരു- with its reduced vowel.
+    // Over the 116 derived spellings: 83 exact, 42 differing ONLY by the glide യ (below), 19 by a
+    // documented espeak notation quirk or self-contradiction, and NONE by a spelling disagreement.
+
     "numbers": {
         "units": ["പൂജ്യം", "ഒന്ന്", "രണ്ട്", "മൂന്ന്", "നാല്", "അഞ്ച്", "ആറ്", "ഏഴ്", "എട്ട്", "ഒമ്പത്"],
         "teens": ["പത്ത്", "പതിനൊന്ന്", "പന്ത്രണ്ട്", "പതിമൂന്ന്", "പതിനാല്", "പതിനഞ്ച്", "പതിനാറ്", "പതിനേഴ്", "പതിനെട്ട്", "പത്തൊമ്പത്"],
         "tens": { "20": "ഇരുപത്", "30": "മുപ്പത്", "40": "നാല്പത്", "50": "അമ്പത്", "60": "അറുപത്", "70": "എഴുപത്", "80": "എൺപത്", "90": "തൊണ്ണൂറ്" },
+
+        // FUSED 21-99. Malayalam writes ONE word — ഇരുപത്തിയൊന്ന്, never the two the old shared
+        // fallback emitted (ഇരുപത് ഒന്ന്). Formed regularly from the ten's COMBINING stem (espeak
+        // `_2X`.._9X`: ഇരുപത്തി, മുപ്പത്തി, നാല്പത്തി, അമ്പത്തി, അറുപത്തി, എഴുപത്തി, എൺപത്തി, തൊണ്ണൂറ്റി)
+        // plus the unit. A CONSONANT-initial unit (രണ്ട്, മൂന്ന്, നാല്) attaches directly; a
+        // VOWEL-initial one takes the glide യ and writes its vowel as a sign on it
+        // (ഇരുപത്തി + ഒന്ന് → ഇരുപത്തിയൊന്ന്, + ആറ് → ഇരുപത്തിയാറ്). espeak's phoneme string simply
+        // concatenates, so it neither confirms nor denies the glide — but [ij] is what the hiatus is
+        // actually realised as, and it is how Malayalam writes it. That is the whole of the 42
+        // "glide-only" differences in the validation above.
+        //
+        // espeak's `_8X` is the one entry that omits the linking -i (en.patt), and it is contradicted
+        // by espeak's OWN `_83`/`_84` (en.pattimu:nny, en.pattina:ly). The -i form is used.
+        "compound": {
+            "21": "ഇരുപത്തിയൊന്ന്", "22": "ഇരുപത്തിരണ്ട്", "23": "ഇരുപത്തിമൂന്ന്", "24": "ഇരുപത്തിനാല്", "25": "ഇരുപത്തിയഞ്ച്", "26": "ഇരുപത്തിയാറ്", "27": "ഇരുപത്തിയേഴ്", "28": "ഇരുപത്തിയെട്ട്", "29": "ഇരുപത്തിയൊമ്പത്",
+            "31": "മുപ്പത്തിയൊന്ന്", "32": "മുപ്പത്തിരണ്ട്", "33": "മുപ്പത്തിമൂന്ന്", "34": "മുപ്പത്തിനാല്", "35": "മുപ്പത്തിയഞ്ച്", "36": "മുപ്പത്തിയാറ്", "37": "മുപ്പത്തിയേഴ്", "38": "മുപ്പത്തിയെട്ട്", "39": "മുപ്പത്തിയൊമ്പത്",
+            "41": "നാല്പത്തിയൊന്ന്", "42": "നാല്പത്തിരണ്ട്", "43": "നാല്പത്തിമൂന്ന്", "44": "നാല്പത്തിനാല്", "45": "നാല്പത്തിയഞ്ച്", "46": "നാല്പത്തിയാറ്", "47": "നാല്പത്തിയേഴ്", "48": "നാല്പത്തിയെട്ട്", "49": "നാല്പത്തിയൊമ്പത്",
+            "51": "അമ്പത്തിയൊന്ന്", "52": "അമ്പത്തിരണ്ട്", "53": "അമ്പത്തിമൂന്ന്", "54": "അമ്പത്തിനാല്", "55": "അമ്പത്തിയഞ്ച്", "56": "അമ്പത്തിയാറ്", "57": "അമ്പത്തിയേഴ്", "58": "അമ്പത്തിയെട്ട്", "59": "അമ്പത്തിയൊമ്പത്",
+            "61": "അറുപത്തിയൊന്ന്", "62": "അറുപത്തിരണ്ട്", "63": "അറുപത്തിമൂന്ന്", "64": "അറുപത്തിനാല്", "65": "അറുപത്തിയഞ്ച്", "66": "അറുപത്തിയാറ്", "67": "അറുപത്തിയേഴ്", "68": "അറുപത്തിയെട്ട്", "69": "അറുപത്തിയൊമ്പത്",
+            "71": "എഴുപത്തിയൊന്ന്", "72": "എഴുപത്തിരണ്ട്", "73": "എഴുപത്തിമൂന്ന്", "74": "എഴുപത്തിനാല്", "75": "എഴുപത്തിയഞ്ച്", "76": "എഴുപത്തിയാറ്", "77": "എഴുപത്തിയേഴ്", "78": "എഴുപത്തിയെട്ട്", "79": "എഴുപത്തിയൊമ്പത്",
+            "81": "എൺപത്തിയൊന്ന്", "82": "എൺപത്തിരണ്ട്", "83": "എൺപത്തിമൂന്ന്", "84": "എൺപത്തിനാല്", "85": "എൺപത്തിയഞ്ച്", "86": "എൺപത്തിയാറ്", "87": "എൺപത്തിയേഴ്", "88": "എൺപത്തിയെട്ട്", "89": "എൺപത്തിയൊമ്പത്",
+            "91": "തൊണ്ണൂറ്റിയൊന്ന്", "92": "തൊണ്ണൂറ്റിരണ്ട്", "93": "തൊണ്ണൂറ്റിമൂന്ന്", "94": "തൊണ്ണൂറ്റിനാല്", "95": "തൊണ്ണൂറ്റിയഞ്ച്", "96": "തൊണ്ണൂറ്റിയാറ്", "97": "തൊണ്ണൂറ്റിയേഴ്", "98": "തൊണ്ണൂറ്റിയെട്ട്", "99": "തൊണ്ണൂറ്റിയൊമ്പത്"
+        },
+
+        // SUPPLETIVE ROUND HUNDREDS, keyed by the count of hundreds — Malayalam does not say "two
+        // hundred" as two words. bare / combining (a remainder follows) from espeak `_NC0` / `_NC`;
+        // 900 is not a hundred at all but തൊള്ളായിരം, "short of a thousand".
+        "hundredForms": {
+            "1": { "bare": "നൂറ്", "combining": "നൂറ്റി" },
+            "2": { "bare": "ഇരുന്നൂറ്", "combining": "ഇരുന്നൂറ്റി" },
+            "3": { "bare": "മുന്നൂറ്", "combining": "മുന്നൂറ്റി" },
+            "4": { "bare": "നാന്നൂറ്", "combining": "നാന്നൂറ്റി" },
+            "5": { "bare": "അഞ്ഞൂറ്", "combining": "അഞ്ഞൂറ്റി" },
+            "6": { "bare": "അറുനൂറ്", "combining": "അറുനൂറ്റി" },
+            "7": { "bare": "എഴുനൂറ്", "combining": "എഴുനൂറ്റി" },
+            "8": { "bare": "എണ്ണൂറ്", "combining": "എണ്ണൂറ്റി" },
+            "9": { "bare": "തൊള്ളായിരം", "combining": "തൊള്ളായിരത്തി" }
+        },
+
+        // SUPPLETIVE ROUND THOUSANDS 1-9. Malayalam fuses the count INTO the thousand: espeak's `_Nf`
+        // stems (ഒന്ന്→∅, രണ്ട്, മൂവ്, നാല്, അയ്യ്, ആറ്, ഏഴ്, എണ്ണ്, ഒമ്പതിന്) prefixed to ആയിരം. This is
+        // what makes 2011 രണ്ടായിരത്തി പതിനൊന്ന് and not *രണ്ട് ആയിരം പതിനൊന്ന്. Counts of 10 and above
+        // fall back to `below1000(count) + ആയിരം`, which is a documented approximation — Malayalam
+        // fuses those too (23,000 ഇരുപത്തിമുവ്വായിരം), and 10 of the 1,955 utterances land there.
+        "thousandForms": {
+            "1": { "bare": "ആയിരം", "combining": "ആയിരത്തി" },
+            "2": { "bare": "രണ്ടായിരം", "combining": "രണ്ടായിരത്തി" },
+            "3": { "bare": "മൂവായിരം", "combining": "മൂവായിരത്തി" },
+            "4": { "bare": "നാലായിരം", "combining": "നാലായിരത്തി" },
+            "5": { "bare": "അയ്യായിരം", "combining": "അയ്യായിരത്തി" },
+            "6": { "bare": "ആറായിരം", "combining": "ആറായിരത്തി" },
+            "7": { "bare": "ഏഴായിരം", "combining": "ഏഴായിരത്തി" },
+            "8": { "bare": "എണ്ണായിരം", "combining": "എണ്ണായിരത്തി" },
+            "9": { "bare": "ഒമ്പതിനായിരം", "combining": "ഒമ്പതിനായിരത്തി" }
+        },
+
+        // The magnitude nouns, bare and combining. The combining form is the joint that holds an Indian
+        // numeral together: 1976 is ആയിരത്തി തൊള്ളായിരത്തി എഴുപത്തിയാറ്. espeak keeps the pair for the
+        // thousand (`_0M1x`/`_0M1`) and the lakh (`_0M2x`/`_0M2`); it lists only കോടി for the crore, so
+        // that one is invariant here rather than guessed. `plural`/`pluralOblique` are NOT declared —
+        // Malayalam does not inflect the noun for the count the way Telugu does.
+        "magnitudeForms": {
+            "hundred": { "bare": "നൂറ്", "combining": "നൂറ്റി" },
+            "thousand": { "bare": "ആയിരം", "combining": "ആയിരത്തി" },
+            "lakh": { "bare": "ലക്ഷം", "combining": "ലക്ഷത്തി" },
+            "crore": { "bare": "കോടി", "combining": "കോടി" }
+        },
+
+        // The decimal-point word, espeak ml_list `_dpt`. Read by normalize.ts, not by the composer.
+        "decimalWord": "ദശാംശം",
+
+        // Retained for the NumbersDef contract (core/numbers.ts) even though the Dravidian composer
+        // reads the forms above; a bare 100/1000/lakh/crore is the magnitude word alone.
         "magnitudes": { "hundred": "നൂറ്", "thousand": "ആയിരം", "lakh": "ലക്ഷം", "crore": "കോടി" },
-        // DRAVIDIAN order: the 21-99 fallback reads TENS then UNIT (ಇಪ್ಪತ್ತೊಂದು / ഇരുപത്തിയൊന്ന്), where the
-        // shared default is the Hindi-belt unit-then-tens. Without this, 21 read as "one twenty".
         "compoundOrder": "tens-unit",
-        // …and a bare hundred/thousand is the magnitude word alone, not "one hundred".
         "bareMagnitude": true
     }
 }

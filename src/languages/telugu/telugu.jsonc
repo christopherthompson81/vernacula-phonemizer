@@ -112,13 +112,15 @@
         "tens": { "20": "ఇరవై", "30": "ముప్పై", "40": "నలభై", "50": "యాభై", "60": "అరవై", "70": "డెబ్బై", "80": "ఎనభై", "90": "తొంభై" },
         "magnitudes": { "hundred": "వంద", "thousand": "వెయ్యి", "lakh": "లక్ష", "crore": "కోటి" },
 
-        // one / oneCombining (a remainder follows) / plural / pluralOblique (a remainder follows).
+        // The shared `DravidianForms` shape (core/numbers.ts): bare / combining (a remainder follows) /
+        // plural / pluralOblique (a remainder follows). Telugu is the language that needs all four —
+        // Kannada and Malayalam inflect only for the remainder, so they omit the plural pair.
         // Only 100 has a distinct combining stem; వెయ్యి / లక్ష / కోటి are unchanged before a remainder.
         "magnitudeForms": {
-            "hundred": { "one": "వంద", "oneCombining": "నూట", "plural": "వందలు", "pluralOblique": "వందల" },
-            "thousand": { "one": "వెయ్యి", "oneCombining": "వెయ్యి", "plural": "వేలు", "pluralOblique": "వేల" },
-            "lakh": { "one": "లక్ష", "oneCombining": "లక్ష", "plural": "లక్షలు", "pluralOblique": "లక్షల" },
-            "crore": { "one": "కోటి", "oneCombining": "కోటి", "plural": "కోట్లు", "pluralOblique": "కోట్ల" }
+            "hundred": { "bare": "వంద", "combining": "నూట", "plural": "వందలు", "pluralOblique": "వందల" },
+            "thousand": { "bare": "వెయ్యి", "combining": "వెయ్యి", "plural": "వేలు", "pluralOblique": "వేల" },
+            "lakh": { "bare": "లక్ష", "combining": "లక్ష", "plural": "లక్షలు", "pluralOblique": "లక్షల" },
+            "crore": { "bare": "కోటి", "combining": "కోటి", "plural": "కోట్లు", "pluralOblique": "కోట్ల" }
         }
     }
 }

@@ -8,15 +8,11 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
-import type { NumbersDef } from "../../core/numbers.ts";
+import type { DravidianForms, NumbersDef } from "../../core/numbers.ts";
 
-/** The four forms a Telugu magnitude noun takes; see the `magnitudeForms` note in telugu.jsonc. */
-export interface MagnitudeForms {
-    one: string;
-    oneCombining: string;
-    plural: string;
-    pluralOblique: string;
-}
+/** The four forms a Telugu magnitude noun takes; see the `magnitudeForms` note in telugu.jsonc.
+ *  Telugu is the consumer that needs all four slots of the shared `DravidianForms`. */
+export type MagnitudeForms = Required<DravidianForms>;
 
 export interface TeluguNumbers extends NumbersDef {
     teens: string[];

@@ -12,15 +12,12 @@ import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
+import { normalizeMalayalam } from "./normalize.ts";
+import { numberToWords } from "./numbers.ts";
 
-interface MalayalamDef extends AbugidaDef {
-    numbers: NumbersDef;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<MalayalamDef>(import.meta.url, "malayalam.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const MALAYALAM_WORD = "ഀ-ൿ"; // Malayalam block (digits handled separately)
 const MALAYALAM_DIGITS: Record<string, string> = {
@@ -89,7 +86,9 @@ const toAscii = (d: string): string =>
 function number(digits: string): string {
     const n = Number(toAscii(digits));
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord);
+    // The SHARED Dravidian composer (core/numbers.ts) via numbers.ts — not `indicNumberWords`, which
+    // cannot express the fused 21-99, the suppletive hundreds/thousands or the combining magnitude.
+    return numberToWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 
 const TOKEN = new RegExp(
@@ -105,7 +104,10 @@ class MalayalamPhonemizer implements Phonemizer {
         // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
         // defines as ASCII-only, so a numeral written in native digits matched NO token and was
         // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
-        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+        // normalize.ts runs FIRST: it maps the legacy ZWJ chillu spellings, removes the ZWNJ that was
+        // splitting words in two, and rewrites numerals, clitics, symbols, times and decimals into
+        // words this tokenizer already speaks (see the ordering notes there).
+        return assembleClauses(foldNativeDigits(normalizeMalayalam(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

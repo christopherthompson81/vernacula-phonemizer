@@ -1,6 +1,10 @@
 /**
  * Telugu cardinal number → words, Indian grouping (వెయ్యి 10³ / లక్ష 10⁵ / కోటి 10⁷).
  *
+ * THE COMPOSITION NOW LIVES IN `core/numbers.ts` as `dravidianNumberWords`, shared with Kannada and
+ * Malayalam; this file keeps the Telugu-only parts — the century year reading and the ordinal
+ * morphology. The migration is BYTE-IDENTICAL over the te_in corpus (0/1978 utterances changed).
+ *
  * WHY TELUGU CANNOT USE THE SHARED `indicNumberWords` COMPOSER. Two independent reasons, both of which
  * made every one of the 627 numerals in the te_in corpus wrong before this file existed:
  *
@@ -32,62 +36,14 @@
  * The 2000s take the ordinary cardinal (2011 → రెండు వేల పదకొండు, audio above), which is what the
  * compositor already produces — so only the 1100-1999 band gets `yearToWords`.
  */
+import { dravidianNumberWords } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
-const ONES = N.units,
-    TEENS = N.teens,
-    TENS = N.tens,
-    F = N.magnitudeForms;
-
-/** 1-99. Telugu is regular here — the ten's free form followed by the unit (ఇరవై ఒకటి). */
-function below100(n: number): string[] {
-    if (n <= 0) return [];
-    if (n < 10) return [ONES[n]!];
-    if (n < 20) return [TEENS[n - 10]!];
-    const t = Math.floor(n / 10) * 10,
-        u = n % 10;
-    return u === 0 ? [TENS[String(t)]!] : [TENS[String(t)]!, ONES[u]!];
-}
-
-/** The four-way magnitude form, selected by count and by whether anything follows it. */
-function magnitude(key: keyof typeof F, count: number, hasRemainder: boolean): string {
-    const f = F[key];
-    if (count === 1) return hasRemainder ? f.oneCombining : f.one;
-    return hasRemainder ? f.pluralOblique : f.plural;
-}
-
-/** 1-999. The count of hundreds is never spelled for 1 — 100 is వంద, and 150 is నూట యాభై. */
-function below1000(n: number): string[] {
-    const h = Math.floor(n / 100),
-        r = n % 100;
-    if (h === 0) return below100(r);
-    const mag = magnitude("hundred", h, r > 0);
-    return h === 1 ? [mag, ...below100(r)] : [ONES[h]!, mag, ...below100(r)];
-}
-
-/** A magnitude group: its count (spelled by below1000) plus the agreeing magnitude noun. */
-function group(key: keyof typeof F, count: number, hasRemainder: boolean): string[] {
-    const mag = magnitude(key, count, hasRemainder);
-    return count === 1 ? [mag] : [...below1000(count), mag];
-}
 
 /** Non-negative integer → Telugu words. */
 export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || n < 0) return "";
-    if (n === 0) return ONES[0]!;
-    const parts: string[] = [];
-    const crore = Math.floor(n / 10000000);
-    n %= 10000000;
-    const lakh = Math.floor(n / 100000);
-    n %= 100000;
-    const thou = Math.floor(n / 1000);
-    n %= 1000;
-    if (crore > 0) parts.push(...group("crore", crore, lakh + thou + n > 0));
-    if (lakh > 0) parts.push(...group("lakh", lakh, thou + n > 0));
-    if (thou > 0) parts.push(...group("thousand", thou, n > 0));
-    parts.push(...below1000(n));
-    return parts.join(" ");
+    return dravidianNumberWords(n, N).join(" ");
 }
 
 /** True for the band that takes the century reading; see the header. */
@@ -98,7 +54,10 @@ export function yearToWords(n: number): string {
     if (!isCenturyYear(n)) return numberToWords(n);
     const century = Math.floor(n / 100),
         rest = n % 100;
-    return [...below100(century), magnitude("hundred", 2, rest > 0), ...below100(rest)].join(" ");
+    // The hundred noun agrees as it would for any count above one — వందల before a remainder, వందలు bare.
+    const h = N.magnitudeForms.hundred;
+    const hundred = rest > 0 ? h.pluralOblique : h.plural;
+    return [numberToWords(century), hundred, ...(rest > 0 ? [numberToWords(rest)] : [])].join(" ");
 }
 
 /**
