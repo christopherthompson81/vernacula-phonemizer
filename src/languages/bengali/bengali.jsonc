@@ -112,19 +112,100 @@
             "80": "আশি",
             "90": "নব্বই"
         },
-        "magnitudes": { "hundred": "একশো", "thousand": "হাজার", "lakh": "লাখ", "crore": "কোটি" },
+        // 21-99 are NOT compositional in Bengali — each has its own fused word — so the shared composer's
+        // unit+tens fallback was producing "এক বিশ" ("one twenty") for 21. 161 corpus numbers land here.
+        // The ten rows marked below are independently attested in tools/referee-eval/referees/
+        // bn.wikipron-ben-broad.tsv, and the engine's reading of each matches that referee's phone
+        // sequence (পঞ্চান্ন → pɔnt͡ʃanːo vs p ɔ n t ɕ a nː o); the rest follow the same regular pattern.
+        // bengali-lexicon.tsv is NOT a corroboration source here — it is a 349-entry exceptions list that
+        // contains only 1 of the 23 numerals the manifest already shipped.
+        "compound": {
+            "21": "একুশ",  // wikipron-attested
+            "22": "বাইশ",
+            "23": "তেইশ",
+            "24": "চব্বিশ",  // wikipron-attested
+            "25": "পঁচিশ",
+            "26": "ছাব্বিশ",
+            "27": "সাতাশ",
+            "28": "আটাশ",
+            "29": "উনত্রিশ",
+            "31": "একত্রিশ",  // wikipron-attested
+            "32": "বত্রিশ",
+            "33": "তেত্রিশ",
+            "34": "চৌত্রিশ",
+            "35": "পঁয়ত্রিশ",
+            "36": "ছত্রিশ",
+            "37": "সাঁইত্রিশ",
+            "38": "আটত্রিশ",
+            "39": "উনচল্লিশ",
+            "41": "একচল্লিশ",  // wikipron-attested
+            "42": "বিয়াল্লিশ",
+            "43": "তেতাল্লিশ",
+            "44": "চুয়াল্লিশ",
+            "45": "পঁয়তাল্লিশ",
+            "46": "ছেচল্লিশ",  // wikipron-attested
+            "47": "সাতচল্লিশ",
+            "48": "আটচল্লিশ",  // wikipron-attested
+            "49": "উনপঞ্চাশ",
+            "51": "একান্ন",
+            "52": "বায়ান্ন",
+            "53": "তিপ্পান্ন",
+            "54": "চুয়ান্ন",
+            "55": "পঞ্চান্ন",  // wikipron-attested
+            "56": "ছাপ্পান্ন",
+            "57": "সাতান্ন",
+            "58": "আটান্ন",
+            "59": "উনষাট",
+            "61": "একষট্টি",
+            "62": "বাষট্টি",
+            "63": "তেষট্টি",
+            "64": "চৌষট্টি",
+            "65": "পঁয়ষট্টি",
+            "66": "ছেষট্টি",
+            "67": "সাতষট্টি",
+            "68": "আটষট্টি",
+            "69": "উনসত্তর",
+            "71": "একাত্তর",  // wikipron-attested
+            "72": "বাহাত্তর",
+            "73": "তিয়াত্তর",
+            "74": "চুয়াত্তর",
+            "75": "পঁচাত্তর",
+            "76": "ছিয়াত্তর",
+            "77": "সাতাত্তর",
+            "78": "আটাত্তর",
+            "79": "উনআশি",  // wikipron-attested
+            "81": "একাশি",
+            "82": "বিরাশি",
+            "83": "তিরাশি",
+            "84": "চুরাশি",
+            "85": "পঁচাশি",
+            "86": "ছিয়াশি",
+            "87": "সাতাশি",
+            "88": "অষ্টাশি",  // wikipron-attested
+            "89": "উননব্বই",
+            "91": "একানব্বই",
+            "92": "বিরানব্বই",
+            "93": "তিরানব্বই",
+            "94": "চুরানব্বই",
+            "95": "পঁচানব্বই",
+            "96": "ছিয়ানব্বই",
+            "97": "সাতানব্বই",
+            "98": "আটানব্বই",
+            "99": "নিরানব্বই",
+        },
+        "magnitudes": { "hundred": "শত", "thousand": "হাজার", "lakh": "লাখ", "crore": "কোটি" },
         "decimalWord": "দশমিক"
     },
 
     // Danda / ASCII → canonical inline pause marks.
     "clausePunctuation": {
-        "।": " । ",
-        "॥": " ॥ ",
-        ".": " . ",
-        "?": " ? ",
-        "!": " ! ",
-        ",": " , ",
-        ";": " ; ",
-        ":": " : "
+        "।": ".",
+        "॥": ".",
+        ".": ".",
+        "?": "?",
+        "!": "!",
+        ",": ",",
+        ";": ",",
+        ":": ","
     }
 }
