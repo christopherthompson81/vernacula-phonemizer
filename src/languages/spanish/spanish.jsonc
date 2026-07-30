@@ -9,6 +9,15 @@
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/es_native_bringup_investigation.md.
 {
+    // ACRONYMS read letter-by-letter that the OOV phonotactic rule would otherwise leave alone, because
+    // they are perfectly pronounceable Spanish letter strings. A LEXICAL fact, listed rather than derived.
+    // Spanish has no pronunciation dictionary here (the g2p is fully rule-based and reads any letter
+    // string), so this list and the OOV rule are the only two signals available.
+    "acronymLetters": [
+        "aol", "dni", "iva", "pib", "rae", "cni", "ine", "afp", "bbc", "cnn", "fbi", "eeuu",
+        "adn", "arn", "vih", "tdt", "usb", "pvc", "led", "gps", "utc", "url", "tic", "pyme",
+    ],
+
     "language": "es",
     "name": "Spanish (broad Castilian)",
     "script": "Latin",

@@ -571,3 +571,75 @@ reason the script reads Lexique's actual entry instead of assuming the noun read
 - Referee eval byte-identical (79.3% / 96.0%; second set 91.3% / 97.6%).
 - fr corpus: 0 utterances changed, 0 defects — none of the 7 new entries occurs after ils/elles in this
   corpus, which is expected and is why the generated set is worth having rather than corpus-driven listing.
+
+## Run 9 — 2026-07-29 — Spanish normalization (the third language)
+
+`src/languages/spanish/normalize.ts`, reusing all three shared tiers: `core/normalizeSymbols.ts` for
+%/currency/units, `core/initialisms.ts` for acronyms, `core/roman.ts` at the registry seam. What is left in
+the language is genuinely Spanish-specific: its abbreviations, ordinal indicators, dates and times.
+
+### What the corpus said (es_419, 2,796 utterances, cased column)
+
+`EE.` ×31 / `UU.` ×31 dominate everything — and `EE. UU.` expands to WORDS (Estados Unidos), not letters.
+Then units ×76 (km, mm, km/h, °F, kg), date "d de mes" ×63, time h:mm ×34, "las N" ×32, percent ×25,
+decimal comma ×20, space-thousands ×15, era `a. C.` ×11 (9 of them written WITH a space), dot-thousands ×10,
+`+` ×5. All-caps ×279 including `XV`×9 / `XVIII`×8 / `XVI`×7 — Roman numerals.
+
+Three things Spanish already got right, unlike the other two: dot-thousands (`17.000` → diecisiete mil) and
+decimal-comma were already in the number tokenizer, % and currency already worked through the shared symbol
+tier, and a 4-digit year is a plain cardinal so there is no pair-wise year rule to write.
+
+### Ordering was EASIER here, for a structural reason worth recording
+
+Roman numerals needed no ordering care at all: `es` is not in the registry's `ROMAN_NATIVE` set, so the
+shared pass converts them at the registry seam BEFORE the engine's `text()` runs. By the time the initialism
+rule sees the text, `siglo XVIII` is already digits. English and French both had to sequence this by hand
+because they resolve Romans themselves.
+
+### What was broken
+
+| class | before | after |
+|---|---|---|
+| abbrev | `EE. UU.` → `ˈee . wˈu .` (two pauses) | `estˈaðos unˈiðos` |
+| abbrev | `Dr.` → `[dɾ]` + pause; `Sr.` → `[sr]` + pause; `etc.` → `[ˈetk]` | doctor, señor, etcétera |
+| abbrev | `356 a. C.` → `a . k .` | `ˈantes de kɾˈisto` |
+| abbrev | `p. m.` → two more pauses | `pˈe ˈeme` |
+| abbrev | `n.º 11` → a bare **º in the output** | `nˈumeɾo ˈonse` |
+| time | `a las 11:00` → `a las ˈonse , sˈeɾo` — the colon became a PAUSE plus a spurious "cero" | `a las ˈonse` |
+| time | `a la 1:15` → `a la ˈuno` | `a la ˈuna` (hora is feminine) |
+| ordinal | `1º`/`1ª` → raw **º/ª in the phoneme string** | primero / primera |
+| initialism | `CD` → `[kð]`, `ADN` → `[aðn]`, `DVD` → `[dβð]`, `HJR` → `[xɾ]`, `PSTN` → `[pstn]` — all unpronounceable | spelled out |
+| units | `120 km/h` → `/h` dropped; `20 °C` → `[k]`; `90 °F` → `[f]`; `83 m` → the letter name | all expanded |
+| grouping | `55 000` → "cincuenta y cinco cero" | "cincuenta y cinco mil" |
+| fractions | `1/5` → "uno cinco" | "un quinto" (apocopated numerator) |
+| signs | `+3` / `-5` → both signs DROPPED | más / menos |
+
+### Two Spanish-specific traps
+
+1. **`°` is not an ordinal indicator.** My first version put U+00B0 in the same class as º/ª, which read
+   `20 °C` as *vigésimo k* and `35°` as *trigésimo quinto*. Only º (U+00BA) and ª (U+00AA) are ordinal
+   indicators; the degree sign is a different character and belongs to the unit tier.
+2. **`n.º` is the form that actually occurs** — n + period + the ordinal indicator. A single-character class
+   missed it and left a bare º in the output, which the corpus sweep caught (2 utterances).
+
+### The one variety-specific rule
+
+es-419 is a pure post-process on `es` output (seseo + yeísmo), so the normalization layer is shared. The one
+place the varieties genuinely differ is the first of the month: *el primero de enero* in America, *el uno de
+enero* in Spain (RAE, *Diccionario panhispánico de dudas* s.v. «fecha»). Threaded as an `americas` flag
+through `createSpanish(americas)`, which `createSpanish419` sets.
+
+### Verification
+
+- 198 files / 2108 tests pass (6 new); `tsc --noEmit` clean.
+- Referee byte-identical for both varieties: es 4307/4657 (92.5%) folded, 99.1% symbol; es-419 92.6% / 99.1%.
+- es_419 corpus, both columns: **223 of 2,796 changed on the cased column** (8%), 94 on the lowercased;
+  0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray symbols. Sampled review found them all improvements.
+
+### Pattern status after three languages
+
+The split has held up: shared machinery in `core/` (symbols, initialisms + phonotactics, romans), and per
+language a numbered pipeline plus data (abbreviation table, letter names, `acronymLetters`, phonotactic
+clusters). Each language contributed one thing the others did not need — English pair-wise years, French a
+heteronym tier, Spanish a variety flag — which is the argument for keeping the pipeline per-language rather
+than trying to generalize the step list itself.
