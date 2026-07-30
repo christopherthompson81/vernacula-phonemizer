@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/french/french.ts";
 import { toIpa } from "../src/languages/french/g2p.ts";
+import { isUnreadableFrench } from "../src/languages/french/normalize.ts";
 
 // Canonical-IPA goldens for French (fr) — standard/Parisian. Primary path is the Lexique 3.83 pronunciation
 // LEXICON (~125k forms, carries every irregular); the rule-based g2p (toIpa) is the OOV fallback. Convention:
@@ -88,6 +89,81 @@ describe("french canonical IPA", () => {
         // ...and an accented word must not be split at the accent: siècle parses as siè + cle (CL = 150)
         // for any pattern that trusts \b, which is defined on ASCII word characters.
         expect(phonemize("le siècle", "fr")).toBe("lə sjˈɛkl");
+    });
+
+    // #562 text normalization (normalize.ts): the ordered pipeline that rewrites everything which is not
+    // already a pronounceable word. Grouped by the class of thing being normalized.
+    test("times: the hour marker is spoken, with feminine agreement", () => {
+        // "11 h 20" previously read as "onze vingt" — the h vanished entirely — and the colon form turned
+        // into a pause mark. heure/minute are feminine, so 1 and anything ending in 1 take *une*.
+        expect(phonemize("il est 11 h 20", "fr")).toBe("il e ɔ̃z œʁ vˈɛ̃"); // onze heures vingt
+        expect(phonemize("à 1 h 15", "fr")).toBe("a yn œʁ kˈɛ̃z"); // UNE heure quinze, not un
+        expect(phonemize("à 21 h", "fr")).toBe("a vɛ̃teyn ˈœʁ"); // vingt-et-une heures
+        expect(phonemize("le train de 4:41", "fr")).toBe("lə tʁɛ̃ də katʁ œʁ kaʁɑ̃teˈyn"); // …quarante et UNE
+    });
+
+    test("digit grouping: a space-grouped thousand is one number", () => {
+        // The tokenizer's number class does not span a space, so these read as two numbers with the
+        // thousand lost — "5 000 ans" was "cinq zéro ans". Both forms occur in the corpus.
+        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃");
+        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃"); // NBSP, which is what FLEURS uses
+        expect(phonemize("1 040 km", "fr")).toBe("mil kaʁɑ̃t kilɔmˈɛtʁ");
+    });
+
+    test("dates: day 1 is the only ordinal day", () => {
+        expect(phonemize("le 1 janvier", "fr")).toBe("lə pʁømje ʒɑ̃vjˈe"); // premier, not un
+        expect(phonemize("le 17 septembre", "fr")).toBe("lə disɛt sɛptˈɑ̃bʁ"); // every other day is a cardinal
+        expect(phonemize("le 14/07/1789", "fr")).toBe("lə katɔʁz ʒɥijɛ mil sɛt sɑ̃ katʁəvɛ̃nˈœf");
+        // French reads a year as a plain cardinal, so there is no pair-wise rule to apply.
+        expect(phonemize("en 1988", "fr")).toBe("ɑ̃ mil nœf sɑ̃ katʁəvɛ̃ɥˈit");
+    });
+
+    test("abbreviations: expanded, and the dot never becomes a pause", () => {
+        expect(phonemize("M. Dupont", "fr")).toBe("məsjø dypˈɔ̃"); // was "m . dypɔ̃" — a letter and a pause
+        expect(phonemize("MM. les députés", "fr")).toBe("mesjø le depytˈe"); // was millimètre + a pause
+        expect(phonemize("le Dr Martin", "fr")).toBe("lə dɔktœʁ maʁtˈɛ̃"); // undotted, as French writes it
+        expect(phonemize("st. louis", "fr")).toBe("sɛ̃ lwˈi"); // saint
+        expect(phonemize("avant j.-c.", "fr")).toBe("avɑ̃ ʒezykʁˈist"); // was "avɑ̃ ʒ . s ." — two pauses
+        expect(phonemize("au n° 11", "fr")).toBe("o nymeʁo ˈɔ̃z"); // numéro
+        // etc. is left as a TOKEN because Lexique already pronounces it; expanding it to "et cetera" made
+        // the g2p read cetera with a schwa. Only the dot is managed — kept here, as the sentence ends.
+        expect(phonemize("etc.", "fr")).toBe("ɛtseteʁˈa .");
+    });
+
+    test("initialisms: spelled out or said as a word, per convention then phonotactics", () => {
+        expect(phonemize("la SNCF", "fr")).toBe("la ɛs ɛn se ˈɛf"); // was the cluster [snkf]
+        expect(phonemize("le TGV", "fr")).toBe("lə te ʒe vˈe"); // was DROPPED from the output entirely
+        expect(phonemize("les USA", "fr")).toBe("le zy ɛs ˈa"); // readable, but conventionally spelled out
+        // Lexicalized acronyms stay words — these regressed to letters when the rule first went in.
+        expect(phonemize("l'ONU", "fr")).toBe("lɔnˈy");
+        expect(phonemize("l'UNESCO", "fr")).toBe("lynɛskˈo");
+        // An all-caps ordinary word is not an initialism, and a Roman numeral gets first refusal.
+        expect(phonemize("PARIS est belle", "fr")).toContain("paʁi");
+        expect(phonemize("Louis XIV", "fr")).toBe("lwi katˈɔʁz"); // not IXE-I-VÉ
+    });
+
+    test("fractions, decimals, negatives, units", () => {
+        expect(phonemize("1/2", "fr")).toBe("œ̃ dəmˈi");
+        expect(phonemize("les 3/4 du total", "fr")).toBe("le tʁwa kaʁ dy tɔtˈal"); // quarts
+        expect(phonemize("1/5", "fr")).toBe("œ̃ sɛ̃kjˈɛm"); // no suppletive name → the ordinal
+        // The fractional part reads as a NUMBER (1,75 → soixante-quinze), which is the French convention…
+        expect(phonemize("3,14", "fr")).toBe("tʁwa viʁɡyl katˈɔʁz"); // …quatorze, not "un quatre"
+        // …except with a leading zero, where a number reading would say 1,5 for 1,05.
+        expect(phonemize("1,05", "fr")).toBe("œ̃ viʁɡyl zeʁo sˈɛ̃k");
+        expect(phonemize("-5 degrés", "fr")).toBe("mwɛ̃ sɛ̃k dəɡʁˈe"); // the minus was silently dropped
+        expect(phonemize("160 km/h", "fr")).toBe("sɑ̃ swasɑ̃t kilɔmɛtʁ paʁ ˈœʁ"); // the /h was dropped
+        expect(phonemize("3 Go", "fr")).toBe("tʁwa ʒiɡaɔktˈɛ"); // read as the word "go"
+    });
+
+    test("isUnreadableFrench decides the unrecorded acronyms", () => {
+        // The signal it exists for: no vowel means nothing can be syllabified, which is exactly the case
+        // that produced an unpronounceable cluster or an empty reading.
+        for (const w of ["SNCF", "TGV", "PDG", "HLM", "CD"]) expect(isUnreadableFrench(w)).toBe(true);
+        // Illegal initial (/tv/) and final (/tp/, /df/) clusters, which French cannot realise.
+        for (const w of ["TVA", "RATP", "EDF"]) expect(isUnreadableFrench(w)).toBe(true);
+        // Readable strings are left readable, so a lexicalized acronym is said as a word.
+        for (const w of ["ONU", "OTAN", "UNESCO", "SMIC", "SIDA", "NASA", "PACS"])
+            expect(isUnreadableFrench(w)).toBe(false);
     });
 
     test("text: phrase-final stress + punctuation, monosyllable le → lə", () => {

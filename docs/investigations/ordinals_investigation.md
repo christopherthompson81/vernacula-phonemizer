@@ -170,3 +170,107 @@ does *not* fix this. Both patterns now use explicit French-letter lookarounds in
    preceding number). Any capitalized abbreviation colliding with a unit entry will do this.
 2. `1e9 joules` → `œ̃ nø nœf` — a stray letter between digits is spoken. Not French prose; noted only
    because the ordinal guard correctly declines to claim it.
+
+## Run 3 — 2026-07-29 — French text normalization (dates/times, abbreviations/initialisms, symbols)
+
+Scope grew to the full normalization layer for French, on the view that ordinals are one member of a
+family and the family should be built together. New file `src/languages/french/normalize.ts`, shaped
+like `english/normalize.ts`: one ordered pipeline of numbered steps.
+
+### Corpus measurement first (fr FLEURS, 3,193 utterances)
+
+Two facts changed the design:
+- **The transcripts are lowercased.** Zero all-caps runs; the abbreviations appear as `m.` ×6, `st.` ×3,
+  `dr.` ×2, `jr.` ×2, `etc.` ×5, `av.` ×4. So abbreviation rules must not depend on capitalization,
+  and the initialism rule cannot be validated against this corpus at all (it protects real input).
+- **NBSP is the separator**: `9 h 30`, `n° 11`, `0 %`, `5 000`. Every pattern has to accept it.
+
+Demand: years ×278, month+day ×72, times ×28 (`11 h 20`, `1 h 15`, NBSP forms), percent ×24, dotted
+abbreviations ~20 real, `n°` ×2, colon times ×3, numeric dd/mm/yyyy ×0.
+
+Grounded each abbreviation in its context before writing a rule: `m.` is Monsieur (m. reid, m. hu,
+m. costello), `st.` is Saint (st. louis), `dr.` is docteur, and **every** `av.` is the era marker
+`av. J.-C.`, not avenue — so the era rule must claim them first.
+
+### What was broken
+
+| class | before | after |
+|---|---|---|
+| time | `11 h 20` → `ɔ̃z vˈɛ̃` ("onze vingt" — h gone) | `ɔ̃z œʁ vˈɛ̃` |
+| time | `1 h 15` → `œ̃ n kˈɛ̃z` (masculine + junk) | `yn œʁ kˈɛ̃z` (UNE heure) |
+| time | `4:41` → `katʁ , kaʁɑ̃teˈœ̃` (colon became a PAUSE) | `katʁ œʁ kaʁɑ̃teˈyn` |
+| grouping | `5 000 ans` → `sɛ̃k zeʁo ˈɑ̃` ("cinq zéro") | `sɛ̃k mil ˈɑ̃` |
+| abbrev | `M. Dupont` → `m . dypˈɔ̃` (letter + pause) | `məsjø dypˈɔ̃` |
+| abbrev | `MM. les députés` → `milimˈɛtʁ .` (millimètre!) | `mesjø le depytˈe` |
+| abbrev | `avant j.-c.` → `avɑ̃ ʒ . s .` (two pauses) | `avɑ̃ ʒezykʁˈist` |
+| abbrev | `n° 11` → `n ˈɔ̃z` | `nymeʁo ˈɔ̃z` |
+| initialism | `SNCF` → `snkf` (unpronounceable) | `ɛs ɛn se ˈɛf` |
+| initialism | `TGV`, `PDG` → **DROPPED ENTIRELY** | `te ʒe vˈe`, `pe de ʒˈe` |
+| fraction | `1/2` → `œ̃ dˈø` ("un deux") | `œ̃ dəmˈi` |
+| decimal | `3,14` → `tʁwa viʁɡyl œ̃ kˈatʁ` | `tʁwa viʁɡyl katˈɔʁz` |
+| negative | `-5 degrés` → minus dropped | `mwɛ̃ sɛ̃k dəɡʁˈe` |
+| units | `160 km/h` → `/h` dropped; `20 °C`, `5 l`, `50 kW`, `3 Go`, `1,75 m` all dropped or truncated | all expanded |
+
+Dates and years needed less than expected: French reads a year as a plain cardinal (1988 = mille neuf
+cent quatre-vingt-huit), so there is no pair-wise year rule of the English kind, and a day is a cardinal
+too. The 1st is the only ordinal day.
+
+### Ordering is load-bearing — the couplings that bit
+
+1. **Roman numerals must precede initialisms.** Both are all-caps letter runs. Running initialisms first
+   letter-spelled `Louis XIV` as IXE-I-VÉ. The initialism pass is therefore a SEPARATE exported function
+   that runs after the numeral passes and claims only what they declined.
+2. **Abbreviations must precede initialisms**, or `MM.` is spelled EM-EM.
+3. **Times must precede units**, or a unit rule for `h` eats the hour of `11 h 20` and leaves `20`.
+4. **`av. J.-C.` must precede `av.` → avenue** (all corpus instances are the era marker).
+5. **Degrouping runs first** so every later step sees one unbroken digit run.
+
+### The readability test (`isUnreadableFrench`)
+
+Replaced a blunt "default to spelling out" with a phonotactic test, so unrecorded acronyms get a
+principled decision rather than a guess. Signals, in confidence order: no vowel at all (nothing to
+syllabify); an illegal word-initial cluster (`TVA` — French has no /tv/ onset); an illegal word-final
+cluster (`RATP` /tp/, `EDF` /df/); a 3+ consonant run with no liquid.
+
+Measured against 38 real French acronyms with known readings:
+- **phonotactics alone: 33/38.** It gets the whole no-vowel class right (SNCF, TGV, PDG, HLM, CD) and,
+  usefully, RATP / EDF / TVA — all readable-looking yet spelled out in reality.
+- **with the convention lists: 38/38.**
+
+The 5 phonotactic misses are all readable-but-conventionally-spelled (`JO`, `USA`, `ONG`, `PIB`, `RER`),
+which is the documented limit: readability is not convention, and no phonotactic test can derive a
+lexical fact. Hence `FORCE_LETTERS` (spell out despite being readable) and `WORD_ACRONYMS` (say as a
+word: onu, otan, unesco, unicef, smic, insee, …). The Lexique-membership veto used elsewhere is *not*
+sufficient here — Lexique has `sida` and `ovni` but not onu/otan/unesco, and `usa` is in it as the passé
+simple of *user*.
+
+Two of my own errors caught by that measurement: I had put `sncb` in WORD_ACRONYMS (it has no vowel and
+is spelled out), and `cs` was missing from the legal-coda set, so `PACS` [paks] was called unreadable.
+
+### Verification
+
+- 198 files / 2085 tests pass (7 new); `tsc --noEmit` clean.
+- Referee eval **byte-identical** to baseline: 79.3% folded / 96.0% symbol; second set 91.3% / 97.6%.
+- Full corpus re-run: **149 of 3,193 utterances changed (4.7%)**, and a sampled review of the changes
+  found them all to be improvements. Defect scan on the new output: 0 digit leaks, 0 sentinels,
+  0 slot-gaps, 0 stray symbols, 0 empty lines.
+
+### Known gaps left, deliberately
+
+- `20 °C` → `dəɡʁe sɛlsjˈy`: Lexique has no `celsius`, and the OOV g2p drops the final ⟨s⟩ where French
+  says [sɛlsjys]. Not fixed by respelling the unit table (a deliberate misspelling in data reads as a
+  bug later) and not by editing `lexicon.tsv`, which is provenanced Lexique 3.83. The clean fix is a
+  small separate non-Lexique overrides file with its own provenance line — worth doing when a second
+  case appears.
+- `utc+1` → the `+` is dropped; `0230 utc` reads as a cardinal. Both pre-existing and out of scope.
+- Undotted `st`/`ste` are NOT expanded (only the dotted forms), because bare `st` before a lowercase word
+  is too ambiguous to claim without the English-style function-word test. No corpus instances.
+
+### Implication for the fleet
+
+This is the pattern the other 190 languages will need, and it decomposes into a language-independent
+skeleton plus per-language data: an ordered pipeline (degroup → era/abbrev → numerals → initialisms →
+symbols), a letter-name table, an abbreviation table, a `FORCE_LETTERS`/`WORD_ACRONYMS` pair, and a
+phonotactic readability predicate. `core/normalizeSymbols.ts` already generalizes the symbol tier;
+times/dates/abbreviations/initialisms are the tiers still per-language. Worth lifting the skeleton into
+`core/` once a second language is done, so the shape is proven twice before it is fixed in place.
