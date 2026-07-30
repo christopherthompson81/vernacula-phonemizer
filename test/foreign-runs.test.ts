@@ -66,7 +66,8 @@ describe("embedded foreign (Latin) runs", () => {
         // must equal what the foreign engine gives for the same word standalone.
         for (const w of ["café", "naïve", "résumé"])
             expect(phonemize(`${w} век`, "ru")).toBe(`${phonemize(w, "en")} ${phonemize("век", "ru")}`);
-        // (Separately: English's own g2p mishandles accented Latin — café → [kʰˈæf], résumé → [ˈɑːɹ sˈʌm].
-        // That is an English OOV defect, not a delegation one, and is deliberately not asserted here.)
+        // The English OOV defect this used to work around is fixed (foldLatinDiacritics): café now reads
+        // [kəfˈeᶦ] rather than [kʰˈæf], so the delegated reading is correct as well as faithful.
+        expect(phonemize("café век", "ru")).toBe("kəfˈeᶦ vʲek");
     });
 });
