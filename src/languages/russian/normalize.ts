@@ -144,11 +144,35 @@ export function normalizeRussian(input: string): string {
 
     // 1) MULTI-DOT ABBREVIATIONS, before the single-letter rule so `н. э.` and `т. е.` are claimed whole —
     //    their interior dots were becoming phrase breaks.
-    s = s.replace(/(?<![\p{L}\p{M}])до\s+н\.\s?э\./giu, "до нашей эры");
-    s = s.replace(/(?<![\p{L}\p{M}])н\.\s?э\./giu, "нашей эры");
-    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?е\./giu, "то есть");
-    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?д\./giu, "так далее");
-    s = s.replace(/(?<![\p{L}\p{M}])т\.\s?п\./giu, "тому подобное");
+    //
+    //    THE TRAILING DOT IS TWO DIFFERENT THINGS and the first version consumed it unconditionally, so
+    //    "в 200 г. н. э. Затем…" ran straight into the next sentence with the boundary GONE. Found by the
+    //    Ukrainian run, which hit the identical bug in its own first pass and reported it here.
+    //    The discriminator is CASE, which a cased script gives for free: a lowercase word or a digit after
+    //    the dot continues the sentence, so the dot was the abbreviation's own and is consumed; an
+    //    uppercase word or end-of-input means it was doing double duty as the sentence end, so it stays.
+    //    Following punctuation already carries the break, so the dot is consumed there too rather than
+    //    doubled (`н. э.,` was emitting both a `.` and a `,`).
+    const MULTI_DOT: ReadonlyArray<readonly [string, string]> = [
+        ["до\\s+н\\.\\s?э", "до нашей эры"],
+        ["н\\.\\s?э", "нашей эры"],
+        ["т\\.\\s?е", "то есть"],
+        ["т\\.\\s?д", "так далее"],
+        ["т\\.\\s?п", "тому подобное"],
+    ];
+    //    The case test happens in the CALLBACK, not in the pattern. `\p{Ll}` inside a regex carrying the
+    //    `i` flag matches uppercase as well — case-insensitive matching case-folds property escapes — so a
+    //    lookahead written that way fired on "Затем" and ate the boundary anyway. The abbreviation itself
+    //    still needs `i` (both `н. э.` and `Н. Э.` occur), so the two cannot share one pattern.
+    for (const [pat, words] of MULTI_DOT) {
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${pat}\\.(\\s*)(\\S?)`, "giu"),
+            (_m: string, sp: string, next: string) => {
+                if (next === "") return `${words}.`; // end of input ⇒ it was the sentence end
+                if (/[,;:!?)»]/u.test(next)) return `${words}${sp}${next}`; // the mark carries the break
+                if (/\p{Lu}/u.test(next)) return `${words}.${sp}${next}`; // a new sentence starts
+                return `${words}${sp}${next}`; // the sentence continues
+            });
+    }
 
     // 2) НОМЕР. The sign was dropped outright.
     s = s.replace(/№\s?(?=\d)/gu, "номер ");

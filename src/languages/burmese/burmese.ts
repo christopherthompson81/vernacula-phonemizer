@@ -262,7 +262,12 @@ export function phonemizeWord(token: string): string {
 // Burmese digits ၀-၉ (U+1040–1049) sit inside the U+1000–109F block, so they would be swallowed by the
 // word group; they are matched with ASCII digits instead and normalised before composition.
 const MY_DIGITS = "\u1040-\u1049";
-const TOKEN = new RegExp(`([\u1000-\u103F\u104A-\u109F\ua9e0-\ua9f9]+)|([0-9${MY_DIGITS}]+)|([။၊.?!,])`, "gu");
+// The letter class STOPS BEFORE U+104A. U+104A ၊ and U+104B ။ are Burmese's own phrase and sentence
+// marks and they sit inside the Myanmar block, so a class written as a raw block range swallows them —
+// the alternation tries the letter branch first and the clause group below could never be reached. Every
+// sentence boundary in Burmese text was being dropped silently. Found by auditing all engines whose TOKEN
+// class is a raw Unicode range, after the Greek run reported the same shape for U+0387 ANO TELEIA.
+const TOKEN = new RegExp(`([\u1000-\u103F\u104C-\u109F\ua9e0-\ua9f9]+)|([0-9${MY_DIGITS}]+)|([။၊.?!,])`, "gu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 

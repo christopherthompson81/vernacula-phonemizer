@@ -163,16 +163,24 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // The unit may carry a RATE denominator (`km/h`) or an EXPONENT (`km²`, `km2`). Both are consumed in
     // the same match so neither can be stranded after the unit word is substituted — the exponent was
     // being left behind as an unreadable character, and the `/h` read as the letter H.
+    //
+    // THE TRAILING GUARD REJECTS AN APOSTROPHE as well as a letter or mark. An apostrophe is neither, but
+    // it is WORD-INTERNAL in several orthographies, so the bare guard let a one-letter unit key bite into
+    // a real word: with `м` declared, Ukrainian `41 м\u2019яч` ("41 balls") read as *сорок один метр\u2019яч*.
+    // Reported by the Ukrainian run. Same shape as the Dutch `Il-76s` case — a short unit key is the
+    // hazard, and being confidently wrong is worse than leaving the letter raw.
     const unitRe = d.units
         ? new RegExp(
-            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}])`,
+            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
             "giu",
         )
         : null;
     // BOTH percent signs. U+066A ٪ is the Arabic-script one, and the tier used to know only ASCII `%`, so
     // ar, ur and fa each pre-folded it in their own normalize.ts before this tier could see it. Accepting
     // it here makes those folds harmless no-ops and means the next Arabic-script language gets it free.
-    const PCT = "[%\u066a]";
+    // U+066A ٪ is the Arabic-script sign, U+FF05 ％ the FULL-WIDTH one that is ordinary CJK typography.
+    // The Cantonese run had to fold ％ locally; accepting it here means the next CJK language does not.
+    const PCT = "[%\u066a\uff05]";
     const pctRe = new RegExp(`(${NUM})\\s?${PCT}`, "gu");
     // The %-before-number form (%40). The lookbehind stops a misfire after other rules run: currency turns
     // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.

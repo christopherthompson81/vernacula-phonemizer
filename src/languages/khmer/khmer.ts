@@ -214,7 +214,11 @@ export function phonemizeWordRules(word: string): string {
     return out.normalize("NFC");
 }
 
-const TOKEN = /([ក-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
+// The letter class EXCLUDES U+17D4-U+17DB. ។ ៕ ៖ are Khmer's own sentence, section and colon marks and
+// they sit inside the Khmer block, so the old `[ក-៝]` (U+1780-U+17DD) swallowed them and the clause group
+// was unreachable — every sentence boundary in Khmer text was dropped. Same shape as the Burmese and Greek
+// cases; see the audit note in burmese.ts.
+const TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
 
 /** Build the Khmer phonemizer. */
 export function createKhmer(): Phonemizer {

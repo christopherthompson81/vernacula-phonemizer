@@ -207,4 +207,21 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("50 km²", "ru")).toContain("kvɐdrˈatnɨx kʲɪɫɐmʲˈetrəf"); // before, SPACED
         expect(phonemize("50 km²", "sv")).toContain("kvadrˈɑ̀ːtkiːlɔmˌeːtɛr");     // compound, one word
     });
+
+    /**
+     * A TOKEN letter class written as a RAW UNICODE BLOCK RANGE swallows that script's own punctuation,
+     * because the alternation tries the letter branch first. Reported by the Greek run for U+0387 ANO
+     * TELEIA; auditing every engine with a raw range found two where the mark was DECLARED in
+     * clausePunctuation and so provably unreachable — and in both it is the primary sentence terminator.
+     */
+    test("a script's own sentence marks reach the clause path", () => {
+        expect(phonemize("မြန်မာ။ မြန်မာ", "my")).toContain(" . "); // U+104B, ends every Burmese sentence
+        expect(phonemize("မြန်မာ၊ မြန်မာ", "my")).toContain(" , "); // U+104A, the phrase mark
+        expect(phonemize("ភាសា។ ភាសា", "km")).toContain(" . ");   // U+17D4 khan
+        expect(phonemize("ភាសា៕ ភាសា", "km")).toContain(" . ");   // U+17D5 bariyoosan
+    });
+
+    test("the full-width percent sign reaches the shared tier", () => {
+        expect(phonemize("80％", "ja")).toBe(phonemize("80%", "ja")); // U+FF05, ordinary CJK typography
+    });
 });

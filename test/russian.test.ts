@@ -176,8 +176,15 @@ describe("russian normalization", () => {
         // interior dots as phrase breaks.
         expect(phonemize("в 2007 г.", "ru")).toBe("f dvʲe tˈɨsʲət͡ɕɪ sʲemʲ ɡˈodʊ"); // в governs году
         expect(phonemize("с 1970-х гг.", "ru")).toBe("s ɐdnˈa tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof .");
-        expect(phonemize("до н. э.", "ru")).toBe("do nˈaʂɨj ˈɛrɨ");
-        expect(phonemize("т. е.", "ru")).toBe("to jesʲtʲ");
+        // The trailing dot is TWO things and was being consumed unconditionally, so a sentence ending in
+        // an era marker lost its boundary entirely — "в 200 г. н. э. Затем…" ran into the next sentence.
+        // Discriminated by CASE now: it survives at a sentence end or before a capital, and is consumed
+        // where the sentence continues. Four corpus utterances recovered a lost terminator.
+        expect(phonemize("до н. э.", "ru")).toBe("do nˈaʂɨj ˈɛrɨ ."); // sentence end ⇒ the dot stays
+        expect(phonemize("в 200 г. н. э. Затем", "ru")).toContain("ˈɛrɨ . "); // new sentence ⇒ stays
+        expect(phonemize("н. э. и далее", "ru")).not.toContain(" . "); // continues ⇒ consumed
+        expect(phonemize("н. э., затем", "ru")).not.toContain(" . "); // the comma carries the break
+        expect(phonemize("т. е.", "ru")).toBe("to jesʲtʲ .");
         expect(phonemize("№ 1", "ru")).toBe("nˈomʲɪr ɐdʲˈin"); // the sign was dropped outright
     });
 
