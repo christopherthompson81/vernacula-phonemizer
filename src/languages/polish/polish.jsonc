@@ -40,6 +40,15 @@
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
+    // LEXICAL FACT, not derivable from spelling: acronyms Polish reads LETTER BY LETTER although the
+    // letters would form a perfectly readable Polish word (so the OOV phonotactic test in
+    // core/initialisms.ts leaves them alone). Attested in the pl_pl corpus: USA ×11 [u es a], RPA ×6
+    // [er pe a], ONZ ×4 [o en zet], PKB ×3, DNA ×3, GPS ×3, AOL ×3. The genuinely unpronounceable ones
+    // (GMT, UTC, DVD, XDR, PNG, TB) need no entry — the no-vowel rule already spells them out, and the
+    // pronounceable acronyms Polish reads AS words (NASA, UNESCO, FIFA, OPEC, ACTA, ASUS, LATAM, SWAPO,
+    // COVID) are deliberately absent so the OOV g2p keeps reading them as words.
+    "acronymLetters": ["usa", "rpa", "onz", "pkb", "dna", "gps", "aol", "ue", "zsrr", "nba"],
+
     // Cardinal number words (composition logic in numbers.ts). SOURCE: pl.wikipedia's per-number articles
     // ("1 (liczba)" → jeden … "1000 (liczba)" → tysiąc, tys.), which spell every unit / teen / round ten /
     // round hundred used below; the magnitude agreement forms are the standard Polish paradigm (tysiąc ·

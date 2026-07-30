@@ -6,9 +6,11 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toSegments } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizePolish, normalizePolishInitialisms, plCountForm, UNITS } from "./normalize.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
@@ -26,16 +28,54 @@ export function phonemizeWord(word: string): string {
     return out.normalize("NFC");
 }
 
-const TOKEN = /([A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ]+)|(\d+)|([.?!,;:])/gu;
+/**
+ * Shared SYMBOL tier (#562) — %, currency signs and unit abbreviations, matched only when a NUMBER is
+ * adjacent, which is why it runs LAST and why the decimal comma is left in the text for it to see.
+ *
+ * `countForm` is Polish's own, not `slavicCountForm`: Polish sends a compound ending in 1 to the genitive
+ * plural (dwadzieścia jeden procent) where Russian keeps the singular. See the note in normalize.ts.
+ *
+ * SOURCED: procent · procenty · procent (the genitive plural of procent is the bare stem); dolar/funt/jen
+ * decline regularly, euro is indeclinable. Polish takes NO connective between a magnitude and the currency
+ * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["procent", "procenty", "procent"],
+    currency: {
+        "$": ["dolar", "dolary", "dolarów"],
+        "€": ["euro"],
+        "£": ["funt", "funty", "funtów"],
+        "¥": ["jen", "jeny", "jenów"],
+    },
+    magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
+    units: UNITS,
+    countForm: plCountForm,
+});
+
+// The number token carries its DECIMAL COMMA (Polish's decimal mark) so the comma is not read as clause
+// punctuation — `14,7` was coming out as a phrase break between "czternaście" and "siedem".
+const TOKEN = /([A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ]+)|(\d+(?:,\d+)?)|([.?!,;:])/gu;
 
 class PolishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: Polish rewrites (grouping, abbreviations, ordinals, clock, ranges, signs) →
+        // INITIALISMS (after abbreviations, so `m.in.` is not spelled EM-EN) → the shared symbol tier last
+        // (it needs the number still adjacent to its unit/sign). Roman numerals arrive already converted
+        // at the registry seam, so the roman-vs-initialism hazard cannot arise here.
+        const normalized = SYMBOLS(normalizePolishInitialisms(normalizePolish(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" "))
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" "))
                     sink.emit(phonemizeWord(wd));
-            else if (m[3]) {
+                if (frac !== undefined) {
+                    sink.emit(phonemizeWord("przecinek")); // the Polish name of the decimal comma
+                    for (const d of frac)
+                        for (const wd of numberToWords(Number(d)).split(" "))
+                            sink.emit(phonemizeWord(wd));
+                }
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }

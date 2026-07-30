@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/polish/polish.ts";
 import { ROMAN_POLICY } from "../src/languages/polish/romanOrdinals.ts";
+import { normalizePolish, normalizePolishInitialisms } from "../src/languages/polish/normalize.ts";
 
 // Canonical-IPA goldens for Polish (pl) — West Slavic rule g2p, penultimate stress. Digraphs (ch→x, cz→t͡ʂ, sz→ʂ,
 // rz→ʐ, dz/dź/dż), the ⟨i⟩ palatalizer, nasal vowels ą/ę (homorganic nasal by place; ą-final→ɔw̃, ę-final→ɛ),
@@ -104,5 +105,124 @@ describe("Polish roman-numeral ordinals", () => {
 
     test("a bare roman numeral still reads as a CARDINAL", () => {
         expect(phonemize("xix", "pl").trim()).toBe("d͡ʑɛvjɛntnˈaɕt͡ɕɛ"); // dziewiętnaście, not dziewiętnasty
+    });
+});
+
+// TEXT NORMALIZATION (#562, src/languages/polish/normalize.ts). Assertions are on the text→text layer,
+// because that is what the layer is: the IPA is the existing word path's job. Counts in the comments are
+// from the pl_pl FLEURS corpus (1,919 unique cased utterances) and are the reason each rule exists.
+describe("Polish text normalization", () => {
+    const n = (s: string): string => normalizePolish(s);
+
+    test("space-grouped thousands are de-grouped first (×16)", () => {
+        // The number token cannot span a space: "104 500" read as "sto cztery pięćset".
+        expect(n("104 500 baryłek")).toBe("104500 baryłek");
+        expect(n("5 000 000 gości")).toBe("5000000 gości"); // two passes — the groups share a digit
+        expect(n("330 000 zakażonych")).toBe("330000 zakażonych");
+        expect(n("30 9")).toBe("30 9"); // NOT grouping — a 1-digit block must not fuse two numbers
+    });
+
+    test("decimal comma reaches the number token, and reads as przecinek", () => {
+        // Handled in polish.ts's TOKEN so the number stays adjacent to its unit for the symbol tier.
+        // A DECIMAL count takes neither the singular nor the paucal — 3,5 metra, so the genitive plural
+        // (the nearer of the two forms a three-form table can hold) rather than *3,5 metry.
+        expect(phonemize("3,5 m", "pl").trim()).toBe("tʂˈɨ pʂɛt͡ɕˈinɛk pjˈɛɲt͡ɕ mˈɛtruf");
+    });
+
+    test("multi-dot abbreviations are claimed before the single-dot rule (×6)", () => {
+        expect(n("ok. 10 000 lat p.n.e.")).toBe("około 10000 lat przed naszą erą.");
+        expect(n("400 n.e. i")).toBe("400 naszej ery i");
+        expect(n("to m.in. zamiecie")).toBe("to między innymi zamiecie");
+        // The abbreviation's dot was ALSO the sentence period — it has to be put back (7 utterances lost
+        // their final pause before this guard existed).
+        expect(n("do roku 1000 n.e.")).toBe("do roku 1000 naszej ery.");
+    });
+
+    test("dotted abbreviations expand and the dot stops being a phrase break (×70)", () => {
+        expect(n("np. złoto")).toBe("na przykład złoto"); // ×27 — read as the nonce word [np] + a break
+        expect(n("agentów ds. pornografii")).toBe("agentów do spraw pornografii");
+        expect(n("w 1861 r. powstał")).toBe("w 1861 roku powstał");
+        expect(n("uzyskał w 1839 r.")).toBe("uzyskał w 1839 roku."); // clause-final dot restored
+        expect(n("zbudowana w 3 w. p.n.e.")).toBe("zbudowana w trzeci wieku przed naszą erą.");
+        expect(n("podejrzanych itp.")).toBe("podejrzanych i tym podobne.");
+        expect(n("lot nr CG4684")).toBe("lot numer CG4684"); // no dot in Polish → read as the cluster [nr]
+    });
+
+    test("`N.` ordinal vs sentence period — ZERO sentence-final pauses may be lost", () => {
+        // Followed by a lowercase word (or a comma) ⇒ ordinal; by an uppercase word or end ⇒ full stop.
+        expect(n("37. kraj świata")).toBe("trzydziesty siódmy kraj świata");
+        expect(n("jego 60. trafieniem")).toBe("jego sześćdziesiąty trafieniem");
+        expect(n("z 1. i 3. pułku")).toBe("z pierwszy i trzeci pułku");
+        // The corpus trap: an AGE plus a full stop, not an ordinal. Must stay untouched.
+        expect(n("Cuddeback, lat 21. Cuddeback prowadził")).toBe("Cuddeback, lat 21. Cuddeback prowadził");
+        expect(n("wyniosła 168.")).toBe("wyniosła 168.");
+        // Decades are the majority (6 of 14) and are the one context whose inflection IS recoverable.
+        // The Roman century has ALREADY become an ordinal word at the registry seam by the time this
+        // layer runs, so the word after `20.` is lowercase — which is what licenses the ordinal reading.
+        expect(n("w latach 20. dwudziesty wieku")).toBe("w latach dwudziestych dwudziesty wieku");
+        expect(n("z lat 30. dziewiętnasty")).toBe("z lat trzydziestych dziewiętnasty");
+        expect(n("Na lata 50. dziewiętnasty")).toBe("Na lata pięćdziesiąte dziewiętnasty");
+        expect(phonemize("w latach 20. XX wieku", "pl").trim())
+            .toBe("f lˈatax dvud͡ʑˈɛstɨx dvud͡ʑˈɛstɨ vjˈɛku"); // end to end, through the roman seam
+    });
+
+    test("version dots between digits stop breaking the sentence (×5)", () => {
+        expect(n("Norma 802.11n funkcjonuje")).toBe("Norma 802 kropka 11n funkcjonuje");
+        expect(n("rysunek 1.1.")).toBe("rysunek 1 kropka 1.");
+    });
+
+    test("clock: feminine ordinal hour, inflected by the governing preposition (×17)", () => {
+        expect(n("o 8:46 rano")).toBe("o ósmej 46 rano"); // locative — o + Loc
+        expect(n("o godz. 12:00 GMT")).toBe("o godzinie dwunastej GMT"); // :00 drops the minutes
+        expect(n("przed godz. 23:35")).toBe("przed godziną dwudziestą trzecią 35"); // instrumental
+        expect(n("o godz. 22:08")).toBe("o godzinie dwudziestej drugiej 08"); // BOTH elements inflect
+        expect(n("(02:30 UTC)")).toBe("(druga 30 UTC)"); // no preposition → nominative
+        // Sports scores are NOT times — two digits are required after the colon.
+        expect(n("wynosi zatem 3:2.")).toBe("wynosi zatem 3:2.");
+        expect(n("wynosi 7:2.")).toBe("wynosi 7:2.");
+    });
+
+    test("numeric ranges keep their endpoints apart (×16)", () => {
+        expect(n("(1418–1450)")).toBe("(1418 do 1450)");
+        expect(n("35–40 mph")).toBe("35 do 40 mil na godzinę");
+        expect(n("Ił-76")).toBe("Ił-76"); // a digit is required on BOTH sides
+        expect(n("100-dolarowych")).toBe("100-dolarowych");
+        expect(n("COVID-19")).toBe("COVID-19");
+    });
+
+    test("units, degrees, signs and fractions", () => {
+        expect(n("83 km/godz. i")).toBe("83 kilometry na godzinę i"); // …3 ⇒ PAUCAL
+        expect(n("70 km/h,")).toBe("70 kilometrów na godzinę,"); // …0 ⇒ genitive plural
+        expect(n("jedenastu km / godz.")).toBe("jedenastu kilometrów na godzinę."); // no numeral adjacent
+        expect(n("19 500 km²")).toBe("19500 kilometrów kwadratowych");
+        expect(n("600 Mb/s.")).toBe("600 megabitów na sekundę.");
+        expect(n("+30°C")).toBe("plus 30 stopni Celsjusza");
+        expect(n("5 mm (1/5 cala)")).toBe("5 mm (jedna piąta cala)"); // mm is left to the shared tier
+    });
+
+    test("the shared symbol tier: percent and units, with POLISH count agreement", () => {
+        // Three-way, but NOT slavicCountForm: a compound ending in 1 takes the genitive plural.
+        expect(phonemize("1%", "pl").trim()).toBe("jˈɛdɛn prˈɔt͡sɛnt");
+        expect(phonemize("3%", "pl").trim()).toBe("tʂˈɨ prɔt͡sˈɛntɨ"); // paucal — trzy procenty
+        expect(phonemize("88%", "pl").trim()).toBe("ɔɕɛmd͡ʑˈɛɕɔnt ˈɔɕɛm prˈɔt͡sɛnt"); // gen-pl
+        expect(phonemize("21%", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn prˈɔt͡sɛnt"); // ★ gen-pl, not sg
+        expect(phonemize("12%", "pl").trim()).toBe("dvanˈaɕt͡ɕɛ prˈɔt͡sɛnt"); // 11–14 always gen-pl
+        expect(n("100 m i 200 m stylem")).toBe("100 m i 200 m stylem"); // units are the tier's, not ours
+        expect(phonemize("2 km", "pl").trim()).toBe("dvˈa kilɔmˈɛtrɨ");
+        expect(phonemize("5 km", "pl").trim()).toBe("pjˈɛɲt͡ɕ kilɔmˈɛtruf");
+    });
+
+    test("initialisms: Polish letter names for the listed and the unpronounceable (×170)", () => {
+        // LEXICAL (polish.jsonc): readable, but Polish spells them out.
+        expect(normalizePolishInitialisms("siły USA i")).toBe("siły u es a i");
+        expect(normalizePolishInitialisms("w RPA jest")).toBe("w er pe a jest");
+        expect(normalizePolishInitialisms("obozu ONZ nie")).toBe("obozu o en zet nie");
+        // OOV: no vowel ⇒ nothing else could be said. DVD read as [tft], GMT as [ɡmt].
+        expect(normalizePolishInitialisms("format DVD jest")).toBe("format de fau de jest");
+        expect(normalizePolishInitialisms("o godzinie GMT tak")).toBe("o godzinie gie em te tak");
+        // OOV but pronounceable ⇒ left to the g2p, which reads them as words.
+        expect(normalizePolishInitialisms("NASA i UNESCO oraz OPEC")).toBe("NASA i UNESCO oraz OPEC");
+        // Attached to digits: a single letter is always a letter name (H5N1, M16).
+        expect(normalizePolishInitialisms("karabinu M16 i")).toBe("karabinu em16 i");
     });
 });

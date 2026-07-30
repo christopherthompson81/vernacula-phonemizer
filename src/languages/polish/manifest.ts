@@ -19,6 +19,8 @@ export interface PolishManifest {
         toVoiced: Record<string, string>;
     };
     clausePunctuation: Record<string, string>;
+    /** LEXICAL: acronyms read letter-by-letter even though the letters could form a readable word. */
+    acronymLetters: string[];
     numbers: {
         units: string[];
         teens: string[];

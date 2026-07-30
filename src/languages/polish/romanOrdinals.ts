@@ -39,7 +39,7 @@ const ORD_TENS: readonly string[] = [
  * Integer → Polish ordinal, masculine nominative. Above 20 both elements are ordinal — *dwudziesty pierwszy*,
  * *pięćdziesiąty drugi*. `undefined` above 100 falls back to the cardinal.
  */
-function ordinal(n: number): string | undefined {
+export function ordinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 100) return undefined;
     if (n === 100) return "setny";
     if (n < 20) return ORD_1_19[n];
