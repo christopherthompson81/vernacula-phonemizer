@@ -39,7 +39,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "՝": " , ", "՞": " ? ", "։": " . "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "՝": ",", "՞": "?", "։": "."
     },
 
     // NUMBERS — Western Armenian cardinal spellings; canonical IPA DERIVED via the same g2p (so the shift applies:

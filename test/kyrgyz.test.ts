@@ -37,6 +37,6 @@ describe("Kyrgyz canonical IPA — rule g2p (Standard Kyrgyz)", () => {
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createKyrgyz().text("Мен барам.")).toBe("men bɑrɑm  . ");
+        expect(createKyrgyz().text("Мен барам.")).toBe("men bɑrɑm .");
     });
 });

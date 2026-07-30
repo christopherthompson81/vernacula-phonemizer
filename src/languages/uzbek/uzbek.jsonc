@@ -28,7 +28,7 @@
     "glottal": "ʔ",
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": "."
     },
 
     // NUMBERS — Uzbek Latin spellings; canonical IPA DERIVED via the same g2p. Turkic decimal system: units + tens

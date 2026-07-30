@@ -49,7 +49,7 @@
     "retroflex": { "rt": "ʈ", "rn": "ɳ", "rl": "ɭ", "rs": "ʂ" },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
     },
 
     // NUMBERS — Norwegian Bokmål cardinal spellings (canonical NumbersDef); canonical IPA DERIVED via the same g2p,

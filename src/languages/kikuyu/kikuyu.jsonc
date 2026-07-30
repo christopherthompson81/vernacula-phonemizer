@@ -39,7 +39,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
     // CARDINAL NUMBERS — the CITATION / COUNTING series (what a speaker says counting aloud, no noun present),

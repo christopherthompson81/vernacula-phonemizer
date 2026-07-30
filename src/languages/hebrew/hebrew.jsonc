@@ -36,7 +36,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "׃": " . "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "׃": "."
     },
 
     // Cardinal number words, authored WITH NIQQUD so the Phase-1 g2p (phonemizeWord) renders them — the deterministic

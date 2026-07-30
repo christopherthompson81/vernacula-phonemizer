@@ -64,7 +64,7 @@
         "del", "dels", "al", "als", "pel", "pels", "com", "si"],
 
     "clausePunctuation": {
-        ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":",
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
 
     // Cardinal number words (masculine). Composition logic in numbers.ts.

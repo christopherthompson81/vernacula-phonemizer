@@ -21,7 +21,7 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
     });
 
     test("7-vowel ATR: the TILDE is vowel QUALITY not nasal — ⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ; doubling = length", () => {
-        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); // "person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
+        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); //"person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
         expect(phonemizeWord("kĩlũngũ")).toBe("keloᵑɡo"); // ⟨ĩ⟩→e, ⟨ũ⟩→o, ⟨ng⟩→ᵑɡ
         expect(phonemizeWord("kaa")).toBe("kaː"); // ⟨aa⟩→aː (length by doubling)
         expect(phonemizeWord("muundu")).toBe("muːⁿdu"); // ⟨uu⟩→uː
@@ -30,32 +30,32 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
     test("KAMBA-SPECIFIC consonants: ⟨v⟩=β, ⟨sy⟩=ʃ, ⟨ky⟩=tʃ, ⟨th⟩=ð, ⟨nth⟩=ⁿð (differ from Kikuyu)", () => {
         expect(phonemizeWord("ngavu")).toBe("ᵑɡaβu"); // ⟨v⟩→β (Kamba's [β]); ⟨ng⟩→ᵑɡ
         expect(phonemizeWord("mavindu")).toBe("maβiⁿdu"); // ⟨v⟩→β intervocalic
-        expect(phonemizeWord("syana")).toBe("ʃana"); // "children" — ⟨sy⟩→ʃ (Kikuyu has no ⟨sy⟩)
+        expect(phonemizeWord("syana")).toBe("ʃana"); //"children" — ⟨sy⟩→ʃ (Kikuyu has no ⟨sy⟩)
         expect(phonemizeWord("kyama")).toBe("tʃama"); // ⟨ky⟩→tʃ affricate
-        expect(phonemizeWord("thandatu")).toBe("ðaⁿdatu"); // "six" — ⟨th⟩→ð, ⟨nd⟩→ⁿd
-        expect(phonemizeWord("nthakame")).toBe("ⁿðakamɛ"); // "blood" — ⟨nth⟩→ⁿð (prenasal dental)
+        expect(phonemizeWord("thandatu")).toBe("ðaⁿdatu"); //"six" — ⟨th⟩→ð, ⟨nd⟩→ⁿd
+        expect(phonemizeWord("nthakame")).toBe("ⁿðakamɛ"); //"blood" — ⟨nth⟩→ⁿð (prenasal dental)
     });
 
     test("prenasalized units + velar nasal: ⟨mb⟩=ᵐb, ⟨nz⟩=ⁿz, ⟨ny⟩=ɲ, ⟨ng'⟩=ŋ (distinct from ⟨ng⟩)", () => {
-        expect(phonemizeWord("ng'ombe")).toBe("ŋɔᵐbɛ"); // "cow" — ⟨ng'⟩→ŋ, ⟨mb⟩→ᵐb
-        expect(phonemizeWord("nyama")).toBe("ɲama"); // "meat" — ⟨ny⟩→ɲ
+        expect(phonemizeWord("ng'ombe")).toBe("ŋɔᵐbɛ"); //"cow" — ⟨ng'⟩→ŋ, ⟨mb⟩→ᵐb
+        expect(phonemizeWord("nyama")).toBe("ɲama"); //"meat" — ⟨ny⟩→ɲ
         expect(phonemizeWord("nzoka")).toBe("ⁿzɔka"); // ⟨nz⟩→ⁿz (post-nasal voicing of s)
         expect(phonemizeWord("itong'o")).toBe("itɔŋɔ"); // ⟨ng'⟩→ŋ (distinct from ⟨ng⟩→ᵑɡ)
         expect(phonemizeWord("king'abwe")).toBe("kiŋaβwɛ"); // ⟨ng'⟩→ŋ, standalone ⟨b⟩→β (mission spelling)
     });
 
     test("clause assembly: words + punctuation", () => {
-        expect(createKamba().text("Mũndũ nĩ mũseo.").trim()).toBe("moⁿdo ne mosɛɔ  ."); // "a person is good"
+        expect(createKamba().text("Mũndũ nĩ mũseo.").trim()).toBe("moⁿdo ne mosɛɔ ."); // "a person is good"
     });
 
     test("loan/name consonants are kept, not silently dropped (⟨d⟩=d, ⟨c⟩=tʃ)", () => {
-        expect(phonemizeWord("Daudi")).toBe("daudi"); // "David" — a common Kenyan name; ⟨d⟩ must not vanish
-        expect(phonemizeWord("daktari")).toBe("daktaɾi"); // "doctor" (loan) — onset ⟨d⟩ kept
+        expect(phonemizeWord("Daudi")).toBe("daudi"); //"David" — a common Kenyan name; ⟨d⟩ must not vanish
+        expect(phonemizeWord("daktari")).toBe("daktaɾi"); //"doctor" (loan) — onset ⟨d⟩ kept
     });
 
     test("the ⟨ng'⟩ apostrophe: all three variants normalise; a bare quote injects no glottal", () => {
         // straight ', curly ’ (U+2019), and modifier-letter ʼ (U+02BC) all spell the velar nasal in the wild
-        for (const w of ["ng'ombe", "ng’ombe", "ngʼombe"]) expect(createKamba().text(w).trim()).toBe("ŋɔᵐbɛ");
+        for (const w of ["ng'ombe","ng’ombe","ngʼombe"]) expect(createKamba().text(w).trim()).toBe("ŋɔᵐbɛ");
         expect(createKamba().text("'mũtĩ'").trim()).toBe("mote"); // a quoted word → no phantom ʔ (Kamba has no glottal)
     });
 });
@@ -91,7 +91,7 @@ describe("Kamba cardinal numbers — the manual's counting series", () => {
         expect(numberToWords(1000000000)).toBe("milioni ngili ĩmwe");
     });
     test("end-to-end through the g2p", () => {
-        expect(phonemize("20", "kam").trim()).toBe("miɔᵑɡɔ ele");
-        expect(phonemize("250", "kam").trim()).toBe("maːna ɛle na miɔᵑɡɔ etanɔ"); // ⟨aa⟩→aː
+        expect(phonemize("20","kam").trim()).toBe("miɔᵑɡɔ ele");
+        expect(phonemize("250","kam").trim()).toBe("maːna ɛle na miɔᵑɡɔ etanɔ"); // ⟨aa⟩→aː
     });
 });

@@ -24,8 +24,8 @@ describe("Lingala canonical IPA", () => {
     });
 
     test("TONE is written and rendered per nucleus (H=˥, L=˩) — the tonal minimal pair", () => {
-        expect(phonemizeWord("moto")).toBe("mo˩to˩"); // L L "person"
-        expect(phonemizeWord("motó")).toBe("mo˩to˥"); // L H "head"
+        expect(phonemizeWord("moto")).toBe("mo˩to˩"); // L L"person"
+        expect(phonemizeWord("motó")).toBe("mo˩to˥"); // L H"head"
     });
 
     test("no diphthongs — final V+i is hiatus, each vowel its own tone-bearing nucleus", () => {
@@ -35,7 +35,7 @@ describe("Lingala canonical IPA", () => {
     test("full text via the registry (numbers + tone + prenasalisation)", () => {
         const ln = getPhonemizer("ln");
         expect(ln.text("2").trim()).toBe("mi˥ba˩le˥"); // míbalé
-        expect(ln.text("Mbɔ́tɛ!").trim()).toBe("ᵐbɔ˥tɛ˩  !");
+        expect(ln.text("Mbɔ́tɛ!").trim()).toBe("ᵐbɔ˥tɛ˩ !");
     });
 
     // NUMBERS above kámá. Two defects: there was no ZERO word at all (0 leaked the digit), and everything ≥ 1 000

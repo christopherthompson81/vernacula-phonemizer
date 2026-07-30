@@ -35,6 +35,6 @@ describe("Jin Chinese (Taiyuan) canonical IPA", () => {
     });
 
     test("clause punctuation becomes a pause", () => {
-        expect(getPhonemizer("cjy").text("馬。").trim()).toBe("ma˥˧  .");
+        expect(getPhonemizer("cjy").text("馬。").trim()).toBe("ma˥˧ .");
     });
 });

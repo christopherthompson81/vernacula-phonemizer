@@ -27,7 +27,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
     // CARDINAL NUMBERS — the CITATION / COUNTING series for a bare numeral, and the "metso" DUMMY-NOUN

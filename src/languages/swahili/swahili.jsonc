@@ -31,7 +31,7 @@
     "vowels": { "a": "ɑ", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u" },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — standard Swahili, joined by "na". units siz. tens kumi/ishirini/…; hundreds mia; thousands elfu;

@@ -293,7 +293,12 @@ class LaoPhonemizer implements Phonemizer {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
-            else if (m[3] && ".!?…".includes(m[3])) sink.pause(" . ");
+            // Canonical, UNPADDED pause marks — a padded value reaches the output as a double space, and
+            // collapsing ? and ! into "." threw away the sentence type. Lao is the one engine that
+            // hardcodes this rather than reading clausePunctuation from its manifest.
+            else if (m[3] === "?") sink.pause("?");
+            else if (m[3] === "!") sink.pause("!");
+            else if (m[3] && ".…".includes(m[3])) sink.pause(".");
         });
     }
 }

@@ -46,7 +46,7 @@
     },
 
     "clausePunctuation": {
-        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Kannada spellings; canonical IPA DERIVED via the same G2P. Units + teens + round tens + magnitudes

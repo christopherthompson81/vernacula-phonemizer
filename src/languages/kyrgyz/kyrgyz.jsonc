@@ -26,7 +26,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
     },
 
     // NUMBERS — Kyrgyz Cyrillic cardinal spellings (canonical NumbersDef schema); canonical IPA DERIVED via the same

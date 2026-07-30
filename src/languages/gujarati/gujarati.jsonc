@@ -62,7 +62,7 @@
     ],
     "finalRules": [],
 
-    "clausePunctuation": { "।": " . ", "॥": " . ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : " },
+    "clausePunctuation": { "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": "," },
 
     // NUMBERS — Gujarati spellings (public-fact numerals); canonical IPA DERIVED by the same g2p. 21–99 are
     // IRREGULAR (like Hindi) — the round tens + 0–20 + magnitudes are authored; the ~80 compound spellings are a

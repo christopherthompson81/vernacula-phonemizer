@@ -14,33 +14,33 @@ describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () 
         expect(phonemizeWord("katinas")).toBe("kɐtʲɪnɐs"); // ⟨t⟩ soft before ⟨i⟩; ⟨k n⟩ hard before ⟨a⟩ (referee-verified)
         expect(phonemizeWord("penki")).toBe("pʲɛŋʲkʲɪ"); // ⟨p⟩ soft before ⟨e⟩, ⟨k⟩ soft before ⟨i⟩, ⟨n⟩→ŋʲ (verified)
         expect(phonemizeWord("šeši")).toBe("ʃʲɛʃʲɪ"); // ⟨š⟩ soft before front vowels — uniform ʲ notation
-        expect(phonemizeWord("medis")).toBe("mʲɛdʲɪs"); // "tree" — mʲ, dʲ
+        expect(phonemizeWord("medis")).toBe("mʲɛdʲɪs"); //"tree" — mʲ, dʲ
     });
 
     test("VELARS ⟨k ɡ⟩ do NOT receive leftward palatalization spread (soften only DIRECTLY before a front vowel)", () => {
-        expect(phonemizeWord("knyga")).toBe("knʲiːɡɐ"); // "book" — ⟨k⟩ HARD before soft ⟨nʲ⟩; ⟨n⟩ soft before ⟨y⟩=iː
+        expect(phonemizeWord("knyga")).toBe("knʲiːɡɐ"); //"book" — ⟨k⟩ HARD before soft ⟨nʲ⟩; ⟨n⟩ soft before ⟨y⟩=iː
         expect(phonemizeWord("naktis")).toBe("nɐktʲɪs"); // ⟨k⟩ HARD before soft ⟨tʲ⟩ (referee-verified)
     });
 
     test("the softening ⟨i⟩ (⟨Cia Ciu⟩): silent, palatalizes the preceding consonant; ⟨a⟩ then fronts to ɛ", () => {
-        expect(phonemizeWord("čia")).toBe("t͡ʃʲɛ"); // "here" — ⟨i⟩ silent, ⟨č⟩ soft, ⟨a⟩→ɛ after the soft consonant
-        expect(phonemizeWord("ačiū")).toBe("ɐt͡ʃʲuː"); // "thanks" — ⟨i⟩ silent softener before back ⟨ū⟩
+        expect(phonemizeWord("čia")).toBe("t͡ʃʲɛ"); //"here" — ⟨i⟩ silent, ⟨č⟩ soft, ⟨a⟩→ɛ after the soft consonant
+        expect(phonemizeWord("ačiū")).toBe("ɐt͡ʃʲuː"); //"thanks" — ⟨i⟩ silent softener before back ⟨ū⟩
     });
 
     test("rising diphthongs ⟨ie⟩=iɛ / ⟨uo⟩=uɔ (⟨ie⟩ palatalizes the preceding consonant)", () => {
-        expect(phonemizeWord("Dievas")).toBe("dʲiɛʋɐs"); // "God" — ⟨d⟩ soft before ⟨ie⟩ (referee-verified)
-        expect(phonemizeWord("lietuva")).toBe("lʲiɛtʊʋɐ"); // "Lithuania" — ⟨l⟩ soft before ⟨ie⟩ (referee-verified)
-        expect(phonemizeWord("aštuoni")).toBe("ɐʃtuɔnʲɪ"); // "eight" — ⟨uo⟩=uɔ
+        expect(phonemizeWord("Dievas")).toBe("dʲiɛʋɐs"); //"God" — ⟨d⟩ soft before ⟨ie⟩ (referee-verified)
+        expect(phonemizeWord("lietuva")).toBe("lʲiɛtʊʋɐ"); //"Lithuania" — ⟨l⟩ soft before ⟨ie⟩ (referee-verified)
+        expect(phonemizeWord("aštuoni")).toBe("ɐʃtuɔnʲɪ"); //"eight" — ⟨uo⟩=uɔ
     });
 
     test("regressive VOICING assimilation in obstruent clusters + non-palatalizing back context", () => {
         expect(phonemizeWord("dirbti")).toBe("dʲɪrʲpʲtʲɪ"); // ⟨b⟩→[p] before voiceless ⟨t⟩ (keeps softness: bʲ→pʲ)
-        expect(phonemizeWord("žmogus")).toBe("ʒmoːɡʊs"); // "man" — hard before back vowels; ⟨o⟩=oː
-        expect(phonemizeWord("kalba")).toBe("kɐlbɐ"); // "language" — all hard (referee-verified)
+        expect(phonemizeWord("žmogus")).toBe("ʒmoːɡʊs"); //"man" — hard before back vowels; ⟨o⟩=oː
+        expect(phonemizeWord("kalba")).toBe("kɐlbɐ"); //"language" — all hard (referee-verified)
     });
 
     test("clause assembly: words + punctuation", () => {
-        expect(createLithuanian().text("Labas, Lietuva!").trim()).toBe("lɐbɐs  ,  lʲiɛtʊʋɐ  !");
+        expect(createLithuanian().text("Labas, Lietuva!").trim()).toBe("lɐbɐs , lʲiɛtʊʋɐ !");
     });
 
     // Cardinal numbers (numbers.ts + the lithuanian.jsonc table). Lithuanian has NO round-hundred words — the
@@ -53,7 +53,7 @@ describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () 
         expect(lt.text("21").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs"); // dvidešimt vienas
         expect(lt.text("101").trim()).toBe("ʃʲɪmtɐs ʋʲiɛnɐs"); // šimtas vienas
         expect(lt.text("555").trim()).toBe("pʲɛŋʲkʲɪ ʃʲɪmtɐɪ pʲɛŋʲkʲɛzʲdʲɛʃʲɪmt pʲɛŋʲkʲɪ"); // penki šimtai penkiasdešimt penki
-        expect(lt.text("1000").trim()).toBe("tuːkstɐnʲtʲɪs"); // tūkstantis — the numeral "vienas" is dropped
+        expect(lt.text("1000").trim()).toBe("tuːkstɐnʲtʲɪs"); // tūkstantis — the numeral"vienas" is dropped
         expect(lt.text("2000").trim()).toBe("dʊ tuːkstɐnʲt͡ʃʲɛɪ"); // du tūkstančiai → NOM PL
         expect(lt.text("10000").trim()).toBe("dʲɛʃʲɪmt tuːkstɐnʲt͡ʃʲuː"); // dešimt tūkstančių → …0 ⇒ GEN PL
         expect(lt.text("21000").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs tuːkstɐnʲtʲɪs"); // ★ …1 ⇒ NOM SG tūkstantis

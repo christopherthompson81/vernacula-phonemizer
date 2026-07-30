@@ -42,7 +42,7 @@
         "a": "a", "e": "e", "i": "i", "o": "ɔ", "u": "u"
     },
 
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
 
     // ── CARDINAL NUMERALS ────────────────────────────────────────────────────────────────────────────────
     // SOURCE: Colin Mark, *The Gaelic-English Dictionary* (Routledge, 2003), the numeral headwords

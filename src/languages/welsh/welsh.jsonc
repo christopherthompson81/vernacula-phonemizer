@@ -60,7 +60,7 @@
     // Enclitics contracted with an apostrophe (o'r, hi'n): the stem is phonemized as a word, then this appended.
     "enclitics": { "r": "r", "n": "n", "m": "m", "th": "θ", "ch": "χ" },
 
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
 
     // Cardinal number words 0–10 (masculine; the full system with mutations/feminine is a later phase).
     "numbers": {

@@ -41,7 +41,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : ", "჻": " . "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "჻": "."
     },
 
     // ★ VIGESIMAL cardinal numbers (composition logic in numbers.ts). Georgian counts 20–99 in SCORES:

@@ -20,7 +20,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
     },
 
     // NUMBERS — standard (spoken) Bulgarian; canonical IPA DERIVED via the same g2p. "и" (and) precedes the final
