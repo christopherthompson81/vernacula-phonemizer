@@ -8,7 +8,7 @@
  * nucleus. DEFERRED: intervocalic voicing sandhi (lexical) + minor-syllable reduction. See docs/investigations/my_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { clauseSink, emitUnclaimed } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { segmentByDag, loadSegWords } from "../../core/segment.ts";
@@ -268,14 +268,24 @@ class BurmesePhonemizer implements Phonemizer {
         const { sink, finish } = clauseSink();
         let m: RegExpExecArray | null;
         const tok = new RegExp(TOKEN.source, "gu");
+        let cursor = 0;
         while ((m = tok.exec(input))) {
+            // This engine scans with its own exec loop rather than assembleClauses, so it needs the
+            // gap pass explicitly — without it embedded Latin (a brand name, acronym) is dropped.
+            if (m.index > cursor) emitUnclaimed(input.slice(cursor, m.index), sink);
+            cursor = m.index + m[0].length;
             if (m[1]) sink.emit(phonemizeWord(m[1]));
+            // KNOWN DEFECT, pre-existing and now documented: Burmese has no numeral data, so a digit
+            // run is read by the FOREIGN (English) phonemizer — "5" comes out [faᶦv], not ငါး. Burmese
+            // native digits ၀-၉ fall in group 1 instead and phonemize to nothing. Both need a sourced
+            // Burmese numeral table (Sinitic-style, with သောင်း 10⁴ / သိန်း 10⁵); tracked for #562.
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : m[2]);
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
         }
+        if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink);
         return finish();
     }
 }

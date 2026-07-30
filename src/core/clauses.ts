@@ -13,6 +13,8 @@
  *     });
  *   }
  */
+import { getDefaultForeign } from "./foreign.ts";
+
 export interface ClauseSink {
     /** Append a phonemized token, space-joined; flushes any pending pause before it. Empty strings are ignored. */
     emit(ipa: string): void;
@@ -50,12 +52,39 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
     };
 }
 
+/** A run of Latin-script text (with its combining marks, apostrophes and internal hyphens). */
+const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
+
+/**
+ * Emit the FOREIGN runs inside text the engine's own tokenizer did not claim.
+ *
+ * Only Latin-script runs are surfaced. Everything else in a gap — stray punctuation, whitespace, a
+ * third script — stays dropped exactly as before, keeping this change tightly scoped to the defect it
+ * fixes (see core/foreign.ts for why 47 engines lost embedded Latin entirely).
+ */
+export function emitUnclaimed(gap: string, sink: ClauseSink): void {
+    if (!/\p{Script=Latin}/u.test(gap)) return; // fast path: nothing foreign here
+    const foreign = getDefaultForeign();
+    if (foreign === undefined) return; // no fallback registered → previous behaviour (dropped)
+    for (const run of gap.matchAll(LATIN_RUN)) sink.emit(foreign(run[0]));
+}
+
 export function assembleClauses(
     input: string,
     token: RegExp,
     handle: (match: RegExpMatchArray, sink: ClauseSink) => void,
 ): string {
     const { sink, finish } = clauseSink();
-    for (const m of input.matchAll(token)) handle(m, sink);
+    let cursor = 0;
+    for (const m of input.matchAll(token)) {
+        const at = m.index ?? cursor;
+        // Text between the previous match and this one is text the tokenizer declined; an engine whose
+        // TOKEN already has a Latin group claims it here and leaves no gap, so this is a no-op for the
+        // engines that were already correct.
+        if (at > cursor) emitUnclaimed(input.slice(cursor, at), sink);
+        handle(m, sink);
+        cursor = at + m[0].length;
+    }
+    if (cursor < input.length) emitUnclaimed(input.slice(cursor), sink);
     return finish();
 }

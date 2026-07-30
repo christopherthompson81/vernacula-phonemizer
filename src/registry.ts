@@ -182,11 +182,18 @@ import { createSylheti } from "./languages/sylheti/sylheti.ts";
 import { createGreek } from "./languages/greek/greek.ts";
 import { createAncientGreek } from "./languages/ancientgreek/ancientgreek.ts";
 import { normalizeRomans, ROMAN_EXCLUSIONS } from "./core/roman.ts";
+import { setDefaultForeign } from "./core/foreign.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
     text(input: string): string;
 }
+
+// Embedded FOREIGN runs (a brand name, acronym or code-switched phrase in a script the engine does not
+// own) are read as English — the same choice the engines that already handle Latin make. Registered
+// here rather than imported by core/, so core keeps its no-dependency position. Without this, the 47
+// engines whose tokenizer matches only their own script DROP such text silently (core/foreign.ts).
+setDefaultForeign((text) => getPhonemizer("en").text(text));
 
 const cache = new Map<string, Phonemizer>();
 
