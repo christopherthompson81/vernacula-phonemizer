@@ -244,10 +244,9 @@ export function normalizePolish(input: string): string {
         (m0, ...rest: unknown[]) => keepFinal("kilometrów na godzinę", m0, rest));
     s = s.replace(/(\d+)\s?mph(?![\p{L}\p{M}])/giu,
         (_m, n: string) => `${n} ${counted(Number(n), MILE)} na godzinę`);
-    s = s.replace(/(\d+)\s?km\s?[²2](?![\p{L}\p{M}])/giu,
-        (_m, n: string) => `${n} ${counted(Number(n), KMH)} kwadratowych`);
-    s = s.replace(/(\d+)\s?mm\s?[²2](?![\p{L}\p{M}])/giu,
-        (_m, n: string) => `${n} milimetrów kwadratowych`);
+    // SQUARED units are composed by the shared tier now (exponentWords in polish.ts). The RATE forms above
+    // stay local: "na godzinę" is a preposition plus an ACCUSATIVE, the corpus writes a bare numberless
+    // `km/h`, and `km/godz.` needs keepFinal so its dot cannot swallow a sentence period.
     s = s.replace(/(\d+)\s?Mb\s?\/\s?s(?![\p{L}\p{M}])/gu, "$1 megabitów na sekundę");
 
     // 3) `godz.` → godzina, in the case the preceding preposition governs. All 8 corpus instances are

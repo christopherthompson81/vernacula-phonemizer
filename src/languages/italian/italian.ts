@@ -325,8 +325,6 @@ const SYMBOLS = makeSymbolNormalizer({
         "km/h": ["chilometro orario", "chilometri orari"],
         "km/s": ["chilometro al secondo", "chilometri al secondo"],
         "m/s": ["metro al secondo", "metri al secondo"],
-        "km²": ["chilometro quadrato", "chilometri quadrati"],
-        "m²": ["metro quadrato", "metri quadrati"],
         mph: ["miglio orario", "miglia orarie"],
         km: ["chilometro", "chilometri"], cm: ["centimetro", "centimetri"],
         mm: ["millimetro", "millimetri"], m: ["metro", "metri"],
@@ -334,6 +332,8 @@ const SYMBOLS = makeSymbolNormalizer({
         gb: ["gigabyte"], mb: ["megabyte"], tb: ["terabyte"],
         kw: ["chilowatt"], mw: ["megawatt"], hz: ["hertz"],
     },
+    // MIGRATION TEST (#562): the composite km²/m² keys are gone, composed by the shared tier instead.
+    exponentWords: { squared: ["quadrato", "quadrati"], cubed: ["cubo", "cubi"] },
 });
 
 class ItalianPhonemizer implements Phonemizer {

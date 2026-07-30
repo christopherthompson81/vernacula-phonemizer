@@ -53,6 +53,12 @@ const SYMBOLS = makeSymbolNormalizer({
     },
     magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
     units: UNITS,
+    // MIGRATION TEST (#562): km²/mm² composed by the shared tier. The adjective agrees, so it carries the
+    // same three count forms the unit nouns do.
+    exponentWords: {
+        squared: ["kwadratowy", "kwadratowe", "kwadratowych"],
+        cubed: ["sześcienny", "sześcienne", "sześciennych"],
+    },
     countForm: plCountForm,
 });
 

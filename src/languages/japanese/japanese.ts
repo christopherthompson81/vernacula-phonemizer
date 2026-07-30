@@ -37,6 +37,13 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 // words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["パーセント"],
+    // MIGRATION TEST (#562): units + exponent from the shared tier instead of normalize.ts's local table.
+    units: {
+        km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"], nm: ["ナノメートル"], m: ["メートル"],
+        kg: ["キログラム"], mg: ["ミリグラム"], g: ["グラム"], t: ["トン"], ha: ["ヘクタール"],
+        ml: ["ミリリットル"], l: ["リットル"],
+    },
+    exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
     currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
 });
 

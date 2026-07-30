@@ -125,9 +125,7 @@ export function normalizeJapanese(input: string): string {
     // 2) UNITS, while a digit is still adjacent to them and the number is still plain ASCII — see
     //    UNIT_KANA for why this cannot be left to the shared symbol tier. The exponent is consumed in the
     //    same match so it can never be stranded.
-    s = s.replace(new RegExp(`(?<=\\d)(\\s?)(${UNIT_ALT})([²³])?(?![\\p{L}\\p{M}])`, "gu"),
-        (_m, sp: string, unit: string, exp?: string) =>
-            `${sp}${exp === undefined ? "" : MEASURE[exp]!}${UNIT_KANA[unit.toLowerCase()]!}`);
+    // MIGRATION TEST: now composed by the shared tier (units + exponentWords in japanese.ts).
 
     // 3) 分の BEFORE the counter fusion in japanese.ts can read 分 as the MINUTES counter. See the header:
     //    3分の1 was さんぷんのいち ("three minutes of one"). Katakana ブンノ is out of the fusion's reach.

@@ -48,6 +48,16 @@ export interface SymbolData {
      */
     unitPer?: string;
     /**
+     * Nouns available ONLY as a rate DENOMINATOR — `h`, `u`, `s` — never matched as a standalone unit.
+     *
+     * This exists because the Dutch migration proved the alternative dangerous. Declaring `s` in `units`
+     * so that `m/s` could compose also made a bare `76s` match, and the corpus's `Il-76s` (the aircraft,
+     * plural) became *zesenzeventig seconde* — confidently wrong, which is worse than the raw letter it
+     * replaced. One-letter denominators collide with plural-s and with alphanumeric designations, so they
+     * are kept out of the standalone alternation entirely.
+     */
+    rateDenominators?: Record<string, string>;
+    /**
      * Squared and cubed units — `km²` → "square kilometres". The measure word is language data and so is
      * its POSITION, which needs three values, not two:
      *   `after`    (default) — Italian, Vietnamese, Polish: *chilometri quadrati*, *kilometr kwadratowy*
@@ -147,12 +157,15 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         ? new RegExp(`(${NUM})${magAlt}\\s?(${CUR})`, "gu")
         : null;
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
+    // Denominators may come from either map; only `units` keys are matchable standalone.
+    const denomKeys = [...Object.keys(d.units ?? {}), ...Object.keys(d.rateDenominators ?? {})]
+        .sort((a, b) => b.length - a.length).join("|");
     // The unit may carry a RATE denominator (`km/h`) or an EXPONENT (`km²`, `km2`). Both are consumed in
     // the same match so neither can be stranded after the unit word is substituted — the exponent was
     // being left behind as an unreadable character, and the `/h` read as the letter H.
     const unitRe = d.units
         ? new RegExp(
-            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${unitAlt})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}])`,
+            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}])`,
             "giu",
         )
         : null;
@@ -195,9 +208,10 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 if (denom !== undefined) {
                     // A rate needs both nouns and the connective; without any of them leave the text
                     // alone rather than emit half a reading.
-                    const dForms = d.units![denom.toLowerCase()];
-                    if (d.unitPer === undefined || dForms === undefined) return whole;
-                    return `${num} ${head} ${d.unitPer} ${dForms[0]!}`;
+                    const dl = denom.toLowerCase();
+                    const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
+                    if (d.unitPer === undefined || dWord === undefined) return whole;
+                    return `${num} ${head} ${d.unitPer} ${dWord}`;
                 }
                 if (exp !== undefined) {
                     const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;

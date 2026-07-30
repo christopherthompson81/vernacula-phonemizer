@@ -197,18 +197,10 @@ export function normalizeDutch(input: string): string {
     s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(\s*uur)?/gu,
         (_m, h: string, min: string, uur?: string) => clock(h, min, uur));
 
-    // 6) SQUARED UNITS, BEFORE the shared symbol tier. That tier matches a unit only when a NUMBER is
-    //    adjacent and its unit alternation has no `²`, so `3.850 km²` would have matched bare `km` and
-    //    orphaned the superscript. The corpus writes both `km²` and the superscript-lost `km2`/`mi2`/`mm2`.
-    s = s.replace(/(\d)\s?(km|mi|cm|mm|m)[²2](?![\p{L}\p{M}\d])/gu, (_m, d: string, u: string) =>
-        `${d} vierkante ${({ km: "kilometer", mi: "mijl", cm: "centimeter", mm: "millimeter", m: "meter" } as Record<string, string>)[u]!}`);
-
-    // 7) COMPOUND UNITS the shared tier cannot express (it matches one token, not a ratio). Dutch writes
-    //    `km/u` (×4), not `km/h`; `m/s` ×1; `mph` ×1 in a gloss. Measure nouns stay SINGULAR after a
-    //    numeral in Dutch ("83 kilometer per uur"), so there is no count agreement to carry.
-    s = s.replace(/(\d)\s?km\/[uh](?![\p{L}\p{M}])/gu, "$1 kilometer per uur");
-    s = s.replace(/(\d)\s?m\/s(?![\p{L}\p{M}])/gu, "$1 meter per seconde");
-    s = s.replace(/(\d)\s?mph(?![\p{L}\p{M}])/gu, "$1 mijl per uur");
+    // 6-7) SQUARED UNITS and RATES are composed by the shared symbol tier — see `unitPer`,
+    //    `rateDenominators` and `exponentWords` in dutch.ts. Migrating them off the local rules was
+    //    verified byte-identical over the whole nl_nl corpus. Dutch's `km/u` spelling and the foreign
+    //    `km/h` both compose, because `u` and `h` are both declared denominators.
 
     // 8) DEGREES. `0°C` came out as the bare consonant *s*; `35°W` dropped the sign and left a lone `W`.
     //    The compass letters are expanded only DIRECTLY after a degree sign, where they cannot be anything

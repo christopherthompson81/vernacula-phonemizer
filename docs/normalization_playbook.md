@@ -188,3 +188,44 @@ sync, and a halted session resumes by listing what is already committed:
 ```sh
 ls src/languages/*/normalize.ts
 ```
+
+---
+
+## Migrating a local rule to a shared seam
+
+When a capability is lifted into `core/`, the languages that already solved it privately should be
+**migrated as an experiment, not left alone** — and the corpus decides, not taste. The gate is a
+before/after diff over that language's whole corpus:
+
+- **byte-identical** → keep the migration; the local rule was duplication
+- **changed for the better** → keep it, and say so in the commit
+- **changed for the worse, or the idiom cannot be expressed** → revert THAT language and record why
+
+Run over ja, ko, th, vi, it, pl, nl for the rate (`km/h`) and exponent (`km²`) seams, the result was
+5 migrated, 2 kept local, 1 not applicable — and two of the migrations fixed bugs:
+
+| language | rate | exponent | evidence |
+|---|---|---|---|
+| it | **kept local** | migrated | `chilometri orari` / `al secondo` — an adjective and a contracted article, not "A per B" |
+| nl | migrated | migrated | 0/1829 changed |
+| pl | **kept local** | migrated | rate is `na` + ACCUSATIVE, has a bare numberless form, and needs `keepFinal` so its dot cannot eat a sentence period |
+| vi | n/a | migrated | 0/1978 changed |
+| ja | n/a | migrated | **fixed a bug**: the local rule matched only `²`, so `mm2` read the ASCII 2 as the number *ni* |
+| ko | **kept local** | n/a | 시속 is a PREFIX and claims a whole range (`35-40 mph` → 시속 35-40 마일) |
+| th | n/a | n/a | no rate or exponent handling exists |
+
+Polish's exponent migration **fixed an agreement bug**: the local rule hardcoded the genitive plural, so
+`864 mm2` read *milimetrów kwadratowych* where 864 takes the paucal *milimetry kwadratowe*.
+
+Two things the experiment taught, both now in `core/normalizeSymbols.ts`:
+
+1. **A rate denominator must not be matchable standalone.** Declaring `s` in `units` so `m/s` could
+   compose also made a bare `76s` match, and the Dutch corpus's `Il-76s` (the aircraft) became
+   *zesenzeventig seconde* — confidently wrong, which is worse than the raw letter it replaced. Hence
+   `rateDenominators`.
+2. **Position needs three values, not two.** `before` and `compound` are different: Russian wants a
+   spaced agreeing adjective (*квадратных километров*), Swedish and Japanese fuse it into one word
+   (*kvadratkilometer*, 平方キロメートル). Collapsing them produced *квадратныхкилометров*.
+
+**A test that asserts on the language-local function will fail after migration, and that is correct** — it
+is testing the wrong layer. Re-assert through `phonemize`, and note in the test that the behaviour moved.

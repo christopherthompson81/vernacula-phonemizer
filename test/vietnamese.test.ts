@@ -115,9 +115,12 @@ describe("Vietnamese normalization (#562)", () => {
     });
 
     test("units: HTML sup, squared, per-hour, degrees", () => {
-        expect(N("chiếm 783.562 km<sup>2</sup> (")).toBe("chiếm 783562 km vuông (");
-        expect(N("diện tích 3.850 km²,")).toBe("diện tích 3850 km vuông,");
-        expect(N("(3136mm2 so với")).toBe("(3136mm vuông so với");
+        // SQUARED units moved to the SHARED tier (exponentWords in vietnamese.ts), so they are no longer
+        // visible to normalizeVietnamese alone — assert them through the full pipeline. The migration was
+        // verified byte-identical over the whole vi_vn corpus.
+        expect(N("chiếm 783.562 km<sup>2</sup> (")).toBe("chiếm 783562 km² ("); // tag → the superscript
+        expect(phonemize("diện tích 3.850 km²,", "vi")).toContain("mˈɛ˧˥t̪ vˈuə˧ŋ");
+        expect(phonemize("(3136mm2 so với", "vi")).toContain("mˈɛ˧˥t̪ vˈuə˧ŋ"); // the ASCII spelling too
         // the corpus writes km/giờ and dặm/giờ in full — the target forms are its own
         expect(N("khoảng 83 km/h và")).toBe("khoảng 83 km/giờ và");
         expect(N("tối đa 40 mph (64 kph)")).toBe("tối đa 40 dặm/giờ (64 km/giờ)");

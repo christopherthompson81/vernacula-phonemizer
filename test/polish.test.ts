@@ -194,7 +194,12 @@ describe("Polish text normalization", () => {
         expect(n("83 km/godz. i")).toBe("83 kilometry na godzinę i"); // …3 ⇒ PAUCAL
         expect(n("70 km/h,")).toBe("70 kilometrów na godzinę,"); // …0 ⇒ genitive plural
         expect(n("jedenastu km / godz.")).toBe("jedenastu kilometrów na godzinę."); // no numeral adjacent
-        expect(n("19 500 km²")).toBe("19500 kilometrów kwadratowych");
+        // km²/mm² moved to the SHARED tier (exponentWords in polish.ts), so they are no longer visible to
+        // normalizePolish alone — assert them through the full pipeline instead. Migrating them was
+        // verified over the whole pl_pl corpus and FIXED an agreement bug: the local rule hardcoded the
+        // genitive plural, so `864 mm2` read *milimetrów kwadratowych* where 864 takes the paucal.
+        expect(phonemize("19 500 km²", "pl")).toContain("kilɔmˈɛtruf kfadratˈɔvɨx");
+        expect(phonemize("864 mm2", "pl")).toContain("milimˈɛtrɨ kfadratˈɔvɛ"); // paucal, was genitive pl.
         expect(n("600 Mb/s.")).toBe("600 megabitów na sekundę.");
         expect(n("+30°C")).toBe("plus 30 stopni Celsjusza");
         expect(n("5 mm (1/5 cala)")).toBe("5 mm (jedna piąta cala)"); // mm is left to the shared tier

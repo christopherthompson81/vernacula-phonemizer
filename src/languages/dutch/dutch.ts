@@ -130,7 +130,13 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], m: ["meter"],
         kg: ["kilogram"], mg: ["milligram"], ha: ["hectare"], mi: ["mijl"],
+        mph: ["mijl per uur"],
     },
+    // Denominators only — `s` as a standalone unit made the corpus's `Il-76s` read *zesenzeventig seconde*.
+    rateDenominators: { u: "uur", h: "uur", s: "seconde" },
+    unitPer: "per",
+    // Dutch puts the measure word BEFORE the unit, spaced, and measure nouns stay singular after a numeral.
+    exponentWords: { squared: ["vierkante"], cubed: ["kubieke"], position: "before" },
     magnitudes: ["miljoen", "miljard", "biljoen"],
 });
 

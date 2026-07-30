@@ -127,10 +127,8 @@ export function normalizeVietnamese(input: string): string {
     // matches a unit only when a NUMBER is adjacent on the left, so the rewrite must keep the digits
     // and the unit abbreviation glued together and only append the word — `783.562 km²` must become
     // `783.562 km vuông`, never `783.562 vuông km`. Covers the ASCII spelling too (3136mm2).
-    s = s.replace(
-        new RegExp(`(?<=\\d\\s?)(km|cm|mm|m)(?:²|2)(?![\\p{L}\\p{M}\\d])`, "gu"),
-        "$1 vuông",
-    );
+    // Composed by the shared tier now (exponentWords in vietnamese.ts); migrating it was verified
+    // byte-identical over the whole vi_vn corpus. The ASCII spelling (3136mm2) composes too.
 
     // ── 3. clock ranges, then sports times, then clocks ──────────────────────────────────────────
     // 3a. A clock–clock pair is always a span, so it can be joined before the ambiguity of step 7
