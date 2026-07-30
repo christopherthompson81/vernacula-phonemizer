@@ -188,5 +188,14 @@
         "hundred": "백",
         "thousand": "천",
         "myriadUnits": ["", "만", "억", "조"], // 10^0, 10^4, 10^8, 10^12
+
+        // The NATIVE series, in the PRENOMINAL form a counter takes (한 명, not 하나 명). Used only by
+        // normalize.ts, for the counters that select it (명 개 시 시간 번째); the series stops at 아흔아홉,
+        // so 100 and above is Sino for every counter. 20 alone is 스무 (스물 only before a ones digit).
+        "native": {
+            "ones": ["", "한", "두", "세", "네", "다섯", "여섯", "일곱", "여덟", "아홉"],
+            "tens": ["", "열", "스물", "서른", "마흔", "쉰", "예순", "일흔", "여든", "아흔"],
+            "twenty": "스무",
+        },
     },
 }

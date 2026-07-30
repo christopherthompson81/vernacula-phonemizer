@@ -32,6 +32,8 @@ export interface KoreanManifest {
         hundred: string;
         thousand: string;
         myriadUnits: string[];
+        /** The native series in prenominal form, for normalize.ts's counter rule (see korean.jsonc). */
+        native: { ones: string[]; tens: string[]; twenty: string };
     };
 }
 
