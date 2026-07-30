@@ -155,6 +155,12 @@ export interface PhonotacticsData {
  *   3. An illegal word-INITIAL cluster (French TVA has no /tv/ onset; English WTO no /wt/).
  *   4. An illegal word-FINAL cluster (French RATP /tp/, EDF /df/; English UTC /tc/).
  *
+ * DIGRAPH ORTHOGRAPHIES MUST FOLD FIRST. This test counts raw LETTERS, so a language whose orthography
+ * writes one sound with two letters looks like it has an illegal consonant run: Hungarian `ENSZ` is
+ * e-n-sz, three sounds, but reads here as a 3-consonant cluster and would be spelled out where it is
+ * actually said as the word *ensz*. Wrap the call in a fold from digraphs to single placeholder letters
+ * before passing the token in; the Hungarian run does exactly that locally. Reported by that run.
+ *
  * KNOWN LIMIT: readability is not convention. `ONG`, `PIB`, `RER`, `US`, `UK` are all readable yet
  * spelled out in speech, which is exactly why `forceLetters` exists — no phonotactic test can derive a
  * lexical convention.

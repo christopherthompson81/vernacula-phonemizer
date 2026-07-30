@@ -28,6 +28,18 @@ export interface NumbersDef {
     };
     /** Optional full irregular 21..99 spellings (keyed by the number); overrides tens+unit composition. */
     compound?: Record<string, string>;
+    /**
+     * Order of the 21..99 FALLBACK when no `compound` spelling is authored. The default is UNIT then TENS
+     * (the Hindi-belt *ekchālīs* shape). DRAVIDIAN languages are the other way round — Kannada
+     * ಇಪ್ಪತ್ತೊಂದು, Malayalam ഇരുപത്തിയൊന്ന് — and were reading "one twenty". Found by the Telugu run,
+     * which fixed its own with a private composer and then measured the same defect in its relatives.
+     */
+    compoundOrder?: "unit-tens" | "tens-unit";
+    /**
+     * Read a bare 100/1000 as the magnitude word ALONE — Kannada ನೂರು, not *ondu nūru. Opt-in, because
+     * the Hindi-belt languages genuinely do say *ek sau* and *ek hazār*.
+     */
+    bareMagnitude?: boolean;
     /** Optional decimal-point word (Hindi दशमलव); when present the text path reads N.M as int दशमलव digit-by-digit. */
     decimalWord?: string;
 }
@@ -47,16 +59,19 @@ export const indicNumberWords: NumberComposer = (n, d) => {
             u = n % 10;
         if (u === 0) return [d.tens[String(t)]!];
         if (d.compound?.[String(n)]) return [d.compound[String(n)]!];
-        // 21-99 fused spelling not authored → degrade to a best-effort UNIT+TENS reading (the Indic order, e.g.
-        // ekchalis-shape) instead of leaking a "?" into the IPA. Approximate (the real fused form differs) but
-        // readable; a full `compound` map overrides it. See the per-language "21-99 deferred" notes.
-        return [d.units[u]!, d.tens[String(t)]!];
+        // 21-99 fused spelling not authored → degrade to a best-effort two-word reading instead of leaking
+        // a "?" into the IPA. Approximate (the real fused form differs) but readable; a full `compound`
+        // map overrides it. The ORDER is language-specific — see `compoundOrder`.
+        return d.compoundOrder === "tens-unit"
+            ? [d.tens[String(t)]!, d.units[u]!]
+            : [d.units[u]!, d.tens[String(t)]!];
     }
     if (n < 1000) {
         const h = Math.floor(n / 100),
             r = n % 100;
         return [
-            d.units[h]!,
+            // A bare hundred is just the magnitude word in the languages that declare it.
+            ...(h === 1 && d.bareMagnitude ? [] : [d.units[h]!]),
             d.magnitudes.hundred,
             ...(r ? indicNumberWords(r, d) : []),
         ];
@@ -65,7 +80,7 @@ export const indicNumberWords: NumberComposer = (n, d) => {
         const th = Math.floor(n / 1000),
             r = n % 1000;
         return [
-            ...indicNumberWords(th, d),
+            ...(th === 1 && d.bareMagnitude ? [] : indicNumberWords(th, d)),
             d.magnitudes.thousand,
             ...(r ? indicNumberWords(r, d) : []),
         ];

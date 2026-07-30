@@ -246,4 +246,18 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("$5 milionów", "pl")).toContain("dɔlˈaruf");
         expect(phonemize("$5 миллионов", "ru")).toContain("dˈoɫːərəf");
     });
+
+    /**
+     * The Indic composer's 21-99 fallback and its bare magnitudes, both reported by the Telugu run after
+     * it fixed the same two defects in its own private composer and then measured its relatives.
+     */
+    test("Dravidian reads tens-then-unit, and a bare hundred has no 'one'", () => {
+        expect(phonemize("21", "kn")).toBe("ˈipːat̪ːu ˈõn̪d̪u"); // was "one twenty"
+        expect(phonemize("21", "ml")).toBe("ˈiɾubat̪ɨ ˈonːɨ");
+        expect(phonemize("100", "kn")).toBe("nˈuːɾu");   // was "one hundred"
+        expect(phonemize("1000", "ml")).toBe("ˈaːjiɾam");
+        // Both flags are OPT-IN: the Hindi-belt languages genuinely say "ek sau" and must not move.
+        expect(phonemize("100", "hi")).toContain("ˈeːk");
+        expect(phonemize("21", "hi")).toBe("ɪkːˈiːs"); // its own compound map still wins
+    });
 });

@@ -26,10 +26,13 @@ describe("kannada canonical IPA", () => {
     test("numbers (Kannada spellings; Indic grouping)", () => {
         expect(phonemize("5", "kn")).toBe("ˈaid̪u"); // aidu
         expect(phonemize("10", "kn")).toBe("hˈat̪ːu"); // hattu
-        expect(phonemize("100", "kn")).toBe("ˈõn̪d̪u nˈuːɾu"); // ondu nūru
+        // A bare hundred is ನೂರು alone — *ondu nūru was the shared composer prefixing "one"
+        // unconditionally, which the Telugu run measured across the Indic languages (#562).
+        expect(phonemize("100", "kn")).toBe("nˈuːɾu"); // nūru
+        expect(phonemize("21", "kn")).toBe("ˈipːat̪ːu ˈõn̪d̪u"); // ippattu ondu — TENS first, was "one twenty"
     });
 
     test("Kannada digits", () => {
-        expect(phonemize("೧೦೦", "kn")).toBe("ˈõn̪d̪u nˈuːɾu"); // 100
+        expect(phonemize("೧೦೦", "kn")).toBe("nˈuːɾu"); // 100
     });
 });

@@ -37,7 +37,9 @@ describe("Malayalam canonical IPA", () => {
     });
 
     test("numbers compose (units/teens/tens/magnitudes; 21-99 compounds deferred)", () => {
-        expect(getPhonemizer("ml").text("100").trim()).toBe("ˈonːɨ nˈuːrɨ"); // ഒന്ന് നൂറ്
+        // A bare hundred is നൂറ് alone; the shared composer was prefixing "one" unconditionally (#562).
+        expect(getPhonemizer("ml").text("100").trim()).toBe("nˈuːrɨ"); // നൂറ്
+        expect(getPhonemizer("ml").text("21").trim()).toBe("ˈiɾubat̪ɨ ˈonːɨ"); // TENS first
         expect(getPhonemizer("ml").text("5").trim()).toBe("ˈaɲt͡ʃɨ"); // അഞ്ച്
     });
 });

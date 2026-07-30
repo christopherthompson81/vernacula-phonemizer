@@ -55,6 +55,11 @@
         "units": ["ಸೊನ್ನೆ", "ಒಂದು", "ಎರಡು", "ಮೂರು", "ನಾಲ್ಕು", "ಐದು", "ಆರು", "ಏಳು", "ಎಂಟು", "ಒಂಬತ್ತು"],
         "teens": ["ಹತ್ತು", "ಹನ್ನೊಂದು", "ಹನ್ನೆರಡು", "ಹದಿಮೂರು", "ಹದಿನಾಲ್ಕು", "ಹದಿನೈದು", "ಹದಿನಾರು", "ಹದಿನೇಳು", "ಹದಿನೆಂಟು", "ಹತ್ತೊಂಬತ್ತು"],
         "tens": { "20": "ಇಪ್ಪತ್ತು", "30": "ಮೂವತ್ತು", "40": "ನಲವತ್ತು", "50": "ಐವತ್ತು", "60": "ಅರವತ್ತು", "70": "ಎಪ್ಪತ್ತು", "80": "ಎಂಬತ್ತು", "90": "ತೊಂಬತ್ತು" },
-        "magnitudes": { "hundred": "ನೂರು", "thousand": "ಸಾವಿರ", "lakh": "ಲಕ್ಷ", "crore": "ಕೋಟಿ" }
+        "magnitudes": { "hundred": "ನೂರು", "thousand": "ಸಾವಿರ", "lakh": "ಲಕ್ಷ", "crore": "ಕೋಟಿ" },
+        // DRAVIDIAN order: the 21-99 fallback reads TENS then UNIT (ಇಪ್ಪತ್ತೊಂದು / ഇരുപത്തിയൊന്ന്), where the
+        // shared default is the Hindi-belt unit-then-tens. Without this, 21 read as "one twenty".
+        "compoundOrder": "tens-unit",
+        // …and a bare hundred/thousand is the magnitude word alone, not "one hundred".
+        "bareMagnitude": true
     }
 }

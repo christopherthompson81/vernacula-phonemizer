@@ -57,6 +57,11 @@
         "units": ["പൂജ്യം", "ഒന്ന്", "രണ്ട്", "മൂന്ന്", "നാല്", "അഞ്ച്", "ആറ്", "ഏഴ്", "എട്ട്", "ഒമ്പത്"],
         "teens": ["പത്ത്", "പതിനൊന്ന്", "പന്ത്രണ്ട്", "പതിമൂന്ന്", "പതിനാല്", "പതിനഞ്ച്", "പതിനാറ്", "പതിനേഴ്", "പതിനെട്ട്", "പത്തൊമ്പത്"],
         "tens": { "20": "ഇരുപത്", "30": "മുപ്പത്", "40": "നാല്പത്", "50": "അമ്പത്", "60": "അറുപത്", "70": "എഴുപത്", "80": "എൺപത്", "90": "തൊണ്ണൂറ്" },
-        "magnitudes": { "hundred": "നൂറ്", "thousand": "ആയിരം", "lakh": "ലക്ഷം", "crore": "കോടി" }
+        "magnitudes": { "hundred": "നൂറ്", "thousand": "ആയിരം", "lakh": "ലക്ഷം", "crore": "കോടി" },
+        // DRAVIDIAN order: the 21-99 fallback reads TENS then UNIT (ಇಪ್ಪತ್ತೊಂದು / ഇരുപത്തിയൊന്ന്), where the
+        // shared default is the Hindi-belt unit-then-tens. Without this, 21 read as "one twenty".
+        "compoundOrder": "tens-unit",
+        // …and a bare hundred/thousand is the magnitude word alone, not "one hundred".
+        "bareMagnitude": true
     }
 }
