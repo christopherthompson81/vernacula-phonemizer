@@ -11,6 +11,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeGeezG2P } from "../../core/geez.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { createAmharicNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -72,6 +73,12 @@ function number(digits: string): string {
 }
 
 // Ethiopic letters (U+1200–U+135A, incl. combining marks) · Arabic digits · Ethiopic + ASCII punctuation.
+//
+// #562 AUDIT, recorded because it is the known hazard for a script whose punctuation lives inside its own
+// Unicode block (Burmese and Khmer were dropping EVERY sentence boundary this way): the letter class here
+// ends at ፚ = U+135A, and ። ፣ ፤ ፥ ፦ ፧ ፨ are U+1362–U+1368. They are ABOVE the range, so the letter branch
+// cannot swallow them and all 3,391 corpus instances already reach the punctuation branch. Verified, not
+// assumed. Do not widen this class to the full block without moving the punctuation branch ahead of it.
 const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
@@ -79,16 +86,25 @@ export type ForeignPhonemizer = (latin: string) => string;
 // #562 symbol normalization — Amharic: በመቶ "in a hundred" is THE standard percent construction
 // (Amharic media universal, after the number); currency/unit words are the standard loans, emitted in
 // Ge'ez script and read by the ordinary fidel g2p.
+// MAGNITUDES added by the #562 run: the corpus writes "US$14.7 ቢሊዮን" and "$2.3 ቢልየን", which without the
+// magnitude list came out as "…ዶላር ቢሊዮን" (the noun inserted before the written magnitude). ቢልየን is a
+// corpus-attested spelling variant of ቢሊዮን and is listed so it is matched, not so it is emitted. No
+// `magnitudeConnective`: Amharic takes none (አንድ ሚሊዮን ዶላር). The tier's own `already` guard covers the
+// three corpus cases that write ዶላር/ዶላሮች after the sign, so the noun is not doubled.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["በመቶ"],
     currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
     units: { kg: ["ኪሎግራም"] },
+    magnitudes: ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"],
 });
+
+/** #562 text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */
+const NORMALIZE = createAmharicNormalizer(numberToText, SYMBOLS);
 
 class AmharicPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        return assembleClauses(NORMALIZE(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
