@@ -104,11 +104,13 @@ quickly rather than skipped, so prefer two independent readers over one.
 
 **Expect the answer to sometimes be "neither".** Asked this of `i.e.`/`e.g.`, the result was three
 different readings across four recordings, and `i.e.` omitted outright by both readers of its sentence —
-so no rendering matched the audio and the choice was free. See
-`docs/investigations/asr_transcript_divergence_investigation.md`, which also records the larger implication:
-**the transcript is the script the reader was given, not a record of what they said**, and where those
-diverge the phonemized output teaches the fine-tune an alignment that is simply wrong. Every check in this
-playbook compares the engine against the transcript, so none of them would catch it.
+so no rendering matched the audio and the choice was free.
+
+That run also surfaced something that is NOT this repo's problem but is worth knowing while working here:
+**a FLEURS transcript is the script the reader was given, not a record of what they said.** Every gate in
+this playbook compares the engine against the transcript, so a perfectly correct rule can still pair IPA
+with audio that never contained those phonemes. The measurement, and the divergence-audit follow-up, live
+with the training scripts — `docs/omnivoice_ipa_corpus_investigation.md`, Run 31, in the `vernacula` repo.
 
 ### 6. Commit — one language, one commit
 
