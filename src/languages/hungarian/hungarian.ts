@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeHungarian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const RULES = MANIFEST.rules;
@@ -26,6 +27,14 @@ function toSegments(word: string): Seg[] {
     let i = 0;
     outer: while (i < w.length) {
         for (const [orth, ipa, v] of RULES) {
+            // ⟨csz⟩ is c + sz across a MORPHEME BOUNDARY, never cs + z. Longest-match otherwise took the
+            // ⟨cs⟩ digraph and left a bare ⟨z⟩, which regressive voicing then turned into [d͡ʒz] — so
+            // *nyolcszáz* and *kilencszáz* came out ˈɲold͡ʒzaːz / ˈkilɛnd͡ʒzaːz, i.e. every numeral with 8
+            // or 9 in a hundreds group (91 of them in the hu_hu corpus, the whole 18xx/19xx year range
+            // among them). The productive `-szor/-szer` and compound cases (kilencszer, táncszám) take
+            // the same boundary; cs+z needs a cs-final stem before a z-initial one and is vanishingly
+            // rare. Skipping the digraph here lets ⟨c⟩ then ⟨sz⟩ match from the manifest table.
+            if (orth === "cs" && w.startsWith("csz", i)) continue;
             if (w.startsWith(orth, i)) {
                 segs.push({ ph: ipa, v });
                 i += orth.length;
@@ -113,7 +122,7 @@ const TOKEN = /([a-záéíóöőúüű]+)|(\d+)|([.!?…,;:])/giu;
 
 class HungarianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeHungarian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

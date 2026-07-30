@@ -12,60 +12,39 @@
  * THE PERIOD, which sits between the numeral and the context word (`XIX. század`):
  *  - Matching is unaffected: the shared pass looks at the next WORD, skipping intervening non-letters, so
  *    `század` is still seen and the ordinal fires.
- *  - The period itself SURVIVES into the output, where the engine renders it as a clause pause —
- *    `tizenkilencedik . ˈsaːzɒd`. That artefact is pre-existing, not introduced here: `XIX. század` already
- *    phonemizes to `ˈtizɛŋkilɛnt͡s . ˈsaːzɒd` today with no policy at all. This contract (a table/rule plus two
- *    context regexes) cannot consume a character outside the numeral token, so removing it would take either a
- *    core change or a Hungarian-side pre-pass that swallows the ordinal period — deliberately left alone.
- *  - Consequence: the ordinal WORD is correct; the phrase carries a spurious pause. Net improvement over the
- *    cardinal, which is the wrong word *and* keeps the pause.
+ *  - The period itself used to SURVIVE into the output as a clause pause — `tizenkilencedik . ˈsaːzɒd`. That
+ *    is now consumed by the Hungarian-side pre-pass this file previously said it would take: step 9d of
+ *    normalize.ts drops a period between an ordinal word and a following LOWERCASE word, which is safe
+ *    because Hungarian starts sentences with a capital.
+ *
+ * ORDINAL FORMATION lives in numbers.ts (`ordinalWords`), shared with normalize.ts — Hungarian writes the
+ * ARABIC ordinal the same way (`19. század`), so the same morphology serves both and neither has a range
+ * cap: the ordinal is the cardinal with its final morph replaced (*kétszáznegyvenhetedik*, *ezredik*).
  */
 import type { RomanPolicy } from "../../core/roman.ts";
-import { MANIFEST } from "./manifest.ts";
-
-const N = MANIFEST.numbers;
-
-/** Standalone 1–9. 1 is the irregular *első* (not *egyedik*). */
-const ORD_UNITS: readonly string[] = [
-    "", "első", "második", "harmadik", "negyedik", "ötödik", "hatodik", "hetedik", "nyolcadik", "kilencedik",
-];
-
-/** 1–9 as the FINAL element of a compound: 21 → huszon+egyedik, 12 → tizen+kettedik. *első* → *egyedik*. */
-const ORD_UNITS_COMBINING: readonly string[] = [
-    "", "egyedik", "kettedik", "harmadik", "negyedik", "ötödik", "hatodik", "hetedik", "nyolcadik",
-    "kilencedik",
-];
-
-/** Whole tens: tizedik, huszadik, then the regular cardinal + -dik with the linking vowel (harmincadik). */
-const ORD_TENS: readonly string[] = [
-    "", "tizedik", "huszadik", "harmincadik", "negyvenedik", "ötvenedik", "hatvanadik", "hetvenedik",
-    "nyolcvanadik", "kilencvenedik",
-];
-
-/**
- * Integer → Hungarian ordinal. Compounds are ONE word: the combining tens prefix (tizen-, huszon- from the
- * language's own `tensPrefix` data, plain cardinal tens from 30 up) directly concatenated with the combining
- * unit ordinal — tizenkilencedik, huszonharmadik, negyvenötödik. `undefined` above 100 falls back to the
- * cardinal.
- */
-function ordinal(n: number): string | undefined {
-    if (!Number.isInteger(n) || n < 1 || n > 100) return undefined;
-    if (n === 100) return "századik";
-    if (n < 10) return ORD_UNITS[n];
-    const t = Math.floor(n / 10),
-        u = n % 10;
-    if (u === 0) return ORD_TENS[t];
-    const prefix = N.tensPrefix[String(t * 10)] ?? N.tens[t]; // tizen- / huszon- / harminc- / negyven- …
-    return prefix === undefined ? undefined : `${prefix}${ORD_UNITS_COMBINING[u]}`;
-}
+import { ordinalWords } from "./numbers.ts";
 
 /**
  * Hungarian is agglutinative, so the context patterns are UNANCHORED at the end: `század` also matches
  * században, századi, századtól, századok, századokban. Covered: (év)század, évezred, évforduló, kerület
  * (Budapest districts — "XIII. kerület" is one of the highest-frequency ordinal Romans in Hungarian text),
- * kongresszus, fejezet, olimpia.
+ * kongresszus, fejezet, olimpia, világháború (`az I. és a II. világháború` ×3 in the hu_hu corpus).
  */
-const CONTEXT = /^((év)?század|évezred|évfordul|kerület|kongresszus|fejezet|olimpi)/iu;
+const CONTEXT = /^((év)?század|évezred|évfordul|kerület|kongresszus|fejezet|olimpi|világháború)/iu;
+
+/**
+ * THE REGNAL PATTERN IS NOT COVERED, and the attempt is recorded because it looked safe and was not.
+ * `II. Erzsébet` / `XVI. Lajos` are *második Erzsébet* / *tizenhatodik Lajos* (3 instances in the hu_hu
+ * corpus, all read as cardinals today), and the obvious licenser is "the FOLLOWING word is capitalised".
+ * Adding `^\p{Lu}` to `ordinalAfter` does fix those three — and breaks `A JAS 39C Gripen`, because an
+ * ordinal context also LICENSES a single-letter numeral in core/roman.ts, so the `C` of `39C` became
+ * *századik*. `RomanPolicy` cannot see that the letter is glued to digits, and cannot ask for a minimum
+ * numeral length, so there is no way to express the regnal rule here without that cost. 3 gained against
+ * 1 confidently-wrong loss is not a trade worth taking; reported rather than worked around.
+ */
+
+/** Integer → Hungarian ordinal (see numbers.ts). Named locally so the policy's shape stays readable. */
+const ordinal = (n: number): string | undefined => (n >= 1 ? ordinalWords(n) : undefined);
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it
  *  REQUIRED here so tests can call it directly without a non-null assertion. */

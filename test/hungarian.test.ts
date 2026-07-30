@@ -57,7 +57,14 @@ describe("Hungarian roman-numeral ordinals", () => {
         expect(ord(50)).toBe("ötvenedik");
         expect(ord(63)).toBe("hatvanharmadik"); // past 50 — anniversary / congress range
         expect(ord(100)).toBe("századik");
-        expect(ord(101)).toBeUndefined(); // out of range → the caller falls back to the cardinal
+        // NO RANGE CAP any more. This used to assert `undefined` above 100, pinning a 1–100 table;
+        // ordinal formation now lives in numbers.ts and is the cardinal with its final morph replaced,
+        // so it reaches every value the cardinal compositor does. The old assertion was preserving a
+        // limitation, not a behaviour.
+        expect(ord(101)).toBe("százegyedik");
+        expect(ord(247)).toBe("kétszáznegyvenhetedik");
+        expect(ord(1000)).toBe("ezredik");
+        expect(ord(2000)).toBe("kétezredik");
     });
 
     test("context matches the agglutinated century forms (unanchored)", () => {
@@ -68,10 +75,115 @@ describe("Hungarian roman-numeral ordinals", () => {
 
     test("the ordinal reading phonemizes in context", () => {
         expect(getPhonemizer("hu").text("tizenkilencedik század").trim()).toBe("ˈtizɛŋkilɛnt͡sɛdik ˈsaːzɒd");
+        // …and through the whole pipeline, from the Roman numeral, with the ordinal period consumed.
+        expect(getPhonemizer("hu").text("XIX. század").trim()).toBe("ˈtizɛŋkilɛnt͡sɛdik ˈsaːzɒd");
         expect(getPhonemizer("hu").text("ötvenedik évforduló").trim()).toBe("ˈøtvɛnɛdik ˈeːfːorduloː");
     });
 
     test("a bare roman numeral still reads as a CARDINAL", () => {
         expect(getPhonemizer("hu").text("xix").trim()).toBe("ˈtizɛŋkilɛnt͡s"); // tizenkilenc, not tizenkilencedik
+    });
+});
+
+// ── Text normalization (src/languages/hungarian/normalize.ts) ──
+// Counts in the comments are from the 1,995 unique hu_hu FLEURS utterances (column 3, the cased one).
+// Each case below is a form the corpus actually writes; the "was" comment is the pre-change output.
+describe("Hungarian text normalization", () => {
+    const say = (s: string): string => getPhonemizer("hu").text(s).trim();
+
+    test("bare `N.` is an ordinal before a lowercase word — and NEVER at a sentence end", () => {
+        // ×59 lowercase-follows. Was: cardinal + a spurious phrase break (ˈtizɛŋkilɛnt͡s . ˈsaːzɒdbɒn).
+        expect(say("a 19. században")).toBe("ˈɒ ˈtizɛŋkilɛnt͡sɛdik ˈsaːzɒdbɒn");
+        expect(say("a 7. legnagyobb")).toBe("ˈɒ ˈhɛtɛdik ˈlɛɡnɒɟobː");
+        expect(say("Az 1000. bélyege")).toBe("ˈɒz ˈɛzrɛdik ˈbeːjɛɡɛ"); // ezer → ezredik, past the old 100 cap
+        expect(say("alkotmány 247. cikkelye")).toBe("ˈɒlkotmaːɲ ˈkeːtsaːznɛɟvɛnhɛtɛdik ˈt͡sikːɛjɛ");
+        expect(say("a 11., 12. és 13. századokban")) // a comma also licenses it
+            .toBe("ˈɒ ˈtizɛnɛɟɛdik , ˈtizɛŋkɛtːɛdik ˈeːʃ ˈtizɛnhɒrmɒdik ˈsaːzɒdoɡbɒn");
+        // THE CHECK THAT MATTERS: both sentence-final `N.` in the corpus keep their period.
+        expect(say("a görkorong és a Forma-1.")).toMatch(/ˈɛɟ \.$/u);
+        expect(say("rekordja 7 - 2.")).toMatch(/ˈkɛtːøː \.$/u);
+        // …as does a numeral before a capitalised continuation.
+        expect(say("az 1. és 2. New Hampshire ezred")).toMatch(/ˈkɛtːøː \./u);
+    });
+
+    test("a YEAR before a month name is a cardinal and the period is silent", () => {
+        // ×19. Was: ˈɛzɛrkilɛnd͡ʒzaːzhɒtvɒnøt . ˈmaːrt͡siuʃ — an ordinal reading here would be wrong.
+        expect(say("1965. március 18-án")).toBe("ˈɛzɛrkilɛnt͡ssaːzhɒtvɒnøt ˈmaːrt͡siuʃ ˈtizɛɲːolt͡sɒdikaːn");
+        expect(say("2017. szeptemberében")).toBe("ˈkeːtɛzɛrtizɛnheːt ˈsɛptɛmbɛreːbɛn");
+        // …but `N. évi` IS an ordinal, so the month gate has to be a month gate.
+        expect(say("a 2000. évi")).toBe("ˈɒ ˈkeːtɛzrɛdik ˈeːvi");
+    });
+
+    test("a day number takes the ORDINAL stem, not the cardinal", () => {
+        // ×32 hyphen-suffixed dates. Was: ˈtizɛnheːt ˈeːn — *tizenhétén*, two stressed words.
+        expect(say("szeptember 17-én")).toBe("ˈsɛptɛmbɛr ˈtizɛnhɛtɛdikeːn");
+        expect(say("július 1-jén")).toBe("ˈjuːliuʃ ˈɛlʃɛjeːn"); // suppletive elsej-
+        expect(say("január 1-én")).toBe("ˈjɒnuaːr ˈɛlʃɛjeːn");
+        expect(say("szeptember 11-e")).toBe("ˈsɛptɛmbɛr ˈtizɛnɛɟɛdikɛ");
+        // the bare date nominative computes its own harmony: back -a vs front -e
+        expect(say("augusztus 24. és")).toBe("ˈɒuɡustuʃ ˈhusonːɛɟɛdikɛ ˈeːʃ");
+        expect(say("március 3. és")).toBe("ˈmaːrt͡siuʃ ˈhɒrmɒdikɒ ˈeːʃ");
+    });
+
+    test("a hyphen-attached suffix joins the spoken numeral as ONE word", () => {
+        // ×166. Was: ˈɛzɛrɲold͡ʒzaːznɛɟvɛɲːolt͡s ˈbɒn — the suffix as its own stressed word.
+        expect(say("1848-ban")).toBe("ˈɛzɛrɲolt͡ssaːznɛɟvɛɲːold͡zbɒn");
+        expect(say("1970-es")).toBe("ˈɛzɛrkilɛnt͡ssaːzhɛtvɛnɛʃ");
+        expect(say("6500-an")).toBe("ˈhɒtɛzɛrøtsaːzɒn");
+        // stem shortening before a vowel-initial suffix: kettő → kett-, hét → het-
+        expect(say("2022-es")).toBe("ˈkeːtɛzɛrhusoŋkɛtːɛʃ");
+        expect(say("1907-es")).toBe("ˈɛzɛrkilɛnt͡ssaːzhɛtɛʃ");
+    });
+
+    test("grouping separators and the decimal comma", () => {
+        // Hungarian groups with a SPACE or a PERIOD and takes the COMMA as the decimal mark.
+        expect(say("100.000 ember")).toBe("ˈsaːzɛzɛr ˈɛmbɛr"); // was: ˈsaːz . ˈnulːɒ
+        expect(say("30 000 ember")).toBe("ˈhɒrmint͡sɛzɛr ˈɛmbɛr"); // was: ˈhɒrmint͡s ˈnulːɒ
+        expect(say("3,5 méter")).toBe("ˈhaːrom ˈɛɡeːs ˈøt ˈmeːtɛr"); // was: ˈhaːrom , ˈøt
+        // a comma before EXACTLY three digits is the English convention leaking through (3 of 3 in corpus)
+        expect(say("100,000 ember")).toBe("ˈsaːzɛzɛr ˈɛmbɛr");
+    });
+
+    test("clock, units, rates, exponents, percent, degrees, signs", () => {
+        expect(say("10:00 és 11:00 között")).toBe("ˈtiːz ˈeːʃ ˈtizɛnɛɟ ˈkøzøtː"); // zero minutes dropped
+        expect(say("11: 20-kor")).toBe("ˈtizɛnɛɟ ˈhuːskor"); // the corpus's spaced colon form
+        expect(say("120 km/h")).toBe("ˈsaːzhuːs ˈkilomeːtɛr ˈpɛr ˈoːrɒ"); // was: ˈkm ˈh
+        expect(say("19500 km²")).toBe("ˈtizɛŋkilɛnt͡sɛzɛrøtsaːz ˈneːɟzɛtkilomeːtɛr"); // compound prefix
+        expect(say("20 km-re")).toBe("ˈhuːs ˈkilomeːtɛrːɛ");
+        expect(say("29%-a")).toBe("ˈhusoŋkilɛnt͡s ˈsaːzɒleːkɒ"); // was: the % dropped outright
+        expect(say("30°C")).toBe("ˈhɒrmint͡s ˈt͡sɛlʃiuʃ ˈfok"); // was: ˈhɒrmint͡s ˈt͡s
+        expect(say("35°-tól")).toBe("ˈhɒrmint͡søt ˈfoktoːl");
+        expect(say("UTC+1")).toBe("ˈuː ˈteː ˈt͡seː ˈplus ˈɛɟ");
+    });
+
+    test("initialisms: spell the unreadable, leave the readable, glue the suffix", () => {
+        expect(say("GPS")).toBe("ˈɡeː ˈpeː ˈɛʃ"); // was: ˈkpʃ
+        expect(say("FBI")).toBe("ˈɛf ˈbeː ˈiː"); // was: ˈvbi — F voiced to [v] before B
+        expect(say("a GDP-je")).toBe("ˈɒ ˈɡeː ˈdeː ˈpeːjɛ"); // suffix on the LAST letter name
+        expect(say("az FBI-nak")).toBe("ˈɒz ˈɛf ˈbeː ˈiːnɒk");
+        expect(say("ENSZ")).toBe("ˈɛns"); // readable as a word — the digraph fold is what saves it
+        expect(say("USA")).toBe("ˈuʃɒ");
+        expect(say("a WC-ben")).toBe("ˈɒ ˈveːt͡seːbɛn"); // lexical: vécé, not *dupla vé cé*
+    });
+
+    test("dotted abbreviations lose their interior dot", () => {
+        expect(say("mint pl. vírus")).toBe("ˈmint ˈpeːldaːul ˈviːruʃ"); // was: ˈpl . — cluster + break
+        expect(say("kb. 20 km-re")).toBe("ˈkørylbɛlyl ˈhuːs ˈkilomeːtɛrːɛ"); // a DIGIT continues too
+        expect(say("Kr.e. 356")).toBe("ˈkristuʃ ˈɛløːtː ˈhaːromsaːzøtvɛnhɒt");
+        expect(say("Dr. Moll")).toBe("ˈdoktor ˈmolː");
+        expect(say("ételek stb.")).toMatch(/ˈʃɒtøbːi \.$/u); // at a phrase end the period is the sentence's
+    });
+
+    test("⟨csz⟩ is a morpheme boundary, not the ⟨cs⟩ digraph", () => {
+        // 91 corpus numerals have 8 or 9 in a hundreds group. Was: ˈɲold͡ʒzaːz / ˈkilɛnd͡ʒzaːz — the
+        // digraph scan took ⟨cs⟩ and voicing then turned the stranded ⟨z⟩ into [d͡ʒz].
+        expect(phonemizeWord("nyolcszáz")).toBe("ˈɲolt͡ssaːz");
+        expect(phonemizeWord("kilencszáz")).toBe("ˈkilɛnt͡ssaːz");
+        expect(phonemizeWord("kilencszer")).toBe("ˈkilɛnt͡ssɛr");
+    });
+
+    test("the attributive két before a scale word, at every multiplier ending in 2", () => {
+        expect(say("22500")).toBe("ˈhusoŋkeːtɛzɛrøtsaːz"); // was: *huszonkettőezer*
+        expect(say("32000")).toBe("ˈhɒrmint͡skeːtɛzɛr");
     });
 });
