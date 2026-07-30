@@ -11,12 +11,15 @@
 
     // Croatian cardinal number words. units/teens/tens are identical to Serbian; the deltas are: hundreds
     // dvjesto/tristo (vs dvesta/trista), thousand tisuća (vs hiljada), million milijun (vs milion).
+    // `oneFeminine`/`twoFeminine` on the thousand: tisuća is a FEMININE noun and the multiplier agrees with it.
+    // Croatian is IJEKAVIAN → dvije, not the Serbian dve (en.wiktionary.org/wiki/dvije#Serbo-Croatian;
+    // en.wiktionary.org/wiki/jedna#Serbo-Croatian) → dvije tisuće, dvadeset jedna tisuća. milijun is masculine.
     "numbers": {
         "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
         "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
         "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
         "hundreds": ["", "sto", "dvjesto", "tristo", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
-        "thousand": { "standalone": "tisuću", "one": "tisuća", "few": "tisuće", "many": "tisuća" },
+        "thousand": { "standalone": "tisuću", "one": "tisuća", "few": "tisuće", "many": "tisuća", "oneFeminine": "jedna", "twoFeminine": "dvije" },
         "million": { "one": "milijun", "few": "milijuna", "many": "milijuna" }
     },
 

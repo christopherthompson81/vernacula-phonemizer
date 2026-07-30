@@ -34,4 +34,16 @@ describe("Serbian canonical IPA", () => {
         expect(d.text("1000").trim()).toBe("xiʎadu"); // hiljadu
         expect(d.text("5000").trim()).toBe("pet xiʎada"); // pet hiljada (5+ → many)
     });
+
+    // GENDER on the magnitude noun: hiljada is FEMININE, so the multiplier is dve / jedna (Serbian is ekavian →
+    // dve, not the ijekavian dvije). milion is masculine and keeps dva.
+    test("numbers: gender agreement on the FEMININE hiljada", () => {
+        const d = createSerbian();
+        expect(d.text("1000").trim()).toBe("xiʎadu"); // hiljadu — the standalone form
+        expect(d.text("2000").trim()).toBe("dʋe xiʎade"); // dve hiljade — FEM two (not *dva hiljade)
+        expect(d.text("5000").trim()).toBe("pet xiʎada"); // pet hiljada — gen.pl
+        expect(d.text("21000").trim()).toBe("dʋadeset jedna xiʎada"); // dvadeset jedna hiljada — …1 → fem sg
+        expect(d.text("1000000").trim()).toBe("jedan milion"); // jedan milion — masculine
+        expect(d.text("2000000").trim()).toBe("dʋa miliona"); // dva miliona — masculine keeps dva
+    });
 });

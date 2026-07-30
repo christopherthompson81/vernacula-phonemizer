@@ -1,8 +1,9 @@
 /**
  * Slovak (sk) cardinal number compositor. Returns composed Slovak TEXT (space-separated) that the phonemizer runs
  * through the g2p, so the IPA stays consistent with the word engine. Tens+units concatenate (dvadsaťjeden = 21);
- * hundreds and thousands are space-separated. Slovak thousand/million agreement: 1 tisíc/milión, 2–4 tisíc/milióny,
- * 5+ tisíc/miliónov (paucal 2–4). See docs/investigations/sk_native_bringup_investigation.md.
+ * hundreds and thousands are space-separated. Slovak thousand/million agreement: 1 tisíc/milión, 2–4 tisíce/milióny,
+ * 5+ tisíc/miliónov (paucal 2–4). Both magnitude nouns are MASCULINE INANIMATE, so the multiplier is dva, not dve —
+ * see `count` below for the sources. See docs/investigations/sk_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 
@@ -28,9 +29,17 @@ function agree(count: number, forms: { sg: string; paucal: string; plural: strin
     return count === 1 ? forms.sg : count >= 2 && count <= 4 ? forms.paucal : forms.plural;
 }
 
-/** A magnitude count as text, using feminine "dve" for exactly 2 (agrees with tisíc/milión: dve tisíce). */
+/**
+ * A magnitude count as text. NO gender switch: both magnitude nouns here are MASCULINE INANIMATE — tisíc is
+ * `m-in` with nom.pl tisíce / gen.pl tisícov, and milión likewise (en.wiktionary.org/wiki/tisíc#Slovak,
+ * en.wiktionary.org/wiki/milión#Slovak) — and the masculine-inanimate form of "two" is *dva*, not *dve*:
+ * "The form dva is used with masculine inanimate nouns, while the form dve is used for both feminine and
+ * neuter nouns" (en.wiktionary.org/wiki/dva#Slovak; en.wikipedia.org/wiki/Slovak_declension gives
+ * "dva (masc. inanimate); dve (otherwise)"). This previously forced "dve" and emitted *dve tisíce / *dve
+ * milióny; the agreeing forms are dva tisíce / dva milióny — matching Czech's dva tisíce (czech/numbers.ts).
+ */
 function count(n: number): string {
-    return n === 2 ? "dve" : sub1000(n);
+    return sub1000(n);
 }
 
 /** Read a raw digit STRING digit-by-digit (nula/jeden/…) — the fallback for out-of-range or over-long numbers

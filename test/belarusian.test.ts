@@ -42,7 +42,20 @@ describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
         expect(be.text("5").trim()).toBe("pʲat͡sʲ"); // пяць
         expect(be.text("21").trim()).toBe("dvat͡sːat͡sʲ ad͡zʲin"); // дваццаць адзін (geminate цц)
         expect(be.text("100").trim()).toBe("sto");
-        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading "адзін"), via westernNumberWords
+        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading "адзін")
+    });
+
+    // MAGNITUDE-NOUN AGREEMENT (the shared East-Slavic compositor in ukrainian/numbers.ts). тысяча is FEMININE
+    // → дзве/адна, and it inflects for the count: nom.sg after …1, nom.pl after …2–4, gen.pl after 5+/11–14.
+    // мільён is masculine and keeps два.
+    test("cardinal numbers: gender + count agreement on the magnitude nouns", () => {
+        const be = createBelarusian();
+        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча
+        expect(be.text("2000").trim()).toBe("d͡zʲvʲe tɨsʲat͡ʂɨ"); // дзве тысячы — FEM two + nom.pl (not *два тысяча)
+        expect(be.text("5000").trim()).toBe("pʲat͡sʲ tɨsʲat͡ʂ"); // пяць тысяч — gen.pl after 5
+        expect(be.text("21000").trim()).toBe("dvat͡sːat͡sʲ adna tɨsʲat͡ʂa"); // дваццаць адна тысяча — …1 → fem sg
+        expect(be.text("1000000").trim()).toBe("ad͡zʲin mʲilʲjon"); // адзін мільён — masc, multiplier KEPT
+        expect(be.text("2000000").trim()).toBe("dva mʲilʲjonɨ"); // два мільёны — nom.pl (not *два мільён)
     });
 
     test("text: words + clause punctuation", () => {

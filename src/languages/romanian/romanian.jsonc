@@ -33,6 +33,26 @@
         "units": ["zero", "unu", "doi", "trei", "patru", "cinci", "șase", "șapte", "opt", "nouă"],
         "teens": ["zece", "unsprezece", "doisprezece", "treisprezece", "paisprezece", "cincisprezece", "șaisprezece", "șaptesprezece", "optsprezece", "nouăsprezece"],
         "tens": ["", "", "douăzeci", "treizeci", "patruzeci", "cincizeci", "șaizeci", "șaptezeci", "optzeci", "nouăzeci"],
-        "hundred": "sută", "hundreds": "sute", "thousand": "mie", "thousands": "mii", "million": "milion", "millions": "milioane", "and": "și", "of": "de"
+        "hundred": "sută", "hundreds": "sute", "thousand": "mie", "thousands": "mii", "million": "milion", "millions": "milioane",
+        // miliard (10⁹) is NEUTER, plural miliarde — en.wiktionary.org/wiki/miliard#Romanian. Without this tier the
+        // compositor indexed units[10] for the billions multiplier and leaked "undefined" into the reading.
+        "billion": "miliard", "billions": "miliarde",
+        "and": "și", "of": "de",
+
+        // GENDER-MARKED numerals. The magnitude words are NOUNS with their own gender and the multiplier must agree
+        // with them: "For those numbers whose unit figure is 1 or 2 the corresponding number name has two
+        // gender-dependent forms"; sută and mie are FEMININE ("The noun sută itself is feminine and as such the
+        // numbers 100 and 200 are o sută and două sute"; "The word for 1000 is feminine, all the others are
+        // neuter"), and for a NEUTER noun "for numbers whose last digit is 2 the feminine numeral is chosen"
+        // (douăzeci și unu de scaune vs douăzeci și două de scaune) — so milion/milioane takes doi→două as well.
+        // Attested forms: o sută, două sute, o mie, două mii, un milion, două milioane; 12 f = douăsprezece;
+        // 21 f = douăzeci și una. Source: en.wikipedia.org/wiki/Romanian_numbers.
+        "gendered": {
+            "oneMasculine": "un",        // 1 before a neuter magnitude: un milion
+            "oneFeminine": "o",          // 1 before a feminine magnitude: o sută, o mie
+            "oneFeminineFinal": "una",   // a COMPOUND ending in 1, feminine: douăzeci și una de mii
+            "twoFeminine": "două",       // …ending in 2, feminine or neuter-plural: două mii, două milioane
+            "twelveFeminine": "douăsprezece" // 12 likewise: douăsprezece mii (masc. doisprezece)
+        }
     }
 }

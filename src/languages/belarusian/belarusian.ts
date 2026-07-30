@@ -10,7 +10,10 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber, westernNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber } from "../../core/numbers.ts";
+// The East-Slavic AGREEING compositor lives in the Ukrainian module and is parameterised by the number-word
+// table (the croatian←serbian pattern): uk and be share the grammar and differ only in their words.
+import { eastSlavicNumberWords, type EastSlavicNumbers } from "../ukrainian/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface BelarusianDef {
@@ -18,7 +21,7 @@ interface BelarusianDef {
     iotated: Record<string, string>;
     consonants: Record<string, string>;
     voicing: { toVoiceless: Record<string, string>; toVoiced: Record<string, string> };
-    numbers: NumbersDef; // includes the optional `hundreds` field read by westernNumberWords
+    numbers: EastSlavicNumbers; // Western/Slavic base table + the magnitude count forms and feminine 1/2
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<BelarusianDef>(import.meta.url, "belarusian.jsonc");
@@ -138,7 +141,8 @@ export function phonemizeWord(word: string): string {
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord, westernNumberWords); // shared Slavic/Western composer
+    // East-Slavic composer: the magnitude nouns AGREE with their multiplier (дзве тысячы, пяць тысяч)
+    return renderNumber(n, DEF.numbers, phonemizeWord, eastSlavicNumberWords);
 }
 
 const CYRILLIC = "\\u0400-\\u04FF";

@@ -11,6 +11,11 @@ interface SlavicMagnitude {
     one: string;
     few?: string;
     many: string;
+    /** GENDER agreement: the magnitude noun's own gender governs the multiplier's 1/2. hiljada/tisuća are
+     *  FEMININE (dve hiljade, dvadeset jedna hiljada), milion/milijun are masculine (dva miliona) — so these
+     *  are present on the thousand only. Omitted ⇒ the masculine base forms are used. */
+    oneFeminine?: string;
+    twoFeminine?: string;
 }
 
 export interface SerbianManifest {

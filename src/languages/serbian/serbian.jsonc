@@ -44,12 +44,16 @@
 
     // Cardinal number words (Serbian, Latin — run through the g2p like any word). Hundreds are irregular
     // (dvesta/trista); tens + units are space-joined (dvadeset jedan).
+    // `oneFeminine`/`twoFeminine` on the thousand: hiljada is a FEMININE noun, so the multiplier agrees with it —
+    // dve hiljade, dvadeset jedna hiljada (en.wiktionary.org/wiki/hiljada: f, nom.pl hiljade, gen.pl hiljada;
+    // "dve hiljade" / "pet hiljada"). Serbian is EKAVIAN → dve (en.wiktionary.org/wiki/dve#Serbo-Croatian).
+    // milion is masculine → no feminine forms (dva miliona).
     "numbers": {
         "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
         "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
         "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
         "hundreds": ["", "sto", "dvesta", "trista", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
-        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada" },
+        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada", "oneFeminine": "jedna", "twoFeminine": "dve" },
         "million": { "one": "milion", "few": "miliona", "many": "miliona" }
     }
 }

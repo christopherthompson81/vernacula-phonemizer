@@ -229,35 +229,94 @@ export function phonemizeWordRules(word: string): string {
 const NUM = DEF.numbers as {
     units: string[]; teens: string[]; tens: string[];
     hundred: string; hundreds: string; thousand: string; thousands: string;
-    million: string; millions: string; and: string; of: string;
+    million: string; millions: string; billion: string; billions: string; and: string; of: string;
+    gendered: {
+        oneMasculine: string; oneFeminine: string; oneFeminineFinal: string;
+        twoFeminine: string; twelveFeminine: string;
+    };
 };
+const G = NUM.gendered;
 
-/** Romanian words for 0 ≤ n < 100. */
-function under100(n: number): string {
-    if (n < 10) return NUM.units[n]!;
-    if (n < 20) return NUM.teens[n - 10]!;
+/**
+ * The GENDER a multiplier has to agree with. Romanian marks gender on the numerals whose unit figure is 1 or 2
+ * only, and the magnitude words are NOUNS with their own gender: sută and mie are FEMININE, milion is NEUTER.
+ * A neuter noun is masculine in the singular but FEMININE in the plural, so a neuter magnitude takes the
+ * masculine form when the count ends in 1 and the feminine when it ends in 2. `"m"` is the un-agreeing case —
+ * a bare number with no magnitude noun after it, which keeps the masculine counting forms (unu, doi).
+ * Source: en.wikipedia.org/wiki/Romanian_numbers (quoted in romanian.jsonc).
+ */
+type Gender = "f" | "n" | "m";
+
+/** One numeral WORD, in the form the following magnitude noun requires. 2 and 12 feminise for a feminine or a
+ *  neuter-plural noun; 1 only for a feminine one (douăzeci și una de mii vs douăzeci și unu de milioane). */
+function gendered(word: string, g: Gender): string {
+    if (g === "m") return word;
+    if (word === NUM.units[2]) return G.twoFeminine;
+    if (word === NUM.teens[2]) return G.twelveFeminine;
+    if (word === NUM.units[1] && g === "f") return G.oneFeminineFinal;
+    return word;
+}
+
+/** `de` links a numeral to the noun it modifies once the count reaches 20: "for integer numbers from 20 to 100,
+ *  preposition *de* is placed between the number name and the modified noun … For numbers from 0 to 19 *de* is
+ *  not used" — which keys off the final two digits, so a round hundred/thousand count takes it too (o sută de
+ *  mii). Source: en.wikipedia.org/wiki/Romanian_numbers. */
+const needsDe = (count: number): boolean => count % 100 === 0 || count % 100 >= 20;
+
+/** Romanian words for 0 ≤ n < 100, with the trailing unit agreeing with `g`. */
+function under100(n: number, g: Gender): string {
+    if (n < 10) return gendered(NUM.units[n]!, g);
+    if (n < 20) return gendered(NUM.teens[n - 10]!, g);
     const t = Math.floor(n / 10), u = n % 10;
-    return u === 0 ? NUM.tens[t]! : `${NUM.tens[t]} ${NUM.and} ${NUM.units[u]}`;
+    return u === 0 ? NUM.tens[t]! : `${NUM.tens[t]} ${NUM.and} ${gendered(NUM.units[u]!, g)}`;
 }
 
-/** Romanian words for 0 ≤ n < 1000. */
-function under1000(n: number): string {
-    if (n < 100) return under100(n);
+/** Romanian words for 0 ≤ n < 1000. The HUNDREDS multiplier always agrees with sută/sute, which are feminine
+ *  regardless of what follows (o sută, două sute); `g` governs only the trailing sub-hundred remainder.
+ *  `stem` drops the feminine article on a bare hundred, for the ordinal (al sutălea, not *al o sutălea). */
+function under1000(n: number, g: Gender, stem = false): string {
+    if (n < 100) return under100(n, g);
     const h = Math.floor(n / 100), rest = n % 100;
-    const head = h === 1 ? NUM.hundred : `${NUM.units[h]} ${NUM.hundreds}`;
-    return rest === 0 ? head : `${head} ${under100(rest)}`;
+    const head =
+        h === 1
+            ? stem ? NUM.hundred : `${G.oneFeminine} ${NUM.hundred}`
+            : `${gendered(NUM.units[h]!, "f")} ${NUM.hundreds}`;
+    return rest === 0 ? head : `${head} ${under100(rest, g)}`;
 }
 
-/** Romanian cardinal for a non-negative integer (up to the millions).
+/** A magnitude group: the agreeing multiplier + `de` where required + the magnitude noun. A count of exactly 1
+ *  takes the ARTICLE, not the numeral — o mie, un milion (never *una mie / *unu milion). In `stem` mode (the
+ *  ordinal path) the article and the `de` linker are dropped, since an ordinal is built on the bare numeral
+ *  stem: al sutălea, al două miilea. */
+function magnitudeGroup(count: number, g: Gender, sg: string, pl: string, stem: boolean): string {
+    if (count === 1) return stem ? sg : `${g === "f" ? G.oneFeminine : G.oneMasculine} ${sg}`;
+    const head = under1000(count, g, stem);
+    return needsDe(count) && !stem ? `${head} ${NUM.of} ${pl}` : `${head} ${pl}`;
+}
+
+/** Romanian cardinal for a non-negative integer (up to the millions), with the magnitude nouns and their
+ *  multipliers in agreement (două mii, o sută de mii, un milion, două milioane).
+ *
  *  Exported so `romanOrdinals.ts` can wrap it in the `al …-lea` ordinal construction rather than
- *  re-authoring the numeral data. */
-export function numberWords(n: number): string {
+ *  re-authoring the numeral data — it passes `stem: true`, which strips the phrasal article and `de` linker
+ *  that an ordinal does not take (al sutălea, not *al o sutălea). */
+export function numberWords(n: number, opts: { stem?: boolean } = {}): string {
+    const stem = opts.stem === true;
     if (n === 0) return NUM.units[0]!;
+    // Above the miliard tier the billions multiplier would need its own thousands grouping → read the digits
+    // instead of indexing past the tables (which used to leak "undefined" into the IPA at 10⁹ itself).
+    if (n >= 1e12) return [...String(n)].map((d) => NUM.units[Number(d)]!).join(" ");
     const parts: string[] = [];
-    const mil = Math.floor(n / 1_000_000), th = Math.floor((n % 1_000_000) / 1000), rest = n % 1000;
-    if (mil > 0) parts.push(mil === 1 ? `${NUM.units[1]} ${NUM.million}` : `${under1000(mil)} ${NUM.millions}`);
-    if (th > 0) parts.push(th === 1 ? NUM.thousand : `${under1000(th)} ${NUM.thousands}`);
-    if (rest > 0) parts.push(under1000(rest));
+    const bil = Math.floor(n / 1_000_000_000),
+        mil = Math.floor((n % 1_000_000_000) / 1_000_000),
+        th = Math.floor((n % 1_000_000) / 1000),
+        rest = n % 1000;
+    // milion and miliard are NEUTER (două milioane, două miliarde); mie is FEMININE (o mie, două mii); a bare
+    // remainder agrees with nothing and keeps the masculine counting forms.
+    if (bil > 0) parts.push(magnitudeGroup(bil, "n", NUM.billion, NUM.billions, stem));
+    if (mil > 0) parts.push(magnitudeGroup(mil, "n", NUM.million, NUM.millions, stem));
+    if (th > 0) parts.push(magnitudeGroup(th, "f", NUM.thousand, NUM.thousands, stem));
+    if (rest > 0) parts.push(under1000(rest, "m", stem));
     return parts.join(" ");
 }
 

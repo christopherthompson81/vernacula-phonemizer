@@ -160,3 +160,68 @@ Ranges are stated per language rather than smoothed over: where a system is atte
 (K'iche' 3,999; Mixe 999; Cherokee 999,999; Shan 10⁵ because no source attests a Tai 10⁶ cognate; Mooré
 and Ewe with no attested word above thousand/million), the compositor implements that range and falls back
 to digit-by-digit above it, with the boundary documented in the file header.
+
+## Run 8 — 2026-07-29 — GENDER and COUNT agreement on the magnitude nouns (uk, be, ro, sr, hr, bs, sk)
+
+Question: a magnitude word is a NOUN with its own gender, and the multiplier must agree with THAT noun —
+internal to the number, so a mismatch is unambiguously wrong rather than a citation-form choice. Which
+compositors store one string per magnitude and therefore cannot agree?
+
+Method: dumped the composed TEXT (not IPA) for `1 2 5 11 12 20 21 100 200 1000 2000 3000 5000 11000 12000
+20000 21000 22000 100000 200000 1e6 2e6 5e6 12e6 21e6 1e9` from every Slavic/Romance compositor, and read
+the correct ones (ru, pl, cs) alongside. Raw before-state:
+
+| lang | 2000 | 5000 | 2e6 | 21000 | 100 / 100000 |
+|---|---|---|---|---|---|
+| uk | `два тисяча` | `п'ять тисяча` | `два мільйон` | `двадцять один тисяча` | — |
+| be | `два тысяча` | `пяць тысяча` | `два мільён` | `дваццаць адзін тысяча` | — |
+| ro | `doi mii` | `cinci mii` | `doi milioane` | `douăzeci și unu mii` | `sută` / `sută mii` |
+| sr | `dva hiljade` | ok | ok | `dvadeset jedan hiljada` | — |
+| hr | `dva tisuće` | ok | ok | `dvadeset jedan tisuća` | — |
+| bs | `dva hiljade` | ok | ok | `dvadeset jedan hiljada` | — |
+| sk | `dve tisíce` | ok | `dve milióny` | ok | — |
+
+Root causes, three different shapes:
+- **uk/be** had no `numbers.ts` at all — a single string per magnitude in the JSONC, composed by the shared
+  `core/numbers.ts` `westernNumberWords`, which concatenates. Both the gender AND the count form were
+  missing. `core/` is shared with Armenian, so the fix is a LOCAL East-Slavic composer (uk owns it, be
+  imports it — the croatian←serbian pattern) that recurses into `westernNumberWords` for sub-1000 groups.
+- **sr/hr/bs** already had the count paradigm (`one/few/many`) but not the GENDER: hiljada/tisuća are
+  feminine, so `dva`/`jedan` had to become `dve`~`dvije`/`jedna`. Bosnian is ijekavian like Croatian → its
+  feminine two is `dvije`, NOT the Serbian ekavian `dve` (the brief had guessed `dve` for bs).
+- **ro** was wrong in the opposite direction *and* incomplete: sută/mie are feminine and milion is neuter
+  (masculine sg, feminine pl), so `doi`→`două` and 12 `doisprezece`→`douăsprezece`; 100/1000 need the
+  feminine article (`o sută`, `o mie`) and 10⁶ the masculine (`un milion`, not `unu milion`); and the `de`
+  linker required from 20 up was authored in the JSONC (`"of": "de"`) but never used by the compositor.
+
+Negative / corrected results worth keeping:
+- **The brief's Slovak suspicion was right, and inverted from what the code claimed.** `sk/numbers.ts`
+  forced `dve` before every magnitude with the comment "agrees with tisíc/milión". Both nouns are `m-in`
+  (Wiktionary `sk-noun|m-in`), and `dva` IS the masculine-inanimate form (`dve` is feminine/neuter) — so
+  the agreeing forms are `dva tisíce` / `dva milióny`, matching Czech. The prior sk bringup log recorded
+  "**dve** (not dva) before a magnitude" as a *fix*; it was a regression. Residual risk noted: the fused
+  invariable `dvetisíc` is attested Slovak, and `sk.wikipedia`'s numeral page and the JÚĽŠ portal were both
+  unusable (no content / JS-only), so the separated form is sourced from gender agreement, not from a
+  corpus count.
+- **`slavicCountForm` (core) IS correct for uk/be** — 1→nom.sg, 2–4→nom.pl, else gen.pl, 11–14 always
+  gen.pl. Checked against the paradigm rather than assumed (the brief warned it is not pan-Slavic; Polish's
+  compound-*jeden* deviation is real, uk/be have no analogous deviation). Reused, not re-implemented.
+- **Romanian's ordinal path shares the cardinal compositor**, so adding the phrasal article and `de` broke
+  `al sutălea` → `al o sutălea`. Fixed by a `stem` flag on `numberWords` rather than by backing the article
+  out: the ordinal is built on the bare numeral stem, the cardinal is the spoken phrase, and they genuinely
+  differ. The pre-existing test for `al sutălea` is what caught it.
+- **Romanian leaked `undefined` at 10⁹** (`undefined sute de milioane`) — pre-existing, not introduced:
+  the billions multiplier indexed `units[10]`. It survived the Run-1/Run-3 detectors because the fleet
+  probe's largest value predates the current list. Added the `miliard`/`miliarde` tier (neuter) + a
+  digit-by-digit fallback above 10¹².
+- **Bare-digit citation forms are all CORRECT as they stand** — the three flagged as suspicious were
+  checked and left alone: Slovene `1` → `ena` ("This is the usual form used when counting or reciting
+  numbers", Wiktionary `ena`), Bulgarian `1` → `едно` (Wiktionary `едно`: neuter, and a noun meaning "one
+  (number or digit 1)"), Romanian `1` → `unu` (Wiktionary `unu` etymology: final /u/ survived precisely
+  because "the word's use is reserved for counting only", vs the article `un`).
+
+Verification: every new word form was phonemized STANDALONE first (49 forms, all clean — no throw, no
+empty, no sentinel); the fleet number probe is CLEAN for all seven codes; the full suite is green (2075);
+and the referee eval is byte-identical before/after for uk 95.1 / be 97.2 / ro 80.9 / sr 98.4 / sk 89.0
+folded-backbone (hr and bs have no referee — they are covered by the shared hbs g2p). Numbers are not
+referee-scored, which is exactly why these errors survived: the probe checks for leaks, not for grammar.

@@ -34,8 +34,21 @@ describe("Ukrainian canonical IPA", () => {
 
     test("numbers compose (Slavic decimal)", () => {
         expect(getPhonemizer("uk").text("100").trim()).toBe("stɔ"); // сто
-        expect(getPhonemizer("uk").text("1000").trim()).toBe("tɪsʲat͡ʃa"); // тисяча — bare (no leading "один"), via westernNumberWords
+        expect(getPhonemizer("uk").text("1000").trim()).toBe("tɪsʲat͡ʃa"); // тисяча — bare (no leading "один")
         expect(getPhonemizer("uk").text("2").trim()).toBe("dʋa"); // два
+    });
+
+    // MAGNITUDE-NOUN AGREEMENT (src/languages/ukrainian/numbers.ts). тисяча is a FEMININE noun, so the
+    // multiplier must be feminine (дві, одна — not два, один), and the noun itself inflects for the count:
+    // nom.sg after …1, nom.pl after …2–4, gen.pl after 5+/11–14. мільйон is masculine and keeps два.
+    test("numbers: gender + count agreement on the magnitude nouns", () => {
+        const uk = getPhonemizer("uk");
+        expect(uk.text("1000").trim()).toBe("tɪsʲat͡ʃa"); // тисяча
+        expect(uk.text("2000").trim()).toBe("dʲʋʲi tɪsʲat͡ʃʲi"); // дві тисячі — FEM two + nom.pl (not *два тисяча)
+        expect(uk.text("5000").trim()).toBe("pjatʲ tɪsʲat͡ʃ"); // п'ять тисяч — gen.pl after 5
+        expect(uk.text("21000").trim()).toBe("dʋadʲt͡sʲatʲ ɔdna tɪsʲat͡ʃa"); // двадцять одна тисяча — …1 → fem sg
+        expect(uk.text("1000000").trim()).toBe("ɔdɪn mʲilʲjɔn"); // один мільйон — masc, multiplier KEPT
+        expect(uk.text("2000000").trim()).toBe("dʋa mʲilʲjɔnɪ"); // два мільйони — nom.pl (not *два мільйон)
     });
 });
 

@@ -36,13 +36,20 @@ describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
         expect(phonemizeWord("ch")).toBe("x"); // ch digraph = x
     });
 
-    test("cardinal numbers (paucal agreement; dve before magnitudes)", () => {
+    // tisíc and milión are both MASCULINE INANIMATE, and the masculine-inanimate form of "two" is dva (dve is
+    // feminine/neuter) — so the multiplier is dva tisíce / dva milióny, matching Czech's dva tisíce. The noun
+    // takes the paucal after 2–4 (tisíce) and the genitive plural after 5+ (tisíc, miliónov).
+    test("cardinal numbers (paucal agreement; MASCULINE dva before the magnitudes)", () => {
         const sk = createSlovak();
         expect(sk.text("0").trim()).toBe("nˈula");
         expect(sk.text("15").trim()).toBe("pˈætnaːsc"); // pätnásť
         expect(sk.text("21").trim()).toBe("dvˈatsacjˌeɟen"); // dvadsaťjeden
         expect(sk.text("1000").trim()).toBe("cˈisiːt͡s"); // tisíc (t→c before i)
-        expect(sk.text("2000").trim()).toBe("dvˈe cˈisiːt͡se"); // dve tisíce (dve + paucal)
+        expect(sk.text("2000").trim()).toBe("dvˈa cˈisiːt͡se"); // dva tisíce — masc. inan. (not *dve tisíce)
+        expect(sk.text("5000").trim()).toBe("pˈæc cˈisiːt͡s"); // päť tisíc — indeclined after 5+
+        expect(sk.text("21000").trim()).toBe("dvˈatsacjˌeɟen cˈisiːt͡s"); // dvadsaťjeden tisíc
+        expect(sk.text("1000000").trim()).toBe("mˈiʎiɔːn"); // milión — bare, no leading jeden
+        expect(sk.text("2000000").trim()).toBe("dvˈa mˈiʎiˌɔːni"); // dva milióny — masc. inan. (not *dve milióny)
         // >9 digits: read digit-by-digit (no miliarda tier; no float precision loss)
         expect(sk.text("1000000000").trim()).toBe("jˈeɟen nˈula nˈula nˈula nˈula nˈula nˈula nˈula nˈula nˈula");
     });

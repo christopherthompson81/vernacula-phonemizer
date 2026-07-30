@@ -4,6 +4,18 @@
  * (1 hiljadu, 2–4 hiljade, 5+ hiljada). Covers 0 … <10⁹. The AGREEMENT GRAMMAR is shared between the Serbian and
  * Croatian standards — only the words differ (hiljada/tisuća, milion/milijun, dvesta/dvjesto) — so the compositor is
  * parameterized by the number-word table (`composeSlavicNumber`); Croatian passes its own table.
+ *
+ * GENDER on the magnitude noun (fixed here): hiljada / tisuća are FEMININE nouns, so the multiplier's 1/2 must be
+ * the feminine jedna / dve~dvije — the compositor previously emitted the masculine base forms (*dva hiljade,
+ * *dvadeset jedan hiljada), which is a plain agreement error internal to the number, not a citation choice.
+ * milion / milijun are masculine, so they keep dva (dva miliona) and carry no feminine forms.
+ *   - hiljada: FEMININE, nom.pl hiljade, gen.pl hiljada; "With numerals 2-4, use the nominative plural form:
+ *     'dve hiljade' … With numerals 5 and higher, use the genitive plural: 'pet hiljada'"
+ *     — en.wiktionary.org/wiki/hiljada (Serbo-Croatian)
+ *   - dve = the EKAVIAN (Serbian) feminine of dva; dvije = the IJEKAVIAN (Croatian, Bosnian) feminine
+ *     — en.wiktionary.org/wiki/dve#Serbo-Croatian, en.wiktionary.org/wiki/dvije#Serbo-Croatian,
+ *       en.wiktionary.org/wiki/два (Serbo-Croatian feminine = dvije)
+ *   - jedna = feminine nominative of jedan — en.wiktionary.org/wiki/jedna#Serbo-Croatian
  */
 import { MANIFEST } from "./manifest.ts";
 
@@ -35,6 +47,13 @@ export function composeSlavicNumber(n: number, N: NumberData): string {
         if (m.few && d >= 2 && d <= 4 && !(dd >= 12 && dd <= 14)) return m.few;
         return m.many;
     };
+    /** Feminise the multiplier's FINAL word for a feminine magnitude noun (hiljada/tisuća): jedan→jedna,
+     *  dva→dve~dvije. Anchored at end-of-string so only the units slot is touched (dvadeset jedan → dvadeset
+     *  jedna); jedanaest/dvanaest/dvadeset do not end in "jedan"/"dva" and are left alone. */
+    const feminise = (words: string, m: { oneFeminine?: string; twoFeminine?: string }): string =>
+        m.oneFeminine && m.twoFeminine
+            ? words.replace(/jedan$/u, m.oneFeminine).replace(/dva$/u, m.twoFeminine)
+            : words;
 
     if (!Number.isSafeInteger(n) || n < 0 || n >= 1e9)
         return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
@@ -47,7 +66,12 @@ export function composeSlavicNumber(n: number, N: NumberData): string {
     if (mil) parts.push(`${below1000(mil)} ${agree(mil, N.million)}`);
     // The thousands group of exactly 1 is the standalone form (hiljadu / tisuću); ≥2 keeps the multiplier + the
     // agreeing form (dve hiljade, pet hiljada; dvije tisuće, pet tisuća).
-    if (th) parts.push(th === 1 ? N.thousand.standalone! : `${below1000(th)} ${agree(th, N.thousand)}`);
+    if (th)
+        parts.push(
+            th === 1
+                ? N.thousand.standalone!
+                : `${feminise(below1000(th), N.thousand)} ${agree(th, N.thousand)}`,
+        );
     if (r) parts.push(below1000(r));
     return parts.join(" ");
 }
