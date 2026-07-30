@@ -260,4 +260,25 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("100", "hi")).toContain("ˈeːk");
         expect(phonemize("21", "hi")).toBe("ɪkːˈiːs"); // its own compound map still wins
     });
+
+    /**
+     * A numeral written in the language's OWN digits must read the same as its ASCII spelling. Auditing 21
+     * scripts found six engines returning an EMPTY STRING — total, silent content loss — because the number
+     * token is `\d+`, which JavaScript defines as ASCII-only, so the numeral matched no token at all and
+     * assembleClauses dropped what the tokenizer declined.
+     */
+    test("native digits read the same as ASCII", () => {
+        for (const [lang, native] of [
+            ["pa", "੫੦"], ["ta", "௫௦"], ["te", "౫౦"], ["ml", "൫൦"], ["si", "෫෦"], ["lo", "໕໐"],
+        ] as [string, string][]) {
+            expect(phonemize(native, lang), lang).not.toBe("");
+            expect(phonemize(native, lang), lang).toBe(phonemize("50", lang));
+        }
+        // …and the fifteen that already worked must not move.
+        for (const [lang, native] of [
+            ["hi", "५०"], ["bn", "৫০"], ["kn", "೫೦"], ["th", "๕๐"], ["my", "၅၀"], ["ar", "٥٠"],
+        ] as [string, string][]) {
+            expect(phonemize(native, lang), lang).toBe(phonemize("50", lang));
+        }
+    });
 });

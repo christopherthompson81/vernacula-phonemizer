@@ -20,6 +20,7 @@
  * Tamil DIGITS (௦–௯) and the Tamil numeral signs (௰ ௱ ௲) do NOT occur in this corpus — checked, the digit
  * inventory is entirely ASCII — so there is no digit fold here. Same negative result as Persian.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalStem } from "./numbers.ts";
 
@@ -173,6 +174,11 @@ export function normalizeTamil(input: string): string {
     //    every later rule asserts letter/digit adjacency, and an invisible character sitting inside a
     //    numeral or between a number and its unit defeats all of them.
     let s = input.replace(/[​-‍﻿]/gu, "");
+
+    // 1b) TAMIL DIGITS ௦-௯ → ASCII. None occur in the corpus (a negative result the file header records),
+    //     but without the fold the engine returned an EMPTY STRING for them: `\d+` is ASCII-only, so a
+    //     native numeral matched no token and assembleClauses dropped it entirely.
+    s = foldNativeDigits(s);
 
     // 2) DIGIT DE-GROUPING, before anything that reads punctuation. A grouping comma is otherwise clause
     //    punctuation and 2,243 became "இரண்டு <pause> இருநூற்றி நாற்பத்தி மூன்று" — and 5,000,000 became

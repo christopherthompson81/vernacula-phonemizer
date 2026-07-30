@@ -5,6 +5,7 @@
  * inherent-vowel schwa alternation (a in the first syllable of a polysyllable, else ə), and initial stress with
  * ˌ on even non-final nuclei. Shim-parity (espeak ships si). See docs/investigations/si_native_bringup_investigation.md.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P } from "../../core/abugida.ts";
@@ -83,7 +84,10 @@ const TOKEN = /([඀-෿]+)|(\d+)|([.!?…,;:])/gu;
 
 class SinhalaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
+        // defines as ASCII-only, so a numeral written in native digits matched NO token and was
+        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

@@ -104,3 +104,52 @@ export function foldLatinDiacritics(s: string): string {
     const stripped = s.normalize("NFD").replace(/\p{M}+/gu, "");
     return stripped.replace(/[øæœßłđðþħıŋ]/gu, (c) => LATIN_ATOMIC[c] ?? c);
 }
+
+/**
+ * Decimal-digit block bases for every script this project supports. Unicode guarantees a decimal digit
+ * block is ten contiguous codepoints in ascending value, so the fold below is arithmetic rather than a
+ * per-script table of ten entries each.
+ */
+const NATIVE_DIGIT_BASES: readonly number[] = [
+    0x0660, // Arabic-Indic
+    0x06f0, // Extended Arabic-Indic (Persian, Urdu)
+    0x0966, // Devanagari
+    0x09e6, // Bengali
+    0x0a66, // Gurmukhi
+    0x0ae6, // Gujarati
+    0x0b66, // Odia
+    0x0be6, // Tamil
+    0x0c66, // Telugu
+    0x0ce6, // Kannada
+    0x0d66, // Malayalam
+    0x0de6, // Sinhala
+    0x0e50, // Thai
+    0x0ed0, // Lao
+    0x0f20, // Tibetan
+    0x1040, // Myanmar
+    0x17e0, // Khmer
+    0xff10, // Fullwidth
+];
+
+/**
+ * Fold any script's own decimal digits to ASCII, so the number path can read them.
+ *
+ * WHY: an engine whose number token is `\d+` (ASCII-only, as JavaScript defines it) sees a numeral written
+ * in the language's own digits as no token at all, and `assembleClauses` skips what the tokenizer declines
+ * — so the number VANISHES. Auditing 21 scripts found six engines returning an EMPTY STRING for their own
+ * numerals: Punjabi, Tamil, Telugu, Malayalam, Sinhala and Lao. Total content loss, silent.
+ *
+ * Applied per engine rather than fleet-wide at the registry, deliberately: Telugu's corpus uses ౦ (U+0C66,
+ * its digit zero) as a HOMOGLYPH for ం (sunna) in 144 places, so a blanket fold ahead of Telugu's own
+ * homoglyph rule would corrupt exactly the language that found the problem. Ordering has to stay the
+ * language's decision.
+ */
+export function foldNativeDigits(s: string): string {
+    return s.replace(/\p{Nd}/gu, (ch) => {
+        const cp = ch.codePointAt(0)!;
+        if (cp < 0x80) return ch; // already ASCII
+        for (const base of NATIVE_DIGIT_BASES)
+            if (cp >= base && cp <= base + 9) return String(cp - base);
+        return ch; // a block we do not carry: leave it rather than guess
+    });
+}

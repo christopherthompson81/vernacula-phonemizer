@@ -6,6 +6,7 @@
  * from consonant CLASS × live/dead × length × tone mark. Tones are Chao contour letters (stripped by the eval
  * backbone). See docs/investigations/lo_native_bringup_investigation.md.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 
@@ -290,7 +291,10 @@ export function phonemizeWord(word: string): string {
 
 class LaoPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
+        // defines as ASCII-only, so a numeral written in native digits matched NO token and was
+        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             // Canonical, UNPADDED pause marks — a padded value reaches the output as a double space, and

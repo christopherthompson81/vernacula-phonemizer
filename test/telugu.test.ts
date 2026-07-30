@@ -77,8 +77,11 @@ describe("telugu text normalization (#562)", () => {
         // All 144 in the corpus are typos for ం; before the fold the G2P dropped them and lost the nasal.
         expect(normalizeTelugu("స౦వత్సర౦లో")).toBe("సంవత్సరంలో");
         expect(phonemize("స౦వత్సర౦లో", "te")).toBe(phonemize("సంవత్సరంలో", "te"));
-        // A real Telugu digit run is untouched.
-        expect(normalizeTelugu("౧౦")).toBe("౧౦");
+        // A real Telugu digit run is NOT read as the anusvara — the homoglyph guard still holds — and is
+        // then folded to ASCII so the number path can see it at all. Before the fold the engine returned
+        // an empty string for it.
+        expect(normalizeTelugu("౧౦")).toBe("10");
+        expect(phonemize("౧౦", "te")).toBe(phonemize("10", "te"));
     });
 
     test("zero-width joiners are removed, so a split word keeps ONE stress", () => {

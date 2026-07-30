@@ -10,6 +10,7 @@
  *
  * The referee-eval strips Chao tone letters, so tones are graded on the synthesis output, not the backbone.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
@@ -169,7 +170,10 @@ export function makeNativePunjabi(
     }
 
     function text(input: string): string {
-        return assembleClauses(input, tokenRe, (m, sink) => {
+        // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
+        // defines as ASCII-only, so a numeral written in native digits matched NO token and was
+        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
+        return assembleClauses(foldNativeDigits(input), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

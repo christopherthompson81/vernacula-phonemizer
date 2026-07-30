@@ -33,6 +33,7 @@
  * minority case. What IS fixed here is the dotted Telugu spellings, whose interior dots were being read
  * as clause breaks (step 5).
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, yearToWords, isCenturyYear } from "./numbers.ts";
 
@@ -165,6 +166,12 @@ export function normalizeTelugu(input: string): string {
                 : m;
         },
     );
+
+    // 2b) GENUINE Telugu digits → ASCII. Step 2 has already claimed every ౦ that was a sunna typo,
+    //     so whatever digits remain are real. Without this the engine returned an EMPTY STRING for a
+    //     numeral written in Telugu digits — `\d+` is ASCII-only, so it matched no token at all and
+    //     assembleClauses dropped it. The corpus has none, but silent total loss is not acceptable.
+    s = foldNativeDigits(s);
 
     // 3) ORDINALS, before the year rule (step 4) and before de-grouping. Before the YEAR rule because
     //    that rule permits a trailing Telugu clitic (2005లో) and would otherwise swallow 1970వ and

@@ -172,9 +172,11 @@ describe("Tamil normalization (#562)", () => {
         expect(normalizeTamil("ஸ்டைல் ​​ஸ்கை")).toBe("ஸ்டைல் ஸ்கை");
     });
 
-    it("Tamil DIGITS ௦–௯ do not occur in the corpus, so none of this depends on them", () => {
-        // Recorded as a negative result: the ta_in digit inventory is entirely ASCII. If a Tamil-digit
-        // corpus ever arrives, a fold belongs at step 1 — the rules below it are all ASCII-keyed.
-        expect(normalizeTamil("௧௨")).toBe("௧௨");
+    it("Tamil DIGITS ௦–௯ do not occur in the corpus, but are folded anyway", () => {
+        // The negative result stands: the ta_in digit inventory is entirely ASCII. The fold exists because
+        // WITHOUT it the engine returned an EMPTY STRING for a Tamil numeral — `\d+` is ASCII-only, so it
+        // matched no token and assembleClauses dropped it. Silent total loss, so worth folding regardless.
+        expect(normalizeTamil("௧௨")).toBe("12");
+        expect(phonemize("௧௨", "ta")).toBe(phonemize("12", "ta"));
     });
 });

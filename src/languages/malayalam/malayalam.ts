@@ -8,6 +8,7 @@
  *     defining Malayalam feature. Distinguished from chillu-final words (which end in the chillu char, not ്).
  *   - word-final anusvara ം → [m]; geminate → length; ള്ള → [ɭː]; first-syllable (weak) stress.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeAbugidaG2P, type AbugidaDef } from "../../core/abugida.ts";
@@ -101,7 +102,10 @@ export type ForeignPhonemizer = (latin: string) => string;
 class MalayalamPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
+        // defines as ASCII-only, so a numeral written in native digits matched NO token and was
+        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
