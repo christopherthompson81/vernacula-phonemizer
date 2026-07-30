@@ -191,9 +191,15 @@ export function normalizeEnglish(input: string): string {
     //     `No.` before a DIGIT is the number sign — the rule above needs a following letter, and this is
     //     the form that actually occurs ("No. 1", ×2 in the cased column), where it read as the word "no".
     s = s.replace(/\bnos?\.\s*(?=\d)/gi, "number ");
-    //     `e.g.` and `i.e.` — the ENGLISH GLOSS, which is a CHOICE among readings that are genuinely
-    //     interchangeable in speech ("for example" / "ee gee" / "exempli gratia"). The gloss is the most
-    //     common spoken form for e.g., and the project's preference for i.e. as well. Both must be handled
+    //     `e.g.` and `i.e.` — the ENGLISH GLOSS, a CHOICE among readings that are genuinely
+    //     interchangeable in speech, and MEASURED rather than assumed. Running Parakeet ASR over the six
+    //     en_us FLEURS recordings that contain one of these (4 sentences, 2 of them read twice):
+    //         i.e. ×2  — BOTH readers omitted it outright ("values, zero or one")
+    //         e.g. ×4  — 2 read the letter names, 1 read "for example", 1 "example given"
+    //     So the readers disagree, three ways, and no single rendering matches the audio. That settles
+    //     the question the other way from how it was posed: there is no "correct" target to match, so the
+    //     project's preference for the gloss is as defensible as any and costs nothing measurable. Both
+    //     must be handled
     //     before the generic dot-stripping below, which would otherwise leave "eg"/"ie" to be read as
     //     words. Two branches, as everywhere: the dot is consumed mid-sentence so it cannot become a
     //     phrase break, and kept where it really is the sentence end.
