@@ -167,3 +167,42 @@ An 8-angle review of the segmentation PR caught a real regression + cleanups:
 - **Lazy lexicon load** (registry imports every language eagerly — matches the riders' lazy pattern), **deduped the
   VOICE map** (builder now reads it from the manifest, so mined flags can't drift from the runtime), single NFC
   normalize, removed a dead `void this.foreign`. Suite 365/365.
+
+## Voicing sandhi: a systematic rule was tried and REJECTED on measurement — 2026-07-29
+
+The engine reads compound voicing from `voicing-lexicon.tsv` (1,269 gold-derived entries) and leaves OOV
+words voiceless. That looked like a gap worth closing with a rule, prompted by Omniglot romanizing 90
+ကိုးဆယ် as "koe-zeh" while the engine gives [ko˥˩sʰɛ˨].
+
+**Two triggers were identified, both real:** (1) an intervocalic rule — voice after an OPEN syllable,
+blocked by a checked (glottal) one; (2) a MINOR-syllable rule — a syllable reduced to bare [ə] voices its
+own onset even word-initially, which is why the gold marks ကစား as [ɡəzá] with syllable 0 voiced, a
+pattern the intervocalic rule alone cannot produce.
+
+**Measured against `voicing-lexicon.tsv`: 84.9% precision, 97.6% recall, 79.7% whole-word exact.** That
+looked shippable. It is not — **the lexicon is a POSITIVE-ONLY sample** (words mined *because* they voice),
+so precision measured against it is meaningless. The unbiased test is the referee, which is 8,288
+multi-syllable words with full IPA:
+
+| rule variant | my referee, folded backbone |
+|---|---|
+| **lexical only (shipped)** | **95.7%** |
+| minor-syllable trigger only | 91.7% |
+| intervocalic trigger only | 81.2% |
+| both triggers | 79.0% |
+
+Every variant loses, and the intervocalic trigger — the "textbook" rule — is the most damaging. The
+referee-eval floor for `my` caught it immediately.
+
+**Direct gold evidence for why:** wikipron and kaikki agree that 30 သုံးဆယ် is [θóʊɴsʰɛ̀] — VOICELESS after
+an open nasal coda, exactly where the rule voices — while 10 တစ်ဆယ် is [təzɛ̀], voiced, despite deriving
+from a checked syllable. 20 နှစ်ဆယ် is [n̥əsʰɛ̀], voiceless, in the same shape as 10. Three numerals, three
+different outcomes, no rule between them.
+
+**Conclusion: Burmese compound voicing is genuinely lexical and the deferral is correct, not a shortcut.**
+The path to better coverage is more gold in `voicing-lexicon.tsv` (extend the kaikki mine), not a rule.
+
+Also corrected: the Omniglot-sourced claim that composed numerals were mis-voiced. They are not — the
+common compounds (တစ်ဆယ်, တစ်ရာ, နှစ်ရာ …) are already in `dictionary.tsv`, and the uncovered ones match the
+gold voiceless. Omniglot's romanization is inconsistent here (it writes "seh" for 20–80 and "zeh" only at
+90); the note in `numbers.ts` was rewritten to say so.
