@@ -643,3 +643,69 @@ language a numbered pipeline plus data (abbreviation table, letter names, `acron
 clusters). Each language contributed one thing the others did not need — English pair-wise years, French a
 heteronym tier, Spanish a variety flag — which is the argument for keeping the pipeline per-language rather
 than trying to generalize the step list itself.
+
+## Run 10 — 2026-07-29 — Hindi normalization (first non-Latin script)
+
+`src/languages/hindi/normalize.ts`. The interesting result is how LITTLE was needed: most tiers were
+already right, so this entry is mostly about what was deliberately left alone.
+
+### Already correct, and untouched
+
+The Indic compositor already reads लाख/करोड़ (100000 → एक लाख, 10⁷ → एक करोड़). The number tokenizer
+already accepts BOTH conventions — Western `9,000` and Indian `1,00,000` — and both were correct. Decimals
+read as दशमलव, % and currency work through the shared symbol tier, the danda । is already a clause mark, and
+embedded Latin runs are already delegated to English by the shared foreign-run pass, which is the right
+reading for the acronyms that occur (AOL, PBS, DNA are said with English letter names in Hindi).
+
+Also worth recording: **zero Devanagari digits in the corpus** — numbers are written with ASCII digits
+throughout — so no digit transliteration was needed. And the corpus uses मिलियन ×28 MORE than लाख ×19, so
+the compositor's existing choice was not something to "fix".
+
+### What was broken
+
+| class | before | after |
+|---|---|---|
+| ordinal | `16वीं` → `sˈoːləɦ ʋˈiː̃` — the suffix spoken as its own word | `soːlˈəɦʋiː̃`, one word |
+| abbrev | `डॉ.` → `ɖˈɔː .` (a pause); `डॉ` → `[ɖɔː]` read as a word | `ɖˈɔːkʈəɾ` |
+| abbrev | `ई.पू.` → `ˈiː . pˈuː .` (two pauses) | `ˈiːsaː pˈuːɾʋ` |
+| unit | `किमी` → `[kˈɪmiː]` read as a word; `मिमी` likewise; `किमी/घंटा` lost the slash | expanded |
+| unit | `20 °C` → `[sˈiː]`, the letter name | `ɖˈɪɡɾiː sˈeːlsɪjəs` |
+| clock | `10:30` → colon became a PAUSE; `11:00` → `,  शून्य` ("eleven, zero o'clock") | बजकर…मिनट / बजे |
+| fraction | `1/5` → "one five" | `ˈeːk bˈəʈaː pˈaː̃t͡ʃ` |
+
+The ordinal fix is the structurally interesting one: the suffix is written ATTACHED to the numeral and
+carries the agreement itself (वाँ masc / वीं fem / वें oblique), so the rule reads the gender off the text
+rather than guessing, and JOINS the suffix to the final cardinal word (सोलह + वीं → सोलहवीं). 1–4 and 6 are
+suppletive (पहला, दूसरा, तीसरा, चौथा, छठा); 5 and everything from 7 up are regular.
+
+### `\b` DOES NOT WORK OUTSIDE ASCII — the same trap as French, in a harsher form
+
+Every rule I wrote with `\b` before a Devanagari letter silently did NOTHING: `\b` is defined on ASCII word
+characters, so there is no boundary before `डॉ` or `ई` at all. In French the same definition caused a FALSE
+match (a boundary found inside `siècle` at the accent); here it causes silent non-matching, which is harder
+to notice — the rules simply had no effect and the output looked unchanged. Every boundary in this file is
+an explicit `(?<![\p{L}\p{M}])` lookaround. **This is the standing hazard for every non-Latin language that
+gets this treatment.**
+
+### A rule deliberately NOT applied, on corpus evidence
+
+The minus-sign rule that the other three languages have is omitted. The only hyphen-before-digit in the
+entire Hindi corpus is `चंद्रयान -1`, a spacecraft NAME, and Devanagari also uses a spaced hyphen in
+compounds (आस-पास) — so the rule has a false positive and, measurably, no true ones. The plus direction is
+kept, because `+ 30° c` is a real plus. Also fixed there: the degree rule had to be case-INSENSITIVE, since
+the lowercased corpus writes `30° c` and a case-sensitive rule left the scale letter as a stray [sˈiː].
+
+### Verification
+
+- 198 files / 2113 tests pass (5 new); `tsc --noEmit` clean.
+- Referee eval byte-identical: 3936/5063 (77.7%) folded, 95.4% symbol.
+- hi_in corpus, both columns: 82–83 of 2,120 changed, 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray
+  symbols. Sampled review found them all improvements.
+
+### Pattern status after four languages
+
+Shared: symbols, initialisms + phonotactics, romans, and now the observation that the ordering hazards
+depend on whether the language resolves Romans itself (en, fr) or gets them at the registry seam (es, hi).
+Per language: a numbered pipeline plus data. Each language has contributed exactly one thing no other
+needed — English pair-wise years, French a heteronym tier, Spanish a variety flag, Hindi suffix-joining
+ordinals and the non-ASCII boundary discipline.
