@@ -9,7 +9,7 @@
 //     ⟨nt⟩=ⁿt, ⟨nj⟩=ᶮdʑ, ⟨nc⟩=ᶮtɕ, ⟨nk⟩=ᵑk, ⟨ng⟩=ᵑɡ; ⟨ng'⟩=ŋ (velar nasal, distinct from ⟨ng⟩); ⟨ny⟩=ɲ.
 //   • DAHL'S LAW is ORTHOGRAPHIC (baked into the spelling: a dissimilated k is written ⟨g⟩→ɣ) → no live rule.
 // TONE (2-tone H/L + downstep) is NOT written (contextual) → not emitted; the referee's tone marks + downstep ꜜ +
-// syllable dots + optional-parens are folded. Numbers deferred. See docs/investigations/ki_native_bringup_investigation.md.
+// syllable dots + optional-parens are folded. CARDINAL NUMBERS: the "numbers" block below (citation forms). See docs/investigations/ki_native_bringup_investigation.md.
 {
     "language": "ki",
     "name": "Kikuyu (Gĩkũyũ)",
@@ -40,5 +40,32 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series (what a speaker says counting aloud, no noun present),
+    // NOT a concord form for an arbitrary noun class: a TTS reading a bare integer has no noun to agree with.
+    // SOURCES: Omniglot "Numbers in Kikuyu (Ndari cia Gĩgĩkũyũ)" (omniglot.com/language/numbers/kikuyu.htm) for
+    // 1–20, the round tens (mĩrongo + multiplier), igana rĩmwe = 100 and ngiri ĩmwe = 1 000; lughayangu.com
+    // "Numbers in Gikuyu" for zero (kĩbũgũ), the magana hundreds series and mĩrioni ĩmwe = 1 000 000. The
+    // composition rule (juxtaposed components, "na" only before the last) is the shared E5x algorithm —
+    // see e5xNumbers.ts, where it is anchored on the ATTESTED Kikamba strings.
+    // SIMPLIFIED / EXTRAPOLATED (a reviewer should know): magana meerĩ (200) and magana matatũ (300) are
+    // attested; magana mana (400) / magana matano (500) are extrapolated from the same class-6 ma- concord, and
+    // 600–900 reuse the uninflected 6–9 stems (ithathatũ, mũgwanja, inyanya, kenda) because those numerals do
+    // not inflect. There is NO word for "billion" here: 10⁹ composes as mĩrioni ngiri ĩmwe ("a thousand
+    // million"), which follows the attested ngiri igana rĩmwe = 100 000 pattern rather than inventing a loan.
+    "numbers": {
+        "zero": "kĩbũgũ",
+        "units": ["", "ĩmwe", "igĩrĩ", "ithatũ", "inya", "ithano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
+        "ten": "ikũmi",
+        "tens": "mĩrongo",
+        "tensMult": ["", "", "ĩrĩ", "ithatũ", "inya", "ithano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
+        "hundredOne": "igana rĩmwe",
+        "hundredRest": "igana rĩmwe",
+        "hundreds": "magana",
+        "hundredsMult": ["", "", "meerĩ", "matatũ", "mana", "matano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
+        "thousand": "ngiri",
+        "million": "mĩrioni",
+        "and": "na"
     }
 }

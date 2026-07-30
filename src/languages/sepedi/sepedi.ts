@@ -3,12 +3,14 @@
  * espeak-independent. A pure greedy longest-match scan over the grapheme table (sepedi.jsonc), the same engine as
  * the sibling Setswana — Sepedi is open CV, so no coda/syllabification logic. Authored beyond any machine referee
  * (kaikki Sotho = 3 words) from standard Sepedi phonology. Signatures: EJECTIVE plain stops ⟨p t k⟩→[pʼ tʼ kʼ]
- * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ], ⟨a⟩→[ɑ]. Vowel height unwritten (default mid); tone deferred.
+ * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ], ⟨a⟩→[ɑ]. Vowel height unwritten (default mid); tone deferred. Cardinal numbers: numbers.ts (citation stems + the
+ * CONJUNCTIVE compounds lesometee/masomepedi/makgolopedi — authored from Northern Sotho sources, NOT from st).
  * See docs/investigations/nso_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface SepediDef {
     graphemes: Record<string, string>;
@@ -40,7 +42,8 @@ class SepediPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -49,7 +52,7 @@ class SepediPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Sepedi phonemizer (greedy rule g2p; tone + numbers deferred). */
+/** Build the Sepedi phonemizer (greedy rule g2p + the cardinal compositor; tone deferred). */
 export function createSepedi(): Phonemizer {
     return new SepediPhonemizer();
 }

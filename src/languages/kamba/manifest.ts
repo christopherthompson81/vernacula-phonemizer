@@ -4,6 +4,7 @@
  * is the greedy longest-match scan (kamba.ts), the Kikuyu pattern.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { E5xNumberTable } from "../kikuyu/e5xNumbers.ts";
 
 export interface KambaManifest {
     language: string;
@@ -11,6 +12,8 @@ export interface KambaManifest {
     script: string;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** The cardinal number words (the citation/counting series) — the composer is the shared E5x algorithm. */
+    numbers: E5xNumberTable;
 }
 
 /** The consolidated hand-authored Kamba data tables (see kamba.jsonc). */

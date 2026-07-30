@@ -5,11 +5,13 @@
  * [Cː] (bbiri→bːiri) — and VOWEL LENGTHENING before a prenasalised consonant (Buganda→buɡaːnda). Signatures:
  * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
  * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
- * lexical + unwritten → DEFERRED. See docs/investigations/lg_native_bringup_investigation.md.
+ * lexical + unwritten → DEFERRED. Cardinal numbers: numbers.ts (citation/counting series + the mu/na
+ * connectives). See docs/investigations/lg_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -62,7 +64,8 @@ class LugandaPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -71,7 +74,7 @@ class LugandaPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Luganda phonemizer (greedy g2p + gemination; tone + numbers deferred). */
+/** Build the Luganda phonemizer (greedy g2p + gemination + the cardinal compositor; tone deferred). */
 export function createLuganda(): Phonemizer {
     return new LugandaPhonemizer();
 }

@@ -12,6 +12,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { isNko, nkoToLatin } from "./bambaraNko.ts";
+import { foldNkoDigits, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const G = MANIFEST.graphemes;
@@ -53,13 +54,15 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word — Bambara Latin (incl. ɛ ɔ ɲ ŋ) OR N'Ko (letters U+07CA–07EA + its tone/nasal marks) / number / punct.
-const TOKEN = /([a-zɛɔɲŋ\u{07CA}-\u{07F5}\u{07FA}\u{07FD}]+)|(\d+)|([.!?…,;:])/giu;
+// The number class covers BOTH digit sets the two registered scripts use: ASCII 0–9 and N'Ko ߀–߉ (U+07C0–07C9).
+const TOKEN = /([a-zɛɔɲŋ\u{07CA}-\u{07F5}\u{07FA}\u{07FD}]+)|([\d\u{07C0}-\u{07C9}]+)|([.!?…,;:])/giu;
 
 class BambaraPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // numbers: N'Ko digits folded to ASCII, composed to Bambara words, then through the same g2p
+            else if (m[2]) for (const wd of numberToWords(Number(foldNkoDigits(m[2]))).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -68,7 +71,7 @@ class BambaraPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Bambara phonemizer (greedy g2p + nasalisation; tone + length + numbers deferred). */
+/** Build the Bambara phonemizer (greedy g2p + nasalisation; decimal numbers; tone + length deferred). */
 export function createBambara(): Phonemizer {
     return new BambaraPhonemizer();
 }

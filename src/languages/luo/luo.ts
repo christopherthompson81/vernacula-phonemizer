@@ -11,6 +11,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -52,7 +53,8 @@ class LuoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1])); // phonemizeWord normalises the ’/ʼ apostrophe + citation accents
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // numbers: composed to Dholuo words (numbers.ts: decimal + the gi-elision), then the same g2p
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -61,7 +63,7 @@ class LuoPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Luo (Dholuo) phonemizer (greedy g2p + glide; ATR, tone, numbers deferred). */
+/** Build the Luo (Dholuo) phonemizer (greedy g2p + glide; decimal numbers; ATR + tone deferred). */
 export function createLuo(): Phonemizer {
     return new LuoPhonemizer();
 }

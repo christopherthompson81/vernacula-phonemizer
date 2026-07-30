@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord as raw } from "../src/languages/bambara/bambara.ts";
+import { createBambara, phonemizeWord as raw } from "../src/languages/bambara/bambara.ts";
+import { numberToWords } from "../src/languages/bambara/numbers.ts";
 
 // The g2p emits combining marks (nasal ã = a + U+0303) to match the referee; normalise NFC for stable literals.
 const phonemizeWord = (w: string) => raw(w).normalize("NFC");
@@ -9,7 +10,7 @@ const phonemizeWord = (w: string) => raw(w).normalize("NFC");
 // against kaikki Bambara (Wiktionary, narrow). The greedy g2p + nasalisation scores 86.5% folded vs the referee
 // (tools/referee-eval, 74 words) — the folds strip TONE (2-level H/L + downstep) and vowel LENGTH, both lexical
 // and absent from the standard orthography. These goldens pin the segmental + nasalisation backbone. Tone,
-// length, and numbers are deferred; N'Ko is a second script, deferred.
+// length are deferred (numbers are composed in numbers.ts); N'Ko is a second script, folded to Latin.
 // See docs/investigations/bm_native_bringup_investigation.md.
 describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
     test("affricates and sibilant: ⟨c⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ", () => {
@@ -43,5 +44,36 @@ describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
         expect(phonemizeWord("ߖߐ߲")).toBe("d͡ʒɔ̃".normalize("NFC")); // ja + O(=/ɔ/) + NASALIZATION MARK → d͡ʒɔ̃
         expect(phonemizeWord("ߓߊ߲")).toBe("bã".normalize("NFC")); // ba + a + NASALIZATION MARK → nasal ã
         expect(phonemizeWord("ߓߊ߲")).toBe(phonemizeWord("ban")); // N'Ko ≡ the Latin spelling
+    });
+
+    // NUMBERS — DECIMAL (Bambara is NOT quinary: 6–9 are opaque stems). Bespoke because 10 tan / 20 mugan are
+    // lexical while 30–90 are solid bi- derivations, and every magnitude noun takes a FOLLOWING multiplier —
+    // except 100, which is the bare kɛmɛ. Slots join with ni 'and'. Sources: Omniglot "Numbers in Bambara",
+    // languagesandnumbers.com bam (the 1234 worked example), kasahorow (fu 'zero').
+    // See src/languages/bambara/numbers.ts.
+    test("numbers: units, lexical tan/mugan, bi- tens, ni compounds", () => {
+        expect(numberToWords(7)).toBe("wolonwula");
+        expect(numberToWords(10)).toBe("tan");
+        expect(numberToWords(11)).toBe("tan ni kelen");
+        expect(numberToWords(20)).toBe("mugan"); // lexical, not *bifila
+        expect(numberToWords(21)).toBe("mugan ni kelen");
+        expect(numberToWords(42)).toBe("binaani ni fila"); // bi- + unit, written solid
+        expect(numberToWords(99)).toBe("bikɔnɔntɔn ni kɔnɔntɔn");
+    });
+
+    test("numbers: kɛmɛ hundreds (bare at 100), waga thousands, milyɔn millions", () => {
+        expect(numberToWords(100)).toBe("kɛmɛ"); // the multiplier is omitted for exactly 100
+        expect(numberToWords(101)).toBe("kɛmɛ ni kelen");
+        expect(numberToWords(555)).toBe("kɛmɛ duuru ni biduuru ni duuru");
+        expect(numberToWords(1000)).toBe("waga kelen"); // the thousand DOES keep its multiplier
+        expect(numberToWords(12345)).toBe("waga tan ni fila ni kɛmɛ saba ni binaani ni duuru");
+        expect(numberToWords(1_000_000)).toBe("milyɔn kelen");
+        expect(numberToWords(2_000_000)).toBe("milyɔn fila");
+    });
+
+    test("numbers: both registered scripts — N'Ko digits (߀–߉) ≡ ASCII", () => {
+        const bm = createBambara();
+        expect(bm.text("21").normalize("NFC")).toBe("muɡã ni kelẽ".normalize("NFC")); // nasalisation applies to the numerals too
+        expect(bm.text("߂߁")).toBe(bm.text("21")); // N'Ko digits fold to ASCII → identical IPA
     });
 });

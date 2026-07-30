@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 
 // Multi-letter units (longest-match first): labial-velars, affricates, ⟨ny⟩→ɲ.
 const DIGRAPH: Record<string, string> = { "gb": "ɡ͡b", "kp": "k͡p", "dz": "d͡z", "ts": "t͡s", "ny": "ɲ" };
@@ -69,14 +70,15 @@ export function phonemizeWord(word: string): string {
 }
 
 // An Ewe word (Latin + ɖ Ɖ ƒ ʋ ɣ ŋ ɔ ɛ + combining marks) / number / punctuation. The input is NFD-normalised in text()
-// so a precomposed nasal/toned vowel (ã ẽ … á à) decomposes to base + a combining mark the ̀-ͯ range captures. Numbers deferred.
+// so a precomposed nasal/toned vowel (ã ẽ … á à) decomposes to base + a combining mark the ̀-ͯ range captures. Numbers → numbers.ts.
 const TOKEN = /([a-zɖƒʋɣŋɔɛA-ZƉƑƲƔŊƆƐ̀-ͯ']+)|(\d+)|([.!?…,;:])/gu;
 
 class EwePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFD"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            // numbers: composed to Ewe words (numbers.ts: wui-/bla- decimal), then through the same scan
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }

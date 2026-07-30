@@ -13,7 +13,7 @@
 //     ⟨nz⟩=ⁿz, ⟨nth⟩=ⁿð; ⟨ng'⟩=ŋ (velar nasal, distinct from ⟨ng⟩); ⟨ny⟩=ɲ; ⟨th⟩=ð; ⟨r⟩=ɾ (tap), ⟨y⟩=j, ⟨w⟩=w.
 // TONE (2-tone H/L) is NOT written (contextual) → not emitted; the referee's tone marks + syllable dots are folded.
 // CONTESTED (validate): ⟨th⟩ voicing [ð] (Omniglot + Wikipedia, 2 curated sources) vs [θ] (some descriptions) — went
-// with [ð] (Kikuyu parallel); ⟨sy⟩=ʃ / ⟨ky⟩=tʃ are single-sourced. Numbers deferred. See docs/investigations/kam_bringup_investigation.md.
+// with [ð] (Kikuyu parallel); ⟨sy⟩=ʃ / ⟨ky⟩=tʃ are single-sourced. CARDINAL NUMBERS: the "numbers" block below (citation forms). See docs/investigations/kam_bringup_investigation.md.
 {
     "language": "kam",
     "name": "Kamba (Kikamba)",
@@ -46,5 +46,37 @@
 
     "clausePunctuation": {
         ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+    },
+
+    // CARDINAL NUMBERS — the CITATION / COUNTING series, i.e. the manual's own kũtala "to count" list, NOT a
+    // concord form for an arbitrary noun class (a TTS reading a bare integer has no noun to agree with).
+    // PRIMARY SOURCE: the Peace Corps *Kikamba Self-Instruction Manual* (hosted at livelingua.com), Lesson 6
+    // "Syĩndu Syiana? – How Many Are They?", vocabulary pp. 28–29 + the grammar note on p. 29 ("Numbers are
+    // quantitative adjectives. Numbers one to five when used as adjectives take the prefix which agrees with the
+    // noun modified. … The numbers six to ten are never inflected."). That table gives verbatim: Ĩmwe, Ĩlĩ,
+    // Itatũ, Inya, Itano, Thanthatũ, Mũonza, Nyanya, Keenda, Ĩkũmi, Ĩkũmi na ĩmwe, Miongo ĩlĩ … Miongo keenda,
+    // Ĩana (I/MA, pl. Maana), Ĩana yĩmwe, Maana elĩ, Ngili ĩmwe, Ngili ĩkũmi, Milioni. Zero = "Noti / nzilo"
+    // (same manual, vocabulary list). Cross-checked against Omniglot "Numbers in Kamba".
+    // The COMPOSITION rule is attested in the same manual's running text and is what the shared E5x composer
+    // implements: components juxtaposed with "na" before the LAST one only — "maana elĩ na mĩongo ĩtano" (250),
+    // "ĩana na mĩongo itano" (150, note bare Ĩana before a remainder), and the year 1957 as
+    // "ngili ĩmwe maana kenda mĩongo ĩtano na mũonza".
+    // SIMPLIFIED / EXTRAPOLATED: only maana elĩ (200) is attested for the hundreds multiplier; 300–500 are
+    // extrapolated with the class-6 a- concord the manual documents (Andũ elĩ / atatũ), and 600–900 reuse the
+    // uninflected 6–9 stems. No word for "billion": 10⁹ composes as milioni ngili ĩmwe ("a thousand million"),
+    // extending the manual's own ngili ĩkũmi = 10 000 multiplicative pattern instead of inventing a loan.
+    "numbers": {
+        "zero": "noti",
+        "units": ["", "ĩmwe", "ĩlĩ", "itatũ", "inya", "itano", "thanthatũ", "mũonza", "nyanya", "keenda"],
+        "ten": "ĩkũmi",
+        "tens": "miongo",
+        "tensMult": ["", "", "ĩlĩ", "ĩtatũ", "ina", "ĩtano", "thanthatũ", "mũonza", "nyanya", "keenda"],
+        "hundredOne": "ĩana yĩmwe",
+        "hundredRest": "ĩana",
+        "hundreds": "maana",
+        "hundredsMult": ["", "", "elĩ", "atatũ", "ana", "atano", "thanthatũ", "mũonza", "nyanya", "keenda"],
+        "thousand": "ngili",
+        "million": "milioni",
+        "and": "na"
     }
 }

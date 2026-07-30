@@ -11,6 +11,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -56,7 +57,8 @@ class WolofPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            // numbers: spoken in the QUINARY/decimal Wolof system (numbers.ts), then through the same g2p
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
@@ -65,7 +67,7 @@ class WolofPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Wolof phonemizer (greedy g2p + gemination; numbers deferred). */
+/** Build the Wolof phonemizer (greedy g2p + gemination; quinary numbers). */
 export function createWolof(): Phonemizer {
     return new WolofPhonemizer();
 }

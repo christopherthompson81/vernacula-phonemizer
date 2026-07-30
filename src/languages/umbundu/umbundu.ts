@@ -3,12 +3,14 @@
  * greedy longest-match scan over the grapheme table (manifest.ts): Umbundu is open CV with prenasalised clusters as
  * single onset units, so no coda/syllabification logic is needed. Signatures: VOICED obstruents ONLY prenasalised
  * (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ, ⟨v⟩→v, ⟨ñ⟩/⟨ny⟩→ɲ, ⟨ng'⟩→ŋ, ⟨l⟩→l. Tone (H á / L à + downstep) is often
- * unwritten → the accents are STRIPPED (tone DEFERRED); nasal-vowel tildes are kept. See
+ * unwritten → the accents are STRIPPED (tone DEFERRED); nasal-vowel tildes are kept. Cardinal numbers: numbers.ts (citation
+ * forms + the quinary 6–9 nouns + the la/l’ connective). See
  * docs/investigations/umb_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -46,13 +48,14 @@ class UmbunduPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
-            // numbers deferred (Umbundu cardinal compositor not yet authored)
+            else if (m[2])
+                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
 }
 
-/** Build the Umbundu phonemizer (greedy rule g2p; tone deferred). */
+/** Build the Umbundu phonemizer (greedy rule g2p + the cardinal compositor; tone deferred). */
 export function createUmbundu(): Phonemizer {
     return new UmbunduPhonemizer();
 }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createEwe, phonemizeWord } from "../src/languages/ewe/ewe.ts";
+import { numberToWords } from "../src/languages/ewe/numbers.ts";
 
 // Canonical-IPA goldens for Ewe (ee) — Eʋegbe, a Gbe language (Niger-Congo, Kwa), the Latin-based African alphabet.
 // Signatures: labial-velars ⟨gb kp⟩→[ɡ͡b k͡p], the bilabial ⟨ƒ⟩→[ɸ]/⟨ʋ⟩→[β] (vs labiodental f/v), affricates ⟨dz ts⟩,
@@ -32,5 +33,35 @@ describe("Ewe (Eʋegbe) canonical IPA", () => {
         const ee = createEwe();
         expect(ee.text("agbalẽ".normalize("NFC"))).toBe("aɡ͡balẽ"); // NFC nasal ⟨ẽ⟩ not dropped by the tokenizer
         expect(ee.text("Ɖekawo")).toBe("ɖekawo"); // uppercase ⟨Ɖ⟩ tokenized
+    });
+
+    // NUMBERS — DECIMAL, but with PREFIXING morphology no data-only composer can express: the teens are wui- +
+    // unit stem and the round tens are bla- + unit stem (bla- is a multiplicative TEN prefix, so blaeve 20 is
+    // 'ten×two' and blaene 40 is 'ten×four' — NOT a base-20 series), 21–99 link with vɔ 'plus', and the
+    // magnitude nouns alafa/akpe/miliɔn take a FOLLOWING multiplier with kple 'and' between slots. Sources:
+    // Omniglot "Numbers in Ewe" + desmotsetdeslangues.eklablog.com/ewe. See src/languages/ewe/numbers.ts.
+    test("numbers: units, wui- teens, bla- tens, vɔ compounds", () => {
+        expect(numberToWords(7)).toBe("adre");
+        expect(numberToWords(10)).toBe("ewo");
+        expect(numberToWords(11)).toBe("wuiɖeke"); // wui- + the unit stem
+        expect(numberToWords(20)).toBe("blaeve"); // bla- (×10) + eve → 10×2
+        expect(numberToWords(21)).toBe("blaeve vɔ ɖeka"); // TENS vɔ UNIT
+        expect(numberToWords(42)).toBe("blaene vɔ eve");
+        expect(numberToWords(99)).toBe("blaasieke vɔ asieke");
+    });
+
+    test("numbers: alafa hundreds, akpe thousands, miliɔn millions (multiplier FOLLOWS, kple joins)", () => {
+        expect(numberToWords(100)).toBe("alafa ɖeka");
+        expect(numberToWords(101)).toBe("alafa ɖeka kple ɖeka");
+        expect(numberToWords(555)).toBe("alafa atɔ̃ kple blaatɔ̃ vɔ atɔ̃");
+        expect(numberToWords(1000)).toBe("akpe ɖeka");
+        expect(numberToWords(12345)).toBe("akpe wuieve kple alafa etɔ̃ kple blaene vɔ atɔ̃");
+        expect(numberToWords(1_000_000)).toBe("miliɔn ɖeka");
+        expect(numberToWords(2_000_000)).toBe("miliɔn eve");
+    });
+
+    test("numbers: end-to-end through the scan (text path)", () => {
+        expect(createEwe().text("20")).toBe("blaeve");
+        expect(createEwe().text("1000")).toBe("ak͡pe ɖeka"); // ⟨kp⟩ → the labial-velar k͡p
     });
 });
