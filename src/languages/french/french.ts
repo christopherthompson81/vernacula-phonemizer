@@ -9,6 +9,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeFrenchOrdinalDigits, normalizeFrenchOrdinalRomans } from "./ordinals.ts";
+import { normalizeFrench, normalizeFrenchInitialisms } from "./normalize.ts";
 import { normalizeRomans } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -96,8 +97,16 @@ function stripLatent(ipa: string, c: string): string {
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["pour cent"],
     currency: { "€": ["euro", "euros"], "$": ["dollar", "dollars"], "£": ["livre", "livres"], "¥": ["yen", "yens"] },
+    // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.
     units: { km: ["kilomètre", "kilomètres"], cm: ["centimètre", "centimètres"], mm: ["millimètre", "millimètres"],
-        kg: ["kilogramme", "kilogrammes"], mg: ["milligramme", "milligrammes"] },
+        kg: ["kilogramme", "kilogrammes"], mg: ["milligramme", "milligrammes"], g: ["gramme", "grammes"],
+        t: ["tonne", "tonnes"], m: ["mètre", "mètres"], l: ["litre", "litres"], ml: ["millilitre", "millilitres"],
+        cl: ["centilitre", "centilitres"], dl: ["décilitre", "décilitres"], ha: ["hectare", "hectares"],
+        "km/h": ["kilomètre par heure", "kilomètres par heure"], "m/s": ["mètre par seconde", "mètres par seconde"],
+        "°c": ["degré Celsius", "degrés Celsius"], "°f": ["degré Fahrenheit", "degrés Fahrenheit"],
+        kw: ["kilowatt", "kilowatts"], w: ["watt", "watts"], hz: ["hertz"], khz: ["kilohertz"], mhz: ["mégahertz"],
+        go: ["gigaoctet", "gigaoctets"], mo: ["mégaoctet", "mégaoctets"], ko: ["kilooctet", "kilooctets"],
+        min: ["minute", "minutes"] },
     magnitudes: ["millions", "million", "milliards", "milliard"],
 });
 
@@ -125,7 +134,12 @@ class FrenchPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, frNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
     // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
     text(input: string, oovOverride?: OovResolver): string {
-        input = normalizeFrenchNumerals(SYMBOLS(input)); // #562
+        const isWord = (w: string): boolean => lexicon().has(w);
+        // #562 normalization order: general text normalization (abbreviations, era markers, numéro,
+        // digit degrouping) → NUMERALS (roman ordinals, digit ordinals, bare romans) → INITIALISMS, which
+        // must see the all-caps runs the numeral pass declined → SYMBOLS (%, currency, units) last, since
+        // the time rule upstream has already claimed the hour marker.
+        input = SYMBOLS(normalizeFrenchInitialisms(normalizeFrenchNumerals(normalizeFrench(input, isWord)), isWord));
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
         type Item = { word: string } | { pause: string };
@@ -137,11 +151,17 @@ class FrenchPhonemizer implements Phonemizer {
                 for (const w of numberToWords(Number(intPart)).split(" "))
                     items.push({ word: w });
                 if (frac !== undefined) {
-                    // decimal: "virgule" + digit-by-digit
+                    // Decimal: "virgule" + the fractional part. French reads that part as a NUMBER
+                    // (1,75 → un virgule soixante-quinze), not digit by digit, so long as doing so is
+                    // unambiguous. A LEADING ZERO makes it ambiguous — reading "05" as a number would
+                    // say 1,5 for 1,05 — and past three digits the number reading stops being useful,
+                    // so both of those fall back to digit-by-digit.
                     items.push({ word: MANIFEST.numbers.decimalSeparator });
-                    for (const d of frac)
-                        for (const w of numberToWords(Number(d)).split(" "))
-                            items.push({ word: w });
+                    const asNumber = frac.length <= 3 && !frac.startsWith("0");
+                    const parts = asNumber
+                        ? numberToWords(Number(frac)).split(" ")
+                        : [...frac].flatMap((d) => numberToWords(Number(d)).split(" "));
+                    for (const w of parts) items.push({ word: w });
                 }
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
