@@ -8,11 +8,14 @@
  * NOT included (documented lexical tail): open/close stressed-mid words where the shared EP lexicon differs from
  * BP (telefone → EP-lexicon [ɔ] vs BP [o]; beringela [ɛ]); ea-hiatus (Ceará); loanwords.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import {
     createPortugueseBR,
     phonemizeWord,
 } from "../src/languages/portuguese-br/portuguese-br.ts";
+import { phonemize } from "../src/index.ts";
+import { ROMAN_POLICY as PT_POLICY } from "../src/languages/portuguese/romanOrdinals.ts";
+import { ROMAN_POLICY } from "../src/languages/portuguese-br/romanOrdinals.ts";
 
 // word → adjudicated BP IPA. Signature features: /t d/ affrication before [i], coda-l → [w], coda-s → [s]/[z],
 // position-split reduction (pretonic mid, final raise), -em → [ẽj̃].
@@ -80,4 +83,38 @@ describe("pt-BR numbers (dez-e- teens)", () => {
             expect(bp.text(n)).toBe(ipa);
         });
     }
+});
+
+// ── Roman-numeral policy (src/languages/portuguese-br/romanOrdinals.ts) ──
+// A CENTURY IS A CARDINAL in pt-BR (Brazilian usage shares the ordinal-≤X / cardinal-≥XI convention: século dezenove) — the shared Roman→digits pass is already right and the policy
+// must not change that. What the policy adds is the PRENOMINAL ordinal of event names, which is ordinal at ANY
+// value (XL/L aniversari·o → the -ésimo / -è series), where the cardinal would be the wrong register.
+describe("pt-BR Roman-numeral policy — centuries cardinal, prenominal events ordinal", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
+        expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
+        expect(ROMAN_POLICY.ordinalAfter?.test("século")).toBe(false);
+        expect(phonemize("século xix", "pt-BR")).toBe('sˈɛkulu dezenˈɔvi');
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(phonemize("xix", "pt-BR")).toBe('dezenˈɔvi');
+    });
+
+    test("prenominal event context is ordinal, and unbounded — XL / L / above L", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("aniversário")).toBe(true);
+        expect(ord(40)).toBe('quadragésimo');
+        expect(ord(50)).toBe('quinquagésimo');
+        expect(ord(60)).toBe('sexagésimo');
+        expect(phonemize('quinquagésimo aniversário', "pt-BR")).toBe('kĩkwaʒˈɛzimu aniveɾsˈaɾju');
+    });
+
+    test("feminine heads are deliberately NOT triggered (the series is masculine)", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("edição")).toBe(false);
+    });
+
+    test("pt-BR re-exports the pt policy verbatim (identical words, only the g2p differs)", () => {
+        expect(ROMAN_POLICY).toBe(PT_POLICY);
+    });
 });

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/polish/polish.ts";
+import { ROMAN_POLICY } from "../src/languages/polish/romanOrdinals.ts";
 
 // Canonical-IPA goldens for Polish (pl) — West Slavic rule g2p, penultimate stress. Digraphs (ch→x, cz→t͡ʂ, sz→ʂ,
 // rz→ʐ, dz/dź/dż), the ⟨i⟩ palatalizer, nasal vowels ą/ę (homorganic nasal by place; ą-final→ɔw̃, ę-final→ɛ),
@@ -65,5 +66,43 @@ describe("Polish canonical IPA", () => {
         expect(phonemize("1000000", "pl").trim()).toBe("mˈiljɔn"); // milion
         expect(phonemize("2000000", "pl").trim()).toBe("dvˈa miljˈɔnɨ"); // dwa miliony (paucal)
         expect(phonemize("1000000000", "pl").trim()).toBe("mˈiljart"); // miliard (final ⟨d⟩ devoices)
+    });
+});
+
+// Roman-numeral ORDINAL policy (src/languages/polish/romanOrdinals.ts). Polish reads a century as an ORDINAL,
+// masculine nominative, agreeing with the masculine wiek. BOTH word orders occur — "XIX wiek" (dominant, and
+// pl.wikipedia's canonical title) and "wiek XIX" — so both ordinalBefore and ordinalAfter are supplied. The
+// table is nominative only: "w XIX wieku" wants the locative dziewiętnastym; see the policy file.
+describe("Polish roman-numeral ordinals", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal?.(n);
+
+    test("ordinal words: BOTH elements inflect above 20 (unlike Russian)", () => {
+        expect(ord(1)).toBe("pierwszy");
+        expect(ord(8)).toBe("ósmy");
+        expect(ord(19)).toBe("dziewiętnasty");
+        expect(ord(21)).toBe("dwudziesty pierwszy");
+        expect(ord(40)).toBe("czterdziesty");
+        expect(ord(50)).toBe("pięćdziesiąty");
+        expect(ord(63)).toBe("sześćdziesiąty trzeci"); // past 50 — the anniversary / congress range
+        expect(ord(100)).toBe("setny");
+        expect(ord(101)).toBeUndefined(); // out of range → the caller falls back to the cardinal
+    });
+
+    test("context matches the inflected century forms, in both word orders", () => {
+        for (const w of ["wiek", "wieku", "wieki", "wieków", "wiekiem", "wiekach", "stulecie", "stulecia", "rocznica", "zjazd"]) {
+            expect(ROMAN_POLICY.ordinalAfter?.test(w)).toBe(true);
+            expect(ROMAN_POLICY.ordinalBefore?.test(w)).toBe(true);
+        }
+        expect(ROMAN_POLICY.ordinalAfter?.test("wielki")).toBe(false);
+    });
+
+    test("the ordinal reading phonemizes in context, either order", () => {
+        expect(phonemize("dziewiętnasty wiek", "pl").trim()).toBe("d͡ʑɛvjɛntnˈastɨ vjˈɛk");
+        expect(phonemize("wiek dziewiętnasty", "pl").trim()).toBe("vjˈɛk d͡ʑɛvjɛntnˈastɨ");
+        expect(phonemize("czterdziesty zjazd", "pl").trim()).toBe("t͡ʂtɛrd͡ʑˈɛstɨ zjˈast");
+    });
+
+    test("a bare roman numeral still reads as a CARDINAL", () => {
+        expect(phonemize("xix", "pl").trim()).toBe("d͡ʑɛvjɛntnˈaɕt͡ɕɛ"); // dziewiętnaście, not dziewiętnasty
     });
 });

@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/portuguese/portuguese.ts";
+import { ROMAN_POLICY } from "../src/languages/portuguese/romanOrdinals.ts";
 
 // Canonical-IPA goldens for European Portuguese (pt-PT), espeak-independent. Rule-based g2p → stress → the EP
 // vowel-REDUCTION pass (unstressed a→ɐ, e→ɨ, o→u) → sibilant voicing. Convention: nasal ɐ̃/ẽ/ĩ/õ/ũ + diphthongs
@@ -113,5 +114,42 @@ describe("european portuguese canonical IPA", () => {
         expect(phonemize("Bom dia, como está?", "pt")).toBe(
             "bˈõ dˈiɐ , kˈomu iʃtˈa ?",
         );
+    });
+});
+
+// ── Roman-numeral policy (src/languages/portuguese/romanOrdinals.ts) ──
+// A CENTURY IS A CARDINAL in Portuguese (Ciberdúvidas: «Século XIX» is not «século décimo nono» but «século dezenove») — the shared Roman→digits pass is already right and the policy
+// must not change that. What the policy adds is the PRENOMINAL ordinal of event names, which is ordinal at ANY
+// value (XL/L aniversari·o → the -ésimo / -è series), where the cardinal would be the wrong register.
+describe("Portuguese Roman-numeral policy — centuries cardinal, prenominal events ordinal", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
+        expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
+        expect(ROMAN_POLICY.ordinalAfter?.test("século")).toBe(false);
+        expect(phonemize("século xix", "pt")).toBe('sˈɛkulu dɨzɐnˈovɨ');
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(phonemize("xix", "pt")).toBe('dɨzɐnˈovɨ');
+    });
+
+    test("prenominal event context is ordinal, and unbounded — XL / L / above L", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("aniversário")).toBe(true);
+        expect(ord(40)).toBe('quadragésimo');
+        expect(ord(50)).toBe('quinquagésimo');
+        expect(ord(60)).toBe('sexagésimo');
+        expect(phonemize('quinquagésimo aniversário', "pt")).toBe('kĩkwɐʒˈɛzimu ɐnivɨɾsˈaɾju');
+    });
+
+    test("feminine heads are deliberately NOT triggered (the series is masculine)", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("edição")).toBe(false);
+    });
+
+    test("composed values and the year boundary", () => {
+        expect(ord(19)).toBe("décimo nono");
+        expect(ord(25)).toBe("vigésimo quinto");
+        expect(ord(100)).toBe("centésimo");
+        expect(ord(1914)).toBeUndefined(); // a Roman-numeral YEAR keeps the cardinal reading
     });
 });

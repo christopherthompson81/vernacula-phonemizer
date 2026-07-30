@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/kazakh/kazakh.ts";
+import { ROMAN_POLICY } from "../src/languages/kazakh/romanOrdinals.ts";
 
 describe("Kazakh Cyrillic g2p", () => {
     it("core words, vowels, canonical relabels", () => {
@@ -45,5 +46,41 @@ describe("Kazakh Cyrillic g2p", () => {
         expect(phonemize("21", "kk")).toBe("ʒəjərmˈɑbˈɪr");
         expect(phonemize("100", "kk")).toBe("ʒˈʏz");
         expect(phonemize("1000", "kk")).toBe("bˈɪr mˈəŋ");
+    });
+});
+
+// Roman-numeral ORDINAL policy (src/languages/kazakh/romanOrdinals.ts). A century is an ordinal: XIX ғасыр →
+// он тоғызыншы ғасыр, attested in Kazakh academic titles ("Он тоғызыншы ғасыр зерттеушілерінің…") and in an
+// English–Kazakh dictionary gloss. Tables rather than a suffixing rule, because the tens are irregular
+// (жиырмасыншы, қырқыншы) and this language's number manifest holds IPA, not orthography.
+describe("Kazakh roman-numeral ordinals", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal?.(n);
+
+    it("ordinal words, incl. the irregular tens; only the last element is suffixed", () => {
+        expect(ord(1)).toBe("бірінші");
+        expect(ord(9)).toBe("тоғызыншы");
+        expect(ord(19)).toBe("он тоғызыншы");
+        expect(ord(20)).toBe("жиырмасыншы"); // irregular epenthetic -с-
+        expect(ord(21)).toBe("жиырма бірінші");
+        expect(ord(40)).toBe("қырқыншы"); // қырық loses its second vowel
+        expect(ord(50)).toBe("елуінші");
+        expect(ord(63)).toBe("алпыс үшінші"); // past 50 — anniversary / congress range
+        expect(ord(100)).toBe("жүзінші");
+        expect(ord(101)).toBeUndefined(); // out of range → the caller falls back to the cardinal
+    });
+
+    it("context matches the agglutinated century forms (unanchored)", () => {
+        for (const w of ["ғасыр", "ғасырда", "ғасырдың", "ғасырлар", "ғасырға", "мыңжылдық", "съезд", "сынып"])
+            expect(ROMAN_POLICY.ordinalAfter?.test(w)).toBe(true);
+        expect(ROMAN_POLICY.ordinalAfter?.test("ғалым")).toBe(false);
+    });
+
+    it("the ordinal reading phonemizes in context", () => {
+        expect(phonemize("он тоғызыншы ғасыр", "kk").trim()).toBe("ˈon tˈoʁəzənʃə ʁˈɑsər");
+        expect(phonemize("елуінші съезд", "kk").trim()).toBe("jelwɪnʃˈɪ sʔˈezd");
+    });
+
+    it("a bare roman numeral still reads as a CARDINAL", () => {
+        expect(phonemize("xix", "kk").trim()).toBe("ˈontˈoʁəz"); // он тоғыз, not он тоғызыншы
     });
 });

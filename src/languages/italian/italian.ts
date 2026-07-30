@@ -273,8 +273,10 @@ function under1000(n: number): string {
     return hundreds + (r ? under1000(r) : "");
 }
 
-/** Spoken Italian for a non-negative integer → space-separated magnitude words (thousands fused, millions split). */
-function numberWords(n: number): string {
+/** Spoken Italian for a non-negative integer → space-separated magnitude words (thousands fused, millions split).
+ *  Exported so `romanOrdinals.ts` can derive the ORDINAL from it (`-esimo` on the cardinal) instead of
+ *  re-authoring the numeral data. */
+export function numberWords(n: number): string {
     if (n === 0) return NUM.units[0]!;
     const parts: string[] = [];
     const millions = Math.floor(n / 1000000);

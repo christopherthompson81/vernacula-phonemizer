@@ -8,8 +8,11 @@
  * NOT included (shared-es lexical exception): ⟨x⟩=[x] in Nahuatl-origin names (México→[ˈmexiko]) — the es engine
  * gives [ks] in both dialects, a shared gap, not es-419-specific.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
 import { phonemizeWord } from "../src/languages/spanish-419/spanish-419.ts";
+import { phonemize } from "../src/index.ts";
+import { ROMAN_POLICY as ES_POLICY } from "../src/languages/spanish/romanOrdinals.ts";
+import { ROMAN_POLICY } from "../src/languages/spanish-419/romanOrdinals.ts";
 
 const GOLD: [string, string][] = [
     // SESEO — ⟨c⟩ before e/i and ⟨z⟩ → [s] (Castilian [θ])
@@ -30,4 +33,38 @@ describe("es-419 (Latin-American) seseo + yeísmo", () => {
             expect(phonemizeWord(word)).toBe(ipa);
         });
     }
+});
+
+// ── Roman-numeral policy (src/languages/spanish-419/romanOrdinals.ts) ──
+// A CENTURY IS A CARDINAL in es-419 (the RAE Ortografía is co-published with ASALE, so the pan-Hispanic reading applies) — the shared Roman→digits pass is already right and the policy
+// must not change that. What the policy adds is the PRENOMINAL ordinal of event names, which is ordinal at ANY
+// value (XL/L aniversari·o → the -ésimo / -è series), where the cardinal would be the wrong register.
+describe("es-419 Roman-numeral policy — centuries cardinal, prenominal events ordinal", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
+        expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
+        expect(ROMAN_POLICY.ordinalAfter?.test("siglo")).toBe(false);
+        expect(phonemize("siglo xix", "es-419")).toBe('sˈiɣlo djesinwˈeβe');
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(phonemize("xix", "es-419")).toBe('djesinwˈeβe');
+    });
+
+    test("prenominal event context is ordinal, and unbounded — XL / L / above L", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("aniversario")).toBe(true);
+        expect(ord(40)).toBe('cuadragésimo');
+        expect(ord(50)).toBe('quincuagésimo');
+        expect(ord(60)).toBe('sexagésimo');
+        expect(phonemize('quincuagésimo aniversario', "es-419")).toBe('kinkwaxˈesimo aniβeɾsˈaɾjo');
+    });
+
+    test("feminine heads are deliberately NOT triggered (the series is masculine)", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("edición")).toBe(false);
+    });
+
+    test("es-419 re-exports the es policy verbatim (no drift)", () => {
+        expect(ROMAN_POLICY).toBe(ES_POLICY);
+    });
 });

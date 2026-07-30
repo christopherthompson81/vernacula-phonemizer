@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { ROMAN_POLICY } from "../src/languages/ukrainian/romanOrdinals.ts";
 import { phonemizeWord } from "../src/languages/ukrainian/ukrainian.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
@@ -35,5 +36,42 @@ describe("Ukrainian canonical IPA", () => {
         expect(getPhonemizer("uk").text("100").trim()).toBe("stɔ"); // сто
         expect(getPhonemizer("uk").text("1000").trim()).toBe("tɪsʲat͡ʃa"); // тисяча — bare (no leading "один"), via westernNumberWords
         expect(getPhonemizer("uk").text("2").trim()).toBe("dʋa"); // два
+    });
+});
+
+// Roman-numeral ORDINAL policy (src/languages/ukrainian/romanOrdinals.ts). Ukrainian reads a century as an
+// ordinal — XII століття → дванадцяте століття — and the century noun is NEUTER (століття/сторіччя), so the
+// table is neuter -е, not the masculine -ий Russian and Polish need. вік is excluded from the context on
+// purpose: a masculine head cannot take this table.
+describe("Ukrainian roman-numeral ordinals", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal?.(n);
+
+    test("neuter ordinal words; only the last element inflects above 20", () => {
+        expect(ord(1)).toBe("перше");
+        expect(ord(12)).toBe("дванадцяте");
+        expect(ord(19)).toBe("дев'ятнадцяте");
+        expect(ord(21)).toBe("двадцять перше"); // cardinal tens + neuter ordinal unit
+        expect(ord(40)).toBe("сорокове"); // own stem
+        expect(ord(50)).toBe("п'ятдесяте");
+        expect(ord(63)).toBe("шістдесят третє"); // past 50 — anniversary / congress range
+        expect(ord(100)).toBe("соте");
+        expect(ord(101)).toBeUndefined(); // out of range → the caller falls back to the cardinal
+    });
+
+    test("context matches the inflected century forms, but NOT masculine вік", () => {
+        for (const w of ["століття", "столітті", "століттю", "століттям", "століть", "сторіччя", "сторіч", "річниця"])
+            expect(ROMAN_POLICY.ordinalAfter?.test(w)).toBe(true);
+        expect(ROMAN_POLICY.ordinalAfter?.test("вік")).toBe(false);
+        expect(ROMAN_POLICY.ordinalAfter?.test("віку")).toBe(false);
+    });
+
+    test("the ordinal reading phonemizes in context", () => {
+        expect(getPhonemizer("uk").text("дванадцяте століття").trim()).toBe("dʋanadʲt͡sʲatɛ stɔlʲitʲːa");
+        expect(getPhonemizer("uk").text("двадцяте сторіччя").trim()).toBe("dʋadʲt͡sʲatɛ stɔrʲit͡ʃt͡ʃʲa");
+    });
+
+    test("a bare roman numeral still reads as a CARDINAL", () => {
+        expect(getPhonemizer("uk").text("xii").trim()).toBe("dʋanadʲt͡sʲatʲ"); // дванадцять, not дванадцяте
+        expect(getPhonemizer("uk").text("xx вік").trim()).toBe("dʋadʲt͡sʲatʲ ʋʲik"); // masculine head → cardinal
     });
 });

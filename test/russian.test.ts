@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { ROMAN_POLICY } from "../src/languages/russian/romanOrdinals.ts";
 import { phonemizeWord } from "../src/languages/russian/russian.ts";
 
 // Canonical-IPA goldens for Russian (ru) — standard Moscow Russian, espeak-independent. Stress is lexical
@@ -106,5 +107,40 @@ describe("russian canonical IPA", () => {
         expect(phonemize("Я люблю русский язык.", "ru")).toBe(
             "ja lʲʊblʲˈu rˈusːkʲɪj jɪzˈɨk .",
         );
+    });
+});
+
+// Roman-numeral ORDINAL policy (src/languages/russian/romanOrdinals.ts). Russian reads a century as an ORDINAL
+// — XIX век → девятнадцатый век — in the MASCULINE NOMINATIVE, agreeing with the masculine век. The table is
+// nominative only, so oblique century phrases ("в XIX веке") get the right lexeme with the wrong ending; that
+// is documented in the policy file and is still a strict improvement on the cardinal.
+describe("Russian roman-numeral ordinals", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal?.(n);
+
+    test("ordinal words: irregular below 20, own stems for the tens, cardinal tens in compounds", () => {
+        expect(ord(1)).toBe("первый");
+        expect(ord(4)).toBe("четвёртый");
+        expect(ord(19)).toBe("девятнадцатый");
+        expect(ord(21)).toBe("двадцать первый"); // only the LAST element inflects (unlike Polish)
+        expect(ord(40)).toBe("сороковой"); // own stem, not derivable from сорок
+        expect(ord(50)).toBe("пятидесятый");
+        expect(ord(63)).toBe("шестьдесят третий"); // past 50 — the anniversary / congress range
+        expect(ord(100)).toBe("сотый");
+        expect(ord(101)).toBeUndefined(); // out of range → the caller falls back to the cardinal
+    });
+
+    test("context matches the inflected century forms, not just the nominative", () => {
+        for (const w of ["век", "века", "веке", "веком", "веков", "веках", "столетие", "столетии", "съезд", "годовщина"])
+            expect(ROMAN_POLICY.ordinalAfter?.test(w)).toBe(true);
+        expect(ROMAN_POLICY.ordinalAfter?.test("веко")).toBe(false); // eyelid, not a century
+    });
+
+    test("the ordinal reading phonemizes in context", () => {
+        expect(phonemize("девятнадцатый век", "ru").trim()).toBe("dʲɪvʲɪtnˈat͡sətɨj vʲek");
+        expect(phonemize("пятидесятый съезд", "ru").trim()).toBe("pʲɪtʲɪdʲɪsʲˈatɨj sjest");
+    });
+
+    test("a bare roman numeral still reads as a CARDINAL", () => {
+        expect(phonemize("xix", "ru").trim()).toBe("dʲɪvʲɪtnˈat͡sətʲ"); // девятнадцать, not девятнадцатый
     });
 });

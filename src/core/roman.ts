@@ -85,6 +85,18 @@ export interface RomanPolicy {
      * emitted verbatim for the engine to phonemize.
      */
     ordinal?: (n: number) => string | undefined;
+    /*
+     * KNOWN CONTRACT LIMIT, worth stating where the next person will look: `ordinal` receives only the
+     * number, not the matched context word — so it cannot inflect for the head noun. Two consequences,
+     * both accepted deliberately rather than overlooked:
+     *   CASE   — oblique century phrases are common ("в XIX веке", "w XIX wieku", "у XIX столітті") and
+     *            want девятнадцатом / dziewiętnastym / дев'ятнадцятому; they get the nominative. The
+     *            right lexeme with the wrong ending still beats a cardinal, which is the wrong word.
+     *   GENDER — a feminine or neuter head takes the masculine form (Russian `L годовщина` →
+     *            пятидесятый, not пятидесятая).
+     * Fixing either means passing the matched context word through to `ordinal` and giving each language
+     * per-case/per-gender tables. Additive to this interface when someone wants it.
+     */
     /**
      * Fires the ORDINAL reading when it matches the text immediately BEFORE the numeral — the century
      * noun ("siglo", "secolul", "wiek", "век") or a regnal title. Without a match the numeral stays a
@@ -114,7 +126,12 @@ const PREV_WORD = /(\p{L}+)[^\p{L}]*$/u;
 const NEXT_WORD = /^[^\p{L}]*(\p{L}+)/u;
 
 export function normalizeRomans(text: string, policy: RomanPolicy = {}): string {
-    if (!/[ivxlcdmIVXLCDM]{2}/u.test(text)) return text; // fast path: nothing plausible
+    // Fast path: ONE Roman letter is the floor, not two. Requiring two CONSECUTIVE letters looked like a
+    // cheaper filter but was wrong for a single-letter numeral in non-Latin context — "L годовщина" (the
+    // 50th anniversary) returned early unconverted, while "L rocznica" happened to pass only because
+    // "rocznica" contains "ci". This still short-circuits every text with no Latin at all, which is the
+    // bulk of the engines this pass exists for.
+    if (!/[ivxlcdmIVXLCDM]/u.test(text)) return text;
     const hasLower = /\p{Ll}/u.test(text);
     return text.replace(TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();

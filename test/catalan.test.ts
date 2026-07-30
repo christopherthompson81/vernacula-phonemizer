@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/catalan/catalan.ts";
+import { ROMAN_POLICY } from "../src/languages/catalan/romanOrdinals.ts";
 
 // Canonical-IPA goldens for General Eastern/Central Catalan (Barcelona standard), espeak-independent. Rule-based
 // g2p → 2R stress → UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u) → regressive voicing assimilation → spirantization
@@ -138,5 +139,43 @@ describe("Catalan proclitic reduction", () => {
 
     test("citation form (phonemizeWord) is unchanged — stress + full vowel", () => {
         expect(phonemizeWord("el")).toBe("ˈɛɫ");
+    });
+});
+
+// ── Roman-numeral policy (src/languages/catalan/romanOrdinals.ts) ──
+// A CENTURY IS A CARDINAL in Catalan (Optimot, «Ús i lectura de les xifres romanes»: after its noun a Roman numeral reads as a cardinal, el segle III = tres) — the shared Roman→digits pass is already right and the policy
+// must not change that. What the policy adds is the PRENOMINAL ordinal of event names, which is ordinal at ANY
+// value (XL/L aniversari·o → the -ésimo / -è series), where the cardinal would be the wrong register.
+describe("Catalan Roman-numeral policy — centuries cardinal, prenominal events ordinal", () => {
+    const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);
+
+    test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
+        expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
+        expect(ROMAN_POLICY.ordinalAfter?.test("segle")).toBe(false);
+        expect(phonemize("segle xix", "ca")).toBe('sˈeɡːɫə dinˈɔw');
+    });
+
+    test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
+        expect(phonemize("xix", "ca")).toBe('dinˈɔw');
+    });
+
+    test("prenominal event context is ordinal, and unbounded — XL / L / above L", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("aniversari")).toBe(true);
+        expect(ord(40)).toBe('quarantè');
+        expect(ord(50)).toBe('cinquantè');
+        expect(ord(60)).toBe('seixantè');
+        expect(phonemize('cinquantè aniversari', "ca")).toBe('siŋkwəntˈɛ əniβəɾsˈaɾi');
+    });
+
+    test("feminine heads are deliberately NOT triggered (the series is masculine)", () => {
+        expect(ROMAN_POLICY.ordinalAfter?.test("edició")).toBe(false);
+    });
+
+    test("the -è series is built from the cardinal, incl. the orthographic irregulars", () => {
+        expect(ord(10)).toBe("desè");
+        expect(ord(19)).toBe("dinovè"); // nou → novè
+        expect(ord(25)).toBe("vint i cinquè"); // cinc → cinquè; hyphens as spaces, per ./numbers.ts
+        expect(ord(100)).toBe("centè");
+        expect(phonemize("vint i cinquè festival", "ca")).toBe("bˈin i siŋkˈɛ fəstiβˈaɫ");
     });
 });
