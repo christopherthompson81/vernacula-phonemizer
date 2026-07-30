@@ -47,7 +47,9 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Mkhedruli letters) / number / punctuation token. ჻ = the Georgian paragraph separator (sentence pause).
-const TOKEN = /([\p{L}\p{M}]+)|(\d+)|([.!?…,;:჻])/gu;
+// Georgian SCRIPT only (was \p{L}, which claimed embedded Latin and then phonemized it to nothing —
+// a silent drop). Narrowing it lets the shared unclaimed-run pass read Latin as foreign instead.
+const TOKEN = /([\p{Script=Georgian}\p{M}]+)|(\d+)|([.!?…,;:჻])/gu;
 
 class GeorgianPhonemizer implements Phonemizer {
     text(input: string): string {
