@@ -235,8 +235,10 @@ checkout. Check for `docs/normalization_playbook.md` and `src/languages/`; if th
 the wrong tree. Create your own:
 
 ```sh
-git -C /path/to/vernacula-phonemizer worktree add <dir> -b norm-<lang>-562 main
-ln -s /path/to/vernacula-phonemizer/node_modules <dir>/node_modules   # gitignored, so not in the worktree
+# NOT under /tmp — a batch lost a worktree and its branch to /tmp cleanup on a date rollover, and the
+# commit survived only because the object was in the shared .git. Use a persistent location.
+git -C /path/to/vernacula-phonemizer worktree add ~/Programming/tmp/<lang>-work -b norm-<lang>-562 main
+ln -s /path/to/vernacula-phonemizer/node_modules ~/Programming/tmp/<lang>-work/node_modules  # gitignored
 ```
 
 **3. One language, one commit, and touch only that language.** The only shared files are `src/core/*` and
