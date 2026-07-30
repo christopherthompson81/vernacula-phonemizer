@@ -31,9 +31,87 @@ describe("Nepali canonical IPA", () => {
         expect(out.startsWith("mˈʌ")).toBe(true); // the Nepali म → mʌ
     });
 
-    test("numbers (Nepali words; 21-99 compounds deferred)", () => {
+    test("numbers (Nepali words)", () => {
         expect(getPhonemizer("ne").text("6").trim()).toBe("t͡sʰˈʌ"); // छ (dental affricate)
         expect(getPhonemizer("ne").text("2").trim()).toBe("d̪ˈui"); // दुई
-        expect(getPhonemizer("ne").text("100").trim()).toBe("ˈek sˈʌj"); // एक सय
+        expect(getPhonemizer("ne").text("100").trim()).toBe("ˈek sˈʌj"); // एक सय — NOT bareMagnitude
+    });
+});
+
+// ── #562 text normalization ───────────────────────────────────────────────────────────────────────
+// Nepali reuses Hindi's ENGINE but supplies its own normalizer and symbol words through the engine's
+// `overrides` parameter (#583). These assert through `text()`, which is the layer that owns the rules.
+const t = (s: string): string => getPhonemizer("ne").text(s).trim();
+
+describe("Nepali normalization (#562)", () => {
+    test("21-99 are FUSED single words, from nepali.jsonc `compound`", () => {
+        // The core fallback composed tens+unit in the Hindi-belt order, so 21 read "one twenty".
+        expect(t("21")).toBe("ˈekːais"); // एक्काइस, not ˈek bˈis
+        expect(t("35")).toBe("pʌˈĩn̪t̪is"); // पैंतीस, not pˈãt͡s t̪ˈis
+        expect(t("99")).toBe("unˈansʌj"); // उनान्सय
+        expect(t("1995")).toBe("ˈek ɦˈʌd͡zaɾ nˈʌu sˈʌj pˈʌnt͡sanʌbːe"); // 175 corpus years depend on this
+        expect(t("2000")).toBe("d̪ˈui ɦˈʌd͡zaɾ");
+    });
+
+    test("ZWJ inside a word no longer splits it (104 corpus instances)", () => {
+        // U+200D is category Cf, so the tokenizer's Devanagari class excluded it: गर्‍यो was two words.
+        expect(t("गर्\u200dयो")).toBe("ɡˈʌɾjo"); // was ɡˈʌɾ jˈo
+    });
+
+    test("ASCII colon written for visarga, but not a genuine list colon", () => {
+        expect(t("प्राय: यो")).toBe("pɾˈajʌh jˈo"); // was pɾˈaj , — a spurious phrase break
+        expect(t("राय: अर्को")).toBe("ɾˈaj , ˈʌɾko"); // a real list colon KEEPS its pause
+    });
+
+    test("ordinals join the cardinal as a MATRA, not the independent vowel", () => {
+        expect(t("15 औं")).toBe("pˈʌnd̪ʱɾʌũ"); // पन्ध्रौं — was pˈʌnd̪ʱɾʌ ˈʌũ, a stray syllable
+        expect(t("9 औँ")).toBe("nˈʌwʌũ"); // नवौं — suppletive stem
+        expect(t("1,000 औँ")).toBe("ˈek ɦˈʌd͡zaɾʌũ"); // a comma-grouped numeral still matches
+    });
+
+    test("clock is Nepali's बजेर/मिनेट, not Hindi's बजकर/मिनट, and never duplicates बजे", () => {
+        expect(t("बिहान 9:30 बजे")).toBe("bˈiɦan nˈʌu bˈʌd͡zeɾ t̪ˈis mˈineʈ");
+        expect(t("11:00 बजेपछि")).toBe("ˈeɡʱaɾ bʌd͡zˈept͡sʰi"); // no बजे inserted before a बज- word
+        expect(t("10:00-11:00 राती")).toBe("d̪ˈʌs bˈʌd͡ze d̪ˈekʰi ˈeɡʱaɾ bˈʌd͡ze ɾˈat̪i");
+    });
+
+    test("a SPORTS time mm:ss.hh is not a clock", () => {
+        // Hindi's rule claimed it and produced a bogus clock plus a spurious phrase break.
+        expect(t("4:41.30 मिनेट")).toBe("t͡sˈaɾ ˈekt͡salis d̪ʌsˈʌmlʌw t̪ˈin sˈunjʌ mˈineʈ");
+    });
+
+    test("currency: डलर/पाउन्ड, a letter-code prefix, and no duplicated noun", () => {
+        expect(t("$500")).toBe("pˈãt͡s sˈʌj ɖˈʌlʌɾ"); // was डॉलर (ɖˈɔːlʌɾ)
+        expect(t("US$30")).toBe("jˈuː ˈɛs t̪ˈis ɖˈʌlʌɾ"); // the shared tier DROPPED this sign entirely
+        expect(t("$1000 डलर")).toBe("ˈek ɦˈʌd͡zaɾ ɖˈʌlʌɾ"); // the text already wrote the noun
+        expect(t("£27 मिलियन")).toBe("sˈʌt̪ːais mˈilijʌn paˈunɖʌ"); // magnitude hops the sign
+    });
+
+    test("ranges take देखि only when ASCENDING — a sports score is not a range", () => {
+        expect(t("35-40 माइल")).toBe("pʌˈĩn̪t̪is d̪ˈekʰi t͡sˈalis mˈail");
+        expect(t("5-3 ले")).toBe("pˈãt͡s t̪ˈin lˈe"); // a hockey scoreline keeps its silent hyphen
+        expect(t("1995-1996 देखि").endsWith("d̪ˈekʰi")).toBe(true);
+        expect(t("1995-1996 देखि")).not.toContain("d̪ˈekʰi d̪ˈekʰi"); // the postposition is already there
+    });
+
+    test("units, rates and abbreviations", () => {
+        expect(t("165 किमी/ घण्टा")).toBe("ˈek sˈʌj pʌĩsˈʌʈʰʈʰi kˈilomiʈʌɾ pɾˈʌt̪i ɡʱˈʌɳʈa");
+        expect(t("6 सेमी")).toBe("t͡sʰˈʌ sˈenʈimiʈʌɾ"); // Nepali सेन्टिमिटर, not Hindi's सेंटीमीटर
+        expect(t("1600 कि.मी. को")).toBe("ˈek ɦˈʌd͡zaɾ t͡sʰˈʌ sˈʌj kˈilomiʈʌɾ kˈo"); // was two pauses
+        expect(t("डा. मोल")).toBe("ɖˈakʈʌɾ mˈol"); // the dot was a phrase break
+    });
+
+    test("percent is प्रतिशत — Hindi's inherited word is CORRECT for Nepali", () => {
+        expect(t("88%")).toBe("ˈʌʈʰasi pɾˈʌt̪isʌt̪");
+    });
+
+    test("degrees keep their scale letter, even welded to a Devanagari postposition", () => {
+        expect(t("+30°Cभन्दा")).toBe("t̪ˈis ɖˈiɡɾi sˈelsijʌs bʱˈʌnd̪a"); // C was read as the letter name
+        expect(t("35°W")).toBe("pʌˈĩn̪t̪is ɖˈiɡɾi pˈʌst͡sim");
+    });
+
+    test("the approximation tilde is spoken; the plus sign deliberately is not", () => {
+        expect(t("~500")).toBe("lˈʌɡbʱʌɡ pˈãt͡s sˈʌj");
+        expect(t("युटिसी+1")).not.toContain("d̪ʱˈʌn"); // a UTC offset is not "plus one"
     });
 });

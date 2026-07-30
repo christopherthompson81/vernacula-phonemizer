@@ -163,12 +163,51 @@
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The
     // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: Hindi 21-99 are IRREGULAR (not compositional — इक्कीस ≠ इक+बीस); the round tens + 0-20 +
-    // magnitudes are here; the ~80 irregular 21-99 spellings are a bounded remaining authoring task.
+    // NOTE: like Hindi's, Nepali's 21-99 are IRREGULAR — FUSED single words (एक्काइस ≠ एक + बीस). Without
+    // the `compound` map below, core/numbers.ts degraded to its two-word fallback in the Hindi-belt
+    // unit-then-tens order, so 21 read "ˈek bˈis" ("one twenty"), 35 "pˈãt͡s t̪ˈis" and 1995
+    // "…pˈãt͡s nˈʌbːe". Measured over the ne_np FLEURS corpus: 226 bare two-digit numerals plus 175
+    // four-digit years, i.e. every one of them mis-read. #562.
+    //
+    // PROVENANCE of the 79 spellings (no form here is invented). Candidates were taken from the two
+    // shipped referees, tools/referee-eval/referees/ne.wikipron-deva.tsv and ne.kaikki-ne.tsv, and matched
+    // against espeak-ng's dictsource/ne_list `_21`.._99` pronunciations by a coarse consonant+vowel-class
+    // skeleton; 43 of 79 matched a referee headword EXACTLY and the rest were arbitrated among
+    // referee-attested variants by closest score. Ties were broken in this order: (1) corpus attestation
+    // — छपन्न is written in the ne_np corpus, so it beats छप्पन्न; (2) espeak's consonant inventory —
+    // 47 सतचालीस (espeak has the च) over Hindi-shaped सैंतालीस, 51 एकाउन्न (single k) over एक्काउन्न,
+    // 71/75 -हत्तर (espeak has the h) over -त्तर, 38 अठतीस (two wikipron rows) over अड्तीस.
+    // Where the two spellings are PHONEMICALLY IDENTICAL under this manifest the choice is free and was
+    // taken from wikipron: ि/ी and ं/ँ never contrast here (Nepali has no phonemic vowel length).
+    // The two least-confident rows, where referee and espeak disagreed and the score was the only
+    // arbiter, are 73 तिरत्तर (espeak suggests neither तिरत्तर nor त्रिहत्तर cleanly) and 76 छहत्तर
+    // (espeak's छयहत्तर is not a referee headword; छयत्तर scored lower). Both are referee-attested Nepali.
+    //
+    // `bareMagnitude` is deliberately NOT set: "एक सय" is standard Nepali, and espeak's ne_list confirms
+    // it — it declares only `_0C  s'aj@` (सय) with no `_1C`, so its own composer emits एक + सय too.
     "numbers": {
         "units": ["शून्य", "एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ"],
         "teens": ["दश", "एघार", "बाह्र", "तेह्र", "चौध", "पन्ध्र", "सोह्र", "सत्र", "अठार", "उन्नाइस"],
         "tens": { "20": "बीस", "30": "तीस", "40": "चालीस", "50": "पचास", "60": "साठी", "70": "सत्तरी", "80": "असी", "90": "नब्बे" },
+        "compound": {
+            "21": "एक्काइस", "22": "बाईस", "23": "तेईस", "24": "चौबीस", "25": "पच्चीस",
+            "26": "छब्बीस", "27": "सत्ताईस", "28": "अट्ठाईस", "29": "उनन्तीस",
+            "31": "एकत्तीस", "32": "बत्तीस", "33": "तेत्तीस", "34": "चौंतीस", "35": "पैंतीस",
+            "36": "छत्तीस", "37": "सैंतीस", "38": "अठतीस", "39": "उनन्चालीस",
+            "41": "एकचालीस", "42": "बयालीस", "43": "त्रिचालीस", "44": "चवालीस", "45": "पैंतालीस",
+            "46": "छयालीस", "47": "सतचालीस", "48": "अठचालीस", "49": "उनन्चास",
+            "51": "एकाउन्न", "52": "बाउन्न", "53": "त्रिपन्न", "54": "चौवन्न", "55": "पचपन्न",
+            "56": "छपन्न", "57": "सन्ताउन्न", "58": "अन्ठाउन्न", "59": "उनन्साठी",
+            "61": "एकसठ्ठी", "62": "बैसठ्ठी", "63": "त्रिसट्ठी", "64": "चौसठ्ठी", "65": "पैंसठ्ठी",
+            "66": "छैंसठ्ठी", "67": "सतसट्ठी", "68": "अठसट्ठी", "69": "उनन्सत्तरी",
+            "71": "एकहत्तर", "72": "बहत्तर", "73": "तिरत्तर", "74": "चौहत्तर", "75": "पचहत्तर",
+            "76": "छहत्तर", "77": "सतहत्तर", "78": "अठहत्तर", "79": "उनासी",
+            "81": "एकासी", "82": "बयासी", "83": "त्रियासी", "84": "चौरासी", "85": "पचासी",
+            "86": "छयासी", "87": "सतासी", "88": "अठासी", "89": "उनानब्बे",
+            "91": "एकानब्बे", "92": "बयानब्बे", "93": "त्रियानब्बे", "94": "चौरानब्बे",
+            "95": "पन्चानब्बे", "96": "छयानब्बे", "97": "सन्तानब्बे", "98": "अन्ठानब्बे",
+            "99": "उनान्सय",
+        },
         "magnitudes": { "hundred": "सय", "thousand": "हजार", "lakh": "लाख", "crore": "करोड" },
         "grouping": "indian-lakh-crore",
         "decimalWord": "दशमलव",

@@ -9,6 +9,37 @@
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeNepaliNormalizer } from "./normalize.ts";
+
+/**
+ * #562 normalization. Nepali shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
+ * supplies its OWN normalizer and its OWN symbol words through `makeNativeHindi`'s `overrides` rather
+ * than inheriting Hindi's (issue #583; `src/languages/marathi/marathi.ts` is the other worked example).
+ *
+ * What is overridden and what is NOT is recorded in normalize.ts's header. For this tier specifically:
+ *   percent  प्रतिशत — IDENTICAL to Hindi's, and that is a measured result: it is the ne_np corpus's own
+ *                     word (×9) and a wikipron headword. Hindi's default is right here.
+ *   units    IDENTICAL to Hindi's. Nepali has no phonemic vowel length, so the corpus's किलोमिटर and
+ *            Hindi's किलोमीटर are the same phoneme string (kˈilomiʈʌɾ); overriding them would change
+ *            nothing. Only सेंटीमीटर would differ, and its Devanagari abbreviation is claimed in
+ *            normalize.ts before this tier ever sees it.
+ *   currency ABSENT here on purpose — the signs are claimed in normalize.ts step 9, which the shared
+ *            tier cannot do: its `(?<![\p{L}\p{M}])` guard makes a letter-code prefix (US$, AUD$)
+ *            unmatchable, and it has no way to suppress a currency noun the text already wrote out.
+ *   unitPer  प्रति with `rateDenominators` — declared so the LATIN rate forms compose; Hindi declares no
+ *            `unitPer` at all, so "km/h" dropped its denominator and read the h as a letter name.
+ */
+const NE_SYMBOLS = makeSymbolNormalizer({
+    percent: ["प्रतिशत"],
+    // Hindi's four keys exactly, with only `cm` respelled (see above). A one-letter `m` is deliberately
+    // NOT declared — the playbook's `rateDenominators` note records a one-letter unit key matching an
+    // alphanumeric designation, and this corpus's digit-adjacent single Latin letters are all something
+    // else (compass points, "5 A", "6 b").
+    units: { km: ["किलोमीटर"], cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
+    unitPer: "प्रति",
+    rateDenominators: { h: "घण्टा", s: "सेकेण्ड" },
+});
 
 // The Devanagari inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces as the
 // Nepali [ʌ]. The word/wordRules/number paths are pure Devanagari, so mapping ə→ʌ on them is safe.
@@ -23,10 +54,14 @@ function engine(foreign?: ForeignPhonemizer): ReturnType<typeof makeNativeHindi>
     const shieldedForeign: ForeignPhonemizer | undefined = foreign
         ? (latin) => foreign(latin).replace(/ə/gu, SENTINEL)
         : undefined;
+    const def = loadManifest<HindiDef>(import.meta.url, "nepali.jsonc");
     const base = makeNativeHindi(
-        loadManifest<HindiDef>(import.meta.url, "nepali.jsonc"),
+        def,
         loadSharedPhonology(),
         shieldedForeign,
+        undefined,
+        undefined,
+        { normalize: makeNepaliNormalizer(def.numbers), symbols: NE_SYMBOLS },
     );
     return {
         word: (w) => nepaliVowel(base.word(w)),
