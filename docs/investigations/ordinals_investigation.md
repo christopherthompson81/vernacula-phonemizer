@@ -820,3 +820,59 @@ percent sign of "৮%".
 - bn corpus: 2,995 of 3,006 cased-column utterances changed; **defects went from 2,995 slot-gaps and 2,949
   stray marks to zero**. Two existing tests had PINNED the bugs (the padded danda, and 1999 as
   "নয় একশো নয় নব্বই") and were corrected.
+
+## Run 13 — 2026-07-30 — Arabic (its own symbol characters, and a near-miss)
+
+Seventh language. Arabic arrived in better shape than most: its punctuation is already right (، ×1664, ؛,
+؟ are all clause marks) and Arabic-Indic digits already fold to ASCII in the number path. So the work was
+narrow, and two things dominate this entry.
+
+### The Arabic-specific SYMBOL characters
+
+Unicode gives Arabic its own percent sign ٪ U+066A, decimal separator ٫ U+066B and thousands separator
+٬ U+066C. Every shared rule in the fleet is written against the ASCII ones, so ٪ was **dropped outright** —
+this was the known-deferred defect on the list, and the corpus's one instance is "93٪ من السكان", where the
+percentage simply vanished. Folding these to their ASCII equivalents in step 1 means the shared symbol tier
+and the number tokenizer both work unchanged, instead of every downstream rule needing an Arabic branch.
+
+### A near-miss worth recording: `م.` ×97 is not an abbreviation
+
+A naive abbreviation scan reports `م.` 97 times and `د.` 3 times — by far the largest apparent abbreviation
+class, and an obvious thing to build a table for. Reading the contexts shows they are **not abbreviations at
+all**: they are ordinary words ENDING in م or د followed by a sentence period — بداخلهم. "inside them.",
+واحد. "one.", جرينلاند. "Greenland.". A table keyed on those letters would have mangled 100 ordinary
+sentence endings. Arabic has essentially no dotted abbreviations here, so the file has no abbreviation
+table. This is the third time a loose regex has over-counted a class (Bengali ম inside মিটার, Hindi's
+suffix scan); reading contexts before writing the rule is now non-negotiable.
+
+### What was broken
+
+| class | before | after |
+|---|---|---|
+| percent | `93٪` → the sign DROPPED | `fˈiː almˈiʔa` |
+| grouping | `1,000` → `waːħid , sˤifr` — separator became a PAUSE | `ʔalf` |
+| decimal | `1.5` → `waːħid . xamsa` | `waːħid fˈaːsˤila xamsa` |
+| clock | `11:00` → `ʔaħada ʕaʃar , sˤifr` — pause + a spurious صفر | `asˈaːʕ ʔaħada ʕaʃar` |
+| units | `5 كم` → `[km]`; `20 °C` → the English letter C | expanded |
+| currency | `$50` → the sign dropped | `xamsuːn duːlˈaːr` |
+
+### Everything this layer emits is DIACRITIZED
+
+The engine reads undiacritized Arabic as a bare consonant skeleton, so an unvocalized emission comes out as
+[drd͡ʒ] / [kjlwmtr] / [dqjq] instead of [dˈarad͡ʒa] / [kiːluːmˈitr] / [daqˈiːqa]. That is a pre-existing
+limit of the OOV path for ordinary source text — out of scope here — but it is entirely avoidable for the
+words we choose to insert, so every unit, currency, sign and clock word carries harakat.
+
+### A defect this run INTRODUCED, caught by the corpus diff and not by any probe
+
+The clock rule supplied الساعة unconditionally. In this corpus a clock time is essentially always already
+preceded by it ("في تمام الساعة 8:46", "حوالي الساعة 11:00"), so the output became "الساعة الساعة". Now
+supplied only when the text lacks it. Every unit probe I had written passed; only the before/after corpus
+diff showed it — which is the standing argument for making that diff a required step.
+
+### Verification
+
+- 198 files / 2128 tests pass (5 new); `tsc --noEmit` clean.
+- Referee byte-identical for both varieties: ar 3082/4758 (64.8%) folded / 91.3% symbol; arz 48.8% / 83.1%.
+- ar_eg corpus, both columns: 65 of 2,104 changed, 0 digit leaks, 0 sentinels, 0 slot-gaps, 0 stray symbols.
+  Sampled review found them all improvements.
