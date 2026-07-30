@@ -20,6 +20,7 @@ import {
 } from "../../core/unicode.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeHindiNormalizer } from "./normalize.ts";
 
 export interface HindiDef extends AbugidaDef {
     postRules: { from: string; to: string }[];
@@ -148,8 +149,14 @@ export function makeNativeHindi(
         return renderNumber(n, def.numbers, word);
     }
 
+    // #562 normalization: Hindi-specific rewrites (ordinal suffixes, Devanagari unit abbreviations,
+    // abbreviations, clock, signs, fractions) BEFORE the shared symbol tier, whose unit keys are Latin.
+    // Roman numerals need no ordering care: `hi` is not in the registry's ROMAN_NATIVE set, so the shared
+    // pass has already run at the registry seam.
+    const normalize = makeHindiNormalizer(def.numbers);
+
     function text(input: string): string {
-        return assembleClauses(SYMBOLS(input), tokenRe, (m, sink) => {
+        return assembleClauses(SYMBOLS(normalize(input)), tokenRe, (m, sink) => {
             if (m[1]) sink.emit(word(m[1]));
             else if (m[2]) sink.emit(foreign ? foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
