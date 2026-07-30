@@ -36,8 +36,13 @@ export interface NumbersDef {
      */
     compoundOrder?: "unit-tens" | "tens-unit";
     /**
-     * Read a bare 100/1000 as the magnitude word ALONE — Kannada ನೂರು, not *ondu nūru. Opt-in, because
-     * the Hindi-belt languages genuinely do say *ek sau* and *ek hazār*.
+     * Read a bare 100/1000/lakh/crore as the magnitude word ALONE — Kannada ನೂರು, not *ondu nūru. Opt-in,
+     * because the Hindi-belt languages genuinely do say *ek sau* and *ek hazār*.
+     *
+     * It applied to hundred and thousand ONLY when first added, so a language declaring it still read
+     * "one lakh" and "one crore" while correctly saying a bare hundred — Malayalam did, and Kannada would
+     * have but for writing its own composer. Reported independently by the Punjabi and Kannada runs, both
+     * of which read the code rather than probing.
      */
     bareMagnitude?: boolean;
     /** Optional decimal-point word (Hindi दशमलव); when present the text path reads N.M as int दशमलव digit-by-digit. */
@@ -89,7 +94,7 @@ export const indicNumberWords: NumberComposer = (n, d) => {
         const l = Math.floor(n / 100000),
             r = n % 100000;
         return [
-            ...indicNumberWords(l, d),
+            ...(l === 1 && d.bareMagnitude ? [] : indicNumberWords(l, d)),
             d.magnitudes.lakh!,
             ...(r ? indicNumberWords(r, d) : []),
         ];
@@ -97,7 +102,7 @@ export const indicNumberWords: NumberComposer = (n, d) => {
     const c = Math.floor(n / 10000000),
         r = n % 10000000;
     return [
-        ...indicNumberWords(c, d),
+        ...(c === 1 && d.bareMagnitude ? [] : indicNumberWords(c, d)),
         d.magnitudes.crore!,
         ...(r ? indicNumberWords(r, d) : []),
     ];

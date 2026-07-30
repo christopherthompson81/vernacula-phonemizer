@@ -260,6 +260,11 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("21", "ml")).toBe("ˈiɾubat̪ɨ ˈonːɨ");
         expect(phonemize("100", "kn")).toBe("nˈuːɾu");   // was "one hundred"
         expect(phonemize("1000", "ml")).toBe("ˈaːjiɾam");
+        // …and lakh/crore too. The flag applied to hundred and thousand ONLY when first added, so a
+        // language declaring it still read "one lakh" while correctly saying a bare hundred. Reported
+        // independently by the Punjabi and Kannada runs, both from reading the code.
+        expect(phonemize("100000", "ml")).toBe("lˈakʂam");
+        expect(phonemize("10000000", "ml")).toBe("kˈoːɖi");
         // Both flags are OPT-IN: the Hindi-belt languages genuinely say "ek sau" and must not move.
         expect(phonemize("100", "hi")).toContain("ˈeːk");
         expect(phonemize("21", "hi")).toBe("ɪkːˈiːs"); // its own compound map still wins

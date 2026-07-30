@@ -112,6 +112,36 @@ this playbook compares the engine against the transcript, so a perfectly correct
 with audio that never contained those phonemes. The measurement, and the divergence-audit follow-up, live
 with the training scripts — `docs/omnivoice_ipa_corpus_investigation.md`, Run 31, in the `vernacula` repo.
 
+### 5c. Sourcing language data from espeak, without making noise
+
+Several runs have needed numeral spellings or unit words that no in-repo referee carries. espeak is the
+usual fallback, with two rules:
+
+**NEVER invoke the binary.** `espeak-ng` synthesises to the speakers by default; `-q` silences it, but the
+files are better anyway. Read them:
+
+```
+/home/chris/Programming/espeak-ng-portable/data/<lang>/fragments.jsonl   # numerals, keyed "0".."99"
+/home/chris/Programming/espeak-ng-portable/data/<lang>/dictionary.jsonl  # word entries
+/home/chris/Programming/espeak-ng/dictsource/<lang>_list                 # the raw upstream form
+```
+
+The `espeak-ng-portable` JSONL is the better source: decimal keys instead of `_NN` grepping, and a
+pre-tokenized `phonemeTokens` array, which is exactly what a skeleton match wants.
+
+**espeak is PHONETIC and cannot hand you orthography**, so a spelling derived from it must be validated.
+The method, from the Kannada and Nepali runs: derive the spelling, round-trip it through this repo's own
+G2P, and check the result against espeak's mnemonic. Where a referee exists, match candidates against the
+phoneme skeleton rather than trusting either alone.
+
+**Measure the method before trusting it.** The Punjabi run built exactly this pipeline for the 39 numerals
+its referee lacked, then validated it against the 36 the referee *does* carry: 19/36 exact, and **8 of 36
+(22%) were espeak being wrong about the word**, not a spelling variant. It declined to ship the 39 on that
+basis. Two by-products worth having: espeak's Punjabi 61–68 coda is refuted by its own 59/60 entries, and
+a hand-rolled phoneme segmenter had a silent bug that `phonemeTokens` removed.
+
+A validated refusal is a result. Record the rate and the failure taxonomy so nobody repeats the attempt.
+
 ### 6. Commit — one language, one commit
 
 The commit message carries the evidence: the counts, what the defect produced before, and why the rule is
