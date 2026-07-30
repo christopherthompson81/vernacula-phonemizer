@@ -40,6 +40,6 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     });
 
     test("text: words + clause punctuation (stress + numbers deferred)", () => {
-        expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu  . ");
+        expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu .");
     });
 });

@@ -35,8 +35,8 @@
 
     // Danda / ASCII → canonical inline pause marks.
     "clausePunctuation": {
-        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; ",
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        "۔": ".", "؟": "?", "،": ",", "؛": ",",
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Persian spellings; canonical IPA DERIVED by the same g2p (with harakat so short vowels are right).

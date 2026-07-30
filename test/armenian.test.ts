@@ -38,10 +38,10 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
         expect(hy.text("2").trim()).toBe("jeɾku"); // երկու
         expect(hy.text("15").trim()).toBe("tɑsnhinɡ"); // տասնհինգ
         expect(hy.text("21").trim()).toBe("kʰəsɑn mek"); // քսան մեկ
-        expect(hy.text("1000").trim()).toBe("hɑzɑɾ"); // հազар — bare (no leading "մեկ"), via westernNumberWords
+        expect(hy.text("1000").trim()).toBe("hɑzɑɾ"); // հազар — bare (no leading"մեկ"), via westernNumberWords
     });
 
     test("text: words + Armenian clause punctuation (։)", () => {
-        expect(createArmenian().text("Բարև ձեզ։")).toBe("bɑɾev d͡zez  . ");
+        expect(createArmenian().text("Բարև ձեզ։")).toBe("bɑɾev d͡zez .");
     });
 });

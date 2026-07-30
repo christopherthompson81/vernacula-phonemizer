@@ -67,7 +67,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — nativised English (Naija counts with English numerals read in Naija phonology). Canonical IPA is

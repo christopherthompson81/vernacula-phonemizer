@@ -50,7 +50,7 @@
     "backVowels": "аоуяёы",
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
     // Cardinal number words (Cyrillic; the compositor in numbers.ts phonemizes each through the g2p so they stay in

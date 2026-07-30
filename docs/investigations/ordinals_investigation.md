@@ -1085,3 +1085,63 @@ Indonesian says the unit after the amount, so the prefix is moved.
 - Referee byte-identical: 17639/18590 (94.9%) folded, 98.9% symbol.
 - id corpus, both columns: 2,575 of 2,579 changed on the cased column; **2,575 slot-gaps → zero**, no digit
   leaks, sentinels or stray marks. Sampled review found them all improvements.
+
+## Run 18 — 2026-07-30 — fleet-wide audit: fixing two defect classes across all 191 languages
+
+Eleven languages of hand work kept turning up the same defects, so this run stopped adding languages and
+looked for them mechanically instead. New tool: `tools/normalization-audit.ts`.
+
+### Method: runtime probes, not static inference
+
+A static scan of the manifests reported 71 with a PADDED `clausePunctuation` value and 30 mapping a mark to
+a native character. But padding is only a DEFECT if the engine passes it through, so the audit probes every
+registered language at runtime with inputs every engine can take — ASCII digits and ASCII punctuation
+(`1, 2. 3? 4!`), plus `50%` vs `50` and `$5` vs `5` — and flags what actually reaches the IPA.
+
+The detector was validated against the eleven already-treated languages, all of which come back **clean**.
+
+### Findings, first run: 143 of 191 languages flagged
+
+| flag | count | meaning |
+|---|---|---|
+| CUR-DROP | 140 | the currency sign vanished |
+| PCT-DROP | 138 | the percent sign vanished |
+| GAP | 73 | a padded pause reached the output as a double space |
+
+Zero DIGIT leaks and zero RAWMARK on the ASCII probe — but probing with NATIVE punctuation showed the raw
+marks were real: `।`, `॥` and `…` landed in the phoneme string in Assamese, Bishnupriya, Kannada, Odia,
+Afrikaans, Catalan, Irish, Gaelic, Swedish, Welsh, Finnish, Georgian and Hebrew.
+
+### Fixed: the two formatting classes, 76 manifests + 1 engine
+
+Applied the convention already established by english/hindi/french/german/spanish — sentence-enders → `.`,
+`?`/`!` kept, and `,` `;` `:` `…` → `,`. **GAP 73 → 0, RAWMARK → 0.**
+
+Lao was the one straggler and needed a code change rather than a manifest one: it hardcodes
+`sink.pause(" . ")` instead of reading `clausePunctuation`, and it also collapsed `?` and `!` into `.`,
+throwing away the sentence type. Both fixed.
+
+17 tests failed on the sweep and every one was PINNING the padded output (`"… tu  . "` with a double space
+and a trailing space). Corrected.
+
+### NOT fixed, and why: the symbol tier (138/140 languages)
+
+Closing PCT-DROP and CUR-DROP means giving each language its word for "percent" and its currency names —
+real per-language data, not a formatting change. Bulk-inventing that across ~138 languages is exactly the
+mass unverified authoring the provenance posture exists to prevent, and a wrong percent word is worse than
+a dropped sign because it is confidently wrong rather than merely missing. The audit reports the list; the
+tier gets added per language, with a source, the way the treated eleven did it.
+
+### Verification
+
+- 198 files / 2149 tests pass; `tsc --noEmit` clean.
+- Referee byte-identical across a ten-language spread of affected engines (fi, pl, uk, ro, sk, nb, th, te,
+  pa, my) — expected, since the referee scores word-level pronunciation, not punctuation.
+- Re-running the audit: GAP 73 → 0, RAWMARK → 0, and the eleven treated languages still clean.
+
+### What this says about the per-language work
+
+Two of the three recurring classes were mechanical all along and could have been swept at any point after
+the first sighting. The one that could not — the symbol tier — is the one that needs a human-sourced word
+per language. That is a useful split to remember before starting language twelve: sweep what is
+formatting, hand-author only what is linguistic.

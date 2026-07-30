@@ -25,7 +25,7 @@
     "glottal": "ʔ",
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": "."
     },
 
     // NUMBERS — Sundanese Latin spellings; canonical IPA DERIVED via the same g2p. Austronesian decimal (units +

@@ -31,7 +31,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — the standard NGOKO system (irregular): teens -welas/-las, 21–29 -likur (25 = selawé, suppletive),

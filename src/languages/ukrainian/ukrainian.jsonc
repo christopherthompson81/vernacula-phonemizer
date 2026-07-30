@@ -26,7 +26,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "—": " , "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
     },
 
     // NUMBERS — Ukrainian Cyrillic spellings; canonical IPA DERIVED via the same g2p. Slavic decimal (units + tens

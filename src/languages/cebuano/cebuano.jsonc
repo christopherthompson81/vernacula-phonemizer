@@ -28,7 +28,7 @@
     "specialWords": { "mga": "manga" },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — native Cebuano spellings; canonical IPA DERIVED by running them through the same g2p. Tens are the

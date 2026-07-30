@@ -28,7 +28,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : ", "…": " . ", "՝": " , ", "՞": " ? ", "։": " . "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "՝": ",", "՞": "?", "։": "."
     },
 
     // NUMBERS — Eastern Armenian cardinal spellings; canonical IPA DERIVED via the same g2p. Slavic-style decimal

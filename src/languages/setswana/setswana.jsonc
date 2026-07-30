@@ -44,7 +44,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
     // Cardinal number words (Mistry Cycle 29 bo-counting series). 8/9 are the two-word "bofera …" forms (bent

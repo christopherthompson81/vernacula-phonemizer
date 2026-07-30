@@ -45,7 +45,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "!": " ! ", "?": " ? ", "…": " … ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
     // CARDINAL NUMBERS — the CITATION / COUNTING series, i.e. the manual's own kũtala "to count" list, NOT a

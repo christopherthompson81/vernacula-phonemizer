@@ -48,6 +48,6 @@ describe("Norwegian Bokmål canonical IPA", () => {
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk  . ");
+        expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk .");
     });
 });

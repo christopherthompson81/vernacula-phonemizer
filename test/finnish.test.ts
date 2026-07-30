@@ -49,6 +49,6 @@ describe("Finnish canonical IPA — greedy g2p (Standard Finnish)", () => {
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createFinnish().text("Talo on iso.")).toBe("tɑlo on iso  . ");
+        expect(createFinnish().text("Talo on iso.")).toBe("tɑlo on iso .");
     });
 });

@@ -42,7 +42,7 @@ describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
         expect(be.text("5").trim()).toBe("pʲat͡sʲ"); // пяць
         expect(be.text("21").trim()).toBe("dvat͡sːat͡sʲ ad͡zʲin"); // дваццаць адзін (geminate цц)
         expect(be.text("100").trim()).toBe("sto");
-        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading "адзін")
+        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading"адзін")
     });
 
     // MAGNITUDE-NOUN AGREEMENT (the shared East-Slavic compositor in ukrainian/numbers.ts). тысяча is FEMININE
@@ -59,6 +59,6 @@ describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createBelarusian().text("Мова жыве.")).toBe("mova ʐɨvʲe  . ");
+        expect(createBelarusian().text("Мова жыве.")).toBe("mova ʐɨvʲe .");
     });
 });

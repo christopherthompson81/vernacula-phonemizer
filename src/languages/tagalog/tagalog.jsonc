@@ -32,7 +32,7 @@
     "specialWords": { "mga": "manga", "ng": "nang" },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — native Tagalog (not Spanish) spellings; canonical IPA DERIVED by running them through the same g2p.

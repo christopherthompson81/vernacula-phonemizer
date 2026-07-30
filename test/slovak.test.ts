@@ -55,6 +55,6 @@ describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
     });
 
     test("text: words + clause punctuation", () => {
-        expect(createSlovak().text("Mesto je pekné.")).toBe("mˈestɔ jˈe pˈekneː  . ");
+        expect(createSlovak().text("Mesto je pekné.")).toBe("mˈestɔ jˈe pˈekneː .");
     });
 });

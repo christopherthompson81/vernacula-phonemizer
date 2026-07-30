@@ -72,6 +72,6 @@
 
     // Urdu/Arabic punctuation → canonical inline pause marks.
     "clausePunctuation": {
-        "۔": " . ", "؟": " ? ", "،": " , ", "؛": " ; "
+        "۔": ".", "؟": "?", "،": ",", "؛": ","
     }
 }

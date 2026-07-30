@@ -87,7 +87,7 @@
     },
 
     "clausePunctuation": {
-        "।": " । ", "॥": " ॥ ", ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        "।": ".", "॥": ".", ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Gurmukhi spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes

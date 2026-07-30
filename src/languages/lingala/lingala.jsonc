@@ -24,7 +24,7 @@
     "vowels": { "a": "a", "e": "e", "ɛ": "ɛ", "i": "i", "o": "o", "ɔ": "ɔ", "u": "u" },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // NUMBERS — Meeuwis §3.6 (cardinals = the connective ya + the ordinal). Ordinals 1–10 + túkú (tens), kámá

@@ -40,7 +40,7 @@
         "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ",
     },
 
-    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": "…", ",": ",", ";": ";", ":": ":" },
+    "clausePunctuation": { ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": "," },
 
     // Cardinal number words (0–10 + tens; the counting system is complex — Phase 2).
     // Irish numerals. Two series are needed because Irish distinguishes the COUNTING form (used standalone and

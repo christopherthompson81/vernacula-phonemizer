@@ -37,7 +37,7 @@
     },
 
     "clausePunctuation": {
-        ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
+        ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },
 
     // Cardinal number words (composition logic in numbers.ts). SOURCE: pl.wikipedia's per-number articles
