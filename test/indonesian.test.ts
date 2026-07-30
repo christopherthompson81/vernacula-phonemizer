@@ -47,3 +47,53 @@ describe("indonesian canonical IPA", () => {
         expect(phonemize("saya makan.", "id")).toContain("mˈakan");
     });
 });
+
+// #562 — the eleventh language. Three defects were outside the normalization layer (padded punctuation, a
+// bare \d+ number token, no decimal word) and are fixed in the manifest and the engine.
+describe("indonesian normalization", () => {
+    test("both number separators, which were clause pauses", () => {
+        // The number token was a bare \d+, so "9.000" tokenized as 9 | . | 000 and the separator became a
+        // PAUSE ("sembilan . nol"). Indonesian groups thousands with a dot and takes a comma decimal.
+        expect(phonemize("9.000 orang", "id")).toBe("səmbˈilan rˈibu ˈoraŋ");
+        expect(phonemize("1.000", "id")).toBe("sərˈibu");
+        expect(phonemize("1,5 meter", "id")).toBe("sˈatu kˈoma lˈima mɛtˈər"); // koma — absent before
+    });
+
+    test("punctuation is a canonical pause, not a padded copy", () => {
+        expect(phonemize("Ini kalimat. Kedua, benar?", "id")).toBe("ˈini kalˈimat . kədˈua , bənˈar ?");
+    });
+
+    test("the clock shares its separator with thousands, and the digit count decides", () => {
+        // Indonesian writes BOTH with a period: 9.000 (×67) and 11.00 (×29). Grouping always takes three
+        // digits after the dot, a clock exactly two, so the two never collide.
+        expect(phonemize("pukul 11.00", "id")).toBe("pˈukul səbəlˈas"); // :00 drops the minutes
+        expect(phonemize("08.46", "id")).toBe("dəlˈapan lewˈat əmpˈat pˈuluh ənˈam"); // lewat = "past"
+        // A RACE time is not a clock: "1:09.02 menit" is minutes:seconds.hundredths, and the corpus has
+        // three. Both guards matter — the trailing one rejects the whole, the leading one stops the scan
+        // restarting inside it and claiming "09.02" as a clock in its own right.
+        expect(phonemize("1:09.02 menit", "id")).not.toContain("lewˈat");
+    });
+
+    test("abbreviations, rupiah and units", () => {
+        expect(phonemize("kosmonot No. 11", "id")).toBe("kosmˈonot nˈomor səbəlˈas"); // No. before a DIGIT
+        expect(phonemize("Dr. Budi", "id")).toBe("dˈoʔtər bˈudi"); // was the letters plus a pause
+        expect(phonemize("dll.", "id")).toBe("dˈan lˈain lˈain .");
+        // Rp is a two-LETTER prefix, which the shared tier (keyed on single-character signs) cannot
+        // express; it was read as [rp]. Indonesian says the unit after the amount, so it is moved.
+        expect(phonemize("Rp 50.000", "id")).toBe("lˈima pˈuluh rˈibu rupˈiah");
+        expect(phonemize("3%", "id")).toBe("tˈiɡa pərsˈɛn"); // Indonesian had NO symbol tier at all
+        expect(phonemize("30 km", "id")).toBe("tˈiɡa pˈuluh kilomətˈər"); // was [ʔm]
+        expect(phonemize("120 km/jam", "id")).toBe("sərˈatus dˈua pˈuluh kilomətˈər pˈɛr d͡ʒˈam");
+        expect(phonemize("20 °C", "id")).toBe("dˈua pˈuluh dərˈad͡ʒat t͡ʃəlsˈius");
+    });
+
+    test("what already worked is untouched", () => {
+        // Indonesian ordinals need nothing: ke-16 is genuinely "ke" plus the cardinal. The manifest also
+        // carries a letterNames map, so initialisms already spell out.
+        expect(phonemize("abad ke-16", "id")).toBe("ˈabad kˈə ənˈam bəlˈas");
+        expect(phonemize("PBB", "id")).toBe("pebebe"); // pe-be-be
+        expect(phonemize("Perang Dunia II", "id")).toBe("pərˈaŋ dunˈia dˈua"); // Roman, from the registry seam
+        expect(phonemize("1/5", "id")).toBe("sˈatu pˈɛr lˈima");
+        expect(phonemize("-5 derajat", "id")).toBe("mˈinus lˈima dərˈad͡ʒat");
+    });
+});

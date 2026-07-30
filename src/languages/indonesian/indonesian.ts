@@ -9,6 +9,8 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeIndonesian } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -18,6 +20,8 @@ interface NumbersDef {
     ribu: string;
     juta: string;
     seprefix: string;
+    /** The word for the decimal comma ("koma"); absent before, so a decimal ran its two halves together. */
+    decimalWord?: string;
 }
 interface IndonesianDef {
     digraphs: Record<string, string>;
@@ -165,20 +169,40 @@ function numberWords(n: number): string {
     return `${numberWords(m)} ${NUM.juta}${r ? " " + numberWords(r) : ""}`;
 }
 
-const TOKEN = /([a-zA-Z]+)|(\d+)|([.?!,;:])/gu;
+// The number class accepts Indonesian's DOT thousands grouping and COMMA decimal. Without them "9.000"
+// tokenized as 9 | . | 000 and the separator became a clause PAUSE ("sembilan . nol"), and "1,5" likewise.
+// Times (11.00) are claimed earlier by normalize.ts, so only real numbers reach this.
+// #562 Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["persen"],
+    currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
+    units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],
+        g: ["gram"], l: ["liter"], ha: ["hektar"] },
+});
+
+const TOKEN = /([a-zA-Z]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
 
 class IndonesianPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562: the Indonesian rewrites (clock, rupiah, abbreviations, slash units) run BEFORE the shared
+        // symbol tier, and the clock must precede the number tokenizer so a dot-time is never read as
+        // thousands grouping.
+        return assembleClauses(SYMBOLS(normalizeIndonesian(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
-                const n = Number(m[2]);
-                if (Number.isSafeInteger(n))
-                    // Number words bypass the ⟨e⟩ lexicon (their ⟨e⟩ is pepet; avoid any taling homograph).
-                    for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeWordRules(wd));
-                else sink.emit(m[2]);
+                // Strip the dot grouping, then split on the decimal comma. Number words bypass the ⟨e⟩
+                // lexicon (their ⟨e⟩ is pepet; avoid any taling homograph).
+                const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
+                const n = Number(intPart);
+                if (!Number.isSafeInteger(n)) return;
+                for (const wd of numberWords(n).split(" ")) sink.emit(phonemizeWordRules(wd));
+                if (frac !== undefined && frac !== "") {
+                    const dot = DEF.numbers.decimalWord;
+                    if (dot) sink.emit(phonemizeWordRules(dot));
+                    for (const d of frac)
+                        for (const wd of numberWords(Number(d)).split(" ")) sink.emit(phonemizeWordRules(wd));
+                }
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
