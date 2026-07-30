@@ -9,6 +9,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeSwahili } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -144,9 +146,31 @@ function numberToText(n: number): string {
 
 const TOKEN = /([a-zA-Z']+)|(\d+)|([.?!,;:])/gu;
 
+/**
+ * Shared symbol tier (#562) — PERCENT ONLY, and that is a measured decision, not an omission.
+ *
+ * · `percentPrefix` is exactly the Swahili order: the corpus writes *asilimia 31*, *asilimia 93*,
+ *   *asilimia 3 hadi 5* (×16 spelled out), so `80%` → `asilimia 80` needs no local rule at all.
+ *   `percent` is a ONE-element `CountForms` because *asilimia* is a class 9/10 N-class noun, which is
+ *   invariant in both number and numeral agreement.
+ * · `units` is NOT declared: there is not a single abbreviated unit symbol in the 1,938-utterance corpus.
+ *   Swahili spells the measure noun out and puts it BEFORE the numeral (*kilomita 70 kwa saa*), so there
+ *   is nothing for a "number then symbol" matcher to find, and declaring short keys like `m` would only
+ *   create the `Il-76s` class of false positive the tier's own comment warns about.
+ * · `currency` is NOT declared either, for a different reason — the tier always emits the currency word
+ *   AFTER the number and offers no `currencyPrefix` to mirror `percentPrefix`, while the corpus writes
+ *   *dola 30*. Swahili therefore handles currency locally in normalize.ts. Recorded as a core limitation
+ *   rather than worked around in core.
+ */
+const SYMBOLS = makeSymbolNormalizer({ percent: ["asilimia"], percentPrefix: true });
+
 class SwahiliPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 ORDER: the shared symbol tier runs FIRST, then normalize.ts. The tier matches on a raw
+        // `<number> %` adjacency, and normalize.ts's decimal rewrite (`1.5` → `1 nukta 5`) destroys
+        // exactly that adjacency — the reverse order would have left a percent sign stranded on any
+        // decimal. Nothing normalize.ts emits can create a new percent sign, so the order is safe.
+        return assembleClauses(normalizeSwahili(SYMBOLS(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const num = Number(m[2]);
