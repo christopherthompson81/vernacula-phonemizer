@@ -526,3 +526,48 @@ The `-ent` class is open — any `-ent` noun/adjective can be extended the same 
 verb reading is the entry minus `ɑ̃`. Worth generating candidates from Lexique rather than hand-listing.
 `ferment`/`affluent` show the generation must read Lexique's actual entry rather than assume the noun
 reading is the one recorded.
+
+## Run 8 — 2026-07-29 — generating the -ent heteronym class from Lexique
+
+Replaced the hand-listed `-ent` entries with a generated set. Script:
+`tools/fr-heteronym-candidates.ts` (`npx tsx tools/fr-heteronym-candidates.ts`).
+
+### Two tests are needed, and the second is the interesting one
+
+1. **Phonological.** French 3sg and 3pl are homophonous (both endings silent), so Lexique's 3sg entry
+   `stem + "e"` should read exactly like the 3pl. This rules out stem-changing verbs: `différent`
+   [difeʁɑ̃] looks like a candidate, but the 3pl of *différer* is spelled *diffèrent* and the 3sg is
+   *diffère*, so `différe` is absent and the pair is correctly rejected.
+
+2. **Morphological.** Test 1 alone is *not* enough, and this was the finding. French orthography is regular
+   enough that an UNRELATED `stem + e` word is homophonous with the stripped -ent form **by coincidence** —
+   measured, **13 of the first 26 candidates**: `ciment`/`cime`, `serpent`/`serpe`, `prudent`/`prude`,
+   `comment`/`comme`, `régiment`/`régime`, `sergent`/`serge`, `décadent`/`décade`, `indolent`/`indole`,
+   `féculent`/`fécule`, plus permanent, proéminent, grandiloquent, urgent. Every one passes the IPA check.
+   So the stem must carry a real verb paradigm — the infinitive `stem + "er"` AND one other inflected form.
+   There is no *cimer, so ciment goes. That filter removed all 13 and kept all the true pairs.
+
+### The verb reading comes from the 3SG, not from stripping the noun
+
+Where the two disagree, Lexique is internally inconsistent and the 3sg is authoritative, being an actual
+verb form. This **caught an error in my own hand-written data**: `excellent` had `[eksɛl]`, copied from the
+noun's first vowel, where Lexique's own `excelle` is `[ɛksɛl]`. Flagged rather than silently dropped.
+
+`pressent` came out of the generator as a genuine double I had not considered: "ils pressent" (they press)
+`[pʁɛs]` versus "il pressent" (he senses, from *pressentir*) `[pʁesɑ̃]`. The ils/il NUMBER contrast is
+exactly what the rule already keys on, so it resolves correctly with no extra machinery.
+
+Result: 15 generated entries (8 previously hand-listed, 7 new — ardent, confluent, influent, pressent,
+somnolent, talent, évident), 14 rejected as coincidences.
+
+Still hand-listed, and the script documents why it cannot find them: `ferment` [fɛʁm] and `affluent`
+[afly], where Lexique records the VERB reading, so the MISSING reading is the noun's. Their entry does not
+end in the nasal, and nothing mechanical establishes that they are also nouns. Their existence is the
+reason the script reads Lexique's actual entry instead of assuming the noun reading is the recorded one.
+
+### Verification
+
+- 198 files / 2102 tests pass (6 new assertions); `tsc --noEmit` clean.
+- Referee eval byte-identical (79.3% / 96.0%; second set 91.3% / 97.6%).
+- fr corpus: 0 utterances changed, 0 defects — none of the 7 new entries occurs after ils/elles in this
+  corpus, which is expected and is why the generated set is worth having rather than corpus-driven listing.

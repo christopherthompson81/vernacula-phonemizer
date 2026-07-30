@@ -190,14 +190,28 @@
         "portions": { "default": "pɔʁsjɔ̃", "cases": [{ "ipa": "pɔʁtjɔ̃", "prev": ["nous"] }] },
         "ferment": { "default": "fɛʁm", "cases": [{ "ipa": "fɛʁmɑ̃", "prev": ["le", "du", "un", "ce", "son"] }] },
         "affluent": { "default": "afly", "cases": [{ "ipa": "aflyɑ̃", "prev": ["un", "le", "ce", "son", "grand", "petit"] }] },
+        // The -ENT class below is GENERATED — `npx tsx tools/fr-heteronym-candidates.ts` — not hand-listed.
+        // The verb reading is taken from Lexique's 3sg entry (stem+"e"), which IS a verb form, rather than
+        // by stripping the nasal off the noun: where the two disagree Lexique is internally inconsistent
+        // and the 3sg wins. That cross-check caught a hand-written error here — `excellent` had [eksɛl],
+        // copying the noun's first vowel, where Lexique's own `excelle` is [ɛksɛl].
+        // `pressent` is a real double: "ils pressent" (they press) [pʁɛs] vs "il pressent" (he senses,
+        // from pressentir) [pʁesɑ̃] — the ils/il number contrast is exactly what the rule keys on.
+        "ardent": { "default": "aʁdɑ̃", "cases": [{ "ipa": "aʁd", "prev": ["ils", "elles"] }] },
+        "confluent": { "default": "kɔ̃flyɑ̃", "cases": [{ "ipa": "kɔ̃fly", "prev": ["ils", "elles"] }] },
         "content": { "default": "kɔ̃tɑ̃", "cases": [{ "ipa": "kɔ̃t", "prev": ["ils", "elles"] }] },
+        "couvent": { "default": "kuvɑ̃", "cases": [{ "ipa": "kuv", "prev": ["ils", "elles"] }] },
+        "excellent": { "default": "eksɛlɑ̃", "cases": [{ "ipa": "ɛksɛl", "prev": ["ils", "elles"] }] },
+        "influent": { "default": "ɛ̃flyɑ̃", "cases": [{ "ipa": "ɛ̃fly", "prev": ["ils", "elles"] }] },
+        "négligent": { "default": "neɡliʒɑ̃", "cases": [{ "ipa": "neɡliʒ", "prev": ["ils", "elles"] }] },
+        "parent": { "default": "paʁɑ̃", "cases": [{ "ipa": "paʁ", "prev": ["ils", "elles"] }] },
+        "pressent": { "default": "pʁesɑ̃", "cases": [{ "ipa": "pʁɛs", "prev": ["ils", "elles"] }] },
         "président": { "default": "pʁezidɑ̃", "cases": [{ "ipa": "pʁezid", "prev": ["ils", "elles"] }] },
         "résident": { "default": "ʁezidɑ̃", "cases": [{ "ipa": "ʁezid", "prev": ["ils", "elles"] }] },
-        "parent": { "default": "paʁɑ̃", "cases": [{ "ipa": "paʁ", "prev": ["ils", "elles"] }] },
+        "somnolent": { "default": "sɔmnɔlɑ̃", "cases": [{ "ipa": "sɔmnɔl", "prev": ["ils", "elles"] }] },
+        "talent": { "default": "talɑ̃", "cases": [{ "ipa": "tal", "prev": ["ils", "elles"] }] },
         "violent": { "default": "vjɔlɑ̃", "cases": [{ "ipa": "vjɔl", "prev": ["ils", "elles"] }] },
-        "excellent": { "default": "eksɛlɑ̃", "cases": [{ "ipa": "eksɛl", "prev": ["ils", "elles"] }] },
-        "négligent": { "default": "neɡliʒɑ̃", "cases": [{ "ipa": "neɡliʒ", "prev": ["ils", "elles"] }] },
-        "couvent": { "default": "kuvɑ̃", "cases": [{ "ipa": "kuv", "prev": ["ils", "elles"] }] },
+        "évident": { "default": "evidɑ̃", "cases": [{ "ipa": "evid", "prev": ["ils", "elles"] }] },
     },
 
     // ACRONYMS read letter-by-letter although their lowercase form is an attested French word, so Lexique
