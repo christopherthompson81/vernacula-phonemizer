@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+import { numberToWords } from "../src/languages/quechua/numbers.ts";
 import { phonemizeWord } from "../src/languages/quechua/quechua.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
@@ -37,5 +39,52 @@ describe("Quechua (Runasimi) canonical IPA", () => {
     test("monosyllables still take stress (matching the referee)", () => {
         expect(phonemizeWord("huk")).toBe("ˈhuk"); // 'one'
         expect(phonemizeWord("pay")).toBe("ˈpaj"); // 'he/she' — ⟨y⟩→j
+    });
+});
+
+// ---------------------------------------------------------------------------------------------------------
+// Cardinal numbers. Southern Quechua is DECIMAL and regular; the one non-Western feature is the LINKING
+// SUFFIX -yuq ~ -niyuq 'having' that attaches a remainder to a round base (chunka hukniyuq = 11). Source:
+// English Wiktionary Quechua cardinal numerals — every base word and every compound below 100 is a lemma
+// there, and the `cardinalbox` chains give 101 / 1,001 / 999 / 999,999 verbatim. See numbers.ts.
+describe("Quechua numbers", () => {
+    for (const [n, expected] of [
+        [0, "ch'usaq"],
+        [1, "huk"],
+        [7, "qanchis"],
+        [10, "chunka"],
+        [11, "chunka hukniyuq"],            // -niyuq after a CONSONANT-final unit
+        [13, "chunka kimsayuq"],            // -yuq after a VOWEL-final unit
+        [20, "iskay chunka"],               // the tens are themselves two words
+        [21, "iskay chunka hukniyuq"],      // Wiktionary lemma ⟨iskay chunka hukniyuq⟩
+        [42, "tawa chunka iskayniyuq"],
+        [99, "isqun chunka isqunniyuq"],
+        [100, "pachak"],                    // bare magnitude — no leading ⟨huk⟩
+        [101, "pachak hukniyuq"],           // Wiktionary's ⟨pachak⟩ cardinalbox successor
+        [555, "pichqa pachak pichqa chunka pichqayuq"],
+        [999, "isqun pachak isqun chunka isqunniyuq"], // verbatim from the ⟨pachak⟩/⟨waranqa⟩ boxes
+        [1000, "waranqa"],
+        [1001, "waranqa hukniyuq"],         // verbatim from the ⟨waranqa⟩ cardinalbox
+        [12345, "chunka iskayniyuq waranqa kimsa pachak tawa chunka pichqayuq"],
+        [999999, "isqun pachak isqun chunka isqunniyuq waranqa isqun pachak isqun chunka isqunniyuq"],
+        [1000000, "hunu"],
+        [1000001, "hunu hukniyuq"],         // verbatim from the ⟨hunu⟩ cardinalbox
+        [1000000000, "lluna"],              // the highest attested magnitude
+    ] as const) {
+        test(`${n} → ${expected}`, () => expect(numberToWords(n)).toBe(expected));
+    }
+
+    test("no gaps or sentinels across 0..20000", () => {
+        for (let n = 0; n <= 20000; n++) expect(numberToWords(n), `n=${n}`).not.toMatch(/undefined|NaN|[0-9]/);
+    });
+
+    // 10^12 and above has no attested magnitude word → digit-by-digit, deliberately (see numbers.ts).
+    test("above the attested range → digit-by-digit", () => {
+        expect(numberToWords(1e12)).toBe("huk ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq ch'usaq");
+    });
+
+    test("end-to-end: the numeral is phonemized, not passed through as digits", () => {
+        expect(phonemize("21", "qu")).toBe("ˈiskaj ˈt͡ʃunka hukˈnijuq");
+        expect(phonemize("100", "qu")).toBe("ˈpat͡ʃak");
     });
 });

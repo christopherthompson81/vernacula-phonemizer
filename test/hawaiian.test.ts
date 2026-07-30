@@ -31,3 +31,35 @@ describe("Hawaiian (ʻŌlelo Hawaiʻi) canonical IPA", () => {
         expect(getPhonemizer("haw").text("aloha").trim()).toBe("aloha");
     });
 });
+
+// Hawaiian cardinal numbers (numbers.ts): the ʻe-prefixed standalone units vs. the bare stems inside a compound, the
+// kana- tens, and the additive connective kūmā fused into ONE word (iwakāluakūmālima 25). The powers of ten are
+// English loans (haneli, kaukani, miliona, biliona) and take the multiplier hoʻokahi for 1. Note the numerals are
+// written with the ʻOKINA (U+02BB) and the KAHAKŌ, both phonemic here — [ʔ] and vowel length. Sources cited in
+// hawaiian.jsonc + numbers.ts.
+describe("Hawaiian cardinal numbers", () => {
+    const haw = getPhonemizer("haw");
+    const say = (n: number): string => haw.text(String(n)).trim();
+
+    test("units (ʻe- prefix → the ʻokina is a real consonant) and the kana- tens", () => {
+        expect(say(0)).toBe("ʔole"); // ʻole
+        expect(say(5)).toBe("ʔelima"); // ʻelima
+        expect(say(20)).toBe("iwakaːlua"); // iwakālua (irregular; macron = length)
+        expect(say(40)).toBe("kanahaː"); // kanahā = kana- + hā
+    });
+
+    test("11-99: tens + kūmā + bare stem, fused into one word", () => {
+        expect(say(11)).toBe("ʔumikuːmaːkahi"); // ʻumikūmākahi
+        expect(say(25)).toBe("iwakaːluakuːmaːlima"); // iwakāluakūmālima
+        expect(say(99)).toBe("kanaiwakuːmaːiwa"); // kanaiwakūmāiwa
+    });
+
+    test("hundreds / thousands / millions — juxtaposed, no kūmā after haneli", () => {
+        expect(say(100)).toBe("hoʔokahi haneli"); // hoʻokahi haneli
+        expect(say(101)).toBe("hoʔokahi haneli ʔekahi"); // hoʻokahi haneli ʻekahi
+        expect(say(555)).toBe("ʔelima haneli kanalimakuːmaːlima"); // ʻelima haneli kanalimakūmālima
+        expect(say(1000)).toBe("hoʔokahi kaukani"); // hoʻokahi kaukani
+        expect(say(1000000)).toBe("hoʔokahi miliona"); // hoʻokahi miliona
+        expect(say(1000000000)).toBe("hoʔokahi piliona"); // biliona — the loan ⟨b⟩ adapts to [p]
+    });
+});

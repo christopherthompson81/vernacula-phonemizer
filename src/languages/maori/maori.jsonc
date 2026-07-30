@@ -18,6 +18,18 @@
         "p": "p", "t": "t", "k": "k", "m": "m", "n": "n", "r": "ɾ", "h": "h", "w": "w"
     },
 
+    // Cardinal numerals (composed by numbers.ts — see that file for the mā/kotahi rules and the source list). The
+    // MODERN STANDARD tekau series (tekau mā tahi 11, rua tekau 20), not the older ngahuru decade forms. The KAHAKŌ
+    // (macron) is phonemic length and load-bearing here: whā [ɸaː] 4, mā [maː] the additive particle.
+    "numbers": {
+        "zero": "kore",
+        "units": ["", "tahi", "rua", "toru", "whā", "rima", "ono", "whitu", "waru", "iwa"],
+        "ten": "tekau",
+        "and": "mā",
+        "one": "kotahi",
+        "magnitudes": { "hundred": "rau", "thousand": "mano", "million": "miriona", "billion": "piriona" }
+    },
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

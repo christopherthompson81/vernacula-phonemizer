@@ -8,6 +8,12 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
+
+// Ol Chiki digits ᱐-᱙ (U+1C50–1C59) → ASCII, so an Ol-Chiki-numeral token composes exactly like a Western one.
+const OL_CHIKI_DIGITS = "᱐᱑᱒᱓᱔᱕᱖᱗᱘᱙";
+const toAsciiDigits = (s: string): string =>
+    [...s].map((c) => (OL_CHIKI_DIGITS.includes(c) ? String(OL_CHIKI_DIGITS.indexOf(c)) : c)).join("");
 
 // Ol Chiki letter → IPA. Vowels + consonants (palatal stops ⟨ᱪ ᱡ⟩ → c/ɟ; retroflex ⟨ᱴ ᱰ ᱬ ᱲ⟩ → ʈ ɖ ɳ ɽ).
 const BASE: Record<string, string> = {
@@ -73,7 +79,13 @@ class SantaliPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) {
+                // Ol Chiki digits and Western digits are the same numbers — normalise, then compose. ≤15 digits
+                // stays inside the safe-integer range; longer reads the raw string digit-by-digit.
+                const d = toAsciiDigits(m[2]);
+                const words = d.length <= 15 ? numberToWords(Number(d)) : readDigits(d);
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) sink.pause(m[3] === "᱾" || m[3] === "᱿" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }

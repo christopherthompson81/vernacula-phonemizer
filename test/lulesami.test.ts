@@ -33,4 +33,30 @@ describe("Lule Sami (julevsámegiella) canonical IPA", () => {
     test("registry wiring", () => {
         expect(getPhonemizer("smj").text("bena").trim()).toBe("ˈpenɑ");
     });
+
+    // ═══ CARDINAL NUMBERS — native Uralic decimal, written SOLID (Finnish-style) below a million. Authored from
+    // the Divvun/Giellatekno digit→text transducer for smj, whose own comments mark the branch we follow as the
+    // one "for tekst-til-tale" (for text-to-speech). Sources + stem alternations in numbers.ts.
+    test("★ cardinals: the lågev / -låhke / -låk and lågenan- stem alternations", () => {
+        const smj = getPhonemizer("smj");
+        expect(smj.text("0").trim()).toBe("ˈnolːɑ"); // nålla
+        expect(smj.text("7").trim()).toBe("ˈkiet͡ʃɑv"); // gietjav — ⟨g⟩→[k], the voiceless-⟨b d g⟩ trap
+        expect(smj.text("15").trim()).toBe("ˈlokenɑnvihtːɑ"); // lågenanvihtta — ATTESTED (repo testdata)
+        expect(smj.text("20").trim()).toBe("ˈkuoktɑlohke"); // guoktalåhke — ×10 with NO following unit
+        expect(smj.text("21").trim()).toBe("ˈkuoktɑlokɑktɑ"); // guoktalåkakta — ×10 BEFORE a unit → -låk-
+        expect(smj.text("45").trim()).toBe("ˈnieʎːɑlokvihtːɑ"); // nielljalåkvihtta — ATTESTED
+    });
+
+    test("cardinals: solid hundreds/thousands; only 10⁶/10⁹ are separate words", () => {
+        const smj = getPhonemizer("smj");
+        expect(smj.text("100").trim()).toBe("ˈt͡ʃuohte"); // tjuohte — bare, no leading akta
+        expect(smj.text("164").trim()).toBe("ˈt͡ʃuohtekuhtːɑloknieʎːɑ"); // tjuohteguhttalåkniellja — ATTESTED
+        expect(smj.text("333").trim()).toBe("ˈkolmːot͡ʃuohtekolmːolokkolmːo"); // gålmmåtjuohtegålmmålåkgålmmå — ATTESTED
+        expect(smj.text("1000").trim()).toBe("ˈtʰuvsɑːn"); // tuvsán (initial ⟨t⟩ is the aspirated loan stop)
+        expect(smj.text("2509").trim()).toBe("ˈkuoktɑtuvsɑːnvihtːɑt͡ʃuohteɑkt͡se"); // guoktatuvsán… — ATTESTED
+        // One solid word all the way through the thousands — note the teen FLIPS to unit+lågenan as a multiplier.
+        expect(smj.text("12345").trim()).toBe("ˈkuoktɑlokenɑntuvsɑːnkolmːot͡ʃuohtenieʎːɑlokvihtːɑ");
+        expect(smj.text("1000000").trim()).toBe("ˈmilːijovnːo"); // millijåvnnå
+        expect(smj.text("1000000000").trim()).toBe("ˈmilːijɑːrtːɑ"); // millijárdda (10⁹ = milliard)
+    });
 });

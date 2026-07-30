@@ -3,7 +3,7 @@
 // Hiligaynon shares the Bisayan core with Cebuano — ⟨ng⟩→ŋ, word-initial + hiatus glottal stop [ʔ], penultimate
 // stress — and differs mainly in its SPANISH-LOAN orthography (this referee is proper-noun-heavy): ⟨j⟩→[h] (the
 // Spanish jota, NOT Cebuano's [d͡ʒ]; Bermejo→beɾmeho) and ⟨f⟩→[p] (nativised; Fuentes→puentes, Demafeliz→demapelis).
-// Validated against wikipron hil_latn (human) + kaikki hil (human). Number words deferred. See
+// Validated against wikipron hil_latn (human) + kaikki hil (human). Native cardinal number words: see the "numbers" block below + numbers.ts. See
 // docs/investigations/hil_native_bringup_investigation.md.
 {
     "language": "hil",
@@ -23,6 +23,26 @@
     "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
 
     "specialWords": { "mga": "manga" },
+
+    // NATIVE Austronesian cardinal numerals (composed by numbers.ts). Hiligaynon — like Tagalog and Cebuano — has
+    // BOTH a native set and a fully-nativised Spanish loan set (uno, dos, baynte, singkwenta …) that dominates
+    // everyday counting, money, clock time and dates. We speak the NATIVE set, following the precedent already set
+    // by tagalog.jsonc (isa/dalawa/sampu) and cebuano.jsonc (usa/duha/napulo): it is the set a Hiligaynon TTS is
+    // expected to read for a bare numeral, it is the one the dictionaries lemmatise, and the Spanish forms are
+    // ordinary loanwords the g2p already handles when written out. Tens are the irregular SYNTHETIC ka-…-an forms
+    // (kaluhaan, kap-atan — the Bisayan shape, cf. Cebuano) rather than the analytic "duha ka pulo"; both are
+    // current, the synthetic set is what Wiktionary/kaikki attest. Sources: Wiktionary "Category:Hiligaynon
+    // cardinal numbers"; Omniglot "Numbers in Hiligaynon" (gatos/libo/milyon); ilonggodictionary.com "Hiligaynon
+    // Numbers" (the "kag" connector). Zero is the Spanish loan "sero" (no native numeral; matches tl/ceb).
+    "numbers": {
+        "units": ["sero", "isa", "duha", "tatlo", "apat", "lima", "anum", "pito", "walo", "siyam"],
+        "tens": ["", "napulo", "kaluhaan", "katloan", "kap-atan", "kalim-an", "kan-uman", "kapituan", "kawaluan", "kasiyaman"],
+        "connector": "kag",
+        "ligature": "ka",
+        "hundred": "gatos",
+        "thousand": "libo",
+        "million": "milyon"
+    },
 
     "clausePunctuation": {
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "

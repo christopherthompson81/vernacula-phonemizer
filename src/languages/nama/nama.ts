@@ -19,6 +19,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 const CLICK = new Set(["ǀ", "ǁ", "ǂ", "ǃ"]); // dental, lateral, palatal, alveolar
 /** A click letter + its accompaniment (the following g/kh/h/n, longest-first) → the IPA click cluster. */
@@ -38,6 +39,10 @@ const LETTER: Record<string, string> = {
     "â": "ã", "ê": "ẽ", "î": "ĩ", "ô": "õ", "û": "ũ", // circumflex = NASALIZED vowel (phonemic in Nama: ǂgâ, ǀî)
     "b": "b", "d": "d", "g": "x", "h": "h", "k": "k", "m": "m", "n": "n", "p": "p", "r": "r", "s": "s",
     "t": "t", "w": "w", "x": "x", // ⟨g⟩ NOT after a click → the velar fricative [x] (Khoekhoegowab→…xo…); ⟨w⟩→[w]
+    // ⟨l j⟩ occur only in NATURALISED LOANS, but they do occur: the Khoekhoegowab section of Namibia's New Era
+    // writes "N$47 miljunsa" / "N$1 biljunmaris" (10⁶/10⁹ — see numbers.ts). Without these two entries the scan
+    // silently deleted them (miljun→*miun), so they are mapped to their ordinary values.
+    "l": "l", "j": "j",
 };
 const PLAIN_VOWEL = new Set([..."aeiou"]);
 
@@ -79,7 +84,12 @@ class NamaPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
+            else if (m[2]) {
+                // Cardinals 1 … 10¹²−1 compose natively; 0 emits the flagged Afrikaans stopgap `nul` and anything
+                // above the ceiling reads digit-by-digit. Never silently dropped. See numbers.ts.
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

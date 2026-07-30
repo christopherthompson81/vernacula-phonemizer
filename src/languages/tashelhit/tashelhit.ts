@@ -15,6 +15,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 interface TashelhitDef {
     graphemes: Record<string, string>; // Berber Latin alphabet → IPA
@@ -64,12 +65,19 @@ class TashelhitPhonemizer implements Phonemizer {
         const nfc = input.normalize("NFC");
         // Latin (with emphatic dot-below + combining marks) OR Tifinagh LETTERS (U+2D30–2D6F, incl. the Tamatart
         // labial ⵯ) — one word class; the Tifinagh separator ⵰ (U+2D70) is punctuation, not a letter.
-        const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([.,?!;:،؟⵰])/gu;
+        // A DIGIT group was missing entirely, so numbers used to be dropped silently; ٠-٩ (Arabic-Indic) are
+        // accepted alongside 0-9 because Moroccan text mixes them.
+        const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([0-9٠-٩]+)|([.,?!;:،؟⵰])/gu;
         let m: RegExpExecArray | null;
         while ((m = tok.exec(nfc))) {
             if (m[1]) sink.emit(phonemize(m[1]));
             else if (m[2]) {
-                const mk = CLAUSE_MARK[m[2]];
+                const d = [...m[2]].map((c) => (c >= "٠" && c <= "٩" ? String(c.codePointAt(0)! - 0x0660) : c)).join("");
+                // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string.
+                const words = d.length <= 12 ? numberToWords(Number(d)) : readDigits(d);
+                for (const wd of words.split(" ")) sink.emit(phonemize(wd));
+            } else if (m[3]) {
+                const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
         }

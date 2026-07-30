@@ -18,6 +18,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 // Multi-letter graphemes, LONGEST-FIRST (trigraphs → digraphs → geminate doubles). ⟨dtj dts⟩ = the voiced
 // affricates (geminate-only); ⟨ssj ttj tts nnj llj⟩ = the palatal/sibilant geminates; ⟨ie uo oa⟩ = diphthongs.
@@ -64,8 +65,12 @@ class LuleSamiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred
-            else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
+            else if (m[2]) {
+                // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the
+                // Number() conversion can't lose precision or go exponential. See numbers.ts for the source.
+                const words = m[2].length <= 12 ? numberToWords(Number(m[2])) : readDigits(m[2]);
+                for (const wd of words.split(" ")) sink.emit(phonemizeWord(wd));
+            } else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }
 }

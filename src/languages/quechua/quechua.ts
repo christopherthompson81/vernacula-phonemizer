@@ -9,6 +9,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { numberToWords } from "./numbers.ts";
 
 interface QuechuaDef {
     digraphs: Record<string, string>;
@@ -47,14 +48,14 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-// A word (Quechua Latin letters incl. ñ + the apostrophe glyphs for ejectives) / number / punctuation. Numbers deferred.
+// A word (Quechua Latin letters incl. ñ + the apostrophe glyphs for ejectives) / number / punctuation.
 const TOKEN = /([a-zñşA-ZÑŞ'’ʼ‘-]+)|(\d+)|([.!?…,;:])/gu;
 
 class QuechuaPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(m[2]); // numbers deferred (digits passed through)
+            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
