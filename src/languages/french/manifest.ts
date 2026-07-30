@@ -17,6 +17,11 @@ export interface FrenchManifest {
     yodFinal: [string, string][];
     clausePunctuation: Record<string, string>;
     liaison: Record<string, string>;
+    /** One spelling → its Lexique reading plus the context-selected alternates. See french.jsonc. */
+    heteronyms: Record<string, {
+        default: string;
+        cases: Array<{ ipa: string; prev?: string[]; next?: string[]; nextIsNumber?: boolean }>;
+    }>;
     acronymLetters: string[];
     hAspire: string[];
     numbers: {

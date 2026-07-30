@@ -196,13 +196,11 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
 
     // 4c) PLUS. The mirror of the negative rule below: a dropped sign is silent content loss, and "+5"
     //     read as "cinq" is as wrong as "-5" read as "cinq" was. Covers the attached form (utc+1).
-    //     SPELLED "plusse" DELIBERATELY: `plus` is a heteronym — [ply] for "more", [plys] as the
-    //     arithmetic operator — and Lexique carries only the [ply] reading. The supplement cannot help,
-    //     being additive-only for words Lexique LACKS, and overriding `plus` outright would break the far
-    //     commoner "more" reading. So this emits the attested informal respelling, which the g2p and the
-    //     supplement both resolve to [plys]. The clean fix is a French heteronym tier; noted, not built.
-    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusse $2");
-    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusse $2");
+    //     Emits the ordinary spelling `plus`; the HETERONYM map in french.jsonc supplies the [plys]
+    //     operator reading, selected by the number that follows. This replaced a "plusse" respelling that
+    //     existed only because Lexique carries just the [ply] "more" reading.
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 5) NEGATIVES: a minus sign before a number is spoken. Requires a boundary before it so a hyphenated
     //    range or a score ("2-1", "1918-1939") is not turned into a subtraction.

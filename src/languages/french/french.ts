@@ -75,6 +75,44 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     return toIpa(word);
 }
 
+// ── Heteronyms ──────────────────────────────────────────────────────────────────────────────────────
+/**
+ * One spelling with two readings, selected by the NEIGHBOURING words. French has no POS tagger, and
+ * Lexique carries a single reading per spelling, so the alternate lives in french.jsonc together with the
+ * context that picks it. Resolution runs in text(), which is the only place with neighbours — a bare
+ * phonemizeWord() call has no context and keeps returning the Lexique reading.
+ */
+const HETERONYMS = MANIFEST.heteronyms;
+
+/** Clitics that can sit between a subject pronoun and its verb ("ils NE content pas", "ils SE couvent"),
+ *  so the pronoun test looks one word further back when it finds one. Without this, the -ent verb rule
+ *  would miss every negated or reflexive clause. */
+const CLITIC = new Set(["ne", "se", "me", "te", "nous", "vous", "le", "la", "les", "lui", "leur", "y", "en"]);
+
+const NUMBER_WORD = new Set([
+    "zéro", "un", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
+    "onze", "douze", "treize", "quatorze", "quinze", "seize", "vingt", "trente", "quarante",
+    "cinquante", "soixante", "cent", "mille", "million", "milliard",
+]);
+
+/** The heteronym reading for `word` given its neighbours, or undefined to fall through to the lexicon. */
+function heteronymIpa(word: string, prev: string | undefined, prev2: string | undefined, next: string | undefined): string | undefined {
+    const entry = HETERONYMS[word];
+    if (entry === undefined) return undefined;
+    for (const c of entry.cases) {
+        if (c.nextIsNumber === true && next !== undefined && NUMBER_WORD.has(next)) return c.ipa;
+        if (c.next !== undefined && next !== undefined && c.next.includes(next)) return c.ipa;
+        if (c.prev !== undefined && prev !== undefined) {
+            // Look past one clitic so a negated or reflexive 3rd-person-plural clause still matches.
+            if (c.prev.includes(prev)) return c.ipa;
+            if (CLITIC.has(prev) && prev2 !== undefined && c.prev.includes(prev2)) return c.ipa;
+        }
+    }
+    // No case matched: fall through so the LEXICON supplies the reading. `default` is recorded in the
+    // data as documentation of what that reading is, and is deliberately not re-asserted here.
+    return undefined;
+}
+
 /** Add a phrase-final accent: ˈ before the last vowel of the last IPA token (rhythmic-group stress). */
 function accentFinal(tokens: string[]): void {
     for (let k = tokens.length - 1; k >= 0; k--) {
@@ -212,10 +250,23 @@ class FrenchPhonemizer implements Phonemizer {
                 if (group.length || out) flush(it.pause);
                 continue;
             } // liaison never crosses a pause
-            let ipa = carry + phonemizeWord(it.word, oovOverride);
+            // Heteronym first: it is the only reading that depends on context, so it must pre-empt the
+            // lexicon (which has exactly one reading per spelling).
+            const wLower = it.word.toLowerCase();
+            const neighbour = (j: number): string | undefined => {
+                const n = items[j];
+                return n !== undefined && "word" in n ? n.word.toLowerCase() : undefined;
+            };
+            const het = heteronymIpa(wLower, neighbour(k - 1), neighbour(k - 2), neighbour(k + 1));
+            let ipa = carry + (het ?? phonemizeWord(it.word, oovOverride));
             carry = "";
             const next = items[k + 1]; // liaison only onto an immediately adjacent word
-            if (next && "word" in next) {
+            // A context-selected HETERONYM reading does not participate in liaison as the left member. Its
+            // final consonant is SOUNDED, not latent, so the liaison machinery would both move it onto the
+            // next word and strip it here: the operator reading of "plus" ([plys]) came out as
+            // "utc ply zœ̃" instead of "utc plys œ̃", which is the ordinary [ply] "more" reading plus a
+            // liaison that arithmetic "plus un" does not have.
+            if (next && "word" in next && het === undefined) {
                 carry = liaisonOnto(it.word, next.word);
                 if (carry) ipa = stripLatent(ipa, carry); // avoid doubling a citation-realised final consonant
             }
