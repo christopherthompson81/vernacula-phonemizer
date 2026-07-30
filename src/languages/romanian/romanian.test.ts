@@ -32,6 +32,38 @@ describe("Romanian (ro) g2p — diagnostic gold", () => {
     }
 });
 
+// ── Cardinal numbers: GENDER + `de` agreement with the magnitude nouns ─────────────────────────────────────
+// sută and mie are FEMININE nouns, milion and miliard are NEUTER (masculine in the singular, feminine in the
+// plural), and the multiplier's 1/2 has to agree: o sută / două sute, o mie / două mii, un milion / două
+// milioane. A count of 20 or more also takes the linker `de` before the noun (o sută de mii, douăzeci și una de
+// mii). Source: en.wikipedia.org/wiki/Romanian_numbers (quoted in romanian.jsonc).
+describe("Romanian cardinal numbers — gender agreement on the magnitude nouns", () => {
+    const ro = (s: string): string => phonemize(s, "ro").trim();
+    test("the feminine mie: o mie / două mii / cinci mii, with `de` from 20 up", () => {
+        expect(ro("1000")).toBe("ˈo ˈmie"); // o mie — the feminine article, not a bare "mie"
+        expect(ro("2000")).toBe("ˈdowə ˈmij"); // două mii — FEM two (not *doi mii)
+        expect(ro("5000")).toBe("ˈt͡ʃint͡ʃʲ ˈmij"); // cinci mii — no gender marking below/above 1–2
+        expect(ro("21000")).toBe("dowəˈzet͡ʃʲ ˈʃi ˈuna ˈde ˈmij"); // douăzeci și una de mii — fem "una" + de
+        expect(ro("100000")).toBe("ˈo ˈsutə ˈde ˈmij"); // o sută de mii — a round hundred takes `de` too
+    });
+    test("the neuter milion: un milion / două milioane (neuter plural takes the FEMININE numeral)", () => {
+        expect(ro("1000000")).toBe("ˈun miˈljon"); // un milion (not *unu milion)
+        expect(ro("2000000")).toBe("ˈdowə miˈljo̯ane"); // două milioane (not *doi milioane)
+        expect(ro("21000000")).toBe("dowəˈzet͡ʃʲ ˈʃi ˈunu ˈde miˈljo̯ane"); // …unu de milioane — …1 stays MASC
+    });
+    test("the feminine sută, and the miliard tier", () => {
+        expect(ro("100")).toBe("ˈo ˈsutə"); // o sută
+        expect(ro("200")).toBe("ˈdowə ˈsute"); // două sute — FEM two (not *doi sute)
+        // un miliard — the 10⁹ tier (the billions multiplier used to index past the tables and leak "undefined").
+        // ⟨lia⟩ glides exactly as in milion → miˈljon, so the reading is consistent with the neighbouring tier.
+        expect(ro("1000000000")).toBe("ˈun miˈljard");
+    });
+    test("a bare digit keeps the MASCULINE counting form (unu, doi)", () => {
+        expect(ro("1")).toBe("ˈunu"); // unu — "reserved for counting only" (en.wiktionary.org/wiki/unu)
+        expect(ro("2")).toBe("ˈdoj"); // doi
+    });
+});
+
 // ── Roman-numeral ORDINAL policy (src/languages/romanian/romanOrdinals.ts) ────────────────────────────────
 // Romanian reads a century as an ordinal in the `al …-lea` construction — the orthography spells it out
 // ("secolul al XIX-lea", ro.wikipedia Date și numere). The article is INSIDE the emitted word because the

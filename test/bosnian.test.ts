@@ -43,6 +43,17 @@ describe("Bosnian canonical IPA — shared Serbo-Croatian g2p + Bosnian deltas",
         expect(bs.text("3000000").trim()).toBe("tri miliona"); // milion (Serbian, not Croatian milijun)
     });
 
+    // GENDER on the magnitude noun: hiljada is FEMININE, so the multiplier agrees — and Bosnian is IJEKAVIAN,
+    // so the feminine of dva is dvije (as in Croatian), not the Serbian ekavian dve. milion is masculine.
+    test("numbers: gender agreement on the FEMININE hiljada (ijekavian dvije)", () => {
+        expect(bs.text("1000").trim()).toBe("xiʎadu"); // hiljadu — the standalone form
+        expect(bs.text("2000").trim()).toBe("dʋije xiʎade"); // dvije hiljade (not *dva hiljade / *dve hiljade)
+        expect(bs.text("5000").trim()).toBe("pet xiʎada"); // pet hiljada — gen.pl
+        expect(bs.text("21000").trim()).toBe("dʋadeset jedna xiʎada"); // dvadeset jedna hiljada — …1 → fem sg
+        expect(bs.text("1000000").trim()).toBe("jedan milion"); // masculine
+        expect(bs.text("2000000").trim()).toBe("dʋa miliona"); // dva miliona — masculine keeps dva
+    });
+
     test("clause assembly", () => {
         expect(bs.text("Dobar dan, Sarajevo!").trim()).toBe("dobar dan , sarajeʋo !");
     });

@@ -14,12 +14,15 @@
     // Bosnian cardinal number words. units/teens/tens are identical to Serbian/Croatian; the deltas from Serbian are
     // just the ijekavian hundreds dvjesta (vs ekavian dvesta) — Bosnian keeps the Serbian hiljada/milion (vs Croatian
     // tisuća/milijun) and the -sta hundreds (dvjesta/trista, vs Croatian -sto).
+    // `oneFeminine`/`twoFeminine` on the thousand: hiljada is FEMININE and the multiplier agrees with it. Bosnian
+    // is IJEKAVIAN like Croatian, so the feminine of dva is dvije (en.wiktionary.org/wiki/dvije#Serbo-Croatian;
+    // en.wiktionary.org/wiki/jedna#Serbo-Croatian) → dvije hiljade, dvadeset jedna hiljada. milion is masculine.
     "numbers": {
         "units": ["nula", "jedan", "dva", "tri", "četiri", "pet", "šest", "sedam", "osam", "devet"],
         "teens": ["deset", "jedanaest", "dvanaest", "trinaest", "četrnaest", "petnaest", "šesnaest", "sedamnaest", "osamnaest", "devetnaest"],
         "tens": ["", "deset", "dvadeset", "trideset", "četrdeset", "pedeset", "šezdeset", "sedamdeset", "osamdeset", "devedeset"],
         "hundreds": ["", "sto", "dvjesta", "trista", "četiristo", "petsto", "šeststo", "sedamsto", "osamsto", "devetsto"],
-        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada" },
+        "thousand": { "standalone": "hiljadu", "one": "hiljada", "few": "hiljade", "many": "hiljada", "oneFeminine": "jedna", "twoFeminine": "dvije" },
         "million": { "one": "milion", "few": "miliona", "many": "miliona" }
     },
 

@@ -36,6 +36,21 @@
         "teens": ["десять", "одинадцять", "дванадцять", "тринадцять", "чотирнадцять", "п'ятнадцять", "шістнадцять", "сімнадцять", "вісімнадцять", "дев'ятнадцять"],
         "tens": { "20": "двадцять", "30": "тридцять", "40": "сорок", "50": "п'ятдесят", "60": "шістдесят", "70": "сімдесят", "80": "вісімдесят", "90": "дев'яносто" },
         "hundreds": ["", "сто", "двісті", "триста", "чотириста", "п'ятсот", "шістсот", "сімсот", "вісімсот", "дев'ятсот"],
-        "magnitudes": { "thousand": "тисяча", "million": "мільйон", "billion": "мільярд" }
+        "magnitudes": { "thousand": "тисяча", "million": "мільйон", "billion": "мільярд" },
+
+        // MAGNITUDE-NOUN AGREEMENT (numbers.ts). Each magnitude is a noun that inflects for the count in front of
+        // it: nom.sg after a count ending in 1, nom.pl (`few`) after 2–4, gen.pl (`many`) after 5+ and 11–14.
+        // Sources: тисяча f, nom.pl тисячі, gen.pl тисяч (en.wiktionary.org/wiki/тисяча#Ukrainian); мільйон
+        // m.inan, мільйони / мільйонів (en.wiktionary.org/wiki/мільйон#Ukrainian); мільярд m, мільярди /
+        // мільярдів (en.wiktionary.org/wiki/мільярд#Ukrainian).
+        "magnitudeCounts": {
+            "thousand": { "few": "тисячі", "many": "тисяч" },
+            "million": { "few": "мільйони", "many": "мільйонів" },
+            "billion": { "few": "мільярди", "many": "мільярдів" }
+        },
+        // тисяча is FEMININE, so the multiplier's 1/2 must be feminine too: одна тисяча, дві тисячі (never
+        // *один/*два тисяча). одна = fem of один (en.wiktionary.org/wiki/один#Ukrainian); дві = fem of два
+        // (en.wiktionary.org/wiki/два#Ukrainian).
+        "feminine": { "one": "одна", "two": "дві" }
     }
 }

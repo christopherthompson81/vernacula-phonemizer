@@ -24,8 +24,19 @@ describe("Croatian (hr) canonical IPA", () => {
 
     test("CROATIAN cardinal numbers (tisuća/milijun/dvjesto ≠ Serbian hiljada/milion/dvesta)", () => {
         expect(phonemize("1000", "hr").trim()).toBe("tisut͡ɕu"); // tisuću (NOT Serbian hiljadu)
-        expect(phonemize("2000", "hr").trim()).toBe("dʋa tisut͡ɕe"); // dva tisuće
+        expect(phonemize("2000", "hr").trim()).toBe("dʋije tisut͡ɕe"); // dvije tisuće
         expect(phonemize("200", "hr").trim()).toBe("dʋjesto"); // dvjesto (NOT Serbian dvesta)
         expect(phonemize("1000000", "hr").trim()).toBe("jedan milijun"); // milijun (NOT Serbian milion)
+    });
+
+    // GENDER on the magnitude noun: tisuća is FEMININE, so the multiplier is the IJEKAVIAN feminine dvije /
+    // jedna (Serbian uses ekavian dve). milijun is masculine and keeps dva.
+    test("numbers: gender agreement on the FEMININE tisuća (ijekavian dvije)", () => {
+        expect(phonemize("1000", "hr").trim()).toBe("tisut͡ɕu"); // tisuću — the standalone form
+        expect(phonemize("2000", "hr").trim()).toBe("dʋije tisut͡ɕe"); // dvije tisuće (not *dva tisuće)
+        expect(phonemize("5000", "hr").trim()).toBe("pet tisut͡ɕa"); // pet tisuća — gen.pl
+        expect(phonemize("21000", "hr").trim()).toBe("dʋadeset jedna tisut͡ɕa"); // dvadeset jedna tisuća
+        expect(phonemize("1000000", "hr").trim()).toBe("jedan milijun"); // masculine
+        expect(phonemize("2000000", "hr").trim()).toBe("dʋa milijuna"); // dva milijuna — masculine keeps dva
     });
 });

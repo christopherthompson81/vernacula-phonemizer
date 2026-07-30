@@ -9,14 +9,15 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber, westernNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber } from "../../core/numbers.ts";
+import { eastSlavicNumberWords, type EastSlavicNumbers } from "./numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface UkrainianDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
     consonants: Record<string, string>;
-    numbers: NumbersDef; // includes the optional `hundreds` field read by westernNumberWords
+    numbers: EastSlavicNumbers; // Western/Slavic base table + the magnitude count forms and feminine 1/2
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<UkrainianDef>(import.meta.url, "ukrainian.jsonc");
@@ -101,7 +102,8 @@ export function phonemizeWord(word: string): string {
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
-    return renderNumber(n, DEF.numbers, phonemizeWord, westernNumberWords); // shared Slavic/Western composer
+    // East-Slavic composer: the magnitude nouns AGREE with their multiplier (дві тисячі, п'ять тисяч) — see numbers.ts
+    return renderNumber(n, DEF.numbers, phonemizeWord, eastSlavicNumberWords);
 }
 
 const CYRILLIC = "\\u0400-\\u04FF";

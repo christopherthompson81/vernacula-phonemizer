@@ -45,7 +45,9 @@ import { numberWords } from "./romanian.ts";
 function romanianOrdinal(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1) return undefined;
     if (n === 1) return "întâi"; // secolul I = secolul întâi; there is no *al unulea*
-    const card = numberWords(n);
+    // `stem: true` — the ordinal is built on the bare numeral, without the phrasal article or the `de` linker
+    // the CARDINAL takes before a magnitude noun (100 = "o sută" spoken, but "al sutălea", not *al o sutălea).
+    const card = numberWords(n, { stem: true });
     const words = card.split(" ");
     const last = words[words.length - 1]!;
     // -lea after a vowel (doi → doilea, nouăsprezece → nouăsprezecelea, sută → sutălea),

@@ -45,6 +45,21 @@
         "teens": ["дзесяць", "адзінаццаць", "дванаццаць", "трынаццаць", "чатырнаццаць", "пятнаццаць", "шаснаццаць", "сямнаццаць", "васямнаццаць", "дзевятнаццаць"],
         "tens": { "20": "дваццаць", "30": "трыццаць", "40": "сорак", "50": "пяцьдзесят", "60": "шэсцьдзесят", "70": "семдзесят", "80": "восемдзесят", "90": "дзевяноста" },
         "hundreds": ["", "сто", "дзвесце", "трыста", "чатырыста", "пяцьсот", "шэсцьсот", "семсот", "восемсот", "дзевяцьсот"],
-        "magnitudes": { "thousand": "тысяча", "million": "мільён", "billion": "мільярд" }
+        "magnitudes": { "thousand": "тысяча", "million": "мільён", "billion": "мільярд" },
+
+        // MAGNITUDE-NOUN AGREEMENT (ukrainian/numbers.ts — the East-Slavic compositor is shared; only the words
+        // differ). Each magnitude noun inflects for its count: nom.sg after a count ending in 1, nom.pl (`few`)
+        // after 2–4, gen.pl (`many`) after 5+ and 11–14. Sources: тысяча f, nom.pl тысячы, gen.pl тысяч
+        // (en.wiktionary.org/wiki/тысяча#Belarusian); мільён m.inan, мільёны / мільёнаў
+        // (en.wiktionary.org/wiki/мільён#Belarusian); мільярд m, мільярды / мільярдаў
+        // (en.wiktionary.org/wiki/мільярд#Belarusian).
+        "magnitudeCounts": {
+            "thousand": { "few": "тысячы", "many": "тысяч" },
+            "million": { "few": "мільёны", "many": "мільёнаў" },
+            "billion": { "few": "мільярды", "many": "мільярдаў" }
+        },
+        // тысяча is FEMININE → адна тысяча, дзве тысячы (never *два тысяча). адна = fem of адзін
+        // (en.wiktionary.org/wiki/адзін); дзве = fem of два (en.wiktionary.org/wiki/два#Belarusian).
+        "feminine": { "one": "адна", "two": "дзве" }
     }
 }
