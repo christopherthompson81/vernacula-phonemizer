@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../../index.ts";
 import { phonemizeWord } from "./lao.ts";
 
 // Diagnostic gold for the Lao (lo) authored g2p — verified-correct common words + one per structural feature
@@ -23,6 +24,29 @@ describe("Lao (lo) g2p — diagnostic gold", () => {
     ] as const) {
         test(`${word} → ${ipa}`, () => {
             expect(phonemizeWord(word)).toBe(ipa);
+        });
+    }
+});
+
+// Cardinal numbers — a Tai system, structurally Thai's: 20 is ຊາວ (and REPLACES "twenty": ຊາວສອງ = 22, no ສິບ),
+// a final 1 in any compound ≥11 is ເອັດ, and 10⁴/10⁵ are their own words (ໝື່ນ / ແສນ). Numerals from Wiktionary
+// "Category:Lao numerals"; the compositor emits Lao script and the g2p above reads it (see lao.ts).
+describe("Lao (lo) cardinal numbers", () => {
+    for (const [n, ipa] of [
+        [0, "suː˩n"], // ສູນ
+        [7, "t͡ɕe˧˥t̚"], // ເຈັດ
+        [11, "si˧˥p̚ ʔe˧˥t̚"], // ສິບເອັດ — final 1 is ເອັດ, not ໜຶ່ງ
+        [20, "saː˧˥w"], // ຊາວ — the irregular twenty (no ສິບ)
+        [21, "saː˧˥w ʔe˧˥t̚"], // ຊາວເອັດ
+        [42, "siː˧ si˧˥p̚ sɔː˩ŋ"], // ສີ່ສິບສອງ — regular unit+ສິບ decade
+        [100, "nɯ˧ŋ hɔː˥˨j"], // ໜຶ່ງຮ້ອຍ
+        [101, "nɯ˧ŋ hɔː˥˨j ʔe˧˥t̚"], // ໜຶ່ງຮ້ອຍເອັດ — ເອັດ after a hundred too
+        [1000, "nɯ˧ŋ pʰa˧˥n"], // ໜຶ່ງພັນ
+        [12345, "nɯ˧ŋ mɯː˧n sɔː˩ŋ pʰa˧˥n saː˩m hɔː˥˨j siː˧ si˧˥p̚ haː˧˩"], // ໝື່ນ myriad magnitude
+        [1000000, "nɯ˧ŋ laː˥˨n"], // ໜຶ່ງລ້ານ
+    ] as const) {
+        test(`${n} → ${ipa}`, () => {
+            expect(phonemize(String(n), "lo")).toBe(ipa);
         });
     }
 });
