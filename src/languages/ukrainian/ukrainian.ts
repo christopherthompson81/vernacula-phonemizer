@@ -12,12 +12,15 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber } from "../../core/numbers.ts";
 import { eastSlavicNumberWords, type EastSlavicNumbers } from "./numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
+import { normalizeUkrainian, normalizeUkrainianInitialisms } from "./normalize.ts";
 
 interface UkrainianDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
     consonants: Record<string, string>;
-    numbers: EastSlavicNumbers; // Western/Slavic base table + the magnitude count forms and feminine 1/2
+    /** Western/Slavic base table + the magnitude count forms, feminine 1/2, and the decimal-comma name. */
+    numbers: EastSlavicNumbers & { decimalConnector: string };
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<UkrainianDef>(import.meta.url, "ukrainian.jsonc");
@@ -106,17 +109,82 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, phonemizeWord, eastSlavicNumberWords);
 }
 
+/**
+ * #562 symbol normalization — Ukrainian: CYRILLIC unit abbreviations (км, not km) and the three-way Slavic
+ * agreement, which for uk IS Russian's selector (see normalize.ts's header for the evidence).
+ *
+ * `м` is NOT declared here on purpose: the shared tier's trailing guard is `(?![\p{L}\p{M}])`, and the
+ * Ukrainian apostrophe is neither a letter nor a mark, so `41 м'яч` would become *сорок один метр'яч*.
+ * It is handled in normalize.ts with an apostrophe-aware guard instead.
+ *
+ * Currency: NOT attested in uk_ua (the corpus spells доларів / фунтів / євро out), but the signs were
+ * being dropped outright, so the three that occur in Ukrainian text at all are declared. The forms are
+ * standard dictionary paradigms, not invented.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["відсоток", "відсотки", "відсотків"],
+    currency: {
+        "€": ["євро"], // indeclinable
+        "$": ["долар", "долари", "доларів"],
+        "£": ["фунт", "фунти", "фунтів"],
+    },
+    units: {
+        "км": ["кілометр", "кілометри", "кілометрів"],
+        "см": ["сантиметр", "сантиметри", "сантиметрів"],
+        "мм": ["міліметр", "міліметри", "міліметрів"],
+        "кг": ["кілограм", "кілограми", "кілограмів"],
+        "ггц": ["гігагерц", "гігагерци", "гігагерців"],
+        "мбіт": ["мегабіт", "мегабіти", "мегабіт"],
+        // LATIN aliases. uk_ua writes the Cyrillic abbreviation throughout, but the engine's TOKEN drops
+        // Latin runs outright, so a foreign-sourced `120 km` loses the unit entirely rather than merely
+        // mispronouncing it. Same reasoning as Russian's aliases; bare `m` is excluded for the same
+        // apostrophe reason as `м`.
+        "km": ["кілометр", "кілометри", "кілометрів"],
+        "cm": ["сантиметр", "сантиметри", "сантиметрів"],
+        "mm": ["міліметр", "міліметри", "міліметрів"],
+        "kg": ["кілограм", "кілограми", "кілограмів"],
+    },
+    unitPer: "на", // км/год → кілометрів НА годину; the denominator is accusative
+    rateDenominators: { "год": "годину", "ч": "годину", "h": "годину", "с": "секунду", "s": "секунду" },
+    // Ukrainian puts the measure adjective BEFORE the noun as a separate agreeing word — квадратних
+    // кілометрів — the same shape as Russian, not Swedish's fused compound.
+    exponentWords: {
+        squared: ["квадратний", "квадратні", "квадратних"],
+        cubed: ["кубічний", "кубічні", "кубічних"],
+        position: "before",
+    },
+    // Inflected forms too, because running text writes the one its numeral governs (2 мільйони, 5 мільйонів).
+    magnitudes: ["тисячі", "тисяч", "мільйон", "мільйона", "мільйони", "мільйонів",
+        "мільярд", "мільярда", "мільярди", "мільярдів"],
+    countForm: slavicCountForm,
+});
+
 const CYRILLIC = "\\u0400-\\u04FF";
-const TOKEN = new RegExp(`([${CYRILLIC}'’ʼ]+)|(\\d+)|([.?!,;:…—])`, "gu");
+// The number token carries its DECIMAL COMMA (Ukrainian's decimal mark) so the comma is not read as clause
+// punctuation — `1,5 кілометра` was coming out as a phrase break between "один" and "п'ять".
+const TOKEN = new RegExp(`([${CYRILLIC}'’ʼ]+)|(\\d+(?:,\\d+)?)|([.?!,;:…—])`, "gu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 
 class UkrainianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: Ukrainian rewrites (de-grouping, abbreviations, ordinal notation, clock, ranges,
+        // signs) → INITIALISMS (after the abbreviations, so a dotted abbreviation is never spelled out)
+        // → the shared symbol tier LAST, because it needs the number still adjacent to its unit or sign.
+        // Roman numerals arrive already converted at the registry seam (uk is not in ROMAN_NATIVE), with
+        // romanOrdinals.ts supplying the ordinal a century wants, so the roman-vs-initialism ordering
+        // hazard cannot arise here.
+        const normalized = SYMBOLS(normalizeUkrainianInitialisms(normalizeUkrainian(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
-            else if (m[3]) {
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                sink.emit(number(intPart!));
+                if (frac !== undefined) {
+                    sink.emit(phonemizeWord(DEF.numbers.decimalConnector));
+                    for (const dg of frac) sink.emit(number(dg));
+                }
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }

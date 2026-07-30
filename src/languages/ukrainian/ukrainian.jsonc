@@ -51,6 +51,20 @@
         // тисяча is FEMININE, so the multiplier's 1/2 must be feminine too: одна тисяча, дві тисячі (never
         // *один/*два тисяча). одна = fem of один (en.wiktionary.org/wiki/один#Ukrainian); дві = fem of два
         // (en.wiktionary.org/wiki/два#Ukrainian).
-        "feminine": { "one": "одна", "two": "дві" }
-    }
+        "feminine": { "one": "одна", "two": "дві" },
+
+        // The name of the decimal COMMA, emitted between the integer and fractional parts (ukrainian.ts).
+        // Ukrainian reads 1,5 either as «одна ціла п'ять десятих» or as «одна кома п'ять»; the punctuation
+        // name is chosen because it is INVARIANT, where «цілих» would need to agree (одна ціла / дві цілі /
+        // п'ять цілих) and the number path has no place to carry that agreement. Same call Polish made
+        // (przecinek). Before this the comma was clause punctuation: 1,5 read as *один , п'ять*.
+        "decimalConnector": "кома"
+    },
+
+    // LEXICAL (#562): all-caps runs that are SPELLED OUT although they are phonotactically readable, so
+    // core/initialisms.ts's OOV test cannot derive them. Everything else in the corpus is handled without a
+    // list: США, ДНК, ВВП, ФБР, МРТ, ДВД, СРСР, НБА, ТБ have an illegal onset or no vowel and are spelled
+    // automatically; ООН, ЗМІ, АЕС, ВІЛ, ІДІЛ, ОПЕК, ЮНЕСКО, СВАПО are readable AND said as words, so they
+    // are deliberately absent. Only the two genuine exceptions are listed.
+    "acronymLetters": ["аол", "ші"]
 }
