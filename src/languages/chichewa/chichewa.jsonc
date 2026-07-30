@@ -51,13 +51,27 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
-    // Cardinal number words (Chichewa). Simplified counting form; unmeasured (the referees are word-only).
+    // Cardinal number words (Chichewa). Sources: Omniglot "Numbers in Chichewa"
+    // (omniglot.com/language/numbers/chichewa.htm) for the tens series — 20 makumi awiri … 50 makumi asanu,
+    // 60 makumi asanu ndi limodzi, 70 makumi asanu ndi awiri, 80 makumi asanu ndi atatu, 90 makumi asanu ndi anayi;
+    // Wiktionary for the magnitude nouns and their classes — "zana" class 5 / plural "mazana" class 6 (hundred),
+    // "chikwi" class 7 / plural "zikwi" class 8 (thousand; "sauzande" is the English loan synonym).
+    //
+    // CONCORD. Chichewa numerals 1–5 are bound stems that take the concord of the counted noun, so a numeral has no
+    // single form. Bare-numeral CITATION form (what a TTS speaks for a lone digit) is the class-8/10 zi- series —
+    // chimodzi, ziwiri, zitatu, zinayi, zisanu — kept in "units". A numeral used as the MULTIPLIER of a magnitude
+    // word agrees with THAT word instead: makumi and mazana are class 6 → the a-/li- series in "classSix"
+    // (limodzi, awiri, atatu, anayi, asanu); zikwi is class 8 → the zi- series, i.e. "units" again. Conflating the
+    // two was the old bug: 60 came out as *makumi zisanu ndi chimodzi, identical to 51.
     "numbers": {
         "units": ["ziro", "chimodzi", "ziwiri", "zitatu", "zinayi", "zisanu", "zisanu ndi chimodzi", "zisanu ndi ziwiri", "zisanu ndi zitatu", "zisanu ndi zinayi"],
+        "classSix": ["", "limodzi", "awiri", "atatu", "anayi", "asanu", "asanu ndi limodzi", "asanu ndi awiri", "asanu ndi atatu", "asanu ndi anayi"],
         "ten": "khumi",
         "tens": "makumi",
         "hundred": "zana",
-        "thousand": "sauzande",
+        "hundreds": "mazana",
+        "thousand": "chikwi",
+        "thousands": "zikwi",
         "and": "ndi"
     }
 }

@@ -34,12 +34,30 @@
         ".": " . ", "?": " ? ", "!": " ! ", ",": " , ", ";": " ; ", ":": " : "
     },
 
-    // NUMBERS — Pashto spellings; canonical IPA DERIVED by the same g2p. Pashto 11-19/tens are irregular; the units
-    // + round tens + magnitudes are authored (21-99 compose as tens+unit — a bounded gap).
+    // NUMBERS — Pashto spellings; canonical IPA DERIVED by the same g2p.
+    //
+    // SOURCE: Omniglot "Pashto numbers and numerals" (omniglot.com/language/numbers/pashto.htm) — units, the
+    // irregular teens, the round tens (شل / دېرش / څلوېښت …), سل, زر, میلیون; the same page supplies the whole
+    // 21-29 ⟨ویشت⟩ series. Cross-checked against learn101.org/pashto_numbers.php, which also supplies the
+    // 31-99 pattern (71 = یو اویا). میلیارد for 10⁹ is the form used throughout Pashto Wikipedia (ps.wikipedia.org,
+    // e.g. "۹.۱ میلیارد ډالر"); بیلیون also occurs there in translated text but میلیارد is the dominant form.
+    //
+    // STRUCTURE (three separate patterns — this is NOT a uniform tens+unit system):
+    //   • 11-19 are irregular fused forms (يوولس, دیارلس, شپاړس, نولس …) → an authored `teens` table.
+    //   • 21-29 use the BOUND form ⟨ویشت⟩ of twenty, not ⟨شل⟩ (21 یوویشت, 25 پنځه ویشت) → an authored `compound` map.
+    //     Omniglot writes 25/27/28 with a hamza (پنځهٔ ویشت); the plain-⟨ه⟩ spelling is used here because the
+    //     hamza form mis-syllabifies in the abjad g2p (پنځهٔ → pənˈəd͡zh) — the pronunciation is identical.
+    //   • 31-99 are UNITS-FIRST with no connector (یو دېرش "one-thirty", یو اویا "one-seventy").
+    // ⟨و⟩ (and) joins only the hundred/thousand/million groups to their remainder.
     "numbers": {
-        "units": ["صفر", "یو", "دوه", "درې", "څلور", "پنځه", "شپږ", "اوه", "اته", "نهه"],
+        "units": ["صفر", "یو", "دوه", "درې", "څلور", "پنځه", "شپږ", "اووه", "اته", "نهه"],
         "ten": "لس",
+        "teens": ["لس", "يوولس", "دولس", "دیارلس", "څوارلس", "پنځه لس", "شپاړس", "اووه لس", "اته لس", "نولس"],
         "tens": { "20": "شل", "30": "دېرش", "40": "څلوېښت", "50": "پنځوس", "60": "شپېته", "70": "اویا", "80": "اتیا", "90": "نوی" },
-        "hundred": "سل", "thousand": "زر", "million": "میلیون", "and": "و"
+        "compound": {
+            "21": "یوویشت", "22": "دوه ویشت", "23": "در ویشت", "24": "څلېر ویشت", "25": "پنځه ویشت",
+            "26": "شپږ ویشت", "27": "اووه ویشت", "28": "اته ویشت", "29": "نهه ویشت"
+        },
+        "hundred": "سل", "thousand": "زر", "million": "میلیون", "billion": "میلیارد", "and": "و"
     }
 }

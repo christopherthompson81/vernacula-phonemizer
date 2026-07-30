@@ -38,6 +38,21 @@ describe("Zulu (isiZulu) g2p — authored beyond-espeak", () => {
         expect(phonemize("21", "zu")).toBe("amaʃˈuːmi amaɓˈiːli nˈaːɲɛ"); // combining forms have no tone data
     });
 
+    // The three unit series are distinct and must NOT be conflated: standalone ku- (kuthathu), connective na-
+    // (nantathu), multiplier ama- (amathathu). Source: zulu.jsonc "numbers" (espeak-independent authored table).
+    // Regression note: 13/15/23/25/… were once reported as failures by a number-audit probe whose sentinel regex
+    // was case-insensitive and so matched the legitimate na- forms "NANtathu"/"NANhlanu" as "NaN". The output was
+    // correct all along; these goldens pin it.
+    it("cardinal numbers — the na- connective series (units 3 and 5) is intact", () => {
+        expect(phonemize("3", "zu")).toBe("kʼutʰˈaːtʰu"); // kuthathu — standalone ku-
+        expect(phonemize("5", "zu")).toBe("kʼuɬˈaːnu"); // kuhlanu
+        expect(phonemize("13", "zu")).toBe("i˥˩ʃˈuː˥˩mi˩ nantʼˈaːtʰu"); // ishumi nantathu — connective na-
+        expect(phonemize("15", "zu")).toBe("i˥˩ʃˈuː˥˩mi˩ nanɬˈaːnu"); // ishumi nanhlanu
+        expect(phonemize("555", "zu")).toBe("amakʰˈuːlu amaɬˈaːnu amaʃˈuːmi amaɬˈaːnu nanɬˈaːnu"); // ama- multipliers
+        expect(phonemize("2000", "zu")).toBe("iz̤iŋkʼuluŋɡ̤wˈaːnɛ amaɓˈiːli"); // izinkulungwane amabili
+        expect(phonemize("1000000", "zu")).toBe("i˩si˥ɡ̤ˈiː˩d̤i˩"); // isigidi
+    });
+
     it("compound splits on internal capitals; tone threads across if the full word is listed", () => {
         expect(phonemize("isiNgisi", "zu")).toBe("ˈiː˥si˩ ŋɡ̤ˈiː˥si˩"); // full word toned → threaded
         expect(phonemize("isiTsonga", "zu")).toBe("ˈiːsi t͡sʼˈɔːŋɡ̤a"); // full word not listed → untoned

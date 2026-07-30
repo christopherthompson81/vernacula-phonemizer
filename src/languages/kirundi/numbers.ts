@@ -1,40 +1,17 @@
 /**
- * Kirundi cardinal number → words (space-separated; each runs through the g2p). Kirundi counting uses
- * icumi (10), makumi (tens), ijana (100), igihumbi (1000), joined with na ("and"). Simplified counting form (the
- * full noun-class concord agreement is contextual and not modelled): makumi abiri = 20, ijana = 100. Covers
- * 0 … <10⁶; larger / non-finite → digit-by-digit. Numbers are unmeasured (the referee is word-only) — best-effort.
+ * Kirundi cardinal number → words. Kirundi's numeral morphology is the same Rwanda-Rundi system as Kinyarwanda's,
+ * so the compositor itself lives in kinyarwanda/numbers.ts (`composeRwandaRundi`) and is shared; only the word
+ * table differs, and it lives in kirundi.jsonc. See that module's header for the concord/simplification notes.
+ *
+ * Kirundi-vs-Kinyarwanda deltas in the table (Omniglot "Numbers in Kirundi", omniglot.com/language/numbers/kirundi.htm;
+ * languagesandnumbers.com/how-to-count-in-rundi (run) for the tens/hundreds rule): 7 is indwi (not karindwi),
+ * 9 is icenda (Kirundi has no ⟨cy⟩), 20 is the regular mirongo ibiri (not the fused Kinyarwanda makumyabiri),
+ * the plural of ijana is amajana (not magana), and 10⁶ is umuriyoni (not miriyoni).
  */
+import { composeRwandaRundi } from "../kinyarwanda/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
-const N = MANIFEST.numbers;
-
-/** 1 ≤ n < 100. */
-function below100(n: number): string {
-    if (n < 10) return N.units[n]!;
-    if (n === 10) return N.ten;
-    const t = Math.floor(n / 10);
-    const u = n % 10;
-    const tens = t === 1 ? N.ten : `${N.tens} ${N.units[t]}`;
-    return u ? `${tens} ${N.and} ${N.units[u]}` : tens;
-}
-
-/** 1 ≤ n < 1000. */
-function below1000(n: number): string {
-    if (n < 100) return below100(n);
-    const h = Math.floor(n / 100);
-    const r = n % 100;
-    const hundred = h === 1 ? N.hundred : `${N.hundred} ${N.units[h]}`;
-    return r ? `${hundred} ${N.and} ${below100(r)}` : hundred;
-}
-
-/** Non-negative integer (< 10⁶) → Kirundi words; larger / non-finite → digit-by-digit. */
+/** Non-negative integer (< 10⁹) → Kirundi words; larger / non-finite → digit-by-digit. */
 export function numberToWords(n: number): string {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e6)
-        return [...String(Math.abs(n))].map((d) => N.units[Number(d)] ?? d).join(" ");
-    if (n === 0) return N.units[0]!;
-    if (n < 1000) return below1000(n);
-    const th = Math.floor(n / 1000);
-    const r = n % 1000;
-    const thousand = th === 1 ? N.thousand : `${N.thousand} ${below1000(th)}`;
-    return r ? `${thousand} ${N.and} ${below1000(r)}` : thousand;
+    return composeRwandaRundi(n, MANIFEST.numbers);
 }

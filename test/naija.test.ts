@@ -80,6 +80,18 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         expect(phonemize("100", "pcm")).toBe("wan hɔndɛd");
     });
 
+    // The compositor stopped at tauzin, so 10⁶+ leaked the raw digit string into the IPA. Naija is English-lexified
+    // and the numbers block stores IPA DIRECTLY, so the scales are added the same way: pcm.wikipedia.org writes
+    // million ⟨miliọn⟩ ("pas 75 miliọn", article "Naijá langwej"), and ⟨ọ⟩ = /ɔ/ in NLA orthography → /miliɔn/;
+    // /biliɔn/ is extrapolated from the same pattern (see naija.jsonc).
+    test("numbers: the miliɔn / biliɔn scales", () => {
+        expect(phonemize("12345", "pcm")).toBe("twɛlv tauzin tɾi hɔndɛd an foti faiv"); // thousands
+        expect(phonemize("100000", "pcm")).toBe("wan hɔndɛd tauzin");
+        expect(phonemize("1000000", "pcm")).toBe("wan miliɔn"); // was a DIGIT-LEAK
+        expect(phonemize("2000000", "pcm")).toBe("tu miliɔn");
+        expect(phonemize("1000000000", "pcm")).toBe("wan biliɔn"); // was a DIGIT-LEAK
+    });
+
     test("running text (BBC-Pidgin sentences)", () => {
         const s = phonemize("Wetin dey happen? Di pikin don chop.", "pcm");
         expect(s).toContain("wɛtin dɛ");

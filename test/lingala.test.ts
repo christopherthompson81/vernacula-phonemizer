@@ -37,4 +37,24 @@ describe("Lingala canonical IPA", () => {
         expect(ln.text("2").trim()).toBe("mi˥ba˩le˥"); // míbalé
         expect(ln.text("Mbɔ́tɛ!").trim()).toBe("ᵐbɔ˥tɛ˩  !");
     });
+
+    // NUMBERS above kámá. Two defects: there was no ZERO word at all (0 leaked the digit), and everything ≥ 1 000
+    // ran through `ordinals[Math.min(th, 10) - 1]`, clamping the thousand-multiplier at ten — so 100 000, 10⁶ and
+    // 10⁹ all produced the identical "kóto zómi". Lingala's higher scales are native class-alternating nouns on a
+    // myriad ladder (10⁴ mokoko/mikoko · 10⁵ elúndu/bilúndu · 10⁶ efúku/bifúku · 10⁹ epúná/bipúná), the singular
+    // standing alone for a multiplier of one. Source: lingalavision.com "How to count in Lingala from 0 to
+    // millions" + Omniglot "Numbers in Lingala" (libungutulu = 0). See lingala.jsonc.
+    test("zero + the native scale ladder (10⁴ mokoko … 10⁹ epúná)", () => {
+        const ln = getPhonemizer("ln");
+        expect(ln.text("0").trim()).toBe("li˩bu˩ᵑɡu˩tu˥lu˩"); // libungutúlu — was a DIGIT-LEAK
+        expect(ln.text("21").trim()).toBe("tu˥ku˥ mi˥ba˩le˥ na˩ mo˩˥ko˥"); // túkú míbalé na mǒkó
+        expect(ln.text("101").trim()).toBe("ka˥ma˥ mo˩˥ko˥ na˩ mo˩˥ko˥"); // kámá mǒkó na mǒkó
+        expect(ln.text("1000").trim()).toBe("ko˥to˩ mo˩˥ko˥"); // kóto is INVARIANT — always + multiplier
+        expect(ln.text("10000").trim()).toBe("mo˩ko˩ko˩"); // mokoko (singular, multiplier 1)
+        expect(ln.text("20000").trim()).toBe("mi˩ko˩ko˩ mi˥ba˩le˥"); // mikoko míbalé (plural + multiplier)
+        expect(ln.text("100000").trim()).toBe("e˩lu˥ⁿdu˩"); // elúndu — was shared with 10⁶ and 10⁹
+        expect(ln.text("1000000").trim()).toBe("e˩fu˥ku˩"); // efúku
+        expect(ln.text("2000000").trim()).toBe("bi˩fu˥ku˩ mi˥ba˩le˥"); // bifúku míbalé
+        expect(ln.text("1000000000").trim()).toBe("e˩pu˥na˥"); // epúná
+    });
 });

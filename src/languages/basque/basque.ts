@@ -70,7 +70,7 @@ const ONES = ["zero", "bat", "bi", "hiru", "lau", "bost", "sei", "zazpi", "zortz
 const SCORES = ["", "hogei", "berrogei", "hirurogei", "laurogei"]; // multiples of 20
 const HUNDREDS = ["", "ehun", "berrehun", "hirurehun", "laurehun", "bostehun", "seiehun", "zazpiehun", "zortziehun", "bederatziehun"];
 
-/** Basque cardinal 0 ≤ n < 10⁹ → the spelled-out words (space-separated). */
+/** Basque cardinal 0 ≤ n < 10¹² → the spelled-out words (space-separated). */
 function cardinalWords(n: number): string {
     if (n < 20) return ONES[n]!;
     if (n < 100) {
@@ -86,15 +86,23 @@ function cardinalWords(n: number): string {
         const thWord = th === 1 ? "mila" : `${cardinalWords(th)} mila`;
         return rem === 0 ? thWord : `${thWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
     }
-    const mil = Math.floor(n / 1_000_000), rem = n % 1_000_000;
-    const milWord = mil === 1 ? "milioi bat" : `${cardinalWords(mil)} milioi`;
-    return rem === 0 ? milWord : `${milWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+    if (n < 1_000_000_000) {
+        const mil = Math.floor(n / 1_000_000), rem = n % 1_000_000;
+        const milWord = mil === 1 ? "milioi bat" : `${cardinalWords(mil)} milioi`;
+        return rem === 0 ? milWord : `${milWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+    }
+    // 10⁹ is NOT ⟨bilioi⟩ in Basque — the long scale puts bilioi at 10¹², and 10⁹ is said ⟨mila milioi⟩ "a thousand
+    // million" (Berria Estilo Liburua, the Euskaltzaindia-aligned style manual: "45.000 milioi [45 mila milioi]";
+    // it also states bilioi = 10¹²). Before this, ≥ 10⁹ fell out of range and leaked the raw digits.
+    const bil = Math.floor(n / 1_000_000_000), rem = n % 1_000_000_000;
+    const bilWord = bil === 1 ? "mila milioi" : `${cardinalWords(bil)} mila milioi`;
+    return rem === 0 ? bilWord : `${bilWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
 }
 
 /** A digit string → canonical IPA of its Basque cardinal (each word phonemized, space-joined). Out-of-range → raw. */
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000) return digits;
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000_000) return digits; // 10¹² (bilioi) not authored
     return cardinalWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 

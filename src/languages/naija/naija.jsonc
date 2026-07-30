@@ -72,10 +72,15 @@
 
     // NUMBERS — nativised English (Naija counts with English numerals read in Naija phonology). Canonical IPA is
     // given directly (the number words are themselves media-spelled loans the rule g2p would mis-vowel).
+    //
+    // SOURCE for the 10⁶/10⁹ scales: Naija Wikipedia (pcm.wikipedia.org) writes million as ⟨miliọn⟩ — "pipul wey dey
+    // spik am for Naijá pas 75 miliọn" (article "Naijá langwej"). In NLA orthography ⟨ọ⟩ = /ɔ/, giving /miliɔn/.
+    // ⟨biliọn⟩ (10⁹) is EXTRAPOLATED from the same pattern — pcm.wikipedia has no attestation of it — but the
+    // English-loan shape is identical and Naija has no schwa, so the unstressed ⟨o⟩ is [ɔ] here too.
     "numbers": {
         "units": ["ziɾo", "wan", "tu", "tɾi", "fo", "faiv", "siks", "sɛvin", "et", "nain"],
         "teens": ["ten", "ilɛvin", "twɛlv", "tatin", "fotin", "fiftin", "sikstin", "sɛvintin", "etin", "naintin"],
         "tens": ["", "", "twɛnti", "tɔti", "foti", "fifti", "siksti", "sɛventi", "eti", "nainti"],
-        "hundred": "hɔndɛd", "thousand": "tauzin", "and": "an"
+        "hundred": "hɔndɛd", "thousand": "tauzin", "million": "miliɔn", "billion": "biliɔn", "and": "an"
     }
 }

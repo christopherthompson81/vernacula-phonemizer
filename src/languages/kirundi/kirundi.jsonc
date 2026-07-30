@@ -45,12 +45,22 @@
 
     // Cardinal number words (Kinyarwanda). Units 1–10; the compositor (numbers.ts) uses the simplified counting
     // form (makumi abiri = 20, ijana = 100, igihumbi = 1000) — the full noun-class concord is contextual (deferred).
+    // Cardinal number words. Same Rwanda-Rundi system as Kinyarwanda (the compositor is shared — see
+    // ../kinyarwanda/numbers.ts), with the Kirundi deltas taken from Omniglot "Numbers in Kirundi"
+    // (omniglot.com/language/numbers/kirundi.htm) and languagesandnumbers.com/how-to-count-in-rundi (run):
+    // 7 indwi (not karindwi), 9 icenda (Kirundi has no ⟨cy⟩), 20 the regular mirongo ibiri (not makumyabiri),
+    // plural of ijana is amajana, 10⁶ umuriyoni. "units" is the bare-numeral citation form.
     "numbers": {
-        "units": ["zeru", "rimwe", "kabiri", "gatatu", "kane", "gatanu", "gatandatu", "karindwi", "umunani", "icyenda"],
+        "units": ["zeru", "rimwe", "kabiri", "gatatu", "kane", "gatanu", "gatandatu", "indwi", "umunani", "icenda"],
         "ten": "icumi",
-        "tens": "makumi",
+        "tens": ["", "", "mirongo ibiri", "mirongo itatu", "mirongo ine", "mirongo itanu", "mirongo itandatu", "mirongo irindwi", "mirongo inani", "mirongo icenda"],
         "hundred": "ijana",
+        "hundreds": "amajana",
+        "hundredsMul": ["", "", "abiri", "atatu", "ane", "atanu", "atandatu", "arindwi", "inani", "cenda"],
         "thousand": "igihumbi",
+        "thousands": "ibihumbi",
+        "thousandsMul": ["", "", "bibiri", "bitatu", "bine", "bitanu", "bitandatu", "birindwi", "munani", "cenda"],
+        "million": "umuriyoni",
         "and": "na"
     }
 }

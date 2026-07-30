@@ -25,12 +25,26 @@
 
     // NUMBERS — standard (spoken) Bulgarian; canonical IPA DERIVED via the same g2p. "и" (and) precedes the final
     // component (сто двайсет и три; сто и три). Teens/tens use the contracted spoken forms (единайсет, двайсет).
+    //
+    // MAGNITUDE AGREEMENT. хиляда is FEMININE, so its multiplier is the plain neuter/feminine numeral (две хиляди)
+    // and it has a plural хиляди. милион and милиард are MASCULINE, which forces two extra forms:
+    //   • the multiplier "one"/"two" must be MASCULINE — един милион, два милиона (not *едно / *две);
+    //   • the noun takes the Bulgarian COUNT (numerative) plural -а after any numeral > 1 — два милиона, пет
+    //     милиона, двайсет милиарда. Source: Wiktionary "милион" (Bulgarian) — declension table gives the count
+    //     form милиона alongside the ordinary plural милиони; милиард (10⁹) declines the same way.
+    // SIMPLIFICATION: a multiplier ENDING in 1 (21 милион, 101 милион) also takes the masculine singular in careful
+    // Bulgarian; that is handled (the last digit decides), but the "…и един" agreement is the only sub-case where
+    // the noun stays singular, so 21 000 000 → двайсет и един милион.
     "numbers": {
         "units": ["нула", "едно", "две", "три", "четири", "пет", "шест", "седем", "осем", "девет"],
         "ten": "десет",
         "teens": ["единайсет", "дванайсет", "тринайсет", "четиринайсет", "петнайсет", "шестнайсет", "седемнайсет", "осемнайсет", "деветнайсет"],
         "tens": { "20": "двайсет", "30": "трийсет", "40": "четирийсет", "50": "петдесет", "60": "шейсет", "70": "седемдесет", "80": "осемдесет", "90": "деветдесет" },
         "hundreds": { "1": "сто", "2": "двеста", "3": "триста", "4": "четиристотин", "5": "петстотин", "6": "шестстотин", "7": "седемстотин", "8": "осемстотин", "9": "деветстотин" },
-        "thousand": "хиляда", "thousands": "хиляди", "and": "и"
+        "thousand": "хиляда", "thousands": "хиляди",
+        "million": "милион", "millions": "милиона", "billion": "милиард", "billions": "милиарда",
+        // Masculine 1/2 — required before милион/милиард (един милион, два милиона).
+        "masculine": { "1": "един", "2": "два" },
+        "and": "и"
     }
 }

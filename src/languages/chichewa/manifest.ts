@@ -12,11 +12,14 @@ export interface ChichewaManifest {
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: {
-        units: string[];
+        units: string[]; // bare-numeral citation form (class-8/10 zi- concord)
+        classSix: string[]; // multiplier form agreeing with the class-6 magnitudes makumi / mazana
         ten: string;
         tens: string;
         hundred: string;
+        hundreds: string;
         thousand: string;
+        thousands: string;
         and: string;
     };
 }

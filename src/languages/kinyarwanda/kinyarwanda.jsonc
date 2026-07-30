@@ -48,12 +48,24 @@
 
     // Cardinal number words (Kinyarwanda). Units 1–10; the compositor (numbers.ts) uses the simplified counting
     // form (makumi abiri = 20, ijana = 100, igihumbi = 1000) — the full noun-class concord is contextual (deferred).
+    // Cardinal number words. Sources: languagesandnumbers.com/how-to-count-in-kinyarwanda (kin) for the per-magnitude
+    // rule (tens = mirongo + i-multiplier except 10/20; hundreds = magana + a-multiplier except 100/800/900;
+    // thousands = ibihumbi + bi-multiplier except 1000/8000/9000); Omniglot "Numbers in Kinyarwanda" and
+    // kinyarwanda.mofeko.com/numbers.html agree independently on 20–90 and on miriyoni = 10⁶; Harvard ELIAS
+    // "Grammar: Cardinal and ordinal numbers" for the statement that 1–7 take class concord while 8/9/10 are invariable.
+    // "units" is the BARE-numeral citation form (what a TTS speaks for a lone digit); see numbers.ts for which
+    // multiplier series each magnitude selects and which simplifications are deliberate.
     "numbers": {
         "units": ["zeru", "rimwe", "kabiri", "gatatu", "kane", "gatanu", "gatandatu", "karindwi", "umunani", "icyenda"],
         "ten": "icumi",
-        "tens": "makumi",
+        "tens": ["", "", "makumyabiri", "mirongo itatu", "mirongo ine", "mirongo itanu", "mirongo itandatu", "mirongo irindwi", "mirongo inani", "mirongo icyenda"],
         "hundred": "ijana",
+        "hundreds": "magana",
+        "hundredsMul": ["", "", "abiri", "atatu", "ane", "atanu", "atandatu", "arindwi", "inani", "cyenda"],
         "thousand": "igihumbi",
+        "thousands": "ibihumbi",
+        "thousandsMul": ["", "", "bibiri", "bitatu", "bine", "bitanu", "bitandatu", "birindwi", "munani", "cyenda"],
+        "million": "miriyoni",
         "and": "na"
     }
 }

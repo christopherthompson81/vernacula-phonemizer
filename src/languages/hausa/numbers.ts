@@ -35,18 +35,24 @@ function below1000(n: number): string[] {
 
 /** Non-negative integer → Hausa words. */
 export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || n < 0) return "";
+    if (!Number.isFinite(n) || n < 0 || n >= 1e12) return "";
     if (n === 0) return ONES[0]!; // sifili
-    const parts: string[] = [];
-    const thou = Math.floor(n / 1000),
-        rest = n % 1000;
-    if (thou > 0) {
-        parts.push(N.thousand);
-        if (thou > 1) parts.push(...below1000(thou));
+    // Magnitude-first, largest scale first (Hausa says the scale word then its multiplier: dubu biyu = 2 000).
+    // The chain previously stopped at dubu and fed the whole quotient to below1000(), which indexes ONES[h] with
+    // h = ⌊q/100⌋ — for q ≥ 1000 that is ONES[10]/ONES[10000], i.e. undefined, so 100 000 / 10⁶ / 10⁹ all collapsed
+    // to the SAME output ("dubu ɗari …"). Each scale now consumes its own decade band and recurses on the rest.
+    const SCALES: [number, string][] = [
+        [1_000_000_000, N.billion], [1_000_000, N.million], [1000, N.thousand],
+    ];
+    for (const [value, scale] of SCALES) {
+        if (n >= value) {
+            const q = Math.floor(n / value),
+                rest = n % value;
+            const parts: string[] = [scale];
+            if (q > 1) parts.push(...numberToWords(q).split(" ")); // the multiplier follows its scale word
+            if (rest > 0) parts.push(N.connector, ...numberToWords(rest).split(" "));
+            return parts.join(" ");
+        }
     }
-    if (rest > 0) {
-        if (thou > 0) parts.push(N.connector);
-        parts.push(...below1000(rest));
-    }
-    return parts.join(" ");
+    return below1000(n).join(" ");
 }

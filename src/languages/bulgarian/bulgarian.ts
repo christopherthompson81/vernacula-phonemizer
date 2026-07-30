@@ -20,6 +20,11 @@ interface NumbersDef {
     hundreds: Record<string, string>;
     thousand: string;
     thousands: string;
+    million: string;
+    millions: string;
+    billion: string;
+    billions: string;
+    masculine: Record<string, string>;
     and: string;
 }
 interface BulgarianDef {
@@ -132,7 +137,29 @@ function numberToText(n: number): string {
         if (!r) return thWord;
         return `${thWord} ${r < 100 || r % 100 === 0 ? NUM.and + " " : ""}${numberToText(r)}`;
     }
+    // милион / милиард (10⁶ / 10⁹) — MASCULINE, so unlike the feminine хиляда they take a masculine multiplier and
+    // the COUNT plural -а above one (един милион, два милиона, пет милиарда). Nothing above 999 999 was composed
+    // before, so 10⁶+ fell through to the digit string and the Cyrillic g2p emitted EMPTY IPA.
+    for (const [value, sg, pl] of [
+        [1_000_000_000, NUM.billion, NUM.billions], [1_000_000, NUM.million, NUM.millions],
+    ] as const) {
+        if (n >= value) {
+            const q = Math.floor(n / value), r = n % value;
+            // The count plural is used for every multiplier except one ending in 1 (…и един милион).
+            const qWord = masculineText(q);
+            const mWord = `${qWord} ${q % 10 === 1 ? sg : pl}`;
+            if (!r) return mWord;
+            return `${mWord} ${r < 100 || r % 100 === 0 ? NUM.and + " " : ""}${numberToText(r)}`;
+        }
+    }
     return String(n);
+}
+/** Like `numberToText` but with the MASCULINE 1/2 (един/два, not едно/две) that милион/милиард require. */
+function masculineText(n: number): string {
+    const m = NUM.masculine[String(n % 10)];
+    if (m === undefined || (n > 10 && n < 20)) return numberToText(n); // teens have no masculine alternation
+    if (n < 10) return m;
+    return numberToText(n).replace(/\S+$/u, m); // …двайсет и ЕДИН, сто и ДВА
 }
 function number(digits: string): string {
     const n = Number(digits);

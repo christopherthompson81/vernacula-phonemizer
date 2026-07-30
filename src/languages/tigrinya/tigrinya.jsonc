@@ -24,12 +24,25 @@
 
     // NUMBERS — Tigrinya (Fidel) spellings; canonical IPA DERIVED via the same fidel→CV g2p. The units 1–10 are all
     // attested in the kaikki referee (ሓደ→ħadə, ክልተ→kɨltə, … ዓሰርተ→ʕasərtə). Units + teens (ዓሰርተ + unit) + round
-    // tens + magnitudes; 21-99 compose as "tens unit".
+    // tens + magnitudes; 21-99 compose as "tens unit" with the ን conjunction (below).
+    //
+    // SOURCE: Fitsum Gaim, "Tigrinya Number Verbalization: Rules, Algorithm, and Implementation", arXiv:2601.03403
+    // — Table 1 (digits / tens / SCALES) and §3.1–3.3 (the conjunction system + the hundred-form alternation).
+    // Scales per that table: 10²  ሚእቲ · 10³ ሽሕ · 10⁶ ሚልዮን · 10⁹ ቢልዮን (Tigrinya loans the scales above thousand).
+    // The paper's variant spellings ሽዱሽተ (6), ሱሳ (60), ቴስዓ (90) are NOT adopted here — the repo's ሽድሽተ / ስሳ / ተስዓ
+    // are the kaikki-calibrated forms already validated by the fidel g2p; both sets are attested.
+    //
+    // CONJUNCTION (paper §3.1–3.3): the suffix ን "and" attaches to EVERY term of an additive chain of length ≥ 2
+    // (25 → ዕስራን ሓሙሽተን), and to NOTHING in a chain of length 1 (40 → ኣርብዓ; 700 → ሸውዓተ ሚእቲ). A multiplier of a
+    // scale word is not itself a chain term (309 → ሰለስተ ሚእትን ትሽዓተን — ሰለስተ bare). A teen is ONE chain term, with
+    // no internal ን (118 → ሚእትን ዓሰርተ ሸሞንተን). ሚእቲ has the allomorph ሚእትን when suffixed (§3.2); every other word
+    // just takes ን. The leading ሓደ of a bare 1×scale is optional in the paper and omitted here (1000 → ሽሕ).
     "numbers": {
         "units": ["ዜሮ", "ሓደ", "ክልተ", "ሰለስተ", "ኣርባዕተ", "ሓሙሽተ", "ሽድሽተ", "ሸውዓተ", "ሸሞንተ", "ትሽዓተ"],
         "ten": "ዓሰርተ",
         "teenPrefix": "ዓሰርተ",
         "tens": { "20": "ዕስራ", "30": "ሰላሳ", "40": "ኣርብዓ", "50": "ሓምሳ", "60": "ስሳ", "70": "ሰብዓ", "80": "ሰማንያ", "90": "ተስዓ" },
-        "hundred": "ሚእቲ", "thousand": "ሽሕ"
+        "hundred": "ሚእቲ", "hundredConjoined": "ሚእትን", "thousand": "ሽሕ", "million": "ሚልዮን", "billion": "ቢልዮን",
+        "conjunction": "ን"
     }
 }

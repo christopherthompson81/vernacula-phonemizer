@@ -47,4 +47,18 @@ describe("Basque (euskara) canonical IPA", () => {
         expect(eu.text("234")).toBe("berehun eta hoɡeita hamalau"); // 200 eta (20+14)
         expect(eu.text("2025")).toBe("bi mila eta hoɡeita bos̺t"); // 2 thousand eta (20+5)
     });
+
+    // 10⁹ was out of range and leaked the raw digits. Basque is LONG-SCALE: ⟨bilioi⟩ is 10¹², and 10⁹ is said
+    // ⟨mila milioi⟩ "a thousand million" — Berria Estilo Liburua (the Euskaltzaindia-aligned style manual):
+    // "45.000 milioi [45 mila milioi]". The vigesimal 20-99 core is untouched.
+    test("the milioi / mila milioi scales (long scale — 10⁹ is NOT bilioi)", () => {
+        const eu = createBasque();
+        expect(eu.text("7")).toBe("s̻as̻pi"); // zazpi — units
+        expect(eu.text("12345")).toBe("hamabi mila hiɾuɾehun eta beroɡeita bos̺t"); // thousands
+        expect(eu.text("100000")).toBe("ehun mila"); // ehun mila
+        expect(eu.text("1000000")).toBe("milioi bat"); // milioi bat — "bat" FOLLOWS milioi
+        expect(eu.text("2000000")).toBe("bi milioi"); // bi milioi
+        expect(eu.text("1000000000")).toBe("mila milioi"); // was a DIGIT-LEAK
+        expect(eu.text("2000000000")).toBe("bi mila milioi");
+    });
 });

@@ -42,6 +42,7 @@ interface AkanDef {
     numbers: {
         zero: string; units: string[]; ten: string; tens: string[];
         hundreds: string[]; thousand: string; thousands: string;
+        million: string; millions: string; billion: string; billions: string;
     };
 }
 
@@ -155,11 +156,20 @@ function under1000(n: number): string {
     const h = Math.floor(n / 100), r = n % 100;
     return r === 0 ? NUM.hundreds[h - 1]! : `${NUM.hundreds[h - 1]} ${under100(r)}`;
 }
-/** Twi cardinal for a non-negative integer (big-to-small; thousands via apem / mpem N). */
+/**
+ * Twi cardinal for a non-negative integer (big-to-small). Each magnitude is the singular noun on its own
+ * (apem, ɔpepem) or the plural + multiplier (mpem mmienu, mpepem mmienu). Every multiplier goes through
+ * `under1000`, so the top magnitude bounds what we can say: ≥10¹² would need a multiplier ≥1000 and has no word,
+ * and falls back to digit-by-digit.
+ */
 function numberWords(n: number): string {
     if (n === 0) return NUM.zero;
-    const th = Math.floor(n / 1000), r = n % 1000;
+    if (n >= 1e12) return [...String(n)].map((d) => (d === "0" ? NUM.zero : NUM.units[Number(d) - 1]!)).join(" ");
     const parts: string[] = [];
+    const bil = Math.floor(n / 1e9), mil = Math.floor((n % 1e9) / 1e6);
+    const th = Math.floor((n % 1e6) / 1000), r = n % 1000;
+    if (bil > 0) parts.push(bil === 1 ? NUM.billion : `${NUM.billions} ${under1000(bil)}`);
+    if (mil > 0) parts.push(mil === 1 ? NUM.million : `${NUM.millions} ${under1000(mil)}`);
     if (th > 0) parts.push(th === 1 ? NUM.thousand : `${NUM.thousands} ${under1000(th)}`);
     if (r > 0) parts.push(under1000(r));
     return parts.join(" ");

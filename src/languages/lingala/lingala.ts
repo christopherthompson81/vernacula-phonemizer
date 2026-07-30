@@ -24,8 +24,12 @@ interface LingalaDef {
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: {
-        ordinals: string[]; ten: string; tens: string; hundred: string;
+        ordinals: string[]; zero: string; ten: string; tens: string; hundred: string;
         thousand: string; and: string; firstCard: string;
+        tenThousand: string; tenThousands: string;
+        hundredThousand: string; hundredThousands: string;
+        million: string; millions: string;
+        billion: string; billions: string;
     };
 }
 
@@ -63,7 +67,8 @@ export function phonemizeWord(word: string): string {
 // ── Numbers (Meeuwis §3.6: cardinal = the connective ya + the ordinal; compounds joined by na) ──────────────
 const NUM = DEF.numbers;
 function cardinalWords(n: number): string {
-    if (n < 1) return "";
+    if (n < 0) return "";
+    if (n === 0) return NUM.zero; // libungutúlu — "0" used to leak the raw digit (there was no zero word at all)
     if (n <= 10) return NUM.ordinals[n - 1]!;
     if (n < 20) return `${NUM.ten} ${NUM.and} ${NUM.ordinals[(n % 10) - 1]}`;
     if (n < 100) {
@@ -76,9 +81,27 @@ function cardinalWords(n: number): string {
         const hun = `${NUM.hundred} ${NUM.ordinals[h - 1]}`;
         return r === 0 ? hun : `${hun} ${NUM.and} ${cardinalWords(r)}`;
     }
-    const th = Math.floor(n / 1000), r = n % 1000;
-    const thou = `${NUM.thousand} ${NUM.ordinals[Math.min(th, 10) - 1] ?? cardinalWords(th)}`;
-    return r === 0 ? thou : `${thou} ${NUM.and} ${cardinalWords(r)}`;
+    // The scale ladder above kámá. kóto is INVARIANT and always carries an explicit multiplier (kóto mǒkó = 1 000);
+    // the higher scales are class-alternating nouns whose SINGULAR stands alone for a multiplier of 1 and whose
+    // PLURAL takes the multiplier (efúku = 10⁶, bifúku míbalé = 2×10⁶). Previously everything ≥ 1 000 went through
+    // `ordinals[Math.min(th, 10) - 1]`, which clamped the thousand-multiplier at 10 — so 100 000, 10⁶ and 10⁹ all
+    // produced the identical "kóto zómi".
+    const SCALES: [number, string, string | null][] = [
+        [1_000_000_000, NUM.billion, NUM.billions],
+        [1_000_000, NUM.million, NUM.millions],
+        [100_000, NUM.hundredThousand, NUM.hundredThousands],
+        [10_000, NUM.tenThousand, NUM.tenThousands],
+        [1000, NUM.thousand, null], // invariant → always "kóto <multiplier>"
+    ];
+    for (const [value, sg, pl] of SCALES) {
+        if (n < value) continue;
+        const q = Math.floor(n / value), r = n % value;
+        const head = pl === null
+            ? `${sg} ${cardinalWords(q)}`
+            : q === 1 ? sg : `${pl} ${cardinalWords(q)}`;
+        return r === 0 ? head : `${head} ${NUM.and} ${cardinalWords(r)}`;
+    }
+    return "";
 }
 
 const TOKEN = /([a-zɛɔ̀-ͯ]+)|(\d+)|([.?!,;:])/giu;
@@ -93,7 +116,7 @@ export function createLingala(): Phonemizer {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     const num = Number(m[2]);
-                    if (Number.isSafeInteger(num) && num > 0) for (const w of cardinalWords(num).split(" ")) sink.emit(phonemizeWord(w));
+                    if (Number.isSafeInteger(num) && num >= 0 && num < 1e12) for (const w of cardinalWords(num).split(" ")) sink.emit(phonemizeWord(w));
                     else sink.emit(m[2]);
                 } else if (m[3]) {
                     const mk = DEF.clausePunctuation[m[3]];
