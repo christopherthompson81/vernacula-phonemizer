@@ -23,6 +23,7 @@
  * FEMININE AGREEMENT is the trap in times: heure and minute are feminine, so 1 and any number ending in
  * 1 take *une*, not *un* — `1 h 15` is "une heure quinze" and `4:41` is "quatre heures quarante et une".
  */
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
 import { ordinal } from "./ordinals.ts";
 
@@ -67,7 +68,7 @@ const UNDOTTED_ABBREV: Readonly<Record<string, string>> = { dr: "docteur", pr: "
  */
 const WORD_ACRONYMS: ReadonlySet<string> = new Set([
     "onu", "otan", "unesco", "unicef", "smic", "sida", "ovni", "insee", "ena", "capes", "cedex",
-    "pacs", "nasa", "fifa", "uefa", "opep", "afnor", "inserm", "erasmus",
+    "pacs", "nasa", "fifa", "uefa", "opep", "afnor", "inserm", "erasmus", "acta", "covid",
 ]);
 
 /** French letter names, for initialisms. Verified individually through this engine: bé=[be], cé=[se],
@@ -89,58 +90,28 @@ const FORCE_LETTERS: ReadonlySet<string> = new Set([
     "usa", "cd", "dvd", "bd", "ps", "pib", "rer", "vtt", "qg", "jo", "ir", "as", "pc", "id", "ong",
 ]);
 
-const VOWEL_LETTER = /[aeiouyàâäéèêëîïôöûüùœæ]/u;
-const CONSONANT_RUN = /[^aeiouyàâäéèêëîïôöûüùœæ]{3,}/u;
-
-/** Two-consonant clusters French can begin a word with: obstruent + liquid, the s-/p- clusters, and the
- *  digraphs that stand for a single sound. */
-const LEGAL_ONSET: ReadonlySet<string> = new Set([
-    "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "kl", "kr",
-    "ch", "ph", "th", "gn", "qu", "sc", "sp", "st", "ps", "pn", "pt", "sm", "sn", "gu", "rh", "ct",
-]);
-
-/** Two-consonant clusters French can end a word with. Liquid- and nasal-final codas are broadly legal;
- *  what is NOT legal is the stop+stop / fricative+stop shape an initialism throws up (RATP, EDF). */
-const LEGAL_CODA: ReadonlySet<string> = new Set([
-    "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "ch", "gn",
-    "st", "sc", "sk", "sp", "ct", "pt", "ft", "xt", "ss", "tt", "ll", "mm", "nn", "pp", "rr", "ff",
-    "rt", "rd", "rs", "rc", "rl", "rm", "rn", "rp", "rb", "rg", "rf", "rv", "rq",
-    "lt", "ld", "ls", "lc", "lm", "lp", "lb", "lf", "lk", "lv",
-    "nt", "nd", "ns", "nc", "nk", "ng", "mp", "mb",
-    // stop/fricative + s: the shape of a written plural and of acronyms like PACS [paks].
-    "cs", "ks", "ts", "ps", "bs", "ds", "gs", "fs", "ms",
-]);
-
-const IS_CONSONANT = (ch: string): boolean => /[a-zà-ÿ]/u.test(ch) && !VOWEL_LETTER.test(ch);
-
 /**
- * Can this letter sequence be READ as a French word at all? Used to decide what to do with an acronym
- * whose reading convention is not recorded: readable → say it as a word, unreadable → spell out the
- * letters. This is the safety net for the failure mode that motivated it — `SNCF` came out as the
- * unpronounceable cluster [snkf], and `TGV` / `PDG` were dropped from the output entirely, because the
- * g2p had no vowel to build a syllable around.
- *
- * Deliberately conservative: it reports unreadable only on high-confidence phonotactic violations, so a
- * plausible letter string is left readable. Three signals, in order of confidence:
- *   1. NO VOWEL at all — nothing can be syllabified (SNCF, TGV, PDG, HLM, CD).
- *   2. An illegal word-INITIAL cluster (TVA: French has no /tv/ onset).
- *   3. An illegal word-FINAL cluster (RATP: no /tp/ coda; EDF: no /df/ coda).
- * Plus a consonant run of 3+ with no liquid to break it up.
- *
- * KNOWN LIMIT: readability is not the same as convention. `ONG`, `PIB` and `RER` are all readable yet
- * conventionally spelled out, which is why FORCE_LETTERS exists above — no phonotactic test can derive
- * a lexical convention.
+ * French phonotactics, for the readability guard in core/initialisms.ts. Legal onsets are obstruent +
+ * liquid plus the s-/p- clusters and the digraphs standing for one sound; legal codas are broadly the
+ * liquid- and nasal-final ones plus stop/fricative + s (the shape of a written plural, and of PACS
+ * [paks]). What is NOT legal is the stop+stop / fricative+stop shape an initialism throws up: RATP /tp/,
+ * EDF /df/, and the /tv/ onset of TVA.
  */
-export function isUnreadableFrench(word: string): boolean {
-    const w = word.toLowerCase();
-    if (!VOWEL_LETTER.test(w)) return true;
-    const run = CONSONANT_RUN.exec(w);
-    if (run !== null && !/[lr]/u.test(run[0])) return true;
-    if (w.length >= 2 && IS_CONSONANT(w[0]!) && IS_CONSONANT(w[1]!) && !LEGAL_ONSET.has(w.slice(0, 2))) return true;
-    const tail = w.slice(-2);
-    if (tail.length === 2 && IS_CONSONANT(tail[0]!) && IS_CONSONANT(tail[1]!) && !LEGAL_CODA.has(tail)) return true;
-    return false;
-}
+export const isUnreadableFrench = makeUnreadableTest({
+    vowels: /[aeiouyàâäéèêëîïôöûüùœæ]/u,
+    legalOnsets: new Set([
+        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "kl", "kr",
+        "ch", "ph", "th", "gn", "qu", "sc", "sp", "st", "ps", "pn", "pt", "sm", "sn", "gu", "rh", "ct",
+    ]),
+    legalCodas: new Set([
+        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr", "ch", "gn",
+        "st", "sc", "sk", "sp", "ct", "pt", "ft", "xt", "ss", "tt", "ll", "mm", "nn", "pp", "rr", "ff",
+        "rt", "rd", "rs", "rc", "rl", "rm", "rn", "rp", "rb", "rg", "rf", "rv", "rq",
+        "lt", "ld", "ls", "lc", "lm", "lp", "lb", "lf", "lk", "lv",
+        "nt", "nd", "ns", "nc", "nk", "ng", "mp", "mb",
+        "cs", "ks", "ts", "ps", "bs", "ds", "gs", "fs", "ms",
+    ]),
+});
 
 /** Non-negative integer → words, with the final *un* feminized (heure/minute are feminine). */
 function feminineWords(n: number): string {
@@ -248,31 +219,16 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
 }
 
 /**
- * INITIALISMS: an all-caps run of 2+ letters → the French letter names. A SEPARATE pass from
- * `normalizeFrench` because of where it has to sit in the order: Roman numerals are all-caps letter runs
- * too (`Louis XIV`, `Super Bowl LVIII`), so the numeral rules get first refusal and this claims only what
- * they declined. Running it earlier letter-spelled every regnal numeral as IXE-I-VÉ.
- *
- * Gated on the text containing lowercase: in an all-caps document the capitals carry no signal, and
- * spelling out every word would be absurd. An acronym whose lowercase form is an attested French word is
- * read AS that word (ONU → [ɔny], UNESCO → [ynɛsko]); anything else is spelled out (SNCF, TGV, PDG —
- * previously an unpronounceable consonant cluster, or dropped from the output entirely).
+ * INITIALISMS. A SEPARATE pass from `normalizeFrench` because of where it must sit in the order: Roman
+ * numerals are all-caps letter runs too (`Louis XIV`), so the numeral rules get first refusal and this
+ * claims only what they declined. The decision order and its measurement live in core/initialisms.ts.
  */
 export function normalizeFrenchInitialisms(text: string, isWord: (lower: string) => boolean): string {
-    if (!/\p{Ll}/u.test(text)) return text;
-    return text.replace(/\b\p{Lu}{2,}\b/gu, (tok) => {
-        const lower = tok.toLowerCase();
-        if (FORCE_LETTERS.has(lower)) return spellOut(lower) ?? tok;
-        // Convention first, then the lexicon, then phonotactics for anything unrecorded.
-        if (WORD_ACRONYMS.has(lower) || isWord(lower)) return lower;
-        if (!isUnreadableFrench(lower)) return lower;
-        return spellOut(lower) ?? tok;
-    });
-}
-
-/** Letter-by-letter reading, or undefined if any character has no letter name (so the caller can leave
- *  the token alone rather than emit a partial reading). */
-function spellOut(lower: string): string | undefined {
-    const names = [...lower].map((ch) => LETTER_NAME[ch]);
-    return names.every((l) => l !== undefined) ? names.join(" ") : undefined;
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        forceLetters: FORCE_LETTERS,
+        wordAcronyms: WORD_ACRONYMS,
+        isWord,
+        isUnreadable: isUnreadableFrench,
+    })(text);
 }

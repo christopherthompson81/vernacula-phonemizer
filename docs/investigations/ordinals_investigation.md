@@ -303,3 +303,97 @@ is [ʒezykʁi]. Both are current in speech, so the existing reading is a variant
 was left alone rather than asserting a change I could not source.
 
 Verified: 18 French tests pass (1 new), referee eval byte-identical (79.3% / 96.0%).
+
+## Run 5 — 2026-07-29 — English parity, and lifting the shared machinery into core/
+
+Audited English against every class built for French, then closed the gaps. English started ahead —
+times, dates, pair-wise years, ordinals, percent, currency, comma-grouping, romans and most units all
+worked — but the initialism story was worse, not better.
+
+### The corpus has TWO transcript columns, which changed the measurement
+
+Column 3 is the ORIGINAL cased transcript; column 4 is the lowercased one my earlier sweeps used. So the
+caps signal IS available in real text, and the cased column is the honest place to measure this class:
+
+| | all-caps tokens | distinct | top |
+|---|---|---|---|
+| en_us | 228 | 84 | US×18, BCE×8, **II×8**, GPS×6, MRI×6, DNA×6, TV×6, UN×6, UTC×5, PBS×5 |
+| fr_fr | 191 | 69 | AOL×8, UTC×7, IRM×6, ACTA×6, ADN×6, PBS×5, FBI×5, DVD×5, ONU×4, PIB×4 |
+
+`II`×8 confirms the ordering constraint is real, not hypothetical: Roman numerals are all-caps letter
+runs, so the numeral rules must claim them before any initialism rule sees them.
+
+Also measured (en, cased): `Jr.`×9 — the single most frequent dotted abbreviation, and English had **no
+rule for it at all** — `Dr.`×7, `etc.`×5, `St.`×4, `No.`×2, `km/h`×15, space-grouped thousands ×4.
+
+### THE DECISION ORDER WAS WRONG IN MY FRENCH IMPLEMENTATION, and the measurement caught it
+
+My first French design used phonotactic readability as the DEFAULT: readable ⇒ say it as a word. Measured
+against the French cased column that is the wrong default — 17 distinct tokens are spelled out (AOL, UTC,
+IRM, ADN, PBS, FBI, DVD, RSPCA, NBA, GPS, PIB, OHA, CIO …) against 5 said as words (ONU, ACTA, COVID,
+UNESCO, OPEP). Readability-as-default gets ACTA and COVID right but AOL, CIO, OHA and NYC wrong, and those
+are the more numerous class. **Corrected to: spelling out is the default, the word reading is marked.**
+French now reads CIO/AOL/OHA/ACMA/TDA correctly, which it did not before this run.
+
+So readability was demoted to the job it is actually good at: a **fail-safe guard on the hand-written
+word-acronym list**, so a mistaken entry there degrades to spelling out instead of to unpronounceable
+output. It is deliberately NOT applied to dictionary hits — that broke `CD`, which has no vowel and so
+reads as "unreadable", yet CMUdict carries it as one token [siːdˈiː] with one stress, better prosody than
+[sˈiː dˈiː]. Trust a dictionary that holds a real pronunciation.
+
+### Lifted to `src/core/initialisms.ts`
+
+Now that the shape is proven twice, `makeInitialismNormalizer` + `makeUnreadableTest` are shared, with
+per-language data only: letter names, `forceLetters`, `wordAcronyms`, a word test, phonotactic clusters.
+French was refactored onto it. Decision order: forceLetters → dictionary → guarded word-acronyms → spell out.
+
+English needs almost no letter-name data: **CMUdict carries all 26 single letters with their letter-NAME
+pronunciations** (f = EH1 F, h = EY1 CH, w = D AH1 B AH0 L Y UW0), so emitting bare letters space-separated
+resolves correctly. Only `a` needs an override, being the reduced article AH0.
+
+`FORCE_LETTERS` for English is deliberately short, with a precise membership test: an entry belongs only
+if the dictionary reads the token as the WORD. CMUdict already has correct letter readings for eu, uk, tv,
+cd, dvd, dc, ac, pc, pm, dj, so forcing those would make output worse. Final list: us, un, it, id, am,
+led, who.
+
+### What was broken in English
+
+| class | before | after |
+|---|---|---|
+| initialism | `NHS` → `[ns]` (H gone) | `ˈɛn ˈeᶦt͡ʃ ˈɛs` |
+| initialism | `MP` → `[mp]`, `NYC` → `[niːk]`, `WTO` → `[uːt]`, `DSLR` → `[ʌdslɚ]`, `PNG` → `[pŋɡ]`, `WNED` → `[aᶷnd]` | all spelled out |
+| initialism | `US` → `[ʌs]` (the pronoun) | `jˈuː ˈɛs` |
+| abbrev | `Jr.` no rule; `No. 11` → the word "no" + a pause | junior; `nˈʌmbɚ ɪlˈɛvən` |
+| abbrev | `Dr. Who` → **"drive who"** ("who" is in the function-word list) | `dˈɑːktɚ hˈuː` |
+| abbrev | `e.g.`/`i.e.`/`U.S.`/`B.C.` → interior dots became PAUSE marks | letters, no pauses |
+| era | `BCE` → `[bsiː]`; `AD` → the word "ad" | `bˈiː sˈiː ˈiː`; `ˈeᶦ dˈiː` |
+| fraction | `1/2` → "one two" | `wˈʌn hˈæf`; `2/5` → "two fifths" |
+| negative | `-5 degrees` → "five degrees" (**meaning inverted**) | `mˈaᶦnəs fˈaᶦv …` |
+| units | `20 °C` → "twenty see"; `km/h` → "kilometers aitch"; `30 m` → "thirty em" | all expanded |
+| grouping | `5 000 years` → "five zero years" | `fˈaᶦv θˈaᶷzənd jˈɪɹz` |
+
+Fixed `Dr.`/`St.` with a capitalization signal that overrides the neighbour test where the input has
+case; the lowercased corpus keeps relying on the neighbour heuristic as before.
+
+Also found the English UNIT alternation was **hardcoded and had drifted from the UNITS table** — several
+table entries were unreachable. It is now generated from the keys, longest first, so `km/h` cannot be
+shadowed by `km` and adding a unit is a one-line data change.
+
+### Verification
+
+- 198 files / 2094 tests pass (8 new); `tsc --noEmit` clean.
+- Referee eval **byte-identical for both languages**, confirmed against a stashed baseline:
+  en 36.1% folded / 78.1% symbol; fr 79.3% / 96.0%.
+- en_us corpus re-run, both columns: 174/2602 changed on the cased column, 59/2602 on the lowercased one;
+  zero digit leaks, sentinels, slot-gaps, stray symbols or empty lines in either. Sampled review of the
+  changes found them all improvements.
+
+### Known gaps left
+
+- Alphanumeric codes (`CG4684`, a flight number) are not claimed: there is no word boundary between the
+  letters and the digits, so the all-caps pattern does not match. Still reads as `[kɡ]`.
+- ISO (`2011-03-14`) and US numeric (`3/14/2011`) dates are unhandled in English; 0 corpus instances, and
+  the fraction rule correctly declines to claim them.
+- Money decimals (`£2.50` → "two point five zero pounds" rather than "two pounds fifty") in both languages.
+- A lone all-caps token is exempted from the all-caps-document gate so `NYC` typed alone still spells out;
+  a multi-word all-caps HEADLINE is still left alone, which is the intended behaviour.
