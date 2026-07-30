@@ -6,6 +6,8 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeUrduNormalizer } from "./normalize.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
@@ -84,25 +86,44 @@ export function phonemizeWord(word: string): string {
     return phonemizeWordCore(word);
 }
 
+// #562 Urdu had no symbol tier at all: "3%" read as just "تین", losing the percent.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["فیصد"],
+    currency: { "₨": ["روپے"], $: ["ڈالر"], "€": ["یورو"], "£": ["پاؤنڈ"] },
+    units: { km: ["کلومیٹر"], cm: ["سینٹیمیٹر"], mm: ["ملیمیٹر"], kg: ["کلوگرام"], m: ["میٹر"],
+        g: ["گرام"], "km/h": ["کلومیٹر فی گھنٹہ"] },
+});
+
 const TOKEN = new RegExp(
     `([${URDU_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:[.,][${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
     "gu",
 );
 
+/** The Urdu-specific rewrites, built once against the manifest's numbers definition. */
+const normalize = makeUrduNormalizer(DEF.numbers);
+
 const toAscii = (d: string): string =>
     [...d].filter((c) => c !== ",").map((c) => EASTERN_DIGITS[c] ?? c).join("");
 
 function number(digits: string): string {
-    const ascii = toAscii(digits);
-    const n = Number(ascii);
-    if (!Number.isSafeInteger(n)) return ascii;
-    return renderNumber(n, DEF.numbers, phonemizeWordCore); // numbers bypass the content lexicon
+    // A DECIMAL is read as the integer part, the decimal word, then the fractional digits one by one.
+    // Without this the guard below returned the raw string and "1.5" LEAKED ASCII DIGITS into the IPA.
+    const [intPart, frac] = toAscii(digits).split(".");
+    const n = Number(intPart);
+    if (!Number.isSafeInteger(n)) return "";
+    const head = renderNumber(n, DEF.numbers, phonemizeWordCore); // numbers bypass the content lexicon
+    if (frac === undefined || frac === "") return head;
+    const dot = DEF.numbers.decimalWord;
+    const tail = [...frac].map((d) => renderNumber(Number(d), DEF.numbers, phonemizeWordCore));
+    return [head, dot ? phonemizeWordCore(dot) : "", ...tail].filter((x) => x !== "").join(" ");
 }
 
 class UrduPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562: Urdu-specific rewrites (ordinal suffixes, clock, spaced units, signs, fractions) then the
+        // shared symbol tier, which Urdu lacked entirely — % and every currency sign were DROPPED.
+        return assembleClauses(SYMBOLS(normalize(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
