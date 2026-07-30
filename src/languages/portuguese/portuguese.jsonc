@@ -11,6 +11,15 @@
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/pt_native_bringup_investigation.md.
 {
+    // ACRONYMS read letter-by-letter that the OOV phonotactic rule would leave alone, being perfectly
+    // pronounceable Portuguese letter strings. A LEXICAL fact, listed rather than derived. EUA (x15 in the
+    // corpus) and TV (x13) are the frequent ones; the pronunciation lexicon here is a CORRECTION table
+    // rather than a wordlist, so it cannot serve as the "is this recorded" test.
+    "acronymLetters": [
+        "eua", "tv", "aol", "oha", "us", "url", "pib", "cpf", "cnpj", "ong", "dvd", "cd", "gps",
+        "utc", "pbs", "bbc", "cnn", "fbi", "adn", "dna", "sms", "led", "usb", "pdf", "iptu"
+    ],
+
     "language": "pt",
     "name": "Portuguese (European, pt-PT)",
     "script": "Latin",

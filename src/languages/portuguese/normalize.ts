@@ -1,0 +1,171 @@
+/**
+ * Portuguese (pt / pt-BR) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is
+ * not already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ *
+ * Eighth language, and structurally the closest to Spanish: same ordinal indicators, same dot-thousands /
+ * comma-decimal conventions, same era markers. Shared with pt-BR, which is the same engine with
+ * `dialect: "bp"` plus an open/close lexicon rather than a separate implementation — so there is one
+ * normalization layer for both, and the few genuinely Brazilian choices are noted where they arise.
+ *
+ * Already correct and untouched: dot-thousands (1.000 → mil) and comma-decimals were already in the number
+ * tokenizer, % and the metric units work through the shared symbol tier, dates take a plain cardinal day,
+ * and Roman numerals are handled at the registry seam (pt is not in ROMAN_NATIVE), so `século XV` is right
+ * and the roman-vs-initialism ordering hazard cannot arise here.
+ *
+ * Measured over the pt_br corpus (2,793 utterances): units ×69, dot-thousands ×65, dates ×56, percent ×29,
+ * comma-decimals ×29, the `NhNN` clock ×28 and `h:mm` ×17, all-caps ×230 (EUA ×15, TV ×13, AOL ×7, OHA ×6),
+ * Roman numerals ×25, ordinal indicators ×20, dotted abbreviations ×19, `a.C.` ×8.
+ */
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { portugueseOrdinal } from "./romanOrdinals.ts";
+
+const GROUP_SPACE = "    ";
+const MONTHS = "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro";
+
+/** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare "no"
+ *  is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT counts. */
+const DOTTED_ABBREV: Readonly<Record<string, string>> = {
+    sr: "senhor", sra: "senhora", srta: "senhorita", srs: "senhores",
+    dr: "doutor", dra: "doutora", prof: "professor", profa: "professora", eng: "engenheiro",
+    etc: "etcétera", "pág": "página", pag: "página", "págs": "páginas",
+    cap: "capítulo", art: "artigo", vol: "volume", av: "avenida", ex: "exemplo",
+    ltda: "limitada", cia: "companhia", "núm": "número", aprox: "aproximadamente",
+};
+const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/** Portuguese letter names, each verified through this engine. */
+const LETTER_NAME: Readonly<Record<string, string>> = {
+    a: "a", b: "bê", c: "cê", d: "dê", e: "é", f: "éfe", g: "gê", h: "agá", i: "i",
+    j: "jota", k: "cá", l: "éle", m: "eme", n: "ene", o: "ó", p: "pê", q: "quê",
+    r: "erre", s: "esse", t: "tê", u: "u", v: "vê", w: "dábliu", x: "xis", y: "ípsilon", z: "zê",
+};
+
+/** Portuguese phonotactics, for the OOV rule in core/initialisms.ts. */
+export const isUnreadablePortuguese = makeUnreadableTest({
+    vowels: /[aeiouáéíóúâêôãõà]/u,
+    legalOnsets: new Set([
+        "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "tr", "vr",
+        "ch", "lh", "nh", "qu", "gu", "ps", "rr", "ss", "sc", "tl",
+    ]),
+    legalCodas: new Set([
+        "ch", "lh", "nh", "rr", "ss", "ns", "rs", "ls", "is", "us", "as", "es", "os",
+        "st", "rt", "rd", "rn", "rl", "rm", "lt", "ld", "nt", "nd", "nc", "ng", "mp", "mb",
+        "sc", "sm", "cs", "ps", "ts", "ks", "bs", "ds",
+    ]),
+});
+
+/** LEXICAL: acronyms spelled out. Authored in portuguese.jsonc beside the other hand-authored facts. */
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
+
+/** Portuguese has a pronunciation lexicon, but it is a CORRECTION table rather than a wordlist, so it
+ *  cannot serve as the "is this recorded" test the way CMUdict or Lexique do. Acronyms are decided by the
+ *  lexical list plus the OOV phonotactic rule alone. */
+export function normalizePortugueseInitialisms(text: string): string {
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        acronymLetters: ACRONYM_LETTERS,
+        isRecorded: () => false,
+        isUnreadable: isUnreadablePortuguese,
+    })(text);
+}
+
+/** Feminine ordinal: every element of a compound inflects (trigésimo sétimo → trigésima sétima). */
+function feminineOrdinal(masc: string): string {
+    return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
+}
+
+/** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
+function feminineCardinal(n: number): string {
+    return numberToWords(n).replace(/um$/u, "uma");
+}
+
+const DENOMINATOR: Readonly<Record<number, string>> = { 2: "meio", 3: "terço" };
+
+function fractionWords(num: number, den: number): string | undefined {
+    if (den < 2 || num < 1) return undefined;
+    const base = DENOMINATOR[den] ?? portugueseOrdinal(den);
+    if (base === undefined) return undefined;
+    return `${numberToWords(num)} ${num > 1 ? `${base}s` : base}`;
+}
+
+/**
+ * Normalize one Portuguese input string. Pure text→text.
+ *
+ * `brazilian` selects the one place the varieties genuinely differ in this layer: the first of the month.
+ */
+export function normalizePortuguese(input: string, brazilian = false): string {
+    let s = input;
+
+    // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
+    //    form is not, and the number token cannot span a space.
+    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
+    s = s.replace(/[   ]/gu, " ");
+
+    // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
+    //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.
+    s = s.replace(/\ba\.\s?C\./giu, "antes de Cristo");
+    s = s.replace(/\bd\.\s?C\./giu, "depois de Cristo");
+
+    // 2) NÚMERO, only before a digit: bare "no" is the contraction em+o and is everywhere.
+    s = s.replace(/\b(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)/giu, "número ");
+
+    // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
+    //    phrase break; at a phrase end it stays, because there it really is the sentence end.
+    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+    s = s.replace(new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+
+    // 4) ORDINAL INDICATORS. º and ª were reaching the phoneme string RAW — a non-IPA character in the
+    //    output. ° (U+00B0 DEGREE SIGN) is deliberately NOT one of them: "35°" and "32 °" occur in this
+    //    corpus and are temperatures, and treating ° as ordinal would read them as ordinals.
+    s = s.replace(/\b(\d+)\.?(?:º|ª)/gu, (whole) => {
+        const n = Number(/\d+/.exec(whole)![0]);
+        const masc = portugueseOrdinal(n);
+        if (masc === undefined) return whole;
+        return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;
+    });
+
+    // 5) CURRENCY. R$ is the Brazilian real and was read as a stray [ʁ] followed by "dólares" — the shared
+    //    tier saw only the $ and had no entry for the R.
+    s = s.replace(/R\$\s?(\d[\d.,]*)/gu, "$1 reais");
+
+    // 6) DEGREES, before the unit tier so the bare sign is not left behind.
+    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 graus Celsius");
+    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 graus Fahrenheit");
+    s = s.replace(/(\d)\s?°/gu, "$1 graus");
+
+    // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
+    //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a
+    //    spurious "zero" at :00. `hora` is feminine, so 1 takes *uma*.
+    s = s.replace(/\b([01]?\d|2[0-3])\s?h\s?([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
+        (_m, h: string, min?: string) => clockWords(Number(h), min === undefined ? undefined : Number(min)));
+    s = s.replace(/\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
+        (_m, h: string, min: string) => clockWords(Number(h), Number(min)));
+
+    // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 mais $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1mais $2");
+
+    // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides.
+    s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
+        fractionWords(Number(a), Number(b)) ?? m0);
+
+    // 10) DATES. The day is a plain cardinal, except the first of the month — and the varieties DIFFER, so
+    //     this is dialect-gated like the Spanish equivalent: Brazil says *primeiro de julho*, Portugal
+    //     normally *um de julho*. An EXPLICIT `1º` is honoured in both, because there the writer marked it.
+    if (brazilian)
+        s = s.replace(new RegExp(`\\b1\\s+de\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `primeiro de ${mon}`);
+
+    return s;
+}
+
+/** An hour/minute pair → "sete horas e dezenove" / "uma hora". */
+function clockWords(h: number, min: number | undefined): string {
+    const head = `${feminineCardinal(h)} ${h === 1 ? "hora" : "horas"}`;
+    return min === undefined || min === 0 ? head : `${head} e ${feminineCardinal(min)}`;
+}
