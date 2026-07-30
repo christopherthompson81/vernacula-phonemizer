@@ -133,7 +133,17 @@ Several agents may be treating different languages at once. Three rules make tha
 uncommitted work. This is the single most dangerous operation in a shared checkout, and the hand recipe
 used to depend on it for the "before" baseline.
 
-**2. Build the baseline from a pinned read-only worktree instead.** Once, for the whole fan-out:
+**2. Emit the "before" baseline BEFORE you edit anything.** This is the simplest correct method and needs
+no second checkout at all — your tree *is* the baseline until you touch it:
+
+```sh
+npx tsx tools/normalization-corpus-diff.ts emit --lang xx --corpus xx_yy --out /tmp/xx.before
+# …now write normalize.ts…
+npx tsx tools/normalization-corpus-diff.ts emit --lang xx --corpus xx_yy --out /tmp/xx.after
+npx tsx tools/normalization-corpus-diff.ts compare --before /tmp/xx.before --after /tmp/xx.after
+```
+
+If you have already started editing and no baseline exists, recover one from a pinned read-only worktree:
 
 ```sh
 git worktree add ../norm-baseline <commit> --detach
