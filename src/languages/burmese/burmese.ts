@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink, emitUnclaimed } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { segmentByDag, loadSegWords } from "../../core/segment.ts";
@@ -258,7 +259,10 @@ export function phonemizeWord(token: string): string {
     return segment(token).map(phonemizeSubword).filter((w) => w !== "").join(" ");
 }
 
-const TOKEN = /([က-႟꧰-꧹]+)|(\d+)|([။၊.?!,])/gu;
+// Burmese digits ၀-၉ (U+1040–1049) sit inside the U+1000–109F block, so they would be swallowed by the
+// word group; they are matched with ASCII digits instead and normalised before composition.
+const MY_DIGITS = "\u1040-\u1049";
+const TOKEN = new RegExp(`([\u1000-\u103F\u104A-\u109F\ua9e0-\ua9f9]+)|([0-9${MY_DIGITS}]+)|([။၊.?!,])`, "gu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 
@@ -275,11 +279,16 @@ class BurmesePhonemizer implements Phonemizer {
             if (m.index > cursor) emitUnclaimed(input.slice(cursor, m.index), sink);
             cursor = m.index + m[0].length;
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            // KNOWN DEFECT, pre-existing and now documented: Burmese has no numeral data, so a digit
-            // run is read by the FOREIGN (English) phonemizer — "5" comes out [faᶦv], not ငါး. Burmese
-            // native digits ၀-၉ fall in group 1 instead and phonemize to nothing. Both need a sourced
-            // Burmese numeral table (Sinitic-style, with သောင်း 10⁴ / သိန်း 10⁵); tracked for #562.
-            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : m[2]);
+            else if (m[2]) {
+                // Digits (ASCII or Burmese ၀-၉) → Burmese number words, then phonemize each.
+                const ascii = [...m[2]].map((c) => {
+                    const cp = c.codePointAt(0)!;
+                    return cp >= 0x1040 && cp <= 0x1049 ? String(cp - 0x1040) : c;
+                }).join("");
+                // One token: the numeral is a single Burmese word, so the segmenter and the compound
+                // voicing apply across it (100 renders [təja˨], not [tɪʔ ja˨]).
+                sink.emit(phonemizeWord(numberToWords(Number(ascii))));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
