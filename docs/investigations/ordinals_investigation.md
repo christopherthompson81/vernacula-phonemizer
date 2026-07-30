@@ -274,3 +274,32 @@ symbols), a letter-name table, an abbreviation table, a `FORCE_LETTERS`/`WORD_AC
 phonotactic readability predicate. `core/normalizeSymbols.ts` already generalizes the symbol tier;
 times/dates/abbreviations/initialisms are the tiers still per-language. Worth lifting the skeleton into
 `core/` once a second language is done, so the shape is proven twice before it is fixed in place.
+
+## Run 4 — 2026-07-29 — the French supplement lexicon (closing the °C gap)
+
+Created `src/languages/french/supplement.tsv`, consulted after Lexique in `phonemizeWord`.
+
+**Why a separate file matters more than it first appeared:** `french/lexicon.tsv` is Lexique 3.83 under
+**CC BY-SA 4.0** — stratum 3 in PROVENANCE.md, fenced under its parent license. Merging our own entries
+into it would pull cleanroom facts inside the share-alike fence and break re-importability. Kept apart,
+the three entries are MIT-safe own work (stratum 1) and Lexique stays authoritative and replaceable. The
+supplement is additive only — every key is absent from Lexique, so the two cannot disagree.
+
+**Audited rather than guessed.** All 118 words the normalizer can emit were checked against Lexique:
+22 are absent and fall to the rule g2p. Comparing each of those 22 to its expected IPA found only
+**three** actually wrong, which is why the file is three lines:
+
+| word | g2p gave | correct | why it is now reachable |
+|---|---|---|---|
+| celsius | `sɛlsjy` | `sɛlsjys` | `20 °C` → "degrés celsius"; final ⟨s⟩ is sounded in this Latin loan |
+| kilowatt | `kilɔva` | `kilowat` | `50 kW`; ⟨w⟩ voiced to [v] and the final ⟨tt⟩ dropped |
+| confer | `kɔ̃fe` | `kɔ̃fɛʁ` | `cf.` → confer; final ⟨r⟩ sounded in the Latin loan |
+
+Oddity worth recording: `kilowatts` (plural) already came out `kilowat` correctly while the SINGULAR
+`kilowatt` gave `kilɔva`. The two forms take different g2p paths; only the singular needed an entry.
+
+**Deliberate non-entry:** `Jésus-Christ`. The g2p gives [ʒezykʁist] where the traditional dictionary form
+is [ʒezykʁi]. Both are current in speech, so the existing reading is a variant rather than a defect and
+was left alone rather than asserting a change I could not source.
+
+Verified: 18 French tests pass (1 new), referee eval byte-identical (79.3% / 96.0%).

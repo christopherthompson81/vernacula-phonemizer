@@ -21,6 +21,31 @@ function lexicon(): Map<string, string> {
     return LEXICON;
 }
 
+/**
+ * SUPPLEMENT — our own cleanroom pronunciations for words Lexique 3.83 does not contain and the rule g2p
+ * gets wrong. Kept as a SEPARATE file from lexicon.tsv on purpose: that file is provenanced Lexique data,
+ * and editing it would muddy both its provenance and any future re-import. This one is additive only —
+ * every key here is absent from Lexique, so the two can never disagree and Lexique stays authoritative
+ * for everything it covers.
+ *
+ * The entries exist because normalize.ts now EMITS words the corpus never contained, so words that were
+ * previously unreachable are suddenly on the hot path: `20 °C` → "degrés celsius", where the g2p drops
+ * the final ⟨s⟩ that French sounds in this Latin loan ([sɛlsjys], not [sɛlsjy]).
+ *
+ * Audited rather than guessed: all 118 words the normalizer can emit were checked against Lexique, 22
+ * were absent, and each of those 22 was compared to its expected IPA. Only three were actually wrong,
+ * which is why this file is three lines and not twenty-two.
+ *
+ * DELIBERATE NON-ENTRY: `Jésus-Christ`. The g2p gives [ʒezykʁist] and the traditional dictionary form is
+ * [ʒezykʁi], but both are current in speech, so the existing reading is a legitimate variant rather than
+ * a defect and is left alone.
+ */
+let SUPPLEMENT: Map<string, string> | undefined;
+function supplement(): Map<string, string> {
+    if (SUPPLEMENT === undefined) SUPPLEMENT = loadTsvMap(import.meta.url, "supplement.tsv");
+    return SUPPLEMENT;
+}
+
 /** The Lexique pronunciation lexicon (lowercased word → IPA). Exposed so the async neural path (frNeural.ts) can skip
  *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
 export function frenchLexicon(): Map<string, string> {
@@ -37,7 +62,7 @@ export type OovResolver = (lowerWord: string) => string | undefined;
  *  engine for out-of-vocabulary words. */
 export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const lower = word.toLowerCase();
-    const direct = lexicon().get(lower) ?? oovOverride?.(lower);
+    const direct = lexicon().get(lower) ?? supplement().get(lower) ?? oovOverride?.(lower);
     if (direct !== undefined) return direct;
     // Hyphenated compound that Lexique does not attest: resolve each element and join WITHOUT a space.
     // A French hyphen is not a word boundary for pronunciation — quarante-et-un is [kaʁɑ̃teœ̃], one
