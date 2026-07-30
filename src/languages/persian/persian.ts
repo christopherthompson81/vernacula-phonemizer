@@ -11,6 +11,8 @@ import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
+import { encliticWord, persianNumberWords, type FaNumbersDef } from "./numbers.ts";
+import { makePersianNormalizer } from "./normalize.ts";
 
 interface PersianDef {
     consonants: Record<string, string>;
@@ -18,7 +20,7 @@ interface PersianDef {
     sukun: string;
     shadda: string;
     inherentVowel: string;
-    numbers: NumbersDef;
+    numbers: FaNumbersDef;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<PersianDef>(import.meta.url, "persian.jsonc");
@@ -33,7 +35,31 @@ const ALIF = "ا",
     YA_AR = "ي",
     HE = "ه";
 const isV = (c: string): boolean => c === ALIF || c === WAW || c === YA || c === YA_AR;
-const endsInVowel = (out: string): boolean => /[aeiouɒ]ː?$/u.test(out);
+/**
+ * WRITTEN-VOWEL GUARD. The two deletion heuristics below (medial schwa, and the final-cluster rule) exist to undo
+ * the DEFAULT [a] this g2p inserts where the abjad wrote nothing. They must not touch an [a] the text actually
+ * WROTE with a fatha — but the IPA string carries no such distinction, so a harakat-derived [a] is tagged and the
+ * tag is removed once both heuristics have run. Without it the number table itself was damaged: سیصَد (300) came
+ * out [sˈiːsd], and likewise پانصَد, نُهصَد and the rest of the fused hundreds — the hundreds digit of every year.
+ *
+ * IT MUST BE A COMBINING MARK, not a spacing sentinel. core/schwa.ts segments the IPA into units and decides by
+ * the units on BOTH sides of a candidate (V·C·a·C·V); a spacing guard becomes a unit of its own and breaks one
+ * side or the other — placed after the vowel it blocked the deletion in the preceding syllable (هَشتاد →
+ * [haʃataːd]), placed before it blocked the one in the following syllable (پانصَد → [paːnasˈad]). A combining
+ * mark is absorbed into the vowel's own unit, so the written vowel still counts as a vowel for its neighbours
+ * while its unit text ("a"+mark) no longer equals the schwa the rule deletes. U+0332 is used because it is not
+ * an IPA symbol this engine emits and composes with nothing under NFC.
+ */
+const WRITTEN = "\u0332";
+const endsInVowel = (out: string): boolean =>
+    new RegExp(`[aeiouɒ]${WRITTEN}?ː?$`, "u").test(out);
+
+/** A written harakat's IPA, with the deletion guard attached when it is the same segment as the DEFAULT vowel
+ *  (only that one is a deletion target, so only that one needs tagging). */
+function harakatIpa(ch: string | undefined): string | undefined {
+    const hk = ch !== undefined ? HARAKAT[ch] : undefined;
+    return hk === INH ? hk + WRITTEN : hk;
+}
 
 /** A long-vowel letter standing after a consonant → its long vowel. */
 function longVowel(ch: string): string | undefined {
@@ -74,6 +100,16 @@ function g2p(word: string): string {
             if (i === n - 1 && out && !endsInVowel(out)) out += "e";
             else out += "h";
             i++;
+            // ⟨ه⟩ is the only consonant whose branch returns BEFORE the shared harakat consumption below, so a
+            // short vowel written after it was silently discarded. That corrupted the DIACRITIZED number table
+            // itself — هِزار read [hzˈaːɾ], هَفت [hfˈat], هَشتاد [hʃatˈaːd], i.e. every year from 1000 up.
+            // Undiacritized running text is unaffected (nothing to consume) and no lexicon entry writes a
+            // harakat after ⟨ه⟩ (0 of 4,132 in lexicon.tsv), so this only ever adds the vowel that was written.
+            const hk = harakatIpa(s[i]);
+            if (hk !== undefined) {
+                out += hk;
+                i++;
+            }
             continue;
         }
         // Standalone glide/vowel letters: after a vowel → glide (v/j); after a consonant → long vowel.
@@ -101,7 +137,7 @@ function g2p(word: string): string {
                 out += "ː";
                 i++;
             }
-            const hk = s[i] !== undefined ? HARAKAT[s[i]!] : undefined;
+            const hk = harakatIpa(s[i]);
             if (s[i] === DEF.sukun) i++;
             else if (hk !== undefined) {
                 out += hk;
@@ -146,12 +182,23 @@ export function phonemizeWordCore(word: string): string {
     // Persian, like Urdu, drops the over-inserted default vowel in a medial C·a·C cluster (the shared Ohala
     // rule on /a/). The correct e/o quality needs the deferred restoration layer; the STRUCTURE is right.
     ipa = deleteMedialSchwa(ipa, "a");
+    // …then the SAME rule again for a WRITTEN fatha. The guard mark makes the written vowel a distinct unit text,
+    // so the pass above cannot see it; this pass restores exactly the previous medial behaviour for it. The guard
+    // is therefore scoped to the final-cluster rule below — the only one that was demonstrably wrong about it.
+    // Deliberate: 5 mined lexicon entries of the shape C-a-ی-ه (تکَیه, گِرَیه, کُلَیه) write a fatha that the medial
+    // rule then deletes, and the wikipron referee agrees with the DELETION (takje, not takaje). Whether that
+    // fatha should have been mined at all is a lexicon question, not one for this pass to answer, so the medial
+    // behaviour is left bit-identical and only the word-final case changes.
+    ipa = deleteMedialSchwa(ipa, "a" + WRITTEN);
     // Persian ALLOWS word-final consonant CLUSTERS (mard, duːst) — so a default [a] before a run of coda
     // consonants at word end is spurious; delete it when a vowel precedes (unlike Urdu, which retains it).
+    // The `(?![ː WRITTEN])` guard is what keeps it off a fatha the text actually wrote: هَشت [haʃat]→[haʃt] is the
+    // inserted vowel and must go, سیصَد [siːsad] is written and must stay (it used to come out [siːsd]).
     ipa = ipa.replace(
-        /([aeiouɒ]ː?[^aeiouɒː ]*)a(?!ː)(?=[^aeiouɒː ]+$)/gu,
+        new RegExp(`([aeiouɒ]ː?[^aeiouɒː ]*)a(?![ː${WRITTEN}])(?=[^aeiouɒː ]+$)`, "gu"),
         "$1",
     );
+    ipa = ipa.replace(new RegExp(WRITTEN, "gu"), ""); // guard removed once both deletion heuristics have run
     // Persian stress is (mostly) word-FINAL: mark the last vowel nucleus.
     const vowels = [...ipa.matchAll(VOWEL_G)];
     if (vowels.length) {
@@ -177,7 +224,10 @@ const toAscii = (d: string): string =>
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
     if (!Number.isSafeInteger(nn)) return digits;
-    return renderNumber(nn, DEF.numbers, phonemizeWordCore); // numbers bypass the content lexicon
+    // The DECIMAL IRANIAN compositor (persian/numbers.ts), not the default Indic lakh/crore one — Persian's
+    // hundreds are irregular fused words and every group is linked by the enclitic ⟨و⟩ /o/, which `encliticWord`
+    // appends to the already-phonemized head word. Numbers bypass the content lexicon (homograph collisions).
+    return renderNumber(nn, DEF.numbers, encliticWord(phonemizeWordCore, DEF.numbers), persianNumberWords);
 }
 const TOKEN = new RegExp(
     `([${PERSO_ARABIC_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,
@@ -200,10 +250,18 @@ export function normalizePersianOrthography(text: string): string {
     return text.normalize("NFC").replace(/[يكىة]/gu, (c) => FA_ORTHO[c] ?? c);
 }
 
+/**
+ * TEXT NORMALIZATION (#562) — the pre-tokenizer pass (normalize.ts). Exported because the NEURAL entry points in
+ * persianNeural.ts do their own tokenization and must see the same rewritten text as the sync path; both call it
+ * immediately after `normalizePersianOrthography`. It is idempotent, so the neural path re-entering the sync path
+ * for a digit run costs nothing.
+ */
+export const normalizePersianText = makePersianNormalizer(DEF.numbers);
+
 class PersianPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(normalizePersianOrthography(input), TOKEN, (m, sink) => {
+        return assembleClauses(normalizePersianText(normalizePersianOrthography(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));

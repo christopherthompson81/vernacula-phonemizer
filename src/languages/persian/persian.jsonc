@@ -40,10 +40,29 @@
     },
 
     // NUMBERS — Persian spellings; canonical IPA DERIVED by the same g2p (with harakat so short vowels are right).
+    // Composed by persian/numbers.ts (the DECIMAL IRANIAN system), NOT by the default Indic lakh/crore composer:
+    // Persian's hundreds are irregular fused words and every group is linked by the enclitic ⟨و⟩ /o/. The previous
+    // table faked "lakh": "صَد هِزار" / "crore": "دَه میلیون" to bend the Indic scale into shape, which read
+    // 1,000,000 as "ده صد هزار" and glued the two-word fake into one [sadahzˈaːɾ]; both fakes are gone.
     "numbers": {
         "units": ["صِفر", "یِک", "دو", "سِه", "چَهار", "پَنج", "شِش", "هَفت", "هَشت", "نُه"],
-        "teens": ["دَه", "یازدَه", "دَوازدَه", "سیزدَه", "چَهاردَه", "پانزدَه", "شانزدَه", "هِفدَه", "هِجدَه", "نوزدَه"],
+        // پانْزْدَه / شانْزْدَه carry an explicit SUKUN. Without it the g2p inserts its default [a] into BOTH empty
+        // slots and the shared Ohala deletion can only take one of the two back (deleting both would leave a
+        // 3-consonant cluster, which the rule declines), so they read [paːnazdah] / [ʃaːnazdah]. The sukun states
+        // the fact directly — there is no vowel there — instead of relying on a heuristic to remove one.
+        "teens": ["دَه", "یازدَه", "دَوازدَه", "سیزدَه", "چَهاردَه", "پانْزْدَه", "شانْزْدَه", "هِفدَه", "هِجدَه", "نوزدَه"],
         "tens": { "20": "بیست", "30": "سی", "40": "چِهِل", "50": "پَنجاه", "60": "شَصت", "70": "هَفتاد", "80": "هَشتاد", "90": "نَوَد" },
-        "magnitudes": { "hundred": "صَد", "thousand": "هِزار", "lakh": "صَد هِزار", "crore": "دَه میلیون" }
+        // The IRREGULAR round hundreds — single fused words, not multiplier + صد (index 0 unused; index 1 = صد).
+        // سیصد and پانصد are independently attested as single headwords in the mined lexicon.tsv.
+        // هَفْتْصَد / هَشْتْصَد take the same sukun treatment as پانْزْدَه above, for the same reason (ft-s / ʃt-s).
+        "hundreds": ["", "صَد", "دِویست", "سیصَد", "چَهارصَد", "پانصَد", "شِشصَد", "هَفْتْصَد", "هَشْتْصَد", "نُهصَد"],
+        "magnitudes": { "hundred": "صَد", "thousand": "هِزار", "million": "میلیون", "billion": "میلیارد" },
+        // The linking enclitic ⟨و⟩ /o/ (bist-o-yek), given as IPA rather than orthography: this g2p reads a bare
+        // ⟨و⟩ as the LONG [uː] (the isV branch), so a spelled ⟨بیستو⟩ would be [biːstuː] and a standalone ⟨و⟩
+        // token [ˈuː]. numbers.ts appends this segment after the preceding word has been phonemized.
+        "connectiveIpa": "o",
+        // The decimal separator, read as a word (چهارده ممیز هفت). Emitted as PLAIN orthography by normalize.ts so
+        // the neural vowel restorer can vocalize it like any other word; the sync g2p gives the abjad default.
+        "decimalWord": "ممیز"
     }
 }

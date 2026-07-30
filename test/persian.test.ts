@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
@@ -39,5 +41,120 @@ describe("persian canonical IPA", () => {
     test("Arabic yeh/kaf fold to Farsi (identical output)", () => {
         expect(phonemize("کسي", "fa")).toBe(phonemize("کسی", "fa")); // Arabic ي vs Farsi ی
         expect(phonemize("ملك", "fa")).toBe(phonemize("ملک", "fa")); // Arabic ك vs Farsi ک
+    });
+});
+
+// ── TEXT NORMALIZATION (#562) ───────────────────────────────────────────────────────────────────────────────
+// src/languages/persian/normalize.ts + the DECIMAL IRANIAN number compositor (persian/numbers.ts). Counts and
+// the before-behaviour these pin are in the normalize.ts header, measured over the fa_ir corpus (1,856 utts).
+describe("persian text normalization (#562)", () => {
+    // The compositor. Persian was previously read by the Indic lakh/crore composer, which had the tens and units
+    // in Indic order, no ⟨و⟩, and no fused hundreds: 21 "یک بیست", 200 "دو صد", 1,000,000 "ده صد هزار".
+    test("cardinals: connective ⟨و⟩ /o/, bare صد/هزار, fused hundreds, million", () => {
+        const cases: [string, string][] = [
+            ["21", "bˈiːsto ˈiːk"], // bist-O-yek — the enclitic connective, and the Iranian tens-first order
+            ["100", "sˈad"], // the BARE hundred (not *یک صد)
+            ["105", "sˈado pˈand͡ʒ"],
+            ["200", "devˈiːst"], // fused irregular hundreds, not multiplier + صد
+            ["300", "siːsˈad"],
+            ["700", "haftsˈad"],
+            ["900", "nohsˈad"],
+            ["1000", "hezˈaːɾ"], // the BARE thousand
+            ["1979", "hezˈaːɾo nohsˈado haftˈaːdo nˈoh"],
+            ["1000000", "ˈiːk miːljˈuːn"], // million KEEPS the یک, unlike صد/هزار
+            ["5000000", "pˈand͡ʒ miːljˈuːn"],
+        ];
+        for (const [n, exp] of cases) expect(phonemize(n, "fa")).toBe(exp);
+    });
+
+    // The ⟨ه⟩ branch of the g2p returned before the shared harakat consumption, so a written short vowel after
+    // ⟨ه⟩ was discarded — which silently corrupted the DIACRITIZED number table itself.
+    test("a harakat written after ⟨ه⟩ is read, not dropped", () => {
+        expect(phonemize("1000", "fa")).toBe("hezˈaːɾ"); // هِزار — was [hzˈaːɾ]
+        expect(phonemize("7", "fa")).toBe("hˈaft"); // هَفت — was [hfˈat]
+        expect(phonemize("80", "fa")).toBe("haʃtˈaːd"); // هَشتاد — was [hʃatˈaːd]
+    });
+
+    // The final-cluster heuristic deletes the g2p's DEFAULT [a] before a word-final coda run. It must not delete
+    // a fatha the text actually WROTE: هَشت is [haʃt] (inserted) but سیصَد is [siːsad] (written, was [siːsd]).
+    test("the written-vowel guard is scoped: inserted [a] goes, written fatha stays", () => {
+        expect(phonemize("8", "fa")).toBe("hˈaʃt"); // inserted → deleted
+        expect(phonemize("300", "fa")).toBe("siːsˈad"); // written → kept
+        expect(phonemize("500", "fa")).toBe("paːnsˈad");
+        // …and the MEDIAL rule is left bit-identical, including for a written fatha (5 lexicon entries depend on
+        // it, and the wikipron referee agrees with the deletion): تکَیه → takje, not takaje.
+        expect(phonemizeWord("تکیه")).toBe("takjˈe");
+        expect(phonemizeWord("گریه")).toBe("ɡeɾjˈe");
+    });
+
+    // Grouping separators were read as CLAUSE PUNCTUATION: "1,000" → [ˈiːk , sˈefɾ] ("one, zero").
+    test("digit de-grouping — ASCII comma, period, and the Arabic comma ⟨،⟩", () => {
+        expect(phonemize("1,000", "fa")).toBe("hezˈaːɾ");
+        expect(phonemize("5,000,000", "fa")).toBe("pˈand͡ʒ miːljˈuːn");
+        expect(phonemize("104.500", "fa")).toBe("sˈado t͡ʃahˈaːɾ hezˈaːɾo paːnsˈad"); // period grouping
+        expect(phonemize("19،500", "fa")).toBe("nuːzdˈah hezˈaːɾo paːnsˈad"); // ⟨،⟩ as the thousands mark
+        // …while ⟨،⟩ as real punctuation (×1691 in the corpus) is untouched — it still emits its pause.
+        expect(phonemize("سلام، دنیا", "fa")).toContain(" , ");
+    });
+
+    // The colon is a clause mark, so "11:00" read as [iːjzadˈah , sˈefɾ] — "eleven, zero" with a pause inside.
+    test("clock: hour ⟨و⟩ minutes دقیقه, minutes dropped at :00, and NO inserted ساعت", () => {
+        expect(phonemize("8:46", "fa")).toBe("hˈaʃt ˈuː t͡ʃehˈelo ʃˈeʃ daqiːqˈe");
+        expect(phonemize("06:30", "fa")).toBe("ʃˈeʃ ˈuː sˈiː daqiːqˈe");
+        expect(phonemize("11:00", "fa")).toBe("iːjzadˈah"); // :00 → the bare hour
+        // the corpus always writes ساعت itself; the rule must not add a second one (the Arabic-clock bug)
+        expect(phonemize("ساعت 12:00", "fa").match(/saːʔˈat/gu)?.length ?? 0).toBeLessThan(2);
+        // …and a دقیقه the TEXT already wrote is reused, not duplicated (3 of the 14 corpus clocks write one).
+        expect(phonemize("ساعت 07:19 دقیقه صبح", "fa").match(/daqiːqˈe/gu)?.length).toBe(1);
+        // …and the DOTTED clock is claimed ONLY when UTC anchors it — otherwise H.MM is a decimal.
+        expect(phonemize("15.00 UTC", "fa")).toContain("paːnzdˈah");
+        expect(phonemize("15.00", "fa")).toContain("mamˈiːz");
+    });
+
+    // The decimal period was a full CLAUSE BREAK inside the number; the fraction reads digit by digit.
+    test("decimals read with ممیز, fractional part digit by digit", () => {
+        expect(phonemize("1.5", "fa")).toBe("ˈiːk mamˈiːz pˈand͡ʒ");
+        expect(phonemize("6.34", "fa")).toBe("ʃˈeʃ mamˈiːz sˈeh t͡ʃahˈaːɾ"); // 3-4, not "thirty-four"
+        expect(phonemize("12.8", "fa")).toBe("davaːzdˈah mamˈiːz hˈaʃt");
+    });
+
+    // Neither % nor the Arabic ٪ is in the engine's TOKEN, so all four corpus percentages were silently DELETED.
+    test("percent — ASCII % and the Arabic ٪ both read درصد", () => {
+        expect(phonemize("80%", "fa")).toBe("haʃtˈaːd daɾsˈed");
+        expect(phonemize("93٪", "fa")).toBe("nˈavdo sˈeh daɾsˈed");
+        expect(phonemize("3%", "fa")).toBe(phonemize("3 درصد", "fa")); // the sign reads as the written word
+    });
+
+    // The ordinal suffix was tokenized apart and spoken as its own word [ʔˈam].
+    test("ordinals: the suffix fuses onto the cardinal, across a ZWNJ too", () => {
+        expect(phonemize("قرن 16ام", "fa")).toBe(phonemize("قرن شانزدهم", "fa"));
+        expect(phonemize("1000‌ام", "fa")).toBe(phonemize("هزارم", "fa")); // ZWNJ between digits and suffix
+        expect(phonemize("16ام", "fa")).not.toContain("ʔˈam"); // no stray glottal word
+    });
+
+    // Persian-Indic ۰-۹ do not occur in this corpus but are ordinary in Persian typing.
+    test("Persian-Indic digits ۰-۹ fold to ASCII", () => {
+        expect(phonemize("۱۹۷۹", "fa")).toBe(phonemize("1979", "fa"));
+        expect(phonemize("۱٫۵", "fa")).toBe(phonemize("1.5", "fa")); // and the Arabic decimal separator ٫
+    });
+
+    // MEASURED AND DELIBERATELY LEFT (normalize.ts header): the hyphen between numbers is 6 ranges, 3 sports
+    // scores and 3 bidi-reversed orders in this corpus, so no connective is inserted — but both numbers must
+    // still reach the output as separate words rather than being fused or dropped.
+    test("a hyphen between numbers inserts nothing, and loses nothing", () => {
+        expect(phonemize("1644-1912", "fa")).toBe(
+            "hezˈaːɾo ʃeʃsˈado t͡ʃehˈelo t͡ʃahˈaːɾ hezˈaːɾo nohsˈado davaːzdˈah",
+        );
+    });
+
+    // `\b` is ASCII-defined and matches NOTHING against Perso-Arabic script (the trap in six languages so far).
+    test("no ASCII word boundary is used in the Persian normalizer", () => {
+        const src = readFileSync(
+            new URL("../src/languages/persian/normalize.ts", import.meta.url),
+            "utf8",
+        );
+        // …in the CODE. The header documents the trap by name, so the comments are stripped before the check.
+        const code = src.replace(/\/\*[\s\S]*?\*\//gu, "").replace(/\/\/[^\n]*/gu, "");
+        expect(code).not.toMatch(/\\b/u);
     });
 });
