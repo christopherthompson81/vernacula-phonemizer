@@ -16,6 +16,7 @@
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { romanToInt } from "../../core/roman.ts";
+import { MANIFEST } from "./manifest.ts";
 
 // ── Roman numerals ──────────────────────────────────────────────────────────────────────────────────
 // A closed, conservative set (2–20, minus vi and xi): FLEURS text is lowercased, so "VI"/"vi" cannot be
@@ -117,6 +118,24 @@ function fractionWords(num: number, den: number): string | undefined {
     return `${num} ${plural}`;
 }
 
+const MONTHS = MONTH_ALT.split("|");
+
+/** English ordinal suffix for a day-of-month (1st, 2nd, 3rd, 4th … 21st, 22nd, 23rd). */
+function ordinalSuffix(n: number): string {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return "st";
+    if (mod10 === 2 && mod100 !== 12) return "nd";
+    if (mod10 === 3 && mod100 !== 13) return "rd";
+    return "th";
+}
+
+/** A numeric date → "march 14th 2011", the word order English speaks and the shape the date/year rules
+ *  below already handle. `undefined` if the fields are not a real date, so the caller leaves it alone. */
+function isoDate(year: number, month: number, day: number): string | undefined {
+    if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+    return `${MONTHS[month - 1]} ${day}${ordinalSuffix(day)} ${year}`;
+}
+
 /** A 4-digit year in its English pair-wise reading, emitted as tokens the number path already handles:
  *  1998 → "19 98" (nineteen ninety-eight), 1905 → "19 oh 5", 1900 → "19 hundred", 2000 → "2 thousand",
  *  2007 → "2 thousand 7", 2011 → "20 11" (twenty eleven). */
@@ -179,6 +198,28 @@ export function normalizeEnglish(input: string): string {
     // 0e) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst
     //     class of silent error: "-5 degrees" was read as "five degrees".
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
+
+    // 0f0) NUMERIC DATES, before the fraction rule (which would otherwise have to guard against them)
+    //      and before the date/year steps below, whose ordinal-day and pair-wise-year rules then apply to
+    //      what this emits. ISO is year-first, the US form month-first.
+    s = s.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (m0, y: string, mo: string, d: string) =>
+        isoDate(Number(y), Number(mo), Number(d)) ?? m0);
+    s = s.replace(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
+        isoDate(Number(y), Number(mo), Number(d)) ?? m0);
+
+    // 0f1) MONEY with cents. Read as "five dollars fifty", not "five point five zero dollars" — a decimal
+    //      reading of a price is wrong in a way listeners notice. Must precede the general currency rule.
+    s = s.replace(/([$£€¥])\s?(\d[\d,]*)\.(\d{2})\b/g,
+        (_m, sym: string, int: string, cents: string) => {
+            const [sg, pl] = CURRENCY[sym]!;
+            const unit = /^1$/.test(int.replace(/,/g, "")) ? sg : pl;
+            return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
+        });
+
+    // 0f2) PLUS. The mirror of the minus rule: a dropped sign is silent content loss, and "+5" read as
+    //      "five" is as wrong as "-5" was. Covers the attached form too (UTC+1 → "UTC plus 1").
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
     // 0f) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both
     //     sides and nothing numeric or alphabetic after.
@@ -285,7 +326,7 @@ export const isUnreadableEnglish = makeUnreadableTest({
         "ch", "ck", "ct", "ff", "ft", "gh", "gs", "ks", "ld", "lf", "lk", "ll", "lm", "ln", "lp", "ls",
         "lt", "lv", "mb", "mn", "mp", "ms", "nc", "nd", "ng", "nk", "ns", "nt", "ph", "pt", "ps", "rb",
         "rc", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rv", "sh", "sk", "sm", "sp",
-        "ss", "st", "th", "ts", "tt", "xt", "zz", "bs", "ds", "ls", "nx",
+        "ss", "st", "th", "ts", "tt", "xt", "zz", "bs", "ds", "ls", "nx", "mf", "lb", "rth", "nth",
     ]),
 });
 
@@ -297,24 +338,9 @@ export const isUnreadableEnglish = makeUnreadableTest({
  */
 const LETTER_NAME = (l: string): string | undefined => (/^[a-z]$/.test(l) ? (l === "a" ? "ay" : l) : undefined);
 
-/** Spelled out despite being a dictionary word — convention beating phonotactics. Every one of these is
- *  a perfectly good English word and every one is spelled out in speech. `US` is the measured case: it
- *  occurs 18 times in the cased column and CMUdict reads it as the pronoun [ʌs]. */
-const FORCE_LETTERS: ReadonlySet<string> = new Set([
-    "us", "un", "it", "id", "am", "led", "who",
-]);
-// This list is deliberately SHORT, and its membership test is precise: an entry belongs here only if the
-// dictionary reads the token as the WORD. CMUdict already carries the correct letter reading for eu, uk,
-// tv, cd, dvd, dc, ac, pc, pm and dj — as ONE token with one stress (cd → [siːdˈiː]), which is better
-// prosody than spelling them out ([sˈiː dˈiː]) — so forcing those would make the output worse, not
-// better. Also deliberately absent: ordinary words that appear in caps as EMPHASIS rather than as
-// initialisms ("I said NO", "get IN"); the dictionary branch reads those correctly as words.
-
-/** Read as a word although CMUdict does not carry it as one. */
-const WORD_ACRONYMS: ReadonlySet<string> = new Set([
-    "nasa", "nato", "unesco", "unicef", "opec", "covid", "sars", "aids", "scuba", "radar", "laser",
-    "asap", "ascii", "faq", "gif", "jpeg", "png", "ram", "rom", "wifi", "swat", "otan",
-]);
+/** LEXICAL: acronyms spelled out although their lowercase form is a dictionary word. Authored in
+ *  english.jsonc alongside the language's other hand-authored facts, not here. */
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /**
  * INITIALISMS. A separate exported pass, not a step inside `normalizeEnglish`, because of where it must
@@ -322,12 +348,11 @@ const WORD_ACRONYMS: ReadonlySet<string> = new Set([
  * claims only what they declined. `II` occurs 8 times in the English cased column, so the collision is
  * real — run earlier, this spells `Louis XIV` as EX-EYE-VEE.
  */
-export function normalizeEnglishInitialisms(text: string, isWord: (lower: string) => boolean): string {
+export function normalizeEnglishInitialisms(text: string, isRecorded: (lower: string) => boolean): string {
     return makeInitialismNormalizer({
         letterName: LETTER_NAME,
-        forceLetters: FORCE_LETTERS,
-        wordAcronyms: WORD_ACRONYMS,
-        isWord,
+        acronymLetters: ACRONYM_LETTERS,
+        isRecorded,
         isUnreadable: isUnreadableEnglish,
     })(text);
 }

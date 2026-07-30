@@ -24,12 +24,19 @@
  * 1 take *une*, not *un* — `1 h 15` is "une heure quinze" and `4:41` is "quatre heures quarante et une".
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST as FR_MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { ordinal } from "./ordinals.ts";
 
 /** Space characters used as digit-group separators in French typography: regular, NBSP, narrow NBSP,
  *  thin space. The FLEURS transcripts use NBSP (`5 000`, `9 h 30`, `n° 11`). */
 const GROUP_SPACE = "    ";
+
+/** Currency sign → [singular, plural], for the money-with-centimes rule. Mirrors the SYMBOLS config in
+ *  french.ts, which owns the plain (no-centimes) currency case. */
+const CURRENCY_WORDS: Readonly<Record<string, [string, string]>> = {
+    "€": ["euro", "euros"], $: ["dollar", "dollars"], "£": ["livre", "livres"], "¥": ["yen", "yens"],
+};
 
 /** Months, for the date rules. */
 const MONTHS = "janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre";
@@ -61,16 +68,6 @@ const DOT_ONLY: ReadonlySet<string> = new Set(["etc", "mme", "mmes", "mlle", "ml
  *  French words, so expanding them unconditionally is safe. */
 const UNDOTTED_ABBREV: Readonly<Record<string, string>> = { dr: "docteur", pr: "professeur" };
 
-/**
- * Acronyms pronounced as WORDS rather than spelled out, where CONVENTION overrides phonotactics: each of
- * these is perfectly readable AND lexicalized, so it must not be spelled out. Lexique carries only a
- * couple of them (sida, ovni) and knows nothing of onu/otan/unesco.
- */
-const WORD_ACRONYMS: ReadonlySet<string> = new Set([
-    "onu", "otan", "unesco", "unicef", "smic", "sida", "ovni", "insee", "ena", "capes", "cedex",
-    "pacs", "nasa", "fifa", "uefa", "opep", "afnor", "inserm", "erasmus", "acta", "covid",
-]);
-
 /** French letter names, for initialisms. Verified individually through this engine: bé=[be], cé=[se],
  *  effe=[ɛf], ache=[aʃ], ku=[ky], esse=[ɛs] (NOT "èse", which voices to [ɛz]), ixe=[iks], zède=[zɛd].
  *  `w` and `y` are genuinely two words in French (double vé, i grec). */
@@ -82,20 +79,11 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
 };
 
 /**
- * All-caps sequences that are read LETTER BY LETTER even though their lowercase form is an attested
- * French word, so the lexicon veto below would otherwise read them as that word. `usa` is the passé
- * simple of *user*, `pis`/`ps` and `bd` are words too — the initialism is what is meant in running text.
- */
-const FORCE_LETTERS: ReadonlySet<string> = new Set([
-    "usa", "cd", "dvd", "bd", "ps", "pib", "rer", "vtt", "qg", "jo", "ir", "as", "pc", "id", "ong",
-]);
-
-/**
- * French phonotactics, for the readability guard in core/initialisms.ts. Legal onsets are obstruent +
- * liquid plus the s-/p- clusters and the digraphs standing for one sound; legal codas are broadly the
- * liquid- and nasal-final ones plus stop/fricative + s (the shape of a written plural, and of PACS
- * [paks]). What is NOT legal is the stop+stop / fricative+stop shape an initialism throws up: RATP /tp/,
- * EDF /df/, and the /tv/ onset of TVA.
+ * French phonotactics, for the OOV rule in core/initialisms.ts. Legal onsets are obstruent + liquid plus
+ * the s-/p- clusters and the digraphs standing for one sound; legal codas are broadly the liquid- and
+ * nasal-final ones plus stop/fricative + s (the shape of a written plural, and of PACS [paks]). What is
+ * NOT legal is the stop+stop / fricative+stop shape an initialism throws up: RATP /tp/, EDF /df/, and the
+ * /tv/ onset of TVA.
  */
 export const isUnreadableFrench = makeUnreadableTest({
     vowels: /[aeiouyàâäéèêëîïôöûüùœæ]/u,
@@ -112,6 +100,10 @@ export const isUnreadableFrench = makeUnreadableTest({
         "cs", "ks", "ts", "ps", "bs", "ds", "gs", "fs", "ms",
     ]),
 });
+
+/** LEXICAL: acronyms spelled out although their lowercase form is an attested French word. Authored in
+ *  french.jsonc alongside the language's other hand-authored facts, not here. */
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(FR_MANIFEST.acronymLetters);
 
 /** Non-negative integer → words, with the final *un* feminized (heure/minute are feminine). */
 function feminineWords(n: number): string {
@@ -188,6 +180,30 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
             return name === undefined ? m0 : `${name}${sp}`;
         });
 
+    // 4b) MONEY with centimes: "deux euros cinquante", not "deux virgule cinquante euro" — a decimal
+    //     reading of a price is wrong in a way listeners notice. Runs before SYMBOLS, which owns the
+    //     plain currency case. The symbol normally follows the amount in French; both orders are matched.
+    s = s.replace(/(\d+),(\d{2})\s?([€$£¥])/gu, (_m, int: string, cents: string, sym: string) => {
+        const [sg, pl] = CURRENCY_WORDS[sym]!;
+        const unit = int === "1" ? sg : pl;
+        return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
+    });
+    s = s.replace(/([€$£¥])\s?(\d+),(\d{2})/gu, (_m, sym: string, int: string, cents: string) => {
+        const [sg, pl] = CURRENCY_WORDS[sym]!;
+        const unit = int === "1" ? sg : pl;
+        return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
+    });
+
+    // 4c) PLUS. The mirror of the negative rule below: a dropped sign is silent content loss, and "+5"
+    //     read as "cinq" is as wrong as "-5" read as "cinq" was. Covers the attached form (utc+1).
+    //     SPELLED "plusse" DELIBERATELY: `plus` is a heteronym — [ply] for "more", [plys] as the
+    //     arithmetic operator — and Lexique carries only the [ply] reading. The supplement cannot help,
+    //     being additive-only for words Lexique LACKS, and overriding `plus` outright would break the far
+    //     commoner "more" reading. So this emits the attested informal respelling, which the g2p and the
+    //     supplement both resolve to [plys]. The clean fix is a French heteronym tier; noted, not built.
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusse $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusse $2");
+
     // 5) NEGATIVES: a minus sign before a number is spoken. Requires a boundary before it so a hyphenated
     //    range or a score ("2-1", "1918-1939") is not turned into a subtraction.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1moins $2");
@@ -223,12 +239,11 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
  * numerals are all-caps letter runs too (`Louis XIV`), so the numeral rules get first refusal and this
  * claims only what they declined. The decision order and its measurement live in core/initialisms.ts.
  */
-export function normalizeFrenchInitialisms(text: string, isWord: (lower: string) => boolean): string {
+export function normalizeFrenchInitialisms(text: string, isRecorded: (lower: string) => boolean): string {
     return makeInitialismNormalizer({
         letterName: (l) => LETTER_NAME[l],
-        forceLetters: FORCE_LETTERS,
-        wordAcronyms: WORD_ACRONYMS,
-        isWord,
+        acronymLetters: ACRONYM_LETTERS,
+        isRecorded,
         isUnreadable: isUnreadableFrench,
     })(text);
 }

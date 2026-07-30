@@ -406,6 +406,17 @@
     // auxiliaries, unstressed pronouns). WHICH words are function words is a language fact. The de-accent
     // pass strips their citation primary stress (I -> a, not stressed); a clause left with no primary then
     // promotes its last word to the nuclear tonic. See src/languages/english/english.ts.
+    // ACRONYMS read letter-by-letter although their lowercase form is an ordinary word, so the
+    // pronunciation dictionary cannot express the distinction (CMUdict has "us" as the pronoun [ʌs]).
+    // A LEXICAL fact, listed rather than derived: the wikipron referee records the near-identical USAR as
+    // a WORD [jusɑɹ] while USAF is letters, which is why spelling cannot decide it. Everything else is
+    // left to the dictionary or, if unrecorded and unpronounceable, spelled out by the OOV rule.
+    "acronymLetters": [
+        "us", "un", "it", "id", "am", "led", "who", "usaf", "usda", "usps", "ieee",
+        // Pronounceable by the OOV test, so it would be left to the g2p, which mangles it ([niːk]).
+        "nyc", "latam", "minae", "rov", "suv", "atv", "gps", "hiv", "ufo", "faa", "epa", "irs",
+    ],
+
     "unstressedWords": [
         "about",
         "above",
