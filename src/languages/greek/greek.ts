@@ -15,6 +15,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeGreek } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const V = MANIFEST.vowels;
@@ -212,11 +213,18 @@ export function phonemizeWordForced(word: string): string {
     return scan(word, true);
 }
 
+// Greek uses `;` as the question mark and the ANO TELEIA as a semicolon. The corpus writes the latter as
+// U+00B7 MIDDLE DOT (all 10 instances); U+0387 GREEK ANO TELEIA is the canonical codepoint but sits INSIDE
+// the Greek letter range of the first group, so it could never reach this alternation — normalize.ts step 0
+// folds it to U+00B7 instead of widening the class here.
 const TOKEN = /([Ͱ-Ͽἀ-῿]+)|(\d+)|([.!;?…,:·])/gu;
 
 class GreekPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: normalizeGreek owns the whole ordered sequence, including the shared symbol tier at
+        // its step 12 — the rate and degree rules have to run before it and the decimal comma after it, so
+        // the tier cannot simply be wrapped around the outside. See normalize.ts for the couplings.
+        return assembleClauses(normalizeGreek(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
