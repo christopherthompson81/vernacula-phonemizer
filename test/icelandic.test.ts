@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { createIcelandic, phonemizeWord } from "../src/languages/icelandic/icelandic.ts";
 import { numberToWords } from "../src/languages/icelandic/numbers.ts";
+import { normalizeIcelandic } from "../src/languages/icelandic/normalize.ts";
 
 // Icelandic (is) — íslenska, North Germanic (Insular), Latin + ⟨þ ð æ ö⟩ (~330k). One of the deepest orthographies
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
@@ -94,4 +95,43 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
         expect(is.text("1000000").trim()).toBe("ein mɪtljoun"); // ein milljón
     });
 
+});
+
+// #562 — the normalization layer. Counts measured over the FLEURS is_is corpus (column 3).
+describe("icelandic normalization", () => {
+    // ★ Icelandic ordinals AGREE IN GENDER AND CASE, which is what separates this from the Norwegian and
+    // Danish single-form tables. Weak declension: -i is masculine NOMINATIVE only; -a covers masculine
+    // oblique, feminine nominative and all neuter; -u is feminine oblique. So -a is the DEFAULT, and
+    // porting a single-form table would give the masculine nominative everywhere.
+    test("the ordinal form is selected by what follows it", () => {
+        expect(normalizeIcelandic("3. maí")).toBe("þriðji maí"); // month → masc NOM
+        expect(normalizeIcelandic("18. öld")).toBe("átjánda öld"); // öld is feminine NOM
+        expect(normalizeIcelandic("18. aldar")).toBe("átjándu aldar"); // feminine OBLIQUE
+        expect(normalizeIcelandic("9. sæti")).toBe("níunda sæti"); // neuter
+        expect(normalizeIcelandic("1. dag")).toBe("fyrsta dag"); // masculine ACCUSATIVE
+    });
+
+    test("a sentence ending in a year keeps its full stop", () => {
+        expect(normalizeIcelandic("Árið 1990. Hann kom")).toBe("Árið 1990. Hann kom");
+    });
+
+    // The period groups thousands here. `HH.MM` looks like it occurs 24 times, but that count is an
+    // artefact of the pattern matching INSIDE `1.234`; exactly one standalone instance exists and it is a
+    // decimal (6.34 tommum). The 10 real clocks are colon-form.
+    test("period-grouped thousands, decimal comma, colon clock", () => {
+        expect(normalizeIcelandic("1.234")).toBe("1234");
+        expect(normalizeIcelandic("12,5")).toBe("12 komma 5");
+        expect(normalizeIcelandic("11:00")).toBe("11 00");
+    });
+
+    test("percent, units, squared units, ranges", () => {
+        expect(normalizeIcelandic("25 %")).toBe("25 prósent");
+        expect(normalizeIcelandic("5 km")).toBe("5 kílómetrar");
+        expect(normalizeIcelandic("km²")).toBe("ferkílómetrar");
+        expect(normalizeIcelandic("1990-1995")).toBe("1990 til 1995");
+    });
+
+    test("ordinary Icelandic text is untouched", () => {
+        expect(normalizeIcelandic("Íslenska er tungumál.")).toBe("Íslenska er tungumál.");
+    });
 });

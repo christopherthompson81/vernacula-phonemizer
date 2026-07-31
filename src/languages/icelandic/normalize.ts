@@ -1,0 +1,178 @@
+/**
+ * Icelandic (is) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the
+ * Icelandic g2p cannot already read into Icelandic words the existing pipeline speaks. Pure text→text, no
+ * IPA. Runs inside icelandic.ts's `text()`, before the tokenizer.
+ *
+ * MEASURED OVER THE FLEURS is_is CORPUS, column 3 (the ORIGINAL cased text; 1008 utterances):
+ *   ordinal dot N.       46 before a lowercase word (5 before a capital)   ← the largest defect
+ *   Latin units N km     57      period-grouped N.NNN  22      ranges N–N  12
+ *   colon clock HH:MM    10      decimal comma N,N      8      percent N %  2      km²  2
+ *
+ * ★ ICELANDIC ORDINALS AGREE IN GENDER AND CASE, which is what makes this file different from the
+ * Norwegian and Danish ones where a single ordinal form served. The weak adjective declension is:
+ *
+ *     -i   masculine NOMINATIVE only
+ *     -a   masculine oblique · feminine nominative · neuter throughout
+ *     -u   feminine oblique
+ *
+ * The corpus's 46 instances split accordingly: 22 before a MONTH NAME (masculine nominative → `-i`,
+ * *sautjándi september*), 15 before `öld`/`aldar` ("century", FEMININE → `-a` nominative, `-u` genitive:
+ * *átjánda öld* but *átjándu aldar*), and 9 others including `sæti` (neuter → `-a`) and `1. dag`
+ * (masculine ACCUSATIVE → `-a`).
+ *
+ * So `-a` is the DEFAULT, not `-i`. A bare `N.` before an arbitrary noun is more likely oblique or
+ * non-masculine than masculine-nominative, and `-i` is the one ending that is never right anywhere else.
+ * Porting Norwegian's single-form table would have produced the masculine nominative everywhere and been
+ * wrong for the 15 `öld` instances alone.
+ *
+ * ⚠ NO PERIOD-CLOCK RULE, and for a fifth distinct reason across this sweep. `HH.MM` appears to occur 24
+ * times, but that count is an artefact: the pattern matches INSIDE the 22 period-grouped thousands
+ * (`1.234` contains `1.23`). Exactly one standalone instance exists and it is a decimal — `6.34 tommum`,
+ * inches. The 10 real clocks are all colon-form.
+ *
+ * ORDERING:
+ *   · DE-GROUPING FIRST, before the ordinal rule, or `1.234` is read as an ordinal followed by a numeral.
+ *   · THE ORDINAL RULE AFTER de-grouping and after the decimal rule, both of which own a period too.
+ */
+
+/**
+ * Ordinals 1–31 in the three weak endings. `masc` is the masculine NOMINATIVE (`-i`); `common` covers
+ * masculine oblique, feminine nominative and all neuter (`-a`); `femOblique` is the feminine oblique
+ * (`-u`), which the corpus needs for the genitive `aldar`.
+ */
+interface OrdinalForms { masc: string; common: string; femOblique: string }
+const ORD = (masc: string, common: string, femOblique: string): OrdinalForms => ({ masc, common, femOblique });
+
+const ORDINALS: Readonly<Record<string, OrdinalForms>> = {
+    "1": ORD("fyrsti", "fyrsta", "fyrstu"),
+    "2": ORD("annar", "annan", "annarrar"),
+    "3": ORD("þriðji", "þriðja", "þriðju"),
+    "4": ORD("fjórði", "fjórða", "fjórðu"),
+    "5": ORD("fimmti", "fimmta", "fimmtu"),
+    "6": ORD("sjötti", "sjötta", "sjöttu"),
+    "7": ORD("sjöundi", "sjöunda", "sjöundu"),
+    "8": ORD("áttundi", "áttunda", "áttundu"),
+    "9": ORD("níundi", "níunda", "níundu"),
+    "10": ORD("tíundi", "tíunda", "tíundu"),
+    "11": ORD("ellefti", "ellefta", "elleftu"),
+    "12": ORD("tólfti", "tólfta", "tólftu"),
+    "13": ORD("þrettándi", "þrettánda", "þrettándu"),
+    "14": ORD("fjórtándi", "fjórtánda", "fjórtándu"),
+    "15": ORD("fimmtándi", "fimmtánda", "fimmtándu"),
+    "16": ORD("sextándi", "sextánda", "sextándu"),
+    "17": ORD("sautjándi", "sautjánda", "sautjándu"),
+    "18": ORD("átjándi", "átjánda", "átjándu"),
+    "19": ORD("nítjándi", "nítjánda", "nítjándu"),
+    "20": ORD("tuttugasti", "tuttugasta", "tuttugustu"),
+    "21": ORD("tuttugasti og fyrsti", "tuttugasta og fyrsta", "tuttugustu og fyrstu"),
+    "22": ORD("tuttugasti og annar", "tuttugasta og annan", "tuttugustu og annarrar"),
+    "23": ORD("tuttugasti og þriðji", "tuttugasta og þriðja", "tuttugustu og þriðju"),
+    "24": ORD("tuttugasti og fjórði", "tuttugasta og fjórða", "tuttugustu og fjórðu"),
+    "25": ORD("tuttugasti og fimmti", "tuttugasta og fimmta", "tuttugustu og fimmtu"),
+    "26": ORD("tuttugasti og sjötti", "tuttugasta og sjötta", "tuttugustu og sjöttu"),
+    "27": ORD("tuttugasti og sjöundi", "tuttugasta og sjöunda", "tuttugustu og sjöundu"),
+    "28": ORD("tuttugasti og áttundi", "tuttugasta og áttunda", "tuttugustu og áttundu"),
+    "29": ORD("tuttugasti og níundi", "tuttugasta og níunda", "tuttugustu og níundu"),
+    "30": ORD("þrítugasti", "þrítugasta", "þrítugustu"),
+    "31": ORD("þrítugasti og fyrsti", "þrítugasta og fyrsta", "þrítugustu og fyrstu"),
+};
+
+/** Month names select the MASCULINE NOMINATIVE — *sautjándi september*. 22 of the corpus's 46 ordinals. */
+const MONTHS = /^(janúar|febrúar|mars|apríl|maí|júní|júlí|ágúst|september|október|nóvember|desember)/u;
+/** `öld` is FEMININE; its oblique forms take the `-u` ordinal — *átjándu aldar*. 15 instances. */
+const FEM_OBLIQUE = /^(aldar|öldinni|aldarinnar|aldir)/u;
+
+/** Latin unit abbreviations → Icelandic words (57 instances). */
+const UNITS: [RegExp, string][] = [
+    [/km/giu, "kílómetrar"],
+    [/kg/giu, "kílógrömm"],
+    [/cm/giu, "sentímetrar"],
+    [/mm/giu, "millímetrar"],
+];
+
+/** Relational and operator signs, read in every position — a dropped sign is inaudible. */
+const RELATIONAL: [RegExp, string][] = [
+    [/±/gu, " plús mínus "],
+    [/[=≈]/gu, " jafnt og "],
+    [/</gu, " minna en "],
+    [/>/gu, " meira en "],
+    [/×/gu, " sinnum "],
+    [/÷/gu, " deilt með "],
+];
+
+/** Currency sign → the Icelandic word. */
+const CURRENCY: Readonly<Record<string, string>> = {
+    "$": "dalir", "€": "evrur", "£": "pund", "¥": "jen",
+};
+
+export function normalizeIcelandic(input: string): string {
+    let t = input;
+
+    // 1) PERIOD-GROUPED THOUSANDS (22), FIRST — before the ordinal rule, which would otherwise claim the
+    //    `1.` of `1.234`. The period is clause punctuation, so the numeral read as "one" + a SENTENCE
+    //    BREAK + "two hundred and thirty four".
+    let prev: string;
+    do {
+        prev = t;
+        t = t.replace(/(\d)\.(\d{3})(?!\d)/gu, "$1$2");
+    } while (t !== prev);
+
+    // 2) DECIMAL COMMA (8). The comma is clause punctuation too, so `12,5` read as a PAUSE inside a
+    //    number. Fractional part spoken digit by digit.
+    t = t.replace(/(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
+        `${whole} komma ${[...frac].join(" ")}`);
+
+    // 3) CLOCK, COLON FORM ONLY (10). The period form is a decimal here — see the header.
+    t = t.replace(/(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+
+    // 4) PERCENT (2) and DEGREES. Postposed.
+    t = t.replace(/(\d+)\s*%/gu, "$1 prósent");
+    t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
+    t = t.replace(/(\d)\s*°\s*C(?!\p{L})/giu, "$1 gráður á Celsíus");
+    t = t.replace(/(\d)\s*°\s*F(?!\p{L})/giu, "$1 gráður á Fahrenheit");
+    t = t.replace(/(\d)\s*°/gu, "$1 gráður");
+
+    // 5) SQUARED UNITS (2), before the plain unit rule or the `km` is consumed and the exponent stranded.
+    t = t.replace(/(?<!\p{L})km\s*[²2](?!\d)/giu, "ferkílómetrar");
+    t = t.replace(/(?<!\p{L})m\s*[²2](?!\d)/giu, "fermetrar");
+
+    // 6) LATIN UNIT ABBREVIATIONS after a number (57).
+    for (const [re, word] of UNITS)
+        t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
+
+    // 7) ORDINAL DOT (46) — the largest defect. `3. maí` read as "þrír" + a SENTENCE BREAK + "maí".
+    //    THE FORM IS SELECTED BY WHAT FOLLOWS, which is the Icelandic-specific part: a month name takes
+    //    the masculine nominative `-i`, the oblique forms of `öld` take `-u`, and everything else takes
+    //    `-a` — see the declension table in the header for why `-a` is the default rather than `-i`.
+    t = t.replace(/(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})\s+(\p{Ll}+)/gu, (m, n: string, next: string) => {
+        const forms = ORDINALS[n];
+        if (forms === undefined) return m;
+        const word = MONTHS.test(next) ? forms.masc : FEM_OBLIQUE.test(next) ? forms.femOblique : forms.common;
+        return `${word} ${next}`;
+    });
+
+    // 8) RANGES (12). Spoken `til`.
+    t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
+
+    // 9) CURRENCY, both placements.
+    for (const [sign, word] of Object.entries(CURRENCY)) {
+        const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+        t = t.replace(new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
+        t = t.replace(new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+    }
+
+    // 10) SIGNED NUMBERS — a sign PREFIXED to a number, after ranges so a range's dash is already gone.
+    t = t.replace(/(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+        `${sign === "+" ? "plús" : "mínus"} ${n}`);
+
+    // 11) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
+    //     relational signs are read in every position.
+    t = t.replace(/(\d)\s*\+\s*(\d)/gu, "$1 plús $2");
+    for (const [re, word] of RELATIONAL) t = t.replace(re, word);
+
+    // 12) AMPERSAND → og.
+    t = t.replace(/\s*[&＆]\s*/gu, " og ");
+
+    // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
+    return t.replace(/[ \t]{2,}/gu, " ");
+}

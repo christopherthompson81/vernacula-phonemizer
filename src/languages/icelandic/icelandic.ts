@@ -13,6 +13,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { normalizeIcelandic } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -179,8 +180,11 @@ export function phonemizeWord(word: string): string {
 const TOKEN = /([a-záéíóúýþðæöA-ZÁÉÍÓÚÝÞÐÆÖ'-]+)|(\d+)|([.!?…,;:])/gu;
 
 class IcelandicPhonemizer implements Phonemizer {
-    text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+    text(rawInput: string): string {
+        // #562: everything the g2p cannot read is rewritten to Icelandic words FIRST — see normalize.ts,
+        // in particular why the ordinal form is selected by the FOLLOWING noun (Icelandic ordinals agree
+        // in gender and case, unlike the Norwegian and Danish single-form tables).
+        return assembleClauses(normalizeIcelandic(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Numbers: the tens-first / gender-concord compositor (numbers.ts) → each word back through the same g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

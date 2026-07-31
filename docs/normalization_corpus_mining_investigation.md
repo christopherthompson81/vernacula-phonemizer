@@ -1237,3 +1237,48 @@ claiming `HH.MM` outright would have turned six measurements into times.
 
 `tsc` clean, **2553 tests**, referee **unchanged** at 77.5% against a pristine worktree. Corpus diff
 38/115 changed, 3/40 in the representative sample. The artifact scans with **no defects**.
+
+---
+
+## Run 22 — 2026-07-31 — Icelandic
+
+The 45th language. Germanic, so the ordinal dot is back — but it needs something none of the previous
+languages did.
+
+### ★ Icelandic ordinals agree in GENDER AND CASE
+
+Norwegian and Danish each got a single ordinal per number. Icelandic cannot: the weak adjective
+declension is
+
+```
+-i   masculine NOMINATIVE only
+-a   masculine oblique · feminine nominative · neuter throughout
+-u   feminine oblique
+```
+
+and the corpus's 46 instances split across all three. 22 before a MONTH NAME (masculine nominative →
+*sautjándi september*), 15 before `öld`/`aldar` — "century", feminine — which needs `-a` in the
+nominative and `-u` in the genitive (*átjánda öld* but *átjándu aldar*), and 9 others including `sæti`
+(neuter → `-a`) and `1. dag` (masculine ACCUSATIVE → `-a`).
+
+**So `-a` is the default, not `-i`.** A bare `N.` before an arbitrary noun is more likely oblique or
+non-masculine than masculine-nominative, and `-i` is the one ending never right anywhere else. Porting the
+Norwegian table would have produced the masculine nominative everywhere and been wrong for the 15 `öld`
+instances alone — the second-largest context in the language.
+
+The rule therefore selects on what FOLLOWS: a month name, an oblique form of `öld`, or the default.
+
+### The period form, for a fifth distinct reason
+
+`HH.MM` appears to occur 24 times. That count is an **artefact**: the pattern matches inside the 22
+period-grouped thousands, since `1.234` contains `1.23`. Exactly ONE standalone instance exists and it is
+a decimal — `6.34 tommum`, inches. The 10 real clocks are colon-form.
+
+Across this sweep the same shape has now needed five different answers: Norwegian dates, Danish and
+Romanian Wi-Fi standards, Bulgarian none at all, Sindhi timezone-marked, Icelandic a counting artefact.
+
+### Gates
+
+`tsc` clean, **2558 tests**, referee **unchanged** at 80.1% against a pristine worktree. Corpus diff
+35/112 changed, 3/40 in the representative sample, all improvements. The artifact scans with **no
+defects**.
