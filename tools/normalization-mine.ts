@@ -35,6 +35,7 @@
  *        [--terminators "။"] [--terms months.txt] [--audit-ascii]
  */
 import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 /**
  * THE PATTERN INVENTORY. `langs` is the count of treated languages that authored a rule in that category —
@@ -54,7 +55,7 @@ interface Cell {
     lexical?: boolean;
 }
 
-const CELLS: Cell[] = [
+export const CELLS: Cell[] = [
     { key: "degrees", langs: 22, re: /\p{Nd}\s*(?:°|℃|℉)/u, search: "[{D}]+ ?°" },
     { key: "digit-run", langs: 19, re: /\p{Nd}{4,}/u, search: "[{D}]{4,}" },
     { key: "fractions", langs: 18, re: /\p{Nd}\s*[\/⁄]\s*\p{Nd}|[½¼¾⅓⅔⅛]/u, search: "[{D}]+/[{D}]+" },
@@ -100,8 +101,163 @@ const CELLS: Cell[] = [
 
 const asciiVariant = (re: RegExp): RegExp => new RegExp(re.source.replace(/\\p\{Nd\}/gu, "\\d"), re.flags);
 
+export type SegmentMode = "sentence" | "paragraph";
+
+/**
+ * THE SPLITTER MUST NOT EAT THE ABBREVIATION DOT, and this destroyed three whole cells before it was
+ * noticed. `.` is a sentence terminator, so `U.S.` split into `U.` and `S.` — each below the minimum
+ * length, so both were discarded — and `dotted`, `era-marker` and `abbrev` reported ZERO across 786k
+ * Burmese sentences while grepping the same text found 1437 dotted forms. Those are exactly the three
+ * cells that depend on a period.
+ *
+ * Two defences. First, `paragraph` mode, which is the RIGHT segmentation whenever the target is the dot
+ * itself: a sentence splitter has to decide what a period means, and that decision is the thing under
+ * test, whereas a paragraph boundary needs no such decision. Second, in `sentence` mode the abbreviation
+ * dots are protected before splitting and restored after. Under-splitting is harmless — the length cap
+ * bounds a segment anyway — whereas over-splitting silently deletes the evidence.
+ */
+const DOT_SENTINEL = "";
+const PROTECT: RegExp[] = [
+    /(?<![\p{L}\p{M}])(?:\p{L}\.){2,}/gu, // U.S., M.Ö., ಕ್ರಿ.ಪೂ
+    /(?<![\p{L}\p{M}])\p{L}\.(?=\s*[\p{Nd}\p{Lu}])/gu, // a lone initial: J. S. Bach, S. 42
+    /(?<![\p{L}\p{M}])\p{L}{2,4}\.(?=\s+\p{Lu})/gu, // Dr. Smith
+];
+
+/** Bounds per mode. A fragment below the minimum carries no context for a rule to be judged in; above the
+ *  maximum it is usually a table or list that survived plain-text extraction. */
+const BOUNDS: Record<SegmentMode, [number, number]> = { sentence: [20, 400], paragraph: [40, 1200] };
+
+export function segment(raw: string, mode: SegmentMode, terminators: string): string[] {
+    const [min, max] = BOUNDS[mode];
+    let text = raw;
+    let pieces: string[];
+    if (mode === "paragraph") {
+        // The extractor writes one paragraph per line, so the boundary is already decided and no dot is
+        // ever interpreted.
+        pieces = text.split("\n");
+    } else {
+        for (const p of PROTECT) text = text.replace(p, (m) => m.replace(/\./gu, DOT_SENTINEL));
+        const esc = (s: string): string => s.replace(/[\\\]^-]/gu, "\\$&");
+        const splitter = new RegExp(`[^${esc(terminators)}]+[${esc(terminators)}]*`, "gu");
+        pieces = [...text.matchAll(splitter)].map((m) => m[0]);
+    }
+    return [...new Set(
+        pieces
+            .map((s) => s.split(DOT_SENTINEL).join(".").replace(/\s+/gu, " ").trim())
+            .filter((s) => s.length >= min && s.length <= max),
+    )];
+}
+
+export interface CellSelection {
+    picked: { cell: string; text: string }[];
+    counts: Record<string, number>;
+    asciiCounts: Record<string, number>;
+}
+
+/** Pure selection: segments → per-cell counts and up to `perCell` examples each. Deterministic. */
+export function selectCells(segments: string[], opts: { perCell: number; terms?: string[] }): CellSelection {
+    const terms = opts.terms ?? [];
+    const termRe = terms.length > 0
+        ? new RegExp(terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|"), "u")
+        : undefined;
+    const matches = (c: Cell, s: string): boolean => (c.lexical ? (termRe?.test(s) ?? false) : c.re.test(s));
+
+    const picked: { cell: string; text: string }[] = [];
+    const seen = new Set<string>();
+    const counts: Record<string, number> = {};
+    const asciiCounts: Record<string, number> = {};
+    for (const cell of CELLS) {
+        const ascii = cell.lexical ? undefined : asciiVariant(cell.re);
+        counts[cell.key] = 0;
+        asciiCounts[cell.key] = 0;
+        let taken = 0;
+        for (const s of segments) {
+            if (!matches(cell, s)) continue;
+            counts[cell.key]!++;
+            if (ascii?.test(s)) asciiCounts[cell.key]!++;
+            // Prefer unpicked segments so the set covers CELLS rather than repeating one dense passage.
+            if (taken < opts.perCell && !seen.has(s)) {
+                picked.push({ cell: cell.key, text: s });
+                seen.add(s);
+                taken++;
+            }
+        }
+    }
+    return { picked, counts, asciiCounts };
+}
+
+export interface MinedCorpus {
+    language: string;
+    source: string;
+    segmentMode: SegmentMode;
+    totalSegments: number;
+    counts: Record<string, number>;
+    asciiCounts: Record<string, number>;
+    picked: { cell: string; text: string }[];
+    sample: string[];
+}
+
+/**
+ * Render the mined corpus as JSONC — the deliverable. Comments carry the provenance and the two warnings
+ * a reader of this file needs (why `hard` is not frequency-representative, and why `sample` exists), so
+ * the artifact explains itself without the investigation doc beside it.
+ */
+export function renderJsonc(c: MinedCorpus): string {
+    const cov = CELLS.filter((x) => (c.counts[x.key] ?? 0) > 0).length;
+    const rows = CELLS.map((x) => {
+        const n = c.counts[x.key] ?? 0, a = c.asciiCounts[x.key] ?? 0;
+        const note = x.lexical ? " lexical cell — matched via the term list" : n > 0 && a === 0 ? " ASCII-BLIND: \\d would find NONE of these" : n > a ? ` \\d would miss ${n - a}` : "";
+        return `        "${x.key}": ${n},${" ".repeat(Math.max(1, 18 - x.key.length - String(n).length))}//${note || ` in ${x.langs} treated languages`}`;
+    }).join("\n");
+    const esc = (s: string): string => JSON.stringify(s);
+    return `// MINED NORMALIZATION CORPUS — ${c.language} (#585). Generated by tools/normalization-mine.ts.
+//
+// WHAT THIS IS. Excerpts of running text SELECTED because they challenge the normalization layer, for a
+// language with no FLEURS corpus. The cells are the empirical shape of the rules the treated languages
+// actually needed, so coverage of them is the completeness criterion — not size.
+//
+// ⚠ "hard" IS NOT FREQUENCY-REPRESENTATIVE. It is selected adversarially, so an instance count inside it
+// means nothing about the language. Use "sample" (uniform, deterministic stride) for anything that needs
+// real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
+// fire, not that nothing else broke.
+//
+// ⚠ AN EMPTY CELL IS NOT EVIDENCE. It is a query to run or a tool bug. Both have happened here: random
+// sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
+// abbreviation dots and emptied three cells that a grep showed were well populated.
+//
+// source: ${c.source}
+// segmentation: ${c.segmentMode}${c.segmentMode === "paragraph" ? " (no dot is ever interpreted — correct when the target IS the period)" : " (abbreviation dots protected before splitting)"}
+{
+    "language": ${esc(c.language)},
+    "source": ${esc(c.source)},
+    "segmentMode": ${esc(c.segmentMode)},
+    "totalSegments": ${c.totalSegments},
+    "cellsCovered": ${cov},
+    "cellsTotal": ${CELLS.length},
+
+    // Occurrences across the whole corpus, and what an ASCII-only \\d selector would have found instead.
+    "counts": {
+${rows}
+    },
+
+    // The hard-set: up to N examples per cell.
+    "hard": [
+${c.picked.map((p) => `        { "cell": ${esc(p.cell)}, "text": ${esc(p.text)} }`).join(",\n")}
+    ],
+
+    // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.
+    "sample": [
+${c.sample.map((s) => `        ${esc(s)}`).join(",\n")}
+    ]
+}
+`;
+}
+
 const argv = process.argv.slice(2);
-const mode = argv[0];
+/** Only dispatch when this file IS the entry point. Without this the whole CLI ran on import and the test
+ *  suite died on `process.exit(2)` before a single test collected. */
+const IS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+const mode = IS_CLI ? argv[0] : "__module__";
 const arg = (n: string, d?: string): string | undefined => {
     const i = argv.indexOf(`--${n}`);
     return i === -1 ? d : argv[i + 1];
@@ -220,11 +376,13 @@ if (mode === "scan") {
     ];
     const hits = new Map<string, number>();
     const example = new Map<string, string>();
-    const lines = readFileSync(inPath, "utf8").trim().split("\n");
-    for (const ln of lines) {
-        const sentence = ln.split("\t")[1] ?? "";
+    // Reads the JSONC artifact the mine step writes; comments are stripped before parsing.
+    const { parseJsonc } = await import(new URL("../src/core/jsonc.ts", import.meta.url).href);
+    const doc = parseJsonc(readFileSync(inPath, "utf8")) as MinedCorpus & { hard: { cell: string; text: string }[] };
+    const lines = [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])];
+    for (const sentence of lines) {
         let ipa: string;
-        try { ipa = phonemize(sentence, lang) as string; } catch (e) { bump("THROW", sentence); continue; }
+        try { ipa = phonemize(sentence, lang) as string; } catch { bump("THROW", sentence); continue; }
         for (const [name, re] of LEAK) if (re.test(ipa)) bump(`LEAK ${name}`, sentence);
         for (const [name, re] of DROPPABLE) {
             if (!re.test(sentence)) continue;
@@ -243,77 +401,62 @@ if (mode === "scan") {
     process.exit(0);
 }
 
-if (mode !== "mine") {
+if (mode === "__module__") {
+    // imported as a library — export only, run nothing
+} else if (mode !== "mine") {
     console.error("usage: fetch --wiki my --out raw.txt [--random N] [--fill cell,cell] [--digits ၀-၉] [--terms f]\n       mine --in raw.txt --out hard.tsv [--per-cell 8] [--sample N] [--terminators \"။\"] [--terms f] [--audit-ascii]");
     process.exit(2);
-}
+} else {
+    const inPath = arg("in"), outPath = arg("out");
+    if (inPath === undefined || outPath === undefined) throw new Error("mine needs --in and --out");
+    const perCell = Number(arg("per-cell", "8"));
+    const sampleN = Number(arg("sample", "0"));
+    const segmentMode = (arg("segment", "sentence") === "paragraph" ? "paragraph" : "sentence") as SegmentMode;
+    const terminators = arg("terminators", ".!?။።۔؟।॥…。！？៕")!;
+    const termsPath = arg("terms");
+    const terms = termsPath !== undefined ? readFileSync(termsPath, "utf8").split("\n").map((s) => s.trim()).filter(Boolean) : [];
 
-const inPath = arg("in"), outPath = arg("out");
-if (inPath === undefined || outPath === undefined) throw new Error("mine needs --in and --out");
-const perCell = Number(arg("per-cell", "8"));
-const sampleN = Number(arg("sample", "0"));
-const terminators = arg("terminators", ".!?။።۔؟।॥…。！？៕")!;
-const termsPath = arg("terms");
-const terms = termsPath !== undefined ? readFileSync(termsPath, "utf8").split("\n").map((s) => s.trim()).filter(Boolean) : [];
-const esc = (s: string): string => s.replace(/[\\\]^-]/gu, "\\$&");
+    const raw = readFileSync(inPath, "utf8");
+    const segments = segment(raw, segmentMode, terminators);
+    const result = selectCells(segments, { perCell, terms });
 
-const raw = readFileSync(inPath, "utf8");
-const splitter = new RegExp(`[^${esc(terminators)}]+[${esc(terminators)}]*`, "gu");
-const sentences = [...new Set(
-    [...raw.matchAll(splitter)]
-        .map((m) => m[0].replace(/\s+/gu, " ").trim())
-        // A fragment shorter than this carries no context for a rule to be judged in; a very long one is
-        // usually a table or list that survived the plain-text extraction.
-        .filter((s) => s.length >= 20 && s.length <= 400),
-)];
-
-const termRe = terms.length > 0
-    ? new RegExp(terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|"), "u")
-    : undefined;
-const test = (c: Cell, s: string): boolean => (c.lexical ? (termRe?.test(s) ?? false) : c.re.test(s));
-
-const picked: { cell: string; sentence: string }[] = [];
-const counts = new Map<string, number>();
-const asciiCounts = new Map<string, number>();
-
-for (const cell of CELLS) {
-    const ascii = cell.lexical ? undefined : asciiVariant(cell.re);
-    let taken = 0;
-    for (const s of sentences) {
-        if (!test(cell, s)) continue;
-        counts.set(cell.key, (counts.get(cell.key) ?? 0) + 1);
-        if (ascii?.test(s)) asciiCounts.set(cell.key, (asciiCounts.get(cell.key) ?? 0) + 1);
-        // Prefer unpicked sentences so the set covers CELLS rather than repeating one dense sentence.
-        if (taken < perCell && !picked.some((p) => p.sentence === s)) {
-            picked.push({ cell: cell.key, sentence: s });
-            taken++;
-        }
+    console.log(`${segments.length} unique ${segmentMode}s\n`);
+    console.log("cell             langs   matched   picked   ascii-only");
+    for (const c of CELLS) {
+        const n = result.counts[c.key] ?? 0, a = result.asciiCounts[c.key] ?? 0;
+        const pk = result.picked.filter((p) => p.cell === c.key).length;
+        const flag = c.lexical ? "  (lexical)" : n > 0 && a === 0 ? "  ← ASCII BLIND" : n > a ? `  (${n - a} missed)` : "";
+        console.log(`${c.key.padEnd(16)} ${String(c.langs).padStart(3)}   ${String(n).padStart(7)}   ${String(pk).padStart(6)}   ${String(a).padStart(9)}${flag}`);
     }
-}
+    const empty = CELLS.filter((c) => (result.counts[c.key] ?? 0) === 0).map((c) => c.key);
+    console.log(`\ncovered ${CELLS.length - empty.length}/${CELLS.length} cells`);
+    if (empty.length > 0) {
+        // An empty cell is a QUERY TO RUN OR A TOOL BUG — never evidence on its own. Run 1 read six empty
+        // cells as "Burmese does not write those" and a targeted search found 1013 articles with a
+        // percentage; later, three dot-bearing cells read empty because the SPLITTER was eating the dots.
+        // Print what to do next rather than a conclusion.
+        console.log(`EMPTY: ${empty.join(" ")}`);
+        console.log(`  → try --segment paragraph, then fetch --fill ${empty.join(",")} --digits <range>`);
+    }
 
-console.log(`sentences: ${sentences.length} unique\n`);
-console.log("cell             langs   matched   picked   ascii-only");
-for (const c of CELLS) {
-    const n = counts.get(c.key) ?? 0, a = asciiCounts.get(c.key) ?? 0;
-    const pk = picked.filter((p) => p.cell === c.key).length;
-    const flag = c.lexical ? "  (lexical)" : n > 0 && a === 0 ? "  ← ASCII BLIND" : n > a ? `  (${n - a} missed)` : "";
-    console.log(`${c.key.padEnd(16)} ${String(c.langs).padStart(3)}   ${String(n).padStart(7)}   ${String(pk).padStart(6)}   ${String(a).padStart(9)}${flag}`);
-}
-const empty = CELLS.filter((c) => (counts.get(c.key) ?? 0) === 0).map((c) => c.key);
-console.log(`\ncovered ${CELLS.length - empty.length}/${CELLS.length} cells`);
-if (empty.length > 0) {
-    // An empty cell is a QUERY TO RUN, not a fact about the language — the first Burmese run read six
-    // empty cells as "Burmese does not write those" and a targeted search found 944 articles with a
-    // percentage. Print the command rather than the conclusion.
-    console.log(`EMPTY: ${empty.join(" ")}`);
-    console.log(`  → fetch --fill ${empty.join(",")} --digits <this language's digit range>`);
-}
+    const sample: string[] = [];
+    if (sampleN > 0) {
+        // Deterministic stride, not a shuffle — reproducible, and no Math.random.
+        const stride = Math.max(1, Math.floor(segments.length / sampleN));
+        for (let i = 0; i < segments.length && sample.length < sampleN; i += stride) sample.push(segments[i]!);
+    }
 
-const lines = picked.map((p) => `${p.cell}\t${p.sentence}`);
-if (sampleN > 0) {
-    // Deterministic stride, not a shuffle — reproducible, and no Math.random.
-    const stride = Math.max(1, Math.floor(sentences.length / sampleN));
-    for (let i = 0; i < sentences.length && lines.length < picked.length + sampleN; i += stride) lines.push(`sample\t${sentences[i]}`);
+    const lang = arg("lang", "und")!;
+    const source = arg("source", inPath)!;
+    writeFileSync(outPath, renderJsonc({
+        language: lang,
+        source,
+        segmentMode,
+        totalSegments: segments.length,
+        counts: result.counts,
+        asciiCounts: result.asciiCounts,
+        picked: result.picked,
+        sample,
+    }), "utf8");
+    console.log(`wrote ${result.picked.length} hard + ${sample.length} sample → ${outPath}`);
 }
-writeFileSync(outPath, lines.join("\n") + "\n", "utf8");
-console.log(`wrote ${lines.length} lines → ${outPath}`);

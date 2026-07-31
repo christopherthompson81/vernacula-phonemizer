@@ -189,3 +189,87 @@ file size before a single byte is parsed, and it is a cheap pre-filter: dump siz
 to the language's encyclopedic footprint is the signature.
 
 Cost of the dump route: wikitext → plain text needs a real extractor (the API gave that for free).
+
+---
+
+## Run 3 — 2026-07-31 — local dump, and the tooling hardened
+
+**Question.** Does the local-dump route close the last cells, and is the pipeline reproducible enough to
+commit its output as a reviewable artifact?
+
+**Dump route.** `mywiki-latest-pages-articles.xml.bz2`, 71 MB, extracted by a purpose-written
+`tools/wikidump-to-text.py` (no wikitext library was available; `wikitextparser` and `mwparserfromhell` are
+both absent). 160,490 pages → **454,821 paragraphs** in 98 seconds. That is 578× the text the API route
+produced in dozens of rate-limited requests.
+
+### The three stubborn cells were a TOOL BUG, not a language fact
+
+Mining the dump still reported `dotted`, `era-marker` and `abbrev` at **zero** — across 786k sentences.
+Grepping the same extracted text:
+
+```
+$ grep -coE "[A-Za-z]\.[A-Za-z]\." my_dump.txt
+1437          # K.S.  A.T.  U.S.  G.H. …
+```
+
+The sentence splitter treats `.` as a terminator, so `U.S.` split into `U.` and `S.`, each below the
+20-char minimum, and both were discarded. **The three empty cells were exactly the three that depend on a
+period.** Run 2 had blamed the extractor for stripping citations; that was wrong, and the real cause was
+one level up in the miner.
+
+Two fixes, and the first is the better one:
+
+1. **`--segment paragraph`.** A sentence splitter must decide what a period MEANS, and when the mining
+   target *is* the period that decision is the thing under test. A paragraph boundary requires no such
+   decision. The extractor now emits one paragraph per line so the miner can choose.
+2. In sentence mode, abbreviation dots are protected before splitting and restored after.
+
+Result: **24/24 cells covered**, from 21/24. `dotted` 1511, `abbrev` 2780, `era-marker` 63.
+
+Counts are NOT comparable across segmentation modes — a paragraph holding five sentences counts once, but
+is likelier to contain any given pattern (`clock` reads 1213 by sentence and 3104 by paragraph). Compare
+within a mode only.
+
+### Reproducibility
+
+The miner exports its internals and is covered by `tools/normalization-mine.test.ts` (7 tests): stable
+selection across runs, stable JSONC rendering, the dot-splitting regression, paragraph mode, the
+native-digit assertion (`asciiCounts.percent === 0` — `\d` finds none of them), and a guard that no fill
+query hardcodes `0-9`. Two full mine runs over the 454k-paragraph dump are **byte-identical**.
+
+One thing this exposed: the tool ran its CLI on import, so the test suite died on `process.exit(2)` before
+collecting a single test. Now guarded on being the entry point.
+
+### The artifact
+
+`tools/corpus/mined/my.jsonc` — 245 lines, 144 hard + 40 sample. Header comments carry the provenance and
+the two warnings a reader needs (why `hard` is not frequency-representative, why an empty cell is not
+evidence), so the file explains itself. Parsed with the repo's own `parseJsonc`, not a regex strip — the
+counts block carries TRAILING comments that a line-anchored strip leaves behind.
+
+### DROP is now in the corpus-diff gate, and it fires on real corpora
+
+Added to `normalization-corpus-diff.ts` as a fourth defect class. Only utterances carrying the symbol pay
+for the second phonemize, so the cost is a few percent rather than a doubling.
+
+Validation on FLEURS corpora:
+
+```
+hu_hu   1995 utterances → 0 markers     (correct: hu_hu contains no $ at all — this IS #584)
+ro_ro   1958 utterances → 12 markers    8 percent, 2 currency, 2 degree
+```
+
+Romanian has a corpus, was audited, and was reading `%` as nothing — invisible to DIGIT / SLOT-GAP /
+RAWMARK because the sign VANISHES rather than leaking. The class is retrospective: it would have caught
+this in the original batches.
+
+Drop scan of the Burmese artifact: `minus ×10, math-sign ×10, percent ×8, degree ×6, currency ×6`.
+
+### Open
+
+- `hu_hu` shows the limit that remains: a differential test cannot fire on a symbol the corpus never
+  contains. The synthetic audit stays necessary; neither check subsumes the other.
+- The bot-generated-wiki risk is still untested. `ceb` at 1845 MB versus Burmese at 71 MB is the signal to
+  check, and dump size is a free pre-filter.
+- Only `my` has been mined. The other ~89 corpus-less languages need a terms list each for the `calendar`
+  cell, which is the one genuinely per-language input the pipeline requires.
