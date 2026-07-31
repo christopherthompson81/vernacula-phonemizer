@@ -17,6 +17,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { normalizeRomanian } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -325,8 +326,11 @@ const TOKEN = /([a-zA-ZăâîșțáéíóúàA-ZĂÂÎȘȚ]+)|(\d+)|([.?!,;:])/g
 /** Build the Romanian phonemizer. */
 export function createRomanian(): Phonemizer {
     return {
-        text(input: string): string {
-            return assembleClauses(input, TOKEN, (m, sink) => {
+        text(rawInput: string): string {
+            // #562: everything the g2p cannot read is rewritten to Romanian words FIRST — see
+            // normalize.ts, in particular why there is NO ordinal-dot rule here despite it being the
+            // largest rule in the Germanic languages.
+            return assembleClauses(normalizeRomanian(rawInput), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     const num = Number(m[2]);

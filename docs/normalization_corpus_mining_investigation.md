@@ -923,3 +923,48 @@ between two dotted numbers makes both ordinals whatever follows, so the pair is 
 `tsc` clean, **2519 tests** (15 in the Danish file), referee **unchanged** at 27.4% folded backbone against
 a pristine worktree. Corpus diff 45/130 changed, 4/40 in the representative sample. The artifact scans with
 **no defects**.
+
+---
+
+## Run 16 — 2026-07-31 — Romanian
+
+The 41st language, and the first Romance one in this sequence. Chosen because the retroactive audit had
+already measured it dropping percent, currency and degrees.
+
+### ★ The finding: the biggest rule from the last two languages must NOT exist here
+
+The ordinal dot is the LARGEST rule in Norwegian (134 instances) and Danish (112), and the shape `N.`
+occurs **169 times** in the Romanian corpus — so porting it looks obviously right. Measured:
+
+```
+N. followed by a lowercase word:  0
+N. followed by a capital:         3
+```
+
+**Romanian has no ordinal dot at all.** Those 169 are sentence ends and the thousands-grouping periods.
+Romanian writes ordinals as WORDS (`primul`, `al doilea`) and dates without a dot (`3 mai`). A rule ported
+from the Germanic pair would have fired on sentence boundaries — the worst kind of defect, because it
+destroys prosody in ordinary prose rather than mangling a rare numeral.
+
+Two languages in a row now where the previous language's headline rule was wrong: Danish needed the
+period as a THOUSANDS SEPARATOR where Norwegian had it as a date, and Romanian needs no dot rule at all.
+
+### Two more per-language readings that a cognate would get wrong
+
+- **Percent is `la sută`** ("per hundred"), not `procent`. The corpus writes the word out 11 times as
+  *la sută* against 3 as *procent* — the cognate an English speaker reaches for is the minority form.
+- **Squared units POSTPOSE the modifier** — `kilometri pătrați`, adjective after noun. Germanic compounds
+  it in front (`kvadratkilometer`) and so does Burmese (`စတုရန်းကီလိုမီတာ`). Three languages, three
+  orders, and only the corpus says which.
+
+### The ASCII-`\b` trap, again, in a file written after documenting it
+
+The rate rule was `/km\s*\/\s*(?:h|or[ăa])\b/` and silently did not fire on `km/oră`. `\b` is defined on
+ASCII word characters, so after the `ă` it finds no boundary. Romanian's alphabet (ă â î ș ț) walks
+straight into the playbook's top-ranked trap. Replaced with `(?!\p{L})`.
+
+### Gates
+
+`tsc` clean, **2526 tests** (7 in the Romanian file), referee **unchanged** at 80.9% folded backbone
+against a pristine worktree. Corpus diff 54/132 changed, 4/40 in the representative sample, all
+improvements. The artifact scans with **no defects**.

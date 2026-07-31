@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "./romanian.ts";
+import { normalizeRomanian } from "./normalize.ts";
 import { ROMAN_EXCLUSIONS } from "../../core/roman.ts";
 import { phonemize } from "../../index.ts";
 import { ROMAN_POLICY } from "./romanOrdinals.ts";
@@ -109,5 +110,55 @@ describe("Romanian Roman-numeral ordinal policy", () => {
     test("the per-language `vii` exclusion (= alive/vines) is carried through, not restated", () => {
         expect(ROMAN_POLICY.exclude).toBe(ROMAN_EXCLUSIONS.ro);
         expect(ROMAN_POLICY.exclude?.has("vii")).toBe(true); // so `secolul VII` is left alone entirely
+    });
+});
+
+// #562 — the normalization layer. Every count is measured over the FLEURS ro_ro corpus (column 3), and
+// every emitted word was probed through the rule g2p (Romanian has no pronunciation lexicon).
+describe("romanian normalization", () => {
+    test("period- and space-grouped thousands stay ONE numeral", () => {
+        // The period is clause punctuation: 1.400 read as "unu" + a SENTENCE BREAK + "patru sute".
+        expect(normalizeRomanian("1.400")).toBe("1400");
+        expect(normalizeRomanian("1 400")).toBe("1400");
+        expect(normalizeRomanian("802.11n")).toBe("802.11n"); // two digits, not a grouping
+    });
+
+    test("decimal comma, clock, degrees", () => {
+        expect(normalizeRomanian("12,5")).toBe("12 virgulă 5");
+        expect(normalizeRomanian("22:00")).toBe("22 00");
+        expect(normalizeRomanian("20 °C")).toBe("20 grade Celsius");
+    });
+
+    // The corpus writes the word out 11 times as "la sută" against 3 as "procent", so the sign takes the
+    // majority reading rather than the cognate an English speaker would reach for.
+    test("percent is la sută, not procent", () => {
+        expect(normalizeRomanian("25 %")).toBe("25 la sută");
+    });
+
+    // Romanian POSTPOSES the modifier — kilometri pătrați — the opposite of the Germanic compounds.
+    test("squared units postpose the modifier; rates expand the slash", () => {
+        expect(normalizeRomanian("km²")).toBe("kilometri pătrați");
+        expect(normalizeRomanian("160 km/h")).toBe("160 kilometri pe oră");
+        // The trailing boundary must be \p{L}, not \b: after the ă of "oră" an ASCII \b finds nothing.
+        expect(normalizeRomanian("160 km/oră")).toBe("160 kilometri pe oră");
+    });
+
+    // ★ Romanian has NO ordinal dot. It is the largest rule in Norwegian (134) and Danish (112), and the
+    // shape occurs 169 times here — but zero are followed by a lowercase word. They are sentence ends and
+    // grouping periods; Romanian writes ordinals as words (primul, al doilea) and dates without a dot.
+    test("a dotted number is NOT an ordinal — sentence ends survive", () => {
+        expect(normalizeRomanian("Este 1990. El a venit")).toBe("Este 1990. El a venit");
+        expect(normalizeRomanian("3. mai")).toBe("3. mai");
+    });
+
+    test("ranges, currency, signs and ampersand", () => {
+        expect(normalizeRomanian("1990-1995")).toBe("1990 până la 1995");
+        expect(normalizeRomanian("$2500")).toBe("2500 dolari");
+        expect(normalizeRomanian("EX = dispărut")).toBe("EX egal cu dispărut");
+        expect(normalizeRomanian("A&B")).toBe("A și B");
+    });
+
+    test("ordinary Romanian text is untouched", () => {
+        expect(normalizeRomanian("Româna este o limbă.")).toBe("Româna este o limbă.");
     });
 });
