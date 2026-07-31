@@ -58,6 +58,8 @@ function number(digits: string): string {
 }
 
 // A word (Sorani Perso-Arabic letters, U+0600–U+06FF incl. ZWNJ) / number / punctuation token.
+import { normalizeCentralKurdish } from "./normalize.ts";
+
 const TOKEN = /([ؠ-ۿ‌]+)|(\d+)|([،؛؟.!?…,:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
@@ -65,7 +67,11 @@ export type ForeignPhonemizer = (latin: string) => string;
 class CentralKurdishPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562: everything the g2p cannot read is rewritten FIRST — see normalize.ts. Most importantly
+        // the ARABIC-INDIC DIGITS are folded to ASCII there: the letter class above is U+0620–U+06FF,
+        // which contains U+0660–U+0669, so a native digit run was claimed by the LETTER branch and read
+        // as an empty string. That is the majority digit system in this corpus.
+        return assembleClauses(normalizeCentralKurdish(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

@@ -1016,3 +1016,59 @@ boundary**, and writing it correctly once in a file is no protection against wri
 against a pristine worktree. Corpus diff 49/122 changed, 5/40 in the representative sample — and two of
 those five surfaced the era marker and the `мили/час` rate, both then fixed. The artifact scans with
 **no defects**.
+
+---
+
+## Run 18 — 2026-07-31 — Central Kurdish, and a defect class the script router cannot see
+
+The 43rd language, and the first Arabic-script one in this sequence.
+
+### ★ The language's own digits phonemized to an EMPTY STRING
+
+`٢٠٢٤` → `""`. So did `١٠٠٠٠`. The cause is the tokenizer's letter class, `[ؠ-ۿ]` = U+0620–U+06FF, which
+**contains** the Arabic-Indic digits U+0660–U+0669 — so a digit run was claimed by the LETTER branch and
+the word phonemizer had nothing to say about it. The `(\d+)` branch could never see them.
+
+This is the majority digit system in the corpus: **2036 Arabic-Indic against 1705 ASCII.**
+
+Same shape as the Burmese defect where a raw block range swallowed that script's own sentence
+terminators. Fixed with the shared `foldNativeDigits` rather than a local table.
+
+### Why the script router did not catch it — and what that means
+
+The natural expectation is that `core/scripts.ts` should have routed these somewhere. It cannot, and the
+reason is structural:
+
+```
+token "٢٠٢٤" → branch LETTER      gaps left for the router: 0
+```
+
+**The router only ever sees UNCLAIMED runs.** Text claimed by the WRONG branch and then read as nothing
+produces no gap at all, so it is invisible to the router by construction — and equally invisible to every
+leak-based defect class, since nothing survives into the IPA to flag. It is a third blind spot, distinct
+from both the leak classes (#584) and the unclaimed-run problem the router solved.
+
+**Probing the fleet for it: seven engines still read their own digits as an empty string** —
+`sd ug ps bal syl rkt shn`. All are Arabic-, Bengali- or Myanmar-script, i.e. the same block-range shape.
+Recorded on #586 rather than fixed here.
+
+(A first version of that probe tested every digit system against every language and reported 191 failures,
+which was meaningless — English "failing" on Arabic-Indic digits is just English not being that engine.
+The question is only ever whether a language reads ITS OWN script's digits.)
+
+### Kurdish uses the ENGLISH numeric conventions
+
+The comma GROUPS (31: `30,000`) and the period DECIMATES (47: `2.4`) — the opposite of Danish, Romanian,
+Bulgarian and Norwegian, all treated immediately before. Reading `30,000` with the previous language's
+rule turns thirty thousand into "thirty point zero zero zero".
+
+Two placement facts the corpus settled, both differing from every prior language here:
+- **percent is PREPOSED** — `لە سەدا ٢٥`, not the postposed form every other language in this sequence uses
+- **the sign appears on either side** — `٨٨%` five times, `%٨٨` once; a digit-anchored rule leaves the
+  second silent
+
+### Gates
+
+`tsc` clean, **2540 tests** (9 in the Kurdish file), referee **unchanged** at 94.9% against a pristine
+worktree. Corpus diff 39/103 changed, 1/40 in the representative sample. The artifact scans with **no
+defects**.
