@@ -22,6 +22,7 @@ export interface CzechManifest {
         toVoiced: Record<string, string>;
     };
     clausePunctuation: Record<string, string>;
+    acronymLetters: string[];
     numbers: {
         units: string[];
         teens: string[];

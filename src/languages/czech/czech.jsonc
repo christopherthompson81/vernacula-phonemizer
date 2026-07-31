@@ -117,6 +117,16 @@
         ":": ",",
     },
 
+    // LEXICAL: acronyms Czech spells out letter-by-letter although their lowercase form is a readable word.
+    // SOURCED from the cs_cz corpus: USA, OSN (OSN/UN), FBI, DNA, CEP, OHA, NSA, USOC, UCLA, MRI, AOL, ADD,
+    // UTC, IM, MIP, RSPCA. Tokens with no vowel letter (DVD, USD, GPS, PC, TV, MP, GMT, GBP, TB, XDR, NHK …)
+    // need no entry — the shared OOV rule letter-spells them automatically. Said as WORDS, deliberately NOT
+    // listed: UNESCO [unesko], NASA, COVID, OPEC, ACTA [akta], REM, ASUS, SWAPO.
+    "acronymLetters": [
+        "usa", "osn", "fbi", "dna", "cep", "oha", "nsa", "usoc", "usaf", "ucla", "mri", "aol",
+        "add", "utc", "im", "mip", "rspca"
+    ],
+
     // Cardinal number words. tens+units concatenate (dvacetjeden = 21); hundreds/thousands are space-separated.
     // Magnitude agreement: sg (1), paucal (2–4), plural (5+). Composition logic is in numbers.ts.
     "numbers": {
