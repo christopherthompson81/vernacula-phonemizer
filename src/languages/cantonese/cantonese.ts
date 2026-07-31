@@ -6,7 +6,7 @@
  * Cantonese tones as Chao contour letters. Direct Jyutping input (with tone digits) is also accepted.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { DIGITS, normalizeCantonese } from "./normalize.ts";
@@ -153,8 +153,11 @@ class CantonesePhonemizer implements Phonemizer {
         // #562: the Cantonese normalization pass runs first, so what reaches the tokenizer is either a word
         // the dict speaks or a number whose CARDINAL reading is the correct one.
         input = normalizeCantonese(input, DEF.measureWords);
-        const { sink, finish } = clauseSink();
-        // The clause-mark alternation is the manifest's keys, so adding a mark to the data is enough (…, ─,
+        // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
+        // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
+        // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
+        // itself; the gap pass covers everything else via the script router (core/scripts.ts).
+                // The clause-mark alternation is the manifest's keys, so adding a mark to the data is enough (…, ─,
         // the ﹑ variant comma). The Latin run is \p{Script=Latin} + combining marks, not [A-Za-z]: the ASCII
         // class split every accented name into fragments — Müslüm Gürses reached the English phonemizer as
         // M / sl / m / G / rses ("ˈɛm sɫ ˈɛm …") instead of two words. 9 tokens in the corpus.
@@ -165,8 +168,8 @@ class CantonesePhonemizer implements Phonemizer {
             `(\\p{Script=Han}+)|(\\d+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${marks}])`,
             "gu",
         );
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(input))) {
+        
+        return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);
@@ -176,8 +179,7 @@ class CantonesePhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 

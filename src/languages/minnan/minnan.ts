@@ -9,7 +9,7 @@
  * Phase 1: segmental + CITATION tone (the tone-sandhi circle is deferred). See docs/investigations/nan_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -204,11 +204,14 @@ export type ForeignPhonemizer = (latin: string) => string;
 class MinnanPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        const { sink, finish } = clauseSink();
-        const tok =
+        // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
+        // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
+        // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
+        // itself; the gap pass covers everything else via the script router (core/scripts.ts).
+                const tok =
             /(\p{Script=Han}+)|(\d+)|([A-Za-zàáâāǎ̀-̍]+(?:-[A-Za-zàáâāǎ̀-̍]+)*)|([。，、？！；：.,?!;:])/gu;
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(input))) {
+        
+        return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);
@@ -218,9 +221,7 @@ class MinnanPhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
-        }
-        void this.foreign;
-        return finish();
+        });
     }
 }
 

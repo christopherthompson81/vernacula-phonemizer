@@ -680,3 +680,47 @@ is recorded rather than changed.
 
 **Status: 5 of 14 affected codes fixed** (en, en-GB, en-IN, fr, fr-CA). Remaining: the seven Sinitic codes
 (yue wuu nan gan hak hsn cjy cdo), hmn, shi.
+
+---
+
+## Run 11 — 2026-07-31 — the Sinitic family
+
+Third of the four bespoke families, and the opposite case from English and French: **these engines did not
+need a bespoke scan at all.** Their loops were already exactly the shape `assembleClauses` takes —
+`clauseSink()` plus an `exec` over a token regex — they simply predated the shared helper and were never
+migrated. So they could adopt the shared path outright instead of hand-rolling a gap pass.
+
+Five files, eight language codes:
+
+```
+sinitic/hanDictIpa.ts   shared by gan hak cjy hsn   ← one edit fixed four codes
+cantonese/cantonese.ts  yue
+wu/wu.ts                wuu
+minnan/minnan.ts        nan
+foochow/foochow.ts      cdo
+```
+
+All eight now read a run in a script they do not own:
+
+```
+yue  世界 Москва 好  →  sɐi˧ kaːi˧ mɐskvˈa hou˧˥
+hak  世界 Москва 好  →  sz̩˥˧ kiaɪ˥˧ mɐskvˈa hau˧˩
+```
+
+The migration also DELETES code rather than adding it — the private `let m: RegExpExecArray | null` loop
+goes away in each. Worth stating as the general lesson from these three runs: "this engine has its own
+scan" was true of 32 directories, but on inspection it meant three different things — a delegating
+variant (most of them), a genuine structural need (English's two-phase tagger, French's forward-looking
+liaison), and simple historical drift (all five Sinitic files). Only the middle case justified private
+code, and even there only for TOKENIZATION, never for the gap pass.
+
+### One trade-off to flag rather than bury
+
+Foochow is written in a LATIN romanisation (BUC) and its Han front-end is deferred, so its tokenizer does
+not claim Han at all. `世界` was therefore a gap, and the router now reads it as **Mandarin** —
+`ʂʐ̩˥˩ t͡ɕiɛ˥˩` — because `Han → cmn` is the documented pragmatic default. For a Min Dong engine that is
+the wrong variety. It is still an improvement on dropping the characters silently, and the honest options
+are all bad until `cdo` has a Han dictionary of its own: read it in the wrong variety, or say nothing.
+Recorded here, not silently accepted.
+
+**Status: 13 of 14 affected codes fixed.** Remaining: `hmn`, `shi`.

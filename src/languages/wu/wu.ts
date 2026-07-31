@@ -12,7 +12,7 @@
  * (rime-wugniu dict + wuu_rules/ph_wuu). See docs/investigations/wu_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -134,10 +134,13 @@ class WuPhonemizer implements Phonemizer {
     text(input: string): string {
         // Whole-string Wugniu input (tone digits present) → direct path.
         if (WUGNIU.test(input.trim())) return wugniuToIpa(input);
-        const { sink, finish } = clauseSink();
-        const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(input))) {
+        // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
+        // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
+        // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
+        // itself; the gap pass covers everything else via the script router (core/scripts.ts).
+                const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
+        
+        return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);
@@ -147,8 +150,7 @@ class WuPhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 

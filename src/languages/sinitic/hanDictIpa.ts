@@ -7,7 +7,7 @@
  * numeral composition. A language module supplies only its dict + its Chao map + its punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 
 export interface HanDictDef {
     /** Pitch digit ("1".."5") → Chao contour letter (˩..˥). */
@@ -133,10 +133,13 @@ class HanDictPhonemizer implements Phonemizer {
     text(input: string): string {
         const d = this.dict();
         const max = maxWordFor(d);
-        const { sink, finish } = clauseSink();
+        // `assembleClauses` rather than a private exec loop: this engine's loop was already exactly that
+        // shape (clauseSink + iterate the token regex), it just predated the shared helper — so it never
+        // got the GAP PASS, and a run in a script it does not own was dropped outright. The Latin branch
+        // below stays, because this engine claims Latin itself via `foreign`; the gap pass now covers
+        // everything else (Greek, Cyrillic, Kana …) through the script router in core/scripts.ts.
         const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(input))) {
+        return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1], d, max, this.def.chao));
             else if (m[2]) {
                 const n = Number(m[2]);
@@ -146,8 +149,7 @@ class HanDictPhonemizer implements Phonemizer {
                 const mk = this.def.clausePunctuation[m[4]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 

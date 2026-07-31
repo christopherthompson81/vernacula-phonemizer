@@ -17,7 +17,7 @@
  * See docs/investigations/cdo_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface FoochowDef {
@@ -167,22 +167,23 @@ export function numberToBucWords(n: number): string[] {
 
 class FoochowPhonemizer implements Phonemizer {
     text(input: string): string {
-        const { sink, finish } = clauseSink();
         // NFD so a syllable is a base letter + trailing combining marks (tone diacritics U+0300–036F + the quality
         // diaeresis-below U+0324) — robust to NFC input, where precomposed vowels (ā, and esp. ṳ = U+1E73) are single
         // codepoints a literal class would miss. Syllables join by - or ·. bucToIpa re-NFDs (idempotent).
         const tok = /([a-zŋ][a-zŋ\u0300-\u036f\u207f]*(?:[-·][a-zŋ\u0300-\u036f\u207f]*)*)|(\d+)|([。，、？！；：.,?!;:])/giu;
+        // `assembleClauses` over the NFD copy — this loop was already that shape and only predated the
+        // helper, so it never got the GAP PASS and any script it does not claim was dropped. Foochow is
+        // written in a LATIN romanisation (BUC), so its own token class is Latin; the gap pass therefore
+        // matters here for Han and every other script, routed via core/scripts.ts.
         const nfd = input.normalize("NFD");
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(nfd))) {
+        return assembleClauses(nfd, tok, (m, sink) => {
             if (m[1]) sink.emit(bucToIpa(m[1]));
             else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2])).join("-")));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 

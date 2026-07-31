@@ -128,3 +128,19 @@ describe("french reads embedded foreign runs", () => {
         expect(phonemize("deux Москва ans", "fr")).toBe("dø mɐskvˈa ˈɑ̃");
     });
 });
+
+// The Sinitic engines are the opposite case from English and French: their loops were ALREADY the shape
+// `assembleClauses` takes (clauseSink + iterate a token regex) and only predated the helper, so they could
+// adopt the shared path outright rather than hand-rolling a gap pass. Five files, eight language codes.
+describe("sinitic engines read embedded foreign runs", () => {
+    for (const lang of ["yue", "wuu", "nan", "cdo", "gan", "hak", "cjy", "hsn"]) {
+        test(`${lang} speaks a Cyrillic run instead of dropping it`, () => {
+            expect(phonemize("世界 Москва 好", lang)).toContain("mɐskvˈa");
+        });
+    }
+
+    test("the engines still claim Latin themselves, and clause marks still pause", () => {
+        expect(phonemize("世界，好", "yue")).toContain(",");
+        expect(phonemize("世界 abc", "yue")).not.toBe(phonemize("世界", "yue"));
+    });
+});
