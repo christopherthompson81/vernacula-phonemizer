@@ -83,3 +83,26 @@ describe("embedded foreign (Latin) runs", () => {
         expect(phonemize("café век", "ru")).toBe("kəfˈeᶦ vʲek");
     });
 });
+
+// English cannot use `assembleClauses` — that is a streaming sink and English is a two-phase pipeline
+// (tokens → POS tagger → resolver). But the GAP PASS is separable from the clause model, which is the
+// split burmese.ts already makes, so English gets foreign runs without adopting the shared scan.
+describe("english reads embedded foreign runs", () => {
+    test("a third script is spoken rather than dropped", () => {
+        expect(phonemize("The word λόγος means word", "en")).toContain("loɣos");
+        expect(phonemize("Vladimir Владимир Putin", "en")).toContain("vɫɐdʲ");
+    });
+
+    test("ordinary English is unchanged, and word order is preserved", () => {
+        expect(phonemize("Hello world", "en")).toBe(phonemize("Hello world", "en"));
+        const out = phonemize("Vladimir Владимир Putin", "en");
+        expect(out.indexOf("vlˈæd")).toBeLessThan(out.indexOf("vɫɐdʲ"));
+    });
+
+    // A foreign unit contributes no WORDS, so the POS tagger's expectation array stays aligned with the
+    // English stream — if it did not, every word after a foreign run would be tagged with its neighbour's
+    // part of speech and could resolve to the wrong homograph.
+    test("a foreign run does not desynchronise the tagger", () => {
+        expect(phonemize("I read Москва books", "en")).toContain("bˈʊks");
+    });
+});

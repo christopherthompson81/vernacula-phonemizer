@@ -8,6 +8,7 @@
  * NOTE: this stage emits per-word CITATION stress + clause-pause marks. Sentence-level de-accenting (the
  * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
  */
+import { readForeignRun } from "../../core/foreign.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
@@ -67,7 +68,11 @@ function promoteFirstVowel(ipa: string): string {
 type Token =
     | { kind: "word"; text: string }
     | { kind: "number"; text: string; ordinal: boolean }
-    | { kind: "clause"; text: string };
+    | { kind: "clause"; text: string }
+    // A run in a script this engine does not own, ALREADY resolved to IPA by whichever engine owns that
+    // script (core/scripts.ts). It carries phonemes rather than text because it must bypass the tagger
+    // and the resolver entirely — there is no English pronunciation of Владимир to look up.
+    | { kind: "foreign"; ipa: string };
 
 // number (grouped + decimal) with optional ordinal suffix · word (letters + internal/trailing apostrophes) · clause punct
 // The word class is LATIN-SCRIPT, not [A-Za-z]: an ASCII-only class split accented loanwords at the
@@ -191,7 +196,25 @@ export class EnglishPhonemizer {
         input = normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
+        // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only,
+        // so before this a Greek or Cyrillic run was dropped outright: "The word λόγος means word" read as
+        // "the word means word". English cannot use `assembleClauses` — that is a streaming sink and this
+        // is a two-phase pipeline (tokens → POS tagger → resolver) — but the GAP PASS is separable from
+        // the clause model, which is the same split burmese.ts makes with its own exec loop.
+        let gapCursor = 0;
+        const claimGap = (upto: number): void => {
+            if (upto > gapCursor) {
+                const gap = input.slice(gapCursor, upto);
+                for (const g of gap.matchAll(/[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu)) {
+                    const ipa = readForeignRun(g[0]);
+                    if (ipa !== undefined && ipa !== "") tokens.push({ kind: "foreign", ipa });
+                }
+            }
+            gapCursor = upto;
+        };
         while ((m = TOKEN_RE.exec(input)) !== null) {
+            claimGap(m.index);
+            gapCursor = m.index + m[0].length;
             if (m[1] !== undefined)
                 tokens.push({
                     kind: "number",
@@ -203,6 +226,7 @@ export class EnglishPhonemizer {
             else if (m[4] !== undefined)
                 tokens.push({ kind: "clause", text: m[4] });
         }
+        claimGap(input.length);
 
         // Expand numbers to words up-front so the POS tagger + resolver see a flat word stream. A word may be
         // flagged `reduced` at expansion time — the decimal separator "point" is a prosodically-weak connector,
@@ -214,13 +238,17 @@ export class EnglishPhonemizer {
         interface Unit {
             words: NumWord[];
             clause?: string;
+            /** Already-resolved IPA (a foreign run); contributes NO words, so tagger alignment is
+             *  unaffected and `expect[wi]` keeps indexing the English stream correctly. */
+            foreign?: string;
         }
         const units: Unit[] = [];
         for (const t of tokens) {
             if (t.kind === "clause") {
                 const mk = this.clausePunctuation[t.text];
                 if (mk) units.push({ words: [], clause: mk });
-            } else if (t.kind === "word")
+            } else if (t.kind === "foreign") units.push({ words: [], foreign: t.ipa });
+            else if (t.kind === "word")
                 units.push({ words: [{ text: t.text }] });
             else {
                 const n = BigInt(t.text.replace(/[,.]/g, "")); // integer part; fractional read separately below
@@ -272,6 +300,12 @@ export class EnglishPhonemizer {
                     cur.mark = u.clause;
                     clauses.push({ items: [], mark: null });
                 }
+                continue;
+            }
+            if (u.foreign !== undefined) {
+                clauses[clauses.length - 1]!.items.push({
+                    word: "", citation: u.foreign, reduced: false, display: u.foreign,
+                });
                 continue;
             }
             for (const w of u.words) {

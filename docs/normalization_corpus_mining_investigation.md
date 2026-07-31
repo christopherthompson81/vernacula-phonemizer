@@ -588,3 +588,56 @@ not done.
 
 One test was superseded rather than fixed: `foreign-runs.test.ts` asserted that a third script stays
 dropped. That was the deliberate scope of the original change; it is now the behaviour being removed.
+
+---
+
+## Run 9 — 2026-07-31 — do the 32 bespoke engines need their own scan?
+
+**Question.** 149 of 181 engines use the shared clause path. Can the other 32 adopt it, or do they truly
+need their own?
+
+**Most of the 32 are not bespoke at all.** They are variant directories that delegate to a base engine.
+Probing each with an embedded Cyrillic run separates them:
+
+```
+already fine (delegate to a shared-path engine):  as gu mr ne skr bho bpy awa mag mai hne rkt hyw pt-BR es-419
+genuinely dropping:                               en en-GB en-IN · fr · yue wuu nan gan hak hsn cjy cdo · hmn · shi
+```
+
+So it is **four engine families**, not 32: English, French, Sinitic, Hmong, Tashelhit.
+
+### The distinction that matters: TOKENIZATION vs the GAP PASS
+
+English genuinely cannot use `assembleClauses` — that is a **streaming sink** model, and English is a
+**two-phase pipeline**: it builds a token list, runs a POS tagger across the whole utterance, then
+resolves each word with its tag. Neither shape can be expressed in the other.
+
+But the gap pass is *separable from the clause model*. `burmese.ts` already makes exactly this split — its
+own `exec` loop, with an explicit `emitUnclaimed` call for the gaps. So the answer is not "adopt the shared
+path"; it is "the gap pass is a component, not a property of the clause model".
+
+For English that meant a fourth token kind carrying **IPA rather than text**, because there is no English
+pronunciation of Владимир to look up — it must bypass both the tagger and the resolver:
+
+```
+The word λόγος means word   →  ðə wˈɝd loɣos mˈiːnz wˈɝd
+Vladimir Владимир Putin     →  vlˈæd̬əmɪɹ vɫɐdʲˈimʲɪr pʰˈuːt̬ɪn
+Tokyo 東京 is big            →  tʰˈoᶷkiʲˌoᶷ toŋ˥˥ t͡ɕiŋ˥˥ ɪz bˈɪɡ
+```
+
+**The alignment hazard is the interesting part.** The tagger holds one expectation per English word, and
+the resolver indexes it with a running counter. A foreign unit therefore contributes **no words** — if it
+contributed one, every word after a foreign run would be tagged with its neighbour's part of speech and
+could resolve to the wrong homograph (`read`, `lead`, `live`). There is a test for exactly that.
+
+**Status: 3 of 14 affected codes fixed** (en, en-GB, en-IN). Still dropping: fr, the seven Sinitic codes,
+hmn, shi. Each needs the same treatment, and each has to be read first — French's loop exists for liaison
+across token boundaries, which is a real constraint the way English's tagger is.
+
+### A judgement call worth flagging
+
+`東京` in English text now reads as **Mandarin**, because `Han → cmn` is the documented pragmatic default.
+For a Japanese place name in English prose the Japanese reading is arguably right, but nothing in the run
+itself says which — Han is genuinely ambiguous, and that is precisely why that entry is labelled
+`pragmatic` rather than `dominant` in `DEFAULT_READER`. An English-specific override could say
+`Han → ja`, and would be wrong for Chinese names. Left as the default, recorded here.
