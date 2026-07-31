@@ -10,6 +10,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { normalizeBulgarian } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface NumbersDef {
@@ -171,8 +172,11 @@ function number(digits: string): string {
 const TOKEN = /([а-яёА-ЯЁ']+)|(\d+)|([.!?…,;:—])/gu;
 
 class BulgarianPhonemizer implements Phonemizer {
-    text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+    text(rawInput: string): string {
+        // #562: everything the g2p cannot read is rewritten to Bulgarian words FIRST — see normalize.ts,
+        // in particular the `N г.` year abbreviation (265 instances, the largest defect) and why there is
+        // no ordinal-dot rule here despite it being the largest rule in the Germanic languages.
+        return assembleClauses(normalizeBulgarian(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

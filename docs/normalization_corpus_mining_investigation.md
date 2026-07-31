@@ -968,3 +968,51 @@ straight into the playbook's top-ranked trap. Replaced with `(?!\p{L})`.
 `tsc` clean, **2526 tests** (7 in the Romanian file), referee **unchanged** at 80.9% folded backbone
 against a pristine worktree. Corpus diff 54/132 changed, 4/40 in the representative sample, all
 improvements. The artifact scans with **no defects**.
+
+---
+
+## Run 17 — 2026-07-31 — Bulgarian
+
+The 42nd language, and the first Cyrillic one in this sequence.
+
+### ★ The headline pattern has no analogue in the previous four languages
+
+`1767 г.` is simply how Bulgarian writes a year, and it occurs **265 times** — more than every other
+numeric pattern in the corpus combined. It was reading as the numeral, then the letter `г` as **[k]**,
+then a **sentence break** from the abbreviation dot. Expands to `година`.
+
+The related `пр.н.е.` ("before the common era", 17) carries THREE abbreviation dots, so `323 г. пр.н.е.`
+fragmented into four clauses.
+
+Neither shape exists in nb, da or ro. Four languages of Germanic/Romance experience gave no reason to look
+for it; only the corpus did.
+
+### Two structural differences from every previous language in the sequence
+
+1. **Units are written in CYRILLIC** — `км` (50), `кг`, `см` — not the Latin `km` that Norwegian, Danish
+   and Romanian all use. A Latin unit table matches nothing. `км2` was reaching the output as the Latin
+   letters "km" plus the numeral "две".
+2. **The count form is the counting plural** — `18 процента`, `50 километра`, `20 градуса`, never the
+   citation singular. Measured: every `N %` written out in the corpus uses `процента` (8/8).
+
+And the decimal separator is read `цяло и` ("whole and"), not a word meaning "comma" as in nb/da/ro.
+
+### The ordinal-dot finding repeats
+
+Of the 54 `N.` shapes, **zero** are followed by a lowercase word. Bulgarian does not write the Germanic
+ordinal dot, exactly as Romanian does not. That is now **two of five** languages in this sequence where
+porting the previous language's largest rule would have fired on sentence boundaries.
+
+### The ASCII-`\b` trap, a third time, in the file that documents it
+
+`SQUARED` was written `/\bкм\s*[²2]/` and silently never fired — `\b` finds no boundary next to a Cyrillic
+letter, so `км2` stayed `км2`. The trailing guard in the same file was already written as `(?!\p{L})`
+*for that exact reason*, one rule further down. **In a non-ASCII orthography `\b` is never the right
+boundary**, and writing it correctly once in a file is no protection against writing it wrongly twice.
+
+### Gates
+
+`tsc` clean, **2534 tests** (13 in the Bulgarian file), referee **unchanged** at 99.6% folded backbone
+against a pristine worktree. Corpus diff 49/122 changed, 5/40 in the representative sample — and two of
+those five surfaced the era marker and the `мили/час` rate, both then fixed. The artifact scans with
+**no defects**.

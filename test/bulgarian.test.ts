@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createBulgarian } from "../src/languages/bulgarian/bulgarian.ts";
+import { normalizeBulgarian } from "../src/languages/bulgarian/normalize.ts";
 
 // Canonical-IPA goldens for Bulgarian / български (bg) — South Slavic, Cyrillic, "clean" (highly phonemic). A
 // left-to-right g2p + phonotactic post-rules, validated against TWO independent human referees (wikipron
@@ -48,5 +49,60 @@ describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
         expect(p.text("21000000")).toBe("dvajsɛt i ɛdin miliɔn"); // двайсет и един милион — …1 keeps the singular
         expect(p.text("1000000000")).toBe("ɛdin miliart"); // един милиард — final ⟨д⟩ devoices to [t]
         expect(p.text("2000000000")).toBe("dva miliarda"); // два милиарда
+    });
+});
+
+
+// #562 — the normalization layer. Every count is measured over the FLEURS bg_bg corpus (column 3); the
+// engine is rule-based, so every emitted word was probed through the g2p rather than looked up.
+describe("bulgarian normalization", () => {
+    // ★ The largest defect in the language, and nothing like it in the four previous ones: `1767 г.` is
+    // how Bulgarian writes a year. It read as the numeral, then the LETTER г as [k], then a SENTENCE
+    // BREAK from the abbreviation dot. 265 instances.
+    test("the year abbreviation N г.", () => {
+        expect(normalizeBulgarian("1767 г.")).toBe("1767 година");
+    });
+
+    // Three abbreviation dots, each becoming a clause break: `323 г. пр.н.е.` fragmented into four.
+    test("the era marker пр.н.е.", () => {
+        expect(normalizeBulgarian("323 г. пр.н.е.")).toBe("323 година преди новата ера");
+    });
+
+    test("space-grouped thousands, decimal comma, clock", () => {
+        expect(normalizeBulgarian("5 000")).toBe("5000"); // read as "пет нула"
+        expect(normalizeBulgarian("12,5")).toBe("12 цяло и 5"); // Bulgarian reads "whole and"
+        expect(normalizeBulgarian("22:00")).toBe("22 00");
+    });
+
+    // The counting plural, not the citation singular: 18 процента, not 18 процент.
+    test("percent takes the counting form", () => {
+        expect(normalizeBulgarian("25 %")).toBe("25 процента");
+    });
+
+    // ⚠ Units are written in CYRILLIC here (км 50), not the Latin km of nb/da/ro — a Latin table matches
+    // nothing. And both boundaries must be \p{L} lookarounds: \b is ASCII-defined and finds no boundary
+    // next to а Cyrillic letter, so `км2` silently stayed `км2`.
+    test("Cyrillic units and squared units", () => {
+        expect(normalizeBulgarian("50 км")).toBe("50 километра");
+        expect(normalizeBulgarian("км2")).toBe("квадратни километра");
+        expect(normalizeBulgarian("км²")).toBe("квадратни километра");
+        expect(normalizeBulgarian("50 км/ч")).toBe("50 километра в час");
+    });
+
+    // ★ Bulgarian has NO ordinal dot — 0 of 54 `N.` shapes are followed by a lowercase word. The rule
+    // that is largest in Norwegian (134) and Danish (112) must not exist here, as in Romanian.
+    test("a dotted number is NOT an ordinal — sentence ends survive", () => {
+        expect(normalizeBulgarian("Това е 1990. Той дойде")).toBe("Това е 1990. Той дойде");
+    });
+
+    test("degrees, ranges, currency and signs", () => {
+        expect(normalizeBulgarian("20 °C")).toBe("20 градуса по Целзий");
+        expect(normalizeBulgarian("1990-1995")).toBe("1990 до 1995");
+        expect(normalizeBulgarian("$2500")).toBe("2500 долара");
+        expect(normalizeBulgarian("EX = изчезнал")).toBe("EX равно на изчезнал");
+    });
+
+    test("ordinary Bulgarian text is untouched", () => {
+        expect(normalizeBulgarian("Българският е език.")).toBe("Българският е език.");
     });
 });
