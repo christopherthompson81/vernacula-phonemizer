@@ -119,6 +119,20 @@ describe("norwegian normalization", () => {
         expect(normalizeNorwegian("¥2500")).toBe("2500 yen");
     });
 
+    // The PLUS half of the signed-number category: +30°C and UTC +1. Measured, the plus is the more
+    // common half (5 in nb_no against 1 minus) — a cell covering only the minus reported the category as
+    // handled while half of it was invisible.
+    test("a plus sign before a number is spoken", () => {
+        expect(normalizeNorwegian("+30°C")).toBe("pluss 30 grader celsius");
+        expect(normalizeNorwegian("UTC +1")).toBe("UTC pluss 1");
+    });
+
+    // A range whose ENDS are ordinals fell between two rules: the range rule saw `10.` as a malformed
+    // number, the ordinal rule saw a dash where it wanted a lowercase word. Attested in nb, da, de, cs.
+    test("a range of ordinals", () => {
+        expect(normalizeNorwegian("10.–11. århundre")).toBe("tiende til ellevte århundre");
+    });
+
     test("ordinary Norwegian text is untouched", () => {
         expect(normalizeNorwegian("Norsk er et språk.")).toBe("Norsk er et språk.");
     });

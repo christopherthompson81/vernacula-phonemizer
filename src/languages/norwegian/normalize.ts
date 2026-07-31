@@ -148,16 +148,28 @@ export function normalizeNorwegian(input: string): string {
         return day !== undefined && month !== undefined ? `${day} ${month} ${y}` : m;
     });
 
-    // 10) ORDINAL DOT (134) — the largest defect in the language. `3. mai` read as "tre" + a SENTENCE
+    // 10) ORDINAL RANGES — `10.–11. århundre`, a range whose ENDS are ordinals. BEFORE the ordinal-dot
+    //     rule, which would otherwise claim `10.` (its lookahead sees the dash, not a lowercase word, so
+    //     in fact it declines) and before the cardinal range rule, which sees `10.` and `11.` as
+    //     malformed numbers and matched neither. So the pattern fell between two rules and was read as
+    //     "ti . ellevte" — a bare cardinal, a sentence break, then an ordinal.
+    //     Not a Norwegian quirk: attested in every ordinal-dot orthography checked (nb 2, da 2, de 1,
+    //     cs 1), which is why it also became a cell in the miner.
+    t = t.replace(/(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, a: string, b: string) => {
+        const first = ORDINALS[String(Number(a))], second = ORDINALS[String(Number(b))];
+        return first !== undefined && second !== undefined ? `${first} til ${second}` : m;
+    });
+
+    // 11) ORDINAL DOT (134) — the largest defect in the language. `3. mai` read as "tre" + a SENTENCE
     //    BREAK + "mai". The following-lowercase guard is what separates it from a sentence ending in a
     //    year; see disambiguation 3 in the header.
     t = t.replace(/(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
 
-    // 11) RANGES (40). A dash between numerals is spoken `til`. After the clock and the ordinal rules so
+    // 12) RANGES (40). A dash between numerals is spoken `til`. After the clock and the ordinal rules so
     //     it cannot claim their separators.
     t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
 
-    // 12) CURRENCY. The sign PRECEDES the amount in writing and the word FOLLOWS it in speech, as in
+    // 13) CURRENCY. The sign PRECEDES the amount in writing and the word FOLLOWS it in speech, as in
     //     English. All five words are in the NST lexicon (kroner, dollar, euro, pund, yen); the corpus
     //     carries ¥ only (3 instances, all `¥N`), and the sign was dropped outright so the amount read as
     //     a bare number. The others are included because a phonemizer is handed arbitrary text, not only
@@ -165,10 +177,16 @@ export function normalizeNorwegian(input: string): string {
     for (const [sign, word] of Object.entries(CURRENCY))
         t = t.replace(new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d[\\d ]*)`, "gu"), `$1 ${word}`);
 
-    // 13) MINUS. Unlike Burmese, Norwegian does write a bare negative temperature, and `minus` is in the
+    // 14) SIGNED NUMBERS. A bare `+` before a number is a POSITIVE sign and was dropped outright —
+    //     `+30°C` read as plain "tretti grader" and `UTC +1` lost the offset entirely. Measured, the plus
+    //     is the MORE common half of this category (5 in nb_no against 1 minus), which is why the miner's
+    //     cell now covers both signs rather than the minus alone. Both words are in the NST lexicon.
+    //     Runs AFTER ranges so a range's dash is already gone, and requires a boundary before the sign so
+    //     a hyphenated compound is untouched. Unlike Burmese, Norwegian does write a bare negative temperature, and `minus` is in the
     //     lexicon. Requires a boundary before the sign so a hyphenated compound is untouched, and runs
     //     AFTER ranges so a range's dash is already gone.
-    t = t.replace(/(?<![\p{L}\d])[-−](\d+)/gu, "minus $1");
+    t = t.replace(/(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
+        `${sign === "+" ? "pluss" : "minus"} ${n}`);
 
     return t;
 }

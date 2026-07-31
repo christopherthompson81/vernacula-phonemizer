@@ -101,7 +101,17 @@ export const CELLS: Cell[] = [
     // NEGATIVES. One treated language (fr) authored this, and it is worth its own cell because it is the
     // AMBIGUOUS half of `ranges` — the same character, and the two rules compete for it. Requires a
     // boundary before the sign so a hyphenated compound is not read as a minus.
-    { key: "negative", langs: 1, re: /(?<![\p{L}\p{Nd}])[-−–]\p{Nd}/u, search: "[ (][-−][{D}]" },
+    // SIGNED NUMBERS. Was `negative` and matched only the minus; the PLUS half is the same phenomenon and
+    // is measurably more common — `+` before a number occurs in nb 5, de 5, en 5, ru 3, fr 3, as positive
+    // temperatures (`+30°C`) and timezone offsets (`UTC +1`), while a bare minus is rarer. A cell that
+    // covered one sign and not the other reported the category as handled when half of it was invisible.
+    { key: "signed-number", langs: 2, re: /(?<![\p{L}\p{Nd}])[-−–+]\p{Nd}/u, search: "[ (][-−+][{D}]" },
+    // ORDINAL RANGES — `10.–11. århundre`, a range whose ENDS are ordinals rather than cardinals. Neither
+    // the `ranges` cell nor an ordinal cell claims it: the dash sits between two ordinal dots, so a range
+    // rule sees `10.` and `11.` as malformed numbers and an ordinal rule sees a dash where it wants a
+    // word. Attested in every ordinal-dot orthography checked — nb 2, da 2, de 1, cs 1 — small counts but
+    // four independent languages, which is what makes it a category rather than a Norwegian quirk.
+    { key: "ordinal-range", langs: 1, re: /\p{Nd}{1,2}\.\s*[-–—]\s*\p{Nd}{1,2}\./u, search: "[{D}]{1,2}\\. ?[-–] ?[{D}]{1,2}\\." },
     // LETTER NAMES: a LONE Latin capital, which the initialism pass cannot claim (it needs two) and which
     // reached the g2p as an unpronounceable consonant. Distinct from `initialism`, and the reason
     // `letterName` exists per language in core/initialisms.ts.
