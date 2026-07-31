@@ -161,6 +161,14 @@ const DOTTED: Readonly<Record<string, string>> = {
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
 
 const HOUR: readonly string[] = ["hodina", "hodiny", "hodin"];
+
+/**
+ * A numeral agreeing with a FEMININE counted noun. Czech marks gender on 1 and 2 only — jeden vs jedna,
+ * dva vs dvě — and both clock nouns are feminine, so the composer's masculine citation form was wrong on
+ * every such hour: `1:15 ráno`, the corpus's own instance, read "jeden hodina patnáct minut". The suffix
+ * form is what changes, so a compound is handled by the same replacement (dvacet jeden → dvacet jedna).
+ */
+const feminine = (words: string): string => words.replace(/jeden$/u, "jedna").replace(/dva$/u, "dvě");
 const MINUTE: readonly string[] = ["minuta", "minuty", "minut"];
 const DEGREE: readonly string[] = ["stupeň", "stupně", "stupňů"];
 
@@ -254,8 +262,8 @@ export function normalizeCzech(input: string): string {
     s = s.replace(/([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)(?:\s+(?:h|hodin)(?![\p{L}\p{M}]))?/gu,
         (m0, h: string, min: string) => {
             const hv = Number(h), mv = Number(min);
-            const head = `${numberToWords(hv)} ${counted(hv, HOUR)}`;
-            return mv === 0 ? head : `${head} ${numberToWords(mv)} ${counted(mv, MINUTE)}`;
+            const head = `${feminine(numberToWords(hv))} ${counted(hv, HOUR)}`;
+            return mv === 0 ? head : `${head} ${feminine(numberToWords(mv))} ${counted(mv, MINUTE)}`;
         });
 
     // 4) DATE `N. N.` — `24. 8. do 5. 9. 2021` (both halves claimed, read as genitive ordinals: "dvacátého
@@ -361,6 +369,22 @@ export function normalizeCzech(input: string): string {
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
     s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 krát ");
+    // MINUS, the counterpart of the `plus` rule above and missing from it. A sign before a number was
+    // dropped outright, so `-5 stupňů` read as "pět stupňů" — five degrees, not minus five. Same boundary
+    // as the plus rule so a hyphenated compound is untouched; U+2212 as well as the hyphen.
+    s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1mínus ");
+
+    // RELATIONAL SIGNS. None occurs in this corpus, but a phonemizer is handed arbitrary text and a
+    // dropped sign is inaudible — the one outcome that cannot be right (#584). All the words read
+    // correctly through the g2p: rovná se [rˈovnaː sˈɛ], mínus [mˈiːnus], plus [plˈus].
+    s = s.replace(/\s*[=≈]\s*/gu, " rovná se ");
+    s = s.replace(/\s*<\s*/gu, " menší než ");
+    s = s.replace(/\s*>\s*/gu, " větší než ");
+    s = s.replace(/\s*÷\s*/gu, " děleno ");
+
+    // AMPERSAND → `a` (2 in the corpus, and `a` is its commonest word at 2155). It was dropped, so
+    // `B&B` read as two bare letters with nothing between them.
+    s = s.replace(/\s*[&＆]\s*/gu, " a ");
 
     // 16) FRACTIONS — feminine, agreeing with the elided *část*: 1/5 is "jedna pětina". Digits on both
     //     sides only, so the corpus's " / " in "i / nebo"-shaped phrases is untouched.
