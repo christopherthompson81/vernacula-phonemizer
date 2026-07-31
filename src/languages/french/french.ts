@@ -5,6 +5,7 @@
  * punctuation; French has no lexical stress, so a single phrase-final accent marks each rhythmic group.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { readForeignRun } from "../../core/foreign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -206,9 +207,29 @@ class FrenchPhonemizer implements Phonemizer {
         input = SYMBOLS(normalizeFrenchInitialisms(normalizeFrenchNumerals(normalizeFrench(input, isWord)), isWord));
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
-        type Item = { word: string } | { pause: string };
+        // An `ipa` item is a run in a script French does not own, ALREADY resolved by whichever engine
+        // owns that script (core/scripts.ts). It carries phonemes, not text, because there is no French
+        // pronunciation of Владимир to look up — and critically it must stay OUT of the liaison
+        // machinery, which is why it is a third variant rather than a `word` holding IPA.
+        type Item = { word: string } | { pause: string } | { ipa: string };
         const items: Item[] = [];
+        // GAPS between tokens carry embedded foreign text. French's word class is Latin-1 only, so a
+        // Greek or Cyrillic run matched nothing and was dropped outright. French cannot use
+        // `assembleClauses` — liaison needs to look one word AHEAD across the whole flattened stream, so
+        // the items list must exist before any phonemes are produced — but the gap pass is separable from
+        // the clause model, as it is in english.ts and burmese.ts.
+        let gapCursor = 0;
+        const claimGap = (upto: number): void => {
+            if (upto > gapCursor)
+                for (const g of input.slice(gapCursor, upto).matchAll(/[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu)) {
+                    const ipa = readForeignRun(g[0]);
+                    if (ipa !== undefined && ipa !== "") items.push({ ipa });
+                }
+            gapCursor = upto;
+        };
         for (const m of input.matchAll(TOKEN)) {
+            claimGap(m.index ?? gapCursor);
+            gapCursor = (m.index ?? gapCursor) + m[0].length;
             if (m[1]) items.push({ word: m[1] });
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
@@ -232,6 +253,7 @@ class FrenchPhonemizer implements Phonemizer {
                 if (mk) items.push({ pause: mk });
             }
         }
+        claimGap(input.length);
 
         let group: string[] = []; // IPA tokens of the current rhythmic group (until a pause)
         let out = "";
@@ -251,6 +273,15 @@ class FrenchPhonemizer implements Phonemizer {
                 if (group.length || out) flush(it.pause);
                 continue;
             } // liaison never crosses a pause
+            if ("ipa" in it) {
+                // A foreign run neither RECEIVES a liaison consonant nor DONATES one: it is not a French
+                // word, so `liaisonOnto` has no lexicon entry to reason about and any carry would be
+                // spliced onto foreign phonemes. The `"word" in next` guard below already prevents the
+                // PREVIOUS word from setting a carry onto this item, so nothing is lost by clearing here.
+                carry = "";
+                group.push(it.ipa);
+                continue;
+            }
             // Heteronym first: it is the only reading that depends on context, so it must pre-empt the
             // lexicon (which has exactly one reading per spelling).
             const wLower = it.word.toLowerCase();

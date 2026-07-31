@@ -106,3 +106,25 @@ describe("english reads embedded foreign runs", () => {
         expect(phonemize("I read Москва books", "en")).toContain("bˈʊks");
     });
 });
+
+// French cannot use `assembleClauses` either, for a different reason from English: liaison looks one word
+// AHEAD across the whole flattened stream, so the item list must exist before any phonemes are produced.
+// The gap pass is separable from that too.
+describe("french reads embedded foreign runs", () => {
+    test("a third script is spoken rather than dropped", () => {
+        expect(phonemize("Le mot λόγος veut dire mot", "fr")).toContain("loɣos");
+        expect(phonemize("Vladimir Владимир Poutine", "fr")).toContain("vɫɐdʲ");
+    });
+
+    test("liaison is unaffected where no foreign run intervenes", () => {
+        expect(phonemize("les amis", "fr")).toBe("le zamˈi");
+        expect(phonemize("deux ans", "fr")).toBe("dø zˈɑ̃");
+    });
+
+    // The hazard: a foreign run is not a French word, so `liaisonOnto` has no lexicon entry to reason
+    // about and a carry would be spliced onto foreign phonemes — "les" must not donate its z to Москва.
+    test("liaison neither lands on nor crosses a foreign run", () => {
+        expect(phonemize("les Москва amis", "fr")).toBe("le mɐskvˈa amˈi");
+        expect(phonemize("deux Москва ans", "fr")).toBe("dø mɐskvˈa ˈɑ̃");
+    });
+});

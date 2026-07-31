@@ -641,3 +641,42 @@ For a Japanese place name in English prose the Japanese reading is arguably righ
 itself says which — Han is genuinely ambiguous, and that is precisely why that entry is labelled
 `pragmatic` rather than `dominant` in `DEFAULT_READER`. An English-specific override could say
 `Han → ja`, and would be wrong for Chinese names. Left as the default, recorded here.
+
+---
+
+## Run 10 — 2026-07-31 — French
+
+Second of the four bespoke families. French's loop exists for a different reason from English's: **liaison
+looks one word AHEAD** across the whole flattened stream, so the item list must be fully built before any
+phonemes are produced. `assembleClauses` is a streaming sink and cannot express that. The gap pass is
+separable from it, as it was for English.
+
+A foreign run becomes a third item variant carrying **IPA rather than text**, and it must stay OUT of the
+liaison machinery entirely — which is exactly why it is a variant rather than a `word` holding phonemes.
+
+```
+Le mot λόγος veut dire mot   →  lə mo loɣos vø diʁ mˈo
+Vladimir Владимир Poutine    →  vladimiʁ vɫɐdʲˈimʲɪr putˈin
+```
+
+**The hazard, and it is French-specific:** `liaisonOnto` reasons from the lexicon, and a foreign run has no
+entry — so a pending liaison consonant would be spliced onto foreign phonemes. Verified both directions:
+
+```
+les amis          →  le zamˈi              liaison intact where nothing intervenes
+les Москва amis   →  le mɐskvˈa amˈi       no z donated to the foreign run
+deux Москва ans   →  dø mɐskvˈa ˈɑ̃
+```
+
+The existing `next && "word" in next` guard already prevents the previous word from setting a carry onto
+an `ipa` item, so nothing had to change there — the item variant made the invariant hold for free, which
+is the argument for modelling it as a variant.
+
+**Incidental finding.** `createFrench(foreign?)` has taken a `foreign` parameter all along, documented
+"unused for now". It is still unused: French's word class `[a-zà-ÿœæ]+` claims Latin ITSELF, so embedded
+English is read with French G2P (`Tokyo` → `tɔkjo`) rather than routed to English. That is arguably
+correct — a French speaker reading French prose does pronounce a Latin-script loanword French-ly — so it
+is recorded rather than changed.
+
+**Status: 5 of 14 affected codes fixed** (en, en-GB, en-IN, fr, fr-CA). Remaining: the seven Sinitic codes
+(yue wuu nan gan hak hsn cjy cdo), hmn, shi.
