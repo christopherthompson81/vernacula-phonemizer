@@ -879,3 +879,47 @@ construction.
 `--fill calendar` was building its query from ALL terms, including the `ordinal-native` ones, because the
 lexical branch read the flat list rather than the cell-scoped one added in Run 5. Two lexical cells would
 have searched each other's evidence.
+
+---
+
+## Run 15 — 2026-07-31 — Danish
+
+The 40th language, chosen adjacent to Norwegian to test whether findings from one member of a family
+transfer to the next. **Three of the four did not**, which is the result worth recording.
+
+### Danish is not Norwegian
+
+| | Norwegian | Danish |
+|---|---|---|
+| period between digits | a DATE (`24.08.2021`) → date rule | a THOUSANDS SEPARATOR (99: `330.000`) → de-group |
+| space grouping | the largest numeric defect, 42 | **zero** — rule absent, not copied |
+| comma | decimal + 5 English groupings needing a guard | purely decimal, 35, no guard needed |
+| ordinal-dot guard | 134 lower : 13 upper | 112 lower : 8 upper — **transfers** |
+
+Copying nb/normalize.ts would have put a date rule on Danish, corrupting every large number in the corpus.
+The families share the ordinal-dot orthography and almost nothing else about numeric convention.
+
+**No period-clock rule in either language, for opposite reasons.** In Norwegian the shape was dates; in
+Danish the 17 instances are `802.11a/b/g/n` — one Wi-Fi standard repeated — plus a single real `15.00 UTC`.
+Claiming it would rewrite the standard's name four times to fix one clock.
+
+### Three bugs the corpus diff caught, two of them mine
+
+1. **Danish POSTPOSES the currency sign** — `1000$`, `5$ og 100$` — 8 postposed against 2 preposed, the
+   opposite of English and of Norwegian. A sign-before-amount rule fires on the minority and leaves the
+   majority silent.
+2. **My digit class ate the following space.** `(\d[\d ]*)` was carried over from Norwegian, where it
+   caught space-grouped numbers; Danish has none, so all it did was swallow the space after the amount:
+   `¥2.500 og` → `2500 yenog`, with the next word fused on.
+3. **A currency CODE can carry the sign** — `US$` (7), `AUD$` (1) — so the sign follows letters and
+   neither digit-anchored pattern fires.
+
+And one found by the sample tier: `1. og 3. New Hampshire` became "første og 3.", because the
+lowercase guard claims the first ordinal and declines the second (a proper noun follows). A coordinator
+between two dotted numbers makes both ordinals whatever follows, so the pair is now claimed together.
+
+### Gates
+
+`tsc` clean, **2519 tests** (15 in the Danish file), referee **unchanged** at 27.4% folded backbone against
+a pristine worktree. Corpus diff 45/130 changed, 4/40 in the representative sample. The artifact scans with
+**no defects**.

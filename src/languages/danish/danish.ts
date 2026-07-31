@@ -12,6 +12,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { normalizeDanish } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
@@ -131,8 +132,11 @@ const TOKEN = /([a-zæøåéöäüóèãà]+)|(\d+)|([.!?…,;:])/giu;
 class DanishPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
     // path omits it, so behaviour is byte-identical to phonemize(text, "da").
-    text(input: string, oovOverride?: OovResolver): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+    text(rawInput: string, oovOverride?: OovResolver): string {
+        // #562: everything the g2p cannot read is rewritten to Danish words FIRST — see normalize.ts for
+        // the ordered steps and, in particular, why Danish is NOT Norwegian (the period is a thousands
+        // separator here, and there is no space grouping at all).
+        return assembleClauses(normalizeDanish(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
             // Numbers: the vigesimal/units-first compositor (numbers.ts) → each word through the same 3-tier g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd, oovOverride));

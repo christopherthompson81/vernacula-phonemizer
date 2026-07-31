@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWordRules } from "../src/languages/danish/danish.ts";
+import { normalizeDanish } from "../src/languages/danish/normalize.ts";
 import { numberToWords } from "../src/languages/danish/numbers.ts";
 
 // Danish (da) — North Germanic, Latin, the DEEPEST European orthography. Vowel quality / soft-d,g / reduction / stress
@@ -71,4 +72,65 @@ describe("Danish canonical IPA", () => {
         expect(phonemize("1000", "da").trim()).toBe("ˈɛd ˈtuːˀsen"); // et tusind
     });
 
+});
+
+// #562 — the normalization layer. Every count is measured over the FLEURS da_dk corpus (column 3), and
+// every emitted word is in da-lexicon.tsv at reference quality.
+describe("danish normalization", () => {
+    // ⚠ The period is a THOUSANDS SEPARATOR in Danish (99 instances) — the German convention. In Norwegian
+    // the same shape was a DATE and got a date rule; here that rule would corrupt every large number.
+    test("period-grouped thousands stay ONE numeral", () => {
+        expect(normalizeDanish("330.000")).toBe("330000");
+        expect(normalizeDanish("24.000 meteoritter")).toBe("24000 meteoritter");
+    });
+
+    // …and the technical shape must survive it: 802.11 has only two digits after the period.
+    test("a technical identifier is not de-grouped", () => {
+        expect(normalizeDanish("802.11n")).toBe("802.11n");
+    });
+
+    test("decimal comma, clock, percent, degrees, squared units", () => {
+        expect(normalizeDanish("12,5")).toBe("12 komma 5");
+        expect(normalizeDanish("kl. 14:30")).toBe("klokken 14 30");
+        expect(normalizeDanish("25 %")).toBe("25 procent");
+        expect(normalizeDanish("20 °C")).toBe("20 grader celsius");
+        expect(normalizeDanish("23 km²")).toBe("23 kvadratkilometer");
+    });
+
+    test("ordinal dot — the largest defect, 112 instances", () => {
+        expect(normalizeDanish("3. maj")).toBe("tredje maj");
+        expect(normalizeDanish("18. århundrede")).toBe("attende århundrede");
+        expect(normalizeDanish("I 1990. Han kom")).toBe("I 1990. Han kom"); // a sentence end survives
+    });
+
+    // The lowercase guard claims `1.` (followed by "og") and declines `3.` (followed by a proper noun),
+    // giving the inconsistent "første og 3.". A coordinator makes BOTH ordinals whatever follows.
+    test("coordinated ordinals are claimed as a pair", () => {
+        expect(normalizeDanish("1. og 3. New Hampshire")).toBe("første og tredje New Hampshire");
+    });
+
+    test("a range of ordinals", () => {
+        expect(normalizeDanish("10.-11. århundrede")).toBe("tiende til ellevte århundrede");
+    });
+
+    // ⚠ Danish POSTPOSES the currency sign — 8 postposed against 2 preposed, the opposite of English —
+    // and a code can carry it instead of a digit (US$, AUD$), where neither digit-anchored pattern fires.
+    test("currency in both positions, and after a currency code", () => {
+        expect(normalizeDanish("1000$")).toBe("1000 dollar");
+        expect(normalizeDanish("$22.500")).toBe("22500 dollar");
+        expect(normalizeDanish("11.000 US$")).toBe("11000 US dollar");
+        // The digit class must not eat the trailing space, or the next word fuses on: "2500 yenog".
+        expect(normalizeDanish("¥2.500 og")).toBe("2500 yen og");
+    });
+
+    test("signs, ranges and ampersand", () => {
+        expect(normalizeDanish("1990-1995")).toBe("1990 til 1995");
+        expect(normalizeDanish("+30 °C")).toBe("plus 30 grader celsius");
+        expect(normalizeDanish("EX = uddød")).toBe("EX lig med uddød");
+        expect(normalizeDanish("A&B")).toBe("A og B");
+    });
+
+    test("ordinary Danish text is untouched", () => {
+        expect(normalizeDanish("Dansk er et sprog.")).toBe("Dansk er et sprog.");
+    });
 });
