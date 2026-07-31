@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord, segment } from "../src/languages/burmese/burmese.ts";
+import { normalizeBurmese } from "../src/languages/burmese/normalize.ts";
 
 // Canonical-IPA goldens for Burmese / မြန်မာ (my) — Sino-Tibetan, the Mon-Burmese abugida (logical order). The
 // core challenge is the RIME chart (vowel × coda: ောင်→aʊɴ, ိုင်→aɪɴ, ိန်→eɪɴ, ုန်→oʊɴ, bare င်→ɪɴ), the ⟨ွ⟩
@@ -94,5 +95,75 @@ describe("burmese canonical IPA", () => {
         // Above 10⁷ the places repeat: 10⁹ is "a hundred crore".
         expect(phonemize("1000000", "my")).toBe(phonemize("တစ်သန်း", "my"));
         expect(phonemize("1000000000", "my")).toBe(phonemize("တစ်ရာကုဋေ", "my"));
+    });
+});
+
+// #562/#585 — the normalization layer, verified against a MINED corpus (tools/corpus/mined/my.jsonc)
+// rather than FLEURS, which has no Burmese. Every emitted word is attested in that corpus.
+describe("burmese normalization", () => {
+    const say = (s: string): string => phonemize(s, "my").trim();
+
+    test("percent follows the number", () => {
+        expect(normalizeBurmese("၉၈%")).toBe("၉၈ ရာခိုင်နှုန်း");
+    });
+
+    test("comma-grouped thousands stay ONE numeral", () => {
+        // The comma is clause punctuation, so this read as "fifty , thousand" — a pause mid-number.
+        expect(normalizeBurmese("၅၀,၀၀၀")).toBe("၅၀၀၀၀");
+        expect(normalizeBurmese("၁,၂၃၄,၅၆၇")).toBe("၁၂၃၄၅၆၇");
+    });
+
+    test("the decimal point becomes ဒသမ, fraction digit-by-digit", () => {
+        // The point was reaching clausePunctuation and becoming a SENTENCE BREAK.
+        expect(normalizeBurmese("၈၆.၄")).toBe("၈၆ ဒသမ ၄");
+        expect(normalizeBurmese("၈၆.၄၅")).toBe("၈၆ ဒသမ ၄ ၅");
+    });
+
+    test("clock reads နာရီ / မိနစ်", () => {
+        expect(normalizeBurmese("၁၄:၃၀")).toBe("၁၄ နာရီ ၃၀ မိနစ်");
+    });
+
+    test("degrees, including the bare sign", () => {
+        expect(normalizeBurmese("၃၅°C")).toBe("၃၅ ဒီဂရီ စင်တီဂရိတ်");
+        expect(normalizeBurmese("၈၄°F")).toBe("၈၄ ဒီဂရီ ဖာရင်ဟိုက်");
+        expect(normalizeBurmese("၅၉°")).toBe("၅၉ ဒီဂရီ"); // the sign stands alone in the corpus
+    });
+
+    test("currency: sign precedes the amount, word follows it", () => {
+        expect(normalizeBurmese("$5")).toBe("5 ဒေါ်လာ");
+        expect(normalizeBurmese("€၂၀")).toBe("၂၀ ယူရို");
+    });
+
+    // The corpus spells a fraction DENOMINATOR-FIRST — ၄ ပုံ ၃ ပုံ for 3/4. Numerator-first is backwards.
+    test("fractions are denominator-first", () => {
+        expect(normalizeBurmese("၃/၄")).toBe("၄ ပုံ ၃ ပုံ");
+    });
+
+    test("a dash between numerals is a range", () => {
+        expect(normalizeBurmese("၁၉၄၈-၁၉၅၂")).toBe("၁၉၄၈ မှ ၁၉၅၂ အထိ");
+    });
+
+    // The one regression the REPRESENTATIVE sample caught that the hard-set could not: a numeric date is
+    // written D-M-Y with the same dash (945 in the corpus), and the range rule read "20 to 1" inside it.
+    test("a D-M-Y date is NOT read as a range", () => {
+        expect(normalizeBurmese("၂၀-၁-၂၀၂၄")).toBe("၂၀-၁-၂၀၂၄");
+        expect(normalizeBurmese("ဆီးချိုအမျိုးအစား-၂")).toBe("ဆီးချိုအမျိုးအစား-၂");
+        // Backtracking once spliced a digit in half here: ၁၂ မှ ၁ အထိ၃ အထိ.
+        expect(normalizeBurmese("၁၂ - ၁၃ အထိ")).toBe("၁၂ - ၁၃ အထိ");
+    });
+
+    test("Latin unit abbreviations after a number", () => {
+        expect(normalizeBurmese("၁၀ km")).toBe("၁၀ ကီလိုမီတာ");
+    });
+
+    // Each period was becoming a clause pause: "yu . es ." — two spurious breaks mid-phrase.
+    test("abbreviation dots are consumed, not spoken as sentence ends", () => {
+        expect(normalizeBurmese("U.S.")).toBe("US");
+        expect(say("မြန်မာနိုင်ငံ။")).not.toContain(".."); // ordinary sentences keep their one mark
+    });
+
+    test("ordinary Burmese text is untouched", () => {
+        expect(normalizeBurmese("မြန်မာနိုင်ငံသည် အရှေ့တောင်အာရှတွင် ရှိသည်။"))
+            .toBe("မြန်မာနိုင်ငံသည် အရှေ့တောင်အာရှတွင် ရှိသည်။");
     });
 });

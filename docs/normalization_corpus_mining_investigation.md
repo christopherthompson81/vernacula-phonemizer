@@ -273,3 +273,92 @@ Drop scan of the Burmese artifact: `minus ×10, math-sign ×10, percent ×8, deg
   check, and dump size is a free pre-filter.
 - Only `my` has been mined. The other ~89 corpus-less languages need a terms list each for the `calendar`
   cell, which is the one genuinely per-language input the pipeline requires.
+
+---
+
+## Run 4 — 2026-07-31 — closing the loop: Burmese normalized from the mined corpus
+
+**Question.** Can a language with no FLEURS data be normalized using only the mined artifact — as both the
+test set and the source of the words the rules emit?
+
+**Yes.** `src/languages/burmese/normalize.ts` is the 38th normalization layer and the first authored
+without a FLEURS corpus.
+
+### The corpus was also the dictionary
+
+This is the part that makes the route viable rather than merely possible. Every word a rule emits was
+attested in the same 454,821 paragraphs, with counts, before it was used:
+
+```
+ရာခိုင်နှုန်း 3139   ဒီဂရီ 2007   ဒေါ်လာ 2791   ကျပ် 3290   ကီလိုမီတာ 1867
+ဒသမ (decimal)  536   နာရီ 2457    မိနစ် 1216    စင်တီဂရိတ် 383   ဖာရင်ဟိုက် 337
+```
+
+And the corpus settled the WORD ORDER questions that no dictionary would have:
+
+- **Percent is postposed** — `၉၈ ရာခိုင်နှုန်း`. Measured 2426 postposed : 97 preposed.
+- **A fraction is denominator-first** — `၃/၄` is `၄ ပုံ ၃ ပုံ`, 213 instances of the shape. Emitting it
+  numerator-first would have been backwards and no probe would have shown it.
+- **A negative is a word, not a sign** — `အနုတ် ၉၃ ဒီဂရီ`, the word BEFORE the number.
+
+### Two negative results the counts overturned
+
+1. **No bare-sign negative rule.** The `negative` cell reported 1934 hits and the DROP scan said
+   `minus ×10`, which reads as an obvious missing rule. Reading the contexts instead: a hyphen before
+   digits is a compound or a date (`ဒီ-၂၀`, `-၂၈ နိုဝင်ဘာ`), and U+2212 — 3259 occurrences, MORE than the
+   hyphen — is overwhelmingly a list bullet (`၎င်းတို့မှာ −`). A rule keying on the sign would have
+   corrupted dates and bullets to fix a case Burmese does not write.
+2. **`°` stands alone.** A first sample showed `၅၉° ဒီဂရီ` — sign plus word — which would make an
+   expanding rule double it. Counting properly: 735 `°`, of which 3 are followed by ဒီဂရီ and 168 are
+   `°C`/`°F`. Four sampled instances would have produced the wrong rule.
+
+### Before → after
+
+Eleven defects fixed. Baseline emitted from a pristine worktree, so this is a real before/after:
+
+```
+၉၈%          ko sʰɛʃɪʔ                    →  … ja˨ɡaɪ˨ɴn̥oʊ˥˩ɴ        (was: % dropped)
+$5           ŋa˥˩                          →  ŋa˥˩ dɔ˨la˨             (was: $ dropped)
+၅၀,၀၀၀       ŋa˥˩sʰɛ˨ , θo˨ʊɴɲa˥ˀ         →  ŋa˥˩θaʊ˥˩ɴ              (was: "fifty , thousand")
+၈၆.၄         ʃɪʔ sʰɛ˥ˀt͡ɕʰaʊʔ . le˥˩       →  … da˥ˀθəma˥ˀ le˥˩        (was: a SENTENCE BREAK)
+၃၅°C         … sˈiː                        →  … di˨ɡəɹi˨ sɪ˨ɴti˨ɡəjeɪʔ (was: English letter name)
+၁၄:၃၀        sʰɛ˥ˀle˥˩ θoʊ˥˩ɴsʰɛ˨          →  … na˨ji˨ … mi˥ˀnɪʔ       (was: colon dropped)
+U.S.         jˈuː . ˈɛs .                  →  jˈuː ˈɛs                (was: 2 spurious breaks)
+```
+
+DROP classes on the artifact: `percent 8→0, degree 6→0, currency 6→0`.
+
+**Gates:** 2478 tests (19 in `test/burmese.test.ts`), `tsc` clean, referee **unchanged** at 95.7% / 99.8%
+folded backbone — as expected, since normalization touches `text()` and the referee is word-level.
+
+### ★ The representative tier earned its place
+
+The corpus diff over the artifact changed **77 of 184** utterances, and exactly **1 of 40** in the
+representative sample. That one was a REGRESSION I had introduced:
+
+```
+၂၀-၁-၂၀၂၄  →  ၂၀ မှ ၁ အထိ …      # a D-M-Y date read as "the 20th to the 1st"
+```
+
+945 hyphenated dates in the corpus against 6033 genuine two-number pairs. The hard-set could never have
+shown this — it proves a rule FIRES; only ordinary text shows what a rule BREAKS. The two-tier design was
+argued for on principle in #585 and this is the first time it paid, on its first use.
+
+Fixing it took two attempts, both worth recording:
+
+- The first guard had the lookbehind BACKWARDS (`dash then digits` where the text is `digits then dash`),
+  so it did nothing.
+- The second guard caused BACKTRACKING: with a trailing `(?!…အထိ)` the engine matched a SHORTER second
+  number to satisfy it, and `၁၂ - ၁၃ အထိ` came out as `၁၂ မှ ၁ အထိ၃ အထိ` — a numeral spliced in half. It
+  needs an explicit `(?!digit)` completeness anchor after the group.
+
+### What remains, and why it is not being fixed
+
+`DROP math-sign ×10` survives. Reading every instance: they are glosses and formulae — `(gêeo = Earth)`,
+`မိုင်း = ကြီးမား`, `E = mc²` — where `=` is not spoken as "equals", plus one real arithmetic expression
+(`၃+၁=၄`). ညီမျှ ("equals") is attested 1110 times, so a rule is *authorable*; it would be wrong in the
+majority of instances. Recorded rather than guessed at.
+
+`DROP minus ×5` is likewise not a missing negative rule: the residue is compound hyphens
+(`အမျိုးအစား-၂`) and NEGATIVE EXPONENTS in scientific notation (`9.1093837 × 10 -31 kg`). The exponent
+case is real and is a cell the miner does not yet have.

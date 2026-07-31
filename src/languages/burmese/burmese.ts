@@ -269,11 +269,16 @@ const MY_DIGITS = "\u1040-\u1049";
 // class is a raw Unicode range, after the Greek run reported the same shape for U+0387 ANO TELEIA.
 const TOKEN = new RegExp(`([\u1000-\u103F\u104C-\u109F\ua9e0-\ua9f9]+)|([0-9${MY_DIGITS}]+)|([။၊.?!,])`, "gu");
 
+import { normalizeBurmese } from "./normalize.ts";
+
 export type ForeignPhonemizer = (latin: string) => string;
 
 class BurmesePhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
-    text(input: string): string {
+    text(rawInput: string): string {
+        // #562: everything the g2p cannot read is rewritten to Burmese words FIRST — see normalize.ts for
+        // the ordered steps and the two negative results.
+        const input = normalizeBurmese(rawInput);
         const { sink, finish } = clauseSink();
         let m: RegExpExecArray | null;
         const tok = new RegExp(TOKEN.source, "gu");
