@@ -89,3 +89,103 @@ before writing the hard-set. Not yet done.
 
 **Not yet tested.** Whether the bot-generated-wiki risk (#585) actually materialises — `ceb` is the
 candidate to check, and Burmese gave no signal either way.
+
+---
+
+## Run 2 — 2026-07-31
+
+**Questions.** (a) Are the four categories spotted in English's `normalize.ts` — roman numerals, calendar,
+negatives, letter names — missing from the inventory? (b) Can an empty cell be FILLED deliberately, given
+the suspicion that the pattern is in the corpus but not in the intro sections?
+
+### (a) Four cells added, and one of them is a design problem
+
+- **negative** — worth its own cell precisely because it is the ambiguous half of `ranges`: the same
+  character, and the two rules compete for it. Only `fr` has authored the rule so far.
+- **letter-name** — a LONE Latin capital, which the initialism pass cannot claim (it requires two) and
+  which reaches the g2p as a bare consonant. Distinct from `initialism`.
+- **roman** — the previous regex could match capitalised English words with roman-ish letters; tightened
+  to require the whole token be roman letters.
+- **era-marker split from year** — these had been conflated. In the treated languages ERA is a *dotted*
+  marker (kn ಕ್ರಿ.ಪೂ, te క్రీ.శ, tr M.Ö., ta கி.மு.) that must be claimed BEFORE the abbreviation rule.
+  Different rule, different ordering constraint, different search pattern from a bare 4-digit year.
+- **calendar** — CANNOT be regex-mined, and this is structural rather than a gap in effort. Month names
+  and non-Gregorian era words (Thai พ.ศ., Ethiopian, Hijri) are *lexical*: they have no shape. The cell
+  therefore takes a per-language `--terms` list and the fill query searches those words directly. Same
+  principle as `acronymLetters` in core/initialisms.ts — a lexical fact belongs in data, not in logic.
+
+### (b) The hypothesis was right, and the earlier conclusion was wrong
+
+Run 1 left six cells empty and the natural reading — "Burmese does not write those" — was **false**. A
+CirrusSearch `insource:` regex query, with the language's own digit range substituted in:
+
+```
+percent      1013 hits on the wiki      clock      330 hits
+roman        2739 hits                  negative   539 hits
+calendar    19242 hits                  degrees    134 hits
+letter-name   104 hits                  currency   317 hits
+```
+
+None of it had surfaced because random sampling reads INTROS, and intros are biographical while
+percentages live in demographics and results sections. **An empty cell is a query to run, not a fact about
+the language.** `fetch --fill` now issues one targeted search per empty cell and pulls those articles' FULL
+text; the miner prints the exact fill command for whatever is still empty.
+
+Coverage after filling: **20/24 cells**, from 14/20. `percent` 0 → 198 matching sentences, `clock` 0 → 51,
+`degrees` 0 → 19, and all four new cells populated.
+
+**API trap worth recording:** `prop=extracts` accepts `exlimit=20` only alongside `exintro`. For FULL text
+the cap is 1, and a batched request silently returns a single article — which reads as "this wiki has
+almost nothing" rather than as an error. Titles must be fetched one at a time.
+
+**Still empty: `dotted`, `era-marker`, `abbrev`, `rate`.** Not for lack of hits — `dotted` reported 2557 and
+`abbrev` 3387 — but those hits are in *wikitext*, i.e. citation metadata and templates, which plain-text
+extraction strips. Search hits in wikitext are not prose occurrences, and the gap between the two is a
+second thing to watch.
+
+### The finding that matters most: the gate cannot see a DROP
+
+The filled 199-line hard-set scored **zero defects** under the shipped classes (DIGIT / SLOT-GAP /
+RAWMARK). It is not clean. Taking a real mined sentence and deleting only its percent sign:
+
+```
+… အများပြည်သူနာရီ ၉၈% သည် ၁၈၅၅ ခုမတိုင်မီ …
+with %    ɡəɹeɪʔbəɹi˥ˀte˨ɪɴ ʃi˥ˀ ʔəmja˥˩ pji˨ðu˨ na˨ji˨ ko˥˩ sʰɛ˥ˀʃɪʔ ðɛ˨ …
+without % ɡəɹeɪʔbəɹi˥ˀte˨ɪɴ ʃi˥ˀ ʔəmja˥˩ pji˨ðu˨ na˨ji˨ ko˥˩ sʰɛ˥ˀʃɪʔ ðɛ˨ …
+IDENTICAL: true
+```
+
+The leak classes detect a character that **survives**; they are blind by construction to one that
+**vanishes**. That is the structural reason the currency drop in #584 went unnoticed through 37 languages
+of corpus-driven work — not carelessness, an unobservable defect class.
+
+Added a `scan` mode with a differential DROP test: phonemize, then phonemize again with the symbol
+deleted, and flag identity. On the same hard-set that had just scored clean:
+
+```
+DROP math-sign ×23   DROP minus ×9   DROP percent ×9   DROP degree ×7   DROP currency ×4
+```
+
+**52 defects in a set the leak classes called clean.** This test costs one extra phonemize per symbol-
+bearing sentence and should be added to `normalization-corpus-diff.ts` as well, where it would have caught
+#584 in the original batches.
+
+### Next: local dumps rather than the API
+
+Dump sizes for candidate languages (`pages-articles.xml.bz2`):
+
+```
+lo 8 MB   bo 18 MB   km 31 MB   my 70 MB   si 79 MB   ka 231 MB   hy 558 MB   ceb 1845 MB
+```
+
+These are small enough to mine locally, which removes three real limits of the API route: search results
+are capped at N per query (so a cell is filled from the top hits rather than from everything), every fetch
+is rate-limited and slow, and full-text extraction costs one request per article. A local dump also
+restores TRUE FREQUENCY, which the two-tier design needs for the representative sample and which the API
+route can only approximate.
+
+**Note `ceb` at 1845 MB — 26× Burmese.** That is the bot-generated-wiki risk from #585 showing up in the
+file size before a single byte is parsed, and it is a cheap pre-filter: dump size wildly out of proportion
+to the language's encyclopedic footprint is the signature.
+
+Cost of the dump route: wikitext → plain text needs a real extractor (the API gave that for free).
