@@ -764,3 +764,62 @@ Final tally of what "32 engines have their own scan" actually meant:
 | historical drift | 7 engines (5 Sinitic + hmn + shi) | migrated to the shared path; net DELETION of code |
 
 Only two of thirty-two needed private code, and neither needed private *gap handling*. 2496 tests.
+
+---
+
+## Run 13 — 2026-07-31 — Norwegian Bokmål
+
+The 39th normalization layer, and the first done under the artifact-first playbook (step 0b) rather than
+by hand tabulation. `tools/corpus/mined/nb.jsonc` generated from `fleurs:nb_no` before anything else —
+23/29 cells covered, which immediately named the ten defects rather than leaving them to be noticed.
+
+### Ten defects, all fixed
+
+```
+5 000 000    ˈfɛm ˈnʊl ˈnʊl              → ˈfɛm mɪlɪˈuːnəɾ        (one numeral read as three)
+1 250        ˈeːn ˈtuːhʉndɾə ˈfɛmtɪ      → ˈtʉːsn ˈtuːhʉndɾə …
+12,5         ˈtɔl , ˈfɛm                 → ˈtɔl ˈkɔmɑ ˈfɛm        (a PAUSE inside a number)
+kl. 14:30    kl . ˈfjʊʈɳ , ˈtɾɛtɪ        → ˈklɔkɑ ˈfjʊʈɳ ˈtɾɛtɪ
+25 %         ˈtjʉːə ˈfɛm                 → … pɾʊˈsɛnt             (sign dropped)
+20 °C        ˈtjʉːə ˈseː                 → … ˈɡɾɑːdəɾ ˈsɛlsɪʊs    (C as an English letter name)
+3. mai       ˈtɾeː . ˈmɑɪ                → ˈtɾeːdjə ˈmɑɪ          (a SENTENCE BREAK mid-date)
+24.08.2021   … . … . …                   → tjuefjerde august 2021
+km²          ˈçiːlʊˌmeːtəɾ               → kʋɑˈdɾɑːtçɪlʊˌmeːtəɾ   (area lost)
+¥2500        (bare number)               → 2500 yen
+```
+
+`5 000 000` also demonstrates the earlier magnitude-paradigm work landing: it reads *fem millionER*, not
+*fem million*.
+
+### Three measured disambiguations, each of which a plausible rule gets wrong
+
+1. **The period form is NOT a clock.** `HH.MM` looks like the Norwegian written clock and 24 instances
+   occur — but reading them shows dates (`24.08.2021`), technical strings (`802.11n`), a duration
+   (`1:09.02`) and an English decimal (`9.174 mi²`). **Exactly one is a clock.** Only the colon form is
+   claimed; the full `D.M.YYYY` shape gets its own rule instead.
+2. **A comma is the decimal separator — except where it is not.** 34 decimals (1,2 · 12,8) against 5
+   English-style thousands groupings that survived translation (23,764 · 291,773 · 755,688), all with
+   exactly three digits after the comma. Splitting on that shape gets both right.
+3. **The ordinal dot needs a following lowercase word.** 134 before lowercase, 13 before a capital.
+   Norwegian month names are lowercase, so every date is caught while a sentence ending in a year is not.
+
+### Gates
+
+`tsc` clean; **2508 tests** (16 in the Norwegian file); referee **unchanged** at 23.0% folded backbone,
+verified against a pristine worktree — as expected, since normalization touches `text()` and the referee
+is word-level.
+
+Corpus diff: **48 of 123 changed, 4 of 40 in the representative sample — all four improvements** (decimal,
+clock+abbreviation, `f.eks.`, decimal). No regression this time, unlike the Burmese run where the sample
+tier caught a date read as a range. DROP classes: percent 5→0, degree 1→0, currency 1→0.
+
+### One thing removed rather than added
+
+`kr` was in the currency map at first. Norwegian POSTPOSES it (`10 kr`), so a sign-before-amount rule could
+never fire on it — and it already reads correctly because the lexicon maps the token `kr` straight to
+[ˈkɾuːnəɾ]. **An entry that can never match is worse than no entry: it reads as coverage.** Removed, with
+the reason recorded in the file.
+
+Residual, both recorded not fixed: `DROP math-sign ×2` (a `>` in a temperature comparison) and
+`DROP minus ×1` (`10.–11. århundre`, an en-dash between two ordinal dots — a range of ordinals, which
+neither the range rule nor the ordinal rule claims).

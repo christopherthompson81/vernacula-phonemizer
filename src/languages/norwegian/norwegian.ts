@@ -11,6 +11,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, westernNumberWords } from "../../core/numbers.ts";
+import { normalizeNorwegian } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -172,8 +173,10 @@ function number(digits: string): string {
 class NorwegianPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only) resolves OOV words between the lexicon and the rule engine; the sync path omits
     // it, so tokenizer / numbers / clause assembly are byte-identical to phonemize(text, "nb").
-    text(input: string, oovOverride?: OovResolver): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+    text(rawInput: string, oovOverride?: OovResolver): string {
+        // #562: everything the g2p cannot read is rewritten to Norwegian words FIRST — see normalize.ts
+        // for the ordered steps and the three measured disambiguations.
+        return assembleClauses(normalizeNorwegian(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

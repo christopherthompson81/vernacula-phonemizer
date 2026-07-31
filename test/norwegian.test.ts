@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, phonemizeWordRules, createNorwegian } from "../src/languages/norwegian/norwegian.ts";
+import { normalizeNorwegian } from "../src/languages/norwegian/normalize.ts";
 
 // Norwegian Bokmål (nb) — North Germanic, Latin, Urban East Norwegian. TWO tiers: an NST pronunciation lexicon
 // (nb-lexicon.tsv, National-Library CC0, ~38k common forms → 98% of real-text tokens, with correct LEXICAL stress)
@@ -63,5 +64,62 @@ describe("Norwegian Bokmål canonical IPA", () => {
 
     test("text: words + clause punctuation", () => {
         expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk .");
+    });
+});
+
+// #562 — the normalization layer. Every count below is measured over the FLEURS nb_no corpus (column 3),
+// and every emitted word is in the NST lexicon at reference quality.
+describe("norwegian normalization", () => {
+    test("space-grouped thousands stay ONE numeral", () => {
+        // Read as "fem null null" — a space is a token boundary, so one numeral arrived as three.
+        expect(normalizeNorwegian("5 000 000")).toBe("5000000");
+        expect(normalizeNorwegian("1 250")).toBe("1250");
+    });
+
+    test("the decimal comma becomes komma, fraction digit-by-digit", () => {
+        expect(normalizeNorwegian("12,5")).toBe("12 komma 5");
+        expect(normalizeNorwegian("1,25")).toBe("1 komma 2 5");
+    });
+
+    // 5 corpus instances are English-style THOUSANDS grouping that survived translation, all with exactly
+    // three digits after the comma; reading them as decimals would say "tjuetre komma sju seks fire".
+    test("English-style comma grouping is de-grouped, not read as a decimal", () => {
+        expect(normalizeNorwegian("23,764")).toBe("23764");
+        expect(normalizeNorwegian("291,773")).toBe("291773");
+    });
+
+    test("clock, percent, degrees and squared units", () => {
+        expect(normalizeNorwegian("kl. 14:30")).toBe("klokka 14 30");
+        expect(normalizeNorwegian("25 %")).toBe("25 prosent");
+        expect(normalizeNorwegian("20 °C")).toBe("20 grader celsius");
+        expect(normalizeNorwegian("23 km²")).toBe("23 kvadratkilometer");
+    });
+
+    test("ordinal dot — the largest defect, 134 instances", () => {
+        expect(normalizeNorwegian("3. mai")).toBe("tredje mai");
+        expect(normalizeNorwegian("15. århundre")).toBe("femtende århundre");
+    });
+
+    // The guard that separates an ordinal from a sentence ending in a year: Norwegian month names are
+    // lowercase, so every date is caught while a sentence end (followed by a capital) is not.
+    test("a sentence ending in a year keeps its full stop", () => {
+        expect(normalizeNorwegian("I 1990. Han kom")).toBe("I 1990. Han kom");
+    });
+
+    // The period form is NOT a clock: of 24 corpus instances, the great majority are dates or technical
+    // strings (802.11n) and exactly one is a time.
+    test("a period between digits is left alone unless it is a full date", () => {
+        expect(normalizeNorwegian("802.11n")).toBe("802.11n");
+        expect(normalizeNorwegian("24.08.2021")).toBe("tjuefjerde august 2021");
+    });
+
+    test("ranges, minus and currency", () => {
+        expect(normalizeNorwegian("1990-1995")).toBe("1990 til 1995");
+        expect(normalizeNorwegian("-5 grader")).toBe("minus 5 grader");
+        expect(normalizeNorwegian("¥2500")).toBe("2500 yen");
+    });
+
+    test("ordinary Norwegian text is untouched", () => {
+        expect(normalizeNorwegian("Norsk er et språk.")).toBe("Norsk er et språk.");
     });
 });
