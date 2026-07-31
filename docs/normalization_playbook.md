@@ -203,6 +203,27 @@ nothing. Treat every one as a defect until you have read the instances and can s
 Burmese run had `DROP minus`, and reading the instances showed the sign was a compound hyphen, a date, or
 a list bullet, never a negative. That conclusion needed the evidence, not the flag.
 
+### 5e. Run the mechanical review BEFORE committing
+
+```bash
+npx tsx tools/normalization-review.ts --lang xx
+```
+
+Two to three seconds. It checks the things that are machine-checkable and that a finished-looking layer
+still gets wrong: the normalizer is wired, a test file references it, the artifact is TRACKED, no sign
+class is silently dropped, and the artifact scan is clean. It then prints the sign readings, the
+numeral-agreement probes and the ordinary-text probes for you to judge.
+
+This exists because reviewing the Czech layer (#588) found four defects and ALL FOUR were checklist items
+— no tests, three dropped sign classes, a numeral that did not agree with its noun, an uncommitted
+artifact. Nine of the fourteen review minutes went on repeated `vitest` runs and one-probe-per-process
+startup, not on judgement.
+
+⚠ NECESSARY, NEVER SUFFICIENT. It cannot tell you whether a reading is right for the language, and its
+sign check inherits the DROP test's false negative: a symbol that changes TOKENIZATION without being
+spoken passes it (Czech's `&` did — `BB` is one initialism, `B B` is two letters). Read the printed
+readings. It also does not cover the referee comparison or the sample-tier diff, which stay manual.
+
 ### 6. Commit — one language, one commit
 
 The commit message carries the evidence: the counts, what the defect produced before, and why the rule is
