@@ -33,5 +33,28 @@
 
     "clausePunctuation": {
         "۔": ".", "؟": "?", "،": ",", "؛": ",", ".": ".", "?": "?", ",": ","
-    }
+    },
+
+    // NUMBERS (#587). Sindhi had NO number composer: sindhi.ts handed every digit run to the foreign
+    // phonemizer, so `5` was spoken as English "five" and `100` as "one hundred". Sindhi is Indo-Aryan
+    // with lakh/crore grouping, so the shared `indicNumberWords` is the right composer.
+    //
+    // EVERY FORM BELOW IS TWO-SOURCE VERIFIED: the orthography comes from the English Wiktionary
+    // "Sindhi numerals" category, and each is cross-checked against espeak-ng's own Sindhi numeral
+    // fragments, which carry PHONEMES for 0–99. The two agree throughout — 11 يارهن ↔ [ja:raha],
+    // 19 اوڻيهه ↔ [Un.vi:ha], 40 چاليهه ↔ [ca:li:ha], 90 نوي ↔ [navve:].
+    //
+    // ⚠ NO `compound` MAP for the fused 21–99. Sindhi does fuse them (21 is one word, not two), and
+    // espeak has the phonemes — but the ORTHOGRAPHY could not be settled: sd.wikipedia attests TWO
+    // spellings for 21 alone (ايڪيهه ×14, ايڪويهه ×5), and a guessed اڪيهه turned out to be attested
+    // nowhere. Authoring 79 forms on that basis would be inventing data. Without the map,
+    // `indicNumberWords` degrades to the two-word `unit + tens` reading in its default UNIT-TENS order,
+    // which is the right order here (ايڪيهه is literally "one-twenty") and approximates the fused word.
+    // See #587 for the sourcing task.
+    "numbers": {
+        "units": ["ٻڙي", "هڪ", "ٻه", "ٽي", "چار", "پنج", "ڇهه", "ست", "اٺ", "نو"],
+        "teens": ["ڏهه", "يارهن", "ٻارهن", "تيرهن", "چوڏهن", "پندرهن", "سورهن", "سترهن", "ارڙهن", "اوڻيهه"],
+        "tens": { "20": "ويهه", "30": "ٽيهه", "40": "چاليهه", "50": "پنجاهه", "60": "سٺ", "70": "ستر", "80": "اسي", "90": "نوي" },
+        "magnitudes": { "hundred": "سؤ", "thousand": "هزار", "lakh": "لک", "crore": "ڪروڙ" },
+    },
 }

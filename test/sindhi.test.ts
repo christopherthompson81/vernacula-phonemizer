@@ -137,9 +137,34 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
         expect(phonemizeWordShipped("۽").replace(/[ˈˌ]/gu, "")).toBe("aẽ");
     });
 
-    test("Latin words and digits route through the foreign phonemizer", () => {
+    // SUPERSEDED IN PART (#587). This asserted that a DIGIT run routes through the foreign phonemizer —
+    // which is exactly why every number in Sindhi text was spoken in ENGLISH: `45` read "forty", `100`
+    // read "one hundred". Latin still routes to English, correctly; digits now go to Sindhi's own
+    // composer.
+    test("Latin words route through the foreign phonemizer, digits do NOT", () => {
         const ipa = phonemize("facebook تي 45", "sd");
-        expect(ipa).toContain("fˈeᶦsbʊk"); // was: dropped (no Latin token group)
-        expect(ipa).toContain("fˈɔːɹt̬i"); // was: dropped (no foreign wired for digits)
+        expect(ipa).toContain("fˈeᶦsbʊk"); // Latin → English, as before
+        expect(ipa).not.toContain("fˈɔːɹt̬i"); // no longer the English "forty"
+        expect(ipa).toContain(phonemize("45", "sd")); // read in Sindhi
+    });
+
+    // Every form is two-source verified: Wiktionary orthography cross-checked against espeak-ng's own
+    // Sindhi numeral phonemes (11 يارهن ↔ [ja:raha], 40 چاليهه ↔ [ca:li:ha], 90 نوي ↔ [navve:]).
+    test("Sindhi numbers, Indic lakh/crore grouping", () => {
+        expect(phonemize("0", "sd")).toBe(phonemize("ٻڙي", "sd"));
+        expect(phonemize("19", "sd")).toBe(phonemize("اوڻيهه", "sd"));
+        expect(phonemize("100", "sd")).toBe(phonemize("هڪ سؤ", "sd"));
+        expect(phonemize("500000", "sd")).toBe(phonemize("پنج لک", "sd")); // lakh, not "five hundred thousand"
+        // Native Arabic-Indic digits read identically — the registry folds them before any engine sees them.
+        expect(phonemize("٢٠٢٤", "sd")).toBe(phonemize("2024", "sd"));
+    });
+
+    // ⚠ No `compound` map for the fused 21–99: sd.wikipedia attests TWO spellings for 21 alone
+    // (ايڪيهه ×14, ايڪويهه ×5) and a guessed اڪيهه is attested nowhere, so authoring 79 forms would be
+    // inventing data. The composer degrades to the two-word UNIT-TENS reading, which is the right order
+    // here — ايڪيهه is literally "one-twenty". See #587.
+    test("21–99 degrade to a two-word unit-tens reading, not a wrong fused word", () => {
+        expect(phonemize("21", "sd")).toBe(phonemize("هڪ ويهه", "sd"));
+        expect(phonemize("45", "sd")).toBe(phonemize("پنج چاليهه", "sd"));
     });
 });

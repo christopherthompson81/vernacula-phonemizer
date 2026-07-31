@@ -6,6 +6,7 @@
  * elsewhere. See docs/investigations/sd_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -18,6 +19,8 @@ interface SindhiDef {
     glides: Record<string, string>;
     harakat: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    /** Indic lakh/crore number words — see the note in sindhi.jsonc on how each form was sourced. */
+    numbers: NumbersDef;
 }
 const DEF = loadManifest<SindhiDef>(import.meta.url, "sindhi.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
@@ -183,6 +186,13 @@ const SD_WORD = "ء-ٟٮ-ۿ";
 // Latin runs and digits BOTH route through `foreign` (the English phonemizer, wired in the registry — the
 // ur/hi pattern). They used to be dropped outright: Latin matched no group at all, and digits emitted ""
 // because createSindhi() never passed a foreign phonemizer — 7% of FLEURS sd_in tokens silently vanished.
+/** A digit run → Sindhi number words → IPA through this engine's own g2p. Indic lakh/crore grouping. */
+function number(digits: string): string {
+    const n = Number(digits);
+    if (!Number.isSafeInteger(n)) return "";
+    return renderNumber(n, DEF.numbers, (w) => phonemizeWordWith(w));
+}
+
 const TOKEN = new RegExp(`([${SD_WORD}]+)|([A-Za-z]+)|(\\d+)|([۔؟،؛.?,])`, "gu");
 
 /** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride →
@@ -194,7 +204,10 @@ class SindhiPhonemizer implements Phonemizer {
     text(input: string, oovOverride?: OovResolver): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWordWith(m[1], oovOverride));
-            else if (m[2] || m[3]) sink.emit(this.foreign ? this.foreign((m[2] ?? m[3])!) : "");
+            // A LATIN run goes to the foreign phonemizer; a DIGIT run does NOT. Sending digits there
+            // meant every numeral in Sindhi text was spoken in English (#587).
+            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
+            else if (m[3]) sink.emit(number(m[3]));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
