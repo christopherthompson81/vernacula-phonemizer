@@ -315,9 +315,12 @@
         "decimalWord": "दशमलव",
     },
 
-    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत). Symbols
-    // in `stripSymbols` are dropped so a currency amount reads as the bare number (₹500 → पाँच सौ), matching
-    // the amount reads as the bare number.
+    // Symbol → spoken word (read AFTER the preceding number in reading order: 50% → पचास प्रतिशत).
+    // ⚠ `stripSymbols` NO LONGER REACHES ₹. The shared currency tier claims the sign first and reads it
+    // as रुपये, matching what $ and € already did here. The declaration is kept because the mechanism is
+    // live for other characters, but the ₹ entry is now inert — and that is the right outcome: dropping a
+    // currency sign is the #584 defect, and before the registry folded native digits the two digit
+    // systems disagreed (₹500 read रुपये, ₹५०० did not).
     "symbols": { "%": "प्रतिशत" },
     "stripSymbols": "₹",
 

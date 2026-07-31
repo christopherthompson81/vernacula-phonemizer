@@ -1072,3 +1072,62 @@ Two placement facts the corpus settled, both differing from every prior language
 `tsc` clean, **2540 tests** (9 in the Kurdish file), referee **unchanged** at 94.9% against a pristine
 worktree. Corpus diff 39/103 changed, 1/40 in the representative sample. The artifact scans with **no
 defects**.
+
+---
+
+## Run 19 — 2026-07-31 — native digits folded fleet-wide
+
+Prompted by the right question about Run 18: if the script router exists so that out-of-script input
+produces a plausible reading, why did English produce NOTHING for `٢٠٢٤` rather than something?
+
+**Because the gap pass surfaces `\p{L}` runs only.** A digit is not a letter, so a foreign digit run
+matched nothing and the router never saw it:
+
+```
+phonemize("Year Москва", "en")  →  "jˈɪɹ mɐskvˈa"     letters route
+phonemize("Year ٢٠٢٤",  "en")  →  "jˈɪɹ"              digits vanish
+```
+
+### But routing digits by script would be the wrong fix
+
+A digit is script-MARKED and language-NEUTRAL in value, and that is what separates it from a letter. A
+Cyrillic word inside English text is Russian and wants the router; `٢٠٢٤` inside English text is just
+2024, and an English reader says "twenty twenty-four" — routing it to Arabic would be wrong.
+
+So the registry now folds native digits to ASCII for **every** language, at the single dispatch point
+beside `stripMarkup`. This closes two defects at once:
+
+```
+en   Year ٢٠٢٤  →  jˈɪɹ twˈɛnti twˈɛnti fˈɔːɹ      (was: digits dropped)
+ar   ٢٠٢٤       →  ʔalfaːn wa ʔarbaʕa wa ʕiʃruːn    (unchanged — read in Arabic)
+```
+
+and the seven engines that read their OWN digits as an empty string — `sd ug ps bal syl rkt shn` — now
+all read. An audit of every TOKEN class found eight written as raw codepoint ranges that CONTAIN that
+script's digits (uyghur U+620–6FF, thai U+E00–E7F, tamil U+B80–BFF, tibetan, sinhala, shan …); the fold
+closes the whole class, because the digits are ASCII before any engine sees them.
+
+**Tashelhit is the instructive counter-example.** It never had the defect, because its TOKEN class lists
+both digit systems explicitly — `([0-9٠-٩]+)` — instead of relying on a block range. Engines with an
+explicit digit branch were fine; engines that used a raw letter range swallowed their own digits.
+
+### ⚠ A NATIVE DIGIT IS NOT ALWAYS A DIGIT
+
+Telugu ౦ (DIGIT ZERO) is a homoglyph for the anusvara ం, and is a typo for it in **all 144** corpus
+instances. Folding it to "0" globally pre-empted the language's own disambiguation, which uses context
+the registry does not have — the test for it failed immediately. Telugu opts out and folds inside its own
+normalize.ts, after the homoglyph rule. That is a real limit on the "language-neutral" claim above, and
+the opt-out set carries the reason.
+
+### One duplication removed, one inconsistency exposed
+
+`FOREIGN_RUN` existed in THREE copies — core/clauses.ts plus hand-rolled duplicates in english.ts and
+french.ts, the two engines that cannot use `assembleClauses`. One definition, three call sites now.
+
+And the fold exposed a pre-existing Hindi inconsistency: `₹500` already read *रुपये* while `₹५००` did
+not, because the currency regex is ASCII-anchored — the two digit systems disagreed, and the test
+asserted the accidental half. `stripSymbols: "₹"` is live config but unreachable, since the shared
+currency tier claims the sign first. Resolved to the reading, which matches what `$` and `€` already did
+and is what #584 requires.
+
+**2540 tests, tsc clean.**

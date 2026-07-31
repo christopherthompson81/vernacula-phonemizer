@@ -9,6 +9,7 @@
  * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
  */
 import { readForeignRun } from "../../core/foreign.ts";
+import { FOREIGN_RUN } from "../../core/clauses.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
@@ -205,7 +206,7 @@ export class EnglishPhonemizer {
         const claimGap = (upto: number): void => {
             if (upto > gapCursor) {
                 const gap = input.slice(gapCursor, upto);
-                for (const g of gap.matchAll(/[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu)) {
+                for (const g of gap.matchAll(FOREIGN_RUN)) {
                     const ipa = readForeignRun(g[0]);
                     if (ipa !== undefined && ipa !== "") tokens.push({ kind: "foreign", ipa });
                 }

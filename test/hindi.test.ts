@@ -20,11 +20,18 @@ describe("hindi canonical IPA", () => {
         expect(phonemize(input, "hi")).toBe(expected);
     });
 
-    test("numbers (Indian grouping + decimal + percent + rupee strip)", () => {
+    test("numbers (Indian grouping + decimal + percent + rupee)", () => {
         expect(phonemize("२०२४", "hi")).toBe("d̪ˈoː ɦəzˈaːɾ t͡ʃɔːbˈiːs");
         expect(phonemize("१२.५", "hi")).toBe("bˈaːɾəɦ d̪əʃˈəmləʋ pˈaː̃t͡ʃ");
         expect(phonemize("५०%", "hi")).toBe("pət͡ʃˈaːs pɾˈət̪ɪʃət̪");
-        expect(phonemize("₹५००", "hi")).toBe("pˈaː̃t͡ʃ sˈɔː");
+        // ₹ is READ, not stripped — and consistently for both digit systems. `stripSymbols: "₹"` in
+        // hindi.jsonc predates the shared currency tier gaining ₹; the tier now claims the sign first, so
+        // the strip is unreachable. Before the registry folded native digits, `₹500` already read
+        // "रुपये" while `₹५००` did not, because the currency regex is ASCII-anchored — the two digit
+        // systems disagreed and this test asserted the accidental half. Dropping a currency sign is the
+        // #584 defect, so the reading is the correct resolution.
+        expect(phonemize("₹५००", "hi")).toBe("pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː");
+        expect(phonemize("₹500", "hi")).toBe(phonemize("₹५००", "hi")); // both digit systems agree
     });
 
     test("clause punctuation → inline pause marks", () => {

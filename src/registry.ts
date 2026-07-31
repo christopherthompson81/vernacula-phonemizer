@@ -200,6 +200,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
 import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
+import { foldNativeDigits } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -246,6 +247,9 @@ setScriptReader((run, host) => {
     }
 });
 
+/** Languages whose own script has a digit that is not always a digit; they fold inside normalize.ts. */
+const FOLD_OPT_OUT: ReadonlySet<string> = new Set(["te"]);
+
 const cache = new Map<string, Phonemizer>();
 
 /** Languages whose own normalization already resolves Roman numerals, with more context than a shared
@@ -278,7 +282,28 @@ export function getPhonemizer(lang: string): Phonemizer {
                 // reading a foreign run re-enters this same wrapper for another language.
                 pushHost(lang);
                 try {
-                    return original(stripMarkup(input));
+                    // NATIVE DIGITS ARE FOLDED FOR EVERY LANGUAGE, at the single dispatch point.
+                    //
+                    // A digit is script-MARKED but language-NEUTRAL in value, and that is what separates
+                    // it from a letter. A Cyrillic word inside English text is Russian and wants the
+                    // script router; `٢٠٢٤` inside English text is just 2024, and an English reader says
+                    // "twenty twenty-four" — routing it to Arabic would be wrong.
+                    //
+                    // Two defects this closes at once. Embedded foreign digits were DROPPED everywhere:
+                    // the gap pass surfaces runs of `\p{L}`, so a digit run matched nothing and the
+                    // router never saw it — `phonemize("Year ٢٠٢٤", "en")` was "jˈɪɹ". And seven engines
+                    // read their OWN digits as an empty string (sd ug ps bal syl rkt shn), because a raw
+                    // block range in the tokenizer's LETTER class swallowed them — the Central Kurdish
+                    // defect, which no gate could see because a claimed-but-empty token leaves no gap.
+                    //
+                    // Per-language folds already in twelve normalize.ts files stay: folding is
+                    // idempotent, and they document the reason locally where the corpus proved it.
+                    // ⚠ A NATIVE DIGIT IS NOT ALWAYS A DIGIT. Telugu ౦ (DIGIT ZERO) is a homoglyph for
+                    // the anusvara ం and is a typo for it in all 144 corpus instances; folding it to "0"
+                    // globally would pre-empt the language's own disambiguation, which uses context the
+                    // registry does not have. Such a language opts out and folds inside its own
+                    // normalize.ts, AFTER the homoglyph rule — see telugu/normalize.ts.
+                    return original(FOLD_OPT_OUT.has(lang) ? stripMarkup(input) : foldNativeDigits(stripMarkup(input)));
                 } finally {
                     popHost();
                 }

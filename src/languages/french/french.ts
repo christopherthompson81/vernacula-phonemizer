@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { readForeignRun } from "../../core/foreign.ts";
+import { FOREIGN_RUN } from "../../core/clauses.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toIpa } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -221,7 +222,7 @@ class FrenchPhonemizer implements Phonemizer {
         let gapCursor = 0;
         const claimGap = (upto: number): void => {
             if (upto > gapCursor)
-                for (const g of input.slice(gapCursor, upto).matchAll(/[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu)) {
+                for (const g of input.slice(gapCursor, upto).matchAll(FOREIGN_RUN)) {
                     const ipa = readForeignRun(g[0]);
                     if (ipa !== undefined && ipa !== "") items.push({ ipa });
                 }

@@ -55,7 +55,20 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
 /** A run of Latin-script text (with its combining marks, apostrophes and internal hyphens). */
 const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
 /** A run of letters in ANY script, kept together with its combining marks and internal apostrophes. */
-const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu;
+/**
+ * A run of letters in ANY script, kept together with its combining marks and internal apostrophes.
+ *
+ * EXPORTED because two engines cannot use `assembleClauses` and hand-roll their own gap pass —
+ * english.ts (a two-phase tagger pipeline) and french.ts (liaison looks one word ahead). Both had a
+ * COPY of this pattern, which meant three places to fix whenever the definition of a foreign run
+ * changed. One definition, three call sites.
+ *
+ * Deliberately LETTERS only, not `\p{Nd}`. A digit is script-marked but language-NEUTRAL in value, so
+ * `٢٠٢٤` in English text is 2024 and wants an English reading, not an Arabic one — the registry folds
+ * native digits to ASCII for every language before any engine sees them, which is a better answer than
+ * routing them by script.
+ */
+export const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu;
 
 /**
  * Emit the FOREIGN runs inside text the engine's own tokenizer did not claim.
