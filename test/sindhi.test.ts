@@ -159,12 +159,25 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
         expect(phonemize("٢٠٢٤", "sd")).toBe(phonemize("2024", "sd"));
     });
 
-    // ⚠ No `compound` map for the fused 21–99: sd.wikipedia attests TWO spellings for 21 alone
-    // (ايڪيهه ×14, ايڪويهه ×5) and a guessed اڪيهه is attested nowhere, so authoring 79 forms would be
-    // inventing data. The composer degrades to the two-word UNIT-TENS reading, which is the right order
-    // here — ايڪيهه is literally "one-twenty". See #587.
-    test("21–99 degrade to a two-word unit-tens reading, not a wrong fused word", () => {
-        expect(phonemize("21", "sd")).toBe(phonemize("هڪ ويهه", "sd"));
-        expect(phonemize("45", "sd")).toBe(phonemize("پنج چاليهه", "sd"));
+    // The fused 21–99, from a Sindhi numerals chart, attestation-checked one at a time against
+    // sd.wikipedia and cross-checked against espeak's phonemes. 58 of 72 are attested and authored.
+    test("fused 21–99 where the form is attested", () => {
+        expect(phonemize("21", "sd")).toBe(phonemize("ايڪيهه", "sd")); // ONE word, not "one twenty"
+        expect(phonemize("45", "sd")).toBe(phonemize("پنجيتاليهه", "sd"));
+        expect(phonemize("1947", "sd")).toContain(phonemize("ستيتاليهه", "sd"));
+    });
+
+    // The third source earned its place: 89 and 98 read as the same word off the chart, and espeak has
+    // 89 [Un.Ia:nave:] against 98 [at.#Ia:nave:] — 89 carries the ūṇ- "one less than" prefix.
+    test("89 and 98 are distinct", () => {
+        expect(phonemize("89", "sd")).not.toBe(phonemize("98", "sd"));
+    });
+
+    // ⚠ 14 forms failed attestation in the spelling transcribed and are OMITTED rather than guessed.
+    // A missing entry degrades to the two-word UNIT-TENS reading — the right order for Sindhi, since
+    // ايڪيهه is literally "one-twenty" — so the cost is an approximate reading, never an invented word.
+    test("an unattested value falls back to the two-word unit-tens reading", () => {
+        expect(phonemize("39", "sd")).toBe(phonemize("نو ٽيهه", "sd"));
+        expect(phonemize("77", "sd")).toBe(phonemize("ست ستر", "sd"));
     });
 });

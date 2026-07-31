@@ -55,6 +55,37 @@
         "units": ["ٻڙي", "هڪ", "ٻه", "ٽي", "چار", "پنج", "ڇهه", "ست", "اٺ", "نو"],
         "teens": ["ڏهه", "يارهن", "ٻارهن", "تيرهن", "چوڏهن", "پندرهن", "سورهن", "سترهن", "ارڙهن", "اوڻيهه"],
         "tens": { "20": "ويهه", "30": "ٽيهه", "40": "چاليهه", "50": "پنجاهه", "60": "سٺ", "70": "ستر", "80": "اسي", "90": "نوي" },
+        // FUSED 21–99 (#587). Sourced from a Sindhi numerals chart (1–100, Sindhi and Urdu columns),
+        // then ATTESTATION-CHECKED one at a time against sd.wikipedia `insource:` — 58 of the 72
+        // non-round values are attested; the 14 that are not appear below in the omission list, NOT here.
+        //
+        // Each was additionally cross-checked against espeak-ng's Sindhi numeral phonemes, and that third
+        // source caught a transcription error: I read 89 and 98 as the same word, where espeak has
+        // 89 [Un.Ia:nave:] against 98 [at.#Ia:nave:] — 89 carries the "one less than" ūṇ- prefix, the
+        // same one 19 اوڻيهه has. Two sources would not have caught it.
+        //
+        // OMITTED, not guessed: 39, 41, 51, 54, 59, 62, 69, 74, 77, 79, 83, 86, 89, 96. Most are the ūṇ- forms (39, 59, 69, 79, 89) whose prefix is hard to
+        // read off a low-resolution column, plus a few where espeak suggests a different shape from the
+        // chart (77 is [satat:aR], i.e. no -ha- infix, against the ستهتر I transcribed). A missing entry
+        // degrades to the two-word UNIT-TENS reading, which is the right order for Sindhi — ايڪيهه is
+        // literally "one-twenty" — so an omission costs an approximate reading, never an invented word.
+        "compound": {
+            "21": "ايڪيهه", "22": "ٻاويهه", "23": "ٽيويهه", "24": "چوويهه",
+            "25": "پنجويهه", "26": "ڇويهه", "27": "ستاويهه", "28": "اٺاويهه",
+            "29": "اوڻٽيهه", "31": "ايڪٽيهه", "32": "ٻٽيهه", "33": "ٽيٽيهه",
+            "34": "چوٽيهه", "35": "پنجٽيهه", "36": "ڇٽيهه", "37": "ستٽيهه",
+            "38": "اٺٽيهه", "42": "ٻائيتاليهه", "43": "ٽيتاليهه", "44": "چوئيتاليهه",
+            "45": "پنجيتاليهه", "46": "ڇائيتاليهه", "47": "ستيتاليهه", "48": "اٺيتاليهه",
+            "49": "اوڻونجاهه", "52": "ٻاونجاهه", "53": "ٽيونجاهه", "55": "پنجونجاهه",
+            "56": "ڇاونجاهه", "57": "ستونجاهه", "58": "اٺونجاهه", "61": "ايڪهٺ",
+            "63": "ٽيهٺ", "64": "چوهٺ", "65": "پنجهٺ", "66": "ڇاهٺ",
+            "67": "ستهٺ", "68": "اٺهٺ", "71": "ايڪهتر", "72": "ٻاهتر",
+            "73": "ٽيهتر", "75": "پنجهتر", "76": "ڇاهتر", "78": "اٺهتر",
+            "81": "ايڪاسي", "82": "ٻياسي", "84": "چوراسي", "85": "پنجاسي",
+            "87": "ستاسي", "88": "اٺاسي", "91": "ايڪانوي", "92": "ٻيانوي",
+            "93": "ٽيانوي", "94": "چورانوي", "95": "پنجانوي", "97": "ستانوي",
+            "98": "اٺانوي", "99": "نوانوي",
+        },
         "magnitudes": { "hundred": "سؤ", "thousand": "هزار", "lakh": "لک", "crore": "ڪروڙ" },
     },
 }
