@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { createFoochow, phonemizeWord } from "../src/languages/foochow/foochow.ts";
+import { createMinDong, phonemizeWord } from "../src/languages/mindong/mindong.ts";
 
 // Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal (~9M). A Bàng-uâ-cê (BUC / Foochow Romanized) → IPA
 // converter (the only major Sinitic branch otherwise absent). BUC missionary convention: plain ⟨p t k⟩ = [pʰ tʰ kʰ],
@@ -9,7 +9,7 @@ import { createFoochow, phonemizeWord } from "../src/languages/foochow/foochow.t
 // is rule-generated, not human). Segmental + citation tone, with the 韻變 (rime alternation) MODELLED (tight/loose
 // by tone register); tone sandhi, initial assimilation, and the Han front-end deferred. See docs/investigations/cdo_native_bringup_investigation.md.
 describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", () => {
-    const cdo = createFoochow();
+    const cdo = createMinDong();
 
     test("the missionary convention: plain ⟨k g c ch⟩ → [kʰ k t͡s t͡sʰ]", () => {
         expect(phonemizeWord("kēng")).toBe("kʰɛiŋ˧˧"); // ⟨k⟩→kʰ, rime eng→ɛiŋ, macron→上聲 33 (犬 "dog")
@@ -37,13 +37,13 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
     });
 
     test("multi-syllable BUC text (hyphen-joined), citation tone per syllable", () => {
-        expect(createFoochow().text("Hók-ciŭ nè̤ng").trim()).toBe("houʔ˨˦ t͡sieu˥˥ nøyŋ˥˧"); // 福州人 "Fuzhou person"
+        expect(createMinDong().text("Hók-ciŭ nè̤ng").trim()).toBe("houʔ˨˦ t͡sieu˥˥ nøyŋ˥˧"); // 福州人 "Fuzhou person"
     });
 
     test("the text() path handles precomposed NFC ⟨ṳ⟩ (U+1E73) — the [y]/[øy] series", () => {
         // Regression: the tokenizer must NFD-normalize, else the single-codepoint NFC ṳ truncates the syllable.
-        expect(createFoochow().text("gṳ̆").trim()).toBe("ky˥˥"); // 車 "cart" — ⟨g⟩→k, ⟨ṳ⟩→y
-        expect(createFoochow().text("dṳ̆ng").trim()).toBe("tyŋ˥˥"); // ⟨ṳng⟩→yŋ, not truncated to "t ŋ̍"
+        expect(createMinDong().text("gṳ̆").trim()).toBe("ky˥˥"); // 車 "cart" — ⟨g⟩→k, ⟨ṳ⟩→y
+        expect(createMinDong().text("dṳ̆ng").trim()).toBe("tyŋ˥˥"); // ⟨ṳng⟩→yŋ, not truncated to "t ŋ̍"
     });
 });
 
@@ -51,9 +51,9 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
 // cantonese/minnan the numerals CANNOT route through a Han reading dict (cdo has none that is not this engine's own
 // referee), so the compositor emits BÀNG-UÂ-CÊ and the converter above reads it. Fuzhou specifics: a magnitude
 // multiplier of 1 is 蜀 siŏh (not 一 ék), of 2 is 兩 lâng before 百/千/萬/億 but 二 nê before 十; 八 báik (8) and
-// 百 báik (100) really are homophones. Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers (see foochow.ts).
+// 百 báik (100) really are homophones. Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers (see mindong.ts).
 describe("Min Dong (cdo) cardinal numbers — Bàng-uâ-cê composition", () => {
-    const cdo = createFoochow();
+    const cdo = createMinDong();
     for (const [n, ipa] of [
         [0, "liŋ˥˧"], // 零 lìng
         [7, "t͡sʰɛiʔ˨˦"], // 七 chék

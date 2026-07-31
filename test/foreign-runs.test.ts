@@ -144,3 +144,20 @@ describe("sinitic engines read embedded foreign runs", () => {
         expect(phonemize("世界 abc", "yue")).not.toBe(phonemize("世界", "yue"));
     });
 });
+
+// The last two bespoke engines, both the same historical-drift case as the Sinitic set.
+describe("hmong and tashelhit read embedded foreign runs", () => {
+    test("hmn speaks a Cyrillic run", () => {
+        expect(phonemize("kuv Москва 7", "hmn")).toContain("mɐskvˈa");
+    });
+    test("shi speaks a Cyrillic run", () => {
+        expect(phonemize("kuv Москва 7", "shi")).toContain("mɐskvˈa");
+    });
+});
+
+// The whole point of the sweep: no engine silently discards a run in a script it does not own.
+test("no registered engine drops a foreign run outright", () => {
+    for (const lang of ["en", "en-GB", "en-IN", "fr", "fr-CA", "yue", "wuu", "nan", "cdo", "gan", "hak", "hsn", "cjy", "hmn", "shi"]) {
+        expect(phonemize("7 Москва 7", lang), lang).not.toBe(phonemize("7  7", lang));
+    }
+});

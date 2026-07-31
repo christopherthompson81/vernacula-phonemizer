@@ -724,3 +724,43 @@ are all bad until `cdo` has a Han dictionary of its own: read it in the wrong va
 Recorded here, not silently accepted.
 
 **Status: 13 of 14 affected codes fixed.** Remaining: `hmn`, `shi`.
+
+---
+
+## Run 12 — 2026-07-31 — Min Dong rename, then hmn and shi
+
+**Naming.** `foochow` → `mindong`. "Foochow" is Chinese Postal Romanization (c. 1900, the same family as
+Peking / Canton / Amoy) — **dated rather than derogatory**, so the connotation worry is largely unfounded.
+The reasons to change it are that it is not the language's modern name and that it was inconsistent with
+its own sibling: `minnan` is Southern Min, so `cdo` should be `mindong`, Eastern Min. The repo's PROSE was
+already modern throughout ("Min Dong / Eastern Min (cdo) — Fuzhou dialect"); only the directory and
+identifiers lagged.
+
+**"Foochow Romanized" is deliberately KEPT** wherever it names the orthography. Bàng-uâ-cê is called that
+in the literature, and renaming it there would break traceability to the sources rather than modernise
+anything. The rename script protects the string explicitly before substituting.
+
+No API break: the language code `cdo` is unchanged and `createFoochow` was not part of the public surface.
+
+**hmn and shi** were the same historical-drift case as the Sinitic set — `clauseSink()` plus a private
+`exec` loop that only predated `assembleClauses`. Both migrated; both now read a script they do not claim.
+
+```
+hmn  kuv Москва 7  →  ku˧˦ mɐskvˈa ça˧
+shi  kuv Москва 7  →  kuv mɐskvˈa sbʕa
+```
+
+### The sweep is complete
+
+**All 15 affected codes fixed**, with a test that asserts the property directly rather than case by case:
+no registered engine silently discards a run in a script it does not own.
+
+Final tally of what "32 engines have their own scan" actually meant:
+
+| | count | verdict |
+|---|---|---|
+| delegating variants | 15 codes | never had a problem |
+| genuine structural need | 2 engines (en, fr) | private scan justified — for TOKENIZATION only; both got a gap pass |
+| historical drift | 7 engines (5 Sinitic + hmn + shi) | migrated to the shared path; net DELETION of code |
+
+Only two of thirty-two needed private code, and neither needed private *gap handling*. 2496 tests.

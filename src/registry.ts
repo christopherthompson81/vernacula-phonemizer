@@ -129,7 +129,7 @@ import { createAragonese } from "./languages/aragonese/aragonese.ts";
 import { createHaitian } from "./languages/haitian/haitian.ts";
 import { createRangpuri } from "./languages/rangpuri/rangpuri.ts";
 import { createBavarian } from "./languages/bavarian/bavarian.ts";
-import { createFoochow } from "./languages/foochow/foochow.ts";
+import { createMinDong } from "./languages/mindong/mindong.ts";
 import { createHmong } from "./languages/hmong/hmong.ts";
 import { createTashelhit } from "./languages/tashelhit/tashelhit.ts";
 import { createCentralKurdish } from "./languages/central-kurdish/central-kurdish.ts";
@@ -646,7 +646,7 @@ function build(lang: string): Phonemizer {
             return createBavarian();
         // Min Dong / Eastern Min (Fuzhou) — Sinitic, tonal; Bàng-uâ-cê (BUC) → IPA converter (Phase 1: segmental + citation tone).
         case "cdo":
-            return createFoochow();
+            return createMinDong();
         // Hmong (White Hmong / Hmoob Dawb) — Hmong-Mien, tonal; RPA → IPA (final consonant letter = tone).
         case "hmn":
             return createHmong();

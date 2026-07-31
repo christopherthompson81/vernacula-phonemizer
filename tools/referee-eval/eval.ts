@@ -57,7 +57,7 @@ import { phonemizeWord as an } from "../../src/languages/aragonese/aragonese.ts"
 import { phonemizeWord as ht } from "../../src/languages/haitian/haitian.ts";
 import { phonemizeWord as rkt } from "../../src/languages/rangpuri/rangpuri.ts";
 import { phonemizeWord as bar } from "../../src/languages/bavarian/bavarian.ts";
-import { phonemizeWord as cdo } from "../../src/languages/foochow/foochow.ts";
+import { phonemizeWord as cdo } from "../../src/languages/mindong/mindong.ts";
 import { phonemizeWord as hmn } from "../../src/languages/hmong/hmong.ts";
 import { phonemizeWord as shi } from "../../src/languages/tashelhit/tashelhit.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";

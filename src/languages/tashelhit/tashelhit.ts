@@ -13,7 +13,7 @@
  * See docs/investigations/shi_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
@@ -58,8 +58,10 @@ function phonemize(word: string): string {
 
 class TashelhitPhonemizer implements Phonemizer {
     text(input: string): string {
-        const { sink, finish } = clauseSink();
-        // NFC first so a precomposed regex class matches emphatics even on NFD input (combining dot-below U+0323
+        // `assembleClauses` rather than a private exec loop: this loop was already that shape and only
+        // predated the shared helper, so it never got the GAP PASS and a run in a script it does not claim
+        // was dropped outright. Routed by core/scripts.ts.
+                // NFC first so a precomposed regex class matches emphatics even on NFD input (combining dot-below U+0323
         // would otherwise shatter the word); phonemize() re-NFCs (idempotent). The class also allows the combining
         // dot-below/marks (U+0300–036F) defensively for any letter without a precomposed form.
         const nfc = input.normalize("NFC");
@@ -68,8 +70,8 @@ class TashelhitPhonemizer implements Phonemizer {
         // A DIGIT group was missing entirely, so numbers used to be dropped silently; ٠-٩ (Arabic-Indic) are
         // accepted alongside 0-9 because Moroccan text mixes them.
         const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([0-9٠-٩]+)|([.,?!;:،؟⵰])/gu;
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(nfc))) {
+        
+        return assembleClauses(nfc, tok, (m, sink) => {
             if (m[1]) sink.emit(phonemize(m[1]));
             else if (m[2]) {
                 const d = [...m[2]].map((c) => (c >= "٠" && c <= "٩" ? String(c.codePointAt(0)! - 0x0660) : c)).join("");
@@ -80,8 +82,7 @@ class TashelhitPhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 

@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal, ~9M.
-// Consumed by foochow.ts. Input = Bàng-uâ-cê (BUC / Foochow Romanized). Converter: [initial] + rime (tight/loose per
+// Consumed by mindong.ts. Input = Bàng-uâ-cê (BUC / Foochow Romanized). Converter: [initial] + rime (tight/loose per
 // the 韻變 register) + tone → IPA. Missionary convention: ⟨p t k⟩=[pʰ tʰ kʰ], ⟨b d g⟩=[p t k], ⟨c⟩=[t͡s], ⟨ch⟩=[t͡sʰ].
 // PHASE 2: the 韻變 (rime alternation) is now MODELLED, not folded — each rime has a TIGHT form (rimes) and, where it
 // alternates, a LOOSE form (rimesLoose), selected by the tone register: the LOOSE tones are 陰去/陰入 (acute) + 陽去

@@ -2,7 +2,7 @@
  * Min Dong / Eastern Min (cdo) — Fuzhou dialect (Fuzhounese), Sinitic, tonal (~9M speakers), the only major Sinitic
  * branch otherwise absent from the fleet. This phonemizer consumes **Bàng-uâ-cê (BUC / Foochow Romanized)** — the
  * phonemic missionary Latin orthography (used by the cdo Wikipedia + historical Bible/press) — and converts it to
- * canonical IPA, mirroring the Min Nan (nan) direct-Tâi-lô path. The converter (foochow.jsonc): strip the tone
+ * canonical IPA, mirroring the Min Nan (nan) direct-Tâi-lô path. The converter (mindong.jsonc): strip the tone
  * diacritic (identifies the tone) → [initial] + rime → IPA + Chao tone letters. BUC follows the missionary
  * convention where the plain stop letters are ASPIRATED: ⟨p t k⟩ = [pʰ tʰ kʰ], ⟨b d g⟩ = [p t k]; ⟨c⟩ = [t͡s],
  * ⟨ch⟩ = [t͡sʰ]; ⟨ng⟩ = [ŋ].
@@ -20,7 +20,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
-interface FoochowDef {
+interface MinDongDef {
     initials: Record<string, string>;
     rimes: Record<string, string>; // tight (citation) rime → IPA
     rimesLoose: Record<string, string>; // the LOOSE 韻變 variant, for rimes that alternate
@@ -30,7 +30,7 @@ interface FoochowDef {
     toneChao: Record<string, string>; // tone number → Chao contour letters
     clausePunctuation: Record<string, string>;
 }
-const DEF = loadManifest<FoochowDef>(import.meta.url, "foochow.jsonc");
+const DEF = loadManifest<MinDongDef>(import.meta.url, "mindong.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Onset consonants tried longest-first so ⟨ng⟩ beats ⟨n⟩+⟨g⟩.
 const INITIALS = Object.keys(DEF.initials).sort((a, b) => b.length - a.length);
@@ -165,14 +165,14 @@ export function numberToBucWords(n: number): string[] {
     return out;
 }
 
-class FoochowPhonemizer implements Phonemizer {
+class MinDongPhonemizer implements Phonemizer {
     text(input: string): string {
         // NFD so a syllable is a base letter + trailing combining marks (tone diacritics U+0300–036F + the quality
         // diaeresis-below U+0324) — robust to NFC input, where precomposed vowels (ā, and esp. ṳ = U+1E73) are single
         // codepoints a literal class would miss. Syllables join by - or ·. bucToIpa re-NFDs (idempotent).
         const tok = /([a-zŋ][a-zŋ\u0300-\u036f\u207f]*(?:[-·][a-zŋ\u0300-\u036f\u207f]*)*)|(\d+)|([。，、？！；：.,?!;:])/giu;
         // `assembleClauses` over the NFD copy — this loop was already that shape and only predated the
-        // helper, so it never got the GAP PASS and any script it does not claim was dropped. Foochow is
+        // helper, so it never got the GAP PASS and any script it does not claim was dropped. Min Dong is
         // written in a LATIN romanisation (BUC), so its own token class is Latin; the gap pass therefore
         // matters here for Han and every other script, routed via core/scripts.ts.
         const nfd = input.normalize("NFD");
@@ -188,8 +188,8 @@ class FoochowPhonemizer implements Phonemizer {
 }
 
 /** Build the Min Dong (Fuzhou) phonemizer — BUC → IPA (segmental + citation tone; Han front-end deferred). */
-export function createFoochow(): Phonemizer {
-    return new FoochowPhonemizer();
+export function createMinDong(): Phonemizer {
+    return new MinDongPhonemizer();
 }
 
 /** Bare BUC word → IPA (tests / referee eval). */

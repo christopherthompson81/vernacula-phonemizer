@@ -7,9 +7,9 @@
 // validates the SEGMENTAL backbone.
 {
     "language": "cdo", "name": "Min Dong (Fuzhou / Eastern Min)", "script": "Latin (Bàng-uâ-cê)",
-    "provenance": "Authored BUC (Foochow-Romanized)→IPA converter (initial/rime/tone maps derived from the Wiktionary Module:cdo-pron BUC↔IPA correspondence + the documented Foochow-Romanized tables); validated against the kaikki-extracted BUC↔IPA pairs.",
+    "provenance": "Authored BUC (Min Dong-Romanized)→IPA converter (initial/rime/tone maps derived from the Wiktionary Module:cdo-pron BUC↔IPA correspondence + the documented Min Dong-Romanized tables); validated against the kaikki-extracted BUC↔IPA pairs.",
     "referees": [
-        { "file": "cdo.buc-ipa.tsv", "source": "kaikki Chinese dump, Min-Dong Foochow-Romanized↔Sinological-IPA (Wiktionary Module:cdo-pron, single-syllable citation, ~1500)", "role": "primary" }
+        { "file": "cdo.buc-ipa.tsv", "source": "kaikki Chinese dump, Min-Dong Min Dong-Romanized↔Sinological-IPA (Wiktionary Module:cdo-pron, single-syllable citation, ~1500)", "role": "primary" }
     ],
     "secondaryGap": "Single source, and it is RULE-GENERATED (Wiktionary Module:cdo-pron), not human — so the % is reference-implementation PARITY, not independent verification. No independent human Fuzhou referee is machine-available (wikipron cdo is the same Wiktionary source; the only Han→reading dict is circular). 🔷 (near the ⛔ boundary).",
     "folds": [

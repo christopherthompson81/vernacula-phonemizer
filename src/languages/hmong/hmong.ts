@@ -10,7 +10,7 @@
  * RPA tables → 🔷 single-source (thin). See docs/investigations/hmn_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { clauseSink } from "../../core/clauses.ts";
+import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToHmongWords } from "./numbers.ts";
 
@@ -53,19 +53,20 @@ function syllableToIpa(syl: string): string {
 
 class HmongPhonemizer implements Phonemizer {
     text(input: string): string {
-        const { sink, finish } = clauseSink();
-        // RPA syllables are space/hyphen-separated Latin letter-runs.
+        // `assembleClauses` rather than a private exec loop: this loop was already that shape and only
+        // predated the shared helper, so it never got the GAP PASS and a run in a script it does not claim
+        // was dropped outright. Routed by core/scripts.ts.
+                // RPA syllables are space/hyphen-separated Latin letter-runs.
         const tok = /([a-zA-Z]+)|(\d+)|([。，、？！；：.,?!;:])/gu;
-        let m: RegExpExecArray | null;
-        while ((m = tok.exec(input))) {
+        
+        return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(syllableToIpa(m[1]));
             else if (m[2]) for (const wd of numberToHmongWords(Number(m[2]))) sink.emit(syllableToIpa(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        }
-        return finish();
+        });
     }
 }
 
