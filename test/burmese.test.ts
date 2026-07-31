@@ -162,6 +162,17 @@ describe("burmese normalization", () => {
         expect(say("မြန်မာနိုင်ငံ။")).not.toContain(".."); // ordinary sentences keep their one mark
     });
 
+    // 24 languages declare `exponentWords`, yet the miner had no exponent cell until this run — so no
+    // mined corpus could exercise them. The modifier PRECEDES the unit here (1859 : 3 in the corpus).
+    test("squared and cubed units, modifier first", () => {
+        expect(normalizeBurmese("၃၈၅၀ km²")).toBe("၃၈၅၀ စတုရန်းကီလိုမီတာ");
+        expect(normalizeBurmese("၅ m³")).toBe("၅ ကုဗမီတာ");
+    });
+
+    test("ampersand is a word, not a dropped character", () => {
+        expect(normalizeBurmese("A&B")).toBe("A နှင့် B");
+    });
+
     test("ordinary Burmese text is untouched", () => {
         expect(normalizeBurmese("မြန်မာနိုင်ငံသည် အရှေ့တောင်အာရှတွင် ရှိသည်။"))
             .toBe("မြန်မာနိုင်ငံသည် အရှေ့တောင်အာရှတွင် ရှိသည်။");

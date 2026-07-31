@@ -148,10 +148,25 @@ export function normalizeBurmese(input: string): string {
         "$1 မှ $2 အထိ",
     );
 
-    // 10) LATIN UNIT ABBREVIATIONS after a number (45). Only when a digit precedes, so ordinary embedded
+    // 10) SQUARED / CUBED UNITS, BEFORE the plain unit rule in step 11 — otherwise `km²` has its `km`
+    //     consumed first and the bare exponent is left stranded with nothing to attach to. The exponent
+    //     was being dropped outright: `၃၈၅၀ km²` read as plain "kilometre", losing the area entirely.
+    //     ⚠ THE MODIFIER PRECEDES THE UNIT in Burmese — စတုရန်းကီလိုမီတာ, 1859 instances against 3 the
+    //     other way round. Emitting it postposed like the percent word would have been backwards, and no
+    //     probe would have shown it; only the corpus count settles the order. (စတုရန်း 2138, ကုဗ 156.)
+    const EXP: [string, string][] = [["²", "စတုရန်း"], ["³", "ကုဗ"]];
+    for (const [sup, modifier] of EXP)
+        for (const [re, word] of UNITS)
+            t = t.replace(new RegExp(`(${d()})\\s*(?:${re.source})\\s*${sup}`, "gu"), `$1 ${modifier}${word}`);
+
+    // 11) LATIN UNIT ABBREVIATIONS after a number (45). Only when a digit precedes, so ordinary embedded
     //     English is left to the Latin fallback.
     for (const [re, word] of UNITS)
         t = t.replace(new RegExp(`(${d()})\\s*(?:${re.source})(?![\\p{L}])`, "gu"), `$1 ${word}`);
+
+    // 12) AMPERSAND → နှင့် ("and"), 2403 in the corpus. It was dropped outright, so `A&B` read as two
+    //     unrelated letters. The word itself is the ordinary conjunction (နှင့် 134,052).
+    t = t.replace(/\s*[&＆]\s*/gu, " နှင့် ");
 
     // 11) DOTTED INITIALISMS (`U.S.`, 1511 in the corpus). The periods are abbreviation dots, not sentence
     //     ends, and each was becoming a clause pause — `U.S.` read as "yu . es .", two spurious breaks in

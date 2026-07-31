@@ -362,3 +362,73 @@ majority of instances. Recorded rather than guessed at.
 `DROP minus ×5` is likewise not a missing negative rule: the residue is compound hyphens
 (`အမျိုးအစား-၂`) and NEGATIVE EXPONENTS in scientific notation (`9.1093837 × 10 -31 kg`). The exponent
 case is real and is a cell the miner does not yet have.
+
+---
+
+## Run 5 — 2026-07-31 — auditing the inventory itself
+
+**Question.** The Burmese run left `DROP math-sign ×10` unexplained. Is the pattern inventory itself
+incomplete — i.e. were there categories the 37 treated languages needed that the miner has no cell for?
+
+**Yes, four, and one of them would have ranked second in the whole table.**
+
+| added cell | evidence for it | why it was invisible |
+|---|---|---|
+| `exponent` | **24 languages declare `exponentWords` in their DATA** | no cell at all; no mined corpus could ever exercise them |
+| `arithmetic` | the unexplained `DROP math-sign` | swallowed by the catch-all `signs` cell, which any currency or percent already satisfies |
+| `ampersand` | Dutch authored a rule; 2403 in the Burmese corpus | never surfaced separately |
+| `iteration` | Thai ๆ — **the largest single defect in that language**, 16.7% of utterances | script-specific mark, invisible to every shape-based cell |
+
+`exponentWords` being declared in 24 manifests is a harder signal than any comment grep, and it is the
+measure worth trusting: the data says the category is real whatever the prose says.
+
+### The ASCII trap recurred one level up, in a cell I wrote after documenting it
+
+The `ordinals` cell listed LATIN suffixes only — `st|nd|rd|th|er|ème|º|ª`. It matched `21st` and found
+NOTHING in ၂၁ ကြိမ်မြောက် / २१वीं / 21е / 21. It looked correct because it worked for English, which is
+exactly the shape of the `\d`-is-ASCII bug, committed in a file whose header warns about that bug. 32
+treated languages have an ordinal rule.
+
+**Widening it over-corrected, and the count said so.** "Digit followed by letters in any script" took
+Burmese from 462 to **35,504** — because Burmese writes numbers directly against words (၂၀၂၄ခုနှစ်), so
+the cell matched 8% of all text and stopped meaning anything. A cell that matches everything cannot answer
+"does this language have ordinals".
+
+The fix is the split the evidence implies: the Latin form is a SHAPE, the native form is LEXICAL — the
+suffix is a word (वीं, е, မြောက်, ที่) exactly as month names are. With a scoped term list:
+
+```
+ordinal-latin    1357        ordinal-native   1688        (was: one cell reading 35,504)
+```
+
+That required per-cell term scoping (`cell<TAB>term`), since two lexical cells now exist and a flat list
+would have made each match the other's evidence.
+
+**Coverage: 29/29 cells on Burmese.**
+
+### Two more real Burmese defects, found only because the cells existed
+
+```
+၃၈၅၀ km²  →  "kilometre"          the ² dropped outright — the area lost entirely
+A&B       →  "ə biː"              the & dropped; A read as the reduced English article
+```
+
+Fixed. And the corpus settled another word-order question that no probe would have: **the squared modifier
+PRECEDES the unit** — စတုရန်းကီလိုမီတာ, 1859 instances against 3 the other way. Postposing it like the
+percent word would have been backwards.
+
+Gates: 2480 tests (21 in the Burmese file), tsc clean.
+
+### Answering the question honestly
+
+Most of what needs normalizing was found — the first 24 cells came from 338 rules that 37 languages
+actually wrote, and Burmese needed 13 of them. But the inventory was **derived from what had already been
+treated**, so it could only ever be as complete as that history, and two of the four additions above
+(`exponent`, `iteration`) were categories with real declared data behind them that simply never got a
+cell. The lesson is that the inventory needs auditing against the DATA declarations (`exponentWords`,
+`unitPer`, `countForm`) and not only against rule comments.
+
+Still unfixed and deliberately so: `DROP math-sign` is glosses and formulae (`gêeo = Earth`, `E = mc²`)
+where `=` is not spoken as "equals"; ညီမျှ is attested 1110 times so a rule is authorable and would be
+wrong in the majority of instances. `DROP minus` residue is compound hyphens and negative exponents in
+scientific notation — the latter now has a cell but not yet a rule.

@@ -68,7 +68,21 @@ export const CELLS: Cell[] = [
     { key: "era-marker", langs: 14, re: /(?:\p{L}\.\s?\p{L}\.)\s*\p{Nd}|\p{Nd}+\s*(?:\p{L}\.\s?\p{L}\.)/u, search: "[A-Za-z]\\.[A-Za-z]\\. ?[{D}]" },
     { key: "year", langs: 14, re: /(?<!\p{Nd})\p{Nd}{4}(?!\p{Nd})/u, search: "[{D}]{4}" },
     { key: "decimals", langs: 12, re: /\p{Nd}[.,]\p{Nd}/u, search: "[{D}][.,][{D}]" },
-    { key: "ordinals", langs: 11, re: /\p{Nd}+(?:st|nd|rd|th|er|re|ème|º|ª|:e)(?![\p{L}\p{Nd}])/u, search: "[{D}]+(st|nd|rd|th|º|ª)" },
+    // ORDINALS, SPLIT IN TWO because one regex cannot do both and pretending otherwise hid a blind spot
+    // in each direction.
+    //
+    // The first version listed LATIN suffixes only (st|nd|rd|th|er|ème|º|ª), so it matched `21st` and
+    // found NOTHING in ၂၁ ကြိမ်မြောက် / २१वीं / 21е / 21. — it looked correct because it worked for
+    // English. That is the `\d`-is-ASCII trap one level up, in a cell written AFTER that trap was
+    // documented, and 32 treated languages have an ordinal rule.
+    //
+    // Widening it to "digit followed by letters in any script" then over-corrected: Burmese writes
+    // numbers directly against words (၂၀၂၄ခုနှစ်), so the count went 462 -> 35,504 and the cell stopped
+    // meaning anything. A cell that matches 8% of all text cannot answer "does this language have
+    // ordinals". So: the Latin shape stays a SHAPE, and the native shape is LEXICAL — the suffix is a
+    // word (वीं, е, မြောက်, ที่) exactly as month names are, and belongs in the term list.
+    { key: "ordinal-latin", langs: 11, re: /\p{Nd}+(?:st|nd|rd|th|er|re|ème|º|ª|:e)(?![\p{L}\p{Nd}])|\p{Nd}+\.(?=\s+\p{Lu})/u, search: "[{D}]+(st|nd|rd|th|º|ª)" },
+    { key: "ordinal-native", langs: 21, re: /$^/u, lexical: true },
     { key: "units", langs: 9, re: /\p{Nd}\s*(?:km|kg|cm|mm|ml|mg|GB|MB|kHz|MHz|GHz|kW|m²|km²|m³)(?![\p{L}])/iu, search: "[{D}] ?(km|kg|cm|mm|MB|GB)" },
     { key: "ranges", langs: 7, re: /\p{Nd}\s*[–—]\s*\p{Nd}|\p{Nd}-\p{Nd}/u, search: "[{D}] ?[–—-] ?[{D}]" },
     { key: "currency", langs: 6, re: /\p{Sc}\s*\p{Nd}|\p{Nd}\s*\p{Sc}/u, search: "[$€£¥₹₩฿] ?[{D}]" },
@@ -91,6 +105,24 @@ export const CELLS: Cell[] = [
     // reached the g2p as an unpronounceable consonant. Distinct from `initialism`, and the reason
     // `letterName` exists per language in core/initialisms.ts.
     { key: "letter-name", langs: 3, re: /(?<![\p{L}\p{M}.])[A-Z](?![\p{L}\p{M}])/u, search: "[A-Z] [{D}]" },
+    // EXPONENTS and SCIENTIFIC NOTATION. 24 languages declare `exponentWords` in their DATA — a harder
+    // signal than a comment grep, and it would rank second in this table — yet the miner had no cell, so
+    // no mined corpus could ever exercise them. Covers the superscript forms (km², m³) and the ×10ⁿ shape
+    // whose negative exponent the Burmese run surfaced as an unexplained DROP:minus residue
+    // (`9.1093837 × 10 -31 kg`).
+    { key: "exponent", langs: 24, re: /\p{Nd}\s*\p{L}*[²³⁰¹⁴-⁹]|\p{L}[²³]|[\p{Nd}]\s*[×x]\s*10\s*[-−–]?\s*\p{Nd}/u, search: "[{D}] ?(km|m|cm)?[²³]" },
+    // ARITHMETIC and RELATIONAL signs standing between operands. Deliberately NOT merged into `signs`:
+    // that cell is a catch-all which any currency or percent already satisfies, so an equation never
+    // surfaced separately. The Burmese run left `DROP math-sign ×10` unexplained for exactly this reason.
+    { key: "arithmetic", langs: 2, re: /\p{Nd}\s*[+×÷=<>≤≥≈]\s*\p{Nd}|\s[=≈]\s/u, search: "[{D}] ?[+×÷=] ?[{D}]" },
+    // AMPERSAND — a word in every language and never a letter, but the shared initialism pass sees `P&R`
+    // as two one-letter runs. Dutch authored the only rule so far (`&` → *en*).
+    { key: "ampersand", langs: 1, re: /&|＆/u, search: "&" },
+    // ITERATION / REPETITION marks: Thai ๆ, Japanese 々 and the kana repeats, Khmer ៗ. Only one treated
+    // language has the rule, but there it was the LARGEST single defect in the language (ๆ, 351
+    // occurrences in 16.7% of th_th utterances, silently dropped). A low language-count cell that is
+    // decisive where it applies, and invisible to every other cell because the mark is script-specific.
+    { key: "iteration", langs: 1, re: /[ๆ々〃ヽヾゝゞៗ]/u, search: "ๆ" },
     // CALENDAR: month names and non-Gregorian era words. LEXICAL, so it has no shape to match and no
     // regex can find it — Thai พ.ศ. (Buddhist), Ethiopian, Hijri and every set of month names are words,
     // not patterns. Supply them with --terms; the fill search then queries the terms directly, which is
@@ -157,10 +189,27 @@ export interface CellSelection {
 /** Pure selection: segments → per-cell counts and up to `perCell` examples each. Deterministic. */
 export function selectCells(segments: string[], opts: { perCell: number; terms?: string[] }): CellSelection {
     const terms = opts.terms ?? [];
-    const termRe = terms.length > 0
-        ? new RegExp(terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|"), "u")
-        : undefined;
-    const matches = (c: Cell, s: string): boolean => (c.lexical ? (termRe?.test(s) ?? false) : c.re.test(s));
+    // Terms may be scoped to a cell as `cell<TAB>term`; a bare line applies to every lexical cell. Two
+    // lexical cells now exist (calendar, ordinal-native) and they need different words, so one flat list
+    // would have made each match the other's evidence.
+    const build = (list: string[]): RegExp | undefined => list.length === 0
+        ? undefined
+        : new RegExp(list.map((t) => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")).join("|"), "u");
+    const shared: string[] = [];
+    const scoped = new Map<string, string[]>();
+    for (const line of terms) {
+        const tab = line.indexOf("\t");
+        if (tab === -1) shared.push(line);
+        else {
+            const key = line.slice(0, tab).trim();
+            if (!scoped.has(key)) scoped.set(key, []);
+            scoped.get(key)!.push(line.slice(tab + 1).trim());
+        }
+    }
+    const termRes = new Map<string, RegExp | undefined>(
+        CELLS.filter((c) => c.lexical).map((c) => [c.key, build([...(scoped.get(c.key) ?? []), ...shared])]),
+    );
+    const matches = (c: Cell, s: string): boolean => (c.lexical ? (termRes.get(c.key)?.test(s) ?? false) : c.re.test(s));
 
     const picked: { cell: string; text: string }[] = [];
     const seen = new Set<string>();
