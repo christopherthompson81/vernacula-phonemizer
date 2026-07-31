@@ -23,16 +23,17 @@
  *
  * Usage:  npx tsx tools/normalization-coverage.ts [--langs hu,ro,th] [--max 400]
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { CELLS } from "./normalization-mine.ts";
+import { parseJsonc } from "../src/core/jsonc.ts";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const TEXT_COLUMN = 2;
 
 /** The treated languages and their FLEURS corpora — every language that has both a per-language
  *  normalize.ts and transcripts. This is the set the audit is about. */
-const TREATED: [string, string][] = [
+const TREATED: [string, string | undefined][] = [
     ["am", "am_et"], ["ar", "ar_eg"], ["bn", "bn_in"], ["cmn", "cmn_hans_cn"], ["de", "de_de"],
     ["el", "el_gr"], ["en", "en_us"], ["es", "es_419"], ["fa", "fa_ir"], ["fr", "fr_fr"],
     ["gu", "gu_in"], ["hi", "hi_in"], ["hu", "hu_hu"], ["id", "id_id"], ["it", "it_it"],
@@ -41,6 +42,8 @@ const TREATED: [string, string][] = [
     ["pt", "pt_br"], ["ru", "ru_ru"], ["sr", "sr_rs"], ["sw", "sw_ke"], ["ta", "ta_in"],
     ["te", "te_in"], ["th", "th_th"], ["tr", "tr_tr"], ["uk", "uk_ua"], ["ur", "ur_pk"],
     ["vi", "vi_vn"], ["yue", "yue_hant_hk"],
+    // No FLEURS corpus — checked entirely from its mined artifact (#585).
+    ["my", undefined],
 ];
 
 /** Symbol classes worth a differential drop test, with the regex that removes each. */
@@ -83,10 +86,26 @@ const { phonemize } = await import(new URL("../src/index.ts", import.meta.url).h
 const shown = CELLS.filter((c) => !c.lexical);
 const rows: { lang: string; status: Record<string, string>; defects: string[] }[] = [];
 
+/**
+ * A language's evidence, artifact FIRST. Every treated language should have a committed
+ * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap (#586), and it
+ * is the only evidence a corpus-less language has at all. FLEURS is the fallback for a language whose
+ * artifact has not been generated yet.
+ */
+function evidence(lang: string, corpus: string | undefined): string[] | undefined {
+    const art = new URL(`corpus/mined/${lang}.jsonc`, import.meta.url).pathname;
+    if (existsSync(art)) {
+        const doc = parseJsonc(readFileSync(art, "utf8")) as { hard: { text: string }[]; sample?: string[] };
+        return [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])];
+    }
+    if (corpus === undefined) return undefined;
+    try { return corpusLines(corpus); } catch { return undefined; }
+}
+
 for (const [lang, corpus] of TREATED) {
     if (only && !only.includes(lang)) continue;
-    let lines: string[];
-    try { lines = corpusLines(corpus); } catch { continue; }
+    const lines = evidence(lang, corpus);
+    if (lines === undefined) continue;
     const status: Record<string, string> = {};
     const defects: string[] = [];
 

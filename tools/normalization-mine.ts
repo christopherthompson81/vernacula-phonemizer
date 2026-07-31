@@ -34,7 +34,8 @@
  *   npx tsx tools/normalization-mine.ts mine  --in raw.txt --out my.hard.tsv [--per-cell 8] [--sample 200]
  *        [--terminators "။"] [--terms months.txt] [--audit-ascii]
  */
-import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 /**
@@ -312,6 +313,7 @@ const arg = (n: string, d?: string): string | undefined => {
     return i === -1 ? d : argv[i + 1];
 };
 const has = (n: string): boolean => argv.includes(`--${n}`);
+const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const UA = "vernacula-phonemizer-corpus-probe/0.1 (https://github.com/christopherthompson81/vernacula-phonemizer)";
 
 async function api(wiki: string, params: Record<string, string>): Promise<any> {
@@ -465,8 +467,27 @@ if (mode === "__module__") {
     const termsPath = arg("terms");
     const terms = termsPath !== undefined ? readFileSync(termsPath, "utf8").split("\n").map((s) => s.trim()).filter(Boolean) : [];
 
-    const raw = readFileSync(inPath, "utf8");
-    const segments = segment(raw, segmentMode, terminators);
+    // A corpus-backed language reads its FLEURS transcripts directly, so EVERY treated language ends up
+    // with the same artifact shape regardless of where its text came from. That matters for round two of
+    // the sweep (#586): the coverage audit then runs off artifacts rather than being FLEURS-only, and a
+    // language treated from a mined corpus is checkable by exactly the same command as one treated from
+    // FLEURS. Column 3 is the ORIGINAL cased text; column 4 is lowercased and stripped of the very
+    // punctuation this layer exists to read.
+    const raw = inPath.startsWith("fleurs:")
+        ? (() => {
+            const dir = join(FLEURS_ROOT, inPath.slice("fleurs:".length));
+            const seen = new Set<string>();
+            for (const f of readdirSync(dir).filter((f) => f.endsWith(".tsv")))
+                for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
+                    const col = line.split("\t")[2];
+                    if (col !== undefined && col !== "") seen.add(col);
+                }
+            return [...seen].join("\n");
+        })()
+        : readFileSync(inPath, "utf8");
+    // FLEURS is one utterance per line and already sentence-sized, so it is segmented as paragraphs —
+    // splitting it again would re-open the abbreviation-dot problem for no gain.
+    const segments = segment(raw, inPath.startsWith("fleurs:") ? "paragraph" : segmentMode, terminators);
     const result = selectCells(segments, { perCell, terms });
 
     console.log(`${segments.length} unique ${segmentMode}s\n`);

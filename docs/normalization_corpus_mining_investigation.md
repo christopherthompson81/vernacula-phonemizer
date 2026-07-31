@@ -486,3 +486,39 @@ inventory should be re-derived and re-run after each sweep — see #586 for the 
 One method note that generalises: the inventory was built by reading rule-header comments, which is why
 `exponent` was missed — that category lives in the manifests as `exponentWords` (24 languages), not in a
 comment. **Data declarations are the harder signal.** `unitPer` (16 languages) should get the same check.
+
+---
+
+## Run 7 — 2026-07-31 — the artifact becomes the standard record
+
+**Decision.** The retroactive fixes (#586) wait until every language has had a first pass — re-treating
+the 37 now would measure them against *today's* inventory, which the remaining first pass will keep
+changing, buying a third round rather than avoiding one. But the corpus process itself is used and updated
+**as we go**, so the tail of round two is short.
+
+**What that required.**
+
+1. **The miner reads FLEURS directly** (`--in fleurs:<corpus>`), so a corpus-backed language produces the
+   same artifact as a mined one. FLEURS is one utterance per line and already sentence-sized, so it is
+   segmented as paragraphs — re-splitting would re-open the abbreviation-dot problem for no gain.
+2. **The coverage audit is artifact-FIRST**, falling back to FLEURS only when no artifact exists. A
+   language treated from a mined corpus is now checkable by exactly the same command as one treated from
+   FLEURS — which is what lets Burmese, with no FLEURS data at all, appear in the same audit.
+3. **The playbook makes it step 0b**, before reading anything by hand, with the four reasons the artifact
+   beats an ad-hoc tabulation — chiefly that `covered N/29` and the `EMPTY:` line answer a question a hand
+   count cannot, since you cannot count what you did not think of. Step 5d adds the DROP scan.
+
+**Generated for all 38 treated languages.** 1.4 MB total, median coverage **22/29** cells.
+
+**Nine languages sit below 20/29 from FLEURS alone:** ar 15, fa 16, cmn 17, ja 17, yue 18, hi 18, pa 18,
+ur 18, ko 19. That is not a property of those languages — it is the #584 finding again, that read-aloud
+news prose is symbol-poor. Those are the artifacts to supplement from a Wikipedia dump in round two, and
+the numbers say which, which is exactly the kind of question that previously had no answer at all.
+
+**Audit on artifacts: 36 defective cells across 22 of 38.** Slightly lower than the 38/24 measured against
+full FLEURS corpora, because an artifact holds a bounded sample per cell rather than every utterance —
+the artifact is a *tripwire*, and the full corpus stays the exhaustive check when one fires.
+
+Burmese's own two residuals are both the deferral already recorded in Run 5: the `²` of `E = mc²` (a
+formula, where "square" is not the reading) and a Japanese kana iteration mark quoted inside a table about
+Japanese. Neither is a new gap.
