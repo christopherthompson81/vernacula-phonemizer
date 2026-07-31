@@ -47,6 +47,20 @@ describe("Norwegian Bokmål canonical IPA", () => {
         expect(nb.text("1000").trim()).toBe("ˈtʉːsn"); // tusen (syllabic n)
     });
 
+    // million/milliard are counted NOUNS and pluralise above one; hundre/tusen do not. The shared Western
+    // composer stored one invariant string per magnitude and so read 2 000 000 as *to million.
+    test("magnitude nouns agree with their count", () => {
+        const nb = createNorwegian();
+        expect(nb.text("1000000").trim()).toBe("ˈeːn mɪlɪˈuːn"); // en million — singular at exactly one
+        expect(nb.text("2000000").trim()).toBe("ˈtuː mɪlɪˈuːnəɾ"); // to millioner
+        expect(nb.text("1000000000").trim()).toBe("ˈeːn mɪlɪˈɑːɖ"); // en milliard
+        expect(nb.text("3000000000").trim()).toBe("ˈtɾeː mɪlɪˈɑɖəɾ"); // tre milliarder
+        // NOT the Slavic rule: a count ending in 1 is still plural in Norwegian (21 millioner).
+        expect(nb.text("21000000").trim()).toBe("ˈtjʉːə ˈeːn mɪlɪˈuːnəɾ");
+        // hundre and tusen take no paradigm, so a multiplier leaves them unchanged.
+        expect(nb.text("2000").trim()).toBe("ˈtuː ˈtʉːsn");
+    });
+
     test("text: words + clause punctuation", () => {
         expect(createNorwegian().text("Norsk er et språk.")).toBe("ˈnɔʂk ˈæːɾ ˈɛt ˈspɾoːk .");
     });

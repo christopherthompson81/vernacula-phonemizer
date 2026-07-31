@@ -45,6 +45,23 @@ export interface NumbersDef {
      * of which read the code rather than probing.
      */
     bareMagnitude?: boolean;
+    /**
+     * COUNT-AGREEING MAGNITUDE NOUNS. `magnitudes` holds one invariant string per magnitude, which is a
+     * grammatical error in every language whose magnitude word is a NOUN that inflects for its count —
+     * Norwegian read 2 000 000 as *to million, where it is to millionER. Where a magnitude appears here,
+     * these forms replace the invariant one; the index comes from `magnitudeCountForm`.
+     *
+     * This is the two-form (sg/pl) case only. The three-form Slavic paradigm PLUS multiplier-gender
+     * agreement is a strict superset, and `eastSlavicNumberWords` (uk/be) already implements it — that
+     * composer is the place to look before widening this one.
+     */
+    magnitudeParadigm?: Partial<Record<"thousand" | "million" | "billion", string[]>>;
+    /**
+     * count → index into `magnitudeParadigm`. Default: singular at exactly 1, plural otherwise, which is the
+     * Germanic/Romance rule. A language whose split is elsewhere (Latvian is singular after any count
+     * ending in 1 except 11) supplies its own; `slavicCountForm` is the ready-made 3-way selector.
+     */
+    magnitudeCountForm?: (count: number) => number;
     /** Optional decimal-point word (Hindi दशमलव); when present the text path reads N.M as int दशमलव digit-by-digit. */
     decimalWord?: string;
 }
@@ -120,9 +137,34 @@ export const indicNumberWords: NumberComposer = (n, d) => {
  * routed through each language's own G2P by `renderNumber`. Needs the irregular round-hundred spellings in
  * `d.hundreds` (сто, двісті, …; Armenian հարюр, երկուհարюр, …). The leading "one" is OMITTED for a bare thousand
  * (тисяча / հазар, matching the bare hundred сто), but KEPT for million/billion (один мільйон — grammatical).
+ *
+ * ITS SCOPE, measured rather than assumed, because "why isn't this used more widely" is a recurring question.
+ * Three engines read it (hy, nb, and uk/be below 1000); 115 languages compose privately, and 22 of those
+ * files carry an explicit why-not. Four requirements gate entry, and a language must satisfy ALL of them:
+ * irregular round hundreds expressible as a FLAT array; magnitudes that are single words per count;
+ * tens-before-units; and NO connector between groups.
+ *
+ * A CONNECTOR SLOT WAS CONSIDERED AND DECLINED. It looks like the single highest-value knob — sq, oc, an,
+ * ast, gl and is are each blocked on it alone — but the placement rule is different in every one of them:
+ * Albanian puts ⟨e⟩ between ALL groups (një mijë e dyqind e tridhjetë e katër), Galician only between tens
+ * and units, Occitan/Aragonese only inside the twenties, and Icelandic ⟨og⟩ only before a trailing
+ * SINGLE-WORD remainder (eitt hundrað og einn, but eitt hundrað tuttugu og einn). One `connective: string`
+ * field cannot express that set, and a placement enum with five members is the per-consumer knob this
+ * consolidation exists to avoid — cf. the note in `dravidianNumberWords` on why Tamil does not migrate.
+ * Revisit only if two languages are found to share a placement rule exactly.
  */
 export const westernNumberWords: NumberComposer = (n, d) => {
     const H = d.hundreds!; // Western systems carry the irregular round-hundred spellings
+    // The magnitude noun in the form its count selects, falling back to the invariant string when the
+    // language authors no paradigm (which is most of them — Armenian's միլիոն does not inflect here).
+    const mag = (key: "thousand" | "million" | "billion", count: number): string => {
+        const forms = d.magnitudeParadigm?.[key];
+        if (forms === undefined || forms.length === 0) return d.magnitudes[key]!;
+        const i = (d.magnitudeCountForm ?? ((c: number) => (c === 1 ? 0 : 1)))(count);
+        // Clamp rather than emit `undefined`: a 3-way selector against a 2-form table is a data error the
+        // caller should not hear as the literal string "undefined" in its IPA.
+        return forms[Math.min(Math.max(i, 0), forms.length - 1)]!;
+    };
     if (n < 10) return [d.units[n]!];
     if (n < 20) return [d.teens![n - 10]!];
     if (n < 100) {
@@ -139,16 +181,16 @@ export const westernNumberWords: NumberComposer = (n, d) => {
         const th = Math.floor(n / 1000),
             r = n % 1000;
         // omit the leading "one" for exactly 1000 (тисяча, not *один тисяча — a bare magnitude like the hundred сто)
-        return [...(th === 1 ? [] : westernNumberWords(th, d)), d.magnitudes.thousand, ...(r ? westernNumberWords(r, d) : [])];
+        return [...(th === 1 ? [] : westernNumberWords(th, d)), mag("thousand", th), ...(r ? westernNumberWords(r, d) : [])];
     }
     if (n < 1_000_000_000) {
         const m = Math.floor(n / 1_000_000),
             r = n % 1_000_000;
-        return [...westernNumberWords(m, d), d.magnitudes.million!, ...(r ? westernNumberWords(r, d) : [])];
+        return [...westernNumberWords(m, d), mag("million", m), ...(r ? westernNumberWords(r, d) : [])];
     }
     const b = Math.floor(n / 1_000_000_000),
         r = n % 1_000_000_000;
-    return [...westernNumberWords(b, d), d.magnitudes.billion!, ...(r ? westernNumberWords(r, d) : [])];
+    return [...westernNumberWords(b, d), mag("billion", b), ...(r ? westernNumberWords(r, d) : [])];
 };
 
 /**
