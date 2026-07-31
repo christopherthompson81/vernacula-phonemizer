@@ -164,7 +164,30 @@ export function normalizeBurmese(input: string): string {
     for (const [re, word] of UNITS)
         t = t.replace(new RegExp(`(${d()})\\s*(?:${re.source})(?![\\p{L}])`, "gu"), `$1 ${word}`);
 
-    // 12) AMPERSAND → နှင့် ("and"), 2403 in the corpus. It was dropped outright, so `A&B` read as two
+    // 12) RELATIONAL AND ARITHMETIC SIGNS. `=` was left unhandled at first on the grounds that the
+    //     corpus's instances are GLOSSES (`gêeo = Earth`, `မိုင်း = ကြီးမား`) where a reader does not say
+    //     "equals". That reasoning was wrong: the sign was being DROPPED, so the two sides ran together
+    //     with no separation at all, and a slightly formal reading is strictly better than an inaudible
+    //     one. Attested: ညီမျှ 1110, ထက်ကြီး 103, ထက်ငယ် 43.
+    //
+    //     `+` BETWEEN TWO WORDS IS LEFT ALONE, and that is not the same call. The corpus's remaining two
+    //     instances are compound joiners — `အချိန်+ရပ်ဝန်းထု` (spacetime), `ရပ်ဝန်း+အချိန်` — where the
+    //     sign marks a compound rather than an operation, and the words are simply spoken adjacent. So
+    //     the plus rule below requires DIGITS on both sides — which is where arithmetic normally is, so
+    //     the restriction costs nothing. The distinction from `=` is real: a gloss sign separates a label
+    //     from its expansion and needs to be audible, a compound joiner does not.
+    const RELATIONAL: [RegExp, string][] = [
+        [/[=≈]/gu, " ညီမျှ "],
+        [/</gu, " ထက်ငယ် "],
+        [/>/gu, " ထက်ကြီး "],
+        [/×/gu, " မြှောက် "],
+        [/÷/gu, " စား "],
+    ];
+    t = t.replace(new RegExp(`(${d()})\\s*\\+\\s*(${d()})`, "gu"), "$1 အပေါင်း $2");
+    for (const [re, word] of RELATIONAL) t = t.replace(re, word);
+    t = t.replace(/[ \t]{2,}/gu, " ");
+
+    // 13) AMPERSAND → နှင့် ("and"), 2403 in the corpus. It was dropped outright, so `A&B` read as two
     //     unrelated letters. The word itself is the ordinary conjunction (နှင့် 134,052).
     t = t.replace(/\s*[&＆]\s*/gu, " နှင့် ");
 
