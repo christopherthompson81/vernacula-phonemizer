@@ -432,3 +432,57 @@ Still unfixed and deliberately so: `DROP math-sign` is glosses and formulae (`g�
 where `=` is not spoken as "equals"; ညီမျှ is attested 1110 times so a rule is authorable and would be
 wrong in the majority of instances. `DROP minus` residue is compound hyphens and negative exponents in
 scientific notation — the latter now has a cell but not yet a rule.
+
+---
+
+## Run 6 — 2026-07-31 — retroactive audit of the 37 treated languages
+
+**Question.** The inventory was derived FROM the treated languages, so it is newer than all of them. How
+much did the early languages miss?
+
+**Command.** `npx tsx tools/normalization-coverage.ts --max 250` — for each treated language × cell,
+report `·` (absent from that corpus), `ok`, `DROP` (a symbol vanishes, differential test) or `LEAK` (a
+digit or raw mark survives).
+
+**Result: 38 defective language×cell pairs across 24 of 37 treated languages.** Collapsing the cases where
+one utterance trips several cells, **33 distinct defects**:
+
+```
+12  ampersand DROP     cmn de en fa gu it ml mr pt ru uk yue
+10  currency  DROP     am bn es id mr ne nl or pa pt
+ 5  exponent  DROP     en id it ne pl
+ 4  degrees   DROP     fr id ja sr
+ 1  percent   DROP     ml
+ 1  ordinal   LEAK     pt
+```
+
+**English — the first language ever treated — drops both `km²` and `&`.** `&` is not exotic; it survived
+because nothing could see it. The corpus diff detects a character that SURVIVES and is blind by
+construction to one that VANISHES (#584), and there was no `ampersand` cell to prompt anyone to look.
+
+### The one LEAK, and why counting cells overstates
+
+Portuguese reported LEAK on six cells — `digit-run`, `year`, `decimals`, `ordinal-latin`,
+`latin-in-native`, `grouped` — all from a SINGLE utterance:
+
+```
+Seu 1.000º selo …   →   sew mˈiɫ º sˈelu        # the º reaches the IPA raw
+12º                 →   dˈɛsimu sɨɡˈũdu         # a bare ordinal is fine
+```
+
+So it is one defect (the ordinal indicator survives when attached to a period-grouped number), not six.
+Cells are not exclusive and a dense utterance satisfies many at once — the matrix is a map of where to
+look, not a defect count. Worth stating because the headline number is otherwise misleading.
+
+This is also the `º` / `ª` class the Italian run found the RAWMARK scan blind to; it is still live in pt.
+
+### What this says about process
+
+The audit took minutes to run and found defects in 65% of the languages that were marked done. The cause
+is ordering, not carelessness: a language treated in batch 1 was judged against roughly a third of the
+cells that exist now, and each later batch discovered something that was applied only forward. The
+inventory should be re-derived and re-run after each sweep — see #586 for the two-round proposal.
+
+One method note that generalises: the inventory was built by reading rule-header comments, which is why
+`exponent` was missed — that category lives in the manifests as `exponentWords` (24 languages), not in a
+comment. **Data declarations are the harder signal.** `unitPer` (16 languages) should get the same check.
