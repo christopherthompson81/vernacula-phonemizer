@@ -9,6 +9,7 @@ import {
     phonemizeWord as phonemizeWordShipped,
     phonemizeWordRules as phonemizeWord,
 } from "../src/languages/sindhi/sindhi.ts";
+import { normalizeSindhi } from "../src/languages/sindhi/normalize.ts";
 
 // Canonical-IPA goldens for Sindhi (sd) — Perso-Arabic ABJAD, Indo-Aryan. The signature is the four-way IMPLOSIVE
 // series ٻ→ɓ, ڏ→ɗ, ڄ→ʄ, ڳ→ɠ (a census gap) + the retroflex series ٽ ٺ ڊ ڍ ڻ ڙ + aspiration (ڀ bʰ, ٿ t̪ʰ,
@@ -179,5 +180,49 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
     test("an unattested value falls back to the two-word unit-tens reading", () => {
         expect(phonemize("39", "sd")).toBe(phonemize("نو ٽيهه", "sd"));
         expect(phonemize("77", "sd")).toBe(phonemize("ست ستر", "sd"));
+    });
+});
+
+// #562 — the normalization layer. Counts are measured over the FLEURS sd_in corpus (column 3), and every
+// emitted word is attested IN that corpus.
+describe("sindhi normalization", () => {
+    // ⚠ Sindhi uses the ENGLISH numeric conventions, like Central Kurdish and unlike the four European
+    // languages in this sweep. The split is total: comma+3 digits is grouping (35, never a decimal),
+    // period+1–2 is a decimal (56, never a grouping).
+    test("comma groups and period decimates", () => {
+        expect(normalizeSindhi("400,000")).toBe("400000");
+        expect(normalizeSindhi("2.4")).toBe("2 پوائنٽ 4"); // پوائنٽ, a borrowing of "point" (39)
+    });
+
+    // The period form is a CLOCK only where a timezone marks it: of 18 `HH.MM` shapes, exactly two are
+    // times and both carry GMT/UTC; the rest are measurements. Claiming the shape outright would turn six
+    // measurements into times.
+    test("a period clock needs a timezone; a measurement keeps its decimal", () => {
+        expect(normalizeSindhi("12.00 GMT")).toBe("12 ڪلاڪ 00 منٽ GMT");
+        expect(normalizeSindhi("3.50 ميٽر")).toBe("3 پوائنٽ 5 0 ميٽر");
+    });
+
+    test("clock, percent, degrees, squared units", () => {
+        expect(normalizeSindhi("11:00")).toBe("11 ڪلاڪ 00 منٽ");
+        expect(normalizeSindhi("25%")).toBe("25 سيڪڙو");
+        expect(normalizeSindhi("%25")).toBe("25 سيڪڙو"); // the Arabic-script sign-first placement
+        expect(normalizeSindhi("20°C")).toBe("20 ڊگري سينٽي گريڊ");
+        expect(normalizeSindhi("km²")).toBe("مربع ڪلوميٽر");
+    });
+
+    // Sindhi marks a range with a CIRCUMFIX — کان … تائين, "from … until" — not one connective word as
+    // the European languages do.
+    test("a range is a circumfix", () => {
+        expect(normalizeSindhi("1990-1995")).toBe("1990 کان 1995 تائين");
+    });
+
+    test("currency, signed numbers and ampersand", () => {
+        expect(normalizeSindhi("$500")).toBe("500 ڊالر");
+        expect(normalizeSindhi("UTC+1")).toBe("UTC جمع 1");
+        expect(normalizeSindhi("A&B")).toBe("A ۽ B");
+    });
+
+    test("ordinary Sindhi text is untouched", () => {
+        expect(normalizeSindhi("سنڌي هڪ ٻولي آهي.")).toBe("سنڌي هڪ ٻولي آهي.");
     });
 });

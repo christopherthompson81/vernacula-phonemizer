@@ -1179,3 +1179,61 @@ each is spoken when embedded in English. A new engine whose script nobody routed
 vanishing from someone's output.
 
 **2543 tests, tsc clean.**
+
+---
+
+## Run 21 — 2026-07-31 — Sindhi, in two stages
+
+The 44th language, and the first that had to be unblocked before it could be normalized at all.
+
+### Stage 1 — the number composer (#587)
+
+`sindhi.ts` handed BOTH Latin runs and DIGIT runs to the foreign phonemizer, so every numeral in Sindhi
+text was spoken in **English**: `5` → "five", `100` → "one hundred". Normalization would have been
+pointless — every rule it writes produces digits for a composer to read, and there was none.
+
+**Sourcing took three sources and caught two of my errors.** The units, all nine tens and the magnitudes
+were already in `sindhi-lexicon.tsv`; the teens and the fused 21–99 were not. espeak-ng carries Sindhi
+numerals 0–99 but as PHONEMES only, and cross-checking those against its `dictionary.jsonl` recovers the
+orthography for just 1 of 9 sampled — it generates numerals from rules rather than storing them.
+
+The user supplied numeral charts (1–100, Sindhi and Urdu columns), which settled the orthography. Each
+form was then attestation-checked one at a time against sd.wikipedia `insource:`, and cross-checked
+against the espeak phonemes. **58 of the 72 non-round values are attested and authored; 14 are omitted.**
+
+Two errors the process caught:
+
+- **A transcription error.** I read 89 and 98 as the same word off the chart. espeak has 89
+  `[Un.Ia:nave:]` against 98 `[at.#Ia:nave:]` — 89 carries the "one less than" ūṇ- prefix that 19
+  اوڻيهه also has. **Two sources would not have caught it**; the third did.
+- **A method error of mine, and the more embarrassing one.** An interim run reported "69 of 72 attested".
+  It was `awk '$3>0'`, and awk compares `"ERR" > 0` as STRINGS — so every row the API rate-limited counted
+  as a pass. The true figure at that moment was 17. The map built on it was reverted before anything
+  shipped; the final counts come from a numeric filter over three merged passes with 4s pacing.
+
+An omitted value degrades to the two-word UNIT-TENS reading, which is the right order for Sindhi —
+ايڪيهه is literally "one-twenty" — so an omission costs an approximate reading, never an invented word.
+
+### Stage 2 — the normalization layer
+
+Sindhi uses the **English numeric conventions**, like Central Kurdish and unlike the four European
+languages in this sweep. The split is total, with no ambiguity left to resolve:
+
+```
+comma + exactly three digits   35   grouping, never a decimal (0)
+period + one or two digits     56   decimal, never a grouping (0)
+```
+
+Three readings a translator would not reach for, all attested in the corpus: percent is **سيڪڙو** (41),
+the decimal separator is the borrowed **پوائنٽ** ("point", 39), and a range is a **CIRCUMFIX** —
+کان … تائين, "from … until" — not the single connective word every European language in this sweep used.
+
+**The representative sample caught one defect**, as it has repeatedly: `12.00 GMT` read as "twelve point
+zero zero". Of the 18 `HH.MM` shapes, exactly TWO are clocks and both carry GMT/UTC; the rest are
+measurements (`6.34 انچ`, `3.50 ميٽر`) plus `802.11n`. **The timezone is the evidence, not the shape** —
+claiming `HH.MM` outright would have turned six measurements into times.
+
+### Gates
+
+`tsc` clean, **2553 tests**, referee **unchanged** at 77.5% against a pristine worktree. Corpus diff
+38/115 changed, 3/40 in the representative sample. The artifact scans with **no defects**.

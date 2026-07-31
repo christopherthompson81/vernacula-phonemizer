@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { normalizeSindhi } from "./normalize.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -201,8 +202,11 @@ export type OovResolver = (word: string) => string | undefined;
 
 class SindhiPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
-    text(input: string, oovOverride?: OovResolver): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+    text(rawInput: string, oovOverride?: OovResolver): string {
+        // #562: everything the g2p cannot read is rewritten to Sindhi words FIRST — see normalize.ts.
+        // This layer was pointless until the number composer landed (#587), since every rule there
+        // produces digits for that composer to read.
+        return assembleClauses(normalizeSindhi(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWordWith(m[1], oovOverride));
             // A LATIN run goes to the foreign phonemizer; a DIGIT run does NOT. Sending digits there
             // meant every numeral in Sindhi text was spoken in English (#587).
