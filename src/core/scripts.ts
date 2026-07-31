@@ -31,7 +31,18 @@
 /** The scripts worth routing. Ordered longest-lived first; detection tries each in turn. */
 export type ScriptName =
     | "Latin" | "Cyrillic" | "Greek" | "Han" | "Kana" | "Hangul" | "Arabic" | "Hebrew"
-    | "Devanagari" | "Bengali" | "Tamil" | "Thai" | "Ethiopic" | "Armenian" | "Georgian" | "Myanmar";
+    | "Devanagari" | "Bengali" | "Tamil" | "Thai" | "Ethiopic" | "Armenian" | "Georgian" | "Myanmar"
+    // The table below was first written from the "obvious" scripts and silently dropped every run in
+    // one it did not list — Telugu, Kannada, Malayalam, Gujarati, Gurmukhi, Odia, Sinhala, Khmer, Lao,
+    // Tibetan, Tifinagh, Cherokee and Ol Chiki all vanished from a host language's output, and the fleet
+    // has an ENGINE for every one of them. The set is now derived from what the registry can actually
+    // read rather than hand-picked; anything with an engine belongs here.
+    | "Telugu" | "Kannada" | "Malayalam" | "Gujarati" | "Gurmukhi" | "Oriya" | "Sinhala"
+    | "Khmer" | "Lao" | "Tibetan" | "Tifinagh" | "Cherokee" | "Ol_Chiki"
+    // …and these five come from the README's OWN example list, which exercises scripts the first two
+    // passes still missed. The lesson is the same each time: the set must be derived from what the fleet
+    // can read (the registry, the language catalogue, the README examples), never from recall.
+    | "Adlam" | "Nko" | "Syloti_Nagri" | "Javanese" | "Sundanese";
 
 const SCRIPT_TESTS: [ScriptName, RegExp][] = [
     ["Latin", /\p{Script=Latin}/u],
@@ -52,6 +63,24 @@ const SCRIPT_TESTS: [ScriptName, RegExp][] = [
     ["Armenian", /\p{Script=Armenian}/u],
     ["Georgian", /\p{Script=Georgian}/u],
     ["Myanmar", /\p{Script=Myanmar}/u],
+    ["Telugu", /\p{Script=Telugu}/u],
+    ["Kannada", /\p{Script=Kannada}/u],
+    ["Malayalam", /\p{Script=Malayalam}/u],
+    ["Gujarati", /\p{Script=Gujarati}/u],
+    ["Gurmukhi", /\p{Script=Gurmukhi}/u],
+    ["Oriya", /\p{Script=Oriya}/u],
+    ["Sinhala", /\p{Script=Sinhala}/u],
+    ["Khmer", /\p{Script=Khmer}/u],
+    ["Lao", /\p{Script=Lao}/u],
+    ["Tibetan", /\p{Script=Tibetan}/u],
+    ["Tifinagh", /\p{Script=Tifinagh}/u],
+    ["Cherokee", /\p{Script=Cherokee}/u],
+    ["Ol_Chiki", /\p{Script=Ol_Chiki}/u],
+    ["Adlam", /\p{Script=Adlam}/u],
+    ["Nko", /\p{Script=Nko}/u],
+    ["Syloti_Nagri", /\p{Script=Syloti_Nagri}/u],
+    ["Javanese", /\p{Script=Javanese}/u],
+    ["Sundanese", /\p{Script=Sundanese}/u],
 ];
 
 /**
@@ -80,6 +109,25 @@ export const DEFAULT_READER: Readonly<Record<ScriptName, string>> = {
     Bengali: "bn", // dominant (also as)
     Tamil: "ta", // nearly deterministic
     Han: "cmn", // pragmatic — Japanese and Cantonese also write Han; see OVERRIDES
+    // NEARLY DETERMINISTIC — one script, one major language, and the fleet has an engine for each.
+    Telugu: "te",
+    Kannada: "kn",
+    Malayalam: "ml",
+    Gujarati: "gu",
+    Gurmukhi: "pa",
+    Oriya: "or",
+    Sinhala: "si",
+    Khmer: "km",
+    Lao: "lo",
+    Tibetan: "bo",
+    Tifinagh: "shi", // Tashelhit is the fleet's Tifinagh engine (Central Atlas Tamazight also uses it)
+    Cherokee: "chr",
+    Ol_Chiki: "sat",
+    Adlam: "ff", // Fula, which the catalogue records as Latin/Adlam
+    Nko: "bm", // the fleet's N'Ko engine is Bambara (Latin/N'Ko)
+    Syloti_Nagri: "syl",
+    Javanese: "jv", // Latin/Javanese — the native script routes to the same engine
+    Sundanese: "su", // Latin/Aksara Sunda
 };
 
 /**

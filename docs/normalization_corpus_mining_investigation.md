@@ -1131,3 +1131,51 @@ currency tier claims the sign first. Resolved to the reading, which matches what
 and is what #584 requires.
 
 **2540 tests, tsc clean.**
+
+---
+
+## Run 20 — 2026-07-31 — the script table was hand-picked, and it took three passes to fix
+
+Asked whether the scanner drops text outside a language's primary or secondary script. It did, for
+**eighteen scripts**, and the fleet has an engine for every one.
+
+### Pass 1 — thirteen scripts with engines
+
+The router's table was written from the "obvious" scripts. Everything else vanished from a host
+language's output:
+
+```
+Telugu · Kannada · Malayalam · Gujarati · Gurmukhi · Odia · Sinhala
+Khmer · Lao · Tibetan · Tifinagh · Cherokee · Ol Chiki
+```
+
+`phonemize("The word తెలుగు here", "en")` returned the English words only.
+
+### Pass 2 — a bug the new test found immediately
+
+With the scripts added, the Telugu run came back as `t̪ˈa lˈa ɡˈa` — "ta la ga", the bare consonants —
+instead of `t̪ˈeluɡu`. English's word class was `[\p{Script=Latin}\p{M}]+`, which also matches a
+**combining mark on its own**, so the vowel signs of an embedded abugida were claimed as English "words"
+and the run was shattered around them:
+
+```
+english WORD token: "The"   "word"   "ె"   "ు"   "ు"   "here"
+```
+
+A mark may FOLLOW a Latin letter; it may not BEGIN a token. The class is now anchored.
+
+### Pass 3 — the README knew about five more
+
+Its own example list exercises `Adlam` (ff), `N'Ko` (bm), `Syloti Nagri` (syl), `Javanese` (jv) and
+`Sundanese` (su) — all still unrouted after passes 1 and 2, all confirmed by the language catalogue's
+script column.
+
+### The lesson, and what the test now does
+
+Three passes, three different sources — the registry, a failing assertion, the README. **The set has to be
+DERIVED from what the fleet can read, never recalled.** So the test no longer carries a hand-kept list: it
+parses the README's examples, asserts every non-ASCII one is in a script the router knows, and asserts
+each is spoken when embedded in English. A new engine whose script nobody routed now fails here instead of
+vanishing from someone's output.
+
+**2543 tests, tsc clean.**

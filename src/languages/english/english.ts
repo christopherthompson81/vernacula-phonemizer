@@ -80,8 +80,12 @@ type Token =
 // accent, so "naïve" tokenized as "na"+"ve" -> [nˈɑː vˈiː] and "résumé" as "r"+"sum" -> [ˈɑːɹ sˈʌm].
 // resolveWord folds the diacritics away for lookup (foldLatinDiacritics). Non-Latin scripts stay
 // unmatched, as before — English is not the engine for them.
+// ⚠ A WORD MUST START WITH A LATIN LETTER. The class was `[\p{Script=Latin}\p{M}]+`, which also matched a
+// COMBINING MARK on its own — so the vowel signs of an embedded abugida were claimed as English "words"
+// and the run was shattered around them: `తెలుగు` reached the Telugu engine as three bare consonants and
+// read "ta la ga" instead of "telugu". Marks may follow a Latin letter; they may not begin a token.
 const TOKEN_RE =
-    /(\d[\d,]*(?:\.\d+)?)(st|nd|rd|th)?|([\p{Script=Latin}\p{M}]+(?:['’][\p{Script=Latin}\p{M}]+)*['’]?)|([.?!,;:])/gu;
+    /(\d[\d,]*(?:\.\d+)?)(st|nd|rd|th)?|(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*['’]?)|([.?!,;:])/gu;
 
 export class EnglishPhonemizer {
     constructor(

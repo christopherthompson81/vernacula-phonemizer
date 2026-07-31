@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
+import { scriptOf } from "../src/core/scripts.ts";
 
 import { phonemize } from "../src/index.ts";
 
@@ -160,4 +163,36 @@ test("no registered engine drops a foreign run outright", () => {
     for (const lang of ["en", "en-GB", "en-IN", "fr", "fr-CA", "yue", "wuu", "nan", "cdo", "gan", "hak", "hsn", "cjy", "hmn", "shi"]) {
         expect(phonemize("7 Москва 7", lang), lang).not.toBe(phonemize("7  7", lang));
     }
+});
+
+// The router's script table was first written from the "obvious" scripts, and silently dropped every run
+// in one it did not list. It took THREE passes to find them all — thirteen scripts with engines in this
+// fleet, then five more that the README's own example list exercises (Adlam, N'Ko, Syloti Nagri,
+// Javanese, Sundanese). The lesson is that the set must be DERIVED from what the fleet can read, never
+// recalled — so this test reads the README rather than carrying a hand-kept list, and a new engine whose
+// script nobody routed fails here instead of vanishing from someone's output.
+describe("script routing covers every script the README exercises", () => {
+    const README = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+    const EXAMPLE = /phonemize(?:Async)?\(\s*"([^"]+)"\s*,\s*"([a-zA-Z-]+)"/gu;
+
+    const cases = [...README.matchAll(EXAMPLE)]
+        .map((m) => [m[1]!.split(/\s+/).find((w) => /[^\u0000-\u007F]/u.test(w)), m[2]!] as const)
+        .filter((c): c is readonly [string, string] => c[0] !== undefined);
+
+    test("the README actually contains examples to check", () => {
+        expect(cases.length).toBeGreaterThan(20);
+    });
+
+    test("every non-ASCII README example is in a script the router knows", () => {
+        const unrouted = cases.filter(([word]) => scriptOf(word) === undefined).map(([w, l]) => `${l} ${w}`);
+        expect(unrouted, "a script with an engine that nothing routes").toEqual([]);
+    });
+
+    test("and each such run is SPOKEN when embedded in another language, not dropped", () => {
+        for (const [word, lang] of cases) {
+            if (lang === "en") continue; // English is the host below
+            const withWord = phonemize(`The word ${word} here`, "en");
+            expect(withWord, `${lang} ${word} vanished`).not.toBe(phonemize("The word here", "en"));
+        }
+    });
 });
