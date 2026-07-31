@@ -377,8 +377,15 @@ if (mode === "fetch") {
         if (cell === undefined) { console.error(`  unknown cell: ${key}`); continue; }
         // A lexical cell is searched by its WORDS; a shape cell by an insource: regex with the language's
         // own digit range substituted for {D}.
+        // A cell with neither a term list nor a search pattern cannot be filled — `zero-width` is the case
+        // (an invisible character has no queryable shape). Say so rather than throwing on `undefined`.
+        if (!cell.lexical && cell.search === undefined) {
+            console.error(`  ${key.padEnd(14)} not fillable by query — no search pattern for this cell`);
+            continue;
+        }
         const srsearch = cell.lexical
-            ? terms.slice(0, 12).map((t) => `"${t}"`).join(" OR ")
+            ? terms.filter((t) => t.startsWith(`${key}\t`) || !t.includes("\t"))
+                .map((t) => `"${t.split("\t").pop()}"`).slice(0, 12).join(" OR ")
             : `insource:/${cell.search!.replace(/\{D\}/gu, digits)}/`;
         if (srsearch === "") { console.error(`  ${key}: lexical cell needs --terms`); continue; }
         try {
@@ -477,27 +484,38 @@ if (mode === "__module__") {
     const termsPath = arg("terms");
     const terms = termsPath !== undefined ? readFileSync(termsPath, "utf8").split("\n").map((s) => s.trim()).filter(Boolean) : [];
 
-    // A corpus-backed language reads its FLEURS transcripts directly, so EVERY treated language ends up
-    // with the same artifact shape regardless of where its text came from. That matters for round two of
-    // the sweep (#586): the coverage audit then runs off artifacts rather than being FLEURS-only, and a
-    // language treated from a mined corpus is checkable by exactly the same command as one treated from
-    // FLEURS. Column 3 is the ORIGINAL cased text; column 4 is lowercased and stripped of the very
-    // punctuation this layer exists to read.
-    const raw = inPath.startsWith("fleurs:")
-        ? (() => {
-            const dir = join(FLEURS_ROOT, inPath.slice("fleurs:".length));
-            const seen = new Set<string>();
-            for (const f of readdirSync(dir).filter((f) => f.endsWith(".tsv")))
-                for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
-                    const col = line.split("\t")[2];
-                    if (col !== undefined && col !== "") seen.add(col);
-                }
-            return [...seen].join("\n");
-        })()
-        : readFileSync(inPath, "utf8");
-    // FLEURS is one utterance per line and already sentence-sized, so it is segmented as paragraphs —
-    // splitting it again would re-open the abbreviation-dot problem for no gain.
-    const segments = segment(raw, inPath.startsWith("fleurs:") ? "paragraph" : segmentMode, terminators);
+    // MULTIPLE SOURCES, MERGED. `--in a,b` reads each and concatenates the segments, which is what a
+    // language with a FLEURS corpus but incomplete coverage needs: FLEURS is read-aloud news prose and so
+    // is symbol-POOR (#584 — hu_hu contains no `$` at all, and nine treated languages sit below 20/29
+    // cells from FLEURS alone), while Wikipedia carries dates, units, eras and month names at far higher
+    // rates. Neither source alone covers the inventory; together they do, and merging beats replacing
+    // because the FLEURS half is the text the engine was actually built and evaluated against.
+    //
+    // A `fleurs:` source reads transcripts directly — column 3 is the ORIGINAL cased text; column 4 is
+    // lowercased and stripped of exactly the punctuation this layer exists to read. FLEURS is one
+    // utterance per line and already sentence-sized, so it is segmented as PARAGRAPHS whatever
+    // `--segment` says; re-splitting it would re-open the abbreviation-dot problem for no gain.
+    const readSource = (src: string): string =>
+        src.startsWith("fleurs:")
+            ? (() => {
+                const dir = join(FLEURS_ROOT, src.slice("fleurs:".length));
+                const seen = new Set<string>();
+                for (const f of readdirSync(dir).filter((f) => f.endsWith(".tsv")))
+                    for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
+                        const col = line.split("\t")[2];
+                        if (col !== undefined && col !== "") seen.add(col);
+                    }
+                return [...seen].join("\n");
+            })()
+            : readFileSync(src, "utf8");
+
+    const sources = inPath.split(",").map((x) => x.trim()).filter(Boolean);
+    const segments = [...new Set(
+        sources.flatMap((src) =>
+            segment(readSource(src), src.startsWith("fleurs:") ? "paragraph" : segmentMode, terminators)),
+    )];
+    if (sources.length > 1) console.log(`merged ${sources.length} sources: ${sources.join(" + ")}`);
+
     const result = selectCells(segments, { perCell, terms });
 
     console.log(`${segments.length} unique ${segmentMode}s\n`);

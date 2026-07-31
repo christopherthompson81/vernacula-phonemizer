@@ -188,5 +188,14 @@ export function normalizeNorwegian(input: string): string {
     t = t.replace(/(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "pluss" : "minus"} ${n}`);
 
+    // 15) ARITHMETIC between two digits — `3+1 gassturbiner`. The signed-number rule above cannot claim
+    //     it: that one requires a BOUNDARY before the sign so a hyphenated compound is left alone, and
+    //     here a digit precedes. Same word, different position, so it needs its own rule.
+    //     A gloss `=` is deliberately NOT handled. Norwegian writes `EX = Utryddet (Extinct)`, where the
+    //     sign separates a label from its expansion and is not read "er lik"; the arithmetic sense is
+    //     rare and the glossing sense is what the corpus contains. Recorded rather than guessed at — the
+    //     same call the Burmese run made for the same construction.
+    t = t.replace(/(\d)\s*\+\s*(\d)/gu, "$1 pluss $2");
+
     return t;
 }

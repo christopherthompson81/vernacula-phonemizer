@@ -823,3 +823,59 @@ the reason recorded in the file.
 Residual, both recorded not fixed: `DROP math-sign ×2` (a `>` in a temperature comparison) and
 `DROP minus ×1` (`10.–11. århundre`, an en-dash between two ordinal dots — a range of ordinals, which
 neither the range rule nor the ordinal rule claims).
+
+---
+
+## Run 14 — 2026-07-31 — merging FLEURS with Wikipedia
+
+**The gap this closes.** FLEURS is read-aloud news prose and therefore symbol-POOR — #584 measured that
+`hu_hu` contains no `$` at all, and nine treated languages sit below 20/29 cells from FLEURS alone.
+Wikipedia carries dates, eras, month names and signed numbers at far higher rates. Neither source alone
+covers the inventory.
+
+**Merging beats replacing**, and the reason is not convenience: the FLEURS half is the text each engine
+was actually built and evaluated against, so dropping it would change what the artifact is evidence *for*.
+`--in a,b` now reads each source and concatenates the segments, deduplicated.
+
+Demonstrated on Norwegian, using the API `--fill` route for the six empty cells rather than a 400 MB dump:
+
+```
+era-marker        3227 hits on no.wikipedia      ordinal-range    5862
+signed-number    17818                           calendar       538346
+arithmetic       26422                           zero-width   not fillable
+```
+
+**Coverage 24/30 → 27/30.**
+
+### An empty cell has a THIRD meaning, and this run is where it showed up
+
+Previously recorded: an empty cell is a query to run (Burmese percent, 1013 articles) or a tool bug (the
+sentence splitter eating abbreviation dots). Norwegian adds the third: **genuinely inapplicable**. Its
+three remaining empties are `ordinal-native` (Norwegian writes the DOT ordinal, which is `ordinal-latin`),
+`zero-width` and `iteration` — none of which Norwegian orthography has. 27/30 is complete for this
+language, and reporting it as 90% would be wrong.
+
+`zero-width` also exposed a tool bug: it has no `search` pattern, because an invisible character has no
+queryable shape, and `--fill` threw on `undefined` instead of saying so. Now it says so.
+
+### What the Wikipedia half found that FLEURS could not
+
+Two more real defects, neither present in the FLEURS corpus at all:
+
+```
+3+1 gassturbiner   the + between two DIGITS — the signed-number rule requires a boundary before the
+                   sign (so a hyphenated compound is left alone), so a digit before it excludes the
+                   match. Same word, different position, needs its own rule.
+(+33 984)          a signed number that is ALSO space-grouped — works only because de-grouping runs first
+```
+
+After both, the merged artifact's only remaining flags are four instances of the gloss `=` — IUCN Red List
+labels (`EX = Utryddet`, `EW = …`, `LC = …`, `DD = …`) where the sign separates a label from its expansion
+and is not read "er lik". Deliberately not handled, the same call the Burmese run made for the same
+construction.
+
+### Also fixed: lexical fill ignored cell scoping
+
+`--fill calendar` was building its query from ALL terms, including the `ordinal-native` ones, because the
+lexical branch read the flat list rather than the cell-scoped one added in Run 5. Two lexical cells would
+have searched each other's evidence.

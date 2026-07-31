@@ -13,53 +13,57 @@
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
 // abbreviation dots and emptied three cells that a grep showed were well populated.
 //
-// source: FLEURS nb_no
+// source: FLEURS nb_no + no.wikipedia (targeted fill)
 // segmentation: sentence (abbreviation dots protected before splitting)
 {
     "language": "nb",
-    "source": "FLEURS nb_no",
+    "source": "FLEURS nb_no + no.wikipedia (targeted fill)",
     "segmentMode": "sentence",
-    "totalSegments": 1852,
-    "cellsCovered": 24,
+    "totalSegments": 14473,
+    "cellsCovered": 27,
     "cellsTotal": 30,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
-        "degrees": 1,          // in 22 treated languages
-        "digit-run": 164,      // in 19 treated languages
-        "fractions": 2,        // in 18 treated languages
-        "clock": 22,           // in 18 treated languages
-        "signs": 8,            // in 17 treated languages
-        "dotted": 2,           // in 16 treated languages
-        "era-marker": 0,       // in 14 treated languages
-        "year": 164,           // in 14 treated languages
-        "decimals": 26,        // in 12 treated languages
-        "ordinal-latin": 8,    // in 11 treated languages
+        "degrees": 26,         // in 22 treated languages
+        "digit-run": 3563,     // in 19 treated languages
+        "fractions": 44,       // in 18 treated languages
+        "clock": 25,           // in 18 treated languages
+        "signs": 290,          // in 17 treated languages
+        "dotted": 42,          // in 16 treated languages
+        "era-marker": 7,       // in 14 treated languages
+        "year": 3550,          // in 14 treated languages
+        "decimals": 306,       // in 12 treated languages
+        "ordinal-latin": 12,   // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 28,           // in 9 treated languages
-        "ranges": 17,          // in 7 treated languages
-        "currency": 1,         // in 6 treated languages
-        "abbrev": 89,          // in 6 treated languages
-        "latin-in-native": 1852, // in 6 treated languages
-        "percent": 5,          // in 5 treated languages
-        "rate": 8,             // in 4 treated languages
+        "units": 142,          // in 9 treated languages
+        "ranges": 295,         // in 7 treated languages
+        "currency": 5,         // in 6 treated languages
+        "abbrev": 1323,        // in 6 treated languages
+        "latin-in-native": 14467, // in 6 treated languages
+        "percent": 263,        // in 5 treated languages
+        "rate": 15,            // in 4 treated languages
         "zero-width": 0,       // in 4 treated languages
-        "roman": 4,            // in 3 treated languages
-        "initialism": 161,     // in 3 treated languages
-        "grouped": 21,         // in 3 treated languages
-        "signed-number": 3,    // in 2 treated languages
+        "roman": 90,           // in 3 treated languages
+        "initialism": 1304,    // in 3 treated languages
+        "grouped": 362,        // in 3 treated languages
+        "signed-number": 14,   // in 2 treated languages
         "ordinal-range": 1,    // in 1 treated languages
-        "letter-name": 124,    // in 3 treated languages
-        "exponent": 3,         // in 24 treated languages
-        "arithmetic": 0,       // in 2 treated languages
-        "ampersand": 1,        // in 1 treated languages
+        "letter-name": 1414,   // in 3 treated languages
+        "exponent": 37,        // in 24 treated languages
+        "arithmetic": 11,      // in 2 treated languages
+        "ampersand": 22,       // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
-        "calendar": 0,         // lexical cell — matched via the term list
+        "calendar": 2095,      // lexical cell — matched via the term list
     },
 
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Montevideo ligger i undertropiske strøk; i sommermånedene er temperaturene over +30°C vanlig." },
+        { "cell": "degrees", "text": "Årlig middeltemperatur er 8,2 °C, i januar minus 9,6 °C og i august 23,3 °C. Årlig regnfall er 1300 mm." },
+        { "cell": "degrees", "text": "Temperaturnivået har tendert til å være noe høyere de senere år. For 1991 til 2014 har middeltemperaturene for henholdsvis januar og juli økt til henholdsvis 2,5 °C og 15,6 °C. Høyeste temperatur i oktober måned ble målt den 11." },
+        { "cell": "degrees", "text": "oktober 2018, da gradestokken viste 23,8 °C. Høyeste temperatur i juli måned ble målt den 26." },
+        { "cell": "degrees", "text": "juli 2019, da temperaturen kom opp i 33,4 °C. Høyeste temperatur i september ble målt 5." },
         { "cell": "digit-run", "text": "For eksempel blir «læring» og «sosialisering» ansett som viktige motivasjonsfaktorer for internettbruk (James m. flere, 1995)." },
         { "cell": "digit-run", "text": "Japans har nesten 7000 øyer (den største heter Honshu), og dette gjør Japan til verdens 7. største øy!" },
         { "cell": "digit-run", "text": "Av 1400 personer som stemte før det føderale valget i 2010, økte antallet som motsetter seg at Australia skal bli en republikk, med 8 prosent siden 2008." },
@@ -67,6 +71,9 @@
         { "cell": "digit-run", "text": "Det vettskremte kongehuset, kong Ludvig XVI, dronning Marie Antoinette sammen med deres to unge barn (Marie Therese på 11 år og Ludvig-Charles på 4 år) og kongens søster, Madam Elizabeth, ble den 6. oktober 1789 presset til å komme tilbake til Paris fra Versailles av en folkemengde med markedskvinner." },
         { "cell": "fractions", "text": "Mens ingen vet sikkert hvem som skrev det, er det kjent at tidlig i dets eksistens ble det store pergamentdokumentet (det måler 29¾ tommer ganger 24½ tommer) rullet opp for oppbevaring." },
         { "cell": "fractions", "text": "Mønsteret bør være på 5 mm (1/5 tommer) eller mer slik at det har nok dybde, og materialet må være mykt nok for kulde." },
+        { "cell": "fractions", "text": "I 1998/1999 ble de seks skogeierforeningene slått sammen til Skogeierforeninga Nord. I 2006 ble foreningen omdannet til et samvirkeforetak og tok navnet Allskog." },
+        { "cell": "fractions", "text": "Sesongene 2019/20 og 2020/21 var han den yngste utøveren på det norske alpinlandslaget for herrer." },
+        { "cell": "fractions", "text": "Insekt-Nytt 29 (1/2) Norsk Entomologisk forening." },
         { "cell": "clock", "text": "802.11n-standarden driver på frekvensene 2.4Ghz og 5.0Ghz." },
         { "cell": "clock", "text": "Brannredningsmannskaper slukket brannen innen kl. 23:35." },
         { "cell": "clock", "text": "Selve kjøretøyet ble fjernet fra ulykkesstedet omtrent klokken 12:00 GMT samme dagen." },
@@ -79,6 +86,14 @@
         { "cell": "signs", "text": "Olje er en viktig industri for venezuelanere, der landet er en nettoeksportør, selv om kun 1 % arbeider i oljeindustrien." },
         { "cell": "dotted", "text": "I tillegg angrep den også alt som kom ned i vannet, selv en gigantisk dinosaur som f.eks. T. rex ville ikke være noen match for den." },
         { "cell": "dotted", "text": "Det finnes flere positive aspekter ved disse nettsidene, som bl.a. omfatter å kunne enkelt konfigurere en klasseside som blogger, videoer, bilder og andre funksjoner." },
+        { "cell": "dotted", "text": "Han mottok undervisning i tegning på Kunstakademiet i 1763 og lærte kobberstikkunsten hos J.M. Preisler." },
+        { "cell": "dotted", "text": "Resultatet av brorens innsamlinger og undersøkelser i Norge og Danmark utkom i Zoologia Danica med C. F. Müllers stikk." },
+        { "cell": "dotted", "text": "C. F. Müllers kolorerte kobberstikk var troverdige og den gode kvalitet av avbildningene var med til å gi disse verker internasjonal berømmelse." },
+        { "cell": "era-marker", "text": "12-15 arter Klasse bladfotinger (Branchipoda) – skjoldkreps, tusenbeinkreps, muslingbladføttinger, vannlopper, m.m. 800 arter." },
+        { "cell": "era-marker", "text": "50(2) s.139–141 Liebherr, J.K. & McHugh, J.V. 2003." },
+        { "cell": "era-marker", "text": "Ødegaard, Frode, o.a. 2004." },
+        { "cell": "era-marker", "text": "november 2012 og vises t.o.m. 20." },
+        { "cell": "era-marker", "text": ", 1978 Н.М. Шанский, В.В. Иванов, Т.В. Шанская." },
         { "cell": "year", "text": "Det tusende stempelet hans var den storslåtte «Great Deeds by Swedish Kings» av David Klöcker Ehrenstrahl i 2000, som er registrert i Guinness verdensrekordbok." },
         { "cell": "year", "text": "Mount Vinson-toppen har en høyde på 4892 meter og ligger på Antarktis høyeste fjell, Vinson Massif, i den nordlige delen eller Sentinel Range." },
         { "cell": "year", "text": "Dersom du bare går i land ved bruk av skipsekskursjoner vil du ikke behøve et eget visum (fra 2009)." },
@@ -104,6 +119,10 @@
         { "cell": "ranges", "text": "Tournament top seeds South Africa fikk en bra start da de hadde en komfortabel 26-00 seier mot 5. plass Zambia." },
         { "cell": "ranges", "text": "Luno hadde 120–160 kubikkmeter med drivstoff om bord da det sluttet å fungere og sterk vind og høye bølger gjorde at det gikk på land." },
         { "cell": "ranges", "text": "Fartsgrenser som er lagt ut er merkbart lavere enn i tidligere og påfølgende seksjoner – vanligvis 35–40 amerikanske mil i timen (56–64 km/t) – og det er enda viktigere å respektere dem enn ellers." },
+        { "cell": "currency", "text": "Englands økonomi er en av de største i verden med en gjennomsnittlig BNP per hode på £22 907." },
+        { "cell": "currency", "text": "Per 2014 er den grunnleggende graden av personlig skatt 20 prosent av skattebelagt inntekt til opp £31 865 over den personlige skattefrie andel (vanligvis £10 000), og er 40 prosent av ekstra inntjening over dette beløpet." },
+        { "cell": "currency", "text": "I 2016 var nivået på bidrag til stiftelsen, ifølge Bloomberg News, på rundt $77 million årlig, noe som høynet anslagene fra Jaffe til mellom $3,08 millioner og $19,2 millioner årlig." },
+        { "cell": "currency", "text": "Med utmerkelsen fulgte en pengepremie på €10 000 (£6 588; $12 700), og en invitasjon til å stille ved PAE Cyberarts Festival i Østerrike senere samme år. Den andre var dommernes Webby Award for kategorien «samfunn»." },
         { "cell": "abbrev", "text": "Polens mannlige synshemmede skiløper, Maciej Krezel, og hans følger Anna Ogarzynska kom til slutt på 13. plass i Super-G. Sør-Koreas Jong Seork Park kjørte inn til en 24. plass i mennenes sittende Super- G." },
         { "cell": "abbrev", "text": "108 tallerkener med Chhappan Bhog (i Hinduismen er dette 56 ulike ting som kan spises, som smågodt, frukt, nøtter, matretter osv. som tilbys til gudefiguren) ble servert til Baba Shyam." },
         { "cell": "abbrev", "text": "Presidenten i USA, George W. Bush, ønsket kunngjøringen velkommen." },
@@ -116,6 +135,9 @@
         { "cell": "latin-in-native", "text": "Selv om det var tre mennesker inne i huset da bilen krasjet inn i det, ble ingen av dem skadet." },
         { "cell": "percent", "text": "Ved ytterlighetene i meningsmålingen synes 29 % at Australia burde bli en republikk fortest mulig, mens 31 % synes Australia aldri bør bli en republikk." },
         { "cell": "percent", "text": "Dette er ikke en lærevanske, men derimot en læreforstyrrelse som «påvirker 3–5% av alle barn og muligens så mange som 2 millioner amerikanske barn»." },
+        { "cell": "percent", "text": "I elven ligger Mindudemningen og tilhørende vannverk, som forsyner 80% av innbyggerne i Morogoro med vann. Anahi er en slekt av biller som har larver som eter planterøtter." },
+        { "cell": "percent", "text": "Strykprosenten er høy (80–90%), ettersom det melder seg mange flere søkere enn antallet ledige stillinger." },
+        { "cell": "percent", "text": "Det største minoritetsspråket er tatarsk, som snakkes av omkring 6,5 millioner mennesker (3% av Russlands befolkning)." },
         { "cell": "rate", "text": "Siden Black Beauty er så lav så hadde politiet på New Zealand problemer med å bruke fartsradaren sin til å se hvor raskt Reid kjørte, og den eneste gangen politiet klarte å ta tiden på Reid var da han bremset ned til 160 km/t." },
         { "cell": "rate", "text": "Stormen, som fant sted rundt 3 000 kilometer fra Miami i Florida, har maksimal vedvarende vindkast på 40 amerikanske mil i timen (64 km/t)." },
         { "cell": "rate", "text": "De genererer kraftige vinder (ofte 160-320 kilometer/time) og kan løfte tunge gjenstander inn i luften, samt frakte dem ettersom tornadoen beveger seg." },
@@ -124,6 +146,8 @@
         { "cell": "roman", "text": "I løpet av striden for selvstendighet organisert av Mau-bevegelsen, førte en fredelig bysamling til drapet på lederen Tupua Tamasese Lealofi III." },
         { "cell": "roman", "text": "34 prosent i meningsmålingen deler dette synspunkt, og ønsker dronning Elizabeth II som Australias siste monark." },
         { "cell": "roman", "text": "Den midlertidige statsministeren Julia Gillard hevdet i kampanjen ved det føderale valget i 2010 at Australia skulle bli en republikk på slutten av dronning Elizabeth II sin regjeringstid." },
+        { "cell": "roman", "text": "1734 (MDCCXXXIV) i den gregorianske kalender var et år uten skuddag som begynte på en fredag." },
+        { "cell": "roman", "text": "Myrothamnaceae er en familie i ordenen Gunnerales ifølge APG III-systemet." },
         { "cell": "initialism", "text": "Penger kan veksles på øyens eneste bank som ligger i Stanley ovenfor FIC West-butikken." },
         { "cell": "initialism", "text": "Rapporten åpner med åpen debatt rundt straffesak og dannelse av konsensus i USA angående politikken mot Midtøsten." },
         { "cell": "initialism", "text": "Antikkens romerske måltider kan ikke ha inkludert matvarer som kom til Europa fra USA eller Asia i senere århundrer." },
@@ -135,56 +159,78 @@
         { "cell": "grouped", "text": "Siden oppstarten har The Onion blitt et veritabelt imperium for nyhetsparodi, med en papirutgave, en nettside som trakk 5 000 000 unike besøkende i oktober måned, personlige annonser, et 24 timers nyhetsnettverk, podkaster og et nylig lansert verdensatlas som heter Our Dumb World." },
         { "cell": "grouped", "text": "Ifølge protestantene dukket omtrent 100 000 mennesker opp i tyske byer som Berlin, Køln, Hamburg og Hanover." },
         { "cell": "signed-number", "text": "Gotisk stil var på topp i perioden mellom 10.–11. århundre og det 14. århundre." },
+        { "cell": "signed-number", "text": "Om vinteren er temperaturen av og til under frysepunktet, men det er sjelden at temperaturen kommer under −6 ℃." },
+        { "cell": "signed-number", "text": "Kulda fra nord eller øst har som regel dempet seg på vei over sjøen til Irland, og det kaldeste som noen gang er målt er −19 ℃." },
+        { "cell": "signed-number", "text": "De ikke-irske nasjonalitetene som så den største økningen fra 2016 var India (+33 984), Romania (+14 137), Brasil (+13 698), Ukraina (+10 006)." },
+        { "cell": "signed-number", "text": "De ikke-irske nasjonalitetene som så den største nedgangen fra 2016 var Polen (-28 835), Storbritannia (-19 766), Litauen (-5 375), Latvia (-1 633) og Slovakia (-1 117)." },
         { "cell": "letter-name", "text": "I mange tilfeller kan det å begi seg ut på et friår i utlandet faktisk forbedre sjansene dine for å komme inn på høyere utdanning når du er tilbake i hjemlandet ditt." },
         { "cell": "letter-name", "text": "I denne dynamiske transportfarkosten er alle på et eller annet vis tilknyttet, og tilhengere av, et transportsystem som er basert på privatbiler." },
         { "cell": "letter-name", "text": "I prinsippet er tibetansk buddhisme veldig enkelt. Det består av Kundalini Yoga, meditasjon og full kjærlighet." },
         { "cell": "letter-name", "text": "I begynnelsen ble antrekk sterkt påvirket av Byzantine-kulturen i øst." },
         { "cell": "letter-name", "text": "Rolando Mendoza avfyrte M16-riflen sin mot turistene." },
         { "cell": "exponent", "text": "Sundarbans består av et område på 3 850 km² med ca. en tredjedel av området dekket av vann og myr." },
-        { "cell": "ampersand", "text": "B&B konkurrerer åpenbart hovedsakelig rundt to hovedting: seng og frokost." }
+        { "cell": "exponent", "text": "Det omslutter byen Innsbruck, som ikke hører til distriktet, men er forvaltningssetet for det. De andre nabodistriktene er Imst i vest og Schwaz i øst. Innsbruck Land grenser dessuten til Bayern (Tyskland) i nord og til Syd-Tirol (Italia) i syd. Distriktet har til sammen 181 698 innbyggere (2021) og dekker et areal på 1990 km²." },
+        { "cell": "exponent", "text": "Flateinnholdet er 3799 km² og ved folketellingen i 2011 hadde Lori 235 537 innbyggere." },
+        { "cell": "exponent", "text": "Det dekker et areal på 2580 km², og har en befolkning på 670 533 ved folketellingen i 2008." },
+        { "cell": "exponent", "text": "Den har 37 604 innbyggere (2020) og dekker et areal på 26,42 km²." },
+        { "cell": "arithmetic", "text": "Tenaska Gateway kraftverk er et varmekraftverk i Rusk County i Texas i det sørlige USA. Anlegget har en installert produksjonskapasitet på 845 MW, fordelt på 3+1 gassturbiner med kogenerasjon." },
+        { "cell": "arithmetic", "text": "EX = Utryddet (Extinct)." },
+        { "cell": "arithmetic", "text": "EW = Utryddet i vill tilstand (Extinct in the wild) Brukes om arter som er antatt å være utryddet i vill tilstand, men som fortsatt overlever i fangenskap." },
+        { "cell": "arithmetic", "text": "I Norge har disse artene 5 % sannsynlighet for å dø ut innen 100 år. LC = Livskraftig (Least concern) Dette er arter som ikke er direkte truet." },
+        { "cell": "arithmetic", "text": "DD = Mangelfullt datagrunnlag (Data deficient) I denne kategorien havner arter som mangler nødvendig informasjon til å vurdere trusselbildet." },
+        { "cell": "ampersand", "text": "B&B konkurrerer åpenbart hovedsakelig rundt to hovedting: seng og frokost." },
+        { "cell": "ampersand", "text": "Utstyret er vesentlig levert av General Electric og Black & Veatch." },
+        { "cell": "ampersand", "text": "David Clutterbuck og Nadine Klasen taler om mentorskapet som en «lærende allianse som åpner for talentet» (sitat fra boken Implementing Mentoring Schemes, Butterworth & Heinemann, 2002)." },
+        { "cell": "ampersand", "text": "Han sykler for B&B Hotels p/b KTM. Han har vært profesjonell syklist siden 2011." },
+        { "cell": "ampersand", "text": "The Marine Flora & Fauna of Norway – (engelskspråklig) Fotografier og info om marine leddyr For elven i Schleswig-Holstein, se Bille (elv)." },
+        { "cell": "calendar", "text": "Årets største turnering avholdes i desember, på polobanen i Las Cañitas." },
+        { "cell": "calendar", "text": "De første sykdomstilfellene denne sesongen ble innrapportert sent i juli." },
+        { "cell": "calendar", "text": "Den vertikale klareringen under broen er femten meter. Byggingen ble gjennomført i august 2011, men det var stengt for trafikk frem til mars 2017." },
+        { "cell": "calendar", "text": "Avbestillingsregler varierer, men siden slutten av mars vil ikke avbestillingsreglene utvides til juli 2020, da OL var planlagt." },
+        { "cell": "calendar", "text": "Den har vært kjent for å være et episenter for luksus fra ca. 400 e.Kr til rundt 1100 e.Kr." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.
     "sample": [
         "Hovedmålet med vitenskapen er å finne ut hvordan verden fungerer gjennom en vitenskapelig metode. Det meste vitenskapelig forskning blir faktisk styrt av denne metoden.",
-        "Teknologi gir muligheten for en løsning med virtuelle ekskursjoner. Elevene kan observere museumsgjenstander, besøke et akvarium, eller beundre flott kunst samtidig som at de sitter med klassen sin.",
-        "Visningene som presenteres, er ofte overfladiske, generelle og enkle sammenlignet med den mer detaljerte informasjonen andre steder.",
-        "Ekstremvær er den generelle betegnelsen for alle svært alvorlige værfenomen med potensial for å gjøre skade, alvorlige sosiale konsekvenser eller tap av menneskeliv.",
-        "Dette gjør at spillere kan styre handlinger og bevegelser ved å flytte enheten gjennom luften.",
-        "Noen ganger finner man overfylte familiestrender med et godt utvalg av butikker langs kysten. Det er trygt å svømme.",
-        "Kort tid etter start mistet Giancarlo Fisichella kontrollen over bilen sin og måtte avslutte løpet.",
-        "Det var så mange mennesker til stede at det var umulig for alle å få plass ved begravelsen på Petersplassen.",
-        "Tid er noe som er komplisert for oss å forstå, selv om det alltid er rundt oss og virker inn på alt det som vi gjør.",
-        "En godt likt ferdighet som mange turister ønsker å lære er boomerang-kasting.",
-        "Når man lager en DVD, vil ytterkantene mest sannsynlig bli kuttet bort, og hvis videoen har undertekster for nær bunnen vil de ikke bli fullstendig vist.",
-        "Effekten som teamet var på jakt etter, ville forårsakes av tidevannskrefter mellom galaksens og melkeveiens mørke materie.",
-        "Kapselen reiser 12,8 kilometer eller 8 kilometer i sekundet, fort nok til å komme fra San Francisco til Los Angeles på ett minutt.",
-        "Noen arenaer tilbyr gratis alkoholholdige drikkevarer. Men alkoholpåvirkning nedsetter dømmekraften, alle gode gamblere vet hvor viktig det er å holde seg edru.",
-        "Hvis du blir skadet mens du prøver å hjelpe, kan det bidra til å gjøre alt mye verre.",
-        "Tyrkias areal gjør det til verdens trettisyvende største land, og har cirka samme størrelse som Metropolitan Frankrike og Storbritannia kombinert.",
-        "Men det bodde allerede Eskimo-stammer der den gang, uavhengig av hans oppdagelse.",
-        "Stillas kan både være virtuelle og fysiske. En lærer kan også med andre ord, være en form for stillas, men det er også den lille bindersmannen i Microsoft Office.",
-        "Jordskjelvet traff Mariana kl. 07:19 lokal tid (19:19. GMT fredag).",
-        "Selvsagt må en førsteklasses mann som løper en halvmil på mindre enn 2 minutter være utstyrt med en viss raskhet, men utholdenhet må dyrkes i enhver fare.",
-        "Mange pattedyr har blitt innført etter at mennesket kom til Galapagos, som f.eks. geiter, hester, kyr, rotter, katter og hunder.",
-        "OPEC sa i sin nyeste månedlige rapport at eksporteringen av råolje hadde sunket til sitt laveste nivå på to tiår, til 2,8 millioner fat daglig.",
-        "Tidlig i tiden som en uavhengig nasjon ble øya omgjort til en tropisk hageby, Singapor botaniske hage bidro med fagkunnskaper.",
-        "Sangeren Sanju Sharma startet kvelden, etterfulgt av Jai Shankar Choudhary. Chhappan bhog bhajan ble i tillegg presentert. Sangeren Raju Kvegwal ledsaget ham.",
-        "Neste bilde viser at atomene avgir fotoner. I realiteten er selvsagt fotoner mye mindre enn de er på bildet.",
-        "Den 21 år gamle Jesus skal ha blitt med i Manchester City i januar i fjor, 2017, fra den brasilianske klubben Palmeiras, for en pris på 27 millioner pund.",
-        "Sluttresultatene fra presidentvalget og parlamentsvalget i Namibia viser at den nåværende presidenten, Hifikepunye Pohamba, ble gjenvalgt med god margin.",
-        "North Shore-strendene i North-Harbor-distriktet ligger i Stillehavet. Strendene der strekker seg helt fra Long Bay i nord – til Devonsport i sør.",
-        "Også blogging «tvinger studenter til å bli mer oppdatert på verden rundt seg». Behovet for å gi det som ønskes til publikumet inspirerer studenter til å være smarte og interessante (Toto, 2004).",
-        "Den militaristiske naturen av det romerske imperiet har vært til stor hjelp i den medisinske utviklingen.",
-        "Noen hoteller har en arv fra gullalderen for dampbaner og havfartøyer; fra før andre verdenskrig, 1800-tallet eller fra tidlig på 1900-tallet.",
-        "Kambodsja ble invadert av thaiene mange ganger på 1700-tallet, og i år 1772 tilintetgjorde de Phnom Phen.",
-        "I noen føderale nasjoner, som for eksempel USA og Canada, er inntektsskatt pålagt både på det føderale og på det lokale nivået, slik at satsene og støttene kan være ulik fra område til område.",
-        "Datamaskiner kan brukes til å konstruere avanserte animasjoner og denne typen animasjon blir stadig mer brukt i fjernsyn og film.",
-        "Verden har endret seg veldig fra menneskers vitenskapelige og teknologiske fremskritt, samt vanskeligheter har blitt mer kompliserte grunnet overbefolkning og menneskehetens ekstravagante livsstil.",
-        "Hjernestrukturer og prosesser vi aldri tidligere har sett er nå mulig å undersøke takket være fremveksten av nye teknologier.",
-        "AI-systemet er nå ofte brukt på feltene i økonomi, medisin, ingeniørfag og forsvar, som er bygget i flere hjemmePC-er og dataspillprogramvare.",
-        "Det å finpusse ferdighetene dine på et etablert reisebloggnettsted er den enkleste måten å komme i gang med reiseskriving på.",
-        "Hvorfor vil en organisasjon gå gjennom den tidkrevende prosessen av å etablere en læreorganisasjon? Ett mål er å sette organisatoriske læringsbegreper i praksis er innovasjon.",
-        "Hovedgrunnen til dette fenomenet er resultatet av at de klare drømmene øker tiden mellom REM-tilstander."
+        "Skyttere i den supplerende skadedyrbekjempelsen ble nøye overvåket av skogvoktere, dette medførte at rettssaken ble overvåket og dens effektivisering evaluert.",
+        "De fleste dødsfallene finner sted på grunn av utmattelse under forsøk i å svømme tilbake mot strømmen, noe som kan være svært problematisk.",
+        "Stardust kommer til å sette ny rekord for å være det raskeste romskipet til å returnere til Jorden, og bryte den tidligere rekorden som ble satt i mai 1969 under returen av Apollo X-kommandomodulen.",
+        "Følgelig kan du finne det mest luksuriøse sengetøyet i de beste av slike etablissementer, kanskje et håndlaget sengeteppe eller en antikk seng.",
+        "På listen over de 400 rikeste amerikanerne i 2008 ble Batten rangert som nr. 190, med en estimert formue på 2,3 milliarder dollar.",
+        "I slike tilfeller kan man likevel til en viss grad øke effektiviteten til utformingen ved konfigurasjon av de tre elementene, tilpasning av hvor langt de er fra hverandre, og hvor mye arbeidsbenk man har tilgjengelig.",
+        "Carsten Borchgrevink, som også deltok på denne eksepdisjonen, valgte ut Jensen som kaptein over «Southern Cross» på sin ekspedisjon til Antarktis fra 1898 til 1900.",
+        "I Bergensdalens sydlige del ligger Nordåsvannet, som er forbundet med Sælenvannet og med Grimstadfjorden i vest. Nord for Grimstadfjorden ligger områdene Fyllingsdalen og Loddefjord, avgrenset av de vestlige byfjellene i øst, av Raunefjorden i vest, og av Byfjorden i nord. Syd for Grimstadfjorden ligger Ytrebygda som avgrenses av Fanafjorden i syd, og øst for denne ligger Kalandsvannet.",
+        "Den gikk fra gamle Bergen stasjon gjennom Bergensdalen til Nesttun og videre via Indre Arna til Voss. Fra Nesttun gikk også Osbanen (1894–1935) videre til Osøyro, og fra Voss gikk Hardangerbanen (1935–1985) videre til Granvin.",
+        "Festspillene holdes på en rekke arenaer i bergensområdet, blant disse Grieghallen, Håkonshallen, Den Nationale Scene, Logen Teater, Bergen Kunsthall, Mariakirken, Bergen domkirke, Korskirken, Johanneskirken, i Troldsalen og komponisthjemmene Troldhaugen, Siljustøl, Lysøen og Valestrandfossen, samt ute i det fri på Torgallmenningen og i Nygårdsparken.",
+        "Til tross for irsk nøytralitet under andre verdenskrig, hadde Irland mer enn 50 000 deltakere i krigen gjennom verving i de britiske væpnede styrkene.",
+        "Hver spesialistgruppe jobber med en bestemt gruppe av dyr, herunder også spesielt utvalgte arter av dyr innen gruppa.",
+        "Storbritannia valgte å ikke gå inn i euro-samarbeidet.",
+        "mai 1885 av Emil Salvesen og John George Dahll, to hjemkomne studenter fra England og Skottland.",
+        "Stalin tvangsflyttet 18.",
+        "olympiske sommerleker og ble arrangert i London i Storbritannia fra 27.",
+        "Uralfjellene regnes (sammen med Uralelven) som grensen mellom Europa og Asia. Uralfjellene strekker seg 2 498 kilometer fra steppene i Kasakhstan til Nordishavet, med øyene Vajgatsj og Novaja Semlja som en fortsettelse av fjellkjeden.",
+        "Senere sovjetiske triumfer i romforskningen var Jurij Gagarin, som i 1961 ble det første menneske i verdensrommet, og Saljut 1, som i 1971 ble verdens første romstasjon.",
+        "mars – Den norske basen i Meymaneh i Afghanistan ble angrepet med raketter.",
+        "januar – Hoppuken 2007/08 avsluttes, med Janne Ahonen som vinner 12.",
+        "Guerrero er kjent for sine spesielle masker, mens huichol-nasjonen i Jalisco lager unike garnmalerier.",
+        "februar – Den sovjetiske tilbaketrekningen fra Afghanistan fullføres.",
+        "I begynnelsen av september 1914 var styrkeforholdet endret til 41 franske og britiske divisjoner, mot 27 tyske.",
+        "Under et nytt angrep i midten av april, kjent som det andre slag om Gaza, led de britiske styrkene igjen tap og måtte trekke seg tilbake.",
+        "Det var ikke hungersnød i Tyskland, men sykdommer og dødsfall knyttet til underernæring forekom.",
+        "Selv om det var eksempler på trossamfunn og prester som demoniserte fienden, var det ikke entydig.",
+        "Ved beleiringen av Maubeuge i september 1914 var det rundt 40 tusen franske soldater som overgav seg, og ved Brusilovoffensiven sommeren 1916 overgav mellom 325 og 415 tusen tyske og østerriksk-ungarske soldater seg. Mellom 25 og 31 % av tap Russland hadde under første verdenskrig (prosentandel av dem tatt til fange, såret eller drept) var krigsfanger.",
+        "Ferros analyse av første verdenskrig var bare delvis på linje med den tyske retningen.",
+        "Til tross for begrensede naturressurser, har intensiv utvikling av landbruks- og industrisektoren det siste tiåret gjort Israel til, stort sett, selvforsynt innen matproduksjon, bortsett fra korn og storfekjøtt.",
+        "– Kenny Stamatopoulos, kanadisk fotballspiller 3.",
+        "Artiklene med de høyeste konfliktratene på engelskspråklig Wikipedia var om George W. Bush, anarkisme, og Muhammed.",
+        "september, og i løpet av de første par krigsårene opplevde Tyskland en enorm suksess.",
+        "Godt over halvparten av sysselsettingen er i tjenesteytende næringer.",
+        "5 millioner innbyggere på Sicilia, samt av et ukjent antall emigranter.",
+        "Det ble opprinnelig brukt til spådomskunst og administrasjon ved hoffet under Shāng-dynastiet.",
+        "Japanhavet: Den nordvestlige vinden om vinteren bringer med seg kraftig snøfall.",
+        "januar – Israel innfører portforbud i palestinske flyktningleirer på Vestbredden og i Gaza.",
+        "mars – Et forsøk på å sprenge en bro over Tverrelven i Alta mislykkes.",
+        "– José Garro, costaricansk fotballspiller 11."
     ]
 }
