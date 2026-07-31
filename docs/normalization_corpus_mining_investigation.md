@@ -522,3 +522,69 @@ the artifact is a *tripwire*, and the full corpus stays the exhaustive check whe
 Burmese's own two residuals are both the deferral already recorded in Run 5: the `²` of `E = mc²` (a
 formula, where "square" is not the reading) and a Japanese kana iteration mark quoted inside a table about
 Japanese. Neither is a new gap.
+
+---
+
+## Run 8 — 2026-07-31 — script routing: a default reader per script
+
+**Correction to Run 5.** I called `E = mc²` a case where "square is not the reading". That was sloppy —
+"square" and "squared" are both ordinary English readings. The real question is whether a Burmese speaker
+reads an embedded English formula in ENGLISH at all, which is a language-SELECTION question, not a wording
+one. That reframing is what prompted this run.
+
+**The finding, which is much larger than the kana case that raised it.** The foreign-run fallback handled
+LATIN only, and `emitUnclaimed` said so outright: "Everything else in a gap … stays dropped exactly as
+before." Measured:
+
+```
+Cyrillic inside Greek      Ο Πούτιν και ο Владимир   →  o putin ce o            Владимир GONE
+Greek inside English       The word λόγος means word →  ðə wˈɝd mˈiːnz wˈɝd     λόγος GONE
+Cyrillic inside Japanese   これは Москва です          →  Москва GONE
+Greek inside Thai          คำว่า Ελλάδα คือ           →  Ελλάδα GONE
+Latin inside Russian       Слово hello значит        →  works — Latin is the special case
+```
+
+**Every non-Latin third script was dropped entirely**, in every engine. A dropped run is invisible to
+every leak-based check — nothing survives into the IPA to flag — the same blindness that hid the currency
+drops in #584.
+
+The choice was also duplicated: `getPhonemizer("en")` appears as the foreign reader at **44 registry call
+sites** plus the global default. "Latin defaults to English" was a decision made 45 times and never
+written down as one.
+
+### The model
+
+`core/scripts.ts`: a default reader per script, overridable per host language. The defaults are labelled
+by confidence, because a near-deterministic mapping and a pragmatic guess should not look alike to whoever
+edits it next — Greek/Hangul/Thai/Armenian/Georgian are nearly deterministic, Cyrillic→ru and Latin→en are
+dominant, and **Han→cmn is explicitly pragmatic**, which is why `OVERRIDES` exists: a Han run inside
+Japanese is Japanese, inside Korean it is hanja read as Korean.
+
+Two guards that matter:
+
+- **Self-routing is refused.** If the target equals the host, the router declines — otherwise the engine
+  is handed back text its own tokenizer just refused, and recurses.
+- **The host is a STACK, not a variable.** Reading a foreign run calls back into another engine, which
+  re-enters the same wrapper; a plain variable is clobbered by the inner call and never restored. Depth is
+  capped at 3.
+
+Result: five of the six cases above now read. `Владимир` → `vɫɐdʲˈimʲɪr`, `Москва` → `mɐskvˈa`,
+`Ελλάδα` → `elaða`.
+
+### Recorded limit: a lone Greek letter is probably mathematics
+
+`α`, `β`, `π`, `Δ` in Latin-script text are variables, and should be read as the host's letter NAME
+("alpha", "pi") — not as a Greek word. The router cannot tell that from a one-letter Greek word, so it
+requires two or more Greek characters before routing, and a single stray letter stays dropped. Doing
+better needs a per-host letter-name table, which is lexical data belonging to the host language.
+
+### What this does NOT fix
+
+**Greek inside English still drops.** English has its own scan and never calls `emitUnclaimed` — its
+tokenizer comment says "Non-Latin scripts stay unmatched, as before — English is not the engine for them."
+**149 of 181 engines use the shared clause path**; the other 32 have bespoke scans and each needs the gap
+pass added individually. English is the most-used engine, so it is the one that matters most, and it is
+not done.
+
+One test was superseded rather than fixed: `foreign-runs.test.ts` asserted that a third script stays
+dropped. That was the deliberate scope of the original change; it is now the behaviour being removed.

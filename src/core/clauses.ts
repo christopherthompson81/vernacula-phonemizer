@@ -13,7 +13,7 @@
  *     });
  *   }
  */
-import { getDefaultForeign } from "./foreign.ts";
+import { getDefaultForeign, readForeignRun } from "./foreign.ts";
 
 export interface ClauseSink {
     /** Append a phonemized token, space-joined; flushes any pending pause before it. Empty strings are ignored. */
@@ -54,6 +54,8 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
 
 /** A run of Latin-script text (with its combining marks, apostrophes and internal hyphens). */
 const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
+/** A run of letters in ANY script, kept together with its combining marks and internal apostrophes. */
+const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu;
 
 /**
  * Emit the FOREIGN runs inside text the engine's own tokenizer did not claim.
@@ -63,10 +65,23 @@ const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
  * fixes (see core/foreign.ts for why 47 engines lost embedded Latin entirely).
  */
 export function emitUnclaimed(gap: string, sink: ClauseSink): void {
-    if (!/\p{Script=Latin}/u.test(gap)) return; // fast path: nothing foreign here
-    const foreign = getDefaultForeign();
-    if (foreign === undefined) return; // no fallback registered → previous behaviour (dropped)
-    for (const run of gap.matchAll(LATIN_RUN)) sink.emit(foreign(run[0]));
+    // Any run of LETTERS is a candidate now, not only Latin. `\p{L}+` with combining marks, so an
+    // abugida or a decomposed accent survives as one run.
+    for (const m of gap.matchAll(FOREIGN_RUN)) {
+        const run = m[0];
+        // The script router first — it knows which language should read this run. It declines for an
+        // unknown script, and for a target equal to the host (which would recurse).
+        const routed = readForeignRun(run);
+        if (routed !== undefined) {
+            if (routed !== "") sink.emit(routed);
+            continue;
+        }
+        // Fallback: the pre-existing Latin-to-English path, kept so behaviour is unchanged wherever the
+        // router has nothing to say.
+        if (!/\p{Script=Latin}/u.test(run)) continue;
+        const foreign = getDefaultForeign();
+        if (foreign !== undefined) sink.emit(foreign(run));
+    }
 }
 
 export function assembleClauses(

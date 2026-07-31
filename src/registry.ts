@@ -197,7 +197,8 @@ import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.t
 import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
-import { setDefaultForeign } from "./core/foreign.ts";
+import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
+import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
 
 export interface Phonemizer {
@@ -228,6 +229,23 @@ const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
 // engines whose tokenizer matches only their own script DROP such text silently (core/foreign.ts).
 setDefaultForeign((text) => getPhonemizer("en").text(text));
 
+// SCRIPT ROUTING (core/scripts.ts). The line above reads every foreign run as ENGLISH, which is correct
+// for Latin and wrong for every other script — and in practice a non-Latin run never reached it at all,
+// because `emitUnclaimed` surfaced only Latin. So `Ο Πούτιν και ο Владимир` read as "o putin ce o" with
+// the Cyrillic silently gone. The router picks a reader from the run's SCRIPT, with the host language's
+// own overrides applied (a Han run inside Japanese is Japanese, not Mandarin).
+setScriptReader((run, host) => {
+    const target = readerFor(run, host);
+    if (target === undefined) return undefined;
+    try {
+        return getPhonemizer(target).text(run);
+    } catch {
+        // An unbuilt or unknown target must not take the whole utterance down; declining here falls back
+        // to the Latin-to-English path, which is what happened before this existed.
+        return undefined;
+    }
+});
+
 const cache = new Map<string, Phonemizer>();
 
 /** Languages whose own normalization already resolves Roman numerals, with more context than a shared
@@ -254,7 +272,17 @@ export function getPhonemizer(lang: string): Phonemizer {
         {
             const engine = p;
             const original = engine.text.bind(engine);
-            (engine as { text: (input: string) => string }).text = (input) => original(stripMarkup(input));
+            (engine as { text: (input: string) => string }).text = (input) => {
+                // The host language has to be known while the engine runs, because a foreign run is
+                // resolved DURING tokenization, deep inside `emitUnclaimed`. Pushed as a stack since
+                // reading a foreign run re-enters this same wrapper for another language.
+                pushHost(lang);
+                try {
+                    return original(stripMarkup(input));
+                } finally {
+                    popHost();
+                }
+            };
         }
         if (!ROMAN_NATIVE.has(lang)) {
             const engine = p;

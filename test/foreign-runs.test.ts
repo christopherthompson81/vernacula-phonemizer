@@ -54,10 +54,22 @@ describe("embedded foreign (Latin) runs", () => {
         expect(after.indexOf("vʲek")).toBeLessThan(after.indexOf("həl"));
     });
 
-    test("only Latin is surfaced — other unclaimed text stays dropped", () => {
-        // A third script in a gap is not the fallback's business (it would need its own engine);
-        // this keeps the change scoped to the measured defect.
-        expect(phonemize("век 世界", "ru")).toBe("vʲek");
+    // SUPERSEDED. This test used to assert that a third script stays dropped — the deliberate scope of
+    // the original Latin-only fallback. core/scripts.ts generalises it: a run is now routed to a reader
+    // chosen by its SCRIPT, so the Han is read as Mandarin instead of vanishing. The old behaviour was a
+    // silent DROP, invisible to every leak-based check, which is the same blindness as #584.
+    test("a third script is routed to a reader for that script, not dropped", () => {
+        const out = phonemize("век 世界", "ru");
+        expect(out.startsWith("vʲek")).toBe(true);
+        expect(out.length).toBeGreaterThan("vʲek".length); // the Han is spoken, not silently lost
+    });
+
+    test("script routing honours the host's overrides and declines self-routing", () => {
+        // Cyrillic inside Greek was read as English (so: dropped, since English cannot claim it).
+        expect(phonemize("Ο Πούτιν και ο Владимир", "el")).toContain("vɫɐdʲ");
+        // A lone Greek letter in another script is far more likely MATHEMATICS than a Greek word, so the
+        // router declines it rather than guessing — see the KNOWN LIMIT in core/scripts.ts.
+        expect(phonemize("The value is α", "en")).not.toContain("ˈaɫfa");
     });
 
     test("the run is delegated verbatim, accents included", () => {

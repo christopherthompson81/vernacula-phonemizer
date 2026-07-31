@@ -29,3 +29,46 @@ export function setDefaultForeign(f: ForeignPhonemizer): void {
 export function getDefaultForeign(): ForeignPhonemizer | undefined {
     return defaultForeign;
 }
+
+/**
+ * SCRIPT-AWARE reading (see core/scripts.ts). `defaultForeign` above always read a run as ENGLISH, which
+ * is right for Latin and wrong for everything else — and in practice every non-Latin run was dropped
+ * before it ever got here. The reader below is given the run AND the host language so it can route by
+ * script, with the host's own overrides applied.
+ */
+export type ScriptReader = (run: string, host: string) => string | undefined;
+
+let scriptReader: ScriptReader | undefined;
+
+/** Register the script router. Called by the registry at load, like `setDefaultForeign`. */
+export function setScriptReader(f: ScriptReader): void {
+    scriptReader = f;
+}
+
+/**
+ * The host language currently being read, as a STACK — reading a foreign run calls back into another
+ * engine, so this nests, and a plain variable would be clobbered by the inner call and never restored.
+ * Synchronous throughout, so a stack is sufficient and no async context is needed.
+ */
+const hosts: string[] = [];
+
+export function pushHost(lang: string): void {
+    hosts.push(lang);
+}
+export function popHost(): void {
+    hosts.pop();
+}
+
+/**
+ * Read one foreign run in the current host's context. `undefined` when there is no router, no host, or
+ * the router declines (an unknown script, or a target equal to the host — which would hand the engine
+ * back text its own tokenizer already refused, and recurse).
+ *
+ * DEPTH IS CAPPED. A pathological document alternating scripts could otherwise nest engine calls without
+ * bound; three levels is far past anything real (a Latin brand inside a Greek quote inside Thai).
+ */
+export function readForeignRun(run: string): string | undefined {
+    const host = hosts[hosts.length - 1];
+    if (scriptReader === undefined || host === undefined || hosts.length > 3) return undefined;
+    return scriptReader(run, host);
+}
