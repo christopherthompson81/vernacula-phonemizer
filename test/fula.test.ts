@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { phonemize } from "../src/index.ts";
+import { normalizeFula } from "../src/languages/fula/normalize.ts";
 import { createFula, phonemizeWord } from "../src/languages/fula/fula.ts";
 import { numberToWords } from "../src/languages/fula/numbers.ts";
 
@@ -67,5 +69,50 @@ describe("Fula g2p (authored)", () => {
         const ff = createFula();
         expect(ff.text("7")).toBe("d͡ʒeːɗˈiɗi"); // jeeɗiɗi — long ee→eː, implosive ɗ, penultimate stress
         expect(ff.text("𞥗")).toBe(ff.text("7")); // Adlam digits fold to ASCII → identical IPA
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/fula/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// rules are the English ordinal digits read as Fula ordinals (1st → gootal), the comma-thousands (the
+// corpus groups with commas), the dot-decimal "tere", the a.m./p.m. clocks with Fula time-of-day words,
+// the rates "e wakkati gootel", and the letter-spelled initialisms.
+describe("Fula text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "ff").trim();
+
+    it("text→text: the English ordinal digit reads the Fula ordinal", () => {
+        expect(normalizeFula("1st")).toBe("gootal");
+        expect(normalizeFula("16th")).toBe("sappo e jeegaɓal");
+        expect(normalizeFula("190th")).toBe("teemedere e cappanɗe jeenayaɓal");
+        expect(ph("1st je janeru")).toBe("ɡˈoːtal d͡ʒˈe d͡ʒanˈeɾu");
+    });
+
+    it("comma-thousands stay grouped; the dot is a decimal (tere)", () => {
+        expect(ph("2,243")).toBe("ud͡ʒunˈaːd͡ʒe ɗˈiɗi ˈe teːmˈedːe ɗˈiɗi ˈe t͡ʃapːˈanɗe nˈaji ˈe tˈati");
+        expect(ph("100,000")).toBe("ud͡ʒunˈaːd͡ʒe teːmedˈeɾe");
+        expect(ph("1.5 million")).toBe("ɡˈoː tˈeɾe d͡ʒˈoji milːˈion");
+        expect(ph("12.8km")).toBe("sˈapːo ˈe ɗˈiɗi tˈeɾe d͡ʒeːtˈati kilomˈetɾe");
+    });
+
+    it("clocks read hour [minute] with p.m./a.m. as kikiiɗe / fajiri", () => {
+        expect(ph("1:15 a.m.")).toBe("ɡˈoː ˈe sˈapːo ˈe d͡ʒˈoji fad͡ʒˈiɾi");
+        expect(ph("8:30 p.m.")).toBe("d͡ʒeːtˈati ˈe t͡ʃapːˈanɗe tˈati kikˈiːɗe");
+        expect(ph("15.00 UTC")).toBe("sˈapːo ˈe d͡ʒˈoji ˈu tˈa t͡ʃˈa");
+    });
+
+    it("era markers expand; ranges join hakkunde; rates use e wakkati gootel", () => {
+        expect(ph("1000B.C.")).toBe("ud͡ʒuⁿdˈeɾe ɓˈawo");
+        expect(ph("7-2")).toBe("d͡ʒeːɗˈiɗi hakːˈuⁿde ɗˈiɗi");
+        expect(ph("160km/h")).toBe("teːmedˈeɾe ˈe t͡ʃapːˈanɗe d͡ʒˈeːɡom kilomˈetɾe ˈe wakːˈati ɡˈoːtel");
+        expect(ph("300mph")).toBe("teːmˈedːe tˈati mˈiles ˈe wakːˈati ɡˈoːtel");
+    });
+
+    it("currency, percent, degrees and initialisms read their words or letters", () => {
+        expect(ph("US$11,000")).toBe("dˈolːaɾ amˈeɾik ud͡ʒunˈaːd͡ʒe sˈapːo ˈe ɡˈoː");
+        expect(ph("AUD$45")).toBe("dˈolːaɾ awstɾalˈija t͡ʃapːˈanɗe nˈaji ˈe d͡ʒˈoji");
+        expect(ph("88%")).toBe("t͡ʃapːˈanɗe d͡ʒeːtˈati ˈe d͡ʒeːtˈati tˈeɾe");
+        expect(ph("30°C")).toBe("t͡ʃapːˈanɗe tˈati diɡˈiɾi t͡ʃelsˈius");
+        expect(ph("MRI")).toBe("mˈa ɾˈa ˈi");
+        expect(ph("H5N1")).toBe("hˈa d͡ʒˈoji nˈa ɡˈoː");
+        expect(ph("U.S.")).toBe("ˈu sˈa");
     });
 });
