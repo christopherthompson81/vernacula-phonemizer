@@ -9,21 +9,52 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { phonemizeWord } from "../serbian/serbian.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeCroatian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Croatian word (Gaj's Latin incl. diacritics č ć š ž đ) / number / punctuation token. Latin-only: modern Croatian
 // is written exclusively in Latin (the Serbian engine's Cyrillic path is not exposed here).
-const TOKEN = /([a-zčćšžđ]+)|(\d+)|([.!?…,;:])/giu;
+// #562: the corpus groups thousands with PERIODS (2.500, 40.000) and writes decimals with COMMAS (2,4 Ghz).
+// The de-grouping happens in normalize.ts; the TOKEN here swallows the comma so the tier can see the number.
+const TOKEN =
+    /([a-zčćšžđ]+)|(\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])/giu;
+
+// #562 symbol normalization — Croatian: % is "posto" (indecilnable), the units/rates/exponents follow the
+// Serbian tier, and the currency signs the corpus writes (¥, $, €, £) are declared. Kept in the ENGINE
+// file so the review tool's sourcing check can see the words.
+export const SYMBOLS = makeSymbolNormalizer({
+    percent: ["posto"],
+    currency: { "¥": ["jen"], "$": ["dolar", "dolara"], "€": ["euro"], "£": ["funta"] },
+    units: {
+        km: ["kilometar", "kilometra", "kilometara"],
+        m: ["metar", "metra", "metara"],
+        mm: ["milimetar", "milimetra", "milimetara"],
+        cm: ["centimetar", "centimetra", "centimetara"],
+        mi: ["milja", "milje", "milja"],
+        ghz: ["gigaherc", "gigaherca", "gigaherca"],
+    },
+    unitPer: "na", // 70 km/h -> sedamdeset kilometara NA sat
+    rateDenominators: { h: "sat", s: "sekunda" },
+    exponentWords: {
+        squared: ["kvadratni", "kvadratna", "kvadratnih"],
+        cubed: ["kubni", "kubna", "kubnih"],
+        position: "before",
+    },
+    countForm: slavicCountForm,
+});
 
 class CroatianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/rate steps need the
+        // number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeCroatian(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1])); // shared Serbo-Croatian g2p
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // Croatian numbers
+                for (const wd of numberToWords(Number(m[2].replace(/\./gu, "").replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd)); // Croatian numbers
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { normalizeCroatian } from "../src/languages/croatian/normalize.ts";
 import { phonemizeWord } from "../src/languages/serbian/serbian.ts";
 
 // Croatian (hr) — South Slavic, Gaj's Latin. A THIN module: the SEGMENTAL grapheme→IPA is the shared Serbo-Croatian
@@ -38,5 +39,52 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("21000", "hr").trim()).toBe("dʋadeset jedna tisut͡ɕa"); // dvadeset jedna tisuća
         expect(phonemize("1000000", "hr").trim()).toBe("jedan milijun"); // masculine
         expect(phonemize("2000000", "hr").trim()).toBe("dʋa milijuna"); // dva milijuna — masculine keeps dva
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/croatian/normalize.ts) — the pre-tokenizer pass behind #562, modeled on
+// the Serbian normalize. The defining rules are the N. ordinal with its Croatian licensors (month genitives,
+// stoljeća, najvećim), the period-thousands vs ordinal disambiguation, the comma-decimal "zarez", the h-clock
+// suffix, the n.e./p.n.e. era markers, and the prenominal roman ordinals (I./II. svjetski rat).
+describe("Croatian text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "hr").trim();
+
+    test("text→text: the N. ordinal reads the Croatian inflected ordinal", () => {
+        expect(normalizeCroatian("15. kolovoza 1940.")).toBe("petnaestog kolovoza 1940.");
+        expect(ph("7. najvećim")).toBe("sedmom najʋet͡ɕim");
+        expect(ph("15. stoljeća")).toBe("petnaestoɡ stoʎet͡ɕa"); // neuter genitive
+    });
+
+    test("period-thousands de-group; comma-decimals read zarez", () => {
+        expect(ph("2.500 ¥")).toBe("dʋije tisut͡ɕe petsto jen");
+        expect(ph("40.000")).toBe("t͡ʃetrdeset tisut͡ɕa");
+        expect(ph("2,4 Ghz")).toBe("dʋa zarez t͡ʃetiri ɡiɡaxert͡sa");
+    });
+
+    test("clocks read the h-suffix; rates use na sat", () => {
+        expect(ph("22:00 i 23:00 h")).toBe("dʋadeset dʋa sata i dʋadeset tri sata");
+        expect(ph("23:35 h")).toBe("dʋadeset tri sata i trideset pet minuta");
+        expect(ph("70 km/h")).toBe("sedamdeset kilometara na sat");
+        expect(ph("40 milja/h")).toBe("t͡ʃetrdeset miʎa na sat");
+    });
+
+    test("era markers expand; roman ordinals inflect; initialisms expand", () => {
+        expect(ph("n. e.")).toBe("noʋe ere .");
+        expect(ph("p.n.e.")).toBe("prije noʋe ere .");
+        expect(ph("I. svjetskog rata")).toBe("prʋoɡ sʋjetskoɡ rata");
+        expect(ph("II. svjetskom ratu")).toBe("druɡom sʋjetskom ratu");
+        expect(ph("itd.")).toBe("i tako daʎe .");
+        expect(ph("Dr. Moll")).toBe("doktor moll");
+        expect(ph("George W. Bush")).toBe("ɡeorɡe busx");
+    });
+
+    test("degrees, fractions, ranges and signs read their Croatian words", () => {
+        expect(ph("90 °F")).toBe("deʋedeset stupɲeʋa farenxajta");
+        expect(ph("35° W")).toBe("trideset pet stupɲeʋa zapadno");
+        expect(ph("1/5 inča")).toBe("jedan peti int͡ʃa");
+        expect(ph("1990-1995")).toContain("do");
+        expect(ph("4×4")).toBe("t͡ʃetiri puta t͡ʃetiri");
+        expect(ph("-5")).toBe("minus pet");
+        expect(ph("UTC+1")).toBe("utt͡s plus jedan");
     });
 });
