@@ -68,6 +68,11 @@ export function ordinalWords(n: number, fem = false): string | undefined {
         if (tail !== "" && card.endsWith(tail))
             return `${card.slice(0, -tail.length)}${small[u]}`;
     }
+    // THE STEM LOSES ITS FINAL VOWEL before the ending: quaranta → quarantè/quarantena, noranta →
+    // norantè/norantena, seixanta → seixantè. Appending straight to the cardinal gave *seixantaè* and
+    // *cent norantaena*, which is both corpus instances of a tens ordinal (`60è`, `190a`). A final -ó
+    // takes the -on- stem instead (milió → milionè).
+    stem = stem.endsWith("ó") ? `${stem.slice(0, -1)}on` : stem.replace(/[ae]$/u, "");
     words[words.length - 1] = fem ? `${stem}ena` : `${stem}è`;
     return words.join(" ");
 }
@@ -170,7 +175,10 @@ export function normalizeCatalan(input: string): string {
     // 4b) DECADES — `1920s`, `90s`. Without this the shared tier's `s` unit reads "1920 s" as *mil nou-cents
     //     vint segons* (nineteen-twenty SECONDS) — the playbook's Il-76s trap. The corpus writes `els anys
     //     1920s`. Drop the plural marker; the number itself is the decade.
-    s = s.replace(/(?<![\d.,])(\d+)s(?![\p{L}\p{M}])/giu, "$1");
+    //     Narrowed to the DECADE shapes — a four-digit year or a bare tens (`1920s`, `90s`). Stripping the
+    //     `s` from ANY number took the unit off a genuine `45s` (forty-five SECONDS), which the tier reads
+    //     correctly once the plural marker is not in the way.
+    s = s.replace(/(?<![\d.,])((?:1\d|20)\d{2}|\d0)s(?![\p{L}\p{M}])/giu, "$1");
 
     // 5) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `11:35 PM` → onze trenta-cinc PM; `06:30` → sis
@@ -200,15 +208,22 @@ export function normalizeCatalan(input: string): string {
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "mig" : `${numberToWords(num)} mitjos`;
-        const ord = ordinalWords(den, false);
-        return ord === undefined ? m0 : `${numberToWords(num)} ${ord}`;
+        // 3 and 4 have their own NOUNS (un terç, tres quarts) rather than the ordinal, and every
+        // denominator pluralises above one: 2/3 dos terços, 3/4 tres quarts, 2/5 dos cinquens. Reading the
+        // bare ordinal gave *un tercer* for 1/3 and *tres quart* for 3/4.
+        const noun = den === 3 ? "terç" : den === 4 ? "quart" : ordinalWords(den, false);
+        if (noun === undefined) return m0;
+        const plural = den === 3 ? "terços" : den === 4 ? "quarts" : noun.replace(/è$/u, "ens");
+        return `${numberToWords(num)} ${num === 1 ? noun : plural}`;
     });
 
     // 8) DEGREES. `30 °C` came out as the bare consonant [k]; `35 ºO` (longitude west) used the ORDINAL
     //    º (U+00BA) which the ° rule missed. `grau` is the degree word (plural graus).
     s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/giu, "$1 graus Celsius");
     s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/giu, "$1 graus Fahrenheit");
-    s = s.replace(/(\d)\s?[°º]\s?([NOE]|O(?![\p{L}\p{M}]))(?![\p{L}\p{M}])/giu, (_m, d: string, c: string) =>
+    //    The class must carry S as well as N/O/E — the map has "sud" but the class did not, so `35 ºS`
+    //    left the º raw (a RAWMARK) and read the S as a letter.
+    s = s.replace(/(\d)\s?[°º]\s?([NSOE])(?![\p{L}\p{M}])/giu, (_m, d: string, c: string) =>
         `${d} graus ${({ N: "nord", S: "sud", E: "est", O: "oest" } as Record<string, string>)[c.toUpperCase()]!}`);
     s = s.replace(/(\d)\s?[°º](?![\p{L}\p{M}])/gu, "$1 graus");
 
@@ -235,5 +250,8 @@ export function normalizeCatalan(input: string): string {
     //     and after the dotted-capital rule.
     s = normalizeInitialisms(s);
 
-    return s;
+    // A padded replacement (` més `, ` i `) doubles a space that was already there — "UTC +1" became
+    // "UTC  més 1". Harmless downstream today because assembleClauses collapses runs, but SLOT-GAP is a
+    // defect class and this pass should not be the one producing candidates for it.
+    return s.replace(/[^\S\n]{2,}/gu, " ");
 }

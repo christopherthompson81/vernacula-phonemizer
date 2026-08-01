@@ -72,7 +72,7 @@ worked).
 - vitest: 2633 passed (200 files) — 8 new ca tests
 - referee: folded backbone 4201/5168 (81.3%) — IDENTICAL to the worktree baseline
 - corpus diff: 109/1841 (5.9%) changed, every change READ and verified an improvement
-- normalization-review --lang ca: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
+- normalization/review.ts --lang ca: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
 
 **Notes**:
 - the review probe `5 000` reads "cinc zero" — a synthetic space-grouping the Catalan corpus never
@@ -106,3 +106,35 @@ caught by probing the ADVERSARIAL NEIGHBOUR, none visible in the corpus diff or 
 
 **Post-fix gates**: corpus diff 111/1841 (6.0%), RAWMARK 1→0, DROP 2→0; 2635 tests (3 new trap-pin
 tests); referee 4201/5168 (81.3%) unchanged; review checklist clean.
+
+## Run 3 — 2026-08-01 (PR #594 review pass)
+
+**Question**: the branch already self-reviewed against the playbook traps, so what is left? ~30 probes over
+the shapes the rules build rather than the shapes they match. **Five defects, one of them on live corpus
+text — and it is in the ordinal, the layer's defining rule.**
+
+1. **A tens ordinal kept its stem vowel.** `${stem}è` appended straight to the cardinal gave *seixantaè*
+   and *cent norantaena*, where Catalan drops the stem-final vowel: **seixantè**, **cent norantena**
+   (quaranta → quarantè, noranta → norantena). Both of the corpus's tens ordinals are affected — `60è`
+   and `190a`, i.e. two of its ten ordinal instances — and both were in the shipped tests' blind spot,
+   because the tests pinned 7è/7a/1r/4t, all of which come from the irregular under-ten TABLE and never
+   exercise the compositional path. A final -ó takes the -on- stem (milió → milionè).
+2. **Fractions read the bare ordinal.** 1/3 was *un tercer* and 3/4 *tres quart*. Catalan uses NOUNS for
+   thirds and quarters (un terç, tres quarts) and pluralises every denominator above one (2/3 dos terços,
+   2/5 dos cinquens). The corpus's only slash fraction is 1/5, which the ordinal path happens to get right.
+3. **The decade rule stripped the plural `s` from ANY number**, so a genuine `45s` (forty-five SECONDS) lost
+   its unit. Narrowed to the decade shapes — a four-digit year or a bare tens (`1920s`, `90s`) — which is
+   what the corpus's one instance is, and the tier then reads `45s` correctly.
+4. **The compass-degree class was missing S** while its map carried "sud", so `35 ºS` left the º raw (a
+   RAWMARK) and read the S as a letter. The corpus writes `ºO`, which is why it never fired.
+5. **A padded replacement doubled an existing space** (`UTC +1` → `UTC  més 1`). Harmless downstream today,
+   since assembleClauses collapses runs, but SLOT-GAP is a defect class and this pass should not manufacture
+   candidates for it. The pass now collapses runs on the way out.
+
+**Gates**: vitest 2639 (200 files, +4 tests); tsc clean; scan no defects; `normalization/review.ts --lang ca`
+checklist clean; referee **identical** at 4201/5168; corpus diff **2/1841**, every counter 0 → 0, and both
+changes are the tens ordinal (`nuɾəntəˈɛnə` → `nuɾəntˈɛnə`, `səʃəntəˈɛ` → `səʃəntˈɛ`).
+
+**The transferable lesson**: this layer's tests covered every ordinal the corpus writes and still missed the
+defect, because the corpus's instances and the RULE's branches are different sets. A table-plus-composition
+rule needs a pin on the composition, not only on the table.

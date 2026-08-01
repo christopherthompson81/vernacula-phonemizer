@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { normalizeCatalan } from "../src/languages/catalan/normalize.ts";
+import { normalizeCatalan, ordinalWords } from "../src/languages/catalan/normalize.ts";
 import { phonemizeWord } from "../src/languages/catalan/catalan.ts";
 import { ROMAN_POLICY } from "../src/languages/catalan/romanOrdinals.ts";
 
@@ -239,6 +239,35 @@ describe("Catalan text normalization", () => {
         expect(ph("Dr. Moll")).toBe("duktˈo mˈɔʎ");
         expect(ph("George W. Bush")).toBe("ʒəˈɔɾʒə w bˈus");
         expect(ph("etc.")).toBe("ətsˈɛtəɾə .");
+    });
+
+    // The tens ordinal drops its stem vowel — both of the corpus's tens instances (60è, 190a) read with it.
+    test("a tens ordinal loses the stem vowel: seixantè, cent norantena", () => {
+        expect(ordinalWords(40)).toBe("quarantè");
+        expect(ordinalWords(60)).toBe("seixantè");
+        expect(ordinalWords(90, true)).toBe("norantena");
+        expect(ordinalWords(190, true)).toBe("cent norantena");
+        expect(ph("el 60è de la temporada")).toBe("əɫ səʃəntˈɛ də ɫə təmpuɾˈaðə"); // was *seixantaè*
+        expect(ph("la 190a posició")).toBe("ɫə sˈen nuɾəntˈɛnə puzisiˈo"); // was *cent norantaena*
+    });
+
+    test("a fraction uses terç/quart and pluralises above one", () => {
+        expect(normalizeCatalan("1/3")).toBe("un terç"); // not the ordinal *un tercer*
+        expect(normalizeCatalan("2/3")).toBe("dos terços");
+        expect(normalizeCatalan("3/4")).toBe("tres quarts"); // was *tres quart*
+        expect(normalizeCatalan("2/5")).toBe("dos cinquens");
+        expect(normalizeCatalan("1/5")).toBe("un cinquè");
+    });
+
+    test("only a DECADE loses its plural s; a unit keeps it", () => {
+        expect(normalizeCatalan("els anys 1920s")).toBe("els anys 1920");
+        expect(normalizeCatalan("els anys 90s")).toBe("els anys 90");
+        expect(ph("45s de vídeo")).toBe("kwəɾˈantə sˈiŋ səɣˈons də bˈiðəu"); // seconds, not *quaranta-cinc*
+    });
+
+    test("the compass degree carries S too, and no rule leaves a double space", () => {
+        expect(ph("35 ºS")).toBe("tɾˈɛntə sˈiŋ ɡɾˈaws sˈut"); // was a raw º plus a stray letter
+        expect(normalizeCatalan("UTC +1")).toBe("u te ce més 1");
     });
 
     test("initialisms letter-spell (EUA); ONU stays the word; B&B reads be i be", () => {
