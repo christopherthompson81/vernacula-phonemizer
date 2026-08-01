@@ -59,16 +59,34 @@ const HIGH: Readonly<Record<string, string>> = {
     a: "ı", ı: "ı", e: "i", ə: "i", i: "i", o: "u", u: "u", ö: "ü", ü: "ü",
 };
 
+/** Two-way LOW harmony, the other half of the pair: a suffix's low vowel is `a` after a back stem vowel and
+ *  `ə` after a front one (on → onda, beş → beşdə; bir → birdən, altı → altıda). */
+const LOW: Readonly<Record<string, string>> = {
+    a: "a", ı: "a", o: "a", u: "a", e: "ə", ə: "ə", i: "ə", ö: "ə", ü: "ə",
+};
+
+/**
+ * Rewrite a WRITTEN suffix so it agrees with the stem it will be spoken against: high vowels take the
+ * four-way class (ı/i/u/ü), low vowels the two-way class (a/ə), and a vowel-initial suffix after a
+ * vowel-final stem gets the buffer `y` (iyirmi + ə → iyirmiyə).
+ *
+ * This is needed because the suffix in the text was harmonised against the DIGITS, not against the words
+ * they are read as, and the two do not always agree: the corpus writes `11:00-dan`, which is read *on
+ * birdən* — `bir` is front, so the ablative is -dən however the numeral was written.
+ */
+function harmoniseSuffix(stem: string, suffix: string): string {
+    const v = lastVowelOf(stem);
+    if (v === undefined || suffix === "") return suffix;
+    const hi = HIGH[v]!, lo = LOW[v]!;
+    const body = [...suffix].map((c) => (/[ıiuü]/u.test(c) ? hi : /[aə]/u.test(c) ? lo : c)).join("");
+    const buffer = VOWEL.test(stem[stem.length - 1]!) && VOWEL.test(body[0]!) ? "y" : "";
+    return `${buffer}${body}`;
+}
+
 function lastVowelOf(w: string): string | undefined {
     for (let i = w.length - 1; i >= 0; i--) if (VOWEL.test(w[i]!)) return w[i]!;
     return undefined;
 }
-
-/** The WRITTEN ordinal suffix (ci/cı/cu/cü) → the harmony class it implies. The written suffix's own vowel
- *  is the class the SPOKEN suffix must take (dörd → -üncü, iyirmi → -inci). */
-const WRITTEN_CLASS: Readonly<Record<string, "ı" | "i" | "u" | "ü">> = {
-    cı: "ı", ci: "i", cu: "u", cü: "ü",
-};
 
 /**
  * Integer → the Azerbaijani ORDINAL, i.e. the cardinal with the ordinal suffix on its LAST word: 18 → `on
@@ -133,7 +151,7 @@ export const isUnreadableAzerbaijani = makeUnreadableTest({
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. ABŞ (Amerika Birləşmiş
  *  Ştatları) is the corpus's dominant one — [ɑbʃ], one syllable, like NASA. GPS, BMT, MS, KNP, CEP are
  *  letter-spelled. */
-const WORD_ACRONYMS: ReadonlySet<string> = new Set(["abş", "nasa", "unecso", "aol", "covid", "fiba", "opec", "rem"]);
+const WORD_ACRONYMS: ReadonlySet<string> = new Set(["abş", "nasa", "unesco", "aol", "covid", "fiba", "opec", "rem"]);
 
 const normalizeInitialisms = makeInitialismNormalizer({
     letterName: (l) => LETTER_NAME[l.toLowerCase()],
@@ -173,7 +191,7 @@ export function normalizeAzerbaijani(input: string): string {
     // 4) ORDINALS — the `N-ci` form. The written suffix (ci/cı/cu/cü) implies the harmony class; the spoken
     //    suffix is the cardinal's last word with -ıncı/-inci/-uncu/-üncü. Was *səkkiz d͡ʒi* / *yüz doxsan
     //    d͡ʒı* / *iyirmi dörd d͡ʒü*. BEFORE the clock rule so a digit run is not first claimed as a time.
-    s = s.replace(/(?<![\d.,])(\d+)-(cı|ci|cu|cü)(?![\p{L}\p{M}])/giu, (m0, d: string, c: string) =>
+    s = s.replace(/(?<![\d.,])(\d+)-(cı|ci|cu|cü)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
         ordinalWords(Number(d)) ?? m0);
 
     // 5) SPACE-GROUPED THOUSANDS. Azerbaijani groups thousands with a SPACE (400 000, 30 000). Two passes,
@@ -183,21 +201,40 @@ export function normalizeAzerbaijani(input: string): string {
 
     // 6) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `12:00 GMT` → saat on iki GMT; `21:20` → iyirmi
-    //    bir iyirmi; `23:35-ə` → the clock with a dative suffix.
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*)([-əa]?)/giu, (m0, h: string, min: string, sp: string, sfx: string) => {
-        const hv = Number(h), mv = Number(min);
-        if (hv > 23 || mv > 59) return m0;
-        const head = mv === 0 ? numberToWords(hv) : `${numberToWords(hv)} ${numberToWords(mv)}`;
-        return `${head}${sp}${sfx}`;
-    });
+    //    bir iyirmi.
+    //
+    //    THE CASE SUFFIX IS GLUED TO THE LAST SPOKEN WORD, and it is the corpus's dominant clock shape:
+    //    NINE of its twenty-one clocks carry one (`10:00-da`, `11:00-dan`, `01:15-də`, `23:35-ə`,
+    //    `11:20-də`, `8:46-da`, `07:19-da`, `09:30-da`, `11:00-dan`). Capturing a single character left the
+    //    hyphen behind and the suffix as its own token, so `10:00-da` read *on dɑ* — two words, a stray
+    //    postposition where the language has one word (*onda*). The written suffix already agrees with the
+    //    last numeral in all nine, since the writer harmonised it against the spoken form.
+    //    The trailing guard rejects a further digit, a colon, or a DOT PLUS A DIGIT — the corpus's three
+    //    sports times are colon-separated (`1:09:02`, `2:11:60`, `4:41:30`) and stay bare numbers, but the
+    //    dot-separated variant of the same shape (`4:41.30`, which Afrikaans shipped) would otherwise have
+    //    its head claimed as a clock and its tail stranded as a phrase break. A bare `.` must still pass —
+    //    a clause can end on a clock.
+    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|\.\d)(?:-([a-zəçğıiöşü]{1,5}))?/giu,
+        (m0, h: string, min: string, sfx?: string) => {
+            const hv = Number(h), mv = Number(min);
+            if (hv > 23 || mv > 59) return m0;
+            const head = mv === 0 ? numberToWords(hv) : `${numberToWords(hv)} ${numberToWords(mv)}`;
+            const last = head.split(" ").pop()!;
+            return `${head}${sfx === undefined ? "" : harmoniseSuffix(last, sfx)}`;
+        });
 
     // 7) VERSION DOTS — `2.4Ghz`, `5.0 Ghz`, `802.11n`, and the figure reference `Şək. 1.1`. The comma is
     //    the decimal; a DOT-decimal followed by a unit (Ghz/GHz), a version letter (n), or a phrase boundary
     //    with a SHORT fraction (1-2 digits — a figure number) is a version. Read "nöqtə" (point). AFTER the
     //    clock (8:30 has a two-digit minute and no letter after). A 3+ digit fraction (`1.234`) stays a
     //    grouping the corpus never writes with a dot.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?=\s*(?:[a-zA-Zçğəıiöşüx]|[)»]|$))/giu, "$1 nöqtə $2");
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(?=[a-zA-Zçğəıiöşüx]|GHz?)/giu, "$1 nöqtə $2");
+    // The lookbehind also rejects a preceding COLON, so the dot inside a colon-separated sports time
+    // (`4:41.30`) is not read as a version point once the clock rule has correctly declined it.
+    s = s.replace(/(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(?=\s*(?:[a-zA-Zçğəıiöşüx]|[)»]|$))/giu, "$1 nöqtə $2");
+    // The fraction is capped at TWO digits and the space is preserved. Unbounded, this rule claimed the
+    // period-THOUSANDS the engine reads as one number (`1.234 nəfər` → *1 nöqtə 234nəfər*, the space eaten
+    // too) — the very grouping the TOKEN's `\d+\.\d{3}` group exists to read.
+    s = s.replace(/(?<![\d.,:])(\d+)\.(\d{1,2})(?![\d])(\s?)(?=[a-zA-Zçğəıiöşüx]|GHz?)/giu, "$1 nöqtə $2$3");
 
     // 8) RATES — the corpus's own prose reads them PREFIXED ("saatda 40 mil", "saniyədə 1,5 km"), exactly
     //    as Turkish. The shared tier only emits "N kilometr saatda"-shaped, so the `/unit` forms are
@@ -216,8 +253,15 @@ export function normalizeAzerbaijani(input: string): string {
     //    noun takes the suffix directly (faizi, faizini). The shared tier's `N%` → "N faiz" cannot see
     //    past the trailing letter, and would double a spelled "faiz". The suffixed form is fully spelled
     //    here (no % remains); the bare `N%` is left for the tier.
-    s = s.replace(/(\d+)%(-?(?:n?[iuə]))\b/gu, (_m, d: string, sfx: string) =>
-        `${d} faiz${sfx.replace(/^-/u, "")}`);
+    //     `\b` IS ASCII-DEFINED and this suffix is not: the old guard silently declined `46%-dən` and
+    //     `1%-nin`, whose suffix ends in a non-ASCII letter, so both read the suffix as a bare word
+    //     (*faiz dən*). Two of the corpus's twelve percent instances. An n-INITIAL suffix also needs the
+    //     linking vowel that its written form assumes — `88%-ni` is *faizini*, never *faizni*, which is a
+    //     cluster the language does not allow (three more instances).
+    s = s.replace(/(\d+)\s?%-?([a-zəçğıiöşün]{1,5})(?![\p{L}\p{M}])/gu, (_m, d: string, sfx: string) => {
+        const link = /^n/u.test(sfx) ? harmoniseSuffix("faiz", "i") : "";
+        return `${d} faiz${link}${harmoniseSuffix(`faiz${link}`, sfx)}`;
+    });
 
     // 10) DEGREES. `+30°C` came out as the bare consonant [dʒ]; `35°` dropped the sign. The scale letters are
     //     expanded only DIRECTLY after a degree sign. `dərəcə` is the corpus's own word ("90 dərəcə farenheyt").
@@ -241,12 +285,16 @@ export function normalizeAzerbaijani(input: string): string {
     //     (locative of the denominator + numerator), ½ → yarım, ¾ → üçdə dörd. LAST, so no earlier rule
     //     has to work around a slash.
     s = s.replace(/(\d+)½/gu, "$1 yarım");
-    s = s.replace(/(\d+)¾/gu, "$1 üçdə dörd");
+    // ¾ is THREE QUARTERS — denominator-locative + numerator, the same shape the slash rule below builds:
+    // *dörddə üç*. "üçdə dörd" is 4/3, and the corpus's one instance (`29¾ düym`) read it that way.
+    s = s.replace(/(\d+)¾/gu, "$1 dörddə üç");
+    s = s.replace(/(\d+)¼/gu, "$1 dörddə bir");
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "yarım" : `${numberToWords(num)} yarım`;
         const dw = numberToWords(den);
-        return dw === "" ? m0 : `${dw}də ${numberToWords(num)}`;
+        // The locative harmonises: beşdə and dörddə, but onda and altıda — `${dw}də` gave *ondə*.
+        return dw === "" ? m0 : `${dw}${harmoniseSuffix(dw, "də")} ${numberToWords(num)}`;
     });
 
     // 13) REGNAL `II` — `II Dünya Müharibəsi` (World War II). The shared Roman pass converts II → 2 before

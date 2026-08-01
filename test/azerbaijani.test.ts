@@ -129,10 +129,35 @@ describe("Azerbaijani text normalization", () => {
         expect(ph("Corc V. Buş")).toBe("d͡ʒˈoɾd͡ʒ v bˈuʃ");
     });
 
-    test("percent with a possessive suffix reads faizi/faizini; bare % reads faiz", () => {
+    test("percent takes ANY case suffix, with the linking vowel an n-initial one needs", () => {
         expect(ph("30%-i")).toBe("otˈuz fɑizˈi");
-        expect(ph("88%-ni")).toBe("sæcsˈæn sæcːˈiz fɑiznˈi");
+        expect(ph("88%-ni")).toBe("sæcsˈæn sæcːˈiz fɑizinˈi"); // faizini — *faizni is not a possible cluster
+        expect(ph("46%-dən")).toBe("ɡˈɯɾx ɑɫtˈɯ fɑizdˈæn"); // was read as a bare word: *faiz dən*
+        expect(ph("1%-nin")).toBe("bˈiɾ fɑizinˈin");
         expect(ph("100%")).toBe("jˈyz fɑˈiz");
+    });
+
+    // NINE of the corpus's twenty-one clocks carry a case suffix, and it belongs ON the last spoken word.
+    test("a clock's case suffix is glued to the last word and harmonised to it", () => {
+        expect(ph("10:00-da başladı")).toBe("ondˈɑ bɑʃɫɑdˈɯ"); // onda, not *on dɑ*
+        expect(ph("01:15-də")).toBe("bˈiɾ ˈon beʃdˈæ");
+        expect(ph("23:35-ə")).toBe("ijiɾmˈi ˈyt͡ʃ otˈuz beʃˈæ");
+        expect(ph("8:46-da")).toBe("sæcːˈiz ɡˈɯɾx ɑɫtɯdˈɑ");
+        // the written suffix agrees with the DIGITS, the spoken one with the WORDS: -dan after `bir` is -dən
+        expect(normalizeAzerbaijani("11:00-dan")).toBe("on birdən");
+    });
+
+    test("a fraction is denominator-locative + numerator, and the locative harmonises", () => {
+        expect(ph("29¾ düym")).toBe("ijiɾmˈi doɡːˈuz dœɾdːˈæ ˈyt͡ʃ dˈyjm"); // ¾ is 3/4, not *üçdə dörd*
+        expect(normalizeAzerbaijani("1/10")).toBe("onda bir"); // not *ondə*
+        expect(normalizeAzerbaijani("1/6")).toBe("altıda bir");
+        expect(normalizeAzerbaijani("1/5")).toBe("beşdə bir");
+    });
+
+    test("a period-thousands survives a following word, and a sports time is not a clock", () => {
+        expect(ph("1.234 nəfər")).toBe("mˈin icˈi jˈyz otˈuz dˈœɾd næfˈæɾ"); // was *1 nöqtə 234nəfər*
+        expect(normalizeAzerbaijani("4:41.30")).toBe("4:41.30"); // untouched: not a clock, not a version
+        expect(normalizeAzerbaijani("saat 11:20.")).toBe("saat on bir iyirmi."); // a clause may end on a clock
     });
 
     test("rates read prefixed (saatda/saniyədə); version dots read nöqtə; units compose", () => {

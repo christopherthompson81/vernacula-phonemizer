@@ -6,7 +6,7 @@ started from). Working branch: `norm-az-562`.
 ## Run 1 — 2026-07-31
 
 **Setup**: baseline emitted from `~/Programming/tmp/az-base` via
-`npx tsx tools/normalization-corpus-diff.ts emit --lang az --corpus az_az --out /tmp/az.base`;
+`npx tsx tools/normalization/corpus-diff.ts emit --lang az --corpus az_az --out /tmp/az.base`;
 identical to `/tmp/az.before` (main tree). Referee baseline: `folded backbone: 3293/4034 (81.6%)`.
 
 **Corpus shape** (1,919 unique az_az utterances — Azerbaijani is Latin-script Turkic, the Oghuz sibling
@@ -75,7 +75,7 @@ prefixed (the tier's "N kilometr saatda" shape is wrong for Azerbaijani).
 - vitest: 2624 passed (200 files) — 19 az tests
 - referee: folded backbone 3293/4034 (81.6%) — IDENTICAL to the worktree baseline
 - corpus diff: 290/1919 (15.1%) changed, every sample-tier change READ and verified an improvement
-- normalization-review --lang az: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
+- normalization/review.ts --lang az: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
 
 **Notes**:
 - the review probe `1.234` reads "bir . iki yüz..." — a synthetic dot-decimal the corpus never writes
@@ -85,3 +85,42 @@ prefixed (the tier's "N kilometr saatda" shape is wrong for Azerbaijani).
   `$` → dollar plus the text's own "ABŞ dolları" (the corpus's currency noun is the possessive form
   "dolları" the tier's saidAfter check cannot match). Per the parent's #590 policy (redundant is a
   PERMISSIBLE drop), the word IS spoken, so this is accepted rather than flagged.
+
+## Run 3 — 2026-08-01 (PR #593 review pass)
+
+**Question**: which shapes does the corpus carry that these rules only half-handle? ~35 probes, then every
+gate re-run. **Seven defects, four of them on live corpus text — and the two biggest are the same mistake in
+two places: a case suffix written after a digit belongs ON the word the digit is read as.**
+
+1. **The clock's case suffix, ×9** — nine of the corpus's twenty-one clocks carry one (`10:00-da`,
+   `11:00-dan`, `01:15-də`, `23:35-ə`, `11:20-də`, `8:46-da`, `07:19-da`, `09:30-da`, `11:00-dan`). The rule
+   captured a SINGLE character, so the hyphen was dropped and the suffix read as its own token: `10:00-da`
+   → *on dɑ*, two words where Azerbaijani has one (*onda*). Now glued.
+2. **…and harmonised, not just glued.** The written suffix agrees with the DIGITS; the spoken one must agree
+   with the WORDS, and they diverge: the corpus writes `11:00-dan`, which is read *on birdən* — `bir` is
+   front, so the ablative is -dən however the numeral was written. Added `harmoniseSuffix`, which applies
+   the four-way high class and the two-way low class (a/ə) and inserts the buffer `y` after a vowel-final
+   stem. One helper, three users (clock, percent, fraction locative).
+3. **Percent took only two of its five suffix shapes, ×6.** The guard was `\b`, which is ASCII-defined
+   (playbook trap 1), so `46%-dən` and `1%-nin` — suffixes ending in a non-ASCII letter — silently declined
+   and read the suffix as a bare word (*faiz dən*). And `-ni` produced *faizni*, a cluster the language does
+   not allow: an n-initial suffix assumes a vowel-final stem, so `88%-ni` is *faizini* (three instances).
+4. **`¾` read as 4/3.** `üçdə dörd` is "four in three"; ¾ is *dörddə üç*, which is exactly the shape the
+   file's own slash-fraction rule builds. One corpus instance (`29¾ düym`).
+5. **The locative did not harmonise**: `${dw}də` gave *ondə* and *altıdə* for 1/10 and 1/6 (back-vowel
+   stems take -da). No corpus instance; wrong for the language.
+6. **The version-dot rule claimed the period-THOUSANDS** the engine reads as one number — `1.234 nəfər` →
+   *1 nöqtə 234nəfər*, with the space eaten as well. Capped the fraction at two digits and preserved the
+   space. Zero corpus instances (az_az groups with spaces), but the second commit on this branch exists
+   precisely to read `1.234` as a number, so the two rules contradicted each other.
+7. **The clock claimed a dot-separated sports time.** The corpus's three are colon-separated (`4:41:30`) and
+   correctly stay bare numbers, but `4:41.30` — the variant Afrikaans shipped — had its head claimed and its
+   tail stranded. Guard is now "no digit, no colon, and no dot-plus-digit"; a bare `.` still passes, since a
+   clause may end on a clock.
+
+Also removed: `WRITTEN_CLASS`, declared and never read (the ordinal recomputes harmony from the cardinal,
+which is right), and a typo in the word-acronym set (`unecso`).
+
+**Gates**: vitest 2627 (200 files, +4 tests); tsc clean; scan no defects; `normalization/review.ts --lang az`
+checklist clean; referee **identical** at wikipron 3293/4034; corpus diff **15/1919** with every counter
+0 → 0 — 9 clock suffixes, 4 percent suffixes, 1 fraction, 1 clock suffix harmonised, each classified.
