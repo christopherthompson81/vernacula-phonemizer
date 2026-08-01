@@ -110,10 +110,13 @@ export function ordinalWords(n: number): string | undefined {
     return `an ${words.join(" ")}`;
 }
 
-/** The ordinal of a CARDINAL WORD when it ends a compound (from numbers.ts's emitted words). */
+/** The ordinal of a CARDINAL WORD when it ends a compound (from numbers.ts's emitted words). The
+ *  counting series prefixes `h` to the vowel-initial aon/ocht (a haon, a hocht), so both forms are
+ *  keyed — 21ú = fiche a haon → "an fiche a h-aonú" would be wrong, so haon maps to aonú and the h is
+ *  dropped (the ordinal is "an t-aonú" for first-of-something, but in a compound "fiche a haonú"). */
 const UNIT_ORD: Readonly<Record<string, string>> = {
-    aon: "aonú", dó: "dara", trí: "tríú", ceathair: "ceathrú", cúig: "cúigiú",
-    sé: "séú", seacht: "seachtú", ocht: "ochtú", naoi: "naoú", deich: "deichiú",
+    aon: "aonú", haon: "aonú", dó: "dara", trí: "tríú", ceathair: "ceathrú", cúig: "cúigiú",
+    sé: "séú", seacht: "seachtú", ocht: "ochtú", hocht: "ochtú", naoi: "naoú", deich: "deichiú",
 };
 const TENS_ORD: Readonly<Record<string, string>> = {
     fiche: "fichiú", tríocha: "tríochadú", daichead: "daicheadú", caoga: "caogadú",
@@ -140,6 +143,8 @@ export function normalizeIrish(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])R\.C\.(?![\p{L}\p{M}])/giu, "roimh Chríost");
     s = s.replace(/(?<![\p{L}\p{M}])AD(?=\s*\d+)/giu, "tar éis Chríost");
     s = s.replace(/(?<![\p{L}\p{M}])\d[\d,]*\s+AD(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/AD/giu, "tar éis Chríost"));
+    s = s.replace(/(?<![\p{L}\p{M}])BC(?=\s*\d+)/giu, "roimh Chríost");
+    s = s.replace(/(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/BC/giu, "roimh Chríost"));
     s = s.replace(/(?<![\p{L}\p{M}])N\.A\.(?![\p{L}\p{M}])/giu, "Náisiúin Aontaithe");
     s = s.replace(/(?<![\p{L}\p{M}])S\.A\.(?![\p{L}\p{M}])/giu, "Stáit Aontaithe");
 
@@ -260,6 +265,10 @@ export function normalizeIrish(input: string): string {
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 níos lú ná $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 níos mó ná $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 faoi $2");
+    // A PERCENT after a DECIMAL — `3.5%`. The dot rule has converted the number to words by now, so the
+    // tier's digit-adjacent % would miss it; claim the word-form percent here (the Fula decimal-percent
+    // leak). The bare-digit `%` is the tier's.
+    s = s.replace(/([\p{L}\p{M}\d]+ pointe [\p{L}\p{M} ]+?)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 faoin gcéad");
 
     // 12) INITIALISMS, LAST of the letter rules: it must run after the era markers (else A.D. → *a.
     //     dé.*) and after the dotted-capital rule.

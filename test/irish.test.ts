@@ -149,6 +149,9 @@ describe("Irish text normalization", () => {
         expect(ph("400,000")).toBe("cˈɛhɾʲə çˈeːd̪ˠ mʲˈiːlʲə");
         expect(ph("1.5 million")).toBe("ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ mʲˈɪlʲən̪ˠ");
         expect(ph("12.8 km")).toBe("ˈa d̪ˠˈoː jˈeːɡ pˠˈɔnʲtʲə ˈa hˈɔxt̪ˠ cˈɪlʲəmʲeːd̪ˠəɾˠ");
+        // trap pins: the haon-ending compound ordinals (21ú, 31ú) and the decimal-percent (3.5%)
+        expect(ph("21ú")).toBe("ˈan̪ˠ fʲˈɪçə ˈa ˈeːn̪ˠuː"); // an fiche a aonú
+        expect(ph("3.5%")).toBe("ˈa tʲɾʲˈiː pˠˈɔnʲtʲə ˈa kˈuːɟ fˠˈiːnʲ ɟˈeːd̪ˠ"); // faoin gcéad after the decimal
     });
 
     test("clocks read hour [minute] with i.n./r.n. as iarnóin / réamhnóin", () => {

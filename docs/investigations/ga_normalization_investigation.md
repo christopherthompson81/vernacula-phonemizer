@@ -98,3 +98,28 @@ are both attested (the review's sourcing check passes).
 **Notes**: the review probes `12,5` (comma-decimal → pointe), `1.234` (pointe digit-by-digit), `5 000`
 (space-grouped, corpus-absent) all read correctly. The `1960idí` decade reads "1960 idí" (the number +
 the Irish -idí suffix as a word) — the corpus's own prose register; acceptable.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Three real defects,
+all found by probing the adversarial neighbour (trap 8/13), none visible in the corpus diff:
+
+- **The `haon`-ending compound ordinals (trap 13)**: `21ú` and `31ú` read "21ú"/"31ú" unchanged — the
+  compositor emits "fiche a haon" (the counting `a` + h-prefixed `haon`), but UNIT_ORD keyed only "aon",
+  so the last word "haon" found no ordinal. The corpus has NO 21ú/31ú (only 11ú, which goes through the
+  <20 table path), so this is defensive — but it was wrong for the language. Fixed: "haon" → "aonú".
+- **The decimal-percent leak (trap 8, the Fula lesson)**: `3.5%` read "a trí pointe a cúig" with the `%`
+  silently dropped — the dot rule converted the number to words, so the tier's digit-adjacent `%` could
+  not see it. Fixed by claiming the word-form percent ("X pointe … faoin gcéad").
+- **English `BC` era marker (defensive)**: the corpus uses `R.C.` (roimh Chríost), but the synthetic
+  `BC 1000`/`1000 BC` probes read [bk]. Added the BC → roimh Chríost expansion.
+
+**Verified non-issues**: the capitalized ordinals (15Ú, 18Ú, 7Ú, 190Ú); the fraction denominators
+(2/3, 3/4, 1/2, 2/5, 3¾, 2½); 30°F/30°/35°E/35°N; the minus-vs-range guard (-5 → lúide, 5-10 → go
+dtí, -5°C); the rate forms (12.8msu, 64km/u, 2.4Ghz/GHz); the comma-decimal vs comma-thousands
+(12,5/12,50 → pointe, 1,400/5,000,000 → thousands); the currency amounts (£27, ¥2,500, $2.3, $1000);
+`go dtí` and `san uair` do NOT trigger mutation (verified — the corpus's own prose matches).
+
+**Post-fix gates**: corpus diff 202/1948 (10.4%) — byte-identical to the pre-review run (no regression,
+the fixes touch only corpus-absent forms); 2660 tests (2 new trap pins); referee 44.8% unchanged; scan
+no defects; review checklist clean, sourcing check passes.
