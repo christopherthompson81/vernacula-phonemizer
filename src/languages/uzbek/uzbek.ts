@@ -6,16 +6,19 @@
  * forms oʻ/gʻ) from the tutuq belgisi (a standalone apostrophe → glottal stop [ʔ]). Final-syllable (weak) stress.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { turkicNumberWords, type UzbekNumberWords } from "./numbers.ts";
+import { normalizeUzbek } from "./normalize.ts";
 
 interface UzbekDef {
     vowels: Record<string, string>;
     consonants: Record<string, string>;
     digraphs: Record<string, string>;
     glottal: string;
-    numbers: NumbersDef;
+    numbers: UzbekNumberWords;
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<UzbekDef>(import.meta.url, "uzbek.jsonc");
@@ -70,44 +73,40 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, phonemizeWord, turkicNumberWords);
 }
 
-// Turkic decimal composition: units + tens + hundred/thousand/… concatenated (no fusion, space-separated).
-function turkicNumberWords(n: number, d: NumbersDef): (string | null)[] {
-    if (n < 10) return [d.units[n]!];
-    if (n < 100) {
-        const t = Math.floor(n / 10) * 10,
-            u = n % 10;
-        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
-    }
-    if (n < 1000) {
-        const h = Math.floor(n / 100),
-            r = n % 100;
-        return [...(h > 1 ? [d.units[h]!] : []), d.magnitudes.hundred!, ...(r ? turkicNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000) {
-        const th = Math.floor(n / 1000),
-            r = n % 1000;
-        return [...(th > 1 ? turkicNumberWords(th, d) : []), d.magnitudes.thousand!, ...(r ? turkicNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000_000) {
-        const m = Math.floor(n / 1_000_000),
-            r = n % 1_000_000;
-        return [...turkicNumberWords(m, d), d.magnitudes.million!, ...(r ? turkicNumberWords(r, d) : [])];
-    }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...turkicNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkicNumberWords(r, d) : [])];
-}
+/** The decimal-comma word (manifest `numbers.decimalWord`) as IPA — read between integer and fraction. */
+const DECIMAL_IPA = phonemizeWord(DEF.numbers.decimalWord!);
 
-const TOKEN = /([a-zʻ'’‘`ʼ′]+)|(\d+)|([.?!,;:…])/giu;
+// #562 symbol normalization — Uzbek. The corpus's own prose fixes the conventions: percent is POSTPOSED
+// ("8 foizga" — foiz = percent), rates are PREFIXED ("soatiga 240 kilometr"), and squared units are a
+// PREFIX adjective ("kvadrat kilometr"). km/mm/cm are claimed here so the tier's "only after a number"
+// guard applies; the m/s and km/s compounds are consumed earlier, in normalize.ts step 10.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["foiz"],
+    currency: { "$": ["dollar"], "¥": ["iyena"] },
+    units: { km: ["kilometr"], mm: ["millimetr"], sm: ["santimetr"], m: ["metr"] },
+    exponentWords: { squared: ["kvadrat"], position: "before" },
+});
+
+const TOKEN = /([a-zʻ'’‘`ʼ′]+)|(\d+(?:,\d+)?)|([.!?…,;:])/giu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
 class UzbekPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/rate/clock steps need the
+        // number and its suffix still adjacent, which the tier would break (1978-yildagi → 1978 … yildagi).
+        return assembleClauses(SYMBOLS(normalizeUzbek(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
-            else if (m[3]) {
+            else if (m[2]) {
+                const [intRaw, frac] = m[2].split(",");
+                for (const wd of number(intRaw!).split(" ")) sink.emit(wd);
+                if (frac !== undefined) {
+                    // The decimal comma reads "vergul" (then digit-by-digit). It goes through the g2p like
+                    // any other number word — emitting the SPELLING here leaked "vergul" into the IPA.
+                    sink.emit(DECIMAL_IPA);
+                    for (const d of frac) for (const wd of number(d).split(" ")) sink.emit(wd);
+                }
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
