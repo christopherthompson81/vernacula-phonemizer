@@ -62,6 +62,11 @@ function toAscii(s: string): string {
  * The CLASSICAL ordinal series 11–20, which is suppletive and not the cardinal plus a suffix: 11শ is একাদশ,
  * not *এঘাৰশ. (1–10 are the Bengali normalize's table — প্রথম…দশম; 21 up are cardinal+তম, also Bengali's.)
  */
+/** Magnitude nouns that sit BETWEEN a number and its currency ("$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ" — the
+ *  corpus's own word order). মিলিয়ন and বিলিয়ন are the attested pair; the Indic scale words are listed
+ *  with them because the same rule has to survive them. */
+const MAGNITUDE = "(?:মিলিয়ন|বিলিয়ন|ট্ৰিলিয়ন|হাজাৰ|লাখ|কোটি)";
+
 const ORDINAL_11_20: Readonly<Record<number, string>> = {
     11: "একাদশ", 12: "দ্বাদশ", 13: "ত্রয়োদশ", 14: "চতুর্দশ", 15: "পঞ্চদশ",
     16: "ষোড়শ", 17: "সপ্তদশ", 18: "অষ্টাদশ", 19: "ঊনবিংশ", 20: "বিংশ",
@@ -73,21 +78,33 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
     const cardinal = (n: number): string => indicNumberWords(n, numbers).map((w) => w ?? "").join(" ");
 
     return (input: string): string => {
-        let s = input;
+        // NFC FIRST — every rule below matches Bengali-script LITERALS, and this script encodes য়/ড়/ঢ়
+        // two ways: precomposed (U+09DF) or base + nukta (U+09AF U+09BC). The corpus uses BOTH, sometimes
+        // in the same word — `বিলিয়ন` is precomposed while one `মিলিয়ন` is not — so a literal written one
+        // way silently matched half the instances: the currency rule left `$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ`
+        // reading *14.7 dollar billion American dollar*. NFC is the right fold because these letters are
+        // Unicode composition EXCLUSIONS, so it yields the decomposed form the literals here use, and it is
+        // what the Bengali g2p already applies downstream (both forms give byte-identical IPA).
+        let s = input.normalize("NFC");
 
         // 1) DOTTED LATIN RUNS → a bare run, before anything else. `U.S.` was *jˈuː . ˈɛs .* — the interior
         //    dot survives as a phrase break. Also `George W. Bush` — the W. suffix dot is a break. A dotted
         //    Bengali run (ইউ.এছ.অ.চি, USOC) is the same shape and loses its dots so the letters read as one
         //    run (the spaces keep them distinct aksharas).
         s = s.replace(/(?<![\p{L}\p{M}])[A-Za-z]\.(?:[  ]?[A-Za-z]\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
-        s = s.replace(/(?<=[A-Z])\.(?=\s+[A-Z])/gu, ""); // George W. Bush — the suffix dot
+        // A LONE capital + dot is an initial (`George W. Bush`, the corpus's only instance). Keying on any
+        // capital before the dot also stripped the SENTENCE period after an acronym — `NASA. Bush` and
+        // `the U.S. The next` lost their pause — so the initial must be a single letter.
+        s = s.replace(/(?<![\p{L}\p{M}])([A-Z])\.(?=\s+[A-Z])/gu, "$1");
         s = s.replace(/(?<![\p{L}\p{M}])[\p{Script=Bengali}\p{M}]+\.(?:[  ]?[\p{Script=Bengali}\p{M}]+\.)+/gu, (m0) => m0.replace(/\./gu, " ").replace(/\s+/gu, " "));
 
         // 2) THE `Nশ` CLASSICAL ORDINALS (11–20) and `1শ` = একশ. The শ suffix is the ordinal for a
         //    two-digit 11–20 (century ordinals — the corpus's dominant use), but `1শ` is "one hundred".
         //    BEFORE the Bengali normalize's ordinal rule (which does not know শ) so the suffix cannot reach
         //    the tokenizer as a bare syllable.
-        s = s.replace(new RegExp(`(?<![${D}])([${D}]{2})(শ)(?![${D}])`, "gu"), (m0, d: string) => {
+        //    The guard `(?!ত)` keeps the WORD শত ("hundred") out: the corpus writes `৯০শত` (nine thousand),
+        //    and without it a `11শত` would read as the ordinal একাদশ with a stray ত.
+        s = s.replace(new RegExp(`(?<![${D}])([${D}]{2})(শ)(?![${D}ত])`, "gu"), (m0, d: string) => {
             const n = Number(toAscii(d));
             return ORDINAL_11_20[n] ?? (n === 10 ? "দশম" : m0);
         });
@@ -110,14 +127,30 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    এন) is a version. `6.5তকৈ` ("6.5 than") has a full Assamese word after and must stay a
         //    decimal. Read "বিন্দু" (point). AFTER the clock (the dot-clock 8:30 has a two-digit minute
         //    and no letter after).
-        s = s.replace(new RegExp(`(?<![${D},.:])([${D}]+)\\.([${D}]+)(?=[a-zA-Z]|এন)`, "gu"),
+        //    BOUNDED TO THAT SHAPE: three or more integer digits (802) plus a SINGLE trailing letter. A
+        //    looser `\d+.\d+[a-z]` reads a decimal glued to its unit as a version — `6.5km` came out
+        //    *6 বিন্দু 5 kilometre*. All four corpus instances (802.11a/b/g/n, ৮০২.১১a) fit the bound.
+        s = s.replace(new RegExp(`(?<![${D},.:])([${D}]{3,})\\.([${D}]+)(?=(?:[a-zA-Z](?![a-zA-Z])|এন))`, "gu"),
             "$1 বিন্দু $2");
 
         // 6) CURRENCY CODES — `AUD$৪৫` and `US$30`. The bare `$` is handled by the Bengali symbol tier;
         //    the LETTER CODE before it is not, so "AUD" read as an English word and the $ vanished.
-        //    Expand the code + $ to the full currency noun, keeping the number for the tier.
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])US\\$[ ]?(?=[${D}])`, "giu"), "আমেৰিকান ডলাৰ ");
-        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])AUD\\$[ ]?(?=[${D}])`, "giu"), "অস্ট্রেলিয়ান ডলাৰ ");
+        //    Expand the code + $ to the full currency noun, AFTER the number: Assamese postposes it
+        //    (৩০ ডলাৰ), which is also what the Bengali symbol tier does with a bare `$30` — emitting the
+        //    noun first read *dollar thirty* and disagreed with the engine's own convention two rules away.
+        //    A MAGNITUDE travels between the number and the noun — the corpus's own prose is
+        //    "$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ", never *45 dollars million*, which is what leaving the magnitude
+        //    where it fell produced for `AUD$৪৫ মিলিয়ন`.
+        const num = `[${D}]+(?:[.,][${D}]+)*`;
+        const CODE: Readonly<Record<string, string>> = { US: "আমেৰিকান", AUD: "অস্ট্রেলিয়ান" };
+        s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(US|AUD)\\$[ ]?(${num})(\\s+${MAGNITUDE})?`, "gu"),
+            (_m, code: string, n: string, mag?: string) => `${n}${mag ?? ""} ${CODE[code]} ডলাৰ`);
+        // A BARE `$` whose sentence ALREADY spells the currency out: `$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ` and
+        // `$2.3 বিলিয়ন ডলাৰৰ` both had the Bengali tier insert a SECOND ডলাৰ, so the reading was
+        // *14.7 dollar billion American dollar*. Here the sign is redundant — drop it and keep the words.
+        s = s.replace(new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})?(?=\\s+(?:আমেৰিকান\\s+)?ডলা[ৰর])`, "gu"), "$1$2");
+        // …and where no noun follows, the magnitude still has to precede it: `$45 মিলিয়ন` → 45 মিলিয়ন ডলাৰ.
+        s = s.replace(new RegExp(`\\$[ ]?(${num})(\\s+${MAGNITUDE})`, "gu"), "$1$2 ডলাৰ");
 
         // 7) `&` → en (আৰু). The corpus's `B&B য়ে` dropped the ampersand; `&` reads আৰু (and). The tight
         //    `X&Y` form (B&B) is kept as letters + আৰু so the foreign path letter-names the sides.
@@ -129,11 +162,17 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         //    the engine; the digit before বিশ্ব যুদ্ধ reads as an ORDINAL (দ্বিতীয়), matching the
         //    Assamese name for the war. Targeted at this phrase: a generic digit+noun rule would misfire
         //    on the corpus's scores and ranges.
+        //     THE NOUN MUST BE PUT BACK. The pattern CONSUMES `বিশ্ব যুদ্ধ`, so returning the ordinal alone
+        //     deleted "World War" outright: the corpus's one instance, `II বিশ্ব যুদ্ধৰ`, read *ditijɔɹ* —
+        //     "of the second", with the thing itself gone. The case suffix (ৰ) is outside the match and
+        //     re-attaches to the noun, which is where it belongs.
         s = s.replace(new RegExp(`([${D}]{1,2})\\s+বিশ্ব যুদ্ধ`, "gu"), (m0, d: string) => {
             const n = Number(toAscii(d));
             if (n < 1 || n > 20) return m0;
-            if (n <= 10) return ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম", "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"][n - 1]!;
-            return ORDINAL_11_20[n]!;
+            const ord = n <= 10
+                ? ["প্রথম", "দ্বিতীয়", "তৃতীয়", "চতুর্থ", "পঞ্চম", "ষষ্ঠ", "সপ্তম", "অষ্টম", "নবম", "দশম"][n - 1]!
+                : ORDINAL_11_20[n]!;
+            return `${ord} বিশ্ব যুদ্ধ`;
         });
 
         // 9) SIGNS the Bengali normalize does not own. It handles `-` (ঋণাত্মক) and `+` (যোগ); `=`, `<`,

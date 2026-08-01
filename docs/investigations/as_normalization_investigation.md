@@ -70,3 +70,58 @@ decimals, comma-grouping, and the ম/তম ordinals). The pre-pass owns ONLY t
 - the pre-pass export is `normalizeAssamese` (a self-contained entry loading the manifest) so the review
   tool's "wired into text()" check can see it — the factory `makeAssameseNormalizer(numbers)` stays as the
   numbers-injected core.
+
+## Run 3 — 2026-07-31 (PR #592 review pass)
+
+**Question**: do the pre-pass rules fire on the corpus instances they were written for, and what do they do
+to text just outside those instances? ~25 adversarial probes, then every gate re-run.
+
+**Seven defects, five of them on live corpus text:**
+
+1. **The regnal rule DELETED the noun it qualifies.** The pattern consumes `বিশ্ব যুদ্ধ` and the replacement
+   returned the ordinal alone, so the corpus's one instance `II বিশ্ব যুদ্ধৰ` read *ditijɔɹ* — "of the
+   second", with "World War" gone. **The test asserted the deleted form** (`toBe("ditij")`), so the suite
+   pinned it.
+2. **`য়` IS ENCODED TWO WAYS AND THE CORPUS USES BOTH.** Bengali-script য়/ড়/ঢ় exist precomposed (U+09DF)
+   and as base + nukta (U+09AF U+09BC); the corpus writes `বিলিয়ন` precomposed and one `মিলিয়ন`
+   decomposed. Every rule here matches Bengali LITERALS, all written one way, so they silently covered half
+   the instances — the currency rule missed `$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ` entirely. Fixed by NFC-folding the
+   input at the pre-pass entry (NFC yields the DECOMPOSED form for these letters — they are composition
+   exclusions — and the g2p already NFCs downstream; both forms give byte-identical IPA). The fold also
+   fixed a latent one: `3য়` now reads তৃতীয় instead of *tini jɔ*.
+3. **Currency word order was inverted.** `US$30` read *dollar thirty* while the shared tier reads a bare
+   `$30` as *thirty dollar* two rules away. The corpus postposes: "11,000 ডলাৰ", "22,500 ডলাৰ".
+4. **A magnitude was stranded after the currency**: `AUD$৪৫ মিলিয়ন` → *45 dollars million*. The corpus's own
+   prose is "$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ" — number, magnitude, then the noun.
+5. **A bare `$` doubled a currency the sentence already spelled**: `$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ` read
+   *14.7 dollar billion American dollar*, and `$2.3 বিলিয়ন ডলাৰৰ` likewise. Where the noun follows, the
+   sign is redundant and is dropped.
+6. **The version-dot rule claimed any decimal + letter**, so `6.5km` read *6 বিন্দু 5 kilometre*. Bounded to
+   the corpus's shape: ≥3 integer digits plus a single trailing letter (802.11a/b/g/n, ৮০২.১১a).
+7. **The initial-dot rule stripped SENTENCE periods.** Keying on any capital before the dot, `NASA. Bush`
+   and `the U.S. The next` lost their pause; an initial is a LONE capital (`George W. Bush`). Also guarded
+   the শ ordinal against the word শত ("hundred") — the corpus writes `৯০শত`.
+
+**The gate had to be fixed too, and this is the interesting part.** Fix 5 makes the reading correct and
+*unavoidably* trips the differential DROP test: the sentence says "American dollar" itself, so the reading
+is byte-identical with and without the `$`, and no correct rule can escape that. The test conflated two
+findings. It now asks a second question — **does the symbol's own word appear in the reading?** — by
+probing the symbol on a bare `5` and looking for the tokens it adds:
+
+- present → the meaning IS spoken, from the sentence's own words → a `REDUNDANT?` NOTE, not a defect
+- absent → nothing says it → `DROP`, exactly as before
+
+Measured across all 67 artifacts: **5 instances in 5 languages become notes** (as ×2, am, es, ne currency;
+ml percent — `93% ശതമാനം` spells the unit beside the sign), **every one hand-checked**, and **every genuine
+drop is preserved** — bn/ca/or/ga still report ¥, and Xhosa's `leUS$30` still reports even though xh reads
+a bare `$5`, because the dollar word is absent from that reading. Two weaker discriminators were tried and
+rejected on measurement first: sibling substitution (`$`→`£`) masked the real bn/ca/or ¥ drops, and an
+isolation probe alone masked the Xhosa one.
+
+Also fixed while there: `re.test()` on a `/g/` regex is STATEFUL, and both scan loops shared their regex
+objects across sentences, so a hit left `lastIndex` mid-string for the next one. Fleet impact measured at
+zero (the `replace` that follows resets it in the common path), but it is a live trap for the next edit.
+
+**Gates**: vitest 2612 (200 files); tsc clean; scan clean (+2 notes); `normalization-review --lang as`
+checklist clean, notes surfaced; referee **identical** at 2171/2982; corpus diff 6/1961 with every counter
+0 → 0, and all six changes classified — 2 doubled-currency, 1 World War, 2 currency order, 1 `3য়` ordinal.

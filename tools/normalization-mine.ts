@@ -444,6 +444,7 @@ if (mode === "scan") {
     ];
     const hits = new Map<string, number>();
     const example = new Map<string, string>();
+    const alone = new Map<string, string[]>();
     // Reads the JSONC artifact the mine step writes; comments are stripped before parsing.
     const { parseJsonc } = await import(new URL("../src/core/jsonc.ts", import.meta.url).href);
     const doc = parseJsonc(readFileSync(inPath, "utf8")) as MinedCorpus & { hard: { cell: string; text: string }[] };
@@ -451,20 +452,68 @@ if (mode === "scan") {
     for (const sentence of lines) {
         let ipa: string;
         try { ipa = phonemize(sentence, lang) as string; } catch { bump("THROW", sentence); continue; }
-        for (const [name, re] of LEAK) if (re.test(ipa)) bump(`LEAK ${name}`, sentence);
+        // `re.lastIndex = 0` BEFORE EVERY `.test`: these regexes are `/g/` and shared across the whole
+        // loop, and `RegExp.prototype.test` ADVANCES lastIndex on a hit — so the next sentence resumed
+        // mid-string and the one after that started over. Measured: `re.test(s1), re.test(s2), re.test(s1)`
+        // → true, false, true on the same pattern. The scan was therefore skipping about half of its
+        // candidate sentences, silently, in both the leak and the drop loop.
+        for (const [name, re] of LEAK) { re.lastIndex = 0; if (re.test(ipa)) bump(`LEAK ${name}`, sentence); }
         for (const [name, re] of DROPPABLE) {
+            re.lastIndex = 0;
             if (!re.test(sentence)) continue;
             const without = sentence.replace(re, "");
-            try { if ((phonemize(without, lang) as string) === ipa) bump(`DROP ${name}`, sentence); } catch { /* the stripped form is not comparable */ }
+            try {
+                if ((phonemize(without, lang) as string) !== ipa) continue;
+                // DELETION SAYS "no contribution" — but it conflates two findings, and the Assamese run
+                // (#592) hit the second one. The corpus writes "($১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ)", which
+                // ALREADY SAYS "American dollar", so the correct reading is byte-identical with and without
+                // the sign: no correct rule can escape the deletion test there. Distinguish the two by
+                // asking whether the symbol's OWN WORD is in the reading. Probe the symbol on a bare `5`,
+                // take the tokens it adds (`$` → "dɔlaɹ"), and look for them in this sentence's IPA:
+                //   present → the meaning IS spoken, from the sentence's own words → a NOTE, not a defect
+                //   absent  → nothing says it → a genuine DROP, reported as before
+                // This is strictly narrower than "does the engine know this symbol anywhere": Xhosa reads a
+                // bare `$5` but swallows the `$` in "leUS$30" (no ɔːla in the reading), and that one still
+                // reports. A symbol the engine never reads at all (bn/ca/or all drop ¥) adds no tokens, so
+                // it can never be downgraded. Probe forms never merge two digits, so `-`/`+`/`=` are judged
+                // on `5-`/`-5`, not on `5-5` → `55`.
+                const symbols = [...new Set(sentence.match(re) ?? [])];
+                const spoken = symbols.length > 0 && symbols.every((sym) => {
+                    const words = contribution(sym);
+                    return words.length > 0 && words.every((w) => ipa.includes(w));
+                });
+                bump(`${spoken ? "REDUNDANT?" : "DROP"} ${name}`, sentence);
+            } catch { /* the mutated form is not comparable */ }
         }
+    }
+    /** The IPA tokens a symbol adds to a bare `5` — its own word, or [] if it says nothing. Memoised. */
+    function contribution(sym: string): string[] {
+        const memo = alone.get(sym);
+        if (memo !== undefined) return memo;
+        let words: string[] = [];
+        try {
+            const bare = new Set((phonemize("5", lang) as string).split(/\s+/u));
+            for (const probe of [`5${sym}`, `${sym}5`]) {
+                const added = (phonemize(probe, lang) as string).split(/\s+/u).filter((t) => t !== "" && !bare.has(t));
+                if (added.length > 0) { words = added; break; }
+            }
+        } catch { words = []; }
+        alone.set(sym, words);
+        return words;
     }
     function bump(k: string, s: string): void {
         hits.set(k, (hits.get(k) ?? 0) + 1);
         if (!example.has(k)) example.set(k, s.slice(0, 80));
     }
     console.log(`scanned ${lines.length} lines of ${inPath} as ${lang}\n`);
-    if (hits.size === 0) console.log("no defects");
-    for (const [k, v] of [...hits.entries()].sort((a, b) => b[1] - a[1]))
+    const defects = [...hits.entries()].filter(([k]) => !k.startsWith("REDUNDANT?"));
+    const notes = [...hits.entries()].filter(([k]) => k.startsWith("REDUNDANT?"));
+    if (defects.length === 0) console.log("no defects");
+    for (const [k, v] of defects.sort((a, b) => b[1] - a[1]))
+        console.log(`${k.padEnd(18)} ×${String(v).padEnd(5)} e.g. ${example.get(k)}`);
+    // Notes, not defects: the symbol reads on its own, so this instance is redundant with the words beside
+    // it. Read them — a redundant sign is usually right, but it is also where a swallowed one would hide.
+    for (const [k, v] of notes.sort((a, b) => b[1] - a[1]))
         console.log(`${k.padEnd(18)} ×${String(v).padEnd(5)} e.g. ${example.get(k)}`);
     process.exit(0);
 }

@@ -179,7 +179,13 @@ if (tracked || existsSync(artifact)) {
     try {
         const out = execSync(`npx tsx tools/normalization-mine.ts scan --in ${artifact} --lang ${lang}`, { encoding: "utf8" });
         const clean = out.includes("no defects");
-        note("artifact scan", clean, clean ? "no defects" : out.trim().split("\n").slice(-3).join(" | "));
+        // A `REDUNDANT?` line is not a defect — the symbol's own word is in the reading, because the
+        // sentence spells it out beside the sign ("93% ശതമാνം", "$2300 millones de dólares"). It is still
+        // worth a human's eye, so it is surfaced here rather than buried in the scan output.
+        const redundant = out.split("\n").filter((l) => l.startsWith("REDUNDANT?")).map((l) => l.split("e.g.")[0]!.trim());
+        note("artifact scan", clean,
+            (clean ? "no defects" : out.trim().split("\n").slice(-3).join(" | "))
+            + (redundant.length > 0 ? ` — note: ${redundant.join(", ")} (read these: the symbol's word is already in the sentence)` : ""));
     } catch { note("artifact scan", null, "scan failed to run"); }
 } else note("artifact scan", null, "no artifact");
 
