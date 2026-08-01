@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord } from "../src/languages/assamese/assamese.ts";
+import { normalizeAssamese } from "../src/languages/assamese/normalize.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Assamese / অসমীয়া (as) — Eastern Indo-Aryan, Bengali-Assamese script. Reuses the
@@ -37,5 +38,45 @@ describe("Assamese canonical IPA", () => {
         const d = getPhonemizer("as");
         expect(d.text("7").trim()).toBe("xat"); // সাত
         expect(d.text("100").trim()).toBe("ek ex"); // এক এশ (one hundred)
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/assamese/normalize.ts) — the Assamese PRE-PASS that runs before the
+// shared Bengali normalize (which Assamese reuses wholesale). It owns the Assamese-specific classes: the
+// শ classical ordinals (11–20), the নং number marker, comma-grouped ordinals, dotted Latin/Bengali runs,
+// version dots, currency codes, the ampersand, and the regnal II. Assertions are FULL-PIPELINE unless the
+// rule is text→text only.
+describe("Assamese text normalization", () => {
+    const ph = (s: string): string => getPhonemizer("as").text(s).trim();
+
+    test("text→text: the শ classical ordinals (11–20) and 1শ = একশ", () => {
+        expect(normalizeAssamese("11শ শতিকা")).toBe("একাদশ শতিকা");
+        expect(normalizeAssamese("18শ শতিকাত")).toBe("অষ্টাদশ শতিকাত");
+        expect(normalizeAssamese("1শ শতাংশ")).toBe("একশ শতাংশ"); // 1শ = one hundred, not an ordinal
+    });
+
+    test("the নং number marker reads নম্বৰ; the comma-grouped ordinal stays attached", () => {
+        expect(ph("190 নং স্থান")).toBe("ek ex nɔbːɔi nɔmbɔɹ xtʰan");
+        expect(ph("60নং আছিল")).toBe("xatʰi nɔmbɔɹ asil");
+        expect(ph("1,000তম")).toBe("ek ɦazaɹɔtɔm");
+    });
+
+    test("dotted runs lose their dots (Latin U.S. and Bengali ইউ.এছ.অ.চি); the W. suffix dot goes", () => {
+        expect(ph("ইউ.এছ.অ.চি ৰ")).toBe("iu es ɔ si ɹɔ");
+        expect(ph("George W. Bush")).toBe("d͡ʒˈɔːɹd͡ʒ dˈʌbəɫjuː bˈʊʃ");
+    });
+
+    test("version dots read বিন্দু, not the decimal দশমিক", () => {
+        expect(ph("802.11এন মানদণ্ড")).toBe("atʰ ex dui bindu eɡʱaɹ en manɔdɔndo");
+    });
+
+    test("currency codes expand (AUD$/US$); the ampersand reads আৰু", () => {
+        expect(ph("AUD$৪৫ মিলিয়ন")).toBe("ɔxtɹelijan dɔlaɹ pãs sɔlːix milijɔn");
+        expect(ph("US$30")).toBe("ameɹikan dɔlaɹ tɹix");
+        expect(ph("B&B য়ে")).toBe("bˈiː aɹu bˈiː je");
+    });
+
+    test("regnal II reads দ্বিতীয় before বিশ্ব যুদ্ধ", () => {
+        expect(ph("II বিশ্ব যুদ্ধ")).toBe("ditij");
     });
 });
