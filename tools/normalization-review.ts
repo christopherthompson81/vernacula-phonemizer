@@ -126,6 +126,54 @@ console.log(`\n── ordinary text and a sentence end must survive ──`);
 for (const probe of ["1990-1995", "12,5", "1.234", "5 000"])
     console.log(`  ${probe.padEnd(10)} ${say(probe).slice(0, 52)}`);
 
+// ── 4b. no SPELLING reaches the phoneme sink ──────────────────────────────────────────────────────
+// Uzbek (#590) pushed the decimal word into the sink as ORTHOGRAPHY: `12,5` read `ˈon ikkˈi vergul bˈeʃ`
+// — ASCII v/g and no stress, where the g2p says `ʋerɡˈul`. Every other language routes the same literal
+// correctly (`sink.emit(phonemizeWord("Komma"))`), which is what makes the defect checkable: a word literal
+// inside `text()` that is NOT an argument of the g2p is the bug, and the wrapped form is the fix.
+//
+// NO GATE COULD SEE IT. The leak classes look for a surviving digit, mark or symbol; a Latin-letter spelling
+// in a Latin-script language looks exactly like a word. In a non-Latin script it would have been obvious —
+// which is why this landed in Uzbek and not in Macedonian.
+//
+// MEASURED before shipping: 0 flags across the 60 languages with a normalizer, and it fires on the pre-fix
+// Uzbek. The filters below are what took it from 70 raw hits to 0 — comments MENTION the decimal word,
+// property tests and dialect comparisons quote strings, and regex flags look like words.
+function textBodies(src: string): string[] {
+    const bodies: string[] = [];
+    for (const m of src.matchAll(/\btext\s*\([^)]*\)\s*(?::\s*string\s*)?\{/gu)) {
+        let depth = 0, i = m.index! + m[0].length - 1;
+        for (; i < src.length; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}" && --depth === 0) break;
+        }
+        bodies.push(src.slice(m.index!, i));
+    }
+    return bodies;
+}
+const spellings: string[] = [];
+for (const f of engineFiles) {
+    const src = readFileSync(join("src/languages", dir, f), "utf8")
+        .replace(/\/\*[\s\S]*?\*\//gu, "")          // a comment mentioning the word is not a call emitting it
+        .replace(/(^|[^:])\/\/[^\n]*/gu, "$1");
+    for (const body of textBodies(src))
+        for (const m of body.matchAll(/"([^"\\\n]{2,40})"|'([^'\\\n]{2,40})'/gu)) {
+            const lit = m[1] ?? m[2]!;
+            const after = body.slice(m.index! + m[0].length, m.index! + m[0].length + 6);
+            const before = body.slice(Math.max(0, m.index! - 40), m.index!);
+            if (!/^[\p{L}\p{M}][\p{L}\p{M} '’ʻ-]*$/u.test(lit) || !/\p{L}{2}/u.test(lit)) continue; // a WORD, not a regex/IPA fragment
+            if (/^[dgimsuvy]+$/u.test(lit)) continue;                       // regex flags
+            if (/phonemiz\w*\(\s*$/u.test(before)) continue;                // the CORRECT shape — routed through the g2p
+            if (/[=!<>]=+\s*$/u.test(before) || /^\s*[=!]==?/u.test(after)) continue; // a comparison
+            if (/^\s*in\s/u.test(after)) continue;                          // `"key" in obj`
+            const ipa = say(lit);
+            if (ipa === "" || ipa === lit || ipa.startsWith("THROW")) continue; // g2p is identity here → undecidable
+            spellings.push(`"${lit}" (g2p: ${ipa})`);
+        }
+}
+note("spelling → g2p", spellings.length === 0,
+    spellings.length === 0 ? "no unphonemized word literal in text()" : `${spellings.join(", ")} — wrap in the g2p`);
+
 // ── 5. the artifact scan ──────────────────────────────────────────────────────────────────────────
 if (tracked || existsSync(artifact)) {
     try {

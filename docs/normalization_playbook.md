@@ -16,6 +16,9 @@ pre-accenting morphology mis-stresses exactly the `-Iz` cardinals (`sekiz`, `dok
 them as plain text regressed ~60 corpus years in the 1900s. Take the exception only with that kind of
 measured evidence, and document the coupling at the `TOKEN` definition.
 
+**Whichever side of that seam a word is on, it must still pass through the g2p.** Uzbek took the exception
+without it and emitted a spelling into the phoneme sink — see trap 6.
+
 **The premise this rests on.** Every language's orthographic conventions are its own. There is no shared
 "normalize dates" function, because Japanese writes 3月14日, German writes `14. März`, and Urdu writes the
 ordinal suffix ویں. What *is* shared is the procedure, the failure modes, and the verification. That is
@@ -211,8 +214,9 @@ npx tsx tools/normalization-review.ts --lang xx
 
 Two to three seconds. It checks the things that are machine-checkable and that a finished-looking layer
 still gets wrong: the normalizer is wired, a test file references it, the artifact is TRACKED, no sign
-class is silently dropped, and the artifact scan is clean. It then prints the sign readings, the
-numeral-agreement probes and the ordinary-text probes for you to judge.
+class is silently dropped, **no word SPELLING reaches the phoneme sink** (trap 6), and the artifact scan is
+clean. It then prints the sign readings, the numeral-agreement probes and the ordinary-text probes for you
+to judge.
 
 This exists because reviewing the Czech layer (#588) found four defects and ALL FOUR were checklist items
 — no tests, three dropped sign classes, a numeral that did not agree with its noun, an uncommitted
@@ -252,6 +256,38 @@ guessing, and state the check that matters: *zero sentence-final pauses were los
 
 **5. Tests can pin the bug.** Several times a failing test was asserting the defective output. Correct the
 test; do not preserve the behaviour.
+
+**6. A word your layer emits must come from the g2p.** Uzbek pushed the decimal word into the phoneme sink
+as ORTHOGRAPHY, so `12,5` read `ˈon ikkˈi vergul bˈeʃ` — ASCII `v`/`g` and no stress mark, where the g2p
+says `ʋerɡˈul`. Every other language writes the same literal correctly:
+`sink.emit(phonemizeWord("Komma"))`. **No gate could see it**: the leak classes hunt a surviving digit, mark
+or symbol, and a Latin-letter spelling in a Latin-script language looks exactly like a word — in a
+non-Latin script it would have been obvious, which is why this landed in Uzbek and not in Macedonian.
+`normalization-review.ts` now fails on a word literal inside `text()` that is not an argument of the g2p
+(measured at 0 false positives across the 60 languages that have a normalizer). Better still, insert the
+word as TEXT in `normalize.ts` and let the tokenizer phonemize it for free — that is what the layer is for,
+and it is why the manifest carries `numbers.decimalWord` rather than the engine carrying a spelling.
+
+**7. A character class that is not case-insensitive misses half the writing system.** Uzbek's
+hyphen-ordinal rule used `[a-zʻ…]` with no `i` flag, so `16-Noyabr` and `1-Mart` — capitalized heads, which
+are ordinary in dates and titles — fell through to the CARDINAL reading with the hyphen dropped, i.e.
+precisely the defect the rule existed to fix. Same family as trap 1: the class was narrower than the
+orthography. Probe the capitalized variant of every form your rule claims.
+
+**8. Zero corpus instances is not evidence of correctness.** The corpus diff can only see shapes the corpus
+contains. Three of the five defects found reviewing Uzbek (#590) had **zero** corpus hits and were still
+wrong for the language: the capitalized ordinal above, `3/4` (the fraction rule tabulated numerator 1, the
+only one attested, so the unattested `3/4` read as two bare cardinals — *uch toʻrt*), and `°F`. **Probe the
+adversarial neighbour of every rule**: the capitalized form, the other numerator, the other unit, the other
+case suffix. And prefer COMPOSING from the language's morphology (denominator-ablative + numerator) over
+tabulating the values you happened to see — a table is correct exactly where you looked and silent
+everywhere else.
+
+**9. A guard alternative with no attested instance is a misfire generator.** Uzbek's regnal rule accepted
+"capitalized name + digit + (genitive OR clause end)". Every corpus instance took the genitive; the
+clause-end alternative matched nothing real and read any `Sahifa 12.` as *Sahifa oʻn ikkinchi*. Widen a
+guard only for a shape you have counted — the same discipline trap 4 applies to writing the rule applies to
+loosening it.
 
 ---
 
