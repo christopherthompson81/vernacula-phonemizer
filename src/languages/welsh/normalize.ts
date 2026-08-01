@@ -204,8 +204,10 @@ export function normalizeWelsh(input: string): string {
     //    is clause punctuation and must be claimed here. `11:35 p.m.` → un deg un tri deg pump y prynhawn;
     //    `06:30` → chwech tri deg. The p.m./a.m. marker (WITH the dots) expands to the Welsh time-of-day
     //    (y prynhawn / y bore), the corpus's own register. NOT a sports time: a THIRD `\d.\d\d` field
-    //    after the minutes (4:41.30) means a pace.
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(p\.?m\.?|a\.?m\.?)?/giu,
+    //    after the minutes (4:41.30) means a pace. The marker is captured WITHOUT eating the space before
+    //    it: a bare `\s*` after the minutes glued "10:00 i 11:00" into "deg i" → "degi" (the space before
+    //    "i" was consumed even when no marker followed).
+    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*(p\.?m\.?|a\.?m\.?))?/giu,
         (m0, h: string, min: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -232,19 +234,19 @@ export function normalizeWelsh(input: string): string {
     //    Read "pwynt" (point). AFTER the clock.
     s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/giu, "$1 pwynt $2");
 
-    // 7b) CLOCK RANGES — `10:00-11:00`. The hyphen between two clock readings is "to" (i); without this
-    //     the hyphen glues the two times into one token. AFTER the colon-clock rule has consumed both.
-    s = s.replace(/(\d[\d ]+?)\s*[-–]\s*(\d[\d ]+?)(?=\s+(?:yr|y)\b)/gu, "$1 i $2");
-
-    // 8) FRACTIONS. `1/5 modfedd` → *un pumed* (the denominator's ordinal). ¾/½ after a whole read
-    //    "a thri chwarter"/"a hanner". The corpus's only fraction is 1/5.
+    // 8) FRACTIONS. `1/5 modfedd` → *un pumed*. The denominator's word is the FRACTION NOUN, which is the
+    //    ordinal for 5+ (pumed, chweched, wythfed) but a separate noun for 3 and 4 (traean = a third,
+    //    chwarter = a quarter — both referee-attested, distinct from the ordinals trydydd/pedwerydd). The
+    //    corpus's only fraction is 1/5; the 3/4 noun branch is pinned here from the referee (trap 13).
+    //    ¾/½ after a whole read "a thri chwarter"/"a hanner".
     s = s.replace(/(\d+)¾/gu, "$1 a thri chwarter");
     s = s.replace(/(\d+)½/gu, "$1 a hanner");
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "hanner" : `${numberToWordsWelsh(num)} hanner`;
-        const ord = ordinalWords(den);
-        return ord === undefined ? m0 : `${numberToWordsWelsh(num)} ${ord}`;
+        const noun = den === 3 ? "traean" : den === 4 ? "chwarter" : ordinalWords(den);
+        if (noun === undefined) return m0;
+        return `${numberToWordsWelsh(num)} ${noun}`;
     });
 
     // 9) DEGREES. `+30°C` came out as the bare consonant [k] with the plus dropped. `gradd` is the

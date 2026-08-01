@@ -141,3 +141,32 @@ with the decade fix. Zero false positives remain.
 
 **Notes**: the review probes `12,5`, `1.234`, `5 000` are all corpus-absent shapes (Welsh groups with
 commas and writes decimals with dots), and each has a defensible reading.
+
+## Run 4 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Two real defects plus
+one dead branch, all found by probing the adversarial neighbour:
+
+- **Clock glue (the big one)**: the colon-clock rule's trailing `\s*(p\.?m\.?|a\.?m\.?)?` consumed the
+  space after the minutes even when no marker followed, so the corpus's `10:00-11:00 yr hwyr` read the
+  range "i" glued onto "deg" → *degi*. The marker is now captured as `(?:\s*(p\.?m\.?|a\.?m\.?))?` —
+  the space only attaches when a marker is present. The corpus output was identical (the corpus's only
+  clock range is handled by the 5b hyphen rule BEFORE the colon-clock), but the synthetic `10:00-11:00
+  yr hwyr` probe was wrong. Pinned by a test.
+- **Fraction noun branch (trap 13, exactly the Catalan lesson)**: the fraction rule used `ordinalWords`
+  for the denominator, so `2/3` read *dau drydydd* and `3/4` *tri pedwerydd*. The referee attests the
+  FRACTION NOUNS traean (a third) and chwarter (a quarter) — distinct from the ordinals trydydd/
+  pedwerydd. The corpus's only fraction is 1/5 (pumed, where ordinal = noun), so the 3/4 noun branch
+  was never read. Special-cased: den 3 → traean, den 4 → chwarter. Pinned by tests.
+- **Dead clock-range rule 7b (trap 9)**: a second `digit-hyphen-digit` → "i" rule after the colon-clock
+  matched ZERO corpus instances (the only clock range is handled by 5b before the clocks) AND carried a
+  `\b` (trap 1). Removed.
+
+**Verified non-issues**: the DU/UDA/AS expansions are case-sensitive (the lowercase "du" = black, "as" =
+a real word) — re-confirmed no false positives; the UD/U.D./O.C./C.C./OC rules are case-insensitive but
+no lowercase collisions exist in the corpus; the `ain` ordinal suffix routes to valid vigesimal forms;
+`-5` → minws while `5-10` ranges stay; the `20s` vigesimal composition (21fed → unfed ar hugain, 39fed →
+pedwerydd ar bymtheg ar hugain) verified correct.
+
+**Post-fix gates**: corpus diff 219/2009 (10.9%) — the changed set is byte-identical to the pre-review
+run (no regression); 2645 tests; referee 83.7% unchanged; scan no defects; review checklist clean.

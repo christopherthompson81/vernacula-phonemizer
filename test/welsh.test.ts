@@ -110,11 +110,19 @@ describe("Welsh text normalization", () => {
         expect(ph("15.00 UTC")).toBe("ˈɨːn dˈeːɡ pˈɨmp ˈɨː tˈiː ˈɛk");
     });
 
-    test("era markers expand; decades drop the -au; fractions use the ordinal", () => {
+    test("era markers expand; decades drop the -au; fractions use the noun/ordinal", () => {
         expect(ph("400 O.C.")).toBe("pˈɛdwar kˈant ˈoːᶤd krˈist");
         expect(ph("1000 C.C.")).toBe("mˈiːl kˈɨn krˈist");
         expect(ph("1970au")).toBe("mˈiːl nˈaːᶷ kˈant sˈaᶦθ dˈeːɡ");
-        expect(ph("1/5 modfedd")).toBe("ˈɨːn pˈɨmɛd mˈɔdvɛð");
+        expect(ph("1/5 modfedd")).toBe("ˈɨːn pˈɨmɛd mˈɔdvɛð"); // un pumed
+        // trap-13 branch pins: 3 and 4 are NOUNS (traean/chwarter), not the ordinals trydydd/pedwerydd.
+        expect(ph("2/3")).toBe("dˈaᶤ trˈeᶤan"); // dau draean
+        expect(ph("3/4")).toBe("trˈiː χwˈartar"); // tri chwarter
+    });
+
+    test("the clock range hyphen is 'i' (to), and p.m./a.m. do not glue the following word", () => {
+        expect(ph("10:00-11:00 yr hwyr")).toBe("dˈeːɡ ˈiː ˈɨːn dˈeːɡ ˈɨːn ˈər hˈuːᶤr");
+        expect(ph("8:30 p.m. amser")).toBe("ˈuːᶤθ trˈiː dˈeːɡ ˈə prˈənhaᶷn ˈamsar");
     });
 
     test("rates, units and degrees read their Welsh words", () => {
