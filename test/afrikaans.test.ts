@@ -107,8 +107,42 @@ describe("Afrikaans text normalization", () => {
         expect(ph("1/5 duim")).toBe("iən fəifdə dœym");
     });
 
-    test("regnal ordinals and the ń indefinite article", () => {
+    test("regnal ordinals take both spellings of the noun and the un-converted Roman I", () => {
         expect(ph("Wêreld Oorlog II")).toBe("tviədə vɛːrəltuərlɔχ");
-        expect(ph("ń Avenger myn skip")).toBe("ɛn ɑːfəŋər məin skəp");
+        expect(ph("Wêreldoorlog II")).toBe("tviədə vɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
+        expect(ph("Wêreld Oorlog I")).toBe("iərstə vɛːrəltuərlɔχ"); // a lone I is never romanised upstream
+    });
+
+    // The article is [ə], and the corpus writes it four ways — 588× with the LEFT quote U+2018, which the
+    // g2p's two-spelling check did not recognise, so the commonest word in the language read as a bare `n`.
+    test("every spelling of the indefinite article reads [ə]", () => {
+        for (const art of ["'n", "’n", "‘n", "ʼn", "ń"])
+            expect(ph(`${art} Avenger myn skip`)).toBe("ə ɑːfəŋər məin skəp");
+        expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
+    });
+
+    // Each of these was a live misreading; the corpus counts are in the investigation doc.
+    test("the era marker is dot-bound, so it cannot eat the indefinite article", () => {
+        expect(normalizeAfrikaans("'n Chinese skip")).toBe("'n Chinese skip"); // was *'na Christushinese*
+        expect(normalizeAfrikaans("323 v.C.")).toBe("323 voor Christus.");
+        expect(normalizeAfrikaans("356 VC")).toBe("356 voor Christus");
+        expect(normalizeAfrikaans("5 000 v. C.")).toBe("5 000 voor Christus.");
+    });
+
+    test("a DOT between digits is the decimal; only a timezone/AM-PM context makes it a clock", () => {
+        expect(ph("6.34 duim")).toBe("sɛs kɔma dri fir dœym");       // was the clock *ses vier en dertig*
+        expect(ph("3.50-meter")).toBe("dri kɔma fəif nœl miətər");
+        expect(ph("15.00 GUT")).toBe("fəiftin χœt");                  // the corpus's one dot-clock
+        expect(ph("4:41.30")).toBe("fir , iən ɛn fiərtəχ kɔma dri nœl"); // a sports time is not a clock
+    });
+
+    test("the AM/PM marker follows the minutes, and nm alone is not a time", () => {
+        expect(ph("9:30 vm")).toBe("niəχə dɛrtəχ fuərmədaχ"); // was *nege voormiddag dertig*
+        expect(ph("10:00vm")).toBe("tin fuərmədaχ");
+        expect(ph("10nm")).toBe("tin nm");                    // nanometres, not *tien namiddag*
+    });
+
+    test("the ordinal suffix is orthography, not a lowercase convention", () => {
+        expect(normalizeAfrikaans("11De Hussars")).toBe("elfde Hussars");
     });
 });

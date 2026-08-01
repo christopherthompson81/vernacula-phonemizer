@@ -84,12 +84,17 @@ export function ordinalWord(n: number): string | undefined {
 }
 
 /** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
- *  as a phrase break. `v.C.`/`vC`/`V.C.` = voor Christus (BC); `d.i.` = dit is (i.e.); `n.C.` = na Christus
- *  (AD). The corpus writes v.C. with a space variant (`5 000 v. C.`). */
+ *  as a phrase break. `v.C.` = voor Christus (BC); `d.i.` = dit is (i.e.); `n.C.` = na Christus (AD).
+ *
+ *  EVERY LETTER PAIR HERE IS DOT-BOUND, and that is load-bearing. The corpus's four BC instances are
+ *  `v. C.`, `v.C.`, `V.C.` and the undotted `vC`/`VC` — a dotted form, or the two letters ADJACENT, never
+ *  "letter space letter". Allowing the unpunctuated spaced form (`v\.?\s?C\.?`) made `n\.?\s?C\.?` match
+ *  the indefinite article before any c-word: `'n Chinese skip` → *'na Christushinese skip*. Afrikaans's
+ *  commonest word, destroyed by a rule with ZERO corpus instances of its own (na Christus never occurs). */
 const MULTI_DOT: readonly (readonly [string, string])[] = [
-    ["v\\.?\\s?C\\.?", "voor Christus"],
-    ["V\\.?\\s?C\\.?", "voor Christus"],
-    ["n\\.?\\s?C\\.?", "na Christus"],
+    ["v\\.\\s?C\\.?", "voor Christus"],
+    ["vC(?![\\p{L}\\p{M}])", "voor Christus"],
+    ["n\\.\\s?C\\.?", "na Christus"],
     ["d\\.\\s?i\\.", "dit is"],
 ];
 
@@ -168,10 +173,15 @@ export function normalizeAfrikaans(input: string): string {
     //    &amp;) — an HTML-escaped `&` that is otherwise just a letter run "amp" and dropped with its neighbours.
     s = s.replace(/&amp;/giu, " & ");
 
-    // 0b) THE `ń` INDEFINITE ARTICLE. `ń` (U+0144, n-acute) is a typographic variant of `'n` — the corpus
-    //    writes "ń permit", "ń Avenger". The g2p would skip it as an unknown letter; it reads as the article
-    //    "en" ([ə], the same as `'n`). Only claimed when STANDALONE (before a word), never inside a name.
-    s = s.replace(/(?<![\p{L}\p{M}])ń(?=[\s-])/gu, "en");
+    // 0b) THE INDEFINITE ARTICLE, in every spelling the corpus uses. `'n` is [ə], and `phonemizeWord`
+    //    recognises exactly two spellings of it: U+0027 `'n` and U+2019 `’n`. The corpus writes it
+    //    **588× as `‘n` (U+2018, the LEFT quote), 137× as `'n`, 4× as `’n` and 3× as `ń`** (U+0144,
+    //    n-acute) — so the commonest word in the language read as a bare consonant `n` in 591 of 732
+    //    instances, and `ń` read as *en* [ɛn]. Fold them all onto the canonical `'n` here; the article is
+    //    the one thing this layer must not get wrong. A word boundary after the `n` is required, so an
+    //    opening quote on an n-word (`‘nuwe’`) is untouched.
+    s = s.replace(/(?<![\p{L}\p{M}])[‘’ʼ`´]n(?![\p{L}\p{M}])/gu, "'n");
+    s = s.replace(/(?<![\p{L}\p{M}])ń(?![\p{L}\p{M}])/gu, "'n");
 
     // 1) ERA MARKERS and MULTI-DOT ABBREVIATIONS. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `v.`/`d.` and leaves `C.`/`i.` behind as an interior phrase break.
@@ -200,32 +210,43 @@ export function normalizeAfrikaans(input: string): string {
 
     // 4) ORDINALS — the Afrikaans form is a numeral plus a LETTER suffix (`11de`, `15de`, `9e`, `60ste`),
     //    exactly as in Dutch, so no bare-`N.` detector is needed. Was *elf de* / *vyftien de* / *nege e*.
-    //    BEFORE the clock rule so a digit run is not first claimed as a time.
-    s = s.replace(/(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/gu, (m0, d: string) =>
+    //    BEFORE the clock rule so a digit run is not first claimed as a time. CASE-INSENSITIVE: the suffix
+    //    is orthography, not a lowercase convention, and a capitalized head (`11De`, a heading or a
+    //    title-cased date) would otherwise read as the cardinal with the suffix stranded as a word.
+    s = s.replace(/(?<![\d,.])(\d{1,4})(?:ste[n]?|de[n]?|e)(?![\p{L}\p{M}])/giu, (m0, d: string) =>
         ordinalWord(Number(d)) ?? m0);
 
     // 5) CLOCK, in both written forms, BEFORE the number tokenizer sees the separator. The undotted
-    //    `vm`/`nm` AM/PM markers are expanded to voormiddag/namiddag and appended (10:00vm, 9:30 vm,
-    //    5vm); the dotted n.m. was already expanded by step 3. The guard `(?![:\d])` keeps SPORTS TIMES
-    //    (`4:41.30`, `2:11:60`) intact, as in Dutch. The DOT form (`15.00 GUT`) must run before the
-    //    decimal rule, and is distinguishable because the hour is range-checked, a decimal point is never
-    //    followed by two minutes, and a dimension like `3.50-meter` (a hyphen-bound unit) is not a clock.
-    //    A 4-digit military time (`0230 UTC`) is a clock too.
-    const clock = (h: string, min: string, period?: string): string => {
-        const head = `${numberToWords(Number(h))}${period ?? ""}`;
-        return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
-    };
+    //    `vm`/`nm` AM/PM markers are expanded to voormiddag/namiddag and appended (10:00vm, 9:30 vm, 5vm);
+    //    the dotted n.m. was already expanded by step 3. A 4-digit military time (`0230 UTC`) is a clock too.
+    // The AM/PM marker goes AFTER the minutes — "nege dertig voormiddag", the order the corpus's own
+    // dotted instance (`8:30 n.m.`) already reads. Appending it to the HOUR put it inside the time:
+    // `9:30 vm` read *nege voormiddag dertig*, which only stayed invisible because the tested instance
+    // (`10:00vm`) drops its zero minutes.
+    const clock = (h: string, min: string, period?: string): string =>
+        `${numberToWords(Number(h))}${Number(min) === 0 ? "" : ` ${numberToWords(Number(min))}`}${period ?? ""}`;
     const period = (p?: string): string =>
         p === undefined ? "" : ` ${p.trim().toLowerCase() === "vm" ? "voormiddag" : "namiddag"}`;
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*(?:vm|nm))?/giu,
+    // The trailing guard rejects a further `:` or `.` FOLLOWED BY A DIGIT — a SPORTS TIME, of which the
+    // corpus has three (`4:41.30`, `2:11:60`, `1:09:02`). Guarding on `:` alone let `4:41.30` through: the
+    // clock claimed `4:41` and stranded `.30` as a phrase break plus a bare number. A plain `.` may NOT be
+    // rejected outright — a clock at a sentence end (`begin om 11:20.`) is followed by one.
+    s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:.]?\d)(\s*(?:vm|nm))?/giu,
         (_m, h: string, min: string, p?: string) => clock(h, min, period(p)));
-    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:-])(\s*(?:vm|nm))?/giu,
+    // THE DOT FORM IS CONTEXT-BOUND, and must be. In this corpus the dot is the DECIMAL POINT, so
+    // `H.MM` and `N.NN` are the same string: the corpus's one dot-clock is `15.00 GUT` and its decimals
+    // include `6.34 duim`, `3.50-meter`, `1.50`, `2.30`. An unguarded hour/minute range check read every
+    // one of them as a time — `6.34 duim` became *ses vier en dertig duim*. So the dot form is claimed
+    // ONLY with a timezone or an AM/PM marker after it, which is the only evidence the corpus offers.
+    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:-])(?=\s*(?:GUT|UTC|SAST|GMT|vm|nm))(\s*(?:vm|nm))?/giu,
         (_m, h: string, min: string, p?: string) => clock(h, min, period(p)));
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3])([0-5]\d)(?=\s*(?:UTC|GUT))/gu,
         (_m, h: string, min: string) => clock(h, min, ""));
-    // An HOUR + AM/PM without a separator (`5vm`) is a clock too.
-    s = s.replace(/(?<![\d:])([01]?\d|2[0-3])(vm|nm)(?![\p{L}\p{M}])/giu,
-        (_m, h: string, p: string) => `${numberToWords(Number(h))} ${p.toLowerCase() === "vm" ? "voormiddag" : "namiddag"}`);
+    // An HOUR + AM/PM without a separator (`5vm`, `10:00vm`'s tail) is a clock too. `vm` ONLY: the corpus's
+    // separator-less instances are both `vm`, and admitting `nm` here reads the nanometre `10nm` as *tien
+    // namiddag*. A spaced or dotted `n.m.`/`nm` still reaches the forms above.
+    s = s.replace(/(?<![\d:])([01]?\d|2[0-3])(vm)(?![\p{L}\p{M}])/giu,
+        (_m, h: string) => `${numberToWords(Number(h))} voormiddag`);
 
     // 6) COMMA-GROUPED THOUSANDS. The comma is the ENGLISH grouping separator here (17,500, 100,000) — NOT
     //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the
@@ -249,11 +270,16 @@ export function normalizeAfrikaans(input: string): string {
     // 9) REGNAL ORDINALS. `Wêreld Oorlog II` → the shared Roman pass already emitted `Wêreld Oorlog 2`; the
     //    digit reads as an ORDINAL (*tweede Wêreldoorlog*), matching how Afrikaans actually names the wars.
     //    Targeted at this phrase: a generic "capitalized phrase + digit" rule would misfire on the corpus's
-    //    dates ("Op September 17, 1939" reads cardinal, and only `II` — two letters — is ever converted by
-    //    the shared roman pass, so a lone `I` never reaches here as a digit).
-    s = s.replace(/Wêreld Oorlog (\d+)/giu, (_m: string, d: string) => {
-        const ord = ordinalWord(Number(d));
-        return ord === undefined ? _m : `${ord} Wêreldoorlog`;
+    //    dates ("Op September 17, 1939" reads cardinal).
+    //    BOTH SPELLINGS AND BOTH WARS. The corpus writes the noun as two words 3× and as one word 2×
+    //    (`Wêreldoorlog II`), and the shared roman pass only converts the two-letter `II` — so a matcher
+    //    for "two words + digit" covered 2 of the 5 instances and left `Wêreldoorlog II` a cardinal and
+    //    both `… Oorlog I` reading as the stray letter *i*. Take the Roman numeral here as well.
+    s = s.replace(/W[êe]reld ?[Oo]orlog (\d+|I{1,3}V?|IV)(?![\p{L}\p{M}])/gu, (m0: string, d: string) => {
+        const roman: Record<string, number> = { I: 1, II: 2, III: 3, IV: 4 };
+        const n = /^\d+$/u.test(d) ? Number(d) : roman[d];
+        const ord = n === undefined ? undefined : ordinalWord(n);
+        return ord === undefined ? m0 : `${ord} Wêreldoorlog`;
     });
 
     // 10) DEGREES. `+30°C` came out as the bare consonant *s*; `90 ° F-hitte` dropped the sign and left a

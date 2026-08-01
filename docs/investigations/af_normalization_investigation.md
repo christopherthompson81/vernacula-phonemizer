@@ -81,3 +81,47 @@ identical to `/tmp/af.before` (main tree). 1236 utterances.
   tier) — the TOKEN emits "komma" instead, and only VERSION dots are claimed as "punt"
 - the review tool's "spelling → g2p" gate (added in #590) is satisfied by emitting
   `phonemizeWord("komma")`
+
+## Run 3 — 2026-07-31 (PR #591 review pass)
+
+**Question**: which of these rules fire on text the corpus contains but the hard-set does not, and which
+fire on text the corpus does NOT contain? Probed ~30 adversarial shapes, then re-ran every gate.
+
+**Seven defects found, all fixed in this PR. Corpus counts measured, not estimated:**
+
+1. **The indefinite article read as a bare `n` in 591 of 732 instances.** `phonemizeWord` recognises two
+   spellings of `'n` (U+0027, U+2019); the corpus writes it **588× as `‘n` (U+2018, the LEFT quote)**, 137×
+   as `'n`, 4× as `’n` and 3× as `ń`. So Afrikaans's commonest word came out `n` instead of `[ə]` —
+   `‘n meter` → *n miətər*. The layer added a rule for the 3-instance `ń` variant (and mapped it to *en*
+   [ɛn], contradicting its own comment saying [ə]) while the 588-instance variant went unnoticed. All four
+   spellings now fold onto the canonical `'n` in step 0b. **411/1236 utterances change on this alone.**
+2. **The era marker ate the indefinite article.** `n\.?\s?C\.?` — every dot optional — matched `'n C…`, so
+   `'n Chinese skip` read *'na Christushinese skip*. Zero corpus instances of "na Christus" exist; the rule
+   with no evidence of its own was destroying the commonest word in the language. All four era patterns are
+   now dot-bound or letter-adjacent, which is exactly what the four BC instances are written as
+   (`v. C.`, `v.C.`, `V.C.`, `vC`/`VC`).
+3. **The dot-clock claimed decimals.** In this corpus the dot IS the decimal point, so `H.MM` and `N.NN`
+   are the same string. An hour/minute range check read `6.34 duim` as *ses vier en dertig* (a live corpus
+   instance), and only a hyphen guard saved `3.50-meter`. The corpus's single dot-clock is `15.00 GUT`, so
+   the dot form is now claimed ONLY before a timezone or AM/PM marker.
+4. **The sports-time guard did not hold.** `(?![:\d])` passes a following `.`, so `4:41.30` (corpus) read
+   as a clock plus a stranded `.30`. Now `(?![:.]?\d)` — a bare `.` must still be allowed, since a clause
+   can end on a clock.
+5. **The AM/PM marker landed between hour and minutes**: `9:30 vm` (corpus) → *nege voormiddag dertig*.
+   Invisible in the tested `10:00vm`, whose zero minutes are dropped.
+6. **`Wêreldoorlog` matched 2 of its 5 corpus instances.** The rule keyed on the two-word spelling and on a
+   digit; the corpus writes the noun as one word 2× and the shared roman pass never converts a lone `I`, so
+   `Wêreldoorlog II` stayed cardinal and both `… Oorlog I` read as the stray letter *i*.
+7. **The ordinal class was lowercase-only** (`11De` → *elf de*). Zero corpus instances; the suffix is
+   orthography, not a lowercase convention.
+
+**Gates after the fixes**: vitest 2604 passed (200 files, +5 tests); tsc clean; scan no defects;
+`normalization-review --lang af` fully clean; referee **byte-identical** (wikipron 1658/2220); corpus diff
+vs the branch head **411/1236 (33.3%)** with all counters 0 → 0. Every one of the **15 distinct change
+shapes** in that diff was classified and matches a fix above — 587 `n`→`ə`, 3 `ɛn`→`ə`, 4 Wêreldoorlog, and
+one each for the sports time, the vm placement and `6.34`.
+
+**The pattern worth carrying forward**: five of the seven had live corpus instances that the corpus DIFF
+could not surface, because the baseline was already wrong in the same place (the article) or the shape sits
+in a sample the diff reports as "changed, improved" without the reader checking the neighbouring reading.
+The corpus diff answers "did I change anything unexpectedly", never "is what I left alone correct".
