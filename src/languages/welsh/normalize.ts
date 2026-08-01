@@ -252,6 +252,14 @@ export function normalizeWelsh(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")}`);
 
+    // 7c) COMMA-DECIMALS — `12,5`, `4,2`. Welsh follows English notation (comma = thousands, dot =
+    //     decimal), so the corpus writes no comma-decimal (verified: zero `\d,\d{1,2}` not part of a
+    //     3-digit group). But a European-style comma-decimal must not LEAK the comma as a clause pause:
+    //     it reads "pwynt" like the dot. A comma followed by a THREE-digit group is thousands (1,400)
+    //     and stays for the TOKEN — this rule claims only 1-2 digit fractions.
+    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
+        `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")}`);
+
     // 8) FRACTIONS. `1/5 modfedd` → *un pumed*. The denominator's word is the FRACTION NOUN, which is the
     //    ordinal for 5+ (pumed, chweched, wythfed) but a separate noun for 3 and 4 (traean = a third,
     //    chwarter = a quarter — both referee-attested, distinct from the ordinals trydydd/pedwerydd). The

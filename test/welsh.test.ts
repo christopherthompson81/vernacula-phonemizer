@@ -104,6 +104,10 @@ describe("Welsh text normalization", () => {
         expect(ph("1.5 miliwn")).toBe("ˈɨːn pˈuːᶤnt pˈɨmp mˈɪljʊn");
         expect(ph("802.11n")).toBe("ˈuːᶤθ kˈant dˈaᶤ pˈuːᶤnt ˈɨːn ˈɨːn n"); // version letter spelled
         expect(ph("1.234")).toBe("ˈɨːn pˈuːᶤnt dˈaᶤ trˈiː pˈɛdwar"); // digit-by-digit fraction
+        // a comma-decimal (European notation, corpus-absent) reads pwynt, not a comma pause
+        expect(ph("12,5")).toBe("ˈɨːn dˈeːɡ dˈaᶤ pˈuːᶤnt pˈɨmp");
+        // but a 3-digit comma group stays thousands
+        expect(ph("1,400")).toBe("mˈiːl pˈɛdwar kˈant");
     });
 
     test("ranges and scores read with 'i' (to); a leading minus stays minws", () => {

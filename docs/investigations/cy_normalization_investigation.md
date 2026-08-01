@@ -201,3 +201,13 @@ letter name rather than gluing onto the last fraction digit.
 **Post-fix gates**: corpus diff 230/2009 (11.4%), all 16 range changes read and verified (scores and
 periods join "i", decimals keep pwynt+unit); 2647 tests (2 new range/decimal pins); referee 83.7%
 unchanged; scan no defects; review checklist clean.
+
+## Run 6 — 2026-08-01 (comma-decimal leak)
+
+The parent's review output still showed `12,5` → "un deg dau **,** pump" — the literal comma leaked into
+the IPA as a clause pause. Welsh follows English notation (comma = thousands 1,400, dot = decimal 1.5),
+so a comma-decimal is corpus-absent — but a European-style `12,5` must not leak the comma. Added a
+comma-decimal rule claiming `\d+,\d{1,2}` (1-2 digit fraction) as "pwynt", while a 3-digit comma group
+stays thousands for the TOKEN. `12,5` now reads "un deg dau pwynt pump"; `1,400`/`400,000`/
+`5,000,000` are untouched. Corpus diff unchanged (230/2009) — the rule fires only on the synthetic
+probe. Pinned by a test.
