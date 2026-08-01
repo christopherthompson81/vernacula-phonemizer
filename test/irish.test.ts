@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { normalizeIrish } from "../src/languages/irish/normalize.ts";
 import { numberToWords } from "../src/languages/irish/numbers.ts";
 import { phonemizeWord } from "../src/languages/irish/irish.ts";
 
@@ -126,5 +127,54 @@ describe("Irish numbers", () => {
     test("end-to-end: the numeral is phonemized, not spelled out digit-wise", () => {
         expect(phonemize("25", "ga")).toBe("fʲˈɪçə ˈa kˈuːɟ"); // fiche a cúig
         expect(phonemize("1998", "ga")).toContain("ɟˈeːd̪ˠ"); // gcéad — the ECLIPSED hundred
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/irish/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// rules are the `Nú` ordinal digits (an chéad, an tríú, an cúigiú déag), the comma-thousands, the dot-decimal
+// "pointe", the i.n./r.n./A.D./R.C. era markers, the msu/km-u rates, and the letter-spelled initialisms.
+describe("Irish text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "ga").trim();
+
+    test("text→text: the Nú ordinal reads the Irish ordinal word", () => {
+        expect(normalizeIrish("15ú")).toBe("an cúigiú déag");
+        expect(normalizeIrish("18ú")).toBe("an t-ochtú déag");
+        expect(normalizeIrish("20ú")).toBe("an fichiú");
+        expect(ph("7ú")).toBe("ˈan̪ˠ ʃˈaxt̪ˠuː"); // an seachtú
+        expect(ph("190ú")).toBe("ˈan̪ˠ cˈeːd̪ˠ n̪ˠˈoːxəd̪ˠuː"); // an céad nóchadú
+    });
+
+    test("comma-thousands stay grouped; the dot is a decimal (pointe)", () => {
+        expect(ph("1,400")).toBe("mʲˈiːlʲə cˈɛhɾʲə çˈeːd̪ˠ");
+        expect(ph("400,000")).toBe("cˈɛhɾʲə çˈeːd̪ˠ mʲˈiːlʲə");
+        expect(ph("1.5 million")).toBe("ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ mʲˈɪlʲən̪ˠ");
+        expect(ph("12.8 km")).toBe("ˈa d̪ˠˈoː jˈeːɡ pˠˈɔnʲtʲə ˈa hˈɔxt̪ˠ cˈɪlʲəmʲeːd̪ˠəɾˠ");
+    });
+
+    test("clocks read hour [minute] with i.n./r.n. as iarnóin / réamhnóin", () => {
+        expect(ph("11:35 i.n.")).toBe("ˈa hˈeːn̪ˠ dʲˈeːɡ tʲɾʲˈiːxə ˈa kˈuːɟ ˈiəɾˠn̪ˠoːⁱnʲ");
+        expect(ph("8:30 p.m.")).toBe("ˈa hˈɔxt̪ˠ tʲɾʲˈiːxə ˈiəɾˠn̪ˠoːⁱnʲ");
+        expect(ph("1:15 r.n.")).toBe("ˈa hˈeːn̪ˠ ˈa kˈuːɟ dʲˈeːɡ ɾˠˈeːwn̪ˠoːⁱnʲ");
+    });
+
+    test("era markers expand; ranges join go dtí; rates use san uair", () => {
+        expect(ph("400 A.D.")).toBe("cˈɛhɾʲə çˈeːd̪ˠ t̪ˠˈaɾˠ ˈeːʃ çɾʲˈiːsˠt̪ˠ"); // tar éis Chríost
+        expect(ph("1000 R.C.")).toBe("mʲˈiːlʲə ɾˠˈɪvʲ çɾʲˈiːsˠt̪ˠ"); // roimh Chríost
+        expect(ph("35-40 msu")).toBe("tʲɾʲˈiːxə ˈa kˈuːɟ ɡˈɔ dʲˈiː d̪ˠˈaçəd̪ˠ mʲˈiːlʲə sˠˈan̪ˠ ˈuəɾʲ");
+        expect(ph("160km/h")).toBe("cˈeːd̪ˠ ʃˈasˠkə cˈɪlʲəmʲeːd̪ˠəɾˠ sˠˈan̪ˠ ˈuəɾʲ");
+    });
+
+    test("degrees, fractions, ampersand and currency read their Irish words", () => {
+        expect(ph("30°C")).toBe("tʲɾʲˈiːxə cˈeːmʲ cˈɛlʲʃʊsˠ");
+        expect(ph("35°W")).toBe("tʲɾʲˈiːxə ˈa kˈuːɟ cˈeːmʲ ʃˈiəɾˠ"); // céim siar — longitude
+        expect(ph("1/5 orlach")).toBe("ˈan̪ˠ kˈuːɟuː ˈɔɾˠl̪ˠəx"); // an cúigiú orlach
+        expect(ph("B&Banna")).toBe("bʲˈeː ˈaɡəsˠ bʲˈeːn̪ˠə"); // bé agus béanna
+        expect(ph("US$14.7")).toBe("d̪ˠˈɔl̪ˠəɾˠ n̪ˠˈə sˠt̪ˠˈɑːt̪ˠ ˈeːn̪ˠt̪ˠəhə ˈa cˈahəɾʲ dʲˈeːɡ pˠˈɔnʲtʲə ˈa ʃˈaxt̪ˠ");
+    });
+
+    test("S.A./N.A. and initialisms expand or letter-spell", () => {
+        expect(ph("S.A.")).toBe("sˠt̪ˠˈɑːⁱtʲ ˈeːn̪ˠt̪ˠəhə"); // Stáit Aontaithe
+        expect(ph("N.A.")).toBe("n̪ˠˈɑːⁱʃuːənʲ ˈeːn̪ˠt̪ˠəhə"); // Náisiúin Aontaithe
+        expect(ph("H5N1")).toBe("hˈeːʃ ˈa kˈuːɟ ˈɛnʲ ˈa hˈeːn̪ˠ"); // héis a cúig ein a haon
     });
 });

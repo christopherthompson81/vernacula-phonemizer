@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeIrish } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Connacht pronunciation lexicon (Run 3): oracle-distilled, consonant+glide-skeleton-verified overrides that pin
@@ -92,20 +93,25 @@ export function g2pWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([a-záéíóúA-ZÁÉÍÓÚ]+(?:['’-][a-záéíóúA-ZÁÉÍÓÚ]+)*)|(\d+)|([.!?…,;:])/gu;
+// Irish groups thousands with COMMAS (1,400 — the TOKEN swallows the comma so the tier can still see the
+// number next to its unit/sign); the dot is a DECIMAL (1.5 → "pointe") or a version, claimed by normalize.
+const TOKEN =
+    /([a-záéíóúA-ZÁÉÍÓÚ]+(?:['’-][a-záéíóúA-ZÁÉÍÓÚ]+)*)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Irish: % is "faoin gcéad" (after the number, as written).
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["faoin gcéad"],
-    currency: { "€": ["euro"], "$": ["dollar", "dollair"], "£": ["punt"] },
+    currency: { "€": ["euro"], "$": ["dollar", "dollair"], "£": ["punt"], "¥": ["yen"] },
     units: { km: ["ciliméadar"], cm: ["ceintiméadar"], mm: ["milliméadar"], kg: ["cileagram"] },
 });
 
 class IrishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/version steps need
+        // the number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeIrish(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) for (const wd of numberToWords(Number(m[2].replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
