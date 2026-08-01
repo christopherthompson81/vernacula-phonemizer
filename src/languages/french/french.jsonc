@@ -190,7 +190,7 @@
         "portions": { "default": "pɔʁsjɔ̃", "cases": [{ "ipa": "pɔʁtjɔ̃", "prev": ["nous"] }] },
         "ferment": { "default": "fɛʁm", "cases": [{ "ipa": "fɛʁmɑ̃", "prev": ["le", "du", "un", "ce", "son"] }] },
         "affluent": { "default": "afly", "cases": [{ "ipa": "aflyɑ̃", "prev": ["un", "le", "ce", "son", "grand", "petit"] }] },
-        // The -ENT class below is GENERATED — `npx tsx tools/fr-heteronym-candidates.ts` — not hand-listed.
+        // The -ENT class below is GENERATED — `npx tsx tools/french/heteronym-candidates.ts` — not hand-listed.
         // The verb reading is taken from Lexique's 3sg entry (stem+"e"), which IS a verb form, rather than
         // by stripping the nasal off the noun: where the two disagree Lexique is internally inconsistent
         // and the 3sg wins. That cross-check caught a hand-written error here — `excellent` had [eksɛl],

@@ -530,7 +530,7 @@ reading is the one recorded.
 ## Run 8 — 2026-07-29 — generating the -ent heteronym class from Lexique
 
 Replaced the hand-listed `-ent` entries with a generated set. Script:
-`tools/fr-heteronym-candidates.ts` (`npx tsx tools/fr-heteronym-candidates.ts`).
+`tools/french/heteronym-candidates.ts` (`npx tsx tools/french/heteronym-candidates.ts`).
 
 ### Two tests are needed, and the second is the interesting one
 
@@ -1089,7 +1089,7 @@ Indonesian says the unit after the amount, so the prefix is moved.
 ## Run 18 — 2026-07-30 — fleet-wide audit: fixing two defect classes across all 191 languages
 
 Eleven languages of hand work kept turning up the same defects, so this run stopped adding languages and
-looked for them mechanically instead. New tool: `tools/normalization-audit.ts`.
+looked for them mechanically instead. New tool: `tools/normalization/audit.ts`.
 
 ### Method: runtime probes, not static inference
 

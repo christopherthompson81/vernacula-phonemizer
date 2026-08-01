@@ -5,7 +5,7 @@ Chronological record. Baseline worktree: `~/Programming/tmp/uz-base` (pinned at 
 ## Run 1 — 2026-07-31
 
 **Setup**: baseline emitted from `~/Programming/tmp/uz-base` via
-`npx tsx tools/normalization-corpus-diff.ts emit --lang uz --corpus uz_uz --out /tmp/uz.base`;
+`npx tsx tools/normalization/corpus-diff.ts emit --lang uz --corpus uz_uz --out /tmp/uz.base`;
 identical to `/tmp/uz.before` (main tree). Referee baseline: `folded backbone: 328/330 (99.4%)`.
 
 **Corpus shape** (1,957 unique uz_uz utterances):
@@ -109,8 +109,8 @@ emission actually IPA? Probed 21 shapes through `normalizeUzbek` + the full pipe
    (Harmless downstream, since TOKEN splits letters from digits, but it made the intermediate text wrong.)
    `°F` also fell to the bare-degree rule and read as *daraja* + a stray letter; it is now named.
 
-**Gates after the fixes**: vitest 2591 passed (200 files, +3 tests); tsc clean; `normalization-mine scan`
-no defects; `normalization-review --lang uz` checklist fully clean; referee **byte-identical** to the
+**Gates after the fixes**: vitest 2591 passed (200 files, +3 tests); tsc clean; `normalization/mine.ts scan`
+no defects; `normalization/review.ts --lang uz` checklist fully clean; referee **byte-identical** to the
 pre-fix branch on all three sets (wikipron 316/345, kaikki 393/450, epitran 328/330); corpus diff vs the
 branch head 16/1957 changed, all defect counters 0 → 0.
 

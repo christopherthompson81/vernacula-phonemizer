@@ -16,7 +16,7 @@
  * without ever being spoken. That is why the sign probes below PRINT their readings instead of only
  * asserting a difference — read them.
  *
- * Usage:  npx tsx tools/normalization-review.ts --lang cs [--dir czech]
+ * Usage:  npx tsx tools/normalization/review.ts --lang cs [--dir czech]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
@@ -93,7 +93,7 @@ try { execSync(`git ls-files --error-unmatch ${artifact}`, { stdio: "ignore" });
 note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync(artifact) ? "exists but is UNTRACKED" : "missing"}`);
 
 // ── 4. the probes. PRINTED, not merely asserted — see the header. ─────────────────────────────────
-const { phonemize } = await import(new URL("../src/index.ts", import.meta.url).href);
+const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
 const say = (t: string): string => { try { return (phonemize(t, lang) as string).trim(); } catch (e) { return `THROW ${(e as Error).message.slice(0, 40)}`; } };
 
 /** A symbol that contributes NOTHING is a hard fail; one that merely changes the output is printed for a
@@ -177,15 +177,16 @@ note("spelling → g2p", spellings.length === 0,
 // ── 5. the artifact scan ──────────────────────────────────────────────────────────────────────────
 if (tracked || existsSync(artifact)) {
     try {
-        const out = execSync(`npx tsx tools/normalization-mine.ts scan --in ${artifact} --lang ${lang}`, { encoding: "utf8" });
+        const out = execSync(`npx tsx tools/normalization/mine.ts scan --in ${artifact} --lang ${lang}`, { encoding: "utf8" });
         const clean = out.includes("no defects");
-        // A `REDUNDANT?` line is not a defect — the symbol's own word is in the reading, because the
-        // sentence spells it out beside the sign ("93% ശതമാνം", "$2300 millones de dólares"). It is still
-        // worth a human's eye, so it is surfaced here rather than buried in the scan output.
-        const redundant = out.split("\n").filter((l) => l.startsWith("REDUNDANT?")).map((l) => l.split("e.g.")[0]!.trim());
+        // A `REDUNDANT` line is a PERMISSIBLE drop, not a defect: the symbol's own word is already in the
+        // reading because the sentence spells it out beside the sign ("93% ശതമാനം", "$2300 millones de
+        // dólares"), and saying it ONCE in the language-idiomatic position is the correct reading. Surfaced
+        // here rather than buried in the scan output, because it is also where a swallowed sign would hide.
+        const redundant = out.split("\n").filter((l) => l.startsWith("REDUNDANT")).map((l) => l.split("e.g.")[0]!.trim());
         note("artifact scan", clean,
             (clean ? "no defects" : out.trim().split("\n").slice(-3).join(" | "))
-            + (redundant.length > 0 ? ` — note: ${redundant.join(", ")} (read these: the symbol's word is already in the sentence)` : ""));
+            + (redundant.length > 0 ? ` — permissible: ${redundant.join(", ")} (the word is already in the sentence; read them anyway)` : ""));
     } catch { note("artifact scan", null, "scan failed to run"); }
 } else note("artifact scan", null, "no artifact");
 

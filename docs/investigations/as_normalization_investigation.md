@@ -6,7 +6,7 @@ started from). Working branch: `norm-as-562`.
 ## Run 1 — 2026-07-31
 
 **Setup**: baseline emitted from `~/Programming/tmp/as-base` via
-`npx tsx tools/normalization-corpus-diff.ts emit --lang as --corpus as_in --out /tmp/as.base`;
+`npx tsx tools/normalization/corpus-diff.ts emit --lang as --corpus as_in --out /tmp/as.base`;
 identical to `/tmp/as.before` (main tree). Referee baseline: `folded backbone: 2171/2982 (72.8%)`.
 
 **Architecture**: Assamese REUSES the Bengali engine (`makeNativeBengali` with the Assamese manifest),
@@ -61,7 +61,7 @@ decimals, comma-grouping, and the ম/তম ordinals). The pre-pass owns ONLY t
 - referee: folded backbone 2171/2982 (72.8%) — IDENTICAL to the worktree baseline
 - corpus diff: 25/1961 (1.3%) changed — small because the shared Bengali normalize already owns the
   corpus's dominant shapes; every change READ and verified an improvement
-- normalization-review --lang as: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
+- normalization/review.ts --lang as: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
 
 **Notes**:
 - the review probe `12,5` reads "এক এশ পাঁচ বিছ" — a synthetic comma+1-digit the corpus never writes
@@ -122,6 +122,6 @@ Also fixed while there: `re.test()` on a `/g/` regex is STATEFUL, and both scan 
 objects across sentences, so a hit left `lastIndex` mid-string for the next one. Fleet impact measured at
 zero (the `replace` that follows resets it in the common path), but it is a live trap for the next edit.
 
-**Gates**: vitest 2612 (200 files); tsc clean; scan clean (+2 notes); `normalization-review --lang as`
+**Gates**: vitest 2612 (200 files); tsc clean; scan clean (+2 notes); `normalization/review.ts --lang as`
 checklist clean, notes surfaced; referee **identical** at 2171/2982; corpus diff 6/1961 with every counter
 0 → 0, and all six changes classified — 2 doubled-currency, 1 World War, 2 currency order, 1 `3য়` ordinal.

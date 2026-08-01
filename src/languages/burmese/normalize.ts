@@ -5,7 +5,7 @@
  *
  * ★ THE FIRST LANGUAGE NORMALIZED WITHOUT A FLEURS CORPUS (#585). Burmese has no FLEURS transcripts, so
  * the evidence here is a MINED corpus: 454,821 paragraphs extracted from the my.wikipedia dump, from which
- * tools/normalization-mine.ts selected a hard-set covering all 24 pattern cells
+ * tools/normalization/mine.ts selected a hard-set covering all 24 pattern cells
  * (tools/corpus/mined/my.jsonc). Every count below is measured over those paragraphs, and — the part that
  * matters — every WORD emitted by a rule below is attested IN THAT SAME CORPUS rather than looked up
  * abstractly. The corpus is both the test set and the dictionary, which is what makes this route viable

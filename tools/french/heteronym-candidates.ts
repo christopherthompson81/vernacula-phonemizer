@@ -7,7 +7,7 @@
  * both incomplete and error-prone. It was error-prone in practice: the hand-written `excellent` entry had
  * the wrong first vowel, which this script's cross-check caught (see below).
  *
- * Usage:  npx tsx tools/fr-heteronym-candidates.ts
+ * Usage:  npx tsx tools/french/heteronym-candidates.ts
  *
  * THE TWO TESTS, and why both are needed:
  *
@@ -39,7 +39,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-const LEXICON = join(dirname(fileURLToPath(import.meta.url)), "../src/languages/french/lexicon.tsv");
+const LEXICON = join(dirname(fileURLToPath(import.meta.url)), "../../src/languages/french/lexicon.tsv");
 
 const lex = new Map<string, string>();
 for (const line of readFileSync(LEXICON, "utf8").split("\n")) {

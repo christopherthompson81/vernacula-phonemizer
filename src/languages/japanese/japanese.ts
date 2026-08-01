@@ -32,7 +32,7 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 // #562 symbol normalization — Japanese: katakana loans, read by the ordinary kana engine.
 // UNITS moved to normalize.ts, which must resolve them before its decimal and exponent rules break the
 // number-adjacency this tier matches on; see UNIT_KANA there. Percent stays, because nothing reorders it.
-// Currency closes the CUR-DROP that tools/normalization-audit.ts flags for ja: the sign was dropped
+// Currency closes the CUR-DROP that tools/normalization/audit.ts flags for ja: the sign was dropped
 // outright, so "$5" and "5" read identically. No sign occurs in this corpus (it writes 円 and ドル as
 // words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
 const SYMBOLS = makeSymbolNormalizer({

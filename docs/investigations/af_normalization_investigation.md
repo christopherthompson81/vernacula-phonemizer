@@ -6,7 +6,7 @@ started from). Working branch: `norm-af-562`.
 ## Run 1 — 2026-07-31
 
 **Setup**: baseline emitted from `~/Programming/tmp/af-base` via
-`npx tsx tools/normalization-corpus-diff.ts emit --lang af --corpus af_za --out /tmp/af.base`;
+`npx tsx tools/normalization/corpus-diff.ts emit --lang af --corpus af_za --out /tmp/af.base`;
 identical to `/tmp/af.before` (main tree). 1236 utterances.
 
 **Corpus shape** (1,236 unique af_za utterances, FLEURS — the mined corpus is the guide):
@@ -70,7 +70,7 @@ identical to `/tmp/af.before` (main tree). 1236 utterances.
 - vitest: 2599 passed (200 files) — 13 afrikaans tests
 - referee: folded backbone 1658/2220 (74.7%) — IDENTICAL to the worktree baseline
 - corpus diff: 169/1236 (13.7%) changed, every sample-tier change READ and verified an improvement
-- normalization-review: checklist clean (including the sign classes and the new spelling→g2p gate)
+- normalization/review.ts: checklist clean (including the sign classes and the new spelling→g2p gate)
 
 **Key corrections found while diffing**:
 - the abbrev keys carry literal dots (m.p.u) → must be regex-escaped; the alternation order made `dr`
@@ -116,7 +116,7 @@ fire on text the corpus does NOT contain? Probed ~30 adversarial shapes, then re
    orthography, not a lowercase convention.
 
 **Gates after the fixes**: vitest 2604 passed (200 files, +5 tests); tsc clean; scan no defects;
-`normalization-review --lang af` fully clean; referee **byte-identical** (wikipron 1658/2220); corpus diff
+`normalization/review.ts --lang af` fully clean; referee **byte-identical** (wikipron 1658/2220); corpus diff
 vs the branch head **411/1236 (33.3%)** with all counters 0 → 0. Every one of the **15 distinct change
 shapes** in that diff was classified and matches a fix above — 587 `n`→`ə`, 3 `ɛn`→`ə`, 4 Wêreldoorlog, and
 one each for the sports time, the vm placement and `6.34`.

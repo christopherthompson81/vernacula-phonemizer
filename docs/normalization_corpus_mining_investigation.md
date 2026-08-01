@@ -19,7 +19,7 @@ non-JSON and the fetch silently yields nothing.
 **Command.**
 
 ```
-npx tsx tools/normalization-mine.ts --in my_raw.txt --out my.hard.tsv --per-cell 8 --sample 60
+npx tsx tools/normalization/mine.ts --in my_raw.txt --out my.hard.tsv --per-cell 8 --sample 60
 ```
 
 **Raw finding — 2949 unique sentences, 14 of 20 cells covered.**
@@ -47,7 +47,7 @@ EMPTY: degrees clock dotted abbrev percent rate
 **14**. Three cells are entirely invisible to `\d`. A miner written with `\d` would have reported a nearly
 empty hard-set for Burmese and looked like it had simply found a clean language.
 
-**This same bug was already shipped.** `tools/normalization-corpus-diff.ts` defined its DIGIT defect class
+**This same bug was already shipped.** `tools/normalization/corpus-diff.ts` defined its DIGIT defect class
 as `/\d/u`. Its RAWMARK class lists the Devanagari, Arabic-Indic and Persian digit ranges, which disguised
 the gap — those three scripts were covered by accident, and Burmese, Thai, Bengali, Khmer and Lao were not
 covered at all. A digit leak in any of them would have passed the gate clean. Fixed to `\p{Nd}` in this
@@ -167,7 +167,7 @@ DROP math-sign ×23   DROP minus ×9   DROP percent ×9   DROP degree ×7   DROP
 ```
 
 **52 defects in a set the leak classes called clean.** This test costs one extra phonemize per symbol-
-bearing sentence and should be added to `normalization-corpus-diff.ts` as well, where it would have caught
+bearing sentence and should be added to `normalization/corpus-diff.ts` as well, where it would have caught
 #584 in the original batches.
 
 ### Next: local dumps rather than the API
@@ -232,7 +232,7 @@ within a mode only.
 
 ### Reproducibility
 
-The miner exports its internals and is covered by `tools/normalization-mine.test.ts` (7 tests): stable
+The miner exports its internals and is covered by `tools/normalization/mine.test.ts` (7 tests): stable
 selection across runs, stable JSONC rendering, the dot-splitting regression, paragraph mode, the
 native-digit assertion (`asciiCounts.percent === 0` — `\d` finds none of them), and a guard that no fill
 query hardcodes `0-9`. Two full mine runs over the 454k-paragraph dump are **byte-identical**.
@@ -249,7 +249,7 @@ counts block carries TRAILING comments that a line-anchored strip leaves behind.
 
 ### DROP is now in the corpus-diff gate, and it fires on real corpora
 
-Added to `normalization-corpus-diff.ts` as a fourth defect class. Only utterances carrying the symbol pay
+Added to `normalization/corpus-diff.ts` as a fourth defect class. Only utterances carrying the symbol pay
 for the second phonemize, so the cost is a few percent rather than a doubling.
 
 Validation on FLEURS corpora:
@@ -440,7 +440,7 @@ scientific notation — the latter now has a cell but not yet a rule.
 **Question.** The inventory was derived FROM the treated languages, so it is newer than all of them. How
 much did the early languages miss?
 
-**Command.** `npx tsx tools/normalization-coverage.ts --max 250` — for each treated language × cell,
+**Command.** `npx tsx tools/normalization/coverage.ts --max 250` — for each treated language × cell,
 report `·` (absent from that corpus), `ok`, `DROP` (a symbol vanishes, differential test) or `LEAK` (a
 digit or raw mark survives).
 

@@ -3,7 +3,7 @@
  * inventory, not the partial one that existed when it was treated.
  *
  * WHY THIS HAS TO EXIST. The 37 languages under #562 were done one at a time over many batches, and each
- * was judged against whatever the playbook knew at that point. The inventory in normalization-mine.ts was
+ * was judged against whatever the playbook knew at that point. The inventory in mine.ts was
  * then derived FROM those 37 — so it is strictly newer than every language in it, and no early language
  * was ever checked against the later cells. That is not hypothetical: `exponent` is declared in 24
  * language manifests and had no cell until the inventory was audited, and the first language checked
@@ -21,12 +21,12 @@
  *
  * A DROP or LEAK is a defect in a language that is already marked done.
  *
- * Usage:  npx tsx tools/normalization-coverage.ts [--langs hu,ro,th] [--max 400]
+ * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { CELLS } from "./normalization-mine.ts";
-import { parseJsonc } from "../src/core/jsonc.ts";
+import { CELLS } from "./mine.ts";
+import { parseJsonc } from "../../src/core/jsonc.ts";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const TEXT_COLUMN = 2;
@@ -82,7 +82,7 @@ function corpusLines(corpus: string): string[] {
     return [...seen];
 }
 
-const { phonemize } = await import(new URL("../src/index.ts", import.meta.url).href);
+const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
 const shown = CELLS.filter((c) => !c.lexical);
 const rows: { lang: string; status: Record<string, string>; defects: string[] }[] = [];
 

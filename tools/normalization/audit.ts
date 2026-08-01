@@ -3,7 +3,7 @@
  * per-language normalization work kept turning up, so they can be found mechanically instead of one
  * language at a time.
  *
- * Usage:  npx tsx tools/normalization-audit.ts [--verbose]
+ * Usage:  npx tsx tools/normalization/audit.ts [--verbose]
  *
  * WHY THIS EXISTS. Working through eleven languages by hand, the same three defects recurred:
  *   · SLOT-GAPS from `clausePunctuation` values that were a PADDED copy of the mark (`"।": " । "`), so the
@@ -29,9 +29,9 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { phonemize } from "../src/index.ts";
+import { phonemize } from "../../src/index.ts";
 
-const REGISTRY = join(dirname(fileURLToPath(import.meta.url)), "../src/registry.ts");
+const REGISTRY = join(dirname(fileURLToPath(import.meta.url)), "../../src/registry.ts");
 const codes = [...new Set([...readFileSync(REGISTRY, "utf8").matchAll(/case "([a-zA-Z0-9-]+)":/g)].map((m) => m[1]!))].sort();
 
 const NATIVE_MARK = /[।॥…。，、۔؟،؛។៕။၊።፣꠨꠩៚]/u;
