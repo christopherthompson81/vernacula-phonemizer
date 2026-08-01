@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { normalizeUzbek } from "../src/languages/uzbek/normalize.ts";
 import { ROMAN_POLICY } from "../src/languages/uzbek/romanOrdinals.ts";
 import { phonemizeWord } from "../src/languages/uzbek/uzbek.ts";
 import { getPhonemizer } from "../src/registry.ts";
@@ -67,5 +68,101 @@ describe("Uzbek roman-numeral ordinals", () => {
 
     test("a bare roman numeral still reads as a CARDINAL", () => {
         expect(getPhonemizer("uz").text("xix").trim()).toBe("ˈon toqqˈiz"); // oʻn toʻqqiz, not …toʻqqizinchi
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/uzbek/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// rule is the corpus-verified ORDINAL: an Arabic numeral + hyphen + word IS the ordinal writing (the
+// orthographic rule sourced in romanOrdinals.ts: "1991-yilning 1-sentabri"). So years, centuries, dates and
+// ranks all read ordinal. Also space-grouped thousands, comma decimals, clocks, era markers, rates, units,
+// percent, currency, signs and initialisms. Assertions are FULL-PIPELINE (phonemize) unless the rule is
+// text→text only.
+describe("Uzbek text normalization", () => {
+    const ph = (s: string): string => getPhonemizer("uz").text(s).trim();
+
+    test("text→text: the `N-word` hyphen becomes the ordinal words", () => {
+        expect(normalizeUzbek("1978-yildagi")).toBe("ming toʻqqiz yuz yetmish sakkizinchi yildagi");
+        expect(normalizeUzbek("190-oʻrinni")).toBe("yuz toʻqsoninchi oʻrinni"); // bare yuz, no "bir"
+        expect(normalizeUzbek("16-noyabr")).toBe("oʻn oltinchi noyabr");
+        expect(normalizeUzbek("7-regbi")).toBe("yetti regbi"); // rugby sevens — a sport, not an ordinal
+    });
+
+    test("text→text: space-grouped thousands de-group; era markers and abbreviations expand", () => {
+        expect(normalizeUzbek("800 000 dan")).toBe("800000 dan");
+        expect(normalizeUzbek("19 500 km²")).toBe("19500 km²");
+        expect(normalizeUzbek("m.a. 356-yil")).toBe("miloddan avval uch yuz ellik oltinchi yil"); // the year reads ordinal too
+        expect(normalizeUzbek("2 mln. yildan")).toBe("2 million yildan");
+        expect(normalizeUzbek("va h.k.)")).toBe("va hokazo.)");
+    });
+
+    test("the `N-word` hyphen is the ORDINAL writing (years, centuries, dates, ranks)", () => {
+        expect(ph("1978-yildagi")).toBe("mˈiŋ toqqˈiz jˈuz jetmˈiʃ sakkizint͡ʃˈi jildaɡˈi"); // …yetmish sakkizinchi
+        expect(ph("15-asrda")).toBe("ˈon beʃint͡ʃˈi asrdˈa"); // oʻn beshinchi asrda
+        expect(ph("16-noyabr")).toBe("ˈon ɒltint͡ʃˈi nɒjˈabr"); // oʻn oltinchi noyabr
+        expect(ph("190-oʻrinni")).toBe("jˈuz toqsɒnint͡ʃˈi orinnˈi"); // bir yuz toʻqsoninchi oʻrinni
+        expect(ph("7-eng yirik")).toBe("jettint͡ʃˈi ˈeŋ jirˈik"); // yettinchi eng yirik
+    });
+
+    test("the hyphen-ordinal suffix is -nchi / -inchi on the LAST word only", () => {
+        expect(ph("1970-yillarning")).toBe("mˈiŋ toqqˈiz jˈuz jetmiʃint͡ʃˈi jillarnˈiŋ"); // …yetmishinchi yillar
+        expect(ph("2010-yilgi")).toBe("ikkˈi mˈiŋ onint͡ʃˈi jilɡˈi"); // ikki ming oʻninchi yilgi
+        expect(ph("1000-markasi")).toBe("miŋint͡ʃˈi markasˈi"); // minginchi markasi
+    });
+
+    test("space-grouped thousands de-group; the comma is a DECIMAL (vergul)", () => {
+        expect(ph("400 000 ta")).toBe("tˈort jˈuz mˈiŋ tˈa"); // 400 000 → toʻrt yuz ming
+        expect(ph("800 000 dan")).toBe("sakkˈiz jˈuz mˈiŋ dˈan");
+        expect(ph("6,5 ballik")).toBe("ɒltˈi vergul bˈeʃ ballˈik"); // olti vergul besh
+        expect(ph("1,5 million")).toBe("bˈir vergul bˈeʃ milliˈɒn");
+        expect(ph("6,34 duymga")).toBe("ɒltˈi vergul ˈut͡ʃ tˈort dujmɡˈa"); // digit-by-digit after vergul
+    });
+
+    test("clocks read hour space minute, dropping :00; GMT/UTC spell out", () => {
+        expect(ph("soat 11:35 da")).toBe("sɒˈat ˈon bˈir ottˈiz bˈeʃ dˈa");
+        expect(ph("soat 12:00 GMT da")).toBe("sɒˈat ˈon ikkˈi ɡˈe ˈem tˈe dˈa");
+        expect(ph("soat 06:30 da")).toBe("sɒˈat ɒltˈi ottˈiz dˈa");
+    });
+
+    test("era markers m.a. / m. expand; dotted abbreviations read in full", () => {
+        expect(ph("m.a. 356-yil 21-iyulda")).toBe("milɒddˈan aʋʋˈal ˈut͡ʃ jˈuz ellˈik ɒltint͡ʃˈi jˈil jiɡirmˈa birint͡ʃˈi ijuldˈa");
+        expect(ph("m. 1000-yillar")).toBe("milɒdˈij miŋint͡ʃˈi jillˈar"); // milodiy
+        expect(ph("2 mln. yildan")).toBe("ikkˈi milliˈɒn jildˈan");
+        expect(ph("va h.k.")).toBe("ʋˈa hɒkazˈɒ .");
+    });
+
+    test("percent, currency, units and rates use the corpus's own words", () => {
+        expect(ph("88%")).toBe("saksˈɒn sakkˈiz fɒˈiz"); // foiz
+        expect(ph("93%i ulangan")).toBe("toqsˈɒn ˈut͡ʃ fɒizˈi ulaŋˈan"); // foizi (possessive)
+        expect(ph("5$ va 100$")).toBe("bˈeʃ dɒllˈar ʋˈa jˈuz dɒllˈar");
+        expect(ph("7000 ¥")).toBe("jettˈi mˈiŋ ijenˈa"); // iyena
+        expect(ph("70 km")).toBe("jetmˈiʃ kilɒmˈetr");
+        expect(ph("35 mm")).toBe("ottˈiz bˈeʃ millimˈetr");
+        expect(ph("19 500 km²")).toBe("ˈon toqqˈiz mˈiŋ bˈeʃ jˈuz kʋadrˈat kilɒmˈetr"); // kvadrat kilometr
+        expect(ph("40 mil/soat")).toBe("sɒatiɡˈa qˈirq mˈil"); // soatiga … mil
+        expect(ph("11 km/soat")).toBe("sɒatiɡˈa ˈon bˈir kilɒmˈetr");
+    });
+
+    test("signs read out; & joins letter names (B&B → be va be)", () => {
+        expect(ph("+30°C")).toBe("pljˈus ottˈiz darad͡ʒˈa");
+        expect(ph("UTC+1")).toBe("ˈu tˈe sˈe pljˈus bˈir");
+        expect(ph("B&B lar")).toBe("bˈe ʋˈa bˈe lˈar");
+        expect(ph("x = y")).toBe("χ tˈeŋ j");
+        expect(ph("5 < 6")).toBe("bˈeʃ kit͡ʃˈik ɒltˈi");
+        expect(ph("6 × 6")).toBe("ɒltˈi karrˈa ɒltˈi");
+    });
+
+    test("initialisms spell out by Uzbek letter name; AQSH stays the word [aqʃ]", () => {
+        expect(ph("BMT global isish")).toBe("bˈe ˈem tˈe ɡlɒbˈal isˈiʃ"); // be em te
+        expect(ph("GPS xaritasi")).toBe("ɡˈe pˈe ˈes χaritasˈi"); // ge pe es
+        expect(ph("AQSH Prezidenti")).toBe("ˈaqʃ prezidentˈi"); // aqsh, one syllable
+        expect(ph("T. rex")).toBe("tˈe rˈeχ"); // te rex
+        expect(ph("M16 avtomatida")).toBe("ˈem ˈon ɒltˈi aʋtɒmatidˈa"); // em-sixteen
+    });
+
+    test("regnal ordinals after a proper name (Yelizaveta II → ikkinchi)", () => {
+        expect(ph("Yelizaveta II hukmronligidan")).toBe("jelizaʋetˈa ikkint͡ʃˈi hukmrɒnliɡidˈan");
+        expect(ph("Lealofi III ning")).toBe("lealɒfˈi ut͡ʃint͡ʃˈi nˈiŋ");
+        // the comma-guard: a digit before a decimal comma stays cardinal
+        expect(ph("Izmir 3,7 million")).toBe("izmˈir ˈut͡ʃ vergul jettˈi milliˈɒn");
     });
 });
