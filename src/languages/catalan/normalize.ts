@@ -75,8 +75,8 @@ export function ordinalWords(n: number, fem = false): string | undefined {
 /** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
  *  as a phrase break. `dC` = després de Crist (AD), `aC` = abans de Crist (BC). */
 const MULTI_DOT: readonly (readonly [string, string])[] = [
-    ["\\bdC", "després de Crist"],
-    ["\\baC", "abans de Crist"],
+    ["dC", "després de Crist"],
+    ["aC", "abans de Crist"],
 ];
 
 /** Single-dot abbreviations → the spoken words. `Dr.` = doctor; `etc.` = et cetera. The dot is a phrase
@@ -146,20 +146,38 @@ export function normalizeCatalan(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(dr|etc)\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
-    // 4) ORDINALS — the `Nè`/`Na`/`Nr`/`Nn` form. The suffix distinguishes the gender: è/r/n masculine,
-    //    a feminine. Was *set è* / *set a* / *cent noranta a*. BEFORE the clock rule so a digit run is not
-    //    first claimed as a time.
-    s = s.replace(/(?<![\d.,])(\d+)(è|a|r|n|ns)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
+    // 4) ORDINALS — the `Nè`/`Na`/`Nr`/`Nn`/`Nt`/`Nns` form. The suffix records the gender and the written
+    //    ending: a feminine, r/n/t the irregular series (primer/segon/tercer/quart), è the -è series. The
+    //    suffix must MATCH the spoken ordinal's final word, which rules out misfires on forms the language
+    //    does not write (11r, 5t) — see trap 9: a guard alternative with no attested instance is a misfire
+    //    generator. Was *set è* / *set a* / *cent noranta a* / *quatre t*. BEFORE the clock rule so a digit
+    //    run is not first claimed as a time.
+    s = s.replace(/(?<![\d.,])(\d+)(è|a|r|n|ns|t)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
         const n = Number(d);
         const fem = sfx.toLowerCase() === "a";
         const ord = ordinalWords(n, fem);
-        return ord === undefined ? m0 : ord;
+        if (ord === undefined) return m0;
+        const last = ord.split(" ").pop()!;
+        const m = sfx.toLowerCase();
+        if (m === "r" && !(last === "primer" || last === "tercer")) return m0;
+        if (m === "n" && last !== "segon") return m0;
+        if (m === "ns" && last !== "segon") return m0;
+        if (m === "t" && last !== "quart") return m0;
+        if (m === "ns") return ord.replace(/ segon$/u, " segons");
+        return ord;
     });
+
+    // 4b) DECADES — `1920s`, `90s`. Without this the shared tier's `s` unit reads "1920 s" as *mil nou-cents
+    //     vint segons* (nineteen-twenty SECONDS) — the playbook's Il-76s trap. The corpus writes `els anys
+    //     1920s`. Drop the plural marker; the number itself is the decade.
+    s = s.replace(/(?<![\d.,])(\d+)s(?![\p{L}\p{M}])/giu, "$1");
 
     // 5) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `11:35 PM` → onze trenta-cinc PM; `06:30` → sis
-    //    trenta. The 24h form with `h` (`10:00h`) and the AM/PM marker are consumed.
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
+    //    trenta. The 24h form with `h` (`10:00h`) and the AM/PM marker are consumed. NOT a sports time:
+    //    a THIRD `\d.\d\d` field after the minutes (4:41.30) means the number is a pace, not a clock — the
+    //    playbook's sports-time cell.
+    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
         (m0, h: string, min: string, hh: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -196,14 +214,17 @@ export function normalizeCatalan(input: string): string {
 
     // 9) GIGAHERTZ — the corpus's `2.4 Ghz`, `5.0 Ghz`. The version-dot rule has already split the number
     //    ("2.4" → "2 punt 4"); the Ghz unit reads gigahercis. AFTER the version rule, BEFORE the tier.
-    s = s.replace(/(\d+(?: punt \d+)?)\s?Ghz?\b(?![\p{L}\p{M}])/giu, "$1 gigahercis");
+    s = s.replace(/(\d+(?: punt \d+)?)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahercis");
 
-    // 10) SIGNS. `UTC +1` — the plus was dropped. `&` → *i* (and). A TRUE minus (`-5`) reads "menys"; the
-    //     corpus's `-\d` are all ranges/scores (6-6, 11.000-22.500, 4.2-3.9) and stay as two bare numbers.
+    // 10) SIGNS. `UTC +1` — the plus was dropped. `&` → *i* (and), with a trailing plural `s` on the LAST
+    //     letter name (`B&Bs` → be i bes — the corpus's only ampersand is the plural). A TRUE minus (`-5`)
+    //     reads "menys"; the corpus's `-\d` are all ranges/scores (6-6, 11.000-22.500, 4.2-3.9) and stay as
+    //     two bare numbers.
     s = s.replace(/\+\s?(?=\d)/gu, " més ");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "menys $1");
-    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
-        `${LETTER_NAME[a.toLowerCase()] ?? a} i ${LETTER_NAME[b.toLowerCase()] ?? b}`);
+    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
+        (_m, a: string, b: string, pl: string) =>
+            `${LETTER_NAME[a.toLowerCase()] ?? a} i ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " i ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 és igual a $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 és menor que $2");

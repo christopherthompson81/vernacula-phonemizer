@@ -195,6 +195,18 @@ describe("Catalan text normalization", () => {
         expect(normalizeCatalan("aC")).toBe("abans de Crist");
     });
 
+    test("trap pins: 4t (quart), the s-decade, and the B&Bs plural", () => {
+        // 4t is the quart series; 20t is NOT a Catalan form (20è) and must not fire.
+        expect(normalizeCatalan("el 4t dia")).toBe("el quart dia");
+        expect(ph("el 4t dia")).toBe("əɫ kwˈaɾt dˈiə");
+        expect(ph("20t")).toBe("bˈin t");
+        // the s-decade must not reach the tier's `s` unit (nineteen-twenty SECONDS).
+        expect(normalizeCatalan("Durant els anys 1920s")).toBe("Durant els anys 1920");
+        expect(ph("Durant els anys 1920s")).toBe("duɾˈan əɫs ˈaɲs mˈiɫ nˈɔw sˈens bˈin");
+        // B&Bs — the plural s lands on the last letter name.
+        expect(ph("els B&Bs")).toBe("əɫs bˈe i bˈes");
+    });
+
     test("the Nè/Na/Nr ordinal reads the Catalan ordinal (masculine/feminine)", () => {
         expect(ph("7è de rugbi")).toBe("sətˈɛ də rˈuɣβi"); // setè
         expect(ph("la 7a illa")).toBe("ɫə sətˈɛnə ˈiʎə"); // setena (feminine)

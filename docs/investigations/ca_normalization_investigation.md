@@ -79,3 +79,30 @@ worked).
   writes (Catalan groups thousands with dots, which the TOKEN already handles); identical to baseline.
 - `4.892 m` is the subtle case: 4892 metres has a 3-digit fraction → stays a grouping; only 1-2 digit
   fractions are versions/decimals.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Three traps bit, all
+caught by probing the ADVERSARIAL NEIGHBOUR, none visible in the corpus diff or the review checklist:
+
+- **Trap 1 (`\b` ASCII)**: the era markers (`\bdC`) and the Ghz rule (`Ghz?\b`) used `\b`. Replaced
+  with the explicit `(?<![\p{L}\p{M}])`…`(?![\p{L}\p{M}])` lookarounds. (The era bodies now carry the
+  lookarounds alone.)
+- **Trap 12 / Il-76s (`s` unit collision)**: `1920s` read *mil nou-cents vint segons* — nineteen-twenty
+  SECONDS — because the shared tier declares `s` in `units`, and "1920 s" is a number-adjacent unit.
+  The playbook's own migration section documents exactly this. The corpus's one instance is
+  `Durant els anys 1920s`. Fix: normalize strips the plural `s` (`\d+s` → the number) BEFORE the tier.
+- **Trap 8 (neighbour of an attested rule)**: `4t` (quart) — the `t` series — was not in the ordinal
+  suffix set, reading *quatre t*. The fix gates EVERY suffix against the spoken ordinal's final word
+  (primer/segon/tercer/quart/…è), which simultaneously rules out forms the language does not write
+  (20t, 2000n, 11r) — trap 9's misfire generator, an unattested guard alternative.
+- **Trap 8 (sports time)**: the clock rule claimed `4:41.30` as a clock (the third `.SS` field was not
+  guarded). Added `(?![:.\d])` so a trailing dot-decimal keeps it unclaimed. Corpus has zero sports
+  times, so this is a defensive neighbour fix.
+- **B&Bs plural**: the corpus's only ampersand is the PLURAL `B&Bs`, which read *p ps* — the `&`
+  dropped AND the plural `s` orphaned. The ampersand rule now carries an optional trailing `s` onto
+  the last letter name: *be i bes*. (The review tool's `&` class is blind to a mid-string `&` that
+  changes TOKENIZATION — exactly the note on the checklist's sign check.)
+
+**Post-fix gates**: corpus diff 111/1841 (6.0%), RAWMARK 1→0, DROP 2→0; 2635 tests (3 new trap-pin
+tests); referee 4201/5168 (81.3%) unchanged; review checklist clean.
