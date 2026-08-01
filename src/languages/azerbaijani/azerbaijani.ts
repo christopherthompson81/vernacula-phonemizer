@@ -4,10 +4,12 @@
  * docs/investigations/az_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeAzerbaijani } from "./normalize.ts";
 
 /** Phonemize a single Azerbaijani word to canonical IPA (final-syllable stress, before the stressed vowel). */
 export function phonemizeWord(word: string): string {
@@ -24,13 +26,31 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// A word (Azerbaijani letters), a number, or clause punctuation. Azerbaijani uses . as thousands sep, , as decimal.
-const TOKEN = /([a-zçğəıiöşüx]+)|(\d+(?:\.\d{3})*(?:,\d+)?)|([.!?…,;:])/giu;
+// #562 — Azerbaijani groups thousands with a SPACE (400 000) or a PERIOD (1.234 — the old class's "."
+// thousands sep, still the idiomatic reading) and takes a COMMA decimal (6,5). The old class was a bare
+// `(\d+)`, so BOTH the space-group and the comma fell through: "400 000" read *dörd yüz sıfır* and "6,5"
+// *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a decimal
+// (the TOKEN's `\d+,\d+`), a period-thousands is a group (the TOKEN's `\d+\.\d{3}`), and a plain digit run
+// is a bare number.
+const TOKEN = /([a-zçğəıiöşüx]+)|(\d+\.\d{3}(?:\.\d{3})*|\d+,\d+|\d+)|([.!?…,;:])/giu;
 
-/** A number token (Azerbaijani thousands-dots / decimal-comma) → spoken words. */
+// #562 symbol normalization — Azerbaijani measure and currency nouns are INVARIANT after a numeral
+// ("üç faiz", "80 kilometr"). `m` is a standalone metre unit (4892 m, 3,50 m).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["faiz"],
+    currency: { "€": ["avro"], "$": ["dollar"], "£": ["funt sterlinq"], "¥": ["yen"] },
+    units: {
+        km: ["kilometr"], sm: ["santimetr"], mm: ["millimetr"], kg: ["kilogram"],
+        m: ["metr"], mil: ["mil"], mi: ["mil"], yard: ["yard"],
+    },
+    exponentWords: { squared: ["kvadrat"], cubed: ["kub"], position: "before" },
+    magnitudes: ["milyon", "milyard", "trilyon"],
+});
+
+/** A number token (Azerbaijani space-/period-thousands, comma-decimal) → spoken words. */
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
+    let words = numberToWords(Number(intRaw!.replace(/[ .]/gu, "")));
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +
@@ -44,7 +64,9 @@ class AzerbaijaniPhonemizer implements Phonemizer {
         // case-fold to i, so the /i/-flag TOKEN class would silently DROP it (İki → ki). Map İ→i and I→ı up front
         // (azLower does the same per-token, but the tokenizer must see the lowercase forms to match at all).
         const normalized = input.replace(/İ/gu, "i").replace(/I/gu, "ı");
-        return assembleClauses(normalized, TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
+        // number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeAzerbaijani(normalized)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberTokenToWords(m[2]).split(" ")) sink.emit(phonemizeWord(wd));
