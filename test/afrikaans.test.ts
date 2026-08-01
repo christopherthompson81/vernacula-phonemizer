@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
+import { normalizeAfrikaans, ordinalWord } from "../src/languages/afrikaans/normalize.ts";
+import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), Latin script,
 // Standard Afrikaans, espeak-independent. A greedy digraph-first g2p + the Germanic OPEN/CLOSED-SYLLABLE vowel-length
@@ -41,5 +43,106 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
 
     test("text: words + clause punctuation (stress + numbers deferred)", () => {
         expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu .");
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/afrikaans/normalize.ts) — the pre-tokenizer pass behind #562. The
+// defining rules are the ORDINAL (numeral + letter suffix: 11de, 15de, 9e, 60ste — Dutch-style) and the
+// ENGLISH separators this corpus actually uses (dot decimal, comma thousands). Also era markers, clocks
+// with vm/n.m., rates, currency, percent, degrees, signs and initialisms.
+describe("Afrikaans text normalization", () => {
+    const ph = (s: string): string => getPhonemizer("af").text(s).trim();
+
+    test("ordinal words: below 20 a table, from 20 up -ste with a sub-20 tail", () => {
+        expect(ordinalWord(1)).toBe("eerste");
+        expect(ordinalWord(9)).toBe("neënde");
+        expect(ordinalWord(11)).toBe("elfde");
+        expect(ordinalWord(15)).toBe("vyftiende");
+        expect(ordinalWord(19)).toBe("negentiende");
+        expect(ordinalWord(20)).toBe("twintigste");
+        expect(ordinalWord(60)).toBe("sestigste");
+        expect(ordinalWord(190)).toBe("honderd en negentigste");
+    });
+
+    test("text→text: the N-suffix ordinal becomes the ordinal words", () => {
+        expect(normalizeAfrikaans("11de Hussars")).toBe("elfde Hussars");
+        expect(normalizeAfrikaans("15de eeu")).toBe("vyftiende eeu");
+        expect(normalizeAfrikaans("9e Augustus")).toBe("neënde Augustus");
+        expect(normalizeAfrikaans("60ste van die seisoen")).toBe("sestigste van die seisoen");
+    });
+
+    test("comma groups thousands and the DOT is a decimal (English convention in this corpus)", () => {
+        expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil");
+        expect(ph("100,000 mense")).toBe("ɦɔndərt dœysənt mɛnsə");
+        expect(ph("12.8 km")).toBe("tvɑːlf kɔma aχt kilɔmiətər");
+        expect(ph("2.3 miljoen")).toBe("tviə kɔma dri məljun");
+    });
+
+    test("clocks read hour [minute] with voormiddag/namiddag; the AM/PM suffix expands", () => {
+        expect(ph("10:00vm")).toBe("tin fuərmədaχ");
+        expect(ph("8:30 n.m.")).toBe("aχt dɛrtəχ nɑːmədaχ .");
+        expect(ph("11:20")).toBe("ɛlf tvəntəχ");
+    });
+
+    test("era markers and dotted abbreviations expand", () => {
+        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn tvəntəχ fuər kɦrəstœs .");
+        expect(ph("d.i. 0 of 1")).toBe("dət əs nœl ɔf iən");
+        expect(ph("Dr. Lee")).toBe("dɔktər liə");
+        expect(ph("40 m.p.u")).toBe("fiərtəχ məil pɛr yːr");
+    });
+
+    test("rates, percent, currency and units use Afrikaans words", () => {
+        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilɔmiətər pɛr yːr");
+        expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimətər");
+        expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilɔmiətər");
+        expect(ph("93%")).toBe("dri ɛn niəχəntəχ pɛrsɛnt");
+        expect(ph("£27 miljoen")).toBe("siəvə ɛn tvəntəχ məljun pɔnt");
+        expect(ph("$2.3 biljoen")).toBe("tviə kɔma dri bəljun dɔlar");
+    });
+
+    test("signs read out; the HTML ampersand becomes en; B&B is letter-named", () => {
+        expect(ph("+30°C")).toBe("plœs dɛrtəχ χrɑːdə sɛlsiœs");
+        expect(ph("Qatar Airways &amp; Turkish Airlines")).toBe("kɑːtar ɑːərvaəis ɛn tœrkəsɦ ɑːərlinəs");
+        expect(ph("B&amp;B")).toBe("biə ɛn biə");
+        expect(ph("1/5 duim")).toBe("iən fəifdə dœym");
+    });
+
+    test("regnal ordinals take both spellings of the noun and the un-converted Roman I", () => {
+        expect(ph("Wêreld Oorlog II")).toBe("tviədə vɛːrəltuərlɔχ");
+        expect(ph("Wêreldoorlog II")).toBe("tviədə vɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
+        expect(ph("Wêreld Oorlog I")).toBe("iərstə vɛːrəltuərlɔχ"); // a lone I is never romanised upstream
+    });
+
+    // The article is [ə], and the corpus writes it four ways — 588× with the LEFT quote U+2018, which the
+    // g2p's two-spelling check did not recognise, so the commonest word in the language read as a bare `n`.
+    test("every spelling of the indefinite article reads [ə]", () => {
+        for (const art of ["'n", "’n", "‘n", "ʼn", "ń"])
+            expect(ph(`${art} Avenger myn skip`)).toBe("ə ɑːfəŋər məin skəp");
+        expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
+    });
+
+    // Each of these was a live misreading; the corpus counts are in the investigation doc.
+    test("the era marker is dot-bound, so it cannot eat the indefinite article", () => {
+        expect(normalizeAfrikaans("'n Chinese skip")).toBe("'n Chinese skip"); // was *'na Christushinese*
+        expect(normalizeAfrikaans("323 v.C.")).toBe("323 voor Christus.");
+        expect(normalizeAfrikaans("356 VC")).toBe("356 voor Christus");
+        expect(normalizeAfrikaans("5 000 v. C.")).toBe("5 000 voor Christus.");
+    });
+
+    test("a DOT between digits is the decimal; only a timezone/AM-PM context makes it a clock", () => {
+        expect(ph("6.34 duim")).toBe("sɛs kɔma dri fir dœym");       // was the clock *ses vier en dertig*
+        expect(ph("3.50-meter")).toBe("dri kɔma fəif nœl miətər");
+        expect(ph("15.00 GUT")).toBe("fəiftin χœt");                  // the corpus's one dot-clock
+        expect(ph("4:41.30")).toBe("fir , iən ɛn fiərtəχ kɔma dri nœl"); // a sports time is not a clock
+    });
+
+    test("the AM/PM marker follows the minutes, and nm alone is not a time", () => {
+        expect(ph("9:30 vm")).toBe("niəχə dɛrtəχ fuərmədaχ"); // was *nege voormiddag dertig*
+        expect(ph("10:00vm")).toBe("tin fuərmədaχ");
+        expect(ph("10nm")).toBe("tin nm");                    // nanometres, not *tien namiddag*
+    });
+
+    test("the ordinal suffix is orthography, not a lowercase convention", () => {
+        expect(normalizeAfrikaans("11De Hussars")).toBe("elfde Hussars");
     });
 });
