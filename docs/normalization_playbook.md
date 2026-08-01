@@ -353,6 +353,43 @@ Two cheap ways to find the unexercised branch:
   table, a Wikipedia list of fractions. Trap 8 says zero corpus instances is not evidence of correctness;
   this is the constructive half of that.
 
+**14. AGREEMENT CANNOT BE APPLIED TO DIGITS.** A digit becomes words in the TOKENIZER, downstream of every
+rule in this layer — so a rule that emits `$1 <joiner> $2`, or that glues a suffix to a digit run, can never
+make the neighbouring word agree, because at that moment there is no word to agree with. Two languages
+shipped the same defect from opposite ends:
+
+- **Welsh** reads a range with `i` (to), which triggers SOFT MUTATION on what follows: 5-3 is *pump i dri*,
+  1894-1895 is *… i fil …*, 100-200 is *cant i ddau gant*. The rule emitted `$1 i $2` on digits, so no
+  mutation was possible; **12 of the corpus's 18 ranges** were wrong, and the shipped test asserted the
+  unmutated *i mil*.
+- **Azerbaijani** writes the case suffix after the DIGITS (`10:00-da`, `11:00-dan`, `88%-ni`), and it has to
+  agree with the WORDS: `11:00-dan` is read *on birdən*, because `bir` is front however the numeral was
+  written. Gluing the written suffix verbatim gave *on birdan*; reading it as its own token gave *on dɑ* —
+  two words where the language has one. **9 clocks and 6 percent instances.**
+
+**The fix shape is the same both times: convert the affected operand to WORDS inside the rule, apply the
+agreement there, and then expand anything the shared tier can no longer see.** That last clause is not
+optional — converting a number to words destroys the number-unit adjacency the tier matches on (step 4's
+"units before decimals" coupling), so a rule that words-ifies an operand must claim a following unit itself.
+Welsh's `2-3 km o iâ` needs the rule to emit *cilometr*; Azerbaijani's percent suffix needs the rule to emit
+*faiz* plus the linking vowel an n-initial suffix assumes (*faizini*, never *faizni*).
+
+Two hazards that come with it, both found the hard way:
+
+- **Order by who needs words first.** Welsh's clock range had to be claimed BEFORE the general range rule,
+  because the mutation applies to the second clock's spoken form, which does not exist until that clock has
+  been read.
+- **Once you stop re-emitting an operand verbatim, its character class starts eating punctuation.** Welsh's
+  `(\d[\d,]*)` also matches a trailing CLAUSE comma; harmless while the rule wrote `$2` back out, silent
+  data loss the moment it wrote words instead (`ers 1995-96, pan …` lost its pause). Anchor such a class to
+  end in a digit.
+
+**Where this bites next, measured rather than guessed.** Kazakh, still untreated, writes the same shapes at
+higher density than Azerbaijani did: **6 clocks with a glued case suffix** (`9:30-да`, `8:30-да`), **36 bare
+numbers with one** (`200-ге`, `8-ден`, `80-нен`, `60-тан`) and **16 ordinals** (`1-ші`, `17-ші`, `60-шы`) in
+1,494 utterances — so the suffix, not the numeral, is that language's defining rule. Expect the same of the
+other Turkic corpora, of Irish (lenition after `i`/`do`), and of anything whose preposition governs a case.
+
 ---
 
 ## Two standing rules on data
