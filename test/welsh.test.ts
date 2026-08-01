@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+import { normalizeWelsh } from "../src/languages/welsh/normalize.ts";
 import { phonemizeWord } from "../src/languages/welsh/welsh.ts";
 
 // Canonical-IPA goldens for Welsh (cy) — espeak-independent, Northern-leaning (u/clear-y → ɨ). Welsh spelling is
@@ -71,5 +73,65 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("wal")).toBe("wˈal"); // word-initial w + vowel → consonant /w/ (not vowel ʊ)
         expect(phonemizeWord("teithio")).toBe("tˈeᶦθjɔ"); // ei → eᶦ (referee-backed); i+vowel → /j/
         expect(phonemizeWord("bara")).toBe("bˈara"); // plain
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/welsh/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// rules are the VIGESIMAL ordinal (settled by audio: 60fed reads trigainfed, not chwe degfed), the
+// comma-thousands (Welsh groups with commas; the dot is a decimal "pwynt"), the era markers O.C./C.C.,
+// the p.m./a.m. clocks, the -au decades, and the letter-spelled initialisms.
+describe("Welsh text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "cy").trim();
+
+    test("the Nfed/Ned/Neg ordinal reads the VIGESIMAL form (trap-13 branch pins)", () => {
+        // table
+        expect(normalizeWelsh("7fed")).toBe("seithfed");
+        expect(normalizeWelsh("6ed")).toBe("chweched");
+        expect(normalizeWelsh("1af")).toBe("cyntaf");
+        // the 20s composition: 37 = 17 on 20
+        expect(normalizeWelsh("37fed")).toBe("ail ar bymtheg ar hugain");
+        expect(ph("37fed")).toBe("ˈaᶦl ˈar bˈəmθɛɡ ˈar hˈɪɡaᶦn");
+        // the round tens, and the corpus's only >100 ordinal
+        expect(normalizeWelsh("60fed")).toBe("trigainfed");
+        expect(normalizeWelsh("190fed")).toBe("degfed a naw ugain");
+        expect(normalizeWelsh("1,000fed")).toBe("milfed");
+    });
+
+    test("comma-thousands stay grouped; the dot is a decimal (pwynt) or a version", () => {
+        expect(ph("1,400 o bobl")).toBe("mˈiːl pˈɛdwar kˈant ˈoː bˈɔbl");
+        expect(ph("400,000")).toBe("pˈɛdwar kˈant mˈiːl");
+        expect(ph("2.4Ghz")).toBe("dˈaᶤ pˈuːᶤnt pˈɛdwar ɡiɡˈahɛrtz");
+        expect(ph("1.5 miliwn")).toBe("ˈɨːn pˈuːᶤnt pˈɨmp mˈɪljʊn");
+    });
+
+    test("clocks read hour [minute] with p.m./a.m. as y prynhawn / y bore", () => {
+        expect(ph("11:35 p.m.")).toBe("ˈɨːn dˈeːɡ ˈɨːn trˈiː dˈeːɡ pˈɨmp ˈə prˈənhaᶷn");
+        expect(ph("07:19 a.m.")).toBe("sˈaᶦθ ˈɨːn dˈeːɡ nˈaːᶷ ˈə bˈɔrɛ");
+        expect(ph("15.00 UTC")).toBe("ˈɨːn dˈeːɡ pˈɨmp ˈɨː tˈiː ˈɛk");
+    });
+
+    test("era markers expand; decades drop the -au; fractions use the ordinal", () => {
+        expect(ph("400 O.C.")).toBe("pˈɛdwar kˈant ˈoːᶤd krˈist");
+        expect(ph("1000 C.C.")).toBe("mˈiːl kˈɨn krˈist");
+        expect(ph("1970au")).toBe("mˈiːl nˈaːᶷ kˈant sˈaᶦθ dˈeːɡ");
+        expect(ph("1/5 modfedd")).toBe("ˈɨːn pˈɨmɛd mˈɔdvɛð");
+    });
+
+    test("rates, units and degrees read their Welsh words", () => {
+        expect(ph("480 cilomedr/awr")).toBe("pˈɛdwar kˈant ˈuːᶤθ dˈeːɡ kilˈɔmɛdr ˈər ˈaᶷr");
+        expect(ph("100 llath/metr")).toBe("kˈant ɬˈaːθ nˈeᶤ vˈɛtr");
+        expect(ph("4892 m")).toBe("pˈɛdaᶦr mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ dˈaᶤ mˈɛtr");
+        expect(ph("+30°C")).toBe("plˈuːs trˈiː dˈeːɡ ɡrˈaːð kˈɛlʃɨs");
+    });
+
+    test("currency prefixes, abbreviations and initialisms read their words or letters", () => {
+        expect(ph("AUD$45 miliwn")).toBe("dˈɔlɛr aᶷstrˈalja pˈɛdwar dˈeːɡ pˈɨmp mˈɪljʊn");
+        expect(ph("US$11,000")).toBe("dˈɔlɛr ˈər ˈɨnɔl dalˈeᶦθja ˈɨːn dˈeːɡ ˈɨːn mˈiːl");
+        expect(ph("y DU")).toBe("ˈə dˈeᶤrnas ɨnˈɛdɪɡ"); // the UK, not "du"
+        expect(ph("y Môr Du")).toBe("ˈə mˈoːr dˈɨː"); // the Black Sea keeps "du"
+        expect(ph("ayb.")).toBe("ˈak ˈən ˈə blˈaːᶤn ."); // ac yn y blaen
+        expect(ph("George W. Bush")).toBe("ɡɛˈɔrɡɛ ˈuː bˈɨsh");
+        expect(ph("NHK")).toBe("ˈɛn ˈaᶦtsh ˈɛk"); // en aitsh ec
+        expect(ph("UCLA")).toBe("ˈɨː ˈɛk ˈɛl ˈa");
     });
 });

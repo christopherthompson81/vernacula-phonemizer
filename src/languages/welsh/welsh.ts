@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeWelsh } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // LEXICON (lexicon.tsv, kaikki/Wiktionary NW-derived): pronunciations the rules mis-derive — per-word ⟨ae⟩/⟨ai⟩
@@ -96,26 +97,32 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
+// Welsh groups thousands with COMMAS (1,400 — the TOKEN swallows the comma so the tier can still see the
+// number); the dot is a DECIMAL (2.3 → "dau pwynt tri") or a version (802.11n), claimed by normalize.
 const TOKEN =
-    /([a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]+(?:['’-][a-zâêîôûŵŷA-Z]+)*)|(\d+)|([.!?…,;:])/gu;
+    /([a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]+(?:['’-][a-zâêîôûŵŷA-Z]+)*)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
-// nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri).
+// nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri*).
 // cant/doler/punt/cilogram are referee-attested; cilometr/milimetr/centimetr are the standard
-// borrowings, read by rule.
+// borrowings, read by rule. `m` (metre) added for the corpus's 100m/230m running events and 4892 m.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["y cant"],
     currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
-    units: { km: ["cilometr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"] },
+    units: { km: ["cilometr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },
 });
 
 class WelshPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/version steps need
+        // the number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeWelsh(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" "))
+            else if (m[2]) {
+                const n = Number(m[2].replace(/,/gu, ""));
+                for (const wd of numberToWords(n).split(" "))
                     sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
