@@ -64,14 +64,14 @@ export const isUnreadableFula = makeUnreadableTest({
 });
 
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */
-const WORD_ACRONYMS: ReadonlySet<string> = new Set(["nasa", "un", "una", "eu"]);
+const WORD_ACRONYMS: ReadonlySet<string> = new Set(["nasa", "eua"]);
 
 const normalizeInitialisms = makeInitialismNormalizer({
     letterName: (l) => LETTER_NAME[l.toLowerCase()],
     acronymLetters: new Set([
         "mri", "oha", "acma", "rem", "us", "usa", "usaf", "fbi", "cia", "nsa", "faa", "bbc",
         "cnn", "cbs", "nba", "nfl", "nhl", "mlb", "mls", "gps", "dna", "hiv", "aids", "pdf", "dvd",
-        "cd", "tv", "pc", "h5n1", "a1gp", "u.s.", "u.s",
+        "cd", "tv", "pc", "h5n1", "a1gp", "u.s.", "u.s", "un", "eu",
     ]),
     isRecorded: (w) => WORD_ACRONYMS.has(w),
     isUnreadable: isUnreadableFula,

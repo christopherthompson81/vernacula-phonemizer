@@ -114,5 +114,7 @@ describe("Fula text normalization", () => {
         expect(ph("MRI")).toBe("mˈa ɾˈa ˈi");
         expect(ph("H5N1")).toBe("hˈa d͡ʒˈoji nˈa ɡˈoː");
         expect(ph("U.S.")).toBe("ˈu sˈa");
+        // UN is the United Nations — letter-spelled, not the word "un"
+        expect(ph("ha UN")).toBe("hˈa ˈu nˈa");
     });
 });
