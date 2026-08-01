@@ -121,6 +121,8 @@ const ROUND_TENS: Readonly<Record<number, string>> = {
 export function ordinalWords(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 0) return undefined;
     if (n <= 19) return n === 0 ? "dimfed" : ORD_1_19[n]!;
+    if (n === 20) return ROUND_TENS[20]; // the branch BOUNDARY: `low` is 0 here, so the 21-39 arm below
+                                        //  returned undefined and ugeinfed was unreachable (trap 13).
     if (n < 40) {
         // 21–39: the compound 1–19 base + "ar hugain". 31 = unfed ar ddeg ar hugain (11 on 20),
         // 37 = ail ar bymtheg ar hugain (17 on 20).
@@ -135,6 +137,30 @@ export function ordinalWords(n: number): string | undefined {
     if (n === 1000) return "milfed";
     return undefined;
 }
+
+/**
+ * SOFT MUTATION (treiglad meddal) of a word's initial consonant. Obligatory after the preposition `i` (to),
+ * which is how Welsh reads every range and score: 5-3 is *pump i dri*, 1894-1895 is *… i fil …*, 100-200 is
+ * *cant i ddau gant*. Twelve of the corpus's eighteen ranges have a mutable second operand.
+ *
+ * THE DIGRAPHS COME FIRST and this is the whole trap: `ch`, `dd`, `ff`, `ng`, `ph`, `th` do not mutate, so
+ * `chwech` must not be read as c → g (*ghwech*), while `ll` → `l` and `rh` → `r` do mutate.
+ */
+export function soften(text: string): string {
+    const two = text.slice(0, 2).toLowerCase();
+    if (two === "ll") return `l${text.slice(2)}`;
+    if (two === "rh") return `r${text.slice(2)}`;
+    if (["ch", "dd", "ff", "ng", "ph", "th"].includes(two)) return text;
+    const SOFT: Readonly<Record<string, string>> = { p: "b", t: "d", c: "g", b: "f", d: "dd", g: "", m: "f" };
+    const soft = SOFT[text[0]!.toLowerCase()];
+    return soft === undefined ? text : `${soft}${text.slice(1)}`;
+}
+
+/** The tier's unit words, needed when a rule converts a number to WORDS and so breaks the number-unit
+ *  adjacency the shared tier matches on (playbook step 4, "units before decimals"). */
+const UNIT_WORD: Readonly<Record<string, string>> = {
+    km: "cilometr", kg: "cilogram", mm: "milimetr", cm: "centimetr", m: "metr",
+};
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // THE PASS
@@ -199,7 +225,30 @@ export function normalizeWelsh(input: string): string {
     //     wyth cant naw deg pump*. The hyphen is NOT clause punctuation here. Handled BEFORE the
     //     colon-clock rule so the two times/numbers are claimed separately and the hyphen does not glue
     //     them into one token. The corpus's 18 digit-ranges are all scores or periods, none a minus.
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 i $2");
+    //     THE JOINER `i` MUTATES WHAT FOLLOWS IT, which a digit-level `$1 i $2` cannot do — the digits only
+    //     become words in the tokenizer, downstream of every text rule. So the SECOND operand is emitted as
+    //     words here and softened: *pump i dri*, *… i fil wyth cant …*, *cant i ddau gant*. The clock range
+    //     is claimed first, for the same reason (its own words have to exist before they can mutate).
+    const clockWords = (h: string, min: string): string =>
+        Number(min) === 0 ? numberToWordsWelsh(Number(h)) : `${numberToWordsWelsh(Number(h))} ${numberToWordsWelsh(Number(min))}`;
+    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)\s*[-–]\s*([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])/gu,
+        (m0, h1: string, m1: string, h2: string, m2: string) =>
+            Number(m1) > 59 || Number(m2) > 59 ? m0 : `${clockWords(h1, m1)} i ${soften(clockWords(h2, m2))}`);
+    //     A UNIT after the range is expanded here too: converting the operand to words leaves the tier no
+    //     number to attach `km` to, and the corpus writes `2-3 km o iâ`. A percent or currency sign after
+    //     the range declines the whole rule instead, since those the tier still owns.
+    //     THE OPERAND MUST END IN A DIGIT. `[\d,]*` also matches a trailing CLAUSE comma, and since this
+    //     rule now re-emits the operand as words rather than `$2` verbatim, that comma was consumed rather
+    //     than passed through: the corpus's `ers 1995-96, pan gyrhaeddodd` lost its pause.
+    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])(\s?(?:km|kg|mm|cm|m)(?![\p{L}\p{M}]))?(?![%\p{Sc}])/gu,
+        (m0, a: string, b: string, unit?: string) => {
+            const n = Number(b.replace(/,/gu, ""));
+            if (!Number.isSafeInteger(n)) return m0;
+            const words = numberToWordsWelsh(n);
+            if (words === "" || /\d/u.test(words)) return m0;
+            const u = unit === undefined ? "" : ` ${UNIT_WORD[unit.trim().toLowerCase()]!}`;
+            return `${a} i ${soften(words)}${u}`;
+        });
 
     // 6) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `11:35 p.m.` → un deg un tri deg pump y prynhawn;
@@ -208,7 +257,11 @@ export function normalizeWelsh(input: string): string {
     //    after the minutes (4:41.30) means a pace. The marker is captured WITHOUT eating the space before
     //    it: a bare `\s*` after the minutes glued "10:00 i 11:00" into "deg i" → "degi" (the space before
     //    "i" was consumed even when no marker followed).
-    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*(p\.?m\.?|a\.?m\.?))?/giu,
+    //    THE MARKER NEEDS A BOUNDARY. `a\.?m\.?` with nothing after it matched the first two letters of a
+    //    following Welsh word: the corpus's `11:00 amser` ("11:00 time") read as *un deg un y bore ser*,
+    //    asserting a time-of-day and eating half a word. The undotted glued form (`10:00am`) is in the
+    //    corpus too, so requiring the dots is not an option — requiring a non-letter after it is.
+    s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*(p\.?m\.?|a\.?m\.?)(?![\p{L}\p{M}]))?/giu,
         (m0, h: string, min: string, ap: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return m0;
@@ -303,5 +356,7 @@ export function normalizeWelsh(input: string): string {
     //     ec.*) and after the dotted-capital rule.
     s = normalizeInitialisms(s);
 
-    return s;
+    // A padded replacement (` plws `, ` a `) doubles a space that was already there. SLOT-GAP is a defect
+    // class; this pass should not manufacture candidates for it.
+    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
 }

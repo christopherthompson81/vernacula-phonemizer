@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { normalizeWelsh } from "../src/languages/welsh/normalize.ts";
+import { normalizeWelsh, ordinalWords, soften } from "../src/languages/welsh/normalize.ts";
 import { phonemizeWord } from "../src/languages/welsh/welsh.ts";
 
 // Canonical-IPA goldens for Welsh (cy) — espeak-independent, Northern-leaning (u/clear-y → ɨ). Welsh spelling is
@@ -110,9 +110,26 @@ describe("Welsh text normalization", () => {
         expect(ph("1,400")).toBe("mˈiːl pˈɛdwar kˈant");
     });
 
+    test("a clock's a.m. marker needs a boundary, and the 20 ordinal exists", () => {
+        expect(normalizeWelsh("11:00 amser")).toBe("un deg un amser"); // was *un deg un y bore ser*
+        expect(normalizeWelsh("10:00am")).toBe("deg y bore"); // the glued undotted form still reads
+        expect(normalizeWelsh("07:19 a.m.")).toBe("saith un deg naw y bore");
+        expect(ordinalWords(20)).toBe("ugeinfed"); // the branch boundary: `low` is 0 in the 21-39 arm
+    });
+
     test("ranges and scores read with 'i' (to); a leading minus stays minws", () => {
         expect(ph("6-6")).toBe("χwˈeːχ ˈiː χwˈeːχ");
-        expect(ph("1894-1895")).toBe("mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɛdwar ˈiː mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɨmp");
+        // `i` MUTATES what follows it: mil → fil, tri → dri, dau → ddau. chwech does not mutate (ch).
+        expect(ph("1894-1895")).toBe("mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɛdwar ˈiː vˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɨmp");
+        expect(ph("5-3 Washington")).toBe("pˈɨmp ˈiː drˈiː washˈiŋtɔn");
+        expect(ph("100-200 milltir")).toBe("kˈant ˈiː ðˈaᶤ ɡˈant mˈiɬtir");
+        expect(ph("2-3 km o iâ")).toBe("dˈaᶤ ˈiː drˈiː kilˈɔmɛtr ˈoː jˈaː"); // the unit survives the rewrite
+        expect(soften("chwech")).toBe("chwech"); // the digraph does not mutate
+        expect(soften("llath")).toBe("lath");
+        // the operand must END in a digit: `[\d,]*` also matches a trailing CLAUSE comma, and re-emitting
+        // the operand as words then ate it — the corpus's `ers 1995-96, pan …` lost its pause.
+        expect(normalizeWelsh("ers 1995-96, pan gyrhaeddodd")).toBe("ers 1995 i naw deg chwech, pan gyrhaeddodd");
+        expect(normalizeWelsh("1,400-1,500 o bobl")).toBe("1,400 i fil pum cant o bobl");
         expect(ph("10:00-11:00 yr hwyr")).toBe("dˈeːɡ ˈiː ˈɨːn dˈeːɡ ˈɨːn ˈər hˈuːᶤr");
         expect(ph("-5 gradd")).toBe("mˈinʊs pˈɨmp ɡrˈaːð");
     });

@@ -132,7 +132,7 @@ version rule and phonemized through the word path.
 - corpus diff: 219/2009 (10.9%) changed, every change READ and verified an improvement (97 initialism,
   31 comma-thousands, 25 ordinal, 16 dot-decimal, 14 decade, 10 abbrev, 8 clock, 2 unit, 2 era, 2 rate,
   2 degree/fraction, 10 misc — M16/H5N1/KV62/A1GP letter-spelling and George W. Bush)
-- normalization-review --lang cy: checklist clean
+- normalization/review.ts --lang cy: checklist clean
 
 **Trap 7 caught live**: the DU/UDA/AS expansions were initially case-INSENSITIVE (`giu`), and the corpus
 diff immediately showed "y Môr Du" (the Black Sea), "Un byr du yw espresso", "Oldsmobile du", "Cirque du
@@ -211,3 +211,39 @@ comma-decimal rule claiming `\d+,\d{1,2}` (1-2 digit fraction) as "pwynt", while
 stays thousands for the TOKEN. `12,5` now reads "un deg dau pwynt pump"; `1,400`/`400,000`/
 `5,000,000` are untouched. Corpus diff unchanged (230/2009) — the rule fires only on the synthetic
 probe. Pinned by a test.
+
+## Run N+1 — 2026-08-01 (PR #595 review pass)
+
+**Question**: the layer already carries a self-review against the playbook traps, so what remains? ~30
+probes, with attention on the rules that CONSTRUCT Welsh rather than the ones that match it. **Four
+defects, two on live corpus text, and one of them is a grammatical requirement the PR body already states.**
+
+1. **`i` MUTATES WHAT FOLLOWS IT, and nothing did the mutation.** The range rule emitted `$1 i $2` on
+   DIGITS, and digits only become words in the tokenizer — downstream of every text rule — so the soft
+   mutation the PR body itself describes (*pump i dri*, *… i fil wyth cant …*) could never happen. **Twelve
+   of the corpus's eighteen ranges have a mutable second operand** (mil → fil ×5, tri → dri ×2, pedwar →
+   bedwar, dau → ddau, cant → gant, pump → bump, dim → ddim), and the shipped test asserted the unmutated
+   *i mil*, pinning the defect.
+   The fix emits the second operand as WORDS and softens it, which forces two more things:
+   - a `soften` helper where **the digraphs come first** — `ch`, `dd`, `ff`, `ng`, `ph`, `th` do not mutate,
+     so `chwech` must not read as c → g, while `ll` → `l` and `rh` → `r` do;
+   - the CLOCK RANGE claimed before the general one (its words have to exist before they can mutate), and a
+     following UNIT expanded in the rule, since converting the operand to words leaves the shared tier no
+     number to attach `km` to — the corpus writes `2-3 km o iâ`.
+2. **The a.m. marker ate a Welsh word.** `a\.?m\.?` with no boundary after it matched the first two letters
+   of the following word: the corpus's `11:00 amser` ("11:00 time") read as *un deg un y bore ser* — a
+   time-of-day asserted and half a word deleted. Requiring the dots is not an option (`10:00am`, undotted
+   and glued, is also in the corpus); requiring a non-letter after the marker is.
+3. **`ordinalWords(20)` returned undefined** although `ROUND_TENS[20] = "ugeinfed"` is right there: the
+   21–39 arm runs first and computes `low = 0`, which fails its own `low < 1` guard. Exactly trap 13's
+   "boundary between the branches" — the table and the composition were both pinned, the seam between them
+   was not.
+4. **A padded replacement left a leading space** (`+30°C` → ` plws …`). Collapsed and trimmed on the way out.
+
+**A regression I introduced and caught in the diff**: re-emitting the operand as words meant the operand's
+own `[\d,]*` class — which also matches a trailing CLAUSE comma — swallowed the comma instead of passing it
+through, and `ers 1995-96, pan gyrhaeddodd` lost its pause. The operand must END in a digit. Pinned.
+
+**Gates**: vitest 2648 (200 files, +2 tests); tsc clean; scan no defects (one permissible `REDUNDANT
+currency` note); `normalization/review.ts --lang cy` checklist clean; referee **identical** at 12034/14376;
+corpus diff **13/2009**, every counter 0 → 0, and every change classified — 12 mutations and the `amser` fix.
