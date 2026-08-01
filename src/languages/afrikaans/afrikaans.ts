@@ -8,10 +8,12 @@
  * docs/investigations/af_afrikaans_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, FIXED_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { decompose } from "./morphology.ts";
+import { normalizeAfrikaans, normalizeAfrikaansInitialisms } from "./normalize.ts";
 
 const FIXED = MANIFEST.fixed;
 const LONG = MANIFEST.vowelsLong;
@@ -115,15 +117,46 @@ export function phonemizeWord(word: string): string {
         .join("");
 }
 
-const TOKEN = /([\p{L}\p{M}'’]+)|(\d+)|([.!?…,;:])/gu;
+// #562 — Afrikaans in this corpus (FLEURS af_za, an English translation) uses the ENGLISH separators:
+// a PERIOD is the decimal point and a COMMA groups thousands. The old class was a bare `(\d+)`, so BOTH
+// separators fell through to clausePunctuation: "12.8" read *twaalf . agt* and "17,500" *sewentien , vyf
+// honderd*. Clocks and the version-dot are claimed by normalize.ts first; a period reaching here is a
+// decimal (the TOKEN's `\d+\.\d+`) and a comma a thousands grouping (`\d{1,3}(?:,\d{3})+`).
+const TOKEN = /(['’]?[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*)|(\d+\.\d+|\d{1,3}(?:,\d{3})+|\d+)|([.!?…,;:])/gu;
+
+// #562 symbol normalization — Afrikaans measure and currency nouns are INVARIANT after a numeral
+// ("drie persent", "480 kilometer per uur"). `m` is deliberately NOT a standalone unit: the corpus's
+// "m.p.u" (myl per uur) and "600Mbit/s" are claimed in normalize.ts first.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["persent"],
+    currency: { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["jen"], "U$": ["VS-dollar"], "VS$": ["VS-dollar"] },
+    units: {
+        km: ["kilometer"], cm: ["sentimeter"], mm: ["millimeter"], kg: ["kilogram"],
+        mi: ["myl"], mph: ["myl per uur"],
+    },
+    rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
+    unitPer: "per",
+    exponentWords: { squared: ["vierkante"], cubed: ["kubieke"], position: "before" },
+    magnitudes: ["miljoen", "miljard", "biljoen"],
+});
 
 class AfrikaansPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/decimal steps need
+        // the number and its separator still adjacent, which the tier would break. The initialism pass is
+        // re-applied to the tier's output because its currency nouns carry caps (VS-dollar from U$/VS$).
+        return assembleClauses(normalizeAfrikaansInitialisms(SYMBOLS(normalizeAfrikaans(input))), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // cardinal → words → IPA
-
-            else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
+            else if (m[2]) {
+                // A PERIOD is the decimal point (12.8) and a COMMA groups thousands (17,500) — see TOKEN.
+                const [intPart, frac] = m[2].replace(/,/gu, "").split(".");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    sink.emit(phonemizeWord("komma"));
+                    for (const d of frac)
+                        for (const wd of numberToWords(Number(d)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            } else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }
 }
