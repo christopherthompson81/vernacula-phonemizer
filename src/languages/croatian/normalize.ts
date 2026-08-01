@@ -135,10 +135,13 @@ export function normalizeCroatian(input: string): string {
     //    era-ordinal rule (step 2) consumes the second dotted number.
     s = s.replace(/(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(?=\s*(?:n\.\s?e\.|p\.\s?n\.\s?e\.))/gu, "$1 do $2");
 
-    // 2) MULTI-DOT ERA MARKER — `n. e.` (nove ere), `p.n.e.` (prije nove ere), and the `400. g. n. e.`
-    //    form. BEFORE the dotted-abbreviation and N. ordinal rules. The leading `N.` of `400. g. n. e.`
-    //    is an ORDINAL (godine elided).
-    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?=(?:n\.\s?e|p\.\s?n\.\s?e)(?![\p{L}\p{M}]))/giu,
+    // 2) MULTI-DOT ERA MARKER — `n. e.` (nove ere), `p.n.e.` (prije nove ere), `g. n. e.`, `g. pr. Kr.`
+    //    (godine prije Krista), and the `400. g. n. e.` form. BEFORE the dotted-abbreviation and N.
+    //    ordinal rules. The leading `N.` of `400. g. n. e.` / `1000. g. pr. Kr.` is an ORDINAL (godine
+    //    elided).
+    //    The `g.` (godine) is BETWEEN the year-ordinal and the era marker, so the year-ordinal claim
+    //    looks past it.
+    s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(?:g\.\s+)?(?=(?:n\.\s?e|p\.\s?n\.\s?e|pr\.\s?Kr\.)(?![\p{L}\p{M}]))/giu,
         (whole, digits: string) => {
             const base = ordinalBase(Number(digits));
             return base === undefined ? whole : `${inflect(base, "f.gen")!} `;
@@ -147,8 +150,10 @@ export function normalizeCroatian(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\.(\s)/giu, "prije nove ere$1");
     s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(?=[.!?]|$)/giu, "nove ere.");
     s = s.replace(/(?<![\p{L}\p{M}])n\.\s?e\.(\s)/giu, "nove ere$1");
-    // The `g.` in `400. g. n. e.` is "godine" (elided); drop it after the year-ordinal claim.
-    s = s.replace(/(?<=\d)\s+g\.\s+(?=n\.\s?e\.)/giu, " ");
+    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(?=[.!?]|$)/giu, "prije Krista.");
+    s = s.replace(/(?<![\p{L}\p{M}])pr\.\s?Kr\.(\s)/giu, "prije Krista$1");
+    // The `g.` in `400. g. n. e.` / `1000. g. pr. Kr.` is "godine" (elided); drop it after the claim.
+    s = s.replace(/(?<=\d)\s+g\.\s+(?=(?:n\.\s?e\.|pr\.\s?Kr\.))/giu, " ");
 
     // 3) DOTTED ABBREVIATIONS. `itd.` → "i tako dalje". The dot is consumed before a following word.
     s = s.replace(/(?<![\p{L}\p{M}])itd\.(\s+)(?=[\p{L}\d(])/giu, "i tako dalje$1");

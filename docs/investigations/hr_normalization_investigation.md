@@ -98,3 +98,26 @@ spells "jen". The currency REGISTER is attested (dolara ×8, posto ×14, funta �
 after the number), and "jen" is the standard Croatian loanword for the yen, the consistent fourth. This
 is a documented sourcing decision (the same reasoning the check's "read the list" prompt invites), not a
 guess: dolar/euro/funta are all attested and establish the pattern.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. One real defect found
+by probing the corpus's own forms (trap 8 — the adversarial NEIGHBOUR of the era marker):
+
+- **The `g. n. e.` / `g. pr. Kr.` forms (trap 8, corpus-attested)**: `400. g. n. e.`, `1000. g. pr. Kr.`
+  and `323. g. pr. Kr.` — the `g.` (godine) sits BETWEEN the year-ordinal and the era marker, so my
+  step-2 year-ordinal claim (which looked directly at `n. e.`) missed all three, and the corpus diff
+  showed `400. g. n. e.` → "četiristo . g . nove ere" (period + letter-spelled g). Fixed: the year
+  ordinal now looks PAST an optional `g.`, and `pr. Kr.` (prije Krista) is claimed alongside `n. e.`
+  and `p.n.e.`. The corpus's 2 `g. pr. Kr.` instances (1000., 323.) and the 2 `g. n. e.` instances
+  (400., 1100.) now read as ordinals + the era words. 3 utterances improved in the corpus diff.
+
+**Verified non-issues**: the month-genitive licensors (11. svibnja, 21. ožujka, 1. siječnja, 31.
+prosinca — all inflect correctly); `5. reda` → petog reda; the fractions (2/3, 3/4, 1/2, 2/5, 3¾, 2½);
+30°F/35°E/35°N/35° S; the minus-vs-range guard (-5 → minus, 5-10 → do, -5°C); the comma-decimal vs
+period-thousands (2,4 vs 2.400 vs 5.000.000); the currency amounts (£27, ¥2.500, $2,3, $1000); "do"
+and "na sat" do not trigger mutation; the percent (3.5%/2,5%/88%/0.5%/100% → posto).
+
+**Post-fix gates**: corpus diff 212/2007 (10.6%) — 3 utterances improved by the g. n. e./pr. Kr. fix,
+verified correct; 2669 tests (2 new trap pins); scan no defects; review checklist clean; sourcing note
+on `jen` documented above.

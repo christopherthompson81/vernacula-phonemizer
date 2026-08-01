@@ -71,6 +71,9 @@ describe("Croatian text normalization", () => {
     test("era markers expand; roman ordinals inflect; initialisms expand", () => {
         expect(ph("n. e.")).toBe("noʋe ere .");
         expect(ph("p.n.e.")).toBe("prije noʋe ere .");
+        // trap pins: the g. n. e. / g. pr. Kr. forms (400. g. n. e., 1000. g. pr. Kr.)
+        expect(ph("od 400. g. n. e.")).toBe("od t͡ʃetiristote noʋe ere .");
+        expect(ph("1000. g. pr. Kr. Asirci")).toBe("tisut͡ɕite prije krista asirt͡si");
         expect(ph("I. svjetskog rata")).toBe("prʋoɡ sʋjetskoɡ rata");
         expect(ph("II. svjetskom ratu")).toBe("druɡom sʋjetskom ratu");
         expect(ph("itd.")).toBe("i tako daʎe .");
