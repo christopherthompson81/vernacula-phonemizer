@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { normalizeCatalan } from "../src/languages/catalan/normalize.ts";
 import { phonemizeWord } from "../src/languages/catalan/catalan.ts";
 import { ROMAN_POLICY } from "../src/languages/catalan/romanOrdinals.ts";
 
@@ -177,5 +178,60 @@ describe("Catalan Roman-numeral policy — centuries cardinal, prenominal events
         expect(ord(25)).toBe("vint i cinquè"); // cinc → cinquè; hyphens as spaces, per ./numbers.ts
         expect(ord(100)).toBe("centè");
         expect(phonemize("vint i cinquè festival", "ca")).toBe("bˈin i siŋkˈɛ fəstiβˈaɫ");
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/catalan/normalize.ts) — the pre-tokenizer pass behind #562. The
+// defining rules are the `Nè`/`Na`/`Nr` ordinal (the Catalan written form), the era markers dC/aC, the
+// dot-thousands vs dot-decimal/version disambiguation, clocks with AM/PM, fractions, and the initialism
+// pass (EUA letter-spells, ONU stays a word).
+describe("Catalan text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "ca").trim();
+
+    test("text→text: the Nè/Na ordinal becomes the ordinal words", () => {
+        expect(normalizeCatalan("7è de rugbi")).toBe("setè de rugbi");
+        expect(normalizeCatalan("la 7a illa")).toBe("la setena illa");
+        expect(normalizeCatalan("dC")).toBe("després de Crist");
+        expect(normalizeCatalan("aC")).toBe("abans de Crist");
+    });
+
+    test("the Nè/Na/Nr ordinal reads the Catalan ordinal (masculine/feminine)", () => {
+        expect(ph("7è de rugbi")).toBe("sətˈɛ də rˈuɣβi"); // setè
+        expect(ph("la 7a illa")).toBe("ɫə sətˈɛnə ˈiʎə"); // setena (feminine)
+        expect(ph("el 1r dia")).toBe("əɫ pɾimˈe dˈiə"); // primer
+    });
+
+    test("dot-thousands stay grouped; 1-2 digit fractions are decimals/versions (punt)", () => {
+        expect(ph("1.400 persones")).toBe("mˈiɫ kwˈatɾə sˈens pəɾsˈonəs"); // 1400
+        expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ bˈujt sˈens nuɾˈantə dˈos m"); // 4892 m
+        expect(ph("1.5 milions")).toBe("un pˈun sˈiŋ miɫiˈons"); // 1.5 → punt
+        expect(ph("2.4 Ghz")).toBe("dˈos pˈun kwˈatɾə ʒiɣəˈɛɾsis");
+        expect(ph("802.11n")).toBe("bˈujt sˈens dˈos pˈun ˈonzə n");
+    });
+
+    test("clocks read hour [minute] with AM/PM letter-spelled", () => {
+        expect(ph("11:35 PM")).toBe("ˈonzə tɾˈɛntə sˈiŋ pˈe ˈemə");
+        expect(ph("06:30 i les 07:30")).toBe("sˈis tɾəntˈaj ɫəs sˈɛt tɾˈɛntə");
+    });
+
+    test("era markers expand (aC/dC) and fractions use the ordinal (un cinquè)", () => {
+        expect(ph("segle III aC")).toBe("sˈeɡːɫə tɾˈɛs əβˈans də kɾˈist"); // abans de Crist
+        expect(ph("1.300 dC")).toBe("mˈiɫ tɾˈɛs sˈens dəspɾˈes də kɾˈist"); // després de Crist
+        expect(ph("1/5 polzades")).toBe("un siŋkˈɛ puɫzˈaðəs"); // un cinquè
+        expect(ph("29¾ polzades")).toBe("bˈin i nˈɔw i tɾˈɛs kwˈaɾs puɫzˈaðəs");
+    });
+
+    test("degrees, currency (¥), abbreviations and dotted initials expand", () => {
+        expect(ph("30 °C")).toBe("tɾˈɛntə ɡɾˈaws səɫsˈiws");
+        expect(ph("2.500 ¥")).toBe("dˈos mˈiɫ sˈiŋ sˈens jˈɛns");
+        expect(ph("Dr. Moll")).toBe("duktˈo mˈɔʎ");
+        expect(ph("George W. Bush")).toBe("ʒəˈɔɾʒə w bˈus");
+        expect(ph("etc.")).toBe("ətsˈɛtəɾə .");
+    });
+
+    test("initialisms letter-spell (EUA); ONU stays the word; B&B reads be i be", () => {
+        expect(ph("els EUA")).toBe("əɫs ˈɛ ˈu ə");
+        expect(ph("l'ONU")).toBe("ɫ ˈɔnu");
+        expect(ph("B&B")).toBe("bˈe i bˈe");
     });
 });
