@@ -91,7 +91,7 @@ The TOKEN gained period-thousands + comma-decimals.
 - corpus diff: 210/2007 (10.5%) changed, every change READ and verified (97 ordinal, 18 thousands,
   17 clock, 15 comma-decimal, 13 rate, 9 abbrev, 6 initialism, 4 roman, 4 currency/percent, 3 range,
   3 degree, 2 hyphen-suffix, 2 era, 2 fraction, 15 misc — George W. Bush/units)
-- normalization-review --lang hr: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
+- normalization/review.ts --lang hr: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
 
 **SOURCING note**: the review flags `jen` (the ¥ word) as unattested — the corpus writes `¥` ×3 but never
 spells "jen". The currency REGISTER is attested (dolara ×8, posto ×14, funta ×1, eura ×1 — all spelled
@@ -121,3 +121,50 @@ and "na sat" do not trigger mutation; the percent (3.5%/2,5%/88%/0.5%/100% → p
 **Post-fix gates**: corpus diff 212/2007 (10.6%) — 3 utterances improved by the g. n. e./pr. Kr. fix,
 verified correct; 2669 tests (2 new trap pins); scan no defects; review checklist clean; sourcing note
 on `jen` documented above.
+
+## Run N+1 — 2026-08-01 (PR #599 review pass)
+
+### The `jen` question — ANSWERED, from the sister standard
+
+The PR asked for an attestation. There is one **in the repo**: Croatian and Serbian are two standards of one
+language, and the Serbian corpus renders **the very same FLEURS sentence** with the word spelled out —
+"od 2500 i 130.000 **japanskih jena**" (Cyrillic "јапанских јена") — where the Croatian translation writes
+"2.500 ¥ … 130.000 ¥". `jen` is in the Serbian epitran referee as well. Recorded at the tier entry.
+
+The review tool's sourcing line cannot see either, because its haystack is one language. That is a real
+limitation for the pluricentric standards still in the queue (bs, and sr↔hr in both directions) and is worth
+teaching the tool; noted here rather than done, since it needs an explicit same-language map.
+
+### The ordinal claimed half its instances
+
+The layer's defining rule is the `N.` ordinal, licensed by a closed list of following words. Tabulating
+every `N.` in the corpus against what the layer actually produced: **108 claimed, 108 left as digits plus a
+period** — a cardinal where Croatian needs an ordinal, and a spurious clause break mid-sentence. The
+breakdown of the 108 misses:
+
+| shape | count | verdict |
+|---|---|---|
+| YEAR + lowercase, mid-sentence (`1683. dinastija Qing`) | 76 | the period is the ORDINAL marker |
+| YEAR + utterance end (`vladao do 1945.`) | 22 | ordinal AND a sentence end |
+| YEAR + capitalised (`15. kolovoza 1940. Saveznici`) | 4 | ordinal AND a sentence end |
+| sentence-final score/clock (`6:6.`, `07:30.`) | 12 | correctly NOT an ordinal |
+| one-off ranks (`190. mjesto`, `37. najveća`, `4. kategorije`, `247. pakistanskog`) | ~15 | ordinals the list did not know |
+
+**A Croatian year is an ordinal with `godine` elided**, in the feminine genitive — the same slot the written
+`1940. godine` already takes, so the case is not being guessed. Two rules were added on that evidence:
+
+1. a year rule (1000–2100 + period), which keeps the period ONLY where it is also a sentence end — an
+   utterance end, or a capital after it. Closing punctuation is neither: the corpus's `(1644. - 1912.)` has
+   two ordinal markers and runs on after the bracket.
+2. six more licensors, each attested after an `N.` in this corpus: mjesto/mjestu, najveća/najveći/najveće,
+   kategorije, pakistanskog, pukovnija, husarska.
+
+Unclaimed afterwards: **24**, of which 12 are the sentence-final scores and clocks that SHOULD stay cardinal,
+1 is a genuine cardinal at a sentence end (`iznosi oko 800. Riječ je…`), and 2 are the round-thousand gap
+(`2000. godine`) that the Serbian parent documents deliberately — the fused *dvijetisućite* is a different
+word-formation and is still not attempted.
+
+**Gates**: vitest 2669 (200 files); tsc clean; scan no defects; `normalization/review.ts --lang hr` checklist
+clean apart from the `jen` prompt answered above; corpus diff **88/2007** with every counter 0 → 0, every
+change a cardinal becoming the ordinal genitive and, mid-sentence, a spurious pause disappearing. No referee
+exists for hr, so that gate is unavailable — stated rather than skipped silently.

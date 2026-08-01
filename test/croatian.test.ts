@@ -50,7 +50,15 @@ describe("Croatian text normalization", () => {
     const ph = (s: string): string => phonemize(s, "hr").trim();
 
     test("text→text: the N. ordinal reads the Croatian inflected ordinal", () => {
-        expect(normalizeCroatian("15. kolovoza 1940.")).toBe("petnaestog kolovoza 1940.");
+        // A YEAR is an ordinal too, with `godine` elided — 102 of the corpus's 216 `N.` instances. The
+        // period is kept only where it is ALSO a sentence end (an utterance end, or a capital after it).
+        expect(normalizeCroatian("15. kolovoza 1940.")).toBe("petnaestog kolovoza tisuću devetsto četrdesete.");
+        expect(normalizeCroatian("1683. dinastija Qing")).toBe("tisuću šeststo osamdeset treće dinastija Qing");
+        expect(normalizeCroatian("(1644. - 1912.) prisilno")).toBe("(tisuću šeststo četrdeset četvrte - tisuću devetsto dvanaeste) prisilno");
+        expect(normalizeCroatian("rezultata 6:6.")).toBe("rezultata 6:6."); // a sentence-final score is not an ordinal
+        // followers added from the tabulation of what the closed list was leaving behind
+        expect(normalizeCroatian("zauzeo 190. mjesto")).toBe("zauzeo sto devedeseto mjesto");
+        expect(normalizeCroatian("oluja 4. kategorije")).toBe("oluja četvrte kategorije");
         expect(ph("7. najvećim")).toBe("sedmom najʋet͡ɕim");
         expect(ph("15. stoljeća")).toBe("petnaestoɡ stoʎet͡ɕa"); // neuter genitive
     });

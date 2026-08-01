@@ -28,6 +28,11 @@ const TOKEN =
 // file so the review tool's sourcing check can see the words.
 export const SYMBOLS = makeSymbolNormalizer({
     percent: ["posto"],
+    // `jen` — the PR asked for an attestation, and there is one in the repo, from the SISTER STANDARD.
+    // Croatian and Serbian are two standards of one language, and the Serbian corpus renders THIS VERY
+    // FLEURS SENTENCE with the word spelled out: "od 2500 i 130.000 japanskih jena" (Cyrillic "јапанских
+    // јена") where the Croatian translation writes "2.500 ¥ … 130.000 ¥". `jen` is in the Serbian epitran
+    // referee too. The review tool's sourcing line cannot see either, because its haystack is one language.
     currency: { "¥": ["jen"], "$": ["dolar", "dolara"], "€": ["euro"], "£": ["funta"] },
     units: {
         km: ["kilometar", "kilometra", "kilometara"],

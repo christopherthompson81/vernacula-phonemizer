@@ -90,6 +90,12 @@ const LICENSOR: Readonly<Record<string, string>> = {
     godine: "f.gen", godini: "f.dat", godinu: "f.acc", godina: "f.nom",
     stoljeća: "n.gen", stoljeću: "m.loc", stoljeće: "m.nom", vijeka: "m.gen", vijeku: "m.loc",
     marka: "f.gen", marku: "f.acc", najvećim: "m.loc",
+    // Added from the review's tabulation of what the list was LEAVING BEHIND — every one of these follows
+    // an `N.` somewhere in the corpus and governs a slot the paradigm already has: `190. mjesto` (rank),
+    // `37. najveća zemlja`, `4. kategorije` (a storm category), `članku 247. pakistanskog Ustava`,
+    // `11. husarska pukovnija`.
+    mjesto: "n.nom", mjestu: "n.loc", najveća: "f.nom", najveći: "m.nom", najveće: "n.nom",
+    kategorije: "f.gen", pakistanskog: "m.gen", pukovnija: "f.nom", husarska: "f.nom",
     kolovoza: "m.gen", rujna: "m.gen", listopada: "m.gen", srpnja: "m.gen", travnja: "m.gen",
     svibnja: "m.gen", lipnja: "m.gen", siječnja: "m.gen", veljače: "m.gen", ožujka: "m.gen",
     studenoga: "m.gen", prosinca: "m.gen",
@@ -198,7 +204,7 @@ export function normalizeCroatian(input: string): string {
         (whole, digits: string, rawSuffix: string) =>
             ordinalForms(Number(digits)).find((f) => f.endsWith(rawSuffix.toLowerCase())) ?? whole);
 
-    // 7) THE `N.` ORDINAL — claimed only when a licensing word from the closed list follows, LOWERCASE.
+    // 7) THE `N.` ORDINAL — claimed when a licensing word from the closed list follows, LOWERCASE.
     s = s.replace(/(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
             const slot = LICENSOR[word];
@@ -207,6 +213,31 @@ export function normalizeCroatian(input: string): string {
             if (base === undefined) return whole;
             return `${inflect(base, slot)!} ${word}`;
         });
+
+    // 7b) A YEAR WITH `godine` ELIDED — the other half of the corpus's ordinals, and the licensor list
+    //     cannot see them because the licensing noun is not written. Tabulating what the closed list left
+    //     behind: **76 mid-sentence years** (`1683. dinastija Qing`, `1965. bio je prvi čovjek`), **22 at
+    //     an utterance end** (`vladao do 1945.`), **4 before a capital** (`15. kolovoza 1940. Saveznici`),
+    //     against 12 sentence-final scores/clocks (`6:6.`, `07:30.`) and ~15 one-off ranks. So the closed
+    //     list claimed 108 of 216 `N.` instances and the rest read as CARDINALS with a spurious break.
+    //
+    //     A four-digit number in 1000–2100 followed by a period is a year, and a Croatian year is an
+    //     ORDINAL in the feminine genitive that agrees with the elided *godine* — the same slot the
+    //     written `1940. godine` takes, so no case is being guessed. The PERIOD is kept only where it is
+    //     also a sentence end (an utterance end, or a capitalised word after it); mid-sentence it is the
+    //     ordinal marker and must not become a pause.
+    //     A SENTENCE END is a capital or the end of the utterance — NOT merely "no letter follows".
+    //     Closing punctuation counts as neither: the corpus writes the year range `(1644. - 1912.)`, where
+    //     both periods are ordinal markers and the text runs on after the bracket.
+    s = s.replace(/(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
+        const base = ordinalBase(Number(digits));
+        if (base === undefined) return whole;
+        const year = inflect(base, "f.gen");
+        if (year === undefined) return whole;
+        const rest = all.slice(at + whole.length).replace(/^[\s)»"'\]]+/u, "");
+        const sentenceEnd = rest === "" || /^[\p{Lu}]/u.test(rest);
+        return `${year}${sentenceEnd ? "." : ""}`;
+    });
 
     // 8) CLOCK, in the COLON form, with the CROATIAN `h` (sat) suffix. `22:00 i 23:00 h` → dvadeset dva
     //    sata i dvadeset tri sata; `23:35 h` → dvadeset tri sata i trideset pet minuta. NOT a sports
