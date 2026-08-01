@@ -78,3 +78,42 @@ currency $/¥ (iyena), units km/mm/sm/m, exponentWords { squared: ["kvadrat"], p
 - rate rules needed case-suffix capture (km/soatgacha → kilometrgacha) and range handling (35–40 → 35 dan 40)
 - the review tool's "wired into text()"/"tests" checks FALSE-FAIL for languages whose engine file sorts
   after numbers.ts/g2p.ts (Turkish fails identically) — the wiring is proven by the corpus diff instead
+
+## Run 3 — 2026-07-31 (PR #590 review pass)
+
+**Question**: does the landed layer hold up under adversarial probes outside the corpus, and is every
+emission actually IPA? Probed 21 shapes through `normalizeUzbek` + the full pipeline, then re-ran every gate.
+
+**Five defects found, all fixed in this PR:**
+
+1. **`vergul` reached the IPA as ORTHOGRAPHY.** `6,5` → `ɒltˈi vergul bˈeʃ` — ASCII `v`/`g`, no stress mark,
+   where the g2p gives `ʋerɡˈul`. uzbek.ts pushed the spelling straight into the sink instead of routing it
+   through `phonemizeWord`, and the tests enshrined it. The word now lives in the manifest as
+   `numbers.decimalWord` (the same slot bn/ml/mr/ur use) and is phonemized once at module load.
+   **This is the only fix with corpus reach: 16/1957 utterances, every one of them this substitution.**
+   The DIGIT/RAWMARK/SLOT-GAP defect classes are all structurally blind to it — a Latin-letter leak in a
+   Latin-script language looks like a word.
+2. **The hyphen-ordinal was case-bound.** `WORD` was `[a-z…]` with no `i` flag, so `16-Noyabr` / `1-Mart` /
+   `1.1-Rasmga` — capitalized heads, ordinary in dates and titles — fell through to the CARDINAL reading with
+   the hyphen dropped, i.e. exactly the defect the layer exists to fix. Corpus has zero instances (0 hits for
+   `[0-9]+-[A-Z]`), which is why it survived the corpus diff; the rule is orthographic, not corpus-shaped.
+3. **The regnal guard was wider than its evidence.** The lookahead accepted `[.,;:!?]|$` in addition to the
+   genitive, so any "Capitalized N." read as regnal: `Sahifa 12.` → *Sahifa oʻn ikkinchi*. Corpus grep for
+   `[A-Z][a-z]+ N(punct|$)` returns 5 hits and NONE is regnal (all comma-decimals/clocks already guarded), so
+   the alternative bought nothing. Now `(?=[  ](?:ning|hukmron))` only.
+4. **Slashed fractions only handled numerator 1.** `3/4` → *uch toʻrt* (two bare cardinals — the slash
+   dropped). Replaced the numerator-1 table with composition: denominator-ablative + numerator
+   (`toʻrtdan uch`, `uchdan ikki`), keeping the yarim/chorak idioms. Also added a slash guard so a date
+   (`1/5/2020`) is not read as a fraction — it was matching, since the old guard only excluded digits.
+5. **An infix `+` lost its separator.** The postposed rule ran first, so `2+2` → `2 plyus2`. Reordered.
+   (Harmless downstream, since TOKEN splits letters from digits, but it made the intermediate text wrong.)
+   `°F` also fell to the bare-degree rule and read as *daraja* + a stray letter; it is now named.
+
+**Gates after the fixes**: vitest 2591 passed (200 files, +3 tests); tsc clean; `normalization-mine scan`
+no defects; `normalization-review --lang uz` checklist fully clean; referee **byte-identical** to the
+pre-fix branch on all three sets (wikipron 316/345, kaikki 393/450, epitran 328/330); corpus diff vs the
+branch head 16/1957 changed, all defect counters 0 → 0.
+
+**Confirmed the review-tool fix works**: `--lang tr` now reports `[ ok ] wired into text()  turkish.ts calls
+normalizeTurkish`. Turkish's two remaining FAILs (no test references its normalizer; four sign classes
+dropped) are real Turkish gaps, not tool artifacts — a separate issue, not touched here.

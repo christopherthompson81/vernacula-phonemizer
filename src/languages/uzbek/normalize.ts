@@ -48,7 +48,10 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords, ordinalWords } from "./numbers.ts";
 
-const WORD = "[a-zʻ'’‘`ʼ′]";
+/** A word character. UPPERCASE included: the hyphen-ordinal writing is orthographic, not case-bound, and a
+ *  capitalized head is ordinary in dates and titles (`1-Mart`, `16-Noyabr`, `1.1-Rasmga`) — with a
+ *  lowercase-only class those read as a CARDINAL with the hyphen dropped. */
+const WORD = "[A-Za-zʻ'’‘`ʼ′]";
 /** A number token the ordinal/dot/era rules rewrite (integers; decimals/grouping handled by the symbol tier). */
 const DIGITS = "(\\d+(?:,\\d+)?)";
 
@@ -71,7 +74,7 @@ const isUnreadableUzbek = makeUnreadableTest({
     ]),
     legalCodas: new Set([
         "ft", "kt", "ks", "lm", "lt", "nd", "ng", "nk", "nt", "pt", "rd", "rf", "rk", "rl",
-        "rm", "rn", "rp", "rs", "rt", "sk", "st", "st", "ts", "yk",
+        "rm", "rn", "rp", "rs", "rt", "sk", "st", "ts", "yk",
     ]),
 });
 
@@ -143,11 +146,12 @@ export function normalizeUzbek(input: string): string {
     // 6) REGNAL ORDINALS. The shared Roman pass converts `Yelizaveta II` → `Yelizaveta 2` (its century
     //    policy only fires on asr/yuzyillik/…; a bare name gets the cardinal digit). The digit after a
     //    capitalized NAME is read as an ordinal — *Yelizaveta ikkinchi*, *Lealofi uchinchi*. The guard is
-    //    the corpus's genitive: all three instances are followed by "ning" (of the …) or "hukmronligidan"
-    //    (reign of …). Without that the rule misfires on scores and percents ("Gingrich 32 foiz", "Betten
-    //    2,3 milliard", "Oxirgi 3 oy") — every one of those has a different word after the digit — and the
-    //    comma-guard keeps "Izmir 3,7 million" from reading as *uchinchi,7*.
-    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[  ](\d{1,2})(?![,\d])(?=[  ](?:ning|hukmron)|[.,;:!?]|$)/gu,
+    //    the corpus's genitive, and ONLY that: every instance is followed by "ning" (of the …) or
+    //    "hukmronligidan" (reign of …). A looser guard that also accepted a clause end read any
+    //    "Capitalized N." as regnal — "Sahifa 12." became *Sahifa oʻn ikkinchi* — and bought nothing, since
+    //    no corpus instance takes that shape. The rule declines on scores and percents ("Gingrich 32 foiz",
+    //    "Betten 2,3 milliard", "Oxirgi 3 oy"), and the comma-guard keeps "Izmir 3,7 million" cardinal.
+    s = s.replace(/(\p{Lu}\p{Ll}+\p{M}*)[  ](\d{1,2})(?![,\d])(?=[  ](?:ning|hukmron))/gu,
         (_m: string, name: string, d: string): string => {
             const n = Number(d);
             const ord = ordinalWords(n);
@@ -155,29 +159,37 @@ export function normalizeUzbek(input: string): string {
         });
 
     // 7) FRACTIONS. ¾/½ after a whole read "va uch chorak" / "va yarim" (the corpus's "29¾ duymga 24½
-    //    duym"); a unit fraction reads "beshdan bir"-shaped (denominator-locative + numerator). The
+    //    duym"); a slashed fraction reads DENOMINATOR-ablative + numerator, composed from the number words
+    //    rather than a table (1/5 → beshdan bir, 3/4 → toʻrtdan uch — a numerator-1-only table read `3/4`
+    //    as the bare cardinals *uch toʻrt*). 1/2 and 1/4 keep their idioms (yarim, chorak). The
     //    vulgar-fraction glyphs are not in any clause-punctuation map, so they were being dropped outright.
     s = s.replace(/(\d+)¾/gu, "$1 va uch chorak");
     s = s.replace(/(\d+)½/gu, "$1 va yarim");
-    s = s.replace(/(?<![\d.,])(\d{1,2})\/(\d{1,2})(?![\d.,])/gu, (_m: string, a: string, b: string) => {
-        const denom = Number(b);
-        const suffix = denom === 2 ? "yarim" : denom === 3 ? "uchdan bir" : denom === 4 ? "chorak"
-            : denom === 5 ? "beshdan bir" : denom === 6 ? "oltidan bir" : undefined;
-        if (suffix === undefined || Number(a) !== 1) return _m;
-        return suffix;
+    // The slash guards exclude a DATE (16/11/1978) and a further slash on either side, which a bare
+    // digit-boundary guard let through — `1/5/2020` would have read *beshdan bir/2020*.
+    s = s.replace(/(?<![\d.,/])(\d{1,2})\/(\d{1,2})(?![\d.,/])/gu, (_m: string, a: string, b: string) => {
+        const num = Number(a),
+            denom = Number(b);
+        if (denom < 2 || num < 1 || num >= denom) return _m; // an improper/degenerate ratio is not a fraction
+        if (num === 1 && denom === 2) return "yarim";
+        if (num === 1 && denom === 4) return "chorak";
+        return `${numberToWords(denom)}dan ${numberToWords(num)}`;
     });
 
     // 8) DEGREE, before the sign rule can strand the +. `30°C` → "30 daraja" (the corpus's own word for
     //    temperature; "daraja" ×57). The C is dropped as Uzbek says "oʻttiz daraja", not "Selsiy".
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 daraja");
+    // Fahrenheit is NAMED, since "daraja" alone would assert the corpus's Celsius default.
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 daraja farengeyt");
     s = s.replace(/(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 daraja");
 
     // 9) SIGNS. The corpus's `+30°C`, `(UTC+1)` and `B&B`; the sign classes from the review checklist are
     //    all probed. Uzbek: + = plyus, - = minus, & = va, = = teng, < = kichik, > = katta, × = karra.
     //    `A&B` reads the letters BY NAME (*be va be*) — the shared initialism pass cannot, a lone capital
     //    is not an all-caps run.
-    s = s.replace(/(\d)\s?\+/gu, "$1 plyus");           // postposed + (30+)
+    // INFIX before POSTPOSED: with the postposed rule first, `2+2` lost its separator (→ "2 plyus2").
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plyus $2");    // UTC+1 → UTC plyus 1
+    s = s.replace(/(\d)\s?\+/gu, "$1 plyus");           // postposed + (30+)
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plyus $2");   // +30 → plyus 30
     s = s.replace(/(?<![\p{L}\p{Nd}])[-−](?=\d)/gu, "minus ");
     s = s.replace(/([A-Za-z])&([A-Za-z])/g,

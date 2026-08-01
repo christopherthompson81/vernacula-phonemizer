@@ -73,6 +73,9 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, phonemizeWord, turkicNumberWords);
 }
 
+/** The decimal-comma word (manifest `numbers.decimalWord`) as IPA — read between integer and fraction. */
+const DECIMAL_IPA = phonemizeWord(DEF.numbers.decimalWord!);
+
 // #562 symbol normalization — Uzbek. The corpus's own prose fixes the conventions: percent is POSTPOSED
 // ("8 foizga" — foiz = percent), rates are PREFIXED ("soatiga 240 kilometr"), and squared units are a
 // PREFIX adjective ("kvadrat kilometr"). km/mm/cm are claimed here so the tier's "only after a number"
@@ -96,13 +99,13 @@ class UzbekPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intRaw, frac] = m[2].split(",");
-                const words: string[] = [];
-                for (const wd of number(intRaw!).split(" ")) words.push(wd);
+                for (const wd of number(intRaw!).split(" ")) sink.emit(wd);
                 if (frac !== undefined) {
-                    words.push("vergul"); // the decimal comma reads "vergul" then digit-by-digit
-                    for (const d of frac) words.push(...number(d).split(" "));
+                    // The decimal comma reads "vergul" (then digit-by-digit). It goes through the g2p like
+                    // any other number word — emitting the SPELLING here leaked "vergul" into the IPA.
+                    sink.emit(DECIMAL_IPA);
+                    for (const d of frac) for (const wd of number(d).split(" ")) sink.emit(wd);
                 }
-                for (const wd of words) sink.emit(wd);
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

@@ -36,6 +36,8 @@
     "numbers": {
         "units": ["nol", "bir", "ikki", "uch", "toʻrt", "besh", "olti", "yetti", "sakkiz", "toʻqqiz"],
         "tens": { "10": "oʻn", "20": "yigirma", "30": "oʻttiz", "40": "qirq", "50": "ellik", "60": "oltmish", "70": "yetmish", "80": "sakson", "90": "toʻqson" },
-        "magnitudes": { "hundred": "yuz", "thousand": "ming", "million": "million", "billion": "milliard" }
+        "magnitudes": { "hundred": "yuz", "thousand": "ming", "million": "million", "billion": "milliard" },
+        // Uzbek marks the decimal with a COMMA and reads it "vergul" (6,5 = olti vergul besh), like Turkish virgül.
+        "decimalWord": "vergul"
     }
 }

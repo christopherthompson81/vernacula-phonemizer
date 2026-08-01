@@ -112,9 +112,9 @@ describe("Uzbek text normalization", () => {
     test("space-grouped thousands de-group; the comma is a DECIMAL (vergul)", () => {
         expect(ph("400 000 ta")).toBe("tˈort jˈuz mˈiŋ tˈa"); // 400 000 → toʻrt yuz ming
         expect(ph("800 000 dan")).toBe("sakkˈiz jˈuz mˈiŋ dˈan");
-        expect(ph("6,5 ballik")).toBe("ɒltˈi vergul bˈeʃ ballˈik"); // olti vergul besh
-        expect(ph("1,5 million")).toBe("bˈir vergul bˈeʃ milliˈɒn");
-        expect(ph("6,34 duymga")).toBe("ɒltˈi vergul ˈut͡ʃ tˈort dujmɡˈa"); // digit-by-digit after vergul
+        expect(ph("6,5 ballik")).toBe("ɒltˈi ʋerɡˈul bˈeʃ ballˈik"); // olti vergul besh — the word goes through the g2p
+        expect(ph("1,5 million")).toBe("bˈir ʋerɡˈul bˈeʃ milliˈɒn");
+        expect(ph("6,34 duymga")).toBe("ɒltˈi ʋerɡˈul ˈut͡ʃ tˈort dujmɡˈa"); // digit-by-digit after vergul
     });
 
     test("clocks read hour space minute, dropping :00; GMT/UTC spell out", () => {
@@ -163,6 +163,27 @@ describe("Uzbek text normalization", () => {
         expect(ph("Yelizaveta II hukmronligidan")).toBe("jelizaʋetˈa ikkint͡ʃˈi hukmrɒnliɡidˈan");
         expect(ph("Lealofi III ning")).toBe("lealɒfˈi ut͡ʃint͡ʃˈi nˈiŋ");
         // the comma-guard: a digit before a decimal comma stays cardinal
-        expect(ph("Izmir 3,7 million")).toBe("izmˈir ˈut͡ʃ vergul jettˈi milliˈɒn");
+        expect(ph("Izmir 3,7 million")).toBe("izmˈir ˈut͡ʃ ʋerɡˈul jettˈi milliˈɒn");
+        // and the guard is the genitive ONLY — a capitalized word before a clause-final number is not regnal
+        expect(normalizeUzbek("Sahifa 12.")).toBe("Sahifa 12.");
+    });
+
+    test("the hyphen-ordinal is orthographic, not case-bound (16-Noyabr, 1-Mart)", () => {
+        expect(normalizeUzbek("16-Noyabr")).toBe("oʻn oltinchi Noyabr");
+        expect(normalizeUzbek("1-Mart")).toBe("birinchi Mart");
+        expect(normalizeUzbek("1.1-Rasmga")).toBe("1 nuqta 1 Rasmga"); // the version dot still wins
+    });
+
+    test("a slashed fraction is denominator-ablative + numerator for ANY numerator", () => {
+        expect(normalizeUzbek("1/5")).toBe("beshdan bir");
+        expect(normalizeUzbek("3/4 qismi")).toBe("toʻrtdan uch qismi"); // not the bare cardinals *uch toʻrt*
+        expect(normalizeUzbek("2/3")).toBe("uchdan ikki");
+        expect(normalizeUzbek("1/2")).toBe("yarim"); // the idiom wins
+        expect(normalizeUzbek("16/11/1978")).toBe("16/11/1978"); // a date is not a fraction
+    });
+
+    test("degrees name Fahrenheit; an infix + keeps its separator", () => {
+        expect(ph("30°F")).toBe("ottˈiz darad͡ʒˈa fareŋˈejt");
+        expect(ph("2+2")).toBe("ikkˈi pljˈus ikkˈi");
     });
 });
