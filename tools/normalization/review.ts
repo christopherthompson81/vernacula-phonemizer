@@ -222,24 +222,35 @@ function fold(t: string): string {
 const SPACELESS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}]/u;
 /** The words that carry EVERY instance of their symbol: the percent word, the currency names, the decimal
  *  word. Extracted from the tier's own data and the manifest, so the check reads declarations, not prose. */
-function highTrafficWords(): string[] {
+function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): string[] {
     const tier = engineSrc.match(/makeSymbolNormalizer\(\{[\s\S]*?\n\}\)/u)?.[0] ?? "";
+    // A currency name is only worth checking if its SIGN is in the corpus: a language that never writes ¥
+    // never speaks its yen word, so its attestation cannot affect a reading. Checking all of them reported
+    // yen/euro/jen across fifteen languages — true, and useless.
+    const used = (block: string): string => block.split(/,(?=\s*"[^"]*"\s*:)/u)
+        .filter((entry) => { const sign = /"([^"]+)"\s*:/u.exec(entry)?.[1]; return sign !== undefined && hay.text.includes(sign); })
+        .join(" ");
     const decl = [
-        ...[...tier.matchAll(/percent:\s*\[([^\]]*)\]/gu)].map((m) => m[1]!),
-        ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => m[1]!),
+        ...[...tier.matchAll(/percent:\s*(\[[^\]]*\])/gu)].map((m) => m[1]!),
+        ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => used(m[1]!)),
         ...readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc"))
             .flatMap((f) => [...readFileSync(join("src/languages", dir, f), "utf8")
-                .matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => m[1]!)),
+                .matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => `["${m[1]!}"]`)),
     ].join(" ");
+    // Extract the WORD ARRAYS first, then the literals inside them. Scanning `"…"` over the raw block
+    // pairs quotes in the wrong phase: in `"$": ["dollar"]` the closing quote of the KEY pairs with the
+    // opening quote of the value, the match consumes both, and `dollar` is never seen — which is how Hausa
+    // reported "all 1 high-traffic words attested" while three of its four currency names went unchecked.
     const words = new Set<string>();
-    for (const m of decl.matchAll(/"([^"\\\n]{2,40})"/gu))
-        for (const w of m[1]!.split(/\s+/u)) if (/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]+$/u.test(w)) words.add(w);
+    for (const arr of decl.matchAll(/\[([^\]]*)\]/gu))
+        for (const lit of arr[1]!.matchAll(/"([^"]+)"/gu))
+            for (const w of lit[1]!.split(/\s+/u)) if (/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]+$/u.test(w)) words.add(w);
     return [...words];
 }
-const needles = highTrafficWords();
+const hay = attestationHaystack();
+const needles = highTrafficWords(hay);
 if (needles.length === 0) note("sourcing", null, "no percent/currency/decimal word declared");
 else {
-    const hay = attestationHaystack();
     const unattested = needles.filter((w) =>
         SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !hay.tokens.has(fold(w)));
     note("sourcing", unattested.length === 0 ? true : null,
