@@ -49,7 +49,10 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
 
 /** Hausa phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
 export const isUnreadableHausa = makeUnreadableTest({
-    vowels: /[aeiouƙƴɓɗ]/u,
+    // ɓ ɗ ƙ ƴ are the hooked CONSONANTS, not vowels — they are already in `legalOnsets` below. Listing
+    // them here made any run containing one count as pronounceable, so a letter-run with a hooked letter
+    // would never be spelled out.
+    vowels: /[aeiou]/u,
     legalOnsets: new Set([
         "ɓ", "ɗ", "ƙ", "ƴ", "sh", "ts", "ch", "gw", "kw", "hw", "gy", "ky", "ny", "b", "d", "f",
         "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y",
@@ -101,10 +104,17 @@ export function normalizeHausa(input: string): string {
 
     // 3b) CURRENCY PREFIXES — `US$14.7`, `US $ 30` (the corpus's US dollar glued AND spaced forms). The
     //     bare `$` is the tier's; the US prefix names the currency. AFTER the era markers.
-    s = s.replace(/(?<![\p{L}\p{M}])(?:US|uS)\s?\$\s?(?=\d)/giu, "dollar ");
+    //     The word is `dala` — the corpus's own "dalar Amurka" and "biliyoyin dalolin Amurka" — not the
+    //     English `dollar`, which is attested nowhere. Same fix as the tier's `$` entry in hausa.ts.
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|uS)\s?\$\s?(?=\d)/giu, "dala ");
 
     // 4) RANGES and SCORES — `2-3 km`, `5-3`, `1644-1912`, `2-5`. Hausa reads these with "zuwa" (to)
     //     or just two numbers. The corpus's prose uses "daga X zuwa Y". A leading minus stays a sign.
+    //     A DECIMAL range needs its own rule and has to come FIRST: the plain-range lookbehind `(?<![\d.,])`
+    //     blocks a digit that follows a dot, so `4.2-3.9 miliyan` — the corpus's one decimal range — never
+    //     matched, the decimal rule then turned each side into words, and the hyphen was dropped with no
+    //     joiner at all (*huɗu maki biyu uku maki tara*).
+    s = s.replace(/(?<![\d.,])(\d+\.\d+)\s*[-–]\s*(\d+\.\d+)(?![\d.])/gu, "$1 zuwa $2");
     s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 zuwa $2");
 
     // 5) CLOCK, in the COLON form. `8:46 na safe` → takwas da arba'in da shida na safe; `11:29` → goma
@@ -202,5 +212,7 @@ export function normalizeHausa(input: string): string {
     //     ca.*) and after the dotted-capital rule.
     s = normalizeInitialisms(s);
 
-    return s;
+    // A padded replacement (` ƙari `, ` da `) doubles a space that was already there and can leave one at
+    // an edge (`+30°C` → ` ƙari …`). SLOT-GAP is a defect class; this pass should not feed it.
+    return s.replace(/[^\S\n]{2,}/gu, " ").replace(/^[^\S\n]+|[^\S\n]+$/gu, "");
 }

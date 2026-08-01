@@ -84,7 +84,7 @@ The TOKEN gained comma-thousands + dot-decimals; the tier gained percent "kashi"
 - corpus diff: 149/1497 (10.0%) changed, every change READ and verified an improvement (54 initialism,
   26 comma-thousands, 18 dot-decimal, 10 clock, 9 range, 6 currency/percent, 4 rate, 3 unit, 3 abbrev,
   2 degree, 2 fraction, 1 era, 1 sign, 10 misc — A1GP/H5N1/KV62/3136mm2)
-- normalization-review --lang ha: checklist clean (wired, tests, all 8 sign classes, spelling→g2p,
+- normalization/review.ts --lang ha: checklist clean (wired, tests, all 8 sign classes, spelling→g2p,
   SOURCING 1 high-traffic word attested, scan)
 
 **Notes**: the review probes `12,5` (comma-decimal → maki), `1.234` (maki digit-by-digit), `5 000`
@@ -117,3 +117,36 @@ US$14.7); the dot-clock vs decimal (12.00 GMT vs 12.5); "zuwa" and "a awa" do no
 **Post-fix gates**: corpus diff 149/1497 (10.0%) — 1 utterance changed by the B.C. fix, verified
 correct; 2664 tests (2 new trap pins); referee 90.3% unchanged; scan no defects; review checklist
 clean, sourcing check passes.
+
+## Run N+1 — 2026-08-01 (PR #598 review pass)
+
+**Four defects. The first was found by fixing the review tool**, whose sourcing check reported "all 1
+high-traffic words attested" for a tier that declares four currency names — it was pairing quotes in the
+wrong phase over `"$": ["dollar"]` and never seeing the values at all.
+
+1. **The dollar was the English spelling.** `dollar` appears in neither the corpus nor the referee; the
+   corpus names the currency twice and both times it is **dala** — "dalar Amurka" and "biliyoyin dalolin
+   Amurka". Fixed in the tier AND in normalize's `US$` prefix rule, which had its own copy. Seven corpus
+   emissions across five utterances.
+   `dala` is polysemous — four of its seven corpus hits are "pyramid" ("dala ta Giza", "mai siffar dala") —
+   but the tier only emits it after a currency sign, so the other sense is unreachable. `yen` stays as a
+   STATED assumption: the corpus writes ¥ ×2, so the word is spoken, but the word itself is attested
+   nowhere here.
+2. **A DECIMAL range never reached the range rule.** The plain-range lookbehind `(?<![\d.,])` blocks a
+   digit that follows a dot, so `4.2-3.9 miliyan` — the corpus's one decimal range, and a shape this PR's
+   own header claims — never matched; the decimal rule then converted each side to words and the hyphen was
+   dropped with no joiner (*huɗu maki biyu uku maki tara*). A decimal-range rule now runs first.
+3. **The hooked consonants were declared as VOWELS.** `vowels: /[aeiouƙƴɓɗ]/u` in the phonotactics test —
+   ɓ ɗ ƙ ƴ are consonants, and are already in `legalOnsets`. Any letter run containing one counted as
+   pronounceable, so it would never be spelled out.
+4. **A padded replacement left an edge space** (`+30°C` → ` ƙari …`). Collapsed and trimmed on the way out.
+
+**Verified NOT a defect** (the hypothesis this review started from): `kashi 80%` does not double the percent
+word. Two of the corpus's four percent instances already write `kashi` and two do not, and the shared tier's
+already-said guard handles both — "kashi 80%" → *kashi tamanin*, "93%" → *kashi casa'in da uku*. The scan
+reports the two pre-written ones as permissible `REDUNDANT percent`, which is exactly right.
+
+**Gates**: vitest 2664 (200 files); tsc clean; scan no defects (two permissible REDUNDANT percent notes);
+`normalization/review.ts --lang ha` checklist clean apart from the `yen` sourcing prompt; referee
+**identical** at 1669/1849; corpus diff **6/1497** with every counter 0 → 0 — 7 dollar→dala and one range
+joiner, each classified.

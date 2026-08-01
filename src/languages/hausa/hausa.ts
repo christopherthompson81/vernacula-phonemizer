@@ -26,7 +26,13 @@ const TOKEN =
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["kashi"],
     percentPrefix: true,
-    currency: { "$": ["dollar"], "€": ["euro"], "¥": ["yen"], "£": ["fam"] },
+    // `dala` is the Hausa dollar, and the corpus proves it in the two places it names the currency —
+    // "dalar Amurka" and "biliyoyin dalolin Amurka". The shipped `dollar` was the English spelling and is
+    // attested nowhere; the review tool's sourcing line flags exactly that. (`dala` is polysemous — it is
+    // also "pyramid", which is what four of its seven corpus hits are — but the tier only emits it after a
+    // currency sign, so the other sense cannot be reached.) `yen` is the standard borrowing and the corpus
+    // does write ¥ ×2, but the word itself is unattested here: a stated assumption, not a source.
+    currency: { "$": ["dala"], "€": ["euro"], "¥": ["yen"], "£": ["fam"] },
     units: { km: ["kilomita"], m: ["mita"], kg: ["kilogram"], mm: ["milimita"], cm: ["santimita"] },
     exponentWords: { squared: ["murabba'i"], cubed: ["cubic"] },
 });

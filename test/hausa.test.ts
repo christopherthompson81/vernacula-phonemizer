@@ -79,8 +79,8 @@ describe("Hausa text normalization", () => {
     });
 
     it("currency, degrees, fractions and initialisms read their words or letters", () => {
-        expect(ph("$11,000")).toBe("dˈu˥bu˥ ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥ dˈollar");
-        expect(ph("US $ 30")).toBe("dˈollar ta˩lˈa˩ti˥n");
+        expect(ph("$11,000")).toBe("dˈu˥bu˥ ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥ dˈa˩la˥");
+        expect(ph("US $ 30")).toBe("dˈa˩la˥ ta˩lˈa˩ti˥n");
         expect(ph("£27")).toBe("a˩ʃˈi˩ri˥n dˈa bˈakʷaⁱ ɸˈa˥˩m"); // fam
         expect(ph("30°C")).toBe("ta˩lˈa˩ti˥n diɡˈiri t͡ʃelsˈius");
         expect(ph("+30°C")).toBe("kʼˈari ta˩lˈa˩ti˥n diɡˈiri t͡ʃelsˈius");
