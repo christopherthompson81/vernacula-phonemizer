@@ -90,3 +90,30 @@ The TOKEN gained comma-thousands + dot-decimals; the tier gained percent "kashi"
 **Notes**: the review probes `12,5` (comma-decimal → maki), `1.234` (maki digit-by-digit), `5 000`
 (space-grouped, corpus-absent) all read correctly. `6×6` → "shida sau shida" (× → sau = times). The
 referee eval prints two "folded backbone" lines (two referee sets); both worktrees agree.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Three real defects,
+all found by probing the adversarial neighbour (trap 8), none visible in the original corpus diff:
+
+- **The decimal-percent leak (the Fula/Irish lesson)**: `3.5%` read "uku maki biyar" with the `%`
+  silently dropped — the dot rule converted the number to words, so the tier's digit-adjacent kashi
+  could not see it. Fixed by claiming the word-form percent ("X maki …" → "kashi X maki …"). Guarded
+  against a preceding "kashi" (the corpus writes "kashi 3.5%" — adding another would double).
+- **The rate-after-decimal glue**: `12.8 km/h` read "...kilomita h" — step 7's unit alternation matched
+  the bare `km` before `km/h` (alternation order), and the rate rule ran after the dot rule had claimed
+  the number. Fixed: longest-first alternation (`km/h|m/s|km/u` before `km|m`) in the version-dot unit
+  rule; `/u` added to the step-10 rate denominator (the corpus's km/u spelling).
+- **The B.C.kafin dedupe**: the corpus's ONE B.C. instance writes "1000 B.C.kafin zuwan" — the "kafin"
+  (before) already follows, so B.C. expanding to "kafin haihuwar Yesu" doubled the "kafin" AND left a
+  stray dot ("kafin haihuwar Yesu.kafin"). Fixed: B.C. is removed when immediately followed by
+  "kafin"; bare BCE still expands.
+
+**Verified non-issues**: the fraction denominators (2/3, 3/4, 1/2, 2/5, 5/8); 30°F/30°/35°E/35°N; the
+minus-vs-range guard (-5 → rashin, 5-10 → zuwa, -5°C); the comma-decimal vs comma-thousands
+(12,5/12,50 → maki, 6,387/5,000,000 → thousands); the currency amounts (£27, ¥2,500, $2.3, $1000,
+US$14.7); the dot-clock vs decimal (12.00 GMT vs 12.5); "zuwa" and "a awa" do not trigger agreement.
+
+**Post-fix gates**: corpus diff 149/1497 (10.0%) — 1 utterance changed by the B.C. fix, verified
+correct; 2664 tests (2 new trap pins); referee 90.3% unchanged; scan no defects; review checklist
+clean, sourcing check passes.

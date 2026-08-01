@@ -85,7 +85,10 @@ export function normalizeHausa(input: string): string {
     s = s.replace(/&amp;/giu, " da ");
 
     // 2) ERA MARKERS — `1000 B.C.`, `10,000 BCE`. The corpus's B.C./BCE read "kafin haihuwar Yesu"
-    //    (before the birth of Jesus) or the simpler "kafin". "kafin" (before) is corpus-idiomatic.
+    //    (before the birth of Jesus). The corpus's ONE instance writes "1000 B.C.kafin zuwan" — the
+    //    "kafin" (before) already follows, so B.C. is redundant there and is removed (else a double
+    //    "kafin kafin"). The bare BCE cases expand.
+    s = s.replace(/B\.?C\.?(?=\.?kafin)/giu, "");
     s = s.replace(/(?<![\p{L}\p{M}])B\.?C\.?E?\.?(?![\p{L}\p{M}])/giu, "kafin haihuwar Yesu");
 
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
@@ -133,9 +136,10 @@ export function normalizeHausa(input: string): string {
     //     corpus's only dot-decimals are 1.1, 1.5, 2.8, 12.8; "maki" is the Hausa word for "point".
     //     AFTER the clock.
     s = s.replace(/(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|km\/h|m\/s|mph|mil\/awa)(?![\p{L}\p{M}])/giu,
+    // Longest-first alternation: km/h and m/s must win over the bare km/m.
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km\/h|m\/s|km\/u|mph|mil\/awa|km|m|kg|mm|cm)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
-            `${i} maki ${[...f].map((d) => hausaNumber(Number(d))).join(" ")} ${({ km: "kilomita", m: "mita", kg: "kilogram", mm: "milimita", cm: "santimita", "km/h": "kilomita a awa", "m/s": "mita a daƙiƙa", mph: "mil a awa", "mil/awa": "mil a awa" } as Record<string, string>)[u.toLowerCase()]!}`);
+            `${i} maki ${[...f].map((d) => hausaNumber(Number(d))).join(" ")} ${({ km: "kilomita", m: "mita", kg: "kilogram", mm: "milimita", cm: "santimita", "km/h": "kilomita a awa", "km/u": "kilomita a awa", "m/s": "mita a daƙiƙa", mph: "mil a awa", "mil/awa": "mil a awa" } as Record<string, string>)[u.toLowerCase()]!}`);
     // A VERSION LETTER after the fraction (802.11n) is a separate letter — emit it spaced.
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
         (m0, i: string, f: string) =>
@@ -167,9 +171,9 @@ export function normalizeHausa(input: string): string {
     // 10) RATES — `160km / h`, `480 km/h`, `133 m/s`, `300 mph`, `600Mbit/s`, `64 kph`, `100-200
     //     mil/awa`. The corpus's own prose "mil/awa" (miles per hour) is text; the unit/unit forms need
     //     "a awa" (per hour). AFTER the version-dot rule (12.8km has been claimed), BEFORE the tier.
-    s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|s)(?![\p{L}\p{M}])/giu,
+    s = s.replace(/(?<!\d)(\d+)\s?(km|m|kg|mm|cm)\s*\/\s*(h|s|u)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string, d: string) =>
-            `${hausaNumber(Number(n))} ${({ km: "kilomita", m: "mita", kg: "kilogram", mm: "milimita", cm: "santimita" } as Record<string, string>)[u.toLowerCase()]!} a ${d.toLowerCase() === "h" ? "awa" : "daƙiƙa"}`);
+            `${hausaNumber(Number(n))} ${({ km: "kilomita", m: "mita", kg: "kilogram", mm: "milimita", cm: "santimita" } as Record<string, string>)[u.toLowerCase()]!} a ${d.toLowerCase() === "h" || d.toLowerCase() === "u" ? "awa" : "daƙiƙa"}`);
     s = s.replace(/(?<!\d)(\d+)\s?(mph|kph|mil\/awa)(?![\p{L}\p{M}])/giu,
         (m0, n: string, u: string) =>
             `${hausaNumber(Number(n))} ${u.toLowerCase() === "kph" ? "kilomita" : "mil"} a awa`);
@@ -188,6 +192,11 @@ export function normalizeHausa(input: string): string {
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kasa da $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 fiye da $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 sau $2");
+    // A PERCENT after a DECIMAL — `3.5%`. The dot rule has converted the number to words by now, so the
+    // tier's digit-adjacent kashi would miss it; claim the word-form percent here (the decimal-percent
+    // leak). The bare-digit `%` is the tier's. NOT when "kashi" already precedes (the corpus writes
+    // "kashi 3.5%" — adding another kashi would double it).
+    s = s.replace(/(?<![kK]ashi\s+)([\p{L}\p{M}\d]+ maki [\p{L}\p{M} ]+?)\s*%\s*(?![\p{L}\p{M}])/gu, "kashi $1");
 
     // 12) INITIALISMS, LAST of the letter rules: it must run after the era markers (else B.C. → *ba.
     //     ca.*) and after the dotted-capital rule.
