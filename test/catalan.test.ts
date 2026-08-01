@@ -247,6 +247,10 @@ describe("Catalan text normalization", () => {
         expect(ordinalWords(60)).toBe("seixantè");
         expect(ordinalWords(90, true)).toBe("norantena");
         expect(ordinalWords(190, true)).toBe("cent norantena");
+        // a PLURAL hundreds stem loses its -s (dos-centè), but a bare `dos` ending a compound keeps it
+        expect(ordinalWords(200)).toBe("dos centè");
+        expect(ordinalWords(900, true)).toBe("nou centena");
+        expect(ordinalWords(102)).toBe("cent dosè");
         expect(ph("el 60è de la temporada")).toBe("əɫ səʃəntˈɛ də ɫə təmpuɾˈaðə"); // was *seixantaè*
         expect(ph("la 190a posició")).toBe("ɫə sˈen nuɾəntˈɛnə puzisiˈo"); // was *cent norantaena*
     });

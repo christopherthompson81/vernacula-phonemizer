@@ -72,7 +72,12 @@ export function ordinalWords(n: number, fem = false): string | undefined {
     // norantè/norantena, seixanta → seixantè. Appending straight to the cardinal gave *seixantaè* and
     // *cent norantaena*, which is both corpus instances of a tens ordinal (`60è`, `190a`). A final -ó
     // takes the -on- stem instead (milió → milionè).
-    stem = stem.endsWith("ó") ? `${stem.slice(0, -1)}on` : stem.replace(/[ae]$/u, "");
+    // …and a PLURAL HUNDREDS stem loses its -s: dos-cents → dos-centè, nou-cents → nou-centena. Only
+    // `cents` — a bare `dos`/`tres` ending a compound keeps its s (102 → cent dosè), so this cannot be a
+    // blanket strip. Found by enumerating the branch rather than the corpus, which writes no N00 ordinal.
+    stem = stem.endsWith("ó") ? `${stem.slice(0, -1)}on`
+        : stem === "cents" ? "cent"
+        : stem.replace(/[ae]$/u, "");
     words[words.length - 1] = fem ? `${stem}ena` : `${stem}è`;
     return words.join(" ");
 }

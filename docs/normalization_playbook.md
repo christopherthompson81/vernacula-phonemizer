@@ -329,6 +329,30 @@ words. Two consequences:
 - **Read the notes anyway.** A permissible drop and a swallowed sign have the same shape from the outside;
   what separates them is whether the word is spoken, which is exactly what the note tells you.
 
+**13. Pin the rule's BRANCHES, not the corpus's instances.** The Catalan layer's tests covered every ordinal
+the corpus writes — `7è`, `7a`, `1r`, `4t` — and still shipped a wrong ordinal, because all four come from
+the irregular under-ten TABLE and none reaches the compositional path that handles everything from 11 up.
+That path appended the ending straight to the cardinal, so `60è` read *seixantaè* and `190a`
+*cent norantaena*, where Catalan drops the stem-final vowel (seixantè, cent norantena). Both of the corpus's
+tens ordinals were wrong, in a layer whose tests all passed and whose corpus diff was clean.
+
+**The corpus's instances and the rule's branches are different sets, and coverage of one is not coverage of
+the other.** A table-plus-composition rule has at least three branches — the table, the composition, and the
+boundary between them — so pin one case from each, and prefer a case the corpus does NOT contain for the
+branch the corpus does not exercise. The same shape recurs wherever a rule has a lookup and a fallback:
+`ordinalWords`, the fraction denominators (Catalan reads 3 and 4 as nouns and everything else as an ordinal
+— the corpus only writes 1/5, so the noun branch was never read), suppletive number tables, the
+`acronymLetters`-vs-phonotactics split in the initialism pass.
+
+Two cheap ways to find the unexercised branch:
+
+- **Diff the rule against itself.** Enumerate what each branch produces for a small range (`[...Array(30)]`
+  through `ordinalWords`, both genders) and read the list. Every defect above is visible at a glance in
+  thirty lines of output, and none of it needs the corpus.
+- **Ask what the rule would do to the language's OWN examples**, not the corpus's — a grammar's ordinal
+  table, a Wikipedia list of fractions. Trap 8 says zero corpus instances is not evidence of correctness;
+  this is the constructive half of that.
+
 ---
 
 ## Two standing rules on data

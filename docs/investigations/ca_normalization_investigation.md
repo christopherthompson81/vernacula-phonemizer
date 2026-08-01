@@ -138,3 +138,21 @@ changes are the tens ordinal (`nuɾəntəˈɛnə` → `nuɾəntˈɛnə`, `səʃ�
 **The transferable lesson**: this layer's tests covered every ordinal the corpus writes and still missed the
 defect, because the corpus's instances and the RULE's branches are different sets. A table-plus-composition
 rule needs a pin on the composition, not only on the table.
+
+## Run 4 — 2026-08-01 (the trap, applied to itself)
+
+Writing trap 13 ("pin the rule's branches, not the corpus's instances") into the playbook meant running its
+own advice: enumerate what `ordinalWords` produces across a range and read the list, both genders. Thirty
+lines of output, no corpus needed — and it found **another defect in the same unexercised branch**:
+
+- `200` read *dos centsè* and `900` *nou centsena*. A PLURAL hundreds stem loses its -s: **dos-centè**,
+  **nou-centena**. It cannot be a blanket strip, because a bare `dos` ending a compound keeps its s
+  (102 → cent dosè), so the rule targets the `cents` stem only.
+
+Also read and deliberately LEFT: the compound units 1–4 produce *vint i primer* / *trenta primer* rather
+than the *vint-i-unè* / *trenta-unè* the IEC prefers. Both forms are attested in Catalan, the corpus contains
+no compound ordinal with a 1–4 unit, and choosing between them is a sourcing question, not a bug — so it is
+recorded here rather than guessed at (playbook: do not bulk-invent language data).
+
+**Gates**: vitest 2639, tsc clean, review checklist clean, referee identical (4201/5168), corpus diff
+**0/1841** — no corpus utterance reaches this branch, which is exactly why the enumeration was needed.
