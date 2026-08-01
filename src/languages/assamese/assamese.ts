@@ -14,6 +14,7 @@ import {
 } from "../bengali/bengali.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
+import { normalizeAssamese } from "./normalize.ts";
 
 // Assamese-specific geminate → length: the Bengali engine collapses only its own phoneme set (t͡ʃ, d̪, ʃ, …); the
 // Assamese consonants that result from deaffrication + the alveolar merger (t tʰ d dʱ s z x) need their own pass.
@@ -36,13 +37,16 @@ function wrap(base: ReturnType<typeof makeNativeBengali>): ReturnType<typeof mak
 
 /** Load assamese.jsonc (beside this file) and build the Assamese phonemizer. `foreign` handles embedded Latin. */
 export function createAssamese(foreign?: ForeignPhonemizer): { text(input: string): string } {
-    return wrap(
-        makeNativeBengali(
-            loadManifest<BengaliDef>(import.meta.url, "assamese.jsonc"),
-            loadSharedPhonology(),
-            foreign,
-        ),
+    const base = makeNativeBengali(
+        loadManifest<BengaliDef>(import.meta.url, "assamese.jsonc"),
+        loadSharedPhonology(),
+        foreign,
     );
+    // #562 — the Assamese PRE-PASS runs BEFORE makeNativeBengali's text(), which internally runs the
+    // Bengali normalize + symbol tier. This pass handles only the Assamese-specific classes (শ ordinals,
+    // নং, dotted runs, version dots, currency codes, &, regnal II); the Bengali layer below it owns the
+    // shared digit-folding / ordinal / clock / decimal machinery.
+    return wrap({ ...base, text: (i) => base.text(normalizeAssamese(i)) });
 }
 
 let AS: ReturnType<typeof makeNativeBengali> | undefined;
