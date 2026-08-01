@@ -1,0 +1,170 @@
+# Croatian (hr) normalization investigation (#562)
+
+Chronological record. Baseline worktree: `~/Programming/tmp/hr-base` (pinned at the commit the work
+started from). Working branch: `norm-hr-562`.
+
+## Run 1 — 2026-08-01
+
+**Setup**: baseline emitted from `~/Programming/tmp/hr-base` → `/tmp/hr.base`. Serbian's normalize.ts
+(`src/languages/serbian/normalize.ts`) is the model — Croatian and Serbian are the pluricentric
+standards of ONE phonological system, and the Serbian file documents the shared Serbo-Croatian number
+system (three-way count agreement, period-thousands, N. ordinals, hyphen+case-suffix decades).
+
+**Corpus shape** (hr_hr FLEURS — a Croatian translation of the English set):
+- **`N.` ordinals** ×many — the Serbian-shaped ordinal marker: `15. kolovoza 1940.`, `7. najvećim`,
+  `6. listopada 1789.`, `1000. marka`, `24. kolovoza`, `21. srpnja`, `11., 12. i 13. stoljeća`.
+  Licensors: month GENITIVES (kolovoza, rujna, listopada, srpnja), `stoljeća`, `marka`, `najvećim`
+  (locative), `godine`.
+- **Period-grouped thousands** ×~26 (2.500, 130.000, 40.000, 10.000, 5.000.000, 3.850, 30.000) — the
+  SAME period as the ordinal marker, so the disambiguation (3-digit group vs ordinal) matters. The
+  corpus ALSO writes plain thousands (7000, 4892, 6000).
+- **Comma-DECIMALS** ×~15 — `2,4 Ghz`, `5,0 Ghz`, `802,11 n` — Croatian writes decimals with COMMAS
+  (unlike Serbian's corpus). AND dot-versions `802.11a/b/g/n` (the Wi-Fi standard).
+- **clocks** ×~15 — `22:00 i 23:00 h`, `23:35 h`, `12:00 GMT`, `06:30` — the CROATIAN `h` (sat) suffix.
+- **sports times** ×3 — `4:41.30`, `2:11.60`, `1:09.02` (NOT clocks).
+- **rates** ×~10 — `70 km/h`, `160 km/h`, `40 milja/h`, `64 km/h` — Croatian "na sat" (per hour).
+- **era markers** ×3 — `n. e.` (nove ere = AD), `p.n.e.` (prije nove ere = BC), `400. g. n. e.`,
+  `1100. g. n. e.`, `356. godine p.n.e.` — multi-dot.
+- **degrees** ×3 — `90 °F`, `+30°C`, `35° W` (longitude).
+- **fractions** ×2 — `29¾ sa 24½ inča`, `1/5 inča`.
+- **initialisms** ×~10 — NHK, MS, FIC, KNP, APS, QVC, A1GP, SAD-a (USA genitive).
+- **abbrev** — `itd.`, `George W. Bush`, `Dr.`, `James i sur.`, `pH`.
+- **roman** — `I. i II. svjetski rat` (PRENOMINAL ordinal!), `I. i II. reda`, Elizabeth II (cardinal).
+- **hyphen+case-suffix** — `1970-ih` (decade), `11-godišnju`, `4-godišnjeg`, `24-časovnom`.
+- **zero-width** ×5.
+- **ranges** — `10 – 60 minuta`, `2-3 km`, `100 – 200 milja/sat`, `120-160 kubičnih metara`,
+  `1000. – 1300. n. e.` (en-dash).
+
+**KEY DEFECTS from the probe** (all mirror Serbian):
+- `15. kolovoza 1940.` → *petnaest . kolovoza …* (ordinal period as sentence break).
+- `2.500 ¥` → *dva . petsto* (period-thousands as break).
+- `2,4 Ghz` → *dva , četiri ghz* (comma-decimal as break).
+- `22:00 i 23:00 h` → *dvadeset dva , nula … x* (colon + the h as [x]).
+- `70 km/h` → *sedamdeset km x* (rate raw).
+- `n. e.` → *n . e .* (era letter-spelled).
+- `90 °F` → *devedeset f*; `+30°C` → *trideset c*.
+- `29¾` → *dvadeset devet* (fraction dropped).
+- `I. i II. svjetskom ratu` → *i . i dva . svjetskom ratu* (roman as cardinal).
+- `1970-ih` → *…sedamdeset ih* (case suffix as letters).
+- `itd.` → *itd .*, `George W. Bush` → *george . bush*, `SAD-a` → *sad a*.
+
+**GOOD already**: `7000`, `4892 m` (plain thousands), `12:00 GMT` (the 12:00 clock works via... no,
+it breaks too).
+
+**Next**: write `src/languages/croatian/normalize.ts`, modeled on Serbian's but adapted for the comma
+decimals, the h-clock suffix, and the Croatian licensors/era markers.
+
+## Run 2 — 2026-08-01 (implementation)
+
+`src/languages/croatian/normalize.ts` landed on `norm-hr-562`, modeled on the Serbian normalize (the
+pluricentric standard). Steps, in order:
+0) zero-width (U+200B ×5)
+1) digit de-grouping (period-thousands 2.500, 40.000) + the en-dash range (1000. – 1300. n. e.)
+2) multi-dot era markers (n. e. → nove ere, p.n.e. → prije nove ere; the 400. g. n. e. form)
+3) dotted abbreviations (itd. → i tako dalje)
+4) dotted capital runs (George W. Bush) + lone initial (W. Bush) + Dr → Doktor + SAD → expansion
+4b) prenominal ROMAN ordinals (I. svjetskog rata → prvog, II. svjetskom ratu → drugom — the shared
+    roman pass skips single-letter I and the registry converts II→2 before the dotted form; handled
+    both ways: the roman rule for I, and the digit-ordinal path for II via the svjetskog/svjetskom
+    licensors)
+5) degrees (stupnjeva Celzija/Farenhajta + the 35° W longitude)
+6) numeral + hyphen + case suffix (1970-ih → tisuću devetsto sedamdesetih)
+7) the `N.` ORDINAL — the Croatian licensors (month genitives kolovoza/rujna/listopada/srpnja,
+    stoljeća (neuter!), marka, najvećim (locative), godine, svjetskog/svjetskom)
+8) clocks with the CROATIAN `h` suffix (22:00 i 23:00 h → dvadeset dva sata i dvadeset tri sata); the
+    marker captured WITHOUT eating the space (the clock-glue trap — "22:00 i 23:00" glued to "satai")
+9) numeric ranges → "do"
+9b) the milja rate (milja/h, milja/sat — the tier's `mi` key doesn't match the spelled word)
+10) the SHARED TIER (in croatian.ts, so the review's sourcing check sees it) — posto, currency
+    (jen/dolar/euro/funta), units, unitPer "na", rateDenominators h→sat s→sekunda, exponents
+11) decimal comma → "zarez" (the corpus's 2,4 Ghz, 802,11)
+12) fractions (1/5 → jedan peti, 29¾ → i tri četvrtine)
+13) signs (all eight classes; minus, equals, less-than, greater-than added per the review)
+
+**Engine wiring** (croatian.ts): `text()` = `assembleClauses(SYMBOLS(normalizeCroatian(input)), TOKEN, …)`.
+The TOKEN gained period-thousands + comma-decimals.
+
+**Gates**:
+- scan: no defects (DROP 8 → 0)
+- tsc: clean
+- vitest: 2669 passed (9 new hr normalization tests)
+- corpus diff: 210/2007 (10.5%) changed, every change READ and verified (97 ordinal, 18 thousands,
+  17 clock, 15 comma-decimal, 13 rate, 9 abbrev, 6 initialism, 4 roman, 4 currency/percent, 3 range,
+  3 degree, 2 hyphen-suffix, 2 era, 2 fraction, 15 misc — George W. Bush/units)
+- normalization/review.ts --lang hr: checklist clean (wired, tests, all 8 sign classes, spelling→g2p, scan)
+
+**SOURCING note**: the review flags `jen` (the ¥ word) as unattested — the corpus writes `¥` ×3 but never
+spells "jen". The currency REGISTER is attested (dolara ×8, posto ×14, funta ×1, eura ×1 — all spelled
+after the number), and "jen" is the standard Croatian loanword for the yen, the consistent fourth. This
+is a documented sourcing decision (the same reasoning the check's "read the list" prompt invites), not a
+guess: dolar/euro/funta are all attested and establish the pattern.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. One real defect found
+by probing the corpus's own forms (trap 8 — the adversarial NEIGHBOUR of the era marker):
+
+- **The `g. n. e.` / `g. pr. Kr.` forms (trap 8, corpus-attested)**: `400. g. n. e.`, `1000. g. pr. Kr.`
+  and `323. g. pr. Kr.` — the `g.` (godine) sits BETWEEN the year-ordinal and the era marker, so my
+  step-2 year-ordinal claim (which looked directly at `n. e.`) missed all three, and the corpus diff
+  showed `400. g. n. e.` → "četiristo . g . nove ere" (period + letter-spelled g). Fixed: the year
+  ordinal now looks PAST an optional `g.`, and `pr. Kr.` (prije Krista) is claimed alongside `n. e.`
+  and `p.n.e.`. The corpus's 2 `g. pr. Kr.` instances (1000., 323.) and the 2 `g. n. e.` instances
+  (400., 1100.) now read as ordinals + the era words. 3 utterances improved in the corpus diff.
+
+**Verified non-issues**: the month-genitive licensors (11. svibnja, 21. ožujka, 1. siječnja, 31.
+prosinca — all inflect correctly); `5. reda` → petog reda; the fractions (2/3, 3/4, 1/2, 2/5, 3¾, 2½);
+30°F/35°E/35°N/35° S; the minus-vs-range guard (-5 → minus, 5-10 → do, -5°C); the comma-decimal vs
+period-thousands (2,4 vs 2.400 vs 5.000.000); the currency amounts (£27, ¥2.500, $2,3, $1000); "do"
+and "na sat" do not trigger mutation; the percent (3.5%/2,5%/88%/0.5%/100% → posto).
+
+**Post-fix gates**: corpus diff 212/2007 (10.6%) — 3 utterances improved by the g. n. e./pr. Kr. fix,
+verified correct; 2669 tests (2 new trap pins); scan no defects; review checklist clean; sourcing note
+on `jen` documented above.
+
+## Run N+1 — 2026-08-01 (PR #599 review pass)
+
+### The `jen` question — ANSWERED, from the sister standard
+
+The PR asked for an attestation. There is one **in the repo**: Croatian and Serbian are two standards of one
+language, and the Serbian corpus renders **the very same FLEURS sentence** with the word spelled out —
+"od 2500 i 130.000 **japanskih jena**" (Cyrillic "јапанских јена") — where the Croatian translation writes
+"2.500 ¥ … 130.000 ¥". `jen` is in the Serbian epitran referee as well. Recorded at the tier entry.
+
+The review tool's sourcing line cannot see either, because its haystack is one language. That is a real
+limitation for the pluricentric standards still in the queue (bs, and sr↔hr in both directions) and is worth
+teaching the tool; noted here rather than done, since it needs an explicit same-language map.
+
+### The ordinal claimed half its instances
+
+The layer's defining rule is the `N.` ordinal, licensed by a closed list of following words. Tabulating
+every `N.` in the corpus against what the layer actually produced: **108 claimed, 108 left as digits plus a
+period** — a cardinal where Croatian needs an ordinal, and a spurious clause break mid-sentence. The
+breakdown of the 108 misses:
+
+| shape | count | verdict |
+|---|---|---|
+| YEAR + lowercase, mid-sentence (`1683. dinastija Qing`) | 76 | the period is the ORDINAL marker |
+| YEAR + utterance end (`vladao do 1945.`) | 22 | ordinal AND a sentence end |
+| YEAR + capitalised (`15. kolovoza 1940. Saveznici`) | 4 | ordinal AND a sentence end |
+| sentence-final score/clock (`6:6.`, `07:30.`) | 12 | correctly NOT an ordinal |
+| one-off ranks (`190. mjesto`, `37. najveća`, `4. kategorije`, `247. pakistanskog`) | ~15 | ordinals the list did not know |
+
+**A Croatian year is an ordinal with `godine` elided**, in the feminine genitive — the same slot the written
+`1940. godine` already takes, so the case is not being guessed. Two rules were added on that evidence:
+
+1. a year rule (1000–2100 + period), which keeps the period ONLY where it is also a sentence end — an
+   utterance end, or a capital after it. Closing punctuation is neither: the corpus's `(1644. - 1912.)` has
+   two ordinal markers and runs on after the bracket.
+2. six more licensors, each attested after an `N.` in this corpus: mjesto/mjestu, najveća/najveći/najveće,
+   kategorije, pakistanskog, pukovnija, husarska.
+
+Unclaimed afterwards: **24**, of which 12 are the sentence-final scores and clocks that SHOULD stay cardinal,
+1 is a genuine cardinal at a sentence end (`iznosi oko 800. Riječ je…`), and 2 are the round-thousand gap
+(`2000. godine`) that the Serbian parent documents deliberately — the fused *dvijetisućite* is a different
+word-formation and is still not attempted.
+
+**Gates**: vitest 2669 (200 files); tsc clean; scan no defects; `normalization/review.ts --lang hr` checklist
+clean apart from the `jen` prompt answered above; corpus diff **88/2007** with every counter 0 → 0, every
+change a cardinal becoming the ordinal genitive and, mid-sentence, a spurious pause disappearing. No referee
+exists for hr, so that gate is unavailable — stated rather than skipped silently.
