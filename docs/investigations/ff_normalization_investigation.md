@@ -95,3 +95,31 @@ unitPer "e wakkati gootel", rateDenominators h→wakkati, s→sahaawa.
 **Notes**: the review probes `5 000` (space-grouped, corpus-absent — Fula groups with commas) reads
 "joyi meere". The `H5N1` normalize output keeps the digits raw (ha5na1) but the TOKEN reads them as
 words in the IPA — a probe artifact that does not affect the corpus.
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Two real defects found
+by probing the adversarial neighbour (trap 8), both in forms the corpus happens not to exercise:
+
+- **Ghz glue (the version-dot ordering)**: the dot rule converted `2.4` → "2 tere nayi" (words), and the
+  step-11 Ghz rule expected a DIGIT after "tere", so `2.4Ghz` read *ɗiɗi tere nayiGhz* — the Ghz glued
+  and unexpanded. Same shape as the Welsh/Azerbaijani "wordify-then-claim" ordering (trap 14): the Ghz
+  claim now runs BEFORE the dot rule on the raw digits. The Fula corpus has no Ghz (verified — it was a
+  probe form), so this is defensive, but it is now correct.
+- **Decimal percent leak**: `3.5%` read *tati tere joyi%* — the `%` survived after a decimal because the
+  bare-digit percent rule missed the word-form number. The percent rule now claims the word-form too
+  (3.5% → tati tere joyi tere).
+
+**Trap 9 cleanup**: the glued-clock-suffix rule matched `nje|nde|ni|na` but the corpus has ONLY `11:00nje`;
+the -na/-ni/-nde alternatives are unattested guard branches and were removed. Also dropped a redundant
+duplicate `US$` rule.
+
+**Verified non-issues**: the case-insensitive ordinal digits (16TH, 1ST, 190TH); the fractions 2/3, 3/4,
+1/2, 3¾, 2½; 30°F and bare 30°; the minus-vs-range guard (-5 → leɓɓa, 5-10 → hakkunde, -5°C); the
+sports-time 4:42.30 (colon pause + decimal — the clock guard keeps it unclaimed); the comma-decimal vs
+comma-thousands (12,5/12,50 → tere, 1,400/5,000,000 → thousands); the currency prefixes (US$11,000 i
+$22,500, AUD$45, £27, ¥2,500); UN reads as the word, REM/US/USA letter-spell.
+
+**Post-fix gates**: corpus diff 161/1500 (10.7%) — byte-identical to the pre-review run (no regression,
+the fixes touch only corpus-absent forms); 2653 tests; referee 71.2% unchanged; scan no defects; review
+checklist clean.

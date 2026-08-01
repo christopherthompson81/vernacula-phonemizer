@@ -133,7 +133,6 @@ export function normalizeFula(input: string): string {
     //     bare `$` is the tier's; the glued prefix names the country. AFTER &amp;, BEFORE the number rules.
     s = s.replace(/(?<![\p{L}\p{M}])AUD\$?(?=\s?\d)/giu, "dollar Awstraliya ");
     s = s.replace(/(?<![\p{L}\p{M}])(?:US|uS)\$?(?=\s?\d)/giu, "dollar Amerik ");
-    s = s.replace(/(?<![\p{L}\p{M}])US\$?(?=\s?\d)/giu, "dollar Amerik ");
 
     // 2) ERA MARKERS — `1000B.C.` (before Christ). The corpus's B.C. is attached to the year. Read the
     //    year, then "ɓawo jibineede Iisaa" (before the birth of Christ) — or the simpler Fula "ɓawo".
@@ -158,9 +157,11 @@ export function normalizeFula(input: string): string {
     //    "hakkunde" (between) — corpus-attested. A leading minus stays a sign (handled later).
     s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 hakkunde $2");
 
-    // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"). The suffix is a separate word,
-    //     not glued to the time; spaced out so the clock rule reads the time, then "nje" follows.
-    s = s.replace(/(?<![\d.,])(\d{1,2}):(\d{2})(nje|nde|ni|na)(?![\p{L}\p{M}])/giu, "$1:$2 $3");
+    // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"; the corpus's only glued
+    //     instance). The suffix is a separate word, not glued to the time; spaced out so the clock rule
+    //     reads the time, then "nje" follows. ONLY the attested -nje (trap 9: no unattested guard
+    //     alternatives — -na/-ni/-nde never occur glued to a time in this corpus).
+    s = s.replace(/(?<![\d.,])(\d{1,2}):(\d{2})(nje)(?![\p{L}\p{M}])/giu, "$1:$2 $3");
 
     // 6) CLOCK, in the COLON form. `1:15 a.m.` → goo e sappo e joyi a.m.; `9:30 fajiri` → … fajiri.
     //    The 24h `0230 UTC` is handled here too (a leading 0 makes it a 4-digit time). The a.m./p.m.
@@ -186,9 +187,12 @@ export function normalizeFula(input: string): string {
             return `${head} ${tz}`;
         });
 
-    // 7) VERSION DOTS and DOT DECIMALS — `1.5 million`, `3.50`, `2.3`, `12.8km`, `802.11n`. The dot is
-    //    a DECIMAL (the corpus follows English; thousands use COMMAS). Read "tere" (point — the Fula
-    //    word for a point/spot), the fraction digit-by-digit. AFTER the clock.
+    // 7) VERSION DOTS and DOT DECIMALS — `1.5 million`, `3.50`, `2.3`, `12.8km`, `802.11n`, `2.4Ghz`.
+    //    The dot is a DECIMAL (the corpus follows English; thousands use COMMAS). Read "tere" (point —
+    //    the Fula word for a point/spot), the fraction digit-by-digit. GIGAHERTZ is claimed FIRST on the
+    //    raw digits, because this rule converts the fraction to WORDS the Ghz rule can no longer see.
+    //    AFTER the clock.
+    s = s.replace(/(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
             `${i} tere ${[...f].map((d) => numberToWords(Number(d))).join(" ")} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta", mph: "miles e wakkati gootel", kph: "kilometre e wakkati gootel" } as Record<string, string>)[u.toLowerCase()]!}`);
@@ -229,11 +233,12 @@ export function normalizeFula(input: string): string {
         (m0, n: string, u: string) =>
             `${numberToWords(Number(n))} kilometre e wakkati gootel`);
 
-    // 11) GIGAHERTZ — `2.4Ghz`. The version-dot rule has already split it; the Ghz reads gigahertz.
-    s = s.replace(/(\d+(?: tere \d[\d ]*)?)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
+    // 11) GIGAHERTZ — handled in step 7 on the raw digits (before the fraction becomes words).
 
     // 12) SIGNS. `4×4` — the × reads "je" (by). `&` → *e* (and). A TRUE minus (`-5`) reads "leɓɓa";
-    //     the corpus's `-\d` are all ranges/scores, now handled above. `%` → *tere*.
+    //     the corpus's `-\d` are all ranges/scores, now handled above. `%` → *tere*, including after a
+    //     decimal (3.5% — the dot rule has converted it to words by now, so the bare-digit `%` rule
+    //     would miss it; handle the word-form percent too).
     s = s.replace(/\+\s?(?=\d)/gu, " e gooto ");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "leɓɓa $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
@@ -244,7 +249,7 @@ export function normalizeFula(input: string): string {
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 fotoo $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 famɗi $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 ɓuri $2");
-    s = s.replace(/(\d)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 tere");
+    s = s.replace(/(\d+(?: tere [\p{L}\p{M}]+)+|[\p{L}\p{M}]+ tere [\p{L}\p{M}]+|\d+)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 tere");
 
     // 13) INITIALISMS, LAST of the letter rules: it must run after the era markers (else B.C. → *ba.
     //     ca.*) and after the dotted-capital rule.
