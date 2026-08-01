@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { normalizeIrish } from "../src/languages/irish/normalize.ts";
+import { normalizeIrish, ordinalWords } from "../src/languages/irish/normalize.ts";
 import { numberToWords } from "../src/languages/irish/numbers.ts";
 import { phonemizeWord } from "../src/languages/irish/irish.ts";
 
@@ -131,17 +131,26 @@ describe("Irish numbers", () => {
 });
 
 // TEXT NORMALIZATION (src/languages/irish/normalize.ts) — the pre-tokenizer pass behind #562. The defining
-// rules are the `Nú` ordinal digits (an chéad, an tríú, an cúigiú déag), the comma-thousands, the dot-decimal
+// rules are the `Nú` ordinal digits (chéad, tríú, cúigiú … déag — the article is the text's own), the comma-thousands, the dot-decimal
 // "pointe", the i.n./r.n./A.D./R.C. era markers, the msu/km-u rates, and the letter-spelled initialisms.
 describe("Irish text normalization", () => {
     const ph = (s: string): string => phonemize(s, "ga").trim();
 
     test("text→text: the Nú ordinal reads the Irish ordinal word", () => {
-        expect(normalizeIrish("15ú")).toBe("an cúigiú déag");
-        expect(normalizeIrish("18ú")).toBe("an t-ochtú déag");
-        expect(normalizeIrish("20ú")).toBe("an fichiú");
-        expect(ph("7ú")).toBe("ˈan̪ˠ ʃˈaxt̪ˠuː"); // an seachtú
-        expect(ph("190ú")).toBe("ˈan̪ˠ cˈeːd̪ˠ n̪ˠˈoːxəd̪ˠuː"); // an céad nóchadú
+        // NO ARTICLE from the layer: 27 of the corpus's 36 `Nú` instances already have one ("an 15ú
+        // haois", "sa 10ú haois"), and a table carrying "an" read them twice. The NOUN goes inside a
+        // compound, which is the corpus's own register ("an naoú haois déag").
+        expect(normalizeIrish("15ú")).toBe("cúigiú déag");
+        expect(normalizeIrish("an 15ú haois")).toBe("an cúigiú haois déag");
+        expect(normalizeIrish("sa 10ú haois")).toBe("sa deichiú haois");
+        expect(normalizeIrish("an 37ú tír")).toBe("an seachtú tír is tríocha");
+        expect(normalizeIrish("an 190ú áit")).toBe("an céad nóchadú áit");
+        expect(normalizeIrish("an 8ú lá")).toBe("an t-ochtú lá"); // the t- prefix after a bare "an"
+        expect(ordinalWords(11)).toBe("aonú déag"); // eleven is aonú, never chéad
+        expect(normalizeIrish("18ú")).toBe("ochtú déag");
+        expect(normalizeIrish("20ú")).toBe("fichiú");
+        expect(ph("7ú")).toBe("ʃˈaxt̪ˠuː"); // seachtú
+        expect(ph("190ú")).toBe("cˈeːd̪ˠ n̪ˠˈoːxəd̪ˠuː"); // céad nóchadú, with the article left to the text
     });
 
     test("comma-thousands stay grouped; the dot is a decimal (pointe)", () => {
@@ -150,7 +159,7 @@ describe("Irish text normalization", () => {
         expect(ph("1.5 million")).toBe("ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ mʲˈɪlʲən̪ˠ");
         expect(ph("12.8 km")).toBe("ˈa d̪ˠˈoː jˈeːɡ pˠˈɔnʲtʲə ˈa hˈɔxt̪ˠ cˈɪlʲəmʲeːd̪ˠəɾˠ");
         // trap pins: the haon-ending compound ordinals (21ú, 31ú) and the decimal-percent (3.5%)
-        expect(ph("21ú")).toBe("ˈan̪ˠ fʲˈɪçə ˈa ˈeːn̪ˠuː"); // an fiche a aonú
+        expect(ph("21ú")).toBe("ˈeːn̪ˠuː ˈɪʃ fʲˈɪçə"); // aonú is fiche — the unit first, the tens last
         expect(ph("3.5%")).toBe("ˈa tʲɾʲˈiː pˠˈɔnʲtʲə ˈa kˈuːɟ fˠˈiːnʲ ɟˈeːd̪ˠ"); // faoin gcéad after the decimal
     });
 

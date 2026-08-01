@@ -83,31 +83,74 @@ const normalizeInitialisms = makeInitialismNormalizer({
 // THE IRISH ORDINAL
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Ordinal words 1–10 (with the article "an" that the corpus's prose uses: "an chéad", "an dara").
- *  1–4 are irregular; 5–10 are the cardinal stem + -ú. Referee-attested through séú. */
+/**
+ * Ordinal words 1–10, WITHOUT the article. The corpus supplies its own — `an 15ú haois`, `sa 10ú haois`,
+ * `ón 8ú haois` — so 27 of the 36 `Nú` instances are preceded by an article or a contraction of one, and
+ * a table that carried "an" read them all twice: *an an cúigiú … *, *sa an deichiú …*. The corpus's own
+ * prose is the register to match, and it writes the bare ordinal: "sa tríú haois", "an cúigiú huair",
+ * "sa naoú háit", "sa deichiú háit", "san aonú háit déag", "an fichiú haois".
+ *
+ * ELEVEN IS `aonú`, NOT `chéad`. Composing 11 as ORD_1_10[1] + déag gave *an chéad déag*; the corpus
+ * writes "san aonú háit déag", and `chéad` is only ever the standalone first. So the teens take their own
+ * unit series, where 1 → aonú.
+ */
 const ORD_1_10: Readonly<Record<number, string>> = {
-    1: "an chéad", 2: "an dara", 3: "an tríú", 4: "an ceathrú", 5: "an cúigiú",
-    6: "an séú", 7: "an seachtú", 8: "an t-ochtú", 9: "an naoú", 10: "an deichiú",
+    1: "chéad", 2: "dara", 3: "tríú", 4: "ceathrú", 5: "cúigiú",
+    6: "séú", 7: "seachtú", 8: "ochtú", 9: "naoú", 10: "deichiú",
 };
+/**
+ * The unit series used INSIDE a compound (teens and 21+): 1 is `aonú`, not `chéad`, and 2 is `dóú`, not
+ * `dara`. The corpus evidences the split for 1 — "san aonú háit déag" — and neither `dara déag` nor
+ * `dóú déag` appears in the corpus or the referee, so 2 follows the same analogy rather than reusing the
+ * standalone form (`dara` is attested, but only standing alone: "an Dara Cogadh Domhanda"). Stated as an
+ * inference, not an attestation.
+ */
+const ORD_UNIT_IN_COMPOUND: Readonly<Record<number, string>> = { ...ORD_1_10, 1: "aonú", 2: "dóú" };
+
+/** Words that are NOT the noun a compound ordinal encloses. The corpus writes a LIST — "sna 11ú, 12ú agus
+ *  13ú haoiseanna" — where the noun comes once at the end, so pulling the next token inside gave
+ *  *dara agus déag*: the conjunction swallowed as if it were the head noun. */
+const NOT_A_NOUN: ReadonlySet<string> = new Set([
+    "agus", "is", "nó", "ná", "ach", "mar", "féin", "seo", "sin", "siúd",
+    "a", "an", "na", "ag", "ar", "as", "chun", "de", "do", "faoi", "go", "i", "in", "le", "ó", "roimh",
+    "sa", "san", "sna", "tar", "thar", "um",
+]);
 
 /** Integer → the Irish ordinal (the corpus's `Nú` digit form). Below 10 the table; from 10 up the
  *  cardinal's last element takes the -ú ordinal ending (an fichiú = 20th, an seascadú = 60th,
  *  an cúigiú déag = 15th). Anything outside the compositor's range → undefined. */
-export function ordinalWords(n: number): string | undefined {
+export function ordinalWords(n: number, noun = ""): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1 || n >= 1e12) return undefined;
     if (n <= 10) return ORD_1_10[n];
-    // 11–19: the unit ordinal + "déag" (an cúigiú déag = 15th, per the corpus's prose "aoinú háit déag").
-    if (n < 20) return `${ORD_1_10[n - 10]} déag`;
-    // 20+: the cardinal, with the LAST element ordinalised. Tens take the stem + -ú (fiche → fichiú,
-    // seasca → seascadú); a compound keeps the unit ordinal on the last word.
+    // THE NOUN GOES INSIDE A COMPOUND ORDINAL, which is why this takes it as an argument. Irish writes
+    // "an naoú haois déag" (the 19th century — lit. ninth century tenth) and "an séú háit déag", never
+    // *an naoú déag haois*: the tens element follows the NOUN. Six of the corpus's teens are of exactly
+    // that shape (`15ú haois`, `17ú haois`, `18ú haois`, `10ú - 11ú haois`, `16ú haois`), and the caller
+    // hands the following word over so it can be placed. With no noun to place, the bare compound is
+    // still the best available reading.
+    const tail = noun === "" ? "" : `${noun} `;
+    if (n < 20) return `${ORD_UNIT_IN_COMPOUND[n - 10]} ${tail}déag`.trim();
+    // 20+: a round ten is the stem + -ú (fiche → fichiú, seasca → seascadú). A compound is the UNIT
+    // ordinal first and the tens last, joined by "is" — the same order as the teens: "an t-aonú lá is
+    // fiche" (the 21st day). The corpus's one compound is `37ú tír` → seachtú tír is tríocha.
     const card = irishNumber(n);
     if (card === "" || /\d/u.test(card)) return undefined;
-    const words = card.split(" ");
-    const last = words[words.length - 1]!;
-    const ord = UNIT_ORD[last] ?? TENS_ORD[last];
-    if (ord === undefined) return undefined;
-    words[words.length - 1] = ord;
-    return `an ${words.join(" ")}`;
+    const words = card.split(" ").filter((w) => w !== "a"); // the counting particle is not part of an ordinal
+    if (words.length === 1) {
+        const ord = TENS_ORD[words[0]!] ?? UNIT_ORD[words[0]!];
+        return ord === undefined ? undefined : `${ord}${noun === "" ? "" : ` ${noun}`}`;
+    }
+    // A compound ending in a TENS word ordinalises IN PLACE and keeps its order — 190 is "céad nóchadú"
+    // (hundred ninetieth), not *nóchadú is céad*. Only a UNIT-final compound takes the "is" inversion.
+    const lastWord = words[words.length - 1]!;
+    if (TENS_ORD[lastWord] !== undefined) {
+        const head = [...words.slice(0, -1), TENS_ORD[lastWord]!].join(" ");
+        return noun === "" ? head : `${head} ${noun}`;
+    }
+    const unit = UNIT_ORD[lastWord];
+    const tens = words.slice(0, -1).join(" ");
+    if (unit === undefined || tens === "") return undefined;
+    return `${unit} ${tail}is ${tens}`.replace(/\s+/gu, " ").trim();
 }
 
 /** The ordinal of a CARDINAL WORD when it ends a compound (from numbers.ts's emitted words). The
@@ -121,7 +164,7 @@ const UNIT_ORD: Readonly<Record<string, string>> = {
 const TENS_ORD: Readonly<Record<string, string>> = {
     fiche: "fichiú", tríocha: "tríochadú", daichead: "daicheadú", caoga: "caogadú",
     seasca: "seascadú", seachtó: "seachtódú", ochtó: "ochtódú", nócha: "nóchadú",
-    céad: "céadú", míle: "míliú", milliún: "milliúna", billiún: "billiúna",
+    céad: "céadú", chéad: "chéadú", míle: "míliú", milliún: "milliúna", billiún: "billiúna",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -168,12 +211,23 @@ export function normalizeIrish(input: string): string {
     // 4) ORDINALS — the `Nú` form (the corpus's own ordinal digits). The suffix is the Irish ordinal
     //    ending; the READING is the ordinal word (an chéad, an dara, an tríú …). The digit run may
     //    include a comma-thousands separator (1,000ú). BEFORE the clock rule.
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)(ú)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
-        const n = Number(d.replace(/,/gu, ""));
-        if (!Number.isFinite(n) || n < 1) return m0;
-        const ord = ordinalWords(n);
-        return ord === undefined ? m0 : ord;
-    });
+    //    THE FOLLOWING NOUN is captured, because a compound ordinal encloses it (see `ordinalWords`), and
+    //    the PRECEDING word is inspected: a vowel-initial ordinal takes the t- prefix after a bare "an"
+    //    (an t-ochtú, an t-aonú), which is the one piece of the article's morphology that belongs to us
+    //    rather than to the corpus text.
+    s = s.replace(/(\ban )?(?<![\d.,])(\d[\d,]*)ú(?![\p{L}\p{M}])([  ]+([\p{L}\p{M}]+))?/giu,
+        (m0, art: string | undefined, d: string, spaced: string | undefined, noun: string | undefined) => {
+            const n = Number(d.replace(/,/gu, ""));
+            if (!Number.isFinite(n) || n < 1) return m0;
+            // A noun is only pulled INSIDE for the compounds that enclose one; elsewhere it stays put.
+            const encloses = n > 10 && (n < 20 || n % 10 !== 0)
+                && (noun === undefined || !NOT_A_NOUN.has(noun.toLowerCase()));
+            const ord = ordinalWords(n, encloses ? (noun ?? "") : "");
+            if (ord === undefined) return m0;
+            const tPrefix = art !== undefined && /^[aeiouáéíóú]/u.test(ord) ? "t-" : "";
+            const head = `${art ?? ""}${tPrefix}${ord}`;
+            return encloses && noun !== undefined ? head : `${head}${spaced ?? ""}`;
+        });
 
     // 5) RANGES and SCORES — `10-60 nóiméad`, `6-6`, `4.2-3.9 milliún`, `AD 1000-1300`. Irish reads
     //    these with "go dtí" (to) or the range just as two numbers. The corpus's prose uses "idir X
@@ -226,9 +280,13 @@ export function normalizeIrish(input: string): string {
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const ord = ordinalWords(Number(b));
         if (ord === undefined) return m0;
-        // A unit fraction (1/N) is the ordinal noun: 1/5 orlach → cúigiú orlach (a fifth of an inch).
-        // A non-unit fraction (M/N) is "M N-ú" (two fifths = dhá chúigiú).
-        return Number(a) === 1 ? ord : `${irishNumber(Number(a))} ${ord}`;
+        // THE ARTICLE BELONGS HERE, not in the ordinal table. A `Nú` digit is preceded by the corpus's own
+        // article ("an 15ú haois"), so the table must not carry one — but a FRACTION supplies its own: 1/5
+        // orlach is "an cúigiú orlach" (the fifth of an inch), and a vowel-initial ordinal takes the
+        // t- prefix after it (1/8 → an t-ochtú).
+        const article = /^[aeiouáéíóú]/u.test(ord) ? "an t-" : "an ";
+        // A unit fraction (1/N) is the ordinal noun; a non-unit fraction (M/N) is "M N-ú" (dhá chúigiú).
+        return Number(a) === 1 ? `${article}${ord}` : `${irishNumber(Number(a))} ${ord}`;
     });
 
     // 9) DEGREES. `30°C` came out as the bare consonant [k]; `35°W` is a LONGITUDE. `céim` is the
