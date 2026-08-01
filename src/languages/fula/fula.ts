@@ -25,11 +25,14 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN =
     /([a-zɓɗŋɲƴñA-ZƁƊŊƝƳÑ\u{1E900}-\u{1E94A}]+)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+[\u{1E950}-\u{1E959}]*|\d*[\u{1E950}-\u{1E959}]+)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Fula. "tere" is the percent word (the corpus reads % as nothing, so the
-// number otherwise has no percent marker); nouns stay SINGULAR after numerals, so one form suffices.
+// #562 symbol normalization — Fula. Percent reads "e teemedere" (in a hundred) — COMPOSED from two
+// attested pieces (`e` ×92 in the corpus, `teemedere` = 100 in this engine's own number data) rather than
+// asserted as a single word: the form this shipped with, "tere", appears in neither the corpus nor the
+// epitran referee's 1,777-word list, and a wrong percent word is worse than a dropped sign (playbook).
+// Nouns stay SINGULAR after numerals, so one form suffices.
 // The unit words are the corpus's own borrowings (kilometre, metre); "e wakkati gootel" = per hour.
 const SYMBOLS = makeSymbolNormalizer({
-    percent: ["tere"],
+    percent: ["e teemedere"],
     currency: { "$": ["dollar"], "€": ["euro"], "¥": ["yen"], "£": ["pound"] },
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },
     unitPer: "e wakkati gootel", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel

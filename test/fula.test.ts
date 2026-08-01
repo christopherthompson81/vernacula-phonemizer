@@ -89,8 +89,8 @@ describe("Fula text normalization", () => {
     it("comma-thousands stay grouped; the dot is a decimal (tere)", () => {
         expect(ph("2,243")).toBe("ud͡ʒunˈaːd͡ʒe ɗˈiɗi ˈe teːmˈedːe ɗˈiɗi ˈe t͡ʃapːˈanɗe nˈaji ˈe tˈati");
         expect(ph("100,000")).toBe("ud͡ʒunˈaːd͡ʒe teːmedˈeɾe");
-        expect(ph("1.5 million")).toBe("ɡˈoː tˈeɾe d͡ʒˈoji milːˈion");
-        expect(ph("12.8km")).toBe("sˈapːo ˈe ɗˈiɗi tˈeɾe d͡ʒeːtˈati kilomˈetɾe");
+        expect(ph("1.5 million")).toBe("ɡˈoː toɓːˈeɾe d͡ʒˈoji milːˈion");
+        expect(ph("12.8km")).toBe("sˈapːo ˈe ɗˈiɗi toɓːˈeɾe d͡ʒeːtˈati kilomˈetɾe");
     });
 
     it("clocks read hour [minute] with p.m./a.m. as kikiiɗe / fajiri", () => {
@@ -99,9 +99,9 @@ describe("Fula text normalization", () => {
         expect(ph("15.00 UTC")).toBe("sˈapːo ˈe d͡ʒˈoji ˈu tˈa t͡ʃˈa");
     });
 
-    it("era markers expand; ranges join hakkunde; rates use e wakkati gootel", () => {
+    it("era markers expand; ranges join haa; rates use e wakkati gootel", () => {
         expect(ph("1000B.C.")).toBe("ud͡ʒuⁿdˈeɾe ɓˈawo");
-        expect(ph("7-2")).toBe("d͡ʒeːɗˈiɗi hakːˈuⁿde ɗˈiɗi");
+        expect(ph("7-2")).toBe("d͡ʒeːɗˈiɗi hˈaː ɗˈiɗi");
         expect(ph("160km/h")).toBe("teːmedˈeɾe ˈe t͡ʃapːˈanɗe d͡ʒˈeːɡom kilomˈetɾe ˈe wakːˈati ɡˈoːtel");
         expect(ph("300mph")).toBe("teːmˈedːe tˈati mˈiles ˈe wakːˈati ɡˈoːtel");
     });
@@ -109,12 +109,22 @@ describe("Fula text normalization", () => {
     it("currency, percent, degrees and initialisms read their words or letters", () => {
         expect(ph("US$11,000")).toBe("dˈolːaɾ amˈeɾik ud͡ʒunˈaːd͡ʒe sˈapːo ˈe ɡˈoː");
         expect(ph("AUD$45")).toBe("dˈolːaɾ awstɾalˈija t͡ʃapːˈanɗe nˈaji ˈe d͡ʒˈoji");
-        expect(ph("88%")).toBe("t͡ʃapːˈanɗe d͡ʒeːtˈati ˈe d͡ʒeːtˈati tˈeɾe");
+        expect(ph("88%")).toBe("t͡ʃapːˈanɗe d͡ʒeːtˈati ˈe d͡ʒeːtˈati ˈe teːmedˈeɾe");
         expect(ph("30°C")).toBe("t͡ʃapːˈanɗe tˈati diɡˈiɾi t͡ʃelsˈius");
         expect(ph("MRI")).toBe("mˈa ɾˈa ˈi");
         expect(ph("H5N1")).toBe("hˈa d͡ʒˈoji nˈa ɡˈoː");
         expect(ph("U.S.")).toBe("ˈu sˈa");
         // UN is the United Nations — letter-spelled, not the word "un"
         expect(ph("ha UN")).toBe("hˈa ˈu nˈa");
+    });
+
+    // SOURCING PINS. Every word these rules emit has to come from somewhere; the forms below were changed
+    // in review because the shipped ones appear in neither the corpus nor the epitran referee's word list.
+    it("emits only sourced words: toɓɓere (dot), haa (range), e teemedere (percent), fota, usta", () => {
+        expect(normalizeFula("1.5")).toBe("1 toɓɓere joyi"); // toɓɓere is the referee's word for a dot
+        expect(normalizeFula("10-60")).toBe("10 haa 60"); // haa ×12 in the corpus; hakkunde is a PREPOSITION
+        expect(normalizeFula("88%")).toBe("88 e teemedere"); // composed: e ×92, teemedere = 100
+        expect(normalizeFula("x = y")).toBe("x fota y"); // fota ×2 in the corpus, in this very sense
+        expect(normalizeFula("-5")).toBe("usta 5"); // usta ×7 ("reduce"); zero leading minuses in the corpus
     });
 });

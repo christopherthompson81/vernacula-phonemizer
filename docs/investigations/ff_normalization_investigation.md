@@ -90,7 +90,7 @@ unitPer "e wakkati gootel", rateDenominators h→wakkati, s→sahaawa.
 - corpus diff: 161/1500 (10.7%) changed, every change READ and verified an improvement (57 initialism,
   22 comma-thousands, 17 misc — H5N1/U.S./units, 15 dot-decimal, 14 ordinal, 9 clock, 8 range,
   6 currency/percent, 5 rate, 4 unit, 2 degree/fraction/amp, 1 era, 1 sign)
-- normalization-review --lang ff: checklist clean
+- normalization/review.ts --lang ff: checklist clean
 
 **Notes**: the review probes `5 000` (space-grouped, corpus-absent — Fula groups with commas) reads
 "joyi meere". The `H5N1` normalize output keeps the digits raw (ha5na1) but the TOKEN reads them as
@@ -123,3 +123,55 @@ $22,500, AUD$45, £27, ¥2,500); UN reads as the word, REM/US/USA letter-spell.
 **Post-fix gates**: corpus diff 161/1500 (10.7%) — byte-identical to the pre-review run (no regression,
 the fixes touch only corpus-absent forms); 2653 tests; referee 71.2% unchanged; scan no defects; review
 checklist clean.
+
+## Run N+1 — 2026-08-01 (PR #596 review pass): SOURCING
+
+The rules here are shaped correctly. What this review checked instead is the thing a thin-referee language
+makes cheap to get wrong and expensive to notice: **every Fula word the layer emits, against the two sources
+this repo actually has** — the 1,500-utterance ff_sn corpus and the epitran `ful-Latn` referee's 1,777-word
+list. The layer's own comments claim "corpus-attested" in places; some of those claims are true and some are
+not.
+
+| word | role | corpus | referee | verdict |
+|---|---|---|---|---|
+| **tere** | decimal point AND percent | **0** | **no** | **unattested, and doing the most work in the layer** |
+| toɓɓere | (dot) | 0 | **yes** | the referee's word for a dot |
+| teemedere | hundred | 0 | yes | also this engine's own number word for 100 |
+| hakkunde | range joiner | 1 | yes | attested — but as a PREPOSITION, see below |
+| haa | (up to) | 12 | yes | the corpus's own infix joiner |
+| ɓawo | BC marker | 47 | yes | the comment's claim holds |
+| fajiri | a.m. | 4 | no | corpus-attested |
+| **kikiiɗe** | p.m. | **0** | **no** | unattested; kept as a STATED assumption |
+| digiri | degree | 2 | no | corpus-attested |
+| famɗi / ɓuri | < / > | 2 / 59 | yes | fine |
+| **leɓɓa** | minus | **0** | **no** | unattested |
+| **fotoo** | equals | **0** | **no** | unattested — though `fota` ×2 and `fotde` (referee) are |
+
+**Four changes, three with corpus reach (30 of 1,500 utterances):**
+
+1. **The decimal point read an unattested word, 16 instances.** `tere` appears in neither source, and the
+   referee's only `ter*` entries are `tergal`/`terɗe` (body parts). Replaced with **toɓɓere**, which the
+   referee carries and which means a dot. This is the layer's highest-traffic word — every decimal in the
+   corpus goes through it.
+2. **Percent used the SAME word as the decimal point, 4 instances.** One word cannot be both "point" and
+   "percent", so at least one had to be wrong; both were. Replaced with **e teemedere** ("in a hundred"),
+   COMPOSED from two attested pieces (`e` ×92, `teemedere` = 100 in this engine's number data) rather than
+   asserted as a unit. The playbook's rule is that a wrong percent word is worse than a dropped sign; a
+   compositional per-hundred is the least-invented option that still reads the sign.
+3. **The range joiner was the wrong part of speech, 13 instances.** `hakkunde` IS attested — as a
+   PREPOSITION taking both operands: the corpus writes *hakkunde India be Pakistan* ("between X and Y"),
+   never *X hakkunde Y*. An infix `N hakkunde M` is therefore ungrammatical for all twelve of the corpus's
+   ranges. Replaced with **haa** (up to), which the corpus uses as an infix ×12.
+4. **The sign words for `−` and `=` were unattested** where attested neighbours exist: **usta** (to reduce,
+   ×7) and **fota** (to be equal, ×2 in exactly that sense — *ɗum fotan be …*). Neither affects a corpus
+   reading: with this rule's own guard, the corpus contains **zero** leading minuses and no `=`, so these
+   only change what the review tool's sign probes say. Still worth swapping an invented form for a real one.
+
+**Left as a stated assumption**: `kikiiɗe` for p.m. It is standard Pulaar to my knowledge but appears in
+neither source, and the referee list is small enough that absence is weak evidence. Recorded here and in the
+code comment rather than silently trusted — the corpus's three p.m. clocks are the exposure.
+
+**Gates**: vitest 2654 (200 files, +1 test pinning the sourcing decisions); tsc clean; scan no defects (two
+permissible `REDUNDANT currency` notes); `normalization/review.ts --lang ff` checklist clean; referee
+**identical** at 1424/2000; corpus diff **30/1500** with every counter 0 → 0 — 16 decimal points, 13 range
+joiners, 4 percents, each classified.

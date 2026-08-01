@@ -154,8 +154,12 @@ export function normalizeFula(input: string): string {
     });
 
     // 5) RANGES and SCORES — `7-2`, `5-3`, `1995-96`, `1644-1912`, `2-3km`. Fula reads these with
-    //    "hakkunde" (between) — corpus-attested. A leading minus stays a sign (handled later).
-    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 hakkunde $2");
+    //    `haa` (up to) — the corpus's own infix joiner, 12 instances of it ("haa wakkati gulɗum", "haa
+    //    dou"). NOT `hakkunde`: that word is attested too, but as a PREPOSITION taking both operands —
+    //    the corpus writes "hakkunde India be Pakistan" (between X and Y), never "X hakkunde Y", so an
+    //    infix `N hakkunde M` is the wrong construction for all twelve of the corpus's ranges.
+    //    A leading minus stays a sign (handled later).
+    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 haa $2");
 
     // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"; the corpus's only glued
     //     instance). The suffix is a separate word, not glued to the time; spaced out so the clock rule
@@ -165,7 +169,9 @@ export function normalizeFula(input: string): string {
 
     // 6) CLOCK, in the COLON form. `1:15 a.m.` → goo e sappo e joyi a.m.; `9:30 fajiri` → … fajiri.
     //    The 24h `0230 UTC` is handled here too (a leading 0 makes it a 4-digit time). The a.m./p.m.
-    //    marker expands to the Fula time-of-day (fajiri = morning, kikiiɗe = evening). NOT a sports
+    //    marker expands to the Fula time-of-day: `fajiri` (dawn) is corpus-attested ×4, `kikiiɗe`
+    //    (afternoon/evening) is NOT — it appears in neither the corpus nor the epitran referee's word
+    //    list, and is carried here as a stated assumption rather than a sourced form. NOT a sports
     //    time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The trailing marker is captured WITHOUT
     //    eating the space before a following word (trap: a bare `\s*` glued "tati fajiri" → "tatifajiri").
     s = s.replace(/(?<![\d:,])(\d{1,2}):(\d{2})(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,
@@ -188,23 +194,23 @@ export function normalizeFula(input: string): string {
         });
 
     // 7) VERSION DOTS and DOT DECIMALS — `1.5 million`, `3.50`, `2.3`, `12.8km`, `802.11n`, `2.4Ghz`.
-    //    The dot is a DECIMAL (the corpus follows English; thousands use COMMAS). Read "tere" (point —
+    //    The dot is a DECIMAL (the corpus follows English; thousands use COMMAS). Read "toɓɓere" (dot —
     //    the Fula word for a point/spot), the fraction digit-by-digit. GIGAHERTZ is claimed FIRST on the
     //    raw digits, because this rule converts the fraction to WORDS the Ghz rule can no longer see.
     //    AFTER the clock.
     s = s.replace(/(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm|mph|kph)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
-            `${i} tere ${[...f].map((d) => numberToWords(Number(d))).join(" ")} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta", mph: "miles e wakkati gootel", kph: "kilometre e wakkati gootel" } as Record<string, string>)[u.toLowerCase()]!}`);
+            `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")} ${({ km: "kilometre", m: "metre", kg: "kilogram", mm: "milimeta", cm: "santimeta", mph: "miles e wakkati gootel", kph: "kilometre e wakkati gootel" } as Record<string, string>)[u.toLowerCase()]!}`);
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
-        `${i} tere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
+        `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
 
     // 7c) COMMA-DECIMALS — `12,5`. Fula follows English (comma = thousands, dot = decimal), so a
     //     comma-decimal is corpus-absent — but it must not LEAK the comma as a clause pause. A comma
     //     followed by a THREE-digit group is thousands (2,243) and stays for the TOKEN; this claims
     //     only 1-2 digit fractions.
     s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (m0, i: string, f: string) =>
-        `${i} tere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
+        `${i} toɓɓere ${[...f].map((d) => numberToWords(Number(d))).join(" ")}`);
 
     // 8) FRACTIONS. `1/5 inch` → *goo e joyi* (the corpus's one fraction, read as a ratio). ¾/½ after
     //    a whole read "e teemedere"/"e hecci". The corpus's only fraction is 1/5.
@@ -235,21 +241,24 @@ export function normalizeFula(input: string): string {
 
     // 11) GIGAHERTZ — handled in step 7 on the raw digits (before the fraction becomes words).
 
-    // 12) SIGNS. `4×4` — the × reads "je" (by). `&` → *e* (and). A TRUE minus (`-5`) reads "leɓɓa";
-    //     the corpus's `-\d` are all ranges/scores, now handled above. `%` → *tere*, including after a
-    //     decimal (3.5% — the dot rule has converted it to words by now, so the bare-digit `%` rule
-    //     would miss it; handle the word-form percent too).
+    // 12) SIGNS. `4×4` — the × reads "je" (with/and, the corpus's conjunction). `&` → *e* (and).
+    //     A TRUE minus (`-5`) reads "usta" (to reduce, corpus ×7): the corpus has ZERO leading minuses —
+    //     verified with this rule's own guard — so no reading depends on the choice, and an attested word
+    //     that means "reduce" beats an unattested one. `=` reads "fota" (to be equal, corpus ×2 in exactly
+    //     that sense: "ɗum fotan be …"). `%` reads *e teemedere* (in a hundred), composed from two attested
+    //     pieces rather than asserted as one — see the header's SOURCING note. The percent rule also has to
+    //     catch the WORD form, since by this point the dot rule has turned `3.5%` into words.
     s = s.replace(/\+\s?(?=\d)/gu, " e gooto ");
-    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "leɓɓa $1");
+    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "usta $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,
         (_m, a: string, b: string, pl: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} e ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " e ");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 je $2");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 fotoo $2");
+    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 fota $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 famɗi $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 ɓuri $2");
-    s = s.replace(/(\d+(?: tere [\p{L}\p{M}]+)+|[\p{L}\p{M}]+ tere [\p{L}\p{M}]+|\d+)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 tere");
+    s = s.replace(/(\d+(?: toɓɓere [\p{L}\p{M}]+)+|[\p{L}\p{M}]+ toɓɓere [\p{L}\p{M}]+|\d+)\s*%\s*(?![\p{L}\p{M}])/gu, "$1 e teemedere");
 
     // 13) INITIALISMS, LAST of the letter rules: it must run after the era markers (else B.C. → *ba.
     //     ca.*) and after the dotted-capital rule.
