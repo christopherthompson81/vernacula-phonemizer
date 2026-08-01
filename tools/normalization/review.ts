@@ -174,6 +174,80 @@ for (const f of engineFiles) {
 note("spelling → g2p", spellings.length === 0,
     spellings.length === 0 ? "no unphonemized word literal in text()" : `${spellings.join(", ")} — wrap in the g2p`);
 
+// ── 4c. SOURCING: where did each high-traffic word come from? ────────────────────────────────────
+// Fula (#596) shipped `tere` as BOTH the decimal point and the percent word. It phonemised cleanly, so the
+// scan, the corpus diff and the referee were all green — and the word appears in neither the language's
+// corpus nor the epitran referee's 1,777-word list. One word cannot be both "point" and "percent"; both
+// readings were wrong, in the highest-traffic rule the layer has.
+//
+// THIS IS A PROMPT, NOT A GATE, and the distinction is measured. Checked over the 66 treated languages, an
+// "unattested" verdict is right often enough to be worth reading and wrong often enough that failing on it
+// would be noise: unit borrowings (kilogram, millimetre) are absent from every source in ~30 languages and
+// are perfectly correct, which is why `units` is excluded here. What remains — the percent word, the
+// currency names, the decimal word — is core vocabulary, where absence is real evidence.
+//
+// So: read the list. For each word, if you cannot say WHERE it came from, source it or leave the symbol
+// unread — a wrong word is worse than a dropped sign (playbook, "Two standing rules on data").
+const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const ESPEAK_DICT = process.env["ESPEAK_NG"] === undefined ? "" : join(process.env["ESPEAK_NG"], "dictsource");
+function attestationHaystack(): ReadonlySet<string> {
+    let hay = "";
+    const add = (f: string): void => { try { hay += readFileSync(f, "utf8"); } catch { /* absent source */ } };
+    if (existsSync(CORPUS_ROOT))
+        for (const cd of readdirSync(CORPUS_ROOT).filter((c) => c.startsWith(`${lang}_`)))
+            for (const f of readdirSync(join(CORPUS_ROOT, cd)).filter((f) => f.endsWith(".tsv"))) add(join(CORPUS_ROOT, cd, f));
+    add(artifact);
+    for (const f of readdirSync("tools/referee-eval/referees").filter((f) => f.startsWith(`${lang}.`)))
+        add(join("tools/referee-eval/referees", f));
+    for (const f of readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc") || f.endsWith(".tsv")))
+        add(join("src/languages", dir, f));
+    if (ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT))
+        for (const f of [`${lang}_list`, `${lang}_extra`]) add(join(ESPEAK_DICT, f));
+    // TOKENS, not a substring test: `hay.includes("tere")` was satisfied by any longer word containing
+    // those four letters, which passed the very word this check exists to catch. Kept alongside the raw
+    // text, because a script written WITHOUT SPACES (Han, Thai, Khmer, Lao, Burmese) has no tokens to
+    // match — there, substring is the only test available.
+    return {
+        tokens: new Set(fold(hay).split(/[^\p{L}\p{M}'’ʻ·-]+/u).filter((t) => t !== "")),
+        text: fold(hay),
+    };
+}
+/** Lowercase and strip combining marks. The Arabic percent word is declared WITH harakat
+ *  (`الْمِئَة`) while every corpus is undiacritised, so a mark-sensitive compare reported ten Arabic
+ *  dialects as unsourced for a word each of their corpora contains. */
+function fold(t: string): string {
+    return t.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "");
+}
+/** Han, Hiragana/Katakana, Thai, Khmer, Lao, Burmese: no spaces, so no token boundaries. */
+const SPACELESS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}]/u;
+/** The words that carry EVERY instance of their symbol: the percent word, the currency names, the decimal
+ *  word. Extracted from the tier's own data and the manifest, so the check reads declarations, not prose. */
+function highTrafficWords(): string[] {
+    const tier = engineSrc.match(/makeSymbolNormalizer\(\{[\s\S]*?\n\}\)/u)?.[0] ?? "";
+    const decl = [
+        ...[...tier.matchAll(/percent:\s*\[([^\]]*)\]/gu)].map((m) => m[1]!),
+        ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => m[1]!),
+        ...readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc"))
+            .flatMap((f) => [...readFileSync(join("src/languages", dir, f), "utf8")
+                .matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => m[1]!)),
+    ].join(" ");
+    const words = new Set<string>();
+    for (const m of decl.matchAll(/"([^"\\\n]{2,40})"/gu))
+        for (const w of m[1]!.split(/\s+/u)) if (/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]+$/u.test(w)) words.add(w);
+    return [...words];
+}
+const needles = highTrafficWords();
+if (needles.length === 0) note("sourcing", null, "no percent/currency/decimal word declared");
+else {
+    const hay = attestationHaystack();
+    const unattested = needles.filter((w) =>
+        SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !hay.tokens.has(fold(w)));
+    note("sourcing", unattested.length === 0 ? true : null,
+        unattested.length === 0
+            ? `all ${needles.length} high-traffic words attested`
+            : `${unattested.join(", ")} — in NO source (corpus, artifact, referee, manifest, espeak). Say where each came from, or leave the symbol unread`);
+}
+
 // ── 5. the artifact scan ──────────────────────────────────────────────────────────────────────────
 if (tracked || existsSync(artifact)) {
     try {

@@ -225,9 +225,28 @@ npx tsx tools/normalization/review.ts --lang xx
 
 Two to three seconds. It checks the things that are machine-checkable and that a finished-looking layer
 still gets wrong: the normalizer is wired, a test file references it, the artifact is TRACKED, no sign
-class is silently dropped, **no word SPELLING reaches the phoneme sink** (trap 6), and the artifact scan is
-clean. It then prints the sign readings, the numeral-agreement probes and the ordinary-text probes for you
-to judge.
+class is silently dropped, **no word SPELLING reaches the phoneme sink** (trap 6), **no high-traffic word is
+unsourced** (see below), and the artifact scan is clean. It then prints the sign readings, the
+numeral-agreement probes and the ordinary-text probes for you to judge.
+
+**The `sourcing` line is a PROMPT, not a pass/fail**, and it is the one check that catches a defect the
+whole rest of this document cannot see. Fula (#596) shipped `tere` as BOTH the decimal point and the percent
+word; it phonemised cleanly, so the scan, the corpus diff and the referee were all green, and the word
+appears in neither the language's corpus nor its referee's 1,777-word list. One word cannot be both "point"
+and "percent" — both readings were wrong, in the highest-traffic rule the layer had.
+
+The check takes the words that carry EVERY instance of their symbol — the percent word, the currency names,
+the decimal word, read from the tier's own declaration and the manifest — and looks for each in every source
+this repo has: the FLEURS corpus, the mined artifact, the referee word lists, the language's own data files,
+and espeak's `dictsource` if `ESPEAK_NG` is set. Measured over the 66 treated languages it names **8 words
+in 4 languages** (Polish `procenty`/`procenta`/`PLN`, Swahili `KSh`/`shilingi`/`TSh`, Ukrainian
+`відсотка`, Malay `dolar`) — each a plausible inflection or code that a human confirms in seconds. `units`
+is deliberately excluded: kilogram and millimetre are absent from every source in some thirty languages and
+are perfectly correct, which would bury the signal. Comparison folds diacritics (the Arabic percent word is
+declared with harakat while every corpus is undiacritised) and falls back to substring for the scripts that
+have no spaces to tokenise on.
+
+**Read the list. If you cannot say where a word came from, source it or leave the symbol unread.**
 
 This exists because reviewing the Czech layer (#588) found four defects and ALL FOUR were checklist items
 — no tests, three dropped sign classes, a numeral that did not agree with its noun, an uncommitted
@@ -403,6 +422,18 @@ percent sign and currency signs. Closing that means each language's actual word 
 currency names. **A wrong percent word is worse than a dropped sign, because it is confidently wrong rather
 than merely missing.** Add the tier when you have a source for that language. If you cannot source it, say
 so in the commit and leave it.
+
+This is now checked mechanically — the `sourcing` line in `normalization/review.ts` (§5e) — because the rule
+was being broken in exactly the way it predicts, and no other gate could see it. The Fula review found four
+words attested in no source, one of them carrying every decimal AND every percent in the language. Two
+lessons from that review are worth keeping separate from the tooling:
+
+- **Compose from attested pieces rather than asserting a new word.** Fula's percent became `e teemedere`
+  ("in a hundred") from `e` ×92 in its corpus and `teemedere` = 100 in the engine's own number data. That is
+  sourced arithmetic, not invention, and it is available in most languages that lack a borrowed term.
+- **Check the PART OF SPEECH, not just the word.** Fula's range joiner `hakkunde` was attested — as a
+  PREPOSITION taking both operands (*hakkunde India be Pakistan*), never as an infix, so `N hakkunde M` was
+  ungrammatical for all twelve corpus ranges. A word being real is not the same as a word fitting the slot.
 
 ---
 
