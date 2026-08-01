@@ -69,8 +69,12 @@ if (!hasNorm) { report(); process.exit(1); }
 // `normalizeCzechInitialisms`, and matching only the first reported "no tests" for a file that has them.
 const exportNames = [...readFileSync(normPath, "utf8").matchAll(/export function (normalize\w+)/gu)].map((m) => m[1]!);
 const exportName = exportNames[0];
-const engine = readdirSync(join("src/languages", dir)).find((f) => f.endsWith(".ts") && !f.includes("normalize") && !f.includes(".test."));
-const engineSrc = engine === undefined ? "" : readFileSync(join("src/languages", dir, engine), "utf8");
+// The engine is not necessarily the first non-normalize .ts file alphabetically: uzbek/ sorts numbers.ts
+// before uzbek.ts, turkish/ sorts g2p.ts before turkish.ts. Scan EVERY candidate engine file, so a
+// normalizer wired into any of them is found.
+const engineFiles = readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".ts") && !f.includes("normalize") && !f.includes(".test."));
+const engineSrc = engineFiles.map((f) => readFileSync(join("src/languages", dir, f), "utf8")).join("\n");
+const engine = engineFiles.find((f) => readFileSync(join("src/languages", dir, f), "utf8").includes(exportName)) ?? engineFiles[0];
 const called = exportNames.filter((n) => engineSrc.includes(n));
 note("wired into text()", called.length > 0, called.length > 0 ? `${engine} calls ${called.join(", ")}` : `no call to ${exportNames.join("/")} found`);
 
