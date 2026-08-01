@@ -26,11 +26,13 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// #562 — Azerbaijani groups thousands with a SPACE (400 000) and takes a COMMA decimal (6,5). The old class
-// was a bare `(\d+)`, so BOTH the space-group and the comma fell through: "400 000" read *dörd yüz sıfır*
-// and "6,5" *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a
-// decimal (the TOKEN's `\d+,\d+`).
-const TOKEN = /([a-zçğəıiöşüx]+)|(\d+,\d+|\d+)|([.!?…,;:])/giu;
+// #562 — Azerbaijani groups thousands with a SPACE (400 000) or a PERIOD (1.234 — the old class's "."
+// thousands sep, still the idiomatic reading) and takes a COMMA decimal (6,5). The old class was a bare
+// `(\d+)`, so BOTH the space-group and the comma fell through: "400 000" read *dörd yüz sıfır* and "6,5"
+// *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a decimal
+// (the TOKEN's `\d+,\d+`), a period-thousands is a group (the TOKEN's `\d+\.\d{3}`), and a plain digit run
+// is a bare number.
+const TOKEN = /([a-zçğəıiöşüx]+)|(\d+\.\d{3}(?:\.\d{3})*|\d+,\d+|\d+)|([.!?…,;:])/giu;
 
 // #562 symbol normalization — Azerbaijani measure and currency nouns are INVARIANT after a numeral
 // ("üç faiz", "80 kilometr"). `m` is a standalone metre unit (4892 m, 3,50 m).
@@ -45,10 +47,10 @@ const SYMBOLS = makeSymbolNormalizer({
     magnitudes: ["milyon", "milyard", "trilyon"],
 });
 
-/** A number token (Azerbaijani space-grouping / comma-decimal) → spoken words. */
+/** A number token (Azerbaijani space-/period-thousands, comma-decimal) → spoken words. */
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/ /gu, "")));
+    let words = numberToWords(Number(intRaw!.replace(/[ .]/gu, "")));
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +
