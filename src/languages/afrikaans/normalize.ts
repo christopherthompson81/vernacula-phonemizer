@@ -254,12 +254,23 @@ export function normalizeAfrikaans(input: string): string {
     for (let i = 0; i < 2; i++)
         s = s.replace(/(\d),(\d{3})(?!\d)/gu, "$1$2");
 
+    // 6b) A COMMA DECIMAL, folded onto the dot form. STANDARD Afrikaans marks the decimal with a COMMA
+    //     (South Africa's official convention, as in Dutch); this corpus is the exception, not the rule,
+    //     because FLEURS af_za was translated from the English set and inherited its separators. So both
+    //     conventions have to read: three digits after the comma is the grouping consumed just above
+    //     (17,500 · 2,243 — corpus-attested), and ONE OR TWO digits is a decimal (12,5 · R2,50) — which
+    //     had no corpus instance and read as a CLAUSE PAUSE inside the number: *twaalf , vyf*. Folding to
+    //     `12.5` here means the TOKEN, the "komma" reading and the symbol tier's adjacency all apply
+    //     unchanged. A clause comma is written with a following SPACE ("In 1990, 5 mense") and is untouched.
+    s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,.])/gu, "$1.$2");
+
     // 7) VERSION DOTS, NOT the decimal. The dot IS the decimal point in this corpus (12.8, 2.3) and the
     //    TOKEN swallows `\d+\.\d+` to emit "komma" between the parts — the shared symbol tier needs the raw
-    //    number for currency/units. But a dot-decimal followed by a LETTER is a version (`802.11n`, the
-    //    Wi-Fi standard), which reads "punt". The corpus's only other version form, `Figuur 1.1`, is claimed
-    //    by its own context. The dot-clock and sports times were already consumed by step 5.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z])/giu, "$1 punt $2");
+    //    number for currency/units. A version is the corpus's `802.11n` (Wi-Fi) and `Figuur 1.1`, and
+    //    NOTHING ELSE: the rule is bounded to those two shapes — three or more integer digits plus a
+    //    single trailing letter, or the explicit figure reference. Claiming any `\d+\.\d+[a-z]` read a
+    //    decimal glued to its unit as a version, so `12.5km` came out *twaalf punt vyf kilometer*.
+    s = s.replace(/(?<![\d.,])(\d{3,})\.(\d+)(?=[a-z](?![a-z]))/giu, "$1 punt $2");
     s = s.replace(/Figuur (\d+)\.(\d+)/giu, "Figuur $1 punt $2");
 
     // 8) RATES and UNITS the shared tier cannot compose. `m.p.u` (myl per uur = mph) was already expanded by

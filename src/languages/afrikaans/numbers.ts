@@ -24,9 +24,15 @@ function below1000(n: number): string {
     return rest ? `${head} ${N.en} ${below100(rest)}` : head;
 }
 
-/** A magnitude group: 1 → the bare word (duisend/miljoen), else the multiplier + word. */
-function magnitude(mult: number, word: string): string {
-    return mult === 1 ? word : `${below1000(mult)} ${word}`;
+/**
+ * A magnitude group. A lone THOUSAND is bare — *duisend*, not "een duisend" — but MILLION and up KEEP the
+ * numeral: 1 000 000 is *een miljoen*, and reading it as a bare *miljoen* drops the count entirely. This is
+ * the same split `core/numbers.ts` documents on `bareMagnitude` (bare hundred/thousand, "one" retained from
+ * million up), which this private composer did not follow. No corpus instance is written in digits, so no
+ * gate caught it.
+ */
+function magnitude(mult: number, word: string, bareAtOne: boolean): string {
+    return mult === 1 && bareAtOne ? word : `${below1000(mult)} ${word}`;
 }
 
 /** 0 … 10⁹-1 → Afrikaans words; beyond (or unsafe) → digit-by-digit units. */
@@ -36,8 +42,8 @@ export function numberToWords(n: number): string {
     }
     if (n < 1000) return below1000(n);
     const parts: string[] = [];
-    if (n >= 1e6) { parts.push(magnitude(Math.floor(n / 1e6), N.million)); n %= 1e6; }
-    if (n >= 1000) { parts.push(magnitude(Math.floor(n / 1000), N.thousand)); n %= 1000; }
+    if (n >= 1e6) { parts.push(magnitude(Math.floor(n / 1e6), N.million, false)); n %= 1e6; }
+    if (n >= 1000) { parts.push(magnitude(Math.floor(n / 1000), N.thousand, true)); n %= 1000; }
     if (n > 0) parts.push(below1000(n));
     return parts.join(" ");
 }

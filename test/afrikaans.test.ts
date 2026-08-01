@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
 import { normalizeAfrikaans, ordinalWord } from "../src/languages/afrikaans/normalize.ts";
+import { numberToWords } from "../src/languages/afrikaans/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), Latin script,
@@ -144,5 +145,30 @@ describe("Afrikaans text normalization", () => {
 
     test("the ordinal suffix is orthography, not a lowercase convention", () => {
         expect(normalizeAfrikaans("11De Hussars")).toBe("elfde Hussars");
+    });
+
+    // STANDARD Afrikaans marks the decimal with a COMMA; this corpus is the exception (translated from the
+    // English FLEURS set), so BOTH conventions have to read. Three digits after the comma is the grouping,
+    // one or two is a decimal — a comma decimal used to read as a clause PAUSE inside the number.
+    test("a comma is the grouping at three digits and the decimal at one or two", () => {
+        expect(ph("12,5 kilometer")).toBe("tvɑːlf kɔma fəif kilɔmiətər"); // was *twaalf , vyf*
+        expect(ph("3,5 miljoen")).toBe("dri kɔma fəif məljun");
+        expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil"); // still the grouping
+        expect(ph("In 1990, 5 mense")).toBe("ən dœysənt niəχə ɦɔndərt ɛn niəχəntəχ , fəif mɛnsə"); // a clause comma
+    });
+
+    test("a version dot is 802.11n and Figuur N.N — a decimal glued to its unit is not", () => {
+        expect(ph("12.5km")).toBe("tvɑːlf kɔma fəif kilɔmiətər"); // was *twaalf punt vyf kilometer*
+        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn tviə pœnt ɛlf n");
+        expect(ph("Figuur 1.1")).toBe("fiχyːr iən pœnt iən");
+    });
+
+    // A lone thousand is bare (duisend) but million and up keep the numeral — the split core/numbers.ts
+    // documents on `bareMagnitude`. No corpus number is written in digits at this scale.
+    test("a lone million keeps its numeral", () => {
+        expect(numberToWords(1_000_000)).toBe("een miljoen"); // was the bare "miljoen"
+        expect(numberToWords(1_500_000)).toBe("een miljoen vyf honderd duisend");
+        expect(numberToWords(1000)).toBe("duisend");
+        expect(numberToWords(2_000_000)).toBe("twee miljoen");
     });
 });

@@ -125,3 +125,35 @@ one each for the sports time, the vm placement and `6.34`.
 could not surface, because the baseline was already wrong in the same place (the article) or the shape sits
 in a sample the diff reports as "changed, improved" without the reader checking the neighbouring reading.
 The corpus diff answers "did I change anything unexpectedly", never "is what I left alone correct".
+
+## Run 4 — 2026-07-31 (the review tool's own `12,5` probe)
+
+**Question**: the post-merge review run prints `12,5 → tvɑːlf , fəif`. Is a clause PAUSE inside a number
+right for Afrikaans?
+
+**No — and the reason generalises.** This layer was derived entirely from FLEURS af_za, which is a
+TRANSLATION of the English set and inherited English separators (dot decimal, comma thousands). But
+**standard Afrikaans marks the decimal with a COMMA** — South Africa's official convention, as in Dutch.
+The corpus is the exception, not the rule, so both conventions have to read. Three fixes, none with a
+single corpus instance, all wrong for the language:
+
+1. **A comma decimal read as a clause pause.** `12,5` → *twaalf , vyf*; `3,5 miljoen` → *drie , vyf
+   miljoen*. Now: comma + three digits stays the grouping (17,500 · 2,243 — corpus-attested), comma + one
+   or two digits folds to the dot form and reads *komma*. A clause comma is written with a following space
+   ("In 1990, 5 mense") and is untouched.
+2. **The version-dot rule claimed a decimal glued to its unit**: `12.5km` → *twaalf punt vyf kilometer*.
+   The corpus's only version forms are `802.11n` and `Figuur 1.1`, so the rule is now bounded to exactly
+   those two shapes (≥3 integer digits + a single trailing letter, or the figure reference).
+3. **`numbers.ts` dropped the numeral before a lone million**: 1 000 000 read as the bare *miljoen*, which
+   states no count at all. A bare hundred/thousand is right (*honderd*, *duisend*) but million and up keep
+   it — the same split `core/numbers.ts` documents on `bareMagnitude`. This is the ENGINE, not the
+   normalization layer (playbook step 3: fix it where it lives).
+
+**Still open, deliberately**: `numberToWords` degrades to digit-by-digit at ≥10⁹ — `1000000000` reads *een
+nul nul nul …*. The fix needs *miljard* in the manifest, and the corpus attests `biljoen` ×3 but never
+`miljard`, so it wants a source rather than my assumption. Left unfixed and recorded.
+
+**Gates**: vitest 2607 (+3 tests), tsc clean, scan no defects, review checklist clean, referee identical,
+corpus diff **0/1236 changed** — which is exactly the point. Every defect in this run was invisible to the
+corpus diff because no corpus utterance has the shape. The diff proves you broke nothing; only probing the
+language's own conventions shows what you never handled.
