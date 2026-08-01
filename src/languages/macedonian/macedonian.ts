@@ -9,6 +9,9 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { numberToText } from "./numbers.ts";
+import { normalizeMacedonian, normalizeMacedonianInitialisms } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -30,7 +33,45 @@ interface MacedonianDef {
 const DEF = loadManifest<MacedonianDef>(import.meta.url, "macedonian.jsonc");
 const L = DEF.letters;
 const CLAUSE_MARK = DEF.clausePunctuation;
-const NUM = DEF.numbers;
+
+/**
+ * Macedonian count form: SINGULAR when the number's last digit is 1 (not 11), else PLURAL. Macedonian has
+ * no paucal — 2 километри and 5 километри are the same form — so it is two-way, unlike Russian's three.
+ * This differs from the default countForm (n===1) on compounds: 21 километар, 22 километри, 11 километри.
+ */
+const mkCountForm = (n: number): number => {
+    const m = Math.abs(n) % 100;
+    return m % 10 === 1 && m !== 11 ? 0 : 1;
+};
+
+// #562 symbol normalization — Macedonian. Percent/currency/units/rates carry the count form above
+// (1 процент, 2 проценти; 1 километар, 2 километри). Units are written BOTH ways — Cyrillic кm and Latin
+// km are equally common in the corpus — so both scripts are declared. The rate denominator is "на час"
+// (per hour) but "во секунда" (per second), which the keyed unitPer expresses.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["процент", "проценти"],
+    currency: {
+        "$": ["долар", "долари"],
+        "¥": ["јен", "јени"],
+        "€": ["евро", "евра"],
+        "£": ["фунта", "фунти"],
+    },
+    magnitudes: ["милијарди", "милиони"],
+    units: {
+        км: ["километар", "километри"], km: ["километар", "километри"],
+        м: ["метар", "метри"], m: ["метар", "метри"],
+        см: ["сантиметар", "сантиметри"], cm: ["сантиметар", "сантиметри"],
+        мм: ["милиметар", "милиметри"], mm: ["милиметар", "милиметри"],
+    },
+    exponentWords: {
+        squared: ["квадратен", "квадратни"],
+        cubed: ["кубен", "кубни"],
+        position: "before",
+    },
+    unitPer: { h: "на", ч: "на", s: "во", с: "во" },
+    rateDenominators: { h: "час", ч: "час", s: "секунда", с: "секунда" },
+    countForm: mkCountForm,
+});
 
 const VOWELS = new Set([..."aɛiɔu"]);
 const FRONT_L = new Set(["е", "и", "ј"]); // ⟨л⟩ is light [l] before these, dark [ɫ] elsewhere
@@ -112,52 +153,45 @@ export function phonemizeWord(word: string): string {
 }
 
 // ── Numbers (decimal; Macedonian) ─────────────────────────────────────────────
-/** Build the Macedonian words for n; "и" precedes the final component (дваесет и еден; сто и еден). */
-function numberToText(n: number): string {
-    if (n < 0) return "";
-    if (n < 10) return NUM.units[n]!;
-    if (n === 10) return NUM.ten;
-    if (n < 20) return NUM.teens[n - 11]!;
-    if (n < 100) {
-        const t = NUM.tens[String(Math.floor(n / 10) * 10)]!, u = n % 10;
-        return u ? `${t} ${NUM.and} ${NUM.units[u]}` : t;
-    }
-    if (n < 1000) {
-        const h = NUM.hundreds[String(Math.floor(n / 100))]!, r = n % 100;
-        if (!r) return h;
-        return `${h} ${r < 20 || r % 10 === 0 ? NUM.and + " " : ""}${numberToText(r)}`;
-    }
-    if (n < 1_000_000) {
-        const th = Math.floor(n / 1000), r = n % 1000;
-        // The multiplier of the FEMININE илјада takes feminine "две" for 2 (две илјади, not два).
-        const thCount = numberToText(th).split(" ").map((x) => (x === NUM.units[2] ? "две" : x)).join(" ");
-        const thWord = th === 1 ? NUM.thousand : `${thCount} ${NUM.thousands}`;
-        if (!r) return thWord;
-        return `${thWord} ${r < 100 || r % 100 === 0 ? NUM.and + " " : ""}${numberToText(r)}`;
-    }
-    if (n < 1_000_000_000) {
-        const mil = Math.floor(n / 1_000_000), r = n % 1_000_000;
-        const milWord = mil === 1 ? NUM.million : `${numberToText(mil)} ${NUM.millions}`; // милион is masculine
-        return r ? `${milWord} ${numberToText(r)}` : milWord;
-    }
-    // ≥ 10⁹: read the digits as words (never empty).
-    return [...String(n)].map((d) => NUM.units[Number(d)]!).join(" ");
-}
+/** One number token → its words, phonemized. The composer lives in numbers.ts (shared with normalize.ts). */
 function number(digits: string): string {
     const n = Number(digits);
     if (!Number.isSafeInteger(n)) return digits;
     return numberToText(n).split(" ").filter(Boolean).map(phonemizeWord).join(" ");
 }
 
-// A word (Macedonian Cyrillic) / number / punctuation token.
-const TOKEN = /([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\d+)|([.!?…,;:—])/gu;
+// A word (Macedonian Cyrillic) / number / punctuation token. The number carries its DECIMAL COMMA
+// (Macedonian's decimal mark) so the comma is not read as clause punctuation — `6,5` was coming out as a
+// phrase break between "шест" and "пет". A 3-digit block after the comma is GROUPING, not a fraction (the
+// corpus's "1,400 луѓе" is fourteen hundred), so it is read as one number; 1–2 digits are a decimal.
+const TOKEN = /([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\d+(?:,\d+)?)|([.!?…,;:—])/gu;
 
 class MacedonianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: Macedonian rewrites (grouping, ordinals, century/date, clock, ranges, signs) →
+        // INITIALISMS (after abbreviations, so `Д-р` is not spelled DE-ER) → the shared symbol tier last
+        // (it needs the number still adjacent to its unit/sign). Roman numerals arrive already converted
+        // at the registry seam, so regnal "Лиалофи III" is "3" by the time normalize runs.
+        const normalized = SYMBOLS(normalizeMacedonianInitialisms(normalizeMacedonian(input)));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
-            else if (m[3]) {
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                if (frac !== undefined && frac.length === 3) {
+                    // "1,400" is 1400 — a grouped thousand, read as one number.
+                    for (const wd of numberToText(Number(`${intPart}${frac}`)).split(" "))
+                        sink.emit(phonemizeWord(wd));
+                } else {
+                    for (const wd of numberToText(Number(intPart)).split(" "))
+                        sink.emit(phonemizeWord(wd));
+                    if (frac !== undefined) {
+                        sink.emit(phonemizeWord("запирка")); // the Macedonian name of the decimal comma
+                        for (const d of frac)
+                            for (const wd of numberToText(Number(d)).split(" "))
+                                sink.emit(phonemizeWord(wd));
+                    }
+                }
+            } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }

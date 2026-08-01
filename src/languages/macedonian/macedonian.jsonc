@@ -21,6 +21,16 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "—": ",",
     },
 
+    // LEXICAL: acronyms spelled out letter-by-letter although the letters could be read as a word. The
+    // corpus's Cyrillic inventory: САД (сад) is pronounced as a WORD [sat] and needs no entry; ФБИ, ДНК,
+    // ТВ, СССР, МС, БДП, ГБП, ФКП, НХК, НПК, ГМТ have no vowel and are letter-spelled by the OOV rule
+    // automatically. These have vowels but the written reading is the letters: ОН (Обединети Нации = UN),
+    // ИОК (IOC), АОЛ (AOL), УКЛА (UCLA), ВИ (вештачка интелигенција = AI — "ви" would read as the
+    // pronoun "you"), plus the embedded-Latin USA/APS/ADD/RSPCA/NHC/WNED/ACMA (a Macedonian reader spells
+    // these letter-by-letter). Pronounceable brand names (ASUS, PALM, MINAE, JAS) are NOT listed — the
+    // foreign engine reads them.
+    "acronymLetters": ["он", "иок", "аол", "укла", "ви", "usa", "aps", "add", "rspca", "nhc", "wned", "acma"],
+
     // Cardinal number words. Tens+units and hundreds+remainder join with the connector "и" (дваесет и еден = 21).
     // No numeric referee → standard Macedonian forms.
     "numbers": {
