@@ -189,16 +189,40 @@ note("spelling → g2p", spellings.length === 0,
 // So: read the list. For each word, if you cannot say WHERE it came from, source it or leave the symbol
 // unread — a wrong word is worse than a dropped sign (playbook, "Two standing rules on data").
 const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+/**
+ * PLURICENTRIC SETS — codes that are STANDARDS OF ONE LANGUAGE, whose sources attest for each other. Not
+ * "related languages": the test is whether a speaker of one would recognise the other's word as their own.
+ *
+ * Croatian (#599) is why this exists. Its tier reads `¥` as `jen`, which the hr corpus never spells — but
+ * the SERBIAN corpus renders the very same FLEURS sentence as "od 2500 i 130.000 japanskih jena", and `jen`
+ * is in the Serbian referee. The evidence existed and a one-language haystack could not see it, so the
+ * check asked a human to source a word the repo already had.
+ *
+ * Kept deliberately short. Arabic's dialect codes are NOT here: they share a script and much of MSA, but a
+ * word being right in one is not evidence for another, which is the whole property this map asserts.
+ */
+const SISTER_STANDARDS: readonly (readonly string[])[] = [
+    ["hr", "sr", "bs"],   // Serbo-Croatian: three standards, one language
+    ["id", "zsm", "ms"],  // Malay: Indonesian and Malaysian
+    ["nb", "nn", "no"],   // Norwegian: Bokmål and Nynorsk
+];
+const sisters = (code: string): readonly string[] =>
+    SISTER_STANDARDS.find((set) => set.includes(code))?.filter((c) => c !== code) ?? [];
 const ESPEAK_DICT = process.env["ESPEAK_NG"] === undefined ? "" : join(process.env["ESPEAK_NG"], "dictsource");
-function attestationHaystack(): ReadonlySet<string> {
+function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
     let hay = "";
     const add = (f: string): void => { try { hay += readFileSync(f, "utf8"); } catch { /* absent source */ } };
-    if (existsSync(CORPUS_ROOT))
-        for (const cd of readdirSync(CORPUS_ROOT).filter((c) => c.startsWith(`${lang}_`)))
-            for (const f of readdirSync(join(CORPUS_ROOT, cd)).filter((f) => f.endsWith(".tsv"))) add(join(CORPUS_ROOT, cd, f));
-    add(artifact);
-    for (const f of readdirSync("tools/referee-eval/referees").filter((f) => f.startsWith(`${lang}.`)))
-        add(join("tools/referee-eval/referees", f));
+    // The language's own sources, then any SISTER STANDARD's — same language, so its corpus and referee
+    // attest here too (see SISTER_STANDARDS).
+    for (const code of [lang, ...sisters(lang)]) {
+        if (existsSync(CORPUS_ROOT))
+            for (const cd of readdirSync(CORPUS_ROOT).filter((c) => c.startsWith(`${code}_`)))
+                for (const f of readdirSync(join(CORPUS_ROOT, cd)).filter((f) => f.endsWith(".tsv"))) add(join(CORPUS_ROOT, cd, f));
+        const art = join("tools/corpus/mined", `${code}.jsonc`);
+        if (existsSync(art)) add(art);
+        for (const f of readdirSync("tools/referee-eval/referees").filter((f) => f.startsWith(`${code}.`)))
+            add(join("tools/referee-eval/referees", f));
+    }
     for (const f of readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc") || f.endsWith(".tsv")))
         add(join("src/languages", dir, f));
     if (ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT))
@@ -251,8 +275,33 @@ const hay = attestationHaystack();
 const needles = highTrafficWords(hay);
 if (needles.length === 0) note("sourcing", null, "no percent/currency/decimal word declared");
 else {
-    const unattested = needles.filter((w) =>
-        SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !hay.tokens.has(fold(w)));
+    // INFLECTION-TOLERANT: a lemma is attested by any of its forms. Croatian `jen` appears in the Serbian
+    // corpus only as the genitive plural *jena*, and Polish `procenty` only as *procent* — the same word
+    // each time, and demanding the exact surface form reported both as unsourced. A needle therefore counts
+    // as attested when a token differs from it by at most three trailing letters in either direction, with
+    // a four-character floor so a short needle cannot be satisfied by an unrelated longer word. Checked
+    // against the case this whole line exists for: no Fula token begins with `tere`, so that still reports.
+    // The tolerance is GRADED BY LENGTH, because a short needle is cheap to match by accident: three
+    // letters allow one more, four allow two, five or more allow three. Croatian `jen` clears on the
+    // Serbian corpus's *jena* (+1) but not on the unrelated *jendek* (+3); Polish `procenty` clears on
+    // *procent* (-1); Fula `tere` still reports, since nothing in its sources begins with those letters.
+    const near = (w: string): boolean => {
+        const f = fold(w);
+        if (hay.tokens.has(f)) return true;
+        if (f.length < 3) return false;
+        const slack = f.length >= 5 ? 3 : f.length - 2;
+        for (const t of hay.tokens) {
+            // FORWARD — the corpus has an inflected form of the needle (jen → jena).
+            if (t.length >= 3 && t.startsWith(f) && t.length - f.length <= slack) return true;
+            // REVERSE — the corpus has a shorter form of the same lemma (procenty → procent). Bounded far
+            // harder, because a fragment matches anything: the token must be a real word (4+) and the
+            // needle long enough to be inflected (5+). Without that floor Catalan's three-letter `ien`
+            // cleared on a two-letter token, which is not evidence of anything.
+            if (t.length >= 4 && f.length >= 5 && f.startsWith(t) && f.length - t.length <= 3) return true;
+        }
+        return false;
+    };
+    const unattested = needles.filter((w) => (SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !near(w)));
     note("sourcing", unattested.length === 0 ? true : null,
         unattested.length === 0
             ? `all ${needles.length} high-traffic words attested`

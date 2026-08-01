@@ -238,13 +238,28 @@ and "percent" — both readings were wrong, in the highest-traffic rule the laye
 The check takes the words that carry EVERY instance of their symbol — the percent word, the currency names,
 the decimal word, read from the tier's own declaration and the manifest — and looks for each in every source
 this repo has: the FLEURS corpus, the mined artifact, the referee word lists, the language's own data files,
-and espeak's `dictsource` if `ESPEAK_NG` is set. Measured over the 66 treated languages it names **8 words
-in 4 languages** (Polish `procenty`/`procenta`/`PLN`, Swahili `KSh`/`shilingi`/`TSh`, Ukrainian
-`відсотка`, Malay `dolar`) — each a plausible inflection or code that a human confirms in seconds. `units`
-is deliberately excluded: kilogram and millimetre are absent from every source in some thirty languages and
-are perfectly correct, which would bury the signal. Comparison folds diacritics (the Arabic percent word is
-declared with harakat while every corpus is undiacritised) and falls back to substring for the scripts that
-have no spaces to tokenise on.
+espeak's `dictsource` if `ESPEAK_NG` is set, and **the corpus and referees of any SISTER STANDARD** (hr/sr/bs,
+id/zsm/ms, nb/nn — codes that are standards of ONE language, so their sources attest for each other).
+
+Four calibrations, each forced by a false report, and each measured over the 66 treated languages:
+
+- **`units` is excluded.** Kilogram and millimetre are absent from every source in some thirty languages and
+  are perfectly correct; including them reported 229 words and buried the signal. Checking every literal
+  rather than these slots reported 1,030.
+- **A currency name is checked only if its SIGN is in the corpus.** A language that never writes ¥ never
+  speaks its yen word.
+- **Diacritics are folded and spaceless scripts fall back to substring.** The Arabic percent word is
+  declared with harakat while every corpus is undiacritised (ten dialects false-flagged); Han/Thai/Khmer/
+  Lao/Myanmar have no token boundaries (cmn, ja false-flagged).
+- **Matching is inflection-tolerant, graded by length.** A lemma is attested by any of its forms: Croatian
+  `jen` appears in the Serbian corpus only as *jena*, Polish `procenty` only as *procent*, Fula `dollar`
+  only as *dollarji*. Three letters allow one more, four allow two, five or more allow three; the reverse
+  direction additionally needs a real word (4+) and an inflectable needle (5+), because without that floor
+  Catalan's `ien` cleared on a two-letter fragment.
+
+What remains is **12 words in 9 languages**, every one a currency borrowing the language plausibly uses but
+no in-repo source records (`yen`, `jen`, `iyena`, `युरो`, `डॉलर`). That is the right residue for a prompt:
+short enough to read, and each one a real question.
 
 **Read the list. If you cannot say where a word came from, source it or leave the symbol unread.**
 

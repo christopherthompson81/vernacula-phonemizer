@@ -31,8 +31,9 @@ export const SYMBOLS = makeSymbolNormalizer({
     // `jen` — the PR asked for an attestation, and there is one in the repo, from the SISTER STANDARD.
     // Croatian and Serbian are two standards of one language, and the Serbian corpus renders THIS VERY
     // FLEURS SENTENCE with the word spelled out: "od 2500 i 130.000 japanskih jena" (Cyrillic "јапанских
-    // јена") where the Croatian translation writes "2.500 ¥ … 130.000 ¥". `jen` is in the Serbian epitran
-    // referee too. The review tool's sourcing line cannot see either, because its haystack is one language.
+    // јена") where the Croatian translation writes "2.500 ¥ … 130.000 ¥". That sentence is the whole of the
+    // evidence: the Serbian referee does NOT carry the word (its `jen*` entries are jendek/jenjati), so the
+    // attestation is the corpus's genitive plural *jena*, which is the lemma in one of its forms.
     currency: { "¥": ["jen"], "$": ["dolar", "dolara"], "€": ["euro"], "£": ["funta"] },
     units: {
         km: ["kilometar", "kilometra", "kilometara"],
