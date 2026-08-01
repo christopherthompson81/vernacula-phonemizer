@@ -194,11 +194,12 @@ export function normalizeWelsh(input: string): string {
     //    the digits with no boundary for the ASCII word class to find (trap 1).
     s = s.replace(/(?<![\p{L}\p{M}\d])(\d[\d,]*)(au)(?![\p{L}\p{M}])/giu, "$1");
 
-    // 5b) CLOCK RANGES — `10:00-11:00`. The hyphen between two clock readings is "i" (to). Handled
-    //     BEFORE the colon-clock rule so the two times are claimed separately and the hyphen does not
-    //     glue them into one token.
-    s = s.replace(/(?<!\d)([01]?\d|2[0-3]):([0-5]\d)\s*[-–]\s*([01]?\d|2[0-3]):([0-5]\d)(?!\d)/gu,
-        "$1:$2 i $3:$4");
+    // 5b) RANGES and SCORES — `6-6`, `5-3`, `26-00`, `1894-1895`, `10:00-11:00`, `10-60 munud`. Welsh
+    //     reads these with "i" (to): *chwech i chwech*, *pump i dri*, *mil wyth cant naw deg pedwar i fil
+    //     wyth cant naw deg pump*. The hyphen is NOT clause punctuation here. Handled BEFORE the
+    //     colon-clock rule so the two times/numbers are claimed separately and the hyphen does not glue
+    //     them into one token. The corpus's 18 digit-ranges are all scores or periods, none a minus.
+    s = s.replace(/(?<![\d.,])(\d[\d,]*)\s*[-–]\s*(\d[\d,]*)(?![\d.])/gu, "$1 i $2");
 
     // 6) CLOCK, in the COLON form. The comma DECIMAL and the DOT version are handled elsewhere; the colon
     //    is clause punctuation and must be claimed here. `11:35 p.m.` → un deg un tri deg pump y prynhawn;
@@ -228,11 +229,28 @@ export function normalizeWelsh(input: string): string {
             return `${head} ${tz}`;
         });
 
-    // 7) VERSION DOTS and DOT DECIMALS — `802.11n/a/b/g`, `2.4Ghz`, `5.0Ghz`, `1.5 miliwn`, `$2.3`. The
-    //    dot is a DECIMAL when the fraction is 1-2 digits, a THOUSANDS separator when 3 (Welsh writes
-    //    thousands with COMMAS, so `1.400` does not occur, but the fraction length rule is defensive).
-    //    Read "pwynt" (point). AFTER the clock.
-    s = s.replace(/(?<![\d.,])(\d+)\.(\d{1,2})(?![\d.])/giu, "$1 pwynt $2");
+    // 7) VERSION DOTS and DOT DECIMALS — `802.11n/a/b/g`, `2.4Ghz`, `5.0Ghz`, `1.5 miliwn`, `$2.3`,
+    //    `1.234`, and the DECIMAL RANGE `4.2-3.9 miliwn` (the corpus's one decimal range). Welsh writes
+    //    THOUSANDS with COMMAS (1,400), so a dot is ALWAYS a decimal/version — there is no dot-thousands
+    //    to protect (verified: zero `\d\.\d{3,}` in the corpus). Read "pwynt" (point), with the FRACTION
+    //    read digit-by-digit (1.234 → un pwynt dau tri pedwar — the standard reading; the whole fraction
+    //    is not a number "two hundred thirty-four"). GIGAHERTZ and the version letters are claimed FIRST
+    //    on the raw digits, because this rule converts the fraction to WORDS that the unit rules can no
+    //    longer see. The hyphen in a decimal RANGE is joined "i" (to) here too. AFTER the clock.
+    s = s.replace(/(?<![\d.,])(\d+\.\d+)\s*[-–]\s*(\d+\.\d+)(?![\d.])/gu, "$1 i $2");
+    s = s.replace(/(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
+    // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
+    // emit it spaced so it reads as the letter name n (the corpus's 802.11n/a/b/g).
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
+        (m0, i: string, f: string) =>
+            `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} `);
+    // A DECIMAL with a UNIT — `12.8 km`. The playbook's "units before decimals" coupling: converting the
+    // number to words breaks the tier's number-unit adjacency, so the unit's WORD must be claimed here.
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm)(?![\p{L}\p{M}])/giu,
+        (m0, i: string, f: string, u: string) =>
+            `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} ${({ km: "cilometr", m: "metr", kg: "cilogram", mm: "milimetr", cm: "centimetr" } as Record<string, string>)[u.toLowerCase()]!}`);
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+        `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")}`);
 
     // 8) FRACTIONS. `1/5 modfedd` → *un pumed*. The denominator's word is the FRACTION NOUN, which is the
     //    ordinal for 5+ (pumed, chweched, wythfed) but a separate noun for 3 and 4 (traean = a third,
@@ -259,10 +277,6 @@ export function normalizeWelsh(input: string): string {
     //     metres — the "/" is an OR here, not a rate denominator). The prose "milltir yr awr" is text.
     s = s.replace(/(?<![\p{L}\p{M}])cilomedr\/awr(?![\p{L}\p{M}])/giu, "cilomedr yr awr");
     s = s.replace(/(?<![\p{L}\p{M}])llath\/metr(?![\p{L}\p{M}])/giu, "llath neu fetr");
-
-    // 11) GIGAHERTZ — `2.4Ghz`, `5.0Ghz`. The version-dot rule has already split the number ("2.4" → "2
-    //     pwynt 4"); the Ghz unit reads gigahertz. AFTER the version rule, BEFORE the tier.
-    s = s.replace(/(\d+(?: pwynt \d+)?)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
 
     // 12) SIGNS. `+30°C` — the plus was dropped. `&` → *a* (and). A TRUE minus (`-5`) reads "minws"; the
     //     corpus's `-\d` are all ranges/scores (6-6, 7-2, 10-60, 35-40) and stay as two bare numbers.

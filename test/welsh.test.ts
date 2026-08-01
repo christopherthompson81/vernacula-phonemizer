@@ -102,6 +102,15 @@ describe("Welsh text normalization", () => {
         expect(ph("400,000")).toBe("pˈɛdwar kˈant mˈiːl");
         expect(ph("2.4Ghz")).toBe("dˈaᶤ pˈuːᶤnt pˈɛdwar ɡiɡˈahɛrtz");
         expect(ph("1.5 miliwn")).toBe("ˈɨːn pˈuːᶤnt pˈɨmp mˈɪljʊn");
+        expect(ph("802.11n")).toBe("ˈuːᶤθ kˈant dˈaᶤ pˈuːᶤnt ˈɨːn ˈɨːn n"); // version letter spelled
+        expect(ph("1.234")).toBe("ˈɨːn pˈuːᶤnt dˈaᶤ trˈiː pˈɛdwar"); // digit-by-digit fraction
+    });
+
+    test("ranges and scores read with 'i' (to); a leading minus stays minws", () => {
+        expect(ph("6-6")).toBe("χwˈeːχ ˈiː χwˈeːχ");
+        expect(ph("1894-1895")).toBe("mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɛdwar ˈiː mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɨmp");
+        expect(ph("10:00-11:00 yr hwyr")).toBe("dˈeːɡ ˈiː ˈɨːn dˈeːɡ ˈɨːn ˈər hˈuːᶤr");
+        expect(ph("-5 gradd")).toBe("mˈinʊs pˈɨmp ɡrˈaːð");
     });
 
     test("clocks read hour [minute] with p.m./a.m. as y prynhawn / y bore", () => {

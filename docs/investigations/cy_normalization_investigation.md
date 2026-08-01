@@ -170,3 +170,34 @@ pedwerydd ar bymtheg ar hugain) verified correct.
 
 **Post-fix gates**: corpus diff 219/2009 (10.9%) — the changed set is byte-identical to the pre-review
 run (no regression); 2645 tests; referee 83.7% unchanged; scan no defects; review checklist clean.
+
+## Run 5 — 2026-08-01 (the parent's probe review: range/dot joiners)
+
+The parent ran `normalization/review.ts --lang cy` and flagged three ordinary-text probes:
+
+- **`1990-1995` → no "to" joiner** — real defect. Welsh reads ranges and scores with "i" (to):
+  *chwech i chwech* (6-6), *pump i dri* (5-3), *mil wyth cant naw deg pedwar i fil wyth cant naw deg
+  pump* (1894-1895). The corpus has 18 digit-ranges (scores and periods), none a minus. Added a general
+  range rule `\d+[-–]\d+` → "i", replacing the clock-specific 5b. The `(?<![\d.,])`/`(?![\d.])`
+  lookarounds keep `4.2-3.9` (a decimal range) and `-5` (a minus) out of it; the decimal range gets its
+  own "i" join before the dot rule.
+- **`1.234` → no dot joiner** — real defect. The old version rule claimed only 1-2 digit fractions, so
+  `1.234` fell to the TOKEN as a float → digit-by-digit "un dau tri pedwar" with no "pwynt". Welsh has
+  ZERO dot-thousands (verified `\d\.\d{3,}` count = 0; thousands are comma-grouped), so a dot is ALWAYS
+  a decimal. The rule now claims all fraction lengths, reading "pwynt" with the fraction digit-by-digit
+  (1.234 → un pwynt dau tri pedwar — NOT "un pwynt dau gant tri deg pedwar", which a whole-number
+  reading of the fraction would give).
+- **`12,5` → no comma joiner** — NOT a defect. The corpus has zero comma-decimals; Welsh follows English
+  (comma-thousands 1,400 + dot-decimals 1.5). `12,5` is a form Welsh never writes, and the comma reads
+  as a pause. Left as-is, documented.
+
+**Regression caught while making the dot fix**: converting "12.8" → "12 pwynt wyth" destroyed the
+tier's number-unit adjacency, so "12.8 km" lost its kilometr (the playbook's "units before decimals"
+coupling). Fixed by claiming the unit's WORD inside the dot rule (`12.8 km` → 12 pwynt wyth cilometr).
+Also `2.4Ghz` needed the Ghz claim moved BEFORE the dot rule (it converted the fraction to words the
+Ghz rule could no longer see), and the version LETTER (802.11n) is emitted spaced so it reads as the
+letter name rather than gluing onto the last fraction digit.
+
+**Post-fix gates**: corpus diff 230/2009 (11.4%), all 16 range changes read and verified (scores and
+periods join "i", decimals keep pwynt+unit); 2647 tests (2 new range/decimal pins); referee 83.7%
+unchanged; scan no defects; review checklist clean.
