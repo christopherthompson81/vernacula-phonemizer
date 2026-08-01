@@ -9,8 +9,9 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Seg } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { numberToWords } from "./numbers.ts";
+import { normalizeCatalan } from "./normalize.ts";
 
 // Lexical stressed mid-vowel HEIGHT (open/close is not spelling-derivable — dona/dóna, os/ós). From the espeak
 // 1.52 Central shim over the 50k corpus; word → "e" (stressed ⟨e⟩ is close /e/) or "o" (stressed ⟨o⟩ is close
@@ -209,10 +210,11 @@ function wordIpa(word: string): string {
     return phonemizeWord(word, true);
 }
 
-// #562 symbol normalization — Catalan.
+// #562 symbol normalization — Catalan. `¥` (yen) was missing, so the corpus's 2.500 ¥ / 130.000 ¥ read as
+// bare numbers with the sign dropped.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["per cent"],
-    currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"] },
+    currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"], "¥": ["ien", "iens"] },
     units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],
         kg: ["quilogram", "quilograms"], h: ["hora", "hores"], s: ["segon", "segons"] },
     unitPer: "per", // 120 km/h -> cent vint quilòmetres per hora; the /h used to be dropped outright
@@ -223,7 +225,9 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class CatalanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
+        // number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeCatalan(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(m[1]));
             else if (m[2]) sink.emit(numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "));
             else if (m[3]) {
