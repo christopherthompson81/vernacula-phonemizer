@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { phonemize } from "../src/index.ts";
+import { normalizeHausa } from "../src/languages/hausa/normalize.ts";
 import { phonemizeWord } from "../src/languages/hausa/hausa.ts";
 import { numberToWords } from "../src/languages/hausa/numbers.ts";
 
@@ -41,5 +43,47 @@ describe("Hausa g2p (authored, Boko orthography)", () => {
         expect(numberToWords(2_000_000)).toBe("miliyan biyu"); // multiplier FOLLOWS the scale word
         expect(numberToWords(1_000_000_000)).toBe("biliyan");
         expect(numberToWords(2_000_000_000)).toBe("biliyan biyu");
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/hausa/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// rules are the kashi-prefix percent (kashi 80%), the comma-thousands, the dot-decimal "maki", the na
+// safe/na yamma clocks, the B.C./BCE era markers, the rates "a awa", and the letter-spelled initialisms.
+describe("Hausa text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "ha").trim();
+
+    it("text→text: the kashi percent and the comma-thousands", () => {
+        expect(ph("kashi 80%")).toBe("kˈaʃi ta˩mˈa˩ni˥n");
+        expect(ph("88%")).toBe("kˈaʃi ta˩mˈa˩ni˥n dˈa tˈa˥kʷa˩s");
+        expect(ph("6,387 km")).toBe("dˈu˥bu˥ ʃˈi˥da˩ dˈa ɗˈa˩ri˥ ˈu˥ku˩ dˈa ta˩mˈa˩ni˥n dˈa bˈakʷaⁱ kilomˈita");
+        expect(ph("5,000,000")).toBe("milˈijan bˈi˩ja˥r");
+    });
+
+    it("the dot is a decimal (maki); the clock reads na safe/na yamma", () => {
+        expect(ph("Hoto na 1.1")).toBe("hˈo˩to˥ nˈa ɗˈa˥ja˥ mˈaki ɗˈa˥ja˥");
+        expect(ph("8:46 na safe")).toBe("tˈa˥kʷa˩s dˈa a˩rbˈa˩ʔi˥n dˈa ʃˈi˥da˩ nˈa sˈa˥ɸe˥");
+        expect(ph("8:30 na yamma")).toBe("tˈa˥kʷa˩s dˈa ta˩lˈa˩ti˥n nˈa jˈa˥˩mma˥");
+        expect(ph("15.00 UTC")).toBe("ɡˈo˥ma˩ ʃˈa˥ bˈi˩ja˥r ˈu tˈa t͡ʃˈa˥");
+    });
+
+    it("era markers expand; ranges join zuwa; rates use a awa", () => {
+        expect(ph("1000 B.C.")).toBe("dˈu˥bu˥ kˈa˩ɸi˩n haⁱhˈuwar jˈesu");
+        expect(ph("10,000 BCE")).toBe("dˈu˥bu˥ ɡˈo˥ma˩ kˈa˩ɸi˩n haⁱhˈuwar jˈesu");
+        expect(ph("1990-1995")).toContain("zˈu˥wa"); // zuwa
+        expect(ph("480 km/h")).toBe("ɗˈa˩ri˥ hˈu˥ɗu˥ dˈa ta˩mˈa˩ni˥n kilomˈita ˈa ˈa˥wa˩");
+        expect(ph("133 m/s")).toBe("ɗˈa˩ri˥ dˈa ta˩lˈa˩ti˥n dˈa ˈu˥ku˩ mˈita ˈa da˩kʼˈi˥kʼa˩");
+    });
+
+    it("currency, degrees, fractions and initialisms read their words or letters", () => {
+        expect(ph("$11,000")).toBe("dˈu˥bu˥ ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥ dˈollar");
+        expect(ph("US $ 30")).toBe("dˈollar ta˩lˈa˩ti˥n");
+        expect(ph("£27")).toBe("a˩ʃˈi˩ri˥n dˈa bˈakʷaⁱ ɸˈa˥˩m"); // fam
+        expect(ph("30°C")).toBe("ta˩lˈa˩ti˥n diɡˈiri t͡ʃelsˈius");
+        expect(ph("+30°C")).toBe("kʼˈari ta˩lˈa˩ti˥n diɡˈiri t͡ʃelsˈius");
+        expect(ph("35°W")).toBe("ta˩lˈa˩ti˥n dˈa bˈi˩ja˥r diɡˈiri jˈa˥˩mma˥"); // digiri yamma
+        expect(ph("inci 1/5")).toBe("ˈint͡ʃi ɗˈa˥ja˥ bˈi˥sa˥ bˈi˩ja˥r"); // ɗaya bisa biyar
+        expect(ph("A1GP")).toBe("ˈa ɗˈa˥ja˥ ɡˈa pˈa");
+        expect(ph("H5N1")).toBe("hˈa bˈi˩ja˥r nˈa ɗˈa˥ja˥"); // ha biyar na ɗaya
+        expect(ph("Roe v. Wade")).toBe("rˈoe dˈa wˈade");
     });
 });
