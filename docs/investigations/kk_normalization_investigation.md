@@ -78,7 +78,7 @@ The TOKEN gained space-thousands + comma-decimals.
 - vitest: 2673 passed (14 new kk normalization tests)
 - corpus diff: 86/1494 (5.8%) changed, every change READ and verified (21 case-suffix, 15 ordinal,
   11 comma-decimal, 11 space-thousands, 7 abbrev, 7 rate, 7 misc — мм/см/м units, 5 clock, 2 degree)
-- normalization-review --lang kk: checklist clean (wired, tests, all 8 sign classes, spelling→g2p,
+- normalization/review.ts --lang kk: checklist clean (wired, tests, all 8 sign classes, spelling→g2p,
   SOURCING all 2 high-traffic words attested, scan)
 
 **Notes**: the review probe `1 km` (Latin km) reads "бір км" — the corpus writes Cyrillic км ×19, never
@@ -114,3 +114,39 @@ comma-decimal vs space-thousands (2,4/12,5/12,50 → бүтін, 17 000/5 000 00
 **Post-fix gates**: corpus diff 89/1494 (6.0%) — the 3 new changes are the 802.11n/15.00 UTC/1.1
 dot-forms, verified correct; 2673 tests (3 new trap pins); scan no defects; review checklist clean;
 sourcing check passes.
+
+## Run N+1 — 2026-08-01 (PR #600 review pass)
+
+The method was to run **every one of the corpus's 47 distinct `digit-hyphen-tail` forms** through the
+normalizer and read the list — the trap-13 technique, applied to the rule this language is about. Two
+defect classes, both live, 32 utterances between them.
+
+1. **A compound numeral was glued into one word.** The layer's own `orthographic()` composed 11–99 as
+   `${TENS}${UNIT}` with no space, so `15-ке` read *онбеске*, `29-да` *жиырматоғызда*, `11:00-ден`
+   *онбірден*, `11000-нан` *онбір мыңнан* — words Kazakh does not have, each stressed by the g2p as one.
+   Kazakh writes них as two: **он бес**, **жиырма тоғыз**. The tell was that the ORDINAL path spaces them
+   correctly, because it goes through `romanOrdinals.ts` — two composers in one language, one of them
+   right, which is what made the split visible.
+2. **`N-НОУН` — the ordinal writing with the noun spelled out — was not claimed at all.** Thirteen corpus
+   instances across seven nouns: `8-ғасырдан`, `20-ғасырдың`, `19-ғасыр`, `17-ғасырда`, `15-ғасырда`,
+   `14-ғасыр`, `10-ғасырда` (century), `2016-жылы`, `2005-жылы` (year), `247-бабына` (article),
+   `4-санатты` (category), `1-түрге` (type), plus the date `15-і`. The case-suffix rule cannot see them
+   because the tail is a WORD, not an ending, so each read as a CARDINAL with the hyphen dropped —
+   *сегіз ғасырдан* where Kazakh says *сегізінші ғасырдан*. Same rule as Uzbek's `N-word` (#590).
+
+   Two consequences the fix had to carry:
+   - **Four-digit ordinals exist here after all.** The layer declined above 999 on the grounds that "the
+     corpus writes no 4-digit ordinal" — but `2016-жылы` and `2005-жылы` are exactly that, and read
+     *екі мың он алтыншы жылы*. Extended, with the ROUND thousand still declining (`1000-шы` needs the
+     fused *мыңыншы*, which romanOrdinals also refuses to construct).
+   - **A one-letter tail is the date possessive**, not a noun: `15-і` is *он бесі*, so it attaches to the
+     numeral rather than standing as a word.
+
+**Gates**: vitest 2675 (200 files, +2 tests); tsc clean; scan no defects; `normalization/review.ts --lang kk`
+checklist clean including the sourcing line; referee **identical** at 1207/1400; corpus diff **32/1494** with
+every counter 0 → 0 — 13 spacing repairs and 19 ordinal readings, each classified.
+
+**Trap 14 held up.** The prediction was that Kazakh's defining rule would be the suffix, and it is: the
+layer's harmony machinery (жүзге / сексеннен / алпыстан / мыңнан / сағатқа) was correct on every corpus form
+before this review. Both defects were in what the suffix attaches TO — the word it lands on, and the tails
+that are nouns rather than endings.

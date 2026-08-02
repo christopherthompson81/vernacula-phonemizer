@@ -66,7 +66,18 @@ const THOUSAND_CARD = "мың";
  *  Above 999 → undefined (the corpus writes no 4-digit ordinal; a round thousand is its own fused form
  *  the romanOrdinals file also declines to attempt). */
 function ordinalWord(n: number): string | undefined {
-    if (!Number.isInteger(n) || n < 1 || n >= 1000) return undefined;
+    if (!Number.isInteger(n) || n < 1 || n >= 1000000) return undefined;
+    // FOUR-DIGIT ORDINALS EXIST HERE, as years in the `N-жылы` form: the corpus writes `2016-жылы` and
+    // `2005-жылы` ("in the year 2016"), which Kazakh reads as an ordinal — екі мың он алтыншы жылы. Only
+    // the LAST element takes the ending, so the thousands head is the plain cardinal. A ROUND thousand
+    // still declines: `1000-шы` needs the fused мыңыншы, which romanOrdinals also refuses to construct.
+    if (n >= 1000) {
+        const th = Math.floor(n / 1000), r = n % 1000;
+        if (r === 0) return undefined;
+        const head = `${th === 1 ? UNIT_CARD[1] : orthographic(th)} ${THOUSAND_CARD}`;
+        const tail = ordinalWord(r);
+        return tail === undefined ? undefined : `${head} ${tail}`;
+    }
     if (n <= 100) return ROMAN_POLICY.ordinal(n);
     // 101–999: the hundreds CARDINAL (except 100, handled above) + the remainder's ordinal.
     const h = Math.floor(n / 100), r = n % 100;
@@ -120,6 +131,19 @@ function caseEnding(caseName: string, lastVowelChar: string): string {
     }
 }
 
+/** The DATE possessive: `15-і` is *он бесі* (the fifteenth [day]) — the number in words with the
+ *  possessive attached to its last word, harmonised. Not an ordinal and not a noun. */
+function ordinal_or_cardinal_tail(n: number, tail: string): string | undefined {
+    const base = orthographic(n);
+    if (base === "") return undefined;
+    const words = base.split(" ");
+    const last = words[words.length - 1]!;
+    const v = lastVowel(last);
+    if (v === undefined) return undefined;
+    words[words.length - 1] = `${last}${BACK_VOWELS.includes(v) ? "ы" : "і"}`;
+    return words.join(" ");
+}
+
 /** Attach a case ending to the LAST WORD of a composed number, honouring harmony. `200-ге` → "екі жүз"
  *  + "ге" → "екі жүзге". */
 function withCase(numberWord: string, caseName: string): string {
@@ -171,6 +195,27 @@ export function normalizeKazakh(input: string): string {
         const n = Number(d);
         const ord = ordinalWord(n);
         return ord === undefined ? m0 : ord;
+    });
+
+    // 2b) `N-НОУН` — the ordinal writing with the noun spelled out, which the case-suffix rule cannot see
+    //     because the tail is a WORD, not an ending. Thirteen corpus instances and seven distinct nouns:
+    //     `8-ғасырдан`, `20-ғасырдың`, `19-ғасыр`, `17-ғасырда`, `15-ғасырда`, `14-ғасыр`, `10-ғасырда`
+    //     (century), `2016-жылы`, `2005-жылы` (year), `247-бабына` (article), `4-санатты` (category),
+    //     `1-түрге` (type). Every one reads the digit as an ORDINAL and keeps the noun with whatever case
+    //     the text gave it — `8-ғасырдан` is *сегізінші ғасырдан*, not *сегіз ғасырдан*. Runs AFTER the
+    //     bare case-suffix rule, so a tail that IS an ending has already been claimed.
+    //     A ONE-LETTER tail is the date possessive (`15-і` = the 15th), which attaches to the number
+    //     instead of standing as a noun.
+    s = s.replace(/(?<![\d.,])(\d+)-([а-яәғқңөұүһі]+)(?![\p{L}\p{M}])/giu, (m0, d: string, tail: string) => {
+        const n = Number(d);
+        if (CASE_BY_SUFFIX[tail.toLowerCase()] !== undefined) return m0; // an ending, not a noun
+        const ord = ordinalWord(n);
+        if (ord === undefined) return m0;
+        if (tail.length <= 2) {
+            const words = ordinal_or_cardinal_tail(n, tail);
+            return words ?? m0;
+        }
+        return `${ord} ${tail}`;
     });
 
     // 3) CLOCK, in the COLON form. `08:46` → сегіз қырық алты; `13:15` → он үш он бес. The corpus's
@@ -312,7 +357,11 @@ function orthographic(n: number): string {
     if (n < 10) return UNIT_CARD[n]!;
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        return u === 0 ? TENS_CARD[t]! : `${TENS_CARD[t]}${UNIT_CARD[u]}`;
+        // TENS AND UNIT ARE SEPARATE WORDS — он бес, жиырма тоғыз. Concatenating them produced words
+        // Kazakh does not have (*онбес, *жиырматоғыз, *онбір) and the g2p then stressed each as one:
+        // `15-ке` read *онбеске*, `29-да` *жиырматоғызда*, `11:00-ден` *онбірден*. The ordinal path in
+        // romanOrdinals.ts spaces them correctly, which is what made the split visible.
+        return u === 0 ? TENS_CARD[t]! : `${TENS_CARD[t]} ${UNIT_CARD[u]}`;
     }
     if (n < 1000) {
         const h = Math.floor(n / 100), r = n % 100;
