@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { phonemize } from "../src/index.ts";
+import { normalizeKazakh } from "../src/languages/kazakh/normalize.ts";
 import { phonemizeWord } from "../src/languages/kazakh/kazakh.ts";
 import { ROMAN_POLICY } from "../src/languages/kazakh/romanOrdinals.ts";
 
@@ -82,5 +83,47 @@ describe("Kazakh roman-numeral ordinals", () => {
 
     it("a bare roman numeral still reads as a CARDINAL", () => {
         expect(phonemize("xix", "kk").trim()).toBe("ˈontˈoʁəz"); // он тоғыз, not он тоғызыншы
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/kazakh/normalize.ts) — the pre-tokenizer pass behind #562. The
+// DEFINING rule (trap 14) is the case suffix after a digit: the suffix must AGREE with the word via vowel
+// harmony (200-ге → екі жүзге, 11:00-ден → он бірден), so the number is wordified first. Also the
+// N-ші/N-шы ordinals, space-thousands, comma-decimals, and the б.д.д. era marker.
+describe("Kazakh text normalization", () => {
+    const ph = (s: string): string => phonemize(s, "kk").trim();
+
+    it("text→text: the N-ші ordinal and the N-case-suffix read as words with harmony", () => {
+        expect(normalizeKazakh("190-шы орын")).toBe("жүз тоқсаныншы орын");
+        expect(ph("60-шы гол")).toBe("ˈɑɫpəsənʃə ɡˈoɫ"); // алпысыншы
+        expect(ph("1-ші")).toBe("bɪrɪnʃˈɪ"); // бірінші
+        expect(ph("200-ге")).toBe("jekˈɪ ʒʏzɡˈe"); // екі жүзге (dative on жүз)
+        expect(ph("80-нен")).toBe("seksennˈen"); // сексеннен (nasal ablative)
+        expect(ph("60-тан")).toBe("ˈɑɫpəstɑn"); // алпыстан (voiceless ablative)
+        expect(ph("1000-нан")).toBe("bˈɪr məŋnˈɑn"); // бір мыңнан (nasal)
+    });
+
+    it("clocks read the h-less colon form, incl. the case suffix", () => {
+        expect(ph("08:46")).toBe("seɡˈɪz qˈərəqɑɫtə");
+        expect(ph("13:15")).toBe("onˈʏʃ onbˈes");
+        expect(ph("11:00-ден")).toBe("onbɪrdˈen"); // он бірден
+        expect(ph("9:30-да")).toBe("tˈoʁəz ˈotəzdɑ"); // тоғыз отызда
+    });
+
+    it("space-thousands de-group; comma-decimals read бүтін; rates use сағат", () => {
+        expect(ph("17 000")).toBe("ˈonʒˈetɪ mˈəŋ");
+        expect(ph("5 000 000")).toBe("bˈes məjlɫəjˈon");
+        expect(ph("2,3 миллиард")).toBe("jˈekɪ bʏtˈɪn ˈʏʃ mˈəjɫɫəjɑrd");
+        expect(ph("83 км/сағ")).toBe("seksenˈʏʃ kəjlomˈetr sɑʁˈɑt");
+        expect(ph("160 км/сағ-қа")).toBe("ʒˈʏz ˈɑɫpəs kəjlomˈetr sɑʁɑtqˈɑ"); // сағатқа
+    });
+
+    it("era markers, degrees, roman ordinals and percent read their Kazakh words", () => {
+        expect(ph("б.д.д. 356 жылы")).toBe("bɪzdˈɪŋ dæwɪrɡˈe dejˈɪn ˈʏʃʒˈʏz jˈelwˈɑɫtə ʒˈəɫə");
+        expect(ph("+ 30 °C-тан")).toBe("pɫjˈus ˈotəz ɡrˈɑdws t͡sˈelʔsəjjden"); // цельсийден
+        expect(ph("35°W")).toBe("ˈotəzbes ɡrˈɑdws bˈɑtəs"); // градус батыс
+        expect(ph("XVI ғасырда")).toBe("ˈon ˈɑɫtənʃə ʁˈɑsərdɑ"); // он алтыншы ғасырда
+        expect(ph("80%")).toBe("seksˈen pˈɑjəz");
+        expect(ph("UTC + 1")).toBe("jˈuː tʰˈiː sˈiː pɫjˈus bˈɪr");
     });
 });

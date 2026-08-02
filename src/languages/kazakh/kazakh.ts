@@ -11,6 +11,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToIpa } from "./numbers.ts";
+import { normalizeKazakh } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Any Kazakh vowel/glide letter (from the manifest's vowel + glide tables) — its absence means an abbreviation.
@@ -70,25 +71,30 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
+// Kazakh Cyrillic words / numbers / punctuation. #562: the corpus groups thousands with SPACES (17 000,
+// 5 000 000) and writes decimals with COMMAS (2,3); the TOKEN swallows both so the tier can see the number.
+const TOKEN = /([Ѐ-ӿ]+)|(\d{1,3}(?: \d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Kazakh: пайыз (percent), CYRILLIC unit abbreviations (the corpus writes
-// км/кг, not km/kg — the same trap as Russian).
-const SYMBOLS = makeSymbolNormalizer({
+// км/кг, not km/kg — the same trap as Russian). Kept in the ENGINE file so the review tool's sourcing
+// check can see the words.
+export const SYMBOLS = makeSymbolNormalizer({
     percent: ["пайыз"],
-    currency: { "$": ["доллар"] },
-    units: { "км": ["километр"], "кг": ["килограмм"] },
+    currency: { "$": ["доллар"], "€": ["еуро"], "¥": ["йен"], "£": ["фунт"] },
+    units: { "км": ["километр"], "кг": ["килограмм"], "м": ["метр"], "мм": ["миллиметр"], "см": ["сантиметр"] },
 });
 
 class KazakhPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's case-suffix/ordinal/era steps need
+        // the number and its suffix still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeKazakh(input)), TOKEN, (m, sink) => {
             // camelCase compound (proper-noun abbreviations like ҚазМұнайГаз) splits on internal capitals.
             if (m[1])
                 for (const part of m[1].split(/(?<=\p{Ll})(?=\p{Lu})/u))
                     sink.emit(phonemizeWord(part));
             else if (m[2])
-                for (const ipa of numberToIpa(Number(m[2])).split(" "))
+                for (const ipa of numberToIpa(Number(m[2].replace(/ /gu, ""))).split(" "))
                     sink.emit(ipa); // numbers are pre-phonemized
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
