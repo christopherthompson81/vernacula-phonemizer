@@ -85,3 +85,32 @@ The TOKEN gained space-thousands + comma-decimals.
 Latin, so the probe is corpus-absent. The trap-14 design (wordify-then-agree) is the whole point of the
 case-suffix rule; the "last vowel" harmony computation was fixed to scan the whole word (the first-dot
 regex matched the FIRST vowel).
+
+## Run 3 — 2026-08-01 (re-review against the playbook traps)
+
+The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Two real defects and
+one corpus-attested addition, found by probing the adversarial neighbour (trap 8):
+
+- **The 4-digit ordinal (trap 13 branch miss)**: `1000-ші` read *undefined жүзінші* — `ordinalWord(1000)`
+  fell through the hundreds extension (h=10, UNIT_CARD[10] undefined) and emitted the literal
+  "undefined". The corpus writes no 4-digit ordinal (all 1–190), so this was corpus-absent — but
+  emitting "undefined" is worse than leaving the suffix raw. Fixed: `ordinalWord` returns undefined
+  above 999, so `1000-ші` stays "бір мың ші" (the honest raw form) rather than garbage.
+- **The minus-degree (the plus-degree sibling)**: `-5°C` read "бес градус цельсий" with the minus
+  dropped — the degree rule consumed the number, so the end-of-pass minus rule found no digit. Same
+  shape as the `+ 30 °C` fix. Added the minus variant to the degree rule (минус бес градус цельсий).
+- **The dot-version/Figure forms (corpus-attested)**: the corpus's `802.11n`, `1.1 суретті` (Figure 1.1)
+  and `15.00 UTC` (dot-clock) all read the dot as a pause. Added a "нүкте" (point) dot-decimal rule
+  (AFTER the comma-decimal, so 2,4 keeps бүтін), plus a dot-clock rule for `15.00 UTC`/`0230 UTC`
+  BEFORE it. The sports times (4: 41.30, 2: 11.60) now read the ".30"/".60" as нүкте — a pace.
+
+**Verified non-issues**: the hundred/unit ordinals (101-ші, 200-ші, 105-ші, 7-ші, 12-ші); the genitive/
+locative/instrumental case suffixes (200-нің, 30-да, 5-те, 2-мен, 80-пен); 30°F/35°E/35°N/40°C; the
+minus-vs-range guard (-5 → минус, 5-10 → range, -5°C → минус); the rates (480 км/сағ, 64 км/сағ); the
+comma-decimal vs space-thousands (2,4/12,5/12,50 → бүтін, 17 000/5 000 000 → thousands); the currency
+($1000); the era variants (б.д.д. 100/2000 жылы). `3.5%`/`2.4Ghz`/dotless `т.б` are all corpus-absent
+(Kazakh writes comma-decimals; verified zero Ghz and zero dotless т.б in the corpus).
+
+**Post-fix gates**: corpus diff 89/1494 (6.0%) — the 3 new changes are the 802.11n/15.00 UTC/1.1
+dot-forms, verified correct; 2673 tests (3 new trap pins); scan no defects; review checklist clean;
+sourcing check passes.

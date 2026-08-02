@@ -62,9 +62,11 @@ const THOUSAND_CARD = "мың";
 
 /** Integer → the Kazakh ORDINAL, in orthography (emitted as text, phonemized by the g2p). The ordinal
  *  suffix -ыншы/-інші attaches to the LAST element only, harmony-paired (the same rule romanOrdinals
- *  documents). Extends romanOrdinals.ordinal (which caps at 100) to the hundreds the corpus writes. */
+ *  documents). Extends romanOrdinals.ordinal (which caps at 100) to the hundreds the corpus writes.
+ *  Above 999 → undefined (the corpus writes no 4-digit ordinal; a round thousand is its own fused form
+ *  the romanOrdinals file also declines to attempt). */
 function ordinalWord(n: number): string | undefined {
-    if (!Number.isInteger(n) || n < 1) return undefined;
+    if (!Number.isInteger(n) || n < 1 || n >= 1000) return undefined;
     if (n <= 100) return ROMAN_POLICY.ordinal(n);
     // 101–999: the hundreds CARDINAL (except 100, handled above) + the remainder's ordinal.
     const h = Math.floor(n / 100), r = n % 100;
@@ -187,6 +189,11 @@ export function normalizeKazakh(input: string): string {
             return base;
         });
 
+    // 3b) DOT-CLOCK before a timezone — `15.00 UTC`, `0230 UTC` (the corpus's 24h times). The dot is
+    //     otherwise a version (step 8b). The 4-digit `0230` (military time) is a bare number.
+    s = s.replace(/(?<![\d.,])(\d{1,2})\.(\d{2})\s*(UTC|GMT)/giu, (_m, h: string, min: string, tz: string) =>
+        `${orthographic(Number(h))} ${orthographic(Number(min))} ${tz}`);
+
     // 4) THE CASE SUFFIX — `200-ге`, `8-ден`, `80-нен`, `60-тан`, `1000-нан`, `11:00-ден`, `9:30-да`,
     //    `160 км/сағ-қа`. The suffix tells the CASE; the number becomes words; the ending attaches to
     //    the last word with harmony. This is trap 14's shape: agreement cannot be applied to digits, so
@@ -208,6 +215,15 @@ export function normalizeKazakh(input: string): string {
     s = s.replace(/(^|[\s(])\+\s?(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
         (_m, lead: string, n: string, sfx: string) => {
             const base = `${lead}плюс ${orthographic(Number(n))} градус Цельсий`;
+            if (sfx !== undefined && sfx !== "") {
+                const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
+                if (caseName !== undefined) return withCase(base, caseName);
+            }
+            return base;
+        });
+    s = s.replace(/(^|[\s(])-(\d+)\s?°\s?C\s?(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан)?/giu,
+        (_m, lead: string, n: string, sfx: string) => {
+            const base = `${lead}минус ${orthographic(Number(n))} градус Цельсий`;
             if (sfx !== undefined && sfx !== "") {
                 const caseName = CASE_BY_SUFFIX[sfx.toLowerCase()];
                 if (caseName !== undefined) return withCase(base, caseName);
@@ -272,6 +288,11 @@ export function normalizeKazakh(input: string): string {
     // 8) DECIMAL COMMA → the word. Kazakh reads the decimal comma as "бүтін" (whole) with the fraction
     //    as a separate number.
     s = s.replace(/(?<=\d),(?=\d)/gu, " бүтін ");
+
+    // 8b) DOT DECIMALS/VERSIONS — `1.1 суретті` (Figure 1.1, the corpus's only dot-decimal; Kazakh
+    //     writes decimals with commas, so a dot is a version/figure number). Read "нүкте" (point).
+    s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
+        `${orthographic(Number(i))} нүкте ${orthographic(Number(f))}`);
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");

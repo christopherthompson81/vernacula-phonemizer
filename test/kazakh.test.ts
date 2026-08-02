@@ -116,6 +116,12 @@ describe("Kazakh text normalization", () => {
         expect(ph("2,3 миллиард")).toBe("jˈekɪ bʏtˈɪn ˈʏʃ mˈəjɫɫəjɑrd");
         expect(ph("83 км/сағ")).toBe("seksenˈʏʃ kəjlomˈetr sɑʁˈɑt");
         expect(ph("160 км/сағ-қа")).toBe("ʒˈʏz ˈɑɫpəs kəjlomˈetr sɑʁɑtqˈɑ"); // сағатқа
+        // trap pins: the dot-version (802.11n), the Figure dot (1.1), the dot-clock (15.00 UTC)
+        expect(ph("802.11n")).toBe("seɡˈɪz ʒˈʏz jekˈɪ nʏktˈe onbˈɪr ˈɛn");
+        expect(ph("1.1 суретті")).toBe("bˈɪr nʏktˈe bˈɪr swrettˈɪ");
+        expect(ph("15.00 UTC")).toBe("onbˈes jˈuː tʰˈiː sˈiː");
+        // the 4-digit ordinal is corpus-absent and must not emit a fused guess
+        expect(normalizeKazakh("1000-ші")).toBe("1000-ші");
     });
 
     it("era markers, degrees, roman ordinals and percent read their Kazakh words", () => {
