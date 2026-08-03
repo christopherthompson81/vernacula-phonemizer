@@ -110,6 +110,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // `méadar ciúbach` ×3 in the FLEURS corpus. The SQUARED word is ×0 there — and rather than leave the
     // artifact's own `19,500 km²` ×2 reading with the power dropped, it was sourced the way a zero corpus
     // count is supposed to be: `attest.ts` against ga.wikipedia, sense-checked on three examples.
+    //   ciliméadar cearnach ×1  "cad é achar na cearnóige atá 2 ciliméadar ar leithead? 4 ciliméadar
+    //                   cearnach atá an t-achar."  ← a MATHS-LESSON sentence, and it uses `cearnóg` for the
+    //                   shape and `ciliméadar cearnach` for the unit in the same breath
     //   cearnach   ×1  "179.7 milliún km² (69.4 milliún míle cearnach)"   ← the modifier, POSTPOSED, in the
     //                   very sentence that writes km² as a symbol
     //   chearnach  ×1  "4,840 slat chearnach … (10,000 méadar cearnach)"  ← lenited after a feminine noun

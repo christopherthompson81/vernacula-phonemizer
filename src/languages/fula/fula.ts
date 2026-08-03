@@ -37,16 +37,32 @@ const SYMBOLS = makeSymbolNormalizer({
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },
     unitPer: "e wakkati gootel", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel
     rateDenominators: { h: "wakkati", s: "sahaawa" },
-    // CUBED ONLY, and sourced from ff.wikipedia because the FLEURS corpus attests no measure word at all
-    // (`kaare` and `karre` are both ×0 there). `attest.ts` found `kubik` ×1 in exactly the slot:
-    //   "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft) e hitaande kala"     ← cubic metres, POSTPOSED
-    // ⚠ The other three candidates are attested and none of them is this word — the Fula lesson again, in
-    // the language it is named after:
-    //   kaare  ×1  the SHAPE — "Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo" (the prayer hall is
-    //              square, with a dome), so km² keeps the unit-plus-`²` fallback
-    //   punndi ×5  a PUBLICATION NAME, every instance inside a reference citation
-    //   karre  ×1  a proper noun in a football article
-    exponentWords: { cubed: ["kubik"], position: "after" },
+    // Both sourced from ff.wikipedia, because the FLEURS corpus attests no measure word at all. Postposed:
+    //   kiloomeeteer kaaree  "468 kiloomeeteer kaaree (181 mi kaaree)"        ← squared
+    //   meeteer kubik        "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft)"       ← cubed
+    // `kaaree` is attested across at least six independent articles (Farayse, Roosiya, Belaruusiya, Abuko,
+    // Akinyele, Aouk Aoukale) — every one a COUNTRY or a place, which is the article class that cannot state
+    // its subject without an area figure. That is where a unit's measure word lives; the maths articles this
+    // wiki does not have would have been the harder route.
+    //
+    // ⚠ `kaare` AND `kaaree` ARE DIFFERENT WORDS, one letter apart, and the shorter one is the SHAPE:
+    // "Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo" (the prayer hall is square, with a dome).
+    // A first pass probed `kaare` and `karre`, read ×1 shape and ×1 proper noun, and concluded this language
+    // had no squared word at all — a word-first probe cannot find a spelling you did not guess. `punndi` ×5,
+    // the third candidate, is a PUBLICATION NAME inside reference citations.
+    //
+    // ⚠ THE CUBE WORD IS AN OPEN QUESTION, and `kubik` is the CAUTIOUS choice rather than the best-attested
+    // one. The slot probe turned up a native competitor with more in-article instances:
+    //   meeteer kubik        ×1, 1 article   "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft)"
+    //   meeteer kuuɓtodinɗo  ×4, 1 article   "28 000 000 meeteer kuuɓtodinɗo (990 000 000 ft kuuɓtodinɗo)"
+    // The second is glossed against `cu ft` in its own text and is applied productively (to `ft` as well as
+    // to `meeteer`), which argues it is the real modifier. But BOTH sit in exactly one article, which this
+    // wiki's own tooling rule calls a LEAD rather than a finding, and the native form is polysemous: its bare
+    // token is ALSO ×4 here and every one of those is a job title — `Hooreejo kuuɓtodinɗo`, in a list of
+    // officeholders. Same count, different word (trap 37 twice over, in one language).
+    // The loan is kept because it is unambiguous in the slot and a wrong word is worse than a plainer one;
+    // picking between two single-article Wikipedia forms is a judgement for a speaker of the language.
+    exponentWords: { squared: ["kaaree"], cubed: ["kubik"], position: "after" },
 });
 
 class FulaPhonemizer implements Phonemizer {

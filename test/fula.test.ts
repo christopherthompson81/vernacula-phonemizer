@@ -130,10 +130,14 @@ describe("Fula text normalization", () => {
 
     // #586 — the cube word came from ff.wikipedia via attest.ts, because the FLEURS corpus attests NO
     // measure word at all: "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft)" — postposed, exactly this slot.
-    // ⚠ The three rejected candidates were all attested and none was this word: `kaare` ×1 is the SHAPE
-    // ("Suudu juulirde nduu ko kaare" — the prayer hall is square), `punndi` ×5 is a PUBLICATION NAME in
-    // reference citations, `karre` ×1 a proper noun. Hence no squared word: km² keeps the fallback.
-    it("the cubed measure word, sourced from the wiki (#586)", () => {
+    // ⚠ `kaare` and `kaaree` are DIFFERENT WORDS, one letter apart: the shorter is the SHAPE ("Suudu
+    // juulirde nduu ko kaare" — the prayer hall is square) and probing it concluded this language had no
+    // squared word at all. The SLOT probe (`attest.ts --after kiloomeeteer`) found the real one, because it
+    // names the noun the modifier attaches to instead of guessing the modifier — `kaaree`, across six
+    // independent place articles, which are the pages that cannot state their subject without an area.
+    // The other rejected candidates: `punndi` ×5 a PUBLICATION NAME in citations, `karre` ×1 a proper noun.
+    it("the squared and cubed measure words, sourced from the wiki (#586)", () => {
+        expect(phonemize("468 km²", "ff")).toContain("kilomˈetɾe kˈaːɾeː");
         expect(phonemize("120 m³", "ff")).toContain("mˈetɾe kˈubik");
         expect(phonemize("160 km/h", "ff")).toContain("kilomˈetɾe ˈe wakːˈati");
     });
