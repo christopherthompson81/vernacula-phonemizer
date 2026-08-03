@@ -264,10 +264,16 @@ async function api(wiki: string, params: Record<string, string>): Promise<any> {
  * MediaWiki guidance is to keep read concurrency modest and 4 already takes most of the win; `--concurrency`
  * overrides it for a bulk sweep.
  */
-async function mapPool<T, R>(items: readonly T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
+export async function mapPool<T, R>(items: readonly T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
     const out = new Array<R>(items.length);
     let next = 0;
-    await Promise.all(Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    // NaN IS THE DANGEROUS INPUT, not a large one. `--concurrency abc` gives `Number(...) === NaN`, and
+    // `Array.from({ length: NaN })` is the EMPTY array — so zero workers start, `Promise.all([])` resolves at
+    // once, and the fetch reports success having downloaded nothing. That is the manufactured-confident-negative
+    // failure this tree keeps finding (a missing User-Agent did the same thing), so the floor is applied here
+    // rather than at the call site, where the next caller would have to remember it.
+    const width = Number.isFinite(limit) ? Math.max(1, Math.min(Math.trunc(limit), items.length)) : 1;
+    await Promise.all(Array.from({ length: width }, async () => {
         for (;;) {
             const i = next++;
             if (i >= items.length) return;
