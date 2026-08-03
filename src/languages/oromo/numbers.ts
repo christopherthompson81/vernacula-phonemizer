@@ -46,7 +46,11 @@ export function numberToWords(n: number): string {
     if (n < 1000) return below1000(n);
     if (n < 1e6) {
         const th = Math.floor(n / 1000), r = n % 1000;
-        const head = th === 1 ? "kuma" : `kuma ${below100(th)}`; // kuma shan = 5,000 (corpus: kuma + count)
+        // below1000, NOT below100: a thousands count of 100 or more (783,562 → kuma dhibba torba
+        // saddeettamii sadii …) reached `TENS[78]`, which is undefined, and CRASHED. It was unreachable
+        // before #562 only because the tokenizer split a grouped number at the comma; de-grouping in
+        // normalize.ts exposed it on the corpus's own `783,562` and `291,773`.
+        const head = th === 1 ? "kuma" : `kuma ${below1000(th)}`; // kuma shan = 5,000 (corpus: kuma + count)
         return r === 0 ? head : `${head} ${below1000(r)}`;
     }
     const m = Math.floor(n / 1e6), r = n % 1e6;
