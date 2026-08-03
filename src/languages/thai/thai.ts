@@ -68,6 +68,10 @@ function numberToThaiWords(n: number): string[] {
 // alone read it.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["เปอร์เซ็นต์"],
+    // #586 — `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a
+    // numeral: กิโลเมตร ×25 "ห่างจากบัวโนสไอเรส 50 กิโลเมตร", เมตร ×46 "ยอดเขาวินสันสูง 4,892 เมตร",
+    // เซนติเมตร ×1 "อยู่ห่างกันเพียง 69 เซนติเมตร". มิลลิเมตร and กิโลกรัม are ×0 and stay undeclared.
+    units: { km: ["กิโลเมตร"], m: ["เมตร"], cm: ["เซนติเมตร"] },
     currency: { $: ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"] },
     unspacedScript: true,
 });
