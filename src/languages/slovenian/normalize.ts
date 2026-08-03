@@ -523,6 +523,23 @@ export function normalizeSlovenian(input: string): string {
             return clock(Number(h), Number(min), (gov && GOV_SLOT[gov]) || "f.nom");
         });
 
+    //    …and the FOUR-DIGIT MILITARY TIME licensed by a zone label — `(0230 UTC)`, ×1. This was first
+    //    reported as a core seam, on the grounds that the tokenizer's `\d+` → `Number()` path loses the
+    //    leading zero (`Number("0230")` is 230, so it read *dvesto trideset*, "two hundred thirty"). That is
+    //    true of the tokenizer and beside the point: the layer never has to let the digits reach it. This is
+    //    the same shape Oromo and Luxembourgish both claim in their own layers (`12.00 GMT`, `15.00 UTC`),
+    //    and the machinery is already here — `clock()` and the governing-preposition slot. Trap 17: the
+    //    deferral was a framing, not a count.
+    //    The ZONE LABEL is the whole licence. A bare 4-digit run is a year far more often than a time, and
+    //    this corpus writes 116 of them; requiring UTC/GMT/CET/CEST after is what separates the one instance
+    //    from all of those. Hours ≤ 23 and minutes ≤ 59, as in CLOCK_BODY.
+    s = s.replace(
+        new RegExp(`(?<![\\d.,:])([01]\\d|2[0-3])([0-5]\\d)(?![\\d.,:])(?=\\s*\\)?\\s*(?:po\\s+)?(?:UTC|GMT|CET|CEST)(?![\\p{L}\\p{M}]))`, "gu"),
+        (_m: string, h: string, min: string, offset: number, whole: string) => {
+            const gov = CLOCK_GOV.exec(whole.slice(0, offset))?.[1]?.toLowerCase();
+            return clock(Number(h), Number(min), (gov && GOV_SLOT[gov]) || "f.nom");
+        });
+
     // 4) VERSION / FIGURE DOTS between digits — `802.11a`, `802.11b`, `802.11g`, `802.11n` ×3 and
     //    `Sliko 1.1.` ×1 all broke the sentence at the interior dot. AFTER the clock (which owns `12.00`)
     //    and BEFORE the ordinal rules, so those never see a digit-dot-digit. "pika" is espeak's Slovene

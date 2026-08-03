@@ -313,4 +313,32 @@ describe("Slovenian #562 — end-to-end through the real phonemizer", () => {
         // the sentence pause a year-ordinal rule would have destroyed, 26 times over
         expect(sl.text("do leta 1945.").trim()).toBe("dɔ lɛta tisɔt͡ʃ dɛʋɛtstɔ pɛtinʃtiridɛsɛt .");
     });
+
+    // A FOUR-DIGIT MILITARY TIME licensed by a zone label. Deferred in the PR as a core seam, because the
+    // tokenizer's `\d+` → `Number()` loses the leading zero (`Number("0230")` is 230, read *dvesto
+    // trideset*). True of the tokenizer, and beside the point: the layer never has to let the digits reach
+    // it. The ZONE LABEL is the whole licence — this corpus writes 116 four-digit YEARS.
+    test("a 4-digit military time is a clock, and a year is not", () => {
+        expect(normalizeSlovenian("(0230 UTC)")).toBe("(druga ura trideset u te ce)");
+        expect(normalizeSlovenian("ob 0230 UTC v sredo")).toBe("ob drugi uri trideset u te ce v sredo");
+        expect(normalizeSlovenian("(1500 po UTC)")).toBe("(petnajsta ura po u te ce)");
+        // …and every neighbour that must NOT be claimed.
+        expect(normalizeSlovenian("leta 1230 je bilo")).toBe("leta 1230 je bilo");
+        expect(normalizeSlovenian("leta 2010 in 1995")).toBe("leta 2010 in 1995");
+        expect(normalizeSlovenian("ob 0230 v sredo")).toBe("ob 0230 v sredo"); // no zone label
+    });
+
+    // The ×14 hyphen compounds (`21-letni`, `24-urne`, `100-metrska`, `8-krat`) are deferred on the claim
+    // that this engine emits no stress, so splitting the compound is phonemically identical. VERIFIED here
+    // rather than asserted, because if any word-boundary phonology existed the claim would be false.
+    test("splitting a hyphen compound is phonemically identical (why ×14 is deferred)", () => {
+        const same = (a: string, b: string): void => {
+            const p = getPhonemizer("sl");
+            expect(p.text(a).replace(/\s+/gu, "")).toBe(p.text(b).replace(/\s+/gu, ""));
+        };
+        same("21-letni", "enaindvajsetletni");
+        same("24-urne", "štiriindvajseturne");
+        same("100-metrska", "stometrska");
+        same("8-krat", "osemkrat");
+    });
 });

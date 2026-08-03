@@ -289,3 +289,89 @@ declaration written through a helper (`percent: F("pct")`) makes the check silen
 "no percent/currency/decimal word declared" and passes. This layer worked around it by writing literal
 arrays plus a drift test, but the check itself would report the same false clean for any future language
 that factors its tier data. `tools/` is out of scope for this branch, so it is recorded here instead.
+
+## Run 14 — 2026-08-03, review before merge
+
+Rebased onto `main`. **The core gap this PR reported is already fixed there** — `review.ts`'s sourcing check
+going silently inert on a helper declaration was committed as `3ddd6d4` after the report, so the gate is now
+live, and this layer's literal-array workaround is what the gate wants anyway. The checklist comes back clean
+on all eight lines, including `sourcing: all 5 high-traffic words attested` — the `??` the PR argued for
+`dolarja`/`dolarji` is resolved by main's inflection-tolerant matching, so there is nothing left to argue.
+
+The review worked the 9-item "deliberately not done" list. **One item was misattributed and is now fixed;
+one claim was verified rather than accepted; the rest hold.**
+
+### `0230 UTC` — deferred as a core seam, and it is not one (trap 17)
+
+The reasoning was: `Number("0230")` is 230, the loss happens in the tokenizer's `\d+` → `Number()` path that
+every language shares, so it is core. The first half is true and the second does not follow — **the layer
+never has to let those digits reach the tokenizer.** Before:
+
+```
+(0230 UTC)  →  dʋɛstɔ tridɛsɛt u tɛ t͡sɛ      "two hundred thirty UTC"
+```
+
+This is the same shape Oromo and Luxembourgish each claim in their own layers (`12.00 GMT`, `15.00 UTC`), and
+the machinery was already in this file: `clock()` plus the governing-preposition slot. Added as an arm of
+step 3:
+
+```
+(0230 UTC)            → (druga ura trideset u te ce)          nominative, no governing preposition
+ob 0230 UTC v sredo   → ob drugi uri trideset u te ce v sredo  locative, from *ob*
+(1500 po UTC)         → (petnajsta ura po u te ce)
+```
+
+**The zone label is the whole licence**, and that is what makes the rule safe: a bare four-digit run is a
+YEAR far more often than a time, and this corpus writes **116** of them. Pinned in both directions —
+`leta 1230`, `leta 2010 in 1995` and an unlabelled `ob 0230` are all untouched.
+
+Trap 17 exactly: the deferral was a framing, not a count.
+
+### The ×14 hyphen compounds — the claim is TRUE, and now proven rather than asserted
+
+The largest item on the list, deferred on the grounds that *"this engine emits no stress, so the
+concatenation is phonemically identical — 0 audible change"*. That is a claim about the g2p, and it would be
+false if any word-boundary phonology existed (Slovene has final devoicing and voicing assimilation, so a
+split compound could plausibly differ at the seam). Measured:
+
+| written | split reading | one-word reading | identical |
+|---|---|---|---|
+| `21-letni` | `ɛnaindʋajsɛt lɛtni` | `ɛnaindʋajsɛtlɛtni` | ✓ |
+| `24-urne` | `ʃtiriindʋajsɛt urnɛ` | `ʃtiriindʋajsɛturnɛ` | ✓ |
+| `100-metrska` | `stɔ mɛtərska` | `stɔmɛtərska` | ✓ |
+| `8-krat` | `ɔsɛm krat` | `ɔsɛmkrat` | ✓ |
+
+Verified and pinned, so that if a stress lexicon or boundary rule is ever added the test fails and the
+deferral is revisited — which is the point of pinning a claim rather than a behaviour.
+
+(`360-km` is NOT identical, and in the right direction: the hyphen-fold expands the unit to *kilometrov*
+where the bare concatenation leaves `km` raw. My first comparison string was artificial.)
+
+### The rest, upheld
+
+- **the slash meaning "or" ×3** — *ali* is attested but choosing it is an interpretation of intent, and
+  espeak's *poševnica* is worse than the silence. Consistent with xh (10 instances) and Malay's `ela/meter`,
+  both left for the same reason, and the operands read as separate tokens either way.
+- **`360-km` / `35-mm` compound-adjective morphology ×2** — the audible defect (raw `[km]`, `[mm]`) is gone;
+  *360-kilometrska* needs a derivational rule per unit.
+- **`pH` ×1** — mixed case, so `core/initialisms.ts` cannot see it by construction.
+- **`Inc.` / `St.` / `et al.` ×3** — the pause was the defect and it is fixed; no Slovene source exists for
+  any of the three, and the corpus's only `Saint` is the composer Saint-Saëns. Identical evidence to sk
+  (#603), where I reached the same conclusion independently.
+- **`2:2` ×1** — a British degree classification, orthographically identical to a score; *dva proti dva* is
+  no worse than the phrase break it replaces.
+- **`÷` `≈` (0), fraction denominators above 10 (0)** — unsourceable, zero instances.
+- **STRESS** — `slovenian.ts` emits none; that is the bring-up investigation's deferred fix, not this seam's.
+
+### Verification
+
+Delta against the PR as submitted: **1 utterance**, the `0230 UTC` sentence.
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2798 tests, 0 failed** (2 new blocks) |
+| `mine.ts scan --lang sl` | 122 lines, **no defects** |
+| `review.ts --lang sl` | **checklist clean, all 8 lines** — including sourcing, now that main's gate fix landed |
+| `corpus-diff` sl_si | **291/1903 (15.3%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / **DROP 6 → 0** / THROW 0 |
+| `referee-eval sl` | **unchanged**, run from both checkouts: 88/5177 raw · 4995/5177 (96.5%) · symbol 99.4% |
