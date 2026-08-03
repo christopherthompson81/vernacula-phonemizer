@@ -247,6 +247,23 @@ function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
     }
     for (const f of readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc") || f.endsWith(".tsv")))
         add(join("src/languages", dir, f));
+    // THE WIKIPEDIA ATTESTATION CACHE (`attest.ts`) — a weaker tier, added last, and added SELECTIVELY.
+    //
+    // It must NOT be `add()`ed as a file, and this is the one hazard in the whole design: the cache records
+    // the word it probed even when the verdict is `absent`, so reading it wholesale would let
+    // `"word": "amadola"` satisfy the search for *amadola* — the gate would attest every word it was ever
+    // asked about, including the ones proven missing. A self-fulfilling haystack is worse than no haystack.
+    //
+    // So: only findings with verdict `attested`, and only their EXAMPLE PROSE, which is real running text
+    // containing the word as a token. An `absent` or `substring-only` finding contributes nothing at all.
+    for (const code of [lang, ...sisters(lang)]) {
+        const cache = join("tools/corpus/attest", `${code}.jsonc`);
+        if (!existsSync(cache)) continue;
+        const src = readFileSync(cache, "utf8");
+        for (const block of src.split(/\}\s*,?\s*(?=\{)/u))
+            if (/"verdict":\s*"attested"/u.test(block))
+                for (const ex of block.matchAll(/"…([^"\\]*)…"/gu)) hay += ` ${ex[1]!} `;
+    }
     if (ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT))
         for (const f of [`${lang}_list`, `${lang}_extra`]) add(join(ESPEAK_DICT, f));
     // TOKENS, not a substring test: `hay.includes("tere")` was satisfied by any longer word containing
@@ -346,11 +363,31 @@ else {
         }
         return false;
     };
+    // WHAT WAS ACTUALLY SEARCHED, per word. "in NO source" was one string for two very different states:
+    // nobody has run the Wikipedia probe, versus the probe ran and the word is absent there too. The second
+    // is a much stronger negative and the reader should not have to re-run `attest.ts` to discover it.
+    const probed = (w: string): string | undefined => {
+        for (const code of [lang, ...sisters(lang)]) {
+            const cache = join("tools/corpus/attest", `${code}.jsonc`);
+            if (!existsSync(cache)) continue;
+            for (const block of readFileSync(cache, "utf8").split(/\}\s*,?\s*(?=\{)/u)) {
+                if (!new RegExp(`"word":\\s*"${w.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}"`, "u").test(block)) continue;
+                return /"verdict":\s*"substring-only"/u.test(block) ? "substring-only on wikipedia"
+                    : /"verdict":\s*"absent"/u.test(block) ? "absent from wikipedia too" : undefined;
+            }
+        }
+        return undefined;
+    };
+    const verdictOf = (w: string): string => {
+        const p = probed(w);
+        return `${w} — in NO source (corpus, artifact, referee, manifest, espeak`
+            + `${p === undefined ? "; wikipedia NOT probed — try tools/normalization/attest.ts" : `, and ${p}`})`;
+    };
     const unattested = needles.filter((w) => (SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !near(w)));
     note("sourcing", unattested.length === 0 ? true : null,
         unattested.length === 0
             ? `all ${needles.length} high-traffic words attested`
-            : `${unattested.join(", ")} — in NO source (corpus, artifact, referee, manifest, espeak). Say where each came from, or leave the symbol unread`);
+            : `${unattested.map(verdictOf).join(", ")} — Say where each came from, or leave the symbol unread`);
 }
 
 // ── 5. the artifact scan ──────────────────────────────────────────────────────────────────────────

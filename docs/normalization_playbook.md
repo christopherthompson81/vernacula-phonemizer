@@ -261,6 +261,47 @@ What remains is **12 words in 9 languages**, every one a currency borrowing the 
 no in-repo source records (`yen`, `jen`, `iyena`, `युरो`, `डॉलर`). That is the right residue for a prompt:
 short enough to read, and each one a real question.
 
+**When the residue is the answer, probe Wikipedia — `tools/normalization/attest.ts`.** For a well-resourced
+language the haystack above is strong; for a language espeak does not ship at all it is nearly just the corpus
+and the artifact, and zu/xh both ended #562 on an unresolvable currency prompt for that reason. The probe asks
+CirrusSearch for one specific WORD and reports it three ways:
+
+```
+$ npx tsx tools/normalization/attest.ts --lang zu --words amadola,idola,iiyeni,amaphuzu
+  word             token  arts  substr-only  verdict
+  amadola          1      1     0            attested
+  idola            1      1     0            attested
+  iiyeni           0      0     0            absent
+  amaphuzu         2      1     0            attested
+```
+
+Four things that design gets right, each one a lesson from this playbook:
+
+- **TOKEN hits and SUBSTRING-ONLY hits are separate columns**, because a substring match is not an
+  attestation and that error has been made four times: ff `tere`, hr `jen` in *jendek*, lb `Yen` in *Libyen*
+  and 19 espeak `-yen` plurals, xh `iiyeni` in *yeNintendo*. Seeing `0 token / 7 substring` is what tells you
+  your grep was lying.
+- **It prints the surrounding prose, because attestation is necessary and never sufficient.** The run above
+  makes the point twice over: `amadola` appears as *izikhali alingene amaDola … wamaDola aseMelika* — the
+  currency, in a monetary amount, which CLOSES that gap; but `idola` appears as *IDola yisifunda … eGabhoni*,
+  a district in Gabon. A place name is not a currency. Check the sense (trap: the Fula `hakkunde` lesson).
+- **`amaphuzu` ×2 is both a confirmation and a refusal.** Zulu declined it as a decimal-point word because
+  its corpus instances were sports points; Wikipedia says the same independently. A probe that confirms a
+  refusal is doing its job.
+- **Wikipedia is recorded as its OWN, WEAKER tier** in `tools/corpus/attest/<lang>.jsonc`, with the article
+  count beside the hit count — one hit in one article is a lead, not a finding. `review.ts` reads only
+  `attested` findings' example prose from that cache, never the file: the cache records the word it probed
+  even when the verdict is `absent`, so reading it wholesale would let the gate attest every word it was ever
+  asked about. A self-fulfilling haystack is worse than no haystack.
+
+The sourcing line now also says which sources were searched, so *nobody has probed this* and *the probe ran
+and the word is absent there too* stop looking the same:
+
+```
+xh   iiyeni — in NO source (corpus, artifact, referee, manifest, espeak, and absent from wikipedia too)
+lb   Yen    — in NO source (corpus, artifact, referee, manifest, espeak; wikipedia NOT probed — try …)
+```
+
 **Read the list. If you cannot say where a word came from, source it or leave the symbol unread.**
 
 This exists because reviewing the Czech layer (#588) found four defects and ALL FOUR were checklist items

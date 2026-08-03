@@ -1,0 +1,58 @@
+// WIKIPEDIA WORD ATTESTATION — zu (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "zu",
+    "wiki": "zu.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "amadola",
+            "verdict": "attested",
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…hukileyo, iTaliya idayisela amanye amazwe izikhali alingene amaDola ayizigidi angama-881 wamaDola aseMelika. iTaliya ithenga im…"
+            ]
+        },
+        {
+            "word": "idola",
+            "verdict": "attested",
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…IDola yisifunda esingaphansi kwesifundazwe se Ngounié, eGabhoni.…"
+            ]
+        },
+        {
+            "word": "iiyeni",
+            "verdict": "absent",
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "amaphuzu",
+            "verdict": "attested",
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…anje ophethe irekhodi lomhlaba elincane lohlelo olufushane (amaphuzu we-87.33). Ungumpetha wethusi we-Youth Youth 2020, i-2019 J…",
+                "…70 selokhu kuqale isizini ka-2015/2016. == Izinhlelo == == Amaphuzu avelele wokuncintisana == == Imiphumela enemininingwane ==…"
+            ]
+        }
+    ],
+}
