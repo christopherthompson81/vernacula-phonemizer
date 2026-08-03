@@ -19,4 +19,14 @@ describe("Standard Malay (zsm) — alias to the Indonesian engine", () => {
     test("produces the shared Malayic output (schwa ⟨e⟩, final consonants)", () => {
         expect(zsm.text("selamat")).toBe("səlˈamat"); // ⟨e⟩ → ə, final -t kept
     });
+
+    // `ms` IS THE SAME LANGUAGE and was simply not wired: `zsm` is the ISO 639-3 code, `ms` the ISO 639-1 one,
+    // and `ms` is what nearly every caller and dataset writes — including this repo's own
+    // tools/corpus/mined/ms.jsonc, whose `source` reads "FLEURS ms_my". So the artifact was filed under a code
+    // the registry threw on, and a fleet sweep iterating the artifacts reported Malay as unreachable while
+    // `zsm` had been working all along.
+    test("ms is accepted as the same engine as zsm", () => {
+        expect(getPhonemizer("ms").text("selamat")).toBe(getPhonemizer("zsm").text("selamat"));
+        expect(getPhonemizer("ms").text("120 m³").trim()).toContain("mɛtˈər pˈadu");
+    });
 });

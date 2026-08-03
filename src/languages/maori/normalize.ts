@@ -1,0 +1,80 @@
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/**
+ * Māori (mi) TEXT NORMALIZATION (#586) — the pre-tokenizer pass. Pure text→text, no IPA. Runs inside
+ * maori.ts's `text()`, before the tokenizer.
+ *
+ * ⚠ THIS LAYER IS THE SYMBOL TIER AND NOTHING ELSE YET. Māori had no normalization of any kind — `text()`
+ * ran the tokenizer straight over raw input — so this file starts where the fleet's shared tier can reach,
+ * and the number-FORMATTING half is still open. The counts for that work are recorded at the bottom.
+ *
+ * The tokenizer's classes are letters, digits and clause marks, so `%`, `$` and every unit abbreviation
+ * were DELETED outright before this: `88%` read as bare *waru tekau mā waru*.
+ *
+ * Every word below is from mi_nz, counted over the 1,994 UNIQUE utterances (FLEURS repeats each one per
+ * speaker, so the raw counts are ~2.5× these):
+ *   ōrau ×8      "i piki ake ki te 8 ōrau"            ← percent, POSTPOSED
+ *   tāra ×6      "te tāra $5 me te $100 hou o Kānata"   pauna ×5  "te utu ko te 27 miriona pauna"
+ *   kiromita ×34 "he taone 50 kiromita (31 maero)"      mita ×28  "He 15 mita te poutū"
+ *   pūrua ×18    "755,688 kiromita pūrua (291,773 maero pūrua)"   ← squared, POSTPOSED
+ *   pūtoru ×3    "I te Luno ētahi 120-160 mita pūtoru o te kora"  ← cubed, POSTPOSED
+ *   ia ×6        "240 kiromita ia hāora", "1.5 kiromita ia hēkona"  ← the rate connective
+ *
+ * ⚠ `tapawhā` ×12 AND `tapatoru` ×5 ARE THE SHAPES, NOT THE POWERS, and both counts beat the words that are
+ * right: tapawhā is a square as in a PLAZA — "St. Pita Tapawhā", St Peter's Square — and tapatoru is a
+ * triangle ("ngā tapatoru hāngai", right triangles). Same split as fr carré, tr kare, gu વર્ગ (trap 37).
+ *
+ * ⚠ `m/h` IS MILES PER HOUR HERE, so it is declared as its own unit KEY rather than left to the rate path.
+ * The corpus writes "35-40 m/h (56-64 km/h)" and "300m/h" — the km/h gloss settles it — and with only `m`
+ * declared plus an `h` denominator the tier would have read mph as *metres* per hour, a confidently wrong
+ * reading where a raw letter was merely a silent one. A slashed key sorts before the bare `m` because
+ * `unitAlt` is longest-first, which is how French's `km/h` key already works.
+ * (The spelling is `maero` ×30, the corpus's dominant form; the two rate instances write `mairo`.)
+ *
+ * NOT DECLARED, deliberately:
+ *   · `mm` — ×15 in the corpus ("35 mm", "3136 mm2") but NO word for it: manomita and mirimita are both ×0
+ *     here and mi.wikipedia offers nothing, so the abbreviation still leaks rather than be invented.
+ *   · `t`/`kg` — no word attested, and `t` is the trap: a digit-adjacent `t` in this corpus is `1,400
+ *     tāngata` ("1,400 PEOPLE"), which an ASCII-classed guard would not reject because `ā` is not [a-zA-Z].
+ *
+ * STILL UNTREATED, and this tier does not pretend otherwise — the number-FORMATTING half is a #585 pass of
+ * its own, since the tokenizer's `(\d+)` stops at a comma and `,` is a clause mark:
+ *   comma-grouped ×50 (`19,500` reads "nineteen, PAUSE, five hundred") · decimals ×38 · ranges ×18 ·
+ *   clock ×12 · and the corpus's one `km₂` (U+2082 SUBSCRIPT two, in "19,500 km₂"), which is bad notation
+ *   rather than orthography — `CO₂` in lb is the only correct subscript in any of the 67 corpora, so nothing
+ *   fleet-wide should learn this one, and it is left for that local pass to fold if it wants to.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["ōrau"],
+    // The PREFIXED forms are declared as their own keys, longest-first, exactly as Gujarati's table does:
+    // this corpus writes `AUD$45 miriona` and `US$14.7 piriona`, and with only a bare `$` the letters were
+    // read as a word ("au …") and the sign dropped. `£` earns its place on the WORD, pauna ×5 ("ngā pauna
+    // Peretānia"), rather than on a sign this corpus never writes.
+    currency: { "US$": ["tāra"], "AUD$": ["tāra"], "NZ$": ["tāra"], $: ["tāra"], "£": ["pauna"] },
+    // A MAGNITUDE MUST BE DECLARED OR THE CURRENCY WORD LANDS INSIDE THE NUMBER. Without these, `$2.3
+    // piriona` read "rua . toru TĀRA piriona" — the sign is adjacent to the digits, so the word was emitted
+    // there and the magnitude stranded behind it. The corpus writes the magnitude FIRST and takes no
+    // connective, which is the shape the tier's hop produces: `piriona tāra` ×1 ("kei ōna piriona tāra te
+    // nui"), `miriona tāra` ×1 ("ngā tini tekau miriona tāra ia tau"), and `27 miriona pauna`.
+    // miriona ×27 · mano ×18 · piriona ×4.
+    magnitudes: ["miriona", "piriona", "mano"],
+    units: { km: ["kiromita"], m: ["mita"], "m/h": ["maero ia hāora"] },
+    unitPer: "ia",
+    rateDenominators: { h: "hāora", s: "hēkona" },
+    exponentWords: { squared: ["pūrua"], cubed: ["pūtoru"], position: "after" },
+});
+
+
+/**
+ * The Māori normalization pass. Currently the shared symbol tier alone — there is no language-local rule
+ * yet, and this is the file the number-formatting work belongs in when it happens (see the header).
+ */
+export function normalizeMaori(input: string): string {
+    // 1) HTML ENTITY, then the bare ampersand → `me` ("and", ×726 in the corpus). The entity must go first or
+    //    `&amp;` would become "me amp ;". The corpus's two instances are the fleet's usual pair, `B&B` and
+    //    `Arts & Sciences`; before this the sign was dropped outright and `B&B` read as two bare consonants.
+    //    Spaced on both sides deliberately — `B&B` is two initialisms, and joining them would make one token.
+    const s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
+    // 2) The shared symbol tier. Everything else this language needs is declared data, not a local rule.
+    return SYMBOLS(s);
+}

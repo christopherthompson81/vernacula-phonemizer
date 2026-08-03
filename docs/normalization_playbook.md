@@ -961,6 +961,43 @@ the one test the sweep depends on most. A probe with internal whitespace is now 
 regex that quotes it, with the space relaxed to `\s+`. **When a tool's verdict contradicts the example it
 prints beside it, believe the example.**
 
+**42. A CHECK THAT READS ONLY THE ENGINE FILE GOES BLIND ON EVERY LANGUAGE THAT DECLARES ITS TIER ELSEWHERE.**
+`review.ts` builds `engineSrc` from the language's `.ts` files and deliberately EXCLUDES anything with
+"normalize" in the name. Its sourcing check then looked for `makeSymbolNormalizer({…percent|currency:` in that
+string — so the twenty languages that configure the tier inside `normalize.ts` were partly invisible, and for
+**pa, yue and mi** it reported "no percent/currency/decimal word declared" while both were declared. The
+sourcing gate was silently inert for them.
+
+The check already carried a warning about this shape — *"a declaration this check cannot parse must complain,
+not shrug"* — and had measured it: zero languages declare tier data through a HELPER, so it was called latent.
+The live blindness was not the helper, it was the FILE. Reading normalize.ts too took pa 0→2 checked words,
+ml 1→3, kn 0→3, el 0→4, sl 0→5, and surfaced two more instances of the known unattested-`yen` class (am, uz).
+
+**When a check reports "nothing declared", run it against a language you KNOW declares the thing.** A
+negative from a gate is a claim about the gate until you have done that once.
+
+**43. AN ARTIFACT FILED UNDER A CODE THE REGISTRY THROWS ON MAKES A WORKING LANGUAGE LOOK BROKEN.** Malay is
+registered as `zsm` (ISO 639-3) and worked throughout; `ms` (ISO 639-1) threw, and `ms` is what nearly every
+caller writes — including this repo's own `tools/corpus/mined/ms.jsonc`, whose `source` field reads
+"FLEURS ms_my". So a fleet sweep that iterated the ARTIFACTS reported Malay as unreachable and its cells as
+unmeasurable, for the whole of #586, while nothing was wrong with the language at all. Accept both codes, and
+when a sweep reports a language as missing, check the code before the engine.
+
+- **The same sweep hid a real gap behind the fake one.** Once `ms` resolved, Malay turned out to drop `m³`
+  outright — and its cube word is `padu` (`meter padu` ×2), not Indonesian's `kubik` (×0 in ms_my). A genuine
+  Malay/Indonesian divergence, which is the whole reason that language owns a normalize.ts, and it had been
+  sitting behind a two-letter lookup failure.
+- **Conversely, `my` was never in the list.** Burmese has had both measure words all along (စတုရန်း / ကုဗ).
+  Three codes that look alike — `mi`, `ms`, `my` — and each was in a different state; the only way to know was
+  to run all three.
+
+**44. A SLASHED UNIT KEY OUTRANKS THE RATE PATH, WHICH IS HOW YOU SPELL AN AMBIGUOUS ABBREVIATION.** Māori's
+corpus writes `m/h` for MILES per hour — "35-40 m/h (56-64 km/h)", where the gloss settles it — so declaring
+`m` plus an `h` denominator would have read mph as *metres* per hour: a confidently wrong reading replacing a
+merely silent one. Declaring `"m/h": ["maero ia hāora"]` as its own unit key fixes it, because `unitAlt` is
+sorted longest-first and a 3-character key is tried before the bare `m` (this is how French's `km/h` key
+already works). Reach for a compound key whenever one abbreviation is not the composition of its parts.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

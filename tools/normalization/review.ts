@@ -124,6 +124,10 @@ const exportName = exportNames[0];
 // normalizer wired into any of them is found.
 const engineFiles = readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".ts") && !f.includes("normalize") && !f.includes(".test."));
 const engineSrc = engineFiles.map((f) => readFileSync(join("src/languages", dir, f), "utf8")).join("\n");
+/** The normalize* files, which `engineFiles` excludes by name — the tier may be declared in one of them. */
+const tierSrc = readdirSync(join("src/languages", dir))
+    .filter((f) => f.endsWith(".ts") && f.includes("normalize") && !f.includes(".test."))
+    .map((f) => readFileSync(join("src/languages", dir, f), "utf8")).join("\n");
 // `exportName` is `exportNames[0]` and CAN be undefined — a normalize.ts that exports no `normalize*`
 // function at all. Unguarded, `.includes(undefined)` searches for the literal string "undefined" and the
 // engine pick silently lands on whatever file happens to contain it (usually none, so `?? engineFiles[0]`),
@@ -459,7 +463,13 @@ const SPACELESS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Scrip
 /** The words that carry EVERY instance of their symbol: the percent word, the currency names, the decimal
  *  word. Extracted from the tier's own data and the manifest, so the check reads declarations, not prose. */
 function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): string[] {
-    const tier = engineSrc.match(/makeSymbolNormalizer\(\{[\s\S]*?\n\}\)/u)?.[0] ?? "";
+    // SEARCHED IN normalize.ts TOO, because `engineSrc` deliberately EXCLUDES any file with "normalize" in
+    // its name — and a language may configure the tier in exactly that file. Three shipped languages do
+    // (pa, yue, mi), and for all three this check reported "no percent/currency/decimal word declared" while
+    // both were declared: the sourcing gate was silently inert for them. That is the false negative the
+    // `declares` note below warns about, arriving through a different door than the one it measured — it
+    // checked for data behind a HELPER and found none, where the live blindness was data in another FILE.
+    const tier = `${engineSrc}\n${tierSrc}`.match(/makeSymbolNormalizer\(\{[\s\S]*?\n\}\)/u)?.[0] ?? "";
     // A currency name is only worth checking if its SIGN is in the corpus: a language that never writes ¥
     // never speaks its yen word, so its attestation cannot affect a reading. Checking all of them reported
     // yen/euro/jen across fifteen languages — true, and useless.
@@ -503,7 +513,7 @@ const needles = highTrafficWords(hay);
 // worked around it locally with literal arrays plus a drift test.
 // Measured before adding this: ZERO shipped languages declare tier data through a helper — all ~49 use
 // literal arrays — so this is latent, not a live blindness, and closing it costs nothing today.
-const declares = /makeSymbolNormalizer\(\{[\s\S]*?\b(?:percent|currency):/u.test(engineSrc);
+const declares = /makeSymbolNormalizer\(\{[\s\S]*?\b(?:percent|currency):/u.test(`${engineSrc}\n${tierSrc}`);
 if (needles.length === 0 && declares)
     note("sourcing", false,
         "a tier IS declared but this check could not read it — declare percent/currency as LITERAL arrays, "
