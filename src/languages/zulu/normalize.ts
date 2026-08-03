@@ -253,11 +253,25 @@ export function normalizeZulu(input: string): string {
     //    contains no click letter, is read by the g2p as an ordinary word, and is KEPT — without it `°F`
     //    and `°C` would be indistinguishable. Zero `°F` occur; the branch is pinned in the tests anyway
     //    (trap 8 — probe the adversarial neighbour of every rule).
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu, "amazinga angu-$1");
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu, "amazinga angu-$1 Fahrenheit");
+    //    TRAP 12: THE SENTENCE MAY ALREADY SAY *amazinga*, and the corpus's only °C instance does. Emitting
+    //    the noun unconditionally read `amazinga okushisa angaphezu kuka-+30°C` as *amazinga okushisa
+    //    angaphezu kuka- AMAZINGA ANGU- amashumi amathathu* — the degree word twice, and two bound concords
+    //    in a row (`kuka-` already governs the number). Same shape as Malay's `80% peratus`. So the head is
+    //    suppressed when the clause already carries it, leaving the written concord to do its job; the
+    //    `angu-` goes with it, because it agrees with the head that is no longer being emitted.
+    const saidDegrees = (before: string): boolean =>
+        /amazinga[^.!?;]*$/u.test(before);
+    const deg = (whole: string, digits: string, tail: string, offset: number, full: string): string =>
+        `${saidDegrees(full.slice(0, offset)) ? "" : "amazinga angu-"}${digits}${tail}`;
+    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu,
+        (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
+    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu,
+        (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
     s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, c: string) => `amazinga angu-${d} ${COMPASS[c.toUpperCase()]!}`);
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º]/gu, "amazinga angu-$1");
+        (m0, d: string, c: string, off: number, full: string) =>
+            deg(m0, d, ` ${COMPASS[c.toUpperCase()]!}`, off, full));
+    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º]/gu,
+        (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
 
     // 10) RANGES → `kuya ku-` ("going to"), ×6 in the corpus and attested taking a DIGIT operand:
     //     `abantu abangu-8 kuya ku-100`, `ku-US$11,000 kuya ku-US$22,500`, `ka-24 Agasti kuya ku-5`. The

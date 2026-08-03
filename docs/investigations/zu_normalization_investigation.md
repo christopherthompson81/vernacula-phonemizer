@@ -386,3 +386,96 @@ every hyphen-prefixed FOREIGN word (`i-Manchester`, `e-Nagasaki`), which is the 
 1,473 utterances. Fixing it means fusing the prefix with the following stem, i.e. Zulu morphophonology
 (`ngo-` + `izinkulungwane` → `ngezinkulungwane`) in the WORD engine, not a symbol rewrite. Measured and
 reported; deliberately out of scope.
+
+## Run 11 — 2026-08-03, review before merge
+
+Rebased onto `main`. Gates reproduce, with one correction to how they were reported (below). The review
+worked the 8-item "deliberately not done" list plus the two argued scan lines. **Six deferrals verified and
+upheld, one upgraded from "deferred" to "already correct", and one defect found that was on no list.**
+
+### The defect: the degree word was said twice (trap 12)
+
+Probing the corpus's own °C sentence rather than the rule in isolation:
+
+```
+amazinga okushisa angaphezu kuka-+30°C avamile
+  → amaz̤ˈiːŋɡ̤a ɔkʼuʃˈiːsa aŋɡ̤apʰˈɛːz̤u kʼˈuːkʼa amaz̤ˈiːŋɡ̤a ˈaːŋɡ̤u amaʃˈuːmi amatʰˈaːtʰu av̤amˈiːlɛ
+                                                  ^^^^^^^^^^^^^^^^^^^^^^
+```
+
+The sentence writes `amazinga okushisa` ("degrees of heat") and the rule adds its own `amazinga angu-` — the
+degree word twice, and **two bound concords in a row**, since the written `kuka-` already governs the number.
+This is Malay's `80% peratus` in a different language, and it is the corpus's ONLY °C instance, so the rule
+was wrong on 1 of 1.
+
+Fixed by suppressing the head when the clause already carries it, leaving the written concord to do its job.
+The `angu-` goes with the head, because it agrees with the noun no longer being emitted. All five branches
+pinned, including the two that must still emit:
+
+```
+kufinyelela ku-30°C namuhla          → kufinyelela ku-amazinga angu-30 namuhla
+amazinga. Kufinyelela ku-30°C        → amazinga. Kufinyelela ku-amazinga angu-30   (clause boundary)
+empumalanga kwe-35°W.                → empumalanga kwe-amazinga angu-35 entshonalanga.
+```
+
+### One deferral upgraded: the currency magnitude is already right
+
+The list deferred `u-$14.7 wamabhiliyoni waseMelika` (1) as "understandable but not idiomatic", on the
+grounds that declaring `magnitudes` needs a table of inflected Zulu forms. Reading the sentence it comes
+from settles it the other way:
+
+```
+ama-euro angamabhiliyoni angu-10 (u-$14.7 wamabhiliyoni waseMelika )
+```
+
+The corpus's own spelled-out phrase is **`ama-euro angamabhiliyoni`** — currency noun FIRST, then the
+agreeing magnitude. And what the layer currently reads is `amadola wamabhiliyoni waseMelika`: the same
+structure, with the same relative order. The shipped reading matches the corpus's own parallel construction,
+so there is nothing to fix and no table to build. Recorded as resolved rather than carried.
+
+### Verified and upheld
+
+- **Initialisms (~110 tokens / 70 acronyms).** The trap-16 check is correct and the seam really is inert:
+  `spellOut()` returns `undefined` if any letter lacks a name, so with no `letterName` table the acronym
+  branch is a no-op. Re-verified independently: `ls espeak-ng/dictsource | grep -icE 'zu_|zul'` → **0**.
+  espeak ships no Zulu at all, the in-repo referee is a programmatic epitran G2P with no letter names, and
+  the corpus writes none. Xhosa (#607) reached the same conclusion for the same reason, independently.
+- **No decimal-point word (≈19 dot-decimals).** Upheld, and the evidence is stronger than the note gives.
+  The one apparent candidate in the corpus is `amaphuzu`, and its sense is wrong: `iwina ngamaphuzu angu-11`
+  is **sports points**, not the punctuation dot. That is the Fula part-of-speech check, and it is the same
+  trap Xhosa hit with `chaphaza` (a verb only). Referee: 0. espeak: no Zulu. So the point is dropped and the
+  fractional digits read one at a time — the point was not spoken before either.
+- **`iqanda` for `00` is NOT a defect.** It looked like one — `iwina ngo-26 -00` reads *…nesithupha iqanda*,
+  literally "egg" — but `zulu.jsonc` declares `"zero": "iqanda"`, so it is the language's own numeral, and
+  the score genuinely is nil. Checked before touching it.
+- **`600Mbit/s` (1).** Upheld, and materially different from Swedish's identical shape (#605), where I DID
+  declare `mbit`: Swedish borrows *megabit* unchanged, whereas Zulu would need a class prefix on a stem no
+  source carries. Composing `amamegabhithi` would be inventing a technical term, not borrowing one.
+- **`°C` scale name (2).** Upheld: ⟨c⟩ is the dental click, so a retained `Celsius` reads [skǀiˈuːs]. The
+  asymmetry with `Fahrenheit` (kept, no click letter) is documented at the rule and both branches pinned.
+- **`amadola` (unsourced).** Upheld as a stated assumption. Re-verified at TOKEN level:
+  `grep -ohPi '(?<![a-z])(ama)?dola\w*'` over the corpus returns **nothing**, and espeak has no Zulu. The
+  `ama-` + borrowing frame is attested (`amaphesenti`, `amaphawundi`, `amakhilomitha`), the corpus writes a
+  currency sign ×9, and dropping the declaration would delete the currency from all nine (#584). Same
+  position as lb's `Yen` and xh's `iiyeni`.
+- **Regnal Romans (5), fractions with numerator > 1 (0), the bound-prefix prosody (349).** Upheld on their
+  counts and their seams — the last is word-engine morphophonology, correctly out of this layer.
+
+### A correction to the PR's gate table
+
+It reported `review.ts --lang zu` as seven `ok` lines plus `[ ?? ] sourcing amadola`. The tool also reports
+**`[FAIL] artifact scan`** for the two residual DROPs and ends with `1 FAILING`. The DROPs themselves are
+argued at length in the PR body, so nothing was hidden — but the gate line should say what the gate says.
+
+### Verification
+
+Delta against the PR as submitted: **1 utterance**, the Montevideo °C sentence.
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2760 tests, 0 failed** (1 new block, 5 assertions) |
+| `mine.ts scan --lang zu` | `DROP math-sign ×1` · `DROP minus ×1` — both argued, unchanged |
+| `review.ts --lang zu` | 6 ok · `?? sourcing amadola` · `FAIL artifact scan` (the two argued DROPs) |
+| `corpus-diff` zu_za | **106/1478 (7.2%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / **DROP 5 → 1** / THROW 0 |
+| `referee-eval zu` | **unchanged**: 1047/1047 (100.0%), symbol accuracy 100.0% |

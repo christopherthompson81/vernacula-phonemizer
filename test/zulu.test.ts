@@ -220,4 +220,20 @@ describe("Zulu text normalization (#562)", () => {
         expect(phonemize("abangu-93%", "zu")).toBe(
             "aɓˈaːŋɡ̤u amaʃˈuːmi ajisiʃijaɡ̤alɔlˈuːɲɛ nantʼˈaːtʰu amapʰɛsˈɛːntʼi");
     });
+
+    // TRAP 12 — the corpus's ONLY °C sentence already says *amazinga*, and the rule was adding its own:
+    // `amazinga okushisa angaphezu kuka-+30°C` read *amazinga okushisa angaphezu kuka- AMAZINGA ANGU- …*,
+    // the degree word twice and two bound concords in a row (`kuka-` already governs the number).
+    it("does not say the degree word twice", () => {
+        expect(normalizeZulu("amazinga okushisa angaphezu kuka-+30°C avamile"))
+            .toBe("amazinga okushisa angaphezu kuka-30 avamile");
+        // …and where the clause does NOT carry it, the rule must still emit it.
+        expect(normalizeZulu("kufinyelela ku-30°C namuhla")).toBe("kufinyelela ku-amazinga angu-30 namuhla");
+        // A clause boundary ends the suppression window — a previous sentence does not license the drop.
+        expect(normalizeZulu("amazinga. Kufinyelela ku-30°C")).toBe("amazinga. Kufinyelela ku-amazinga angu-30");
+        // The corpus's second instance is a LONGITUDE with no degree word of its own: still emitted.
+        expect(normalizeZulu("empumalanga kwe-35°W.")).toBe("empumalanga kwe-amazinga angu-35 entshonalanga.");
+        // Fahrenheit survives the suppression path (0 corpus instances, pinned per trap 8).
+        expect(normalizeZulu("izinga elingu-35°F")).toBe("izinga elingu-amazinga angu-35 Fahrenheit");
+    });
 });
