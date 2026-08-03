@@ -304,3 +304,107 @@ referee-eval xh   (vs a pinned worktree of cd4004b)       → BYTE-IDENTICAL, md
 (`iidola`, `iiponti`, `iipesenti`, `iikhilomitha`, `iisentimitha`, `iikhilogram`) applied to the currency
 name; attested in no source, and espeak has no Xhosa to consult. Declared so the corpus's three `¥` are not
 swallowed, and flagged for the reviewer — `ha` and `lb` carry exactly this `??` for `yen`/`Yen`.
+
+## Run 11 — 2026-08-03, review before merge
+
+Rebased onto `main`. Every gate reproduces. The review pressed the 7-item "deliberately not done" list, the
+two composed words and the two argued DROP lines. **No defect was found, and no code changed.** What
+follows is the verification, because a deferral accepted without one is just a deferral repeated.
+
+### The defect its sibling had, and this layer does not
+
+Zulu (#606, reviewed an hour earlier) shipped a trap-12 doubling in exactly this rule: its corpus's only °C
+sentence already said *amazinga*, and the rule added its own. The same construction here:
+
+```
+amaqondo angaphezulu kwe +30°C aqhelekile.
+  → amaqondo angaphezulu kwe 30 aqhelekile.       ← ONE degree word
+kwi-30°C                → kwi-amaqondo 30         ← emitted where the clause lacks it
+empumalanga kwi-35°W    → … amaqondo 35 entshona
+```
+
+`saidBefore(full, off, "maqondo")` is already in the rule, on all four branches. The two sibling agents
+diverged on the identical construction and this one got it right; the divergence is why reading the corpus's
+own sentence — not the rule in isolation — is what catches this class.
+
+Also consistent, and better than Zulu's: **neither scale name is emitted**, for C or F. Zulu keeps
+`Fahrenheit` (no click letter) while dropping Celsius; here both are unnamed, because no Xhosa spelling of
+either is attested and ⟨c⟩ is a click. Zero °F instances in both corpora, so either is defensible — but one
+rule for both scales is the tidier claim.
+
+### The era markers (6) — this is the more disciplined sibling
+
+Both Nguni corpora are in the same state, and I measured both:
+
+| | `ngaphambi` | `kuka` | `Kristu` |
+|---|---:|---:|---:|
+| xh | 27 | 19 | **1**, inside `zobuKristu` / `yobu Kristu` |
+| zu | 28 | 14 | **2**, inside `ubuKristu` / `yobuKristu` |
+
+The preposition and the concord are well attested in both. `Kristu` is attested in neither as a bare proper
+noun — only as a **bound stem inside the class-14 word for Christianity**. Zulu composed
+`ngaphambi kukaKristu` from those pieces and said so plainly; Xhosa refused. **Xhosa is right**: extracting a
+personal name from an abstract-noun stem and putting it in a dating formula is a morphological inference, not
+an attestation — the Fula `hakkunde` lesson (a word being real is not a word fitting the slot).
+
+`BCE` therefore still reads `ɓkǀˈɛː`, which is blocked on the same missing letter-name table as the 102
+initialisms. Dropping the marker instead would change 10 000 BCE into 10 000, so the cluster is the
+least-bad reading. The zero-invention half is done: `B.C.E.` no longer emits three sentence breaks.
+
+### Slash as "or" (10) — upheld, and the reason is measurable
+
+The concern was that a blanket rule would read *kunye okanye okanye*. Confirmed: `okanye` is already on one
+side in 3 of the 10, and one "instance" is `"Õ/õ"`, a glyph pair that is not an alternation at all. The
+decisive check is whether the operands FUSE without the slash — they do not:
+
+```
+iiyadi/iimitha ezimbini  ⇒ iijˈaːd̤i iimˈiːtʰa ɛz̤imbˈiːni
+ukuya / ukusuka eKapa    ⇒ ukʼˈuːja ukʼusˈuːkʼa ɛkʼˈaːpʼa
+```
+
+Two clean tokens with their own stresses — an under-read, not a leak. Malay left `ela/meter` alone on the
+same reasoning. A pause was considered and rejected: it would be wrong for the glyph pair, and a slash is
+not reliably a pause in speech.
+
+### The two composed words, re-verified at TOKEN level
+
+- **`iiyeni`** (`¥`, 3 instances). A substring grep makes this look sourced; it is not. The corpus's one
+  apparent hit is **inside `yeNintendo`**. Genuinely unattested — and dropping the declaration deletes the
+  currency from all three sentences (#584), so it ships as a stated assumption. Same position as lb's `Yen`
+  and zu's `amadola`, and the third time this exact trade has come up in this batch.
+- **`iimilimitha`** (`mm`). 0 attested — but the `ii-` + borrowing frame is (`iikhilomitha`, `iimitha`,
+  `iikhilogram`), and this is the unit-borrowing class §5e excludes from the sourcing check by measurement.
+
+### The two argued DROPs, verified
+
+- **`DROP math-sign ×1`** — `amaqondo angaphezulu kwe +30°C`. The `+` is a positivity marker and the
+  sentence's own *angaphezulu* ("above") already says it: trap 12. Reading confirmed correct.
+- **`DROP minus ×1`** — `sineyona mimoya ebhudla kangange -40 mph`. The scan prints the head of the
+  utterance, which reads as a different sentence than the note describes; it is the same one. The hyphen is
+  a stray dash (the English source says "at 40 mph"), and it is correctly dropped rather than read as
+  *thabatha*: `kʼaŋɡ̤ˈaːŋɡ̤ɛ amaʃˈuːmi amˈaːnɛ iimajˈiːlɛ ŋɡ̤ɛjˈuːrɛ`. The same sentence's two real ranges
+  (`35-40`, `56-64`) do get `ukuya ku-`.
+
+### The mandated currency fix, verified
+
+```
+leUS$30  ⇒ lˈɛː amaʃˈuːmi amatʰˈaːtʰu iid̤ˈɔːla z̤asɛmɛlˈiːkʼa
+i$10     ⇒ ˈiː iʃˈuːmi iid̤ˈɔːla
+```
+
+Both glued-prefix shapes read, and `DROP currency` is 0.
+
+### Gates
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2773 tests, 0 failed** |
+| `mine.ts scan --lang xh` | `DROP math-sign ×1` · `DROP minus ×1` — both verified permissible above |
+| `review.ts --lang xh` | 6 ok · `?? sourcing iiyeni` · `FAIL artifact scan` (the two argued DROPs) |
+| `corpus-diff` xh_za | **98/1509 (6.5%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / **DROP 5 → 1** / THROW 0 |
+| `referee-eval xh` | **byte-identical to main**, re-run on both: 787/874 (90.0%) · symbol 98.4% · epitran 701/874 (80.2%) |
+
+All 98 changes read. They are ranges gaining `ukuya ku-`, `mpʰ` → *iimayile ngeyure*, `ˈaː . m .` →
+*kusasa*, `Mnu.` → *umnumzana*, the English `th` suffix removed, `U.S.` collapsed, and — the largest group —
+space-grouped thousands going from *ishumi iqanda* ("ten egg") to *amawaka ishumi*.
