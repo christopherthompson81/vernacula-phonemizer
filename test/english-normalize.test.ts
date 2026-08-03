@@ -258,4 +258,43 @@ describe("Latin abbreviations and phrases", () => {
         expect(p("ad hoc committee")).toContain("ˈæd hˈɑːk");
         expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹaᶦ");
     });
+
+    // #586's headline case, and en was the FIRST language treated: the exponent and the ampersand were
+    // dropped for the whole of #562 because no gate could see them until defects.ts unified the tables.
+    test("the exponent and the ampersand, #586's opening examples", () => {
+        // `km²` matched the unit and stranded the `²`, so an AREA read as a length.
+        expect(normalizeEnglish("The park covers 19,500 km² and")).toBe("The park covers 19,500 square kilometers and");
+        expect(normalizeEnglish("3 m³ of water")).toBe("3 cubic meters of water");
+        // The COUNT still governs the noun: "one cubic meter", not "one cubic meters".
+        expect(normalizeEnglish("a 1 m³ tank")).toBe("a 1 cubic meter tank");
+        expect(normalizeEnglish("1 km of road")).toBe("1 kilometer of road");
+        // The ampersand VANISHED, so "Arts & Sciences" read as "Arts Sciences".
+        expect(normalizeEnglish("College of Arts & Sciences")).toBe("College of Arts and Sciences");
+        expect(normalizeEnglish("B&Bs compete")).toBe("B and Bs compete");
+    });
+
+    test("the relational and arithmetic signs", () => {
+        expect(normalizeEnglish("6 × 6 mm")).toBe("6 times 6 millimeters"); // the unit rule also fires
+        expect(normalizeEnglish("12 ÷ 4")).toBe("12 divided by 4");
+        expect(normalizeEnglish("x = y")).toBe("x equals y");
+        expect(normalizeEnglish("5 < 6")).toBe("5 less than 6");
+        expect(normalizeEnglish("7 > 3")).toBe("7 greater than 3");
+        expect(normalizeEnglish("±5 degrees")).toBe("plus or minus 5 degrees");
+        // `<`/`>` are gated on DIGITS so an HTML tag is not eaten — this corpus's text carries none, but a
+        // phonemizer is handed arbitrary text.
+        expect(normalizeEnglish("<i>italic</i> text")).toBe("<i>italic</i> text");
+    });
+
+    // A RANGE IS NOT A SUBTRACTION, and this is a regression pin. Adding a leading-minus arm that allowed a
+    // SPACE after the dash (`[−–]\s?`) read the corpus's `(1418 – 1450)` as "fourteen eighteen MINUS one
+    // thousand four hundred fifty". Step 0e requires the digit immediately after the dash, which is what
+    // keeps a spaced range out; `\s?` is the whole difference between the two behaviours.
+    test("a spaced dash between years is never a minus", () => {
+        expect(normalizeEnglish("Sejong (1418 – 1450)")).toBe("Sejong (1418 – 1450)");
+        expect(normalizeEnglish("from 1990 - 1995")).not.toContain("minus");
+        expect(normalizeEnglish("scores 5 - 3")).not.toContain("minus");
+        // …while a real negative still reads.
+        expect(normalizeEnglish("a -5 degree night")).toBe("a minus 5 degree night");
+        expect(normalizeEnglish("COVID-19 cases")).not.toContain("minus");
+    });
 });
