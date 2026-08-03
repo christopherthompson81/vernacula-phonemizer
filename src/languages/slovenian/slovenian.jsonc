@@ -49,6 +49,19 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
 
+    // #562 Acronyms that Slovene SPELLS OUT even though their letters are phonotactically readable, so
+    // core/initialisms.ts's OOV test cannot derive it — a lexical convention, not a spelling fact. Chosen by
+    // running that test over every all-caps run in the sl_si corpus (132 instances, 85 distinct) and keeping
+    // the readable ones convention spells: ZDA ×11 is the most frequent acronym in the corpus and would
+    // otherwise have been read as the word *zda*. The vowel-less and illegal-cluster ones (ZN, BDP, DVD,
+    // GMT, GPS, DNK, UTC, DSLR, NBA, FBI, ABC, USD, TV, GP …) need no entry — the OOV test already spells
+    // them — and the genuinely word-read ones (COVID, UNESCO, OPEC, ISIS, ASUS, ACTA, REM, EVA) are left to
+    // the g2p, which is what that test is for.
+    "acronymLetters": [
+        "zda", "usa", "eu", "it", "ai", "ip", "im", "oi", "et", "uw", "mri", "aol", "faa",
+        "ucla", "eva", "cep", "oha", "fic", "acma", "mip"
+    ],
+
     // Cardinal number words. Slovene uses the Germanic-style unit-IN-ten inversion (21 = enaindvajset "one-and-twenty");
     // tens+units concatenate into one word, hundreds/thousands are space-separated. No numeric referee → standard forms.
     "numbers": {
@@ -58,6 +71,11 @@
         "hundreds": ["", "sto", "dvesto", "tristo", "štiristo", "petsto", "šeststo", "sedemsto", "osemsto", "devetsto"],
         "and": "in", // the unit-in-ten infix (ena + in + dvajset)
         "thousand": "tisoč",
+        // #562 The decimal separator's WORD. Slovene writes the decimal with a COMMA (17 corpus instances,
+        // `2,4 GHz`) and reads it *vejica* — espeak-ng's own name for the comma in dictsource/sl_list
+        // (`_, v'e:jitsa`) and a headword in the wikipron slv referee. Declared here rather than as a
+        // literal in code so the tokenizer phonemizes it like any other word (#562 trap 6).
+        "decimalWord": "vejica",
         // Slovene numerals 2–4 AGREE with the gender of the counted magnitude noun (m: dva/trije/štirje; f: dve/tri/
         // štiri). milijon is masculine (trije milijoni), milijarda is feminine (dve milijardi). tisoč takes the plain
         // sub-1000 form (dva tisoč, tri tisoč). Compound counts (22 milijonov) use the plain form + the plural noun.
