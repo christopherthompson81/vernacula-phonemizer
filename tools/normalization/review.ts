@@ -56,6 +56,30 @@ if (dir === undefined) {
     process.exit(2);
 }
 
+const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+/**
+ * PLURICENTRIC SETS — codes that are STANDARDS OF ONE LANGUAGE, whose sources attest for each other. Not
+ * "related languages": the test is whether a speaker of one would recognise the other's word as their own.
+ *
+ * Croatian (#599) is why this exists. Its tier reads `¥` as `jen`, which the hr corpus never spells — but
+ * the SERBIAN corpus renders the very same FLEURS sentence as "od 2500 i 130.000 japanskih jena", and `jen`
+ * is in the Serbian referee. The evidence existed and a one-language haystack could not see it, so the
+ * check asked a human to source a word the repo already had.
+ *
+ * Kept deliberately short. Arabic's dialect codes are NOT here: they share a script and much of MSA, but a
+ * word being right in one is not evidence for another, which is the whole property this map asserts.
+ */
+const SISTER_STANDARDS: readonly (readonly string[])[] = [
+    ["hr", "sr", "bs"],   // Serbo-Croatian: three standards, one language
+    ["id", "zsm", "ms"],  // Malay: Indonesian and Malaysian
+    ["nb", "nn", "no"],   // Norwegian: Bokmål and Nynorsk
+];
+// A FUNCTION DECLARATION, not a const arrow: the artifact lookup in §3 runs above this point in the file,
+// and a const would be a use-before-initialisation there (it was — the whole tool threw).
+function sisters(code: string): readonly string[] {
+    return SISTER_STANDARDS.find((set) => set.includes(code))?.filter((c) => c !== code) ?? [];
+}
+
 const results: [string, boolean | null, string][] = [];
 const note = (name: string, ok: boolean | null, detail: string): void => { results.push([name, ok, detail]); };
 
@@ -87,7 +111,18 @@ const testing = testFiles.filter((f) => { const src = readFileSync(f, "utf8"); r
 note("tests", testing.length > 0, testing.length > 0 ? testing.join(", ") : `no test file references ${exportNames.join("/")}`);
 
 // ── 3. the artifact is committed (Czech's was left untracked) ─────────────────────────────────────
-const artifact = join("tools/corpus/mined", `${lang}.jsonc`);
+// The artifact is usually `<lang>.jsonc`, but a language served through an ALIAS files it under the code
+// its corpus is named for: Standard Malay runs as `zsm` while its corpus is `ms_my` and its artifact is
+// `ms.jsonc`. Reporting that as "missing" then skips the scan entirely, which is how #601 lost a gate to a
+// naming detail.
+//
+// A sister candidate is only usable if that code is NOT ITSELF A REGISTERED LANGUAGE: a registered sibling
+// has its own artifact for its own corpus, and scanning Indonesian's `id.jsonc` as `zsm` reports
+// Indonesian's drops against Malay — which is worse than the missing-file failure it replaced.
+const registered = (code: string): boolean => readFileSync("src/registry.ts", "utf8").includes(`case "${code}":`);
+const artifact = [`${lang}.jsonc`, ...sisters(lang).filter((c) => !registered(c)).map((c) => `${c}.jsonc`)]
+    .map((f) => join("tools/corpus/mined", f))
+    .find((f) => existsSync(f)) ?? join("tools/corpus/mined", `${lang}.jsonc`);
 let tracked = false;
 try { execSync(`git ls-files --error-unmatch ${artifact}`, { stdio: "ignore" }); tracked = true; } catch { /* untracked */ }
 note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync(artifact) ? "exists but is UNTRACKED" : "missing"}`);
@@ -188,26 +223,6 @@ note("spelling → g2p", spellings.length === 0,
 //
 // So: read the list. For each word, if you cannot say WHERE it came from, source it or leave the symbol
 // unread — a wrong word is worse than a dropped sign (playbook, "Two standing rules on data").
-const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
-/**
- * PLURICENTRIC SETS — codes that are STANDARDS OF ONE LANGUAGE, whose sources attest for each other. Not
- * "related languages": the test is whether a speaker of one would recognise the other's word as their own.
- *
- * Croatian (#599) is why this exists. Its tier reads `¥` as `jen`, which the hr corpus never spells — but
- * the SERBIAN corpus renders the very same FLEURS sentence as "od 2500 i 130.000 japanskih jena", and `jen`
- * is in the Serbian referee. The evidence existed and a one-language haystack could not see it, so the
- * check asked a human to source a word the repo already had.
- *
- * Kept deliberately short. Arabic's dialect codes are NOT here: they share a script and much of MSA, but a
- * word being right in one is not evidence for another, which is the whole property this map asserts.
- */
-const SISTER_STANDARDS: readonly (readonly string[])[] = [
-    ["hr", "sr", "bs"],   // Serbo-Croatian: three standards, one language
-    ["id", "zsm", "ms"],  // Malay: Indonesian and Malaysian
-    ["nb", "nn", "no"],   // Norwegian: Bokmål and Nynorsk
-];
-const sisters = (code: string): readonly string[] =>
-    SISTER_STANDARDS.find((set) => set.includes(code))?.filter((c) => c !== code) ?? [];
 const ESPEAK_DICT = process.env["ESPEAK_NG"] === undefined ? "" : join(process.env["ESPEAK_NG"], "dictsource");
 function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
     let hay = "";
@@ -265,7 +280,17 @@ function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): s
     // pairs quotes in the wrong phase: in `"$": ["dollar"]` the closing quote of the KEY pairs with the
     // opening quote of the value, the match consumes both, and `dollar` is never seen — which is how Hausa
     // reported "all 1 high-traffic words attested" while three of its four currency names went unchecked.
+    // A LAYER MAY EMIT ITS PERCENT WORD AS TEXT and declare no tier at all — Malay (#601) reads `%` in
+    // normalize.ts with `peratus` because the tier it inherits says the Indonesian `persen`. Reading only
+    // the declaration made the check inert for exactly the language whose percent word was in question.
+    // So: any `.replace()` whose PATTERN mentions `%` contributes the word literals in its REPLACEMENT.
+    const normSrc = readFileSync(normPath, "utf8");
+    const emitted = [...normSrc.matchAll(/\.replace\(\s*\/[^\n]*%[^\n]*\/[a-z]*\s*,([^;]*)\)/gu)]
+        .map((m) => m[1]!).join(" ");
     const words = new Set<string>();
+    for (const lit of emitted.matchAll(/"([^"\\\n]{2,40})"|`([^`\\\n]{2,40})`/gu))
+        for (const w of (lit[1] ?? lit[2]!).split(/\s+/u))
+            if (/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]+$/u.test(w)) words.add(w);
     for (const arr of decl.matchAll(/\[([^\]]*)\]/gu))
         for (const lit of arr[1]!.matchAll(/"([^"]+)"/gu))
             for (const w of lit[1]!.split(/\s+/u)) if (/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]+$/u.test(w)) words.add(w);
