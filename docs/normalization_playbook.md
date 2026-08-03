@@ -473,6 +473,27 @@ vowel-less clusters, exactly what that seam exists to prevent.
   Pin it with a test through the real phonemizer, using an operand that would break if the order were wrong
   (a vowel-less numeral like `XV`, not the `II` the corpus happens to contain).
 
+
+**17. A "TOO BIG TO DO HERE" ITEM IS A COUNT, NOT A FEELING.** Trap 16 is about seams that already exist;
+this is about scope estimates that were never measured. Luxembourgish (#604) deferred applying the Eifeler
+Regel across a cardinal's right edge as *"a behaviour change to every number in the language with its own
+corpus diff to earn"*. Counted: **nine utterances**, all on *siwen*, which is effectively the only lb
+numeral ending in an unstressed ⟨-en⟩ — and the mechanism (`applyEifelerRegel`) already had four callers.
+The same PR deferred a parenthetical-dash fix it called *"a one-line manifest change and clearly right"*;
+that one was 31 lost pauses.
+
+- **Count it before deferring it.** One grep separates "every number in the language" from "nine sentences".
+- **A mark that should be a pause and instead VANISHES is in scope**, whatever the seam it lives in. That is
+  the DROP family (#584), not a tokenizer refactor.
+- **The inconsistency is the tell.** When a layer applies a sandhi wherever *it* emits a word but not on the
+  plain path, the reading is right in the rewritten cases and wrong in the ordinary one — which is worse
+  than uniformly wrong, because the tests on the rewritten cases all pass.
+- **Touching `src/core` is the reviewer's call, and it is a measurement too.** lb correctly declined to fix
+  a real tier gap (a magnitude word between the number and its unit). Measured over every corpus whose
+  language declares both `magnitudes` and `units`: 7 utterances in 7 languages, all the SAME sentence, six
+  of them shipping the identical defect. Bounded like that, a core fix is cheaper than seven local ones —
+  but run the per-language corpus diff for every affected language before believing it.
+
 ---
 
 ## Two standing rules on data

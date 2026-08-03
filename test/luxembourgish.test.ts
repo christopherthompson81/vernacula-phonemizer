@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { getPhonemizer } from "../src/registry.ts";
+
 import { createLuxembourgish, phonemizeWord } from "../src/languages/luxembourgish/luxembourgish.ts";
 import { numberToWords } from "../src/languages/luxembourgish/numbers.ts";
 import { normalizeLuxembourgish, ordinalStem } from "../src/languages/luxembourgish/normalize.ts";
@@ -263,4 +265,39 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(lb.text("0 kg").trim()).toBe(lb.text("0 Kilogramm").trim()); // was *kk*
     });
 
+    // ── REVIEW ADDITIONS (#604) ──────────────────────────────────────────────────────────────────────
+    // The PARENTHETICAL EN DASH was dropped outright in 31 utterances, running two clauses together. It
+    // reads as the short break `;` and `:` already map to. The corpus's 54 en dashes are 11 numeric ranges
+    // (claimed as `bis` long before the tokenizer) and this.
+    test("a parenthetical en dash is a pause, not silence", () => {
+        const lb = getPhonemizer("lb");
+        expect(lb.text("Kloteren a Sprangen – erfuerdert awer Training.").trim())
+            .toBe("klotərən a ʃpraŋən , ərfuərdərt avər trai̯niŋ .");
+        // A numeric range never reaches the tokenizer as a dash, so this must still be `bis`.
+        expect(normalizeLuxembourgish("vun 2 – 3 km")).toContain("bis");
+    });
+
+    // THE EIFELER REGEL APPLIES ACROSS A NUMBER'S RIGHT EDGE. normalize.ts already applied it wherever IT
+    // emitted a numeral word; the plain number path did not, so the sandhi was right in the rewritten
+    // cases and wrong in the ordinary one. 9 corpus utterances, all on *siwen*.
+    test("a cardinal's unstressed -en obeys the Eifeler Regel before the next word", () => {
+        const lb = getPhonemizer("lb");
+        expect(lb.text("Et sinn 7 Kilometer.").trim()).toBe("æt zin zivə kilomətər ."); // dropped before K
+        expect(lb.text("Et sinn 7 Deeg.").trim()).toBe("æt zin zivən deːχ ."); // kept before d
+        expect(lb.text("Et sinn 7 Auer.").trim()).toBe("æt zin zivən æu̯ər ."); // kept before a vowel
+        // BEFORE A PAUSE THE ⟨n⟩ IS RETAINED. Trimming whitespace alone handed the rule a `.`, which is
+        // outside the keeper set, so the sandhi fired across a sentence boundary and said *siwe*.
+        expect(lb.text("Et sinn 7.").trim()).toBe("æt zin zivən .");
+        // THE STEM OF *Millioun* IS NOT AN INFLECTIONAL ⟨-en⟩ — a bare final-n test read *eng Milliou*.
+        expect(lb.text("Et sinn 1000000 Kilometer.").trim()).toBe("æt zin æŋ miliəu̯n kilomətər .");
+    });
+
+    // A MAGNITUDE BETWEEN THE NUMBER AND ITS UNIT left `km` entirely raw, because the shared tier needs the
+    // number adjacent to the unit. Fixed in core/normalizeSymbols.ts, where currency had had the same hop
+    // for far longer; six other languages were shipping the identical defect on this same sentence.
+    test("a magnitude between the number and the unit", () => {
+        const lb = getPhonemizer("lb");
+        expect(lb.text("iwwer 2,2 Millioune km² vum Ozean").trim())
+            .toBe("ivər t͡sveː koma t͡sveː miliəu̯nə kvadratkilomətər fum ot͡səan");
+    });
 });

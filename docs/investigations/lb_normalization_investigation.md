@@ -323,3 +323,137 @@ changes was read at word level.
    `COVID-19`, `II-76`, `HJR-3`, `36-x-24`). Trap 9.
 7. **The parenthetical en dash** — 44 instances, dropped entirely, because `–` is in neither `TOKEN` nor
    `clausePunctuation`. A one-line manifest change, clearly right, and out of scope for #562 (Run 8).
+
+## Run 12 — 2026-08-02, review before merge
+
+Rebased onto `main`. Every gate as submitted reproduces. The review worked the seven-item
+"deliberately NOT done" list; three items became fixes, four stayed, and one of the four is now backed by a
+measurement rather than an assertion.
+
+### Item 4 (initialisms): the deferral is CORRECT, and now verified
+
+Trap 16 says to check whether the seam already exists before accepting a scope decision — Slovak (#603)
+deferred initialisms for a reason that collapsed on contact. Here it does not:
+
+```
+$ grep -cE '^_[a-z]\s' espeak-ng/dictsource/lb_list      → 2      (_a, _e — the rest of that block is ACCENT names)
+$ grep -icE '^(bé|cé|dé|ef|gé|jot|…)\s' lb.wikipron-ltz-broad.tsv → 2  (em, jot — both ambiguous)
+```
+
+`core/initialisms.ts` needs a letter-name table to emit anything at all, and Luxembourgish has **2 of 26**
+in any in-repo source. Both halves of the seam — the lexical list and the OOV phonotactic rule — produce
+their output through `letterName`, so neither can run. The class stays deferred, and the reading it ships
+is on record: `US` [us], `USA` [uza], `UN` [un], `FBI` [fbi], `GPS` [kps], `HIV` [hif], `DNA` [dna],
+`EU` [æu]. Unblocking it needs an external source for the alphabet, not a code change.
+
+### Item 6 (the parenthetical en dash): 31 lost pauses. Fixed.
+
+The PR called this "a one-line manifest change and clearly right" and declined it as unrelated to #562. A
+mark that should have become a pause and instead vanishes is squarely in scope — it is the DROP family
+(#584). Of the corpus's 54 en dashes, 11 are numeric ranges (rewritten to `bis` in step 10, long before the
+tokenizer) and **31 utterances carry a parenthetical dash that was discarded**, running two clauses
+together with nothing between:
+
+```
+before  klotərən a ʃpraŋən ərfuərdərt avər …
+after   klotərən a ʃpraŋən , ərfuərdərt avər …
+```
+
+`–` added to `clausePunctuation` (→ `,`, the same short break `;` and `:` take) and to `TOKEN`'s punctuation
+class; both are lb's own files. NOTE, because it matters for the rest of the sweep: **this is a
+cross-language gap.** Only `cantonese.jsonc` declares `–` today, and de, nl and cs all drop it on the same
+sentence. Fixed here because it is this language's manifest and this corpus's measured defect; the other
+~60 want their own pass.
+
+### Item 1 (the Eifeler Regel on cardinals): 9 utterances, not "every number". Fixed.
+
+The PR carved this out as "a behaviour change to every number in the language with its own corpus diff to
+earn". Measured, it is nine utterances — because **`siwen` is effectively the only Luxembourgish numeral
+ending in an unstressed ⟨-en⟩**:
+
+```
+$ npx tsx .probe/eif.ts
+utterances where a NUMBER's final -n should drop before the next word: 9
+    siwen + M…   siwen + W…   siwen + K…   zweehonnertsiwen + P…   siwen + p…
+```
+
+And the mechanism already existed: `applyEifelerRegel` with four callers. The inconsistency was that
+`normalize.ts` applied the sandhi wherever *it* emitted a numeral word (range operand, ordinal ending,
+fraction numerator) while the plain number path did not — so `7 Kilometer` read *siwen kilomətər* against
+the corpus's own `siwe bis aacht`. Applied at the number sink in `luxembourgish.ts`.
+
+Two guards, both earned rather than assumed:
+
+- **`/en$/`, not a bare final ⟨n⟩** — the same guard the range rule already carries, and for the same
+  reason: 1 000 000 is *eng Millioun*, whose ⟨n⟩ is the stem, and a bare test reads *eng Milliou*. It
+  cannot be moved inside `applyEifelerRegel`, because the numeral connector *an* → *a* is a two-letter
+  function word the rule also governs and no `-en` test matches. Noted at the function.
+- **The follower must be a LETTER.** Trimming whitespace alone handed the rule a `.` — outside the keeper
+  set — so `Et sinn 7.` fired the sandhi across a sentence boundary and said *siwe*. Caught by probing the
+  pause case, which the corpus does not contain. Both pinned.
+
+### Item 3 (the core gap): fixed in core, after measuring the blast radius
+
+`2,2 Millioune km²` left `km` raw because the shared tier requires the number ADJACENT to the unit. The PR
+identified this correctly and declined to touch `src/core` — the right call for a fan-out agent, and mine to
+make as reviewer. The fix is symmetric with code that already existed: currency has matched `magAlt` on
+**both** sides of the number since the Nepali run; the unit path never did.
+
+Blast radius measured before writing anything, over every corpus whose language declares both `magnitudes`
+and `units` (35 languages):
+
+```
+af 1 · az 1 · nl 1 · el 1 · lb 1 · mk 1 · ta 1     TOTAL 7
+```
+
+**Seven utterances, and all seven are the same FLEURS sentence** — the 15-island archipelago. Six other
+languages were shipping the identical defect. Corpus diff for each of the six confirms exactly one utterance
+changed and no class regression (nl's DROP 1 and ta's DROP 2 are pre-existing and unmoved):
+
+```
+af  - ər tviə kɔma tviə məljun km tviə fan di siə
+af  + ər tviə kɔma tviə məljun firkantə kilɔmiətər fan di siə
+az  + … miljˈon kvɑdɾˈɑt ciɫomˈetɾ …      nl + … mˈɪljun vˈirkˈɑntə kˈiloːmətər
+mk  + … milˈiɔni kvˈadratni kiɫˈɔmɛtri     el + … tetɾaɣonika milia
+ta  + … mˈɪlːɪjɐn t͡ɕˈɐd̪ʊɾɐ kˈɪloːmˌiːʈːɐr
+```
+
+Each also removes a stranded "two" — the `2` of `km2` had been read as a number. The magnitude is
+re-emitted verbatim (trap 10) and governs the count form through the language's own `countForm` via `MANY`,
+the same constant and the same reasoning `withMagnitude` uses on the currency side.
+
+German is untouched and still reads `2,2 Millionen km2` wrongly, for a different reason: its layer converts
+the decimal comma to *Komma* BEFORE the tier, so `NUM` no longer matches. Zero corpus instances; recorded,
+not chased.
+
+### `Yen`: kept, and the record strengthened
+
+Re-verified at TOKEN level, because a substring grep is what makes this class look sourced when it is not.
+The lb corpus's 2 apparent hits are `Libyen` and `Webproxyen`; espeak `lb_list`'s 19 are all `-yen` plurals
+(`babyen`, `moyen`, `libyen`, `whiskyen`); the wikipron referee has none. So: **unsourced, confirmed.**
+
+Kept anyway, and this is the whole argument: `¥` carries 3 of the corpus's 6 currency instances, and
+dropping the declaration deletes the currency outright from the only sentence that has one — #584's
+inaudible sign, the one outcome that cannot be right. `£` stays undeclared, because its sign is absent from
+the corpus: there is no reading to lose, so the word would be a pure guess.
+
+### Items left, with the PR's reasoning intact
+
+Item 2 (bare `1` before a noun, 0 instances), item 5 (a hyphen range — `\d-\d` has 0 instances against many
+`-N` compounds, trap 9), item 7 (`bzw.` ×1 inside a German-flavoured sentence; `Prof.`/`etc.` ×0; the
+one-letter unit keys, which are the Dutch `Il-76s` hazard; `£` above).
+
+### Verification
+
+Delta against the PR as submitted: **40 utterances — 32 parenthetical dashes, 7 Eifeler, 1 magnitude**, and
+nothing else.
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2732 tests, 0 failed** (4 new: 3 lb + 1 core) |
+| `mine.ts scan --lang lb` | 134 lines, **no defects** |
+| `review.ts --lang lb` | checklist clean; `Yen` is the one `??`, argued above |
+| `corpus-diff` lb_lu | **218/1896 (11.5%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 9) |
+| `corpus-diff` af az nl el mk ta | **1 utterance each**, no class regression |
+| `referee-eval lb` | **unchanged**: 2808/3893 (72.1%), symbol 93.0% |

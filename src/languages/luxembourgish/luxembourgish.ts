@@ -16,7 +16,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { numberToWords } from "./numbers.ts";
+import { applyEifelerRegel, numberToWords } from "./numbers.ts";
 import { normalizeLuxembourgish } from "./normalize.ts";
 
 interface LuxDef {
@@ -157,16 +157,25 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Luxembourgish Latin letters incl. é ë ä + the loan vowels) / number / punctuation token.
-const TOKEN = /([a-zéëäàáâôûüöA-ZÉËÄÀÁÂÔÛÜÖ'-]+)|(\d+)|([.!?…,;:])/gu;
+// The ASCII hyphen is inside the WORD class (`Typ-1-Diabetes`, `COVID-19`); the EN DASH is punctuation,
+// and had to be added to both this class and `clausePunctuation` or it is silently discarded — 31
+// utterances lost a clause break that way. Ranges never reach here as dashes: step 10 rewrites them.
+const TOKEN = /([a-zéëäàáâôûüöA-ZÉËÄÀÁÂÔÛÜÖ'-]+)|(\d+)|([.!?…,;:–])/gu;
 
 /**
  * #562 symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
  * Dollar), so no `countForm` override is needed. Sourcing, per §5e:
  *   Prozent — corpus ×14 + espeak lb_list · Dollar — corpus ×7 · Euro — corpus ×1 + espeak ·
  *   Kilometer/Meter/Zentimeter/Millimeter/Gramm/Meilen/Stonn/Sekonn — espeak lb_list · Hektar — espeak.
- *   **Yen is attested in NO in-repo source** and is shipped only because ¥ carries 3 of the corpus's 6
- *   currency instances; see the investigation doc. £ is not declared — its sign is absent from the corpus
- *   and its word is unsourced.
+ *   **Yen is attested in NO in-repo source**, re-verified at TOKEN level during review because a
+ *   substring grep is what makes this class look sourced when it is not: the lb corpus's 2 apparent hits
+ *   are `Libyen` and `Webproxyen`, and espeak lb_list's 19 are all `-yen` plurals (`babyen`, `moyen`,
+ *   `libyen`, `whiskyen`). Zero in the wikipron referee. Kept anyway, and this is the whole of the
+ *   argument: `¥` carries 3 of the corpus's 6 currency instances and DROPPING it deletes the currency
+ *   outright from the only sentence that has one (#584 — an inaudible sign is the one outcome that cannot
+ *   be right). The spelling is German's, which lb shares for this loan, and de/nl and seven other shipped
+ *   languages carry the identical `??` residue. £ is NOT declared — its sign is absent from the corpus, so
+ *   there is no reading to lose and the word would be a pure guess.
  * The two RATE idioms are lifted verbatim from the corpus, which writes both:
  *   `240 Kilometer an der Stonn (149 Meilen an der Stonn)` and `1,5 Kilometer pro Sekonn`.
  * `g`, `t` and `ha` are deliberately NOT declared: `50 Hektar` is written out, there is no bare `\dg`
@@ -203,7 +212,30 @@ class LuxembourgishPhonemizer implements Phonemizer {
         return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            //
+            // THE EIFELER REGEL APPLIES ACROSS THE NUMBER'S RIGHT EDGE TOO. `7 Kilometer` was read
+            // *siwen kilomètre* where the language says *siwe Kilometer* — and the corpus proves the rule
+            // on numerals itself, writing `siwe bis aacht`. normalize.ts already applies it wherever IT
+            // emits a numeral word (the range operand, the ordinal ending, the fraction numerator); the
+            // plain number path did not, so the sandhi was right in the rewritten cases and wrong in the
+            // ordinary one. Measured: 9 utterances in lb_lu, every one on *siwen*, which is effectively
+            // the only lb numeral ending in an unstressed ⟨-en⟩.
+            //
+            // The `/en$/` guard is load-bearing and is the same one the range rule carries: a bare final
+            // ⟨n⟩ test strips the STEM of *Millioun* (1 000 000 → *eng Milliou*). It cannot move inside
+            // applyEifelerRegel, because the numeral CONNECTOR *an* → *a* is a two-letter function word
+            // that the rule also governs and that no `-en` test matches.
+            else if (m[2]) {
+                const words = numberToWords(Number(m[2])).split(" ");
+                // The follower must be a LETTER. Before a pause the ⟨n⟩ is RETAINED, and `Et sinn 7.`
+                // proved the point: trimming whitespace alone handed the rule a `.`, which is outside the
+                // keeper set, so the sandhi fired across a sentence boundary and said *siwe*.
+                const after = /^\s*([\p{L}\p{M}])/u.exec((m.input ?? "").slice((m.index ?? 0) + m[0].length));
+                const last = words.length - 1;
+                if (after !== null && /en$/u.test(words[last]!))
+                    words[last] = applyEifelerRegel(words[last]!, after[1]!);
+                for (const wd of words) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

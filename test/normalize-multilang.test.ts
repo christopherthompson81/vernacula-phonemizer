@@ -20,6 +20,28 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("40%")).toBe("yüzde 40");
     });
 
+    // A MAGNITUDE MAY SIT BETWEEN THE NUMBER AND A UNIT too, not just a currency sign. Without it the
+    // number is not adjacent to the unit, the match fails, and the unit reaches the IPA as RAW LETTERS —
+    // `2,2 Millioune km²` read `km` plus a stranded "2". Seven corpus utterances across af/az/nl/el/lb/mk/ta,
+    // all the same FLEURS sentence; six languages shipped the defect (#604).
+    test("a unit hops the magnitude too, and the magnitude governs the count", () => {
+        const n = makeSymbolNormalizer({
+            percent: ["percent"],
+            units: { km: ["kilometre", "kilometres"] },
+            magnitudes: ["million"],
+            exponentWords: { squared: ["square"], position: "before" },
+        });
+        expect(n("2.2 million km2")).toBe("2.2 million square kilometres");
+        expect(n("5 million km")).toBe("5 million kilometres");
+        // A magnitude counts as MANY, so the plural is selected even when the numeral itself is 1.
+        expect(n("1 million km")).toBe("1 million kilometres");
+        expect(n("1 km")).toBe("1 kilometre"); // …and a bare 1 still takes the singular
+        expect(n("5 km")).toBe("5 kilometres");
+        // A magnitude the language did not declare is not a magnitude: leave the text alone rather than
+        // silently swallow the word between.
+        expect(n("2 zillion km")).toBe("2 zillion km");
+    });
+
     test("currency hops the magnitude and agrees in count", () => {
         const n = makeSymbolNormalizer({
             percent: ["percent"],
