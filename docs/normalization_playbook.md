@@ -39,7 +39,7 @@ npx tsx tools/normalization/mine.ts mine --in fleurs:hu_hu --out tools/corpus/mi
     --lang hu --source "FLEURS hu_hu" --per-cell 4 --sample 30
 
 # a language WITHOUT one — mine a Wikipedia dump (see #585; my.jsonc is the worked example)
-python3 tools/wikidump-to-text.py xxwiki.xml.bz2 xx_paras.txt
+python3 tools/normalization/wikidump-to-text.py xxwiki.xml.bz2 xx_paras.txt
 npx tsx tools/normalization/mine.ts mine --in xx_paras.txt --out tools/corpus/mined/xx.jsonc \
     --lang xx --segment paragraph --terms xx_terms.txt --per-cell 6 --sample 40
 ```
@@ -534,6 +534,58 @@ that one was 31 lost pauses.
   language declares both `magnitudes` and `units`: 7 utterances in 7 languages, all the SAME sentence, six
   of them shipping the identical defect. Bounded like that, a core fix is cheaper than seven local ones —
   but run the per-language corpus diff for every affected language before believing it.
+
+
+## Before you defer a class, look it up — `tools/normalization/sources.ts`
+
+Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
+They are the same handful of VOCABULARY CLASSES recurring, and each deferral turns on one question: *is there
+a source for this class in this language?*
+
+| class | mentioned in | the blocker |
+|---|---:|---|
+| initialisms / letter names | **20 of 25** | a `letterName` table — without one `core/initialisms.ts` is a NO-OP |
+| era markers | 18 | a sourced era phrase, usually needing assembly |
+| fraction denominators | 16 | the language's own denominator series |
+| rate + frequency units | 14 | unit borrowings (the class §5e excludes by measurement) |
+| sports-time / colon | 14 | no attested reading for a pace |
+
+Every one was hand-investigated per language, and the cost is not the time — it is that **it was got wrong**.
+Slovak deferred 119 initialisms as "a separate seam" when the seam existed, ~30 languages wired it, and
+espeak carried Slovak's full letter table. `sources.ts` is trap 16 mechanised:
+
+```
+$ npx tsx tools/normalization/sources.ts --lang om
+  [ ok ] letter-names     espeak 27 letters — WIREABLE, not yet wired
+  [ ok ] decimal-point    espeak _dpt + espeak _. + manifest decimalWord
+  [  · ] era-phrase       no era marker in the corpus
+  [NONE] scale-names      ° occurs, neither scale name anywhere — the letter gets dropped
+  [part] fraction-series  an ordinal/denominator series exists to compose from — verify each form
+```
+
+`--all` gives the fleet as a matrix. The headline number is that **letter names are absent for 94 of the
+registered languages**, so initialisms are structurally blocked for most of the fleet — that is a sourcing
+problem, not a coding one, and it is worth knowing before anyone plans the work.
+
+**Three false positives its own first runs produced, all now fixed, all instructive:**
+
+- **An espeak `$directive` is not a pronunciation.** `lb_list`'s letter block is 2 real names plus fourteen
+  `à  $accent` entries; counting those reported 18 of 26 — "partial" for a language that has two.
+- **Reading CODE is not reading DATA.** The percent/currency classes read source rather than structured
+  fields, and the first pass produced 14 + 10 false NONEs; catching the emit-from-`normalize.ts` shape took
+  it to 6 + 2, and `as`/`th`/`fa` STILL reported negative while carrying শতাংশ, เปอร์เซ็นต์ and درصد. Three
+  known false negatives out of six is not a verdict, so those two classes now report **`chk?`** and defer to
+  `review.ts`, which tests the READING instead of the source.
+- **A comment documenting an absence is not evidence of presence.** Oromo reported `scale-names: Celsius
+  Fahrenheit` from its own file — where the only occurrences are the comment recording that neither is
+  sourceable, part of it written during that PR's review. Comments are stripped now. Verified against three
+  hand-established ground truths afterwards: om NONE, zu partial/Fahrenheit, xh NONE, each matching what its
+  review concluded.
+
+**And the standing caveat: availability is not correctness.** An `ok` says a source exists, never that the
+word fits the slot. `ff hakkunde`, `ms paun` (the weight, not the currency), `zu amaphuzu` (sports points,
+not the decimal point) and the Gabonese district `Idola` all pass this report and fail on sense. Read the
+source — that is `attest.ts`'s example column, and it is the half no tool can do.
 
 ---
 

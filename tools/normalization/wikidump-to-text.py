@@ -20,7 +20,7 @@ symbols intact — not faithful wikitext rendering. So:
 
 Digits, %, currency, degrees and dashes are left exactly as written — they are the entire point.
 
-Usage:  python3 tools/wikidump-to-text.py mywiki.xml.bz2 out.txt [--max-articles N]
+Usage:  python3 tools/normalization/wikidump-to-text.py mywiki.xml.bz2 out.txt [--max-articles N]
 """
 import bz2
 import re

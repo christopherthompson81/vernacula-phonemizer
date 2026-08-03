@@ -198,7 +198,7 @@ Cost of the dump route: wikitext → plain text needs a real extractor (the API 
 commit its output as a reviewable artifact?
 
 **Dump route.** `mywiki-latest-pages-articles.xml.bz2`, 71 MB, extracted by a purpose-written
-`tools/wikidump-to-text.py` (no wikitext library was available; `wikitextparser` and `mwparserfromhell` are
+`tools/normalization/wikidump-to-text.py` (no wikitext library was available; `wikitextparser` and `mwparserfromhell` are
 both absent). 160,490 pages → **454,821 paragraphs** in 98 seconds. That is 578× the text the API route
 produced in dozens of rate-limited requests.
 
