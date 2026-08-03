@@ -34,13 +34,28 @@ const N = loadManifest<LuxNumbersDef>(import.meta.url, "luxembourgish.jsonc").nu
 // consonant. ⟨u⟩ is listed as a vowel head for completeness even though no tens word begins with it.
 const N_KEEPERS = new Set([..."ndtzh", ..."aeiouäëéèáâôûüy"]);
 
+/**
+ * The EIFELER REGEL as a text→text operation: a word-final ⟨n⟩ survives before ⟨n d t z h⟩ and before a
+ * vowel, and is deleted before any other consonant. Before a PAUSE (nothing following) the ⟨n⟩ is kept.
+ *
+ * Exported because normalize.ts needs exactly the same rule for the words IT emits — the ordinal ending
+ * (*vum éischte**n** Dag* but *am drëtte Joerhonnert*), the fraction numerator (*een Drëttel* but *ee
+ * Fënneftel*) and the left operand of a range joined by *bis* (*siwe bis aacht*). One definition, three
+ * callers, so the connector below and the ordinal ending can never drift apart.
+ */
+export function applyEifelerRegel(word: string, following: string): string {
+    if (!word.endsWith("n")) return word;
+    const c = following[0]?.toLowerCase();
+    if (c === undefined) return word; // before a pause the ⟨n⟩ is retained
+    return N_KEEPERS.has(c) ? word : word.slice(0, -1);
+}
+
 const DEF: UnitsFirstDef = {
     ones: N.ones,
     tens: N.tens,
     compoundOnes: N.compoundOnes,
     // "an" → "a" when the following tens word starts with a consonant outside the n/d/t/z/h set.
-    connector: (_unit, tensWord) =>
-        N_KEEPERS.has(tensWord[0]!.toLowerCase()) ? N.connector : N.connector.slice(0, -1),
+    connector: (_unit, tensWord) => applyEifelerRegel(N.connector, tensWord),
     hundred: N.hundred,
     thousand: N.thousand,
     million: N.million,

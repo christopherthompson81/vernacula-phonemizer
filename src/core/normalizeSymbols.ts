@@ -196,9 +196,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // a real word: with `м` declared, Ukrainian `41 м\u2019яч` ("41 balls") read as *сорок один метр\u2019яч*.
     // Reported by the Ukrainian run. Same shape as the Dutch `Il-76s` case — a short unit key is the
     // hazard, and being confidently wrong is worse than leaving the letter raw.
+    // A MAGNITUDE WORD MAY SIT BETWEEN THE NUMBER AND THE UNIT, exactly as it may between the number and
+    // a currency sign — `2,2 Millioune km²`, `2.2 miljoen km2`, `2,2 милиони km2`. Currency has matched
+    // `magAlt` on both sides since the Nepali run; the unit path never did, so the number was not adjacent
+    // to the unit, the match failed, and the unit reached the IPA AS RAW LETTERS. Reported by the
+    // Luxembourgish run (#604), which measured it and correctly declined to touch core.
+    // Blast radius, measured over every corpus whose language declares both `magnitudes` and `units`:
+    // SEVEN utterances, in af, az, nl, el, lb, mk and ta — and all seven are the same FLEURS sentence, the
+    // 15-island archipelago. Six languages were shipping the identical defect.
+    // The magnitude is re-emitted in place: it is the NUMBER's word, not the unit's.
     const unitRe = d.units
         ? new RegExp(
-            `(${NUM})\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
+            `(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
             "giu",
         )
         : null;
@@ -272,8 +281,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         s = s.replace(pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
         s = s.replace(pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
         if (unitRe)
-            s = s.replace(unitRe, (whole, num: string, u: string, denom?: string, exp?: string) => {
-                const head = pick(d.units![u.toLowerCase()]!, numValue(num), cf);
+            s = s.replace(unitRe, (whole, num: string, mag: string | undefined, u: string,
+                denom?: string, exp?: string) => {
+                // The magnitude travels with the NUMBER and is re-emitted verbatim (trap 10 — a rule that
+                // consumes a word must put it back). It also governs the count form the way a LARGE COUNT
+                // does, resolved through the language's own `countForm` via MANY — the same reasoning, and
+                // the same constant, that `withMagnitude` uses for the currency side, and for the same
+                // reason: passing a literal 2 means the PAUCAL to a Slavic selector, and taking the last
+                // entry breaks as soon as a fourth form is appended.
+                const hasMag = mag !== undefined && mag !== "";
+                const q = hasMag ? `${num}${mag}` : num;
+                const n = hasMag ? MANY : numValue(num);
+                const head = pick(d.units![u.toLowerCase()]!, n, cf);
                 if (denom !== undefined) {
                     // A rate needs both nouns and the connective; without any of them leave the text
                     // alone rather than emit half a reading.
@@ -281,19 +300,19 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
                     const per = typeof d.unitPer === "string" ? d.unitPer : d.unitPer?.[dl];
                     if (per === undefined || dWord === undefined) return whole;
-                    return `${num} ${head} ${per} ${dWord}`;
+                    return `${q} ${head} ${per} ${dWord}`;
                 }
                 if (exp !== undefined) {
                     const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
                     if (forms === undefined) return whole; // not declared ⇒ untouched, as before
                     // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
                     // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".
-                    const word = pick(forms, numValue(num), cf);
+                    const word = pick(forms, n, cf);
                     const pos = d.exponentWords?.position ?? "after";
-                    if (pos === "compound") return `${num} ${word}${head}`;
-                    return pos === "before" ? `${num} ${word} ${head}` : `${num} ${head} ${word}`;
+                    if (pos === "compound") return `${q} ${word}${head}`;
+                    return pos === "before" ? `${q} ${word} ${head}` : `${q} ${head} ${word}`;
                 }
-                return `${num} ${head}`;
+                return `${q} ${head}`;
             });
         return s;
     };
