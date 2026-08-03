@@ -47,6 +47,40 @@ describe("shared symbol normalizer (core)", () => {
     // magnitude and `m³` reached the IPA as the English letter name (*ˈɛm*) — the same failure the spaced
     // case had. The magnitude is re-emitted verbatim, so it keeps its space when it has one and none when it
     // does not. Measured over all 66 FLEURS corpora: no corpus reading changes, so this is robustness.
+    // #586, found by the zh.wikipedia fill. The boundary guards assume spaces between words, so in Chinese and
+    // Japanese — where a unit or sign is normally flanked by Han/kana — they rejected the ORDINARY case and
+    // only punctuation-adjacent instances worked.
+    test("unspacedScript: a Han neighbour is a boundary, not token-continuation", () => {
+        const n = makeSymbolNormalizer({
+            percent: ["百分之"], percentPrefix: true,
+            currency: { $: ["美元"] },
+            units: { km: ["公里"], "℃": ["摄氏度"] },
+            exponentWords: { squared: ["平方"], position: "compound" },
+            unspacedScript: true,
+        });
+        expect(n("38℃很热")).toBe("38 摄氏度很热"); // was: the ℃ dropped
+        expect(n("為$500，")).toBe("為500 美元，"); // was: the $ dropped
+        expect(n("50 km²的面积")).toBe("50 平方公里的面积"); // was: the exponent dropped
+        // …and the guard still does its job against a LATIN neighbour, which can continue the key.
+        expect(n("50 kmx")).toBe("50 kmx");
+    });
+
+    // A DOTTED DESIGNATION IS NOT A QUANTITY. `802.11g` read as "802.11 grams" in ten languages, because the
+    // one-letter unit key matched the version suffix. Measured over all 66 corpora: 444 dotted-version
+    // instances against 4 decimals glued to a one-letter unit (and those are period thousands separators).
+    test("a dotted version is not a unit (#586)", () => {
+        const n = makeSymbolNormalizer({ percent: ["pct"], units: { g: ["gram"], km: ["km-word"], m: ["metre"] } });
+        expect(n("802.11g")).toBe("802.11g"); // was "802.11 gram"
+        expect(n("802.11n")).toBe("802.11n");
+        // The narrowness is the point — all of these still read:
+        expect(n("12.5 g")).toBe("12.5 gram"); // not glued
+        expect(n("12.5km")).toBe("12.5 km-word"); // two-letter key
+        expect(n("1,000 km")).toBe("1,000 km-word");
+        expect(n("3,5 m")).toBe("3,5 metre");
+        // The measured cost: a decimal GLUED to a one-letter unit is no longer read. 4 corpus instances.
+        expect(n("4.892m")).toBe("4.892m");
+    });
+
     test("an unspaced magnitude still hops, and keeps its own spacing", () => {
         const n = makeSymbolNormalizer({
             percent: ["百分之"],

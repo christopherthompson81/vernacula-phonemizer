@@ -679,6 +679,46 @@ with. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
   fuse the measure word into the unit. So the measurement — 21 languages leak a raw `km`, 7 lose the unit —
   went into the file's header for the sweep instead of into a gate that would cry wolf.
 
+**27. A GUARD THAT ASSUMES SPACES BETWEEN WORDS REJECTS THE ORDINARY CASE WHERE THERE ARE NONE.** The shared
+tier brackets currency keys and unit abbreviations with `(?<![\p{L}\p{M}])…(?![\p{L}\p{M}])`, so a short key
+cannot bite into a word (Ukrainian `41 м'яч`, Dutch `Il-76s`). In Chinese and Japanese a unit or sign is
+**normally** flanked by Han or kana, so the guard rejected the normal case and only punctuation-adjacent
+instances worked:
+
+```
+38℃。 → 摄氏度 ✓      38℃很热 → ℃ DROPPED        $500。 → 美元 ✓   為$500，→ $ DROPPED
+50 km²。→ 平方公里 ✓   50 km²的面积 → ² DROPPED   20 °C。→ ✓        20°C很热 → reads C as English *sˈiː*
+```
+
+- **FLEURS could not show this, and the corpus diff proves it: 0/1999.** The cmn corpus writes its units as
+  words (平方公里) and its handful of signs sit next to punctuation. It took a `fetch --fill` (trap 25) to
+  surface, which is the strongest argument yet for the hybrid artifact.
+- **Fix it as opt-in DATA, not globally.** `unspacedScript: true` narrows "any letter" to "a Latin letter",
+  because a Han/kana neighbour is already a token boundary by script change. Global relaxation would have
+  disarmed the guard for the alphabetic languages that need it.
+- **Check the sibling scripts, and check what they actually declare.** ja had the identical readings and got
+  the flag; yue and th show them too but declare only `percent` through the tier, so theirs is a missing
+  DECLARATION, not a guard problem. Say which is which rather than filing one bug.
+
+**28. A DOTTED DESIGNATION IS NOT A QUANTITY — AND A ONE-LETTER UNIT KEY WILL CLAIM IT.** `802.11g` read as
+"802.11 GRAMS" in ten languages (ar bn cmn el es fr id ja pt ur), because `g` is a declared unit. Measured over
+all 66 corpora, since the Wi-Fi article was translated into nearly all of them:
+
+```
+dotted VERSION glued to one letter (802.11n/a/b/g)   444
+a DECIMAL glued to a one-letter unit                   4   (and those are period THOUSANDS separators)
+```
+
+- **444 against 4 is the whole argument.** State both numbers; the cost is real and small, and hiding it would
+  make the guard look free.
+- **A lookahead alone does not work.** Rejected at `802`, the engine retries from the FRACTIONAL part and
+  matches `11g` on its own. It needs a lookbehind to stop a match beginning inside a number AND a lookahead to
+  stop one beginning at the front of it.
+- **Keep it narrow.** `12.5km` (two-letter key), `12.5 g` (not glued) and `1,000 km` must all still read.
+- **The fix landed because a NEW change surfaced an OLD defect.** `unspacedScript` widened this from the bare
+  form to the kana-followed form; the bare form had been wrong all along. When your change makes an existing
+  bug more visible, fix the bug rather than reverting the change.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

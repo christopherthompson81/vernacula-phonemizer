@@ -45,6 +45,12 @@ const SYMBOLS = makeSymbolNormalizer({
     },
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
     currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
+    // Japanese has no spaces either, so the tier's letter-boundary guards were rejecting its ordinary case
+    // the same way they were Chinese's: `20℃は暑い` dropped the ℃ and `50 km²の` lost the exponent, while their
+    // punctuation-adjacent twins worked. Found by extending the cmn measurement (#586) to the other unspaced
+    // scripts. yue and th show the same readings but declare only `percent` through this tier, so theirs is a
+    // missing DECLARATION rather than a guard problem — recorded for the sweep, not fixed here.
+    unspacedScript: true,
 });
 
 class JapanesePhonemizer implements Phonemizer {

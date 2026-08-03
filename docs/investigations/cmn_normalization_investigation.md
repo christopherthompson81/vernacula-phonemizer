@@ -338,6 +338,85 @@ naming cmn and yue as sourced when neither is.
 
 ---
 
+## Run 11 — 2026-08-03 — the hybrid fill, and the core defect FLEURS could never show
+
+**Question.** cmn's artifact was FLEURS-only at **17/29 cells**, with `currency`, `signed-number`, `exponent`,
+`arithmetic` and `ampersand` all EMPTY — the very rules Run 3 added. What does filling them say?
+
+```
+fetch --wiki zh --fill currency,exponent,arithmetic,ampersand,dotted,era-marker,ordinal-latin,iteration
+  currency 11528 hits · arithmetic 129801 · ampersand 194608 · dotted 69591 · era-marker 2389
+  ordinal-latin 47640 · exponent 1191 · iteration 175      → 160 passages
+fetch --wiki zh --fill signed-number                        → 20 passages
+```
+
+`--fill negative` reported **`unknown cell: negative`** — the cell was renamed `signed-number` since cmn was
+mined, which is its own finding: the artifact's `counts` block is keyed on names that no longer exist.
+
+Merged with FLEURS: **17/29 → 32/35 covered.** Then the scan:
+
+```
+DROP currency ×2   索科羅縣的住戶收入中位數為$23,439，而家庭收入中位數則為$29,544。
+DROP degree   ×1   2℃之间，总体分布趋势为…
+DROP iteration ×2  …คนอ้วน ๆ（khon uan uan…       ← THAI, quoted in a Chinese article ABOUT Thai
+REDUNDANT currency ×3   …判罰$40,000美元的罰款…      ← correctly downgraded, sign + word both present
+```
+
+**THE BOUNDARY GUARDS ASSUME SPACES BETWEEN WORDS.** Probing the two real ones:
+
+```
+38℃。      → 摄氏度 ✓        38℃很热     → ℃ DROPPED
+$500。     → 美元 ✓          為$500，    → $ DROPPED
+50 km²。   → 平方公里 ✓       50 km²的面积 → ² DROPPED
+20 °C。    → 摄氏度 ✓        20°C很热    → reads the C as English *sˈiː*
+```
+
+The tier guards currency keys and unit abbreviations with `(?<![\p{L}\p{M}])…(?![\p{L}\p{M}])`, so that a
+short key cannot bite into a word (Ukrainian `41 м'яч`, Dutch `Il-76s`). In Chinese there are no spaces, so a
+unit or sign is **normally** flanked by Han — and the guard rejects the ordinary case. Only the
+punctuation-adjacent instances ever worked, which is precisely why FLEURS could not show it: the cmn corpus
+writes its units as words (平方公里) and its few signs sit next to punctuation. **The FLEURS corpus diff for
+this change is 0/1999.**
+
+Fixed with `unspacedScript: true` in `SymbolData` — opt-in, because the guard is load-bearing where words ARE
+spaced. It narrows "any letter" to "a Latin letter", since a Han or kana neighbour is already a boundary by
+script change. Extended to **ja**, which had the identical readings (`20℃は暑い`, `50 km²の`); **yue** and **th**
+show them too but declare only `percent` through the tier, so theirs is a missing declaration, not a guard.
+
+---
+
+## Run 12 — 2026-08-03 — the flag exposed a second, older defect
+
+`unspacedScript` on ja changed 15 corpus utterances. Fourteen were raw-Latin leaks becoming words
+(`ˈʊkm` → キロメートル, `ˈɛm` → メートル, a bare `m` → ミリメートル). **One was a regression:**
+
+```
+802.11gとの互換性    "gee" → "GRAMS"
+```
+
+The one-letter unit key `g` matching a version suffix. And the bare `802.11g` was **already** reading as グラム
+before the flag — so this is an older, wider defect that the flag merely widened. Measured over all 66 corpora,
+because the Wi-Fi article was translated into nearly every one:
+
+```
+dotted VERSION glued to one letter (802.11n/a/b/g)   444
+a DECIMAL glued to a one-letter unit                   4   (4.892m ×3, 3.50m ×1 — and those are period
+                                                            THOUSANDS separators, not decimals)
+```
+
+So a `NOT_VERSION` guard now rejects a number-with-a-dot glued to exactly ONE trailing letter. **Both a
+lookbehind and a lookahead are needed**: rejected at `802`, the engine simply retried from the fractional part
+and matched `11g` alone. It is deliberately narrow — `12.5km` (two-letter key), `12.5 g` (not glued) and
+`1,000 km` all still read; the measured cost is those 4 instances.
+
+It fixes `802.11g` in **ten languages** that were reading "grams": ar bn cmn el es fr id ja pt ur. Seven now
+read the letter name; es, pt and id emit a bare `ɡ` because they have no letter-name table — the
+`letter-names` gap this loop-back already counted at 96 of 187. Both beat *confidently wrong*.
+
+This is why `version-dot` is an inventory cell: it had no protection in core at all.
+
+---
+
 ## What this run says about #586
 
 **Most of the findings are in the tooling and core, not the language.** `attest.ts` structurally unable to

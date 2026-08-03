@@ -13,58 +13,69 @@
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
 // abbreviation dots and emptied three cells that a grep showed were well populated.
 //
-// source: FLEURS en_us
+// source: FLEURS en_us + en.wikipedia (targeted fill)
 // segmentation: sentence (abbreviation dots protected before splitting)
 {
     "language": "en",
-    "source": "FLEURS en_us",
+    "source": "FLEURS en_us + en.wikipedia (targeted fill)",
     "segmentMode": "sentence",
-    "totalSegments": 1970,
-    "cellsCovered": 24,
-    "cellsTotal": 29,
+    "totalSegments": 18423,
+    "cellsCovered": 31,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
-        "degrees": 2,          // in 22 treated languages
-        "digit-run": 149,      // in 19 treated languages
-        "fractions": 1,        // in 18 treated languages
-        "clock": 21,           // in 18 treated languages
-        "signs": 15,           // in 17 treated languages
-        "dotted": 25,          // in 16 treated languages
-        "era-marker": 8,       // in 14 treated languages
-        "year": 149,           // in 14 treated languages
-        "decimals": 57,        // in 12 treated languages
-        "ordinal-latin": 39,   // in 11 treated languages
+        "degrees": 57,         // in 22 treated languages
+        "digit-run": 5527,     // in 19 treated languages
+        "fractions": 29,       // in 18 treated languages
+        "clock": 45,           // in 18 treated languages
+        "signs": 1085,         // in 17 treated languages
+        "dotted": 307,         // in 16 treated languages
+        "era-marker": 35,      // in 14 treated languages
+        "year": 5505,          // in 14 treated languages
+        "decimals": 792,       // in 12 treated languages
+        "ordinal-latin": 589,  // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 26,           // in 9 treated languages
-        "ranges": 17,          // in 7 treated languages
-        "currency": 9,         // in 6 treated languages
-        "abbrev": 92,          // in 6 treated languages
-        "latin-in-native": 1970, // in 6 treated languages
-        "percent": 4,          // in 5 treated languages
-        "rate": 8,             // in 4 treated languages
-        "zero-width": 1,       // in 4 treated languages
-        "roman": 7,            // in 3 treated languages
-        "initialism": 158,     // in 3 treated languages
-        "grouped": 38,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
-        "letter-name": 111,    // in 3 treated languages
+        "units": 121,          // in 9 treated languages
+        "ranges": 430,         // in 7 treated languages
+        "currency": 399,       // in 6 treated languages
+        "abbrev": 2231,        // in 6 treated languages
+        "latin-in-native": 18419, // in 6 treated languages
+        "percent": 661,        // in 5 treated languages
+        "rate": 15,            // in 4 treated languages
+        "zero-width": 3,       // in 4 treated languages
+        "roman": 332,          // in 3 treated languages
+        "initialism": 3108,    // in 3 treated languages
+        "grouped": 771,        // in 3 treated languages
+        "signed-number": 19,   // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
+        "letter-name": 1323,   // in 3 treated languages
         "exponent": 2,         // in 24 treated languages
-        "arithmetic": 0,       // in 2 treated languages
-        "ampersand": 3,        // in 1 treated languages
+        "arithmetic": 3,       // in 2 treated languages
+        "ampersand": 93,       // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 2,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 3261,  // in 4 treated languages
+        "scaled-currency": 268, // in 3 treated languages
+        "ordinal-caps": 2,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Montevideo is in the subtropics; in the summer months, temperatures above +30°C are common." },
         { "cell": "degrees", "text": "Fred is the strongest tropical cyclone ever recorded so far south and east in the Atlantic since the advent of satellite imagery, and only the third major hurricane on record east of 35°W." },
+        { "cell": "degrees", "text": "Winter temperatures vary from 0 °C (32 °F) in the Alps to 12 °C (54 °F) in Sicily; so, average summer temperatures range from 20 °C (68 °F) to over 25 °C (77 °F)." },
+        { "cell": "degrees", "text": "5 °F) in the last 100 years, twice the worldwide temperature rise. The goal of the Taiwanese government is to cut carbon emissions by 20 percent in 2030 and by 50 percent in 2050, compared to 2005 levels." },
         { "cell": "digit-run", "text": "Out of 1,400 people polled prior to the 2010 federal election, those who oppose Australia becoming a republic grew by 8 per cent since 2008." },
         { "cell": "digit-run", "text": "For example, “learning” and “socialization” are suggested as important motivations for Internet use (James et al., 1995)." },
         { "cell": "digit-run", "text": "Eventually, wooden wheels were replaced by iron wheels. In 1767, the first full-iron rails were introduced." },
         { "cell": "digit-run", "text": "The northern part or Sentinel Range has Antarctica's highest mountains, the Vinson Massif, peaking at 4892 m Mount Vinson." },
         { "cell": "fractions", "text": "While no one knows for certain who wrote it, it is known that early in its life, the large parchment document (it measures 29¾ inches by 24½ inches) was rolled up for storage." },
+        { "cell": "fractions", "text": "38/10, ranking it 76th globally out of 172 countries." },
+        { "cell": "fractions", "text": "The seismic hazard map for Taiwan by the USGS shows 9/10 of the island at the most hazardous rating." },
+        { "cell": "fractions", "text": "37/10, ranking it 43rd globally out of 172 countries." },
         { "cell": "clock", "text": "Between 10:00-11:00 pm MDT, a fire was started by the inmates in the yard." },
         { "cell": "clock", "text": "The 802.11n standard operates on both the 2.4Ghz and 5.0Ghz frequencies." },
         { "cell": "clock", "text": "This will allow it to be backwards compatible with 802.11a, 802.11b and 802.11g, provided that the base station has dual radios." },
@@ -115,11 +126,15 @@
         { "cell": "latin-in-native", "text": "Robin Uthappa made the innings highest score, 70 runs in just 41 balls by hitting 11 fours and 2 sixes." },
         { "cell": "percent", "text": "Nadal bagged 88% net points in the match winning 76 points in the first serve." },
         { "cell": "percent", "text": "European Turkey (eastern Thrace or Rumelia in the Balkan peninsula) includes 3% of the country." },
+        { "cell": "percent", "text": "Sony Music would have the option to buy half of his stake, or about 25% of the catalog, at a set price." },
+        { "cell": "percent", "text": "Overall web traffic increased by between 11% and 20%." },
         { "cell": "rate", "text": "The speeds of 802.11n are substantially faster than that of its predecessors with a maximum theoretical throughput of 600Mbit/s." },
         { "cell": "rate", "text": "The New Zealand police had trouble using their speed radar guns to see how fast Mr Reid was going because of how low Black Beauty is, and the only time the police managed to clock Mr Reid was when he slowed down to 160km/h." },
         { "cell": "rate", "text": "Fred currently has winds of 105 miles per hour (165 km/h) and is moving towards the northwest." },
         { "cell": "rate", "text": "Posted speed limits are noticeably lower than in previous and subsequent sections — commonly 35-40 mph (56-64 km/h) — and strict obedience to them is even more important than otherwise." },
         { "cell": "zero-width", "text": "The AI ​​system is now often used in the fields of economics, medicine, engineering and the military, as has been built in several home computer and video game software applications." },
+        { "cell": "zero-width", "text": "Official website Minecraft Wiki – ⁠⁠⁠⁠⁠⁠an unofficial encyclopedia documenting the game Minecraft Classic –⁠⁠⁠⁠⁠⁠ a remake version based on an old version of Minecraft Your Name (Japanese: 君の名は。" },
+        { "cell": "zero-width", "text": "On November 15, 1965, Walt, along with Roy and Florida's governor Haydon Burns, announced plans for a park called Disney World, which included Magic Kingdom—‌a larger version of Disneyland‍—‌and the City of Tomorrow, at the park's center." },
         { "cell": "roman", "text": "During the struggle for independence organised by the Mau movement, a peaceful gathering in the town resulted in the killing of the paramount chief Tupua Tamasese Lealofi III." },
         { "cell": "roman", "text": "French law was changed. His activism went back to age 15 when he joined the French Resistance during World War II." },
         { "cell": "roman", "text": "34 per cent of those in the poll share this view, wanting Queen Elizabeth II to be Australia's last monarch." },
@@ -132,47 +147,67 @@
         { "cell": "grouped", "text": "Goats seem to have been first domesticated roughly 10,000 years ago in the Zagros Mountains of Iran." },
         { "cell": "grouped", "text": "Since 1966 the Sundarbans have been a wildlife sanctuary, and it is estimated that there are now 400 Royal Bengal tigers and about 30,000 spotted deer in the area." },
         { "cell": "grouped", "text": "However, these plans were rendered obsolete nearly overnight, when over 800,000 soldiers from the Soviet's Union Red Army entered and created the Belarussian and Ukrainian fronts after invading the eastern regions of Poland in violation of the Riga Peace Treaty, the Soviet-Polish Non-Aggression Pact, and other international treaties, both bilateral and multilateral." },
+        { "cell": "signed-number", "text": "6 million farms in 2010 (−32% since 2000) covering 12,700,000 ha or 31,382,383 acres (63% are in south Italy)." },
+        { "cell": "signed-number", "text": "The highest point is Jabal Umm al Dami, at 1,854 m (6,083 ft) above sea level, while the lowest is the Dead Sea −420 m (−1,378 ft), the lowest land point on Earth." },
+        { "cell": "signed-number", "text": "The highlight came at the 2016 Rio Olympic Games when Ahmad Abughaush won Jordan's first ever medal of any colour at the games by taking gold in the −67 kg weight." },
+        { "cell": "signed-number", "text": "9 °F) on 28 and 30 August 1881, and the lowest temperature recorded was −6." },
         { "cell": "letter-name", "text": "A former Filipino policeman has kept Hong Kong tourists hostage by hijacking their bus in Manila, the capital of the Philippines." },
         { "cell": "letter-name", "text": "A curry can be either \"dry\" or \"wet\" depending on the amount of liquid." },
         { "cell": "letter-name", "text": "I lost my sister and her friend, and on my way there were two disabled people in wheelchairs, people just jumping over and pushing them,\" Armand Versace said." },
         { "cell": "letter-name", "text": "I don't know if you realize it or not, but most of the goods from Central America came into this country duty-free." },
         { "cell": "exponent", "text": "The Sundarbans cover an area of 3,850 km², of which about one-third is covered in water/marsh areas." },
+        { "cell": "arithmetic", "text": "Ethiopia has 926 km of electrified 1,435 mm (4 ft 8+1⁄2 in) standard gauge railways, 656 km for the Addis Ababa–Djibouti Railway between Addis Ababa and the Port of Djibouti (via Awash) and 270 km for the Awash–Hara Gebeya Railway between Addis Ababa and the twin cities of Dessie/Kombolcha." },
+        { "cell": "arithmetic", "text": "Ethiopian education is governed by the Ministry of Education and uses a 4+4+2+2 system; elementary education consists of eight years, divided into two cycles of four years, and four years of secondary education, divided into two stages of two years." },
+        { "cell": "arithmetic", "text": "This would have modified the base Minecraft game to use Lego bricks, which meant adapting the basic 1×1 block to account for larger pieces typically used in Lego sets. Persson worked on an early version called \"Project Rex Kwon Do\", named after the character of the same name from the film Napoleon Dynamite." },
         { "cell": "ampersand", "text": "He graduated from the College of Arts & Sciences of the University of Virginia in 1950 and was a significant donor to that institution." },
         { "cell": "ampersand", "text": "Airlines such as Emirates, Etihad Airways, Qatar Airways & Turkish Airlines have greatly expanded their services to Africa, and offer connections to many major African cities at competitive rates than other European airlines." },
-        { "cell": "ampersand", "text": "At the top end, B&Bs obviously compete mainly on two main things: bedding and breakfast." }
+        { "cell": "ampersand", "text": "At the top end, B&Bs obviously compete mainly on two main things: bedding and breakfast." },
+        { "cell": "ampersand", "text": "From 1966 to 1968, the Jackson 5 toured throughout the Midwest, performing frequently on the Chitlin' Circuit as an opening act for artists such as Sam & Dave, the O'Jays, Gladys Knight, and Etta James." },
+        { "cell": "sports-time", "text": "Her other race, the Giant Slalom, saw her finish in tenth in the women's sitting group with a combined run time of 4:41.30, 2:11.60 minutes slower than first place finisher Austrian Claudia Loesch and 1:09.02 minutes slower than the ninth place finisher Gyöngyi Dani of Hungary." },
+        { "cell": "sports-time", "text": "Abebe Bikila became the first athlete from a Sub-Saharan country to win an Olympic gold medal when he won the Marathon at the 1960 Rome Olympic Games in a world record time of 2:15:16." },
+        { "cell": "quote-letter", "text": "Scientists think that ocelots follow and find animals to eat (prey) by smell, sniffing for where they've been on the ground." },
+        { "cell": "quote-letter", "text": "Ancient Roman meals couldn't have included foods that came to Europe from America or from Asia in later centuries." },
+        { "cell": "quote-letter", "text": "That didn't seem to make sense to me; it certainly wasn't fair." },
+        { "cell": "quote-letter", "text": "The feathers' structure suggests that they were not used in flight but rather for temperature regulation or display. The researchers suggested that, even though this is the tail of a young dinosaur, the sample shows adult plumage and not a chick's down." },
+        { "cell": "scaled-currency", "text": "But Prime Minister John Howard has said the act was only to safeguard the facilities of the hospital from being downgraded by the Tasmanian government, in giving an extra AUD$45 million." },
+        { "cell": "scaled-currency", "text": "Batten was ranked 190th on the 2008 400 Richest Americans list with an estimated fortune of $2.3 billion." },
+        { "cell": "scaled-currency", "text": "CafeNet El Sol offers a reservation service for a fee of US$30, or $10 for one-day passes; details on their Corcovado page." },
+        { "cell": "scaled-currency", "text": "He was inducted into the Rock and Roll Hall of Fame twice, the Songwriters Hall of Fame, and the Dance Hall of Fame. Having donated an estimated $500 million, Jackson is credited with setting a standard for celebrity charity." },
+        { "cell": "ordinal-caps", "text": "Chains such as FamilyMart provide clothing laundry services in select stores, and tickets for TRA and THSR are available at 7-Eleven, FamilyMart, Hi-Life and OK. Taiwanese culinary history is murky and is intricately tied to patterns of migration and colonization." },
+        { "cell": "ordinal-caps", "text": "He did endorsements for the Philippines based Oxecure, SparSha, All Café in the 7-Eleven store, Lazada, Isuzu Motors, Scotch, and others." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.
     "sample": [
         "The main local beer is 'Number One', it is not a complex beer, but pleasant and refreshing. The other local beer is called \"Manta\".",
-        "Scientists say the explosion caused by the collision was massive.",
-        "In Japan, the first cherry blossom parties were hosted by the emperor only for himself and other members of the aristocracy around the Imperial Court.",
-        "During the struggle for independence organised by the Mau movement, a peaceful gathering in the town resulted in the killing of the paramount chief Tupua Tamasese Lealofi III.",
-        "It is one of the main attractions of South Africa and it is considered the flagship of South African National Parks (SANParks).",
-        "A simple popular dinner, especially during the summer, is the Pa amb Oli: Bread with olive oil, tomato, and any available condiments such as cheese, tunafish, etc.",
-        "\"He [Wales] basically lied to us from the start. First, by acting as if this was for legal reasons. Second, by pretending he was listening to us, right up to his art deletion.\"",
-        "USA Gymnastics supports the United States Olympic Committee's letter and accepts the absolute need of the Olympic family to promote a safe environment for all of our athletes.",
-        "Written words are often easier to understand than spoken words, also. This is especially true of addresses, which are often difficult to pronounce intelligibly.",
-        "For instance, they didn't have corn, nor tomatoes, nor potatoes, nor cocoa, and no ancient Roman ever tasted a turkey.",
-        "Travellers who had an easy time adjusting to the new culture sometimes have a particularly hard time readjusting to their native culture.",
-        "The bus was headed to Six Flags St. Louis in Missouri for the band to play to a sold-out crowd.",
-        "The aircraft had been headed to Irkutsk and was being operated by interior troops.",
-        "He is speculated to make a run for president in 2016.",
-        "Christopher Garcia, a spokesperson of the Los Angeles Police Department, said the suspected male offender is being investigated for trespassing rather than vandalism.",
-        "If you want some small though rich pastries, try what depending on region are called Berliner, Pfannkuchen or Krapfen.",
-        "Several people verified the discovery using different hardware and software by the beginning of February and it was announced on Tuesday.",
-        "Vautier's achievements outside of directing include a hunger strike in 1973 against what he viewed as political censorship.",
-        "In Berlin, police estimated 6,500 protestors.",
-        "The study found that depression, fear and catastrophising mediated the relationship between pain and disability in lower back pain sufferers.",
-        "Luxembourg has always tried to remain a neutral country but it was occupied in both World War I and World War II by Germany.",
-        "Another difference was that while the poor people and the woman ate their food while sitting in chairs, the rich men liked to have banquets together where they would lounge on their sides while they ate their meals.",
-        "Since the arrival of man to the Galapagos, many mammals have been introduced including goats, horses, cows, rats, cats and dogs.",
-        "While San Francisco's economy is linked to it being a world-class tourist attraction, its economy is diversified.",
-        "Fewer than a thousand cases have ever been reported in humans, but some of them have been fatal.",
-        "This is especially popular with school leavers, allowing them to take a year out before university, without compromising their education.",
-        "They often have more autonomy than conventional team members as their teams may meet according to varying time zones which may not be understood by their local management.",
-        "A tornado is a spinning column of very low-pressure air, which sucks the surrounding air inward and upward.",
-        "The hostel's guests were mostly citizens of the United Arab Emirates.",
-        "Make sure your hand is as relaxed as possible while still hitting all the notes correctly - also try not to make much extraneous motion with your fingers."
+        "Historians have criticized past FBI policies for focusing resources on cases which are easy to solve, especially stolen car cases, with the intent of boosting the agency's success rate.",
+        "He received the \"Hero of the Soviet Union\", the Soviet Union's highest honor, for his work.",
+        "Of course, the superprofits derived from the protracted exploitation of the Filipino people would constitute the basic gains of U.S. imperialism.",
+        "He received various awards and accolades for his philanthropic work, including two bestowed by American presidents.",
+        "A natural mummy, Ötzi, dated 3400–3100 BC, was discovered in the Similaun glacier in 1991.",
+        "Archaeological remains suggest they were initially hunter-gatherers that slowly shifted to intensive fishing.",
+        "Although he portrayed the same character as in Happy Days, the series was set in the present in Boulder, Colorado, instead of the late 1950s in Milwaukee.",
+        "All profits from sales of the album The Gay Nineties Old Tyme Music: Daisy Bell, which includes her rendition of \"Daisy Bell (Bicycle Built for Two)\", were donated to the charity Little Kids Rock, which supports musical education in underprivileged elementary schools.",
+        "With Carrera in prison in Argentina, O'Higgins and anti-Carrera cohort José de San Martín, hero of the Argentine War of Independence, led an army that crossed the Andes into Chile and defeated the royalists.",
+        "During the Battle of Hattin (1187) near Lake Tiberias just north of Transjordan, the Crusaders lost to Saladin, the founder of the Ayyubid dynasty (1187–1260).",
+        "Truman believed if aggression went unchecked, a chain reaction would start that would marginalize the UN and encourage communist aggression elsewhere.",
+        "D'Annunzio and De Ambris designed the Charter, which advocated national-syndicalist corporatist productionism alongside D'Annunzio's political views.",
+        "During the 1990s, the United States withheld dues citing inefficiency and only started repayment on the condition that a major reforms initiative be introduced.",
+        "The current system follows school expansion schemes which are very similar to the system in the rural areas during the 1980s, with an addition of deeper regionalisation, providing rural education in students' own languages starting at the elementary level, and with more budgetary financing allocated to the education sector.",
+        "All but 8 of the 131 clergy who participated in the trial were French and two thirds were associated with the University of Paris, but most were pro-Burgundian and pro-English.",
+        "This format was identical with the tournament structure being used in 1998.",
+        "Your Name was broadcast on Japanese television for the first time on November 4, 2017, transmitted by Wowow.",
+        "For example, the usual romanization for the current King's name is Vajiralongkorn, as opposed to Wachiralongkon.",
+        "Isan culture, although similar, was at the same time quite exotic, with the pungent foods and rural people referred to as 'stinky' and the people 'stupid' and 'lazy'.",
+        "For big events, Kai Tak Sports Park anchors the city's newest entertainment hub, built on the former airport site, with a 50,000-seat main stadium and a retractable roof. Hong Kong Stadium remains a key venue for football and major fixtures in Causeway Bay, with a capacity of 40,116.",
+        "Aside from the national prevalence of falconry, the UAE have played a formative role internationally in the co-ordination of UNESCO's recognition of falconry as intangible heritage.",
+        "Parts of Berlin – including large parts of the city center – were destroyed in the bombing of Berlin by Allied air raids in 1943–45 and the 1945 Battle of Berlin.",
+        "The countries of NAFTA are also some of each other's largest trade partners.",
+        "Nonetheless, the Isle of Man Constabulary voluntarily submits to inspection by the British inspectorate of police, and the Isle of Man Coastguard contracts His Majesty's Coastguard (UK) for air-sea rescue operations.",
+        "As ballots were still being counted two days after Election Day, Trump falsely asserted that there was \"tremendous corruption and fraud going on\", adding: \"If you count the legal votes, I easily win. If you count the illegal votes, they can try to steal the election from us.",
+        "Disney has also been accused a number of times of plagiarizing already existing works in its films.",
+        "She has also shown appreciation for Paramore after inviting Hayley Williams to join her set during Williams's first Coachella set to perform an acoustic version of \"Misery Business\" and sing \"Happier Than Ever\".",
+        "The Kenya Universities and Colleges Central Placement Service (KUCCPS), formerly the Joint Admissions Board (JAB), is responsible for selecting students joining the public universities.",
+        "The city is coextensive with Orleans Parish."
     ]
 }
