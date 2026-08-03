@@ -157,4 +157,23 @@ describe("persian text normalization (#562)", () => {
         const code = src.replace(/\/\*[\s\S]*?\*\//gu, "").replace(/\/\/[^\n]*/gu, "");
         expect(code).not.toMatch(/\\b/u);
     });
+
+    // #586 — the header records that this corpus writes NO unit abbreviation, which is still true; but
+    // `5 km` reached the g2p as the cluster [ˈʊkm] and a phonemizer is handed arbitrary text (the argument
+    // step 7b already makes for the currency signs fa_ir also lacks). Every word is the corpus's own:
+    // کیلومتر ×65, متر ×45, and the richest measure-word attestation in the sweep — کیلومتر مربع ×16,
+    // متر مکعب ×3, both POSTPOSED.
+    test("unit abbreviations and their powers (#586)", () => {
+        expect(phonemize("19,500 km²", "fa")).toContain("kiːlˈuːmtɾ maɾebˈeʔ");
+        expect(phonemize("120 m³", "fa")).toContain("mˈetɾ mˈakʔb");
+        expect(phonemize("4892 m", "fa")).toContain("mˈetɾ");
+        // ⚠ LATIN KEYS ONLY. The ckb pass reads `کم`/`سم` as unit abbreviations; the SAME graphemes here are
+        // ordinary words — کم ×63 is the adjective "little/few" and سم ×5 is "poison" — so a shared
+        // Perso-Arabic table would read 68 Persian words as measurements.
+        expect(phonemize("اصطکاک کم است", "fa")).toContain("kˈam ʔˈast");
+        expect(phonemize("سم مار", "fa")).toContain("sˈam");
+        // ORDERING: before the decimal rule (6), which rewrites the dot as ممیز and would leave the version
+        // guard no dot to reject. `802.11m` is a designation, so the `m` stays a letter name.
+        expect(phonemize("802.11m", "fa")).toContain("ˈiːk ˈiːk ˈɛm");
+    });
 });

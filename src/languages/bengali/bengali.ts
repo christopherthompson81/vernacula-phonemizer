@@ -100,6 +100,13 @@ export function makeNativeBengali(
         currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"] },
         units: { km: ["কিলোমিটার"], cm: ["সেন্টিমিটার"], mm: ["মিলিমিটার"], kg: ["কিলোগ্রাম"],
             m: ["মিটার"], g: ["গ্রাম"], "km/h": ["কিলোমিটার প্রতি ঘন্টা"] },
+        // `বর্গকিলোমিটার` ×8. SPACED rather than fused, because this tier is shared with ASSAMESE and the
+        // two corpora disagree about the space — bn fuses it onto কিলোমিটার but writes `বর্গ মাইল` spaced in
+        // the very same sentence, and as writes `বৰ্গ কিলোমিটাৰ` (×7) spaced throughout. `before` is
+        // therefore attested in both, where `compound` would have been wrong for one of them.
+        // No cubed word: ঘন ×19 in this corpus is the REDUPLICATED ADVERB `ঘন ঘন` ("frequently"), and
+        // `ঘন মিটার`/`ঘনমিটার` are both zero — a count that says nothing about the unit sense (trap 12).
+        exponentWords: { squared: ["বর্গ"], position: "before" },
     });
     const normalize = makeBengaliNormalizer(def.numbers);
 

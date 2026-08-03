@@ -127,4 +127,14 @@ describe("Fula text normalization", () => {
         expect(normalizeFula("x = y")).toBe("x fota y"); // fota ×2 in the corpus, in this very sense
         expect(normalizeFula("-5")).toBe("usta 5"); // usta ×7 ("reduce"); zero leading minuses in the corpus
     });
+
+    // #586 — the cube word came from ff.wikipedia via attest.ts, because the FLEURS corpus attests NO
+    // measure word at all: "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft)" — postposed, exactly this slot.
+    // ⚠ The three rejected candidates were all attested and none was this word: `kaare` ×1 is the SHAPE
+    // ("Suudu juulirde nduu ko kaare" — the prayer hall is square), `punndi` ×5 is a PUBLICATION NAME in
+    // reference citations, `karre` ×1 a proper noun. Hence no squared word: km² keeps the fallback.
+    it("the cubed measure word, sourced from the wiki (#586)", () => {
+        expect(phonemize("120 m³", "ff")).toContain("mˈetɾe kˈubik");
+        expect(phonemize("160 km/h", "ff")).toContain("kilomˈetɾe ˈe wakːˈati");
+    });
 });

@@ -149,4 +149,11 @@ describe("bengali normalization", () => {
         expect(phonemize("১/৫", "bn")).toBe("pãt͡ʃ bʱaɡeɾ æk"); // "of five parts, one"
         expect(phonemize("1/2", "bn")).toBe("ɔɾd̪ʱek"); // অর্ধেক
     });
+
+    // #586 — `বর্গকিলোমিটার` ×8. Declared SPACED because this tier is shared with Assamese and the two
+    // corpora disagree about the space: bn fuses it here but writes `বর্গ মাইল` spaced in the same sentence,
+    // and as writes `বৰ্গ কিলোমিটাৰ` spaced throughout. `before` is attested in both.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("19,500 km²", "bn")).toContain("bɔɾɡo kilomiʈaɾ");
+    });
 });

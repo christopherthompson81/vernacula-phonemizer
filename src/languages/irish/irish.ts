@@ -102,7 +102,24 @@ const TOKEN =
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["faoin gcéad"],
     currency: { "€": ["euro"], "$": ["dollar", "dollair"], "£": ["punt"], "¥": ["yen"] },
-    units: { km: ["ciliméadar"], cm: ["ceintiméadar"], mm: ["milliméadar"], kg: ["cileagram"] },
+    // `m` ADDED so the cube reading below has a head noun at all: méadar ×12, and every digit-adjacent bare
+    // `m` in this corpus is a metre — `100m agus 200m` (freestyle events), `100 troith (30 m)`, `133 m/s`.
+    // That is the one-letter-key hazard checked rather than assumed, and here it comes back clean.
+    units: { km: ["ciliméadar"], cm: ["ceintiméadar"], mm: ["milliméadar"], kg: ["cileagram"],
+        m: ["méadar"] },
+    // `méadar ciúbach` ×3 in the FLEURS corpus. The SQUARED word is ×0 there — and rather than leave the
+    // artifact's own `19,500 km²` ×2 reading with the power dropped, it was sourced the way a zero corpus
+    // count is supposed to be: `attest.ts` against ga.wikipedia, sense-checked on three examples.
+    //   cearnach   ×1  "179.7 milliún km² (69.4 milliún míle cearnach)"   ← the modifier, POSTPOSED, in the
+    //                   very sentence that writes km² as a symbol
+    //   chearnach  ×1  "4,840 slat chearnach … (10,000 méadar cearnach)"  ← lenited after a feminine noun
+    //   cearnacha  ×1  "174,600 ciliméadar, nó 67,400 míle cearnacha"     ← plural variant
+    // ⚠ `cearnóg` ×1 is NOT this word: it is the noun "a square" ("Is cearnóg suite i gCathair Westminster
+    // í Berkeley Square"), the same shape-vs-unit split that bare `carré`, `kare` and ਵਰਗ have here.
+    // ONE INVARIANT FORM, matching `units`' single `ciliméadar` and the singular in two of the three
+    // examples; the sources disagree about agreement (`4,840 slat chearnach` singular against `67,400 míle
+    // cearnacha` plural), so a count-form split would be inventing a rule neither one settles.
+    exponentWords: { squared: ["cearnach"], cubed: ["ciúbach"], position: "after" },
 });
 
 class IrishPhonemizer implements Phonemizer {

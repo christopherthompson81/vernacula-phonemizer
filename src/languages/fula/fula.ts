@@ -37,6 +37,16 @@ const SYMBOLS = makeSymbolNormalizer({
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },
     unitPer: "e wakkati gootel", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel
     rateDenominators: { h: "wakkati", s: "sahaawa" },
+    // CUBED ONLY, and sourced from ff.wikipedia because the FLEURS corpus attests no measure word at all
+    // (`kaare` and `karre` are both ×0 there). `attest.ts` found `kubik` ×1 in exactly the slot:
+    //   "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft) e hitaande kala"     ← cubic metres, POSTPOSED
+    // ⚠ The other three candidates are attested and none of them is this word — the Fula lesson again, in
+    // the language it is named after:
+    //   kaare  ×1  the SHAPE — "Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo" (the prayer hall is
+    //              square, with a dome), so km² keeps the unit-plus-`²` fallback
+    //   punndi ×5  a PUBLICATION NAME, every instance inside a reference citation
+    //   karre  ×1  a proper noun in a football article
+    exponentWords: { cubed: ["kubik"], position: "after" },
 });
 
 class FulaPhonemizer implements Phonemizer {

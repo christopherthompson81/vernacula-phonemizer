@@ -258,4 +258,10 @@ describe("arabic normalization", () => {
         // mangled 100 sentence endings.
         expect(phonemize("يهضمونها بداخلهم. يمكن", "ar")).toBe("jhdˤmwnhˈaː bdˈaːxlhm . jmkn");
     });
+
+    // #586 — `كيلومتر مربع` ×8 in the corpus, the adjective FOLLOWING its noun as Arabic adjectives do.
+    // Note Urdu writes the cognate مربع BEFORE the noun, so the position is per-language, not per-word.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783,562 km²", "ar")).toContain("kiːluːmˈitr murˈabːaʕ");
+    });
 });

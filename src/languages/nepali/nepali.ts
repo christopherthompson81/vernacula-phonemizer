@@ -39,6 +39,10 @@ const NE_SYMBOLS = makeSymbolNormalizer({
     units: { km: ["किलोमीटर"], cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
     unitPer: "प्रति",
     rateDenominators: { h: "घण्टा", s: "सेकेण्ड" },
+    // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"), word-first. घन ×0 — and this
+    // is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1, so the cube
+    // reading stays on the fallback until a corpus says otherwise.
+    exponentWords: { squared: ["वर्ग"], position: "before" },
 });
 
 // The Devanagari inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces as the

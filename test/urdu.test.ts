@@ -99,4 +99,10 @@ describe("urdu normalization", () => {
         // A naive scan reports قم ×5, which looks like the BC marker. It is the start of قمری "lunar".
         expect(phonemize("قمری مواد", "ur")).toBe("qˈəmɾiː mʋɑːd̪");
     });
+
+    // #586 — `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-FIRST, where Arabic postposes its cognate مربع.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783562 km²", "ur")).toContain("mʊɾˈəbbɑːʔ kɪloːmˈiːʈəɾ");
+        expect(phonemize("120 m³", "ur")).toContain("kjˈoːbək mˈiːʈəɾ");
+    });
 });

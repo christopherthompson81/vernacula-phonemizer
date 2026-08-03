@@ -167,6 +167,43 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(?<![\d.,])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*UTC(?![A-Za-z]))/gu,
             (m: string, h: string, min: string) => clock(m, h, min));
 
+        // 3b) UNIT ABBREVIATIONS AND THEIR POWERS (#586). The header above records that this corpus writes NO
+        //     unit abbreviation, and that is still true — but `5 km` was reaching the g2p as the cluster [ˈʊkm]
+        //     and `5 km²` lost the quantity outright, and a phonemizer is handed arbitrary text (the argument
+        //     step 7b already makes for the currency signs this corpus also lacks). No word is invented: every
+        //     one is this corpus's own spelled-out form, and this is the richest unit inventory in the sweep.
+        //
+        //       کیلومتر ×65  "این پارک 19،500 کیلومتر مربع مساحت دارد"    متر ×45   "ارتفاع 4892 متر"
+        //       میلی‌متر ×10  "56 در 56 میلی‌متر نگاتیو"                    کیلوگرم ×4 "200 پوند (90 کیلوگرم)"
+        //       سانتی‌متر ×3  "6 در 6 سانتی‌متر"
+        //       مربع ×32 / کیلومتر مربع ×16   ← squared, POSTPOSED
+        //       مکعب  ×3 / متر مکعب      ×3   ← cubed,   POSTPOSED  "120-160 متر مکعب سوخت داشت"
+        //
+        //     ⚠ LATIN KEYS ONLY, never the Perso-Arabic ones, and this language is the reason that distinction
+        //     exists: the ckb pass measured `کم` and `سم` as unit abbreviations there, and the SAME graphemes
+        //     here are ordinary words — `کم` ×63, never once after a numeral, is the adjective "little/few"
+        //     ("اصطکاک کم است"), and `سم` ×5 is "poison". A shared Perso-Arabic table would read 68 ordinary
+        //     Persian words as measurements. The Latin run after a digit here is `4x`, `5N`, `UTC` — no bare `m`.
+        //     PLACED BEFORE THE DECIMAL RULE (6) AND AFTER DE-GROUPING (3), and both halves of that are
+        //     forced. Step 6 rewrites the dot as the word ممیز, so a rule sitting after it sees
+        //     `802 ممیز 1 1 m` and the `NOT_VERSION` guard has no dot left to reject — `802.11m` read as
+        //     metres. And before de-grouping, `19،500 km` would match only its last three digits.
+        //     THE EXPONENT ARM MUST PRECEDE THE PLAIN ONE, or the plain rule eats the unit and strands the `²`.
+        const FA_UNIT: Readonly<Record<string, string>> = {
+            km: "کیلومتر", cm: "سانتی‌متر", mm: "میلی‌متر", kg: "کیلوگرم", m: "متر",
+        };
+        const faUnits = Object.keys(FA_UNIT).sort((a, b) => b.length - a.length).join("|");
+        //     A DOTTED DESIGNATION IS NOT A QUANTITY: `802.11m` read as "802.11 metres". This is
+        //     `NOT_VERSION` from core/normalizeSymbols.ts, and it has to guard on the WHOLE number rather
+        //     than the adjacent digit — a lookbehind for "digit after a dot" would also reject this corpus's
+        //     real `12.8 کم`. What separates them is the SPACE: a version glues its letter to the digits.
+        const FA_NUM = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))(\\d[\\d.,]*)";
+        s = s.replace(new RegExp(`${FA_NUM}\\s?(${faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
+            (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
+                `${n} ${FA_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "مکعب" : "مربع"}`);
+        s = s.replace(new RegExp(`${FA_NUM}\\s?(${faUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
+            (_m, n: string, u: string) => `${n} ${FA_UNIT[u.toLowerCase()]!}`);
+
         // 6) DECIMALS. AFTER de-grouping (3) and after both clock rules (4, 5), each of which would otherwise be
         //    mis-claimed by a decimal-shaped pattern. The period was a full CLAUSE BREAK: "1.5 میلیون" read as
         //    [ˈiːk . pˈand͡ʒ …] — a sentence boundary inside a number. Persian reads the separator as ممیز and the

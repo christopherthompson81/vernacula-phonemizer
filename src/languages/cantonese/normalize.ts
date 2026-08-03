@@ -90,6 +90,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // would read every such name as a measurement. Trap 19's caveat, arriving as a real hazard.
     units: { km: ["公里"], kg: ["公斤"] },
     currency: { $: ["美元"], "€": ["歐元"], "£": ["英鎊"] },
+    // `平方公里` ×4 ("公園占地一萬九千平方公里"), fused and word-first. 立方 is ×0 here, and `m³` could not be
+    // read anyway while 米 stays undeclared for the 米勒 reason above — the two gaps are the same gap.
+    exponentWords: { squared: ["平方"], position: "compound" },
     unspacedScript: true,
 });
 

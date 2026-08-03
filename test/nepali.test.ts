@@ -114,4 +114,10 @@ describe("Nepali normalization (#562)", () => {
         expect(t("~500")).toBe("lˈʌɡbʱʌɡ pˈãt͡s sˈʌj");
         expect(t("युटिसी+1")).not.toContain("d̪ʱˈʌn"); // a UTC offset is not "plus one"
     });
+
+    // #586 — `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"). No cube word: घन is ×0, and
+    // this is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(t("3,850 km²")).toContain("wˈʌɾɡʌ kˈilomiʈʌɾ");
+    });
 });

@@ -67,4 +67,20 @@ describe("central kurdish normalization", () => {
     test("ordinary Kurdish text is untouched", () => {
         expect(normalizeCentralKurdish("کوردی زمانێکە.")).toBe("کوردی زمانێکە.");
     });
+
+    // #586 — LATIN unit aliases, which needed no new vocabulary: only a second key onto words this corpus
+    // already spells out (کیلۆمەتر ×33, مەتر ×21). `5 km` reached the g2p as the cluster [ˈʊkm] while `5 کم`
+    // read correctly. The two measure words are the corpus's own and both FOLLOW the noun — دووجا ×4 from
+    // "پارکەکە 19500 کم دووجا", سێجا ×3 from "لونۆ 120-160 مەتر سێجا".
+    test("Latin unit aliases and the exponent words (#586)", () => {
+        expect(phonemize("19500 km²", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
+        expect(phonemize("120 m³", "ckb")).toContain("matɾ seːd͡ʒaː");
+        expect(phonemize("5 km", "ckb")).toContain("kiːloːmatɾ"); // was the cluster [ˈʊkm]
+        // The Perso-Arabic path is untouched, including the corpus's own already-spelled exponent.
+        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
+        expect(phonemize("12.8 کم", "ckb")).toContain("xaːɫ haʃt kiːloːmatɾ");
+        // ORDERING: this rule must precede the decimal rule, which rewrites the dot as the word خاڵ and
+        // would leave the version guard nothing to reject. `802.11m` is a designation, not 11 metres.
+        expect(phonemize("802.11m", "ckb")).toContain("jak jak ˈɛm");
+    });
 });

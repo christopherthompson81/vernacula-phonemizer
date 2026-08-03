@@ -114,6 +114,12 @@ const SYMBOLS = makeSymbolNormalizer({
     percentPrefix: true,
     currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },
     units: { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] },
+    // THE MEASURE WORD FUSES ONTO THE END, which is the `suffix` position and the reason it exists. This
+    // corpus writes `783.562 kilometrekare` ×4 and `120-160 metreküp` ×2 — one word each. Neither of the
+    // other three positions produces that: `after` gives *kilometre kare*, `compound` gives *karekilometre*.
+    // ⚠ Bare `kare` ×6 is the SHAPE ("küçük kare veya toplardan"), plus one `mil kare` for the imperial
+    // gloss — the fused unit form is the attestation, not the bare word.
+    exponentWords: { squared: ["kare"], cubed: ["küp"], position: "suffix" },
 });
 
 class TurkishPhonemizer implements Phonemizer {

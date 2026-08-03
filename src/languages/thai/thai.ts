@@ -73,6 +73,20 @@ const SYMBOLS = makeSymbolNormalizer({
     // เซนติเมตร ×1 "อยู่ห่างกันเพียง 69 เซนติเมตร". มิลลิเมตร and กิโลกรัม are ×0 and stay undeclared.
     units: { km: ["กิโลเมตร"], m: ["เมตร"], cm: ["เซนติเมตร"] },
     currency: { $: ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"] },
+    // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1.
+    // ⚠ Bare ตาราง substring-matches ×11 and its first instance is `ตารางธาตุ` — the periodic TABLE, which
+    // is what ตาราง means on its own. In an unspaced script the bare count cannot be a token count at all
+    // (trap 19), so only the full compound is evidence.
+    // `before` RATHER THAN `compound`, against the orthography, because the fused form is MIS-SYLLABIFIED by
+    // this G2P and the spaced one is not:
+    //   5 ตารางกิโลเมตร  → …mˌeː˧to˧n      5 ตาราง กิโลเมตร  → …mˌeː˦˥t   (= bare กิโลเมตร)
+    //   5 ลูกบาศก์เมตร   → lˈuːkbaː˧sˌa˨˩meː…   spaced → lˈuːkbaː˨˩t mˈeː˦˥t
+    // The second is the clearer one: ลูกบาศก์ ends in a KARAN (ก์, a silencing mark) and only the spaced
+    // reading honours it. This is not a defect introduced by the choice — the corpus's own
+    // `2.2 ล้านตารางกิโลเมตรภายใน` already reads mˌeː˧to˧n as written, so the Thai compound path is broken
+    // independently and is recorded as such. The space is an intermediate-representation hint to the G2P,
+    // never output, so taking the correct reading costs nothing here.
+    exponentWords: { squared: ["ตาราง"], cubed: ["ลูกบาศก์"], position: "before" },
     unspacedScript: true,
 });
 

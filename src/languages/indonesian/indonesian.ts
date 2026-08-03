@@ -178,6 +178,10 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
     units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],
         g: ["gram"], l: ["liter"], ha: ["hektar"] },
+    // `kilometer persegi` ×3 — the modifier follows. Bare `persegi` ×9 includes the SHAPE ("persegi yang
+    // tidak memiliki sisi bawahnya"), so the collocation is what attests the unit sense. `kubik` ×0, so
+    // `m³` keeps the fallback.
+    exponentWords: { squared: ["persegi"], position: "after" },
 });
 
 const TOKEN = /([a-zA-Z]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;

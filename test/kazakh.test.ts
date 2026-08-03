@@ -153,4 +153,11 @@ describe("Kazakh text normalization", () => {
         expect(ph("80%")).toBe("seksˈen pˈɑjəz");
         expect(ph("UTC + 1")).toBe("jˈuː tʰˈiː sˈiː pɫjˈus bˈɪr");
     });
+
+    // #586 — `шаршы километр` ×8 and `текше метр` ×2, word-first. The measure word does not inflect: the
+    // corpus's `2,2 миллион шаршы километріне` carries the dative on the HEAD noun, so one form suffices.
+    it("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("2,2 km²", "kk")).toContain("ʃˈɑrʃə kəjlomˈetr");
+        expect(phonemize("120 m³", "kk")).toContain("tekʃˈe mˈetr");
+    });
 });

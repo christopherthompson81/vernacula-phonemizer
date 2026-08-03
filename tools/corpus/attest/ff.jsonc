@@ -1,0 +1,99 @@
+// WIKIPEDIA WORD ATTESTATION — ff (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ff",
+    "wiki": "ff.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "kaare",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ɓulli ndiyam), ina ɓadii minareeji. Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo. Narthex ina waɗi domeeji tati tok…"
+            ]
+        },
+        {
+            "word": "karre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…gollal makko fuɗɗam e 14 oktoobar 2007 to kiita e Kitchee. Karre maako ɓooyi bana non ɓaawo o hawti e haala moftal hakkunde…"
+            ]
+        },
+        {
+            "word": "kilometre kaare",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "punndi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…o, wallitii kam e daɗndude fenaande – Oba Saheed Elegusho\". Punndi. \"Oba Sahiid Elegushi Teddinaama\". Ñalawma oo. 27 oktoobar…",
+                "…aaɓi-haaɗtirde Igbinedion ina teddina Oba Saheed Elegushi\". Punndi. 10 noowammbar 2019. \"Elegushi ina darii toowɗo...no o heɓi…",
+                "…Elegushi ina darii toowɗo...no o heɓiri teddungal goɗngal\". Punndi. 8 Duujal 2019. Laamɗo Akan (3 oktoobar 2019). \"Tambuwal, D…",
+                "…ii ko laamɗo, Elegushi ina jokki e yiɗde - Olori Sekinatn\". Punndi. Ayomide ayano (21 août 2020). \"BREAKING: Laamɗo leydi ndii…",
+                "…Kemi lanre-aremu (18 juin 2019). \"Oba Elegushi ɗon ƴaɓɓoo\". Punndi. Bolatito Adebola (19 suwee 2020). \"Oba Elegushi E Moto mum…"
+            ]
+        },
+        {
+            "word": "kuubu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "kubik",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…mawɗo, ina hiisa wonde ina waawi waasde 60 miliyoŋ meeteer kubik (2.1×109 cu ft) e hitaande kala. Silt gonɗo e nder weendu n…"
+            ]
+        },
+        {
+            "word": "metre kuubu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}

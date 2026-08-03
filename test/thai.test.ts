@@ -143,4 +143,14 @@ describe("Thai text normalization (#562)", () => {
     test("Thai digits ๐-๙ fold to ASCII (zero in the corpus; the number path is ASCII-only)", () => {
         expect(phonemize("๒๕", "th")).toBe(phonemize("25", "th"));
     });
+
+    // #586 — `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1. Emitted SPACED although Thai fuses them, because this
+    // G2P mis-syllabifies the fused form and drops ลูกบาศก์'s karan: `5 ลูกบาศก์เมตร` → *lˈuːkbaː˧sˌa˨˩meː…*
+    // against the spaced *lˈuːkbaː˨˩t mˈeː˦˥t*. That is a pre-existing compound-path defect — the corpus's
+    // own `2.2 ล้านตารางกิโลเมตร` already reads it wrong as written — so the space is a G2P hint, not a claim
+    // about the orthography.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783,562 km²", "th")).toContain("tˈaː˧raː˧ŋ kˈi˨˩loː˧mˌeː˦˥t");
+        expect(phonemize("120 m³", "th")).toContain("lˈuː˥˩kbaː˨˩t mˈeː˦˥t");
+    });
 });

@@ -88,6 +88,10 @@ export const SYMBOLS = makeSymbolNormalizer({
     units: { "км": ["километр"], km: ["километр"], "кг": ["килограмм"], kg: ["килограмм"],
         "м": ["метр"], m: ["метр"], "мм": ["миллиметр"], mm: ["миллиметр"],
         "см": ["сантиметр"], cm: ["сантиметр"] },
+    // `шаршы километр` ×8 and `текше метр` ×2, both word-first. The measure word does NOT inflect: the
+    // corpus's `2,2 миллион шаршы километріне` carries the dative on the HEAD noun and leaves шаршы alone,
+    // which is what an agglutinative language does and why one form suffices here.
+    exponentWords: { squared: ["шаршы"], cubed: ["текше"], position: "before" },
 });
 
 class KazakhPhonemizer implements Phonemizer {

@@ -15,6 +15,9 @@
  *  `countForm`. A language with no agreement uses a 1-element array. */
 export type CountForms = string[];
 
+/** Where a language puts the squared/cubed measure word relative to the unit noun. See `exponentWords`. */
+export type ExponentPosition = "before" | "after" | "compound" | "suffix";
+
 export interface SymbolData {
     /** The word for %, e.g. "percent", "Prozent", "por ciento", or count forms for Slavic. */
     percent: CountForms;
@@ -93,17 +96,25 @@ export interface SymbolData {
     rateDenominators?: Record<string, string>;
     /**
      * Squared and cubed units — `km²` → "square kilometres". The measure word is language data and so is
-     * its POSITION, which needs three values, not two:
+     * its POSITION, which needs FOUR values, not two:
      *   `after`    (default) — Italian, Vietnamese, Polish: *chilometri quadrati*, *kilometr kwadratowy*
      *   `before`   — Russian: *квадратных километров*, an agreeing adjective with a space
-     *   `compound` — Swedish and Japanese, which fuse it into one word: *kvadratkilometer*, 平方キロメートル
+     *   `compound` — Swedish and Japanese, which fuse it BEFORE: *kvadratkilometer*, 平方キロメートル
+     *   `suffix`   — Turkish, which fuses it AFTER: *kilometrekare*, *metreküp*
      * `before` and `compound` were one value at first, which silently produced Russian
-     * *квадратныхкилометров* as a single unreadable token.
+     * *квадратныхкилометров* as a single unreadable token. `suffix` is the same mistake waiting on the other
+     * side: Turkish attests `783.562 kilometrekare` and `120-160 metreküp` in its own corpus, and neither
+     * `compound` (*karekilometre*) nor `after` (*kilometre kare*) is that word.
+     *
+     * ⚠ THE POSITION CAN DIFFER BETWEEN SQUARED AND CUBED, so it also takes a per-power record — the same
+     * shape `unitPer` takes, for the same reason. Amharic is the case: it borrowed the two readings from
+     * different directions and its corpus writes `783,562 ስኩዌር ኪ.ሜ.` (word BEFORE) beside `120-160 ሜትር ኪዩብ`
+     * (word AFTER). One value per language would have had to be wrong about one of them.
      */
     exponentWords?: {
         squared?: CountForms;
         cubed?: CountForms;
-        position?: "before" | "after" | "compound";
+        position?: ExponentPosition | Readonly<Partial<Record<"squared" | "cubed", ExponentPosition>>>;
     };
     /**
      * THIS LANGUAGE IS WRITTEN WITHOUT SPACES BETWEEN WORDS — Chinese, Japanese.
@@ -372,7 +383,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     return d.unitPrefix ? `${head} ${q} ${per} ${dWord}` : `${q} ${head} ${per} ${dWord}`;
                 }
                 if (exp !== undefined) {
-                    const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
+                    const power = exp === "\u00b3" || exp === "3" ? "cubed" : "squared";
+                    const forms = d.exponentWords?.[power];
                     if (forms === undefined) {
                         // NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back, rather than
                         // abandoning the whole match. Returning `whole` was silently the worst of the three
@@ -390,9 +402,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
                     // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".
                     const word = pick(forms, n, cf);
-                    const pos = d.exponentWords?.position ?? "after";
-                    if (pos === "compound") return `${q} ${word}${head}`;
-                    return pos === "before" ? `${q} ${word} ${head}` : `${q} ${head} ${word}`;
+                    const declared = d.exponentWords?.position;
+                    const pos = (typeof declared === "string" ? declared : declared?.[power]) ?? "after";
+                    // The unit PHRASE is assembled first and the quantity placed around it, because
+                    // `unitPrefix` governs the exponent reading exactly as it governs the plain one — Oromo
+                    // writes `iskuweer kiloometiiri 783,562`, noun phrase THEN number. Building the return
+                    // per-position instead is what left this branch the only one of the three that ignored
+                    // `unitPrefix`, so `5 km²` read in the fleet's word order rather than the language's.
+                    const phrase = pos === "compound" ? `${word}${head}`
+                        : pos === "suffix" ? `${head}${word}`
+                        : pos === "before" ? `${word} ${head}`
+                        : `${head} ${word}`;
+                    return d.unitPrefix ? `${phrase} ${q}` : `${q} ${phrase}`;
                 }
                 return d.unitPrefix ? `${head} ${q}` : `${q} ${head}`;
             });

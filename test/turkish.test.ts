@@ -128,4 +128,13 @@ describe("Turkish text normalization (#562)", () => {
         expect(phonemize("30°C", "tr")).toBe("otˈuz deɾed͡ʒˈe"); // was otˈuz d͡ʒ — ° dropped, C read as Turkish c
         expect(phonemize("UTC+1", "tr")).toBe("ˈu tˈe d͡ʒˈe aɾtˈɯ bˈiɾ");
     });
+
+    // #586 — the SUFFIX exponent position, which exists because of this language. The corpus writes
+    // `783.562 kilometrekare` and `120-160 metreküp`: the measure word welds onto the END of the unit noun,
+    // which none of the tier's other three positions can spell. Before this, `km²` read as a bare
+    // *kilometre* with the power silently gone.
+    it("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783.562 km²", "tr")).toContain("ciɫometɾekaɾˈe");
+        expect(phonemize("120 m³", "tr")).toContain("metɾecˈyp");
+    });
 });
