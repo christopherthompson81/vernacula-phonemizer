@@ -444,3 +444,36 @@ describe("currency signs were dropped silently in five languages (#584)", () => 
         expect(phonemize("$500的", "yue")).toContain("mei˩˧ jyːn˨˩");
     });
 });
+
+/**
+ * #586 — an UNDECLARED measure word used to abandon the whole unit match, so `5 km²` lost the unit as well as
+ * the power and the abbreviation reached the phoneme sink verbatim. Measured across the 66 languages with an
+ * artifact: 21 read a raw `km` in the IPA while `5 km` read correctly in every one of them. No gate said a word,
+ * because deleting the `²` changes the unit token and the drop test cannot isolate it (see review.ts's header).
+ */
+describe("an undeclared exponent word must not cost the unit too (#586)", () => {
+    test("the unit still reads, and the exponent is handed back to be seen", () => {
+        const n = makeSymbolNormalizer({ percent: ["pct"], units: { km: ["kilometre"] } });
+        expect(n("5 km²")).toBe("5 kilometre²"); // was "5 km²", wholly untouched
+        expect(n("5 km")).toBe("5 kilometre");   // unchanged
+    });
+
+    test("…and a declared word still wins, in each position", () => {
+        const mk = (position: "before" | "after" | "compound") => makeSymbolNormalizer({
+            percent: ["pct"], units: { km: ["kilometre"] },
+            exponentWords: { squared: ["square"], position },
+        });
+        expect(mk("before")("5 km²")).toBe("5 square kilometre");
+        expect(mk("after")("5 km²")).toBe("5 kilometre square");
+        expect(mk("compound")("5 km²")).toBe("5 squarekilometre");
+    });
+
+    // The two languages whose measure word this run sourced from their own corpora.
+    test("de fuses it on the front, cy puts it after with a space", () => {
+        expect(phonemize("5 km²", "de")).toBe("fʏnf kvadʁˈaːtkilomeːtɐ");   // Quadratkilometer ×2 in corpus
+        expect(phonemize("5 km²", "cy")).toBe("pˈɨmp kilˈɔmɛtr sɡwˈaːr");    // "cilomedr sgwâr" ×10
+        expect(phonemize("5 m³", "cy")).toBe("pˈɨmp mˈɛtr kˈɪᵘbiɡ");        // ciwbig ×3
+        // …and the magnitude still hops in front of it.
+        expect(phonemize("2,2 Millionen km²", "de")).toContain("kvadʁˈaːtkilomeːtɐ");
+    });
+});
