@@ -103,6 +103,27 @@ describe("hindi normalization", () => {
         expect(phonemize("आस-पास", "hi")).toBe("ˈaːs pˈaːs"); // a compound
     });
 
+    // Found by the Wikipedia gap-fill (#586) — coordinates are absent from FLEURS entirely, and the two
+    // sentences that carry them leaked THREE marks: `´` (U+00B4) and `'` as the minutes mark, and `º`
+    // (U+00BA MASCULINE ORDINAL INDICATOR) standing in for the degree sign — the same substitution the
+    // Italian run found in `dell'11º`.
+    test("coordinates: the minutes mark and the U+00BA degree sign (#586)", () => {
+        expect(phonemize("२८°२१´", "hi")).toBe("əʈʈʰaːˈiːs ɖˈɪɡɾiː ɪkːˈiːs mˈɪnəʈ");
+        expect(phonemize("३०º ०५'", "hi")).toBe("t̪ˈiːs ɖˈɪɡɾiː pˈaː̃t͡ʃ mˈɪnəʈ");
+        expect(phonemize("२८°२१´३०″", "hi")).toBe("əʈʈʰaːˈiːs ɖˈɪɡɾiː ɪkːˈiːs mˈɪnəʈ t̪ˈiːs seːkˈə̃ɳɖ");
+        expect(phonemize("७९º", "hi")).toBe("ʊnˈaːsiː ɖˈɪɡɾiː"); // the bare U+00BA
+        expect(phonemize("20 °C", "hi")).toBe("bˈiːs ɖˈɪɡɾiː sˈeːlsɪjəs"); // …and °C is unchanged
+    });
+
+    // The real negative the gap-fill found, in a domain FLEURS has none of.
+    test("a real negative from the hybrid artifact reads (#586)", () => {
+        expect(phonemize("ट्राइटन की सतह पर औसत तापमान -२३५.२° सेंटीग्रेड है।", "hi"))
+            .toContain("ɾˈɪɳ d̪ˈoː sˈɔː pɛː̃n̪t̪ˈiːs d̪əʃˈəmləʋ d̪ˈoː ɖˈɪɡɾiː"); // ऋण २३५.२ डिग्री
+        // …and the dash-as-SEPARATOR the same fill found, which must NOT become a sign. This is why the
+        // percent arm was removed from the rule: "Koch (31,381 – 98.53% Hindu)" is a census figure.
+        expect(phonemize("कोच (३१,३८१ -९८.५३% हिंदू)", "hi")).not.toContain("ɾˈɪɳ");
+    });
+
     test("the remaining signs, with Hindi's postpositional comparatives (#586)", () => {
         expect(phonemize("x = y", "hi")).toBe("ˈɛks bəɾˈaːbəɾ wˈaᶦ"); // बराबर
         expect(phonemize("6 × 6", "hi")).toBe("t͡ʃʰˈəɦ ɡˈʊɳaː t͡ʃʰˈəɦ"); // गुणा

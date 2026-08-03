@@ -216,9 +216,16 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // SEVEN utterances, in af, az, nl, el, lb, mk and ta — and all seven are the same FLEURS sentence, the
     // 15-island archipelago. Six languages were shipping the identical defect.
     // The magnitude is re-emitted in place: it is the NUMBER's word, not the unit's.
+    // `\s?` BEFORE THE EXPONENT, and deliberately OUTSIDE the capture group so the group count — which the
+    // callback reads POSITIONALLY — does not change. Hindi's Wikipedia sets the exponent off with a space
+    // (`km \u00b2`), and with it required to touch the unit the whole match failed and the exponent DROPPED.
+    // Putting the `\s?` outside is self-limiting too: on the ASCII branch the lookbehind `(?<=[a-zA-Z])` then
+    // sees the SPACE rather than the unit letter and fails, so `km 2` (a kilometre, then the number two) is
+    // still not an exponent while `km \u00b2` is.
+    // Zero occurrences in all 66 FLEURS corpora — robustness for the one attested wiki form, not a repair.
     const unitRe = d.units
         ? new RegExp(
-            `(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
+            `(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
             "giu",
         )
         : null;

@@ -121,9 +121,22 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         // 5) DEGREES. The bare sign and the two scales; ° alone was dropped and °C read as a letter name.
         //    Case-insensitive: the corpus is lowercased, so "30° c" occurs and a case-sensitive rule left
         //    the scale letter behind as a stray syllable ([ɖˈɪɡɾiː sˈiː]).
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
-        s = s.replace(/(\d)\s?°/gu, "$1 डिग्री");
+        //
+        //    5a) COORDINATES FIRST, because the degree rules below would eat the ° and strand the minutes
+        //        mark. Found by the Wikipedia gap-fill, which is the only tier that carries coordinates:
+        //          मुरादाबाद ज़िला २८°२१´ से २८°१६´ उत्तरी अक्षांश व ७८°४´ से ७९º पूर्वी देशांतर
+        //          गैरसैण तहसील में ३०º ०५' अक्षांश और ७९º १८' देशांतर
+        //        Three separate leaks in two sentences: `´` (U+00B4), `'` (ASCII) and `″`-less minutes, plus
+        //        `º` — U+00BA MASCULINE ORDINAL INDICATOR standing in for the degree sign, exactly the
+        //        substitution the Italian run found in `dell'11º`. The minutes mark is claimed ONLY after a
+        //        degree, because a bare `'` is an apostrophe or a quote elsewhere (the quote-letter cell).
+        s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[´′'](?:\s?(\d+)\s?[″"])?/gu,
+            (_m, deg: string, min: string, sec?: string) =>
+                `${deg} डिग्री ${min} मिनट${sec === undefined ? "" : ` ${sec} सेकंड`}`);
+        //    `[°º]` in every arm below, for the same U+00BA substitution.
+        s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
+        s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
+        s = s.replace(/(\d)\s?[°º]/gu, "$1 डिग्री");
 
         // 6) TIMES. The colon was becoming a PHRASE BREAK, and a :00 was read as शून्य ("eleven, zero
         //    o'clock"). Hindi says the full form "दस बजकर तीस मिनट" — which already contains बजे's sense,
@@ -168,8 +181,15 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //     sourced from a bare probe for ऋण, whose own attestations are the LOAN sense (अनर्जक ऋण,
         //     "non-performing loan"); that is the Fula trap, and the pair citation is what escapes it.
         //     माइनस, the loan word broadcasters use, did not attest in slot and is not used here.
+        //     A DEGREE WORD, AND NOT A PERCENT. The lookahead began as `°|डिग्री|%|प्रतिशत`, and the
+        //     Wikipedia gap-fill (see the hybrid artifact) killed the percent arm with two real sentences:
+        //     hi writes a census figure as `कोच (३१,३८१ -९८.५३% हिंदू)` — "Koch (31,381 – 98.53% Hindu)",
+        //     where the dash is a SEPARATOR introducing the percentage, not a sign. With `%` in the lookahead
+        //     that read as "31,381 MINUS 98.53 percent". Its spaced twin `साक्षरता - ६१%` escaped only by
+        //     accident, because the digits are not adjacent to the dash. A negative percentage is plausible
+        //     but unattested here; a dash-introduced one is attested twice, so degrees only.
         s = s.replace(/(^|[(\[（])\s?[-−–](\d)/gu, "$1ऋण $2");
-        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री|%|प्रतिशत))/gu, "ऋण $1");
+        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री))/gu, "ऋण $1");
 
         // 7c) THE REMAINING SIGNS. Each word is cited; none is a guess.
         //

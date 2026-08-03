@@ -635,6 +635,27 @@ re-check in one command.
   counter-example, so re-testing it cost one grep. Write deferrals that way.
 - **Do not "fix the FAIL".** A red gate that is correct beats a green gate that is wrong.
 
+**25. A ZERO COUNT IS A QUERY TO RUN — AND A FILLED CELL IS A LEAD, NOT A FINDING.** `mine.ts`'s header says
+it in capitals: *an empty cell is not evidence, it is a query to run or a tool bug.* The hi pass nearly shipped
+with the other conclusion — "hi_in contains zero `= < > × ÷ ± & ² ³`, so these rules are robustness only" —
+which is a statement about FLEURS dressed up as a statement about Hindi. `fetch --fill` answers it, and merging
+(`--in fleurs:xx,fill.txt`) beats replacing because the FLEURS half is the text the engine was evaluated
+against. Coverage went 18/29 → 29/35, and the newly populated cells then produced, in one scan:
+
+- **two defects no rule covered** — coordinates (`२८°२१´`, and `º` U+00BA standing in for the degree sign, the
+  Italian `dell'11º` substitution again) and `km ²`, the exponent set off by a space;
+- **a real negative that vindicated a rule** built on the strength of its positive twin (Triton's −235.2 °C);
+- **a real negative the rule correctly declines** — Mars's magnitude `-२.८८ परिमाण`, whose shape is identical to
+  an attested SEPARATOR (`ऊँचाई -१७१ मीटर`, "elevation – 171 m"), so claiming one claims the other;
+- **a false positive in a rule already committed** — `कोच (३१,३८१ -९८.५३% हिंदू)` is a census figure, and the
+  `%` in my lookahead read it as "31,381 minus 98.53 percent". The percent arm came back out.
+
+**Then read what came back.** One article — on the sextant — supplied both a `¢` and a `²` that are neither
+currency nor an exponent: it writes `१२०°` correctly, so those are mojibake for the arc-minute `′` and
+arc-second `″` in an imported/OCR'd text. FLEURS is transcribed speech and clean by construction; a wiki fill
+carries whatever the wiki carries. The fill is the right instrument, and its output stands in the same relation
+to a rule as `attest.ts`'s hits do to a word: necessary, never sufficient.
+
 
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
