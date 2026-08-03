@@ -749,6 +749,36 @@ article to plaintext. The requests are independent.
 - **Pooling also let each request fail alone.** Serially, one bad article threw to the cell's catch and silently
   abandoned the remaining titles.
 
+**31. RE-MINING IS NOT MONOTONE — DIFF THE SCAN, NOT JUST THE COVERAGE.** The #586 re-mine of 63 artifacts
+raised fleet coverage from 1511 to 1709 populated cells, and along the way it QUIETLY DROPPED a defect example:
+zu's `endawe$ni` (a corpus typo with a stray `$`) still occurs twice in zu_za but no longer appears in the
+artifact, so `DROP currency ×1` vanished from its scan. Selection prefers unpicked segments in order to spread
+coverage, so changing the cell set changes which examples survive `--per-cell`.
+
+- **Run `mine.ts scan` over every artifact before and after, and read BOTH directions of the diff.** Measured
+  here: 8 findings appeared, 7 changed count, 1 disappeared. Only the last needed judgement — and only the diff
+  made it visible.
+- **A vanished finding is not automatically a loss.** That `$` sits inside a typo'd word where dropping it is
+  arguably right. Judge it; do not assume either way.
+- **Coverage going up is not the same as defects going down.** `coverage.ts`'s verdict was byte-identical
+  before and after (67 defective cells across 34/37), because the underlying FLEURS text did not change. The
+  re-mine buys measurement COMPLETENESS; new defects come from the Wikipedia fills (trap 25), as cmn showed.
+
+**32. AN ARTIFACT THAT CANNOT BE REGENERATED FROM THE REPOSITORY IS NOT REALLY COMMITTED.** `my.jsonc` is the
+tree's richest artifact — 454,821 segments from a full dump — and two of its cells are LEXICAL, found by
+matching the language's own words from a `--terms` file. That file was a scratch file and was never committed,
+so the artifact could not be rebuilt at all: a naive re-mine would have silently emptied `calendar` (81,301
+occurrences) and `ordinal-native`.
+
+- **Commit the term list beside the artifact** (`tools/corpus/terms/<lang>.tsv`), with its provenance. Every
+  term but one was corroborable against the repo's own Burmese data, checked mechanically rather than asserted;
+  the exception was verified through the phonemizer instead.
+- **Rebuilding it proved the reproducibility rather than assuming it**: the fresh extraction returned exactly
+  454,821 segments, the same number the original recorded. That equality is the evidence the pipeline is
+  deterministic; without it the "same" artifact is a claim.
+- **The rebuild was also strictly better where it could be measured** — 35/35 cells and `ordinal-native` 15×
+  better covered — but `calendar` came back 2.5% lower on a newer dump. Report both directions.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

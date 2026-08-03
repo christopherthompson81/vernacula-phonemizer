@@ -20,8 +20,8 @@
     "source": "FLEURS tr_tr",
     "segmentMode": "sentence",
     "totalSegments": 1872,
-    "cellsCovered": 22,
-    "cellsTotal": 29,
+    "cellsCovered": 24,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 5,            // in 3 treated languages
         "initialism": 138,     // in 3 treated languages
         "grouped": 30,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 0,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 38,     // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 2,      // in 3 treated languages
+        "quote-letter": 612,   // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -122,7 +128,11 @@
         { "cell": "letter-name", "text": "Meksika'dan Arly Velasquez, erkekler oturuşlu Super-G'yi 15. sırada bitirdi. Yeni Zelandalı Adam Hall ise erkekler ayakta Super-G'yi 9. sırada bitirdi." },
         { "cell": "letter-name", "text": "Polonya erkekler görme engelli kayakçısı Maciej Krezel ve rehber Anna Ogarzynska, Super-G.'yi on üçüncü olarak bitirdi. Güney Koreli Jong Seork Park, Super-G. erkekler oturan kategorisini yirmi dördüncü olarak bitirdi." },
         { "cell": "letter-name", "text": "Erkekler ayakta Super-G.'yi Avustralyalı Mitchell Gourley on birinci sırada bitirdi, Çek yarışmacı Oldrich Jelinek erkekler oturarak Super-G.'de on altıncı bitirdi." },
-        { "cell": "letter-name", "text": "Pullu ayakları ve pençeleri var, yumurtluyorlar ve bir T-Rex gibi iki arka ayakları üzerinde yürüyorlar." }
+        { "cell": "letter-name", "text": "Pullu ayakları ve pençeleri var, yumurtluyorlar ve bir T-Rex gibi iki arka ayakları üzerinde yürüyorlar." },
+        { "cell": "quote-letter", "text": "Point Marlon ve Fairmont arasındaki arazi, sık sık tenha, geri kalmış bölgelerden geçen Buffalo-Pittsburgh Otoyolu'nun en zorlu sürüş koşullarını sunuyor." },
+        { "cell": "quote-letter", "text": "Rapor, Amerika Birleşik Devletleri'nde Ortadoğu'ya karşı politika hakkında açık bir müzakere ve bir uzlaşma istemiyle başlıyor." },
+        { "cell": "quote-letter", "text": "Anakaraya olan uzaklıktan dolayı memeliler yolculuğa çıkamadılar, bu da dev kaplumbağayı Galapagos'ta otlayan ana hayvan haline getirdi." },
+        { "cell": "quote-letter", "text": "Hem sivil hem de askeri operasyonlarda kullanılan uçakların bakımının iyi yapılmadığı ve eski bir filoya sahip olan İran'da hava kazaları sıklıkla meydana gelmektedir." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

@@ -20,8 +20,8 @@
     "source": "FLEURS pt_br",
     "segmentMode": "sentence",
     "totalSegments": 1939,
-    "cellsCovered": 24,
-    "cellsTotal": 29,
+    "cellsCovered": 27,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 18,           // in 3 treated languages
         "initialism": 146,     // in 3 treated languages
         "grouped": 34,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 0,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 552,    // in 3 treated languages
         "exponent": 2,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 2,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 5,      // in 3 treated languages
+        "quote-letter": 9,     // in 4 treated languages
+        "scaled-currency": 1,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -140,7 +146,11 @@
         { "cell": "letter-name", "text": "O paciente esteve na Nigéria, onde alguns casos do vírus Ebola ocorreram." },
         { "cell": "exponent", "text": "O Sundarbans cobre uma extensão de 3.850 km², sendo que um terço dele está coberto por áreas de água/pântano." },
         { "cell": "ampersand", "text": "Ele se formou pelo College of Arts & Sciences da Universidade de Virgínia em 1950 e foi um significativo doador para essa instituição." },
-        { "cell": "ampersand", "text": "No topo, as acomodações B&Bs competem principalmente em dois quesitos: cama e café da manhã." }
+        { "cell": "ampersand", "text": "No topo, as acomodações B&Bs competem principalmente em dois quesitos: cama e café da manhã." },
+        { "cell": "quote-letter", "text": "Os cursos d'água do interior podem ser um bom tema ao redor do qual organizar um feriado." },
+        { "cell": "quote-letter", "text": "Posteriormente, ele foi transferido para o Addenbrooke's Hospital em Cambridge." },
+        { "cell": "quote-letter", "text": "Os Três Reinos foi uma das eras mais sangrentas da história da China Antiga, milhares de pessoas morreram lutando para se sentar no trono do grande palácio de Xi'an." },
+        { "cell": "quote-letter", "text": "Ventos fortes, granizo, precipitações excessivas e incêndios florestais são formas e efeitos de um clima rigoroso, assim como tempestades, tornados, trombas d'água e ciclones." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

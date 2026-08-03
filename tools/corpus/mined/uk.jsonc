@@ -20,8 +20,8 @@
     "source": "FLEURS uk_ua",
     "segmentMode": "sentence",
     "totalSegments": 1918,
-    "cellsCovered": 21,
-    "cellsTotal": 29,
+    "cellsCovered": 24,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 4,            // in 3 treated languages
         "initialism": 133,     // in 3 treated languages
         "grouped": 16,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 1,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 11,     // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 2,      // in 3 treated languages
+        "quote-letter": 230,   // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -121,7 +127,12 @@
         { "cell": "letter-name", "text": "Винищувач JAS 39C Gripen обрушився на злітно-посадкову смугу близько 9:30 ранку за місцевим часом (02:30 UTC) та вибухнув, внаслідок чого аеропорт закрив небо для комерційних рейсів." },
         { "cell": "letter-name", "text": "Пану Рейду вдалося 7 разів проїхати через міст на новозеландському автомобілі A1GP Black Beauty зі швидкістю понад 160 км/год." },
         { "cell": "exponent", "text": "Сундарбан займає площу 3 850 км², близько третини з яких вкриті водою чи болотистою місцевістю." },
-        { "cell": "ampersand", "text": "Врешті-решт, готелі типу B&B, вочевидь, змагаються у двох основних речах: ліжко та сніданок." }
+        { "cell": "ampersand", "text": "Врешті-решт, готелі типу B&B, вочевидь, змагаються у двох основних речах: ліжко та сніданок." },
+        { "cell": "version-dot", "text": "Швидкість стандарту 802.11n - істотно вища, ніж у його попередників, та має максимальну теоретичну пропускну здатність 600 Мбіт/с." },
+        { "cell": "quote-letter", "text": "Кур'єрським компаніям добре платять за швидку доставку речей. Найчастіше, час дуже важливий, коли мова йде про доставку ділових документів, товарів чи запчастин для невідкладного ремонту." },
+        { "cell": "quote-letter", "text": "Ще тисячі років тому людина на ім'я Аристарх сказала, що вся Сонячна система обертається навколо Сонця." },
+        { "cell": "quote-letter", "text": "За повідомленням поліції, водію транспортного засобу, який збив фотографа, навряд чи будуть пред'явлені кримінальні звинувачення." },
+        { "cell": "quote-letter", "text": "У цьому динамічному транспортному русі туди й назад всі так чи інакше пов'язані та підтримують транспортну систему, яка базується на приватних автомобілях." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

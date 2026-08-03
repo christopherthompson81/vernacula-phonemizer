@@ -20,8 +20,8 @@
     "source": "FLEURS sw_ke",
     "segmentMode": "sentence",
     "totalSegments": 1930,
-    "cellsCovered": 21,
-    "cellsTotal": 29,
+    "cellsCovered": 25,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 3,            // in 3 treated languages
         "initialism": 103,     // in 3 treated languages
         "grouped": 33,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 1,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 31,     // in 3 treated languages
         "exponent": 0,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 1,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 23,    // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -118,7 +124,12 @@
         { "cell": "letter-name", "text": "Katika miaka yote ya 1960, Brzezinski alimfanyia kazi John F. Kennedy kama mshauri wake na pia utawala wa Lyndon B. Johnson." },
         { "cell": "letter-name", "text": "Michezo maarufu ni pamoja na kandanda, mpira wa kikapu, mpira wa wavu, polo ya majini, mchezo wa uzio, raga, uendeshaji baiskeli, hoki ya barafu, hoki ya gogo na mashindano ya magari ya F1." },
         { "cell": "letter-name", "text": "Pia alishambulia chochote kilichoingia majini; hata dinosau mkubwa kama vile T. rex hangejimudu dhidi yake." },
-        { "cell": "ampersand", "text": "Mwishowe, ni wazi kwamba B&amp;Bs hushindana haswa kwenye vitu viwili vikuu: matandiko na kiamsha kinywa." }
+        { "cell": "ampersand", "text": "Mwishowe, ni wazi kwamba B&amp;Bs hushindana haswa kwenye vitu viwili vikuu: matandiko na kiamsha kinywa." },
+        { "cell": "sports-time", "text": "Alimaliza wa kumi katika mbio yake nyingine, Giant Slalom, kwenye kitengo cha kuketi cha wanawake kwa muda uliojumuishwa wa ukimbiaji wa 4:41.30, dakika 2:11.60 polepole kuliko aliyemaliza katika nafasi ya kwanza Mwaustralia Claudia Loesch na dakika 1:09.02 polepole kuliko aliyemaliza katika nafasi ya tisa Gyongyi Dani wa Hungaria." },
+        { "cell": "quote-letter", "text": "Wakati ulienda ng’ambo kwa mara ya kwanza, watu walikuwa pengine na subira na kuelewa, wakijua wasafiri katika nchi ya kigeni, wanahitaji kuzoea." },
+        { "cell": "quote-letter", "text": "Watoto huwekwa kwenye Huduma ya Malezi kwa sababu nyingine nyingi ambazo huanzia kutelekezwa hadi kudhulumiwa na hata unyang’anyi." },
+        { "cell": "quote-letter", "text": "Wakati hii mara nyingi ni aina ya dhana tu isiyofaa, njia nzuri ya kupatana kule Paris bado ni kuwa katika tabia yako njema, kufanya kama mtu ambaye ni “bien e’lev’e” (amelelewa vizuri). Itafanya kupatana rahisi mno." },
+        { "cell": "quote-letter", "text": "Upande wa kaskazini na mahali rahisi kufika kuna mji wa mahaba na wa kuvutia, uliofanywa maarufu na wageni baada ya kusimulia mapambo yake ya kung'aa kama yalivyorekodiwa na Lord Byron." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

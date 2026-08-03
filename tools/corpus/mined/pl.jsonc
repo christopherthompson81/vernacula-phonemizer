@@ -20,8 +20,8 @@
     "source": "FLEURS pl_pl",
     "segmentMode": "sentence",
     "totalSegments": 1915,
-    "cellsCovered": 22,
-    "cellsTotal": 29,
+    "cellsCovered": 25,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 36,           // in 3 treated languages
         "initialism": 142,     // in 3 treated languages
         "grouped": 15,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 1,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 219,    // in 3 treated languages
         "exponent": 3,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 18,    // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -132,7 +138,12 @@
         { "cell": "letter-name", "text": "W tym sezonie pierwsze przypadki choroby zgłoszono pod koniec lipca." },
         { "cell": "exponent", "text": "Sundarbany mają powierzchnię 3850 km², z czego około jedną trzecią pokrywają wody i moczary." },
         { "cell": "exponent", "text": "To archipelag z 15 wyspami rozrzuconymi po oceanie na powierzchni 2,2 miliona km²." },
-        { "cell": "ampersand", "text": "W górnym segmencie obiekty typu bed&breakfast są konkurencyjne głównie pod względem noclegów i śniadań." }
+        { "cell": "ampersand", "text": "W górnym segmencie obiekty typu bed&breakfast są konkurencyjne głównie pod względem noclegów i śniadań." },
+        { "cell": "version-dot", "text": "Prędkości standardu 802.11n są o wiele wyższe niż w poprzednich wersjach standardu, a poziom maksymalnej teoretycznej przepustowości wynosi 600 Mb/s." },
+        { "cell": "quote-letter", "text": "Komisja była reakcją Martelly'ego na szeroko rozpowszechnione protesty przeciw reżimowi, które rozpoczęły się w październiku." },
+        { "cell": "quote-letter", "text": "W latach sześćdziesiątych Brzeziński był doradcą Johna F. Kennedy'ego, a później pracował w administracji Lyndona B. Johnsona." },
+        { "cell": "quote-letter", "text": "Epoka Trzech Królestw zapisała się w dziejach starożytnych Chin jako okres wielkiego rozlewu krwi; tysiące ludzi poniosło śmierć, walcząc o najwyższy tron w wielkim pałacu w Xi'an." },
+        { "cell": "quote-letter", "text": "W czasie wyborów w 1976 roku był doradcą Cartera w kwestiach polityki zagranicznej, później zajmował stanowisko doradcy ds. bezpieczeństwa narodowego w latach 1977–1981, przejmując pałeczkę od Henry'ego Kissingera." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

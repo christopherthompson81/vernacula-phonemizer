@@ -20,8 +20,8 @@
     "source": "FLEURS ur_pk",
     "segmentMode": "sentence",
     "totalSegments": 1639,
-    "cellsCovered": 18,
-    "cellsTotal": 29,
+    "cellsCovered": 20,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 6,       // in 3 treated languages
         "grouped": 9,          // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 0,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 1,      // in 3 treated languages
         "exponent": 0,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 1,      // in 3 treated languages
+        "version-dot": 0,      // in 3 treated languages
+        "quote-letter": 4,     // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -100,7 +106,12 @@
         { "cell": "grouped", "text": "ترکی کا رقبہ 1600 کلومیٹر (1,000 میل) سے زیادہ لمبا اور 800 کلو میٹر (500 میل) چوڑا ہے۔ یہ موٹے طور سے مستطیل شکل کا ہے۔" },
         { "cell": "grouped", "text": "2,400 لوگوں کی مین حملے والی فوج ٹرینتان سے نو میل شمال میں ندی عبور کرے گی، اس کے بعد ایک گرین اور دوسرا سلیوان کے ماتحت صبح سے پہلے حملہ کرنے کے لئے دو حصوں میں منقسم ہو جائے گی۔" },
         { "cell": "grouped", "text": "برلین میں پولیس نے احتجاجیوں کی تعداد کا تخمینہ 6,500 لگایا۔" },
-        { "cell": "grouped", "text": "زمیں پر گرنے والے تقریبا 24,000 معلوم شہاب ثاقب میں سے صرف 34 کے مریخی الاصل ہونے کی تصدیق ہوئی ہے۔" }
+        { "cell": "grouped", "text": "زمیں پر گرنے والے تقریبا 24,000 معلوم شہاب ثاقب میں سے صرف 34 کے مریخی الاصل ہونے کی تصدیق ہوئی ہے۔" },
+        { "cell": "sports-time", "text": "اس کی دوسری دوڑ، جائنٹ سلالوم، خواتیں کے مقابلوں میں اسے مجموعی طور پر 4:41.30 دوڑ کے وقت کے ساتھ، دسویں نمبر پے دیکھا گیا جو 2:11.60 منٹس پہلی پوزیشن پے آنے والی آسٹریلین کلاوڈا سے آہستہ تھی اور 1:09.02 منٹس نویں نمبر پر آنے والی ہنگری کی گیونگی ڈینی سے رفتار میں کم تھی۔" },
+        { "cell": "quote-letter", "text": "خاص مقامی بییر کا نام ‘نمبر ون’ ہے، یہ کثیف بییر نہیں ہے بلکہ خوشگوار اور تازگی بخش ہے۔ دوسری مقامی بییر ‘مانتا’ کہلاتی ہے۔" },
+        { "cell": "quote-letter", "text": "ایک سابق طالب علم نے کہا کہ اُس نے 'کمرۂ جماعت میں بازاری زبان کا استعمال کیا ، نوٹس میں ڈیٹنگ کرنے کی مہارتوں کو سکھایا، اور وہ بالکل طلباء کا ایک دوست تھا'۔" },
+        { "cell": "quote-letter", "text": "ورجین نے صرف نادرن راک کے 'اچھے بینک' کو خریدا ہے، نہ کہ اسیٹ مینجمنٹ کمپنی کو۔" },
+        { "cell": "quote-letter", "text": "وزیر اعظم اسٹیفن ہارپر اپنے پی ایم او دفتر میں این ڈی پی کے لیڈر جیک لیٹن کے ساتھ منگل کے روز ہونے والی 25 منٹ کی ملاقات کے بعد حکومت کے ‘کلین ایئر ایکٹ’ کو دوسری ریڈنگ سے پہلے ایک آل پارٹی کمیٹی کے پاس نظر ثانی کے لئے بھیجنے پر رضامند ہوگئے ہيں۔" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

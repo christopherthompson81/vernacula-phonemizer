@@ -20,8 +20,8 @@
     "source": "FLEURS ne_np",
     "segmentMode": "sentence",
     "totalSegments": 1987,
-    "cellsCovered": 20,
-    "cellsTotal": 29,
+    "cellsCovered": 25,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 107,     // in 3 treated languages
         "grouped": 34,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 2,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 24,     // in 3 treated languages
         "exponent": 0,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 1,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 5,     // in 4 treated languages
+        "scaled-currency": 3,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -117,10 +123,17 @@
         { "cell": "grouped", "text": "यद्यपि, यी योजनाहरू रातभरिमा नै जस्तो पुरानो ढङ्गले प्रस्तुत गरिएका थिए, जब रिगा शान्ति सन्धी, सोभियत-पोलिस गैर-आक्रमण सन्धीहरू र अन्य अन्तर्राष्ट्रिय सन्धीहरू द्विपक्षीय बहुपक्षीय रूपमा उल्लङ्घन गरेर पोल्यान्डका पूर्वी क्षेत्रहरूमा आक्रमण गरेपछि सोभियत युनियन रेड आर्मीका 800,000भन्दा भन्दा बढी सैनिकहरूले प्रवेश गरे र बेलारूसी र युक्रेनी मोर्चाहरू सिर्जना गरे।" },
         { "cell": "grouped", "text": "बाख्राहरू लगभग 10,000 वर्ष पहिला इरानको जाग्रोस पहाडमा पालिएको हुन्थ्यो जस्तो देखिन्छ।" },
         { "cell": "grouped", "text": "बर्लिनमा, पुलिसले 6,500 प्रदर्शनकारीहरू भएको अनुमान गरे।" },
+        { "cell": "signed-number", "text": "प्रधानमन्त्रीको आधिकारिक निवासस्थान, डाउनिङ स्ट्रिटमा प्रहरीद्वारा संरक्षित प्रवेशद्वारको विपरीत रहेको ह्वाइटहलमा स्थानीय समय, 11:00 बजे (युटिसी+1) को छेउछाउ विरोश-प्रदर्शन सुरु भएको थियो।" },
         { "cell": "letter-name", "text": "मेक्सिकोका अर्ली भेलास्केज पुरुषको सिटिङ सुपर-G मा पन्ध्रौँ स्थानमा रहे। न्युजिल्यान्डका एडम हल पुरुषहरूको स्ट्यान्डिङ सुपर-G मा नवौं स्थानमा रहे।" },
         { "cell": "letter-name", "text": "फिलिपिन्सको विजयमा U.S को साम्राज्यवादको युद्धको खर्च फिलिपिन्सका मानिसहरूले स्वयं नै तिरेका थिए।" },
         { "cell": "letter-name", "text": "pH स्तर परीक्षण गरिएको रसायनमा हाइड्रोजन (pH मा H) आयनहरूको मात्राबाट सङ्केत हुन्छ।" },
-        { "cell": "letter-name", "text": "रोलान्डो मेन्डोजाले पर्यटकहरूमाथि आफ्नो M16 राइफल चलायो।" }
+        { "cell": "letter-name", "text": "रोलान्डो मेन्डोजाले पर्यटकहरूमाथि आफ्नो M16 राइफल चलायो।" },
+        { "cell": "sports-time", "text": "उनको अन्य जाती, जाईण्ट स्लालोमले महिलाको बसोबास समूहमा 4:41.30, 2:11.60 मिनेट ढिलो पहिलो स्थान फिनिशर अस्ट्रियन क्लाउडिया लोश र नवौं स्थानकोभन्दा 1:09.02 मिनेट ढिलो फिनिशर हंगेरीको ग्लोंगी दानीको दशौं स्थानमा उनले समाप्त गरेको देखिन्।" },
+        { "cell": "version-dot", "text": "यसले 802.11a, 802.11b र 802.11g सँग पछाडिपट्टि संगत हुन यसलाई अनुमति दिन्छ, आधार स्टेसन सँग दोहोरो रेडियो छ भने।" },
+        { "cell": "quote-letter", "text": "2010 मा राष्ट्रियकरण गरिएको समयमा हालको हाइ स्ट्रिट बैंक नर्दर्न रक पिएलसी 'खराब बैंक', नर्दर्न रक (सम्पत्ति व्यवस्थापन) बाट छुट्टिएको थियो।" },
+        { "cell": "quote-letter", "text": "प्रधानमन्त्री स्टेफेन हार्परले PMO मा NDP का नेता ज्याक लेटनसँग मङ्गलबार 25 मिनेटको बैठक बसेपछि सरकारको “स्वच्छ हावासम्बन्धी ऐन'को दोस्रो सुनुवाइअघि उक्त ऐन समीक्षाका निम्ति सर्वदलीय समितिमा पठाउन सहमति जनाएका छन्।" },
+        { "cell": "quote-letter", "text": "अस्ट्रेलियामा अपहरणकारीहरूको निगरानी र निरिक्षण सामान्य हुनु पर्छ भनेर RSPCA न्यु साउथ वेल्सका निरिक्षक डेभिड ओ'शनेसीले ABCलाई भने।" },
+        { "cell": "quote-letter", "text": "ओयापक नदीमा भएको पुल तार पुल हो। यो ब्राजिलमा रहेको ओआपोक सहर र फ्रेन्च गुयानामा रहेको सेन्ट-जर्जस डे ल'ओयापोक सहरहरू जोड्न ओयापक नदीमा फैलिएको छ।" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

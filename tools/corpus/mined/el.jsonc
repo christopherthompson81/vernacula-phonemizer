@@ -20,8 +20,8 @@
     "source": "FLEURS el_gr",
     "segmentMode": "sentence",
     "totalSegments": 1967,
-    "cellsCovered": 23,
-    "cellsTotal": 29,
+    "cellsCovered": 26,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 105,     // in 3 treated languages
         "grouped": 40,         // in 3 treated languages
-        "negative": 1,         // in 1 treated languages
+        "signed-number": 2,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 18,     // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 1,      // in 3 treated languages
+        "version-dot": 2,      // in 3 treated languages
+        "quote-letter": 4,     // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -124,12 +130,18 @@
         { "cell": "grouped", "text": "Οι κατσίκες εξημερώθηκαν μάλλον για πρώτη φορά στα Όρη Ζάγκρος του Ιράν πριν 10.000 χρόνια." },
         { "cell": "grouped", "text": "Εντούτοις, τα σχέδια αυτά έπαψαν να είναι ωφέλημα μέσα σε ένα βράδυ σχεδόν, όταν περισσότεροι από 800.000 στρατιώτες του Κόκκινου Στρατού της Σοβιετικής Ένωσης εισήρθαν και δημιούργησαν το μέτωπο της Λευκορωσίας και το μέτωπο της Ουκρανίας, αφού εισέβαλαν στα ανατολικά εδάφη της Πολωνίας παραβιάζοντας τη Συνθήκη Ειρήνης της Ρίγας, το Σύμφωνο μη επίθεσης μεταξύ της Σοβιετικής Ένωσης και της Πολωνίας και άλλες διεθνείς συνθήκες, τόσο διμερείς όσο και πολυμερείς." },
         { "cell": "grouped", "text": "Δημιούργησε περισσότερα από 1.000 γραμματόσημα για τη Σουηδία, καθώς και για άλλες 28 χώρες." },
-        { "cell": "negative", "text": "Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται στην κορυφή του λόφου χτίστηκε προς το τέλος του 9ου αιώνα, την περίοδο της βασιλείας του Γιασοβαρμάν." },
+        { "cell": "signed-number", "text": "Η διαμαρτυρία ξεκίνησε περίπου στις 11:00 τοπική ώρα (UTC +1) στο Γουάιτχολ απέναντι από τη φρουρούμενη από την αστυνομία είσοδο στη Ντάουνινγκ Στριτ, την επίσημη πρωθυπουργική κατοικία." },
+        { "cell": "signed-number", "text": "Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται στην κορυφή του λόφου χτίστηκε προς το τέλος του 9ου αιώνα, την περίοδο της βασιλείας του Γιασοβαρμάν." },
         { "cell": "letter-name", "text": "Ο Arly Velasquez από το Μεξικό τερμάτισε δέκατος πέμπτος στο Super-G του παραολυμπιακού αλπικού (sit) σκι αντρών. Ο Adam Hall από τη Νέα Ζηλανδία τερμάτισε ένατος στο παραολυμπιακό αλπικό (standing) σκι αντρών." },
         { "cell": "letter-name", "text": "H Μεγάλη Πυραμίδα της Γκίζας αποτελεί το μόνο από τα επτά θαύματα που εξακολουθεί να υπάρχει σήμερα." },
         { "cell": "letter-name", "text": "Το επίπεδο του pH καθορίζεται από την ποσότητα ιόντων υδρογόνου (το H στο pH) της εξεταζόμενης χημικής ουσίας." },
         { "cell": "letter-name", "text": "Στην Κροατία και τη Δανία, υπάρχουν ύποπτα κρούσματα του ιού H5N1 δεν έχουν επιβεβαιωθεί ακόμη." },
-        { "cell": "ampersand", "text": "Στο κυριότερο μέρος, τα B&B ανταγωνίζονται ξεκάθαρα σε δύο βασικά θέματα: στις παροχές του δωματίου και το πρωινό." }
+        { "cell": "ampersand", "text": "Στο κυριότερο μέρος, τα B&B ανταγωνίζονται ξεκάθαρα σε δύο βασικά θέματα: στις παροχές του δωματίου και το πρωινό." },
+        { "cell": "sports-time", "text": "Στον άλλο αγώνα της, το γιγαντιαίο σλάλομ, τερμάτισε δέκατη στην ομάδα καθιστού σκι γυναικών με συνολικό χρόνο 4:41.30, 2:11.60 λεπτά πιο αργά από την Αυστριακή Κλαούντια Λος που τερμάτισε πρώτη και 1:09.02 λεπτά πιο αργά από την Ουγγαρέζα Γκιόνγκι Ντάνι που τερμάτισε ένατη." },
+        { "cell": "quote-letter", "text": "Η πολιτική ομάδα που έχει την εξουσία, ο Οργανισμός του Λαού Νοτιοδυτικής Αφρικής (South West Africa People's Organisation), είχε πλειοψηφήσει κατά την ψηφοφορία για τους βουλευτές." },
+        { "cell": "quote-letter", "text": "Ο Όλιβερ Σακς στη διατριβή του με τίτλο «Η Ομιλία του Προέδρου» (The President's Speech), αναφέρει πως τα άτομα που αδυνατούν να κατανοήσουν την ομιλία λόγω εγκεφαλικής βλάβης είναι σε θέση, ωστόσο, να διακρίνουν την ειλικρίνεια με ακρίβεια." },
+        { "cell": "quote-letter", "text": "Η Oyapock River Bridge είναι μια καλωδιωτή γέφυρα. Εκτείνεται στο ποτάμι Oyapock συνδέοντας τις πόλεις Oiapoque της Βραζιλία και Saint-Georges de l'Oyapock της Γαλλικής Γουιάνας." },
+        { "cell": "quote-letter", "text": "Ο Κάρνο είναι ένας φημισμένος πλην αμφιλεγόμενος καθηγητής αγγλικών που δίδαξε στα φροντιστήρια Modern Education και King's Glory, ενώ υποστηρίζει ότι είχε 9.000 μαθητές στο απόγειο της καριέρας του." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.
