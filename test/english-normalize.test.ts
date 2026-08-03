@@ -271,6 +271,12 @@ describe("Latin abbreviations and phrases", () => {
         // The ampersand VANISHED, so "Arts & Sciences" read as "Arts Sciences".
         expect(normalizeEnglish("College of Arts & Sciences")).toBe("College of Arts and Sciences");
         expect(normalizeEnglish("B&Bs compete")).toBe("B and Bs compete");
+        // THE HTML ENTITY, and both halves of that fix. Unhandled, the bare-`&` rule turned `&amp;` into
+        // "and amp;" — a word invented out of markup. Handled without consuming the surrounding spaces, it
+        // emitted a DOUBLE SPACE, which is the SLOT-GAP defect class. 0 corpus instances; a phonemizer is
+        // handed arbitrary text, and core/markup.ts (which decodes these) is not wired for English.
+        expect(normalizeEnglish("Arts &amp; Sciences")).toBe("Arts and Sciences");
+        expect(normalizeEnglish("fish &amp; chips")).not.toMatch(/ {2}|amp/u);
     });
 
     test("the relational and arithmetic signs", () => {

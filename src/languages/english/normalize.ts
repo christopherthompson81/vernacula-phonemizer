@@ -364,10 +364,16 @@ export function normalizeEnglish(input: string): string {
     //    LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the
     //    currency step keys on `$` beside a number, the unit step on a number beside an abbreviation — and
     //    inserting words between them first would break those adjacencies.
+    //    THE HTML ENTITY FIRST, or the bare-`&` rule below turns `&amp;` into "and amp;" — a word invented
+    //    out of markup, which is worse than the drop it replaces. This corpus writes no entity (0 measured)
+    //    but a phonemizer is handed arbitrary text. `core/markup.ts` decodes these and English does not use
+    //    it; wiring that is a broader change (it also strips tags) and is not what this PR is for.
+    s = s.replace(/\s*&amp;\s*/giu, " and ");
     s = s.replace(/\s*&\s*/gu, " and ");
-    //    `×`/`÷`/`=`/`<`/`>` only BETWEEN digits, because this corpus's text carries HTML (`<i>`, `<sup>`)
-    //    and a bare `<` rule would eat the tags. `±` and a leading `+`/`−` take no such guard: they are
-    //    unambiguous before a number, and `+30°C` is the corpus's one instance.
+    //    `×`/`÷`/`<`/`>` only BETWEEN digits. Not because THIS corpus carries HTML — it does not, 0 tags
+    //    measured, and an earlier draft of this comment claimed otherwise by carrying the reasoning over
+    //    from the Malay layer, where the tags are real. The guard is kept because a phonemizer is handed
+    //    arbitrary text and `<` is the one sign whose bare form would eat a tag if one ever arrived.
     s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 times ");
     s = s.replace(/(\d)\s*÷\s*(?=\d)/gu, "$1 divided by ");
     //    `=` takes the HOUSE PATTERN `(\S)\s*=\s*(\S)` that eleven other layers use, not the digit gate: an
