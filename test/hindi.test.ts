@@ -77,14 +77,46 @@ describe("hindi normalization", () => {
         expect(phonemize("11:00 बजे", "hi")).toBe("ɡjˈaːɾəɦ bˈəd͡ʒeː"); // …but kept at :00, which is right
     });
 
-    test("fractions and the plus sign; the minus is deliberately not claimed", () => {
+    test("fractions and the plus sign", () => {
         expect(phonemize("1/2", "hi")).toBe("ˈaːd̪ʱaː");
         expect(phonemize("1/3", "hi")).toBe("ˈeːk t̪ɪɦˈaːiː");
         expect(phonemize("1/5", "hi")).toBe("ˈeːk bˈəʈaː pˈaː̃t͡ʃ"); // the ordinary spoken "n बटा m"
         expect(phonemize("+3 डिग्री", "hi")).toBe("d̪ʱˈən t̪ˈiːn ɖˈɪɡɾiː");
-        // The only hyphen-before-digit in the corpus is a spacecraft NAME, and Devanagari also uses a
-        // spaced hyphen in compounds, so a minus rule here has false positives and no true ones.
+    });
+
+    // #586. The minus WAS deliberately not claimed, and the refusal was right about the rule it refused:
+    // measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive and no true ones.
+    // A narrower rule escapes the objection — the sign is unambiguous when it opens the string or a bracket,
+    // or when a degree/percent word follows — and the corpus's own `+ 30° C` proves the signed temperature is
+    // an attested shape here, which is the one where dropping the sign inverts the meaning.
+    test("the minus is claimed only where it cannot be a designation (#586)", () => {
+        expect(phonemize("-5", "hi")).toBe("ɾˈɪɳ pˈaː̃t͡ʃ"); // ऋण पाँच
+        expect(phonemize("-5 डिग्री", "hi")).toBe("ɾˈɪɳ pˈaː̃t͡ʃ ɖˈɪɡɾiː");
+        expect(phonemize("तापमान -5 °C है।", "hi"))
+            .toBe("t̪aːpmˈaːn ɾˈɪɳ pˈaː̃t͡ʃ ɖˈɪɡɾiː sˈeːlsɪjəs ɦˈɛː ."); // the inverting case
+        expect(phonemize("(-3)", "hi")).toBe("ɾˈɪɳ t̪ˈiːn");
+        // …and the two designations the refusal was protecting are still untouched. `फ़ॉर्मूला-1` is the one
+        // the SCAN misreported too: the character before its hyphen is a matra, so `(?<!\p{L})` let it pass.
         expect(phonemize("चंद्रयान -1", "hi")).toBe("t͡ʃə̃n̪d̪ɾəjˈaːn ˈeːk");
+        expect(phonemize("फ़ॉर्मूला-1 चैंपियनशिप", "hi")).toBe("fˈɔːɾmuːlaː ˈeːk t͡ʃˈɛː̃mpɪjənʃɪp");
+        expect(phonemize("25-30 साल", "hi")).toBe("pət͡ʃːˈiːs t̪ˈiːs sˈaːl"); // a range
+        expect(phonemize("आस-पास", "hi")).toBe("ˈaːs pˈaːs"); // a compound
+    });
+
+    test("the remaining signs, with Hindi's postpositional comparatives (#586)", () => {
+        expect(phonemize("x = y", "hi")).toBe("ˈɛks bəɾˈaːbəɾ wˈaᶦ"); // बराबर
+        expect(phonemize("6 × 6", "hi")).toBe("t͡ʃʰˈəɦ ɡˈʊɳaː t͡ʃʰˈəɦ"); // गुणा
+        expect(phonemize("6 ÷ 3", "hi")).toBe("t͡ʃʰˈəɦ bʱˈaːɡ t̪ˈiːn"); // भाग
+        expect(phonemize("±5", "hi")).toBe("d̪ʱˈən ɾˈɪɳ pˈaː̃t͡ʃ"); // the धन/ऋण pair
+        // THE COMPARATIVE REORDERS: Hindi states it postpositionally, so `5 < 6` is "5, 6 से कम" — the
+        // western order would have been fluent nonsense. Corpus: "+ 30° C से अधिक तापमान".
+        expect(phonemize("5 < 6", "hi")).toBe("pˈaː̃t͡ʃ t͡ʃʰˈəɦ sˈeː kˈəm");
+        expect(phonemize("6 > 5", "hi")).toBe("t͡ʃʰˈəɦ pˈaː̃t͡ʃ sˈeː ˈəd̪ʱɪk");
+        // The ampersand: English inside a Latin run, और otherwise.
+        expect(phonemize("AT&T", "hi")).toBe("ˈæt ˈənd tʰˈiː");
+        expect(phonemize("राम & श्याम", "hi")).toBe("ɾˈaːm ˈɔːɾ ʃjˈaːm");
+        // The exponent's measure word precedes the unit, with a space. Corpus: "19,500 वर्ग किलोमीटर".
+        expect(phonemize("50 km²", "hi")).toBe("pət͡ʃˈaːs ʋˈəɾɡ kɪloːmˈiːʈəɾ");
     });
 });
 

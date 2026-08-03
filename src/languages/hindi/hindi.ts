@@ -197,6 +197,15 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["प्रतिशत"],
     currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
     units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
+    // `km²` → वर्ग किलोमीटर. Undeclared, the tier left the whole match alone and `km²` reached the IPA as a
+    // Latin fragment — `5 km²` read as *pˈaː̃t͡ʃ ˈʊkm*, worse than the raw text, and the review gate could not
+    // flag it as a DROP because deleting the `²` changes the output.
+    // वर्ग is corpus-attested in exactly this slot: "यह पार्क 19,500 वर्ग किलोमीटर में फैला है". घन is the
+    // formal counterpart; the corpus writes the loan क्यूबिक once ("120-160 क्यूबिक मीटर ईंधन"), which is
+    // what a speaker may say but not what the notation should compose to.
+    // `before`, not `compound`: Hindi sets the measure word off with a space, and one form each because the
+    // word does not agree with its count here.
+    exponentWords: { squared: ["वर्ग"], cubed: ["घन"], position: "before" },
 });
 
 export function createHindi(foreign?: ForeignPhonemizer): {

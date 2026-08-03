@@ -606,6 +606,35 @@ magnitude is followed by a currency word or a comma, never a sign or a unit.
   measured-defect repair — and the comment says so. Without the measurement I would have written a comment
   claiming to fix defects that exist in no corpus.
 
+**23. A GUARD WRITTEN FOR AN ALPHABET IS BLIND IN AN ABUGIDA — `\p{L}` IS NOT THE END OF A WORD.** A
+Devanagari word usually ends in a MATRA, not a bare consonant, so the character before the hyphen in
+`फ़ॉर्मूला-1` is ा (U+093E, `Mn`). `DROPPABLE`'s minus guard was `(?<![\p{L}\p{Nd}])`, which therefore passed,
+and the scan reported a dropped minus on Formula-1 — a designation whose hyphen is correctly silent. Measured
+over all 37 artifacts, adding `\p{M}` removed the class **entirely** for bn, or, te and pa, and halved it for
+hi and ta.
+
+- **Any guard that means "not inside a word" needs `\p{M}` beside `\p{L}`.** The layers already know this —
+  hi's own ordinal and abbreviation rules use `(?![\p{L}\p{M}])` — and the shared defect table did not.
+- **The survivors of a guard fix are the interesting ones.** What remained was `चंद्रयान -1` and, in Tamil,
+  `சந்திரயான் -1` — the same FLEURS sentence, generating the identical false positive in every language it was
+  translated into. Same pattern as the seven-utterance magnitude case in trap 17.
+
+**24. CHECK WHETHER THE RULE SHAPE IS THE ONLY ONE AVAILABLE BEFORE ACCEPTING A REFUSAL — INCLUDING YOUR OWN.**
+Trap 16 is about seams that exist; this is its complement. Hindi's layer DECLINED the minus rule under #562 and
+was right: measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive (`चंद्रयान -1`)
+and **no true ones** — the corpus contains no negative number. Re-measuring for #586 reproduced those counts
+exactly. The gate said FAIL, the corpus said the gate was wrong, and the deferral was documented well enough to
+re-check in one command.
+
+- **What broke the refusal was not better evidence, it was a narrower rule.** Every counter-example is a
+  DESIGNATION, and a designation never has a degree word after it — so a sign that opens the string/bracket, or
+  is followed by a degree or percent word, is unambiguous. Both arms have zero corpus counter-examples.
+- **The right context is often the discriminator when the left context is exhausted.** Mandarin reached the
+  same conclusion from the opposite direction (its problem was that Han precedes everything).
+- **A well-written refusal is a re-runnable measurement.** hi's step-7 comment carried the counts and the
+  counter-example, so re-testing it cost one grep. Write deferrals that way.
+- **Do not "fix the FAIL".** A red gate that is correct beats a green gate that is wrong.
+
 
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 

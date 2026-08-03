@@ -1,0 +1,112 @@
+// WIKIPEDIA WORD ATTESTATION — hi (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "hi",
+    "wiki": "hi.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "ऋण",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…अनर्जक ऋण (non-performing loan या NPL) वह ऋण है जो वापस नहीं आ पा रह…",
+                "…अनर्जक ऋण (non-performing loan या NPL) वह ऋण है जो वापस नहीं आ पा रहा हो। == सन्दर्भ == == इन्हें भी द…"
+            ]
+        },
+        {
+            "word": "गुणा",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…इसी से गणित की प्रारम्भिक शिक्षा का आरम्भ होता है। प्रत्येक मनुष्य अपने दैनिक जीवन में प्रायः अंकगणित का उपयोग करता है। अ…",
+                "…। == अंक और संख्या == शून्य (०) से लेकर नौ (९) को प्रदर्शित करने वाले संकेतों को अंक कहते हैं। अंक ही गणित का मूल है। दैनि…",
+                "…, और २ अंक प्रयुक्त हुए हैं। == अंकगणित की मूल प्रक्रियाएँ == अंकगणित की मुख्य चार मूल प्रक्रियाएँ होती हैं जोड़ घटाना गुण…",
+                "…मुख्य चार मूल प्रक्रियाएँ होती हैं जोड़ घटाना गुणा भाग === जोड़ === जब किसी संख्या या अंक में एक या एक से अधिक संख्या या…",
+                "…ब किसी संख्या या अंक में एक या एक से अधिक संख्या या अंक को मिलाया जाता है तो उसे जोड़ (en:Addition) कहते हैं। जोड़ को + चि…",
+                "…ख्या या अंक में एक या एक से अधिक संख्या या अंक को मिलाया जाता है तो उसे जोड़ (en:Addition) कहते हैं। जोड़ को + चिह्न से प्…"
+            ]
+        },
+        {
+            "word": "भाजित",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…यें निम्न हैं: 1, 4, 10, 20, 35, 56, 84, 120, 165, 220, … (sequence A000292 in OEIS) == सूत्र == n-वीं चतुष्फलकीय संख्या का…"
+            ]
+        },
+        {
+            "word": "घन",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…याँ (जैसे रेखा) एवं द्वि-विमीय आकृतियाँ (जैसे त्रिभुज, चतुर्भुज, वर्ग आदि) का आयतन शून्य होता है। == आयतन के सूत्र == (आयत…",
+                "…रेखा) एवं द्वि-विमीय आकृतियाँ (जैसे त्रिभुज, चतुर्भुज, वर्ग आदि) का आयतन शून्य होता है। == आयतन के सूत्र == (आयतन की इकाई…"
+            ]
+        },
+        {
+            "word": "माइनस",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…्षीय आयोगों, और प्रतिनिधियों द्वारा अध्यक्षता या सह-अध्यक्षता वाली किसी भी अन्य संरचनाओं में भागीदारी को तोड़ने का फैसला किय…"
+            ]
+        },
+        {
+            "word": "बराबर",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…तन के लिये सदिश (वेक्टर) सूत्र : === किसी घनाभ के किसी एक शीर्ष पर मिलने वाली तीनों कोर () को सदिश रूप में व्यक्त करें तो उस…",
+                "…= किसी चतुष्फलकी (tetrahedron) के आयतन के लिये सदिश सूत्र : === किसी चतुष्फलकी के चारों शीर्षों के स्थिति सदिश (position vec…"
+            ]
+        },
+        {
+            "word": "ऋणात्मक",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…न्हें आरोही क्रम में कैसे सजायेंगे? २) दो पूर्णांक संख्याएं दी हुई हैं ; उनका महत्तम समापवर्तक कैसे निकालेंगे ? == कुछ प्रसिद…",
+                "…लनविधियाँ (algorithms for sorting) कम्प्रेशन की कलनविधियाँ (algorithms for compression) ट्री-सर्च अल्गोरिद्म (min-max तथा alp…",
+                "…्प्रेशन की कलनविधियाँ (algorithms for compression) ट्री-सर्च अल्गोरिद्म (min-max तथा alpha-beta) क्रिप्टोग्राफी के अल्गोरिद्म…",
+                "…ियाँ (algorithms for compression) ट्री-सर्च अल्गोरिद्म (min-max तथा alpha-beta) क्रिप्टोग्राफी के अल्गोरिद्म == इतिहास == प्र…"
+            ]
+        }
+    ],
+}

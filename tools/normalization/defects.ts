@@ -58,7 +58,13 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
     // Only where a digit FOLLOWS and no letter/digit precedes, so a compound hyphen (`Il-76`, `COVID-19`)
     // and a range (`5-3`) are not mistaken for a negative. Probe forms never merge two digits, so `-`/`+`
     // are judged on `5-`/`-5` and not on `5-5` → `55`.
-    ["minus", /(?<![\p{L}\p{Nd}])[-−–](?=\p{Nd})/gu],
+    //
+    // `\p{M}` IS IN THE GUARD, and leaving it out made this class blind across every abugida in the fleet.
+    // A Devanagari word usually ends in a MATRA, not a bare consonant: the character before the hyphen in
+    // `फ़ॉर्मूला-1` is ा (U+093E, `Mn`), so `(?<!\p{L})` passed and the scan reported a DROP on Formula-1 —
+    // a designation whose hyphen is correctly silent. Found by the #586 loop-back on hi, where BOTH reported
+    // minus drops were designations and the corpus contains no negative number at all.
+    ["minus", /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\p{Nd})/gu],
     ["math-sign", /[+±×÷=<>]/gu],
     ["exponent", /[²³⁰¹⁴-⁹]/gu],
     ["ampersand", /[&＆]/gu],
