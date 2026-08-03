@@ -41,12 +41,32 @@
  *   · km² BEFORE the plain unit rule, or `км` is consumed and the exponent left stranded.
  */
 
-/** Cyrillic unit abbreviations → the COUNTING form of the word. Longest first. */
+/**
+ * Unit abbreviations → the COUNTING form of the word. Longest first.
+ *
+ * BOTH SCRIPTS, and the header's claim that "a Latin unit table matches nothing here" is half right (#586).
+ * Cyrillic is what the corpus mostly writes — км ×50, см ×5, кг ×4, мм ×3, all after a numeral — but it also
+ * writes LATIN abbreviations 14 times, every one of them after a numeral:
+ *
+ *   "Стандартният 35 mm филм (негатив 36 на 24 mm)"     mm ×12 · cm ×2
+ *
+ * Those were reaching the output as the raw letters, the same `ˈʊkm` shape found fleet-wide. The Latin keys map
+ * to the identical words, so this is an alias list rather than new data — exactly the gap Kazakh had, where the
+ * words were right and only the Cyrillic spelling of the KEY was declared.
+ *
+ * `м` and `г` get NO Latin alias on purpose. A one-letter key is the documented `Il-76s` hazard, and in Latin
+ * it would also collide with `m`/`g` inside ordinary Bulgarian-transliterated text; the Cyrillic one-letter
+ * keys are safe because a Latin `m` cannot appear inside a Cyrillic word.
+ */
 const UNITS: [string, string][] = [
     ["км", "километра"],
     ["кг", "килограма"],
     ["см", "сантиметра"],
     ["мм", "милиметра"],
+    ["km", "километра"],
+    ["kg", "килограма"],
+    ["cm", "сантиметра"],
+    ["mm", "милиметра"],
     ["м", "метра"],
     ["г", "грама"],
 ];
@@ -59,9 +79,13 @@ const SQUARED: [RegExp, string][] = [
     // `км2`. This is the third instance of the same trap in two languages (the Romanian rate rule ended
     // `or[ăa]\b`, and the trailing guard in step 8 below is written correctly for exactly this reason).
     // In a non-ASCII orthography `\b` is never the right boundary.
-    [/(?<!\p{L})км\s*[²2](?!\d)/giu, "квадратни километра"],
+    // The Latin `km` is accepted here for the same reason it is in `UNITS` (#586): once the plain unit gained
+    // a Latin alias, `50 km2` read "километра ДВЕ" — the unit substituted and the exponent left to be spoken
+    // as a bare numeral, which is worse than the raw `km` it replaced. The pair must move together.
+    // Bulgarian's own one-letter `м` keeps no Latin alias, so `m2` is deliberately not matched.
+    [/(?<!\p{L})(?:км|km)\s*[²2](?!\d)/giu, "квадратни километра"],
     [/(?<!\p{L})м\s*[²2](?!\d)/giu, "квадратни метра"],
-    [/(?<!\p{L})км\s*[³3](?!\d)/giu, "кубични километра"],
+    [/(?<!\p{L})(?:км|km)\s*[³3](?!\d)/giu, "кубични километра"],
     [/(?<!\p{L})м\s*[³3](?!\d)/giu, "кубични метра"],
 ];
 

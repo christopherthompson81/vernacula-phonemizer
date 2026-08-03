@@ -89,6 +89,27 @@ export function normalizeCentralKurdish(input: string): string {
     t = t.replace(/(\d)\s*°\s*F(?!\p{L})/giu, "$1 پلەی فەهرەنهایت");
     t = t.replace(/(\d)\s*°/gu, "$1 پلە");
 
+    // 6b) UNIT ABBREVIATIONS (#586). `19500 کم` read the abbreviation as raw letters — the `ˈʊkm` shape found
+    //     fleet-wide — and the corpus writes them 32 times, EVERY ONE after a numeral:
+    //
+    //       کم ×30  "پارکەکە 19500 کم دووجا دایپۆشیوە"  ·  "بە نزیکەی 12.8 کم یان 8 میل"
+    //       سم ×2   "فیلمی کامێرای شێوە مامناوەندی 6 بە 6 سم بەکاردەهێنن"
+    //
+    //     A NUMERAL MUST PRECEDE, and that guard is the whole safety of this rule rather than a nicety. The
+    //     Persian pass measured the same two graphemes and found the opposite: `کم` occurs 63 times in fa_ir
+    //     and NEVER after a numeral, because there it is the adjective "little/few" ("اصطکاک کم است" — friction
+    //     is low), and `سم` ×5 is "poison". An unguarded table would read 68 ordinary Persian words as units.
+    //     In ckb both are 30/30 and 2/2 after a numeral, so the guard costs nothing here and is load-bearing
+    //     for anyone copying the table.
+    //
+    //     The words are the corpus's own spelled-out forms (کیلۆمەتر ×33, and سانتیمەتر from the same source
+    //     as `سم`'s expansion). The exponent needs no rule: the corpus already writes it as the WORD دووجا
+    //     after the unit ("کم دووجا"), so expanding the abbreviation leaves "کیلۆمەتر دووجا" intact.
+    //     `م` and `کگ` are NOT declared — `م` is a one-letter key in a script where it is a very common
+    //     letter, and `کگ` occurs zero times.
+    t = t.replace(/(\d)\s*کم(?![\p{L}\p{M}])/gu, "$1 کیلۆمەتر");
+    t = t.replace(/(\d)\s*سم(?![\p{L}\p{M}])/gu, "$1 سانتیمەتر");
+
     // 7) RANGES (34). Spoken `بۆ` ("to"), which is an ordinary word in the corpus (2057).
     t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 بۆ $2");
 
