@@ -11,7 +11,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeGeezG2P } from "../../core/geez.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
-import { createAmharicNormalizer } from "./normalize.ts";
+import { makeAmharicNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -99,7 +99,7 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 /** #562 text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */
-const NORMALIZE = createAmharicNormalizer(numberToText, SYMBOLS);
+const NORMALIZE = makeAmharicNormalizer(numberToText, SYMBOLS);
 
 class AmharicPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}

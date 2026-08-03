@@ -587,6 +587,34 @@ word fits the slot. `ff hakkunde`, `ms paun` (the weight, not the currency), `zu
 not the decimal point) and the Gabonese district `Idola` all pass this report and fail on sense. Read the
 source — that is `attest.ts`'s example column, and it is the half no tool can do.
 
+
+## Naming: what a normalizer export is called
+
+Three shapes, and the fleet already agrees on all three — this writes the convention down so it stops being
+folklore, after the #586 loop-back found the one outlier by watching `review.ts` print a blank where a name
+should have been.
+
+| shape | when | count |
+|---|---|---:|
+| `normalizeXxx(text)` | a plain normalizer, the default | **75** |
+| `makeXxxNormalizer(deps)` | a FACTORY, because the engine serves several languages off one normalizer with different number data — hi, ur, mr, as, gu, ne, or, fa, bn, pa, am | **11** |
+| `createXxx()` | an ENGINE constructor, the thing `registry.ts` calls | 189 |
+
+The rule that makes it memorable: **`create` returns a `Phonemizer`; `make` returns a configured function;
+`normalize` IS the function.** `src/core` follows it without exception — `makeSymbolNormalizer`,
+`makeInitialismNormalizer`, `makeUnreadableTest`, `makeAbugidaG2P`.
+
+`createAmharicNormalizer` was the single violation, and it was the worst kind: it used the ENGINE verb for a
+normalizer factory, so it collided with the one convention that has 189 members. Renamed to
+`makeAmharicNormalizer`.
+
+**Why a tool noticed before a person did.** `review.ts` matched `export function (normalize\w+)` only, so for
+all eleven factory languages `exportNames` was empty and two checks reported a false FAIL — *"no call to
+&nbsp;&nbsp;found"* and *"no test file references&nbsp;&nbsp;"*, with a blank where the name belongs. A report
+that cannot name what it is looking for is not reporting a real absence, and that blank is the tell. The
+pattern now accepts all three shapes; keep it that way even though the convention is documented, because a
+gate that breaks on the next outlier is a gate that gets switched off.
+
 ---
 
 ## Two standing rules on data

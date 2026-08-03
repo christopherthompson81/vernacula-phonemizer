@@ -85,7 +85,7 @@ const ORDINAL: Record<string, string> = {
  * `symbols` is the shared `makeSymbolNormalizer` pass (%, currency). It is threaded THROUGH this function
  * instead of wrapping it, because the ordering is load-bearing in both directions — see step 9.
  */
-export function createAmharicNormalizer(
+export function makeAmharicNormalizer(
     numberToText: (n: number) => string,
     symbols: (text: string) => string,
 ): (text: string) => string {

@@ -99,7 +99,17 @@ if (!hasNorm) { report(); process.exit(1); }
 
 // ALL exported normalizers, not the first: czech/normalize.ts exports both `normalizeCzech` and
 // `normalizeCzechInitialisms`, and matching only the first reported "no tests" for a file that has them.
-const exportNames = [...readFileSync(normPath, "utf8").matchAll(/export function (normalize\w+)/gu)].map((m) => m[1]!);
+//
+// AND NOT ONLY THE `normalize*` NAME. Eleven languages export a FACTORY instead, because their engine serves
+// several languages off one normalizer with different number data: `makeHindiNormalizer` (hi, ur, mr, as, gu,
+// ne, or, fa, bn, pa) and `makeAmharicNormalizer` (am). Matching `normalize\w+` alone found nothing in any
+// of them, so `exportNames` was EMPTY and two checks reported a false FAIL — "no call to  found" and "no test
+// file references " — with a blank where the name should be. Found by the #586 loop-back on hi, and the blank
+// is what gave it away: a report that cannot name what it is looking for is not reporting a real absence.
+const exportNames = [...readFileSync(normPath, "utf8")
+    .matchAll(/export function ((?:normalize|make|create)\w+)/gu)]
+    .map((m) => m[1]!)
+    .filter((n) => /^normalize/u.test(n) || /Normalizer/u.test(n));
 const exportName = exportNames[0];
 // The engine is not necessarily the first non-normalize .ts file alphabetically: uzbek/ sorts numbers.ts
 // before uzbek.ts, turkish/ sorts g2p.ts before turkish.ts. Scan EVERY candidate engine file, so a
@@ -114,15 +124,34 @@ const engine = exportName === undefined
     ? engineFiles[0]
     : engineFiles.find((f) => readFileSync(join("src/languages", dir, f), "utf8").includes(exportName)) ?? engineFiles[0];
 const called = exportNames.filter((n) => engineSrc.includes(n));
-note("wired into text()", called.length > 0, called.length > 0 ? `${engine} calls ${called.join(", ")}` : `no call to ${exportNames.join("/")} found`);
+note("wired into text()", called.length > 0,
+    called.length > 0 ? `${engine} calls ${called.join(", ")}`
+        : exportNames.length === 0 ? `${normPath} exports no normalize*/…Normalizer function — cannot tell`
+            : `no call to ${exportNames.join("/")} found`);
 
 // ── 2. tests reference the normalizer (Czech shipped none; the suite was identical before and after) ──
 const testFiles = [
     ...readdirSync("test").filter((f) => f.endsWith(".test.ts")).map((f) => join("test", f)),
     ...readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".test.ts")).map((f) => join("src/languages", dir, f)),
 ];
-const testing = testFiles.filter((f) => { const src = readFileSync(f, "utf8"); return exportNames.some((n) => src.includes(n)); });
-note("tests", testing.length > 0, testing.length > 0 ? testing.join(", ") : `no test file references ${exportNames.join("/")}`);
+// TWO WAYS A TEST CAN EXERCISE THIS LAYER, and requiring only the first was a false negative for all eleven
+// FACTORY languages. `test/hindi.test.ts` asserts `phonemize("५०%", "hi")` → *pachaas pratishat* — a proper
+// normalization test, end-to-end through the wired pipeline, which never names `makeHindiNormalizer`. Testing
+// through `phonemize` is if anything the better shape, since it also proves the wiring.
+//   1. it references an exported normalizer BY NAME (the unit-test shape)
+//   2. it phonemizes IN THIS LANGUAGE with an input carrying a digit or a symbol — i.e. something only this
+//      layer can read. Gated on the symbol, not merely on the language code, or every g2p test would count
+//      and the check could never fail.
+const NORMALIZABLE = /["'`][^"'`\n]*[\d%\p{Sc}°&+=<>‰،؛।॥][^"'`\n]*["'`]/u;
+const testing = testFiles.filter((f) => {
+    const src = readFileSync(f, "utf8");
+    if (exportNames.some((n) => src.includes(n))) return true;
+    return new RegExp(`["'\`]${lang}["'\`]`, "u").test(src) && NORMALIZABLE.test(src);
+});
+note("tests", testing.length > 0,
+    testing.length > 0 ? testing.join(", ")
+        : exportNames.length === 0 ? `${normPath} exports no normalize*/…Normalizer function — cannot tell`
+            : `no test file references ${exportNames.join("/")}`);
 
 // ── 3. the artifact is committed (Czech's was left untracked) ─────────────────────────────────────
 // The artifact is usually `<lang>.jsonc`, but a language served through an ALIAS files it under the code
