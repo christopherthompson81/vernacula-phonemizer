@@ -50,7 +50,27 @@ function numberToThaiWords(n: number): string[] {
 }
 
 // #562 symbol normalization — Thai: เปอร์เซ็นต์ (kaikki-attested /pɤː˧.sen˧/), read by the Thai g2p.
-const SYMBOLS = makeSymbolNormalizer({ percent: ["เปอร์เซ็นต์"] });
+//
+// CURRENCY (#584). `$5` read as bare *hˈaː˥˩*. th_th contains ZERO `$` against 39 `%`, so the corpus-driven
+// gate that caught the percent could not see this — yet all four words are in that same corpus, spelled out
+// and immediately after a numeral, which is the slot the tier emits into:
+//
+//   ดอลลาร์ ×28  "ธนบัตรใหม่ชนิดราคา 5 และ 100 ดอลลาร์แคนาดา"
+//   ปอนด์   ×14  "ที่ใช้อย่างเป็นทางการในฟอล์กแลนด์คือปอนด์ฟอล์กแลนด์ (FKP)"
+//   เยน     ×6   "ราคาตั้งแต่ 2,500 เยน ไปจนถึง 130,000 เยน"
+//   ยูโร    ×3   "ทำรายได้มากกว่า 10 พันล้านยูโร (14.7 พันล้านดอลลาร์สหรัฐ"
+//
+// One form each: Thai nouns do not inflect for number. Counted by SUBSTRING and that is correct here — Thai
+// is written without spaces, so there is no token boundary to test and the examples are the evidence (#586).
+//
+// `unspacedScript` for the same reason: a currency sign in Thai is normally flanked by Thai letters, and the
+// tier's letter-boundary guard would reject exactly that ordinary case — `$5ของ` dropped the sign while `$5`
+// alone read it.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["เปอร์เซ็นต์"],
+    currency: { $: ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"] },
+    unspacedScript: true,
+});
 
 class ThaiPhonemizer implements Phonemizer {
     text(input: string): string {

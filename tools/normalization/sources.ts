@@ -235,13 +235,38 @@ function tierWords(c: Ctx): Row[] {
     // shared tier entirely and keeps its own implementation; the Nordic layers claim percent locally for
     // ordering reasons. Same heuristic review.ts uses for the same reason (#601): a `.replace()` whose
     // PATTERN mentions the sign is emitting the word.
+    // THE SIGN MUST BE FOUND IN THE PATTERN, NOT IN THE WHOLE `.replace(...)`, and getting that wrong made
+    // this check report `have` for almost every language. `$` is the regex END-OF-STRING ANCHOR, the
+    // backreference marker (`"$1 percent"`) and the JS template-literal sigil (`${h} ${min}`) — and `$` is in
+    // `\p{Sc}`. So testing the whole call text found a "currency sign" in every layer that uses a template
+    // literal anywhere, which is all of them. Measured: fa, hu, sr, th and yue all reported
+    // `currency-word: declared or emitted` while every one of them DROPS `$5` — the five languages of #584,
+    // reported clean by the tool meant to find them.
+    //
+    // So: match the regex LITERAL only, and for `$` require it to be ESCAPED (`\$`, how a pattern matches a
+    // literal dollar) or inside a CHARACTER CLASS (`[$€]`). The other signs are not regex metacharacters and
+    // need no such care.
     const emits = (sign: RegExp): boolean =>
-        [...c.langSrc.matchAll(/\.replace\(\s*\/[^\n]*\/[a-z]*\s*,([^;]*)\)/gu)]
+        [...c.langSrc.matchAll(/\.replace\(\s*(\/(?:\\.|\[[^\]]*\]|[^/\n])+\/[a-z]*)\s*,([^;]*)\)/gu)]
             // The word may sit anywhere in the replacement, not against the quote: English writes
             // `.replace(/(\d)\s?%/gu, "$1 percent")`, so a `["'`]\p{L}{2,}` anchor missed it.
-            .some((m) => sign.test(m[0]!) && /["'`][^"'`]*\p{L}{3,}/u.test(m[1]!));
+            // The replacement window is CAPPED: `([^;]*)` runs to the next semicolon, which in a chained
+            // `.replace(...).join("")` swallows the following calls — `join` then counted as the emitted
+            // word. 120 characters is past any real replacement string and short of the next call.
+            .some((m) => sign.test(m[1]!) && /["'`][^"'`]*\p{L}{3,}/u.test(m[2]!.slice(0, 120)));
+    /**
+     * A currency sign as a regex may write it. For `$` this accepts ONLY the escaped form `\$`, which is how a
+     * pattern matches a literal dollar (English writes `/\$/`).
+     *
+     * The character-class form `[$€]` is deliberately NOT accepted, because the shape is indistinguishable from
+     * a REGEX-ESCAPING class — Cantonese has `.replace(/[.*+?^${}()|[\]\\-]/gu, "\\$&")`, which contains `$`
+     * only because it escapes it, and accepting classes let that report as a currency emission. Missing a real
+     * `[$…]` costs a `check` verdict, which this class's header already declares the conservative outcome:
+     * `review.ts` tests the READING and is the authority.
+     */
+    const CUR_IN_PATTERN = /[¢-¥֏؋৲৳૱௹฿៛₠-₿]|\\\$/u;
     const pct = /percent:\s*\[/u.test(tier) || emits(/%/u);
-    const cur = /currency:\s*\{/u.test(tier) || emits(/\p{Sc}/u);
+    const cur = /currency:\s*\{/u.test(tier) || emits(CUR_IN_PATTERN);
     const signInCorpus = /[%٪％]/u.test(c.corpus);
     const curInCorpus = /\p{Sc}/u.test(c.corpus);
     // THESE TWO REPORT `check`, NEVER `none`, AND THAT IS A MEASURED DECISION. The other classes read

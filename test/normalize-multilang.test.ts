@@ -404,3 +404,43 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("yüzde 40%", "tr")).toBe(phonemize("40%", "tr"));     // prefix, Turkish
     });
 });
+
+/**
+ * #584 — five languages that had been through the #562 pass read `%` correctly and dropped CURRENCY signs
+ * SILENTLY: the sign contributed nothing and `$5` was byte-identical to `5`, so nothing downstream marked the
+ * loss. The cause was the gate, not an oversight: each language got the symbol coverage its own corpus
+ * exercised, and all five corpora contain ZERO `$` against 18–54 `%`.
+ *
+ * Every word below is attested IN ITS OWN CORPUS, spelled out next to a numeral even though the sign never
+ * appears there. Two of the sourcing traps fired and are recorded at the declarations: Serbian `фунти` ×12 is
+ * the WEIGHT pound ("200 фунти (90 кг)"), and `евр` returns 27 hits of Европа to one of евра.
+ */
+describe("currency signs were dropped silently in five languages (#584)", () => {
+    test("each of the five now says its own currency word", () => {
+        expect(phonemize("$5", "fa")).toBe("pˈand͡ʒ dolˈaːɾ");        // دلار ×18
+        expect(phonemize("$5", "hu")).toBe("ˈøt ˈdolːaːr");            // dollár ×6
+        expect(phonemize("$5", "sr")).toBe("pet dolara");              // долара ×17
+        expect(phonemize("$5", "th")).toBe("hˈaː˥˩ dˈɔ˧nlaː˥˩");      // ดอลลาร์ ×28
+        expect(phonemize("$5", "yue")).toBe("ŋ̩˩˧ mei˩˧ jyːn˨˩");     // 美元 ×8
+    });
+
+    test("the sign is no longer a no-op, and the percent it never broke still reads", () => {
+        for (const l of ["fa", "hu", "sr", "th", "yue"]) {
+            expect(phonemize("$5", l)).not.toBe(phonemize("5", l));
+            expect(phonemize("50%", l)).not.toBe(phonemize("50", l));
+        }
+    });
+
+    test("Serbian selects its count form, as its unit table does", () => {
+        expect(phonemize("$1", "sr")).toBe("jedan dolar");    // nominative singular
+        expect(phonemize("$3", "sr")).toBe("tri dolara");     // paucal
+        expect(phonemize("$5", "sr")).toBe("pet dolara");     // genitive plural
+    });
+
+    test("Thai and Cantonese need `unspacedScript`, or the ordinary case drops", () => {
+        // A sign in an unspaced script is normally flanked by native letters, which the tier's
+        // letter-boundary guard rejected — the punctuation-adjacent form worked and the ordinary one did not.
+        expect(phonemize("$5ของ", "th")).toContain("dˈɔ˧nlaː˥˩");
+        expect(phonemize("$500的", "yue")).toContain("mei˩˧ jyːn˨˩");
+    });
+});
