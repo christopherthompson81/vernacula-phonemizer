@@ -357,4 +357,14 @@ describe("german normalization", () => {
         expect(phonemize("+3 Grad", "de")).toBe("plʊs dʁaɪ̯ ɡʁaːt");
         expect(phonemize("1/5", "de")).toBe("aɪ̯n fˈʏnftəl"); // ordinal stem + -el
     });
+
+    // #586 — bare `m` was the RAW LETTER, so `5 m³` read as *fʏnf m* while `5 km³` read correctly: the
+    // exponent branch resolves its head noun from `units` first, and `Kubik` had nothing to attach to.
+    // Meter ×6, and every digit-adjacent bare `m` in the corpus is a metre.
+    test("the bare metre, and the cube word it feeds (#586)", () => {
+        expect(phonemize("4892 m", "de")).toContain("mˈeːtɐ");
+        expect(phonemize("100 m und 200 m", "de")).toContain("mˈeːtɐ ʊnt");
+        expect(phonemize("5 m³", "de")).toContain("kˈuːbɪkmeːtɐ"); // compound, one word
+        expect(phonemize("BMW M3", "de")).toContain("m dʁaɪ̯");    // not a volume
+    });
 });

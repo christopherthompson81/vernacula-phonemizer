@@ -212,4 +212,13 @@ describe("Ukrainian text normalization (#562)", () => {
     test("fractions read as a feminine ordinal, agreeing with the elided частина", () => {
         expect(normalizeUkrainian("(1/5 дюйма)")).toBe("(одна п'ята дюйма)");
     });
+
+    // #586 — the BARE METRE, both spellings. It had been excluded for the apostrophe in `41 м’яч` ("41
+    // balls"), where a short key could bite into the next word — but the tier's trailing guard rejects
+    // `'’ʼ` explicitly, so that string is safe and the exclusion was obsolete. Verified below.
+    test("the bare metre, both spellings, and the apostrophe that kept it out (#586)", () => {
+        expect(getPhonemizer("uk").text("120 m³").trim()).toContain("kubʲit͡ʃnɪx mɛtʲrʲiu̯");
+        expect(getPhonemizer("uk").text("120 м³").trim()).toContain("kubʲit͡ʃnɪx mɛtʲrʲiu̯");
+        expect(getPhonemizer("uk").text("41 м’яч").trim()).toContain("mjat͡ʃ"); // one word, not "41 metres" + яч
+    });
 });

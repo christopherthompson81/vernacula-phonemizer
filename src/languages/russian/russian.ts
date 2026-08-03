@@ -107,7 +107,12 @@ const SYMBOLS = makeSymbolNormalizer({
         // reached the g2p raw — "120 km/h" came out as the cluster [ˈʊkm] plus the ENGLISH letter H.
         "km": ["километр", "километра", "километров"], "cm": ["сантиметр", "сантиметра", "сантиметров"],
         "mm": ["миллиметр", "миллиметра", "миллиметров"], "kg": ["килограмм", "килограмма", "килограммов"],
-        "ч": ["час", "часа", "часов"], "h": ["час", "часа", "часов"] },
+        "ч": ["час", "часа", "часов"], "h": ["час", "часа", "часов"],
+        // THE BARE METRE, both spellings. метров ×6 / метра ×2, and digit-adjacent bare Latin `m` is ×0 in
+        // this corpus. `кубический` was already declared below but unreachable without a head noun, so
+        // `120 m³` read as the letter name while `120 km³` read correctly. The apostrophe hazard that kept
+        // Ukrainian's `м` out is guarded by the tier itself (`'’ʼ` are rejected after a unit key).
+        "м": ["метр", "метра", "метров"], "m": ["метр", "метра", "метров"] },
     unitPer: "в",
     exponentWords: { squared: ["квадратный", "квадратных"], cubed: ["кубический", "кубических"], position: "before" },
     // Without these the magnitude never matched, so "$5 миллионов" hopped the currency word to the WRONG

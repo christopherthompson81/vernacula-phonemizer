@@ -156,4 +156,11 @@ describe("bengali normalization", () => {
     test("the squared/cubed measure word (#586)", () => {
         expect(phonemize("19,500 km²", "bn")).toContain("bɔɾɡo kilomiʈaɾ");
     });
+
+    // #586 — `120-160 কিউবিক মিটার জ্বালানি তেল`, the loan, word-first. This is the word an earlier pass could
+    // not find: it probed ঘন (×19 — the reduplicated adverb "frequently") and `ঘনমিটার` (×0), and the corpus
+    // uses neither.
+    test("the cubed measure word (#586)", () => {
+        expect(phonemize("120 m³", "bn")).toContain("kiubik miʈaɾ");
+    });
 });

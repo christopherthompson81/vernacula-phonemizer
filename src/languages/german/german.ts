@@ -390,7 +390,11 @@ const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["Prozent"],
     currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
-    units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"] },
+    // `m` — Meter ×6, and every digit-adjacent bare `m` in this corpus is a metre: `4892 m Höhe`,
+    // `100 m und 200 m Freistil`, `133 m/s`. Without it `Kubik`/`Quadrat` below could not reach a bare
+    // metre, so `5 m³` read as the raw letter while `5 km³` read correctly.
+    units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"],
+        m: ["Meter"] },
     // #586. `5 km²` read as *fʏnf km* — the abbreviation reaching the phoneme sink verbatim, the QUANTITY lost
     // and not merely its power, because an undeclared measure word made the tier abandon the whole match. The
     // core now emits the unit and hands the exponent back, so this became a VISIBLE `DROP:exponent` (de went

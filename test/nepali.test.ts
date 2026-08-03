@@ -120,4 +120,13 @@ describe("Nepali normalization (#562)", () => {
     test("the squared/cubed measure word (#586)", () => {
         expect(t("3,850 km²")).toContain("wˈʌɾɡʌ kˈilomiʈʌɾ");
     });
+
+    // #586 — `120–160 घनमिटर इन्धन`, and this is why a token probe for घन read ×0: the corpus writes it FUSED
+    // to the unit noun. `before` still spells it as two words, which the same corpus does for
+    // `वर्ग किलोमिटर`. `m` had to be declared too — मिटर ×12 is the corpus's spelling (मीटर is ×0 here).
+    test("the bare metre and the cubed measure word (#586)", () => {
+        expect(t("5 m")).toContain("mˈiʈʌɾ");
+        expect(t("120 m³")).toContain("ɡʱˈʌn mˈiʈʌɾ");
+        expect(t("802.11m")).toContain("ˈɛm");
+    });
 });

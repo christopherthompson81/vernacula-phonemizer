@@ -88,6 +88,14 @@ const UNITS: [RegExp, string][] = [
     [/kg/giu, "kílógrömm"],
     [/cm/giu, "sentímetrar"],
     [/mm/giu, "millímetrar"],
+    // ⚠ NO BARE `m`, though metra ×4 / metrar ×2 and every digit-adjacent bare `m` in the corpus IS a metre
+    // (`100 m og 200 m skriðsund`, `133 m/s`, `100 fet (30 m)`). It was added and withdrawn on measurement:
+    // `802.11m` then read as "…ellefu METRAR". The shared tier has a `NOT_VERSION` guard for exactly that —
+    // it exists because `802.11g` once read as "802.11 GRAMS" in ten languages — but the guard works by
+    // seeing the DOT, and step 4 above has already turned it into a separate token by then. Trap 39: a
+    // guard's evidence has a lifetime, and this file spends the dot before the tier can use it.
+    // Nothing is lost by leaving it out: the squared and cubed rules below are LOCAL and never consult this
+    // table, so `5 m³` reads regardless.
 ];
 
 /** Relational and operator signs, read in every position — a dropped sign is inaudible. */
@@ -135,6 +143,13 @@ export function normalizeIcelandic(input: string): string {
     // 5) SQUARED UNITS (2), before the plain unit rule or the `km` is consumed and the exponent stranded.
     t = t.replace(/(?<!\p{L})km\s*[²2](?!\d)/giu, "ferkílómetrar");
     t = t.replace(/(?<!\p{L})m\s*[²2](?!\d)/giu, "fermetrar");
+    //    …and CUBED, the same shape. `rúmmetra` is the corpus's own word: "Luno var með 120–160 rúmmetra af
+    //    eldsneyti um borð". Icelandic fuses the measure word on like `fer-`, so this is a prefix and not a
+    //    separate word — `ferkílómetrar` above is the pattern. The nominative plural is emitted to match the
+    //    rest of this file's unit table; the corpus's `rúmmetra` is that noun in the accusative, which the
+    //    numeral governs and which no rule here inflects for (a standing limitation of the whole table).
+    t = t.replace(/(?<!\p{L})km\s*[³3](?!\d)/giu, "rúmkílómetrar");
+    t = t.replace(/(?<!\p{L})m\s*[³3](?!\d)/giu, "rúmmetrar");
 
     // 6) LATIN UNIT ABBREVIATIONS after a number (57).
     for (const [re, word] of UNITS)

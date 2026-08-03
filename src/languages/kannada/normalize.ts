@@ -73,8 +73,12 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["ಪ್ರತಿಶತ"],
     currency: { "US$": ["ಡಾಲರ್"], "$": ["ಡಾಲರ್"] },
     magnitudes: ["ಮಿಲಿಯನ್", "ಬಿಲಿಯನ್", "ದಶಲಕ್ಷ", "ಶತಕೋಟಿ", "ಲಕ್ಷ", "ಕೋಟಿ"],
-    units: { km: ["ಕಿಲೋಮೀಟರ್"] },
-    exponentWords: { squared: ["ಚದರ"], position: "before" },
+    // `m` ADDED so the cube word below has a head noun at all — the exponent branch resolves the unit from
+    // `units` first, so a cube word without it is dead data. ಮೀಟರ್ ×10, and digit-adjacent bare `m` is ×0 in
+    // this corpus, so the one-letter-key hazard is checked rather than assumed.
+    units: { km: ["ಕಿಲೋಮೀಟರ್"], m: ["ಮೀಟರ್"] },
+    // `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ` — word-first, beside ಚದರ.
+    exponentWords: { squared: ["ಚದರ"], cubed: ["ಘನ"], position: "before" },
 });
 
 /**

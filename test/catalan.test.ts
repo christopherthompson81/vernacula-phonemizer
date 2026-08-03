@@ -215,7 +215,9 @@ describe("Catalan text normalization", () => {
 
     test("dot-thousands stay grouped; 1-2 digit fractions are decimals/versions (punt)", () => {
         expect(ph("1.400 persones")).toBe("mˈiɫ kwˈatɾə sˈens pəɾsˈonəs"); // 1400
-        expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ bˈujt sˈens nuɾˈantə dˈos m"); // 4892 m
+        // The bare `m` was the RAW LETTER here until #586 declared `metre`/`metres` — this corpus's only
+        // digit-adjacent bare `m`, and a genuine metre ("un màxim de 4.892 m del Mont Vinson").
+        expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ bˈujt sˈens nuɾˈantə dˈos mˈɛtɾəs"); // 4892 m
         expect(ph("1.5 milions")).toBe("un pˈun sˈiŋ miɫiˈons"); // 1.5 → punt
         expect(ph("2.4 Ghz")).toBe("dˈos pˈun kwˈatɾə ʒiɣəˈɛɾsis");
         expect(ph("802.11n")).toBe("bˈujt sˈens dˈos pˈun ˈonzə n");

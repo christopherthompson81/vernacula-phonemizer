@@ -196,7 +196,10 @@ export function makeNativeHindi(
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["प्रतिशत"],
     currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
-    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
+    // `m` — मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus, so the one-letter-key hazard is
+    // checked rather than assumed. `घन` was declared below but unreachable without it: the exponent branch
+    // resolves the unit from `units` first, so `5 m³` read as the bare letter *ˈɛm*.
+    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मीटर"] },
     // `km²` → वर्ग किलोमीटर. Undeclared, the tier left the whole match alone and `km²` reached the IPA as a
     // Latin fragment — `5 km²` read as *pˈaː̃t͡ʃ ˈʊkm*, worse than the raw text, and the review gate could not
     // flag it as a DROP because deleting the `²` changes the output.

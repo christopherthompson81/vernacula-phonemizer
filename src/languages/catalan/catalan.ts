@@ -216,7 +216,15 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["per cent"],
     currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"], "¥": ["ien", "iens"] },
     units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],
-        kg: ["quilogram", "quilograms"], h: ["hora", "hores"], s: ["segon", "segons"] },
+        kg: ["quilogram", "quilograms"], h: ["hora", "hores"], s: ["segon", "segons"],
+        m: ["metre", "metres"] },
+    // `m` — metres ×12 ("un màxim de 4.892 m del Mont Vinson", the corpus's only digit-adjacent bare `m`,
+    // and a genuine metre). The singular is regular agreement, not a separate attestation.
+    // Without it `cúbic`/`cúbics` below were dead data: the exponent branch needs the unit word first.
+    // ⚠ RESIDUAL EXPOSURE (trap 39): normalize.ts step 6 rewrites the dot to "punt" before the tier, so the
+    // tier's `NOT_VERSION` guard has no dot left to see and `802.11m` reads as "…onze METRES". Note the same
+    // rule makes `6.5m` read as 6.5 metres, which is RIGHT — the ambiguity is real, and the only wrong case
+    // is a dotted version whose trailing letter is `m`, which no corpus contains (802.11 comes as a/b/g/n).
     unitPer: "per", // 120 km/h -> cent vint quilòmetres per hora; the /h used to be dropped outright
     exponentWords: { squared: ["quadrat", "quadrats"], cubed: ["cúbic", "cúbics"] },
     magnitudes: ["milions", "milió"],

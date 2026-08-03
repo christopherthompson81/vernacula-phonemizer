@@ -134,4 +134,15 @@ describe("icelandic normalization", () => {
     test("ordinary Icelandic text is untouched", () => {
         expect(normalizeIcelandic("Íslenska er tungumál.")).toBe("Íslenska er tungumál.");
     });
+
+    // #586 — `rúmmetra` is the corpus's own word ("Luno var með 120–160 rúmmetra af eldsneyti um borð").
+    // Icelandic fuses the measure word on as a prefix, like `fer-` in the squared rule above it.
+    // ⚠ Bare `m` is deliberately NOT in the unit table: adding it made `802.11m` read as "…ellefu METRAR",
+    // because this file spends the version dot before the shared tier's NOT_VERSION guard can use it
+    // (trap 39). Nothing is lost — these rules are local and do not consult that table.
+    test("the cubed unit, and why bare m stays out (#586)", () => {
+        expect(createIcelandic().text("5 m³").trim()).toContain("rumɛtrar");
+        expect(createIcelandic().text("5 km³").trim()).toContain("rumciloumɛtrar");
+        expect(createIcelandic().text("802.11m").trim()).toMatch(/ m$/u); // still a letter, not a metre
+    });
 });

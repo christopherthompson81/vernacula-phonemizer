@@ -51,6 +51,10 @@ const UNITS: [RegExp, string][] = [
     [/kg/giu, "ڪلوگرام"],
     [/cm/giu, "سينٽيميٽر"],
     [/mm/giu, "ملي ميٽر"],
+    // ⚠ NO BARE `m`, though ميٽر ×32 is spelled out and digit-adjacent bare `m` is ×0 here. Added and
+    // withdrawn on measurement: `802.11m` read as "…hiku hiku MĪṬARU". The tier's `NOT_VERSION` guard covers
+    // that class, but it works by seeing the DOT and this file has already rewritten it to a word (trap 39).
+    // Nothing is lost: the squared and cubed rules below are LOCAL and do not consult this table.
 ];
 
 export function normalizeSindhi(input: string): string {
@@ -98,6 +102,10 @@ export function normalizeSindhi(input: string): string {
     // 7) SQUARED UNITS, before the plain unit rule or the `km` is consumed and the exponent stranded.
     t = t.replace(/(?<!\p{L})km\s*[²2](?!\d)/giu, "مربع ڪلوميٽر");
     t = t.replace(/(?<!\p{L})m\s*[²2](?!\d)/giu, "مربع ميٽر");
+    //    …and CUBED, the same shape and the same word order. `ڪيوبڪ ميٽر` is the corpus's own: "لونو ۾
+    //    120–160 ڪيوبڪ ميٽر تيل هو" — the loan, preceding the noun exactly as مربع does.
+    t = t.replace(/(?<!\p{L})km\s*[³3](?!\d)/giu, "ڪيوبڪ ڪلوميٽر");
+    t = t.replace(/(?<!\p{L})m\s*[³3](?!\d)/giu, "ڪيوبڪ ميٽر");
 
     // 8) LATIN UNIT ABBREVIATIONS after a number. The trailing guard is `(?!\p{L})`, never `\b`: `\b` is
     //    defined on ASCII word characters and finds no boundary against Perso-Arabic script, so the rule

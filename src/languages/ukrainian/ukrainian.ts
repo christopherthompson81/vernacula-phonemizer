@@ -135,10 +135,17 @@ const SYMBOLS = makeSymbolNormalizer({
         "кг": ["кілограм", "кілограми", "кілограмів", "кілограма"],
         "ггц": ["гігагерц", "гігагерци", "гігагерців", "гігагерца"],
         "мбіт": ["мегабіт", "мегабіти", "мегабіт"],
+        // THE BARE METRE, BOTH SPELLINGS. This was excluded, and the stated reason — the apostrophe in
+        // `41 м\u2019яч` ("41 balls"), where a short key would bite into the following word — is no longer a
+        // reason: the tier's trailing guard rejects `\u0027\u2019\u02bc` explicitly, so `м\u2019яч` cannot
+        // be entered. Verified against that exact corpus string. метрів ×6, and the cube word declared below
+        // could not reach a bare metre without this, so `120 m\u00b3` read as the letter name while
+        // `120 km\u00b3` read correctly.
+        "м": ["метр", "метри", "метрів", "метра"],
+        "m": ["метр", "метри", "метрів", "метра"],
         // LATIN aliases. uk_ua writes the Cyrillic abbreviation throughout, but the engine's TOKEN drops
         // Latin runs outright, so a foreign-sourced `120 km` loses the unit entirely rather than merely
-        // mispronouncing it. Same reasoning as Russian's aliases; bare `m` is excluded for the same
-        // apostrophe reason as `м`.
+        // mispronouncing it. Same reasoning as Russian's aliases.
         "km": ["кілометр", "кілометри", "кілометрів", "кілометра"],
         "cm": ["сантиметр", "сантиметри", "сантиметрів", "сантиметра"],
         "mm": ["міліметр", "міліметри", "міліметрів", "міліметра"],

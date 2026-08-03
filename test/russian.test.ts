@@ -204,4 +204,15 @@ describe("russian normalization", () => {
         // Roman numerals arrive already converted, with the ordinal a century wants.
         expect(phonemize("XV век", "ru")).toBe("pʲɪtnˈat͡sətɨj vʲek");
     });
+
+    // #586 — the BARE METRE, both spellings. `кубический` was declared but unreachable without a head noun,
+    // so `120 m³` read as the letter name while `120 km³` read correctly. The agreement comes out of
+    // slavicCountForm: 92 takes the paucal (метра), 200 and 30 the genitive plural (метров).
+    // The apostrophe hazard that kept Ukrainian's `м` out is guarded by the tier itself.
+    test("the bare metre, both spellings, and the cube it feeds (#586)", () => {
+        expect(phonemize("120 m³", "ru")).toContain("kʊbʲˈit͡ɕɪskʲɪx mʲˈetrəf");
+        expect(phonemize("120 м³", "ru")).toContain("kʊbʲˈit͡ɕɪskʲɪx mʲˈetrəf");
+        expect(phonemize("92 м", "ru")).toContain("mʲˈetrə");   // paucal
+        expect(phonemize("200 м", "ru")).toContain("mʲˈetrəf"); // genitive plural
+    });
 });

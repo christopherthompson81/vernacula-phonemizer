@@ -36,13 +36,19 @@ const NE_SYMBOLS = makeSymbolNormalizer({
     // NOT declared — the playbook's `rateDenominators` note records a one-letter unit key matching an
     // alphanumeric designation, and this corpus's digit-adjacent single Latin letters are all something
     // else (compass points, "5 A", "6 b").
-    units: { km: ["किलोमीटर"], cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"] },
+    // `m` — मिटर ×12, which is the corpus's spelling (मीटर, the long-vowel form, is ×0 here); digit-adjacent
+    // bare `m` is ×0, so the one-letter-key hazard is checked rather than assumed. Without it the cube word
+    // below has no head noun and is dead data.
+    units: { km: ["किलोमीटर"], cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मिटर"] },
     unitPer: "प्रति",
     rateDenominators: { h: "घण्टा", s: "सेकेण्ड" },
     // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"), word-first. घन ×0 — and this
     // is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1, so the cube
     // reading stays on the fallback until a corpus says otherwise.
-    exponentWords: { squared: ["वर्ग"], position: "before" },
+    // `120–160 घनमिटर इन्धन` — and this is why a token probe said ×0 for घन: the corpus writes it FUSED to
+    // the unit noun. `before` still spells it correctly as two words, which the same corpus does for
+    // `वर्ग किलोमिटर`; only the cube instance happens to be written closed.
+    exponentWords: { squared: ["वर्ग"], cubed: ["घन"], position: "before" },
 });
 
 // The Devanagari inherent/independent vowel stays ə through the shared schwa-deletion, then surfaces as the

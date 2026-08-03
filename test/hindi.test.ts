@@ -160,4 +160,13 @@ describe("Hindi ordinal suffix boundary", () => {
         expect(phonemize("5वा दिन", "hi")).toBe("pˈaː̃t͡ʃʋaː d̪ˈɪn");
         expect(phonemize("21वें", "hi")).toBe("ɪkːˈiːsʋeː̃");
     });
+
+    // #586 — मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus. `घन` was already declared but
+    // unreachable: without a head noun in `units` the exponent branch cannot fire, so `120 m³` read as the
+    // bare letter name *ˈɛm* while `120 km³` read correctly.
+    test("the bare metre makes the cube word reachable (#586)", () => {
+        expect(phonemize("5 m", "hi")).toContain("mˈiːʈəɾ");
+        expect(phonemize("120 m³", "hi")).toContain("ɡʱˈən mˈiːʈəɾ");
+        expect(phonemize("802.11m", "hi")).toContain("ˈɛm"); // a dotted designation is not a quantity
+    });
 });
