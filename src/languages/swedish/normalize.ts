@@ -258,12 +258,28 @@ export const isUnreadableSwedish = makeUnreadableTest({
  * carries `usa  u-Es'A:` and `usa:s  u-Es'A:s`, i.e. /ʉːɛsˈɑː/ — the letter names, not a word. That is
  * also the single most frequent acronym in the corpus (27 instances), and it currently reads [ɵsˈɑː].
  *
- * DELIBERATELY SHORT. `OS` (6) and `AI` (3) are almost certainly spelled in speech too — /ˈuːɛs/,
- * /ɑːˈiː/ — but no source in this repo records either, and `os` is an ordinary Swedish word. A wrong
- * letter-reading is confidently wrong where the OOV word-reading is merely bland, so they are left to the
- * OOV g2p and counted in the PR's "deliberately not done" list instead of guessed at.
+ * `OS` (6), `AI` (3) and `USOC` (2) were left out at first, on the grounds that no source records them and
+ * that "a wrong letter-reading is confidently wrong where the OOV word-reading is merely bland". Reading
+ * what the OOV g2p actually produced inverted that argument:
+ *
+ *     röstades ur OS 2005     → … ʉːr uːs tvɔtˈʉːsɛn feːm
+ *     det luktar os i köket   → … lˈɵ̀ktar uːs iː …
+ *
+ * BYTE-IDENTICAL. The Olympics reads as *os*, the ordinary Swedish noun for fumes — not a bland reading but
+ * a DIFFERENT REAL WORD, which is the very failure that argument was guarding against. `USOC` reads as the
+ * nonce word [ˈʉ̀ːsɔk]. And a case-keyed collision between an acronym and a common noun is precisely what
+ * `acronymLetters` exists for: core/initialisms.ts names `US` the country versus `us` the pronoun as the
+ * thing a pronunciation dictionary cannot express.
+ *
+ * The reading is not invented. espeak's `usa  u-Es'A:` establishes that Swedish SPELLS this class, the
+ * letter names below are already sourced from espeak's own mnemonic (26 of 29 matched outright), so listing
+ * adds no data — and the corpus writes `OS-programmet`, `vinter-OS`, `sommar-OS`, hyphenating it into
+ * compounds the way an abbreviation behaves and a noun does not.
+ *
+ * STILL DELIBERATELY SHORT: `EU` is not listed. It already reads [ˈèːˌʉː], which is the letter reading, so
+ * an entry would change nothing; and nothing else in the corpus's 92 acronyms collides with a Swedish word.
  */
-const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["usa"]);
+const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["usa", "os", "ai", "usoc"]);
 
 /**
  * Swedish has no pronunciation dictionary that records ACRONYM readings — `accent-stress.tsv` is an

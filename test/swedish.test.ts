@@ -298,6 +298,19 @@ describe("swedish text normalization (#562)", () => {
         expect(phonemize("USA", "sv")).toBe("ʉː ɛsː ɑː");
         // Pronounceable and unlisted → the OOV g2p reads it as a word, which is the seam's default.
         expect(phonemize("NASA", "sv")).toBe("nˈɑ̀ːsa");
+        // …but "left to the OOV g2p" is only safe when the word it produces is a NON-word. `OS` read as
+        // [uːs], byte-identical to the ordinary noun *os* ("fumes") — a different real word, which is the
+        // confidently-wrong failure, not a bland one. A case-keyed collision between an acronym and a
+        // common noun is exactly what `acronymLetters` is for (core/initialisms.ts: `US` vs `us`).
+        // The input needs lowercase somewhere: the seam exempts an ALL-CAPS document, and a bare
+        // "OS 2012" is indistinguishable from a headline. This is the corpus's own sentence shape.
+        expect(phonemize("vid OS 2012 i London", "sv")).toBe("viːd uː ɛsː tvɔtˈʉːsɛn tɔlv iː lˈɔndɔn");
+        expect(phonemize("AI", "sv")).toBe("ɑː iː");
+        expect(phonemize("USOC", "sv")).toBe("ʉː ɛsː uː seː");
+        // THE LOWERCASE NOUN MUST BE UNTOUCHED — the whole point of keying on case.
+        expect(phonemize("det luktar os", "sv")).toBe("deː lˈɵ̀ktar uːs");
+        // `EU` is deliberately NOT listed: it already reads as its letters, so an entry changes nothing.
+        expect(phonemize("EU", "sv")).toBe("ˈèːˌʉː");
         // Letters ATTACHED to digits are an alphanumeric code, not a word.
         expect(phonemize("H5N1", "sv")).toBe("hoː feːm ɛnː ɛtː");
         // ROMAN NUMERALS ARE ALREADY DIGITS by the time this pass runs (registry.ts wraps text() with
@@ -324,5 +337,19 @@ describe("swedish text normalization (#562)", () => {
         expect(phonemize("160 km/t", "sv")).toContain("peːr tˈɪ̀mːɛ"); // the Swedish variant denominator
         // `s` must NOT match standalone — the Dutch `Il-76s` lesson, and this corpus writes `Il-76:or`.
         expect(phonemize("76 s", "sv")).not.toContain("sɛkˈɵnd");
+    });
+
+    // GHz and Mbit were declared, reverted, and restored in review. Undeclared they read as unpronounceable
+    // clusters ([ɡhs], [mbiːt s]); declared they read as the right words with ⟨g⟩ softened before a front
+    // vowel. That softening is a SYSTEMATIC g2p gap in loanwords — `gitarr` reads [jɪtˈarː] for /ɡɪˈtar/
+    // with no tier involved — so the declaration is right and only the g2p is wrong, which also means a
+    // later g2p fix repairs these for free. A recognisable word with one wrong segment beats a non-word.
+    test("the frequency and bitrate units, and the g2p gap they expose", () => {
+        expect(phonemize("2,4 GHz", "sv")).toBe("tvoː kˈɔ̀mːa fˈỳːra jˈìːɡahɛʈs");
+        expect(phonemize("600 Mbit/s", "sv")).toBe("sˈɛ̀kshɵndra mˈèːɡabɪt peːr sɛkˈɵnd");
+        // The gap, pinned so it is visible rather than folklore: fixing the g2p should change BOTH.
+        expect(phonemize("gitarr", "sv")).toBe("jɪtˈarː");
+        // `Il-76:or` must not be eaten by the new keys — the Dutch `Il-76s` hazard, in this corpus too.
+        expect(phonemize("Il-76:or", "sv")).not.toContain("mˈèːɡabɪt");
     });
 });

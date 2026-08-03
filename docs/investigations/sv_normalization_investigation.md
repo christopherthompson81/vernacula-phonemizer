@@ -324,3 +324,100 @@ The referee is unchanged **by construction as well as by measurement**: `tools/r
   TOKENIZER, downstream of every rule here (trap 14), and the correct form depends on the noun's gender
   (*en kilometer*, *ett kilogram*), which is per-noun lexical data the manifest does not carry. Measured, not
   assumed: `grep -oP '(?<![\d,.])1\s*(?:%|km|cm|mm|kg|procent|kilometer|meter|timme|år)\b'` → **0**.
+
+## Run 12 — 2026-08-03, review before merge
+
+Rebased onto `main`. Every gate as submitted reproduces: checklist clean, scan clean, referee
+797/5286 raw · 2946/5286 folded (55.7%) · symbol 88.1%. The review worked the 13-item
+"deliberately not done" list. **Three items became fixes; ten stayed, and four of those are now
+confirmed by an independent measurement rather than accepted on the note's word.**
+
+### `OS` / `AI` / `USOC` (11) — the reason inverted when the alternative was read
+
+The note argued: *"a wrong letter-reading is confidently wrong where the OOV word-reading is merely bland,
+so they are left to the OOV g2p."* Reading what the OOV g2p actually produces:
+
+```
+röstades ur OS 2005      → … ʉːr uːs tvɔtˈʉːsɛn feːm
+det luktar os i köket    → … lˈɵ̀ktar uːs iː ɕˈøːkɛt
+```
+
+**Byte-identical.** The Olympics is read as *os*, the ordinary Swedish noun for fumes — not a bland reading
+but a DIFFERENT REAL WORD, which is precisely the failure the argument was guarding against. `USOC` reads as
+the nonce word [ˈʉ̀ːsɔk]. And a case-keyed collision between an acronym and a common noun is the exact case
+`acronymLetters` exists for: `core/initialisms.ts` names `US` the country versus `us` the pronoun as the
+thing a pronunciation dictionary cannot express.
+
+Nothing was invented to fix it. espeak's `usa  u-Es'A:` establishes that Swedish SPELLS this class; the
+letter names were already in the branch, sourced from espeak's own mnemonic (26 of 29 matched); so listing
+`os`/`ai`/`usoc` adds **no data at all**. Supporting evidence in the corpus: it writes `OS-programmet`,
+`vinter-OS`, `sommar-OS` — hyphenated into compounds the way an abbreviation behaves and a noun does not.
+
+`EU` is still NOT listed, deliberately: it already reads [ˈèːˌʉː], which is the letter reading, so an entry
+would change nothing. Nothing else among the corpus's 92 acronyms collides with a Swedish word.
+
+### `GHz` (2) and `Mbit/s` (1) — a systematic g2p gap, not a reason to leave letters raw
+
+The note recorded these as tried-and-reverted: declaring `ghz` gives *gigahertz* → [jˈiːɡahɛʈs], "a
+different wrong answer, not a fix". The comparison that settles it:
+
+| | undeclared | declared |
+|---|---|---|
+| `2,4 GHz` | `ɡhs` | `jˈìːɡahɛʈs` |
+| `600 Mbit/s` | `mbiːt s` | `mˈèːɡabɪt peːr sɛkˈɵnd` |
+
+One is not a word in any language; the other is the right word with one wrong segment. And the softening is
+**systematic in loanwords, independent of this change**:
+
+```
+gitarr → jɪtˈarː       (for /ɡɪˈtar/, no symbol tier involved)
+```
+
+So the declaration is CORRECT and only the g2p is wrong — which also means a later g2p fix repairs both for
+free, where leaving the letters raw stays wrong forever. Declared, with `gitarr` pinned in a test so the gap
+is visible rather than folklore, and `Il-76:or` pinned so the new keys cannot eat it (the Dutch hazard, and
+this corpus has the shape).
+
+`gigahertz` and `megabit` are UNIT BORROWINGS — the class §5e excludes from the sourcing check by
+measurement, as kilogram and millimetre are in some thirty languages. The corpus writes `Mbit` ×3 and never
+the expansion.
+
+### Four deferrals verified independently, and all four hold
+
+- **`en`/`ett` on the numeral 1 — count 0.** Re-run: `grep -ohP '(?<![\d,.:])1\s+\p{L}+'` returns
+  `1 och` ×2, `1 skickade`, `1 sju`, `1 juli`, `1 i` — not one counted noun or unit among them. Deferral
+  correct, and it is trap-14 territory besides (the numeral is produced downstream, and en/ett is per-noun
+  lexical data the manifest does not carry).
+- **The fraction `1/5` (1).** The claim was that the `D/M` date convention makes the discriminator
+  unmeasurable. Verified: the ONLY `\d{1,2}/\d{1,2}` in 1,863 utterances is `1/5` itself. So there is no
+  attested date to calibrate against, and a rule would be a guess against a genuinely common competing
+  orthography. Same shape as Slovak's `1995/96`, and left for the same reason.
+- **`etcetera` → [ɛtkˈeːtɛra].** Verified: `c` really is absent from `swedish.jsonc`'s `consonants` block,
+  so this is a g2p/manifest gap on the referee's path, not a normalization one. Correctly out of scope.
+- **`s.k.` agreement (2).** Swedish inflects *så kallad* for its noun (*så kallade flikstup*, *så kallat
+  utmarkstillstånd*); the gender is per-noun lexical data, and the corpus writes no determiner or definite
+  ending to read it off. It already emits the right two words with a citation-form ending, against
+  `s . k .` — two bare consonants and two spurious breaks — before. Left.
+
+The rest stand on their counts: the lone initial `N.` (1) and `Malcolm X` (1) are documented limits of
+`core/initialisms.ts`, which this branch must not edit; `s.109` (1); `°N`/`°S`/`°Ö` (0); the nb/da
+abbreviations (0 each); `17-hundratalet` (1), which already reads acceptably.
+
+### Verification
+
+Delta against the PR as submitted: **12 utterances — 6 `OS`, 2 `AI`, 2 `USOC` (including the genitive
+`USOC:s` → `ʉː ɛsː uː seːs`), 2 `GHz` in one sentence, 1 `Mbit/s`** — and nothing else.
+
+| | vs main | vs PR |
+|---|---|---|
+| utterance-final terminators LOST | **0** | **0** |
+| utterance-final terminators GAINED | 1 | 0 |
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2747 tests, 0 failed** (2 new) |
+| `mine.ts scan --lang sv` | 125 lines, **no defects** |
+| `review.ts --lang sv` | **checklist clean**, all 8 checks |
+| `corpus-diff` sv_se | **287/1863 (15.4%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 2) |
+| `referee-eval sv` | **unchanged**: 797/5286 raw, 2946/5286 folded (55.7%), symbol 88.1% |

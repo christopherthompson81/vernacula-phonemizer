@@ -129,11 +129,21 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["procent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pund"] },
     // `m` added: 4 corpus instances of a bare metre (`4892 m`, `100 m`, `30 m`, and the `133 m/s`
-    // denominator) were reaching the g2p as a bare [m]. `ghz` (2 instances, `2,4 GHz` / `5,0 GHz`, read
-    // as [ɡhs]) was TRIED and reverted: this g2p softens ⟨g⟩ before a front vowel, so *gigahertz* comes
-    // out [jˈiːɡahɛʈs] — a different wrong answer, not a fix. Recorded in the PR as a measured gap.
+    // denominator) were reaching the g2p as a bare [m].
+    //
+    // `ghz` and `mbit` WERE tried, reverted, and are now back, because the reason for reverting did not
+    // survive being measured against the alternative. Undeclared, `2,4 GHz` reads [ɡhs] and `600 Mbit/s`
+    // reads [mbiːt s] — unpronounceable clusters. Declared, they read [jˈiːɡahɛʈs] and [mˈeːɡabiːt], the
+    // right words with ⟨g⟩ softened before a front vowel. That softening is a SYSTEMATIC g2p gap in
+    // loanwords, not something this declaration causes: `gitarr` reads [jɪtˈarː] for /ɡɪˈtar/ with no
+    // symbol tier involved at all. So the declaration is CORRECT and only the g2p is wrong — which also
+    // means a later g2p fix repairs these for free, where leaving the letters raw stays wrong forever.
+    // A recognisable word with one wrong segment beats a cluster that is not a word (#584).
+    // UNIT BORROWINGS are the class §5e excludes from the sourcing check by measurement — gigahertz and
+    // megabit are absent from every in-repo Swedish source, as kilogram and millimetre are in some thirty
+    // languages. The corpus writes the abbreviation `Mbit` ×3 and never the expansion.
     units: { km: ["kilometer"], m: ["meter"], cm: ["centimeter"], mm: ["millimeter"],
-        kg: ["kilogram"] },
+        kg: ["kilogram"], ghz: ["gigahertz"], mbit: ["megabit"] },
     // `h`/`s` MOVED out of `units` into rateDenominators, and `t`/`min` added. The tier's own header
     // records why a one-letter denominator must not be standalone-matchable (the Dutch `Il-76s` →
     // *zesenzeventig seconde*), and this corpus has the same shape in `Il-76:or`. Measured: 0 bare `N h`
