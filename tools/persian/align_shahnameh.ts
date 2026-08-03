@@ -12,7 +12,8 @@
  * and the Tajik text (shahnameh-tajik-corpus parquet → tg_shahnameh.txt). See the fa restoration investigation doc.
  *   npx tsx tools/persian/align_shahnameh.ts <dir-with-fa_shahnameh.txt+tg_shahnameh.txt>
  */
-import { translitToSkeleton, tajikIpaToPersian } from "../../persian/tajik-align.ts";
+import { readFileSync, writeFileSync } from "node:fs";
+import { translitToSkeleton, tajikIpaToPersian } from "./tajik-align.ts";
 const SP=process.argv[2];
 const NORM:Record<string,string>={"ص":"س","ث":"س","ذ":"ز","ض":"ز","ظ":"ز","ط":"ت","ح":"ه","آ":"ا","ي":"ی","ك":"ک","ٔ":"","ء":"ع","أ":"ا","إ":"ا","ؤ":"و"};
 const HAR=/[ً-ْـ]/g; const CYR=/[Ѐ-ӿ]+/gu; const FAW=/[ء-ۿ]+/gu;
@@ -20,8 +21,8 @@ const HAR=/[ً-ْـ]/g; const CYR=/[Ѐ-ӿ]+/gu; const FAW=/[ء-ۿ]+/gu;
 const faSkel=(s:string)=>[...s.replace(HAR,"")].map(c=>NORM[c]??c).filter(c=>/[ء-ۿ]/u.test(c)).join("").replace(/[اويهءعآئؤ]/gu,"");
 const tgSkel=(s:string)=>(s.match(CYR)||[]).map(w=>translitToSkeleton(w)).join("").replace(/[اويهءعآئؤ]/gu,"");
 const iran=(ipa:string,w:string)=>{let x=ipa.replace(/i(?!ː)/g,"e").replace(/u(?!ː)/g,"o"); if(/ه$/.test(w))x=x.replace(/a$/,"e"); return x;};
-const faLines=readFileSync(`${SP}/fa_shahnameh.txt`,"utf8").split("\n").map(s=>s.trim()).filter(Boolean);
-const tgLines=readFileSync(`${SP}/tg_shahnameh.txt`,"utf8").split("\n").map(s=>s.trim()).filter(Boolean);
+const faLines=readFileSync(`${SP}/fa_shahnameh.txt`,"utf8").split("\n").map((s: string)=>s.trim()).filter(Boolean);
+const tgLines=readFileSync(`${SP}/tg_shahnameh.txt`,"utf8").split("\n").map((s: string)=>s.trim()).filter(Boolean);
 // index tg by skeleton (first occurrence)
 const tgBySkel=new Map<string,string>();
 for(const t of tgLines){const k=tgSkel(t); if(k.length>=6 && !tgBySkel.has(k)) tgBySkel.set(k,t);}

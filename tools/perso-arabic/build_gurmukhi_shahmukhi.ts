@@ -54,7 +54,7 @@ function main(): void {
         gated = 0;
     for (const line of readFileSync(DUMP, "utf8").split("\n")) {
         if (!line) continue;
-        let d: { word?: string; forms?: { form?: string }[] };
+        let d: { word?: string; forms?: { form?: string; tags?: string[] }[] };
         try {
             d = JSON.parse(line);
         } catch {

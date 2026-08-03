@@ -130,7 +130,7 @@ function namedByCode(sym: string, sentence: string, read: string, lang: string,
 function scan(lines: string[], foreign: RegExp | undefined): Record<string, number> {
     const out: Record<string, number> = {};
     for (const [name, re] of DEFECTS) out[name] = lines.filter((l) => re.test(l)).length;
-    out["THROW"] = lines.filter((l) => l.startsWith(" THROW")).length;
+    out["THROW"] = lines.filter((l) => l.startsWith(" THROW")).length;
     if (foreign) out["FOREIGN"] = lines.filter((l) => foreign.test(l)).length;
     return out;
 }
@@ -147,7 +147,7 @@ if (mode === "emit") {
         try {
             read = (phonemize(l, lang) as string).replace(/\n/gu, " ");
         } catch (e) {
-            return ` THROW ${(e as Error).message}`;
+            return ` THROW ${(e as Error).message}`;
         }
         // The differential DROP test. Only an utterance that actually carries the symbol pays for the
         // second phonemize, so the cost is a few percent of the corpus rather than a doubling.

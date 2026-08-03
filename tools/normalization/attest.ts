@@ -162,8 +162,18 @@ if (!exists) {
     process.exit(3);
 }
 
+// A MISSING ARGUMENT IS A USAGE ERROR, not a stack trace: `words()` throws, and at top level that surfaced
+// as an unhandled rejection with a Node banner, which reads like the tool is broken rather than misinvoked.
+let wordList: string[];
+try {
+    wordList = words();
+} catch (e) {
+    console.error(`${(e as Error).message}`);
+    console.error("usage: --lang <code> [--words a,b,c | --from-review] [--wiki <wikicode>] [--limit N]");
+    process.exit(2);
+}
 const findings: Finding[] = [];
-for (const w of words()) findings.push(await probe(w));
+for (const w of wordList) findings.push(await probe(w));
 
 const pad = (s: string, n: number): string => s.padEnd(n);
 console.log(`\n── ${wiki}.wikipedia.org — TOKEN attestation ──\n`);

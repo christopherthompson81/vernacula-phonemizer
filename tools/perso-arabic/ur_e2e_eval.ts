@@ -26,8 +26,11 @@ function cfold(ipa: string): string {
 const wiki = new Map<string, Set<string>>();
 for (const l of readFileSync(`${HERE}/../../tools/referee-eval/referees/ur.wikipron-urd-broad.tsv`, "utf8").split("\n")) {
     const p = l.split("\t");
-    if (p.length < 2 || !p[0]) continue;
-    (wiki.get(p[0]) ?? wiki.set(p[0], new Set()).get(p[0])!).add(cfold(p[1].replace(/ /gu, "")));
+    const [head, pron] = p;
+    if (head === undefined || pron === undefined || head === "") continue;
+    let set = wiki.get(head);
+    if (set === undefined) { set = new Set(); wiki.set(head, set); }
+    set.add(cfold(pron.replace(/ /gu, "")));
 }
 
 let N = 0, newOk = 0, baseOk = 0;

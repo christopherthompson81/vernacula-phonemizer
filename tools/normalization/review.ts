@@ -27,11 +27,18 @@ const arg = (n: string): string | undefined => {
     const i = argv.indexOf(`--${n}`);
     return i === -1 ? undefined : argv[i + 1];
 };
-const lang = arg("lang");
-if (lang === undefined) {
+// NARROWED INTO ITS OWN BINDING, and this is not ceremony. `arg()` returns `string | undefined`, and the
+// guard below narrows it — but every use is inside a HOISTED `function` declaration, and TypeScript cannot
+// know when a hoisted function will be called, so inside those bodies the variable has its DECLARED type
+// again. That is why `tools/` being outside tsconfig's `include` mattered: seven of these were live in this
+// file, and the same blind spot previously hid a use-before-initialisation that made the tool throw for
+// every language, plus a wrong `ReadonlySet<string>` return annotation.
+const langArg = arg("lang");
+if (langArg === undefined) {
     console.error("usage: --lang <code> [--dir <languages-subdir>]");
     process.exit(2);
 }
+const lang: string = langArg;
 
 /** Resolve the language directory from the registry: `case "cs":` … `createCzech()` … and the import that
  *  names the file. Passed explicitly with --dir when a language's wiring does not follow that shape. */
@@ -50,11 +57,12 @@ function resolveDir(code: string): string | undefined {
     return undefined;
 }
 
-const dir = arg("dir") ?? resolveDir(lang);
-if (dir === undefined) {
+const dirArg = arg("dir") ?? resolveDir(lang);
+if (dirArg === undefined) {
     console.error(`could not resolve the languages/ subdir for "${lang}" — pass --dir`);
     process.exit(2);
 }
+const dir: string = dirArg;
 
 const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /**
@@ -98,7 +106,13 @@ const exportName = exportNames[0];
 // normalizer wired into any of them is found.
 const engineFiles = readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".ts") && !f.includes("normalize") && !f.includes(".test."));
 const engineSrc = engineFiles.map((f) => readFileSync(join("src/languages", dir, f), "utf8")).join("\n");
-const engine = engineFiles.find((f) => readFileSync(join("src/languages", dir, f), "utf8").includes(exportName)) ?? engineFiles[0];
+// `exportName` is `exportNames[0]` and CAN be undefined — a normalize.ts that exports no `normalize*`
+// function at all. Unguarded, `.includes(undefined)` searches for the literal string "undefined" and the
+// engine pick silently lands on whatever file happens to contain it (usually none, so `?? engineFiles[0]`),
+// which would then be reported as the wiring site. Surfaced only once tools/ came under tsconfig.
+const engine = exportName === undefined
+    ? engineFiles[0]
+    : engineFiles.find((f) => readFileSync(join("src/languages", dir, f), "utf8").includes(exportName)) ?? engineFiles[0];
 const called = exportNames.filter((n) => engineSrc.includes(n));
 note("wired into text()", called.length > 0, called.length > 0 ? `${engine} calls ${called.join(", ")}` : `no call to ${exportNames.join("/")} found`);
 
