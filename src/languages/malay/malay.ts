@@ -5,7 +5,7 @@
  * Malayic language sharing the reformed Latin orthography, and no Malay-specific grapheme→IPA delta is
  * claimed (see registry.ts, and tools/language-catalogue served_by='id'). What is NOT shared is the
  * ORTHOGRAPHIC convention around numbers, clocks, units and abbreviations, which is what normalize.ts here
- * rewrites. Measured: 79 of 1,908 ms_my utterances change; 0 of 1,936 id_id utterances do, by construction —
+ * rewrites. Measured: 105 of 1,908 ms_my utterances change; 0 of 1,936 id_id utterances do, by construction —
  * nothing in src/languages/indonesian/ is touched or configured from here.
  */
 import type { Phonemizer } from "../../registry.ts";

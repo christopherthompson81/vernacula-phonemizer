@@ -255,3 +255,94 @@ the two would be worse than reading the inherited one).
 Not fixed and known: `5 000` (space-thousands) reads *lima nol*; the corpus never writes it, and it is a
 shared-tokenizer question rather than a Malay one. `ela/meter` keeps its unread slash. `Elizabeth II`
 reads *dua*, not *Kedua*.
+
+## Run 8 — 2026-08-02, review before merge
+
+Rebased onto `main` first. That alone cleared the one FAIL the PR reported: `review.ts --lang zsm` said
+`tools/corpus/mined/zsm.jsonc missing`, but main had since taught the lookup to fall back to a sister
+standard's artifact when the sister is not itself a registered language — so `zsm` now finds `ms.jsonc`,
+and the artifact scan it had been skipping actually ran. Checklist clean, `sourcing` included.
+
+### The defect the gates could not see: the currency word inside the quantity
+
+Question: does the layer's step-3 sign move actually put the currency where Malay puts it?
+
+```
+$ npx tsx .probe/p2.ts
+"dengan anggaran kekayaan $2.3 bilion."          ⇒ … dˈua pərpulˈuhan tˈiɡa dˈolar bilˈion .
+"(US $14.7 billion)"                             ⇒ … əmpˈat bəlˈas pərpulˈuhan tˈud͡ʒuh dˈolar billˈion …
+"berjumlah $45 juta AUD."                        ⇒ … əmpˈat pˈuluh lˈima dˈolar d͡ʒˈuta aude .
+"berjumlah £ 27 juta."                           ⇒ … dˈua pˈuluh tˈud͡ʒuh pˈound d͡ʒˈuta .
+```
+
+All four read the currency BETWEEN the number and its own magnitude word. The corpus settles the order
+against them without ambiguity — it spells `bilion dolar` ×4 and `juta dolar` ×4, and `dolar bilion` ×0.
+
+Four instances, and every gate was clean on them: no digit leaked, no mark survived, nothing was dropped,
+and `test/malay.test.ts` PINNED two of the wrong readings as goldens (`dˈolar bilˈion`, `pˈound d͡ʒˈuta`).
+The same shape as Catalan's tens ordinals and Irish's doubled article — a clean corpus diff and a green
+suite are compatible with a wrong language, which is the whole reason traps 13/14 exist.
+
+Cause: the shared tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so wherever the sign
+sits inside the quantity is where the word lands. The layer's step 3 had moved the sign behind the digits,
+which fixes `$1.50` but leaves it in front of a following `bilion`.
+
+**Moving the sign further does not work, and this was measured, not assumed:**
+
+```
+"dengan anggaran kekayaan 2 perpuluhan 3 bilion $."  ⇒ … dˈua pərpulˈuhan tˈiɡa bilˈion .
+```
+
+Past a word the sign is no longer digit-adjacent, so the tier drops it and the currency VANISHES — a DROP
+traded for a word out of order, which is worse. So the sign is consumed and re-emitted as a word, and the
+words are verbatim the inherited tier's own table (`indonesian.ts` `currency`): the reading is unchanged,
+only its position is, and no Malay currency name is claimed. Trap 12 outranks it where a CURRENCY CODE
+follows — `$45 juta AUD` names the currency already, so the sign is dropped rather than said twice.
+
+After: `dˈua pərpulˈuhan tˈiɡa bilˈion dˈolar`, `… tˈud͡ʒuh billˈion dˈolar`, `… lˈima d͡ʒˈuta aude`,
+`… tˈud͡ʒuh d͡ʒˈuta pˈound`. Corpus diff 105 → 107/1908; the two added utterances are `£ 27 juta` and
+`$45 juta AUD`, neither of which the layer had been claiming.
+
+### A gate that was under-reporting: an ISO code names a currency too
+
+The trap-12 drop above came back as a real `DROP:currency`, because the REDUNDANT discrimination added in
+#592 asks whether the symbol's OWN WORD is in the reading. `AUD` is read as spelled letters, so `dolar` is
+nowhere in the IPA and no correct rule can pass the deletion test on that sentence.
+
+Extended both copies of the check (`mine.ts scan`, `corpus-diff.ts emit`): a currency drop is also
+permissible when the sentence names the currency by an ISO code that is itself spoken in the reading.
+Sign-keyed rather than a bare three-capitals shape, since that shape is every other initialism in the
+corpus; and the code must be spoken, or a dropped code would license a dropped sign.
+
+Precision, measured over all 65 mined artifacts (`mine.ts scan` before vs after):
+
+| | |
+|---|---|
+| lines reclassified DROP → REDUNDANT | **3** |
+| languages affected | mi, ms, zu |
+| distinct sentences | **1** — all three are the same FLEURS utterance (`$… AUD`) |
+| unrelated reclassifications | **0** |
+
+mi and zu are not yet normalized; the reclassification is correct there too, and it removes a false defect
+from each of their backlogs.
+
+### Sourcing note carried into the code
+
+`titik` (the version dot) was emitted with no citation. Its 12 corpus instances are all the "point / spot"
+noun — `titik kuat`, `titik hubungan` — a different sense, so the corpus does not attest it here. The real
+source is espeak-ng `dictsource/ms_list:120`, `_.` → `t'iti?`, the name of the MARK, against `:70`'s
+`_dpt` → `perpuluhan`, the name of the decimal SEPARATOR. Malay names the two separately and the layer is
+right to; the citation now says so in the code. (Playbook: check the part of speech, not just the word.)
+
+### Gates after the fixes
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2686 tests, 0 failed** |
+| `mine.ts scan --in ms.jsonc --lang zsm` | 135 lines, **no defects**; permissible `REDUNDANT currency ×1` |
+| `review.ts --lang zsm` | **checklist clean**, all 8 checks |
+| `corpus-diff` ms_my | **107/1908 (5.6%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 |
+| `referee-eval/eval.ts id` | **unchanged**: 17639/18590 (94.9%), symbol accuracy 98.9%, secondary 25/25 |
+
+Also corrected: `malay.ts`'s docstring claimed 79 changed utterances against a measured 105.

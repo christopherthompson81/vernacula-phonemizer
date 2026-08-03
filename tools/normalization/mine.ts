@@ -465,6 +465,11 @@ if (mode === "scan") {
         ["RAWMARK", /[…。、，％℃°ºª〜～・！？²³\p{Sc}।॥۔؟،؛]/u],
         ["ZERO-WIDTH", /[​-‍⁠﻿]/u],
     ];
+    /** ISO codes that denote each currency sign, for `namedByCode` below. */
+    const SIGN_CODES: Readonly<Record<string, string>> = {
+        $: "USD|AUD|CAD|NZD|SGD|HKD|TWD|MXN|BRL|ARS|CLP|COP",
+        "€": "EUR", "£": "GBP", "¥": "JPY|CNY|RMB", "₹": "INR", "₽": "RUB", "₩": "KRW", "₺": "TRY", "₪": "ILS",
+    };
     /** Each symbol class, and the regex that deletes it, for the differential drop test. */
     const DROPPABLE: [string, RegExp][] = [
         ["percent", /[%‰]/gu],
@@ -511,7 +516,8 @@ if (mode === "scan") {
                 const symbols = [...new Set(sentence.match(re) ?? [])];
                 const spoken = symbols.length > 0 && symbols.every((sym) => {
                     const words = contribution(sym);
-                    return words.length > 0 && words.every((w) => ipa.includes(w));
+                    if (words.length > 0 && words.every((w) => ipa.includes(w))) return true;
+                    return namedByCode(sym, sentence, ipa);
                 });
                 bump(`${spoken ? "REDUNDANT" : "DROP"} ${name}`, sentence);
             } catch { /* the mutated form is not comparable */ }
@@ -531,6 +537,21 @@ if (mode === "scan") {
         } catch { words = []; }
         alone.set(sym, words);
         return words;
+    }
+    /** A CURRENCY IS ALSO NAMED BY ITS ISO CODE, which `contribution` cannot see: the code reads as spelled
+     *  letters, so the sign's own word is nowhere in the IPA and a correct drop still reported. Malay (#601)
+     *  writes `$45 juta AUD` — one currency stated twice, so saying it once is right and no rule can pass the
+     *  deletion test. Sign-keyed, not a bare three-capitals shape, which is every other initialism too. The
+     *  code must itself be SPOKEN in the reading, or a dropped code would license a dropped sign. */
+    function namedByCode(sym: string, sentence: string, ipa: string): boolean {
+        const alt = SIGN_CODES[sym];
+        if (alt === undefined) return false;
+        const code = new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "u").exec(sentence)?.[0];
+        if (code === undefined) return false;
+        try {
+            const spelled = (phonemize(code, lang) as string).split(/\s+/u).filter((t) => t !== "");
+            return spelled.length > 0 && spelled.every((t) => ipa.includes(t));
+        } catch { return false; }
     }
     function bump(k: string, s: string): void {
         hits.set(k, (hits.get(k) ?? 0) + 1);

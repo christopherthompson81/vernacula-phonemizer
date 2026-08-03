@@ -112,11 +112,28 @@ export function normalizeMalay(input: string): string {
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space
     //    is the whole fix; `US` is written, so it stays written (trap 12: say each thing once).
     s = s.replace(new RegExp(`(${L}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
-    //    …and a sign in front of a DECIMAL amount is moved BEHIND it, which is where the tier says the
-    //    currency word anyway (`$1000` → *seribu dolar*). Without this, step 15 splits the number and the
-    //    tier only sees the integer part, so `$2.3 bilion` read *dua DOLAR perpuluhan tiga bilion* — the
-    //    currency word inside the number. Moving the sign keeps the currency VOCABULARY entirely with the
-    //    shared tier: this layer declares no currency name of its own, because none of them differ.
+    //    …and A MAGNITUDE WORD AFTER THE AMOUNT has to be got out from between the number and its currency.
+    //    The tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so it lands inside the
+    //    quantity: `$2.3 bilion` read *dua perpuluhan tiga DOLAR bilion* and `$45 juta` *empat puluh lima
+    //    DOLAR juta* — both contradicted by the corpus's own spelled-out order, `bilion dolar` ×4 and `juta
+    //    dolar` ×4 against `dolar bilion` ×0. `billion` is in the class because this corpus writes the
+    //    English spelling once, in `US $14.7 billion`.
+    //    MOVING THE SIGN DOES NOT WORK and was measured: `2.3 bilion $` is no longer digit-adjacent, so the
+    //    tier drops the sign and the currency VANISHES — a DROP is worse than a word out of order. So the
+    //    sign is consumed here and re-emitted as a word. The words are not this layer's invention: they are
+    //    verbatim the INHERITED TIER'S OWN currency table (indonesian.ts `currency`), which is the point —
+    //    the reading is unchanged, only its position is, and no Malay currency name is claimed.
+    //    Trap 12 takes precedence over both: where a CURRENCY CODE follows, the sentence has already named
+    //    the currency (`$45 juta AUD`) and a word here would say it twice, so the sign is simply dropped.
+    const MAGNITUDE = "ribu|juta|bilion|billion|trilion";
+    const CURRENCY_WORD: Readonly<Record<string, string>> = { $: "dolar", "€": "euro", "£": "pound", "¥": "yen" };
+    const AMOUNT = `\\d[\\d.]*(?:\\s+(?:${MAGNITUDE}))?`;
+    s = s.replace(new RegExp(`[$€£¥]\\s?(?=${AMOUNT}\\s+(?:AUD|USD|MYR|SGD|EUR|GBP|JPY|NZD|CAD|HKD)${R})`, "gu"), "");
+    s = s.replace(new RegExp(`([$€£¥])\\s?(\\d[\\d.]*)(\\s+(?:${MAGNITUDE}))${R}`, "gu"),
+        (_m, sign: string, amt: string, mag: string) => `${amt}${mag} ${CURRENCY_WORD[sign]!}`);
+    //    A bare DECIMAL amount still has to move, for the same reason at a smaller scale: without it step 15
+    //    splits the number and the tier only sees the integer part, so `$1.50` read *satu DOLAR perpuluhan
+    //    lima nol*. An integer amount is left alone — the tier already reads `$1000` as *seribu dolar*.
     s = s.replace(/([$€£¥])\s?(\d+\.\d+)/gu, "$2 $1");
 
     // 4) PERCENT. Malay says `peratus` (×15 in this corpus, spelled out after the number); Indonesian's tier
@@ -271,6 +288,11 @@ export function normalizeMalay(input: string): string {
     //     breaks the number-adjacency the shared unit tier matches on: `802.11g` read *sebelas GRAM* before
     //     (and still would as `11 g`), the confidently-wrong-word failure the `rateDenominators` note
     //     describes. `11-g` reads the bare letter, which is what the standard's name is.
+    //     THE VERSION DOT IS `titik`, NOT `perpuluhan`: `802.11` is not a quantity, so the dot is the
+    //     PUNCTUATION MARK rather than a decimal separator, and Malay names the two separately — espeak-ng
+    //     `dictsource/ms_list:120` gives `_.` → `t'iti?` (the mark) against `:70`'s `_dpt` → `perpuluhan`
+    //     (the separator). The corpus's own 12 `titik` are the "point / spot" noun, a different sense, which
+    //     is why the espeak line and not the corpus count is the citation here.
     s = s.replace(/(?<![\d.])(\d+)\.(\d+)([a-z])(?![\p{L}\p{M}])/gu, "$1 titik $2-$3");
     s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d])/gu, (whole, int: string, frac: string) =>
         int.length <= 3 && frac === "000" ? whole : `${int} perpuluhan ${[...frac].join(" ")}`);

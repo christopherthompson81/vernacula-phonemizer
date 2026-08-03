@@ -360,6 +360,13 @@ words. Two consequences:
   → `REDUNDANT`, a note. Absent → `DROP`, a defect. A symbol the engine never reads adds no tokens and can
   never be downgraded, and a symbol swallowed only in context still reports (Xhosa reads a bare `$5` but not
   the `$` in `leUS$30`).
+- **A currency is also named by its ISO CODE**, which that second question cannot see: `$45 juta AUD` (ms,
+  #601) states one currency twice, but the code reads as spelled letters, so `dolar` is nowhere in the IPA
+  and the correct drop reported as a defect. Both gates now also accept a sign-keyed ISO code that is itself
+  spoken in the reading — sign-keyed rather than a bare three-capitals shape, which is every other
+  initialism in the corpus; and the code must be spoken, or a dropped code would license a dropped sign.
+  Measured over all 65 mined artifacts: 3 lines reclassified (mi, ms, zu), all the same FLEURS sentence,
+  0 unrelated.
 - **Read the notes anyway.** A permissible drop and a swallowed sign have the same shape from the outside;
   what separates them is whether the word is spoken, which is exactly what the note tells you.
 

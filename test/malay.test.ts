@@ -112,13 +112,30 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
     test("the currency VOCABULARY stays with the shared tier; only the sign's position is Malay's problem", () => {
         // A sign glued behind letters was swallowed whole, so the amount lost its currency word.
         expect(normalizeMalay("yuran sebanyak US$30,")).toBe("yuran sebanyak US $30,");
-        // …and a sign in front of a DECIMAL amount is moved behind it, or the tier sees only the integer
-        // part and says the currency word INSIDE the number (*dua dolar perpuluhan tiga*).
-        expect(normalizeMalay("kekayaan $2.3 bilion.")).toBe("kekayaan 2 perpuluhan 3 $ bilion.");
-        expect(phonemize("kekayaan $2.3 bilion.", "zsm")).toBe("kəkajˈaan dˈua pərpulˈuhan tˈiɡa dˈolar bilˈion .");
-        // No currency NAME is declared here: dolar/euro/pound/yen are identical in both standards, and the
-        // ms corpus writes `pound Falkland` for the currency (its `paun` ×3 is the WEIGHT pound).
-        expect(phonemize("berjumlah £ 27 juta.", "zsm")).toBe("bərd͡ʒˈumlah dˈua pˈuluh tˈud͡ʒuh pˈound d͡ʒˈuta .");
+        // …and a sign in front of a bare DECIMAL amount is moved behind it, or the tier sees only the
+        // integer part and says the currency word INSIDE the number (*satu dolar perpuluhan lima nol*).
+        expect(normalizeMalay("harga €1.50 sekilo")).toBe("harga 1 perpuluhan 5 0 € sekilo");
+        expect(phonemize("harga €1.50 sekilo", "zsm")).toBe("hˈarɡa sˈatu pərpulˈuhan lˈima nˈol əˈuro səkˈilo");
+        // A MAGNITUDE WORD after the amount is the case the tier cannot get right at all: keyed on the
+        // sign's adjacency to the digits, it says the currency between the number and its own magnitude.
+        // The corpus settles the order itself — `bilion dolar` ×4, `juta dolar` ×4, `dolar bilion` ×0.
+        expect(normalizeMalay("kekayaan $2.3 bilion.")).toBe("kekayaan 2 perpuluhan 3 bilion dolar.");
+        expect(phonemize("kekayaan $2.3 bilion.", "zsm")).toBe("kəkajˈaan dˈua pərpulˈuhan tˈiɡa bilˈion dˈolar .");
+        // No currency NAME is invented for that move: the words are verbatim the INHERITED tier's own table
+        // (indonesian.ts `currency`), so only the position changes. `pound` is also what the ms corpus writes
+        // for the currency — its `paun` ×3 is the WEIGHT pound.
+        expect(phonemize("berjumlah £ 27 juta.", "zsm")).toBe("bərd͡ʒˈumlah dˈua pˈuluh tˈud͡ʒuh d͡ʒˈuta pˈound .");
+        // MOVING the sign instead of naming it is not an option, and this pins why: past a word it is no
+        // longer digit-adjacent, so the tier drops it and the currency vanishes outright.
+        expect(normalizeMalay("kadar $1.5 trilion")).toBe("kadar 1 perpuluhan 5 trilion dolar");
+        // Trap 12 outranks both: a CURRENCY CODE after the amount already names the currency, so the sign is
+        // dropped rather than said twice. `billion` is in the magnitude class because the corpus writes the
+        // English spelling once, in `US $14.7 billion`.
+        expect(normalizeMalay("tambahan berjumlah $45 juta AUD.")).toBe("tambahan berjumlah 45 juta AUD.");
+        expect(normalizeMalay("(US $14.7 billion)")).toBe("(US 14 perpuluhan 7 billion dolar)");
+        // An INTEGER amount with no magnitude word is left entirely alone — the tier already reads it.
+        expect(normalizeMalay("kos $1000 setahun")).toBe("kos $1000 setahun");
+        expect(phonemize("kos $1000 setahun", "zsm")).toBe("kˈos sərˈibu dˈolar sətˈahun");
     });
 
     test("what Malay INHERITS unchanged from the Indonesian layer", () => {
