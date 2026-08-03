@@ -512,3 +512,39 @@ describe("unit words for the languages that had none (#586)", () => {
         expect(phonemize("米勒", "yue")).not.toContain("mˈiː");
     });
 });
+
+/**
+ * #586 — the three languages with no symbol tier. Their local layers already handled units in the NATIVE
+ * script (bg) or not at all (ckb, fa), and each needed a different answer. The measurement that decided it was
+ * "how often does this abbreviation follow a NUMERAL", not "how often does it occur".
+ */
+describe("unit abbreviations in the tier-less languages (#586)", () => {
+    test("bg: the Latin aliases its corpus also writes", () => {
+        // bg_bg writes Cyrillic км ×50 — which already read — AND Latin mm ×12 / cm ×2, which did not:
+        // "Стандартният 35 mm филм (негатив 36 на 24 mm)".
+        expect(phonemize("35 mm", "bg")).toBe("trijsɛt i pɛt milimɛtra");
+        expect(phonemize("69 cm", "bg")).toBe("ʃɛjsɛt i dɛvɛt santimɛtra");
+        expect(phonemize("50 km", "bg")).toBe("pɛdɛsɛt kiɫɔmɛtra");
+        expect(phonemize("50 км", "bg")).toBe("pɛdɛsɛt kiɫɔmɛtra"); // Cyrillic unchanged
+        // The exponent had to move with the unit: once `km` substituted alone, `50 km2` read
+        // "километра ДВЕ" — the unit right and the power spoken as a bare numeral.
+        expect(phonemize("50 km2", "bg")).toBe("pɛdɛsɛt kvadratni kiɫɔmɛtra");
+        expect(phonemize("50 км2", "bg")).toBe("pɛdɛsɛt kvadratni kiɫɔmɛtra");
+    });
+
+    test("ckb: its own native abbreviations, guarded by a preceding numeral", () => {
+        // ckb_iq writes کم ×30 and سم ×2, every one after a numeral.
+        expect(phonemize("12.8 کم", "ckb")).toBe("dwaːnza xaːɫ haʃt kiːloːmatɾ");
+        expect(phonemize("6 سم", "ckb")).toBe("ʃaʃ saːntiːmatɾ");
+        // The exponent needs no rule: the corpus already writes it as the WORD دووجا after the unit.
+        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
+    });
+
+    test("fa: the SAME graphemes are ordinary words, so nothing is declared", () => {
+        // The guard above is load-bearing, not a nicety. In fa_ir `کم` occurs 63 times and NEVER after a
+        // numeral — it is the adjective "little/few" — and `سم` ×5 is "poison". An unguarded table copied
+        // from ckb would read 68 ordinary Persian words as measurements.
+        expect(phonemize("اصطکاک کم است", "fa")).toBe("ʔasatkˈaːk kˈam ʔˈast");
+        expect(phonemize("غلظت بالای سم", "fa")).toBe("ɣˈalzt baːlˈaːj sˈam");
+    });
+});
