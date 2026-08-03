@@ -10,6 +10,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "../zulu/g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeXhosa, MAGNITUDES } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const RULES = MANIFEST.rules;
@@ -32,17 +33,42 @@ export function phonemizeWord(word: string): string {
 
 const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Xhosa: class-10 loan plurals (iipesenti, iidola, iikhilomitha).
-// ¥ and the mm/cm/mi/mph units are NOT wired — no attested Xhosa forms to hand; see #562.
+/**
+ * #562 symbol normalization — Xhosa: class-10 loan plurals (iipesenti, iidola, iikhilomitha).
+ *
+ * `US$` IS DECLARED AS ITS OWN KEY, and that is the fix for the drop the playbook names: the tier's
+ * pattern is letter-bounded on the left, so a bare `$` can never match inside `US$30`. `normalize.ts`
+ * step 5 additionally prises the sign off the Xhosa CONCORD PREFIX that is glued to it (`leUS$30`,
+ * `i$10`) — a compound key cannot do that job, because `i` is a noun prefix and not a currency code.
+ *
+ * Every currency word is a corpus token: *nakwiidola zaseMelika*, *Iiponti zaseBritane*. `¥` is the one
+ * exception — `iiyeni` is COMPOSED from the corpus's own ii- class-10 loan-plural pattern (iidola,
+ * iiponti, iipesenti, iikhilomitha) and is attested in no source; declared so the sign is not swallowed,
+ * and flagged in the PR. Units and rates that need more than a noun (`km/h`, `mph`, `°C`) are resolved in
+ * normalize.ts, because Xhosa's rate denominator is a single attested word (*ngeyure*), not "A per B".
+ */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["iipesenti"],
-    currency: { "$": ["iidola"], "£": ["iiponti"] },
-    units: { km: ["iikhilomitha"] },
+    currency: {
+        "US$": ["iidola zaseMelika"], "AUD$": ["iidola"],
+        "$": ["iidola"], "£": ["iiponti"], "¥": ["iiyeni"],
+    },
+    units: {
+        km: ["iikhilomitha"], m: ["iimitha"], cm: ["iisentimitha"],
+        mm: ["iimilimitha"], mi: ["iimayile"], kg: ["iikhilogram"],
+    },
+    magnitudes: [...MAGNITUDES],
+    // `km²` ×1. `izikwere` is the HSRC English/isiXhosa maths dictionary's own plural (*Izikwere
+    // ezahlulwe zangamaqhezu*); the noun follows the measure noun, as Italian/Polish do.
+    exponentWords: { squared: ["isikwere", "izikwere"], position: "after" },
 });
 
 class XhosaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(SYMBOLS(input), TOKEN, (m, sink) => {
+        // normalize.ts runs BEFORE the shared tier, and leaves every operand as DIGITS precisely so the
+        // tier can still see number–unit adjacency (the one exception is the clock, which must produce
+        // words for the `na-` connective and therefore claims its own marker and timezone — trap 14).
+        return assembleClauses(SYMBOLS(normalizeXhosa(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
