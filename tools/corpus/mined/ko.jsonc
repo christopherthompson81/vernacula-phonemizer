@@ -20,8 +20,8 @@
     "source": "FLEURS ko_kr",
     "segmentMode": "sentence",
     "totalSegments": 1534,
-    "cellsCovered": 19,
-    "cellsTotal": 29,
+    "cellsCovered": 22,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 61,      // in 3 treated languages
         "grouped": 20,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 0,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 19,     // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 5,      // in 3 treated languages
+        "quote-letter": 39,    // in 4 treated languages
+        "scaled-currency": 1,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -117,7 +123,13 @@
         { "cell": "letter-name", "text": "pH 레벨은 시험을 거친 화학 물질에서 수소(pH에서 H) 이온의 양으로 표시합니다." },
         { "cell": "letter-name", "text": "RSPCA(동물 학대 예방 왕립협회) 뉴 사우스 웨일즈 최고 책임자 데이비드 오샤너시(David O'Shannessy)는 도살장에 대한 감시와 검사가 호주에서 일반적이야 한다고 말했습니다." },
         { "cell": "letter-name", "text": "\"나사의 우주 왕복선 프로그램 책임자 웨인 헤일 주니어(N. Wayne Hale Jr.)는 \"\"우리가 걱정하던 시기\"\" 후에 발포 단열재가 떨어졌다고 말했다. \"" },
-        { "cell": "exponent", "text": "순다르반(the Sundarbans)은 면적이 3,850 km²이고, 그중 약 3분의 1이 물과 늪지대 지역으로 덮여 있다." }
+        { "cell": "exponent", "text": "순다르반(the Sundarbans)은 면적이 3,850 km²이고, 그중 약 3분의 1이 물과 늪지대 지역으로 덮여 있다." },
+        { "cell": "version-dot", "text": "휘슬러(밴쿠버에서 자동차로 1.5시간 거리)는 물가가 높지만, 2010년 동계 올림픽으로 인해 유명한 지역입니다." },
+        { "cell": "version-dot", "text": "이는 굉장히 복잡한 객체로, 단순화된 보어 모형에 의하면 핵을 중심으로 전자들이 회전하는 형태로, 마치 행성들이 태양을 따라 도는 것처럼 구성되어 있다고 합니다. 그림 1.1을 보세요." },
+        { "cell": "quote-letter", "text": "NPWS와 '오스트레일리아 스포츠 슈터 협회'의 파트너쉽으로 '스포츠 슈터 협회'의 사냥 프로그램에 따라 자격을 갖춘 자원봉사자를 모집했다." },
+        { "cell": "quote-letter", "text": "상대적인 접근이 불가능한 의미를 결합하여, 'Timbuktu'는 이국적이고 멀리 떨어진 지역에 대한 은유로 사용하게 되었다." },
+        { "cell": "quote-letter", "text": "특히 비(非)로마니, 사이에서는 널리 쓰이지만, 로마니, 사람들에 대한 부정적인 고정관념과 부정확한 인식을 주기 때문에 '집시'라는 말은 종종 불쾌하게 여겨지고 있다." },
+        { "cell": "quote-letter", "text": "'적대적 환경 코스'에 대한 인터넷 검색 결과가 아마도 현지 회사 주소를 제공해 줄 것입니다." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

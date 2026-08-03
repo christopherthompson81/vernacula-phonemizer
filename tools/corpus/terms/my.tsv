@@ -1,0 +1,45 @@
+# MINING TERMS — Burmese (my). Read by `mine.ts --terms`, for the LEXICAL cells only.
+#
+# WHY THIS FILE IS COMMITTED. `my.jsonc` is the one artifact in the tree mined from a full Wikipedia dump
+# rather than FLEURS, and it is the best-covered one — 454,821 segments, every cell of the inventory it was
+# measured against. Two of those cells are LEXICAL (`calendar`, `ordinal-native`): they are found by matching
+# the language's own WORDS, not by a shape, so they cannot be filled without a term list. The list used
+# originally was a scratch file and was never committed, which meant the tree's richest artifact could not be
+# regenerated from the repository at all — the #586 re-mine hit exactly that wall (calendar alone holds 81,301
+# occurrences and would simply have vanished).
+#
+# `cell<TAB>term` scopes a term to one cell; a bare line applies to every lexical cell. The two cells need
+# different words, which is why the scoping exists.
+#
+# PROVENANCE. Every month name below except ဇွန် is corroborated in the repo's own Burmese data
+# (`src/languages/burmese/dictionary.tsv`, `seg-words.txt`); ဇွန် is absent from those files, and was checked
+# through the phonemizer instead — it reads as `zʊ˨ɴ` from the g2p rules, so its absence is a dictionary gap
+# and not a missing reading. The ordinals are the Pali-derived series, all ten corroborated in the same files.
+# Checked mechanically: of the 22 terms here, ဇွန် is the only one absent from the repo's Burmese data.
+# These are SEARCH terms, not pronunciation data: a wrong one costs recall in one cell, never a wrong reading.
+
+# ── calendar: the Gregorian month names as Burmese Wikipedia writes them ──
+calendar	ဇန်နဝါရီ
+calendar	ဖေဖော်ဝါရီ
+calendar	မတ်
+calendar	ဧပြီ
+calendar	မေ
+calendar	ဇွန်
+calendar	ဇူလိုင်
+calendar	ဩဂုတ်
+calendar	စက်တင်ဘာ
+calendar	အောက်တိုဘာ
+calendar	နိုဝင်ဘာ
+calendar	ဒီဇင်ဘာ
+
+# ── ordinal-native: the Pali-derived ordinal series ──
+ordinal-native	ပထမ
+ordinal-native	ဒုတိယ
+ordinal-native	တတိယ
+ordinal-native	စတုတ္ထ
+ordinal-native	ပဉ္စမ
+ordinal-native	ဆဋ္ဌမ
+ordinal-native	သတ္တမ
+ordinal-native	အဋ္ဌမ
+ordinal-native	နဝမ
+ordinal-native	ဒသမ

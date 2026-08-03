@@ -20,8 +20,8 @@
     "source": "FLEURS ja_jp",
     "segmentMode": "sentence",
     "totalSegments": 1396,
-    "cellsCovered": 17,
-    "cellsTotal": 29,
+    "cellsCovered": 19,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 27,      // in 3 treated languages
         "grouped": 22,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 0,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 9,      // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 1,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 50,       // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 4,      // in 3 treated languages
+        "quote-letter": 1,     // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -109,7 +115,9 @@
         { "cell": "iteration", "text": "また、国連では、地球温暖化の影響を被っている国々がその影響に対処できるように支援するための基金について最終決定したいと考えています。" },
         { "cell": "iteration", "text": "「ジプシー」という言葉は、特にロマ人以外の人たちの間で広く使われていますが、否定的な固定観念やロマ人に対する不正確な認識と結びついているため、往々にして不快な言葉とみなされます。" },
         { "cell": "iteration", "text": "これらの理論は、人々が成人期を迎えて成熟するにつれて内在化した特定のニーズや欲望を抱いていることを示唆しています。" },
-        { "cell": "iteration", "text": "上空の澄んだ美しい空と、周囲の多くの山々以外には何も見えません。洞窟の中からは、外界はほとんど見えず、外界の音も聞こえません。" }
+        { "cell": "iteration", "text": "上空の澄んだ美しい空と、周囲の多くの山々以外には何も見えません。洞窟の中からは、外界はほとんど見えず、外界の音も聞こえません。" },
+        { "cell": "version-dot", "text": "これは非常に複雑な天体で、単純化されたボーアモデルによれば、中心核が電子によって周回しており、太陽を周回している惑星に似ています（図1.1参照）。" },
+        { "cell": "quote-letter", "text": "カーノ氏は有名だが物議を醸している英語の家庭教師で、Modern EducationやKing's Gloryで講師を務め、最盛期には9,000人の生徒がいたと公言しています。" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

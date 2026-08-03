@@ -20,8 +20,8 @@
     "source": "FLEURS es_419",
     "segmentMode": "sentence",
     "totalSegments": 1945,
-    "cellsCovered": 22,
-    "cellsTotal": 29,
+    "cellsCovered": 27,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 28,           // in 3 treated languages
         "initialism": 155,     // in 3 treated languages
         "grouped": 18,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 2,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 77,     // in 3 treated languages
         "exponent": 0,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 1,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 6,     // in 4 treated languages
+        "scaled-currency": 2,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -134,11 +140,18 @@
         { "cell": "grouped", "text": "Al parecer, las cabras fueron domesticadas, por primera vez, hace unos 10 000 años, en los montes Zagros, en Irán." },
         { "cell": "grouped", "text": "Capital de Samoa, la ciudad de Apia se ubica en la isla de Upolu y cuenta con poco menos de 40 000 habitantes." },
         { "cell": "grouped", "text": "De todas formas, el porcentaje de XDR-TB en el grupo total de enfermos de tuberculosis aún parece ser reducido: 6000 de un total de 333 000 individuos infectados en un momento particular en Sudáfrica." },
+        { "cell": "signed-number", "text": "La manifestación inició cerca de las 11:00 hora local (UTC +1) en Whitehall, frente a la puerta de acceso a Downing Street, residencia oficial del primer ministro, la cual contaba con vigilancia policial." },
         { "cell": "letter-name", "text": "A pesar de que había tres personas en el interior de la vivienda en el momento del impacto del automóvil, ninguna de ellas sufrió lesiones." },
         { "cell": "letter-name", "text": "Arly Velásquez, de México, obtuvo la posición número quince en el Super-G masculino sentado. Adam Hall, de Nueva Zelanda, finalizó en el puesto nueve en la categoría Super-G masculina." },
         { "cell": "letter-name", "text": "A mí me pareció que eso no tenía sentido; definitivamente no fue justo." },
         { "cell": "letter-name", "text": "Tienen extremidades escamadas y con garras, ponen huevos y se desplazan sobre sus patas traseras al igual que el T-Rex." },
-        { "cell": "ampersand", "text": "En la mejor categoría, la contienda entre los B&B se da, por supuesto, en dos servicios: la ropa de cama y el desayuno." }
+        { "cell": "ampersand", "text": "En la mejor categoría, la contienda entre los B&B se da, por supuesto, en dos servicios: la ropa de cama y el desayuno." },
+        { "cell": "sports-time", "text": "En su otra carrera, el eslalon gigante, obtuvo el décimo lugar en el grupo femenino de sentadas con un tiempo de ejecución combinado de 4:41.30, 2:11.60 minutos por detrás de la primera finalista austríaca, Claudia Loesch, y 1:09.02 minutos por debajo del noveno finalista, Gyöngyi Dani, de Hungría." },
+        { "cell": "version-dot", "text": "Las velocidades del estándar 802.11n son mucho más altas que las alcanzadas por los que lo precedieron, con un rendimiento teórico máximo de 600 Mbps." },
+        { "cell": "quote-letter", "text": "Uno de los periodos más sanguinarios de la historia de Antigua China fue el de Los Tres Reinos, donde miles de personas murieron en una lucha por ocupar el trono del gran palacio en Xi'an." },
+        { "cell": "quote-letter", "text": "David, O'Shannessy, jefe de inspección de la RSPCA Nueva Gales del Sur, afirmó a ABC que en Australia debería ser algo normal someter a vigilancia e inspecciones a los mataderos." },
+        { "cell": "quote-letter", "text": "El 24 de septiembre de 1759, Arthur Guinness suscribió un contrato de arrendamiento de 9000 años de vigencia por la cervecería St. James's Gate en Dublín, Irlanda." },
+        { "cell": "quote-letter", "text": "El puente del río Oyapock es una estructura atirantada que lo cruza, conectando Oiapoque, ciudad brasileña, y Saint-Georges de l'Oyapock, en Guayana Francesa." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

@@ -20,8 +20,8 @@
     "source": "FLEURS ru_ru",
     "segmentMode": "sentence",
     "totalSegments": 1951,
-    "cellsCovered": 21,
-    "cellsTotal": 29,
+    "cellsCovered": 24,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 20,           // in 3 treated languages
         "initialism": 149,     // in 3 treated languages
         "grouped": 20,         // in 3 treated languages
-        "negative": 0,         // in 1 treated languages
+        "signed-number": 1,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 13,     // in 3 treated languages
         "exponent": 1,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 1,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 3,     // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -120,7 +126,11 @@
         { "cell": "letter-name", "text": "Знак движения смычка вверх выглядит как V, а движение смычка вниз — как скоба или квадрат без нижней стороны." },
         { "cell": "letter-name", "text": "Современный город Касабланка основан рыбаками-берберами в X веке до н. э. Он использовался римлянами, финикийцами и меренидами как стратегический порт, называемый Анфа." },
         { "cell": "letter-name", "text": "Как правило, нет смысла даже искать скидки на бизнес-класс или первый класс для прямых полетов из A в Б." },
-        { "cell": "ampersand", "text": "Будучи лидерами в своей нише, мини-гостиницы B&B конкурируют в основном по двум главным параметрам: постель и завтрак." }
+        { "cell": "ampersand", "text": "Будучи лидерами в своей нише, мини-гостиницы B&B конкурируют в основном по двум главным параметрам: постель и завтрак." },
+        { "cell": "version-dot", "text": "Скорости 802.11n значительно быстрее, чем у его предшественников с максимальной теоретической пропускной способностью в 600 Мбит/с." },
+        { "cell": "quote-letter", "text": "Мост через реку Ояпок представляет из себя вантовый мост. Он простирается через реку Ояпок и соединяет города Ояпоки в Бразилии и Сен-Жорж-де-л'Ояпок во Французской Гвиане." },
+        { "cell": "quote-letter", "text": "По словам Мика О'Флинна, исполняющего обязанности директора по сохранению парков и наследия Службы охраны диких животных и национальных парков, четыре стрелка, отобранные для первой стрелковой операции, прошли комплексную подготовку и инструктаж по безопасности." },
+        { "cell": "quote-letter", "text": "Дэвид О'Шаннесси, главный инспектор RSPCA в Новом Южном Уэльсе, сообщил ABC, что инспекции и наблюдения за скотобойнями в Австралии должны стать обыденностью." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

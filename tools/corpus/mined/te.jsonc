@@ -20,8 +20,8 @@
     "source": "FLEURS te_in",
     "segmentMode": "sentence",
     "totalSegments": 1749,
-    "cellsCovered": 24,
-    "cellsTotal": 29,
+    "cellsCovered": 27,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 3,            // in 3 treated languages
         "initialism": 82,      // in 3 treated languages
         "grouped": 30,         // in 3 treated languages
-        "negative": 2,         // in 1 treated languages
+        "signed-number": 3,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 30,     // in 3 treated languages
         "exponent": 2,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 3,      // in 3 treated languages
+        "quote-letter": 7,     // in 4 treated languages
+        "scaled-currency": 3,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -125,13 +131,17 @@
         { "cell": "grouped", "text": "అయినప్పటికీ, క్షయ వ్యాధి గల సమూహం మొత్తంలో ఇప్పటికీ XDR-TB శాతం తక్కువగా ఉన్నట్లు కనిపిస్తుంది; దక్షిణాఫ్రికాలో ఏ సమయంలోనైనా మొత్తం 330,000 మందిలో 6,000 మందికి సోకింది." },
         { "cell": "grouped", "text": "మేకలు ఇరాన్ లోని జాగ్రోస్ పర్వతాలలో సుమారు 10,000 సంవత్సరాల క్రితం మొదటిసారిగా పెంపుడు జంతువులుగా ఉన్నట్లు తెలుస్తోంది." },
         { "cell": "grouped", "text": "మూడవ స్థానంలో, హామ్లిన్ ఇరవై పాయింట్ల వెనుకబడి ఉన్నాడు, కాని బౌయర్ కంటే ఐదు ముందు ఉన్నాడు. కహ్నే మరియు ట్రూక్స్, జూనియర్ 2,220 ఇంకా 2,207 పాయింట్లతో వరుసగా ఐదవ మరియు ఆరవ స్థానంలో ఉన్నారు." },
-        { "cell": "negative", "text": "కోవిడ్-19 కు సంబంధించిన ఆందోళనల కారణంగా యునైటెడ్ స్టేట్స్ నేషనల్ బాస్కెట్‌బాల్ అసోసియేషన్ (ఎన్‌బి‌ఏ) తన ప్రొఫెషనల్ బాస్కెట్‌బాల్ సీజన్‌ను బుధవారం నిలిపివేసింది." },
-        { "cell": "negative", "text": "మానవ రహిత లునార్ ఆర్బిటర్ చంద్రయాన్-1 దాని మూన్ ఇంపాక్ట్ ప్రోబ్ (ఎంఐపి)ను బయటకు తీసింది, ఇది చంద్రుడి ఉపరితలంపై సెకనుకు 1.5 కిలోమీటర్ల (గంటకు 3000 మైళ్లు) వేగంతో దూసుకుపోయి, విజయవంతంగా చంద్రుడి దక్షిణ ధ్రువం సమీపంలో బలంగా కొట్టుకొని దిగింది." },
+        { "cell": "signed-number", "text": "కోవిడ్-19 కు సంబంధించిన ఆందోళనల కారణంగా యునైటెడ్ స్టేట్స్ నేషనల్ బాస్కెట్‌బాల్ అసోసియేషన్ (ఎన్‌బి‌ఏ) తన ప్రొఫెషనల్ బాస్కెట్‌బాల్ సీజన్‌ను బుధవారం నిలిపివేసింది." },
+        { "cell": "signed-number", "text": "మానవ రహిత లునార్ ఆర్బిటర్ చంద్రయాన్-1 దాని మూన్ ఇంపాక్ట్ ప్రోబ్ (ఎంఐపి)ను బయటకు తీసింది, ఇది చంద్రుడి ఉపరితలంపై సెకనుకు 1.5 కిలోమీటర్ల (గంటకు 3000 మైళ్లు) వేగంతో దూసుకుపోయి, విజయవంతంగా చంద్రుడి దక్షిణ ధ్రువం సమీపంలో బలంగా కొట్టుకొని దిగింది." },
         { "cell": "letter-name", "text": "Philippinesపై విజయంలో U.S ప్రభుత్వం యొక్క యుద్ధ వ్యయాలు Filipino ప్రజల చేతనే చెల్లించబడ్డాయి." },
         { "cell": "letter-name", "text": "రోలాండో మెన్డోజా తన M16 రైఫిల్‌ను పర్యాటకులపై పేల్చాడు." },
         { "cell": "letter-name", "text": "\"\"\"అప్ బో\"\" గుర్తు V లాగా కనిపిస్తుంది మరియు \"\"డౌన్ బో గుర్తు\"\" ప్రధానమైనదిగా లేదా దాని దిగువ వైపు కోల్పోయిన చతురస్రంగా కనిపిస్తుంది.\"" },
         { "cell": "letter-name", "text": "World War I మరియు World War IIలో సబ్‌మెరైన్‌లను ఉపయోగించారు. అప్పుడు అవి చాలా తక్కువ వేగంతో ముందుకు ప్రయాణించేవి మరియు చాలా పరిమితమైన షూటింగ్ పరిధిని కలిగి ఉండేవి." },
-        { "cell": "exponent", "text": "సుందర్బన్స్ మగ అడవులు 3,850 km² విస్తీర్ణంలో ఉన్నాయి, ఇక్కడ మూడింట ఒకవంతు ప్రాంతం నీరు/బురదతో కప్పబడి ఉంది." }
+        { "cell": "exponent", "text": "సుందర్బన్స్ మగ అడవులు 3,850 km² విస్తీర్ణంలో ఉన్నాయి, ఇక్కడ మూడింట ఒకవంతు ప్రాంతం నీరు/బురదతో కప్పబడి ఉంది." },
+        { "cell": "quote-letter", "text": "ప్రాచీన చైనా చరిత్రలో ఈ మూడు రాజ్యాల శకము రక్తపాత యుగాలలో ఒకటి, Xi’anలో గ్రాండ్ ప్యాలెస్‌ సింహాసనాన్ని పొందడానికి పోరాడుతూ వేలాది మంది మరణించారు." },
+        { "cell": "quote-letter", "text": "నేను ప్రజలకు 'మీరు మాతో వ్యవహరించే విధానాన్ని బట్టి మేము మీతో వ్యవహరిస్తాం' అని చెప్పాలనుకుంటున్నాను." },
+        { "cell": "quote-letter", "text": "ఈ సందర్భంగా ఆమె మాట్లాడుతూ.. 'దాడి జరిగే అవకాశం ఉందని చెప్పడానికి ఎలాంటి తెలివితేటలు లేవు." },
+        { "cell": "quote-letter", "text": "గ్రీన్లాండ్లో నేరాలు, మరియు సాధారణంగా విదేశీయుల పట్ల అసంకల్పిత, దాదాపు తెలియదు. పట్టణాల్లో కూడా 'రఫ్ ఏరియాలు' లేవు." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

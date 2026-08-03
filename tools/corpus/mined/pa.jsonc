@@ -20,8 +20,8 @@
     "source": "FLEURS pa_in",
     "segmentMode": "sentence",
     "totalSegments": 1582,
-    "cellsCovered": 18,
-    "cellsTotal": 29,
+    "cellsCovered": 19,
+    "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
@@ -47,13 +47,19 @@
         "roman": 0,            // in 3 treated languages
         "initialism": 0,       // in 3 treated languages
         "grouped": 25,         // in 3 treated languages
-        "negative": 1,         // in 1 treated languages
+        "signed-number": 1,    // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
         "letter-name": 2,      // in 3 treated languages
         "exponent": 0,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
         "ampersand": 0,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
+        "sports-time": 0,      // in 3 treated languages
+        "version-dot": 0,      // in 3 treated languages
+        "quote-letter": 347,   // in 4 treated languages
+        "scaled-currency": 0,  // in 3 treated languages
+        "ordinal-caps": 0,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -105,8 +111,12 @@
         { "cell": "grouped", "text": "ਟੈਂਕ ਦੇ ਥੱਲੇ ਇੱਕ ਸੈਕੰਡਰੀ ਇਲਾਕਾ ਜਿਸਦੀ ਸਮਰੱਥਾ 104,500 ਬੈਰਲ ਰੱਖਣ ਦੀ ਸੀ ਹਜੇ ਆਪਣੀ ਸਮਰੱਥਾ ਤੱਕ ਨਹੀਂ ਭਰਿਆ ਸੀ।" },
         { "cell": "grouped", "text": "ਟਾਪੂ ‘ਤੇ ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਟਾਈਨੋਜ਼ ਅਤੇ ਕੈਰੀਬੀਜ਼ ਲੋਕਾਂ ਨੇ ਵਾਸ ਕੀਤਾ। ਕੈਰੀਬੀਜ਼ ਐਰਾਵਾਕਨ ਭਾਸ਼ਾ ਬੋਲਣ ਵਾਲੇ ਲੋਕ ਸਨ ਜੋ ਲਗਭਗ 10,000 ਈ.ਪੂ. ਵਿੱਚ ਇੱਥੇ ਪਹੁੰਚੇ।" },
         { "cell": "grouped", "text": "ਕਾਰਨੋ ਜਾਣਿਆ-ਪਹਿਚਾਣਿਆ ਪਰ ਵਿਵਾਦਪੂਰਨ ਅੰਗਰੇਜੀ ਟਿਊਟਰ ਹੈ ਜਿਸਨੇ ਆਧੁਨਿਕ ਸਿੱਖਿਆ ਅਤੇ ਕਿੰਗਸ ਗਲੋਰੀ ਅਧੀਨ ਪੜ੍ਹਾਇਆ ਜਿਸਨੇ ਆਪਣੇ ਕੈਰੀਅਰ ਦੇ ਸਿਖਰ ਉੱਤੇ 9,000 ਵਿਦਿਆਰਥੀ ਹੋਣ ਦਾ ਦਾਅਵਾ ਕੀਤਾ।" },
-        { "cell": "negative", "text": "ਗੋਥਿਕ ਸ਼ੈਲੀ 10ਵੀਂ-11ਵੀਂ ਸਦੀ ਵਿਚਕਾਰ ਅਤੇ 14 ਵੀਂ ਸਦੀ ਵਿੱਚ ਆਪਣੀ ਚਰਮ ਸੀਮਾ ‘ਤੇ ਸੀ।" },
-        { "cell": "letter-name", "text": "ਯਾਤਰੀਆਂ ਨੂੰ ਪਾਣੀ ਦਿੱਤਾ ਗਿਆ ਕਿਉਂਕਿ ਉਹਨਾਂ ਨੇ 90(F)-ਡਿਗਰੀ ਗਰਮੀ ਵਿੱਚ ਉਡੀਕ ਕੀਤੀ।" }
+        { "cell": "signed-number", "text": "ਗੋਥਿਕ ਸ਼ੈਲੀ 10ਵੀਂ-11ਵੀਂ ਸਦੀ ਵਿਚਕਾਰ ਅਤੇ 14 ਵੀਂ ਸਦੀ ਵਿੱਚ ਆਪਣੀ ਚਰਮ ਸੀਮਾ ‘ਤੇ ਸੀ।" },
+        { "cell": "letter-name", "text": "ਯਾਤਰੀਆਂ ਨੂੰ ਪਾਣੀ ਦਿੱਤਾ ਗਿਆ ਕਿਉਂਕਿ ਉਹਨਾਂ ਨੇ 90(F)-ਡਿਗਰੀ ਗਰਮੀ ਵਿੱਚ ਉਡੀਕ ਕੀਤੀ।" },
+        { "cell": "quote-letter", "text": "ਪ੍ਰਕਿਰਤੀਵਾਦੀਆਂ ਅਤੇ ਫ਼ਿਲਾਸਫ਼ਰਾਂ ਨੇ ਕਲਾਸਿਕਲ ਲਿਖਤਾਂ ਅਤੇ, ਖਾਸ ਤੌਰ ‘ਤੇ, ਲਾਤੀਨੀ ਭਾਸ਼ਾ ਵਿੱਚ ਬਾਈਬਲ ਉੱਤੇ ਧਿਆਨ ਕੇਂਦਰਿਤ ਕੀਤਾ।" },
+        { "cell": "quote-letter", "text": "ਟਿੱਪਣੀ ਦੀ ਮੰਗ ਕਰਨ ‘ਤੇ ਮਿੱਲਰ ਨੇ ਕਿਹਾ, \"ਮਾਈਕ ਸੁਣਨ ਵੇਲੇ ਬਹੁਤ ਗੱਲਾਂ ਕਰਦਾ ਹੈ...ਮੈਂ ਤਿਆਰ ਹੋ ਰਿਹਾ ਸੀ ਇਸਲਈ ਮੈਂ ਉਸਦੀ ਗੱਲ ਨਹੀਂ ਸੁਣ ਰਿਹਾ ਸੀ।\"" },
+        { "cell": "quote-letter", "text": "ਸਾਈਟ 'ਤੇ ਕੀਤੀਆਂ ਜਾਣ ਵਾਲੀਆਂ ਗਤੀਵਿਧੀਆਂ ਦੀਆਂ ਉਦਾਹਰਨਾਂ ਵਿੱਚ ਸ਼ਿਕਾਰ ਕਰਨਾ, ਮੱਛੀ ਫੜਨਾ, ਫੋਟੋਗ੍ਰਾਫ਼ੀ, ਪੰਛੀ ਦੇਖਣਾ, ਅਤੇ ਪਾਰਕਾਂ ਵਿੱਚ ਜਾਣਾ, ਅਤੇ ਵਾਤਾਵਰਨ ਪ੍ਰਣਾਲੀ ਦੀ ਜਾਣਕਾਰੀ ਬਾਰੇ ਅਧਿਐਨ ਕਰਨਾ ਸ਼ਾਮਲ ਹੈ।" },
+        { "cell": "quote-letter", "text": "ਹਾਲਾਂਕਿ ਇਸਦਾ ਵਿਆਪਕ ਤੌਰ 'ਤੇ, ਵਿਸ਼ੇਸ਼ ਰੂਪ ਵਿੱਚ ਗੈਰ-ਰੋਮਾਨੀ ਵਿੱਚ, ਉਪਯੋਗ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, \"ਜਿਪਸੀ\" ਸ਼ਬਦ ਨੂੰ ਇਸਦੀਆਂ ਨਕਾਰਾਤਮਕ ਧਾਰਨਾਵਾਂ ਅਤੇ ਰੋਮਾਨੀ ਲੋਕਾਂ ਦੇ ਗਲਤ ਅਨੁਭਵਾਂ ਦੇ ਕਾਰਨ ਅਕਸਰ ਅਪਮਾਨਜਨਕ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ।" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.
