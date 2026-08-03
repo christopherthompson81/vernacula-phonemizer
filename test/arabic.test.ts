@@ -264,4 +264,11 @@ describe("arabic normalization", () => {
     test("the squared/cubed measure word (#586)", () => {
         expect(phonemize("783,562 km²", "ar")).toContain("kiːluːmˈitr murˈabːaʕ");
     });
+
+    // #586 — `متراً مكعّباً` from the corpus's cubic-metre sentence, the adjective FOLLOWING its noun as
+    // Arabic adjectives do, same side as مربع. A token probe for the bare `متر مكعب` reads ×0 because the
+    // corpus writes it with case endings — the sentence is the evidence, not the lemma.
+    test("the cubed measure word (#586)", () => {
+        expect(phonemize("120 m³", "ar")).toContain("mˈitr mukˈaʕːab");
+    });
 });

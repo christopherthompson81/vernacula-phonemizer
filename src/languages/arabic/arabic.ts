@@ -191,7 +191,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // rest of this table; the corpus writes it bare, and the diacritizer would have to guess otherwise.
     // No cubed word: `متر مكعب` is zero in this corpus, so `m³` keeps the documented unit-plus-`³` fallback
     // rather than a plausible invention.
-    exponentWords: { squared: ["مُرَبَّع"], position: "after" },
+    // `متراً مكعّباً` — the corpus's cubic-metre sentence, adjective FOLLOWING as Arabic adjectives do, same
+    // side as مربع above. (An earlier pass probed the bare `متر مكعب` and read ×0; the corpus writes it with
+    // case endings, which a token probe for the bare form cannot match — the sentence is the evidence.)
+    exponentWords: { squared: ["مُرَبَّع"], cubed: ["مُكَعَّب"], position: "after" },
 });
 
 class ArabicPhonemizer implements Phonemizer {

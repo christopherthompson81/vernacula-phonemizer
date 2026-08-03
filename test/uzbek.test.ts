@@ -186,4 +186,12 @@ describe("Uzbek text normalization", () => {
         expect(ph("30°F")).toBe("ottˈiz darad͡ʒˈa fareŋˈejt");
         expect(ph("2+2")).toBe("ikkˈi pljˈus ikkˈi");
     });
+
+    // #586 — `bortida 120–160 kubometr yonilg'i`, FUSED — and fused the other way round from `kvadrat`,
+    // which the same corpus writes spaced (`783 562 kvadrat kilometerni`). Hence the per-power position
+    // record: one value could not spell both. `kub`/`kubik` are ×0 here.
+    test("cubed is fused where squared is spaced (#586)", () => {
+        expect(getPhonemizer("uz").text("120 m³").trim()).toContain("kubɒmˈetr");
+        expect(getPhonemizer("uz").text("783 562 km²").trim()).toContain("kʋadrˈat kilɒmˈetr");
+    });
 });

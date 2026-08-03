@@ -280,4 +280,12 @@ describe("Oromo text normalization", () => {
         expect(phonemize("783.562 km²", "om")).toContain("iskuwˈeːr kiːloːmˈeːtira ᶑˈibːa");
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː");
     });
+
+    // #586 — an earlier pass recorded `kuubik` as ×0 and left `m³` alone; the corpus does have the word,
+    // spelled `kubiik` and in this language's own noun-first order: "iibame boba'aa kubiik metirii 120-160
+    // of irraa qaba ture". Same shape as the `iskuweer` rule beside it.
+    test("the cubed measure word, noun-first (#586)", () => {
+        expect(phonemize("120 m³", "om")).toContain("kubˈiːk mˈeːtira");
+        expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː"); // guard still holds
+    });
 });

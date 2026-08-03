@@ -141,4 +141,10 @@ describe("telugu text normalization (#562)", () => {
         expect(normalizeTelugu("1970వ")).toBe("పంతొమ్మిది వందల డెబ్బయ్యవ");
         expect(normalizeTelugu("60వది")).toBe("అరవయ్యవది");
     });
+
+    // #586 — `120–160 క్యూబిక్ మీటర్ల ఇంధనాన్ని`, the loan, word-first. ఘన ×2 here is "solid/volume"
+    // (`నీటి ఘన పరిమాణం`, the volume of water) and not the measure word, so the sentence decides it.
+    test("the cubed measure word (#586)", () => {
+        expect(phonemize("120 m³", "te")).toContain("kjˈuːbik mˈiːʈaɾlu");
+    });
 });

@@ -225,4 +225,14 @@ describe("sindhi normalization", () => {
     test("ordinary Sindhi text is untouched", () => {
         expect(normalizeSindhi("سنڌي هڪ ٻولي آهي.")).toBe("سنڌي هڪ ٻولي آهي.");
     });
+
+    // #586 — `ڪيوبڪ ميٽر` is the corpus's own ("لونو ۾ 120–160 ڪيوبڪ ميٽر تيل هو"), the loan preceding the
+    // noun exactly as مربع does in the squared rule above.
+    // ⚠ Bare `m` is deliberately NOT in the unit table: adding it made `802.11m` read as a metre, because
+    // this file rewrites the version dot to a word before the shared tier's guard can see it (trap 39).
+    test("the cubed unit, and why bare m stays out (#586)", () => {
+        expect(phonemize("5 m³", "sd")).toContain("kˈiːʋbəkə mˈiːʈəɾə");
+        expect(phonemize("5 km³", "sd")).toContain("kˈiːʋbəkə kəloːmˈiːʈəɾə");
+        expect(phonemize("802.11m", "sd")).toContain("ˈɛm"); // still a letter
+    });
 });

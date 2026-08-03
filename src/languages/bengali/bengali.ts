@@ -106,7 +106,11 @@ export function makeNativeBengali(
         // therefore attested in both, where `compound` would have been wrong for one of them.
         // No cubed word: ঘন ×19 in this corpus is the REDUPLICATED ADVERB `ঘন ঘন` ("frequently"), and
         // `ঘন মিটার`/`ঘনমিটার` are both zero — a count that says nothing about the unit sense (trap 12).
-        exponentWords: { squared: ["বর্গ"], position: "before" },
+        // `120-160 কিউবিক মিটার জ্বালানি তেল` — the loan, word-first. This is the word an earlier pass could
+        // not find: it probed ঘন (×19, the reduplicated adverb "frequently") and `ঘনমিটার` (×0), and the
+        // corpus uses neither. ⚠ Assamese SHARES this tier and its own corpus attests no cube word at all —
+        // the as translation of that sentence writes `বর্গমিটাৰ`, the SQUARE word, for cubic metres.
+        exponentWords: { squared: ["বর্গ"], cubed: ["কিউবিক"], position: "before" },
     });
     const normalize = makeBengaliNormalizer(def.numbers);
 

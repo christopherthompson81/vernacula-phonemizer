@@ -84,7 +84,10 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["foiz"],
     currency: { "$": ["dollar"], "¥": ["iyena"] },
     units: { km: ["kilometr"], mm: ["millimetr"], sm: ["santimetr"], m: ["metr"] },
-    exponentWords: { squared: ["kvadrat"], position: "before" },
+    // `bortida 120–160 kubometr yonilg'i` — FUSED, and fused the other way round from `kvadrat`, which the
+    // same corpus writes spaced (`783 562 kvadrat kilometerni`). Hence the per-power position record: one
+    // value could not spell both. `kub`/`kubik` are ×0 here; the closed `kubometr` is what this corpus has.
+    exponentWords: { squared: ["kvadrat"], cubed: ["kubo"], position: { squared: "before", cubed: "compound" } },
 });
 
 const TOKEN = /([a-zʻ'’‘`ʼ′]+)|(\d+(?:,\d+)?)|([.!?…,;:])/giu;

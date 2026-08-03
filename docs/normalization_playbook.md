@@ -998,6 +998,47 @@ merely silent one. Declaring `"m/h": ["maero ia hāora"]` as its own unit key fi
 sorted longest-first and a 3-character key is tried before the bare `m` (this is how French's `km/h` key
 already works). Reach for a compound key whenever one abbreviation is not the composition of its parts.
 
+**45. ONE SENTENCE CAN SOURCE A WHOLE FLEET — FIND THE ONE THE CORPUS REPEATS.** The cube word for sixteen
+languages came out of a single utterance. FLEURS is a *translation* of one English set, so every corpus carries
+the same source text, and one of those sentences is "The Luno had 120-160 cubic metres of fuel aboard". Locate
+it by its FIGURES (`120` and `160` co-occurring) and the measure word is beside them, in that language's own
+orthography and word order — no candidate list, no guessing, and it settles position at the same time.
+
+This is how the sweep's earlier ×0 results get overturned, and three of them were wrong for three different
+reasons:
+
+| | earlier verdict | the sentence says | why the probe missed it |
+|---|---|---|---|
+| ne | घन ×0 | `120–160 घनमिटर` | written FUSED to the noun |
+| om | kuubik ×0 | `kubiik metirii 120-160` | spelled differently |
+| ar | `متر مكعب` ×0 | `120 إلى 160 متراً مكعّباً` | inflected — case endings on both words |
+
+- **Read the sentence in EVERY language before trusting it, because the translations are not all faithful.**
+  Three of the twenty-three say something else, and each would have shipped a wrong word: `as` writes
+  `বর্গমিটাৰ` — the SQUARE word — for cubic metres; `bg` writes the bare abbreviation `м3` and no word at all;
+  `xh` left the phrase in English (`ye-cubic metres`). A parallel corpus is a *set of translations*, and a
+  translation can be wrong in exactly the cell you are reading.
+
+**46. A ONE-LETTER UNIT KEY IS NOT SAFE JUST BECAUSE THE CORPUS SAYS SO — CHECK WHAT SPENDS THE DOT.** Bare `m`
+was measured clean in every one of these corpora (digit-adjacent `m` is ×0 in eight of them, and every instance
+in the rest is a genuine metre). Declaring it still broke four languages: `802.11m` read as "…eleven METRES" in
+af, ca, is and sd.
+
+The tier HAS a guard for this — `NOT_VERSION`, which exists because `802.11g` once read as "802.11 GRAMS" in
+ten languages — and the guard works by seeing the DOT. All four of those languages rewrite the version dot to a
+word (`punt`) or to a separate token BEFORE the tier runs, so by then there is no dot to reject. Trap 39 again,
+and this time it was *latent*: it needed a one-letter key to become visible, and `m` was the key that supplied
+it. uz and as had the same exposure already and nobody had looked.
+
+- **Withdraw the key where it buys nothing.** is and sd keep their cube readings without it, because their
+  squared/cubed rules are LOCAL and never consult the unit table — so the key was pure exposure.
+- **Where it does buy something, say what it costs.** af and ca keep it: the residual case needs a dotted
+  version whose trailing letter is exactly `m`, which no corpus contains (802.11 comes as a/b/g/n), and in ca
+  the same rule makes `6.5m` read as 6.5 metres, which is *right*. Recorded in both files rather than left to
+  be rediscovered.
+- **The fleet-level fix is the ordering one**, and it is not done: a language that spends the version dot
+  before the tier must handle the version shape itself.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

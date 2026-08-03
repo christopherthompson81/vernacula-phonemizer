@@ -80,7 +80,9 @@ const SYMBOLS = makeSymbolNormalizer({
         miles: ["మైలు", "మైళ్లు"],
         inches: ["అంగుళం", "అంగుళాలు"],
     },
-    exponentWords: { squared: ["చదరపు"], position: "before" },
+    // `120–160 క్యూబిక్ మీటర్ల ఇంధనాన్ని` — the loan, word-first. ఘన ×2 in this corpus is "solid/volume"
+    // (`నీటి ఘన పరిమాణం`, the volume of water) and not the measure word, so the sentence decides it.
+    exponentWords: { squared: ["చదరపు"], cubed: ["క్యూబిక్"], position: "before" },
 });
 
 /**

@@ -339,6 +339,11 @@ export function normalizeOromo(input: string): string {
     //         become a square kilometre.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `iskuweer ${UNIT[u.toLowerCase()]!} ${n}`);
+    //     (b3) …and CUBED. An earlier pass recorded `kuubik` as ×0 and left `m³` alone; the corpus does have
+    //         the word, spelled `kubiik` and in this language's own noun-first order — "iibame boba'aa
+    //         kubiik metirii 120-160 of irraa qaba ture". Same shape as (b2).
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?³|3)(?![\\p{L}\\p{M}\\d])`, "giu"),
+        (_m, n: string, u: string) => `kubiik ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (c) the abbreviation BEFORE its number (`mm 5`, `km 6,387`) — and this must come BEFORE (d),
     //         which was found by the corpus's `mm 36 mm 24n` (a 36×24 mm negative): with (d) first, the
     //         SECOND `mm` was eaten as the postposed unit of `36`, and the first was left as the raw

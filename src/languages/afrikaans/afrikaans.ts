@@ -133,6 +133,19 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["kilometer"], cm: ["sentimeter"], mm: ["millimeter"], kg: ["kilogram"],
         mi: ["myl"], mph: ["myl per uur"],
+        // `m` — meter ×9, and `kubieke`/`vierkante` below could not reach a bare metre without it.
+        // The one hazard in this corpus is `40 m.p.u` (myl per uur, the Afrikaans way), which a
+        // letter-guard would NOT reject because a dot is not a letter — but normalize.ts rewrites the dotted
+        // abbreviation to words BEFORE the tier runs, so no bare `m` survives to be misread. `133 m/s` is
+        // the other instance and is a genuine metre.
+        // ⚠ RESIDUAL EXPOSURE, stated rather than left to be discovered: normalize.ts step 7 rewrites a
+        // version dot to the WORD "punt" before the tier runs, so the tier's `NOT_VERSION` guard — which
+        // exists because `802.11g` once read as "802.11 GRAMS" in ten languages — has no dot left to see, and
+        // `802.11m` reads as "…elf METER". Trap 39. It is bounded and unattested: that rule fires only on
+        // THREE-or-more integer digits plus one trailing letter, so `6.5m` is untouched (it reads the letter),
+        // and no corpus contains a dotted version ending in `m` — 802.11 comes as a/b/g/n. Measured the same
+        // way in ca, and in uz/as where it predates this change.
+        m: ["meter"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
     unitPer: "per",

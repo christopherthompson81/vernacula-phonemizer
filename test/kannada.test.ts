@@ -128,4 +128,12 @@ describe("kannada text normalization", () => {
         expect(normalizeKannada("29¾ ಇಂಚು")).toBe("29 ಮುಕ್ಕಾಲು ಇಂಚು"); // was dropped outright
         expect(normalizeKannada("35°W")).toBe("35 ಡಿಗ್ರಿ W");
     });
+
+    // #586 — `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ`, word-first beside ಚದರ. `m` had to be declared for it to have a
+    // head noun (ಮೀಟರ್ ×10; digit-adjacent bare `m` is ×0, so the one-letter-key hazard is checked).
+    test("the bare metre and the cubed measure word (#586)", () => {
+        expect(phonemize("5 m", "kn")).toContain("mˈiːʈaɾ");
+        expect(phonemize("120 m³", "kn")).toContain("ɡʱˈana mˈiːʈaɾ");
+        expect(phonemize("802.11m", "kn")).toContain("ˈɛm");
+    });
 });
