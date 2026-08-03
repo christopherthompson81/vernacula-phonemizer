@@ -25,6 +25,11 @@
     // Vowels → IPA (5-vowel system; length is written by DOUBLING, handled in the scanner: aa→aː).
     "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u" },
 
+    // The DECIMAL POINT word, read by normalize.ts (#562). Declared here rather than in code so there is
+    // one source of truth and the sourcing check can see it. espeak-ng dictsource om_list gives `_dpt` and
+    // `_.` → tuqaa; the corpus writes "sirna tuqaalee" (the system of dots = punctuation) and "tuqaa 76".
+    "decimalWord": "tuqaa",
+
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },

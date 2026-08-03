@@ -431,6 +431,25 @@ numbers with one** (`200-ге`, `8-ден`, `80-нен`, `60-тан`) and **16 o
 1,494 utterances — so the suffix, not the numeral, is that language's defining rule. Expect the same of the
 other Turkic corpora, of Irish (lenition after `i`/`do`), and of anything whose preposition governs a case.
 
+**15. THE SAME BOUND SUFFIX IS ALSO WRITTEN WITH A SPACE — count both.** Trap 14 is stated in terms of a
+suffix GLUED to the digits, and every layer that has faced it went looking for exactly that. Oromo (#602)
+shipped a rule covering ~35 glued enclitics and missed **24 unique utterances** where the corpus detaches
+the very same morpheme (`bara 1945 tti`, `sa’aatii 24 f`, `qabxii 2,207 n`) — more sentences than the glued
+form. Detaching a bound postposition is a slip of the orthography, not a word boundary, and the reading is
+the same impossibility either way: a standalone `tti` is a word-initial geminate, a standalone `f` a bare
+consonant. Neither the mined artifact nor the corpus diff flags it, because with the space the text is just
+a number followed by a short word.
+
+- **Search for the morpheme, not the shape.** `grep -oE '[0-9] (tti|ti|f|n)\b'` beside the glued count is
+  the whole check, and it takes seconds.
+- **The spaced alternation must be NARROWER than the glued one** (trap 9). Oromo glues `tu` but never
+  detaches it — and `tu` is an Oromo *word*, the focus marker, so only the absence of a space tells them
+  apart. Admitting the spaced form for a suffix the corpus never spaces invents a misfire.
+- **Watch what else now looks like a spaced suffix.** Once the rule accepts `digits + space + short token`,
+  anything the layer itself spaces off matches too: Oromo's version rule emitted `802.11n` as `802 tuqaa 1
+  1 n`, and the Wi-Fi standard's letter was read as a case suffix (*tokkoon*). Set such a letter off with a
+  hyphen instead — the tokenizer skips it, so the reading is unchanged and the shape is unambiguous.
+
 ---
 
 ## Two standing rules on data

@@ -85,3 +85,161 @@ describe("Oromo stress (Dejene 2010 §5.3.1)", () => {
         }
     });
 });
+
+// ── TEXT NORMALIZATION (#562) ────────────────────────────────────────────────────────────────────────
+// The pins are on the rule's BRANCHES, not on the corpus's instances (trap 13): the ordinal and the
+// enclitic are COMPOSED from the cardinal, so the branch the corpus never writes (10ffaa, 8ffaa, a
+// consonant-final stem before -tti) is pinned beside the branch it does. The evidence for every word is
+// in docs/investigations/om_normalization_investigation.md, Run 4.
+import { normalizeOromo, normalizeOromoNumerals } from "../src/languages/oromo/normalize.ts";
+import { numberToWords } from "../src/languages/oromo/numbers.ts";
+
+describe("Oromo text normalization", () => {
+    test("ordinal -ffaa: composed from the cardinal, every stem shape", () => {
+        // The corpus's OWN spelled-out ordinals, reproduced by the rule: tokkoffaa, lamaffaa, sadaffaa,
+        // afuraffaa, shanaffaa, jahaffaa, torbaffaa.
+        expect(normalizeOromoNumerals("1ffaa")).toBe("tokkoffaa"); // vowel-final stem
+        expect(normalizeOromoNumerals("3ffaa")).toBe("sadaffaa"); // final ii → a
+        expect(normalizeOromoNumerals("5ffaa")).toBe("shanaffaa"); // consonant-final → link a
+        // …and the branches the corpus does NOT write as digits+ffaa (trap 8/13).
+        expect(normalizeOromoNumerals("8ffaa")).toBe("saddeetaffaa");
+        expect(normalizeOromoNumerals("10ffaa")).toBe("kudhanaffaa");
+        expect(normalizeOromoNumerals("16ffaa")).toBe("kudha jahaffaa"); // suffix on the LAST word only
+        expect(normalizeOromoNumerals("190ffaa")).toBe("dhibba sagaltamaffaa");
+        expect(normalizeOromoNumerals("15ffaatti")).toBe("kudha shanaffaatti"); // ffaa + trailer
+        expect(normalizeOromoNumerals("2ffaa’ti")).toBe("lamaffaati"); // the apostrophe is a separator
+    });
+
+    test("glued case enclitic attaches to the WORD, with its linking vowel (trap 14)", () => {
+        expect(normalizeOromoNumerals("1994tti")).toBe("kuma dhibba sagal sagaltamii afuritti"); // C + i
+        expect(normalizeOromoNumerals("2010’tti")).toBe("kuma lama kudhanitti");
+        expect(normalizeOromoNumerals("1tti")).toBe("tokkotti"); // V → bare (corpus: tokkotti ×7)
+        expect(normalizeOromoNumerals("3n")).toBe("sadiin"); // -n after a LONG vowel
+        expect(normalizeOromoNumerals("2n")).toBe("lamaan"); // -n lengthens a short one (corpus ×9)
+        expect(normalizeOromoNumerals("5n")).toBe("shaniin"); // -n after a consonant (corpus ×1)
+        expect(normalizeOromoNumerals("2020f")).toBe("kuma lama digdamaaf");
+        expect(normalizeOromoNumerals("10if")).toBe("kudhaniif"); // written link folded into the stem's
+        expect(normalizeOromoNumerals("30tu")).toBe("soddomatu");
+        expect(normalizeOromoNumerals("1.5tti")).toBe("tokko tuqaa shanitti"); // a DECIMAL operand
+        // NOT a suffix: `fi` and `ni` are words, `moota` has no attested attachment, `s` is a plural on a
+        // foreign designation. All keep the reading they had.
+        expect(normalizeOromoNumerals("1fi2")).toBe("1fi2");
+        expect(normalizeOromoNumerals("1850moota")).toBe("1850moota");
+        expect(normalizeOromoNumerals("Il-76s")).toBe("Il-76s");
+    });
+
+    // The corpus DETACHES the same enclitic in 24 unique utterances — more sentences than it glues it in —
+    // and the detached reading is the same impossibility: a word-initial geminate [tːi], or a bare [f]/[n].
+    test("the enclitic written with a SPACE attaches just the same", () => {
+        expect(normalizeOromoNumerals("bara 1945 tti")).toBe("bara kuma dhibba sagal afurtamii shanitti");
+        expect(normalizeOromoNumerals("bara 2016 ti")).toBe("bara kuma lama kudha jahati");
+        expect(normalizeOromoNumerals("sa’aatii 24 f")).toBe("sa’aatii digdamii afuriif");
+        expect(normalizeOromoNumerals("qabxii 2207 n")).toBe("qabxii kuma lama dhibba lama torbaan");
+        expect(normalizeOromoNumerals("22500 tiin")).toBe("kuma digdamii lama dhibba shanitiin");
+        expect(normalizeOromoNumerals("miliyyoona 2.8 tti")).toBe("miliyyoona lama tuqaa saddeetitti");
+        // The SPACED alternation is narrower than the glued one, and `tu` is why: it is an Oromo WORD, the
+        // focus marker, and only the absence of a space tells the two apart.
+        expect(normalizeOromoNumerals("Caribe tu jiraata")).toBe("Caribe tu jiraata");
+        expect(normalizeOromoNumerals("namoota 15 tu")).toBe("namoota 15 tu");
+        expect(normalizeOromoNumerals("15tu")).toBe("kudha shanitu"); // …glued, it still attaches
+        // `fi` survives by construction: the trailing-letter guard rejects `f` followed by `i`.
+        // (an UNSUFFIXED number stays digits — the tokenizer speaks it downstream.)
+        expect(normalizeOromoNumerals("qabxii 2220 fi 2207 n")).toBe("qabxii 2220 fi kuma lama dhibba lama torbaan");
+        // A clause break really does end the numeral phrase, so the space must not cross one.
+        expect(normalizeOromoNumerals("bara 1945, tti")).toBe("bara 1945, tti");
+        // A VERSION LETTER IS NOT AN ENCLITIC. `802.11n` reaches pass 2 already split, and with the letter
+        // set off by a space it was indistinguishable from `2,207 n` — the corpus diff caught the Wi-Fi
+        // standard being read as *tokkoon*. The hyphen step 8 emits is what keeps the two apart.
+        expect(normalizeOromo("saffisawwan 802.11n kan")).toBe("saffisawwan 802 tuqaa 1 1-n kan");
+        expect(normalizeOromoNumerals("saffisawwan 802 tuqaa 1 1-n kan")).toBe("saffisawwan 802 tuqaa 1 1-n kan");
+    });
+
+    // Step 5 consumes the meridiem and emits a half-day WORD, so a following enclitic no longer has digits
+    // in front of it — the corpus's `sa’a 1:15 a.m tti` left a bare [tːi] until the rule looked here too.
+    test("an enclitic after the half-day word the clock emits", () => {
+        expect(normalizeOromo("sa’a 1:15 a.m tti")).toBe("sa’a 1 fi daqiiqaa 15 ganama tti");
+        expect(normalizeOromoNumerals("sa’a 1 fi daqiiqaa 15 ganama tti"))
+            .toBe("sa’a 1 fi daqiiqaa 15 ganamatti");
+        expect(normalizeOromoNumerals("galgala tti")).toBe("galgalatti");
+    });
+
+    test("de-grouping, and the thousands crash it exposed", () => {
+        expect(normalizeOromo("783,562 qabata")).toBe("783562 qabata");
+        expect(numberToWords(783562)).toBe("kuma dhibba torba saddeettamii sadii dhibba shan jaatamii lama");
+        expect(normalizeOromoNumerals("2,3")).toBe("2 tuqaa 3"); // a 1–2 digit block is NOT grouping
+    });
+
+    test("decimal point stays DIGITS so the symbol tier can still see the number", () => {
+        expect(normalizeOromoNumerals("2.3")).toBe("2 tuqaa 3");
+        expect(normalizeOromoNumerals("6.34")).toBe("6 tuqaa 3 4"); // fraction read digit by digit
+        expect(phonemize("miliyoona 2.3", "om")).toBe("milijˈoːna lˈama tukʼˈaː sadˈiː");
+        expect(phonemize("Biliyoona $2.3", "om")).toBe("bilijˈoːna doːlˈaːra lˈama tukʼˈaː sadˈiː");
+    });
+
+    test("clock: hour-and-minute, bare hour at :00, half-day words, and what is NOT a clock", () => {
+        expect(normalizeOromo("11:20 irratti")).toBe("11 fi daqiiqaa 20 irratti");
+        expect(normalizeOromo("sa’aatii 10:00 irratti")).toBe("sa’aatii 10 irratti"); // never *zeeroo*
+        expect(normalizeOromo("8:46 a.m.")).toBe("8 fi daqiiqaa 46 ganama");
+        expect(normalizeOromo("8:46 p.m.")).toBe("8 fi daqiiqaa 46 galgala");
+        expect(normalizeOromo("har’a 12.00 GMT tti")).toBe("har’a 12 GMT tti"); // the dot form
+        // `qabxii 2:2` is a degree classification, not a time — the minutes must be two digits.
+        expect(normalizeOromo("qabxii 2:2 argachuun")).toBe("qabxii 2:2 argachuun");
+    });
+
+    test("range joins with hanga; a SCORE is left alone (direction is the discriminator)", () => {
+        expect(normalizeOromo("(1644-1912)")).toBe("(1644 hanga 1912)");
+        expect(normalizeOromo("bara 1995-96")).toBe("bara 1995 hanga 96"); // a year span
+        expect(normalizeOromo("guyyaa 2-5 barbaada")).toBe("guyyaa 2 hanga 5 barbaada");
+        expect(normalizeOromo("waliin 7-2 dha")).toBe("waliin 7-2 dha"); // descending → a score
+        expect(normalizeOromo("26-00 dhaan")).toBe("26-00 dhaan");
+        // An ORDINAL range — the mined artifact counts 0 of these, and the corpus has one
+        // (`jaarraa 10ffaa - 11ffaa`); without its own rule the spaced hyphen read as a MINUS.
+        expect(normalizeOromo("jaarraa 10ffaa - 11ffaa")).toBe("jaarraa 10ffaa hanga 11ffaa");
+        expect(phonemize("jaarraa 10ffaa - 11ffaa", "om")).toBe("d\u0361\u0292a\u02d0r\u02d0\u02c8a\u02d0 ku\u1d91anaf\u02d0\u02c8a\u02d0 h\u02c8an\u0261a k\u02c8u\u1d91a tok\u02d0of\u02d0\u02c8a\u02d0");
+        expect(normalizeOromo("5 - 3")).toBe("5 - 3"); // a spaced score is still not a subtraction
+    });
+
+    test("units lead their number, on either written side, plus the rate and sq mi", () => {
+        expect(normalizeOromo("mm 5")).toBe("miiliimeetira 5");
+        expect(normalizeOromo("(mm 36 mm 24n negatiiva)")).toBe("(miiliimeetira 36 miiliimeetira 24n negatiiva)");
+        expect(normalizeOromo("35 mm")).toBe("miiliimeetira 35"); // the postposed order, corpus-absent
+        expect(normalizeOromo("(165km/h)")).toBe("(sa’aatiitti kiiloomeetira 165)"); // locative denominator
+        expect(normalizeOromo("300,948 sq mi")).toBe("iskuweer maayilii 300948");
+        expect(normalizeOromo("km 2-3 tauun")).toBe("kiiloomeetira 2 hanga 3 tauun"); // after the range step
+    });
+
+    test("percent and currency: the noun leads, and the tier's words are the sourced ones", () => {
+        expect(phonemize("88% galche", "om")).toBe("parsantˈiː sadːeːtːamˈiː sadːˈeːt ɡˈalt͡ʃe");
+        expect(phonemize("$ 1000", "om")).toBe("doːlˈaːra kˈuma");
+        expect(phonemize("US$11,000", "om")).toBe("doːlˈaːra ameːrikˈaː kˈuma kˈuᶑa tˈokːo");
+        // the enclitic survives the tier and is still attached to the WORD, not the digits
+        expect(phonemize("miiliyoona £27tiin", "om")).toBe("miːlijˈoːna paːwundˈiː diɡdamˈiː torbatˈiːn");
+        // a decimal percent: the tier claims the sign first, the decimal is read after it
+        expect(phonemize("3.5%", "om")).toBe("parsantˈiː sadˈiː tukʼˈaː ʃˈan");
+    });
+
+    test("degrees, fraction, era marker, abbreviations, and every sign class", () => {
+        expect(normalizeOromo("35°W")).toBe("digirii 35 dhihaa");
+        expect(normalizeOromo("20 °C")).toBe("digirii 20"); // the SCALE name is unsourced, so unread
+        expect(normalizeOromo("inchii 1/5")).toBe("inchii 5 keessaa 1"); // denominator-first
+        expect(normalizeOromo("D.K.D 5000")).toBe("dhaloota Kiristoos dura 5000");
+        expect(normalizeOromo("(fkn. Neezerland")).toBe("(fakkeenyaaf Neezerland");
+        expect(normalizeOromo("Dr. Damadiiyan")).toBe("Dr Damadiiyan"); // the dot, not the letters
+        expect(normalizeOromo("B&amp;B")).toBe("B fi B");
+        expect(normalizeOromo("x = y")).toBe("x wal qixa y");
+        expect(normalizeOromo("5 < 6")).toBe("5 6 caalaa xiqqaa");
+        expect(normalizeOromo("5 > 6")).toBe("5 6 caalaa guddaa");
+        expect(normalizeOromo("6 × 6")).toBe("6 si’a 6");
+        expect(normalizeOromo("-5")).toBe("hir’isuu 5");
+        expect(normalizeOromo("+5")).toBe("ida’uu 5");
+    });
+
+    test("a sentence end is never claimed", () => {
+        // ~40 of the corpus's 49 `X.` shapes are sentence-final periods. None may be eaten: the pause
+        // has to survive both passes, next to an abbreviation rule and next to the decimal rule.
+        expect(normalizeOromo("ga’e. Inni yeroo")).toBe("ga’e. Inni yeroo");
+        expect(phonemize("dhagaan tokko. Kan inni", "om")).toContain(" . ");
+        expect(normalizeOromoNumerals("fakkii 1.1.")).toBe("fakkii 1 tuqaa 1.");
+        expect(phonemize("fakkii 1.1.", "om")).toBe("fakːˈiː tˈokːo tukʼˈaː tˈokːo .");
+    });
+});

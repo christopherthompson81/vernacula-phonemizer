@@ -8,7 +8,9 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeOromo, normalizeOromoNumerals } from "./normalize.ts";
 
 interface OromoDef {
     digraphs: Record<string, string>;
@@ -162,10 +164,46 @@ export function phonemizeWordSegmental(word: string): string {
 
 const TOKEN = /([A-Za-zʼ’']+)|(\d+)|([.?!,;:])/gu;
 
+/**
+ * The shared SYMBOL tier (#562) — percent and currency, the two classes whose word is language DATA.
+ *
+ * BOTH ARE PREFIXED, because Oromo is head-initial for measure phrases: the corpus writes
+ * `parsantii 3 hanga 5`, `dhibbeentaan tokko`, `doolaara US biiliyoonotaan`, `paawundii 200`,
+ * `daqiiqaa 3` — the noun, then the number. Count forms are single-entry: an Oromo noun does not
+ * inflect for the numeral that counts it (`kiiloo meetira 1600`, `paawundii 1,000`).
+ *
+ * SOURCING (playbook §5e — a wrong word is worse than a dropped sign; the evidence table is in
+ * docs/investigations/om_normalization_investigation.md, Run 4):
+ *   parsantii          FLEURS om_et ×3 (`parsantii 3 hanga 5`) + espeak-ng dictsource om_list `%`
+ *   doolaara           FLEURS om_et ×1 (`doolaara US biiliyoonotaan`) + epitran referee + om_list `_$`
+ *   doolaara Ameerikaa both words corpus-attested; `US$` is declared as a compound key because a bare
+ *                      `$` cannot match inside `US$11,000` (the tier is letter-bounded on the left)
+ *   paawundii          FLEURS om_et ×5 + om_list `£`. The corpus's five are the WEIGHT noun; Oromo
+ *                      borrows one word for both senses, as English does
+ *   yuuroo             om_list `€` only — and `€` never occurs in the corpus, so it carries no reading
+ * NOT declared: `¥`, which has no source and no instance. UNITS are not declared here at all — the tier
+ * can only postpose them, and Oromo puts them first; normalize.ts owns them.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["parsantii"],
+    percentPrefix: true,
+    currency: {
+        "US$": ["doolaara Ameerikaa"],
+        "$": ["doolaara"],
+        "£": ["paawundii"],
+        "€": ["yuuroo"],
+    },
+    currencyPrefix: true,
+});
+
 class OromoPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts, then the shared tier, then normalize.ts's number pass. The tier matches DIGITS
+        // beside a sign, so every rule that turns digits into WORDS — the glued Oromo enclitic and the
+        // decimal — has to run after it (trap 14 from the other end). That ordering is what keeps the
+        // currency and percent words in ONE place, the declaration above.
+        return assembleClauses(normalizeOromoNumerals(SYMBOLS(normalizeOromo(input))), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
