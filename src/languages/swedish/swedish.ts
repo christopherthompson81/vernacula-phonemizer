@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Compound } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeSwedish, normalizeSwedishInitialisms } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const EXCEPTIONS = MANIFEST.exceptions;
@@ -114,14 +115,31 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
+
+/** NFC fold, hoisted OUT of `text()` on purpose. `normalization/review.ts`'s trap-6 check scans `text()`
+ *  bodies for word literals that never reach the g2p, and `"NFC"` is a two-letter-plus Latin string the
+ *  Swedish g2p happily reads as [ɛnː ɛfː seː] — so the argument of `.normalize()` reported as an
+ *  unphonemized spelling. It is the first false positive that check has produced (see the PR); moving the
+ *  call out of the scanned body costs nothing and keeps the check meaningful. */
+const nfc = (s: string): string => s.normalize("NFC");
 const TOKEN = /([a-zåäöéA-ZÅÄÖÉ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["procent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pund"] },
-    units: { km: ["kilometer"], cm: ["centimeter"], mm: ["millimeter"], kg: ["kilogram"],
-        h: ["timme"], s: ["sekund"] },
+    // `m` added: 4 corpus instances of a bare metre (`4892 m`, `100 m`, `30 m`, and the `133 m/s`
+    // denominator) were reaching the g2p as a bare [m]. `ghz` (2 instances, `2,4 GHz` / `5,0 GHz`, read
+    // as [ɡhs]) was TRIED and reverted: this g2p softens ⟨g⟩ before a front vowel, so *gigahertz* comes
+    // out [jˈiːɡahɛʈs] — a different wrong answer, not a fix. Recorded in the PR as a measured gap.
+    units: { km: ["kilometer"], m: ["meter"], cm: ["centimeter"], mm: ["millimeter"],
+        kg: ["kilogram"] },
+    // `h`/`s` MOVED out of `units` into rateDenominators, and `t`/`min` added. The tier's own header
+    // records why a one-letter denominator must not be standalone-matchable (the Dutch `Il-76s` →
+    // *zesenzeventig seconde*), and this corpus has the same shape in `Il-76:or`. Measured: 0 bare `N h`
+    // and 0 bare `N s` in sv_se, so the move changes no reading — it removes a latent misfire. `t` is the
+    // Swedish variant denominator (`160 km/t`, 1 instance, previously [km t]).
+    rateDenominators: { h: "timme", t: "timme", s: "sekund", min: "minut" },
     unitPer: "per", // the /h was reaching the g2p as a bare letter
     // Swedish COMPOUNDS the measure word onto the unit: kvadratkilometer, one word — hence "before".
     exponentWords: { squared: ["kvadrat"], cubed: ["kubik"], position: "compound" },
@@ -131,7 +149,11 @@ const SYMBOLS = makeSymbolNormalizer({
 class SwedishPhonemizer implements Phonemizer {
     text(input: string): string {
         // NFC first so decomposed å/ä/ö/é tokenize as single letters (the TOKEN class matches only precomposed).
-        return assembleClauses(SYMBOLS(input).normalize("NFC"), TOKEN, (m, sink) => {
+        // #562 order: normalize.ts, then the INITIALISM pass (which must see abbreviations already expanded
+        // and the inflectional colon already resolved), then the shared symbol tier — which still needs to
+        // see number–unit adjacency, so normalize.ts leaves digits as digits.
+        const normalized = SYMBOLS(normalizeSwedishInitialisms(normalizeSwedish(input)));
+        return assembleClauses(nfc(normalized), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(/[.,]/);
