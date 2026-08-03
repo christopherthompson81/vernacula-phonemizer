@@ -37,7 +37,24 @@ const SYMBOLS = makeSymbolNormalizer({
     // English reading of the bare letter C.
     currency: { "$": ["美元"], "€": ["欧元"], "£": ["英镑"], "¥": ["元"], "₤": ["英镑"] },
     units: { mm: ["毫米"], cm: ["厘米"], km: ["公里"], m: ["米"], kg: ["千克"], g: ["克"],
-        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"] },
+        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"],
+        // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), not `°`+letter, so the two keys above could not
+        // reach them and `20℃` read as bare 二十 — the whole unit gone, not merely the degree sign. They are
+        // in the RAWMARK leak class for exactly this reason. Found while reviewing the hi change, which had
+        // the identical gap; measured across the fleet, most languages still do.
+        "℃": ["摄氏度"], "℉": ["华氏度"] },
+    // `km²` → 平方公里. The measure word PRECEDES the unit and fuses to it with no space, which is the
+    // `compound` position — the same one Japanese uses for 平方キロメートル. `before` would emit "平方 公里",
+    // splitting one Han run into two and losing the segmenter's chance to see the compound.
+    // Attested in the artifact itself: 公园占地 19500 平方公里 · 783,562 平方公里（300,948 平方英里）.
+    // One form each, because a Chinese measure word does not agree with its count.
+    exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
+    // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿 (10⁸),
+    // not "million". Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to
+    // the English letter reading: `5 万 km²` came out as *ˈʊkm*, which is worse than the raw text. The
+    // artifact writes the magnitude against a currency NOUN (13 万日元, 40 万例) rather than against a Latin
+    // unit, so this guards a plausible input rather than a sampled one.
+    magnitudes: ["万", "亿", "兆"],
 });
 
 class MandarinPhonemizer implements Phonemizer {

@@ -16,6 +16,12 @@
  * without ever being spoken. That is why the sign probes below PRINT their readings instead of only
  * asserting a difference — read them.
  *
+ * That paragraph was written as a limitation and stood as one for thirty-seven languages, while THIS FILE'S
+ * OWN `A&B` PROBE had the merge defect it describes — so the gate printed the ampersand's reading with no
+ * DROPPED marker and the human was asked to notice. It is mechanical now: the probe is spaced (`A & B`), so
+ * deleting the sign can no longer join two operands. The general rule survives — a printed reading still
+ * needs a human — but this particular class no longer depends on one. See `signCases`.
+ *
  * Usage:  npx tsx tools/normalization/review.ts --lang cs [--dir czech]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -174,15 +180,38 @@ note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync
 const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
 const say = (t: string): string => { try { return (phonemize(t, lang) as string).trim(); } catch (e) { return `THROW ${(e as Error).message.slice(0, 40)}`; } };
 
-/** A symbol that contributes NOTHING is a hard fail; one that merely changes the output is printed for a
- *  human to judge, because changing tokenization is not the same as being spoken. */
+/**
+ * A symbol that contributes NOTHING is a hard fail; one that merely changes the output is printed for a
+ * human to judge, because changing tokenization is not the same as being spoken.
+ *
+ * EVERY PROBE MUST BE NON-MERGING, and `A&B` was not. Deleting its `&` yields `AB` — ONE token, read
+ * differently from `A B` — so the differential test saw a change and reported the class clean. Measured on
+ * cmn, whose artifact writes `一众 B&B 公司`: this gate printed `ampersand A&B  ˈə bˈiː` with no DROPPED
+ * marker while `corpus-diff.ts` reported `DROP:ampersand` on the real sentence. The spaced form `A & B`
+ * deletes to `A  B`, which reads as `A B`, so a dropped `&` is now visible. This is the same trap
+ * `defects.ts` documents for the minus: never build a probe whose deletion joins two operands.
+ *
+ * THE CLASS LIST IS `DROPPABLE`'s, because a probe list that drifts from the defect table is exactly what
+ * `defects.ts` was extracted to stop — and this list had drifted, missing `÷`, `>`, `±`, the exponent and
+ * the currency sign outright. Two classes are DELIBERATELY not probed here, stated rather than silently
+ * omitted:
+ *   · `iteration` (ๆ 々 ゝ ៗ) — script-specific. A language that does not use the mark would report it
+ *     dropped, so the finding would be noise for all but a handful; `mine.ts scan` catches it where the
+ *     corpus actually contains one.
+ *   · nothing else. Every other DROPPABLE class is below.
+ */
 const signCases: [string, string, RegExp][] = [
     ["minus", "-5", /[-−]/gu],
     ["plus", "+5", /\+/gu],
-    ["ampersand", "A&B", /&/gu],
+    ["plus-minus", "±5", /±/gu],
+    ["ampersand", "A & B", /&/gu],
     ["equals", "x = y", /=/gu],
     ["less-than", "5 < 6", /</gu],
+    ["greater-than", "6 > 5", />/gu],
     ["times", "6 × 6", /×/gu],
+    ["divide", "6 ÷ 3", /÷/gu],
+    ["exponent", "5 km²", /²/gu],
+    ["currency", "$5", /\$/gu],
     ["percent", "25 %", /%/gu],
     ["degrees", "20 °C", /°/gu],
 ];
@@ -192,9 +221,42 @@ for (const [name, probe, strip] of signCases) {
     const full = say(probe), bare = say(probe.replace(strip, ""));
     const isDropped = full === bare;
     if (isDropped) dropped.push(name);
-    console.log(`  ${name.padEnd(11)} ${probe.padEnd(8)} ${isDropped ? "DROPPED" : "       "}  ${full.slice(0, 46)}`);
+    console.log(`  ${name.padEnd(13)} ${probe.padEnd(8)} ${isDropped ? "DROPPED" : "       "}  ${full.slice(0, 46)}`);
 }
 note("sign classes", dropped.length === 0, dropped.length === 0 ? "none dropped" : `DROPPED: ${dropped.join(" ")}`);
+
+/**
+ * ⚠ THE `exponent` LINE IS THE WEAKEST OF THE THIRTEEN — READ IT, DO NOT TRUST ITS MARKER.
+ *
+ * Every other probe deletes a symbol and leaves the rest of the string tokenizing identically. The exponent
+ * cannot: deleting the `²` from `5 km²` also changes the UNIT TOKEN, because `km²` and `km` are different
+ * strings to the word path. So the readings differ for reasons unrelated to the exponent, and the class
+ * reports clean even when the exponent is gone.
+ *
+ * MEASURED OVER THE 66 LANGUAGES WITH A MINED ARTIFACT, while `signCases` reported nothing for any of them:
+ *
+ *   21 leak a RAW `km` into the IPA   am ar as bg bn ckb cy de fa ff ga gu kk mi ne pa sw th tr ur yue
+ *    7 lose the unit word entirely    da fr hu id ja nb sv
+ *
+ * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim, trap 6's
+ * defect arriving through the exponent. French differs from `5 km` by ONE VOWEL (kilomˈɛtʁ vs kilɔmˈɛtʁ),
+ * an incidental g2p artefact of the changed token, so even a careful reader has to compare two nearly
+ * identical strings to see that the `²` was dropped. That is 28 of 66 languages, for #586 to sweep.
+ *
+ * TWO MECHANICAL CHECKS WERE TRIED AND BOTH REJECTED, which is why this is a comment and not a `note()`:
+ *
+ *   · A spaced probe (`5 km ²`) — the non-merging fix that worked for the ampersand. WRONG here: English
+ *     handles the exponent in its own layer and requires it attached, so the probe invents a failure for one
+ *     of the languages that is correct.
+ *   · Asserting the bare unit's words survive into the `km²` reading, taken differentially against `5`.
+ *     Rejected at 6 false positives in 19: the `compound` position languages (da hu ja ko nb sv) FUSE the
+ *     measure word into the unit, and the fused token's g2p legitimately differs from the standalone one —
+ *     Swedish reads a lone `km` with ɕ (*ɕɪlɔmˈeːtɛr*) and the compound with k (*kvadrˈɑ̀ːtkiːlɔmˌeːtɛr*).
+ *     Suprasegmental stripping fixes four of the six and not those two.
+ *
+ * A gate that fails six correct languages to catch thirteen broken ones is not worth shipping; a documented
+ * count that the sweep can act on is.
+ */
 
 console.log(`\n── numeral agreement (does the numeral suit its noun? judgement required) ──`);
 for (const probe of ["1:15", "2:00", "21:00", "1 km", "2 km", "5 km", "21 %"])

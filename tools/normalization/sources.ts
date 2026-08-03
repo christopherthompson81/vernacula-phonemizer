@@ -114,19 +114,67 @@ interface Row { klass: string; verdict: Verdict; detail: string }
  * Neither shape is universal — sv_list uses only the first, lb_list has 2 of 26 and fills the rest of that
  * block with ACCENT names, which is exactly the trap that makes a header say "letter names" over data that
  * is not.
+ *
+ * See `NOT_SPELLING_LETTERS` below for the third shape of the same trap — data that is a real alphabet and
+ * still not an answer to this question.
  */
+
+/**
+ * SCRIPTS WHOSE SINGLE-CHARACTER HEADWORDS ARE NOT THE LETTERS ANYONE SPELLS WITH.
+ *
+ * The question this class answers is narrow: when a reader meets an initialism, what does each character get
+ * called? `\p{L}` matches 亿 as readily as `b`, and cmn_list is 3,899 lines of Han headwords — so the count
+ * came back **3,836 letters** and this tool reported `letter-names espeak 3836 — WIREABLE` for a language
+ * whose Latin letter block is entirely COMMENTED OUT. Found by the #586 loop-back on cmn.
+ *
+ * Excluded by script rather than by count, because a large count can be legitimate: Ethiopic really does have
+ * ~350 fidel and Amharic's seam is keyed on them, so a "no alphabet has more than N letters" threshold would
+ * have thrown away a real table. Devanagari and Arabic letters are `\p{Lo}` like Han, so the general-category
+ * route is no good either.
+ *
+ * BOPOMOFO IS HERE FOR A DIFFERENT REASON THAN THE REST, and it is the one worth stating: it IS an alphabet,
+ * with 37 letters, and excluding Han alone left cmn reporting exactly 37 — a plausible-looking number that
+ * was the entire bopomofo block. But bopomofo is a PHONETIC ANNOTATION system; nobody spells 拿 B A out in
+ * ㄅㄆㄇ. Chinese initialisms are spelled with LATIN letter names, which is precisely the block espeak has
+ * disabled. A source can be real, and an alphabet, and still not answer the question being asked.
+ */
+const NOT_SPELLING_LETTERS = /[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Hangul}\p{sc=Yi}\p{sc=Bopomofo}]/u;
+
 function letterNames(c: Ctx): Row {
     const inRepo = /letterName:/u.test(c.langSrc);
     // A `$directive` VALUE IS NOT A LETTER NAME, and this is the trap the class header warns about, caught by
     // the tool's own first run: lb_list's letter block is 2 real names (`_a`, `_e`) plus FOURTEEN accent
     // entries (`à  $accent`), and counting those reported 18 of 26 — "partial" for a language that has two.
     // espeak's `$` values are flags (`$accent`, `$abbrev`, `$only`), never pronunciations.
-    const bare = new Set([...c.espeak.matchAll(/^(\p{L})\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase()));
-    const under = new Set([...c.espeak.matchAll(/^_(\p{L})\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase()));
+    const keep = (s: Iterable<string>): string[] => [...s].filter((ch) => !NOT_SPELLING_LETTERS.test(ch));
+    const bare = new Set(keep([...c.espeak.matchAll(/^(\p{L})\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase())));
+    const under = new Set(keep([...c.espeak.matchAll(/^_(\p{L})\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase())));
     const n = new Set([...bare, ...under]).size;
+    // A COMMENTED-OUT BLOCK IS NOT AN ABSENCE, and reporting it as one loses the most actionable state there
+    // is. cmn_list carries all 26 Latin letter names disabled behind `//`, with the reason written above them
+    // ("This will make letter within English sentense translated not correctly"), and Chinese speakers DO
+    // spell UTC and NBA with Latin letter names — so the data exists, the objection is scoped to espeak's own
+    // sentence-level routing, and porting it here is a different question from sourcing it.
+    //
+    // ONLY LATIN HEADWORDS, AND ONLY IN A NON-LATIN LANGUAGE. The first version of this counted any commented
+    // single-character entry and promptly invented a new false positive of exactly the kind above it: Burmese
+    // reported 44, which are commented-out WORD entries for single-character particles (`//က $nounf`, and
+    // `//က kə3` — က is a postposition as well as a letter). An abugida's single characters are words too.
+    // A run of LATIN letters inside a Chinese, Burmese or Thai dictionary cannot be word entries, which makes
+    // the script the discriminator — and it is the case that matters anyway, since a non-Latin language spells
+    // an initialism (UTC, NBA) with Latin letter names.
+    const latinOnly = c.espeak.match(/^(?:_?[\p{sc=Latn}])\s+(?!\$)\S/gmu)?.length ?? 0;
+    const disabled = latinOnly >= 20 ? new Set<string>() // already live, not disabled
+        : new Set([...c.espeak.matchAll(/^\/\/\s*_?([\p{sc=Latn}])\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase()));
     if (inRepo) return { klass: "letter-names", verdict: "have", detail: `wired in ${c.dir}/ (espeak has ${n})` };
     if (n >= 20) return { klass: "letter-names", verdict: "have", detail: `espeak ${n} letters — WIREABLE, not yet wired` };
     if (n > 0) return { klass: "letter-names", verdict: "partial", detail: `espeak only ${n} letters — a partial table makes the seam a NO-OP` };
+    if (disabled.size >= 20) {
+        return {
+            klass: "letter-names", verdict: "partial",
+            detail: `espeak has ${disabled.size} letter names but COMMENTED OUT — read its reason before porting`,
+        };
+    }
     const espeakAtAll = c.espeak !== "";
     return {
         klass: "letter-names", verdict: "none",

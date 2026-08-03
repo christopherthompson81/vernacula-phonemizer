@@ -49,6 +49,11 @@ const UNITS: Record<string, [string, string]> = {
     "miles/hour": ["mile per hour", "miles per hour"], "mbit/s": ["megabit per second", "megabits per second"],
     "yards/meters": ["yard per meter", "yards per meters"],
     "°c": ["degree Celsius", "degrees Celsius"], "°f": ["degree Fahrenheit", "degrees Fahrenheit"],
+    // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), so the two keys above cannot reach them and `20℃`
+    // read as bare "twenty" — the whole unit gone, not merely the sign. They are in the RAWMARK leak class
+    // for exactly this reason. Found while reviewing the cmn/hi loop-back (#586), which had the same gap;
+    // measured across the fleet, 53 of 65 languages still drop ℃ and each needs its own word.
+    "℃": ["degree Celsius", "degrees Celsius"], "℉": ["degree Fahrenheit", "degrees Fahrenheit"],
     "°": ["degree", "degrees"],
     m: ["meter", "meters"], l: ["liter", "liters"], ml: ["milliliter", "milliliters"],
     g: ["gram", "grams"], t: ["ton", "tons"], w: ["watt", "watts"],

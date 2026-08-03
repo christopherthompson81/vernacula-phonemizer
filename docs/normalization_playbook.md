@@ -536,6 +536,149 @@ that one was 31 lost pauses.
   but run the per-language corpus diff for every affected language before believing it.
 
 
+**18. A PROBE WHOSE DELETION MERGES ITS OPERANDS CANNOT DETECT A DROP.** The differential test is "phonemize
+it, delete the symbol, phonemize again; identical means the symbol said nothing". That inference is only valid
+if deleting the symbol leaves the *rest* of the string tokenizing the same way. `review.ts` probed the
+ampersand with `A&B`, whose deletion yields `AB` — one initialism instead of two letters — so the reading
+changed, the test concluded the symbol contributed, and the class was reported clean for **thirty-seven
+languages** while cmn's `一众 B&B 公司` read as "B B".
+
+- **The file's own header had already described the defect** (found on the Czech run) and responded by asking
+  the human to read the printed readings. A limitation you have diagnosed precisely enough to write down is
+  usually one you can close: the spaced probe `A & B` deletes to `A  B`, which reads as `A B`.
+- **`defects.ts` documents the same trap for the minus** — "probe forms never merge two digits, so `-`/`+` are
+  judged on `5-`/`-5` and not on `5-5` → `55`". The lesson had been learned in one file and not carried to the
+  other. When you fix a probe, check every other probe in the repo for the same shape.
+- **A probe list that drifts from the defect table is the thing the shared table was extracted to prevent.**
+  `signCases` was missing `÷ > ±`, the exponent and the currency sign. Derive it from `DROPPABLE`, and where a
+  class is deliberately excluded (`iteration` is script-specific) say so in the file — a silent omission is
+  indistinguishable from an oversight.
+
+**19. A WORD-BOUNDARY TEST IS MEANINGLESS IN A SCRIPT WITH NO WORD BOUNDARIES.** `attest.ts` separates TOKEN
+hits from SUBSTRING-ONLY hits, and only the first attests — the discipline that caught `Yen` inside `Libyen`.
+For Chinese, Japanese, Thai, Khmer and the rest, splitting prose on non-letters yields **one token per
+sentence**, so every real word scores `substring-only` by construction. Measured on cmn: 等于 小于 乘以 除以
+平方 立方 and 摄氏度 — the last of which this repo has *shipped* as the Celsius word since #562 — all reported
+as negatives. The one `attested` verdict hit only because a LaTeX dump had put spaces around it.
+
+- **A gate that returns the same answer for every input is not a strict gate, it is a broken one.** The tell
+  is uniformity: thirteen words, thirteen identical verdicts.
+- **Key the exception off the probed WORD, not the language or the wiki** — a Latin loan probed on
+  zh.wikipedia still admits the boundary test, and should still get it.
+- **Say what precision was lost.** In an unspaced script the substring match *is* the hit, so the verdict is
+  written `attested*` and the examples are kept and must be read — a Han hit can always be a fragment of a
+  longer compound, and nothing else will catch that.
+- **A comment claiming the behaviour you wish you had is worse than no comment.** `tokens()` said it "works
+  for a spaceless orthography's words too" while doing the exact opposite.
+
+**20. THE ENGINE'S OWN NUMERAL RULES ARE DOWNSTREAM OF WHATEVER DIGITS YOU EMIT.** Writing an exponent as a
+digit (`5³` → `5的3次方`) let Mandarin's 两 rule claim it: 五的**两**次方, where 两 is the counting-two used
+before a measure word and never the two of a power. Spelling the word instead (`的立方`) puts the reading
+beyond reach of any numeral rule. Emitting digits for the engine to read is the right default — this layer
+does it for fractions, and Hindi and Icelandic do it for ordinals — but it hands the result to every rule the
+engine has, so check what those rules do to the digit you just wrote.
+
+**21. A PLAUSIBLE NUMBER DESERVES THE SAME SUSPICION AS AN ABSURD ONE.** `sources.ts` reported cmn as having
+**3,836 letter names** — obviously wrong, and it was Han headwords matching a `\p{L}` pattern. Excluding Han
+left it reporting **37**, which looks exactly like a real alphabet, and was the entire bopomofo block. Same
+defect, same line, and only the first count announced itself.
+
+- **Bopomofo is a genuine 37-letter alphabet and still the wrong answer**, because it is a phonetic annotation
+  system and Chinese initialisms are spelled with Latin letter names. Ask what the class is *for*, not whether
+  the data is real. Availability is not correctness, one level up: the source existed, was an alphabet, and did
+  not answer the question.
+- **Then my fix invented the same defect again.** Counting commented-out single-character entries made Burmese
+  report 44 — commented-out WORD entries for single-character particles (`//က $nounf`). An abugida's single
+  characters are words too. Caught only by re-running the fleet after the fix.
+- **Re-run `--all` after touching a gate, and diff the verdicts per language.** The single-language run said
+  the fix worked; the fleet run said it had broken Burmese and, separately, that ko and yue had been false
+  positives all along (94 → 96 blocked). A gate change is a fleet change.
+
+**22. MEASURE THE BLAST RADIUS WITH THE CHEAPEST INSTRUMENT THAT SETTLES IT.** Widening core `magAlt` from
+`\s+` to `\s*` touches the 42 language dirs that declare `magnitudes`; corpus-diffing all of them is ~40 minutes
+of emits. But `\s*` is a strict superset, so the only new matches are where a magnitude *touches* a digit —
+which is a grep over the 66 corpora. Result: **two languages, seven occurrences**, and in all seven the
+magnitude is followed by a currency word or a comma, never a sign or a unit.
+
+- **The cheap instrument gave the STRONGER answer.** A grep proves zero on 64 corpora; 84 emits would only have
+  shown "no diff observed". Then diff the two that could have been affected, to close it.
+- **Say which kind of fix it is.** No corpus reading changes, so this is robustness for plausible input, not a
+  measured-defect repair — and the comment says so. Without the measurement I would have written a comment
+  claiming to fix defects that exist in no corpus.
+
+**23. A GUARD WRITTEN FOR AN ALPHABET IS BLIND IN AN ABUGIDA — `\p{L}` IS NOT THE END OF A WORD.** A
+Devanagari word usually ends in a MATRA, not a bare consonant, so the character before the hyphen in
+`फ़ॉर्मूला-1` is ा (U+093E, `Mn`). `DROPPABLE`'s minus guard was `(?<![\p{L}\p{Nd}])`, which therefore passed,
+and the scan reported a dropped minus on Formula-1 — a designation whose hyphen is correctly silent. Measured
+over all 37 artifacts, adding `\p{M}` removed the class **entirely** for bn, or, te and pa, and halved it for
+hi and ta.
+
+- **Any guard that means "not inside a word" needs `\p{M}` beside `\p{L}`.** The layers already know this —
+  hi's own ordinal and abbreviation rules use `(?![\p{L}\p{M}])` — and the shared defect table did not.
+- **The survivors of a guard fix are the interesting ones.** What remained was `चंद्रयान -1` and, in Tamil,
+  `சந்திரயான் -1` — the same FLEURS sentence, generating the identical false positive in every language it was
+  translated into. Same pattern as the seven-utterance magnitude case in trap 17.
+
+**24. CHECK WHETHER THE RULE SHAPE IS THE ONLY ONE AVAILABLE BEFORE ACCEPTING A REFUSAL — INCLUDING YOUR OWN.**
+Trap 16 is about seams that exist; this is its complement. Hindi's layer DECLINED the minus rule under #562 and
+was right: measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive (`चंद्रयान -1`)
+and **no true ones** — the corpus contains no negative number. Re-measuring for #586 reproduced those counts
+exactly. The gate said FAIL, the corpus said the gate was wrong, and the deferral was documented well enough to
+re-check in one command.
+
+- **What broke the refusal was not better evidence, it was a narrower rule.** Every counter-example is a
+  DESIGNATION, and a designation never has a degree word after it — so a sign that opens the string/bracket, or
+  is followed by a degree or percent word, is unambiguous. Both arms have zero corpus counter-examples.
+- **The right context is often the discriminator when the left context is exhausted.** Mandarin reached the
+  same conclusion from the opposite direction (its problem was that Han precedes everything).
+- **A well-written refusal is a re-runnable measurement.** hi's step-7 comment carried the counts and the
+  counter-example, so re-testing it cost one grep. Write deferrals that way.
+- **Do not "fix the FAIL".** A red gate that is correct beats a green gate that is wrong.
+
+**25. A ZERO COUNT IS A QUERY TO RUN — AND A FILLED CELL IS A LEAD, NOT A FINDING.** `mine.ts`'s header says
+it in capitals: *an empty cell is not evidence, it is a query to run or a tool bug.* The hi pass nearly shipped
+with the other conclusion — "hi_in contains zero `= < > × ÷ ± & ² ³`, so these rules are robustness only" —
+which is a statement about FLEURS dressed up as a statement about Hindi. `fetch --fill` answers it, and merging
+(`--in fleurs:xx,fill.txt`) beats replacing because the FLEURS half is the text the engine was evaluated
+against. Coverage went 18/29 → 29/35, and the newly populated cells then produced, in one scan:
+
+- **two defects no rule covered** — coordinates (`२८°२१´`, and `º` U+00BA standing in for the degree sign, the
+  Italian `dell'11º` substitution again) and `km ²`, the exponent set off by a space;
+- **a real negative that vindicated a rule** built on the strength of its positive twin (Triton's −235.2 °C);
+- **a real negative the rule correctly declines** — Mars's magnitude `-२.८८ परिमाण`, whose shape is identical to
+  an attested SEPARATOR (`ऊँचाई -१७१ मीटर`, "elevation – 171 m"), so claiming one claims the other;
+- **a false positive in a rule already committed** — `कोच (३१,३८१ -९८.५३% हिंदू)` is a census figure, and the
+  `%` in my lookahead read it as "31,381 minus 98.53 percent". The percent arm came back out.
+
+**Then read what came back.** One article — on the sextant — supplied both a `¢` and a `²` that are neither
+currency nor an exponent: it writes `१२०°` correctly, so those are mojibake for the arc-minute `′` and
+arc-second `″` in an imported/OCR'd text. FLEURS is transcribed speech and clean by construction; a wiki fill
+carries whatever the wiki carries. The fill is the right instrument, and its output stands in the same relation
+to a rule as `attest.ts`'s hits do to a word: necessary, never sufficient.
+
+
+**26. A DIFFERENTIAL TEST MUST HOLD EVERYTHING BUT THE VARIABLE STILL — SUBSTITUTE, DO NOT DELETE.** The drop
+test asks "did this symbol contribute?" by phonemizing the sentence with and without it. Deleting the symbol
+also changes how its NEIGHBOURS tokenize, and the test then credits the symbol for that change. Korean's own
+artifact writes `32℃에`, which reads as two tokens (*sˈɐmsibi ˈe*); delete the ℃ and `32에` **agglutinates**
+into one (*sˈɐmsibie*), so the readings differ and `scan` reported ko as having NO DEFECTS while `20℃` read as
+bare *isˈip̚*. Replacing the symbol with a SPACE holds the boundary still. Measured over all 66 artifacts:
+**16 new drops found, 0 lost** — ten of them the B&B ampersand across nine languages, the defect #586 opens
+with. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
+
+- **This is trap 18 at the corpus level.** There it was a probe (`A&B` → `AB`); here it is real text. Same
+  cause, and it is worst in agglutinative languages — Korean, Japanese, Turkish, Finnish, Hungarian.
+- **A rising defect count is the gate improving.** Do not read it as a regression, and do not tune it down.
+- **Then check for the OTHER copy of the logic.** `coverage.ts` imports the defect TABLES from `defects.ts` and
+  kept its own copy of the LOOP, so the fix landed in one of two call sites and the fleet count did not move.
+  The probe is now `withoutSymbol()`, exported and shared. Extracting shared DATA does not stop shared
+  DECISIONS from drifting — hoist the decision too.
+- **Some blindness cannot be fixed cheaply, and then you document the count.** The exponent probe has the same
+  merge problem (deleting `²` changes the unit token) and resists it: a spaced probe invents a failure for
+  English, and asserting the unit survives gives 6 false positives in 19 because `compound`-position languages
+  fuse the measure word into the unit. So the measurement — 21 languages leak a raw `km`, 7 lose the unit —
+  went into the file's header for the sweep instead of into a gate that would cry wolf.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

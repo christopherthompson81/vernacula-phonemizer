@@ -24,7 +24,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { DROPPABLE, isRedundant, makeContribution } from "./defects.ts";
+import { DROPPABLE, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { join } from "node:path";
 import { CELLS } from "./mine.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
@@ -139,7 +139,13 @@ for (const [lang, corpus] of TREATED) {
         for (const l of hits.slice(0, MAX)) {
             const ipa = say(l);
             if (ipa === undefined) continue;
-            const without = say(l.replace(re, ""));
+            // SUBSTITUTE, never delete — the shared probe. Deleting also changes how the symbol's
+            // NEIGHBOURS tokenize, and this loop then credits the symbol for that: Korean's `32℃에` splits
+            // into two tokens, and deleting the ℃ agglutinates `32에` into one, so the readings differed and
+            // ko scanned CLEAN while `20℃` read as bare *isˈip̚*. Measured over all 66 artifacts, the
+            // substitution finds 16 drops this missed and loses none — ten of them the B&B ampersand, in
+            // nine languages, which is the defect #586 opens with.
+            const without = say(withoutSymbol(l, re));
             if (without === undefined || without !== ipa) continue;
             const symbols = [...new Set(l.match(re) ?? [])];
             if (isRedundant(l, ipa, symbols, contribution, say)) continue;

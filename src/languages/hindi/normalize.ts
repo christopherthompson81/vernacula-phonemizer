@@ -121,9 +121,29 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         // 5) DEGREES. The bare sign and the two scales; ° alone was dropped and °C read as a letter name.
         //    Case-insensitive: the corpus is lowercased, so "30° c" occurs and a case-sensitive rule left
         //    the scale letter behind as a stray syllable ([ɖˈɪɡɾiː sˈiː]).
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
-        s = s.replace(/(\d)\s?°/gu, "$1 डिग्री");
+        //
+        //    5a) COORDINATES FIRST, because the degree rules below would eat the ° and strand the minutes
+        //        mark. Found by the Wikipedia gap-fill, which is the only tier that carries coordinates:
+        //          मुरादाबाद ज़िला २८°२१´ से २८°१६´ उत्तरी अक्षांश व ७८°४´ से ७९º पूर्वी देशांतर
+        //          गैरसैण तहसील में ३०º ०५' अक्षांश और ७९º १८' देशांतर
+        //        Three separate leaks in two sentences: `´` (U+00B4), `'` (ASCII) and `″`-less minutes, plus
+        //        `º` — U+00BA MASCULINE ORDINAL INDICATOR standing in for the degree sign, exactly the
+        //        substitution the Italian run found in `dell'11º`. The minutes mark is claimed ONLY after a
+        //        degree, because a bare `'` is an apostrophe or a quote elsewhere (the quote-letter cell).
+        s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[´′'](?:\s?(\d+)\s?[″"])?/gu,
+            (_m, deg: string, min: string, sec?: string) =>
+                `${deg} डिग्री ${min} मिनट${sec === undefined ? "" : ` ${sec} सेकंड`}`);
+        //    `[°º]` in every arm below, for the same U+00BA substitution.
+        //
+        //    5b) ℃ AND ℉ ARE SINGLE CODE POINTS (U+2103, U+2109) and matched nothing here, so `20℃` read as
+        //        bare *bˈiːs* — the whole unit silently gone, not merely the sign. They are in the RAWMARK
+        //        leak class precisely because they are easy to miss this way. Found while reviewing this
+        //        change: step 7b's lookahead named them as if they were handled, and they were not.
+        s = s.replace(/(\d)\s?℃/gu, "$1 डिग्री सेल्सियस");
+        s = s.replace(/(\d)\s?℉/gu, "$1 डिग्री फ़ारेनहाइट");
+        s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
+        s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
+        s = s.replace(/(\d)\s?[°º]/gu, "$1 डिग्री");
 
         // 6) TIMES. The colon was becoming a PHRASE BREAK, and a :00 was read as शून्य ("eleven, zero
         //    o'clock"). Hindi says the full form "दस बजकर तीस मिनट" — which already contains बजे's sense,
@@ -136,14 +156,92 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
                 return `${hw} बजकर ${cardinal(Number(min)).join(" ")} मिनट`;
             });
 
-        // 7) PLUS only. A dropped sign is normally silent content loss — but the MINUS rule used in the
-        //    other languages is deliberately NOT applied here, on the corpus evidence: the only
-        //    hyphen-before-digit in the whole corpus is `चंद्रयान -1`, a spacecraft NAME, and reading it as
-        //    "Chandrayaan minus one" is worse than leaving the hyphen silent. Devanagari text also uses a
-        //    spaced hyphen in compounds (आस-पास), so a minus rule here has false positives and, measurably,
-        //    no true ones. `+ 30° c` on the other hand is a real plus, so that direction is kept.
+        // 7) PLUS. `+ 30° c` is a real plus in the corpus, and धन is its attested sign word — see the
+        //    ऋण citation in step 7b, which names धनात्मक and ऋणात्मक चिह्न as a pair.
         s = s.replace(/(\S)\+\s?(\d)/gu, "$1 धन $2");
         s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1धन $2");
+
+        // 7b) MINUS — WHERE IT IS UNAMBIGUOUS, AND ONLY THERE.
+        //
+        //     This step used to be a documented REFUSAL, and the refusal was right about the rule it was
+        //     refusing. Re-measured over the whole hi_in corpus for #586, its numbers hold exactly:
+        //
+        //       hyphen preceded by a DIGIT (a range: 25-30, 1000-1300, 100-200)   22   — never a negative
+        //       hyphen preceded by a SPACE                                         1   — `चंद्रयान -1`
+        //       hyphen at string start or after an opening bracket                 0
+        //       real negative numbers                                             0
+        //
+        //     So the fleet's usual shape — `(^|[\s(])[-−–](\d)` — has one false positive here and no true
+        //     ones, and `फ़ॉर्मूला-1` is a second: the character before its hyphen is a MATRA (ा, `\p{M}`),
+        //     which `(?<!\p{L})` does not exclude. Both are designations, and reading them as "minus one" is
+        //     worse than the silence.
+        //
+        //     WHAT ESCAPES THE OBJECTION IS RIGHT CONTEXT, not a better left guard — the same discrimination
+        //     the Mandarin pass arrived at. A sign is unambiguous when it opens the string or a bracket, or
+        //     when a DEGREE or PERCENT word follows the number; a designation never has one. And that is the
+        //     case worth having: the corpus writes `+ 30° C से अधिक तापमान`, so the signed temperature is an
+        //     attested shape here, and it is exactly the shape where dropping the sign INVERTS the meaning.
+        //     `चंद्रयान -1` and `आस-पास` are untouched by both arms.
+        //
+        //     ऋण, from hi.wikipedia's पूर्णांक: "ऋणात्मक पूर्णांक = जिन संख्याओं के आगे ऋणात्मक चिह्न लगा हो
+        //     … जैसे -१, -२" — the article glossing `-१` itself, with धनात्मक चिह्न as its counterpart. NOT
+        //     sourced from a bare probe for ऋण, whose own attestations are the LOAN sense (अनर्जक ऋण,
+        //     "non-performing loan"); that is the Fula trap, and the pair citation is what escapes it.
+        //     माइनस, the loan word broadcasters use, did not attest in slot and is not used here.
+        //     A DEGREE WORD, AND NOT A PERCENT. The lookahead began as `°|डिग्री|%|प्रतिशत`, and the
+        //     Wikipedia gap-fill (see the hybrid artifact) killed the percent arm with two real sentences:
+        //     hi writes a census figure as `कोच (३१,३८१ -९८.५३% हिंदू)` — "Koch (31,381 – 98.53% Hindu)",
+        //     where the dash is a SEPARATOR introducing the percentage, not a sign. With `%` in the lookahead
+        //     that read as "31,381 MINUS 98.53 percent". Its spaced twin `साक्षरता - ६१%` escaped only by
+        //     accident, because the digits are not adjacent to the dash. A negative percentage is plausible
+        //     but unattested here; a dash-introduced one is attested twice, so degrees only.
+        s = s.replace(/(^|[(\[（])\s?[-−–](\d)/gu, "$1ऋण $2");
+        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री))/gu, "ऋण $1");
+
+        // 7c) THE REMAINING SIGNS. Each word is cited; none is a guess.
+        //
+        //     COMPARATIVES REORDER, and that is why they are not a table like the rest. Hindi states the
+        //     comparison POSTPOSITIONALLY — the standard comes first and से कम / से अधिक follows it — so
+        //     `A < B` is "A, B से कम", not "A से कम B". The corpus shows the shape twice:
+        //     "+ 30° C से अधिक तापमान" ("temperature above +30 °C") and "800,000 से ज़्यादा सैनिकों"
+        //     ("more than 800,000 soldiers"). Emitting the western order would have been fluent nonsense.
+        //
+        //     TRAILING PUNCTUATION MUST NOT TRAVEL WITH THE OPERAND. `(\S+)` is greedy about it, and
+        //     `यह 5 < 6, और वह …` came out as "पाँच छह , से कम और" — the comma stranded BETWEEN the operand
+        //     and its postposition, i.e. a clause pause in the middle of a phrase. So the second operand is
+        //     split from its trailing marks and they are re-emitted AFTER the comparative word.
+        //
+        //     THE CATCH-ALL SECOND PASS is not redundant. `/g` replaces in ONE pass over the input, so in a
+        //     chain (`a < b < c`) the first match consumes `b` and the second `<` is left with no left
+        //     operand — it matched nothing and then vanished, turning a reorder into a DROP. A chained
+        //     comparison is absent from the corpus and reads awkwardly either way, but nothing may go silent.
+        const comparative = (sign: string, word: string): void => {
+            s = s.replace(new RegExp(`(\\S+)\\s*${sign}\\s*(\\S+)`, "gu"), (_m, a: string, b: string) => {
+                const split = /^(.*?)([,;।॥!?)\]"'’]*)$/su.exec(b);
+                const operand = split?.[1] ?? b, marks = split?.[2] ?? "";
+                return `${a} ${operand} ${word}${marks}`;
+            });
+            s = s.replace(new RegExp(`\\s?${sign}\\s?`, "gu"), ` ${word} `);
+        };
+        comparative("<", "से कम");
+        comparative(">", "से अधिक");
+        //     बराबर — corpus: "इस अभिमुखता अनुपात के लगभग बराबर" ("approximately equal to this aspect
+        //     ratio"). Infix, which is the arithmetic reading (दस जमा दस बराबर बीस).
+        s = s.replace(/\s?=\s?/gu, " बराबर ");
+        //     गुणा and भाग — hi.wikipedia's अंकगणित names the four operations and ties each to its sign:
+        //     "अंकगणित की मुख्य चार मूल प्रक्रियाएँ होती हैं जोड़ घटाना गुणा भाग", then "गुणा को x चिह्न से
+        //     प्रदर्शित किया जाता है। उदाहरणः 2 x 4 = 8" and "भाग को / चिह्न से प्रदर्शित किया जाता है".
+        //     `/` itself is NOT routed here — step 8 already reads it as the fraction बटा.
+        s = s.replace(/\s?×\s?/gu, " गुणा ");
+        s = s.replace(/\s?÷\s?/gu, " भाग ");
+        //     ± takes the pair named in the पूर्णांक citation above, in its conventional order.
+        s = s.replace(/±\s?/gu, "धन ऋण ");
+        //     THE AMPERSAND, split the way the Mandarin pass split it: between LATIN letters it stays inside
+        //     the run this engine already delegates to English (`AT&T`, `R&D` are English terms, and reading
+        //     half of one in Hindi would be a code-switch mid-word); elsewhere it is और, which the corpus
+        //     writes 36 times as the ordinary conjunction.
+        s = s.replace(/(?<=[A-Za-z])\s?&\s?(?=[A-Za-z])/gu, " and ");
+        s = s.replace(/\s?&\s?/gu, " और ");
 
         // 8) FRACTIONS. आधा and तिहाई are suppletive; the rest are "n बटा m", the ordinary spoken form.
         s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
