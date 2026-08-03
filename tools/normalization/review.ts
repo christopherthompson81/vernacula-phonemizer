@@ -28,6 +28,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
+import { DROPPABLE } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -244,6 +245,44 @@ const signCases: [string, string, RegExp][] = [
     ["percent", "25 %", /%/gu],
     ["degrees", "20 °C", /°/gu],
 ];
+/**
+ * EVERY `DROPPABLE` CLASS MUST BE PROBED HERE, and this asserts it rather than trusting the comment above.
+ *
+ * `signCases` cannot be DERIVED from `DROPPABLE` — a defect regex is not a probe string, and one class needs
+ * several probes (`math-sign` covers `+ ± = < > × ÷`). So it is a hand-kept list, which is exactly the shape
+ * that drifted before: the list was missing `÷ > ±`, the exponent and the currency sign, and nothing said so.
+ * Mapping each class to the probes that cover it turns the next omission into a loud failure instead of a
+ * silent hole — add a class to `DROPPABLE` and this fails until you probe it or state why you did not.
+ */
+const CLASS_PROBES: Readonly<Record<string, readonly string[]>> = {
+    percent: ["percent"],
+    currency: ["currency"],
+    degree: ["degrees"],
+    minus: ["minus"],
+    "math-sign": ["plus", "plus-minus", "equals", "less-than", "greater-than", "times", "divide"],
+    exponent: ["exponent"],
+    ampersand: ["ampersand"],
+    // Script-specific: a language that does not use the mark would report it dropped, so the finding would be
+    // noise for all but a handful. `mine.ts scan` catches it where the corpus actually contains one.
+    iteration: [],
+};
+{
+    const probeNames = new Set(signCases.map(([n]) => n));
+    const unmapped = DROPPABLE.map(([k]) => k).filter((k) => CLASS_PROBES[k] === undefined);
+    const unprobed = Object.entries(CLASS_PROBES)
+        .filter(([, ps]) => ps.length > 0 && !ps.some((p) => probeNames.has(p)))
+        .map(([k]) => k);
+    const orphan = [...probeNames].filter((n) => !Object.values(CLASS_PROBES).some((ps) => ps.includes(n)));
+    const ok = unmapped.length === 0 && unprobed.length === 0 && orphan.length === 0;
+    note("sign probes cover DROPPABLE", ok, ok
+        ? `all ${DROPPABLE.length} classes mapped to probes`
+        : [
+            unmapped.length > 0 ? `class(es) with NO mapping: ${unmapped.join(" ")}` : "",
+            unprobed.length > 0 ? `mapped but never probed: ${unprobed.join(" ")}` : "",
+            orphan.length > 0 ? `probe(s) mapped to no class: ${orphan.join(" ")}` : "",
+        ].filter(Boolean).join(" | "));
+}
+
 const dropped: string[] = [];
 console.log(`\n── sign classes (read these; a DROPPED line is a hard fail) ──`);
 for (const [name, probe, strip] of signCases) {
