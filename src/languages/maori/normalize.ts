@@ -50,6 +50,12 @@ const SYMBOLS = makeSymbolNormalizer({
     // this corpus writes `AUD$45 miriona` and `US$14.7 piriona`, and with only a bare `$` the letters were
     // read as a word ("au …") and the sign dropped. `£` earns its place on the WORD, pauna ×5 ("ngā pauna
     // Peretānia"), rather than on a sign this corpus never writes.
+    // ⚠ `NZ$` IS NOT ATTESTED HERE — the string "NZ" is ×0 in mi_nz — and is declared anyway, stated rather
+    // than left to look sourced like its two neighbours. The justification is not corpus frequency: it is
+    // that the New Zealand dollar is te reo Māori's OWN currency, `tāra` is the attested word for a dollar
+    // (×6), and the alternative is that the commonest sign this language will ever be handed reads its
+    // letters as a word. If that argument is ever judged too thin, delete the key — the reading of the
+    // other four does not depend on it.
     currency: { "US$": ["tāra"], "AUD$": ["tāra"], "NZ$": ["tāra"], $: ["tāra"], "£": ["pauna"] },
     // A MAGNITUDE MUST BE DECLARED OR THE CURRENCY WORD LANDS INSIDE THE NUMBER. Without these, `$2.3
     // piriona` read "rua . toru TĀRA piriona" — the sign is adjacent to the digits, so the word was emitted

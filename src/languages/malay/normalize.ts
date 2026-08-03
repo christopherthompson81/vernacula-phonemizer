@@ -185,7 +185,21 @@ export function normalizeMalay(input: string): string {
     //     `isi padu` ×2 in the same corpus is "volume" (`isi padu air` — the volume of water), which is the
     //     same root in its ordinary sense and not the measure word; the collocation with the unit noun is the
     //     evidence, as everywhere else in this sweep. `m³` previously lost the `³` outright.
-    s = s.replace(new RegExp(`(?<=\\d)m[³3]${R}`, "gu"), " meter padu");
+    //     COVERS EVERY UNIT, not just `m`: a first pass wrote the `m³` arm alone and left `5 km³` reading as a
+    //     bare *lima kilometer* with the `³` gone, because the km arms above handle only `[²2]` and nothing
+    //     behind this file supplies a cube word at all — the tier Malay inherits is Indonesian's, whose
+    //     `exponentWords` has `squared` only. So the squared arms can fall through to the tier and the cubed
+    //     ones cannot.
+    //     The MULTI-LETTER keys take the ASCII `3` as the km² arms take the ASCII `2`; bare `m` stays
+    //     SUPERSCRIPT-ONLY and digit-anchored, for the reason the comment above gives about `M2` — `M3` is a
+    //     motorway (`M3 lebuhraya`) and a BMW, so `5 m3` is deliberately left to read as a number.
+    const CUBED: Readonly<Record<string, string>> = {
+        km: "kilometer", cm: "sentimeter", mm: "milimeter",
+    };
+    const cubeAlt = Object.keys(CUBED).sort((a, b) => b.length - a.length).join("|");
+    const cube = (_m: string, u: string): string => ` ${CUBED[u.toLowerCase()]!} padu`;
+    s = s.replace(new RegExp(`(?<=\\d)\\s?(${cubeAlt})[³3]${R}`, "gu"), cube);
+    s = s.replace(new RegExp(`${L}(${cubeAlt})[³3]${R}`, "gu"), (m, u: string) => cube(m, u).trimStart());
     s = s.replace(/(\d\s?)m³/gu, "$1meter padu");
 
     // 9) FREQUENCY, before the decimal rule: `2.4Ghz` is a decimal GLUED to its unit, and step 15's
