@@ -141,6 +141,20 @@ describe("mandarin normalization", () => {
         expect(phonemize("20℉", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ xwɑ˧˥ ʂʐ̩˥˩ tu˥˩"); // 华氏度
     });
 
+    // #586, from the zh.wikipedia fill: Chinese has no spaces, so a unit or sign is normally flanked by Han —
+    // and the shared tier's letter-boundary guards were rejecting exactly that. Only punctuation-adjacent
+    // instances worked, which is why the FLEURS corpus (units written as words) could never show it.
+    test("a unit or sign survives a Han neighbour (#586)", () => {
+        expect(phonemize("38℃很热", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ pɑ˥˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩ xən˨˩˦ ʐɤ˥˩");
+        expect(phonemize("20°C很热", "cmn")) // was: the C read as English *sˈiː*
+            .toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩ xən˨˩˦ ʐɤ˥˩");
+        expect(phonemize("50 km²的面积", "cmn"))
+            .toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦ tɤ miɛn˥˩ t͡ɕi˥˥");
+        expect(phonemize("為$500，", "cmn")).toBe("weⁱ˥˩ wu˧˥ paⁱ˨˩˦ meⁱ˨˩˦ jyæn˧˥ ,"); // 美元
+        // …and a dotted designation is still not a quantity: `g` must not become 克 here.
+        expect(phonemize("802.11g的标准", "cmn")).not.toContain("kʰɤ˥˩");
+    });
+
     test("fractions are stated in the opposite order from the notation", () => {
         expect(phonemize("1/5", "cmn")).toBe("wu˨˩˦ fən˥˥ ʈ͡ʂʐ̩˥˥ ji˥˥"); // 五分之一, "of five parts, one"
         expect(phonemize("3/4", "cmn")).toBe("sɹ̩˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ san˥˥"); // 四分之三

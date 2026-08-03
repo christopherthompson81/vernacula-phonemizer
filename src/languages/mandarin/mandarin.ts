@@ -55,6 +55,12 @@ const SYMBOLS = makeSymbolNormalizer({
     // artifact writes the magnitude against a currency NOUN (13 万日元, 40 万例) rather than against a Latin
     // unit, so this guards a plausible input rather than a sampled one.
     magnitudes: ["万", "亿", "兆"],
+    // Chinese has NO SPACES between words, so a unit or a currency sign is normally flanked by Han — which is
+    // exactly what the tier's letter-boundary guards were rejecting. Only punctuation-adjacent instances
+    // worked: `38℃。` read 摄氏度 and `38℃很热` dropped the ℃; `$500。` read 美元 and `為$500，` dropped the sign;
+    // `50 km²的面积` lost the exponent; `20°C很热` read the C as English *sˈiː*. Found by the zh.wikipedia fill,
+    // because the FLEURS corpus writes its units as words (平方公里) and its few signs sit next to punctuation.
+    unspacedScript: true,
 });
 
 class MandarinPhonemizer implements Phonemizer {

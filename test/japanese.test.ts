@@ -203,6 +203,17 @@ describe("Japanese text normalization (#562)", () => {
         expect(phonemizeText("1,2")).toContain(" , "); // …and a non-grouping comma stays a pause
     });
 
+    // #586. Japanese has no spaces, so a unit is normally followed by kana — and the shared tier's
+    // letter-boundary guard was rejecting exactly that, letting the abbreviation reach the phoneme sink
+    // verbatim. Measured over ja_jp: 14 utterances, all of this shape.
+    test("a unit survives a kana neighbour instead of leaking (#586)", () => {
+        expect(phonemizeText("35 mmで")).toBe("sänd͡ʑɯᵝːɡo̞ miɾime̞ːto̞ɾɯᵝde̞"); // was a raw `m`
+        expect(phonemizeText("5tの車")).toBe("ɡo̞ to̞nno̞ kɯᵝɾɯᵝmä"); // was English *tʰˈiː*
+        expect(phonemizeText("50 km²の")).toBe("ɡo̞d͡ʑɯᵝː he̞ːho̞ːkiɾo̞me̞to̞ɾɯᵝno̞"); // 平方キロメートル
+        // …and the version suffix must NOT become グラム: 802.11g is read as a letter, not as grams.
+        expect(phonemizeText("802.11gとの")).not.toContain("ɾämɯᵝ");
+    });
+
     test("embedded Latin is nativized instead of read as English", () => {
         // The English fallback (core/foreign.ts) injects phonemes Japanese has no inventory for:
         // NASA was [nˈæsə], WHO [dˈʌbəɫjuː ˈeᶦt͡ʃ ˈoᶷ], SNS [ˈɛs ˈɛn ˈɛs]. Corpus-wide this took the

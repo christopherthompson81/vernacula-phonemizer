@@ -95,6 +95,18 @@ export interface SymbolData {
         cubed?: CountForms;
         position?: "before" | "after" | "compound";
     };
+    /**
+     * THIS LANGUAGE IS WRITTEN WITHOUT SPACES BETWEEN WORDS — Chinese, Japanese.
+     *
+     * Set it and the boundary guards around currency keys and unit abbreviations stop treating "any letter"
+     * as token-continuation and treat only a LATIN letter that way. The guards exist to stop a short key
+     * biting into a word (Ukrainian `41 м\u2019яч`, Dutch `Il-76s`), a hazard that only arises inside one
+     * alphabetic run; a Han or kana neighbour is a token boundary by script change and never continues a
+     * Latin/symbol key. Left unset, the guard rejects the ORDINARY case in these languages — measured on cmn,
+     * where `38\u2103\u5f88\u70ed` dropped the \u2103 and `\u70ba$500\uff0c` dropped the `$` while their
+     * punctuation-adjacent twins worked.
+     */
+    unspacedScript?: boolean;
 }
 
 const defaultCountForm = (n: number): number => (n === 1 ? 0 : 1);
@@ -183,7 +195,17 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             .map((s) => s.replace(/[$.*+?^${}()|[\]\\]/gu, "\\$&"))
             .join("|")
         : "";
-    const CUR = `(?<![\\p{L}\\p{M}])(?:${curKeys})(?![\\p{L}\\p{M}])`;
+    // THE BOUNDARY GUARDS ASSUME SPACES BETWEEN WORDS, and in Chinese or Japanese there are none — so the
+    // ordinary case is the one they reject. `unspacedScript` narrows the guard from "any letter" to "a letter
+    // that could CONTINUE this token", which for a Latin/symbol key means a Latin letter. A Han neighbour is
+    // already a token boundary by script change, so it needs no guard; marks and apostrophes still do.
+    // Measured on cmn (zh.wikipedia fill), where only punctuation-adjacent instances were working:
+    //   為$500，  → `$` DROPPED (Han precedes)        38℃很热     → `℃` DROPPED (Han follows)
+    //   20°C很热  → reads C as English *sˈiː*         50 km²的面积 → `²` DROPPED
+    // Opt-in per language rather than global, because the guard is load-bearing where words ARE spaced: it is
+    // what stops a one-letter unit biting into a word (Ukrainian `41 м'яч`, Dutch `Il-76s`).
+    const wordCont = d.unspacedScript ? "\\p{sc=Latn}" : "\\p{L}";
+    const CUR = `(?<![${wordCont}\\p{M}])(?:${curKeys})(?![${wordCont}\\p{M}])`;
     const curBefore = d.currency
         ? new RegExp(`(${CUR})\\s?(${NUM})${magAlt}`, "gu")
         : null;
@@ -223,9 +245,25 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // sees the SPACE rather than the unit letter and fails, so `km 2` (a kilometre, then the number two) is
     // still not an exponent while `km \u00b2` is.
     // Zero occurrences in all 66 FLEURS corpora — robustness for the one attested wiki form, not a repair.
+    // A DOTTED DESIGNATION IS NOT A QUANTITY. `802.11g` was reading as "802.11 GRAMS" — the one-letter unit
+    // key `g` matching the version suffix — and `802.11n` as the English letter *ˈɛn*. Measured over all 66
+    // FLEURS corpora, because the Wi-Fi article was translated into nearly every one of them:
+    //
+    //   dotted VERSION glued to a single letter (802.11n/a/b/g)   444
+    //   a DECIMAL glued to a single-letter unit                     4   (4.892m ×3, 3.50m ×1 — and those are
+    //                                                                   period THOUSANDS separators, not decimals)
+    //
+    // So the guard rejects a number-with-a-dot glued to exactly ONE trailing letter. It is deliberately narrow:
+    // `12.5km` keeps working because `km` is two letters, and a spaced `12.5 g` keeps working because the letter
+    // is not glued. This is why the `version-dot` cell exists in the inventory; it had no protection in core.
+    // BOTH HALVES ARE NEEDED. The lookahead alone was not enough: rejected at `802`, the engine simply retried
+    // from the FRACTIONAL part and matched `11g` on its own. The lookbehind stops a match beginning inside a
+    // number, and the lookahead stops it beginning at the front of one. Verified: `802.11g` and `802.11n` are
+    // left alone, while `12.5km` (two-letter key), `12.5 g` (not glued) and `1,000 km` still read.
+    const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
     const unitRe = d.units
         ? new RegExp(
-            `(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![\\p{L}\\p{M}\u0027\u2019\u02bc])`,
+            `${NOT_VERSION}(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
             "giu",
         )
         : null;

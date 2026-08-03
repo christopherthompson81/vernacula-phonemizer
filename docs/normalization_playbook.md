@@ -679,6 +679,76 @@ with. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
   fuse the measure word into the unit. So the measurement — 21 languages leak a raw `km`, 7 lose the unit —
   went into the file's header for the sweep instead of into a gate that would cry wolf.
 
+**27. A GUARD THAT ASSUMES SPACES BETWEEN WORDS REJECTS THE ORDINARY CASE WHERE THERE ARE NONE.** The shared
+tier brackets currency keys and unit abbreviations with `(?<![\p{L}\p{M}])…(?![\p{L}\p{M}])`, so a short key
+cannot bite into a word (Ukrainian `41 м'яч`, Dutch `Il-76s`). In Chinese and Japanese a unit or sign is
+**normally** flanked by Han or kana, so the guard rejected the normal case and only punctuation-adjacent
+instances worked:
+
+```
+38℃。 → 摄氏度 ✓      38℃很热 → ℃ DROPPED        $500。 → 美元 ✓   為$500，→ $ DROPPED
+50 km²。→ 平方公里 ✓   50 km²的面积 → ² DROPPED   20 °C。→ ✓        20°C很热 → reads C as English *sˈiː*
+```
+
+- **FLEURS could not show this, and the corpus diff proves it: 0/1999.** The cmn corpus writes its units as
+  words (平方公里) and its handful of signs sit next to punctuation. It took a `fetch --fill` (trap 25) to
+  surface, which is the strongest argument yet for the hybrid artifact.
+- **Fix it as opt-in DATA, not globally.** `unspacedScript: true` narrows "any letter" to "a Latin letter",
+  because a Han/kana neighbour is already a token boundary by script change. Global relaxation would have
+  disarmed the guard for the alphabetic languages that need it.
+- **Check the sibling scripts, and check what they actually declare.** ja had the identical readings and got
+  the flag; yue and th show them too but declare only `percent` through the tier, so theirs is a missing
+  DECLARATION, not a guard problem. Say which is which rather than filing one bug.
+
+**28. A DOTTED DESIGNATION IS NOT A QUANTITY — AND A ONE-LETTER UNIT KEY WILL CLAIM IT.** `802.11g` read as
+"802.11 GRAMS" in ten languages (ar bn cmn el es fr id ja pt ur), because `g` is a declared unit. Measured over
+all 66 corpora, since the Wi-Fi article was translated into nearly all of them:
+
+```
+dotted VERSION glued to one letter (802.11n/a/b/g)   444
+a DECIMAL glued to a one-letter unit                   4   (and those are period THOUSANDS separators)
+```
+
+- **444 against 4 is the whole argument.** State both numbers; the cost is real and small, and hiding it would
+  make the guard look free.
+- **A lookahead alone does not work.** Rejected at `802`, the engine retries from the FRACTIONAL part and
+  matches `11g` on its own. It needs a lookbehind to stop a match beginning inside a number AND a lookahead to
+  stop one beginning at the front of it.
+- **Keep it narrow.** `12.5km` (two-letter key), `12.5 g` (not glued) and `1,000 km` must all still read.
+- **The fix landed because a NEW change surfaced an OLD defect.** `unspacedScript` widened this from the bare
+  form to the kana-followed form; the bare form had been wrong all along. When your change makes an existing
+  bug more visible, fix the bug rather than reverting the change.
+
+**29. AN ARTIFACT CAN BE TRACKED, GREEN AND ANSWERING LAST MONTH'S QUESTION.** The cell inventory GROWS as the
+sweep proceeds, and nothing compared an artifact's recorded `cellsTotal` to the current list — so a language
+could report a comfortable `covered 24/29` while the inventory stood at 35. Measured when the check was added:
+**64 of 67 artifacts stale.** `sports-time`, `version-dot`, `quote-letter`, `scaled-currency` and `ordinal-caps`
+had never been evaluated for any of those 64, which is five cells × 64 languages of silence.
+
+- **A RENAME is worse than an addition, because it is silent in both directions.** `negative` became
+  `signed-number`, so 35 artifacts carry a count under a key that no longer exists AND report nothing for the
+  key that replaced it. The only place the fleet ever said so was `fetch --fill negative` answering
+  `unknown cell: negative`.
+- **`review.ts` now FAILS on a stale artifact**, naming the never-evaluated cells and the dead keys. It is a
+  fail rather than a note because a green checklist over an out-of-date measurement is worse than no checklist.
+- **The inventory belongs in its own module.** `CELLS` moved to `cells.ts` so the other tools can read it
+  without running `mine.ts` — `coverage.ts` had been importing it from the CLI and executing its usage banner
+  as a side effect on every run. Same reasoning as `defects.ts`: a shared fact is not one tool's setting.
+
+**30. WHEN A FETCH IS SLOW, MEASURE WHETHER IT IS SLOW AT WORK OR SLOW AT WAITING.** `fetch --fill` took about
+seven minutes for a megabyte of text. The cause was in the code, not the network: `exlimit` is capped at 1 for a
+FULL extract, so a nine-cell fill is ~190 SEQUENTIAL round-trips, each asking the server to render a whole
+article to plaintext. The requests are independent.
+
+- **Measured on a FIXED title list, because the search itself is unstable.** The same `insource:` query returned
+  33 then 75 totalhits on consecutive calls, so a naive before/after of two fetch runs proves nothing — it
+  compares different articles. With the list held constant: `1 → 9114 ms`, `4 → 1304 ms` (7.0×), `8 → 784 ms`.
+- **Preserve result ORDER, not just results.** Writing each response as it lands would make the output file
+  depend on network timing, and `mine` samples per cell from that file — so a re-fetch would no longer
+  reproduce the artifact. Place results back at their own index; verified byte-identical at 1, 4 and 8.
+- **Pooling also let each request fail alone.** Serially, one bad article threw to the cell's catch and silently
+  abandoned the remaining titles.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

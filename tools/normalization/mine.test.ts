@@ -10,7 +10,8 @@
  */
 import { describe, expect, test } from "vitest";
 import { parseJsonc } from "../../src/core/jsonc.ts";
-import { CELLS, segment, selectCells, renderJsonc } from "./mine.ts";
+import { mapPool, segment, selectCells, renderJsonc } from "./mine.ts";
+import { CELLS } from "./cells.ts";
 
 const TERMINATORS = ".!?။።۔؟।॥…。！？៕";
 
@@ -86,5 +87,35 @@ describe("normalization miner", () => {
             if (c.search === undefined) continue;
             expect(c.search, `${c.key} hardcodes an ASCII digit range`).not.toContain("0-9");
         }
+    });
+});
+
+/**
+ * The fill's article fetches are pooled (#586) — 9114 ms serial vs 1304 ms at 4 on a fixed 16-title list.
+ * Two properties are load-bearing and neither is visible from the output of a successful run.
+ */
+describe("mapPool", () => {
+    test("preserves RESULT ORDER even when completions arrive reversed", async () => {
+        // The artifact is sampled per cell from the fetched file, so an order that depends on network timing
+        // would make a re-fetch produce a different artifact from the same query.
+        const out = await mapPool([80, 60, 40, 20, 0], 4, async (d, i) => {
+            await new Promise((r) => setTimeout(r, d));
+            return i;
+        });
+        expect(out).toEqual([0, 1, 2, 3, 4]);
+    });
+
+    test("a NON-NUMERIC limit falls back to serial instead of fetching NOTHING", async () => {
+        // `--concurrency abc` gives NaN, and `Array.from({ length: NaN })` is the EMPTY array — zero workers,
+        // `Promise.all([])` resolving at once, and a fetch that reports success having downloaded nothing.
+        const seen: number[] = [];
+        const out = await mapPool([1, 2, 3], Number("abc"), async (v) => { seen.push(v); return v * 2; });
+        expect(out).toEqual([2, 4, 6]);
+        expect(seen).toHaveLength(3);
+    });
+
+    test("a limit wider than the list, and an empty list, are both safe", async () => {
+        expect(await mapPool([1, 2], 99, async (v) => v)).toEqual([1, 2]);
+        expect(await mapPool([], 4, async (v) => v)).toEqual([]);
     });
 });
