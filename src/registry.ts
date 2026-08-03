@@ -53,6 +53,7 @@ import { createCzech } from "./languages/czech/czech.ts";
 import { createBengali } from "./languages/bengali/bengali.ts";
 import { createUrdu } from "./languages/urdu/urdu.ts";
 import { createIndonesian } from "./languages/indonesian/indonesian.ts";
+import { createMalay } from "./languages/malay/malay.ts";
 import { createPunjabi } from "./languages/punjabi/punjabi.ts";
 import { createMarathi } from "./languages/marathi/marathi.ts";
 import { createTelugu } from "./languages/telugu/telugu.ts";
@@ -483,8 +484,11 @@ function build(lang: string): Phonemizer {
         // and the documented differences (Malaysian final open ⟨a⟩ leaning to [ə], some vowel realisations) are
         // accent-level, not a categorical grapheme→IPA delta — so `id` is its nearest verified sibling. First-class
         // code, transparent that no Malay-specific phonology is claimed. See tools/language-catalogue (served_by='id').
+        // #562: the PHONOLOGY is still Indonesian's — createMalay wraps createIndonesian — but the two standards'
+        // orthographic conventions differ (Malay groups thousands with a comma and writes the decimal dot, the exact
+        // inverse of Indonesian), so Malay owns its own text-normalization pre-pass. See languages/malay/normalize.ts.
         case "zsm":
-            return createIndonesian();
+            return createMalay();
         case "pa":
             return createPunjabi((latin) => getPhonemizer("en").text(latin));
         // Western Punjabi / Lahnda (Shahmukhi, Pakistan) — the SAME Punjabi engine; the scanner auto-detects the
