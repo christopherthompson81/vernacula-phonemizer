@@ -265,14 +265,101 @@ The three changes, all improvements:
 2. `11:00 (UTC+1)` — the `+` now reads 加.
 3. `一众 B&B 公司` — the `&` now reads "and".
 
+## Run 9 — 2026-08-03 — the core `\s+`, measured instead of corpus-diffed 84 times
+
+**Question.** `magAlt` requires whitespace before the magnitude, so `1350亿m³` fails. Fixing it is a core
+change affecting the 42 language dirs that declare `magnitudes`. What is the blast radius?
+
+Running corpus-diff for 42 languages before and after is ~40 minutes of emits. But `\s*` is a strict superset
+of `\s+`, so the ONLY new matches are where a magnitude **touches** a digit — which is a grep, not an eval:
+
+```
+for each language declaring magnitudes: grep its FLEURS corpus for /\d(magnitude)/
+  → cmn  cmn_hans_cn   3   e.g. 7亿
+  → kn   kn_in         4   e.g. 7ದಶಲಕ್ಷ
+  → all 64 other corpora: zero
+```
+
+Then reading the seven hits:
+
+```
+cmn 「年营业额 100 亿欧元（147亿美元）」     — 美元 is a currency WORD, not a sign
+kn  「ಜನಸಂಖ್ಯೆಯು ಸರಿಸುಮಾರು 3.7ದಶಲಕ್ಷ,」   — followed by a comma
+```
+
+**Finding.** In all seven the magnitude is followed by a currency word or a comma — never a sign or a unit —
+so the tier has nothing to place and **the fix changes no corpus reading anywhere**. Confirmed by running the
+two corpora that could possibly have been affected: `cmn 0/1999`, `kn 0/1811`.
+
+So the change ships as **robustness for plausible input, not a measured-defect repair**, and says so in the
+code. That distinction is the whole point of the measurement: without it I would have written a comment
+claiming a fix for defects that do not exist in any corpus.
+
+(kn carries 6 pre-existing DROPs, unrelated and untouched — a finding for the sweep.)
+
+---
+
+## Run 10 — 2026-08-03 — the letter-name false positive, and the two more behind it
+
+**Question.** `sources.ts` reports `letter-names espeak 3836 — WIREABLE` for cmn. Why?
+
+**Finding 1.** `\p{L}` matches 亿 as readily as `b`, and cmn_list is 3,899 lines of **Han headwords**. Excluded
+by SCRIPT rather than by count, because a large count can be legitimate — Ethiopic has ~350 fidel and
+Amharic's seam is keyed on them — and because Devanagari and Arabic letters are `\p{Lo}` like Han, so the
+general-category route fails too.
+
+**Finding 2 — the plausible-looking number.** Excluding Han alone left cmn reporting exactly **37**, which
+looks like a real alphabet and is the entire **bopomofo** block. Bopomofo *is* an alphabet; it is also a
+phonetic annotation system, and nobody spells an acronym in ㄅㄆㄇ. Chinese initialisms are spelled with LATIN
+letter names. A source can be real, and an alphabet, and still not answer the question being asked.
+
+**Finding 3 — the actual state is more useful than "absent".** cmn_list carries all 26 Latin letter names
+**commented out**, with espeak's reason written above them ("This will make letter within English sentense
+translated not correctly"). That is not an absence, it is a scoped objection to espeak's own sentence routing,
+and it is the most actionable thing the report could say. Added as a `partial` verdict.
+
+**Finding 4 — my own fix invented a fourth false positive, caught the same way.** Counting *any* commented
+single-character entry made Burmese report 44 — which are commented-out WORD entries for single-character
+particles (`//က $nounf`, `//က kə3`; က is a postposition as well as a letter). An abugida's single characters
+are words too, exactly like Han. The discriminator is script: a run of LATIN letters inside a Chinese, Burmese
+or Thai dictionary cannot be word entries, and it is the case that matters anyway.
+
+**Fleet delta**, measured against the baseline worktree — three verdicts, all corrections:
+
+```
+cmn  ok   → part    26 Latin letter names, COMMENTED OUT
+ko   part → NONE    Hangul syllable headwords were being counted
+yue  ok   → NONE    Han headwords were being counted
+     letter-names blocked: 94 → 96
+```
+
+The docs headline "letter names absent for 94 of 187" was therefore **understating** the gap by two, and
+naming cmn and yue as sourced when neither is.
+
+---
+
 ## What this run says about #586
 
-Three of the eight findings above are in the **tooling**, not the language: `attest.ts` structurally unable to
-answer for a quarter of the world's scripts, `review.ts` blind to the ampersand while its own header described
-the blindness, and `sources.ts` counting Han headwords as letter names. The premise of #586 — that the gates
-improved and the swept languages deserve re-measuring — is right, but the corollary is sharper: **the gates are
-still improving, and each loop-back is as likely to fix a tool as a language.** The en result matters for the
-same reason: a widened gate that finds nothing in the reference language is a widened gate you can trust.
+**Most of the findings are in the tooling and core, not the language.** `attest.ts` structurally unable to
+answer for a quarter of the world's scripts; `review.ts` blind to the ampersand while its own header described
+the blindness; `sources.ts` counting Han headwords, then bopomofo, then Burmese particles as letter names; core
+`magAlt` assuming every orthography spaces its magnitudes. The language fix itself — twelve sign readings — was
+the smaller half of the work.
+
+That is the case for having picked en, cmn and hi: they are the highest-traffic languages, and they are also
+the ones whose scripts and corpora stress the tooling in different directions. en validates (clean on all 13
+widened classes — a widened gate that finds nothing in the reference language is one you can trust); cmn breaks
+every assumption that a word has boundaries and a magnitude has a space; hi is next.
+
+Three habits earned their keep, all of them cheap:
+
+1. **Measure the blast radius with the cheapest instrument that settles it.** Run 9's grep replaced 84 corpus
+   emits and gave a *stronger* answer — provable zero on 64 corpora, not "no diff observed".
+2. **Distrust a plausible number as much as an absurd one.** 3,836 letters is obviously wrong; 37 is not, and
+   both were the same defect.
+3. **Re-run the fleet after fixing a gate.** Runs 8 and 10 each found something the single-language run could
+   not, and Run 10's own fix introduced a defect that only the fleet re-run caught.
 
 The recurring one, restated: a gate finding is a diagnosis, not a prescription. Run 6 is the case where the
-gate contradicted my reasoning and the gate was right.
+gate contradicted my reasoning and the gate was right; Run 10 finding 4 is the case where my fix to a gate was
+itself wrong in the way the gate had been.

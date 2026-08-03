@@ -578,6 +578,34 @@ beyond reach of any numeral rule. Emitting digits for the engine to read is the 
 does it for fractions, and Hindi and Icelandic do it for ordinals — but it hands the result to every rule the
 engine has, so check what those rules do to the digit you just wrote.
 
+**21. A PLAUSIBLE NUMBER DESERVES THE SAME SUSPICION AS AN ABSURD ONE.** `sources.ts` reported cmn as having
+**3,836 letter names** — obviously wrong, and it was Han headwords matching a `\p{L}` pattern. Excluding Han
+left it reporting **37**, which looks exactly like a real alphabet, and was the entire bopomofo block. Same
+defect, same line, and only the first count announced itself.
+
+- **Bopomofo is a genuine 37-letter alphabet and still the wrong answer**, because it is a phonetic annotation
+  system and Chinese initialisms are spelled with Latin letter names. Ask what the class is *for*, not whether
+  the data is real. Availability is not correctness, one level up: the source existed, was an alphabet, and did
+  not answer the question.
+- **Then my fix invented the same defect again.** Counting commented-out single-character entries made Burmese
+  report 44 — commented-out WORD entries for single-character particles (`//က $nounf`). An abugida's single
+  characters are words too. Caught only by re-running the fleet after the fix.
+- **Re-run `--all` after touching a gate, and diff the verdicts per language.** The single-language run said
+  the fix worked; the fleet run said it had broken Burmese and, separately, that ko and yue had been false
+  positives all along (94 → 96 blocked). A gate change is a fleet change.
+
+**22. MEASURE THE BLAST RADIUS WITH THE CHEAPEST INSTRUMENT THAT SETTLES IT.** Widening core `magAlt` from
+`\s+` to `\s*` touches the 42 language dirs that declare `magnitudes`; corpus-diffing all of them is ~40 minutes
+of emits. But `\s*` is a strict superset, so the only new matches are where a magnitude *touches* a digit —
+which is a grep over the 66 corpora. Result: **two languages, seven occurrences**, and in all seven the
+magnitude is followed by a currency word or a comma, never a sign or a unit.
+
+- **The cheap instrument gave the STRONGER answer.** A grep proves zero on 64 corpora; 84 emits would only have
+  shown "no diff observed". Then diff the two that could have been affected, to close it.
+- **Say which kind of fix it is.** No corpus reading changes, so this is robustness for plausible input, not a
+  measured-defect repair — and the comment says so. Without the measurement I would have written a comment
+  claiming to fix defects that exist in no corpus.
+
 
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 

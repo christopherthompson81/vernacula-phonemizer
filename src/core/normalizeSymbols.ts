@@ -158,8 +158,19 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // LONGEST FIRST, because a shorter magnitude is often a prefix of a longer inflected one. Russian
     // lists both миллион and миллионов; in declaration order the short form matched first and stranded
     // the suffix, giving *пять миллион долларовов*. Same discipline as the currency keys below.
+    // `\s*`, NOT `\s+`: A SPACE BEFORE THE MAGNITUDE IS NOT UNIVERSAL. Chinese and Japanese are written
+    // without spaces, so `1350亿m³` is the ordinary form and `1350 亿 m³` the exceptional one — with `\s+`
+    // the number was not adjacent to the magnitude, the match failed, and `m³` reached the IPA as the
+    // ENGLISH LETTER NAME (*ˈɛm*), the same failure mode the Luxembourgish run reported for the spaced case.
+    // The group is re-emitted verbatim, so it carries its own leading space when there is one and none when
+    // there is not; it can never match empty, because the alternation requires a magnitude word.
+    //
+    // BLAST RADIUS, measured over all 66 FLEURS corpora rather than argued: exactly TWO attach a magnitude
+    // to a digit — cmn (3×, `147亿美元`) and kn (4×, `3.7ದಶಲಕ್ಷ,`) — and in all seven the magnitude is
+    // followed by a currency WORD or a comma, never a sign or a unit. So this fix changes no corpus reading
+    // anywhere: it is robustness for plausible input, not a measured-defect repair, and is recorded as such.
     const magAlt = d.magnitudes?.length
-        ? `(\\s+(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")}))?`
+        ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")}))?`
         : "()?";
     // Currency keys are an ALTERNATION, not a character class. As a class, a key could only ever be one
     // character, so a letter-code currency — Polish `zł`, and `PLN`/`USD`/`CHF` generally — could not be

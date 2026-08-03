@@ -42,6 +42,27 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("2 zillion km")).toBe("2 zillion km");
     });
 
+    // A SPACE BEFORE THE MAGNITUDE IS NOT UNIVERSAL. Chinese and Japanese are written without spaces, so
+    // `1350亿m³` is the ordinary form; with the separator as `\s+` the number was not adjacent to the
+    // magnitude and `m³` reached the IPA as the English letter name (*ˈɛm*) — the same failure the spaced
+    // case had. The magnitude is re-emitted verbatim, so it keeps its space when it has one and none when it
+    // does not. Measured over all 66 FLEURS corpora: no corpus reading changes, so this is robustness.
+    test("an unspaced magnitude still hops, and keeps its own spacing", () => {
+        const n = makeSymbolNormalizer({
+            percent: ["百分之"],
+            percentPrefix: true,
+            units: { m: ["米"], km: ["公里"] },
+            magnitudes: ["万", "亿"],
+            exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
+        });
+        // The space before the measure word is the tier's uniform `quantity word` shape, not a defect: the
+        // magnitude keeps whatever spacing it was written with, and the Han run splits on the space with both
+        // halves reading correctly (立方米 → li˥˩ fɑŋ˥˥ mi˨˩˦, verified through the cmn phonemizer).
+        expect(n("1350亿m³")).toBe("1350亿 立方米");
+        expect(n("5万km²")).toBe("5万 平方公里");
+        expect(n("1350 亿 m³")).toBe("1350 亿 立方米"); // the spaced form still works
+    });
+
     test("currency hops the magnitude and agrees in count", () => {
         const n = makeSymbolNormalizer({
             percent: ["percent"],
