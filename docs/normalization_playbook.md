@@ -923,6 +923,44 @@ The general form: **a guard's evidence has a lifetime.** When you copy a guard f
 language-local pass, check that what it inspects still exists at that point in *that* file's numbered order —
 the tier runs on text every local pass has already finished rewriting.
 
+**40. A WORD-FIRST PROBE CANNOT FIND A SPELLING YOU DID NOT GUESS — NAME THE SLOT INSTEAD.** Fula was recorded
+as having no squared word at all, on the evidence that `kaare` ×1 is the SHAPE ("Suudu juulirde nduu ko
+kaare" — the prayer hall is square). It has one. It is **`kaaree`**, one letter longer, attested across six
+independent articles (`468 kiloomeeteer kaaree (181 mi kaaree)`), and no amount of probing `kaare` would ever
+have surfaced it. `concept.ts` could not help either: ff.wikipedia has no article for exponentiation,
+mass–energy equivalence, area or volume.
+
+So invert once more. `attest.ts --after <noun>` names the noun the modifier must ATTACH to and reports every
+word that follows it — the modifier cannot hide, because the slot is defined by something you already know.
+
+    npx tsx tools/normalization/attest.ts --lang ff --after kiloomeeteer,meeteer,miil
+      → kuuɓtodinɗo ×4 · kaaree ×2 · walla ×1 · gooto ×1 · kubik ×1
+
+- **The ARTICLE CLASS matters more than the register.** The intuition that a measure word lives in scholarly
+  maths prose is reasonable and is not what paid: this wiki has 20,809 articles about PLACES, and a place
+  cannot state its subject without an area figure. Every `kaaree` attestation came from a country or a
+  reserve. Pick the page class that is *forced* to say the thing. (Where the scholarly form does exist it is
+  the better quote: ga.wikipedia has "cad é achar na cearnóige atá 2 ciliméadar ar leithead? 4 ciliméadar
+  cearnach atá an t-achar." — and it distinguishes the shape word from the unit word in one sentence.)
+- **It finds competitors to words you have already shipped.** The same run surfaced `meeteer kuuɓtodinɗo` ×4,
+  glossed against `cu ft` in its own text and applied productively to `ft` as well — against the `meeteer
+  kubik` ×1 that a word probe had found and that was already committed. Both sit in one article, so neither
+  is yet a finding; the loan was kept as the cautious pick and the competitor recorded beside it.
+- **And it re-proves trap 37 with the counts IDENTICAL.** Bare `kuuɓtodinɗo` is also ×4 in this wiki, and
+  every one of those is a job title — `Hooreejo kuuɓtodinɗo`, in a list of officeholders. Same number,
+  different word. The slot finds candidates; only the quotes find the sense.
+
+**41. A PHRASE PROBE MUST BE TESTED AS A PHRASE.** `attest.ts` gated its hit count on token-set membership,
+and `tokens()` splits on exactly the space a collocation contains — so **every multi-word probe reported
+`substring-only`**, which reads as a negative. It was reporting that against its own evidence: the run that
+called `kiloomeeteer kaaree` substring-only printed "468 kiloomeeteer kaaree (181 mi kaaree)" as the example
+directly above it. `ga`'s `ciliméadar cearnach` was written off the same way and is in fact attested.
+
+This mattered because trap 37 says the collocation IS the evidence, so the tool was systematically failing
+the one test the sweep depends on most. A probe with internal whitespace is now gated by the same lookaround
+regex that quotes it, with the space relaxed to `\s+`. **When a tool's verdict contradicts the example it
+prints beside it, believe the example.**
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

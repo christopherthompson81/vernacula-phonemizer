@@ -21,59 +21,18 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "kaare",
+            "word": "kuuɓtodinɗo",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 1,
+            "tokenHits": 4,
             "articles": 1,
             "substringOnly": 0,
             "examples": [
-                "…ɓulli ndiyam), ina ɓadii minareeji. Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo. Narthex ina waɗi domeeji tati tok…"
+                "…onmu - Administrateur Sole (Août 1998 - Juin 1999) Hooreejo kuuɓtodinɗo (Juin 1999-Mai 2002) Hon. Wale Badmus - Hooreejo fedde nde…",
+                "…m (Dec 2003-Abriil 2004) Hon. Kunle Nafiu Bamiji - Hooreejo Kuuɓtodinɗo(Abriil 2004-Mee 2007) Hon. Tafa mufutau .A. - Hooreejo goll…",
+                "…pitiiɗo(Juin 2007-Octobre 2007) Hon. Ayobami Ojo - hooreejo kuuɓtodinɗo (okt 2007- desammbar 2007) Alh. (Hooreejo) Ismaa’il A.B. Ad…",
+                "…mbar 2007) Alh. (Hooreejo) Ismaa’il A.B. Adedeji - Hooreejo kuuɓtodinɗo(Dec 2007-Juin 2011) Alh. (Hooreejo) Ismaa’il A.B. Adedeji -…"
             ]
-        },
-        {
-            "word": "karre",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…gollal makko fuɗɗam e 14 oktoobar 2007 to kiita e Kitchee. Karre maako ɓooyi bana non ɓaawo o hawti e haala moftal hakkunde…"
-            ]
-        },
-        {
-            "word": "kilometre kaare",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "punndi",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 5,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…o, wallitii kam e daɗndude fenaande – Oba Saheed Elegusho\". Punndi. \"Oba Sahiid Elegushi Teddinaama\". Ñalawma oo. 27 oktoobar…",
-                "…aaɓi-haaɗtirde Igbinedion ina teddina Oba Saheed Elegushi\". Punndi. 10 noowammbar 2019. \"Elegushi ina darii toowɗo...no o heɓi…",
-                "…Elegushi ina darii toowɗo...no o heɓiri teddungal goɗngal\". Punndi. 8 Duujal 2019. Laamɗo Akan (3 oktoobar 2019). \"Tambuwal, D…",
-                "…ii ko laamɗo, Elegushi ina jokki e yiɗde - Olori Sekinatn\". Punndi. Ayomide ayano (21 août 2020). \"BREAKING: Laamɗo leydi ndii…",
-                "…Kemi lanre-aremu (18 juin 2019). \"Oba Elegushi ɗon ƴaɓɓoo\". Punndi. Bolatito Adebola (19 suwee 2020). \"Oba Elegushi E Moto mum…"
-            ]
-        },
-        {
-            "word": "kuubu",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
         },
         {
             "word": "kubik",
@@ -87,13 +46,29 @@
             ]
         },
         {
-            "word": "metre kuubu",
-            "verdict": "absent",
+            "word": "meeteer kuuɓtodinɗo",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
+            "tokenHits": 4,
+            "articles": 1,
             "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…ji == Baraas oo ko sifaa ɓulli leydi peewnaaɗi e 28 000 000 meeteer kuuɓtodinɗo (990 000 000 ft kuuɓtodinɗo) e kaɓirɗe e 720 000 meeteer ku…",
+                "…uuɓtodinɗo (990 000 000 ft kuuɓtodinɗo) e kaɓirɗe e 720 000 meeteer kuuɓtodinɗo (25 000 000 ft kuuɓtodinɗo) e beton. Ko 88 meeter (289 ft)…",
+                "…diri e dame jeegom, ina jogii mbaawka ɓuuɓde ko ɓuri 13 000 meeteer kuuɓtodinɗo e leƴƴannde (460 000 cu ft/s). == Koolaaɗo kuuɓal == Laana…",
+                "…feere ina rokka 62 meeteer (203 ft) hoore ndiyam e haa 450 meeteer kuuɓtodinɗo e leƴƴannde (16 000 cu ft/s) e turbineeji Francis.[4] Kala…"
+            ]
+        },
+        {
+            "word": "meeteer kubik",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…iltation mawɗo, ina hiisa wonde ina waawi waasde 60 miliyoŋ meeteer kubik (2.1×109 cu ft) e hitaande kala. Silt gonɗo e nder weendu n…"
+            ]
         }
     ],
 }

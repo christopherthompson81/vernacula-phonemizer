@@ -62,6 +62,7 @@
  *   npx tsx tools/normalization/attest.ts --lang zu --words amadola,idola,iiyeni
  *   npx tsx tools/normalization/attest.ts --lang zu --words amadola --wiki zu   # if the wiki code differs
  *   npx tsx tools/normalization/attest.ts --lang lb --from-review               # take the words the gate names
+ *   npx tsx tools/normalization/attest.ts --lang ff --after kiloomeeteer,meeteer  # what FOLLOWS this noun?
  *
  * Writes `tools/corpus/attest/<lang>.jsonc` so the answer is recorded, reviewable and reproducible, and so
  * `review.ts` can read it instead of asking the same question again next time.
@@ -79,7 +80,7 @@ const has = (n: string): boolean => argv.includes(`--${n}`);
 
 const lang = arg("lang");
 if (lang === undefined) {
-    console.error("usage: --lang <code> [--words a,b,c | --from-review] [--wiki <wikicode>] [--limit N]");
+    console.error("usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]");
     process.exit(2);
 }
 const wiki = arg("wiki", lang)!;
@@ -150,9 +151,13 @@ interface Finding {
 async function probe(word: string): Promise<Finding> {
     const w = fold(word);
     const bounded = !UNSPACED.test(word);
+    /** A probe with internal whitespace is a COLLOCATION, tested as a phrase rather than as a token. */
+    const phrase = /\s/u.test(word.trim());
     // In an unspaced script the hit test is a plain substring; everywhere else it is flanked by the
-    // not-a-letter lookarounds that make `Yen` fail inside `Libyen`.
-    const hitRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${w}(?![\\p{L}\\p{M}])` : w, "gu");
+    // not-a-letter lookarounds that make `Yen` fail inside `Libyen`. Internal whitespace is relaxed to `\s+`
+    // so a phrase still matches across a line break or a double space in the extract.
+    const body = phrase ? w.trim().split(/\s+/u).map(reEsc).join("\\s+") : w;
+    const hitRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}])` : body, "gu");
     // CirrusSearch tokenises, so a plain term search is the right recall net; the token test below is what
     // supplies the precision. `insource:` regex was tried and is worse here — it is expensive on small wikis
     // and its own \b is ASCII-defined, which is the trap that disabled the initialism pass fleet-wide.
@@ -173,9 +178,15 @@ async function probe(word: string): Promise<Finding> {
     for (const p of Object.values<any>(e?.query?.pages ?? {})) {
         const text = String(p.extract ?? "").replace(/\s+/gu, " ");
         if (text === "") continue;
-        // The token set gates the count for a bounded script only. For an unspaced one it would gate on a
-        // sentence-sized token and reject everything, so the substring hit stands as the hit.
-        if (bounded ? tokens(text).has(w) : fold(text).includes(w)) {
+        // The token set gates the count for a bounded SINGLE WORD only. For an unspaced script it would gate
+        // on a sentence-sized token and reject everything, so the substring hit stands as the hit — and for a
+        // MULTI-WORD PHRASE it can never match at all, because `tokens()` splits on the very space the phrase
+        // contains. That made every phrase probe report `substring-only`, which reads as a NEGATIVE, while the
+        // phrase was sitting in the quoted example directly above it: ff's `kiloomeeteer kaaree` was called
+        // substring-only in the same run whose example was "468 kiloomeeteer kaaree (181 mi kaaree)". A phrase
+        // is the collocation test this file exists to support (trap 37), so it is gated by `hitRe`, which
+        // already flanks the WHOLE probe with the not-a-letter lookarounds.
+        if (phrase ? hitRe.test(fold(text)) : bounded ? tokens(text).has(w) : fold(text).includes(w)) {
             articles++;
             // Count and quote the occurrences, so a human can judge the SENSE — the part no tool can do.
             // `amaphuzu` (zu) is a real token meaning sports POINTS, not the decimal point; `paun` (ms) is
@@ -195,7 +206,8 @@ async function probe(word: string): Promise<Finding> {
             // prompt to look; a misaligned one is a wrong finding, and #610 made these quotes the whole of the
             // evidence for unspaced scripts.
             tokenHits += [...fold(text).matchAll(hitRe)].length;
-            const quoteRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${reEsc(word)}(?![\\p{L}\\p{M}])` : reEsc(word), "giu");
+            const qBody = phrase ? word.trim().split(/\s+/u).map(reEsc).join("\\s+") : reEsc(word);
+            const quoteRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${qBody}(?![\\p{L}\\p{M}])` : qBody, "giu");
             for (const m of text.matchAll(quoteRe)) {
                 if (examples.length >= 6) break;
                 const at = m.index!;
@@ -210,11 +222,86 @@ async function probe(word: string): Promise<Finding> {
     return { word, tokenHits, articles, substringOnly, examples, bounded, verdict };
 }
 
+/**
+ * SLOT PROBE (`--after <noun>`) — the third sourcing tier, and the only one that can find a word you cannot
+ * spell.
+ *
+ * `--words` asks "does THIS word occur?" and `concept.ts` asks "what does this language CALL the thing?".
+ * Both fail the same way when the answer is a spelling you did not guess. Fula is the case: probing `kaare`
+ * returned ×1 and it was the SHAPE ("Suudu juulirde nduu ko kaare" — the prayer hall is square), so the
+ * language was recorded as having no squared word. It has one. It is `kaaree`, one letter longer, and no
+ * amount of probing `kaare` would ever have surfaced it.
+ *
+ * So invert once more: name the noun the modifier must ATTACH to, and report every word that follows it.
+ * The modifier cannot hide, because the slot is defined by something you already know.
+ *
+ *   npx tsx tools/normalization/attest.ts --lang ff --after kiloomeeteer,meeteer,miil
+ *     → kaaree ×4 · gooto ×1 · kubik ×1        (and `gooto` is "one", which is why you read the examples)
+ *
+ * ⚠ THE ARTICLE CLASS MATTERS MORE THAN THE REGISTER. The intuition that a measure word lives in scholarly
+ * maths prose is reasonable and was not what paid here: ff.wikipedia has no article for exponentiation,
+ * mass–energy equivalence, area or volume. What it has is 20,809 articles about PLACES, and a place cannot
+ * state its subject without an area figure — every one of the six independent `kaaree` attestations came
+ * from a country or a reserve. Pick the page class that is FORCED to say the thing.
+ * (ga.wikipedia does have the scholarly form, and it is the better quote when it exists: "cad é achar na
+ * cearnóige atá 2 ciliméadar ar leithead? 4 ciliméadar cearnach atá an t-achar.")
+ */
+async function slotProbe(nouns: string[]): Promise<void> {
+    const after = new Map<string, number>();
+    const examples: string[] = [];
+    const seen = new Set<string>();
+    for (const noun of nouns) {
+        const s = await api({
+            action: "query", list: "search", srsearch: noun,
+            srlimit: String(Math.min(limit, 50)), srnamespace: "0",
+        });
+        const titles = (s?.query?.search ?? []).map((h: any) => String(h.title)).filter((t: string) => !seen.has(t));
+        for (const t of titles) seen.add(t);
+        for (let i = 0; i < titles.length; i += 20) {
+            const e = await api({
+                action: "query", titles: titles.slice(i, i + 20).join("|"),
+                prop: "extracts", explaintext: "1", exlimit: "20",
+            });
+            for (const p of Object.values<any>(e?.query?.pages ?? {})) {
+                const text = String(p.extract ?? "").replace(/\s+/gu, " ");
+                // The noun, then a NUMBER-free following token. `\p{L}\p{M}` only, so a figure or a
+                // parenthesis ends the slot rather than being reported as the modifier.
+                const re = new RegExp(`(?<![\\p{L}\\p{M}])${reEsc(noun)}\\s+([\\p{L}\\p{M}]{2,})`, "giu");
+                for (const m of text.matchAll(re)) {
+                    const k = m[1]!.toLowerCase();
+                    after.set(k, (after.get(k) ?? 0) + 1);
+                    if (examples.length < 10)
+                        examples.push(`${p.title}: …${text.slice(Math.max(0, m.index! - 50), m.index! + m[0].length + 26).trim()}…`);
+                }
+            }
+        }
+    }
+    console.log(`\n── ${wiki}.wikipedia.org — what FOLLOWS ${nouns.join(" / ")} ──\n`);
+    if (after.size === 0) {
+        console.log("  nothing — no article in the search net puts a word directly after that noun.\n");
+        return;
+    }
+    for (const [w, n] of [...after].sort((a, b) => b[1] - a[1]).slice(0, 20))
+        console.log(`  ${w.padEnd(22)} ×${n}`);
+    console.log(`\n  READ THE EXAMPLES. This tier finds the SLOT, never the sense — the commonest follower of a`);
+    console.log(`  unit noun is often a numeral or an ordinary adjective, and only the quotes tell you which.\n`);
+    for (const e of examples) console.log(`    ${e}`);
+    console.log();
+}
+
 const exists = await wikiExists();
 if (!exists) {
     console.error(`${wiki}.wikipedia.org does not respond as a wiki — a negative from here is NOT evidence.`);
     console.error(`Pass --wiki <code> if this language's wiki is filed under a different code.`);
     process.exit(3);
+}
+
+// `--after` is its own mode: it discovers candidates rather than judging them, so it prints and exits
+// without writing the artifact — nothing here is a finding yet.
+const afterArg = arg("after");
+if (afterArg !== undefined) {
+    await slotProbe(afterArg.split(",").map((n) => n.trim()).filter((n) => n !== ""));
+    process.exit(0);
 }
 
 // A MISSING ARGUMENT IS A USAGE ERROR, not a stack trace: `words()` throws, and at top level that surfaced
@@ -224,7 +311,7 @@ try {
     wordList = words();
 } catch (e) {
     console.error(`${(e as Error).message}`);
-    console.error("usage: --lang <code> [--words a,b,c | --from-review] [--wiki <wikicode>] [--limit N]");
+    console.error("usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]");
     process.exit(2);
 }
 const findings: Finding[] = [];

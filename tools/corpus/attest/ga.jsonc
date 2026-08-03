@@ -21,35 +21,15 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "cearnacha",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…s mó san Indinéis. Tá sí 174,600 ciliméadar, nó 67,400 míle cearnacha, d'achar. Tá cónaí ar 18,455,058 duine ar an oileán de réir…"
-            ]
-        },
-        {
-            "word": "chearnach",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…Tomhas talún is ea acra, 4,840 slat chearnach nó beagán faoi dhá chúigiú de heicteár (10,000 méadar cearn…"
-            ]
-        },
-        {
             "word": "ciliméadar cearnach",
-            "verdict": "substring-only",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 1,
-            "examples": []
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…a, cad é achar na cearnóige atá 2 ciliméadar ar leithead? 4 ciliméadar cearnach atá an t-achar. == Féach freisin == == Tagairtí ==…"
+            ]
         },
         {
             "word": "méadar cearnach",
@@ -61,15 +41,35 @@
             "examples": []
         },
         {
-            "word": "ciúbach",
+            "word": "méadar ciúbach",
             "verdict": "attested",
             "bounded": true,
             "tokenHits": 1,
             "articles": 1,
             "substringOnly": 0,
             "examples": [
-                "…nn, arís sula dtéann an Fheoir isteach inti, ná 37.4 méadar ciúbach in aghaidh an tsoicind. Ag an gcumasc leis an bhFeoir, is é…"
+                "…a habhann, arís sula dtéann an Fheoir isteach inti, ná 37.4 méadar ciúbach in aghaidh an tsoicind. Ag an gcumasc leis an bhFeoir, is é…"
             ]
+        },
+        {
+            "word": "cearnach",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…domhain, agus tá achar 179.7 milliún km² (69.4 milliún míle cearnach) aige. Leathann sé 15,500 km (9,600 míle) ó Mhuir Bheiring…"
+            ]
+        },
+        {
+            "word": "ciliméadair chearnacha",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
         }
     ],
 }
