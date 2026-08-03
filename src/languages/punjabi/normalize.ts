@@ -62,6 +62,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".
     // ਕਿਲੋਗਰਾਮ is ×0 in the corpus and is left undeclared rather than taken from Wikidata's label alone.
     units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"] },
+    // `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, both word-first.
+    // ⚠ Bare ਵਰਗ is ×12 and its first instance is `ਉੱਚ ਵਰਗ` — "upper CLASS". The bare count would have
+    // triple-counted a different word; only the collocation with the unit noun attests the unit sense.
+    exponentWords: { squared: ["ਵਰਗ"], cubed: ["ਘਣ"], position: "before" },
     currency: { "$": ["ਡਾਲਰ"] },
     magnitudes: ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"],
 });

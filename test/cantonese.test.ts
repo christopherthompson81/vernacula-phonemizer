@@ -109,4 +109,10 @@ describe("cantonese text normalization (#562)", () => {
         // [A-Za-z]+ split Müslüm into M / sl / m, three separate English words ("ˈɛm sɫ ˈɛm").
         expect(yue("Müslüm")).toBe(phonemize("Müslüm", "en"));
     });
+
+    // #586 — `平方公里` ×4 ("公園占地一萬九千平方公里"), fused and word-first. No cube reading: 立方 is ×0 here and
+    // 米 stays undeclared for the 米勒 ("Miller") reason, so the two gaps are the same gap.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("19500 km²", "yue")).toContain("pʰɪŋ˨˩ fɔːŋ˥ kʊŋ˥ lei˩˧");
+    });
 });

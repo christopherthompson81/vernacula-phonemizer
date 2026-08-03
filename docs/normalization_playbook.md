@@ -859,6 +859,70 @@ hand are unaffected, because folding is idempotent.
   entirely on its own corpus sentence `32℃에`. Same shape as the tier's `unspacedScript` (trap 27), in a local
   rule — so when you fix a guard in one place, grep for its twin.
 
+**37. THE BARE MODIFIER IS NEVER THE ATTESTATION — COUNT THE COLLOCATION.** Sourcing the squared/cubed measure
+word for 17 languages, the bare word was a DIFFERENT WORD in six of them, every time with a healthy count:
+
+| language | bare count | what it actually is | the real evidence |
+|---|---:|---|---:|
+| gu | વર્ગ ×55 | the CLASSROOM (`વિદ્યાર્થીઓ તેમના વર્ગમાં`) | `વર્ગ કિલોમીટર` ×10 |
+| pa | ਵਰਗ ×12 | upper CLASS (`ਉੱਚ ਵਰਗ`) | `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 |
+| th | ตาราง ×11 | the periodic TABLE (`ตารางธาตุ`) | `ตารางกิโลเมตร` ×5 |
+| bn | ঘন ×19 | the reduplicated adverb `ঘন ঘন`, "frequently" | — (cube unattested) |
+| fr | carré ×2 | the SHAPE (`un carré dont le côté…`) | `kilomètres carrés` ×9 |
+| tr | kare ×6 | the SHAPE (`küçük kare veya toplardan`) | `kilometrekare` ×4 |
+
+A modifier's bare token count measures the wrong thing, because the word is polysemous exactly where it is
+most common. Probe `<word> <unit-noun>`; a zero bare count is meaningless too (gu's cube word is the loan
+ક્યુબિક, not ઘન, and only the corpus says so).
+
+- **The one that would have shipped wrong is `am`.** Both candidates are attested and the LOSER outnumbers the
+  winner: ካሬ ×8 against ስኩዌር ×4. But all eight ካሬ are the SQUARE-MILE gloss in the parenthetical beside a
+  square-kilometre figure (`783,562 ስኩዌር ኪ.ሜ. (300,948 ካሬ ኪ.ሜ.)`) — so the corpus attests ካሬ as this text's
+  rendering of *mi²*, and picking by count picks the wrong unit.
+- **Position is per-language AND can be per-power.** Urdu puts مربع before its noun where Arabic postposes the
+  cognate مربع; Amharic borrowed its two readings from opposite directions and writes `ስኩዌር ኪ.ሜ.` before but
+  `ሜትር ኪዩብ` after. `exponentWords.position` therefore takes a per-power record, like `unitPer`.
+- **`suffix` is the fourth position, and it is `compound` mirrored.** Turkish welds the word onto the END:
+  `kilometrekare`, `metreküp`. This is trap 2 of the rate/exponent migration arriving on the other side —
+  `before` and `compound` were one value until Russian produced *квадратныхкилометров*.
+- **A declared word can be DEAD.** gu's ક્યુબિક did nothing until bare `m` was declared, because the exponent
+  branch needs a head noun from `units` first; `120 m³` read as the letter *ˈɛm*. Check that what you added
+  actually fires — and check the one-letter-key hazard when you add it (digit-adjacent `m` is ×0 in gu/hi/kn/
+  or/sd, and mr's ×7 are all `100m` swimming events, i.e. metres).
+- **The corpus diff will often be ZERO, and that is not a reason to skip it.** Transcripts SPELL these words
+  out, which is where the attestation comes from; the change fires on the SYMBOL form, which the transcripts
+  mostly lack. 12 of 17 languages changed 0 lines. The four that moved were worth reading, though: `mm2` was
+  reading its ASCII exponent as a separate NUMBER — fr *milimɛtʁ **dø***, id *milimetər **dua***, ne
+  *milimiʈʌɾ **d̪ui*** — a defect none of the probes named.
+
+**38. AN ALIAS NEEDS NO NEW VOCABULARY — CHECK WHETHER THE WORD IS ALREADY THERE.** `ckb` and `fa` were the last
+two languages reading `5 km` as the cluster [ˈʊkm], and both were recorded as blocked for want of corpus
+evidence. They were not: ckb reads `5 کم` correctly and fa spells `کیلومتر` out **65 times**. What was missing
+was a *key*, not a word — the same move ru, uk and kk had already made. Before deferring a unit for lack of
+attestation, check whether the language already says it in another spelling; "no Latin abbreviation in the
+corpus" is a fact about the corpus's orthography, not about the vocabulary.
+
+- **But keys are NOT transferable between languages in the same script, and this pair is the proof.** ckb's
+  unit table reads `کم` → kilometre and `سم` → centimetre, attested 30/30 and 2/2 after a numeral. The SAME
+  two graphemes in fa are ordinary words: `کم` ×63, never once after a numeral, is the adjective "little/few"
+  ("اصطکاک کم است"), and `سم` ×5 is "poison". Copying the table would read 68 ordinary Persian words as
+  measurements. fa therefore gets **Latin keys only**, and the numeral guard is what makes ckb's safe.
+- **`ff` shows the other half of the answer.** Its corpus attests no measure word at all, so `attest.ts`
+  against ff.wikipedia supplied one — `kubik` ×1, in exactly the slot ("60 miliyoŋ meeteer kubik"). Its three
+  competitors were all attested and none was the word: `kaare` the shape, `punndi` a publication name in
+  citations, `karre` a proper noun. Corpus silence means reach for the wiki, not for a guess.
+
+**39. A LOCAL RULE THAT DEPENDS ON A CHARACTER MUST RUN BEFORE THE RULE THAT CONSUMES IT.** The `NOT_VERSION`
+guard (`802.11m` is a designation, not 11 metres) works by seeing the DOT. Added to ckb and fa beside their
+other unit rules, it did nothing — because both files rewrite the decimal point into a WORD several steps
+earlier (ckb `خاڵ`, fa `ممیز`), so by then the text reads `802 ممیز 1 1 m` and there is no dot to reject. The
+rule had to move above the decimal step, and below de-grouping (or `19،500 km` matches only its last three
+digits), which pins it to exactly one position in the sequence.
+
+The general form: **a guard's evidence has a lifetime.** When you copy a guard from the shared tier into a
+language-local pass, check that what it inspects still exists at that point in *that* file's numbered order —
+the tier runs on text every local pass has already finished rewriting.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

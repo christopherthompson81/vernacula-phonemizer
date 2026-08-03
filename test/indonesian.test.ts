@@ -96,4 +96,10 @@ describe("indonesian normalization", () => {
         expect(phonemize("1/5", "id")).toBe("sˈatu pˈɛr lˈima");
         expect(phonemize("-5 derajat", "id")).toBe("mˈinus lˈima dərˈad͡ʒat");
     });
+
+    // #586 — `kilometer persegi` ×3. Bare `persegi` ×9 includes the SHAPE ("persegi yang tidak memiliki
+    // sisi bawahnya"), so the collocation with the unit noun is what attests the unit sense.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783.562 km²", "id")).toContain("kilomətˈər pərsəɡˈi");
+    });
 });

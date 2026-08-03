@@ -270,4 +270,14 @@ describe("Oromo text normalization", () => {
         // The era marker must still expand rather than be spelled DAA-KAA-DAA.
         expect(phonemize("D.K.D 5000 tti", "om")).toBe("ᶑalˈoːta kiristˈoːs dˈura kˈuma ʃanˈitːi");
     });
+
+    // #586 — the corpus's `iskuweer kiloometiiri 783,562` is a SQUARE KILOMETRE, and this language's units
+    // are local precisely because the shared tier could only postpose them. The exponent rule sits beside
+    // the `sq mi` one and keeps the same noun-first, number-last order.
+    // The `\s?²`-but-not-`\s?2` asymmetry is copied from the tier: `km 6,387` and `km 2-3` are real forms
+    // in this corpus, so a SPACED ASCII 2 must stay the next number.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783.562 km²", "om")).toContain("iskuwˈeːr kiːloːmˈeːtira ᶑˈibːa");
+        expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː");
+    });
 });

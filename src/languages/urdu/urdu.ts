@@ -92,6 +92,9 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { "₨": ["روپے"], $: ["ڈالر"], "€": ["یورو"], "£": ["پاؤنڈ"] },
     units: { km: ["کلومیٹر"], cm: ["سینٹیمیٹر"], mm: ["ملیمیٹر"], kg: ["کلوگرام"], m: ["میٹر"],
         g: ["گرام"], "km/h": ["کلومیٹر فی گھنٹہ"] },
+    // `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-first — note Urdu puts مربع BEFORE its noun where
+    // Arabic puts the cognate مربع after it. Bare مربع ×20 is mostly the shape, as in French and Turkish.
+    exponentWords: { squared: ["مربع"], cubed: ["کیوبک"], position: "before" },
 });
 
 const TOKEN = new RegExp(

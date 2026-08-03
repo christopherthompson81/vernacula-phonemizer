@@ -95,7 +95,8 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },
     magnitudes: ["ദശലക്ഷം", "മില്യൺ", "ബില്യൺ", "ലക്ഷം", "കോടി"],
     units: { km: ["കിലോമീറ്റർ"], m: ["മീറ്റർ"], mm: ["മില്ലിമീറ്റർ"] },
-    exponentWords: { squared: ["ചതുരശ്ര"], position: "before" },
+    // `ചതുരശ്ര കിലോമീറ്റർ` ×2 and `ക്യൂബിക് മീറ്റർ` ×1, both word-first, both from the corpus's own prose.
+    exponentWords: { squared: ["ചതുരശ്ര"], cubed: ["ക്യൂബിക്"], position: "before" },
 });
 
 /**

@@ -189,4 +189,13 @@ describe("Irish text normalization", () => {
         expect(ph("N.A.")).toBe("n̪ˠˈɑːⁱʃuːənʲ ˈeːn̪ˠt̪ˠəhə"); // Náisiúin Aontaithe
         expect(ph("H5N1")).toBe("hˈeːʃ ˈa kˈuːɟ ˈɛnʲ ˈa hˈeːn̪ˠ"); // héis a cúig ein a haon
     });
+
+    // #586 — `méadar ciúbach` ×3 in the corpus. Bare `m` had to be declared for the cube to have a head
+    // noun at all, and every digit-adjacent `m` here is a metre (`100m agus 200m`, `133 m/s`) — the
+    // one-letter-key hazard checked rather than assumed. `ciliméadar cearnach` is ×0, so km² keeps the
+    // documented unit-plus-`²` fallback instead of shipping on a Wikidata label alone.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("120 m³", "ga")).toContain("mʲˈeːd̪ˠəɾˠ cˈuːbˠəx");
+        expect(phonemize("100m agus 200m", "ga")).toContain("mʲˈeːd̪ˠəɾˠ ˈaɡəsˠ");
+    });
 });

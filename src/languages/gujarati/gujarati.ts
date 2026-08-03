@@ -58,9 +58,22 @@ const GU_SYMBOLS = makeSymbolNormalizer({
         "મીમી": ["મીલીમીટર"], "મિમી": ["મીલીમીટર"], "એમએમ": ["મીલીમીટર"],
         "માઇલ": ["માઇલ"], "માઈલ": ["માઈલ"], // identity — declared so the RATE form માઇલ/કલાક composes
         km: ["કિલોમીટર"], cm: ["સેન્ટીમીટર"], mm: ["મીલીમીટર"], kg: ["કિલોગ્રામ"],
+        // `m` ADDED so the cube word below has a head noun — without it `120 m³` read as a bare letter
+        // *ˈɛm* and the declaration was dead. મીટર ×28 spelled out, and digit-adjacent bare `m` is ×0 in
+        // this corpus, so the one-letter-key hazard is checked rather than assumed. (Same measurement over
+        // hi/kn/or/sd — all ×0 — and mr ×7, all of them `100m આણિ 200m` swimming events, i.e. metres. Those
+        // five have no cube word yet and are left to the bare-`m` sweep.)
+        m: ["મીટર"],
     },
     unitPer: "પ્રતિ",
     rateDenominators: { "ક": "કલાક", "કલાક": "કલાક", "સેકંડ": "સેકંડ", h: "કલાક", s: "સેકંડ" },
+    // `વર્ગ કિલોમીટર` ×10 — the best-attested measure word in this sweep — and `ક્યુબિક મીટર` ×2, both
+    // word-first. ⚠ NEITHER bare word is the evidence, and both bare counts are traps:
+    //   વર્ગ ×55   is the CLASSROOM ("વિદ્યાર્થીઓ તેમના વર્ગમાં બેસીને")
+    //   ઘન  ×6    is SOLID, the state of matter ("ઘન, પ્રવાહી, વાયુ અને પ્લાઝમા") — and it is the same
+    //             ધન/ઘન cluster that offered five confidently wrong plus words in Phase 1
+    // The cube word here is the English loan ક્યુબિક, not ઘન, which the corpus decides and a label could not.
+    exponentWords: { squared: ["વર્ગ"], cubed: ["ક્યુબિક"], position: "before" },
 });
 
 /** Load gujarati.jsonc (beside this file) and build the Gujarati phonemizer. `foreign` handles embedded Latin. */

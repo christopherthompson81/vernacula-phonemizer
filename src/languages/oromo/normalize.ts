@@ -328,6 +328,17 @@ export function normalizeOromo(input: string): string {
         (_m, n: string, u: string, d: string) => `${PER[d.toLowerCase()]!} ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (b) `sq mi` ×3 — *iskuweer* is the corpus's own transliteration (`iskuweer kiloometiiri`).
     s = s.replace(/(?<![\p{L}\p{M}\d])(\d[\d.]*)\s?sq\s?mi(?![\p{L}\p{M}])/giu, "iskuweer maayilii $1");
+    //     (b2) …and the SAME reading for `km²`, which is what the corpus's `iskuweer kiloometiiri 783,562`
+    //         actually is: *iskuweer* leads, the unit noun follows, the number comes last. The shared tier
+    //         now honours `unitPrefix` in its exponent branch, but Oromo's units are local precisely
+    //         because the tier can only postpose them, so the power belongs here beside (b). No cube word:
+    //         `kuubik` is ×0 in this corpus, so `m³` is left alone rather than invented.
+    //         `(?:\s?²|2)` copies the tier's own asymmetry rather than accepting `\s?[²2]`: a SPACED
+    //         superscript is an exponent (Hindi's wiki writes `km ²`) but a spaced ASCII `2` is the next
+    //         NUMBER — `km 6,387` and `km 2-3` are both real forms in this corpus, so `km 2` must not
+    //         become a square kilometre.
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "giu"),
+        (_m, n: string, u: string) => `iskuweer ${UNIT[u.toLowerCase()]!} ${n}`);
     //     (c) the abbreviation BEFORE its number (`mm 5`, `km 6,387`) — and this must come BEFORE (d),
     //         which was found by the corpus's `mm 36 mm 24n` (a 36×24 mm negative): with (d) first, the
     //         SECOND `mm` was eaten as the postposed unit of `36`, and the first was left as the raw

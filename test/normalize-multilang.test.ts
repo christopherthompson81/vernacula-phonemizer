@@ -283,6 +283,48 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("50 km²", "es")).toContain("kwaðɾˈaðos");    // after
         expect(phonemize("50 km²", "ru")).toContain("kvɐdrˈatnɨx kʲɪɫɐmʲˈetrəf"); // before, SPACED
         expect(phonemize("50 km²", "sv")).toContain("kvadrˈɑ̀ːtkiːlɔmˌeːtɛr");     // compound, one word
+        expect(phonemize("50 km²", "tr")).toContain("ciɫometɾekaɾˈe");            // suffix, one word
+    });
+
+    /**
+     * THE FOURTH POSITION, and the two things the exponent branch was missing that the plain branch had.
+     *
+     * `suffix` is `compound` mirrored. Turkish's own corpus writes `783.562 kilometrekare` and
+     * `120-160 metreküp` — the measure word welded onto the END — and none of the other three values can
+     * spell that: `after` gives *kilometre kare*, `compound` gives *karekilometre*, `before` the same
+     * spaced. It is the same omission `before`/`compound` were before they were split apart, arriving on
+     * the other side.
+     */
+    test("the exponent measure word can suffix, differ per power, and follow unitPrefix (#586)", () => {
+        const suffix = makeSymbolNormalizer({
+            percent: ["yüzde"],
+            units: { km: ["kilometre"], m: ["metre"] },
+            exponentWords: { squared: ["kare"], cubed: ["küp"], position: "suffix" },
+        });
+        expect(suffix("783.562 km²")).toBe("783.562 kilometrekare");
+        expect(suffix("120 m³")).toBe("120 metreküp");
+
+        // PER-POWER POSITION. Amharic borrowed its two readings from different directions and its corpus
+        // writes them on opposite sides — `783,562 ስኩዌር ኪ.ሜ.` but `120-160 ሜትር ኪዩብ`. One value per language
+        // had to be wrong about one of them.
+        const mixed = makeSymbolNormalizer({
+            percent: ["ፐርሰንት"],
+            units: { km: ["ኪሎ ሜትር"], m: ["ሜትር"] },
+            exponentWords: { squared: ["ስኩዌር"], cubed: ["ኪዩብ"], position: { squared: "before", cubed: "after" } },
+        });
+        expect(mixed("5 km²")).toBe("5 ስኩዌር ኪሎ ሜትር");
+        expect(mixed("5 m³")).toBe("5 ሜትር ኪዩብ");
+
+        // `unitPrefix` GOVERNS THE EXPONENT READING TOO, and the exponent branch was the only one of the
+        // three that ignored it — so a head-first language read `5 km²` in the fleet's word order instead
+        // of its own. Oromo writes the noun phrase, then the number: `iskuweer kiloometiiri 783,562`.
+        const prefixed = makeSymbolNormalizer({
+            percent: ["parsantii"],
+            units: { km: ["kiiloomeetira"] },
+            unitPrefix: true,
+            exponentWords: { squared: ["iskuweer"], position: "before" },
+        });
+        expect(prefixed("783 km²")).toBe("iskuweer kiiloomeetira 783");
     });
 
     /**

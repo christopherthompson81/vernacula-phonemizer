@@ -130,4 +130,11 @@ describe("punjabi text normalization (#562)", () => {
         expect(phonemize("2.3", "pa")).toBe("d̪ˈoː t̪ˈɪ̃n");
         expect(phonemize("2.3 ਅਰਬ ਡਾਲਰ", "pa")).not.toContain(".");
     });
+
+    // #586 — `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, word-first. Bare ਵਰਗ is ×12 and its first instance is
+    // `ਉੱਚ ਵਰਗ` — "upper CLASS" — so only the collocation attests the unit sense.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783,562 km²", "pa")).toContain("ʋˈəɾəɡ kɪloːmˈiːʈəɾ");
+        expect(phonemize("120 m³", "pa")).toContain("kˈə˨˩ɳ mˈiːʈəɾ");
+    });
 });

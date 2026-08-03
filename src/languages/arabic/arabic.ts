@@ -187,6 +187,11 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { $: ["دُولَار"], "€": ["يُورُو"], "£": ["جُنَيْه"], "¥": ["يِن"] },
     units: { km: ["كِيلُومِتْر"], cm: ["سِنْتِيمِتْر"], mm: ["مِلِّيمِتْر"], kg: ["كِيلُوجِرَام"],
         m: ["مِتْر"], g: ["جِرَام"], "km/h": ["كِيلُومِتْر فِي السَّاعَة"] },
+    // `كيلومتر مربع` ×8 — the adjective FOLLOWS its noun, as Arabic adjectives do. Vocalised to match the
+    // rest of this table; the corpus writes it bare, and the diacritizer would have to guess otherwise.
+    // No cubed word: `متر مكعب` is zero in this corpus, so `m³` keeps the documented unit-plus-`³` fallback
+    // rather than a plausible invention.
+    exponentWords: { squared: ["مُرَبَّع"], position: "after" },
 });
 
 class ArabicPhonemizer implements Phonemizer {

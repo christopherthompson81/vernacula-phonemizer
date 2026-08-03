@@ -265,4 +265,11 @@ describe("french canonical IPA", () => {
         expect(toIpa("choses")).toBe("ʃoz"); // before z (-ses→z) → [o]
         expect(toIpa("croire")).toBe("kʁwaʁ"); // wa nucleus recognised → final e silent (not schwa)
     });
+
+    // #586 — `km²` read as a bare *kilomètre* with the power dropped. `kilomètres carrés` ×9 and
+    // `mètres cubes` ×2 in the corpus; the adjective agrees, so both count forms are declared.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(phonemize("783 562 km²", "fr")).toContain("kilɔmɛtʁ kaʁˈe");
+        expect(phonemize("120 m³", "fr")).toContain("mɛtʁ kˈyb");
+    });
 });

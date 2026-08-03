@@ -101,6 +101,13 @@ const SYMBOLS = makeSymbolNormalizer({
     // spelling stays for kg while the corpus's own spaced forms are used for the two new keys — a
     // spelling-preference finding for the sweep, recorded rather than silently harmonised.
     units: { kg: ["ኪሎግራም"], km: ["ኪሎ ሜትር"], m: ["ሜትር"] },
+    // THE TWO POWERS SIT ON OPPOSITE SIDES, which is why `position` takes a per-power record. This corpus
+    // writes `783,562 ስኩዌር ኪ.ሜ.` (×4, the English loan, word BEFORE) and `120-160 ሜትር ኪዩብ` (×3, word
+    // AFTER) — two borrowings that came in from different directions and kept their source order.
+    // ⚠ ካሬ ×8 is NOT the squared word to use, despite outnumbering ስኩዌር: every instance is the SQUARE MILE
+    // in the parenthetical gloss beside a square-kilometre figure (`783,562 ስኩዌር ኪ.ሜ. (300,948 ካሬ ኪ.ሜ.)`),
+    // so the corpus attests it as this text's rendering of *mi²*, not of *km²*.
+    exponentWords: { squared: ["ስኩዌር"], cubed: ["ኪዩብ"], position: { squared: "before", cubed: "after" } },
     magnitudes: ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"],
 });
 

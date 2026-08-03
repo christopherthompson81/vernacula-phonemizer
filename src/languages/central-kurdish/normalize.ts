@@ -65,6 +65,32 @@ export function normalizeCentralKurdish(input: string): string {
         t = t.replace(/(\d)[,،](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
+    // 2b) LATIN UNIT ALIASES AND THEIR POWERS (#586). and this needs NO NEW VOCABULARY — only a second key onto a word the corpus already
+    //     attests, which is the same move ru, uk and kk made. `5 km` was reaching the g2p as the cluster
+    //     [ˈʊkm] while `5 کم` read correctly: same unit, one spelling handled and the other not. The Latin
+    //     run is rare here (`4Ghz`, `1a`, `1b` — no bare `m`), so unlike the Arabic-script `م` a Latin `m`
+    //     key is safe, and `مەتر` ×21 / `میلیمەتر` ×4 are the corpus's own words for it.
+    //     THIS RUNS BEFORE THE DECIMAL RULE (3), and that ordering is FORCED rather than tidy: step 3
+    //     replaces the dot with the WORD خاڵ, so by 6b a version designation is already `802 خاڵ 1 1 m`
+    //     and the `NOT_VERSION` guard below has nothing left to recognise — `802.11m` read as metres.
+    //     After DE-GROUPING (2) though, or `19،500 km` matches only its last three digits.
+    //     THE EXPONENT ARM MUST COME FIRST, or the plain rule below consumes the unit and strands the `²`.
+    //     Both measure words are the corpus's own and both FOLLOW the noun:
+    //       دووجا ×4  "پارکەکە 19500 کم دووجا دایپۆشیوە"       (squared)
+    //       سێجا  ×3  "لونۆ 120-160 مەتر سێجا سوتەمەنی بار کرد" (cubed)
+    const CKB_UNIT: Readonly<Record<string, string>> = {
+        km: "کیلۆمەتر", cm: "سانتیمەتر", mm: "میلیمەتر", m: "مەتر",
+    };
+    const ckbUnits = Object.keys(CKB_UNIT).sort((a, b) => b.length - a.length).join("|");
+    //     A DOTTED DESIGNATION IS NOT A QUANTITY (`802.11m`) — `NOT_VERSION` from the shared tier, guarding
+    //     the WHOLE number, because a lookbehind on the adjacent digit would also reject `12.8 کم` above.
+    const CKB_NUM = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))(\\d[\\d.,]*)";
+    t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
+        (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
+            `${n} ${CKB_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "سێجا" : "دووجا"}`);
+    t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
+        (_m, n: string, u: string) => `${n} ${CKB_UNIT[u.toLowerCase()]!}`);
+
     // 3) DECIMAL POINT (47) — again the English convention. The period is clause punctuation, so `2.4`
     //    read as "two" + a SENTENCE BREAK + "four". Fractional part spoken digit by digit.
     t = t.replace(/(\d+)\.(\d+)/gu, (_m, whole: string, frac: string) =>
@@ -109,7 +135,6 @@ export function normalizeCentralKurdish(input: string): string {
     //     letter, and `کگ` occurs zero times.
     t = t.replace(/(\d)\s*کم(?![\p{L}\p{M}])/gu, "$1 کیلۆمەتر");
     t = t.replace(/(\d)\s*سم(?![\p{L}\p{M}])/gu, "$1 سانتیمەتر");
-
     // 7) RANGES (34). Spoken `بۆ` ("to"), which is an ordinary word in the corpus (2057).
     t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 بۆ $2");
 

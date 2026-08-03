@@ -172,6 +172,12 @@ const SYMBOLS = makeSymbolNormalizer({
         kw: ["kilowatt", "kilowatts"], w: ["watt", "watts"], hz: ["hertz"], khz: ["kilohertz"], mhz: ["mégahertz"],
         go: ["gigaoctet", "gigaoctets"], mo: ["mégaoctet", "mégaoctets"], ko: ["kilooctet", "kilooctets"],
         min: ["minute", "minutes"] },
+    // `kilomètres carrés` ×9 and `mètres cubes` ×2. The adjective agrees, so both numbers are listed; only
+    // the PLURAL is corpus-attested (no `1 km²` occurs) and the singular is regular agreement, stated here
+    // rather than left to look like an attested form.
+    // ⚠ Bare `carré` ×2 is the SHAPE ("un carré dont le côté inférieur est manquant") — the collocation
+    // with the unit noun is the attestation, never the bare word.
+    exponentWords: { squared: ["carré", "carrés"], cubed: ["cube", "cubes"], position: "after" },
     magnitudes: ["millions", "million", "milliards", "milliard"],
     magnitudeConnective: "de", // cinq millions DE dollars
 });

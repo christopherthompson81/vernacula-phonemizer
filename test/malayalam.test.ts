@@ -120,4 +120,9 @@ describe("Malayalam text normalization", () => {
         expect(ml("6.5")).toBe("ˈaːrɨ d̪ˈaʃaːmʃam ˈaɲt͡ʃɨ"); // was ˈaːrɨ . ˈaɲt͡ʃɨ
         expect(ml("06:30")).toBe("ˈaːrɨ mˈupːat̪ɨ"); // was ˈaːrɨ , mˈupːat̪ɨ — a pause inside the time
     });
+
+    // #586 — `ക്യൂബിക് മീറ്റർ` ×1 joins the already-declared `ചതുരശ്ര കിലോമീറ്റർ` ×2; both word-first.
+    test("the squared/cubed measure word (#586)", () => {
+        expect(ml("120 m³")).toContain("kjˈuːbikɨ mˈiːrːaɾ");
+    });
 });
