@@ -174,6 +174,18 @@ const SYMBOLS = makeSymbolNormalizer({
         "KSh": ["shilingi"], "TSh": ["shilingi"],
     },
     currencyPrefix: true,
+    // #586 — `5 km` read as *tˈɑnɔ kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
+    // puts the measure noun FIRST and the tier only emitted it after. Counted over sw_ke's four attested unit
+    // words: 82 unit-before to 0 unit-after — "Mbuga hiyo inachukua kilomita 19,500 mraba", "mtindo huru wa
+    // mita 100 na mita 200". Hence `unitPrefix`, the mirror of the `currencyPrefix` already set above.
+    // Verified: kilomita ×59, mita ×23, kilogramu ×6, sentimita ×2.
+    unitPrefix: true,
+    units: { km: ["kilomita"], m: ["mita"], cm: ["sentimita"], kg: ["kilogramu"] },
+    // THE RATE, because declaring the unit alone left a stray letter. sw_ke writes `160 Km/h` ×2 — with a
+    // CAPITAL K, which a case-sensitive grep misses and the tier's `giu` pattern does not — and once `Km` read
+    // as kilomita the `/h` was stranded as a bare *h*. "kwa saa" is attested ×34 and "kwa sekunde" ×5.
+    unitPer: "kwa",
+    rateDenominators: { h: "saa", s: "sekunde" },
 });
 
 class SwahiliPhonemizer implements Phonemizer {

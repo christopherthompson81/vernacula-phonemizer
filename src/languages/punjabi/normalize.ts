@@ -58,6 +58,10 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["ਪ੍ਰਤੀਸ਼ਤ"],
+    // #586 — `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
+    // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".
+    // ਕਿਲੋਗਰਾਮ is ×0 in the corpus and is left undeclared rather than taken from Wikidata's label alone.
+    units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"] },
     currency: { "$": ["ਡਾਲਰ"] },
     magnitudes: ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"],
 });

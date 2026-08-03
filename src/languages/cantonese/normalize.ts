@@ -78,6 +78,17 @@ function spellDigits(s: string): string {
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["百分之"],
     percentPrefix: true,
+    // #586 — `5 km` read as *ŋ̩˩˧ ˈʊkm*: no unit was declared. Verified in yue_hant_hk:
+    // 公里 ×50 "公園占地一萬九千平方公里", 公斤 ×2 "（ 90 公斤）的人".
+    //
+    // WIKIDATA'S OWN yue LABELS ARE THE WRONG VARIETY, and the corpus is what caught it: it offers 千米 and
+    // 千克, the mainland standard, which occur ×0 here, against the HK 公里 ×50 and 公斤 ×2. A concept label
+    // gives the language's term for a concept, not the register this corpus is in.
+    //
+    // `m` IS DELIBERATELY ABSENT. 米 substring-matches ×36 and the first example is 米勒 — "Miller". In an
+    // unspaced script a one-character unit is unseparable from any name that contains it, so a declaration
+    // would read every such name as a measurement. Trap 19's caveat, arriving as a real hazard.
+    units: { km: ["公里"], kg: ["公斤"] },
     currency: { $: ["美元"], "€": ["歐元"], "£": ["英鎊"] },
     unspacedScript: true,
 });

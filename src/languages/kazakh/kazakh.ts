@@ -81,7 +81,13 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d{1,3}(?: \d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:]
 export const SYMBOLS = makeSymbolNormalizer({
     percent: ["пайыз"],
     currency: { "$": ["доллар"], "€": ["еуро"], "¥": ["йен"], "£": ["фунт"] },
-    units: { "км": ["километр"], "кг": ["килограмм"], "м": ["метр"], "мм": ["миллиметр"], "см": ["сантиметр"] },
+    // #586 — LATIN KEYS TOO. The words below were already right; only the Cyrillic abbreviations were
+    // declared, and the corpus writes the LATIN ones — so `5 km` read as *bˈes ˈʊkm*, the abbreviation
+    // reaching the phoneme sink while `5 км` read correctly. Same words, two spellings of the key.
+    // Verified in kk_kz: километр ×7 "жеті километр қашықтықта", метр ×10, сантиметр ×2.
+    units: { "км": ["километр"], km: ["километр"], "кг": ["килограмм"], kg: ["килограмм"],
+        "м": ["метр"], m: ["метр"], "мм": ["миллиметр"], mm: ["миллиметр"],
+        "см": ["сантиметр"], cm: ["сантиметр"] },
 });
 
 class KazakhPhonemizer implements Phonemizer {

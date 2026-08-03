@@ -94,7 +94,13 @@ export type ForeignPhonemizer = (latin: string) => string;
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["በመቶ"],
     currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
-    units: { kg: ["ኪሎግራም"] },
+    // #586 — `5 km` read as *amɨst ˈʊkm*: no km or m was declared at all. Verified in am_et:
+    // ሜትር ×15 "ከፍታ 15 ሜትር ነው", ኪሎ ሜትር ×3 "ሰባ ኪሎ ሜትር ያህል ርቆ ነበር", ኪሎ ግራም ×3 "(16 ኪሎ ግራም) ይመዝናል".
+    // NOTED, NOT CHANGED: the corpus writes ኪሎ ሜትር and ኪሎ ግራም with a SPACE, and the ኪሎግራም already declared
+    // here occurs ×0. Both are current Amharic and the space does not change the reading, so the closed
+    // spelling stays for kg while the corpus's own spaced forms are used for the two new keys — a
+    // spelling-preference finding for the sweep, recorded rather than silently harmonised.
+    units: { kg: ["ኪሎግራም"], km: ["ኪሎ ሜትር"], m: ["ሜትር"] },
     magnitudes: ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"],
 });
 

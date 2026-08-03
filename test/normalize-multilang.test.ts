@@ -477,3 +477,38 @@ describe("an undeclared exponent word must not cost the unit too (#586)", () => 
         expect(phonemize("2,2 Millionen km²", "de")).toContain("kvadʁˈaːtkilomeːtɐ");
     });
 });
+
+/**
+ * #586 — nine treated languages declared NO unit words, so `5 km` leaked the abbreviation into the IPA
+ * (*bˈes ˈʊkm*, *hˈaː˥˩ ˈʊkm*, *tˈɑnɔ kˈm̩*). The words were sourced by inverting the search: name the concept
+ * to Wikidata (`tools/normalization/concept.ts`), then verify the candidate in the language's OWN corpus.
+ * Fleet effect: raw `km` in the IPA 21 → 4, and the four remaining are three languages with no symbol tier at
+ * all (bg, ckb, fa) plus untreated mi.
+ */
+describe("unit words for the languages that had none (#586)", () => {
+    test("each reads its own unit instead of leaking the abbreviation", () => {
+        expect(phonemize("5 km", "kk")).toBe("bˈes kəjlomˈetr");            // Latin key was missing, not the word
+        expect(phonemize("5 km", "pa")).toBe("pˈə̃ɲd͡ʒ kɪloːmˈiːʈəɾ");      // ਕਿਲੋਮੀਟਰ ×31
+        expect(phonemize("5 km", "th")).toBe("hˈaː˥˩ kˈi˨˩loː˧mˌeː˦˥t");    // กิโลเมตร ×25
+        expect(phonemize("5 km", "yue")).toBe("ŋ̩˩˧ kʊŋ˥ lei˩˧");           // 公里 ×50, the HK form
+        expect(phonemize("5 m", "am")).toBe("amɨst metɨɾ");                  // ሜትር ×15
+    });
+
+    test("Swahili puts the measure noun FIRST, including in a rate", () => {
+        // 82 unit-before to 0 unit-after across sw_ke's attested unit words, which is why `unitPrefix` exists.
+        expect(phonemize("5 km", "sw")).toBe("kilɔmˈitɑ tˈɑnɔ");
+        // And the rate hinges on the same head noun, which the first version of `unitPrefix` forgot — the
+        // corpus's `160 Km/h` (capital K) then read the unit and stranded the `/h` as a bare *h*.
+        expect(phonemize("160 Km/h", "sw")).toBe("kilɔmˈitɑ mˈiɑ mˈɔʄɑ nˈɑ sitˈini kʷˈɑ sˈɑː");
+        expect(phonemize("10 m/s", "sw")).toBe("mˈitɑ kˈumi kʷˈɑ sɛkˈuⁿdɛ");
+        // …and a language that emits the unit after is untouched by the flag.
+        expect(phonemize("120 km/h", "de")).toBe("ˈaɪ̯nhʊndɐtt͡svant͡sɪç kilomˈeːtɐ pʁoː ʃtˈʊndə");
+    });
+
+    test("yue declares no `m`, deliberately", () => {
+        // 米 substring-matches ×36 in an unspaced script and the first example is 米勒 — "Miller". A
+        // one-character unit cannot be separated from a name containing it, so declaring it would read every
+        // such name as a measurement.
+        expect(phonemize("米勒", "yue")).not.toContain("mˈiː");
+    });
+});

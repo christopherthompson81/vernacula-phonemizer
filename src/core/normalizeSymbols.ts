@@ -58,6 +58,16 @@ export interface SymbolData {
      */
     currencyPrefix?: boolean;
     /**
+     * The UNIT noun precedes the number — Swahili writes *kilomita 19,500*, *mita 100*, the mirror of the
+     * `currencyPrefix` case and for the same reason (a measure noun heads its phrase in Bantu).
+     *
+     * Opt-in and measured, not inferred from `currencyPrefix`: counting the four unit words sw_ke attests,
+     * the corpus is **82 unit-before to 0 unit-after**, while the tier's default emits it after and had no way
+     * to say otherwise. Before this, sw could not declare units at all — which is why `5 km` read as *tˈɑnɔ
+     * kˈm̩*, the abbreviation reaching the phoneme sink.
+     */
+    unitPrefix?: boolean;
+    /**
      * The word joining two units in a RATE — `km/h` → "kilometres PER hour". Composition is shared; only
      * the word is language data ("per", "pro", "par"). Both units must be declared in `units`, since the
      * denominator needs its own noun (`h` → hour/Stunde/heure).
@@ -356,7 +366,10 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
                     const per = typeof d.unitPer === "string" ? d.unitPer : d.unitPer?.[dl];
                     if (per === undefined || dWord === undefined) return whole;
-                    return `${q} ${head} ${per} ${dWord}`;
+                    // `unitPrefix` applies here too, and forgetting it left Swahili reading
+                    // "160 kilomita kwa saa" where the language writes the measure noun first. The rate is
+                    // one phrase, so the whole of it hinges on the head noun's position.
+                    return d.unitPrefix ? `${head} ${q} ${per} ${dWord}` : `${q} ${head} ${per} ${dWord}`;
                 }
                 if (exp !== undefined) {
                     const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
@@ -381,7 +394,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     if (pos === "compound") return `${q} ${word}${head}`;
                     return pos === "before" ? `${q} ${word} ${head}` : `${q} ${head} ${word}`;
                 }
-                return `${q} ${head}`;
+                return d.unitPrefix ? `${head} ${q}` : `${q} ${head}`;
             });
         return s;
     };
