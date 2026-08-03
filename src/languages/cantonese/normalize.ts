@@ -62,7 +62,25 @@ function spellDigits(s: string): string {
 
 // The percent word 百分之 PRECEDES its number, as in Mandarin — and the corpus corroborates it directly,
 // writing 百分之三十 in running text ×3. Declared through the shared tier rather than reimplemented.
-const SYMBOLS = makeSymbolNormalizer({ percent: ["百分之"], percentPrefix: true });
+//
+// CURRENCY (#584). `$5` read as bare *ŋ̩˩˧*. yue_hant_hk contains ZERO `$` against 54 `%`, so the
+// corpus-driven gate could not see it — but the words are in that same corpus:
+//
+//   美元 ×8  "每次可被處以 1,000 美元的罰款"
+//   英鎊 ×3  "福克蘭群島鎊 (FKP)，價值與英鎊 (GBP) 相等"
+//   歐元 ×2  "每年營業額超過 100 億歐元（約 147 億美元）"
+//
+// Counted by substring, which is the only test an unspaced script admits; the examples are the evidence.
+// `¥` is DELIBERATELY ABSENT — neither 日圓 nor 日元 occurs, and an unsourced word is left unread.
+//
+// `unspacedScript` because a sign in Chinese is normally flanked by Han, which the tier's letter-boundary
+// guard rejected: `$500。` read 美元 while `為$500，` dropped it (#586).
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["百分之"],
+    percentPrefix: true,
+    currency: { $: ["美元"], "€": ["歐元"], "£": ["英鎊"] },
+    unspacedScript: true,
+});
 
 /**
  * Normalize one Cantonese string. `measureWords` is the manifest's classifier inventory (step 7).

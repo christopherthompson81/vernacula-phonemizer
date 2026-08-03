@@ -65,6 +65,12 @@ function foldDigit(c: string): string {
 
 /** A Persian word continues across a ZWNJ, so "not followed by a letter" must exclude ZWNJ as well. */
 const NOT_WORD = "(?![\\p{L}\\p{M}\\u200C])";
+
+/** Currency sign → its Persian word, each attested in fa_ir under a token test (see step 7b). `¥` is ین; the
+ *  Japanese and Chinese currencies are not distinguished in the corpus's single yen instance. */
+const CURRENCY: Readonly<Record<string, string>> = {
+    "$": "دلار", "€": "یورو", "£": "پوند", "¥": "ین",
+};
 /** Harakat + the connective marker: stripped from any word this layer writes into the TEXT (see the header). */
 const HARAKAT_OR_MARK = /[ً-ْٰ\u{E000}]/gu;
 /** ⟨و⟩ /o/, the connective, as ordinary text — read by the word path exactly like the ubiquitous conjunction. */
@@ -179,6 +185,26 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    only datum for that tier is this one word and it has no count agreement to select — and because the
         //    tier's percent pattern is ASCII-`%`-only anyway (see the core note in the commit message).
         s = s.replace(new RegExp(`(\\d)\\s?%${NOT_WORD}`, "gu"), `$1 درصد`);
+
+        // 7b) CURRENCY (#584). `$5` read as bare [pˈand͡ʒ] — the sign is in no group of the engine's TOKEN, so
+        //     it was DELETED exactly as the percent signs were, and a dropped sign is worse than a wrong word
+        //     because nothing in the output marks the loss. fa_ir contains ZERO `$` against 18 `%`, so the
+        //     corpus-driven gate that caught the percent could not reach this one — but the WORDS are in that
+        //     same corpus, spelled out and against a numeral, which is the slot this rule emits into:
+        //
+        //       دلار ×18  "میلیاردها دلار آمریکا"        پوند ×16  "پوند فالکلند (FKP)"
+        //       ین   ×4   "بین 2500 تا 130،000 ین"       یورو ×3   "10 میلیارد یورو (14.7 میلیارد دلار"
+        //
+        //     TOKEN-matched, and that mattered: a substring count for ین returns 7790 because it is inside این
+        //     ("this") and همین — the same trap that made hu's font read 211 for a word occurring 10 times.
+        //
+        //     Done HERE rather than through the shared symbol tier, for the reason step 7 gives for percent:
+        //     Persian has no count agreement for the selector to choose from, and the tier's currency guard is
+        //     letter-bounded on both sides, which an RTL script with no space between sign and numeral would
+        //     fight. The sign PRECEDES the number in logical order and the word FOLLOWS it, so unlike percent
+        //     this rule moves the reading across the numeral.
+        s = s.replace(new RegExp(`([$€£¥])\\s?(\\d[\\d.,]*)`, "gu"),
+            (_m, sign: string, num: string) => `${num} ${CURRENCY[sign]!}`);
 
         // 8) ORDINALS. Persian writes the ordinal as the numeral plus ـم/ـام (قرن 16ام "the 16th century" — ×5
         //    here, one of them across a ZWNJ: ⟨1000‌ام⟩). The suffix was tokenized apart and spoken as its own

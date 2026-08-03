@@ -197,6 +197,23 @@ const normalizeInitialisms = makeInitialismNormalizer({
  */
 const normalizeSymbols = makeSymbolNormalizer({
     percent: ["százalék"],
+    /**
+     * CURRENCY (#584). `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong
+     * word because nothing in the output marks the loss. hu_hu contains ZERO `$` against 57 `%`, so the
+     * corpus-driven gate that caught the percent could not see this; the WORDS are nonetheless in that same
+     * corpus, spelled out:
+     *
+     *   dollár  ×6   "11,000 és 22,500 amerikai dollár közötti áron"
+     *   font    ×10  "hivatalos pénzneme a falklandi font (FKP)"
+     *
+     * ONE FORM EACH, because Hungarian takes the SINGULAR after a numeral (öt dollár, not *öt dollárok).
+     *
+     * `euró` and `jen` are DELIBERATELY ABSENT: both are 0 in the corpus under a token test, and espeak's
+     * apparent hits are substring noise (`jen` inside *érjen*, `font` inside *fontos* — the latter is why the
+     * first substring count read 211 for a word that occurs 10 times). An unsourced currency word is left
+     * unread rather than guessed.
+     */
+    currency: { $: ["dollár"], "£": ["font"] },
     units: {
         km: ["kilométer"], m: ["méter"], cm: ["centiméter"], mm: ["milliméter"],
         kg: ["kilogramm"], "mérföld": ["mérföld"], mbit: ["megabit"],

@@ -247,6 +247,28 @@ const NOT_LETTER = "(?![\\p{L}\\p{M}])";
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["posto"], // INDECLINABLE — corpus посто ×57 against процената ×8 / одсто ×3; espeak's
     // shared hbs table gives `%` → posto too. One form, so the count selector never has to choose.
+    /**
+     * CURRENCY (#584). `$5` read as bare *pet*. sr_rs contains ZERO `$` against 24 `%`, so the corpus-driven
+     * gate could not see it — but the words are in that corpus, and they DECLINE, which is why a token test
+     * for the bare nominative found nothing and the stem had to be searched instead:
+     *
+     *   долара ×17 · долари ×2   "милијарде америчких долара ради избегавања пореза"
+     *   јена   ×2               "од 2500 и 130.000 јапанских јена"
+     *
+     * Three forms through `slavicCountForm`, as the units above take: 1 долар · 2–4 долара · 5+ долара.
+     * `долар` itself is the citation form of the attested долара rather than a separate finding.
+     *
+     * WRITTEN IN LATIN to match `posto` and the unit table, though the corpus attests Cyrillic. Serbian is
+     * digraphic and this engine reads both — measured, not assumed: `dolar`/`долар`, `dolara`/`долара`,
+     * `jen`/`јен` and `posto`/`посто` each phonemize IDENTICALLY.
+     *
+     * `€` AND `£` ARE DELIBERATELY ABSENT, and both are traps this sourcing walked into:
+     *   · `евр` returns 28 corpus hits of which 27 are **Европа/Европи/Европе/Европу** — the stem of Europe.
+     *     One remaining `евра` is a lead, not a finding.
+     *   · `фунти` ×12 looks like a solid pound until the sentence is read: "Особа која на Земљи тежи
+     *     200 фунти (90 кг)" — the WEIGHT pound, not the currency. The Malay `paun` trap exactly.
+     */
+    currency: { $: ["dolar", "dolara", "dolara"], "¥": ["jen", "jena", "jena"] },
     units: {
         km: ["kilometar", "kilometra", "kilometara"],
         m: ["metar", "metra", "metara"],
