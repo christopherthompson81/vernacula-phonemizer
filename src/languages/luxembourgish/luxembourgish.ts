@@ -15,7 +15,9 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeLuxembourgish } from "./normalize.ts";
 
 interface LuxDef {
     digraphs: Record<string, string>;
@@ -157,9 +159,48 @@ export function phonemizeWord(word: string): string {
 // A word (Luxembourgish Latin letters incl. é ë ä + the loan vowels) / number / punctuation token.
 const TOKEN = /([a-zéëäàáâôûüöA-ZÉËÄÀÁÂÔÛÜÖ'-]+)|(\d+)|([.!?…,;:])/gu;
 
+/**
+ * #562 symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
+ * Dollar), so no `countForm` override is needed. Sourcing, per §5e:
+ *   Prozent — corpus ×14 + espeak lb_list · Dollar — corpus ×7 · Euro — corpus ×1 + espeak ·
+ *   Kilometer/Meter/Zentimeter/Millimeter/Gramm/Meilen/Stonn/Sekonn — espeak lb_list · Hektar — espeak.
+ *   **Yen is attested in NO in-repo source** and is shipped only because ¥ carries 3 of the corpus's 6
+ *   currency instances; see the investigation doc. £ is not declared — its sign is absent from the corpus
+ *   and its word is unsourced.
+ * The two RATE idioms are lifted verbatim from the corpus, which writes both:
+ *   `240 Kilometer an der Stonn (149 Meilen an der Stonn)` and `1,5 Kilometer pro Sekonn`.
+ * `g`, `t` and `ha` are deliberately NOT declared: `50 Hektar` is written out, there is no bare `\dg`
+ * (the `g` in `802.11g` is a version letter), and a one-letter unit key is the Dutch `Il-76s` hazard.
+ * NEITHER IS `meile`, and that one was a real defect the corpus diff caught: declaring it so that
+ * `Meile/h` could compose also rewrote the corpus's own six spelled-out `(31 Meile)` into `Meilen` — and
+ * the corpus's Meile/Meilen alternation is the EIFELER REGEL applied correctly seven times out of seven
+ * (`(15 Meilen) nord-` keeps the ⟨n⟩ before ⟨n⟩; `(31 Meile) vu`, `(3 980 Meile) laang`, `(500 Meile)
+ * breet` drop it before a consonant). `mph` and `Meile/h` are claimed in normalize.ts instead, where the
+ * sandhi can be got right, and a spelled-out `Meile` is now left exactly as the writer set it.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["Prozent"],
+    currency: { "$": ["Dollar"], "€": ["Euro"], "¥": ["Yen"] },
+    units: { km: ["Kilometer"], m: ["Meter"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"] },
+    magnitudes: ["Milliounen", "Millioune", "Millioun", "Milliarden", "Milliard"],
+    unitPer: { h: "an der", s: "pro" },
+    rateDenominators: { h: "Stonn", s: "Sekonn" },
+    // `km²` ×3 (`19 500 km²`, `3 850 km²`, `2,2 Millioune km²`) used to leave the unit entirely raw,
+    // because the tier declines an undeclared exponent. Luxembourgish fuses the measure word German-style,
+    // and the corpus writes both compounds itself: `783 562 Quadratkilometer (300 948 Quadratmeilen)` and
+    // `120 – 160 Kubikmeter`.
+    exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" },
+});
+
 class LuxembourgishPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562 order: the Luxembourgish rewrites (de-grouping, era, abbreviations, ORDINALS, sports
+        // times, clock, decimals, ranges, degrees, signs, fractions) → the shared symbol tier. The
+        // ordinals and the clock must precede the number tokenizer; the tier runs last because it needs
+        // a NUMBER adjacent to its unit, and both decimal rules above leave their operands as digits so
+        // that adjacency survives.
+        const normalized = SYMBOLS(normalizeLuxembourgish(input));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

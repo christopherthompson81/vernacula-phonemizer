@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { createLuxembourgish, phonemizeWord } from "../src/languages/luxembourgish/luxembourgish.ts";
 import { numberToWords } from "../src/languages/luxembourgish/numbers.ts";
+import { normalizeLuxembourgish, ordinalStem } from "../src/languages/luxembourgish/normalize.ts";
 
 // Luxembourgish (lb) — Lëtzebuergesch, West Germanic (Moselle Franconian), Latin script (~390k). A German-derived
 // orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) + a distinctive diphthong system + French loans. The engine is a
@@ -85,6 +86,181 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
     test("numbers: wired into the phonemizer", () => {
         expect(lb.text("21").trim()).toBe("eːnant͡svant͡səχ"); // eenanzwanzeg
         expect(lb.text("45").trim()).toBe("fənəfafei̯ərt͡səχ"); // fënnefavéierzeg (n-deleted)
+    });
+
+});
+
+// #562 TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
+// text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
+// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13. See
+// docs/investigations/lb_normalization_investigation.md.
+describe("Luxembourgish #562 normalization — the period's four jobs + the Eifeler Regel", () => {
+    const lb = createLuxembourgish();
+    const N = normalizeLuxembourgish;
+
+    // The ordinal STEM has five branches and the corpus exercises only some of them: the suppletive table,
+    // the `+t` path, the doubled-`t` collapse at 8, the `+st` path from 20, and the multi-word carrier
+    // where the ending must land on the last word only. 8, 100 and 1922 are NOT in the corpus.
+    test("ordinal stem: every branch, not just the attested values (trap 13)", () => {
+        expect(ordinalStem(1)).toBe("éischt"); // suppletive
+        expect(ordinalStem(3)).toBe("drëtt"); // suppletive
+        expect(ordinalStem(7)).toBe("siwent"); // +t
+        expect(ordinalStem(8)).toBe("aacht"); // the tt COLLAPSE — aacht + t, unattested in the corpus
+        expect(ordinalStem(19)).toBe("nonzéngt"); // the last +t
+        expect(ordinalStem(20)).toBe("zwanzegst"); // the first +st — the branch boundary
+        expect(ordinalStem(24)).toBe("véieranzwanzegst"); // compound, matches espeak's own entry
+        expect(ordinalStem(100)).toBe("honnertst"); // matches espeak's own entry
+        expect(ordinalStem(1922)).toBe("dausend nénghonnertzweeanzwanzegst"); // ending on the LAST word
+    });
+
+    // The ending is `-en` plus the language's own final-n deletion, read off the corpus's spelled-out
+    // ordinals: *am drëtte Joerhonnert* / *vum éischten Dag* / *op der zéngter Plaz*.
+    test("ordinal ending: the Eifeler Regel decides -en vs -e, and `der` takes -er", () => {
+        expect(N("am 16. Joerhonnert")).toBe("am siechzéngte Joerhonnert"); // ⟨j⟩ → n DELETED
+        expect(N("den 1. Dag vum Mount")).toBe("den éischten Dag vum Mount"); // ⟨d⟩ → n KEPT
+        expect(N("den 3. August")).toBe("den drëtten August"); // a VOWEL → n kept
+        expect(N("de 14. Mäerz")).toBe("de véierzéngte Mäerz"); // ⟨m⟩ → deleted
+        expect(N("op der 3. Plaz")).toBe("op der drëtter Plaz"); // feminine dative → -er
+    });
+
+    test("ordinal licensing: article + noun, and coordinated lists", () => {
+        expect(N("den 190. vun der Lëscht")).toBe("den honnertnonzegste vun der Lëscht"); // article + lowercase word
+        expect(N("Säin 1 000. Timber")).toBe("Säin dausendsten Timber"); // needs the de-grouping first
+        expect(N("am 11., 12. an 13. Joerhonnert"))
+            .toBe("am eeleften, zwieleften an dräizéngte Joerhonnert"); // list; ⟨n⟩ kept before the pause
+        expect(N("tëschent dem 10. bis 11. an dem 14. Joerhonnert"))
+            .toBe("tëschent dem zéngte bis eeleften an dem véierzéngte Joerhonnert");
+    });
+
+    // The four sentence-final `N.` in the corpus, plus three constructed neighbours. None may be claimed:
+    // an ordinal is licensed by what FOLLOWS, and a sentence period has nothing after it.
+    test("a sentence-final numeral is NOT an ordinal", () => {
+        expect(N("an Afghanistan 1979.")).toBe("an Afghanistan 1979.");
+        expect(N("am Joer 2020.")).toBe("am Joer 2020."); // `Joer` is deliberately not a licenser
+        expect(N("d'Wanterolympiad 2010.")).toBe("d'Wanterolympiad 2010.");
+        expect(N("Kapitel 5. Dat ass gutt")).toBe("Kapitel 5. Dat ass gutt"); // content word before
+        expect(lb.text("an Afghanistan 1979.").trim().endsWith(".")).toBe(true); // the PAUSE survives
+    });
+
+    // The crux: one character, four jobs, separated by fraction length and by what follows.
+    test("the period — grouping vs clock vs ordinal vs version", () => {
+        expect(N("vun 1.000 Dollar")).toBe("vun 1000 Dollar"); // THREE digits ⇒ grouping
+        expect(N("um 7.19 Auer")).toBe("um 7 Auer 19"); // TWO digits + a licenser ⇒ clock
+        expect(N("am 16. Joerhonnert")).toBe("am siechzéngte Joerhonnert"); // nothing after ⇒ ordinal
+        expect(N("Den 802.11n-Standard")).toBe("Den 802.11n-Standard"); // a version dot: untouched
+        expect(N("Ofbildung 1.1.")).toBe("Ofbildung 1.1."); // a figure number: untouched
+        expect(N("4.41,30")).toBe("4 41 Komma 3 0"); // a sports time: NOT a clock, NOT a decimal point
+    });
+
+    // All six `\d+:\d+` in the corpus are scores or ratios, so there is no colon rule at all.
+    test("the colon is a score in Luxembourgish, never a clock", () => {
+        expect(N("7:2")).toBe("7:2");
+        expect(N("D'Endresultat war 21:20")).toBe("D'Endresultat war 21:20");
+        expect(N("mat 3:2 bezeechent")).toBe("mat 3:2 bezeechent");
+    });
+
+    test("clock: `Auer` is re-emitted, a zone label is put back, and hour 1 is feminine", () => {
+        expect(N("um 20.30 Auer Lokalzäit (15.00 UTC)")).toBe("um 20 Auer 30 Lokalzäit (15 Auer UTC)");
+        expect(N("Tëschent 22.00 an 23.00 Auer MDT")).toBe("Tëschent 22 Auer an 23 Auer MDT");
+        expect(N("E Samschdeg um 1.15 Auer")).toBe("E Samschdeg um eng Auer 15"); // trap 14: Auer is FEMININE
+        expect(N("tëschent 6.30 a 7.30 Auer")).toBe("tëschent 6 Auer 30 a 7 Auer 30"); // licensed both ways
+        // An UNLICENSED period-pair is left alone: the decimal rule takes a one-digit fraction only,
+        // because in this language a two-digit fraction after a dot is the clock shape.
+        expect(N("De Programm ass 20.30 lassgaangen")).toBe("De Programm ass 20.30 lassgaangen");
+        expect(N("12.5 Kilometer")).toBe("12 Komma 5 Kilometer"); // one digit ⇒ the decimal branch
+    });
+
+    test("thousands: both the period and the three space characters the corpus uses", () => {
+        expect(N("130.000 Yen")).toBe("130000 Yen");
+        expect(N("55 000 Barrellen")).toBe("55000 Barrellen"); // plain space
+        expect(N("9 000 Leit")).toBe("9000 Leit"); // NBSP
+        expect(N("4 830 Kilometer")).toBe("4830 Kilometer"); // NARROW NBSP
+        expect(lb.text("9 000").trim()).toBe("neːŋdæu̯zənt"); // was *néng null*
+    });
+
+    test("decimals: the comma is the decimal point, the fraction is read digit by digit", () => {
+        expect(N("1,5 Kilometer")).toBe("1 Komma 5 Kilometer");
+        expect(N("7,74 Meter")).toBe("7 Komma 7 4 Meter");
+        expect(N("Whistler (1.5 Fuerstonne)")).toBe("Whistler (1 Komma 5 Fuerstonne)"); // the dot form too
+        expect(N("ofgeschloss, 12 Leit")).toBe("ofgeschloss, 12 Leit"); // a clause comma is untouched
+    });
+
+    // TRAP 14: `bis` starts with ⟨b⟩, so a left operand ending in unstressed ⟨-en⟩ loses it — the corpus
+    // writes `siwe bis aacht`. Emitting `$1 bis $2` on digits could never do that.
+    test("ranges: the joiner is `bis`, and it triggers n-deletion on the left operand", () => {
+        expect(N("(1894 – 1895)")).toBe("(1894 bis 1895)");
+        expect(N("vun 2 – 3 km Äis")).toBe("vun 2 bis 3 km Äis"); // right operand stays DIGITS for the tier
+        expect(N("7 – 8 Deeg")).toBe("siwe bis 8 Deeg"); // *siwen* → *siwe*
+        expect(N("1000000 – 2000000")).toBe("1000000 bis 2000000"); // *eng Millioun*: stem ⟨n⟩, NOT deleted
+        expect(N("ers 1995 – 1996, pan")).toBe("ers 1995 bis 1996, pan"); // the clause comma survives
+        expect(N("gëtt – duerch")).toBe("gëtt – duerch"); // the PARENTHETICAL dash (×44) is untouched
+    });
+
+    // The fraction noun composes as ordinal stem + `el`; espeak's lb_list confirms six of them and records
+    // `véierel` as the one irregular. The corpus writes only `1/5`, so every other branch is unexercised.
+    test("fractions: the table, the composition, and the numerator's own n-deletion", () => {
+        expect(N("5 mm (1/5 Zoll)")).toBe("5 mm (ee Fënneftel Zoll)"); // the corpus's only fraction
+        expect(N("1/3 vum Land")).toBe("een Drëttel vum Land"); // ⟨d⟩ keeps the n — the corpus's own spelling
+        expect(N("1/4 Stonn")).toBe("ee Véierel Stonn"); // the IRREGULAR noun, unattested in the corpus
+        expect(N("1/2 Zoll")).toBe("een hallef Zoll"); // 2 is an adjective, not a noun
+        expect(N("3/4 vun der Zäit")).toBe("dräi Véierel vun der Zäit"); // numerator > 1
+        expect(N("2/3 vun de Leit")).toBe("zwee Drëttel vun de Leit");
+    });
+
+    test("era, abbreviations and the ones deliberately left alone", () => {
+        expect(N("am 10. Joerhonnert v. Chr. ass")).toBe("am zéngte Joerhonnert vir Christus ass");
+        expect(N("(1000 – 1300 n. Chr.)")).toBe("(1000 bis 1300 no Christus)");
+        expect(N("z. B. de Pennsylvania Wilds")).toBe("zum Beispill de Pennsylvania Wilds");
+        expect(N("Kéis, Thon asw.")).toBe("Kéis, Thon an sou weider."); // the sentence break survives
+        expect(N("Nëss, Iessen asw., déi")).toBe("Nëss, Iessen an sou weider, déi"); // no DOUBLED pause
+        expect(N("den Dr. Damadian")).toBe("den Dokter Damadian");
+        expect(N("Six Flags St. Louis")).toBe("Six Flags St. Louis"); // NOT expanded: *Sankt* is unsourced
+    });
+
+    test("degrees and signs — and the compound hyphens that must not become a minus", () => {
+        expect(N("bei 32 °C Hëtzt")).toBe("bei 32 Grad Celsius Hëtzt");
+        expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — trap 8 probe
+        expect(N("iwwer +30 Grad Celsius")).toBe("iwwer plus 30 Grad Celsius");
+        expect(N("(UTC+1)")).toBe("(UTC plus 1)");
+        expect(N("Typ-1-Diabetes an COVID-19")).toBe("Typ-1-Diabetes an COVID-19"); // no minus
+        expect(N("Standard-35-mm-Film")).toBe("Standard-35-mm-Film");
+    });
+
+    // Both of these were found by the CORPUS DIFF, not by a probe.
+    test("`Meile` is the writer's own Eifeler form and must not be pluralised; only the RATE is claimed", () => {
+        const lb2 = createLuxembourgish();
+        expect(N("50 Kilometer (31 Meile) vu Buenos Aires")).toBe("50 Kilometer (31 Meile) vu Buenos Aires");
+        expect(lb2.text("20 km (15 Meilen) nord").trim()).toBe(lb2.text("20 Kilometer (15 Meilen) nord").trim());
+        expect(N("165 km/h (105 Meile/h)")).toBe("165 km/h (105 Meilen an der Stonn)"); // km/h → the tier
+        expect(N("300 mph")).toBe("300 Meilen an der Stonn");
+    });
+
+    test("the squared/cubed unit fuses German-style, from the corpus's own compounds", () => {
+        expect(lb.text("19 500 km²").trim()).toBe(lb.text("19500 Quadratkilometer").trim());
+        expect(lb.text("5 m²").trim()).toBe(lb.text("5 Quadratmeter").trim());
+        expect(lb.text("7 m³").trim()).toBe(lb.text("7 Kubikmeter").trim()); // cf. the corpus's Kubikmeter
+    });
+
+    // `&` has 2 corpus instances; the relational signs have zero and are read anyway (#584 — a dropped
+    // sign is inaudible, which is the one outcome that cannot be right).
+    test("no sign class is silently dropped", () => {
+        expect(N("College of Arts & Sciences")).toBe("College of Arts an Sciences");
+        expect(N("x = y")).toBe("x ass gläich y");
+        expect(N("5 < 6")).toBe("5 méi kleng ewéi 6");
+        expect(N("7 > 6")).toBe("7 méi grouss ewéi 6");
+        expect(N("6 × 6 cm")).toBe("6 mol 6 cm");
+        expect(N("12 ÷ 4")).toBe("12 dividéiert duerch 4"); // the corpus's own "dividéiert duerch zwielef"
+        expect(N("4x4")).toBe("4x4"); // the ASCII x is a LETTER here and stays one
+    });
+
+    // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (trap 6).
+    test("the symbol tier: percent, currency, units and the two rate idioms", () => {
+        expect(lb.text("88 %").trim()).toBe(lb.text("88 Prozent").trim());
+        expect(lb.text("30 $").trim()).toBe(lb.text("30 Dollar").trim());
+        expect(lb.text("165 km/h").trim()).toBe(lb.text("165 Kilometer an der Stonn").trim()); // corpus idiom
+        expect(lb.text("133 m/s").trim()).toBe(lb.text("133 Meter pro Sekonn").trim()); // corpus idiom
+        expect(lb.text("7 cm").trim()).toBe(lb.text("7 Zentimeter").trim()); // was *km*
+        expect(lb.text("0 kg").trim()).toBe(lb.text("0 Kilogramm").trim()); // was *kk*
     });
 
 });
