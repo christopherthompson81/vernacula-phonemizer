@@ -168,6 +168,15 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         expect(phonemize("120 m³", "id")).toContain("mɛtˈər");      // id has no cube word; not "padu"
         expect(phonemize("120 m³", "id")).not.toContain("pˈadu");
         expect(phonemize("isi padu air", "zsm")).toBe("ˈisi pˈadu ˈair"); // the bare word is untouched
-        expect(phonemize("M3 lebuhraya", "zsm")).toContain("m tˈiɡa");   // the motorway is not a volume
+        // EVERY unit, not just `m`: nothing behind this file has a cube word at all (the tier Malay inherits
+        // is Indonesian's, `squared` only), so unlike the squared arms these cannot fall through.
+        expect(phonemize("5 km³", "zsm")).toContain("kilomətˈər pˈadu");
+        expect(phonemize("5 km3", "zsm")).toContain("kilomətˈər pˈadu");
+        expect(phonemize("3136 mm3", "zsm")).toContain("milimətˈər pˈadu");
+        // …but bare `m` stays SUPERSCRIPT-ONLY, because `M3` is a motorway and a car. `5 m3` reads as a
+        // number deliberately, the same trade the `m²` arm above already makes.
+        expect(phonemize("M3 lebuhraya", "zsm")).toContain("m tˈiɡa");
+        expect(phonemize("BMW M3", "zsm")).toContain("m tˈiɡa");
+        expect(phonemize("1 M3", "zsm")).not.toContain("pˈadu");
     });
 });
