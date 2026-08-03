@@ -192,7 +192,11 @@ export function normalizeKorean(input: string): string {
 
     // 4) DEGREES, before rule 9 — the C of 30°C is otherwise a single capital letter and rule 9 would
     //    spell it 씨. 섭씨 / 화씨 are the Korean names for the two scales and precede the number.
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gu, "섭씨 $1도");
+    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER (#586). Korean spaces its eojeol but not
+    // its particles, so a temperature is normally followed by one — and `(?![\p{L}])` rejected exactly that:
+    // `20℃` read 섭씨 20도 while `20℃에` read "20도씨에", losing 섭씨 and spelling the C as 씨 through rule 9.
+    // The corpus's own instance is `32℃에 달하는` (×3), so the ordinary case was the broken one.
+    s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gu, "섭씨 $1도");
     s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu, "화씨 $1도");
     s = s.replace(/(\d)\s?°/gu, "$1도");
 

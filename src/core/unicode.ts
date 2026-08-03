@@ -153,3 +153,35 @@ export function foldNativeDigits(s: string): string {
         return ch; // a block we do not carry: leave it rather than guess
     });
 }
+
+/**
+ * SQUARED DEGREE SIGNS → their two-character equivalents: ℃ → `°C`, ℉ → `°F`.
+ *
+ * WHY A FOLD RATHER THAN A RULE PER LANGUAGE. U+2103 and U+2109 are single code points that mean exactly what
+ * `°C` and `°F` mean, and 52 of the 65 languages with a mined artifact ALREADY read `°C` correctly while
+ * dropping `℃` — the whole unit, not just the sign: `20℃` came out as bare *twenty*. Folding is therefore the
+ * only change that closes 52 languages at once, and it needs no new word in any of them. 13 already handled
+ * both, because they had written the ℃ arm out by hand (bg ckb cmn da en hi is ja my nb ro sd sv); folding is
+ * idempotent, so those stay as they are.
+ *
+ * ⚠ NOT `NFKC`, AND THIS IS THE WHOLE REASON THE LIST IS CURATED. Blanket compatibility normalisation looks
+ * like the general answer and is measurably destructive here. Counting every compatibility character in the
+ * corpora:
+ *
+ *   ²  → "2"     in 46 corpora   — would erase every exponent reading the tier composes
+ *   …  → "..."   in 18 corpora   — one ellipsis becomes THREE clause breaks
+ *   ¾  → "3⁄4"   in 35 corpora
+ *   য় ড় ਸ਼ ਜ਼ ଡ଼ ज़ …           — nukta letters in five Indic scripts, recomposed differently
+ *   ，（）：；                    — fullwidth punctuation the CJK layers claim deliberately
+ *
+ * ⚠ № IS DELIBERATELY EXCLUDED, though it is the same kind of character. NFKC gives `No`, and Bulgarian —
+ * which writes it 21 times ("космонавт № 11") — says *номер*. Folding it would replace a dropped symbol with
+ * an English word read by a Bulgarian g2p, which is the confidently-wrong outcome this tree ranks below
+ * silence. It needs a per-language WORD, not a fold.
+ *
+ * The CJK squared units (㎞ ㎡ ㎥ ㎏ ㎜ ㎝ ㎢ ㏊) are omitted for a duller reason: zero occurrences in any
+ * corpus, and each would need the language to declare that unit anyway.
+ */
+export function foldSquaredDegrees(s: string): string {
+    return s.replace(/℃/gu, "\u00b0C").replace(/℉/gu, "\u00b0F");
+}

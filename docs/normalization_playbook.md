@@ -837,6 +837,28 @@ as an article TITLE — two independent expressions, both citable (`tools/normal
 - **The real gain is that `attest.ts` finally has something to probe.** This does not replace the sense check;
   it is what makes the sense check possible.
 
+**36. A COMPATIBILITY CHARACTER IS A FOLD, NOT FIFTY RULES — BUT NEVER `NFKC`.** ℃ (U+2103) is one code point
+meaning exactly what `°C` means, and **52 of the 65** languages with an artifact read `°C` correctly while
+dropping `℃` — losing the whole unit, not merely the sign (`20℃` → bare *twenty*). One fold at the registry's
+single dispatch point closed all 52 and needed no new word in any language. The 13 that had written a ℃ arm by
+hand are unaffected, because folding is idempotent.
+
+- **Blanket `NFKC` is the obvious generalisation and is measurably destructive.** Counted over the corpora:
+  `²` → `2` in **46** of them, which erases every exponent reading the tier composes; `…` → `...` in 18, turning
+  one ellipsis into three clause breaks; `¾` → `3⁄4` in 35; and the nukta letters of five Indic scripts
+  (য় ড় ਸ਼ ਜ਼ ଡ଼ ज़) recompose differently. Curate the list; do not reach for the standard's blanket form.
+- **№ IS THE INSTRUCTIVE EXCLUSION.** It is the same kind of character and NFKC gives `No` — but Bulgarian
+  writes it 21 times ("космонавт № 11") and says *номер*. Folding would replace a dropped symbol with an
+  English word read by a Bulgarian g2p: confidently wrong, which this tree ranks below silence. It needs a
+  per-language WORD.
+- **Fold only what the corpora contain.** The CJK squared units (㎞ ㎡ ㎥ ㎏ ㎢) are zero everywhere, and each
+  would need the language to declare that unit anyway.
+- **A fold surfaces the guards behind it.** Routing ℃ into the `°C` path exposed a pre-existing defect in ja,
+  ko and yue: `(?![\p{L}])` after the scale letter rejects a following kana or Hangul particle, which in an
+  unspaced script is the ORDINARY case. `20℃` read correctly and `20℃を` read "20度 シー を"; ko lost 섭씨
+  entirely on its own corpus sentence `32℃에`. Same shape as the tier's `unspacedScript` (trap 27), in a local
+  rule — so when you fix a guard in one place, grep for its twin.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

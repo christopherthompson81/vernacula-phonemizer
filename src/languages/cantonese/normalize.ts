@@ -108,6 +108,23 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // ％ U+FF05 ×1 (20％) and ／ U+FF0F ×1; the shared tier knows only ASCII % and Arabic ٪.
     s = s.replace(/％/gu, "%").replace(/／/gu, "/");
 
+    // ── 1b. degrees ──────────────────────────────────────────────────────────────────────────────
+    // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback,
+    // which is the whole unit lost rather than merely its sign (#586). The shared tier cannot express this
+    // one: the scale name PRECEDES the number and 度 FOLLOWS it, so the reading wraps around the numeral
+    // and a `units` entry can only append.
+    //
+    // Both words and the ORDER are the corpus's own, ×2 each:
+    //   攝氏  "氣溫經常超過攝氏 30 度"        華氏  "在華氏 90 度的高溫中"
+    // Wikidata's `degree Celsius` label for yue is 攝氏 too, independently. The SIGN itself occurs ×0 here,
+    // so this is robustness for plausible input — but the words are not a guess.
+    //
+    // Before the thousands de-grouping is fine (no digits move), and it must be before the Latin-run pass
+    // that reads a bare C as a letter name. ℃/℉ arrive already folded to `°C`/`°F` by the registry.
+    s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}])/gu, "攝氏$1度");
+    s = s.replace(/(\d+)\s?°\s?F(?![\p{sc=Latn}])/gu, "華氏$1度");
+    s = s.replace(/(\d+)\s?°/gu, "$1度");
+
     // ── 2. de-group thousands separators ─────────────────────────────────────────────────────────
     // BEFORE EVERYTHING ELSE. A grouping comma is otherwise read as clause punctuation, and worse: the
     // engine tokenizes `\d+`, so "1,000" became 一 + [pause] + integerToHan(0) = 零 — the value was gone,
