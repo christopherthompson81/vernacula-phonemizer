@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createXhosa } from "../src/languages/xhosa/xhosa.ts";
+import { normalizeXhosa } from "../src/languages/xhosa/normalize.ts";
+import { phonemize } from "../src/index.ts";
 
 // Canonical-IPA goldens for Xhosa / isiXhosa (xh) — Nguni Bantu, AUTHORED beyond-espeak. The sibling of Zulu:
 // it REUSES the shared Zulu g2p scan (the 15-way click series, depressor consonants, implosive b→ɓ, ejective
@@ -45,5 +47,184 @@ describe("Xhosa canonical IPA", () => {
         expect(d.text("555").trim()).toBe("amakʰˈuːlu amaɬˈaːnu amaʃˈuːmi amaɬˈaːnu nanɬˈaːnu");
         expect(d.text("2000").trim()).toBe("amawˈaːkʼa amaɓˈiːni"); // amawaka amabini
         expect(d.text("1000000").trim()).toBe("isiɡ̤ˈiːd̤i"); // isigidi
+    });
+});
+
+// #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13):
+// every rule with a table plus a fallback gets one case from each side, and the cases the corpus does NOT
+// contain (a capitalised ordinal suffix, `°F`, `00:30`, an out-of-range hour, a comma decimal) are pinned
+// deliberately, because zero corpus instances is not evidence of correctness (trap 8).
+describe("Xhosa text normalization (#562)", () => {
+    test("thousands de-grouping — comma, space, and the two shapes that must NOT de-group", () => {
+        expect(normalizeXhosa("eziyi-3,850")).toBe("eziyi-3850");
+        expect(normalizeXhosa("ezingama-5,000,000")).toBe("ezingama-5000000");
+        // The trailing guard is `(?![\d]|,\d)`: a clause comma and a sentence period must not block it.
+        // Both of these silently declined with a `(?![\d.,])` guard, and step 6 then read the leftover
+        // comma as a decimal — `¥130,000` came out "one hundred and thirty zero zero zero yen".
+        expect(normalizeXhosa("ne-¥130,000, yaye")).toBe("ne-¥130000, yaye");
+        expect(normalizeXhosa("nayi-2,207.")).toBe("nayi-2207.");
+        expect(normalizeXhosa("abangama-6 500.")).toBe("abangama-6500.");
+        expect(normalizeXhosa("ne-10 000 BCE")).toBe("ne-10000 BCE");
+        // A four-digit tail is a DATE comma (Novemba 26,2008), not grouping.
+        expect(normalizeXhosa("Novemba 26,2008")).toBe("Novemba 26,2008");
+        // A partial grouped match must not be taken (`1,234` inside `1,234,5`).
+        expect(normalizeXhosa("1,234,5")).toBe("1,234,5");
+        // Space grouping needs blocks of exactly three, or two unrelated numbers would fuse.
+        expect(normalizeXhosa("nge 30 9")).toBe("nge 30 9");
+    });
+
+    test("the clock — all four minute branches of the na- connective, plus the refusals", () => {
+        // :00 → the hour alone. Otherwise the zero word `iqanda` ("egg") is spoken, which is what
+        // `12.00 GMT` read before.
+        expect(normalizeXhosa("ngo-11:00")).toBe("ngo-ishumi nanye");
+        // 1–9: the manifest's own suppletive na- series (kunye → nanye), not a derivation.
+        expect(normalizeXhosa("8:08")).toBe("isibhozo nesibhozo");
+        // 10–19: the head is `ishumi`, so na+i → ne.
+        expect(normalizeXhosa("ngo-07:19 a.m.")).toBe("ngo-isixhenxe neshumi nethoba kusasa");
+        // 20+: the head is `amashumi`, so na+a → na. The corpus writes this one with a SPACE after the
+        // colon; `10: 00` and `11: 00` do too.
+        expect(normalizeXhosa("nge-8: 30 p.m.")).toBe("nge-isibhozo namashumi amathathu emva kwemini");
+        expect(normalizeXhosa("ngo-11:20,amapolisa")).toBe("ngo-ishumi nanye namashumi amabini,amapolisa");
+        // The DOT clock, which needs its timezone to be distinguishable from a decimal.
+        expect(normalizeXhosa("ngo-12.00 GMT")).toBe("ngo-ishumi nambini GMT");
+        expect(normalizeXhosa("(15.00 UTC)")).toBe("(ishumi nanhlanu UTC)");
+        // A SPORTS TIME IS NOT A CLOCK — a third field. All three corpus paces must fall through.
+        expect(normalizeXhosa("le-4: 41.30")).toBe("le-4: 41 3 0");
+        expect(normalizeXhosa("eyi-1: 09.02")).toBe("eyi-1: 09 0 2");
+        // Out-of-range operands are left alone rather than read as a time.
+        expect(normalizeXhosa("24:45")).toBe("24:45");
+    });
+
+    test("currency — the compound key, the concord-prefix split, and the decimal path", () => {
+        // THE DROP THIS LAYER EXISTS FOR. `$` is letter-bounded on the left in the shared tier, and Xhosa
+        // glues its concord straight onto the sign, so both of these were silently swallowed.
+        expect(phonemize("leUS$30", "xh")).toContain("iid̤ˈɔːla z̤asɛmɛlˈiːkʼa");
+        expect(phonemize("i$10", "xh")).toContain("iid̤ˈɔːla");
+        // …and the spaced code form converges on the same compound key.
+        expect(phonemize("i-US $ 14.7 yezigidi", "xh")).toContain("iid̤ˈɔːla z̤asɛmɛlˈiːkʼa");
+        // A decimal amount must claim its own sign and magnitude — step 12 destroys the tier's adjacency.
+        expect(normalizeXhosa("bungange-$2.3 bhiliyoni")).toBe("bungange-2 3 bhiliyoni iidola");
+        // A GROUPED comma is not a decimal, even right after a sign.
+        expect(normalizeXhosa("ne-¥7,000.")).toBe("ne-¥7000.");
+        expect(phonemize("ne-¥7,000.", "xh")).toContain("iijˈɛːni");
+        expect(phonemize("ye-£ 27 yezigidi", "xh")).toContain("iipʼˈɔːntʼi");
+    });
+
+    test("units and rates — the tier's nouns, and the rate the tier cannot express", () => {
+        expect(phonemize("i-5 mm", "xh")).toContain("iimilimˈiːtʰa");
+        expect(phonemize("30 cm", "xh")).toContain("iisɛntʼimˈiːtʰa");
+        expect(phonemize("500 mi", "xh")).toContain("iimajˈiːlɛ");
+        expect(phonemize("3,850 km²", "xh")).toContain("iikʰilɔmˈiːtʰa iz̤ikʼwˈɛːrɛ");
+        // A decimal with a unit: the rule claims the unit itself (trap 14's second clause).
+        expect(normalizeXhosa("ezingange 3.50 m ububanzi")).toBe("ezingange 3 5 0 iimitha ububanzi");
+        // Rates are local because Xhosa's denominator is ONE attested word, not "A per B".
+        expect(normalizeXhosa("kwi-480 km/h")).toBe("kwi-480 iikhilomitha ngeyure");
+        expect(normalizeXhosa("nge-160km/h.")).toBe("nge-160 iikhilomitha ngeyure.");
+        expect(normalizeXhosa("kwi-83 km / h,")).toBe("kwi-83 iikhilomitha ngeyure,");
+        expect(normalizeXhosa("133 m/s;")).toBe("133 iimitha ngomzuzwana;");
+        expect(normalizeXhosa("300 mph")).toBe("300 iimayile ngeyure");
+        expect(normalizeXhosa("i-64 kph")).toBe("i-64 iikhilomitha ngeyure");
+        // ORDERING: the range must be claimed BEFORE the rate, or the second endpoint is not adjacent to
+        // its unit and `km/h` reaches the g2p as raw letters.
+        expect(normalizeXhosa("u-35-40 mph (56-64 km/h)")).toBe(
+            "u-35 ukuya ku 40 iimayile ngeyure (56 ukuya ku 64 iikhilomitha ngeyure)");
+    });
+
+    test("ranges — ascending spans only; scores and seasons keep their juxtaposition", () => {
+        expect(normalizeXhosa("ibine-120-160")).toBe("ibine-120 ukuya ku 160");
+        expect(normalizeXhosa("(1644-1912)")).toBe("(1644 ukuya ku 1912)");
+        expect(normalizeXhosa("(1418 – 1450)")).toBe("(1418 ukuya ku 1450)");
+        expect(normalizeXhosa("ngu- 7-2.")).toBe("ngu- 7-2.");     // a tennis score
+        expect(normalizeXhosa("ka 1995-96,")).toBe("ka 1995-96,");  // a season
+        expect(normalizeXhosa("26 - 00.")).toBe("26 - 00.");        // an ice-hockey score
+        // A DECIMAL range needs its own rule and must run first — and it is not ascending-gated, because
+        // the corpus's one instance counts backwards in time.
+        expect(normalizeXhosa("kwi-4.2-3.9 yezigidi")).toBe("kwi-4 2 ukuya ku 3 9 yezigidi");
+    });
+
+    test("degrees — the redundancy guard, the compass, and the unattested neighbours", () => {
+        // TRAP 12: the corpus's one Celsius sentence already says `amaqondo`, so it must not be doubled.
+        // …and the leading `+` goes with it: it is a POSITIVITY marker that `angaphezulu` ("above") already
+        // states, so keeping it would double the meaning. This is why the artifact scan's residual
+        // `DROP math-sign ×1` is this sentence, and why it is permissible (trap 12).
+        expect(normalizeXhosa("amaqondo angaphezulu kwe +30°C aqhelekile."))
+            .toBe("amaqondo angaphezulu kwe 30 aqhelekile.");
+        // A leading MINUS on a temperature is a real negative and is read — 0 corpus instances, pinned as
+        // the adversarial neighbour (trap 8).
+        expect(normalizeXhosa("(-30°C)")).toBe("(thabatha amaqondo 30)");
+        // …but the sign capture is letter-guarded, because Xhosa's CONCORD hyphen looks exactly like a
+        // minus. Unguarded, this ordinary spelling read *kwi thabatha amaqondo 30* — "in minus thirty".
+        expect(normalizeXhosa("kwi-30°C")).toBe("kwi-amaqondo 30");
+        expect(normalizeXhosa("kwimpuma 35°W.")).toBe("kwimpuma amaqondo 35 entshona.");
+        // Neither of these occurs in the corpus. `°F` fell through every branch before it was claimed
+        // alongside `°C` (the bare-degree rule rejects a trailing letter), losing the ° and leaking the F.
+        expect(normalizeXhosa("nge-98°F")).toBe("nge-amaqondo 98");
+        expect(normalizeXhosa("kwi-40°N")).toBe("kwi-amaqondo 40 emantla");
+        expect(normalizeXhosa("kwi-45°")).toBe("kwi-amaqondo 45");
+    });
+
+    test("the English ordinal suffix is stripped — the Xhosa concord is already written", () => {
+        expect(normalizeXhosa("le-18th sentyhuri")).toBe("le-18 sentyhuri");
+        expect(normalizeXhosa("yango 17th-century")).toBe("yango 17-century");
+        expect(normalizeXhosa("yakhe ye 60th,")).toBe("yakhe ye 60,");
+        // Case-insensitive (trap 7): a capitalised suffix is ordinary in a title and must not fall through
+        // to the raw-letter reading the rule exists to remove.
+        expect(normalizeXhosa("ye-21ST")).toBe("ye-21");
+        expect(normalizeXhosa("ye-1st ne-2nd ne-3rd")).toBe("ye-1 ne-2 ne-3");
+    });
+
+    test("dotted abbreviations — the final dot survives a sentence end but not a continuation", () => {
+        // Glued next word: separate it, no period.
+        expect(normalizeXhosa("yi-U.S.Geological Survey")).toBe("yi-US Geological Survey");
+        // Mid-sentence: the dot goes.
+        expect(normalizeXhosa("ne-1000 B.C.E., ama-Asiriya")).toBe("ne-1000 BCE, ama-Asiriya");
+        // End of input, and a new capitalised sentence: the SENTENCE break must be kept, or three pauses
+        // are silently deleted (the Swahili `expandDotted` lesson).
+        expect(normalizeXhosa("yase U.S.")).toBe("yase US.");
+        expect(normalizeXhosa("yase U.S. Ngoko ke")).toBe("yase US. Ngoko ke");
+        expect(normalizeXhosa("kwi-U.S House")).toBe("kwi-US House");
+        expect(normalizeXhosa("uN.Wayne Hale Jr. uthe")).toBe("uN Wayne Hale Jr uthe");
+        expect(normalizeXhosa("UMnu. Costello uthe")).toBe("UMnumzana Costello uthe");
+        expect(normalizeXhosa("watsho uMnu Costello.")).toBe("watsho uMnumzana Costello.");
+    });
+
+    test("decimals emit NO separator word — none is attested in any source (see normalize.ts)", () => {
+        expect(normalizeXhosa("eziyi-12.8 okanye")).toBe("eziyi-12 8 okanye");
+        expect(normalizeXhosa("ku 6.34 ye intshi")).toBe("ku 6 3 4 ye intshi");
+        // The corpus's one COMMA decimal, and the 3-digit tail that must stay grouping.
+        expect(normalizeXhosa("eziyi-2,3 miliyoni")).toBe("eziyi-2 3 miliyoni");
+        expect(normalizeXhosa("eziyi-2,300 miliyoni")).toBe("eziyi-2300 miliyoni");
+        // A version dot is read digit-by-digit too, which at least removes the full stop it used to emit.
+        expect(normalizeXhosa("se-802.11n")).toBe("se-802 1 1n");
+        expect(normalizeXhosa("iFigure 1.1.")).toBe("iFigure 1 1.");
+    });
+
+    test("relational and arithmetic signs — 0 corpus instances, read anyway (#584)", () => {
+        // Every word is the HSRC maths dictionary's own gloss for that SYMBOL; most are corpus tokens too.
+        expect(normalizeXhosa("x = y")).toBe("x lilingana ne y");
+        expect(normalizeXhosa("5 < 6")).toBe("5 ngaphantsi kuna 6");
+        expect(normalizeXhosa("23 > 19")).toBe("23 ngaphezulu kuna 19");
+        expect(normalizeXhosa("7 × 2")).toBe("7 phindaphinda 2");
+        expect(normalizeXhosa("8 ÷ 2")).toBe("8 yahlula 2");
+        expect(normalizeXhosa("+5")).toBe("dibanisa 5");
+        expect(normalizeXhosa("-5")).toBe("thabatha 5");
+        // `UTC+1` is the corpus's one operator-position plus.
+        expect(normalizeXhosa("lalapha( UTC+1) e")).toBe("lalapha( UTC dibanisa 1) e");
+        // THE STRAY DASH. The corpus's one ` -N` is a hyphen, not a negative: the English original reads
+        // "winds blowing at 40 mph". Reading it as *thabatha* would be confidently wrong, so the guard
+        // rejects a dash whose space follows a word — and the ` -` here must stay unread.
+        expect(normalizeXhosa("ebhudla kangange -40 mph")).toBe("ebhudla kangange -40 iimayile ngeyure");
+        // …while a compound hyphen is never touched.
+        expect(normalizeXhosa("i-COVID-19 ne-Il-76")).toBe("i-COVID-19 ne-Il-76");
+    });
+
+    test("the ampersand and its HTML entity → kunye", () => {
+        expect(normalizeXhosa("Arts & Sciences")).toBe("Arts kunye Sciences");
+        expect(normalizeXhosa("iiB&amp;B ezikhuphisana")).toBe("iiB kunye B ezikhuphisana");
+    });
+
+    test("no SLOT-GAP: a padded replacement must not leave a double or edge space", () => {
+        for (const probe of ["Arts & Sciences", "leUS$30", "+30°C", "yase U.S.", "9:30 a.m."])
+            expect(normalizeXhosa(probe)).not.toMatch(/^\s|\s$|\s\s/u);
     });
 });
