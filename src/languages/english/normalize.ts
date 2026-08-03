@@ -85,9 +85,13 @@ const DOTTED_ABBREV: Record<string, (next: string) => string> = {
 
 // Built FROM the table, longest key first, so adding a unit is a one-line data change and "km/h" cannot
 // be shadowed by "km". Previously this alternation was hardcoded and had drifted from the table.
+// THE EXPONENT IS PART OF THE UNIT MATCH, not a separate rule, because the unit rule consumes the unit and
+// anything left behind reaches the g2p raw. `km²` matched `km`, the `²` was stranded and then dropped, and
+// `The park covers 19,500 km²` read as a LENGTH — the area gone. Two corpus instances, and #586 opens with
+// this one. `m³` has zero instances and is claimed anyway (trap 8): it is the same rule's other branch.
 const UNIT_RE = new RegExp(
     `(\\d[\\d,]*(?:\\.\\d+)?)\\s?(${Object.keys(UNITS).sort((a, b) => b.length - a.length)
-        .join("|")})(?![\\p{L}\\p{M}])`,
+        .join("|")})([²³])?(?![\\p{L}\\p{M}])`,
     "giu",
 );
 
@@ -229,6 +233,13 @@ export function normalizeEnglish(input: string): string {
     // 0e) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst
     //     class of silent error: "-5 degrees" was read as "five degrees".
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
+    //     `±` belongs here, with its siblings: it was the ONE sign genuinely missing. I first added a whole
+    //     leading-sign block late in the pass before noticing 0e and 0f2 already existed — and the gate had
+    //     said so, listing only `equals less-than times` as dropped, not minus or plus. Read the gate's own
+    //     words before adding a rule it did not ask for. The duplicate `–` arm I added also RE-BROKE the
+    //     corpus's `(1418 – 1450)`, because it allowed a space after the dash where 0e requires the digit
+    //     immediately: `\s?` is what turns a range into a subtraction.
+    s = s.replace(/(^|[\s(])±\s?(\d)/gu, "$1plus or minus $2");
 
     // 0f0) NUMERIC DATES, before the fraction rule (which would otherwise have to guard against them)
     //      and before the date/year steps below, whose ordinal-day and pair-wise-year rules then apply to
@@ -305,9 +316,15 @@ export function normalizeEnglish(input: string): string {
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = s.replace(UNIT_RE,
-        (_m, num: string, u: string) => {
+        (_m, num: string, u: string, exp: string | undefined) => {
             const [sg, pl] = UNITS[u.toLowerCase()]!;
-            return `${num} ${/^1(?:\.0+)?$/.test(num.replace(/,/g, "")) ? sg : pl}`;
+            // English puts the measure word BEFORE the unit — "square kilometers", "cubic meters" — and the
+            // COUNT still governs the noun: "one cubic meter", not "one cubic meters". A first cut forced the
+            // plural on the reasoning that the quantity is the area rather than the one square; that is not
+            // how English says it, and `1 m³` came out "one cubic meters".
+            const measure = exp === "²" ? "square " : exp === "³" ? "cubic " : "";
+            const one = /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
+            return `${num} ${measure}${one ? sg : pl}`;
         });
 
     // 7a) ALL-CAPS romans of ANY value, when the text distinguishes case — "Super Bowl LVIII" (58),
@@ -336,6 +353,36 @@ export function normalizeEnglish(input: string): string {
             const suf = n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th";
             return `${prev} the ${n}${suf}`;
         });
+
+    // 8) THE AMPERSAND AND THE SIGN CLASSES. English was the FIRST language treated and these were never
+    //    added, so they were dropped silently for the whole of #562 — `College of Arts & Sciences` read
+    //    *Arts Sciences*, `B&Bs` read *bee bees*, `Qatar Airways & Turkish Airlines` lost its conjunction.
+    //    Three corpus instances of `&`; the relational signs have ZERO, which is not evidence of
+    //    correctness (trap 8) and is why `review.ts` reports them as DROPPED. A dropped sign is inaudible,
+    //    the one outcome that cannot be right (#584).
+    //
+    //    LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the
+    //    currency step keys on `$` beside a number, the unit step on a number beside an abbreviation — and
+    //    inserting words between them first would break those adjacencies.
+    //    THE HTML ENTITY FIRST, or the bare-`&` rule below turns `&amp;` into "and amp;" — a word invented
+    //    out of markup, which is worse than the drop it replaces. This corpus writes no entity (0 measured)
+    //    but a phonemizer is handed arbitrary text. `core/markup.ts` decodes these and English does not use
+    //    it; wiring that is a broader change (it also strips tags) and is not what this PR is for.
+    s = s.replace(/\s*&amp;\s*/giu, " and ");
+    s = s.replace(/\s*&\s*/gu, " and ");
+    //    `×`/`÷`/`<`/`>` only BETWEEN digits. Not because THIS corpus carries HTML — it does not, 0 tags
+    //    measured, and an earlier draft of this comment claimed otherwise by carrying the reasoning over
+    //    from the Malay layer, where the tags are real. The guard is kept because a phonemizer is handed
+    //    arbitrary text and `<` is the one sign whose bare form would eat a tag if one ever arrived.
+    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 times ");
+    s = s.replace(/(\d)\s*÷\s*(?=\d)/gu, "$1 divided by ");
+    //    `=` takes the HOUSE PATTERN `(\S)\s*=\s*(\S)` that eleven other layers use, not the digit gate: an
+    //    equals sign between non-digits is still an equals sign (`x = y`), and this corpus contains no `=`
+    //    and no HTML tag at all (measured: 0 of each), so the tag hazard that justifies gating `<`/`>` does
+    //    not apply to it. Gating it on digits left `review.ts` reporting `equals` as a DROPPED class.
+    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 equals $2");
+    s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 less than ");
+    s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 greater than ");
 
     return s;
 }
