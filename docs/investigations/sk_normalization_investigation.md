@@ -475,3 +475,119 @@ One reading in the review output worth recording as a known ambiguity: `1.234` r
 tridsaťštyri*. In a language with SPACE thousands and COMMA decimals that is the version-dot reading, and
 the corpus has zero period-grouped thousands, so it is defensible — but a text importing a foreign
 convention would be misread.
+
+## Run 14 — 2026-08-02, review before merge
+
+Rebased onto `main`. Every gate as submitted reproduces. The review focused on the PR's own
+"deliberately not done" list, and the first item on it did not survive contact.
+
+### Initialisms: the stated reason was wrong
+
+> *Needs a lexical spelled-vs-word list, which is exactly the data the playbook says not to bulk-invent,
+> and it is a separate seam (`core/initialisms.ts`). Croatian shipped without it too.*
+
+`src/core/initialisms.ts` **already exists and about thirty languages wire it** — including **Czech**, which
+this PR itself calls "the nearest sibling" and whose header cites the very same acronym inventory
+(`USA ×13, OSN ×6`). FLEURS translates the same sentences, so it is the same list. The work is ~40 lines
+following `czech/normalize.ts`, not a new seam.
+
+The "bulk-invent" objection is also the opposite of what that file says. Its header records that an earlier
+version *carried* a word-acronym list and a length threshold and that **both were removed** as "logic trying
+to re-derive lexical facts". What a language supplies is (a) a letter-name table — a plain orthographic
+fact, and espeak-ng `dictsource/sk_list` carries Slovak's in full — and (b) `acronymLetters`, only for the
+cases where a readable string is spelled out by convention.
+
+The measured cost of leaving it out, over the full `sk_sk` inventory — **119 instances, 74 distinct
+acronyms, the second-largest shape in this corpus after `N.` ×106**:
+
+```
+HDP  → [xtp]      DVD → [tft]     GMT  → [ɡmt]     TB  → [tp]      VPN  → [fpn]
+NHK  → [nxk]      USD → [ˈust]    USGS → [ˈusks]   XDR → [ɡzdˈr̩]  PTWC → [ptft͡s]
+ZSSR → [zsːˈr̩]   USA → [ˈusa]    OSN  → [ˈɔsn]    FBI → [vbˈi]    CEP  → [t͡sˈep]
+```
+
+Not "slightly off" — vowel-less consonant clusters, which is precisely the failure the shared seam was
+built for (its header cites English `NHS` → [ns], French `SNCF` → [snkf]).
+
+**Wired.** Letter names transcribed from `sk_list`'s own letter block (`b be:` → bé, `ľ el^` → eľ,
+`w dv'ojite:,ve:` → dvojité vé, `x iks`, `y ipsilon`). Phonotactics adapted from Czech's — West Slavic and
+cluster-tolerant, so the work is done by the no-vowel test, not by cluster policing. `isRecorded` is always
+false: Slovak's g2p is rule-based, as in Czech and Russian. Classification over the 74:
+
+| | n | |
+|---|---|---|
+| spelled — no vowel / illegal cluster, no data entry needed | 33 | HDP, DVD, GMT, TB, XDR, VPN, PTWC, NHK, GPS, DSLR … |
+| spelled — LEXICAL, listed in `slovak.jsonc` | 26 | USA, OSN, FBI, NBA, MRI, USOC, UCLA, RSPCA, HIV, AUD … |
+| left as WORDS for the OOV g2p | 18 | UNESCO, NASA, COVID, OPEC, SWAPO, FIFA, ISIS, ACTA, PALM … |
+
+Two tuning fixes the classification forced: `sw` added to the onsets (SWAPO was being spelled) and `lm` to
+the codas (PALM). Six listed entries (osn, fbi, nba, add, usgs, rspca) are *also* caught by the cluster
+rules and so redundant today; kept deliberately, because the reading is a lexical convention while the
+phonotactic sets are tuning parameters — loosening an onset later must not silently turn OSN into a word.
+
+### The ordering hazard, checked rather than assumed
+
+The seam's header makes ordering a hard constraint: run before the Roman rules and `Louis XIV` becomes
+EX-EYE-VEE. `normalizeSlovak` sees `III.` still Roman — which looked alarming until the actual wiring
+settled it: `core/roman.ts` is applied in **`registry.ts`**, wrapping `engine.text()`, so it runs *before*
+the engine and a Roman numeral is already digits by the time step 15 runs. Verified end-to-end, including a
+vowel-less numeral that would have been spelled if the order were wrong:
+
+```
+Alžbeta II. navštívila  ⇒ ˈalʒbeta drˈuɦaː nˈavʃciːvˌila
+Ľudovít XIV. bol        ⇒ ʎˈudɔviːt ʃtˈr̩naːsti bˈɔl
+Ľudovít XV. bol         ⇒ ʎˈudɔviːt pˈætnaːsti bˈɔl        ← no vowel; still an ordinal
+```
+
+Only `XL`/`XXL` reach step 15, because `roman.ts` stoplists them as clothing sizes outside a numeral
+context — and there letter-spelling is the *right* reading anyway. Pinned by a test.
+
+### The other four "not done" items
+
+- **`St. Louis`** ×1 — the PR is right that there is no source for the word: the corpus's single `Saint` is
+  the composer **Saint-Saëns**, a French surname, not this abbreviation's expansion, and Czech's
+  `St. = svatý` is the hagionym sense, wrong for an American city. But the *dot* is a separate defect from
+  the word: it put a full phrase break inside `do Six Flags v St. Louis v štáte Missouri`. Removing it needs
+  no vocabulary. Claimed by name, and only before a capitalised word, so a sentence-final `st.` keeps its
+  pause. **Fixed.**
+- **`B&B`** ×1 — joining it left `B a B`, read [p ˈa p], two bare devoiced stops rather than *bé*. Step 15
+  cannot help: its run needs two adjacent capitals. Fixed at the ampersand rule, which is what makes it
+  safe — a general "lone capital → letter name" rule is impossible in Slovak, where `v`, `a`, `i`, `s`, `k`,
+  `o`, `u`, `z` are all real words (`V 16. storočí` opens with one). **Fixed.**
+- **`Lealofiho III.`** ×1 — left as the PR has it. The regnal rule declines an utterance-final ordinal, and
+  the PR's reason is correct and measured: widening it would claim `stanice Fort Greely 9.` and eat that
+  pause. Roman-ness cannot rescue it either, since `roman.ts` has already turned `III.` into `3.`.
+- **`1995/96`** ×1 — left, but now for a measured reason rather than an assertion. Every West/South Slavic
+  sibling reads it identically, with the slash dropped and the endpoints fused:
+
+  ```
+  cs ⇒ … cˈɪsiːt͡s dˈɛvjɛtsɛt dˈɛvadˌɛsaːtpjɛt dˈɛvadˌɛsaːtʃɛst
+  hr ⇒ … tisut͡ɕu deʋetsto deʋedeset pet deʋedeset ʃest
+  pl ⇒ … tˈɨɕɔnt͡s d͡ʑɛvjˈɛɲt͡ɕsɛt d͡ʑɛvjɛɲd͡ʑd͡ʑˈɛɕɔnt pjˈɛɲt͡ɕ …
+  sk ⇒ … cˈisiːt͡s ɟˈevæcstɔ ɟˈevæɟɟˌesɪ̯atpæc ɟˈevæɟɟˌesɪ̯atʃesc
+  ```
+
+  A shared cross-language gap with one instance here, not a Slovak defect. espeak gives `_/ lomka`, so a
+  word exists — but "lomka" for a sports season is stilted, and changing Slovak alone would put it out of
+  step with three siblings for no measured gain. Recorded, not fixed.
+- **Fraction denominators above 10** — left; zero corpus instances and the rule already composes rather
+  than tabulates, which is the property that mattered.
+
+### Verification
+
+Delta against the PR as submitted: **93 utterances, every one an initialism** (plus `St.` and `B&B`), and
+the invariant the whole `N.` design rests on is intact.
+
+| | vs main | vs PR |
+|---|---|---|
+| utterance-final terminators LOST | **0** | **0** |
+| utterance-final terminators GAINED | 6 | 0 |
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2711 tests, 0 failed** (4 new) |
+| `mine.ts scan --lang sk` | 117 lines, **no defects** |
+| `review.ts --lang sk` | **checklist clean**, all 8 checks |
+| `corpus-diff` sk_sk | **247/1719 (14.4%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 6) |
+| `referee-eval sk` | **unchanged**: 14191/15950 (89.0%), symbol 97.9% |

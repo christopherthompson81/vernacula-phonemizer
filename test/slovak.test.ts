@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { getPhonemizer } from "../src/registry.ts";
 import { phonemizeWord, createSlovak } from "../src/languages/slovak/slovak.ts";
 import { normalizeSlovak, ordinalWords } from "../src/languages/slovak/normalize.ts";
 
@@ -137,7 +138,7 @@ describe("Slovak text normalization (#562)", () => {
         expect(normalizeSlovak("Presne o 8:46 ráno")).toBe("Presne o ôsmej štyridsaťšesť ráno");
         expect(normalizeSlovak("Tesne po 11:00 demonštranti")).toBe("Tesne po jedenástej demonštranti");
         expect(normalizeSlovak("do 23:35 hod uhasili.")).toBe("do dvadsiatej tretej tridsaťpäť uhasili."); // `hod` consumed once
-        expect(normalizeSlovak("o 12.00 GMT")).toBe("o dvanástej GMT"); // the PERIOD clock
+        expect(normalizeSlovak("o 12.00 GMT")).toBe("o dvanástej gé em té"); // the PERIOD clock, + step 15
         expect(normalizeSlovak("odchádza medzi 06:30 a 07:30."))
             .toBe("odchádza medzi šiestou tridsať a siedmou tridsať."); // medzi → instrumental, both halves
         expect(normalizeSlovak("oheň medzi 22:00 - 23:00 Horského"))
@@ -154,7 +155,7 @@ describe("Slovak text normalization (#562)", () => {
         expect(normalizeSlovak("teploty nad +30°C.")).toBe("teploty nad plus 30 stupňov Celzia.");
         expect(normalizeSlovak("-5 stupňov")).toBe("mínus 5 stupňov");
         expect(normalizeSlovak("negatív má 36x24 mm")).toBe("negatív má 36 krát 24 milimetrov");
-        expect(normalizeSlovak("B&B súťažia")).toBe("B a B súťažia");
+        expect(normalizeSlovak("B&B súťažia")).toBe("bé a bé súťažia"); // joined AND spelled
         expect(normalizeSlovak("5 < 6")).toBe("5 menší ako 6");
         expect(normalizeSlovak("7 > 3")).toBe("7 väčší ako 3");
         expect(normalizeSlovak("x = y")).toBe("x rovná sa y");
@@ -194,5 +195,46 @@ describe("Slovak text normalization (#562)", () => {
         const sk = createSlovak();
         expect(sk.text("V 16. storočí.").trim()).toBe("v ʃˈestnaːstɔm stˈɔrɔt͡ʃiː .");
         expect(sk.text("88 %").trim()).toBe("ˈɔsemɟˌesɪ̯atˌɔsem pˈert͡sent");
+    });
+
+    // INITIALISMS — 119 instances over 74 acronyms, the second-largest shape in this corpus after `N.`
+    // ×106, and every one read as a raw letter cluster before this. Wires the shared core/initialisms.ts
+    // seam, as Czech (the nearest sibling, same FLEURS sentences) already does.
+    test("initialisms: spelled, or left to the OOV g2p as a word", () => {
+        // LEXICAL — readable as a word, but Slovak spells them. Only a data entry can know this.
+        expect(normalizeSlovak("USA a OSN")).toBe("ú es á a ó es en");
+        expect(normalizeSlovak("MRI a FBI")).toBe("em er í a ef bé í");
+        // OOV — no vowel letter, so the shared phonotactic rule spells them with no entry needed.
+        expect(normalizeSlovak("HDP vzrástol")).toBe("há dé pé vzrástol");
+        expect(normalizeSlovak("cez VPN")).toBe("cez vé pé en");
+        expect(normalizeSlovak("PTWC vydalo")).toBe("pé té dvojité vé cé vydalo");
+        // …and the ones that ARE words stay words, for the OOV g2p to read.
+        for (const w of ["UNESCO", "NASA", "OPEC", "SWAPO", "FIFA", "PALM"])
+            expect(normalizeSlovak(`${w} uviedla`)).toBe(`${w} uviedla`);
+        // PERSONAL INITIALS get their letter names instead of a bare consonant plus a phrase break.
+        expect(normalizeSlovak("J. S. Bach")).toBe("jé es Bach");
+    });
+
+    // The seam's ordering constraint, pinned end-to-end because it is invisible in normalize.ts alone:
+    // core/roman.ts runs in the REGISTRY, before the engine, so a Roman numeral is already digits by the
+    // time step 15 sees it. Were the order reversed, `Alžbeta II.` would read EM-EM.
+    test("a Roman numeral survives the initialism pass", () => {
+        const sk = getPhonemizer("sk");
+        expect(sk.text("Alžbeta II. navštívila").trim()).toBe("ˈalʒbeta drˈuɦaː nˈavʃciːvˌila");
+        expect(sk.text("Ľudovít XIV. bol").trim()).toBe("ʎˈudɔviːt ʃtˈr̩naːsti bˈɔl");
+        expect(sk.text("Ľudovít XV. bol").trim()).toBe("ʎˈudɔviːt pˈætnaːsti bˈɔl"); // vowel-less Roman
+    });
+
+    // An ALL-CAPS DOCUMENT carries no signal in its capitals — the seam exempts it, and Slovak must not
+    // spell every word of a headline.
+    test("an all-caps line is left alone", () => {
+        expect(normalizeSlovak("SPRÁVA O STAVE KRAJINY")).toBe("SPRÁVA O STAVE KRAJINY");
+    });
+
+    // `St. Louis` ×1 — the DOT only. No source exists for the word (the corpus's single `Saint` is the
+    // composer SAINT-SAËNS, a surname), but the dot was a full phrase break mid-sentence.
+    test("St. loses its dot and keeps its silence", () => {
+        expect(normalizeSlovak("v St. Louis v štáte")).toBe("v St Louis v štáte");
+        expect(normalizeSlovak("stanica st.")).toBe("stanica st."); // sentence-final: pause kept
     });
 });

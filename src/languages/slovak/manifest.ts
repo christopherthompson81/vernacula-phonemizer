@@ -21,6 +21,9 @@ export interface SlovakManifest {
         toVoiced: Record<string, string>;
     };
     clausePunctuation: Record<string, string>;
+    /** Acronyms spelled out letter-by-letter although their lowercase form is readable — a LEXICAL fact
+     *  no phonotactic rule can derive. Consumed by normalize.ts's initialism pass. */
+    acronymLetters: string[];
     numbers: {
         units: string[];
         teens: string[];

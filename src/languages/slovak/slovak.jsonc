@@ -65,5 +65,22 @@
 
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
-    }
+    },
+
+    // LEXICAL: acronyms Slovak spells out letter-by-letter although their lowercase form COULD be read as a
+    // word, so no phonotactic rule can derive it (core/initialisms.ts states this limit explicitly). Every
+    // entry occurs in the sk_sk corpus; the counts are in the investigation log, Run 14.
+    // Tokens with NO VOWEL LETTER need no entry — the shared OOV rule letter-spells them automatically, and
+    // that is most of this corpus's inventory: HDP, DVD, USD, GMT, TB, XDR, NHK, VPN, PTWC, GPS, GBP, DSLR,
+    // FTIR, FKP, KNP, NMR, NPWS, NSW, TMZ, CCTV, CG, HK, QC, SM, MS, TT, PBS, APS, HJR, PNG.
+    // Six entries below (osn, fbi, nba, add, usgs, rspca) DO carry a vowel and are additionally caught by
+    // the cluster rules, so they are redundant today. They are kept deliberately: the reading is a lexical
+    // convention, and the phonotactic sets are tuning parameters — loosening an onset later must not
+    // silently turn OSN into a word.
+    // Said as WORDS and deliberately NOT listed, matching Czech's identical decision on the same set:
+    // UNESCO, NASA, COVID, OPEC, SWAPO, ISIS, FIFA, ACTA, ASUS, REM, PALM, LATAM, MINAE, METI, FATA, EVA.
+    "acronymLetters": [
+        "usa", "osn", "fbi", "nba", "mri", "aol", "add", "cep", "usoc", "usgs", "usaf", "ucla",
+        "rspca", "fic", "faa", "acma", "mip", "mov", "hiv", "suv", "aud", "ip", "ui", "uw", "it", "ai"
+    ]
 }

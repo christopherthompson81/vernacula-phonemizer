@@ -55,8 +55,67 @@
  *
  * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1).
  */
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { MANIFEST } from "./manifest.ts";
 import { SYMBOLS, skCountForm } from "./slovak.ts";
 import { numberToWords } from "./numbers.ts";
+
+/**
+ * SLOVAK LETTER NAMES, for the initialism pass. Sourced from espeak-ng `dictsource/sk_list`'s own letter
+ * block, transcribed back into Slovak orthography (`b be:` → bé, `f ef` → ef, `ľ el^` → eľ, `w
+ * dv'ojite:,ve:` → dvojité vé, `x iks`, `y ipsilon`, `z zet`, `ž Zet`). So USA is [ú es á], OSN [ó es en],
+ * HDP [há dé pé] — and not the consonant clusters those three came out as.
+ */
+const LETTER_NAME: Readonly<Record<string, string>> = {
+    a: "á", á: "dlhé á", ä: "á prehlasované", b: "bé", c: "cé", č: "čé", d: "dé", ď: "ďé",
+    e: "é", é: "dlhé é", f: "ef", g: "gé", h: "há", i: "í", í: "dlhé í", j: "jé", k: "ká",
+    l: "el", ĺ: "dlhé el", ľ: "eľ", m: "em", n: "en", ň: "eň", o: "ó", ó: "dlhé ó",
+    ô: "ó so vokáňom", p: "pé", q: "kvé", r: "er", ŕ: "dlhé er", s: "es", š: "eš", t: "té",
+    ť: "ťé", u: "ú", ú: "dlhé ú", v: "vé", w: "dvojité vé", x: "iks", y: "ypsilon",
+    ý: "dlhé ypsilon", z: "zet", ž: "žet",
+};
+
+/** Slovak phonotactics, for the OOV rule in core/initialisms.ts. West Slavic like Czech and tolerant of
+ *  heavy clusters, so the onset/coda sets are generous on purpose: the work is done by the no-vowel test
+ *  (HDP, DVD, GMT, TB, XDR, VPN, PTWC, NHK) and the run/onset tests, not by cluster policing.
+ *  `r`/`l` are SYLLABIC in Slovak (`vlk`, `prst`, and the corpus's own `ZSSR` → [zsːˈr̩]), which the shared
+ *  test already accommodates: its consonant-run signal exempts a run containing a liquid. */
+export const isUnreadableSlovak = makeUnreadableTest({
+    vowels: /[aeiouyáäéíóôúý]/u,
+    legalOnsets: new Set([
+        "bl", "br", "bz", "čl", "čm", "čn", "čr", "čv", "dl", "dr", "dv", "dž", "gl", "gn", "gr",
+        "hl", "hm", "hn", "hr", "hv", "kl", "kn", "kr", "kv", "ml", "mn", "mr", "pl", "pn", "pr",
+        "ps", "pt", "sk", "sl", "sm", "sn", "sp", "st", "sv", "sw", "šk", "šl", "šm", "šn", "šp", "št",
+        "šv", "tl", "tr", "tv", "vl", "vn", "vr", "vz", "zl", "zn", "zv", "žl", "žn",
+    ]),
+    legalCodas: new Set([
+        "ck", "ct", "čt", "dn", "lm", "rb", "rd", "rk", "rl", "rm", "rn", "rs", "rt", "rv", "rž",
+        "sk", "st", "šť", "št", "tn", "zd", "zl", "zm", "zn",
+    ]),
+});
+
+/**
+ * INITIALISM PASS — 119 instances over 74 distinct acronyms in `sk_sk`, the second-largest shape in this
+ * corpus after `N.` ×106, and every one of them was read as a raw letter cluster: `HDP` → [xtp], `DVD` →
+ * [tft], `GMT` → [ɡmt], `PTWC` → [ptft͡s], `NHK` → [nxk], `USGS` → [ˈusks], `USA` → [ˈusa].
+ *
+ * This wires the SHARED seam (`core/initialisms.ts`), which ~30 languages already use — including Czech,
+ * whose implementation this follows and whose acronym inventory is the same one (FLEURS translates the
+ * same sentences). Slovak has no pronunciation dictionary — the g2p is rule-based — so `isRecorded` is
+ * always false, exactly as in Czech and Russian.
+ *
+ * ORDERING, and the seam's header states it as a hard constraint: this MUST run after the Roman-numeral
+ * and regnal rules (`Alžbeta II.` must not become EM-EM; `II` occurs twice in this corpus) and after the
+ * abbreviation expansions. Running it last in `normalizeSlovak` satisfies both.
+ */
+export function normalizeSlovakInitialisms(text: string): string {
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        acronymLetters: new Set(MANIFEST.acronymLetters),
+        isRecorded: () => false,
+        isUnreadable: isUnreadableSlovak,
+    })(text);
+}
 
 /** Regular, NBSP and narrow-NBSP. The corpus uses NBSP BOTH as a thousands separator (`11 000`) and as an
  *  ordinary inter-word space (28 instances, `s vlastnením`), so it is folded to a plain space after the
@@ -338,6 +397,13 @@ export function normalizeSlovak(input: string): string {
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
         (_m, ab: string) => DOTTED[ab.toLowerCase()]!);
+    //    `St. Louis` ×1 — the DOT ONLY, with no expansion. There is no source for the word: the corpus's
+    //    single `Saint` is the composer SAINT-SAËNS, a French surname, not this abbreviation's reading,
+    //    and Czech's `St. = svatý` is the hagionym sense, wrong for an American city. But the dot is a
+    //    separate defect from the word — it put a full phrase break in the middle of `do Six Flags v St.
+    //    Louis v štáte Missouri` — and removing it needs no vocabulary at all. Claimed BY NAME (trap 4),
+    //    and only before a capitalised word, so a sentence-final `st.` cannot lose its pause.
+    s = s.replace(/(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
 
     // 3) CLOCK RANGE, before the single clock (trap 14's ordering lesson — order by who needs WORDS
     //    first). `medzi 22:00 - 23:00` governs the INSTRUMENTAL on BOTH clocks, and the second one's form
@@ -488,7 +554,23 @@ export function normalizeSlovak(input: string): string {
     s = s.replace(/\s*>\s*/gu, " väčší ako ");
     s = s.replace(/\s*÷\s*/gu, " delené ");
     //     `&` → "a" (1 corpus instance, `B&B`, where it was dropped and left two unlinked letters).
+    //     THE FLANKING LETTERS ARE SPELLED when both are lone capitals, which is what `B&B` is: joining
+    //     them alone still left `B a B`, read [p ˈa p] — two bare devoiced stops, not the letter *bé*.
+    //     Step 15 cannot rescue them, because its run requires two adjacent capitals. Doing it here, gated
+    //     on the ampersand, is what keeps it safe: a general "lone capital → letter name" rule is
+    //     impossible in Slovak, where `v`, `a`, `i`, `s`, `k`, `o`, `u`, `z` are all real words (`V 16.
+    //     storočí` opens with one).
+    s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})\s*[&＆]\s*(\p{Lu})(?![\p{L}\p{M}])/gu,
+        (m0, a: string, b: string) => {
+            const [x, y] = [LETTER_NAME[a.toLowerCase()], LETTER_NAME[b.toLowerCase()]];
+            return x === undefined || y === undefined ? m0 : `${x} a ${y}`;
+        });
     s = s.replace(/\s*[&＆]\s*/gu, " a ");
+
+    // 15) INITIALISMS, LAST. The seam's ordering constraint is that it must follow the Roman-numeral and
+    //     regnal rules (step 8) and the abbreviation expansions (steps 1–2) — an all-caps run is what a
+    //     Roman numeral and an unexpanded abbreviation both look like. Running last satisfies both.
+    s = normalizeSlovakInitialisms(s);
 
     return s;
 }
