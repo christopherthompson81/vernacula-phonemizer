@@ -12,6 +12,16 @@
  * committed anchor is a hand-adjudicated gold of the distinctive features (test/chhattisgarhi.test.ts). See
  * docs/investigations/hne_native_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: NO SOURCE EXISTS, and that is the recorded verdict rather than a gap to revisit.
+ * Checked for Chhattisgarhi: hne.wikipedia does not exist, espeak does not ship the language, there is no
+ * FLEURS corpus, no mined artifact and no referee. The haystack is empty in every tier
+ * (`tools/normalization/sources.ts --lang hne`).
+ *
+ * So Hindi's inherited words are not merely the default here, they are the only available answer — consistent
+ * with this engine being a labelled cannot-verify approximation served via the Hindi engine. Do not replace
+ * them with a guess: an unsourced word is confidently wrong, where an inherited one is merely borrowed.
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";

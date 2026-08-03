@@ -118,6 +118,8 @@ async function wikiExists(): Promise<boolean> {
     } catch { return false; }
 }
 
+/** Escape a probed word for use inside a regex — a term list may contain a dot or a hyphen. */
+const reEsc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "");
 /** TOKEN membership, the whole point of this file — for a script that HAS tokens. Splits on anything that is
  *  not a letter or mark, and folds diacritics the way the review gate does. */
@@ -180,12 +182,24 @@ async function probe(word: string): Promise<Finding> {
             // the weight pound, not the currency. Attestation is necessary and never sufficient — and where
             // `bounded` is false these quotes are the ONLY evidence, since no boundary test filtered them.
             hitRe.lastIndex = 0;
-            for (const m of fold(text).matchAll(hitRe)) {
-                tokenHits++;
-                if (examples.length < 6) {
-                    const at = m.index!;
-                    examples.push(`…${text.slice(Math.max(0, at - 60), at + w.length + 60).trim()}…`);
-                }
+            // COUNT on the folded text, but QUOTE from the original — and never mix the two indices.
+            //
+            // `fold()` does NFD + `\p{M}+` removal, which CHANGES STRING LENGTH in every script that writes
+            // combining marks. Slicing the ORIGINAL text at an index found in the FOLDED text therefore lands
+            // a window off by however many marks preceded the hit, and the quoted sentence does not contain
+            // the word at all. Latin without diacritics folds to itself, which is why this survived: it was
+            // caught reading Maithili, where `प्रतिशत`'s example showed a passage with no प्रतिशत in it.
+            //
+            // Examples are re-found in the ORIGINAL text with the ORIGINAL word. If the wiki writes it with
+            // different marks the fold still COUNTS the hit and no example is quoted — a missing quote is a
+            // prompt to look; a misaligned one is a wrong finding, and #610 made these quotes the whole of the
+            // evidence for unspaced scripts.
+            tokenHits += [...fold(text).matchAll(hitRe)].length;
+            const quoteRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${reEsc(word)}(?![\\p{L}\\p{M}])` : reEsc(word), "giu");
+            for (const m of text.matchAll(quoteRe)) {
+                if (examples.length >= 6) break;
+                const at = m.index!;
+                examples.push(`…${text.slice(Math.max(0, at - 60), at + word.length + 60).trim()}…`);
             }
         } else if (fold(text).includes(w)) {
             substringOnly++;

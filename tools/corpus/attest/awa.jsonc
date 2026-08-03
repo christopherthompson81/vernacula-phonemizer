@@ -1,0 +1,101 @@
+// WIKIPEDIA WORD ATTESTATION — awa (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "awa",
+    "wiki": "awa.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "प्रतिशत",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ख वर्ग किलोमीटर है, जवन पूरा दक्खिन अमरीकी प्रायद्वीप कय 40 प्रतिशत हिस्सा होय। अमेज़न कै जंगल धरती कै पर्यावरण संतुलन करै मा ब…"
+            ]
+        },
+        {
+            "word": "फीसदी",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "सैकड़ा",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…आपन बल्लेबाजी खर्तिन सबसे मसहुर हैं। फ़रवरी २०१० तक, वन १६ सैकड़ा लगाय चुका हैं, जवनेम 6 सैकड़ा ऑस्ट्रेलिया कय खिलाफ बनाय हैं…",
+                "…ुर हैं। फ़रवरी २०१० तक, वन १६ सैकड़ा लगाय चुका हैं, जवनेम 6 सैकड़ा ऑस्ट्रेलिया कय खिलाफ बनाय हैं। ऑस्ट्रेलिया कय खिलाफ ईडन गार…"
+            ]
+        },
+        {
+            "word": "बजकर",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "बजे",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "मिनट",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ांस) से तैर के सैंडगेट (इंग्लैंड) तक 42 मील दूरी 16 घंटा 20 मिनट मा तय कइन्हिन। एह तरह ऊ इंग्लिश चैनल पार करे वाली एशिया क प…"
+            ]
+        },
+        {
+            "word": "ईसा",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ती के संकेत देर से पाषाण युग से मिलत हैं। अचमेनी राजवंश ५५० ईसा पूर्व मा इ क्षेत्र कय जीत लिहिन जवने से पारसी धर्मकय उदय भव…",
+                "…म्राज्य कय भाग बन गा। अल्बानियाई कोकेशियान लोग चौथी शताब्दी ईसा पूर्व मा इ क्षेत्र मा एक स्वतंत्र राज्य स्थापित किहिन, लेकि…",
+                "…ा इ क्षेत्र मा एक स्वतंत्र राज्य स्थापित किहिन, लेकिन ९५-६७ ईसा पूर्व मा टाइग्रेनेस द्वितीय द ग्रेट द्वारा जीत लिहिस। == इत…",
+                "…ती के संकेत देर से पाषाण युग से मिलत हैं। अचमेनी राजवंश ५५० ईसा पूर्व मा इ क्षेत्र कय जीत लिहिन जवने से पारसी धर्म कय उदय भ…",
+                "…म्राज्य कय भाग बन गा। अल्बानियाई कोकेशियान लोग चौथी शताब्दी ईसा पूर्व मा इ क्षेत्र मा एक स्वतंत्र राज्य स्थापित किहिन, लेकि…",
+                "…ा इ क्षेत्र मा एक स्वतंत्र राज्य स्थापित किहिन, लेकिन ९५-६७ ईसा पूर्व मा टाइग्रेनेस द्वितीय द ग्रेट द्वारा जीत लिहिस। == आध…"
+            ]
+        }
+    ],
+}

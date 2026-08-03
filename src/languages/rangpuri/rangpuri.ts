@@ -10,6 +10,17 @@
  * Inherent-schwa deletion is the same shared algorithm as Hindi. Validated against the Toulmin (2006) Appendix-A
  * Rangpur referee (tools/krnb/referees/RP.tsv). See docs/investigations/rkt_krnb_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: NO SOURCE EXISTS, and Rangpuri is the language this issue predicted would diverge
+ * most. rkt.wikipedia does not exist, espeak does not ship it, and there is no FLEURS corpus or artifact. The
+ * one source it has — `tools/referee-eval/referees/rkt.toulmin-rp.tsv`, 372 lines from Toulmin's grammar — is a
+ * word→IPA list and contains NONE of the candidate words (its only `डॉ` hit is डॉना, a different word).
+ *
+ * So the inherited Hindi words stand unconfirmed, and this is the case to treat with most suspicion: Rangpuri
+ * is Eastern Indo-Aryan (KRNB), not a Hindi-belt variety, and the engine reads Hindi's clock words through
+ * KRNB phonology — `10:30` → *d̪ˈɔs bˈɔd͡zkɔɾ t̪ˈis mˈinɔʈ*, which is Hindi's WORD in Rangpuri's SOUND, the
+ * "confidently wrong" shape. Flagged, not guessed at: a KRNB source is what would settle it.
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";

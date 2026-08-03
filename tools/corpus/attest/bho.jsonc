@@ -1,0 +1,102 @@
+// WIKIPEDIA WORD ATTESTATION — bho (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "bho",
+    "wiki": "bh.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "प्रतिशत",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…दी1239.08 वर्ग कि.मि.बा, जौन नेपाल देस के कुल आवादी के .... प्रतिशत भू–भाग होला। == देखीं == == संदर्भ ==…"
+            ]
+        },
+        {
+            "word": "फीसदी",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…58 बिलियन हो गइल। साल 2010 में दुनिया के कुल जनसंख्या के 22 फीसदी लोग के लगे इंटरनेट तक पहुँच हो चुकल रहे आ एह समय ले 1 बिलिय…"
+            ]
+        },
+        {
+            "word": "सैकड़ा",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…बेकती के संख्या 5.40 रहल आ मानव लिंगानुपात 94.77 औरत प्रति सैकड़ा मरद रहल। मानव बिकास सूचकांक के अनुसार 1991 के एगो रपट में स…"
+            ]
+        },
+        {
+            "word": "बजकर",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "बजे",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…रदर्शन पर एक ठो लाइव प्रसारण में कइने। मोदी के घोषणा सवा आठ बजे साँझ के प्रसारित भइल आ ओही रात से पुरान नोट बंद कर दिहल गइल…"
+            ]
+        },
+        {
+            "word": "मिनट",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…से जचगी होखे तब ओकरा के सीजेरियन जचगी कहल जाला। आपरेशन कुछ मिनट से ले के कई दिन तक चले वाला हो सके लें। == संदर्भ ==…"
+            ]
+        },
+        {
+            "word": "ईसा",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ो के ई देस घर रहल बा। आज के ईरान के इलाका पहिल बेर 7वीं सदी ईसा पूर्व में सियाक्सारेस के नेतृत्व में मेड लोग द्वारा एकजुट क…",
+                "…सारेस के नेतृत्व में मेड लोग द्वारा एकजुट कइल गइल। 6वीं सदी ईसा पूर्व में ई देस अपना सबसे बड़ा फैलाव पर पहुँचल, जब साइरस मह…",
+                "…निड साम्राज्य (हखामनी साम्राज्य) के स्थापना कइलें। 4वीं सदी ईसा पूर्व में सिकंदर महान एह साम्राज्य के जीत लिहलें। 3वीं सदी…",
+                "…पूर्व में सिकंदर महान एह साम्राज्य के जीत लिहलें। 3वीं सदी ईसा पूर्व में एगो ईरानी विद्रोह भइल, जेकरा से पार्थियन साम्राज्…"
+            ]
+        }
+    ],
+}
