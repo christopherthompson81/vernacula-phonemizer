@@ -160,8 +160,13 @@ export function normalizeJapanese(input: string): string {
     // 8) DEGREES. ℃ is a single character and never decomposed, so the shared symbol tier could not see
     //    it. Japanese says the bare 度 for Celsius — 30℃ is さんじゅうど — and marks Fahrenheit explicitly,
     //    which is the ambiguity 華氏 exists to resolve.
-    s = s.replace(/(\d)\s?(?:℃|°\s?C)(?![\p{L}])/gu, "$1度");
-    s = s.replace(/(\d)\s?(?:℉|°\s?F)(?![\p{L}])/gu, "華氏$1度");
+    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER (#586). Japanese has no spaces, so what
+    // follows a temperature is normally kana — and kana is `\p{L}`, so the guard rejected the ORDINARY case:
+    // `20℃` read 20度 while `20℃を` read "20度 シー を", the scale letter spelled out because this arm failed
+    // and the bare `°` rule below claimed the sign alone. The guard exists to stop `°Cm`-style run-ons, which
+    // only a Latin letter can form. Same reasoning as the tier's `unspacedScript`, in a local rule.
+    s = s.replace(/(\d)\s?(?:℃|°\s?C)(?![\p{sc=Latn}])/gu, "$1度");
+    s = s.replace(/(\d)\s?(?:℉|°\s?F)(?![\p{sc=Latn}])/gu, "華氏$1度");
     s = s.replace(/(\d)\s?°/gu, "$1度");
 
     // 9) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.

@@ -201,7 +201,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
 import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldNativeDigits } from "./core/unicode.ts";
+import { foldNativeDigits, foldSquaredDegrees } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -304,7 +304,14 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // globally would pre-empt the language's own disambiguation, which uses context the
                     // registry does not have. Such a language opts out and folds inside its own
                     // normalize.ts, AFTER the homoglyph rule — see telugu/normalize.ts.
-                    return original(FOLD_OPT_OUT.has(lang) ? stripMarkup(input) : foldNativeDigits(stripMarkup(input)));
+                    // ℃/℉ ARE FOLDED FOR EVERY LANGUAGE TOO, and unconditionally — there is no opt-out list
+                    // because there is no language for which `℃` means something other than `°C`. 52 of the 65
+                    // languages with an artifact already read `°C` and dropped `℃` entirely, losing the unit
+                    // and not merely the sign; the 13 that handled both had written the arm out by hand, and
+                    // folding is idempotent so they are unaffected. See `foldSquaredDegrees` for why the list
+                    // stops at two characters instead of being NFKC.
+                    const pre = foldSquaredDegrees(stripMarkup(input));
+                    return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {
                     popHost();
                 }

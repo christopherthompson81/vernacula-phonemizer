@@ -548,3 +548,46 @@ describe("unit abbreviations in the tier-less languages (#586)", () => {
         expect(phonemize("غلظت بالای سم", "fa")).toBe("ɣˈalzt baːlˈaːj sˈam");
     });
 });
+
+/**
+ * #586 — ℃ (U+2103) is one code point meaning exactly what `°C` means, and 52 of the 65 languages with an
+ * artifact read `°C` correctly while dropping `℃` — losing the whole unit, not just the sign. So it is folded
+ * for every language at the registry's single dispatch point, beside the native-digit fold.
+ *
+ * NOT NFKC: counted over the corpora, blanket compatibility folding would turn `²` into `2` in 46 of them
+ * (erasing every exponent reading), `…` into three clause breaks in 18, and recompose nukta letters in five
+ * Indic scripts. And № is deliberately excluded — NFKC gives "No", where Bulgarian (21 instances) says номер.
+ */
+describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
+    test("the fold reaches languages that never wrote a ℃ arm", () => {
+        for (const l of ["de", "fr", "es", "ru", "tr", "sw"]) {
+            expect(phonemize("20℃", l)).toBe(phonemize("20 °C", l));
+            expect(phonemize("20℃", l)).not.toBe(phonemize("20", l)); // and it is no longer a no-op
+        }
+    });
+
+    test("…and the 13 that DID write one are unaffected, because folding is idempotent", () => {
+        for (const l of ["bg", "cmn", "hi", "is", "my"]) {
+            expect(phonemize("20℃", l)).toBe(phonemize("20 °C", l));
+        }
+    });
+
+    // The fold surfaced a pre-existing guard defect in three unspaced-script languages: `(?![\p{L}])` after
+    // the scale letter rejects a following kana / Hangul particle / Han character, which in those scripts is
+    // the ORDINARY case. It reproduces with `20 °Cを` too, so the fold did not cause it.
+    test("the scale letter's guard must reject a LATIN letter, not any letter", () => {
+        expect(phonemize("20℃を", "ja")).toBe("nid͡ʑɯᵝːdo̞o̞");            // was "20度 シー を"
+        expect(phonemize("20℃에", "ko")).toBe("sˈɘp̚s͈i isˈip̚t͈oe");      // was "20도씨에", losing 섭씨
+        expect(phonemize("32℃에 달하는", "ko")).toContain("sˈɘp̚s͈i");      // ko_kr's own sentence, ×3
+    });
+
+    test("yue had no degree rule at all; its corpus supplies both words AND the order", () => {
+        // 攝氏 ×2 "氣溫經常超過攝氏 30 度" · 華氏 ×2 "在華氏 90 度的高溫中" — the scale name precedes the
+        // number and 度 follows, so the reading wraps around the numeral and the shared tier cannot express it.
+        expect(phonemize("20℃", "yue")).toBe("siːp̚˧ siː˨ jiː˨ sɐp̚˨ tou˨");   // 攝氏二十度
+        expect(phonemize("90 °F", "yue")).toBe("waː˨˩ siː˨ kɐu˧˥ sɐp̚˨ tou˨"); // 華氏九十度
+        expect(phonemize("45°", "yue")).toBe("sei˧ sɐp̚˨ ŋ̩˩˧ tou˨");           // 四十五度
+        // …and it agrees with the corpus's own spelled-out form, which is the check that matters.
+        expect(phonemize("20℃", "yue")).toBe(phonemize("攝氏 20 度", "yue"));
+    });
+});
