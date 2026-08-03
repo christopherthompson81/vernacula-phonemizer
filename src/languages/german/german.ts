@@ -391,6 +391,13 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["Prozent"],
     currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
     units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"] },
+    // #586. `5 km²` read as *fʏnf km* — the abbreviation reaching the phoneme sink verbatim, the QUANTITY lost
+    // and not merely its power, because an undeclared measure word made the tier abandon the whole match. The
+    // core now emits the unit and hands the exponent back, so this became a VISIBLE `DROP:exponent` (de went
+    // 3 → 6 drops while three sentences' units were repaired); this declaration is what closes it.
+    // German FUSES the measure word onto the front, which is `compound`: corpus ×2
+    // "2,2 Millionen Quadratkilometer Ozeanfläche", and Kubik ×2 for the cube.
+    exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" },
     magnitudes: ["Millionen", "Million", "Milliarden", "Milliarde"],
 });
 

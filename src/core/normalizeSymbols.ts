@@ -360,7 +360,20 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 }
                 if (exp !== undefined) {
                     const forms = exp === "\u00b3" || exp === "3" ? d.exponentWords?.cubed : d.exponentWords?.squared;
-                    if (forms === undefined) return whole; // not declared ⇒ untouched, as before
+                    if (forms === undefined) {
+                        // NO MEASURE WORD DECLARED — emit the UNIT and hand the exponent back, rather than
+                        // abandoning the whole match. Returning `whole` was silently the worst of the three
+                        // options: the unit never read either, so the abbreviation reached the phoneme sink
+                        // verbatim and the QUANTITY was lost, not just its power. Measured across the 66
+                        // languages with an artifact, while no gate said a word:
+                        //   21 read `5 km²` with a raw `km` in the IPA — de *fʏnf km*, cy *pˈɨmp km*,
+                        //      tr *bˈeʃ km* — against `5 km` reading correctly in every one of them
+                        //    7 more lost the unit word another way
+                        // Re-emitting the exponent keeps the unit's reading AND leaves the `²` where the leak
+                        // gate can see it (`RAWMARK` covers ²³), so what remains is a visible missing WORD in
+                        // one language's data instead of an invisible missing reading in twenty-one.
+                        return `${q} ${head}${exp}`;
+                    }
                     // Count forms, because in Romance the measure word is an ADJECTIVE and agrees:
                     // "un kilómetro cuadrado" vs "cincuenta kilómetros cuadrados".
                     const word = pick(forms, n, cf);

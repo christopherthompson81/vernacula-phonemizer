@@ -110,6 +110,15 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["y cant"],
     currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
     units: { km: ["cilometr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },
+    // #586. `5 km²` read as *pˈɨmp km*, the abbreviation raw in the IPA — see the German note for the shared
+    // cause. Welsh puts the measure word AFTER the unit with a space, which the corpus shows ×10:
+    // "2.2 miliwn cilomedr sgwâr o gefnfor"; ciwbig ×3 for the cube. One form each — both are adjectives and
+    // do not agree here.
+    //
+    // NOTED, NOT CHANGED: the corpus spells the unit `cilomedr` ×67 and never `cilometr` ×0, which is what is
+    // declared above. Both are current Welsh orthography and they phonemize close to identically, so this is a
+    // spelling-preference finding for the sweep rather than a defect to fix inside an exponent change.
+    exponentWords: { squared: ["sgwâr"], cubed: ["ciwbig"], position: "after" },
 });
 
 class WelshPhonemizer implements Phonemizer {
