@@ -450,6 +450,29 @@ a number followed by a short word.
   1 n`, and the Wi-Fi standard's letter was read as a case suffix (*tokkoon*). Set such a letter off with a
   hyphen instead — the tokenizer skips it, so the reading is unchanged and the shape is unambiguous.
 
+
+**16. BEFORE DECLARING A CLASS OUT OF SCOPE, CHECK WHETHER THE SEAM ALREADY EXISTS.** Slovak (#603) shipped
+its largest untreated class — **119 initialisms over 74 acronyms, second only to `N.` ×106** — with the
+reason *"it is a separate seam (`core/initialisms.ts`)"*. That file already existed and about thirty
+languages already wired it, **including Czech, which the same PR calls "the nearest sibling"** and which
+cites the identical acronym inventory. The work was ~40 lines copied from the sibling, not new
+infrastructure. Meanwhile the readings being shipped were `HDP` → [xtp], `DVD` → [tft], `GMT` → [ɡmt] —
+vowel-less clusters, exactly what that seam exists to prevent.
+
+- **`grep -rln` for the seam and for a sibling that uses it** costs nothing and settles the question. A
+  scope decision is a measurement like any other; "this needs new infrastructure" is a claim to verify, not
+  a reason to state.
+- **"Don't bulk-invent data" is not a reason to skip a seam whose whole design avoids inventing data.**
+  `core/initialisms.ts` records in its own header that a word-acronym list and a length threshold were
+  *removed* as "logic trying to re-derive lexical facts". What a language supplies is a letter-name table
+  (an orthographic fact — espeak's `dictsource/<lang>_list` carries one for most languages) plus the short
+  list of readable strings that convention spells out anyway.
+- **Wiring a shared pass introduces an ordering constraint — verify it end-to-end, not in the layer.**
+  Slovak's Roman numerals still look Roman inside `normalize.ts`, which suggests the pass will eat them;
+  `core/roman.ts` is in fact applied in `registry.ts`, wrapping `engine.text()`, so they are digits by then.
+  Pin it with a test through the real phonemizer, using an operand that would break if the order were wrong
+  (a vowel-less numeral like `XV`, not the `II` the corpus happens to contain).
+
 ---
 
 ## Two standing rules on data
