@@ -316,3 +316,61 @@ can hold. Recorded as playbook trap 15 instead, with the grep that finds it in s
 | `review.ts --lang om` | **checklist clean**, all 8 checks |
 | `corpus-diff` om_et | **130/1218 (10.7%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 8) |
 | `referee-eval om` | **unchanged**: epitran 5334/5336 (100.0%), kaikki 49/51 (96.1%) |
+
+## Run 9 — 2026-08-03, the initialism deferral, closed
+
+#602 deferred initialisms (64 instances) with the note that espeak's `om_list` "carries the full Oromo
+letter-name inventory, so an initialism pass is sourceable". The new `tools/normalization/sources.ts` reports
+`om` as **WIREABLE, not yet wired**, which is what brought it back — the deferral was correct at the time and
+had simply never been actioned.
+
+The table is read straight off `dictsource/om_list` lines 42–67, all 26 Qubee letters, as CV names:
+
+```
+b  ba:     c  tS`a:     q  k`a:     x  t`a:     n  na   ← short, the one exception
+```
+
+Transcribed back into Qubee so the g2p produces espeak's own phonemes, and round-tripped to prove it:
+`baa`→[bˈaː], `caa`→[t͡ʃʼˈaː], `qaa`→[kʼˈaː], `xaa`→[tʼˈaː].
+
+Oromo needs almost no lexical list, because it permits essentially **no complex onset**: the shared
+phonotactic rule spells `DNA`, `GPS`, `GMT`, `FBI`, `MRI`, `TV` with no data entry at all. Ten entries cover
+the vowel-initial readables (`us`, `uk`, `usa`, `usaf`, `ucla`, `uw`, `aol`, `oha`, `utc`, `wned`); `UNESCO`,
+`ACTA`, `REM`, `ROV`, `SUV` are left as words.
+
+### The ordering hazard, and why `ii` is the one to check
+
+The vowel letter name for ⟨i⟩ is `ii` — and a standalone `ii` reads as **[lˈama], "two"**, because
+`core/roman.ts` treats it as Roman II. That would put "two" at the end of every `MRI`. It does not, because
+`normalizeRomans` is applied in `registry.ts` **wrapping** `engine.text()`, so it runs before this pass and
+never sees an emitted letter name. Verified end-to-end and pinned:
+
+```
+seenaa II jedhu   ⇒ seːnˈaː lˈama d͡ʒˈeᶑu      the SOURCE Roman still reads as 2
+MRI scanner       ⇒ mˈaː rˈaː ˈiː st͡ʃʼanːˈer   the EMITTED ii is the vowel
+D.K.D 5000 tti    ⇒ ᶑalˈoːta kiristˈoːs dˈura … the era marker still expands, not DAA-KAA-DAA
+```
+
+### The enclitic rides the last letter name
+
+Two corpus instances turned out better than expected. `GPS'f` and `CCTV'n` carry Oromo case enclitics on the
+initialism, and because the pass spells the letters and leaves the enclitic in place, the dative and
+instrumental land on the final letter name exactly as the orthography writes them:
+
+```
+GPS'f   ⇒ ɡˈaː pˈaː sˈaːʔf        "for G-P-S"
+CCTV'n  ⇒ t͡ʃʼˈaː t͡ʃʼˈaː tˈaː vˈaːʔn
+```
+
+Still open and unchanged: `(NBA)n`, where the enclitic follows a closing bracket and so has no host — the
+same orphan noted in Run 8 for `12.00 GMT tti`.
+
+### Gates
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2800 tests, 0 failed** (2 new blocks) |
+| `review.ts --lang om` | **checklist clean**, all 8 |
+| `corpus-diff` om_et | **43/1218 changed**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 — all 43 read |
+| `referee-eval om` | **unchanged**: epitran 5334/5336 (100.0%), kaikki 49/51 (96.1%) |

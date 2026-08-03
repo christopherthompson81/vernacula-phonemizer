@@ -242,4 +242,32 @@ describe("Oromo text normalization", () => {
         expect(normalizeOromoNumerals("fakkii 1.1.")).toBe("fakkii 1 tuqaa 1.");
         expect(phonemize("fakkii 1.1.", "om")).toBe("fakːˈiː tˈokːo tukʼˈaː tˈokːo .");
     });
+
+    // #602 deferred initialisms (64 instances, `PTWC` → [ptʼwt͡ʃʼ]) with the note that espeak's om_list
+    // "carries the full Oromo letter-name inventory, so an initialism pass is sourceable". It does — lines
+    // 42–67, all 26 Qubee CV names — and `sources.ts` now reports the language as WIREABLE-not-wired.
+    test("initialisms spell out with the Qubee letter names", () => {
+        // OOV: Oromo permits essentially no complex onset, so the phonotactic rule spells these with no
+        // data entry at all.
+        expect(phonemize("DNA isaa", "om")).toBe("dˈaː na ˈaː isˈaː");
+        expect(phonemize("GPS fayyadama", "om")).toBe("ɡˈaː pˈaː sˈaː fajːadˈama");
+        // LEXICAL: vowel-initial and readable, so only a manifest entry can know they are spelled.
+        expect(phonemize("US fi UK", "om")).toBe("ˈuː sˈaː fˈi ˈuː kˈaː");
+        // …and the ones that ARE words stay words.
+        for (const w of ["UNESCO", "ACTA", "ROV"]) expect(phonemize(`${w} jedhe`, "om")).toContain("d͡ʒˈeᶑe");
+        expect(phonemize("UNESCO jedhe", "om")).toBe("unˈest͡ʃʼo d͡ʒˈeᶑe");
+        // THE ENCLITIC RIDES THE LAST LETTER NAME, which is what the corpus writes: `GPS'f` is the dative.
+        expect(phonemize("GPS'f kenne", "om")).toBe("ɡˈaː pˈaː sˈaːʔf kˈenːe");
+    });
+
+    // ORDERING, pinned end-to-end because it is invisible in normalize.ts alone. `core/roman.ts` runs in
+    // registry.ts, wrapping text(), so Romans are digits before the initialism pass — and the vowel letter
+    // name `ii` this table emits is therefore never seen by it. A standalone `ii` DOES read as *lama* (two)
+    // through the registry, so if the order were reversed every `MRI` would end in "two".
+    test("a Roman numeral survives, and the emitted `ii` is not read as one", () => {
+        expect(phonemize("seenaa II jedhu", "om")).toBe("seːnˈaː lˈama d͡ʒˈeᶑu"); // Roman → 2
+        expect(phonemize("MRI scanner", "om")).toBe("mˈaː rˈaː ˈiː st͡ʃʼanːˈer"); // emitted ii = the vowel
+        // The era marker must still expand rather than be spelled DAA-KAA-DAA.
+        expect(phonemize("D.K.D 5000 tti", "om")).toBe("ᶑalˈoːta kiristˈoːs dˈura kˈuma ʃanˈitːi");
+    });
 });

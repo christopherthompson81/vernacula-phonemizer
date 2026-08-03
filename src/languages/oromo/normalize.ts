@@ -63,6 +63,7 @@
  * rather than guessed.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -73,6 +74,47 @@ import { numberToWords } from "./numbers.ts";
  *  espeak `om_list` `_dpt`/`_.` → *tuqaa*; the corpus writes *sirna tuqaalee* (the system of dots =
  *  punctuation) and *tuqaa 76* (points). */
 const POINT = loadManifest<{ decimalWord: string }>(import.meta.url, "oromo.jsonc").decimalWord;
+
+/**
+ * OROMO LETTER NAMES — the Qubee alphabet's own CV names, read straight off espeak-ng `dictsource/om_list`
+ * lines 42–67, which carries all 26: `b  ba:`, `c  tS\`a:`, `q  k\`a:`, `x  t\`a:`, `n  na` (short, the one
+ * exception). Transcribed back into Qubee orthography, so the g2p produces espeak's own phonemes — verified
+ * by round-trip: baa→[bˈaː], caa→[t͡ʃʼˈaː], qaa→[kʼˈaː], xaa→[tʼˈaː].
+ *
+ * This was #602's largest deferral (64 instances, `PTWC` → [ptʼwt͡ʃʼ]), left with the note that om_list
+ * "carries the full Oromo letter-name inventory, so an initialism pass is sourceable". `sources.ts` now
+ * reports it as WIREABLE-not-wired, which is what brought it back.
+ */
+const LETTER_NAME: Readonly<Record<string, string>> = {
+    a: "aa", b: "baa", c: "caa", d: "daa", e: "ee", f: "faa", g: "gaa", h: "haa", i: "ii",
+    j: "jaa", k: "kaa", l: "laa", m: "maa", n: "na", o: "oo", p: "paa", q: "qaa", r: "raa",
+    s: "saa", t: "taa", u: "uu", v: "vaa", w: "waa", x: "xaa", y: "yaa", z: "zaa",
+};
+
+/** Oromo phonotactics for the OOV rule. Oromo is strongly CV: it permits essentially NO complex onset, so
+ *  the onset test alone spells DNA, FBI, MRI, GPS, GMT and TV without any of them needing a data entry.
+ *  The few clusters listed are the ones the corpus's own words actually begin with. */
+export const isUnreadableOromo = makeUnreadableTest({
+    vowels: /[aeiou]/u,
+    legalOnsets: new Set(["dh", "ch", "ny", "ph", "sh"]),
+    legalCodas: new Set(["rk", "rt", "rs", "nt", "nd", "mb", "lt", "st"]),
+});
+
+/**
+ * INITIALISM PASS. ORDERING: `core/roman.ts` is applied in `registry.ts`, wrapping `engine.text()`, so a
+ * Roman numeral is already digits before this file runs — which also means the vowel letter name `ii` this
+ * table emits is never seen by the Roman pass. That matters: a standalone `ii` DOES read as *lama* (two)
+ * through the registry, and if the ordering were reversed every `MRI` would end in "two". Pinned by a test.
+ * Oromo has no pronunciation dictionary — its g2p is rule-based — so `isRecorded` is always false.
+ */
+export function normalizeOromoInitialisms(text: string): string {
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        acronymLetters: new Set(loadManifest<{ acronymLetters: string[] }>(import.meta.url, "oromo.jsonc").acronymLetters),
+        isRecorded: () => false,
+        isUnreadable: isUnreadableOromo,
+    })(text);
+}
 
 /** Measure nouns, in the corpus's own spellings. Emitted BEFORE the number (fact 1 above). */
 const UNIT: Readonly<Record<string, string>> = {

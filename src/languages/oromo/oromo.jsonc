@@ -30,6 +30,14 @@
     // `_.` → tuqaa; the corpus writes "sirna tuqaalee" (the system of dots = punctuation) and "tuqaa 76".
     "decimalWord": "tuqaa",
 
+    // LEXICAL: acronyms Oromo spells out although the letters could be read as a word, so no phonotactic rule
+    // can derive it (core/initialisms.ts states this limit). All are vowel-initial or vowel-bearing and would
+    // otherwise fall through to the OOV g2p as words — `US` read [ˈus], `AOL` [aˈol], `OHA` as a word.
+    // Tokens with NO readable onset (DNA, FBI, MRI, GPS, GMT, TV, TT) need no entry: the shared OOV rule
+    // spells them, because Oromo permits none of those clusters word-initially.
+    // Said as WORDS and deliberately NOT listed: UNESCO, ACTA, REM, ROV, SUV.
+    "acronymLetters": ["us", "uk", "usa", "usaf", "ucla", "uw", "aol", "oha", "utc", "wned"],
+
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     },

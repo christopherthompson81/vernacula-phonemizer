@@ -10,7 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
-import { normalizeOromo, normalizeOromoNumerals } from "./normalize.ts";
+import { normalizeOromo, normalizeOromoInitialisms, normalizeOromoNumerals } from "./normalize.ts";
 
 interface OromoDef {
     digraphs: Record<string, string>;
@@ -203,7 +203,13 @@ class OromoPhonemizer implements Phonemizer {
         // beside a sign, so every rule that turns digits into WORDS — the glued Oromo enclitic and the
         // decimal — has to run after it (trap 14 from the other end). That ordering is what keeps the
         // currency and percent words in ONE place, the declaration above.
-        return assembleClauses(normalizeOromoNumerals(SYMBOLS(normalizeOromo(input))), TOKEN, (m, sink) => {
+        // The INITIALISM pass runs LAST of the three text passes: after normalizeOromo has expanded the
+        // dotted abbreviations and the era marker (or `D.K.D` would be spelled DAA-KAA-DAA), and after the
+        // symbol tier, whose signs are not letter runs. `core/roman.ts` is applied in registry.ts, wrapping
+        // this method, so Roman numerals are digits before any of this — see normalize.ts's note on why that
+        // ordering is what keeps the emitted vowel name `ii` from being read as "two".
+        const normalized = normalizeOromoInitialisms(normalizeOromoNumerals(SYMBOLS(normalizeOromo(input))));
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
