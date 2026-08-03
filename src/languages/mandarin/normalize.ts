@@ -18,6 +18,32 @@
  * What genuinely needs a rewrite here is the FRACTION, because Chinese states it in the opposite order
  * from the western notation: 1/5 is 五分之一, "of five parts, one". Emitting the reordered form as DIGITS
  * lets the engine's own numeral substitution do the reading.
+ *
+ * ── THE SIGN CLASSES (#586) ────────────────────────────────────────────────────────────────────────────
+ *
+ * The #562 pass left every math sign DROPPED, which the review gate reported as
+ * `DROPPED: minus plus equals less-than times` and the artifact scan as `DROP math-sign ×1`. The minus was
+ * the one that mattered: `-5 度` read as 五度, **positive** five degrees, so a below-freezing temperature
+ * was silently reported as above it.
+ *
+ * EVERY WORD BELOW IS ATTESTED IN ITS OWN NOTATION SLOT, from zh.wikipedia via
+ * `tools/normalization/attest.ts` (cached in `tools/corpus/attest/cmn.jsonc`) and, for 乘以 and 平方, from
+ * the FLEURS artifact itself. The attestations are quoted because the sense is the whole question — 加 and
+ * 加上 both mean "plus" in a dictionary and only one of them is the operator:
+ *
+ *   =  等于    "任何数字与1相乘皆等于其本身"  ·  "一加一不等於二"
+ *   <  小于    "呼吸频率（RR）小于每分钟30次"
+ *   >  大于    "a > b ，即 a 大于 b"          — the article glosses the notation directly
+ *   ×  乘以    "29¾ 英寸乘以 24½ 英寸" (cmn.jsonc)  ·  "0乘以任何实数都等于0（0×10=0）"
+ *   ÷  除以    "總人口數除以總面積"
+ *   +  加      "1+1是一個數學算式 … 1+1或一加一也可能指" — Wikipedia's own gloss OF `1+1`
+ *   ±  正负    "直流正负800千伏" — a ±800 kV rating, the sign in a unit context
+ *   -  负      "0非正非负" · "0的负数次方" — the negative-number morpheme
+ *   -  零下    "经过零下40度高寒地带" — a −40° zone, and the reason temperature gets its OWN rule
+ *
+ * 加上 was the first candidate for `+`, on a wiki gloss of `1+0=1`. It is the wrong word: its own
+ * attestations are the CONJUNCTION sense ("加上海外市場後" — "plus the overseas market, …"), and the
+ * disambiguation page for `1+1` names the arithmetic reading 一加一. Availability is not correctness.
  */
 
 /**
@@ -28,6 +54,87 @@
  */
 const FRACTION = /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu;
 
+/**
+ * THE TWO LEFT GUARDS, and why they differ — measured, not reasoned.
+ *
+ * Chinese is written WITHOUT SPACES, so the character before a negative is normally a Han letter: `气温-5度`
+ * is a negative and the fleet's `(?<![\p{L}\p{Nd}])` refuses it. English can use `(^|[\s(])` because English
+ * always has the space. So the first attempt here excluded only a preceding DIGIT or LATIN letter, on the
+ * theory that a hyphenated code in Chinese prose is always one of those.
+ *
+ * THE CORPUS SAID NO. It writes the aircraft as **伊尔-76** — Il-76 with the *name* transliterated and the
+ * designation left in digits — twice, and the character before the hyphen is Han. The relaxed guard read it
+ * as 伊尔负76, "Il negative seventy-six". The Han-adjacent negative was my invention; 伊尔-76 is attested.
+ *
+ * The discrimination that survives is one of RIGHT context, not left: the temperature rule can afford the
+ * loose guard because a DEGREE WORD follows it, and 伊尔-76 has none. So `BELOW_ZERO` reads Han-adjacent and
+ * the general negative takes the fleet's strict guard, which costs a bare unspaced `气温-5` (no degree word)
+ * and buys back the corpus sentence.
+ */
+const SIGN = "[-−–]";
+const NEG_LEFT_STRICT = "(?<![\\p{L}\\p{Nd}-])";
+const NEG_LEFT_LOOSE = "(?<![\\p{Nd}\\p{sc=Latn}-])";
+
+/** TEMPERATURE first: before a degree word Chinese says 零下 ("below zero"), not 负. `°C` is still `°C`
+ *  here — the shared symbol tier turns it into 摄氏度 after this layer runs — so the lookahead accepts the
+ *  raw sign, the fullwidth forms, and the bare 度. */
+const BELOW_ZERO = new RegExp(`${NEG_LEFT_LOOSE}${SIGN}(\\d+(?:[.,]\\d+)?)(?=\\s*(?:°|℃|℉|度))`, "gu");
+const NEGATIVE = new RegExp(`${NEG_LEFT_STRICT}${SIGN}(?=\\d)`, "gu");
+
+/** Sign → word, applied in order. `±` is its own code point, so it cannot be reached by the `+` arm. */
+const SIGNS: readonly (readonly [RegExp, string])[] = [
+    [/±\s?/gu, "正负"],
+    [/\s?×\s?/gu, "乘以"],
+    [/\s?÷\s?/gu, "除以"],
+    [/\s?=\s?/gu, "等于"],
+    [/\s?<\s?/gu, "小于"],
+    [/\s?>\s?/gu, "大于"],
+    // Both the spaced form and the attached one (`UTC+1` → UTC加1), matching the English rule's coverage.
+    [/\s?\+\s?/gu, "加"],
+];
+
+/**
+ * THE AMPERSAND, which is the one drop left after the signs above and the class #586 opens with.
+ *
+ * The artifact's only `&` is `一众 B&B 公司` — "a number of B&B companies" — and it read as *bˈiː bˈiː*,
+ * "B B". Between LATIN letters the ampersand stays inside the Latin run and is spelled ` and `, because the
+ * whole token is an English term that the engine already delegates to English: reading half of `B&B` in
+ * Mandarin would be a code-switch in the middle of a word. `AT&T` and `R&D` behave the same way.
+ *
+ * Elsewhere it becomes 和, the ordinary Chinese "and". No corpus sentence exercises that arm — it guards
+ * against silence rather than fixing a measured reading, and is marked as such.
+ */
+const AMP_LATIN = /(?<=[A-Za-z])\s?[&＆]\s?(?=[A-Za-z])/gu;
+const AMP_ELSEWHERE = /\s?[&＆]\s?/gu;
+
+/**
+ * A BARE exponent — `5³`, no unit — becomes 的立方 ("the cube of"), the same measure word the unit case uses.
+ *
+ * Requires a DIGIT before the exponent, which is what keeps it off `km²`: there the exponent follows the
+ * unit's letters, and the unit case belongs to the shared tier's `exponentWords` (wired in mandarin.ts as
+ * 平方/立方, which PRECEDE the unit — 平方公里).
+ *
+ * 的2次方 / 的3次方 WAS THE FIRST ATTEMPT and is the reason the word is spelled out instead. Emitting the
+ * exponent as a DIGIT walked into the engine's own 两 rule: `5²` read as 五的**两**次方, and 两 is the
+ * counting-two used before a measure word, never the two of an ordinal or a power (二次方). Writing 平方/立方
+ * puts the reading beyond reach of any numeral rule, and reuses a word already attested for this language.
+ */
+const BARE_EXPONENT = /(?<=\d)([²³])/gu;
+const POWER: Readonly<Record<string, string>> = { "²": "平方", "³": "立方" };
+
 export function normalizeMandarin(input: string): string {
-    return input.replace(FRACTION, (_m, num: string, den: string) => `${den}分之${num}`);
+    let s = input;
+    // 1) FRACTION — the reordering the western notation needs.
+    s = s.replace(FRACTION, (_m, num: string, den: string) => `${den}分之${num}`);
+    // 2) NEGATIVES, temperature before the general case so 零下 wins where it applies.
+    s = s.replace(BELOW_ZERO, "零下$1");
+    s = s.replace(NEGATIVE, "负");
+    // 3) The remaining signs.
+    for (const [re, word] of SIGNS) s = s.replace(re, word);
+    // 3b) The ampersand, Latin-internal arm first so the general arm cannot claim it.
+    s = s.replace(AMP_LATIN, " and ");
+    s = s.replace(AMP_ELSEWHERE, "和");
+    // 4) A bare exponent, after the signs so nothing above can strand it.
+    s = s.replace(BARE_EXPONENT, (_m, e: string) => `的${POWER[e]!}`);
+    return s;
 }

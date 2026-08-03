@@ -142,6 +142,45 @@ describe("mandarin normalization", () => {
         expect(phonemize("3/4", "cmn")).toBe("sɹ̩˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ san˥˥"); // 四分之三
     });
 
+    test("a dropped minus INVERTS a temperature (#586)", () => {
+        // The defect this whole pass exists for: `-5 度` read as 五度 — POSITIVE five degrees.
+        expect(phonemize("-5 度", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩"); // 零下五度, "five below zero"
+        expect(phonemize("-5 °C", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 零下五摄氏度
+        // Han-adjacent, because Chinese has no spaces — the fleet's `(?<!\p{L})` guard would refuse this one.
+        expect(phonemize("气温-5度。", "cmn")).toBe("t͡ɕʰi˥˩ wuən˥˥ liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩ .");
+        expect(phonemize("-5", "cmn")).toBe("fu˥˩ wu˨˩˦"); // 负五 — 负 away from a degree word
+    });
+
+    test("a negative is not a range, a score, or a hyphenated code", () => {
+        expect(phonemize("6-6", "cmn")).toBe("lioᵘ˥˩ lioᵘ˥˩"); // the artifact's tennis score
+        expect(phonemize("5-3", "cmn")).toBe("wu˨˩˦ san˥˥"); // and its baseball one
+        expect(phonemize("Il-76", "cmn")).toBe("ˈɪɫ t͡ɕʰi˥˥ ʂʐ̩˧˥ lioᵘ˥˩"); // Latin-initial compound
+        expect(phonemize("1990-1995", "cmn"))
+            .toBe("ji˥˩ t͡ɕʰiɛn˥˥ t͡ɕioᵘ˧˥ paⁱ˧˥ t͡ɕioᵘ˨˩˦ ʂʐ̩˧˥ ji˥˩ t͡ɕʰiɛn˥˥ t͡ɕioᵘ˧˥ paⁱ˧˥ t͡ɕioᵘ˨˩˦ ʂʐ̩˧˥ wu˨˩˦");
+    });
+
+    test("the math signs each have a word, and it is the operator's word", () => {
+        expect(phonemize("x = y", "cmn")).toBe("ˈɛks təŋ˨˩˦ jy˧˥ wˈaᶦ"); // 等于
+        expect(phonemize("5 < 6", "cmn")).toBe("wu˧˥ ɕjɑᵘ˨˩˦ jy˧˥ lioᵘ˥˩"); // 小于
+        expect(phonemize("6 × 6", "cmn")).toBe("lioᵘ˥˩ ʈ͡ʂʰəŋ˧˥ ji˨˩˦ lioᵘ˥˩"); // 乘以
+        expect(phonemize("6 ÷ 3", "cmn")).toBe("lioᵘ˥˩ ʈ͡ʂʰu˧˥ ji˨˩˦ san˥˥"); // 除以
+        expect(phonemize("±5", "cmn")).toBe("ʈ͡ʂəŋ˥˩ fu˥˩ wu˨˩˦"); // 正负
+        // 加, the arithmetic operator — NOT 加上, whose attestations are the conjunction sense.
+        expect(phonemize("+5", "cmn")).toBe("t͡ɕiɑ˥˥ wu˨˩˦");
+        // The artifact's one math-sign drop: a UTC offset, where the sign is attached to letters.
+        expect(phonemize("11:00 (UTC+1)", "cmn")).toBe("ʂʐ̩˧˥ ji˥˥ , liŋ˧˥ jˈuː tʰˈiː sˈiː t͡ɕiɑ˥˥ ji˥˥");
+    });
+
+    test("the exponent's measure word PRECEDES the unit", () => {
+        expect(phonemize("50 km²", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦"); // 五十平方公里
+        expect(phonemize("50 m³", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ li˥˩ fɑŋ˥˥ mi˨˩˦"); // 五十立方米
+        // A myriad magnitude between the number and the unit — undeclared, `km` fell through to English.
+        expect(phonemize("5 万 km²", "cmn")).toBe("wu˨˩˦ wɑn˥˩ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦"); // 五万平方公里
+        // A BARE exponent takes 的平方/的立方. Emitting a digit here read 5² as 五的**两**次方.
+        expect(phonemize("5²", "cmn")).toBe("wu˨˩˦ tɤ pʰiŋ˧˥ fɑŋ˥˥"); // 五的平方
+        expect(phonemize("5³", "cmn")).toBe("wu˨˩˦ tɤ li˥˩ fɑŋ˥˥"); // 五的立方
+    });
+
     test("what already worked is unchanged", () => {
         expect(phonemize("2011年3月14日", "cmn"))
             .toBe("ər˥˩ liŋ˧˥ ji˥˥ ji˥˥ niɛn˧˥ san˥˥ jyɛ˥˩ ʂʐ̩˧˥ sɹ̩˥˩ ʐʐ̩˥˩"); // year digit-wise, month/day cardinal

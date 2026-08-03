@@ -16,6 +16,12 @@
  * without ever being spoken. That is why the sign probes below PRINT their readings instead of only
  * asserting a difference — read them.
  *
+ * That paragraph was written as a limitation and stood as one for thirty-seven languages, while THIS FILE'S
+ * OWN `A&B` PROBE had the merge defect it describes — so the gate printed the ampersand's reading with no
+ * DROPPED marker and the human was asked to notice. It is mechanical now: the probe is spaced (`A & B`), so
+ * deleting the sign can no longer join two operands. The general rule survives — a printed reading still
+ * needs a human — but this particular class no longer depends on one. See `signCases`.
+ *
  * Usage:  npx tsx tools/normalization/review.ts --lang cs [--dir czech]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -174,15 +180,38 @@ note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync
 const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
 const say = (t: string): string => { try { return (phonemize(t, lang) as string).trim(); } catch (e) { return `THROW ${(e as Error).message.slice(0, 40)}`; } };
 
-/** A symbol that contributes NOTHING is a hard fail; one that merely changes the output is printed for a
- *  human to judge, because changing tokenization is not the same as being spoken. */
+/**
+ * A symbol that contributes NOTHING is a hard fail; one that merely changes the output is printed for a
+ * human to judge, because changing tokenization is not the same as being spoken.
+ *
+ * EVERY PROBE MUST BE NON-MERGING, and `A&B` was not. Deleting its `&` yields `AB` — ONE token, read
+ * differently from `A B` — so the differential test saw a change and reported the class clean. Measured on
+ * cmn, whose artifact writes `一众 B&B 公司`: this gate printed `ampersand A&B  ˈə bˈiː` with no DROPPED
+ * marker while `corpus-diff.ts` reported `DROP:ampersand` on the real sentence. The spaced form `A & B`
+ * deletes to `A  B`, which reads as `A B`, so a dropped `&` is now visible. This is the same trap
+ * `defects.ts` documents for the minus: never build a probe whose deletion joins two operands.
+ *
+ * THE CLASS LIST IS `DROPPABLE`'s, because a probe list that drifts from the defect table is exactly what
+ * `defects.ts` was extracted to stop — and this list had drifted, missing `÷`, `>`, `±`, the exponent and
+ * the currency sign outright. Two classes are DELIBERATELY not probed here, stated rather than silently
+ * omitted:
+ *   · `iteration` (ๆ 々 ゝ ៗ) — script-specific. A language that does not use the mark would report it
+ *     dropped, so the finding would be noise for all but a handful; `mine.ts scan` catches it where the
+ *     corpus actually contains one.
+ *   · nothing else. Every other DROPPABLE class is below.
+ */
 const signCases: [string, string, RegExp][] = [
     ["minus", "-5", /[-−]/gu],
     ["plus", "+5", /\+/gu],
-    ["ampersand", "A&B", /&/gu],
+    ["plus-minus", "±5", /±/gu],
+    ["ampersand", "A & B", /&/gu],
     ["equals", "x = y", /=/gu],
     ["less-than", "5 < 6", /</gu],
+    ["greater-than", "6 > 5", />/gu],
     ["times", "6 × 6", /×/gu],
+    ["divide", "6 ÷ 3", /÷/gu],
+    ["exponent", "5 km²", /²/gu],
+    ["currency", "$5", /\$/gu],
     ["percent", "25 %", /%/gu],
     ["degrees", "20 °C", /°/gu],
 ];
@@ -192,7 +221,7 @@ for (const [name, probe, strip] of signCases) {
     const full = say(probe), bare = say(probe.replace(strip, ""));
     const isDropped = full === bare;
     if (isDropped) dropped.push(name);
-    console.log(`  ${name.padEnd(11)} ${probe.padEnd(8)} ${isDropped ? "DROPPED" : "       "}  ${full.slice(0, 46)}`);
+    console.log(`  ${name.padEnd(13)} ${probe.padEnd(8)} ${isDropped ? "DROPPED" : "       "}  ${full.slice(0, 46)}`);
 }
 note("sign classes", dropped.length === 0, dropped.length === 0 ? "none dropped" : `DROPPED: ${dropped.join(" ")}`);
 

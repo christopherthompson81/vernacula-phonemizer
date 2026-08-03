@@ -536,6 +536,49 @@ that one was 31 lost pauses.
   but run the per-language corpus diff for every affected language before believing it.
 
 
+**18. A PROBE WHOSE DELETION MERGES ITS OPERANDS CANNOT DETECT A DROP.** The differential test is "phonemize
+it, delete the symbol, phonemize again; identical means the symbol said nothing". That inference is only valid
+if deleting the symbol leaves the *rest* of the string tokenizing the same way. `review.ts` probed the
+ampersand with `A&B`, whose deletion yields `AB` — one initialism instead of two letters — so the reading
+changed, the test concluded the symbol contributed, and the class was reported clean for **thirty-seven
+languages** while cmn's `一众 B&B 公司` read as "B B".
+
+- **The file's own header had already described the defect** (found on the Czech run) and responded by asking
+  the human to read the printed readings. A limitation you have diagnosed precisely enough to write down is
+  usually one you can close: the spaced probe `A & B` deletes to `A  B`, which reads as `A B`.
+- **`defects.ts` documents the same trap for the minus** — "probe forms never merge two digits, so `-`/`+` are
+  judged on `5-`/`-5` and not on `5-5` → `55`". The lesson had been learned in one file and not carried to the
+  other. When you fix a probe, check every other probe in the repo for the same shape.
+- **A probe list that drifts from the defect table is the thing the shared table was extracted to prevent.**
+  `signCases` was missing `÷ > ±`, the exponent and the currency sign. Derive it from `DROPPABLE`, and where a
+  class is deliberately excluded (`iteration` is script-specific) say so in the file — a silent omission is
+  indistinguishable from an oversight.
+
+**19. A WORD-BOUNDARY TEST IS MEANINGLESS IN A SCRIPT WITH NO WORD BOUNDARIES.** `attest.ts` separates TOKEN
+hits from SUBSTRING-ONLY hits, and only the first attests — the discipline that caught `Yen` inside `Libyen`.
+For Chinese, Japanese, Thai, Khmer and the rest, splitting prose on non-letters yields **one token per
+sentence**, so every real word scores `substring-only` by construction. Measured on cmn: 等于 小于 乘以 除以
+平方 立方 and 摄氏度 — the last of which this repo has *shipped* as the Celsius word since #562 — all reported
+as negatives. The one `attested` verdict hit only because a LaTeX dump had put spaces around it.
+
+- **A gate that returns the same answer for every input is not a strict gate, it is a broken one.** The tell
+  is uniformity: thirteen words, thirteen identical verdicts.
+- **Key the exception off the probed WORD, not the language or the wiki** — a Latin loan probed on
+  zh.wikipedia still admits the boundary test, and should still get it.
+- **Say what precision was lost.** In an unspaced script the substring match *is* the hit, so the verdict is
+  written `attested*` and the examples are kept and must be read — a Han hit can always be a fragment of a
+  longer compound, and nothing else will catch that.
+- **A comment claiming the behaviour you wish you had is worse than no comment.** `tokens()` said it "works
+  for a spaceless orthography's words too" while doing the exact opposite.
+
+**20. THE ENGINE'S OWN NUMERAL RULES ARE DOWNSTREAM OF WHATEVER DIGITS YOU EMIT.** Writing an exponent as a
+digit (`5³` → `5的3次方`) let Mandarin's 两 rule claim it: 五的**两**次方, where 两 is the counting-two used
+before a measure word and never the two of a power. Spelling the word instead (`的立方`) puts the reading
+beyond reach of any numeral rule. Emitting digits for the engine to read is the right default — this layer
+does it for fractions, and Hindi and Icelandic do it for ordinals — but it hands the result to every rule the
+engine has, so check what those rules do to the digit you just wrote.
+
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

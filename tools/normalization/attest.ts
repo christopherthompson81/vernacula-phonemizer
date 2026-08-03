@@ -33,6 +33,26 @@
  * The substring column is printed anyway, because seeing `0 token / 7 substring` is what teaches you that the
  * word is absent and your grep was lying.
  *
+ * ── EXCEPT WHERE THERE ARE NO WORD BOUNDARIES ──────────────────────────────────────────────────────────
+ *
+ * The paragraph above is right for every alphabetic script and WRONG for a spaceless one, and the original
+ * `tokens()` comment here claimed it "works for a spaceless orthography's words too" while doing the exact
+ * opposite. Splitting Chinese prose on non-letters yields ONE token per sentence, so `toks.has(word)` is
+ * false for every real Chinese word and the verdict is `substring-only` no matter what. Measured on cmn:
+ *
+ *   等于 小于 乘以 除以 平方 立方 摄氏度 …  →  0 token / 1 substring — every one, including 摄氏度,
+ *                                            which this repo has SHIPPED as the Celsius word since #562
+ *
+ * Worse, the one `attested` verdict in that run — 大于 — hit only because a LaTeX dump had put spaces round
+ * it. The boundary test was not measuring the language; it was measuring the markup.
+ *
+ * So for a word in an unspaced script the substring match IS the hit test, and the tool says so in the
+ * verdict (`attested*`) rather than laundering it. What is lost is real: the boundary test supplies the
+ * precision that caught `Libyen`, and there is no substitute for it here — a Han substring can always be a
+ * fragment of a longer compound. That makes READING THE EXAMPLES not merely advisable but the only filter,
+ * which is why examples are now kept for these hits; before this change they were discarded, so the sole
+ * evidence a spaceless language can offer was collected, thrown away, and reported as a negative.
+ *
  * WIKIPEDIA IS A WEAKER SOURCE THAN A CORPUS OR A REFEREE, and the cache records it as its own tier rather
  * than laundering it into "attested". It is user-generated, it is not audio-aligned, and for a small wiki a
  * single article can be one contributor's idiolect — so the cache stores the HIT COUNT and the number of
@@ -99,11 +119,20 @@ async function wikiExists(): Promise<boolean> {
 }
 
 const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "");
-/** TOKEN membership, the whole point of this file. Splits on anything that is not a letter or mark, so it
- *  works for a spaceless orthography's words too, and folds diacritics the way the review gate does. */
+/** TOKEN membership, the whole point of this file — for a script that HAS tokens. Splits on anything that is
+ *  not a letter or mark, and folds diacritics the way the review gate does. */
 function tokens(text: string): Set<string> {
     return new Set(fold(text).split(/[^\p{L}\p{M}]+/u).filter((t) => t !== ""));
 }
+
+/**
+ * Scripts written without spaces between words, where the token test above cannot apply.
+ *
+ * Keyed off the PROBED WORD, not the wiki: a Chinese word is unspaced wherever it appears, and probing a
+ * Latin loan on zh.wikipedia should still get the boundary test that Latin admits. Kana are here with Han
+ * because Japanese is unspaced throughout; Hangul is NOT — modern Korean puts spaces between eojeol.
+ */
+const UNSPACED = /[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Thai}\p{sc=Lao}\p{sc=Khmer}\p{sc=Myanmar}\p{sc=Tibetan}\p{sc=Javanese}]/u;
 
 interface Finding {
     word: string;
@@ -111,11 +140,17 @@ interface Finding {
     articles: number;
     substringOnly: number;
     examples: string[];
-    verdict: "attested" | "substring-only" | "absent";
+    /** False when the script has no word boundaries, so `tokenHits` is a bare substring count. */
+    bounded: boolean;
+    verdict: "attested" | "attested*" | "substring-only" | "absent";
 }
 
 async function probe(word: string): Promise<Finding> {
     const w = fold(word);
+    const bounded = !UNSPACED.test(word);
+    // In an unspaced script the hit test is a plain substring; everywhere else it is flanked by the
+    // not-a-letter lookarounds that make `Yen` fail inside `Libyen`.
+    const hitRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${w}(?![\\p{L}\\p{M}])` : w, "gu");
     // CirrusSearch tokenises, so a plain term search is the right recall net; the token test below is what
     // supplies the precision. `insource:` regex was tried and is worse here — it is expensive on small wikis
     // and its own \b is ASCII-defined, which is the trap that disabled the initialism pass fleet-wide.
@@ -124,7 +159,9 @@ async function probe(word: string): Promise<Finding> {
         srlimit: String(Math.min(limit, 50)), srnamespace: "0", srprop: "snippet",
     });
     const hits: any[] = s?.query?.search ?? [];
-    if (hits.length === 0) return { word, tokenHits: 0, articles: 0, substringOnly: 0, examples: [], verdict: "absent" };
+    if (hits.length === 0) {
+        return { word, tokenHits: 0, articles: 0, substringOnly: 0, examples: [], bounded, verdict: "absent" };
+    }
     // Pull the pages' text so the judgement is made on prose, not on the API's highlighted snippet (which
     // wraps matches in markup and can elide the surrounding word).
     const titles = hits.slice(0, Math.min(limit, 20)).map((h) => String(h.title)).join("|");
@@ -134,13 +171,16 @@ async function probe(word: string): Promise<Finding> {
     for (const p of Object.values<any>(e?.query?.pages ?? {})) {
         const text = String(p.extract ?? "").replace(/\s+/gu, " ");
         if (text === "") continue;
-        const toks = tokens(text);
-        if (toks.has(w)) {
+        // The token set gates the count for a bounded script only. For an unspaced one it would gate on a
+        // sentence-sized token and reject everything, so the substring hit stands as the hit.
+        if (bounded ? tokens(text).has(w) : fold(text).includes(w)) {
             articles++;
             // Count and quote the occurrences, so a human can judge the SENSE — the part no tool can do.
             // `amaphuzu` (zu) is a real token meaning sports POINTS, not the decimal point; `paun` (ms) is
-            // the weight pound, not the currency. Attestation is necessary and never sufficient.
-            for (const m of fold(text).matchAll(new RegExp(`(?<![\\p{L}\\p{M}])${w}(?![\\p{L}\\p{M}])`, "gu"))) {
+            // the weight pound, not the currency. Attestation is necessary and never sufficient — and where
+            // `bounded` is false these quotes are the ONLY evidence, since no boundary test filtered them.
+            hitRe.lastIndex = 0;
+            for (const m of fold(text).matchAll(hitRe)) {
                 tokenHits++;
                 if (examples.length < 6) {
                     const at = m.index!;
@@ -151,8 +191,9 @@ async function probe(word: string): Promise<Finding> {
             substringOnly++;
         }
     }
-    const verdict = tokenHits > 0 ? "attested" : substringOnly > 0 ? "substring-only" : "absent";
-    return { word, tokenHits, articles, substringOnly, examples, verdict };
+    const verdict: Finding["verdict"] = tokenHits > 0 ? (bounded ? "attested" : "attested*")
+        : substringOnly > 0 ? "substring-only" : "absent";
+    return { word, tokenHits, articles, substringOnly, examples, bounded, verdict };
 }
 
 const exists = await wikiExists();
@@ -183,6 +224,11 @@ for (const f of findings)
         + `${pad(String(f.substringOnly), 12)} ${f.verdict}`);
 console.log(`\n  READ THE EXAMPLES. A token hit proves the word EXISTS, never that it fits the slot — the`);
 console.log(`  Fula lesson. zu's amaphuzu is a real token meaning sports POINTS, not the decimal point.\n`);
+if (findings.some((f) => !f.bounded)) {
+    console.log(`  * = UNSPACED SCRIPT: no word boundary exists, so the count is a SUBSTRING count and this`);
+    console.log(`  tool supplied no precision at all. The hit may be a fragment of a longer compound. The`);
+    console.log(`  examples below are the whole of the evidence — an unread \`attested*\` is worth nothing.\n`);
+}
 for (const f of findings) {
     if (f.examples.length === 0) continue;
     console.log(`  ${f.word}:`);
@@ -205,6 +251,11 @@ writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Writte
 // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
 // lb's \`Yen\` in \`Libyen\`, xh's \`iiyeni\` in \`yeNintendo\`. A substring-only verdict is a NEGATIVE result.
 //
+// \`bounded\` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so \`tokenHits\` is a substring count and the verdict is written \`attested*\`. The precision
+// that makes \`Libyen\` fail for \`Yen\` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
@@ -215,6 +266,7 @@ writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Writte
 ${findings.map((f) => `        {
             "word": ${esc(f.word)},
             "verdict": ${esc(f.verdict)},
+            "bounded": ${f.bounded},
             "tokenHits": ${f.tokenHits},
             "articles": ${f.articles},
             "substringOnly": ${f.substringOnly},

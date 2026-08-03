@@ -1,0 +1,218 @@
+// WIKIPEDIA WORD ATTESTATION — cmn (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "cmn",
+    "wiki": "zh.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "等于",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 3,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…0第二小的自然数。阿拉伯数字“1”的形状由古苏美尔和巴比伦符号演变而来。 在数学中，1为乘法单位元，即任何数字与1相乘皆等于其本身。按照惯例，1不被视为素数。在数字电路中，1表示二进制中的“开启”状态，是计算技术的基础。在哲学领域，1在诸多传统…",
+                "…2}=1} ）、平方根（ 1 = 1 {\\displaystyle {\\sqrt {1}}=1} ）、1的任何其他幂始终等于1本身。1是它自己的阶乘（ 1 ! = 1 {\\displaystyle 1!=1} ），而1也是0的阶乘（这是空积的特…",
+                "…如，在普朗克单位制中，光速被定为1。无量纲量也称为量纲为1的量。在量子力学中，波函数的归一化条件要求波函数的模平方的积分等于1。在化學中，氢是元素周期表的第一个元素，也是已知宇宙中最丰富的元素，它的原子序数为1。元素周期表的第一族由氢和碱金属组…"
+            ]
+        },
+        {
+            "word": "小于",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…型：以上呼吸道感染为主要表现，如咽痛、发热、咳嗽等。 中型：持续高熱大于3天或（和）咳嗽、呼吸急促等，但呼吸频率（RR）小于每分钟30次（30次/分）、静息状态下吸空气时指氧飽和度大于93%，影像学可见肺炎表现。 重型 成人符合任意一条且不能以…"
+            ]
+        },
+        {
+            "word": "大于",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 3,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…aystyle b} a > b {\\displaystyle a>b} ，即 a {\\displaystyle a} 大于 b {\\displaystyle b} 上述两个属于严格不等。 a ≤ b {\\displaystyle a\\leq…",
+                "…yle b} a ≥ b {\\displaystyle a\\geq b} ，即 a {\\displaystyle a} 大于等于 b {\\displaystyle b} a ≠ b {\\displaystyle a\\neq b} ，即 a {\\…",
+                "…向。 符号 a ≫ b {\\displaystyle a\\gg b} 表示 a {\\displaystyle a} “远大于” b {\\displaystyle b} 。其含义是不确定的，可以是 100 倍的差异，也可能是10个数量级的差异。和…"
+            ]
+        },
+        {
+            "word": "乘以",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…0是個高斯整數。 0可被2整除，所以0是偶數。 分數中的分母不可以是0。 0非正非负，0的相反数和绝对值是其本身。 0乘以任何实数都等于0（0×10=0），任何实数加上0等于其本身（1+0=1）。 0没有倒数和负倒数，任何數（包括0）除以0皆…"
+            ]
+        },
+        {
+            "word": "除以",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…口密度（英語：Population density）是指在一定时期一定单位面积土地上的平均人口数目，計算方式是其總人口數除以總面積扣除山地保育地等不可用地的面積，一般使用的单位是每平方公里人数或每平方米所居住的人口数。 人口密度是反映人口分布疏…"
+            ]
+        },
+        {
+            "word": "负",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 7,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…0（零／〇）是代表“空量”（无）的一个数。0是-1与1之间的整数，属于偶数，其既不是正数也不是负数。 0是大多数记数系统的位值记号，同样作为占位符数字使用。这种用法起源于印度数学，中世纪时经伊斯兰数学家传播到欧洲，并…",
+                "…無入負之。」（這段話的大意是「方程相消：遇到同符号系数应相减其数值，遇到异符号系数应相加其数值，正系数遇到没有未知项应取负，负系数遇到没有未知项应取正。」）以上文字裡的「無入」通常被数学历史家认为是零的概念。當時并没有使用符号來表示零。 69…",
+                "…負之。」（這段話的大意是「方程相消：遇到同符号系数应相减其数值，遇到异符号系数应相加其数值，正系数遇到没有未知项应取负，负系数遇到没有未知项应取正。」）以上文字裡的「無入」通常被数学历史家认为是零的概念。當時并没有使用符号來表示零。 690年…",
+                "…下一個與下兩個皆是1、前兩個是-1。 0是個高斯整數。 0可被2整除，所以0是偶數。 分數中的分母不可以是0。 0非正非负，0的相反数和绝对值是其本身。 0乘以任何实数都等于0（0×10=0），任何实数加上0等于其本身（1+0=1）。 0没有…",
+                "…相反数和绝对值是其本身。 0乘以任何实数都等于0（0×10=0），任何实数加上0等于其本身（1+0=1）。 0没有倒数和负倒数，任何數（包括0）除以0皆無意義。 0不能做对数的底。 0的正数次方等于0，0的负数次方是無意義。 0的0次方目前是…",
+                "…本身（1+0=1）。 0没有倒数和负倒数，任何數（包括0）除以0皆無意義。 0不能做对数的底。 0的正数次方等于0，0的负数次方是無意義。 0的0次方目前是未定式，部分領域中，如組合數學，常用的慣例是定義為1。也有人主張定義為1。 0階乘（記…"
+            ]
+        },
+        {
+            "word": "加",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 44,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…一加（全稱：深圳市萬普拉斯科技有限公司，英語：OnePlus）是中國一家行動通訊終端裝置研製與軟件開發的企業，於2012年1…",
+                "…14日由OPPO前员工劉作虎和裴宇主導成立，其產品於全球多國市場銷售，口号为“不将就（Never Settle）”。 一加成立之初即为OPPO母公司欧加控股全资持有，2021年6月16日，一加成为OPPO旗下子品牌，并共享OPPO的销售渠道和…",
+                "…裴宇主導成立，其產品於全球多國市場銷售，口号为“不将就（Never Settle）”。 一加成立之初即为OPPO母公司欧加控股全资持有，2021年6月16日，一加成为OPPO旗下子品牌，并共享OPPO的销售渠道和售后服务，在中国大陆预装的新机…",
+                "…口号为“不将就（Never Settle）”。 一加成立之初即为OPPO母公司欧加控股全资持有，2021年6月16日，一加成为OPPO旗下子品牌，并共享OPPO的销售渠道和售后服务，在中国大陆预装的新机用户界面由氢OS改为ColorOS。现时…",
+                "…OPPO旗下子品牌，并共享OPPO的销售渠道和售后服务，在中国大陆预装的新机用户界面由氢OS改为ColorOS。现时，一加在中国大陆地区自我定位为OPPO旗下“主打性能的先锋品牌”。在中国大陆以外的市场，一加依然作为独立品牌运营，亦鲜少在官方…",
+                "…氢OS改为ColorOS。现时，一加在中国大陆地区自我定位为OPPO旗下“主打性能的先锋品牌”。在中国大陆以外的市场，一加依然作为独立品牌运营，亦鲜少在官方宣传中提及与OPPO的关系，其在海外发售的装置依然预装OxygenOS。 == 歷史…"
+            ]
+        },
+        {
+            "word": "正负",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…特高压输电是一种长距离、大容量、低损耗输送直流电和交流电的方法，特高压指交流1000千伏、直流正负800千伏及以上的电压等级。中华人民共和国自2009年起开始采用特高压输电输送电力，建成准东—皖南特高压直流输电工程、苏…"
+            ]
+        },
+        {
+            "word": "平方",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 15,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…公畝（英語：are）是面積的單位，定義為100平方米。 == 與其他單位的比較 == 1 公畝等於： 100 平方米 0.000 1 km² 0.01 公頃 0.024…",
+                "…公畝（英語：are）是面積的單位，定義為100平方米。 == 與其他單位的比較 == 1 公畝等於： 100 平方米 0.000 1 km² 0.01 公頃 0.024 710 英畝 3.953 678 平方桿 30.25 坪 119…",
+                "…1 公畝等於： 100 平方米 0.000 1 km² 0.01 公頃 0.024 710 英畝 3.953 678 平方桿 30.25 坪 119.60 平方碼 1076.3910 平方英尺 155 000 平方英吋 轉換公式： 1 平方米…",
+                "…000 1 km² 0.01 公頃 0.024 710 英畝 3.953 678 平方桿 30.25 坪 119.60 平方碼 1076.3910 平方英尺 155 000 平方英吋 轉換公式： 1 平方米 = 0.01 公畝 1 km² =…",
+                "…公頃 0.024 710 英畝 3.953 678 平方桿 30.25 坪 119.60 平方碼 1076.3910 平方英尺 155 000 平方英吋 轉換公式： 1 平方米 = 0.01 公畝 1 km² = 10,000 公畝 1 公頃…",
+                "…英畝 3.953 678 平方桿 30.25 坪 119.60 平方碼 1076.3910 平方英尺 155 000 平方英吋 轉換公式： 1 平方米 = 0.01 公畝 1 km² = 10,000 公畝 1 公頃 = 100 公畝 1 英…"
+            ]
+        },
+        {
+            "word": "立方",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 4,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…面積4億公頃，是草地面積最大的國家之一，當中內蒙古、新疆、青海和西藏為四大牧區。中华人民共和国水資源總量達25,500億立方公尺，排行世界首位；當中有大量的河流和湖泊，重要的河流有黃河、長江、西江、湄公河、雅鲁藏布江、珠江、淮河、松花江和黑龍江…",
+                "…、錳、銅、鋁、鉛、鋅等金屬礦產54種，石墨、磷、硫、鉀鹽等非金屬礦產91種。附近海域石油約250億噸，天然氣有8.4萬億立方公尺。 中华人民共和国長期是世界上最大的煤炭生產國及消費國，超過70%能源依靠煤炭供應。中华人民共和国石油產量則位居世界…",
+                "…俄羅斯、中東、中亞和非洲進口，並在2013年超越美國成為最大的石油進口國。2015年，中华人民共和国天然氣產量1350億立方米，消費量達到1932億立方米。2017年5月18日，中华人民共和国在南海神狐海域首次实现海域可燃冰试采成功，可能对未来…",
+                "…，並在2013年超越美國成為最大的石油進口國。2015年，中华人民共和国天然氣產量1350億立方米，消費量達到1932億立方米。2017年5月18日，中华人民共和国在南海神狐海域首次实现海域可燃冰试采成功，可能对未来能源生产和消费革命产生深远影…"
+            ]
+        },
+        {
+            "word": "零下",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…机械、材料进行相互配合，推出了中國標準動車組，並將進一步追趕先進列車的指標，建成了针对不同气候、不同地形的高铁，例如经过零下40度高寒地带的哈大高铁、全球第一条环線高铁和最南端的高铁——穿越热带地区和台风频发环境的海南环岛高铁、经过大风区和戈壁…"
+            ]
+        },
+        {
+            "word": "次方",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 3,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…实数加上0等于其本身（1+0=1）。 0没有倒数和负倒数，任何數（包括0）除以0皆無意義。 0不能做对数的底。 0的正数次方等于0，0的负数次方是無意義。 0的0次方目前是未定式，部分領域中，如組合數學，常用的慣例是定義為1。也有人主張定義為1…",
+                "…（1+0=1）。 0没有倒数和负倒数，任何數（包括0）除以0皆無意義。 0不能做对数的底。 0的正数次方等于0，0的负数次方是無意義。 0的0次方目前是未定式，部分領域中，如組合數學，常用的慣例是定義為1。也有人主張定義為1。 0階乘（記作0!…",
+                "…有倒数和负倒数，任何數（包括0）除以0皆無意義。 0不能做对数的底。 0的正数次方等于0，0的负数次方是無意義。 0的0次方目前是未定式，部分領域中，如組合數學，常用的慣例是定義為1。也有人主張定義為1。 0階乘（記作0!）定義為1。 0 為任…"
+            ]
+        },
+        {
+            "word": "摄氏度",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…85度咖啡蛋糕烘焙專賣店，又稱85°C、85摄氏度或85度C（英語：85 Cafe, 85C Daily Cafe, 85°C Bakery Café, 85 Degre…"
+            ]
+        },
+        {
+            "word": "一加一",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 5,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…1+1是一個數學算式，在二進制中等於10，在n進制（n≥3）中等於2。 1+1或一加一也可能指： 哥德巴赫猜想，即“任一大於2的偶數，都可表示成兩個質數之和。”的略寫。 1+1 (電視頻道)，一家烏克蘭的電…",
+                "…： 哥德巴赫猜想，即“任一大於2的偶數，都可表示成兩個質數之和。”的略寫。 1+1 (電視頻道)，一家烏克蘭的電視台。 一加一 (AGA歌曲) 一加一 (高達電影)，尚盧高達元 1+1 (電視劇)，1970年代香港無綫電視17集電視連續劇。 ==…",
+                "…一大於2的偶數，都可表示成兩個質數之和。”的略寫。 1+1 (電視頻道)，一家烏克蘭的電視台。 一加一 (AGA歌曲) 一加一 (高達電影)，尚盧高達元 1+1 (電視劇)，1970年代香港無綫電視17集電視連續劇。 == 相關項目 == 1 +…",
+                "…)，1970年代香港無綫電視17集電視連續劇。 == 相關項目 == 1 + 1 + 1 + 1 + …，一個發散級數 一加一不等於二 一加一残障人公益集团，位于中国北京的一个民间本土残障人自助组织…",
+                "…香港無綫電視17集電視連續劇。 == 相關項目 == 1 + 1 + 1 + 1 + …，一個發散級數 一加一不等於二 一加一残障人公益集团，位于中国北京的一个民间本土残障人自助组织…"
+            ]
+        },
+        {
+            "word": "加上",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…空軍、海軍和海軍陸戰隊總計將裝備2,456架，用以取代F-16系列、A-10攻擊機、F/A-18系列、AV-8B等機型，加上海外市場後全球訂單合計已達3,500架。英国、意大利、荷兰、澳大利亚、日本、挪威、丹麦、以色列、加拿大、土耳其（已遭禁售…",
+                "…和尾翼面積比A/B型大，將裝備在福特級核動力航空母艦上。 CF-01是在2009年7月28日出廠，然而一些組件運交延遲，加上設計方面的修改，導致第一次試飛的時間從2009年底延後到2010年6月。初期試飛計畫包括15次飛行，接著進行結構偶合和震…"
+            ]
+        }
+    ],
+}
