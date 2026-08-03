@@ -287,9 +287,14 @@ export function normalizeHungarian(input: string): string {
     //    translations (`100,000 ember`, `11,000 és 22,500 amerikai dollár` — 3 of 3 in the corpus are
     //    thousands, none is a decimal), so it is de-grouped too rather than read as *száz egész nulla*.
     for (let i = 0; i < 3; i++) { // repeat: 5.000.000 has two separators
-        s = s.replace(/(\d)[.  ](\d{3})(?![\d.,])/gu, "$1$2");
-        s = s.replace(/(\d)\.[  ](\d{3})(?![\d.,])/gu, "$1$2"); // the corpus's one `400. 000`
-        s = s.replace(/(\d),(\d{3})(?![\d.,])/gu, "$1$2");
+        // THE TRAILING GUARD EXCLUDES A DECIMAL, NOT A CLAUSE MARK. `(?![\d.,])` refused to de-group a number
+        // followed by its own sentence comma, so `24.000, és mások` read *huszonnégy . NULLA ,* — the group
+        // split off, `000` spoken as zero, AND a spurious full stop. Hungarian marks the decimal with a
+        // comma, so the mark is only a separator when a digit follows: `(?![\d]|,\d)`. Same defect the zu
+        // and xh runs found in swahili/normalize.ts, which is where this guard shape came from.
+        s = s.replace(/(\d)[.  ](\d{3})(?![\d]|,\d)/gu, "$1$2");
+        s = s.replace(/(\d)\.[  ](\d{3})(?![\d]|,\d)/gu, "$1$2"); // the corpus's one `400. 000`
+        s = s.replace(/(\d),(\d{3})(?![\d]|,\d)/gu, "$1$2");
     }
 
     // 3) CLOCK, before any rule can read the separator: the colon is clause punctuation and became a

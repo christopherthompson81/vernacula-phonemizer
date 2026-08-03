@@ -116,7 +116,12 @@ export function normalizeSwahili(input: string): string {
     //    out *moja , sifuri* and `755,688` as two numbers with a pause between them. ×44.
     //    Exactly three digits per block, so a decimal comma (none occur here, but Swahili permits it)
     //    could never be swallowed.
-    s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?![\d.,])/gu, (whole) => whole.replace(/,/gu, ""));
+    //    THE TRAILING GUARD EXCLUDES A DECIMAL, NOT A CLAUSE MARK. `(?![\d.,])` refuses to de-group a number
+    //    followed by its own sentence comma or period, so `24,000, na wengine` read *ishirini na nne , SIFURI ,*
+    //    — the group split off and `000` spoken as zero. Found independently by the zu and xh runs (#606/#607),
+    //    both of which had copied this guard from here, and verified in main before fixing. The mark is only a
+    //    separator when a DIGIT follows it: `(?![\d]|,\d)`.
+    s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
 
     // 4) CURRENCY is the SHARED tier's now (`currencyPrefix` in swahili.ts). Safe to move because
     //    swahili.ts runs SYMBOLS *before* this pass, so the tier still sees the sign adjacent to its
