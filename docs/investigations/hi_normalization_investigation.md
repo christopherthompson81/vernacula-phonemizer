@@ -335,6 +335,68 @@ lead, not a finding — the same relationship `attest.ts` has to its own hits.
 
 ---
 
+## Run 12 — 2026-08-03 — reviewing the PR found four more, three of them mine
+
+**1. My own comparative rule stranded a clause pause.** `(\S+)` is greedy about trailing punctuation:
+
+```
+यह 5 < 6, और वह 7 > 8 है।   →  … पाँच छह , से कम और …      the comma INSIDE the phrase
+```
+
+The second operand is now split from its trailing marks, which are re-emitted after the comparative word. And
+a chain (`a < b < c`) silently lost its second sign, because `/g` replaces in ONE pass and the first match had
+consumed `b`, leaving the second `<` with no left operand — a reorder turning into a DROP. A catch-all second
+pass now guarantees nothing goes silent, at the cost of an awkward reading nothing attests either way.
+
+**2. `℃` and `℉` are single code points, and nothing reached them.** `20℃` read as bare *bˈiːs* — the whole
+unit gone, not merely the sign — because step 5 matches `°`/`º` followed by C/F. My own step-7b lookahead named
+`℃|℉` as though they were handled. Fixed in hi, and the same gap existed in **cmn** (`20℃` → 二十) and in
+**en** (`20℃` → "twenty"), both fixed here since both already have the words.
+
+Measured over the fleet: **53 of 65 languages drop ℃**, and it is corpus-attested — ja_jp has 2, ko_kr has 3,
+and it is in the ko and nb mined artifacts. A central fold was considered and rejected: only 4 languages
+declare `°c` through the shared tier, so most need their own word. Recorded for the sweep.
+
+**3. THE DROP TEST WAS DELETING WHEN IT SHOULD SUBSTITUTE — and this is the biggest finding of the review.**
+Korean's own artifact writes `32℃에`. It reads as two tokens (*sˈɐmsibi ˈe*); delete the ℃ and `32에`
+**agglutinates** into one (*sˈɐmsibie*), so the readings differ, the test concludes the ℃ contributed, and
+`mine.ts scan` reported ko as having **no defects**. That is the merge trap `review.ts` had in its `A&B` probe,
+arriving in real corpus text — and structural for any agglutinative language.
+
+Replacing the symbol with a SPACE holds the token boundary still. Measured over all 66 artifacts:
+
+```
+NEW drops found only by substitution: 16      Drops lost: 0
+```
+
+Ten of the sixteen are the **B&B ampersand** — de es id it nb(×2) pl pt ta th — one FLEURS sentence, nine
+languages, and the exact defect #586 opens with. Also `ja` (`6×6 cm`, `3,850 km²`), `tr` (`19.500 km²'lik`),
+`ko` (the ℃), `de` (`10.-11` as a range) and `zu` (a stray `$` inside a word).
+
+**And the fix had to be hoisted, because the drift came back.** `coverage.ts` imports the defect TABLES from
+`defects.ts` but keeps its own copy of the differential LOOP (it iterates per class, deliberately). So the
+space fix landed in `dropsIn` only and the fleet count did not move. The probe is now `withoutSymbol()`,
+exported and shared. Fleet count: **56 defective cells across 30/37 → 68 across 34/37.** The count going UP is
+the gate improving.
+
+**4. My new `exponent` probe is merge-blind and cannot be fixed cheaply — so it is documented, not shipped.**
+Deleting the `²` from `5 km²` also changes the unit TOKEN, so the readings differ for reasons unrelated to the
+exponent. Measured while `signCases` reported nothing:
+
+```
+21 leak a RAW `km` into the IPA   am ar as bg bn ckb cy de fa ff ga gu kk mi ne pa sw th tr ur yue
+ 7 lose the unit word entirely    da fr hu id ja nb sv
+```
+
+German reads `5 km²` as *fʏnf km*. French differs from `5 km` by ONE VOWEL. Two mechanical checks were tried
+and both rejected: a spaced probe (`5 km ²`) invents a failure for English, whose own layer requires the
+exponent attached; and asserting the bare unit's words survive gives **6 false positives in 19**, because the
+`compound`-position languages fuse the measure word into the unit and the fused token's g2p legitimately
+differs (Swedish reads a lone `km` with ɕ and the compound with k). A gate that fails six correct languages to
+catch thirteen broken ones is not worth shipping; the count is, and it is now in `review.ts`'s header.
+
+---
+
 ## What FLEURS alone did NOT say, and what the fill answered
 
 Counted over `hi_in` alone:

@@ -113,6 +113,10 @@ describe("hindi normalization", () => {
         expect(phonemize("२८°२१´३०″", "hi")).toBe("əʈʈʰaːˈiːs ɖˈɪɡɾiː ɪkːˈiːs mˈɪnəʈ t̪ˈiːs seːkˈə̃ɳɖ");
         expect(phonemize("७९º", "hi")).toBe("ʊnˈaːsiː ɖˈɪɡɾiː"); // the bare U+00BA
         expect(phonemize("20 °C", "hi")).toBe("bˈiːs ɖˈɪɡɾiː sˈeːlsɪjəs"); // …and °C is unchanged
+        // ℃ / ℉ are SINGLE code points, so the `°`+letter rules could not reach them and `20℃` read as bare
+        // "twenty" — the whole unit gone. Found while reviewing this change; cmn and en had the same gap.
+        expect(phonemize("20℃", "hi")).toBe("bˈiːs ɖˈɪɡɾiː sˈeːlsɪjəs");
+        expect(phonemize("20℉", "hi")).toBe("bˈiːs ɖˈɪɡɾiː faːɾˈeːnɦaːɪʈ");
     });
 
     // The real negative the gap-fill found, in a domain FLEURS has none of.

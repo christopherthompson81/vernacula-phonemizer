@@ -134,6 +134,13 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
             (_m, deg: string, min: string, sec?: string) =>
                 `${deg} डिग्री ${min} मिनट${sec === undefined ? "" : ` ${sec} सेकंड`}`);
         //    `[°º]` in every arm below, for the same U+00BA substitution.
+        //
+        //    5b) ℃ AND ℉ ARE SINGLE CODE POINTS (U+2103, U+2109) and matched nothing here, so `20℃` read as
+        //        bare *bˈiːs* — the whole unit silently gone, not merely the sign. They are in the RAWMARK
+        //        leak class precisely because they are easy to miss this way. Found while reviewing this
+        //        change: step 7b's lookahead named them as if they were handled, and they were not.
+        s = s.replace(/(\d)\s?℃/gu, "$1 डिग्री सेल्सियस");
+        s = s.replace(/(\d)\s?℉/gu, "$1 डिग्री फ़ारेनहाइट");
         s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}])/giu, "$1 डिग्री सेल्सियस");
         s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}])/giu, "$1 डिग्री फ़ारेनहाइट");
         s = s.replace(/(\d)\s?[°º]/gu, "$1 डिग्री");
@@ -198,8 +205,26 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //     `A < B` is "A, B से कम", not "A से कम B". The corpus shows the shape twice:
         //     "+ 30° C से अधिक तापमान" ("temperature above +30 °C") and "800,000 से ज़्यादा सैनिकों"
         //     ("more than 800,000 soldiers"). Emitting the western order would have been fluent nonsense.
-        s = s.replace(/(\S+)\s*<\s*(\S+)/gu, "$1 $2 से कम");
-        s = s.replace(/(\S+)\s*>\s*(\S+)/gu, "$1 $2 से अधिक");
+        //
+        //     TRAILING PUNCTUATION MUST NOT TRAVEL WITH THE OPERAND. `(\S+)` is greedy about it, and
+        //     `यह 5 < 6, और वह …` came out as "पाँच छह , से कम और" — the comma stranded BETWEEN the operand
+        //     and its postposition, i.e. a clause pause in the middle of a phrase. So the second operand is
+        //     split from its trailing marks and they are re-emitted AFTER the comparative word.
+        //
+        //     THE CATCH-ALL SECOND PASS is not redundant. `/g` replaces in ONE pass over the input, so in a
+        //     chain (`a < b < c`) the first match consumes `b` and the second `<` is left with no left
+        //     operand — it matched nothing and then vanished, turning a reorder into a DROP. A chained
+        //     comparison is absent from the corpus and reads awkwardly either way, but nothing may go silent.
+        const comparative = (sign: string, word: string): void => {
+            s = s.replace(new RegExp(`(\\S+)\\s*${sign}\\s*(\\S+)`, "gu"), (_m, a: string, b: string) => {
+                const split = /^(.*?)([,;।॥!?)\]"'’]*)$/su.exec(b);
+                const operand = split?.[1] ?? b, marks = split?.[2] ?? "";
+                return `${a} ${operand} ${word}${marks}`;
+            });
+            s = s.replace(new RegExp(`\\s?${sign}\\s?`, "gu"), ` ${word} `);
+        };
+        comparative("<", "से कम");
+        comparative(">", "से अधिक");
         //     बराबर — corpus: "इस अभिमुखता अनुपात के लगभग बराबर" ("approximately equal to this aspect
         //     ratio"). Infix, which is the arithmetic reading (दस जमा दस बराबर बीस).
         s = s.replace(/\s?=\s?/gu, " बराबर ");

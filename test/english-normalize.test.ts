@@ -164,6 +164,11 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
 
     test("units that were dropped or read as letter names", () => {
         expect(phonemize("20 °C", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs"); // was "twenty see"
+        // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
+        // `20℃` read as bare "twenty" — the whole unit gone, not merely the sign. Found while reviewing the
+        // cmn/hi loop-back (#586); 53 of 65 languages still drop ℃, and ja and ko have it in their corpora.
+        expect(phonemize("20℃", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs");
+        expect(phonemize("20℉", "en")).toBe("twˈɛnti dᵻɡɹˈiːz fˈɛɹənhˌaᶦt");
         expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
         expect(phonemize("30 m", "en")).toBe("θˈɝd̬iː mˈiːt̬ɚz"); // was "thirty em"
         // Space-grouped thousands: the number token cannot span a space, so the thousand was lost.

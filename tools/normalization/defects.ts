@@ -40,8 +40,9 @@ export const LEAK_CLASSES: readonly (readonly [string, RegExp])[] = [
 ];
 
 /**
- * A DROP is a symbol that VANISHED — detected differentially: phonemize the sentence, then phonemize it
- * again with the symbol deleted, and compare. Identical readings prove the symbol contributed nothing.
+ * A DROP is a symbol that VANISHED — detected differentially: phonemize the sentence, then phonemize it again
+ * with the symbol REPLACED BY A SPACE (see `withoutSymbol`; deleting it perturbs how its neighbours tokenize
+ * and the test then credits the symbol for that), and compare. Identical readings prove it said nothing.
  *
  * THE UNION of what the three copies knew, with the widest form of each pattern kept:
  *   · `minus` keeps the EN DASH, which `corpus-diff.ts` was missing — a corpus writes `–5` as readily as `-5`
@@ -150,6 +151,21 @@ export function isRedundant(
 }
 
 /**
+ * THE PROBE STRING for the differential test: the sentence with the symbol replaced by a SPACE.
+ *
+ * Exported because there are TWO differential loops, not one — `dropsIn` below tests every class against one
+ * sentence, while `coverage.ts` iterates PER CLASS and stops at the first hit, which is deliberate (a class
+ * whose instances sit late in the corpus is otherwise never tested; getting that wrong once took the fleet
+ * count from 38 defective cells to 15). Those two shapes cannot share a loop, so they share this instead —
+ * the alternative was the same one-character decision written in two files, which is exactly the drift this
+ * module was extracted to end. It happened anyway: the space fix landed in `dropsIn` and `coverage.ts` kept
+ * deleting, so the fleet count did not move until this was hoisted.
+ *
+ * WHY A SPACE AND NOT DELETION: see `dropsIn`.
+ */
+export const withoutSymbol = (sentence: string, re: RegExp): string => sentence.replace(re, " ");
+
+/**
  * Run the differential drop test for one sentence.
  *
  * `re.lastIndex = 0` BEFORE EVERY `.test`: these regexes are `/g/` and shared across a whole corpus loop,
@@ -167,7 +183,15 @@ export function dropsIn(
     for (const [klass, re] of DROPPABLE) {
         re.lastIndex = 0;
         if (!re.test(sentence)) continue;
-        const without = say(sentence.replace(re, ""));
+        // SUBSTITUTE A SPACE, DO NOT DELETE. Deleting the symbol also changes how its NEIGHBOURS tokenize,
+        // and the test then attributes that change to the symbol. This is the merge trap `review.ts` had in
+        // its `A&B` probe, arriving from the other direction — in real corpus text, and worst in an
+        // agglutinative language. Korean's own artifact writes `32℃에`, which reads as two tokens
+        // (*sˈɐmsibi ˈe*); delete the ℃ and `32에` agglutinates into one (*sˈɐmsibie*), so the readings differ,
+        // the test concluded the ℃ contributed, and `scan` reported ko as having NO DEFECTS while `20℃` read
+        // as bare *isˈip̚*. Replacing the symbol with a space holds the token boundary still, so what is
+        // compared is the symbol's own contribution and nothing else.
+        const without = say(withoutSymbol(sentence, re));
         if (without === undefined || without !== ipa) continue;
         const symbols = [...new Set(sentence.match(re) ?? [])];
         out.push({ klass, redundant: isRedundant(sentence, ipa, symbols, contribution, say) });

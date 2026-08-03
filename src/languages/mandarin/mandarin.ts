@@ -37,7 +37,12 @@ const SYMBOLS = makeSymbolNormalizer({
     // English reading of the bare letter C.
     currency: { "$": ["美元"], "€": ["欧元"], "£": ["英镑"], "¥": ["元"], "₤": ["英镑"] },
     units: { mm: ["毫米"], cm: ["厘米"], km: ["公里"], m: ["米"], kg: ["千克"], g: ["克"],
-        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"] },
+        "km/h": ["公里每小时"], "°c": ["摄氏度"], "°f": ["华氏度"], "°": ["度"],
+        // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), not `°`+letter, so the two keys above could not
+        // reach them and `20℃` read as bare 二十 — the whole unit gone, not merely the degree sign. They are
+        // in the RAWMARK leak class for exactly this reason. Found while reviewing the hi change, which had
+        // the identical gap; measured across the fleet, most languages still do.
+        "℃": ["摄氏度"], "℉": ["华氏度"] },
     // `km²` → 平方公里. The measure word PRECEDES the unit and fuses to it with no space, which is the
     // `compound` position — the same one Japanese uses for 平方キロメートル. `before` would emit "平方 公里",
     // splitting one Han run into two and losing the segmenter's chance to see the compound.

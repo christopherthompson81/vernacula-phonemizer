@@ -135,6 +135,10 @@ describe("mandarin normalization", () => {
         expect(phonemize("20 °C", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度, was the letter C
         expect(phonemize("35°", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ wu˨˩˦ tu˥˩"); // 度
         expect(phonemize("120 km/h", "cmn")).toBe("ji˥˩ paⁱ˨˩˦ ər˥˩ ʂʐ̩˧˥ koŋ˥˥ li˧˥ meⁱ˧˥ ɕjɑᵘ˨˩˦ ʂʐ̩˧˥");
+        // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
+        // `20℃` read as bare 二十 — the whole unit gone. Found while reviewing #586; hi and en had it too.
+        expect(phonemize("20℃", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度
+        expect(phonemize("20℉", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ xwɑ˧˥ ʂʐ̩˥˩ tu˥˩"); // 华氏度
     });
 
     test("fractions are stated in the opposite order from the notation", () => {

@@ -657,6 +657,28 @@ carries whatever the wiki carries. The fill is the right instrument, and its out
 to a rule as `attest.ts`'s hits do to a word: necessary, never sufficient.
 
 
+**26. A DIFFERENTIAL TEST MUST HOLD EVERYTHING BUT THE VARIABLE STILL — SUBSTITUTE, DO NOT DELETE.** The drop
+test asks "did this symbol contribute?" by phonemizing the sentence with and without it. Deleting the symbol
+also changes how its NEIGHBOURS tokenize, and the test then credits the symbol for that change. Korean's own
+artifact writes `32℃에`, which reads as two tokens (*sˈɐmsibi ˈe*); delete the ℃ and `32에` **agglutinates**
+into one (*sˈɐmsibie*), so the readings differ and `scan` reported ko as having NO DEFECTS while `20℃` read as
+bare *isˈip̚*. Replacing the symbol with a SPACE holds the boundary still. Measured over all 66 artifacts:
+**16 new drops found, 0 lost** — ten of them the B&B ampersand across nine languages, the defect #586 opens
+with. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
+
+- **This is trap 18 at the corpus level.** There it was a probe (`A&B` → `AB`); here it is real text. Same
+  cause, and it is worst in agglutinative languages — Korean, Japanese, Turkish, Finnish, Hungarian.
+- **A rising defect count is the gate improving.** Do not read it as a regression, and do not tune it down.
+- **Then check for the OTHER copy of the logic.** `coverage.ts` imports the defect TABLES from `defects.ts` and
+  kept its own copy of the LOOP, so the fix landed in one of two call sites and the fleet count did not move.
+  The probe is now `withoutSymbol()`, exported and shared. Extracting shared DATA does not stop shared
+  DECISIONS from drifting — hoist the decision too.
+- **Some blindness cannot be fixed cheaply, and then you document the count.** The exponent probe has the same
+  merge problem (deleting `²` changes the unit token) and resists it: a spaced probe invents a failure for
+  English, and asserting the unit survives gives 6 false positives in 19 because `compound`-position languages
+  fuse the measure word into the unit. So the measurement — 21 languages leak a raw `km`, 7 lose the unit —
+  went into the file's header for the sweep instead of into a gate that would cry wolf.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
