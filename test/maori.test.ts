@@ -64,4 +64,36 @@ describe("Māori cardinal numbers", () => {
         expect(say(1000000)).toBe("kotahi miɾiona"); // kotahi miriona
         expect(say(1000000000)).toBe("kotahi piɾiona"); // kotahi piriona
     });
+
+    // #586 — Māori had NO normalization of any kind: `text()` ran the tokenizer straight over raw input, and
+    // its classes are letters, digits and clause marks, so `%`, `$` and every unit abbreviation were DELETED.
+    // Every word here is from mi_nz over its 1,994 unique utterances — ōrau ×8, tāra ×6, pauna ×5,
+    // kiromita ×34, mita ×28, pūrua ×18, pūtoru ×3, the rate connective `ia` ×6, me ×726.
+    test("the symbol tier: percent, currency, units and the powers (#586)", () => {
+        const mi = createMaori();
+        expect(mi.text("88%").trim()).toBe("waɾu tekau maː waɾu oːɾau");      // the % was dropped outright
+        expect(mi.text("$5").trim()).toBe("ɾima taːɾa");
+        expect(mi.text("50 km").trim()).toContain("kiɾomita");
+        expect(mi.text("3850 km2").trim()).toContain("kiɾomita puːɾua");      // the corpus's own ASCII form
+        expect(mi.text("120 m³").trim()).toContain("mita puːtoɾu");
+        expect(mi.text("240 km/h").trim()).toContain("kiɾomita ia haːoɾa");
+        expect(mi.text("133 m/s").trim()).toContain("mita ia heːkona");
+        expect(mi.text("B&B").trim()).toContain("me");                        // ×2, the fleet's usual pair
+    });
+
+    // ⚠ THE TRAPS, each one a word whose count BEATS the word that is right.
+    test("the shape words and tāngata are not units (#586)", () => {
+        const mi = createMaori();
+        // tapawhā ×12 is a square as in a PLAZA — St Peter's Square — and tapatoru ×5 a triangle. Neither is
+        // a power, and both outnumber pūtoru ×3.
+        expect(mi.text("St. Pita Tapawhā").trim()).toContain("tapaɸaː");
+        // `m/h` IS MILES per hour here ("35-40 m/h (56-64 km/h)"), so it is its own unit key: with only a
+        // bare `m` plus an `h` denominator the tier read mph as METRES per hour.
+        expect(mi.text("35 m/h").trim()).toContain("maeɾo ia haːoɾa");
+        // A digit-adjacent `t` in this corpus is `1,400 tāngata` — 1,400 PEOPLE, not tonnes — and an
+        // ASCII-classed guard would not reject it, because `ā` is not [a-zA-Z]. No `t` key is declared.
+        expect(mi.text("1400 tāngata").trim()).toContain("taːŋata");
+        // A magnitude must be declared or the currency word lands INSIDE the number.
+        expect(mi.text("$2.3 piriona").trim()).toContain("piɾiona taːɾa");
+    });
 });

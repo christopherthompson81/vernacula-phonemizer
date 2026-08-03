@@ -157,4 +157,17 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         expect(phonemize("pukul 11.30 pagi", "id")).toBe("pˈukul səbəlˈas lewˈat tˈiɡa pˈuluh pˈaɡi");
         expect(phonemize("Dr. Damadian", "id")).toBe("dˈoʔtər damadˈian");
     });
+
+    // #586 — `m³` lost the `³` outright. `padu` is a REAL Malay/Indonesian divergence rather than a shared
+    // word, which is the whole reason this file's layer exists: ms_my writes `meter padu` ×2 ("Luno membawa
+    // 120–160 meter padu bahan bakar") and `kubik` ×0, where Indonesian uses `kubik`.
+    // ⚠ `isi padu` ×2 in the same corpus is the ordinary sense, "volume" (`isi padu air`) — the collocation
+    // with the unit noun is the evidence, and the rule must not touch the bare word.
+    test("the cubed measure word is Malay's own, not Indonesian's (#586)", () => {
+        expect(phonemize("120 m³", "zsm")).toContain("mɛtˈər pˈadu");
+        expect(phonemize("120 m³", "id")).toContain("mɛtˈər");      // id has no cube word; not "padu"
+        expect(phonemize("120 m³", "id")).not.toContain("pˈadu");
+        expect(phonemize("isi padu air", "zsm")).toBe("ˈisi pˈadu ˈair"); // the bare word is untouched
+        expect(phonemize("M3 lebuhraya", "zsm")).toContain("m tˈiɡa");   // the motorway is not a volume
+    });
 });

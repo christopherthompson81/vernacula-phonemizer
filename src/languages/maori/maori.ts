@@ -8,6 +8,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeMaori } from "./normalize.ts";
 
 interface MaoriDef {
     digraphs: Record<string, string>;
@@ -41,7 +42,7 @@ const TOKEN = /([a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]+)|(\d+)|([.!?…,;:])/gu;
 
 class MaoriPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeMaori(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Cardinal numbers (numbers.ts) — emitted one word at a time, as for ordinary text.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

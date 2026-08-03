@@ -494,6 +494,12 @@ function build(lang: string): Phonemizer {
         // #562: the PHONOLOGY is still Indonesian's — createMalay wraps createIndonesian — but the two standards'
         // orthographic conventions differ (Malay groups thousands with a comma and writes the decimal dot, the exact
         // inverse of Indonesian), so Malay owns its own text-normalization pre-pass. See languages/malay/normalize.ts.
+        // `ms` IS THE SAME LANGUAGE, and its absence was a live gap rather than a policy: `zsm` is the ISO 639-3
+        // code for Standard Malay, `ms` the ISO 639-1 two-letter one, and `ms` is what nearly every caller and
+        // dataset writes — including this repo's own `tools/corpus/mined/ms.jsonc`, whose `source` reads
+        // "FLEURS ms_my". So the artifact was filed under a code the registry threw on, and a fleet sweep that
+        // iterated the artifacts reported Malay as unreachable while `zsm` had been working the whole time.
+        case "ms":
         case "zsm":
             return createMalay();
         case "pa":

@@ -178,6 +178,15 @@ export function normalizeMalay(input: string): string {
     s = s.replace(new RegExp(`(?<=\\d)km[²2]${R}`, "gu"), " kilometer persegi"); // glued: `19,500km²`
     s = s.replace(new RegExp(`${L}km[²2]${R}`, "gu"), "kilometer persegi");
     s = s.replace(/(\d\s?)m²/gu, "$1meter persegi");
+    //     CUBED, and this is a REAL Malay/Indonesian divergence rather than a shared word — which is the whole
+    //     reason this file exists. Malay says `padu`, Indonesian `kubik`, and in ms_my:
+    //       meter padu ×2  "Luno membawa 120–160 meter padu bahan bakar di atas kapal"
+    //       kubik      ×0
+    //     `isi padu` ×2 in the same corpus is "volume" (`isi padu air` — the volume of water), which is the
+    //     same root in its ordinary sense and not the measure word; the collocation with the unit noun is the
+    //     evidence, as everywhere else in this sweep. `m³` previously lost the `³` outright.
+    s = s.replace(new RegExp(`(?<=\\d)m[³3]${R}`, "gu"), " meter padu");
+    s = s.replace(/(\d\s?)m³/gu, "$1meter padu");
 
     // 9) FREQUENCY, before the decimal rule: `2.4Ghz` is a decimal GLUED to its unit, and step 15's
     //    version-dot guard is exactly "a letter follows the fraction", so the unit has to be words first.
