@@ -37,6 +37,7 @@
 import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { LEAK_CLASSES, dropsIn, makeContribution } from "./defects.ts";
 
 /**
  * THE PATTERN INVENTORY. `langs` is the count of treated languages that authored a rule in that category —
@@ -464,25 +465,17 @@ if (mode === "scan") {
     const inPath = arg("in"), lang = arg("lang");
     if (inPath === undefined || lang === undefined) throw new Error("scan needs --in and --lang");
     const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
-    const LEAK: [string, RegExp][] = [
-        ["DIGIT", /\p{Nd}/u],
-        ["SLOT-GAP", /\s{2,}|^\s|\s$/u],
-        ["RAWMARK", /[…。、，％℃°ºª〜～・！？²³\p{Sc}।॥۔؟،؛]/u],
-        ["ZERO-WIDTH", /[​-‍⁠﻿]/u],
-    ];
-    /** ISO codes that denote each currency sign, for `namedByCode` below. */
-    const SIGN_CODES: Readonly<Record<string, string>> = {
-        $: "USD|AUD|CAD|NZD|SGD|HKD|TWD|MXN|BRL|ARS|CLP|COP",
-        "€": "EUR", "£": "GBP", "¥": "JPY|CNY|RMB", "₹": "INR", "₽": "RUB", "₩": "KRW", "₺": "TRY", "₪": "ILS",
+    // `say` is the one place this file knows how to phonemize; defects.ts takes it as a callback, so the
+    // shared module needs no import of its own and stays independently testable.
+    const say = (t: string): string | undefined => {
+        try { return phonemize(t, lang) as string; } catch { return undefined; }
     };
-    /** Each symbol class, and the regex that deletes it, for the differential drop test. */
-    const DROPPABLE: [string, RegExp][] = [
-        ["percent", /[%‰]/gu],
-        ["currency", /\p{Sc}/gu],
-        ["degree", /[°℃℉]/gu],
-        ["minus", /(?<![\p{L}\p{Nd}])[-−–](?=\p{Nd})/gu],
-        ["math-sign", /[+±×÷=<>]/gu],
-    ];
+    const contribution = makeContribution(say);
+    // The defect tables and the REDUNDANT discrimination come from `defects.ts`, shared with
+    // `corpus-diff.ts emit` and `coverage.ts`. Three copies had drifted: this one was the only place that
+    // knew `math-sign`, and it was blind to `exponent`, `ampersand` and `iteration`, which coverage.ts
+    // knew. The shared table is the union — see that file's header.
+
     const hits = new Map<string, number>();
     const example = new Map<string, string>();
     const alone = new Map<string, string[]>();
@@ -498,65 +491,11 @@ if (mode === "scan") {
         // mid-string and the one after that started over. Measured: `re.test(s1), re.test(s2), re.test(s1)`
         // → true, false, true on the same pattern. The scan was therefore skipping about half of its
         // candidate sentences, silently, in both the leak and the drop loop.
-        for (const [name, re] of LEAK) { re.lastIndex = 0; if (re.test(ipa)) bump(`LEAK ${name}`, sentence); }
-        for (const [name, re] of DROPPABLE) {
-            re.lastIndex = 0;
-            if (!re.test(sentence)) continue;
-            const without = sentence.replace(re, "");
-            try {
-                if ((phonemize(without, lang) as string) !== ipa) continue;
-                // DELETION SAYS "no contribution" — but it conflates two findings, and the Assamese run
-                // (#592) hit the second one. The corpus writes "($১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ)", which
-                // ALREADY SAYS "American dollar", so the correct reading is byte-identical with and without
-                // the sign: no correct rule can escape the deletion test there. Distinguish the two by
-                // asking whether the symbol's OWN WORD is in the reading. Probe the symbol on a bare `5`,
-                // take the tokens it adds (`$` → "dɔlaɹ"), and look for them in this sentence's IPA:
-                //   present → the meaning IS spoken → a PERMISSIBLE drop, reported as a NOTE, not a defect
-                //   absent  → nothing says it → a genuine DROP, reported as before
-                // This is strictly narrower than "does the engine know this symbol anywhere": Xhosa reads a
-                // bare `$5` but swallows the `$` in "leUS$30" (no ɔːla in the reading), and that one still
-                // reports. A symbol the engine never reads at all (bn/ca/or all drop ¥) adds no tokens, so
-                // it can never be downgraded. Probe forms never merge two digits, so `-`/`+`/`=` are judged
-                // on `5-`/`-5`, not on `5-5` → `55`.
-                const symbols = [...new Set(sentence.match(re) ?? [])];
-                const spoken = symbols.length > 0 && symbols.every((sym) => {
-                    const words = contribution(sym);
-                    if (words.length > 0 && words.every((w) => ipa.includes(w))) return true;
-                    return namedByCode(sym, sentence, ipa);
-                });
-                bump(`${spoken ? "REDUNDANT" : "DROP"} ${name}`, sentence);
-            } catch { /* the mutated form is not comparable */ }
-        }
-    }
-    /** The IPA tokens a symbol adds to a bare `5` — its own word, or [] if it says nothing. Memoised. */
-    function contribution(sym: string): string[] {
-        const memo = alone.get(sym);
-        if (memo !== undefined) return memo;
-        let words: string[] = [];
-        try {
-            const bare = new Set((phonemize("5", lang) as string).split(/\s+/u));
-            for (const probe of [`5${sym}`, `${sym}5`]) {
-                const added = (phonemize(probe, lang) as string).split(/\s+/u).filter((t) => t !== "" && !bare.has(t));
-                if (added.length > 0) { words = added; break; }
-            }
-        } catch { words = []; }
-        alone.set(sym, words);
-        return words;
-    }
-    /** A CURRENCY IS ALSO NAMED BY ITS ISO CODE, which `contribution` cannot see: the code reads as spelled
-     *  letters, so the sign's own word is nowhere in the IPA and a correct drop still reported. Malay (#601)
-     *  writes `$45 juta AUD` — one currency stated twice, so saying it once is right and no rule can pass the
-     *  deletion test. Sign-keyed, not a bare three-capitals shape, which is every other initialism too. The
-     *  code must itself be SPOKEN in the reading, or a dropped code would license a dropped sign. */
-    function namedByCode(sym: string, sentence: string, ipa: string): boolean {
-        const alt = SIGN_CODES[sym];
-        if (alt === undefined) return false;
-        const code = new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "u").exec(sentence)?.[0];
-        if (code === undefined) return false;
-        try {
-            const spelled = (phonemize(code, lang) as string).split(/\s+/u).filter((t) => t !== "");
-            return spelled.length > 0 && spelled.every((t) => ipa.includes(t));
-        } catch { return false; }
+        for (const [name, re] of LEAK_CLASSES) { re.lastIndex = 0; if (re.test(ipa)) bump(`LEAK ${name}`, sentence); }
+        // REDUNDANT is a permissible drop and is reported as a NOTE, not a defect: where the sentence
+        // itself says what the symbol means, the correct reading is byte-identical with and without it.
+        for (const d of dropsIn(sentence, ipa, say, contribution))
+            bump(`${d.redundant ? "REDUNDANT" : "DROP"} ${d.klass}`, sentence);
     }
     function bump(k: string, s: string): void {
         hits.set(k, (hits.get(k) ?? 0) + 1);

@@ -24,6 +24,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { DROPPABLE, isRedundant, makeContribution } from "./defects.ts";
 import { join } from "node:path";
 import { CELLS } from "./mine.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
@@ -46,19 +47,15 @@ const TREATED: [string, string | undefined][] = [
     ["my", undefined],
 ];
 
-/** Symbol classes worth a differential drop test, with the regex that removes each. */
-const DROPPABLE: [string, RegExp][] = [
-    ["percent", /[%‰]/gu],
-    ["currency", /\p{Sc}/gu],
-    ["degree", /[°℃℉]/gu],
-    ["exponent", /[²³⁰¹⁴-⁹]/gu],
-    ["ampersand", /[&＆]/gu],
-    ["iteration", /[ๆ々〃ヽヾゝゞៗ]/gu],
-];
+// The DROP tables come from `defects.ts`, shared with `mine.ts scan` and `corpus-diff.ts emit`. Three copies
+// had drifted; this one was the only place that knew `exponent`, `ampersand` and `iteration`, and it was
+// blind to `minus` and `math-sign`. It also did NOT do the REDUNDANT discrimination, so a permissible drop —
+// a sentence that names its own currency in words — was reported here as a defect.
 /** Which cell each drop class reports against. */
 const DROP_CELL: Record<string, string> = {
     percent: "percent", currency: "currency", degree: "degrees",
     exponent: "exponent", ampersand: "ampersand", iteration: "iteration",
+    minus: "signed-number", "math-sign": "arithmetic",
 };
 
 const LEAK = /\p{Nd}|[…。、，％℃°ºª〜～・！？²³\p{Sc}।॥۔؟،؛]/u;
@@ -125,20 +122,30 @@ for (const [lang, corpus] of TREATED) {
         }
     }
 
-    // DROP: the differential test, which the leak classes are blind to by construction.
+    // DROP: the differential test, which the leak classes are blind to by construction. A REDUNDANT drop is
+    // NOT reported — the sentence already says what the symbol means, so the identical reading is correct.
+    const say = (t: string): string | undefined => {
+        try { return phonemize(t, lang) as string; } catch { return undefined; }
+    };
+    const contribution = makeContribution(say);
+    // PER CLASS, not per sentence, and that ordering is the whole point: the candidates are the lines that
+    // CONTAIN the symbol, and MAX applies to those. Iterating the first MAX lines instead and testing whatever
+    // classes they happen to contain looks equivalent and is not — a class whose instances sit late in the
+    // corpus is then never tested at all. Measured when I got it wrong: 38 defective cells fell to 15.
     for (const [name, re] of DROPPABLE) {
-        const cell = DROP_CELL[name]!;
+        const cell = DROP_CELL[name];
+        if (cell === undefined) continue;
         const hits = lines.filter((l) => { re.lastIndex = 0; return re.test(l); });
-        if (hits.length === 0) continue;
         for (const l of hits.slice(0, MAX)) {
-            try {
-                const full = phonemize(l, lang) as string;
-                if ((phonemize(l.replace(re, ""), lang) as string) === full) {
-                    status[cell] = "DROP";
-                    defects.push(`${cell} DROP: ${l.slice(0, 60)}`);
-                    break;
-                }
-            } catch { /* not comparable */ }
+            const ipa = say(l);
+            if (ipa === undefined) continue;
+            const without = say(l.replace(re, ""));
+            if (without === undefined || without !== ipa) continue;
+            const symbols = [...new Set(l.match(re) ?? [])];
+            if (isRedundant(l, ipa, symbols, contribution, say)) continue;
+            status[cell] = "DROP";
+            defects.push(`${cell} DROP: ${l.slice(0, 60)}`);
+            break;
         }
     }
     rows.push({ lang, status, defects });

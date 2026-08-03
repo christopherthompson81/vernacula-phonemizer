@@ -27,6 +27,7 @@
  * is what the embedded-Latin fallback produces (see core/foreign.ts); pass it a regex of foreign phonemes.
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { dropsIn, makeContribution } from "./defects.ts";
 import { join } from "node:path";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
@@ -79,53 +80,10 @@ const DEFECTS: [string, RegExp][] = [
     ["DROP", /\u27EADROP:/u],
 ];
 
-/** Symbol classes worth a differential drop test, with the regex that removes each. */
-const DROPPABLE: [string, RegExp][] = [
-    ["percent", /[%‰]/gu],
-    ["currency", /\p{Sc}/gu],
-    ["degree", /[°℃℉]/gu],
-    ["minus", /(?<![\p{L}\p{Nd}])[-−](?=\p{Nd})/gu],
-];
-
-/** The IPA tokens a symbol adds to a bare `5` — its own word, or [] if it says nothing at all. Memoised. */
-const CONTRIB = new Map<string, string[]>();
-function contribution(sym: string, lang: string, phonemize: (t: string, l: string) => string): string[] {
-    const memo = CONTRIB.get(sym);
-    if (memo !== undefined) return memo;
-    let words: string[] = [];
-    try {
-        const bare = new Set(phonemize("5", lang).split(/\s+/u));
-        for (const probe of [`5${sym}`, `${sym}5`]) {
-            const added = phonemize(probe, lang).split(/\s+/u).filter((t) => t !== "" && !bare.has(t));
-            if (added.length > 0) { words = added; break; }
-        }
-    } catch { words = []; }
-    CONTRIB.set(sym, words);
-    return words;
-}
-
-/** A CURRENCY IS ALSO NAMED BY ITS ISO CODE, which `contribution` cannot see: the code is read as spelled
- *  letters, so the sign's own word is nowhere in the IPA and a correct drop still reported. Malay (#601)
- *  writes `$45 juta AUD` — the sign and the code are the same currency stated twice, so saying it once is
- *  the right reading and the deletion test cannot pass on it. Sign-keyed rather than a bare three-capitals
- *  shape, because that shape is every other initialism in the corpus too. */
-const SIGN_CODES: Readonly<Record<string, string>> = {
-    $: "USD|AUD|CAD|NZD|SGD|HKD|TWD|MXN|BRL|ARS|CLP|COP",
-    "€": "EUR", "£": "GBP", "¥": "JPY|CNY|RMB", "₹": "INR", "₽": "RUB", "₩": "KRW", "₺": "TRY", "₪": "ILS",
-};
-/** Whether the sentence names `sym`'s currency by ISO code AND that code is itself spoken in the reading —
- *  the second half matters, or a dropped code would license a dropped sign. */
-function namedByCode(sym: string, sentence: string, read: string, lang: string,
-    phonemize: (t: string, l: string) => string): boolean {
-    const alt = SIGN_CODES[sym];
-    if (alt === undefined) return false;
-    const code = new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "u").exec(sentence)?.[0];
-    if (code === undefined) return false;
-    try {
-        const spelled = phonemize(code, lang).split(/\s+/u).filter((t) => t !== "");
-        return spelled.length > 0 && spelled.every((t) => read.includes(t));
-    } catch { return false; }
-}
+// The defect tables and the REDUNDANT discrimination live in `defects.ts`, shared with `mine.ts scan`
+// and `coverage.ts`. They were three copies and they had DRIFTED — this file's `minus` class was missing
+// the EN DASH, and it had no `math-sign`, `exponent`, `ampersand` or `iteration` class at all, so the
+// gate could not see a dropped `&` or `²`. See that file's header for the full table.
 
 function scan(lines: string[], foreign: RegExp | undefined): Record<string, number> {
     const out: Record<string, number> = {};
@@ -141,6 +99,13 @@ if (mode === "emit") {
     // Imported lazily and by URL so this file can also run inside a pristine worktree, where the import
     // must resolve against THAT checkout's src/ rather than the one this file was authored in.
     const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
+    // `say` is the one place this file knows how to phonemize; defects.ts takes it as a callback so it needs
+    // no import of its own and stays testable. It returns undefined on a throw, which the drop test reads as
+    // "not comparable" rather than as a difference.
+    const say = (t: string): string | undefined => {
+        try { return (phonemize(t, lang) as string).replace(/\n/gu, " "); } catch { return undefined; }
+    };
+    const contribution = makeContribution(say);
     const lines = corpusLines(corpus);
     const ipa = lines.map((l: string) => {
         let read: string;
@@ -149,28 +114,13 @@ if (mode === "emit") {
         } catch (e) {
             return ` THROW ${(e as Error).message}`;
         }
-        // The differential DROP test. Only an utterance that actually carries the symbol pays for the
-        // second phonemize, so the cost is a few percent of the corpus rather than a doubling.
-        for (const [name, re] of DROPPABLE) {
-            re.lastIndex = 0;
-            if (!re.test(l)) continue;
-            try {
-                if ((phonemize(l.replace(re, ""), lang) as string).replace(/\n/gu, " ") !== read) continue;
-                // …unless the symbol's OWN WORD is already in the reading, put there by the sentence's own
-                // words: the Assamese corpus writes "($১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ)" and Malayalam's "93%
-                // ശതമാനം" spells the unit beside the sign, so the correct reading is byte-identical with
-                // and without it and NO rule can pass the deletion test there. Same discrimination as
-                // `normalization/mine.ts scan`, which reports these as a REDUNDANT? note; here they simply
-                // do not count, so the DROP column keeps meaning "a symbol went unspoken".
-                const symbols = [...new Set(l.match(re) ?? [])];
-                const spoken = symbols.length > 0 && symbols.every((sym) => {
-                    const words = contribution(sym, lang, phonemize);
-                    if (words.length > 0 && words.every((w) => read.includes(w))) return true;
-                    return namedByCode(sym, l, read, lang, phonemize);
-                });
-                if (!spoken) read += ` \u27EADROP:${name}\u27EB`;
-            } catch { /* the stripped form is not comparable — no claim either way */ }
-        }
+        // The differential DROP test, from defects.ts so all three tools test the same classes. Only an
+        // utterance that actually carries a symbol pays for the second phonemize, so the cost is a few
+        // percent of the corpus rather than a doubling. A REDUNDANT drop does not count: the DROP column has
+        // to keep meaning "a symbol went unspoken", or the Assamese and Malay sentences that already name
+        // their currency would make it uninterpretable.
+        for (const d of dropsIn(l, read, say, contribution))
+            if (!d.redundant) read += ` \u27EADROP:${d.klass}\u27EB`;
         return read;
     });
     writeFileSync(out, `${ipa.join("\n")}\n`);
