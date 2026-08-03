@@ -5,8 +5,10 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeSlovak } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 /** One Slovak word → canonical IPA with first-syllable primary stress + even-non-final secondary stress. */
@@ -30,9 +32,75 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([A-Za-zÁáÄäČčĎďÉéÍíĹĺĽľŇňÓóÔôŔŕŠšŤťÚúÝýŽž]+)|(\d+)|([.!?…,;:])/gu;
 
+/**
+ * #562 Slovak count-form selector: 1 → 0 (sg), exactly 2/3/4 → 1 (nominative plural), everything else → 2
+ * (genitive plural).
+ *
+ * NOT the shared `slavicCountForm`, and NOT Czech's final-digit selector either — this is the one place
+ * Slovak parts company with both, and it is keyed on the WHOLE numeral rather than its last digits.
+ * Standard Slovak puts the counted noun in the GENITIVE PLURAL after any compound numeral, whatever it
+ * ends in: *dvadsaťdva kilometrov*, *šesťdesiatštyri kilometrov*, *dvadsaťjeden hodín* — where the
+ * final-digit rule would give *dvadsaťdva kilometre* (Czech) or *dvadsaťjeden hodina* (Russian).
+ *
+ * SOURCED FROM THIS ENGINE'S OWN DATA, not from a sibling language: numbers.ts already selects the
+ * magnitude form with exactly `count === 1 ? sg : count >= 2 && count <= 4 ? paucal : plural`, and
+ * slovak.jsonc documents it as "1 tisíc/milión, 2–4 tisíce/milióny, 5+ tisíc/miliónov". `numberToWords`
+ * has been composing *dvadsaťdva tisíc* (genitive plural) on that rule since bringup; the tier now agrees.
+ *
+ * Declared HERE, beside the tier that consumes it, so the two cannot drift apart — and so the module
+ * graph has no initialisation cycle (normalize.ts imports this file, never the reverse at init time).
+ */
+export const skCountForm = (n: number): number => (n === 1 ? 0 : n === 2 || n === 3 || n === 4 ? 1 : 2);
+
+/**
+ * #562 SYMBOL NORMALIZATION — Slovak. Kept in the ENGINE file (not normalize.ts) so the review tool's
+ * sourcing check can read the declaration. Every word here is attested in the sk_sk corpus or in espeak's
+ * Slovak dictsource; see the SOURCING paragraph in normalize.ts.
+ *
+ *   percent  percento / percentá / percent — the corpus writes `percent` 11 times and `percento` once.
+ *   currency dolár (corpus: dolárov ×3, doláre ×1; espeak `_$ dolár`), euro / libra / jen from espeak's
+ *            `€ euro`, `£ libra`, `¥ jen`. Only `$` occurs in the corpus (×2, POSTPOSED: `11 000 $`).
+ *   units    the corpus writes km ×24, mm ×6, cm, m ×3, kg ×3, GHz ×2. `kilometrov` appears 12 times.
+ *   rate     `km/h` ×6 → *kilometrov NA hodinu*; `m/s` takes *za sekundu*, which is why unitPer is keyed
+ *            by denominator rather than being one word.
+ *   exponent `km²` ×2 → *štvorcových kilometrov* — an agreeing adjective BEFORE the noun, as in Russian.
+ *
+ * COUNT AGREEMENT uses `skCountForm`, not `slavicCountForm`: a Slovak compound ending in 1 takes the
+ * genitive plural (*dvadsaťjeden percent*), never the Russian singular.
+ */
+export const SYMBOLS = makeSymbolNormalizer({
+    percent: ["percento", "percentá", "percent"],
+    currency: {
+        "$": ["dolár", "doláre", "dolárov"],
+        "€": ["euro", "eurá", "eur"],
+        "£": ["libra", "libry", "libier"],
+        "¥": ["jen", "jeny", "jenov"],
+    },
+    units: {
+        km: ["kilometer", "kilometre", "kilometrov"],
+        m: ["meter", "metre", "metrov"],
+        cm: ["centimeter", "centimetre", "centimetrov"],
+        mm: ["milimeter", "milimetre", "milimetrov"],
+        kg: ["kilogram", "kilogramy", "kilogramov"],
+        ghz: ["gigahertz", "gigahertze", "gigahertzov"],
+        mhz: ["megahertz", "megahertze", "megahertzov"],
+    },
+    unitPer: { h: "na", s: "za" }, // 70 km/h → kilometrov NA hodinu; 10 m/s → metrov ZA sekundu
+    rateDenominators: { h: "hodinu", s: "sekundu" },
+    exponentWords: {
+        squared: ["štvorcový", "štvorcové", "štvorcových"],
+        cubed: ["kubický", "kubické", "kubických"],
+        position: "before",
+    },
+    countForm: skCountForm,
+});
+
 class SlovakPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // #562: normalize.ts FIRST — its ordinal, clock, era and range steps need the digits still
+        // adjacent to their marks. It calls the shared symbol tier itself, at the one point where the
+        // number is still beside its unit but the decimal comma has not yet become a word.
+        return assembleClauses(normalizeSlovak(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 // ≤9 digits fits a safe integer (<1e9, the top composed magnitude) → compose; longer → read the raw
