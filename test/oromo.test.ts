@@ -128,6 +128,41 @@ describe("Oromo text normalization", () => {
         expect(normalizeOromoNumerals("Il-76s")).toBe("Il-76s");
     });
 
+    // The corpus DETACHES the same enclitic in 24 unique utterances — more sentences than it glues it in —
+    // and the detached reading is the same impossibility: a word-initial geminate [tːi], or a bare [f]/[n].
+    test("the enclitic written with a SPACE attaches just the same", () => {
+        expect(normalizeOromoNumerals("bara 1945 tti")).toBe("bara kuma dhibba sagal afurtamii shanitti");
+        expect(normalizeOromoNumerals("bara 2016 ti")).toBe("bara kuma lama kudha jahati");
+        expect(normalizeOromoNumerals("sa’aatii 24 f")).toBe("sa’aatii digdamii afuriif");
+        expect(normalizeOromoNumerals("qabxii 2207 n")).toBe("qabxii kuma lama dhibba lama torbaan");
+        expect(normalizeOromoNumerals("22500 tiin")).toBe("kuma digdamii lama dhibba shanitiin");
+        expect(normalizeOromoNumerals("miliyyoona 2.8 tti")).toBe("miliyyoona lama tuqaa saddeetitti");
+        // The SPACED alternation is narrower than the glued one, and `tu` is why: it is an Oromo WORD, the
+        // focus marker, and only the absence of a space tells the two apart.
+        expect(normalizeOromoNumerals("Caribe tu jiraata")).toBe("Caribe tu jiraata");
+        expect(normalizeOromoNumerals("namoota 15 tu")).toBe("namoota 15 tu");
+        expect(normalizeOromoNumerals("15tu")).toBe("kudha shanitu"); // …glued, it still attaches
+        // `fi` survives by construction: the trailing-letter guard rejects `f` followed by `i`.
+        // (an UNSUFFIXED number stays digits — the tokenizer speaks it downstream.)
+        expect(normalizeOromoNumerals("qabxii 2220 fi 2207 n")).toBe("qabxii 2220 fi kuma lama dhibba lama torbaan");
+        // A clause break really does end the numeral phrase, so the space must not cross one.
+        expect(normalizeOromoNumerals("bara 1945, tti")).toBe("bara 1945, tti");
+        // A VERSION LETTER IS NOT AN ENCLITIC. `802.11n` reaches pass 2 already split, and with the letter
+        // set off by a space it was indistinguishable from `2,207 n` — the corpus diff caught the Wi-Fi
+        // standard being read as *tokkoon*. The hyphen step 8 emits is what keeps the two apart.
+        expect(normalizeOromo("saffisawwan 802.11n kan")).toBe("saffisawwan 802 tuqaa 1 1-n kan");
+        expect(normalizeOromoNumerals("saffisawwan 802 tuqaa 1 1-n kan")).toBe("saffisawwan 802 tuqaa 1 1-n kan");
+    });
+
+    // Step 5 consumes the meridiem and emits a half-day WORD, so a following enclitic no longer has digits
+    // in front of it — the corpus's `sa’a 1:15 a.m tti` left a bare [tːi] until the rule looked here too.
+    test("an enclitic after the half-day word the clock emits", () => {
+        expect(normalizeOromo("sa’a 1:15 a.m tti")).toBe("sa’a 1 fi daqiiqaa 15 ganama tti");
+        expect(normalizeOromoNumerals("sa’a 1 fi daqiiqaa 15 ganama tti"))
+            .toBe("sa’a 1 fi daqiiqaa 15 ganamatti");
+        expect(normalizeOromoNumerals("galgala tti")).toBe("galgalatti");
+    });
+
     test("de-grouping, and the thousands crash it exposed", () => {
         expect(normalizeOromo("783,562 qabata")).toBe("783562 qabata");
         expect(numberToWords(783562)).toBe("kuma dhibba torba saddeettamii sadii dhibba shan jaatamii lama");

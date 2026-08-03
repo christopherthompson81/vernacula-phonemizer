@@ -226,3 +226,93 @@ NBA, PTWC, ACMA, OHA, HJR-3) still read as Qubee letter runs — `PTWC` → `[pt
 carries the full Oromo letter-name inventory (`a→a:`, `b→ba:`, `c→tS'a:`, `q→k'a:`, `x→t'a:` …), so an
 initialism pass is sourceable; it needs `makeUnreadableTest` phonotactics and an acronym list, which is a
 change of a different shape from this one.
+
+## Run 8 — 2026-08-02, review before merge
+
+Rebased onto `main`. Gates as submitted all reproduce: `review.ts --lang om` checklist clean, `mine.ts scan`
+no defects, referee byte-identical, corpus diff 114/1218 with DROP 8 → 0.
+
+### The class the layer was built for, in the spelling it did not look for
+
+The layer's premise is trap 14 — the enclitic glued to the digits (`1994tti`, `16ffaa`, `2020f`) — and it
+handles ~35 of those. Reading the corpus diff turned up `sa’a 1:15 a.m tti` still ending in a bare `tːi`,
+which prompted the obvious question the implementation never asked: how often does this corpus write the
+same morpheme **with a space**?
+
+```
+$ awk -F'\t' '{print $3}' om_et/*.tsv | sort -u | grep -cE '[0-9] (tti|ti|tiin|f|n)\b'
+24
+$ … | grep -ohE '[0-9] (tti|ti|tiin|tu|ttan|if|f|n)\b' | awk '{print $2}' | sort | uniq -c
+      1 f      1 n      2 ti      1 tiin     19 tti
+```
+
+**24 unique utterances — more sentences than the glued form appears in.** `bara 1945 tti`, `hanga 100 tti`,
+`sa’aatii 24 f`, `qabxii 2,207 n`, `$22,500 tiin`, `miliyyoona 2.8 tti`, `D.K.D 5000 tti`. And the reading is
+the *same impossibility* the glued rule exists to prevent: a standalone `tti` is the word-initial geminate
+[tːi], a standalone `f`/`n` a bare consonant. Detaching a bound postposition is a slip of the orthography,
+not a word boundary, so the space is not evidence of anything.
+
+Nothing flagged it. Not the mined artifact, not the scan, not the corpus diff, not the review checklist —
+with the space, the text is a number followed by a short word, which is what every measure phrase looks
+like. It was visible only by reading the changed utterances and noticing what had *not* changed.
+
+Rule 14b, and two deliberate narrowings:
+
+- **The spaced alternation is `tiin|tti|ti|f|n`, narrower than the glued `ttan|tiin|tti|ti|tu|if|f|n`** —
+  exactly what was counted (trap 9). Leaving `tu` out is not bookkeeping: `tu` IS an Oromo word, the focus
+  marker (`Caribe tu jiraata`), and only the absence of a space distinguishes the two. The corpus glues
+  `tu` and never detaches it.
+- **One space, no punctuation across it.** A clause break really does end the numeral phrase; `bara 1945,
+  tti` is pinned untouched. `fi` is safe by construction — the trailing-letter guard rejects `f` + `i`.
+
+Plus the half-day arm: step 5 consumes the meridiem and emits *ganama*, so in `sa’a 1:15 a.m tti` the
+enclitic no longer has digits in front of it. Same regular morphology (vowel-final stem, short link). The
+morphology is corpus-attested; this particular output form is not, which is the honest statement of it.
+
+### A regression the corpus diff caught, from the fix itself
+
+First measurement after 14b: 25 utterances changed, and one was wrong.
+
+```
+- safːisawːˈan ᶑˈibːa sadːˈeːt lˈama tukʼˈaː tˈokːo tˈokːo n
++ safːisawːˈan ᶑˈibːa sadːˈeːt lˈama tukʼˈaː tˈokːo tokːˈoːn      ← 802.11n
+```
+
+Step 8 spaces the version letter off the digits, so `802.11n` reaches pass 2 as `802 tuqaa 1 1 n` — a digit,
+a space, an `n`, byte-for-byte the shape of the corpus's detached enclitic. The Wi-Fi standard's letter was
+read as a case suffix. Fixed at the source: step 8 now sets the letter off with a HYPHEN, which the
+tokenizer skips (it matches only letters, digits and clause marks), so the reading is unchanged and the
+shape is no longer ambiguous — the same device Malay's `11-g` uses. Pinned in the tests.
+
+Final delta vs the PR as submitted: **24 utterances, every one a standalone `tːi`/`tˈi`/`f`/`n` becoming an
+attached enclitic, no other change.** Corpus diff 114 → **130/1218 (10.7%)**, all five classes still zero.
+
+### Not fixed, and why
+
+`12.00 GMT tti` still reads a bare `tːi`. The host is an INITIALISM, not a numeral, and Oromo initialisms
+are the declared follow-up (64 instances, `PTWC` → `[ptʼwt͡ʃʼ]`); attaching the enclitic to `GMT` would give
+`ɡmttːi`, which is worse than the gap. One utterance.
+
+`°C`/`°F`: the `[CF]?` in step 11 CONSUMES the scale letter, so it is dropped, not merely left unnamed. The
+code now says so plainly rather than calling it "unread". Confirmed unsourceable — no `selsi*`/`faaren*`
+token in the corpus, either referee, the manifest, or espeak `om_list`. Zero corpus instances; the lesser of
+two wrongs, since unconsumed a bare `C` reads as the Qubee ejective [t͡ʃʼ], a phoneme rather than a word.
+
+### A cell that was tried and rejected
+
+`mine.ts` gained nothing here. Every per-sentence regex for "a bound suffix written with a space" —
+`\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`, every measure phrase in every language,
+so the cell reports COVERED everywhere and tells you nothing. The evidence for this defect is a
+corpus-level statistic (the same morpheme appearing both glued and detached), which is not a shape a cell
+can hold. Recorded as playbook trap 15 instead, with the grep that finds it in seconds.
+
+### Gates after the fixes
+
+| gate | result |
+|---|---|
+| `npx tsc --noEmit` | clean |
+| `npx vitest run` | 201 files, **2698 tests, 0 failed** (12 new) |
+| `mine.ts scan --lang om` | 107 lines, **no defects** |
+| `review.ts --lang om` | **checklist clean**, all 8 checks |
+| `corpus-diff` om_et | **130/1218 (10.7%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 8) |
+| `referee-eval om` | **unchanged**: epitran 5334/5336 (100.0%), kaikki 49/51 (96.1%) |

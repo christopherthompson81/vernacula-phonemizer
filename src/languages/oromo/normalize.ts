@@ -147,6 +147,16 @@ function numeralWords(num: string): string {
  *  `-ffaa` trailer, where it is handled by concatenation. */
 const ENCLITIC = "ttan|tiin|tti|ti|tu|if|f|n";
 
+/** The same enclitics WRITTEN WITH A SPACE — `bara 1945 tti`, `sa’aatii 24 f`, `qabxii 2,207 n`. The
+ *  corpus detaches them in 24 unique utterances, against ~35 glued ones, and the reading is the same
+ *  impossibility either way: a standalone `tti` is the word-initial geminate [tːi], a standalone `f`/`n` a
+ *  bare consonant. Detaching a bound postposition is an orthographic slip, not a word boundary.
+ *  A NARROWER ALTERNATION than `ENCLITIC`, and deliberately so (trap 9 — pin what was counted): spaced,
+ *  the corpus writes only `tti` ×19, `ti` ×2, `tiin` ×1, `f` ×1, `n` ×1. Leaving `tu` out is not
+ *  bookkeeping — `tu` IS an Oromo word, the focus marker (`Caribe tu jiraata`), and only the absence of a
+ *  space distinguishes the two. `fi` is safe by construction: the trailing letter guard rejects `f` + `i`. */
+const ENCLITIC_SPACED = "tiin|tti|ti|f|n";
+
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // PASS 1 — everything that leaves the digits alone, so the shared symbol tier can still see them
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -221,8 +231,13 @@ export function normalizeOromo(input: string): string {
     //    a decimal with an enclitic; spacing the letter off keeps the sentence pause out. BEFORE the
     //    enclitic rule in pass 2, which would otherwise read `802.11n` as a number with an `-n` suffix.
     //    The single-letter guard is what keeps `1.5tti` (3 letters) for the enclitic rule.
+    //    THE LETTER IS SET OFF BY A HYPHEN, not a space, and the corpus diff is why: with a space,
+    //    `802.11n` became `802 tuqaa 1 1 n` — a digit, a space and an `n`, which is indistinguishable from
+    //    the corpus's detached enclitic (`2,207 n`), so rule 14b read the Wi-Fi standard's letter as a case
+    //    suffix and said *tokkoon*. The tokenizer skips a hyphen (it matches only letters, digits and
+    //    clause marks), so the reading is unchanged and the shape is no longer ambiguous.
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/gu,
-        (_m, i: string, f: string) => `${i} ${POINT} ${[...f].join(" ")} `);
+        (_m, i: string, f: string) => `${i} ${POINT} ${[...f].join(" ")}-`);
 
     // 9) RANGES — 11 in the corpus, against 3 SCORES that must not be claimed. *hanga* ("up to") is
     //    attested ×6 as an INFIX between two numbers (`8 hanga 100`, `340 hanga 500tti`, `100 hanga 250`,
@@ -250,7 +265,11 @@ export function normalizeOromo(input: string): string {
     // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested (×2, as the academic degree —
     //     Oromo borrows the one word) and is in the epitran referee. The compass words are all in the
     //     corpus. °C/°F have ZERO corpus instances and are probed anyway (trap 8): the SCALE NAMES are in
-    //     no source this repo has, so the reading stops at *digirii N* rather than inventing one.
+    //     no source this repo has — not the corpus, not either referee, not espeak's `om_list` — so the
+    //     reading stops at *digirii N*. Note what that costs: the `[CF]?` CONSUMES the letter, so the
+    //     scale is dropped, not merely left unnamed. Deliberate, and the lesser of two wrongs — unconsumed,
+    //     a bare `C` reads as the Qubee ejective [t͡ʃʼ], a phoneme rather than a word — but it is a drop,
+    //     and it stays a drop until Celsius/Fahrenheit can be sourced.
     s = s.replace(/(\d+)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, n: string, c: string) => `digirii ${n} ${COMPASS[c]!}`);
     s = s.replace(/(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gu, "digirii $1");
@@ -340,6 +359,29 @@ export function normalizeOromoNumerals(input: string): string {
             return [...words, attachEnclitic(last, suf === "if" ? "f" : suf)].join(" ");
         },
     );
+
+    // 14b) THE SAME ENCLITIC, WRITTEN WITH A SPACE — `bara 1945 tti`, `hanga 100 tti`, `sa’aatii 24 f`,
+    //      `qabxii 2,207 n`, `$22,500 tiin`, `miliyyoona 2.8 tti`. TWENTY-FOUR unique utterances, against
+    //      the ~35 glued ones above, and the same impossible reading: `tti` alone is the word-initial
+    //      geminate [tːi], `f`/`n` alone a bare consonant. Detaching a bound postposition is a slip of the
+    //      orthography, not a word boundary, so the space is not evidence of anything.
+    //      ONE space, and no punctuation across it: a clause break really would end the numeral phrase.
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+(?:\\.\\d+)?)[’'ʼ]? (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
+        (m0, num: string, suf: string) => {
+            const words = numeralWords(num).split(" ");
+            const last = words.pop();
+            if (last === undefined) return m0;
+            return [...words, attachEnclitic(last, suf)].join(" ");
+        },
+    );
+    //      …and after a HALF-DAY WORD, which is where step 5 leaves the corpus's `sa’a 1:15 a.m tti`: the
+    //      clock rule consumed the meridiem and emitted *ganama*, so the enclitic no longer has digits in
+    //      front of it and the rule above cannot see it. Same regular morphology as every numeral above
+    //      (vowel-final stem, short link) — the MORPHOLOGY is corpus-attested, this particular output form
+    //      is not, which is the honest statement of what is claimed here.
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(ganama|galgala) (${ENCLITIC_SPACED})(?![\\p{L}\\p{M}\\d])`, "gu"),
+        (_m, w: string, suf: string) => attachEnclitic(w, suf));
 
     // 15) DECIMAL POINT — 14 instances (`miliyoona 2.3`, `inchii 6.34`, `sa’aatii 1.5`). The fraction is
     //     read DIGIT BY DIGIT after *tuqaa*, which is what the digits already do downstream, so this rule
