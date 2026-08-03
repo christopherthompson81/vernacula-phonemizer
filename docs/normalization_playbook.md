@@ -779,6 +779,32 @@ occurrences) and `ordinal-native`.
 - **The rebuild was also strictly better where it could be measured** — 35/35 cells and `ordinal-native` 15×
   better covered — but `calendar` came back 2.5% lower on a newer dump. Report both directions.
 
+**33. AN INDEX FROM A FOLDED STRING DOES NOT ADDRESS THE ORIGINAL ONE.** `attest.ts` counted hits in
+`fold(text)` — NFD plus `\p{M}+` removal — and then sliced the QUOTE out of the unfolded `text` at that index.
+Folding changes string length in every script that writes combining marks, so the window landed off by however
+many marks preceded the hit and the quoted sentence did not contain the word at all. Latin without diacritics
+folds to itself, which is why it survived until a Maithili run showed `प्रतिशत`'s example as a passage with no
+प्रतिशत in it. #610 had just made those quotes **the whole of the evidence** for unspaced scripts.
+
+- **Count in one representation and quote from the other, never mix the indices.** Examples are now re-found in
+  the original text with the original word; if the wiki spells it with different marks the fold still counts the
+  hit and no example is quoted. A missing quote is a prompt to look. A misaligned one is a wrong finding.
+- **The bug was invisible to every test that could have caught it,** because the only fixture where folding is
+  identity is the one that does not exercise it.
+
+**34. A TOKEN HIT ON A SMALL WIKI IS NOT EVIDENCE ABOUT THAT LANGUAGE.** Small Devanagari wikis carry verbatim
+Hindi and Nepali passages, so the probe finds the word and the sentence is in another language. Reading
+Maithili's four `बजकर` hits: two are Hindi (*का मुहूर्त*, *रहा*, *मिलाकर*) and two are genuine Maithili
+(*प्रतिष्ठाक*, *सेकेण्ड सँ*, *रहल जे*); its single `प्रतिशत` hit is Nepali (*भन्दा*, *लागेकाछन्*).
+
+- **Identify the sentence's language from its MORPHOLOGY, not its script.** The shared vocabulary is exactly
+  what makes the contamination invisible — a Hindi sentence quoted in a Maithili article is still Devanagari,
+  still topical, and still wrong as evidence.
+- **This is the sharpest form of "attestation is necessary, never sufficient"**, and it bites hardest on the
+  languages that need the tool most: the smaller the wiki, the higher the proportion of borrowed text.
+- **A split verdict is a real verdict.** For `mai` the clock words are confirmed and the percent word is not,
+  from the same probe run.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

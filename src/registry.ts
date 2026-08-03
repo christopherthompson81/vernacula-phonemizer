@@ -700,6 +700,11 @@ function build(lang: string): Phonemizer {
         // a marked retroflexion tendency, intonation) are allophonic/prosodic, NOT a categorical grapheme→IPA
         // delta, and there is NO referee to verify one. So we serve it via `hi` (its nearest verified sibling —
         // Western Hindi) as a labelled approximation. See tools/language-catalogue (served_by='hi').
+        // #583 — NORMALIZER WORDS: no source exists. bgc.wikipedia does not exist, espeak does not ship
+        // Haryanvi, and there is no FLEURS corpus, artifact or referee — every tier of the haystack is empty.
+        // Hindi's inherited percent/clock/era words are therefore the only available answer, which is
+        // consistent with this being a labelled approximation served via `hi` in the first place. Recorded so
+        // nobody re-investigates a settled refusal; a KRNB-style divergence check would need a Haryanvi source.
         case "bgc":
             return createHindi((latin) => getPhonemizer("en").text(latin));
         // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.

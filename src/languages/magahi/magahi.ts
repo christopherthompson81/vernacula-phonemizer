@@ -7,6 +7,19 @@
  * glides (व→w, य→j). Single comparative-source delta on the grammar-anchored Bhojpuri base → 🔷. Was a mag→bho
  * alias until the reference revealed the delta. See docs/investigations/mag_native_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Magahi, one of them by a
+ * DEFINITION rather than a usage. Evidence from mag.wikipedia via `tools/normalization/attest.ts`
+ * (`tools/corpus/attest/mag.jsonc`); sentences judged Magahi by हे / हल / हलै / आउ / -के:
+ *
+ *   प्रतिशत  ✓✓ the Magahi wiki's own article DEFINES it: "प्रतिशतके अर्थ हे प्रति सौ या प्रति सैकड़ा
+ *               (% = 1/100)" — a definitional citation tying the word to the SIGN, which is stronger than
+ *               any usage example. Also in use: "साक्षरता दर ७५ प्रतिशत … हलै आउ".
+ *   बजे      ✓ "रातके १२ बजे होलै हल"
+ *   मिनट     ✓ "प्रति मिनट क्रान्ति, सङ्क्षिप्त आर/मिनट या आरपिएम हे"
+ *   ईसा पूर्व ✓ "ईसा पूर्व ३०४ से ईसा पूर्व २३२ … हल"
+ *   बजकर      NOT ATTESTED (0 hits) — Hindi's clock connective stands, unconfirmed.
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";

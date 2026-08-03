@@ -9,6 +9,19 @@
  * single-source-verified bring-up, not a confident convergence. Distinct from the ⛔ Bhojpuri/Awadhi stubs, which
  * have NO referee at all. See docs/investigations/mai_native_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: Hindi's CLOCK words are confirmed for Maithili; its percent word is NOT, and is
+ * retained unconfirmed. Evidence from mai.wikipedia via `tools/normalization/attest.ts`
+ * (`tools/corpus/attest/mai.jsonc`). This language is why the reading has to be done per sentence:
+ *
+ *   बजकर + मिनट ✓ "प्राण प्रतिष्ठाक मुहूर्त १२ बजकर २९ मिनट ८ सेकेण्ड सँ … रहल जे"
+ *                  — प्रतिष्ठाक / सेकेण्ड सँ / रहल जे are Maithili. TWO of the four बजकर hits are Maithili;
+ *                    the other two are the same passage in HINDI (का मुहूर्त, रहा, मिलाकर), quoted verbatim.
+ *   मिनट     ✓ "5 घंटा 30 मिनट जोड़ला सं प्राप्त होइत अछि"           — होइत अछि is Maithili
+ *   प्रतिशत   ✗ its single hit is a NEPALI passage ("९७.९ प्रतिशत भन्दा अधिक … लागेकाछन्"), so it says
+ *              nothing about Maithili. Hindi's default stands, unconfirmed — not replaced, because an
+ *              unsourced substitute is worse than an inherited word (this issue's own standing rule).
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";

@@ -16,6 +16,21 @@
  * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates). See
  * docs/investigations/awa_native_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are now confirmed for Awadhi
+ * rather than merely inherited. Evidence from awa.wikipedia via `tools/normalization/attest.ts`
+ * (`tools/corpus/attest/awa.jsonc`), with each sentence's language judged from its MORPHOLOGY, because a
+ * Devanagari token hit on a small wiki is routinely a quoted Hindi passage:
+ *
+ *   प्रतिशत  ✓ "प्रायद्वीप कय 40 प्रतिशत हिस्सा होय"        — कय / होय are Awadhi
+ *   मिनट     ✓ "16 घंटा 20 मिनट मा तय कइन्हिन"              — मा / कइन्हिन are Awadhi
+ *   ईसा पूर्व ✓ "५५० ईसा पूर्व मा इ क्षेत्र कय जीत लिहिन"    — Awadhi
+ *   बजकर, बजे  NOT ATTESTED (0 hits) — the clock connective is rare in encyclopedic prose, so this is
+ *              absence of evidence, not evidence of absence. Hindi's default stands, unconfirmed.
+ *
+ * A TRAP RECORDED: `सैकड़ा` ×2 is real Awadhi and means CRICKET CENTURIES — "वन १६ सैकड़ा लगाय चुका हैं" —
+ * not "per hundred". It is not a percent word here. Same shape as the Malay `paun` weight-vs-currency trap.
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";

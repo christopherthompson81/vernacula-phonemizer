@@ -6,6 +6,22 @@
  * length, ऐ→[ɛ]/औ→[ɔ] MONOPHTHONGS (not the diphthongs earlier claimed), श/ष→[s] (only /s ɦ/ fricatives), व→[w]
  * (not Hindi ʋ), ण/ञ→[n]. 🔷 single published source; see docs/investigations/bho_native_bringup_investigation.md.
  */
+/**
+ * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Bhojpuri. Evidence from
+ * bh.wikipedia via `tools/normalization/attest.ts` (`tools/corpus/attest/bho.jsonc`); each sentence's language
+ * judged from its morphology (बा, होला, गइल, भइल), since a Devanagari hit on a small wiki is often quoted Hindi:
+ *
+ *   प्रतिशत  ✓ "नेपाल देस के कुल आवादी के … प्रतिशत भू–भाग होला"
+ *   बजे      ✓ "मोदी के घोषणा सवा आठ बजे साँझ के प्रसारित भइल"
+ *   मिनट     ✓ "आपरेशन कुछ मिनट से ले के कई दिन तक चले वाला हो सके लें"
+ *   ईसा पूर्व ✓ "7वीं सदी ईसा पूर्व में … रहल बा"                     (×4)
+ *   बजकर      NOT ATTESTED (0 hits) — Hindi's clock connective stands, unconfirmed.
+ *
+ * ALSO ATTESTED, AND DELIBERATELY NOT ADOPTED: `फीसदी` ✓ "जनसंख्या के 22 फीसदी लोग" is equally good Bhojpuri
+ * for percent. Two valid words is not a reason to change a working one — replacing प्रतिशत here would trade a
+ * confirmed reading for another confirmed reading and churn the corpus diff for nothing.
+ * `सैकड़ा` occurs as the RATIO phrase प्रति सैकड़ा ("94.77 औरत प्रति सैकड़ा मरद"), not as the `%` word.
+ */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
