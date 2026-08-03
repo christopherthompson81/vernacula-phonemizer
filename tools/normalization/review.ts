@@ -199,6 +199,13 @@ for (const f of engineFiles) {
             if (!/^[\p{L}\p{M}][\p{L}\p{M} '’ʻ-]*$/u.test(lit) || !/\p{L}{2}/u.test(lit)) continue; // a WORD, not a regex/IPA fragment
             if (/^[dgimsuvy]+$/u.test(lit)) continue;                       // regex flags
             if (/phonemiz\w*\(\s*$/u.test(before)) continue;                // the CORRECT shape — routed through the g2p
+            // A UNICODE NORMALIZATION FORM IS AN API ARGUMENT, NOT TEXT. `input.normalize("NFC")` inside a
+            // `text()` body flagged `"NFC"` as a spelling leak reading [nft͡ʃʼ] — a FALSE POSITIVE, and the
+            // gate's first since it shipped at 0/60. Reported by the Swedish run (#605), which worked around
+            // it by hoisting the fold out of `text()`; that is a real edit made to satisfy a broken check,
+            // which is the worst thing a gate can cause. Reproduced by injecting the fold into Oromo's
+            // `text()` before fixing. `.normalize(` only, so a genuine word literal elsewhere still reports.
+            if (/\.normalize\(\s*$/u.test(before)) continue;
             if (/[=!<>]=+\s*$/u.test(before) || /^\s*[=!]==?/u.test(after)) continue; // a comparison
             if (/^\s*in\s/u.test(after)) continue;                          // `"key" in obj`
             const ipa = say(lit);
