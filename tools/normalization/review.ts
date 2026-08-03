@@ -305,7 +305,20 @@ function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): s
 }
 const hay = attestationHaystack();
 const needles = highTrafficWords(hay);
-if (needles.length === 0) note("sourcing", null, "no percent/currency/decimal word declared");
+// A DECLARATION THIS CHECK CANNOT PARSE MUST COMPLAIN, NOT SHRUG. The extractors above read LITERAL
+// arrays (`percent: ["odstotek", …]`); a language that declares the same data through a helper
+// (`percent: F("pct")`) yields no needles, and the arm below then reports "nothing declared" — which reads
+// as *there is nothing to check* when the truth is *the check went blind*. A false negative is worse than
+// a false positive: the NFC bug at least announced itself. Reported by the Slovenian run (#608), which
+// worked around it locally with literal arrays plus a drift test.
+// Measured before adding this: ZERO shipped languages declare tier data through a helper — all ~49 use
+// literal arrays — so this is latent, not a live blindness, and closing it costs nothing today.
+const declares = /makeSymbolNormalizer\(\{[\s\S]*?\b(?:percent|currency):/u.test(engineSrc);
+if (needles.length === 0 && declares)
+    note("sourcing", false,
+        "a tier IS declared but this check could not read it — declare percent/currency as LITERAL arrays, "
+        + "or the sourcing gate silently passes");
+else if (needles.length === 0) note("sourcing", null, "no percent/currency/decimal word declared");
 else {
     // INFLECTION-TOLERANT: a lemma is attested by any of its forms. Croatian `jen` appears in the Serbian
     // corpus only as the genitive plural *jena*, and Polish `procenty` only as *procent* — the same word
