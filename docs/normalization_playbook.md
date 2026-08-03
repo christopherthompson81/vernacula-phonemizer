@@ -719,6 +719,36 @@ a DECIMAL glued to a one-letter unit                   4   (and those are period
   form to the kana-followed form; the bare form had been wrong all along. When your change makes an existing
   bug more visible, fix the bug rather than reverting the change.
 
+**29. AN ARTIFACT CAN BE TRACKED, GREEN AND ANSWERING LAST MONTH'S QUESTION.** The cell inventory GROWS as the
+sweep proceeds, and nothing compared an artifact's recorded `cellsTotal` to the current list — so a language
+could report a comfortable `covered 24/29` while the inventory stood at 35. Measured when the check was added:
+**64 of 67 artifacts stale.** `sports-time`, `version-dot`, `quote-letter`, `scaled-currency` and `ordinal-caps`
+had never been evaluated for any of those 64, which is five cells × 64 languages of silence.
+
+- **A RENAME is worse than an addition, because it is silent in both directions.** `negative` became
+  `signed-number`, so 35 artifacts carry a count under a key that no longer exists AND report nothing for the
+  key that replaced it. The only place the fleet ever said so was `fetch --fill negative` answering
+  `unknown cell: negative`.
+- **`review.ts` now FAILS on a stale artifact**, naming the never-evaluated cells and the dead keys. It is a
+  fail rather than a note because a green checklist over an out-of-date measurement is worse than no checklist.
+- **The inventory belongs in its own module.** `CELLS` moved to `cells.ts` so the other tools can read it
+  without running `mine.ts` — `coverage.ts` had been importing it from the CLI and executing its usage banner
+  as a side effect on every run. Same reasoning as `defects.ts`: a shared fact is not one tool's setting.
+
+**30. WHEN A FETCH IS SLOW, MEASURE WHETHER IT IS SLOW AT WORK OR SLOW AT WAITING.** `fetch --fill` took about
+seven minutes for a megabyte of text. The cause was in the code, not the network: `exlimit` is capped at 1 for a
+FULL extract, so a nine-cell fill is ~190 SEQUENTIAL round-trips, each asking the server to render a whole
+article to plaintext. The requests are independent.
+
+- **Measured on a FIXED title list, because the search itself is unstable.** The same `insource:` query returned
+  33 then 75 totalhits on consecutive calls, so a naive before/after of two fetch runs proves nothing — it
+  compares different articles. With the list held constant: `1 → 9114 ms`, `4 → 1304 ms` (7.0×), `8 → 784 ms`.
+- **Preserve result ORDER, not just results.** Writing each response as it lands would make the output file
+  depend on network timing, and `mine` samples per cell from that file — so a re-fetch would no longer
+  reproduce the artifact. Place results back at their own index; verified byte-identical at 1, 4 and 8.
+- **Pooling also let each request fail alone.** Serially, one bad article threw to the cell's catch and silently
+  abandoned the remaining titles.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

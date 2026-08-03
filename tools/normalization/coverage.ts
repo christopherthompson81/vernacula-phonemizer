@@ -26,7 +26,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { DROPPABLE, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { join } from "node:path";
-import { CELLS } from "./mine.ts";
+import { CELLS } from "./cells.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";

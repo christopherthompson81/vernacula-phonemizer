@@ -27,6 +27,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
+import { CELLS, staleness } from "./cells.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -175,6 +176,34 @@ const artifact = [`${lang}.jsonc`, ...sisters(lang).filter((c) => !registered(c)
 let tracked = false;
 try { execSync(`git ls-files --error-unmatch ${artifact}`, { stdio: "ignore" }); tracked = true; } catch { /* untracked */ }
 note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync(artifact) ? "exists but is UNTRACKED" : "missing"}`);
+
+/**
+ * IS THE ARTIFACT MEASURED AGAINST TODAY'S INVENTORY?
+ *
+ * A tracked artifact can still be answering last month's question. The cell inventory GROWS as the sweep
+ * proceeds — five cells came out of the uz/af/as review passes alone, and `negative` was RENAMED to
+ * `signed-number` — and nothing compared an artifact's recorded `cellsTotal` to the current list. So a
+ * language could report a comfortable `covered 24/29` while the inventory stood at 35 and five of its cells
+ * had never been evaluated for that language at all.
+ *
+ * Measured across the tree when this check was added: **64 of 67 artifacts stale**, with `sports-time`,
+ * `version-dot`, `quote-letter`, `scaled-currency` and `ordinal-caps` never evaluated for any of those 64, and
+ * 35 still carrying a count under the dead key `negative`. That is a fleet-sized blind spot that no gate
+ * mentioned, and it is exactly the kind #586 exists to close — so it is a FAIL, not a note.
+ */
+if (existsSync(artifact)) {
+    const st = staleness(readFileSync(artifact, "utf8"));
+    const current = st.missing.length === 0 && st.unknown.length === 0;
+    const detail = current
+        ? `mined against all ${CELLS.length} cells`
+        : [
+            st.minedAgainst !== undefined && st.minedAgainst !== CELLS.length
+                ? `mined against ${st.minedAgainst} cells, inventory is now ${CELLS.length}` : "",
+            st.missing.length > 0 ? `NEVER EVALUATED: ${st.missing.join(" ")}` : "",
+            st.unknown.length > 0 ? `dead key(s): ${st.unknown.join(" ")}` : "",
+        ].filter(Boolean).join(" | ");
+    note("artifact current", current, current ? detail : `${detail} — re-mine with mine.ts`);
+}
 
 // ── 4. the probes. PRINTED, not merely asserted — see the header. ─────────────────────────────────
 const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);

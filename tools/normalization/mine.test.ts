@@ -10,7 +10,8 @@
  */
 import { describe, expect, test } from "vitest";
 import { parseJsonc } from "../../src/core/jsonc.ts";
-import { CELLS, segment, selectCells, renderJsonc } from "./mine.ts";
+import { segment, selectCells, renderJsonc } from "./mine.ts";
+import { CELLS } from "./cells.ts";
 
 const TERMINATORS = ".!?။።۔؟।॥…。！？៕";
 
