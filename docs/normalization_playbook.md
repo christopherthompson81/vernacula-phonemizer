@@ -805,6 +805,38 @@ Maithili's four `बजकर` hits: two are Hindi (*का मुहूर्�
 - **A split verdict is a real verdict.** For `mai` the clock words are confirmed and the percent word is not,
   from the same probe run.
 
+**35. WHEN YOU HAVE NO CANDIDATE WORD, ASK WHAT THE LANGUAGE CALLS THE THING.** Every sourcing avenue in this
+tree reads TEXT and asks *does this word occur?* — the corpus, the referees, espeak, `attest.ts`. All of them
+need a candidate first, and when you have none they fail worse than silently. The #586 Phase 1 findings left five
+Indic languages dropping the `+` in `UTC+1`, and a substring search for plausible words offered:
+
+```
+gu ધન ×167   ml ധന ×119   ne धन ×84   ta மேலும் ×161
+```
+
+Token-matched, all five corpora attest a plus word **zero** times. gu's ધન is **Sagittarius**
+("આકાશગંગા ધન તારામંડળ"), ml's is *finance*, ne's is *wealth*, ta's means *"moreover"*. A word-first search had
+nothing to offer but five confidently wrong answers.
+
+**Invert it: name the concept once in English and let each language supply its own term.** Wikidata holds one
+item per concept with labels in hundreds of languages, and Wikipedia's interlanguage links give the same thing
+as an article TITLE — two independent expressions, both citable (`tools/normalization/concept.ts`).
+
+- **THREE INDEPENDENT ROUTES AGREED**, which is why it is worth trusting as a method: `hi जोड़ घटाना गुणा भाग`
+  is exactly what was read by hand out of the अंकगणित article; `ta கூட்டல் கழித்தல்` is exactly the title behind
+  en:Plus_and_minus_signs's interlanguage link; `yue 加 減 乘 除` is exactly what was chosen for Mandarin from
+  zh.wikipedia prose. None of the three knew about the others.
+- **Prefer the OPERATION item to the SYMBOL item.** "plus sign" (Q6265342) is widely filled with the bare
+  character `+`, which says nothing; "addition" (Q32043) is properly labelled.
+- **A label is a CANDIDATE, not a reading** — the same wall `attest.ts` warns about, one step earlier. Wikidata
+  names the operation; what a reader says BETWEEN two operands can differ. Hindi is the worked example: `जोड़`
+  is addition, `धन` is the plus SIGN, and only the second belongs in `+5`. `गुणा` happens to be both.
+- **Labels need light cleaning, and the tool deliberately does not do it**: `ne भाग (गणित)` carries a
+  disambiguator, `th การบวก` a nominalising prefix where the article title uses the bare verb `บวก`. Which part
+  is the word is a judgement about that language, not a string operation.
+- **The real gain is that `attest.ts` finally has something to probe.** This does not replace the sense check;
+  it is what makes the sense check possible.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
