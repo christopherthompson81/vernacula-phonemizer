@@ -305,4 +305,21 @@ describe("Oromo text normalization", () => {
         expect(phonemize("165km/h", "om")).toContain("saʔaːtˈiːtːi");
         expect(phonemize("3,850 km²", "om")).toContain("iskuwˈeːr");
     });
+
+    test("#657 accented Latin stays ONE word and goes to the foreign reader", () => {
+        // `[A-Za-zʼ’']+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read
+        // as an English LETTER NAME and the rest of the word started over: `São Paulo` → *s ˈə ˈo paˈulo*.
+        // Invisible to every gate — no digit or raw mark survives and nothing VANISHES.
+        expect(phonemize("Cañitas", "om")).toBe(phonemize("Cañitas", "en"));
+        expect(phonemize("São", "om")).toBe(phonemize("São", "en"));
+        // ⚠ The registry comment claimed "no foreign needed — om is Latin-script". Being Latin-script is exactly
+        // what made a reader NECESSARY: the word group claims Latin text, so an accented name was claimed and
+        // then mangled by a g2p with no rule for the letter.
+        expect(phonemize("Cañitas", "om")).not.toMatch(/ˈɛn/u);
+        // Native Oromo is untouched, and so are the rules that key on the Latin class.
+        expect(phonemize("makiina nagaa", "om")).toBe("makˈiːna naɡˈaː");
+        expect(phonemize("Kunis kan godhamu danda’u", "om")).toContain("dandˈaʔu");
+        expect(phonemize("6 × 6 cm", "om")).toContain("sˈiʔa");
+        expect(phonemize("165km/h", "om")).toContain("saʔaːtˈiːtːi");
+    });
 });

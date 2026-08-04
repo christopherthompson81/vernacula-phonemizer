@@ -162,7 +162,16 @@ export function phonemizeWordSegmental(word: string): string {
     return scan(word).join("").normalize("NFC");
 }
 
-const TOKEN = /([A-Za-zʼ’']+)|(\d+)|([.?!,;:])/gu;
+// ⚠ ALL OF LATIN, not just Oromo's own letters — `[A-Za-zʼ’']+` ended the token at a diacritic, so the letter
+// carrying it became an unclaimed gap read as an English LETTER NAME and the rest of the word started over:
+// `São Paulo` read *s ˈə ˈo paˈulo*. One word became three. Invisible to every gate: no digit or raw mark
+// survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot reach (#657).
+// `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}ʼ’']*)|(\d+)|([.?!,;:])/gu;
+/** Oromo's OWN inventory — this is the token class as it stood before the widening above, lifted verbatim, so
+ *  nothing about the language is invented here. A token outside it carries a letter Oromo orthography does not
+ *  use, i.e. a FOREIGN NAME, and goes to the injected reader rather than to a g2p with no rule for it. */
+const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
 
 /**
  * The shared SYMBOL tier (#562) — percent and currency, the two classes whose word is language DATA.
@@ -215,7 +224,11 @@ class OromoPhonemizer implements Phonemizer {
         // ordering is what keeps the emitted vowel name `ii` from being read as "two".
         const normalized = normalizeOromoInitialisms(normalizeOromoNumerals(SYMBOLS(normalizeOromo(input))));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(
+                NATIVE_WORD.test(m[1]) || this.foreign === undefined
+                    ? phonemizeWord(m[1])
+                    : this.foreign(m[1]),
+            );
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
