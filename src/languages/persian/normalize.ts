@@ -296,6 +296,28 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
         s = s.replace(/\+\s?(?=\d)/gu, " به اضافه ");
 
+        // 7d) THE AMPERSAND → اند, AND IT IS THE ENGLISH WORD ON PURPOSE. The corpus's `که B&B ها به عمدتا`
+        //     dropped the sign: *kˈe bˈiː bˈiː hˈaː*, the two initialisms adjacent with nothing between.
+        //     Absent from the text by construction, so audio again — and here BOTH fa_ir speakers of the
+        //     sentence agree, which is the cleanest attestation in this batch.
+        //       wav2vec2-xlsr-53-espeak-cv-ft, speaker A:  `h ɑ b eː  b iː a n b iː  d a r p ɑ j ɑ n …`
+        //                                       speaker B:  `x ɑ b e  b i a n d b iː  d a r p ɑ j ɑ n …`
+        //     `b iː a n (d) b iː` is *bī and bī*. Speaker B's /d/ is explicit; A's is elided before the /b/,
+        //     which is ordinary connected speech and not a competing form.
+        //     ⚠ MMS ALONE WOULD HAVE READ AS A DROP. Its `fas` transcript of speaker A omits the span entirely
+        //     and of speaker B renders it `هاب بینبی` — floated to the head of the sentence and looking like a
+        //     false start. The phones show it is neither. Two instruments, and the phone recogniser is the one
+        //     that answers this question, as fa's own plus rule above records.
+        //
+        //     WHY NOT `و`, the Persian conjunction. Because that is not what is said. `B&B` is an English term
+        //     carried whole into Persian, and both readers carry its conjunction with it — the same
+        //     per-language split the fleet already shows for this glyph, where yue reads native `和`, th native
+        //     `และ`, uk native `та`, and ja borrows `アンド`. Attestation per language, not a fleet default.
+        //     Renderable, unlike mi's plus: /a/, /n/ and /d/ are all ordinary Persian, so اند reads as "and"
+        //     with no invented phonology.
+        //     Spaced on both sides because the neighbours are initialisms — joining them would make one token.
+        s = s.replace(/&/gu, " اند ");
+
         // 8) ORDINALS. Persian writes the ordinal as the numeral plus ـم/ـام (قرن 16ام "the 16th century" — ×5
         //    here, one of them across a ZWNJ: ⟨1000‌ام⟩). The suffix was tokenized apart and spoken as its own
         //    word [ʔˈam]; fused onto the cardinal's last word it is the ordinary ordinal (شانزدهم, هزارم). LAST,

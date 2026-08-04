@@ -97,7 +97,19 @@ export function makeNativeBengali(
     // read as just "তিন") and the Latin unit abbreviations were unexpanded. শতাংশ follows the number.
     const SYMBOLS = makeSymbolNormalizer({
         percent: ["শতাংশ"],
-        currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"] },
+        // #586 — `¥` ADDED, and the audio's answer here is about the SILENCE, not the word. The corpus's
+        // `টিকিটের দাম ¥2,500 থেকে ¥130,000` dropped all three signs; both bn_in speakers of the sentence read
+        // the amounts and no currency at all (wav2vec2: `… d a m d u a z ɛ r p a ʃ o t e k …` — "dām dui hazār
+        // pā̃cśata", straight on to the next number). or_in does the same.
+        //
+        // WE VOICE IT ANYWAY, and that is a deliberate policy call rather than an oversight: for TTS an
+        // explicitly typed character is CONTENT, and a speaker's omission is evidence about reading habit, not
+        // licence to delete. The same rule that kept hi's `+30 °C` audible.
+        //
+        // So the audio bounds what it can: it proves no *other* word is there to compete with this one. `ইয়েন`
+        // is the standard Bengali form of the currency name — ordinary lexis, not an audio finding, and marked
+        // as such so a later pass does not credit the corpus with attesting it.
+        currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"], "¥": ["ইয়েন"] },
         units: { km: ["কিলোমিটার"], cm: ["সেন্টিমিটার"], mm: ["মিলিমিটার"], kg: ["কিলোগ্রাম"],
             m: ["মিটার"], g: ["গ্রাম"], "km/h": ["কিলোমিটার প্রতি ঘন্টা"] },
         // `বর্গকিলোমিটার` ×8. SPACED rather than fused, because this tier is shared with ASSAMESE and the

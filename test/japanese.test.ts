@@ -253,4 +253,13 @@ describe("Japanese text normalization (#562)", () => {
         // The corpus's other colons are a ratio and a UK degree class; two digits of minutes excludes both.
         expect(phonemizeText("3:2")).toBe("säɴ ni");
     });
+
+    test("#586 the ampersand is アンド, and the epenthetic vowel is the proof", () => {
+        // wav2vec2: `x oː k ɪ l  b iː a n d ə b iː  ɡ ʊ m o t o …`. Japanese cannot end a syllable in /d/, so
+        // a borrowed "and" must surface as /a.n.do/ — the `ə` is the language's phonotactics stamped onto the
+        // English word, which is exactly what アンド spells.
+        const s = phonemize("高級B&Bが主として寝具と朝食の2つの要素で競争しているのは明らかです。", "ja");
+        expect(s).toContain("ändo̞");
+        expect(s).not.toBe(phonemize("高級BBが主として寝具と朝食の2つの要素で競争しているのは明らかです。", "ja"));
+    });
 });

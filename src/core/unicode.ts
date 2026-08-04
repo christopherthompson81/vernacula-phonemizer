@@ -200,7 +200,10 @@ function sourceByte(c: string): number | undefined {
 }
 
 export function repairDoubleEncoded(s: string): string {
-    if (!/[\u00c2\u00c3\u00e2]/u.test(s)) return s;
+    // The lead bytes the arms below can repair. This must stay in step with them: it was `[\u00c2\u00c3\u00e2]`
+    // when the two-byte arms were C2/C3-only, and widening the arm to C5 without widening this fast path left
+    // `\u00c4\u00b0zmir` returning EARLY and unrepaired \u2014 the fix silently did nothing.
+    if (!/[\u00c2-\u00c5\u00e2]/u.test(s)) return s;
     return s
         // THREE-BYTE first, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF;
         // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
@@ -238,8 +241,23 @@ export function repairDoubleEncoded(s: string): string {
         // whole class of interception, which is why it is the right fix rather than widening the guard.
         .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
         .replace(/\u00e2\u20ac(?=[\p{L}\p{M}\s]|$)/gu, "\u201c")
-        .replace(/\u00c2([\u0080-\u00bf])/gu, "$1")
-        .replace(/\u00c3([\u0080-\u00bf])/gu, (_m, c: string) => String.fromCodePoint(c.codePointAt(0)! + 0x40));
+        // TWO-BYTE, as the GENERAL formula rather than one arm per lead byte. `C2` and `C3` were special-cased
+        // here for a while, and the case that showed why that was wrong is `\u00c4\u00b0zmir` \u2014 the mojibake of `\u0130`
+        // (U+0130), whose UTF-8 is `C4 B0`. A lead byte of C4 was outside both arms, so the sequence survived
+        // to the tier as `\u00c4` + `\u00b0` \u2014 AND `\u00b0` IS A DEGREE SIGN, so the audit reported a `degree` DROP on a
+        // sentence about the population of a Turkish city. A phantom degree, exactly as `\u00e2\u20ac`'s stranded euro
+        // was a phantom currency. The lesson repeats: half-repaired mojibake does not merely fail to read, it
+        // MANUFACTURES a symbol for a later pass to reason about.
+        //
+        // `cp = ((lead & 0x1f) << 6) | (b2 & 0x3f)` is the UTF-8 definition, and it subsumes what the two arms
+        // said: for C2 it returns b2 unchanged (hence "drop the \u00c2") and for C3 it returns b2 + 0x40 (hence the
+        // shift). Extending to C4/C5 reaches Latin Extended-A \u2014 the Turkish, Polish and Baltic letters.
+        //
+        // BOUNDED BY MEASUREMENT, on the same standard as the arms above. `[C4C5]` + a continuation byte occurs
+        // **twice across all 67 corpora, both `\u00c4\u00b0` in id_id**, and the next range up, `[C6-CF]`, occurs ZERO
+        // times \u2014 so stopping at C5 costs nothing and every character this newly repairs is a real one.
+        .replace(/([\u00c2-\u00c5])([\u0080-\u00bf])/gu, (_m, lead: string, c: string) =>
+            String.fromCodePoint(((lead.codePointAt(0)! & 0x1f) << 6) | (c.codePointAt(0)! & 0x3f)));
 }
 
 /**

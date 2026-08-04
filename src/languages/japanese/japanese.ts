@@ -37,6 +37,23 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 // words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["パーセント"],
+    // #586 — `&` was DROPPED: the corpus's `高級B&Bが…` read *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together
+    // with nothing between them. SOURCED FROM THE CORPUS'S OWN AUDIO, because the word is absent from the text
+    // by construction — `&` is written as a GLYPH, so no amount of Japanese prose contains its reading.
+    //
+    // The two instruments agree and each supplies half the answer. MMS-1b-all (`jpn`, a TEXT recogniser, so it
+    // answers WHICH WORD) transcribes the span as `航級bンdbが` — mangled, but the `ン` is unmistakably a moraic
+    // /n/ between the two B's, which is what rules out the sign being silent. wav2vec2-xlsr-53-espeak-cv-ft (a
+    // PHONEME recogniser, so it answers WHAT IT SOUNDS LIKE) then gives the form exactly:
+    //   `x oː k ɪ l  b iː a n d ə b iː  ɡ ʊ m o t o …`
+    // `b iː a n d ə b iː` is *bī ando bī*, and THE EPENTHETIC VOWEL IS THE PROOF. Japanese cannot end a
+    // syllable in /d/, so a borrowed "and" must surface as /a.n.do/ — the `ə` after the `d` is the language's
+    // own phonotactics stamped onto the English word, which is precisely what アンド spells. A bare English
+    // "and" would have decoded without it.
+    //
+    // Note the asymmetry with the other unspaced scripts: yue reads `和` and th `และ`, their NATIVE
+    // conjunctions, while Japanese borrows. That is why this is per-language audio data and not a fleet default.
+    ampersand: "アンド",
     // MIGRATION TEST (#562): units + exponent from the shared tier instead of normalize.ts's local table.
     units: {
         km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"], nm: ["ナノメートル"], m: ["メートル"],

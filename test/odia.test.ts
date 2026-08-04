@@ -89,4 +89,15 @@ describe("Odia text normalization", () => {
         // A slash between ordinary words is NOT a rate: nine of the corpus's fourteen are ଏବଂ/କିମ୍ବା etc.
         expect(or("ଏବଂ/କିମ୍ବା")).toBe("ˈebɔ̃ kˈimba");
     });
+
+    test("#586 yen, pound, and the UTC offset's plus", () => {
+        // Same sentence and same finding as bn — the or_in speaker voices no currency either.
+        expect(or("ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000 ହେବା ସହିତ।")).toContain("jˈen̪ɔ");
+        // `£` stayed hidden behind `¥`: the audit reports the FIRST defective instance per cell, so closing
+        // one instance revealed another. A cell is not done until it re-scans clean.
+        expect(or("ପାଲମେରାସରୁ £27 ନିୟୁତ ଦେୟ ସହିତ।")).toContain("pˈauɳɖɔ");
+        // Both or_in speakers SKIP the whole parenthetical, so this word ships on typology: the six Indic
+        // languages whose plus was resolved from audio in this sweep all borrow, with no counterexample.
+        expect(or("ସମୟ ପ୍ରାୟ 11:00 (UTC+1)ରେ")).toContain("plˈɔs");
+    });
 });

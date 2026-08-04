@@ -238,6 +238,23 @@ export function normalizeItalian(input: string): string {
     s = s.replace(/(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
+    // 9b) THE PLUS AS A WORD-JOINER — a shape the whole signed-number sweep never met. Every other `+` resolved
+    //     in #586 sat against a DIGIT (a UTC offset, a temperature, an arithmetic operand), and the guards were
+    //     written accordingly. Italian's only `+` joins two NOUNS: `pacchetti combinati volo+hotel`, a package
+    //     deal. Nothing numeric anywhere near it, so a digit-keyed rule could never have found it, and the sign
+    //     was DROPPED — `volo hotel`, two nouns collided into an asyndeton.
+    //
+    //     ATTESTED, and directly rather than by inference. MMS-1b-all (`ita`) on the it_it speaker of this
+    //     sentence: `… pacchetti combinati vol o più hotel`. The reader says *più*, the ordinary arithmetic
+    //     word, for a `+` that is not arithmetic at all — so Italian treats the glyph as a word here and does
+    //     not silently coordinate the nouns.
+    //
+    //     LETTER-KEYED ON BOTH SIDES, which is what keeps it away from every numeric plus: a signed number or a
+    //     UTC offset has a digit on at least one side and is left for a later rule to claim. Spaced on output
+    //     because the inputs are closed up (`volo+hotel` is one token to the tokenizer, and *volopiùhotel* is
+    //     not a word).
+    s = s.replace(/(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])/gu, " più ");
+
     // 10) CURRENCY WRITTEN BEFORE THE AMOUNT. The corpus only ever postposes the sign ("banconote da 5 $",
     //     "2.500 ¥"), which the shared symbol tier handles correctly, so this rule exists for the preposed
     //     form the tier gets subtly wrong in Italian: its magnitude hop emits `5 milioni dollari`, and

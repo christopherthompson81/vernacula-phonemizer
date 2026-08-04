@@ -665,3 +665,155 @@ lossless. A conclusion drawn from one consumer's needs should not become the arc
 That leaves the codec test with exactly one use, which is still worth having: the npz set is a **validated
 fallback** for a yes/no question if a tarball is ever missing. It is not a substitute for the audio and not a
 storage strategy.
+
+## Run 12 — 2026-08-04 09:xx — the re-sweep after vulgar fractions: 15 cells → 6, and the PHANTOM SYMBOL class
+
+Re-measured #586 from scratch rather than trusting the running tally. `npx tsx tools/normalization/coverage.ts`
+reported **15 defective cells across 12 of 37 treated languages**, which split cleanly into six the user had
+already ruled out of scope (five designations — `चंद्रयान -1` in hi/mr/ta, `એચજેઆર -3` in gu, and kn's is the
+same HJR-3 sentence — plus el's documented apposition dash) and **nine actionable**.
+
+### What the nine actually were, and four of them were recurrences
+
+| lang | cell | mechanism |
+|---|---|---|
+| id | degree | **NOT A DEGREE.** `Ä°zmir` is mojibake for `İzmir` |
+| id | currency | `US$ 14,7` — the initialism defect, third occurrence after pt and nl |
+| it | exponent | `2,2 milioni di km²` — a magnitude between number and unit |
+| it | arithmetic | `volo+hotel` — a plus joining WORDS |
+| or | arithmetic | `(UTC+1)` |
+| bn, or | currency | `¥` |
+| fa, ja | ampersand | `B&B` |
+
+### ⚠ THE PHANTOM SYMBOL — the finding worth keeping from this run
+
+Two of the nine were not defects at all. Latin-1 punctuation doubles as a UTF-8 continuation byte, so
+half-repaired mojibake **manufactures a symbol** for a later pass to reason about:
+
+```
+Ä°zmir   = Ä + °   →  a DEGREE SIGN in a sentence about a city's population
+SÃ£o     = Ã + £   →  a POUND SIGN in a Brazilian place name
+```
+
+Both were being chased as per-language defects. This is the same trap `repairDoubleEncoded`'s header already
+recorded for mr's `â€` stranding a `€` that `\p{Sc}` read as a phantom currency — **the third instance of one
+pattern**, which is what promotes it from an anecdote to a class: mojibake does not merely fail to read, it
+INVENTS symbols, and the invented ones look exactly like the real ones the gates hunt for.
+
+`repairDoubleEncoded` covered lead bytes C2, C3 and E2. `İ` is `C4 B0`, outside all three. Replaced the two
+special-cased two-byte arms with the UTF-8 formula `cp = ((lead & 0x1f) << 6) | (b2 & 0x3f)`, which subsumes
+what they said (for C2 it returns b2 — "drop the Â"; for C3, b2 + 0x40) and extends to C4/C5.
+
+Bounded by measurement on the file's own standard: `[C4C5]` + a continuation byte occurs **twice across all 67
+corpora, both `Ä°` in id_id**, and `[C6-CF]` occurs **zero** times, so stopping at C5 costs nothing.
+
+⚠ **The first version of the fix silently did nothing.** The function's early-out guard was `[ÂÃâ]`, so
+`Ä°zmir` returned before reaching the widened arm. Caught only because the probe printed the input unchanged.
+*A fast path is part of a pattern's definition; widening one without the other is a no-op that typechecks.*
+
+### The gates were measuring a string the engine never reads
+
+Consequence of the above, and the more general fix: both `coverage.ts` and `corpus-diff.ts` scanned RAW corpus
+text, while the engine applies `repairDoubleEncoded` to every input before any language rule runs. So the gates
+were hunting symbols in text the engine never sees — reporting an **un-closable** DROP on `São Paulo`, because
+the differential test is unreliable on corrupt input (blanking a phantom leaves a byte-identical reading, which
+scores as a drop). Both now repair at ingestion.
+
+⚠ **The ruler must be the same on both sides of a before/after; only the ENGINE should differ.** Verifying this
+meant copying the updated `corpus-diff.ts` into the pinned baseline worktree — using the old instrument for
+"before" and the new one for "after" would have conflated a tooling change with an engine change. With
+consistent ingestion, id went `DROP 2 → 0`; with mixed ingestion it had falsely read `3 → 1`.
+
+### Audio, and one thing the phones settled that MMS would have got backwards
+
+Six cells needed a WORD, so the fourth sourcing tier again. All six languages' audio was already local
+(121 GiB at `corpus/audio_cache`). Nine clips, 2–3 speakers where available.
+
+- **it `volo+hotel`** — MMS-1b-all (`ita`): `pacchetti combinati vol o più hotel`. The reader says *più*, the
+  arithmetic word, for a `+` that is not arithmetic. Directly attested.
+- **fa `B&B`** — wav2vec2, **both** speakers: `b iː a n b iː` / `b i a n d b iː` = *bī and bī*, the ENGLISH
+  word. ⚠ **MMS alone would have scored this a DROP**: it omits the span for speaker A and renders it
+  `هاب بینبی` for B, floated to the head of the sentence looking like a false start. The phones show it is
+  neither. Second time this session that the two instruments disagreed and the phone recogniser was right for
+  "what is said" while MMS was right for "which word".
+- **ja `B&B`** — `b iː a n d ə b iː`. **The epenthetic vowel is the proof**: Japanese cannot close a syllable
+  in /d/, so a borrowed "and" must surface as /a.n.do/. That `ə` is the language's own phonotactics stamped on
+  the English word, which is exactly what アンド spells. A bare English "and" would decode without it.
+- **bn, or `¥`** — both bn speakers and the or speaker voice **no currency word at all**
+  (`d a m d u a z ɛ r p a ʃ o t e k`; `s a t o h z e r h e b a`). Voiced anyway, per the standing TTS policy:
+  an explicitly typed character is content, and a speaker's omission is evidence about reading habit. The audio
+  bounds what it can — it proves no OTHER word competes for the slot. The words themselves (`ইয়েন`, `ୟେନ`) are
+  ordinary lexis and are marked as such, not credited to the corpus.
+- **or `(UTC+1)`** — ⚠ **the weakest-sourced cell in the whole sweep, and labelled so in the code.** Both or
+  speakers skip the entire parenthetical (`11:00 ଘ ରେ`, `11:0t ରେ`) — the parenthetical-skip pattern already
+  seen in ta/en/am/zu/mi/ne/sr/sw/yue/te, never counted against a word. So no attestation exists and the rule
+  ships on **typology**: the six Indic languages whose plus WAS resolved from audio this sweep all borrow, with
+  no native-word counterexample (hi प्लस, ne प्लस, te ప్లస్, gu પ્લસ, kn ಪ್ಲಸ್, ml പ്ലസ്, ta பிளஸ்). Seven
+  recordings across four scripts is a strong prior, and ଯୋଗ — the native noun "addition" — is the exact shape
+  those recordings ruled out elsewhere (hi's first draft used धन and audio corrected it).
+
+### Two errors of my own, both caught by re-reading the output rather than the differential
+
+1. **The `US$` fold turned a silent DROP into an audible word-order error.** Unfolding let id's tier place the
+   currency noun, and it placed it wrong: *empat belas koma tujuh DOLAR MILIAR* instead of *…miliar dolar*,
+   because without a `magnitudes` list the magnitude is not part of the quantity. ⚠ *Closing a drop is not
+   finished when the differential changes — only when the READING is checked.*
+2. **it's `magnitudes` was withheld for one consumer and broke another.** The list was deliberately absent so
+   the CURRENCY path could not emit `5 milioni dollari` without the partitive — but `magnitudes` also gates
+   `magAltU`, the UNIT path's connective hop, so withholding it left the tier unable to cross `milioni di` and
+   `2,2 milioni di km²` read as *…milioni di KM*: exponent dropped AND unit noun raw in the IPA. One field, two
+   consumers, only one of which had the problem. Safe to declare because normalize.ts step 10 runs first and
+   consumes the whole preposed currency shape; measured, the corpus has exactly one currency-sign sentence,
+   postposed, and zero sentences pairing a sign with *milioni*/*miliardi*.
+
+### A cell can hide behind itself
+
+`or`'s `£27 ନିୟୁତ` — a transfer fee reading *satāisa niyuta deya*, currency gone — only appeared **after** the
+`¥` was fixed, because the coverage audit reports the FIRST defective instance per cell. Same for id. *A cell
+is not done when a fix lands; it is done when the cell re-scans clean.*
+
+### Repairing an input exposes the rules that were never exercised on it
+
+`id`'s coordinate degree had no rule, and could not have been noticed: the corpus writes `di timur 35Â°W`, so
+the sign was half of a broken `°` and the bare `(\d)\s?°` arm never saw it. Mending the mojibake put `35°W` in
+front of that arm, which produced `tiga puluh lima derajatW` — the direction letter glued raw into the IPA.
+Fixed with a compass map mirroring it's. *A mojibake fix must be followed by a re-read of the sentences it
+unmasks, because those sentences are reaching their language's rules for the first time.*
+
+### Result
+
+**15 defective cells → 6**, and all six remaining are the out-of-scope class (five designations + el's
+apposition dash). **Zero actionable defects remain in the 37 treated languages.**
+
+Gates: tsc clean; **202 test files, 2901 tests** (10 added, including a new `test/unicode-mojibake.test.ts` for
+the phantom-symbol class); corpus diffs on all six changed languages read in full —
+
+| lang | changed | DROP before → after |
+|---|---|---|
+| id | 5/1936 | 2 → 0 |
+| it | 2/1978 | 2 → 0 |
+| bn | 1/1981 | 1 → 0 |
+| or | 3/1327 | 3 → 0 |
+| fa | 1/1856 | 1 → 0 |
+| ja | 1/1788 | 1 → 0 |
+
+No DIGIT, SLOT-GAP, RAWMARK or THROW introduced anywhere.
+
+### ⚠ ADJACENT DEFECT FOUND, DELIBERATELY NOT FIXED HERE — id's tokenizer is ASCII-only
+
+Reading the id diff surfaced a real defect in a different class. `id`'s `TOKEN` is `([a-zA-Z]+)`, so **every
+accented Latin letter fragments the word** and each fragment is read as an English letter name:
+
+```
+São Paulo  →  s ˈə ˈo paˈulo          Cañitas  →  t͡ʃˈa ˈɛn ˈitas
+Klöcker    →  ʔl ˈoᶷ t͡ʃkˈər           İzmir    →  ˈaᶦ zmˈir      (Izmir → ˈizmir, correctly)
+```
+
+Not a #586 cell and invisible to both gates — the output has no digits and no raw marks, so it is a WRONG-WORD
+defect, not a leak or a drop. It is pre-existing; the mojibake repair only changed which wrong reading appears
+(`ˈə zmˈir` → `ˈaᶦ zmˈir`) while making the underlying text correct.
+
+**yue already solved this exact problem** — `test/cantonese.test.ts` pins "accented Latin stays one run for the
+foreign phonemizer (×9)". That is the model for id, and the pointer for whoever picks this up. Left out of scope
+because it needs its own measurement across every ASCII-tokenizer language, not a patch smuggled into a
+symbol-inventory sweep.
