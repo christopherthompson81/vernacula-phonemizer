@@ -129,6 +129,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // ampersand always joins. ⚠ Both were checked at TOKEN level rather than by substring — a substring
     // count is meaningless for these two, since `і` and `та` occur inside hundreds of ordinary words
     // (3853 and 2290 raw substring hits against 51 and 14 real tokens).
+    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // word — `готелі типу B&B … змагаються у двох основних речах: ліжко та сніданок` ("bed AND breakfast").
+    // That settles the `і` vs `та` question on the corpus's own usage rather than on a preference.
     ampersand: "та",
     percent: ["відсоток", "відсотки", "відсотків", "відсотка"],
     currency: {

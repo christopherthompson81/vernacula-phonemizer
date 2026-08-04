@@ -99,6 +99,8 @@ const SYMBOLS = makeSymbolNormalizer({
     // 8 in the corpus. Chosen over the native options because they do not fit the slot: `ഉം` is a BOUND
     // suffix (it attaches to both coordinands, so it cannot stand between two initialisms), and `ഒപ്പം` /
     // `കൂടാതെ` mean "along with" / "besides" — 1 and 2 tokens, and the wrong register for a proper name.
+    // Trap 8, checked: EVERY `&` in all five corpora treated in this batch is the universal `B&B` /
+    // `Arts & Sciences` pair — no `AT&T`, no URL query — so "and" is right in every attested context.
     ampersand: "ആൻഡ്",
     percent: ["ശതമാനം"],
     currency: { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },

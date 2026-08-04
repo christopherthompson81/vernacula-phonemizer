@@ -70,6 +70,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // #586 — `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
     // conjunction and the corpus's own word, ×1711 — the most frequent candidate by a wide margin (`กับ`
     // ×674 is "with", and `แอนด์`, the transliterated English "and", is ×0 here).
+    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // word — `ที่พักประเภท B&B แข่งขันกันในสองสิ่งเป็นหลัก คือ ที่นอนและอาหารเช้า` ("bed AND breakfast").
+    // The text states what the sign expands to, in the same breath, with the conjunction chosen here.
     ampersand: "และ",
     percent: ["เปอร์เซ็นต์"],
     // #586 — `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a

@@ -53,6 +53,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // corpus: ×1 there against மற்றும்'s 997. It is common in the wiki (121 tokens) because that haystack is
     // full of transliterated company names, which is a fact about the haystack and not about how this
     // language reads an ampersand.
+    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // word — `B&Bs இரண்டு முக்கிய விஷயங்களில் போட்டியிடுகின்றன: படுக்கை மற்றும் காலை உணவு` ("bed AND
+    // breakfast"). The text states what the sign expands to, in the same breath, with the conjunction chosen
+    // here. Frequency counts are the weaker argument; this is the slot, glossed.
     ampersand: "மற்றும்",
     percent: ["சதவீதம்"],
     currency: { "US$": ["டாலர்"], "$": ["டாலர்"] },
