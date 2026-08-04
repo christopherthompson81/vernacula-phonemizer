@@ -68,7 +68,16 @@ const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
  * native digits to ASCII for every language before any engine sees them, which is a better answer than
  * routing them by script.
  */
-export const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*/gu;
+/**
+ * ⚠ A TRAILING SUPERSCRIPT TRAVELS WITH THE RUN, because it belongs to the foreign expression and not to the
+ * host. Burmese quotes `E = mc²`; the `²` is `No`, not `\p{L}`, so the run ended at `mc` and the exponent was
+ * left in the gap and DROPPED — the formula read *ˈiː ɲi˨m̥ja mˈɪk*, equals correctly voiced and the square
+ * gone. English can read `mc²` perfectly well once it is handed the whole thing, so the fix is to stop cutting
+ * the expression in half rather than to invent a Burmese reading for an English formula.
+ * Only TRAILING, and only the superscript digits: a superscript cannot begin a word, so this cannot start a
+ * run that would not otherwise exist, and it cannot swallow a following host-language character.
+ */
+export const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]*/gu;
 
 /**
  * Emit the FOREIGN runs inside text the engine's own tokenizer did not claim.

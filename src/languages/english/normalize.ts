@@ -183,6 +183,12 @@ function yearWords(y: number): string {
 }
 
 /** Normalize one English input string. Pure text→text; no IPA. */
+/** Superscript digits → ASCII, so an exponent reaches the number path as a readable numeral. */
+const SUPERSCRIPT_DIGIT: Readonly<Record<string, string>> = {
+    "\u2070": "0", "\u00b9": "1", "\u00b2": "2", "\u00b3": "3", "\u2074": "4",
+    "\u2075": "5", "\u2076": "6", "\u2077": "7", "\u2078": "8", "\u2079": "9",
+};
+
 export function normalizeEnglish(input: string): string {
     let s = input;
 
@@ -346,6 +352,31 @@ export function normalizeEnglish(input: string): string {
             const measure = exp === "²" ? "square " : exp === "³" ? "cubic " : "";
             const one = /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
             return `${num} ${measure}${one ? sg : pl}`;
+        });
+
+    // 6b) A BARE EXPONENT — a base with NO unit for the rule above to attach the power to, so the superscript
+    //     was dropped outright. English does not use the shared symbol tier (it has no `makeSymbolNormalizer`
+    //     call at all), so `bareExponent` in core cannot reach it and this is the local equivalent.
+    //
+    //     ⚠ THE PREDICATE IS A DIFFERENT WORD FROM THE MODIFIER, which is the whole reason this cannot reuse
+    //     the table above: English reads *square kilometres* but *twenty SQUARED*, *cubic metres* but
+    //     *eight CUBED*. Substituting the modifier would give "twenty square".
+    //
+    //     THE BASE MAY BE LETTERS, not only digits, and that is the case that exposed the gap: `E = mc²` read
+    //     as *ˈiː ˈiːkwəɫz mˈɪk* — the equals correctly voiced and the square silently gone. It reaches here
+    //     through Burmese too, whose artifact quotes the formula and routes the Latin run to English.
+    //
+    //     `to the power of N` USES THE CARDINAL, deliberately, though "to the fifth power" is the more
+    //     idiomatic English. The ordinal form would have to be produced for an arbitrary exponent, and the
+    //     cardinal is both correct and unambiguous — see `bareExponent` in core/normalizeSymbols.ts for why the
+    //     cross-language argument settles it the same way. The digits are emitted for the number path to speak.
+    //     Ordered AFTER the unit rule so a unit exponent is never stolen from it.
+    s = s.replace(/(\d[\d.,]*|[A-Za-z]+)\s?([\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
+        (_m, base: string, sup: string) => {
+            const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
+            return digits === "2" ? `${base} squared`
+                : digits === "3" ? `${base} cubed`
+                : `${base} to the power of ${digits}`;
         });
 
     // 7a) ALL-CAPS romans of ANY value, when the text distinguishes case — "Super Bowl LVIII" (58),

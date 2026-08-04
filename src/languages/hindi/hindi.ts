@@ -219,6 +219,17 @@ const SYMBOLS = makeSymbolNormalizer({
     // `before`, not `compound`: Hindi sets the measure word off with a space, and one form each because the
     // word does not agree with its count here.
     exponentWords: { squared: ["वर्ग"], cubed: ["घन"], position: "before" },
+    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
+    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
+    // they are different words (वर्ग किलोमीटर but बीस का वर्ग).
+    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
+    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
+    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
+    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
+    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
+    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
+    bareExponent: { squared: "{n} का वर्ग", cubed: "{n} का घन", power: "{n} की घात {e}" },
 });
 
 export function createHindi(foreign?: ForeignPhonemizer): {

@@ -15,6 +15,25 @@
  *  `countForm`. A language with no agreement uses a 1-element array. */
 export type CountForms = string[];
 
+/** Superscript digits → ASCII, so the exponent reaches the engine's number path as a readable numeral. */
+const SUPERSCRIPT: Readonly<Record<string, string>> = {
+    "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
+    "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+};
+const SUPERSCRIPT_RUN = `[${Object.keys(SUPERSCRIPT).join("")}]+`;
+
+/**
+ * A BARE exponent — a base with no unit noun, so the unit path above has nothing to attach the power to and
+ * the superscript was being dropped.
+ *
+ * THE BASE MAY BE DIGITS OR LETTERS, and both occur. `20²` is a number; `mc²` is not, and it is the case that
+ * exposed this — `E = mc²` inside a Burmese article read as *ˈiː ɲi˨m̥ja mˈɪk*, with the `=` correctly voiced
+ * and the square silently gone. Letters are matched too so the power survives even when the base is a symbol
+ * the host language reads its own way. `\p{Nd}` not `\d`, because a language may write its own numerals and
+ * `foldNativeDigits` is applied per engine rather than fleet-wide (see core/unicode.ts).
+ */
+const BARE_EXPONENT = new RegExp(`(\\p{Nd}[\\p{Nd}.,]*|[\\p{L}\\p{M}]+)\\s?(${SUPERSCRIPT_RUN})`, "gu");
+
 /** Where a language puts the squared/cubed measure word relative to the unit noun. See `exponentWords`. */
 export type ExponentPosition = "before" | "after" | "compound" | "suffix";
 
@@ -115,6 +134,43 @@ export interface SymbolData {
         squared?: CountForms;
         cubed?: CountForms;
         position?: ExponentPosition | Readonly<Partial<Record<"squared" | "cubed", ExponentPosition>>>;
+    };
+    /**
+     * Reading for an exponent on a BARE base — one with no unit noun to attach to. `20²`, `mc²`, `2¹⁰`.
+     *
+     * WHY IT IS SEPARATE FROM `exponentWords`, and it has to be: that field holds the UNIT MODIFIER, and in
+     * most languages the modifier and the predicate are DIFFERENT WORDS. English reads *square kilometres*
+     * but *twenty squared*; Italian *chilometri quadrati* but *venti al quadrato*, which needs a connective
+     * the modifier form does not carry. Reusing `exponentWords` here would produce "twenty square".
+     *
+     * ⚠ WITHOUT THIS THE EXPONENT WAS DROPPED IN EVERY LANGUAGE. Measured before the change — `20²` read as
+     * the bare number in all eight probed: en *twˈɛnti*, de *t͡svˈant͡sɪç*, fr *vˈɛ̃*, es *bˈeᶦnte*,
+     * it *vˈenti*, hi *bˈiːs*, pt *vˈĩtɨ*, ru *dvˈat͡sətʲ*. The whole exponent machinery was unit-only, so a
+     * power with nothing to modify silently vanished.
+     *
+     * TEMPLATES, not bare words, because word order and connectives are language data. `{n}` is the base as
+     * written and `{e}` the exponent in ASCII digits, so the engine's own number path speaks it:
+     *   en  squared: "{n} squared"        power: "{n} to the power of {e}"
+     *   hi  squared: "{n} का वर्ग"          power: "{n} की घात {e}"
+     * A template also lets a language put the power word FIRST if that is its order, which no arrangement of
+     * fixed fields could express.
+     *
+     * ⚠ `power` USES THE CARDINAL, NOT THE ORDINAL — "to the power of five", never "to the fifth power". The
+     * ordinal reading is the more idiomatic English, and it was rejected on purpose: it would require the
+     * exponent's ORDINAL form in every language, which several inflect for gender and case (the Icelandic,
+     * Czech and Serbian runs all had to build ordinal tables), and the exponent would then need its own
+     * agreement rules. The cardinal reuses the number path that already exists and needs one connective
+     * phrase per language. `{e}` is emitted as DIGITS for exactly that reason.
+     *
+     * MEASURED SURFACE, so nobody mistakes this for a hot path: across all 67 artifacts a superscript follows
+     * a NON-unit base **twice** (hi's `२०²`/`१०²`) plus my's `mc²`, and `⁴`-`⁹` and multi-digit superscripts
+     * occur ZERO times. This is robustness for arbitrary input, not a repair of a common defect — the 104
+     * other superscripts are all unit exponents the path above already reads.
+     */
+    bareExponent?: {
+        squared?: string;
+        cubed?: string;
+        power?: string;
     };
     /**
      * The word for `&`, which is DROPPED outright without one — and a dropped sign is inaudible.
@@ -451,6 +507,26 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 }
                 return d.unitPrefix ? `${head} ${q}` : `${q} ${head}`;
             });
+
+        // A BARE EXPONENT, LAST — after the unit path, which must have its chance first or this would steal
+        // every `km²` and read it as "kilometre squared" instead of "square kilometres". By the time control
+        // reaches here a surviving superscript has no unit to modify, which is exactly the case `bareExponent`
+        // describes. Undeclared, nothing changes and the character stays where the RAWMARK leak gate can see
+        // it — the same choice the unit branch makes for a missing measure word, and for the same reason: a
+        // visible gap in one language's data beats an invisible missing reading.
+        if (d.bareExponent !== undefined) {
+            const be = d.bareExponent;
+            s = s.replace(BARE_EXPONENT, (whole, base: string, sup: string) => {
+                const digits = [...sup].map((c) => SUPERSCRIPT[c]!).join("");
+                // `2` and `3` have their own words in every language that has any; everything else — including
+                // `1`, `0` and a multi-digit power — goes through the generic form. `¹` is deliberately NOT
+                // special-cased to "to the power of one": it is vanishingly rare and reading it plainly is
+                // correct, where inventing "itself" would not be.
+                const tpl = digits === "2" ? be.squared : digits === "3" ? be.cubed : be.power;
+                if (tpl === undefined) return whole; // this language declares only some powers
+                return tpl.replace(/\{n\}/gu, base).replace(/\{e\}/gu, digits);
+            });
+        }
         return s;
     };
 }

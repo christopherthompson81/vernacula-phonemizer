@@ -63,6 +63,17 @@ const SYMBOLS = makeSymbolNormalizer({
     // Attested in the artifact itself: 公园占地 19500 平方公里 · 783,562 平方公里（300,948 平方英里）.
     // One form each, because a Chinese measure word does not agree with its count.
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
+    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
+    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
+    // they are different words (平方公里 but 二十的平方).
+    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
+    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
+    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
+    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
+    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
+    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
+    bareExponent: { squared: "{n}的平方", cubed: "{n}的立方", power: "{n}的{e}次方" },
     // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿 (10⁸),
     // not "million". Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to
     // the English letter reading: `5 万 km²` came out as *ˈʊkm*, which is worse than the raw text. The

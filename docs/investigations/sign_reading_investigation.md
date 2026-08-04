@@ -979,3 +979,93 @@ names strings and not shapes. That is the property working in the wild rather th
 **10 defective cells → 2.** 12 accepted across 7 languages, every one printed with its reason. Gates: tsc clean;
 **204 files / 2914 tests**; corpus diffs xh 1/1509 (DROP 2→1, the single change read), hi 0/1702, and en / lb / ms
 byte-identical.
+
+## Run 15 — 2026-08-04 — arbitrary exponent reading: the audit reaches 0/67
+
+Implemented the bare-exponent reading the last run identified as the residual, and the audit is now **0
+defective cells across 0/67 treated languages**.
+
+### The 4+ reading: CARDINAL, not ordinal
+
+Asked for a suggestion on the reading for powers above 3. Shipped **"to the power of N"** rather than
+**"to the Nth power"**, and the argument is cross-linguistic rather than stylistic:
+
+- the ordinal form needs the EXPONENT'S ORDINAL in every language, and several inflect it for gender and case
+  — the Icelandic, Czech and Serbian runs each had to build ordinal tables, and the exponent would then need
+  its own agreement rules
+- the cardinal reuses the number path that already exists in every engine, and needs exactly ONE connective
+  phrase per language
+
+"to the fifth power" is the more idiomatic English of the two; it is not worth 67 languages of ordinal
+morphology, and the cardinal is unambiguous. `{e}` is emitted as DIGITS so each language's own number path
+speaks it.
+
+### Why it could not reuse `exponentWords`
+
+That field holds the UNIT MODIFIER, and in most languages the modifier and the predicate are different words:
+
+| | unit modifier | bare predicate |
+|---|---|---|
+| en | *square* kilometres | twenty *squared* |
+| it | chilometri *quadrati* | venti *al quadrato* |
+| hi | *वर्ग* किलोमीटर | बीस *का वर्ग* |
+| de | *Quadrat*kilometer | zwanzig *zum Quadrat* |
+
+Reusing it would have produced "twenty square". So `bareExponent` is a new field, and it takes TEMPLATES
+(`{n}` base, `{e}` exponent) rather than words, because the connective and the word order are language data —
+`{n} al quadrato`, `{n}の{e}乗`, `{n} की घात {e}`. No arrangement of fixed fields expresses all three.
+
+### Two mechanisms, because English does not use the shared tier
+
+English has no `makeSymbolNormalizer` call at all — it handles `km²` in its own normalize.ts — so it needed a
+local twin of the rule. Worth knowing before assuming a tier field reaches the whole fleet.
+
+⚠ **Ordering is load-bearing in both.** The bare rule runs AFTER the unit path. Matching first would claim
+every `km²` and read it "kilometre squared" instead of "square kilometres" — so by the time control reaches the
+bare rule, a surviving superscript provably has no unit to modify, which is the condition the rule wants.
+
+### The base may be LETTERS, and a superscript now travels with a foreign run
+
+`E = mc²` was the case that exposed the gap, and it needed a second fix. `²` is `No`, not `\p{L}`, so
+`FOREIGN_RUN` ended at `mc` and left the exponent in the gap to be dropped — my's artifact quotes the formula
+and routes the Latin to English, which never saw the `²`. Including a TRAILING superscript in the run fixes it
+for every host at once: **the fix is to stop cutting the expression in half, not to invent a Burmese reading
+for an English formula.** Only trailing, and only superscript digits — a superscript cannot begin a word, so
+this can neither start a run that would not otherwise exist nor swallow a host character.
+
+### Provenance, stated because it is weaker than most data here
+
+Ten languages declared: en, de, fr, es, it, pt, ru, ja, cmn, hi. These are **standard mathematical register,
+not corpus attestations**, and the sourcing attempt is worth recording because it FAILED informatively:
+
+```
+hi घात:0   ru степени:0   de Potenz:0   it potenza:0   ko 제곱:0   vi lũy thừa:0
+th กำลัง:6  ← the PROGRESSIVE ASPECT marker      fa توان:8 / ar أس:8  ← substring traps
+fr carré:4 / cmn 平方:8 / hi वर्ग:5     ← all the UNIT modifier, in km² sentences
+```
+
+Every apparent hit was either the unit modifier or the substring trap `tools/normalization/attest.ts` exists to
+catch. FLEURS is news and encyclopedia prose and contains no spoken arithmetic, so the power words are simply
+not in it. Declared anyway under #584's rule — a dropped sign is inaudible, the one outcome that cannot be
+right — and labelled in each file so no later pass credits the corpus with them.
+
+⚠ **de has no distinct predicate cube word** and takes the generic form (*acht hoch drei*), which is the
+standard spoken German. Recorded so it does not look like an omission.
+
+The other 57 languages are UNDECLARED BY DESIGN: the field is optional, undeclared behaviour is unchanged, and
+the superscript stays where the RAWMARK leak gate can see it — the same choice the unit branch makes for a
+missing measure word, and for the same reason.
+
+### Measured surface, so nobody mistakes this for a hot path
+
+Across all 67 artifacts a superscript follows a NON-unit base **twice** (hi's `२०²`/`१०²`, both the corrupt
+Vernier sentence) plus my's `mc²`. `⁴`-`⁹` and multi-digit superscripts occur **ZERO** times. The other ~113
+superscripts are unit exponents the existing path already reads — including 11 with a NON-LATIN unit
+abbreviation (`ኪ.ሜ²`, `किमि²`, `км²`) that an earlier Latin-only count had misfiled as "other".
+
+### Result
+
+**Audit: 0 defective cells across 0/67 treated languages**, with 12 accepted cells printed with their reasons.
+Gates: tsc clean; **205 files / 2920 tests**; corpus diffs on twelve languages (en de fr es it pt ru ja cmn hi
+el th) all **byte-identical** — the expected outcome, since FLEURS carries only unit exponents, and the
+confirmation that a fleet-wide `FOREIGN_RUN` change regressed nothing.
