@@ -124,7 +124,12 @@ describe("Vietnamese normalization (#562)", () => {
         // the corpus writes km/giờ and dặm/giờ in full — the target forms are its own
         expect(N("khoảng 83 km/h và")).toBe("khoảng 83 km/giờ và");
         expect(N("tối đa 40 mph (64 kph)")).toBe("tối đa 40 dặm/giờ (64 km/giờ)");
-        expect(N("thường trên +30°C.")).toBe("thường trên +30 độ xê.");
+        // #586. This line used to assert `+30`, i.e. the sign SURVIVING normalization as a literal — after
+        // which the tokenizer dropped it, so the reading lost the sign entirely. The word is sourced from the
+        // corpus's own audio: Cohere over vi_vn/train gives "…utc cộng một…" (2 of 2 speakers). Both those
+        // speakers OMIT the sign before the temperature, but the target is TTS and an explicitly typed
+        // character is content, so it is voiced here too. See normalize.ts step 11b.
+        expect(N("thường trên +30°C.")).toBe("thường trên cộng 30 độ xê.");
         expect(N("phía đông 35° Tây.")).toBe("phía đông 35 độ Tây.");
         // `m` = mét reaches the shared symbol tier, which needs the digits still adjacent
         expect(phonemize("cao 4892 m", "vi")).toContain("mˈɛ˧˥t̪");
