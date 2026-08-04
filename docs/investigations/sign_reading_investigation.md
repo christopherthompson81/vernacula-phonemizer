@@ -238,3 +238,65 @@ and an audio referee will routinely hear things that do not line up with the scr
   (`libtorch_global_deps.so` missing).
 - the omnivoice token `.npz` set is a route to reconstruct audio for the 28 covered corpora, but it does not
   extend LANGUAGE coverage — it needs the omnivoice decoder, i.e. torch again.
+
+## Run 4 — 2026-08-03 — the C# ONNX backends: en confirms the convention, ar and ja get their word
+
+The Indic path covered only ta/hi. Vernacula ships **C# ONNX** ASR backends and the weights are installed at
+`~/.local/share/Vernacula/models` (parakeet, qwen3asr, cohere_transcribe, whisper_turbo) — no torch involved, so
+the "blocked on a broken torch install" note in Run 3 was wrong about the whole fleet, only right about the
+Python path.
+
+```
+dotnet run --project src/Vernacula.CLI -c Release --no-build -- --audio X.wav \
+  --model <dir with parakeet files + silero_vad.onnx> --diarization vad --export-format txt
+  [--asr qwen3asr --qwen3asr-model ~/.local/share/Vernacula/models/qwen3asr --language ja]
+```
+⚠ Parakeet resolves its files at the `--model` ROOT while silero/sortformer live in subdirectories, so a
+composed directory of symlinks is needed; pointing `--model` at the models root fails on `nemo128.onnx`.
+
+### en (parakeet) — the convention, measured
+
+| shape | speakers | result |
+|---|---|---|
+| `temperatures above +30°C` | 2 | **0 of 2 voice the plus** — "temperatures above thirty degrees Celsius are common" |
+| `(UTC+1)` | 3 | **2 of 3** say "UTC plus one"; the third skipped the parenthetical entirely |
+
+Confirms the general convention independently: **a measurement plus is frequently omitted, a UTC offset is
+voiced.** en behaves exactly as hi does. ⚠ **NO CODE CHANGE FOLLOWS** — under the TTS policy the written sign is
+content and gets voiced, so en's existing unconditional `plus` is correct. The measurement closes the follow-up
+rather than opening a change.
+
+Also: the "one speaker skips `(UTC+1)`" pattern has now recurred in **ta and en**. Treat a missing
+parenthetical as expected reader behaviour, not as a signal about the language.
+
+### ar and ja — the dimension `×`, sourced at last
+
+| lang | decoded | reading |
+|---|---|---|
+| ja | `六掛ける六センチ` … `56かける56ミリ` | `×` → **かける** |
+| ar | `…ستة وثلاثين في أربعة وعشرين ملليمتر…` | `×` → **في** |
+
+Both are the words Run 2 failed to source and mis-attested: `掛ける` returned the everyday verb (broth over
+noodles) and `في` returned thousands of locative hits. The dimension sense is invisible in writing because
+writing uses the glyph; the recording puts the word in the slot.
+
+⚠ **ar was cross-checked with two backends** because Qwen3-ASR rendered the slot as `فاربعة` — a ف-initial
+function word with the yāʾ elided, suggestive but not clean. Cohere renders `في أربعة` cleanly. That agreement
+settles the TRANSCRIPTION, not speaker variation: it is still one speaker, and ar's second `×` instance sits in
+the `test` split whose audio this corpus does not carry. ja likewise has one speaker, but the sign occurs
+**twice inside the one utterance** and both were rendered かける.
+
+Shipped: ar reads `في` keyed on the FOLLOWING digit alone (the manuscript's `29¾ بوصة × 24½ بوصة` has a unit
+word on the left, so a digit-flanked rule misses it); ja keys on both digits, which is safe because the
+language is unspaced.
+
+Gates: corpus diff **ar DROP 2 → 0** (defect-free on this class), **ja DROP 2 → 1**; 2/1702 and 1/1788 changed,
+every change read. Referee eval unchanged by construction — zero `×` in any ar or ja referee list.
+
+### Remaining, honestly
+
+- th, vi, am, xh, zu — audio cached, ASR backends present; not yet run.
+- te — in neither the audio cache nor the token set; needs a download.
+- hu's `×` — European, so parakeet covers it, but hu has no FLEURS corpus here (its `×` came from the mined
+  wiki artifact), so there is no aligned recording to consult.
+- ⚠ ar drops the vulgar fraction in `29¾` (reads "twenty-nine"). Pre-existing, unrelated to this work, unfixed.

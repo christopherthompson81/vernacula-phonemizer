@@ -83,6 +83,25 @@ export function normalizeArabic(input: string): string {
     s = s.replace(new RegExp(`(\\S)\\+\\s?([${DIGIT}])`, "gu"), "$1 زَائِد $2");
     s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${DIGIT}])`, "gu"), "$1زَائِد $2");
 
+    // 5b) THE DIMENSION `×` → في, SOURCED FROM THE CORPUS'S OWN AUDIO. The corpus writes it twice, both times
+    //     as a MEASUREMENT and not a multiplication: `مقاس 35 مم (36× 24 مم نيجاتيف)` and the manuscript's
+    //     `ذات مقاسات 29¾ بوصة × 24½ بوصة`. Before this the sign was dropped, so "36 by 24 mm" read as two
+    //     bare numbers with nothing between them.
+    //
+    //     ⚠ THE WORD COULD NOT BE SOURCED FROM TEXT, and في is exactly why: probed against prose it returns
+    //     thousands of hits, every one the locative preposition ("in the north", "in Jordan") — trap 37 with
+    //     an overwhelming wrong-sense majority. The dimension sense is invisible in writing because writing
+    //     uses the glyph. What settles it is the FLEURS recording of the sentence, where the slot is audibly
+    //     filled: Cohere renders `…خمسة وثلاثين ملليمتر ستة وثلاثين في أربعة وعشرين ملليمتر…`, and Qwen3-ASR
+    //     independently gives the same ف-initial function word in the same slot. One speaker, two decoders —
+    //     which settles the TRANSCRIPTION, not speaker variation; the second instance sits in ar's `test`
+    //     split, whose audio this corpus does not carry.
+    //
+    //     Keyed on the FOLLOWING digit only, deliberately. The dimension `×` is NOT reliably digit-flanked —
+    //     in `29¾ بوصة × 24½ بوصة` the left neighbour is a unit WORD and the numbers carry vulgar fractions,
+    //     so the `(\d)\s*×\s*(\d)` shape that Czech uses misses it outright.
+    s = s.replace(new RegExp(`\\s*×\\s*(?=[${DIGIT}])`, "gu"), " في ");
+
     // 6) FRACTIONS, as "numerator على denominator" — the plain spoken reading, which avoids the broken-plural
     //    forms (أخماس …) that a fully idiomatic rendering would need.
     s = s.replace(new RegExp(`(?<![${DIGIT}.,/])([${DIGIT}]{1,3})/([${DIGIT}]{1,3})(?![${DIGIT}/])`, "gu"),
