@@ -1786,3 +1786,96 @@ occupies exactly one token) passes for all fourteen and cannot lie about it.
 worth testing.* Stated directly, the test is also shorter.
 
 Gates run separately: tsc PASS; **206 files / 2937 tests**; audit 0 defective cells across 0/67.
+
+## Run 29 — 2026-08-04 — ⚠ Run 28 WAS WRONG: #657 was 91 languages, not fourteen, and the scope was mis-derived
+
+**Question.** "So #657 is done?"
+
+**Command.** The same fleet-wide behavioural probe Run 28's test was built from, but over ALL registered languages
+rather than the fourteen: `Cañitas`, `São`, `Klöcker`, asserting *no English letter name in the output AND the word
+occupies exactly one token*.
+
+    checked 180 registered languages
+    ⚠ STILL FRAGMENTING (91)
+    TREATED still fragmenting (28): as az bn ca hr da ff de ha hu is ga ja kn ko lb ml mi fa sr sd es sv te tr ur uz cy
+    UNTREATED still fragmenting (63)
+
+**⚠ THE NEGATIVE RESULT, AND IT IS THE IMPORTANT ONE: I replaced a measurement with a grep.** The original probe
+that opened #657 reported **42 languages fragmenting** — correct. The work list was then re-derived from
+`grep '^const TOKEN'`, which found 21 files, and the two numbers were never reconciled. Every engine not declaring
+its tokenizer in that exact shape fell out of scope silently — including `de`, `es`, `sv`, `tr`, `sr`, all of which
+the probe had already flagged. Run 28's "the remaining fourteen" was the grep's output, not the defect's extent.
+
+*A structural pattern is a convenience; the measurement is the scope.* This is the same error as the audit's
+hardcoded 37-of-67 language list, made four runs after that was written down. The correction is structural, not
+resolve-to-do-better: the probe becomes the test, sweeping every code the registry serves, with the remaining
+languages named in an allow-list that the test also checks is not stale.
+
+### The 91 classify into two shapes, and 17 of them collapse to 10 edit sites
+
+Two probes per language. `computer` → does the output match English (ROUTES to an injected reader) or is it the
+engine's own (NATIVISES)? Then `Ka<accent>o` for each of `ñ ã ö é å ç ł` against its de-accented twin → differs but
+does not fragment, so the letter is NATIVE and must survive a fold.
+
+17 routers, 74 nativisers. The routers collapse to ten sites because the engines share modules — `bengali.ts`
+serves `bn`/`as`/`bpy`, `sinitic/hanDictIpa.ts` serves `gan`/`hak`/`cjy`/`hsn`.
+
+**`ja`/`ko` are a DIFFERENT defect wearing the same symptom.** Their tokenizers are fine. Their initialism spellers
+are bounded by `(?<![A-Za-z])…(?![A-Za-z])`, and an ASCII-only lookaround does not see an accented letter as a
+letter — so the `S` of `São` passed the *isolated capital* test and was spelled out as a letter name, leaving the
+rest of the name behind: `São` → *esu / ˈʌɔː*, `Sámi` → *ˈesɯ ˈɑːmi*. The fix widens the BOUNDARY, not the matched
+class, which is correctly ASCII-caps-only — an initialism is ASCII by definition, but the thing that decides where
+one ENDS is not.
+
+### ⚠ The architecture correction, mid-run
+
+> "Shared code for the scanner seems important, so that the limited regex isn't used to decide script-level
+> routing. It feels like it should be an early decision and not repeated in multiple places."
+
+That names the class exactly, and it is why widening 108 regexes one at a time was the wrong shape of fix. Each
+engine's hand-written letter list —
+
+    const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+)|([.!?…,;:])/gu;        // de
+    const TOKEN = /([a-zçëA-ZÇË]+)|(\d+)|([.!?…,;:])/giu;          // sq
+
+— was doing two unrelated jobs, and is only correct for one:
+
+1. **which script is this** — a ROUTING question, a property of the script. A letter list is a bad approximation of
+   a script: anything it omits falls out of the token, lands in the gap, and `emitUnclaimed` routes it as foreign.
+   **One omitted letter re-routes mid-word.** This decision was being made 108 times over and was wrong in all 108.
+2. **which letters can I pronounce** — an INVENTORY question, genuinely per-language and genuinely lexical.
+
+`core/hostWord.ts` splits them. `hostWordRun(scripts, extra)` answers (1) from the script, once, so there is no
+letter list left to omit a letter from. `makeNativiser(NATIVE_WORD)` answers (2), taking each engine's former token
+class verbatim — demoted from a routing decision to what it always was, a statement about which letters the g2p has
+rules for. Sixteen copies of `foldToBase`/`nat` collapse into it.
+
+**⚠ AND THE SCOPE LIMIT, measured rather than assumed: shared script scanning cannot fix the 74 nativisers.**
+Script routing only ever fires ACROSS scripts. A Portuguese name inside Spanish text is Latin inside Latin — there
+is no routing decision to get right and the run correctly stays with the host. What remains is inventory: the g2p
+has no rule for `ã` and simply DROPS it, and dropping is not nativising but deleting (`Klöcker` → *klkkeɾ*). So the
+shared scanner prevents recurrence of the cross-script class, and the same-script class needs the fold regardless.
+Two decisions, two mechanisms, and conflating them is what produced the bug in the first place.
+
+### Applied, and the corpus diff
+
+Ten router sites widened to `LATIN_RUN`; `ja`/`ko` boundaries widened; the sixteen already-treated nativisers
+migrated onto the shared module. **91 → 74 fragmenting.** tsc PASS, 206 files / 2937 tests.
+
+Corpus diff against baseline `b0c9882`, the ten router languages that have a FLEURS corpus, every change read:
+
+| lang | changed | what |
+|---|---|---|
+| as | 2/1961 | `İzmir` *ˈaᶦ tsmˈaᶦɹ* → *ˈɪzmaᶦɹ*; `levé` *lˈɛv ˈiː* → *ɪlˈɛv* |
+| bn | 7/1981 | `Cañitas`, `Asunción`, `Erdoğan`, `Guaraní`, `Ürümqi`, `Taínos`, `Guaycurú`/`Payaguá` — all whole now |
+| fa | 1/1856 | `Cochamó` *kt͡ʃˈæm ˈoᶷ* → *kt͡ʃˈæmɔː* |
+| sd | 1/2009 | `levé` |
+| te | 2/1757 | `levé`; `Barça` *bˈɑːɹ sˈiː ˈə* → *bˈɑːɹkə* |
+| ko | 2/1746 | `Müslüm`; `Sámi` *ˈesɯ ˈɑːmi* → *sˈæmi* (the initialism-boundary fix) |
+| kn ml ur ja | 0 | no accented Latin in those corpora — the fix is real but unattested there |
+
+No defect-class count moved in either direction; all 15 changes are the defect being repaired.
+
+**Negative result worth keeping:** `levé` is the recurring one, and it is the *universal-sentence* technique paying
+off in reverse — one French word in one FLEURS sentence surfaces the same defect in `as`, `sd` and `te` at once,
+because all three are translations of the same English source. A single attested word is fleet-wide evidence.

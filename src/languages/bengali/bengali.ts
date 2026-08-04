@@ -15,6 +15,7 @@
  * Stress is word-initial and weak in Bengali; the broad referee does not mark it, so we leave it unmarked.
  */
 import { makeAbugidaG2P } from "../../core/abugida.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
@@ -135,8 +136,11 @@ export function makeNativeBengali(
     const symbols = def.symbols ?? {};
     const strip = def.stripSymbols ?? "";
     const symbolClass = [...Object.keys(symbols), ...strip].join("");
+    // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
+    // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
+    // engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
     const tokenRe = new RegExp(
-        `([${BENGALI_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
+        `([${BENGALI_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,
         "gu",
     );

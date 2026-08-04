@@ -13,6 +13,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -138,7 +139,10 @@ class WuPhonemizer implements Phonemizer {
         // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
         // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
         // itself; the gap pass covers everything else via the script router (core/scripts.ts).
-                const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
+                // ⚠ The Latin arm is ALL of Latin plus marks, not `[A-Za-z]+`: the ASCII class ended the token at a
+                // diacritic and left that letter read as an English letter name (`Cañitas` → *kʰˈʌ ˈɛn ˈaᶦt̬əz*). The
+                // engine routes a Latin run to the injected reader, so widening is the whole fix (#657).
+                const tok = new RegExp(`(\\p{Script=Han}+)|(\\d+)|(${LATIN_RUN})|([。，、？！；：.,?!;:])`, "gu");
         
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));

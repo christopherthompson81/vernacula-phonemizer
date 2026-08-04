@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadLines, loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -228,7 +229,7 @@ function numberStressIdx(token: string): number | undefined {
 // started over: `São Paulo` → *s ˈə ʔˈo paʔˈulo*, `Klöcker` → *kl ˈoᶷ kkˈeɾ*. Invisible to every gate — no digit
 // or raw mark survives and nothing VANISHES, so neither the leak classes nor the differential DROP test see it.
 // The hyphen-compound shape is preserved: Tagalog writes `kaibigan-ko` and the two halves are ONE word.
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:[-‑]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*)|(\d+)|([.?!,;:])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN}(?:[-‑]${LATIN_RUN})*)|(\\d+)|([.?!,;:])`, "gu");
 /**
  * Tagalog's OWN inventory — the token class as it stood before the widening, lifted verbatim.
  *
@@ -239,19 +240,17 @@ const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:[-‑]\p{Script=Latin
  */
 const NATIVE_WORD = /^[A-Za-zÑñ]+(?:[-‑][A-Za-zÑñ]+)*$/u;
 /**
- * Fold an out-of-inventory accent to its BASE — `ö`→`o`, `ã`→`a`. Tagalog NATIVISES rather than routing
- * (`computer` → *kompˈuteɾ*, not English *kəmpjˈuːt̬ɚ*; the injected reader is declared but not auto-used), so a
- * foreign name is read with Tagalog values — which needs a letter to read. Dropping it, as the g2p does for a
- * letter it has no rule for, is not nativising but deleting: that is the `Klöcker` → *klkkeɾ* trap pcm hit.
- * NFD then discard marks, so a precomposed `ö` and a decomposed `o`+U+0308 behave alike.
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * above is the inventory — a word it rejects carries a letter this language does not use. See
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
+const nat = makeNativiser(NATIVE_WORD);
 
 class TagalogPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(NATIVE_WORD.test(m[1]) ? m[1] : foldToBase(m[1])));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))

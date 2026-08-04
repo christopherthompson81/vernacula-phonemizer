@@ -247,5 +247,8 @@ export function normalizeKorean(input: string): string {
     //    Bounded by explicit letter lookarounds — never \b, which would also fire between a letter and a
     //    Hangul syllable — so a mixed-case word is untouched: ZMapp's ZM fails the trailing lookahead.
     //    The second alternative is the isolated capital (×57 in the corpus: H5N1, 슈퍼-G, W. 부시).
-    return s.replace(/(?<![A-Za-z])[A-Z][A-Z-]*[A-Z](?![A-Za-z])|(?<![A-Za-z])[A-Z](?![A-Za-z])/gu, spell);
+    //    ⚠ THE BOUNDARY IS ALL OF LATIN, not `[A-Za-z]`. An ASCII-only lookaround does not see an accented
+    //    letter as a letter, so the `S` of `São` passed the isolated-capital test and was spelled out as a
+    //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː* (#657).
+    return s.replace(/(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
 }

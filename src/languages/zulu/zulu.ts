@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -79,22 +80,17 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
  */
 const NATIVE_WORD = /^[A-Za-z]+$/u;
 /**
- * Fold an OUT-OF-INVENTORY accent to its base — `ö`→`o`, `ã`→`a`. This engine NATIVISES rather than routing (its
- * loan reading is its own, not English's), so a foreign name is read with native values — which needs a letter to
- * read. The g2p has no rule for a letter outside its inventory and simply DROPS it, and dropping is not
- * nativising but deleting: that is the `Klöcker` → *klkkeɾ* trap. NFD then discard marks, so a precomposed and a
- * decomposed accent behave alike.
- * ⚠ CONDITIONAL, because a native accent must survive: folding unconditionally would destroy exactly the
- * accented letters this language CAN read (Tagalog's `ñ` was the case that showed it).
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * above is the inventory — a word it rejects carries a letter this language does not use. See
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
-const nat = (w: string): string => (NATIVE_WORD.test(w) ? w : foldToBase(w));
+const nat = makeNativiser(NATIVE_WORD);
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
 // every gate: no digit or raw mark survives and nothing VANISHES (#657).
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 // #562 symbol normalization — Zulu: loan plurals (amaphesenti, amadola, amakhilomitha).
 //

@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 
 export interface HanDictDef {
     /** Pitch digit ("1".."5") → Chao contour letter (˩..˥). */
@@ -138,7 +139,10 @@ class HanDictPhonemizer implements Phonemizer {
         // got the GAP PASS, and a run in a script it does not own was dropped outright. The Latin branch
         // below stays, because this engine claims Latin itself via `foreign`; the gap pass now covers
         // everything else (Greek, Cyrillic, Kana …) through the script router in core/scripts.ts.
-        const tok = /(\p{Script=Han}+)|(\d+)|([A-Za-z]+)|([。，、？！；：.,?!;:])/gu;
+        // ⚠ The Latin arm is ALL of Latin plus marks, not `[A-Za-z]+`: the ASCII class ended the token at a
+        // diacritic and left that letter read as an English letter name (`Cañitas` → *kʰˈʌ ˈɛn ˈaᶦt̬əz*). The
+        // engine routes a Latin run to the injected reader, so widening is the whole fix (#657).
+        const tok = new RegExp(`(\\p{Script=Han}+)|(\\d+)|(${LATIN_RUN})|([。，、？！；：.,?!;:])`, "gu");
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1], d, max, this.def.chao));
             else if (m[2]) {
