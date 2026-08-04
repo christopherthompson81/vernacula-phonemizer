@@ -261,7 +261,16 @@ const SYMBOLS = makeSymbolNormalizer({
     // initialisms and joining them would make one token.
     ampersand: "e",
     percent: ["por cento"],
-    currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["iene", "ienes"] },
+    // `US$` AS ITS OWN KEY. The tier's currency guard rejects a sign preceded by a LETTER — the guard that
+    // stops a key biting into a word — so `US$ 11.000` had the `S` before the `$` and the sign was DROPPED.
+    // Same fix gu and mi use for their prefixed forms; `dólar` ×9 / `dólares` ×8 are the corpus's own words.
+    // ⚠ VERIFIED ON THE DIRECT FORM, INERT ON THE CORPUS, and the difference is not yet explained: `US$ 11.000`
+    // now reads "onze mil dólares", but the corpus's own `vendidas por US$ 11.000 a US$ 22.500 a onça` does not
+    // change and its `DROP currency ×1` stands. Something else in that utterance is claiming the sign or the
+    // space first — a separator this note has not identified. Declared anyway because the key is right and the
+    // direct reading improves; the corpus instance is still open.
+    currency: { "US$": ["dólar", "dólares"], "AUD$": ["dólar", "dólares"], "€": ["euro", "euros"],
+        "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["iene", "ienes"] },
     // Longest keys match first, so km/h beats km. The slash unit was dropping its /h entirely.
     units: { "km/h": ["quilômetro por hora", "quilômetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
         km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],

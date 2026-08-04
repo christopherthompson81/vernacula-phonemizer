@@ -39,7 +39,11 @@ const NE_SYMBOLS = makeSymbolNormalizer({
     // `m` — मिटर ×12, which is the corpus's spelling (मीटर, the long-vowel form, is ×0 here); digit-adjacent
     // bare `m` is ×0, so the one-letter-key hazard is checked rather than assumed. Without it the cube word
     // below has no head noun and is dead data.
-    units: { km: ["किलोमीटर"], cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मिटर"] },
+    // THE DEVANAGARI ABBREVIATION, both spellings the corpus uses — किमि ×5 and किमी ×6. Only the Latin keys
+    // were declared, so `19,500 किमि²` matched nothing: the unit AND its exponent were lost together while the
+    // Latin `19,500 km²` read correctly. Same shape as ru/uk/kk declaring Cyrillic keys beside their Latin ones.
+    units: { km: ["किलोमीटर"], "किमि": ["किलोमीटर"], "किमी": ["किलोमीटर"],
+        cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मिटर"] },
     unitPer: "प्रति",
     rateDenominators: { h: "घण्टा", s: "सेकेण्ड" },
     // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"), word-first. घन ×0 — and this
