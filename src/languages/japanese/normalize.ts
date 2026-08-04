@@ -174,6 +174,25 @@ export function normalizeJapanese(input: string): string {
     s = s.replace(/(^|[\s(（])\+\s?(\d)/gu, "$1プラス$2");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1プラス$2");
 
+    // 9b) THE DIMENSION `×` → かける, SOURCED FROM THE CORPUS'S OWN AUDIO. The corpus's one instance is the
+    //     film-camera sentence, which writes it twice: `6×6 cm、より正確には56×56 mm`. Both are MEASUREMENTS,
+    //     not multiplications, and before this the sign was dropped — `6×6` read ろく ろく, two bare numbers.
+    //
+    //     ⚠ THE WORD COULD NOT BE SOURCED FROM TEXT. Probed against prose, 掛ける returns the everyday verb —
+    //     the attestation found was 蕎麦全書 on pouring broth over noodles (`冷たいつゆを掛けていた`), which is
+    //     trap 37 at its most misleading, since the word IS correct and the cited sense is not. Wikidata is no
+    //     better: it returns the bare character `×` as ja's label for the multiplication sign.
+    //
+    //     What settles it is the recording. Qwen3-ASR over ja_jp/train renders BOTH instances in the slot:
+    //     `六掛ける六センチ` and `56かける56ミリ`. One speaker — but two independent instances inside the one
+    //     utterance, which is stronger than a single occurrence and weaker than two speakers. ja_jp carries
+    //     exactly one row for this sentence, so a second speaker is not available here.
+    //
+    //     Digit-flanked, which is safe for ja: the language is unspaced, so a dimension `×` sits directly
+    //     between the numerals. (⚠ That is NOT portable — ar's `29¾ بوصة × 24½ بوصة` has a unit word on the
+    //     left, so Arabic keys on the following digit alone.)
+    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1かける");
+
     // 10) LATIN INITIALISMS → katakana, LAST, so the rules above still see the ASCII they match on (the
     //     unit and degree rules are keyed on lowercase letters or symbols, untouched by an all-caps rule).
     //     The run may carry internal hyphens (XDR-TB ×4) and is bounded by explicit letter lookarounds so

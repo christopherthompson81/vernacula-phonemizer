@@ -1,0 +1,72 @@
+// WIKIPEDIA WORD ATTESTATION — th (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "th",
+    "wiki": "th.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "คูณ",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 33,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ในคณิตศาสตร์ กฎผลคูณของแคลคูลัส หรือเรียกว่า กฎของไลบ์นิซ เป็นสูตรสำหรับหาอนุพัน…",
+                "…ูลัส หรือเรียกว่า กฎของไลบ์นิซ เป็นสูตรสำหรับหาอนุพันธ์ของผลคูณของฟังก์ชันที่หาอนุพันธ์ได้สองฟังก์ชันหรือมากกว่า ซึ่งอาจเขี…",
+                "…aystyle {d \\over dx}(uv)=u{dv \\over dx}+v{du \\over dx}} กฎผลคูณสามารถขยายไปยังผลคูณของฟังก์ชันสามตัวหรือมากกว่าก็ได้ หรือใน…",
+                "…(uv)=u{dv \\over dx}+v{du \\over dx}} กฎผลคูณสามารถขยายไปยังผลคูณของฟังก์ชันสามตัวหรือมากกว่าก็ได้ หรือในกรณีอื่น ๆ ที่ไม่ใช่…",
+                "…ู้แปลผลงานของไลบ์นิซ์เสนอว่า ไอแซค บาร์โรว์ เป็นผู้ค้นพบกฎผลคูณก่อน การพิสูจน์ของไลบ์นิซ์เริ่มต้นโดยสมมติให้ u(x) และ v(x)…",
+                "…u ( d v ) {\\displaystyle d(uv)=(du)v+u(dv)\\,} และนี่คือกฎผลคูณในรูปของดิฟเฟอเรนเชียล ถ้าเราหารตลอดด้วยดิฟเฟอเรนเชียล dx เร…"
+            ]
+        },
+        {
+            "word": "บวก",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 78,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…การบวก (อังกฤษ: addition; มักแทนด้วยเครื่องหมายบวก \"+\") คือหนึ่งใน…",
+                "…การบวก (อังกฤษ: addition; มักแทนด้วยเครื่องหมายบวก \"+\") คือหนึ่งในการดำเนินการทางคณิตศาสตร์ของเลขคณิตมูลฐาน นอ…",
+                "…ือหนึ่งในการดำเนินการทางคณิตศาสตร์ของเลขคณิตมูลฐาน นอกจากการบวกยังมีการลบ การคูณ และการหาร การบวกจำนวนสองจำนวนคือผลรวมของปร…",
+                "…ของเลขคณิตมูลฐาน นอกจากการบวกยังมีการลบ การคูณ และการหาร การบวกจำนวนสองจำนวนคือผลรวมของปริมาณสองปริมาณรวมกัน ตัวอย่างเช่น ใ…",
+                "…ียบเท่ากับนิพจน์ทางคณิตศาสตร์ว่า \"3 + 2 = 5\" หมายความว่า \"3 บวก 2 เท่ากับ 5\" เป็นต้น นอกจากการนับผลไม้แล้ว การบวกสามารถใช้แ…",
+                "…วามว่า \"3 บวก 2 เท่ากับ 5\" เป็นต้น นอกจากการนับผลไม้แล้ว การบวกสามารถใช้แทนการรวมวัตถุอื่น ๆ การบวกสามารถนิยามด้วยสมบัติที่…"
+            ]
+        },
+        {
+            "word": "ลบ",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 13,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…การป้อนกลับเชิงลบ คือการที่ความต่างระหว่างค่าจริงกับค่าอ้างอิงของระบบ ไปส่งผล…",
+                "…ื่อนออกจากค่าอ้างอิงจะถูกควบคุม ระบบที่มีดัชนีการป้อนกลับทางลบสูงมีแนวโน้มจะมีความเสถียรมาก == การนำไปใช้ == === วิศวกรรมเ…",
+                "…ววิทยาและเคมี === ระบบทางชีวภาพหลาย ๆ ระบบ มีกลไกป้อนกลับทางลบควบคุมอยู่ เช่น baroreflex ที่ควบคุมความดันเลือดและการสร้างเ…",
+                "…ภาพหลาย ๆ อย่าง (เช่น ในกายวิภาคของมนุษย์) ใช้การป้อนกลับทางลบมาควบคุมสมดุล ตัวอย่างของการใช้การป้อนกลับทางลบมาควบคุมสมดุล…",
+                "…ารป้อนกลับทางลบมาควบคุมสมดุล ตัวอย่างของการใช้การป้อนกลับทางลบมาควบคุมสมดุลชีวภาพมีหลายอย่างมาก เช่น การควบคุมอุณหภูมิกาย…",
+                "…ป็นต้น การควบคุมการหลั่งฮอร์โมนส่วนใหญ่ใช้กลไกการป้อนกลับทางลบมาควบคุม เช่น ต่อม X หลั่งฮอร์โมน X ไปกระตุ้นเนื้อเยื่อเป้าห…"
+            ]
+        }
+    ],
+}

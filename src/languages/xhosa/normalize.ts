@@ -369,9 +369,14 @@ export function normalizeXhosa(input: string): string {
     //     · `+` is read only BETWEEN two operands (`UTC+1`, `4+4`). The corpus's other instance is
     //       `amaqondo angaphezulu kwe +30°C` — a POSITIVITY marker, redundant with the sentence's own
     //       *angaphezulu* ("above"), which is trap 12 exactly: the correct reading is byte-identical with
-    //       and without the sign. Xhosa has no attested positivity word (the HSRC glosses are the ADDITION
-    //       operator, and `kunye` is also the numeral 1, so `UTC+1` would read *kunye kunye*), so it stays
-    //       unread and the artifact scan's residual `DROP math-sign ×1` is that sentence.
+    //       and without the sign, so it stays unread and the artifact scan's residual `DROP math-sign ×1`
+    //       is that sentence.
+    //       ⚠ THAT SILENCE IS NOW SOURCED, NOT MERELY ARGUED, and the reason for it has changed. It used to
+    //       rest on "Xhosa has no attested positivity word"; the word IS now known — `plas`, see below — so
+    //       absence is no longer the argument. What survives is the redundancy, and it is confirmed by the
+    //       recordings: BOTH xh_za speakers of the Montevideo sentence produce no plus phones at all
+    //       (`…a n a p e z u l u k w e t e t i…`), while all three of the UTC sentence do. Same language,
+    //       same sign, two positions, and the readers themselves make the distinction.
     //     · `-` is read only where it cannot be a compound hyphen or a stray dash: nothing alphanumeric
     //       before it, AND not a space that itself follows a word. The corpus's one ` -N` is
     //       `ebhudla kangange -40 mph`, where the English original reads "winds blowing at 40 mph" — a
@@ -382,11 +387,22 @@ export function normalizeXhosa(input: string): string {
     s = s.replace(/[  ]*>[  ]*/gu, " ngaphezulu kuna ");
     s = s.replace(/(\d)[  ]*×[  ]*(?=\d)/gu, "$1 phindaphinda ");
     s = s.replace(/[  ]*÷[  ]*/gu, " yahlula ");
-    s = s.replace(/(?<=[\p{L}\d])\+(?=\d)/gu, " dibanisa ");
+    //     ⚠ `+` BETWEEN OPERANDS IS `plas`, NOT `dibanisa`, AND THE CORPUS'S OWN AUDIO IS WHY. `dibanisa` is
+    //     the HSRC dictionary's ADDITION OPERATOR and it is a correct gloss of the symbol; it is not what a
+    //     reader says in `UTC+1`. All THREE xh_za speakers of that sentence say the English loan — decoded
+    //     with facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer, so its vocabulary contains no
+    //     `+` and no digits and it physically cannot echo the orthography back):
+    //         j u t i s i  p l a s  w a n   ·   j u tʃ i s i  b l a s  w a n   ·   j u s t i s i  p l a s  w a n
+    //     The method was validated on hi, where the answer was already known from a text ASR: it reproduced
+    //     `p l a s e k` / `p l e s w a n` for the offset and NO plus phones for the temperature, 4 of 4.
+    //     `plas` and not `plus`: the attested vowel is [a], and this orthography is phonemic, so `plus` would
+    //     read pʼlˈuːs. ⚠ The conventional isiXhosa spelling of the loan is UNSOURCED — this spelling is
+    //     chosen to reproduce the attested PHONES, which is what this layer exists to feed.
+    s = s.replace(/(?<=[\p{L}\d])\+(?=\d)/gu, " plas ");
     //     A LEADING `+` is read too — the degree rule at step 12 has already claimed the one instance where
     //     it would double the sentence's own words, so what reaches here is the arbitrary-text case, and
     //     #584's rule applies: a dropped sign is inaudible.
-    s = s.replace(/(?<![\p{L}\p{M}\d])\+[  ]?(?=\d)/gu, "dibanisa ");
+    s = s.replace(/(?<![\p{L}\p{M}\d])\+[  ]?(?=\d)/gu, "plas ");
     s = s.replace(/(?<![\p{L}\p{M}\d])(?<![\p{L}\p{M}][  ])[-−](?=\d)/gu, "thabatha ");
 
     // 15) DECIMALS ×11, LAST of the numeric rules — steps 6 to 12 all need the number intact. The dot was

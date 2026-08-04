@@ -206,10 +206,15 @@ describe("Xhosa text normalization (#562)", () => {
         expect(normalizeXhosa("23 > 19")).toBe("23 ngaphezulu kuna 19");
         expect(normalizeXhosa("7 × 2")).toBe("7 phindaphinda 2");
         expect(normalizeXhosa("8 ÷ 2")).toBe("8 yahlula 2");
-        expect(normalizeXhosa("+5")).toBe("dibanisa 5");
+        // #586. `plas`, not the HSRC dictionary's addition operator `dibanisa`: all THREE xh_za speakers of
+        // the `UTC+1` sentence say the English loan, decoded with a PHONEME recognizer whose vocabulary holds
+        // no `+` and no digits (`j u t i s i p l a s w a n`). `dibanisa` glosses the SYMBOL correctly and is
+        // not what a reader says. Spelled `plas` because the attested vowel is [a] and the orthography is
+        // phonemic — `plus` would read pʼlˈuːs.
+        expect(normalizeXhosa("+5")).toBe("plas 5");
         expect(normalizeXhosa("-5")).toBe("thabatha 5");
         // `UTC+1` is the corpus's one operator-position plus.
-        expect(normalizeXhosa("lalapha( UTC+1) e")).toBe("lalapha( UTC dibanisa 1) e");
+        expect(normalizeXhosa("lalapha( UTC+1) e")).toBe("lalapha( UTC plas 1) e");
         // THE STRAY DASH. The corpus's one ` -N` is a hyphen, not a negative: the English original reads
         // "winds blowing at 40 mph". Reading it as *thabatha* would be confidently wrong, so the guard
         // rejects a dash whose space follows a word — and the ` -` here must stay unread.

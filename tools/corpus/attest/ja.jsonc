@@ -1,0 +1,67 @@
+// WIKIPEDIA WORD ATTESTATION — ja (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ja",
+    "wiki": "ja.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "プラス",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 3,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…『99プラス』（ナイナイプラス）は、2007年10月2日から2010年3月23日まで日本テレビ系列で毎週火曜日23:58 - 翌0:…",
+                "…『99プラス』（ナイナイプラス）は、2007年10月2日から2010年3月23日まで日本テレビ系列で毎週火曜日23:58 - 翌0:29（JST、特別…"
+            ]
+        },
+        {
+            "word": "マイナス",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…-（マイナス）〜シングル・コレクション Vol.2は1990年にリリースされた、甲斐バンドのベスト・アルバム。 == 概要 == 甲…"
+            ]
+        },
+        {
+            "word": "かける",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "掛ける",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…書』には新材木町にあった「信濃屋」の「ぶっかけ」が始まりとの記述がある。冷たいつゆを掛けていたが、寒い時期には熱いつゆを掛けるようになり、寛政からはそれを「かけそば」と呼ぶようになっていった。当時は『蕎麦全書』においても、下品な食べ方とされていた…"
+            ]
+        }
+    ],
+}

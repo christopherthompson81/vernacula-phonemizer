@@ -229,6 +229,28 @@ export function normalizeVietnamese(input: string): string {
     // 36 x 24 mm, 6x6 cm, 56x56 mm. Digit-flanked only; a bare `x` elsewhere is left alone.
     s = s.replace(/(?<=\d)\s*[x×]\s*(?=\d)/giu, " nhân ");
 
+    // ── 11b. the plus sign → "cộng", SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────
+    // The two instances are the fleet's usual pair, `(UTC +1)` and `+30°C`, and both dropped the sign
+    // outright before this. The WORD could not be got from text: Wikidata's label for vi's "plus sign"
+    // is the bare character `+`, and prose writes the glyph, so there is nothing to probe for.
+    //
+    // FLEURS ships audio aligned to every transcript. Cohere-transcribe over vi_vn/train, both sentences,
+    // TWO speakers each and unanimous:
+    //   (UTC +1) → "…giờ địa phương utc cộng một tại bạch sảnh…"     ← cộng, 2 of 2
+    //   +30°C    → "…nhiệt độ thường trên ba mươi độ c"              ← sign NOT voiced, 2 of 2
+    //
+    // ⚠ THE OMISSION IS NOT FOLLOWED, and that is a deliberate policy choice, not an oversight. The target
+    // is TTS: a reader who skips a character the author explicitly typed tells us about reading habit, not
+    // about content we may delete. So both arms voice it. vi joins en and hi in the cross-linguistic
+    // convention the recordings show — a MEASUREMENT plus is frequently omitted, a UTC OFFSET is voiced —
+    // and the reason it is safe either way is that omitting a plus is LOSSLESS while omitting a minus
+    // INVERTS (`+30°` and `30°` are the same temperature; `-30°` and `30°` are not).
+    //
+    // After step 11 so `x`/`×` has already been claimed, and before the initialism pass so `UTC` is still
+    // the ASCII the arm below matches on.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 cộng ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1cộng ");
+
     // ── 12. Vietnamese abbreviations, then foreign initialisms ───────────────────────────────────
     // ERA MARKERS BEFORE GENERIC INITIALISMS — the playbook's coupling, and load-bearing here: TCN and
     // SCN are all-caps runs, so step 12b would otherwise spell "trước Công nguyên" as "tê xê en nờ".

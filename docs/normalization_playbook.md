@@ -1387,3 +1387,53 @@ Two things the experiment taught, both now in `core/normalizeSymbols.ts`:
 
 **A test that asserts on the language-local function will fail after migration, and that is correct** — it
 is testing the wrong layer. Re-assert through `phonemize`, and note in the test that the behaviour moved.
+
+## The corpus's own AUDIO is a sourcing tier, and it outranks every text tier for a SIGN
+
+Established on #586's plus/minus work, after the text tiers were exhausted twice
+(`docs/investigations/sign_reading_investigation.md`).
+
+**The failure that motivates it.** A written sign — `+`, `−`, `×` — is written as a GLYPH in running prose in
+every language, including Wikipedia. So the word for it is not *rare* in text; it is **absent from text by
+construction**. Measured: `concept.ts` returns the bare character `+` as the language's own label for "plus
+sign" in **14 of 19** languages, and every prose probe for a candidate word hit the wrong sense (`ar في` = the
+locative "in"; `th ลบ` = the adjective "negative"; `ja 掛ける` = pouring broth over noodles). No amount of extra
+corpus fixes this, which is why "build a hybrid corpus" was the wrong instinct for this class.
+
+**The tier.** FLEURS ships audio aligned to every transcript, so the sentence containing the sign has a
+recording of a human reading it aloud. What the speaker says in that slot is evidence no text tier can supply,
+and it cannot be laundered by a substring match.
+
+```
+audio  /mnt/data/omnivoice_ipa/corpus/audio_cache/data/<corpus>/audio/train.tar.gz   (29 corpora)
+ASR    IndicConformer 600m ONNX, 22 Indic languages, pure onnxruntime (no torch):
+       vernacula/scripts/indicconformer_export/validate_indicconformer_package.py
+         --package ~/models/indicconformer_600m_onnx --wav X.wav --lang ta
+```
+
+Four rules learned immediately, all of them cheap to get wrong:
+
+1. **IT SETTLES THE WORD, NOT WHETHER TO READ THE SIGN.** This is the one to hold onto. The audio fixed hi's
+   plus from `धन` to `प्लस` — a real correction. It did NOT license making the sign silent, even though both
+   hi speakers omit the `+` in `+ 30° C`. **For a TTS target, a reader who skips a character the author
+   explicitly wrote is telling us about reading habits, not about content we may delete.** An audio referee
+   will routinely hear things that do not line up with the script; that is a signal to interpret, not a
+   transcript to obey.
+2. **COUNT THE SPEAKERS. A reader is not a faithful renderer of the text.** FLEURS records several speakers per
+   sentence, and they disagree: the third Tamil speaker of the UTC sentence skipped `(UTC+1)` *entirely*. One
+   utterance is not an attestation. Two independent speakers agreeing in the same slot is a reading
+   convention; one is a reading.
+3. **THE SAME SIGN CAN HAVE TWO READINGS IN ONE LANGUAGE, and speakers differ on which.** hi voices `प्लस` in
+   `UTC+1` and drops it in `+ 30° C`; ta voices it in both. The general convention (confirmed independently
+   for English): **a measurement plus is frequently omitted, a minus is not, and a UTC offset is voiced.**
+   There is a reason — **omitting a plus is lossless and omitting a minus INVERTS**. `+30°` and `30°` are the
+   same temperature; `-30°` and `30°` are not. Never justify reading a plus with the minus's argument; hi's
+   rule did exactly that, borrowing its own minus step's citation.
+4. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
+   STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
+   unintelligible recording.
+
+Trap 37's deeper form lives here too: hi shipped `धन` for the plus, correctly sourced from a Wikipedia
+mathematics article naming `धनात्मक चिह्न` / `ऋणात्मक चिह्न` as a pair. That citation is sound for what it says —
+it is what the sign is **called** — and it is the wrong REGISTER for what a reader says. A correctly-sourced
+word from the wrong register is harder to catch than a word with two senses, because the citation looks right.

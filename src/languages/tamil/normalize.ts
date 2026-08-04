@@ -251,6 +251,41 @@ export function normalizeTamil(input: string): string {
         (_m, int: string, frac: string) => `${int} புள்ளி ${[...frac].join(" ")}`,
     );
 
+    // 8b) PLUS — SOURCED FROM THE CORPUS'S OWN AUDIO, which is the only tier that could answer it.
+    //
+    //     The sign is written as a GLYPH in every language's prose, including the wiki, so the word is not
+    //     rare in text — it is absent from text by construction, and Runs 1–2 of
+    //     docs/investigations/sign_reading_investigation.md burned both the label tier (Wikidata returns the
+    //     bare character `+` as ta's own label for "plus sign") and the prose tier on it.
+    //
+    //     FLEURS ships audio aligned to every transcript, so the sentence containing the sign has a
+    //     recording of a human READING IT ALOUD. Three utterances, two sentences, decoded with IndicConformer
+    //     600m (ONNX) over ta_in/train:
+    //
+    //       UTC+1    → "…யூடிசி பிளஸ் ஒன்…"                  2 of 3 speakers
+    //       +30 °C   → "…வெப்பம் பிளஸ் முப்பது டிகிரி சி…"        1 speaker — THE ONLY ROW ta_in HAS
+    //
+    //     So பிளஸ் is the word, in both positions. ⚠ THE WORD IS WHAT THE AUDIO SETTLES, NOT WHETHER TO READ
+    //     THE SIGN: both hi speakers OMIT the plus before a temperature (hi says प्लस in the offset), and for
+    //     a TTS target an omission is a REFEREE signal, not a licence to delete a character the author
+    //     explicitly wrote. hi voices it in both positions too, for that reason — so the divergence the
+    //     recordings show is one of reading HABIT, and the rule follows the text.
+    //
+    //     ⚠ A READER IS NOT A FAITHFUL RENDERER OF THE TEXT, so a single utterance is not an attestation —
+    //     and this corpus proves it in the very sentence it is being used on: the THIRD ta speaker of the
+    //     UTC sentence skipped `(UTC+1)` ENTIRELY. That is why the counts are recorded above rather than a
+    //     bare "the audio says". The offset arm is 2 of 3 and safe; ⚠ THE TEMPERATURE ARM RESTS ON ONE
+    //     SPEAKER, because one row is all ta_in contains for that sentence, and it is the weaker claim of
+    //     the two. It is kept because it agrees with the offset arm (ta does say the word) and nothing
+    //     contradicts it — not because one recording settles anything. A second ta speaker for the
+    //     Montevideo sentence would have to come from a FLEURS split this corpus does not carry.
+    //
+    //     Both arms, so the sign is read whether it is glued to a label (`UTC+1`) or opens the quantity.
+    //     After the decimal step and before degrees: the plus attaches to a number that later rules still
+    //     need to see as a bare numeral.
+    s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
+    s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
+
     // 9) DEGREES. One bare `35 ° W` plus the spelled-out டிகிரி elsewhere; the scale letter is matched
     //    case-insensitively because the corpus writes both C and c.
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 டிகிரி செல்சியஸ்");

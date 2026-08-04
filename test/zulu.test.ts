@@ -89,7 +89,12 @@ describe("Zulu text normalization (#562)", () => {
         expect(normalizeZulu("x = y")).toBe("x kulingana no-y");
         expect(normalizeZulu("5 < 6")).toBe("5 ngaphansi kuka-6");
         expect(normalizeZulu("6 > 5")).toBe("6 ngaphezu kuka-5"); // the adversarial neighbour — 0 instances
-        expect(normalizeZulu("(UTC+1)")).toBe("(UTC no-1)"); // the corpus's only readable plus
+        // #586. `plas`, not ` no-`. ` no-` was inferred from the SENSE of `(UTC+1)` while the rule's own
+        // comment said a bare positive sign was left under-specified rather than guessing a borrowing — but the
+        // borrowing is audible: a PHONEME recognizer (no `+`, no digits in its vocabulary) gives
+        // `j u t i s i p l a s w a n`. One speaker of three; the other two skip the parenthetical entirely, so
+        // it is 1 of 1 among those who read the offset — thinner than xh's 3 of 3, and recorded as such.
+        expect(normalizeZulu("(UTC+1)")).toBe("(UTC plas 1)");
         expect(normalizeZulu("-5")).toBe("ukukhipha 5"); // a PREFIX; Zulu subtraction takes an object
         // The guard that makes the minus rule safe: a rugby score must NOT read *ukukhipha iqanda*.
         expect(normalizeZulu("ngo-26 -00 kalula")).toBe("ngo-26 -00 kalula");
@@ -132,7 +137,7 @@ describe("Zulu text normalization (#562)", () => {
         expect(normalizeZulu("(15.00 UTC)")).toBe("(15 UTC)");
         expect(normalizeZulu("ngo-12,00 GMT")).toBe("ngo-12 GMT");
         expect(normalizeZulu("(0230 UTC)")).toBe("(2 nemizuzu engu-30 UTC)"); // was read as the number 230
-        expect(normalizeZulu("(UTC+1)")).toBe("(UTC no-1)"); // an offset, not a time — the + reads at step 14b
+        expect(normalizeZulu("(UTC+1)")).toBe("(UTC plas 1)"); // an offset, not a time — the + reads at step 14b
     });
 
     it("ranges — ascending spans join with `kuya ku-`, scores and seasons do not", () => {
@@ -161,7 +166,11 @@ describe("Zulu text normalization (#562)", () => {
 
     it("square miles, degrees, and the compass — the click letters the ° left behind", () => {
         expect(normalizeZulu("(300,948 sq mi)")).toBe("(300948 amamayela skwele)"); // `sq` read as [skǃ]
-        expect(normalizeZulu("kuka-+30°C")).toBe("kuka-amazinga angu-30"); // C alone read as the click [kǀ]
+        // #586. The plus is now VOICED: the degree pattern used to open with `[+]?`, matching the sign and
+        // never re-emitting it, so `+30°C` lost it silently. `plas` is sourced (step 14b) and the sign is
+        // claimed at step 8c, BEFORE degrees — after the degree rewrite the text reads `+amazinga…` and the
+        // sign step needs a digit after the sign, so ordering is what makes it reachable.
+        expect(normalizeZulu("kuka-+30°C")).toBe("kuka- plas amazinga angu-30"); // C alone read as the click [kǀ]
         expect(normalizeZulu("angu-35°F")).toBe("angu-amazinga angu-35 Fahrenheit"); // NOT in the corpus
         expect(normalizeZulu("kwe-35°W")).toBe("kwe-amazinga angu-35 entshonalanga");
         expect(normalizeZulu("40°N")).toBe("amazinga angu-40 enyakatho");
@@ -226,7 +235,7 @@ describe("Zulu text normalization (#562)", () => {
     // the degree word twice and two bound concords in a row (`kuka-` already governs the number).
     it("does not say the degree word twice", () => {
         expect(normalizeZulu("amazinga okushisa angaphezu kuka-+30°C avamile"))
-            .toBe("amazinga okushisa angaphezu kuka-30 avamile");
+            .toBe("amazinga okushisa angaphezu kuka- plas 30 avamile");
         // …and where the clause does NOT carry it, the rule must still emit it.
         expect(normalizeZulu("kufinyelela ku-30°C namuhla")).toBe("kufinyelela ku-amazinga angu-30 namuhla");
         // A clause boundary ends the suppression window — a previous sentence does not license the drop.
