@@ -185,6 +185,7 @@ function yearWords(y: number): string {
 /** Normalize one English input string. Pure text→text; no IPA. */
 /** Superscript digits → ASCII, so an exponent reaches the number path as a readable numeral. */
 const SUPERSCRIPT_DIGIT: Readonly<Record<string, string>> = {
+    "\u207b": "-", // SUPERSCRIPT MINUS — a negative exponent, `10\u207b\u00b3\u00b9`
     "\u2070": "0", "\u00b9": "1", "\u00b2": "2", "\u00b3": "3", "\u2074": "4",
     "\u2075": "5", "\u2076": "6", "\u2077": "7", "\u2078": "8", "\u2079": "9",
 };
@@ -257,9 +258,51 @@ export function normalizeEnglish(input: string): string {
     s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
     s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
 
+    // 0d) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — and the ordering is the whole reason
+    //     this is a separate rule from 6b rather than the same one.
+    //     A superscript sits BETWEEN the number and its unit (`9.11 × 10⁻³¹ kg`), which breaks the adjacency the
+    //     unit rule matches on: the unit then failed and `kg` reached the phoneme stream RAW as *kɡ* — a LEAK,
+    //     which is worse than the dropped exponent it accompanied. Resolving the superscript here leaves the
+    //     exponent's DIGITS immediately before the unit, so step 6 sees `31 kg` and reads it, and the whole
+    //     phrase comes out "…to the power of negative thirty-one kilograms" — which is how a person says it.
+    //     ⚠ It cannot simply be moved earlier wholesale: a bare exponent must be resolved AFTER the unit rule or
+    //     it steals every `km²` and reads it "kilometre squared". Hence two placements, narrow here and general
+    //     there — the narrowing is the `× 10` shape, which is unambiguous scientific notation.
+    //     ⚠ AND BEFORE STEP 0e, which is where the first attempt went wrong. Placed after it, the sign rule had
+    //     already rewritten `-31` to `negative 31`, so the ASCII pattern could no longer match and the reading
+    //     kept saying "ten negative thirty-one" — the sign present, the power still missing. Running first means
+    //     this rule owns the whole construction and emits the sign word itself.
+    //     Measured: the `10 -31` ASCII form occurs twice (my's artifact) and the superscript form ZERO times, so
+    //     this is robustness for correctly-written input rather than a repair of a sampled defect.
+    //     ⚠ THE ASCII FORM IS MATCHED TOO, and it is the one that actually occurs: both real instances in the
+    //     fleet write the exponent as plain digits with the superscript lost — `9.1093837 × 10 -31 kg` and
+    //     `2.5×10 -11 m` (my's artifact). Unhandled, that read "ten NEGATIVE thirty-one kilograms": the sign
+    //     survived but the power was gone, so the reading said subtraction where the text meant an exponent.
+    //     THE ATTACHED MINUS IS THE DISCRIMINATOR — `10 -31` is scientific notation, `10 - 31` (spaced on both
+    //     sides) is subtraction — and both corpus instances write it attached, which is the convention. Combined
+    //     with the required `×` before the `10`, nothing that is not scientific notation can reach this.
+    s = s.replace(/(?<=[×x·]\s?)(10)\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+|-\d+)/gu,
+        (_m, ten: string, sup: string) => {
+            const digits = sup.startsWith("-")
+                ? sup
+                : [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
+            const neg = digits.startsWith("-");
+            return `${ten} to the power of ${neg ? `negative ${digits.slice(1)}` : digits}`;
+        });
+
     // 0e) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst
     //     class of silent error: "-5 degrees" was read as "five degrees".
-    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
+    //     ⚠ "NEGATIVE", NOT "MINUS", and the distinction is the point. `minus` is the ARITHMETIC OPERATOR —
+    //     "ten minus four" — and English convention reserves it for that, using `negative` for a SIGN on an
+    //     amount: "negative thirty-one", "a low of negative forty". This rule only ever matches the SIGN
+    //     position (start of string, after a space, or after an opening paren), so it was spending the
+    //     operator's word on the sign's job. Reading `-31` as "minus thirty-one" is not wrong in isolation, but
+    //     it is ambiguous with subtraction in exactly the place where a phonemizer cannot afford to be — and
+    //     the ambiguity is real here, because a bare `10 - 4` is currently DROPPED, so "minus" in the output
+    //     could only ever have come from a sign anyway.
+    //     `negative` on a measurement is also unremarkable English ("negative forty Celsius"), so the
+    //     disambiguation costs nothing on the reading it is most often applied to.
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1negative $2");
     //     `±` belongs here, with its siblings: it was the ONE sign genuinely missing. I first added a whole
     //     leading-sign block late in the pass before noticing 0e and 0f2 already existed — and the gate had
     //     said so, listing only `equals less-than times` as dropped, not minus or plus. Read the gate's own
@@ -378,12 +421,19 @@ export function normalizeEnglish(input: string): string {
     //     ⚠ AND THE CAP NEEDS `(?<![A-Za-z])`, or it caps nothing: `{1,3}` happily matches the LAST three
     //     letters of a long word, so `Smith¹` matched `ith` and still read as arithmetic. Caught by probing the
     //     exact case the cap was written for.
-    s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?([\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
+    s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?(\u207b?[\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
         (_m, base: string, sup: string) => {
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
-            return digits === "2" ? `${base} squared`
-                : digits === "3" ? `${base} cubed`
-                : `${base} to the power of ${digits}`;
+            //     THE SIGN WORD IS EMITTED HERE, not left as an ASCII `-` for the sign rule to pick up: that
+            //     rule is step 0e and this is step 6b, so anything written now is downstream of it and a `-`
+            //     would simply be dropped — reading `2\u207b\u2075` as "two to the power of five", with the sign
+            //     silently inverted. Ordering makes emitting the word the only correct option.
+            const neg = digits.startsWith("-");
+            const mag = neg ? digits.slice(1) : digits;
+            const power = neg ? `negative ${mag}` : mag;
+            return mag === "2" && !neg ? `${base} squared`
+                : mag === "3" && !neg ? `${base} cubed`
+                : `${base} to the power of ${power}`;
         });
 
     // 7a) ALL-CAPS romans of ANY value, when the text distinguishes case — "Super Bowl LVIII" (58),

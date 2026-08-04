@@ -129,7 +129,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
     // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
     // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} в квадрате", cubed: "{n} в кубе", power: "{n} в степени {e}" },
+    bareExponent: { squared: "{n} в квадрате", cubed: "{n} в кубе", power: "{n} в степени {e}" , negative: "минус" },
     // Without these the magnitude never matched, so "$5 миллионов" hopped the currency word to the WRONG
     // side and read *пять долларов миллионов*. The inflected forms are listed because running text writes
     // the one its numeral governs (5 миллионов, 2 миллиона).

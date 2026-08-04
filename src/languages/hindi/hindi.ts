@@ -229,7 +229,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
     // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
     // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} का वर्ग", cubed: "{n} का घन", power: "{n} की घात {e}" },
+    bareExponent: { squared: "{n} का वर्ग", cubed: "{n} का घन", power: "{n} की घात {e}" , negative: "ऋण" },
 });
 
 export function createHindi(foreign?: ForeignPhonemizer): {

@@ -73,7 +73,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
     // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
     // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n}的平方", cubed: "{n}的立方", power: "{n}的{e}次方" },
+    bareExponent: { squared: "{n}的平方", cubed: "{n}的立方", power: "{n}的{e}次方" , negative: "负" },
     // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿 (10⁸),
     // not "million". Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to
     // the English letter reading: `5 万 km²` came out as *ˈʊkm*, which is worse than the raw text. The
