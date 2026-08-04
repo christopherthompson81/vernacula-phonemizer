@@ -355,6 +355,26 @@ export function normalizeSerbian(input: string): string {
     s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, unit: string, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
+    //    4b) THE BARE DEGREE, which this rule used to decline on purpose — "a bare-degree rule would read
+    //    `35°W` as a temperature". That reasoning protects the SCALE word, and it over-corrected: the arm
+    //    above supplies both the degree noun and Celsius/Fahrenheit, so declining the whole shape threw away
+    //    the degree noun too. The corpus's `источно од 35°W.` read *…istočno od trideset pet .* — the `°` and
+    //    the `W` both silent, so a longitude lost the word that makes it a longitude.
+    //    This arm emits the DEGREE NOUN ONLY, with the same numeral agreement (35 → *stepeni*), and no scale
+    //    word — which is exactly right for a longitude and harmless for a bare temperature. It is safe to
+    //    write unguarded because the C/F arm above has already consumed those forms.
+    //    ⚠ THE COMPASS LETTER IS STILL NOT READ, and that is a stated limit rather than an oversight. The full
+    //    form is *35 степени западне географске дужине*, but a four-way table cannot be sourced here: `западно`
+    //    ×9, `западне` ×7, `северне` ×5, `источне` ×2 — and `јужне` is ×0. Inventing the missing quarter to
+    //    complete a table is the failure this repo keeps records to avoid, so the `W` keeps the silence it has
+    //    today and only the recoverable half is fixed.
+    //    ⚠ IT CONSUMES A WRITTEN DEGREE NOUN, exactly as the C/F arm does, and for the same reason: without
+    //    that, `35° степени` read *trideset pet stepeni STEPENI* — the doubling trap 12 names and this rule's
+    //    own comment warns about, reintroduced two lines below the warning. No corpus instance has the shape
+    //    (the one written noun, `32 °C степена`, is taken by the arm above), so this is robustness — but a
+    //    rule that re-creates the failure its neighbour documents is not worth shipping.
+    s = s.replace(/(\d+)\s?°(\s*(?:степен[аи]|stepen[ai]))?/gu,
+        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
     //    suffix is the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule
