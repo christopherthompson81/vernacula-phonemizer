@@ -368,7 +368,13 @@ export function normalizeSerbian(input: string): string {
     //    ×9, `западне` ×7, `северне` ×5, `источне` ×2 — and `јужне` is ×0. Inventing the missing quarter to
     //    complete a table is the failure this repo keeps records to avoid, so the `W` keeps the silence it has
     //    today and only the recoverable half is fixed.
-    s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
+    //    ⚠ IT CONSUMES A WRITTEN DEGREE NOUN, exactly as the C/F arm does, and for the same reason: without
+    //    that, `35° степени` read *trideset pet stepeni STEPENI* — the doubling trap 12 names and this rule's
+    //    own comment warns about, reintroduced two lines below the warning. No corpus instance has the shape
+    //    (the one written noun, `32 °C степена`, is taken by the arm above), so this is robustness — but a
+    //    rule that re-creates the failure its neighbour documents is not worth shipping.
+    s = s.replace(/(\d+)\s?°(\s*(?:степен[аи]|stepen[ai]))?/gu,
+        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
     //    suffix is the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule
