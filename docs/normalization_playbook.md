@@ -1429,7 +1429,14 @@ Four rules learned immediately, all of them cheap to get wrong:
    There is a reason — **omitting a plus is lossless and omitting a minus INVERTS**. `+30°` and `30°` are the
    same temperature; `-30°` and `30°` are not. Never justify reading a plus with the minus's argument; hi's
    rule did exactly that, borrowing its own minus step's citation.
-4. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
+4. **A 2 kbps CODEC RECONSTRUCTION ANSWERS ONLY THE YES/NO QUESTION.** The corpus also ships Higgs-Audio-v2
+   codec tokens (7–12 MB/language vs ~1.6 GB of audio) and they *are* decodable (`higgs_decoder.onnx`). Graded
+   against known answers on hi's four utterances, all four survived — both spoken pluses and both silences, at
+   log-mel SD ~3.1 dB. But the round trip moved a vowel `[e]` → `[a]` and flipped `p` → `b`, and a vowel is
+   exactly what an orthography choice rests on (xh/zu's `plas` vs `plus`). Use reconstruction to ask *is there a
+   word here*; never to ask *which word*. Prune to the 2–5 extracted utterances instead — lossless, and smaller
+   than the codes.
+5. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
 
