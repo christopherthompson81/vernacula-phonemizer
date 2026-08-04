@@ -105,4 +105,23 @@ describe("tagalog canonical IPA", () => {
         expect(phonemize("1000", "tl")).toBe("sanlˈibo"); // sanlíbo — penult exception
         expect(phonemize("200", "tl")).toBe("dalawˈaŋ daʔˈan"); // dalawáng daán — ligature keeps final stress
     });
+
+    test("#657 out-of-inventory accents fold; ñ is NATIVE and must not", () => {
+        // `[A-Za-zÑñ]+` ended the token at an out-of-class diacritic, so that letter became an unclaimed gap read
+        // as an English LETTER NAME: `São Paulo` → *s ˈə ʔˈo paʔˈulo*, `Klöcker` → *kl ˈoᶷ kkˈeɾ*.
+        // ⚠ THE FOLD IS CONDITIONAL, and that is the whole subtlety here. Tagalog inherited `ñ` from Spanish and
+        // reads it as /ɲ/, so folding every accent the way pcm does would destroy exactly the accented letter this
+        // language CAN read.
+        expect(phonemize("Cañitas", "tl")).toBe("kaɲˈitas");
+        expect(phonemize("Doña Maria", "tl")).toContain("dˈoɲa");
+        // An out-of-inventory accent folds to its base — Tagalog NATIVISES (`computer` → kompˈuteɾ, not English)
+        // so a foreign name is read with Tagalog values, which needs a letter to read. Dropping it is deleting.
+        expect(phonemize("São Paulo", "tl")).toBe(phonemize("Sao Paulo", "tl"));
+        expect(phonemize("Klöcker", "tl")).toBe(phonemize("Klocker", "tl"));
+        expect(phonemize("Klöcker", "tl")).not.toMatch(/ˈoᶷ/u);
+        // The hyphen compound is one word, and native text is untouched.
+        expect(phonemize("kaibigan-ko", "tl")).toBe("kaʔibiɡˈanʔko");
+        expect(phonemize("ang mga bata", "tl")).toBe("ʔˈaŋ maŋˈa bˈata");
+        expect(phonemize("computer", "tl")).toBe("kompˈuteɾ");
+    });
 });
