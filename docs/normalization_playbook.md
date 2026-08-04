@@ -1445,6 +1445,12 @@ Four rules learned immediately, all of them cheap to get wrong:
    `z`~`l` both voiced continuants) and a phone string could not separate them. A text ASR could: MMS wrote
    `اضف` (ض) for one speaker and `بعه` (ع) for the other — different letters, matching the split. When phones
    suggest two variants, confirm with a model that emits script before claiming the language has two forms.
+   ⚠ **BUT THE CROSS-CHECK ONLY WORKS WHEN THE SPOKEN ITEM IS A WORD THE SCRIPT MODEL WILL SPELL.** Tried on
+   xh and zu — whose `plas`-not-`plus` spelling rests on the attested vowel being [a] — MMS wrote `utc+1`, the
+   GLYPH, for every speaker: in fa the readers said a NATIVE word, in xh/zu an English loan in a slot where an
+   orthographic model prefers the sign. So those two spellings still rest on phones alone, and are labelled in
+   their files as reproducing the attested phones with the conventional loan spelling UNSOURCED. Know which of
+   the two situations you are in before claiming a spelling is corroborated.
 6. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
