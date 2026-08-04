@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeNumberToWords, type AlbanianNumbers } from "./numbers.ts";
@@ -48,7 +49,9 @@ export function phonemizeWord(word: string): string {
         for (const key of ORDER) {
             if (w.startsWith(key, i)) { segs.push(DIGRAPHS[key]!); i += key.length; continue outer; }
         }
-        const ph = G[w[i]!];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
+        const ph = G[w[i]!] ?? latinPhone(w[i]!);
         if (ph !== undefined) segs.push(ph);
         i += 1;
     }

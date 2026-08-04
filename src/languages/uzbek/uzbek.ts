@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber } from "../../core/numbers.ts";
@@ -54,7 +55,10 @@ export function phonemizeWord(word: string): string {
             continue;
         }
         if (DEF.vowels[c] !== undefined) out.push(DEF.vowels[c]!);
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
         else if (DEF.consonants[c] !== undefined) out.push(DEF.consonants[c]!);
+        else { const p = latinPhone(c); if (p !== undefined) out.push(p); }
         // else: unknown char (stray punctuation inside a token) → skip
         i++;
     }
