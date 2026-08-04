@@ -14,6 +14,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
@@ -58,7 +59,9 @@ function scan(word: string): string[] {
         if (c === "y") { out.push(VOWEL_LETTER.has(next) ? "ʝ" : "i"); i += 1; continue; }
         // word-initial ⟨r⟩ → [r] trill (single ⟨r⟩ is the tap [ɾ] via the table; ⟨rr⟩ is the digraph above).
         if (c === "r" && i === 0) { out.push("r"); i += 1; continue; }
-        const ph = G[c];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
+        const ph = G[c] ?? latinPhone(c, { initial: i === 0 });
         if (ph !== undefined && ph !== "") out.push(ph);
         i += 1;
     }

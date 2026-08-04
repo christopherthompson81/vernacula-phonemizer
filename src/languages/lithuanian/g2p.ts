@@ -16,6 +16,7 @@
  * quality; the referee's length + pitch accents are folded. See docs/investigations/lt_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const V = MANIFEST.vowels;
 const VDI = MANIFEST.vowelDigraphs;
@@ -51,7 +52,10 @@ function tokenize(w: string): Unit[] {
         const c = w[i]!;
         if (c in V) { u.push({ ch: c, kind: "V", ph: V[c]!, soft: false }); i += 1; continue; }
         if (c in C) { u.push({ ch: c, kind: "C", ph: C[c]!, soft: false }); i += 1; continue; }
-        i += 1; // unknown → skip
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        { const p = latinPhone(c, { initial: i === 0, includeH: true }); if (p !== undefined) u.push({ ch: c, kind: "C", ph: p, soft: false }); }
+        i += 1;
     }
     return u;
 }

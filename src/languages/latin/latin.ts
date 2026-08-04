@@ -13,6 +13,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Short vowels LAX to open-mid/near-close (Allen); ⟨a⟩ stays open. Long vowels (macron) are tense + [ː].
 const SHORT: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", y: "y", ë: "ɛ", ï: "ɪ", ö: "ɔ", ü: "ʊ", ÿ: "y" };
@@ -110,7 +111,10 @@ export function phonemizeWord(word: string): string {
         }
         // ── Single consonants ───────────────────────────────────────────────
         if (CONS[c] !== undefined) { segs.push(CONS[c]!); i += 1; continue; }
-        i += 1; // unmapped (apostrophe, stray mark) — drop
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        { const p = latinPhone(c, { initial: i === 0, includeH: true }); if (p !== undefined) segs.push(p); }
+        i += 1;
     }
 
     // ── Post-processing on the segment array ────────────────────────────────

@@ -8,6 +8,7 @@
  * downstream (malagasy.ts). See docs/investigations/mg_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const VOWEL_IPA = MANIFEST.vowels;
 const CONS_IPA = MANIFEST.consonants;
@@ -77,9 +78,10 @@ export function toSegments(word: string): Seg[] {
             i++;
             continue;
         }
-        const cons = CONS_IPA[c];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        const cons = CONS_IPA[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
-        // else: unknown char (punctuation) → skip
         i++;
     }
     return segs;

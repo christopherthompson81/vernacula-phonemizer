@@ -17,6 +17,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface LingalaDef {
@@ -59,7 +60,11 @@ export function phonemizeWord(word: string): string {
             i += mark in TONE ? 2 : 1;
             continue;
         }
-        i += 1; // unknown (incl. stray combining marks) → skip
+        // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
+        // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
+        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        out += latinPhone(c, { initial: i === 0 }) ?? "";
+        i += 1;
     }
     return out.normalize("NFC");
 }

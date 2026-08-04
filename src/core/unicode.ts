@@ -175,19 +175,50 @@ export function foldNativeDigits(s: string): string {
  * closed list, and admitting only the letters that happen to occur would leave the same trap for the next
  * corpus. Every entry is a visual look-alike, not a transliteration.
  */
+/**
+ * ⚠ PRECAUTIONARY, NOT CORPUS-ATTESTED, and the distinction matters for how much weight the rows carry. Counted
+ * across all 67 corpora, exactly ONE member of this table occurs between two Latin letters: `ϊ`, twice, in
+ * `af proteϊene`. Every other row is here on the Unicode TR39 confusables basis — a phonemizer is handed arbitrary
+ * text, and homoglyphs arrive from OCR and from keyboard-layout slips rather than from curated corpora.
+ *
+ * ⚠ THE LOWERCASE MAPPING IS NOT THE LOWERCASE OF THE UPPERCASE ONE. Greek capital `Β` looks like Latin `B`, so it
+ * folds to `B`. Greek small `β` does NOT look like `b` — it looks like German `ß`, which is why a mistyped or
+ * OCR'd `Straβe` is far commoner than anyone intending a `b`. Folding `β`→`b` by symmetry with `Β`→`B` would be
+ * wrong in exactly the case the row exists for.
+ *
+ * Without the row the letter is not merely mis-read, it FRAGMENTS the word: `β` is Greek script, so a Latin-script
+ * tokenizer declines it, and a lone Greek letter is below the script router's two-letter threshold — so
+ * `Straβe` came out *stɹˈæ ˈiː* in English, the β gone and the word in two pieces (#657's defect class arriving by
+ * a different route).
+ */
 const LATIN_CONFUSABLE: Readonly<Record<string, string>> = {
     // Greek → Latin
     "ϊ": "ï", "Α": "A", "Β": "B", "Ε": "E", "Η": "H", "Ι": "I",
     "Κ": "K", "Μ": "M", "Ν": "N", "Ο": "O", "Ρ": "P", "Τ": "T",
     "Υ": "Y", "Χ": "X", "α": "a", "ο": "o", "ρ": "p", "υ": "u",
+    // Greek LOWERCASE, whose Latin look-alikes differ from their capitals' (see the note above).
+    "β": "ß", "ν": "v", "κ": "k", "χ": "x", "ι": "i",
     // Cyrillic → Latin
     "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H",
     "О": "O", "Р": "P", "С": "C", "Т": "T", "У": "Y", "Х": "X",
     "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y",
     "х": "x", "і": "i", "ё": "ë",
 };
+/**
+ * Preceded by a Latin letter, and NOT followed by more of the homoglyph's own script.
+ *
+ * ⚠ REQUIRING LATIN ON BOTH SIDES MISSES THE WORD-FINAL CASE, which for the row this was written for is the
+ * commonest one: German `ß` is word-final constantly — `Weiß`, `Gauß`, `Fluß`, `Maß` — so `Weiβ` and `Gauβ` were
+ * left unrepaired and still lost the letter, while the medial `Straβe` was fixed. A trailing-context guard has to
+ * admit the end of the word.
+ *
+ * The trailing lookahead is what keeps genuine Greek and Cyrillic safe, and it is strictly better than "must be
+ * followed by Latin": a real Greek word is either not preceded by a Latin letter at all (`Το βιβλίο` — the β
+ * follows a space) or continues in its own script (`theβιβλίο` — the β is followed by ι), and both are declined.
+ */
 const CONFUSABLE_RE = new RegExp(
-    `(?<=\\p{Script=Latin})([${Object.keys(LATIN_CONFUSABLE).join("")}])(?=\\p{Script=Latin})`, "gu");
+    `(?<=\\p{Script=Latin})([${Object.keys(LATIN_CONFUSABLE).join("")}])`
+    + `(?![\\p{Script=Greek}\\p{Script=Cyrillic}])`, "gu");
 
 /** Fold a Greek/Cyrillic look-alike sitting INSIDE a Latin word to its Latin equivalent. */
 export function foldLatinConfusables(s: string): string {
@@ -402,4 +433,25 @@ export function foldVulgarFractions(s: string): string {
 
 export function foldSquaredDegrees(s: string): string {
     return s.replace(/℃/gu, "\u00b0C").replace(/℉/gu, "\u00b0F");
+}
+
+/**
+ * FULLWIDTH LATIN LETTERS AND DIGITS → their ASCII twins (Ｇ→G, ７→7).
+ *
+ * The fullwidth forms are the same characters at CJK cell width, used inside Chinese, Japanese and Korean text for
+ * Latin runs and numerals. Nothing downstream knows them: they are `Script=Latin` letters with NO decomposition, so
+ * the mark-stripping fold cannot reach them and a g2p with no rule DROPS them. Attested in the corpora as `Ｇ` and
+ * `Ｗ` inside CJK sentences.
+ *
+ * ⚠ LETTERS AND DIGITS ONLY, not the whole fullwidth block. U+FF01–FF5E also holds fullwidth PUNCTUATION, and the
+ * CJK engines already read their own `，、。？！` and the fullwidth ASCII marks deliberately — folding those would
+ * reach into decisions those engines have already made. This is the narrow half of NFKC that is unambiguously
+ * safe, chosen for the same reason `foldSquaredDegrees` stops at two characters instead of applying NFKC wholesale.
+ */
+const FULLWIDTH = /[\uFF10-\uFF19\uFF21-\uFF3A\uFF41-\uFF5A]/gu;
+export function foldFullwidthLatin(s: string): string {
+    FULLWIDTH.lastIndex = 0;
+    if (!FULLWIDTH.test(s)) return s;
+    FULLWIDTH.lastIndex = 0;
+    return s.replace(FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
 }

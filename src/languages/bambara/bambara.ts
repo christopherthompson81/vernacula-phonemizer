@@ -15,6 +15,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { isNko, nkoToLatin } from "./bambaraNko.ts";
 import { foldNkoDigits, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -47,9 +48,11 @@ export function phonemizeWord(word: string): string {
             i += 1;
             continue;
         }
-        const g = G[c];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        const g = G[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
         if (g !== undefined) out.push(g);
-        i += 1; // single grapheme, or skip unknown
+        i += 1;
     }
     return out.join("");
 }

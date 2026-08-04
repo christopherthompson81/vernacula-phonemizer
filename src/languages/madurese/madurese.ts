@@ -14,6 +14,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST, CONS, CONS_KEYS, VOWEL_KEYS, type Reg } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const VSPEC = MANIFEST.vowelSpec;
 const DEVOICE = MANIFEST.finalDevoice;
@@ -68,7 +69,11 @@ function tokenize(w: string): Seg[] {
         }
         if (!matched) {
             geminate = false;
-            i += 1; // unknown char → skip
+            // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+            // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+            { const ph = latinPhone(w[i]!, { initial: i === 0, includeH: true });
+              if (ph !== undefined) segs.push({ kind: "C", ipa: ph, reg: "low" }); }
+            i += 1;
         }
     }
     return segs;

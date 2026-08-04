@@ -2225,3 +2225,83 @@ render /t͡ʃ/, and preserving the source sound is judged worth that.
 keep being fragile. So this needs a look at how many engines share a g2p helper before it is scoped.
 
 Reverted to `ad3fb37`; the measurement is preserved in the issue. tsc PASS, 207 files / 2943 tests.
+
+## Run 34 — 2026-08-04 — #663: positional ⟨x⟩, and MEASURING which languages are strict CV instead of guessing
+
+### ⟨x⟩ is /z/ word-initially
+
+`x`→/ks/ is the letter's value between or after vowels (`Xerox` → *…oks*, `taxi`), but no language that borrows
+⟨x⟩ begins a word with the cluster — `Xerox`, `xylophone`, `Xanthe` all start /z/. Emitting /ks/ there manufactured
+an initial cluster the SOURCE language does not have either, which is the worst case: illegal in the host and wrong
+about the loan. `latinPhone` now takes the position; `ak Xerox` → *zeroks*.
+
+⚠ And it correctly does NOT fire where a language has its own ⟨x⟩ rule: Albanian reads ⟨x⟩ as /d͡z/ and Uzbek as
+/χ/, so `sq Xerox` → *ˈd͡zɛɾod͡z* and `uz axis` → *aχˈis* — untouched, because the fall-through is never reached.
+That is the placement doing its job.
+
+### ⚠ "The suspicious ones should be measured/routed" — measured, and my assumption was wrong
+
+I had assumed the routing set was "engines missing many letters": mi 13, qu 7, naq 6, ak 6, mad 5, yo 5, mg 5.
+That is a proxy for the wrong property. What makes the letter-level floor produce ILLEGAL output is strict CV
+phonotactics — no codas, no clusters — and letter count does not measure that.
+
+Measured from each language's OWN text (corpus where one exists, lexicon/manifest otherwise), the share of words
+ending in a consonant:
+
+| lang | letters missing | word-final consonant |
+|---|---|---|
+| **mi** | 13 | **4.9%** |
+| hr | 4 | 23.2% |
+| ff | 3 | 26.5% |
+| nso | 3 | 45.8% |
+| uz | 2 | 51.7% |
+| az | 1 | 60.2% |
+| lb | 1 | 83.8% |
+
+**Māori is the only strict-CV engine in the set, by a factor of five** — and it is already routed. Every other
+measurable language permits codas freely, so the floor produces legal forms and routing would be a regression, not
+an improvement. Letter count and phonotactic restrictiveness are not the same axis: `ff` is missing three letters
+and permits codas at 26.5%; `mi` is missing thirteen and permits them at 4.9%.
+
+⚠ AND MY CLUSTER METRIC WAS CONFOUNDED, so only the coda figure is load-bearing. A crude vowel/non-vowel test
+counts Māori's own ⟨ng⟩ and ⟨wh⟩ digraphs as consonant clusters, which is why Māori shows 30.8% "clusters" while
+being the strictest CV language in the fleet. The digraph is one segment; the metric cannot see that.
+
+⚠ NO EVIDENCE FOR SEVEN OF THE CANDIDATES. `naq qu ak mad yo mg` and several others have under 400 words of native
+text available, so they are absent from the table entirely — not passing it. Deciding to route them would be acting
+on the letter-count proxy I have just shown does not measure the property. Recorded as needing corpus data.
+
+Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.
+
+## Run 35 — 2026-08-04 — #663 complete: 45 engines → 9, and all nine remaining are by design
+
+The last three fall-through idioms hooked (`az kl kaa naq ltg`, then `mg tk crh`). Behavioural measurement across
+every registered language: **45 engines dropping an ASCII letter → 9**, and each of the nine is deliberate:
+
+| remaining | why |
+|---|---|
+| `gl it quc an ast wo` | ⟨h⟩ ONLY. Written and read as nothing in those orthographies; the table declines `h` by default and these engines never opt in. Correct silence, not loss. |
+| `sr hr bs` | Deferred to the normalization work. They share one Serbo-Croatian g2p, and `35°W` normalises to `stepeniW` — the degree rule consumes `°` and leaves the compass letter ATTACHED to the previous word. Voicing it reads *stepeniw*; the right answer is the Serbian word for "west", which is normalization vocabulary, not a phone. |
+
+Residual letters: `h` 6, and `q w x y` only via the three deferred engines. From `x` in 30 engines and `q` in 29.
+
+### Four g2p idioms, none of them findable by grep
+
+The scan loops fall into four shapes, and locating them by pattern-matching found 8 of 41 — the same "structural
+pattern instead of a measurement" error as #657, made again:
+
+1. `if (ph !== undefined) push; i += 1;` — the fall-through is the IMPLICIT else, so augmenting the LOOKUP
+   (`G[c] ?? latinPhone(c, …)`) is the whole hook (14 engines)
+2. `if (!matched) i++;` — an explicit miss branch on a longest-match loop (14 engines)
+3. a commented `i += 1; // unknown → skip` at the end of a long if/continue chain (9 engines)
+4. `for (let i = 0; …; i++)` with NO fall-through statement at all — the increment is the loop header, so the
+   branch has to be written (8 engines)
+
+### ⚠ And ⟨q x⟩ IN THE OUTPUT IS USUALLY CORRECT, which broke my leak probe a fifth time
+
+`crh Quixote → quiksoˈte`, `az Xerox → xeɾˈox`, `kaa → χeˈroχ`, `naq → xerox` all keep a ⟨q⟩ or ⟨x⟩ — and every one
+is that language's OWN rule firing, because /q/ and /x/ are their phonemes. The fall-through was never reached.
+A probe that flags "a letter that looks like orthography" cannot distinguish orthography from a phonetic alphabet
+that is itself written in Latin letters. Fifth time on these two issues; the lesson is that IPA is Latin.
+
+Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.

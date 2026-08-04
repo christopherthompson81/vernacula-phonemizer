@@ -137,6 +137,7 @@ const UNDECOMPOSABLE: Readonly<Record<string, string>> = {
     ß: "ss", ł: "l", Ł: "L", đ: "d", Đ: "D", ħ: "h", Ħ: "H", ŋ: "n", Ŋ: "N",
     ɛ: "e", Ɛ: "E", ɔ: "o", Ɔ: "O", ə: "e", Ə: "E", ɓ: "b", Ɓ: "B", ɗ: "d", Ɗ: "D",
     ƙ: "k", Ƙ: "K", ƴ: "y", Ƴ: "Y", ı: "i", ʉ: "u", ɨ: "i", ƀ: "b", ŧ: "t", ſ: "s",
+    ƒ: "f", Ƒ: "F", // f with hook — /f/ in the African orthographies that use it (and the florin sign)
 };
 const UNDECOMPOSABLE_RE = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join("")}]`, "gu");
 

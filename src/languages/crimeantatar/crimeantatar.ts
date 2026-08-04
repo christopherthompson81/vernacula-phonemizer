@@ -15,6 +15,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel; the
 // palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature — deferred). ⟨v⟩ is
@@ -37,8 +38,10 @@ export function phonemizeWord(word: string): string {
     const segs: string[] = [];
     for (let i = 0; i < chars.length; i++) {
         const c = chars[i]!;
-        let ph = LETTER[c];
-        if (ph === undefined) continue; // unknown char — skip
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        let ph = LETTER[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
+        if (ph === undefined) continue; // not a letter at all (stray mark) — skip
         // ⟨v⟩ → [w] in a POST-VOCALIC CODA (after a vowel, not before one): the Kipchak offglide (av→ɑw, suv→suw).
         // Intervocalic / onset ⟨v⟩ stays [v] (quvet→quvet, vatan→vɑtɑn) — the referee's Arabic-loan quvetsiz confirms.
         if (c === "v" && i > 0 && CYR_VOWEL.has(chars[i - 1]!) && !(i + 1 < chars.length && CYR_VOWEL.has(chars[i + 1]!))) {
