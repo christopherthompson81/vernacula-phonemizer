@@ -154,6 +154,13 @@ export function normalizeBulgarian(input: string): string {
     //    `22:00` read as "двайсет и две , нула". There is no period-clock form — see the header.
     t = t.replace(/(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
+    // 6b) НОМЕР. The NUMERO SIGN was dropped outright — "космонавт № 11" read as *космонавт единадесет*, the
+    //     sign silently gone. `номер` ×5 in this corpus (plus `номера` ×1), and ru and uk already read the sign
+    //     exactly this way, preposed before the figure. THIS IS THE CHARACTER DELIBERATELY EXCLUDED FROM THE
+    //     ℃ FOLD: NFKC maps № to the Latin "No", which a Bulgarian g2p would read as an English word — a
+    //     compatibility character can need a WORD rather than a fold, which is why it was left for here.
+    t = t.replace(/№\s?(?=\d)/gu, "номер ");
+
     // 7) PERCENT (18) → the counting plural `процента`, which is what the corpus writes out (8/8).
     t = t.replace(/(\d+)\s*%/gu, "$1 процента");
 

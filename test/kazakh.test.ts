@@ -160,4 +160,12 @@ describe("Kazakh text normalization", () => {
         expect(phonemize("2,2 km²", "kk")).toContain("ʃˈɑrʃə kəjlomˈetr");
         expect(phonemize("120 m³", "kk")).toContain("tekʃˈe mˈetr");
     });
+
+    // #586 — THE NUMERO SIGN was dropped: «№ 11 ғарышкер» read as *он бір ғарышкер*. `нөмір` ×1 here, and the
+    // same corpus writes the same content the other way round — `1 және 2 нөмірлі реакторлар`, the postposed
+    // adjectival form, which suits a different construction than a preposed sign.
+    // ⚠ One instance of each: acted on because the alternative is a silently dropped sign.
+    it("the numero sign reads нөмір (#586)", () => {
+        expect(phonemize("«№ 11 ғарышкер»", "kk")).toContain("nɵmˈɪr ˈonbˈɪr");
+    });
 });

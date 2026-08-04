@@ -104,20 +104,31 @@ const TOKEN =
 
 // #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
 // nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri*).
-// cant/doler/punt/cilogram are referee-attested; cilometr/milimetr/centimetr are the standard
-// borrowings, read by rule. `m` (metre) added for the corpus's 100m/230m running events and 4892 m.
+// cant/doler/punt/cilogram are referee-attested; milimetr/centimetr are the standard borrowings, read by
+// rule. `m` (metre) added for the corpus's 100m/230m running events and 4892 m.
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["y cant"],
     currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
-    units: { km: ["cilometr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },
+    units: { km: ["cilomedr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },
     // #586. `5 km²` read as *pˈɨmp km*, the abbreviation raw in the IPA — see the German note for the shared
     // cause. Welsh puts the measure word AFTER the unit with a space, which the corpus shows ×10:
     // "2.2 miliwn cilomedr sgwâr o gefnfor"; ciwbig ×3 for the cube. One form each — both are adjectives and
     // do not agree here.
     //
-    // NOTED, NOT CHANGED: the corpus spells the unit `cilomedr` ×67 and never `cilometr` ×0, which is what is
-    // declared above. Both are current Welsh orthography and they phonemize close to identically, so this is a
-    // spelling-preference finding for the sweep rather than a defect to fix inside an exponent change.
+    // `cilomedr`, NOT `cilometr`, and this was recorded as a spelling preference before it was measured. It is
+    // not one. The corpus writes `cilomedr` ×26 unique (×67 raw) and `cilometr` ZERO times, and the two do NOT
+    // "phonemize close to identically" as the earlier note claimed — Welsh /t/ and /d/ are distinct phonemes:
+    //     cilometr → kilˈɔmɛtr        cilomedr → kilˈɔmɛdr
+    // so the declared form put an audible [t] where this language says [d].
+    // THE EXPONENT PHRASE IS WHAT SETTLES IT. The corpus's own squared reading is `cilomedr sgwâr` ×10
+    // ("2.2 miliwn cilomedr sgwâr o gefnfor") — the measure word below is taken from that phrase, so the head
+    // noun has to be the same word or the tier composes half an attested collocation.
+    //
+    // ⚠ `mm`/`cm` ARE LEFT AS -metr, on purpose. Neither spelling of either is attested here (milimetr,
+    // milimedr, centimetr, centimedr are all ×0), so there is no corpus to follow — and while the attested
+    // pattern is suggestive (the free-standing word is `metr` ×10 but the COMPOUND is `cilomedr`), extending
+    // it to two units the corpus never writes would be inference dressed as evidence. The standard borrowing
+    // stays until something attests otherwise.
     exponentWords: { squared: ["sgwâr"], cubed: ["ciwbig"], position: "after" },
 });
 

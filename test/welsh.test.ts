@@ -172,4 +172,15 @@ describe("Welsh text normalization", () => {
         expect(ph("NHK")).toBe("ˈɛn ˈaᶦtsh ˈɛk"); // en aitsh ec
         expect(ph("UCLA")).toBe("ˈɨː ˈɛk ˈɛl ˈa");
     });
+
+    // #586 — `cilomedr`, NOT `cilometr`. Recorded as a spelling preference before it was measured; it is not
+    // one. The corpus writes `cilomedr` ×26 unique and `cilometr` ZERO times, and Welsh /t/ and /d/ are
+    // distinct phonemes — kilˈɔmɛtr vs kilˈɔmɛdr — so the declared form put an audible [t] where this language
+    // says [d]. THE EXPONENT PHRASE SETTLES IT: the corpus's squared reading is `cilomedr sgwâr` ×10, so the
+    // head noun has to be that word or the tier composes half an attested collocation.
+    test("the unit noun is the corpus's spelling (#586)", () => {
+        expect(phonemize("5 km", "cy")).toContain("kilˈɔmɛdr");
+        expect(phonemize("5 km²", "cy")).toContain("kilˈɔmɛdr sɡwˈaːr"); // = the corpus's own phrase
+        expect(phonemize("5 m", "cy")).toContain("mˈɛtr");               // the FREE word is metr ×10
+    });
 });
