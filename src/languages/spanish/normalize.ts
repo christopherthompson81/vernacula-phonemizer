@@ -187,6 +187,12 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     });
 
     // 6) SIGNS. A dropped sign is silent content loss, and for a temperature it inverts the meaning.
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
+    //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
+    //    character, so the + rule cannot see it, and putting it first keeps the sign audible either way.
+    s = s.replace(/±/gu, " más menos ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 más $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1más $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");

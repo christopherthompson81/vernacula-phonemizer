@@ -408,6 +408,12 @@ export function normalizeGreek(input: string): string {
 
     // 11) SIGNS and VULGAR FRACTIONS. `(UTC +1)`; and `29¾ επί 24½ ίντσες`, where the elided noun is
     //     feminine (ίντσα) — «είκοσι εννιά και τρία τέταρτα».
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
+    //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
+    //    character, so the + rule cannot see it, and putting it first keeps the sign audible either way.
+    s = s.replace(/±/gu, " συν μείον ");
     s = s.replace(/(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "συν ");
     s = s.replace(/(\d)\s?½/gu, "$1 και μισή");
     s = s.replace(/(\d)\s?¼/gu, "$1 και ένα τέταρτο");

@@ -80,6 +80,12 @@ export function normalizeArabic(input: string): string {
 
     // 5) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(new RegExp(`(^|[\\s(])[-−–]([${DIGIT}])`, "gu"), "$1نَاقِص $2");
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
+    //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
+    //    character, so the + rule cannot see it, and putting it first keeps the sign audible either way.
+    s = s.replace(/±/gu, " زَائِد نَاقِص ");
     s = s.replace(new RegExp(`(\\S)\\+\\s?([${DIGIT}])`, "gu"), "$1 زَائِد $2");
     s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${DIGIT}])`, "gu"), "$1زَائِد $2");
 
