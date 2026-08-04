@@ -513,7 +513,10 @@ describe("an undeclared exponent word must not cost the unit too (#586)", () => 
     // The two languages whose measure word this run sourced from their own corpora.
     test("de fuses it on the front, cy puts it after with a space", () => {
         expect(phonemize("5 km²", "de")).toBe("fʏnf kvadʁˈaːtkilomeːtɐ");   // Quadratkilometer ×2 in corpus
-        expect(phonemize("5 km²", "cy")).toBe("pˈɨmp kilˈɔmɛtr sɡwˈaːr");    // "cilomedr sgwâr" ×10
+        // `cilomedr`, the corpus's spelling — and its own squared phrase is `cilomedr sgwâr` ×10, so the
+        // head noun and the measure word come from one attested collocation (was `cilometr`, an audible
+        // [t] for [d], since Welsh /t/ and /d/ are distinct phonemes).
+        expect(phonemize("5 km²", "cy")).toBe("pˈɨmp kilˈɔmɛdr sɡwˈaːr");    // "cilomedr sgwâr" ×10
         expect(phonemize("5 m³", "cy")).toBe("pˈɨmp mˈɛtr kˈɪᵘbiɡ");        // ciwbig ×3
         // …and the magnitude still hops in front of it.
         expect(phonemize("2,2 Millionen km²", "de")).toContain("kvadʁˈaːtkilomeːtɐ");

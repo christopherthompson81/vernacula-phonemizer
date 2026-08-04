@@ -218,6 +218,14 @@ export function normalizeKazakh(input: string): string {
         return `${ord} ${tail}`;
     });
 
+    // 2b) НӨМІР. The NUMERO SIGN was dropped outright — the corpus's «№ 11 ғарышкер» read as *он бір
+    //     ғарышкер*, the sign gone. `нөмір` ×1 here ("жергілікті нөмір алу"), and the same corpus writes the
+    //     content the other way round in `1 және 2 нөмірлі реакторлар` — the postposed adjectival form, which
+    //     suits a different construction and is not what a preposed sign wants. Emitted preposed, the shape ru
+    //     and uk already use for this character. ⚠ ONE INSTANCE OF EACH: this is a lead acted on because the
+    //     alternative is a silently dropped sign, not a strongly attested reading.
+    s = s.replace(/№\s?(?=\d)/gu, "нөмір ");
+
     // 3) CLOCK, in the COLON form. `08:46` → сегіз қырық алты; `13:15` → он үш он бес. The corpus's
     //    `10: 00` (space after colon) is handled. Runs BEFORE the case-suffix rule so a case-suffixed
     //    clock (`11:00-ден`, `9:30-да`) is read as a time first and the suffix attaches to its last

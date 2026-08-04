@@ -119,4 +119,13 @@ describe("bulgarian normalization", () => {
         expect(createBulgarian().text("120 km/h").trim()).toContain("kiɫɔmɛtra f t͡ʃas");
         expect(createBulgarian().text("120 км/ч").trim()).toContain("kiɫɔmɛtra f t͡ʃas"); // unchanged
     });
+
+    // #586 — THE NUMERO SIGN was dropped outright: "космонавт № 11" read as *космонавт единадесет*, the sign
+    // silently gone. `номер` ×5 in this corpus, and ru/uk already read it this way, preposed.
+    // ⚠ This is the character DELIBERATELY EXCLUDED from the ℃ fold (trap 36): NFKC maps № to the Latin "No",
+    // which a Bulgarian g2p reads as an English word. A compatibility character can need a WORD, not a fold.
+    test("the numero sign reads номер (#586)", () => {
+        expect(createBulgarian().text("космонавт № 11").trim()).toContain("nɔmɛr ɛdinajsɛt");
+        expect(createBulgarian().text("реактори № 1").trim()).toContain("nɔmɛr");
+    });
 });
