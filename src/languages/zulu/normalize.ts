@@ -238,24 +238,44 @@ export function normalizeZulu(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
         (m0) => halfDay(m0).trim());
 
-    // 8c) THE PLUS, CLAIMED BEFORE DEGREES — the ordering coupling, and it was a live defect. The degree rule
-    //     below used to open with `[+]?`, matching the sign and never re-emitting it, so `+30°C` read
-    //     *amazinga angu-30* with the plus silently gone. That was harmless while zu had no sourced plus word;
-    //     now that `plas` is sourced (step 14b) it HID one, and the sign could never reach step 14b anyway —
-    //     after the degree rewrite the text is `+amazinga…`, and 14b's arm requires a digit after the sign.
-    //     So the sign is claimed here, before its operand is consumed, and `[+]?` is gone from the degree
-    //     patterns so a form this arm misses cannot be silently eaten there either.
+    // 8c) THE PLUS → `plas`, SOURCED FROM THE CORPUS'S OWN AUDIO, and claimed HERE rather than with the other
+    //     signs at step 14b because the ordering is load-bearing. This step is the whole of the plus handling;
+    //     step 14b deliberately has no plus arm, because one there would be unreachable.
+    //
+    //     THE WORD. It used to read ` no-` ("and/with"), inferred from the sense of the corpus's `(UTC+1)`,
+    //     with step 14b's own note saying a bare positive sign was left under-specified "rather than guessing a
+    //     borrowing". It did not need guessing — it is audible. Decoded with
+    //     facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME recognizer whose vocabulary holds no `+` and no
+    //     digits, so unlike a text ASR it cannot echo the orthography back:
+    //         5534088546704143284  →  j u t i s i  p l a s  w a n
+    //     ⚠ ONE SPEAKER OF THREE, and the other two are absence rather than counter-evidence: they skip the
+    //     whole parenthetical (`…isikhathi sendawo ewhitehall…`), the reader behaviour also seen in ta, en and
+    //     am. So it is 1 of 1 among speakers who read the offset at all — thinner than xh's 3 of 3, and
+    //     recorded as such. The method was validated on hi, where a text ASR had already given the answer: 4 of
+    //     4, including reproducing the SILENCE before a temperature, so it does not invent the word either.
+    //     ⚠ Spelled `plas`, not `plus`: the attested vowel is [a] and this orthography is phonemic, so `plus`
+    //     would read pʼlˈuːs. THE CONVENTIONAL isiZulu SPELLING OF THE LOAN IS UNSOURCED — this spelling is
+    //     chosen to reproduce the attested phones, which is what this layer exists to feed.
+    //
+    //     THE ORDERING, which was a live defect. The degree rule below used to open with `[+]?`, matching the
+    //     sign and never re-emitting it, so `+30°C` read *amazinga angu-30* with the plus silently gone. That
+    //     was harmless while zu had no sourced plus word; once `plas` was sourced it HID one. And a plus arm at
+    //     step 14b could not have fixed it: after the degree rewrite the text reads `+amazinga…`, and a digit
+    //     lookahead cannot match that. So the sign is taken before its operand is consumed, and `[+]?` is gone
+    //     from both degree patterns so a form this arm misses cannot be quietly eaten there either.
     //
     //     ⚠ THE CORPUS INSTANCE IS `kuka-+30°C` — A HYPHEN IMMEDIATELY FOLLOWED BY THE SIGN. `kuka-` is Zulu's
     //     bound-prefix hyphen, so the text carries `-+`, two adjacent marks, and that is what the one
-    //     recording is evidence about: the phoneme recognizer decodes `…kuka p l a s o m aɪ n a s v e d i…`,
-    //     i.e. the reader voiced BOTH signs ("plus or minus"). That is a faithful reading of a two-character
-    //     sequence, NOT evidence that Zulu says "plus or minus" before a temperature, and not a noisy decode
-    //     as an earlier note here claimed. The comparison that settles it is xh, whose text writes `kwe +30°C`
-    //     with a space and whose two speakers voice NOTHING. Same sign, same sentence, different neighbouring
-    //     character, different reading — so the divergence is in the SOURCE ORTHOGRAPHY, not the language.
-    //     The `-` is left silent (it is a prefix marker here, and zu's minus arm already requires a digit
-    //     directly after the dash, which `-+` does not give).
+    //     Montevideo recording is evidence about: it decodes `…kuka p l a s o m aɪ n a s v e d i…`, i.e. the
+    //     reader voiced BOTH signs ("plus or minus"). That is a faithful reading of a two-character sequence and
+    //     NOT evidence that Zulu says "plus or minus" before a temperature. (It was first filed as a noisy
+    //     decode; that was wrong — the text, not the audio, is what is unusual.) The comparison that settles it
+    //     is xh, whose text writes `kwe +30°C` with a space and whose two speakers voice NOTHING. Same sign,
+    //     same sentence, different neighbouring character, different reading — the divergence is in the SOURCE
+    //     ORTHOGRAPHY, not the language. So the TEMPERATURE position has no zu evidence either way, and this
+    //     arm claims the sign wherever it precedes a digit rather than inventing a separate temperature rule.
+    //     The `-` is left silent (a prefix marker here, and zu's minus arm requires a digit directly after the
+    //     dash, which `-+` does not give).
     s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
 
     // 9) DEGREES (×2). `°` was dropped and the scale letter read as a CLICK: `+30°C` → [… kǀ], `35°W` →
@@ -395,10 +415,12 @@ export function normalizeZulu(input: string): string {
     //                                `no-` ×3 immediately before a digit run
     //        `<`  → `ngaphansi kuka-` `ngaphansi` ×14 + `kuka-` ×14      (`>` is the adversarial neighbour,
     //        `>`  → `ngaphezu kuka-`  `ngaphezu` ×15 + `kuka-` ×14        trap 8: zero instances of either)
-    //        `+`  → ` no-`            "and/with", ×3 before a digit run, and the sense of the corpus's own
-    //                                `(UTC+1)`. A BARE POSITIVE SIGN has zero corpus instances and this
-    //                                leaves it under-specified rather than guessing a borrowing — stated
-    //                                as a limit, not a source.
+    //        `+`  → NOT HERE ANY MORE — the plus is claimed at STEP 8c, before the degree rule, and reads
+    //                                `plas`. It used to read ` no-` ("and/with"), inferred from the sense of
+    //                                the corpus's `(UTC+1)` while this note said a bare positive sign was
+    //                                left under-specified "rather than guessing a borrowing". It did not need
+    //                                guessing: it is audible. See step 8c for the evidence and for why the
+    //                                sign has to be taken before degrees.
     //        `-`  → `ukukhipha `      "to take out / subtract" ×2, as a PREFIX. Oromo's shape (`hirʔisuu`),
     //                                and the part of speech matters (Fula's `hakkunde`): Zulu subtraction
     //                                takes the subtrahend as an object, so it cannot be an infix.
@@ -410,25 +432,9 @@ export function normalizeZulu(input: string): string {
     s = s.replace(/[  ]?=[  ]?/gu, " kulingana no-");
     s = s.replace(/[  ]?<[  ]?/gu, " ngaphansi kuka-");
     s = s.replace(/[  ]?>[  ]?/gu, " ngaphezu kuka-");
-    // ⚠ `+` IS `plas`, NOT ` no-`, AND THE CORPUS'S OWN AUDIO IS WHY. ` no-` was inferred from the SENSE of
-    // `(UTC+1)` ("and/with"), with the comment above stating plainly that a bare positive sign had zero corpus
-    // instances and was left under-specified rather than guessing a borrowing. The borrowing did not have to be
-    // guessed: it is audible. Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft — a PHONEME recognizer, whose
-    // vocabulary holds no `+` and no digits, so it cannot echo the orthography back:
-    //     5534088546704143284  →  j u t i s i  p l a s  w a n
-    // ⚠ ONE SPEAKER OF THREE, and the other two are not counter-evidence but ABSENCE: they skip the whole
-    // parenthetical (`…isikhathi sendawo ewhitehall…`), the same reader behaviour seen in ta, en and am. So the
-    // count is 1 of 1 among speakers who read the offset at all — thinner than xh's 3 of 3, and recorded as
-    // such. `plas` rather than `plus` because the attested vowel is [a] and this orthography is phonemic
-    // (`plus` would read pʼlˈuːs); ⚠ the conventional isiZulu spelling of the loan is UNSOURCED.
-    // The method was validated on hi, where a text ASR already gave the answer: it reproduced `p l a s e k` /
-    // `p l e s w a n` for the offset and no plus phones for the temperature, 4 of 4.
-    // ⚠ THE TEMPERATURE POSITION IS NOT DECIDED HERE. zu's one Montevideo recording decodes as
-    // `…a ŋ a p e z u ɡ u ɡ a  p l a s o m aɪ n a s  v e d i d i ɡ r i…` — plus phones ARE present, unlike xh's
-    // two speakers, but the decode is noisy enough that "plas o mainas" cannot be read as a confident reading.
-    // One noisy file is not a source, so this rule claims the sign wherever it precedes a digit and no separate
-    // temperature arm is invented.
-    s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
+    // THE PLUS IS NOT CLAIMED HERE — step 8c takes it, before the degree rule, and the ordering is load-bearing
+    // (the degree rule used to swallow the sign, and after its rewrite the text reads `+amazinga…`, which this
+    // step's digit lookahead cannot match). An arm here would be unreachable, so there is deliberately none.
     s = s.replace(/(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][  ])[-−](?=\d)/gu, "ukukhipha ");
 
     // 15) A SPACED DASH is a parenthetical break and was DROPPED ENTIRELY — 22 clause boundaries with no
