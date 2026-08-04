@@ -238,4 +238,20 @@ describe("italian text normalization", () => {
         expect(phonemize("tra il 1894-1895", "it")).not.toContain("mˈeno");
         expect(phonemize("vittoria contro lo Zambia (26 - 00)", "it")).not.toContain("mˈeno");
     });
+
+    test("#586 the plus as a WORD-JOINER, and the exponent across a magnitude", () => {
+        // `volo+hotel` is the only `+` in the corpus and it is not arithmetic — no digit on either side, so
+        // every digit-keyed rule from the signed-number sweep was blind to it. MMS-1b-all (`ita`) on the
+        // it_it speaker: "pacchetti combinati vol o piu hotel".
+        expect(phonemize("pacchetti combinati volo+hotel", "it")).toContain("vˈolo pjˈu ˈotel");
+        // The numeric pluses must be untouched by that rule — it is letter-keyed on BOTH sides.
+        expect(phonemize("ora locale (UTC+1)", "it")).toContain("pjˈu ˈuno");
+        expect(phonemize("una temperatura di +30 °C", "it")).toContain("pjˈu trˈenta");
+        // `magnitudes` was withheld to protect the CURRENCY path and thereby broke the UNIT path: the tier
+        // could not cross `milioni di` to reach the unit, so the exponent dropped AND `km` leaked raw.
+        expect(phonemize("una superficie di 2,2 milioni di km²", "it")).toContain("miljˈoni dˈi kilomˈetri kwadrˈati");
+        expect(phonemize("una superficie di 2,2 milioni di km²", "it")).not.toMatch(/km/u);
+        // The adjacent shape must not regress.
+        expect(phonemize("19.500 km²", "it")).toContain("kilomˈetri kwadrˈati");
+    });
 });

@@ -100,7 +100,16 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["ପ୍ରତିଶତ"],
-    currency: { "US$": ["ଡଲାର"], "$": ["ଡଲାର"] },
+    // #586 — `¥` ADDED. Same sentence and same finding as bn: the corpus's `ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000` dropped the
+    // sign, and the or_in speaker voices no currency word either (wav2vec2: `… s a t o h z e r h e b a …` —
+    // "sāta hazāra hebā", the amount and then the verb). Voiced regardless, because a typed character is
+    // content for TTS; `ୟେନ` is the standard Odia form and is ordinary lexis, not an audio attestation.
+    // `£` was a GENUINE missing declaration, and it stayed hidden behind the `¥` above: the coverage audit
+    // reports the FIRST defective instance per cell, so the yen sentence masked `ପାଲମେରାସରୁ £27 ନିୟୁତ ଦେୟ` —
+    // a transfer fee that read *satāisa niyuta deya*, "27 million fee", with the currency gone and nothing in
+    // the output marking its absence. Worth noting as a gate property: closing one instance of a cell can
+    // reveal another, so a cell is not done until it re-scans clean.
+    currency: { "US$": ["ଡଲାର"], "$": ["ଡଲାର"], "¥": ["ୟେନ"], "£": ["ପାଉଣ୍ଡ"] },
     magnitudes: ["ହଜାର", "ଲକ୍ଷ", "କୋଟି", "ନିୟୁତ", "ମିଲିୟନ୍", "ମିଲିୟନ", "ବିଲିଅନ୍", "ବିଲିଅନ"],
     units: {
         km: ["କିଲୋମିଟର"],
@@ -262,6 +271,29 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //     including "90(F)-ଡିଗ୍ରୀ" where the text writes the word itself). The corpus's single ° is
         //     the longitude "35°W", for which "35 ଡିଗ୍ରୀ W" is the right reading.
         s = s.replace(/(\d)\s?°/gu, "$1 ଡିଗ୍ରୀ");
+
+        // 13) THE UTC OFFSET'S PLUS. The corpus's `ପ୍ରାୟ 11:00 (UTC+1)ରେ` dropped the sign, and unlike every
+        //     other language in this batch THE AUDIO COULD NOT SUPPLY THE WORD — so this rule ships on
+        //     TYPOLOGY, and says so rather than dressing an inference up as an attestation.
+        //
+        //     Both or_in speakers of the sentence SKIP THE WHOLE PARENTHETICAL. MMS-1b-all (`ory`):
+        //       speaker A  `… ସ୍ଥାନୀୟ ସମୟ ପ୍ରାୟ 11:00 ଘ ରେ ଏହି …`   ← `ଘ`, the start of ଘଣ୍ଟା "hour", not UTC
+        //       speaker B  `… ସ୍ଥାନୀୟ ସମୟ ପ୍ରାୟ 11:0t ରେ ଏହି …`     ← nothing at all
+        //     That is the parenthetical-skip pattern the sweep met in ta, en, am, zu, mi, ne, sr, sw, yue and
+        //     te: ordinary reader behaviour, and by the standing rule it is NEVER counted against a word. It
+        //     also means the sign still needs a reading, because for TTS a typed character is content.
+        //
+        //     WHY ପ୍ଲସ୍ AND NOT THE NATIVE ଯୋଗ. Because the six Indic languages whose plus WAS resolved from
+        //     audio in this sweep all borrow, unanimously and with no native-word counterexample: hi प्लस,
+        //     ne प्लस, te ప్లస్, gu પ્લસ, kn ಪ್ಲಸ್, ml പ്ലസ്, ta பிளஸ். Seven independent recordings agreeing
+        //     across four scripts is a strong prior for the eighth, and the alternative — ଯୋଗ, the
+        //     mathematical noun "addition" — is the exact shape those recordings ruled out elsewhere (hi's
+        //     first draft used धन and the audio corrected it to प्लस).
+        //     ⚠ THIS IS THE WEAKEST-SOURCED CELL IN THE SWEEP. If or_in audio for another `+` ever turns up,
+        //     check it against this string first.
+        //     Digit-keyed on the right only: the offset is `UTC+1`, so the sign has a LETTER before it and a
+        //     digit after, and a range or a compound hyphen cannot reach this arm.
+        s = s.replace(/\+(?=\d)/gu, " ପ୍ଲସ୍ ");
 
         return s;
     };

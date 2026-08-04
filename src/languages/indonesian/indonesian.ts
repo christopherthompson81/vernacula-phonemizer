@@ -180,6 +180,16 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "dan",
     percent: ["persen"],
     currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
+    // #586 — REQUIRED BY THE `US$` FOLD, and found only because the fold exposed it. Unfolding `US$ 14,7
+    // miliar` let the tier place the currency noun at last, and it placed it in the WRONG SLOT:
+    // *empat belas koma tujuh DOLAR MILIAR*, because without this list the magnitude is not part of the
+    // quantity and the noun lands directly after the digits. Indonesian puts the noun after the magnitude —
+    // *14,7 miliar dolar*. So the fold turned a silent DROP into an audible word-order error, which is a
+    // reminder that closing a drop is not finished until the reading is checked, not just the differential.
+    //
+    // NO `magnitudeConnective`: Indonesian juxtaposes (*miliar dolar*, not *miliar de dolar*), unlike
+    // Catalan's *de* or Italian's *di*. Attested in this corpus as `juta` ×8, `miliar` and `ribu`.
+    magnitudes: ["triliun", "miliar", "juta", "ribu"],
     units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],
         g: ["gram"], l: ["liter"], ha: ["hektar"] },
     // `kilometer persegi` ×3 — the modifier follows. Bare `persegi` ×9 includes the SHAPE ("persegi yang

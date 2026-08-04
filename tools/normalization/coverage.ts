@@ -25,6 +25,7 @@
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { DROPPABLE, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
+import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
@@ -74,7 +75,22 @@ function corpusLines(corpus: string): string[] {
     for (const f of readdirSync(dir).filter((f) => f.endsWith(".tsv")))
         for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
             const col = line.split("\t")[TEXT_COLUMN];
-            if (col !== undefined && col !== "") seen.add(col);
+            // MOJIBAKE IS REPAIRED BEFORE THE SCAN, because otherwise this audit reports symbols THAT ARE NOT
+            // THERE. Double-encoded text is full of Latin-1 punctuation used as a UTF-8 continuation byte, and
+            // several of those bytes are the very signs the DROP classes look for:
+            //   `SÃ£o Paulo`  → `Ã` + `£`  — a POUND SIGN, reported as a currency DROP in a place name
+            //   `Ä°zmir`      → `Ä` + `°`  — a DEGREE SIGN, reported as a degree DROP in a population figure
+            //   `19.500 kmÂ²` → `Â` + `²`  — the one case where the phantom coincides with a real symbol
+            // Both of the first two were chased as defects during #586 before the cause was spotted, and each
+            // would have cost a per-language rule for a sign no reader will ever see.
+            //
+            // Repairing here is not leniency, it is MATCHING THE ENGINE: the registry applies
+            // `repairDoubleEncoded` to every input before any language rule runs, so un-repaired text is input
+            // the engine never sees. A gate that measures a different string than the engine reads will report
+            // defects that cannot be fixed and miss ones that can — the differential test in particular is
+            // unreliable on corrupt input, since blanking a phantom sign can leave a byte-identical reading and
+            // so score as a DROP.
+            if (col !== undefined && col !== "") seen.add(repairDoubleEncoded(col));
         }
     return [...seen];
 }

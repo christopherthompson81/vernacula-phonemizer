@@ -185,4 +185,13 @@ describe("persian text normalization (#562)", () => {
         expect(phonemize("133 m/s", "fa")).toContain("bˈaɾ saːnejˈe");
         expect(phonemize("اصطکاک کم است", "fa")).toContain("kˈam ʔˈast"); // the adjective still untouched
     });
+
+    test("#586 the ampersand is the ENGLISH word, and both speakers say it", () => {
+        // wav2vec2-xlsr-53-espeak-cv-ft, both fa_ir speakers of the sentence:
+        //   A `h ɑ b eː  b iː a n b iː  d a r p ɑ j ɑ n …`   B `x ɑ b e  b i a n d b iː  d a r p ɑ j ɑ n …`
+        // MMS alone would have read as a drop — it omits the span for A and floats it to the head for B.
+        const s = phonemize("بدیهی است که B&B ها به عمدتا.", "fa");
+        expect(s).toContain("ʔˈand");
+        expect(s).not.toBe(phonemize("بدیهی است که BB ها به عمدتا.", "fa"));
+    });
 });

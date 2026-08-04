@@ -36,6 +36,12 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
 };
 const UNIT_ALT = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).join("|");
 
+/** Compass points for the COORDINATE sense of `°` (`35°W`), keyed lowercase because the rule matches
+ *  case-insensitively. Indonesian names the direction, exactly as the degree rule names the scale. */
+const COMPASS: Readonly<Record<string, string>> = {
+    n: "utara", s: "selatan", e: "timur", w: "barat",
+};
+
 /** Every rule here emits DIGITS where a number is involved and lets the engine's own number path speak
  *  them, which keeps this layer free of the number words entirely. */
 export function normalizeIndonesian(input: string): string {
@@ -52,6 +58,21 @@ export function normalizeIndonesian(input: string): string {
         const mv = Number(min);
         return mv === 0 ? `${Number(h)}` : `${Number(h)} lewat ${mv}`;
     });
+
+    // 1b) THE DOLLAR CODE → the bare sign. Third language with this defect after pt and nl, and it arrives by
+    //     a THIRD route: those two compose an `initialisms` pass that split `US$` and left the `$` behind a
+    //     letter, whereas Indonesian has no such pass — its `letterNames` map spells a capital run inside the
+    //     engine, so `US$ 14,7` reached the tier with the `$` ALREADY preceded by `S` and the tier's
+    //     word-guard, the one that stops a key biting into a word, correctly refused it. The corpus's
+    //     `10 miliar euro (US$ 14,7 miliar)` read *…uɛs əmpat bəlas koma tud͡ʒuh miliar…*: the code spelled out
+    //     and THE CURRENCY GONE. Different mechanism, identical symptom and identical fix — which is the
+    //     argument for the fold being the right shape rather than a per-language patch.
+    //
+    //     The `(?=[ ]?\d)` tail is required, not decorative: pt shipped this without it and a bare `US$` with
+    //     no amount after it would leave a lone `$` the tier cannot place. Note the corpus writes BOTH
+    //     spacings — `US$ 14,7` and `US $30` — and only the closed one is broken, since the open one already
+    //     puts a space between the letter and the sign.
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[  ]?\d)/gu, "$");
 
     // 2) RUPIAH. `Rp` was read as the bare letter pair [rp]; the shared symbol tier is keyed on
     //    single-character signs and cannot express a two-letter prefix. Indonesian says the unit AFTER the
@@ -76,6 +97,15 @@ export function normalizeIndonesian(input: string): string {
     // 5) DEGREES. °C was falling through to the English reading of the letter C.
     s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 derajat Celsius");
     s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 derajat Fahrenheit");
+    //    COORDINATES, the third sense of the sign, and it was UNREACHABLE UNTIL THE MOJIBAKE REPAIR. The
+    //    corpus writes `di timur 35Â°W` — the coordinate's degree sign was half of a broken `°` in
+    //    double-encoded text, so the bare arm below could never see it and the `W` was never a problem.
+    //    Generalising `repairDoubleEncoded` to lead byte C4 (for `Ä°zmir`) also mended THIS sentence's `Â°`,
+    //    at which point `35°W` reached the bare arm and read *tiga puluh lima derajatW* with the direction
+    //    letter glued raw into the IPA. Repairing an input EXPOSES the rules that were never exercised on it,
+    //    so a mojibake fix has to be followed by a re-read of the sentences it unmasks.
+    s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/giu,
+        (_m, d: string, dir: string) => `${d} derajat ${COMPASS[dir.toLowerCase()]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 derajat");
 
     // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.

@@ -322,8 +322,21 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "e",
     percent: ["per cento"],
     // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
-    // which needs the partitive *di* the shared magnitude hop cannot insert. Hence no `magnitudes` list.
+    // which needs the partitive *di* the shared magnitude hop cannot insert.
     currency: Object.fromEntries(Object.entries(CURRENCY).map(([sign, forms]) => [sign, [...forms]])),
+    // #586 — DECLARED FOR THE UNIT PATH, and the reason it was withheld no longer applies. This list was
+    // deliberately absent so the CURRENCY magnitude hop could not emit `5 milioni dollari` without the
+    // partitive. But `magnitudes` also gates `magAltU`, the UNIT path's connective hop — so withholding it to
+    // protect currency left the tier unable to cross `milioni di` to reach a unit, and
+    // `2,2 milioni di km²` read as *due virgola due milioni di KM*: the exponent dropped AND the unit noun
+    // left raw in the IPA. One field, two consumers, and only one of them had a problem.
+    //
+    // Safe because step 10 runs FIRST and consumes the whole preposed shape — sign, amount, magnitude and
+    // partitive together — so the currency path here never sees a magnitude to hop. Measured: the corpus has
+    // exactly ONE currency-sign sentence (`tra 2.500 ¥ e 130.000 ¥`), postposed, with no magnitude word
+    // anywhere near it, and ZERO sentences carrying both a currency sign and *milioni*/*miliardi*.
+    magnitudes: ["miliardi", "miliardo", "milioni", "milione", "mila"],
+    magnitudeConnective: "di", // due virgola due milioni DI chilometri quadrati
     // Longest keys match first (the builder sorts by length), so km² beats km and km/h beats km.
     units: {
         "km/h": ["chilometro orario", "chilometri orari"],

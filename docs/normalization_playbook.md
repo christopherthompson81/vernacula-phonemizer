@@ -1464,3 +1464,61 @@ Trap 37's deeper form lives here too: hi shipped `धन` for the plus, correctl
 mathematics article naming `धनात्मक चिह्न` / `ऋणात्मक चिह्न` as a pair. That citation is sound for what it says —
 it is what the sign is **called** — and it is the wrong REGISTER for what a reader says. A correctly-sourced
 word from the wrong register is harder to catch than a word with two senses, because the citation looks right.
+
+## A corrupt input MANUFACTURES symbols — repair before you measure
+
+Three separate #586 defects turned out to be the same non-defect, so this is a class and not an anecdote.
+Double-encoded (mojibake) text uses Latin-1 punctuation as a UTF-8 continuation byte, and **some of those bytes
+are exactly the signs the DROP classes hunt for**:
+
+```
+Ä°zmir  = Ä + °   a DEGREE SIGN, in a sentence about a city's population
+SÃ£o    = Ã + £   a POUND SIGN,  in a Brazilian place name
+â€<lost> → €      a EURO SIGN,   in a sentence with no money in it   (mr, found earlier)
+```
+
+Each was investigated as a real per-language defect first. Mojibake does not merely fail to read — it invents
+symbols, and the invented ones are indistinguishable from real ones to a `\p{Sc}`-style probe.
+
+Three rules follow:
+
+1. **Every gate ingests through `repairDoubleEncoded`.** The engine applies it to all input before any language
+   rule runs, so a gate reading raw text is measuring a string the engine never sees. `coverage.ts` and
+   `corpus-diff.ts` both do this at ingestion. Un-repaired, they report DROPs that **cannot be closed by any
+   amount of language work** — the differential test is unreliable on corrupt input, because blanking a phantom
+   sign can leave a byte-identical reading, which scores as a drop.
+2. **The ruler is the same on both sides of a before/after; only the ENGINE differs.** If you change a gate's
+   ingestion, copy the updated tool into the pinned baseline worktree before re-emitting. Mixed instruments
+   conflate a tooling change with an engine change — the same run read `DROP 3 → 1` mixed and `2 → 0` clean.
+3. **After repairing an input, RE-READ the sentences it unmasks.** They are reaching their language's rules for
+   the first time. `id`'s corpus writes `di timur 35Â°W`, so its coordinate `°` was half a broken byte and the
+   degree rule had never been exercised on it; mending the mojibake produced `tiga puluh lima derajatW`, with
+   the direction letter glued raw into the IPA. The fix exposes the next defect, and that is normal.
+
+### A fast path is part of a pattern's definition
+
+`repairDoubleEncoded` opens with an early-out guard. Widening its arms from lead byte C3 to C5 without widening
+that guard produced a change that **typechecked, ran, and did nothing** — the guard rejected `Ä°zmir` before any
+arm saw it. Caught only because the probe printed its input back unchanged. Whenever a function screens input
+before matching it, the screen and the matcher are one pattern in two places.
+
+## Closing a DROP is not finished until you read the READING
+
+The differential test answers "does this symbol contribute?" — not "is the contribution right". Two failures in
+one run, both invisible to the gate that had just gone green:
+
+- id's `US$` fold made the currency audible **in the wrong slot**: *empat belas koma tujuh DOLAR MILIAR* instead
+  of *…miliar dolar*, because without a `magnitudes` list the magnitude is not part of the quantity. The
+  differential changed, so the cell scored clean.
+- `35°W` became *derajat* plus a raw glued `W`.
+
+Read the output string, every time. And note the corollary about coverage's reporting: it shows the **first**
+defective instance per cell, so **a cell can hide behind itself** — or's `£27` transfer fee only appeared after
+its `¥` was fixed. A cell is done when it re-scans clean, not when a fix lands.
+
+### One declaration, two consumers
+
+`magnitudes` was deliberately withheld from Italian to stop the CURRENCY path emitting `5 milioni dollari`
+without the partitive *di*. But the same field gates `magAltU`, the UNIT path's connective hop — so protecting
+one consumer silently broke the other, and `2,2 milioni di km²` read as *…milioni di KM*, exponent dropped and
+unit noun raw. Before withholding a tier declaration to avoid one bad reading, check what else reads that field.

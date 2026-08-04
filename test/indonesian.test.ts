@@ -102,4 +102,22 @@ describe("indonesian normalization", () => {
     test("the squared/cubed measure word (#586)", () => {
         expect(phonemize("783.562 km²", "id")).toContain("kilomətˈər pərsəɡˈi");
     });
+
+    test("#586 the US$ code, its magnitude slot, and the coordinate degree", () => {
+        // Third language with this defect after pt and nl, by a third route: id has no initialism pass, so the
+        // `$` simply arrived preceded by `S` and the tier's word-guard refused it.
+        const g = phonemize("10 miliar euro (US$ 14,7 miliar) per tahun", "id");
+        expect(g).toContain("dˈolar");
+        // ⚠ AND IN THE RIGHT SLOT. Without `magnitudes` the fold turned a silent DROP into an audible
+        // word-order error — *empat belas koma tujuh DOLAR MILIAR* instead of *…miliar dolar*.
+        expect(g).toContain("milˈiar dˈolar");
+        expect(g).not.toMatch(/dˈolar milˈiar/u);
+        // The spaced form already worked and must not regress.
+        expect(phonemize("biaya US $30", "id")).toContain("dˈolar");
+        // The COORDINATE sense of `°` was unreachable until the mojibake repair mended this sentence's `Â°`;
+        // reaching the bare arm then left the direction letter glued raw into the IPA.
+        expect(phonemize("di timur 35°W", "id")).toContain("dərˈad͡ʒat bˈarat");
+        expect(phonemize("di timur 35Â°W", "id")).toContain("dərˈad͡ʒat bˈarat");
+        expect(phonemize("suhu di atas 30°C", "id")).toContain("dərˈad͡ʒat t͡ʃəlsˈius");
+    });
 });

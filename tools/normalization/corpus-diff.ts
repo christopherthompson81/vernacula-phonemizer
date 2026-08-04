@@ -28,6 +28,7 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dropsIn, makeContribution } from "./defects.ts";
+import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
@@ -50,7 +51,14 @@ function corpusLines(corpus: string): string[] {
     for (const f of readdirSync(dir).filter((f) => f.endsWith(".tsv")))
         for (const line of readFileSync(join(dir, f), "utf8").split("\n")) {
             const col = line.split("\t")[TEXT_COLUMN];
-            if (col !== undefined && col !== "") seen.add(col);
+            // MOJIBAKE REPAIRED BEFORE THE DIFF, for the reason coverage.ts spells out at its own ingestion:
+            // double-encoded text uses Latin-1 punctuation as continuation bytes, and some of those bytes ARE
+            // the symbols the DROP classes hunt — `SÃ£o Paulo` contains a `£` and `Ä°zmir` a `°`. Un-repaired,
+            // this gate reports a permanent un-closable DROP on a place name.
+            // The engine already applies this pass to every input, so repairing here makes the gate measure the
+            // string the engine actually reads. Note this is the RULER, not the engine: the same ingestion must
+            // be used for both sides of a before/after, and only the engine should differ between them.
+            if (col !== undefined && col !== "") seen.add(repairDoubleEncoded(col));
         }
     return [...seen];
 }
