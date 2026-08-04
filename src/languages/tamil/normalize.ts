@@ -46,6 +46,14 @@ const NA = "(?![\\p{L}\\p{M}])";
  * forms are handled locally in step 5.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright, so `B&Bs` lost the sign and read as two bare consonants. `மற்றும்`
+    // is the ordinary conjunction, ×997 in the corpus, and the wiki examples put it in exactly this slot —
+    // inside an institution name: `எண்ணெய் மற்றும் இயற்கை எரிவாயுக் கழகம்` (Oil and Natural Gas Corporation).
+    // ⚠ `அண்ட்`, the transliterated English "and", was the adversarial candidate and is REJECTED on the
+    // corpus: ×1 there against மற்றும்'s 997. It is common in the wiki (121 tokens) because that haystack is
+    // full of transliterated company names, which is a fact about the haystack and not about how this
+    // language reads an ampersand.
+    ampersand: "மற்றும்",
     percent: ["சதவீதம்"],
     currency: { "US$": ["டாலர்"], "$": ["டாலர்"] },
     magnitudes: ["மில்லியன்", "பில்லியன்", "ட்ரில்லியன்", "லட்சம்", "கோடி"],

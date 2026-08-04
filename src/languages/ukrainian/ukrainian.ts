@@ -122,6 +122,14 @@ function number(digits: string): string {
  * standard dictionary paradigms, not invented.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright, losing the sign from `готелі типу B&B`. `та` is the conjunction used
+    // to join two nouns, and it is the shape every other treated language took here (de *und*, pt *e*,
+    // ru *и*, mi *me*): the plain conjunction, not a transliteration. `і` is the other Ukrainian "and" and
+    // is equally correct as a word; `та` is preferred between two coordinate nouns, which is what an
+    // ampersand always joins. ⚠ Both were checked at TOKEN level rather than by substring — a substring
+    // count is meaningless for these two, since `і` and `та` occur inside hundreds of ordinary words
+    // (3853 and 2290 raw substring hits against 51 and 14 real tokens).
+    ampersand: "та",
     percent: ["відсоток", "відсотки", "відсотків", "відсотка"],
     currency: {
         "€": ["євро"], // indeclinable

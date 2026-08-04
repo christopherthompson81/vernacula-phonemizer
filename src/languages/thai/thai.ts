@@ -67,6 +67,10 @@ function numberToThaiWords(n: number): string[] {
 // tier's letter-boundary guard would reject exactly that ordinary case — `$5ของ` dropped the sign while `$5`
 // alone read it.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
+    // conjunction and the corpus's own word, ×1711 — the most frequent candidate by a wide margin (`กับ`
+    // ×674 is "with", and `แอนด์`, the transliterated English "and", is ×0 here).
+    ampersand: "และ",
     percent: ["เปอร์เซ็นต์"],
     // #586 — `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a
     // numeral: กิโลเมตร ×25 "ห่างจากบัวโนสไอเรส 50 กิโลเมตร", เมตร ×46 "ยอดเขาวินสันสูง 4,892 เมตร",
