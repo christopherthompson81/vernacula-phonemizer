@@ -388,3 +388,82 @@ repair is to let the currency tier claim a sign before the initialism pass sees 
 reordering and belongs to its own change.
 
 Gates: corpus diff pt 1/1943, **DROP 1 → 0**. (The pre-existing `RAWMARK 1`, the `1.000º` ordinal, is untouched.)
+
+## Run 7 — 2026-08-03 — the PHONEME recognizer closes am, xh and zu. Text ASR could not, and here is the proof.
+
+Run 5 left four languages blocked. Two more models were tried, and the difference between them is the finding.
+
+### `facebook/mms-1b-all` — accurate, and WRONG FOR THIS QUESTION
+
+1162 languages, CTC, per-language adapters. It transcribes am/xh/zu/th well. But at the sign it emits
+**the sign**: `utc+1` (amh), `kwe-+30°c` (xho), `kuka-+30°c` (zul), `utc.1` (tha). Its vocabulary is
+orthographic — characters, digits, punctuation.
+
+A `+` in that output is tempting to read as "a plus was spoken". **A control on languages whose answer was
+already known kills that reading:**
+
+| language | speakers actually said (verbalizing ASR) | MMS emitted |
+|---|---|---|
+| ta `+30 °C` | `பிளஸ் முப்பது` | `130ப` — word lost |
+| ta `UTC+1` | `பிளஸ் ஒன்` | `utc.1` — word lost |
+| hi `यूटीसी + 1` | `प्लस एक` (2 of 2) | `यूटीसी1` / `यूटीसी.1` — **word lost** |
+| vi `UTC +1` | `cộng một` (2 of 2) | `utc cộng 1` — rendered |
+
+So MMS is unreliable **in both directions** at a sign slot: it dropped two demonstrably spoken plus words and
+rendered a third. Its `+` for xho/zul is a character, not evidence. ⚠ Without this control the run would have
+reported "xh and zu voice the plus" on the strength of a `+` glyph.
+
+### `facebook/wav2vec2-xlsr-53-espeak-cv-ft` — the right instrument
+
+A PHONEME recognizer: its vocabulary contains **no `+` and no digits**, so it physically cannot echo the
+orthography back. Whatever is in the slot must appear as phones. (Decoded with a hand-rolled CTC collapse over
+`vocab.json` — the `Wav2Vec2PhonemeCTCTokenizer` demands the `phonemizer` package at construction, which is only
+needed for text→phoneme encoding, not for decoding.)
+
+**Validated on hi first, where the answer was already known — 4 of 4:**
+
+```
+UTC  →  j uː d i s iː  p l a s e k        ("plus ek")   matches प्लस एक
+UTC  →  j uː d i s iː  p l e s w a n      ("plus one")  matches प्लस वन
+temp →  m e t iː s d e ɡ r i s s e l ʃ e s     no plus phones — matches the SILENCE
+temp →  m e d iː z l i ɡ l s e l s i s         no plus phones
+```
+
+Reproducing the silence is the part that matters: it shows the instrument is not inventing the word either.
+
+### Results
+
+| lang | `UTC+1` | `+30 °C` |
+|---|---|---|
+| am | `m j uː t iː s iː p l a s w a n` — **2 of 3** (third skips the parenthetical) | `s a l a s a d i ɡ l i s…` — **no plus, 2 of 2** |
+| xh | `p l a s w a n` — **3 of 3** | `…k w e t e t i…` — **no plus, 2 of 2** |
+| zu | `p l a s w a n` — **1 of 3**; the other two skip the parenthetical, so 1 of 1 among readers | `p l a s o m aɪ n a s…` — plus present, ONE noisy file |
+
+All three voice the English loan. The skip pattern has now recurred in **ta, en, am and zu** — a missing
+parenthetical is expected reader behaviour, not a fact about the language.
+
+### What shipped, and three judgements inside it
+
+- **am** — new rule, `+` → `ፕላስ` (reads `pɨlas`). DROP 2 → 0.
+- **xh** — `dibanisa` → `plas`. ⚠ This CORRECTS a correctly-sourced word: `dibanisa` is the HSRC English/isiXhosa
+  maths dictionary's ADDITION OPERATOR, a right gloss of the symbol and the wrong register for a reader.
+  ⚠ And it UPGRADES an honest limit: xh left `+30 °C` unread partly because "Xhosa has no attested positivity
+  word". The word is now known, so absence is no longer the argument — what survives is the redundancy with the
+  sentence's own *angaphezulu* ("above"), and the recordings confirm it, since both Montevideo speakers produce
+  no plus phones while all three UTC speakers do. Same language, same sign, two positions, distinction made by
+  the readers. DROP 2 → 2 (a word swap; the residual is that deliberately-silent sentence).
+- **zu** — ` no-` → `plas`. ` no-` was inferred from the sense of `(UTC+1)` while the rule's own comment said a
+  bare positive sign was left under-specified "rather than guessing a borrowing". It did not need guessing.
+  DROP 3 → 2. ⚠ zu's temperature position is NOT decided: its one Montevideo file decodes as
+  `p l a s o m aɪ n a s`, so plus phones are present unlike xh's two speakers, but one noisy file is not a
+  source and no separate temperature arm was invented.
+- ⚠ Spelled `plas`, not `plus`, in xh/zu: the attested vowel is [a] and both orthographies are phonemic, so
+  `plus` would read `pʼlˈuːs`. **The conventional loan spelling in isiXhosa/isiZulu is UNSOURCED** — this
+  spelling is chosen to reproduce the attested phones, which is what this layer exists to feed.
+
+### Where this leaves the class
+
+Sourced from audio and shipped: **ta, hi, vi, am, xh, zu** (plus), **ar, ja** (`×`), **pt** (currency), with
+**en** measured and deliberately unchanged. Still unreachable: **th** (Cohere cannot do the language; Whisper
+re-orthographizes; MMS emits the sign — the phoneme model was not run on it) and the twelve languages with no
+locally cached audio at all (gu kn ml ne sr sw mi yue te fa nb my), which need a FLEURS download.

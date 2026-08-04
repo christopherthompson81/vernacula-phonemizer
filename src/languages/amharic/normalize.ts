@@ -231,6 +231,33 @@ export function makeAmharicNormalizer(
         //     dropped as it always was, and no Amharic spelling of "Celsius" is sourceable here.
         s = s.replace(/°/gu, " ዲግሪ ");
 
+        // 15. THE PLUS SIGN → ፕላስ, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED outright, so the
+        //     corpus's `(UTC+1)` lost it entirely. No text tier could supply the word: `concept.ts` returns the
+        //     bare character `+` as Amharic's own label for "plus sign", and prose writes the glyph, so there is
+        //     nothing to probe for.
+        //
+        //     Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME recognizer — its vocabulary holds
+        //     no `+` and no digits, so unlike a text ASR it cannot echo the orthography back at you. Over
+        //     am_et/train:
+        //       UTC+1   →  m j uː t iː s iː  p l a s  w a n   ·   w eɪ m y t i s i  p l a s  w a n   (2 of 3;
+        //                  the third skips the parenthetical, the reader behaviour also seen in ta, en and zu)
+        //       +30°C   →  s a l a s a d i ɡ l i s e d i s j o s   ·   s a l a s a d i ɡ r i s l i ʃ e ts j o
+        //                  — ሰላሳ ዲግሪ, thirty degrees, with NO plus phones, 2 of 2
+        //
+        //     ⚠ TEXT ASR GOT THIS WRONG IN BOTH DIRECTIONS AND MUST NOT BE USED FOR IT. MMS-1b-all (amh
+        //     adapter) transcribes this corpus accurately but emits `utc+1` — the SIGN — because its vocabulary
+        //     is orthographic; and on the control languages it silently DROPPED a demonstrably spoken plus
+        //     (hi's `प्लस`, ta's `பிளஸ்`). A `+` in a text ASR's output is not evidence that a word was said.
+        //     The phoneme model was validated on hi, where the answer was already known: 4 of 4 correct,
+        //     including reproducing the SILENCE before the temperature.
+        //
+        //     Both arms, so the sign is read glued to a label or opening the quantity. The measurement position
+        //     is voiced too: both am speakers omit it there, but for a TTS target a reader skipping a character
+        //     the author typed is evidence about reading habit, not licence to delete content — and omitting a
+        //     plus is lossless where omitting a minus inverts.
+        s = s.replace(/(\S)\+[  ]?(?=\d)/gu, "$1 ፕላስ ");
+        s = s.replace(/(^|[  ])\+[  ]?(?=\d)/gu, "$1ፕላስ ");
+
         return s.replace(/[  ]{2,}/gu, " ");
     };
 }

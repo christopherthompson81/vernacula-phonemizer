@@ -390,7 +390,25 @@ export function normalizeZulu(input: string): string {
     s = s.replace(/[  ]?=[  ]?/gu, " kulingana no-");
     s = s.replace(/[  ]?<[  ]?/gu, " ngaphansi kuka-");
     s = s.replace(/[  ]?>[  ]?/gu, " ngaphezu kuka-");
-    s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " no-");
+    // ⚠ `+` IS `plas`, NOT ` no-`, AND THE CORPUS'S OWN AUDIO IS WHY. ` no-` was inferred from the SENSE of
+    // `(UTC+1)` ("and/with"), with the comment above stating plainly that a bare positive sign had zero corpus
+    // instances and was left under-specified rather than guessing a borrowing. The borrowing did not have to be
+    // guessed: it is audible. Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft — a PHONEME recognizer, whose
+    // vocabulary holds no `+` and no digits, so it cannot echo the orthography back:
+    //     5534088546704143284  →  j u t i s i  p l a s  w a n
+    // ⚠ ONE SPEAKER OF THREE, and the other two are not counter-evidence but ABSENCE: they skip the whole
+    // parenthetical (`…isikhathi sendawo ewhitehall…`), the same reader behaviour seen in ta, en and am. So the
+    // count is 1 of 1 among speakers who read the offset at all — thinner than xh's 3 of 3, and recorded as
+    // such. `plas` rather than `plus` because the attested vowel is [a] and this orthography is phonemic
+    // (`plus` would read pʼlˈuːs); ⚠ the conventional isiZulu spelling of the loan is UNSOURCED.
+    // The method was validated on hi, where a text ASR already gave the answer: it reproduced `p l a s e k` /
+    // `p l e s w a n` for the offset and no plus phones for the temperature, 4 of 4.
+    // ⚠ THE TEMPERATURE POSITION IS NOT DECIDED HERE. zu's one Montevideo recording decodes as
+    // `…a ŋ a p e z u ɡ u ɡ a  p l a s o m aɪ n a s  v e d i d i ɡ r i…` — plus phones ARE present, unlike xh's
+    // two speakers, but the decode is noisy enough that "plas o mainas" cannot be read as a confident reading.
+    // One noisy file is not a source, so this rule claims the sign wherever it precedes a digit and no separate
+    // temperature arm is invented.
+    s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
     s = s.replace(/(?<![\p{L}\p{Nd}])(?<![\p{L}\p{Nd}][  ])[-−](?=\d)/gu, "ukukhipha ");
 
     // 15) A SPACED DASH is a parenthetical break and was DROPPED ENTIRELY — 22 clause boundaries with no
