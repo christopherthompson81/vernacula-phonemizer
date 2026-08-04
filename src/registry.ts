@@ -201,7 +201,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
 import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldNativeDigits, foldSquaredDegrees, repairDoubleEncoded } from "./core/unicode.ts";
+import { foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -250,6 +250,15 @@ setScriptReader((run, host) => {
 
 /** Languages whose own script has a digit that is not always a digit; they fold inside normalize.ts. */
 const FOLD_OPT_OUT: ReadonlySet<string> = new Set(["te"]);
+
+/** Languages whose own normalization already reads the VULGAR FRACTIONS, and reads them BETTER than the fold
+ *  can — with the "and" that joins a mixed number. ca says *vint-i-nou I tres quarts* and mk *…ˈи три
+ *  четврт…*; the fold, which only rewrites `¾` to ` 3/4`, drops that conjunction because supplying it needs a
+ *  per-language word in a per-language position. Measured over the artifacts: 36 languages carry a vulgar
+ *  fraction, 27 DROP it and these 9 already handle it, so the fold is for the 27 and must not pre-empt the 9.
+ *  Found by the test suite — ca's and mk's fraction tests failed on the missing conjunction, which is exactly
+ *  the regression an opt-out exists to prevent. */
+const VULGAR_FOLD_OPT_OUT: ReadonlySet<string> = new Set(["az", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz"]);
 
 const cache = new Map<string, Phonemizer>();
 
@@ -315,7 +324,8 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // and `Ã` are LETTERS. `19.500 kmÂ²` lost its whole unit that way — the tier's trailing
                     // guard saw a letter after `km` and refused the match. Measured safe across all 67 corpora
                     // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
-                    const pre = foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)));
+                    const folded = foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)));
+                    const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
                     return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {
                     popHost();
