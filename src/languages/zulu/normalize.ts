@@ -238,6 +238,26 @@ export function normalizeZulu(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])([Aa]\.[Mm]|[Pp]\.[Mm])\.?(?![\p{L}\p{M}])/gu,
         (m0) => halfDay(m0).trim());
 
+    // 8c) THE PLUS, CLAIMED BEFORE DEGREES — the ordering coupling, and it was a live defect. The degree rule
+    //     below used to open with `[+]?`, matching the sign and never re-emitting it, so `+30°C` read
+    //     *amazinga angu-30* with the plus silently gone. That was harmless while zu had no sourced plus word;
+    //     now that `plas` is sourced (step 14b) it HID one, and the sign could never reach step 14b anyway —
+    //     after the degree rewrite the text is `+amazinga…`, and 14b's arm requires a digit after the sign.
+    //     So the sign is claimed here, before its operand is consumed, and `[+]?` is gone from the degree
+    //     patterns so a form this arm misses cannot be silently eaten there either.
+    //
+    //     ⚠ THE CORPUS INSTANCE IS `kuka-+30°C` — A HYPHEN IMMEDIATELY FOLLOWED BY THE SIGN. `kuka-` is Zulu's
+    //     bound-prefix hyphen, so the text carries `-+`, two adjacent marks, and that is what the one
+    //     recording is evidence about: the phoneme recognizer decodes `…kuka p l a s o m aɪ n a s v e d i…`,
+    //     i.e. the reader voiced BOTH signs ("plus or minus"). That is a faithful reading of a two-character
+    //     sequence, NOT evidence that Zulu says "plus or minus" before a temperature, and not a noisy decode
+    //     as an earlier note here claimed. The comparison that settles it is xh, whose text writes `kwe +30°C`
+    //     with a space and whose two speakers voice NOTHING. Same sign, same sentence, different neighbouring
+    //     character, different reading — so the divergence is in the SOURCE ORTHOGRAPHY, not the language.
+    //     The `-` is left silent (it is a prefix marker here, and zu's minus arm already requires a digit
+    //     directly after the dash, which `-+` does not give).
+    s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
+
     // 9) DEGREES (×2). `°` was dropped and the scale letter read as a CLICK: `+30°C` → [… kǀ], `35°W` →
     //    [… w]. `amazinga` ×5 is the corpus's own degree word (`amazinga okushisa` = degrees of heat), and
     //    the concord `angu-` agrees with it — a class-6 noun THIS rule emits, so the digits may stay
@@ -263,9 +283,9 @@ export function normalizeZulu(input: string): string {
         /amazinga[^.!?;]*$/u.test(before);
     const deg = (whole: string, digits: string, tail: string, offset: number, full: string): string =>
         `${saidDegrees(full.slice(0, offset)) ? "" : "amazinga angu-"}${digits}${tail}`;
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu,
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
-    s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu,
         (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
     s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\p{L}\p{M}])/gu,
         (m0, d: string, c: string, off: number, full: string) =>

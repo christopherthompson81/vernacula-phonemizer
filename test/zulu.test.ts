@@ -166,7 +166,11 @@ describe("Zulu text normalization (#562)", () => {
 
     it("square miles, degrees, and the compass — the click letters the ° left behind", () => {
         expect(normalizeZulu("(300,948 sq mi)")).toBe("(300948 amamayela skwele)"); // `sq` read as [skǃ]
-        expect(normalizeZulu("kuka-+30°C")).toBe("kuka-amazinga angu-30"); // C alone read as the click [kǀ]
+        // #586. The plus is now VOICED: the degree pattern used to open with `[+]?`, matching the sign and
+        // never re-emitting it, so `+30°C` lost it silently. `plas` is sourced (step 14b) and the sign is
+        // claimed at step 8c, BEFORE degrees — after the degree rewrite the text reads `+amazinga…` and the
+        // sign step needs a digit after the sign, so ordering is what makes it reachable.
+        expect(normalizeZulu("kuka-+30°C")).toBe("kuka- plas amazinga angu-30"); // C alone read as the click [kǀ]
         expect(normalizeZulu("angu-35°F")).toBe("angu-amazinga angu-35 Fahrenheit"); // NOT in the corpus
         expect(normalizeZulu("kwe-35°W")).toBe("kwe-amazinga angu-35 entshonalanga");
         expect(normalizeZulu("40°N")).toBe("amazinga angu-40 enyakatho");
@@ -231,7 +235,7 @@ describe("Zulu text normalization (#562)", () => {
     // the degree word twice and two bound concords in a row (`kuka-` already governs the number).
     it("does not say the degree word twice", () => {
         expect(normalizeZulu("amazinga okushisa angaphezu kuka-+30°C avamile"))
-            .toBe("amazinga okushisa angaphezu kuka-30 avamile");
+            .toBe("amazinga okushisa angaphezu kuka- plas 30 avamile");
         // …and where the clause does NOT carry it, the rule must still emit it.
         expect(normalizeZulu("kufinyelela ku-30°C namuhla")).toBe("kufinyelela ku-amazinga angu-30 namuhla");
         // A clause boundary ends the suppression window — a previous sentence does not license the drop.

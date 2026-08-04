@@ -467,3 +467,51 @@ Sourced from audio and shipped: **ta, hi, vi, am, xh, zu** (plus), **ar, ja** (`
 **en** measured and deliberately unchanged. Still unreachable: **th** (Cohere cannot do the language; Whisper
 re-orthographizes; MMS emits the sign — the phoneme model was not run on it) and the twelve languages with no
 locally cached audio at all (gu kn ml ne sr sw mi yue te fa nb my), which need a FLEURS download.
+
+## Run 8 — 2026-08-03 — `p l a s o m aɪ n a s` is not Zulu, it is `-+`
+
+Run 7 filed zu's Montevideo decode — `…kuka p l a s o m aɪ n a s v e d i…` — as "plus phones present but the
+decode is noisy". That was lazy. Read as words it is plainly "plus or minus", which is semantically incoherent
+for *angaphezu* ("above") — and the explanation is in the SOURCE TEXT, not the audio:
+
+```
+zu:  amazinga okushisa angaphezu kuka-+30°C avamile.     ← hyphen IMMEDIATELY followed by the sign
+xh:  amaqondo angaphezulu kwe +30°C aqhelekile.          ← space before the sign
+```
+
+`kuka-` is Zulu's bound-prefix hyphen, so the text carries **`-+`, two adjacent marks, and the reader voiced
+BOTH**. The decode is therefore accurate, not noisy — a faithful reading of a two-character sequence. And the
+xh/zu divergence Run 7 attributed to *language* is really a difference in the source orthography: same sign,
+same sentence, different neighbouring character, different reading.
+
+⚠ **So there is no zu evidence about a plain `+` before a temperature.** The one recording speaks to `-+`.
+
+### And the `-+` broke our normalizer too
+
+Probing it surfaced a live defect that the Run 7 numbers had hidden (zu's DROP went 3 → 2, not 3 → 1):
+
+```
++30°C     → amazinga angu-30      the plus SILENTLY GONE
+kuka-+30  → kuka- plas 30         without °C, the plus rule fires fine
+```
+
+zu's degree pattern opened with `[+]?` — matching the sign and never re-emitting it. Harmless while zu had no
+sourced plus word; once `plas` was sourced it HID one. And the sign could not reach the sign step regardless:
+after the degree rewrite the text reads `+amazinga…`, and that step requires a digit after the sign.
+
+Fixed by the ordering coupling the playbook records — **claim the sign before the rule that consumes its
+operand**: a plus arm at step 8c, before degrees, and `[+]?` removed from both degree patterns so a form the
+arm misses cannot be quietly eaten there either. `+30°C` now reads `plas amazinga angu-30`; the corpus sentence
+reads `kuka- plas 30` (the degree noun still suppressed by the existing trap-12 rule, since *amazinga* precedes).
+
+Corpus diff zu **DROP 3 → 1**, 3 utterances changed, all three accounted for:
+
+| line | change |
+|---|---|
+| 428 | **IPA byte-identical** — only the `⟪DROP:minus⟫` annotation vanished. That is Run 2's guard fix landing on a real utterance: `ngo-26 -00` is a score, not a minus. |
+| 947 | `nˈɔː kʼˈuːɲɛ` → `pʼlˈaːs kʼˈuːɲɛ` — the offset word |
+| 1437 | the plus now read; `⟪DROP:math-sign⟫` gone |
+
+The lesson worth keeping: **an odd decode is a question about the TEXT before it is a fact about the language.**
+"Noisy" was the wrong verdict; the corpus had a two-character sequence in it, and both the reader and the
+normalizer stumbled on the same thing.
