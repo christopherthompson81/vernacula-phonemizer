@@ -1438,7 +1438,14 @@ Four rules learned immediately, all of them cheap to get wrong:
    ⚠ This is a rule about EVIDENCE, not about storage: keep the full audio. A sourcing pass needs only 2–5
    utterances per language, but the same corpus is the material for fine-tuning work, which wants every speaker
    and every utterance losslessly — do not let one consumer's needs become the archive's policy.
-5. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
+5. **PHONES ANSWER "IS THERE A WORD"; ORTHOGRAPHY ANSWERS "WHICH WORD" — USE BOTH.** These are inverse tools
+   and neither substitutes. A phoneme recognizer cannot echo a glyph back, which is why it is right for a sign;
+   but it also cannot distinguish near-minimal pairs, and candidate words for the same concept often ARE near
+   minimal pairs. Persian's `به اضافه` vs `به علاوه` differ in two confusable segments (`f`~`v` by voicing,
+   `z`~`l` both voiced continuants) and a phone string could not separate them. A text ASR could: MMS wrote
+   `اضف` (ض) for one speaker and `بعه` (ع) for the other — different letters, matching the split. When phones
+   suggest two variants, confirm with a model that emits script before claiming the language has two forms.
+6. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
 

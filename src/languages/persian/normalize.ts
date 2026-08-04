@@ -265,6 +265,20 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //       `… b eː z ɑ f eː  j e k …`        →  به اضافه یک   (be ezāfe yek)
         //       `… b ɛ a l ɑ v e j e  j e k …`    →  به علاوهٔ یک   (be alāve-ye yek)
         //       `… m a h a l l iː  j e k  s ɑ a t …`  →  no plus word at all
+        //     ⚠ WHETHER THOSE ARE REALLY TWO WORDS WAS CHALLENGED, AND THE CHALLENGE WAS RIGHT TO MAKE. The two
+        //     candidates are the same syllable shape — be + V-CVː-CV — differing in exactly two segments, and
+        //     /f/~/v/ differ only in voicing while /z/~/l/ are both voiced continuants. At this decode quality
+        //     that is close to a minimal pair, so "two forms" could equally have been one word decoded twice
+        //     with noise. A phone string alone could not settle it.
+        //     ⚠ SETTLED BY A SECOND MODALITY. MMS-1b-all (`fas` adapter) transcribes to Persian SCRIPT, and the
+        //     consonant identity is the tell — اضافه carries ض, علاوه carries ع:
+        //       speaker 1  `… به وقت محلی  به اضف۱  به وقت ساعت …`   ← ض  → به اضافه
+        //       speaker 3  `… به وقت محلی  بعه۱     به وقت ساعت …`   ← ع  → بعلاوه / به علاوه
+        //       speaker 2  `… به وقت محلی  ۱ ساعت   به وقت ساعت …`   ← no plus word, as the phones showed
+        //     Both are truncated, but they pick DIFFERENT letters for the two speakers, matching the split the
+        //     phoneme model showed. Note this is the exact INVERSE of the tier's usual caution: a text ASR is
+        //     the wrong tool for "is there a sign here" because it emits the glyph, and the right tool for
+        //     "which word is this" because it emits orthography.
         //     ⚠ TWO ATTESTED FORMS, ONE SPEAKER EACH, so the choice between them is STATED, not measured. Both
         //     are ordinary Persian and both read correctly here (bˈe ʔazaːfˈe / bˈe ʔalaːvˈe). `به اضافه` is
         //     preferred because its noun اضافه is specifically ADDITION, whereas علاوه doubles as the discourse
