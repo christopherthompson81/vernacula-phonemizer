@@ -129,8 +129,14 @@ const TOKEN = new RegExp(`([ؠ-ۿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟.!?…,:])`,
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
  * deciding where the script boundary falls (#657).
+ *
+ * ⚠ ONE ADDITION BEYOND THE VERBATIM LIFT: the combining caron U+030C. `ǰ` is precomposed in LOWER case only (U+01F0), so a capital J-caron is always base + combining caron — so a
+ * CAPITALISED native word failed the inventory test and the fold stripped its diacritic. Harmless while the
+ * class was only deciding tokenization (the letter fell out of the token and fragmented, which is the defect this
+ * issue is about); it becomes a silent DELETION the moment the class also drives the fold. Found by checking every
+ * class against the upper case of its own letters, not by a corpus (#657).
  */
-const NATIVE_CLASS = "[a-zāēīōūšžčǰṭḍṛġ]";
+const NATIVE_CLASS = "[a-zāēīōūšžčǰṭḍṛġ\\u030C]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 export type ForeignPhonemizer = (latin: string) => string;

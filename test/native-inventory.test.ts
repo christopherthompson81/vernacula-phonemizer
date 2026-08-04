@@ -31,7 +31,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
-import { dirCodes } from "../tools/registry-map.ts";
+import { makeNativiser } from "../src/core/hostWord.ts";
+import { dirCodes, registeredCodes } from "../tools/registry-map.ts";
 
 /** Expand a character-class body to its literal characters (ranges only over short spans, which is all we use). */
 function expand(body: string): string[] {
@@ -109,5 +110,57 @@ describe("a declared native inventory matches what the g2p can read (#657)", () 
         expect(phonemize("þing", "is")).toContain("θ");
         expect(phonemize("blåbær", "nb")).toContain("æ");
         expect(phonemize("ɛdwuma", "ak")).toContain("ɛ");
+    });
+
+    test("⚠ a combining mark with NO precomposed form survives the fold", () => {
+        // Tâi-lô tone 8 is base + U+030D COMBINING VERTICAL LINE ABOVE, which composes to nothing, so NFC leaves
+        // the cluster two characters long. A char test allowing exactly ONE class match rejected every such
+        // cluster and the fold stripped the tone — asserted on the nativiser directly, because Min Nan's g2p has
+        // no rule for U+030D either (a separate gap, present on both sides of this change).
+        const nat = makeNativiser("[A-Za-zàáâāǎÀÁÂĀǍ̀-̍]", "u");
+        expect(nat("ta̍k"), "tone 8 preserved").toBe("ta̍k");
+        expect(nat("tāi"), "tone 7 preserved").toBe("tāi");
+        // ⚠ AND NOT VIA AN NFD TEST, which is the generous-looking fix that breaks it the other way: `ñ`
+        // decomposes to `n` + U+0303, and U+0303 sits inside that same tone range, so testing the decomposed form
+        // judged `ñ` NATIVE. It then escaped the fold, reached a g2p with no rule for it, and came out VERBATIM.
+        expect(nat("Cañitas"), "ñ is NOT in this inventory").toBe("Canitas");
+    });
+
+    test("⚠ no engine emits raw orthography into its IPA", () => {
+        // The signature of an over-permissive inventory: the fold judges a letter native, declines to touch it,
+        // and the g2p passes it through unread. `Cañitas` read *cañitas˥* in Min Nan and *cañitas˥˥* in Min Dong.
+        //
+        // ⚠ ONLY CHARACTERS THAT ARE NEVER IPA. An earlier version of this listed every accented letter in the
+        // probe words and flagged nine engines, five of them wrongly: `ã õ ĩ ũ` are NASALISED VOWELS (`gn`, `ee`,
+        // `umb`, `yo` all emit them correctly), and `è ì á` are this repo's tone and pitch-accent notation — `sv`
+        // marks accent 2 with a grave. Testing "looks like orthography" measures the probe, not the engine.
+        const ORTHO = /[ñöüäłŁźÿÆÞþÐ]/u;
+        // ⚠ SCOPED TO ENGINES THAT DECLARE AN INVENTORY. `cdo` (Min Dong) leaks the same way and is NOT included,
+        // because it is a DIFFERENT defect that this issue's mechanism cannot fix: its token class expresses its
+        // own letters as base PLUS a combining range (`[a-zŋ\u0300-\u036f]`), and NFC composes several of them
+        // into precomposed forms the class does not list — so a mechanical fold destroys `ṳ` (U+1E73, read /y/)
+        // while still having no way to reject `ñ`, whose tilde sits in that same range. Narrowing the range needs
+        // Bàng-uâ-cê orthographic sourcing, i.e. evidence, not a table. Fixing it blind broke two real tests.
+        const declared = new Set(
+            [...dirCodes()].filter(([dir]) => readdirSync(`src/languages/${dir}`)
+                .some((f) => f.endsWith(".ts") && /^const NATIVE_CLASS = /mu.test(readFileSync(`src/languages/${dir}/${f}`, "utf8"))))
+                .flatMap(([, codes]) => codes),
+        );
+        const leaks: string[] = [];
+        for (const { code } of registeredCodes().filter((r) => declared.has(r.code)))
+            for (const w of ["Cañitas", "Klöcker", "São", "Thérèse", "Łódź"]) {
+                try {
+                    const out = phonemize(w, code);
+                    if (ORTHO.test(out)) leaks.push(`${code}: ${w} → ${out}`);
+                } catch { /* engine cannot take a bare Latin word */ }
+            }
+        expect(leaks, "raw orthographic letters reaching the phoneme string").toEqual([]);
+    });
+
+    test("a CAPITALISED native word reads like its lowercase form", () => {
+        // A class listing its accented letters in lower case only rejects the capital, so the fold strips the
+        // diacritic off every sentence-initial word. cy was missing ten capitals, nan five.
+        for (const [lang, word] of [["cy", "Ŵyl"], ["nan", "Tâi"], ["cs", "Čas"], ["nb", "Blåbær"]] as const)
+            expect(phonemize(word, lang), `${lang} ${word}`).toBe(phonemize(word.toLowerCase(), lang));
     });
 });

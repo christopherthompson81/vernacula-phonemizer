@@ -88,7 +88,25 @@ export function hostWordRun(scripts: readonly ScriptName[], extra = "", medialOn
     // arm must decline them. (`[\p{Script=Nko}--\p{Nd}]` would say this directly but needs the `v` flag, which
     // these engines' tokenizers do not use; a lookahead per position says the same thing under `u`.)
     const nd = "(?!\\p{Nd})";
-    return `${nd}[${letters}${extra}](?:${nd}[${letters}\\p{M}${extra}${medialOnly}])*`;
+    const run = `${nd}[${letters}${extra}](?:${nd}[${letters}\\p{M}${extra}${medialOnly}])*`;
+    // ⚠ VALIDATED, NOT DOCUMENTED. `extra` and `medialOnly` are spliced into a character class, so a `-` in the
+    // wrong place becomes a RANGE: Min Dong passed `"-·"` and produced `[\p{M}-·]`, a range from a property
+    // escape, which is a hard SyntaxError the first time the engine runs. Compiling here turns that into a
+    // named failure at construction instead.
+    //
+    // ⚠ AND VALIDATION RATHER THAN REWRITING, which was the first attempt: moving every `-` to the end looks
+    // like the robust fix and silently destroys a legitimate RANGE — Serbian and Bosnian pass their whole
+    // Cyrillic alphabet as `"а-шђјљњћџ"`, and helpfully relocating that hyphen collapsed `а-ш` to `аш` and
+    // dropped twenty-two letters out of the inventory. A guard that edits its input is not a guard.
+    try {
+        new RegExp(run, "u");
+    } catch (e) {
+        throw new Error(
+            `hostWordRun: extra=${JSON.stringify(extra)} medialOnly=${JSON.stringify(medialOnly)} does not form a `
+            + `valid character class (put a literal "-" LAST; a range like "а-ш" is fine as written): ${String(e)}`,
+        );
+    }
+    return run;
 }
 
 /** The Latin word arm — the overwhelmingly common case, spelled once so call sites do not repeat the array. */
@@ -147,12 +165,27 @@ const CLUSTER = /\P{M}\p{M}*/gu;
  * Turkish utterances changed, which is what a fix reaching far too far looks like.
  */
 export function makeNativiser(nativeClass: string, flags = "u"): (w: string) => string {
-    const word = new RegExp(`^(?:${nativeClass})+$`, flags);
-    const char = new RegExp(`^(?:${nativeClass})$`, flags);
+    const inClass = new RegExp(`^(?:${nativeClass})+$`, flags);
+    /**
+     * Is every character of `s` inside the inventory? NFC first, so a precomposed and a decomposed accent are
+     * judged alike, then `+` so the test is "every character", not "exactly one".
+     *
+     * ⚠ `+` RATHER THAN A SINGLE OCCURRENCE, because a cluster is base PLUS its marks and NOT EVERY MARK
+     * COMPOSES. Tâi-lô tone 8 is base + U+030D COMBINING VERTICAL LINE ABOVE, which has no precomposed form at
+     * all, so NFC leaves it as two characters; requiring exactly one class match rejected it and the fold then
+     * stripped the tone it was asked to protect — `ta̍k` read *tak*, while `tâi` (precomposed) kept its tone. A
+     * tone language quietly losing one tone is as bad as this layer gets. With `+`, a base letter plus a
+     * combining RANGE — Tâi-lô's `[A-Za-zàáâāǎ̀-̍]`, Hawaiian's and Latin's `̀-ͯ` — matches its own marks.
+     *
+     * ⚠ AND NFC ONLY, NEVER ALSO NFD. Testing the decomposed form too looks like the symmetric, generous thing
+     * and it makes every combining-range class ENORMOUSLY over-permissive: `ñ` decomposes to `n` + U+0303, and
+     * U+0303 sits inside Tâi-lô's `̀-̍`, so `ñ` was judged NATIVE, escaped the fold, reached a g2p with no rule
+     * for it and came out VERBATIM — `Cañitas` in Min Nan read *cañitas˥*, raw orthography in the phoneme
+     * string. A range written for six tone marks cannot be read as a licence for every mark in its numeric span.
+     */
+    const known = (s: string): boolean => inClass.test(s.normalize("NFC"));
     return (w: string): string => {
-        if (word.test(w)) return w;
-        return (w.normalize("NFC").match(CLUSTER) ?? [])
-            .map((c) => (char.test(c) ? c : foldLatinToBase(c)))
-            .join("");
+        if (known(w)) return w;
+        return (w.match(CLUSTER) ?? []).map((c) => (known(c) ? c : foldLatinToBase(c))).join("");
     };
 }

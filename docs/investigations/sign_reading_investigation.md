@@ -2074,3 +2074,78 @@ inventory test states the ASCII exemption explicitly rather than leaving it to l
 sr 2/1923 (`élevé`, `Ōō`) · ff 13/1500 (`Bé`, `Ōō`, `São`). No defect class moved either way.
 
 Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 32 — 2026-08-04 — self-review: four defects in my own fix, and one over-reach I reverted
+
+Reviewing the branch before merge, with checks aimed at the failure modes a corpus diff CANNOT see — the ~150
+languages with no corpus. Six mechanical checks over every engine carrying a `NATIVE_CLASS`: case coverage, lead
+vs medial, numbers still tokenizing, punctuation still reaching the clause machinery, the fold actually taking
+effect, and transform leftovers.
+
+### 1. ⚠ NFC DEFEATS A CLASS WRITTEN AS BASE + COMBINING RANGE
+
+The worst of the four, and it silently deleted a TONE. `makeNativiser` normalised each cluster to NFC and tested
+it against ONE class occurrence. Tâi-lô tone 8 is base + U+030D COMBINING VERTICAL LINE ABOVE, which composes to
+nothing, so NFC leaves the cluster two characters long and a single-occurrence test rejects it — the fold then
+stripped the tone it was asked to protect. `ta̍k` read *tak*, while `tâi` (precomposed) kept its tone. **A tone
+language quietly losing one tone is as bad as this layer gets.** Fixed with `+`: the question is "is every
+character of this cluster in the inventory", not "is this cluster one class match".
+
+### 2. ⚠ AND THE GENEROUS-LOOKING FIX FOR (1) BROKE IT THE OTHER WAY
+
+My first fix also tested the DECOMPOSED form, on the reasoning that a class may spell an accent either way and
+both should be honoured. That makes every combining-range class enormously over-permissive: `ñ` decomposes to
+`n` + U+0303, U+0303 sits inside Tâi-lô's `̀-̍`, so `ñ` was judged NATIVE, escaped the fold, reached a g2p with
+no rule for it and came out **verbatim** — `Cañitas` in Min Nan read *cañitas˥*, raw orthography in the phoneme
+string. Min Dong and Tashelhit the same.
+
+*A range written for six tone marks cannot be read as a licence for every mark in its numeric span.* NFC only.
+
+### 3. ⚠ THREE CLASSES LISTED THEIR ACCENTS IN LOWER CASE ONLY
+
+Welsh was missing ten capitals (`ÀÈÌÒÙÏËÖÄÜ`), Min Nan five (`ÀÁÂĀǍ`), Balochi the combining caron. Inherited
+from the original token classes, and HARMLESS while the class only decided tokenization — the capital fell out of
+the token and fragmented, which is the defect this issue is about. It becomes a silent DELETION the moment the
+same class drives the fold. `TÂI` lost the tone `tâi` kept.
+
+*A latent data gap becomes a live defect when you give the data a second job.* Found by checking every class
+against the upper case of its own letters — no corpus involved, and cy/nan's corpus diffs did not move.
+
+### 4. ⚠ A GUARD THAT EDITS ITS INPUT IS NOT A GUARD
+
+`hostWordRun` documented "put `-` last" and left it to the caller. The very next caller passed `"-·"` and
+produced `[\p{M}-·]` — a range from a property escape, a hard SyntaxError at first use. So I made the function
+move every `-` to the end, which looks robust and **silently destroyed a legitimate range**: `sr`/`bs` pass their
+whole Cyrillic alphabet as `"а-шђјљњћџ"`, and helpfully relocating that hyphen collapsed `а-ш` to `аш` and
+dropped twenty-two letters out of the inventory. The over-claim test caught it immediately (22 findings for sr).
+Replaced with VALIDATION: compile the class at construction and throw a named error. A constraint a caller can
+silently violate belongs in the callee — but enforcing it must not mean rewriting what the caller meant.
+
+### 📌 AND ONE OVER-REACH, REVERTED
+
+The leak probe found `cdo` (Min Dong) emitting *cañitas˥˥*. It is a REAL leak — and identical on `main`, because
+cdo never fragmented and so was never in this issue's scope. I applied the standard treatment anyway and **broke
+two real tests**: cdo's class expresses its own letters as base plus a combining range, and NFC composes several
+of them into precomposed forms the class does not list, so the fold destroyed `ṳ` (U+1E73, read /y/) and `ø̤`.
+Narrowing that range needs Bàng-uâ-cê orthographic sourcing — evidence, not a table.
+
+Reverted, and the leak test is explicitly scoped to engines that DECLARE an inventory, with the reason stated at
+the assertion so the exclusion is not mistaken for coverage. *Taking a pre-existing, out-of-scope defect and
+fixing it mechanically without the sourcing is how a clean change acquires a regression.*
+
+### Probes that measured their own frames — a running tally, because this keeps happening
+
+Four times on this issue now. The leak probe alone was wrong twice more in this run: first it flagged **139**
+engines by treating any combining mark as orthography, when combining marks are ordinary IPA diacritics
+(`t̬` voicing, `ɐ̃` nasalisation, `t͡s` the affricate tie). Narrowed to precomposed letters, it flagged **99**,
+because `æ` is a phoneme. Narrowed to letters that are NEVER IPA, it flagged **9**, of which **5 were still
+wrong**: `ã õ ĩ ũ` are nasalised vowels (`gn`, `ee`, `umb`, `yo` all emit them correctly) and `è ì` are this
+repo's own pitch-accent notation — `sv` marks accent 2 with a grave.
+
+139 → 99 → 9 → 1 real finding. *Every intermediate number looked like a discovery.*
+
+### Verification
+
+All 27 corpus diffs re-run after the fixes: byte-identical to the verified numbers, no defect class moved.
+Gates run separately: tsc PASS; **207 files / 2943 tests**; audit 0 defective cells across 0/67; probe
+`✓ none fragment an accented Latin word`.

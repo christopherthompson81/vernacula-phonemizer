@@ -107,8 +107,14 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
  * is no longer also deciding where the script boundary falls (#657).
+ *
+ * ⚠ ONE ADDITION BEYOND THE VERBATIM LIFT: the capitals `ÀÈÌÒÙÏËÖÄÜ`. the lowercase half listed ten accented vowels the uppercase half did not — so a
+ * CAPITALISED native word failed the inventory test and the fold stripped its diacritic. Harmless while the
+ * class was only deciding tokenization (the letter fell out of the token and fragmented, which is the defect this
+ * issue is about); it becomes a silent DELETION the moment the class also drives the fold. Found by checking every
+ * class against the upper case of its own letters, not by a corpus (#657).
  */
-const NATIVE_CLASS = "[a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]";
+const NATIVE_CLASS = "[a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶÀÈÌÒÙÏËÖÄÜ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
