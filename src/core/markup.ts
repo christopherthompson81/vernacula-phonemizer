@@ -42,7 +42,10 @@ const TAG = /<\/?[a-zA-Z][^<>]*>/gu;
  *
  * ⚠ NARROW BY DESIGN, because `|` and `!` are ordinary characters in a way `<tag>` is not. Only three shapes
  * are matched, each unambiguous:
- *   · `{|` and the rest of its line   the table OPEN, whose remainder is always attributes, never prose
+ *   · a LINE-LEADING `{|` and the rest of its line   the table OPEN, whose remainder is always attributes
+ *     ⚠ anchored to line start, because the arm consumes TO END OF LINE — unanchored, a stray `{|` in prose
+ *     (set-builder notation, a code snippet) would delete the remainder of the sentence. A wikitable open is
+ *     always the first thing on its line, so the anchor costs nothing and bounds the damage to nothing.
  *   · `|}`                            the table close
  *   · a LINE-LEADING `|`, optionally followed by `attr="value"` pairs and a closing `|`   the cell prefix
  *   · `||`                            the inline cell separator
@@ -60,7 +63,7 @@ const TAG = /<\/?[a-zA-Z][^<>]*>/gu;
  * Burmese orthography at all.
  */
 const WIKITABLE =
-    /\{\|[^\n]*|\|\}|^[ \t]*\|(?:[a-zA-Z-]+=(?:"[^"\n]*"|'[^'\n]*'|[^|\s]+)[ \t]*)*\|?|\|\|/gmu;
+    /^[ \t]*\{\|[^\n]*|\|\}|^[ \t]*\|(?:[a-zA-Z-]+=(?:"[^"\n]*"|'[^'\n]*'|[^|\s]+)[ \t]*)*\|?|\|\|/gmu;
 const ENTITY = /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]*);/gu;
 
 /** Strip HTML tags and decode character entities. Pure text→text; a string containing neither is

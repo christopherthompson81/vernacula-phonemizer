@@ -85,4 +85,20 @@ describe("bare exponent", () => {
         expect(phonemize("10⁰", "en")).toContain("pʰˈaᶷɚ ʌv zˈɪɹoᶷ");
         expect(phonemize("10¹", "en")).toContain("pʰˈaᶷɚ ʌv wˈʌn");
     });
+
+    test("⚠ A FOOTNOTE MARKER IS NOT AN EXPONENT — the length cap and its boundary guard", () => {
+        // A superscript on an ordinary word is a citation far more often than a power, and reading one as
+        // arithmetic is the confidently-wrong outcome this repo ranks below silence. So a LETTER base is capped
+        // at three characters — variables are short, prose words are not.
+        expect(phonemize("Smith¹ said", "en")).not.toContain("pʰˈaᶷɚ");
+        expect(phonemize("the theory² holds", "en")).not.toContain("skwˈɛɹd");
+        expect(phonemize("evidence³ shows", "en")).not.toContain("kjˈuːbd");
+        // ⚠ THE CAP ALONE DID NOTHING. `{1,3}` matches the LAST three letters of a long word, so `Smith¹`
+        // matched `ith` and still read *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn*. The `(?<![A-Za-z])` boundary is what
+        // makes a length limit limit anything, and this test exists because the first version shipped without it.
+        expect(phonemize("Smith¹ said", "en")).toBe(phonemize("Smith said", "en"));
+        // Short bases — real mathematical variables — are unaffected.
+        expect(phonemize("mc²", "en")).toContain("skwˈɛɹd");
+        expect(phonemize("x⁷", "en")).toContain("pʰˈaᶷɚ");
+    });
 });

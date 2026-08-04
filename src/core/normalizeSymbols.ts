@@ -32,7 +32,8 @@ const SUPERSCRIPT_RUN = `[${Object.keys(SUPERSCRIPT).join("")}]+`;
  * the host language reads its own way. `\p{Nd}` not `\d`, because a language may write its own numerals and
  * `foldNativeDigits` is applied per engine rather than fleet-wide (see core/unicode.ts).
  */
-const BARE_EXPONENT = new RegExp(`(\\p{Nd}[\\p{Nd}.,]*|[\\p{L}\\p{M}]+)\\s?(${SUPERSCRIPT_RUN})`, "gu");
+const BARE_EXPONENT = new RegExp(
+    `(\\p{Nd}[\\p{Nd}.,]*|(?<![\\p{L}\\p{M}])[\\p{L}\\p{M}]{1,3})\\s?(${SUPERSCRIPT_RUN})`, "gu");
 
 /** Where a language puts the squared/cubed measure word relative to the unit noun. See `exponentWords`. */
 export type ExponentPosition = "before" | "after" | "compound" | "suffix";

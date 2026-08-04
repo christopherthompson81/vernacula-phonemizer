@@ -371,7 +371,14 @@ export function normalizeEnglish(input: string): string {
     //     cardinal is both correct and unambiguous — see `bareExponent` in core/normalizeSymbols.ts for why the
     //     cross-language argument settles it the same way. The digits are emitted for the number path to speak.
     //     Ordered AFTER the unit rule so a unit exponent is never stolen from it.
-    s = s.replace(/(\d[\d.,]*|[A-Za-z]+)\s?([\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
+    //     ⚠ A LETTER BASE IS CAPPED AT THREE, because a superscript on an ordinary word is a FOOTNOTE marker
+    //     far more often than an exponent: `Smith¹` is a citation, and reading it "Smith to the power of one"
+    //     is the confidently-wrong outcome this repo ranks below silence. Variables are short, prose words are
+    //     not. See `BARE_EXPONENT` in core/normalizeSymbols.ts for the measurement behind the cap.
+    //     ⚠ AND THE CAP NEEDS `(?<![A-Za-z])`, or it caps nothing: `{1,3}` happily matches the LAST three
+    //     letters of a long word, so `Smith¹` matched `ith` and still read as arithmetic. Caught by probing the
+    //     exact case the cap was written for.
+    s = s.replace(/(\d[\d.,]*|(?<![A-Za-z])[A-Za-z]{1,3})\s?([\u2070\u00b9\u00b2\u00b3\u2074-\u2079]+)/gu,
         (_m, base: string, sup: string) => {
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
             return digits === "2" ? `${base} squared`

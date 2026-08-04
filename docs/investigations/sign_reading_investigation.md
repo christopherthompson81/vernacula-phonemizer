@@ -1069,3 +1069,54 @@ abbreviation (`ኪ.ሜ²`, `किमि²`, `км²`) that an earlier Latin-onl
 Gates: tsc clean; **205 files / 2920 tests**; corpus diffs on twelve languages (en de fr es it pt ru ja cmn hi
 el th) all **byte-identical** — the expected outcome, since FLEURS carries only unit exponents, and the
 confirmation that a fleet-wide `FOREIGN_RUN` change regressed nothing.
+
+## Run 16 — 2026-08-04 — self-review of the exponent work: three fixes, one of them a real bug
+
+Reviewed the four branch commits before opening the PR. Three findings, and the first was a genuine defect
+shipped minutes earlier.
+
+### ⚠ A FOOTNOTE MARKER IS NOT AN EXPONENT — and my first guard against it did nothing
+
+A superscript digit on an ordinary word is a CITATION far more often than a power: `Smith¹` is a footnote, and
+reading it *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn* is exactly the confidently-wrong outcome this repo ranks below
+silence. The rule matched `[\p{L}\p{M}]+` before a superscript with no length limit, so it did that.
+
+Capped the letter base at three characters — mathematical variables are short (`x`, `mc`, `E`), prose words are
+not. **Then probed the motivating case and the cap had changed nothing:** `{1,3}` happily matches the LAST three
+letters of a long word, so `Smith¹` matched `ith` and still read as arithmetic. A length limit only limits
+anything if the match must START at a word boundary; `(?<![\p{L}\p{M}])` is what makes the cap a cap.
+
+*A guard has to be tested against the input that motivated it, not merely against the cases it was already
+passing.* Second time this session a change typechecked, ran, and did nothing — the first was
+`repairDoubleEncoded`'s early-out guard.
+
+Measured to set the cap: after mojibake repair every real letter base in the fleet is a two-letter unit
+(`km²` ×108) or `mc`. The apparent long ones were `kmÂ²` and `AsunciÃ³n`, where the `²`/`³` is half of a
+double-encoded byte and not an exponent at all — the phantom class again, this time inflating a length
+distribution. Known exclusion: `किमि²` (ne, 4 chars) is a genuine Devanagari unit abbreviation and is now out of
+reach, which is the right place for it to fail — a unit exponent belongs to the unit path.
+
+### `{|` had to be anchored to line start
+
+The wikitable-open arm consumed TO END OF LINE. Unanchored, a stray `{|` in prose — set-builder notation, a code
+snippet — would have deleted the rest of the sentence. A table open is always first on its line, so the anchor
+costs nothing and bounds the damage to nothing. Verified: `the set {|x|} is defined and more text follows`
+survives intact.
+
+### ⚠ AND I MADE THE STALE-RULER MISTAKE I WARNED ABOUT IN RUN 12
+
+Re-diffing after the fixes, `ne` reported 8 changed utterances and `id` 6 — alarming, since neither declares
+`bareExponent`. Both were **my own measurement error**: I compared against baseline files that did not come from
+the right commit (`id.before` was several commits old and `ne.before` had never been emitted at all). Re-emitted
+from the true branch point (`45c0226`): **both byte-identical, 0/1993 and 0/1936.**
+
+Run 12 states the rule — "the ruler must be the same on both sides of a before/after; only the ENGINE should
+differ" — and I still reached for a leftover file because it had the right name. *A baseline needs its commit
+recorded, not just its filename.* The false alarm cost one re-run; believing it would have cost a wild goose
+chase through two languages that were never touched.
+
+### Result
+
+Gates after the fixes: tsc clean; **205 files / 2921 tests** (one added, pinning the footnote case and the
+boundary guard that makes the cap work); audit **0 defective cells across 0/67**; corpus diffs byte-identical on
+en, de, it, hi, ne and id against the true branch point.
