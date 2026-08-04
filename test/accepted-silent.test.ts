@@ -10,6 +10,7 @@ import { describe, expect, test } from "vitest";
 import { ACCEPTED_SILENT, DROPPABLE, isAcceptedSilent } from "../tools/normalization/defects.ts";
 
 const MINUS = DROPPABLE.find(([n]) => n === "minus")![1];
+const MATH = DROPPABLE.find(([n]) => n === "math-sign")![1];
 
 describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
     test("the five named designations are accepted", () => {
@@ -47,9 +48,25 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         expect(isAcceptedSilent("hi", "minus", "कोई संख्या नहीं", MINUS)).toBe(false);
     });
 
-    test("the table is exactly the five languages the sweep resolved", () => {
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "kn", "mr", "ta"]);
-        // Two universal sentences, one designation each — FLEURS translates ONE English set.
-        for (const forms of Object.values(ACCEPTED_SILENT)) expect(forms).toHaveLength(1);
+    test("the table covers the sweep's whole residual, per class", () => {
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "kn", "mi", "mr", "my", "ta", "xh"]);
+        // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
+        for (const byClass of Object.values(ACCEPTED_SILENT))
+            for (const forms of Object.values(byClass)) {
+                expect(forms.length).toBeGreaterThan(0);
+                for (const f of forms) expect(typeof f).toBe("string");
+            }
+    });
+
+    test("classes are independent — an accept for one class never covers another", () => {
+        // my accepts a compound-joiner `+` (math-sign) and an apposition `-` (minus) SEPARATELY. Neither may
+        // stand in for the other, and no class may borrow a sibling's list.
+        expect(isAcceptedSilent("my", "math-sign", "\u1021\u1001\u103B\u102D\u1014\u103A+\u101B\u1015\u103A\u101D\u1014\u103A\u1038\u1011\u102F", MATH)).toBe(true);
+        expect(isAcceptedSilent("my", "minus", "\u1021\u1001\u103B\u102D\u1014\u103A+\u101B\u1015\u103A\u101D\u1014\u103A\u1038\u1011\u102F", MINUS)).toBe(false);
+        // An UNLISTED word-joining plus in my still reports — the accept names the two spacetime compounds,
+        // not the shape.
+        expect(isAcceptedSilent("my", "math-sign", "\u1000+\u1001", MATH)).toBe(false);
+        // xh's accepted stray hyphen is minus-only; its `+` is now VOICED and must not be accepted at all.
+        expect(isAcceptedSilent("xh", "math-sign", "kwe +30\u00B0C", MATH)).toBe(false);
     });
 });

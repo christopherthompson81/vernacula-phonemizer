@@ -184,6 +184,21 @@ export function normalizeBurmese(input: string): string {
         [/÷/gu, " စား "],
     ];
     t = t.replace(new RegExp(`(${d()})\\s*\\+\\s*(${d()})`, "gu"), "$1 အပေါင်း $2");
+    //     ⚠ AND A `+` WITH A DIGIT ONLY AFTER IT, which the both-sides guard above was too tight to reach.
+    //     The comment above is right that a LETTER-flanked `+` is a compound joiner and stays silent, but it
+    //     drew the line at "digits on both sides", and that also excluded the two instances where the sign is
+    //     genuinely a word:
+    //       `အာဆီယံ +၃`  — ASEAN **Plus Three**, where the plus is part of the organisation's NAME
+    //       `(+⅔)`        — a positivity marker on a fraction (now `(+2/3)` after the vulgar-fraction fold)
+    //     A digit after the sign is the discriminator, and it separates these cleanly from the compounds,
+    //     every one of which has a letter on both sides (`အချိန်+ရပ်ဝန်းထု`, `ရပ်ဝန်း+အချိန်`).
+    //     Still NOT matched, and deliberately: the ETYMOLOGY plus between parenthesised glosses
+    //     (`(gêeo = Earth) + (graphein = to write)`), where what follows is a bracket rather than a digit.
+    //     ⚠ That one has its own attested reading and it is NOT အပေါင်း — the artifact glosses the symbol in
+    //     its own text, `နိ+ ဝါန =နိ နှင့် ဝါန` ("ni+vāna = ni AND vāna"), so an etymological `+` is နှင့်.
+    //     Left unimplemented rather than guessed at: three instances, all inside a bracket-gloss shape narrow
+    //     enough that a rule for it would be fitted to this article rather than to the language.
+    t = t.replace(new RegExp(`(?<![${D}])\\+\\s*(?=${d()})`, "gu"), "အပေါင်း ");
     for (const [re, word] of RELATIONAL) t = t.replace(re, word);
     t = t.replace(/[ \t]{2,}/gu, " ");
 

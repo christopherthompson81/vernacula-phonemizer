@@ -119,12 +119,55 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  *
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
-export const ACCEPTED_SILENT: Readonly<Record<string, readonly string[]>> = {
-    gu: ["એચજેઆર -3"],
-    hi: ["चंद्रयान -1"],
-    kn: ["ಎಚ್‌ಜೆಆರ್ -3"],
-    mr: ["चंद्रयान -1"],
-    ta: ["சந்திரயான் -1"],
+export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    // DESIGNATIONS — a product name or bill number whose hyphen is silent in speech. Two universal sentences
+    // across the five languages that write a SPACE before the hyphen; every other language writes it closed and
+    // the `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    gu: { minus: ["એચજેઆર -3"] },
+    kn: { minus: ["ಎಚ್‌ಜೆಆರ್ -3"] },
+    mr: { minus: ["चंद्रयान -1"] },
+    ta: { minus: ["சந்திரயான் -1"] },
+    hi: {
+        minus: [
+            "चंद्रयान -1",
+            // AN ERA RANGE, not a negative: "circa 600 BCE-1200 CE". The range lookbehind spans a digit plus at
+            // most two letters and a dot, and `600 ई. पू.-` is longer than that — widening it far enough to
+            // reach past two abbreviations would swallow hi's ONE true negative (`ख॰इ॰), -२.८८ परिमाण`), which
+            // is the same shape. So the range is named instead of pattern-matched.
+            "पू.-1200",
+        ],
+    },
+    my: {
+        // AN APPOSITION dash inside a list of ethnic groups — `(Koreans -၂သန်း)`, "Koreans – 2 million".
+        // Already documented as an apposition in the `minus` class comment above.
+        minus: ["Koreans -၂သန်း"],
+        // A COMPOUND JOINER, and this one is a linguistic judgement rather than a shrug. `အချိန်+ရပ်ဝန်းထု` is
+        // *spacetime*; the `+` marks a compound and the words are spoken adjacent, exactly as a hyphen would be.
+        // burmese/normalize.ts step 12 states the distinction it draws: a GLOSS sign (`=`) separates a label
+        // from its expansion and must be audible, a compound joiner need not be. Contrast Italian's
+        // `volo+hotel`, a coordination whose reader was recorded saying *più* — same glyph, different function.
+        "math-sign": ["အချိန်+ရပ်ဝန်းထု", "ရပ်ဝန်း+အချိန်"],
+        // A BARE ITERATION MARK HAS NOTHING TO REPEAT, so silence is the only correct output. These two entries
+        // are the ENTIRE evidence for my's `iteration` cell and they are wikitable rows from a Burmese article
+        // about JAPANESE kana marks — `ゝ`/`ゞ` are not Burmese orthography at all. Routed to Japanese the mark
+        // still reads empty, because `ja` also (correctly) has no antecedent to reduplicate.
+        iteration: ["ゝ (reduplicates", "ゞ (reduplicates"],
+    },
+    xh: {
+        // A STRAY HYPHEN. `ebhudla kangange -40 mph`, where the English original reads "winds blowing at
+        // 40 mph" — so reading it as *thabatha* ("minus") would be confidently wrong. xhosa/normalize.ts
+        // step 14 records this and measures its guarded pattern at 0 corpus matches.
+        minus: ["kangange -40"],
+    },
+    mi: {
+        // ⚠ ATTESTED, AND THE ENGINE CANNOT SAY IT — a different limit from every other entry here. Both mi_nz
+        // speakers voice this plus, using the English loan. But Māori has no /l/ and no /s/, so the g2p reduces
+        // every candidate spelling to a wrong syllable (`plus` → [pu], `plas` → [pa]). Emitting [pa] would be a
+        // confidently wrong syllable where there is currently silence, which this repo ranks below a missing
+        // reading; substituting a native maths word would invent a reading the recordings contradict.
+        // maori/normalize.ts step 1b holds the full sourcing so no later pass re-derives it and reaches for [pa].
+        "math-sign": ["+30 tākiri"],
+    },
 };
 
 /**
@@ -134,8 +177,7 @@ export const ACCEPTED_SILENT: Readonly<Record<string, readonly string[]>> = {
  * the language names none, so the accept can only ever remove a hit it can fully account for.
  */
 export function isAcceptedSilent(lang: string, cls: string, line: string, re: RegExp): boolean {
-    if (cls !== "minus") return false;
-    const forms = ACCEPTED_SILENT[lang];
+    const forms = ACCEPTED_SILENT[lang]?.[cls];
     if (forms === undefined) return false;
     const spans: [number, number][] = [];
     for (const f of forms)

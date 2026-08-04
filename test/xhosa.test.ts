@@ -144,11 +144,14 @@ describe("Xhosa text normalization (#562)", () => {
 
     test("degrees — the redundancy guard, the compass, and the unattested neighbours", () => {
         // TRAP 12: the corpus's one Celsius sentence already says `amaqondo`, so it must not be doubled.
-        // …and the leading `+` goes with it: it is a POSITIVITY marker that `angaphezulu` ("above") already
-        // states, so keeping it would double the meaning. This is why the artifact scan's residual
-        // `DROP math-sign ×1` is this sentence, and why it is permissible (trap 12).
+        // ⚠ THE LEADING `+` IS NOW VOICED, reversing a SOURCED silence on policy grounds. The evidence stands
+        // — both xh_za speakers of this sentence produce no plus phones in the TEMPERATURE position while all
+        // three of the UTC sentence do — but for TTS an explicitly typed character is CONTENT, and a speaker's
+        // omission is evidence about reading habit, not licence to delete. The identical case was decided on
+        // hi (shipped silent on 2-of-2 omission, then reverted to voicing); xh was the last holdout, so
+        // hi/zu/te/sw all read this sign and xh alone did not.
         expect(normalizeXhosa("amaqondo angaphezulu kwe +30°C aqhelekile."))
-            .toBe("amaqondo angaphezulu kwe 30 aqhelekile.");
+            .toBe("amaqondo angaphezulu kwe plas 30 aqhelekile.");
         // A leading MINUS on a temperature is a real negative and is read — 0 corpus instances, pinned as
         // the adversarial neighbour (trap 8).
         expect(normalizeXhosa("(-30°C)")).toBe("(thabatha amaqondo 30)");

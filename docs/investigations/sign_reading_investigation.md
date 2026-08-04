@@ -878,3 +878,104 @@ Gates: tsc clean; 202 files / 2902 tests; el diff 12/1969, DROP 1 → 0, no DIGI
 being re-examined. el sat there for the whole sweep because the label said "ambiguous negative", and one question
 about whether the label was right turned it into a twelve-sentence improvement. Re-derive the classification of
 anything in a permanent-residual list before treating the list as closed.
+
+## Run 14 — 2026-08-04 — the ten artifact-side cells: 10 → 2, and the residual is ONE fleet-wide gap
+
+Worked the ten cells the widened audit surfaced. Diagnosed each against the actual matched character before
+touching anything, which was necessary: **the labels were wrong on four of them**.
+
+| cell | label said | what it actually was | outcome |
+|---|---|---|---|
+| hi currency | currency | **`¢`**, a CENT SIGN — not the `°` in the shown prefix | declared `सेंट` |
+| hi signed-number | minus | era RANGE `600 ई. पू.-1200 ई.` | accepted |
+| hi exponent | exponent | bare `२०²` | **open — fleet-wide gap** |
+| mi arithmetic | arithmetic | attested plus the engine cannot pronounce | accepted |
+| my signed-number | minus | apposition `(Koreans -၂သန်း)` | accepted |
+| my arithmetic | arithmetic | compound joiner `အချိန်+ရပ်ဝန်းထု` … **and `အာဆီယံ +၃`** | fixed + accepted |
+| my exponent | exponent | `E = mc²` — **English text**, and English's gap | **open — same gap** |
+| my iteration | iteration | wikitable markup + a bare `ゝ` | markup fixed, mark accepted |
+| xh signed-number | minus | stray hyphen `kangange -40 mph` | accepted |
+| xh arithmetic | arithmetic | `+30°C`, suppressed on purpose | **fixed on policy** |
+
+### ⚠ xh's silence was SOURCED and was reversed anyway — the policy decides, not the recording
+
+xh's `+30°C` was deliberately silent, and the reasoning was good: both xh_za speakers of the Montevideo
+sentence produce no plus phones in the TEMPERATURE position while all three of the UTC sentence do — the
+"same sign, two readings in one language" rule. The file called the residual DROP "permissible".
+
+That evidence is unchanged and still correct. What overrides it is the standing rule: **for TTS an explicitly
+typed character is CONTENT, and a speaker's omission is evidence about reading habit, not licence to delete.**
+The identical case was already decided on hi — hi's `+30 °C` silence was shipped on 2-of-2 omission and then
+reverted to voicing under this rule — and xh was simply never brought along. Measured: `hi`, `zu`, `te` and `sw`
+all read this sign and **xh alone did not**, with zu being xh's closest relative and the language where the plus
+rule was moved ahead of degrees for exactly this reason. A sourced finding can be correct and still not decide
+the question; the policy is a separate layer, and consistency across the fleet is evidence that it was applied.
+
+### `my`'s plus: the both-sides guard was too tight by exactly two instances
+
+my already read `+` between digits as `အပေါင်း`, and its comment correctly argues that a LETTER-flanked plus is
+a compound joiner (`အချိန်+ရပ်ဝန်းထု` = *spacetime*) and stays silent — genuinely different from Italian's
+`volo+hotel`, a coordination whose reader was recorded saying *più*. Same glyph, different function.
+
+But the guard was "digits on BOTH sides", which also excluded the two cases where the sign is a word:
+`အာဆီယံ +၃` — **ASEAN Plus Three**, where the plus is part of the organisation's NAME — and `(+⅔)`, a
+positivity marker on a fraction. A digit AFTER is the discriminator, and every compound has a letter on both
+sides, so it separates them with no overlap.
+
+⚠ **The etymology plus was left unimplemented, and its reading is attested.** `(gêeo = Earth) + (graphein = to
+write)` is a third construction, and the artifact **glosses the symbol in its own text** — `နိ+ ဝါန =နိ နှင့် ဝါန`
+("ni+vāna = ni AND vāna") — so an etymological `+` is `နှင့်`, not `အပေါင်း`. Three instances, all inside a
+bracket-gloss shape narrow enough that a rule would be fitted to the article rather than to the language.
+Recorded rather than shipped.
+
+### Markup was being SPOKEN, which is worse than a drop
+
+my's `iteration` evidence is two wikitable rows, and `stripMarkup` handles HTML but not wikitable syntax, so
+`|bgcolor="#F3F5DE"| ゝ …` read as *bɡkˈʌlɚ ɲi˨m̥ja˥ˀ ˈɛf θoʊɴ ˈɛf ŋa dˈiː* — "bgcolor equals F 3 F 5 D E", a
+style attribute recited one hex digit at a time. That is the inverse of the dropped-sign problem: **audible
+garbage**, and strictly worse, because silence can at least be mistaken for a reading choice.
+
+Fixed in `stripMarkup`, on the philosophy its own header states ("a phonemizer handed `<i>` should render it,
+not read it"). ⚠ **The `!` header arms were written and then removed** — wikitables mark headers with `!` and
+`!!`, so both belong to the syntax, but measured across all 67 corpora AND all 67 artifacts they occur **zero
+times**, while `!` is ordinary sentence punctuation everywhere. Zero value against a real cost (`Wow!! Amazing`
+would lose its clause break). Only the `|` shapes ship. Verified byte-identical on en, lb (`&apos;` ×192) and
+ms (`<i>` tags) — the three most markup-prone corpora.
+
+And the mark itself: **a bare iteration mark has nothing to repeat**, so silence is the only correct output.
+Routed to Japanese it still reads empty, because `ja` also has no antecedent. Those two rows are also my's ENTIRE
+`iteration` evidence and they describe JAPANESE kana in a Burmese article — `ゝ`/`ゞ` are not Burmese orthography.
+
+### The residual is ONE gap in two languages, and it is fleet-wide
+
+Both remaining cells are a **bare-number exponent**: hi's `२०²` and my's `E = mc²` (the latter inside an
+embedded ENGLISH run, so it is English's gap). Measured — **every language drops it**:
+
+```
+en 20² → twˈɛnti     de 20² → t͡svˈant͡sɪç   fr 20² → vˈɛ̃      it 20² → vˈenti
+es 20² → bˈeᶦnte     hi 20² → bˈiːs        pt 20² → vˈĩtɨ     ru 20² → dvˈat͡sətʲ
+```
+
+The exponent machinery is **unit-only** across the whole fleet, and the bare form needs a DIFFERENT word from
+the unit modifier — English wants "squared", not the "square" of *square kilometres*, and Italian needs a
+connective (*venti al quadrato*). English does not even use the shared `exponentWords`; it handles `km²`
+locally. So closing this needs a new tier field plus sourced words for 67 languages, which is its own pass.
+Left OPEN and visible rather than mislabelled accepted — these two are not correct-as-is.
+
+⚠ **hi's two cells are probably the same corrupt sentence.** `२०² या १०²` and `२०¢ या १०¢` are the same Vernier
+sentence in two artifact copies with a different character in the slot, which is the signature of an OCR or
+encoding corruption of `″` (arc-seconds — a Vernier scale reads those, not money and not squares). Neither `¢`
+nor `²` is what the author wrote. `¢` was declared anyway, because the engine's job is to read the character it
+is given, and that caveat is in the code.
+
+### The accepted baseline generalised to any class, and immediately proved itself
+
+`ACCEPTED_SILENT` was minus-only; it is now keyed `lang → class → literal strings`. Adding my's compound
+plus **immediately surfaced a new instance** — `အာဆီယံ +၃`, which the accept correctly did NOT cover because it
+names strings and not shapes. That is the property working in the wild rather than only in a test.
+
+### Result
+
+**10 defective cells → 2.** 12 accepted across 7 languages, every one printed with its reason. Gates: tsc clean;
+**204 files / 2914 tests**; corpus diffs xh 1/1509 (DROP 2→1, the single change read), hi 0/1702, and en / lb / ms
+byte-identical.

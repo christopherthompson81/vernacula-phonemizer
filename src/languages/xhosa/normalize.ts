@@ -342,6 +342,19 @@ export function normalizeXhosa(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}\d])([+-])?(\d+)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gu,
         (_m, sign: string | undefined, n: string, off: number, full: string) => {
             const body = saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`;
+            // ⚠ THE `+` IS NOW VOICED, AND THIS REVERSES A SOURCED SILENCE ON POLICY GROUNDS. The evidence
+            // below is unchanged and still correct: both xh_za speakers of the Montevideo sentence produce no
+            // plus phones in the TEMPERATURE position while all three of the UTC sentence do. What changed is
+            // the standing rule about what to do with that — for TTS an explicitly typed character is CONTENT,
+            // and a speaker's omission is evidence about reading habit, not licence to delete it.
+            // The identical case was decided on hi: hi's `+30 °C` silence was shipped on 2-of-2 speaker
+            // omission, then reverted to voicing under this rule. xh was left behind, so `hi`, `zu`, `te` and
+            // `sw` all read this sign and xh alone did not — and zu is xh's closest relative, where the plus
+            // rule was moved AHEAD of degrees for exactly this reason.
+            // Emitted HERE rather than by step 14, because this rule has already consumed the sign by then and
+            // step 14's leading arm requires a DIGIT after it — `+amaqondo 30` would not match. Same ordering
+            // problem zu solved by reordering; one word here is the smaller change.
+            if (sign === "+") return `plas ${body}`;
             return sign === "-" ? `thabatha ${body}` : body;
         });
     s = s.replace(/(\d+)[  ]?°[  ]?([NSEW])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string, off: number, full: string) =>
