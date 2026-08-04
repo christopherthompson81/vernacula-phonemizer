@@ -128,6 +128,13 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     //
     // Before the thousands de-grouping is fine (no digits move), and it must be before the Latin-run pass
     // that reads a bare C as a letter name. ℃/℉ arrive already folded to `°C`/`°F` by the registry.
+    // THE PLUS → 加, from the corpus's own AUDIO (a PHONEME recognizer, no `+` in its vocabulary):
+    //   `… j u5 tɕ i5 s  k ɑ5 j a5  t ei5 t i5 m …` — 「UTC 加一」, 1 of 2 speakers; the other skips it.
+    // 加 reads kaː˥, which is the decoded syllable. Spaced on both sides for the same reason the ampersand
+    // cell is: 「UTC」 is an initialism and joining it to 加 would make one token.
+    // BEFORE the degree rules — the ordering coupling zu's `[+]?` taught.
+    s = s.replace(/\s*\+\s*(?=\d)/gu, " 加 ");
+
     s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}])/gu, "攝氏$1度");
     s = s.replace(/(\d+)\s?°\s?F(?![\p{sc=Latn}])/gu, "華氏$1度");
     s = s.replace(/(\d+)\s?°/gu, "$1度");

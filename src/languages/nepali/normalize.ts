@@ -279,6 +279,14 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    THE TRAILING SPACE in each replacement is load-bearing for the same reason: "+30°Cभन्दा"
         //    has a Devanagari postposition welded to the C, and without it सेल्सियस and भन्दा became one
         //    token [selsijʌsbʱˈʌnd̪a]. The double-space collapse at step 13 cleans up the rest.
+        // THE PLUS → प्लस, from the corpus's own AUDIO (facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME
+        // recognizer — no `+` and no digits in its 392-token vocabulary). Over ne_np/train:
+        //   UTC+1  →  `… j u t i s i p l o s e k …` / `… j u d i s i p l a s e k …`   2 of 3 (third skips it)
+        //   +30°C  →  `… t i s d i ɡ r i b o n d a …`  तीस डिग्री, NO plus phones, 2 of 2
+        // प्लस reads plˈʌs, matching the decode. BEFORE the degree rule (the ordering zu's `[+]?` taught).
+        s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
+        s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
+
         s = s.replace(/(\d)\s?°\s?C(?![A-Za-z])/gu, "$1 डिग्री सेल्सियस ");
         s = s.replace(/(\d)\s?°\s?F(?![A-Za-z])/gu, "$1 डिग्री फरेनहाइट ");
         s = s.replace(/(\d)\s?°\s?N(?![A-Za-z])/gu, "$1 डिग्री उत्तर ");

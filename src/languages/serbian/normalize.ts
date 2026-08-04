@@ -352,6 +352,13 @@ export function normalizeSerbian(input: string): string {
     //    bare-degree rule would read it as a temperature. The written degree noun is CONSUMED when it is
     //    present — the corpus writes `32 °C степена`, and emitting the word again gave *…stepeni …
     //    stepena*. The count agrees with the numeral (32 → gen.sg stepena), not with what was written.
+    // 3b) THE PLUS → плус, from the corpus's own AUDIO (a PHONEME recognizer, so no `+` in its vocabulary).
+    //     `… w u t e ts e p l u s t j e d a n …` — "UTC plus jedan", 1 of 2 speakers; the other skips the
+    //     parenthetical entirely, the reader behaviour seen in ta, en, am, zu, mi, ne and sw. плус reads
+    //     `plus`, matching the decode. BEFORE the degree rules, the ordering coupling zu's `[+]?` taught.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 плус ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1плус ");
+
     s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, unit: string, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
