@@ -408,6 +408,46 @@ export function normalizeGreek(input: string): string {
     s = s.replace(/(\d)\s?¼/gu, "$1 και ένα τέταρτο");
     s = s.replace(/(\d)\s?¾/gu, "$1 και τρία τέταρτα");
 
+    // 11b) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
+    //      and the classification was wrong: it is not a minus, not a designation, and not ambiguous. Greek
+    //      writes an APPOSITION between dashes where English would use commas or brackets —
+    //      `Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται …` — and both dashes were
+    //      dropped SILENTLY, so the aside ran into its host clause with no break at all:
+    //        was  `… pnom kɾom ðeka ðio çiʎometɾa … sçem ɾip pu vɾiscete …`
+    //        now  `… pnom kɾom , ðeka ðio çiʎometɾa … sçem ɾip , pu vɾiscete …`
+    //      The missing thing is a PHRASE BREAK, not a word, which is why no amount of looking for a minus
+    //      vocabulary was ever going to close it.
+    //
+    //      THE CORPUS SEPARATES THE TWO USES BY CHARACTER, exactly and with no overlap. Counted across el_gr:
+    //        · ASCII hyphen before a digit ×29 — EVERY one a range or a designation (`3-5%`, `1469-1539`,
+    //          `56-64 χιλιόμετρα/ώρα`, `7:00-8:00`, `26 - 00`, `COVID-19`, `Chandrayaan-1`)
+    //        · EN DASH before a digit ×1 — the parenthetical above.  EM DASH before a digit ×0.
+    //      So there are ZERO true negatives in this corpus and the en/em dash is never arithmetic. That is
+    //      what makes this safe to key on the dash CHARACTER: ranges are written with `-` and are untouched.
+    //
+    //      ⚠ WHITESPACE IS THE DISCRIMINATOR, and one instance proves it is needed. Of the 21 en/em dashes,
+    //      20 are appositional and have a space on at least one side; the twenty-first is `Apollo–Soyuz`
+    //      (which this corpus leaves in LATIN script), a COMPOUND joining two proper nouns, with no space on
+    //      either side — the "en dash as a joiner" convention. A pause there would be wrong,
+    //      so the rule requires adjacent whitespace and the compound is left alone. 20/20 against 1/1.
+    //      The `(?<=\S)` guard keeps a sentence-initial dash from producing a leading comma (a SLOT-GAP).
+    s = s.replace(/(?<=\S)(?:\s+[–—]\s*|[–—]\s+)/gu, ", ");
+
+    // 11c) THE MINUS → μείον, and this one is ROBUSTNESS, not a measured repair — said plainly because the
+    //      file's other sign rules are corpus-attested and this one cannot be. el_gr contains ZERO true
+    //      negatives (all 30 dash-before-digit instances are ranges, designations or the apposition above),
+    //      so no gate can see this and the corpus diff for it is empty BY CONSTRUCTION.
+    //      It is worth having anyway because the asymmetry is indefensible on its own terms: step 11 already
+    //      voices `+` as συν from a single `(UTC +1)`, and a `-5` that reads exactly like `5` is silent
+    //      content loss of the kind #586 exists to remove.
+    //      THE GUARD IS THE ONE `tools/normalization/defects.ts` arrived at after resolving all 66 artifacts
+    //      by hand, reused rather than reinvented: no letter, mark or digit before (which excludes the
+    //      designations `COVID-19` and `Chandrayaan-1`), and not a RANGE — the second lookbehind spans a
+    //      digit plus at most an ordinal suffix, an abbreviating dot and one space, which is what rejects
+    //      `35-40`, `(1469-1539)`, `7:00-8:00` and the spaced `26 - 00`.
+    //      The en/em dashes are gone by step 11b, so this only ever sees ASCII `-` and U+2212.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−](?=\p{Nd})/gu, "μείον ");
+
     // 12) SHARED SYMBOL TIER: %, currency, plain units, squared/cubed. AFTER the rate and degree rules,
     //     which need the raw `km/h` and `°C`, and BEFORE the decimal rewrite of step 13 — the tier only
     //     matches a unit when a NUMBER is adjacent, and inserting «κόμμα» destroys that adjacency.
