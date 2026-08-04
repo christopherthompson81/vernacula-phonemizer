@@ -235,4 +235,12 @@ describe("sindhi normalization", () => {
         expect(phonemize("5 km³", "sd")).toContain("kˈiːʋbəkə kəloːmˈiːʈəɾə");
         expect(phonemize("802.11m", "sd")).toContain("ˈɛm"); // still a letter
     });
+
+    // #586 — RATES, before the plain unit loop which would otherwise consume the numerator and leave the
+    // denominator as an English letter name (`120 km/h` → …[ˈeᶦt͡ʃ], `133 m/s` → [ˈɛm ˈɛs]). Every word is the
+    // corpus's own, spelled out in its rate sentence: "480 ڪلو ميٽر في ڪلاڪ (133 ميٽر في سيڪنڊ)".
+    test("the rate denominators (#586)", () => {
+        expect(phonemize("120 km/h", "sd")).toContain("fˈiː kəlˈaːk");
+        expect(phonemize("133 m/s", "sd")).toContain("fˈiː siːkˈəɳɖə");
+    });
 });

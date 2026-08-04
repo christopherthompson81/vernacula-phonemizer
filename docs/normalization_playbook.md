@@ -1039,6 +1039,42 @@ it. uz and as had the same exposure already and nobody had looked.
 - **The fleet-level fix is the ordering one**, and it is not done: a language that spends the version dot
   before the tier must handle the version shape itself.
 
+**47. LOCAL vs CORE: THE TEST IS "CAN THE TIER SAY IT?", AND THERE ARE FOUR REASONS IT CANNOT.** Audited all 65
+layers for classes the shared tier owns. Local is RIGHT in these cases, and each is represented in the fleet:
+
+1. **The idiom is not "A per B".** `el` takes an agreeing definite article (*χιλιόμετρα την ώρα*), `te`/`kn` a
+   PREFIX in the dative (*గంటకు 105 మైళ్ల*), `pl` a preposition plus the ACCUSATIVE with a bare numberless form.
+   `unitPer` is one invariant string; none of these is.
+2. **The tier can only POSTPOSE.** `om`'s corpus writes the unit before the number (`mm 5`, `km 6,387`).
+3. **ORDERING — the tier runs after normalize, so it cannot see what normalize spent.** `fa`/`ckb` units must
+   run BEFORE their own decimal rule or `NOT_VERSION` has no dot left to reject (traps 39, 46). A guard that
+   needs a character cannot live downstream of the rule that rewrites it.
+4. **ARCHITECTURE, which is not idiom and should not be labelled as one.** `zsm` is a pre-pass over the whole
+   Indonesian engine and cannot override the inherited `SymbolData`, so the only way to say `peratus` instead
+   of `persen` is to consume the `%` first. Its comments read like dialect choices; they are override
+   failures, now relabelled.
+
+And local is WRONG when it is simply older than the tier — which is diagnosable, because a hand-written table
+covers the SINGLE SUBSTITUTIONS and omits the COMPOSED ones:
+
+    da  120 km/t → kiloˈmeːˀdɐ + [ˈteːˀ]      the letter T          nb  133 m/s → [ˈɛm ˈɛs]
+    is   83 km/klst → …ciloumɛtrar + HKLST    raw letters           sd  120 km/h → …[ˈeᶦt͡ʃ]
+    fa  120 km/h → …[ˈeᶦt͡ʃ]                  the English letter H  ckb `کم/کاتژمێر` → the slash DROPPED
+
+Nine languages read a rate denominator as an English letter name, and five read a bare `m` as [ˈɛm]. Nobody
+hand-writes a cross-product; the tier matches number + unit + denominator in one pass.
+
+- **PROBE IN THE LANGUAGE'S OWN ORTHOGRAPHY or the audit lies.** The first pass used Latin abbreviations and
+  over-reported `bg` (which writes `км`, `м/сек`) and `ro` (complete all along) as broken. Bulgarian's own
+  forms — `5 км`, `5 м3`, `120 км/ч` — were all correct; only `м/сек` and the Latin rate were missing.
+- **A LEXICON ENTRY IS A THIRD MECHANISM, and it is the one that hides this.** Danish reads `km` from
+  `da-lexicon.tsv`, not from any rule. That is why `5 km` was right and `120 km/h` was not: a dictionary reads
+  a TOKEN and can never compose across a slash. When a unit reads correctly but its rate does not, look for the
+  abbreviation in the lexicon before assuming a rule exists.
+- **Adopt the tier for what it composes, and leave the rest.** da/nb declare only the numerator and the two
+  denominators; `cm`/`kg` stay with the lexicon, because routing `cm` through the word path would MOVE ITS
+  STRESS (ˈsɛntiˌmeːˀdɐ → sɛntiˈmeːˀdɐ) for no gain. Migration is not all-or-nothing.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.

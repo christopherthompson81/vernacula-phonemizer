@@ -36,6 +36,42 @@
  * for a completely different reason — there the shape was dates, here it is a Wi-Fi standard.
  */
 
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/**
+ * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only (#586).
+ *
+ * WHY THIS LANGUAGE HAD NONE. Danish predates the tier and reads its unit abbreviations from the LEXICON
+ * (`da-lexicon.tsv` maps `km` → kiloˈmeːˀdɐ). That works for a TOKEN and can never compose across a slash,
+ * which is why `5 km` was right while the denominator of a rate reached the IPA as an ENGLISH LETTER NAME:
+ *   120 km/h → …kiloˈmeːˀdɐ + `h` as a letter      133 m/s → …ˈɛm ˈɛs, BOTH as letters
+ * A hand-written table covers the single substitutions and omits the COMPOSED ones; the tier matches
+ * number + unit + denominator in one pass, which is the whole reason to reach for it here.
+ *
+ * DECLARED, and no more: km/m for the numerator plus the two denominators. Every word is the corpus's own —
+ * kilometer ×8, meter ×4, `i timen` ×7 ("3000 mil i timen"), `i sekundet` ×3 ("1,5 kilometer i sekundet") —
+ * and `km`/`kilometer` phonemize IDENTICALLY here, so declaring the numerator leaves the plain reading
+ * untouched while making the rate reachable.
+ *
+ * ⚠ `cm`, `mm` and `kg` ARE LEFT TO THE LEXICON on purpose. Their words are ×0 in this corpus, the lexicon
+ * already reads cm and mm correctly, and routing `cm` through the word path would MOVE ITS STRESS
+ * (ˈsɛntiˌmeːˀdɐ → sɛntiˈmeːˀdɐ) for no gain. `kg` → ˈkilo is the lexicon's too, and "kilo" for a kilogram is
+ * ordinary Danish, so it is left alone rather than "corrected" on no evidence.
+ *
+ * ⚠ THE ABBREVIATION IS `km/t`, NOT `km/h` — Danish `t` is *time* (hour), and this corpus writes `km/t` ×8
+ * against `km/h` ×0. Both are declared: `t` is what the language writes, `h` is what foreign-sourced text
+ * hands it, and the reading is the same either way.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    // `percent` is REQUIRED by SymbolData. The local rule above already claims every `%`, so this
+    // never fires — but it is the corpus's own word and declaring it lets review.ts's sourcing check
+    // see it, which it cannot do for a word that only exists inside a `.replace()`.
+    percent: ["procent"],
+    units: { km: ["kilometer"], m: ["meter"] },
+    unitPer: "i",
+    rateDenominators: { t: "timen", h: "timen", s: "sekundet" },
+});
+
 /**
  * ORDINALS 1–31. Danish builds 21–29 units-first (enogtyvende, "one-and-twentieth"), matching the
  * cardinal system in unitsFirstNumbers.ts.
@@ -185,5 +221,9 @@ export function normalizeDanish(input: string): string {
     t = t.replace(/\s*[&＆]\s*/gu, " og ");
 
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
-    return t.replace(/[ \t]{2,}/gu, " ");
+    t = t.replace(/[ \t]{2,}/gu, " ");
+
+    // 16) THE SHARED TIER LAST, so every local rule above has already claimed its own text — the squared
+    //     compounds in particular, which the tier has no word for in this language.
+    return SYMBOLS(t);
 }

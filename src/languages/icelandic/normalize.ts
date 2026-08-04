@@ -152,6 +152,13 @@ export function normalizeIcelandic(input: string): string {
     t = t.replace(/(?<!\p{L})m\s*[³3](?!\d)/giu, "rúmmetrar");
 
     // 6) LATIN UNIT ABBREVIATIONS after a number (57).
+    // 6a) RATES, BEFORE the plain unit loop — that loop's guard is `(?!\p{L})`, which a slash satisfies, so it
+    //     ate the numerator and left the denominator to read as a letter: `83 km/klst` came out
+    //     *…kílómetrar HKLST* and `120 km/h` as *…kílómetrar H*. `á klukkustund` ×3 in this corpus
+    //     ("17.500 mílna hraða á klukkustund"); the abbreviation it writes is `km/klst.`, Icelandic
+    //     *klukkustund*, not `km/h`, and both are claimed because foreign-sourced text hands over the latter.
+    //     NO SECOND: `á sekúndu` and `sekúndu` are both ×0 here, so `m/s` is left alone rather than invented.
+    t = t.replace(/(?<!\p{L})km\s*\/\s*(?:klst\.?|h)(?![\p{L}])/giu, "kílómetrar á klukkustund");
     for (const [re, word] of UNITS)
         t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
 

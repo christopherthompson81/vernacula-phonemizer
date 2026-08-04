@@ -40,6 +40,38 @@
  *   · DEGREES before the unit rule, or the C of `20 °C` is read as the English letter name [seː].
  */
 
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/**
+ * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only (#586).
+ *
+ * WHY THIS LANGUAGE HAD NONE. Norwegian predates the tier and reads its unit abbreviations from the LEXICON,
+ * which handles a TOKEN and can never compose across a slash — so `5 km` was right while a rate's denominator
+ * reached the IPA as an ENGLISH LETTER NAME (`133 m/s` → …ˈɛm ˈɛs, both letters).
+ *
+ * DECLARED: km/m for the numerator, the two denominators, and `mm`. Every word is the corpus's own —
+ * kilometer ×15, meter ×9, `i timen` ×9 ("35–40 amerikanske mil i timen (56–64 km/t)"), `i sekundet` ×2 —
+ * and `km`/`kilometer` phonemize IDENTICALLY, so the plain reading is untouched.
+ *
+ * `mm` IS DECLARED TO FIX A DEFECT, not to add a reading: the lexicon reads the bare abbreviation as the
+ * GEMINATE [mː], and this corpus writes `mm` ×10 (`35 mm`, `36 mm`). The word `millimeter` is ×0 here, so the
+ * justification is not frequency — it is that this engine ALREADY pronounces `millimeter` correctly
+ * (ˈmɪlɪˌmeːtəɾ) and [mː] is not a reading of anything. `cm` is already right from the lexicon and stays
+ * there; `kg` → ˈçiːlʊ ("kilo") is ordinary Norwegian and is left alone.
+ *
+ * ⚠ THE ABBREVIATION IS `km/t` — Norwegian `t` is *time* (hour) — and the corpus writes it that way. Both
+ * `t` and `h` are declared, for the same reason Danish declares both.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    // `percent` is REQUIRED by SymbolData. The local rule above already claims every `%`, so this
+    // never fires — but it is the corpus's own word and declaring it lets review.ts's sourcing check
+    // see it, which it cannot do for a word that only exists inside a `.replace()`.
+    percent: ["prosent"],
+    units: { km: ["kilometer"], m: ["meter"], mm: ["millimeter"] },
+    unitPer: "i",
+    rateDenominators: { t: "timen", h: "timen", s: "sekundet" },
+});
+
 /**
  * ORDINALS 1–31 — enough for dates, centuries and placings, which is every ordinal shape the corpus has.
  * 1–15, 18, 20 are in the NST lexicon; the rest (sekstende, syttende, nittende, the tjue- compounds) go
@@ -219,5 +251,7 @@ export function normalizeNorwegian(input: string): string {
     // The insertions above pad with spaces so a sign never fuses with its neighbours; collapse the runs.
     t = t.replace(/[ \t]{2,}/gu, " ");
 
-    return t;
+    // THE SHARED TIER LAST, so every local rule above has already claimed its own text — the squared
+    // compounds in particular, which the tier has no word for in this language.
+    return SYMBOLS(t);
 }

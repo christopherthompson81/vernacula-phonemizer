@@ -126,6 +126,15 @@ export function normalizeBulgarian(input: string): string {
     //    times as `в час`. Before the unit rule, or the numerator is consumed and the slash left bare.
     t = t.replace(/(?<!\p{L})км\s*\/\s*ч(?!\p{L})/giu, "километра в час");
     t = t.replace(/(\p{L}+)\s*\/\s*час(?!\p{L})/giu, "$1 в час");
+    //    THE SECOND, which this rule did not cover: the corpus's `133 м/сек` read the denominator as the bare
+    //    syllable [sɛk] and `м/с` as [s]. `в секунда` ×2 ("1,5 километра в секунда"), the same construction.
+    t = t.replace(/(?<!\p{L})м\s*\/\s*(?:сек|с)(?!\p{L})/giu, "метра в секунда");
+    //    AND THE LATIN ABBREVIATIONS. Cyrillic is what this corpus writes and the header is right about that,
+    //    but a foreign-sourced `120 km/h` reached the g2p with the denominator as the ENGLISH LETTER NAME
+    //    [ˈeᶦt͡ʃ] — the same reason ru, uk and kk each declare Latin aliases beside their Cyrillic keys. The
+    //    plain Latin `km` already read correctly here; only the rate did not.
+    t = t.replace(/(?<!\p{L})km\s*\/\s*h(?!\p{L})/giu, "километра в час");
+    t = t.replace(/(?<!\p{L})m\s*\/\s*s(?!\p{L})/giu, "метра в секунда");
 
     // 4) SPACE-GROUPED THOUSANDS (53). A space is a token boundary, so `5 000` read as "пет нула" —
     //    "five zero". Includes NBSP and the narrow NBSP.

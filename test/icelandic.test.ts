@@ -145,4 +145,15 @@ describe("icelandic normalization", () => {
         expect(createIcelandic().text("5 km³").trim()).toContain("rumciloumɛtrar");
         expect(createIcelandic().text("802.11m").trim()).toMatch(/ m$/u); // still a letter, not a metre
     });
+
+    // #586 — RATES. The plain unit loop's guard is `(?!\p{L})`, which a slash satisfies, so it ate the
+    // numerator and left the denominator as raw letters: the corpus's own `83 km/klst.` ×4 read as
+    // *…kílómetrar HKLST*. `á klukkustund` ×3 ("17.500 mílna hraða á klukkustund"), and the abbreviation this
+    // language writes is `km/klst.`, not `km/h` — both are claimed.
+    // NO SECOND: `á sekúndu` and `sekúndu` are both ×0 here, so `m/s` is left alone rather than invented.
+    test("the rate, in Icelandic's own abbreviation (#586)", () => {
+        expect(createIcelandic().text("83 km/klst.").trim()).toContain("ciloumɛtrar au");
+        expect(createIcelandic().text("120 km/h").trim()).toContain("ciloumɛtrar au");
+        expect(createIcelandic().text("133 m/s").trim()).toContain(" s");  // untouched: no word for it
+    });
 });

@@ -110,6 +110,12 @@ export function normalizeSindhi(input: string): string {
     // 8) LATIN UNIT ABBREVIATIONS after a number. The trailing guard is `(?!\p{L})`, never `\b`: `\b` is
     //    defined on ASCII word characters and finds no boundary against Perso-Arabic script, so the rule
     //    would silently never fire — the trap that bit Romanian and Bulgarian earlier in this sweep.
+    // RATES, BEFORE the plain unit loop, which would otherwise consume the numerator and leave the
+    // denominator to read as an English letter name (`120 km/h` → …ڪلوميٽر [ˈeᶦt͡ʃ], `133 m/s` → [ˈɛm ˈɛs]).
+    // Every word is the corpus's own, spelled out in its rate sentence: "480 ڪلو ميٽر في ڪلاڪ (133 ميٽر في
+    // سيڪنڊ؛ 300 ميل في ڪلاڪ)" — `في` is "per", `ڪلاڪ` the hour, `سيڪنڊ` the second.
+    t = t.replace(/(?<!\p{L})km\s*\/\s*h(?![\p{L}\p{M}])/giu, "ڪلوميٽر في ڪلاڪ");
+    t = t.replace(/(?<!\p{L})m\s*\/\s*s(?![\p{L}\p{M}])/giu, "ميٽر في سيڪنڊ");
     for (const [re, word] of UNITS)
         t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source})(?!\\p{L})`, "gu"), `$1 ${word}`);
 
