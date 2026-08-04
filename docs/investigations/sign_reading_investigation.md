@@ -2149,3 +2149,79 @@ repo's own pitch-accent notation — `sv` marks accent 2 with a grave.
 All 27 corpus diffs re-run after the fixes: byte-identical to the verified numbers, no defect class moved.
 Gates run separately: tsc PASS; **207 files / 2943 tests**; audit 0 defective cells across 0/67; probe
 `✓ none fragment an accented Latin word`.
+
+## Run 33 — 2026-08-04 — #663: the orthographic fold is the WRONG MECHANISM, and Uzbek proved it in one test
+
+### Step 1, re-measuring, because the 43-engine list was known-contaminated
+
+Two frame bugs had to be fixed before the number meant anything.
+
+**Aliasing.** The original probe used one frame, `ka` + L + `o`, compared against `kao` — so testing `a` built
+`kaao` and testing `o` built `kaoo`, which gemination and vowel-length rules collapse to `kao`. That was the whole
+of German's reported "drops a h o q" and Maltese's "drops a h o". Fixed by choosing, per letter, only frames whose
+own characters are DISJOINT from the letter under test.
+
+**Position.** The replacement frames were all INTERVOCALIC (`mi_ru`, `se_la`, `to_pi`), and German `h` is silent in
+exactly that position while being perfectly pronounceable word-initially. So the probe reported German, Spanish,
+Italian, Catalan, Galician and six more as "dropping h" when it had measured a CORRECT contextual silence. Fixed by
+spanning initial, medial and final, and requiring EVERY usable frame to agree.
+
+Result: **45 engines**, `x` in 30, `q` in 29, `c` in 17; Maori missing thirteen of twenty-six. Six of the 45 are
+`h`-only and almost certainly correct silence (Italian, Galician, Aragonese, Asturian write `h` and read nothing).
+
+### Step 2 built the wrong thing
+
+`core/latinFallback.ts`: a central letter→LETTER table (`q`→k, `x`→ks, `c`→k), applied transitively by
+`makeNativiser` when the fold's output was still unreadable, with per-language overrides (Maori `s`→`h`, since
+Maori borrows /s/ as /h/ — `Christmas` → `Kirihimete`). Two self-inflicted defects on the way, both caught by my
+own checks:
+
+· **A total table cycles where a measured-only one could not.** `k`↔`t`, `m`↔`n`, `e`↔`i`, `o`↔`u` — each row
+  individually right, collectively useless, because the cycle guard stops the oscillation and then leaves the
+  letter ALONE. `Cañitas` in a Maori-like inventory came back *Canitat*, the `C` untouched. Fixed by making the
+  rows a DAG onto six terminals.
+· **`u` is not a terminal.** I wrote the terminal set from what LOOKS basic (`a i u t n`) rather than from the
+  measurement — and Malagasy is measurably missing `u`, so `u`→`o` and `o`→`u` ended up in the same table.
+· And the acyclicity CHECK was wrong too: a global visited-set calls RECONVERGENCE a cycle, and `x`→`ks` reaches
+  `t` through both `k` and `s`. It rejected the correct table. DFS with an on-path set.
+
+### ⚠ AND THEN 10 TESTS FAILED, and the failure is the whole argument
+
+Removing a letter from an engine's `NATIVE_CLASS` is what lets the fold reach it. Uzbek cannot read a bare `c`, so
+`c` came out of the class — and **Uzbek writes /t͡ʃ/ as the DIGRAPH `ch`**. Every Uzbek ordinal broke:
+
+    ikkinchi   →  ikkinkhi        (t͡ʃ → kh)
+    uch        →  ukh
+    kichik     →  kikhik
+
+*A letter can be unreadable ALONE and essential as part of a sequence.* The inventory is per-character; a g2p reads
+sequences. Croatian, Luxembourgish, Maori and Serbian broke the same way — 10 tests across 5 files.
+
+That is not a bug in the table. It is a bug in the LAYER: an orthographic substitution runs before the g2p, so it
+rewrites the spelling the g2p is about to read, and any multigraph is collateral damage.
+
+### 📌 THE REDIRECTION, and it is the right one
+
+> "My original idea was that phones unknown to a language would still be available. So even if Ç/ç appeared in a
+> word where that diacritized letter form isn't in the language, the g2p could phonemize it with sound. I figured
+> there wouldn't be a need to describe out-of-language overrides, and that those centralized phonetics would be
+> used."
+
+A central letter→**PHONE** table, consulted by the g2p when it has no rule, rather than a letter→letter table
+applied before it. That fixes both defects of what I built:
+
+| | orthographic fold (built, reverted) | central phones (the redirection) |
+|---|---|---|
+| digraphs | DESTROYS them — `ch`→`kh` | untouched; the g2p still sees `ch` and its own rule wins |
+| per-language data | NEEDED, because folding to a host letter is lossy in language-specific ways (`mi` s→h) | none — the letter keeps its own sound |
+| `ç` in Maori | →`c`→`k`, the sound is gone | /t͡ʃ/, the sound survives |
+| voice inventory | never leaves the host's phone set | may emit a phone the host voice lacks — accepted deliberately |
+
+The last row is the real trade and it is now a recorded decision rather than an accident: a Maori voice may not
+render /t͡ʃ/, and preserving the source sound is judged worth that.
+
+⚠ The hook is the open question, and it is not free: the g2p is the layer that KNOWS it has no rule, and there are
+45 of them. A post-hoc "did a letter vanish" check on the output would be fragile in exactly the way these probes
+keep being fragile. So this needs a look at how many engines share a g2p helper before it is scoped.
+
+Reverted to `ad3fb37`; the measurement is preserved in the issue. tsc PASS, 207 files / 2943 tests.
