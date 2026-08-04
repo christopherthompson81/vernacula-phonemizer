@@ -274,6 +274,26 @@ export function normalizeTelugu(input: string): string {
         (_m, int: string, frac: string) => `${int} పాయింట్ ${[...frac].join(" ")}`,
     );
 
+    // 12b) THE PLUS SIGN → ప్లస్, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED, so `+30°C`
+    //      read *ముప్పై డిగ్రీల సెల్సియస్* — thirty degrees, with nothing where the sign was.
+    //
+    //      No text tier could supply the word: `concept.ts` returns the BARE CHARACTER `+` as Telugu's own
+    //      label for "plus sign", and prose writes the glyph, so there is nothing to probe for. te's audio was
+    //      not in this corpus until #586's FLEURS fetch; with it, decoded by
+    //      facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer — 392 tokens, no `+` and no digits in
+    //      its vocabulary, so it cannot echo the orthography back):
+    //        UTC+1   →  `… j u t i s i  p l a s  o n i …`      1 of 2 speakers; the other skips the
+    //                                                          parenthetical, as in ta, en, am and zu
+    //        +30°C   →  `… m u p aɪ d i ɡ ɾ i s e l s i s …`   ముప్పై = thirty, NO plus phones, 2 of 2
+    //      ప్లస్ reads plˈas, which is the decoded string exactly, so no new lexical data is needed.
+    //
+    //      BEFORE the degree rule — the ordering coupling zu's `[+]?` taught: a rule that consumes the sign's
+    //      operand must not get there first. Both arms, so the sign is read glued to a label or opening the
+    //      quantity; the measurement position is voiced too because for a TTS target an explicitly typed
+    //      character is content, not a reader's habit to copy.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ప్లస్ ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
+
     // 13) DEGREES, after the decimal step so a temperature like 1.5°C keeps its point. ×2.
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");
