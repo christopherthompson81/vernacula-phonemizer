@@ -2384,3 +2384,42 @@ eight languages that never route through the tier. That is the same fan-out the 
 badly is how the Uzbek digraph regression happened in #663 — so the 19-row table above is the durable half.
 
 Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
+
+## Run 37 — 2026-08-04 — #654: validate against the repo's OWN gate, not a scratchpad probe
+
+*"tools/normalization has tools for finding attestations, they're just not tuned for those symbols. Reuse them?"*
+
+Correct, and I had been writing throwaway probes past a gate that already asks the question. `review.ts --lang X`
+carries a **`plus-minus` cell** — it was there the whole time, empty. Run against the eighteen languages just
+changed, it now reports the reading and **0 failing**:
+
+    de  ±5 → plʊs mˈiːnʊs fʏnf      es  ±5 → mˈas mˈenos θˈinko     ru  ±5 → plʲus mʲˈinʊs pʲætʲ
+    ja  ±5 → pɯᵝɾäsɯᵝmäꜜinäsɯᵝ ɡo̞   el  ±5 → sin mion pende         ar  ±5 → zˈaːʔid nˈaːqisˤ xamsa
+    uk  ±5 → plʲus mʲinus pjatʲ     sd  ±5 → d͡ʒˈəmaː mˈənəfiː pˈəɲd͡ʒə   cs  ±5 → plˈus mˈiːnus pjˈɛt
+
+German's single remaining failure is the pre-existing `Yen` sourcing gap, which `attest.ts`'s own header names as
+one of the known-hard cases. Nothing I added introduced a sourcing failure.
+
+*The gate's verdict is worth more than my probe's, and it is repeatable by anyone.* My scratchpad probe measured
+"does the output differ from the sign-free input" — a weaker question, and one I had to write twice because the
+first version harvested range words.
+
+### The tooling that already covers the remaining signs
+
+| tool | what it answers | state for #654 |
+|---|---|---|
+| `cells.ts` `signs` (`[%‰+±×÷=<>]\|\p{Sc}`) | does the artifact EXERCISE a sign cell | 17 languages — the thin attestation my count found, independently |
+| `cells.ts` `arithmetic` (`\p{Nd}\s*[+×÷=<>≤≥≈]\s*\p{Nd}`) | a sign BETWEEN operands | 2 languages |
+| `review.ts` | per-language cell readings + the sourcing verdict | `plus-minus` cell now filled for 18 more |
+| `attest.ts` | is a candidate WORD real in this language (token vs SUBSTRING) | the route for `=`/`<`/`>`, where the corpus has nothing |
+
+So the cell machinery already knows `÷ = < > ≤ ≥ ≈`; what it reports is that almost nothing exercises them —
+the same conclusion as the direct count, reached by a different instrument, which is the useful part.
+
+⚠ AND `attest.ts` IS THE RIGHT INSTRUMENT FOR THE REMAINING THREE, not a new probe. `=`/`<`/`>` have no corpus
+sentence to read, so a candidate reading has to be checked against Wikipedia — which is exactly what `attest.ts`
+does, with the token-vs-substring separation that four earlier greps needed. Tuning it for symbols means asking it
+about the candidate WORDS (`kleiner als`, `menor que`), not about the symbol.
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts 0 failing on all
+eighteen changed languages.
