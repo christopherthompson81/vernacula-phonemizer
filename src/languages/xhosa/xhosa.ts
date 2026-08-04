@@ -48,6 +48,10 @@ const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
  * normalize.ts, because Xhosa's rate denominator is a single attested word (*ngeyure*), not "A per B".
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "phindaphinda" },
     percent: ["iipesenti"],
     currency: {
         "US$": ["iidola zaseMelika"], "AUD$": ["iidola"],

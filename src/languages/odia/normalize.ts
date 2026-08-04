@@ -99,6 +99,11 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * `unitPer`, because they are written as one token with no slash for the rate machinery to find.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ଗୁଣନ" },
     percent: ["ପ୍ରତିଶତ"],
     // #586 — `¥` ADDED. Same sentence and same finding as bn: the corpus's `ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000` dropped the
     // sign, and the or_in speaker voices no currency word either (wav2vec2: `… s a t o h z e r h e b a …` —

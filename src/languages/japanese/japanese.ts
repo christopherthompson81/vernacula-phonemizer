@@ -36,6 +36,10 @@ const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass l
 // outright, so "$5" and "5" read identically. No sign occurs in this corpus (it writes 円 and ドル as
 // words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "かける" },
     percent: ["パーセント"],
     // #586 — `&` was DROPPED: the corpus's `高級B&Bが…` read *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together
     // with nothing between them. SOURCED FROM THE CORPUS'S OWN AUDIO, because the word is absent from the text

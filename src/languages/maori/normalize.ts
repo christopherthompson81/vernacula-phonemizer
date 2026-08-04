@@ -45,6 +45,11 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  *   fleet-wide should learn this one, and it is left for that local pass to fold if it wants to.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "whakarea" },
     percent: ["ōrau"],
     // The PREFIXED forms are declared as their own keys, longest-first, exactly as Gujarati's table does:
     // this corpus writes `AUD$45 miriona` and `US$14.7 piriona`, and with only a bare `$` the letters were

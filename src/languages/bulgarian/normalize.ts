@@ -104,7 +104,9 @@ const RELATIONAL: [RegExp, string][] = [
     [/=/gu, " равно на "],
     [/</gu, " по-малко от "],
     [/>/gu, " по-голямо от "],
-    [/×/gu, " по "],
+    // ⚠ ASCII `x` TOO, not only `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and the
+    // bare `x` was reaching the phoneme stream as its own LETTER NAME. Digit-bounded, so it cannot claim a letter.
+    [/×|(?<=\p{Nd})[ \t]?x[ \t]?(?=\p{Nd})/gu, " по "],
     [/÷/gu, " делено на "],
 ];
 

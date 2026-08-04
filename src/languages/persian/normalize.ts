@@ -293,6 +293,13 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     same correction fa's currency rule above documents for the same RTL reason.
         //     The digit-first arm requires NO digit after the sign, so an ordinary arithmetic `5+3` is left to
         //     the second arm and does not become *به اضافه ۵ ۳*.
+        // 7e) THE MULTIPLICATION SIGN → ضربدر, and ASCII `x` alongside it. Persian had NO reading for the sign:
+        //     `6 × 6` read as *ʃˈeʃ ʃˈeʃ*, two numbers with the relation gone, and `6x6` read the `x` as the
+        //     English LETTER NAME. `NxN` outnumbers `×` roughly 85 to 20 across the corpora, so the ASCII form is
+        //     the one that matters. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus attestation — fa's artifact
+        //     has no instance, and the sweep's plausible hits elsewhere were homographs of prepositions.
+        //     Digit-bounded on both sides so the `x` cannot claim a letter.
+        s = s.replace(/(?<=[\d\u06f0-\u06f9])\s?(?:×|x)\s?(?=[\d\u06f0-\u06f9])/gu, " ضربدر ");
         s = s.replace(/(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
         s = s.replace(/\+\s?(?=\d)/gu, " به اضافه ");
 

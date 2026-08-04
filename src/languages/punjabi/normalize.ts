@@ -57,6 +57,11 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ਗੁਣਾ" },
     percent: ["ਪ੍ਰਤੀਸ਼ਤ"],
     // #586 — `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
     // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".

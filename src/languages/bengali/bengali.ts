@@ -96,6 +96,11 @@ export function makeNativeBengali(
     // #562 Bengali had NO symbol tier at all, so % and every currency sign were DROPPED outright ("3%"
     // read as just "তিন") and the Latin unit abbreviations were unexpanded. শতাংশ follows the number.
     const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "গুণ" },
         percent: ["শতাংশ"],
         // #586 — `¥` ADDED, and the audio's answer here is about the SILENCE, not the word. The corpus's
         // `টিকিটের দাম ¥2,500 থেকে ¥130,000` dropped all three signs; both bn_in speakers of the sentence read

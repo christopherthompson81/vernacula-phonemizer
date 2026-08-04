@@ -100,7 +100,9 @@ export function normalizeArabic(input: string): string {
     //     Keyed on the FOLLOWING digit only, deliberately. The dimension `×` is NOT reliably digit-flanked —
     //     in `29¾ بوصة × 24½ بوصة` the left neighbour is a unit WORD and the numbers carry vulgar fractions,
     //     so the `(\d)\s*×\s*(\d)` shape that Czech uses misses it outright.
-    s = s.replace(new RegExp(`\\s*×\\s*(?=[${DIGIT}])`, "gu"), " في ");
+    // ⚠ ASCII `x` TOO: `NxN` outnumbers `×` roughly 85 to 20 in the corpora and the bare `x` was read as its
+    // own LETTER NAME. Digit-bounded on both sides so it cannot claim a letter.
+    s = s.replace(new RegExp(`\\s*(?:×|(?<=[${DIGIT}])x)\\s*(?=[${DIGIT}])`, "gu"), " في ");
 
     // 6) FRACTIONS, as "numerator على denominator" — the plain spoken reading, which avoids the broken-plural
     //    forms (أخماس …) that a fully idiomatic rendering would need.

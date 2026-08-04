@@ -47,6 +47,11 @@ const lexicon = (): Map<string, string> => {
  * is confidently wrong far more often than it is right.
  */
 const GU_SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ગુણ્યા" },
     // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `અને` ×1128 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.

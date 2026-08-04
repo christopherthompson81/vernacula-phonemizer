@@ -122,6 +122,11 @@ function number(digits: string): string {
  * standard dictionary paradigms, not invented.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "помножити на" },
     // #586 — `&` was DROPPED outright, losing the sign from `готелі типу B&B`. `та` is the conjunction used
     // to join two nouns, and it is the shape every other treated language took here (de *und*, pt *e*,
     // ru *и*, mi *me*): the plain conjunction, not a transliteration. `і` is the other Ukrainian "and" and

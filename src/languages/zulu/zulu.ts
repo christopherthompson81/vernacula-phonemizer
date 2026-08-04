@@ -95,6 +95,10 @@ const TOKEN = /([A-Za-z]+)|(\d+)|([.!?…,;:])/gu;
 // NO `rateDenominators`/`unitPer`: Zulu's rate is ONE agglutinated word (nga- + ihora → `ngehora`, ×6)
 // and this tier emits a rate as four tokens, so the rate is handled in normalize.ts. See the note there.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "kuphindwe ngo-" },
     percent: ["amaphesenti"],
     currency: { "US$": ["amadola"], "AUD$": ["amadola"], "$": ["amadola"], "£": ["amaphawundi"] },
     units: {

@@ -65,6 +65,11 @@ const TE_LETTER = "\\u0C00-\\u0C65\\u0C70-\\u0C7F";
  * shared "A per B" postposed idiom cannot express it. Handled locally in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "గుణించి" },
     percent: ["శాతం"],
     currency: { "US$": ["డాలరు", "డాలర్లు"], "$": ["డాలరు", "డాలర్లు"] },
     magnitudes: ["మిలియన్", "బిలియన్", "ట్రిలియన్", "లక్ష", "కోటి"],

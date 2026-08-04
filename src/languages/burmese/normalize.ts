@@ -180,7 +180,9 @@ export function normalizeBurmese(input: string): string {
         [/[=≈]/gu, " ညီမျှ "],
         [/</gu, " ထက်ငယ် "],
         [/>/gu, " ထက်ကြီး "],
-        [/×/gu, " မြှောက် "],
+    // ⚠ ASCII `x` TOO, not only `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and the
+    // bare `x` was reaching the phoneme stream as its own LETTER NAME. Digit-bounded, so it cannot claim a letter.
+        [/×|(?<=\p{Nd})[ \t]?x[ \t]?(?=\p{Nd})/gu, " မြှောက် "],
         [/÷/gu, " စား "],
     ];
     t = t.replace(new RegExp(`(${d()})\\s*\\+\\s*(${d()})`, "gu"), "$1 အပေါင်း $2");

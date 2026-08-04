@@ -92,6 +92,11 @@ export type ForeignPhonemizer = (latin: string) => string;
 // `magnitudeConnective`: Amharic takes none (አንድ ሚሊዮን ዶላር). The tier's own `already` guard covers the
 // three corpus cases that write ዶላር/ዶላሮች after the sign, so the noun is not doubled.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "በ" },
     percent: ["በመቶ"],
     currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
     // #586 — `5 km` read as *amɨst ˈʊkm*: no km or m was declared at all. Verified in am_et:

@@ -35,7 +35,9 @@ const RELATIONAL: [RegExp, string][] = [
     [/[=≈]/gu, " برابر "],
     [/</gu, " کان گهٽ "],
     [/>/gu, " کان وڌيڪ "],
-    [/×/gu, " ڀيرا "],
+    // ⚠ ASCII `x` TOO, not only `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and the
+    // bare `x` was reaching the phoneme stream as its own LETTER NAME. Digit-bounded, so it cannot claim a letter.
+    [/×|(?<=\p{Nd})[ \t]?x[ \t]?(?=\p{Nd})/gu, " ڀيرا "],
     [/÷/gu, " ورهايل "],
 ];
 
