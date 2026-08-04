@@ -27,6 +27,29 @@ import re
 import sys
 import xml.etree.ElementTree as ET
 
+# ⚠ DOUBLE-ENCODED UTF-8 IS REPAIRED AT MINING TIME, not left for the engine to absorb. The engine does repair
+# it (src/core/unicode.ts `repairDoubleEncoded`), but leaving it in the ARTIFACT means every measurement over
+# the mined text sees PHANTOM SYMBOLS — `Las CaÃ±itas` contains a `±` because `Ã±` is the mis-decode of `ñ`,
+# and that phantom was cited in #654 as the fleet's only `±`. Same class as `Ä°zmir` (a `°`) and `SÃ£o` (a `£`).
+# THE ARITHMETIC IS EXACT, which is what separates this from the `<sup>` flattening: UTF-8 `C2..C5 XX` encodes a
+# known code point, so the repair is a decode and not an inference. Nothing is guessed, so it is safe to apply
+# to the stored text rather than only at read time.
+CONT = range(0x80, 0xC0)
+def repair_double_encoded(t: str) -> str:
+    if not any(c in t for c in "\u00c2\u00c3\u00c4\u00c5"):
+        return t
+    out = []
+    i = 0
+    while i < len(t):
+        a = t[i]
+        if 0xC2 <= ord(a) <= 0xC5 and i + 1 < len(t) and ord(t[i + 1]) in CONT:
+            out.append(chr(((ord(a) & 0x1F) << 6) | (ord(t[i + 1]) & 0x3F)))
+            i += 2
+        else:
+            out.append(a)
+            i += 1
+    return "".join(out)
+
 RE_COMMENT = re.compile(r"<!--.*?-->", re.S)
 RE_REF = re.compile(r"<ref[^>]*?/>|<ref.*?</ref>", re.S | re.I)
 RE_TAG = re.compile(r"<[^>]+>")
@@ -86,6 +109,7 @@ def clean(text: str) -> list:
     text = RE_LINK.sub(r"\1", text)
     text = RE_EXTLINK.sub(lambda m: m.group(1) or " ", text)
     text = RE_HEADING.sub(" ", text)
+    text = repair_double_encoded(text)   # BEFORE anything reads a symbol out of it — see the note above
     if RE_WIKI_ERROR.search(text):
         return ""   # a template-error paragraph is discarded whole; see RE_WIKI_ERROR
     text = RE_SUP.sub(lambda m: m.group(1).translate(SUP_DIGITS), text)  # BEFORE RE_TAG, which would flatten it
