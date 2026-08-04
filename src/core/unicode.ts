@@ -206,6 +206,26 @@ export function repairDoubleEncoded(s: string): string {
         // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
         // is why every hit here is a dash, quote or ellipsis. Measured: 16 occurrences, all in id_id
         // (`â€“` → `–`, `â€”` → `—`), zero in the other 66 corpora.
+        // LOSSY RESIDUE, where the third byte did not survive to be decoded — and the intended character is
+        // still IDENTIFIABLE, which is the only reason this arm is allowed to guess. `â€` alone is `E2 80`, the
+        // first two bytes of a General Punctuation character (U+2000–U+206F), so whatever is missing was
+        // punctuation: a quote, a dash or a space. That bounds the damage — every candidate is either a clause
+        // mark or silent in this engine, so choosing wrongly among them cannot produce a wrong WORD, whereas
+        // leaving the sequence alone leaves a `€` that `\p{Sc}` reads as a PHANTOM CURRENCY. mr's
+        // `currency DROP` was exactly that: a euro sign inside a broken quote, in a sentence with no money in it.
+        //
+        // ⚠ U+FFFD IS A FINGERPRINT, NOT NOISE. Of the E2 80 xx third bytes, only 0x81/0x8D/0x8F/0x90/0x9D are
+        // unmapped in CP1252 and so become the replacement character — and among those, `E2 80 9D` is `”`, the
+        // closing double quote, which is overwhelmingly the most frequent in running text. So `â€` + U+FFFD → `”`.
+        // ⚠ THE PAIRING IS CORROBORATED ACROSS LANGUAGES, which is what settles the opening quote — FLEURS
+        // translates ONE English set, so the same sentence exists elsewhere with its bytes intact:
+        //   en  `For example, “learning” and “socialization” are suggested as important motivations …`
+        //   hi  `उदाहरण के लिए, “लर्निंग” और “सोशलाइजेशन” को इंटरनेट …`
+        //   mr  `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट …`
+        // Both siblings write U+201C/U+201D, so the residue before a letter is an OPENING quote, not a dash.
+        // Measured: the sequence occurs in exactly two corpora, id_id (42) and mr_in (24), and nowhere else.
+        .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
+        .replace(/\u00e2\u20ac(?=[\p{L}\p{M}])/gu, "\u201c")
         .replace(/\u00e2[\s\S]{2}/gu, (m) => {
             const b2 = sourceByte(m[1]!), b3 = sourceByte(m[2]!);
             if (b2 === undefined || b3 === undefined) return m;
