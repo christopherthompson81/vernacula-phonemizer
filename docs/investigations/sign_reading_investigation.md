@@ -1417,3 +1417,62 @@ ru 0/1959, sv 0/1863. Gates: tsc clean; 205 files / 2927 tests; audit 0 defectiv
 
 **Still open**: om's `×` (its local rule and the `unitPrefix` reorder interact — ASCII `x` works, `×` still
 drops), and item (3), `±`/`<`/`>`, which remain undeclared almost fleet-wide with ZERO attested instances.
+
+## Run 21 — 2026-08-04 — "no way to find an equal sentence and listen?" — yes, and it corrected my data
+
+Challenged on shipping 17 multiplication words as "standard register" without trying the audio. The challenge was
+right: I had dismissed the audio route on TEXT grounds ("the corpora are news prose"), which is exactly the
+argument the FOURTH SOURCING TIER exists to answer — a sign's word is absent from text BY CONSTRUCTION, so you
+listen. It is the same method that resolved ~15 languages' plus word earlier in this sweep, and I did not reach
+for it.
+
+### The universal sentence is the `4x4` vehicle sentence
+
+Present in 14 of the 17. ⚠ **MMS was useless, as its own documented limitation predicts** — it echoes the
+orthography at a sign: `4x4` came back as `4x4`, `44`, `4ু4`, `4ራ 4ራ`. wav2vec2 (no digits, no `x` in its
+392-token vocabulary) is the instrument that can answer.
+
+### Four register guesses CONFIRMED, and one CORRECTED
+
+| lang | phones | reading | vs my guess |
+|---|---|---|---|
+| am | `a r a t **b a** r a t` | *arat ba arat* → በ | ✓ confirmed |
+| bn | `tʃ a r **ɡ u n a** …` | *char guna* → গুণ | ✓ confirmed |
+| mr | `tʃ a r **ɡ u n i l e** tʃ a r` | *char gunile char* → गुणिले | ✓ confirmed |
+| ne | `tʃ a r **ɡ u n a** t a r` | *char guna char* → गुणा | ✓ confirmed |
+| uk | `tʃ o t e r i … **n a** tʃ e t e r e` | *chotyry NA chetery* → **на** | ✗ I shipped `помножити на` |
+
+`помножити на` is the full verbal form a textbook uses; **a reader saying a dimension uses the bare
+preposition.** Corrected. That is a real defect the audio caught and no text source would have.
+
+### ⚠ AND A FINDING THAT CHANGES THE MODEL: `4x4` IS A BORROWED DESIGNATION
+
+Several readers do not use their language's multiplication word at all:
+
+```
+mi  f o  b aɪ  f o          "four BY four"     — English
+pa  dʒ a r  b aɪ  dʒ a r    "char BY char"     — Punjabi four, ENGLISH by
+om  f o r  b aɪ … f o r     "four by four"     — English
+kn  f o r  i n t u  f o r   "four INTO four"   — Indian English "into"
+gu  f o ɾ  e k s  v o r     "four EKS four"    — the LETTER, spelled
+fa  … e k s  f o r …        "eks four"         — the LETTER, spelled
+```
+
+So `4x4` is not arithmetic in these languages — it is a **vehicle designation carried whole from English**, and
+the readers carry its pronunciation with it. Two of them even spell the `x` as a letter, which is the one thing
+this sweep set out to eliminate — *and for those two speakers it is the correct reading of a borrowed term.*
+
+⚠ **This does NOT mean the register words are wrong.** They were declared for the ARITHMETIC/dimension sense
+(`6 × 6 cm`), which this sentence does not test. What it means is that `4x4` needs its own treatment as a
+designation, on the same footing as `चंद्रयान -1` — and that the `by` slot cannot simply be filled with the
+English word, because reproducing "four by four" in Punjabi or Māori orthography is the unrenderable-loan problem
+mi's plus already documented.
+
+Recorded rather than acted on: changing six languages' reading of `4x4` on one speaker each is thinner evidence
+than the correction it would make, and the arithmetic sense is unaffected.
+
+### The lesson
+
+*I had the tier, the method, the audio and the universal-sentence technique, and still defaulted to register
+because the TEXT sweep failed.* The text failing is the trigger for the audio tier, not a reason to stop. Four
+confirmations and one correction from fourteen clips, at maybe twenty minutes of work.
