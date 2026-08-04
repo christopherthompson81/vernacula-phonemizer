@@ -164,6 +164,36 @@ export function normalizeGerman(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
+    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SIGNS ARE UNATTESTED AND THE WORDS ARE NOT, and that
+    //     distinction is the whole sourcing story. Searching de_de for `=`/`<`/`>`/`÷` finds nothing usable — every
+    //     `<` in the fleet is an HTML tag — so the first pass at #654 concluded the corpus could not source these
+    //     and only Wikipedia could. Wrong question: these readings are ordinary comparative PROSE, and the words
+    //     are in the corpus in quantity.
+    //
+    //     Counted as TOKENS in de_de (4212 utterances):
+    //       `kleiner als`   7 phrase hits   (kleiner ×22, als ×606)
+    //       `geteilt durch` 2 phrase hits   (geteilt ×4,  durch ×171)
+    //       `größer`        ×10             — the mirror of the attested `kleiner als`
+    //       `gleich`        ×3 TOKEN, ×107 SUBSTRING  ⚠ see below
+    //
+    //     ⚠ `gleich` IS THE SUBSTRING TRAP AGAIN. 107 raw hits look decisive and 104 of them are inside
+    //     `Vergleich`, `gleichzeitig`, `gleichfalls`. Only 3 are the standalone word. It is still attested — 3
+    //     token hits is attestation — but a plain grep would have reported it as the best-sourced of the four when
+    //     it is the thinnest. `attest.ts` exists because this error has been made four times before.
+    //
+    //     ⚠ AND `größer als` HAS ZERO PHRASE HITS while both its words are common. Phrase-level attestation is too
+    //     strict a bar for a construction: the language's comparative is `ADJ + als`, `kleiner als` proves the
+    //     construction, and `größer` proves the adjective. Requiring the exact pair would reject a reading the
+    //     corpus fully supports.
+    //
+    //     German math register puts the copula in (`ist gleich`, `ist kleiner als`), but the sign appears in
+    //     running text where the verb is already present or absent for its own reasons, so the bare form is what
+    //     the rule emits — the same choice `en` makes with `equals` rather than `is equal to`.
+    s = s.replace(/\s?=\s?/gu, " gleich ");
+    s = s.replace(/\s?<\s?/gu, " kleiner als ");
+    s = s.replace(/\s?>\s?/gu, " größer als ");
+    s = s.replace(/\s?÷\s?/gu, " geteilt durch ");
+
     // 7) FRACTIONS. ½ is "ein halb"; the rest are the ordinal stem plus -el (ein Fünftel).
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);

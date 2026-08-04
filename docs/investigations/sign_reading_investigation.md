@@ -2480,3 +2480,70 @@ rule — so this is genuinely per-language reading, not a fan-out over a table. 
 | logic notation | — | ZERO occurrences fleet-wide; out of scope with evidence |
 
 Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
+
+## Run 39 — 2026-08-04 — #654: one language end to end, and the blueprint it produced
+
+German as the pilot, chosen because it has a corpus to diff against and I could check the method's answer
+independently. `=`/`<`/`>`/`÷` all read now:
+
+    7 = 3  → zˈiːbən ɡlaɪ̯ç dʁaɪ̯              7 ÷ 3  → zˈiːbən ɡətˈaɪ̯lt dʊɐ̯ç dʁaɪ̯
+    7 < 3  → zˈiːbən klˈaɪ̯nɐ als dʁaɪ̯        3 + 4 = 7 → dʁaɪ̯ plʊs fiːɐ̯ ɡlaɪ̯ç zˈiːbən
+
+`review.ts --lang de` now fills the `equals` and `divide` cells; corpus diff 0/1956; 2951 tests pass.
+
+### ⚠ RUN 38 WAS WRONG: the corpus CAN source these, and I had asked it the wrong question
+
+Run 38 concluded "there is no sentence to read — `attest.ts` against Wikipedia is the only remaining route." That
+was based on searching the corpora for the SIGN. The sign is genuinely absent. **The WORDS are ordinary comparative
+prose and are in the corpus in quantity.**
+
+Counted as tokens in de_de (4212 utterances):
+
+    kleiner als    7 phrase hits    (kleiner ×22, als ×606)
+    geteilt durch  2 phrase hits    (geteilt ×4,  durch ×171)
+    größer         ×10              — the mirror of the attested `kleiner als`
+    gleich         ×3 TOKEN / ×107 SUBSTRING
+
+*I had been looking for the notation and concluding the vocabulary was unavailable.* Two different questions.
+
+### The four traps this one language hit
+
+1. **⚠ `gleich` is the substring trap, a fifth time.** 107 raw hits look decisive; 104 are inside `Vergleich`,
+   `gleichzeitig`, `gleichfalls`. Three are the standalone word. Still attested — 3 token hits IS attestation — but
+   a plain grep would rank it the best-sourced of the four when it is the thinnest.
+2. **⚠ Phrase-level attestation is too strict a bar.** `größer als` has ZERO phrase hits while both its words are
+   common. The construction is `ADJ + als`; `kleiner als` proves the construction and `größer` proves the adjective.
+   Demanding the exact pair would reject a reading the corpus fully supports.
+3. **⚠ `attest.ts` confirms EXISTENCE, NOT REGISTER — and this is the important one.** Run against
+   `ist gleich,kleiner als,größer als,geteilt durch`, German Wikipedia returned three `absent` and one `attested`:
+   `größer als` ×2, both from ***"Gott ist größer als Elvis"*, a film title.** The tool's own printed warning is
+   exactly this — "a token hit proves the word EXISTS, never that it fits the slot" — and the one hit it found is
+   the wrong sense. For a mathematical reading, general Wikipedia gives nothing or a false positive.
+4. **The copula.** German math register says `ist gleich`, `ist kleiner als`. The bare form is emitted because the
+   sign appears in running text where the verb is present or absent for its own reasons — the same call `en` makes
+   with `equals` rather than `is equal to`.
+
+### 📌 THE BLUEPRINT, in tier order, each with the pilot's evidence
+
+| tier | source | what it settles | evidence from this pilot |
+|---|---|---|---|
+| 1 | the language's OWN shipped rules | a COMPOUND of words already present | `±` = plus + minus, 18 languages at zero cost |
+| 2 | the FLEURS corpus, searched for the WORDS not the sign | is this vocabulary real in this language | `kleiner als` ×7, `geteilt durch` ×2 — token-level, substring separated |
+| 3 | Wikipedia via `attest.ts` | does the word EXIST at all | necessary, NOT sufficient — returned a film title as the maths reading |
+| 4 | a MATH-REGISTER source (textbook, Wikipedia's own mathematics articles) | does the word fit THIS SLOT | the tier the pilot shows is required, not optional |
+
+Tier 4 is the answer to "high-school mathematics textbooks should have letter spellings for these words". The pilot
+demonstrates why it is not a nicety: the reading is register-specific, tier 2 gives thin coverage for the
+specifically-mathematical sense (`gleich` ×3), and tier 3 actively misleads. A register-matched source is the only
+one that confirms the SENSE rather than the string.
+
+⚠ AND TIER 2 IS NOT AVAILABLE EVERYWHERE. de_de has 4212 utterances; the thin corpora have a few hundred. For
+those, tiers 3 and 4 are the whole haystack — which is the same asymmetry `attest.ts`'s header records for `zu`
+and `xh`, where espeak ships nothing and the referee is programmatic G2P output.
+
+### Cost, for scoping the remaining 34
+
+One language: four rules, one corpus count, one `attest.ts` run, one gate pass. The sourcing dominated; the code
+was four `s.replace` lines. That ratio is why this is per-language reading rather than a fan-out over a table.
+
+Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts de fills equals + divide.
