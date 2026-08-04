@@ -59,7 +59,29 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // punctuation — `2,3` was coming out as a phrase break between "dva" and "tři". A 3-digit block after the
 // comma is GROUPING, not a fraction (the corpus's "19,500 km²" is nineteen thousand five hundred), so it
 // is read as one number.
-const TOKEN = /([A-Za-zÁáČčĎďÉéĚěÍíŇňÓóŘřŠšŤťÚúŮůÝýŽž]+)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
+/**
+ * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name.
+ */
+const NATIVE_WORD = /^[A-Za-zÁáČčĎďÉéĚěÍíŇňÓóŘřŠšŤťÚúŮůÝýŽž]+$/u;
+/**
+ * Fold an OUT-OF-INVENTORY accent to its base — `ö`→`o`, `ã`→`a`. This engine NATIVISES rather than routing (its
+ * loan reading is its own, not English's), so a foreign name is read with native values — which needs a letter to
+ * read. The g2p has no rule for a letter outside its inventory and simply DROPS it, and dropping is not
+ * nativising but deleting: that is the `Klöcker` → *klkkeɾ* trap. NFD then discard marks, so a precomposed and a
+ * decomposed accent behave alike.
+ * ⚠ CONDITIONAL, because a native accent must survive: folding unconditionally would destroy exactly the
+ * accented letters this language CAN read (Tagalog's `ñ` was the case that showed it).
+ */
+const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
+const nat = (w: string): string => (NATIVE_WORD.test(w) ? w : foldToBase(w));
+
+// ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
+// out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
+// rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
+// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Czech, with the Slavic three-way agreement (1 procento / 2 procenta /
 // 5 procent). `countForm` is Czech's own, not `slavicCountForm`: a compound ending in 1 is the genitive
@@ -95,7 +117,7 @@ class CzechPhonemizer implements Phonemizer {
         // at the registry seam, so the regnal rule (normalize.ts step 12) sees digits after proper names.
         const normalized = SYMBOLS(normalizeCzechInitialisms(normalizeCzech(input)));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const [intPart, frac] = m[2].split(",");
                 if (frac !== undefined && frac.length === 3) {
