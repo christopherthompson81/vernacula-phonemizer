@@ -169,7 +169,12 @@ const MARKED_SUFFIX = new RegExp(`(\\S+)\\s${SUFFIX_MARK}(\\p{L}+)`, "gu");
 /** Read a unit carrying an apostrophe suffix: park the suffix, let the tier speak the unit, glue it back. */
 function readSuffixedUnits(text: string): string {
     const parked = text.replace(SUFFIXED_UNIT, `$1 ${SUFFIX_MARK}$2`);
-    return SYMBOLS(parked).replace(MARKED_SUFFIX, "$1$2");
+    // The final strip is belt and braces: the glue step only fires when the tier left a word before the mark,
+    // so an input where the tier declined to speak the unit would otherwise carry a CONTROL CHARACTER into the
+    // IPA. No probed input does that — 5,5 km'lik, 0,5 m'lik, 12 kg'dan, %80'ini, 1.600 km'lik and the
+    // malformed 5 km' were all checked clean — but a stray U+0001 in the phoneme string is a bad enough
+    // failure mode to spend one line on rather than argue about.
+    return SYMBOLS(parked).replace(MARKED_SUFFIX, "$1$2").split(SUFFIX_MARK).join("");
 }
 
 class TurkishPhonemizer implements Phonemizer {
