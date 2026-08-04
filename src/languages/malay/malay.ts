@@ -9,11 +9,18 @@
  * nothing in src/languages/indonesian/ is touched or configured from here.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { createIndonesian } from "../indonesian/indonesian.ts";
+import { createIndonesian, type ForeignPhonemizer } from "../indonesian/indonesian.ts";
 import { normalizeMalay } from "./normalize.ts";
 
 class MalayPhonemizer implements Phonemizer {
-    private readonly inner: Phonemizer = createIndonesian();
+    private readonly inner: Phonemizer;
+    /** The FOREIGN reader is threaded through to the Indonesian engine, or Malay would keep the defect Indonesian
+     *  just lost: a token carrying a diacritic is a foreign name, and without a reader for it the native g2p
+     *  drops the letter it cannot spell (`Cañitas` → *t͡ʃaˈitas*). Malay inherits Indonesian's phonology, so it
+     *  inherits its foreign-name problem too — and its solution. */
+    constructor(foreign?: ForeignPhonemizer) {
+        this.inner = createIndonesian(foreign);
+    }
     /** Malay conventions first, then the Indonesian engine's own `text()` — which runs the inherited
      *  Indonesian normalization and the shared symbol tier over what is left. Ordering is the point: a
      *  Malay rule can only pre-empt an Indonesian one if it runs first, and the shapes it does NOT claim
@@ -25,6 +32,6 @@ class MalayPhonemizer implements Phonemizer {
 }
 
 /** Build the Standard Malay phonemizer. */
-export function createMalay(): Phonemizer {
-    return new MalayPhonemizer();
+export function createMalay(foreign?: ForeignPhonemizer): Phonemizer {
+    return new MalayPhonemizer(foreign);
 }

@@ -1555,3 +1555,53 @@ Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67; b
 `id`'s TOKEN is `[a-zA-Z]+` and every accented Latin letter fragments the word. That is the ASCII-tokenizer defect
 already recorded in Run 12; the correct spelling now reaches it, and it still cannot read it. `yue` solved this
 with `\p{Script=Latin}` and pins it with a test.
+
+## Run 24 — 2026-08-04 — id's ASCII tokenizer: the defect the phantom `±` was hiding behind
+
+Repairing `Las CaÃ±itas` to `Las Cañitas` (Run 23) made the *spelling* right and the *reading* no better:
+`t͡ʃˈa ˈɛn ˈitas` — "cha EN itas". `id`'s TOKEN word group was `[a-zA-Z]+`, so a diacritic ENDED the token, the
+letter carrying it became an unclaimed gap read as an English LETTER NAME, and the rest of the word started over.
+One word became three, none of them right:
+
+```
+Cañitas → t͡ʃˈa ˈɛn ˈitas      São → s ˈə ˈo      Klöcker → ʔl ˈoᶷ t͡ʃkˈər      Cochamó → t͡ʃˈot͡ʃha ˈoᶷ
+```
+
+⚠ **INVISIBLE TO EVERY GATE.** No digit or raw mark survives, and nothing VANISHES, so it is a WRONG-WORD defect
+that neither the leak classes nor the differential DROP test can reach. It was found by reading a corpus diff —
+the same way English's magnitude leak was.
+
+### Widening the token was necessary but not sufficient
+
+`\p{Script=Latin}[\p{Script=Latin}\p{M}]*` stopped the fragmentation, and the reading was still wrong:
+`Cañitas` → *t͡ʃaˈitas*, because id's native g2p has no rule for `ñ` and silently **drops the letter it cannot
+spell**. Quieter than fragmenting, no more correct.
+
+⚠ **A DIACRITIC IS THE SIGNAL, and it is a reliable one**: Indonesian orthography has none, so a token carrying
+one is a FOREIGN NAME and belongs on the foreign path. `NATIVE_WORD = /^[a-zA-Z]+$/` routes it, and the registry
+now injects English exactly as it does for Hindi — `createIndonesian` accepted no reader at all before, so
+`this.foreign` was always undefined and the fallback always fired.
+
+*This is the difference from yue's fix, which looked like the same problem.* yue's Latin group already fed the
+foreign reader, so widening the pattern was the whole change. id's Latin group is its NATIVE word group, so
+widening it alone just hands the g2p letters it cannot pronounce. Same symptom, two different fixes.
+
+**Malay inherits both**, since `createMalay` wraps `createIndonesian` — it had to be threaded through, or `ms`
+would have kept the defect `id` just lost.
+
+### Result
+
+`id Cañitas` → `kʰˈæniːt̬əs`, **byte-identical to English's reading**, and the same for `ms`/`zsm`.
+Corpus diffs **id 21/1936 and ms 21/1908**, every changed line read: every one is a fragmented name becoming a
+whole word (`t͡ʃˈa ˈɛn ˈitas`→`kʰˈæniːt̬əs`, `ʔl ˈoᶷ t͡ʃkˈər`→`klˈɑːkɚ`, ` ˈə ˈo`→`ˈaᶷ`). No DROP, DIGIT,
+RAWMARK, SLOT-GAP or THROW.
+
+Gates: tsc clean; 205 files / 2929 tests; audit 0 defective cells across 0/67.
+
+⚠ **AND THE PROBE SAYS 42 LANGUAGES FRAGMENT**, not one. That number needs care before it becomes a work item:
+for a NON-Latin-script language an accented Latin word is a foreign run and the script router may already handle
+it, so the probe (comparing space counts against an ASCII twin) will over-report. The genuinely comparable cases
+are the Latin-script engines whose own word group is ASCII-or-partial — `xh`, `zu`, `sw`, `om`, `naija`, `akan`,
+`nama`, `tagalog`, and the partial-diacritic ones (`cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`, `ig`,
+`yo`). Each needs the id treatment: widen the token AND decide whether its g2p or a foreign reader takes the
+result. Worth its own issue rather than a blind sweep.
