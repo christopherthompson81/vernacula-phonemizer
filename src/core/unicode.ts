@@ -176,9 +176,42 @@ export function foldNativeDigits(s: string): string {
  * third byte was already replaced with U+FFFD upstream, so the information is gone. Two instances in one
  * corpus, and guessing which quote it was would be invention.
  */
+/**
+ * The bytes 0x80–0x9F have no Latin-1 characters, so a mis-decode of them goes through CP1252 instead — and
+ * that is what makes the THREE-byte case look different from the two-byte one. `â€\u201c` is not
+ * `\u00e2 + \u0080 + \u0093`; it is `\u00e2 + \u20ac + \u201c`, because CP1252 maps 0x80 to the euro sign and
+ * 0x93 to a curly quote. An earlier pass measured the 3-byte signature as ZERO across all 67 corpora by
+ * searching for the Latin-1 form, which does not occur — the CP1252 form occurs 16 times.
+ */
+const CP1252_BACK = new Map<number, number>([
+    [0x20ac, 0x80], [0x201a, 0x82], [0x0192, 0x83], [0x201e, 0x84], [0x2026, 0x85], [0x2020, 0x86],
+    [0x2021, 0x87], [0x02c6, 0x88], [0x2030, 0x89], [0x0160, 0x8a], [0x2039, 0x8b], [0x0152, 0x8c],
+    [0x017d, 0x8e], [0x2018, 0x91], [0x2019, 0x92], [0x201c, 0x93], [0x201d, 0x94], [0x2022, 0x95],
+    [0x2013, 0x96], [0x2014, 0x97], [0x02dc, 0x98], [0x2122, 0x99], [0x0161, 0x9a], [0x203a, 0x9b],
+    [0x0153, 0x9c], [0x017e, 0x9e], [0x0178, 0x9f],
+]);
+
+/** The byte a mis-decoded character came from: its CP1252 slot, or its own value in the Latin-1 range. */
+function sourceByte(c: string): number | undefined {
+    const o = c.codePointAt(0)!;
+    const m = CP1252_BACK.get(o);
+    if (m !== undefined) return m;
+    return o >= 0x80 && o <= 0xff ? o : undefined;
+}
+
 export function repairDoubleEncoded(s: string): string {
-    if (!/[\u00c2\u00c3][\u0080-\u00bf]/u.test(s)) return s;
+    if (!/[\u00c2\u00c3\u00e2]/u.test(s)) return s;
     return s
+        // THREE-BYTE first, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF;
+        // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
+        // is why every hit here is a dash, quote or ellipsis. Measured: 16 occurrences, all in id_id
+        // (`â€“` → `–`, `â€”` → `—`), zero in the other 66 corpora.
+        .replace(/\u00e2[\s\S]{2}/gu, (m) => {
+            const b2 = sourceByte(m[1]!), b3 = sourceByte(m[2]!);
+            if (b2 === undefined || b3 === undefined) return m;
+            if (b2 < 0x80 || b2 > 0xbf || b3 < 0x80 || b3 > 0xbf) return m;
+            return String.fromCodePoint(((0xe2 & 0x0f) << 12) | ((b2 - 0x80) << 6) | (b3 - 0x80));
+        })
         .replace(/\u00c2([\u0080-\u00bf])/gu, "$1")
         .replace(/\u00c3([\u0080-\u00bf])/gu, (_m, c: string) => String.fromCodePoint(c.codePointAt(0)! + 0x40));
 }

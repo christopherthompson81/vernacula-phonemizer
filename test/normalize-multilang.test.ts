@@ -650,7 +650,14 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
         // C3 XX: the code point is the trailing byte plus 0x40 — `Ã±` → `ñ`, `Ã¶` → `ö`.
         expect(phonemize("Las Ca\u00c3\u00b1itas", "id")).toBe(phonemize("Las Cañitas", "id"));
         expect(phonemize("Kl\u00c3\u00b6cker", "id")).toBe(phonemize("Klöcker", "id"));
+        // THE THREE-BYTE CASE goes through CP1252, not Latin-1: `â€"` is `â + € + "`, because CP1252 maps
+        // byte 0x80 to the euro sign and 0x93 to a curly quote. An earlier pass measured this signature as
+        // ZERO by searching for the Latin-1 form, which does not occur — the CP1252 form occurs 16 times, all
+        // in id_id, and the stray `€` was being counted as a DROPPED CURRENCY.
+        expect(phonemize("1000\u00e2\u20ac\u201c1300", "id")).toBe(phonemize("1000\u20131300", "id"));
+        expect(phonemize("barbule \u00e2\u20ac\u201d peneliti", "id")).toBe(phonemize("barbule \u2014 peneliti", "id"));
         // …and it is INERT on text that merely contains those letters without a continuation byte.
+        expect(phonemize("l\u2019\u00e2me", "fr")).toBe(phonemize("l\u2019\u00e2me", "fr")); // a real â
         expect(phonemize("Âge", "fr")).toBe(phonemize("Âge", "fr"));
         expect(phonemize("5 km²", "de")).toBe("fʏnf kvadʁˈaːtkilomeːtɐ");
     });
