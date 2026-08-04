@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
@@ -31,7 +32,10 @@ export function phonemizeWord(word: string): string {
         for (const key of ORDER) {
             if (w.startsWith(key, i)) { out.push(DIGRAPHS[key]!); i += key.length; continue outer; }
         }
-        const ph = G[w[i]!];
+        // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
+        // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
+        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        const ph = G[w[i]!] ?? latinPhone(w[i]!);
         if (ph !== undefined) out.push(ph);
         i += 1;
     }

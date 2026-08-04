@@ -24,6 +24,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -111,7 +112,11 @@ function phonemizeCore(word: string, useTone: boolean): string {
         if (c === "b") { out.push(/[mnɲŋ]$/u.test(out[out.length - 1] ?? "") ? "m" : "b"); i += 1; continue; }
         if (c in DEF.consonants) { out.push(DEF.consonants[c]!); i += 1; continue; }
         if (c === TILDE) { if (out.length) out[out.length - 1] += TILDE; i += 1; continue; } // nasalisation on the vowel
-        i += 1; // unknown → skip
+        // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
+        // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
+        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        { const p = latinPhone(c); if (p !== undefined) out.push(p); }
+        i += 1;
     }
     // TONE + vowel-nasality overlay (shipped path): attach Chao letters (H→˥, L→˩) and ◌̃ to each nucleus.
     if (useTone) {

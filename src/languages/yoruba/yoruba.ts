@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface YorubaDef {
@@ -123,7 +124,11 @@ export function phonemizeWord(word: string): string {
             i++;
             continue;
         }
-        i++; // unknown / stray mark → skip
+        // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
+        // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
+        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        { const p = latinPhone(c); if (p !== undefined) segs.push({ ph: p }); }
+        i++;
     }
 
     let out = "";
