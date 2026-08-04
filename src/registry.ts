@@ -622,7 +622,7 @@ function build(lang: string): Phonemizer {
         case "haw":
             return createHawaiian();
         case "mi":
-            return createMaori();
+            return createMaori((latin) => getPhonemizer("en").text(latin));
         // Quechua (Runasimi) — Southern Quechua; 3 vowels, overt 3-way stop series (plain/aspirate/ejective), penult stress.
         case "qu":
             return createQuechua();
