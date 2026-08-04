@@ -2423,3 +2423,60 @@ about the candidate WORDS (`kleiner als`, `menor que`), not about the symbol.
 
 Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts 0 failing on all
 eighteen changed languages.
+
+## Run 38 — 2026-08-04 — #654: the relational exemplars, and why the remaining 35 cannot be derived
+
+Same zero-cost extraction used for `±` — run each language's own `normalize` and diff against the sign-free input.
+**30 languages already ship `=`, `<` and `>`; 14 also ship `÷`.**
+
+| lang | `=` | `<` | `>` | `÷` |
+|---|---|---|---|---|
+| af | gelyk aan | kleiner as | groter as | gedeel deur |
+| bg | равно на | по-малко от | по-голямо от | делено на |
+| cmn | 等于 | 小于 | 大于 | 除以 |
+| cs | rovná se | menší než | větší než | děleno |
+| da | lig med | mindre end | større end | divideret med |
+| en | equals | less than | greater than | divided by |
+| is | jafnt og | minna en | meira en | deilt með |
+| lb | ass gläich | méi kleng ewéi | méi grouss ewéi | dividéiert duerch |
+| mk | еднакво на | помало од | поголемо од | поделено со |
+| nb | er lik | mindre enn | større enn | delt på |
+| ro | egal cu | mai mic decât | mai mare decât | împărțit la |
+| sd | برابر | کان گهٽ | کان وڌيڪ | ورهايل |
+| sk | rovná sa | menší ako | väčší ako | delené |
+| sv | lika med | mindre än | större än | delat med |
+| ckb | یەکسانە بە | کەمتر لە | زیاتر لە | دابەش بە |
+
+…and `=`/`<`/`>` only: `as az ca cy ff ga ha hr kk ms om sl uz xh zu`.
+
+**The register is consistent across all 30**: equality is "equal to", the inequalities are a comparative plus the
+language's "than", and division is a passive participle plus "by". That is the school-mathematics register the
+`multiply` and `plus` data already sit in, and it is what makes these readings ✓ TREE rather than invented.
+
+### ⚠ The remaining 35 CANNOT be derived, and this is where the ± route runs out
+
+`±` worked because it is a COMPOUND of two words each language already shipped — plus and minus were both already
+in the tree, so juxtaposing them added nothing. `=`/`<`/`>`/`÷` are not compounds of anything already present: a
+language missing `<` needs its comparative-plus-than construction, which is new vocabulary regardless of how it is
+assembled. There is no second word in the tree to lift.
+
+So the 35 need the fourth tier, and the corpus cannot supply it: `=` ×52 is LaTeX/MediaWiki residue and one
+`1+4=5分`, and every `<`/`>` is an HTML tag `stripMarkup` removes. **There is no recording to listen to and no
+sentence to read** — `attest.ts` against Wikipedia is the only remaining route, checking a CANDIDATE word with the
+token-vs-substring separation, exactly as its header describes.
+
+⚠ AND THE CANDIDATE HAS TO COME FROM SOMEWHERE FIRST. `attest.ts` verifies a word; it does not propose one. For
+each of the 35 the candidate is that language's own comparative construction, which is grammar rather than a sign
+rule — so this is genuinely per-language reading, not a fan-out over a table. That is the difference between the
+±  work (mechanical, 18 languages in one pass) and this.
+
+### Where #654 stands
+
+| sign | dropped | note |
+|---|---|---|
+| `±` | 56 → **37** | 18 languages added at zero sourcing cost; gate-clean |
+| `÷` | 48 | measured UNATTESTED — belongs with ≤/≥/≠ as robustness, not the issue's second priority |
+| `=` `<` `>` | 35 each | the only signs with any attestation; 30 exemplars recorded above; the 35 need per-language sourcing |
+| logic notation | — | ZERO occurrences fleet-wide; out of scope with evidence |
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
