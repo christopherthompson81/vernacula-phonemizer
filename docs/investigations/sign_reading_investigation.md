@@ -1367,3 +1367,53 @@ Gates: tsc clean; 205 files / 2927 tests; audit 0 defective cells across 0/67.
 **Still open**: ~26 languages have no multiplication word (the droppers I could not source confidently), cmn's
 artifact carries LaTeX/template residue that is read aloud, and `±`/`<`/`>` remain undeclared almost fleet-wide
 with zero attested instances.
+
+## Run 20 — 2026-08-04 — items (2) and (1): LaTeX residue, and the multiplication word fleet-wide
+
+### (2) LaTeX/template residue was being READ ALOUD
+
+cmn's artifact carries `{\displaystyle W={\frac {Rv+Cm}{v+m}}}` and three MediaWiki template ERROR messages.
+Both were spoken as English — *dˈʌbəɫjuː dɪsplˈeᶦstaᶦɫ …* ("W displaystyle W") and *mˈɪsɪŋ ɹikwˈaᶦɚd pɚˈæmət̬ɚ*.
+Same class as the wikitable prefix: not a dropped sign but AUDIBLE GARBAGE.
+
+- **Engine**: `stripMarkup` now removes LaTeX control sequences. ⚠ Zero risk, measured — a BACKSLASH occurs
+  **zero times in all 67 corpora** and in one artifact entry, so `\word` can never reach real prose.
+- ⚠ **The brace strip had to be conditional, which the first version got wrong.** `[{}]` unconditionally
+  reached ordinary text (`a {curly} aside` → `a  curly  aside`). Braces are rare rather than impossible in prose,
+  so a LaTeX COMMAND is what licenses treating them as math. No command, no brace strip.
+  (Also needed a non-global twin for the presence test — `.test()` on a `/g` regex advances `lastIndex` and makes
+  alternate calls disagree with themselves.)
+- **Mining tool**: a paragraph containing a MediaWiki error marker is now DISCARDED WHOLE. These are FIXED
+  strings from a broken template, so unlike ordinary garbage they can be matched exactly rather than guessed at,
+  and the surrounding text is template expansion with no reliable prose to salvage.
+
+### (1) The multiplication word, from 33 broken to 1
+
+Started at 33 languages either dropping `×` or reading ASCII `x` as a LETTER NAME. Now **one**.
+
+⚠ **My first measurement of who was broken was WRONG, twice over.** The detector looked for `ks`/`eks` in the
+IPA — which matches `sˈɪks` (English "six") and `eksi` (Greek "six"). Both false positives, and both languages
+were already correct. Replaced with the only reliable test: *does the ASCII form read identically to the `×`
+form?* That split the failures into two groups that need different fixes, which the leak-string test could never
+have shown.
+
+| group | fix | count |
+|---|---|---|
+| no word at all | declare `multiply` (~REG standard register) | 17 |
+| reads `×`, not ASCII `x` | declare `multiply` (✓TREE — their OWN word) or extend their local table | 16 |
+
+Words came from the language's own existing rule wherever one existed (✓TREE, zero new sourcing) — harvested
+from two different shapes, `replace(/×/…)` AND the `[/×/gu, " word "]` TABLE form that a first grep missed.
+The rest are ~REG, marked distinctly in each file.
+
+⚠ **Eight languages do not route this through the tier at all** and needed their local rule extended instead —
+a reminder that a tier field does not reach a language that never asked the tier. ar and om use a third shape
+again (`new RegExp` with a digit class; a two-group `replace`), and fa had no `×` rule of any kind.
+
+### Result
+
+**32 of 33 fixed.** Corpus diffs, every changed line read: cmn 2/1999 (`ˈɛks`→乘以), ta 1/1886 (`ˈɛks`→பெருக்கல்),
+ru 0/1959, sv 0/1863. Gates: tsc clean; 205 files / 2927 tests; audit 0 defective cells across 0/67.
+
+**Still open**: om's `×` (its local rule and the `unitPrefix` reorder interact — ASCII `x` works, `×` still
+drops), and item (3), `±`/`<`/`>`, which remain undeclared almost fleet-wide with ZERO attested instances.

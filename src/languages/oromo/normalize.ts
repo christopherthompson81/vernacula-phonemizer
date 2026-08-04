@@ -372,7 +372,9 @@ export function normalizeOromo(input: string): string {
     //       score (`5-3`) are both excluded.
     s = s.replace(/(\d+)\s*<\s*(\d+)/gu, "$1 $2 caalaa xiqqaa");
     s = s.replace(/(\d+)\s*>\s*(\d+)/gu, "$1 $2 caalaa guddaa");
-    s = s.replace(/(\d+)\s*×\s*(\d+)/gu, "$1 si’a $2");
+    // ⚠ ASCII `x` TOO: `NxN` outnumbers `×` roughly 85 to 20 in the corpora and the bare `x` was read as its
+    // own LETTER NAME. Digit-bounded on both sides so it cannot claim a letter.
+    s = s.replace(/(\d+)\s*(?:×|x)\s*(\d+)/gu, "$1 si’a $2");
     s = s.replace(/\s*=\s*/gu, " wal qixa ");
     s = s.replace(/(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "ida’uu ");
     //       The second lookbehind is variable-length and was added by the corpus diff: `10ffaa - 11ffaa`

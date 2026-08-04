@@ -44,6 +44,10 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 // #562 symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "乘以" },
     percent: ["百分之"],
     percentPrefix: true,
     // Currency: the sign was DROPPED outright ($50 read as 五十, losing 美元). Mandarin says the unit after

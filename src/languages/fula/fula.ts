@@ -32,6 +32,10 @@ const TOKEN =
 // Nouns stay SINGULAR after numerals, so one form suffices.
 // The unit words are the corpus's own borrowings (kilometre, metre); "e wakkati gootel" = per hour.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "je" },
     percent: ["e teemedere"],
     currency: { "$": ["dollar"], "€": ["euro"], "¥": ["yen"], "£": ["pound"] },
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },

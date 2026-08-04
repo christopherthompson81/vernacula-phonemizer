@@ -82,7 +82,9 @@ const RELATIONAL: [RegExp, string][] = [
     [/=/gu, " egal cu "],
     [/</gu, " mai mic decât "],
     [/>/gu, " mai mare decât "],
-    [/×/gu, " ori "],
+    // ⚠ ASCII `x` TOO, not only `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and the
+    // bare `x` was reaching the phoneme stream as its own LETTER NAME. Digit-bounded, so it cannot claim a letter.
+    [/×|(?<=\p{Nd})[ \t]?x[ \t]?(?=\p{Nd})/gu, " ori "],
     [/÷/gu, " împărțit la "],
 ];
 

@@ -185,6 +185,11 @@ const TOKEN = /([A-Za-zʼ’']+)|(\d+)|([.?!,;:])/gu;
  * can only postpose them, and Oromo puts them first; normalize.ts owns them.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "si’a" },
     percent: ["parsantii"],
     percentPrefix: true,
     currency: {

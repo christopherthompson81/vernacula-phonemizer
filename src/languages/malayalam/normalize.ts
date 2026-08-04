@@ -91,6 +91,11 @@ const ZWJ_CHILLU: Readonly<Record<string, string>> = {
  * shape cannot express. Nothing to source, nothing to guess.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ഗുണം" },
     // #586 — `&` was DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
     // TRANSLITERATED English "and", and it is attested in exactly this construction rather than merely as a
     // word: every wiki hit is an English institution name rendered in Malayalam — `ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ്

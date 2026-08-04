@@ -88,6 +88,11 @@ export function phonemizeWord(word: string): string {
 
 // #562 Urdu had no symbol tier at all: "3%" read as just "تین", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ضرب" },
     percent: ["فیصد"],
     currency: { "₨": ["روپے"], $: ["ڈالر"], "€": ["یورو"], "£": ["پاؤنڈ"] },
     units: { km: ["کلومیٹر"], cm: ["سینٹیمیٹر"], mm: ["ملیمیٹر"], kg: ["کلوگرام"], m: ["میٹر"],

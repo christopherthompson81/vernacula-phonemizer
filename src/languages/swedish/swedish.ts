@@ -126,6 +126,10 @@ const TOKEN = /([a-zåäöéA-ZÅÄÖÉ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
+    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    multiply: { times: "gånger" },
     percent: ["procent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pund"] },
     // `m` added: 4 corpus instances of a bare metre (`4892 m`, `100 m`, `30 m`, and the `133 m/s`

@@ -34,6 +34,26 @@ const NAMED: Readonly<Record<string, string>> = {
 };
 
 /**
+ * LaTeX CONTROL SEQUENCES, as MediaWiki's `<math>` leaves them. cmn's artifact carries
+ * `{\displaystyle W={\frac {Rv+Cm}{v+m}}}`, and the commands were SPOKEN — *dˈʌbəɫjuː dɪsplˈeᶦstaᶦɫ …*,
+ * "W displaystyle W", the markup recited as English. Same class as the wikitable prefix: not a dropped sign
+ * but AUDIBLE GARBAGE, and strictly worse, because silence can at least pass for a reading choice.
+ *
+ * ⚠ ZERO RISK, measured: a BACKSLASH occurs **zero times in all 67 FLEURS corpora** and in exactly one mined
+ * artifact entry (the cmn formula above). A backslash followed by letters is never natural prose in any of
+ * these orthographies, so the pattern cannot reach real text.
+ * ⚠ THE BRACES ARE ONLY STRIPPED WHEN A COMMAND WAS PRESENT, which the first version got wrong. `{\frac
+ * {Rv+Cm}{v+m}}` is a math group and its braces must go, but stripping `[{}]` unconditionally reached ordinary
+ * prose — `a {curly} aside` became `a  curly  aside`. Braces are rare rather than impossible in running text,
+ * so the LaTeX command is what licenses treating them as math. No command, no brace strip.
+ */
+const LATEX_CMD = /\\[a-zA-Z]+\s?/gu;
+/** Non-global twin for the presence test — `.test()` on a `/g` regex advances `lastIndex` and would make
+ *  alternate calls disagree with themselves. */
+const HAS_LATEX = /\\[a-zA-Z]+/u;
+const MATH_BRACE = /[{}]/gu;
+
+/**
  * `<sup>` AND `<sub>` CARRY MEANING THAT THE TAG STRIP DESTROYS, so they are rendered to real superscript
  * characters BEFORE the general tag pass removes their brackets.
  *
@@ -119,11 +139,14 @@ const ENTITY = /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]*);/gu;
 /** Strip HTML tags and decode character entities. Pure text→text; a string containing neither is
  *  returned unchanged, and the fast path makes that the common case. */
 export function stripMarkup(text: string): string {
-    if (!text.includes("<") && !text.includes("&") && !text.includes("|") && !text.includes("!")) return text;
+    if (!text.includes("<") && !text.includes("&") && !text.includes("|") && !text.includes("!")
+        && !text.includes("\\") && !text.includes("{") && !text.includes("}")) return text;
     // Wikitable first: a cell's contents may themselves be HTML, and the cell prefix is what hides them.
     // Then sup/sub, which must precede the general TAG pass — that pass deletes their brackets and leaves the
     // digits inline, which is exactly the flattening described above.
-    return text.replace(WIKITABLE, " ")
+    // Braces only when a LaTeX command licensed it — see LATEX_CMD.
+    const deLatex = HAS_LATEX.test(text) ? text.replace(LATEX_CMD, " ").replace(MATH_BRACE, " ") : text;
+    return deLatex.replace(WIKITABLE, " ")
         .replace(SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""))
         .replace(TAG, "").replace(ENTITY, (whole, body: string) => {
         if (body.startsWith("#")) {

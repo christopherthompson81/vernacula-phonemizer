@@ -70,6 +70,11 @@ const NA = "(?![\\p{L}\\p{M}])";
  * "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ". The shared postposed "A per B" idiom cannot express it. Handled in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "ಗುಣಿಸಿ" },
     percent: ["ಪ್ರತಿಶತ"],
     currency: { "US$": ["ಡಾಲರ್"], "$": ["ಡಾಲರ್"] },
     magnitudes: ["ಮಿಲಿಯನ್", "ಬಿಲಿಯನ್", "ದಶಲಕ್ಷ", "ಶತಕೋಟಿ", "ಲಕ್ಷ", "ಕೋಟಿ"],

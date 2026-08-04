@@ -31,6 +31,11 @@ import { makeNepaliNormalizer } from "./normalize.ts";
  *            `unitPer` at all, so "km/h" dropped its denominator and read the h as a letter name.
  */
 const NE_SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "गुणा" },
     percent: ["प्रतिशत"],
     // Hindi's four keys exactly, with only `cm` respelled (see above). A one-letter `m` is deliberately
     // NOT declared — the playbook's `rateDenominators` note records a one-letter unit key matching an

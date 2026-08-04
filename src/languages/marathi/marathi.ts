@@ -30,6 +30,11 @@ function engine(foreign?: ForeignPhonemizer) {
  *  a coupling that was load-bearing in three separate steps. Verified byte-identical over the whole
  *  mr_in corpus when moved onto the seam. */
 const MR_SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
+    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
+    // defaults to it — this language does not split dimension from product.
+    multiply: { times: "गुणिले" },
     // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `आणि` ×1073 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.

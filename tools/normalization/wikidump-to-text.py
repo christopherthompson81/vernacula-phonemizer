@@ -30,6 +30,15 @@ import xml.etree.ElementTree as ET
 RE_COMMENT = re.compile(r"<!--.*?-->", re.S)
 RE_REF = re.compile(r"<ref[^>]*?/>|<ref.*?</ref>", re.S | re.I)
 RE_TAG = re.compile(r"<[^>]+>")
+# ⚠ MEDIAWIKI ERROR MESSAGES ARE NOT PROSE, and three reached cmn's artifact and were READ ALOUD as English:
+# `截至2023年 (2023-Missing required parameter 1=month!` → *… mˈɪsɪŋ ɹikwˈaᶦɚd pɚˈæmət̬ɚ …*. These are FIXED
+# strings emitted by a broken template, so unlike ordinary garbage they can be matched exactly rather than
+# guessed at — and a paragraph containing one is discarded whole, because the surrounding text is a template
+# expansion too and there is no reliable prose to salvage from it.
+RE_WIKI_ERROR = re.compile(
+    r"Missing required parameter|Expression error|Template loop detected|Cite error|"
+    r"Invalid time|Unknown archive|script error",
+    re.I)
 # ⚠ <sup> IS RENDERED, NOT STRIPPED, and stripping it was OUR data loss rather than the source's.
 # RE_TAG below deletes the brackets and leaves the digits INLINE, so `2.802×10<sup>10</sup>` mined as
 # `2.802×1010` — the exponent merged into the mantissa and no later pass can tell where the boundary was.
@@ -77,6 +86,8 @@ def clean(text: str) -> list:
     text = RE_LINK.sub(r"\1", text)
     text = RE_EXTLINK.sub(lambda m: m.group(1) or " ", text)
     text = RE_HEADING.sub(" ", text)
+    if RE_WIKI_ERROR.search(text):
+        return ""   # a template-error paragraph is discarded whole; see RE_WIKI_ERROR
     text = RE_SUP.sub(lambda m: m.group(1).translate(SUP_DIGITS), text)  # BEFORE RE_TAG, which would flatten it
     text = RE_TAG.sub(" ", text)
     text = RE_QUOTES.sub("", text)
