@@ -117,6 +117,23 @@ export interface SymbolData {
         position?: ExponentPosition | Readonly<Partial<Record<"squared" | "cubed", ExponentPosition>>>;
     };
     /**
+     * The word for `&`, which is DROPPED outright without one — and a dropped sign is inaudible.
+     *
+     * 16 languages still lost it after the #562 sweep, always in the same two corpus sentences: `B&B` and
+     * `Arts & Sciences` (also `bed & breakfast`, `Qatar Airways & Turkish Airlines`). Every one of them has a
+     * high-frequency conjunction to spend — und ×1135, dan ×1053, og ×1135, и ×1129, және ×561 — so this was a
+     * missing CELL, not a sourcing problem.
+     *
+     * ⚠ SPACED ON BOTH SIDES, always. `B&B` is two initialisms and `bed&breakfast` (which pl writes glued) is
+     * two words; substituting without spaces fuses them into one token, which is the merge defect
+     * `review.ts`'s own probe carried for thirty-seven languages. The HTML entity is folded first, or `&amp;`
+     * reads as the word plus "amp" plus a semicolon.
+     *
+     * NOT for a language whose conjunction is an ENCLITIC: Malayalam joins nouns with `-ഉം`, which cannot be
+     * emitted as a free word, and `കൂടാതെ` means "besides", not "and". Left dropped there rather than wrong.
+     */
+    ampersand?: string;
+    /**
      * THIS LANGUAGE IS WRITTEN WITHOUT SPACES BETWEEN WORDS — Chinese, Japanese.
      *
      * Set it and the boundary guards around currency keys and unit abbreviations stop treating "any letter"
@@ -317,6 +334,11 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const PCT_BEFORE = saidBefore(d.percent);
 
     return (text: string): string => {
+        // THE AMPERSAND FIRST, and spaced — see `ampersand`. Before every other rule because a `&` between
+        // two initialisms (`B&B`) must become three tokens, and any later rule that reads a token boundary
+        // needs the split to have happened already.
+        if (d.ampersand !== undefined)
+            text = text.replace(/&amp;/giu, "&").replace(/[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         // "cinco millones DE dólares" — emitted only when a magnitude was actually matched.
         const join = (mag: string | undefined): string =>

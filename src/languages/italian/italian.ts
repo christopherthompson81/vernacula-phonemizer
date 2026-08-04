@@ -316,6 +316,10 @@ const TOKEN = /([a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]+)|(\d+)|([.?!,;
  * real, and `l'` before a vowel would be claimed as *litri* since an apostrophe is not a letter.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `e` ×1067 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "e",
     percent: ["per cento"],
     // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
     // which needs the partitive *di* the shared magnitude hop cannot insert. Hence no `magnitudes` list.

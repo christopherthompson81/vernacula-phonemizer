@@ -47,6 +47,10 @@ const lexicon = (): Map<string, string> => {
  * is confidently wrong far more often than it is right.
  */
 const GU_SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `અને` ×1128 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "અને",
     percent: ["ટકા"], // Hindi's प्रतिशत is not Gujarati — and in Devanagari it was not even audible
     currency: {
         "US$": ["ડોલર"], "AUD$": ["ડોલર"], "$": ["ડોલર"],
