@@ -311,6 +311,16 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     10a) Devanagari abbreviations after a digit. `(?![\p{L}\p{M}])` after the key is what keeps
         //          मिमी out of longer words; the abbreviation may be followed by `/` (see 10b), which is
         //          neither a letter nor a mark, so the guard still admits it.
+        //          THE SQUARED FORM FIRST, or this rule consumes the abbreviation and strands the `²` — the
+        //          ordering coupling bg, is and sd all record for the same shape. The corpus writes
+        //          `19,500 किमि²`, and once `किमी` became `किलोमिटर` the tier had a WORD before the `²` with no
+        //          digit adjacency left, so the exponent was dropped and the area read as a length. वर्ग goes
+        //          BEFORE the noun here, which is the position the tier declares and the corpus attests
+        //          (`3,850 वर्ग किलोमिटर`).
+        s = s.replace(
+            new RegExp(`(\\d)\\s?(${UNIT_ALT})(?:\\s?²|2)(?![\\p{L}\\p{M}\\d])`, "gu"),
+            (_m, d: string, u: string) => `${d} वर्ग ${UNIT_WORD[u]!}`,
+        );
         s = s.replace(
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
