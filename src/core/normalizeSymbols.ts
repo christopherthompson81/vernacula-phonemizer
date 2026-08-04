@@ -222,6 +222,18 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const magAlt = d.magnitudes?.length
         ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")}))?`
         : "()?";
+    // FOR THE UNIT PATH, THE MAGNITUDE MAY BE FOLLOWED BY ITS CONNECTIVE, and the text already contains it.
+    // Catalan writes `2,2 milions de km²` and Italian the same shape: the number is separated from the unit by
+    // TWO words, so the adjacency this tier matches on was broken and the whole quantity failed — `km²` fell
+    // to the exponent fallback and the area was read as a length.
+    // Kept OUT of the currency path deliberately. There the connective is GENERATED (`join()` emits it, so
+    // `$5 milions` reads "cinc milions DE dòlars"); consuming a connective that is already present would let
+    // `join()` add a second one. Here it is consumed INSIDE the magnitude's own capture group, so the
+    // callback's `${num}${mag}` re-emits it and nothing is dropped.
+    const magAltU = d.magnitudes?.length && d.magnitudeConnective !== undefined
+        ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")})(?:\\s+${
+            d.magnitudeConnective.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")})?)?`
+        : magAlt;
     // Currency keys are an ALTERNATION, not a character class. As a class, a key could only ever be one
     // character, so a letter-code currency — Polish `zł`, and `PLN`/`USD`/`CHF` generally — could not be
     // expressed as currency data at all; the Polish run hit this and had to omit its own złoty. Longest
@@ -301,7 +313,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
     const unitRe = d.units
         ? new RegExp(
-            `${NOT_VERSION}(${NUM})${magAlt}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
+            `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
             "giu",
         )
         : null;

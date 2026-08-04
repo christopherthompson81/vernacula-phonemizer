@@ -154,6 +154,14 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     s = s.replace(/\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");
     s = s.replace(/\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?/giu, "après Jésus-Christ");
 
+    // 1b) THE DEGREE SIGN, SPACED. French typography puts a space before `°C`, and the corpus writes
+    //     `une chaleur de 32 ° C` — with blanks on BOTH sides of the sign. The tier reads the degree through
+    //     its `"°c"` UNIT KEY, which needs the two characters adjacent, so the spaced form matched nothing and
+    //     the whole `° C` was DROPPED: the sentence read "trente-deux" with no unit at all. Closed up here
+    //     rather than by loosening the tier's key, because a key is a spelling and this is whitespace.
+    //     Only between a DIGIT and the scale letter, so an ordinary `°` (bearings, `n°`) is untouched.
+    s = s.replace(/(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gu, "$1°");
+
     // 2) NUMÉRO: n° / nº before a number.
     s = s.replace(/\bn[°º]\s*(?=\d)/giu, "numéro ");
 
