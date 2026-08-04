@@ -223,6 +223,21 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //    અંશ and not Hindi's inherited डिग्री: the corpus writes the word itself in exactly this
         //    function ("35 ડિગ્રી પશ્ચિમ", "90 (ફે.) - ડિગ્રી ગરમીમાં"), where its અંશ ×7 all mean
         //    "extent/portion" instead. The only ° in the corpus is "+30°C થી વધુ".
+        // THE PLUS → પ્લસ, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED, so `+30°C` read *ત્રીસ
+        // ડિગ્રી* — thirty degrees, with nothing where the sign was — and `(યુ. ટી. સી.+1)` lost it too.
+        // No text tier could give the word: concept.ts returns the BARE CHARACTER `+` as Gujarati's own label
+        // for "plus sign", and prose writes the glyph. Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft, a
+        // PHONEME recognizer whose 392-token vocabulary holds no `+` and no digits, over gu_in/train:
+        //   UTC+1  →  `… a r j uː t i s iː  p l a s v o n  k a l l a k …`   2 of 3 speakers
+        //   +30°C  →  `… m a h i n ɔ o m a  p l a s  t r iː s d i ɡ r i …`  and
+        //             `… m a h i n aʊ m a  p l a s  t r e s aʊ s s ɛ l ts i a s …`   BOTH speakers
+        // ★ gu VOICES THE MEASUREMENT PLUS, 2 of 2 — unlike en, hi, vi, te, xh and am, which all omit it there,
+        // and like ta and mi. So the reading habit genuinely splits across the fleet; it is not a universal.
+        // પ્લસ reads plˈəs, matching the decode, so no new lexical data was needed.
+        // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
+        s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 પ્લસ ");
+        s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1પ્લસ ");
+
         s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી સેલ્સિયસ");
         s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી ફેરનહીટ");
         s = s.replace(/(\d)\s?°/gu, "$1 ડિગ્રી");

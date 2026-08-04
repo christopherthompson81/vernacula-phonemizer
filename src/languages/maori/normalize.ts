@@ -81,6 +81,22 @@ export function normalizeMaori(input: string): string {
     //    `Arts & Sciences`; before this the sign was dropped outright and `B&B` read as two bare consonants.
     //    Spaced on both sides deliberately — `B&B` is two initialisms, and joining them would make one token.
     const s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
+    // 1b) ⚠ THE PLUS IS ATTESTED AND DELIBERATELY NOT SHIPPED, WHICH IS A DIFFERENT LIMIT FROM "UNSOURCED".
+    //     The corpus's `(UTC+1)` and `+30°C` both drop the sign. The audio ANSWERS what the readers say —
+    //     decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft over mi_nz/train:
+    //       UTC+1  →  `… j y t i s i  p l a s w a n  k i w aɪ t h o l …`   1 of 3 (two skip the parenthetical)
+    //       +30°C  →  `… a k e i t e  p l a s  θ ɛ t i  t a k i r i s i …`  BOTH speakers — mi voices the
+    //                 MEASUREMENT plus, like ta and gu and unlike en/hi/vi/te/xh/am
+    //     So the word is known: the speakers use the English "plus".
+    //
+    //     ⚠ AND THIS ENGINE CANNOT SAY IT. Māori has no /l/ and no /s/, so the g2p drops both letters:
+    //     `plus` → [pu], `plas` → [pa]. There is NO Māori spelling that reproduces the attested phones, and
+    //     emitting [pa] for a plus sign would be a confidently wrong syllable where there is currently silence
+    //     — the one outcome this repo ranks below a missing reading. (The same inventory gap already shows in
+    //     `Whitehall` → [ɸiteha].)
+    //     A native maths word was NOT substituted: the recordings say the readers use the loan, so choosing a
+    //     different word because it happens to be pronounceable would be inventing a reading the evidence
+    //     contradicts. Recorded here so the next pass does not re-derive the sourcing and reach for [pa].
     // 2) The shared symbol tier. Everything else this language needs is declared data, not a local rule.
     return SYMBOLS(s);
 }

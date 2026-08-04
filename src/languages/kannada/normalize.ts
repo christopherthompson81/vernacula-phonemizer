@@ -257,6 +257,17 @@ export function normalizeKannada(input: string): string {
     // 12) DEGREES (×1, "35°W"), last, so a decimal temperature would keep its point. Only the bare sign
     //     is handled: ಡಿಗ್ರಿ is written out once in this corpus, but ಸೆಲ್ಸಿಯಸ್/ಫ್ಯಾರನ್‌ಹೀಟ್ appear
     //     nowhere and neither °C nor °F occurs, so no scale words are invented.
+    // THE PLUS → ಪ್ಲಸ್, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED, so the corpus's
+    // `11:00(UTC +1)` lost it. No text tier could supply the word — concept.ts returns the BARE CHARACTER `+`
+    // as Kannada's own label for "plus sign", and prose writes the glyph. Decoded with
+    // facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME recognizer (392 tokens, no `+`, no digits), over
+    // kn_in/train — BOTH speakers of the sentence, unanimous:
+    //   `… s a m a j a h a n n o n d u  j u t i s i  p l a s w a n  k e ʃ u r u w aɪ t u`
+    // ಪ್ಲಸ್ reads plˈas, which is the decoded string exactly, so no new lexical data was needed.
+    // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ಪ್ಲಸ್ ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
+
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
 
     return s;
