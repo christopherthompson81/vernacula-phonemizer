@@ -2305,3 +2305,82 @@ A probe that flags "a letter that looks like orthography" cannot distinguish ort
 that is itself written in Latin letters. Fifth time on these two issues; the lesson is that IPA is Latin.
 
 Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.
+
+## Run 36 — 2026-08-04 — #654: the sourcing half, and a measurement that settles the scope question
+
+### Re-measured, and the counts are unchanged since #586
+
+`±` dropped by 56/66 · `÷` 48 · `<` 35 · `>` 35 · `=` 35. Probed as a sign between two operands, comparing
+against the bare pair, so a sign that changes nothing is inaudible.
+
+### ⚠ "Is logic symbology needed in every language?" — measured, and the answer is NO with evidence
+
+Counted across all 67 corpora AND all 67 mined artifacts:
+
+| class | attested |
+|---|---|
+| arithmetic / relational | `=` ×52 · `<` ×37 · `>` ×37 · `±` ×6 |
+| …and NOT attested | `÷` `≤` `≥` `≠` `≈` `∓` `∝` — zero |
+| logic / set / analysis | `∀ ∃ ∈ ∉ ⊂ ⊃ ∪ ∩ ∧ ∨ ¬ ⇒ ⇔ ∴ ∵ ⊕ ⊗ ∑ ∏ ∫ ∂ √ ∞ ≡ ≅ ⊆ ⊇ ∅` — **ZERO, all of them** |
+
+So propagating logic notation to 67 languages would be inventing register for symbols that occur nowhere in the
+evidence. It is not merely low priority; there is no observation to source it from. The reason is linguistic as well
+as statistical: relational and arithmetic operators are school-level and every language has vernacular words for
+them, while logic notation is read in an English-derived academic register even by non-English speakers — so the
+per-language vocabulary a tier field would need does not exist to be found.
+
+⚠ AND `÷` IS IN THE SAME UNATTESTED CATEGORY as `≤`/`≥`/`≠`, which the issue's suggested order did not distinguish.
+`÷` is missing from 48 engines, which makes it look like the second priority; it occurs zero times. The three signs
+with any evidence at all are `=`, `<`, `>`.
+
+### The ± sourcing: 19 languages at ZERO new cost, read out of their own shipped rules
+
+`±` is derivable where a language already ships BOTH a plus word and a minus word. Extracted by running each
+language's own `normalize` and diffing against the sign-free input — measured from shipped behaviour, not harvested
+by pattern:
+
+| ✓ TREE (both words already shipped) | plus | minus |
+|---|---|---|
+| ar | زَائِد | نَاقِص |
+| ckb | کۆ | کەم |
+| cs / sk | plus | mínus |
+| de / hr / id / lb / sl | plus | minus |
+| el | συν | μείον |
+| es | más | menos |
+| fr | plus | moins |
+| ja | プラス | マイナス |
+| mk / ru | плюс/плус | минус |
+| pt | mais | menos |
+| sd | جمع | منفي |
+| uk | плюс | мінус |
+| uz | plyus | minus |
+
+Six languages already read `±` and they confirm the FORM: `bg плюс минус`, `da plus minus`, `is plús mínus`,
+`nb pluss minus`, `ro plus minus`, `sv plus minus` — bare juxtaposition, no conjunction. `cmn` uses a dedicated
+word (`正负`) rather than a juxtaposition, and `en` is the outlier that needs one (`plus or minus`), which is the
+same en-specific split already documented for `negative` vs `minus`.
+
+### ⚠ AND I WALKED STRAIGHT INTO THE HARVESTING TRAP THE ISSUE DOCUMENTS
+
+My first minus probe used several frames including a spaced hyphen between numerals, and returned:
+
+    bg до · da til · sv till · pl do · hr do · sr do · uk до · ga go dtí · cy i dri · is til · nb til
+    ro până la · ckb بۆ · ff haa · ha zuwa · sd کان # تائين          ← RANGE words ("to", "until")
+    xh thabatha · zu ukukhipha · om hir'isuu                         ← subtraction VERBS, not sign words
+
+**A hyphen between numerals is a RANGE in most orthographies**, and the engines read it that way deliberately, so
+that frame answers a different question. Only a sign with NO LEFT OPERAND cannot be a range — `−3 m` is the one
+frame whose answer is certainly the sign word. Re-probed that way, the minus column above is trustworthy and
+`xh`/`zu`/`om` correctly show no minus word at all.
+
+*The issue predicted this exact failure and I reproduced it anyway.* What made it recoverable was that the wrong
+answers were readable as words: `до` and `til` are obviously "to". A numeric harvest would have looked fine.
+
+### Not implemented yet, and why the sourcing was worth banking first
+
+The plus/minus rules are per-language and take at least three shapes — an inline `s.replace(/\+/…)` (de), a
+`[/±/gu, " word "]` table entry (bg, da, sv), and a `new RegExp` with a digit class. A tier field does not reach the
+eight languages that never route through the tier. That is the same fan-out the `multiply` work took, and doing it
+badly is how the Uzbek digraph regression happened in #663 — so the 19-row table above is the durable half.
+
+Gates unchanged: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67.
