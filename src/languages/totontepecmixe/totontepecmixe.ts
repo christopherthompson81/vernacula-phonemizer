@@ -16,6 +16,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Multi-letter graphemes (longest-first). ⟨tx cy ch⟩ = the palatalized affricate /cy/ [t͡ʃ]; ⟨ts⟩ = /c/ [t͡s];
 // ⟨qu⟩ = [k]. (Nasal clusters ⟨ny⟩ + post-nasal voicing are handled in the passes below.)
@@ -56,7 +57,10 @@ export function phonemizeWord(word: string): string {
             if (t[i + 1] === c) { segs.push({ ph: VOWEL[c]! + "ː", vowel: true }); i += 2; continue; }
             segs.push({ ph: VOWEL[c]!, vowel: true }); i++; continue;
         }
-        if (CONS[c] !== undefined) segs.push({ ph: CONS[c]!, vowel: false });
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        { const ph = CONS[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
+          if (ph !== undefined) segs.push({ ph, vowel: false }); }
         i++;
     }
     consonantPasses(segs);

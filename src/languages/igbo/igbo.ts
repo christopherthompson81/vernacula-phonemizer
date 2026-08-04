@@ -10,6 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 interface IgboDef {
     digraphs: Record<string, string>;
@@ -73,7 +74,10 @@ export function phonemizeWord(word: string): string {
             i++;
             continue;
         }
-        i++; // unknown / stray mark → skip
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        out += latinPhone(c, { initial: i === 0, includeH: true }) ?? "";
+        i++;
     }
     return out.normalize("NFC");
 }
