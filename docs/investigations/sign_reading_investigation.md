@@ -564,3 +564,50 @@ and the `B&B` ampersand.
 written sign, so its existing unconditional `plus` is correct.
 **Still unreachable:** the twelve languages with no locally cached audio — gu kn ml ne sr sw mi yue te fa nb my
 — which need a FLEURS download; and th's `×`, ar's second `×`, and or/pa's `¥`, all in uncached splits or absent.
+
+## Run 10 — 2026-08-03 — closing the class: hi's true negative, and the final residuals
+
+### ⚠ A measurement bug in my own probe, caught before it was reported
+
+The closing re-measurement used `persym.ts`, which HARD-CODES its own copy of the `minus` regex — the
+pre-fix one. Its `-(neg)` column therefore showed 15 hits and looked like a regression of Run 2. It is not a
+regression; it is the same trap that bit `minus.ts` at the start of this investigation, and for the same
+reason. **A probe that copies a pattern instead of importing it measures the past.** The `+`/`×` columns use
+plain `\+`/`×` and were valid.
+
+### hi's `-२.८८ परिमाण` — the fleet's only true negative, fixed
+
+It read *do dashamlav aath aath*, positive. The existing degree arm could not reach it: that arm requires a
+DEGREE word after the number, and परिमाण ("magnitude") is not one. Adding परिमाण to the lookahead would fix one
+sentence and teach nothing, so the general property was used instead:
+
+**A MINUS BEFORE A DECIMAL.** Every false positive this class suffers is an INTEGER — designation
+(`चंद्रयान -1`, `फ़ॉर्मूला-1`), score, year range (`२०१७ -१७`) — and none of those is ever written with a
+fractional part.
+
+⚠ The single counterexample is the one hi's own file already documents: `कोच (३१,३८१ -९८.५३% हिंदू)`, where the
+dash INTRODUCES the percentage and is a decimal. It is excluded because a digit precedes the dash, so the range
+guard is repeated on this arm rather than trusted to the class above. Verified both ways: `-२.८८ परिमाण` now
+reads ऋण, `-९८.५३%` stays silent.
+
+Inert on the FLEURS corpus — that sentence comes from hi's wiki hybrid fill, so `hi` corpus diff stays DROP 1→1
+(its 2 changed utterances are the plus work from Run 3). The effect shows in the artifact measurement.
+
+### Final state of both classes
+
+**minus: 9 → 8 hits, and ZERO are true negatives.** All eight have named causes:
+
+| residual | cause | decidable here? |
+|---|---|---|
+| gu `એચજેઆર -3`, hi/mr/ta `चंद्रयान -1` | designation | ✗ needs a lexicon — `word␣-␣digit` is also a real minus |
+| el `–12 χιλιόμετρα … Ριπ–`, my `(Koreans -၂သန်း)` | apposition dash | ✗ |
+| hi `पू.-1200` | range past the tight window | ✗ by design — widening it swallowed hi's true negative |
+| xh `kangange -40 mph` | Bantu hyphen prefix + intruding space | ✗ |
+
+**math-sign / plus:** shipped from audio in ta, hi, vi, am, xh, zu, th; `×` in ar, ja; en measured and
+correctly unchanged. Remaining `+` drops are the twelve languages with **no locally cached audio**
+(fa gu kn mi ml my nb ne sr sw te yue) plus xh's deliberate, now-sourced silence. Remaining `×`: hu (ASCII
+`6 x 6`, no FLEURS corpus so no aligned audio) and th (test split, uncached).
+
+**So the class is closed to the limit of the available evidence**, and what remains is a data-acquisition
+task (a FLEURS download) or genuinely undecidable without a lexicon — not an unexamined gap.

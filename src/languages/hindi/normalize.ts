@@ -233,6 +233,26 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //     but unattested here; a dash-introduced one is attested twice, so degrees only.
         s = s.replace(/(^|[(\[（])\s?[-−–](\d)/gu, "$1ऋण $2");
         s = s.replace(/(?<![\p{L}\p{M}\p{Nd}-])[-−–](\d+(?:[.,]\d+)?)(?=\s?(?:°|℃|℉|डिग्री))/gu, "ऋण $1");
+        //     A THIRD ARM: A MINUS BEFORE A **DECIMAL**. This is the fleet's ONLY true negative number, and it
+        //     was reading as positive — `०.३७२७१९ ख॰इ॰), -२.८८ परिमाण` (an astronomical magnitude) came out
+        //     *do dashamlav aath aath*, sign gone. The degree arm above could not reach it: it requires a
+        //     DEGREE word after the number, and परिमाण is not one. Adding परिमाण to that lookahead would fix
+        //     one sentence and teach nothing; the general property is better.
+        //
+        //     WHY A DECIMAL IS THE RIGHT DISCRIMINATOR. Every false positive this class suffers is an INTEGER:
+        //     a designation (`चंद्रयान -1`, `फ़ॉर्मूला-1`), a score, a year range (`२०१७ -१७`). None of those is
+        //     ever written with a fractional part, so `-N.NN` is essentially never a designation.
+        //
+        //     ⚠ THE ONE COUNTEREXAMPLE IS THE ONE THIS FILE ALREADY DOCUMENTS, and it is why the range guard is
+        //     repeated here rather than trusted to the class above: hi writes a census figure as
+        //     `कोच (३१,३८१ -९८.५३% हिंदू)` — "Koch (31,381 – 98.53% Hindu)" — where the dash INTRODUCES the
+        //     percentage and is not a sign, and that IS a decimal. It is excluded because a digit precedes the
+        //     dash (`३१,३८१ -`), the same shape `defects.ts`'s minus guard now excludes fleet-wide. Verified on
+        //     both: `-२.८८ परिमाण` reads ऋण and `-९८.५३%` stays silent.
+        s = s.replace(
+            /(?<![\p{L}\p{M}\p{Nd}-])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−–](\d+[.,]\d+)(?![\d.,])/gu,
+            "ऋण $1",
+        );
 
         // 7c) THE REMAINING SIGNS. Each word is cited; none is a guess.
         //
