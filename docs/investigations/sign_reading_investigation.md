@@ -817,3 +817,64 @@ defect, not a leak or a drop. It is pre-existing; the mojibake repair only chang
 foreign phonemizer (×9)". That is the model for id, and the pointer for whoever picks this up. Left out of scope
 because it needs its own measurement across every ASCII-tokenizer language, not a patch smuggled into a
 symbol-inventory sweep.
+
+## Run 13 — 2026-08-04 — el was MISCLASSIFIED: not a negative, a missing PAUSE
+
+Asked whether all six residual cells were the designation/ambiguous-negative class. Five are. **el was not**,
+and checking rather than assuming turned it into a fix.
+
+el's cell was reported as `signed-number DROP` on `Ο ναός Πνομ Κρομ –12 χιλιόμετρα … Σιέμ Ριπ– που …`. It is an
+**apposition bracketed by dashes**, the Greek equivalent of commas or parentheses, and BOTH dashes were being
+dropped silently — so the aside ran into its host clause with no break:
+
+```
+was  … pnom kɾom   ðeka ðio çiʎometɾa … sçem ɾip   pu vɾiscete …
+now  … pnom kɾom , ðeka ðio çiʎometɾa … sçem ɾip , pu vɾiscete …
+```
+
+**The missing thing was a PHRASE BREAK, not a word.** No amount of hunting for a minus vocabulary could ever
+have closed it, which is why it sat in the residual for the whole sweep — it had been filed under the class that
+has no fix.
+
+### The corpus separates the two uses BY CHARACTER, with no overlap
+
+| shape | count | what it is |
+|---|---|---|
+| ASCII hyphen `-` before a digit | **29** | every one a range or designation — `3-5%`, `1469-1539`, `56-64 χιλιόμετρα/ώρα`, `7:00-8:00`, `26 - 00`, `COVID-19`, `Chandrayaan-1` |
+| EN DASH `–` before a digit | **1** | the apposition above |
+| EM DASH `—` before a digit | **0** | |
+
+So el contains **zero true negatives**, and its en/em dash is never arithmetic. That is what makes keying on the
+dash CHARACTER safe here — a fact about this language's typography, not a fleet default.
+
+⚠ **One instance proves the whitespace guard is needed.** Of the 21 en/em dashes, 20 are appositional with a
+space on at least one side; the twenty-first is `Apollo–Soyuz` (left in Latin script), an en dash used as a
+COMPOUND JOINER, with no space on either side. A pause there would be wrong. 20/20 against 1/1 — and the corpus
+diff confirmed it, changing exactly 12 of the 13 dash-bearing sentences and leaving Apollo–Soyuz alone.
+
+⚠ **My first draft of the comment said `Απόλλο–Σογιούζ`.** The corpus writes it in LATIN. Caught by grepping for
+the actual unchanged instance instead of trusting what I had just written about it.
+
+### An asymmetry found by probing past the fix
+
+While checking the dash rule against every shape, `θερμοκρασία -5 βαθμοί` read as plain *pende*. el voices `+`
+as συν (step 11, from a single `(UTC +1)`) and had **no minus word at all**. Added μείον, reusing the guard
+`defects.ts` arrived at after resolving all 66 artifacts by hand rather than reinventing it.
+Labelled **robustness, not a measured repair**, and said so in the code: with zero true negatives in el_gr no
+gate can see it and its corpus diff is empty by construction. Worth having anyway, because a `-5` that reads
+exactly like `5` is the silent content loss #586 exists to remove, and the plus/minus asymmetry inside one file
+is indefensible on its own terms.
+
+### Result
+
+**6 defective cells → 5**, and the residual is now HOMOGENEOUS: two universal sentences (`चंद्रयान -1`,
+`એચજેઆર -3`) across the five languages that write a space before the hyphen — hi, mr, ta, gu, kn. All are
+designations whose hyphen is correctly silent; the readings are already right, and the DROP differential simply
+cannot distinguish a spaced designation hyphen from a minus. Accepted as the limitless lexical problem.
+
+Gates: tsc clean; 202 files / 2902 tests; el diff 12/1969, DROP 1 → 0, no DIGIT/SLOT-GAP/RAWMARK/THROW.
+
+⚠ **The lesson worth keeping is about the residual itself.** A defect parked under a class that has no fix stops
+being re-examined. el sat there for the whole sweep because the label said "ambiguous negative", and one question
+about whether the label was right turned it into a twelve-sentence improvement. Re-derive the classification of
+anything in a permanent-residual list before treating the list as closed.

@@ -176,4 +176,26 @@ describe("greek clause marks", () => {
         expect(phonemize("ναι· όχι", "el")).toBe("ne , oçi"); // U+00B7
         expect(phonemize("γιατί;", "el")).toBe("ʝati ?"); // γι- synizes: the [i] is absorbed into [ʝ]
     });
+
+    test("#586 the APPOSITION dash is a pause, and the range hyphen is not", () => {
+        // Reported for a whole sweep as a `signed-number` DROP, and misclassified: not a minus, not a
+        // designation, not ambiguous. Greek brackets an aside between dashes and BOTH were silently dropped,
+        // so the aside ran into its host clause with no break.
+        const g = phonemize("Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται στην κορυφή.", "el");
+        expect(g).toContain("kɾom , ðeka ðio");
+        expect(g).toContain("ɾip , pu");
+        // An opening dash before a LETTER is the same construction (×19 of the 20).
+        expect(phonemize("θρησκείες –τον ιουδαϊσμό.", "el")).toContain("θɾiscies , ton");
+        // ⚠ NO SPACE EITHER SIDE = a COMPOUND joiner, not an apposition. The corpus's one instance, and a
+        // pause here would be wrong.
+        expect(phonemize("της αποστολής Apollo–Soyuz δείχνοντας.", "el")).not.toMatch(/apolo ,/u);
+        // The corpus separates the two uses BY CHARACTER: all 29 ranges/designations use ASCII `-`.
+        expect(phonemize("Το 3-5% των μαθητών.", "el")).not.toContain(",");
+        expect(phonemize("γκουρού Νανάκ (1469-1539).", "el")).not.toContain("mion");
+        expect(phonemize("τον COVID-19.", "el")).not.toContain("mion");
+        expect(phonemize("το Chandrayaan-1 εξώθησε.", "el")).not.toContain("mion");
+        expect(phonemize("με 26 - 00 νίκες.", "el")).not.toContain("mion");
+        // The minus itself: ROBUSTNESS only — el_gr has zero true negatives, so no gate can see this.
+        expect(phonemize("θερμοκρασία -5 βαθμοί.", "el")).toContain("mion pende");
+    });
 });
