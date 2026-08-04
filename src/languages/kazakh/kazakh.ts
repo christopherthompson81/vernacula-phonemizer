@@ -82,6 +82,11 @@ export const SYMBOLS = makeSymbolNormalizer({
     // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `және` ×561 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "есе" },
     ampersand: "және",
     percent: ["пайыз"],
     currency: { "$": ["доллар"], "€": ["еуро"], "¥": ["йен"], "£": ["фунт"] },

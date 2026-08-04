@@ -316,6 +316,11 @@ const TOKEN = /([a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]+)|(\d+)|([.?!,;
  * real, and `l'` before a vowel would be claimed as *litri* since an apostrophe is not a letter.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "per" },
     // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `e` ×1067 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.

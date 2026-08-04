@@ -501,7 +501,21 @@ export function normalizeEnglish(input: string): string {
     //    measured, and an earlier draft of this comment claimed otherwise by carrying the reasoning over
     //    from the Malay layer, where the tags are real. The guard is kept because a phonemizer is handed
     //    arbitrary text and `<` is the one sign whose bare form would eat a tag if one ever arrived.
-    s = s.replace(/(\d)\s*×\s*(?=\d)/gu, "$1 times ");
+    // ⚠ TWO WORDS FOR ONE SIGN, and ASCII `x` accepted alongside `×`.
+    //     English says "six BY six centimetres" for a FORMAT and "five TIMES five" for a PRODUCT; a `4x4` is
+    //     "a four BY four". Reading a dimension as "times" is not what anyone says.
+    //     ⚠ AND ASCII `x` WAS READ AS THE LETTER: `6x6 cm` came out *sˈɪks ˈɛks sˈɪks …* — "six EKS six". That
+    //     is the DOMINANT written form, ~85 `NxN` instances across the corpora against ~20 for `×`, and it is
+    //     audible garbage rather than a drop, so no leak or DROP gate could see it.
+    //     THE DISCRIMINATOR: a unit after the right operand means a measurement; an UNSPACED ascii `x` between
+    //     digits is the `4x4`/`6x6` format idiom. Both take "by"; everything else takes "times". Equality of the
+    //     operands cannot decide it — `4x4` and `5 × 5` are both equal and read differently.
+    s = s.replace(/(\d)\s*(×|x)\s*(?=\d)/gu, (whole, left: string, sign: string, off: number, full: string) => {
+        const tail = full.slice(off + whole.length);
+        const hasUnit = /^\d[\d.,]*\s?[A-Za-z]/u.test(tail);
+        const unspacedAscii = sign === "x" && !/\s/u.test(whole);
+        return `${left} ${hasUnit || unspacedAscii ? "by" : "times"} `;
+    });
     s = s.replace(/(\d)\s*÷\s*(?=\d)/gu, "$1 divided by ");
     //    `=` takes the HOUSE PATTERN `(\S)\s*=\s*(\S)` that eleven other layers use, not the digit gate: an
     //    equals sign between non-digits is still an equals sign (`x = y`), and this corpus contains no `=`

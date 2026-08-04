@@ -50,7 +50,12 @@ describe("greek normalization — embedded Latin (291/1969 utterances, the large
     test("single letters are spelled, but not when a digit is attached", () => {
         expect(normalizeGreek("το c και το g")).toBe("το σι και το τζι");
         expect(normalizeGreek("A(H5N1) χωρίς")).toBe("έι(H5N1) χωρίς"); // H5N1 is not an initialism
-        expect(normalizeGreek("η χρήση 4x4")).toBe("η χρήση 4x4"); // nor is 4x4
+        // ⚠ `4x4` NO LONGER STAYS RAW, and the original point survives: the `x` must not be spelled as an
+        // English LETTER NAME. It used to reach the output untouched (and then read as *iks*); now the shared
+        // tier's `multiply` claims it, because ASCII `x` is the dominant written form of the sign (~85 `NxN`
+        // instances fleet-wide against ~20 `×`). `normalizeGreek` calls SYMBOLS at its step 12, so the tier
+        // rule is visible from here.
+        expect(normalizeGreek("η χρήση 4x4")).toBe("η χρήση 4 επί 4");
     });
 
     test("Latin↔Greek homoglyphs are folded, not read as English letters", () => {

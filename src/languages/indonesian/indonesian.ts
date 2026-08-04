@@ -174,6 +174,11 @@ function numberWords(n: number): string {
 // Times (11.00) are claimed earlier by normalize.ts, so only real numbers reach this.
 // #562 Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "kali" },
     // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `dan` ×1053 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.

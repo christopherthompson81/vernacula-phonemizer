@@ -245,6 +245,11 @@ const NOT_LETTER = "(?![\\p{L}\\p{M}])";
  * *квадратних километара* out).
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "puta" },
     percent: ["posto"], // INDECLINABLE — corpus посто ×57 against процената ×8 / одсто ×3; espeak's
     // shared hbs table gives `%` → posto too. One form, so the count selector never has to choose.
     /**

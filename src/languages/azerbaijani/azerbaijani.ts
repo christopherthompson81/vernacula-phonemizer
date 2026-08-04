@@ -37,6 +37,11 @@ const TOKEN = /([a-zçğəıiöşüx]+)|(\d+\.\d{3}(?:\.\d{3})*|\d+,\d+|\d+)|([.
 // #562 symbol normalization — Azerbaijani measure and currency nouns are INVARIANT after a numeral
 // ("üç faiz", "80 kilometr"). `m` is a standalone metre unit (4892 m, 3,50 m).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "vur" },
     percent: ["faiz"],
     currency: { "€": ["avro"], "$": ["dollar"], "£": ["funt sterlinq"], "¥": ["yen"] },
     units: {

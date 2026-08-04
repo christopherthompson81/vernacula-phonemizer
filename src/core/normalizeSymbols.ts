@@ -191,6 +191,30 @@ export interface SymbolData {
         negative?: string;
     };
     /**
+     * The MULTIPLICATION SIGN's words — `6 × 6 cm`, `4x4`, `5 × 5`.
+     *
+     * ⚠ ASCII `x` IS THE DOMINANT WRITTEN FORM AND WAS READ AS A LETTER NAME. Counted across the FLEURS
+     * corpora: `NxN`-shaped forms occur ~85 times against ~20 for `×`, and almost every engine read the `x`
+     * as its own letter — en *six EKS six centimetres*, it *sei KS sei*, fr *six IKS six*, de *sechs KS
+     * sechs*. That is audible garbage, not a drop, so no leak or DROP gate could see it.
+     *
+     * TWO WORDS, because a dimension and a product are not the same reading. English says "six BY six
+     * centimetres" for a format and "five TIMES five" for a product; a `4x4` is "a four BY four". Most
+     * languages reuse one word for both (cs *krát*, da *gange*, ro *ori*, ca *per*, ga *faoi*) and simply
+     * declare it twice — `by` defaults to `times` when omitted, so a single-word language costs nothing.
+     *
+     * WHICH WORD IS CHOSEN, and the rule is deliberately mechanical:
+     *   · a UNIT follows (`6 × 6 cm`, `56 × 56 mm`)            → `by`  — it is a measurement
+     *   · UNSPACED ASCII between digits (`4x4`, `6x6`)          → `by`  — the format/designation idiom
+     *   · anything else (`5 × 5`, `4 × 100`)                    → `times`
+     * The unspaced-ASCII arm is what separates `4x4` (a vehicle) from `5 × 5` (a product), since both have
+     * equal operands and equality alone cannot tell them apart.
+     */
+    multiply?: {
+        times: string;
+        by?: string;
+    };
+    /**
      * The word for `&`, which is DROPPED outright without one — and a dropped sign is inaudible.
      *
      * 16 languages still lost it after the #562 sweep, always in the same two corpus sentences: `B&B` and
@@ -465,6 +489,27 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         };
         s = s.replace(pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
         s = s.replace(pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+        // THE MULTIPLICATION SIGN, both `×` and ASCII `x` — BEFORE the unit path, and that ordering is load-bearing.
+        // Placed after it, a `unitPrefix` language broke: Swahili's unit path MOVES the noun ahead of its number,
+        // so `6x6 cm` became *sita KS sentimita sita* — the pattern no longer had a digit after the sign and the
+        // `x` fell through to the letter reading. Running first also makes the dimension test easier rather than
+        // harder: the unit is still an ABBREVIATION here, so "is a unit coming?" is just "digit then letters",
+        // and no reordering has happened. The unit path still finds its number adjacent — `6 per 6 cm` keeps
+        // `6 cm` together.
+        if (d.multiply !== undefined) {
+            const mul = d.multiply;
+            const by = mul.by ?? mul.times;
+            s = s.replace(/(\p{Nd})\s*(×|x)\s*(?=\p{Nd})/gu, (whole, left: string, sign: string, off: number, full: string) => {
+                // A UNIT after the right operand makes it a measurement; an UNSPACED ascii `x` is the
+                // `4x4`/`6x6` format idiom. `\s*` in the pattern means the spacing test has to read the source.
+                const spaced = /\s/u.test(whole);
+                const tail = full.slice(off + whole.length);
+                const hasUnit = /^\p{Nd}[\d.,]*\s?\p{L}/u.test(tail);
+                const word = hasUnit || (sign === "x" && !spaced) ? by : mul.times;
+                return `${left} ${word} `;
+            });
+        }
+
         if (unitRe)
             s = s.replace(unitRe, (whole, num: string, mag: string | undefined, u: string,
                 denom?: string, exp?: string) => {

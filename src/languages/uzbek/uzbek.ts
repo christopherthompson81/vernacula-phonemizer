@@ -81,6 +81,11 @@ const DECIMAL_IPA = phonemizeWord(DEF.numbers.decimalWord!);
 // PREFIX adjective ("kvadrat kilometr"). km/mm/cm are claimed here so the tier's "only after a number"
 // guard applies; the m/s and km/s compounds are consumed earlier, in normalize.ts step 10.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "karra" },
     percent: ["foiz"],
     currency: { "$": ["dollar"], "¥": ["iyena"] },
     units: { km: ["kilometr"], mm: ["millimetr"], sm: ["santimetr"], m: ["metr"] },

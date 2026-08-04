@@ -167,6 +167,11 @@ const TOKEN = /([a-zA-Z']+)|(\d+)|([.?!,;:])/gu;
 // Kimarekani", "kilomita 70 kwa saa" — which is why the local rule existed. Verified byte-identical over
 // the whole sw_ke corpus.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "mara" },
     percent: ["asilimia"],
     percentPrefix: true,
     currency: {
