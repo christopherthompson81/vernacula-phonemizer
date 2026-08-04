@@ -148,6 +148,27 @@ interface Finding {
     verdict: "attested" | "attested*" | "substring-only" | "absent";
 }
 
+/**
+ * Batch titles by their ENCODED LENGTH, not by count.
+ *
+ * The API takes `titles` in the query string, so every title is percent-encoded — and a non-Latin script
+ * costs about three bytes per character. A fixed batch of 20 titles is fine for Latin and overflows the URI
+ * limit for Devanagari: mr.wikipedia returned **414 URI Too Long** and the probe died with a stack trace,
+ * which for an attestation tool reads as "this language has nothing" — the manufactured-negative failure this
+ * file's `api()` already warns about, arriving through a different door.
+ */
+function titleBatches(titles: string[], budget = 1500): string[][] {
+    const out: string[][] = [];
+    let cur: string[] = [], len = 0;
+    for (const t of titles) {
+        const cost = encodeURIComponent(t).length + 3; // + the `|` separator, encoded
+        if (cur.length > 0 && (len + cost > budget || cur.length >= 20)) { out.push(cur); cur = []; len = 0; }
+        cur.push(t); len += cost;
+    }
+    if (cur.length > 0) out.push(cur);
+    return out;
+}
+
 async function probe(word: string): Promise<Finding> {
     const w = fold(word);
     const bounded = !UNSPACED.test(word);
@@ -171,8 +192,10 @@ async function probe(word: string): Promise<Finding> {
     }
     // Pull the pages' text so the judgement is made on prose, not on the API's highlighted snippet (which
     // wraps matches in markup and can elide the surrounding word).
-    const titles = hits.slice(0, Math.min(limit, 20)).map((h) => String(h.title)).join("|");
-    const e = await api({ action: "query", titles, prop: "extracts", explaintext: "1", exlimit: "20" });
+    // Same encoded-length budget as the slot probe: a count-based batch overflows the URI in a non-Latin
+    // script, and only the FIRST batch is needed here since `limit` already caps the sample.
+    const titles = titleBatches(hits.map((h) => String(h.title)))[0] ?? [];
+    const e = await api({ action: "query", titles: titles.join("|"), prop: "extracts", explaintext: "1", exlimit: "20" });
     let tokenHits = 0, articles = 0, substringOnly = 0;
     const examples: string[] = [];
     for (const p of Object.values<any>(e?.query?.pages ?? {})) {
@@ -257,9 +280,9 @@ async function slotProbe(nouns: string[]): Promise<void> {
         });
         const titles = (s?.query?.search ?? []).map((h: any) => String(h.title)).filter((t: string) => !seen.has(t));
         for (const t of titles) seen.add(t);
-        for (let i = 0; i < titles.length; i += 20) {
+        for (const batch of titleBatches(titles)) {
             const e = await api({
-                action: "query", titles: titles.slice(i, i + 20).join("|"),
+                action: "query", titles: batch.join("|"),
                 prop: "extracts", explaintext: "1", exlimit: "20",
             });
             for (const p of Object.values<any>(e?.query?.pages ?? {})) {

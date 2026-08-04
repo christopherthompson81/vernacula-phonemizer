@@ -1126,6 +1126,35 @@ in one language: eleven defects, none of which was really about units or signs.
   damaged positions were. Recoverable as a DATA judgement, not at runtime, and worth knowing the corpus can
   answer questions its own bytes cannot.
 
+**50. BATCH AN API BY ENCODED LENGTH, NOT BY COUNT — OR THE TOOL DIES ONLY IN NON-LATIN SCRIPTS.**
+`attest.ts` fetched extracts 20 titles at a time. Titles ride in the QUERY STRING, so each is
+percent-encoded, and a non-Latin script costs about three bytes per character: 20 Devanagari titles overflow
+the URI limit and mr.wikipedia answered **414 URI Too Long**. The probe died with a stack trace on the one
+language family it was most needed for. Batching by encoded length fixes it, and the shape of the bug is the
+one this file keeps meeting — a limit that is fine for Latin and wrong everywhere else, like `\b` and `\d`.
+
+It threw rather than returning nothing, which is the better failure: a manufactured confident negative is what
+`api()`'s own User-Agent note warns about, and a batch overflow is a second door into the same room.
+
+**51. THE WIKI ROUTE HAS A FLOOR, AND SIX LANGUAGES ARE UNDER IT.** After the corpus route closed the cube word
+for sixteen languages (trap 45), the six holdouts went to `attest.ts --after` on their own wikis. **None of
+them yields a cube word.** What follows the metre noun is ordinary prose or a numeral:
+
+    mr   फ्रीस्टाईल ×7 · बॅकस्ट्रोक ×2 · बटरफ्लाय ×2      swimming events — the `100 मीटर फ्रीस्टाईल` pattern
+    or   ଦୂରରେ ×5 ("away") · ଉଚ୍ଚତା ×1 ("height")
+    id   persegi ×2 (the SQUARED word, already declared) · dari, dengan, menjadi, yang
+    zu   ayishumi ×1 ("ten") · angu · elilodwa            numerals and linkers
+    xh   ezili ×1 (a numeral linker) · ye
+    yue  nothing at all
+
+That is a floor, not a failure: a small wiki simply does not discuss volume. Record it and stop — the same
+principle as trap 48. What would move these is a source neither the corpus nor the wiki provides.
+
+- **ONE SENSE TRAP FOUND ON THE WAY, and it validates an existing declaration rather than breaking it.**
+  Xhosa's `iimitha` ×1 is metres ("Iimitha ezili-167 ukuphakama") and `imitha` ×1 is RAYS ("ifunxa imitha
+  ye-infrared", absorbs infrared radiation) — one noun-class prefix apart, and xh declares the right one.
+  Worth knowing before anyone "simplifies" that key.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
