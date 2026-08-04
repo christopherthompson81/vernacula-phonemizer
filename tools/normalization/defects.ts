@@ -93,6 +93,66 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
 ];
 
 /**
+ * DESIGNATIONS ACCEPTED AS CORRECTLY SILENT (#586) — the sweep's permanent residual, named per instance.
+ *
+ * WHY A BASELINE AND NOT A GUARD. The `minus` class above explains why a spaced designation cannot be
+ * separated from a real negative by pattern: `चंद्रयान -1` and a real `-5 stupňů` are the same shape — word,
+ * space, dash, digit — so telling them apart needs a LEXICON, and the comment there records the judgement that
+ * "a quiet gate would be worse". That judgement still holds; widening the regex to swallow these would blind
+ * the class to every true negative of the same shape, and hi's one real negative is exactly that shape.
+ *
+ * So these are accepted BY IDENTITY instead. Each entry is the literal designation string as it appears in the
+ * corpus, and a hit is accepted only when EVERY occurrence of the symbol in that sentence falls inside one of
+ * them. Two properties follow, and both are the point:
+ *   · a SIXTH designation, or the same one in a new language, still reports — nothing is suppressed by shape
+ *   · a sentence carrying a listed designation AND a real negative still reports, because the negative's match
+ *     does not lie inside a named span
+ *
+ * WHAT IS BEING ASSERTED. Not that the drop is harmless — that the reading is already CORRECT. These are
+ * product names (`Chandrayaan-1`) and bill numbers (`HJR-3`) whose hyphen is silent in speech, so a silent
+ * hyphen is the right output and the differential test is reporting a true fact with a false label. Resolved
+ * per hit across all 66 artifacts; see docs/investigations/sign_reading_investigation.md.
+ *
+ * The five are two universal sentences: FLEURS translates ONE English set, so `Chandrayaan-1` and `HJR-3` recur
+ * across the fleet, and these five are simply the languages that write a SPACE before the hyphen. Every other
+ * language writes it closed and the `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+ *
+ * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
+ */
+export const ACCEPTED_SILENT: Readonly<Record<string, readonly string[]>> = {
+    gu: ["એચજેઆર -3"],
+    hi: ["चंद्रयान -1"],
+    kn: ["ಎಚ್‌ಜೆಆರ್ -3"],
+    mr: ["चंद्रयान -1"],
+    ta: ["சந்திரயான் -1"],
+};
+
+/**
+ * Is every occurrence of this class's symbol inside a designation accepted for this language?
+ *
+ * Deliberately strict: returns false when the sentence contains a match OUTSIDE a named span, and false when
+ * the language names none, so the accept can only ever remove a hit it can fully account for.
+ */
+export function isAcceptedSilent(lang: string, cls: string, line: string, re: RegExp): boolean {
+    if (cls !== "minus") return false;
+    const forms = ACCEPTED_SILENT[lang];
+    if (forms === undefined) return false;
+    const spans: [number, number][] = [];
+    for (const f of forms)
+        for (let i = line.indexOf(f); i !== -1; i = line.indexOf(f, i + 1)) spans.push([i, i + f.length]);
+    if (spans.length === 0) return false;
+    const saved = re.lastIndex;
+    re.lastIndex = 0;
+    let sawOne = false;
+    for (let m = re.exec(line); m !== null; m = re.exec(line)) {
+        sawOne = true;
+        if (!spans.some(([a, b]) => m!.index >= a && m!.index < b)) { re.lastIndex = saved; return false; }
+    }
+    re.lastIndex = saved;
+    return sawOne;
+}
+
+/**
  * ISO codes that denote each currency sign.
  *
  * A CURRENCY IS ALSO NAMED BY ITS ISO CODE, which `contribution` cannot see: the code reads as spelled

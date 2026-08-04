@@ -15,6 +15,10 @@
  * WHAT IT REPORTS, per language × cell:
  *   ·      the cell does not occur in that language's corpus — nothing to check
  *   ok     it occurs and the engine reads it without a detectable defect
+ *   ok*    it occurs, the differential test fires, and every instance is an ACCEPTED SILENT designation —
+ *          a product name or bill number whose hyphen is correctly silent (`चंद्रयान -1`, `એચજેઆર -3`).
+ *          Listed per instance in `defects.ts` ACCEPTED_SILENT, printed in its own section below, and NOT
+ *          counted as a defect. A designation not on that list still reports as a DROP.
  *   DROP   it occurs and a symbol in it VANISHES (differential test: the reading is byte-identical with
  *          the symbol deleted). This is the class the corpus diff was blind to — see #584.
  *   LEAK   it occurs and a digit or raw mark SURVIVES into the IPA.
@@ -24,7 +28,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { DROPPABLE, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
+import { DROPPABLE, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
@@ -33,9 +37,16 @@ import { parseJsonc } from "../../src/core/jsonc.ts";
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const TEXT_COLUMN = 2;
 
-/** The treated languages and their FLEURS corpora — every language that has both a per-language
- *  normalize.ts and transcripts. This is the set the audit is about. */
-const TREATED: [string, string | undefined][] = [
+/**
+ * The FLEURS corpus for a language, where one exists — the FALLBACK evidence source only. `evidence()` prefers
+ * the mined artifact, so this map matters just for a language whose artifact is missing.
+ *
+ * ⚠ THIS IS NOT THE LANGUAGE LIST. It used to be, and it went stale exactly as this file's own header warns:
+ * hand-maintained at 37 entries while the tree grew to 67 treated languages, so **30 languages silently were
+ * never audited at all** and every "N defective cells across N/37" line understated its own scope. The list is
+ * now DERIVED (see TREATED below) and this map is only a lookup.
+ */
+const FLEURS: [string, string | undefined][] = [
     ["am", "am_et"], ["ar", "ar_eg"], ["bn", "bn_in"], ["cmn", "cmn_hans_cn"], ["de", "de_de"],
     ["el", "el_gr"], ["en", "en_us"], ["es", "es_419"], ["fa", "fa_ir"], ["fr", "fr_fr"],
     ["gu", "gu_in"], ["hi", "hi_in"], ["hu", "hu_hu"], ["id", "id_id"], ["it", "it_it"],
@@ -47,6 +58,117 @@ const TREATED: [string, string | undefined][] = [
     // No FLEURS corpus — checked entirely from its mined artifact (#585).
     ["my", undefined],
 ];
+const FLEURS_FOR = new Map(FLEURS);
+
+/**
+ * THE TREATED LANGUAGES, DERIVED — the committed mined artifacts ARE the list.
+ *
+ * This file's header already states the invariant: "Every treated language should have a committed
+ * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap (#586)". So the
+ * artifact directory is the authoritative register of what has been treated, and reading it removes the one
+ * way this audit could under-report: by not knowing about a language.
+ *
+ * ⚠ WHY THIS MATTERS MORE THAN IT LOOKS. A hardcoded list cannot fail loudly. When it lagged the tree at 37 of
+ * 67, the audit still printed a confident "0 defective cells across 0/37" — the number that was wrong was the
+ * DENOMINATOR, and nothing in the output hinted that 30 languages had never been looked at. A gate that
+ * silently narrows its own scope is worse than one that fails, because its clean runs are believed.
+ *
+ * Sorted so the matrix and the defect list are stable across runs.
+ */
+/**
+ * THE TREATED LANGUAGES, DERIVED FROM THE TREE — the presence of `src/languages/<dir>/normalize.ts` IS the
+ * definition of "treated", so that file is what the list is built from. Nothing to keep in step by hand.
+ *
+ * The indirection is that this audit needs an ISO CODE (to call `phonemize(text, lang)`) while the tree is laid
+ * out by language NAME (`greek/`, `mandarin/`), so the registry supplies the mapping in two hops that are both
+ * plain text:
+ *     import { createGreek } from "./languages/greek/greek.ts";   →  factory → dir
+ *     case "el": return createGreek();                            →  code → factory
+ * Registry CASE ORDER decides the canonical code for a dir that serves several, which is what makes `en` win
+ * over `en-GB` — the base language is always registered first.
+ *
+ * ⚠ AN UNRESOLVED DIRECTORY IS REPORTED, NOT SKIPPED. A `normalize.ts` this cannot map to a code is exactly the
+ * failure mode that produced the bug below, so it prints a warning instead of quietly shrinking the run.
+ */
+const LANG_ROOT = new URL("../../src/languages/", import.meta.url).pathname;
+const REGISTRY_SRC = readFileSync(new URL("../../src/registry.ts", import.meta.url).pathname, "utf8");
+
+// ⚠ `../corpus/mined/`, NOT `corpus/mined/` — the path `evidence()` carried for the whole sweep, which resolved
+// to the non-existent `tools/normalization/corpus/mined/`. The real home is `tools/corpus/`, as review.ts and
+// every doc reference agree. So `existsSync` was false for EVERY language and the artifact-first branch never
+// once fired: every audit silently ran on FLEURS instead, and the wiki-mined shapes the artifacts exist to
+// supply were never checked. Invisible because the fallback was a working code path, so nothing ever threw.
+const MINED_DIR = new URL("../corpus/mined/", import.meta.url).pathname;
+
+const dirOfFactory = new Map<string, string>();
+for (const m of REGISTRY_SRC.matchAll(/import\s*\{([^}]+)\}\s*from\s*"\.\/languages\/([^/"]+)\//g))
+    for (const name of m[1]!.split(",").map((n) => n.trim().split(/\s+as\s+/)[0]!))
+        if (name.startsWith("create")) dirOfFactory.set(name, m[2]!);
+
+/**
+ * EVERY code the registry routes to each dir — not just the first.
+ *
+ * ⚠ FALL-THROUGH CASE LABELS ARE THE WHOLE DIFFICULTY, and getting this wrong hid Malay. The registry writes
+ *     case "ms":
+ *     case "zsm":
+ *         return createMalay();
+ * so a pattern that expects `return` to follow the label matches only `zsm` — and `zsm` is the code with NO
+ * evidence, because the artifact and the FLEURS corpus are both filed under `ms`. registry.ts documents this
+ * trap in that very block: "the artifact was filed under a code the registry threw on, and a fleet sweep that
+ * iterated the artifacts reported Malay as unreachable". Iterating from the other side reproduces it exactly.
+ * So labels are accumulated until a `return` is reached, and all of them are kept.
+ */
+const codesOfDir = new Map<string, string[]>();
+{
+    let pending: string[] = [];
+    for (const m of REGISTRY_SRC.matchAll(/case\s+"([\w-]+)"\s*:|return\s+(create\w+)/g)) {
+        if (m[1] !== undefined) { pending.push(m[1]); continue; }
+        const dir = dirOfFactory.get(m[2]!);
+        if (dir !== undefined && pending.length) {
+            const seen = codesOfDir.get(dir) ?? [];
+            for (const c of pending) if (!seen.includes(c)) seen.push(c);
+            codesOfDir.set(dir, seen);
+        }
+        pending = [];
+    }
+}
+
+/** Does this code have evidence to audit — a mined artifact, or a FLEURS corpus? */
+const hasEvidence = (lang: string): boolean =>
+    existsSync(join(MINED_DIR, `${lang}.jsonc`)) || FLEURS_FOR.get(lang) !== undefined;
+
+/**
+ * The code to audit a dir under: the first one that HAS EVIDENCE, else the first registered.
+ *
+ * Preferring evidence over registry order is what makes this self-correcting. `ms` and `zsm` are the same
+ * engine, and picking by order alone would keep choosing whichever the registry happened to list first with no
+ * regard for whether that code can be measured at all.
+ */
+function codeOfDir(dir: string): string | undefined {
+    const codes = codesOfDir.get(dir);
+    if (codes === undefined || codes.length === 0) return undefined;
+    return codes.find(hasEvidence) ?? codes[0];
+}
+
+const treatedDirs = readdirSync(LANG_ROOT)
+    .filter((d) => existsSync(join(LANG_ROOT, d, "normalize.ts")))
+    .sort();
+
+// ⚠ EVERY EXCLUSION IS ANNOUNCED. A dir that cannot be resolved to a code, or a code with no evidence, used to
+// leave the run via a bare `continue` — which is how Malay vanished and how the 37-vs-67 gap stayed invisible
+// for the whole sweep. The denominator must never shrink quietly.
+const unresolved = treatedDirs.filter((d) => codeOfDir(d) === undefined);
+if (unresolved.length)
+    console.error(`⚠ ${unresolved.length} dir(s) with a normalize.ts but no registry code: ${unresolved.join(", ")}`);
+const noEvidence = treatedDirs
+    .flatMap((d) => { const c = codeOfDir(d); return c !== undefined && !hasEvidence(c) ? [`${d} (${c})`] : []; });
+if (noEvidence.length)
+    console.error(`⚠ ${noEvidence.length} treated language(s) with NO evidence to audit: ${noEvidence.join(", ")}`);
+
+const TREATED: [string, string | undefined][] = treatedDirs
+    .flatMap((d) => { const c = codeOfDir(d); return c === undefined ? [] : [c]; })
+    .sort()
+    .map((lang) => [lang, FLEURS_FOR.get(lang)]);
 
 // The DROP tables come from `defects.ts`, shared with `mine.ts scan` and `corpus-diff.ts emit`. Three copies
 // had drifted; this one was the only place that knew `exponent`, `ampersand` and `iteration`, and it was
@@ -97,7 +219,7 @@ function corpusLines(corpus: string): string[] {
 
 const { phonemize } = await import(new URL("../../src/index.ts", import.meta.url).href);
 const shown = CELLS.filter((c) => !c.lexical);
-const rows: { lang: string; status: Record<string, string>; defects: string[] }[] = [];
+const rows: { lang: string; status: Record<string, string>; defects: string[]; accepted: string[] }[] = [];
 
 /**
  * A language's evidence, artifact FIRST. Every treated language should have a committed
@@ -106,7 +228,7 @@ const rows: { lang: string; status: Record<string, string>; defects: string[] }[
  * artifact has not been generated yet.
  */
 function evidence(lang: string, corpus: string | undefined): string[] | undefined {
-    const art = new URL(`corpus/mined/${lang}.jsonc`, import.meta.url).pathname;
+    const art = new URL(`../corpus/mined/${lang}.jsonc`, import.meta.url).pathname;
     if (existsSync(art)) {
         const doc = parseJsonc(readFileSync(art, "utf8")) as { hard: { text: string }[]; sample?: string[] };
         return [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])];
@@ -121,6 +243,7 @@ for (const [lang, corpus] of TREATED) {
     if (lines === undefined) continue;
     const status: Record<string, string> = {};
     const defects: string[] = [];
+    const accepted: string[] = [];
 
     for (const cell of shown) {
         const hits = lines.filter((l) => cell.re.test(l));
@@ -165,12 +288,21 @@ for (const [lang, corpus] of TREATED) {
             if (without === undefined || without !== ipa) continue;
             const symbols = [...new Set(l.match(re) ?? [])];
             if (isRedundant(l, ipa, symbols, contribution, say)) continue;
+            // ACCEPTED BY IDENTITY — a named designation whose hyphen is correctly silent. Reported in its own
+            // section rather than dropped on the floor: an audit that quietly hides five findings teaches you to
+            // distrust the clean runs, and the whole value of `0 defective cells` is that it means something.
+            // See ACCEPTED_SILENT for why this is a per-instance baseline and not a widened guard.
+            if (isAcceptedSilent(lang, name, l, re)) {
+                status[cell] = "ok*";
+                accepted.push(`${cell}: ${l.slice(0, 60)}`);
+                continue;
+            }
             status[cell] = "DROP";
             defects.push(`${cell} DROP: ${l.slice(0, 60)}`);
             break;
         }
     }
-    rows.push({ lang, status, defects });
+    rows.push({ lang, status, defects, accepted });
     const bad = Object.values(status).filter((v) => v !== "ok" && v !== "·").length;
     console.error(`${lang} done — ${bad} defective cell(s)`);
 }
@@ -195,3 +327,18 @@ for (const r of rows) {
     for (const d of r.defects) console.log(`   ${d}`);
 }
 console.log(`\n${total} defective cells across ${rows.filter((r) => r.defects.length).length}/${rows.length} treated languages`);
+
+// ACCEPTED, PRINTED — never silently withheld. These are the sweep's permanent residual: the differential test
+// fires on them and the reading is nonetheless correct, because a designation's hyphen is silent in speech. They
+// are shown so a clean defect count stays trustworthy AND so the accepted set stays visible and auditable — a
+// baseline nobody can see is indistinguishable from a bug nobody has found.
+const acceptedRows = rows.filter((r) => r.accepted.length);
+if (acceptedRows.length) {
+    console.log("\n=== accepted as correctly silent (designations — see ACCEPTED_SILENT in defects.ts) ===");
+    for (const r of acceptedRows) {
+        console.log(`\n${r.lang}:`);
+        for (const a of r.accepted) console.log(`   ${a}`);
+    }
+    const n = acceptedRows.reduce((s, r) => s + r.accepted.length, 0);
+    console.log(`\n${n} accepted cell(s) across ${acceptedRows.length} language(s) — INTENTIONAL, not a TODO`);
+}
