@@ -203,7 +203,19 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["persegi"], position: "after" },
 });
 
-const TOKEN = /([a-zA-Z]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
+// ⚠ THE WORD GROUP SPANS ALL OF LATIN, not just ASCII, and `[a-zA-Z]+` was silently shredding foreign names.
+// A diacritic ended the token, so the letter carrying it became an unclaimed gap read as an English LETTER NAME
+// and the rest of the word started over: `Cañitas` → *t͡ʃˈa ˈɛn ˈitas* ("cha EN itas"), `São` → *s ˈə ˈo*,
+// `Klöcker` → *ʔl ˈoᶷ t͡ʃkˈər*. One word became three, none of them right.
+// ⚠ INVISIBLE TO EVERY GATE: no digit or raw mark survives, and nothing VANISHES, so it is a WRONG-WORD defect
+// that neither the leak classes nor the differential DROP test can see. Found only by reading a corpus diff.
+// `\p{M}` so a DECOMPOSED accent stays with its base rather than ending the token one character later.
+// yue fixed the same defect the same way and pins it (`yue("Müslüm") === phonemize(…, "en")`).
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
+/** An ordinary Indonesian word is plain ASCII letters. A diacritic means a FOREIGN name — Indonesian
+ *  orthography has none — so such a token goes to the injected foreign reader instead of the native g2p, which
+ *  has no rule for `ñ`/`ö`/`ó` and would mangle what it cannot spell. */
+const NATIVE_WORD = /^[a-zA-Z]+$/u;
 
 class IndonesianPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
@@ -212,7 +224,11 @@ class IndonesianPhonemizer implements Phonemizer {
         // symbol tier, and the clock must precede the number tokenizer so a dot-time is never read as
         // thousands grouping.
         return assembleClauses(SYMBOLS(normalizeIndonesian(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(
+                NATIVE_WORD.test(m[1]) || this.foreign === undefined
+                    ? phonemizeWord(m[1])
+                    : this.foreign(m[1]),
+            );
             else if (m[2]) {
                 // Strip the dot grouping, then split on the decimal comma. Number words bypass the ⟨e⟩
                 // lexicon (their ⟨e⟩ is pepet; avoid any taling homograph).
@@ -235,6 +251,9 @@ class IndonesianPhonemizer implements Phonemizer {
 }
 
 /** Build the Indonesian phonemizer. */
-export function createIndonesian(): Phonemizer {
-    return new IndonesianPhonemizer();
+/** `foreign` reads a token carrying a DIACRITIC — a foreign name, since Indonesian orthography has none. The
+ *  registry injects English, exactly as it does for Hindi. Without it the native g2p silently drops the letter it
+ *  cannot spell (`Cañitas` → *t͡ʃaˈitas*), which is quieter than the old fragmentation but no more correct. */
+export function createIndonesian(foreign?: ForeignPhonemizer): Phonemizer {
+    return new IndonesianPhonemizer(foreign);
 }

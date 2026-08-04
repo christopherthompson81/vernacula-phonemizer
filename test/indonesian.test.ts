@@ -120,4 +120,23 @@ describe("indonesian normalization", () => {
         expect(phonemize("di timur 35Â°W", "id")).toContain("dərˈad͡ʒat bˈarat");
         expect(phonemize("suhu di atas 30°C", "id")).toContain("dərˈad͡ʒat t͡ʃəlsˈius");
     });
+
+    test("⚠ accented Latin stays ONE word and goes to the foreign reader (#654)", () => {
+        // `[a-zA-Z]+` shredded every foreign name: a diacritic ended the token, the letter carrying it became an
+        // unclaimed gap read as an English LETTER NAME, and the rest of the word started over.
+        //   Cañitas → t͡ʃˈa ˈɛn ˈitas ("cha EN itas")   ·   São → s ˈə ˈo   ·   Klöcker → ʔl ˈoᶷ t͡ʃkˈər
+        // ⚠ INVISIBLE TO EVERY GATE: no digit or raw mark survives and nothing VANISHES, so it is a WRONG-WORD
+        // defect that neither the leak classes nor the differential DROP test can see. Found by reading a diff.
+        expect(phonemize("Cañitas", "id")).toBe(phonemize("Cañitas", "en"));
+        expect(phonemize("Klöcker", "id")).toBe(phonemize("Klöcker", "en"));
+        expect(phonemize("São", "id")).toBe(phonemize("São", "en"));
+        // A DIACRITIC MEANS A FOREIGN NAME — Indonesian orthography has none — so the token goes to the injected
+        // reader rather than the native g2p, which drops the letter it cannot spell (`Cañitas` → t͡ʃaˈitas).
+        expect(phonemize("Cañitas", "id")).not.toMatch(/t͡ʃaˈitas/u);
+        // Ordinary Indonesian is untouched: plain ASCII still takes the native path.
+        expect(phonemize("makan nasi goreng", "id")).toBe("mˈakan nˈasi ɡˈoreŋ");
+        expect(phonemize("250 tahun kemudian", "id")).toContain("dˈua rˈatus lˈima pˈuluh");
+        // Malay wraps the Indonesian engine, so it inherits both the phonology and this fix.
+        expect(phonemize("Cañitas", "ms")).toBe(phonemize("Cañitas", "id"));
+    });
 });

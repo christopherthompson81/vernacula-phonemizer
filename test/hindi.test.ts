@@ -178,4 +178,20 @@ describe("Hindi ordinal suffix boundary", () => {
         expect(phonemize("120 m³", "hi")).toContain("ɡʱˈən mˈiːʈəɾ");
         expect(phonemize("802.11m", "hi")).toContain("ˈɛm"); // a dotted designation is not a quantity
     });
+
+    test("⚠ accented Latin stays ONE word for the foreign reader (#654, 17 languages)", () => {
+        // `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read as
+        // an English LETTER NAME and the rest of the word started over: `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* —
+        // "ES ə O Paulo". Invisible to every gate: no digit or raw mark survives and nothing VANISHES, so it is a
+        // WRONG-WORD defect neither the leak classes nor the differential DROP test can reach.
+        // This group already means FOREIGN (its match goes to the injected reader), so widening it is the whole
+        // fix — unlike Indonesian, whose Latin group is its NATIVE word group and needed a routing decision too.
+        for (const lang of ["hi", "mr", "ne", "gu", "pa", "or"])
+            expect(phonemize("São Paulo", lang), lang).toBe(phonemize("São Paulo", "en"));
+        // Reaches every language composing `makeNativeHindi`, plus pa and or which carry their own tokenizer.
+        expect(phonemize("शहर São Paulo में", "hi")).toContain("sˈaᶷ pʰˈɔːloᶷ");
+        // ASCII Latin still spells as an initialism, and the native path is untouched.
+        expect(phonemize("शहर GPS में", "hi")).toContain("d͡ʒˈiː pʰˈiː ˈɛs");
+        expect(phonemize("शहर में", "hi")).toBe("ʃˈɛɦɛɾ mˈeː̃");
+    });
 });

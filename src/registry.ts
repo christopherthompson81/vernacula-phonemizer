@@ -501,7 +501,7 @@ function build(lang: string): Phonemizer {
         case "ur":
             return createUrdu((latin) => getPhonemizer("en").text(latin));
         case "id":
-            return createIndonesian();
+            return createIndonesian((latin) => getPhonemizer("en").text(latin));
         // Standard Malay (Malaysian/Bruneian) — ALIAS to the Indonesian engine as a labelled approximation. Malay and
         // Indonesian are mutually intelligible standardisations of the same Malayic language, sharing the reformed
         // Latin orthography and largely the same grapheme→IPA phonology. There is no independent Malay referee wired,
@@ -518,7 +518,7 @@ function build(lang: string): Phonemizer {
         // iterated the artifacts reported Malay as unreachable while `zsm` had been working the whole time.
         case "ms":
         case "zsm":
-            return createMalay();
+            return createMalay((latin) => getPhonemizer("en").text(latin));
         case "pa":
             return createPunjabi((latin) => getPhonemizer("en").text(latin));
         // Western Punjabi / Lahnda (Shahmukhi, Pakistan) — the SAME Punjabi engine; the scanner auto-detects the
