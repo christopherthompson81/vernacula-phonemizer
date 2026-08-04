@@ -162,3 +162,79 @@ symbol hu's corpus already reads. Recorded as unsourced rather than filled with 
   reading gloss, a spoken-register wiki (Wikipedia's "spoken articles"), or a language's own maths-teaching
   text. Untried here.
 - ⚠ `hu` writes `6 x 6` and `56 × 56` in ONE sentence, so whatever eventually ships must accept the ASCII `x`.
+
+## Run 3 — 2026-08-03 — ASR ON THE FLEURS AUDIO. The wall comes down.
+
+**The speech-register source was sitting in the corpus the whole time.** FLEURS ships audio aligned to every
+transcript, so the sentence containing `+30 °C` has a recording of a human reading it aloud. Whatever the
+speaker said in that position **is** the word — no prose required, and prose was never going to give it.
+
+Checked first, and negative: FLEURS's own column 4 ("normalized" transcription, which this repo's tooling never
+reads — it takes column 3) only lowercases and strips punctuation. It **keeps `+` as a sign** in all 19
+languages. So the text side of the dataset is exhausted; the audio side is not.
+
+### Route
+
+Local audio: `/mnt/data/omnivoice_ipa/corpus/audio_cache/data/<corpus>/audio/train.tar.gz`, 29 languages, 46G.
+ASR: AI4Bharat IndicConformer, ONNX, 22 Indic languages with per-language vocab spans —
+`/home/chris/models/indicconformer_600m_onnx`, driven by
+`vernacula/scripts/indicconformer_export/validate_indicconformer_package.py` (pure onnxruntime, no torch).
+
+⚠ `indicconformer_onnx` (the 400M export) decodes EMPTY, including on the reference audio its own docs use. A
+broken export is indistinguishable from an unintelligible recording unless you check a known-good file first.
+Use the 600m package.
+
+### ta — `பிளஸ்`, three speakers, two sentences
+
+```
++30 °C   →  …வெப்பம் பிளஸ் முப்பது டிகிரி சி…      (piḷas = "plus")
+UTC+1    →  …சுமார் பதினோரு மணிக்கு யூடிசி பிளஸ் ஒன்…   ×2 speakers
+UTC+1    →  (third speaker skipped the parenthetical entirely)
+```
+
+The offset is read wholly as English loans — `ஒன்` ("one"), not Tamil `ஒன்று`.
+
+### hi — and here the two shapes DIVERGE, which is the finding
+
+```
+UTC+1    →  …यूटीसी प्लस एक…   /  …यूटीसी प्लस वन…      plus SPOKEN, 2 speakers
++ 30° C  →  …तीस डिग्री सेल्सियस से अधिक…             plus NOT SPOKEN, 2 speakers
+```
+
+**Both Hindi speakers omitted the `+` before the temperature and both said `प्लस` in the offset.** So:
+
+- ✓ Run 1's guess that `+30 °C` and `UTC+1` are read differently is confirmed as a fact about **speakers**.
+- ⚠ **BUT THE OMISSION IS NOT A LICENCE TO DROP THE SIGN, and concluding that was this run's error.** The
+  target is TTS: a reader who skips a character the author explicitly typed is evidence about reading habits,
+  not about content we may delete. An author who writes `+30 °C` marked the sign deliberately, so the faithful
+  rendering voices it. Both ta and hi therefore read the plus in both positions.
+- What the audio DOES settle is the **word** — hi's `प्लस`, replacing a `धन` that was correctly sourced from a
+  maths article naming the sign and is simply the wrong register. That correction is the run's real product.
+- Corollary for the gate: had the silence shipped, hi's `+30 °C` would have registered as a permanent `DROP`,
+  since a differential test only knows the symbol vanished. Voicing the sign keeps gate and reading aligned.
+- Both speakers also said `सेल्सियस` for a bare `C`, and one read `1` as Hindi `एक` while the other used
+  English `वन` — the same sentence, the same position, two registers.
+
+### What this establishes as a method
+
+A FOURTH sourcing tier, above the wiki: **the corpus's own audio**. It is stronger than every text tier for
+this class of question, because it answers *what a reader says*, which is the actual question a phonemizer
+asks, and it is immune to the failure that blocked Runs 1–2 (prose writes the glyph, so the word is absent
+from writing by construction — not rare, absent).
+
+It also supplies something no text tier can: **evidence about reading habit** — "two speakers read this sign as
+nothing". ⚠ That is not the same as "the correct output is silence", and the distinction is the whole lesson of
+this run. For a TTS target the written character is the content; the recording is a referee on *how* it is said,
+and an audio referee will routinely hear things that do not line up with the script. Interpret it, don't obey it.
+
+### Coverage and limits, measured
+
+- audio cache and the omnivoice token set cover the **same 28–29 corpora**; `te_in` is in NEITHER, and te's
+  `+` rows are in `train` while only its `test` tarball is cached. te needs a network fetch.
+- every other affected language has `train` cached and its `+` rows in `train`: am ta vi xh zu ar ja th hi.
+- but ASR coverage is the binding constraint: IndicConformer is Indic-only, so of the affected set only
+  **ta and hi** are reachable locally today. am/vi/xh/zu/ar/ja/th need Cohere-transcribe, OmniVoice or
+  Qwen3-ASR — all present in the HF cache but all requiring torch, which is broken in this environment
+  (`libtorch_global_deps.so` missing).
+- the omnivoice token `.npz` set is a route to reconstruct audio for the 28 covered corpora, but it does not
+  extend LANGUAGE coverage — it needs the omnivoice decoder, i.e. torch again.

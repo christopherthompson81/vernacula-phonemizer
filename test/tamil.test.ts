@@ -179,4 +179,16 @@ describe("Tamil normalization (#562)", () => {
         expect(normalizeTamil("௧௨")).toBe("12");
         expect(phonemize("௧௨", "ta")).toBe(phonemize("12", "ta"));
     });
+
+    it("the PLUS is read பிளஸ், sourced from the corpus's own audio (#586)", () => {
+        // Wikidata returns the bare character `+` as ta's label for "plus sign", and prose writes the glyph,
+        // so no text tier could answer this. IndicConformer 600m over ta_in/train:
+        //   UTC+1  → "…யூடிசி பிளஸ் ஒன்…"  (2 of 3 speakers; the third skipped the parenthetical entirely)
+        //   +30 °C → "…வெப்பம் பிளஸ் முப்பது டிகிரி சி…"  (1 speaker — the only row ta_in has)
+        // ⚠ NOT a fleet default: both hi speakers OMIT the plus before a temperature (see hindi.test.ts).
+        expect(normalizeTamil("UTC+1")).toContain("பிளஸ்");
+        expect(normalizeTamil("+30 டிகிரி")).toContain("பிளஸ்");
+        // A designation keeps its silent hyphen — the plus arms must not have widened the sign rules.
+        expect(normalizeTamil("சந்திரயான் -1")).not.toContain("பிளஸ்");
+    });
 });

@@ -81,7 +81,16 @@ describe("hindi normalization", () => {
         expect(phonemize("1/2", "hi")).toBe("ˈaːd̪ʱaː");
         expect(phonemize("1/3", "hi")).toBe("ˈeːk t̪ɪɦˈaːiː");
         expect(phonemize("1/5", "hi")).toBe("ˈeːk bˈəʈaː pˈaː̃t͡ʃ"); // the ordinary spoken "n बटा m"
-        expect(phonemize("+3 डिग्री", "hi")).toBe("d̪ʱˈən t̪ˈiːn ɖˈɪɡɾiː");
+        // #586. The plus was `धन` here until the corpus's own AUDIO was consulted: both hi_in speakers of the
+        // `यूटीसी + 1` sentence say प्लस. धन is what the sign is CALLED in a maths article, not what is read
+        // in the slot — a correctly-sourced word from the wrong register.
+        // Both hi speakers of `+ 30° C` omit the sign, but for a TTS target that is a REFEREE signal and not
+        // a licence to delete a character the author explicitly wrote, so it is still voiced. The omission
+        // does explain why it is harmless either way: omitting a plus is lossless (`+30°` and `30°` are the
+        // same temperature) whereas omitting a minus INVERTS — which is why 7b's inversion argument belongs
+        // to the minus alone and must not be recycled for the plus.
+        expect(phonemize("+3 डिग्री", "hi")).toBe("plˈəs t̪ˈiːn ɖˈɪɡɾiː");
+        expect(phonemize("यूटीसी + 1", "hi")).toBe("juːʈˈiːsiː plˈəs ˈeːk"); // the word, per two speakers
     });
 
     // #586. The minus WAS deliberately not claimed, and the refusal was right about the rule it refused:

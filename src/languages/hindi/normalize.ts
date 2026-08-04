@@ -156,10 +156,46 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
                 return `${hw} बजकर ${cardinal(Number(min)).join(" ")} मिनट`;
             });
 
-        // 7) PLUS. `+ 30° c` is a real plus in the corpus, and धन is its attested sign word — see the
-        //    ऋण citation in step 7b, which names धनात्मक and ऋणात्मक चिह्न as a pair.
-        s = s.replace(/(\S)\+\s?(\d)/gu, "$1 धन $2");
-        s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1धन $2");
+        // 7) PLUS — REWRITTEN FROM THE CORPUS'S OWN AUDIO, which contradicted this rule twice.
+        //
+        //    This step used to read EVERY `+` as धन, sourced from the same hi.wikipedia पूर्णांक article cited
+        //    in step 7b, which names धनात्मक चिह्न and ऋणात्मक चिह्न as a pair. That citation is sound for what
+        //    it says — it is the NAME OF THE SIGN in a mathematics article — and it is the wrong register for
+        //    what a reader says out loud. Trap 37 one level deeper than usual: not a word with two senses, but
+        //    a correctly-sourced word from the wrong register.
+        //
+        //    FLEURS ships audio aligned to every transcript, so the sign's own sentences have recordings of
+        //    people reading them. Four utterances over hi_in/train, IndicConformer 600m (ONNX):
+        //
+        //      यूटीसी + 1   → "…स्थानीय समय यूटीसी प्लस एक पर…"  /  "…यूटीसी प्लस वन पर…"   ← प्लस, not धन
+        //      + 30° C      → "…गर्मियों के महीनों में तीस डिग्री सेल्सियस से अधिक…"        ← NOTHING, both speakers
+        //
+        //    ⚠ A READER IS NOT A FAITHFUL RENDERER OF THE TEXT, so the SPEAKER COUNT is the evidence, not the
+        //    transcript. This corpus demonstrates the hazard directly: the third ta speaker of the same UTC
+        //    sentence skipped `(UTC+1)` entirely. Both hi claims here are 2-of-2 — two independent speakers
+        //    agreeing per shape, which is why they are strong enough to overturn a shipped rule. The silence
+        //    finding in particular could not rest on one speaker, since one reader omitting a sign is exactly
+        //    what unfaithful reading looks like; two doing it in the same slot is a reading convention.
+        //
+        //    WHAT THE AUDIO CHANGES, AND WHAT IT DOES NOT. It fixes the WORD: प्लस, the loan, is what both
+        //    speakers say in the slot; धन is what the sign is CALLED. That is a register error in the old
+        //    citation and the audio is the right tier to catch it.
+        //
+        //    ⚠ IT DOES NOT MAKE THE SIGN SILENT, and the temptation to conclude that was the trap here. Both
+        //    speakers omitted the `+` before the temperature, and for a TTS target that is a REFEREE signal,
+        //    not a licence: a reader who skips a character the author explicitly wrote is telling us about
+        //    reading habits, not about content we may delete. An author who types `+30 °C` chose to mark the
+        //    sign, and voicing it is the faithful rendering. So both arms below read it.
+        //
+        //    The omission is still worth recording, because it explains WHY it is safe either way, and the
+        //    old comment got this backwards by borrowing 7b's argument: OMITTING A PLUS IS LOSSLESS AND
+        //    OMITTING A MINUS INVERTS. `+30°` and `30°` are the same temperature; `-30°` and `30°` are not.
+        //    That asymmetry is why speakers drop one and not the other — and why 7b's "dropping the sign
+        //    INVERTS the meaning" is true of the minus and MUST NOT be recycled to justify the plus.
+        //
+        //    Both arms, so the sign is read glued to a label (`यूटीसी + 1`) or opening the quantity.
+        s = s.replace(/(\S)\+\s?(\d)/gu, "$1 प्लस $2");
+        s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1प्लस $2");
 
         // 7b) MINUS — WHERE IT IS UNAMBIGUOUS, AND ONLY THERE.
         //
