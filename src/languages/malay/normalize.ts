@@ -138,6 +138,13 @@ export function normalizeMalay(input: string): string {
 
     // 4) PERCENT. Malay says `peratus` (×15 in this corpus, spelled out after the number); Indonesian's tier
     //    says `persen`, which ms_my never writes (×0). Claimed here so the inherited tier never sees a `%`.
+    //    ⚠ THIS IS AN ARCHITECTURAL CONSTRAINT, NOT AN IDIOMATIC ONE, and the distinction matters when reading
+    //    the rest of this file: `peratus` is not local because Malay's percent is somehow unlike the tier's
+    //    shape — it is postposed and invariant, exactly what the tier declares. It is local because this
+    //    language is a PRE-PASS over the whole Indonesian engine (malay.ts) and therefore cannot OVERRIDE the
+    //    inherited `SymbolData`; the only way to say a different word is to consume the symbol first. The same
+    //    is true of the unit and exponent rules below. If Malay ever needs its own tier, the fix is to give it
+    //    one, not to add more pre-emption here.
     //    Trap 12 first: where a sentence writes both the sign and the word, the sign is DELETED — leaving it
     //    for the inherited tier would say it twice, and in the wrong dialect (`lapan puluh persen peratus`).
     s = s.replace(/(\d)\s?%(?=\s*peratus)/gu, "$1");

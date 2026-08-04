@@ -88,6 +88,30 @@ export function normalizeCentralKurdish(input: string): string {
     t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
         (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
             `${n} ${CKB_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "سێجا" : "دووجا"}`);
+    //     RATES BEFORE the plain arm, or that arm consumes the numerator and strands the slash — which left
+    //     `120 km/h` reading the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as [ˈɛs]. The
+    //     construction is this corpus's own: "480 کم لە کاتژمێر (133 مەتر/چرکە؛ 300میل/کاتژمێر)" — `لە` is the
+    //     "per", `کاتژمێر` the hour, `چرکە` the second. The corpus also writes the PERSO-ARABIC denominator
+    //     against a slash (`مەتر/چرکە`), which read with the slash silently dropped, so that shape is claimed
+    //     too.
+    const CKB_PER: Readonly<Record<string, string>> = {
+        h: "کاتژمێر", s: "چرکە", "کاتژمێر": "کاتژمێر", "چرکە": "چرکە",
+    };
+    const ckbPer = Object.keys(CKB_PER).sort((a, b) => b.length - a.length).join("|");
+    t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "giu"),
+        (_m, n: string, u: string, d: string) =>
+            `${n} ${CKB_UNIT[u.toLowerCase()]!} لە ${CKB_PER[d.toLowerCase()]!}`);
+    //     …and the PERSO-ARABIC numerator, which the corpus writes as `کم/کاتژمێر` and `مەتر/چرکە`.
+    //     ⚠ THE ABBREVIATION MUST BE ACCEPTED HERE, NOT JUST THE WORD. This block runs at step 2b — lifted
+    //     above the decimal rule so the version guard keeps its dot (trap 39) — while the Perso-Arabic unit
+    //     expansion is step 6b, further DOWN the file. So at this point `کم` has not become `کیلۆمەتر` yet, and
+    //     an arm matching only the spelled forms silently missed the corpus's own `کم/کاتژمێر`.
+    const CKB_NUMER: Readonly<Record<string, string>> = {
+        "کم": "کیلۆمەتر", "کیلۆمەتر": "کیلۆمەتر", "مەتر": "مەتر", "سم": "سانتیمەتر",
+    };
+    const ckbNumer = Object.keys(CKB_NUMER).sort((a, b) => b.length - a.length).join("|");
+    t = t.replace(new RegExp(`(\\d[\\d.,]*)\\s*(${ckbNumer})\\s*/\\s*(${ckbPer})(?![\\p{L}\\p{M}\\d])`, "gu"),
+        (_m, n: string, u: string, d: string) => `${n} ${CKB_NUMER[u]!} لە ${CKB_PER[d]!}`);
     t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
         (_m, n: string, u: string) => `${n} ${CKB_UNIT[u.toLowerCase()]!}`);
 

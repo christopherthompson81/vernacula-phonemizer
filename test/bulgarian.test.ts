@@ -105,4 +105,18 @@ describe("bulgarian normalization", () => {
     test("ordinary Bulgarian text is untouched", () => {
         expect(normalizeBulgarian("Българският е език.")).toBe("Българският е език.");
     });
+
+    // #586 — this layer already read `км/ч` as `в час`; two shapes it did not cover.
+    // ⚠ THE AUDIT THAT FOUND THESE FIRST OVER-REPORTED THEM, by probing with LATIN abbreviations against a
+    // Cyrillic-writing language. Bulgarian's own forms were already right — `5 км`, `5 м`, `5 км2`, `5 м3`,
+    // `120 км/ч` all read correctly before this — so what follows is narrow on purpose.
+    test("the rate denominators this layer had missed (#586)", () => {
+        // The corpus's own `133 м/сек` read the denominator as the bare syllable [sɛk]. `в секунда` ×2.
+        expect(createBulgarian().text("133 м/сек").trim()).toContain("mɛtra f sɛkunda");
+        expect(createBulgarian().text("133 м/с").trim()).toContain("mɛtra f sɛkunda");
+        // Latin aliases for the RATE only — the plain Latin `km` already read correctly, but `120 km/h` gave
+        // the denominator as the ENGLISH letter name. Same reason ru/uk/kk declare Latin keys.
+        expect(createBulgarian().text("120 km/h").trim()).toContain("kiɫɔmɛtra f t͡ʃas");
+        expect(createBulgarian().text("120 км/ч").trim()).toContain("kiɫɔmɛtra f t͡ʃas"); // unchanged
+    });
 });

@@ -176,4 +176,13 @@ describe("persian text normalization (#562)", () => {
         // guard no dot to reject. `802.11m` is a designation, so the `m` stays a letter name.
         expect(phonemize("802.11m", "fa")).toContain("ˈiːk ˈiːk ˈɛm");
     });
+
+    // #586 — RATES. `120 km/h` read the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as
+    // [ˈɛs]. The construction is spelled out in this corpus's own rate sentence: "480 کیلومتر بر ساعت
+    // (133 متر بر ثانیه؛ 300 مایل بر ساعت)" — `بر` is "per", `ساعت` the hour, `ثانیه` the second.
+    test("the rate denominators (#586)", () => {
+        expect(phonemize("120 km/h", "fa")).toContain("bˈaɾ saːʔˈet");
+        expect(phonemize("133 m/s", "fa")).toContain("bˈaɾ saːnejˈe");
+        expect(phonemize("اصطکاک کم است", "fa")).toContain("kˈam ʔˈast"); // the adjective still untouched
+    });
 });

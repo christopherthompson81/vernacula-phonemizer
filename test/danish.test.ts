@@ -133,4 +133,19 @@ describe("danish normalization", () => {
     test("ordinary Danish text is untouched", () => {
         expect(normalizeDanish("Dansk er et sprog.")).toBe("Dansk er et sprog.");
     });
+
+    // #586 — ADOPTED THE SHARED TIER for units and rates. Danish predates it and reads unit abbreviations
+    // from the LEXICON (`km` → kiloˈmeːˀdɐ), which handles a TOKEN and can never compose across a slash: the
+    // denominator reached the IPA as a LETTER NAME. Note `km/t` — Danish `t` is *time* (hour), ×8 in the
+    // corpus against `km/h` ×0 — and that `km`/`kilometer` phonemize identically, so the plain reading is
+    // untouched. Words from the corpus: kilometer ×8, meter ×4, `i timen` ×7, `i sekundet` ×3.
+    test("units and rates through the shared tier (#586)", () => {
+        expect(phonemize("160 km/t", "da")).toContain("kiloˈmeːˀdɐ ˈiːˀ ˈtiːmən"); // was the letter T
+        expect(phonemize("120 km/h", "da")).toContain("kiloˈmeːˀdɐ ˈiːˀ ˈtiːmən"); // was the letter H
+        expect(phonemize("133 m/s", "da")).toContain("ˈmeːˀdɐ ˈiːˀ seˈkɔnˀdəð");   // was ˈɛm ˈɛs
+        expect(phonemize("5 m", "da")).toContain("ˈmeːˀdɐ");                        // was ˈɛm
+        expect(phonemize("5 km", "da")).toContain("kiloˈmeːˀdɐ");                   // unchanged
+        expect(phonemize("5 cm", "da")).toContain("ˈsɛntiˌmeːˀdɐ"); // left to the lexicon, stress intact
+        expect(phonemize("5 km²", "da")).toContain("kvaˈdʁɑːˀdkiloˌmeːˀdɐ"); // local compound still wins
+    });
 });

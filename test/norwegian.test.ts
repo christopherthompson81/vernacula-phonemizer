@@ -136,4 +136,16 @@ describe("norwegian normalization", () => {
     test("ordinary Norwegian text is untouched", () => {
         expect(normalizeNorwegian("Norsk er et språk.")).toBe("Norsk er et språk.");
     });
+
+    // #586 — ADOPTED THE SHARED TIER for units and rates, for the reason Danish did: the lexicon handles a
+    // TOKEN and cannot compose across a slash, so a rate's denominator read as an English letter name.
+    // `mm` is declared to FIX A DEFECT — the lexicon read the bare abbreviation as the GEMINATE [mː], and the
+    // corpus writes `mm` ×10. Words from the corpus: kilometer ×15, meter ×9, `i timen` ×9, `i sekundet` ×2.
+    test("units and rates through the shared tier (#586)", () => {
+        expect(createNorwegian().text("160 km/t").trim()).toContain("ˈçiːlʊˌmeːtəɾ ˈiː ˈtiːmən"); // was the letter T
+        expect(createNorwegian().text("133 m/s").trim()).toContain("ˈmeːtəɾ ˈiː səˈkʊnə");        // was ˈɛm ˈɛs
+        expect(createNorwegian().text("5 m").trim()).toContain("ˈmeːtəɾ");                         // was ˈɛm
+        expect(createNorwegian().text("35 mm").trim()).toContain("ˈmɪlɪˌmeːtəɾ");                  // was the geminate [mː]
+        expect(createNorwegian().text("5 km²").trim()).toContain("kʋɑˈdɾɑːtçɪlʊˌmeːtəɾ");          // local compound wins
+    });
 });

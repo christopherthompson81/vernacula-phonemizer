@@ -201,6 +201,15 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(new RegExp(`${FA_NUM}\\s?(${faUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
             (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
                 `${n} ${FA_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "مکعب" : "مربع"}`);
+        //     RATES FIRST of the two arms, or the plain one consumes the numerator and strands the slash —
+        //     which is what left `120 km/h` reading the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and
+        //     `133 m/s` as [ˈɛs]. The construction is the corpus's own, spelled out in its rate sentence:
+        //     "480 کیلومتر بر ساعت (133 متر بر ثانیه؛ 300 مایل بر ساعت)" — `بر` is "per", `ساعت` the hour,
+        //     `ثانیه` the second.
+        const FA_PER: Readonly<Record<string, string>> = { h: "ساعت", s: "ثانیه" };
+        s = s.replace(new RegExp(`${FA_NUM}\\s?(${faUnits})\\s?/\\s?([hs])(?![\\p{L}\\p{M}\\d])`, "giu"),
+            (_m, n: string, u: string, d: string) =>
+                `${n} ${FA_UNIT[u.toLowerCase()]!} بر ${FA_PER[d.toLowerCase()]!}`);
         s = s.replace(new RegExp(`${FA_NUM}\\s?(${faUnits})(?![\\p{L}\\p{M}\\d])`, "giu"),
             (_m, n: string, u: string) => `${n} ${FA_UNIT[u.toLowerCase()]!}`);
 
