@@ -1476,3 +1476,29 @@ than the correction it would make, and the arithmetic sense is unaffected.
 *I had the tier, the method, the audio and the universal-sentence technique, and still defaulted to register
 because the TEXT sweep failed.* The text failing is the trigger for the audio tier, not a reason to stop. Four
 confirmations and one correction from fourteen clips, at maybe twenty minutes of work.
+
+## Run 22 — 2026-08-04 — om's `×`: the straggler was the same ordering bug, a third time
+
+`normalizeOromo("6 × 6 cm")` → `"6 × seentiimeetira 6"`. Oromo's unit rules honour `unitPrefix` and **move the
+noun ahead of its number**, so by the time the sign rule ran there was no digit after the `×` and *si’a* was
+DROPPED. `6x6 cm` failed the mirror way: the `x` broke the unit rule's adjacency, so the sign read and **`cm`
+LEAKED** instead.
+
+Moving the sign rule above the unit block fixes both at once — the reordering has not happened yet, and the unit
+rule then still finds `6 cm` adjacent.
+
+⚠ **This is the THIRD time this exact ordering has bitten in this sweep**, and every time it was a `unitPrefix`
+language that exposed it:
+1. the shared tier's `multiply`, where Swahili read *sita KS sentimita sita*
+2. English's scientific-notation exponent, where the superscript between number and unit leaked `kg`
+3. om here
+
+*A rule that consumes a sign between two operands must run before any rule that may REORDER those operands.*
+Worth stating as a rule of thumb rather than rediscovering: `unitPrefix` is the flag that makes it happen, so a
+new sign rule should be probed against a `unitPrefix` language (sw, om) and not only against a fleet-typical one.
+
+Verified: om corpus diff **0/1218 byte-identical** — expected, since om_et's own text writes the sign in the
+`4x4` sentence only, which the earlier ASCII fix already covered. Unit forms pinned in the test (noun-first
+`km 6,387`, the rate `165km/h`, `sq mi`, `km²`) because they are what the reorder exists for.
+
+Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67.

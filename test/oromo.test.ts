@@ -288,4 +288,21 @@ describe("Oromo text normalization", () => {
         expect(phonemize("120 m³", "om")).toContain("kubˈiːk mˈeːtira");
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː"); // guard still holds
     });
+
+    test("#586 the multiplication sign runs BEFORE the unit block — unitPrefix moves the noun", () => {
+        // ⚠ Oromo's unit rules honour `unitPrefix` and MOVE the noun ahead of its number, so `6 × 6 cm` became
+        // `6 × seentiimeetira 6` — the sign's `(\d+)…(\d+)` no longer had a digit after it and *si’a* was
+        // DROPPED. `6x6 cm` failed the mirror way: the `x` broke the unit rule's adjacency, so the sign read but
+        // `cm` LEAKED. Running the sign first fixes both — the same ordering the shared tier needs for
+        // `multiply`, for the same reason, found the same way: by probing a `unitPrefix` language.
+        expect(phonemize("6 × 6 cm", "om")).toContain("sˈiʔa");
+        expect(phonemize("6x6 cm", "om")).toBe(phonemize("6 × 6 cm", "om"));
+        expect(phonemize("6x6 cm", "om")).not.toMatch(/t͡ʃʼm|\bcm\b/u);   // the unit no longer leaks
+        expect(phonemize("5 × 5", "om")).toContain("sˈiʔa");
+        // The unit forms the reorder exists for must be untouched — noun-first is Oromo's own convention.
+        expect(phonemize("5 mm", "om")).toContain("miːliːmˈeːtira");
+        expect(phonemize("km 6,387", "om")).toContain("kiːloːmˈeːtira");
+        expect(phonemize("165km/h", "om")).toContain("saʔaːtˈiːtːi");
+        expect(phonemize("3,850 km²", "om")).toContain("iskuwˈeːr");
+    });
 });

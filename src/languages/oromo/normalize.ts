@@ -323,6 +323,18 @@ export function normalizeOromo(input: string): string {
     //     already become `km 2 hanga 3` and the unit still leads it.
     //     (a) RATE first — `(165km/h)`. The `(?![\p{L}])` guard on the plain-unit rules is satisfied by
     //         the `/`, so a later rate would have already lost its numerator.
+    //     ⚠ THE MULTIPLICATION SIGN RUNS BEFORE THE UNIT BLOCK, and it is the ONLY sign that has to. Oromo's
+    //     unit rules honour `unitPrefix` and MOVE the noun ahead of its number, so `6 × 6 cm` became
+    //     `6 × seentiimeetira 6` — the sign's `(\d+)…(\d+)` no longer had a digit after it and *si’a* was
+    //     DROPPED. `6x6 cm` failed the mirror way: the `x` broke the unit rule's adjacency, so the sign read
+    //     but `cm` LEAKED. Running first fixes both — the reordering has not happened, and the unit rule then
+    //     still finds `6 cm` adjacent.
+    //     The same ordering the shared tier needs for `multiply` (core/normalizeSymbols.ts), for the same
+    //     reason and discovered the same way: by probing a `unitPrefix` language.
+    //     ASCII `x` alongside `×`: `NxN` forms outnumber `×` roughly 85 to 20 across the corpora, and a bare
+    //     `x` was reaching the phoneme stream as its own letter name.
+    s = s.replace(/(\d+)\s*(?:×|x)\s*(\d+)/gu, "$1 si’a $2");
+
     const units = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})\\s?/\\s?([hs])(?![\\p{L}\\p{M}])`, "giu"),
         (_m, n: string, u: string, d: string) => `${PER[d.toLowerCase()]!} ${UNIT[u.toLowerCase()]!} ${n}`);
@@ -374,7 +386,8 @@ export function normalizeOromo(input: string): string {
     s = s.replace(/(\d+)\s*>\s*(\d+)/gu, "$1 $2 caalaa guddaa");
     // ⚠ ASCII `x` TOO: `NxN` outnumbers `×` roughly 85 to 20 in the corpora and the bare `x` was read as its
     // own LETTER NAME. Digit-bounded on both sides so it cannot claim a letter.
-    s = s.replace(/(\d+)\s*(?:×|x)\s*(\d+)/gu, "$1 si’a $2");
+    //     (`×` is handled EARLIER, before the unit block — see the note there. It has to be, because Oromo's
+    //     unit rules honour `unitPrefix` and move the noun between the sign's two operands.)
     s = s.replace(/\s*=\s*/gu, " wal qixa ");
     s = s.replace(/(?<![\p{L}\p{M}\d])\+\s?(?=\d)/gu, "ida’uu ");
     //       The second lookbehind is variable-length and was added by the corpus diff: `10ffaa - 11ffaa`
