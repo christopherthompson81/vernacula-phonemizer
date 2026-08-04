@@ -224,14 +224,20 @@ export function repairDoubleEncoded(s: string): string {
         //   mr  `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट …`
         // Both siblings write U+201C/U+201D, so the residue before a letter is an OPENING quote, not a dash.
         // Measured: the sequence occurs in exactly two corpora, id_id (42) and mr_in (24), and nowhere else.
-        .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
-        .replace(/\u00e2\u20ac(?=[\p{L}\p{M}])/gu, "\u201c")
         .replace(/\u00e2[\s\S]{2}/gu, (m) => {
             const b2 = sourceByte(m[1]!), b3 = sourceByte(m[2]!);
             if (b2 === undefined || b3 === undefined) return m;
             if (b2 < 0x80 || b2 > 0xbf || b3 < 0x80 || b3 > 0xbf) return m;
             return String.fromCodePoint(((0xe2 & 0x0f) << 12) | ((b2 - 0x80) << 6) | (b3 - 0x80));
         })
+        // ⚠ AFTER the three-byte pass, NOT BEFORE — the review caught this and my reasoning had been wrong.
+        // I argued these arms were safe ahead of it because the well-formed third characters (U+201C for `–`,
+        // U+201D for `—`) are punctuation and so could not match `[\p{L}\p{M}]`. True for those two, false in
+        // general: `“` is `E2 80 9C` whose third byte 0x9C maps to `œ` — A LETTER — so the opening-quote arm
+        // matched `â€` and stranded the `œ`, turning `â€œ` into `“œ`. Ordering after the full decode removes the
+        // whole class of interception, which is why it is the right fix rather than widening the guard.
+        .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
+        .replace(/\u00e2\u20ac(?=[\p{L}\p{M}\s]|$)/gu, "\u201c")
         .replace(/\u00c2([\u0080-\u00bf])/gu, "$1")
         .replace(/\u00c3([\u0080-\u00bf])/gu, (_m, c: string) => String.fromCodePoint(c.codePointAt(0)! + 0x40));
 }

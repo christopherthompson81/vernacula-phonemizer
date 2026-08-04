@@ -1448,9 +1448,14 @@ Four rules learned immediately, all of them cheap to get wrong:
    ⚠ **BUT THE CROSS-CHECK ONLY WORKS WHEN THE SPOKEN ITEM IS A WORD THE SCRIPT MODEL WILL SPELL.** Tried on
    xh and zu — whose `plas`-not-`plus` spelling rests on the attested vowel being [a] — MMS wrote `utc+1`, the
    GLYPH, for every speaker: in fa the readers said a NATIVE word, in xh/zu an English loan in a slot where an
-   orthographic model prefers the sign. So those two spellings still rest on phones alone, and are labelled in
-   their files as reproducing the attested phones with the conventional loan spelling UNSOURCED. Know which of
-   the two situations you are in before claiming a spelling is corroborated.
+   orthographic model prefers the sign. ★ AND THAT IS NOT A WEAKNESS FOR xh/zu, because the two questions are
+   different: fa's was LEXICAL IDENTITY (which of two words?), where script is the deciding evidence, while
+   xh/zu's is VOWEL QUALITY (does the loan have [a] or [u]?), where the PHONE recognizer is the appropriate
+   instrument and the script model has nothing to add. The check that matters there is a direct A/B — run our
+   own g2p on each candidate spelling and compare against the decoded phones (`plas` → pʼlˈaːs, `plus` →
+   pʼlˈuːs, audio `p l a s`) — which is exactly how those spellings were chosen. So: ask what KIND of question
+   you have. Lexical identity → script. Pronunciation → phones, and A/B the candidate spellings through the
+   engine. The conventional loan orthography remains unsourced, which is a separate and stated limit.
 6. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
