@@ -115,7 +115,11 @@ export function makeNativePunjabi(
     const CLAUSE_MARK = def.clausePunctuation;
     const addakRe = new RegExp(`${ADDAK}([${CONS_CLASS}]਼?)`, "gu");
     const tokenRe = new RegExp(
-        `([${GURMUKHI_WORD}${SHAHMUKHI_CLASS}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:۔؟،؛])`,
+            // ⚠ ALL OF LATIN, not just ASCII: `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it
+    // became an unclaimed gap read as an English LETTER NAME and the rest of the word started over —
+    // `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ*, "ES ə O Paulo". This group already means FOREIGN (its match goes
+    // to the injected reader), so widening it is the whole fix. Same change as the shared abugida tokenizer.
+    `([${GURMUKHI_WORD}${SHAHMUKHI_CLASS}]+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${DIGIT_CLASS}]+)|([।॥.?!,;:۔؟،؛])`,
         "gu",
     );
 

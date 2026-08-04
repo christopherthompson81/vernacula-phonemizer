@@ -60,7 +60,11 @@ function number(digits: string): string {
 }
 
 const TOKEN = new RegExp(
-    `([${ODIA_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
+        // ⚠ ALL OF LATIN, not just ASCII: `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it
+    // became an unclaimed gap read as an English LETTER NAME and the rest of the word started over —
+    // `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ*, "ES ə O Paulo". This group already means FOREIGN (its match goes
+    // to the injected reader), so widening it is the whole fix. Same change as the shared abugida tokenizer.
+    `([${ODIA_WORD}]+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
     "gu",
 );
 

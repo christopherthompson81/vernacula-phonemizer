@@ -1605,3 +1605,32 @@ are the Latin-script engines whose own word group is ASCII-or-partial — `xh`, 
 `nama`, `tagalog`, and the partial-diacritic ones (`cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`, `ig`,
 `yo`). Each needs the id treatment: widen the token AND decide whether its g2p or a foreign reader takes the
 result. Worth its own issue rather than a blind sweep.
+
+### Run 24b — "shouldn't Latin runs get sent whole?" — the phrasing is fine, the WORDS were not
+
+Asked whether an embedded Latin run should reach the foreign reader whole, spaces included, rather than word by
+word. Measured both halves of the question:
+
+**Phrasing: word-by-word is already almost identical to whole-phrase.** `bit by bit` in a non-Latin host reads
+`bˈɪt bˈaᶦ bˈɪt` against English's own `bˈɪt baᶦ bˈɪt` — the only difference is stress on a function word. Not
+worth a mechanism.
+
+⚠ **But the probe exposed the same ASCII-tokenizer defect in FIVE more places.** `São Paulo` in Hindi read
+*ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* — "ES ə O Paulo" — because `makeNativeHindi`'s Latin group was `[A-Za-z]+` too. Widened
+there (**17 languages compose it**) plus `pa` and `or`, which carry their own tokenizer.
+
+*The fix was simpler here than in id, for a structural reason worth recording*: in these engines the Latin group
+ALREADY means "foreign" — its match goes straight to the injected reader — so widening the pattern is the whole
+change. Indonesian's Latin group is its NATIVE word group, so widening it also required deciding native-vs-foreign
+per token. **Same symptom, two different fixes, and the difference is which side of the routing boundary the
+group sits on.**
+
+⚠ **The genuinely undecidable case is Latin-in-Latin, and it is left alone.** `bit by bit` and `high wheel base`
+are pure-ASCII English phrases in Indonesian text; nothing in the characters distinguishes them from Indonesian,
+so `id` reads them natively (*bˈit bj bˈit*) and that cannot be fixed without a lexicon. Capitalisation was
+considered as a signal for extending a foreign run across spaces and rejected: `Kota São Paulo` would pull the
+Indonesian `Kota` into the English run.
+
+Corpus diffs, every changed line read: hi 2/1702, ne 2/1993, gu 1/1996, mr/pa/or 0 — every change a letter-name
+fragment becoming a word (`ˈɛs ˈə mˈiː`→`sˈæmi`, `ˈɛs ˈʌ ˈo`→`sˈa`). `or`'s Latin-`I`-as-danda rule and `pa`'s
+initialisms verified intact. Gates: tsc clean; 205 files / 2930 tests; audit 0 defective cells across 0/67.

@@ -110,7 +110,18 @@ export function makeNativeHindi(
     const strip = def.stripSymbols ?? "";
     const symbolClass = [...Object.keys(symbols), ...strip].join("");
     const tokenRe = new RegExp(
-        `([${script.word}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
+        // ⚠ THE LATIN GROUP SPANS ALL OF LATIN, not just ASCII — `[A-Za-z]+` shredded every accented foreign name.
+    // A diacritic ENDED the token, so the letter carrying it became an unclaimed gap read as an English LETTER
+    // NAME and the rest of the word started over: `São Paulo` in Hindi read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* — "ES ə O
+    // Paulo". One word became three, none of them right.
+    // ⚠ INVISIBLE TO EVERY GATE: no digit or raw mark survives and nothing VANISHES, so it is a WRONG-WORD
+    // defect that neither the leak classes nor the differential DROP test can see.
+    // Simpler than the identical fix in `id`, and for a structural reason: THIS group already means "foreign"
+    // (its match goes straight to the injected reader), so widening it is the whole change. Indonesian's Latin
+    // group is its NATIVE word group, so widening there also needed a native-vs-foreign decision.
+    // `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
+    // ⚠ REACHES 17 LANGUAGES, every one that composes `makeNativeHindi`.
+    `([${script.word}]+)|(\\p{Script=Latin}[\\p{Script=Latin}\\p{M}]*)|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,
         "gu",
     );
