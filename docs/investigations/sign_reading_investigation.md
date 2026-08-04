@@ -1300,3 +1300,70 @@ regeneration is the mechanism. Recorded here so the flattened forms are not mist
 
 Gates: tsc clean; **205 files / 2927 tests**; audit **0 defective cells across 0/67**; corpus diffs — en 2/1976
 (both the defects above, read individually) and el, es, lb, ms, vi **byte-identical**.
+
+## Run 19 — 2026-08-04 — the `arithmetic` item, and it was not about `=` at all
+
+#586's last open item was `arithmetic` / `=`, deferred as "needs a per-language decision". Measuring it first
+changed what the work was.
+
+### The sign counts were almost all phantoms
+
+`=` ×50, `<` ×6, `>` ×6, `±` ×1 across the artifacts — and reading them:
+
+- **`<` and `>` ×12** — every one is an HTML TAG (`<i>`, `<sup>`) in ms. Not operators; `stripMarkup` removes them.
+- **`±` ×1** — `Las CaÃ±itas`: the mojibake `Ã±` CONTAINS `±`. The phantom class again.
+- **`=` ×50** — dominated by cmn's artifact carrying MediaWiki/LaTeX residue (`{\displaystyle W={\frac{Rv+Cm}{v+m}}}`,
+  `Missing required parameter 1=month!`), which is being READ ALOUD as English. One genuine arithmetic (`1+4=5分`).
+- **`×` ×20** — the only genuinely attested one, and mostly DIMENSIONS.
+
+⚠ So `=` is largely an artifact-quality problem, not a vocabulary one, and `±`/`<`/`>` have ZERO real instances.
+
+### ⚠ THE REAL DEFECT WAS ASCII `x`, AND IT WAS AUDIBLE GARBAGE
+
+Counted in the corpora: `NxN`-shaped forms occur **~85 times against ~20 for `×`** — the ASCII form is dominant.
+And almost every engine read the `x` as its own LETTER NAME:
+
+```
+en  6x6 cm → sˈɪks ˈɛks sˈɪks …     it  sˈej KS sˈej      fr  sis IKS sis      de  zɛçs KS zɛçs
+```
+
+Not a drop — *audible garbage*, which is why no leak or DROP gate ever saw it. hu was the only language right,
+because it was fixed by hand earlier this sweep. Separately, 31 of 67 dropped `×` entirely.
+
+### Two decisions, arbitrated
+
+**1. `×` has TWO readings, and English uses different words.** A DIMENSION is "six BY six centimetres"; a PRODUCT
+is "five TIMES five"; a `4x4` is "a four BY four". Most languages reuse one word (cs *krát*, da *gange*,
+ro *ori*, ca *per*, ga *faoi*), so `multiply.by` defaults to `times` and a single-word language costs nothing.
+The discriminator is mechanical: a unit follows → `by`; UNSPACED ascii between digits → `by` (the `4x4`/`6x6`
+idiom); else `times`. ⚠ Equality of operands cannot decide it — `4x4` and `5 × 5` are both equal and read
+differently.
+
+**2. Attested first, then register.** The sweep found the word attested almost nowhere, and the apparent hits are
+HOMOGRAPHS OF PREPOSITIONS: es `por` ×23, it `per` ×25, ru `на` ×31 — all the preposition, never the operator.
+Same trap as the exponent sourcing. So provenance is marked per language: **✓ TREE** where the word came from
+that language's own existing `×` rule (20 languages — zero new sourcing, and declaring it is what fixes ASCII
+`x` for them), **~ REG** where it is standard register for a language that dropped the sign (11).
+
+### Two ordering bugs, both found by probing
+
+⚠ **The declarations landed in the WRONG OBJECT for four languages.** Anchoring the insertion on the first
+`percent:`/`units:` line matched a field in an unrelated type or config near the top of the file, not the
+`makeSymbolNormalizer({…})` call — so it, id, sw and mk typechecked, shipped, and did NOTHING. Caught because
+`it 5 × 5` still read *t͡ʃˈinkwe t͡ʃˈinkwe*. *A config field in the wrong object is invisible to the compiler.*
+
+⚠ **The rule had to run BEFORE the unit path, not after.** Placed after, `unitPrefix` languages broke: Swahili's
+unit path MOVES the noun ahead of its number, so `6x6 cm` became *sita KS sentimita sita* — no digit after the
+sign, and the `x` fell through to the letter reading. Running first is better anyway: the unit is still an
+ABBREVIATION, so "is a unit coming?" is just "digit then letters", and the unit path still finds `6 cm` adjacent.
+
+### Result
+
+31 languages declared. Corpus diffs, every changed line read: **en 1/1976** (`ˈɛks`→`baᶦ`), **de 2/1956**
+(`ks`→`maːl`), **it 3/1978** (`ks`→`pˈer`), **cs 2/1947** (`ks`→`krˈaːt`), **el 1/1969** (`ˈɛks`→`epi`),
+sw 0/1938. Every one is a letter name becoming a word; no DROP, DIGIT, RAWMARK, SLOT-GAP or THROW anywhere.
+Gates: tsc clean; 205 files / 2927 tests; audit 0 defective cells across 0/67.
+
+**Still open**: ~26 languages have no multiplication word (the droppers I could not source confidently), cmn's
+artifact carries LaTeX/template residue that is read aloud, and `±`/`<`/`>` remain undeclared almost fleet-wide
+with zero attested instances.

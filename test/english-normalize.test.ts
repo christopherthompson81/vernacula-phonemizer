@@ -287,7 +287,14 @@ describe("Latin abbreviations and phrases", () => {
     });
 
     test("the relational and arithmetic signs", () => {
-        expect(normalizeEnglish("6 × 6 mm")).toBe("6 times 6 millimeters"); // the unit rule also fires
+        // ⚠ "BY", NOT "TIMES", when a UNIT follows: English reads a FORMAT as "six by six millimetres" and a
+        // PRODUCT as "five times five". `4x4` and `2 x 4` take "by" too — the unspaced/idiomatic form.
+        expect(normalizeEnglish("6 × 6 mm")).toBe("6 by 6 millimeters"); // the unit rule also fires
+        expect(normalizeEnglish("5 × 5")).toBe("5 times 5");
+        // ⚠ ASCII `x` IS THE DOMINANT WRITTEN FORM (~85 `NxN` against ~20 `×`) and was read as the LETTER:
+        // `6x6 cm` came out "six EKS six centimetres" — audible garbage no leak or DROP gate could see.
+        expect(normalizeEnglish("6x6 cm")).toBe("6 by 6 centimeters");
+        expect(normalizeEnglish("a 4x4")).toBe("a 4 by 4");
         expect(normalizeEnglish("12 ÷ 4")).toBe("12 divided by 4");
         expect(normalizeEnglish("x = y")).toBe("x equals y");
         expect(normalizeEnglish("5 < 6")).toBe("5 less than 6");

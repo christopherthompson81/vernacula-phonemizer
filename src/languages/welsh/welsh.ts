@@ -107,6 +107,11 @@ const TOKEN =
 // cant/doler/punt/cilogram are referee-attested; milimetr/centimetr are the standard borrowings, read by
 // rule. `m` (metre) added for the corpus's 100m/230m running events and 4892 m.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "gwaith" },
     percent: ["y cant"],
     currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
     units: { km: ["cilomedr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },

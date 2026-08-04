@@ -114,6 +114,11 @@ function numberTokenToWords(tok: string): string {
 const UNITS = { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] };
 
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "çarpı" },
     percent: ["yüzde"],
     percentPrefix: true,
     currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },

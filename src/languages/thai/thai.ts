@@ -73,6 +73,11 @@ const SYMBOLS = makeSymbolNormalizer({
     // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
     // word — `ที่พักประเภท B&B แข่งขันกันในสองสิ่งเป็นหลัก คือ ที่นอนและอาหารเช้า` ("bed AND breakfast").
     // The text states what the sign expands to, in the same breath, with the conjunction chosen here.
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "คูณ" },
     ampersand: "และ",
     percent: ["เปอร์เซ็นต์"],
     // #586 — `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a

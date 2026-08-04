@@ -27,6 +27,11 @@ const TOKEN =
 // Serbian tier, and the currency signs the corpus writes (¥, $, €, £) are declared. Kept in the ENGINE
 // file so the review tool's sourcing check can see the words.
 export const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "puta" },
     percent: ["posto"],
     // `jen` — the PR asked for an attestation, and there is one in the repo, from the SISTER STANDARD.
     // Croatian and Serbian are two standards of one language, and the Serbian corpus renders THIS VERY

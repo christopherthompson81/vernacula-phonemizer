@@ -202,6 +202,11 @@ const DOTTED_ALT = Object.keys(DOTTED)
  * like Russian — «783.562 τετραγωνικά χιλιόμετρα» — so `position: "before"`.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "επί" },
     percent: ["τοις εκατό"], // invariant
     currency: {
         "$": ["δολάριο", "δολάρια"],

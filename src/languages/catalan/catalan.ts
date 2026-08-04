@@ -213,6 +213,11 @@ function wordIpa(word: string): string {
 // #562 symbol normalization — Catalan. `¥` (yen) was missing, so the corpus's 2.500 ¥ / 130.000 ¥ read as
 // bare numbers with the sign dropped.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "per" },
     percent: ["per cent"],
     currency: { "€": ["euro", "euros"], "$": ["dòlar", "dòlars"], "£": ["lliura", "lliures"], "¥": ["ien", "iens"] },
     units: { km: ["quilòmetre", "quilòmetres"], cm: ["centímetre", "centímetres"], mm: ["mil·límetre", "mil·límetres"],

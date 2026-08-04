@@ -79,6 +79,11 @@ const SYMBOLS = makeSymbolNormalizer({
     // #586 — `&` was DROPPED outright, losing the sign from `提供豪華的 B&B 服務`. 和 is the standard written
     // conjunction and the corpus's most frequent candidate (和 ×603, 與 ×320, 同 ×185). For an UNSPACED script
     // the substring match IS the hit test, which is what attest.ts's header establishes for cmn.
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "乘" },
     ampersand: "和",
     percent: ["百分之"],
     percentPrefix: true,

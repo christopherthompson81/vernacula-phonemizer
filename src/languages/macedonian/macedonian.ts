@@ -49,6 +49,11 @@ const mkCountForm = (n: number): number => {
 // km are equally common in the corpus — so both scripts are declared. The rate denominator is "на час"
 // (per hour) but "во секунда" (per second), which the keyed unitPer expresses.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "пати" },
     percent: ["процент", "проценти"],
     currency: {
         "$": ["долар", "долари"],

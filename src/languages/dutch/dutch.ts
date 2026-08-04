@@ -125,6 +125,11 @@ const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\
 // "83 kilometer", "27 miljoen pond"), so each entry is a single form and no count agreement is needed. `g` is
 // deliberately NOT a unit: the corpus writes the Wi-Fi standards "802.11a/b/g", and "11g" is not 11 grams.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
+    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
+    // One word, so `by` defaults to it; this language does not split dimension from product.
+    multiply: { times: "keer" },
     percent: ["procent"],
     currency: { "€": ["euro"], $: ["dollar"], "£": ["pond"], "¥": ["yen"] },
     units: {

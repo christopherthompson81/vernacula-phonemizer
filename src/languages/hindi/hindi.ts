@@ -194,6 +194,11 @@ export function makeNativeHindi(
 /** Load hindi.jsonc (beside this file) and build the Hindi phonemizer. `foreign` handles embedded Latin. */
 // #562 symbol normalization — Hindi (प्रतिशत is invariant; units after the number).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
+    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // omitted and defaults to it — this language does not split dimension from product.
+    multiply: { times: "गुणा" },
     percent: ["प्रतिशत"],
     // `¢` added for #586, and it is ROBUSTNESS with an unusually honest caveat. The sign occurs in ZERO of the
     // 67 FLEURS corpora and NO language in the fleet declares it, so this is a fleet-wide gap that happens to
