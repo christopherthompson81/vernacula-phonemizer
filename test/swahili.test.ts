@@ -83,7 +83,11 @@ describe("swahili text normalization (#562)", () => {
 
     test("degrees: ºC leaked the raw character and read C as the letter", () => {
         // "+30ºC" → *thelathini º k*, with U+00BA emitted RAW into the phoneme stream.
-        expect(phonemize("+30ºC", "sw")).toBe("ɲˈuzi ʄˈɔtɔ θɛlɑθˈini sɛlsiˈɑsi");
+        // #586. The plus is now read (plas). The degree rule below used to capture `([+-]?)` and DISCARD it,
+        // so the sign vanished — the same shape zu's `[+]?` had. ⚠ sw's two temperature speakers say the DEGREE
+        // word in that slot (`z aɪ i d i a  ɲ u z i  t a l a t i n i`), not a plus; the offset speaker says
+        // `p l a s w a n`. Voiced here per the standing choice on explicitly typed characters.
+        expect(phonemize("+30ºC", "sw")).toBe("plˈɑs ɲˈuzi ʄˈɔtɔ θɛlɑθˈini sɛlsiˈɑsi");
         expect(phonemize("30°C", "sw")).toBe("ɲˈuzi ʄˈɔtɔ θɛlɑθˈini sɛlsiˈɑsi");
     });
 

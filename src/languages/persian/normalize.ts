@@ -252,6 +252,50 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(new RegExp(`([$€£¥])\\s?(\\d[\\d.,]*)`, "gu"),
             (_m, sign: string, num: string) => `${num} ${CURRENCY[sign]!}`);
 
+        // 7b) THE PLUS → به اضافه, SOURCED FROM THE CORPUS'S OWN AUDIO — and this is the one language in the
+        //     batch where the speakers disagreed on the WORD rather than on whether to say it.
+        //     The corpus writes the offset RTL as `(1+ به‌وقت ساعت هماهنگ جهانی)` and the sign was DROPPED.
+        //     No text tier could supply the word: `به اضافه` and `به علاوه` are both ×0 in the corpus AND ×0 in
+        //     the wiki; the only wiki hit for any candidate is `بعلاوه`, and its example is the DISCOURSE
+        //     connective — "بعلاوه، این تعریف …" ("moreover, this definition …") — which is trap 37, not the
+        //     operator. `مثبت` ×17 is the adjective "positive", also not the operator.
+        //
+        //     Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer: 392 tokens, no `+`, no
+        //     digits), all three fa_ir speakers of the sentence:
+        //       `… b eː z ɑ f eː  j e k …`        →  به اضافه یک   (be ezāfe yek)
+        //       `… b ɛ a l ɑ v e j e  j e k …`    →  به علاوهٔ یک   (be alāve-ye yek)
+        //       `… m a h a l l iː  j e k  s ɑ a t …`  →  no plus word at all
+        //     ⚠ WHETHER THOSE ARE REALLY TWO WORDS WAS CHALLENGED, AND THE CHALLENGE WAS RIGHT TO MAKE. The two
+        //     candidates are the same syllable shape — be + V-CVː-CV — differing in exactly two segments, and
+        //     /f/~/v/ differ only in voicing while /z/~/l/ are both voiced continuants. At this decode quality
+        //     that is close to a minimal pair, so "two forms" could equally have been one word decoded twice
+        //     with noise. A phone string alone could not settle it.
+        //     ⚠ SETTLED BY A SECOND MODALITY. MMS-1b-all (`fas` adapter) transcribes to Persian SCRIPT, and the
+        //     consonant identity is the tell — اضافه carries ض, علاوه carries ع:
+        //       speaker 1  `… به وقت محلی  به اضف۱  به وقت ساعت …`   ← ض  → به اضافه
+        //       speaker 3  `… به وقت محلی  بعه۱     به وقت ساعت …`   ← ع  → بعلاوه / به علاوه
+        //       speaker 2  `… به وقت محلی  ۱ ساعت   به وقت ساعت …`   ← no plus word, as the phones showed
+        //     Both are truncated, but they pick DIFFERENT letters for the two speakers, matching the split the
+        //     phoneme model showed. Note this is the exact INVERSE of the tier's usual caution: a text ASR is
+        //     the wrong tool for "is there a sign here" because it emits the glyph, and the right tool for
+        //     "which word is this" because it emits orthography.
+        //     ⚠ TWO ATTESTED FORMS, ONE SPEAKER EACH, so the choice between them is STATED, not measured. Both
+        //     are ordinary Persian and both read correctly here (bˈe ʔazaːfˈe / bˈe ʔalaːvˈe). `به اضافه` is
+        //     preferred because its noun اضافه is specifically ADDITION, whereas علاوه doubles as the discourse
+        //     "moreover" — the very sense the wiki's only hit shows. If that argument is ever judged too thin,
+        //     swap the string; the evidence supports either equally.
+        //     The sign PRECEDES the numeral in logical order, so this moves the word across it, exactly as the
+        //     currency rule above does and for the same RTL reason.
+        //     ⚠ TWO ARMS, BECAUSE THIS CORPUS STORES THE OFFSET AS `1+` IN LOGICAL ORDER — the sign AFTER the
+        //     digit, which is what the bidi reordering of a `+1` leaves behind. A single arm that replaced the
+        //     sign in place produced *یک به اضافه* ("one plus"), the operand and operator inverted, when all
+        //     three speakers say *به اضافه یک*. So the digit-first arm MOVES the word across the numeral, the
+        //     same correction fa's currency rule above documents for the same RTL reason.
+        //     The digit-first arm requires NO digit after the sign, so an ordinary arithmetic `5+3` is left to
+        //     the second arm and does not become *به اضافه ۵ ۳*.
+        s = s.replace(/(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
+        s = s.replace(/\+\s?(?=\d)/gu, " به اضافه ");
+
         // 8) ORDINALS. Persian writes the ordinal as the numeral plus ـم/ـام (قرن 16ام "the 16th century" — ×5
         //    here, one of them across a ZWNJ: ⟨1000‌ام⟩). The suffix was tokenized apart and spoken as its own
         //    word [ʔˈam]; fused onto the cardinal's last word it is the ordinary ordinal (شانزدهم, هزارم). LAST,

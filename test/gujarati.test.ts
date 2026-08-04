@@ -165,9 +165,17 @@ describe("gujarati canonical IPA", () => {
         // 293/4 and 241/2 are MIXED NUMBERS (29¾, 24½) written without the space, so `num < den`
         // refuses them rather than saying "two hundred ninety-three divided by four".
         expect(gu("293/4 ઇંચ")).toBe(gu("293 4 ઇંચ"));
-        // NO word is emitted for `+`: espeak-ng's gu_list gives Hindi's પ્રતિશત for `%` and so is not a
-        // usable arbiter, and the corpus's two plus signs lose almost nothing by staying silent.
-        expect(gu("+30°C")).toBe(gu("30°C"));
+        // #586. The plus IS now read, as પ્લસ. This line used to assert silence, on the grounds that
+        // "espeak-ng's gu_list gives Hindi's પ્રતિશત for `%` and so is not a usable arbiter" — a sourcing
+        // failure, correctly reported. The arbiter arrived from a tier that did not exist then: the corpus's
+        // own AUDIO. facebook/wav2vec2-xlsr-53-espeak-cv-ft (a phoneme recognizer, so no `+` in its vocabulary)
+        // over gu_in/train gives `… m a h i n ɔ o m a  p l a s  t r iː s d i ɡ r i …` and
+        // `… p l a s  t r e s aʊ s s ɛ l ts i a s …` — BOTH speakers of the Montevideo sentence — and
+        // `… a r j uː t i s iː  p l a s v o n …` for the offset.
+        // ★ Note gu voices the MEASUREMENT plus, which en/hi/vi/te/xh/am all omit. The habit splits by
+        // language, so "loses almost nothing by staying silent" was a guess this evidence overturns.
+        expect(gu("+30°C")).not.toBe(gu("30°C"));
+        expect(gu("+30°C")).toBe(gu("પ્લસ 30°C"));
     });
 
     test("NEGATIVE RESULTS worth recording", () => {

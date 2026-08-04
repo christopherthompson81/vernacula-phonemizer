@@ -106,7 +106,10 @@ describe("Nepali normalization (#562)", () => {
     });
 
     test("degrees keep their scale letter, even welded to a Devanagari postposition", () => {
-        expect(t("+30°Cभन्दा")).toBe("t̪ˈis ɖˈiɡɾi sˈelsijʌs bʱˈʌnd̪a"); // C was read as the letter name
+        // #586. The plus is now read (प्लस), sourced from the corpus's own audio: 2 of 3 ne_np speakers of the
+        // offset sentence say `p l a s`/`p l o s`. ⚠ Both TEMPERATURE speakers omit it (`t i s d i ɡ r i`), so
+        // this arm is the standing choice to voice an explicitly typed character, not a copied reading habit.
+        expect(t("+30°Cभन्दा")).toBe("plˈʌs t̪ˈis ɖˈiɡɾi sˈelsijʌs bʱˈʌnd̪a"); // C was read as the letter name
         expect(t("35°W")).toBe("pʌˈĩn̪t̪is ɖˈiɡɾi pˈʌst͡sim");
     });
 

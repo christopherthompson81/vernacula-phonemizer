@@ -206,12 +206,38 @@ export function repairDoubleEncoded(s: string): string {
         // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
         // is why every hit here is a dash, quote or ellipsis. Measured: 16 occurrences, all in id_id
         // (`â€“` → `–`, `â€”` → `—`), zero in the other 66 corpora.
+        // LOSSY RESIDUE, where the third byte did not survive to be decoded — and the intended character is
+        // still IDENTIFIABLE, which is the only reason this arm is allowed to guess. `â€` alone is `E2 80`, the
+        // first two bytes of a General Punctuation character (U+2000–U+206F), so whatever is missing was
+        // punctuation: a quote, a dash or a space. That bounds the damage — every candidate is either a clause
+        // mark or silent in this engine, so choosing wrongly among them cannot produce a wrong WORD, whereas
+        // leaving the sequence alone leaves a `€` that `\p{Sc}` reads as a PHANTOM CURRENCY. mr's
+        // `currency DROP` was exactly that: a euro sign inside a broken quote, in a sentence with no money in it.
+        //
+        // ⚠ U+FFFD IS A FINGERPRINT, NOT NOISE. Of the E2 80 xx third bytes, only 0x81/0x8D/0x8F/0x90/0x9D are
+        // unmapped in CP1252 and so become the replacement character — and among those, `E2 80 9D` is `”`, the
+        // closing double quote, which is overwhelmingly the most frequent in running text. So `â€` + U+FFFD → `”`.
+        // ⚠ THE PAIRING IS CORROBORATED ACROSS LANGUAGES, which is what settles the opening quote — FLEURS
+        // translates ONE English set, so the same sentence exists elsewhere with its bytes intact:
+        //   en  `For example, “learning” and “socialization” are suggested as important motivations …`
+        //   hi  `उदाहरण के लिए, “लर्निंग” और “सोशलाइजेशन” को इंटरनेट …`
+        //   mr  `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट …`
+        // Both siblings write U+201C/U+201D, so the residue before a letter is an OPENING quote, not a dash.
+        // Measured: the sequence occurs in exactly two corpora, id_id (42) and mr_in (24), and nowhere else.
         .replace(/\u00e2[\s\S]{2}/gu, (m) => {
             const b2 = sourceByte(m[1]!), b3 = sourceByte(m[2]!);
             if (b2 === undefined || b3 === undefined) return m;
             if (b2 < 0x80 || b2 > 0xbf || b3 < 0x80 || b3 > 0xbf) return m;
             return String.fromCodePoint(((0xe2 & 0x0f) << 12) | ((b2 - 0x80) << 6) | (b3 - 0x80));
         })
+        // ⚠ AFTER the three-byte pass, NOT BEFORE — the review caught this and my reasoning had been wrong.
+        // I argued these arms were safe ahead of it because the well-formed third characters (U+201C for `–`,
+        // U+201D for `—`) are punctuation and so could not match `[\p{L}\p{M}]`. True for those two, false in
+        // general: `“` is `E2 80 9C` whose third byte 0x9C maps to `œ` — A LETTER — so the opening-quote arm
+        // matched `â€` and stranded the `œ`, turning `â€œ` into `“œ`. Ordering after the full decode removes the
+        // whole class of interception, which is why it is the right fix rather than widening the guard.
+        .replace(/\u00e2\u20ac\ufffd/gu, "\u201d")
+        .replace(/\u00e2\u20ac(?=[\p{L}\p{M}\s]|$)/gu, "\u201c")
         .replace(/\u00c2([\u0080-\u00bf])/gu, "$1")
         .replace(/\u00c3([\u0080-\u00bf])/gu, (_m, c: string) => String.fromCodePoint(c.codePointAt(0)! + 0x40));
 }

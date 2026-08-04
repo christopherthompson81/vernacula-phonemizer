@@ -132,7 +132,20 @@ export function normalizeSwahili(input: string): string {
     //    Wikipedia uses throughout ("nyuzi joto 45°C", "nyuzi joto +4 Selsiasi", "nyuzi joto 2.9 za
     //    Selsiasi"), and the same measure-noun-first order the corpus uses for every other unit.
     //    BEFORE decimals, for the number-adjacency reason above.
-    s = s.replace(/([+-]?)(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gu, "nyuzi joto $2 Selsiasi");
+    // ⚠ THE PLUS, CLAIMED BEFORE THE DEGREE RULE BELOW — which captured `([+-]?)` and then DISCARDED it,
+    //   emitting only `$2`, so the corpus's `+30°C` read *nyuzi joto thelathini Selsiasi* with the sign gone.
+    //   Exactly the shape zu's `[+]?` had: a rule that consumes the sign's operand and drops the sign.
+    //   The word is from the corpus's own AUDIO (a PHONEME recognizer, no `+` in its 392-token vocabulary):
+    //     UTC+1  →  `… j u t i s i  p l a s w a n  k a t i k a …`   1 of 1 speaker of that sentence
+    //   ⚠ The TEMPERATURE speakers do NOT say it: `… z aɪ i d i a  ɲ u z i  t a l a t i n i …` reads *zaidi ya
+    //   NYUZI thelathini* — the reader supplies the DEGREE word where the sign is, not a plus (2 of 2, the
+    //   second decoding the same slot as `dʒ u m l a`). So sw patterns with en/hi/vi/te/xh/am/ne, not with
+    //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
+    //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
+    //   and this spelling is chosen to reproduce the attested phones.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plas ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1plas ");
+    s = s.replace(/(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gu, "nyuzi joto $1 Selsiasi");
     s = s.replace(/([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gu, "nyuzi joto $2 Fahrenheit");
     s = s.replace(/([+-]?)(\d[\d.,]*)\s?°/gu, "nyuzi joto $2");
 

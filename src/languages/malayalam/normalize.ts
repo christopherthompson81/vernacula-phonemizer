@@ -225,6 +225,15 @@ export function normalizeMalayalam(input: string): string {
     // 9) DEGREES (×1), last, so a decimal temperature would keep its point. Only the bare sign is
     //    handled: ഡിഗ്രി is written out three times in this corpus, but no scale word (സെൽഷ്യസ്,
     //    ഫാരൻഹീറ്റ്) appears anywhere here and neither °C nor °F occurs, so none is invented.
+    // THE PLUS → പ്ലസ്, from the corpus's own AUDIO (a PHONEME recognizer, no `+` in its vocabulary). Over
+    // ml_in/train, and ml voices it in BOTH positions:
+    //   UTC+1  →  `… n j uː l t i s iː p l a s o n n ə …` and `… y j uː l t i s i p l a s o n n …`  2 of 2
+    //   +30°C  →  `… m a s a ŋ l i l p l a s v u p o d e d i ɡ …`  plus + മുപ്പതു, 1 of 1
+    // ★ Like ta, gu and mi, and unlike en/hi/vi/te/xh/am/ne, ml says the MEASUREMENT plus. പ്ലസ് reads
+    // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
+    s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
+
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
 
     return s;

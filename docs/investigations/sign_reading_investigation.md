@@ -611,3 +611,57 @@ correctly unchanged. Remaining `+` drops are the twelve languages with **no loca
 
 **So the class is closed to the limit of the available evidence**, and what remains is a data-acquisition
 task (a FLEURS download) or genuinely undecidable without a lexicon — not an unexamined gap.
+
+## Run 11 — 2026-08-03 — can the 2 kbps codec substitute for the audio? Tested, and the answer is "for one question only"
+
+The corpus ships Higgs-Audio-v2 codec tokens (`corpus/tokens/codes_<lang>.npz`, 7–12 MB per language against
+~1.6 GB of audio), so the obvious economy is to keep the codes and drop the tarballs. Measured from the npz
+shapes the bitrate is **8 quantizers × 25 Hz × 10 bits = 2.0 kbps** at 24 kHz native, which is deep in
+"intelligible but not faithful" territory — so it needed a test rather than a decision.
+
+⚠ The reconstruction path is REAL and already in the tree: `higgs_decoder.onnx` (86 MB) plus
+`ingest_fleurs.py`'s own `validate_roundtrip`. No torch needed. Worth checking before assuming, because a
+tokenizer with no decoder would have made the whole idea moot.
+
+**The test that matters is the one with ground truth.** hi's four `+` utterances were already decoded from REAL
+audio in Run 3 — two where the plus is spoken, two where it is silent — so the round trip can be graded rather
+than admired: decode from codes, resample 24 k → 16 k, re-run the phoneme recognizer.
+
+| utterance | real audio | reconstructed | |
+|---|---|---|---|
+| UTC (1) | `j u d i s i p l a s e k` | `j u d i s i p l a s e k` | ✓ identical |
+| UTC (2) | `j uː d i s iː p l e s w a n` | `j uː d iː s s t iː p l a s w ɔ l` | ✓ `p l a s` survives |
+| temp (1) | `m e t iː s d e ɡ r i s …` no plus | `m e d iː s d e ɡ r i s …` no plus | ✓ silence preserved |
+| temp (2) | `m e d iː z l i ɡ l …` no plus | `m e d iː z l i ɡ l i …` no plus | ✓ silence preserved |
+
+**4 of 4 survive**, log-mel spectral distance 3.04–3.19 dB, durations frame-exact.
+
+### ⚠ But the degradation lands exactly where this session made a decision
+
+```
+real  p l e s w a n     →  recon  p l a s w ɔ l      the VOWEL moved [e] → [a]
+real  … e k  p a r …    →  recon  … e k  b a r …     voicing flipped p → b
+```
+
+The `plas` vs `plus` spelling shipped for xh and zu rests on **the attested vowel being [a]** — and this round
+trip can manufacture exactly that shift. So:
+
+- ✓ **presence or absence of a word in a slot** — survives 2 kbps
+- ✗ **fine phonetic judgement** (vowel quality, voicing) — does NOT, and that is what an orthography choice
+  rests on
+
+### Conclusion — and ⚠ THE STORAGE QUESTION IS SETTLED SEPARATELY: KEEP ALL THE AUDIO
+
+The finding here is about EVIDENCE, not about disk. Reconstruction answers "is there a word in this slot" and
+must not be used to answer "which word" — any sourcing done from reconstructed audio has to say so.
+
+⚠ **The full audio is retained deliberately, and pruning it would be wrong.** This investigation only ever
+needed 2–5 utterances per language, and an earlier draft of this section concluded from that "prune to the
+extracted utterances". That reasoning was scoped to sign-sourcing and is too narrow: the corpus audio is also
+the material for FINE-TUNING work, which wants the whole distribution — every speaker, every utterance,
+lossless. A conclusion drawn from one consumer's needs should not become the archive's policy. All 58 GiB stays
+(182 G free on the volume, so there is no pressure forcing the question).
+
+That leaves the codec test with exactly one use, which is still worth having: the npz set is a **validated
+fallback** for a yes/no question if a tarball is ever missing. It is not a substitute for the audio and not a
+storage strategy.

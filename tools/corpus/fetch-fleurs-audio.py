@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Fetch FLEURS *train* audio for languages whose transcripts we have but whose audio we lack.
+
+WHY THIS IS COMMITTED. The audio is the fourth sourcing tier (see docs/normalization_playbook.md, "The
+corpus's own AUDIO is a sourcing tier"): for a written SIGN — `+`, `−`, `×` — the word is absent from every
+text haystack by construction, because writing uses the glyph, and only a recording of someone reading the
+sentence answers it. Which languages that tier can reach is therefore a property of what has been downloaded,
+and #586 hit that wall repeatedly: twelve languages were reported "unreachable" purely because their tarball
+was missing. A scratch downloader would leave the same hole `tools/corpus/terms/my.tsv` documents — the tree's
+richest artifact could not be regenerated because the script that built it was never committed.
+
+LAYOUT. Writes `<root>/data/<lang>/audio/train.tar.gz`, which is the layout the corpus already uses, so
+nothing else needs a path change. Downloads resume, and a file whose size already matches the remote is
+skipped — so a re-run is cheap and interrupting this is safe.
+
+Only the TRAIN split is fetched. That is where the sign-bearing utterances sit for every language checked
+under #586 (te_in was the one language with a cached `test` tarball and its `+` rows were all in `train`),
+and pulling dev/test as well would roughly double 58 GiB for no measured gain.
+
+Usage:
+  python3 tools/corpus/fetch-fleurs-audio.py --root /mnt/data/omnivoice_ipa/corpus/audio_cache \
+      --transcripts /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data [--langs te_in,fa_ir] [--dry-run]
+  # default: every language present in --transcripts but absent from <root>/data, plus any whose
+  # train.tar.gz is missing or short.
+"""
+import argparse, os, sys, time
+
+REPO = "google/fleurs"
+
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--root", required=True, help="audio cache root; files land under <root>/data/<lang>/audio/")
+    p.add_argument("--transcripts", required=True, help="dir of per-language transcript folders, used as the want-list")
+    p.add_argument("--langs", help="comma-separated FLEURS codes; overrides the derived want-list")
+    p.add_argument("--priority", default="", help="comma-separated codes to fetch FIRST, so work can resume early")
+    p.add_argument("--dry-run", action="store_true", help="report sizes and exit without downloading")
+    return p.parse_args()
+
+
+def main() -> None:
+    a = parse_args()
+    from huggingface_hub import HfApi, hf_hub_download
+
+    have_dir = os.path.join(a.root, "data")
+    os.makedirs(have_dir, exist_ok=True)
+    if a.langs:
+        want = [s.strip() for s in a.langs.split(",") if s.strip()]
+    else:
+        want = sorted(os.listdir(a.transcripts))
+
+    api = HfApi()
+    paths = [f"data/{l}/audio/train.tar.gz" for l in want]
+    # One batched metadata call, not one HEAD per language — the lesson in tools/corpus/README.md.
+    sizes = {i.path.split("/")[1]: i.size for i in api.get_paths_info(REPO, paths, repo_type="dataset")}
+    absent = [l for l in want if l not in sizes]
+    if absent:
+        print(f"no train tarball in {REPO} (skipped): {' '.join(absent)}", file=sys.stderr)
+
+    def needed(lang: str) -> bool:
+        dest = os.path.join(have_dir, lang, "audio", "train.tar.gz")
+        return not (os.path.exists(dest) and abs(os.path.getsize(dest) - sizes[lang]) < 1024)
+
+    todo = [l for l in sizes if needed(l)]
+    pri = [s.strip() for s in a.priority.split(",") if s.strip()]
+    todo.sort(key=lambda l: (pri.index(l) if l in pri else len(pri), l))
+    total = sum(sizes[l] for l in todo)
+    print(f"{len(todo)} to fetch, {total / 2**30:.1f} GiB "
+          f"({len(sizes) - len(todo)} already complete)", flush=True)
+    if a.dry_run:
+        for l in todo:
+            print(f"  {l:16} {sizes[l] / 2**30:5.2f} GiB")
+        return
+
+    done, failed, got = [], [], 0
+    for i, lang in enumerate(todo, 1):
+        t0 = time.time()
+        try:
+            hf_hub_download(REPO, f"data/{lang}/audio/train.tar.gz", repo_type="dataset", local_dir=a.root)
+            n = os.path.getsize(os.path.join(have_dir, lang, "audio", "train.tar.gz"))
+            got += n
+            ok = abs(n - sizes[lang]) < 1024
+            print(f"[{i}/{len(todo)}] {lang}: {n / 2**30:.2f} GiB in {time.time() - t0:.0f}s"
+                  f"{'' if ok else '  ⚠ SIZE MISMATCH'}", flush=True)
+            (done if ok else failed).append(lang)
+        except Exception as e:  # noqa: BLE001 — one language failing must not abandon the rest
+            print(f"[{i}/{len(todo)}] {lang}: FAILED {type(e).__name__}: {e}", flush=True)
+            failed.append(lang)
+
+    print(f"\ndone {len(done)}  failed {len(failed)}  fetched {got / 2**30:.1f} GiB", flush=True)
+    if failed:
+        print("FAILED:", " ".join(failed), flush=True)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

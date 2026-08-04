@@ -1429,7 +1429,34 @@ Four rules learned immediately, all of them cheap to get wrong:
    There is a reason — **omitting a plus is lossless and omitting a minus INVERTS**. `+30°` and `30°` are the
    same temperature; `-30°` and `30°` are not. Never justify reading a plus with the minus's argument; hi's
    rule did exactly that, borrowing its own minus step's citation.
-4. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
+4. **A 2 kbps CODEC RECONSTRUCTION ANSWERS ONLY THE YES/NO QUESTION.** The corpus also ships Higgs-Audio-v2
+   codec tokens (7–12 MB/language vs ~1.6 GB of audio) and they *are* decodable (`higgs_decoder.onnx`). Graded
+   against known answers on hi's four utterances, all four survived — both spoken pluses and both silences, at
+   log-mel SD ~3.1 dB. But the round trip moved a vowel `[e]` → `[a]` and flipped `p` → `b`, and a vowel is
+   exactly what an orthography choice rests on (xh/zu's `plas` vs `plus`). Use reconstruction to ask *is there a
+   word here*; never to ask *which word*, and label any sourcing that came from a reconstruction.
+   ⚠ This is a rule about EVIDENCE, not about storage: keep the full audio. A sourcing pass needs only 2–5
+   utterances per language, but the same corpus is the material for fine-tuning work, which wants every speaker
+   and every utterance losslessly — do not let one consumer's needs become the archive's policy.
+5. **PHONES ANSWER "IS THERE A WORD"; ORTHOGRAPHY ANSWERS "WHICH WORD" — USE BOTH.** These are inverse tools
+   and neither substitutes. A phoneme recognizer cannot echo a glyph back, which is why it is right for a sign;
+   but it also cannot distinguish near-minimal pairs, and candidate words for the same concept often ARE near
+   minimal pairs. Persian's `به اضافه` vs `به علاوه` differ in two confusable segments (`f`~`v` by voicing,
+   `z`~`l` both voiced continuants) and a phone string could not separate them. A text ASR could: MMS wrote
+   `اضف` (ض) for one speaker and `بعه` (ع) for the other — different letters, matching the split. When phones
+   suggest two variants, confirm with a model that emits script before claiming the language has two forms.
+   ⚠ **BUT THE CROSS-CHECK ONLY WORKS WHEN THE SPOKEN ITEM IS A WORD THE SCRIPT MODEL WILL SPELL.** Tried on
+   xh and zu — whose `plas`-not-`plus` spelling rests on the attested vowel being [a] — MMS wrote `utc+1`, the
+   GLYPH, for every speaker: in fa the readers said a NATIVE word, in xh/zu an English loan in a slot where an
+   orthographic model prefers the sign. ★ AND THAT IS NOT A WEAKNESS FOR xh/zu, because the two questions are
+   different: fa's was LEXICAL IDENTITY (which of two words?), where script is the deciding evidence, while
+   xh/zu's is VOWEL QUALITY (does the loan have [a] or [u]?), where the PHONE recognizer is the appropriate
+   instrument and the script model has nothing to add. The check that matters there is a direct A/B — run our
+   own g2p on each candidate spelling and compare against the decoded phones (`plas` → pʼlˈaːs, `plus` →
+   pʼlˈuːs, audio `p l a s`) — which is exactly how those spellings were chosen. So: ask what KIND of question
+   you have. Lexical identity → script. Pronunciation → phones, and A/B the candidate spellings through the
+   engine. The conventional loan orthography remains unsourced, which is a separate and stated limit.
+6. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
 
