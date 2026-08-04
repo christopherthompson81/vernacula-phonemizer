@@ -122,10 +122,28 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     // 4) ORDINAL INDICATORS. º and ª were reaching the phoneme string RAW — a non-IPA character in the
     //    output. ° (U+00B0 DEGREE SIGN) is deliberately NOT one of them: "35°" and "32 °" occur in this
     //    corpus and are temperatures, and treating ° as ordinal would read them as ordinals.
-    s = s.replace(/\b(\d+)\.?(?:º|ª)/gu, (whole) => {
-        const n = Number(/\d+/.exec(whole)![0]);
+    //    ⚠ THE DIGIT RUN MUST SPAN THE GROUPING DOTS, and until #586 it did not — `\d+` cannot cross the `.`
+    //    in `1.000º`, and the consequences were two different failures on the same shape:
+    //      `1.000º`  the pattern matched the TAIL, `000º`, so n was 0, portugueseOrdinal(0) is undefined, the
+    //                match was returned unchanged and the º REACHED THE IPA RAW — the leak this rule exists to
+    //                prevent, on the one form it could not see. (`Seu 1.000º selo` read *mˈiɫ º*.)
+    //      `2.500º`  worse, because the tail IS an ordinal: it matched `500º` → *quingentésimo* and stranded
+    //                `2.`, so the reading was *dois PONTO quingentésimo* — two point five-hundredth.
+    //    Step 0 deliberately leaves dot-grouping to the number tokenizer, so this rule has to accept it
+    //    itself. The grouped alternative comes FIRST so it wins over the bare `\d+` on `1.000º`, and the dots
+    //    are stripped before Number() rather than by a separate pass, which would change what step 0 hands on.
+    //    ⚠ WHEN NO ORDINAL WORD IS AVAILABLE THE INDICATOR IS STRIPPED, NOT KEPT. `portugueseOrdinal` is
+    //    bounded to 1–1000, so `2.500º` and `1.000.000º` have no word — and returning the match unchanged put
+    //    a raw `º` in the phoneme string, which is the very thing this rule exists to prevent and the worst of
+    //    the three outcomes (#584). Dropping the indicator reads `2.500º` as the cardinal *dois mil e
+    //    quinhentos*: it loses the ordinality, which is honest lossiness, and invents no morphology. Same
+    //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
+    //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
+    //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
+    s = s.replace(/\b(\d{1,3}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
+        const n = Number(digits.replace(/\./gu, ""));
         const masc = portugueseOrdinal(n);
-        if (masc === undefined) return whole;
+        if (masc === undefined) return digits;
         return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;
     });
 

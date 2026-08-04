@@ -133,6 +133,12 @@ describe("Serbian normalization (#562)", () => {
     test("degrees consume the degree noun the text already wrote", () => {
         expect(say("32 °C степена")).toBe("trideset dʋa stepena t͡selzijusa");
         expect(say("90 °F")).toBe("deʋedeset stepeni farenxajta");
-        expect(say("35°W")).toBe("trideset pet"); // a LONGITUDE — outside the rule on purpose
+        // #586. The bare degree now reads the DEGREE NOUN, with numeral agreement and no scale word. This
+        // line used to assert "trideset pet" — the ° declined outright so a LONGITUDE lost the word that
+        // makes it one. Declining protected the scale word (Celsius/Fahrenheit), which the C/F arm supplies,
+        // and threw away the degree noun with it.
+        // ⚠ The compass `W` is still unread, and deliberately: `јужне` is ×0 in this corpus, so a four-way
+        // table would have to invent its missing quarter. Only the recoverable half is fixed.
+        expect(say("35°W")).toBe("trideset pet stepeni");
     });
 });
