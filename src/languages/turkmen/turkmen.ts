@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 interface TurkmenDef {
     digraphs: Record<string, string>;
@@ -38,8 +39,12 @@ function sonority(seg: string): number {
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
     const segs: string[] = [];
+    let at0 = 0;
     for (const ch of w) {
-        const ph = G[ch];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        const ph = G[ch] ?? latinPhone(ch, { initial: at0 === 0, includeH: true });
+        at0 += 1;
         if (ph !== undefined) segs.push(ph);
     }
     // Word-final (oxytone) stress — the Turkic default: ˈ before the MAXIMAL onset of the last vowel's syllable.

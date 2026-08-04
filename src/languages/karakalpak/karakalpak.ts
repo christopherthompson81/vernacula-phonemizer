@@ -17,6 +17,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const DIGRAPHS: [string, string][] = [["sh", "ʃ"], ["ch", "t͡ʃ"]];
 // Single letters. Vowels: the acute letters ⟨á ó ú⟩ are the front counterparts of ⟨a o u⟩; ⟨ı⟩ (dotless) is [ɯ].
@@ -41,9 +42,10 @@ export function phonemizeWord(word: string): string {
     for (let i = 0; i < chars.length; i++) {
         const dg = DIGRAPHS.find(([k]) => chars[i] === k[0] && chars[i + 1] === k[1]);
         if (dg) { segs.push(dg[1]); i++; continue; }
-        const ph = LETTER[chars[i]!];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        const ph = LETTER[chars[i]!] ?? latinPhone(chars[i]!, { initial: i === 0, includeH: true });
         if (ph !== undefined) segs.push(ph);
-        // else: unknown char — skip
     }
     // Word-final (oxytone) stress — ˈ before the last vowel's onset consonant (Turkic default).
     const vIdx = segs.map((s, idx) => (IPA_VOWEL.has(s) ? idx : -1)).filter((x) => x >= 0);

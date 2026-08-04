@@ -2272,3 +2272,36 @@ text available, so they are absent from the table entirely — not passing it. D
 on the letter-count proxy I have just shown does not measure the property. Recorded as needing corpus data.
 
 Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.
+
+## Run 35 — 2026-08-04 — #663 complete: 45 engines → 9, and all nine remaining are by design
+
+The last three fall-through idioms hooked (`az kl kaa naq ltg`, then `mg tk crh`). Behavioural measurement across
+every registered language: **45 engines dropping an ASCII letter → 9**, and each of the nine is deliberate:
+
+| remaining | why |
+|---|---|
+| `gl it quc an ast wo` | ⟨h⟩ ONLY. Written and read as nothing in those orthographies; the table declines `h` by default and these engines never opt in. Correct silence, not loss. |
+| `sr hr bs` | Deferred to the normalization work. They share one Serbo-Croatian g2p, and `35°W` normalises to `stepeniW` — the degree rule consumes `°` and leaves the compass letter ATTACHED to the previous word. Voicing it reads *stepeniw*; the right answer is the Serbian word for "west", which is normalization vocabulary, not a phone. |
+
+Residual letters: `h` 6, and `q w x y` only via the three deferred engines. From `x` in 30 engines and `q` in 29.
+
+### Four g2p idioms, none of them findable by grep
+
+The scan loops fall into four shapes, and locating them by pattern-matching found 8 of 41 — the same "structural
+pattern instead of a measurement" error as #657, made again:
+
+1. `if (ph !== undefined) push; i += 1;` — the fall-through is the IMPLICIT else, so augmenting the LOOKUP
+   (`G[c] ?? latinPhone(c, …)`) is the whole hook (14 engines)
+2. `if (!matched) i++;` — an explicit miss branch on a longest-match loop (14 engines)
+3. a commented `i += 1; // unknown → skip` at the end of a long if/continue chain (9 engines)
+4. `for (let i = 0; …; i++)` with NO fall-through statement at all — the increment is the loop header, so the
+   branch has to be written (8 engines)
+
+### ⚠ And ⟨q x⟩ IN THE OUTPUT IS USUALLY CORRECT, which broke my leak probe a fifth time
+
+`crh Quixote → quiksoˈte`, `az Xerox → xeɾˈox`, `kaa → χeˈroχ`, `naq → xerox` all keep a ⟨q⟩ or ⟨x⟩ — and every one
+is that language's OWN rule firing, because /q/ and /x/ are their phonemes. The fall-through was never reached.
+A probe that flags "a letter that looks like orthography" cannot distinguish orthography from a phonetic alphabet
+that is itself written in Latin letters. Fifth time on these two issues; the lesson is that IPA is Latin.
+
+Gates run separately: tsc PASS; 207 files / 2943 tests; audit 0 defective cells across 0/67.

@@ -21,6 +21,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const CLICK = new Set(["ǀ", "ǁ", "ǂ", "ǃ"]); // dental, lateral, palatal, alveolar
 /** A click letter + its accompaniment (the following g/kh/h/n, longest-first) → the IPA click cluster. */
@@ -71,7 +72,9 @@ export function phonemizeWord(word: string): string {
         if (PLAIN_VOWEL.has(cur) && lc(i + 1) === cur) { segs.push(LETTER[cur]! + "ː"); i++; continue; }
         // WORD-FINAL gender suffix ⟨-b⟩ → [p] (devoicing): ǀgomab→ǀómàp.
         if (cur === "b" && i === chars.length - 1) { segs.push("p"); continue; }
-        const ph = LETTER[cur];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        const ph = LETTER[cur] ?? latinPhone(cur, { initial: i === 0, includeH: true });
         if (ph !== undefined) segs.push(ph);
         // tone diacritics on vowels, ʼ, etc.: dropped (tone not emitted; it folds)
     }

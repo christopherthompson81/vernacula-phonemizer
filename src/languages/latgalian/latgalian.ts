@@ -19,6 +19,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Multi-char graphemes (longest-first): the affricate digraphs.
 const DIGRAPHS: [string, string][] = [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]];
@@ -54,8 +55,11 @@ export function phonemizeWord(word: string): string {
             segs.push({ ph: beforeCons ? "w" : "v", vowel: false, frontTrigger: false });
             continue;
         }
-        if (CONS[c] !== undefined) segs.push({ ph: CONS[c]!, vowel: false, frontTrigger: false });
-        // else: apostrophe, hyphen, stray marks — skip
+        if (CONS[c] !== undefined) { segs.push({ ph: CONS[c]!, vowel: false, frontTrigger: false }); continue; }
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        { const p = latinPhone(c, { initial: i === 0, includeH: true });
+          if (p !== undefined) segs.push({ ph: p, vowel: false, frontTrigger: false }); }
     }
     // ★ PALATALIZATION: a consonant is palatalized if its NEXT vowel (skipping the consonant cluster) is a FRONT
     // vowel ⟨i ī e ē⟩ — the whole ONSET before a front vowel softens (bazneica→bazʲnʲɛit͡sa). ★ /r/ is OPAQUE: an

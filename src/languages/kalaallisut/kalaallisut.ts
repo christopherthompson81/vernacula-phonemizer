@@ -13,6 +13,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Single vowel graphemes → IPA. ⟨e o⟩ are the orthographic lowered-before-uvular allophones of /i u/ → [i]/[u].
 // ⟨y⟩ joins æ ø å as a Danish-loan vowel letter: it is unavoidable once Danish numerals are read (tyve, fyrre,
@@ -45,7 +46,9 @@ export function phonemizeWord(word: string): string {
         // Doubled CONSONANT → long (aallaat→aːlːaːt, aappaa→aːpːaː).
         if (CONS[c] !== undefined && c === nx) { out.push(CONS[c]! + "ː"); i += 1; continue; }
         if (CONS[c] !== undefined) { out.push(CONS[c]!); continue; }
-        // apostrophe / hyphen / stray marks → skip
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        { const p = latinPhone(c, { initial: i === 0, includeH: true }); if (p !== undefined) out.push(p); }
     }
     return out.join("");
 }

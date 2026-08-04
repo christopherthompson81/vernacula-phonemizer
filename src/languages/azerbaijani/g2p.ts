@@ -11,6 +11,7 @@
  * number reading are downstream. See docs/investigations/az_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const VOWEL_IPA = MANIFEST.vowels.ipa;
 const FRONT = new Set(MANIFEST.vowels.front);
@@ -85,9 +86,10 @@ export function toSegments(word: string): Seg[] {
             segs.push({ ph: wordFinal ? "x" : "ɡ", nucleus: false });
             continue;
         }
-        const cons = CONS_IPA[c];
+        // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
+        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        const cons = CONS_IPA[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
-        // else: unknown char (punctuation slipped in) → skip
     }
     // Nasal PLACE assimilation: /n/ → [ŋ] before a velar stop k/ɡ, [ɲ] before a palatal c/ɟ.
     for (let i = 0; i < segs.length - 1; i++) {
