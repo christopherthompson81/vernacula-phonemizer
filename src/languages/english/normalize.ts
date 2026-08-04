@@ -94,8 +94,24 @@ const DOTTED_ABBREV: Record<string, (next: string) => string> = {
 // anything left behind reaches the g2p raw. `km²` matched `km`, the `²` was stranded and then dropped, and
 // `The park covers 19,500 km²` read as a LENGTH — the area gone. Two corpus instances, and #586 opens with
 // this one. `m³` has zero instances and is claimed anyway (trap 8): it is the same rule's other branch.
+// A DOTTED DESIGNATION IS NOT A QUANTITY, and this rule had no guard for it: the number group accepts a
+// fraction, so `802.11g` matched with `802.11` + `g` and read as "eight hundred two point one one GRAMS".
+// That is the exact defect the shared tier's `NOT_VERSION` exists to stop — its own note records `802.11g`
+// reading as "802.11 grams" in ten languages — and English never got it, because English does not use the
+// tier. `802.11g` occurs in 46 of the 67 corpora, en_us among them, so this was live.
+//
+// The guard is the tier's, copied verbatim in shape: reject a `\d+[.,]\d+` immediately followed by a SINGLE
+// letter. Measured before adopting it — the only glued decimal-plus-one-letter forms in any corpus are
+// `3.50m` (ko) and `4.892m` (pt), neither of them English, against 802.11a/b/c/g/n ×232. A SPACED quantity is
+// untouched because the lookahead requires the letter to be glued, so `100.5 m` still reads as metres.
+// AND THE STANDARD IS NAMED EXPLICITLY, not left to the general heuristic. 802.11 is a networking standard
+// whose amendment suffixes are now TWO letters — 802.11ac, ax, ah, be, bn — and `802.11ah` (Wi-Fi HaLow)
+// collides with `Ah`, ampere-hours. The general arm above only guards a SINGLE trailing letter, so naming the
+// family covers every suffix length, present and future, and costs nothing: it is the only such designation
+// in any of the 67 corpora (×232 across 46 of them).
+const NOT_VERSION = "(?<![\\d.,])(?!802[.,]11\\w)(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
 const UNIT_RE = new RegExp(
-    `(\\d[\\d,]*(?:\\.\\d+)?)\\s?(${Object.keys(UNITS).sort((a, b) => b.length - a.length)
+    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)\\s?(${Object.keys(UNITS).sort((a, b) => b.length - a.length)
         .join("|")})([²³])?(?![\\p{L}\\p{M}])`,
     "giu",
 );

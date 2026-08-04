@@ -40,9 +40,20 @@ const UNITS: [RegExp, string][] = [
     [/\bkm\b/giu, "kilometri"],
     [/\bkg\b/giu, "kilograme"],
     [/\bcm\b/giu, "centimetri"],
-    [/\bmm\b/giu, "milimetri"],
-    [/\bm\b/giu, "metri"],
-    [/\bg\b/giu, "grame"],
+    // A DOTTED DESIGNATION IS NOT A QUANTITY. These are bare word-boundary replacements with no number
+    // context, so the trailing letter of a version designation was claimed outright: `802.11g` read as
+    // "opt sute doi . unsprezece GRAME". That is the defect the shared tier's `NOT_VERSION` exists to stop
+    // (its note records `802.11g` → "802.11 grams" in ten languages), and Romanian never got it because it
+    // does not use the tier. `802.11g` is in ro_ro, so this was live, not theoretical.
+    // The lookbehind rejects a one-letter unit GLUED to a dotted number and nothing else: `5 g` and
+    // `100.5 g` keep their space and still read, and the only glued decimal-plus-letter forms in any corpus
+    // are `3.50m` (ko) and `4.892m` (pt) — neither Romanian.
+    // The second lookbehind NAMES THE STANDARD: 802.11's amendment suffixes are now TWO letters (ac, ax, ah,
+    // be, bn) and `802.11ah` (Wi-Fi HaLow) collides with `Ah`, ampere-hours — which the digit-based arm, that
+    // only sees one letter back, would not catch.
+    [/(?<!\d[.,]\d{1,4})(?<!802[.,]11[a-z]{0,3})\bmm\b/giu, "milimetri"],
+    [/(?<!\d[.,]\d{1,4})(?<!802[.,]11[a-z]{0,3})\bm\b/giu, "metri"],
+    [/(?<!\d[.,]\d{1,4})(?<!802[.,]11[a-z]{0,3})\bg\b/giu, "grame"],
 ];
 
 /** Squared / cubed units. Romanian POSTPOSES the modifier — *kilometri pătrați*, "square kilometres" with
