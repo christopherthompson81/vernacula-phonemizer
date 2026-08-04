@@ -155,6 +155,35 @@ export function foldNativeDigits(s: string): string {
 }
 
 /**
+ * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
+ * `\u00b2` arrives as `\u00c2\u00b2` and `\u00f1` as `\u00c3\u00b1`. Mojibake is one of the commonest real-world corruptions in
+ * scraped text, and a phonemizer is handed arbitrary text.
+ *
+ * WHY THIS IS SAFE, measured rather than assumed. The signature is `\u00c2` or `\u00c3` followed by a UTF-8
+ * CONTINUATION byte (U+0080–U+00BF) — a sequence that occurs in no natural orthography, because those code
+ * points are C1 controls and punctuation that never follow a capital A-circumflex or A-tilde. Counted across
+ * all 67 FLEURS corpora: **31 occurrences, every one of them in id_id, and zero anywhere else.** All 31 are
+ * genuine corruption:
+ *   `19.500 km\u00c2\u00b2` (should be km\u00b2) · `Las Ca\u00c3\u00b1itas` (Ca\u00f1itas) · `David Kl\u00c3\u00b6cker` (Kl\u00f6cker)
+ * The `km\u00c2\u00b2` case cost four readings outright: `\u00c2` IS a letter, so the tier's trailing guard rejected the
+ * unit match and `km` reached the IPA raw.
+ *
+ * THE ARITHMETIC IS EXACT, not a lookup table. UTF-8 `C2 XX` encodes U+0080–U+00BF, and for a lead byte of
+ * C2 the code point EQUALS the trailing byte, so the repair is simply to drop the `\u00c2`. For `C3 XX` the code
+ * point is the trailing byte plus 0x40, which is why the second arm shifts.
+ *
+ * ⚠ LOSSY MOJIBAKE CANNOT BE REPAIRED AND IS NOT ATTEMPTED. mr_in carries `\u00e2\u0080\ufffd` twice — a curly quote whose
+ * third byte was already replaced with U+FFFD upstream, so the information is gone. Two instances in one
+ * corpus, and guessing which quote it was would be invention.
+ */
+export function repairDoubleEncoded(s: string): string {
+    if (!/[\u00c2\u00c3][\u0080-\u00bf]/u.test(s)) return s;
+    return s
+        .replace(/\u00c2([\u0080-\u00bf])/gu, "$1")
+        .replace(/\u00c3([\u0080-\u00bf])/gu, (_m, c: string) => String.fromCodePoint(c.codePointAt(0)! + 0x40));
+}
+
+/**
  * SQUARED DEGREE SIGNS → their two-character equivalents: ℃ → `°C`, ℉ → `°F`.
  *
  * WHY A FOLD RATHER THAN A RULE PER LANGUAGE. U+2103 and U+2109 are single code points that mean exactly what

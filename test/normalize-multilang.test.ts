@@ -635,4 +635,23 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
         // …and it agrees with the corpus's own spelled-out form, which is the check that matters.
         expect(phonemize("20℃", "yue")).toBe(phonemize("攝氏 20 度", "yue"));
     });
+
+    /**
+     * DOUBLE-ENCODED UTF-8, repaired at the registry's single dispatch point. id_id carries it upstream —
+     * FLEURS itself, not our mining — and the injected `Â`/`Ã` are LETTERS, so every downstream guard
+     * misfired: the tier's trailing guard refused the unit match and `km` reached the IPA raw.
+     * Measured safe across all 67 corpora: the signature (`Â`/`Ã` + a UTF-8 continuation byte) occurs 31
+     * times, every one in id_id and zero elsewhere. Closed RAWMARK 2→0 and DROP 25→16 in that language.
+     */
+    test("double-encoded UTF-8 is repaired before anything reads a character (#586)", () => {
+        // C2 XX: the code point EQUALS the trailing byte, so the `Â` is simply dropped.
+        expect(phonemize("19.500 km\u00c2\u00b2 dan", "id")).toContain("kilomətˈər pərsəɡˈi");
+        expect(phonemize("19.500 km\u00c2\u00b2 dan", "id")).toBe(phonemize("19.500 km² dan", "id"));
+        // C3 XX: the code point is the trailing byte plus 0x40 — `Ã±` → `ñ`, `Ã¶` → `ö`.
+        expect(phonemize("Las Ca\u00c3\u00b1itas", "id")).toBe(phonemize("Las Cañitas", "id"));
+        expect(phonemize("Kl\u00c3\u00b6cker", "id")).toBe(phonemize("Klöcker", "id"));
+        // …and it is INERT on text that merely contains those letters without a continuation byte.
+        expect(phonemize("Âge", "fr")).toBe(phonemize("Âge", "fr"));
+        expect(phonemize("5 km²", "de")).toBe("fʏnf kvadʁˈaːtkilomeːtɐ");
+    });
 });

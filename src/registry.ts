@@ -201,7 +201,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
 import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldNativeDigits, foldSquaredDegrees } from "./core/unicode.ts";
+import { foldNativeDigits, foldSquaredDegrees, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -310,7 +310,12 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // and not merely the sign; the 13 that handled both had written the arm out by hand, and
                     // folding is idempotent so they are unaffected. See `foldSquaredDegrees` for why the list
                     // stops at two characters instead of being NFKC.
-                    const pre = foldSquaredDegrees(stripMarkup(input));
+                    // DOUBLE-ENCODED UTF-8 IS REPAIRED FIRST, before anything reads a character: mojibake is
+                    // the one corruption that makes every downstream guard misfire, because the injected `Â`
+                    // and `Ã` are LETTERS. `19.500 kmÂ²` lost its whole unit that way — the tier's trailing
+                    // guard saw a letter after `km` and refused the match. Measured safe across all 67 corpora
+                    // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
+                    const pre = foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)));
                     return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {
                     popHost();
