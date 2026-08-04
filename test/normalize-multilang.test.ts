@@ -654,4 +654,28 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
         expect(phonemize("Âge", "fr")).toBe(phonemize("Âge", "fr"));
         expect(phonemize("5 km²", "de")).toBe("fʏnf kvadʁˈaːtkilomeːtɐ");
     });
+
+    /**
+     * `802.11g` READ AS "ELEVEN GRAMS" — in English, on a string present in 46 of the 67 corpora.
+     *
+     * This is the defect the shared tier's `NOT_VERSION` exists to stop (its note records `802.11g` reading as
+     * "802.11 grams" in ten languages) — and en/ro never got it, because neither uses the tier. Their own unit
+     * rules had no version guard: en's number group accepts a fraction, and ro's are bare `\b`-bounded word
+     * replacements with no number context at all.
+     *
+     * THE STANDARD IS NAMED, not left to the general heuristic: 802.11's amendment suffixes are now TWO
+     * letters (ac, ax, ah, be, bn), and `802.11ah` — Wi-Fi HaLow — collides with `Ah`, ampere-hours.
+     */
+    test("a networking standard is not a quantity (#586)", () => {
+        expect(phonemize("802.11g", "en")).not.toContain("ɡɹˈæmz");
+        expect(phonemize("802.11g", "ro")).not.toContain("ɡrame");
+        expect(phonemize("802.11ah", "en")).not.toContain("ˈaᶷɚ"); // ampere-HOURS
+        expect(phonemize("802.11ac", "ro")).not.toContain("ˈgrame");
+        // …and a genuine quantity is untouched, spaced or comma-grouped.
+        expect(phonemize("5 g", "en")).toContain("ɡɹˈæmz");
+        expect(phonemize("100.5 m", "en")).toContain("mˈiːt̬ɚz");
+        expect(phonemize("19,500 km", "en")).toContain("kəlˈɑːmʌt̬ɚz");
+        expect(phonemize("5 g", "ro")).toContain("ɡrame");
+        expect(phonemize("5 mm", "ro")).toContain("milimeˈtri");
+    });
 });
