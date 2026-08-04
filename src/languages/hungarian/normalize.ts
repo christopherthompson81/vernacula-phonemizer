@@ -92,6 +92,18 @@
  *     phonotactic OOV test lets them through as words because they ARE syllabifiable; whether Hungarian
  *     spells each of them out is a lexical fact I could not source per token, and `acronymLetters` is
  *     where it would go if I could. `WC` is the one exception, because *vécé* is a dictionary word.
+ *
+ * ⚠ THE MULTIPLICATION SIGN IS A VOWEL-HARMONIC SUFFIX HERE, NOT A WORD, and #586 leaves it UNSHIPPED for that
+ * reason rather than for want of evidence. The corpus writes `6 x 6 cm-es formátumot, egészen pontosan 56 × 56
+ * mm-es` — note BOTH spellings in one sentence, the ASCII `x` and U+00D7 — and the sign is dropped, so the
+ * dimensions read as bare numbers.
+ * The reading is settled: facebook/wav2vec2-xlsr-53-espeak-cv-ft over hu_hu/train gives
+ *     `… f iː l m k ɔ m ɛ r ɔ  h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə …`      hatszor hat centiméter
+ *     `… ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r …`      ötvenhatszor ötvenhat milliméter
+ * So `×` is the multiplicative -szor/-szer/-ször FUSED ONTO THE FIRST NUMERAL, and which allomorph appears
+ * depends on that numeral's vowels (hat→hatszor, öt→ötször, kettő→kétszer). That needs the number words plus
+ * harmony, not a string substitution — the same shape `attachSuffix` handles for apostrophe suffixes — so it is
+ * a separate change and is recorded here so the next pass does not re-derive the sourcing.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

@@ -50,7 +50,15 @@
  *     and neither the corpus (ଦଶମିକ ×0) nor the kaikki referee spells the word. Step 5 therefore only
  *     NEUTRALISES the dot; the defect being fixed is the SENTENCE BREAK it produced mid-number.
  *     `numbers.decimalWord` is left unset.
- *   - ¥ (×3) and £ (×1). ୟେନ is attested nowhere in this repo. ପାଉଣ୍ଡ is attested ×5 but every one of them
+ *   - ¥ (×3) and £ (×1). ୟେନ is attested nowhere in this repo — AND THE AUDIO NOW SHOWS THE SILENCE IS RIGHT,
+ *     which turns a reported sourcing failure into a sourced negative. The reader of `¥7,000` says only the
+ *     number: facebook/wav2vec2-xlsr-53-espeak-cv-ft over or_in/train gives
+ *     `… m u l j o p r a j o  s a t o h z e r  h e b a s o h i t o …` — "mūlya prāya SĀTA HAZĀRA hebā sahita",
+ *     seven thousand, with no currency word in the slot. ⚠ One speaker, so this is 1 of 1.
+ *     ⚠ AND pa, WHICH HAS THE SAME SENTENCE, GOES THE OTHER WAY — its reader says the loan
+ *     (`… h i a r r  j e n  d e v i tʃ …`), so pa now declares ¥ → ਯੇਨ. Same sign, same source sentence,
+ *     opposite readings, and neither was decidable from text. Do not copy or's silence to a sibling script.
+ *     ପାଉଣ୍ଡ is attested ×5 but every one of them
  *     is the WEIGHT ("200 ପାଉଣ୍ଡ (90 କି.ଗ୍ରା.)"), so declaring it as £'s currency noun would be inferring
  *     the sense, not sourcing it. Both signs stay dropped, as they were.
  *   - କି.ଗ୍ରା. (×2) EXPANDS TO NOTHING. କିଲୋଗ୍ରାମ appears in neither the corpus nor the referee, and the

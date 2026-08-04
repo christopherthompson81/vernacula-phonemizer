@@ -66,7 +66,18 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ Bare ਵਰਗ is ×12 and its first instance is `ਉੱਚ ਵਰਗ` — "upper CLASS". The bare count would have
     // triple-counted a different word; only the collocation with the unit noun attests the unit sense.
     exponentWords: { squared: ["ਵਰਗ"], cubed: ["ਘਣ"], position: "before" },
-    currency: { "$": ["ਡਾਲਰ"] },
+    // ⚠ `¥` → ਯੇਨ, AND IT WAS RECORDED AS UNSOURCEABLE UNTIL THE AUDIO ARRIVED. The corpus writes
+    // `ਟਿਕਟਾਂ ਦੀ ਕੀਮਤ ¥2,500 ਅਤੇ ¥130,000` and the sign was DROPPED, so the price lost its currency entirely.
+    // "yen" is ×0 in this corpus's TEXT and in the wiki, which is why #586 filed it as unsourceable — a correct
+    // report about the text tiers and the wrong conclusion about the language. The reader says it: decoded with
+    // facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer, so it cannot echo a glyph back),
+    //   `… t i k t a n d i k iː m a t … ʌ l a k a t iː h i a r r  j e n  d e v i tʃ k a r h o v e ɡ iː …`
+    // — "…hazār YEN de vich…", the loan spoken in slot. ਯੇਨ reads jˈeːn, which is that decode exactly.
+    // ⚠ ONE SPEAKER: pa_in carries a single recording of this sentence, so it is 1 of 1 rather than a majority.
+    // ⚠ CONTRAST or, WHICH HAS THE SAME SENTENCE AND WHOSE READER OMITS THE CURRENCY: or's `¥7,000` decodes as
+    // `… m u l j o p r a j o  s a t o h z e r  h e b a …` — "mūlya prāya sāta hazāra", the bare number. So the
+    // silence is right for or and wrong for pa, and neither could be settled from text.
+    currency: { "$": ["ਡਾਲਰ"], "¥": ["ਯੇਨ"] },
     magnitudes: ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"],
 });
 
