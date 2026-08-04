@@ -30,6 +30,10 @@ function engine(foreign?: ForeignPhonemizer) {
  *  a coupling that was load-bearing in three separate steps. Verified byte-identical over the whole
  *  mr_in corpus when moved onto the seam. */
 const MR_SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `आणि` ×1073 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "आणि",
     percent: ["टक्के"], // Hindi's प्रतिशत is not Marathi
     currency: { "$": ["डॉलर"], "€": ["युरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"] },
     units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलिमीटर"], kg: ["किलोग्रॅम"] },

@@ -63,6 +63,10 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * `t` and `h` are declared, for the same reason Danish declares both.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `og` ×1135 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "og",
     // `percent` is REQUIRED by SymbolData. The local rule above already claims every `%`, so this
     // never fires — but it is the corpus's own word and declaring it lets review.ts's sourcing check
     // see it, which it cannot do for a word that only exists inside a `.replace()`.

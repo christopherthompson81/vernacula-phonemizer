@@ -40,6 +40,10 @@ export function phonemizeWord(word: string): string {
  * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `i` ×846 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "i",
     percent: ["procent", "procenty", "procent", "procenta"],
     currency: {
         "$": ["dolar", "dolary", "dolarów", "dolara"],

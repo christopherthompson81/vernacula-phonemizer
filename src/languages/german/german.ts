@@ -388,6 +388,10 @@ const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!
 
 // #562 symbol normalization — German words (Prozent/Euro/Kilometer are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `und` ×1135 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "und",
     percent: ["Prozent"],
     currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
     // `m` — Meter ×6, and every digit-adjacent bare `m` in this corpus is a metre: `4892 m Höhe`,

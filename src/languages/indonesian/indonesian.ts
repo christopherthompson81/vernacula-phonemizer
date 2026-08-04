@@ -174,6 +174,10 @@ function numberWords(n: number): string {
 // Times (11.00) are claimed earlier by normalize.ts, so only real numbers reach this.
 // #562 Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `dan` ×1053 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "dan",
     percent: ["persen"],
     currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
     units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],

@@ -99,6 +99,10 @@ const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
 // #562 symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `и` ×1129 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "и",
     percent: ["процент", "процента", "процентов"],
     currency: { "€": ["евро"], "$": ["доллар", "доллара", "долларов"], "£": ["фунт", "фунта", "фунтов"] },
     units: { "км": ["километр", "километра", "километров"], "см": ["сантиметр", "сантиметра", "сантиметров"],

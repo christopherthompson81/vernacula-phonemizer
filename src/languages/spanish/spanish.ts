@@ -85,6 +85,10 @@ function wordIpa(word: string): string {
 
 // #562 symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `y` ×1141 in this corpus. The tier spaces it on both sides, because `B&B` is two
+    // initialisms and joining them would make one token.
+    ampersand: "y",
     percent: ["por ciento"],
     currency: { "€": ["euro", "euros"], "$": ["dólar", "dólares"], "£": ["libra", "libras"], "¥": ["yen", "yenes"] },
     // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.

@@ -678,4 +678,21 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
         expect(phonemize("5 g", "ro")).toContain("ɡrame");
         expect(phonemize("5 mm", "ro")).toContain("milimeˈtri");
     });
+
+    /**
+     * `&` HAD NO TIER CELL AT ALL, so 16 languages dropped it — always in the same two corpus sentences,
+     * `B&B` and `Arts & Sciences`. Every one has a high-frequency conjunction to spend (und ×1135, dan ×1053,
+     * og ×1135, и ×1129, және ×561), so this was a missing cell rather than a sourcing problem.
+     * SPACED on both sides: `B&B` is two initialisms and pl writes `bed&breakfast` glued, so substituting
+     * without spaces would fuse them into one token — the merge defect review.ts's own probe once had.
+     */
+    test("the ampersand is a tier cell, spaced on both sides (#586)", () => {
+        const n = makeSymbolNormalizer({ percent: ["percent"], ampersand: "and" });
+        expect(n("B&B")).toBe("B and B");            // three tokens, never one
+        expect(n("bed&breakfast")).toBe("bed and breakfast");
+        expect(n("Arts &amp; Sciences")).toBe("Arts and Sciences"); // the entity folds first
+        expect(n("A & B")).toBe("A and B");
+        // A language that declares none is untouched — the enclitic case (ml joins nouns with -ഉം).
+        expect(makeSymbolNormalizer({ percent: ["percent"] })("B&B")).toBe("B&B");
+    });
 });
