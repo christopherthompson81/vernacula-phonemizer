@@ -155,6 +155,49 @@ export function foldNativeDigits(s: string): string {
 }
 
 /**
+ * GREEK / CYRILLIC LETTERS USED AS LATIN LOOK-ALIKES, folded ONLY when flanked by Latin letters.
+ *
+ * FOUND BY A FIX THAT REGRESSED. Afrikaans' tokenizer claimed any `\p{L}` as a word, which silently deleted
+ * embedded Greek, Cyrillic and Thai (they were CLAIMED, so they never became a gap for the script router).
+ * Bounding the token to Latin script fixed that and broke two words — because af_za writes `proteϊen` and
+ * `ruϊnes` with U+03CA GREEK SMALL LETTER IOTA WITH DIALYTIKA in place of Latin `ï`. The over-claiming token had
+ * been quietly absorbing a homoglyph, so the "correct" narrowing exposed a defect it had been masking.
+ *
+ * ⚠ WHICH IS THE SAME SHAPE AS THE MOJIBAKE PHANTOMS: a character from the wrong script masquerading as one
+ * from the right one, invisible until something downstream depends on the distinction. It is the third variety
+ * of it in this file, after the double-encoding repair and the squared-degree fold.
+ *
+ * THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes a fleet-wide fold safe here where
+ * `foldNativeDigits` had to stay per-engine. A genuinely Greek or Cyrillic word has no Latin neighbours, so
+ * `Ελλάδα` and `Владимир` cannot match however they are hosted; only a letter WEDGED INSIDE a Latin word can.
+ * Measured across all 67 FLEURS corpora: `\p{Latin}[\p{Greek}\p{Cyrillic}]\p{Latin}` occurs **twice, both in
+ * af_za, both this ϊ**. The table is wider than those two hits deliberately — the confusable set is a known,
+ * closed list, and admitting only the letters that happen to occur would leave the same trap for the next
+ * corpus. Every entry is a visual look-alike, not a transliteration.
+ */
+const LATIN_CONFUSABLE: Readonly<Record<string, string>> = {
+    // Greek → Latin
+    "ϊ": "ï", "Α": "A", "Β": "B", "Ε": "E", "Η": "H", "Ι": "I",
+    "Κ": "K", "Μ": "M", "Ν": "N", "Ο": "O", "Ρ": "P", "Τ": "T",
+    "Υ": "Y", "Χ": "X", "α": "a", "ο": "o", "ρ": "p", "υ": "u",
+    // Cyrillic → Latin
+    "А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H",
+    "О": "O", "Р": "P", "С": "C", "Т": "T", "У": "Y", "Х": "X",
+    "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y",
+    "х": "x", "і": "i", "ё": "ë",
+};
+const CONFUSABLE_RE = new RegExp(
+    `(?<=\\p{Script=Latin})([${Object.keys(LATIN_CONFUSABLE).join("")}])(?=\\p{Script=Latin})`, "gu");
+
+/** Fold a Greek/Cyrillic look-alike sitting INSIDE a Latin word to its Latin equivalent. */
+export function foldLatinConfusables(s: string): string {
+    CONFUSABLE_RE.lastIndex = 0;
+    if (!CONFUSABLE_RE.test(s)) return s;
+    CONFUSABLE_RE.lastIndex = 0;
+    return s.replace(CONFUSABLE_RE, (c) => LATIN_CONFUSABLE[c]!);
+}
+
+/**
  * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
  * `\u00b2` arrives as `\u00c2\u00b2` and `\u00f1` as `\u00c3\u00b1`. Mojibake is one of the commonest real-world corruptions in
  * scraped text, and a phonemizer is handed arbitrary text.

@@ -201,7 +201,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
 import { readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
+import { foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -324,7 +324,9 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // and `Ã` are LETTERS. `19.500 kmÂ²` lost its whole unit that way — the tier's trailing
                     // guard saw a letter after `km` and refused the match. Measured safe across all 67 corpora
                     // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
-                    const folded = foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)));
+                    // `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
+                    // sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
+                    const folded = foldLatinConfusables(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input))));
                     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
                     return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {

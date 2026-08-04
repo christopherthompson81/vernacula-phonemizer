@@ -42,7 +42,20 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Umbundu letters incl. ⟨ñ⟩ + the ⟨ng'⟩ apostrophe, and tone/nasal diacritics) / number / punctuation token.
-const TOKEN = /([\p{L}\p{M}'’]+)|(\d+)|([.!?…,;:])/gu;
+// ⚠ THE WORD GROUP IS BOUNDED TO LATIN SCRIPT, and `[\p{L}\p{M}]` here was silent content loss. `\p{L}` matches
+// EVERY script, so this token claimed embedded Greek, Cyrillic, Thai and Devanagari as though they were words of
+// this language — and because they were CLAIMED they never became a gap, so `emitUnclaimed` never ran and the
+// script router (core/scripts.ts) never saw them. The engine's own word path then returned empty for a script it
+// cannot read, and the run vanished with nothing in the IPA to flag it.
+// Bounding the group is what makes the run UNCLAIMED, which is the state the router is built to handle. `\p{M}` is
+// kept alongside so a decomposed accent or tone mark stays attached to its Latin base.
+//
+// ⚠ AND THE GROUP MUST BEGIN WITH A LATIN LETTER, not merely contain Latin-or-mark. `[\p{Script=Latin}\p{M}]+`
+// still matches a BARE COMBINING MARK, because `\p{M}` is script-neutral — so scanning `เด็ก` skipped the two
+// Thai letters, claimed the lone U+0E47 as a "word", and split the gap into `เด` + `ก`. The router then read two
+// syllables where Thai reads one: `dˈeː˧ kˈa˨˩ʔ` for what should be `dˈe˨˩k`. Anchoring on a Latin letter means a
+// mark can only ever be claimed as part of a Latin word, which is the only thing it should attach to here.
+const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}'’]*)|(\d+)|([.!?…,;:])/gu;
 
 class UmbunduPhonemizer implements Phonemizer {
     text(input: string): string {
