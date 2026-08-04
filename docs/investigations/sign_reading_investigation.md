@@ -650,13 +650,18 @@ trip can manufacture exactly that shift. So:
 - ✗ **fine phonetic judgement** (vowel quality, voicing) — does NOT, and that is what an orthography choice
   rests on
 
-### Conclusion
+### Conclusion — and ⚠ THE STORAGE QUESTION IS SETTLED SEPARATELY: KEEP ALL THE AUDIO
 
-**Do not transcode-and-delete.** Prune to the EXTRACTED utterances instead: every language treated this session
-needed 2–5 wavs, 2–5 MB total — *smaller* than the 7–12 MB npz and lossless, because the question never needs
-ten hours of speech. Deletion is safe because `tools/corpus/fetch-fleurs-audio.py` resumes and skips
-size-matched files, so a re-fetch is ~3 minutes at 8 MB/s.
+The finding here is about EVIDENCE, not about disk. Reconstruction answers "is there a word in this slot" and
+must not be used to answer "which word" — any sourcing done from reconstructed audio has to say so.
 
-What the test does buy: the npz set is a **validated fallback**. If a tarball is gone and the question is the
-yes/no kind, the codes answer it. That is worth knowing and was not knowable without measuring — but it is a
-safety net, not the primary source, and any sourcing done from reconstructed audio must say so.
+⚠ **The full audio is retained deliberately, and pruning it would be wrong.** This investigation only ever
+needed 2–5 utterances per language, and an earlier draft of this section concluded from that "prune to the
+extracted utterances". That reasoning was scoped to sign-sourcing and is too narrow: the corpus audio is also
+the material for FINE-TUNING work, which wants the whole distribution — every speaker, every utterance,
+lossless. A conclusion drawn from one consumer's needs should not become the archive's policy. All 58 GiB stays
+(182 G free on the volume, so there is no pressure forcing the question).
+
+That leaves the codec test with exactly one use, which is still worth having: the npz set is a **validated
+fallback** for a yes/no question if a tarball is ever missing. It is not a substitute for the audio and not a
+storage strategy.

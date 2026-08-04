@@ -1434,8 +1434,10 @@ Four rules learned immediately, all of them cheap to get wrong:
    against known answers on hi's four utterances, all four survived — both spoken pluses and both silences, at
    log-mel SD ~3.1 dB. But the round trip moved a vowel `[e]` → `[a]` and flipped `p` → `b`, and a vowel is
    exactly what an orthography choice rests on (xh/zu's `plas` vs `plus`). Use reconstruction to ask *is there a
-   word here*; never to ask *which word*. Prune to the 2–5 extracted utterances instead — lossless, and smaller
-   than the codes.
+   word here*; never to ask *which word*, and label any sourcing that came from a reconstruction.
+   ⚠ This is a rule about EVIDENCE, not about storage: keep the full audio. A sourcing pass needs only 2–5
+   utterances per language, but the same corpus is the material for fine-tuning work, which wants every speaker
+   and every utterance losslessly — do not let one consumer's needs become the archive's policy.
 5. **VERIFY THE ASR PACKAGE ON KNOWN-GOOD AUDIO FIRST.** The 400M IndicConformer export decodes to an EMPTY
    STRING, including on the reference file its own docs cite. A broken export is indistinguishable from an
    unintelligible recording.
