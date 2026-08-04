@@ -434,3 +434,24 @@ export function foldVulgarFractions(s: string): string {
 export function foldSquaredDegrees(s: string): string {
     return s.replace(/℃/gu, "\u00b0C").replace(/℉/gu, "\u00b0F");
 }
+
+/**
+ * FULLWIDTH LATIN LETTERS AND DIGITS → their ASCII twins (Ｇ→G, ７→7).
+ *
+ * The fullwidth forms are the same characters at CJK cell width, used inside Chinese, Japanese and Korean text for
+ * Latin runs and numerals. Nothing downstream knows them: they are `Script=Latin` letters with NO decomposition, so
+ * the mark-stripping fold cannot reach them and a g2p with no rule DROPS them. Attested in the corpora as `Ｇ` and
+ * `Ｗ` inside CJK sentences.
+ *
+ * ⚠ LETTERS AND DIGITS ONLY, not the whole fullwidth block. U+FF01–FF5E also holds fullwidth PUNCTUATION, and the
+ * CJK engines already read their own `，、。？！` and the fullwidth ASCII marks deliberately — folding those would
+ * reach into decisions those engines have already made. This is the narrow half of NFKC that is unambiguously
+ * safe, chosen for the same reason `foldSquaredDegrees` stops at two characters instead of applying NFKC wholesale.
+ */
+const FULLWIDTH = /[\uFF10-\uFF19\uFF21-\uFF3A\uFF41-\uFF5A]/gu;
+export function foldFullwidthLatin(s: string): string {
+    FULLWIDTH.lastIndex = 0;
+    if (!FULLWIDTH.test(s)) return s;
+    FULLWIDTH.lastIndex = 0;
+    return s.replace(FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
+}
