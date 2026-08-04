@@ -63,9 +63,29 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
     // `\p{M}` IS IN THE GUARD, and leaving it out made this class blind across every abugida in the fleet.
     // A Devanagari word usually ends in a MATRA, not a bare consonant: the character before the hyphen in
     // `फ़ॉर्मूला-1` is ा (U+093E, `Mn`), so `(?<!\p{L})` passed and the scan reported a DROP on Formula-1 —
-    // a designation whose hyphen is correctly silent. Found by the #586 loop-back on hi, where BOTH reported
-    // minus drops were designations and the corpus contains no negative number at all.
-    ["minus", /(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\p{Nd})/gu],
+    // a designation whose hyphen is correctly silent.
+    //
+    // ⚠ THE SECOND LOOKBEHIND EXCLUDES A RANGE, and without it this class was measuring almost nothing it
+    // claimed to. Resolved per hit across all 66 artifacts (docs/investigations/sign_reading_investigation.md),
+    // the 15 dropped "minus" instances were 8 RANGES (`dem 10.-11.`, `(1418 -1450)`, `26 -00`, `1995 -96`,
+    // `२०१७ -१७`, `1000 -1300`, `10મી -11મી`, `ngo-26 -00`), 4 DESIGNATIONS (`चंद्रयान -1` in hi/mr/ta,
+    // `એચજેઆર -3`), 2 APPOSITION dashes (el's parenthetical `–12 χιλιόμετρα … Σιέμ Ριπ–`, my's
+    // `(Koreans -၂သန်း)`) — and exactly ONE true negative.
+    //
+    // A dash BETWEEN TWO NUMBERS is never a minus, so that exclusion costs no recall: the window is
+    // deliberately tight (a digit, then at most an ordinal suffix or an abbreviating dot, then at most one
+    // space) rather than "a digit somewhere behind". Measured why — hi's one real negative is `०.३७२७१९
+    // ख॰इ॰), -२.८८ परिमाण` (an astronomical magnitude), and a window wide enough to reach past `ख॰इ॰),`
+    // swallows it. Under-excluding a range is a stray report; over-excluding deletes the only true positive
+    // in the fleet.
+    //
+    // ⚠ A DESIGNATION AFTER A SPACE IS NOT DECIDABLE HERE and is deliberately still reported. `चंद्रयान -1`
+    // and a real `-5 stupňů` are the same shape — word, space, dash, digit — so separating them needs a
+    // lexicon, not a guard. Those hits want a per-language judgement; a quiet gate would be worse.
+    //
+    // Corrects this comment's own earlier claim that hi "contains no negative number at all" — it does, and
+    // the sentence above is it. That claim was made from the two designation hits without resolving the rest.
+    ["minus", /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−–](?=\p{Nd})/gu],
     ["math-sign", /[+±×÷=<>]/gu],
     ["exponent", /[²³⁰¹⁴-⁹]/gu],
     ["ampersand", /[&＆]/gu],
