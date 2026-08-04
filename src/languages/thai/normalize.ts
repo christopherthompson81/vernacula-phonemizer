@@ -254,6 +254,11 @@ export function normalizeThai(input: string): string {
     // ⚠ KEYED ON THE FOLLOWING DIGIT ALONE, not digit-flanked, and Arabic's rule records the same reason: in
     // `29¾ นิ้ว × 24½ นิ้ว` the left neighbour is the unit WORD นิ้ว and the numbers carry vulgar fractions, so a
     // `(\d)\s*×\s*(\d)` shape misses it outright.
+    // ⚠ U+00D7 ONLY, NOT THE ASCII `x`, and that asymmetry is deliberate. hu's corpus writes both spellings in
+    // one sentence, so the ASCII form is real orthography THERE — but that is a fact about Hungarian typography,
+    // and th_th contains zero ASCII instances. Accepting a bare `x` here would be looser than vi's rule, which
+    // is digit-FLANKED, because this one keys on the following digit alone (it has to: the left neighbour is the
+    // unit word นิ้ว). Add it if a Thai instance ever appears; do not import it from another language's habits.
     s = s.replace(/\s*[×]\s*(?=\d)/gu, " คูณ ");
 
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
