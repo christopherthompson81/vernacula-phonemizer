@@ -71,7 +71,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
     // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
     // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n}の二乗", cubed: "{n}の三乗", power: "{n}の{e}乗" },
+    bareExponent: { squared: "{n}の二乗", cubed: "{n}の三乗", power: "{n}の{e}乗" , negative: "マイナス" },
     currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
     // Japanese has no spaces either, so the tier's letter-boundary guards were rejecting its ordinary case
     // the same way they were Chinese's: `20℃は暑い` dropped the ℃ and `50 km²の` lost the exponent, while their

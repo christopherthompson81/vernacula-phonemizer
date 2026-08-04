@@ -17,6 +17,8 @@ export type CountForms = string[];
 
 /** Superscript digits → ASCII, so the exponent reaches the engine's number path as a readable numeral. */
 const SUPERSCRIPT: Readonly<Record<string, string>> = {
+    "⁻": "-", // SUPERSCRIPT MINUS (U+207B) — a NEGATIVE exponent, `10⁻³¹`. Without it the whole run failed to
+    //         match and `10⁻³¹` read as bare *tʰˈɛn*, sign and power both gone.
     "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
     "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
 };
@@ -172,6 +174,21 @@ export interface SymbolData {
         squared?: string;
         cubed?: string;
         power?: string;
+        /**
+         * The word for a NEGATIVE exponent's sign — `10⁻³¹` is "to the power of MINUS thirty-one".
+         *
+         * Emitted as a WORD rather than left as an ASCII `-`, because ordering makes that the only correct
+         * option: a language's own sign rule lives in its normalize.ts, which runs BEFORE this tier, so a `-`
+         * written here is downstream of it and would simply be dropped — reading `2⁻⁵` as "two to the power of
+         * five", with the sign silently inverted.
+         *
+         * ⚠ ENGLISH USES "negative" HERE AND "minus" FOR THE OPERATOR, and the distinction is worth carrying:
+         * `minus` is the arithmetic operator ("ten minus four") and English convention reserves it for that,
+         * spending `negative` on a sign attached to an amount. Most other languages do not split the two words
+         * — de *minus*, fr *moins*, ru *минус* serve both — so each entry is that language's own sign word,
+         * taken from the minus rule already in its normalize.ts rather than invented here.
+         */
+        negative?: string;
     };
     /**
      * The word for `&`, which is DROPPED outright without one — and a dropped sign is inaudible.
@@ -523,9 +540,15 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                 // `1`, `0` and a multi-digit power — goes through the generic form. `¹` is deliberately NOT
                 // special-cased to "to the power of one": it is vanishingly rare and reading it plainly is
                 // correct, where inventing "itself" would not be.
-                const tpl = digits === "2" ? be.squared : digits === "3" ? be.cubed : be.power;
+                const neg = digits.startsWith("-");
+                const mag = neg ? digits.slice(1) : digits;
+                // A NEGATIVE exponent always takes the generic `power` form: no language has a word for
+                // "negative squared", and `10⁻²` is "to the power of minus two", not "minus squared".
+                const tpl = neg ? be.power : mag === "2" ? be.squared : mag === "3" ? be.cubed : be.power;
                 if (tpl === undefined) return whole; // this language declares only some powers
-                return tpl.replace(/\{n\}/gu, base).replace(/\{e\}/gu, digits);
+                if (neg && be.negative === undefined) return whole; // sign unreadable → leave it visible
+                const exponent = neg ? `${be.negative} ${mag}` : mag;
+                return tpl.replace(/\{n\}/gu, base).replace(/\{e\}/gu, exponent);
             });
         }
         return s;

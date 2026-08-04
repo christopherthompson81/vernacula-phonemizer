@@ -101,4 +101,39 @@ describe("bare exponent", () => {
         expect(phonemize("mc²", "en")).toContain("skwˈɛɹd");
         expect(phonemize("x⁷", "en")).toContain("pʰˈaᶷɚ");
     });
+
+    test("#586 NEGATIVE exponents — the issue's last named open item", () => {
+        // "Negative exponents in scientific notation — has a cell now, no rule." U+207B was missing from the
+        // superscript run, so `10⁻³¹` read as bare *tʰˈɛn*: sign and power both gone.
+        expect(phonemize("10⁻³¹", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv");
+        expect(phonemize("2⁻⁵", "en")).toContain("nˈɛɡət̬ɪv fˈaᶦv");
+        // Every declared language reads it, each with its OWN sign word taken from its existing minus rule.
+        for (const [lang, want] of [["de", "mˈiːnʊs"], ["fr", "mwɛ̃"], ["es", "mˈenos"], ["it", "mˈeno"],
+            ["pt", "mˈenuʃ"], ["ru", "mʲˈinʊs"], ["hi", "ɾˈɪɳ"]] as [string, string][])
+            expect(phonemize("10⁻³¹", lang), lang).toContain(want);
+        // A negative exponent always takes the GENERIC power form: `10⁻²` is "to the power of minus two",
+        // never "minus squared" — no language has a word for that.
+        expect(phonemize("10⁻²", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv tʰˈuː");
+    });
+
+    test("#586 SCIENTIFIC NOTATION keeps its unit — the superscript broke their adjacency", () => {
+        // ⚠ THE UNIT LEAKED. A superscript sits BETWEEN the number and the unit, so the unit rule's adjacency
+        // failed and `9.11 × 10⁻³¹ kg` reached the phoneme stream with a RAW `kɡ` — worse than the dropped
+        // exponent beside it. Resolving the exponent BEFORE the unit rule leaves its digits next to the unit.
+        const sup = phonemize("9.11 × 10⁻³¹ kg", "en");
+        expect(sup).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv");
+        expect(sup).toContain("kʰˈɪləɡɹˌæmz");
+        expect(sup).not.toMatch(/kɡ/u);
+        // The ASCII form is the one that actually occurs — both real instances write the exponent as plain
+        // digits with the superscript lost (`9.1093837 × 10 -31 kg`, `2.5×10 -11 m`, my's artifact).
+        expect(phonemize("9.11 × 10 -31 kg", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv");
+        expect(phonemize("2.5×10 -11 m", "en")).toContain("mˈiːt̬ɚz");
+        // ⚠ AND IT MUST RUN BEFORE THE SIGN RULE. Placed after, step 0e had already rewritten `-31` to
+        // "negative 31", the ASCII pattern could no longer match, and the reading kept saying "ten negative
+        // thirty-one" — sign present, power missing.
+        expect(phonemize("9.11 × 10 -31 kg", "en")).toContain("tʰuː ðə pʰˈaᶷɚ");
+        // ⚠ SUBTRACTION IS NOT SCIENTIFIC NOTATION. The `×` and the ATTACHED minus are the discriminators.
+        expect(phonemize("10 - 31 people", "en")).not.toContain("pʰˈaᶷɚ");
+        expect(phonemize("from 10 - 31", "en")).not.toContain("pʰˈaᶷɚ");
+    });
 });

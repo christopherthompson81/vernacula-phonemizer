@@ -158,8 +158,10 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("1/2", "en")).toBe("wˈʌn hˈæf"); // was "one two"
         expect(phonemize("3/4", "en")).toBe("θɹˈiː kwˈɔːɹt̬ɚz");
         expect(phonemize("2/5", "en")).toBe("tʰˈuː fˈɪfθs"); // ordinal denominator, pluralized
-        // A dropped minus INVERTS the meaning — the worst class of silent error for a temperature.
-        expect(phonemize("-5 degrees", "en")).toBe("mˈaᶦnəs fˈaᶦv dᵻɡɹˈiːz");
+        // A dropped sign INVERTS the meaning — the worst class of silent error for a temperature.
+        // ⚠ "NEGATIVE", NOT "MINUS": `minus` is the arithmetic OPERATOR and English reserves it for that,
+        // using `negative` for a sign on an amount. See step 0e — this rule only ever matches the sign position.
+        expect(phonemize("-5 degrees", "en")).toBe("nˈɛɡət̬ɪv fˈaᶦv dᵻɡɹˈiːz");
     });
 
     test("units that were dropped or read as letter names", () => {
@@ -302,10 +304,13 @@ describe("Latin abbreviations and phrases", () => {
     // keeps a spaced range out; `\s?` is the whole difference between the two behaviours.
     test("a spaced dash between years is never a minus", () => {
         expect(normalizeEnglish("Sejong (1418 – 1450)")).toBe("Sejong (1418 – 1450)");
-        expect(normalizeEnglish("from 1990 - 1995")).not.toContain("minus");
-        expect(normalizeEnglish("scores 5 - 3")).not.toContain("minus");
+        // ⚠ ASSERTED ON "negative", NOT "minus" — the word the sign rule now emits. Left as `minus` these
+        // three would pass VACUOUSLY, testing nothing, since that word is no longer produced anywhere by this
+        // rule. A regression pin has to name the string the code can actually emit.
+        expect(normalizeEnglish("from 1990 - 1995")).not.toContain("negative");
+        expect(normalizeEnglish("scores 5 - 3")).not.toContain("negative");
         // …while a real negative still reads.
-        expect(normalizeEnglish("a -5 degree night")).toBe("a minus 5 degree night");
-        expect(normalizeEnglish("COVID-19 cases")).not.toContain("minus");
+        expect(normalizeEnglish("a -5 degree night")).toBe("a negative 5 degree night");
+        expect(normalizeEnglish("COVID-19 cases")).not.toContain("negative");
     });
 });

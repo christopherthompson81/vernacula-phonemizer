@@ -288,7 +288,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
     // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
     // The cardinal is used for the generic power, never the ordinal — see core for that argument.
-    bareExponent: { squared: "{n} ao quadrado", cubed: "{n} ao cubo", power: "{n} elevado a {e}" },
+    bareExponent: { squared: "{n} ao quadrado", cubed: "{n} ao cubo", power: "{n} elevado a {e}" , negative: "menos" },
     magnitudes: ["milhões", "milhão", "bilhões", "bilhão"],
     magnitudeConnective: "de", // cinco milhões DE dólares
 });

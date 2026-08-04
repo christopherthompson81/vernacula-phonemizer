@@ -1120,3 +1120,86 @@ chase through two languages that were never touched.
 Gates after the fixes: tsc clean; **205 files / 2921 tests** (one added, pinning the footnote case and the
 boundary guard that makes the cap work); audit **0 defective cells across 0/67**; corpus diffs byte-identical on
 en, de, it, hi, ne and id against the true branch point.
+
+## Run 17 — 2026-08-04 — assessing against #586's own text, and the last named open item
+
+Read the issue rather than working from memory of it, and checked each thing it asks for.
+
+### What the issue asks, and where it stands
+
+| #586 asks for | status |
+|---|---|
+| Round 1 — sweep every treated language against the full inventory | **done**, and the sweep itself was found to be running on 37 of 67 |
+| Round 2 — re-run, because round 1 changes the inventory | **done**, repeatedly; audit now 0/67 |
+| Audit the inventory against DECLARATIONS, not just rule comments | **checked** — every widely-declared field has a cell (`units` 105, `percent` 57, `currency` 54, `magnitudes` 52, `exponentWords` 51, `unitPer` 22 → `rate`, `ampersand` 17). No missing cell. |
+| `arithmetic` / `=` — "needs a per-language decision, not a shared default" | **32 of 67 read it, 35 drop.** Still the deferred per-language item the issue describes. |
+| Negative exponents in scientific notation — "has a cell now, no rule" | **CLOSED this run** |
+
+⚠ **My own exponent work had a hole in exactly the place the issue names.** `U+207B` SUPERSCRIPT MINUS was
+missing from the superscript run, so `10⁻³¹` read as bare *tʰˈɛn* — sign and power both gone. Implementing
+"arbitrary exponent reading" and omitting the negative exponent left the issue's last named item open while
+looking closed.
+
+### ⚠ AND THE UNIT LEAKED, which is worse than the drop it accompanied
+
+`9.11 × 10⁻³¹ kg` read as `… tʰˈaᶦmz tʰˈɛn kɡ` — a RAW `kɡ` in the IPA. A superscript sits BETWEEN the number
+and its unit, which breaks the adjacency the unit rule matches on, so the unit failed and its abbreviation
+reached the phoneme stream verbatim. Fixed by resolving the scientific-notation exponent BEFORE the unit rule,
+which leaves the exponent's DIGITS immediately next to the unit — step 6 then sees `31 kg` and the whole phrase
+comes out "…to the power of negative thirty-one kilograms", which is how a person says it.
+
+**Two placements, and both are necessary**: scientific notation must precede the unit rule or the unit leaks; a
+bare exponent must follow it or it steals every `km²` and reads it "kilometre squared".
+
+⚠ **And it had to precede the SIGN rule too.** First placed after it, the ASCII form silently failed: step 0e
+had already rewritten `-31` to "negative 31", so the pattern could no longer match and the reading kept saying
+"ten negative thirty-one" — sign present, power missing. Three ordering constraints on one rule, each found by
+probing rather than by reading.
+
+### "negative" for the sign, "minus" for the operator
+
+Corrected on the point that `minus` is the arithmetic OPERATOR and English convention reserves it for that,
+spending `negative` on a sign attached to an amount. English's step 0e only ever matches the SIGN position
+(start of string, after a space, after an open paren) — so it was spending the operator's word on the sign's
+job. Now `-31` → "negative thirty-one", `-5 °C` → "negative five degrees Celsius".
+
+The disambiguation is real and cheap: `negative` on a measurement is unremarkable English, and a bare `10 - 4`
+is currently DROPPED, so "minus" in English output could only ever have come from a sign anyway.
+
+⚠ **Most languages do not split the two words** — de *minus*, fr *moins*, ru *минус* serve both senses — so
+`bareExponent.negative` is each language's OWN sign word, lifted from the minus rule already in its
+normalize.ts rather than invented: de minus, fr moins, es menos, it meno, pt menos, ru минус, ja マイナス,
+cmn 负, hi ऋण. Sourcing from the repo's own shipped data beats sourcing from my own confidence.
+
+⚠ **Two test pins would have passed VACUOUSLY.** `expect(...).not.toContain("minus")` on the range cases still
+passed after the change — because that word is no longer emitted anywhere by the rule, so the assertion tested
+nothing. Retargeted to `"negative"`. *A regression pin has to name the string the code can actually emit;*
+renaming an output silently defuses every negative assertion about it.
+
+### What the corpus forms actually are
+
+Scientific notation occurs 4 times in the artifacts, and only 2 are recoverable:
+
+```
+my  9.1093837 × 10 -31 kg     ASCII, superscript flattened  → now reads
+my  2.5×10 -11 m              ASCII, superscript flattened  → now reads
+hi  2.802×1010 वर्ग फु         `10¹⁰` FLATTENED INTO THE MANTISSA — unrecoverable
+hi  1.1×109 वर्ग फु            `10⁹` likewise — unrecoverable
+```
+
+⚠ The last two are **data loss, not a rule gap**: `2.802×1010` genuinely reads "2.802 times 1010" and nothing in
+the text says the exponent was ever superscripted. Recorded so no later pass tries to "fix" them by guessing
+where a power boundary was.
+
+The ASCII form needs the ATTACHED minus as its discriminator — `10 -31` is scientific notation, `10 - 31`
+(spaced both sides) is subtraction — and both real instances write it attached, which is the convention.
+Combined with the required `×`, nothing that is not scientific notation reaches the rule.
+
+### Result
+
+Gates: tsc clean; **205 files / 2921 tests**; audit **0 defective cells across 0/67**; corpus diffs
+byte-identical on en, de, hi and ru — expected, since en_us contains no true negative at all (the fleet's only
+one is hi's astronomical magnitude) and no corpus writes a superscripted exponent.
+
+**Outstanding against #586 after this run: the `arithmetic` / `=` item only** — 35 of 67 languages still drop
+`=`, which the issue itself defers as needing a per-language decision rather than a shared default.
