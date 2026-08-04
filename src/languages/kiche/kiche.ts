@@ -42,7 +42,7 @@ export function phonemizeWord(word: string): string {
         }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
         // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
-        const ph = G[w[i]!] ?? latinPhone(w[i]!);
+        const ph = G[w[i]!] ?? latinPhone(w[i]!, { initial: i === 0 });
         if (ph !== undefined) segs.push(ph);
         i += 1;
     }

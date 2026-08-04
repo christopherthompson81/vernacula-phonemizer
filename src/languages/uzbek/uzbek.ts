@@ -58,7 +58,7 @@ export function phonemizeWord(word: string): string {
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
         // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
         else if (DEF.consonants[c] !== undefined) out.push(DEF.consonants[c]!);
-        else { const p = latinPhone(c); if (p !== undefined) out.push(p); }
+        else { const p = latinPhone(c, { initial: i === 0 }); if (p !== undefined) out.push(p); }
         // else: unknown char (stray punctuation inside a token) → skip
         i++;
     }

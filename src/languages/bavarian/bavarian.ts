@@ -69,7 +69,7 @@ function scan(word: string): Tok[] {
         const c = w[i]!;
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
         // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
-        const ph = G[c] ?? latinPhone(c);
+        const ph = G[c] ?? latinPhone(c, { initial: i === 0 });
         if (ph !== undefined) toks.push({ ph, rVar: c === "r" });
         i += 1;
     }

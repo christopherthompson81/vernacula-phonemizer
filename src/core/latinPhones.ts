@@ -86,7 +86,7 @@ export const LATIN_PHONE: Readonly<Record<string, string>> = {
     t: "t",
     v: "v",
     w: "w",
-    x: "ks", // the letter's own value; the one two-phone row
+    x: "ks", // ⚠ POSITIONAL — see `X_INITIAL`. This is the medial/final value; word-initially it is /z/.
     y: "j", // ⚠ AMBIGUOUS: consonantal /j/ (English, Latin) vs vowel /i~y/ (Scandinavian, Welsh, Slavic ⟨y⟩)
     z: "z",
     // Vowels, for completeness — a scan rarely falls through on these, but the table should not have holes.
@@ -133,8 +133,37 @@ export const LATIN_PHONE: Readonly<Record<string, string>> = {
  * consult this table for `h`, so `h` is opt-in via `includeH`. Measuring "the g2p says nothing" cannot distinguish
  * deliberate silence from a missing rule, so the distinction has to be declared by the caller.
  */
-export function latinPhone(ch: string, includeH = false): string | undefined {
+/**
+ * ⚠ WORD-INITIAL ⟨x⟩ IS /z/, NOT /ks/. The cluster is the letter's value between or after vowels (`Xerox` →
+ * *…oks*, `taxi`), but no language that borrows ⟨x⟩ begins a word with the cluster — `Xerox`, `xylophone`,
+ * `Xanthe` all start /z/. Emitting /ks/ there manufactured an initial cluster that the source language does not
+ * have either, which is the worst of both: illegal in the host AND wrong about the loan.
+ */
+const X_INITIAL = "z";
+
+export interface PhoneOpts {
+    /** Is this the first character of the word? Selects the initial allophone (currently ⟨x⟩ only). */
+    initial?: boolean;
+    /**
+     * Consult the table for ⟨h⟩. Off by default: `h` is written and read as NOTHING in Italian, Galician,
+     * Aragonese and Asturian, and those engines fall through on it for that reason — correctly. Measuring "the g2p
+     * says nothing" cannot tell deliberate silence from a missing rule, so the caller declares it.
+     */
+    includeH?: boolean;
+}
+
+/**
+ * The phone for `ch`, or `undefined` if this table has nothing to say — which is the correct answer for anything
+ * that is not a letter.
+ *
+ * ⚠ NOT FOR COMBINING MARKS, and the guard is here rather than left to each caller: the scan branch this is
+ * consulted from also swallows stray combining marks, and a mark is not a segment. Giving one a phone would invent
+ * a sound where the orthography has a diacritic the engine has already handled or declined.
+ */
+export function latinPhone(ch: string, opts: PhoneOpts = {}): string | undefined {
     if (/\p{M}/u.test(ch)) return undefined;
-    if (ch === "h" || ch === "H") return includeH ? LATIN_PHONE.h : undefined;
-    return LATIN_PHONE[ch.toLowerCase()];
+    const c = ch.toLowerCase();
+    if (c === "h") return opts.includeH === true ? LATIN_PHONE.h : undefined;
+    if (c === "x" && opts.initial === true) return X_INITIAL;
+    return LATIN_PHONE[c];
 }

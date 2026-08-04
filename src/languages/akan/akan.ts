@@ -115,7 +115,7 @@ function phonemizeCore(word: string, useTone: boolean): string {
         // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
         // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
         // has been tried, so it can never override a reading this language has an opinion about (#663).
-        { const p = latinPhone(c); if (p !== undefined) out.push(p); }
+        { const p = latinPhone(c, { initial: i === 0 }); if (p !== undefined) out.push(p); }
         i += 1;
     }
     // TONE + vowel-nasality overlay (shipped path): attach Chao letters (H→˥, L→˩) and ◌̃ to each nucleus.
