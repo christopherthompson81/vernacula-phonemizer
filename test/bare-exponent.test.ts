@@ -136,4 +136,71 @@ describe("bare exponent", () => {
         expect(phonemize("10 - 31 people", "en")).not.toContain("pʰˈaᶷɚ");
         expect(phonemize("from 10 - 31", "en")).not.toContain("pʰˈaᶷɚ");
     });
+
+    test("⚠ THREE ENCODINGS, ONE READING — and the markup one was OUR data loss", () => {
+        // A caller hands a phonemizer whichever encoding is at hand. All three must land on the same reading.
+        const want = phonemize("19,500 km²", "en");
+        expect(phonemize("19,500 km<sup>2</sup>", "en")).toBe(want);   // HTML markup
+        expect(phonemize("19,500 km&sup2;", "en")).toBe(want);         // HTML named entity
+        expect(phonemize("19,500 km^2", "en")).toBe(want);             // caret, as a programmer types it
+        expect(phonemize("19,500 km&#178;", "en")).toBe(want);         // numeric entity (already worked)
+
+        const neg = phonemize("9.11 × 10⁻³¹ kg", "en");
+        expect(phonemize("9.11 × 10<sup>-31</sup> kg", "en")).toBe(neg);
+        expect(phonemize("9.11 × 10^-31 kg", "en")).toBe(neg);
+
+        // ⚠ THE MARKUP CASE WAS A LOSS WE CAUSED, not the source's. Stripping `<sup>` left the digits INLINE,
+        // so `2.802×10<sup>10</sup>` became `2.802×1010` — the exponent merged into the mantissa. The arithmetic
+        // proves it: hi's `2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)` only reconciles as 2.802×10¹⁰ sq ft.
+        expect(phonemize("2.802×10<sup>10</sup>", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
+        // ⚠ AND MY FIRST CLAIM ABOUT WHY IT HID WAS WRONG, which this assertion caught. I wrote that the unit
+        // case "survives flattening because the tier accepts an ASCII exponent" — true for 7 of the 9 tier
+        // languages that carry `km2` (el es ml bg ne hu cmn), but NOT for en, sw or nb. In those three the `2`
+        // fell out of the unit match and read as a SEPARATE NUMBER: "nineteen thousand five hundred kilometres
+        // TWO". Audibly wrong, and invisible to both gates — no superscript survives to leak, nothing vanishes.
+        // en now accepts the ASCII exponent (bounded by the unit list, so `H2O` cannot match). sw and nb differ
+        // for another reason: they declare no `exponentWords`, so the tier hands the exponent back BY DESIGN —
+        // a visible missing WORD in their data, which is the documented behaviour and not this bug.
+        expect(phonemize("19,500 km2", "en")).toBe(want);
+        expect(phonemize("1 m3", "en")).toBe(phonemize("1 m³", "en"));
+        // The unit list is the guard: these are not units and must be untouched.
+        expect(phonemize("H2O", "en")).toContain("tʰˈuː");
+        expect(phonemize("802.11g", "en")).toContain("d͡ʒˈiː");
+    });
+
+    test("the caret guard is tight, and `<sub>` is deliberately NOT mapped", () => {
+        // A caret must follow a letter or digit and be followed only by (optionally signed/braced) digits.
+        expect(phonemize("a ^ b", "en")).not.toContain("pʰˈaᶷɚ");
+        expect(phonemize("2^10", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
+        expect(phonemize("10^{10}", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
+        // ⚠ SUBSCRIPTS STAY ASCII. Nothing reads a subscript digit, so rendering `<sub>2</sub>` to `₂` would take
+        // a form that IS spoken and make it silent — the same error as the bug above, pointed the other way.
+        expect(phonemize("CO<sub>2</sub> levels", "en")).toContain("tʰˈuː");
+        expect(phonemize("H<sub>2</sub>O", "en")).toBe(phonemize("H2O", "en"));
+    });
+
+    test("named entities that map to readable characters no longer stay literal", () => {
+        expect(phonemize("&minus;5 degrees", "en")).toContain("nˈɛɡət̬ɪv fˈaᶦv");
+        expect(phonemize("&plusmn;3", "en")).toContain("plˈʌs ɔːɹ mˈaᶦnəs");
+        expect(phonemize("&frac34; cup", "en")).toContain("kwˈɔːɹt̬ɚz");
+        // An entity with no readable target is still left as written rather than invented away.
+        expect(phonemize("&notareal; thing", "en")).toBeTruthy();
+    });
+
+    test("⚠ ENGLISH LEAKED ITS UNIT ACROSS A MAGNITUDE WORD — found by chasing the flattened exponent", () => {
+        // `2.2 million km2 of ocean` — the archipelago sentence, in en_us — read as *… mˈɪɫjən ˈʊkm tʰˈuː …*:
+        // the abbreviation reached the phoneme stream AS RAW LETTERS and the area was lost entirely. Invisible
+        // to every gate, because bare Latin letters are in no leak class and nothing vanished for DROP to catch.
+        // Same defect the shared tier fixed with `magnitudes`; English does not use that tier.
+        const s = phonemize("2.2 million km2 of ocean", "en");
+        expect(s).toContain("skwˈɛɹ kəlˈɑːmʌt̬ɚz");
+        expect(s).not.toMatch(/ʊkm/u);
+        expect(phonemize("2.2 million km² of ocean", "en")).toBe(s);
+        // The plain unit leaked too — it is the magnitude that breaks adjacency, not the exponent.
+        expect(phonemize("2.2 million km of ocean", "en")).toContain("kəlˈɑːmʌt̬ɚz");
+        // A magnitude forces the PLURAL: the singular test looks at the digits alone, so `1 million km` would
+        // otherwise read "kilometre".
+        expect(phonemize("1 million km", "en")).toContain("kəlˈɑːmʌt̬ɚz");
+        expect(phonemize("1 m³", "en")).toContain("kjˈuːbɪk mˈiːt̬ɚ"); // …and the real singular still works
+    });
 });

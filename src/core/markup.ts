@@ -21,7 +21,57 @@ const NAMED: Readonly<Record<string, string>> = {
     amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
     laquo: "«", raquo: "»", ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’",
     hellip: "…", ndash: "–", mdash: "—", deg: "°", times: "×", middot: "·", euro: "€", pound: "£", yen: "¥",
+    // ⚠ ADDED because they were staying LITERAL. An unknown entity is deliberately left as written (see below),
+    // which is right for a name nothing can render — but every one of these maps to a character the engine
+    // ALREADY reads, so leaving them literal meant `km&sup2;` reached the phoneme stream as the text
+    // "km ampersand sup two semicolon". A programmer hands a phonemizer whichever encoding is at hand, and the
+    // NUMERIC forms already worked (`&#178;` → `²`), so the named ones failing was pure inconsistency.
+    // Each is paired with the machinery that reads it: sup1-3 → the exponent rules, frac → the vulgar-fraction
+    // fold, minus/plusmn → the sign rules, cent/micro/permil → the symbol tier.
+    sup1: "¹", sup2: "²", sup3: "³",
+    frac12: "½", frac14: "¼", frac34: "¾",
+    minus: "−", plusmn: "±", micro: "µ", permil: "‰", cent: "¢",
 };
+
+/**
+ * `<sup>` AND `<sub>` CARRY MEANING THAT THE TAG STRIP DESTROYS, so they are rendered to real superscript
+ * characters BEFORE the general tag pass removes their brackets.
+ *
+ * ⚠ WE WERE THE CAUSE OF A DATA LOSS I HAD RECORDED AS THE SOURCE'S FAULT. Stripping `<sup>10</sup>` leaves the
+ * digits INLINE, so `2.802×10<sup>10</sup>` becomes `2.802×1010` — the exponent merges into the mantissa and no
+ * later pass can tell where the boundary was. I had written that off as corpus damage; it is ours.
+ *
+ * THE ARITHMETIC PROVES IT, which is what settles the question rather than a guess about the wiki source:
+ *   `2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)`  →  2,603 km² IS 2.802×10¹⁰ sq ft
+ *   `100 kमी2 (1.1×109 वर्ग फुट)`               →  100 km²   IS 1.1×10⁹ sq ft
+ * The values only reconcile with the exponent restored, so `1010` and `109` were `10¹⁰` and `10⁹`.
+ *
+ * ⚠ AND IT WAS SURVIVABLE FOR UNITS, WHICH IS WHY IT HID. `km<sup>2</sup>` flattens to `km2`, and the symbol
+ * tier deliberately accepts an ASCII exponent after a letter — the branch that made the original `<sup>` fix
+ * work. So the damage showed up in twelve corpora as a harmless-looking `km2` and only became visible where the
+ * base was a NUMBER and the two digit runs collided. A lossy transform that happens to be readable in the
+ * common case is the hardest kind to notice.
+ *
+ * DIGITS AND SIGNS ONLY. `4<sup>th</sup>` keeps its letters as plain text (`4th`), which the ordinal rule
+ * already reads — there is no superscript `th` worth inventing, and mapping letters would break that path.
+ *
+ * ⚠ `<sub>` IS DELIBERATELY *NOT* MAPPED, and writing the mapping first is what showed why. Superscripts are
+ * READ — the exponent machinery speaks them — so rendering `<sup>2</sup>` to `²` hands the information to
+ * something that can use it. NOTHING reads a subscript digit, so rendering `<sub>2</sub>` to `₂` takes a form
+ * that WAS readable and makes it silent:
+ *     `CO2 levels`  → *kʰˈoᶷ tʰˈuː lˈɛvəɫz*      ← the flattened ASCII form, and the 2 is spoken
+ *     `CO₂ levels`  → *kʰˈoᶷ lˈɛvəɫz*            ← "correctly" rendered, and the 2 is GONE
+ * That is the same error as the bug this whole comment is about, pointed the other way: a transform is only a
+ * repair if something downstream can read what it produces. `<sub>` occurs ZERO times in all 67 corpora and all
+ * 67 artifacts, so the mapping had no measured benefit to weigh against a measured regression. If a subscript
+ * reading is ever wanted, the digit words come first and the mapping second.
+ */
+const SUP_MAP: Readonly<Record<string, string>> = {
+    "0": "\u2070", "1": "\u00b9", "2": "\u00b2", "3": "\u00b3", "4": "\u2074",
+    "5": "\u2075", "6": "\u2076", "7": "\u2077", "8": "\u2078", "9": "\u2079",
+    "-": "\u207b", "+": "\u207a",
+};
+const SUP_TAG = /<sup>([+-]?\d+)<\/sup>/giu;
 
 /**
  * An HTML TAG. The name must start with a letter or `/`, which is what keeps ordinary prose safe: a
@@ -71,7 +121,11 @@ const ENTITY = /&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]*);/gu;
 export function stripMarkup(text: string): string {
     if (!text.includes("<") && !text.includes("&") && !text.includes("|") && !text.includes("!")) return text;
     // Wikitable first: a cell's contents may themselves be HTML, and the cell prefix is what hides them.
-    return text.replace(WIKITABLE, " ").replace(TAG, "").replace(ENTITY, (whole, body: string) => {
+    // Then sup/sub, which must precede the general TAG pass — that pass deletes their brackets and leaves the
+    // digits inline, which is exactly the flattening described above.
+    return text.replace(WIKITABLE, " ")
+        .replace(SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""))
+        .replace(TAG, "").replace(ENTITY, (whole, body: string) => {
         if (body.startsWith("#")) {
             const cp = body[1] === "x" || body[1] === "X"
                 ? Number.parseInt(body.slice(2), 16)
