@@ -1712,3 +1712,40 @@ The third was not in the issue's method when I wrote it. Worth checking each rem
 is before applying anything — `xh`, `zu`, `sw`, `akan`, `nama` are the ones most likely to be nativisers too.
 
 Gates: tsc clean; 205 files / 2932 tests; audit 0 defective cells across 0/67.
+
+## Run 27 — 2026-08-04 — tl: a fourth shape, where the fold has to be CONDITIONAL
+
+`tl` is a NATIVISER like pcm — `computer` → *kompˈuteɾ*, not English's *kəmpjˈuːt̬ɚ*, and its declared reader is
+not auto-used. So the pcm treatment applies: widen the token, fold the accent, no routing.
+
+⚠ **Except that `ñ` IS TAGALOG ORTHOGRAPHY**, inherited from Spanish and read as /ɲ/. `Doña` → *dˈoɲa* and
+`Cañitas` → *kaɲˈitas* were already correct. **pcm's unconditional fold would have destroyed exactly the accented
+letter this language CAN read**, turning `ñ` into `n`.
+
+So the fold is gated on the language's own inventory: a token the native class ACCEPTS is passed through
+untouched, and only a token it REJECTS is folded. Both halves then work:
+
+```
+Cañitas → kaɲˈitas   (ñ preserved)          São Paulo → saʔˈo paʔˈulo = Sao Paulo
+Doña    → dˈoɲa      (ñ preserved)          Klöcker   → klˈokkeɾ      = Klocker
+```
+
+The hyphen-compound token shape was preserved through the widening — Tagalog writes `kaibigan-ko` as one word,
+and `kaʔibiɡˈanʔko` is unchanged.
+
+### The variant table, now four rows
+
+| Latin group | engine reads a foreign name | fix |
+|---|---|---|
+| means FOREIGN (`hi` +16, `pa`, `or`) | via the reader | widen the pattern; that is all |
+| NATIVE (`id`/`ms`, `om`) | via the reader | widen **+** route non-native tokens to it |
+| NATIVE (`pcm`) | NATIVISED | widen **+** fold accent to base, unconditionally |
+| NATIVE, **with native accents** (`tl`) | NATIVISED | widen **+** fold **only** what the native class rejects |
+
+*Each of the last three was discovered by the engine after it, not predicted.* The lesson for the remaining
+twelve: read what the engine does with an ordinary English loan (`computer`) and with an accented letter that is
+in its class, before choosing a fix. Two probes, and they pick the row.
+
+Gates run separately: tsc PASS; 205 files / 2933 tests; audit 0 defective cells across 0/67.
+Remaining in #657: `xh`, `zu`, `sw`, `akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro` — all
+needing a reader injected or a fold chosen, and all needing the two probes first.

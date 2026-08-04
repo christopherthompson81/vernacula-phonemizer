@@ -223,13 +223,35 @@ function numberStressIdx(token: string): number | undefined {
     return NUM_PENULT.has(root) && nuclei >= 2 ? nuclei - 2 : nuclei - 1;
 }
 
-const TOKEN = /([A-Za-zÑñ]+(?:[-‑][A-Za-zÑñ]+)*)|(\d+)|([.?!,;:])/gu;
+// ⚠ ALL OF LATIN, not just Tagalog's own letters — `[A-Za-zÑñ]+` ended the token at an out-of-class diacritic,
+// so the letter carrying it became an unclaimed gap read as an English LETTER NAME and the rest of the word
+// started over: `São Paulo` → *s ˈə ʔˈo paʔˈulo*, `Klöcker` → *kl ˈoᶷ kkˈeɾ*. Invisible to every gate — no digit
+// or raw mark survives and nothing VANISHES, so neither the leak classes nor the differential DROP test see it.
+// The hyphen-compound shape is preserved: Tagalog writes `kaibigan-ko` and the two halves are ONE word.
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:[-‑]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*)|(\d+)|([.?!,;:])/gu;
+/**
+ * Tagalog's OWN inventory — the token class as it stood before the widening, lifted verbatim.
+ *
+ * ⚠ `Ñ`/`ñ` IS NATIVE HERE, which is why the fold below has to be CONDITIONAL. Tagalog inherited the letter
+ * from Spanish and reads it as /ɲ/ — `Doña` → *dˈoɲa*, `Cañitas` → *kaɲˈitas*, both already correct. Folding
+ * every accent to its base the way pcm does would have destroyed exactly the accented letter this language CAN
+ * read, turning `ñ` into `n`. So the fold applies only to a token this class REJECTS.
+ */
+const NATIVE_WORD = /^[A-Za-zÑñ]+(?:[-‑][A-Za-zÑñ]+)*$/u;
+/**
+ * Fold an out-of-inventory accent to its BASE — `ö`→`o`, `ã`→`a`. Tagalog NATIVISES rather than routing
+ * (`computer` → *kompˈuteɾ*, not English *kəmpjˈuːt̬ɚ*; the injected reader is declared but not auto-used), so a
+ * foreign name is read with Tagalog values — which needs a letter to read. Dropping it, as the g2p does for a
+ * letter it has no rule for, is not nativising but deleting: that is the `Klöcker` → *klkkeɾ* trap pcm hit.
+ * NFD then discard marks, so a precomposed `ö` and a decomposed `o`+U+0308 behave alike.
+ */
+const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
 
 class TagalogPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(NATIVE_WORD.test(m[1]) ? m[1] : foldToBase(m[1])));
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n))
