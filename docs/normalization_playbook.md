@@ -1075,6 +1075,34 @@ hand-writes a cross-product; the tier matches number + unit + denominator in one
   denominators; `cm`/`kg` stay with the lexicon, because routing `cm` through the word path would MOVE ITS
   STRESS (ˈsɛntiˌmeːˀdɐ → sɛntiˈmeːˀdɐ) for no gain. Migration is not all-or-nothing.
 
+**48. THE UNIVERSAL SENTENCE PROVES NEGATIVES TOO, AND THAT CAN CLOSE A QUESTION.** Trap 45 uses FLEURS's
+shared source text to FIND a word. The same technique settles the opposite, and it retired the longest-running
+open item in this sweep — the math-sign cluster, carried as "needs per-language sourcing" for months.
+
+Two sentences carry a plus sign across the fleet. **38 corpora write `+30` and NOT ONE spells it**; 62 mention
+`UTC`, and every one either writes `UTC+1` with the sign or gives a time with no offset at all. So the earlier
+per-language ×0 results were not probe failures — there is nothing to find. `attest.ts` against the wikis
+returns adjacent senses only: gu's ધન ×1 is **Dhanteras**, a festival; kn's ಧನ ×2 is a Vishnu epithet; kn's
+ಧನಾತ್ಮಕ ×4 is "positive" as in *positive stress*. (One real find: gu's ઋણ ×3 IS mathematical — *ઋણ ઘાત*
+negative exponent, *ઋણ સંખ્યાઓ* negative numbers.)
+
+- **THE CLUSTER WAS OVERSTATED, and measuring the READING rather than the gate showed it.** The plus is
+  already read across most of the fleet: af/de/nl/pl/hr/sv all say *plus*, `tr` *artı*, `sd` جمع, `zu` *na*.
+  What remained was a handful of languages, not a fleet-wide hole.
+- **AND ONE OF THE TWO CONTEXTS DOES NOT WANT A WORD.** In `+30°C` the sign follows a comparative in every
+  language that has it — `થી વધુ`, `മുകളിലുള്ള`, `भन्दा माथिको`, `కంటే ఎక్కువ`, `zaidi ya`, `über`, `över` —
+  so it is REDUNDANT with the preposition, and dropping it is defensible rather than a defect. Only `UTC+1` is
+  contentful, and nothing attests how to say it.
+- **READ WHAT THE GATE FLAGGED BEFORE BELIEVING THE COUNT.** Its sign probes are deliberately blunt — they
+  surface candidates for a human, as this file's own header says — and they conflate senses:
+  gu's "DROP minus ×2" is a RANGE (`10મી -11મી અને 14મી શતાબ્દીઓમાં`, the 10th–11th centuries), and th's
+  "DROP math-sign" is a DIMENSION CROSS (`29¾ นิ้ว × 24½ นิ้ว`), which reads "by", not "times". Across all 67
+  artifacts the minus probe has 48 hits and a large share are ranges — distinguishing them mechanically would
+  mean duplicating every language's range rule, which is exactly why each layer has one that runs FIRST.
+
+The lesson is not "the probe is broken". It is that **a definitive negative is a result worth spending effort
+on**, because it converts an open-ended hunt into a decision you can defend and stop revisiting.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
