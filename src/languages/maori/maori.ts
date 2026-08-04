@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeMaori } from "./normalize.ts";
@@ -38,12 +39,21 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Māori Latin letters incl. the macron vowels ā ē ī ō ū) / number / punctuation token.
-const TOKEN = /([a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]+)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'ʻ-")})|(\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class MaoriPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(normalizeMaori(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Cardinal numbers (numbers.ts) — emitted one word at a time, as for ordinary text.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

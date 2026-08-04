@@ -4,6 +4,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -61,7 +62,16 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation; // ¿¡ openers are silent → a
 // A word / number / clause-punctuation token. Numbers use the Spanish convention: dot = thousands separator
 // (1.500), comma = decimal (3,14). Each dot/comma must be followed by digits, so a clause-final "." or ","
 // glued to a number falls through to the punctuation branch. Spanish letters incl. accents + ñ/ü.
-const TOKEN = /([a-záéíóúüñ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-záéíóúüñ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 /** A number token (with Spanish thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
@@ -132,7 +142,7 @@ class SpanishPhonemizer implements Phonemizer {
         // the registry's ROMAN_NATIVE set, so the shared pass has already converted them before text().
         const normalized = SYMBOLS(normalizeSpanishInitialisms(normalizeSpanish(input, { americas: this.americas })));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(m[1]));
+            if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(
                     numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "),

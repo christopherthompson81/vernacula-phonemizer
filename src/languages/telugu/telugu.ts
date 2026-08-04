@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -57,8 +58,11 @@ function number(digits: string): string {
     return numberToWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 
+// The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
+// diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
 const TOKEN = new RegExp(
-    `([${TELUGU_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
+    `([${TELUGU_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
     "gu",
 );
 

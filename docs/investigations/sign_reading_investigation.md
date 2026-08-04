@@ -1786,3 +1786,366 @@ occupies exactly one token) passes for all fourteen and cannot lie about it.
 worth testing.* Stated directly, the test is also shorter.
 
 Gates run separately: tsc PASS; **206 files / 2937 tests**; audit 0 defective cells across 0/67.
+
+## Run 29 — 2026-08-04 — ⚠ Run 28 WAS WRONG: #657 was 91 languages, not fourteen, and the scope was mis-derived
+
+**Question.** "So #657 is done?"
+
+**Command.** The same fleet-wide behavioural probe Run 28's test was built from, but over ALL registered languages
+rather than the fourteen: `Cañitas`, `São`, `Klöcker`, asserting *no English letter name in the output AND the word
+occupies exactly one token*.
+
+    checked 180 registered languages
+    ⚠ STILL FRAGMENTING (91)
+    TREATED still fragmenting (28): as az bn ca hr da ff de ha hu is ga ja kn ko lb ml mi fa sr sd es sv te tr ur uz cy
+    UNTREATED still fragmenting (63)
+
+**⚠ THE NEGATIVE RESULT, AND IT IS THE IMPORTANT ONE: I replaced a measurement with a grep.** The original probe
+that opened #657 reported **42 languages fragmenting** — correct. The work list was then re-derived from
+`grep '^const TOKEN'`, which found 21 files, and the two numbers were never reconciled. Every engine not declaring
+its tokenizer in that exact shape fell out of scope silently — including `de`, `es`, `sv`, `tr`, `sr`, all of which
+the probe had already flagged. Run 28's "the remaining fourteen" was the grep's output, not the defect's extent.
+
+*A structural pattern is a convenience; the measurement is the scope.* This is the same error as the audit's
+hardcoded 37-of-67 language list, made four runs after that was written down. The correction is structural, not
+resolve-to-do-better: the probe becomes the test, sweeping every code the registry serves, with the remaining
+languages named in an allow-list that the test also checks is not stale.
+
+### The 91 classify into two shapes, and 17 of them collapse to 10 edit sites
+
+Two probes per language. `computer` → does the output match English (ROUTES to an injected reader) or is it the
+engine's own (NATIVISES)? Then `Ka<accent>o` for each of `ñ ã ö é å ç ł` against its de-accented twin → differs but
+does not fragment, so the letter is NATIVE and must survive a fold.
+
+17 routers, 74 nativisers. The routers collapse to ten sites because the engines share modules — `bengali.ts`
+serves `bn`/`as`/`bpy`, `sinitic/hanDictIpa.ts` serves `gan`/`hak`/`cjy`/`hsn`.
+
+**`ja`/`ko` are a DIFFERENT defect wearing the same symptom.** Their tokenizers are fine. Their initialism spellers
+are bounded by `(?<![A-Za-z])…(?![A-Za-z])`, and an ASCII-only lookaround does not see an accented letter as a
+letter — so the `S` of `São` passed the *isolated capital* test and was spelled out as a letter name, leaving the
+rest of the name behind: `São` → *esu / ˈʌɔː*, `Sámi` → *ˈesɯ ˈɑːmi*. The fix widens the BOUNDARY, not the matched
+class, which is correctly ASCII-caps-only — an initialism is ASCII by definition, but the thing that decides where
+one ENDS is not.
+
+### ⚠ The architecture correction, mid-run
+
+> "Shared code for the scanner seems important, so that the limited regex isn't used to decide script-level
+> routing. It feels like it should be an early decision and not repeated in multiple places."
+
+That names the class exactly, and it is why widening 108 regexes one at a time was the wrong shape of fix. Each
+engine's hand-written letter list —
+
+    const TOKEN = /([a-zäöüßA-ZÄÖÜ]+)|(\d+)|([.!?…,;:])/gu;        // de
+    const TOKEN = /([a-zçëA-ZÇË]+)|(\d+)|([.!?…,;:])/giu;          // sq
+
+— was doing two unrelated jobs, and is only correct for one:
+
+1. **which script is this** — a ROUTING question, a property of the script. A letter list is a bad approximation of
+   a script: anything it omits falls out of the token, lands in the gap, and `emitUnclaimed` routes it as foreign.
+   **One omitted letter re-routes mid-word.** This decision was being made 108 times over and was wrong in all 108.
+2. **which letters can I pronounce** — an INVENTORY question, genuinely per-language and genuinely lexical.
+
+`core/hostWord.ts` splits them. `hostWordRun(scripts, extra)` answers (1) from the script, once, so there is no
+letter list left to omit a letter from. `makeNativiser(NATIVE_WORD)` answers (2), taking each engine's former token
+class verbatim — demoted from a routing decision to what it always was, a statement about which letters the g2p has
+rules for. Sixteen copies of `foldToBase`/`nat` collapse into it.
+
+**⚠ AND THE SCOPE LIMIT, measured rather than assumed: shared script scanning cannot fix the 74 nativisers.**
+Script routing only ever fires ACROSS scripts. A Portuguese name inside Spanish text is Latin inside Latin — there
+is no routing decision to get right and the run correctly stays with the host. What remains is inventory: the g2p
+has no rule for `ã` and simply DROPS it, and dropping is not nativising but deleting (`Klöcker` → *klkkeɾ*). So the
+shared scanner prevents recurrence of the cross-script class, and the same-script class needs the fold regardless.
+Two decisions, two mechanisms, and conflating them is what produced the bug in the first place.
+
+### Applied, and the corpus diff
+
+Ten router sites widened to `LATIN_RUN`; `ja`/`ko` boundaries widened; the sixteen already-treated nativisers
+migrated onto the shared module. **91 → 74 fragmenting.** tsc PASS, 206 files / 2937 tests.
+
+Corpus diff against baseline `b0c9882`, the ten router languages that have a FLEURS corpus, every change read:
+
+| lang | changed | what |
+|---|---|---|
+| as | 2/1961 | `İzmir` *ˈaᶦ tsmˈaᶦɹ* → *ˈɪzmaᶦɹ*; `levé` *lˈɛv ˈiː* → *ɪlˈɛv* |
+| bn | 7/1981 | `Cañitas`, `Asunción`, `Erdoğan`, `Guaraní`, `Ürümqi`, `Taínos`, `Guaycurú`/`Payaguá` — all whole now |
+| fa | 1/1856 | `Cochamó` *kt͡ʃˈæm ˈoᶷ* → *kt͡ʃˈæmɔː* |
+| sd | 1/2009 | `levé` |
+| te | 2/1757 | `levé`; `Barça` *bˈɑːɹ sˈiː ˈə* → *bˈɑːɹkə* |
+| ko | 2/1746 | `Müslüm`; `Sámi` *ˈesɯ ˈɑːmi* → *sˈæmi* (the initialism-boundary fix) |
+| kn ml ur ja | 0 | no accented Latin in those corpora — the fix is real but unattested there |
+
+No defect-class count moved in either direction; all 15 changes are the defect being repaired.
+
+**Negative result worth keeping:** `levé` is the recurring one, and it is the *universal-sentence* technique paying
+off in reverse — one French word in one FLEURS sentence surfaces the same defect in `as`, `sd` and `te` at once,
+because all three are translations of the same English source. A single attested word is fleet-wide evidence.
+
+## Run 30 — 2026-08-04 — 74 → 11, and the fold semantics were wrong in three separate ways
+
+Mechanical migration of the 74 nativisers: lift each engine's token word class to `NATIVE_CLASS`, derive the
+TOKEN word arm from the SCRIPT via `hostWordRun`, wrap the word handler in `nat()`. **62 of the 74 transformed
+mechanically** (63 codes, since `es-419` rides on `es`); 11 remain for hand treatment. Result: **91 → 11**.
+
+The transform is scripted, not typed by hand, which is the only reason a 62-language change was reviewable. The
+guard that made it safe was refusing to touch anything it could not prove simple — a multi-script word arm, a
+tokenizer that is not a top-level `const TOKEN`, a handler that is not `if (m[1])`. Those became the SKIP list
+rather than a silent best-effort.
+
+### ⚠ Three defects, each found by the corpus diff and none by any probe or test
+
+**1. `hostWordRun` required a LETTER in lead position, and Hausa writes a leading apostrophe.**
+
+`'yan` is Hausa for "sons of"; the apostrophe carries the glottalisation. Requiring a Latin letter first left it
+outside the token, so `ʔʲˈan` came out *jˈan* — the glottal simply gone. The old hand-written classes were FLAT
+(`[a-zɓɗƙƴ'’]+`), so everything in them was lead-legal; an engine that instead spelled the join out
+(`[X]+(?:['’-][X]+)*`) meant those characters MEDIALLY only. Both shapes have to survive, so `hostWordRun` grew a
+`medialOnly` parameter and the transform decides which from the arm's own shape. ha 46 → 15 changes.
+
+*The lead position is not the same question as the continuation, and "one letter, then more letters" reads as
+obviously right while being wrong for every orthography with a word-initial mark.*
+
+**2. The fold was ALL-OR-NOTHING PER WORD, so one foreign letter corrupted every other letter beside it.**
+
+Turkish came back at **189/1876 = 10.1% changed**, which is what a fix reaching far too far looks like. `İsveç`
+failed the word-level inventory test on `İ`, so the fold also flattened the `ç` to `c` — and Turkish reads `c` as
+/d͡ʒ/, so the word read *ɯsvˈed͡ʒ*. `makeNativiser` now judges each character separately.
+
+**And the 10.1% was real anyway.** `İ` (U+0130) has no Unicode simple case-fold to `i` — it folds to `i` + a
+combining dot — so the `/i/` flag never made the old class accept it. `İtalya` was fragmenting and reading as
+English *"I"* + *talya*; folding it to bare `I` then hit Turkish's DOTLESS capital and gave *ɯtaɫja*, the wrong
+vowel. Adding `İ` to the inventory fixes it properly: `g2p.ts` already maps İ→i with the right locale rule, it
+just had to be handed the letter. Every one of the 189 is an `İ`-initial Turkish word — `İtalya`, `İngilizce`,
+`İran`, `İsrail`, `İmparatorluk`, `İlçe` — previously read as an English letter name. **The largest single-language
+win in the issue.** (Azerbaijani hit the identical trap and had already solved it the other way, normalising İ→i
+before tokenizing. Two engines, same trap, two independent fixes, and neither knew about the other.)
+
+**3. NFD cannot reach a letter that does not decompose, so the fold left it to be DROPPED.**
+
+`Æthelred` in German read *thˈɛlʁət* — the Æ gone. `æ ø œ ð þ ß ł đ ħ ŋ ɛ ɔ ə ɓ ɗ ƙ ƴ ı` are DISTINCT letters, not
+base-plus-mark; NFD leaves them alone, the g2p has no rule, and the letter is deleted. Measured: **86 languages
+dropped at least one, roughly 80 languages per letter.** An explicitly typed character is content, and deleting it
+is neither nativising nor routing, so `foldLatinToBase` gained a second tier mapping each to the nearest letter
+the g2p is guaranteed to read. 86 → 32, and the residual 32 are probe artifacts (the fold target is itself silent
+in that language, e.g. Spanish `h`).
+
+⚠ SINGLE LETTERS, NOT the conventional digraphs. `æ`→ae, `ø`→oe, `þ`→th, `ŋ`→ng are the standard ASCII
+transliterations, but a g2p reading `ae` as two vowel segments turns one sound into two — worse than an imprecise
+single vowel. `ß`→`ss` is the one exception, because that IS the German orthographic identity and every g2p reads
+`ss` as a single /s/.
+
+### ⚠ And then the per-character fold exposed something the word-level fold had been hiding
+
+Romanian: `Thérèse` → *ˈthrese*, the é gone. Romanian's class claimed `á é í ó ú à` — but its g2p has no rules for
+them. **The word-level fold had been masking the mismatch by accident**: a word containing one was rejected whole,
+so everything in it got folded and the over-claimed letter came out readable. Judging characters separately trusts
+the class, and the class was lying.
+
+`NATIVE_CLASS` is a CLAIM ABOUT THE G2P, so measure it. Probe every character an engine claims against
+`phonemize("ka" + c + "o") === phonemize("kao")`. Eight engines over-claim: **da ro kea mt lb rup ast lg**. Each
+had the offending letters removed, and `test/native-inventory.test.ts` now pins it.
+
+⚠ The first version of that probe flagged **fourteen** languages, and six were false positives: `'`, `’`, `ʼ`,
+`·`, `‑` and bare combining marks carry no segment, so a g2p ignoring one is CORRECT. Narrowed to `\p{L}` minus
+`\p{Lm}` — the modifier-letter apostrophes are letters by Unicode category and punctuation by function.
+
+**Luxembourgish is the second-largest win, and it was invisible until the class stopped lying.** Removing
+`à á â ô û ü ö` took lb from 33 to **227/1896 = 12.0% changed**, and every one is a vowel that had been SILENTLY
+DELETED: `berühmt` read *bærmt*, `verfügbar` *fərfɡbarə*, `Ostküst` *ostkst*, `Südkoreaner* *stkorəanər*,
+`endgülteg` *ændɡltəχ*. Twelve percent of Luxembourgish utterances were missing a vowel.
+
+📌 FOLLOW-UP, recorded rather than papered over: `ü`/`ö` ARE Luxembourgish letters in German loans, and the honest
+fix is g2p rules (/y/, /ø/) rather than a fold to `u`/`o`. The fold is strictly better than deletion and is not
+the right answer. Same for Luganda's `ŋ` → `n`.
+
+### Corpus diff — 25 languages, every change read
+
+tr 189/1876 · lb 227/1896 · cy 49/2009 · ca 15/1841 · de 26/1956 · hr 21/2007 · sv 20/1863 · ha 15/1497 ·
+ro 14/1958 · ga 14/1948 · da 14/1878 · hu 7/1995 · az 3/1919 · is 1/846 · mi 1/1994 · uz 1/1957 · cs 1/1947 ·
+it 1/1978 · nb 1/1859 · zu 1/1478 · pl 0 · sk 0 · sl 0 · sw 0 · xh 0
+
+**No defect class moved in either direction in any of the 25.** Every change is a fragment collapsing into a word
+or a deleted letter becoming audible: `Cañitas`, `São`, `Klöcker`, `Galápagos`, `Asunción`, `Erdoğan`, `Taínos`,
+`Guaycurú`, `Payaguá`, `Chișinău`, `Cochamó`, `Bartolomé`, `Jiménez`, `Fernández`, `Sápmi`, `Sámi`, `Ürümqi`,
+`İzmir`, `Æthelred`, `Łódź`, `élevé`, `República`, `Hāngī`, `Halarsvík`, `Guaraníerne`.
+
+The zeroes are as informative as the counts: cs/sk/sl/sw/pl/xh were already correct and the semantics change did
+not disturb them, which is what says the per-character fold is a strict refinement rather than a different answer.
+
+### What remains
+
+**11 languages**, all for the reason the transform refused to guess:
+
+| why | languages |
+|---|---|
+| word arm mixes Latin with a second script | `bs` `sr` (Cyrillic), `bm` (N'Ko), `ff` (Adlam), `su` (Sundanese), `za` (Han) |
+| Perso-Arabic OR Latin as two alternatives in one group | `bal` |
+| tokenizer is not a top-level `const TOKEN`, or the handler is not `if (m[1])` | `hmn` `nan` `shi` `jv` |
+
+Each needs its scripts named explicitly to `hostWordRun` — mechanical, but a blind widening would let a
+MIXED-script run become one token, which is a behaviour change worth not making by accident.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 31 — 2026-08-04 — the last 11, and #657 reaches ZERO
+
+The eleven the transform refused to guess at, done by hand. Result: **`✓ none fragment an accented Latin word`**
+across all 180 registered languages. `REMAINING` in `test/latin-tokenizers.test.ts` is now empty, and the sweep
+fails in BOTH directions so it cannot be repopulated to quiet a regression.
+
+| language | shape | treatment |
+|---|---|---|
+| `sr` `bs` | Cyrillic + Latin in one class | `hostWordRun(["Latin"], "а-шђјљњћџ")` — the Cyrillic range stays as literal class content, so the widening touches only the Latin half |
+| `bm` | Latin + N'Ko | `hostWordRun(["Latin", "Nko"])` — bm IS the fleet's N'Ko engine, so the full script is right |
+| `ff` | Latin + Adlam | `hostWordRun(["Latin", "Adlam"])` |
+| `su` | Latin + Sundanese | `hostWordRun(["Latin", "Sundanese"])` |
+| `shi` | Latin + Tifinagh | `hostWordRun(["Latin", "Tifinagh"])` |
+| `za` | Latin arm with `'` join; Han is a separate arm | `hostWordRun(["Latin"], "", "'")` |
+| `bal` | Perso-Arabic OR Latin as two alternatives | kept the alternation, widened only the Latin arm |
+| `hmn` | tokenizer is a local `const tok` | same treatment, inventory at module scope |
+| `jv` | handler is `if (m[1] \|\| m[2])` | ⚠ only group 1 nativises — group 2 is the Aksara Jawa run, this language's OWN script, where there is no inventory question to ask |
+| `nan` | Latin arm is group 3, with a hyphen join | `hostWordRun(["Latin"], "", "-")` |
+
+### ⚠ `\p{Script=X}` INCLUDES X'S DIGITS, and the word arm precedes the number arm
+
+Widening bm and ff to their second scripts broke both languages' native-digit tests: N'Ko's ߀–߉ are
+`Script=Nko` and Adlam's 𞥐–𞥙 are `Script=Adlam`, so the script-derived word class silently swallowed every
+native-digit numeral before the number arm could see it. `hostWordRun` now refuses digits outright
+(`(?!\p{Nd})` per position — `[\p{Script=Nko}--\p{Nd}]` says it directly but needs the `v` flag, which these
+tokenizers do not use).
+
+*This is the multi-script hazard the transform's SKIP list existed to avoid, and it landed anyway on the very
+languages the list deferred — which is the argument for the list, not against it: the failure surfaced in two
+existing tests instead of in a corpus nobody diffed.*
+
+### The Serbian `й`, and a probe that measured its own frame
+
+The inventory audit flagged `sr`/`bs` for claiming `й`, `у` and `х`. Two of those three were the PROBE'S FAULT.
+It built `ka` + letter + `o`, and sr/bs write both Cyrillic and Latin with the engine choosing a script PER WORD
+— so `kaуo` is a mixed word no orthography contains, and the engine drops the minority script's letter. `ухо`
+reads *uxo* and `хвала` *xʋala*, both perfectly. The frame now matches the letter's script.
+
+`й` survived the corrected probe and is a REAL over-claim: the old class used the coarse range `а-ш`, which
+sweeps up `й` — a Russian letter this orthography does not have (it writes `ј`, U+0458, outside the range and
+listed separately). Excluding it hands the letter to the fold, and `й` DOES decompose (и + combining breve), so
+`Толстой` now reads *tolstoi* instead of losing its final letter. ⚠ The TOKEN deliberately stays wide: claiming
+the whole Cyrillic run is the SCRIPT question, and getting that right is what puts the letter in front of the
+fold at all.
+
+### "Mixed script words might need a Latinizer?" — mostly already there, and the gap is elsewhere
+
+Asked mid-run, and worth answering with a measurement. `kaуo` **already** becomes `kayo`: `foldLatinConfusables`
+maps a Cyrillic/Greek look-alike sitting between two Latin letters to its Latin twin, and it runs in the registry
+pipeline for every language before any tokenizer sees the text.
+
+⚠ AND NOTE IT FOLDS BY SHAPE, NOT BY VALUE — `у` → `y` because it LOOKS like one, though Serbian `у` SOUNDS like
+`u`. That is the right call for the case it exists for (a homoglyph typo, where the author meant the Latin
+letter); it would be the wrong call for genuine transliteration. Two different operations that happen to have the
+same input.
+
+For genuine cross-script text the SCRIPT ROUTER is the better answer than transliteration, because routing
+preserves the source phonology instead of approximating it. A Serbian↔Latin transliterator would be defensible —
+that mapping is bijective and standardised — but it buys little: real text writes whole words in one script, and
+the router already handles whole words.
+
+**The actual gap the question uncovered is not cross-script at all.** `phonemize("kayo", "sr")` returns *kao* — the
+`y` is DROPPED, because Serbian's class claims all of `a-z` while Serbian Latin has no `q w x y`.
+
+### 📌 A separate defect, measured: 43 engines claim `a-z` and drop part of it
+
+    sr hr bs   drop q w x y          ak   drops c j q v x z
+    mi         drops b c d f g j l q s v x y z   (thirteen of twenty-six)
+    qu         drops b d f g v x z    naq  drops c f q v y z    tk  drops c q x
+
+So `Cañitas` keeps its `ñ` now and still loses its `C` in Maori.
+
+⚠ NOT the same fix, and that is why it is not in this issue. Folding an accent has a UNIVERSAL answer — strip the
+mark and the base letter is right everywhere. An absent ASCII consonant has none: `q`→k, `w`→v or u, `x`→ks,
+`c`→k or s are per-language substitution choices needing sourcing, and for several of these languages the better
+answer is to ROUTE the foreign name to a reader rather than nativise it at all.
+
+⚠ AND SOME OF THE 43 ARE CORRECT SILENCE, NOT LOSS. Spanish/Italian/Catalan/Galician/Occitan/Latin `h` IS silent.
+Worse, my probe's own frame manufactures false positives: testing `a` builds `kaao` and testing `o` builds `kaoo`,
+which gemination and vowel-length rules make identical to `kao` — that is the whole of German's "drops a h o q"
+and Maltese's "drops a h o". The finding needs per-language judgement, not a table, which is exactly why the
+inventory test states the ASCII exemption explicitly rather than leaving it to look like coverage.
+
+### Corpus diff, the last two with corpora
+
+sr 2/1923 (`élevé`, `Ōō`) · ff 13/1500 (`Bé`, `Ōō`, `São`). No defect class moved either way.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 32 — 2026-08-04 — self-review: four defects in my own fix, and one over-reach I reverted
+
+Reviewing the branch before merge, with checks aimed at the failure modes a corpus diff CANNOT see — the ~150
+languages with no corpus. Six mechanical checks over every engine carrying a `NATIVE_CLASS`: case coverage, lead
+vs medial, numbers still tokenizing, punctuation still reaching the clause machinery, the fold actually taking
+effect, and transform leftovers.
+
+### 1. ⚠ NFC DEFEATS A CLASS WRITTEN AS BASE + COMBINING RANGE
+
+The worst of the four, and it silently deleted a TONE. `makeNativiser` normalised each cluster to NFC and tested
+it against ONE class occurrence. Tâi-lô tone 8 is base + U+030D COMBINING VERTICAL LINE ABOVE, which composes to
+nothing, so NFC leaves the cluster two characters long and a single-occurrence test rejects it — the fold then
+stripped the tone it was asked to protect. `ta̍k` read *tak*, while `tâi` (precomposed) kept its tone. **A tone
+language quietly losing one tone is as bad as this layer gets.** Fixed with `+`: the question is "is every
+character of this cluster in the inventory", not "is this cluster one class match".
+
+### 2. ⚠ AND THE GENEROUS-LOOKING FIX FOR (1) BROKE IT THE OTHER WAY
+
+My first fix also tested the DECOMPOSED form, on the reasoning that a class may spell an accent either way and
+both should be honoured. That makes every combining-range class enormously over-permissive: `ñ` decomposes to
+`n` + U+0303, U+0303 sits inside Tâi-lô's `̀-̍`, so `ñ` was judged NATIVE, escaped the fold, reached a g2p with
+no rule for it and came out **verbatim** — `Cañitas` in Min Nan read *cañitas˥*, raw orthography in the phoneme
+string. Min Dong and Tashelhit the same.
+
+*A range written for six tone marks cannot be read as a licence for every mark in its numeric span.* NFC only.
+
+### 3. ⚠ THREE CLASSES LISTED THEIR ACCENTS IN LOWER CASE ONLY
+
+Welsh was missing ten capitals (`ÀÈÌÒÙÏËÖÄÜ`), Min Nan five (`ÀÁÂĀǍ`), Balochi the combining caron. Inherited
+from the original token classes, and HARMLESS while the class only decided tokenization — the capital fell out of
+the token and fragmented, which is the defect this issue is about. It becomes a silent DELETION the moment the
+same class drives the fold. `TÂI` lost the tone `tâi` kept.
+
+*A latent data gap becomes a live defect when you give the data a second job.* Found by checking every class
+against the upper case of its own letters — no corpus involved, and cy/nan's corpus diffs did not move.
+
+### 4. ⚠ A GUARD THAT EDITS ITS INPUT IS NOT A GUARD
+
+`hostWordRun` documented "put `-` last" and left it to the caller. The very next caller passed `"-·"` and
+produced `[\p{M}-·]` — a range from a property escape, a hard SyntaxError at first use. So I made the function
+move every `-` to the end, which looks robust and **silently destroyed a legitimate range**: `sr`/`bs` pass their
+whole Cyrillic alphabet as `"а-шђјљњћџ"`, and helpfully relocating that hyphen collapsed `а-ш` to `аш` and
+dropped twenty-two letters out of the inventory. The over-claim test caught it immediately (22 findings for sr).
+Replaced with VALIDATION: compile the class at construction and throw a named error. A constraint a caller can
+silently violate belongs in the callee — but enforcing it must not mean rewriting what the caller meant.
+
+### 📌 AND ONE OVER-REACH, REVERTED
+
+The leak probe found `cdo` (Min Dong) emitting *cañitas˥˥*. It is a REAL leak — and identical on `main`, because
+cdo never fragmented and so was never in this issue's scope. I applied the standard treatment anyway and **broke
+two real tests**: cdo's class expresses its own letters as base plus a combining range, and NFC composes several
+of them into precomposed forms the class does not list, so the fold destroyed `ṳ` (U+1E73, read /y/) and `ø̤`.
+Narrowing that range needs Bàng-uâ-cê orthographic sourcing — evidence, not a table.
+
+Reverted, and the leak test is explicitly scoped to engines that DECLARE an inventory, with the reason stated at
+the assertion so the exclusion is not mistaken for coverage. *Taking a pre-existing, out-of-scope defect and
+fixing it mechanically without the sourcing is how a clean change acquires a regression.*
+
+### Probes that measured their own frames — a running tally, because this keeps happening
+
+Four times on this issue now. The leak probe alone was wrong twice more in this run: first it flagged **139**
+engines by treating any combining mark as orthography, when combining marks are ordinary IPA diacritics
+(`t̬` voicing, `ɐ̃` nasalisation, `t͡s` the affricate tie). Narrowed to precomposed letters, it flagged **99**,
+because `æ` is a phoneme. Narrowed to letters that are NEVER IPA, it flagged **9**, of which **5 were still
+wrong**: `ã õ ĩ ũ` are nasalised vowels (`gn`, `ee`, `umb`, `yo` all emit them correctly) and `è ì` are this
+repo's own pitch-accent notation — `sv` marks accent 2 with a grave.
+
+139 → 99 → 9 → 1 real finding. *Every intermediate number looked like a discovery.*
+
+### Verification
+
+All 27 corpus diffs re-run after the fixes: byte-identical to the verified numbers, no defect class moved.
+Gates run separately: tsc PASS; **207 files / 2943 tests**; audit 0 defective cells across 0/67; probe
+`✓ none fragment an accented Latin word`.

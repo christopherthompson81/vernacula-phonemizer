@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 
@@ -107,12 +108,21 @@ function number(digits: string): string {
 }
 
 // A word (Turkmen Latin letters incl. ä ç ž ň ö ş ü ý) / number / punctuation token.
-const TOKEN = /([a-zäçžňöşüýA-ZÄÇŽŇÖŞÜÝ]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zäçžňöşüýA-ZÄÇŽŇÖŞÜÝ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class TurkmenPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

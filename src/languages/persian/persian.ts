@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -229,8 +230,11 @@ function number(digits: string): string {
     // appends to the already-phonemized head word. Numbers bypass the content lexicon (homograph collisions).
     return renderNumber(nn, DEF.numbers, encliticWord(phonemizeWordCore, DEF.numbers), persianNumberWords);
 }
+// The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
+// diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
 const TOKEN = new RegExp(
-    `([${PERSO_ARABIC_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,
+    `([${PERSO_ARABIC_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,
     "gu",
 );
 

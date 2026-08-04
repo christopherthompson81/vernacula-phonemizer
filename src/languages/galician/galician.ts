@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -82,7 +83,16 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word / number / clause-punctuation token. Numbers use the Iberian convention: dot = thousands separator
 // (1.500), comma = decimal (3,14). Galician letters incl. accents + ñ/ü.
-const TOKEN = /([a-záéíóúüñ]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-záéíóúüñ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 /** A number token (with thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
@@ -107,7 +117,7 @@ function wordIpa(word: string): string {
 class GalicianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(m[1]));
+            if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(
                     numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "),

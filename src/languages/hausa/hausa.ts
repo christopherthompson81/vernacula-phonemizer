@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { phonemizeWord } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -18,8 +19,16 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Hausa Boko letters incl. ɓ ɗ ƙ ƴ (and their capitals) + apostrophe (a letter: 'yan, 'a'a).
 // #562: the corpus groups thousands with COMMAS (6,387, 783,562) and writes decimals with DOTS (1.5,
 // 12.8); the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
-const TOKEN =
-    /([a-zɓɗƙƴA-ZƁƊƘƳ'’]+)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zɓɗƙƴA-ZƁƊƘƳ'’]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // #562 symbol normalization — Hausa: % is "kashi" BEFORE the number (the corpus's "kashi 80%"); nouns
 // stay SINGULAR after numerals; the unit words are the corpus's own borrowings (kilomita, mita).
@@ -47,7 +56,7 @@ class HausaPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's era/version/rate steps need the
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeHausa(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/g, "'")));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1]).replace(/’/g, "'")));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2].replace(/,/gu, ""))).split(" "))
                     sink.emit(phonemizeWord(wd));

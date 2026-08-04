@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -58,12 +59,21 @@ export function phonemizeWord(word: string): string {
 
 // A word (Kurmanji Hawar letters incl. diacritics ê î û ç ş, the dotted ğ ẍ ḧ, and the apostrophe ayn) / number /
 // punctuation token. All three dotted letters that appear in the consonant map must be here or text() drops them.
-const TOKEN = /([a-zêîûçşğẍḧ']+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zêîûçşğẍḧ']";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class KurmanjiPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

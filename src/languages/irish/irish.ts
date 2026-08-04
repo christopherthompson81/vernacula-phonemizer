@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
@@ -95,8 +96,16 @@ export function g2pWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Irish groups thousands with COMMAS (1,400 — the TOKEN swallows the comma so the tier can still see the
 // number next to its unit/sign); the dot is a DECIMAL (1.5 → "pointe") or a version, claimed by normalize.
-const TOKEN =
-    /([a-záéíóúA-ZÁÉÍÓÚ]+(?:['’-][a-záéíóúA-ZÁÉÍÓÚ]+)*)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-záéíóúA-ZÁÉÍÓÚ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // #562 symbol normalization — Irish: % is "faoin gcéad" (after the number, as written).
 const SYMBOLS = makeSymbolNormalizer({
@@ -135,7 +144,7 @@ class IrishPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/version steps need
         // the number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeIrish(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) for (const wd of numberToWords(Number(m[2].replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });

@@ -9,18 +9,35 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { phonemizeWord } from "../serbian/serbian.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Bosnian word — both scripts (Cyrillic + Gaj's Latin incl. diacritics č ć š ž đ) / number / punctuation token.
-const TOKEN = /([а-шђјљњћџa-zčćšžđ]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "а-шђјљњћџ")})|(\\d+)|([.!?…,;:])`, "giu");
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ *
+ * ⚠ `й` IS EXCLUDED, and it is the one part of this that is not a straight lift. The old class used the coarse
+ * range `а-ш`, which sweeps up `й` — a RUSSIAN letter that Serbian/Bosnian Cyrillic does not have (this
+ * orthography writes `ј`, U+0458, which sits outside the range entirely and is listed separately). The g2p has no
+ * rule for `й` and dropped it. Excluding it from the inventory hands it to the fold instead, and `й` DOES
+ * decompose — и + combining breve — so `Толстой` now reads with a final /i/ rather than losing the letter.
+ * The TOKEN above deliberately stays wide: claiming the whole Cyrillic run is the SCRIPT question, and getting
+ * that right is what puts the letter in front of the fold at all (#657).
+ */
+const NATIVE_CLASS = "[а-ик-шђјљњћџa-zčćšžđ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class BosnianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1])); // shared Serbo-Croatian g2p
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // shared Serbo-Croatian g2p
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // Bosnian numbers
             else if (m[3]) {

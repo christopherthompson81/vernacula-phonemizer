@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeUrduNormalizer } from "./normalize.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
@@ -102,8 +103,11 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["مربع"], cubed: ["کیوبک"], position: "before" },
 });
 
+// The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
+// diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
 const TOKEN = new RegExp(
-    `([${URDU_WORD}]+)|([A-Za-z]+)|([${DIGIT_CLASS}]+(?:[.,][${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
+    `([${URDU_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:[.,][${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
     "gu",
 );
 

@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { normalizeSindhi } from "./normalize.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
@@ -194,7 +195,10 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, (w) => phonemizeWordWith(w));
 }
 
-const TOKEN = new RegExp(`([${SD_WORD}]+)|([A-Za-z]+)|(\\d+)|([۔؟،؛.?,])`, "gu");
+// The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
+// diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+const TOKEN = new RegExp(`([${SD_WORD}]+)|(${LATIN_RUN})|(\\d+)|([۔؟،؛.?,])`, "gu");
 
 /** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride →
  *  rules); used only by the async neural path (`sindhiNeural.ts`), so the sync engine is unchanged. */

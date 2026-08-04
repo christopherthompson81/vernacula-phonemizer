@@ -10,6 +10,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -47,12 +48,21 @@ export function phonemizeWord(word: string): string {
 // A word (Dholuo letters + the ⟨ng'⟩ apostrophe in all three common forms — ASCII ', ’ U+2019, ʼ U+02BC MODIFIER
 // LETTER APOSTROPHE, the Unicode-canonical letter-apostrophe for ng' in African Latin orthographies; also accented
 // citation vowels, normalised away in phonemizeWord) / number / punctuation token.
-const TOKEN = /([a-zàáâãäèéêëìíîïòóôõöùúûü'’ʼ]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’ʼ")})|(\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zàáâãäèéêëìíîïòóôõöùúûü'’ʼ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class LuoPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1])); // phonemizeWord normalises the ’/ʼ apostrophe + citation accents
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // phonemizeWord normalises the ’/ʼ apostrophe + citation accents
             // numbers: composed to Dholuo words (numbers.ts: decimal + the gi-elision), then the same g2p
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

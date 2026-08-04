@@ -17,6 +17,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { normalizeRomanian } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -325,25 +326,27 @@ export function numberWords(n: number, opts: { stem?: boolean } = {}): string {
  * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name.
+ *
+ * ⚠ NOT QUITE VERBATIM: á é í ó ú à were REMOVED, because the g2p has no rule for them and DROPPED them outright.
+ * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
+ * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
+ * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
+ * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
+ * `test/native-inventory.test.ts` now measures it rather than trusting it.
  */
-const NATIVE_WORD = /^[a-zA-ZăâîșțáéíóúàA-ZĂÂÎȘȚ]+$/u;
+const NATIVE_CLASS = "[a-zA-ZăâîșțA-ZĂÂÎȘȚ]";
 /**
- * Fold an OUT-OF-INVENTORY accent to its base — `ö`→`o`, `ã`→`a`. This engine NATIVISES rather than routing (its
- * loan reading is its own, not English's), so a foreign name is read with native values — which needs a letter to
- * read. The g2p has no rule for a letter outside its inventory and simply DROPS it, and dropping is not
- * nativising but deleting: that is the `Klöcker` → *klkkeɾ* trap. NFD then discard marks, so a precomposed and a
- * decomposed accent behave alike.
- * ⚠ CONDITIONAL, because a native accent must survive: folding unconditionally would destroy exactly the
- * accented letters this language CAN read (Tagalog's `ñ` was the case that showed it).
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
+ * above is the inventory — a word it rejects carries a letter this language does not use. See
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
-const nat = (w: string): string => (NATIVE_WORD.test(w) ? w : foldToBase(w));
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
 // every gate: no digit or raw mark survives and nothing VANISHES (#657).
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d+)|([.?!,;:])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /** Build the Romanian phonemizer. */
 export function createRomanian(): Phonemizer {

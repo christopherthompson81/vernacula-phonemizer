@@ -14,6 +14,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, foldLatinToBase } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface NumbersDef {
@@ -146,18 +147,13 @@ function numberWords(n: number): string {
 // its own output — `water` → *wata*, `computer` → *kampjuta*, not English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Sending an
 // accented token to the foreign reader would contradict the engine's design, so the token is only made WHOLE and
 // pcm's own g2p reads it, which is what the fragmentation was preventing.
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d+)|([.?!,;:])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /**
- * Fold an accented Latin letter to its BASE — `ö`→`o`, `ã`→`a`, `ñ`→`n` — before the rule g2p sees it.
- *
- * ⚠ REQUIRED BY THE NATIVISING CHOICE, and widening the token without it made one case WORSE. pcm's g2p has no
- * rule for `ö`, so the letter simply VANISHED: `Klöcker` came out *klkkeɾ*, an unpronounceable cluster, where
- * fragmenting had at least produced syllables. Nativising an English-spelled word means reading it with Naija
- * values — which requires a letter to read. Dropping it is not nativising, it is deleting.
- * NFD then discard the marks, so this handles a PRECOMPOSED `ö` and a decomposed `o`+U+0308 alike.
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * above is the inventory — a word it rejects carries a letter this language does not use. See
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
 
 class NaijaPhonemizer implements Phonemizer {
     // `foreign` = the English DICT lookup (knownWord): a known-English word is nativised, an OOV one (substrate
@@ -165,7 +161,7 @@ class NaijaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(foldToBase(m[1]), this.foreign));
+            if (m[1]) sink.emit(phonemizeWord(foldLatinToBase(m[1]), this.foreign));
             else if (m[2]) {
                 const n = Number(m[2]);
                 // numberWords already yields canonical IPA (the number words are media-spelled loans given

@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -99,12 +100,28 @@ export function phonemizeWord(word: string): string {
 
 // A word (Latin incl. the ALUPEC accented vowels; ' ’ - keep clitic clusters together — d'algen, odja-l) / number /
 // punctuation token. Numbers are deferred (passed through). The apostrophe/hyphen are dropped by the scan.
-const TOKEN = /([a-záàâéèêíìîóòôúùûA-ZÁÀÂÉÈÊÍÌÎÓÒÔÚÙÛ'’-]+)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’-")})|(\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ *
+ * ⚠ NOT QUITE VERBATIM: ì ù Ì Ù were REMOVED, because the g2p has no rule for them and DROPPED them outright.
+ * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
+ * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
+ * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
+ * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
+ * `test/native-inventory.test.ts` now measures it rather than trusting it.
+ */
+const NATIVE_CLASS = "[a-záàâéèêíîóòôúûA-ZÁÀÂÉÈÊÍÎÓÒÔÚÛ'’-]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class KabuverdianuPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Kabuverdianu number WORDS, each phonemized like any other word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

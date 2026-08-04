@@ -11,6 +11,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { isNko, nkoToLatin } from "./bambaraNko.ts";
 import { foldNkoDigits, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -55,12 +56,20 @@ export function phonemizeWord(word: string): string {
 
 // A word — Bambara Latin (incl. ɛ ɔ ɲ ŋ) OR N'Ko (letters U+07CA–07EA + its tone/nasal marks) / number / punct.
 // The number class covers BOTH digit sets the two registered scripts use: ASCII 0–9 and N'Ko ߀–߉ (U+07C0–07C9).
-const TOKEN = /([a-zɛɔɲŋ\u{07CA}-\u{07F5}\u{07FA}\u{07FD}]+)|([\d\u{07C0}-\u{07C9}]+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin", "Nko"])})|([\\d\\u{07C0}-\\u{07C9}]+)|([.!?…,;:])`, "giu");
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zɛɔɲŋ\\u{07CA}-\\u{07F5}\\u{07FA}\\u{07FD}]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class BambaraPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: N'Ko digits folded to ASCII, composed to Bambara words, then through the same g2p
             else if (m[2]) for (const wd of numberToWords(Number(foldNkoDigits(m[2]))).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

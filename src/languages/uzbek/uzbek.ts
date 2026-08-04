@@ -7,6 +7,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -95,7 +96,16 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["kvadrat"], cubed: ["kubo"], position: { squared: "before", cubed: "compound" } },
 });
 
-const TOKEN = /([a-zʻ'’‘`ʼ′]+)|(\d+(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "ʻ'’‘`ʼ′")})|(\\d+(?:,\\d+)?)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zʻ'’‘`ʼ′]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 
@@ -104,7 +114,7 @@ class UzbekPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/rate/clock steps need the
         // number and its suffix still adjacent, which the tier would break (1978-yildagi → 1978 … yildagi).
         return assembleClauses(SYMBOLS(normalizeUzbek(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const [intRaw, frac] = m[2].split(",");
                 for (const wd of number(intRaw!).split(" ")) sink.emit(wd);

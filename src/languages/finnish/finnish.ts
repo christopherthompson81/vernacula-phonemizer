@@ -12,6 +12,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
@@ -44,12 +45,21 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Finnish Latin letters incl. ä ö å + loan š ž) / number / punctuation token.
-const TOKEN = /([a-zäöåšž]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zäöåšž]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class FinnishPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤9 digits fits a safe integer (<1e9) → compose; longer → read the raw string digit-by-digit so the
                 // float conversion can't lose precision or go exponential (1e21 → "1e+21").
