@@ -1502,3 +1502,56 @@ Verified: om corpus diff **0/1218 byte-identical** — expected, since om_et's o
 `km 6,387`, the rate `165km/h`, `sq mi`, `km²`) because they are what the reorder exists for.
 
 Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67.
+
+## Run 23 — 2026-08-04 — the phantom `±`: fixing the DATA, not just reading around it
+
+#654 cited `Las CaÃ±itas` as the fleet's only `±`. The engine already repaired it — but the ARTIFACT still carried
+the mojibake, so every measurement over the mined text still saw the phantom.
+
+⚠ **THE ARTIFACTS ARE OURS, AND A CORRUPT ONE IS WORSE THAN AN INCOMPLETE ONE.** The mis-decode of a letter
+CONTAINS a sign: `Ã±` contains `±`, `Ä°` contains `°`, `Ã£` contains `£`, `Â²` contains `²`. So the file did not
+merely fail to read — it MANUFACTURED symbols for every downstream measurement, and #586 chased both the `°` and
+the `£` as per-language defects before the cause was found. Repairing the stored text is what stops that class of
+false lead at its source.
+
+Three things done, in the order that matters:
+
+1. **The mining tool now repairs double-encoding** (`repair_double_encoded` in wikidump-to-text.py), before
+   anything reads a symbol out of the text — so a regenerated artifact needs no errata at all.
+2. **The 13 affected entries were corrected in place** (id ×12, mr ×1), editing the RAW jsonc so comments and
+   formatting survive and only the mojibake bytes change.
+3. **An ERRATA block was added to each header**, because an artifact records its own provenance and a correction
+   is part of that.
+
+### ⚠ AND THE TWO ERRATA ARE NOT THE SAME KIND, which I got wrong on the first pass
+
+I wrote one errata text and applied it to both files, claiming "the decode is EXACT, nothing is guessed". True for
+id, **false for mr** — and checking what actually changed is what caught it:
+
+| file | change | kind |
+|---|---|---|
+| id | `Ã±`→`ñ`, `Ã£`→`ã`, `Ä°`→`İ`, `Â²`→`²`, `Ã³`→`ó` | **exact DECODE** — UTF-8 `C2..C5 XX` encodes a known code point |
+| mr | `â€इलर्निंगâ€�` → `“इलर्निंग”` | **INFERENCE** — the third byte did not survive; U+FFFD is all that is left |
+
+mr's repair reconstructs rather than decodes, so its errata now says so and cites the two constraints that make it
+safe to store: U+FFFD is a **fingerprint** (only five `E2 80 xx` third bytes are unmapped in CP1252, and `9D` = `”`
+is by far the commonest in running text), and the pairing is **corroborated across languages** (en
+`“learning” and “socialization”`, hi `“लर्निंग” और “सोशलाइजेशन”` — the same sentence with its bytes intact, which is
+what settles the OPENING quote rather than a dash). Plus the damage is bounded even if wrong: every candidate is a
+quote, dash or space, all clause marks or silent here, so a wrong pick cannot produce a wrong WORD.
+
+*Applying one justification to two changes because they were in the same commit is exactly how a stronger claim
+gets attached to weaker evidence.* The `<sup>` flattening in the same file's history is the third kind and is
+still NOT retro-repaired: `10<sup>10</sup>` → `1010` loses the boundary, and restoring it would need inferring
+where the boundary was.
+
+### Result
+
+`±` in the artifacts: **1 → 0**. The phantom is gone from the data, not merely tolerated by the readers.
+Gates: tsc clean; 205 files / 2928 tests; audit 0 defective cells across 0/67; both artifacts re-parse
+(id 80 hard + 30 sample, mr 77 + 30).
+
+⚠ **The `Las Cañitas` READING is still wrong, for an unrelated reason** — `t͡ʃˈa ˈɛn ˈitas`, "cha en itas", because
+`id`'s TOKEN is `[a-zA-Z]+` and every accented Latin letter fragments the word. That is the ASCII-tokenizer defect
+already recorded in Run 12; the correct spelling now reaches it, and it still cannot read it. `yue` solved this
+with `\p{Script=Latin}` and pins it with a test.

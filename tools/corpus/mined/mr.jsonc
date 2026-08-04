@@ -9,6 +9,22 @@
 // real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
 // fire, not that nothing else broke.
 //
+// ⚠ ERRATA — 1 LOSSY MOJIBAKE residue was CORRECTED IN PLACE (2026-08-04, #654):
+//   `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� …`  →  `उदाहरणार्थ, “इलर्निंग” आणि “समाजीकरण” …`
+// ⚠ THIS ONE IS AN INFERENCE, NOT AN EXACT DECODE, and the distinction matters — id.jsonc's errata is the exact
+// kind and this is not. `â€` is `E2 80`, the first two bytes of a General Punctuation character, and the third
+// byte did not survive: the closing mark arrived as U+FFFD. So the repair RECONSTRUCTS rather than decodes.
+// WHAT MAKES IT SAFE ENOUGH TO STORE: two independent constraints, both recorded in src/core/unicode.ts.
+//   · U+FFFD IS A FINGERPRINT — of the `E2 80 xx` third bytes, only 0x81/0x8D/0x8F/0x90/0x9D are unmapped in
+//     CP1252 and become the replacement character, and among those `E2 80 9D` is `”`, overwhelmingly the most
+//     frequent in running text.
+//   · THE PAIRING IS CORROBORATED ACROSS LANGUAGES — FLEURS translates ONE English set, so this sentence exists
+//     elsewhere with its bytes intact: en `“learning” and “socialization”`, hi `“लर्निंग” और “सोशलाइजेशन”`. Both
+//     siblings write U+201C/U+201D, which is what settles the OPENING quote rather than a dash.
+// ⚠ AND THE DAMAGE IS BOUNDED EVEN IF WRONG: every candidate for the missing character is a quote, a dash or a
+// space — all of them either clause marks or silent in this engine — so a wrong choice cannot produce a wrong
+// WORD. Left as mojibake it left a `€` that `\p{Sc}` read as a PHANTOM CURRENCY, which is what #586 chased.
+// The mining tool now repairs this at source (`repair_double_encoded` in wikidump-to-text.py).
 // ⚠ AN EMPTY CELL IS NOT EVIDENCE. It is a query to run or a tool bug. Both have happened here: random
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
 // abbreviation dots and emptied three cells that a grep showed were well populated.
@@ -67,7 +83,7 @@
         { "cell": "degrees", "text": "उपग्रह इमेजरीचा शोध लागल्यापासून अटलांटिकच्या दक्षिण आणि पूर्वेकडे नोंदविण्यात आलेलं फ्रेड हे आजवरचं सर्वात शक्तिशाली समशीतोष्ण चक्रावीदळ आहे आणि 35°W च्या पूर्वेकडे नोंदवलेलं केवळ तिसरा मोठा चक्रवात आहे." },
         { "cell": "degrees", "text": "मोंटेव्हिडिओ हे उष्ण कटिबंधात येते, उन्हाळी महिन्यात,+30°से. पेक्षा अधिक तापमान सामान्य असते." },
         { "cell": "digit-run", "text": "NSA म्हणून त्यांनी जागतिक बाबींना मुत्सद्दीपणाने हाताळण्यास कार्टर यांना मदत केली जसे की कॅम्प डेव्हिड अ‍ॅकार्ड्स,1978; 1970 दशकाच्या उत्तरार्धात अमेरिका-चीन संबंधांना सामान्य करण्याच्या विचारात; इराण क्रांती, ज्यामुळे इराण बंधक संकट ओढावले1979; आणि 1979 मध्ये अफगाणिस्तानात सोव्हिएत आक्रमण." },
-        { "cell": "digit-run", "text": "उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� ला इंटरनेट वापरासाठी (जेम्स एट अल., 1995) महत्त्वपूर्ण प्रेरणा म्हणून सूचित केले आहे." },
+        { "cell": "digit-run", "text": "उदाहरणार्थ, “इलर्निंग” आणि “समाजीकरण” ला इंटरनेट वापरासाठी (जेम्स एट अल., 1995) महत्त्वपूर्ण प्रेरणा म्हणून सूचित केले आहे." },
         { "cell": "digit-run", "text": "जपान जवळपास 7000 बेटांचा समूह आहे ( सर्वात मोठे आहे होन्शू) जे जपानला जगातील 7 सर्वात मोठे बेट बनवते." },
         { "cell": "digit-run", "text": "1755 मध्ये भूकंप झाल्यानंतर फक्त रिकामे सोडण्यासाठी पोर्तुगीजांनी ते नष्ट केले आणि कॅसा ब्रान्का या नावाने पुन्हा बांधले." },
         { "cell": "fractions", "text": "हे कोणी लिहिले आहे कोणालाही माहिती नाही, मात्र हे माहिती आहे की त्याच्या सुरुवातीच्या आयुष्यात, मोठे चर्मपत्र दस्तऐवज (२९ ३/४ इंच ते २४ १/२ इंच आकाराचे) साठवणीसाठी आणले होते." },

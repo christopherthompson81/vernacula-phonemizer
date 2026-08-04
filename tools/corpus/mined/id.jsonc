@@ -9,6 +9,21 @@
 // real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
 // fire, not that nothing else broke.
 //
+// ⚠ ERRATA — 12 sequences of DOUBLE-ENCODED UTF-8 was CORRECTED IN PLACE (2026-08-04, #654). The wiki text was UTF-8
+// decoded as Latin-1 and re-encoded, so it arrived mis-decoded:
+//   Las CaÃ±itas → Las Cañitas · SÃ£o Paulo → São Paulo · Ä°zmir → İzmir · 19.500 kmÂ² → 19.500 km²
+// ⚠ WHY THIS ARTIFACT WAS EDITED RATHER THAN LEFT AS MINED. The mojibake did not merely fail to read — it
+// MANUFACTURED SYMBOLS for every measurement over this file, because the mis-decode of a letter contains a
+// sign: `Ã±` contains `±`, `Ä°` contains `°`, `Ã£` contains `£`, `Â²` contains `²`. #654 cited `Las CaÃ±itas`
+// as the fleet's ONLY `±`, and #586 chased both the `°` and the `£` as per-language defects before the cause
+// was found. An artifact that invents symbols is worse than one that is merely incomplete.
+// ⚠ AND THE DECODE IS EXACT, which is what licenses editing stored evidence here. UTF-8 `C2..C5 XX` encodes a
+// known code point, so this is a DECODE, not an inference — nothing is guessed. Contrast the `<sup>` flattening
+// in the same file's history, where `10<sup>10</sup>` became `1010` and the exponent boundary is unrecoverable:
+// that one was NOT retro-repaired, because restoring it would have required inferring where the boundary was.
+// The mining tool now repairs this at source (`repair_double_encoded` in wikidump-to-text.py), so a regenerated
+// artifact needs no errata.
+//
 // ⚠ AN EMPTY CELL IS NOT EVIDENCE. It is a query to run or a tool bug. Both have happened here: random
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
 // abbreviation dots and emptied three cells that a grep showed were well populated.
@@ -73,16 +88,16 @@
         { "cell": "clock", "text": "Ini akan memungkinkannya untuk kompatibel dengan 802.11a, 802.11b dan 802.11g, asalkan stasiun pangkalan memiliki radio ganda." },
         { "cell": "clock", "text": "Antara pukul 22.00 dan 23.00 Waktu Standar Pegunungan, para narapidana memulai kebakaran di halaman." },
         { "cell": "clock", "text": "Kendaraan itu sendiri diambil dari tempat kecelakaan sekitar pukul 12.00 GMT di hari yang sama." },
-        { "cell": "signs", "text": "Turnamen terbesar tahun ini berlangsung pada bulan Desember di lapangan polo di Las CaÃ±itas." },
-        { "cell": "signs", "text": "Karena bulu dinosaurus tidak memiliki batang yang berkembang dengan baik, yang disebut rachis, tetapi memiliki ciri yang lain â€” duri dan barbule â€” peneliti berkesimpulan bahwa rachis mungkin merupakan perkembangan evolusi lebih akhir dibanding ciri-ciri lainnya." },
-        { "cell": "signs", "text": "Zaman berlangsungnya peristiwa-peristiwa ini biasanya dinamakan Abad Pertengahan Tinggi dari periode sejarah Eropa di abad ke-11, ke-12, dan ke-13 (1000â€“1300 M)." },
-        { "cell": "signs", "text": "Selama Perang Revolusi, tiga belas negara bagian pertama-tama membentuk sebuah pemerintah pusat yang lemah â€” dengan Kongres sebagai satu-satunya komponen â€” di bawah Pasal-Pasal Konfederasi." },
+        { "cell": "signs", "text": "Turnamen terbesar tahun ini berlangsung pada bulan Desember di lapangan polo di Las Cañitas." },
+        { "cell": "signs", "text": "Karena bulu dinosaurus tidak memiliki batang yang berkembang dengan baik, yang disebut rachis, tetapi memiliki ciri yang lain — duri dan barbule — peneliti berkesimpulan bahwa rachis mungkin merupakan perkembangan evolusi lebih akhir dibanding ciri-ciri lainnya." },
+        { "cell": "signs", "text": "Zaman berlangsungnya peristiwa-peristiwa ini biasanya dinamakan Abad Pertengahan Tinggi dari periode sejarah Eropa di abad ke-11, ke-12, dan ke-13 (1000–1300 M)." },
+        { "cell": "signs", "text": "Selama Perang Revolusi, tiga belas negara bagian pertama-tama membentuk sebuah pemerintah pusat yang lemah — dengan Kongres sebagai satu-satunya komponen — di bawah Pasal-Pasal Konfederasi." },
         { "cell": "dotted", "text": "U.S. Corps of Engineers memperkirakan bahwa curah hujan sebesar 6 inci ini mampu menerobos tanggul yang sudah rusak." },
-        { "cell": "year", "text": "\"Perangko ke-1000-nya adalah \"Karya Besar Raja Swedia\" oleh David KlÃ¶cker Ehrenstrahl di tahun 2000, yang terdaftar di Buku Rekor Dunia Guinness.\"" },
+        { "cell": "year", "text": "\"Perangko ke-1000-nya adalah \"Karya Besar Raja Swedia\" oleh David Klöcker Ehrenstrahl di tahun 2000, yang terdaftar di Buku Rekor Dunia Guinness.\"" },
         { "cell": "year", "text": "Portugis menghancurkan dan membangunnya kembali dengan nama Casa Branca, hanya untuk menelantarkannya setelah gempa bumi di tahun 1755." },
         { "cell": "year", "text": "Raja Louis XVI yang ketakutan, Ratu Marie Antoinette, dua anak kecil mereka (Marie Therese yang berusia 11 tahun dan Louis-Charles yang berusia empat tahun) dan saudara perempuan Raja, Madam Elizabeth, pada tanggal 6 Oktober 1789 dipaksa kembali ke Paris dari Versailles oleh massa wanita pasar." },
         { "cell": "year", "text": "\"Contohnya, \"belajar\" dan \"bersosialisasi\" disarankan sebagai motivasi penting dalam penggunaan Internet (James dkk., 1995). \"" },
-        { "cell": "decimals", "text": "Taman ini mencakup 19.500 kmÂ² dan terbagi dalam 14 ecozone yang berbeda-beda, masing-masing mendukung satwa liar yang berbeda." },
+        { "cell": "decimals", "text": "Taman ini mencakup 19.500 km² dan terbagi dalam 14 ecozone yang berbeda-beda, masing-masing mendukung satwa liar yang berbeda." },
         { "cell": "decimals", "text": "Amazon juga merupakan sungai paling luas di dunia, dengan lebar sekitar 9,6 kilometer." },
         { "cell": "decimals", "text": "Orang Jepang memiliki hampir 7.000 pulau (yang terbesar adalah Honshu) sehingga menjadikan Jepang pulau terbesar ke-7 di dunia" },
         { "cell": "decimals", "text": "Di seluruh Amerika Serikat, ada sekitar 400.000 kasus yang terdaftar dari Multiple Sclerosis (MS), yang membuatnya menjadi penyakit neurologis utama di usia dewasa muda dan paruh baya." },
@@ -100,8 +115,8 @@
         { "cell": "ranges", "text": "Antarktika Pedalaman adalah dataran tinggi terpencil yang tertututup oleh es setebal 2-3 km." },
         { "cell": "currency", "text": "Dia juga terlibat dalam pengukiran uang kertas untuk banyak negara, contoh karyanya yang terbaru termasuk potret Perdana Menteri di bagian depan uang kertas $5 dan $100 Kanada yang baru." },
         { "cell": "currency", "text": "250 tahun kemudian, Guinness berkembang menjadi sebuah usaha global yang menghasilkan lebih dari 10 miliar euro (US$ 14,7 miliar) per tahun." },
-        { "cell": "currency", "text": "Diharapkan sebagian besar tiket acara seharga antara Â¥2.500 dan Â¥130.000, sedangkan tiket biasa nilainya sekitar Â¥7.000." },
-        { "cell": "currency", "text": "Jesus yang berusia 21 tahun bergabung dengan Manchester City tahun lalu pada Januari 2017 dari klub Brazil Palmeiras dengan biaya transfer sebesar Â£ 27 juta." },
+        { "cell": "currency", "text": "Diharapkan sebagian besar tiket acara seharga antara ¥2.500 dan ¥130.000, sedangkan tiket biasa nilainya sekitar ¥7.000." },
+        { "cell": "currency", "text": "Jesus yang berusia 21 tahun bergabung dengan Manchester City tahun lalu pada Januari 2017 dari klub Brazil Palmeiras dengan biaya transfer sebesar £ 27 juta." },
         { "cell": "abbrev", "text": "Presiden AS George W. Bush menerima pengumuman tersebut." },
         { "cell": "abbrev", "text": "Peski tunanetra asal Polandia Maciej Krezel dan pemandu Anna Ogarzynska selesai di urutan tiga belas di Super-G. Jong Seork Park asal Korea Selatan selesai di urutan ke-24 dalam Super-G duduk putra." },
         { "cell": "abbrev", "text": "Arly Velasquez dari Meksiko finis di urutan lima belas dalam ajang Super-G laki-laki. Adam Hall dari Selandia Baru finis di urutan sembilan dalam ajang Super-G laki-laki." },
@@ -134,11 +149,11 @@
         { "cell": "letter-name", "text": "Sepanjang tahun 1960-an, Brzezinski bekerja untuk John F. Kennedy sebagai penasihatnya dan kemudian bekerja di pemerintahan Lyndon B. Johnson." },
         { "cell": "letter-name", "text": "Sultan Maroko membangun kembali kota tersebut menjadi Daru I-Badya. Kota tersebut kemudian dinamai Casablanca oleh para pedagang Spanyol yang mendirikan basis perdagangan di sana." },
         { "cell": "letter-name", "text": "Rolando Mendoza menembakkan M16 miliknya ke arah para turis." },
-        { "cell": "exponent", "text": "Sejak AsunciÃ³n berdiri tahun 1537, Paraguay telah berhasil mempertahankan banyak karakter dan identitas aslinya." },
-        { "cell": "exponent", "text": "Dijuluki Yosemite-nya Amerika Selatan, destinasi pendakian utama Chili yaitu Lembah CochamÃ³ memiliki beraneka tebing dan dinding batu granit raksasa." },
-        { "cell": "exponent", "text": "Sundarbans mencakup area seluas 3.850 kmÂ², yang sekitar sepertiganya tertutup daerah air/rawa." },
+        { "cell": "exponent", "text": "Sejak Asunción berdiri tahun 1537, Paraguay telah berhasil mempertahankan banyak karakter dan identitas aslinya." },
+        { "cell": "exponent", "text": "Dijuluki Yosemite-nya Amerika Selatan, destinasi pendakian utama Chili yaitu Lembah Cochamó memiliki beraneka tebing dan dinding batu granit raksasa." },
+        { "cell": "exponent", "text": "Sundarbans mencakup area seluas 3.850 km², yang sekitar sepertiganya tertutup daerah air/rawa." },
         { "cell": "ampersand", "text": "Di ujung teratas, B&B jelas bersaing, terutama pada dua hal utama: tempat tidur dan sarapan." },
-        { "cell": "sports-time", "text": "Balapannya yang lain, Giant Slalom, membuatnya selesai di urutan kesepuluh di grup duduk putri dengan waktu tempuh gabungan 4:41.30, 2:11.60 menit lebih lambat dari Claudia Loesch dari Austria yang selesai di urutan pertama dan 1:09.02 menit lebih lambat dari GyÃ¶ngyi Dani dari Hongaria yang selesai di urutan kesembilan." },
+        { "cell": "sports-time", "text": "Balapannya yang lain, Giant Slalom, membuatnya selesai di urutan kesepuluh di grup duduk putri dengan waktu tempuh gabungan 4:41.30, 2:11.60 menit lebih lambat dari Claudia Loesch dari Austria yang selesai di urutan pertama dan 1:09.02 menit lebih lambat dari Gyöngyi Dani dari Hongaria yang selesai di urutan kesembilan." },
         { "cell": "quote-letter", "text": "Jumlah dari orang yang hadir sangatlah banyak sehingga tidak mungkin bagi semuanya untuk mendapatkan akses ke pemakaman di St. Peter's Square." },
         { "cell": "quote-letter", "text": "Dalam makalahnya yang berjudul The President's Speech, Oliver Sacks menunjukkan bagaimana seseorang yang tak memahami ucapan akibat menderita kerusakan otak tetap mampu secara akurat menilai keikhlasan." },
         { "cell": "quote-letter", "text": "Tiga Kerajaan adalah salah satu era paling berdarah dalam sejarah Tiongkok Kuno, ribuan orang tewas berjuang untuk duduk di kursi tertinggi di istana agung di Xi'an." },
