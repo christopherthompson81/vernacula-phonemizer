@@ -8,6 +8,11 @@
 // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
 // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
 //
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
@@ -16,12 +21,26 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "iiyeni",
-            "verdict": "absent",
-            "tokenHits": 0,
-            "articles": 0,
+            "word": "iimitha",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
             "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…o laseGandaki Pradesh, kumantla-embindi weNepal . No8 wakhe Iimitha ezili-167 ukuphakama ngaphezu komphakamo wolwandle yintaba…"
+            ]
+        },
+        {
+            "word": "imitha",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…de ibonakala elubala ekukhanyeni okubonakalayo kodwa ifunxa imitha ye-infrared, isebenze njengegesi yegreenhouse. Ikharbon dio…"
+            ]
         }
     ],
 }
