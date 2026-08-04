@@ -239,6 +239,28 @@ export function normalizeThai(input: string): string {
     // dropped sign is inaudible, which is the one outcome that cannot be right.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " บวก ");
 
+    // ── 8c. the dimension × → คูณ, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
+    // The corpus's one instance is the manuscript sentence, `วัดขนาดได้ 29¾ นิ้ว × 24½ นิ้ว`, and the sign was
+    // DROPPED — so a measurement read as two bare numbers.
+    // ⚠ `คูณ` HAD ZERO HITS IN THE WIKI HAYSTACK when attest.ts probed it, which is why #586 recorded this as
+    // unsourced and invented no rule. It is audible. The utterance sits in th_th's TEST split, which this
+    // corpus did not carry until the split was fetched; decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft
+    // (a PHONEME recognizer — no `×` and no digits in its 392-token vocabulary):
+    //     `… k ʌ n a d aɪ  j iː s ɪ p k aʊ  s e s a m s ʊ n s iː  k uː n  j iː z p s iː  s e n ʊ ŋ s ʊ n s ɔ ŋ  n iː …`
+    //   ยี่สิบเก้า (29) · เศษสามส่วนสี่ (¾) · **คูณ** · ยี่สิบสี่ (24) · เศษหนึ่งส่วนสอง (½) · นิ้ว
+    // ★ Note the reader also SPELLS OUT THE VULGAR FRACTIONS (เศษสามส่วนสี่ for ¾), which this layer does not
+    //   yet do — a separate gap, recorded here because the same recording is the evidence for it.
+    //
+    // ⚠ KEYED ON THE FOLLOWING DIGIT ALONE, not digit-flanked, and Arabic's rule records the same reason: in
+    // `29¾ นิ้ว × 24½ นิ้ว` the left neighbour is the unit WORD นิ้ว and the numbers carry vulgar fractions, so a
+    // `(\d)\s*×\s*(\d)` shape misses it outright.
+    // ⚠ U+00D7 ONLY, NOT THE ASCII `x`, and that asymmetry is deliberate. hu's corpus writes both spellings in
+    // one sentence, so the ASCII form is real orthography THERE — but that is a fact about Hungarian typography,
+    // and th_th contains zero ASCII instances. Accepting a bare `x` here would be looser than vi's rule, which
+    // is digit-FLANKED, because this one keys on the following digit alone (it has to: the left neighbour is the
+    // unit word นิ้ว). Add it if a Thai instance ever appears; do not import it from another language's habits.
+    s = s.replace(/\s*[×]\s*(?=\d)/gu, " คูณ ");
+
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° (else the C is left behind and routes to the English phonemizer as "sˈiː").
     s = s.replace(/\s*°\s*C(?![A-Za-z])/gu, " องศาเซลเซียส");

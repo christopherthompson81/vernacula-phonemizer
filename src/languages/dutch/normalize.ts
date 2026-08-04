@@ -140,6 +140,20 @@ function spellCaps(run: string): string | undefined {
 export function normalizeDutch(input: string): string {
     let s = input;
 
+    // 0) THE DOLLAR CODE → the bare sign, before the INITIALISM pass can split it. dutch.ts composes
+    //    `SYMBOLS(initialisms(normalizeDutch(x)))`, so the capital-run rule reaches `US` first and spells it —
+    //    after which the `$` is preceded by a letter and the tier's guard, the one that stops a key biting into
+    //    a word, correctly refuses it. The corpus's `10 miljard euro (US$ 14,7 miljard)` therefore read
+    //    *…ˈy ˈɛs veertien komma zeven miljard*: the code spelled out and THE CURRENCY GONE.
+    //    Exactly the defect pt carried, and the same fix, because the two files share that composition.
+    //
+    //    ⚠ FOLDING RATHER THAN DECLARING A `US$` KEY IS THE ATTESTED READING, not a convenience. The nl_nl
+    //    speaker of this sentence says the currency WORD and never the code — MMS-1b-all (`nld`) transcribes
+    //    `… 10 miljard euro  14. miljard DOLLAR  omzet draait`. So dropping `US` loses nothing a reader says,
+    //    and the tier's `$` → *dollar* is the whole reading. (A text ASR is the right instrument here because
+    //    the question is WHICH WORD, not whether a sign is present.)
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$(?=[  ]?\d)/gu, "$");
+
     // 1) ERA MARKERS and the MULTI-DOT abbreviations. FIRST, before the single-dot rule — otherwise the
     //    single-dot rule consumes `v.` / `e.` and leaves `Chr.` / `d.` behind as an interior phrase break.
     //    Also before step 2, whose capital-run rule would otherwise not see them but whose output would

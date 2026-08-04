@@ -34,6 +34,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--transcripts", required=True, help="dir of per-language transcript folders, used as the want-list")
     p.add_argument("--langs", help="comma-separated FLEURS codes; overrides the derived want-list")
     p.add_argument("--priority", default="", help="comma-separated codes to fetch FIRST, so work can resume early")
+    p.add_argument("--splits", default="train",
+                   help="comma-separated splits to fetch (train,dev,test). Default train — that is where every "
+                        "sign-bearing utterance checked under #586 sits. dev/test are the held-out material a "
+                        "FINE-TUNE wants, and they also carry a few corpus instances train lacks (ar's and th's "
+                        "second `×`), so they are worth fetching for their own reasons.")
     p.add_argument("--dry-run", action="store_true", help="report sizes and exit without downloading")
     return p.parse_args()
 
@@ -50,42 +55,45 @@ def main() -> None:
         want = sorted(os.listdir(a.transcripts))
 
     api = HfApi()
-    paths = [f"data/{l}/audio/train.tar.gz" for l in want]
+    splits = [x.strip() for x in a.splits.split(",") if x.strip()]
+    paths = [f"data/{l}/audio/{sp}.tar.gz" for l in want for sp in splits]
     # One batched metadata call, not one HEAD per language — the lesson in tools/corpus/README.md.
-    sizes = {i.path.split("/")[1]: i.size for i in api.get_paths_info(REPO, paths, repo_type="dataset")}
-    absent = [l for l in want if l not in sizes]
+    sizes = {(i.path.split("/")[1], i.path.rsplit("/", 1)[1][:-7]): i.size
+             for i in api.get_paths_info(REPO, paths, repo_type="dataset")}
+    absent = [f"{l}/{sp}" for l in want for sp in splits if (l, sp) not in sizes]
     if absent:
         print(f"no train tarball in {REPO} (skipped): {' '.join(absent)}", file=sys.stderr)
 
-    def needed(lang: str) -> bool:
-        dest = os.path.join(have_dir, lang, "audio", "train.tar.gz")
-        return not (os.path.exists(dest) and abs(os.path.getsize(dest) - sizes[lang]) < 1024)
+    def needed(key) -> bool:
+        lang, sp = key
+        dest = os.path.join(have_dir, lang, "audio", f"{sp}.tar.gz")
+        return not (os.path.exists(dest) and abs(os.path.getsize(dest) - sizes[key]) < 1024)
 
-    todo = [l for l in sizes if needed(l)]
+    todo = [k for k in sizes if needed(k)]
     pri = [s.strip() for s in a.priority.split(",") if s.strip()]
-    todo.sort(key=lambda l: (pri.index(l) if l in pri else len(pri), l))
-    total = sum(sizes[l] for l in todo)
+    todo.sort(key=lambda k: (pri.index(k[0]) if k[0] in pri else len(pri), k[0], k[1]))
+    total = sum(sizes[k] for k in todo)
     print(f"{len(todo)} to fetch, {total / 2**30:.1f} GiB "
           f"({len(sizes) - len(todo)} already complete)", flush=True)
     if a.dry_run:
-        for l in todo:
-            print(f"  {l:16} {sizes[l] / 2**30:5.2f} GiB")
+        for lang, sp in todo:
+            print(f"  {lang:16} {sp:5} {sizes[(lang, sp)] / 2**30:5.2f} GiB")
         return
 
     done, failed, got = [], [], 0
-    for i, lang in enumerate(todo, 1):
+    for i, (lang, sp) in enumerate(todo, 1):
         t0 = time.time()
         try:
-            hf_hub_download(REPO, f"data/{lang}/audio/train.tar.gz", repo_type="dataset", local_dir=a.root)
-            n = os.path.getsize(os.path.join(have_dir, lang, "audio", "train.tar.gz"))
+            hf_hub_download(REPO, f"data/{lang}/audio/{sp}.tar.gz", repo_type="dataset", local_dir=a.root)
+            n = os.path.getsize(os.path.join(have_dir, lang, "audio", f"{sp}.tar.gz"))
             got += n
-            ok = abs(n - sizes[lang]) < 1024
-            print(f"[{i}/{len(todo)}] {lang}: {n / 2**30:.2f} GiB in {time.time() - t0:.0f}s"
+            ok = abs(n - sizes[(lang, sp)]) < 1024
+            print(f"[{i}/{len(todo)}] {lang}/{sp}: {n / 2**30:.2f} GiB in {time.time() - t0:.0f}s"
                   f"{'' if ok else '  ⚠ SIZE MISMATCH'}", flush=True)
-            (done if ok else failed).append(lang)
+            (done if ok else failed).append(f"{lang}/{sp}")
         except Exception as e:  # noqa: BLE001 — one language failing must not abandon the rest
-            print(f"[{i}/{len(todo)}] {lang}: FAILED {type(e).__name__}: {e}", flush=True)
-            failed.append(lang)
+            print(f"[{i}/{len(todo)}] {lang}/{sp}: FAILED {type(e).__name__}: {e}", flush=True)
+            failed.append(f"{lang}/{sp}")
 
     print(f"\ndone {len(done)}  failed {len(failed)}  fetched {got / 2**30:.1f} GiB", flush=True)
     if failed:
