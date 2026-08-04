@@ -107,7 +107,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { numberToWords, ordinalWords, stemForSuffix } from "./numbers.ts";
+import { multiplicativeWords, numberToWords, ordinalWords, stemForSuffix } from "./numbers.ts";
 
 const LOWER = "a-záéíóöőúüű";
 
@@ -290,6 +290,23 @@ export function normalizeHungarian(input: string): string {
     //    break, and before the initialism pass (step 11) which would otherwise spell `Kr` as *ká er*.
     //    Boundaries are explicit lookarounds, never `\b` — `\b` is ASCII-defined and finds no boundary
     //    against á/é/í/ó/ö/ő/ú/ü/ű.
+    // THE DIMENSION `×` → THE MULTIPLICATIVE, sourced from the corpus's own audio. The corpus writes
+    // `6 x 6 cm-es formátumot, egészen pontosan 56 × 56 mm-es` — ⚠ BOTH SPELLINGS IN ONE SENTENCE, the ASCII
+    // `x` and U+00D7, which is an internal control rather than a typo — and the sign was DROPPED, so the
+    // dimensions read as two bare numbers.
+    // facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer: no `×` and no digits in its vocabulary)
+    // over hu_hu/train:
+    //   `… f iː l m k ɔ m ɛ r ɔ  h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə …`   hatszor hat centiméter
+    //   `… ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r …`   ötvenhatszor ötvenhat milliméter
+    // So the sign is not a WORD here but a SUFFIX on the FIRST operand, which is why this emits the first
+    // number as words and leaves the second as digits for the tokenizer. See `multiplicativeWords` for why the
+    // allomorph is a table and not a harmony rule (`harminc` → harmincszor is anti-harmonic).
+    // Digit-flanked on both sides, which keeps an ordinary letter `x` and any algebraic use out of it.
+    s = s.replace(/(?<![\d.,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
+        const w = multiplicativeWords(Number(n));
+        return w === undefined ? m0 : `${w} `;
+    });
+
     s = s.replace(/(?<![\p{L}\p{M}])Kr\.\s?e\./giu, "Krisztus előtt"); // ×3
     s = s.replace(/(?<![\p{L}\p{M}])Kr\.\s?u\./giu, "Krisztus után"); // ×1
     s = s.replace(/(?<![\p{L}\p{M}])i\.\s?sz\./giu, "időszámításunk szerint"); // ×2
