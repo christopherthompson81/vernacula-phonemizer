@@ -1103,6 +1103,29 @@ negative exponent, *ઋણ સંખ્યાઓ* negative numbers.)
 The lesson is not "the probe is broken". It is that **a definitive negative is a result worth spending effort
 on**, because it converts an open-ended hunt into a decision you can defend and stop revisiting.
 
+**49. MOJIBAKE MAKES EVERY DOWNSTREAM GUARD MISFIRE, AND THE GATE MISATTRIBUTES THE DAMAGE.** id_id carries
+double-encoded UTF-8 upstream — `19.500 km\u00c2\u00b2` for km\u00b2, `Las Ca\u00c3\u00b1itas` for Ca\u00f1itas, `David Kl\u00c3\u00b6cker` for
+Kl\u00f6cker. The injected `\u00c2` and `\u00c3` are LETTERS, so the tier's trailing guard refused the unit match and `km`
+reached the IPA raw. Repairing it at the registry's dispatch point closed **RAWMARK 2 → 0 and DROP 25 → 16**
+in one language: eleven defects, none of which was really about units or signs.
+
+- **The gate had them filed under the wrong classes.** Those sentences were reported as `DROP:exponent` and
+  `DROP:math-sign`, because the injected characters happened to sit where those probes look. A defect count is
+  a count of PROBE HITS, not of causes — when several classes fail in one language, check for a shared upstream
+  cause before treating them as separate items. (I had this recorded as an `id kmÂ²` MINING defect. It is
+  neither mining nor about `km`: the tool copied faithfully and the corruption is in FLEURS.)
+- **MEASURE THE SIGNATURE BEFORE FOLDING, same discipline as trap 36.** `\u00c2`/`\u00c3` followed by a UTF-8
+  continuation byte (U+0080–U+00BF) occurs in no natural orthography — counted across all 67 corpora: **31
+  occurrences, every one in id_id, zero elsewhere.** And the repair is exact arithmetic, not a table: for a
+  lead byte of C2 the code point equals the trailing byte (so drop the `\u00c2`); for C3 it is the trailing byte
+  plus 0x40.
+- **LOSSY MOJIBAKE IS DIFFERENT, AND A PARALLEL CORPUS STILL RECOVERS THE INTENT.** mr_in has `\u00e2\u0080\ufffd` — a curly
+  quote whose third byte was already replaced upstream, so no byte-level repair can work. But FLEURS is a
+  TRANSLATION of one source set, so the sibling sentence answers it: en writes `\u201clearning\u201d and \u201csocialization\u201d`,
+  de `\u201eLernen\u201c`, fr `\u00ab l'apprentissage \u00bb` — mr used the English-style curly pair, which is what its two
+  damaged positions were. Recoverable as a DATA judgement, not at runtime, and worth knowing the corpus can
+  answer questions its own bytes cannot.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
