@@ -541,7 +541,11 @@ function build(lang: string): Phonemizer {
         case "tl":
             return createTagalog();
         case "om":
-            return createOromo(); // digits: native compositor (#562); no foreign needed — om is Latin-script
+            // ⚠ A FOREIGN READER IS NEEDED AFTER ALL, and the old comment's reasoning was the trap: being
+            // Latin-script is exactly what made this necessary, not what made it unnecessary. Oromo's word group
+            // claims Latin text, so an accented foreign NAME was claimed and then mangled by a g2p with no rule
+            // for the letter — `São Paulo` read *s ˈə ˈo paˈulo*. See #657.
+            return createOromo((latin) => getPhonemizer("en").text(latin));
         case "pl":
             return createPolish();
         case "sd":

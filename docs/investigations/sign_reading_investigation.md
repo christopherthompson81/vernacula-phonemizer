@@ -1634,3 +1634,41 @@ Indonesian `Kota` into the English run.
 Corpus diffs, every changed line read: hi 2/1702, ne 2/1993, gu 1/1996, mr/pa/or 0 — every change a letter-name
 fragment becoming a word (`ˈɛs ˈə mˈiː`→`sˈæmi`, `ˈɛs ˈʌ ˈo`→`sˈa`). `or`'s Latin-`I`-as-danda rule and `pa`'s
 initialisms verified intact. Gates: tsc clean; 205 files / 2930 tests; audit 0 defective cells across 0/67.
+
+## Run 25 — 2026-08-04 — #657 opened, and the first Latin-script engine done (om)
+
+Filed #657 for the 14 Latin-script engines still shredding accented Latin, then started on it.
+
+### The method needs no new linguistic data, which is what makes it mechanical
+
+The observation that unlocks it: **each engine's current token class already IS its declared native inventory.**
+So the class is lifted verbatim into a `NATIVE_WORD` test, the token widens to all Latin, and a token failing the
+test goes to the foreign reader. Step 1 is a copy, not a judgement.
+
+### ⚠ `ig` and `yo` do NOT need fixing, which the measurement caught before the edit
+
+Both already use `À-ɏḀ-ỿ`, wide enough to hold the word: `ig São Paulo` → `sao paulo`, `yo` → `sa˧o˧ k͡pa˧u˧lo˧`.
+They read the name NATIVELY rather than routing it — a different judgement call, and a defensible one. They were
+on my scope list from a probe that only detected *fragmentation*; checking each before touching it kept two
+languages out of a change they did not need.
+
+### om done, and the registry comment was the trap
+
+`return createOromo(); // no foreign needed — om is Latin-script`
+
+⚠ **Being Latin-script is exactly what made a reader NECESSARY, not unnecessary.** Because the word group claims
+Latin text, an accented foreign name was CLAIMED and then mangled by a g2p with no rule for the letter — the
+opposite of the comment's reasoning. `São Paulo` read *s ˈə ˈo paˈulo*.
+
+Corpus diff **3/1218**, every line read — all three are letter-name fragments becoming words
+(`t͡ʃʼˈa ˈɛn itˈa`→`kʰˈæniːt̬ə`, `ˈa ˈaᶦ nˈos`→`ʰˈæiːnoᶷz`, `ard ˈaᶦ ˈuni ˈoᶷ`→`ɑːɹd̬ɪ jˈuːnjə`). Native Oromo
+byte-identical; the `×` and rate rules re-verified, since both key on the Latin class.
+
+### Remaining in #657
+
+`pcm` and `tl` fragment and have a reader — but ⚠ **`pcm` deliberately NATIVISES English rather than reading it
+as English** (`phonemizeWord(m[1], this.foreign)` uses the reader as a DICT lookup, per its own header), so it
+wants the token widened WITHOUT the routing change. Then the twelve needing a reader injected: `xh`, `zu`, `sw`,
+`akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`.
+
+Gates: tsc clean; 205 files / 2931 tests; audit 0 defective cells across 0/67.
