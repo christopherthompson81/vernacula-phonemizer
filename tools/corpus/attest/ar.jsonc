@@ -1,0 +1,72 @@
+// WIKIPEDIA WORD ATTESTATION — ar (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ar",
+    "wiki": "ar.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "زائد",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 8,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "ناقص",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…نسبة لقيم e من 0 إلى أقل بقليل من 1، يكون شكل المدار عن قطع ناقص متطاول بشكل متزايد (أو أكثر تفلطحًا)؛ بالنسبة لقيم e أكبر ب…",
+                "…playstyle \\arcsin(e)} يعطي زاوية إسقاط دائرة مثالية على قطع ناقص ذي اختلاف مركزه e. على سبيل المثال، لمشاهدة اختلاف مركز مدا…"
+            ]
+        },
+        {
+            "word": "في",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 692,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ية، جَنوبَ بلاد الشام، غربَ آسيا، تتوسط الشرق الأوسط بكونها في جَنوب بلاد الشام، وشَمال شبه جزيرة العرب. تحدها سوريا من ال…",
+                "…شرق، وتحدها السعودية شرقًا وجنوبًا، كما تطل على خليج العقبة في الجنوب الغربي، حيث تطل مدينة العقبة على البحر الأحمر، ويعتب…",
+                "…ه مع فلسطين وسوريا. أما باقي الحدود فهي امتداد لبادية الشام في الشمال والشرق وصحراء النفوذ في الجنوب، ووادي عربة إلى الجنو…",
+                "…حدود فهي امتداد لبادية الشام في الشمال والشرق وصحراء النفوذ في الجنوب، ووادي عربة إلى الجنوب الغربي. تتنوع التضاريس في الأ…",
+                "…فوذ في الجنوب، ووادي عربة إلى الجنوب الغربي. تتنوع التضاريس في الأردن بشكل كبير، وأهم جباله جبال عجلون في الشمال الغربي، و…",
+                "…. تتنوع التضاريس في الأردن بشكل كبير، وأهم جباله جبال عجلون في الشمال الغربي، وجبال الشراة في الجنوب، أعلى قمة تلك الموجود…"
+            ]
+        },
+        {
+            "word": "ضرب",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…إعصار الخفجي هو إعصار ضرب مدينة الخفجي في شمال شرق المملكة العربية السعودية في 28 أكت…"
+            ]
+        }
+    ],
+}

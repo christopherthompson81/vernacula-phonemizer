@@ -89,3 +89,76 @@ that cannot tell a minus from a Zulu noun prefix. The guard is the prerequisite,
 1. Tighten the `minus` guard so the cell measures minuses (prerequisite for trusting any later count).
 2. Source `plus` / `minus` / `by` per language, corpus → referee → wiki, and declare them in the tier.
 3. Re-measure. Only then is an empty cell evidence of anything.
+
+## Run 2 — 2026-08-03 — the guard, and then the sourcing wall
+
+### The guard (shipped, c517e4b)
+
+Added a second lookbehind excluding the range shape. 15 dropped-minus hits → **9**; de, kn, ml, th, zu go
+clean. hi's one real negative survives, which is the constraint that set the window width. Tooling-only, so no
+runtime effect. Remaining 9: 4 designations, 2 apposition dashes, hi's `पू.-1200` (a range the tight window
+cannot reach — accepted), hi's true negative, xh's `kangange -40 mph` (a Bantu prefix with an intruding space).
+
+### The sourcing wall — this is the real blocker, and it is NOT corpus volume
+
+`concept.ts --items Q6265342,Q10764194,Q1900125` (plus sign / minus sign / ×) over all 19 affected languages:
+
+```
+       plus sign      minus sign     ×
+  am   +              -              ×          ← the LABEL IS THE BARE CHARACTER
+  gu   +              -              ×             …and so for fa kn mi ml ne sr sw ta te th xh zu
+  ar   علامة زائد     علامة ناقص     علامة الضرب
+  hu   pluszjel       mínuszjel      ×
+  ja   プラス記号        マイナス記号       ×
+  vi   +              -              dấu nhân
+  yue  加號            減號            乘號
+```
+
+**14 of 19 languages return the bare character as their own label for it.** That is the same laundering the
+tool's header warns about — a label that is the symbol says nothing about what a reader says. Only ar, hu, ja,
+vi, yue yield a word at all, and those are SIGN NAMES (`pluszjel` = "plus-sign", 加號 = "plus-sign"), which
+still need the operand-position sense checked separately.
+
+`attest.ts` on the candidates, senses checked (trap 37 — the bare modifier is never the attestation):
+
+| candidate | verdict | what the hits actually are |
+|---|---|---|
+| hu `mínusz` | ✓ **attested, right sense** | `egy sárga lap: mínusz 1 pont` — directly before a number |
+| ja `マイナス` | ✓ attested by a **reading gloss** | the album title `-（マイナス）`: the character, then its reading |
+| ja `プラス` | ✗ sense unproven | only the TV title `99プラス` |
+| ja `掛ける` | ✗ wrong sense | pouring broth over noodles |
+| ar `في` | ✗ wrong sense | the locative preposition "in", thousands of hits |
+| ar `ضرب` | ✗ wrong sense | "struck" — a hurricane struck the city |
+| th `ลบ` | ✗ wrong sense | the ADJECTIVE "negative", `การป้อนกลับทางลบ` = negative feedback |
+| th `คูณ`, `บวก` | ✗ | zero hits |
+| hu `-szor` | ~ real, wrong sense | `13-szor` = "13 times over" (frequency), and vowel-harmonic → local if ever |
+
+### Why more corpus would not fix this, and what would
+
+The dimension `×` and the signed `+` are **written as signs in running prose, in every language, including in
+the wiki**. So the word is not rare in the corpus — it is *systematically absent from written text*, because
+writing uses the glyph. Adding text cannot surface a word that writing never spells. That is a different
+failure from `ff`'s `kaaree` and `ga`'s `cearnach`, which were ordinary words merely missing from FLEURS and
+sitting in wiki prose; those the wiki route found immediately.
+
+The two things that DID work are worth naming, because they are the only routes that can work here:
+
+- a **reading gloss** — text that writes the character and then its pronunciation (`-（マイナス）`). Rare, but
+  decisive when present, and findable by searching for a character next to a parenthesis.
+- a **word-only context where the sign cannot be used** — `mínusz 1 pont` in a rules list. Prose that must
+  read as speech (sports rules, recipes, spoken-register text) spells what formal prose signs.
+
+⚠ So NOTHING is shipped for ar/th here, and hu/ja's sourced words do not match their measured defects: hu's
+and ja's actual drop is `×`, not the minus. Declaring `mínusz` for hu would be speculative robustness for a
+symbol hu's corpus already reads. Recorded as unsourced rather than filled with a plausible guess.
+
+### What this run establishes
+
+- #627's conclusion is retired but its *instinct about the corpus* was half right: the SHAPE is abundant (17
+  languages' dropped `+`), the WORD is unobtainable from written text by construction. "No rule is authorable"
+  was wrong; "no rule is authorable **from prose alone, for most of the fleet**" is right, and is a much
+  narrower claim than the one closed on.
+- The remaining route for the other 14 languages is a **speech-register source**, not a bigger corpus: a
+  reading gloss, a spoken-register wiki (Wikipedia's "spoken articles"), or a language's own maths-teaching
+  text. Untried here.
+- ⚠ `hu` writes `6 x 6` and `56 × 56` in ONE sentence, so whatever eventually ships must accept the ASCII `x`.
