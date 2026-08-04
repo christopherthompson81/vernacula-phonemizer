@@ -134,7 +134,30 @@ function numberWords(n: number): string {
     return String(n); // beyond the compositor → leave as digits
 }
 
-const TOKEN = /([A-Za-z]+)|(\d+)|([.?!,;:])/gu;
+// ⚠ ALL OF LATIN, not just ASCII — `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became
+// an unclaimed gap read as an English LETTER NAME and the rest of the word started over: `São Paulo` read
+// *ɛs ˈə o pɔlo* ("ES ə O") and `Cañitas` *kɔ ˈɛn itas*. One word became three. Invisible to every gate: no digit
+// or raw mark survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot see.
+// `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
+//
+// ⚠ AND THAT IS THE WHOLE FIX HERE — deliberately NO native-vs-foreign routing, unlike id (#654) and om (#657).
+// This engine NATIVISES: the header states that the rule g2p is applied to English-spelled tokens rather than
+// routed to the English phonemizer, because "nativising is more correct for the creole", and the evidence is in
+// its own output — `water` → *wata*, `computer` → *kampjuta*, not English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Sending an
+// accented token to the foreign reader would contradict the engine's design, so the token is only made WHOLE and
+// pcm's own g2p reads it, which is what the fragmentation was preventing.
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|(\d+)|([.?!,;:])/gu;
+
+/**
+ * Fold an accented Latin letter to its BASE — `ö`→`o`, `ã`→`a`, `ñ`→`n` — before the rule g2p sees it.
+ *
+ * ⚠ REQUIRED BY THE NATIVISING CHOICE, and widening the token without it made one case WORSE. pcm's g2p has no
+ * rule for `ö`, so the letter simply VANISHED: `Klöcker` came out *klkkeɾ*, an unpronounceable cluster, where
+ * fragmenting had at least produced syllables. Nativising an English-spelled word means reading it with Naija
+ * values — which requires a letter to read. Dropping it is not nativising, it is deleting.
+ * NFD then discard the marks, so this handles a PRECOMPOSED `ö` and a decomposed `o`+U+0308 alike.
+ */
+const foldToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
 
 class NaijaPhonemizer implements Phonemizer {
     // `foreign` = the English DICT lookup (knownWord): a known-English word is nativised, an OOV one (substrate
@@ -142,7 +165,7 @@ class NaijaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1], this.foreign));
+            if (m[1]) sink.emit(phonemizeWord(foldToBase(m[1]), this.foreign));
             else if (m[2]) {
                 const n = Number(m[2]);
                 // numberWords already yields canonical IPA (the number words are media-spelled loans given
