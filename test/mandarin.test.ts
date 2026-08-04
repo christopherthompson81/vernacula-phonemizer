@@ -204,4 +204,26 @@ describe("mandarin normalization", () => {
             .toBe("ər˥˩ liŋ˧˥ ji˥˥ ji˥˥ niɛn˧˥ san˥˥ jyɛ˥˩ ʂʐ̩˧˥ sɹ̩˥˩ ʐʐ̩˥˩"); // year digit-wise, month/day cardinal
         expect(phonemize("20世纪", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂʐ̩˥˩ t͡ɕi˥˩"); // a century is a CARDINAL
     });
+
+    test("#586 embedded foreign SCRIPT routes, and accented Latin stays one word", () => {
+        // cmn drives clauseSink() directly instead of going through assembleClauses, and assembleClauses is
+        // where emitUnclaimed calls the script router — so taking the fast path meant silently opting out of a
+        // fleet-wide fix. Every non-Latin foreign script was DELETED: Greek, Cyrillic, Thai, all of it.
+        expect(phonemize("這個詞 Ελλάδα 意即", "cmn")).toContain(phonemize("Ελλάδα", "el"));
+        expect(phonemize("這個詞 Владимир 意即", "cmn")).toContain(phonemize("Владимир", "ru"));
+        expect(phonemize("這個詞 เด็ก 意即", "cmn")).toContain(phonemize("เด็ก", "th"));
+        // ⚠ THE COST WAS ITS OWN CORPUS: cmn's artifact is partly a Chinese article ABOUT THAI GRAMMAR. The
+        // audit called this an `iteration DROP` (a missing ๆ); the truth was the whole Thai run was gone.
+        expect(phonemize("其疊詞形 เด็กๆ 來表", "cmn")).toContain(phonemize("เด็กๆ", "th"));
+        // A run spans ONE interior space, because Thai separates a reduplication mark: split at the space, `ๆ`
+        // reaches Thai with no antecedent and the reading loses a word.
+        expect(phonemize("คนอ้วน ๆ 意即", "cmn")).toContain(phonemize("คนอ้วน ๆ", "th"));
+        // `\p{Script=Latin}`, not `[A-Za-z]` — the same fix yue already pins. The ASCII class split an accented
+        // word at every diacritic and read each fragment as an English LETTER NAME (`Haldarsvík` → "…v" + "kay").
+        expect(phonemize("Müslüm", "cmn")).toBe(phonemize("Müslüm", "en"));
+        expect(phonemize("Haldarsvík", "cmn")).toBe(phonemize("Haldarsvík", "en"));
+        // Han and Latin themselves must be untouched by the new branch.
+        expect(phonemize("一個胖子", "cmn")).toBe("ji˧˥ kɤ˥˩ pʰɑŋ˥˩ t͡sɹ̩");
+        expect(phonemize("這個詞 hello 意即", "cmn")).toContain(phonemize("hello", "en"));
+    });
 });

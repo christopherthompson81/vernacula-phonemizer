@@ -13,10 +13,24 @@ import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeMandarin } from "./normalize.ts";
 import { clauseSink } from "../../core/clauses.ts";
+import { readForeignRun } from "../../core/foreign.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 const HAN = /\p{Script=Han}/u;
-const LATIN = /[A-Za-z]/;
+// ⚠ `\p{Script=Latin}`, NOT `[A-Za-z]`. The ASCII class split an accented Latin word into pieces at every
+// diacritic and handed each fragment to the English reader separately: `Haldarsvík` became `Haldarsv` + `k`, read
+// as two words with the `í` dropped outright. yue fixed this and PINS it (`yue("Müslüm") === phonemize(…, "en")`,
+// its comment: "[A-Za-z]+ split Müslüm into M / sl / m"); cmn carried the same bug unfixed.
+// It also has to be right before the foreign-run branch below can be: with an ASCII test, a bare `í` is neither
+// Han nor "Latin", so it would reach the script router as a one-letter foreign run and be read as a LETTER NAME.
+// Fixing the router branch without this made those readings worse rather than better — measured on 13 cmn
+// utterances, all of them accented Latin proper nouns.
+const LATIN = /\p{Script=Latin}/u;
+/** Continuation of a Latin run: the script plus combining marks, so a decomposed accent stays attached. */
+const LATIN_RUN = /[\p{Script=Latin}\p{M}]/u;
+/** A letter or combining mark that is neither Han nor Latin — the run the script router should read. `\p{M}` is
+ *  included so an abugida's matras stay inside their own run instead of splitting it. */
+const FOREIGN_CHAR = /[\p{L}\p{M}]/u;
 // Clause punctuation + the measure-word set are DATA (cmn.jsonc). A standalone 2 before a measure word reads
 // colloquial 两 (两个, 两天), not 二.
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -49,6 +63,17 @@ const SYMBOLS = makeSymbolNormalizer({
     // Attested in the artifact itself: 公园占地 19500 平方公里 · 783,562 平方公里（300,948 平方英里）.
     // One form each, because a Chinese measure word does not agree with its count.
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
+    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
+    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
+    // they are different words (平方公里 but 二十的平方).
+    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
+    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
+    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
+    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
+    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
+    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
+    bareExponent: { squared: "{n}的平方", cubed: "{n}的立方", power: "{n}的{e}次方" },
     // Chinese groups by MYRIADS, so the magnitude word between a number and its unit is 万 (10⁴) or 亿 (10⁸),
     // not "million". Undeclared, the tier's number–unit adjacency broke on it and the unit fell through to
     // the English letter reading: `5 万 km²` came out as *ˈʊkm*, which is worse than the raw text. The
@@ -180,10 +205,46 @@ class MandarinPhonemizer implements Phonemizer {
             } else if (LATIN.test(ch)) {
                 // Latin run → foreign (en)
                 let j = i;
-                while (j < cp.length && LATIN.test(cp[j]!)) j++;
+                while (j < cp.length && LATIN_RUN.test(cp[j]!)) j++;
                 sink.emit(
                     this.foreign ? this.foreign(cp.slice(i, j).join("")) : "",
                 );
+                i = j;
+            } else if (FOREIGN_CHAR.test(ch)) {
+                // A LETTER RUN THAT IS NEITHER HAN NOR LATIN → the script router (core/scripts.ts).
+                //
+                // Without this branch such a run fell to the `else` below and was SKIPPED, so Mandarin
+                // silently deleted every non-Latin foreign script — Greek, Cyrillic, Thai, Devanagari, all of
+                // it. `這個詞 Ελλάδα 意即` read as if the Greek were not there. The scanner's own comment
+                // records the cause: it "drives clauseSink() directly rather than going through
+                // assembleClauses", and `assembleClauses` is where `emitUnclaimed` calls the router — so
+                // taking the fast path meant opting out of a fleet-wide fix without saying so.
+                //
+                // ⚠ THE COST WAS ITS OWN CORPUS. cmn's mined artifact is partly a Chinese article ABOUT THAI
+                // GRAMMAR, quoting `เด็กๆ`, `คนอ้วน ๆ` and their glosses. The audit reported this as an
+                // `iteration DROP` — a missing `ๆ` — and the truth was larger and simpler: the whole Thai run
+                // was gone, and the `dˈʌk dˈʌk` in the output was the LATIN gloss `dek dek` read as English.
+                // A dropped run is invisible to every leak-based check, so only the differential test saw
+                // anything at all, and what it saw it mislabelled.
+                //
+                // Every sibling Sinitic engine already routed correctly (yue, wuu, nan) — this was cmn alone.
+                // ⚠ THE RUN SPANS A SINGLE INTERIOR SPACE, and the iteration mark is why. Thai writes no space
+                // between words but DOES separate a reduplication mark: `คนอ้วน ๆ`. Split at the space, `ๆ`
+                // becomes a run of its own and reaches Thai with no antecedent to reduplicate, so the reading
+                // lost a whole word — `kʰon ʔuan` for what Thai reads `kʰon ʔuan ʔuan`. Unspaced `เด็กๆ` was
+                // already right, which is what made the difference visible.
+                // Only ONE space, and only between two foreign letters, so a foreign run cannot reach across
+                // Han or Latin text and swallow it.
+                let j = i;
+                while (j < cp.length) {
+                    if (FOREIGN_CHAR.test(cp[j]!) && !HAN.test(cp[j]!) && !LATIN.test(cp[j]!)) { j++; continue; }
+                    const next = cp[j + 1];
+                    if (cp[j] === " " && next !== undefined
+                        && FOREIGN_CHAR.test(next) && !HAN.test(next) && !LATIN.test(next)) { j += 2; continue; }
+                    break;
+                }
+                const routed = readForeignRun(cp.slice(i, j).join(""));
+                if (routed !== undefined && routed !== "") sink.emit(routed);
                 i = j;
             } else {
                 // punctuation → pending pause; other → skip

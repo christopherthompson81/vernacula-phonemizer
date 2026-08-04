@@ -878,3 +878,245 @@ Gates: tsc clean; 202 files / 2902 tests; el diff 12/1969, DROP 1 → 0, no DIGI
 being re-examined. el sat there for the whole sweep because the label said "ambiguous negative", and one question
 about whether the label was right turned it into a twelve-sentence improvement. Re-derive the classification of
 anything in a permanent-residual list before treating the list as closed.
+
+## Run 14 — 2026-08-04 — the ten artifact-side cells: 10 → 2, and the residual is ONE fleet-wide gap
+
+Worked the ten cells the widened audit surfaced. Diagnosed each against the actual matched character before
+touching anything, which was necessary: **the labels were wrong on four of them**.
+
+| cell | label said | what it actually was | outcome |
+|---|---|---|---|
+| hi currency | currency | **`¢`**, a CENT SIGN — not the `°` in the shown prefix | declared `सेंट` |
+| hi signed-number | minus | era RANGE `600 ई. पू.-1200 ई.` | accepted |
+| hi exponent | exponent | bare `२०²` | **open — fleet-wide gap** |
+| mi arithmetic | arithmetic | attested plus the engine cannot pronounce | accepted |
+| my signed-number | minus | apposition `(Koreans -၂သန်း)` | accepted |
+| my arithmetic | arithmetic | compound joiner `အချိန်+ရပ်ဝန်းထု` … **and `အာဆီယံ +၃`** | fixed + accepted |
+| my exponent | exponent | `E = mc²` — **English text**, and English's gap | **open — same gap** |
+| my iteration | iteration | wikitable markup + a bare `ゝ` | markup fixed, mark accepted |
+| xh signed-number | minus | stray hyphen `kangange -40 mph` | accepted |
+| xh arithmetic | arithmetic | `+30°C`, suppressed on purpose | **fixed on policy** |
+
+### ⚠ xh's silence was SOURCED and was reversed anyway — the policy decides, not the recording
+
+xh's `+30°C` was deliberately silent, and the reasoning was good: both xh_za speakers of the Montevideo
+sentence produce no plus phones in the TEMPERATURE position while all three of the UTC sentence do — the
+"same sign, two readings in one language" rule. The file called the residual DROP "permissible".
+
+That evidence is unchanged and still correct. What overrides it is the standing rule: **for TTS an explicitly
+typed character is CONTENT, and a speaker's omission is evidence about reading habit, not licence to delete.**
+The identical case was already decided on hi — hi's `+30 °C` silence was shipped on 2-of-2 omission and then
+reverted to voicing under this rule — and xh was simply never brought along. Measured: `hi`, `zu`, `te` and `sw`
+all read this sign and **xh alone did not**, with zu being xh's closest relative and the language where the plus
+rule was moved ahead of degrees for exactly this reason. A sourced finding can be correct and still not decide
+the question; the policy is a separate layer, and consistency across the fleet is evidence that it was applied.
+
+### `my`'s plus: the both-sides guard was too tight by exactly two instances
+
+my already read `+` between digits as `အပေါင်း`, and its comment correctly argues that a LETTER-flanked plus is
+a compound joiner (`အချိန်+ရပ်ဝန်းထု` = *spacetime*) and stays silent — genuinely different from Italian's
+`volo+hotel`, a coordination whose reader was recorded saying *più*. Same glyph, different function.
+
+But the guard was "digits on BOTH sides", which also excluded the two cases where the sign is a word:
+`အာဆီယံ +၃` — **ASEAN Plus Three**, where the plus is part of the organisation's NAME — and `(+⅔)`, a
+positivity marker on a fraction. A digit AFTER is the discriminator, and every compound has a letter on both
+sides, so it separates them with no overlap.
+
+⚠ **The etymology plus was left unimplemented, and its reading is attested.** `(gêeo = Earth) + (graphein = to
+write)` is a third construction, and the artifact **glosses the symbol in its own text** — `နိ+ ဝါန =နိ နှင့် ဝါန`
+("ni+vāna = ni AND vāna") — so an etymological `+` is `နှင့်`, not `အပေါင်း`. Three instances, all inside a
+bracket-gloss shape narrow enough that a rule would be fitted to the article rather than to the language.
+Recorded rather than shipped.
+
+### Markup was being SPOKEN, which is worse than a drop
+
+my's `iteration` evidence is two wikitable rows, and `stripMarkup` handles HTML but not wikitable syntax, so
+`|bgcolor="#F3F5DE"| ゝ …` read as *bɡkˈʌlɚ ɲi˨m̥ja˥ˀ ˈɛf θoʊɴ ˈɛf ŋa dˈiː* — "bgcolor equals F 3 F 5 D E", a
+style attribute recited one hex digit at a time. That is the inverse of the dropped-sign problem: **audible
+garbage**, and strictly worse, because silence can at least be mistaken for a reading choice.
+
+Fixed in `stripMarkup`, on the philosophy its own header states ("a phonemizer handed `<i>` should render it,
+not read it"). ⚠ **The `!` header arms were written and then removed** — wikitables mark headers with `!` and
+`!!`, so both belong to the syntax, but measured across all 67 corpora AND all 67 artifacts they occur **zero
+times**, while `!` is ordinary sentence punctuation everywhere. Zero value against a real cost (`Wow!! Amazing`
+would lose its clause break). Only the `|` shapes ship. Verified byte-identical on en, lb (`&apos;` ×192) and
+ms (`<i>` tags) — the three most markup-prone corpora.
+
+And the mark itself: **a bare iteration mark has nothing to repeat**, so silence is the only correct output.
+Routed to Japanese it still reads empty, because `ja` also has no antecedent. Those two rows are also my's ENTIRE
+`iteration` evidence and they describe JAPANESE kana in a Burmese article — `ゝ`/`ゞ` are not Burmese orthography.
+
+### The residual is ONE gap in two languages, and it is fleet-wide
+
+Both remaining cells are a **bare-number exponent**: hi's `२०²` and my's `E = mc²` (the latter inside an
+embedded ENGLISH run, so it is English's gap). Measured — **every language drops it**:
+
+```
+en 20² → twˈɛnti     de 20² → t͡svˈant͡sɪç   fr 20² → vˈɛ̃      it 20² → vˈenti
+es 20² → bˈeᶦnte     hi 20² → bˈiːs        pt 20² → vˈĩtɨ     ru 20² → dvˈat͡sətʲ
+```
+
+The exponent machinery is **unit-only** across the whole fleet, and the bare form needs a DIFFERENT word from
+the unit modifier — English wants "squared", not the "square" of *square kilometres*, and Italian needs a
+connective (*venti al quadrato*). English does not even use the shared `exponentWords`; it handles `km²`
+locally. So closing this needs a new tier field plus sourced words for 67 languages, which is its own pass.
+Left OPEN and visible rather than mislabelled accepted — these two are not correct-as-is.
+
+⚠ **hi's two cells are probably the same corrupt sentence.** `२०² या १०²` and `२०¢ या १०¢` are the same Vernier
+sentence in two artifact copies with a different character in the slot, which is the signature of an OCR or
+encoding corruption of `″` (arc-seconds — a Vernier scale reads those, not money and not squares). Neither `¢`
+nor `²` is what the author wrote. `¢` was declared anyway, because the engine's job is to read the character it
+is given, and that caveat is in the code.
+
+### The accepted baseline generalised to any class, and immediately proved itself
+
+`ACCEPTED_SILENT` was minus-only; it is now keyed `lang → class → literal strings`. Adding my's compound
+plus **immediately surfaced a new instance** — `အာဆီယံ +၃`, which the accept correctly did NOT cover because it
+names strings and not shapes. That is the property working in the wild rather than only in a test.
+
+### Result
+
+**10 defective cells → 2.** 12 accepted across 7 languages, every one printed with its reason. Gates: tsc clean;
+**204 files / 2914 tests**; corpus diffs xh 1/1509 (DROP 2→1, the single change read), hi 0/1702, and en / lb / ms
+byte-identical.
+
+## Run 15 — 2026-08-04 — arbitrary exponent reading: the audit reaches 0/67
+
+Implemented the bare-exponent reading the last run identified as the residual, and the audit is now **0
+defective cells across 0/67 treated languages**.
+
+### The 4+ reading: CARDINAL, not ordinal
+
+Asked for a suggestion on the reading for powers above 3. Shipped **"to the power of N"** rather than
+**"to the Nth power"**, and the argument is cross-linguistic rather than stylistic:
+
+- the ordinal form needs the EXPONENT'S ORDINAL in every language, and several inflect it for gender and case
+  — the Icelandic, Czech and Serbian runs each had to build ordinal tables, and the exponent would then need
+  its own agreement rules
+- the cardinal reuses the number path that already exists in every engine, and needs exactly ONE connective
+  phrase per language
+
+"to the fifth power" is the more idiomatic English of the two; it is not worth 67 languages of ordinal
+morphology, and the cardinal is unambiguous. `{e}` is emitted as DIGITS so each language's own number path
+speaks it.
+
+### Why it could not reuse `exponentWords`
+
+That field holds the UNIT MODIFIER, and in most languages the modifier and the predicate are different words:
+
+| | unit modifier | bare predicate |
+|---|---|---|
+| en | *square* kilometres | twenty *squared* |
+| it | chilometri *quadrati* | venti *al quadrato* |
+| hi | *वर्ग* किलोमीटर | बीस *का वर्ग* |
+| de | *Quadrat*kilometer | zwanzig *zum Quadrat* |
+
+Reusing it would have produced "twenty square". So `bareExponent` is a new field, and it takes TEMPLATES
+(`{n}` base, `{e}` exponent) rather than words, because the connective and the word order are language data —
+`{n} al quadrato`, `{n}の{e}乗`, `{n} की घात {e}`. No arrangement of fixed fields expresses all three.
+
+### Two mechanisms, because English does not use the shared tier
+
+English has no `makeSymbolNormalizer` call at all — it handles `km²` in its own normalize.ts — so it needed a
+local twin of the rule. Worth knowing before assuming a tier field reaches the whole fleet.
+
+⚠ **Ordering is load-bearing in both.** The bare rule runs AFTER the unit path. Matching first would claim
+every `km²` and read it "kilometre squared" instead of "square kilometres" — so by the time control reaches the
+bare rule, a surviving superscript provably has no unit to modify, which is the condition the rule wants.
+
+### The base may be LETTERS, and a superscript now travels with a foreign run
+
+`E = mc²` was the case that exposed the gap, and it needed a second fix. `²` is `No`, not `\p{L}`, so
+`FOREIGN_RUN` ended at `mc` and left the exponent in the gap to be dropped — my's artifact quotes the formula
+and routes the Latin to English, which never saw the `²`. Including a TRAILING superscript in the run fixes it
+for every host at once: **the fix is to stop cutting the expression in half, not to invent a Burmese reading
+for an English formula.** Only trailing, and only superscript digits — a superscript cannot begin a word, so
+this can neither start a run that would not otherwise exist nor swallow a host character.
+
+### Provenance, stated because it is weaker than most data here
+
+Ten languages declared: en, de, fr, es, it, pt, ru, ja, cmn, hi. These are **standard mathematical register,
+not corpus attestations**, and the sourcing attempt is worth recording because it FAILED informatively:
+
+```
+hi घात:0   ru степени:0   de Potenz:0   it potenza:0   ko 제곱:0   vi lũy thừa:0
+th กำลัง:6  ← the PROGRESSIVE ASPECT marker      fa توان:8 / ar أس:8  ← substring traps
+fr carré:4 / cmn 平方:8 / hi वर्ग:5     ← all the UNIT modifier, in km² sentences
+```
+
+Every apparent hit was either the unit modifier or the substring trap `tools/normalization/attest.ts` exists to
+catch. FLEURS is news and encyclopedia prose and contains no spoken arithmetic, so the power words are simply
+not in it. Declared anyway under #584's rule — a dropped sign is inaudible, the one outcome that cannot be
+right — and labelled in each file so no later pass credits the corpus with them.
+
+⚠ **de has no distinct predicate cube word** and takes the generic form (*acht hoch drei*), which is the
+standard spoken German. Recorded so it does not look like an omission.
+
+The other 57 languages are UNDECLARED BY DESIGN: the field is optional, undeclared behaviour is unchanged, and
+the superscript stays where the RAWMARK leak gate can see it — the same choice the unit branch makes for a
+missing measure word, and for the same reason.
+
+### Measured surface, so nobody mistakes this for a hot path
+
+Across all 67 artifacts a superscript follows a NON-unit base **twice** (hi's `२०²`/`१०²`, both the corrupt
+Vernier sentence) plus my's `mc²`. `⁴`-`⁹` and multi-digit superscripts occur **ZERO** times. The other ~113
+superscripts are unit exponents the existing path already reads — including 11 with a NON-LATIN unit
+abbreviation (`ኪ.ሜ²`, `किमि²`, `км²`) that an earlier Latin-only count had misfiled as "other".
+
+### Result
+
+**Audit: 0 defective cells across 0/67 treated languages**, with 12 accepted cells printed with their reasons.
+Gates: tsc clean; **205 files / 2920 tests**; corpus diffs on twelve languages (en de fr es it pt ru ja cmn hi
+el th) all **byte-identical** — the expected outcome, since FLEURS carries only unit exponents, and the
+confirmation that a fleet-wide `FOREIGN_RUN` change regressed nothing.
+
+## Run 16 — 2026-08-04 — self-review of the exponent work: three fixes, one of them a real bug
+
+Reviewed the four branch commits before opening the PR. Three findings, and the first was a genuine defect
+shipped minutes earlier.
+
+### ⚠ A FOOTNOTE MARKER IS NOT AN EXPONENT — and my first guard against it did nothing
+
+A superscript digit on an ordinary word is a CITATION far more often than a power: `Smith¹` is a footnote, and
+reading it *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn* is exactly the confidently-wrong outcome this repo ranks below
+silence. The rule matched `[\p{L}\p{M}]+` before a superscript with no length limit, so it did that.
+
+Capped the letter base at three characters — mathematical variables are short (`x`, `mc`, `E`), prose words are
+not. **Then probed the motivating case and the cap had changed nothing:** `{1,3}` happily matches the LAST three
+letters of a long word, so `Smith¹` matched `ith` and still read as arithmetic. A length limit only limits
+anything if the match must START at a word boundary; `(?<![\p{L}\p{M}])` is what makes the cap a cap.
+
+*A guard has to be tested against the input that motivated it, not merely against the cases it was already
+passing.* Second time this session a change typechecked, ran, and did nothing — the first was
+`repairDoubleEncoded`'s early-out guard.
+
+Measured to set the cap: after mojibake repair every real letter base in the fleet is a two-letter unit
+(`km²` ×108) or `mc`. The apparent long ones were `kmÂ²` and `AsunciÃ³n`, where the `²`/`³` is half of a
+double-encoded byte and not an exponent at all — the phantom class again, this time inflating a length
+distribution. Known exclusion: `किमि²` (ne, 4 chars) is a genuine Devanagari unit abbreviation and is now out of
+reach, which is the right place for it to fail — a unit exponent belongs to the unit path.
+
+### `{|` had to be anchored to line start
+
+The wikitable-open arm consumed TO END OF LINE. Unanchored, a stray `{|` in prose — set-builder notation, a code
+snippet — would have deleted the rest of the sentence. A table open is always first on its line, so the anchor
+costs nothing and bounds the damage to nothing. Verified: `the set {|x|} is defined and more text follows`
+survives intact.
+
+### ⚠ AND I MADE THE STALE-RULER MISTAKE I WARNED ABOUT IN RUN 12
+
+Re-diffing after the fixes, `ne` reported 8 changed utterances and `id` 6 — alarming, since neither declares
+`bareExponent`. Both were **my own measurement error**: I compared against baseline files that did not come from
+the right commit (`id.before` was several commits old and `ne.before` had never been emitted at all). Re-emitted
+from the true branch point (`45c0226`): **both byte-identical, 0/1993 and 0/1936.**
+
+Run 12 states the rule — "the ruler must be the same on both sides of a before/after; only the ENGINE should
+differ" — and I still reached for a leftover file because it had the right name. *A baseline needs its commit
+recorded, not just its filename.* The false alarm cost one re-run; believing it would have cost a wild goose
+chase through two languages that were never touched.
+
+### Result
+
+Gates after the fixes: tsc clean; **205 files / 2921 tests** (one added, pinning the footnote case and the
+boundary guard that makes the cap work); audit **0 defective cells across 0/67**; corpus diffs byte-identical on
+en, de, it, hi, ne and id against the true branch point.
