@@ -133,6 +133,35 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    tier saw only the $ and had no entry for the R.
     s = s.replace(/R\$\s?(\d[\d.,]*)/gu, "$1 reais");
 
+    // 5b) THE DOLLAR CODES → the bare sign, WHICH IS WHAT MAKES THE DECLARED KEY REACHABLE. `US$` was
+    //     declared in portuguese.ts's currency table and the corpus's `DROP currency ×1` stood anyway, with a
+    //     note saying the difference "is not yet explained". It is explained, and the explanation indicts the
+    //     verification: the INITIALISM pass runs before the symbol tier (portuguese.ts composes
+    //     `SYMBOLS(initialisms(normalize(x)))`), and it splits the all-caps run — `por US$ 11.000 a` became
+    //     `por u esse$ 11.000 a`, after which the `$` is preceded by a LETTER and the tier's guard, the one
+    //     that stops a key biting into a word, correctly refuses it. The sign then vanishes.
+    //
+    //     ⚠ WHY THE ORIGINAL CHECK PASSED, and it is worth knowing: core/initialisms.ts opens with an
+    //     all-caps-DOCUMENT guard — `if (!/\p{Ll}/.test(text) && /\s/.test(text.trim())) return text` — so a
+    //     probe string of `US$ 11.000`, which contains no lowercase at all, tripped that guard and skipped the
+    //     pass entirely. The one context tested was the one context where the interfering rule is inactive.
+    //     A single-expression probe can trip a document-level heuristic; test the sign inside a sentence.
+    //
+    //     The fold is the attested reading, not a convenience: both pt_br speakers of this sentence say the
+    //     currency word and NEVER the code — "vendidas por 11 mil dólares a 22 mil e quinhentos dólares a
+    //     onça" (Parakeet over pt_br/train, 2 of 2). So `US` is not voiced, and folding to `$` loses nothing a
+    //     reader says. Folding rather than emitting the word directly (the shape R$ uses above) keeps the
+    //     tier's count agreement, so `US$ 1` still reads *dólar* and not *dólares*.
+    //
+    //     ⚠ NOT FIXED IN core/initialisms.ts, deliberately. Excluding `\p{Sc}` from that pass's trailing
+    //     guard would fix pt and REGRESS the 18 other languages that carry `US$`/`AUD$` without declaring a
+    //     compound key (measured across all 66 artifacts: 20 languages, every instance `US$` or `AUD$`, no
+    //     counterexample). They would stop spelling the letters and start reading `US` as a WORD, with the
+    //     sign still dropped — worse, for a fix they do not benefit from. The general repair is to let the
+    //     currency tier claim a sign before the initialism pass sees the letters; that is a reordering, and
+    //     it belongs to its own change.
+    s = s.replace(/(?<![\p{L}\p{M}])(?:US|AUD)\$/gu, "$");
+
     // 6) DEGREES, before the unit tier so the bare sign is not left behind.
     s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 graus Celsius");
     s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 graus Fahrenheit");

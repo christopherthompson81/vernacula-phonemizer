@@ -300,3 +300,91 @@ every change read. Referee eval unchanged by construction — zero `×` in any a
 - hu's `×` — European, so parakeet covers it, but hu has no FLEURS corpus here (its `×` came from the mined
   wiki artifact), so there is no aligned recording to consult.
 - ⚠ ar drops the vulgar fraction in `29¾` (reads "twenty-nine"). Pre-existing, unrelated to this work, unfixed.
+
+## Run 5 — 2026-08-03 — vi shipped; th/am/xh/zu are backend-limited, and the `ipa` field is CIRCULAR
+
+### vi (Cohere) — `cộng`, 2 of 2 speakers on both sentences
+
+`(UTC +1)` → "…utc cộng một…"; `+30°C` → "…trên ba mươi độ c" (sign not voiced). Shipped voicing both arms per
+the TTS policy. vi joins en and hi in the convention. Corpus diff DROP 2 → 0.
+
+### th, am, xh, zu — not sourceable with the installed backends
+
+| lang | backend | outcome |
+|---|---|---|
+| th | Cohere | transcribes Thai audio as **Vietnamese-looking nonsense** — unusable, obviously so |
+| th | Whisper | accurate Thai, but **re-orthographizes**: emits `UTC + 1` and `11.00 น.` |
+| am, xh, zu | Cohere | decodes collapse into loops and hallucinated language switches |
+
+⚠ **THE ASR MUST EMIT SPOKEN FORM, NOT WRITTEN FORM.** This is a selection criterion for the whole method, not
+a fixable step. Verified in `WhisperTurbo.cs`: no text post-processing exists anywhere in the file (the only
+`Normalize` is ISO language-code remapping) and the text path is a plain byte-level BPE decode of emitted
+tokens. So the `+` is a TOKEN THE DECODER CHOSE — Whisper trained on web-scraped audio/written-text pairs and
+emits formatted text end-to-end. Once re-orthographized the evidence is gone; no post-process recovers it.
+IndicConformer (CTC, verbatim) / Cohere / Qwen3-ASR all verbalize; Whisper does not.
+
+⚠ A convergent lead deliberately NOT used: three of the collapsed decodes independently emitted "plus one" near
+the UTC slot (am `بلاس وان`, xh `UTC plus one`, zu `U. T. C. plus one.`). Suggestive that these languages use
+the English loan in offsets — but taking a fragment out of a garbage decode is laundering. Logged as a lead.
+
+The unblock, untried here because it needs torch (broken in this environment: `libtorch_global_deps.so`):
+**`facebook/mms-1b-all`** (1162 languages, CTC so verbatim, per-language adapters incl. `amh`/`xho`/`zul`/`tha`)
+and, for IPA rather than text, **`facebook/wav2vec2-xlsr-53-espeak-cv-ft`** — a phone recognizer structurally
+cannot re-orthographize, which is exactly the Whisper failure mode.
+
+### ⚠ THE `omnivoice_ipa` MANIFEST `ipa` FIELD IS OUR OWN OUTPUT — NOT AN AUDIO REFEREE
+
+`/mnt/data/omnivoice_ipa/corpus/tokens/manifest_<corpus>.jsonl` carries a per-utterance `ipa` field, and the
+corpus name invites reading it as audio-derived. It is not. Compared against `phonemize()` on the same text for
+am/xh/zu it is **essentially identical** — same phone inventory, same stress marks, same idiosyncratic click
+transcription (`ikʼwiŋɡ̤iŋ̤ǃˈaːna`); the only differences are older behaviour (am lacks today's `diɡɨɾi sˈiː`,
+commas placed differently).
+
+So the absence of a "plus" word in that field reflects **our dropping of the sign**, not what any speaker said.
+Reaching for it as evidence would be reading our own bug back. It IS useful as a snapshot of past output for
+regression archaeology — never for sourcing.
+
+## Run 6 — 2026-08-03 — pt's unexplained `DROP currency ×1`, and a verification that verified nothing
+
+The standing note on pt's declared `US$` key said it was "verified on the direct form, inert on the corpus, and
+the difference is not yet explained". Both halves are now resolved, and the explanation indicts the check.
+
+Isolation, which is what makes the cause visible:
+
+```
+US$ 11.000          → ˈõzɨ mˈiɫ dˈɔlɐɾɨʃ      "onze mil dólares"    ✓
+por US$ 11.000 a    → poɾ ˈu ˈesɨ ˈõzɨ mˈiɫ    "por U S onze mil"    ✗
+```
+
+It reads correctly **iff the currency expression is the entire string** — any token before or after breaks it,
+independent of the number. Instrumenting the two layers separately:
+
+```
+US$ 11.000        → initialisms → US$ 11.000              (untouched)
+por US$ 11.000 a  → initialisms → por u esse$ 11.000 a    (US split into letters)
+```
+
+**Cause.** `portuguese.ts` composes `SYMBOLS(initialisms(normalize(x)))`, so the initialism pass runs BEFORE the
+symbol tier and splits the all-caps run; the `$` is then preceded by a letter and the tier's guard — the one
+that stops a key biting into a word — correctly refuses it. The sign vanishes.
+
+⚠ **WHY THE ORIGINAL CHECK PASSED.** `core/initialisms.ts` opens with an all-caps-DOCUMENT guard,
+`if (!/\p{Ll}/.test(text) && /\s/.test(text.trim())) return text`. The probe string `US$ 11.000` contains no
+lowercase at all, so it tripped that guard and skipped the pass entirely. **The one context tested was the one
+context where the interfering rule is inactive.** A single-expression probe can trip a document-level
+heuristic — test a sign inside a sentence.
+
+**Fix, and why it is local.** pt folds `US$`/`AUD$` → `$` in normalize step 5b, before initialisms; the
+compound keys are removed as unreachable. Folding rather than emitting words keeps the tier's count agreement
+(`US$ 1` still reads *dólar*). The fold is the attested reading, not a convenience: **both pt_br speakers say
+the currency word and never voice the code** — "vendidas por 11 mil dólares a 22 mil e quinhentos dólares a
+onça" (Parakeet, 2 of 2).
+
+⚠ **NOT fixed in `core/initialisms.ts`.** Excluding `\p{Sc}` from that pass's trailing guard would fix pt and
+regress the others: measured across all 66 artifacts, **20 languages carry an uppercase run glued to a currency
+sign, every instance `US$` or `AUD$`, no counterexample** — and 18 of them declare no compound key, so they
+would stop spelling the letters and start reading `US` as a WORD with the sign still dropped. The general
+repair is to let the currency tier claim a sign before the initialism pass sees the letters, which is a
+reordering and belongs to its own change.
+
+Gates: corpus diff pt 1/1943, **DROP 1 → 0**. (The pre-existing `RAWMARK 1`, the `1.000º` ordinal, is untouched.)
