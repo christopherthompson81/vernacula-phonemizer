@@ -112,7 +112,8 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // ⚠ AND WIDENING THE TOKEN ALONE MADE ONE CASE WORSE: pcm has no rule for `ö`, so the letter VANISHED and
         // `Klöcker` came out *klkkeɾ*, an unpronounceable cluster. Nativising needs a letter to read; dropping it
         // is not nativising, it is deleting. So an accent folds to its BASE first.
-        for (const [acc, ascii] of [["São Paulo", "Sao Paulo"], ["Cañitas", "Canitas"], ["Klöcker", "Klocker"]])
+        const pairs: [string, string][] = [["São Paulo", "Sao Paulo"], ["Cañitas", "Canitas"], ["Klöcker", "Klocker"]];
+        for (const [acc, ascii] of pairs)
             expect(phonemize(acc, "pcm"), acc).toBe(phonemize(ascii, "pcm"));
         expect(phonemize("Klöcker", "pcm")).toBe("klokkeɾ");
         // Native Naija is untouched.
