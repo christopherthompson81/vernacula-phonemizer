@@ -238,13 +238,13 @@ const TOKEN = new RegExp(`(${LATIN_RUN}(?:[-‑]${LATIN_RUN})*)|(\\d+)|([.?!,;:]
  * every accent to its base the way pcm does would have destroyed exactly the accented letter this language CAN
  * read, turning `ñ` into `n`. So the fold applies only to a token this class REJECTS.
  */
-const NATIVE_WORD = /^[A-Za-zÑñ]+(?:[-‑][A-Za-zÑñ]+)*$/u;
+const NATIVE_CLASS = "[A-Za-zÑñ‑-]";
 /**
- * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
  * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const nat = makeNativiser(NATIVE_WORD);
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class TagalogPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}

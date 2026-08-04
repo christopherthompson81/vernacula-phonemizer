@@ -166,13 +166,13 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name.
  */
-const NATIVE_WORD = /^[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+$/u;
+const NATIVE_CLASS = "[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]";
 /**
- * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
  * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const nat = makeNativiser(NATIVE_WORD);
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the

@@ -63,31 +63,90 @@
 import type { ScriptName } from "./scripts.ts";
 
 /**
- * The word arm for an engine that writes in `scripts`: one letter of any of them, then letters, combining marks
- * and whatever `extra` characters continue a word in this orthography (apostrophes, an internal hyphen).
+ * The word arm for an engine that writes in `scripts`: a lead character, then letters, combining marks and
+ * whatever `extra` characters continue a word in this orthography (apostrophes, an internal hyphen).
  *
  * Returned as a STRING, because most engines build their `TOKEN` by template — a native-script arm, a number arm,
- * a punctuation arm. `extra` is inserted into a character class, so it must already be class-safe (put `-` last).
+ * a punctuation arm. `extra` and `medialOnly` are inserted into character classes, so they must already be
+ * class-safe (put `-` last).
+ *
+ * ⚠ `medialOnly` EXISTS BECAUSE THE LEAD POSITION IS NOT THE SAME QUESTION as the continuation, and getting it
+ * wrong silently deletes a phoneme. The first version of this required a LETTER in lead position, which reads as
+ * the obviously-right thing and is wrong for any orthography where a mark is word-initial and phonemic: Hausa
+ * writes `'yan` with a leading apostrophe for the glottalised /ʲ/, and requiring a letter first left the
+ * apostrophe outside the token — `ʔʲan` became *jan*, the glottal simply gone. The old hand-written classes were
+ * flat (`[a-zɓɗƙƴ'’]+`), so anything in them was lead-legal; an engine whose arm instead spelled the join out
+ * (`[X]+(?:['’-][X]+)*`) meant those characters MEDIALLY only. Both shapes have to survive the migration, so the
+ * caller says which it had. Found by a corpus diff, not by a test — which is the fourth time on this issue that
+ * the diff caught what the probe could not.
  */
-export function hostWordRun(scripts: readonly ScriptName[], extra = ""): string {
+export function hostWordRun(scripts: readonly ScriptName[], extra = "", medialOnly = ""): string {
     const letters = scripts.map((s) => `\\p{Script=${s}}`).join("");
-    return `[${letters}][${letters}\\p{M}${extra}]*`;
+    return `[${letters}${extra}][${letters}\\p{M}${extra}${medialOnly}]*`;
 }
 
 /** The Latin word arm — the overwhelmingly common case, spelled once so call sites do not repeat the array. */
 export const LATIN_RUN = hostWordRun(["Latin"]);
 
 /**
- * Discard combining marks, so a precomposed and a decomposed accent behave alike. `ö`→`o`, `ã`→`a`.
- * ⚠ Not every accented-looking letter decomposes: Akan's `ɛ` and Nama's clicks are DISTINCT LETTERS, and NFD
- * leaves them alone. That is correct — there is no accent to fold — but it means a test asserting "the fold
- * changed something" is vacuous for those languages. Assert the word is not SHREDDED instead.
+ * ⚠ LETTERS NFD CANNOT REACH. `ö` decomposes to `o` + a combining mark, so discarding marks folds it. `æ`, `ø`,
+ * `þ`, `ð`, `ß`, `ł`, `ŋ`, `ɛ` and the rest below are DISTINCT LETTERS with no decomposition at all — NFD leaves
+ * them exactly as they are, the g2p has no rule for them, and the letter is then silently DROPPED. Measured
+ * across the fleet: 86 languages dropped at least one of these, ~80 languages per letter. `Æthelred` in German
+ * read *thˈɛlʁət*, the Æ simply gone.
+ *
+ * Dropping is the worst of the available answers: an explicitly typed character is content, and deleting it is
+ * neither nativising nor routing. So each maps to the nearest letter the language's own g2p is guaranteed to have
+ * a rule for.
+ *
+ * ⚠ SINGLE LETTERS, NOT DIGRAPHS, and that is the deliberate choice. The conventional ASCII transliterations are
+ * digraphs (`æ`→ae, `ø`→oe, `þ`→th, `ŋ`→ng), but a g2p reading `ae` as two vowel segments turns one sound into
+ * two — a worse error than an imprecise single vowel. `ß`→`ss` is the one exception, because that IS the German
+ * orthographic identity and every g2p reads `ss` as a single /s/.
+ *
+ * These are approximations by phonetic proximity, not claims about any orthography. A language for which one of
+ * these letters is NATIVE never reaches this table — the conditional fold leaves its own letters alone, which is
+ * why Akan keeps `ɛ` and Nama keeps its clicks.
  */
-export const foldLatinToBase = (w: string): string => w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC");
+const UNDECOMPOSABLE: Readonly<Record<string, string>> = {
+    æ: "a", Æ: "A", œ: "o", Œ: "O", ø: "o", Ø: "O", ð: "d", Ð: "D", þ: "t", Þ: "T",
+    ß: "ss", ł: "l", Ł: "L", đ: "d", Đ: "D", ħ: "h", Ħ: "H", ŋ: "n", Ŋ: "N",
+    ɛ: "e", Ɛ: "E", ɔ: "o", Ɔ: "O", ə: "e", Ə: "E", ɓ: "b", Ɓ: "B", ɗ: "d", Ɗ: "D",
+    ƙ: "k", Ƙ: "K", ƴ: "y", Ƴ: "Y", ı: "i", ʉ: "u", ɨ: "i", ƀ: "b", ŧ: "t", ſ: "s",
+};
+const UNDECOMPOSABLE_RE = new RegExp(`[${Object.keys(UNDECOMPOSABLE).join("")}]`, "gu");
 
 /**
- * Build the CONDITIONAL fold for a nativising engine. `nativeWord` is the language's own inventory, anchored:
- * a word it matches is left exactly alone, and anything else has its accents folded to base.
+ * Discard combining marks, so a precomposed and a decomposed accent behave alike (`ö`→`o`, `ã`→`a`), then map the
+ * letters no decomposition can reach (see `UNDECOMPOSABLE` above).
  */
-export const makeNativiser = (nativeWord: RegExp) => (w: string): string =>
-    (nativeWord.test(w) ? w : foldLatinToBase(w));
+export const foldLatinToBase = (w: string): string =>
+    w.normalize("NFD").replace(/\p{M}+/gu, "").normalize("NFC")
+        .replace(UNDECOMPOSABLE_RE, (c) => UNDECOMPOSABLE[c] ?? c);
+
+/** One base character with any combining marks that belong to it — the unit a fold decision is made about. */
+const CLUSTER = /\P{M}\p{M}*/gu;
+
+/**
+ * Build the CONDITIONAL fold for a nativising engine. `nativeClass` is a character class matching exactly the
+ * letters this language's g2p has rules for — its former token class, lifted verbatim.
+ *
+ * A word entirely inside the inventory is returned untouched. Otherwise each character is judged SEPARATELY and
+ * only the ones the inventory rejects are folded to base.
+ *
+ * ⚠ PER CHARACTER, NOT PER WORD, and the difference is not cosmetic. Folding the whole word because ONE letter
+ * was foreign destroyed the native accents sitting beside it: Turkish `İsveç` failed the word test on `İ`, so the
+ * fold also flattened the `ç` to `c` — and Turkish reads `c` as /d͡ʒ/, so the word came out *ɯsvˈed͡ʒ*. One
+ * out-of-inventory letter was corrupting every other letter in its word. Found by a corpus diff at 10% of
+ * Turkish utterances changed, which is what a fix reaching far too far looks like.
+ */
+export function makeNativiser(nativeClass: string, flags = "u"): (w: string) => string {
+    const word = new RegExp(`^(?:${nativeClass})+$`, flags);
+    const char = new RegExp(`^(?:${nativeClass})$`, flags);
+    return (w: string): string => {
+        if (word.test(w)) return w;
+        return (w.normalize("NFC").match(CLUSTER) ?? [])
+            .map((c) => (char.test(c) ? c : foldLatinToBase(c)))
+            .join("");
+    };
+}

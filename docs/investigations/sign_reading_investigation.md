@@ -1879,3 +1879,109 @@ No defect-class count moved in either direction; all 15 changes are the defect b
 **Negative result worth keeping:** `levé` is the recurring one, and it is the *universal-sentence* technique paying
 off in reverse — one French word in one FLEURS sentence surfaces the same defect in `as`, `sd` and `te` at once,
 because all three are translations of the same English source. A single attested word is fleet-wide evidence.
+
+## Run 30 — 2026-08-04 — 74 → 11, and the fold semantics were wrong in three separate ways
+
+Mechanical migration of the 74 nativisers: lift each engine's token word class to `NATIVE_CLASS`, derive the
+TOKEN word arm from the SCRIPT via `hostWordRun`, wrap the word handler in `nat()`. **62 of the 74 transformed
+mechanically** (63 codes, since `es-419` rides on `es`); 11 remain for hand treatment. Result: **91 → 11**.
+
+The transform is scripted, not typed by hand, which is the only reason a 62-language change was reviewable. The
+guard that made it safe was refusing to touch anything it could not prove simple — a multi-script word arm, a
+tokenizer that is not a top-level `const TOKEN`, a handler that is not `if (m[1])`. Those became the SKIP list
+rather than a silent best-effort.
+
+### ⚠ Three defects, each found by the corpus diff and none by any probe or test
+
+**1. `hostWordRun` required a LETTER in lead position, and Hausa writes a leading apostrophe.**
+
+`'yan` is Hausa for "sons of"; the apostrophe carries the glottalisation. Requiring a Latin letter first left it
+outside the token, so `ʔʲˈan` came out *jˈan* — the glottal simply gone. The old hand-written classes were FLAT
+(`[a-zɓɗƙƴ'’]+`), so everything in them was lead-legal; an engine that instead spelled the join out
+(`[X]+(?:['’-][X]+)*`) meant those characters MEDIALLY only. Both shapes have to survive, so `hostWordRun` grew a
+`medialOnly` parameter and the transform decides which from the arm's own shape. ha 46 → 15 changes.
+
+*The lead position is not the same question as the continuation, and "one letter, then more letters" reads as
+obviously right while being wrong for every orthography with a word-initial mark.*
+
+**2. The fold was ALL-OR-NOTHING PER WORD, so one foreign letter corrupted every other letter beside it.**
+
+Turkish came back at **189/1876 = 10.1% changed**, which is what a fix reaching far too far looks like. `İsveç`
+failed the word-level inventory test on `İ`, so the fold also flattened the `ç` to `c` — and Turkish reads `c` as
+/d͡ʒ/, so the word read *ɯsvˈed͡ʒ*. `makeNativiser` now judges each character separately.
+
+**And the 10.1% was real anyway.** `İ` (U+0130) has no Unicode simple case-fold to `i` — it folds to `i` + a
+combining dot — so the `/i/` flag never made the old class accept it. `İtalya` was fragmenting and reading as
+English *"I"* + *talya*; folding it to bare `I` then hit Turkish's DOTLESS capital and gave *ɯtaɫja*, the wrong
+vowel. Adding `İ` to the inventory fixes it properly: `g2p.ts` already maps İ→i with the right locale rule, it
+just had to be handed the letter. Every one of the 189 is an `İ`-initial Turkish word — `İtalya`, `İngilizce`,
+`İran`, `İsrail`, `İmparatorluk`, `İlçe` — previously read as an English letter name. **The largest single-language
+win in the issue.** (Azerbaijani hit the identical trap and had already solved it the other way, normalising İ→i
+before tokenizing. Two engines, same trap, two independent fixes, and neither knew about the other.)
+
+**3. NFD cannot reach a letter that does not decompose, so the fold left it to be DROPPED.**
+
+`Æthelred` in German read *thˈɛlʁət* — the Æ gone. `æ ø œ ð þ ß ł đ ħ ŋ ɛ ɔ ə ɓ ɗ ƙ ƴ ı` are DISTINCT letters, not
+base-plus-mark; NFD leaves them alone, the g2p has no rule, and the letter is deleted. Measured: **86 languages
+dropped at least one, roughly 80 languages per letter.** An explicitly typed character is content, and deleting it
+is neither nativising nor routing, so `foldLatinToBase` gained a second tier mapping each to the nearest letter
+the g2p is guaranteed to read. 86 → 32, and the residual 32 are probe artifacts (the fold target is itself silent
+in that language, e.g. Spanish `h`).
+
+⚠ SINGLE LETTERS, NOT the conventional digraphs. `æ`→ae, `ø`→oe, `þ`→th, `ŋ`→ng are the standard ASCII
+transliterations, but a g2p reading `ae` as two vowel segments turns one sound into two — worse than an imprecise
+single vowel. `ß`→`ss` is the one exception, because that IS the German orthographic identity and every g2p reads
+`ss` as a single /s/.
+
+### ⚠ And then the per-character fold exposed something the word-level fold had been hiding
+
+Romanian: `Thérèse` → *ˈthrese*, the é gone. Romanian's class claimed `á é í ó ú à` — but its g2p has no rules for
+them. **The word-level fold had been masking the mismatch by accident**: a word containing one was rejected whole,
+so everything in it got folded and the over-claimed letter came out readable. Judging characters separately trusts
+the class, and the class was lying.
+
+`NATIVE_CLASS` is a CLAIM ABOUT THE G2P, so measure it. Probe every character an engine claims against
+`phonemize("ka" + c + "o") === phonemize("kao")`. Eight engines over-claim: **da ro kea mt lb rup ast lg**. Each
+had the offending letters removed, and `test/native-inventory.test.ts` now pins it.
+
+⚠ The first version of that probe flagged **fourteen** languages, and six were false positives: `'`, `’`, `ʼ`,
+`·`, `‑` and bare combining marks carry no segment, so a g2p ignoring one is CORRECT. Narrowed to `\p{L}` minus
+`\p{Lm}` — the modifier-letter apostrophes are letters by Unicode category and punctuation by function.
+
+**Luxembourgish is the second-largest win, and it was invisible until the class stopped lying.** Removing
+`à á â ô û ü ö` took lb from 33 to **227/1896 = 12.0% changed**, and every one is a vowel that had been SILENTLY
+DELETED: `berühmt` read *bærmt*, `verfügbar` *fərfɡbarə*, `Ostküst` *ostkst*, `Südkoreaner* *stkorəanər*,
+`endgülteg` *ændɡltəχ*. Twelve percent of Luxembourgish utterances were missing a vowel.
+
+📌 FOLLOW-UP, recorded rather than papered over: `ü`/`ö` ARE Luxembourgish letters in German loans, and the honest
+fix is g2p rules (/y/, /ø/) rather than a fold to `u`/`o`. The fold is strictly better than deletion and is not
+the right answer. Same for Luganda's `ŋ` → `n`.
+
+### Corpus diff — 25 languages, every change read
+
+tr 189/1876 · lb 227/1896 · cy 49/2009 · ca 15/1841 · de 26/1956 · hr 21/2007 · sv 20/1863 · ha 15/1497 ·
+ro 14/1958 · ga 14/1948 · da 14/1878 · hu 7/1995 · az 3/1919 · is 1/846 · mi 1/1994 · uz 1/1957 · cs 1/1947 ·
+it 1/1978 · nb 1/1859 · zu 1/1478 · pl 0 · sk 0 · sl 0 · sw 0 · xh 0
+
+**No defect class moved in either direction in any of the 25.** Every change is a fragment collapsing into a word
+or a deleted letter becoming audible: `Cañitas`, `São`, `Klöcker`, `Galápagos`, `Asunción`, `Erdoğan`, `Taínos`,
+`Guaycurú`, `Payaguá`, `Chișinău`, `Cochamó`, `Bartolomé`, `Jiménez`, `Fernández`, `Sápmi`, `Sámi`, `Ürümqi`,
+`İzmir`, `Æthelred`, `Łódź`, `élevé`, `República`, `Hāngī`, `Halarsvík`, `Guaraníerne`.
+
+The zeroes are as informative as the counts: cs/sk/sl/sw/pl/xh were already correct and the semantics change did
+not disturb them, which is what says the per-character fold is a strict refinement rather than a different answer.
+
+### What remains
+
+**11 languages**, all for the reason the transform refused to guess:
+
+| why | languages |
+|---|---|
+| word arm mixes Latin with a second script | `bs` `sr` (Cyrillic), `bm` (N'Ko), `ff` (Adlam), `su` (Sundanese), `za` (Han) |
+| Perso-Arabic OR Latin as two alternatives in one group | `bal` |
+| tokenizer is not a top-level `const TOKEN`, or the handler is not `if (m[1])` | `hmn` `nan` `shi` `jv` |
+
+Each needs its scripts named explicitly to `hostWordRun` — mechanical, but a blind widening would let a
+MIXED-script run become one token, which is a behaviour change worth not making by accident.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.

@@ -49,11 +49,14 @@ function fragments(lang: string): string {
  * inventory fold (see core/hostWord.ts).
  */
 const REMAINING = new Set([
-    "sq", "an", "rup", "az", "ast", "bal", "bm", "eu", "bar", "bs", "ca", "ceb", "nya", "crh", "hr", "da",
-    "et", "fo", "fi", "ff", "gl", "de", "gn", "ht", "ha", "haw", "hil", "hmn", "hu", "is", "ilo", "ga",
-    "jv", "kea", "kl", "kaa", "quc", "rw", "rn", "kmr", "ltg", "la", "lg", "smj", "luo", "lb", "mad", "mg",
-    "mt", "mi", "nan", "nci", "oc", "pap", "qu", "gd", "nso", "sr", "st", "tn", "sn", "so", "es", "es-419",
-    "su", "sv", "shi", "mto", "tr", "tk", "uz", "cy", "wo", "za",
+    // Multi-script word arms — the arm mixes Latin with a second script, so widening it blindly would let a
+    // MIXED-script run become one token. Each needs its scripts named explicitly to `hostWordRun`.
+    "bs", "sr",            // Cyrillic + Latin in one class
+    "bm",                  // Latin + N'Ko          ff: Latin + Adlam
+    "ff", "su", "za",      // Latin + Sundanese / Latin + Han
+    "bal",                 // Perso-Arabic OR Latin as two alternatives inside one group
+    // Tokenizers that are not a top-level `const TOKEN`, or whose word handler is not `if (m[1])`.
+    "hmn", "nan", "shi", "jv",
 ]);
 
 describe("accented Latin stays one word (#657)", () => {

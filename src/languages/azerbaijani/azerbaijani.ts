@@ -5,6 +5,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -32,7 +33,16 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a decimal
 // (the TOKEN's `\d+,\d+`), a period-thousands is a group (the TOKEN's `\d+\.\d{3}`), and a plain digit run
 // is a bare number.
-const TOKEN = /([a-zçğəıiöşüx]+)|(\d+\.\d{3}(?:\.\d{3})*|\d+,\d+|\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zçğəıiöşüx]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 // #562 symbol normalization — Azerbaijani measure and currency nouns are INVARIANT after a numeral
 // ("üç faiz", "80 kilometr"). `m` is a standalone metre unit (4892 m, 3,50 m).
@@ -72,7 +82,7 @@ class AzerbaijaniPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeAzerbaijani(normalized)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberTokenToWords(m[2]).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

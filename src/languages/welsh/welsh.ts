@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { type Seg, toSegments } from "./g2p.ts";
@@ -99,8 +100,16 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Welsh groups thousands with COMMAS (1,400 — the TOKEN swallows the comma so the tier can still see the
 // number); the dot is a DECIMAL (2.3 → "dau pwynt tri") or a version (802.11n), claimed by normalize.
-const TOKEN =
-    /([a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]+(?:['’-][a-zâêîôûŵŷA-Z]+)*)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
 // nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri*).
@@ -142,7 +151,7 @@ class WelshPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/version steps need
         // the number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeWelsh(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const n = Number(m[2].replace(/,/gu, ""));
                 for (const wd of numberToWords(n).split(" "))

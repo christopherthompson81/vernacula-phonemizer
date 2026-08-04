@@ -5,6 +5,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
@@ -91,8 +92,24 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // matters: the ordinal branch precedes the number branch, and its lookahead (whitespace + another token) is
 // exactly the corpus-derived detector — it declines inside `1.234` and `802.11a`, where no space follows the
 // dot, and at end of input, which is the one sentence-final `N.` the corpus contains (`rekoru 7-2.`).
-const TOKEN =
-    /([a-zçğıiöşüâîû]+)|(\d+)\.(?=[^\S\n]+\S)|(\d+(?:\.\d{3})*(?:,\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ *
+ * ⚠ `İ` IS ADDED, and it is the one letter here that is not a straight lift. Capital İ (U+0130) has no Unicode
+ * simple case-fold to `i` — it folds to `i` + COMBINING DOT ABOVE — so the /i/ flag does not make the old class
+ * accept it. The class was therefore already incomplete, and the fold turned that latent gap into a wrong vowel:
+ * `İ` fell outside the inventory, folded to bare `I`, and `I` is Turkish's DOTLESS capital, so `İtalya` read
+ * *ɯtaɫja* and `İzmir` *ɯzmˈiɾ*. `g2p.ts` already maps İ→i and I→ı with the right locale rule; it just has to be
+ * given the letter. (Azerbaijani hit the same trap and solved it the other way, normalising İ→i before
+ * tokenizing — see azerbaijani.ts.)
+ */
+const NATIVE_CLASS = "[a-zçğıiöşüâîûİ]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 /** A number token (Turkish thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
@@ -187,7 +204,7 @@ class TurkishPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's `/`-unit step needs the number and
         // the unit still adjacent, which the symbol tier would break (83 km/s → 83 kilometre/s).
         return assembleClauses(readSuffixedUnits(normalizeTurkish(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2] !== undefined) {
                 const ord = ordinalWords(Number(m[2]));
                 if (ord !== undefined)

@@ -11,6 +11,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
 
 // Short vowels LAX to open-mid/near-close (Allen); ⟨a⟩ stays open. Long vowels (macron) are tense + [ː].
@@ -174,12 +175,21 @@ function placeStress(segs: string[]): void {
 
 // A word (Latin letters incl. macrons/diaeresis + editorial ⟨v j⟩ + combining marks like the U+0306 "common-quantity"
 // breve, which phonemizeWord strips) / number / punctuation. The combining range keeps ū̆/ī̆ inside one token.
-const TOKEN = /([a-zāēīōūȳëïöüÿA-ZĀĒĪŌŪȲËÏÖÜŸ̀-ͯ]+)|(\d+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zāēīōūȳëïöüÿA-ZĀĒĪŌŪȲËÏÖÜŸ̀-ͯ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class LatinPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: compose the Latin cardinal phrase (subtractive x8/x9, mīlle/mīlia), then phonemize each word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

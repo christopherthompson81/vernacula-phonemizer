@@ -12,6 +12,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { normalizeDanish } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -127,7 +128,23 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
 // A Danish word (Latin incl. æ ø å + loanword accents é ö ä ü ó è ã à) / number / punctuation token. The accent set
 // must cover every letter that appears in a da-lexicon.tsv key, else that entry is unreachable and the word is split
 // at the missing char (voilà → "voil"); it also feeds the neural WORD regex in daNeural.ts (keep the two in sync).
-const TOKEN = /([a-zæøåéöäüóèãà]+)|(\d+)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ *
+ * ⚠ NOT QUITE VERBATIM: ó è ã à were REMOVED, because the g2p has no rule for them and
+ * DROPPED them outright. The old token class listed them anyway, and the word-level fold hid the mismatch — a
+ * word containing one was rejected whole, so everything in it got folded and the letter came out readable by
+ * accident. Judging each character on its own exposes the over-claim instead of masking it: `Thérèse` in
+ * Romanian read *ˈthrese*, the é gone, because the class promised a rule that did not exist. NATIVE_CLASS is a
+ * claim about the G2P, and `test/native-inventory.test.ts` now measures it rather than trusting it.
+ */
+const NATIVE_CLASS = "[a-zæøåéöäü]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class DanishPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
@@ -137,7 +154,7 @@ class DanishPhonemizer implements Phonemizer {
         // the ordered steps and, in particular, why Danish is NOT Norwegian (the period is a thousands
         // separator here, and there is no space grouping at all).
         return assembleClauses(normalizeDanish(rawInput), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1]), oovOverride));
             // Numbers: the vigesimal/units-first compositor (numbers.ts) → each word through the same 3-tier g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd, oovOverride));
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }

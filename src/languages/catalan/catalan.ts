@@ -6,6 +6,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Seg } from "./g2p.ts";
@@ -186,7 +187,16 @@ export function phonemizeWord(word: string, unstressed = false): string {
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Catalan letters incl. accents + ç + the l·l middot; numbers: dot = thousands, comma = decimal.
-const TOKEN = /([a-zàèéíòóúüïç·]+)|(\d+(?:\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "·")})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zàèéíòóúüïç·]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
@@ -241,7 +251,7 @@ class CatalanPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeCatalan(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(m[1]));
+            if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2]) sink.emit(numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

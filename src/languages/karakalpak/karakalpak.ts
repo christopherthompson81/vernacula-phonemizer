@@ -15,6 +15,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
 
 const DIGRAPHS: [string, string][] = [["sh", "ʃ"], ["ch", "t͡ʃ"]];
@@ -64,12 +65,21 @@ function number(digits: string): string {
 // Karakalpak Latin (2016) — a-z + the acute/dotless letters. Both capital ⟨I⟩ (dotless, U+0049 → [ɯ]) and ⟨İ⟩ (dotted,
 // U+0130 → [i]) must be in the class (İ is the Karakalpak capital of ⟨i⟩; omitting it drops the letter and splits the
 // word). ⟨ç⟩ is NOT Karakalpak (the affricate is the ⟨ch⟩ digraph), so it's excluded. Word / number / punctuation.
-const TOKEN = /([a-záóúíńǵıA-ZÁÓÚÍŃǴIİ]+)|(\d+)|([.?!,;:…])/gu;
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-záóúíńǵıA-ZÁÓÚÍŃǴIİ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class KarakalpakPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });

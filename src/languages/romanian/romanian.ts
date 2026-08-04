@@ -326,14 +326,21 @@ export function numberWords(n: number, opts: { stem?: boolean } = {}): string {
  * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name.
+ *
+ * ⚠ NOT QUITE VERBATIM: á é í ó ú à were REMOVED, because the g2p has no rule for them and DROPPED them outright.
+ * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
+ * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
+ * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
+ * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
+ * `test/native-inventory.test.ts` now measures it rather than trusting it.
  */
-const NATIVE_WORD = /^[a-zA-ZăâîșțáéíóúàA-ZĂÂÎȘȚ]+$/u;
+const NATIVE_CLASS = "[a-zA-ZăâîșțA-ZĂÂÎȘȚ]";
 /**
- * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
+ * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
  * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
  */
-const nat = makeNativiser(NATIVE_WORD);
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the

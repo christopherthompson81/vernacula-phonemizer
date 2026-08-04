@@ -14,6 +14,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { applyEifelerRegel, numberToWords } from "./numbers.ts";
@@ -160,7 +161,23 @@ export function phonemizeWord(word: string): string {
 // The ASCII hyphen is inside the WORD class (`Typ-1-Diabetes`, `COVID-19`); the EN DASH is punctuation,
 // and had to be added to both this class and `clausePunctuation` or it is silently discarded — 31
 // utterances lost a clause break that way. Ranges never reach here as dashes: step 10 rewrites them.
-const TOKEN = /([a-zéëäàáâôûüöA-ZÉËÄÀÁÂÔÛÜÖ'-]+)|(\d+)|([.!?…,;:–])/gu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:–])`, "gu");
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
+ * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
+ * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
+ * is no longer also deciding where the script boundary falls (#657).
+ *
+ * ⚠ NOT QUITE VERBATIM: à á â ô û ü ö and their capitals were REMOVED, because the g2p has no rule for them and DROPPED them outright.
+ * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
+ * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
+ * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
+ * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
+ * `test/native-inventory.test.ts` now measures it rather than trusting it.
+ */
+const NATIVE_CLASS = "[a-zéëäA-ZÉËÄ'-]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /**
  * #562 symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
@@ -215,7 +232,7 @@ class LuxembourgishPhonemizer implements Phonemizer {
         // that adjacency survives.
         const normalized = SYMBOLS(normalizeLuxembourgish(input));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
             //
             // THE EIFELER REGEL APPLIES ACROSS THE NUMBER'S RIGHT EDGE TOO. `7 Kilometer` was read
