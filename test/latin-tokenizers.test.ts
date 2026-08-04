@@ -40,24 +40,11 @@ function fragments(lang: string): string {
 }
 
 /**
- * ⚠ STILL BROKEN — 74 engines that NATIVISE a foreign name and have no fold, so an out-of-inventory accent is
- * still cut out of the word. Each needs `makeNativiser` wiring plus a corpus diff read; they are being worked
- * through in batches. Shrink this list, never grow it.
- *
- * These are NOT a script-routing problem and the shared scanner does not reach them: a Portuguese name inside
- * Spanish text is Latin inside Latin, so the run correctly stays with the host and what is missing is the
- * inventory fold (see core/hostWord.ts).
+ * ⚠ EMPTY, AND IT MUST STAY EMPTY. Every code the registry serves now keeps an accented Latin word whole. The
+ * sweep below fails in BOTH directions, so a language added to this list without cause fails too — the list
+ * cannot be used to quiet a regression.
  */
-const REMAINING = new Set([
-    // Multi-script word arms — the arm mixes Latin with a second script, so widening it blindly would let a
-    // MIXED-script run become one token. Each needs its scripts named explicitly to `hostWordRun`.
-    "bs", "sr",            // Cyrillic + Latin in one class
-    "bm",                  // Latin + N'Ko          ff: Latin + Adlam
-    "ff", "su", "za",      // Latin + Sundanese / Latin + Han
-    "bal",                 // Perso-Arabic OR Latin as two alternatives inside one group
-    // Tokenizers that are not a top-level `const TOKEN`, or whose word handler is not `if (m[1])`.
-    "hmn", "nan", "shi", "jv",
-]);
+const REMAINING = new Set<string>([]);
 
 describe("accented Latin stays one word (#657)", () => {
     test("⚠ the fleet-wide sweep — every code the registry serves", () => {

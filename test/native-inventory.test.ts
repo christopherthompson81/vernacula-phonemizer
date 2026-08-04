@@ -15,6 +15,18 @@
  * segment, so a g2p that ignores it is correct rather than over-claiming. The first version of this probe flagged
  * fourteen languages for exactly that and had to be narrowed — `\p{L}` minus `\p{Lm}`, since the modifier-letter
  * apostrophes are letters by Unicode category and punctuation by function.
+ *
+ * ⚠ AND A HOLE THAT IS DELIBERATE, STATED SO IT IS NOT MISTAKEN FOR COVERAGE: **ASCII is exempt.** Nearly every
+ * class here carries `a-z`, and 43 engines claim the whole range while their g2p drops part of it — `q w x y` in
+ * Serbian/Croatian/Bosnian, `c j q v x z` in Akan, thirteen of twenty-six letters in Maori. So `Cañitas` keeps its
+ * `ñ` now and still loses its `C` in Maori.
+ *
+ * That is a REAL defect and it is NOT this issue's. Folding an accent has a universal answer — strip the mark, and
+ * the base letter is right for every language. An absent ASCII consonant has no universal answer: `q`→k, `w`→v or
+ * u, `x`→ks, `c`→k or s are per-language substitution choices that need sourcing, and for several of these
+ * languages the better answer is to ROUTE the foreign name to a reader instead of nativising it at all. Tracked
+ * separately rather than guessed at here. Some of the 43 are also correct silence, not loss — Spanish `h` IS
+ * silent — which is exactly why it needs per-language judgement rather than a table.
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
@@ -39,6 +51,20 @@ function expand(body: string): string[] {
     return out;
 }
 
+/**
+ * The frame to test a letter in, IN ITS OWN SCRIPT.
+ *
+ * ⚠ A SINGLE LATIN FRAME IS INVALID FOR A BI-SCRIPT ENGINE, and the first version of this test used one. Serbian
+ * and Bosnian write both Cyrillic and Latin, and their engines pick a script PER WORD — so `kaуo` is a mixed
+ * word no orthography contains, and the engine drops the minority script's letter. That looked exactly like an
+ * over-claim and flagged `у` and `х`, two of the most ordinary letters in the language: `ухо` reads *uxo* and
+ * `хвала` *xʋala*, both perfectly. Measuring in the wrong frame produces a finding about the frame.
+ */
+const FRAMES: [RegExp, string, string][] = [
+    [/\p{Script=Cyrillic}/u, "ка", "о"],
+    [/\p{Script=Latin}/u, "ka", "o"],
+];
+
 describe("a declared native inventory matches what the g2p can read (#657)", () => {
     test("no engine claims a letter its own g2p drops", () => {
         const overclaims: string[] = [];
@@ -48,17 +74,18 @@ describe("a declared native inventory matches what the g2p can read (#657)", () 
                 const src = readFileSync(`src/languages/${dir}/${f}`, "utf8");
                 const m = src.match(/^const NATIVE_CLASS = "\[([^"]*)\]";$/mu);
                 if (m === null) continue;
-                const bare = phonemize("kao", code);
                 for (const c of new Set(expand(m[1]!))) {
                     // ASCII is never in question; punctuation and modifier letters carry no segment.
                     if (/[a-zA-Z]/u.test(c) || !/\p{L}/u.test(c) || /\p{Lm}/u.test(c)) continue;
-                    let out: string;
+                    const frame = FRAMES.find(([re]) => re.test(c));
+                    if (frame === undefined) continue; // no frame we can build safely in this letter's script
+                    const [, lead, tail] = frame;
                     try {
-                        out = phonemize(`ka${c}o`, code);
+                        if (phonemize(`${lead}${c}${tail}`, code) === phonemize(`${lead}${tail}`, code))
+                            overclaims.push(`${code} claims ${c} but drops it`);
                     } catch {
                         continue;
                     }
-                    if (out === bare) overclaims.push(`${code} claims ${c} but drops it`);
                 }
                 break;
             }

@@ -8,6 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { aksaraToLatin, isAksaraSunda, normalizeSundaDigits } from "./sundaAksara.ts";
 
@@ -103,14 +104,22 @@ function number(digits: string): string {
 }
 
 // A word — Latin (incl. é) OR Aksara Sunda (letters + signs U+1B80–1BAF, 1BBA–1BBF; digits normalised to ASCII).
-const TOKEN = /([a-zéÉ\u{1B80}-\u{1BAF}\u{1BBA}-\u{1BBF}]+)|(\d+)|([.?!,;:…])/giu;
+const TOKEN = new RegExp(`(${hostWordRun(["Latin", "Sundanese"])})|(\\d+)|([.?!,;:…])`, "giu");
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zéÉ\\u{1B80}-\\u{1BAF}\\u{1BBA}-\\u{1BBF}]";
+const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 
 class SundanesePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(normalizeSundaDigits(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

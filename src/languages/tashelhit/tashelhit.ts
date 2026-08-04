@@ -14,6 +14,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
@@ -69,10 +70,14 @@ class TashelhitPhonemizer implements Phonemizer {
         // labial ⵯ) — one word class; the Tifinagh separator ⵰ (U+2D70) is punctuation, not a letter.
         // A DIGIT group was missing entirely, so numbers used to be dropped silently; ٠-٩ (Arabic-Indic) are
         // accepted alongside 0-9 because Moroccan text mixes them.
-        const tok = /([a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]+)|([0-9٠-٩]+)|([.,?!;:،؟⵰])/gu;
-        
+        // ⚠ The word class is the SCRIPTS (Latin + Tifinagh), not a letter list — see core/hostWord.ts.
+        const tok = new RegExp(
+            `(${hostWordRun(["Latin", "Tifinagh"])})|([0-9٠-٩]+)|([.,?!;:،؟⵰])`,
+            "gu",
+        );
+
         return assembleClauses(nfc, tok, (m, sink) => {
-            if (m[1]) sink.emit(phonemize(m[1]));
+            if (m[1]) sink.emit(phonemize(nat(m[1])));
             else if (m[2]) {
                 const d = [...m[2]].map((c) => (c >= "٠" && c <= "٩" ? String(c.codePointAt(0)! - 0x0660) : c)).join("");
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string.
@@ -95,3 +100,12 @@ export function createTashelhit(): Phonemizer {
 export function phonemizeWord(word: string): string {
     return phonemize(word);
 }
+
+/**
+ * This language's OWN inventory — the token word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zɣġšžčɛḍṭṣẓṛḥḷṇʷ̀-ͯⴰ-ⵯA-ZƔĠŠŽČƐḌṬṢẒṚḤḶṆ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");

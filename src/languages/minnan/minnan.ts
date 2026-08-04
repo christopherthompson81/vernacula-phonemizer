@@ -10,6 +10,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -208,15 +209,17 @@ class MinnanPhonemizer implements Phonemizer {
         // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
         // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
         // itself; the gap pass covers everything else via the script router (core/scripts.ts).
-                const tok =
-            /(\p{Script=Han}+)|(\d+)|([A-Za-zàáâāǎ̀-̍]+(?:-[A-Za-zàáâāǎ̀-̍]+)*)|([。，、？！；：.,?!;:])/gu;
-        
+        const tok = new RegExp(
+            `(\\p{Script=Han}+)|(\\d+)|(${hostWordRun(["Latin"], "", "-")})|([。，、？！；：.,?!;:])`,
+            "gu",
+        );
+
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n)) sink.emit(hanNumeralRun(integerToHan(n)));
-            } else if (m[3]) sink.emit(tailoToIpa(m[3]));
+            } else if (m[3]) sink.emit(tailoToIpa(nat(m[3])));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);
@@ -234,3 +237,12 @@ export function createMinnan(foreign?: ForeignPhonemizer): Phonemizer {
 export function phonemizeWord(word: string): string {
     return HAN.test(word) ? hanRun(word) : tailoToIpa(word);
 }
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[A-Za-zàáâāǎ̀-̍]";
+const nat = makeNativiser(NATIVE_CLASS, "u");

@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import {
@@ -206,8 +207,18 @@ function numberToText(n: number): string {
 
 // Latin word · Aksara Jawa word run (letters+signs, U+A980–U+A9C0) · Aksara digits · ASCII digits · Aksara pada
 // punctuation (U+A9C1–U+A9CE, U+A9DE–U+A9DF) · ASCII punctuation.
-const TOKEN =
-    /([a-zA-ZéèêÉÈÊ]+)|([\u{A980}-\u{A9C0}]+)|([\u{A9D0}-\u{A9D9}]+)|(\d+)|([\u{A9C1}-\u{A9CE}\u{A9DE}\u{A9DF}])|([.?!,;:])/gu;
+const TOKEN = new RegExp(
+    `(${hostWordRun(["Latin"])})|([\\u{A980}-\\u{A9C0}]+)|([\\u{A9D0}-\\u{A9D9}]+)|(\\d+)|([\\u{A9C1}-\\u{A9CE}\\u{A9DE}\\u{A9DF}])|([.?!,;:])`,
+    "gu",
+);
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zA-ZéèêÉÈÊ]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
 function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
@@ -221,7 +232,9 @@ function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
 class JavanesePhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1] || m[2]) sink.emit(phonemizeWord(m[1] ?? m[2]!));
+            // ⚠ Only the LATIN group is nativised. Group 2 is the Aksara Jawa run — this language's own
+            // script, where there is no inventory question to ask (#657).
+            if (m[1] || m[2]) sink.emit(phonemizeWord(m[1] !== undefined ? nat(m[1]) : m[2]!));
             else if (m[3])
                 emitNumber(Number([...m[3]].map(aksaraDigit).join("")), sink);
             else if (m[4]) emitNumber(Number(m[4]), sink);

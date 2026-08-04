@@ -82,7 +82,13 @@ import type { ScriptName } from "./scripts.ts";
  */
 export function hostWordRun(scripts: readonly ScriptName[], extra = "", medialOnly = ""): string {
     const letters = scripts.map((s) => `\\p{Script=${s}}`).join("");
-    return `[${letters}${extra}][${letters}\\p{M}${extra}${medialOnly}]*`;
+    // ⚠ NEVER CLAIM A DIGIT. `\p{Script=X}` includes X's DIGITS — N'Ko's ߀–߉ are Script=Nko and Adlam's 𞥐–𞥙 are
+    // Script=Adlam — and because the word arm precedes the number arm, a script-derived class silently swallowed
+    // every native-digit numeral in Bambara and Fula. The number arm exists precisely to read those, so the word
+    // arm must decline them. (`[\p{Script=Nko}--\p{Nd}]` would say this directly but needs the `v` flag, which
+    // these engines' tokenizers do not use; a lookahead per position says the same thing under `u`.)
+    const nd = "(?!\\p{Nd})";
+    return `${nd}[${letters}${extra}](?:${nd}[${letters}\\p{M}${extra}${medialOnly}])*`;
 }
 
 /** The Latin word arm — the overwhelmingly common case, spelled once so call sites do not repeat the array. */

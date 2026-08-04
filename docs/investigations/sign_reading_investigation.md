@@ -1985,3 +1985,92 @@ Each needs its scripts named explicitly to `hostWordRun` — mechanical, but a b
 MIXED-script run become one token, which is a behaviour change worth not making by accident.
 
 Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.
+
+## Run 31 — 2026-08-04 — the last 11, and #657 reaches ZERO
+
+The eleven the transform refused to guess at, done by hand. Result: **`✓ none fragment an accented Latin word`**
+across all 180 registered languages. `REMAINING` in `test/latin-tokenizers.test.ts` is now empty, and the sweep
+fails in BOTH directions so it cannot be repopulated to quiet a regression.
+
+| language | shape | treatment |
+|---|---|---|
+| `sr` `bs` | Cyrillic + Latin in one class | `hostWordRun(["Latin"], "а-шђјљњћџ")` — the Cyrillic range stays as literal class content, so the widening touches only the Latin half |
+| `bm` | Latin + N'Ko | `hostWordRun(["Latin", "Nko"])` — bm IS the fleet's N'Ko engine, so the full script is right |
+| `ff` | Latin + Adlam | `hostWordRun(["Latin", "Adlam"])` |
+| `su` | Latin + Sundanese | `hostWordRun(["Latin", "Sundanese"])` |
+| `shi` | Latin + Tifinagh | `hostWordRun(["Latin", "Tifinagh"])` |
+| `za` | Latin arm with `'` join; Han is a separate arm | `hostWordRun(["Latin"], "", "'")` |
+| `bal` | Perso-Arabic OR Latin as two alternatives | kept the alternation, widened only the Latin arm |
+| `hmn` | tokenizer is a local `const tok` | same treatment, inventory at module scope |
+| `jv` | handler is `if (m[1] \|\| m[2])` | ⚠ only group 1 nativises — group 2 is the Aksara Jawa run, this language's OWN script, where there is no inventory question to ask |
+| `nan` | Latin arm is group 3, with a hyphen join | `hostWordRun(["Latin"], "", "-")` |
+
+### ⚠ `\p{Script=X}` INCLUDES X'S DIGITS, and the word arm precedes the number arm
+
+Widening bm and ff to their second scripts broke both languages' native-digit tests: N'Ko's ߀–߉ are
+`Script=Nko` and Adlam's 𞥐–𞥙 are `Script=Adlam`, so the script-derived word class silently swallowed every
+native-digit numeral before the number arm could see it. `hostWordRun` now refuses digits outright
+(`(?!\p{Nd})` per position — `[\p{Script=Nko}--\p{Nd}]` says it directly but needs the `v` flag, which these
+tokenizers do not use).
+
+*This is the multi-script hazard the transform's SKIP list existed to avoid, and it landed anyway on the very
+languages the list deferred — which is the argument for the list, not against it: the failure surfaced in two
+existing tests instead of in a corpus nobody diffed.*
+
+### The Serbian `й`, and a probe that measured its own frame
+
+The inventory audit flagged `sr`/`bs` for claiming `й`, `у` and `х`. Two of those three were the PROBE'S FAULT.
+It built `ka` + letter + `o`, and sr/bs write both Cyrillic and Latin with the engine choosing a script PER WORD
+— so `kaуo` is a mixed word no orthography contains, and the engine drops the minority script's letter. `ухо`
+reads *uxo* and `хвала` *xʋala*, both perfectly. The frame now matches the letter's script.
+
+`й` survived the corrected probe and is a REAL over-claim: the old class used the coarse range `а-ш`, which
+sweeps up `й` — a Russian letter this orthography does not have (it writes `ј`, U+0458, outside the range and
+listed separately). Excluding it hands the letter to the fold, and `й` DOES decompose (и + combining breve), so
+`Толстой` now reads *tolstoi* instead of losing its final letter. ⚠ The TOKEN deliberately stays wide: claiming
+the whole Cyrillic run is the SCRIPT question, and getting that right is what puts the letter in front of the
+fold at all.
+
+### "Mixed script words might need a Latinizer?" — mostly already there, and the gap is elsewhere
+
+Asked mid-run, and worth answering with a measurement. `kaуo` **already** becomes `kayo`: `foldLatinConfusables`
+maps a Cyrillic/Greek look-alike sitting between two Latin letters to its Latin twin, and it runs in the registry
+pipeline for every language before any tokenizer sees the text.
+
+⚠ AND NOTE IT FOLDS BY SHAPE, NOT BY VALUE — `у` → `y` because it LOOKS like one, though Serbian `у` SOUNDS like
+`u`. That is the right call for the case it exists for (a homoglyph typo, where the author meant the Latin
+letter); it would be the wrong call for genuine transliteration. Two different operations that happen to have the
+same input.
+
+For genuine cross-script text the SCRIPT ROUTER is the better answer than transliteration, because routing
+preserves the source phonology instead of approximating it. A Serbian↔Latin transliterator would be defensible —
+that mapping is bijective and standardised — but it buys little: real text writes whole words in one script, and
+the router already handles whole words.
+
+**The actual gap the question uncovered is not cross-script at all.** `phonemize("kayo", "sr")` returns *kao* — the
+`y` is DROPPED, because Serbian's class claims all of `a-z` while Serbian Latin has no `q w x y`.
+
+### 📌 A separate defect, measured: 43 engines claim `a-z` and drop part of it
+
+    sr hr bs   drop q w x y          ak   drops c j q v x z
+    mi         drops b c d f g j l q s v x y z   (thirteen of twenty-six)
+    qu         drops b d f g v x z    naq  drops c f q v y z    tk  drops c q x
+
+So `Cañitas` keeps its `ñ` now and still loses its `C` in Maori.
+
+⚠ NOT the same fix, and that is why it is not in this issue. Folding an accent has a UNIVERSAL answer — strip the
+mark and the base letter is right everywhere. An absent ASCII consonant has none: `q`→k, `w`→v or u, `x`→ks,
+`c`→k or s are per-language substitution choices needing sourcing, and for several of these languages the better
+answer is to ROUTE the foreign name to a reader rather than nativise it at all.
+
+⚠ AND SOME OF THE 43 ARE CORRECT SILENCE, NOT LOSS. Spanish/Italian/Catalan/Galician/Occitan/Latin `h` IS silent.
+Worse, my probe's own frame manufactures false positives: testing `a` builds `kaao` and testing `o` builds `kaoo`,
+which gemination and vowel-length rules make identical to `kao` — that is the whole of German's "drops a h o q"
+and Maltese's "drops a h o". The finding needs per-language judgement, not a table, which is exactly why the
+inventory test states the ASCII exemption explicitly rather than leaving it to look like coverage.
+
+### Corpus diff, the last two with corpora
+
+sr 2/1923 (`élevé`, `Ōō`) · ff 13/1500 (`Bé`, `Ōō`, `São`). No defect class moved either way.
+
+Gates run separately: tsc PASS; **207 files / 2940 tests**; audit 0 defective cells across 0/67.

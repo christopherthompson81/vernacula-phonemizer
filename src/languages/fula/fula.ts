@@ -4,6 +4,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { phonemizeWord as g2pWord } from "./g2p.ts";
 import { adlamToLatin, isAdlam } from "./fulaAdlam.ts";
@@ -22,8 +23,19 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // The number class covers BOTH digit sets the two registered scripts use: ASCII 0–9 and Adlam 𞥐–𞥙 (U+1E950–1E959).
 // #562: the corpus groups thousands with COMMAS (2,243, 100,000) and writes decimals with DOTS (1.5, 3.50);
 // the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
-const TOKEN =
-    /([a-zɓɗŋɲƴñA-ZƁƊŊƝƳÑ\u{1E900}-\u{1E94A}]+)|(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|\d+[\u{1E950}-\u{1E959}]*|\d*[\u{1E950}-\u{1E959}]+)|([.!?…,;:])/gu;
+const TOKEN = new RegExp(
+    `(${hostWordRun(["Latin", "Adlam"])})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+[\\u{1E950}-\\u{1E959}]*|\\d*[\\u{1E950}-\\u{1E959}]+)|([.!?…,;:])`,
+    "gu",
+);
+
+/**
+ * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
+ * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
+ * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
+ * deciding where the script boundary falls (#657).
+ */
+const NATIVE_CLASS = "[a-zɓɗŋɲƴñA-ZƁƊŊƝƳÑ\\u{1E900}-\\u{1E94A}]";
+const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // #562 symbol normalization — Fula. Percent reads "e teemedere" (in a hundred) — COMPOSED from two
 // attested pieces (`e` ×92 in the corpus, `teemedere` = 100 in this engine's own number data) rather than
@@ -74,7 +86,7 @@ class FulaPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/version steps need
         // the number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeFula(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: Adlam digits folded to ASCII, composed to Fula words (numbers.ts: quinary 6–9), then g2p
             else if (m[2]) {
                 const n = Number(foldAdlamDigits(m[2]).replace(/,/gu, ""));
