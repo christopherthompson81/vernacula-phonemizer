@@ -515,3 +515,52 @@ Corpus diff zu **DROP 3 → 1**, 3 utterances changed, all three accounted for:
 The lesson worth keeping: **an odd decode is a question about the TEXT before it is a fact about the language.**
 "Noisy" was the wrong verdict; the corpus had a two-character sequence in it, and both the reader and the
 normalizer stumbled on the same thing.
+
+## Run 9 — 2026-08-03 — th, the last language with cached audio. `บวก`.
+
+Thai was the one language where every prior tier had failed, each in a different way — which makes it the
+cleanest demonstration of why the phoneme recognizer is the right instrument:
+
+| tier | outcome on Thai |
+|---|---|
+| `concept.ts` (Wikidata label) | returns the BARE CHARACTER `+` as Thai's own label for "plus sign" |
+| `attest.ts` on `ลบ` | the ADJECTIVE "negative" (`การป้อนกลับทางลบ`, negative feedback) — not the operator |
+| `attest.ts` on `คูณ`, `บวก` | zero hits in the wiki haystack |
+| Cohere-transcribe | renders Thai audio as VIETNAMESE-looking nonsense |
+| Whisper large-v3-turbo | accurate Thai, but RE-ORTHOGRAPHIZES: `UTC + 1`, `11.00 น.` |
+| MMS-1b-all (tha) | accurate, and also emits the sign: `utc.1` |
+
+`facebook/wav2vec2-xlsr-53-espeak-cv-ft`, whose 392-token vocabulary contains no `+`, both th_th speakers:
+
+```
+… t ɔ ŋ k i5 n   j uː t iː s i5   b ʊ k   l i5 ŋ   t i5 w aɪ h ɑu5 s …
+… t ɑu5 ŋ t i5 n  j u5 t i5 s i5  b ʊ k   n ŋ     t i5 w aɪ t h ɑu5 s …
+```
+
+`j uː t iː s i5` = ยูทีซี · **`b ʊ k` = บวก** · `n ŋ` / `l i5 ŋ` = หนึ่ง → "UTC บวก หนึ่ง", **2 of 2**.
+
+No new lexical data was needed: the engine already reads บวก as `bˈua˨˩k` and หนึ่ง as `nˈɯ˨˩ŋ`, matching the
+decode. Shipped at step 8b, BEFORE the degree rule — the ordering coupling zu's `[+]?` taught, insurance here
+since Thai's degree rule does not match the sign today.
+
+⚠ `+30 °C` has ZERO instances in th_th — this corpus does not carry the Montevideo sentence, unlike most of the
+fleet — so that arm is the arbitrary-text case #584 argues for, not an attested one.
+
+Corpus diff th **DROP 4 → 2**, 2 utterances changed, both accounted for:
+
+| line | change |
+|---|---|
+| 484 | **IPA byte-identical** — only `⟪DROP:minus⟫` vanished: the guard fix on the range `ค.ศ. 1000 -1300` |
+| 1517 | the UTC sentence now reads บวก; `⟪DROP:math-sign⟫` gone |
+
+th's remaining 2: the `×` of the manuscript sentence (`29¾ นิ้ว × 24½ นิ้ว`) — which sits in th's **test** split,
+whose audio this corpus does not carry, so it is unsourced and no rule was invented (`คูณ` is ×0 in the wiki) —
+and the `B&B` ampersand.
+
+## Where the class stands after nine runs
+
+**Sourced from audio and shipped:** ta, hi, vi, am, xh, zu, th (plus) · ar, ja (`×`) · pt (currency).
+**Measured and deliberately unchanged:** en — the convention is confirmed, and the TTS policy says voice the
+written sign, so its existing unconditional `plus` is correct.
+**Still unreachable:** the twelve languages with no locally cached audio — gu kn ml ne sr sw mi yue te fa nb my
+— which need a FLEURS download; and th's `×`, ar's second `×`, and or/pa's `¥`, all in uncached splits or absent.

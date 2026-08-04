@@ -208,6 +208,37 @@ export function normalizeThai(input: string): string {
     // every period that is NOT an abbreviation dot. Applied longest-key-first (see ABBREV).
     for (const { re, to } of ABBREV_RULES) s = s.replace(re, to);
 
+    // ── 8b. the plus sign → บวก, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
+    // The corpus's two instances are `ตามเวลาท้องถิ่น (UTC+1)`, and the sign was DROPPED outright:
+    // `(UTC+1)` read *jˈuː tʰˈiː sˈiː nˈɯŋ* — "U T C one", with nothing where the plus was.
+    //
+    // ⚠ THREE TEXT TIERS FAILED ON THIS WORD BEFORE THE AUDIO SETTLED IT, and each failed differently:
+    //   · `concept.ts` returns the BARE CHARACTER `+` as Thai's own label for "plus sign"
+    //   · `attest.ts` on ลบ returns the ADJECTIVE "negative" — การป้อนกลับทางลบ, negative feedback — not the
+    //     operator; คูณ and บวก returned zero hits in the wiki haystack
+    //   · Cohere-transcribe renders Thai audio as VIETNAMESE-looking nonsense, and Whisper transcribes Thai
+    //     accurately but RE-ORTHOGRAPHIZES, emitting `UTC + 1` and `11.00 น.` — it hands the glyph back
+    //   · MMS-1b-all (tha adapter) is accurate too and also emits the sign, `utc.1`; on control languages it
+    //     silently DROPPED a demonstrably spoken plus (hi's प्लस, ta's பிளஸ்), so a character in its output
+    //     is not evidence a word was said
+    //
+    // What answers it is a PHONEME recognizer — facebook/wav2vec2-xlsr-53-espeak-cv-ft, whose 392-token
+    // vocabulary contains no `+` at all, so it physically cannot echo the orthography back. Both th_za
+    // speakers, 2 of 2:
+    //     … t ɔ ŋ k i5 n  j uː t iː s i5   b ʊ k   l i5 ŋ  t i5 w aɪ h ɑu5 s …
+    //     … t ɑu5 ŋ t i5 n  j u5 t i5 s i5  b ʊ k   n ŋ    t i5 w aɪ t h ɑu5 s …
+    // `j uː t iː s i5` is ยูทีซี, `b ʊ k` is บวก, and `n ŋ`/`l i5 ŋ` is หนึ่ง — "UTC บวก หนึ่ง". The engine
+    // already reads บวก as bˈua˨˩k and หนึ่ง as nˈɯ˨˩ŋ, matching the decode, so no new lexical data is needed.
+    // The method was validated on hi, where a text ASR had already given the answer: 4 of 4, including
+    // reproducing the SILENCE before a temperature, which shows it does not invent the word either.
+    //
+    // BEFORE the degree rule, which is the ordering coupling zu's `[+]?` taught: a rule that consumes the
+    // sign's operand must not get there first. Thai's degree rule does not match the sign today, so this is
+    // insurance rather than a fix. `+30°C` has ZERO corpus instances here (unlike most of the fleet — th_th
+    // does not carry the Montevideo sentence), so that arm is the arbitrary-text case #584 argues for: a
+    // dropped sign is inaudible, which is the one outcome that cannot be right.
+    s = s.replace(/\s*\+\s*(?=\d)/gu, " บวก ");
+
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° (else the C is left behind and routes to the English phonemizer as "sˈiː").
     s = s.replace(/\s*°\s*C(?![A-Za-z])/gu, " องศาเซลเซียส");
