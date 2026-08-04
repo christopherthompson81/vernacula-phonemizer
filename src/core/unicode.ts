@@ -270,6 +270,47 @@ export function repairDoubleEncoded(s: string): string {
  * The CJK squared units (㎞ ㎡ ㎥ ㎏ ㎜ ㎝ ㎢ ㏊) are omitted for a duller reason: zero occurrences in any
  * corpus, and each would need the language to declare that unit anyway.
  */
+/**
+ * VULGAR FRACTIONS → the ASCII `n/m` every language's fraction rule already matches.
+ *
+ * MEASURED FIRST, because the shape of the fix follows from it: 36 of the 67 artifacts contain a vulgar
+ * fraction, **every one of them the same universal sentence** — the manuscript's `(measuring 29¾ inches × 24½
+ * inches)` — and **27 of the 36 DROP it**, reading `29¾` as bare *twenty-nine*. Nine already handle it
+ * (az ca el ga hr kn mk te uz). One sentence, twenty-seven languages, so this is a fold and not twenty-seven
+ * vocabularies: each language then speaks it with the fraction machinery it already has.
+ *
+ * ⚠ NOT NFKC, for the reason `foldSquaredDegrees` gives at length — and here specifically because NFKC maps
+ * `¾` to `3⁄4` with U+2044 FRACTION SLASH, which no language's fraction rule matches. The fold has to be ASCII
+ * `/` to reach that machinery at all, which is why the compatibility mapping is not the answer even for the one
+ * character where it looks closest.
+ *
+ * ⚠ A SPACE IS INSERTED AFTER A DIGIT, and without it the fold makes things worse rather than better. These are
+ * MIXED numbers: `29¾` means twenty-nine and three quarters, so a bare substitution yields `293/4`, which
+ * Gujarati's fraction rule already refuses by design — its comment records `293/4 and 241/2 are MIXED NUMBERS …
+ * so `num < den` refuses them rather than saying "two hundred ninety-three divided by four"`. That refusal is
+ * correct given `293/4`; the space is what makes the input honest. gu therefore goes from a documented refusal
+ * to a reading, with no change to gu.
+ *
+ * ⚠ WHAT THIS DOES NOT SUPPLY is the "and" of *twenty-nine AND three quarters*, which is a per-language word in
+ * a per-language position. The fold gets the fraction SPOKEN; joining it to the integer idiomatically is a
+ * separate change, and th's own recording shows the reader saying the fraction as a unit
+ * (`s e s a m s ʊ n s iː` = เศษสามส่วนสี่) rather than as an addition.
+ */
+const VULGAR: Readonly<Record<string, string>> = {
+    "¼": "1/4", "½": "1/2", "¾": "3/4", "⅐": "1/7", "⅑": "1/9", "⅒": "1/10",
+    "⅓": "1/3", "⅔": "2/3", "⅕": "1/5", "⅖": "2/5", "⅗": "3/5", "⅘": "4/5",
+    "⅙": "1/6", "⅚": "5/6", "⅛": "1/8", "⅜": "3/8", "⅝": "5/8", "⅞": "7/8",
+};
+const VULGAR_RE = new RegExp(`[${Object.keys(VULGAR).join("")}]`, "gu");
+
+/** Vulgar fraction characters → ASCII `n/m`, spaced off a preceding digit so a mixed number stays two terms. */
+export function foldVulgarFractions(s: string): string {
+    if (!VULGAR_RE.test(s)) return s;
+    VULGAR_RE.lastIndex = 0;
+    return s.replace(VULGAR_RE, (c, off: number, full: string) =>
+        (/\d/u.test(full[off - 1] ?? "") ? " " : "") + VULGAR[c]!);
+}
+
 export function foldSquaredDegrees(s: string): string {
     return s.replace(/℃/gu, "\u00b0C").replace(/℉/gu, "\u00b0F");
 }
