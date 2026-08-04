@@ -30,6 +30,16 @@ import xml.etree.ElementTree as ET
 RE_COMMENT = re.compile(r"<!--.*?-->", re.S)
 RE_REF = re.compile(r"<ref[^>]*?/>|<ref.*?</ref>", re.S | re.I)
 RE_TAG = re.compile(r"<[^>]+>")
+# ⚠ <sup> IS RENDERED, NOT STRIPPED, and stripping it was OUR data loss rather than the source's.
+# RE_TAG below deletes the brackets and leaves the digits INLINE, so `2.802×10<sup>10</sup>` mined as
+# `2.802×1010` — the exponent merged into the mantissa and no later pass can tell where the boundary was.
+# THE ARITHMETIC PROVES the loss is ours: hi's `2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)` only reconciles as
+# 2.802×10¹⁰ sq ft, and `100 kमी2 (1.1×109 वर्ग फुट)` as 1.1×10⁹. It hid for so long because the UNIT case is
+# survivable — `km<sup>2</sup>` flattens to `km2`, which the symbol tier accepts — so twelve corpora carry a
+# harmless-looking `km2` and only a NUMBER base made the collision visible.
+# Digits and signs only: `4<sup>th</sup>` keeps its letters, which the ordinal rule reads.
+SUP_DIGITS = str.maketrans("0123456789-+", "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079\u207b\u207a")
+RE_SUP = re.compile(r"<sup>([+-]?\d+)</sup>", re.I)
 RE_TABLE = re.compile(r"\{\|.*?\|\}", re.S)
 RE_FILE = re.compile(r"\[\[(?:File|Image|ဖိုင်|Category|Wikipedia)[^\]]*\]\]", re.I)
 RE_LINK = re.compile(r"\[\[(?:[^\]|]*\|)?([^\]|]*)\]\]")
@@ -67,6 +77,7 @@ def clean(text: str) -> list:
     text = RE_LINK.sub(r"\1", text)
     text = RE_EXTLINK.sub(lambda m: m.group(1) or " ", text)
     text = RE_HEADING.sub(" ", text)
+    text = RE_SUP.sub(lambda m: m.group(1).translate(SUP_DIGITS), text)  # BEFORE RE_TAG, which would flatten it
     text = RE_TAG.sub(" ", text)
     text = RE_QUOTES.sub("", text)
     text = RE_LISTMARK.sub(" ", text)

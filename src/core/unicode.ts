@@ -304,6 +304,34 @@ export function repairDoubleEncoded(s: string): string {
 }
 
 /**
+ * CARET EXPONENTS → real superscripts. `2^10`, `km^2`, `10^-31`, and the LaTeX-ish `10^{10}`.
+ *
+ * WHY THIS IS A FOLD AND NOT A LANGUAGE RULE: the caret is how a programmer types an exponent when the
+ * keyboard has no superscripts, and it means the same thing in every language. Rendering it to `²`/`¹⁰`/`⁻³¹`
+ * hands it to the exponent machinery that already exists, rather than asking 67 languages to learn a second
+ * notation. Same argument as `foldSquaredDegrees` and `foldVulgarFractions`, which sit beside it.
+ *
+ * ⚠ UNHANDLED IT WAS WORSE THAN A DROP. `2^10` read as *tʰˈuː tʰˈɛn* — "two ten", two numbers with the
+ * relationship gone; `10^-31` as *tʰˈɛn θˈɝd̬iː wˈʌn*, losing the sign as well; and `km^2` as *ˈʊkm tʰˈuː*,
+ * with the unit abbreviation LEAKING raw because the caret broke its adjacency to the number.
+ *
+ * THE GUARD IS TIGHT because a caret is also an ordinary character. It must follow a letter or digit and be
+ * followed only by digits (optionally signed, optionally braced), so a stray `^` in prose or a regex quoted in
+ * running text cannot match. Measured across all 67 corpora and all 67 artifacts: `^` occurs ZERO times, so
+ * this is robustness for input a caller may hand us, not a repair of anything sampled.
+ */
+const CARET_SUP: Readonly<Record<string, string>> = {
+    "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+    "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "-": "⁻", "+": "⁺",
+};
+const CARET_RE = /(?<=[\p{L}\p{Nd}])\^\{?([+-]?\d+)\}?/gu;
+
+export function foldCaretExponents(s: string): string {
+    if (!s.includes("^")) return s;
+    return s.replace(CARET_RE, (_m, exp: string) => [...exp].map((c) => CARET_SUP[c] ?? c).join(""));
+}
+
+/**
  * SQUARED DEGREE SIGNS → their two-character equivalents: ℃ → `°C`, ℉ → `°F`.
  *
  * WHY A FOLD RATHER THAN A RULE PER LANGUAGE. U+2103 and U+2109 are single code points that mean exactly what

@@ -111,8 +111,24 @@ const DOTTED_ABBREV: Record<string, (next: string) => string> = {
 // in any of the 67 corpora (×232 across 46 of them).
 const NOT_VERSION = "(?<![\\d.,])(?!802[.,]11\\w)(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
 const UNIT_RE = new RegExp(
-    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)\\s?(${Object.keys(UNITS).sort((a, b) => b.length - a.length)
-        .join("|")})([²³])?(?![\\p{L}\\p{M}])`,
+    // ⚠ THE ASCII EXPONENT IS ACCEPTED TOO (`km2`, `m3`), not only the superscript. Two reasons, and the first
+    // is that WE PRODUCE the ASCII form: stripping `<sup>2</sup>` used to leave the digits inline, so twelve
+    // corpora carry a flattened `km2`. English matched only `[²³]`, so the `2` fell out of the unit match and
+    // read as a SEPARATE NUMBER — `19,500 km2` came out "nineteen thousand five hundred kilometres TWO".
+    // Audibly wrong, and invisible to both gates: no superscript survives to leak and no symbol vanishes.
+    // Second, `km2` is simply what a person types when the keyboard has no superscript, so accepting it is
+    // right independently of how our own pipeline mangled it.
+    // Bounded by the UNIT LIST, which is what makes it safe — `H2O` cannot match because `H` is not a unit key.
+    // ⚠ A MAGNITUDE WORD MAY SIT BETWEEN THE NUMBER AND ITS UNIT, and without this English LEAKED the unit.
+    // `2.2 million km2 of ocean` — the archipelago sentence, in en_us — read as *… mˈɪɫjən ˈʊkm tʰˈuː …*: the
+    // abbreviation reached the phoneme stream AS RAW LETTERS and the area was lost entirely. Invisible to every
+    // gate, because bare Latin letters are in no leak class and nothing vanished for the DROP test to catch.
+    // This is the same defect the shared tier fixed with `magnitudes` (reported by the Luxembourgish run and
+    // found again in Italian this sweep) — English does not use that tier, so it needs its own hop.
+    // The magnitude is RE-EMITTED in place: it belongs to the number's reading, not the unit's.
+    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?(${
+        Object.keys(UNITS).sort((a, b) => b.length - a.length)
+            .join("|")})([²³23])?(?![\\p{L}\\p{M}])`,
     "giu",
 );
 
@@ -386,15 +402,17 @@ export function normalizeEnglish(input: string): string {
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = s.replace(UNIT_RE,
-        (_m, num: string, u: string, exp: string | undefined) => {
+        (_m, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
             const [sg, pl] = UNITS[u.toLowerCase()]!;
             // English puts the measure word BEFORE the unit — "square kilometers", "cubic meters" — and the
             // COUNT still governs the noun: "one cubic meter", not "one cubic meters". A first cut forced the
             // plural on the reasoning that the quantity is the area rather than the one square; that is not
             // how English says it, and `1 m³` came out "one cubic meters".
-            const measure = exp === "²" ? "square " : exp === "³" ? "cubic " : "";
-            const one = /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
-            return `${num} ${measure}${one ? sg : pl}`;
+            const measure = exp === "²" || exp === "2" ? "square " : exp === "³" || exp === "3" ? "cubic " : "";
+            // A magnitude forces the PLURAL: "2.2 million square kilometres", never "…kilometre". The
+            // singular test looks at the digits alone, so without this `1 million km` would read "kilometre".
+            const one = mag === undefined && /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
+            return `${num}${mag ?? ""} ${measure}${one ? sg : pl}`;
         });
 
     // 6b) A BARE EXPONENT — a base with NO unit for the rule above to attach the power to, so the superscript

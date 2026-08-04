@@ -1203,3 +1203,100 @@ one is hi's astronomical magnitude) and no corpus writes a superscripted exponen
 
 **Outstanding against #586 after this run: the `arithmetic` / `=` item only** — 35 of 67 languages still drop
 `=`, which the issue itself defers as needing a per-language decision rather than a shared default.
+
+## Run 18 — 2026-08-04 — "are WE causing the data loss?" — yes, and the answer found three more defects
+
+Run 17 recorded hi's `2.802×1010` as unrecoverable "data loss, not a rule gap". Challenged on whether the loss
+was ours or the orthography's. **It was ours**, and I had asserted otherwise without checking.
+
+### Two places flatten `<sup>`, and the arithmetic proves the value
+
+`wikidump-to-text.py:32` (`RE_TAG = re.compile(r"<[^>]+>")`) and `stripMarkup` both delete the brackets and
+leave the digits INLINE. So `2.802×10<sup>10</sup>` is mined and read as `2.802×1010` — the exponent merges into
+the mantissa and no later pass can find the boundary.
+
+The arithmetic settles it, rather than a guess about the wiki source:
+
+```
+2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)   →  2,603 km² IS 2.802×10¹⁰ sq ft
+100 kमी2 (1.1×109 वर्ग फुट)                →  100 km²   IS 1.1×10⁹ sq ft
+```
+
+The values only reconcile with the exponent restored. Both tools now render `<sup>N</sup>` to real superscript
+characters before the tag pass.
+
+⚠ **IT HID BECAUSE THE UNIT CASE LOOKED FINE.** `km<sup>2</sup>` flattens to `km2`, and the shared tier
+deliberately accepts an ASCII exponent after a letter — the branch that made the original `<sup>` fix work. So
+twelve corpora carry a harmless-*looking* `km2` and only a NUMBER base made the collision visible. *A lossy
+transform that stays readable in the common case is the hardest kind to notice.*
+
+### ⚠ AND "HARMLESS-LOOKING" WAS WRONG, WHICH MY OWN TEST CAUGHT
+
+I wrote that the unit case "survives flattening because the tier accepts an ASCII exponent" and asserted it.
+The assertion FAILED. Measured properly: 7 of the 9 tier languages carrying `km2` do read it as an exponent
+(el es ml bg ne hu cmn) — but **en, sw and nb do not**, and there the `2` falls out of the unit match and reads
+as a SEPARATE NUMBER: *"nineteen thousand five hundred kilometres TWO"*. Audibly wrong, and invisible to both
+gates — no superscript survives to leak, nothing vanishes for DROP to catch.
+
+- **en** matched only `[²³]`; now accepts `[23]` too, bounded by the unit list so `H2O` and `802.11g` cannot
+  match. Fixes `3136 mm2` in en_us.
+- **sw / nb** differ for another reason entirely: they declare no `exponentWords`, so the tier hands the exponent
+  back BY DESIGN — the documented visible gap, not this bug. Left as a data gap.
+
+### ⚠ AND CHASING THAT FOUND A LEAK IN ENGLISH — the first language ever treated
+
+`2.2 million km2 of ocean` (the archipelago sentence, in en_us) read as *… mˈɪɫjən ˈʊkm tʰˈuː …*: **the unit
+abbreviation reached the phoneme stream as RAW LETTERS** and the area was lost. The plain `2.2 million km` leaks
+too, so it is the MAGNITUDE breaking adjacency, not the exponent.
+
+This is the same defect the shared tier fixed with `magnitudes` — reported by the Luxembourgish run, found again
+in Italian earlier this sweep — and English does not use that tier, so it never got the hop. Added, with the
+magnitude re-emitted in place and forcing the PLURAL (the singular test reads the digits alone, so `1 million km`
+would otherwise say "kilometre").
+
+⚠ **No gate could see this one either.** Bare Latin letters are in no leak class, and nothing vanished. Two
+independent invisible defects in en_us, both surfaced by asking who caused a data loss.
+
+### Support every encoding, render them all to Unicode
+
+On the observation that a caller passes whichever encoding is at hand. Three now converge on one reading:
+
+| encoding | before | now |
+|---|---|---|
+| `km²` | ok | ok |
+| `km<sup>2</sup>` | → `km2`, flattened | → `km²` |
+| `km&sup2;` | **stayed LITERAL** — read as "ampersand sup two semicolon" | → `km²` |
+| `km^2` | `ˈʊkm tʰˈuː` — unit LEAKED | → `km²` |
+| `km&#178;` | ok (numeric entities already worked) | ok |
+
+Named entities were the inconsistency: the numeric form worked while every NAMED one that maps to a readable
+character was left literal. Added `sup1-3`, `frac12/14/34`, `minus`, `plusmn`, `micro`, `permil`, `cent` — each
+paired with machinery that already reads it. Caret notation became a shared fold beside `foldSquaredDegrees`,
+guarded to require an alphanumeric before and only signed digits after (`a ^ b` untouched; `^` occurs ZERO times
+in all 67 corpora, so it is robustness for what a caller may hand us).
+
+### ⚠ AND `<sub>` IS DELIBERATELY *NOT* MAPPED — I wrote it, then measured it out
+
+Symmetry argued for rendering `<sub>2</sub>` to `₂`. Measured:
+
+```
+CO2 levels  → kʰˈoᶷ tʰˈuː lˈɛvəɫz     the flattened ASCII form — the 2 IS spoken
+CO₂ levels  → kʰˈoᶷ lˈɛvəɫz           "correctly" rendered — the 2 is GONE
+```
+
+Nothing reads a subscript digit, so the "correct" rendering takes a readable form and makes it silent — **the
+same error as the bug this whole run is about, pointed the other way.** `<sub>` occurs zero times in all 67
+corpora and artifacts, so there was no benefit to weigh against a measured regression. *A transform is only a
+repair if something downstream can read what it produces.*
+
+### The existing artifacts are NOT retro-repaired, deliberately
+
+The two hi entries still carry `1010`/`109`, and twelve corpora still carry `km2`. The arithmetic proves the
+VALUES, but not the exact markup that was there — I inferred `<sup>` from the flattening pattern. Hand-editing
+mined evidence on an inference is weaker than regenerating it from the dump, so the tools are fixed and
+regeneration is the mechanism. Recorded here so the flattened forms are not mistaken for source fidelity.
+
+### Result
+
+Gates: tsc clean; **205 files / 2927 tests**; audit **0 defective cells across 0/67**; corpus diffs — en 2/1976
+(both the defects above, read individually) and el, es, lb, ms, vi **byte-identical**.
