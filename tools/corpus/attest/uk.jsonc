@@ -1,0 +1,68 @@
+// WIKIPEDIA WORD ATTESTATION — uk (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "uk",
+    "wiki": "uk.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "та",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 14,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…Бібліотека та Архів Канади (англ. Library and Archives Canada, фр. Biblio…",
+                "…ння документальної спадщини цієї країни, текстів, зображень та інших документів, що відносяться до історії, культури та по…",
+                "…нь та інших документів, що відносяться до історії, культури та політики Канади. Архівні й бібліотечні матеріали надходять…",
+                "…ід 2004 року діяльність установи регулює Акт про бібліотеки та архіви Канади, проголошений 22 квітня 2004 року. == Фонди =…",
+                "…ліотеку передусім цікавлять матеріали, пов'язані з історією та культурою Канади. Тут зберігаються журнали корінного населе…",
+                "…ментальна література, фільми, урядові публікації, документи та вебсайти, юдаїка, документи шкіл-інтернатів для індіанців,…"
+            ]
+        },
+        {
+            "word": "і",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 51,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…І, і — літера деяких кириличних абеток; позначає неогублений…",
+                "…І, і — літера деяких кириличних абеток; позначає неогублений гол…",
+                "…еогублений голосний звук переднього ряду високого підняття [і]. Колись називалась «і десяткове». == Історія == Походить в…",
+                "…к переднього ряду високого підняття [і]. Колись називалась «і десяткове». == Історія == Походить від старослов'янської ки…",
+                "…торія == Походить від старослов'янської кириличної літери («і»), утворене на основі аналогічної літери візантійського уні…",
+                "…том грецької Ι, ι («йота»). Старослов'янська назва букви — «і», її фонетичний дублер називається «іже», хоча зазвичай їх…"
+            ]
+        },
+        {
+            "word": "енд",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…Бі-енд-І (англ. B and E) — переписна місцевість (CDP) в США, в окр…",
+                "…тату Техас. Населення — 489 осіб (2020). == Географія == Бі-енд-І розташоване за координатами 26°21′24″ пн. ш. 98°45′13″ зх…"
+            ]
+        }
+    ],
+}

@@ -1,0 +1,63 @@
+// WIKIPEDIA WORD ATTESTATION — ml (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ml",
+    "wiki": "ml.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "ആൻഡ്",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 18,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ൾക്കൊള്ളുന്ന മെഡിക്കൽ സ്പെഷ്യാലിറ്റിയാണ് ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ് ഗൈനക്കോളജി (ഒബ്‌സ് ആൻഡ് ഗൈന, ഒ& ജി, ഒബി-ജിവൈഎൻ, ഒബി/ജിവൈഎൻ…",
+                "…പെഷ്യാലിറ്റിയാണ് ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ് ഗൈനക്കോളജി (ഒബ്‌സ് ആൻഡ് ഗൈന, ഒ& ജി, ഒബി-ജിവൈഎൻ, ഒബി/ജിവൈഎൻ എന്നിങ്ങനെ ചുരുക്കി വിളി…",
+                "…ിക്കേഷനുകൾ നൽകുന്നത് അമേരിക്കൻ ബോർഡ് ഓഫ് ഒബ്‌സ്റ്റട്രിക്‌സ് ആൻഡ് ഗൈനക്കോളജി (ABOG) ആണ്. ഒബി-ജിവൈഎൻ സർട്ടിഫിക്കേഷന്റെ ആദ്യപടി…",
+                "…ർത്തിയായ ശേഷം, അപേക്ഷകർ റോയൽ കോളേജ് ഓഫ് ഒബ്‌സ്റ്റട്രീഷ്യൻസ് ആൻഡ് ഗൈനക്കോളജിസ്റ്റ്സ് നടത്തുന്ന ഭാഗം 1 എംആർസിഒജി പരീക്ഷ എഴുതുന…",
+                "…ം ശ്രദ്ധ കേന്ദ്രീകരിക്കുന്നു. റീപ്രൊഡക്റ്റീവ് എൻഡോക്രൈനോളജി ആൻഡ് ഇൻഫെർട്ടിലിറ്റി: വന്ധ്യതയുടെ ജീവശാസ്ത്രപരമായ കാരണങ്ങളിലും ച…",
+                "…ക്കുന്ന ഒരു ഗൈനക്കോളജിക്കൽ ഉപവിഭാഗം ഫീമെയിൽ പെൽവിക് മെഡിസിൻ ആൻഡ് റീകൺസ്ട്രക്റ്റീവ് സർജറി: മൂത്രാശയ അജിതേന്ദ്രിയത്വവും പെൽവിക…"
+            ]
+        },
+        {
+            "word": "ഒപ്പം",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ം ,ക്രിറ്റേഷ്യസ് പരമ്പരാഗതമായി ലോവർ ക്രിറ്റേഷ്യസ് (തുടക്ക), ഒപ്പം (അന്ത്യ) അപ്പർ ക്രിറ്റേഷ്യസ് എന്നിങ്ങനെ തിരിച്ചിരിക്കുന്നു.…"
+            ]
+        },
+        {
+            "word": "കൂടാതെ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…േപ്പിന്റെ തണ്ട് പല്ല് വൃത്തിയാക്കുന്നതിനായി ഉപയോഗിക്കുന്നു. കൂടാതെ ത്വക്ക് രോഗങ്ങൾ, സന്ധിവാതം,വൃണം, ചുമ, പ്രമേഹം തുടങ്ങിയ രോഗങ…",
+                "…ഔഷധനിർമ്മാണത്തിനായി വേപ്പിന്റെ പല ഭാഗങ്ങളും ഉപയോഗിക്കുന്നു. കൂടാതെ വേപ്പിൽ നിന്നും ജൈവകീടനാശിനിയും ഉത്പാദിപ്പിക്കുന്നുണ്ട്. തട…"
+            ]
+        }
+    ],
+}

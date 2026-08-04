@@ -76,6 +76,10 @@ function spellDigits(s: string): string {
 // `unspacedScript` because a sign in Chinese is normally flanked by Han, which the tier's letter-boundary
 // guard rejected: `$500。` read 美元 while `為$500，` dropped it (#586).
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright, losing the sign from `提供豪華的 B&B 服務`. 和 is the standard written
+    // conjunction and the corpus's most frequent candidate (和 ×603, 與 ×320, 同 ×185). For an UNSPACED script
+    // the substring match IS the hit test, which is what attest.ts's header establishes for cmn.
+    ampersand: "和",
     percent: ["百分之"],
     percentPrefix: true,
     // #586 — `5 km` read as *ŋ̩˩˧ ˈʊkm*: no unit was declared. Verified in yue_hant_hk:

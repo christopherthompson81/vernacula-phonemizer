@@ -91,6 +91,17 @@ const ZWJ_CHILLU: Readonly<Record<string, string>> = {
  * shape cannot express. Nothing to source, nothing to guess.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // #586 — `&` was DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
+    // TRANSLITERATED English "and", and it is attested in exactly this construction rather than merely as a
+    // word: every wiki hit is an English institution name rendered in Malayalam — `ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ്
+    // ഗൈനക്കോളജി`, `അമേരിക്കൻ ബോർഡ് ഓഫ് ഒബ്സ്റ്റട്രിക്സ് ആൻഡ് ഗൈനക്കോളജി`, `റോയൽ കോളേജ് ഓഫ് ഒബ്സ്റ്റട്രീഷ്യൻസ്
+    // ആൻഡ് ഗൈനക്കോളജിസ്റ്റ്സ്` — and one of those sentences writes the sign itself, `ഒ& ജി`. 18 wiki tokens,
+    // 8 in the corpus. Chosen over the native options because they do not fit the slot: `ഉം` is a BOUND
+    // suffix (it attaches to both coordinands, so it cannot stand between two initialisms), and `ഒപ്പം` /
+    // `കൂടാതെ` mean "along with" / "besides" — 1 and 2 tokens, and the wrong register for a proper name.
+    // Trap 8, checked: EVERY `&` in all five corpora treated in this batch is the universal `B&B` /
+    // `Arts & Sciences` pair — no `AT&T`, no URL query — so "and" is right in every attested context.
+    ampersand: "ആൻഡ്",
     percent: ["ശതമാനം"],
     currency: { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },
     magnitudes: ["ദശലക്ഷം", "മില്യൺ", "ബില്യൺ", "ലക്ഷം", "കോടി"],
