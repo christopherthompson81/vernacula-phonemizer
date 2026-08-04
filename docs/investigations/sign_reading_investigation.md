@@ -1672,3 +1672,43 @@ wants the token widened WITHOUT the routing change. Then the twelve needing a re
 `akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro`.
 
 Gates: tsc clean; 205 files / 2931 tests; audit 0 defective cells across 0/67.
+
+## Run 26 — 2026-08-04 — pcm: the fix is HALF the fix, and the missing half made one case worse
+
+pcm fragments like the others (`São Paulo` → *ɛs ˈə o pɔlo*, "ES ə O") so it needed fixing — but **not** the same
+fix. Its header is explicit: the rule g2p is applied to English-spelled tokens "rather than routing them to the
+English phonemizer … nativising is more correct for the creole", and its own output proves it — `water` → *wata*,
+`computer` → *kampjuta*, against English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Routing an accented token to the foreign
+reader would contradict the engine's design.
+
+So: widen the token, **no** native-vs-foreign routing.
+
+### ⚠ And widening alone made one case WORSE, which only appeared on a third example
+
+`São Paulo` → *so pɔlo* and `Cañitas` → *kaitas* both looked like wins. `Klöcker` → **klkkeɾ** — pcm has no rule
+for `ö`, so the letter simply VANISHED and left an unpronounceable cluster, where fragmenting had at least
+produced syllables.
+
+**Nativising an English-spelled word means reading it with Naija values, which requires a letter to read.
+Dropping it is not nativising, it is deleting.** So an accent folds to its BASE first (NFD, discard marks), and
+every accented form now reads identically to its ASCII twin:
+
+```
+São Paulo → sau pɔlo   = Sao Paulo      Cañitas → kanitas = Canitas      Klöcker → klokkeɾ = Klocker
+```
+
+*Two examples agreed and the third disagreed.* Had I stopped at `São`/`Cañitas` — both of which lose a letter the
+g2p cannot use and still read plausibly — the regression would have shipped looking like a fix.
+
+### The shape of #657 is now three variants, not one
+
+| engine kind | fix |
+|---|---|
+| Latin group means FOREIGN (`hi` +16, `pa`, `or`) | widen the pattern; that is all |
+| Latin group is NATIVE, engine reads foreign names as foreign (`id`/`ms`, `om`) | widen **+** route non-native tokens to the reader |
+| Latin group is NATIVE, engine NATIVISES by design (`pcm`) | widen **+** fold the accent to its base; **no** routing |
+
+The third was not in the issue's method when I wrote it. Worth checking each remaining engine for which kind it
+is before applying anything — `xh`, `zu`, `sw`, `akan`, `nama` are the ones most likely to be nativisers too.
+
+Gates: tsc clean; 205 files / 2932 tests; audit 0 defective cells across 0/67.

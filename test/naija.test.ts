@@ -100,4 +100,23 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
             "abɛɡ mek ju no vɛks",
         );
     });
+
+    test("#657 accented Latin stays ONE word and is NATIVISED, not routed and not deleted", () => {
+        // `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read as
+        // an English LETTER NAME: `São Paulo` → *ɛs ˈə o pɔlo* ("ES ə O"), `Cañitas` → *kɔ ˈɛn itas*.
+        // ⚠ NO FOREIGN ROUTING HERE, unlike id (#654) and om (#657). This engine NATIVISES — its header says the
+        // rule g2p is applied to English-spelled tokens because "nativising is more correct for the creole", and
+        // its own output proves it: `water` → wata, `computer` → kampjuta, not English's wˈɔːt̬ɚ / kəmpjˈuːt̬ɚ.
+        expect(phonemize("water", "pcm")).toBe("wata");
+        expect(phonemize("computer", "pcm")).toBe("kampjuta");
+        // ⚠ AND WIDENING THE TOKEN ALONE MADE ONE CASE WORSE: pcm has no rule for `ö`, so the letter VANISHED and
+        // `Klöcker` came out *klkkeɾ*, an unpronounceable cluster. Nativising needs a letter to read; dropping it
+        // is not nativising, it is deleting. So an accent folds to its BASE first.
+        const pairs: [string, string][] = [["São Paulo", "Sao Paulo"], ["Cañitas", "Canitas"], ["Klöcker", "Klocker"]];
+        for (const [acc, ascii] of pairs)
+            expect(phonemize(acc, "pcm"), acc).toBe(phonemize(ascii, "pcm"));
+        expect(phonemize("Klöcker", "pcm")).toBe("klokkeɾ");
+        // Native Naija is untouched.
+        expect(phonemize("di pikin dem", "pcm")).toBe("di pikin dɛm");
+    });
 });
