@@ -109,11 +109,15 @@ function numberTokenToWords(tok: string): string {
 // %40 and 40% occur in the wild and both rewrite to prefix order. `m` → metre is claimed here rather than in
 // normalize.ts so the shared tier's "only after a number" guard applies (4892 m, 100m); the `m/s` compound is
 // consumed earlier, in normalize.ts step 4, before this tier can break the adjacency.
+/** The unit table, named so the apostrophe-suffix rule below can derive its alternation from the SAME object
+ *  the tier is given — a second hand-written list would drift the moment a unit is added. */
+const UNITS = { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] };
+
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["yüzde"],
     percentPrefix: true,
     currency: { "€": ["avro"], "$": ["dolar"], "£": ["sterlin"], "₺": ["lira"], "¥": ["yen"] },
-    units: { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] },
+    units: UNITS,
     // THE MEASURE WORD FUSES ONTO THE END, which is the `suffix` position and the reason it exists. This
     // corpus writes `783.562 kilometrekare` ×4 and `120-160 metreküp` ×2 — one word each. Neither of the
     // other three positions produces that: `after` gives *kilometre kare*, `compound` gives *karekilometre*.
@@ -122,11 +126,57 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["kare"], cubed: ["küp"], position: "suffix" },
 });
 
+/**
+ * THE APOSTROPHE SUFFIX DEFEATED THE UNIT TIER ENTIRELY, and #586's audit only saw the smallest part of it.
+ * Turkish attaches case/possessive suffixes to an abbreviation with an apostrophe, and the tier's trailing
+ * guard — which exists so a key cannot bite into a word — rejects the letter that follows. Measured over
+ * tr_tr, fourteen instances, and every one of them was misread:
+ *
+ *     19.500 km²'lik  →  *kilometre lik*     the ² DROPPED, area lost           (×2, the audit's `exponent DROP`)
+ *     360 km'lik      →  *km lik*            THE UNIT SURVIVED AS RAW LETTERS   (×2, +1600 km'lik ×2, 70 km'ye)
+ *     35 mm'dir       →  *mm dir*            same                               (×3)
+ *     6 cm'ye, 4892 m'lik, 6,387 km'dir      same
+ *     5 km2'lik       →  *kilometre ikilik*  the ASCII 2 read as the NUMBER two — confidently wrong
+ *
+ * ⚠ AND A RAW UNIT IS NOT MUTE IN THIS LANGUAGE, IT IS MISPRONOUNCED. `6 cm'ye` read [aɫtˈɯ d͡ʒm jˈe]: the
+ * letters `cm` went through the g2p as an ordinary word, and Turkish `c` is [d͡ʒ]. So the alternative to
+ * reading the unit was not silence but a confident wrong word — the same argument the Zulu click rules rest
+ * on, and the reason this is worth fixing at fourteen instances.
+ *
+ * ⚠ ONLY THE EXPONENT CASE WAS VISIBLE TO THE GATE. A raw `km` in the IPA is not a digit and not a symbol, so
+ * the LEAK check cannot see it and the differential DROP check cannot either — the reading changes when the
+ * letters are deleted, so nothing "vanished". Twelve of the fourteen were invisible, which is the #584 blind
+ * spot in a new shape: a defect is only found by the gate that was built to look for it.
+ *
+ * PROTECT AND RESTORE, rather than a local unit table. The suffix is moved out of the way behind a sentinel so
+ * the tier sees an ordinary boundary, then glued back onto whatever word the tier produced. That way the unit
+ * words stay owned by the tier — `kilometrekare` + `lik` → *kilometrekarelik*, `kilometre` + `lik` →
+ * *kilometrelik* — and nothing here needs to know them. Plain concatenation is correct for the same reason
+ * `attachSuffix` gives in normalize.ts: Turkish orthography already writes the suffix in the harmonised form
+ * the spoken word demands.
+ *
+ * ⚠ KEYED ON THE DECLARED UNITS, NOT ON `\\p{L}+`, and that is load-bearing. The same shape sits on words this
+ * must not touch, all of them in this corpus: `7 Ekim'de`, `20 Mart'ta` (month names after a day number),
+ * `12.00 GMT'de`, `802.11n'nin`, `2. Elizabeth'in`, `29, Cincinnati'nin`. A letter-run rule would read every
+ * one of them as a measurement. The requirement that an apostrophe follow the unit IMMEDIATELY is what keeps
+ * `5 Mart'ta` safe even though `m` is a unit key: after `m` comes `a`, not `'`.
+ */
+const UNIT_ALT = Object.keys(UNITS).sort((a, b) => b.length - a.length).join("|");
+const SUFFIX_MARK = "\u0001"; // never occurs in input; the glue step below removes it again
+const SUFFIXED_UNIT = new RegExp(`(\\d[\\d.,]*\\s?(?:${UNIT_ALT})(?:\\s?[²³23])?)['’](\\p{L}+)`, "gu");
+const MARKED_SUFFIX = new RegExp(`(\\S+)\\s${SUFFIX_MARK}(\\p{L}+)`, "gu");
+
+/** Read a unit carrying an apostrophe suffix: park the suffix, let the tier speak the unit, glue it back. */
+function readSuffixedUnits(text: string): string {
+    const parked = text.replace(SUFFIXED_UNIT, `$1 ${SUFFIX_MARK}$2`);
+    return SYMBOLS(parked).replace(MARKED_SUFFIX, "$1$2");
+}
+
 class TurkishPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts FIRST, then the shared symbol tier — normalize's `/`-unit step needs the number and
         // the unit still adjacent, which the symbol tier would break (83 km/s → 83 kilometre/s).
-        return assembleClauses(SYMBOLS(normalizeTurkish(input)), TOKEN, (m, sink) => {
+        return assembleClauses(readSuffixedUnits(normalizeTurkish(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2] !== undefined) {
                 const ord = ordinalWords(Number(m[2]));
