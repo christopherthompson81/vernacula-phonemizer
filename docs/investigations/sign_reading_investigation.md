@@ -1749,3 +1749,40 @@ in its class, before choosing a fix. Two probes, and they pick the row.
 Gates run separately: tsc PASS; 205 files / 2933 tests; audit 0 defective cells across 0/67.
 Remaining in #657: `xh`, `zu`, `sw`, `akan`, `nama`, `cs`, `it`, `pl`, `sk`, `sl`, `lv`, `lt`, `nb`, `ro` — all
 needing a reader injected or a fold chosen, and all needing the two probes first.
+
+## Run 28 — 2026-08-04 — #657 closed out: the remaining fourteen, and a test that lied twice
+
+Applied the `tl` shape to all fourteen remaining engines. The two probes picked the row before any edit, and they
+picked the SAME row for all of them: every one NATIVISES its loans — `cs computer` → *t͡sˈomputɛr* (Czech `c` =
+/ts/), `it` → *kompˈuter*, `pl` → *kɔmpˈutɛr*, none of them English's *kəmpjˈuːt̬ɚ*. **None has a reader injected,
+and injecting English would have been wrong** — Czech reading a French name should not sound English.
+
+So: widen the token, fold only what the native class rejects. Uniform across all fourteen, and the transform needs
+no linguistic data because each engine's own class supplies the inventory.
+
+Result: `São Paulo` and `Klöcker` now read exactly like their ASCII twins in all fourteen, while every native
+accent survives — `čas`, `perché`, `łódź`, `blåbær`, `țară`, and Nama's `ǀgôa` → *ᵏǀoa* with the click intact.
+
+Corpus diffs, ten languages: cs 10/1947, it 14/1978, pl 11/1919, nb 19/1859, ro 12/1958, xh 16/1509, zu 18/1478,
+sk 9/1719, sl 16/1903, sw 0/1938. Sampled and read — every change is a letter-name fragment collapsing into a
+word (`s ˈə mˈiː`→`sˈaːmi`, ` ˈoᶷ kkˈ`→`ˈokk`, ` ˈɛn ˈ`→`ɲ`). No DROP, DIGIT, RAWMARK, SLOT-GAP or THROW.
+
+### ⚠ AND THE NEW TEST ASSERTED THE WRONG THING TWICE
+
+`test/latin-tokenizers.test.ts` is the fleet-wide pin so the next instance is caught by a test rather than by
+reading a diff. Its native-accent case took three attempts, and both failures are worth keeping:
+
+1. **Vacuous.** I compared the native word against its de-accented form and demanded they differ. Akan's `ɛ` and
+   Nama's clicks are **distinct letters, not base-plus-diacritic** — NFD cannot decompose them, so there is
+   nothing for a fold to destroy and the comparison can never be true. Failed on `ak ɛdwuma`.
+2. **Still wrong after guarding for that.** Nama reads `ô` as /o/ in its OWN g2p, so `ǀgôa` and `ǀgoa` coincide
+   *legitimately*. Identical output is not evidence the accent was dropped.
+
+Both versions were testing a PROXY — "differs from de-accented" — for the property I actually wanted, which is
+"the word is not shredded". Asserting the property directly (no English letter names in the output, and the word
+occupies exactly one token) passes for all fourteen and cannot lie about it.
+
+*A proxy assertion fails in the cases where the proxy and the property come apart, which are exactly the cases
+worth testing.* Stated directly, the test is also shorter.
+
+Gates run separately: tsc PASS; **206 files / 2937 tests**; audit 0 defective cells across 0/67.
