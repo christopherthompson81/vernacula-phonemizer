@@ -302,7 +302,14 @@ export function normalizeHungarian(input: string): string {
     // number as words and leaves the second as digits for the tokenizer. See `multiplicativeWords` for why the
     // allomorph is a table and not a harmony rule (`harminc` → harmincszor is anti-harmonic).
     // Digit-flanked on both sides, which keeps an ordinary letter `x` and any algebraic use out of it.
-    s = s.replace(/(?<![\d.,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
+    // ⚠ THREE THINGS THE LOOKBEHINDS EXCLUDE, all found by probing the rule's neighbours rather than by
+    //   inspection. `(?<![\d.,])` alone was not enough:
+    //     `1 000 x 2`  Hungarian groups thousands with a SPACE, so the bare guard matched `000 x` and gave
+    //                  *1 nullaszor 2* — the thousand split apart. Hence `(?<!\d[ .,])`, which rejects a
+    //                  digit-then-separator while still allowing the ordinary leading space in `kamera 6 x 6`.
+    //     `6-8 x 10`   a RANGE's second operand became the base: *hatnyolcszor 10*. Hence `-` in the class.
+    //   `{1,6}` caps the operand so a 15-digit run falls through untouched rather than through numberToWords.
+    s = s.replace(/(?<![\d.,\-])(?<!\d[ .,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
         const w = multiplicativeWords(Number(n));
         return w === undefined ? m0 : `${w} `;
     });
