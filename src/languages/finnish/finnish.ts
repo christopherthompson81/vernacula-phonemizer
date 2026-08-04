@@ -12,6 +12,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
@@ -39,7 +40,13 @@ export function phonemizeWord(word: string): string {
         for (const key of GRAPHEME_KEYS) {
             if (w.startsWith(key, i)) { out += G[key]!; i += key.length; matched = true; break; }
         }
-        if (!matched) i += 1; // unknown char → skip
+        // ⚠ NOT SILENTLY: a letter with no grapheme rule here still denotes a sound, and dropping it deletes
+        // what the writer typed. Consulted only on the MISS branch, after every grapheme (including every
+        // digraph) has been tried, so it can never override a reading this language has an opinion about (#663).
+        if (!matched) {
+            out += latinPhone(w[i]!, { initial: i === 0, includeH: true }) ?? "";
+            i += 1;
+        }
     }
     return out;
 }
