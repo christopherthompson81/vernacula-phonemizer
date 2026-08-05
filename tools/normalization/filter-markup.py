@@ -38,6 +38,7 @@ RE_MARKUP_RESIDUE = _ns["RE_MARKUP_RESIDUE"]
 RE_FILE = _ns["RE_FILE"]
 RE_MEDIA = _ns["RE_MEDIA"]
 RE_PERSONAL = _ns["RE_PERSONAL"]
+decode_entities = _ns["decode_entities"]
 
 
 def keep(line: str) -> bool:
@@ -93,6 +94,17 @@ def self_test() -> int:
     return 1 if bad else 0
 
 
+# ⚠ THIS TOOL BOTH DROPS AND TRANSFORMS, and the transform was added later for a reason worth recording. The
+# guards above discard a line; entity decoding REWRITES one. Both need to reach corpora that were extracted
+# before the fix and whose .bz2 files are long deleted — 94 of 154 artifacts carry HTML entities, 2,653
+# occurrences — and re-downloading gigabytes to re-run the converter would be the expensive way to get there.
+#
+# Decoding runs BEFORE the guards, so an entity cannot hide a pattern they are meant to catch: `&#37;` is a
+# percent sign, and a media link written with `&amp;` in its query string is still a media link.
+def repair(line: str) -> str:
+    return decode_entities(line)
+
+
 def main() -> None:
     if "--self-test" in sys.argv:
         sys.exit(self_test())
@@ -100,7 +112,7 @@ def main() -> None:
     total_in = total_out = 0
     for path in [a for a in sys.argv[1:] if not a.startswith("--")]:
         lines = Path(path).read_text(encoding="utf8").splitlines()
-        kept = [l for l in lines if l.strip() and keep(l)]
+        kept = [r for r in (repair(l) for l in lines) if r.strip() and keep(r)]
         total_in += len(lines)
         total_out += len(kept)
         dropped = len(lines) - len(kept)

@@ -22,6 +22,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { normalizeKhmer } from "./normalize.ts";
 import { numberToKhmerWords } from "./numbers.ts";
 
 interface KhmerDef {
@@ -224,7 +225,10 @@ const TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
 export function createKhmer(): Phonemizer {
     return {
         text(input: string): string {
-            return assembleClauses(input, TOKEN, (m, sink) => {
+            // Normalization BEFORE tokenizing: TOKEN is a deliberately minimal three-way split and skips every
+            // symbol it does not name, so a symbol has to become a Khmer word before it gets here. See
+            // normalize.ts for what each rule reads and where its vocabulary was sourced.
+            return assembleClauses(normalizeKhmer(input), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     // Khmer digits ០–៩ (U+17E0–17E9) → ASCII, then compose (see numbers.ts).

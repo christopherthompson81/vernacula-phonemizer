@@ -23,6 +23,7 @@ Digits, %, currency, degrees and dashes are left exactly as written — they are
 Usage:  python3 tools/normalization/wikidump-to-text.py mywiki.xml.bz2 out.txt [--max-articles N] [--jobs N]
 """
 import bz2
+import html
 import os
 import re
 import sys
@@ -224,7 +225,46 @@ def strip_templates(s: str) -> str:
     return "".join(out)
 
 
+# ⚠ HTML ENTITIES MUST BE RESOLVED HERE, NOT IN EACH LANGUAGE'S NORMALIZER. Wikitext carries `&nbsp;`, `&amp;`
+# and numeric character references, and stripping tags does not touch them — so they reached the mined artifacts
+# of **94 of 154 languages, 2,653 occurrences**. The first fix for this was written into one language's
+# normalization layer, where it would have had to be written 94 times; the playbook's own step 3 says to fix a
+# defect where it lives, and it lives in extraction.
+#
+# The damage is not merely a stray token. An ampersand rule that turns `&` into the language's word for "and"
+# sees the `&` of `&nbsp;` and produces "and nbsp" — confident nonsense, in the phoneme stream, read aloud.
+#
+# ⚠ `&nbsp;` BETWEEN DIGITS IS A THOUSANDS SEPARATOR, not a space: `10&nbsp;000` is ten thousand, and turning it
+# into a space would leave two numbers for a de-grouping rule that only knows about commas. It is deleted there
+# and becomes an ordinary space everywhere else.
+#
+# Decoding runs BEFORE the residue and error guards, so an entity cannot hide a pattern they are meant to catch.
+RE_NBSP_GROUPED = re.compile(r"(?<=\d)&nbsp;(?=\d)")
+
+def decode_entities(text: str) -> str:
+    if "&" not in text:
+        return text
+    text = RE_NBSP_GROUPED.sub("", text)
+    # html.unescape resolves the named and numeric forms together, including the long tail this corpus has
+    # that a hand-written list would miss.
+    # ⚠ AND THE DECODED EMOJI STAY. An earlier version of this function stripped them by block — `&#10084;`
+    # decodes to a heart, `&#9758;` to a pointing hand, and neither looked like speech. That was wrong twice over.
+    #
+    # First, espeak-ng ships PER-LANGUAGE EMOJI NAME TABLES (`en_emoji`, `ar_emoji`, `my_emoji`, and many more in
+    # the same dictsource this project already mines for letter names and sign words), so the reference
+    # implementation VOICES them — a heart is read as its name, not skipped.
+    #
+    # Second, and worse: this engine currently drops them. `I ❤ this` reads as "aᶦ ðˈɪs". Stripping them here
+    # would have deleted the EVIDENCE of that gap from every mined corpus, so the drop scan could never report
+    # it — the same failure as a corpus that cannot fail its own gate. An explicitly typed character is content;
+    # a pipeline that quietly removes what the engine cannot say is measuring itself.
+    #
+    # So they are decoded and kept, and the residual shows up as an honest DROP for someone to close.
+    return html.unescape(text).replace("\u00a0", " ")
+
+
 def clean(text: str) -> list:
+    text = decode_entities(text)
     text = RE_COMMENT.sub(" ", text)
     text = RE_MATH.sub(" ", text)
     text = RE_REF.sub(" ", text)
