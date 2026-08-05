@@ -38,6 +38,7 @@
  * DNA, GPS, COVID…). A Latin→Malayalam letter-name table would be invented data.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import {
     cliticToWords,
@@ -238,6 +239,48 @@ export function normalizeMalayalam(input: string): string {
     // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
+
+    // THE DIVISION AND COMPARISON SIGNS (#654). The EQUALITY IS DELIBERATELY LEFT DROPPED — see the end.
+    //
+    // ⚠ THE PARALLEL-CORPUS FORM IS A SUBORDINATE CLAUSE, NOT A READING, and Malayalam is the clearest case of
+    // why a hit in FLEURS's aspect-ratio sentence is a lead rather than an answer. That sentence gives
+    // "പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ", and both halves are inflected FOR THAT SENTENCE:
+    //
+    //   ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ, and -ുമ്പോൾ IS the word "when" (historically -ഉം + പോൾ
+    //   "time"). So the form means "when dividing" — a temporal SUBORDINATOR, subordinated here to the main
+    //   predicate ആണെന്ന് പറയാം ("can be said to be"). Between two operands there is no main clause for it to
+    //   attach to, so `6 ÷ 3` would read "six when-divided three", a fragment awaiting a predicate.
+    //
+    //   ഉപയോഗിച്ച് ("using") is a converb, not the instrumental case -കൊണ്ട് that Malayalam puts on a divisor.
+    //   The translator wrote a two-clause paraphrase of the operation, not a reading of the notation.
+    //
+    // What the sentence DOES establish, with certainty, is the ROOT: ഹരി-. The form comes from ml.wikipedia's
+    // arithmetic article, which names the sign against the glyph in a section heading —
+    //
+    //     === ഹരണം (÷ or /) ===        then  "ഗുണനത്തിന്റെ വിപരീത ക്രിയയാണ് ഹരണം"
+    //
+    // — so ഹരണം (×12 token / 2 articles) is the sign's own NAME, and a sign name reads infix: `el` does exactly
+    // this with ίσον, `ja` with イコール, and `ta`'s wiki writes the parallel Dravidian nominal out in the slot
+    // ("a வகுத்தல் b"). ⚠ That last step is a fleet PATTERN rather than an attested "a ഹരണം b" string, and is
+    // marked as such: the naming citation is the evidence, the infix placement is the inference.
+    //
+    // ⚠ AND ഹരണം'S SIX CORPUS HITS ARE ALL INSIDE അപഹരണം, "ABDUCTION" — the substring trap, and the funniest
+    // instance of it so far. The corpus contributes the root and nothing else.
+    //
+    // ⚠ THE COMPARATIVE MORPHEME CANNOT BE TOKEN-COUNTED AT ALL. -എക്കാൾ ("than") is BOUND: it appears only
+    // fused (കൾച്ചർ ഷോക്കിനെക്കാൾ, പരമ്പരാഗത ഭാഷകളെക്കാൾ), so its token count is ×0 by construction, not by
+    // absence — the agglutinative counterpart of the ZWNJ false negative Persian produced. What IS countable is
+    // the head it governs: കൂടുതൽ ×182 token, കുറവ് ×12. Postposed, so the comparison cannot read backwards.
+    //
+    // Emitted UNFUSED, as ta's accusative is, and for the same reason: fusing needs the numeral spelled here
+    // plus its sandhi. The phones are unchanged; the tokenizer sees a boundary Malayalam would not write.
+    s = postposedSign(s, "<", "എക്കാൾ കുറവ്");
+    s = postposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
+    s = s.replace(/\s?÷\s?/gu, " ഹരണം ");
+    // ⚠ `=` IS LEFT DROPPED, REPORTED RATHER THAN GUESSED. Every candidate for the equality word is ×0 in BOTH
+    // the corpus and the wiki: സമം, തുല്യം, ഹരിച്ചാൽ. The root-plus-name route that settled the division sign
+    // has no equivalent here — nothing names the `=` glyph in ml.wikipedia's arithmetic article. This is the
+    // one reading in the batch with no source, so it stays silent until there is one.
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
 
