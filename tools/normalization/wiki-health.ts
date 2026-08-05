@@ -47,6 +47,7 @@
  *   npx tsx tools/normalization/wiki-health.ts --in ceb.raw.txt [--mode sentence|paragraph]
  *       [--terminators ".!?"] [--baseline de_de] [--label ceb]
  */
+import { SCRIPTS } from "./scripts.ts";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -66,32 +67,7 @@ const arg = (n: string, d?: string): string | undefined => {
 };
 const has = (n: string): boolean => argv.includes(`--${n}`);
 
-/**
- * The scripts the fleet writes in. A TABLE IS UNAVOIDABLE HERE — there is no regex that asks a character
- * "which script are you"; `\p{Script=…}` can only be tested one script at a time. Keeping the list explicit
- * and finite is the honest version: an unlisted script lands in `Other`, which is visible in the output
- * rather than being silently folded into a neighbour.
- */
-const SCRIPTS: readonly [string, RegExp][] = [
-    ["Latin", /\p{Script=Latin}/u], ["Cyrillic", /\p{Script=Cyrillic}/u], ["Arabic", /\p{Script=Arabic}/u],
-    ["Devanagari", /\p{Script=Devanagari}/u], ["Han", /\p{Script=Han}/u], ["Hiragana", /\p{Script=Hiragana}/u],
-    ["Katakana", /\p{Script=Katakana}/u], ["Hangul", /\p{Script=Hangul}/u], ["Greek", /\p{Script=Greek}/u],
-    ["Hebrew", /\p{Script=Hebrew}/u], ["Bengali", /\p{Script=Bengali}/u], ["Tamil", /\p{Script=Tamil}/u],
-    ["Telugu", /\p{Script=Telugu}/u], ["Kannada", /\p{Script=Kannada}/u], ["Malayalam", /\p{Script=Malayalam}/u],
-    ["Gujarati", /\p{Script=Gujarati}/u], ["Gurmukhi", /\p{Script=Gurmukhi}/u], ["Oriya", /\p{Script=Oriya}/u],
-    ["Sinhala", /\p{Script=Sinhala}/u], ["Thai", /\p{Script=Thai}/u], ["Lao", /\p{Script=Lao}/u],
-    ["Myanmar", /\p{Script=Myanmar}/u], ["Khmer", /\p{Script=Khmer}/u], ["Ethiopic", /\p{Script=Ethiopic}/u],
-    ["Georgian", /\p{Script=Georgian}/u], ["Armenian", /\p{Script=Armenian}/u], ["Tibetan", /\p{Script=Tibetan}/u],
-    ["Thaana", /\p{Script=Thaana}/u], ["Cherokee", /\p{Script=Cherokee}/u], ["Ol_Chiki", /\p{Script=Ol_Chiki}/u],
-    ["Tifinagh", /\p{Script=Tifinagh}/u], ["Syriac", /\p{Script=Syriac}/u], ["Nko", /\p{Script=Nko}/u],
-    ["Vai", /\p{Script=Vai}/u], ["Adlam", /\p{Script=Adlam}/u], ["Mongolian", /\p{Script=Mongolian}/u],
-    // ADDED after a fleet run reported `100% of lines are not in Other script` — the languages whose script
-    // this table did not name. Each is a registry language with a mined corpus.
-    ["Syloti_Nagri", /\p{Script=Syloti_Nagri}/u], ["Tai_Le", /\p{Script=Tai_Le}/u],
-    ["New_Tai_Lue", /\p{Script=New_Tai_Lue}/u], ["Tai_Tham", /\p{Script=Tai_Tham}/u],
-    ["Coptic", /\p{Script=Coptic}/u], ["Yi", /\p{Script=Yi}/u],
-    ["Canadian_Aboriginal", /\p{Script=Canadian_Aboriginal}/u],
-];
+/** The script table now lives in scripts.ts — see its header for why there is only one copy. */
 
 export interface Health {
     /** True segment count of the corpus. */

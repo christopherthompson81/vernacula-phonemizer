@@ -40,6 +40,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DROPPABLE, LEAK_CLASSES, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
 import { CELLS, type Cell } from "./cells.ts";
+import { dominantScript, isNativeSegment } from "./scripts.ts";
 
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo #602, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
@@ -153,6 +154,15 @@ export interface CellSelection {
 /** Pure selection: segments → per-cell counts and up to `perCell` examples each. Deterministic. */
 export function selectCells(segments: string[], opts: { perCell: number; terms?: string[] }): CellSelection {
     const terms = opts.terms ?? [];
+    // ⚠ A SEGMENT WITH NONE OF THE CORPUS'S OWN SCRIPT IS NOT EVIDENCE ABOUT THIS LANGUAGE, and this selector
+    // is the reason it has to be said here. Selection is ADVERSARIAL — it prefers symbol-dense segments — and
+    // foreign-language prose in a non-Latin wiki is symbol-dense (prices, box-office figures, bare markup), so
+    // English articles quoted in the wiki were over-represented in the very tier the gate reads. km's artifact
+    // carried 47 such cells of 253, and their `US$` drops reported as Khmer reading gaps. Filtered here rather
+    // than in `extracts()`/`segmentFile()` because only this function sees the WHOLE corpus, which is what
+    // makes the script inferable without a language→script table that could fall stale.
+    const script = dominantScript(segments.join("\n").slice(0, 400_000));
+    segments = segments.filter((s) => isNativeSegment(s, script));
     // Terms may be scoped to a cell as `cell<TAB>term`; a bare line applies to every lexical cell. Two
     // lexical cells now exist (calendar, ordinal-native) and they need different words, so one flat list
     // would have made each match the other's evidence.
