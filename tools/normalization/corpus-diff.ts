@@ -29,6 +29,7 @@
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { dropsIn, makeContribution } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
+import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
 
 const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
@@ -45,6 +46,41 @@ const flag = (name: string): string | undefined => {
 
 /** Every utterance of a corpus, deduplicated — FLEURS repeats a sentence once per speaker, and counting a
  *  defect three times because three people read it overstates the defect. */
+/**
+ * THE TEXT UNDER TEST, from either evidence source.
+ *
+ * ⚠ THIS GATE COULD NOT READ THE CORPORA #585 EXISTS TO PROVIDE, which made that issue's deliverable
+ * unusable for its own stated purpose. #585 opens by observing that "the #562 normalization work is gated on a
+ * per-language corpus diff, which is the check that has found more real defects than any other. That confines
+ * the plan to the ~66 languages with a FLEURS corpus" — and then supplies mined artifacts for 87 more. But this
+ * file read `CORPUS_ROOT` and nothing else, so `--corpus km_kh` simply threw: the corpora arrived and the gate
+ * that consumes them was never taught to look.
+ *
+ * The `mined:` prefix mirrors `mine.ts`'s own `fleurs:` convention, and is EXPLICIT rather than a fallback on
+ * purpose. An implicit "try the artifact if the corpus is missing" is how `coverage.ts` spent an entire sweep
+ * silently reading FLEURS while believing it read artifacts — a wrong relative path made `existsSync` false for
+ * every language, and because the fallback was a working code path nothing ever threw.
+ *
+ * ⚠ AND AN ARTIFACT IS NOT A CORPUS, so the two are not interchangeable for every question. `hard` is selected
+ * adversarially, so a count inside it says nothing about the language; `sample` is a uniform stride, which is
+ * the real distribution only for a dump-sourced artifact. For the BEFORE/AFTER question this file asks — did my
+ * change alter how any of this text reads — that does not matter: both sides read the same lines, and a
+ * difference is a difference. It matters enormously for any claim about frequency, which this file never makes.
+ */
+function minedLines(lang: string): string[] {
+    const art = new URL(`../corpus/mined/${lang}.jsonc`, import.meta.url).pathname;
+    const doc = parseJsonc(readFileSync(art, "utf8")) as { hard: { text: string }[]; sample?: string[] };
+    // Deduplicated and repaired identically to the FLEURS path, so the two sources are measured by one ruler.
+    const seen = new Set<string>();
+    for (const t of [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])]) if (t !== "") seen.add(repairDoubleEncoded(t));
+    return [...seen];
+}
+
+/** `mined:<lang>` reads the committed artifact; anything else is a FLEURS directory name. */
+function textLines(source: string): string[] {
+    return source.startsWith("mined:") ? minedLines(source.slice(6)) : corpusLines(source);
+}
+
 function corpusLines(corpus: string): string[] {
     const dir = join(CORPUS_ROOT, corpus);
     const seen = new Set<string>();
@@ -114,7 +150,7 @@ if (mode === "emit") {
         try { return (phonemize(t, lang) as string).replace(/\n/gu, " "); } catch { return undefined; }
     };
     const contribution = makeContribution(say);
-    const lines = corpusLines(corpus);
+    const lines = textLines(corpus);
     const ipa = lines.map((l: string) => {
         let read: string;
         try {
@@ -166,6 +202,12 @@ if (mode === "emit") {
   normalization/corpus-diff.ts emit    --lang <code> --corpus <fleurs-dir> --out <file>
   normalization/corpus-diff.ts compare --before <file> --after <file> [--foreign <regex>] [--examples N]
 
-corpora available under ${CORPUS_ROOT}:
-  ${readdirSync(CORPUS_ROOT).join(" ")}`);
+--corpus takes either a FLEURS directory name or 'mined:<lang>' for a committed artifact — which is the only
+option for the 87 languages that have no FLEURS corpus (#585).
+
+FLEURS corpora under ${CORPUS_ROOT}:
+  ${readdirSync(CORPUS_ROOT).join(" ")}
+
+mined artifacts (use as 'mined:<lang>'):
+  ${readdirSync(new URL("../corpus/mined/", import.meta.url).pathname).map((f) => f.replace(/\.jsonc$/u, "")).join(" ")}`);
 }
