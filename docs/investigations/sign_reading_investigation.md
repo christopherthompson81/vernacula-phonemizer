@@ -3349,3 +3349,71 @@ marker or for a temperature scale.
 Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across
 0/67; corpus diff 0 changed for hu pl sr ml ne or te sl kk af ca cy ga zu hu az, and the two non-zero results
 read (ta reverted; sw's single change is the earlier ampersand work).
+
+## Run 48 — 2026-08-04 — #654: PR #665, and what reviewing the diff found
+
+Branch `sign-reading-654`, 43 commits, 107 files. Ten of thirteen sign classes at 0/67.
+
+### ⚠ THREE DEFECTS FOUND BY REVIEW, NONE BY THE TESTS
+
+**1. ± fused onto the preceding word in gu, mr and hi.** Found by listing every sign rule the PR adds side by
+side, which made one row look different from the other twenty-odd: three languages used `/±\s?/` with an
+UNSPACED replacement.
+
+    gu  તાપમાન±5  →  t̪apmanˈəpləs mˈainəs pˈãɲt͡ʃ      ← "tapman" + "plas" as ONE token
+    hi  तापमान±5   →  t̪aːpmˈaːnd̪ʱən ɾˈɪɳ pˈaː̃t͡ʃ
+
+hi's was pre-existing; gu's and mr's were mine, **copied from it in this branch**. The shared tier's own
+`ampersand` note already records this hazard verbatim. All three fixed, because leaving hi's means the next
+language to copy it inherits the defect again. Then verified across the whole PR — 32 languages × 4 signs, a
+letter directly against the sign, no fusion anywhere.
+
+**2. `review.ts` and `coverage.ts` disagreed about an accepted silence.** `coverage.ts` has consulted
+`ACCEPTED_SILENT` since #586; `mine.ts scan` — which `review.ts` shells out to — never did. So mr's
+`चंद्रयान -1` was accepted as a designation by the audit and reported as `DROP minus` by review, *in the same
+repo, on the same sentence*. `ACCEPTED` now joins `REDUNDANT` as a NOTE rather than a defect. This is the
+divergence the issue was asked to handle, one layer below where I handled it.
+
+**3. mi's `ACCEPTED_SILENT` entry was dead.** It accepted `+30 tākiri` because Māori's inventory could not say
+the attested loan — but this branch routes unspellable words to English, so the plus now reads and the accept
+covered nothing. ⚠ **A baseline entry that can never fire is worse than none: it masks exactly the regression
+the table exists to expose.** The audit surfaced it on its own, going 12/7 → 11/6 accepted.
+
+⚠ **AND A TEST CAUGHT THAT ONE**, which is the right outcome: `accepted-silent.test.ts` pins the table's key
+list so table and test cannot drift. Both updated together.
+
+### ⚠ AND I NEARLY REPORTED THE WHOLE BRANCH AS LOST
+
+Mid-review, `src/languages/maori/normalize.ts` showed 107 lines with none of my rules, `git log` showed no
+commits from this session, and `git status` showed it clean. I was two commands from concluding the work had
+been destroyed. **The shell was in `/tmp/vp-base-654`** — the detached baseline worktree used for corpus diffs —
+so every `git` and `grep` was reading the pinned pre-session tree. The branch was intact the whole time.
+
+That is the **fourth** time the cwd of that worktree changed an answer in this issue (after the null corpus
+diff, and twice more). The worktree is now REMOVED, since every corpus diff it existed for is done. *A pinned
+copy of the repo one `cd` away is a loaded gun for any tool that resolves paths relative to the cwd* — and
+`git`, `grep`, `tsx` and `corpus-diff` all do.
+
+### Checks that came back clean
+
+- **Chained comparisons** survive in all twelve postposed languages (`2 < 5 < 9` keeps both), which is what
+  `core/postposedSign.ts`'s second pass exists for.
+- **am's prefix rule** handles non-digit operands: `x < y` → "ɛks kə wai janəsə".
+- **HTML is stripped before these rules** (`<b>gras</b>` → gras), and a URL's `=` reading as "equals" is
+  ESTABLISHED behaviour rather than something this PR introduces — en/da/sv/bg/ro all did it before the branch.
+- **`mine.ts`'s new ACCEPTED path is correctly scoped** — hi reports "no defects" with "ACCEPTED minus ×2" as a
+  note, matching its two entries exactly.
+- Every remaining `review.ts` failure is a documented residual class, plus nl's pre-existing test-coverage gate.
+  nl and mr each had TWO failures before this branch and now have one.
+
+### Final state
+
+| class | dropped | note |
+|---|---|---|
+| `= < > × & ² $ % °` and `plus` | **0/67** | read by every treated language |
+| `minus` | 2/67 | am (photographic-negative homograph) · my (no corpus at all) — 6 intentional |
+| `÷` | 4/67 | ff ha om zu — floor established SEVEN ways |
+| `±` | 12/67 | the operation-vs-polarity pairing mismatch |
+
+Gates: tsc PASS · 208 files / 2951 tests · audit 0 defective cells across 0/67 and 11 accepted · `review.ts`
+per language · `corpus-diff` against a pinned baseline for every language touched, every change read.
