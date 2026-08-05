@@ -349,6 +349,25 @@ export function normalizeKazakh(input: string): string {
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    // THE DIVISION SIGN (#654). ⚠ THE DIVISOR TAKES THE DATIVE, exactly as in az, and kk.wikipedia attests the
+    //    construction on NUMERIC operands directly:
+    //
+    //      "санның цифрларының қосындысы 3-ке бөлінсе, онда санның өзі де 3-ке бөлінеді"
+    //          if the sum of the number's digits is divisible BY 3, then the number itself is divisible BY 3
+    //      "осы санның 2-дәрежесі (яғни квадраты) де 4-ке бөлінеді"
+    //
+    //    plus the division article itself — "Бөлу - берілген көбейтінді және көбейткіштердің біреуі бойынша …",
+    //    and "кейде бөлу амалы қиғаш сызықпен (x/b)" (sometimes the division operation is written with a slash).
+    //    `бөлінеді` ×22 / 10 articles, `-ке бөлінеді` ×11 / 9.
+    //
+    //    ⚠ AND THE SUFFIX MACHINERY WAS ALREADY HERE — `withCase`, built for the corpus's own `200-ге` / `60-тан`
+    //    forms, which does harmony AND the voiceless/nasal variants (қырық → қырыққа). So the dative is one
+    //    call and nothing about Kazakh morphology is re-derived. Verified across бір…мың: бірге, екіге, үшке,
+    //    төртке, беске, алтыға, жетіге, сегізге, тоғызға, онға, жиырмаға, отызға, қырыққа, елуге, алпысқа,
+    //    жетпіске, сексенге, тоқсанға, жүзге, мыңға.
+    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
+        `${orthographic(Number(a))} ${withCase(orthographic(Number(b)), "dat")} бөлінеді`);
+
     // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
     //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
