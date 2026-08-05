@@ -47,6 +47,7 @@
  *                                           "BCE" ×3 instead, so Hindi's era rule had nothing to do here.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 /**
  * Suppletive ordinals 1-4 and 9. Nepali's ordinal has ONE form (no gender/number agreement written on it,
@@ -286,6 +287,21 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         // प्लस reads plˈʌs, matching the decode. BEFORE the degree rule (the ordering zu's `[+]?` taught).
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from ne_np — one of the few languages in
+        // this issue where tier 2 settles all four, with no Wikipedia needed:
+        //
+        //   `बराबर`      ×5 token    "यस आकार अनुपातको बराबर" — EQUAL TO this aspect ratio
+        //   `भन्दा कम`    ×20 phrase  ·  `भन्दा बढी` ×75 phrase   — both postposed, both with real operands
+        //   `विभाजन`     ×11 token   and "बाह्रलाई विभाजन गरेर" — FLEURS's parallel division sentence
+        //
+        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL and भन्दा FUSES to the standard (सामान्यभन्दा धेरै), so they use
+        // core/postposedSign.ts; an infix rule would read the comparison backwards. The equality and division
+        // read infix, as the cognates in hi/ur/pa do, each sourced from its own corpus.
+        s = postposedSign(s, "<", "भन्दा कम");
+        s = postposedSign(s, ">", "भन्दा बढी");
+        s = s.replace(/\s?=\s?/gu, " बराबर ");
+        s = s.replace(/\s?÷\s?/gu, " विभाजन ");
 
         s = s.replace(/(\d)\s?°\s?C(?![A-Za-z])/gu, "$1 डिग्री सेल्सियस ");
         s = s.replace(/(\d)\s?°\s?F(?![A-Za-z])/gu, "$1 डिग्री फरेनहाइट ");

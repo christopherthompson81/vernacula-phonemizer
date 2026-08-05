@@ -33,6 +33,7 @@
  * KANNADA spellings, whose interior dots were being read as clause breaks (step 6).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, ordinalStem, DECIMAL_WORD } from "./numbers.ts";
 
@@ -274,6 +275,25 @@ export function normalizeKannada(input: string): string {
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
+
+    // THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE REGISTER SOURCE IS A SYMBOL GLOSSARY — kn.wikipedia's
+    // arithmetic article lists the signs with their Kannada names, which is the most direct tier-4 shape of all:
+    //
+    //   "… ಗುಣಿಸು (ಇನ್'ಟು) ಗುರುತು. ಭಾಗಾಹಾರ ಭಾಗಿಸುವುದು: '÷'  ಸಮ ಎಡ ಮತ್ತು ಬಲದ ಸಂಖ್ಯೆಗಳ ಬೆಲೆ ಸಮ '=' ಸರಿ-ಸಮ,(ಈಕ್ವಲ್ಸ್)"
+    //     …'×' is ಗುಣಿಸು · '÷' is ಭಾಗಿಸುವುದು · '=' is ಸಮ / ಸರಿ-ಸಮ, glossed with the English loan ಈಕ್ವಲ್ಸ್
+    //
+    // ⚠ AND `ಸಮ` IS THE LARGEST SUBSTRING TRAP IN THE ISSUE: ×0 TOKEN / ×399 SUBSTRING in kn_in, inside
+    // ಸಮುದಾಯ (community), ಸಮಾನವಾಗಿ (equally), ಸಮಸ್ಯೆ (problem). It is also a HOMOGRAPH in the right register —
+    // several of its wiki hits are ಸಮ ಸಂಖ್ಯೆ, "EVEN number" — so neither count could have settled it. The
+    // glossary line pairing it with the '=' glyph is the whole of the evidence.
+    //
+    // The comparatives come from kn_in and are POSTPOSITIONAL (ಗಿಂತ fuses to the standard —
+    // ಸಾಮಗ್ರಿಗಳಿಗಿಂತ ಕಡಿಮೆ): `ಗಿಂತ ಕಡಿಮೆ` ×6, `ಗಿಂತ ಹೆಚ್ಚು` ×12. The division word is the corpus's own form from
+    // FLEURS's parallel sentence, ಭಾಗಿಸುವಿಕೆ ×3 ("ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ").
+    s = postposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
+    s = postposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
+    s = s.replace(/\s?=\s?/gu, " ಸಮ ");
+    s = s.replace(/\s?÷\s?/gu, " ಭಾಗಿಸುವಿಕೆ ");
 
     return s;
 }
