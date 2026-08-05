@@ -3077,3 +3077,91 @@ fleet's most extreme routing case (#663).
 
 Gates for this run: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67 and 12 accepted;
 corpus diff ta 0/1886, ml 0/1955, hu 0/1995, yue 0/1726.
+
+## Run 45 — 2026-08-04 — #654: the relational comparisons reach 0/67
+
+    sr једнако · мање од · веће од · подељено са      ur برابر · سے کم · سے زیادہ · تقسیم
+    pa ਬਰਾਬਰ · ਤੋਂ ਘੱਟ · ਤੋਂ ਵੱਧ · ਭਾਗ                kn ಸಮ · ಗಿಂತ ಕಡಿಮೆ · ಗಿಂತ ಹೆಚ್ಚು · ಭಾಗಿಸುವಿಕೆ
+    ne बराबर · भन्दा कम · भन्दा बढी · विभाजन          te సమానం · కంటే తక్కువ · కంటే ఎక్కువ · భాగించడం
+    bn সমান · থেকে কম · থেকে বেশি · ভাগ               sw sawa na · chini ya · zaidi ya · kugawanya kwa
+    or ସମାନ · ଠାରୁ କମ · ଠାରୁ ଅଧିକ · ଭାଗ               am እኩል · ከ_ ያነሰ · ከ_ የበለጠ · በ_ በመክፈል
+    mi rite ki · iti iho i · nui ake i · whakawehe ki
+
+### 📌 `<` AND `>` ARE NOW 0/67 — read by every treated language
+
+| sign | at the German pilot | now |
+|---|---|---|
+| `<` `>` | 37/67 dropped | **0/67** |
+| `=` | 37/67 | **1/67** — `ml` only |
+| `÷` | 52/67 | **8/67** |
+| `±` | 37/67 | 28/67 |
+
+**Nine of these eleven languages were sourced from their own corpora alone**, no Wikipedia needed — `ur pa ne te
+bn or` and, for three of four readings, `sw`. That is the opposite of what Run 39's blueprint predicted: the pilot
+concluded tier 2 would be thin and tiers 3–4 would carry the work, and for the well-resourced European languages
+it was right. For the Indic and Dravidian corpora it is backwards — those corpora carry the comparative
+constructions in quantity (`ਤੋਂ ਵੱਧ` ×51, `भन्दा बढी` ×75, `సే ఎక్కువ` ×40, `zaidi ya` ×107) because comparison is
+ordinary prose, and it was the EQUALITY word that needed a register source, not the comparatives.
+
+### ⚠ AMHARIC NEEDED A RULE SHAPE NOTHING ELSE IN THE ISSUE HAD USED
+
+Every other language either substitutes between the operands or appends after them. **Amharic PREFIXES the
+standard of comparison**: `ከ-` goes on the front of the operand and the comparative follows, so `A < B` is
+"A ከB ያነሰ" — and the corpus shows it on a numeric operand directly, `ለትንሽ ከ40,000 ያነሰ የህዝብ ቁጥር` (a population of
+fewer than 40,000). `core/postposedSign.ts` cannot express that: it appends words after the operand and never
+modifies it. The division is the same shape with `በ-`.
+
+So the fleet now has **four** rule shapes, and which one applies is a property of the SIGN'S CONSTRUCTION in that
+language, not of the language's word order:
+
+| shape | languages |
+|---|---|
+| infix substitution | de es fr pt it ru nl pl uk el ar hu sw yue mi, `ta`/`fa`/`ja` for SOME signs |
+| postposed, words after both operands | hi ur pa ne te bn or mr gu kn ml ta tr ja ko fa |
+| postposed with a case suffix built on the spelled operand | tr (ablative), ko (topic + comparative particle) |
+| **prefixed onto the standard** | **am** |
+
+`ta` remains the clearest proof that the shape is per-sign: `சமம்` and `வகுத்தல்` are nominal and infix while its
+comparison is postpositional, in one language. `mi` is the second — all four infix in a VSO language, because the
+comparative's "than" (`i`) precedes the standard.
+
+### ⚠ MĀORI COULD BE DONE ONLY BECAUSE THE WORDS ARE SAYABLE
+
+The same file leaves the PLUS unread, and the note there is the reason: both FLEURS speakers voice the English
+loan `plas`, and Māori has no /l/ and no /s/, so the g2p would emit **[pa]** — a confidently wrong syllable where
+there is currently silence. The four relational readings are built from Māori phonemes (`rite ki`, `iti iho i`,
+`nui ake i`, `whakawehe ki`), so nothing has to be approximated. *A reading is only shippable if the engine can
+say it*, which is a constraint no amount of sourcing can substitute for.
+
+### More traps, and one the harvest itself produced
+
+- ⚠ **`ಸಮ` (kn) is the largest substring trap in the issue: ×0 TOKEN / ×399 SUBSTRING**, inside `ಸಮುದಾಯ`
+  (community), `ಸಮಾನವಾಗಿ` (equally), `ಸಮಸ್ಯೆ` (problem) — *and* a homograph in the right register, since several
+  wiki hits are `ಸಮ ಸಂಖ್ಯೆ`, "EVEN number". Neither count could settle it; a **symbol glossary** did:
+  kn.wikipedia lists the signs against their names — "ಭಾಗಿಸುವುದು: '÷' … ಬೆಲೆ ಸಮ '=' ಸರಿ-ಸಮ,(ಈಕ್ವಲ್ಸ್)".
+- `ভাগ` (bn) ×12 token / ×202 substring, mostly inside `বেশিরভাগ` ("most"); `ଭାଗ` (or) ×9 / ×60 inside `ତଳଭାଗରେ`.
+- ⚠ **`sw` INVERTS THE TIER ORDER IN BOTH DIRECTIONS AT ONCE.** Its corpus division hits are the partition sense
+  (`kugawanya nyuklia` = nuclear fission), so the register tier settles `÷` — but its WIKI hits for `chini ya` are
+  the wrong sense too ("Chini ya Elimu kwa wote" = UNDER the programme) while the corpus has it on a real quantity
+  (`huenda chini ya kiwango cha kugandisha`, below freezing, ×70). *The tiers rank HAYSTACKS, not individual
+  findings*, and a language can need the weaker tier for one reading and the stronger for another.
+- ⚠ **THE HARVEST'S "57 of 67" WAS AN UNDERCOUNT.** `--sentence '3\s?:\s?2'` reported `te` absent; the sentence is
+  there and writes the ratio **without the colon** ("3 2 గా చెప్పబడింది"). The true count is 58. *A
+  parallel-sentence probe has to be keyed on something the translators could not reformat, and a punctuation mark
+  is not that.*
+
+### What remains, and why
+
+| sign | dropped | reason |
+|---|---|---|
+| `=` | **ml** | the only PURE sourcing gap left: `സമം` `തുല്യം` `ഹരിച്ചാൽ` are ×0 in BOTH corpus and wiki, and nothing names the `=` glyph |
+| `÷` | az · hu | MORPHOLOGICAL: the operand takes a case (`üçə bölünür`, `B-vel osztva`) with harmony and consonant assimilation — wants `tr`/`ko`'s spell-then-suffix machinery |
+| `÷` | sl | both `deljeno z` and `delimo z` are ×0 on sl.wikipedia; only one inflected corpus instance exists |
+| `÷` | ff · ha · kk · om · zu | no parallel sentence in the corpus and thin wikis — the genuinely under-resourced tail |
+| `÷` | mi | the division IS read; this line is the `6 ÷ 3` probe hitting mi's #663 English routing on the bare probe |
+| `±` | 28 | the tail that has no confirmable minus word, plus the eight that never route through the tier |
+| `minus` · `ampersand` | 18 · 14 | classes the `= < > ÷ ±` framing never tracked; now visible in the audit |
+
+Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit **0 defective cells across
+0/67**; corpus diff sr 0/1923, ur 0/1644, pa 0/1589, kn 0/1811, ne 0/1993, te 0/1757, bn 0/1981, sw 0/1938,
+or 0/1327, am 0/1922, mi 0/1994.
