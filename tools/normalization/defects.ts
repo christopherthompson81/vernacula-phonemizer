@@ -130,57 +130,6 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-    mi: {
-        // ⚠ ATTESTED AND UNSAYABLE, which is a limit no sourcing can lift. Both mi_nz speakers voice this plus,
-        // and both use the English loan; Māori has no /l/ and no /s/, so every candidate spelling reduces to a
-        // wrong syllable (`plus` → [pu], `plas` → [pa]). The OPERATOR position between two numbers now reads
-        // `tāpiri` (maori/normalize.ts), so what remains silent is the SIGN position alone — `+5`, `+30°C` —
-        // where `tāpiri` would say "append" and the loan cannot be pronounced.
-        plus: "the sign position only: the attested reading is an English loan Māori's inventory cannot say "
-            + "(/l/, /s/ → [pa]), and the native `tāpiri` means append, not positive — see maori/normalize.ts",
-        // ⚠ THE MINUS FAILS THE SAME WAY, AND FOR A REASON THAT NO SOURCING CAN LIFT. The loan is unsayable
-        // here too — `minus` carries /s/, which Māori does not have, so the g2p reduces it exactly as it does
-        // `plas`. And the native candidate is the wrong part of the vocabulary: `tango` ("take") is the
-        // SUBTRACTION verb, ×8 in mi_nz, and reading `-5` as "take five" states an operation where the sign
-        // marks polarity. mi_nz contains no negative quantity at all, so there is nothing to decode either.
-        // Same shape as the plus: an attested reading the inventory cannot produce, and a native word for a
-        // different job.
-        minus: "the loan carries /s/, which Māori lacks, and the native `tango` is the subtraction verb — "
-            + "reading `-5` as \"take five\" would state an operation where the sign marks polarity",
-    },
-    gu: {
-        // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
-        // designations — the bill number `એચજેઆર -3` (already in ACCEPTED_SILENT) and `ગોથિક શૈલી 10મી -11મી`,
-        // a spaced ORDINAL range, where the character before the hyphen is a letter and the one after is a digit.
-        minus: "measured: gu_in has two `word -digit` instances (the bill `એચજેઆર -3` and the ordinal range "
-            + "`10મી -11મી`), the shape no guard can reject — see ta's entry and ACCEPTED_SILENT",
-    },
-    kn: {
-        minus: "measured: kn_in has the bill number `ಎಚ್‌ಜೆಆರ್ -3`, the `word -digit` shape no guard can reject "
-            + "— see ta's entry and ACCEPTED_SILENT, which lists this instance as correctly silent",
-    },
-    yue: {
-        // ⚠ AND HERE THE SHAPE IS AN ARTEFACT OF THE TRANSCRIPT, not of Chinese. FLEURS writes Han with a space
-        // between EVERY character, so the aircraft designation `Il-76` is stored as `伊 爾 -76` — a letter, a
-        // space, then the hyphen. The undecidable shape arrives through the corpus's own formatting, which is
-        // the same source-orthography divergence zu/xh documented for the plus.
-        minus: "measured: the per-character spacing FLEURS uses for Han turns the designation `Il-76` into "
-            + "`伊 爾 -76`, producing the `word -digit` shape no guard can reject",
-    },
-    ta: {
-        // ⚠ TRIED, AND THE CORPUS DIFF REJECTED IT. A guarded minus rule was written for ta and correctly refused
-        // every range, score and closed designation — and then read `சந்திரயான் -1` as "கழித்தல் ஒன்று", minus
-        // one. That is the shape NO guard can reject: `word -1` is identical to a genuine `was -5`, so telling
-        // them apart needs a lexicon. `ACCEPTED_SILENT` already lists this exact instance as correctly silent,
-        // which means the rule converted an accepted silence into an audible error — strictly worse than the gap.
-        //
-        // ⚠ AND IT IS THE SAME SENTENCE IN FIVE LANGUAGES. FLEURS is parallel, so the Chandrayaan designation
-        // appears in gu, hi, kn, mr and ta — and those are exactly the five languages `ACCEPTED_SILENT` lists
-        // for `minus`. Whatever is decided here applies to all of them, and it is not a coincidence to be
-        // rediscovered per language.
-        minus: "measured, then TESTED: a guarded rule read the spacecraft `சந்திரயான் -1` as minus one, the one "
-            + "shape no guard can reject — see ACCEPTED_SILENT, which lists this instance as correctly silent",
-    },
     mr: {
         // Devanagari compounds are written with a hyphen (आस-पास), and the corpus's one hyphen-before-digit
         // outside a range is `चंद्रयान -1`, a spacecraft name.
