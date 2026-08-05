@@ -111,8 +111,22 @@ if (code === undefined || words.length === 0) {
     process.exit(2);
 }
 
-const utts = utterances(code);
-const spaceless = utts.some((u) => SPACELESS.test(u));
+const utts0 = utterances(code);
+const spaceless = utts0.some((u) => SPACELESS.test(u));
+/**
+ * ⚠ A HAN TRANSCRIPT IS SPACED PER CHARACTER, SO A MULTI-CHARACTER WORD NEVER MATCHES AS WRITTEN. FLEURS
+ * writes cmn/yue with a space between EVERY character — "此 格 式 的 長 寬 比 除 以 12" — so probing 除以
+ * against the raw text returns nothing, and the tool reported Cantonese as having no word for any of the four
+ * signs. It has three of them, in the corpus, with numeric operands:
+ *
+ *     除以 ×2   "長 寬 比 除 以 12"          小於 ×1   "不 會 小 於 50 公 頃"
+ *     大於 ×1   "遠 大 於 定 焦 鏡 頭"
+ *
+ * Fourth manufactured negative this issue has found in its own tooling, and the same shape as the other
+ * three: a confident absence with nothing behind it. For an unspaced script the whitespace is not linguistic
+ * information at all, so it is removed from BOTH sides before the substring test.
+ */
+const utts = spaceless ? utts0.map((u) => u.replace(/[ \t]+/gu, "")) : utts0;
 // One flat token set for the boundary test, and the joined text for the substring count.
 const toks = new Map<string, number>();
 // ⚠ U+200C ZWNJ IS WORD-INTERNAL, NOT A SEPARATOR. Persian writes compounds with a zero-width non-joiner —
@@ -122,7 +136,9 @@ const toks = new Map<string, number>();
 for (const u of utts) for (const t of u.split(/[^\p{L}\p{M}‌'’-]+/u)) if (t !== "") toks.set(t, (toks.get(t) ?? 0) + 1);
 
 console.log(`${code}: ${utts.length} utterances, ${toks.size} distinct tokens${spaceless ? "  ⚠ SPACELESS SCRIPT — substring IS the hit test" : ""}`);
-for (const w of words) {
+for (const w0 of words) {
+    // The probe loses its spaces too, for the same reason the corpus did.
+    const w = spaceless ? w0.replace(/[ \t]+/gu, "") : w0;
     const parts = w.split(/\s+/u);
     const phrase = utts.filter((u) => u.includes(w)).length;
     const per = parts.map((p) => {

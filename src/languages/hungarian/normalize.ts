@@ -399,6 +399,22 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
 
+    // THE RELATIONAL SIGNS (#654). All three read INFIX and all three are attested, `egyenlő` ×12 token / 8
+    // articles in the arithmetic register with the sense in view ("nagyobb vagy egyenlő", "két egyenlő részre
+    // osztja") and `nagyobb mint` in both corpus (×3 phrase) and wiki. `kisebb mint` has ×0 phrase hits in
+    // either, while `kisebb` ×24 and `mint` ×259 are both common in hu_hu — the construction is ADJ + mint and
+    // its sibling proves it, exactly as `größer als` needed for German.
+    s = s.replace(/\s?=\s?/gu, " egyenlő ");
+    s = s.replace(/\s?<\s?/gu, " kisebb mint ");
+    s = s.replace(/\s?>\s?/gu, " nagyobb mint ");
+    // ⚠ THE DIVISION SIGN IS DELIBERATELY LEFT DROPPED, and the reason is morphological rather than a sourcing
+    //   gap: `osztva` is well attested (×8 / 7 articles) and it governs the INSTRUMENTAL on the operand, every
+    //   single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva". So `A ÷ B` is
+    //   "A B-vel osztva", which needs the numeral spelled here and the suffix built with vowel harmony AND
+    //   consonant assimilation (három → hárommal, négy → néggyel, öt → öttel, egy → eggyel). That is the
+    //   machinery `tr` and `ko` have, and it is a separate piece of work from reading a sign — the same reason
+    //   `az` is deferred. Emitting a bare "hat osztva három" would be an ungrammatical case, not an accent.
+
     // 8) DECIMALS. The comma was reaching `clausePunctuation` as a COMMA PAUSE mid-number. Hungarian says
     //    *egész* between the parts (*három egész öt*). The digits are LEFT AS DIGITS so the existing
     //    number path pronounces them — this layer has no reason to duplicate the compositor here.
