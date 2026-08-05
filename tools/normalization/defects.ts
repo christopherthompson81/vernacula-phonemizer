@@ -260,15 +260,6 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // step 14 records this and measures its guarded pattern at 0 corpus matches.
         minus: ["kangange -40"],
     },
-    mi: {
-        // ⚠ ATTESTED, AND THE ENGINE CANNOT SAY IT — a different limit from every other entry here. Both mi_nz
-        // speakers voice this plus, using the English loan. But Māori has no /l/ and no /s/, so the g2p reduces
-        // every candidate spelling to a wrong syllable (`plus` → [pu], `plas` → [pa]). Emitting [pa] would be a
-        // confidently wrong syllable where there is currently silence, which this repo ranks below a missing
-        // reading; substituting a native maths word would invent a reading the recordings contradict.
-        // maori/normalize.ts step 1b holds the full sourcing so no later pass re-derives it and reaches for [pa].
-        "math-sign": ["+30 tākiri"],
-    },
 };
 
 /**
