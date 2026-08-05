@@ -75,6 +75,7 @@
  *     rates; the other nine are ଏବଂ/କିମ୍ବା ("and/or"), ନୀତି/ଯୋଗାଯୋଗ, and the place name ଜାକର/ବୁମଥାଙ୍ଗ.
  *     Step 4 is therefore keyed on a closed list of measure nouns on both sides.
  */
+import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -299,6 +300,23 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //     Digit-keyed on the right only: the offset is `UTC+1`, so the sign has a LETTER before it and a
         //     digit after, and a range or a compound hyphen cannot reach this arm.
         s = s.replace(/\+(?=\d)/gu, " ପ୍ଲସ୍ ");
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from or_in:
+        //
+        //   `ସମାନ`        ×41 token  "ଫର୍ମାଟ ସମାନ କିମ୍ବା ଏହି ପରିମାପ ଅନୁପାତର ଅତି ନିକଟତର" — EQUAL TO this ratio
+        //   `ଠାରୁ କମ`      ×3 phrase  ·  `ଠାରୁ ଅଧିକ` ×16 phrase — both postposed
+        //   `ଭାଗ`         ×9 token   the division word, cognate of hi's भाग
+        //
+        // ⚠ `ଭାଗ` IS A SUBSTRING TRAP TOO, like bn's ভাগ: ×9 token against ×60 SUBSTRING, inside ତଳଭାଗରେ ("in the
+        // lower part") and similar compounds where it is the ordinary noun "part". The token count is the
+        // evidence.
+        //
+        // The comparatives are POSTPOSITIONAL (ଠାରୁ follows the standard and fuses to it — ସବୁଠାରୁ ଅଧିକ), so they
+        // use core/postposedSign.ts; an infix rule would read the comparison backwards.
+        s = postposedSign(s, "<", "ଠାରୁ କମ");
+        s = postposedSign(s, ">", "ଠାରୁ ଅଧିକ");
+        s = s.replace(/\s?=\s?/gu, " ସମାନ ");
+        s = s.replace(/\s?÷\s?/gu, " ଭାଗ ");
 
         return s;
     };

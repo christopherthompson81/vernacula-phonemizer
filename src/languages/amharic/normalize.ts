@@ -258,6 +258,31 @@ export function makeAmharicNormalizer(
         s = s.replace(/(\S)\+[  ]?(?=\d)/gu, "$1 ፕላስ ");
         s = s.replace(/(^|[  ])\+[  ]?(?=\d)/gu, "$1ፕላስ ");
 
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from am_et — and Amharic needs a rule shape
+        // no other language in this issue has used.
+        //
+        // ⚠ THE STANDARD OF COMPARISON TAKES A PREFIX, NOT A POSTPOSITION. Amharic marks it with ከ- on the front
+        // of the operand and puts the comparative after it, so `A < B` is "A ከB ያነሰ" — the corpus shows this on
+        // a numeric operand directly: "ለትንሽ ከ40,000 ያነሰ የህዝብ ቁጥር" (a population of FEWER THAN 40,000).
+        // core/postposedSign.ts cannot express that: it appends words after the operand and never modifies it.
+        // The division is the same shape with በ-: FLEURS's parallel sentence writes "በአስራ ሁለት በመክፈል"
+        // ("by dividing by twelve"), i.e. በ + operand + በመክፈል.
+        //
+        //   `ያነሰ`    ×11 token  ·  `የበለጠ` ×71 token  ·  `በመክፈል` ×3  ·  `እኩል` ×2 token
+        //
+        // `እኩል` reads infix, as the equality words do elsewhere ("እኩል ቅሬታዎች" — equal complaints).
+        //
+        // ⚠ THE PREFIX IS WRITTEN FUSED TO THE DIGIT AND ENDS UP AS ITS OWN TOKEN, which is a known limitation
+        // rather than the intent. `ከ6` is emitted fused — the orthographic form — but the number path then
+        // replaces the digit with its word, leaving ከ as a separate token: `6 > 5` reads *kə sɨdɨst* where
+        // ከስድስት would be one word. The PHONES are identical either way (/kə/ + /sɨdɨst/), so this is the same
+        // prosodic imperfection ta's accusative ஐ and ml's -എക്കാൾ carry, for the same reason — fusing properly
+        // needs the numeral spelled in this rule, which is tr's and ko's machinery.
+        s = s.replace(/(\S+)\s*<\s*(\S+)/gu, "$1 ከ$2 ያነሰ");
+        s = s.replace(/(\S+)\s*>\s*(\S+)/gu, "$1 ከ$2 የበለጠ");
+        s = s.replace(/(\S+)\s*÷\s*(\S+)/gu, "$1 በ$2 በመክፈል");
+        s = s.replace(/\s?=\s?/gu, " እኩል ");
+
         return s.replace(/[  ]{2,}/gu, " ");
     };
 }
