@@ -33,6 +33,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -301,6 +302,80 @@ function tierWords(c: Ctx): Row[] {
     ];
 }
 
+/**
+ * SIGN VOCABULARY (#654) — minus, ±, =, <, >, ×, ÷ and the exponent.
+ *
+ * ⚠ THIS FILE DID NOT KNOW ABOUT THESE CLASSES, AND THAT IS A REAL GAP RATHER THAN AN OMISSION. #654 spent a
+ * whole issue establishing the sign vocabulary for the fleet, and taught `defects.ts` (SIGN_CASES), `review.ts`
+ * and `coverage.ts` about it — but not this file. So the tool the playbook mandates running BEFORE writing a
+ * layer was blind to eight of the classes `review.ts` then FAILS the layer on.
+ *
+ * The consequence is not hypothetical. Writing the Khmer layer, this report listed percent, currency, degrees,
+ * decimal and fractions and said nothing about signs, so the author asserted "× ÷ and = have no corpus-attested
+ * Khmer reading" into a code comment WITHOUT CHECKING. Every one of them was attested, several heavily: ដក
+ * (minus) ×3,808, គុណ (times) ×3,338, ចែក (divide) ×3,285, ស្មើ (equals) ×2,077 — with `៣គុណ៥` and `២៨ ដក៥`
+ * written out in arithmetic position. A silent class is how folklore replaces a lookup, which is the exact
+ * failure this file's header was written to end.
+ *
+ * WHAT IS CHECKED. Whether the SIGN occurs in the evidence at all, and whether the layer already emits a reading.
+ * It deliberately does NOT try to name the word: #654's finding was that the readings are ordinary prose —
+ * `kleiner als`, `ਤੋਂ ਵੱਧ`, `zaidi ya` — attested in quantity and specific to each language, so the candidate has
+ * to come from `corpus-words.ts` with its SENSE checked. Availability here means "go and look", never "use this".
+ *
+ * ⚠ AND THE EXPONENT IS THE ONE THAT USUALLY FAILS. Khmer has ការេ "square" ×147 and it is 0/0 digit-adjacent —
+ * it is a unit word (`ម៉ែត្រការេ`, square metre), not a reading for `²`. Availability is not correctness.
+ */
+/**
+ * ⚠ EVERY CLASS THE GATES TEST MUST HAVE A ROW HERE, and three did not. `DROPPABLE` in `defects.ts` is the
+ * authoritative list of symbol classes whose disappearance `review.ts` and `coverage.ts` will fail a layer on:
+ *
+ *     ampersand · currency · degree · exponent · iteration · math-sign · minus · percent
+ *
+ * This file reported on currency, percent, degree (as scale-names) and — only after #654's gap was noticed —
+ * minus and exponent. It said nothing about AMPERSAND or the ITERATION mark, so an author running the mandated
+ * pre-flight check was told those classes did not exist. Khmer needed both: `&` 1,331 occurrences and ៗ 24,413,
+ * the latter being the single largest defect in the language.
+ *
+ * `SOURCES_EXEMPT` records the classes that deliberately have no vocabulary row, WITH the reason, so the
+ * relationship is complete rather than merely long. `sources.test.ts` asserts the two sets reconcile, which is
+ * what stops the next class added to `DROPPABLE` from silently lacking a pre-flight row — the same failure mode
+ * as `coverage.ts`'s hand-maintained language list, which sat at 37 while the tree grew to 67 and left 30
+ * languages unaudited behind a confident "0 defects".
+ */
+export const SOURCES_EXEMPT: Readonly<Record<string, string>> = {
+    // A repetition mark needs a RULE, not a word: the reading is "say the previous word again", so there is no
+    // vocabulary to source. Thai's ๆ and Khmer's ៗ are both handled by reduplication in their own layers.
+    iteration: "needs a rule (repeat the antecedent), not a vocabulary item",
+    // A catch-all bucket for arithmetic signs, each of which has its own row below. Nothing to source under the
+    // bucket name itself.
+    "math-sign": "a bucket over equals/times/divide/plus, each of which has its own row",
+};
+
+const SIGN_PROBES: readonly { klass: string; sign: RegExp; hint: string }[] = [
+    { klass: "minus-word", sign: /(?<![\p{L}\p{Nd}])[-−–]\p{Nd}/u, hint: "subtract/negative" },
+    { klass: "plus-minus-word", sign: /±/u, hint: "the two words, or one compound" },
+    { klass: "equals-word", sign: /\p{Nd}\s*=\s*\p{Nd}|\s=\s/u, hint: "equal/is" },
+    { klass: "less-than-word", sign: /\p{Nd}\s*<\s*\p{Nd}/u, hint: "smaller/fewer than" },
+    { klass: "greater-than-word", sign: /\p{Nd}\s*>\s*\p{Nd}/u, hint: "bigger/more than" },
+    { klass: "times-word", sign: /\p{Nd}\s*[×✕]\s*\p{Nd}/u, hint: "multiply" },
+    { klass: "divide-word", sign: /\p{Nd}\s*[÷]\s*\p{Nd}/u, hint: "divide/share" },
+    { klass: "ampersand-word", sign: /&(?![a-zA-Z]{2,8};|#\d{1,6};)/u, hint: "and" },
+    { klass: "plus-word", sign: /\p{Nd}\s*\+\s*\p{Nd}/u, hint: "plus/add" },
+    { klass: "exponent-word", sign: /\p{Nd}\s*\p{L}*[²³⁰¹⁴-⁹]|\p{L}[²³]/u, hint: "square/power — usually NOT sourceable; check digit-adjacency" },
+];
+
+function signWords(c: Ctx): Row[] {
+    return SIGN_PROBES.map(({ klass, sign, hint }) => {
+        if (!sign.test(c.corpus)) return { klass, verdict: "n/a" as const, detail: "the sign does not occur in the evidence" };
+        // A reading already emitted by the layer counts as handled; the source text is the only place to look,
+        // since a normalizer may emit a word inline rather than declaring it (see the percent/currency note).
+        const emitted = new RegExp(`${klass.replace(/-word$/u, "")}`, "iu").test(c.langSrc);
+        return emitted
+            ? { klass, verdict: "have" as const, detail: "the layer names this class" }
+            : { klass, verdict: "check" as const, detail: `sign occurs, no reading found — source the ${hint} word with corpus-words.ts, then SENSE-check it digit-adjacent` };
+    });
+}
+
 /** FRACTION DENOMINATORS — deferred in 16 of 25. The signal is whether the language's own ordinal/denominator
  *  series exists to compose from, which in this repo means a manifest ordinal table or espeak entries. */
 function fractionSeries(c: Ctx): Row {
@@ -315,38 +390,49 @@ function fractionSeries(c: Ctx): Row {
 
 function rowsFor(code: string): { ctx: Ctx; rows: Row[] } {
     const c = context(code);
-    return { ctx: c, rows: [letterNames(c), decimalWord(c), eraPhrase(c), scaleNames(c), ...tierWords(c), fractionSeries(c)] };
+    return { ctx: c, rows: [letterNames(c), decimalWord(c), eraPhrase(c), scaleNames(c), ...tierWords(c), fractionSeries(c), ...signWords(c)] };
 }
 
 const MARK: Record<Verdict, string> = { have: " ok ", partial: "part", none: "NONE", check: "chk?", "n/a": "  · " };
 
-if (has("all")) {
-    const codes = fleet();
-    const klasses = ["letter-names", "decimal-point", "era-phrase", "scale-names", "percent-word", "currency-word", "fraction-series"];
-    console.log(`\n── vocabulary sources across ${codes.length} registered languages ──\n`);
-    console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
-    const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
-    for (const code of codes) {
-        const { rows } = rowsFor(code);
-        const by = new Map(rows.map((r) => [r.klass, r]));
-        for (const k of klasses) if (by.get(k)?.verdict === "none") blockedBy[k]!.push(code);
-        if (has("blocked") && !rows.some((r) => r.verdict === "none")) continue;
-        console.log(`  ${code.padEnd(4)}${klasses.map((k) => MARK[by.get(k)?.verdict ?? "n/a"].padEnd(10)).join("")}`);
+/**
+ * ⚠ THE CLI MUST NOT RUN ON IMPORT — the fourth file in this directory to need this guard, after `mine.ts`,
+ * `wiki-health.ts` and `candidates.ts`, and discovered the same way each time: a test tried to import a pure
+ * function and the whole report executed instead, taking the suite with it.
+ */
+const IS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+function main(): void {
+    if (has("all")) {
+        const codes = fleet();
+        const klasses = ["letter-names", "decimal-point", "era-phrase", "scale-names", "percent-word", "currency-word", "fraction-series"];
+        console.log(`\n── vocabulary sources across ${codes.length} registered languages ──\n`);
+        console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
+        const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
+        for (const code of codes) {
+            const { rows } = rowsFor(code);
+            const by = new Map(rows.map((r) => [r.klass, r]));
+            for (const k of klasses) if (by.get(k)?.verdict === "none") blockedBy[k]!.push(code);
+            if (has("blocked") && !rows.some((r) => r.verdict === "none")) continue;
+            console.log(`  ${code.padEnd(4)}${klasses.map((k) => MARK[by.get(k)?.verdict ?? "n/a"].padEnd(10)).join("")}`);
+        }
+        console.log(`\n── blocked counts (a NONE is work that needs a SOURCE, not code) ──`);
+        for (const k of klasses)
+            console.log(`  ${k.padEnd(16)} ${String(blockedBy[k]!.length).padStart(3)}  ${blockedBy[k]!.slice(0, 22).join(" ")}${blockedBy[k]!.length > 22 ? " …" : ""}`);
+        console.log(`\n  AVAILABILITY IS NOT CORRECTNESS — an ` + "`ok`" + ` says a source exists, never that the word fits the`);
+        console.log(`  slot. ff hakkunde, ms paun, zu amaphuzu and the Gabonese district Idola all passed here.\n`);
+    } else {
+        const code = arg("lang");
+        if (code === undefined) { console.error("usage: --lang <code> | --all [--blocked]"); process.exit(2); }
+        const { ctx, rows } = rowsFor(code);
+        console.log(`\n── ${code} (${ctx.dir ?? "?"}) vocabulary sources ──\n`);
+        for (const r of rows) console.log(`  [${MARK[r.verdict]}] ${r.klass.padEnd(16)} ${r.detail}`);
+        console.log(`\n  espeak: ${ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
+            + ` · referee: ${ctx.referee === "" ? "none" : `${ctx.referee.split("\n").length} lines`}`
+            + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`
+            + (existsSync(new URL(`../corpus/mined/${ctx.code}.jsonc`, import.meta.url).pathname) ? " (incl. mined artifact)" : ""));
+        console.log(`\n  AVAILABILITY IS NOT CORRECTNESS. Read the source before using it (the Fula lesson).\n`);
     }
-    console.log(`\n── blocked counts (a NONE is work that needs a SOURCE, not code) ──`);
-    for (const k of klasses)
-        console.log(`  ${k.padEnd(16)} ${String(blockedBy[k]!.length).padStart(3)}  ${blockedBy[k]!.slice(0, 22).join(" ")}${blockedBy[k]!.length > 22 ? " …" : ""}`);
-    console.log(`\n  AVAILABILITY IS NOT CORRECTNESS — an ` + "`ok`" + ` says a source exists, never that the word fits the`);
-    console.log(`  slot. ff hakkunde, ms paun, zu amaphuzu and the Gabonese district Idola all passed here.\n`);
-} else {
-    const code = arg("lang");
-    if (code === undefined) { console.error("usage: --lang <code> | --all [--blocked]"); process.exit(2); }
-    const { ctx, rows } = rowsFor(code);
-    console.log(`\n── ${code} (${ctx.dir ?? "?"}) vocabulary sources ──\n`);
-    for (const r of rows) console.log(`  [${MARK[r.verdict]}] ${r.klass.padEnd(16)} ${r.detail}`);
-    console.log(`\n  espeak: ${ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
-        + ` · referee: ${ctx.referee === "" ? "none" : `${ctx.referee.split("\n").length} lines`}`
-        + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`
-        + (existsSync(new URL(`../corpus/mined/${ctx.code}.jsonc`, import.meta.url).pathname) ? " (incl. mined artifact)" : ""));
-    console.log(`\n  AVAILABILITY IS NOT CORRECTNESS. Read the source before using it (the Fula lesson).\n`);
 }
+
+if (IS_CLI) main();
