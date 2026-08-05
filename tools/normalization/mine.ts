@@ -145,6 +145,31 @@ export function segmentFile(path: string, mode: SegmentMode, terminators: string
     return [...out];
 }
 
+/**
+ * A bounded, strided sample of a corpus — enough text to infer its script, and never more.
+ *
+ * ⚠ THIS EXISTS BECAUSE `segments.join("\n").slice(0, 400_000)` THREW ON THE LARGEST DUMP. The join builds the
+ * whole corpus as ONE STRING before the slice can narrow it, so hy's 1.4 GB dump died on
+ * `RangeError: Invalid string length` — Node's maximum string length, the same ceiling that once made tt, arz,
+ * ka and eu unminable at all and was fixed by streaming in `segmentFile`. Reintroducing it one function later
+ * is why the bound has to be built INTO the probe rather than applied after the fact.
+ *
+ * Strided rather than head-truncated: the first 400 KB of a wiki dump is whatever the alphabet put first, and a
+ * corpus whose opening articles are foreign would have its script inferred from them. A deterministic stride
+ * across the whole array samples the corpus as it actually is, and keeps the artifact reproducible.
+ */
+export function scriptProbe(segments: readonly string[], budget = 400_000): string {
+    const step = Math.max(1, Math.floor(segments.length / 2_000));
+    const parts: string[] = [];
+    let size = 0;
+    for (let i = 0; i < segments.length && size < budget; i += step) {
+        const seg = segments[i]!;
+        parts.push(seg);
+        size += seg.length + 1;
+    }
+    return parts.join("\n").slice(0, budget);
+}
+
 export interface CellSelection {
     picked: { cell: string; text: string }[];
     counts: Record<string, number>;
@@ -161,7 +186,7 @@ export function selectCells(segments: string[], opts: { perCell: number; terms?:
     // carried 47 such cells of 253, and their `US$` drops reported as Khmer reading gaps. Filtered here rather
     // than in `extracts()`/`segmentFile()` because only this function sees the WHOLE corpus, which is what
     // makes the script inferable without a language→script table that could fall stale.
-    const script = dominantScript(segments.join("\n").slice(0, 400_000));
+    const script = dominantScript(scriptProbe(segments));
     segments = segments.filter((s) => isNativeSegment(s, script));
     // Terms may be scoped to a cell as `cell<TAB>term`; a bare line applies to every lexical cell. Two
     // lexical cells now exist (calendar, ordinal-native) and they need different words, so one flat list

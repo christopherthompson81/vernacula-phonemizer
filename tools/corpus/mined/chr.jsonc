@@ -35,38 +35,38 @@
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
         "degrees": 0,          // in 22 treated languages
-        "digit-run": 121,      // in 19 treated languages
+        "digit-run": 106,      // in 19 treated languages
         "fractions": 2,        // in 18 treated languages
         "clock": 2,            // in 18 treated languages
         "signs": 5,            // in 17 treated languages
         "dotted": 9,           // in 16 treated languages
         "era-marker": 0,       // in 14 treated languages
-        "year": 121,           // in 14 treated languages
-        "decimals": 26,        // in 12 treated languages
-        "ordinal-latin": 24,   // in 11 treated languages
+        "year": 106,           // in 14 treated languages
+        "decimals": 24,        // in 12 treated languages
+        "ordinal-latin": 22,   // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
         "units": 7,            // in 9 treated languages
-        "ranges": 28,          // in 7 treated languages
+        "ranges": 22,          // in 7 treated languages
         "currency": 0,         // in 6 treated languages
-        "abbrev": 300,         // in 6 treated languages
-        "latin-in-native": 321, // in 6 treated languages
+        "abbrev": 292,         // in 6 treated languages
+        "latin-in-native": 275, // in 6 treated languages
         "percent": 4,          // in 5 treated languages
         "rate": 0,             // in 4 treated languages
         "zero-width": 0,       // in 4 treated languages
         "roman": 7,            // in 3 treated languages
-        "initialism": 704,     // in 3 treated languages
-        "grouped": 21,         // in 3 treated languages
+        "initialism": 687,     // in 3 treated languages
+        "grouped": 20,         // in 3 treated languages
         "signed-number": 2,    // in 2 treated languages
         "ordinal-range": 0,    // in 1 treated languages
-        "letter-name": 30,     // in 3 treated languages
+        "letter-name": 22,     // in 3 treated languages
         "exponent": 4,         // in 24 treated languages
         "arithmetic": 0,       // in 2 treated languages
-        "ampersand": 4,        // in 1 treated languages
+        "ampersand": 3,        // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
         "sports-time": 0,      // in 3 treated languages
         "version-dot": 0,      // in 3 treated languages
-        "quote-letter": 13,    // in 4 treated languages
+        "quote-letter": 10,    // in 4 treated languages
         "scaled-currency": 0,  // in 3 treated languages
         "ordinal-caps": 0,     // in 2 treated languages
     },
@@ -125,13 +125,13 @@
         { "cell": "units", "text": "ᎢᏂᏗᎢᎠ (ᎾᏍᎩᎾᏍᏇ ᎢᏅᏗᎾ ᏙᏱᏗᏢ ᎦᏚᎲ ᏓᎶᏂᎦᏍᏛ-Ꭿ. ᏂᎬᎢ 3,287,240 km², ᎠᎴ ᎢᏅᏗᎾ ᎦᎵᏉᎩᏁᎢ ᏙᏱᏗᏢ ᎦᏚᎲ ᎡᎶᎯ-Ꮒ. ᎾᏂᎥ ᏴᏫ 1,028,737,436. ᎠᏰᎵ ᏗᎦᎳᏫᎢᏍᏗ ᎦᏚᎲᎢ ᎠᏤ ᏕᎵ. Mumbai ᎤᏔᏂᎢᏍᏗ ᎦᏚᎲᎢ ᎢᏅᏗᎾ-Ꭿ." },
         { "cell": "units", "text": "ᏌᏊ ᎢᏳᎾᎢᏍᏔᏅ ᎤᎬᏫᏳᎯ ᏙᏱᏗᏢ ᎦᏚᎲ ᏭᏕᎵᎬᏗᏢ ᏳᎳᏛ-Ꭿ. ᏂᎬᎢ 243,610 km². ᎾᏂᎥ ᏴᏫ 62,041,708. ᎠᏰᎵ ᏗᎦᎳᏫᎢᏍᏗ ᎦᏚᎲᎢ ᎠᎴ ᎤᏔᏂᎢᏍᏗ ᎦᏚᎲᎢ ᎫᎴ ᏗᏍᎪᏂᎯᏱ." },
         { "cell": "ranges", "text": "Ned Christie (1852—1892), ᏗᎦᏃᏣᎵ ᎤᏁᎫᏥᏓ ᎠᎴ Frontiersman ᎾᎯᏳᎨᏒ ᎣᎦᎳᎰᎻ ᏗᏓᏙᎳᏤᎸ, Tribal ᎨᎳ, ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ;" },
-        { "cell": "ranges", "text": "Howard, Gregg, ed. English/Cherokee Glossary. Various Indians Peoples Publishing, 2000. ISBN 1-884655-63-7." },
         { "cell": "ranges", "text": "Howard, Gregg, ed. English/Cherokee Glossary. Richardson, ᏅᏓᎩ: Various Indians Peoples Publishing, 2000. ISBN 1-884655-63-7." },
         { "cell": "ranges", "text": "Banks, William H., Jr. Plants of the Cherokee. Gatlinburg, ᏔᎾᏏ: Great Smoky Mountains Association, 2004. ISBN 0-937207-43-8." },
         { "cell": "ranges", "text": "ᏆᏟᎩ ᎯᎳᏫ (1923–2008), ᏑᏓᎵᏁᎢ ᎤᎬᏫᏳᎯ ᎠᏲᎳᏂ (1976–1990)" },
         { "cell": "ranges", "text": "ᏆᏟᎩ ᏙᏩᎶᏫ (1944–2010), ᎠᎦᎸᏥ ᏗᎧᏃᎩᏍᎩ ᎠᎴ ᎠᏛᏁᎵᏍᎩ" },
         { "cell": "ranges", "text": "ᏍᏗᏫ ᎩᎵᏏᏱ ᎡᎯ (~1096–1154), ᏫᎵᏯᎻ the Conqueror ᎤᎵᏏᎠᏧᏣ" },
         { "cell": "ranges", "text": "ᏍᏗᏫ I ᎲᎦᎵᏱ ᎡᎯ (~965–1038), ᎤᎬᏫᏳᎯ ᎤᏪᏥ ᎡᏆ ᎠᏂᎲᎦᎵ, ᎢᎬᏱᎢ ᎲᎦᎵᏱ ᎤᎬᏫᏳᎯ" },
+        { "cell": "ranges", "text": "ᏍᏗᏫ II ᎲᎦᎵᏱ ᎡᎯ (1101–1131), ᎤᎬᏫᏳᎯ ᎧᎶᎹᏂ ᎤᏪᏥ" },
         { "cell": "abbrev", "text": "ᎾᏍᎩᏃ ᎯᎠ ᏄᎵᏍᏔᏂᏙᎴ ᎤᏕᏅ ᏥᏌ ᎦᎶᏁᏛ. ᎾᏍᎩ ᎺᎵ ᏥᏌ ᎤᏥ ᏦᏩ ᎤᏓᎸᏍᏗ, ᎠᏏᏉ ᏂᏓᎾᏤᎬᎾ ᎨᏎᎢ, ᎤᏁᎵᏤ ᎦᎸᏉᏗᏳ ᎠᏓᏅᏙ ᎤᏓᏅᏖᎸᎯ." },
         { "cell": "abbrev", "text": "ᎦᏚᎲᏃ ᎾᏎᎵᏗ ᏧᏙᎢᏛ ᏭᎷᏨ ᎾᎿ ᎡᎮᎢ. ᎾᏍᎩᏃ ᎤᏙᎯᏴᏁ ᎠᎾᏙᎴᎰᏍᎩ ᏧᏂᏁᏤᎢ, ᎾᏎᎵᏗ ᎡᎯ ᎠᎪᏎᎮᏍᏗ, ᏧᎾᏛᏁᎢ." },
         { "cell": "abbrev", "text": "ᎯᎠ ᎧᏁᏨ \"ᏣᎳᎩ\" ᎨᏒᎢ derived ᎧᏁᏨ ᎦᏙ ᎤᏍᏗ ᎤᎷᏨᎩ ᎠᎴᏅᏔᏅ ᏂᏛᎴᏅᏓ ᎯᎠ ᎠᏂᏣᏓ ᏗᏓᏁᏟᏴᎡᏗ ᎦᏬᏂᎯᏍᏗ. ᎾᏍᎩ ᏥᏄᏍᏛᎩ derived ᏂᏛᎴᏅᏓ ᎯᎠ ᎠᏂᏣᏓ ᎧᏁᏨ \"Cha-ᏂᏚᏍᏛᎢ-kee\" ᎦᏙ ᎤᏍᏗ ᎤᏅᏔᏂᏓᏍᏗ \"ᎾᏍᎩ ᎦᎪ ᎠᎴᏂᏓᏍᏗ ᎭᏫᎾᏗᏢ ᎯᎠ ᏙᏓᎸ\" ᎠᎴ \"ᎾᏍᎩ ᎦᎪ ᎠᎴᏂᏓᏍᏗ ᎭᏫᎾᏗᏢ ᎯᎠ ᎤᏍᏔᎦᎳᏱ.\" ᎯᎠ ᏚᏙᎥ ᎦᏙ ᎤᏍᏗ ᎯᎠ ᏣᎳᎩ ᎠᎴᏅᏔᏅ ᎬᏔᏅᎯ ᎾᏍᎩᎾᎢ ᎤᏅᏌ ᎨᏒᎢ Ah-Ꮒ-yv-wi-Ꮿ (ᏗᏙᎳᎩ ᎠᏁᏢᏔᏅᎯ \"ᎾᏍᎩ ᎯᎠ ᎠᎴ ᏂᎦᏛ ᎯᎠ ᏴᏫ ᏴᏫ\"). ᎤᎪᏗᏗ ᎾᏰᎯᏯ ᏴᏩᏁᎬ ᎠᏂᎳᏍᏓᎸ ᎤᎭ ᏚᏙᎥ ᎾᏍᎩᎾᎢ ᎤᏅᏌ ᎦᏙ ᎤᏍᏗ ᎤᏅᏔᏂᏓᏍᏗ ᎾᎥᏂᎨᏍᏙᏗᏇ ᎪᎯ. ᏱᏂᎬᏛᎾ, ᎪᎯᏊ ᎢᏴ ᏥᎩ ᏣᎳᎩ ᎤᏯᏅᏛ ᎤᏅᏌ ᏣᎳᎩ, ᎠᎴ ᏣᎳᎩ." },
@@ -140,15 +140,14 @@
         { "cell": "abbrev", "text": "ᎤᎪᏗᏗ ᏣᎳᎩ traditionalists ᎤᎭ ᏚᎦᏘᎸᏒ ᎠᎵᏍᎪᎳᏗᏍᎩ tribal ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎯᎠ Freedmen; ᏱᏂᎬᏛᎾ, ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎾᏍᎩ ᎾᏍᏇ ᎠᎵᏍᎪᎸᏙᏗ ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎠᏂᏴᏫ Delaware ᎩᎬ ᏚᎳᏏᏔᏅᎩ ᎾᏍᎩ ᏧᏩᎫᏔᏅ treaties ᎠᎴ ᏓᏓᏁᏤᎸ ᎬᏙᏗ ᎯᎠ ᎠᏫᏒᏗ ᎧᏃᎮᎭ. ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᏭᏔᏅᎢ ᏧᎾᏓᏱᎵᏓᏍᏗ ᎤᏬᎳᏨ ᎯᎠ ᏧᏓᎴᎿᎢ ᎠᏛᏁᎵᏍᎩ ᎤᏍᏆᎸᎡᎲ ᎯᎠ Freedmen ᎭᏫᎾᏗᏢ ᏣᎳᎩ ᎧᏃᎮᏍᎩ ᎠᎴ ᎯᎠ ᎠᏂᏔᎵ ᎾᎾᏛᏁᎲ ᎤᏐᏅᎢ ᎠᎴ ᏧᏣᏔᏊ ᎤᎦᏙᎲᏒ ᎬᏙᏗ ᎯᎠ ᏣᎳᎩ ᏴᏫ ᎾᎯᏳᎨᏒ ᎬᏂᎨᏒ ᏄᏍᏛᎢ-ᎣᎦᎳᎰᎻ Statehood ᎭᏫᎾᏗᏢ ᏩᏎᏍᏗ ᎾᎿ Ꮝ ᏧᏚᎪᏔᏅ, ᎠᎴ upheld ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎦᎫᏍᏛᏗ ᎠᏚᏓᎸᏗ ᎢᏗᎦᏗ ᏂᏚᏳᎪᏛ ᎾᏍᎩᎾᎢ ᏂᎦᏛ ᏣᎳᎩ ᎠᏂᏴᏫ." },
         { "cell": "abbrev", "text": "ᎯᎠ ᏄᎬᏫᏳᏌᏕᎩ ᎤᎬᏫᏳᎯ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᏝᏱᎪᎯᎩ ᏚᏃᏣᎳᏅ Ꮎ ᎤᏍᏆᎸᎲ ᎠᏯᏙᎯᎲ ᎤᏛᎯᏍᏔᏅᎩ ᎾᎥᎢ ᎯᎠ ᏣᎳᎩ ᏴᏫ Ꮎ ᎯᎠ ᎢᏳᏍᏗ ᎧᏃᎮᏗ ᎾᎿ ᎯᎠ ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎯᎠ Freedmen ᏥᏄᏍᏛᎩ ᎾᏊ ᎠᎴᏂᏙᎲ ᎠᎦᏎᏍᏔᏅ ᎾᏍᎩᎾᎢ ᎠᏓᏑᏰᏍᎬ ᎾᏍᎩ ᎠᏂᏰᎸᏍᎬ ᎧᏁᎢᏍᏔᏅ amendments ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎦᎫᏍᏛᏗ. ᎾᏍᎩ ᎯᎠ ᎪᏢᎯᏌᏅᎯ ᎠᎴ ᏄᏪᎵᏒ ᎠᏓᏍᏚᏁᏗ tribal ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎠᏍᏓᏩᏛᏍᏗ ᎢᏯᏛᏁᏗ ᏣᎳᎩ ᎤᏤᎵ ᎾᎥᎢ ᎩᎬ ᎠᎦᏲᎳᏗᏍᏗ ᎠᎴ ᎬᏫᏍᏓᏗ ᎯᎠ Freedman ᏂᏛᎴᏅᏓ Tribal ᎠᏁᎳ ᎤᎾᏓᏡᎬ. ᎾᏊ, ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎦᎫᏍᏛᏗ ᎠᏓᏍᏚᏁᏗ ᎦᎪ ᎠᎾᏍᎬᏘ ᎠᎴ ᎠᎾᏍᎬᏘ ᎾᏍᎩ ᏂᎨᏒᎾ ᎢᏯᏓᏛᏁᏗ ᏥᏄᏍᏗ ᏧᏓᎩᏴᎲ ᎠᏰᎵ ᎤᏒᎧᎵ ᎾᏍᎩ ᎤᏩᏒ ᎾᏍᎩ ᎠᏂᏏᏴᏫᎭ ᎦᎪ ᎠᎴ ᏣᎳᎩ ᎩᎬ. ᎢᎦᏛ ᏣᎳᎩ traditionalists ᎿᏛᎦ ᎾᏍᎩ ᏂᎨᏒᎾ ᎠᏓᏲᏔᎡᏗ ᎯᎠ ᏫᏓᎧᏃᏗᏱ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᏭᏔᏅᎢ ᏧᎾᏓᏱᎵᏓᏍᏗ Ꮎ ᎯᎠ Freedman ᎠᏂᏁᏉᎬ contributed ᏣᎳᎩ ᎥᎦᏔᎲᎢ ᎠᎴ ᎤᎾᏙᏢᎯ ᎭᏫᎾᏗᏢ ᎪᎯᏊ ᎢᏴ ᏥᎩ ᎢᏧᏩᎪᏗ, ᎠᎴ ᏗᎦᏘᎸᏍᏗ ᎠᎵᏍᎪᎳᏗᏍᎩ ᎯᎠ Freedmen ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎭᏫᎾᏗᏢ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ. ᏐᎢ traditionalists ᎤᎭ asserted Ꮎ Freedmen ᎤᎭ ᎤᎵᏍᎨᏛ ᎠᎴ ᏚᏳᎪᏛ ᎾᎿᎢ ᎭᏫᎾᏗᏢ ᎯᎠ CN." },
         { "cell": "abbrev", "text": "ᎯᎠ ᎠᏫᏒᏗ ᎠᏂᎩᏚᏩᎩ ᏗᏂᏤᎷᎯᏍᎩ ᏣᎳᎩ ᎠᏂᏴᏫ, ᎾᏍᎩ ᎾᏍᏇ ᏩᏎᎸᎯ ᏥᏄᏍᏗ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ, ᎤᎭ ᎠᏤᎯᏐᏗᏱ sued ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎠᏔᏲᏍᏗ ᎯᎠ ceding tribal ᎦᏙᎯ ᎢᎦᏛ ᎠᎴ ᎠᏕᎳ ᎤᏓᏍᏛᏗᏍᏗ ᎦᏬᎯᎸᏙᏗ ᏧᏓᎴᏅᏓ ᎦᏟᏌᏅ ᎠᏯᏙᎯᎲ. ᏂᎦᏛ ᎾᏍᎩ ᎯᎠ ᏓᏓᎳᏑᎸ ᎤᎭ ᎤᏄᎸᏅᎩ ᎠᎴ ᏭᏪᏙᎢ dismissed. ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎾᏍᎩ ᎾᏍᏇ ᏝᏱᎪᎯᎩ sued ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎾᏍᎩᎾᎢ ᎠᏓᏲᏔᎡᏗ HR ᎠᏎᎯᎯ ᎢᎦ ᎠᏎᎯᎯ ᎢᎦ ᎠᏓᏚᎬ 3534, ᎠᏎᎯᎯ ᎢᎦ ᎠᏎᎯᎯ ᎢᎦ ᎠᏓᏚᎬ Ꮎ ᎧᏁᏨ ᎢᏯᏛᏁᏗ ᎯᎠ ᎠᏰᎵ ᎤᏙᏢᏒ ᎣᎦᎳᎰᎻ ᎠᎴ ᎯᎠ ᎠᏫᏒᏗ ᎧᏃᎮᎭ ᎥᏓᏓᎫᏴᎡᏗᏱ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎠᎴ ᏥᏄᏍᏛᎩ ᎡᎯᏍᏛ ᎬᏙᏗ ᎯᎠ ᏚᏳᎪᏛ ᎢᏯᏛᏁᎸ ᏂᎨᏒᎾ ᎥᏳᎩ ᎯᎠ ᏲᏩᏁᎬ Riverbed ᎾᎥᎢ ᎯᎠ ᎤᏔᏂᏗ ᎦᏙᎯ ᎣᎦᎳᎰᎻ ᎾᏍᎩᎾᎢ ᏴᏫ ᎤᏁᏓᏍᏗ ᎬᏙᏗ ᏗᎦᏙᎯ ᎠᎴ hydroelectric ᎤᎳᏂᎬᎬ ᎤᎾᏁᎶᏔᏅ. ᎯᎠ ᏓᏓᎳᏑᎸ ᎤᏝᏅᎩ ᎾᎥᎢ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎠᏔᏲᏍᏗ ᏚᎵᎬᏩᎳᏂᏙᎸ ᏂᏛᎴᏅᏓ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᏂᏛᎴᏅᏓ HR ᎠᏎᎯᎯ ᎢᎦ ᎠᏓ ᎠᏎᎯᎯ ᎢᎦ ᎠᏓᏚᎬ 3534 ᏥᏄᏍᏛᎩ ᎾᏍᎩ ᎾᏍᏇ ruled ᎾᏍᏋ ᎤᎾᎵᎪᏒ ᎠᎴ ᏄᏠᏯᏍᏛᎾ ᏄᏍᏛ. ᎾᎯᏳᎨᏒ ᎯᎠ ᎤᏔᏂᏗ ᎦᏙᎯ ᎣᎦᎳᎰᎻ ᏓᏓᎳᏑᎸ ᎾᏍᎩ ᎤᏃᏜᎩ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎤᏤᎵ ᏚᏳᎪᏛ ᎢᏯᏛᏁᎸ ᏂᎨᏒᎾ casino ᎠᏥᏰᎶᎲ (ᎠᎪᏩᏛᏗ ᎠᏫᏒᏗ ᎠᏂᎩᏚᏩᎩ ᏗᏂᏤᎷᎯᏍᎩ ᏣᎳᎩ ᎠᏂᏴᏫ ᎾᏍᎩᎾᎢ ᎤᏟ ᎢᎦᎢ ᎠᏓᏃᎯᏎᏗ ᎾᏍᎩ ᎠᏂᏰᎸᏍᎬ ᎯᎠ ᎤᏔᏂᏗ ᎦᏙᎯ ᎣᎦᎳᎰᎻ ᏗᎦᎸᏫᏍᏓᏁᏗ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎾᏍᎩᎾᎢ ᎠᏂᎩᏍᏗᏍᎬ ᏚᏳᎪᏛ ᎢᏯᏛᏁᎸ ᏂᎨᏒᎾ casinos), ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎠᏏᏇ sued ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎠᏔᏲᏍᏗ ᎠᎴᏫᏍᏙᏗ tribal ᎦᏙᎯ ᎢᎦᏛ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎠᏓᏁᎸ ᎠᏁᏍᎬᏗ casinos. ᎾᏍᎩ ᎯᎠ ᏓᏓᎳᏑᎸ ᎨᏒᎩ ᎾᏍᎩ ᎾᏍᏇ dismissed, ᎠᎴ ᎾᏍᎩ ᏥᏄᏍᏛᎩ ruled ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎨᏒᎢ ᎾᏍᎩ ᏂᎨᏒᎾ ᎯᎠ ᎦᏂᏓᏛ ᏚᏳᎪᏛ ᎯᎠ ᏧᎬᏩᎶᏗ ᏂᎬᎿᏅ ᎯᎠ ᏣᎳᎩ ᏴᏫ." },
-        { "cell": "latin-in-native", "text": "Cherokee New Testament Online Online translation of the New Testament. Currently the largest Cherokee document on the internet." },
         { "cell": "latin-in-native", "text": "WikiLang ᏣᎳᎩ page (Basic grammar information)" },
-        { "cell": "latin-in-native", "text": "CherokeeLessons.com (Hosts Creative Commons licensed materials including a textbook covering grammar and many hours of challenge/response based audio lesson files)." },
-        { "cell": "latin-in-native", "text": "A REFERENCE GRAMMAR OF OKLAHOMA CHEROKEE" },
-        { "cell": "latin-in-native", "text": "UNILANG forum for freely available teaching materials. (Includes PDF textbook and audio files)." },
         { "cell": "latin-in-native", "text": "ᎯᎠ ᏓᏂᏍᏇᎵᏲᎬ \"ᏣᎳᎩ\" ᏥᏄᏍᏛᎩ ᏌᏊ ᎢᏳᏩᎫᏗ ᎤᏬᎯᏳᏅ ᎾᏍᏋ ᎤᏍᏆᎸᎲ ᎯᎠ ᏣᎳᎩ ᎦᏬᏂᎯᏍᏗ ᎤᏤᎵ ᏚᏙᎥ, \"ᏣᎳᎩ\" (ᏣᎳᎩ) – ᎪᎯ ᎾᎯᏳᎢ ᎠᎾᏍᎬᏘ ᎤᎭ ᏭᏪᏙᎢ ᏄᎾᏓᏛᏁᎸ phonetically ᎭᏫᎾᏗᏢ Portuguese (ᎠᎴ ᎤᏟ ᎢᎦᎢ ᏄᏓᎷᎸᎾ barranquenho ᎦᏬᏂᎯᏍᏗ, ᎣᏂ ᏧᏩᎫᏛ ᏧᎬᏩᎶᏗ ᎠᎦᏘᏯ Soto ᏥᏄᏍᏛᎩ Extremaduran) ᏥᏄᏍᏗ chalaque, ᎾᎯᏳᎢ ᎭᏫᎾᏗᏢ ᎠᎦᎸᏥ ᏥᏄᏍᏗ cheraqui, ᎠᎴ ᎾᎯᏳᎢ ᎾᎥᎢ ᎯᎠ ᎩᎵᏏ ᏥᏄᏍᏗ ᏣᎳᎩ." },
         { "cell": "latin-in-native", "text": "ᎯᎠ ᎪᎯᏊ ᎢᏴ ᏥᎩ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ (ᏩᏎᎸᎯ ᏥᏄᏍᏗ \"ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎣᎦᎳᎰᎻ\" ᎭᏫᎾᏗᏢ Ꮝ ᎦᎫᏍᏛᏗ) ᎭᏫᎾᏗᏢ ᎾᏞᎬ ᎢᏧᏩᎪᏗ ᎤᎭ excelled ᎠᎴ ᎤᎭ ugatohvsvi uprecedented ᎤᏚᏃᎯᏍᏔᏍᎧ ᎭᏫᎾᏗᏢ ᎠᎳᏏᏅᏙᏗ ᎤᏛᏏᏗᏒ, ᎢᏗᎦᏘᎭ, ᎠᎴ ᎣᏍᏛ ᎾᏍᎩᎾᎢ Ꮝ ᎠᏁᎲᎢ ᎭᏫᎾᏗᏢ ᎯᎠ leadership ᏄᎬᏫᏳᏌᏕᎩ ᎤᎬᏫᏳᎯ Chad ᎠᏥᏅᏏᏓᏍᏗ, ᎬᏙᏗ ᎦᏛᎬᎢ ᏗᎦᎸᏫᏍᏓᏁᏗ, ᏧᏠᎯᏍᏗ, ᎤᏙᎯᏳ ᎾᏍᎩ ᏧᎬᏩᎶᏗ, ᎠᎴ ᏗᎦᎶᎪᏗ ᎤᎬᏩᎵ ᏧᏁᏉᏨ, ᎠᏠᏯᏍᏗᏍᎩ ᎤᏂᎪᏗᏗ ᎦᎸᎳᏗᎨᏍᏗ ᎠᏙᏢᏍᎩ casino ᎠᏥᏰᎶᎲ. ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎠᎨᏔᏗᏍᏗ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᏗᎦᎸᏫᏍᏓᏁᏗ, ᎤᏙᎯᏳ ᎡᏆ ᎤᎵᏍᏕᎸᏗ contractor Ꮎ ᎪᏢᏗ ᎯᎸᏍᎩ ᎢᏯᎦᏴᎵ ᏧᏂᎸᏫᏍᏓᏁᏗ ᎭᏫᎾᏗᏢ ᎧᎸᎬᎢᏗᏢ ᎣᎦᎳᎰᎻ ᎾᏍᎩᎾᎢ ᏣᎳᎩ ᎠᏁᎲᎢ." },
         { "cell": "latin-in-native", "text": "ᎯᎠ ᎠᏰᎵ ᎤᏙᏢᏒ ᎤᎭ ᎠᏁᏍᎨᏓ ᎠᏰᎸ ᏄᏛᎿᏕᎬ clinics ᏂᎦᏅᎯᏒ ᎣᎦᎳᎰᎻ, contributed ᎾᎥ ᏄᎾᏓᎸ ᏚᏙᎳᏩᏛᎲ ᎢᏗᏛᏁᏗ, ᎠᏁᏍᎨᏓ ᎠᎾᏕᎶᏆᏍᎬ ᎬᏔᏂᏓᏍᏗ ᎠᎴ universities ᎾᏍᎩᎾᎢ Ꮝ ᎠᏁᎲᎢ, instilled ᎯᎠ ᎠᎵᏏᎾᎯᏍᏙᏗ Gadugi ᎠᎴ ᎣᏩᏒ-utugi gvsv ᎭᏫᎾᏗᏢ Ꮝ ᎠᏁᎲᎢ, revitalized ᎦᏬᏂᎯᏍᏗ ᎠᏂᎧᏅᏍᎬ ᎢᏗᏛᏁᏗ ᎾᏍᎩᎾᎢ Ꮝ ᏗᏂᏲᎵ ᎠᎴ ᎠᏛᏍᎩ, ᎠᎴ ᎨᏒᎢ ᎤᎳᏂᎩᏛ ᎠᎴ ᎤᏙᎯᏳ ᎠᎳᏏᏅᏙᏗ ᎠᎴ ᎠᏙᏱᏯᏛ ᎠᎬᏩᎵ ᎦᏌᏙᏯᏍᏗ ᎭᏫᎾᏗᏢ ᎧᎸᎬᎢᏗᏢ ᎣᎦᎳᎰᎻ." },
-        { "cell": "roman", "text": "ᏍᏗᏫ II ᎲᎦᎵᏱ ᎡᎯ (1101–1131), ᎤᎬᏫᏳᎯ ᎧᎶᎹᏂ ᎤᏪᏥ" },
+        { "cell": "latin-in-native", "text": "ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎾᏍᎩ ᎾᏍᏇ ᎠᎵᏍᏕᎸᏗ ᎯᎠ Sundance ᎠᎴ ᏣᎳᎩ ᏫᏚᏳᎪᏛ ᏓᎾᎵᏍᏓᏴᎲᏍᎬ ᎭᏫᎾᏗᏢ Tahlequah, ᎣᎦᎳᎰᎻ ᎠᎴ ᎠᏣᏪᏐᎸᏍᏙᏗ ᎦᏚᎲᎢ, Utah, ᎠᎴ ᏓᏓᏁᎳᏁ ᎢᏗᏛᏁᏗ ᎠᎴ ᏧᎬᏩᎶᏗ ᎦᎷᎩ ᎾᏍᎩᎾᎢ ᎾᏰᎯᏯ ᏴᏩᏁᎬ ᏫᏚᏳᎪᏛ ᎪᏪᎵ ᎠᏪᎵ ᎪᏪᎵᏍᏗ participate ᎭᏫᎾᏗᏢ ᎯᎠ ᎠᏌᎳᏙᏗ ᏗᏟᎶᏍᏔᏅ ᏗᎦᎸᏫᏍᏓᏁᏗ. ᎤᎪᏗᏗ ᏗᎦᏃᏣᎵ ᎾᏰᎯᏯ ᏴᏩᏁᎬ ᎠᏛᏁᎵᏍᎩ ᎠᎴ ᎠᏁᎳ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ, ᏯᏛᎿ ᏥᏄᏍᏗ ᏪᏌ ᏎᏚᏗ." },
+        { "cell": "latin-in-native", "text": "ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎤᏟ ᎢᎦᎢ ᏝᏱᎪᎯᎩ ᎠᏰᎲᎩ ᎠᎲᏏᏓᏍᏗ ᎠᎯᎵᏒ ᏗᎦᏘᎴᎩ ᎤᎬᏫᏳᎯ Chad ᎠᏥᏅᏏᏓᏍᏗ, ᎤᎬᏫᏳᎯ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎦᎪ ᎾᏍᎩ ᎾᏍᏇ ᎠᏰᎲ ᏔᎵ ᎠᏁᎳ ᎤᎾᏓᏡᎬ ᎭᏫᎾᏗᏢ ᎢᏧᎳ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎠᎴ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ. ᎣᏂ ᏧᏩᎫᏛ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎤᏎᎸ ᎢᏳᎢ ᎯᎠ ᎠᎲᏏᏓᏍᏗ ᎠᎯᎵᏒ ᎾᎾᎢ ᎯᎠ ᏗᏙᎳᎩ ᎢᏳᏩᎪᏗ ᎤᏎᎸ ᎢᏳᎢ ᎾᏍᎩᎾᎢ ᎯᎠ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ ᎤᏔᏂᏗ ᎦᏙᎯ ᎯᎠ ᎠᏰᎵ ᎤᏙᏢᏒ ᎾᎿ ᎨᏒ ᏩᏎᏍᏗ ᎾᎥᎢ ᎯᎠ ᏄᎬᏫᏳᏌᏕᎩ ᎤᎬᏫᏳᎯ ᎾᎾᎢ ᎯᎠ ᏣᎳᎩ ᎬᎾᏕᎾ ᏗᎦᎸᏫᏍᏓᏁᏗ ᏂᎨᏒᎾ ᎢᎦ, ᎯᎠ ᏂᎦᏛ ᎠᏟᎶᏍᏗ ᏥᏄᏍᏛᎩ perceived ᏥᏄᏍᏗ ᏴᏫ ᎤᏁᏓᏍᏗ ᎦᎾᏄᎪᏨᎢ ᎾᎥᎢ ᎯᎠ ᎤᏂᎪᏗᏗ ᎯᎠ ᏣᎳᎩ ᏴᏫ ᎠᎴ garnered ᏄᎦᏎᏍᏛᎾ ᎠᎴ ᎾᎪᎯᏳᎲᏍᎬᎾ. ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎤᏃᎮᎸᎩ ᎭᏫᎾᏗᏢ ᏗᏤᎢ ᏣᏥᏲᎯᏍᏗ Ꮎ ᎤᏅᏌ ᎨᏒᎩ ᎢᏯᏛᏁᏗ ᎯᎠ ᎠᎲᏏᏓᏍᏗ ᎬᏂᎨᏒ ᎢᎬᏁᏗ ᎠᏓᏍᏛᏗᏍᏙᏗ ᎤᎬᏫᏳᎯ Chad ᎠᏥᏅᏏᏓᏍᏗ ᎾᏍᎩᎾᎢ ᎤᏄᎸᎲᏍᎬ ᎠᎵᏍᏕᎸᏗ ᎯᎠ ᏚᏳᎪᏛ ᎢᏯᏛᏁᎸ ᏂᎨᏒᎾ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ casino ᎾᎯᏳᎨᏒ ᎯᎠ ᎢᏳᏩᎪᏗ ᎯᎠ ᎤᏔᏂᏗ ᎦᏙᎯ ᎣᎦᎳᎰᎻ ᏗᎦᎸᏫᏍᏓᏁᏗ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᏗᏂᏤᎷᎯᏍᎩ." },
+        { "cell": "latin-in-native", "text": "ᎯᎠ ᏣᎳᎩ ᏴᏫ ᏥᏄᏍᏗ ᏂᎦᏛ reacted unfavorably ᎯᎠ ᏗᎵᏖᎸᏗ ᎯᎠ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ ᎾᏍᎩ ᎠᏂᏰᎸᏍᎬ Chad ᎠᏥᏅᏏᏓᏍᏗ ᎤᏤᎵ ᎠᎲᏏᏓᏍᏗ, ᎠᎴ ᎯᎠ ᏂᎦᎵᏍᏔᏂᏙᎲ ᏥᏄᏍᏛᎩ ᏂᎬᎢ viewed ᏥᏄᏍᏗ ᎠᏙᏱᏯᏛ ᎠᎬᏩᎵ ᎤᏝᏏᏛ ᎠᎴ ᏗᎦᏃᏣᎵ ᎾᏛᏍᎬᎾ ᎾᎥᎢ ᎠᏂᎩᏚᏩᎩ ᎠᏂᏣᎳᎩ. ᎤᎪᏗᏗ ᏣᎳᎩ ᎤᏬᎯᏳ ᎯᎠ UKB ᎨᏒᎢ Ꮭ ᎦᏅᎯᏓᎨ ᎤᏙᎯᏳᏒ \"ᏗᏂᏤᎷᎯᏍᎩ\" ᎠᎴ ᎠᎾᏓᏟᏏᏍᎬ ᎤᎾᏙᏢᎯ ᎤᎾᏓᏡᎩ, ᎠᎴ ᎤᎭ ᎠᎰᎵ ᎤᏃᏴᎬ ᎤᏃᎮᎸᎩ ᏥᏄᏍᏗ ᏯᏛᎿ ᎭᏫᎾᏗᏢ ᏗᏤᎢ ᏗᎦᏃᏣᎳᏅ. Chad ᎠᏥᏅᏏᏓᏍᏗ criticized ᎯᎠ UKB ᎾᏍᎩᎾᎢ disgracing ᎯᎠ ᏣᎳᎩ ᏴᏫ ᎠᎴ behaving ᎾᏍᎩᏯᎢ \"ᎠᎾᏓᏟᏏᏍᎬ ᎤᎾᏙᏢᎯ ᎤᎾᏓᏡᎩ\" ᎭᏫᎾᏗᏢ ᎦᏬᎯᎵᏴᏓ ᎤᎾᏤᎵ ᏗᎵᏖᎸᏗ." },
+        { "cell": "latin-in-native", "text": "ᎪᎯᏊ ᎢᏴ ᏥᎩ ᏣᎳᎩ Societies, ᎬᏙᏗ ᎯᎠ ᏓᎦᏘᎴᎬ ᎯᎠ UKB, ᎠᎴ ᎤᏙᎯᏳ democratic societies ᎦᏙ ᎤᏍᏗ Ꮭ ᎦᏅᎯᏓᎨ ᎠᎵᏍᎪᎸᏙᏗ ᎠᎲᏏᏓᏍᏗ tribal ᎠᏁᎳ." },
         { "cell": "roman", "text": "ᏍᏗᏫ III ᎲᎦᎵᏱ ᎡᎯ (1147–1172), ᎤᎬᏫᏳᎯ ᎨᏌ II ᎤᏪᏥ" },
         { "cell": "roman", "text": "ᏍᏗᏫ IV ᎲᎦᎵᏱ ᎡᎯ (~1133–1165), ᎤᎬᏫᏳᎯ ᏇᎳ II ᏦᎢᏁᎢ ᎤᏪᏥ" },
         { "cell": "roman", "text": "ᏍᏗᏫ II ᎼᎵᏕᏫᏯ ᎡᎯ (ᎣᏲᎱᏢᎢ 1447), ᎤᎬᏫᏳᎯ ᎤᏪᏥ, ᎡᎵᎩᏎᏂᏚ ᏎᎵ ᏋᏂ ᎤᏪᏥ" },
@@ -169,7 +168,6 @@
         { "cell": "grouped", "text": "ᏗᎧᏃᎩᏛ ᎬᏔᏂᏓᏍᏗ ᏂᎦᎥᏇ ᏓᎦᏒᏍᏗᎭ. ᏗᎧᏃᎩᏛ ᎪᎱᏍᏗ ᏗᎬᏔᏂᏓᏍᏗ ᎠᎦᏎᏍᏙᏗ organology ᎭᏞ. ᎠᏂᏴᏫ ᎦᏬᎯᏣᎯ 37,000 ᏧᏕᏘᏴᏓ ᎢᏳ ᏥᎨᏒ ᎢᏴᏱᎢ ᏗᎧᏃᎩᏛ ᎪᎱᏍᏗ ᏗᎬᏔᏂᏓᏍᏗ ᎤᏂᎲᎢ." },
         { "cell": "grouped", "text": "ᎠᎾᏥᏍᏓᏂᎵ (anatsisdanili) (ᎪᏟᏍᏙᏗ: ) ᏔᎵᏁᎢ ᎡᎶᎯ ᎨᏐᎢ. ᎠᎾᏥᏍᏓᏂᎵ, ᏅᏙᏃ ᎢᎦ ᎡᎯ 108,000,000 ᏦᎷ (67,000,000 ᎢᏯᎹᎵ) ᏂᏚᎾᏓᎸᎢ." },
         { "cell": "grouped", "text": "ᎹᏏ (masi) (ᎪᏟᏍᏙᏗ: ) ᏅᎩᏁᎢ ᎡᎶᎯ ᎨᏐᎢ. ᎹᏏ, ᏅᏙᏃ ᎢᎦ ᎡᎯ 230,000,000 ᏦᎷ (143,000,000 ᎢᏯᎹᎵ) ᏂᏚᎾᏓᎸᎢ." },
-        { "cell": "grouped", "text": "rect 888 168 940 330 20 Fenchurch Street" },
         { "cell": "grouped", "text": "Baskin-Robbins, Inc. ᎢᎦ ᎢᏗᏔᎦ ᎬᏩᎶᏒ ᎠᎹᏱᎩ ᎤᏓᎷᎸᏔᏅ ᎤᎵᏍᏙᏗ ᎬᏙᏓᎸᎢ ᏗᏣᏚᎩ ᎠᎴ ᎬᏙᏓᎸᎢ ice cream ᎠᎴ cake ᏗᏫᎦᏓᏍᏗ ᎠᎹᏱᎩ ᏧᏂᏴᏫᏍᏗ ᎤᎵᏍᏙᏗ ᎤᎵᏍᏆᎳᏗ ᏧᏂᏴᏫᏍᏗ Inspire Brands ᎤᎾᏙᏢᏒ. Baskin-Robbins ᎠᎴ 1945 ᎠᏱᎦ ᎧᎵᏎᏅᎢ ᎠᏰᎵ Burt Baskin ᎠᎴ Irv Robbins ᎤᏓᎷᏛᏗ Glendale, California ᎤᏙᏢᎢ. ᎤᎵᏍᏆᎳᏗ ᎠᏓᏁᎸᎢ ᎠᎴ Canton, Massachusetts ᎤᎾᏙᏢᏒ, ᎠᎴ ᎤᏃᏴᏫᏍᏗ ᎠᎵᏍᏙᏗ Dunkin' Donuts ᎠᎹᏱᎩ ᎠᏓᎾᏓᏙᎲᎢ. ᎤᎵᏍᏆᎳᏗ ᏓᏆᏙᎠ ᎠᎴ ᎦᏙᎩ ᎤᎵᏍᏙᏗ ᎬᏙᏓᎸᎢ ᏗᏣᏚᎩ ᎢᏤᎵᏍᏗ ᎢᏳᏍᏗ, 7,800 ᎤᏓᎷᏙᏗ ᏧᏂᏴᏫᏍᏗ ᎢᏳᏍᏗ ᎢᎦ." },
         { "cell": "signed-number", "text": "ᎵᎳ ᏙᏮᏍ (ᏍᏆᏂ ᎧᏬᏂᎯᏍᏗ: Lila Downs; ᏚᎵᏍᏗ 9 -1968 Ꮑ ᏩᎭᎧ, ᎺᏏᎪ) ᎢᏍ Ꭰ ᏍᎢᎾᎦᎡ, ᏲᏁᎦ ᏗᎧᏃᎩᏍᎩ. ᎠᏕᎵ ᎣᏍᏓ ᎧᏃᎩᏍᎩ ᎠᎴ ᎡᎶᎯ ᏫᏚᏳᎪᏛ ᎠᎪᎵᏨ." },
         { "cell": "signed-number", "text": "ᎹᏱᎩᎵ I ᎳᏂᎦᏇ (????-844) ᎠᏍᎦᏯ ᎤᏤᎵ ᎤᏪᏥ ᎤᎬᏫᏳᎯ ᎡᏆ ᏂᎨᏉᎶᏏ" },
@@ -183,13 +181,10 @@
         { "cell": "letter-name", "text": "ᏦᏍᎪᎦᎵᏉᎩᏁ ᎤᎬᏫᏳᎯ Richard M. Nixon ᎭᏞ. ᏍᎦᏚᎩᏃ ᎤᏕᏅ ᎠᏕᎳᏧᏢᎢ" },
         { "cell": "ampersand", "text": "ᎦᎶᎵᎠᏂ ᎦᎴᏦᏫᎠᎩ (1914&ndash;1972), ᎠᏉᎵ ᏔᎷᏣ ᎠᎳᏍᎦᎶᏗ ᎠᎾᏁᎶᎲᏍᎩ" },
         { "cell": "ampersand", "text": "ᎦᎶᎵᎠᏂ ᏫᏤᏂᏘ (1961&ndash;1989), ᎠᏛᏥ-ᎠᏑᎵᎾᎻ ᎠᎾᏁᎶᎲᏍᎩ" },
-        { "cell": "ampersand", "text": "J. Anthony Foley and Stephen Lalor (ed), Gill & Macmillan Annotated Constitution of Ireland (Gill & Macmillan, 1995) (ISBN 0-7171-2276-X)" },
         { "cell": "ampersand", "text": "Ben & Jerry's ᎤᏛᏁᎢ ᎤᎦᎾᏍᏗ Holdings Inc. ᎠᎾᏟ ᎠᏂᏬᏗ ᎠᏓᏔᏅᎢ ᏚᎾᏙᏢ ᏗᎦᏚᎩ ᎠᏓᎾᏙᎢ ᎤᏴᏜᏗ, ᎦᎵᏉᎩ ᏳᎪᎩᎯ, ᎠᎦᏚᎩ ᏐᏌᏏ. 1978 ᎠᏎᏃᏗ ᏗᎧᏃᎩ Burlington, Vermont ᎤᏓᏙᏢ, ᎤᏒᏊᎩ ᎤᏴᏜᏗ ᎠᎦᏓ ᎢᏳᏍᏗᎢ ᎤᏛᏁᎢ ᎦᎵᏉᎩ ᏧᏓᎷᏙᏗ ᎾᎿ ᎠᎴ ᏕᏥᏍᏆᏂᎨᏍᏗ ᎠᏕᎳᏗᏜ ᎠᏓᏅᏙᏗ. ᎤᏒᏊᎩ 2000 ᎤᏃᏴᏫᏯ ᏧᏂᏲᏟᎢ ᎤᎾᏙᏢ Unilever ᎭᏢᏒᎾᎢ, ᎠᎴ ᎤᏚᎾᏙᏢ ᎤᏓᎷᎸᎢ ᏚᎸᏉᎩ ᎢᏣᏔᏅᏙᏗ ᎢᏯ ᎠᎾᏟᏍᏗ. ᎠᎾᏟ ᎢᏣᏔᏅᏙᏗ ᎠᏍᏓᏅᏙᏗ ᏧᏓᎷᏙᎸᎢ South Burlington, Vermont, ᎠᎴ ᎤᏚᎾᏙᏢ ᎧᎵᎩ Waterbury, Vermont." },
         { "cell": "quote-letter", "text": "ᎯᎳᎪ ᎢᏳ ᏣᏥᏱ ᎤᏓᏅᏒ ᎧᏁᏉᏍᏗ ᎤᏔᏂᏗ ᎦᏙᎯ ᏧᏂᎧᎿᏩᏛᏍᏗ ᎦᏬᎯᎸᏙᏗ ᏣᎳᎩ ᎠᏂᎳᏍᏓᎸ ᏗᎦᏙᎯ ᎭᏫᎾᏗᏢ 1830, ᎯᎠ ᎢᏳᏍᏗ ᏯᏛᎿ ᎤᏪᏅᏒ ᎢᎪᎯᏓ Ꭴ.. ᏭᏔᏅᎢ ᏧᎾᏓᏱᎵᏓᏍᏗ. ᎭᏫᎾᏗᏢ ᏣᎳᎩ ᎠᏰᎵ ᎤᏙᏢᏒ v. ᏣᏥᏱ (1831), ᎯᎠ Marshall ᏧᎾᏓᏱᎵᏓᏍᏗ ᎠᏍᏓᏩᏛᏍᏙᏗ Ꮎ ᎯᎠ ᏣᎳᎩ ᎨᏒᎩ ᎠᏰᎵ ᎤᏙᏢᏒ, ᎠᎴ ᏭᎶᏒᏍᏛ ᎤᏴᏜ \"ᎢᏅ ᏕᎨᏒ ᎠᏰᎵ ᎤᏙᏢᏒ,\" ᎤᏅᏌ ᎨᏒᎩ \"ᏄᏍᏛ ᎤᏪᏅᏒ, ᎦᏛᎢ ᎠᏰᎵ ᎤᏙᏢᏒ\" ᎠᎴ ᎯᎠ ᎦᏚ ᏗᏄᏬ ᎾᏍᎩ ᎢᎬᏂᏏᏍᎩ ᏄᏛᏁᎸ ᎾᏍᎩ ᏂᎨᏒᎾ ᎤᎶᏒᎩ ᎭᏫᏂᏗᏢ ᎯᎠ Court's ᎠᎴᏅᏗᏍᎬ ᏓᎳᏏᏛ. ᎭᏫᎾᏗᏢ ᎠᏍᏓᏩᏗᏒ ᎦᏚ ᏗᏄᏬ,Worcester v. ᎤᏔᏂᏗ ᎦᏙᎯ ᏣᏥᏱ (1832), ᎯᎠ ᏧᎾᏓᏱᎵᏓᏍᏗ ᎠᏍᏓᏩᏛᏍᏙᏗ ᎠᏓᏍᏕᎸᏗ ᎯᎠ ᏣᎳᎩ ᎠᏆᏤᎵ ᎠᏛᏗ, ᏚᏂᏴᏒ Ꮎ ᏣᏥᏱ ᏰᎵᏇ ᎾᏍᎩ ᏂᎨᏒᎾ ᎧᏁᏍᏗ ᎢᏯᏛᏁᏗ ᏧᏂᎧᎿᏩᏛᏍᏗ ᎭᏫᎾᏗᏢ ᏣᎳᎩ ᏀᎾ ᎨᏒ, ᎣᏂ ᏧᏩᎫᏛ ᎾᏍᎩ ᎤᏩᏒ ᎯᎠ ᎬᎾᏕᎾ ᎠᏰᎵ ᎤᏙᏢᏒ (ᎾᏍᎩ ᏂᎨᏒᎾ ᎤᏔᏂᏗ ᎦᏙᎯ ᎠᏰᎵ ᎤᏙᏢᏒ) ᎠᏰᎲ ᏓᎳᏏᏛ ᎭᏫᎾᏗᏢ ᎠᏴᏫᏯ ᏂᏚᎾᏛᏁᎵᏙᎸ. ᎠᎦᏲᎳᏗᏍᏗ ᏣᏥᏱ ᏄᏛᏁᎸ ᎾᏍᎩ ᏂᎨᏒᎾ ᎤᏕᏯᏙᏗ ᎦᎾᏄᎪᎢᏍᏗ ᎭᏫᎾᏗᏢ ᎯᎠ ᎦᎸᏛ ᎧᏁᏌᎢ, ᎠᎴ ᎠᏓᎦᏎᏍᏙᏗ ᏂᎨᏒᎾ ᎯᎠ ᏭᏔᏅᎢ Court's ᏧᏚᎪᏔᏅ." },
         { "cell": "quote-letter", "text": "ᎯᎠ ᏚᏙᎥ ᏏᏉᏯ ᎠᎴ Sikwâ'yǐ ᎨᏒᎢ ᎤᏬᎯᏳᏅ ᎾᏍᏋ ᏗᎫᎪᏔᏅ ᏂᏛᎴᏅᏓ ᎯᎠ ᏣᎳᎩ ᎧᏁᏨ ᏏᏆ ᏏᏆ ᎦᏛᎬᎢ \"ᏏᏆ\". ᎪᎯ ᎨᏒᎢ ᎢᏳᏍᏗᏊ ᏩᏎᎸᎯ ᎠᏛᏍᎩ ᎤᏙᏢᏒ ᎠᎴ ᎣᏂᏯᎨᏍᏙᏗ ᎠᏥᏐᏅᏅ Ꮎ ᎠᎦᏍᎦᏂ ᏏᏉᏯ ᏰᎵᏆ ᎢᏯᏛᏁᏗ." },
         { "cell": "quote-letter", "text": "SantaLand.com, one of the Internet's oldest ᏗᎭᏄᎧᎯ-related website, founded in 1991 by former Library of Congress archivist Jeff Guide" },
-        { "cell": "quote-letter", "text": "An octopus's shark encounter – footage of an octopus eating a shark (also in Quicktime format)" },
-        { "cell": "quote-letter", "text": "You can help expand this system by creating templates for your language. Categories have already been created for most languages which have editions of Wikipedia containing over a hundred articles; they just need labelling up! It's recommended to copy the English or French versions when expanding the scheme, as most of the languages listed here are incomplete." },
         { "cell": "quote-letter", "text": "'ᎩᎶ ᏮᏎ ᏯᏩᏛᏁᎵ ᏩᏙ ᏥᏲᏎᎰ, ᏣᎳᎩ ᎠᏂᏴᏫ ᎠᏂᏗᏍᎪ ᏩᏙ 'ᎩᎶ ᏮᏎ ᏯᎩᏁᎵ. ᎠᏂᏴᏫ ᏥᏈᏍᏗ ᏩᏙ ᎠᏂᏗᏍᎪ ᎠᎴ ᏍᎩᎾ ᎣᏍᏓ! ᏥᏈᏍᏗ ᎠᏂᏴᏫ ᏥᏈᏍᏗ ᎠᏂᏛᏁᎰ ᏍᏊᎢ. ᎠᎩᎸᏈᏗ ᎠᎩᏪᏍᏗ ᏩᏙ ᏥᏈᏍᏗ ᎠᏂᏴᏫ, ᎣᎩᎾᎵ ᏍᏊ ᎠᏂᏗᏍᎪ ᏩᏙ. ᎢᏳᏓᎭ ᎠᏂᏴᏫ ᎠᏂᏛᏁᎰ ᏮᏎ ᎠᎴ Ꮭ 'ᎩᎶ ᎠᏗ ᏮᏎ ᎠᎴ ᏥᏈᏍᏗ ᏩᏙ ᎠᏂᏗᏍᎪ ᏍᏊᎢ. ᏃᏥᎩ ᏥᏈᏍᏗ ᏧᎾᏍᏗ ᏣᎳᎩ ᏗᏂᏲᏟ ᎠᏂᏗ ᏩᏙ, ᎢᏳᏓᎭ ᏥᎪᏩᏘ ᎤᏔᎾ ᏗᎪᏪᎵ ᎪᏪᎸ ᏩᏙ ᏂᎦᏓ ᏣᎳᎩ ᎠᏂᏬᏂᏍᎩ, ᏍᏊ ᏥᎪᏩᏘ ᏗᏯᏟᏗ ᏱᎦᏓ ᎠᏂᏗ ᏩᏙ ᏂᎦᏓ ᏧᏂᏍᏗ ᏣᎳᎩ ᏗᏂᏲᏟ. ᎣᎩᎾᎵ ᎠᏘᏟᏗ ᎤᎭ ᏍᎩᎾ ᎠᏗ ᏩᏙ ᏂᎦᏓ ᏍᎩᎾ ᎣᏍᏓ. ᏙᏳ ᎠᎩᎸᏈᏗ Ꭰ'ᏛᎪᏗ ᏍᎩᎾ ᏱᎦᏪᏍᏗ ᏣᎳᎩ ᎬᏗ ᏩᏙ ᎠᎴ ᏍᎩᎾ ᎣᏍᏓ. ᎤᏩᏌ ᏙᏳ ᎠᎩᎸᏈᏗ Ꭰ'ᏛᎪᏗ ᏩᏙ, ᎰᏩ ᏍᎩᎾ ᏂᎦᏓ ᏩᏙ." },
         { "cell": "quote-letter", "text": "Ꮤ ᏘᏯᎾ Ꮚ ᎳᏃᏩ (ᏣᎳᎩ: Tatiyana Bulanowa; ᏲᏂᎢ: Татьяна Ивановна Буланова Tat'yana Ivanovna Bulanova) ᎠᏲᏂᎢ ᏗᎧᏃᎩᏍᎩ." },
         { "cell": "quote-letter", "text": "ᎠᏂᎢᏤᎢᏳᏍᏗ (ᏣᎳᎩ: Ànìʻìjéʻìyūsdi; ᎢᏤᎢᏳᏍᏗ: Kalaallit) ᎠᏂᏴᏫ ᎢᏤᎢᏳᏍᏗ ᎦᏙᎯ ᎠᏁᎯ. ᎠᏂᎢᏤᎢᏳᏍᏗ ᎢᏤᎢᏳᏍᏗ ᎠᏂᏬᏂᎭ." }

@@ -34,41 +34,41 @@
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
-        "degrees": 265,        // in 22 treated languages
-        "digit-run": 124524,   // in 19 treated languages
-        "fractions": 964,      // in 18 treated languages
-        "clock": 5589,         // in 18 treated languages
-        "signs": 3766,         // in 17 treated languages
-        "dotted": 30092,       // in 16 treated languages
-        "era-marker": 1159,    // in 14 treated languages
-        "year": 104904,        // in 14 treated languages
-        "decimals": 11339,     // in 12 treated languages
-        "ordinal-latin": 5236, // in 11 treated languages
+        "degrees": 260,        // in 22 treated languages
+        "digit-run": 116955,   // in 19 treated languages
+        "fractions": 759,      // in 18 treated languages
+        "clock": 5453,         // in 18 treated languages
+        "signs": 3342,         // in 17 treated languages
+        "dotted": 28642,       // in 16 treated languages
+        "era-marker": 973,     // in 14 treated languages
+        "year": 97463,         // in 14 treated languages
+        "decimals": 10743,     // in 12 treated languages
+        "ordinal-latin": 3799, // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 30,           // in 9 treated languages
-        "ranges": 28591,       // in 7 treated languages
-        "currency": 50,        // in 6 treated languages
-        "abbrev": 55537,       // in 6 treated languages
-        "latin-in-native": 40224, // in 6 treated languages
-        "percent": 1510,       // in 5 treated languages
-        "rate": 418,           // in 4 treated languages
+        "units": 17,           // in 9 treated languages
+        "ranges": 25545,       // in 7 treated languages
+        "currency": 48,        // in 6 treated languages
+        "abbrev": 52203,       // in 6 treated languages
+        "latin-in-native": 29486, // in 6 treated languages
+        "percent": 1480,       // in 5 treated languages
+        "rate": 412,           // in 4 treated languages
         "zero-width": 6,       // in 4 treated languages
-        "roman": 7535,         // in 3 treated languages
-        "initialism": 43218,   // in 3 treated languages
-        "grouped": 2891,       // in 3 treated languages
-        "signed-number": 1993, // in 2 treated languages
-        "ordinal-range": 42,   // in 1 treated languages
-        "letter-name": 10487,  // in 3 treated languages
-        "exponent": 5128,      // in 24 treated languages
-        "arithmetic": 1037,    // in 2 treated languages
-        "ampersand": 2256,     // in 1 treated languages
+        "roman": 7191,         // in 3 treated languages
+        "initialism": 39847,   // in 3 treated languages
+        "grouped": 2765,       // in 3 treated languages
+        "signed-number": 1576, // in 2 treated languages
+        "ordinal-range": 34,   // in 1 treated languages
+        "letter-name": 5668,   // in 3 treated languages
+        "exponent": 5122,      // in 24 treated languages
+        "arithmetic": 832,     // in 2 treated languages
+        "ampersand": 1493,     // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
-        "sports-time": 19,     // in 3 treated languages
-        "version-dot": 15,     // in 3 treated languages
-        "quote-letter": 1935,  // in 4 treated languages
-        "scaled-currency": 26, // in 3 treated languages
-        "ordinal-caps": 29,    // in 2 treated languages
+        "sports-time": 17,     // in 3 treated languages
+        "version-dot": 13,     // in 3 treated languages
+        "quote-letter": 930,   // in 4 treated languages
+        "scaled-currency": 25, // in 3 treated languages
+        "ordinal-caps": 21,    // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -151,16 +151,16 @@
         { "cell": "ordinal-latin", "text": "Алексеев А. А. Заметки о первых грамматических трудах по чувашскому языку // Уч. зап. ЧНИИ, вып. 49. Филология. — Шупашкар, 1970. — С. 203—220." },
         { "cell": "ordinal-latin", "text": "Димитриева В. Д. Документы об издании книги «Сочинения, принадлежащие к грамматике чувашского языка» // Уч. зап. ЧНИИ, вып. 34. Филология. — Чебоксары, 1967. — С. 153—162." },
         { "cell": "ordinal-latin", "text": "Ле Гофф Ж. Цивилизация средневекового Запада. М., «Прогресс», 1992. Глава VII — Материальная жизнь." },
-        { "cell": "ordinal-latin", "text": "László Klima, The linguistic affinity of the Volgaic Finno-Ugrians and their ethnogenesis (early 4th millennium BC — late 1st millennium AD), Societas historiae Fenno-Ugricae (1996), ISBN 951-97040-1-9" },
         { "cell": "ordinal-latin", "text": "«Чăваш литературин антологийĕ», составители: Д. В. Гордеев, Ю. А. Силэм. Шупашкар, 2003. ISBN 5-7670-1279-2 ." },
+        { "cell": "ordinal-latin", "text": "«Чăваш литературин антологийĕ», составители: Д. В. Гордеев, Ю. А. Силэм. Чебоксары, 2003. ISBN 5-7670-1279-2." },
         { "cell": "units", "text": "Сона (франц. Saône) — Францин тухăç енче юхакан юханшыв, Ронăн сылтăм юппи. Тăршшĕ 482 çухрăм, бассейн лаптăкĕ 29&nbsp;950 км². Вăтамран 410 m³/с шыв юхать." },
         { "cell": "units", "text": "Биледжик (туркк.: Bitlis), — Турци илĕсен пĕри. Тĕпхули çакăн пекех Битлис ятлă. Илте 388 678 çын (2000) пурăнать. Лаптăкĕ 8 413 km²." },
         { "cell": "units", "text": "Караман (туркк.: Karaman), — Турци илĕсен пĕри. Тĕпхули çакăн пекех Караман ятлă. Илте 243&nbsp;210 çын (2000) пурăнать. Лаптăкĕ 8 816 km²." },
         { "cell": "units", "text": "Малатья (туркк.: Malatya), — Турци илĕсен пĕри. Тĕпхули Малатья. Илте 853 658 çын пурăнать (2000). Лаптăкĕ 12 235 km²." },
-        { "cell": "units", "text": "Im mittleren Norden des Urals befindet sich der mit 1895 m höchste Gipfel des Gebirges, die Narodnaja. Rund 180 km südlich des Polarkreises, stellt der dortige Teil des Uralgebirges nicht nur klimatisch betrachtet ein Hochgebirge dar." },
         { "cell": "units", "text": "Вутăпа хутмалли тĕнчери чи пысăк мунча — Merisotakoulu финн çар-тинĕс шкулĕн сауни. Ăна 1904 çулта Суоменлиннара туса лартнă. Пăс пӳлĕмĕн лаптăкĕ — 65 m², маччи 5 метр çӳллĕш. Сентресем çине 180 çын вырнаçма пултарать. Сауна халĕ те вĕренекенсемпе вĕрентӳçсем вали ĕçлет." },
         { "cell": "units", "text": "Носков Г.А. и др. Полевой воробей Passser montanus L. (характеристика вида на пространстве ареала). Л., 1981 DjVu 10,1 Mb" },
         { "cell": "units", "text": "Co-founder Angela Beesley on Wikia brief video interview during SB Forum on Digital Transitions (18 MB) ака, 10-2006" },
+        { "cell": "units", "text": ", 2015 DB216 (орбитине тĕрĕс мар кăтартнă), (87269) 2000 OO67, VN112 2004, 2005 VX3, (308933) 2006 SQ372, 2007 TG422, 2007 DA61, MS9 2009, 2010 GB174, 2010 NV1, 2010 BK118, 2012 DR30, 2015 ER61, 2013 BL76, 2013 AZ60, 2013 RF98.]]" },
         { "cell": "ranges", "text": "Юр чӳк уйăхĕн 3-мĕш декадинче ларать те ака уйăхĕччен ирĕлмесĕр выртать, акан варринче вара пĕтĕмпех ирĕлсе пĕтет. Юр çулталăкра пурĕ 150—160 кун выртать." },
         { "cell": "ranges", "text": "1437–1445 çулсенче ку çĕрсем çинче Хусан ханлăхĕ йĕркеленет, Чăваш Ен çĕрĕсем унта кĕреççĕ. 1552 çулта вырăссем Хусана çĕнсе илеççĕ, чăвашсем те вĕсене самай пулăшаççĕ. Чăвашсем хăйсен патшалăхне туса хума ĕмĕтленĕ пулнă, анчах та вырăссене çак шухăш пачах килĕшмен — вара вĕсем чăваш çĕрĕсене Раççей çумне хушаççĕ." },
         { "cell": "ranges", "text": "И. П. Прокопьев — КПСС Чӑваш обкомӗн пӗрремӗш секретарӗ (1974-1988), чӑваш АССР Улттӑмӗш созыври Аслӑ Канашӗн председателӗ (1963-1967);" },
@@ -247,14 +247,14 @@
         { "cell": "signed-number", "text": "çу, 2 — Привилей 1447, (Казимир привилĕсене -1447) çирĕплетнĕ — Казимир IV Ягайлович аслă кнеç Вильнăра кăларнă Аслă Литва кнеçлĕхĕнчи саккун тăвакан акт. Çак акт хресченсене феодалсен пăхăнăвне çирĕплетекен юридици саккунĕ пулать." },
         { "cell": "signed-number", "text": "Район климачĕ вăтам континентлă. Хĕлĕсем вăрăм та сивĕ, çилĕллĕ, çăвĕсем ăшă. Хĕллехи вăтам температура — -12,9&nbsp;°C тан, çуллахи — +18,3&nbsp;°C. Палăртса юлнă чи сивĕ температура — -44&nbsp;°C, чи ăшши — +37&nbsp;°C." },
         { "cell": "signed-number", "text": "Мастерство писателя. Антология журнала «Литературная учёба». 1930—-2005. 2005." },
-        { "cell": "ordinal-range", "text": "The history of Permian, Mari and Chuvash plural suffixes in the light of Indo-Aryan parallels // Suomalais-Ugrilaisen Seuran aikakauskirja. Helsinki, 1999. – 88. – P. 73 – 101;" },
-        { "cell": "ordinal-range", "text": "Murteiden taistelu Volgan mutkassa ja meillä. Volgan-Kaman alueen vähemmistökirjakielten synty // Virittäjä. – Helsnki, 2000. – 4. – S. 542 – 568;" },
         { "cell": "ordinal-range", "text": "Будущее нации – в школе / В.А. Абрамов [и др.]. – Чебоксары: Изд-во Новое время, 2006. – 5.50 п.л." },
         { "cell": "ordinal-range", "text": "Никифоров, А. Хусан тапхăрĕ / А. Никифоров // Ялав. – 1999. – № 11. –12. – С. 90–93." },
         { "cell": "ordinal-range", "text": "«Мужчина в черном» и другие // Хыпар. – 2008. – 32-33. – 0.1 п.л." },
         { "cell": "ordinal-range", "text": "Ялгир, П. Николаева Мария Николаевна // Ялгир, П. Литературный мир Чувашии / П. Ялгир. – Чебоксары, 2005. – 78." },
         { "cell": "ordinal-range", "text": "Тарханова К. Неидеальный герой (интервью, Дмитрий Ульяновпа) // «МК». — 2005. — çу, 14. — 15.02.2009." },
         { "cell": "ordinal-range", "text": "Б. Сопельняк. Последний узник Шпандау . Портал Хранитель, 03.-04.2007." },
+        { "cell": "ordinal-range", "text": "01.06. — 07.1824 ç. — «Демут» хăна çурчĕ — Мойка юханшывĕн çыран хĕрри, 40;" },
+        { "cell": "ordinal-range", "text": "08. — 11.1824 ç. — А. И. Одоевский хваттерĕ, Погодин тупăш çуртĕнче — Сутă-илӳ урамĕ, 5;" },
         { "cell": "letter-name", "text": "Бриллиантсемпе I степеньлĕ Ялав (Хункăри)," },
         { "cell": "letter-name", "text": "Агаков Леонид Яковлевич, — X ĕмĕрти чаплă чăваш çыравçи." },
         { "cell": "letter-name", "text": "Раççей — ядерлă патшалăх . Космос патшалăхсенчен пĕрри . Раççей ПНО Хăрушсăрлăх Канашне ялах хутшăнакан, вето правипе кӗрет. Çавăнпа, Раççей нумай тĕнчери организацисенче пур: ПНО, G20, ЕАЭП, ППП, КХКО, ТСО, OSCE, SCO, APEC, БРИКС, ТОК тата ыттисем." },
@@ -289,28 +289,28 @@
         { "cell": "ampersand", "text": "кăрлач, 3 — Владимир Павлович Безобразов, экономист тата публицист (вил.&nbsp;1889)." },
         { "cell": "sports-time", "text": "1972, 23:59:60 UTC — пĕрремĕш хут тĕкел çул çеккунтине кĕртнĕ" },
         { "cell": "sports-time", "text": "«Восток» карапĕ космослăха 1961 çулхи ака уйăхĕн12-мĕшĕнче, 9 сех. 7 минутра (мускав вăхăчĕпе) Байконур космодромран çĕкленнĕ. Çĕр тавра 108 минут хушшинче çаврăнса 10:25:34 вăхăтра карап шутланă енĕпе вĕçеве вĕçлет. Гагаринăн чĕнмелли «Кедр» пулнă." },
-        { "cell": "sports-time", "text": "Shekulli. Ta shpëtojmë Wikipedian Shqipe. Die, 12 Gus 2007 08:57:00. Nga Ardian Vehbiu" },
         { "cell": "sports-time", "text": "Пи хисепĕн кунне математикăна савакансем пуш уйăхĕн 14-мĕшĕнче, 1:59:26 вахăтра уявлаççĕ." },
         { "cell": "sports-time", "text": "Çак официаллă мар уява 1987&nbsp;çулта Сан-Францискора пурăнан Ларри Шоу (Larry Shaw) шутласа кăларнă; унăн палăртăвĕпе американсен вăхăт шутлав системинче (уйăх&nbsp;/ хисеп)&nbsp; пушăн&nbsp;14 — 3/14&nbsp;—тата 1:59:26 вак вăхăчĕ пи хисепĕн пĕрремĕш разрядĕнчи паллисем \\pi = 3,1415926…. пулаççĕ." },
         { "cell": "sports-time", "text": "42 çухрăм тăршĕллĕ çула пирĕн çĕршывран виççĕн тухрĕç:Альбина Майорова,Лилия Шобухова тата Татьяна Петрова-Архипова.Лилия вĕçне çитмейрĕ,20 çухрăм иртсен хăйне япăх туйма пуçланăран ăмăртăва вĕçлерĕ. Татьяна Африка спортсменĕсене çеç мала ярса виççĕмĕш тухма пултарчĕ.Вăрăм çула вăл 2:23:29 вахăтра вĕçлерĕ.Ку вăл мала тухнă Эфиопи спортсменĕнчен 22 секкунт нумайрах.Иккĕмĕш вырăна Кенирен тухрĕ." },
         { "cell": "sports-time", "text": "— Хĕвел системинчи астероид, транснептун объектсен шутĕнчи кьюбивано. 08:36:31 UTC Spacewatch (А. Э. Глисон, Дж. А. Ларсен, Р. C. Макмиллан) KPNO (Аризона, АПШ) уçнă. Абсолютлă çăлтăр виçи 5,2." },
-        { "cell": "sports-time", "text": "Charlie Kaufman lecture on screenwriting , BAFTA Lecture Series, 30 September 2011. (1:10:08 hours)" },
+        { "cell": "sports-time", "text": "Чи малтан тĕтĕмлĕ тар шутласа кăларнă. Ăна кали селитрине, йывăç кăмрăкне тат кӳкăрте пăтраштарса тăваççĕ (75:15:10 пайсемпе). Авалхи вăхăтранах çунтарма тата сирпĕтме усă курнă тесе калани йăлана кĕне. Анчах кăна çирĕплетекен материалсемпе документсене тупман." },
+        { "cell": "sports-time", "text": "Топ-десятка самых известных поджогов в истории человечества // Игорь Гончаренко, Портал гражданской журналистики. Интернет-издание ХайВей, 26, июнь, 2015 10:37:07" },
         { "cell": "version-dot", "text": "ru:Чувашская мифология#.D0.AB.D1.80.D0.B0.D0.BC.D0.B0.D1.81.D1.8C" },
         { "cell": "version-dot", "text": "Словио пĕрмаях аталанса хушăнса ӳсет. Ака, 1 2007 çултанхи словио версийĕ — 2.74k." },
         { "cell": "version-dot", "text": "ru:Постпереходные металлы#.D0.9B.D1.91.D0.B3.D0.BA.D0.B8.D0.B5_.D0.BC.D0.B5.D1.82.D0.B0.D0.BB.D0.BB.D1.8B" },
         { "cell": "version-dot", "text": "XYZ Filter v1.0b ( Ку фильтр тĕс япăх курăнакан вырăна тĕплĕн майлаштармалли)" },
         { "cell": "version-dot", "text": "(Advanced Systems Format.asf)-па ĕçлесси халĕ кунта çуккă, 1.3d версирен пуçласа, çак фирма чарние пула Microsoft ." },
         { "cell": "version-dot", "text": "Маслова И. В. Влияние климата на отдельные аспекты жизнедеятельности земноводных и пресмыкающихся (рус.) : сборник / Сост. А. О.Кокорин. — Москва: WWF России, 2006. — С. 111. — ISBN 5895640370. — Bibcode: 26.23В58." },
-        { "cell": "version-dot", "text": "i! = \\Gamma(1+i) \\approx 0.4980 - 0.1549i." },
         { "cell": "version-dot", "text": "Niftalı Qocayev ÜMUMİ FİZİKA KURSU II Cild MOLEKULYAR FİZİKA. Bakı-2008.192s. (азербайджанла)" },
+        { "cell": "version-dot", "text": "Храмов, Ю. А. Гюйгенс Христиан // Физики : Биографический справочник / Под ред. А. И. Ахиезера. — Изд. 2-е, испр. и доп. — М. : Наука, 1983. — С. 95. — 400 с. — 200 000 экз. — ББК 22.3гя2. — УДК 53(G)." },
         { "cell": "quote-letter", "text": "Чӳк, 15 — Референдум иртернĕ хыççăн Италин гимнĕ шутне Fratelli d'Italia гимна йышăннă." },
         { "cell": "quote-letter", "text": "çĕртме, 25 — Шарль Ожье де Бац де Кастельмор, граф д’Артаньян — гасконь дворянинĕ, Людовик XIV астулра чухне король мушкетёрĕсен ротинче хĕсметре тăнă." },
         { "cell": "quote-letter", "text": "Юпа, 12 — Италин гимнĕ шутне вăхатлăха Fratelli d'Italia гимна йышăннă." },
-        { "cell": "quote-letter", "text": "Pere Pau Caçador i d'Aguilar-Dusai 1605-1608" },
-        { "cell": "quote-letter", "text": "Onofre d'Alentorn i de Botella 1608-1611" },
-        { "cell": "quote-letter", "text": "Gispert d'Amat i Desbosc de Sant Vicenç 1644-1647" },
-        { "cell": "quote-letter", "text": "Manuel de Copons i d'Esquerrer 1707-1710" },
-        { "cell": "quote-letter", "text": "Kimberli Mäkäräinen's Meadow Mari Grammar" },
+        { "cell": "quote-letter", "text": "Куран — мӑсӑльмансен сӑваплӑ кĕнеки. Ячĕ «кара'а» (арап чĕлхинчен куçарсан «вуламалла» пек куçарăнать) сăмахĕнчен пулнă. Сӑваплӑ Курана Аллах Мухаммӑт пихампарне 22 çул хушши Ҫапраил архангелĕ урлă панă. Ун хыççăн вара вăл кĕнеке пĕрре те улшăнман." },
+        { "cell": "quote-letter", "text": "Ева Лисина чăвашла тата вырăсла çырнă нумай калав, юмах, повеç, пьеса авторĕ. Чăвашла А.Н. Островский, Э. де Филиппо, П.Гаринеи, Ю. О’Нил тата ытти çыравçă хайлавĕсене куçарнă." },
+        { "cell": "quote-letter", "text": "Коканд (узбек. Qo'qon) — Узбекистанăн хевел тухăç енчи хула, Фергана айлăмĕн кăнтăр-хĕвеланăç енĕнче вырнаçнă. Çын шучĕ 180 пинпе танлашать. Хула Ферган вилоятне кĕрет." },
+        { "cell": "quote-letter", "text": "Сум (So‘m), — Узбекистан валюти. Сума 1994 çулхи утă уйăхĕн 1 Узбекистан президенчĕн указĕпе хута кĕртнĕ. \"Узбекистан Республикинче халăх валютине хута кĕртесси çинчен\" указа 1994 çулхи çĕртме уйăхĕн 16 кăларнă." },
+        { "cell": "quote-letter", "text": "Юпа, 12 — Aseman Airline'ăн Fokker F-28 самолёчĕ Исфахантан Тегерана вĕçнĕ чухне, Тегерантан 240 çухрăм кăнтаралла вырнаçнă Натанз патĕнче персе аннă. 66 çын вилнĕ." },
         { "cell": "scaled-currency", "text": "1987 çулхи чӳк, 19 («йĕксĕк тунтикун») FTSE 100 индексĕ 30 % ытла ӳкет, пасарăн капитализацийĕ £63 млрд шутлă начарланать, тĕнчери хуçалăх (экономика кризисĕ) тапранать, Совет Союзĕ арканнă хыççăн çеç (1990-мĕш пуçламăш çулĕсенче) иртсе каять." },
         { "cell": "scaled-currency", "text": "Карно ушкăнĕпе Чаплин 1910, авăн —1912, çĕртме вăхăтĕнче АПШ-ра гастрольре ĕçлет. 1912 çулта вăл пиллĕк уйăхлăха Англие таврăнать, 1912, юпа, 2 Карно ушкăнĕпе АПШ-на каять те унтах юлать. Унăн пултарулăхне кинопродюсер Мак Сеннет асăрхать. Ăна Чарли вылявĕ килĕшет, вара вăл артиста хăйĕн «Кистоун Филм» (Keystone Film) студине чĕнет. 1913 çулхи авăн, 23 Чаплин «Кистоун Филм» студипе ĕç хучĕ çырса ал пусать, эрнине $150 шалупа килĕшет." },
         { "cell": "scaled-currency", "text": "Швеци OMX Group 2003 ç туса хунă. OMX — Nordic Exchange оператăрĕ, Скандинавипе Балтика çĕршывĕсен пасарĕн 80% яхăн хаклă хучĕсене йĕркелесе тăрать. 2006 ç. —сутăç сумĕ $516,7 млн, тупăçĕ — $121 млн, капитализацийĕ — $2,5 млрд." },
@@ -325,8 +325,8 @@
         { "cell": "ordinal-caps", "text": "Гудв Владимир Сергеевич - февралӗн 6-Мӗшӗнче Мускав облаҫӗнчи Большевик поселокӗнче Ҫуралнӑ." },
         { "cell": "ordinal-caps", "text": "Вырăс супер-агенчĕ — çав тери вăрттăн шпион Шура Осечкин (Павел Деревянко), вăлах СС штандартенфюрерĕ Олаф Шуренберг, хăйне пач шеллемесĕр, никама уямасăр Китлĕр (Михаил Крылов) ставкинче пăсăк ĕçсене туса пырать. Вăрçă кĕç-вĕç пĕтмелле, çакна ĕнтĕ, фанат-фюрерпа шикленӳллĕ Мюллерсăр (Юрий Гальцев) пуçне, пурĕ те чухлаççĕ. Райхри ахаль ĕçтĕшсем мĕнпур япала çине алă сулнă — çирĕп шухăша путмасăр клубсенче аташса çӳреççĕ. Шуренберг килте тунсăхласа ларать, 007-Штрассе çинчи хăйĕн çуртĕнче вăрттăн пахча-çимĕç ӳстерет." },
         { "cell": "ordinal-caps", "text": "Тулă-1-Курская — Тулă хулин тĕп чукун çул чарăнăвĕ (Мускав вокзалĕ)." },
-        { "cell": "ordinal-caps", "text": "2004: Don Matteo, season 4, 23RD episode" },
-        { "cell": "ordinal-caps", "text": "1-Нянь-Яха — Раççей территоринчи юханшыв. Ямал-Ненец автономлă тăрăхĕ/Ненец АО территорипе юхать. Юханшыв Яромичу-Яха юханшывăн сылтăм çыранĕпе юппинчен 23 км юхса кĕрет. Юханшыв тăршшĕ 21 км." }
+        { "cell": "ordinal-caps", "text": "1-Нянь-Яха — Раççей территоринчи юханшыв. Ямал-Ненец автономлă тăрăхĕ/Ненец АО территорипе юхать. Юханшыв Яромичу-Яха юханшывăн сылтăм çыранĕпе юппинчен 23 км юхса кĕрет. Юханшыв тăршшĕ 21 км." },
+        { "cell": "ordinal-caps", "text": "2-Нянь-Яха — Раççей территоринчи юханшыв. Ямал-Ненец автономлă тăрăхĕ/Ненец АО территорипе юхать. Юханшыв Яромичу-Яха юханшывăн сылтăм çыранĕпе юппинчен 26 км юхса кĕрет. Юханшыв тăршшĕ 25 км." }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

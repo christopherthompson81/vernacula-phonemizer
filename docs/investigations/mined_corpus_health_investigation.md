@@ -939,3 +939,49 @@ was the difference between a sourced reading and a guess. Left silent and docume
 **Open, and a decision for the user:** the other 32 affected artifacts are still contaminated. The dumps are on
 disk (116 files, 11 GB), so re-mining is possible; it would change 32 committed artifacts and correct their cell
 counts the same way km's were corrected.
+
+## Run 19 — 2026-08-05 16:40 · the fleet re-mine, and the same string ceiling walked into twice
+
+Re-mined every dump-sourced artifact whose gating tier carried foreign-script cells. 30 languages, all now at
+zero: km my ab ary arz awa ba be bo chr chv gan hy hyw ka ky lo mai mn pnb ps sat shn si skr syl tg ti ug wuu.
+Each artifact keeps its 200-entry `sample` tier, none lost a cell to the filter, and all 30 scan clean for
+contact-shaped data.
+
+**I reintroduced the Node string ceiling one function after the code that exists to avoid it.** My filter began
+`dominantScript(segments.join("\n").slice(0, 400_000))` — the join materialises the WHOLE corpus before the slice
+can narrow it, so hy's 1.4 GB dump died on `RangeError: Invalid string length` at `Array.join`. This is the same
+ceiling that once made tt, arz, ka and eu unminable and was fixed by streaming in `segmentFile`; putting a
+`.slice()` after a `.join()` is the bug wearing a bound. Replaced with `scriptProbe()`, which accumulates a
+capped, STRIDED sample — strided rather than head-truncated because the first 400 KB of a dump is whatever the
+alphabet put first, and a corpus whose opening articles are foreign would have its script inferred from them.
+The bound is now structural and pinned by a test that passes 200,000 segments.
+
+The 27 artifacts mined before the fix were re-run afterwards, because a committed artifact should be what the
+current code produces, not what an earlier version did.
+
+**Four cells lost all their evidence, and three of those losses are the point of the exercise.** Checked rather
+than assumed, by reading what the old evidence actually was:
+  · gan `ordinal-latin` — English bibliography entries (`Jensen, Hans. 1970. Sign Symbol and Script. London…`)
+  · hyw `ordinal-range` — an English book title
+  · si `iteration` — JAPANESE news quotations sitting in a Sinhala wiki
+
+Those three cells were reporting COVERED on foreign text. EMPTY is the honest state, and it is a better input to
+a layer author than a false positive.
+
+**The fourth was my own error, twice over.** `my`'s lost `ordinal-native` and `calendar` had genuine Burmese
+evidence. Two causes: its raw dump was no longer on disk so I re-downloaded a NEWER snapshot (different articles,
+so not a controlled comparison), and `my` is the one language in the fleet with a `--terms` list —
+`tools/corpus/terms/my.tsv`, 45 terms — which my sweep command omitted. It had been the fleet's only 35/35
+artifact and my re-mine dropped it to 33/35. Re-mined with `--terms`: 35/35, 273 hard cells, 0 foreign.
+
+Earlier in the same session the same omission cost km its entire 200-entry sample tier, because I re-mined with
+bare defaults instead of `dumpmine.sh`'s `--per-cell 8 --sample 200 --segment paragraph`. Both are the same
+mistake: reconstructing a generator's invocation from memory instead of from the script that recorded it.
+
+**Not re-mined, and why:**
+  · `cmn` (6/114) — a HYBRID: FLEURS plus targeted wiki fills. A dump re-mine would discard the fills, which is
+    what `remine.sh` already refuses to do for it.
+  · `he` (2/180), `mag` (5/128) — API-sourced (random articles plus `insource:` fills), so reproducing them
+    means a rate-limited network sweep rather than a local pass.
+
+Fleet state: 154 artifacts, 33 were contaminated, 30 are now clean, 3 remain and are named above.

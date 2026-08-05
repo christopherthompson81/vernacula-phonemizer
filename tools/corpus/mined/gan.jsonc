@@ -29,44 +29,44 @@
     "source": "gan.wikipedia.org dump (pages-articles, paragraphs)",
     "segmentMode": "paragraph",
     "totalSegments": 3020,
-    "cellsCovered": 31,
+    "cellsCovered": 29,
     "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
         "degrees": 15,         // in 22 treated languages
-        "digit-run": 1207,     // in 19 treated languages
+        "digit-run": 1119,     // in 19 treated languages
         "fractions": 11,       // in 18 treated languages
-        "clock": 78,           // in 18 treated languages
-        "signs": 157,          // in 17 treated languages
-        "dotted": 17,          // in 16 treated languages
-        "era-marker": 1,       // in 14 treated languages
-        "year": 1190,          // in 14 treated languages
-        "decimals": 229,       // in 12 treated languages
-        "ordinal-latin": 9,    // in 11 treated languages
+        "clock": 58,           // in 18 treated languages
+        "signs": 153,          // in 17 treated languages
+        "dotted": 12,          // in 16 treated languages
+        "era-marker": 0,       // in 14 treated languages
+        "year": 1102,          // in 14 treated languages
+        "decimals": 207,       // in 12 treated languages
+        "ordinal-latin": 0,    // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 3,            // in 9 treated languages
-        "ranges": 80,          // in 7 treated languages
+        "units": 2,            // in 9 treated languages
+        "ranges": 58,          // in 7 treated languages
         "currency": 1,         // in 6 treated languages
-        "abbrev": 31,          // in 6 treated languages
-        "latin-in-native": 1209, // in 6 treated languages
+        "abbrev": 17,          // in 6 treated languages
+        "latin-in-native": 939, // in 6 treated languages
         "percent": 104,        // in 5 treated languages
         "rate": 5,             // in 4 treated languages
         "zero-width": 1,       // in 4 treated languages
-        "roman": 9,            // in 3 treated languages
-        "initialism": 150,     // in 3 treated languages
-        "grouped": 90,         // in 3 treated languages
-        "signed-number": 10,   // in 2 treated languages
+        "roman": 6,            // in 3 treated languages
+        "initialism": 99,      // in 3 treated languages
+        "grouped": 89,         // in 3 treated languages
+        "signed-number": 9,    // in 2 treated languages
         "ordinal-range": 0,    // in 1 treated languages
-        "letter-name": 117,    // in 3 treated languages
+        "letter-name": 83,     // in 3 treated languages
         "exponent": 24,        // in 24 treated languages
-        "arithmetic": 13,      // in 2 treated languages
-        "ampersand": 23,       // in 1 treated languages
+        "arithmetic": 9,       // in 2 treated languages
+        "ampersand": 15,       // in 1 treated languages
         "iteration": 1,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
         "sports-time": 3,      // in 3 treated languages
         "version-dot": 88,     // in 3 treated languages
-        "quote-letter": 93,    // in 4 treated languages
+        "quote-letter": 51,    // in 4 treated languages
         "scaled-currency": 1,  // in 3 treated languages
         "ordinal-caps": 0,     // in 2 treated languages
     },
@@ -113,14 +113,14 @@
         { "cell": "signs", "text": "佢係世界第二大嗰洲，哈係世界上第二多人嗰洲。非洲嗰面積有30,221,532平方公里，多過九億人；佔世界人口嗰 14 %。加到馬達加斯加有四十六隻國家，加到別嗰島國就五十四。" },
         { "cell": "signs", "text": "上栗係萍鄉管到嗰一隻縣，佢位到萍鄉嗰北首。全縣管到六隻鎮四隻鄉同到一隻場，攏共199隻行政村，十隻居委會，總人口大概47萬，農業人口占總人口嗰88%，人口密度係630人/平方公里。" },
         { "cell": "signs", "text": "以實際統治領土而言，中華民國嗰領土包括臺灣本島、澎湖群島、金門群島、馬祖群島跟南海嗰東沙群島、南沙群島中的太平島跟中洲礁，總面積為36,192.8155平方公里，海岸線長1,813餘公里，可耕地占24%。中華民國政府主張之中國大陸領土，則不在實際控制之下。" },
-        { "cell": "dotted", "text": "Rix, Helmut. 1993. \"La scrittura e la lingua\" In: Cristofani, Mauro (hrsg.) 1993. Gli etruschi - Una nuova immagine. Firenze: Giunti. S.199-227." },
         { "cell": "dotted", "text": "頌聖歌（，泰國人一般叫佢Kor Wor&nbsp;&nbsp;ข.ว.）係一隻向泰王致敬嗰歌，係到泰王國電影院開映之前都要演或唱嗰，同時間銀幕上會出示箇時間泰王拉瑪九世親近平民嗰畫面。所有在場嗰人都要企到，向泰王致敬。" },
         { "cell": "dotted", "text": "1713年十二月十二號，江西巡撫佟國勒宣布李秉忠同得葡萄牙人麥大成（J. F. Cordoso）、法國人湯尚賢（Pierre-Vincent de Tartre）繪製嗰《江西統省輿圖》正式完工。第年十二月二號十七點，佟國勒搦箇本輿地圖到康熙皇帝嗰手上。" },
-        { "cell": "dotted", "text": "The Masnavi I Ma'navi, by Maulana Jalalu-'d-din Muhammad Rumi, Abridged and Translated by E.H. Whinfield on sacred-texts.com" },
         { "cell": "dotted", "text": "基阿尼·沃薩濟（意大利文：Gianni Versace，），係隻意大利嗰時裝設計師，佢嗰自有品牌Gianni Versace S.p.A係國際時裝大牌之一。佢50歲嗰時間，拕人槍殺嘚佢邁阿密嗰屋裡頭。" },
         { "cell": "dotted", "text": "Hermès International, S.A.或Hermès（法語讀音：）係法國嗰一家奢侈品公司，主要經營皮草、成衣、生活用品、香水同得別嗰滴子奢侈產品。佢係1937年拕Thierry Hermès創立嗰，係而今奢侈品牌裡頭資格至老嗰牌子之一。" },
         { "cell": "dotted", "text": "Gianni Versace S.p.A.或Versace（意大利語讀音：）係基阿尼·沃薩濟（Gianni Versace）到1978年創立嗰一家高級時裝公司，產品涵蓋高級訂制、成衣、服飾品、香水、化妝品、家居裝飾箇滴子門類。" },
         { "cell": "dotted", "text": "學者、評論家對《To Autumn》都一致覺得佢係英語最完美嗰詩歌之一。A.C. Swinburne話佢同得《Ode on a Grecian Urn》係吉茨創作嗰俄打裡頭最接近絕對完美嗰；Aileen Ward話佢係吉茨最完美、最無憂嗰詩作；Douglas Bush話佢結構、體裁、語調、韻律都係無瑕嗰； Walter Evert話佢係吉茨改過嗰詩裡頭唯一係完美嗰，若係要話滴子吉茨對英語詩歌傳統嗰卓越貢獻，許就係完首詩嗰絕對完美性，佢嗰隻隻部份都係非常重要嗰、相互之間也緊密呼應。" },
+        { "cell": "dotted", "text": "1997年，Andrew Motion總結對《To Autumn》嗰評價，末後話「佢係時常拕話係吉茨最…無憂嗰詩作。…要話佢嗰成就嗰最大力量，許就係佢嗰張力係有效、高標準嗰。」 1998年，M. H. Abrams話「《To Autumn》係吉茨嗰最督一部藝術要作。箇首詩對時間、刹那、死亡嗰從容默許，係發生的吉茨曉得佢嗰壽命不多過兩年嗰背景下。」 同年，James Chandler話「咁多人都話《To Autumn》係吉茨最偉大嗰作品，許係因為佢有量面對佢短暫一生最野嗰挑戰，跟得戰勝。」 2000年，Timothy Corrigan話「好似別嗰評論家話嗰，《To Autumn》係吉茨最大嗰成就，因為佢改善日常口語嗰英語白話，嘚完首詩裡頭變得咁有田園魅力。」 2008年，Stanley Plumly話「歷史、歷代都永生會搦《Ode to a Nightingale》、《Ode on a Grecian Urn》、《To Autumn》看做係英語裡頭最值得收錄嗰悲觀抒情詩。」" },
+        { "cell": "dotted", "text": "Abrams M. H. 「Keats's Poems：The Material Dimensions」於《The Persistence of Poetry》，Ed. Robert Ryan同Ronald Sharp，Amherst：University of Mass，Press，1998，ISBN 1-55849-175-9" },
         { "cell": "year", "text": "萍鄉地古屬《禹貢》九州揚州，春秋時屬吳國，戰國時屬楚國長沙郡。漢時屬豫章郡宜春縣地。三國吳寶鼎二年（267年）立縣，縣治設在今蘆溪縣古崗，屬安成郡。萍鄉得名有兩種說法，一種是此地多萍草[1]，另外一種是楚昭王渡江於此得萍實。晉仍屬安成郡，義熙年間，封何無忌為萍鄉縣公。東晉至南朝陳屬江州安成郡。隋屬袁州。唐初縣治遷至今市治所在地，隸屬江南西道袁州。宋隸屬江南西路袁州，元元貞初年，升為萍鄉州，隸江西行省袁州路。明洪武二年（1369年），改州為縣，屬江西袁州府。清屬江西省袁州府。1960年設立縣級萍鄉市。1970年升為地級萍鄉市。" },
         { "cell": "year", "text": "萍鄉地區人類居住的歷史可追溯到舊石器時代，在蘆溪縣宣風鎮竹山園發現有舊石器時代遺址。蘆溪縣新泉、宣風、虹橋，上栗縣施家台、桐木荊坪、赤山大寶山等地均發現有新石器時代遺址。今萍鄉經濟開發區田中管理處境內發現商周古城，稱“譚台”，《江西省志》將其列為江西在商代的三座古城之一。[6] 在蘆溪的舊縣城以前被稱為“甘卓壘”，東晉元帝太興元年318年），陳敏于江東僭稱王，晉元帝司馬睿遣鎮南將軍陶侃水陸二道來伐，又讓甘卓領兵至萍鄉縣東築壘，連接五所，所以舊縣城也被稱為甘卓壘。[7] 孫中山領導的同盟會于1906年12月發動了萍瀏醴起義，揭開了辛亥革命的序幕。1922年9月，劉少奇、李立三等在此領導了舉世聞名的安源路礦工人大罷工，萍鄉成為中國工人運動的策源地。同時也是秋收起義的策源地。萍鄉也是中國最早的重工業基地之一。" },
         { "cell": "year", "text": "武功（WooKong）山是全國知名的旅遊景點，位於萍鄉的東部，從市中心開車大約四十五分鐘能到，海拔1918米，平均海拔約1500米。儘管大部分景點的方便遊客的基礎設施還未開發。" },
@@ -137,34 +137,25 @@
         { "cell": "decimals", "text": "中華民國，1949年後，中華民國政府播遷臺灣，位到亞洲嗰東頭、太平洋嗰西海岸，佢實際管到嗰領土有台灣同到別嗰滴子附屬島嶼、澎湖群島、金門群島、馬祖列島、東沙群島哈有南沙群島嗰太平島跟中洲島，實際面積36,188 平方公里。首都遷台前係南京。中華民國係第二次世界大戰嗰主要戰勝國，也係聯合國五隻主要創始會員國之一。三民主義跟五權憲法係佢現行政治制度嗰思想根源。中華民國政府而今還冇放棄中國大陸地區嗰主權，法定領土為1947年制憲，一滴子台灣人主張要根據憲法嗰第四條跟憲法增修條文嗰第一條改變固有疆域同到明確定義領土，但係因為門檻太高，加上中華人民共和國跟國際嗰壓力，故係箇哈係蠻難實現嗰。" },
         { "cell": "decimals", "text": "大戰以諾曼第（Normandy）登陸戰最出名。經過周密嗰計劃同到充足準備，15.6萬盟軍到1944年6月6號（D-Day）由諾曼第箇隻缺口登陸，從此，德國陷於東西夾擊，腹背受敵嗰局面。" },
         { "cell": "decimals", "text": "1949年後，中華民國政府播遷臺灣，位到亞洲嗰東頭、太平洋嗰西海岸，佢實際管到嗰領土有台灣同到別嗰滴子附屬島嶼、澎湖群島、金門群島、馬祖列島、東沙群島哈有南沙群島嗰太平島跟中洲島，實際面積36,188 平方公里。首都遷台前係南京。中華民國係第二次世界大戰嗰主要戰勝國，也係聯合國五隻主要創始會員國之一。三民主義跟五權憲法係佢現行政治制度嗰思想根源。中華民國政府而今還冇放棄中國大陸地區嗰主權，法定領土為1947年制憲，一滴子台灣人主張要根據憲法嗰第四條跟憲法增修條文嗰第一條改變固有疆域同到明確定義領土，但係因為門檻太高，加上中華人民共和國跟國際嗰壓力，故係箇哈係蠻難實現嗰。" },
-        { "cell": "ordinal-latin", "text": "Jensen, Hans. 1970. Sign Symbol and Script. London: George Allen and Unwin Ltd. Transl. of Die Schrift in Vergangenheit und Gegenwart. VEB Deutscher Verlag der Wissenschaften. 1958, as revised by the author." },
-        { "cell": "ordinal-latin", "text": "Sampson, Geoffrey. 1985. Writing systems. London (etc.): Hutchinson." },
-        { "cell": "ordinal-latin", "text": "Wachter, Rudolf. 1987. Altlateinische Inschriften: sprachliche und epigraphische Untersuchungen zu den Dokumenten bis etwa 150 v.Chr. Bern (etc.): Peter Lang." },
-        { "cell": "ordinal-latin", "text": "Nagasaki, Seiki. Nihon no dentoshoku : sono shikimei to shikicho, Seigensha, 2001. ISBN 4-916094-53-0" },
-        { "cell": "ordinal-latin", "text": "Nihon Shikisai Gakkai. Shinpen shikisai kagaku handobukku, Tokyo Daigaku Shuppankai, 1985. ISBN 4-13-061000-7" },
-        { "cell": "ordinal-latin", "text": "Wolfgang Kosack:Laotse Von der Kraft und Vom Sinn. Buch der Sinnsprüche in 81 Abschnitten und 2 Teilen. Uebertragen aus den Seidentexten zu Ma Wang Dui Christoph Brunner, Basel 2014. ISBN 978-3-906206-18-9." },
-        { "cell": "ordinal-latin", "text": "Flesch William，「Companion to British Poetry，19th Century」，Facts on File，2009，ISBN 978-0816058969" },
-        { "cell": "ordinal-latin", "text": "Anniversary: Oral Fixation (20th) and Pies Descalzos (30th) Live (2025)" },
         { "cell": "units", "text": "胡志明市係越南最大嗰城市，越南隻直轄市（thành phố trực thuộc trung ương，城庯直屬中央）。面積2,095km2, 人口6,600,000 (2008)。" },
-        { "cell": "units", "text": "AMAZON SWIM EXPEDITION 2007-A Slovenian man (MARTIN STREL) completes the 5,268 km swim down the Amazon" },
         { "cell": "units", "text": "同海市係越南廣平省最大嗰城市，係廣平省嗰省會、直辖市（thành phố trực thuộc tỉnh，城舖直屬省）。佢嗰係面積154,0km2, 人口1080,000（2010年）。" },
         { "cell": "ranges", "text": "蘋果係一種樹同到水果，係隻薔薇科嗰植物，好多地方都種。中國古代叫林檎。西方品種(Delicious)傳來嗰地利蛇果簡稱蛇果。5-12米高係細小嗰落葉喬木，有好密嗰樹冠。葉係互生，卵形，花係粉紅色，果到秋天成熟。" },
         { "cell": "ranges", "text": "協調世界時，簡稱UTC，佢英文係Coordinated Universal Time，法文係Temps Universel Cordonné。中國大陸用ISO 8601:2000嗰國家標準《數據元和交換格式信息交換日期和時間表示法》（GB/T 7408-2005）叫佢“協調世界時”。臺灣用CNS 7648嗰《資料元及交換格式–資訊交換–日期及時間的表示法》叫佢“世界協調時間”。" },
         { "cell": "ranges", "text": "Korotayev A., Malkov A., Khaltourina D.，Chapter 2: Historical Population Dynamics in China，載 Introduction to Social Macrodynamics: Secular Cycles and Millennial Trends，莫斯科：URSS，2006年，ISBN 5-484-00559-0 ." },
         { "cell": "ranges", "text": "北京人又叫北京猿人，正式嗰叫法係「中國猿人北京種」，眼下科學上叫「北京直立人」比較普遍，佢嗰拉丁文名字係Homo erectus pekinensis。佢係中國嗰直立人化石。大約70-20萬年前活動於北京嗰西南首。" },
-        { "cell": "ranges", "text": "Chang, Iris. The Rape of Nanking: The Forgotten Holocaust of World War II, New York : BasicBooks, 1997, ISBN 0-465-06835-9." },
         { "cell": "ranges", "text": "中文版：《南京暴行：被遺忘的大屠殺》(美)張純如著 孫英春等譯，北京東方出版社，1998 ISBN 7-5060-1052-6" },
         { "cell": "ranges", "text": "陸九淵(金溪)：(1139-1193)，南宋哲學家，佢在以前儒學發展嗰基礎上，創立了心學體系，開創了心學一派。" },
         { "cell": "ranges", "text": "2008年，國家發改委給國務院嗰建議批復建設地鐵裏頭冇南昌，不過江西省政府努了力 ，南昌拕批准建起幾個地鐵；2008年9月南昌開始組建地鐵公司 ，之後在10月16日定下，叫“南昌轨道交通有限公司” ，之後公示5條綫路嗰規劃。 2009年7月國務院批准了《南昌市城市轨道交通近期建设规划(2009-2016年)》 ，之後2009年7月29日南昌城市嗰快速軌道交通工程開始動工了 ，同日嗰新聞發佈會話了規劃嗰5條綫路嗰走向同到建設嗰計劃：1號綫同到2號綫計劃在2016年通車，3號綫計劃2020年開通，之後兩條綫就看情況再決定開工。 政府自己計劃係5條綫路在2014年前得批准，在2015年前都開工。之後6-10號綫再看情況作補充，同到環綫地鐵。" },
+        { "cell": "ranges", "text": "南昌政府在2013年4月份表態話，第二輪建設會在2014年到2020年。 之後決定了建設嗰方案。箇個方案選了折中嗰方案 ，依著《南昌市城市快速轨道交通建设规划（2014-2020）》嗰計劃，在2014年延申二號綫，2016年延申一號綫，搞的最快可以在2014年9月開始3號綫嗰建設，之後2015年9月開始4號綫建設。 在2013年5月15日，國務院把軌道交通嗰審核權限交到省級，給之後嗰變化打正了基礎。" },
         { "cell": "currency", "text": "1999年4月27號，《Notting Hill》到Leicester廣場嗰Odeon電影院舉行首映式。 佢嗰英國本土票房收入達$116,089,678，全球收入達$363,889,678。 開映週末佢賺得$0.27億嗰收入，打破美國浪漫喜劇片嗰相關紀錄， 第個禮拜佢接得賺到$0.15億， 末後開始滑落。 播映一個月之後，佢嗰首映週嗰票房紀錄拕女主角Roberts嗰別部電影《Runaway Bride》打破。 佢係1999年第六高票房收入嗰電影， 也係到2007年4月為止，史上最高票房收入電影嗰104名。 許時間，佢一徑係英國嗰最高收入電影。" },
         { "cell": "abbrev", "text": "拉丁語：Marcus Aurelius Lucii f. Quinti n. tribu Galeria Antoninus Felix, domo Caesaraugusta" },
-        { "cell": "abbrev", "text": "Needham, Joseph (1986). Science and Civilization in China: Volume 5, Chemistry and Chemical Technology, Part 7, Military Technology; the Gunpowder Epic. Taipei: Caves Books, Ltd." },
-        { "cell": "abbrev", "text": "Bear his mild yoke, they serve him best. His state (e)" },
         { "cell": "abbrev", "text": "聖 托馬·阿奎那（St. Thomas Aquinas，約3月7號）係隻歐洲中世紀嗰經院哲學嗰哲學家同得神學家。佢過身後拕封做「天使博士」（Doctor Angelicus）或「全能博士」（Doctor Communis）。" },
-        { "cell": "abbrev", "text": "(1707) A Paraphrase and Notes on the Epistles of St. Paul’'" },
         { "cell": "abbrev", "text": "維吉尼野·烏爾芙（英文：Adeline Virginia Woolf），1882年1月25號出世，1941年3月28號過身，係隻英國嗰女作家，佢拕認為係20世紀現代主義同得女性主義嗰先鋒人物。佢出名嗰小說有《妲諾維夫人》（Mrs. Dalloway）、《燈塔行》（To the Lighthouse）、《野革嗰房間》（Jakob's Room）。" },
-        { "cell": "abbrev", "text": "Jon Elster, An Introduction to Karl Marx. Cambridge, England, 1986." },
-        { "cell": "abbrev", "text": "Shenfield, Stephen D. Vladislav Bugera: Portrait of a Post-Marxist Thinker" },
+        { "cell": "abbrev", "text": "京斯可羅斯聖潘可拿斯 站（King's Cross St. Pancras）係倫敦地鐵嗰所科線、咸摩斯密史&實第線、美絕波利頓線、羅笙線、必卡底利線、韋庫拖里阿線嗰一隻站。" },
+        { "cell": "abbrev", "text": "等校訂過《To Autumn》後，箇首詩拕收錄嘚吉茨嗰1820年詩作集《Lamia, Isabella, the Eve of St. Agnes, and Other Poems》裡頭。發行者Taylor跟到Hessey有滴怫佢會受到吉茨嗰1820年詩作Endymion嗰負面影響，為得防止瑣嗰口碑，故係發行箇部詩集之前刪吥哩任何可能舞出爭議嗰政治傾向嗰言論。" },
+        { "cell": "abbrev", "text": "起頭，對《To Autumn》嗰關注集中得佢係《Lamia, Isabella, the Eve of St. Agnes, and Other Poems》嗰一篇箇隻身份上。一隻匿名評論家嘚1820年6月嗰《Monthly Review》話，「箇隻作者有豐富嗰想像力、幻想力；佢嗰幻想力嘚《On Autumn》許幾行表現得極其豐富，舞得我俚對自然嗰真實性嗰瞭解過多我俚早以相過嗰任何描述。…若係我俚冇什哩愅嗰話，K先生嗰特長已經超出所有評論能力嗰範圍。我俚情願𠱽得佢莫有許多驚人嗰原創力，莫許歡喜用新穎、古舊嗰句式，莫覺得詩作就凈係箇個或許個。」 但Josiah Conder嘚1820年9月嗰《Eclectic Review》反得話，「頭隻為得初嘗詩作嗰樂趣，自然嗰選擇細短篇幅。第二隻關於秋天嗰俄打也冇什哩不合嗰內容。」 1820年嗰《Edinburgh Magazine》乾脆話，「關於幻想、秋天嗰俄打都有巨大嗰意義。」" },
+        { "cell": "abbrev", "text": "Bewell Alan. 「『To Autumn』 and the Curing of Space」於《Keats's Poetry and Prose》，ed Jeffrey Cox，634–642，New York：W. W. Norton & Company，2008，ISBN 978-0-393-92491-6" },
+        { "cell": "abbrev", "text": "Bloom Harold，「The Ode To Autumn」於《Keats's Odes》，ed. Jack Stillinger，44–47，Englewood，NJ：Prentice-Hall，1968，OCLC 176883021" },
         { "cell": "latin-in-native", "text": "佢係基督教嗰「耶穌基督」(出自希臘語：Ιησούς Χριστός或Iēsous Christos）。根據佢生嗰所在也叫佢「納匝肋人耶穌」。" },
         { "cell": "latin-in-native", "text": "大不列顛及北愛爾蘭聯合王國（英文：United Kingdom of Great Britain and Northern Ireland ），有時間拕叫做聯合王國（United Kingdom或UK）或不列顛（Britain）係位到歐洲大陸嗰西北海岸對首嗰一隻主權國家。佢係一隻由大不列顛島同得愛爾蘭島嗰東北部份、別嗰滴子島嶼組成嗰島國。 北愛爾蘭係英國唯一有陸地國際交界嗰一隻地方，佢同愛爾蘭共和國交界。 除吥箇部份，英國拕大西洋、北海、英吉利海峽同得愛爾蘭海圍得。佢最大嗰島，大不列顛島拕根海底隧道連得法國。" },
         { "cell": "latin-in-native", "text": "英國係隻君主立憲國，佢由四隻國（country）聯合組成：英格蘭、北愛爾蘭、蘇格蘭、威爾士。 佢實行議會政治，議會位到國家嗰首都——倫敦，但到北愛爾蘭、威爾士、蘇格蘭嗰首府也有自簡嗰議會。" },
@@ -189,11 +180,9 @@
         { "cell": "roman", "text": "奧巴馬（英文：Barack Hussein Obama II，），第44任美國總統。前伊利諾州嗰參議員，2008年美國總統選舉民主黨候選人。2007年2月，佢正式宣布參加2008年美國總統選舉 。2008年6月4號宣佈贏得初選，正式代表民主黨做美國總統候選人，係美國歷史上頭隻黑人總統候選人。2008年11月4號和2012年11月6號，奧巴馬當選美國總統。" },
         { "cell": "roman", "text": "1964年，德國嗰柏林洪堡大學嗰學者第羅（Thomas Thilo）搦《天工開物》嗰頭四章翻譯成德文，寫正佢嗰博士論文《宋應星寫個〈天工開物〉嗰頭四章論農藝同到農產品嗰進一步加工》（Die Dapitel I bis IV-Ackerbau und Weiterbearbeitung der Acebauproduked des Tian-gong Kai- wu von Song Ying-Xing）。1967年，第羅接得發表《宋應星論中國農業嗰經營》 （Song Ying-xing uberchinesische andwirtschaft）。箇都係當代外國學術界對宋應星嗰學術思想研究嗰新嗰開端。" },
         { "cell": "roman", "text": "Louis Vuitton Malletier或Louis Vuitton、LV（法語讀音：）係家法國嗰時裝公司，主要經營高級訂制、皮草、成衣、鞋類、手錶、珠寶、飾品、眼鏡同得書類。佢係1854年拕Louis Vuitton創立嗰，而今係世界頭上最知名嗰品牌之一。" },
-        { "cell": "roman", "text": "Baynes Thomas (Ed.)，「Encyclopædia Britannica」，Vol XIV，Cambridge：Cambridge University Press，1888，OCLC 1387837" },
         { "cell": "roman", "text": "「XXV」形式：一滴具有描述性質嗰動詞或冇實際意義嗰音節拕擺嘚一隻單音節動詞嗰前首，去生動化箇隻動詞嗰表現情狀、或者表示動詞嗰實現過程具有連續性跟持久性，好似「丩丩轉、蹀蹀跳、嚯嚯叫」等。" },
         { "cell": "roman", "text": "丕平三世 或 短身王丕平（拉丁文：Pepin III 或 Pepin the Short），公元715年出世，公元768年9月24號過身，係隻法蘭克王國（今下嗰法國）加洛林王朝嗰初任國王。墨洛溫王朝嗰傍系姻親751年他嗰簒奪法蘭克王國嗰國王至768年，沙利門大帝嗰父親。" },
         { "cell": "roman", "text": "丕平四世 或 驼背王丕平（拉丁文：Pepin IV 或 Pepin the Hunchback），公元767年出世，公元811年過身，係隻法蘭克王國（今下嗰法國）加洛林王朝嗰皇太子。皇帝沙利門大帝嗰長子及丕平三世嗰適長孫。" },
-        { "cell": "roman", "text": "My Days in Korea & Other Essays by Philip Jaisohn, MD, edited by Sun-pyo Hong, published by Yonsei University Press, 1999." },
         { "cell": "initialism", "text": "微軟起先發行兩隻版本：專業版（Windows XP Professional）同家庭版（Windows XP Home Edition），末後又發行媒體中心版（Windows XP Media Center Edition）、平板電腦版（Windows XP Tablet PC Editon）、嵌入版（Windows XP Embedded）同到瘦客戶端版（Windows Fundamentals for Legacy PCs）等。" },
         { "cell": "initialism", "text": "世界自然基金會（WWF，World Wide Fund for Nature）係隻國際環保團體，基金會做嗰事有環境保育、研究同到復修（:en:ecological restoration）。先前嗰名子叫 World Wide Fund，而美國同加拿大嗰分會哈係用到箇隻名子。係世界頭上最大嗰獨立保育組織，有超過 500 萬嗰支持者，全世界 90 幾隻國家做到 15000 項保育同環保有關嗰工程。世界各地，WWF 都係一隻慈善機構，大約九成嗰資金來自私人同企業嗰捐款。" },
         { "cell": "initialism", "text": "WWF 嗰目標係『制止同扭轉對自然環境嗰破壞』（\"to halt and reverse the destruction of our natural environment\"） 。世界自然基金會係到1961年9月11號成立。" },
@@ -211,7 +200,6 @@
         { "cell": "grouped", "text": "(波蘭語 : Końskowola, 國際音標 : [kɔɲskɔ'vɔla]) 是 波蘭 東南方向嗰 一隻 村子，在 库鲁夫卡河 (Kurówka) 普拉维 (Puławy) 同到 库鲁夫市 (Kurów) 中間。 是 卢布林行政區的 首府，有 2,188 隻人。" },
         { "cell": "grouped", "text": "2009年，江西人口嗰出生率係1.387%，死亡率係0.598%，人口增長率係0.789%。全贛常住人口總量為4432.16萬人，全年凈增人口32.05萬人，年齡人口達到3073.70萬人。" },
         { "cell": "signed-number", "text": "整數係自然數(1、2、3...)、佢個哩嗰負值(-1、-2、-3...)同到0嗰統稱，係實數嗰一類。整數有無限隻，向數線嗰正負兩頭延伸。整數到集合裡頭會用 \\mathbb{Z} 或者粗體Z字來表示。到加、減同到乘法裡頭。整數集附上加法同乘法係一隻環，即係任何一隻整數加、減或者乘別隻整數，結果都會係整數。" },
-        { "cell": "signed-number", "text": "width:20 fontsize:M textcolor:black color:skyblue shift:(20,-6) anchor:from" },
         { "cell": "signed-number", "text": "等公元258年，Valerian大帝執政嗰時間，安鐸尼年努斯就盈20%嗰銀含量嘍，帝國嗰機構就開始到貨幣嗰外頭鍍銀，覺得𠵹就得增加滴子佢俚嗰價值。Claudius Gothicus大帝嗰當政期間，安鐸尼年努斯嗰銀含量都冇到3%-4%，𠵹箇款貨幣同得別嗰青銅貨幣都冇什哩差別嘍，抵得八分之一隻安鐸尼年努斯嗰色斯特州斯幾乎都冇鑄造嘍。公元271年，Aurelian大帝著手羅馬帝國嗰貨幣改革，佢添加安鐸尼年努斯嗰重，故係箇隻貨幣拕叫做Aurelianus。佢也一下發行過黃銅嗰阿斯同得色斯特州斯。" },
         { "cell": "signed-number", "text": "一般用電解飽和食鹽水來制取，電解飽和食鹽水時，電極陰極出氫氣（放有鐵絲）：2H 2 O+2e - =H 2 ↑+2OH - ，陽極出氯氣（放有石墨）：2Cl - =Cl 2 +2e - 。" },
         { "cell": "signed-number", "text": "反應方程式：MnO 2 +4HCl=MnCl 2 +Cl 2 ↑+2H 2 O。（條件：加熱。）或2KMnO 4 +16HCl=2MnCl 2 +2KCl+5Cl 2 ↑+8H 2 O。" },
@@ -219,10 +207,10 @@
         { "cell": "letter-name", "text": "C++ 係一隻多用途高階嗰程式語言，同時配有低階部份。佢同時兼顧伓同嗰編程方法，就像程序編程，資料抽象，物件導向編程，同到通用編程。一九九零年代起，C++成為最受歡迎嗰程式商用語言。" },
         { "cell": "letter-name", "text": "孺賓（Brfxxccxxmnpcccclllmmnprxvclmnckssqlbb11116），瑞典人，1991年生人。佢爺娘幫佢取箇隻名字，末後冇拕批准，哈拕罰吥500喇美金。之後佢爺娘哈想叫佢「A」，也冇拕批准。" },
         { "cell": "letter-name", "text": "東京外国語大学語学研究所，《世界の言語ガイドブック》，1998年，ISBN 4-385-35815-X" },
-        { "cell": "letter-name", "text": "Song, Yingxing, translated with preface by E-Tu Zen Sun and Shiou-Chuan Sun (1966). T'ien-Kung K'ai-Wu: Chinese Technology in the Seventeenth Century. University Park: Pennsylvania State University Press." },
         { "cell": "letter-name", "text": "{ZnCO}_3 \\rarr \\ {CO}_2 + {ZnO} （條件：300&nbsp;°C）" },
         { "cell": "letter-name", "text": "{CO}_2 + {C} \\rarr \\ 2{CO} （條件：＞900&nbsp;°C）" },
         { "cell": "letter-name", "text": "{ZnO} + {CO} \\rarr \\ {Zn} + {CO}_2 （條件：＞907&nbsp;°C）" },
+        { "cell": "letter-name", "text": "弱強四歩格（Iambic tetrameter）：「Because // I could // not stop // for Death」" },
         { "cell": "exponent", "text": "亞細亞洲（南昌話：/ŋa²¹³ ɕi³⁵ ŋa²¹³ t͡siiu⁴²/，古希臘文：Ασία），又簡稱亞洲（南昌話：/ŋa²¹³ t͡siiu⁴²/），絕大部分都位到北半球，係全世界上最大，最多人嗰一隻洲。佢東頭一徑到白令海峽嗰傑日尼奧夫角（西經169度40分，北緯60度5分），南頭一徑到努沙登加拉群島（東經103度30分，南緯11度7分），西頭一徑到巴巴角（東經26度3分，北緯39度27分），北頭一徑到切柳斯金角（東經104度18分，北緯77度43分），最高嗰山係珠穆朗瑪峰。亞洲東西嗰時差係11小時。佢西首連到歐洲，箇就係世界上最大嗰大陸-歐亞大陸。" },
         { "cell": "exponent", "text": "地球（南昌話：/tʰi¹¹ tɕʰiu²⁴/，符號： ）係太陽系嗰一隻行星，搦太陽嗰遠近來話嗰話，佢排第三。搦大細來話嗰話，就排第五。佢係今日已知唯一有生物嗰星球。地球到四萬五千七百萬年前形成。地球有隻天然衞星月球，佢到四萬五千三百三十三萬年前開始繞到地球轉。地球哈係人類居住嗰所在。" },
         { "cell": "exponent", "text": "《將進酒》（南昌話：/tsʰɔŋ⁴² tɕin⁴⁵ tɕiu²¹³/，樂府舊題），又拕喊《惜樽空》，「將」係「邀請」嗰意思。渠係唐代詩人李白嗰作品，體裁係七言嗰古詩。箇隻詩寫嘚天寶十一年（752），作者嘚河南嵩山，同得友人岑勛（岑夫子），嘚元丹丘（丹丘生）潁陽山喫酒喫得歪歪子而扤出來嗰。箇隻詩係話到李白懷才不遇嗰鬱悶，跟到對人生嗰短暫覺得蠻𢝇嗰心情。" },
@@ -233,20 +221,17 @@
         { "cell": "exponent", "text": "江澤民（南昌話：[kɔŋ⁴⁴ tsʰik⁵ min³⁵]，）係中國嗰黨跟得國家嗰第三代最高領導人。1926年到江蘇揚州出世。佢到1989年6月24號－2002年11月15號係中國共產黨中央委員會總書記，1993年3月27號－2003年3月15號係中華人民共和國主席。2022年11月30號死嘚上海。" },
         { "cell": "arithmetic", "text": "圓周率，一般用 π 表示，係一隻數學同到物理學普遍存在嗰常數。佢嗰定義係一隻圓嗰圓周同佢嗰直徑之比，哈等於圓嗰面積同佢嗰半徑嗰平方之比。佢係精確計算圓嗰周長、圓面積、球體積等幾何形狀嗰關鍵。分析學上，π 可以定義為最細嗰 x > 0 讓 sin(x) = 0。" },
         { "cell": "arithmetic", "text": "圓周率係隻無理數，唔可以用分數準確表示。π = 3.14159265358979323846264338327950288419716939937510582097494..........." },
-        { "cell": "arithmetic", "text": "TimeAxis = orientation:horizontal format:yyyy" },
-        { "cell": "arithmetic", "text": "ImageSize = width:640 height:auto barincrement:25" },
-        { "cell": "arithmetic", "text": "PlotArea = left:10 right:10 top:10 bottom:40" },
-        { "cell": "arithmetic", "text": "ScaleMajor = unit:year increment:50 start:0 gridcolor:drabgreen" },
         { "cell": "arithmetic", "text": "美國英語(American English = AE)係話到美國話嗰通用英語，英國英語(British English = BE)係話到英國話嗰通用英語，箇隻表就會介紹到兩者之間嗰差別。" },
         { "cell": "arithmetic", "text": "歐拉公式， e\\,^{i \\pi} + 1 = 0\\; ，搦數學上五個最重要嗰常數用最簡約嗰方式建立起關係。公式中包含1、0、自然對數嗰底e、圓周率π同到複數嗰虛數單位i。" },
+        { "cell": "arithmetic", "text": "雖然鉍頭回拕認為係最重嗰元素跟穩定嗰同位素，但鉍-209一徑拕懷疑係不穩定嘅。臨䐁嘚2003年，嘚法國研究嗰人員認定鉍係放射性元素，渠嗰半衰期有1.9×10¹⁹年左右，係宇宙年齡嗰10億倍。自此以後，鉛就係質量最大嗰穩定元素。" },
         { "cell": "ampersand", "text": "Simon & Schuster Macmillan，《\"Naming\" Encyclopedia of Marriage and the Family. David Levinson》，1995年" },
-        { "cell": "ampersand", "text": "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whom we, that have not seen thy face ," },
-        { "cell": "ampersand", "text": "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;By faith, and faith alone, embrace ," },
-        { "cell": "ampersand", "text": "But being too happy in thine happiness,&mdash;" },
-        { "cell": "ampersand", "text": "Still wouldst thou sing, and I have ears in vain&mdash;" },
-        { "cell": "ampersand", "text": "Fled is that music:&mdash;Do I wake or sleep?" },
         { "cell": "ampersand", "text": "(蛙 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;飛込む)" },
         { "cell": "ampersand", "text": "《簡·愛》（英文：Jane Eyre；音標：[]）係布朗第姊妹之一嗰謝羅蒂·布朗第（Charlotte Brontë）寫嗰本脫出名嗰長篇小說。佢到1847年10月16號拕Smith, Elder & Co.公司到英國嗰倫敦出版。" },
+        { "cell": "ampersand", "text": "艾美·環校詩（Amy Winehouse），1983年9月14號出世，係隻英國嗰創作歌手，憑得佢嗰R&B、soul、jazz、rock & roll、ska箇滴子多種曲風嗰電子混音出名。" },
+        { "cell": "ampersand", "text": "麥琨進入Rokeby School學習，等1985年佢16歲嗰時間離開學堂，藝術搦得「一般水平」（O-level，Ordinary Level）。 接得佢到Savile Row街嗰Anderson & Sheppard裁縫舖裡頭做學徒，末後麥琨先後到Gieves & Hawkes、戲劇服裝品牌Angels and Bermans底下做事。 佢學徒生涯裡頭學到嗰技術幫得佢到時裝世界樹立正一隻剪裁得當嗰名聲。" },
+        { "cell": "ampersand", "text": "多羅齊·賈巴拿（意大利文：Dolce & Gabbana，音標：），有時間拕簡寫做D & G，係隻1985年創立嗰意大利嗰時裝品牌，佢嗰設計師係米蘭嗰Domenico Dolce同得Stefano Gabbana。2005年，箇隻牌子嗰總營銷額達7億5千萬美金 。" },
+        { "cell": "ampersand", "text": "利婭娜（Rihanna，音標：），全名係Robyn Rihanna Fenty，1988年2月20號出世，係隻巴巴多斯嗰黑人R&B女歌手。" },
+        { "cell": "ampersand", "text": "柔黛歐·齋府（英文：Rodeo Drive）係美國加利福尼亞州嗰卑武利·希爾茲（Beverly Hills）嗰一隻購物區，佢憑得佢匯集大量嗰名牌而出名，好似Giorgio Armani、Bulgari、Cartier、Chanel、Christian Dior、Dolce & Gabbana、Ermenegildo Zegna、Fendi、Gucci、Hermès、Hugo Boss、Louis Vuitton、Prada、Tiffany & Co.、Valentino、Versace、Yves Saint-Laurent。" },
         { "cell": "iteration", "text": "三隻字：長谷川、佐々木、五十嵐、久保田、佐久間、小笠原、大久保、小野寺、波多野…" },
         { "cell": "sports-time", "text": "按性別分，江西攏共有22194643隻男嗰，21196644隻女嗰，人口比率係51.15:48.85 。" },
         { "cell": "sports-time", "text": "按戶口分，江西龍共有11607169隻非農業戶口，31784118隻農業戶口，人口比率係26.75:73.25。" },
@@ -259,14 +244,14 @@
         { "cell": "version-dot", "text": "獨立門（朝鮮話：독립문，獨立門）係韓國首爾西大門區獨立公園裡頭嗰一隻門。1896年11月21日定基、1897年11月20日完工。佢嗰高係14.28米、闊係11.48米。約1850隻御影石做成。佢哈係仿照法國巴黎嗰凱旋門嗰模子做嗰。" },
         { "cell": "version-dot", "text": "中共湘贛省委到肖氏祠堂辦公達一年零一月。肖氏祠堂1914年建正，磚木結構，樓上樓下攏共有22隻房間，占地面積800.32平方米。1949年建國後維修多道，1986年摣原貌進行復原陳列。" },
         { "cell": "version-dot", "text": "1989年，學者到新喻嗰袁河左首二級階地上發現龔家山、打鼓嶺箇二隻舊石器時代遺址，攏共尋到49件石製品，佢俚係15件石核、9件帶人工跡嗰石頭，同到16件石片、1件砍砸器、7件刮削器跟1件球形石。用光釋光法試測到打鼓嶺中、上部發現嗰2隻沉積物樣品，佢俚嗰年代分別係36.1±2.6ka同到 64.2±4.9ka。" },
-        { "cell": "quote-letter", "text": "Icelandic - English Dictionary: from Webster's Rosetta Edition." },
         { "cell": "quote-letter", "text": "北大西洋公約組織（英語：NATO，North Atlantic Treaty Organization；法語：OTAN，l'Organisation du traité de l'Atlantique nord），簡稱北約組織或北約，係指隻為到實現防衛協作咁纔建立嗰國際組織。1949年3月18日美國同到西歐國家公開組建嗰北大西洋公約組織，到許年四月四日到美國華盛頓簽署《北大西洋公約》正式成立。佢嗰總部設在布魯塞爾。最高決策機構係北約理事會。理事會係成員國嗰國家元首同到政府高層、外長、國防部長組成嗰。" },
         { "cell": "quote-letter", "text": "法國係隻辦總統制嗰共和國，佢嗰建國理念都寫嘚在《人權同得公民權嗰宣言》（Déclaration des droits de l'Homme et du citoyen）裡頭。" },
         { "cell": "quote-letter", "text": "到埃及、印度嗰本地治里（Pondicherry）、義大利嗰（Vallée d'Aoste）、老撾、柬埔寨、毛利塔尼亞、英國（汊河島，海峽群島）、美國（阿卡迪亞，Cajun）跟到越南也有滴子人話法語。" },
         { "cell": "quote-letter", "text": "非常多嗰希伯萊名字都係出自希伯來語版嗰《聖經》。世界上嗰猶太教徒、基督教徒、甚至穆斯林都會用箇兮名字。希伯萊明細一般都會有特殊嗰含意、暗指，像Judah（יהודה，Yəhûḏāh）就係話歷史上有名嗰猶大。Reuben（ראובן，Rəʼûḇēn）係話「看，崽哩」。" },
         { "cell": "quote-letter", "text": "希伯萊名字經常有隻詞綴，猶太人用得多嗰係יהו（-yāhû / -iyyāhû / -ayhû）同到יה（-yāh/-iyyāh），佢俚組成嗰常見名有ישׁעיהו（Yəšaʻªyāhû）、צדקיהו（Ṣiḏqiyyāhû）、שׂריה（Śərāyāh）。" },
         { "cell": "quote-letter", "text": "羅馬化：Abu Kareem Muhammad al-Jameel ibn Nidh'aal ibn Abdulazeez aal-Filisteeni" },
-        { "cell": "quote-letter", "text": "基督教國家之間嗰文化傳統、語言習俗都不同。但都歡喜用聖賢、天使嗰名字做自簡嗰名字。像，英語嗰Michael、法語嗰Michel、德語嗰Michael、西班牙語嗰Miguel、意大利語嗰Michele、瑞典語嗰Mikael、希臘語嗰Μιχάλης（Michalis）、俄羅斯語嗰Михаил（Mikhaïl）、阿拉伯語嗰ميكال‎（Mikâïl）都係出自希伯萊語嗰מיכאל（Mikha'el），係話「崇拜上帝」嗰一隻大天使。" }
+        { "cell": "quote-letter", "text": "基督教國家之間嗰文化傳統、語言習俗都不同。但都歡喜用聖賢、天使嗰名字做自簡嗰名字。像，英語嗰Michael、法語嗰Michel、德語嗰Michael、西班牙語嗰Miguel、意大利語嗰Michele、瑞典語嗰Mikael、希臘語嗰Μιχάλης（Michalis）、俄羅斯語嗰Михаил（Mikhaïl）、阿拉伯語嗰ميكال‎（Mikâïl）都係出自希伯萊語嗰מיכאל（Mikha'el），係話「崇拜上帝」嗰一隻大天使。" },
+        { "cell": "quote-letter", "text": "1811年以降，荷蘭引進大量嗰外姓，箇下荷蘭人有10萬多隻姓。荷蘭蠻多嗰姓牽頭都有隻前綴，像van（嗰）、de / het / 't （箇）、der（箇嗰）、van de（箇來嗰）、in het（箇裡頭嗰），像van Rijn係話「萊茵河來嗰」、de Wolf係話「箇隻狼」。一滴子動詞形式嗰姓後頭加上-en，就係話佢嗰工作，像van Bruggen係話「做橋嗰人」。" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

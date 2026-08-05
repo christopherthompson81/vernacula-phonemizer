@@ -9,6 +9,7 @@
  */
 import { describe, expect, test } from "vitest";
 import { dominantScript, isNativeSegment, scriptCounts } from "./scripts.ts";
+import { scriptProbe } from "./mine.ts";
 
 const KM = "អក្សរខ្មែរ".repeat(40);      // enough Khmer to clear the evidence floor
 const EN = "the quick brown fox ".repeat(40);
@@ -64,5 +65,29 @@ describe("scriptCounts", () => {
         const c = scriptCounts("abcអក្សរ");
         expect(c.get("Latin")).toBe(3);
         expect(c.get("Khmer")).toBeGreaterThan(0);
+    });
+});
+
+describe("scriptProbe — the bound must be structural, not applied afterwards", () => {
+    test("⚠ a corpus far larger than the budget does not build one giant string", () => {
+        // `segments.join("\n").slice(0, 400_000)` threw `RangeError: Invalid string length` on hy's 1.4 GB dump:
+        // the join materialises everything before the slice can narrow it. This is the same Node string ceiling
+        // that once made tt, arz, ka and eu unminable, so the bound belongs INSIDE the probe.
+        const many = Array.from({ length: 200_000 }, (_, i) => `segment number ${i} with some filler text`);
+        const probe = scriptProbe(many);
+        expect(probe.length).toBeLessThanOrEqual(400_000);
+        expect(probe.length).toBeGreaterThan(0);
+    });
+
+    test("it strides rather than truncating the head", () => {
+        // The first 400 KB of a dump is whatever the alphabet put first; a corpus whose opening articles are
+        // foreign would otherwise have its script inferred from them.
+        const segs = [...Array.from({ length: 5_000 }, () => "aaaa"), ...Array.from({ length: 5_000 }, () => "zzzz")];
+        expect(scriptProbe(segs)).toContain("zzzz");
+    });
+
+    test("and it is deterministic, because the artifact it feeds is committed", () => {
+        const segs = Array.from({ length: 3_000 }, (_, i) => `s${i}`);
+        expect(scriptProbe(segs)).toBe(scriptProbe(segs));
     });
 });

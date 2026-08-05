@@ -29,46 +29,46 @@
     "source": "hyw.wikipedia.org dump (pages-articles, paragraphs)",
     "segmentMode": "paragraph",
     "totalSegments": 140044,
-    "cellsCovered": 32,
+    "cellsCovered": 31,
     "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
-        "degrees": 179,        // in 22 treated languages
-        "digit-run": 65465,    // \d would miss 19
-        "fractions": 613,      // in 18 treated languages
-        "clock": 728,          // \d would miss 1
-        "signs": 2386,         // in 17 treated languages
-        "dotted": 3953,        // in 16 treated languages
-        "era-marker": 940,     // \d would miss 3
-        "year": 65282,         // \d would miss 19
-        "decimals": 3799,      // in 12 treated languages
-        "ordinal-latin": 870,  // \d would miss 1
+        "degrees": 175,        // in 22 treated languages
+        "digit-run": 61620,    // in 19 treated languages
+        "fractions": 551,      // in 18 treated languages
+        "clock": 627,          // in 18 treated languages
+        "signs": 2293,         // in 17 treated languages
+        "dotted": 3283,        // in 16 treated languages
+        "era-marker": 911,     // in 14 treated languages
+        "year": 61458,         // in 14 treated languages
+        "decimals": 3644,      // in 12 treated languages
+        "ordinal-latin": 470,  // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 25,           // in 9 treated languages
-        "ranges": 14412,       // \d would miss 6
+        "units": 22,           // in 9 treated languages
+        "ranges": 13235,       // in 7 treated languages
         "currency": 141,       // in 6 treated languages
-        "abbrev": 17816,       // in 6 treated languages
-        "latin-in-native": 25624, // in 6 treated languages
+        "abbrev": 16449,       // in 6 treated languages
+        "latin-in-native": 21365, // in 6 treated languages
         "percent": 1139,       // in 5 treated languages
-        "rate": 150,           // in 4 treated languages
-        "zero-width": 234,     // in 4 treated languages
-        "roman": 1358,         // in 3 treated languages
-        "initialism": 15367,   // in 3 treated languages
-        "grouped": 2245,       // in 3 treated languages
-        "signed-number": 512,  // in 2 treated languages
-        "ordinal-range": 1,    // in 1 treated languages
-        "letter-name": 3943,   // in 3 treated languages
-        "exponent": 610,       // in 24 treated languages
-        "arithmetic": 493,     // in 2 treated languages
-        "ampersand": 907,      // in 1 treated languages
+        "rate": 148,           // in 4 treated languages
+        "zero-width": 226,     // in 4 treated languages
+        "roman": 1158,         // in 3 treated languages
+        "initialism": 14167,   // in 3 treated languages
+        "grouped": 2162,       // in 3 treated languages
+        "signed-number": 463,  // in 2 treated languages
+        "ordinal-range": 0,    // in 1 treated languages
+        "letter-name": 2583,   // in 3 treated languages
+        "exponent": 608,       // in 24 treated languages
+        "arithmetic": 435,     // in 2 treated languages
+        "ampersand": 561,      // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
         "sports-time": 4,      // in 3 treated languages
-        "version-dot": 32,     // in 3 treated languages
-        "quote-letter": 18267, // in 4 treated languages
+        "version-dot": 30,     // in 3 treated languages
+        "quote-letter": 17620, // in 4 treated languages
         "scaled-currency": 93, // in 3 treated languages
-        "ordinal-caps": 46,    // in 2 treated languages
+        "ordinal-caps": 40,    // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -249,7 +249,6 @@
         { "cell": "signed-number", "text": "հինգերորդ աստիճանը հինգերորդ աստիճաններու գումար է՝ 144⁵=27⁵+84⁵+110⁵+133⁵" },
         { "cell": "signed-number", "text": "երկու ձեւերով երկու քառակուսիներու գումար ներկայացնող չորրորդ թիւն է՝ 145=12²+1²=8²+9²" },
         { "cell": "signed-number", "text": "ինքնասիրահարուած թիւ է, քանի որ իր նիշերու՝ անոնց քանակի աստիճաններու գումարն է՝ 153=1³+5³+3³" },
-        { "cell": "ordinal-range", "text": "The Paulician-T’ondrakian heresy: a religious historical study of the origin and development of the heresy in the Armenian church in the 9. — 11. centuries (1975) (Theological Monograph Series, № 15; Princeton University Press, 1988)" },
         { "cell": "letter-name", "text": "1539՝ Ֆրանսուա I թագաւորը լատիներէնին տեղ պետական լեզու կը դարձնէ է ֆրանսերէնը" },
         { "cell": "letter-name", "text": "100&nbsp;°C-ը ջուրի եռման ջերմաստիճանն է" },
         { "cell": "letter-name", "text": "1970 . միջուկային մարտագլխիկներ փոխադրող խորհրդային K-8 սուզանաւը խորտակուեց Պիսքայի Ծոցին մէջ" },
@@ -269,11 +268,11 @@
         { "cell": "arithmetic", "text": "հինգ յաջորդական պարզ թիւերու գումար է 101=13+17+19+23+29" },
         { "cell": "arithmetic", "text": "Առաջին երեք կենտ պարզ թիւերու արտադրեալն է 105=3 × 5 × 7" },
         { "cell": "arithmetic", "text": "14+50+54=15+40+63=18+30+70=21+25+72=118 եւ" },
-        { "cell": "arithmetic", "text": "14×50×54=15×40×63=18×30×70=21×25×72=37800" },
         { "cell": "arithmetic", "text": "հինգ յաջորդական պարզ թիւերու գումար է՝ 199=17+19+23+29+31" },
         { "cell": "arithmetic", "text": "երկու հարեւան եւ չորս յաջորդական պարզ թիւերու գումար է՝ 120=59+61=23+29+31+37" },
         { "cell": "arithmetic", "text": "երեք յաջորդական պարզ թիւերու գումար է 121=37+41+43 (12 րդը )" },
         { "cell": "arithmetic", "text": "ութ յաջորդական պարզ թիւերու գումար է՝ 124=5+7+11+13+17+19+23+29" },
+        { "cell": "arithmetic", "text": "առաջին տասը պարզ թիւերուն գումարն է՝ 129=2+3+5+7+11+13+17+19+23+29" },
         { "cell": "ampersand", "text": "երկու խորանարդներու արտադրեալ է երկու եղանակներով՝ 1728 = 3³ &times; 4³=2³ &times; 6³" },
         { "cell": "ampersand", "text": "2004՝ Երկիրէն աննախադէպ մօտ (43 հազար&nbsp;քմ) կ'անցնէ ասստղակերպը" },
         { "cell": "ampersand", "text": "մինուս քառասունը Սելսիւսի եւ Ֆարէնհայթի սանդղակներուն միակ համընկնող ջերմաստիճանն է՝ -40&nbsp;°C=-40&nbsp;°F" },
@@ -316,8 +315,8 @@
         { "cell": "ordinal-caps", "text": "Մահուան 10-Ամեակ Երգ Հաւատարմութեան 20 Օգոստոս 2016" },
         { "cell": "ordinal-caps", "text": "Հայաստանի Եւ Արցախի Անկախութեան 25-Ամեակներուն Նուիրուած Վահանակներ ԱՄՆ -ի Մասաչուսէթս Նահանգի Ամենաբանուկ Մայրուղիներուն Վրայ 23/09/2016" },
         { "cell": "ordinal-caps", "text": "Այդ նոյն ժամանակ ալ կը նկարահանուէր տաղանդաւոր ծաղրածուի ստեղծագործութեան մասին պատմող երկու ֆիլմ. «Ծանօթացէք՝ Լէոնիդ Ենգիբարեան» եւ «2-Լէոնիտ-2»։ Ենգիբարեանը գրած է «Առաջին րաունտ» (1971 թուական), «Վերջին րաունտ» (1984 թուականին) գիրքերը (երկուքն ալ ռուսերէն): Արձակագիր եւ կինոռեժիսոր Վասիլի Շուքշինը զինք համարած է հիանալի գրող։ 1971 թուականին Ենգիբարեանը կը հեռանայ «Սոիւզկոսցիրքէն»՝ այն բանէն յետոյ, երբ իր գործընկեր Պելովին չէին թոյլատրած իրեն հետ մեկնիլ արտասահմանեան հիւրախաղերու։" },
-        { "cell": "ordinal-caps", "text": "The Case for Bi-Nationalism: Why one state — liberal and constitutionalist — may be the key to peace in the Middle East, The Boston Review, December 2001-January 2002" },
-        { "cell": "ordinal-caps", "text": "Increased Red Cell Calcium, Decreased Calcium Adenosine Triphosphatase, and Altered Membrane Proteins During Fava Bean Hemolysis in Glucose-6-Phosphate Dehydrogenase-Deficient (Mediterranean Variant) Individuals, By Franco Turrini, Anna Naitana, Lidia Mannuzzu, Gianpiero Pescarmona, and Paolo Arese" }
+        { "cell": "ordinal-caps", "text": "Իսկ Արեւելահայաստանի եւ ընդհանրապէս ռուսական կայսրութեան տարածքին մէջ կը ստեղծուին հետեւալ խմբակները․ Բարենպատակ Ընկերութիւն (1869-Կիւմրի կամ Ալեքսանտրապոլ), Հայրենեաց Սիրոյ Գրասենեակ (1874-Մեծ Ղարաքիլիսէ), Ուժ կազմակերպութիւն (1880-Շուշի), «Մշակ» թերթի հոսանքը (1872-Թիֆլիս)։ Հայ մտաւորականներ կը կազմեն հայկական խմբակցութիւն մը, որ թերթեր կը հրատարակէ («Մունետիկ» եւ «Հայրենասէր Ձայներ») թռուցիկներ կը ցրուէ։ 1887-ին Քրիստափոր Միքայէլեան եւ Ստեփան Զորեան (Ռոստոմ) կը փորձեն հիմնել գաղտնի տպարան մը, որպէսզի յեղափոխական միտքեր տարածեն, սակայն չեն յաջողիր եւ 1889- ին կը կազմեն Երիտասարդ Հայաստանը (Դրօշակ յեղափոխական խմբակ)։ 1882 Ներսէս Աբէլեան կը հիմնէ Հայրենասէրներու Միութիւնը։" },
+        { "cell": "ordinal-caps", "text": "Կայսրութեան նախորդող եւ 500-Ամեայ պատմութիւն ունեցող Հռոմի Հանրապետութիւնը տկարացած էր բազմաթիւ քաղաքացիական պատերազմներու պատճառով (քաղաքացիական պատերազմներուն ընթացքին բազմաթիւ ծերակուտականներ սպաննուած էին եւ Ծերակոյտին մէջ կը գերակշռէին Առաջին կամ Երկրորդ եռապետութեան այս կամ այն մասնակիցներուն աջակիցները)։" }
     ],
 
     // The representative tier. Uniform stride over the same segments; keep it alongside the hard-set.

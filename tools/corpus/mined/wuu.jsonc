@@ -35,40 +35,40 @@
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
         "degrees": 241,        // in 22 treated languages
-        "digit-run": 26237,    // in 19 treated languages
-        "fractions": 135,      // in 18 treated languages
-        "clock": 1707,         // in 18 treated languages
-        "signs": 1165,         // in 17 treated languages
-        "dotted": 301,         // in 16 treated languages
-        "era-marker": 19,      // in 14 treated languages
-        "year": 26022,         // in 14 treated languages
-        "decimals": 5359,      // \d would miss 1
-        "ordinal-latin": 209,  // in 11 treated languages
+        "digit-run": 25580,    // in 19 treated languages
+        "fractions": 128,      // in 18 treated languages
+        "clock": 1688,         // in 18 treated languages
+        "signs": 1069,         // in 17 treated languages
+        "dotted": 217,         // in 16 treated languages
+        "era-marker": 7,       // in 14 treated languages
+        "year": 25376,         // in 14 treated languages
+        "decimals": 5336,      // \d would miss 1
+        "ordinal-latin": 77,   // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 245,          // in 9 treated languages
-        "ranges": 1240,        // in 7 treated languages
-        "currency": 7,         // in 6 treated languages
-        "abbrev": 721,         // in 6 treated languages
-        "latin-in-native": 25507, // in 6 treated languages
+        "units": 241,          // in 9 treated languages
+        "ranges": 1001,        // in 7 treated languages
+        "currency": 6,         // in 6 treated languages
+        "abbrev": 502,         // in 6 treated languages
+        "latin-in-native": 23821, // in 6 treated languages
         "percent": 680,        // in 5 treated languages
-        "rate": 389,           // in 4 treated languages
-        "zero-width": 53,      // in 4 treated languages
-        "roman": 651,          // in 3 treated languages
-        "initialism": 3915,    // in 3 treated languages
-        "grouped": 2580,       // in 3 treated languages
-        "signed-number": 93,   // in 2 treated languages
+        "rate": 388,           // in 4 treated languages
+        "zero-width": 51,      // in 4 treated languages
+        "roman": 633,          // in 3 treated languages
+        "initialism": 3430,    // in 3 treated languages
+        "grouped": 2577,       // in 3 treated languages
+        "signed-number": 91,   // in 2 treated languages
         "ordinal-range": 0,    // in 1 treated languages
-        "letter-name": 2019,   // in 3 treated languages
+        "letter-name": 1677,   // in 3 treated languages
         "exponent": 202,       // in 24 treated languages
-        "arithmetic": 155,     // in 2 treated languages
-        "ampersand": 376,      // in 1 treated languages
+        "arithmetic": 110,     // in 2 treated languages
+        "ampersand": 277,      // in 1 treated languages
         "iteration": 11,       // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
         "sports-time": 3,      // in 3 treated languages
         "version-dot": 2870,   // \d would miss 1
-        "quote-letter": 890,   // in 4 treated languages
-        "scaled-currency": 4,  // in 3 treated languages
-        "ordinal-caps": 8,     // in 2 treated languages
+        "quote-letter": 713,   // in 4 treated languages
+        "scaled-currency": 3,  // in 3 treated languages
+        "ordinal-caps": 6,     // in 2 treated languages
     },
 
     // The hard-set: up to N examples per cell.
@@ -113,22 +113,20 @@
         { "cell": "signs", "text": "日本人（日本国民）个民族构成比较简单，但並弗是单一民族国家。大致98%是大和族，剩下来有200万人左右琉球人（明治维新后勒1872年拨日本政府并吞个琉球王朝个遗民）、3万人左右个阿伊努族、30万多日籍朝鲜族、10万人左右个日籍汉族等。除了日本人以外还有200万外国人合法住了勒日本，包括60万朝鲜、韩国人、50万中国人等。大和族个人种起源于日本群岛、亚洲大陆及附近太平洋群岛等各个地方，语言搭文化受到邻近个中国及朝鲜影响。现在包括外国人个日本居民当中99%以上人口通晓日语。剩下来个1%左右，主要包括新近移居日本个中国人、巴西人等，也或多或少兼通日语。现行个公用语言是以江户山手地区（今东京中心一带）个方言为基础个“标准语”。" },
         { "cell": "signs", "text": "Ad-hoc On-demand Distance Vector (AODV)是一种勒自组网里向用于移动网点个路由协议，按英文字面个意思是自组网 按需 距离 向量(上海话：)，目前还是一种实验性质个协议。勒拉自组网里向，弗存在一只中心网点进行路由管理，所有个网点侪是平等个，每只网点侪要担负路由器个职能。AODV协议采用一种反应式路由机制，也就是讲，只有当网络中个网点需要发送数据个辰光再去建立一条路由，弗然，各个网点弗会主动生成并且维护一条呒没数据传输个路由==基本算法==" },
         { "cell": "signs", "text": "吴语来勒清帝国个前中期地位较高，满洲皇帝多次来江南，对评弹等艺术有老高个评价，乾隆还亲自学过评弹。但1850年代个太平天国畀吴语巨大打击。江南地区个人口损失来勒40%以上。皖南个吴语地区，比方讲，宣州，则基本被太平天国军杀光本地人口。迭也导致宣城-芜湖等地个皖南吴语基本消失。句容、溧水、金坛等地个吴语土著被大量替换。吴语经过迭次冲击，元气大伤。尤其是宣城地区，从此之后，基本脱离历史高头搭江南个联系哉。" },
-        { "cell": "dotted", "text": "Frequently Asked Questions: Goodridge et al. v. The Department of Public Health by the Human Rights Campaign" },
         { "cell": "dotted", "text": "圣约翰堂是美国人约翰.M.慕尔博士用心设计个。搭天赐庄圣约翰堂建筑风格一样，面积大小一样个现在还有两座，一座是勒海美国个圣・路易斯，一座勒海日本个神户。苏州天赐庄圣约翰堂原来个名字是“苏州东监理会教堂”，之所以改名字叫圣约翰堂，是为仔纪念卫理公会个创始人约翰・卫斯理。" },
         { "cell": "dotted", "text": "前印度泰米尔纳德邦个总督P.C.亚历山大博士(Dr. P.C Alexander)" },
-        { "cell": "dotted", "text": "Bhatia, B. M., Famines in India: A study in Some Aspects of the Economic History of India with Special Reference to Food Problem, Delhi: Konark Publishers Pvt. Ltd, 1985" },
-        { "cell": "dotted", "text": "No One Is Illegal: Fighting Racism and State Violence on the U.S.-Mexico Border (2006)" },
-        { "cell": "dotted", "text": "Prisoners of the American Dream: Politics and Economy in the History of the U.S. Working Class (1986, 1999)" },
         { "cell": "dotted", "text": "2002 : Hum Tumhare Hain Sanam 演 K.S. Adiyaman" },
-        { "cell": "dotted", "text": "L.L. Ivanov et al. The Future of the Falkland Islands and Its People. Sofia: Manfred Wörner Foundation, 2003. 96 pp.&nbsp;ISBN 954-91503-1-3 (Capítulo principal en español)" },
-        { "cell": "era-marker", "text": "Problem of the Rupee 书 作者&nbsp;：&nbsp; B. R. Ambedkar——History of the Rupee till 1923 A.D." },
-        { "cell": "era-marker", "text": "Churcher, C.S. 1993. Mammalian Species No. 453. American Society of Mammalogists." },
-        { "cell": "era-marker", "text": "Cook，Martin L. (1991). The Open Circle: Confessional Method in Theology. Minneapolis，Minn.: Fortress Press. xiv，130 p. N.B.: Discusses the place of Confessions of Faith in Protestant theology，especially in Lutheranism. ISBN 978-0-8006-2482-8" },
-        { "cell": "era-marker", "text": "Lindberg, David C.: \"The Genesis of Kepler's Theory of Light: Light Metaphysics from Plotinus to Kepler.\" Osiris, N.S. 2. University of Chicago Press, 1986, pp. 5–42." },
-        { "cell": "era-marker", "text": "Cohen, A. P. 1985. The Symbolic Construction of Community. Routledge: New York." },
-        { "cell": "era-marker", "text": "McMillan, D.W., & Chavis, D.M. 1986. \"Sense of community: A definition and theory.\" American Journal of Community Psychology, 14(1), 6-23." },
-        { "cell": "era-marker", "text": "Peck, M.S. 1987. The Different Drum: Community-Making and Peace. New York: Simon & Schuster. ISBN 978-0-684-84858-7" },
-        { "cell": "era-marker", "text": "Putnam, R. D. 2000. Bowling Alone: The collapse and revival of American community. New York: Simon & Schuster" },
+        { "cell": "dotted", "text": "因为弗像中国大陆网站一样做政治审查，中文维基百科常朝畀中共当局封锁。2015年5月19号开始，中文维基百科个域名zh.wikipedia.org搭著zh.m.wikipedia.org畀了封锁。" },
+        { "cell": "dotted", "text": "Problem of the Rupee 书 作者&nbsp;：&nbsp; B. R. Ambedkar——History of the Rupee till 1923 A.D." },
+        { "cell": "dotted", "text": "别名&nbsp;：&nbsp; Shah Rukh Khan、King Khan、S.R.K." },
+        { "cell": "dotted", "text": "Teledifusão de Macau S.A. 澳门广播电视股份有限公司－葡文" },
+        { "cell": "dotted", "text": "共产党（พรรคคอมมิวนิสต์แห่งประเทศไทย，泰文简写：พ.ค.ท.）" },
+        { "cell": "era-marker", "text": "《攻壳机动队》系列因其网络破格並带有反乌托邦性质个世界观著名。作品中对于未来科技有著精密个设想、考据搭描绘，交关概念今朝已经变成现实，《攻壳机动队》也因此获得了众多硬科幻爱好者个赞赏，並对后世交关科幻作品影响交关。沃卓斯基姐妹承认正是因为受到押井守个《攻壳机动队》个直接启发再创作出著名个《黑客帝国》系列。神山健治2004年个《攻壳机动队：S.A.C. 2nd GIG》关于难民问题个设定也来拉十年后个欧洲移民危机里反映出来。" },
+        { "cell": "era-marker", "text": "2009年5月5號，鄧紫棋到美國洛杉磯搭渠个頭一張個人大碟《18...》錄音，同一年10月27號發行。《18...》大碟裏向收仔蠻受歡迎个歌《A.I.N.Y.》，靠渠鄧紫棋愈發出名哉。同一年11月20號、21號搭22號，鄧紫棋垃九龍灣國際展貿中心匯星（Star hall）舉辦仔頭一場個人演唱會《G.E.M. 18 Live 2009演唱會》，還邀請側田搭林海峰當嘉賓。同一年12月份，鄧紫棋垃加拿大多倫多舉行仔頭一場海外音樂會。" },
+        { "cell": "era-marker", "text": "多特蒙德普鲁士1909球类运动俱乐部注册协会（德语：Ballspiel-Verein Borussia 1909 e.V. Dortmund，BVB）是垃拉德国鲁尔区多特蒙德个足球俱乐部。" },
+        { "cell": "era-marker", "text": "阿里斯托芬（Ἀριστοφάνης，约前448年－前380年），古希腊喜剧作家，雅典公民。渠被看作是古希腊喜剧尤其是旧喜剧最重要个代表。相传写有四十四部喜剧，现存《阿哈奈人》(The Acharnians 425 B.C.)、《骑士》(The Knights 424 B.C) 、《和平》(Peace 421 B.C)、《鸟》(The Birds 414 B.C)、《蛙》(The Frogs 405 B.C)等十一部。" },
+        { "cell": "era-marker", "text": "维罗纳足球俱乐部（Hellas Verona Football Club s.p.a. 1903）是意大利个一家足球俱乐部。主场设拉威尼托大区个城市维罗纳。俱乐部成立于1903年。" },
+        { "cell": "era-marker", "text": "2020年泰国示威（泰语：การประท้วงในประเทศไทย พ.ศ. 2563）是讲2020年勒泰国发生个反对泰国政府搭2014年军政府领袖巴育·占奥差个示威活动。" },
         { "cell": "year", "text": "1940年代，舞台灯光搭仔扩音设备逐步勒拉越剧演出活动里向出现。1950年代，剧场演出个辰光，开始勒拉舞台边浪摆只显示屏，用字幕放台词，方便观众。1960年代，开始用录音设备来制造声音效果，比方讲打雷个声音。" },
         { "cell": "year", "text": "早期，越剧只有男演员，进入上海发展后因女班演出广受欢迎，发展成各個角色侪由女演员演个女子越剧。1949年后，恢復招收部分男演员。因为越剧声腔阴柔，男演员咾难演出越剧个声腔特点，故咾今朝大多数侪用女班戏，越剧界个男演员邪气少。" },
         { "cell": "year", "text": "崇明岛勒唐朝武德元年（618年）露出水面，到今朝已经有1300多年个历史。由于长江携带个大量泥沙淤积，崇明岛每年以143米的速度朝东海延伸，增加土地大约487公顷, 几经变迁，现在东西约80多公里，南北宽约10-15公里，面积为1041平方千米。崇明岛大气污染程度较轻微，水、土地也较干静，再加上气候属于北亚热带，温度适中，四季分明，光照充足，有利于多种农作物个生长。崇明岛有交关名、优、特、稀产品，譬如老毛蟹（阳澄湖个大闸蟹就是崇明个蟹苗）、面丈鱼、凤尾鱼、刀鱼（秋刀鱼）、甜芦粟、包瓜、鳗鱼（鳗鲡）、对虾、白山羊、金瓜、甜玉米、芦笋、食用菌、崇明大白菜等。" },
@@ -145,14 +143,14 @@
         { "cell": "decimals", "text": "韩国位于朝鲜半岛南部。朝鲜半岛地处亚洲大陆个东北部，从北朝南延伸，全长1,100公里。韩国邻海搭太平洋最西部个海域交汇。朝鲜半岛北部搭中国、俄罗斯接壤，东部濒临東海，搭邻国日本隔海相望。除脱搭大陆相连个半岛之外，韩国还有3,000个大大小小个岛屿。" },
         { "cell": "decimals", "text": "朝鲜半岛面积为222,154平方公里，差勿多搭英国或者罗马尼亚大小相当。其中45%，即99,000平方公里土地，为可耕地（弗包括已经开垦个土地）。像葡萄牙、匈牙利、爱尔兰一样，朝鲜半岛个山地大约占领土个三分之二。" },
         { "cell": "decimals", "text": "朝鲜半岛有交关风景优美个山川，因此韩国人往往帮伊称作“锦绣江山”。最高个山峰是位于朝鲜搭中国接壤个白头山（长白山），海拔2,744米。白头山是一座活火山，山口形成了一个叫“天池”个大来交关个火山湖。白头山是韩国民族精神特别重要个象征，拨写进韩国国歌当中。" },
-        { "cell": "ordinal-latin", "text": "Financial Times World Desk Reference, 5th Edition (2003), Dorling Kindersley, UK , ISBN 0-7513-4889-9" },
         { "cell": "ordinal-latin", "text": "Palais de Justice - Mairie du 3ème (中转: 到Place Guichard - Bourse du Travail搿站转里昂地铁B线；公交25 - (28路勒21点之后) - 99)" },
         { "cell": "ordinal-latin", "text": "Bachut - Mairie du 8ème (中转 : 公交 23 - 24 - 26)" },
         { "cell": "ordinal-latin", "text": "2002 : 23rd March 1931 : Shaheed 演 Guddu Dhanoa" },
-        { "cell": "ordinal-latin", "text": "Niagara Falls Guidebooks from the 19th Century Digitally-recreated 19th century guidebooks" },
-        { "cell": "ordinal-latin", "text": "The C Book by M.Banahan-D.Brady-M.Doran (Addison-Wesley, 2nd ed.) — book for beginning and intermediate students, now out of print and free to download." },
-        { "cell": "ordinal-latin", "text": "Shahrukh Khan – Still Reading Khan. A1Books Distributor 2007. ISBN 978-81-87107-79-8." },
-        { "cell": "ordinal-latin", "text": "Gahlot, Deepa; Agarwal, Amit. King Khan SRK. Augsburg Weltbild 2007. ISBN 978-3-8289-8869-9." },
+        { "cell": "ordinal-latin", "text": "嘉年威华利第二童军营部（2nd Glen Waverley Scout Group）" },
+        { "cell": "ordinal-latin", "text": "第十二&lt;&lt;乐趣&gt;&gt;童军俱乐部（12th Lurch scout club）" },
+        { "cell": "ordinal-latin", "text": "Hugh Honour。 《世界艺术史》A world history of art, 5th ed.。吴介祯等译。台湾：木马文化出版，2001。 ISBN9574695352" },
+        { "cell": "ordinal-latin", "text": "《斷背山》勒第78屆奧斯卡金像獎（:en:78th Academy Awards）當中獲得八項提名，是同一屆裡向最多嗰，最後渠奪得了最佳導演、最佳改編劇本與最佳電影配樂三項大獎。徠勒獲獎名單揭曉前頭，《斷背山》畀普遍公認為最有希望得到最佳影片獎，但最後敗北《衝擊效應》。 《斷背山》也勒商業上向獲得相當大嗰成功，勒史上愛情/劇情片中票房排名第八。" },
+        { "cell": "ordinal-latin", "text": "依據古代記載，蘇格拉底出生嘞伯里克利統治个雅典黄金時期，出身貧寒，阿爺是雕刻師，俚娘是助產士。蘇格拉底个家之婦是贊西佩（Xanthippe，5th century–4th century BCE），俚替蘇格拉底生仔3個兒子（Lamprocles, Sophroniscus, Menexenus）。蘇格拉底死个辰光，俚篤儕非常年幼。" },
         { "cell": "units", "text": "法国本土勒拉西欧，但是渠有交关海外属地，而且搿星海外属地个行政地位分好几种。勒欧洲外头个有：北美洲、大小安的列斯群岛、南美洲、印度洋、大洋洲等等。渠搭邻国有2970公里个边境线，一龙总有8个邻国：西班牙 （650 km）, 比利时 （620 km）, 瑞士 （572 km）, 意大利 （515 km）, 德国 （450 km）, 卢森堡 （73七三 〧〣 km）, 安道尔 （57〥〧 km）, 摩纳哥 （4,5 km）。勒法属圭亚那，搭巴西有580 km，搭苏里南有520 km。勒大小安的列斯群岛个圣马丁岛大约匝有10,2 km边境线，该岛分别拨法国搭荷兰控制。 最后一部分是：法国宣称个Terre Adélie （属于法属南方、南极洲领土（简称TAAF）]]）勒到澳大利亚宣称主权个南极洲范围里向。" },
         { "cell": "units", "text": "里昂（包括维勒班）是大里昂地区个中心。里昂地区是以里昂市为中心个直径拉50-100公里范围内个地区。里昂所在个罗讷省，面积在43698 km²。里昂搭渠地区坐落拉西欧个十字路口，被地中海，大西洋搭仔东欧地区围绕。" },
         { "cell": "units", "text": "淞河，法文Saône，法国东部一条河，穿过法国第二城市里昂。搿条河全长480公里，平均流量473m³每秒（勒Couzon-au-Mont-d'Or测个数据），流域面积29950 km²，最后流进学纳河。" },
@@ -160,30 +158,29 @@
         { "cell": "units", "text": "根西岛（英文Guernsey）是英国个海外属地，勒勒英吉利海峡靠近法国海岸线海峡群岛之中，搭周围一星小岛一淘组成根西行政区（Bailiwick of Guernsey）。行政区总面积78km²，人口65,031人（2004年），首府生彼得港（Saint Peter Port）。" },
         { "cell": "units", "text": "此地是北亚热带南缘季风海洋型气候，常年温和湿润，冬暖夏凉，光照充足。年平均气温16.1℃ ，1月顶冷，温度平均有5.5℃ ,8月份热，温度有26.9℃，2150.7小时，全年≥10℃活动积温5009.6℃，无霜期235天。年平均降雨量1200mm。年平均相对湿度80%，是湿润或者半湿润个地区。" },
         { "cell": "units", "text": "北京搭天津之间个城际铁路线，起点北京南，终点天津站，全长113.544千米，2008年8月1号开通仔。最高时速可以到350km/h，但是一般性运营个辰光只到330km/h。" },
-        { "cell": "units", "text": "Prapawadee claimed title in women's 53kg of weightlifting" },
+        { "cell": "units", "text": "例如&nbsp;：&nbsp; A, B, C 三人个体重为 55 kg, 60 kg, 80 kg 箇咾合计有&nbsp;：&nbsp; 195 kg 三人体重个平均值是&nbsp;：&nbsp;195 kg ÷ 3 = 65 kg" },
         { "cell": "ranges", "text": "到清中期（約18世紀），傳奇開始衰微，向書齋文學轉化，彈詞卻逐步興盛起來了。出版之錢德蒼編个戲曲折子戲選集《綴白裘》（1763-1774）搭沈起鳳（1741-?）个傳奇“沈氏四種”（《報恩緣》、《才人福》、《文星榜》、《伏虎韜》），還有大量彈詞腳本。《綴白裘》搭“沈氏四種”中使用方言个段落交關，產生之新个詞語搭用法，並對晚清吳語小說个發展奠定之堅實基礎。" },
         { "cell": "ranges", "text": "姚文元（上海吴语：，），男，浙江诸暨人，“四人帮”成员之一，渠拉爷是姚蓬子；中央文化革命小组成员（1966-1969），中共中央政治局委员（1969年～1976年）。" },
         { "cell": "ranges", "text": "0-14 岁: 28.7% （男性:407,547人; 女性:392,440人）" },
         { "cell": "ranges", "text": "15-64 岁: 67.7% （男性:943,418人; 女性:945,063人）" },
         { "cell": "ranges", "text": "1949年10月1号，来勒北京天安门城楼，毛泽东宣布中华人民共和国成立。1950年代，开始搭苏联保持亲密关系，并且参加朝鲜战争。1953年，签署停战协议。之后进入社会主义改造阶段，拿老早个经济模式国有化，开始农业合作社建设。到1950年代末，开始大跃进。1960年代初，发生三年自然灾害，1966-1976年，发生文化大革命。1976年，毛泽东死脱，之后发生粉碎四人帮活动。1978年，来勒邓小平个决策下，开始改革开放，经济迅速发展。1980年代，开放深圳等特区，1990年代，开始开放上海个浦东新区。1990年代末，经济转型，2000年之后，经济实力愈发增强。来勒国际高头个地位也逐步提升。" },
         { "cell": "ranges", "text": "匈奴民族勒古代建立匈奴王国。匈奴王国之后分裂成北匈奴搭南匈奴。此外，柔然王国也认为是由匈奴民族建立个。居四个国家先后勒蒙古称王称霸。6-13世纪，先后出现突厥王国、薛延陀王国、回纥王国（后来改称回鹘王国）搭黠戛斯王国等国家，称霸中亚搭蒙古。1206年，铁木真统一蒙古，建立北到吉尔吉斯，西到叙利亚，东到太平洋，南到波斯个蒙古帝国。后来子只保住北亚东部；忽必烈拿国名改成元朝，並且称霸中国。勒西伯利亚，则有白帐{术赤王朝}搭蓝帐{术赤王朝}两个蒙古帝国封国；白帐勒14世纪灭脱蓝帐，改称金帐。先后出现过蒙古王国，西伯利亚王国搭土尔扈特王国（俄罗斯个附庸国），但是分别拨后金，俄罗斯搭清朝灭脱。从1771到1911，北亚一直拨俄罗斯，清朝搭后来个中国统治。" },
-        { "cell": "ranges", "text": "Geographica-The Complete Illustrated World Reference (1999), Random House Australia/Periplus, ISBN 962-593-622-X" },
         { "cell": "ranges", "text": "朱之瑜（1600-1682），思想家，文学家，史学家，日本水戶学大师，水户黄门个老师" },
+        { "cell": "ranges", "text": "章炳麟（1868-1936），又名章太炎，民主革命家、思想家、著名学者、语言学家，皇汉教父" },
         { "cell": "currency", "text": "2008年温布尔顿女子单打奖金 : GBP : £187,500；女子双打奖金 : ;GBP : £52,000" },
         { "cell": "currency", "text": "3兄弟个名称是 ： John Hargraves、 James Hargraves、 搭仔Edmund Hargraves 发现金子个日期是 ： 1851年2月 地方是 ： Ophir gold diggings，渠俚居勒勒 Summer Hill Creek 搭仔 Lewis Ponds Creek 河山谷里向 新南威尔斯政府奖赏拨 Hargraves 3兄弟个奖金是 ： £10,500 （ 勒2004年搿个数值等于是—— $1,125,434 ）" },
         { "cell": "currency", "text": "2007年: 勒英国电视节目──Big Brother Celebrity浪 ── 奖金：三十六万七千五百英镑 (£367,500 GBP)" },
-        { "cell": "currency", "text": "New NT$500 and NT$1000 banknotes introduced, anti-counterfeit measures taken Taiwan News (online), July 20, 2005" },
         { "cell": "currency", "text": "创建傲种网格方法类似公司网格，一个较低端个服务器（约一万美元）就能胜任几万客户端个调度工作。伦敦个威斯特斯顿大学创建了一个傲种网格，据估计，一年可节省约£125,000。" },
         { "cell": "currency", "text": "哈同夫妇呒没亲生囡，哈同领养仔11名外国孤儿，罗迦陵领养仔9名中国孤儿。1931年6月19号，哈同来勒爱俪园病故，留下来高达一亿七千二百万元或$150,000,000个巨额遗产 ，遗产税就高达1800万元。1941年，罗迦陵也走脱，必过因为夫妇二人留下来个遗嘱有弗小出入，引发哈同遗产案。1954年，中共政府征用爱俪园个地造仔中苏友好大厦（乃朝上海展览中心）。" },
         { "cell": "currency", "text": "1945年11月9号，明思德递交辞呈，拉1946年10月1号生效。 麦克劳德呢，过仔5日天也递交辞呈，就介生效。 1947年，中央学院再次授学位畀渠。 1946年9月份，明思德宣布学院得着詹姆斯·克拉克·麦克雷诺兹个5万块美金（相当于2023年个$781,000）遗赠。" },
         { "cell": "abbrev", "text": "渠是加利福尼亚大学伯克莱分校个物理学教授。渠因为搭John C. Mather一道“发现宇宙微波背景辐射个黑体形式搭仔各相异性\",两家头一道获得2006年个诺贝尔物理学奖。" },
-        { "cell": "abbrev", "text": "2005: General Motors Cancer Research Foundation’s Alfred P. Sloan Jr. Prize" },
         { "cell": "abbrev", "text": "伊勒位于马里兰州个美国国家航空航天局个Goddard空间飞行中心工作，而且伊也是马里兰州大学个物理助理教授。勒2006年，伊搭George F. Smoot两个人一道获得诺贝尔物理学奖，来表彰伊俚发现“宇宙微波背景辐射个黑体形式搭各向异性”。搿项发现会得帮忙巩固宇宙大爆炸理论，具体方法是通过利用宇宙背景探测卫星。根据诺贝尔奖委员会个话，宇宙背景探测卫星计划也代表从此之后，宇宙学作为一种新个精确个学科。" },
-        { "cell": "abbrev", "text": "Chao, Yuen Ren. A Grammar of Spoken Chinese. Berkeley: University of California Press, 1968, ISBN 0-520-00219-9." },
-        { "cell": "abbrev", "text": "V&#7853;n n&#432;&#7899;c &#273;ã &#273;ên r&#7891;i. Bình minh chi&#7871;u kh&#7855;p n&#417;i." },
         { "cell": "abbrev", "text": "阿根廷人侪交关欢喜叫 伊 「布亚斯」（Baires）报章里向有一星辰光简写为「Bs. As.」。该城市还有一个雅称叫「拉普拉塔河个花后」(The Queen of the Plata)。" },
-        { "cell": "abbrev", "text": "Evil Paradises: Dreamworlds of Neoliberalism, ed. with Daniel Bertrand Monk (2007)" },
         { "cell": "abbrev", "text": "Jumper（台湾翻译：移动世界）是2008年个一部科幻电影，伊根据Steven Gould1992年一部同名科幻小说Jumper改编。电影导演Doug Liman，演员Hayden Christensen、Samuel L. Jackson、Jamie Bell、 Rachel Bilson、AnnaSophia Robb搭仔Max Thieriot。该电影2008年2月14号出来个。" },
+        { "cell": "abbrev", "text": "诗丽黛玮曾经4度得到《印度电影观众──最佳女演员奖》。1986年和1987年因为一印度一些政治问题而呒举行《印度电影观众奖》授奖仪式箇咾伊演出个Nagina，蛇女（1986） 和 Mr. India，印度先生（1987） 拿弗着最挂女演员奖。" },
+        { "cell": "abbrev", "text": "T. Creamer， A Chinese-English Dictionary of the Wu Dialect，上海外语教育出版社，1992，p73, p121" },
+        { "cell": "abbrev", "text": "他信经济是泰国前总理他信（Thaksin Shinawatra&nbsp;&nbsp;&nbsp; พ.ต.ท. ทักษิณ ชินวัตร &nbsp;）个创立个经济学说。" },
+        { "cell": "abbrev", "text": "伍捷朴先生（Mr. Banyong Lamsam）乃歇是泰华农民银行董事会个董事长；（副董事长是鲍·沙拉信警上将）。" },
         { "cell": "latin-in-native", "text": "越剧，又叫绍兴戏，英文名Yue Opera。目前对“越剧”箇只名字个顶顶早起源有争议，箇是因为老早各地各人个讲法侪弗一样，资料记载也各有区别，所以大家对越剧名字个由来搭变化並呒没一個准确个共识 。一般认为伊是从浙江等地个民间戏曲当中演变过来个。" },
         { "cell": "latin-in-native", "text": "“二”有辰光读“两”，勒搭“百”搭配个辰光常用“两”，比如：222 “两百廿二”，即[liaŋ-pɑʔ-ɲie-ɲi]" },
         { "cell": "latin-in-native", "text": "“十五”弗可以发成“[zəʔ][ṇ]”,因为[zəʔ]意思是“入”个文读，而[ṇ]又是“侬”（侬）个音，所以侬弗可以话“入侬”，而委婉话成[so-ṇ]。" },
@@ -208,22 +205,22 @@
         { "cell": "rate", "text": "1997年朞，徠Technion IIT公司嗰兩箇以色列程式設計師：Zeev Suraski搭Andi Gutmans，畀PHP嗰剖析器轉寫爻，成了PHP 3嗰基礎，哈PHP也徠箇時候改起䜒PHP: Hypertext Preprocessor. 。通過一兩嗰月頭嗰測試，開發團隊徠1997年11月馱出PHP/FI 2，隨腳便開始PHP 3嗰開放測試，到後晚徠1998年6月正式放出PHP 3。Zeev Suraski搭Andi Gutmans徠PHP 3放出後開改PHP嗰核心，箇徠1999年放出嗰剖析器名字Zend Engine ，渠伊也徠以色列嗰Ramat Gan成立Zend Technologies來管PHP嗰開發。" },
         { "cell": "rate", "text": "（Nakhon Sawan&nbsp;&nbsp;&nbsp;&nbsp;นครสวรรค์ นครสวรรค์） 也叫那空沙旺府 ，是泰国第二十大个府。面积：9597平方公里，居民：1百万，人口密度是114人 /平方公里。" },
         { "cell": "rate", "text": "由于渠个低密度、高速自转搭流体个可变性，土星个外形呈现为一个椭球体，也就是极轴相对扁平而赤道相对突出，渠个赤道直径搭两极直径之比相差大约10%（前者120,536公里，后者108,728公里）。其它气体行星虽然也是椭球体，但突出程度侪咾小。虽然土星核心个密度远高于水，但由于存在较厚个大气层，土星仍是太阳系中唯一密度低于水个行星，渠个比重是0.69 公克/公分³。土星个质量是地球个95倍，相比较木星质量是地球个318倍，但直径只比土星大约20%。" },
-        { "cell": "zero-width", "text": "Malayalam News - വിവിധ മാധ്യമങ്ങളില്‍ നിന്നുള്ള പ്രധാനപ്പെട്ട വാര്‍ത്തകള്‍ ഇവിടെ വായിക്കാം." },
-        { "cell": "zero-width", "text": "writeKA Scripton: English to Malayalam Online Transliterator - മലയാളം എഴുതാനുള്ള ഓണ്‍ലൈന്‍ ഉപകരണം." },
         { "cell": "zero-width", "text": "《吴录》是一部记录吴国（三国）历史个史书。作者是晋代​个张勃。搿本书现在存一卷，现存本是清初重修本。《三国志注》当中个《吴书》弗少地方侪是从搿本书里向引征过来个。" },
         { "cell": "zero-width", "text": "但必过一句“我里承诺保持Debian GNU/Linux发行版是完​​全自由个软件”到“我里承诺Debian系统搭它个所有组件侪是自由个”个改变，让发布管理者Anthony Towns做出一个实质变化：" },
         { "cell": "zero-width", "text": "“因为弗再限于‘软件’，并且箇决定是开发者来讨论我里应该哪亨处理像文档搭固件等非软件内容个过程中做出个，我弗再拥护箇项政策决议以期好免除文档、固件等内容，尽管社会契约已经修订来涵盖所​​有伊些领域。”" },
         { "cell": "zero-width", "text": "清代中期，揚州商人童嶽薦在佢个烹飪書《調鼎集》裡頭便寫到爻大㓠肉圓个做法: 取肋條肉去皮切細長條粗㓠，加豆粉少許作料，用手松捺不可搓，或油炸，或蒸，襯用嫩青。 箇道菜晚清起廣為人知，徐珂个《清稗類鈔》有写道： 獅子頭者，以形似而得名，豬肉圓也。或竹筍，略和以水及鹽，以肉作極大之圓，置其上，上覆菜葉，以罐蓋蓋之，乃入鐵鍋，撒鹽少許，鍋裂，然後以文火乾燒之 ​，然後與蛋白混合，使混合物易於凝固。放在肉丸上方，蓋上鍋蓋，將鍋放入盛有鹽水的鍋中。肉熟為止。" },
         { "cell": "zero-width", "text": "希尔德里克一世（法语：Childéric Ier，440年－481年6月26号），自457或​​458年起任萨利昂法兰克人国王。渠个名字来自法兰克语hild-“战斗”搭-rik“强大”，Childericus是渠个拉丁文形式。渠是克洛维一世个父亲。" },
         { "cell": "zero-width", "text": "哈菲兹（本名沙姆斯丁·穆罕默德，波斯语：اجه شمس‌الدین محمد حافظ شیرازی‎，约1315年－约1390年），为最有名个波斯抒情诗人，常被誉为“诗人个诗人”。" },
+        { "cell": "zero-width", "text": "由拓樸學个角度分析可以了解跟牆行演算法為啥掂。拉垃定义上，「简单个连住」个迷宫啥墙是全部都相连住，即是勿循环路，所以拉垃一个个迷宫门，每当走迷宫哀个人撞到分叉路，哀条分​​叉路净是有得再分叉或者做倔头路。即是表示，如果将个人个可能路线画做一幅树状图，咿幅树状图勿会有任何互相交叉个分枝，而且个迷宫有得变形做一个圆圈。即是讲靠跟墙行演算法解一个迷宫基本上等同沿住一个圆圈由起点行到去终点个样子。" },
+        { "cell": "zero-width", "text": "当然，跟墙行演算法都有伊个弱点：首先，上述讲了呢柞物质是以「迷宫是个简单个连住」做前题，如果个迷宫勿是简单个连住（例如入口或是出口是个迷宫中心，拨循环路围住；又或是啥路彼此之间会垃对方上面或者下面去，而正确路线个衰部份拨循环路围住），跟墙行演算法就勿通会行；另一方面，如果一个人门行行吓到了半路先至开始用跟墙行演算法，而个迷宫​​勿是简单连住，伊可能会永世沿住一列循环个墙打转。如果一个人行到半路先开始用跟墙行演算法，伊可以搵个方法记低伊开始用跟墙行演算法哀点，而因为跟墙行演算法如果去勿到出口只手是会走返到去起点，所以起码会帮到伊知道个迷宫是简单连住了。" },
         { "cell": "roman", "text": "第二小组（WG II)：\"Impacts, Adaptation and Vulnerability\"（影响・适应・脆弱性）" },
         { "cell": "roman", "text": "第三小组（WG III)：\"Mitigation of Climate Change\"（气候变化缓和）" },
-        { "cell": "roman", "text": "Article on the development of Nike's Aerofly and the Aerofly LX spikes" },
-        { "cell": "roman", "text": "Royal Embassy of Saudi Arabia in Washington, DC" },
-        { "cell": "roman", "text": "60 Minutes II Interview (June 30, 2000) with Charlie Rose" },
-        { "cell": "roman", "text": "World War II Eye Witness Account – Audio Recording" },
         { "cell": "roman", "text": "约翰·席德尼·麦凯恩三世（John Sidney McCain III，1936年8月29号 － 2018年8月25号），美国政治家、共和党重量级人物，乃朝是亚利桑那州资深联邦参议员，曾拉2008年代表共和党参选过美国总统。" },
         { "cell": "roman", "text": "2008年 黄贯中 《Let's Fight Live (CD+DVD)》- Let's Fight / 黄贯中 + Fighters" },
+        { "cell": "roman", "text": "1993年——成为二区上訴庭审理员（Region II Court of Appeal）" },
+        { "cell": "roman", "text": "电脑个种类有无数种，最起头个电脑有整间戏场能大。能界也还有馨大个电脑设备，专门用来科学计算搭大公司（比方银行）个事务处理，箇种超级电脑瑲讲大型机（Mainframe）；私人用个是小型个电脑，讲私人电脑（Personal Computer, PC）；便带式好动个电脑便讲手提电脑要勿笔记本电脑（Laptop Computer）。私人电脑搭手提电脑是到处望得着个信息处理搭通讯工具。不过，能界用得最多个电脑其实是嵌入式电脑，一种用来控制各种设备个电脑，用来控制譬如飞机、数码相机（Digital Camera, DC）许。" },
+        { "cell": "roman", "text": "Cool，是英文Classroom Object Oriented Langage个缩写词，是1996年由大仲马•艾肯（Alexander Aiken）受到Java／ML／Pascal／C++搿星程序编制闲话个启发发明出来个新型闲话。" },
+        { "cell": "roman", "text": "MV Teratai Prima是印度尼西亚个一艘渡輪，2009年1月11号来勒望加錫海峽沉没 获救个人表示，船是畀超过4米个浪拍翻脱个。印尼官方表示超过300個人死脱，只救起来35個人。" },
         { "cell": "initialism", "text": "第二次世界大战纳粹德国战败，根据战时波茨坦会议（Potsdam Conference）英、美、法、苏四国个秘约，决定勒德国战败之后拿其一分成四分别由四个战胜国占领，并且合组一个顶高管理单位同盟管理议会（Allied Control Council，ACC）来治理德国事务。尚况由于理念浪个两样，勒战后以美国为主个西方阵营搭以苏联为主个共产阵营慢慢叫茄门，1948年3月份个辰光，美、英、法三国勒伦敦举行会议，初步决议要拿三国分别管理个德国领土合并，组成一个德国西部个政权，针对搿点苏联方面作出反制，首先是退出ACC，再进而宣布着手设立一个东德政权个计划。" },
         { "cell": "initialism", "text": "但直接导致东西德分离个导火线，是发生勒1948年6月20号，西方占领区境内个货币重整计划。当时西方三国占领区内原本分开发行个货币进行仔整合动作，但却排除苏联占领区，发行所谓个西德马克，而苏联占领区也勒短短三日以后发行东德马克，象征东西德正式分离。东西德分离之后，东德方面曾勒1948年中开始，对用西德马克个西柏林地区进行封锁，为期11个号头，希望通过此举达到完全控制整个柏林地区个目的，但却勒西方国家持续以空运方式所进行个柏林空运支持下头朆实现。勒柏林封锁解除（1949年5月12号）之后朆有多少辰光个5月23号，西德（德意志联邦共和国）宣布正式成立。而东德方面也勒同年个10月7号宣布正式成立以德意志社会主义统一党（Sozialistische Einheitspartei Deutschlands，SED）一党专政个社会主义共和政体。" },
         { "cell": "initialism", "text": "翁美玲勒拉15岁个辰光远开香港到英国，搭俚笃娘搭仔慢爷一道生活。俚笃娘是勒拉两年前头移民到英国个。翁美玲勒拉香港个辰光上个是玫瑰园学堂(位于 香港司徒拔道——Stubbs Road )，勒搭俚完成俚个小学搭仔一部分中级教育。俚勒拉剑桥个一只中学里向继续中级教育个学习，通过着通用教育证书（GCE）个普通水准考试（GCE O-Level）。完成仔普通水准考试之后，俚参加着一只由剑桥大学举办个2年头基础课程。该个项目完成仔，俚咦到伦敦交关有名个艺术搭仔设计中央学院里向去学纺织品设计，勒拉该所艺术学堂里向登着4年。" },
@@ -252,10 +249,10 @@
         { "cell": "letter-name", "text": "电车勒19世纪上半期出现，但是刚刚开始个辰光，电车是硬是靠动物拉个。最最早个电车（名字叫hippomobile）是美国造个，用来沟通纽约到Harlem(1834年)，后来子1850年，纽约到新奥尔良。头一批铁轨，因为采用“U”字形个结构，事故连二发生过好几趟。从1850年开始用喉管形铁轨；1852年开始用呒得弯头个铁轨（法国人Alphonse LOUBAT发明）。1853年，趁世界博览会之际，勒法国巴黎第8区修建着一条试验电车轨道。" },
         { "cell": "letter-name", "text": "内部：伏尔加格勒州 (NW/N), 阿斯特拉罕州 (N/NE/E), 达吉斯坦共和国 (S), Stavropol 边疆区 (SW), 罗斯托夫州 (W)." },
         { "cell": "letter-name", "text": "SCV 唱片公司举办全国华语创作歌曲比赛冠军-《Baby I Love You》" },
-        { "cell": "letter-name", "text": "Di&#7879;t &#272;&#7871; qu&#7889;c M&#7929;, phá tan bè l&#361; bán n&#432;&#7899;c." },
-        { "cell": "letter-name", "text": "&#272;ây C&#7917;u Long hùng tráng, &#272;ây Tr&#432;&#7901;ng S&#417;n vinh quang." },
-        { "cell": "letter-name", "text": "C&#7847;m g&#432;&#417;m, ôm sung, xông t&#7899;i!" },
-        { "cell": "letter-name", "text": "Truong Nhu Tang, David Chanoff, Doan Van Toai, A Viet Cong Memoir (Harcourt Brace Jovanovich, New York, 1985)" },
+        { "cell": "letter-name", "text": "八国集团，世界浪顶顶富裕、政治浪顶顶强大个八个国家。成员国有：美国、英国、法国、加拿大、日本、意大利、俄罗斯、德国。该集团年年有八国峰会，讨论世界浪实事，也是该辰光，有好星示威者抗议。2014年因俄罗斯介入克里米亚战争而遭受国际制裁后，被冻结席位，组织再次称为七国集团 (G7)。" },
+        { "cell": "letter-name", "text": "2000年10月31日，新加坡航空班号SQ006、机身号码9V-SPK，由新加坡经台北飞往洛杉矶个波音747-400型客机，来拉台风天个大雨中起飞个辰光，因为塔台航管與駕駛沟通弗良與疏忽，导致班机誤闯施工维修中之跑道，以致於来拉起飞加速个过程中擦撞跑道上个工程机具而失控墜毁，造成82人死亡與多人受伤。" },
+        { "cell": "letter-name", "text": "Josiah Goddard (1813-1854)，中文名高德，是美国浸礼会传教士，勒浸礼会外国传教团委员会里向负责暹（也就是今朝个泰国）搭仔中国宁波地区个教务。渠开始勒曼谷传仔六年教，后手来因为健康原因勒1848年调动到浙江个宁波，最后生病过身勒海宁波。勒传教过程当中，高德拿圣经翻译成宁波闲话出版，还编写仔一本《汉英潮州方言词典》（A Chinese and English Vocabulary in the Tie-chiu Dialect）。" },
+        { "cell": "letter-name", "text": "所属事务所：K DASH系列→TURE PROJECT（属Tanabe Angency Co.,Ltd关连企业，也可说是企业集团个核心）" },
         { "cell": "exponent", "text": "地球上水总储量约为1.36 x 1018m3，但除去海洋等咸水资源外，只有2.5%为淡水。淡水又主要以冰川搭深层地下水个形式存在，河流搭湖泊中个淡水仅占世界总淡水个0.3%。" },
         { "cell": "exponent", "text": "厕所，也叫厕所间（上海话：⁵tshy-su-ke）、马桶间（上海话：⁶mo-don-ke）、卫生间（上海话：⁶we-san-ke）、坑棚间（上海话：khan³⁵-ban⁵⁵-kae³¹）、便桶间、茅坑间、屙坑间、茅尿间、尿桶间咾啥个，是用只马桶或者屙缸，畀人屙污，屙尿个独立场化。有一眼廁所会有草纸供应，方便人拆完揩屁股。" },
         { "cell": "exponent", "text": "人口: 250万&nbsp;(城市中心: 170万)。 人口密度: 488/km²&nbsp;(城市中心: 745/km²)" },
@@ -265,21 +262,21 @@
         { "cell": "exponent", "text": "銅鈿（doŋ²²³ diɪ 223-33 ），貤讴洋鈿、銅鈿銀子搭仔錢，是一眼人为仔提高交易效益，对一种媒介达成个共识。铜钿有邪气多个形式，：贝壳、粮食、金属、纸币、银行卡信用卡等磁条卡、搭仔移动支付加密货币咾啥。" },
         { "cell": "exponent", "text": "孛拉先拿湖（Lago de Bracciano）勒到意大利个拉齐奥， 湖个成因是40万年前火山活动。勒到罗马南边25英哩，最深处有160米，湖有15公里长、3公里宽。 湖面积：57.5 km²" },
         { "cell": "arithmetic", "text": "Poise搿个单位有点大，一般用伊个100份之一，centiPoise(cP) centi-英文表示一百份之一。(1 cP = 10-2P = 10-3 Pa·s)" },
-        { "cell": "arithmetic", "text": "MySpace-music id = sofiarotaru, name = Sofia Rotaru" },
         { "cell": "arithmetic", "text": "IMDB数据库 id = 0744719, name = Sofia Rotaru" },
-        { "cell": "arithmetic", "text": "例如&nbsp;：&nbsp; A, B, C 三人个体重为 55 kg, 60 kg, 80 kg 箇咾合计有&nbsp;：&nbsp; 195 kg 三人体重个平均值是&nbsp;：&nbsp;195 kg ÷ 3 = 65 kg" },
         { "cell": "arithmetic", "text": "一般化平均で特に m = 2 个场合は、二乗平均平方根と呼ばれ、物理学や工学で様々な応用をもつ。" },
         { "cell": "arithmetic", "text": "という平均が定义できる。f(x) = x により相加平均が、f(x) = 1/x により调和平均が、f(x) = log(x) により相乗平均がそれぞれ表されている事が分かる。" },
         { "cell": "arithmetic", "text": "正字法高头，半开元音加隻钝音符搭半闭元音区别开来（譬方‹e›＝，而‹è›＝)。‹n›跟牢‹a›、‹e›、‹o›表示鼻化。不过，元音字符加仔钝音符个说话，‹n›就勿表示鼻化，而表示鼻音（譬方‹on› = ，而‹òn› = )）。" },
         { "cell": "arithmetic", "text": "直角坐标系里向个定义： (x-x_m)^2 + (y-y_m)^2 = a^2 ，a是半径， (x_m,y_m) 是圆心个坐标。" },
-        { "cell": "ampersand", "text": "Gi&#7843;i phóng mi&#7873;n Nam, chúng ta cùng quy&#7871;t ti&#7871;n b&#432;&#7899;c." },
-        { "cell": "ampersand", "text": "Ôi x&#432;&#417;ng tan máu r&#417;i, long hân thù ng&#7845;t tr&#7901;i." },
-        { "cell": "ampersand", "text": "Sông núi bao nhiêu n&#259;m c&#7855;t r&#7901;i." },
-        { "cell": "ampersand", "text": "Thúc gi&#7909;c &#273;oàn ta xung phong &#273;i gi&#7871;t thù." },
-        { "cell": "ampersand", "text": "Vai sát vai chung m&#7897;t bóng c&#7901;." },
-        { "cell": "ampersand", "text": "Vùng lên! Nhân dân mi&#7873;n Nam anh hùng!" },
-        { "cell": "ampersand", "text": "Vùng lên! Xông pha v&#432;&#7907;t qua bão bùng." },
-        { "cell": "ampersand", "text": "Th&#7873; c&#7913;u l&#7845;y n&#432;&#7899;c nhà! Th&#7873; hy sinh &#273;&#7871;n cùng!" },
+        { "cell": "arithmetic", "text": "参数方程个定义： x = x_m + a \\cos \\theta ， y = y_m + a \\sin \\theta" },
+        { "cell": "arithmetic", "text": "cout 接落來箇段代码是C++原始码，编译运行之后，渠会算出3+2，再畀答案写到屏幕里。" },
+        { "cell": "ampersand", "text": "Warren Edward Buffett （&nbsp;1930年8月30号养勒勒&nbsp;Omaha，Nebraska&nbsp;）是美国一左翼投机资本家，擅长用自家个热钱进行投机倒把，立在政治浪长期支持左翼美国民主党，立在宗教浪是所谓不可知论者。巴菲特是1990年代美国顶出名个资本家，立在世界各地个成功学市场当中名头老响，一般拿伊搭同样属于[[左翼]个bill gates并列，侪是交关中国人心目中个偶像。" },
+        { "cell": "ampersand", "text": "澳大利亚搭新西兰军团纪念日，也叫:ANZAC Day，是英文:Australia and New Zealand Army Corps&nbsp;个简称，中文也有处简称“澳新军团日”。每年4月25号有大型纪念活动。" },
+        { "cell": "ampersand", "text": "人造浪&nbsp;╱&nbsp;Climate change `causing extreme waves`" },
+        { "cell": "ampersand", "text": "经纬度&nbsp;：&nbsp;北纬&nbsp;：&nbsp; 13°43′30″&nbsp;╱&nbsp;东经&nbsp;：&nbsp; 100°29′9″" },
+        { "cell": "ampersand", "text": "英属印度帝国（英语：British Raj&nbsp;或British India&nbsp;）指英国人勒1858年到1947年之间所统治个印度次大陆，包括仔今天个印度共和国、孟加拉国、巴基斯坦搭缅甸。伊浬个辰光伊垃国家是拔英国个殖民者统治个，侪成为大英帝国个组成部分。" },
+        { "cell": "ampersand", "text": "Raju&nbsp;勒孤儿院里向长大，伊呒啥钞票但搭姐姐好有亲情，有一天Raju勒学校里向看见个美眉（是西跋榭滴扮演个），伊好欢喜呀。后来才晓得女子名字叫Parul，又发现伊个同班同学Bobby亦爱追求个伊。 个情景还不够复杂么?&nbsp;Parul个叔叔Jagpal是个警察，好想拔伊介绍拔辛格警长。。。" },
+        { "cell": "ampersand", "text": "《我的路》（Shanghai: A Sentimental Journey. Rebecca Pan & Big Band Live）。EMI/国际文化交流音像出版社，CNA260437000，2004.6" },
+        { "cell": "ampersand", "text": "Lucinda Rhodes-Flaherty&nbsp;(1981年—)&nbsp;——是英国影星、舞者、歌星，勒勒交互式个电视剧KateModern里向。 伊个爱好: 戏剧、唱歌、啦啦队队长。" },
         { "cell": "iteration", "text": "佐佐木希（日文：佐々木 希 假名：ささき のぞみ 罗马字：Sasaki Nozomi，）是日本出生个写真女星搭女演员，家乡是秋田县。年轻辰光是太妹，后势来，拿自家包装成甜美形象，有交关男性粉丝。" },
         { "cell": "iteration", "text": "大内氏(假名：おおうちし)是一个日本氏族。本姓叫多多良氏(多々良氏)。祖先是百济国聖明王第三王子个后代。从镰仓时代开始，世袭周防国守护大名。到室町幕府中期，兼并长门国、石见国、丰前国等地，成为西日本顶顶大个贵族大名。到1551年，末代家督大内义隆畀下臣陶隆房逼死，大内氏灭亡。大内氏个家纹是「大内菱」。" },
         { "cell": "iteration", "text": "北斋一生改号频繁多达30回。使用个号有得「春朗」「群馬亭」「北齋」「宗理」「可侯」「辰齋」「辰政（ときまさ）」「百琳」「畫狂人」「雷斗」「戴斗」「不染居」「錦袋舎」「為一」「畫狂人」「九々蜃」「雷辰」「畫狂老人」「天狗堂熱鐵」「鏡裏庵梅年」「月痴老人」「卍」「是和齋」「三浦屋八右衛門」「百姓八右衛門」「土持仁三郎」「魚佛」「穿山甲」咾啥。" },
@@ -302,13 +299,11 @@
         { "cell": "quote-letter", "text": "清'帝国有各种各样个官学，京师还有国子监、宗学、觉罗学、八旗官学等。各个省下头，还有府学、州学、县学。除脱迭些官学之外，还有私人搭地方社会创办个私塾、社学、义学，学院等教育机构。。" },
         { "cell": "quote-letter", "text": "吳歌起源交關早，顧頡剛《吳歌小史》認爲弗會比《詩經》晏。《詩經》裏向雖然嘸撥吳歌，但有人認爲“吳歌實可與詩三百並駕齊驅”。明人王世貞講：“雖俚字鄉語，不能離俗，而得古風人遺意；其辭亦有可采者。如‘月子彎彎照九州，幾家歡樂幾家愁？幾人夫婦同羅帳？幾人飄流在他州？’又‘約郎約到月上時，只見月上東方不見渠。不知奴處山低月上早？又不知郎處山高月上遲？’ 即使子建太白降爲俚談，恐亦不能過也。”吳歌多數是戀歌，像《子夜歌》、《懊依歌》咾啥，明人馮夢龍編錄个《桂枝兒》（官話作品，仿吳歌味道）搭仔《山歌》（吳語作品）也多數儕是“結識私情”之類，像《桂枝兒•牽掛》：“我好似水底色隨波遊戲，儂好似釣魚人巧弄心機。釣鉤兒放著些甜滋味，一時間吞下了，到如今吐又遲。牽掛在心頭也，放又放不下儂。” 也有反映風情民俗、訴說疾苦或勸人爲善个，像蘇州个《十二月風俗山歌》《江南百姓苦愁愁》《長工謠》咾啥到今朝還勒許流傳。" },
         { "cell": "quote-letter", "text": "Weston Ruter's online IPA Chart Unicode “Keyboard” 汉化增强版（补充汉藏语学界专用符号等）" },
-        { "cell": "quote-letter", "text": "Why Wikivoyage isn't GFDL: Problems with using the GFDL for short printed texts" },
-        { "cell": "quote-letter", "text": "《Chinese Folk Songs and Folk Singers: Shan'ge Traditions in Southern Jiangsu》" },
         { "cell": "quote-letter", "text": "《有侬在身旁》马来西亚 RFM、MY FM、Cat's Radio 精选中文排行榜冠军" },
         { "cell": "quote-letter", "text": "Grenelle环境对策搭会议（法文 Grenelle de l'environnement），勒2007年10月份法国巴黎举行，主要活动是各方面政治接触，决定可持续发展长期任务。为啥叫Grenelle?原先勒1968年5月份通过Grenelle协议（法文：Accords de Grenelle,地点勒勒法国国家劳动部，巴黎Grenelle路），取同名，因为搿趟也是一趟多方面个辩论会：政府、专业协会、非政府组织NGO。" },
         { "cell": "quote-letter", "text": "勒Perrache个SNCF火车站 (中转 : 火车（法国国有铁路公司）；里昂地铁1号线；里昂有轨电车2号线；公交车8 - 31 - 32 - 46 - 49 - 49D - 55 - 63 - 73 - 91 / Presqu'Île大巴 - 96 - N4 - 101 - 105 - 125 - 175 / 机场-火车站大巴 - 182 - 184 - 185)" },
-        { "cell": "ordinal-caps", "text": "The 325-Million-Years Ancient Plants（พืชโบราณ 325 ล้านปี&nbsp;）" },
-        { "cell": "ordinal-caps", "text": "Sulfur-cycling fossil bacteria from the 1.8-Ga Duck Creek Formation provide promising evidence of evolution's null hypothesis, Proceedings of the National Academy of Sciences of the United States of America. &nbsp; Summarized in: Scientists discover bacteria that haven't evolved in more than 2 billion years, LiveScience and BusinessInsider" },
+        { "cell": "quote-letter", "text": "Perrache - Gare SNCF（勒Perrache个SNCF火车站） (中转 : 火车；里昂地铁A线；里昂有轨电车1号线；公交 8 - 31 - 32 - 46 - 49 - 49D - 55 - 63 - 73 - 91 / Presqu'Île大巴 - 96 - N4 - 101 - 105 - 125 - 175 / 机场-火车站大巴 - 182 - 184 - 185)" },
+        { "cell": "quote-letter", "text": "Jet d'Eau - Mendès France (中转 : 公交 36 - 53 - 296)" },
         { "cell": "ordinal-caps", "text": "7-Eleven是连锁便利商店，从美国南方公司冰品商店特许经营起家，后来被日本7&I控股公司收购，乃朝是渠个旗下全资子公司，现任公司会长是铃木敏文。渠个总部设勒日本东京。" },
         { "cell": "ordinal-caps", "text": "拉计算机科学中，7z是一种可以使用多种压缩算法进行数据压缩个档案格式。该格式最初被7-Zip实现并采用，但是箇种档案格式是公有个，并且7-Zip软件本身亦拉GNU宽通用公共许可证 (GNU LGPL)协议下开放源代码。" },
         { "cell": "ordinal-caps", "text": "《大话西游之月光宝盒》（英文：A Chinese Odyssey Part 1-Pandora's Box）是于1995年依据中国明代作家吴承恩所撰写个神怪小说《西游记》为基础改编个香港电影，续作是《大话西游之大圣娶亲》。 本片拉香港个票房搭口碑侪大获成功。" },

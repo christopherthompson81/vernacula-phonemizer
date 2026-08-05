@@ -35,38 +35,38 @@
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
     "counts": {
         "degrees": 30,         // in 22 treated languages
-        "digit-run": 55728,    // \d would miss 1
-        "fractions": 346,      // in 18 treated languages
-        "clock": 439,          // in 18 treated languages
-        "signs": 24087,        // in 17 treated languages
-        "dotted": 278,         // in 16 treated languages
-        "era-marker": 95,      // in 14 treated languages
-        "year": 55612,         // \d would miss 1
-        "decimals": 29822,     // in 12 treated languages
-        "ordinal-latin": 63,   // in 11 treated languages
+        "digit-run": 53861,    // \d would miss 1
+        "fractions": 336,      // in 18 treated languages
+        "clock": 436,          // in 18 treated languages
+        "signs": 23988,        // in 17 treated languages
+        "dotted": 232,         // in 16 treated languages
+        "era-marker": 94,      // in 14 treated languages
+        "year": 53778,         // \d would miss 1
+        "decimals": 29810,     // in 12 treated languages
+        "ordinal-latin": 22,   // in 11 treated languages
         "ordinal-native": 0,   // lexical cell — matched via the term list
-        "units": 24,           // in 9 treated languages
-        "ranges": 1737,        // in 7 treated languages
+        "units": 23,           // in 9 treated languages
+        "ranges": 1636,        // in 7 treated languages
         "currency": 10,        // in 6 treated languages
-        "abbrev": 18564,       // in 6 treated languages
-        "latin-in-native": 10096, // in 6 treated languages
-        "percent": 23770,      // in 5 treated languages
+        "abbrev": 18441,       // in 6 treated languages
+        "latin-in-native": 7149, // in 6 treated languages
+        "percent": 23767,      // in 5 treated languages
         "rate": 24,            // in 4 treated languages
         "zero-width": 91,      // in 4 treated languages
-        "roman": 101,          // in 3 treated languages
-        "initialism": 1453,    // in 3 treated languages
-        "grouped": 909,        // in 3 treated languages
-        "signed-number": 997,  // in 2 treated languages
+        "roman": 56,           // in 3 treated languages
+        "initialism": 1291,    // in 3 treated languages
+        "grouped": 907,        // in 3 treated languages
+        "signed-number": 995,  // in 2 treated languages
         "ordinal-range": 0,    // in 1 treated languages
-        "letter-name": 929,    // in 3 treated languages
+        "letter-name": 677,    // in 3 treated languages
         "exponent": 219,       // in 24 treated languages
-        "arithmetic": 156,     // in 2 treated languages
-        "ampersand": 161,      // in 1 treated languages
+        "arithmetic": 84,      // in 2 treated languages
+        "ampersand": 114,      // in 1 treated languages
         "iteration": 0,        // in 1 treated languages
         "calendar": 0,         // lexical cell — matched via the term list
         "sports-time": 8,      // in 3 treated languages
-        "version-dot": 20,     // in 3 treated languages
-        "quote-letter": 458,   // in 4 treated languages
+        "version-dot": 19,     // in 3 treated languages
+        "quote-letter": 301,   // in 4 treated languages
         "scaled-currency": 6,  // in 3 treated languages
         "ordinal-caps": 0,     // in 2 treated languages
     },
@@ -146,13 +146,13 @@
         { "cell": "decimals", "text": "نسبة نّاس نّشيطين (لّي يقدرو يخدمو): 26,4%" },
         { "cell": "decimals", "text": "نسبة لبطالة (نّاس لّي ما خدامينش و تايقلبو على خدمة): 38,5%" },
         { "cell": "ordinal-latin", "text": "كاينين كتر من 600 حفرة ف مناجم ميبلادن، موزعة علا مناطق ؤلا غيران ب سميات مختالفين، من بينهوم: ليزو Les O، ليزيس Les S، ليضال Les Dalles، ليزابي Les AB، بولمادن Bou Elmaden، ليزا Les A، ليزير Les R، ليتي Les T، آن ماري Anne-Marie، دوزييم ؤريزون 2ème Horizon، مارݣيريت Marguerite، ؤ منجم أ سي إيف ACF Mine. كاينين حتا لمناجم د أحولي لي محسوبين علا جماعة ميبلادن، ؤ لمناجم ديال زايدة لّي محسوبين علا جماعة زايدة." },
-        { "cell": "ordinal-latin", "text": "Earthquake Mw 6.5 in Morocco, February 24th, 2004 – EMSC" },
         { "cell": "ordinal-latin", "text": "كان أندرو روذرفورد إيرل لول من تيفيوت (بالنݣليزية: Andrew Rutherford, 1st Earl of Teviot) الإسكتلندي المولود ضابط نشط، نفذ إصلاحات كتيرة فمستعمرة طنجة ملي تولا منصب الحاكم العام. أمر بلبني تاع حصون جديدة باش يحمي المستعمرة، وربح بزاف تاع المرات قوات الخضر غيلان." },
-        { "cell": "ordinal-latin", "text": "1986 : Live at the 19th Montreux Jazz Festival (WEA, 33T) - concert enregistré à Montreux en 1985" },
         { "cell": "ordinal-latin", "text": "Le 22 يناير 2016، سجل هدف الانتصار ضد Almere City (ربح، 0–2). Le 5 فبراير، كان هداف ضد MVV Maastricht في انتصار 4–0. Le 12 فبراير، سجل زوج من الأهداف ضد Jong Ajax وخرج من الملعب في دقيقة 89 للملاعب Jordy Tutuarima (ربح، 4–2). Le 26 فبراير، سجل من جديد ضد FC Eindhoven رغم هزيمة 2–1. فآخر المباراة، حصل على جائزة Bronzen Stier اللي كان كيعني أفضل أمل في القسم الثاني الهولندي. Le 4 مارس، سجل الهدف الأول للمباراة في تعادل 2-2 ضد VVV Venlo. Le 18 مارس، سجل ثاني زوج أهداف ديالو في الموسم ضد FC Dordrecht (ربح، 3–0). فشهر أبريل، لعب آخر المباريات ديالو مع Telstar ضد NAC Breda (مسجل لهدف)، TOP Oss (مسجل لهدف) و Helmond Sport. ختم الموسم فالمركز الرابع عشر ديال البطولة وسجل 18 أهداف في 36 مباراة." },
-        { "cell": "ordinal-latin", "text": "Burke's Peerage and Baronetage, 107th edn., (London, 2003)" },
-        { "cell": "ordinal-latin", "text": "\"Geometry\"&nbsp; . Encyclopædia Britannica. Vol.&nbsp;11 (11th&nbsp;ed.). 1911. pp.&nbsp;675–736." },
-        { "cell": "ordinal-latin", "text": "Aubert, Paul; Desvois, Jean-Michel (1996). Presse et pouvoir en Espagne, 1868–1975. Maison des Pays Ibériques. ISBN 2-909596-11-7." },
+        { "cell": "ordinal-latin", "text": "سانت مارتنز پريس، 1st edition (غلاف قاسح، 389 صفحة), إصدار 4 شتنبر 2007:" },
+        { "cell": "ordinal-latin", "text": "سانت مارتن ڭريفين، 1st reprint edition with new afterword (غلاف د لوراق, 448 صفحة), إصدار 14 أكتوبر 2008:" },
+        { "cell": "ordinal-latin", "text": "الرواية تأضاپطات من عند ستوديوات لقرن 20 20th Century Studios ل 9 د لأفلام، جوج د السيريات د التلفازة (وحدة على شكل روسوم)، وتائقي ديال مور لكواليس، و عدد ديال لكتوبا د لكوميكس." },
+        { "cell": "ordinal-latin", "text": "بقا غير مخطوط واحد ديال كتاب Aphorismi ديال أرمينݣو. فيه تقريبا عشرين مقولة مختصرة على التغدية والبول، على الغرار ديال Aphorisms ديال أبقراط وParabole medicationis ديال أرناو دي ڤيلانوڤا لي كملها فـ 1300. Tabula antidotarii جدول ديال الخلطات الطبية، وبقات فـ سبعة ديال المخطوطات. كاين إختلاف كبير بين النسخ. العدد ديال الخلطات اللي فيها غادية من 49 حتى ل73، والأصل ديالها كان غالبا فيه 68 خلطة. كاينين ستة ديال الأعمدة ف الجدول: عمود للسمية ديال الخلطة، وخمسة ديال الأعمدة لخرة لي كاتكلم على المكونات ديالها، الخصائص الفيزيائية، الفوائد الطبية، الجرعات، والطريقة ديال الإستعمال. فـ 1306، من بعد ما تطردو اليهود من فرانسا، تترجم Tabula antidotarii للعبرية فـ برشلونة من الطرف ديال إستوري ها-بارحي، لي كان صديق ديال يعقوب بن ماخير. كاينين ثلاثة ديال النسخ من هاد الترجمة العبرية." },
+        { "cell": "ordinal-latin", "text": "يوهانا دونال: إين politisches Lesebuch. مانديلباوم-فيرلاݣ. 2013. ISBN 978-3-85476-407-6 مرفوعة ب النݣليزية شوف من أصل ف 2022-01-25." },
         { "cell": "units", "text": "لموركاب اليوم فيه من غير التيران، واحد لقاعة متعددة الرياضات كتهز 15.000 متفرج، پيسين أولمبي مفتوح، قاعة ديال الندوات، مركز إعلامي فيه 650m²، قاعة ديال لجتيماعات، مركز ديال لعلاجات ومركز ديال محاربة لمنشيطات." },
         { "cell": "units", "text": "كيهز هاد التيران شي 68.000 متفريج، مابينها 7.150 بلاصة للصحافة و550 بلاصة VIP، مع امكانية التوسيعة فلڤيراج الشمالي والجنوبي. التيران بعيد على الصونطرڤيل بـ10 كيلوميتر، نفس لمسافة باش بعيد على محطة طنجة لمدينة وبعيد على لمطار ديال طنجة بـ4 كيلوميتر. الدخول كيكون من 17 باب مع واحد الدخلة أساسية بمنضر زوين. كاين تما واحد لمركز إعلامي على مساحة 600m²، واحد لمصحة وپاركينݣ منظم كايهز 7.500 طوموبيلة. كيتعتابر هاد السطاد من أكبر التيرانات فلمغريب." },
         { "cell": "units", "text": "قاعة ديال الصحافة فيها 600m² وبزاف دلغرف تكميلية." },
@@ -192,7 +192,7 @@
         { "cell": "latin-in-native", "text": "آلبرخت دورر (بالألمانية: Albrecht Dürer؛" },
         { "cell": "latin-in-native", "text": "أيت ملول كانت شحال هادي عبارة على غابات وبلايص ديال الفلاحة، وأغلبية الشجر اللي كان فيها هو شجر الأركان (arganier)." },
         { "cell": "latin-in-native", "text": "فـ 2019، كانت أيت ورير كيدوزو منها جوج خطوط ديال الطوبيس اللي تابعين لمجال مراكش (كتسيرهم شركة سميتها ألزا Alsa ):" },
-        { "cell": "latin-in-native", "text": "(2001) L'Insoumis, Juifs, Marocains et rebelles" },
+        { "cell": "latin-in-native", "text": "بنشمسي معروف حيث كان هو لمؤسس ولمدير د النشر د جوج د لأسبوعيات مغريبية لي هوما: تيلكيل (ب لفرانساوية TelQuel) و نيشان (لي كانت ب دّاريجة)." },
         { "cell": "percent", "text": "نسبة نّاس اللي خدامين ف دّولة (ولا لبيطاليين اللي سبق ليهوم خدمو): 15,6%" },
         { "cell": "percent", "text": "نسبة نّاس اللي خدامين ف لپريڤي (ولا لبيطاليين اللي سبق ليهوم خدمو):36,6%" },
         { "cell": "percent", "text": "نسبة لأمية (نّاس لّي ما كايعرفوش يقراو ولا يكتبو) : 56,6%" },
@@ -224,7 +224,7 @@
         { "cell": "roman", "text": "في 13 غشت 2010، زهير فضال وقع مع CD San Roque de Lepe في القسم الثالث، بعد ما كان دار فترة اختبار. وفي ماي ديال العام الموالي، انتقل لـ RCD Espanyol، و تكلفوه بالفريق الاحتياطي اللي كيشارك ف نفس المستوى." },
         { "cell": "roman", "text": "يمكن نبدلو بيه الشكل د الضو، مثلا من الضّو خطيبيطي (Courant alternatif AC) الضّو نيشان (Courant continu DC) بحال فكارط السݣي د الضّو (Alim) تاع التليفزيون." },
         { "cell": "roman", "text": "هاد الزونات كلها و التعصاب ديالو، التلت اللوراني كايتعصب بلعصب اللسانوحلقومي الجويجة لقلقولية التاسعة (N IX) و التلتاين لقداميين كايتعصبو بلعصب لكمّاري الجويجة لقلقولية السابعة (N VII)." },
-        { "cell": "roman", "text": "Boogert, N. van den (1997). The Berber Literary Tradition of the Sous. With an edition and translation of \"The Ocean of Tears\" by Muḥammad Awzal (d. 1749). De Goeje Fund, Vol. XXVII. Leiden: NINO" },
+        { "cell": "roman", "text": "مركب نور ورزازات للطاقة الشمسية هو واحد لموركّاب كبير كاين ف مدينة ورزازات. كايتكون من 4 ديال لمحطات اللي هي نور I، نور II، نور III، ونور IV. هاد لموركّاب ديال الطاقة الشمسية مكلفة بيه لوكالة لمغريبية د طّاقة لموستدامة اللي كاتسمى بشكل مضموص ب سميت مازن MASEN واللي تابعة ل لوزارة ديال الطاقة والمعادن والبيئة. أما التطوير والتسيير ديال المركز فا مكلفة بيه شركة أكوا پاور." },
         { "cell": "initialism", "text": "أقا مربوطة بطريق معبدة (RN17) لي كتوصلها ل مدينة طاطا ف شّمال شرقي، وكاين طريق آخرى كتمشي لمدون بحال إشت، بويزگارن، گلميم وتيزنيت ف جيهة لغربية، وزيد عليها طريق ثانوي نحو إميتيك ف شمال." },
         { "cell": "initialism", "text": "أنݣولا ستاقلات من لبرتغال ف 1975 من بعد حرب اللي بداتها لحركة الشعبية لتحرير أنݣولا (MPLA) ف 1961. هاد لحزب النيت هو اللي حاكم لبلاد من مورا ليستيقلال تال دابا. الرئيس د أنݣولا من 2017 هو جواو لورينسو." },
         { "cell": "initialism", "text": "[[فيشي:Old Morocco and the forbidden Atlas (IA cu31924028610123).pdf|تصغير|كتاب عن لمغريب، لأطلس]]" },
@@ -270,9 +270,9 @@
         { "cell": "arithmetic", "text": "4 × 200 متر سباحة حرة في 8 دقايق 43 ثانية 40 يوم 13/09/2010 في كازا." },
         { "cell": "arithmetic", "text": "4 × 100 متر سباحة متنوعة في 4 دقايق 22 ثانية 21 يوم 17/12/2011 في الدوحة." },
         { "cell": "arithmetic", "text": "كتهز شارج ناقصة علا لإليكطرون ؤ شارج زايدة علا لپروطون بواحد شارج بتدائية ديال 1.602×10−19 كولوم." },
-        { "cell": "arithmetic", "text": "PlotArea = left:70 right:40 top:20 bottom:20" },
-        { "cell": "arithmetic", "text": "ScaleMajor = unit:year increment:1000 start:0 gridcolor:gray1" },
         { "cell": "arithmetic", "text": "m\\ = لعدد ديال لأصوات باش لفيلم يبان ف لّيستة (25000 صوت)" },
+        { "cell": "arithmetic", "text": "C\\ = لمويان ديال تصويت (لّي هو حاليا 7)." },
+        { "cell": "arithmetic", "text": "جّاپونية (日本語 ، نيهونݣو | نيهون 日本 = جّاپون، ݣو 語 = لوغة) واحد لّوغة شرق أسياوية معزولة كايهضرو بيها شي 128 مليون، أغلبهوم ف جّاپون، لّي تمّا هي لّوغة د لبلاد، ؤ كتر من 1.5 مليون زماݣري جاپوني ؤ ولادهوم ؤ حفادهوم لي عايشين ف بلدان خرين، سيرتو ف أمريكا شّمالية ؤ لجنوبية. جّاپونية كاتّكتب من ليسر ل ليمن ولّا من لفوق لتحت." },
         { "cell": "ampersand", "text": "Black Holes & Revelations - تقابي كوحل و عتيرافات (2006)" },
         { "cell": "ampersand", "text": "هوّ دابا رئيس لپروجي د اللابو د الدرة لباردة Cold Atom Lab، ؤ لمشرف على لپروجي د الصيونص د الرادار و الراديو د لكواكب Planetary Radar & Radio Sciences، لي بجوج تابعين ل لابوراطوار د دّفيع تّفاعولي." },
         { "cell": "ampersand", "text": "قدر يضبّر على أول ݣيطار فاش كانت عندو 12 لعام و فاش دار 15 لعام أسس هو وخوه مارك ݣروپ سماوه Jay. & Company Band. بداو تايغينيو ف قاعات صغيرة ف بارسيلونا و نّواحي ديالها، پاو خدم بزّاف ديال لخدامي (سرباي، مانكان، مسؤول ف شركة د لإشهار) و عاوناتو لخدمة ديالو باش يضبّر لمصاريف ديال لݣروپ و قدر يشري لماطريال باش يخدم (سينطيتيزور، بواط د ميكساج و ݣيطار إلكتريك)." },
@@ -303,8 +303,8 @@
         { "cell": "quote-letter", "text": "بوروندي (ب لكيروندية: Republika y'Uburundi، ب لفرانساوية: République du Burundi) هي بلاد ماكاطلش على لبحر جات فلجنوب الشرقي د إفريقيا. تاتحدًها رواندا من الشمال، طنزانيا من لجنوب و الشرق، و جمهورية لكونݣو الديموقراطية من لغرب. بوروندي جات فلمنطقة اللي فيها ضايات بزاف و لحدود ديالها ف لجنوب تاطًل على الضاية ديال طانݣانيكا." },
         { "cell": "quote-letter", "text": "إرنسطو ݣيڤارا دي لا سيرنا (بالصبليونية: Ernesto 'Che' Ernestico Guevara de la Serna) (14 يونيو 1928 - 9 أكتوبر 1967) و اللي معروف بتشي ݣيڤارا, كان مناضل ثوري وطبيب وكاتب وسياسي أرجونتيني كان معروف فلعالم حيث كان تيشجع على الثورة. ݣيڤارا كان من لقادة ديال الثورة ف كوبا على الديكتاتور فولخينسيو باتيسطا, وملًي نجحات الثورة اللي قادها فيديل كاسطرو, عطاو لݣيڤارا لجنسية د كوبا وولاً وزير تما. تشي ݣيڤارا كان تيشجع الثورات فلعالم كلًُو ودار محاولات خرا بحال ف لكونݣو (ولكن ماصدقاتش) و ف بوليڤيا, اللي شدُّوه فيها وعدموه ف 1967, وهو كانت عندو غي 39 عام." },
         { "cell": "quote-letter", "text": "لمدينة فيها عاوتاني \"لمدرسة لوطنية للهندسة لمعمارية\"، بالفرنسية(Ecole Nationale d'Architecture)، وهي مدرسة عمومية للهندسة ." },
-        { "cell": "quote-letter", "text": "« », L’Économiste, Casablanca, no 1708,‎ 19 février 2004 (lire en ligne [archive], consulté le 8 novembre 2016)" },
         { "cell": "quote-letter", "text": "من جهة، القلم المغربي ديال حفصة بكري لمراني، اللي هي أستاذة فالأدب الإنجليزي، وكاتبة ديال “Jeux de l’être et de l’avoir” و“Sparks of life”، وعضوة مؤسسة فـ \"دار الشعر\" فالمغرب." },
+        { "cell": "quote-letter", "text": "رواندا رسميا لجمهورية د رواندا (بلينݣليزية: Republic of Rwanda - بلفرانساوية: République du Rwanda - بلكينيارواندا: Repubulika y'u Rwanda - بالسواحيلي: Jamhuri ya Rwanda) هي بلاد ماكاطلش على لبحر جات ف الشرق د إفريقيا. تاتحدّها طنزانيا من الشرق، أوݣاندا من الشمال، جمهورية لكونݣو ديموقراطية من لغرب، و بوروندي من لجنوب. رواندا بلاد طالعة فلإرتفاع، و تاتسمّا ب \"لبلاد ديال ألف هضبة\". رواندا معروفة تا باللي فيها الضايات بزاف، و هي وحدا من لبلايص اللي تينبع فيها لواد د النيل." },
         { "cell": "scaled-currency", "text": "إعتبارا من أبريل 2008، لحكومة لبريطانية زادت سيوفا لي عندهوم شفرة معاوجة طولها 50 سم (20 إنش) ولا كتر (\"طول شفرة خاصو يكون لمسافة لخط لمستقيم من لفوق د لمقبض لراس شفرة\") لأمر لأسلحة لهجومية. هاد لحضر كان رد على تقارير بلي سيوفا ساموراي ستعملو ف كتر من 80 هجوم وربعة د لقتيلات على مدى ربع سنين لي فاتو. لي كيخالفو هاد لحضر غادي يتحبسو تال ستة شهور ويتخلصو غرامة د £5,000. ممارسو لفنون لقيتالية، لممتلون تاريخيون وناس خرين باقين يقدرو يملكو هاد سيوفا. سيف يقدر يكون قانوني تاهو بشرط بلي تصاوب فجاپون قبل 1954، ولا تصاوب بستعمال طرق صناعة سيوف تقليدية. قانوني تاهو تشريه يلا قدر يتصنف كـ \"سلاح ممارس فنون قتالية\". هاد لحضر كيطبق على نݣليز، ويلز، سكوتلاندا وإيرلاندا شّمالية. هاد لحضر تعدل فغشت 2008 باش يسمح ببيع وملكية بلا رخصة لكاطانا \"تقليدية\" مصنوعة بليد." }
     ],
 
