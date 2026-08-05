@@ -40,7 +40,9 @@
  *   npx tsx tools/normalization/candidates.ts --plan 12       # the next N fetch commands, ready to run
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { mapPool } from "./mine.ts";
+import { SISTER_STANDARDS } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string, d?: string): string | undefined => {
@@ -71,18 +73,6 @@ const WIKI_OVERRIDE: Record<string, string> = {
     zsm: "ms",   // Standard Malay
     "es-419": "es", // Latin American Spanish shares the Spanish wiki
 };
-
-/**
- * SISTER STANDARDS whose artifact is reusable, mirroring `review.ts`'s own table so the two agree about
- * which languages do not need their own mining pass. A sister artifact is a legitimate answer to "this code
- * has no corpus"; it is not an answer to "this code has no wiki", which is why the two columns are separate.
- */
-const SISTERS: readonly (readonly string[])[] = [
-    ["hr", "sr", "bs"],
-    ["id", "zsm", "ms"],
-    ["nb", "nn", "no"],
-    ["es", "es-419"],
-];
 
 const fleet = (): string[] => [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/case "([a-z][a-z0-9-]*)":/gu)].map((m) => m[1]!)),
@@ -140,8 +130,25 @@ async function sitematrix(): Promise<Map<string, Wiki>> {
  *   a network or HTTP failure, after retries → UNKNOWN   (a fact about this run, reported as such)
  *   statistics JSON                          → the volume
  */
-interface Volume { articles: number; words: number }
-type Probe = Volume | "incubator" | "unknown";
+export interface Volume { articles: number; words: number }
+export type Probe = Volume | "incubator" | "unknown";
+
+/**
+ * CLASSIFY A PROBE RESPONSE. Extracted so it can be tested: this is the logic that once reported two dozen
+ * live wikis as never launched, and it was buried in the CLI where nothing could reach it.
+ *
+ * `ok` is whether the transport succeeded at all. A body that will not parse as JSON is the incubator
+ * redirect — an HTML document — which is a fact about the WIKI, decided on content and unreachable by a
+ * transport failure. Everything else that fails is a fact about the RUN.
+ */
+export function classify(ok: boolean, body: string | undefined): Probe {
+    if (!ok || body === undefined) return "unknown";
+    let j: any;
+    try { j = JSON.parse(body); } catch { return "incubator"; }
+    const st = j?.query?.statistics;
+    if (typeof st?.articles !== "number") return "incubator";
+    return { articles: st.articles, words: typeof st["cirrussearch-article-words"] === "number" ? st["cirrussearch-article-words"] : 0 };
+}
 
 const delay = (ms: number): Promise<void> => new Promise((res) => { setTimeout(res, ms); });
 
@@ -156,112 +163,119 @@ async function volume(wiki: string): Promise<Probe> {
             if (!r.ok) { await delay(400 * (attempt + 1)); continue; }
             body = await r.text();
         } catch { await delay(400 * (attempt + 1)); continue; }
-        let j: any;
-        // A body that is not JSON is the incubator redirect — an HTML document. That is decided on the
-        // BODY, so it cannot be reached by a transport failure.
-        try { j = JSON.parse(body); } catch { return "incubator"; }
-        const s = j?.query?.statistics;
-        if (typeof s?.articles !== "number") return "incubator";
-        return { articles: s.articles, words: typeof s["cirrussearch-article-words"] === "number" ? s["cirrussearch-article-words"] : 0 };
+        return classify(true, body);
     }
     return "unknown";
 }
 
-const mined = new Set(readdirSync(MINED).map((f) => f.replace(/\.jsonc$/u, "")));
-const referees = readdirSync(REFEREES);
-const matrix = await sitematrix();
+/**
+ * ⚠ THE CLI MUST NOT RUN ON IMPORT, and it did. `mine.ts` and `wiki-health.ts` both carry this guard with the
+ * same note — "without this the whole CLI ran on import and the test suite died before a single test collected"
+ * — and this file is the third to need it. Measured before the fix: importing this module took 1,482 ms and
+ * emitted the full report, because it issues roughly ninety live requests to the MediaWiki API at module scope.
+ * A test file importing `classify` would therefore have hammered someone else's server on every `vitest run`.
+ */
+const IS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-interface Row {
-    code: string;
-    wiki: string | undefined;
-    state: "open" | "closed" | "none" | "incubator" | "unknown";
-    vol: Volume | undefined;
-    referees: number;
-    sister: string | undefined;
-    mined: boolean;
+async function main(): Promise<void> {
+    const mined = new Set(readdirSync(MINED).map((f) => f.replace(/\.jsonc$/u, "")));
+    const referees = readdirSync(REFEREES);
+    const matrix = await sitematrix();
+
+    interface Row {
+        code: string;
+        wiki: string | undefined;
+        state: "open" | "closed" | "none" | "incubator" | "unknown";
+        vol: Volume | undefined;
+        referees: number;
+        sister: string | undefined;
+        mined: boolean;
+    }
+
+    /** Below this the wiki has no minable prose. `kl` reports 18 words of article text and `ak` 17. */
+    const MIN_WORDS = 20_000;
+
+    const codes = fleet().filter((c) => has("all") || !mined.has(c));
+    const rows: Row[] = codes.map((code) => {
+        const wikiCode = WIKI_OVERRIDE[code] ?? code;
+        const entry = matrix.get(wikiCode);
+        return {
+            code,
+            wiki: entry === undefined ? undefined : wikiCode,
+            state: entry === undefined ? "none" : entry.closed ? "closed" : "open",
+            vol: undefined,
+            referees: referees.filter((f) => f.startsWith(`${code}.`)).length,
+            sister: SISTER_STANDARDS.find((s) => s.includes(code))?.find((c) => c !== code && mined.has(c)),
+            mined: mined.has(code),
+        };
+    });
+
+    // Volume only for the wikis sitematrix lists, pooled. Concurrency 4, not 8: at 8 the API dropped enough
+    // connections that the retry loop above was doing real work on every run, and this is a 90-request sweep
+    // against someone else's server.
+    const live = rows.filter((r) => r.wiki !== undefined);
+    const vols = await mapPool(live, 4, (r) => volume(r.wiki!));
+    live.forEach((r, i) => {
+        const p = vols[i]!;
+        if (p === "incubator" || p === "unknown") r.state = p;
+        else r.vol = p;
+    });
+
+    /** A wiki with no prose is as blocked as no wiki at all, and for the sweep's purposes the same thing. */
+    const empty = (r: Row): boolean => r.state === "incubator" || (r.state !== "unknown" && (r.vol?.words ?? 0) < MIN_WORDS);
+    // `unknown` is in NEITHER list — it is a failed probe, and putting it in `blocked` would be the same lie the
+    // header describes, one layer up. It is printed separately with an instruction to re-run.
+    const unknown = rows.filter((r) => r.state === "unknown");
+    const blocked = rows.filter((r) => r.state === "none" || empty(r));
+    const usable = rows.filter((r) => r.state !== "none" && r.state !== "unknown" && !empty(r))
+        .sort((a, b) => (b.vol?.words ?? 0) - (a.vol?.words ?? 0));
+
+    if (has("blocked")) {
+        console.log(`\n── ${blocked.length} codes with no minable wiki ──\n`);
+        for (const r of blocked) {
+            const why = r.state === "incubator"
+                ? `${r.wiki}.wikipedia.org redirects to Wikimedia Incubator — listed by sitematrix, never launched`
+                : r.state === "closed"
+                    ? `CLOSED wiki with ${r.vol?.words ?? 0} words of article text — frozen AND empty, not frozen and readable`
+                    : r.state !== "none"
+                        ? `only ${(r.vol?.words ?? 0).toLocaleString("en")} words of article text across ${(r.vol?.articles ?? 0).toLocaleString("en")} articles`
+                        : r.sister !== undefined
+                            ? `sister artifact ${r.sister}.jsonc covers it`
+                            : r.referees > 0 ? `${r.referees} referee(s) but no running text — the referee is a lexicon, not a corpus`
+                                : "no wiki and no referee";
+            console.log(`  ${r.code.padEnd(8)} ${why}`);
+        }
+        console.log("");
+    } else if (arg("plan") !== undefined) {
+        const n = Number(arg("plan"));
+        console.log(`\n# next ${n} fetches, densest wiki first. Health-check each BEFORE mining it.\n`);
+        for (const r of usable.filter((x) => !x.mined).slice(0, n)) {
+            console.log(`npx tsx tools/normalization/mine.ts fetch --wiki ${r.wiki} --out /tmp/${r.code}.raw.txt --random 500`);
+            console.log(`npx tsx tools/normalization/wiki-health.ts --in /tmp/${r.code}.raw.txt --label ${r.code} --baseline de_de`);
+        }
+        console.log("");
+    } else {
+        console.log(`\n── ${rows.length} unmined registry codes · ${usable.length} with a wiki · ${blocked.length} blocked ──\n`);
+        console.log(`  ${"code".padEnd(8)}${"wiki".padEnd(8)}${"articles".padStart(9)}${"words".padStart(14)}${"w/art".padStart(7)}  ${"ref".padStart(3)}  note`);
+        for (const r of usable) {
+            const perArt = (r.vol?.articles ?? 0) === 0 ? 0 : Math.round((r.vol?.words ?? 0) / r.vol!.articles);
+            const note = [
+                r.state === "closed" ? "CLOSED wiki — frozen, but the text is still served" : "",
+                r.wiki !== r.code ? `filed under ${r.wiki}, not ${r.code}` : "",
+                r.sister !== undefined ? `sister ${r.sister} already mined` : "",
+                // A stub farm passes the volume floor and still cannot fill a cell inventory: a 40-word article
+                // is a lead sentence and an infobox, and the infobox does not survive plain-text extraction.
+                perArt > 0 && perArt < 80 ? `⚠ ${perArt} words/article — stubs` : "",
+                r.referees === 0 ? "no referee (irrelevant to mining — recorded because the issue counts by it)" : "",
+            ].filter(Boolean).join("; ");
+            console.log(`  ${r.code.padEnd(8)}${(r.wiki ?? "—").padEnd(8)}${(r.vol?.articles ?? 0).toLocaleString("en").padStart(9)}`
+                + `${(r.vol?.words ?? 0).toLocaleString("en").padStart(14)}${String(perArt).padStart(7)}  ${String(r.referees).padStart(3)}  ${note}`);
+        }
+        console.log(`\n  blocked (${blocked.length}): ${blocked.map((r) => r.code).join(" ")}`);
+        if (unknown.length > 0)
+            console.log(`  ⚠ PROBE FAILED for ${unknown.length} — ${unknown.map((r) => r.code).join(" ")} — this says nothing about those wikis; re-run`);
+        console.log(`  run with --blocked for why each one is blocked, or --plan N for the next N fetch commands\n`);
+    }
 }
 
-/** Below this the wiki has no minable prose. `kl` reports 18 words of article text and `ak` 17. */
-const MIN_WORDS = 20_000;
-
-const codes = fleet().filter((c) => has("all") || !mined.has(c));
-const rows: Row[] = codes.map((code) => {
-    const wikiCode = WIKI_OVERRIDE[code] ?? code;
-    const entry = matrix.get(wikiCode);
-    return {
-        code,
-        wiki: entry === undefined ? undefined : wikiCode,
-        state: entry === undefined ? "none" : entry.closed ? "closed" : "open",
-        vol: undefined,
-        referees: referees.filter((f) => f.startsWith(`${code}.`)).length,
-        sister: SISTERS.find((s) => s.includes(code))?.find((c) => c !== code && mined.has(c)),
-        mined: mined.has(code),
-    };
-});
-
-// Volume only for the wikis sitematrix lists, pooled. Concurrency 4, not 8: at 8 the API dropped enough
-// connections that the retry loop above was doing real work on every run, and this is a 90-request sweep
-// against someone else's server.
-const live = rows.filter((r) => r.wiki !== undefined);
-const vols = await mapPool(live, 4, (r) => volume(r.wiki!));
-live.forEach((r, i) => {
-    const p = vols[i]!;
-    if (p === "incubator" || p === "unknown") r.state = p;
-    else r.vol = p;
-});
-
-/** A wiki with no prose is as blocked as no wiki at all, and for the sweep's purposes the same thing. */
-const empty = (r: Row): boolean => r.state === "incubator" || (r.state !== "unknown" && (r.vol?.words ?? 0) < MIN_WORDS);
-// `unknown` is in NEITHER list — it is a failed probe, and putting it in `blocked` would be the same lie the
-// header describes, one layer up. It is printed separately with an instruction to re-run.
-const unknown = rows.filter((r) => r.state === "unknown");
-const blocked = rows.filter((r) => r.state === "none" || empty(r));
-const usable = rows.filter((r) => r.state !== "none" && r.state !== "unknown" && !empty(r))
-    .sort((a, b) => (b.vol?.words ?? 0) - (a.vol?.words ?? 0));
-
-if (has("blocked")) {
-    console.log(`\n── ${blocked.length} codes with no minable wiki ──\n`);
-    for (const r of blocked) {
-        const why = r.state === "incubator"
-            ? `${r.wiki}.wikipedia.org redirects to Wikimedia Incubator — listed by sitematrix, never launched`
-            : r.state === "closed"
-                ? `CLOSED wiki with ${r.vol?.words ?? 0} words of article text — frozen AND empty, not frozen and readable`
-                : r.state !== "none"
-                    ? `only ${(r.vol?.words ?? 0).toLocaleString("en")} words of article text across ${(r.vol?.articles ?? 0).toLocaleString("en")} articles`
-                    : r.sister !== undefined
-                        ? `sister artifact ${r.sister}.jsonc covers it`
-                        : r.referees > 0 ? `${r.referees} referee(s) but no running text — the referee is a lexicon, not a corpus`
-                            : "no wiki and no referee";
-        console.log(`  ${r.code.padEnd(8)} ${why}`);
-    }
-    console.log("");
-} else if (arg("plan") !== undefined) {
-    const n = Number(arg("plan"));
-    console.log(`\n# next ${n} fetches, densest wiki first. Health-check each BEFORE mining it.\n`);
-    for (const r of usable.filter((x) => !x.mined).slice(0, n)) {
-        console.log(`npx tsx tools/normalization/mine.ts fetch --wiki ${r.wiki} --out /tmp/${r.code}.raw.txt --random 500`);
-        console.log(`npx tsx tools/normalization/wiki-health.ts --in /tmp/${r.code}.raw.txt --label ${r.code} --baseline de_de`);
-    }
-    console.log("");
-} else {
-    console.log(`\n── ${rows.length} unmined registry codes · ${usable.length} with a wiki · ${blocked.length} blocked ──\n`);
-    console.log(`  ${"code".padEnd(8)}${"wiki".padEnd(8)}${"articles".padStart(9)}${"words".padStart(14)}${"w/art".padStart(7)}  ${"ref".padStart(3)}  note`);
-    for (const r of usable) {
-        const perArt = (r.vol?.articles ?? 0) === 0 ? 0 : Math.round((r.vol?.words ?? 0) / r.vol!.articles);
-        const note = [
-            r.state === "closed" ? "CLOSED wiki — frozen, but the text is still served" : "",
-            r.wiki !== r.code ? `filed under ${r.wiki}, not ${r.code}` : "",
-            r.sister !== undefined ? `sister ${r.sister} already mined` : "",
-            // A stub farm passes the volume floor and still cannot fill a cell inventory: a 40-word article
-            // is a lead sentence and an infobox, and the infobox does not survive plain-text extraction.
-            perArt > 0 && perArt < 80 ? `⚠ ${perArt} words/article — stubs` : "",
-            r.referees === 0 ? "no referee (irrelevant to mining — recorded because the issue counts by it)" : "",
-        ].filter(Boolean).join("; ");
-        console.log(`  ${r.code.padEnd(8)}${(r.wiki ?? "—").padEnd(8)}${(r.vol?.articles ?? 0).toLocaleString("en").padStart(9)}`
-            + `${(r.vol?.words ?? 0).toLocaleString("en").padStart(14)}${String(perArt).padStart(7)}  ${String(r.referees).padStart(3)}  ${note}`);
-    }
-    console.log(`\n  blocked (${blocked.length}): ${blocked.map((r) => r.code).join(" ")}`);
-    if (unknown.length > 0)
-        console.log(`  ⚠ PROBE FAILED for ${unknown.length} — ${unknown.map((r) => r.code).join(" ")} — this says nothing about those wikis; re-run`);
-    console.log(`  run with --blocked for why each one is blocked, or --plan N for the next N fetch commands\n`);
-}
+if (IS_CLI) await main();

@@ -177,6 +177,32 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     },
 };
 
+/**
+ * SISTER STANDARDS — codes that are the same language under different standardisation, so one's artifact,
+ * corpus and referee are evidence for another's.
+ *
+ * ⚠ THIS LIVED IN TWO FILES AND HAD ALREADY DIVERGED, inside the change that introduced the second copy.
+ * `review.ts` held three sets and `candidates.ts` four — the extra being Latin American Spanish, which shares
+ * the Spanish wiki and therefore its artifact. So `candidates.ts` reported that code as artifact-covered while
+ * `review.ts`, asked the same question, would have gone looking for a file that does not exist. Two tools,
+ * contradictory answers, one fleet fact.
+ *
+ * That is exactly the failure this file was created to end: its own header records three copies of the defect
+ * tables drifting until one of them was the only place that knew about a whole sign class. A fleet fact belongs
+ * in one place, and this is that place.
+ */
+export const SISTER_STANDARDS: readonly (readonly string[])[] = [
+    ["hr", "sr", "bs"],      // Serbo-Croatian: three standards, one language
+    ["id", "zsm", "ms"],     // Malay: Indonesian and Malaysian
+    ["nb", "nn", "no"],      // Norwegian: Bokmål and Nynorsk
+    ["es", "es-419"],        // Latin American Spanish shares the Spanish wiki, and so its artifact
+];
+
+/** The other codes in `code`'s sister set, or none. */
+export function sistersOf(code: string): readonly string[] {
+    return SISTER_STANDARDS.find((set) => set.includes(code))?.filter((c) => c !== code) ?? [];
+}
+
 export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
     ["minus", "-5", /[-−]/gu],
     ["plus", "+5", /\+/gu],
