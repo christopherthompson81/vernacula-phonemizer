@@ -813,9 +813,16 @@ export function normalizeSlovenian(input: string): string {
     //     `< jE||m'a:njSe` = je manjše, `> jE||v'etSjE` = je večje) plus the corpus's own `od` for the
     //     comparative's complement, which espeak's formula reading omits (the Fula lesson: check the part
     //     of speech, not just the word — *je manjše* without *od* is not a Slovene comparison).
-    //     `≈` and `÷` are deliberately NOT read: neither *približno enako* nor *deljeno* is attested in the
-    //     corpus, the referee, or espeak's Slovene data, and the playbook's rule is to leave a symbol
-    //     unread rather than invent its word. Zero corpus instances of either.
+    //     `≈` is deliberately NOT read: *približno enako* is attested in neither the corpus, the referee, nor
+    //     espeak's Slovene data, and the playbook's rule is to leave a symbol unread rather than invent its word.
+    //
+    //     ⚠ THIS NOTE USED TO SAY THE SAME OF `÷`, AND THAT WAS WRONG — see the rule below, which now reads it.
+    //     The claim was true of the haystacks it names (corpus, referee, espeak) and those are the top tiers, so
+    //     it was a reasonable stopping point. What it missed is that sl.wikipedia has `deljeno` ×20 token / 10
+    //     articles including on a numeric operand. The first #654 probe missed it too, for a different reason:
+    //     it searched with a maths-register restriction, which those articles fail because they write the
+    //     notation instead of reading it. Recorded rather than quietly edited, because "attested nowhere" is the
+    //     kind of claim that stops the next search, and this one was three tiers short of nowhere.
     s = s.replace(/\s*=\s*/gu, " enako ");
     s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 je manjše od ");
     s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 je večje od ");
@@ -832,6 +839,26 @@ export function normalizeSlovenian(input: string): string {
             const [x, y] = [LETTER_NAME[a.toLowerCase()], LETTER_NAME[b.toLowerCase()]];
             return x === undefined || y === undefined ? m0 : `${x} in ${y}`;
         });
+    // THE DIVISION SIGN (#654), and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the third time in this issue,
+    // after pl and ml. `deljeno z` and `delimo z` were both measured ×0 with
+    // `attest.ts --context "matematika aritmetika deljenje"` and sl was recorded as unsourceable. Probing the
+    // same word with NO restriction returns ×20 token / 10 articles for `deljeno` and ×6 / 4 for `deljeno z`,
+    // with the sense in plain view and one hit on a numeric operand:
+    //
+    //   "Pozitivno deljeno z negativnim je negativno"   ·   "nič deljeno z nič je nič"
+    //   "zatem korenjeno in nato povečano za 8 ter končno še deljeno z 10"        ← divided BY 10
+    //
+    // ⚠ THE PREPOSITION ALTERNATES z/s BY VOICING, which the same examples show directly — "deljeno z
+    // negativnim" but "deljeno s pozitivnih". Slovene writes `s` before a voiceless obstruent and `z`
+    // elsewhere, so the rule spells its operand and picks: s tri, s štiri, s pet, s šest, s sedem, s sto —
+    // z ena, z dva, z osem, z devet, z deset, z dvajset. Emitting a fixed `z` would misvoice half the numerals,
+    // which is a wrong word rather than an accent.
+    const SL_VOICELESS = /^[ptksšcčfh]/u;
+    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) => {
+        const y = numberToWords(Number(b));
+        return `${numberToWords(Number(a))} deljeno ${SL_VOICELESS.test(y) ? "s" : "z"} ${y}`;
+    });
+
     s = s.replace(/\s*[&＆]\s*/gu, " in ");
 
     // 19) A LONE LETTER GLUED TO A DIGIT RUN → its LETTER NAME. Eight instances: the Wi-Fi standards
