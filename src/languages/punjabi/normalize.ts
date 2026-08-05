@@ -44,6 +44,7 @@
  *   - ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys. All ×3 ਸੈਮੀ in the corpus are ਸੈਮੀ ਆਧੁਨਿਕ / ਸੈਮੀਫਾਈਨਲ ("semi-"),
  *     and all ×18 ਗ੍ਰਾ are ਗ੍ਰਾਂਡ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ / ਗ੍ਰਾਨਵਿਲੇ. Playbook trap #2, live in this corpus.
  */
+import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -191,6 +192,25 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         // 9) DEGREES. The bare sign was dropped outright. °C is left to emit ਡਿਗਰੀ + the Latin C: the
         //    Punjabi word for the scale is attested nowhere in this repo (see the header).
         s = s.replace(/(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from pa_in:
+        //
+        //   `ਬਰਾਬਰ`     ×8 token    "ਬਰਾਬਰ ਜਾਂ ਇਸ ਪੱਖ ਅਨੁਪਾਤ ਦੇ ਲਗਪਗ ਨੇੜੇ" — EQUAL TO this aspect ratio
+        //   `ਤੋਂ ਘੱਟ`    ×14 phrase   "ਚੀਜ਼ਾਂ ਤੋਂ ਘੱਟ ਪੁਰਾਣੇ" — less old THAN things
+        //   `ਤੋਂ ਵੱਧ`    ×51 phrase
+        //   `ਨਾਲ ਭਾਗ`   ×1          "ਬਾਰ੍ਹਾਂ ਨਾਲ ਭਾਗ ਕਰਨਾ" — FLEURS's parallel division sentence
+        //
+        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL (ਤੋਂ follows the standard), so they use core/postposedSign.ts;
+        // an infix rule would read the comparison backwards.
+        //
+        // ⚠ AND `ਭਾਗ` IS A HOMOGRAPH: ×16 token, but the commonest sense in this corpus is "part / section"
+        // ("100 ਫੁੱਟ ਚੌੜੇ ਭਾਗ" — a 100-foot wide SECTION), not division. It is nonetheless the division word —
+        // `hi` ships the cognate भाग on its own wiki citation, and the parallel sentence puts this exact word in
+        // the division slot here. The count is not the evidence; the parallel sentence is.
+        s = postposedSign(s, "<", "ਤੋਂ ਘੱਟ");
+        s = postposedSign(s, ">", "ਤੋਂ ਵੱਧ");
+        s = s.replace(/\s?=\s?/gu, " ਬਰਾਬਰ ");
+        s = s.replace(/\s?÷\s?/gu, " ਭਾਗ ");
 
         return s;
     };

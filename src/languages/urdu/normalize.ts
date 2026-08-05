@@ -16,6 +16,7 @@
  * ×12, فیصد ×9. ASCII digits throughout — no Arabic-Indic digits occur.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 /** Arabic-Indic digits, both ranges, folded to ASCII so one representation reaches every rule. */
 const ARABIC_DIGIT = /[٠-٩۰-۹]/gu;
@@ -104,6 +105,25 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
         s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1منفی $2");
         s = s.replace(/(\S)\+\s?(\d)/gu, "$1 جمع $2");
         s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1جمع $2");
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from ur_pk — no Wikipedia needed, which
+        // makes Urdu one of the few languages in this issue where tier 2 settled all four readings:
+        //
+        //   `برابر`      ×4 token   "اس تناسبِ نظر کے برابر" — EQUAL TO this aspect ratio
+        //   `سے کم`      ×26 phrase  ·  `سے زیادہ` ×78 phrase   — both postposed, both with real operands
+        //   `سے تقسیم`   ×1          "بارہ سے تقسیم دے کر" — FLEURS's parallel division sentence
+        //   `تقسیم`      ×8 token    the division word on its own
+        //
+        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL, like Hindi's, so they use core/postposedSign.ts: سے follows
+        // the standard of comparison, so `A < B` is "A B سے کم". An infix rule would read it backwards.
+        //
+        // The equality and the division read INFIX, matching the cognate pair `hi` already ships (बराबर / भाग)
+        // — but sourced here from Urdu's own corpus rather than carried across, since the two languages are
+        // separately attested and only the script differs for these words.
+        s = postposedSign(s, "<", "سے کم");
+        s = postposedSign(s, ">", "سے زیادہ");
+        s = s.replace(/\s?=\s?/gu, " برابر ");
+        s = s.replace(/\s?÷\s?/gu, " تقسیم ");
 
         // 7) FRACTIONS, as "denominator بٹا numerator" — the ordinary spoken form; ½ is آدھا.
         s = s.replace(/(?<![\d.,/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {

@@ -364,6 +364,26 @@ export function normalizeSerbian(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 плус ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1плус ");
 
+    // 3c) THE RELATIONAL AND DIVISION SIGNS (#654). sr.wikipedia's дељење article reads the operation aloud and
+    //     then names the notation, giving two of the four in one sentence:
+    //
+    //       "двадесет подељено са пет једнако четири. Ово се означава као 20 / 5 = 4"
+    //          twenty divided by five equals four. This is denoted as 20 / 5 = 4
+    //
+    //     `једнако` ×17 token / 7 articles in that register ("10 / 3 једнако 3+1/3", "a / b није увек једнако
+    //     b / a"), `подељено са` ×2, `мање од` ×3. `веће од` is ×0 in the wiki sample and ×1 token in sr_rs —
+    //     the construction is ADJ + од and its sibling `мање од` proves it, the case German needed for
+    //     `größer als`. hr independently ships the same four words in Latin script, which is corroboration
+    //     between two closely related languages rather than transfer: each was sourced from its own corpus.
+    //
+    //     ⚠ THE CORPUS'S OWN `једнако` IS THE WRONG SENSE, so the register tier is doing the work here: its two
+    //     token hits are the ADVERB "equally" ("луна је била једнако чудна као и ја" — Luna was equally strange
+    //     as I), which has no arithmetic reading. Fourth instance of that trap after it/ru/ar.
+    s = s.replace(/\s?=\s?/gu, " једнако ");
+    s = s.replace(/\s?<\s?/gu, " мање од ");
+    s = s.replace(/\s?>\s?/gu, " веће од ");
+    s = s.replace(/\s?÷\s?/gu, " подељено са ");
+
     s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, unit: string, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
