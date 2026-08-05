@@ -277,10 +277,27 @@ export function normalizeMalayalam(input: string): string {
     s = postposedSign(s, "<", "എക്കാൾ കുറവ്");
     s = postposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
     s = s.replace(/\s?÷\s?/gu, " ഹരണം ");
-    // ⚠ `=` IS LEFT DROPPED, REPORTED RATHER THAN GUESSED. Every candidate for the equality word is ×0 in BOTH
-    // the corpus and the wiki: സമം, തുല്യം, ഹരിച്ചാൽ. The root-plus-name route that settled the division sign
-    // has no equivalent here — nothing names the `=` glyph in ml.wikipedia's arithmetic article. This is the
-    // one reading in the batch with no source, so it stays silent until there is one.
+
+    // THE EQUALITY, and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the Polish lesson, repeated exactly.
+    // This rule was first left DROPPED on the finding that സമം, തുല്യം and ഹരിച്ചാൽ were ×0 in both corpus and
+    // wiki. That was measured with `attest.ts --context "ഗണിതം അങ്കഗണിതം ഹരണം"`, i.e. inside maths articles, and
+    // those articles write the notation instead of reading it. Dropping the restriction found the word at once:
+    //
+    //   `തുല്യം`  ×11 token / 11 ARTICLES   "കിലോഗ്രാമിന്റെ പിണ്ഡത്തിന് തുല്യം" — EQUAL TO the mass of the
+    //                                       kilogram; "രാജസൂയത്തിനു തുല്യം ഫലം" — a result EQUAL TO the Rajasuya
+    //   `സമമാണ്`  ×19                       the predicative form, "is equal"
+    //
+    // ⚠ AND `സമം` IS THE WRONG WORD FOR THIS SLOT, which is why probing it first was misleading. It is ×22 but
+    // means "in equal MEASURE" adverbially ("ഇവ സമം കഷായം" — these in equal parts, "10 ഗ്രാം സമം നെയ്യും") and is
+    // separately the name of a rhetorical figure ("സമം എന്ന അലങ്കാരം"). Its Tamil, Kannada and Telugu cognates
+    // (சமம், ಸಮ, సమానం) ARE the equality word in those languages — all four are the same Sanskrit loan *sama* —
+    // so a sister-language inference would have picked exactly the wrong member of the set. The cognate tells
+    // you where to look; it does not tell you which sense the borrowing settled into.
+    //
+    // ⚠ POSTPOSED, because the attested construction is DATIVE + തുല്യം: the standard comes first
+    // (`പിണ്ഡത്തിന് തുല്യം`), so `A = B` is "A B-ന് തുല്യം". The dative is emitted unfused for the same reason
+    // the comparative's -എക്കാൾ is, and with the same known limitation.
+    s = postposedSign(s, "=", "ന് തുല്യം");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
 
