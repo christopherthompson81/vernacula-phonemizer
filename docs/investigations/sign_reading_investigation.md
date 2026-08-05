@@ -2664,3 +2664,108 @@ Gates for all six, run separately: tsc PASS; 208 files / 2951 tests; audit 0 def
 `review.ts` fills `equals`/`less-than`/`greater-than`/`divide` for each; corpus diff 0 changed for every one
 (es 0/1948, fr 0/1972, pt 0/1943, it 0/1978, ru 0/1959, nl 0/1829) — zero is the correct result, because what
 the corpora lack is the notation, which is the whole reason these needed tiers 3 and 4.
+
+## Run 41 — 2026-08-04 — #654: ar ja ko tr, and the infix assumption breaking
+
+Four more languages, and this batch is where the European rule SHAPE stopped generalising. Every language up to
+Run 40 read the sign by substituting words *between* the operands. Three of these four cannot.
+
+    ar  سبعة يُسَاوِي ثلاثة · أَصْغَر مِن · أَكْبَر مِن · مَقْسُوم عَلَى     (10 registered codes at once)
+    ja  なな イコール さん · 7は3より小さい · 7は3より大きい · なな わる さん
+    ko  칠은 삼과 같다 · 칠은 삼보다 작다 · 칠은 삼보다 크다 · 칠 나누기 삼
+    tr  yedi eşittir üç · yedi üçten küçüktür · yedi üçten büyüktür · yedi bölü üç
+
+### ⚠ AN INFIX RULE IN A VERB-FINAL LANGUAGE INVERTS THE MEANING
+
+Japanese puts the predicate last. ja.wikipedia reads the chain `1 < x < 5` as 「xは1より大きく5より小さい」, so
+`A < B` is 「AはBより小さい」. Substituting より小さい *between* the operands the way de/es/fr/pt/it/ru/nl/pl/uk/el
+all do would give 「7より小さい3」 — **"3, which is smaller than 7"**, the comparison backwards.
+
+This is a different failure from anything earlier in the issue. A wrong-sense attestation ships a reading that is
+odd; an infix rule in a verb-final language ships a reading that is *false*. So ja and ko consume BOTH operands
+and rebuild the clause, and only the signs that genuinely are infix in those languages (`=`/`÷` in ja, `÷` in ko)
+keep the simple form.
+
+⚠ AND THE CONSEQUENCE: **a two-operand rule can only fire where it can identify both operands.** Where an operand
+is not something the rule can spell, the sign stays dropped — the status quo — because a rule that is correct
+about what it claims beats a total rule that garbles the rest.
+
+### 📌 A NEW TIER, ABOVE ATTESTATION: CAN THE RULE CONSTRUCT THE READING AT ALL
+
+Run 40 added grammatical compatibility with `numbers.ts` as a consideration. Turkish sharpens it into a *choice
+criterion*, because tr.wikipedia attests **two** readings of `=` in the same article:
+
+    "beş artı üç sekize eşittir"     5 + 3 = 8    dative, postposed
+    "bir artı bir eşittir iki"       1 + 1 = 2    infix, no case at all
+
+Both are real. The infix one ships, and not for tidiness: **a case-marked reading can only be built for an operand
+the rule can SPELL.** The dative version would have left `x = y` unread, because there is no way to inflect an
+operand whose spoken form the rule does not know. Where two forms are attested, prefer the one whose construction
+does not depend on knowing the operand.
+
+The comparatives have no such alternative — the ablative *is* the construction — so those two fire only between
+numbers, and the rule builds the suffix from the spelled word: vowel harmony from the stem's last vowel, and the
+ablative's consonant assimilating to a voiceless final. Verified across the whole numeral vocabulary rather than
+assumed: üçten, dörtten, altıdan, kırktan, yüzden.
+
+Korean needed the same self-spelling for a different reason — the particles are allomorphic on the **spelled**
+number (7 → 칠 takes 은, 4 → 사 takes 는), decided by whether the last Hangul syllable is closed, and the
+digit-to-word pass runs later and could not repair a particle already chosen wrongly.
+
+### The wrong-sense trap again, and the partitive is its commonest shape
+
+Arabic's corpus gives `أكبر من` ×10 phrase hits and **they are the partitive** — "a LARGER SET OF small places",
+where مِن marks the partitive rather than the standard of comparison. Identical in shape to Italian's
+`numero maggiore di basi`. Two unrelated languages, same failure: *the comparative-plus-preposition string is
+shared between comparison and partition, so a phrase count cannot separate them.*
+
+⚠ AND THE USER CORRECTED THE UKRAINIAN VERSION OF THIS CLAIM, which is worth keeping distinct. `поділити на`
+is NOT a second sense — Slavic uses one preposition for both readings, so the phrase is ambiguous exactly where
+English distinguishes *divide into* from *divide by*, and the sense lives in the ARGUMENT (a plural noun vs a
+numeral). That is *no evidence either way*, not counter-evidence. The Italian and Arabic cases are genuinely
+different constructions; the Ukrainian one was me over-reading a count.
+
+### Three defects found by writing the rules, all pre-existing
+
+1. **ja: the topic particle は read /ha/ after a digit.** The は→わ gate accepted a preceding kanji or kana but
+   not a DIGIT, so 「7は」 stayed /ha/. **Four corpus utterances change**, every one a topic particle after a
+   numeral (`3分の1は`, `HJR-3は`, `Il-76は`, `KV62は`) and every one wrong before.
+2. **ko: no rule for ANY additive sign.** `+`, `−`, `±` were all dropped — `3 + 4` read 삼 사, two bare numbers.
+   Fixing it hit the ordering rule again: the degree rule REORDERS (it lifts 섭씨 in front of the number) and had
+   stranded the sign, reading 마이너스 섭씨 오도 ("minus Celsius five degrees"). It now carries the sign across.
+3. **tr: no minus and no ±**, both named by the same article that gave the relational readings.
+
+Korean went from 8 dropped sign classes to 0; Turkish from 4 to 0.
+
+### The ampersand, and where it belongs
+
+The `ampersand` cell was the last hard fail in ko/tr, and the user's framing settled what it is: **a Latin-script
+printing ligature, not native vocabulary anywhere.** That makes it a *loan* in a non-Latin script and a *native
+word* in a Latin one, which is exactly how the fleet now reads it:
+
+    ko  앤드   ·  ja  アンド        (the symbol arrives inside a Latin run — R&B, P&R — so the reading is a loan)
+    tr  ve    ·  nl  en           (a Latin-script language reads it with its own conjunction)
+
+Not an arithmetic sign, so not #654's subject — but the gate demanded it and the distinction is the answer.
+
+### ⚠ A GATE-DISCIPLINE FAILURE WORTH RECORDING
+
+The `es` corpus diff in commit 4b57e2b was **a null test**. `corpus-diff.ts emit` resolves the engine relative to
+the CURRENT WORKING DIRECTORY, the shell was still inside the baseline worktree from the "before" emit, and so
+both sides were the same tree. It reported 0/1948 — the right answer, arrived at without measuring anything.
+
+Re-run properly: still 0/1948. *A gate that cannot fail is not a gate*, and this one silently could not, which
+is the same class of error as the `attest.ts` `exlimit` warning in Run 40 — a tool reporting a confident result
+it had no evidence for. Every subsequent diff in this session was run with an explicit absolute `cd`.
+
+### Where #654 stands
+
+| sign | dropped at Run 40 | dropped now |
+|---|---|---|
+| `±` | 35 | **31** (it nl pl ko tr, plus ja/ar already) |
+| `=` `<` `>` | 28 dirs | **24 dirs** |
+| `÷` | 41 | 37 |
+
+Thirteen languages now read all four: de es fr pt it ru nl pl uk el ar ja ko tr (fourteen counting `ar`'s ten
+codes as one). Gates per language, run separately: tsc PASS; 208 files / 2951 tests; corpus diff ar 0/1702,
+ko 0/1746, tr 0/1876, ja 4/1788 (every change read, all four the particle fix).
