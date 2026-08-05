@@ -197,6 +197,35 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1más $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
 
+    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
+    //     genuinely absent from the corpus — every `<` in the fleet is an HTML tag `stripMarkup` removes — but
+    //     the readings are ordinary comparative prose, and those words are in es_419 in quantity:
+    //
+    //       `menor que`   ×9 phrase hits   (menor ×35, que ×2983)
+    //       `igual a`     ×5 phrase hits   (igual ×42)
+    //       `mayor que`   ×3 phrase hits   (mayor ×128)
+    //       `dividido`    ×1               — the one word the corpus cannot settle on its own
+    //
+    //     ⚠ THE DIVISION WORD NEEDED THE REGISTER TIER, and general Wikipedia would have answered wrong. Both
+    //     `dividido entre` (the school reading in most of the Spanish-speaking world) and `dividido por` are
+    //     real, and `dividido` appears once in the whole corpus, so neither the corpus nor a bare existence
+    //     check separates them. Restricting the article sample to maths prose
+    //     (`attest.ts --context "matemáticas aritmética división"`) puts the canonical División article in the
+    //     net, and that article reads the operation aloud in exactly this slot:
+    //
+    //       "veinte dividido por cinco es igual a cuatro"
+    //
+    //     which sources the division word AND the equals word in one sentence, between two operands. That is
+    //     the tier the German pilot showed is required rather than optional: German Wikipedia's only hit for
+    //     `größer als` was a film title, and existence checks cannot tell a sense from a string.
+    //
+    //     The copula is dropped (`igual a`, not `es igual a`) because the sign occurs in running text where the
+    //     verb is already present or absent for its own reasons — the same call `en` makes with `equals`.
+    s = s.replace(/\s?=\s?/gu, " igual a ");
+    s = s.replace(/\s?<\s?/gu, " menor que ");
+    s = s.replace(/\s?>\s?/gu, " mayor que ");
+    s = s.replace(/\s?÷\s?/gu, " dividido por ");
+
     // 7) FRACTIONS, guarded against a date and a unit ratio by requiring digits both sides.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
