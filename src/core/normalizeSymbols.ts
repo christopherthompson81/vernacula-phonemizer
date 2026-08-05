@@ -365,7 +365,21 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // Opt-in per language rather than global, because the guard is load-bearing where words ARE spaced: it is
     // what stops a one-letter unit biting into a word (Ukrainian `41 м'яч`, Dutch `Il-76s`).
     const wordCont = d.unspacedScript ? "\\p{sc=Latn}" : "\\p{L}";
-    const CUR = `(?<![${wordCont}\\p{M}])(?:${curKeys})(?![${wordCont}\\p{M}])`;
+    /**
+     * ⚠ THE MARK GUARD FOLLOWS `unspacedScript`, AND MUST — in an abugida a dependent vowel is how a word
+     * ENDS, not a mid-word-only signal. `\p{M}` was appended here unconditionally, which is right for Latin
+     * (a word-final combining mark is unusual there) and wrong for Khmer, where roughly half the vocabulary
+     * ends in one. The effect was that a currency sign attached to a mark-final word was DROPPED while the
+     * same sign on a consonant-final word was read: Khmer `១លាន$` gave "one million dollars" and `១កោដិ$`
+     * gave "one koti" with the sign silently gone. Both spellings are in the corpus; only one worked.
+     *
+     * The reason it is safe to relax is that A CURRENCY SIGN IS NOT A LETTER, so unlike a unit abbreviation
+     * it cannot be the prefix of a longer word — the hazard the guard exists for. The unit path below KEEPS
+     * its trailing mark guard for exactly that reason: there a mark after the match means the letters matched
+     * were part of a bigger word.
+     */
+    const markCont = d.unspacedScript ? "" : "\\p{M}";
+    const CUR = `(?<![${wordCont}${markCont}])(?:${curKeys})(?![${wordCont}${markCont}])`;
     const curBefore = d.currency
         ? new RegExp(`(${CUR})${OPT_SEP}(${NUM})${magAlt}`, "gu")
         : null;

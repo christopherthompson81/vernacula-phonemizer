@@ -727,3 +727,26 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
         expect(phonemize("un angle de 90 °", "fr")).not.toContain("sɛlsjˈys");
     });
 });
+
+describe("⚠ the currency mark guard follows unspacedScript (abugida word endings)", () => {
+    // The tier rejects a currency sign adjacent to a combining mark, so a sign cannot be read out of the middle
+    // of a word. `\p{M}` was appended UNCONDITIONALLY, which is right for Latin — a word-final combining mark is
+    // unusual there — and wrong for an abugida, where a dependent vowel is how a word normally ENDS.
+    //
+    // The symptom was a silent split decision inside one language: Khmer `១លាន$` ("one million dollars") read
+    // the sign because លាន ends in a consonant, while `១កោដិ$` ("one koti dollars") dropped it because កោដិ ends
+    // in U+17B7. Both spellings are in the corpus; only one worked. Relaxing it is safe because a currency sign
+    // is NOT A LETTER and so, unlike a unit abbreviation, cannot be the prefix of a longer word.
+    test("a magnitude ending in a combining mark still composes with a postposed sign", () => {
+        expect(phonemize("១កោដិ$", "km")).toContain("ɗollaː");   // ends U+17B7 — was dropped
+        expect(phonemize("១ពាន់$", "km")).toContain("ɗollaː");   // ends U+17CB — was dropped
+        expect(phonemize("១លាន$", "km")).toContain("ɗollaː");    // ends in a consonant — always worked
+    });
+
+    test("and the guard still holds for a spaced script, where a mark IS word-internal", () => {
+        // The relaxation is conditional on `unspacedScript`, so nothing changes for the languages the guard was
+        // written for. Measured before the change: across the five unspacedScript languages' corpora, ZERO
+        // currency signs sit adjacent to a combining mark in cmn, yue, ja or th — the fix is inert for all four.
+        expect(phonemize("$5", "en")).toContain("dˈɑːlɚz");
+    });
+});
