@@ -139,6 +139,25 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         plus: "the sign position only: the attested reading is an English loan Māori's inventory cannot say "
             + "(/l/, /s/ → [pa]), and the native `tāpiri` means append, not positive — see maori/normalize.ts",
     },
+    gu: {
+        // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
+        // designations — the bill number `એચજેઆર -3` (already in ACCEPTED_SILENT) and `ગોથિક શૈલી 10મી -11મી`,
+        // a spaced ORDINAL range, where the character before the hyphen is a letter and the one after is a digit.
+        minus: "measured: gu_in has two `word -digit` instances (the bill `એચજેઆર -3` and the ordinal range "
+            + "`10મી -11મી`), the shape no guard can reject — see ta's entry and ACCEPTED_SILENT",
+    },
+    kn: {
+        minus: "measured: kn_in has the bill number `ಎಚ್‌ಜೆಆರ್ -3`, the `word -digit` shape no guard can reject "
+            + "— see ta's entry and ACCEPTED_SILENT, which lists this instance as correctly silent",
+    },
+    yue: {
+        // ⚠ AND HERE THE SHAPE IS AN ARTEFACT OF THE TRANSCRIPT, not of Chinese. FLEURS writes Han with a space
+        // between EVERY character, so the aircraft designation `Il-76` is stored as `伊 爾 -76` — a letter, a
+        // space, then the hyphen. The undecidable shape arrives through the corpus's own formatting, which is
+        // the same source-orthography divergence zu/xh documented for the plus.
+        minus: "measured: the per-character spacing FLEURS uses for Han turns the designation `Il-76` into "
+            + "`伊 爾 -76`, producing the `word -digit` shape no guard can reject",
+    },
     ta: {
         // ⚠ TRIED, AND THE CORPUS DIFF REJECTED IT. A guarded minus rule was written for ta and correctly refused
         // every range, score and closed designation — and then read `சந்திரயான் -1` as "கழித்தல் ஒன்று", minus

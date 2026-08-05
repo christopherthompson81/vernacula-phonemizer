@@ -308,6 +308,20 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //     check it against this string first.
         //     Digit-keyed on the right only: the offset is `UTC+1`, so the sign has a LETTER before it and a
         //     digit after, and a range or a compound hyphen cannot reach this arm.
+        // THE MINUS AND ± (#654). ⚠ MEASURED SAFE: every `-<digit>` in or_in is a range, score or closed
+        //    designation, and there are ZERO instances of `word · space · hyphen · digit` — the one shape no
+        //    guard can reject, and the one that made mr, nl, ta, gu, kn and yue decline this rule.
+        //
+        //    `ଋଣାତ୍ମକ` ×7 / 3 articles is the POLARITY word, attested on the number line beside its opposite
+        //    `ଧନାତ୍ମକ` (positive), which is the sense a leading sign needs. The loan `ମାଇନସ` is ×0 here, and
+        //    `ବିଯୋଗ` is the subtraction OPERATION. bn already reads its cognate `ঋণাত্মক` in exactly this slot,
+        //    so the Indic treatment is consistent — and each was sourced from its own language.
+        //
+        //    Three guards: a digit immediately after the sign, a letter or digit immediately before, and a digit
+        //    ANYWHERE to the left (the spaced range/score, which the fleet's usual guard misses).
+        s = s.replace(/±/gu, " ପ୍ଲସ୍ ଋଣାତ୍ମକ ");
+        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+            /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "ଋଣାତ୍ମକ ");
         s = s.replace(/\+(?=\d)/gu, " ପ୍ଲସ୍ ");
 
         // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from or_in:

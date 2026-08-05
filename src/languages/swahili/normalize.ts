@@ -143,6 +143,26 @@ export function normalizeSwahili(input: string): string {
     //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
     //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
     //   and this spelling is chosen to reproduce the attested phones.
+    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
+    //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
+    //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
+    //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
+    //    corpus, not about the guard.
+    //
+    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
+    //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
+    //    the fleet's usual guard misses — the gap that cost a real defect in th).
+    //
+    //    SOURCED: sw.wikipedia's negative-number article — "Namba hasi katika hisabati ni namba halisi ambayo ni
+    //    pungufu ya namba 0. Namba hasi huwakilisha kinyume" (a NEGATIVE number is a real number less than 0).
+    //    `hasi` x27 / 8 articles, and it is the polarity word rather than the subtraction verb, which is what the
+    //    sign position needs.
+    //
+    //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+    s = s.replace(/±/gu, " plas hasi ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "hasi ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plas ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1plas ");
     s = s.replace(/(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gu, "nyuzi joto $1 Selsiasi");

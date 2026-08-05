@@ -285,6 +285,24 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //   UTC+1  →  `… j u t i s i p l o s e k …` / `… j u d i s i p l a s e k …`   2 of 3 (third skips it)
         //   +30°C  →  `… t i s d i ɡ r i b o n d a …`  तीस डिग्री, NO plus phones, 2 of 2
         // प्लस reads plˈʌs, matching the decode. BEFORE the degree rule (the ordering zu's `[+]?` taught).
+        // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+        //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
+        //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
+        //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
+        //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
+        //    corpus, not about the guard.
+        //
+        //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
+        //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
+        //    the fleet's usual guard misses — the gap that cost a real defect in th).
+        //
+        //    SOURCED: ne.wikipedia NAMES THE SIGN — "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)", subtraction, which
+        //    is denoted by the MINUS SIGN ⟨−⟩. x10 / 8 articles, and the same article pairs it with प्लस.
+        //
+        //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+        s = s.replace(/±/gu, " प्लस माइनस ");
+        s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+            /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "माइनस ");
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
 

@@ -237,6 +237,26 @@ export function normalizeMalayalam(input: string): string {
     //   +30°C  →  `… m a s a ŋ l i l p l a s v u p o d e d i ɡ …`  plus + മുപ്പതു, 1 of 1
     // ★ Like ta, gu and mi, and unlike en/hi/vi/te/xh/am/ne, ml says the MEASUREMENT plus. പ്ലസ് reads
     // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
+    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
+    //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
+    //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
+    //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
+    //    corpus, not about the guard.
+    //
+    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
+    //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
+    //    the fleet's usual guard misses — the gap that cost a real defect in th).
+    //
+    //    SOURCED, AND THE SAME SENTENCE GIVES ± DIRECTLY: ml.wikipedia writes "പ്ലസ്-മൈനസ് ചിഹ്നം, ±,
+    //    ഒന്നിലധികം അർത്ഥങ്ങളുള്ള ഒരു ഗണിത…" — the PLUS-MINUS SIGN, ±, a mathematical symbol with several
+    //    meanings. So both the minus word (x16 / 8 articles) and the ± pairing come from one quote naming the
+    //    glyph, which is the strongest shape tier 4 takes.
+    //
+    //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+    s = s.replace(/±/gu, " പ്ലസ് മൈനസ് ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "മൈനസ് ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
 
