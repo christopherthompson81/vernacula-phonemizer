@@ -130,6 +130,19 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    km: {
+        // Both refusals are argued with a measured distribution in src/languages/khmer/normalize.ts, and in both
+        // cases a rule DOES ship for the shape the corpus supports — it is the probe's shape that is undecidable,
+        // the same structure as gu/kn's minus below.
+        equals: "measured: of 5,844 `=` in the mined corpus, 1,348 are a gloss (`ចក្រវាឡរណប=satellite`), 1,057 "
+            + "are code-shaped (`==`, an assignment, a quoted value) and 9 are URL query strings, against 109 "
+            + "genuine digit-flanked arithmetic — which IS read. Widening to the probe's `x = y` letter-flanked "
+            + "shape would fire on the code and the glosses, getting it wrong about as often as right",
+        plus: "measured: the digit-flanked plus IS read (74 corpus instances → បូក). The probe's LEADING `+5` "
+            + "shape is the undecidable one: of 254 sites with no number before the sign, 142 are LaTeX or C "
+            + "(`x+3\\!`, `\\to +\\infty`, `printf(...a+b)`) against 4 genuine paren-arithmetic instances "
+            + "(`(២១-១)+៤`), because this wiki carries maths articles written in LaTeX and a C tutorial",
+    },
     gu: {
         // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
         // designations — the bill number `એચજેઆર -3` (already in ACCEPTED_SILENT) and `ગોથિક શૈલી 10મી -11મી`,
@@ -250,6 +263,12 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // DESIGNATIONS — a product name or bill number whose hyphen is silent in speech. Two universal sentences
     // across the five languages that write a SPACE before the hyphen; every other language writes it closed and
     // the `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    // A C FORMAT SPECIFIER, not a percentage. The km wiki carries a programming tutorial whose code survives
+    // into the corpus (`scanf("%lf %lf",&a, &b); /*Khmer comment*/`), and the cell selector reaches for it
+    // because `%` next to letters is exactly what the percent cell looks for. The `%` in `%lf` is a conversion
+    // flag — silence is the CORRECT reading, and a rule that voiced it would be a defect. The line survives the
+    // native-script filter legitimately, because its trailing comment really is Khmer.
+    km: { percent: ["%lf"] },
     gu: { minus: ["એચજેઆર -3"] },
     kn: { minus: ["ಎಚ್‌ಜೆಆರ್ -3"] },
     mr: { minus: ["चंद्रयान -1"] },

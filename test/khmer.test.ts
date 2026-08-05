@@ -88,3 +88,55 @@ describe("Khmer (km) cardinal numbers — bi-quinary 6–9", () => {
         });
     }
 });
+
+describe("Khmer signs, units and currencies (#585 review pass)", () => {
+    // Every reading below is corpus-sourced; the counts are digit-flanked occurrences in the mined kmwiki dump.
+    test("arithmetic signs read as words", () => {
+        expect(phonemizeText("៥+៣", "km")).toContain("ɓouk");        // + 74 instances, បូក
+        // ⚠ NOT `៨-២` — a digit-hyphen-digit is a RANGE in Khmer and the range rule runs first, so that reads
+        // "eight TO two" (ɗɑl). The minus rule is for the LEADING dash, which is the negative/subtract reading.
+        expect(phonemizeText("-៥", "km")).toContain("ɗɑːk");          // − ដក, attested ×3,808
+        expect(phonemizeText("៨-២", "km")).toContain("ɗɑl");          // and the range still wins here
+        expect(phonemizeText("៣×៥", "km")).toContain("kun");          // × 46 instances, គុណ
+        expect(phonemizeText("៨÷២", "km")).toContain("caek");         // ÷ ROBUSTNESS: 0 instances, ចែក sourced ×3,285
+        expect(phonemizeText("៤=៤", "km")).toContain("smaə");         // = digit-flanked only; see normalize.ts
+    });
+
+    test("⚠ the LEADING ± is read, and the leading + deliberately is not", () => {
+        // Measured asymmetry, not an oversight. Of the sites with no number before the sign, all 4 ± are genuine
+        // (`±20°` latitude bands, `± 0.1 ឆ្នាំ`) while 142 of 254 + are LaTeX or C from this wiki's maths
+        // articles and programming tutorial. Reading the leading + would be a misfire generator.
+        expect(phonemizeText("±២០", "km")).toContain("ɓoukɗɑːk");
+        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓoukɗɑːk");
+    });
+
+    test("both spellings of the kilometre abbreviation are read", () => {
+        // គម 212 instances after a digit, Latin km 95. Declaring one left the other a foreign-fallback mangle.
+        expect(phonemizeText("៥ គម", "km")).toContain("kiːloumaet");
+        expect(phonemizeText("៥ km", "km")).toContain("kiːloumaet");
+    });
+
+    test("all four currencies are read, on whichever side the sign sits", () => {
+        // Khmer POSTPOSES the sign (`២៤៧០$`) as well as preposing it, and the riel, euro and pound were simply
+        // never declared — which was most of the artifact's remaining currency drops.
+        expect(phonemizeText("២៤៧០$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("១០០៛", "km")).toContain("riəl");
+        expect(phonemizeText("២,៣ €", "km")).toContain("ʔəɨrou");
+        expect(phonemizeText("£៥", "km")).toContain("pʰaon");
+    });
+
+    test("⚠ US$ is read, which needs its own key because the Latin guard blocks the bare $", () => {
+        // The tier refuses a sign preceded by a Latin letter — the guard that stops a sign being read out of the
+        // middle of a Latin word. `US$` appears in ordinary Khmer prose (`ប្រហែល US$3,236`), so it is declared
+        // as a multi-character key and matched as a unit.
+        expect(phonemizeText("US$3,236", "km")).toContain("ɗollaːʔaːmeːrək");
+        expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaːʔaːmeːrək");
+    });
+
+    test("⚠ a magnitude word between the number and a postposed sign still composes", () => {
+        // `១ កោដិ$` — one koti dollars. The postposed pattern needs a NUMBER before the sign, so without the
+        // magnitude declared the sign was dropped. This was 9 of the artifact's drops.
+        expect(phonemizeText("១ កោដិ$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("១០លាន$", "km")).toContain("ɗollaː");
+    });
+});

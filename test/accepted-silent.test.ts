@@ -55,7 +55,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // spell, so the plus now reads [plˈʌs], the drop no longer happens, and the accept had nothing left to
         // cover. A baseline entry that can never fire is worse than none: it would mask exactly the regression
         // this table exists to make visible. Removed there, and here, together.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "kn", "mr", "my", "ta", "xh"]);
+        // ⚠ `km` WAS ADDED IN THE #585 REVIEW PASS, and it is the first entry here that is not a designation.
+        // The km wiki carries a programming tutorial whose code reaches the corpus, and the percent cell selects
+        // it because `%` beside letters is exactly what that cell looks for. The `%` in `scanf("%lf %lf", …)` is
+        // a C conversion flag, so silence is the CORRECT reading and a rule that voiced it would be the defect.
+        // The line is legitimately in the corpus — its trailing comment really is Khmer — so it survives the
+        // native-script filter and has to be accepted by identity instead.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

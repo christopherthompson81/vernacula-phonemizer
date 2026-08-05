@@ -76,14 +76,47 @@ import { lastKhmerWord } from "./segment.ts";
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["ភាគរយ"],
-    currency: { $: ["ដុល្លារ"] },
+    // ៛ is the riel, 97 occurrences — the country's own currency, and declaring only the dollar left it unread.
+    // ⚠ FOUR CURRENCIES, NOT ONE — and the three additions were pure omission rather than a judgement.
+    // The artifact's remaining `currency` drops were mostly £ and €, which the corpus writes with Khmer digits
+    // (`£៥ លាន`, `២,៣ €`) and which no rule could reach because they were not in this map. Both words are
+    // corpus-attested: អឺរ៉ូ ×84, ផោន ×39, រៀល ×451, ដុល្លារ ×435.
+    //
+    // ⚠ `US$` IS DECLARED AS ITS OWN KEY, and the first version of this comment got the reason wrong. I recorded
+    // it as "the guard working — every US$ instance sits in an English sentence the wiki quotes verbatim", which
+    // was true only of the artifact's ENGLISH cells. Once those were filtered out of the corpus (see
+    // scripts.ts's isNativeSegment) the surviving `US$` instances were ordinary Khmer prose — `ប្រហែល US$3,236`,
+    // `តិចជាង US$ ១,០២៥` — so it was a real reading gap that foreign-line noise had been hiding. The bare `$`
+    // key cannot reach it because the tier refuses a sign preceded by a Latin letter, which is the guard that
+    // stops a sign being read out of the middle of a Latin word; a multi-character key is matched as a unit and
+    // sidesteps it. ដុល្លារអាមេរិក is attested ×116.
+    //
+    // ⚠ AND `¥` IS DELIBERATELY NOT DECLARED. Its single corpus instance is `CN¥117,500` — Chinese yuan, not
+    // yen — so the obvious word យ៉េន (×38, and genuinely the yen: `២,៨ពាន់លានយ៉េន`) would be the WRONG reading.
+    // The yuan word is not attested at all: យ័ន looks frequent at ×436 until the hits are read, and every one is
+    // a substring of បាយ័ន (the Bayon temple), អារ្យ័ន (Aryan) or យ័ន្ត — the spaceless-script inflation
+    // `corpus-words.ts` warns about in its own banner, checked here rather than trusted. So this is one
+    // ambiguous instance whose correct reading has no source, and it stays silent as a KNOWN GAP: the remaining
+    // `artifact scan` DROP is this, and it is not claimed to be correct the way an ACCEPTED_SILENT entry is.
+    currency: {
+        $: ["ដុល្លារ"], "៛": ["រៀល"], "€": ["អឺរ៉ូ"], "£": ["ផោន"], "US$": ["ដុល្លារអាមេរិក"],
+    },
     // A scale is a UNIT to this tier. `℃` is listed beside `°C` because the corpus carries both spellings, and
     // the bare `°` last so the longer keys win — the tier sorts by length, but declaring the order makes it read.
     // ⚠ THE KEYS MUST BE LOWERCASE. The tier looks a matched unit up as `d.units[u.toLowerCase()]` with a
     // non-null assertion, so a capitalised key is not a missed match — it is a TypeError at runtime
     // ("Cannot read properties of undefined") the first time that unit appears in real text. Declaring `°C`
     // crashed on `៣៥°C`; `°c` matches the same input because the alternation is case-insensitive.
-    units: { "គម": ["គីឡូម៉ែត្រ"], "°c": ["អង្សាសេ"], "℃": ["អង្សាសេ"], "°": ["អង្សា"] },
+    // Both spellings of the kilometre abbreviation: the corpus writes គម 212 times after a digit and the
+    // Latin `km` 95 times, so declaring only one leaves the other reading as a foreign-fallback mangle
+    // (`1 km` came out as *muəj ˈʊkm*).
+    units: { "គម": ["គីឡូម៉ែត្រ"], km: ["គីឡូម៉ែត្រ"], "°c": ["អង្សាសេ"], "℃": ["អង្សាសេ"], "°": ["អង្សា"] },
+    // ⚠ MAGNITUDES ARE WHAT LET A POSTPOSED SIGN COMPOSE. Khmer writes the sign AFTER the amount — `២៤៧០$`,
+    // `រយកោដិ$ស.រ.` — and the tier's postposed currency pattern needs a NUMBER before it. Where a magnitude
+    // word intervenes (`១ កោដិ$`, one koti dollars) the pattern found no number and the sign was DROPPED, which
+    // is 9 of the artifact's remaining drops. All four are corpus-attested after a digit: លាន 1,324,
+    // ពាន់ 558, ម៉ឺន 274, កោដិ 53.
+    magnitudes: ["លាន", "ពាន់", "ម៉ឺន", "កោដិ"],
     exponentWords: { squared: ["ការេ"], position: "suffix" },
     multiply: { times: "គុណ" },
     ampersand: "និង",
@@ -182,12 +215,41 @@ export function normalizeKhmer(text: string): string {
     // the only one the evidence supports.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
 
+    // ── 5b. plus, and plus-minus ─────────────────────────────────────────────────────────────────────
+    // ⚠ THE PLUS RULE EXISTED AND I DELETED IT while restructuring for the shared tier — the tier carries
+    // `multiply` but has no plus, so migrating silently dropped a class with 74 digit-flanked instances. Caught
+    // by `review.ts` reporting `plus` among the DROPPED sign classes. បូក is corpus-attested (3,338).
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
+    // ± is 19 digit-flanked instances, every one a scientific tolerance — `១៨៣០ ±៤០ km`, `25,559 ± 4 គីឡូម៉ែត្រ`.
+    // I had recorded it as "the sign does not occur in the evidence", which was an artifact of testing with a
+    // grep whose `\$sg` escaped to a word boundary rather than a literal. បូកដក is attested ×4 and is the
+    // compositional form of two words that are individually very frequent.
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូកដក ");
+    // AND THE LEADING FORM, which is what `review.ts`'s `±5` probe tests. Measured before adding rather than
+    // after: stripping whitespace properly, exactly 4 sites in the corpus have a ± with no number before it, and
+    // all 4 are genuine — the latitude bands `±20°`, `±60°`, `± 50°` and the tolerance `± 0.1 ឆ្នាំ`. No misfires
+    // available, so this is safe in a way the leading PLUS is not (see ACCEPTED_SIGN_SILENCE in defects.ts).
+    s = s.replace(new RegExp(`(?<![${D}])±${SEP}(?=[${D}])`, "gu"), "បូកដក ");
+
     // ── 6. minus ─────────────────────────────────────────────────────────────────────────────────────
     // AFTER step 4, which has already claimed every dash BETWEEN two numbers — so what reaches here is
     // a dash with no number before it, which is the negative/subtract reading. ដក is attested 3,808 times with
     // `២៨ ដក៥` written out. The ordering is the whole guard: this corpus has 4,014 ranges against 399 signed
     // numbers, so a digit-flanked dash belongs to the range and only a leading one is a minus.
     s = s.replace(new RegExp(`(?<![${D}${KH}])[-−–](?=[${D}])`, "gu"), "ដក ");
+
+    // ── 6b. divide, less-than, greater-than — ROBUSTNESS, not repair ─────────────────────────────────
+    // ⚠ THESE SIGNS DO NOT OCCUR DIGIT-FLANKED IN THIS CORPUS: `÷` 0, `<` 0, `>` 2. Khmer writes the WORD
+    // instead — ចែក 3,285, and the same is true of `×` (0 signs, គុណ 3,338), which is #654's central finding
+    // restated: the signs are absent while the readings are ordinary prose.
+    //
+    // They are added anyway because the words are SOURCED and the rules are digit-flanked, so on this corpus
+    // they cannot misfire — the risk trap 9 (a guard alternative with no attested…) warns about is a guard
+    // that fires on something else, and with zero instances there is nothing here to fire on. This is the
+    // "pure robustness rather than a repair" #654 argues for, and it closes the same class for arbitrary input.
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}÷${SEP}(?=[${D}])`, "gu"), " ចែក ");
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}<${SEP}(?=[${D}])`, "gu"), " តិចជាង ");
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}>${SEP}(?=[${D}])`, "gu"), " ច្រើនជាង ");
 
     // ── 7. fractions ─────────────────────────────────────────────────────────────────────────────────
     // The frame is NUM ភាគ NUM, which the corpus writes out 74 times as `៥ភាគ៦` — the language's own

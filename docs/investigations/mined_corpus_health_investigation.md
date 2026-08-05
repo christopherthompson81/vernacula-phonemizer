@@ -866,3 +866,76 @@ artifact-current and artifact-scan checks. That is right for a treated language 
 **all 93 will fail at step 1 forever**, so three of the five gates are unreachable for exactly the languages
 this work exists to serve. Not changed here — it is a shared gate and mid-sweep is the wrong time — and
 `mine.ts scan` covers the important part directly. Recorded as the next tooling item.
+
+## Run 18 — 2026-08-05 16:00 · the km review gate, and a corpus defect wearing a language defect's clothes
+
+`npx tsx tools/normalization/review.ts --lang km` still reported 2 FAILs after the Khmer layer shipped. Working
+them down turned up one core bug, one mining bug and four cases of my own earlier measurement being wrong.
+
+**Three regexes lied, all in the same way.** Counting whether a sign occurs in the corpus, I wrote
+`grep -cE "[០-៩][ ​]?\\$sg[ ​]?[០-៩]"` in a shell loop — and for `sg='<'` that expands to `\<`, an ERE **word
+boundary**, not a literal. `<` and `>` came back as 1,023 and 44,388 "digit-flanked" hits. Re-measured in Python
+with `re.escape`: `<` 0, `>` 2. The same shape bit twice more: `(?<![០-៩])\s*±` counts digit-preceded tolerances
+as "leading" because the lookbehind is satisfied by starting *after* the space, so `25,559 ± 4` looked like a
+leading ±. Correct counts need the whitespace stripped explicitly, not consumed inside the pattern.
+
+The corrected numbers changed three decisions. `+` is 74 digit-flanked instances and I had **deleted its rule**
+while migrating to the shared tier — the tier carries `multiply` but no plus, so the migration silently dropped a
+class. `±` is 19 instances, every one a scientific tolerance, against my earlier note that "the sign does not
+occur". `÷`, `<`, `>` really are absent (0, 0, 2), so their rules are pure robustness.
+
+**A currency sign adjacent to a combining mark was dropped, and only half of Khmer noticed.** `១លាន$` read "one
+million dollars"; `១កោដិ$` read "one koti" with the sign gone. Both spellings are in the corpus. Cause is
+`normalizeSymbols.ts`'s `CUR = (?<![${wordCont}\p{M}])…`, where `\p{M}` was appended **unconditionally** —
+correct for Latin, where a word-final combining mark is unusual, and wrong for an abugida, where a dependent
+vowel is how a word ENDS. `លាន`/`ម៉ឺន` end in consonants and worked; `កោដិ`/`ពាន់` end in U+17B7/U+17CB and did
+not. Safe to relax because **a currency sign is not a letter** and so, unlike a unit abbreviation, cannot be the
+prefix of a longer word — the unit path keeps its mark guard for exactly that reason. Blast radius measured
+before the change: across all five `unspacedScript` languages, ZERO currency signs sit adjacent to a combining
+mark in cmn, yue, ja or th. Inert for four of five.
+
+**The bigger finding: 18.6% of km's gating tier was not Khmer.** 47 of 253 cells had no Khmer letter — a Jackie
+Chan filmography, a Stradivari-violin article, a UN administration report. The mechanism is worth stating because
+it generalises: `selectCells` is **adversarial**, it prefers symbol-dense segments, and foreign-language prose in
+a non-Latin wiki is symbol-dense (prices, box-office figures, bare markup). So contamination concentrates in
+exactly the tier the gate reads. Fleet-wide, **33 of 154 artifacts** in a non-Latin script carry such cells:
+ps 60/248, sat 57/245, ug 55/239, si 52/252, km 47/253, wuu 47/242, lo 45/244.
+
+Fixed in `selectCells` via a new shared `tools/normalization/scripts.ts` — the script table moved out of
+`wiki-health.ts` rather than being copied, because a sister table that falls behind its twin is precisely how
+`sources.ts` came to report by silence that the sign classes did not apply. The script is **inferred from the
+corpus** instead of from a language→script map, so there is no new table to go stale.
+
+Two refinements, both from failures:
+  · the first version tested `\p{Script=Khmer}` and let English through on a **Khmer-digit year** — the digits
+    ០-៩ *are* script=Khmer, so wiki timeline entries (`២០០៥ - Influenced by Live 8, …`) survived, 17 of 252
+    cells. The test must be a native **letter**.
+  · the threshold is ZERO native letters, not a ratio: a Khmer sentence quoting an English film title is still
+    Khmer evidence. Latin-script corpora are never filtered at all.
+
+**And the contamination had been hiding a real gap.** I had written that `US$25` staying silent was "the guard
+working — every US$ instance sits in an English sentence the wiki quotes verbatim." True of the English cells.
+Once they were filtered out, the surviving `US$` instances were ordinary Khmer prose — `ប្រហែល US$3,236`,
+`តិចជាង US$ ១,០២៥` — so it was a real reading gap that the noise had concealed. Declared as its own
+multi-character key, since the bare `$` cannot reach past the Latin guard.
+
+Filtering also **halved four cell counts**: ordinal-latin 899→90, quote-letter 2040→861, ampersand 356→142,
+scaled-currency 26→6. Those were measuring quoted English. A layer author reading 899 would conclude Latin
+ordinals are common in Khmer; the honest number is 90. No cell lost its evidence entirely (32 covered, before
+and after).
+
+**Refusals recorded rather than papered over.** `=` stays digit-flanked only: of 5,844 in the corpus, 1,348 are
+glosses and 1,057 code-shaped against 109 arithmetic, so widening to the probe's `x = y` shape gets it wrong
+about as often as right. The leading `+` stays unread: 142 of 254 such sites are LaTeX or C, because this wiki
+has maths articles and a programming tutorial. Both went to `ACCEPTED_SIGN_SILENCE` with their measurements.
+`%lf` went to `ACCEPTED_SILENT` — a C conversion flag, where silence is the *correct* reading.
+
+**One drop remains, and it is a genuine gap.** `CN¥117,500`. The `CN` prefix disambiguates it as yuan, so
+យ៉េន (×38, genuinely the yen) would be the wrong word — and the yuan word is unattested: `យ័ន` looks frequent at
+×436 until the hits are read, and every one is a substring of បាយ័ន (the Bayon temple), អារ្យ័ន (Aryan) or
+យ័ន្ត. That is the spaceless-script inflation `corpus-words.ts` warns about in its own banner, and checking it
+was the difference between a sourced reading and a guess. Left silent and documented; not claimed to be correct.
+
+**Open, and a decision for the user:** the other 32 affected artifacts are still contaminated. The dumps are on
+disk (116 files, 11 GB), so re-mining is possible; it would change 32 committed artifacts and correct their cell
+counts the same way km's were corrected.
