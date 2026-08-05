@@ -21,15 +21,19 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "równa się",
+            "word": "minus",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 2,
-            "articles": 1,
+            "tokenHits": 33,
+            "articles": 8,
             "substringOnly": 0,
             "examples": [
-                "…gera 10 911 m), czyli 19 761 m. „Sucha wybitność” Mauna Kea równa się „mokrej wybitności” (4205 m) powiększonej o głębokość najwy…",
-                "…ha wybitność” po Mount Everest. „Sucha wybitność” Aconcagui równa się mokrej wybitności (6962 m) plus głębokość najwyższej przełę…"
+                "…Osoby: Gotthard Minus – niemiecki zbieracz monet Inne: minus – oznaczenia matemat…",
+                "…Osoby: Gotthard Minus – niemiecki zbieracz monet Inne: minus – oznaczenia matematyczne Minus Cars – brytyjski producent…",
+                "…miecki zbieracz monet Inne: minus – oznaczenia matematyczne Minus Cars – brytyjski producent samochodów Zobacz też: Minüs Mín…",
+                "…czny i śpiew operowy). 21 marca 2017 ukazał się utwór „Plus Minus Infinity”, nagrany oraz zmiksowany przez Cosmo Entrainment…",
+                "…znaków pauzy, półpauzy, lub minusa bezpośrednio. Pojedynczy minus zostanie zamieniony na znak minusa, lub łącznika w zależnoś…",
+                "…Godzilla Minus One (jap. ゴジラマイナスワン Gojira Mainasu Wan) – japoński film typ…"
             ]
         }
     ],

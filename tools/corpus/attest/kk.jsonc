@@ -1,0 +1,72 @@
+// WIKIPEDIA WORD ATTESTATION — kk (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "kk",
+    "wiki": "kk.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "ке бөлінеді",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 11,
+            "articles": 9,
+            "substringOnly": 0,
+            "examples": [
+                "…ың цифрларының қосындысы 3-ке бөлінсе, онда санның өзі де 3-ке бөлінеді; 2) Егер үшбұрыштың бір бұрышы тік болса, онда қалған екі б…",
+                "…етін болса, онда осы санның 2-дәрежесі (яғни квадраты) де 4-ке бөлінеді\" делінген тұжырымға \"егер бір бүтін сан 2-ге бөлінбейтін бо…",
+                "…расындағы мектеп жасына дейінгі кезең. Мектеп жасының өзі 3-ке бөлінеді: 7 мен 9-дың арасындағы төменгі сынып оқушылары (балдырғанд…",
+                "…расындағы мектеп жасына дейінгі кезең. Мектеп жасының өзі 3-ке бөлінеді: 7 мен 9-дың арасындағы төменгі сынып оқушылары (балдырғанд…",
+                "…алар, үгілу қыртысының кендері және қорымдық кендер болып 4-ке бөлінеді. Өндірістік мәні зор қазба байлықтардың көпшілігі негізінен…",
+                "…а орналасады. Төменгі жапырақтары сағақты, тақталары 4 не 5-ке бөлінеді. Жоғары жағындағылары үштен не бір-бірден жіңішке қандауыр…"
+            ]
+        },
+        {
+            "word": "ға бөлінеді",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 4,
+            "substringOnly": 1,
+            "examples": [
+                "…а бөлінбесе, онда a p — 1 ≡ 1 (mod p) (немесе a p — 1 — 1 p-ға бөлінеді). Басқаша тұжырымдасақ, Кез келген жәй p мен бүтін a үшін a…",
+                "…а тұжырымдасақ, Кез келген жәй p мен бүтін a үшін a p — a p-ға бөлінеді. == Дәлелдеуі == Кез келген жәй p және бүтін теріс емес a ү…",
+                "…ік. Негізі a=0 үшін a p − a = 0 {\\displaystyle a^{p}-a=0} p-ға бөлінеді. Көшу. Тұжырым a=k үшін орындалсын. a=k+1 үшін дәлелдейік.…",
+                "…{\\displaystyle 1\\leq l\\leq p-1} үшін, осы бөлшектің алымы p-ға бөлінеді, ал бөлімі — бөлінбейді, олай болса, ( p l ) {\\displaystyle…",
+                "…( p l ) {\\displaystyle {p \\choose l}} p {\\displaystyle p} -ға бөлінеді. Сондықтан барлық қосылғыштар k p − k + ∑ l = 1 p − 1 ( p l…",
+                "…) {\\displaystyle k^{p}-k+\\sum _{l=1}^{p-1}{p \\choose l}} p-ға бөлінеді. Теріс a және тақ p үшін теореманы b=-a деп қойып оңай дәле…"
+            ]
+        },
+        {
+            "word": "бөлінеді",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 22,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…жылдың 11 желтоқсанынан Италия мемлекеті 20 облысқа (аумақ) бөлінеді. Оның ішіндегі 5 облысы өзінің ерекше автономды статусына и…",
+                "…алле-д’Аостадан басқа аумақтардың бәрі Италия Провнициясына бөлінеді. Провинциялар өзара қауымдарға бөлінеді, ал қауымдарды аума…",
+                "…талия Провнициясына бөлінеді. Провинциялар өзара қауымдарға бөлінеді, ал қауымдарды аумақтық бөліктермен ажыратылады. Қауымдар ж…",
+                "…зб (араб.: حزب‎) — Құранның бөлігі. Құран Кәрім отыз джузға бөлінеді, ал әрбір джуз екі хизбке бөлінеді, ал хизб өз кезегінде тө…",
+                "…Құран Кәрім отыз джузға бөлінеді, ал әрбір джуз екі хизбке бөлінеді, ал хизб өз кезегінде төрт рубғқа бөлінеді. Әдетте хизбтер…",
+                "…джуз екі хизбке бөлінеді, ал хизб өз кезегінде төрт рубғқа бөлінеді. Әдетте хизбтер Құран жаттаған адамдар үшін Құранды қайтала…"
+            ]
+        }
+    ],
+}

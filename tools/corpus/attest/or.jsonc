@@ -1,0 +1,40 @@
+// WIKIPEDIA WORD ATTESTATION — or (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "or",
+    "wiki": "or.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "ଋଣାତ୍ମକ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…ଖ୍ୟାକୁ ଚିହ୍ନଟ ବା ପ୍ରକାଶ କରିଥାଏ । ଚିତ୍ରରେ କେବଳ ଧନାତ୍ମକ ୯ ଏବଂ ଋଣାତ୍ମକ ୯ ମଧ୍ୟବର୍ତ୍ତୀ ସଂଖ୍ୟା ସବୁ ଦର୍ଶାଯାଇଥିଲେ ବି ସଂଖ୍ୟାରେଖାରେ ସମସ୍ତ…",
+                "…ାରେଖାରେ ସମସ୍ତ ବାସ୍ତବ ସଂଖ୍ୟା ଯଥା; ପୂର୍ଣ୍ଣସଂଖ୍ୟା (ଧନାତ୍ମକ ଏବଂ ଋଣାତ୍ମକ ), ଗଣନ ସଂଖ୍ୟା, ପରିମେୟ ସଂଖ୍ୟା, ଅପରିମେୟ ସଂଖ୍ୟା ଇତ୍ୟାଦି ସମସ୍ତ…",
+                "…ରେ ଅନ୍ତର । ଉଦାହରଣ ସ୍ୱରୂପ ଉପରିସ୍ଥ ସଂଖ୍ୟାରେଖାରେ ଧନାତ୍ମକ ୧ ଏବଂ ଋଣାତ୍ମକ ୧ ମଧ୍ୟରେ ଅନ୍ତର ହେଉଛି ଏହି ଦୁଇ ବିନ୍ଦୁ ମଧ୍ୟରେ ଦୂରତା ଅର୍ଥାତ ୨ ।…",
+                "…। ଏଥିରେ ଦୁଇଟି ଟର୍ମିନାଲ ଥାଏ: କ୍ୟାଥୋଡ଼ ବା ଧନାତ୍ମକ ଓ ଆନୋଡ଼ ବା ଋଣାତ୍ମକ । ଧନାତ୍ମକ ଟର୍ମିନାଲଟି ଋଣାତ୍ମକଠାରୁ ଉଚ୍ଚ ବିଭବ (potential)ରେ ଥା…",
+                "…ନାତ୍ମକ ଟର୍ମିନାଲଟି ଋଣାତ୍ମକଠାରୁ ଉଚ୍ଚ ବିଭବ (potential)ରେ ଥାଏ । ଋଣାତ୍ମକ ଟର୍ମିନାଲଟି ଇଲେକ୍ଟ୍ରନର ସ୍ରୋତ । ବାହ୍ୟ ସର୍କିଟ ବ୍ୟାଟେରୀ ସହ ସଂଯୋ…",
+                "…ାଲଟି ଇଲେକ୍ଟ୍ରନର ସ୍ରୋତ । ବାହ୍ୟ ସର୍କିଟ ବ୍ୟାଟେରୀ ସହ ସଂଯୋଗ କଲେ, ଋଣାତ୍ମକ ଟର୍ମିନାଲରୁ ଇଲେକ୍ଟ୍ରନ ଗୁଡ଼ିକ ଗତିଶୀଳ ହୋ‍ଇ ଅନ୍ୟ ଟର୍ମିନାଲକୁ ଯାଆ…"
+            ]
+        }
+    ],
+}

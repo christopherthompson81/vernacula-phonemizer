@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — ur (#586). Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
@@ -16,12 +16,12 @@
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
-    "language": "az",
-    "wiki": "az.wikipedia.org",
+    "language": "ur",
+    "wiki": "ur.wikipedia.org",
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "müsbət mənfi",
+            "word": "مثبت منفی",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,
@@ -30,7 +30,7 @@
             "examples": []
         },
         {
-            "word": "plus minus",
+            "word": "جمع منفی",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,

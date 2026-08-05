@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — ha (#586). Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
@@ -16,27 +16,25 @@
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
-    "language": "az",
-    "wiki": "az.wikipedia.org",
+    "language": "ha",
+    "wiki": "ha.wikipedia.org",
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "müsbət mənfi",
-            "verdict": "absent",
+            "word": "ninkawa",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
+            "tokenHits": 17,
+            "articles": 8,
             "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "plus minus",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…uta ce mai ban sha'awa ta kwayar halitta wacce ta haifar da ninkawa wani sashi a ƙarshen chromosome 22. == Gabatarwa == Alamomi…",
+                "…lun, lokacin incubation yana nuna lokacin da kwayoyin da ke ninkawa suka ɗauka don isa matakin da ake buƙata don samar da alamo…",
+                "…kamuwa da kwayar cuta, a cikin incubation kwayar cutaa tana ninkawa. Wannan ya bambanta da jinkirin kwayar cuta, wani nau'i na…",
+                "…n kwayar cuta, wani nau'i na barci wanda kwayar cutaa ba ta ninkawa. Misali na jinkiri shine kamuwa da kwayar cutar HIV. HIV na…",
+                "…kuma ba su nuna alamun cutar kansa ba, duk da cewa HIV yana ninkawa a cikin Tsarin lymphatic kuma yana tara babban nauyin kwaya…",
+                "…a yankunan masu kula da kwayoyin da kuma taimakawa furotin ninkawa / buɗewa, ɓarna cikin amyloid, da furotin sake ninkawa a ci…"
+            ]
         }
     ],
 }

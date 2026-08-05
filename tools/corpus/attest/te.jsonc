@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — te (#586). Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
@@ -16,27 +16,21 @@
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
-    "language": "az",
-    "wiki": "az.wikipedia.org",
+    "language": "te",
+    "wiki": "te.wikipedia.org",
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "müsbət mənfi",
-            "verdict": "absent",
+            "word": "మైనస్ గుర్తు",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
+            "tokenHits": 2,
+            "articles": 1,
             "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "plus minus",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…ి అతని అంచనాలో సుమారు 30 కి.మీ./సె. ఎక్కువగా రావడం, ఫలితంగా మైనస్ గుర్తు రాకుండా పోయి వుంటుంది. దానితో అతని అంచనా తప్పని తేలింది. ప్…",
+                "…రేడియల్ వేగాన్ని -5.5 కి.మీ./సె. ఖచ్చితంగా నిర్ధారించారు. ఈ మైనస్ గుర్తు ఈ నక్షత్రం సూర్యుని సమీపిస్తున్నదని తెలియ చేస్తుంది. అంటే స…"
+            ]
         }
     ],
 }

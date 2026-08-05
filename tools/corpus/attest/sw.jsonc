@@ -18,50 +18,22 @@
 {
     "language": "sw",
     "wiki": "sw.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "hisabati hesabu mgawanyo",
+    "tier": "wikipedia",
     "findings": [
         {
-            "word": "kugawanya",
+            "word": "hasi",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 27,
+            "articles": 8,
             "substringOnly": 0,
             "examples": [
-                "…Hisa katika hisabati ni tokeo la mgawanyo au hesabu ya kugawanya namba moja kwa nyingine. Kama swali ni 6 ÷ 3 basi hisa yake…"
-            ]
-        },
-        {
-            "word": "gawanya kwa",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "sawa na",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "chini ya",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 2,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…mo ya msingi kote ulimwenguni na viwango hivi vinaongezeka. Chini ya Elimu kwa mipango yote inaendeshwa na UNESCO, nchi nyingi w…",
-                "…ka nchi nyingi, ni lazima kwa watoto kupata elimu ya msingi.Chini ya mpango wa elimu kwa wote ulioanzishwa na Shirika la Elimu,…"
+                "…Namba hasi katika hisabati ni namba halisi ambayo ni pungufu ya namba…",
+                "…isabati ni namba halisi ambayo ni pungufu ya namba 0. Namba hasi huwakilisha kinyume. Kama namba chanya inawakilisha elekea…",
+                "…kinyume. Kama namba chanya inawakilisha elekea kulia, namba hasi inamaanisha elekea kushoto. Kama namba chanya inawakilisha…",
+                "…amba chanya inawakilisha juu ya usawa wa bahari, basi namba hasi inawakilisha chini ya usawa wa bahari. Kama namba chanya in…",
+                "…awa wa bahari. Kama namba chanya inawakilisha kuweka, namba hasi inawakilisha kutoa. Mara nyingi huwakilisha ukubwa wa deni…",
+                "…Mto Hasi unapatikana katika Mkoa wa Iringa (Nyanda za Juu za Kusini,…"
             ]
         }
     ],

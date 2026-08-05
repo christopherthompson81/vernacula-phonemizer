@@ -21,23 +21,30 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "tāpiri",
+            "word": "putu",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 7,
-            "articles": 5,
+            "tokenHits": 4,
+            "articles": 3,
             "substringOnly": 0,
             "examples": [
-                "…i te “a”, ki te “e”, ki te “o”, ki te “k” rānei. Ka taea te tāpiri te “mau” ki muri, kia whakatakitinitia te tūingoa, e whai a…",
-                "…gā tāurunga o tēnei rārangi ki ērā o te paerewa ISO 3166-1, tāpiri atu ki ētahi wehenga nuinga whakamihi-kore kāore i te ISO 3…",
-                "…ore tētahi tatau raupapa i whakaratohia). Mō te nuinga, kua tāpiri te rahinga o ngā wehenga nuinga whakamihi-kore ki te rahing…",
-                "…toru ngā waeine rahinga o tēnei rārangi: Rahinga tapeke: te tāpiri i ngā rahinga whenua me rahinga wai o roto o ngā paenga me…",
-                "…, ka kīia hoki mō ngā tūkapi i muri i te tūmahi. Ka taea te tāpiri te “ŋā” ki muri, kia whakatakitinitia te tūingoa, e whai ak…",
-                "…ā ka whakataurite ngā raraunga. Me te aha anō, kāore pea te tāpiri i ngā tatau mō ngā whenua katoa e ōrite ki te tapeke aorere…"
+                "…Ko te tio he wai totoka me tino makariri i te putu paemahana 0 Herehiūhu (Celsius). == Ngā tohutoro ==…",
+                "…ia i ngā kakahu whero mo te takurua, he potae whero me ngā putu pango, he roa, he pahau ma. Ka kitea ngā taonga mai i a Han…",
+                "…ana te tuahu me te \"ofai ti'a\" (he kohatu tapua rawa). 140 putu pea te roanga o te paepae i mua i te ahu, kua 10 putu pea t…",
+                "…. 140 putu pea te roanga o te paepae i mua i te ahu, kua 10 putu pea te teitei o nga papakohatu kua titia kia tu hei paepae…"
             ]
         },
         {
-            "word": "tāpiritanga",
+            "word": "takiritanga",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "Herehiuha",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,
@@ -46,7 +53,7 @@
             "examples": []
         },
         {
-            "word": "tōrunga",
+            "word": "pāmahana",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,

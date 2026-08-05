@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — bn (#586). Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
@@ -16,27 +16,20 @@
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
-    "language": "az",
-    "wiki": "az.wikipedia.org",
+    "language": "bn",
+    "wiki": "bn.wikipedia.org",
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "müsbət mənfi",
-            "verdict": "absent",
+            "word": "প্লাস মাইনাস",
+            "verdict": "attested",
             "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
+            "tokenHits": 1,
+            "articles": 1,
             "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "plus minus",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
+            "examples": [
+                "…্ড আইআর অগ্নিপঙ্খ রান স্টাইল তেরে লিয়ে তাপিস দিল ক্যা কারে প্লাস মাইনাস মৌসম ইকরার কে দো পাল পিয়ার কে == তথ্যসূত্র == == বহিঃসংযোগ…"
+            ]
         }
     ],
 }

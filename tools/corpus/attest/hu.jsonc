@@ -18,25 +18,22 @@
 {
     "language": "hu",
     "wiki": "hu.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "matematika osztás aritmetika",
+    "tier": "wikipedia",
     "findings": [
         {
-            "word": "osztva",
+            "word": "mínuszjel",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 8,
-            "articles": 7,
-            "substringOnly": 0,
+            "tokenHits": 12,
+            "articles": 4,
+            "substringOnly": 4,
             "examples": [
-                "…ot b=a} és b ≠ 0 , {\\displaystyle b\\neq 0,} akkor a-t b-vel osztva visszakapjuk c-t. Jelben a:b=c, vagy a/b=c, vagy a b . {\\di…",
-                "…hívni. Ha a számot x jelöli, akkor a reciproka 1/x, azaz 1 osztva x-szel, vagy másképp x−1, azaz x a mínusz egyedik hatványon…",
-                "…T-beli elemet véve, az x-a elsőfokú polinommal maradékosan osztva f-et, a maradékpolinom éppen f(a), vagyis az f polinom hely…",
-                "…t az egészeket keressük, ami egy bizonyos számmal (modulus) osztva meghatározott maradékot ad. Ezek a diofantoszi egyenletek m…",
-                "…osztás hasonló a szorzáshoz. Negatív számot negatív számmal osztva az eredmény pozitív, pozitív számot negatívval osztva negat…",
-                "…ámmal osztva az eredmény pozitív, pozitív számot negatívval osztva negatív. Ha az osztandónak és az osztónak különböző az előj…"
+                "…A két előjel a pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát…",
+                "…n használatos jelentését l. az Egyéb alkalmazásai alatt. == Mínuszjel == A mínuszjelnek (amely nem tévesztendő össze a kötőjellel…",
+                "…áskor viszont van köztük eltérés: az APL-ben emelt helyzetű mínuszjel ¯ (Unicode U+00AF) használatos, ha előjelről, nem pedig füg…",
+                "…0−5^2 pedig −25-öt ad eredményül. A pluszjelhez hasonlóan a mínuszjel is használatos a fizikában, a kémiában és más területeken,…",
+                "…z- és mínuszjelet. A kémiában a felső indexbe írt plusz- és mínuszjel pozitív és negatív töltésű iont jelöl (pl. NH+4). 1‑nél nag…",
+                "…özi fonetikai ábécé szerint a felső indexben lévő plusz- és mínuszjel (mint mellékjel) előrébb vagy hátrébb képzett beszédhangot…"
             ]
         }
     ],

@@ -1,0 +1,40 @@
+// WIKIPEDIA WORD ATTESTATION — ne (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ne",
+    "wiki": "ne.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "माइनस",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 10,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ) जोड, गुणन र भाग सहित चार प्र…",
+                "…== २ + २ = ५ डबल हाइफन समानता (गणित) तार्किक समानता प्लस र माइनस सङ्केत…",
+                "…य उप-प्रजातिहरूमा सामान्यतया एउटै ढाँचा हुन्छ (छाती ब्यान्ड माइनस) तर खैरो टोपी वा सबै खैरो पेट र फ्ल्याङ्कहरू। दुवै लिङ्ग सम…",
+                "…र मापन गर्दा (वन क्षेत्रमा परिवर्तन र वन क्षेत्रको परिवर्तन माइनस शुद्ध वृक्षारोपण विस्तार) मापन गर्दा नेपालले आफ्नो ७.९ प्रत…",
+                "…ाईले एउटा अंक देख्नुहुनेछ । अक्सर माइनसबाट सुरु हुने यो अंक माइनस ४० देखि माइनस १३० सम्मको रेन्जमा देखिन्छ । यदि माइनस ४० देख…",
+                "…देख्नुहुनेछ । अक्सर माइनसबाट सुरु हुने यो अंक माइनस ४० देखि माइनस १३० सम्मको रेन्जमा देखिन्छ । यदि माइनस ४० देख्नुभयो भने त्य…"
+            ]
+        }
+    ],
+}
