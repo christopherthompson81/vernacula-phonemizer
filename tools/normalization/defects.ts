@@ -139,6 +139,20 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         plus: "the sign position only: the attested reading is an English loan Māori's inventory cannot say "
             + "(/l/, /s/ → [pa]), and the native `tāpiri` means append, not positive — see maori/normalize.ts",
     },
+    ta: {
+        // ⚠ TRIED, AND THE CORPUS DIFF REJECTED IT. A guarded minus rule was written for ta and correctly refused
+        // every range, score and closed designation — and then read `சந்திரயான் -1` as "கழித்தல் ஒன்று", minus
+        // one. That is the shape NO guard can reject: `word -1` is identical to a genuine `was -5`, so telling
+        // them apart needs a lexicon. `ACCEPTED_SILENT` already lists this exact instance as correctly silent,
+        // which means the rule converted an accepted silence into an audible error — strictly worse than the gap.
+        //
+        // ⚠ AND IT IS THE SAME SENTENCE IN FIVE LANGUAGES. FLEURS is parallel, so the Chandrayaan designation
+        // appears in gu, hi, kn, mr and ta — and those are exactly the five languages `ACCEPTED_SILENT` lists
+        // for `minus`. Whatever is decided here applies to all of them, and it is not a coincidence to be
+        // rediscovered per language.
+        minus: "measured, then TESTED: a guarded rule read the spacecraft `சந்திரயான் -1` as minus one, the one "
+            + "shape no guard can reject — see ACCEPTED_SILENT, which lists this instance as correctly silent",
+    },
     mr: {
         // Devanagari compounds are written with a hyphen (आस-पास), and the corpus's one hyphen-before-digit
         // outside a range is `चंद्रयान -1`, a spacecraft name.

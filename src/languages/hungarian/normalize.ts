@@ -405,6 +405,34 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 Celsius-fok");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit-fok");
     s = s.replace(/(\d)\s?°/gu, "$1 fok");
+    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    //    (1000 - 1300), a SCORE (6-6), a DESIGNATION (forma-1) or a clock range. The rule is written anyway on
+    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
+    //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
+    //    what verifies that rather than the guard looking plausible.
+    //
+    //    THREE GUARDS, each rejecting a shape this corpus actually contains:
+    //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
+    //      · a letter or digit IMMEDIATELY BEFORE — rejects `forma-1` and closed ranges
+    //      · a digit ANYWHERE to the left — rejects the SPACED range or score (`1000 - 1300`), which the fleet's
+    //        usual guard misses because the character before the hyphen is a SPACE. That gap cost a real defect
+    //        in th, where a year range was read as a subtraction.
+    //
+    //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` is the same shape as a genuine
+    //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
+    //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
+    //    not about the guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ");
+    // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
+    //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
+    //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
+    //    + rule, since ± is a single character the + rule cannot see.
+    //    ⚠ AND hu.wikipedia NAMES BOTH SIGNS TOGETHER, which is as direct as this gets: "A két előjel a
+    //    pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát" — the two
+    //    SIGNS are the plus sign and the minus sign, expressing positive and negative. Exactly the sense ±
+    //    needs, and the reason this pair is a tolerance marker rather than two operations.
+    s = s.replace(/±/gu, " plusz mínusz ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
 

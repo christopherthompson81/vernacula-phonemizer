@@ -370,6 +370,30 @@ export function normalizeSerbian(input: string): string {
     //     `… w u t e ts e p l u s t j e d a n …` — "UTC plus jedan", 1 of 2 speakers; the other skips the
     //     parenthetical entirely, the reader behaviour seen in ta, en, am, zu, mi, ne and sw. плус reads
     //     `plus`, matching the decode. BEFORE the degree rules, the ordering coupling zu's `[+]?` taught.
+    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    //    (1000-1300), a SCORE (6-6), a DESIGNATION (il-76) or a clock range. The rule is written anyway on
+    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
+    //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
+    //    what verifies that rather than the guard looking plausible.
+    //
+    //    THREE GUARDS, each rejecting a shape this corpus actually contains:
+    //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
+    //      · a letter or digit IMMEDIATELY BEFORE — rejects `il-76` and closed ranges
+    //      · a digit ANYWHERE to the left — rejects the SPACED range or score (`26 - 00`), which the fleet's
+    //        usual guard misses because the character before the hyphen is a SPACE. That gap cost a real defect
+    //        in th, where a year range was read as a subtraction.
+    //
+    //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` is the same shape as a genuine
+    //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
+    //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
+    //    not about the guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "минус ");
+    // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
+    //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
+    //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
+    //    + rule, since ± is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " плус минус ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 плус ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1плус ");
 
