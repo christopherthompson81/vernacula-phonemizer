@@ -320,6 +320,12 @@ export function normalizeIrish(input: string): string {
         (_m, a: string, b: string, tail: string) =>
             `${LETTER_NAME[a.toLowerCase()] ?? a} agus ${LETTER_NAME[b.toLowerCase()] ?? b}${tail}`);
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 ionann is $2");
+    // THE DIVISION SIGN (#654), the one sign this file still dropped. Sourced from FLEURS's parallel
+    // aspect-ratio sentence, which performs a division aloud in 57 of its 67 languages — the Irish translator
+    // wrote "roinnt ar a dó dhéag" ("divided by twelve"), i.e. a recording of a human reading the operation
+    // with a numeral operand. ga.wikipedia corroborates the same form (x1); the participle `roinnte ar` is x0,
+    // so the attested shape is the one shipped rather than the tidier-looking one.
+    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 roinnt ar $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 níos lú ná $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 níos mó ná $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 faoi $2");

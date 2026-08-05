@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — ga (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
@@ -16,15 +16,15 @@
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
-    "language": "ga",
-    "wiki": "ga.wikipedia.org",
+    "language": "az",
+    "wiki": "az.wikipedia.org",
     "tier": "wikipedia (register-restricted)",
     // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
     // `--context` set to exactly this string.
-    "context": "matamaitic uimhríocht roinnt",
+    "context": "riyaziyyat hesab bölmə",
     "findings": [
         {
-            "word": "roinnte ar",
+            "word": "bölü",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,
@@ -33,14 +33,19 @@
             "examples": []
         },
         {
-            "word": "roinnt ar",
+            "word": "bölünür",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 11,
+            "articles": 7,
             "substringOnly": 0,
             "examples": [
-                "…b {Q} } . Is sórt fáinne spéisiúil é réimse, inarbh fhéidir roinnt ar eilimintí neamhnialasacha. Níl tacar na slánuimhreacha Z {\\…"
+                "…Riyazi analiz isə öz növbəsində həqiqi və kompleks analizə bölünür. O digər riyazi sahələrlə kəsişən müxtəlif altsahələri əhat…",
+                "…muşdur, yəni bütün biliklər sahəsi ardıcıl olaraq 10 sahəyə bölünür. Bu sistemdən istifadə etməklə, istənilən sənədi indeksləşd…",
+                "…a bütün anlayışlar (təsnifat obyektləri) UOT-a görə 2 qrupa bölünür: əsas və köməkçi. Əsas anlayışlar, ərəb rəqəmlərindən ibarə…",
+                "…erarxik prinsipinə əsasən ümumidən başlayaraq alt bölmələrə bölünür. Burada axtarışın keyfiyyətli aparılması xatirinə hər bir b…",
+                "…örə 10-dan böyük olmayan 10 hissəyə ardıcıl olaraq qruplara bölünür. Bununla praktiki indeksləşdirmə məqsədi ilə qruplara bölmə…",
+                "…məktəb kursu ən aşağı və ən yüksək pillələr üzrə hazırlığa bölünür. 3 il təhsil müddətini əhatə edən hazırlıq kursu gələcəkdə…"
             ]
         }
     ],

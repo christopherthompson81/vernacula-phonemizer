@@ -247,6 +247,12 @@ export function normalizeCatalan(input: string): string {
             `${LETTER_NAME[a.toLowerCase()] ?? a} i ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " i ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 és igual a $2");
+    // THE DIVISION SIGN (#654), the one sign this file still dropped. ca.wikipedia's arithmetic prose uses the
+    // participle in the slot — "21 = 16+4+1 +1 dividit per 8" — and FLEURS's parallel aspect-ratio sentence,
+    // which performs a division aloud in 57 of its 67 languages, has the Catalan translator writing the gerund
+    // of the same verb ("dividint per dotze"). Both are attested; the participle is the neutral sign reading,
+    // since the gerund is inflected for its clause rather than for the notation.
+    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 dividit per $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 és menor que $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 és major que $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 per $2");

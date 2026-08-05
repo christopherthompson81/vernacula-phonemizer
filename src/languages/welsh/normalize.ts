@@ -348,6 +348,11 @@ export function normalizeWelsh(input: string): string {
             `${LETTER_NAME[a.toLowerCase()] ?? a} a ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " a ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 yn hafal i $2");
+    // THE DIVISION SIGN (#654), the one sign this file still dropped. cy.wikipedia's Rhannu article states the
+    // reading and uses this file's own equals word in the same clause — "mae a rhannu â b yn hafal ag c" — and
+    // names it again as a quoted expression: 'Gellir ysgrifennu "a rhannu â b" fel a ganlyn'. FLEURS's parallel
+    // aspect-ratio sentence gives the same verb ("gan rannu â deuddeg"), so corpus and register agree.
+    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 rhannu â $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 yn llai na $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 yn fwy na $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 gwaith $2");

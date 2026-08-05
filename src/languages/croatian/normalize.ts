@@ -296,6 +296,13 @@ export function normalizeCroatian(input: string): string {
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 jednako $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 manje od $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 veće od $2");
+    // 13b) THE DIVISION SIGN (#654), the one sign this file still dropped — `6 ÷ 3` read as two bare numbers.
+    //      ⚠ THE SOURCE READS THE SIGN ITSELF, which is as direct as this issue's tier 4 gets: hr.wikipedia's
+    //      Dijeljenje article writes "a podijeljeno s b jednako c: a ÷ b = c" — the ÷ glyph, its reading, and
+    //      the very equals word this file already emits, in one sentence. Corroboration in both directions.
+    //      FLEURS's parallel aspect-ratio sentence, which performs a division aloud in 57 of its 67 languages,
+    //      independently gives the same verb here ("omjer … dijeli se s dvanaest").
+    s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 podijeljeno s $2");
 
     return s;
 }
