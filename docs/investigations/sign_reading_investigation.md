@@ -2964,3 +2964,116 @@ for `=`/`<`/`>` and 37 for `÷`.
 Gates for this run: tsc PASS; 208 files / 2951 tests; corpus diff mr 0/1992, gu 0/1996, hi 0/1702, ca 0/1841,
 hr 0/2007, cy 0/2009, ga 0/1948 — and `review.ts` "sign classes: none dropped" for hr, with ca/cy/ga clean but
 for the pre-existing ± and mr/gu clean but for mr's deliberately declined minus.
+
+## Run 44 — 2026-08-04 — #654: the measurement moves into the audit, and the denominator was wrong
+
+### 📌 THE NUMBER I HAD BEEN QUOTING WAS AGAINST THE WRONG DENOMINATOR
+
+The user asked for the count as **n/67**, and asking the question exposed the error. I had been reporting against
+REGISTERED CODES — 192 of them — which counts ten Arabic dialects as ten languages and includes every language
+with no normalization layer at all. That overstated both the remaining work and the progress.
+
+`coverage.ts` already owns the right denominator: the languages that HAVE a `normalize.ts`, the 67 of
+"0 defective cells across 0/67". On the user's suggestion the sweep now lives there rather than in a scratch
+probe, sharing `SIGN_CASES` with `review.ts` via `defects.ts` so the two cannot disagree about what a dropped
+sign is. `review.ts` is a CLI script and cannot be imported, which is exactly why the fleet number had been
+re-derived by hand each time it was quoted.
+
+    === signs still DROPPED, fleet-wide (#654) ===        (after this run)
+      minus        18/67      plus-minus   28/67      equals       12/67
+      plus          2/67      ampersand    14/67      less-than    11/67
+      degrees       1/67      divide       20/67      greater-than 11/67
+      times · exponent · currency · percent    0/67
+
+⚠ **TWO OF THOSE CLASSES MY FRAMING WAS NOT TRACKING AT ALL** — `minus` 18/67 and `ampersand` 14/67. Naming the
+issue after `= < > ÷ ±` made the other droppable signs invisible to my own reporting, which is the same failure
+the audit's own header records about its hardcoded 37-of-67 list.
+
+⚠ **AND IT TURNS A LUCKY CATCH INTO A GATE.** These signs are absent from the corpora, so `corpus-diff` reports
+0 changed whether a rule works or has just been deleted — Run 43's Croatian regression was caught only because
+`review.ts` happened to be run for that language. Sweeping all 67 on every audit run makes it structural.
+
+### Languages completed this run
+
+    ta   ஏழு சமம் மூன்று · ஐ விட குறைவாக · ஐ விட அதிகமாக · வகுத்தல்
+    ml   ആറ് ഹരണം മൂന്ന് · എക്കാൾ കുറവ് · എക്കാൾ കൂടുതൽ          (= left dropped, see below)
+    yue  七等於三 · 小於 · 大於 · 除以
+    hu   hét egyenlő három · kisebb mint · nagyobb mint          (÷ deferred, see below)
+
+**Two sources state the reading outright**, and both cover two signs at once:
+
+    yue  「A ÷ B = Q...R  讀做  A 除以 B 等於 Q 餘 R」     讀做 = "is read as"
+    ta   「"3 + 2 = 5" அதாவது, "3 கூட்டல் 2 சமம் 5"」      and "a வகுத்தல் b என்பது"
+
+⚠ **TAMIL MIXES THE RULE SHAPES, and that is about the CONSTRUCTIONS rather than about word order.** `சமம்` and
+`வகுத்தல்` are nominal ("equal", "division") and sit between the operands; the comparison is a postposition
+(`விட` follows the standard). So an infix comparative would read backwards while an infix equality is correct —
+in the same language. Being verb-final does not decide the shape; each sign's own construction does.
+
+### ⚠ WHY THE PARALLEL SENTENCE COULD NOT SOURCE MALAYALAM — the user asked, and the answer is morphological
+
+The harvest gives ml `പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ`, and **both halves are inflected for that sentence**:
+
+    ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ,  and -ുമ്പോൾ IS the word "when"
+                   (historically -ഉം + പോൾ "time")
+
+It is a temporal SUBORDINATOR, subordinated here to the main predicate `ആണെന്ന് പറയാം` ("can be said to be") —
+*"when divided using twelve, the ratio is 3:2"*. Between two operands there is no main clause for it to attach
+to, so `6 ÷ 3` would read *"six when-divided three"*: a fragment awaiting a predicate that never arrives.
+
+And independently: `ഉപയോഗിച്ച്` ("using") is a CONVERB, not the instrumental case `-കൊണ്ട്` Malayalam puts on a
+divisor. The translator wrote a two-clause **paraphrase** of the operation, not a reading of the notation.
+
+*So the sentence establishes the ROOT with certainty and nothing reliable about the FORM.* `ഹരി-` is certain; the
+form came from ml.wikipedia naming the sign against the glyph in a section heading — `=== ഹരണം (÷ or /) ===` —
+and a sign NAME reads infix (`el` ίσον, `ja` イコール, `ta` வகுத்தல்). ⚠ That last step is a fleet PATTERN, not an
+attested `a ഹരണം b` string, and is marked as such in the file.
+
+### Two new measurement-trap shapes, both from Malayalam
+
+1. ⚠ **`ഹരണം`'s six corpus hits are all inside `അപഹരണം`, "ABDUCTION".** The substring trap, best instance yet.
+2. ⚠ **`-എക്കാൾ` ("than") has a token count of ×0 BY CONSTRUCTION, not by absence.** It is a BOUND morpheme and
+   appears only fused (`ഷോക്കിനെക്കാൾ`, `ഭാഷകളെക്കാൾ`). *An agglutinative language's comparative morpheme cannot
+   be token-counted at all* — the counterpart of the Persian ZWNJ false negative. What is countable is the head
+   it governs (`കൂടുതൽ` ×182, `കുറവ്` ×12).
+
+### ⚠ A FOURTH MANUFACTURED NEGATIVE IN THE TOOLING — Han is spaced per character
+
+`corpus-words.ts` reported Cantonese as having **no word for any of the four signs**. FLEURS writes Han with a
+space between EVERY character — 「此 格 式 的 長 寬 比 除 以 12」 — so a two-character word never matches as
+written. Cantonese has three of the four in its own corpus, with numeric operands. Fixed by removing whitespace
+from both sides for an unspaced script, where it carries no linguistic information.
+
+Fourth in this issue, after `attest.ts`'s `exlimit` (Run 40), the cwd null test (Run 41) and the Persian ZWNJ
+split (Run 42). **All four have the same shape: a confident NEGATIVE with nothing behind it.** For sourcing that
+is the dangerous direction of error, because a negative ends the search — a false positive gets caught when you
+read the examples, and a false negative never gets read at all.
+
+### Two deferrals, both morphological rather than sourcing gaps
+
+- **hu `÷`** — `osztva` is well attested (×8) and governs the INSTRUMENTAL on the operand every time
+  (`a-t b-vel osztva`, `1 osztva x-szel`). So `A ÷ B` is "A B-vel osztva", needing the numeral spelled here plus
+  vowel harmony AND consonant assimilation (`három → hárommal`, `négy → néggyel`, `egy → eggyel`).
+- **az `÷`** — the dative on the second operand (`altı üçə bölünür`), the same shape.
+- **ml `=`** — the only pure sourcing gap: `സമം`, `തുല്യം`, `ഹരിച്ചാൽ` are ×0 in BOTH corpus and wiki, and
+  nothing names the `=` glyph. Reported, not guessed.
+
+Both morphological deferrals want `tr`'s and `ko`'s machinery — spell the operand, then build the suffix — which
+is a separate piece of work from reading a sign. Emitting a bare form would be an ungrammatical CASE, not an
+accent.
+
+### Where #654 stands, n/67
+
+| sign | at Run 39 (the pilot) | now |
+|---|---|---|
+| `=` | 30/67 read | **55/67** — dropped by 12 |
+| `<` `>` | 30/67 | **56/67** — dropped by 11 |
+| `÷` | 15/67 | **47/67** — dropped by 20 |
+| `±` | 30/67 | **39/67** — dropped by 28 |
+
+Still dropping the relational signs (11–12): `am bn kn mi ne or pa sr sw te ur` (+ `ml` for `=` only).
+Of these `sr` is the compass-vocabulary deferral the user assigned to the normalization work, and `mi` is the
+fleet's most extreme routing case (#663).
+
+Gates for this run: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67 and 12 accepted;
+corpus diff ta 0/1886, ml 0/1955, hu 0/1995, yue 0/1726.
