@@ -41,7 +41,7 @@ Two orthographic facts that shape every rule:
    `paawundii 200`, `mm 5`, `km 6,387`, `iskuweer kiloometiiri 783,562`, `daqiiqaa 3`, `sa’aatii 24`,
    `parsantii 3 hanga 5`, `doolaara US biiliyoonotaan`, `miliyoona 2.3`. So the tier needs
    `percentPrefix` + `currencyPrefix`, and units must be emitted BEFORE their number, not after.
-2. **Enclitics are written glued to the DIGITS** (`1994tti`, `16ffaa`, `2,243n`) — trap 14. The digit
+2. **Enclitics are written glued to the DIGITS** (`1994tti`, `16ffaa`, `2,243n`) — trap 14 (agreement cannot be applied to digits). The digit
    becomes words in the tokenizer, downstream of this layer, so the suffix must be attached to the WORD.
 
 A NEGATIVE result: `\d,\d{1,2}(?!\d)` → **0 instances**. Oromo here follows the English convention
@@ -71,12 +71,12 @@ npx tsx <probe over every attested form>   # phonemize(form, "om")
 | `mm 5` / `300,948 sq mi` | `mː ʃˈan` / `… skʼ mˈi` | unit abbreviations read as Qubee letters — `mm` → the GEMINATE `[mː]`, `sq` → `[skʼ]` |
 | `D.K.D 5000 tti` | `d . k . d kˈuma ʃˈan tːˈi` | era marker letter-spelled with two interior pauses |
 | `Dr. Damadiiyan` / `kkf.)` | `dr . damadˈiːjan` / `kːf .` | interior sentence pause mid-sentence |
-| `mm 5 (inchii 1/5)` | `… int͡ʃˈiː tˈokːo ʃˈan` | fraction read as two bare cardinals (trap 8's Uzbek `3/4`) |
+| `mm 5 (inchii 1/5)` | `… int͡ʃˈiː tˈokːo ʃˈan` | fraction read as two bare cardinals (trap 8 (zero corpus instances is not evidence of…)'s Uzbek `3/4`) |
 | `-5` `+5` `A&B` `x = y` `5 < 6` `6 × 6` | `ʃˈan` `ʃˈan` `ˈa b` `tʼ j` `ʃˈan d͡ʒˈaha` `d͡ʒˈaha d͡ʒˈaha` | every sign class silently dropped |
 | `qabxii 2:2 argachuun` | `kʼabtʼˈiː lˈama , lˈama` | NOT a clock (a British degree classification) — the clock rule must not claim it |
 
 Implication: the two biggest classes by count are the ones no fleet scan reports — the glued ordinal
-(24) and the glued enclitic (~35), i.e. trap 14, exactly as predicted for "anything whose preposition
+(24) and the glued enclitic (~35), i.e. trap 14 (agreement cannot be applied to digits), exactly as predicted for "anything whose preposition
 governs a case".
 
 ## Run 4 — 2026-08-02 — sourcing every word before writing a rule (§5e)
@@ -150,7 +150,7 @@ unsyncopated variant is attested for each of them too (*lamaffaa*, *afuraffaa*),
 regular one.
 
 Implication: no ordinal TABLE is needed — the ordinal is composed from the existing cardinal, so it is
-correct at 8, 10 and 190 as well as at the values the corpus happens to write (trap 13's constructive half).
+correct at 8, 10 and 190 as well as at the values the corpus happens to write (trap 13 (pin the rule's BRANCHES)'s constructive half).
 
 ## Run 6 — 2026-08-02 — a crash the de-grouping exposed (playbook step 3: is the defect in this layer?)
 
@@ -165,7 +165,7 @@ was unreachable before this change only because the tokenizer split a grouped nu
 defect the layer exists to fix. Implication: fixed in `numbers.ts` (`below1000`), not papered over in
 `normalize.ts`; the corpus has two such numbers (`783,562`, `291,773`) and both now read as one number.
 
-## Run 7 — 2026-08-02 — enumerating the rule's BRANCHES (trap 13)
+## Run 7 — 2026-08-02 — enumerating the rule's BRANCHES (trap 13 (pin the rule's BRANCHES))
 
 Ran every ordinal 1–30 plus 40…200, 1000, 1994, 2010 through the composer, and every enclitic over
 1,2,3,4,5,8,9,10,11,20,30,100. Read the list. The interesting rows:
@@ -201,7 +201,7 @@ SRC  Akkaataan Gootiikii jaarraa 10ffaa - 11ffaa fi jaarraa 14ffaa’ti …
   +  … kuᶑanafːˈaː hirʔˈisuː kˈuᶑa tokːofːˈaː …          ← "the tenth MINUS the eleventh"
 ```
 
-An ORDINAL RANGE, spaced. The mined artifact reports `ordinal-range: 0` for om, which is trap 8 exactly:
+An ORDINAL RANGE, spaced. The mined artifact reports `ordinal-range: 0` for om, which is trap 8 (zero corpus instances is not evidence of…) exactly:
 the cell's count is not evidence, and the shape exists. Two fixes: an ordinal-range rule
 (`Nffaa - Mffaa` → *hanga*), and a variable-length lookbehind on the minus rule so a hyphen with a number
 anywhere before it can never be a subtraction. Both are pinned in `test/oromo.test.ts`, including the
@@ -234,7 +234,7 @@ no defects, referee byte-identical, corpus diff 114/1218 with DROP 8 → 0.
 
 ### The class the layer was built for, in the spelling it did not look for
 
-The layer's premise is trap 14 — the enclitic glued to the digits (`1994tti`, `16ffaa`, `2020f`) — and it
+The layer's premise is trap 14 (agreement cannot be applied to digits) — the enclitic glued to the digits (`1994tti`, `16ffaa`, `2020f`) — and it
 handles ~35 of those. Reading the corpus diff turned up `sa’a 1:15 a.m tti` still ending in a bare `tːi`,
 which prompted the obvious question the implementation never asked: how often does this corpus write the
 same morpheme **with a space**?
@@ -259,7 +259,7 @@ like. It was visible only by reading the changed utterances and noticing what ha
 Rule 14b, and two deliberate narrowings:
 
 - **The spaced alternation is `tiin|tti|ti|f|n`, narrower than the glued `ttan|tiin|tti|ti|tu|if|f|n`** —
-  exactly what was counted (trap 9). Leaving `tu` out is not bookkeeping: `tu` IS an Oromo word, the focus
+  exactly what was counted (trap 9 (a guard alternative with no attested…)). Leaving `tu` out is not bookkeeping: `tu` IS an Oromo word, the focus
   marker (`Caribe tu jiraata`), and only the absence of a space distinguishes the two. The corpus glues
   `tu` and never detaches it.
 - **One space, no punctuation across it.** A clause break really does end the numeral phrase; `bara 1945,
@@ -304,7 +304,7 @@ two wrongs, since unconsumed a bare `C` reads as the Qubee ejective [t͡ʃʼ], a
 `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`, every measure phrase in every language,
 so the cell reports COVERED everywhere and tells you nothing. The evidence for this defect is a
 corpus-level statistic (the same morpheme appearing both glued and detached), which is not a shape a cell
-can hold. Recorded as playbook trap 15 instead, with the grep that finds it in seconds.
+can hold. Recorded as playbook trap 15 (the same bound suffix is also written with…) instead, with the grep that finds it in seconds.
 
 ### Gates after the fixes
 

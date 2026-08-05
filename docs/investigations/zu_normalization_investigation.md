@@ -36,7 +36,7 @@ cannot (see Run 3).
 
 ## Run 2 — 2026-08-02 — is the noun-class concord actually a trap-14 problem here?
 
-**Question.** Zulu is agglutinative Bantu, so the brief's headline risk is trap 14: a rule that needs a
+**Question.** Zulu is agglutinative Bantu, so the brief's headline risk is trap 14 (agreement cannot be applied to digits): a rule that needs a
 concord on a numeral cannot get one, because the digits only become words in the tokenizer.
 
 ```
@@ -60,7 +60,7 @@ TEXT. 349 of the corpus's number occurrences carry it:
 **Implication.** The concord agrees with the HEAD NOUN, not with the numeral, and the head noun is either
 already written (349 cases) or is a noun **my own rule emits** (the minutes noun, the degree noun, a unit
 noun). Either way the agreeing morpheme is determined by something the layer can see, and never by the
-value of the digits. **So trap 14 does not bite for Zulu — provided no rule invents a concord for a noun
+value of the digits. **So trap 14 (agreement cannot be applied to digits) does not bite for Zulu — provided no rule invents a concord for a noun
 it did not itself put there.** That single constraint decides three things:
 
 1. the numeral stays DIGITS in every rule (the tokenizer's `numberToWords` does the words);
@@ -209,7 +209,7 @@ currency names and no measure vocabulary beyond what its word list happens to co
 **Range joiner.** `kuya ku-` ×6, and attested taking a DIGIT operand — `abantu abangu-8 kuya ku-100`,
 `ku-US$11,000 kuya ku-US$22,500`, `kusukela ngomhla ka-24 Agasti kuya ku-5`. The `ku-` is class-17
 locative and **invariant**, which is exactly why it is the right joiner: nothing about it has to agree with
-the value of the digits (trap 14 cannot arise). Ascending-only, on Swahili's measurement: of the 16 `N-N`
+the value of the digits (trap 14 (agreement cannot be applied to digits) cannot arise). Ascending-only, on Swahili's measurement: of the 16 `N-N`
 shapes, 13 ascending ones are genuine spans (`1469–1539`, `1644-1912`, `1894-1895`, `1418 – 1450`,
 `120-160`, `100-200`, `35-40`, `56-64`, `10 -11`, `3-5`, `2-5`, `2-3` ×2) and the 3 non-ascending are the
 season `1995-96` and the scores `26 -00`, `5-3`/`7–2`. `4.2-3.9` (million years ago) is a genuine but
@@ -218,7 +218,7 @@ DESCENDING span and is deliberately left alone rather than mis-joined.
 **Clock.** 12 real colon clocks; 3 sports times (`4:41.30`, `2:11.60`, `1:09.02`) excluded by requiring no
 third `.dd` field. `10: 08` and `9: 30` put a SPACE after the colon — a `:\s?` is needed, and it is safe:
 of the corpus's 43 colons, only those six match `: ?\d\d` and none is a clause colon. The hour NOUN is not
-added (trap 12): every one of the 12 is already introduced by `ngo-`/`ngawo-`/`kuka-` ("at [the hour]"),
+added (trap 12 (a REDUNDANT symbol is a permissible drop)): every one of the 12 is already introduced by `ngo-`/`ngawo-`/`kuka-` ("at [the hour]"),
 and the corpus writes the noun explicitly when it wants it (`ngehora lika-10 namuhla ekuseni`). a.m./p.m.
 → `ekuseni` ×10 / `ntambama` ×1, the corpus's own half-day words.
 
@@ -230,7 +230,7 @@ untranslated — `Celsius` is unattested in every source, and the sentence carry
 **Fraction** (×1, `u-5 mm (1/5 yintshi)`). `ingxenye ye<ordinal>` is the corpus's own fraction shape:
 `ingxenye yesithathu` ×2 (a third), `ingxenye yesine` ×1 (a quarter). The 5–10 ordinals compose from the
 same `yesi-` frame over stems already in `zulu.jsonc`. NB `ishumi` is class 5, so 10th is `yeshumi`, NOT
-`*yesishumi` — which is why the table is explicit rather than derived (trap 13).
+`*yesishumi` — which is why the table is explicit rather than derived (trap 13 (pin the rule's BRANCHES)).
 
 **Ampersand** → `kanye ne-`, attested ×13 in exactly that hyphenated-before-a-foreign-token shape
 (`kanye ne-NPWS`), out of `kanye` ×290.
@@ -247,7 +247,7 @@ never appears as a bare token in this corpus.
 order). Which rules then destroy the number↔symbol adjacency the tier needs?
 
 **Finding.** Only the decimal rewrite. Five instances sit against a tier symbol: `$14.7`, `$2.3` (currency
-BEFORE), `12.8 km`, `2.2 km2`, `3.50 m` (unit AFTER). Per trap 14's second clause the decimal rule claims
+BEFORE), `12.8 km`, `2.2 km2`, `3.50 m` (unit AFTER). Per trap 14 (agreement cannot be applied to digits)'s second clause the decimal rule claims
 them itself, in three ordered passes (currency-decimal, unit-decimal, plain decimal) — the same shape
 Hausa uses at its step 7.
 
@@ -309,7 +309,7 @@ perl -nle '$n++ while /(?<![\d.,])\d{1,3}(?:,\d{3})+(?=[.,](?!\d))/g; END{print}
 same shape on dot-decimals: 1.1.  → the interior dot survived as a pause                → 1    (missed)
 ```
 
-**18% of the class, and the inconsistency is the tell** (trap 17's third bullet): right where the number
+**18% of the class, and the inconsistency is the tell** (trap 17 (a "too big to do here" item is a count)'s third bullet): right where the number
 stands alone, wrong right where a clause boundary follows it. Fixed to `(?!\d)` for de-grouping and
 `(?!\.?\d)` for the decimals; re-verified that the clause pause SURVIVES in all seven
 (`angu-1,000, futhi` → `inkulungwane , futhi`).
@@ -346,7 +346,7 @@ exactly three digits only.
 **The two artifact-scan lines that remain, argued rather than silenced.**
 
 - `DROP math-sign ×1` — `amazinga okushisa angaphezu kuka-+30°C avamile`. The sentence's own `angaphezu`
-  ("more than") IS the leading plus's meaning, so this is trap 12's REDUNDANT shape exactly: say it once, in
+  ("more than") IS the leading plus's meaning, so this is trap 12 (a REDUNDANT symbol is a permissible drop)'s REDUNDANT shape exactly: say it once, in
   the position the language puts it. Tried the alternative — letting step 14b claim the plus before the
   degree rule — and it produces `angaphezu kuka- no-amazinga angu-30`, two bound prefixes in a row and
   "more than AND 30 degrees". Worse. The `+` elsewhere IS now read (`UTC+1` → `UTC no-1`, verified in the
@@ -393,7 +393,7 @@ Rebased onto `main`. Gates reproduce, with one correction to how they were repor
 worked the 8-item "deliberately not done" list plus the two argued scan lines. **Six deferrals verified and
 upheld, one upgraded from "deferred" to "already correct", and one defect found that was on no list.**
 
-### The defect: the degree word was said twice (trap 12)
+### The defect: the degree word was said twice (trap 12 (a REDUNDANT symbol is a permissible drop))
 
 Probing the corpus's own °C sentence rather than the rule in isolation:
 

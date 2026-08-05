@@ -257,7 +257,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //     The corpus writes the offset RTL as `(1+ به‌وقت ساعت هماهنگ جهانی)` and the sign was DROPPED.
         //     No text tier could supply the word: `به اضافه` and `به علاوه` are both ×0 in the corpus AND ×0 in
         //     the wiki; the only wiki hit for any candidate is `بعلاوه`, and its example is the DISCOURSE
-        //     connective — "بعلاوه، این تعریف …" ("moreover, this definition …") — which is trap 37, not the
+        //     connective — "بعلاوه، این تعریف …" ("moreover, this definition …") — which is trap 37 (the bare modifier is never the attestation), not the
         //     operator. `مثبت` ×17 is the adjective "positive", also not the operator.
         //
         //     Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer: 392 tokens, no `+`, no
@@ -396,7 +396,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    the final word; they are written undiacritized, so the short /o/ of ـُم is left to the same
         //    restoration layer that supplies every other short vowel in Persian text (the deferred gap 🟠).
         //    Only the attested ⟨ام⟩ spelling is matched. A bare ⟨م⟩ suffix is also legal Persian but does not occur
-        //    here, and matching it would let the rule reach into ordinary digit+word sequences (trap 2).
+        //    here, and matching it would let the rule reach into ordinary digit+word sequences (trap 2 (loose patterns over-count)).
         s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\u200C?ام${NOT_WORD}`, "gu"),
             (whole, digits: string) => {
                 const n = Number(digits);

@@ -130,7 +130,7 @@ measured reason is worse than the alias (playbook, "duplication is evidence, not
   single largest remaining Malay-vs-Indonesian delta, deliberately out of this layer's scope.
 - **Roman numerals / regnal ordinals** — `Elizabeth II` arrives from the registry seam as `Elizabeth 2` and
   reads *dua* where Malay says *Kedua*. 4 instances, same in Indonesian, and the guard shape that gets it
-  right is exactly the misfire generator trap 9 warns about. Left alone.
+  right is exactly the misfire generator trap 9 (a guard alternative with no attested…) warns about. Left alone.
 - **`ela/meter` ×2** — a slash ALTERNATION ("keep 100 yards/metres away"), not a rate. No word is sourced
   for it; the rate table is a closed list so it cannot be claimed by accident.
 - **`N:M` where nothing marks a clock** (score 21:20, ratio 3:2, degree class 2:2) — three instances, three
@@ -144,7 +144,7 @@ measured reason is worse than the alias (playbook, "duplication is evidence, not
 
 ## Run 6 — first implementation, and the five defects the probe pass found in it
 
-Probing my own rules before the corpus diff (the cheap half of trap 13 — diff the rule against itself):
+Probing my own rules before the corpus diff (the cheap half of trap 13 (pin the rule's BRANCHES) — diff the rule against itself):
 
 1. `antara pukul 06.30 dan 07.30` — only the FIRST clock was claimed. The `pukul` window is bounded by
    `[^.!?]`, and the first clock's own DOT closes it for the second. Fix: repeat the clock pass to a fixed
@@ -239,14 +239,14 @@ Read in full (word-level diff of before/after). No change falls outside these cl
 (Utterances carrying more than one class are counted once per class, which is why the column sums above the
 105 changed utterances.)
 
-### Adversarial neighbours probed (trap 8 / trap 13)
+### Adversarial neighbours probed (trap 8 (zero corpus instances is not evidence of…) / trap 13 (pin the rule's BRANCHES))
 
 Branches with ZERO corpus instances, pinned anyway: the `12 p.m.` → *tengah hari* and `12 a.m.` →
 *tengah malam* arms of the meridiem table (the corpus only has 1 a.m., 8/10/11 p.m.); the `1–6 p.m.` →
 *petang* arm; the year-pair arm of the range rule vs. its measure-word arm; `°C` and bare `°`; `m²`;
 `km/s`, `m/s`; a fraction with three digits after the point (`3.141`, decimal) vs a 3-digit group
 (`9.000`, thousands); a percent already followed by its own word (`80% peratus` — the sign is dropped, the
-word said once, trap 12); `8 p.m.` with no minutes; `$1.00` (a decimal price, NOT a one-o'clock);
+word said once, trap 12 (a REDUNDANT symbol is a permissible drop)); `8 p.m.` with no minutes; `$1.00` (a decimal price, NOT a one-o'clock);
 `4:41.30` (a sports time, not a clock); a sentence-final `A.S.` (keeps its pause) against a mid-sentence
 one (loses both); `12,5` (an Indonesian-convention decimal comma still reads *dua belas koma lima* — this
 layer does not claim it, because in the Malay convention a lone `,5` is not a group and guessing between

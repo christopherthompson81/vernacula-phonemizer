@@ -87,7 +87,7 @@ describe("Kazakh roman-numeral ordinals", () => {
 });
 
 // TEXT NORMALIZATION (src/languages/kazakh/normalize.ts) — the pre-tokenizer pass behind #562. The
-// DEFINING rule (trap 14) is the case suffix after a digit: the suffix must AGREE with the word via vowel
+// DEFINING rule (trap 14 (agreement cannot be applied to digits)) is the case suffix after a digit: the suffix must AGREE with the word via vowel
 // harmony (200-ге → екі жүзге, 11:00-ден → он бірден), so the number is wordified first. Also the
 // N-ші/N-шы ordinals, space-thousands, comma-decimals, and the б.д.д. era marker.
 describe("Kazakh text normalization", () => {

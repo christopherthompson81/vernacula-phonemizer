@@ -163,7 +163,7 @@ export function normalizeFula(input: string): string {
 
     // 5b) GLUED CLOCK SUFFIX — `11:00nje` (the Fula locative -nje "at"; the corpus's only glued
     //     instance). The suffix is a separate word, not glued to the time; spaced out so the clock rule
-    //     reads the time, then "nje" follows. ONLY the attested -nje (trap 9: no unattested guard
+    //     reads the time, then "nje" follows. ONLY the attested -nje (trap 9 (a guard alternative with no attested…): no unattested guard
     //     alternatives — -na/-ni/-nde never occur glued to a time in this corpus).
     s = s.replace(/(?<![\d.,])(\d{1,2}):(\d{2})(nje)(?![\p{L}\p{M}])/giu, "$1:$2 $3");
 

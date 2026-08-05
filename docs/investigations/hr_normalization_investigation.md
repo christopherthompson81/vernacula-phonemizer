@@ -102,9 +102,9 @@ guess: dolar/euro/funta are all attested and establish the pattern.
 ## Run 3 — 2026-08-01 (re-review against the playbook traps)
 
 The parent asked for a re-review with `docs/normalization_playbook.md` in mind. One real defect found
-by probing the corpus's own forms (trap 8 — the adversarial NEIGHBOUR of the era marker):
+by probing the corpus's own forms (trap 8 (zero corpus instances is not evidence of…) — the adversarial NEIGHBOUR of the era marker):
 
-- **The `g. n. e.` / `g. pr. Kr.` forms (trap 8, corpus-attested)**: `400. g. n. e.`, `1000. g. pr. Kr.`
+- **The `g. n. e.` / `g. pr. Kr.` forms (trap 8 (zero corpus instances is not evidence of…), corpus-attested)**: `400. g. n. e.`, `1000. g. pr. Kr.`
   and `323. g. pr. Kr.` — the `g.` (godine) sits BETWEEN the year-ordinal and the era marker, so my
   step-2 year-ordinal claim (which looked directly at `n. e.`) missed all three, and the corpus diff
   showed `400. g. n. e.` → "četiristo . g . nove ere" (period + letter-spelled g). Fixed: the year

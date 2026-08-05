@@ -94,7 +94,7 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
 
 // #562 TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
 // text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
-// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13. See
+// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13 (pin the rule's BRANCHES). See
 // docs/investigations/lb_normalization_investigation.md.
 describe("Luxembourgish #562 normalization — the period's four jobs + the Eifeler Regel", () => {
     const lb = createLuxembourgish();
@@ -103,7 +103,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
     // The ordinal STEM has five branches and the corpus exercises only some of them: the suppletive table,
     // the `+t` path, the doubled-`t` collapse at 8, the `+st` path from 20, and the multi-word carrier
     // where the ending must land on the last word only. 8, 100 and 1922 are NOT in the corpus.
-    test("ordinal stem: every branch, not just the attested values (trap 13)", () => {
+    test("ordinal stem: every branch, not just the attested values (trap 13 (pin the rule's BRANCHES))", () => {
         expect(ordinalStem(1)).toBe("éischt"); // suppletive
         expect(ordinalStem(3)).toBe("drëtt"); // suppletive
         expect(ordinalStem(7)).toBe("siwent"); // +t
@@ -164,7 +164,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
     test("clock: `Auer` is re-emitted, a zone label is put back, and hour 1 is feminine", () => {
         expect(N("um 20.30 Auer Lokalzäit (15.00 UTC)")).toBe("um 20 Auer 30 Lokalzäit (15 Auer UTC)");
         expect(N("Tëschent 22.00 an 23.00 Auer MDT")).toBe("Tëschent 22 Auer an 23 Auer MDT");
-        expect(N("E Samschdeg um 1.15 Auer")).toBe("E Samschdeg um eng Auer 15"); // trap 14: Auer is FEMININE
+        expect(N("E Samschdeg um 1.15 Auer")).toBe("E Samschdeg um eng Auer 15"); // trap 14 (agreement cannot be applied to digits): Auer is FEMININE
         expect(N("tëschent 6.30 a 7.30 Auer")).toBe("tëschent 6 Auer 30 a 7 Auer 30"); // licensed both ways
         // An UNLICENSED period-pair is left alone: the decimal rule takes a one-digit fraction only,
         // because in this language a two-digit fraction after a dot is the clock shape.
@@ -221,7 +221,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
 
     test("degrees and signs — and the compound hyphens that must not become a minus", () => {
         expect(N("bei 32 °C Hëtzt")).toBe("bei 32 Grad Celsius Hëtzt");
-        expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — trap 8 probe
+        expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — trap 8 (zero corpus instances is not evidence of…) probe
         expect(N("iwwer +30 Grad Celsius")).toBe("iwwer plus 30 Grad Celsius");
         expect(N("(UTC+1)")).toBe("(UTC plus 1)");
         expect(N("Typ-1-Diabetes an COVID-19")).toBe("Typ-1-Diabetes an COVID-19"); // no minus
@@ -255,7 +255,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(N("4x4")).toBe("4x4"); // the ASCII x is a LETTER here and stays one
     });
 
-    // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (trap 6).
+    // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (trap 6 (a word your layer emits must come from the…)).
     test("the symbol tier: percent, currency, units and the two rate idioms", () => {
         expect(lb.text("88 %").trim()).toBe(lb.text("88 Prozent").trim());
         expect(lb.text("30 $").trim()).toBe(lb.text("30 Dollar").trim());

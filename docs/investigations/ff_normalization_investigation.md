@@ -99,11 +99,11 @@ words in the IPA — a probe artifact that does not affect the corpus.
 ## Run 3 — 2026-08-01 (re-review against the playbook traps)
 
 The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Two real defects found
-by probing the adversarial neighbour (trap 8), both in forms the corpus happens not to exercise:
+by probing the adversarial neighbour (trap 8 (zero corpus instances is not evidence of…)), both in forms the corpus happens not to exercise:
 
 - **Ghz glue (the version-dot ordering)**: the dot rule converted `2.4` → "2 tere nayi" (words), and the
   step-11 Ghz rule expected a DIGIT after "tere", so `2.4Ghz` read *ɗiɗi tere nayiGhz* — the Ghz glued
-  and unexpanded. Same shape as the Welsh/Azerbaijani "wordify-then-claim" ordering (trap 14): the Ghz
+  and unexpanded. Same shape as the Welsh/Azerbaijani "wordify-then-claim" ordering (trap 14 (agreement cannot be applied to digits)): the Ghz
   claim now runs BEFORE the dot rule on the raw digits. The Fula corpus has no Ghz (verified — it was a
   probe form), so this is defensive, but it is now correct.
 - **Decimal percent leak**: `3.5%` read *tati tere joyi%* — the `%` survived after a decimal because the

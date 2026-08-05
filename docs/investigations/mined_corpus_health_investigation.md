@@ -649,7 +649,7 @@ grammatical (`ilay`, `no`). The prose is ordinary Malagasy history — Gallieni'
 Republic, Tsiranana. The low MSTTR is the language's particle density.
 
 So `REVIEWED` now records per-language verdicts a human has read, with the evidence cited rather than the
-outcome asserted — the alternative being to re-investigate the same language on every sweep, which is trap 16.
+outcome asserted — the alternative being to re-investigate the same language on every sweep, which is trap 16 (before declaring a class out of scope).
 
 ---
 

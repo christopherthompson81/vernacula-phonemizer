@@ -55,7 +55,7 @@ const UNITS: [RegExp, string][] = [
     [/mm/giu, "ملي ميٽر"],
     // ⚠ NO BARE `m`, though ميٽر ×32 is spelled out and digit-adjacent bare `m` is ×0 here. Added and
     // withdrawn on measurement: `802.11m` read as "…hiku hiku MĪṬARU". The tier's `NOT_VERSION` guard covers
-    // that class, but it works by seeing the DOT and this file has already rewritten it to a word (trap 39).
+    // that class, but it works by seeing the DOT and this file has already rewritten it to a word (trap 39 (a local rule that depends on a character…)).
     // Nothing is lost: the squared and cubed rules below are LOCAL and do not consult this table.
 ];
 

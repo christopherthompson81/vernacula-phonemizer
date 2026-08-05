@@ -88,7 +88,7 @@ describe("central kurdish normalization", () => {
     // slash — "480 کم لە کاتژمێر (133 مەتر/چرکە)" — and the slash was silently dropped, so four utterances lost
     // the "per" entirely. `لە` is the per, `کاتژمێر` the hour, `چرکە` the second, all from that sentence.
     // ⚠ The Perso-Arabic arm must accept the ABBREVIATION (`کم`), not just the spelled word: this block runs
-    // above the decimal rule to keep the version dot (trap 39), and `کم` → `کیلۆمەتر` happens further down.
+    // above the decimal rule to keep the version dot (trap 39 (a local rule that depends on a character…)), and `کم` → `کیلۆمەتر` happens further down.
     test("the rate, in both scripts (#586)", () => {
         expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
         expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɾ la t͡ʃɾka");

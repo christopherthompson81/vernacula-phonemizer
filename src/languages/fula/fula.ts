@@ -75,7 +75,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // to `meeteer`), which argues it is the real modifier. But BOTH sit in exactly one article, which this
     // wiki's own tooling rule calls a LEAD rather than a finding, and the native form is polysemous: its bare
     // token is ALSO ×4 here and every one of those is a job title — `Hooreejo kuuɓtodinɗo`, in a list of
-    // officeholders. Same count, different word (trap 37 twice over, in one language).
+    // officeholders. Same count, different word (trap 37 (the bare modifier is never the attestation) twice over, in one language).
     // The loan is kept because it is unambiguous in the slot and a wrong word is worse than a plainer one;
     // picking between two single-article Wikipedia forms is a judgement for a speaker of the language.
     exponentWords: { squared: ["kaaree"], cubed: ["kubik"], position: "after" },

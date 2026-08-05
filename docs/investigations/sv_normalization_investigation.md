@@ -113,7 +113,7 @@ Three defects in one: the year is read in the FULL cardinal style (*ettusen fyra
 a year in hundreds (*fjortonhundra*); the compound is split into three words where Swedish has one
 (*fjortonhundratalet*); and the hyphen is dropped rather than fused.
 
-## Run 5 — 2026-08-02 — the initialism seam (trap 16)
+## Run 5 — 2026-08-02 — the initialism seam (trap 16 (before declaring a class out of scope))
 
 ```sh
 grep -oP '(?<![\p{L}])[A-ZÅÄÖ]{2,6}(?![\p{L}])' col3.txt | wc -l        # 168 instances
@@ -172,7 +172,7 @@ grep -oP "(?:$M)\s+(?:1[1-9]\d\d|20\d\d)(?![\d.,:])" col3.txt | wc -l     # 41
 ```
 
 **41 of ~110.** 0 false positives, but 37% coverage — so `år 1945` would read *nittonhundrafyrtiofem* and
-`1945 och` *ettusenniohundrafyrtiofem* in the same corpus. That is trap 17's "the inconsistency is the
+`1945 och` *ettusenniohundrafyrtiofem* in the same corpus. That is trap 17 (a "too big to do here" item is a count)'s "the inconsistency is the
 tell", and it decided the design: go UNCONDITIONAL over 1100–1999.
 
 Enumerating all 116 in-range contexts by hand, the only non-year uses are `de 1200 skalbolag`,
@@ -231,7 +231,7 @@ appended after its period. **Net: zero lost.**
 
 **2. THE YEAR RULE ATE A UNIT.** `1 300 km av Trans-Alaska…` → *trettonhundra* + a bare **[km]**, and
 `en 1600 km lång väg` the same. Converting an operand to words destroys the number–unit adjacency
-`makeSymbolNormalizer` matches on — trap 14, and step 4's "units before decimals" coupling. The
+`makeSymbolNormalizer` matches on — trap 14 (agreement cannot be applied to digits), and step 4's "units before decimals" coupling. The
 un-idiomatic *ettusen trehundra kilometer* it replaced was strictly better than a lost unit. Two
 utterances, measured with:
 
@@ -321,7 +321,7 @@ The referee is unchanged **by construction as well as by measurement**: `tools/r
   validated refusal is a result; `usa` is listed because espeak attests it.
 - **`en`/`ett` agreement on the numeral 1 is untouched and has 0 corpus instances.** `1 km` reads *ett
   kilometer* where Swedish wants *en kilometer* — but the numeral comes from `numberToWords` in the
-  TOKENIZER, downstream of every rule here (trap 14), and the correct form depends on the noun's gender
+  TOKENIZER, downstream of every rule here (trap 14 (agreement cannot be applied to digits)), and the correct form depends on the noun's gender
   (*en kilometer*, *ett kilogram*), which is per-noun lexical data the manifest does not carry. Measured, not
   assumed: `grep -oP '(?<![\d,.])1\s*(?:%|km|cm|mm|kg|procent|kilometer|meter|timme|år)\b'` → **0**.
 

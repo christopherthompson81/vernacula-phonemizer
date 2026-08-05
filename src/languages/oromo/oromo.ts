@@ -215,7 +215,7 @@ class OromoPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts, then the shared tier, then normalize.ts's number pass. The tier matches DIGITS
         // beside a sign, so every rule that turns digits into WORDS — the glued Oromo enclitic and the
-        // decimal — has to run after it (trap 14 from the other end). That ordering is what keeps the
+        // decimal — has to run after it (trap 14 (agreement cannot be applied to digits) from the other end). That ordering is what keeps the
         // currency and percent words in ONE place, the declaration above.
         // The INITIALISM pass runs LAST of the three text passes: after normalizeOromo has expanded the
         // dotted abbreviations and the era marker (or `D.K.D` would be spelled DAA-KAA-DAA), and after the

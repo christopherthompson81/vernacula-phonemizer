@@ -4,7 +4,7 @@
  *
  * MEASURED over the 1,218 unique cased om_et FLEURS utterances (column 3):
  *   digit + GLUED ENCLITIC ×35   1994tti · 2010’tti · 5’tti · 500tti · 30tu · 15tu · 2020f · 10if · 7ttan
- *                                · 2,243n · 3n · 27tiin          ← the language's defining shape (trap 14)
+ *                                · 2,243n · 3n · 27tiin          ← the language's defining shape (trap 14 (agreement cannot be applied to digits))
  *   digit + `-ffaa` ORDINAL ×24  16ffaa ×4 · 18ffaa ×3 · 1ffaa ×2 · 15ffaatti ×2 · 190ffaa · 60ffaadha
  *                                · 11ffaan · 17ffaaf · 8ffaadhaa · 2ffaa’ti
  *   comma-grouped ×28            783,562 · 24,000 · US$11,000 · 2,243n · 10,000
@@ -15,7 +15,7 @@
  *   units ×8                     mm 5 · mm 36 · mm 24n · km 6,387 · km 2-3 · 165km/h · 300,948 sq mi ×3
  *   percent ×3 · degrees ×1 (35°W) · math sign ×1 (=) · era ×1 (D.K.D) · fraction ×1 (1/5) · &amp; ×1
  *   dotted abbrev ×8             Dr. · Jr. ×4 · N. Wayne · kkf. · fkn. ×2   — beside ~40 SENTENCE-FINAL
- *                                periods, which must NOT be claimed (trap 4)
+ *                                periods, which must NOT be claimed (trap 4 (ambiguity is resolved by evidence))
  *
  * WHAT WAS BROKEN, verbatim from the pre-change engine:
  *   `88% galche`     → `sadːeːtːamˈiː sadːˈeːt ɡˈalt͡ʃe`             the % dropped
@@ -45,13 +45,13 @@
  *    than declared to the tier, which can only postpose them.
  * 2. **Enclitics are written glued to the DIGITS** (`1994tti`, `16ffaa`, `2,243n`). The digit becomes words
  *    in the TOKENIZER, downstream of this whole layer, so the suffix cannot be left on the digits — it has
- *    to be attached to the WORD, with the linking vowel the word's shape demands. That is trap 14, and it
+ *    to be attached to the WORD, with the linking vowel the word's shape demands. That is trap 14 (agreement cannot be applied to digits), and it
  *    is the biggest defect class in this corpus.
  *
  * WHY THERE ARE TWO PASSES, and what runs between them. `oromo.ts` composes
  *     normalizeOromoNumerals( SYMBOLS( normalizeOromo(input) ) )
  * The shared symbol tier matches DIGITS next to a sign, so anything that turns digits into words must run
- * AFTER it (trap 14's "expand anything the shared tier can no longer see", taken from the other end). Both
+ * AFTER it (trap 14 (agreement cannot be applied to digits)'s "expand anything the shared tier can no longer see", taken from the other end). Both
  * of the rules that words-ify — the enclitic/ordinal rule and the decimal rule — therefore live in the
  * SECOND pass, and the tier gets `£27tiin` and `$2.3` intact. This is what lets the currency and percent
  * WORDS live in exactly one place (the tier's declaration) instead of being duplicated here.
@@ -137,11 +137,11 @@ const VOWELS = "aeiou";
 const isVowel = (c: string): boolean => VOWELS.includes(c);
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
-// MORPHOLOGY — attaching an enclitic to a NUMERAL WORD (trap 14)
+// MORPHOLOGY — attaching an enclitic to a NUMERAL WORD (trap 14 (agreement cannot be applied to digits))
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * The ORDINAL stem. Composed, not tabulated (trap 13's constructive half): the corpus's own spelled-out
+ * The ORDINAL stem. Composed, not tabulated (trap 13 (pin the rule's BRANCHES)'s constructive half): the corpus's own spelled-out
  * ordinals are *tokkoffaa · lamaffaa · sadaffaa · afuraffaa · shanaffaa · jahaffaa · torbaffaa ·
  * saglaffaa · saddeetaffa[a] · digdammaffaa*, and one rule fits all of them —
  *   final `ii` → `a`      sadii → sadaffaa
@@ -181,7 +181,7 @@ function numeralWords(num: string): string {
     return `${head} ${POINT} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}`;
 }
 
-/** The written enclitics, longest-first. ONLY the shapes the corpus glues to digits (trap 9): a guard
+/** The written enclitics, longest-first. ONLY the shapes the corpus glues to digits (trap 9 (a guard alternative with no attested…)): a guard
  *  alternative with no attested instance is a misfire generator.
  *  DELIBERATELY EXCLUDED — `ni` and `fi` are Oromo WORDS (`1fi2` is a missing space, not a suffix);
  *  `moota`/`ootaa` are the decade plural (`1850moota`, `1980’ootaa`, ×4) for which no attachment to a
@@ -193,7 +193,7 @@ const ENCLITIC = "ttan|tiin|tti|ti|tu|if|f|n";
  *  corpus detaches them in 24 unique utterances, against ~35 glued ones, and the reading is the same
  *  impossibility either way: a standalone `tti` is the word-initial geminate [tːi], a standalone `f`/`n` a
  *  bare consonant. Detaching a bound postposition is an orthographic slip, not a word boundary.
- *  A NARROWER ALTERNATION than `ENCLITIC`, and deliberately so (trap 9 — pin what was counted): spaced,
+ *  A NARROWER ALTERNATION than `ENCLITIC`, and deliberately so (trap 9 (a guard alternative with no attested…) — pin what was counted): spaced,
  *  the corpus writes only `tti` ×19, `ti` ×2, `tiin` ×1, `f` ×1, `n` ×1. Leaving `tu` out is not
  *  bookkeeping — `tu` IS an Oromo word, the focus marker (`Caribe tu jiraata`), and only the absence of a
  *  space distinguishes the two. `fi` is safe by construction: the trailing letter guard rejects `f` + `i`. */
@@ -227,7 +227,7 @@ export function normalizeOromo(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])D\.?K\.?D\.?(?![\p{L}\p{M}])/gu, "dhaloota Kiristoos dura");
 
     // 4) DOTTED ABBREVIATIONS. The corpus writes 8 of them beside ~40 SENTENCE-FINAL periods, so each
-    //    shape is claimed by name (trap 4 — the German bare-ordinal method) and nothing generic runs:
+    //    shape is claimed by name (trap 4 (ambiguity is resolved by evidence) — the German bare-ordinal method) and nothing generic runs:
     //    zero sentence-final pauses may be lost.
     //      `fkn.` ×2 → fakkeenyaaf         (corpus ×7, "for example")
     //      `kkf.` ×1 → kan kana fakkaatan  (corpus ×2, "and the like")
@@ -244,7 +244,7 @@ export function normalizeOromo(input: string): string {
     //    `H fi daqiiqaa M`: *daqiiqaa* ("minute") is corpus-attested before its number (`daqiiqaa 3 dura`)
     //    and *fi* is the ordinary conjunction; the hour noun *sa’aatii* is NOT added, because the corpus
     //    already writes it before 5 of the 8 (`sa’aatii 10:00`, `sa’a 1:15`) and saying it twice is
-    //    trap 12. `:00` reads as the bare hour, never *zeeroo*.
+    //    trap 12 (a REDUNDANT symbol is a permissible drop). `:00` reads as the bare hour, never *zeeroo*.
     //    NOT a clock: `qabxii 2:2` (a British degree classification, ×1) — the minutes must be TWO digits,
     //    which is what keeps that instance out. A third `.dd` field would be a sports time; none occur.
     //    a.m./p.m. → *ganama* / *galgala*, the corpus's own half-day words (`ganama keessaa 07:19`).
@@ -288,11 +288,11 @@ export function normalizeOromo(input: string): string {
     //    56-64, 100-200, 120-160, 328-820, 1644-1912, 1894-1895, 1418-1450, 1995-96) and all THREE scores
     //    descend (26-00, 5-3, 7-2 — a winning score is written winner-first). A descending range or an
     //    ascending score would be misread; that is the known limit, and it is preferable to a list of
-    //    measure nouns, which would be silent on every noun the corpus happens not to contain (trap 8).
+    //    measure nouns, which would be silent on every noun the corpus happens not to contain (trap 8 (zero corpus instances is not evidence of…)).
     //    A year span is claimed first, because `1995-96` is ascending only as a year (96 < 1995).
     //     An ORDINAL range first of all — `jaarraa 10ffaa - 11ffaa` ("the 10th–11th century", ×1). The
     //     mined artifact's `ordinal-range` cell reports 0 for om and this instance is why that count is
-    //     not evidence (trap 8): without the rule the corpus diff caught the hyphen being read as a MINUS.
+    //     not evidence (trap 8 (zero corpus instances is not evidence of…)): without the rule the corpus diff caught the hyphen being read as a MINUS.
     s = s.replace(/(?<![\d.,-])(\d+)ffaa\s*[-–]\s*(\d+)ffaa(?![\d.,-])/gu, "$1ffaa hanga $2ffaa");
     s = s.replace(/(?<![\d.,-])(\d{4})\s?[-–]\s?(\d{2,4})(?![\d.,-])/gu, "$1 hanga $2");
     s = s.replace(/(?<![\d.,-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
@@ -301,12 +301,12 @@ export function normalizeOromo(input: string): string {
     // 10) FRACTION — `inchii 1/5` (×1). Oromo puts the DENOMINATOR first with *keessaa* ("out of"),
     //     which the corpus writes ×106 in exactly that slot (`filannoof dhihaatan 17,000 keessaa`).
     //     Composed rather than tabulated on the one attested numerator, which is the Uzbek `3/4` defect
-    //     (trap 8): every numerator and denominator reads the same way here.
+    //     (trap 8 (zero corpus instances is not evidence of…)): every numerator and denominator reads the same way here.
     s = s.replace(/(?<![\d/.,])(\d{1,3})\/(\d{1,3})(?![\d/.,])/gu, "$2 keessaa $1");
 
     // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested (×2, as the academic degree —
     //     Oromo borrows the one word) and is in the epitran referee. The compass words are all in the
-    //     corpus. °C/°F have ZERO corpus instances and are probed anyway (trap 8): the SCALE NAMES are in
+    //     corpus. °C/°F have ZERO corpus instances and are probed anyway (trap 8 (zero corpus instances is not evidence of…)): the SCALE NAMES are in
     //     no source this repo has — not the corpus, not either referee, not espeak's `om_list` — so the
     //     reading stops at *digirii N*. Note what that costs: the `[CF]?` CONSUMES the letter, so the
     //     scale is dropped, not merely left unnamed. Deliberate, and the lesser of two wrongs — unconsumed,
@@ -363,7 +363,7 @@ export function normalizeOromo(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(${units})\\s?(?=\\d)`, "giu"),
         (_m, u: string) => `${UNIT[u.toLowerCase()]!} `);
     //     (d) the abbreviation AFTER its number (`35 mm`) — zero corpus instances in this order, but it
-    //         is the adversarial neighbour of (c) and of the review's `1 km`/`5 km` probes (trap 8).
+    //         is the adversarial neighbour of (c) and of the review's `1 km`/`5 km` probes (trap 8 (zero corpus instances is not evidence of…)).
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?![\\p{L}\\p{M}’'ʼ])`, "giu"),
         (_m, n: string, u: string) => `${UNIT[u.toLowerCase()]!} ${n}`);
 
@@ -410,7 +410,7 @@ export function normalizeOromo(input: string): string {
 export function normalizeOromoNumerals(input: string): string {
     let s = input;
 
-    // 14) GLUED ORDINAL AND ENCLITIC (trap 14) — 24 + ~35 instances, the language's defining shape.
+    // 14) GLUED ORDINAL AND ENCLITIC (trap 14 (agreement cannot be applied to digits)) — 24 + ~35 instances, the language's defining shape.
     //     `16ffaa` → *kudha jahaffaa*, `1994tti` → *kuma dhibba sagal sagaltamii afuritti*. The suffix
     //     attaches to the LAST word of the numeral, with the linking vowel its shape demands
     //     (attachEnclitic/ordinalStem above, both read off the corpus's spelled-out forms).

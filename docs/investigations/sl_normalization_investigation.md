@@ -112,13 +112,13 @@ problem is the NUMERAL's gender, not the noun's: the tokenizer reads a bare `1` 
 four cells need repair (m: 1→en, 3→trije, 4→štirje; f: 2→dve) and it can only be done AFTER the tier,
 because the noun does not exist until the tier has emitted it. Step 15.
 
-## Run 5 — 2026-08-02 — sourcing, and the letter-name table (trap 16)
+## Run 5 — 2026-08-02 — sourcing, and the letter-name table (trap 16 (before declaring a class out of scope))
 
 ```
 grep -inE 'letter|^_' $ESPEAK_NG/dictsource/sl_list
 ```
 
-**Question (trap 16):** Slovak deferred 119 initialisms to `core/initialisms.ts` and was wrong. Does
+**Question (trap 16 (before declaring a class out of scope)):** Slovak deferred 119 initialisms to `core/initialisms.ts` and was wrong. Does
 Slovenian have the data?
 **RAW:** `dictsource/sl_list` opens with `// letter names` and 25 Slovene letters plus `q ku`,
 `w dv#'ojniv,@`, `x iks`, `y 'ipsilon`. Every consonant is named with a following SCHWA (`b b@`, `f f@`,
@@ -152,11 +152,11 @@ node -e '…/(?<![\p{L}\p{M}.,])\d+\s?g(?![\p{L}\p{M}])/…'
 
 **Question:** should `g` be declared as *gram* in the tier?
 **RAW:** the corpus's ONLY number-adjacent `g` is `802.11g` — the Wi-Fi standard. Declaring it would have
-read that letter as *gram*: the `Il-76s` hazard, and trap 15's third bullet. **Not declared.** `mi` likewise
+read that letter as *gram*: the `Il-76s` hazard, and trap 15 (the same bound suffix is also written with…)'s third bullet. **Not declared.** `mi` likewise
 (it is the Slovene pronoun *we*). The eight letters glued to digits (`802.11a/b/g/n`, `Il-76s`, `JAS 39C`)
 get their LETTER NAMES instead, step 19.
 
-**Question (trap 15):** is the `-ih` suffix also written with a space?
+**Question (trap 15 (the same bound suffix is also written with…)):** is the `-ih` suffix also written with a space?
 **RAW:** `grep` for `\d+ ?- ?(ih|ega|em|im)` gives 2 (`1830-ih`, `ob 5-ih`); the spaced form gives 0.
 Both glued instances are the SAME morphology and neither is an ordinal — 1830-ih is the ordinal's genitive
 plural *tisoč osemsto tridesetih*, 5-ih the cardinal's locative plural *petih* — and both are stem + `ih`
@@ -198,7 +198,7 @@ periods + 28 grouping periods + 17 decimal commas + 16 clock marks + ~25 era-mar
 `(?<=\p{Lu})\+` case; scan is now clean.
 
 **Third finding, from `review.ts`'s ordinary-text probe rather than the corpus:** `5 000` read *pet nič*.
-The corpus has **0** space-grouped numbers, so this is trap 8 exactly — zero instances is not evidence of
+The corpus has **0** space-grouped numbers, so this is trap 8 (zero corpus instances is not evidence of…) exactly — zero instances is not evidence of
 correctness. Space de-grouping added; it changes nothing in the corpus. NBSP appears 22 times and always as
 an ORDINARY inter-word space, never as a separator, so it is folded to a plain space only AFTER de-grouping.
 
@@ -243,10 +243,10 @@ Kanadčanu je 7–2`, which read *sedem DO dva*** — a score turned into a rang
 The corpus writes the joiner out twice, in exactly this function: **`zmaga za eno točko, 21 proti 20`** and
 **`razmerje ena proti štirideset`** (`proti` ×39 overall). And the discriminator is DIRECTION: a range runs
 upward, a score does not. So step 5a claims a non-ascending short pair, or any colon pair, as
-`a proti b` — suppressed to `a b` when the sentence already writes *proti* right after it (trap 12:
+`a proti b` — suppressed to `a b` when the sentence already writes *proti* right after it (trap 12 (a REDUNDANT symbol is a permissible drop):
 `26:00 proti peti nosilki` states it once).
 
-**Then the corpus diff caught two misfires of the new rule** (trap 9 — widening a guard needs the same
+**Then the corpus diff caught two misfires of the new rule** (trap 9 (a guard alternative with no attested…) — widening a guard needs the same
 discipline as writing one):
 
 ```
@@ -301,7 +301,7 @@ on all eight lines, including `sourcing: all 5 high-traffic words attested` — 
 The review worked the 9-item "deliberately not done" list. **One item was misattributed and is now fixed;
 one claim was verified rather than accepted; the rest hold.**
 
-### `0230 UTC` — deferred as a core seam, and it is not one (trap 17)
+### `0230 UTC` — deferred as a core seam, and it is not one (trap 17 (a "too big to do here" item is a count))
 
 The reasoning was: `Number("0230")` is 230, the loss happens in the tokenizer's `\d+` → `Number()` path that
 every language shares, so it is core. The first half is true and the second does not follow — **the layer

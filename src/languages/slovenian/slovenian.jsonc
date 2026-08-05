@@ -74,7 +74,7 @@
         // #562 The decimal separator's WORD. Slovene writes the decimal with a COMMA (17 corpus instances,
         // `2,4 GHz`) and reads it *vejica* — espeak-ng's own name for the comma in dictsource/sl_list
         // (`_, v'e:jitsa`) and a headword in the wikipron slv referee. Declared here rather than as a
-        // literal in code so the tokenizer phonemizes it like any other word (#562 trap 6).
+        // literal in code so the tokenizer phonemizes it like any other word (#562 trap 6 (a word your layer emits must come from the…)).
         "decimalWord": "vejica",
         // Slovene numerals 2–4 AGREE with the gender of the counted magnitude noun (m: dva/trije/štirje; f: dve/tri/
         // štiri). milijon is masculine (trije milijoni), milijarda is feminine (dve milijardi). tisoč takes the plain

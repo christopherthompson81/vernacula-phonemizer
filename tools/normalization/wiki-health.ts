@@ -463,7 +463,7 @@ export function histogram(mined: Health, base: Health): Histogram {
  *
  * WHY THIS EXISTS. The corroboration rule is a good filter and it is not an oracle: `mg` trips two signals and
  * is not a bot corpus. Every automated rule here will have cases like that, and the alternative to recording
- * them is re-investigating the same language on every sweep — which is trap 16 in the playbook, and the reason
+ * them is re-investigating the same language on every sweep — which is trap 16 (before declaring a class out of scope) in the playbook, and the reason
  * `sources.ts` and `ACCEPTED_SIGN_SILENCE` exist. A settled refusal and a settled acceptance are both worth
  * writing down.
  *

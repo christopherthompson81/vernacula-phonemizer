@@ -99,13 +99,13 @@ compositor in numbers.ts would suggest.
     Daleithiau
 1c) Welsh abbreviations DU → Deyrnas Unedig, UDA → Unol Daleithiau America, AS → Aelod Seneddol —
     CASE-SENSITIVE, because the lowercase "du" is the Welsh for "black" (y Môr Du = the Black Sea) and
-    the initial case-insensitive rule produced false positives on every "du" in prose (trap 7)
+    the initial case-insensitive rule produced false positives on every "du" in prose (trap 7 (a character class that is not…))
 2) dotted capital runs (George W. Bush)
 3) single-dot abbrevs (ayb. → ac yn y blaen)
-4) `Nfed`/`Ned`/`Neg`/`Naf`/`Nydd`/`Nain` ORDINALS — the VIGESIMAL table + composition (trap 13 branch
+4) `Nfed`/`Ned`/`Neg`/`Naf`/`Nydd`/`Nain` ORDINALS — the VIGESIMAL table + composition (trap 13 (pin the rule's BRANCHES) branch
    pins in the tests); comma-thousands allowed inside the digit run (1,000fed)
 5) decades (1970au → the -au is a plural suffix, not a word) — NOT `\b`, which finds no boundary
-   between the digit and the attached -au (trap 1)
+   between the digit and the attached -au (trap 1 (`\b` is ASCII-defined))
 5b) clock ranges (10:00-11:00 → the hyphen is "i" = to)
 6) clocks in the COLON form, with p.m./a.m. → y prynhawn / y bore (the corpus's own register)
 6b) clocks in the DOT form before a timezone (15.00 UTC, 12.00 GMT — the dot would otherwise read pwynt)
@@ -153,14 +153,14 @@ one dead branch, all found by probing the adversarial neighbour:
   the space only attaches when a marker is present. The corpus output was identical (the corpus's only
   clock range is handled by the 5b hyphen rule BEFORE the colon-clock), but the synthetic `10:00-11:00
   yr hwyr` probe was wrong. Pinned by a test.
-- **Fraction noun branch (trap 13, exactly the Catalan lesson)**: the fraction rule used `ordinalWords`
+- **Fraction noun branch (trap 13 (pin the rule's BRANCHES), exactly the Catalan lesson)**: the fraction rule used `ordinalWords`
   for the denominator, so `2/3` read *dau drydydd* and `3/4` *tri pedwerydd*. The referee attests the
   FRACTION NOUNS traean (a third) and chwarter (a quarter) — distinct from the ordinals trydydd/
   pedwerydd. The corpus's only fraction is 1/5 (pumed, where ordinal = noun), so the 3/4 noun branch
   was never read. Special-cased: den 3 → traean, den 4 → chwarter. Pinned by tests.
-- **Dead clock-range rule 7b (trap 9)**: a second `digit-hyphen-digit` → "i" rule after the colon-clock
+- **Dead clock-range rule 7b (trap 9 (a guard alternative with no attested…))**: a second `digit-hyphen-digit` → "i" rule after the colon-clock
   matched ZERO corpus instances (the only clock range is handled by 5b before the clocks) AND carried a
-  `\b` (trap 1). Removed.
+  `\b` (trap 1 (`\b` is ASCII-defined)). Removed.
 
 **Verified non-issues**: the DU/UDA/AS expansions are case-sensitive (the lowercase "du" = black, "as" =
 a real word) — re-confirmed no false positives; the UD/U.D./O.C./C.C./OC rules are case-insensitive but
@@ -235,7 +235,7 @@ defects, two on live corpus text, and one of them is a grammatical requirement t
    time-of-day asserted and half a word deleted. Requiring the dots is not an option (`10:00am`, undotted
    and glued, is also in the corpus); requiring a non-letter after the marker is.
 3. **`ordinalWords(20)` returned undefined** although `ROUND_TENS[20] = "ugeinfed"` is right there: the
-   21–39 arm runs first and computes `low = 0`, which fails its own `low < 1` guard. Exactly trap 13's
+   21–39 arm runs first and computes `low = 0`, which fails its own `low < 1` guard. Exactly trap 13 (pin the rule's BRANCHES)'s
    "boundary between the branches" — the table and the composition were both pinned, the seam between them
    was not.
 4. **A padded replacement left a leading space** (`+30°C` → ` plws …`). Collapsed and trimmed on the way out.

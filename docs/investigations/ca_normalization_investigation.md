@@ -95,7 +95,7 @@ caught by probing the ADVERSARIAL NEIGHBOUR, none visible in the corpus diff or 
 - **Trap 8 (neighbour of an attested rule)**: `4t` (quart) — the `t` series — was not in the ordinal
   suffix set, reading *quatre t*. The fix gates EVERY suffix against the spoken ordinal's final word
   (primer/segon/tercer/quart/…è), which simultaneously rules out forms the language does not write
-  (20t, 2000n, 11r) — trap 9's misfire generator, an unattested guard alternative.
+  (20t, 2000n, 11r) — trap 9 (a guard alternative with no attested…)'s misfire generator, an unattested guard alternative.
 - **Trap 8 (sports time)**: the clock rule claimed `4:41.30` as a clock (the third `.SS` field was not
   guarded). Added `(?![:.\d])` so a trailing dot-decimal keeps it unclaimed. Corpus has zero sports
   times, so this is a defensive neighbour fix.

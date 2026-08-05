@@ -87,7 +87,7 @@ describe("Oromo stress (Dejene 2010 §5.3.1)", () => {
 });
 
 // ── TEXT NORMALIZATION (#562) ────────────────────────────────────────────────────────────────────────
-// The pins are on the rule's BRANCHES, not on the corpus's instances (trap 13): the ordinal and the
+// The pins are on the rule's BRANCHES, not on the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal and the
 // enclitic are COMPOSED from the cardinal, so the branch the corpus never writes (10ffaa, 8ffaa, a
 // consonant-final stem before -tti) is pinned beside the branch it does. The evidence for every word is
 // in docs/investigations/om_normalization_investigation.md, Run 4.
@@ -101,7 +101,7 @@ describe("Oromo text normalization", () => {
         expect(normalizeOromoNumerals("1ffaa")).toBe("tokkoffaa"); // vowel-final stem
         expect(normalizeOromoNumerals("3ffaa")).toBe("sadaffaa"); // final ii → a
         expect(normalizeOromoNumerals("5ffaa")).toBe("shanaffaa"); // consonant-final → link a
-        // …and the branches the corpus does NOT write as digits+ffaa (trap 8/13).
+        // …and the branches the corpus does NOT write as digits+ffaa (trap 8 (zero corpus instances is not evidence of…)/13).
         expect(normalizeOromoNumerals("8ffaa")).toBe("saddeetaffaa");
         expect(normalizeOromoNumerals("10ffaa")).toBe("kudhanaffaa");
         expect(normalizeOromoNumerals("16ffaa")).toBe("kudha jahaffaa"); // suffix on the LAST word only
@@ -110,7 +110,7 @@ describe("Oromo text normalization", () => {
         expect(normalizeOromoNumerals("2ffaa’ti")).toBe("lamaffaati"); // the apostrophe is a separator
     });
 
-    test("glued case enclitic attaches to the WORD, with its linking vowel (trap 14)", () => {
+    test("glued case enclitic attaches to the WORD, with its linking vowel (trap 14 (agreement cannot be applied to digits))", () => {
         expect(normalizeOromoNumerals("1994tti")).toBe("kuma dhibba sagal sagaltamii afuritti"); // C + i
         expect(normalizeOromoNumerals("2010’tti")).toBe("kuma lama kudhanitti");
         expect(normalizeOromoNumerals("1tti")).toBe("tokkotti"); // V → bare (corpus: tokkotti ×7)

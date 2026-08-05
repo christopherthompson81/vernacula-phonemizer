@@ -7,9 +7,9 @@ import { normalizeMalay } from "../src/languages/malay/normalize.ts";
 // Indonesian engine as a labelled approximation), so these goldens pin the TEXT→TEXT layer that runs in
 // front of it — the shapes where the two standards' orthographic conventions genuinely differ.
 //
-// Pinned by RULE BRANCH, not by corpus instance (playbook trap 13): every branch below has at least one
+// Pinned by RULE BRANCH, not by corpus instance (playbook trap 13 (pin the rule's BRANCHES)): every branch below has at least one
 // case, and the branches the ms_my corpus does NOT exercise — 12 a.m./12 p.m., the afternoon `petang` arm,
-// a three-place decimal, `°C`, `m²`, `m/s` — are pinned deliberately (trap 8).
+// a three-place decimal, `°C`, `m²`, `m/s` — are pinned deliberately (trap 8 (zero corpus instances is not evidence of…)).
 describe("malay (zsm) normalization — the conventions Indonesian does not share", () => {
     test("separators are the ENGLISH ones: comma groups thousands, the dot is the decimal point", () => {
         // Read with Indonesian's separators, `1,400` was *satu koma empat nol nol* ("one point four zero
@@ -52,7 +52,7 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         // The meridiem is consumed and re-emitted as the Malay part of the day.
         expect(normalizeMalay("pukul 1.15 a.m. hari")).toBe("pukul 1 15 pagi hari");
         expect(normalizeMalay("pada 11:35 pm.")).toBe("pada 11 35 malam.");
-        // Branches with ZERO corpus instances (trap 8): noon, midnight, and the afternoon arm.
+        // Branches with ZERO corpus instances (trap 8 (zero corpus instances is not evidence of…)): noon, midnight, and the afternoon arm.
         expect(normalizeMalay("pukul 12.00 p.m.")).toBe("pukul 12 tengah hari");
         expect(normalizeMalay("pukul 12.00 a.m.")).toBe("pukul 12 tengah malam");
         expect(normalizeMalay("pukul 3.30 p.m.")).toBe("pukul 3 30 petang");

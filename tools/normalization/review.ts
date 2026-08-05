@@ -300,7 +300,7 @@ for (const name of accepted) console.log(`  ⓘ ${name} is INTENTIONALLY silent 
  *   21 leak a RAW `km` into the IPA   am ar as bg bn ckb cy de fa ff ga gu kk mi ne pa sw th tr ur yue
  *    7 lose the unit word entirely    da fr hu id ja nb sv
  *
- * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim, trap 6's
+ * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim, trap 6 (a word your layer emits must come from the…)'s
  * defect arriving through the exponent. French differs from `5 km` by ONE VOWEL (kilomˈɛtʁ vs kilɔmˈɛtʁ),
  * an incidental g2p artefact of the changed token, so even a careful reader has to compare two nearly
  * identical strings to see that the `²` was dropped. That is 28 of 66 languages, for #586 to sweep.

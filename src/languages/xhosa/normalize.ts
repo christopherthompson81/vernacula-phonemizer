@@ -35,7 +35,7 @@
  *   B&amp;B        → ɓ ɓ                                     the HTML entity dropped
  *   120-160        → ikʰˈuːlu … ikʰˈuːlu …                   no joiner between the endpoints
  *
- * ─── THE NOUN-CLASS CONCORD, measured rather than assumed (playbook trap 14) ───
+ * ─── THE NOUN-CLASS CONCORD, measured rather than assumed (playbook trap 14 (agreement cannot be applied to digits)) ───
  *
  * The thing that looks hard in a Bantu language is agreement: a numeral qualifying a noun takes a concord
  * agreeing with that noun's class (*iimizuzu emithathu*, *iinyanga ezintathu*). It does not arise as a
@@ -48,12 +48,12 @@
  *
  * Trap 15's spaced alternation does not exist in Xhosa: `grep -oPE '[0-9] (na|ne|nga|ku|nge|ye)(?![a-z])'`
  * over the corpus finds 6 hits and every one is a prefix on the FOLLOWING token (`240 ye-km`, `Inombolo-1
- * neye-2`), never a detached suffix on the preceding number. So no spaced alternative is admitted (trap 9).
+ * neye-2`), never a detached suffix on the preceding number. So no spaced alternative is admitted (trap 9 (a guard alternative with no attested…)).
  *
  * THE ONE RULE THAT NEEDS WORDS IS THE CLOCK, for exactly the trap-14 reason: the minutes take the
  * connective `na-`, a BOUND morpheme that cannot be glued to a digit run. So step 8 converts both operands
  * to words itself, applies the fusion, and claims the a.m./p.m. marker and the timezone in the same match —
- * because after words-ification the shared tier can no longer see them (trap 14's second clause).
+ * because after words-ification the shared tier can no longer see them (trap 14 (agreement cannot be applied to digits)'s second clause).
  *
  * ─── WORDS I DECLINED TO INVENT ───
  *
@@ -68,7 +68,7 @@
  * **No era phrase and no letter names.** See the "deliberately not done" list in the PR; both are counted
  * (6 and 102) and both are refusals for want of a source, not for want of a seam. `core/initialisms.ts` needs
  * a `letterName` table; without one its `spellOut` returns undefined and the pass is a NO-OP, so wiring it
- * would change nothing — Swahili's situation verbatim, not Slovak's (trap 16).
+ * would change nothing — Swahili's situation verbatim, not Slovak's (trap 16 (before declaring a class out of scope)).
  */
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -125,7 +125,7 @@ const COMPASS: Readonly<Record<string, string>> = {
 /** a.m./p.m. `kusasa` is the corpus's own clock marker (*ngentsimbi ye 9:30 kusasa*) and the HSRC
  *  dictionary's gloss (*am – amaxesha akusasa*); `emva kwemini` is corpus-verbatim (*ngoLwesithathu emva
  *  kwemini*) and is literally *post meridiem*, so it is right for every p.m. hour rather than only the
- *  three (8:30, 9:19, 10:08 p.m.) the corpus happens to contain — trap 8. */
+ *  three (8:30, 9:19, 10:08 p.m.) the corpus happens to contain — trap 8 (zero corpus instances is not evidence of…). */
 const AM = "kusasa";
 const PM = "emva kwemini";
 
@@ -201,7 +201,7 @@ export function normalizeXhosa(input: string): string {
 
     // 3) ABBREVIATIONS whose expansion the corpus supplies itself. `Mnu.` → `Mnumzana`, from the corpus's
     //    own *U Mnumzana u Reid*; ×2 (`UMnu.`, `Mnu.`) plus one dotless `uMnu`. Requires a following
-    //    capitalised name so the token cannot be claimed inside anything else (trap 2).
+    //    capitalised name so the token cannot be claimed inside anything else (trap 2 (loose patterns over-count)).
     //    `Jr.` ×4 has no Xhosa reading to give it, so only its DOT is removed, and only when a lowercase
     //    word follows — i.e. when the sentence visibly continues (both corpus instances do). `St.` ×1 is
     //    deliberately untouched: it is an English place name (St James Gate), as in the Swahili layer.
@@ -240,7 +240,7 @@ export function normalizeXhosa(input: string): string {
     s = s.replace(/(?<=[\p{L}\p{M}])(?=(?:US|AUD)?[$£¥€][  ]?\d)/gu, " ");
     s = s.replace(/(?<![\p{L}\p{M}])(US|AUD)[  ]+(?=[$£¥€][  ]?\d)/gu, "$1");
 
-    // 6) A DECIMAL CARRYING A CURRENCY SIGN OR A UNIT must claim it here — trap 14's second clause. Step 12
+    // 6) A DECIMAL CARRYING A CURRENCY SIGN OR A UNIT must claim it here — trap 14 (agreement cannot be applied to digits)'s second clause. Step 12
     //    turns `14.7` into `14 7`, which destroys the number adjacency the shared tier matches on, so
     //    `US$ 14.7 yezigidi` would have read *14 iidola zaseMelika 7 yezigidi* with the noun inside the
     //    number. Three instances: `US$ 14.7 yezigidi`, `$2.3 bhiliyoni`, `3.50 m`.
@@ -264,7 +264,7 @@ export function normalizeXhosa(input: string): string {
     //    counts backwards in time (4.2 to 3.9 million years ago) and a decimal pair is never a score.
     s = s.replace(/(?<![\d.,])(\d+\.\d+)[  ]?[-–][  ]?(\d+\.\d+)(?![\d.])/gu, "$1 ukuya ku $2");
 
-    // 8) THE CLOCK, colon form ×12 — and the one rule that must produce WORDS (trap 14). The minutes take
+    // 8) THE CLOCK, colon form ×12 — and the one rule that must produce WORDS (trap 14 (agreement cannot be applied to digits)). The minutes take
     //    the connective `na-`, a bound morpheme: `9:30` is *ithoba namashumi amathathu*, and `na` cannot be
     //    glued to a digit run because the digits do not become words until the tokenizer, downstream of
     //    every rule here. So both operands are converted here and the fusion applied (see `connective`).
@@ -326,19 +326,19 @@ export function normalizeXhosa(input: string): string {
     //     TRAP 12: the corpus's one Celsius sentence ALREADY says it — *amaqondo angaphezulu kwe +30°C* —
     //     so a second `amaqondo` would double the noun. Suppressed when the word precedes.
     //     BEFORE step 13, which needs the digits intact.
-    //     `F` is claimed alongside `C` although the corpus has no Fahrenheit — trap 8: the adversarial
+    //     `F` is claimed alongside `C` although the corpus has no Fahrenheit — trap 8 (zero corpus instances is not evidence of…): the adversarial
     //     neighbour of an attested rule. Without it, `30°F` fell through every branch here (the bare-degree
     //     rule's trailing guard rejects a letter) and lost the ° while the F reached the g2p raw.
     //     THE SIGN IS CLAIMED HERE TOO, and asymmetrically. A leading `+` on a temperature is a POSITIVITY
     //     marker, and the corpus's one instance — *amaqondo angaphezulu kwe +30°C* — already says it in
-    //     words (*angaphezulu*, "above"), so saying it again would double the meaning: trap 12, and the
+    //     words (*angaphezulu*, "above"), so saying it again would double the meaning: trap 12 (a REDUNDANT symbol is a permissible drop), and the
     //     reason the artifact scan's residual `DROP math-sign ×1` is that sentence and is permissible.
-    //     A leading `-` is a real negative and IS read (0 corpus instances; trap 8's adversarial
+    //     A leading `-` is a real negative and IS read (0 corpus instances; trap 8 (zero corpus instances is not evidence of…)'s adversarial
     //     neighbour), because otherwise step 14's minus rule could not see it — the ° rewrite has already
     //     separated the sign from its digits by then.
     //     THE SIGN CAPTURE IS LETTER-GUARDED, and it has to be: Xhosa's concord hyphen looks exactly like a
     //     minus. Unguarded, `kwi-30°C` — an ordinary Xhosa spelling — read *kwi thabatha amaqondo 30*,
-    //     "in minus thirty degrees". Same family as trap 1: the pattern was wider than the orthography.
+    //     "in minus thirty degrees". Same family as trap 1 (`\b` is ASCII-defined): the pattern was wider than the orthography.
     s = s.replace(/(?<![\p{L}\p{M}\d])([+-])?(\d+)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gu,
         (_m, sign: string | undefined, n: string, off: number, full: string) => {
             const body = saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`;
@@ -366,7 +366,7 @@ export function normalizeXhosa(input: string): string {
     //     one already carries its Xhosa concord in the text — *ngesenturi ye 16th*, *nge 15th senturi*,
     //     *yakhe ye 60th*, *yango 17th-century* — so the Latin suffix is redundant orthography, and it was
     //     reaching the phoneme stream as a bare [tʰ]. Stripping it is the whole fix; no ordinal morphology
-    //     is invented (Xhosa's is written, and is written here). Case-insensitive (trap 7).
+    //     is invented (Xhosa's is written, and is written here). Case-insensitive (trap 7 (a character class that is not…)).
     s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
     // 14) RELATIONAL AND ARITHMETIC SIGNS. `=` `<` `>` `×` `÷` have ZERO corpus instances and are read
@@ -381,7 +381,7 @@ export function normalizeXhosa(input: string): string {
     //     THE TWO SIGNED-NUMBER GUARDS ARE MEASURED, not stylistic:
     //     · `+` is read only BETWEEN two operands (`UTC+1`, `4+4`). The corpus's other instance is
     //       `amaqondo angaphezulu kwe +30°C` — a POSITIVITY marker, redundant with the sentence's own
-    //       *angaphezulu* ("above"), which is trap 12 exactly: the correct reading is byte-identical with
+    //       *angaphezulu* ("above"), which is trap 12 (a REDUNDANT symbol is a permissible drop) exactly: the correct reading is byte-identical with
     //       and without the sign, so it stays unread and the artifact scan's residual `DROP math-sign ×1`
     //       is that sentence.
     //       ⚠ THAT SILENCE IS NOW SOURCED, NOT MERELY ARGUED, and the reason for it has changed. It used to

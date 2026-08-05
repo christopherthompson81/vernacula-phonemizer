@@ -44,7 +44,7 @@ import { CELLS, type Cell } from "./cells.ts";
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo #602, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
 // every measure phrase in every language, so the cell reports COVERED everywhere and says nothing. The
-// finding is real and general (playbook trap 15); the evidence for it is a corpus-level statistic — the
+// finding is real and general (playbook trap 15 (the same bound suffix is also written with…)); the evidence for it is a corpus-level statistic — the
 // same morpheme appearing both glued and detached — which is not the shape a cell can hold.
 
 const asciiVariant = (re: RegExp): RegExp => new RegExp(re.source.replace(/\\p\{Nd\}/gu, "\\d"), re.flags);

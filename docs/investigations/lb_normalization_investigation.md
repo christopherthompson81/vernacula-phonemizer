@@ -40,7 +40,7 @@ Tabulated over column 3. Counts are instances, not utterances.
 | **negative numbers** | **0** | every `-N` in the corpus is a compound hyphen: `Typ-1-Diabetes`, `COVID-19`, `II-76`, `36-x-24-mm` |
 | all-caps initialisms | 173 | `US` 18, `USA` 14, `UN` 5 — **not treated**, see Run 8 |
 
-### The `N.` context table (trap 4, the German method)
+### The `N.` context table (trap 4 (ambiguity is resolved by evidence), the German method)
 
 AFTER: `Joerhonnert` 23 · `September` 8 · `August` 5 · `Juli` 4 · `Januar` 3 · `Oktober` 2 · `Mäerz` 2 ·
 `Juni`/`Februar`/`November` 1 each (= 27 months) · `an` 4 · `vun` 2 · `bis`/`beim`/`gréisste`/`Dag`/`oder`/
@@ -125,7 +125,7 @@ So the ending is not a case table at all — it is one ending plus a sandhi rule
 factored out as `applyEifelerRegel()` and is now shared by the connector, the ordinal ending and the
 fraction numerator (`een Drëttel` — corpus — but `ee Fënneftel`).
 
-### The ordinal STEM, and how it was validated (trap 13)
+### The ordinal STEM, and how it was validated (trap 13 (pin the rule's BRANCHES))
 
 Composition: cardinal + `t` below 20, + `st` from 20, collapse a doubled `t`, two suppletive stems
 (`1 éischt`, `3 drëtt`). Enumerated 1…30 and spot-checked against **two independent sources**:
@@ -154,7 +154,7 @@ Composition: cardinal + `t` below 20, + `st` from 20, collapse a doubled `t`, tw
 | `an der` / `pro` | `/h` / `/s` | corpus: `240 Kilometer **an der Stonn** (149 Meilen an der Stonn)` and `1,5 Kilometer **pro** Sekonn` — both idioms taken verbatim |
 | `Stonn`, `Sekonn`, `Meilen` | rate nouns | corpus + espeak |
 | `Grad`, `Celsius` | `°C` | espeak / corpus ×1 |
-| `Fahrenheit` | `°F` | invariant proper name; **zero corpus instances** (trap 8 probe only) |
+| `Fahrenheit` | `°F` | invariant proper name; **zero corpus instances** (trap 8 (zero corpus instances is not evidence of…) probe only) |
 | `vir`, `no`, `Christus` | `v./n. Chr.` | espeak `vir`, `no`; **`Christus` corpus ×1** (`d'Opersteeung vu Christus`) |
 | `zum Beispill` | `z. B.` | corpus ×10 as words |
 | `an sou weider` | `asw.` | espeak `sou`, `weider` |
@@ -175,7 +175,7 @@ in the PR.
 where an lb speaker may equally say the French *Saint*, which is playbook §5b territory (ask the audio) and
 not a text question. Left unexpanded — 5 spurious pauses kept rather than 5 confidently-wrong words.
 
-## Run 7 — 2026-08-02 — trap 14: what a joiner does to its neighbour
+## Run 7 — 2026-08-02 — trap 14 (agreement cannot be applied to digits): what a joiner does to its neighbour
 
 `bis` begins with `b`, which is **not** in the Eifeler keeper set — so a range whose left operand ends in
 `n` must lose that `n`, and the corpus proves it: **`siwe bis aacht`**, not \**siwen bis aacht*.
@@ -183,8 +183,8 @@ not a text question. Left unexpanded — 5 spurious pauses kept rather than 5 co
 Emitting `$1 bis $2` on digits could never do that, because at that moment there is no word. So the range
 rule words-ifies the LEFT operand — and only when it has to (`numberToWords(n)` ends in `n`; in practice 7,
 and anything ending in *Millioun*/*Milliarden*). The right operand stays digits, which is what keeps the
-shared tier's number↔unit adjacency alive for `2 – 3 km` (trap 14's second clause). The operand character
-class is anchored to end in a digit so it cannot eat a clause comma (trap 14, hazard 2).
+shared tier's number↔unit adjacency alive for `2 – 3 km` (trap 14 (agreement cannot be applied to digits)'s second clause). The operand character
+class is anchored to end in a digit so it cannot eat a clause comma (trap 14 (agreement cannot be applied to digits), hazard 2).
 
 The same applies to the clock: `Auer` is **feminine**, so hour 1 is *eng Auer*, never \**eent Auer*. The
 clock rule words-ifies h=1 for that reason. Zero corpus instances of `1 Auer`/`1.xx Auer`… except
@@ -208,12 +208,12 @@ corpus-diff to earn. Reported, not done. Where **this layer** emits a word, the 
   clearly right, but it is a change to the *tokenizer's* punctuation set rather than to normalization, and
   it would move 44 utterances for a reason unrelated to #562. Reported.
 * **`bzw.`** (1 instance, inside a German-flavoured sentence) and **`Prof.`/`etc.`** (0 instances) —
-  trap 9: no attested instance, no rule.
+  trap 9 (a guard alternative with no attested…): no attested instance, no rule.
 * **`ha`/`t`/`g` units** — `50 Hektar` is written out, and there is no bare `\dg` in the corpus
   (`802.11g` is the version). A one-letter unit key is the Dutch `Il-76s` hazard; not declared.
 * **`£`** — sign absent from the corpus, word unsourced.
 
-## Run 9 — 2026-08-02 — branch enumeration (trap 13)
+## Run 9 — 2026-08-02 — branch enumeration (trap 13 (pin the rule's BRANCHES))
 
 Ran `ordinalStem` over 1…30 plus {37, 60, 100, 190, 1000, 1922, 1979, 2010} and the fraction composer over
 denominators 2…12, and read the lists. Output recorded in the test file as pins. The branches are:
@@ -253,7 +253,7 @@ reached the IPA as raw letters. Luxembourgish fuses the measure word German-styl
 both compounds itself — `783 562 Quadratkilometer (300 948 Quadratmeilen)` and `120 – 160 Kubikmeter` — so
 `exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" }`. Sourced, not invented.
 
-Neither was visible in any unit probe. This is trap 3, twice, in one language.
+Neither was visible in any unit probe. This is trap 3 (the corpus diff sees what probes cannot), twice, in one language.
 
 ## Run 11 — 2026-08-02 — the mechanical review, and the sign classes
 
@@ -419,7 +419,7 @@ ta  + … mˈɪlːɪjɐn t͡ɕˈɐd̪ʊɾɐ kˈɪloːmˌiːʈːɐr
 ```
 
 Each also removes a stranded "two" — the `2` of `km2` had been read as a number. The magnitude is
-re-emitted verbatim (trap 10) and governs the count form through the language's own `countForm` via `MANY`,
+re-emitted verbatim (trap 10 (a rule that CONSUMES a word must put it back)) and governs the count form through the language's own `countForm` via `MANY`,
 the same constant and the same reasoning `withMagnitude` uses on the currency side.
 
 German is untouched and still reads `2,2 Millionen km2` wrongly, for a different reason: its layer converts
@@ -440,7 +440,7 @@ the corpus: there is no reading to lose, so the word would be a pure guess.
 ### Items left, with the PR's reasoning intact
 
 Item 2 (bare `1` before a noun, 0 instances), item 5 (a hyphen range — `\d-\d` has 0 instances against many
-`-N` compounds, trap 9), item 7 (`bzw.` ×1 inside a German-flavoured sentence; `Prof.`/`etc.` ×0; the
+`-N` compounds, trap 9 (a guard alternative with no attested…)), item 7 (`bzw.` ×1 inside a German-flavoured sentence; `Prof.`/`etc.` ×0; the
 one-letter unit keys, which are the Dutch `Il-76s` hazard; `£` above).
 
 ### Verification

@@ -102,7 +102,7 @@ two places: a case suffix written after a digit belongs ON the word the digit is
    the four-way high class and the two-way low class (a/ə) and inserts the buffer `y` after a vowel-final
    stem. One helper, three users (clock, percent, fraction locative).
 3. **Percent took only two of its five suffix shapes, ×6.** The guard was `\b`, which is ASCII-defined
-   (playbook trap 1), so `46%-dən` and `1%-nin` — suffixes ending in a non-ASCII letter — silently declined
+   (playbook trap 1 (`\b` is ASCII-defined)), so `46%-dən` and `1%-nin` — suffixes ending in a non-ASCII letter — silently declined
    and read the suffix as a bare word (*faiz dən*). And `-ni` produced *faizni*, a cluster the language does
    not allow: an n-initial suffix assumes a vowel-final stem, so `88%-ni` is *faizini* (three instances).
 4. **`¾` read as 4/3.** `üçdə dörd` is "four in three"; ¾ is *dörddə üç*, which is exactly the shape the

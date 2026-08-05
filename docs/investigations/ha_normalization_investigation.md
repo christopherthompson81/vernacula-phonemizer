@@ -94,7 +94,7 @@ referee eval prints two "folded backbone" lines (two referee sets); both worktre
 ## Run 3 — 2026-08-01 (re-review against the playbook traps)
 
 The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Three real defects,
-all found by probing the adversarial neighbour (trap 8), none visible in the original corpus diff:
+all found by probing the adversarial neighbour (trap 8 (zero corpus instances is not evidence of…)), none visible in the original corpus diff:
 
 - **The decimal-percent leak (the Fula/Irish lesson)**: `3.5%` read "uku maki biyar" with the `%`
   silently dropped — the dot rule converted the number to words, so the tier's digit-adjacent kashi

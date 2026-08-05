@@ -102,13 +102,13 @@ the Irish -idí suffix as a word) — the corpus's own prose register; acceptabl
 ## Run 3 — 2026-08-01 (re-review against the playbook traps)
 
 The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Three real defects,
-all found by probing the adversarial neighbour (trap 8/13), none visible in the corpus diff:
+all found by probing the adversarial neighbour (trap 8 (zero corpus instances is not evidence of…)/13), none visible in the corpus diff:
 
-- **The `haon`-ending compound ordinals (trap 13)**: `21ú` and `31ú` read "21ú"/"31ú" unchanged — the
+- **The `haon`-ending compound ordinals (trap 13 (pin the rule's BRANCHES))**: `21ú` and `31ú` read "21ú"/"31ú" unchanged — the
   compositor emits "fiche a haon" (the counting `a` + h-prefixed `haon`), but UNIT_ORD keyed only "aon",
   so the last word "haon" found no ordinal. The corpus has NO 21ú/31ú (only 11ú, which goes through the
   <20 table path), so this is defensive — but it was wrong for the language. Fixed: "haon" → "aonú".
-- **The decimal-percent leak (trap 8, the Fula lesson)**: `3.5%` read "a trí pointe a cúig" with the `%`
+- **The decimal-percent leak (trap 8 (zero corpus instances is not evidence of…), the Fula lesson)**: `3.5%` read "a trí pointe a cúig" with the `%`
   silently dropped — the dot rule converted the number to words, so the tier's digit-adjacent `%` could
   not see it. Fixed by claiming the word-form percent ("X pointe … faoin gcéad").
 - **English `BC` era marker (defensive)**: the corpus uses `R.C.` (roimh Chríost), but the synthetic

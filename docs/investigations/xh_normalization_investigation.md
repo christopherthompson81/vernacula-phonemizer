@@ -92,7 +92,7 @@ DNA/NHC/GMT/MRI → d̤nˈaː / nhkǀ / ɡ̤mtʼ / mrˈiː                      
 **Implication.** Fourteen distinct rule families. The concord-prefix shape (~330) is the language's
 defining orthography and — importantly — the engine already reads it *acceptably*: the hyphen is dropped
 and the prefix is emitted as its own word, which is what the writing separates it as. Nothing to do there,
-and inventing an agreement on the numeral would be trap 14. See Run 4.
+and inventing an agreement on the numeral would be trap 14 (agreement cannot be applied to digits). See Run 4.
 
 ---
 
@@ -170,7 +170,7 @@ which is a published bilingual glossary, not my invention. Found this way:
 
 ## Run 4 — 2026-08-02 — the noun-class concord, measured rather than assumed
 
-**Question.** Does a rule in this layer need to make a numeral agree with its noun (trap 14)?
+**Question.** Does a rule in this layer need to make a numeral agree with its noun (trap 14 (agreement cannot be applied to digits))?
 
 Xhosa writes the concord **explicitly, hyphenated onto the digits**: `ezingama-3000`, `eziyi-12.8`,
 `abayi-93%`, `ngo-1957`, `ku-100-200`, `we-1683`, `imizuzu emi-3`, `iminyaka engama-250`. ~330 occurrences
@@ -186,12 +186,12 @@ minutes take the connective `na-`, which is a BOUND morpheme and cannot be glued
 clock rule converts both operands to words itself and applies the fusion, using the fusion evidenced by
 `xhosa.jsonc`'s own `na` series (na+i→ne: *ithoba*→*nethoba*; na+a→na: *amashumi*→*namashumi*). It then
 claims the a.m./p.m. marker and the timezone in the same match, because after words-ification the tier can
-no longer see them (trap 14's second clause).
+no longer see them (trap 14 (agreement cannot be applied to digits)'s second clause).
 
 `grep -oPE '[0-9] (na|ne|nga|ku|nge|ye)(?![a-zA-Z])'` on the corpus → **6 hits, and every one is a prefix on
 the FOLLOWING token** (`ye-240 ye-km ngeyure`, `Inombolo-1 neye-2`, `ne-¥130,000`), never a detached suffix on
-the preceding number. So trap 15's spaced alternation does not exist here — Xhosa never detaches the concord
-from the digits, it always hyphenates — and no spaced alternative is admitted (trap 9: a guard with no
+the preceding number. So trap 15 (the same bound suffix is also written with…)'s spaced alternation does not exist here — Xhosa never detaches the concord
+from the digits, it always hyphenates — and no spaced alternative is admitted (trap 9 (a guard alternative with no attested…): a guard with no
 attested instance is a misfire generator).
 
 ---
@@ -267,7 +267,7 @@ would have read *kunye kunye*.
    *thabatha* would be confidently wrong. This is the Burmese `DROP minus` precedent verbatim.
 2. The degree rule's sign capture had to be LETTER-GUARDED, and this was a live bug for about ten minutes:
    Xhosa's concord hyphen is indistinguishable from a minus, so `kwi-30°C` — an ordinary spelling — read
-   *kwi thabatha amaqondo 30*, "in minus thirty degrees". Same family as trap 1: the pattern was wider than
+   *kwi thabatha amaqondo 30*, "in minus thirty degrees". Same family as trap 1 (`\b` is ASCII-defined): the pattern was wider than
    the orthography. Caught by writing the adversarial-neighbour test, not by the corpus (0 instances).
 
 `review.ts` now reports **`[ ok ] sign classes  none dropped`**.
@@ -292,10 +292,10 @@ referee-eval xh   (vs a pinned worktree of cd4004b)       → BYTE-IDENTICAL, md
 
 - `DROP math-sign ×1` — *kwinyanga zehlobo, amaqondo angaphezulu kwe +30°C aqhelekile.* The `+` is a
   POSITIVITY marker and the sentence already says it in words (*angaphezulu*, "above"), so the correct
-  reading says it once: trap 12 exactly, where "no correct rule can escape the deletion test". Xhosa has no
+  reading says it once: trap 12 (a REDUNDANT symbol is a permissible drop) exactly, where "no correct rule can escape the deletion test". Xhosa has no
   attested positivity word — the HSRC glosses are the addition operator — so the sign stays unread here
   while `+` in an operator position (`UTC+1`) is read. The differential test cannot see the difference,
-  which is precisely what trap 12 documents.
+  which is precisely what trap 12 (a REDUNDANT symbol is a permissible drop) documents.
 - `DROP minus ×1` — the stray hyphen in *kangange -40 mph*, per Run 6. Any correct handling of a stray
   hyphen produces the same reading with and without it, so the flag is unavoidable and the evidence is the
   answer.
@@ -378,7 +378,7 @@ not reliably a pause in speech.
 ### The two argued DROPs, verified
 
 - **`DROP math-sign ×1`** — `amaqondo angaphezulu kwe +30°C`. The `+` is a positivity marker and the
-  sentence's own *angaphezulu* ("above") already says it: trap 12. Reading confirmed correct.
+  sentence's own *angaphezulu* ("above") already says it: trap 12 (a REDUNDANT symbol is a permissible drop). Reading confirmed correct.
 - **`DROP minus ×1`** — `sineyona mimoya ebhudla kangange -40 mph`. The scan prints the head of the
   utterance, which reads as a different sentence than the note describes; it is the same one. The hyphen is
   a stray dash (the English source says "at 40 mph"), and it is correctly dropped rather than read as

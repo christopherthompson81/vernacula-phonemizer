@@ -23,7 +23,7 @@
  *
  * **The COLON is not a clock in this language.** All six `\d+:\d+` in the corpus are scores or ratios —
  * `7:2`, `2:2`, `6:6`, `21:20`, `3:2`, `5:3-Victoire`. A colon-clock rule would have misfired 6 times out
- * of 6, so none is written (trap 9).
+ * of 6, so none is written (trap 9 (a guard alternative with no attested…)).
  *
  * ── THE ORDINAL ENDING IS THE EIFELER REGEL, NOT A CASE TABLE ──────────────────────────────────────────
  * The corpus spells out enough ordinals to derive the inflection outright:
@@ -59,7 +59,7 @@ const ORDINAL_NOUN = `${MONTHS}|Joerhonnert|Joerhonnerts|Joerdausend`;
  * um/nom/déi/säi/säin 1 each); the rest of the paradigm is included because it is the same closed class.
  * DELIBERATELY EXCLUDED: the copula. `ass 15. beim Männer-Super-G` is a real ordinal (the corpus spells
  * the parallel out — *ass néngte beim Männer-Super-G*) but licensing off a verb turns any sentence-final
- * numeral into an ordinal, which is trap 9 for the sake of one instance. So is `Joer`, which precedes two
+ * numeral into an ordinal, which is trap 9 (a guard alternative with no attested…) for the sake of one instance. So is `Joer`, which precedes two
  * of the four sentence-final years.
  */
 const LICENSER = new Set([
@@ -100,7 +100,7 @@ export function ordinalStem(n: number): string | undefined {
  * Denominator → the fraction NOUN. Composition is *ordinal stem + el*, which espeak's own list confirms
  * for 3, 5, 6, 7, 8 and 9 (`drëttel fënneftel sechstel siwentel aachtel néngtel`). `4` is the one
  * irregular it records — `véierel`, not \**véiertel* — and `2` is not a noun at all but the adjective
- * `hallef`, handled by the caller. Composing rather than tabling is trap 8's constructive half: the
+ * `hallef`, handled by the caller. Composing rather than tabling is trap 8 (zero corpus instances is not evidence of…)'s constructive half: the
  * corpus writes exactly one fraction (`1/5`).
  */
 const FRACTION_NOUN: Readonly<Record<number, string>> = { 4: "Véierel" };
@@ -178,7 +178,7 @@ const FRACTION = /(?<![\d.,:/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu;
 const perDigit = (frac: string): string => [...frac].join(" ");
 
 /** Normalize one Luxembourgish input string. Pure text→text; the words land as TEXT so the tokenizer
- *  phonemizes them through the same g2p as everything else (trap 6). */
+ *  phonemizes them through the same g2p as everything else (trap 6 (a word your layer emits must come from the…)). */
 export function normalizeLuxembourgish(input: string): string {
     let s = input;
 
@@ -216,7 +216,7 @@ export function normalizeLuxembourgish(input: string): string {
     s = s.replace(ABBREV_END, (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
 
     // 5) ORDINALS — the largest defect (×67), every one previously a cardinal plus a spurious PAUSE.
-    //    Three licensing conditions, each read off the corpus table (see the file header and trap 4):
+    //    Three licensing conditions, each read off the corpus table (see the file header and trap 4 (ambiguity is resolved by evidence)):
     //      (a) the FOLLOWING word is a month or Joerhonnert                                   — 50 of 63
     //      (b) the PRECEDING word is a determiner/possessive/contraction and a word follows    — 6
     //      (c) the ordinal heads a coordinated LIST: `11., 12. an 13.`, `10. bis 11.`, `19. oder … 20.` — 6
@@ -288,7 +288,7 @@ export function normalizeLuxembourgish(input: string): string {
     //     ends in ⟨n⟩ loses it — the corpus writes `siwe bis aacht`. A digit cannot do that, so the LEFT
     //     operand is words-ified when and only when it needs to be. The right operand stays digits, which
     //     is what keeps the number↔unit adjacency alive for `2 – 3 km`. The operand class is anchored to
-    //     end in a digit so it cannot swallow a clause comma (trap 14, hazard 2).
+    //     end in a digit so it cannot swallow a clause comma (trap 14 (agreement cannot be applied to digits), hazard 2).
     s = s.replace(RANGE, (_m, left: string) => {
         const words = /^\d+$/u.test(left) ? numberToWords(Number(left)) : "";
         // Only an unstressed final ⟨-en⟩ is the rule's target — *siwen* → *siwe*, *Milliounen* →

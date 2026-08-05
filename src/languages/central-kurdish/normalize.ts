@@ -105,7 +105,7 @@ export function normalizeCentralKurdish(input: string): string {
             `${n} ${CKB_UNIT[u.toLowerCase()]!} لە ${CKB_PER[d.toLowerCase()]!}`);
     //     …and the PERSO-ARABIC numerator, which the corpus writes as `کم/کاتژمێر` and `مەتر/چرکە`.
     //     ⚠ THE ABBREVIATION MUST BE ACCEPTED HERE, NOT JUST THE WORD. This block runs at step 2b — lifted
-    //     above the decimal rule so the version guard keeps its dot (trap 39) — while the Perso-Arabic unit
+    //     above the decimal rule so the version guard keeps its dot (trap 39 (a local rule that depends on a character…)) — while the Perso-Arabic unit
     //     expansion is step 6b, further DOWN the file. So at this point `کم` has not become `کیلۆمەتر` yet, and
     //     an arm matching only the spelled forms silently missed the corpus's own `کم/کاتژمێر`.
     const CKB_NUMER: Readonly<Record<string, string>> = {

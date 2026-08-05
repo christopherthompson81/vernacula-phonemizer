@@ -16,7 +16,7 @@
  *
  * MEASURED over the hr_hr FLEURS corpus (see docs/investigations/hr_normalization_investigation.md).
  *
- * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1).
+ * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
  */
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";

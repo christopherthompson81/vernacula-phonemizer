@@ -15,7 +15,7 @@
  * Every one of those was hand-investigated, per language, by whoever wrote the layer — and the cost of doing
  * it by hand is not the time, it is that **it was got wrong**: Slovak (#603) deferred 119 initialisms with
  * "it is a separate seam", when the seam existed, 30 languages already wired it, and espeak carried Slovak's
- * full letter-name table. That is trap 16, and this file is trap 16 mechanised: the check becomes a lookup.
+ * full letter-name table. That is trap 16, and this file is trap 16 (before declaring a class out of scope) mechanised: the check becomes a lookup.
  *
  * The counterpart matters just as much. Luxembourgish (#604) and Zulu/Xhosa (#606/#607) deferred the same
  * class CORRECTLY — lb_list has 2 of 26 letter names and espeak ships no Zulu or Xhosa at all — and the

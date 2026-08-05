@@ -3,7 +3,7 @@
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
  * Kazakh's DEFINING rule (measured over the kk_hr FLEURS corpus — see the investigation doc) is the
- * CASE SUFFIX after a digit, exactly as trap 14 predicted:
+ * CASE SUFFIX after a digit, exactly as trap 14 (agreement cannot be applied to digits) predicted:
  *   `N-ші`/`N-шы` ordinals ×16 (190-шы, 60-шы, 19-шы, 1-ші)
  *   bare numbers with a CASE suffix ×36 (200-ге, 8-ден, 80-нен, 60-тан, 1000-нан, 11:00-ден, 9:30-да,
  *     160 км/сағ-қа)
@@ -29,7 +29,7 @@
  *   `б.д.д.`    → `bˈə . dˈə . dˈə .`       the era marker letter-spelled
  *   `83 км/сағ` → `… kəjlomˈetr sˈɑʁ`       the rate denominator raw
  *
- * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1).
+ * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToIpa } from "./numbers.ts";
@@ -90,7 +90,7 @@ function ordinalWord(n: number): string | undefined {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// CASE SUFFIXES (trap 14 — the defining rule)
+// CASE SUFFIXES (trap 14 (agreement cannot be applied to digits) — the defining rule)
 // ---------------------------------------------------------------------------------------------------
 
 /** The Kazakh case suffixes the corpus writes after digits, keyed by the CASE they mark. The suffix the

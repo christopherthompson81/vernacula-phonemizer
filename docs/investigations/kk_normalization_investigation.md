@@ -15,7 +15,7 @@ started from). Working branch: `norm-kk-562`.
 - **BARE NUMBERS with CASE SUFFIXES** ×36 (trap-14's defining shape) — `200-ге` (dative), `8-ден`
   (ablative), `80-нен`, `60-тан`, `1000-нан`, `160 км/сағ-қа`, `11:00-ден`, `9:30-да`, `35-40 миль /
   сағ`. The suffix must agree with the WORD via vowel harmony (200-ге → екі жүзге, 11:00-ден → on bir-
-  ден), so gluing the written suffix verbatim is wrong (trap 14).
+  ден), so gluing the written suffix verbatim is wrong (trap 14 (agreement cannot be applied to digits)).
 - **`б.д.д.`** (before the birth of Jesus = BC) ×2, **`т.б.`** (etc.), **`т.с.с.`** — dotted
   abbreviations.
 - **Space-grouped thousands** ×6 (17 000, 24 000, 5 000 000, 104 500, 10 000, 55 000) — the TOKEN `\d+`
@@ -45,7 +45,7 @@ started from). Working branch: `norm-kk-562`.
 (roman ordinal), `2005-жылы` → екі мың бес жылы (year), `1977-1981` (range), `Елизавета II`.
 
 **Next**: write `src/languages/kazakh/normalize.ts`. The DEFINING rule is the case suffix after digits
-(trap 14): the suffix must agree with the WORDS via vowel harmony, and the ordinal suffix must attach to
+(trap 14 (agreement cannot be applied to digits)): the suffix must agree with the WORDS via vowel harmony, and the ordinal suffix must attach to
 the last cardinal element.
 
 ## Run 2 — 2026-08-01 (implementation)
@@ -58,7 +58,7 @@ the last cardinal element.
    romanOrdinals.ordinal (≤100) + an extension for the hundreds (101–999)
 3) CLOCKS — the colon form (08:46 → сегіз қырық алты), with the case suffix consumed (11:00-ден →
    он бірден, 9:30-да → тоғыз отызда)
-4) THE CASE SUFFIX — the DEFINING rule (trap 14). `200-ге`, `8-ден`, `80-нен`, `60-тан`, `1000-нан`
+4) THE CASE SUFFIX — the DEFINING rule (trap 14 (agreement cannot be applied to digits)). `200-ге`, `8-ден`, `80-нен`, `60-тан`, `1000-нан`
    → the number becomes words, the ending attaches to the last word with vowel harmony AND the
    voiceless/nasal variants (жүз→жүзге, сексен→сексеннен, алпыс→алпыстан, мың→мыңнан)
 5) DEGREES — `+ 30 °C-тан` → плюс отыз градус цельсийден, `35°W` → градус батыс
@@ -89,9 +89,9 @@ regex matched the FIRST vowel).
 ## Run 3 — 2026-08-01 (re-review against the playbook traps)
 
 The parent asked for a re-review with `docs/normalization_playbook.md` in mind. Two real defects and
-one corpus-attested addition, found by probing the adversarial neighbour (trap 8):
+one corpus-attested addition, found by probing the adversarial neighbour (trap 8 (zero corpus instances is not evidence of…)):
 
-- **The 4-digit ordinal (trap 13 branch miss)**: `1000-ші` read *undefined жүзінші* — `ordinalWord(1000)`
+- **The 4-digit ordinal (trap 13 (pin the rule's BRANCHES) branch miss)**: `1000-ші` read *undefined жүзінші* — `ordinalWord(1000)`
   fell through the hundreds extension (h=10, UNIT_CARD[10] undefined) and emitted the literal
   "undefined". The corpus writes no 4-digit ordinal (all 1–190), so this was corpus-absent — but
   emitting "undefined" is worse than leaving the suffix raw. Fixed: `ordinalWord` returns undefined

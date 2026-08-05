@@ -2,7 +2,7 @@
  * Zulu / isiZulu (zu) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * THE NOUN-CLASS CONCORD, which is the thing this language was expected to break on (trap 14), and what
+ * THE NOUN-CLASS CONCORD, which is the thing this language was expected to break on (trap 14 (agreement cannot be applied to digits)), and what
  * measuring it showed. Zulu does not inflect the numeral. It writes a RELATIVE-CONCORD + COPULATIVE
  * prefix hyphenated onto the digit run, and that prefix is ALREADY IN THE TEXT — 349 of the corpus's
  * number occurrences carry one:
@@ -12,7 +12,7 @@
  *
  * The concord agrees with the HEAD NOUN, never with the value of the digits — and the head noun is either
  * already written (those 349) or is a noun THIS FILE emits. So the agreement is always determined by
- * something the layer can see, and trap 14 does not bite, on one condition: no rule may invent a concord
+ * something the layer can see, and trap 14 (agreement cannot be applied to digits) does not bite, on one condition: no rule may invent a concord
  * for a noun it did not itself put there. Three consequences, and they are the design:
  *
  *   1. every rule leaves the numeral as DIGITS — the tokenizer's numberToWords does the words;
@@ -63,7 +63,7 @@
  * one at a time. `nengxenye` ("and a part") was considered for `.5` on the Hausa `da rabi` model and
  * rejected: all 17 corpus instances of `ingxenye` gloss it as PART, not HALF.
  *
- * INITIALISMS ARE NOT WIRED, and this is a checked deferral rather than an assumption (trap 16).
+ * INITIALISMS ARE NOT WIRED, and this is a checked deferral rather than an assumption (trap 16 (before declaring a class out of scope)).
  * `src/core/initialisms.ts` exists and 37 language files use it — but read its `spellOut()`: it returns
  * `undefined` as soon as ANY letter lacks a name, and the caller then leaves the token alone. With no
  * `letterName` table the acronym branch is a literal no-op on all ~110 tokens, and no Zulu letter-name
@@ -98,7 +98,7 @@ const COMPASS: Record<string, string> = {
  *  yesithathu` ×2 (a third) and `ingxenye yesine` ×1 (a quarter), out of `ingxenye` ×17. 5–10 compose
  *  from the same frame over stems already in zulu.jsonc. EXPLICIT rather than derived, because `ishumi`
  *  is class 5 and takes `yeshumi`, not the `*yesishumi` a derivation from the isi- nouns would give
- *  (trap 13 — the table branch and the boundary between the frames are different cases). */
+ *  (trap 13 (pin the rule's BRANCHES) — the table branch and the boundary between the frames are different cases). */
 const ORDINAL_YE: Record<number, string> = {
     2: "yesibili", 3: "yesithathu", 4: "yesine", 5: "yesihlanu", 6: "yesithupha",
     7: "yesikhombisa", 8: "yesishiyagalombili", 9: "yesishiyagalolunye", 10: "yeshumi",
@@ -121,7 +121,7 @@ function expandDotted(s: string, body: string, word: string): string {
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
 
-/** A clock's spoken body. The hour NOUN is never added (trap 12): all 12 of the corpus's colon clocks are
+/** A clock's spoken body. The hour NOUN is never added (trap 12 (a REDUNDANT symbol is a permissible drop)): all 12 of the corpus's colon clocks are
  *  already introduced by `ngo-`/`ngawo-`/`kuka-` ("at [the hour]"), and the corpus writes the noun itself
  *  when it wants it (`ngehora lika-10 namuhla ekuseni`). `:00` reads as the bare hour, never *iqanda*.
  *  `nemizuzu engu-M` is sourced composition: `imizuzu` ×3 (and `umzuzu` in BOTH tone.tsv and the epitran
@@ -129,7 +129,7 @@ function expandDotted(s: string, body: string, word: string): string {
  *  here (nemidlalo, nemithetho, nemikhumbi, neminyaka, nemizila, nemisebenzi, nemimoya, nemibuzo, …); and
  *  the class-4 copulative concord `engu-` is attested on a DIGIT RUN in `iminyaka engu-40`. The concord
  *  agrees with `imizuzu`, a noun this rule itself emits — never with the value of the digits, so nothing
- *  here needs the numeral as words (trap 14). */
+ *  here needs the numeral as words (trap 14 (agreement cannot be applied to digits)). */
 function clockBody(h: string, min: string): string {
     const hv = Number(h), mv = Number(min);
     return mv === 0 ? String(hv) : `${hv} nemizuzu engu-${mv}`;
@@ -145,7 +145,7 @@ function halfDay(marker: string | undefined): string {
  * Zulu text normalization. Runs BEFORE the shared symbol tier (`SYMBOLS(normalizeZulu(input))`, the
  * Fula/Hausa order), so every rule leaves a NUMBER where the tier expects one — except the decimal
  * rewrite, which is the only rule that destroys number↔symbol adjacency and therefore claims its
- * neighbouring currency sign and unit itself (trap 14's second clause).
+ * neighbouring currency sign and unit itself (trap 14 (agreement cannot be applied to digits)'s second clause).
  */
 export function normalizeZulu(input: string): string {
     let s = input;
@@ -157,7 +157,7 @@ export function normalizeZulu(input: string): string {
     // 2) AMPERSAND → `kanye ne-` ("and the"), the corpus's own form before a hyphenated foreign token
     //    (`kanye ne-NPWS`, ×13 of `kanye` ×290). Both instances lost the conjunction entirely: `Arts &
     //    Sciences` → [ˈaːrt͡sʼ skǀiˈɛːŋǀɛs], `amaB&B` → [ˈaːmaɓ ɓ]. The surrounding spaces are absorbed so
-    //    the glued and spaced spellings both give `X kanye ne-Y` (trap 15 — the same morpheme, two
+    //    the glued and spaced spellings both give `X kanye ne-Y` (trap 15 (the same bound suffix is also written with…) — the same morpheme, two
     //    spellings; here it is the SIGN that is spaced or not, and both occur once each).
     s = s.replace(/\s*&\s*/gu, " kanye ne-");
 
@@ -310,7 +310,7 @@ export function normalizeZulu(input: string): string {
     //    has already said it is a temperature, so `°C` reads as the bare degree phrase. `Fahrenheit`
     //    contains no click letter, is read by the g2p as an ordinary word, and is KEPT — without it `°F`
     //    and `°C` would be indistinguishable. Zero `°F` occur; the branch is pinned in the tests anyway
-    //    (trap 8 — probe the adversarial neighbour of every rule).
+    //    (trap 8 (zero corpus instances is not evidence of…) — probe the adversarial neighbour of every rule).
     //    TRAP 12: THE SENTENCE MAY ALREADY SAY *amazinga*, and the corpus's only °C instance does. Emitting
     //    the noun unconditionally read `amazinga okushisa angaphezu kuka-+30°C` as *amazinga okushisa
     //    angaphezu kuka- AMAZINGA ANGU- amashumi amathathu* — the degree word twice, and two bound concords
@@ -335,7 +335,7 @@ export function normalizeZulu(input: string): string {
     //     `abantu abangu-8 kuya ku-100`, `ku-US$11,000 kuya ku-US$22,500`, `ka-24 Agasti kuya ku-5`. The
     //     `ku-` is class-17 locative and INVARIANT, which is exactly why it is the right joiner here:
     //     nothing about it has to agree with the value of the digits, so the operands stay digits and
-    //     trap 14 cannot arise. ASCENDING ONLY, measured: of the 16 `N-N` shapes, 13 ascending ones are
+    //     trap 14 (agreement cannot be applied to digits) cannot arise. ASCENDING ONLY, measured: of the 16 `N-N` shapes, 13 ascending ones are
     //     genuine spans (1469–1539, 1644-1912, 1894-1895, 1418 – 1450, 120-160, 100-200, 35-40, 56-64,
     //     10 -11, 3-5, 2-5, 2-3 ×2) and the 3 non-ascending are the season `1995-96` and the scores
     //     `26 -00` / `5-3` / `7–2`, which read as a juxtaposition rather than a span. `4.2-3.9` (million
@@ -345,14 +345,14 @@ export function normalizeZulu(input: string): string {
     //     then split both operands and strand the dash with no joiner at all.
     //     BEFORE the decimal rules and BEFORE the unit/rate rules (which then see `40 mph` in
     //     `35 kuya ku-40 mph`). Both operands are re-emitted VERBATIM and both classes END IN A DIGIT, so
-    //     a trailing clause comma can never be eaten (trap 14's second hazard).
+    //     a trailing clause comma can never be eaten (trap 14 (agreement cannot be applied to digits)'s second hazard).
     const span = (whole: string, a: string, b: string): string =>
         Number(a.replace(/,/gu, "")) < Number(b.replace(/,/gu, "")) ? `${a} kuya ku-${b}` : whole;
     //     A DECIMAL range is joined in EITHER direction, unlike an integer one. The ascending-only guard
     //     exists to keep sports scores and seasons out, and neither is ever written with a decimal point —
     //     so the corpus's one decimal range, the DESCENDING `eminyakeni eyizigidi ezingu-4.2-3.9 edlule`
     //     ("4.2 to 3.9 million years ago"), is a genuine span and is joined. Narrowly widened on one
-    //     counted instance rather than on taste (trap 9 in reverse).
+    //     counted instance rather than on taste (trap 9 (a guard alternative with no attested…) in reverse).
     s = s.replace(/(?<![\d.,])(\d+\.\d+)[  ]*[-–—][  ]*(\d+\.\d+)(?![\d.,])/gu, "$1 kuya ku-$2");
     s = s.replace(/(?<![\d.,])(\d[\d,]*\d|\d)[  ]*[-–—][  ]*(\d[\d,]*\d|\d)(?![\d.,])/gu, span);
 
@@ -387,7 +387,7 @@ export function normalizeZulu(input: string): string {
     //     worse than a missing one. See the header for the rejected `nengxenye` candidate.
     //
     //     THIS IS THE ONLY RULE THAT BREAKS number↔symbol ADJACENCY, so it claims its neighbours itself
-    //     (trap 14's second clause). Five instances need it: `$14.7` and `ku-$2.3` have the sign BEFORE,
+    //     (trap 14 (agreement cannot be applied to digits)'s second clause). Five instances need it: `$14.7` and `ku-$2.3` have the sign BEFORE,
     //     `12.8 km`, `2.2 km2` and `3.50 m` have the unit AFTER. Ordered currency → unit → plain, longest
     //     context first, so neither neighbour can be stranded once the number stops being a number.
     //     `US$`/`AUD$` are listed here as well as in the tier, for the same shadowing reason.
@@ -413,7 +413,7 @@ export function normalizeZulu(input: string): string {
     // 14) FRACTION (×1, `u-5 mm (1/5 yintshi)`) — read "one five" before. `ingxenye ye<ordinal>` is the
     //     corpus's own fraction shape: `ingxenye yesithathu` ×2, `ingxenye yesine` ×1, of `ingxenye` ×17.
     //     NUMERATOR 1 ONLY, and deliberately: "three fifths" is *izingxenye ezintathu kwezinhlanu*, whose
-    //     numerator carries a class-8 concord that would have to be applied to the digits (trap 14) using
+    //     numerator carries a class-8 concord that would have to be applied to the digits (trap 14 (agreement cannot be applied to digits)) using
     //     concord forms no source in this repo carries. Zero such instances occur; an unclaimed `3/5`
     //     keeps the bare juxtaposition it has today, which is not confidently wrong. AFTER the decimals,
     //     so a date-like `1.5/2` cannot reach here half-rewritten.
@@ -432,7 +432,7 @@ export function normalizeZulu(input: string): string {
     //                                the `ku-` prefix the corpus uses throughout (`kuhlanganisa` ×6), and
     //                                `no-` ×3 immediately before a digit run
     //        `<`  → `ngaphansi kuka-` `ngaphansi` ×14 + `kuka-` ×14      (`>` is the adversarial neighbour,
-    //        `>`  → `ngaphezu kuka-`  `ngaphezu` ×15 + `kuka-` ×14        trap 8: zero instances of either)
+    //        `>`  → `ngaphezu kuka-`  `ngaphezu` ×15 + `kuka-` ×14        trap 8 (zero corpus instances is not evidence of…): zero instances of either)
     //        `+`  → NOT HERE ANY MORE — the plus is claimed at STEP 8c, before the degree rule, and reads
     //                                `plas`. It used to read ` no-` ("and/with"), inferred from the sense of
     //                                the corpus's `(UTC+1)` while this note said a bare positive sign was

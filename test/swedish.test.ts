@@ -140,7 +140,7 @@ describe("swedish canonical IPA", () => {
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // #562 TEXT NORMALIZATION (src/languages/swedish/normalize.ts)
 //
-// These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13). The ordinal and the
+// These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13 (pin the rule's BRANCHES)). The ordinal and the
 // hundreds-year composers each have a table branch, a compositional branch and a boundary between them,
 // and the corpus exercises only the first — every case below marked ⟨unattested⟩ is there precisely
 // because the corpus never writes it.

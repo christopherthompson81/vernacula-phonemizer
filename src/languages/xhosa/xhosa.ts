@@ -89,7 +89,7 @@ class XhosaPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts runs BEFORE the shared tier, and leaves every operand as DIGITS precisely so the
         // tier can still see number–unit adjacency (the one exception is the clock, which must produce
-        // words for the `na-` connective and therefore claims its own marker and timezone — trap 14).
+        // words for the `na-` connective and therefore claims its own marker and timezone — trap 14 (agreement cannot be applied to digits)).
         return assembleClauses(SYMBOLS(normalizeXhosa(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])

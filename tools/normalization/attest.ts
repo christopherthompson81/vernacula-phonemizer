@@ -245,7 +245,7 @@ async function probe(word: string): Promise<Finding> {
         // contains. That made every phrase probe report `substring-only`, which reads as a NEGATIVE, while the
         // phrase was sitting in the quoted example directly above it: ff's `kiloomeeteer kaaree` was called
         // substring-only in the same run whose example was "468 kiloomeeteer kaaree (181 mi kaaree)". A phrase
-        // is the collocation test this file exists to support (trap 37), so it is gated by `hitRe`, which
+        // is the collocation test this file exists to support (trap 37 (the bare modifier is never the attestation)), so it is gated by `hitRe`, which
         // already flanks the WHOLE probe with the not-a-letter lookarounds.
         if (phrase ? hitRe.test(fold(text)) : bounded ? tokens(text).has(w) : fold(text).includes(w)) {
             articles++;

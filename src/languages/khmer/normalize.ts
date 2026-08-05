@@ -178,7 +178,7 @@ export function normalizeKhmer(text: string): string {
     //       109  digit = digit    arithmetic — this rule
     //         9  URL query strings
     // Widening to the probe's shape would fire on the code and the query strings, getting it wrong nearly as
-    // often as right, which is trap 9's misfire generator seen from the other side. The arithmetic reading is
+    // often as right, which is trap 9 (a guard alternative with no attested…)'s misfire generator seen from the other side. The arithmetic reading is
     // the only one the evidence supports.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
 

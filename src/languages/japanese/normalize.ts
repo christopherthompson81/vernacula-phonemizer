@@ -207,7 +207,7 @@ export function normalizeJapanese(input: string): string {
     //
     //     ⚠ THE WORD COULD NOT BE SOURCED FROM TEXT. Probed against prose, 掛ける returns the everyday verb —
     //     the attestation found was 蕎麦全書 on pouring broth over noodles (`冷たいつゆを掛けていた`), which is
-    //     trap 37 at its most misleading, since the word IS correct and the cited sense is not. Wikidata is no
+    //     trap 37 (the bare modifier is never the attestation) at its most misleading, since the word IS correct and the cited sense is not. Wikidata is no
     //     better: it returns the bare character `×` as ja's label for the multiplication sign.
     //
     //     What settles it is the recording. Qwen3-ASR over ja_jp/train renders BOTH instances in the slot:

@@ -93,7 +93,7 @@ const DOTTED_ABBREV: Record<string, (next: string) => string> = {
 // THE EXPONENT IS PART OF THE UNIT MATCH, not a separate rule, because the unit rule consumes the unit and
 // anything left behind reaches the g2p raw. `km²` matched `km`, the `²` was stranded and then dropped, and
 // `The park covers 19,500 km²` read as a LENGTH — the area gone. Two corpus instances, and #586 opens with
-// this one. `m³` has zero instances and is claimed anyway (trap 8): it is the same rule's other branch.
+// this one. `m³` has zero instances and is claimed anyway (trap 8 (zero corpus instances is not evidence of…)): it is the same rule's other branch.
 // A DOTTED DESIGNATION IS NOT A QUANTITY, and this rule had no guard for it: the number group accepts a
 // fraction, so `802.11g` matched with `802.11` + `g` and read as "eight hundred two point one one GRAMS".
 // That is the exact defect the shared tier's `NOT_VERSION` exists to stop — its own note records `802.11g`
@@ -485,7 +485,7 @@ export function normalizeEnglish(input: string): string {
     //    added, so they were dropped silently for the whole of #562 — `College of Arts & Sciences` read
     //    *Arts Sciences*, `B&Bs` read *bee bees*, `Qatar Airways & Turkish Airlines` lost its conjunction.
     //    Three corpus instances of `&`; the relational signs have ZERO, which is not evidence of
-    //    correctness (trap 8) and is why `review.ts` reports them as DROPPED. A dropped sign is inaudible,
+    //    correctness (trap 8 (zero corpus instances is not evidence of…)) and is why `review.ts` reports them as DROPPED. A dropped sign is inaudible,
     //    the one outcome that cannot be right (#584).
     //
     //    LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the

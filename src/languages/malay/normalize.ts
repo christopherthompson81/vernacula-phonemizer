@@ -23,7 +23,7 @@
  * ORDERING is load-bearing throughout; each step states its coupling. The two that matter most: every rule
  * that consumes a GLUED unit (`2.4Ghz`, `160km/j`, `19,500km²`) runs BEFORE the decimal rule, because the
  * version-dot guard is "a letter follows the fraction digits" and a glued unit looks exactly like that; and
- * the clock runs before the range, because a range endpoint may be a clock (playbook trap 14's ordering
+ * the clock runs before the range, because a range endpoint may be a clock (playbook trap 14 (agreement cannot be applied to digits)'s ordering
  * hazard).
  */
 
@@ -60,7 +60,7 @@ const FREQ_WORD: Readonly<Record<string, string>> = {
 /** Compass letters after a degree sign: `35°W` was read as the glued `dərˈad͡ʒatw`. */
 const COMPASS: Readonly<Record<string, string>> = { n: "utara", s: "selatan", e: "timur", w: "barat" };
 
-const L = "(?<![\\p{L}\\p{M}])"; // never `\b` — playbook trap 1
+const L = "(?<![\\p{L}\\p{M}])"; // never `\b` — playbook trap 1 (`\b` is ASCII-defined)
 const R = "(?![\\p{L}\\p{M}])";
 
 /** A clock is only a clock when something says so, and in this corpus something always does: `pukul`/`jam`
@@ -83,16 +83,16 @@ function meridiemWord(hour: number, mark: string): string {
 
 /** Nouns that mark a hyphenated pair as a RANGE rather than a score. Every corpus range is followed by one
  *  (or is a year pair); every corpus SCORE — 5-3, 6-6, 7-2, 26 - 00 — is followed by none, which is what
- *  keeps `hingga` out of them. Widened only for shapes that were counted (playbook trap 9). */
+ *  keeps `hingga` out of them. Widened only for shapes that were counted (playbook trap 9 (a guard alternative with no attested…)). */
 const RANGE_NOUN = [
     "minit", "jam", "saat", "hari", "malam", "petang", "pagi", "bulan", "minggu", "tahun", "abad",
     "km", "kilometer", "meter", "sentimeter", "milimeter", "batu", "ela", "inci", "kaki", "kg", "kilogram",
     "juta", "bilion", "ribu", "peratus", "darjah", "kali", "orang", "ekor", "pm", "GMT", "UTC", "MDT",
 ].join("|");
 
-/** Malay is not a mutating or case-marking language, so trap 14 does not bite here: `hingga` and the
+/** Malay is not a mutating or case-marking language, so trap 14 (agreement cannot be applied to digits) does not bite here: `hingga` and the
  *  clock rewrites can be applied to DIGITS without any agreement being lost, and every operand is
- *  re-emitted verbatim (trap 10). Every rule below emits DIGITS where a number is involved and lets the
+ *  re-emitted verbatim (trap 10 (a rule that CONSUMES a word must put it back)). Every rule below emits DIGITS where a number is involved and lets the
  *  engine's own number path speak them, which keeps this layer free of the number words entirely. */
 export function normalizeMalay(input: string): string {
     let s = input;
@@ -110,7 +110,7 @@ export function normalizeMalay(input: string): string {
 
     // 3) `US$30` — the shared symbol tier is keyed on a sign at a token boundary, so a `$` glued behind
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space
-    //    is the whole fix; `US` is written, so it stays written (trap 12: say each thing once).
+    //    is the whole fix; `US` is written, so it stays written (trap 12 (a REDUNDANT symbol is a permissible drop): say each thing once).
     s = s.replace(new RegExp(`(${L}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
     //    …and A MAGNITUDE WORD AFTER THE AMOUNT has to be got out from between the number and its currency.
     //    The tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so it lands inside the
@@ -259,7 +259,7 @@ export function normalizeMalay(input: string): string {
     }
 
     // 12) A BARE hour with a meridiem (`8 p.m.`) — zero corpus instances, but it is the adversarial
-    //     neighbour of the clock above and read `p . m .` before (trap 8).
+    //     neighbour of the clock above and read `p . m .` before (trap 8 (zero corpus instances is not evidence of…)).
     s = s.replace(new RegExp(`(?<![\\d.:])(\\d{1,2})\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
         (_m, h: string, mark: string) => `${h} ${meridiemWord(Number(h), mark)}`);
     //     …and `pg`, the corpus's abbreviation for `pagi`, which read as the bare letters `pɡ`. Only after a
@@ -283,7 +283,7 @@ export function normalizeMalay(input: string): string {
     s = s.replace(/(?<![\d.:])(\d{1,4}):(\d{1,4})(?!\d)/gu, "$1 $2");
 
     // 13b) ARITHMETIC AND COMPARISON SIGNS, dropped silently by the shared tier (in Indonesian too). Zero
-    //      instances in this corpus, which is not evidence of correctness (trap 8) — and the corpus does
+    //      instances in this corpus, which is not evidence of correctness (trap 8 (zero corpus instances is not evidence of…)) — and the corpus does
     //      supply every word: it spells the multiplication infix itself in `format 6 kali 6 sm` and
     //      `negatif 56 kali 56 mm`, and writes `sama dengan` ×11, `kurang daripada` ×3, `lebih daripada`
     //      ×11. `<`/`>`/`×` are claimed ONLY between digits, because this corpus's text still carries HTML
@@ -297,7 +297,7 @@ export function normalizeMalay(input: string): string {
     //     silently dropped, so `10-60 minit` read *sepuluh enam puluh minit*. Fires ONLY for a pair that a
     //     measure/period noun follows, or a pair of four-digit years — which is what keeps it out of the
     //     four sports scores (5-3, 6-6, 7-2, 26 - 00), none of which has either. Operands are re-emitted
-    //     verbatim and the class ends in a digit, so a following clause comma cannot be eaten (trap 14).
+    //     verbatim and the class ends in a digit, so a following clause comma cannot be eaten (trap 14 (agreement cannot be applied to digits)).
     const num = "\\d+(?:\\.\\d+)?";
     s = s.replace(new RegExp(`(?<![\\d.])(${num})\\s?[-–]\\s?(${num})(?=\\s*(?:${RANGE_NOUN})${R})`, "gu"), "$1 hingga $2");
     //     The year arm's trailing guard is `(?!\d)` and NOT `(?![\d.,])`: `sejak 1995-1996, apabila` ends on

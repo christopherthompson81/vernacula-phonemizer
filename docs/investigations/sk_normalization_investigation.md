@@ -71,7 +71,7 @@ Croatian and removes half of the disambiguation problem the brief anticipated.
 python3: for each match of (?<![\d.,])(\d{1,4})\. — classify what follows
 ```
 
-Question: which of the 106 `N.` are ORDINAL markers and which are sentence periods? (Playbook trap 4, the
+Question: which of the 106 `N.` are ORDINAL markers and which are sentence periods? (Playbook trap 4 (ambiguity is resolved by evidence), the
 German method; and Croatian #599's defect — a closed licensor list claimed only half its corpus.)
 
 Raw finding:
@@ -155,7 +155,7 @@ the following word.
 Implication: two ordinal steps — a licensed one that inflects (with list handling for `11., 12. a 13.
 storočí` and `19. a začiatku 20. storočia`), then a general one that emits the masculine nominative for
 anything the licensor list does not know. The general step claims **0** corpus instances today; it exists
-because trap 8 says a closed list is correct exactly where you looked.
+because trap 8 (zero corpus instances is not evidence of…) says a closed list is correct exactly where you looked.
 
 ---
 
@@ -272,7 +272,7 @@ rule claiming a football score.
 
 ---
 
-## Run 7 — 2026-08-02, enumerating the ordinal's BRANCHES (trap 13)
+## Run 7 — 2026-08-02, enumerating the ordinal's BRANCHES (trap 13 (pin the rule's BRANCHES))
 
 ```
 npx tsx ord.scratch.ts     # ordinalWords 1..30, 37, 60, 70, 80, 100, 190, 200, 1918 × every slot
@@ -320,7 +320,7 @@ enumeration settled before any test was written:
 npx tsx ord.scratch.ts
 ```
 
-Question: read the ordinal function's own output across a range, per trap 13's "diff the rule against
+Question: read the ordinal function's own output across a range, per trap 13 (pin the rule's BRANCHES)'s "diff the rule against
 itself".
 
 Raw finding:
@@ -378,7 +378,7 @@ Raw finding — five defects, each in a rule whose unit test would have passed:
    plural`), which is where the corrected selector comes from. Affected every unit and percent instance
    with a compound count.
 3. **The ordinal list ate its own comma.** `v 11., 12. a 13. storočí` read *v jedenástom dvanástom a
-   trinástom storočí* — a real pause deleted, trap 14's second hazard exactly.
+   trinástom storočí* — a real pause deleted, trap 14 (agreement cannot be applied to digits)'s second hazard exactly.
 4. **`atď.,` produced two marks.** The end-of-clause branch appended a period before a following comma:
    *a tak ďalej., obetovaných*. Split into three shapes; only a genuine utterance end gets the period.
 5. **`6-6` is not a range.** `za stavu 6-6 vyžiadalo tajbrejk` read *šesť do šesť*. Equal endpoints are
@@ -419,7 +419,7 @@ genitive (Alžbety → **druhej**), `-ho` → masculine genitive of a vowel-fina
 **tretieho**), anything else → masculine nominative, which is the previous behaviour.
 
 The corpus's third roman, `Lealofiho III.`, sits at an UTTERANCE END, so the lowercase-follower guard
-declines it: it keeps its sentence period and its cardinal reading. That is the deliberate trade — trap 9
+declines it: it keeps its sentence period and its cardinal reading. That is the deliberate trade — trap 9 (a guard alternative with no attested…)
 says a guard widened past what you counted is a misfire generator, and widening this one to "digit + period
 + end of clause" would claim `čerpacej stanice Fort Greely 9.` as *Greely deviaty* and eat the pause.
 

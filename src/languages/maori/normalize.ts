@@ -22,7 +22,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  *
  * ⚠ `tapawhā` ×12 AND `tapatoru` ×5 ARE THE SHAPES, NOT THE POWERS, and both counts beat the words that are
  * right: tapawhā is a square as in a PLAZA — "St. Pita Tapawhā", St Peter's Square — and tapatoru is a
- * triangle ("ngā tapatoru hāngai", right triangles). Same split as fr carré, tr kare, gu વર્ગ (trap 37).
+ * triangle ("ngā tapatoru hāngai", right triangles). Same split as fr carré, tr kare, gu વર્ગ (trap 37 (the bare modifier is never the attestation)).
  *
  * ⚠ `m/h` IS MILES PER HOUR HERE, so it is declared as its own unit KEY rather than left to the rate path.
  * The corpus writes "35-40 m/h (56-64 km/h)" and "300m/h" — the km/h gloss settles it — and with only `m`

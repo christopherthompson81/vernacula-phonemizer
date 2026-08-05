@@ -107,13 +107,13 @@ ORD_COMPOUND[1] = "unfed";
 
 /** The round vigesimal tens the Wikipedia table documents — and nothing else. The non-round 40s–90s
  *  have inconsistent connectors (50 = degfed ar ddeugain but 51 = unfed ar ddeg a deugain) and the
- *  corpus writes no such digit, so they return undefined (trap 9: no unattested guard branches). */
+ *  corpus writes no such digit, so they return undefined (trap 9 (a guard alternative with no attested…): no unattested guard branches). */
 const ROUND_TENS: Readonly<Record<number, string>> = {
     20: "ugeinfed", 30: "degfed ar hugain", 40: "deugainfed", 50: "degfed ar ddeugain",
     60: "trigainfed", 70: "degfed ar trigain", 80: "pedwar ugeinfed", 90: "degfed a phedwar ugain",
 };
 
-/** Integer → the vigesimal ordinal. Attested forms only (trap 13 + trap 9): the 1–19 table, the 20s and
+/** Integer → the vigesimal ordinal. Attested forms only (trap 13 (pin the rule's BRANCHES) + trap 9 (a guard alternative with no attested…)): the 1–19 table, the 20s and
  *  30s composition (the corpus writes 37fed = ail ar bymtheg ar hugain), the round tens the Wikipedia
  *  table documents, the corpus's 190fed (10 a naw ugain → degfed a naw ugain) and the simple -fed on
  *  cant/mil. Anything else → undefined, so the caller leaves the digit untouched rather than emitting a
@@ -122,7 +122,7 @@ export function ordinalWords(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 0) return undefined;
     if (n <= 19) return n === 0 ? "dimfed" : ORD_1_19[n]!;
     if (n === 20) return ROUND_TENS[20]; // the branch BOUNDARY: `low` is 0 here, so the 21-39 arm below
-                                        //  returned undefined and ugeinfed was unreachable (trap 13).
+                                        //  returned undefined and ugeinfed was unreachable (trap 13 (pin the rule's BRANCHES)).
     if (n < 40) {
         // 21–39: the compound 1–19 base + "ar hugain". 31 = unfed ar ddeg ar hugain (11 on 20),
         // 37 = ail ar bymtheg ar hugain (17 on 20).
@@ -217,7 +217,7 @@ export function normalizeWelsh(input: string): string {
 
     // 5) DECADES — `1970au`, `1920au`, `90au`. The Welsh plural -au after the year. Read as the decade
     //    number (the -au is a plural of the year, not a separate word). NOT `\b` — the -au is attached to
-    //    the digits with no boundary for the ASCII word class to find (trap 1).
+    //    the digits with no boundary for the ASCII word class to find (trap 1 (`\b` is ASCII-defined)).
     s = s.replace(/(?<![\p{L}\p{M}\d])(\d[\d,]*)(au)(?![\p{L}\p{M}])/giu, "$1");
 
     // 5b) RANGES and SCORES — `6-6`, `5-3`, `26-00`, `1894-1895`, `10:00-11:00`, `10-60 munud`. Welsh
@@ -316,7 +316,7 @@ export function normalizeWelsh(input: string): string {
     // 8) FRACTIONS. `1/5 modfedd` → *un pumed*. The denominator's word is the FRACTION NOUN, which is the
     //    ordinal for 5+ (pumed, chweched, wythfed) but a separate noun for 3 and 4 (traean = a third,
     //    chwarter = a quarter — both referee-attested, distinct from the ordinals trydydd/pedwerydd). The
-    //    corpus's only fraction is 1/5; the 3/4 noun branch is pinned here from the referee (trap 13).
+    //    corpus's only fraction is 1/5; the 3/4 noun branch is pinned here from the referee (trap 13 (pin the rule's BRANCHES)).
     //    ¾/½ after a whole read "a thri chwarter"/"a hanner".
     s = s.replace(/(\d+)¾/gu, "$1 a thri chwarter");
     s = s.replace(/(\d+)½/gu, "$1 a hanner");

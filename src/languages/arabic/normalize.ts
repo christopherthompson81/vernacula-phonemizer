@@ -118,7 +118,7 @@ export function normalizeArabic(input: string): string {
     //     bare numbers with nothing between them.
     //
     //     ⚠ THE WORD COULD NOT BE SOURCED FROM TEXT, and في is exactly why: probed against prose it returns
-    //     thousands of hits, every one the locative preposition ("in the north", "in Jordan") — trap 37 with
+    //     thousands of hits, every one the locative preposition ("in the north", "in Jordan") — trap 37 (the bare modifier is never the attestation) with
     //     an overwhelming wrong-sense majority. The dimension sense is invisible in writing because writing
     //     uses the glyph. What settles it is the FLEURS recording of the sentence, where the slot is audibly
     //     filled: Cohere renders `…خمسة وثلاثين ملليمتر ستة وثلاثين في أربعة وعشرين ملليمتر…`, and Qwen3-ASR

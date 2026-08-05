@@ -132,7 +132,7 @@ targeted probe of the *candidate* rather than the *slot* caught it.
 
 ## Run 4 — 2026-08-03 — the seam already existed for the exponent
 
-Before writing an exponent rule (trap 16 — check whether the seam exists before deferring to it):
+Before writing an exponent rule (trap 16 (before declaring a class out of scope) — check whether the seam exists before deferring to it):
 `makeSymbolNormalizer` already has `exponentWords` with a three-valued `position`, and its own comment names
 **Japanese 平方キロメートル** as the `compound` case. Chinese is the same shape. So the unit exponent is one
 declared line in `mandarin.ts`, not a rule:

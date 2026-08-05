@@ -88,7 +88,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1.
     // ⚠ Bare ตาราง substring-matches ×11 and its first instance is `ตารางธาตุ` — the periodic TABLE, which
     // is what ตาราง means on its own. In an unspaced script the bare count cannot be a token count at all
-    // (trap 19), so only the full compound is evidence.
+    // (trap 19 (a word-boundary test is meaningless in a…)), so only the full compound is evidence.
     // `before` RATHER THAN `compound`, against the orthography, because the fused form is MIS-SYLLABIFIED by
     // this G2P and the spaced one is not:
     //   5 ตารางกิโลเมตร  → …mˌeː˧to˧n      5 ตาราง กิโลเมตร  → …mˌeː˦˥t   (= bare กิโลเมตร)

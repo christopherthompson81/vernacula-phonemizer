@@ -99,7 +99,7 @@ describe("Slovak text normalization (#562)", () => {
             .toBe("v jedenástom, dvanástom a trinástom storočí");
         expect(normalizeSlovak("z obdobia 19. a začiatku 20. storočia"))
             .toBe("z obdobia devätnásteho a začiatku dvadsiateho storočia"); // one interpolated head
-        // outside the licensor list → the masculine nominative citation form (trap 8's generalization)
+        // outside the licensor list → the masculine nominative citation form (trap 8 (zero corpus instances is not evidence of…)'s generalization)
         expect(normalizeSlovak("5. ročník")).toBe("piaty ročník");
         // REGNAL: the shared roman pass has already made `Alžbeta II.` into `Alžbeta 2.`, and the
         // agreement comes from the NAME, not from the following word. Both corpus instances are a QUEEN.
@@ -109,7 +109,7 @@ describe("Slovak text normalization (#562)", () => {
         expect(normalizeSlovak("stanice Fort Greely 9.")).toBe("stanice Fort Greely 9."); // an utterance END
     });
 
-    // The check that matters (playbook trap 4): a `N.` that is a SENTENCE END must not be claimed. Slovak
+    // The check that matters (playbook trap 4 (ambiguity is resolved by evidence)): a `N.` that is a SENTENCE END must not be claimed. Slovak
     // writes a year as a CARDINAL with no ordinal period, so all 31 utterance-final `N.` in the corpus are
     // sentence periods — the Croatian year-ordinal rule would have destroyed fourteen of them.
     test("a sentence-final period is NOT an ordinal", () => {

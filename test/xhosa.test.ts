@@ -50,10 +50,10 @@ describe("Xhosa canonical IPA", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13):
+// #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13 (pin the rule's BRANCHES)):
 // every rule with a table plus a fallback gets one case from each side, and the cases the corpus does NOT
 // contain (a capitalised ordinal suffix, `°F`, `00:30`, an out-of-range hour, a comma decimal) are pinned
-// deliberately, because zero corpus instances is not evidence of correctness (trap 8).
+// deliberately, because zero corpus instances is not evidence of correctness (trap 8 (zero corpus instances is not evidence of…)).
 describe("Xhosa text normalization (#562)", () => {
     test("thousands de-grouping — comma, space, and the two shapes that must NOT de-group", () => {
         expect(normalizeXhosa("eziyi-3,850")).toBe("eziyi-3850");
@@ -115,7 +115,7 @@ describe("Xhosa text normalization (#562)", () => {
         expect(phonemize("30 cm", "xh")).toContain("iisɛntʼimˈiːtʰa");
         expect(phonemize("500 mi", "xh")).toContain("iimajˈiːlɛ");
         expect(phonemize("3,850 km²", "xh")).toContain("iikʰilɔmˈiːtʰa iz̤ikʼwˈɛːrɛ");
-        // A decimal with a unit: the rule claims the unit itself (trap 14's second clause).
+        // A decimal with a unit: the rule claims the unit itself (trap 14 (agreement cannot be applied to digits)'s second clause).
         expect(normalizeXhosa("ezingange 3.50 m ububanzi")).toBe("ezingange 3 5 0 iimitha ububanzi");
         // Rates are local because Xhosa's denominator is ONE attested word, not "A per B".
         expect(normalizeXhosa("kwi-480 km/h")).toBe("kwi-480 iikhilomitha ngeyure");
@@ -153,7 +153,7 @@ describe("Xhosa text normalization (#562)", () => {
         expect(normalizeXhosa("amaqondo angaphezulu kwe +30°C aqhelekile."))
             .toBe("amaqondo angaphezulu kwe plas 30 aqhelekile.");
         // A leading MINUS on a temperature is a real negative and is read — 0 corpus instances, pinned as
-        // the adversarial neighbour (trap 8).
+        // the adversarial neighbour (trap 8 (zero corpus instances is not evidence of…)).
         expect(normalizeXhosa("(-30°C)")).toBe("(thabatha amaqondo 30)");
         // …but the sign capture is letter-guarded, because Xhosa's CONCORD hyphen looks exactly like a
         // minus. Unguarded, this ordinary spelling read *kwi thabatha amaqondo 30* — "in minus thirty".
@@ -170,7 +170,7 @@ describe("Xhosa text normalization (#562)", () => {
         expect(normalizeXhosa("le-18th sentyhuri")).toBe("le-18 sentyhuri");
         expect(normalizeXhosa("yango 17th-century")).toBe("yango 17-century");
         expect(normalizeXhosa("yakhe ye 60th,")).toBe("yakhe ye 60,");
-        // Case-insensitive (trap 7): a capitalised suffix is ordinary in a title and must not fall through
+        // Case-insensitive (trap 7 (a character class that is not…)): a capitalised suffix is ordinary in a title and must not fall through
         // to the raw-letter reading the rule exists to remove.
         expect(normalizeXhosa("ye-21ST")).toBe("ye-21");
         expect(normalizeXhosa("ye-1st ne-2nd ne-3rd")).toBe("ye-1 ne-2 ne-3");
