@@ -89,6 +89,29 @@ export function normalizeArabic(input: string): string {
     s = s.replace(new RegExp(`(\\S)\\+\\s?([${DIGIT}])`, "gu"), "$1 زَائِد $2");
     s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${DIGIT}])`, "gu"), "$1زَائِد $2");
 
+    // 5aa) RELATIONAL AND DIVISION SIGNS (#654). The register source states the mapping outright — ar.wikipedia's
+    //      division article writes «يُرمز إلى القسمة بالعلامة ÷» ("division is denoted by the sign ÷") and then
+    //      glosses the equality directly: «إذا كان جداء b و c يساوي a, أي a = b × c». The words in the slot,
+    //      beside the very signs this rule reads.
+    //
+    //        يساوي      ×38 token / 9 articles — "فالناتج يساوي 2", "فإن المعدل يساوي 2000"
+    //        أصغر من    "البسط أصغر من المقام" (numerator smaller than denominator), "أصغر من 16 عامًا"
+    //        أكبر من    "عدد طبيعي أكبر من 1" (a natural number greater than 1)
+    //        مقسوم على  "مجموع عددين مقسوم على أكبرهما يساوي خارج قسمة …"
+    //
+    //      ⚠ AND THE CORPUS'S OWN `أكبر من` ×10 IS THE PARTITIVE, NOT THE COMPARATIVE — "مجموعة أكبر من الأماكن
+    //      الصغيرة" is "a LARGER SET OF small places", where مِن marks the partitive rather than the standard of
+    //      comparison. Arabic writes both with the same two words, exactly as Italian does with `maggiore di`,
+    //      so the tier-2 phrase count cannot separate them and the register quotes are what settle it. The
+    //      equality word is absent from ar_eg altogether (×0 token / ×0 substring).
+    //
+    //      ⚠ FULLY DIACRITIZED, like every other word this file emits. The engine reads short vowels from the
+    //      text, so an undiacritized يساوي would be read off its consonant skeleton.
+    s = s.replace(/\s?=\s?/gu, " يُسَاوِي ");
+    s = s.replace(/\s?<\s?/gu, " أَصْغَر مِن ");
+    s = s.replace(/\s?>\s?/gu, " أَكْبَر مِن ");
+    s = s.replace(/\s?÷\s?/gu, " مَقْسُوم عَلَى ");
+
     // 5b) THE DIMENSION `×` → في, SOURCED FROM THE CORPUS'S OWN AUDIO. The corpus writes it twice, both times
     //     as a MEASUREMENT and not a multiplication: `مقاس 35 مم (36× 24 مم نيجاتيف)` and the manuscript's
     //     `ذات مقاسات 29¾ بوصة × 24½ بوصة`. Before this the sign was dropped, so "36 by 24 mm" read as two

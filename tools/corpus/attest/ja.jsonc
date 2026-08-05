@@ -18,49 +18,60 @@
 {
     "language": "ja",
     "wiki": "ja.wikipedia.org",
-    "tier": "wikipedia",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "算術 演算 除算",
     "findings": [
         {
-            "word": "プラス",
-            "verdict": "attested*",
-            "bounded": false,
-            "tokenHits": 3,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…『99プラス』（ナイナイプラス）は、2007年10月2日から2010年3月23日まで日本テレビ系列で毎週火曜日23:58 - 翌0:…",
-                "…『99プラス』（ナイナイプラス）は、2007年10月2日から2010年3月23日まで日本テレビ系列で毎週火曜日23:58 - 翌0:29（JST、特別…"
-            ]
-        },
-        {
-            "word": "マイナス",
+            "word": "イコール",
             "verdict": "attested*",
             "bounded": false,
             "tokenHits": 1,
             "articles": 1,
             "substringOnly": 0,
             "examples": [
-                "…-（マイナス）〜シングル・コレクション Vol.2は1990年にリリースされた、甲斐バンドのベスト・アルバム。 == 概要 == 甲…"
+                "…A, B, C, AVG」と書けば実数型の変数 A, B, C, AVG 計4つの宣言。 変数に値を入れることは、=（イコール）で表現し、右辺の計算結果の値を左辺の変数に入れる命令と定めた。 1978年にリリースされたFORTRAN 77ではIF…"
             ]
         },
         {
-            "word": "かける",
-            "verdict": "absent",
-            "bounded": false,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "掛ける",
+            "word": "わる",
             "verdict": "attested*",
             "bounded": false,
             "tokenHits": 1,
             "articles": 1,
             "substringOnly": 0,
             "examples": [
-                "…書』には新材木町にあった「信濃屋」の「ぶっかけ」が始まりとの記述がある。冷たいつゆを掛けていたが、寒い時期には熱いつゆを掛けるようになり、寛政からはそれを「かけそば」と呼ぶようになっていった。当時は『蕎麦全書』においても、下品な食べ方とされていた…"
+                "…除算記号（じょさんきごう、じょざんきごう）は、除算を表す演算子記号である。日本語では一般に「わる」と読む。 英語圏（および日本語圏）で主に使われる「÷」がUnicodeでは division sign（除算記号）とな…"
+            ]
+        },
+        {
+            "word": "より小さい",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…に、== と === という、異なる比較基準の演算子を持つ言語もある。 不等号 1 < x < 5が「xは1より大きく5より小さい」を意味しないプログラミング言語が多い。そのような場合には論理演算子を使って「1 < x and x < 5」のように記…",
+                "…いほうへ） 最も近くの表現できる値へ丸める。表現可能な2つの値の中間の値であったら、正の値ならより大きいほう、負の値ならより小さいほうの値を採用する。 === 方向丸め === 0方向への丸め 0に近い側へ丸める。切り捨て (truncation)…",
+                "…2135」)、機種によっては「E 0.」のように表示される。 なお、計算結果の絶対値が厳密な0ではないが表現可能な最小値より小さい値になった場合（アンダーフロー。8桁の場合の0.0000001未満の場合など）は0として扱われ、エラー表示はされない。…",
+                "…（ふのすう、英: negative number, minus number, below number; 負数）は、0より小さい実数である。とくに初等数学・算術や初等数論などの文脈によっては、（暗黙の了解のもと）特に断りなく、より限定的な範囲の正の…"
+            ]
+        },
+        {
+            "word": "より大きい",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 5,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…る。 最近接丸め（0から遠いほうへ） 最も近くの表現できる値へ丸める。表現可能な2つの値の中間の値であったら、正の値ならより大きいほう、負の値ならより小さいほうの値を採用する。 === 方向丸め === 0方向への丸め 0に近い側へ丸める。切り捨て…",
+                "…（せいのすう、英: positive number, plus number, above number; 正数）は、0より大きい実数である。対照的に負の数（ふのすう、英: negative number, minus number, below n…",
+                "…達した。 負数は現代まで十分に理解されていなかった。つい18世紀まで、スイスの数学者レオンハルト・オイラーは負数が無限大より大きいと信じており（この見解はジョン・ウォリスと共通である）、方程式が返すあらゆる負の解を意味がないものとして無視することが普…",
+                "…はジョン・ウォリスと共通である）、方程式が返すあらゆる負の解を意味がないものとして無視することが普通だった。負数が無限大より大きいという論拠は、 1 x {\\displaystyle {\\frac {1}{x}}} の商と、x が正の側から x =…",
+                "…と定義しており、NaN を返す。 結果が虚数となるような演算（以下は一部） 負数の平方根 負数の対数 -1未満の値や+1より大きい値の逆三角関数 負数の偶数乗根 必要な値がないとき、明示的に変数に NaN を代入しておくことがある。IEEE 754…"
             ]
         }
     ],

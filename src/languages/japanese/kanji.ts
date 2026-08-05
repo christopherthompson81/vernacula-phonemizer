@@ -313,7 +313,14 @@ export function segmentText(text: string): string {
                 prev !== undefined &&
                 ((SINGLE_PARTICLES.has(unit) && isKanji(prev)) ||
                     ((unit === "は" || unit === "へ") &&
-                        (isKanji(prev) || isKana(prev)))));
+                        // ⚠ A DIGIT COUNTS AS A CONTENT WORD HERE. `7は` is the topic particle just as `私は`
+                        // is, but the gate tested only kanji and kana, so the は stayed /ha/ — 「7は3より小さい」
+                        // read *nana ha* instead of *nana wa*. Found by #654's relational rule, which builds
+                        // exactly that clause, and pre-existing for any text that topic-marks a bare numeral.
+                        // Safe to widen: a counter written with hiragana は immediately after a digit would be
+                        // a ≥2-mora unit and is matched before this branch, so single は after a digit is the
+                        // particle.
+                        (isKanji(prev) || isKana(prev) || /\d/u.test(prev)))));
         out += particle && unit === "は"
             ? "わ"
             : particle && unit === "へ"

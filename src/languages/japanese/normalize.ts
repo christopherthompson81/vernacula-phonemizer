@@ -180,6 +180,27 @@ export function normalizeJapanese(input: string): string {
     s = s.replace(/(^|[\s(（])\+\s?(\d)/gu, "$1プラス$2");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1プラス$2");
 
+    // 9aa) RELATIONAL AND DIVISION SIGNS (#654). ja.wikipedia states two of these outright, which is as direct
+    //      as a sourcing tier gets — an article whose subject IS the sign, saying how it is read:
+    //
+    //        除算記号 …「日本語では一般に『わる』と読む」        ("generally read as わる in Japanese")
+    //        「=（イコール）で表現し」                          (names the sign = as イコール)
+    //
+    //      ⚠ AND THE INEQUALITIES ARE POSTPOSED, SO AN INFIX RULE WOULD INVERT THE MEANING. Japanese puts the
+    //      predicate last: the same source reads the chain `1 < x < 5` as 「xは1より大きく5より小さい」, i.e.
+    //      `A < B` is 「AはBより小さい」. Substituting より小さい *between* the operands the way every European
+    //      language in this issue does would yield 「7より小さい3」, which reads as "3, which is smaller than 7"
+    //      — the comparison backwards. So these two rules consume BOTH operands and rebuild the clause.
+    //
+    //      ⚠ WHICH MEANS THEY ONLY FIRE BETWEEN TWO NUMBERS, and that is deliberate. Where the operands are not
+    //      digits the sign stays dropped, exactly as before — a rule that is correct on the cases it claims
+    //      beats a total rule that lies about the rest. 小なり / 大なり, the sign NAMES and infix-safe, were
+    //      probed as the alternative and are ×0 / ×0 on ja.wikipedia, so they are not the register's reading.
+    s = s.replace(/(\d)\s?<\s?(\d)/gu, "$1は$2より小さい");
+    s = s.replace(/(\d)\s?>\s?(\d)/gu, "$1は$2より大きい");
+    s = s.replace(/\s?=\s?/gu, "イコール");
+    s = s.replace(/\s?÷\s?/gu, "わる");
+
     // 9b) THE DIMENSION `×` → かける, SOURCED FROM THE CORPUS'S OWN AUDIO. The corpus's one instance is the
     //     film-camera sentence, which writes it twice: `6×6 cm、より正確には56×56 mm`. Both are MEASUREMENTS,
     //     not multiplications, and before this the sign was dropped — `6×6` read ろく ろく, two bare numbers.

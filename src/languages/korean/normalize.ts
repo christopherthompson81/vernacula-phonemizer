@@ -190,15 +190,89 @@ export function normalizeKorean(input: string): string {
         (_m, unit: string, exp?: string) =>
             `${exp === undefined ? "" : exp === "³" || exp === "3" ? "세제곱" : "제곱"}${UNIT_HANGUL[unit]!}`);
 
+
     // 4) DEGREES, before rule 9 — the C of 30°C is otherwise a single capital letter and rule 9 would
     //    spell it 씨. 섭씨 / 화씨 are the Korean names for the two scales and precede the number.
+    // ⚠ THE SCALE NAME PRECEDES THE SIGNED NUMBER, NOT THE SIGN, so the sign is captured and carried across
+    //    (#654). This rule REORDERS — it lifts 섭씨 in front of the number — and without the capture it lifted
+    //    the scale name over the sign as well: `-5 °C` became `-섭씨 5도`, stranding the minus where the sign
+    //    rules below can no longer see a digit after it, and reading `마이너스 섭씨 오도` ("minus Celsius five
+    //    degrees") once they were taught to. Carrying it gives 섭씨 마이너스 오도, which is the Korean order.
+    //    This is the ordering rule the sign work keeps rediscovering: a rule that consumes a sign next to an
+    //    operand must run before — or be taught about — any rule that MOVES that operand.
     // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER (#586). Korean spaces its eojeol but not
     // its particles, so a temperature is normally followed by one — and `(?![\p{L}])` rejected exactly that:
     // `20℃` read 섭씨 20도 while `20℃에` read "20도씨에", losing 섭씨 and spelling the C as 씨 through rule 9.
     // The corpus's own instance is `32℃에 달하는` (×3), so the ordinary case was the broken one.
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gu, "섭씨 $1도");
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu, "화씨 $1도");
+    s = s.replace(/([-−–±]?)(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gu, "섭씨 $1$2도");
+    s = s.replace(/([-−–±]?)(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu, "화씨 $1$2도");
     s = s.replace(/(\d)\s?°/gu, "$1도");
+
+    //     ⚠ AND `+`, `−`, `±` WERE DROPPED OUTRIGHT TOO — pre-existing, and found while checking this rule's
+    //     output on `3 + 4 = 7`. Korean had no rule for any additive sign, so `3 + 4` read 삼 사, two bare
+    //     numbers, and `-5` read as plain 오 with the sign inverted away. The same article that glosses the
+    //     division and equality expressions also names these two — 「덧셈과 뺄셈」, 「더하기표와 빼기표」 — so they
+    //     cost no additional sourcing.
+    //
+    //     AFTER the relational rules, deliberately: those match digits on both sides, so `3 + 4 = 7` must have
+    //     its `= 7` consumed first. The result reads 삼 더하기 사는 칠과 같다, which is the school register.
+    //     ⚠ THE TWO REGISTERS ARE NOT INTERCHANGEABLE, and Korean keeps them apart: 더하기 / 빼기 are the
+    //     OPERATORS (three plus four), 플러스 / 마이너스 the SIGNS (minus five degrees). So the additive rule
+    //     below uses 더하기 while the negative rule uses 마이너스, and ± — which is a sign and not an operation —
+    //     juxtaposes the loan pair, the same pair `ja` uses (プラスマイナス). Runs BEFORE the + rule, since ± is
+    //     a single character the + rule cannot see.
+    s = s.replace(/±/gu, " 플러스 마이너스 ");
+    s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 더하기 ");
+    //     The LEADING plus is the sign, not the operation, so it takes 플러스 (`+5` → 플러스 5) — the same
+    //     operator/sign split as the pair above.
+    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1플러스 ");
+    s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, "$1마이너스 ");
+
+    // 4b) RELATIONAL AND DIVISION SIGNS (#654). ko.wikipedia's arithmetic articles read the notation out beside
+    //     the notation, which is the article class this issue's tier 4 looks for:
+    //
+    //       "3을 4로 나눈 몫 3 ÷ 4(3 나누기 4)"          — the ÷ expression glossed, and INFIX
+    //       "제곱은 근과 같다 (ax2 = bx)"                 — the = expression glossed, and POSTPOSED
+    //       "1보다 무한소만 작다"  ·  "37보다 크거나 같은"   — the comparisons, also postposed
+    //       "등호(=)를 사용하기 시작하였다"                 — names the sign, which is not the same as reading it
+    //
+    //     ⚠ SO ONLY THE DIVISION SIGN IS INFIX. Korean is verb-final: `A = B` is 「A는 B와 같다」 and `A < B` is
+    //     「A는 B보다 작다」, with the predicate after both operands. Substituting between them the way the
+    //     European rules in this issue do would produce word salad, so these three consume BOTH operands.
+    //
+    //     ⚠ AND THE PARTICLES ARE ALLOMORPHIC ON THE SPELLED NUMBER, WHICH IS WHY THIS RULE SPELLS ITS OWN
+    //     OPERANDS. 는/은 and 와/과 are selected by whether the preceding syllable has a final consonant, and
+    //     that is a property of the WORD, not the digit: 7 → 칠 (final ㄹ, so 은) but 4 → 사 (no final, so 는).
+    //     The digit-to-word pass runs later and could not fix a particle already chosen wrongly, so the rule
+    //     calls `numberToWords` itself and picks the allomorph from the result's last jamo.
+    //
+    //     ⚠ AN OPERAND IS A NUMBER, A HANGUL WORD, OR A LONE LATIN LETTER — the three things that appear either
+    //     side of these signs, and all three have to be spelled HERE so the particle can be chosen. The Latin
+    //     case is why `x = y` is in scope at all: rule 9 below converts only UPPERCASE Latin, so a lowercase
+    //     variable name never becomes Hangul and there would be no syllable to test. `LETTER_HANGUL` already
+    //     holds the letter names this file emits, so the operand spells through the same table (x → 엑스).
+    //
+    //     Anything else — a parenthesis, a longer Latin word, a formula — leaves the sign dropped, as before.
+    //     The postposed clause cannot be built without knowing both operands, and a rule that is right about
+    //     what it claims beats a total rule that garbles the rest.
+    const OPERAND = String.raw`\d+|[가-힣]+|[A-Za-z]`;
+    const kWord = (t: string): string =>
+        /^\d+$/u.test(t) ? (numberToWords(Number(t)) || t) : (LETTER_HANGUL[t.toUpperCase()] ?? t);
+    /** Does this word end in a closed syllable? Decodes the Hangul syllable block: T = (code − AC00) % 28. */
+    const kClosed = (w: string): boolean => {
+        const c = w.codePointAt(w.length - 1) ?? 0;
+        return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 !== 0;
+    };
+    const kTopic = (w: string): string => `${w}${kClosed(w) ? "은" : "는"}`;
+    const relational = (sign: string, tail: (y: string) => string): void => {
+        s = s.replace(new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
+            (_m, a: string, b: string) => `${kTopic(kWord(a))} ${tail(kWord(b))}`);
+    };
+    relational("=", (y) => `${y}${kClosed(y) ? "과" : "와"} 같다`);
+    relational("<", (y) => `${y}보다 작다`);
+    relational(">", (y) => `${y}보다 크다`);
+    s = s.replace(/\s?÷\s?/gu, " 나누기 ");
+
 
     // 5) RANGES (×12 for these three marks). The mark is in no table, so it was dropped outright and
     //    1894~1895 read as two bare years. 에서 is the standard reading of 물결표 between two numbers.

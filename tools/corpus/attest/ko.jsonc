@@ -1,0 +1,91 @@
+// WIKIPEDIA WORD ATTESTATION — ko (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ko",
+    "wiki": "ko.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "산술 사칙연산 나눗셈",
+    "findings": [
+        {
+            "word": "나누기",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 4,
+            "examples": [
+                "…셈과 나눗셈을 덧셈과 뺄셈보다 우선으로 계산해야 한다. == 같이 보기 == 산수 더하기표와 빼기표 0으로 나누기 실수 허수…",
+                "…한다. 예를 들어, ⁠3/4⁠은 3과 4의 비 3 : 4(3 대 4)나, 3을 4로 나눈 몫 3 ÷ 4(3 나누기 4)를 나타낼 수 있다. 분수는 분자의 절댓값이 분모의 절댓값보다 작은 진분수와 그렇지 않은 가분수로 분류…"
+            ]
+        },
+        {
+            "word": "작다",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 1,
+            "substringOnly": 1,
+            "examples": [
+                "….999, …의 초거듭제곱 구성에 관한 동치류 [(0.9, 0.99, 0.999, …)]는 1보다 무한소만 작다. 보다 일반적으로 층수 H의 무한대 초자연수의 위치에 마지막 9가 오는 초실수 uH = 0.999…;…99…",
+                "…석한 \"0.999…\"는 1에 무한히 가깝다. 이언 스튜어트는 이 해석을 \"0.999…는 1보다 \"아주 조금 작다.\"라는 직관을 엄밀하게 정당화하는 \"완전히 합리적인\" 방법으로 특징지었다.R. Ely (2010) 역시 학…",
+                "…= ⁠1/3⁠이 된다. 그러나 문자열 LRLLL… (0.111…에 대응한다)의 값은 1에 비해 극히 약간 작다. 이들의 2가지 수(LRLLL…과 1)의 차이는 초현실수 ⁠1/ω⁠ (ω는 최소 무한 순서수)이다. 이와…"
+            ]
+        },
+        {
+            "word": "크다",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…수는 37보다 크거나 같은 숫자가 발생할 때까지 계산된다. 그래서 1과 12는 37보다 적지만 126은 더 크다. 다음으로 126보다 작거나 같은 37의 최대 배수가 계산된다. 따라서 3 & times; 37 = 111…"
+            ]
+        },
+        {
+            "word": "등호",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 1,
+            "examples": [
+                "…독일의 위드만이 《상업산술》에서 +, - 기호를 사용하기 시작하였고, 영국의 레코드는 《지혜의 숫돌》에서 등호(=)를 사용하기 시작하였다. 나눗셈 기호(÷), 곱셈 기호(×), 부등호 역시 이 시기의 영국 수학자들에…",
+                "…}}}\\right)=1-\\lim _{n\\to \\infty }{\\frac {1}{10^{n}}}=1} 마지막 등호 ( lim n → ∞ 1 10 n = 0 {\\displaystyle \\lim _{n\\to \\infty }{…"
+            ]
+        },
+        {
+            "word": "같다",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 57,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…이 기본적으로 사용된다. 그 밖에도 팔진법, 십육진법과 같은 기수법이 사용된다. 각 기수법의 특징은 다음과 같다. 십진법은 0부터 9까지 열 개의 숫자를 사용한다. 일상생활에서 가장 익숙한 기수법이다. 이진법은 0과 1…",
+                "…있는데, 각각을 풀기 위한 대수적이고 기하학적인 방법을 제시하고 있다. 여섯 가지 타입의 2차식은 다음과 같다: 제곱은 근과 같다 (ax2 = bx) 제곱은 숫자와 같다 (ax2 = c) 근은 숫자와 같다 (bx =…",
+                "…기 위한 대수적이고 기하학적인 방법을 제시하고 있다. 여섯 가지 타입의 2차식은 다음과 같다: 제곱은 근과 같다 (ax2 = bx) 제곱은 숫자와 같다 (ax2 = c) 근은 숫자와 같다 (bx = c) 제곱과 근의 합…",
+                "…시하고 있다. 여섯 가지 타입의 2차식은 다음과 같다: 제곱은 근과 같다 (ax2 = bx) 제곱은 숫자와 같다 (ax2 = c) 근은 숫자와 같다 (bx = c) 제곱과 근의 합은 숫자와 같다 (ax2 + bx = c…",
+                "…식은 다음과 같다: 제곱은 근과 같다 (ax2 = bx) 제곱은 숫자와 같다 (ax2 = c) 근은 숫자와 같다 (bx = c) 제곱과 근의 합은 숫자와 같다 (ax2 + bx = c) 제곱과 숫자의 합은 근과 같다 (…",
+                "…= bx) 제곱은 숫자와 같다 (ax2 = c) 근은 숫자와 같다 (bx = c) 제곱과 근의 합은 숫자와 같다 (ax2 + bx = c) 제곱과 숫자의 합은 근과 같다 (ax2 + c = bx) 근과 숫자의 합은 제곱…"
+            ]
+        }
+    ],
+}
