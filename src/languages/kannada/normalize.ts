@@ -298,11 +298,22 @@ export function normalizeKannada(input: string): string {
     //
     // The comparatives come from kn_in and are POSTPOSITIONAL (ಗಿಂತ fuses to the standard —
     // ಸಾಮಗ್ರಿಗಳಿಗಿಂತ ಕಡಿಮೆ): `ಗಿಂತ ಕಡಿಮೆ` ×6, `ಗಿಂತ ಹೆಚ್ಚು` ×12. The division word is the corpus's own form from
-    // FLEURS's parallel sentence, ಭಾಗಿಸುವಿಕೆ ×3 ("ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ").
+    // ⚠ THE DIVISION WORD WAS CHANGED AFTER espeak's DICTSOURCE WAS CONSULTED, and the parallel sentence is why
+    // it was wrong the first time. That sentence gives `ಭಾಗಿಸುವಿಕೆ` ×3 ("ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ"), a verbal noun
+    // inflected for its own clause — the exact trap recorded for ml, where the harvest supplies the ROOT and not
+    // the FORM. Three sources agree on the neutral term instead:
+    //
+    //   espeak kn_list:  ÷  b#a:ga:ka:ra   = ಭಾಗಾಕಾರ, a hand-authored pronunciation for the GLYPH
+    //   kn.wikipedia:    ಭಾಗಾಕಾರ ×11 / 7 articles, against ಭಾಗಿಸುವಿಕೆ ×0
+    //   and the hit is the FOUR-OPERATIONS article — "ನಾಲ್ಕು ಕ್ರಿಯೆಗಳಲ್ಲಿ ಒಂದಾಗಿದೆ. ಉಳಿದ ಕ್ರಿಯೆಗಳೆಂದರೆ ಸಂಕಲನ,
+    //   ವ್ಯವಕಲನ, ಗುಣಾಕಾರ" (one of the four operations; the others are addition, subtraction, multiplication)
+    //
+    // The corpus is the higher tier in general and is not the better source HERE, because what it contains is
+    // one translator's subordinate clause rather than the language's term for the operation.
     s = postposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
     s = postposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
     s = s.replace(/\s?=\s?/gu, " ಸಮ ");
-    s = s.replace(/\s?÷\s?/gu, " ಭಾಗಿಸುವಿಕೆ ");
+    s = s.replace(/\s?÷\s?/gu, " ಭಾಗಾಕಾರ ");
 
     return s;
 }
