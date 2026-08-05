@@ -193,6 +193,28 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    Punjabi word for the scale is attested nowhere in this repo (see the header).
         s = s.replace(/(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
 
+        // THE ADDITIVE SIGNS (#654). pa_in gives nothing usable — ਜਮਾਂ is ×0, ਪਲੱਸ appears only inside the brand
+        // name ਮੈਟਰੋਪਲੱਸ, and ਜੋੜ is ×1 token against ×33 SUBSTRING (ਜੋੜੇ, "couples"). pa.wikipedia's arithmetic
+        // article settles all of it, naming the sign and then READING an expression with operands:
+        //
+        //   "ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ "+" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ …)"   addition, denoted by the "+" sign
+        //   "3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ।"                                          3 PLUS 2 EQUALS 5
+        //
+        // ⚠ THE SECOND QUOTE ALSO CORROBORATES THE EQUALITY WORD SHIPPED BELOW, which was sourced independently
+        // from the corpus (ਬਰਾਬਰ ×8). Evidence in both directions, from two different tiers.
+        //
+        // `ਘਟਾਓ` ×5 / 4 articles is the subtraction word, so ± is then this language's own two words juxtaposed —
+        // the tier-1 route, at no further sourcing cost.
+        //
+        // ⚠ THE MINUS TAKES THE RANGE GUARD th NEEDED. The fleet convention rejects a sign with a space AFTER it,
+        // which misses a range spaced only BEFORE the sign (`1000 -1300` read as a subtraction in th_th). A digit
+        // anywhere to the left rejects the match: a negative quantity does not follow a number, a range does.
+        s = s.replace(/±/gu, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
+        s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 ਜਮ੍ਹਾਂ ");
+        s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1ਜਮ੍ਹਾਂ ");
+        s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+            /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ਘਟਾਓ `);
+
         // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from pa_in:
         //
         //   `ਬਰਾਬਰ`     ×8 token    "ਬਰਾਬਰ ਜਾਂ ਇਸ ਪੱਖ ਅਨੁਪਾਤ ਦੇ ਲਗਪਗ ਨੇੜੇ" — EQUAL TO this aspect ratio

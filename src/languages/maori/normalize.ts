@@ -102,6 +102,28 @@ export function normalizeMaori(input: string): string {
     //     A native maths word was NOT substituted: the recordings say the readers use the loan, so choosing a
     //     different word because it happens to be pronounceable would be inventing a reading the evidence
     //     contradicts. Recorded here so the next pass does not re-derive the sourcing and reach for [pa].
+    // 1aa) THE PLUS AS AN OPERATOR → tāpiri (#654), which the note above declined and should not have — and the
+    //      reason is the OPERATOR/SIGN split this repo already documents for ko, vi and fa.
+    //
+    //      ⚠ THE TWO RECORDINGS THAT MOTIVATED THE REFUSAL ARE BOTH THE *SIGN*, NOT THE OPERATION. They are
+    //      `UTC+1` (a UTC offset) and `+30°C` (a positive temperature). In neither is anything being added, so
+    //      what the speakers voiced — the English loan `plas` — is Māori's reading of the POSITIVE SIGN, and the
+    //      note's conclusion holds for that position: the loan carries /l/ and /s/, which this inventory lacks,
+    //      so the g2p would emit [pa] and silence is better than a confidently wrong syllable.
+    //
+    //      It says nothing about `3 + 4`, and for THAT position mi_nz has a native, sayable, well-attested word:
+    //
+    //        `tāpiri` ×38 TOKEN   "nāna i tāpiri" (he ADDED) · "i tāpiritia ia ki te rārangi" (was ADDED to the
+    //                             list) — the addition verb, built from Māori phonemes throughout
+    //
+    //      So the operator arm reads and the sign arm stays silent, which is the same division of labour as
+    //      ko's 더하기 vs 마이너스 and vi's trừ vs âm. ⚠ AND THE NATIVE WORD IS NOT A SUBSTITUTE FOR THE LOAN: it
+    //      is the word for a different job. Using `tāpiri` for `+30°C` would say "thirty degrees ADD", which is
+    //      why that arm is left alone rather than filled with it.
+    //
+    //      Digits required on BOTH sides, so a UTC offset or a signed temperature cannot reach this rule.
+    s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 tāpiri ");
+
     // 1b) THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from mi_nz — and unlike the plus above,
     //     ⚠ ALL FOUR READINGS ARE NATIVE MĀORI WORDS THIS ENGINE CAN ACTUALLY SAY. That is the whole reason they
     //     can be shipped where the plus cannot: the note above records that the plus is a LOAN in the recordings
