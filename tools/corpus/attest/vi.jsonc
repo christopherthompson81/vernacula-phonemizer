@@ -1,0 +1,60 @@
+// WIKIPEDIA WORD ATTESTATION — vi (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "vi",
+    "wiki": "vi.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "toán học số âm",
+    "findings": [
+        {
+            "word": "dấu trừ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…hơn 0. Trong toán học, số âm thường được biểu diễn bằng một dấu trừ – trước giá trị dương tương ứng. Giống như số dương === Số…",
+                "…ơn nói nó được ký hiệu bằng | |. ± 1. Ký hiệu dấu cộng hoặc dấu trừ. 2. Ký hiệu khoảng giá trị mà một đại lượng đo đạc có thể c…",
+                "…hịch đảo là giá trị ban đầu. Số âm thường được viết với một dấu trừ ở phía trước. Ví dụ: −3 đại diện cho một đại lượng âm với c…",
+                "…ừ và số âm, đôi khi dấu âm được đặt cao hơn một chút so với dấu trừ (như là siêu ký tự). Ngược lại, một số lớn hơn 0 được gọi l…",
+                "…đảo phép cộng của chính nó. Số đối của a được đánh dấu bằng dấu trừ: −a. Ví dụ, số đối của 7 là −7, vì 7 + (−7) = 0, và số đối…"
+            ]
+        },
+        {
+            "word": "âm năm",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "cộng trừ",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 2,
+            "examples": []
+        }
+    ],
+}

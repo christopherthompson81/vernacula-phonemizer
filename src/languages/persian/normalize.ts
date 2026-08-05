@@ -303,6 +303,69 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(\d[\d.,]*)\s?\+(?!\s?\d)/gu, "به اضافه $1");
         s = s.replace(/\+\s?(?=\d)/gu, " به اضافه ");
 
+        // 7c0) THE DEGREE SIGN, which had NO rule at all — this file's header records that fa_ir spells its
+        //      units out in all 1,856 utterances, so no abbreviation table was needed, and `°` fell through with
+        //      it. `20 °C` therefore read *bist si*: the sign dropped and the C spoken as an English letter name.
+        //
+        //      The corpus supplies both scale readings in the slot, with a numeral, so this is tier 2 throughout:
+        //
+        //        "دما معمولاً به بیش از ۳۰ درجه سانتی‌گراد می‌رسد"       ×2   ← 30 °C
+        //        "در گرمای ۹۰ درجه فارنهایت منتظر بودند"                ×3   ← 90 °F
+        //        `درجه` ×30 TOKEN on its own, for the bare sign
+        //
+        //      Persian puts the unit AFTER the number, so unlike Korean's 섭씨 this rule reorders nothing and
+        //      cannot strand a sign to its left.
+        //
+        //      ⚠ AND `سانتی‌گراد` FIRST PROBED AS `substring-only` — A FALSE NEGATIVE FROM THE TOOL, not from the
+        //      corpus. Persian writes compounds with U+200C ZWNJ, which `corpus-words.ts` was splitting on, so a
+        //      word present twice in exactly this slot was reported absent. The incoherence gave it away: 0 token
+        //      with 2 PHRASE hits is impossible unless the tokenizer is wrong. Fixed there; 1,091 further Persian
+        //      tokens were being split the same way.
+        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 درجه سانتی‌گراد");
+        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 درجه فارنهایت");
+        s = s.replace(/(\d)\s?°/gu, "$1 درجه");
+
+        // 7c1) THE MINUS AND ±, both dropped before, so `-5 °C` read as five degrees above zero (#654).
+        //      ⚠ PERSIAN SPLITS THE SIGN FROM THE OPERATION, as ko and vi do: منفی is the NEGATIVE sign
+        //      (×22 token / 9 articles, correct sense throughout) while به اضافه / منها are the operators, and
+        //      this file's plus rule already uses the operator form. A sign directly before a digit is the
+        //      negative-quantity case, so it takes منفی.
+        //
+        //      ± pairs the two SIGN names rather than the operators, and takes the conjunction: `مثبت و منفی`
+        //      is attested (×1) and the conjoined shape is the one `en` already ships ("plus or minus"), which
+        //      is why the fleet has both this and the bare juxtaposition. ×1 is a lead rather than a finding, so
+        //      it is recorded as the weakest evidence in this rule — but a dropped ± is inaudible, which cannot
+        //      be right either.
+        s = s.replace(/±/gu, " مثبت و منفی ");
+        //      ⚠ THE RANGE GUARD IS THE ONE `th` NEEDED. The fleet convention rejects a sign with a space
+        //      AFTER it, catching a score like `26 - 00`, and misses a range spaced only BEFORE the sign —
+        //      th_th's `1000 -1300` read as a subtraction until this was added. A digit anywhere to the left
+        //      rejects the match: a negative quantity does not follow a number, a range does.
+        s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+            /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}منفی `);
+
+        // 7c2) RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SOURCE IS AN EXPLICIT PRONUNCIATION INSTRUCTION —
+        //      fa.wikipedia's notation article does not merely use these words, it says how each sign is READ,
+        //      and lists the alternatives:
+        //
+        //        «۲×۲ برابر ۴ است» یا «۲×۲ برابر است با ۴» یا «۲×۲ مساوی است با ۴» یا «۲×۲ می‌شود ۴»
+        //        3 < 4 می‌خوانیم «۳ کمتر از ۴ است» یا «۳ کوچکتر از ۴ است»          ("we READ 3 < 4 as …")
+        //
+        //      ⚠ AND IT SHOWS THE COPULA IS FINAL, WHICH SPLITS THE FOUR SIGNS INTO TWO RULE SHAPES. Persian is
+        //      SOV, so the comparative reading ends in است: `A < B` is «A کوچکتر از B است», with the verb after
+        //      both operands — those two rules consume both operands, as in ja/ko/tr. The equality is different
+        //      and genuinely infix, because برابر است با carries its copula in the MIDDLE ("is equal with"), so
+        //      it substitutes between the operands like any European rule. Same for تقسیم بر.
+        //
+        //      Corpus support, tier 2: `کوچکتر از` ×5 phrase, `بزرگتر` ×11 token (its sibling proves the
+        //      construction, as `größer` did for de), `برابر` ×35 token, and `تقسیم بر` ×3 — the last from
+        //      FLEURS's PARALLEL division sentence, which reads a division aloud with a numeral operand in 57 of
+        //      the 67 corpora and is therefore audio-aligned evidence for the division word.
+        s = s.replace(/(\d+)\s?<\s?(\d+)/gu, "$1 کوچکتر از $2 است");
+        s = s.replace(/(\d+)\s?>\s?(\d+)/gu, "$1 بزرگتر از $2 است");
+        s = s.replace(/\s?=\s?/gu, " برابر است با ");
+        s = s.replace(/\s?÷\s?/gu, " تقسیم بر ");
+
         // 7d) THE AMPERSAND → اند, AND IT IS THE ENGLISH WORD ON PURPOSE. The corpus's `که B&B ها به عمدتا`
         //     dropped the sign: *kˈe bˈiː bˈiː hˈaː*, the two initialisms adjacent with nothing between.
         //     Absent from the text by construction, so audio again — and here BOTH fa_ir speakers of the

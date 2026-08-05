@@ -78,7 +78,11 @@ const utts = utterances(code);
 const spaceless = utts.some((u) => SPACELESS.test(u));
 // One flat token set for the boundary test, and the joined text for the substring count.
 const toks = new Map<string, number>();
-for (const u of utts) for (const t of u.split(/[^\p{L}\p{M}'’-]+/u)) if (t !== "") toks.set(t, (toks.get(t) ?? 0) + 1);
+// ⚠ U+200C ZWNJ IS WORD-INTERNAL, NOT A SEPARATOR. Persian writes compounds with a zero-width non-joiner —
+// سانتی‌گراد (Celsius), می‌شود — and splitting on it reported `سانتی‌گراد` as `substring-only`, i.e. as a
+// NEGATIVE, while the corpus contains it twice in exactly the slot being probed (`۳۰ درجه سانتی‌گراد`). The
+// phrase count is what exposed it: 0 token / 2 phrase is incoherent unless the tokenizer is wrong.
+for (const u of utts) for (const t of u.split(/[^\p{L}\p{M}‌'’-]+/u)) if (t !== "") toks.set(t, (toks.get(t) ?? 0) + 1);
 
 console.log(`${code}: ${utts.length} utterances, ${toks.size} distinct tokens${spaceless ? "  ⚠ SPACELESS SCRIPT — substring IS the hit test" : ""}`);
 for (const w of words) {

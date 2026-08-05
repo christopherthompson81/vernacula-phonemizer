@@ -251,6 +251,57 @@ export function normalizeVietnamese(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 cộng ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1cộng ");
 
+    // ── 11b2. the MINUS and ±, which this file argued for and never had (#654) ────────────────────
+    // The note above ends "omitting a plus is LOSSLESS while omitting a minus INVERTS" — and then no minus
+    // rule followed. Both signs were dropped outright, so `-5 °C` read as *năm độ*, five degrees above zero.
+    //
+    // ⚠ VIETNAMESE SPLITS THE SIGN FROM THE OPERATION, as Korean does. `dấu trừ` is the MINUS SIGN and `trừ`
+    // the subtraction verb, while a NEGATIVE quantity is read `âm` — vi.wikipedia keeps them apart explicitly:
+    // "dấu trừ và số âm, đôi khi dấu âm được đặt cao hơn một chút so với dấu trừ". The rule below matches a
+    // sign directly before a digit, which is the negative-quantity case, so it emits `âm`.
+    //
+    // ± is defined by the same article: "± 1. Ký hiệu dấu cộng hoặc dấu trừ" — the plus-or-minus sign — so the
+    // juxtaposed reading is the sourced one, and it uses this file's own `cộng` (`dấu trừ` ×5 / 4 articles).
+    s = s.replace(/±/gu, " cộng trừ ");
+    // ⚠ THE RANGE GUARD IS THE SAME ONE `th` NEEDED, and for the same reason: the fleet's usual convention
+    // rejects a sign with a space AFTER it (which catches a score like `26 - 00`) and so misses a range spaced
+    // only BEFORE the sign — th_th's `ค.ศ. 1000 -1300` was read as a subtraction until this was added. A digit
+    // anywhere to the left rejects the match: a negative quantity does not follow a number, a range does.
+    s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}âm `);
+
+    // ── 11c. the relational and division signs (#654) ────────────────────────────────────────────
+    // Vietnamese is SVO and all four readings are infix, so this is the ordinary rule shape.
+    //
+    // ⚠ `bằng` IS THE في TRAP: ×352 TOKEN HITS ON vi.wikipedia AND EVERY ONE THE WRONG SENSE. Vietnamese
+    // `bằng` is both the equality word and the INSTRUMENTAL preposition ("by means of"), and prose is
+    // overwhelmingly the latter — "bằng các chứng minh toán học" (by mathematical proofs), "được viết ra bằng
+    // chữ" (written in words), plus `bằng chứng` (evidence) as a compound. The corpus is the same: ×224 phrase
+    // hits, the sampled one being "tìm con mồi bằng mùi" (finds prey BY SMELL). A count-only pass would have
+    // called this the best-attested word in the issue while proving nothing about the reading.
+    //
+    // ⚠ SO THE SLOT WAS PROBED INSTEAD OF THE WORD, which is the general escape from a homograph majority:
+    // search for the SIGN'S NAME and for the reading WITH ITS OPERANDS, not for the bare word.
+    //
+    //   "Kết quả được biểu thị sau dấu bằng. Ví dụ: 1 + 1 = 2  («một cộng một bằng hai»)"
+    //   "cho biết chúng bằng nhau, biểu diễn thông qua dấu bằng ( = )"
+    //
+    // — the sign named, and the reading quoted beside the notation. `dấu bằng` ×5 / 4 articles.
+    //
+    // The other three need no such rescue: `nhỏ hơn` ×20 and `lớn hơn` ×15 as corpus phrases, and `chia cho`
+    // ×2 from the parallel division sentence ("tỷ lệ khung hình cho định dạng này chia cho mười hai"), which
+    // FLEURS carries in 57 of its 67 languages and is therefore audio-aligned evidence for the division word.
+    s = s.replace(/\s?=\s?/gu, " bằng ");
+    s = s.replace(/\s?<\s?/gu, " nhỏ hơn ");
+    s = s.replace(/\s?>\s?/gu, " lớn hơn ");
+    s = s.replace(/\s?÷\s?/gu, " chia cho ");
+
+    // THE AMPERSAND, dropped before. A Latin-script printing ligature, and Vietnamese is written in Latin
+    // script, so it reads with the language's own conjunction rather than as a loan — the same call `tr` (ve)
+    // and `nl` (en) make, as against `ko` (앤드) and `ja` (アンド) where the symbol only ever arrives inside a
+    // Latin run and takes a loan reading.
+    s = s.replace(/\s?&\s?/gu, " và ");
+
     // ── 12. Vietnamese abbreviations, then foreign initialisms ───────────────────────────────────
     // ERA MARKERS BEFORE GENERIC INITIALISMS — the playbook's coupling, and load-bearing here: TCN and
     // SCN are all-caps runs, so step 12b would otherwise spell "trước Công nguyên" as "tê xê en nờ".

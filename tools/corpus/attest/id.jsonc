@@ -1,0 +1,80 @@
+// WIKIPEDIA WORD ATTESTATION — id (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "id",
+    "wiki": "id.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "matematika aritmetika pembagian",
+    "findings": [
+        {
+            "word": "lebih kecil dari",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "lebih besar dari",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…=== Bilangan prima === Bilangan prima adalah bilangan yang lebih besar dari 1 yang hanya bisa dibagi dengan angka 1 dan bilangan itu se…",
+                "…,5,7,11,13,17,19...} Bilangan komposit adalah bilangan yang lebih besar dari 1 namun bisa dibagi dengan angka 1 dan bilangan asli yang l…"
+            ]
+        },
+        {
+            "word": "sama dengan",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 42,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…enyebutnya adalah perpangkatan dari 10. Sebagai contoh, 0.3 sama dengan 3 10 {\\displaystyle {\\tfrac {3}{10}}} , dan 25.12 sama deng…",
+                "…ma dengan 3 10 {\\displaystyle {\\tfrac {3}{10}}} , dan 25.12 sama dengan 2512 100 {\\displaystyle {\\tfrac {2512}{100}}} . Setiap bila…",
+                "…displaystyle -6} , karena apabila dijumlahkan maka hasilnya sama dengan 0 {\\displaystyle 0} . Selain unsur invers, operasi aritmeti…",
+                "…yle 1000=10^{3}} , maka logaritma dari 1000 dengan basis 10 sama dengan 3. Logaritma dari x {\\displaystyle x} dengan basis b {\\disp…",
+                "…Tanda sama dengan atau tanda kesetaraan, dinyatakan sebagai =, adalah simbol…",
+                "…bert Recorde pada tahun 1557. Dalam sebuah persamaan, tanda sama dengan yang ditempatkan di antara dua ekspresi yang memiliki nilai…"
+            ]
+        },
+        {
+            "word": "dibagi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 30,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…i operasi perkalian. Pada operasi ini, suatu bilangan dapat dibagi menjadi beberapa bagian yang sama oleh suatu bilangan lain.…",
+                "…an sebagai kasus istimewa dari operasi perkalian. Alih-alih dibagi oleh suatu bilangan, operasi pembagian dapat dipandang seba…",
+                "…gai timbal balik. Timbal balik dari suatu bilangan adalah 1 dibagi oleh bilangan tersebut. Sebagai contoh, 48 ÷ 8 = 48 × 1 8 {…",
+                "…dalam ilmu pengetahuan). Adalah wajar bagi universitas bila dibagi ke dalam bagian-bagian yang menyertakan departemen Ilmu Pen…",
+                "…siomatisasi sejati teori bilangan sepenuhnya. Logika modern dibagi ke dalam teori rekursi, teori model, teori pembuktian terpa…",
+                "…masing-masing dari 5 bagian di mana satu himpunan ukuran 20 dibagi. Misalnya, 20 apel dibagi menjadi lima kelompok yang terdir…"
+            ]
+        }
+    ],
+}
