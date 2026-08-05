@@ -85,7 +85,7 @@ export function normalizeMaori(input: string): string {
     //    `&amp;` would become "me amp ;". The corpus's two instances are the fleet's usual pair, `B&B` and
     //    `Arts & Sciences`; before this the sign was dropped outright and `B&B` read as two bare consonants.
     //    Spaced on both sides deliberately — `B&B` is two initialisms, and joining them would make one token.
-    const s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
+    let s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
     // 1b) ⚠ THE PLUS IS ATTESTED AND DELIBERATELY NOT SHIPPED, WHICH IS A DIFFERENT LIMIT FROM "UNSOURCED".
     //     The corpus's `(UTC+1)` and `+30°C` both drop the sign. The audio ANSWERS what the readers say —
     //     decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft over mi_nz/train:
@@ -102,6 +102,31 @@ export function normalizeMaori(input: string): string {
     //     A native maths word was NOT substituted: the recordings say the readers use the loan, so choosing a
     //     different word because it happens to be pronounceable would be inventing a reading the evidence
     //     contradicts. Recorded here so the next pass does not re-derive the sourcing and reach for [pa].
+    // 1b) THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from mi_nz — and unlike the plus above,
+    //     ⚠ ALL FOUR READINGS ARE NATIVE MĀORI WORDS THIS ENGINE CAN ACTUALLY SAY. That is the whole reason they
+    //     can be shipped where the plus cannot: the note above records that the plus is a LOAN in the recordings
+    //     (`plas`), and Māori having no /l/ and no /s/ means the g2p would emit [pa] — a confidently wrong
+    //     syllable. Here the corpus supplies words made of Māori phonemes, so there is nothing to approximate:
+    //
+    //       `rite ki`     ×43 phrase   "tana ōrite ki ngā raiona" — its EQUIVALENCE TO lions
+    //       `iti iho`     ×40 phrase   "he iti iho te wā hanimuni" — the honeymoon period is LESS
+    //       `nui ake`     ×100 phrase  "te taipitopito nui ake" — GREATER detail
+    //       `whakawehe`   ×15 token    and FLEURS's parallel division sentence, "te whakawehe ki te tekau mā rua"
+    //                                 ("dividing by twelve")
+    //
+    //     ⚠ ALL FOUR ARE INFIX, which is not what a VSO language would suggest and is a fact about the
+    //     constructions: the comparative takes `i` as its "than" and the standard follows it
+    //     ("he iti iho te wā X i te Y"), so `A < B` is "A iti iho i B" with the operands in written order. Same
+    //     for the equality (`rite ki`) and the division (`whakawehe ki`), both of which take their preposition
+    //     before the second operand. So no reordering is needed — the ja/ko/fa problem does not arise here.
+    //
+    //     Māori is the fleet's most extreme routing case (#663): a word it cannot spell goes to the English
+    //     reader. These words are all spellable, so they stay on the native branch and phonemize natively.
+    s = s.replace(/\s?=\s?/gu, " rite ki ");
+    s = s.replace(/\s?<\s?/gu, " iti iho i ");
+    s = s.replace(/\s?>\s?/gu, " nui ake i ");
+    s = s.replace(/\s?÷\s?/gu, " whakawehe ki ");
+
     // 2) The shared symbol tier. Everything else this language needs is declared data, not a local rule.
     return SYMBOLS(s);
 }
