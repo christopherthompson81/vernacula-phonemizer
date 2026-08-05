@@ -93,6 +93,40 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
 ];
 
 /**
+ * THE SIGN-CLASS PROBES — one synthetic input per droppable sign, and the pair of readings that decides whether
+ * the engine voiced it (#586/#654).
+ *
+ * ⚠ SHARED, BECAUSE A HAND-KEPT LIST IN ONE TOOL IS A LIST THAT DRIFTS. This table lived inside `review.ts`,
+ * which is a CLI script and therefore cannot be imported — so `coverage.ts` could not sweep the fleet with the
+ * same probes `review.ts` uses per language, and the #654 progress number had to be re-derived in a scratch
+ * script each time. That is exactly the shape the `DROPPABLE` comment above warns about: this very list was
+ * once missing `÷ > ±`, the exponent and the currency sign, and nothing said so.
+ *
+ * ⚠ IT CANNOT BE DERIVED FROM `DROPPABLE`. A defect regex is not a probe string, and one class needs several
+ * probes — `math-sign` alone covers `+ ± = < > × ÷`. `review.ts` asserts the mapping between the two rather
+ * than trusting it, which turns the next omission into a loud failure.
+ *
+ * Each entry is [class name, the probe, the regex that REMOVES the sign from it]. A sign is DROPPED when the
+ * reading of the probe equals the reading of the probe with the sign stripped out — i.e. the character
+ * contributed nothing.
+ */
+export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
+    ["minus", "-5", /[-−]/gu],
+    ["plus", "+5", /\+/gu],
+    ["plus-minus", "±5", /±/gu],
+    ["ampersand", "A & B", /&/gu],
+    ["equals", "x = y", /=/gu],
+    ["less-than", "5 < 6", /</gu],
+    ["greater-than", "6 > 5", />/gu],
+    ["times", "6 × 6", /×/gu],
+    ["divide", "6 ÷ 3", /÷/gu],
+    ["exponent", "5 km²", /²/gu],
+    ["currency", "$5", /\$/gu],
+    ["percent", "25 %", /%/gu],
+    ["degrees", "20 °C", /°/gu],
+];
+
+/**
  * DESIGNATIONS ACCEPTED AS CORRECTLY SILENT (#586) — the sweep's permanent residual, named per instance.
  *
  * WHY A BASELINE AND NOT A GUARD. The `minus` class above explains why a spaced designation cannot be

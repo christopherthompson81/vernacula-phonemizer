@@ -28,7 +28,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { DROPPABLE, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
+import { DROPPABLE, SIGN_CASES, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
@@ -341,4 +341,41 @@ if (acceptedRows.length) {
     }
     const n = acceptedRows.reduce((s, r) => s + r.accepted.length, 0);
     console.log(`\n${n} accepted cell(s) across ${acceptedRows.length} language(s) — INTENTIONAL, not a TODO`);
+}
+
+/**
+ * FLEET-WIDE SIGN-CLASS SWEEP (#654) — which signs are still silently DROPPED, and by how many of the treated
+ * languages.
+ *
+ * ⚠ WHY IT BELONGS HERE AND NOT IN A PROBE SCRIPT. `review.ts` runs the same probes for ONE language, so the
+ * fleet number had to be re-derived in a scratch file every time it was quoted — and it was quoted against the
+ * wrong denominator as a result: counting registered CODES gives 192 and calls ten Arabic dialects ten
+ * languages, which overstates both the work and the progress. This file already owns the right denominator, the
+ * languages that HAVE a normalization layer, and already prints "N/67" for defective cells.
+ *
+ * ⚠ AND IT CATCHES A REGRESSION THAT NOTHING ELSE CAN. These signs are ABSENT from the FLEURS corpora — that is
+ * the whole reason #654 needed Wikipedia and register sources — so `corpus-diff.ts` reports 0 changed whether a
+ * rule works or has just been deleted. A scripted edit to croatian/normalize.ts REPLACED its `>` rule instead of
+ * appending after it, and only the per-language sign check saw it. Sweeping every language every run turns that
+ * from a lucky catch into a gate.
+ *
+ * The probes come from `SIGN_CASES` in defects.ts, shared with `review.ts`, so the two cannot disagree about
+ * what a dropped sign is.
+ */
+console.log("\n=== signs still DROPPED, fleet-wide (#654) ===");
+const signDrops = new Map<string, string[]>(SIGN_CASES.map(([name]) => [name, []]));
+let measured = 0;
+for (const [lang] of TREATED) {
+    const say = (t: string): string | undefined => {
+        try { return phonemize(t, lang) as string; } catch { return undefined; }
+    };
+    measured++;
+    for (const [name, probe, strip] of SIGN_CASES) {
+        const full = say(probe), bare = say(probe.replace(strip, ""));
+        if (full !== undefined && full === bare) signDrops.get(name)!.push(lang);
+    }
+}
+for (const [name, langs] of signDrops) {
+    const n = langs.length;
+    console.log(`  ${name.padEnd(12)} ${String(n).padStart(2)}/${measured} dropped${n === 0 ? "" : `   ${langs.join(" ")}`}`);
 }

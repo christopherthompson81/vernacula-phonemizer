@@ -28,7 +28,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
-import { DROPPABLE } from "./defects.ts";
+import { DROPPABLE, SIGN_CASES } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -234,21 +234,7 @@ const say = (t: string): string => { try { return (phonemize(t, lang) as string)
  *     corpus actually contains one.
  *   · nothing else. Every other DROPPABLE class is below.
  */
-const signCases: [string, string, RegExp][] = [
-    ["minus", "-5", /[-−]/gu],
-    ["plus", "+5", /\+/gu],
-    ["plus-minus", "±5", /±/gu],
-    ["ampersand", "A & B", /&/gu],
-    ["equals", "x = y", /=/gu],
-    ["less-than", "5 < 6", /</gu],
-    ["greater-than", "6 > 5", />/gu],
-    ["times", "6 × 6", /×/gu],
-    ["divide", "6 ÷ 3", /÷/gu],
-    ["exponent", "5 km²", /²/gu],
-    ["currency", "$5", /\$/gu],
-    ["percent", "25 %", /%/gu],
-    ["degrees", "20 °C", /°/gu],
-];
+const signCases = SIGN_CASES;
 /**
  * EVERY `DROPPABLE` CLASS MUST BE PROBED HERE, and this asserts it rather than trusting the comment above.
  *
