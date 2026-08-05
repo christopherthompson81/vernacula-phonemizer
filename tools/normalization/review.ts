@@ -28,7 +28,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
-import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES } from "./defects.ts";
+import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES, sistersOf } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -85,16 +85,8 @@ const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fle
  * Kept deliberately short. Arabic's dialect codes are NOT here: they share a script and much of MSA, but a
  * word being right in one is not evidence for another, which is the whole property this map asserts.
  */
-const SISTER_STANDARDS: readonly (readonly string[])[] = [
-    ["hr", "sr", "bs"],   // Serbo-Croatian: three standards, one language
-    ["id", "zsm", "ms"],  // Malay: Indonesian and Malaysian
-    ["nb", "nn", "no"],   // Norwegian: Bokmål and Nynorsk
-];
-// A FUNCTION DECLARATION, not a const arrow: the artifact lookup in §3 runs above this point in the file,
-// and a const would be a use-before-initialisation there (it was — the whole tool threw).
-function sisters(code: string): readonly string[] {
-    return SISTER_STANDARDS.find((set) => set.includes(code))?.filter((c) => c !== code) ?? [];
-}
+// Imported, not restated — see SISTER_STANDARDS in defects.ts for why the second copy was removed.
+const sisters = sistersOf;
 
 const results: [string, boolean | null, string][] = [];
 const note = (name: string, ok: boolean | null, detail: string): void => { results.push([name, ok, detail]); };
