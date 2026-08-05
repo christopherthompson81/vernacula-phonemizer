@@ -338,6 +338,31 @@ export function normalizeKazakh(input: string): string {
     //    decimal comma (2,3), so it runs before step 8 folds the comma into a word.
     s = SYMBOLS(s);
 
+    // 7z) FRACTIONS, AND THE READING COMES FROM THE CORPUS'S OWN AUDIO. There was no fraction rule at all here:
+    //     the slash was dropped and the digits read in order, so `1/5` came out *бір бес* ("one five") and `2/3`
+    //     *екі үш*. The corpus's only instance is the sample-depth sentence, `5 мм (1/5 дюйм)`, and the notation
+    //     is in the TEXT while the reading is only in the AUDIO — so the text tiers cannot answer it at all.
+    //
+    //     Decoded from kk_kz/train with facebook/wav2vec2-xlsr-53-espeak-cv-ft (the recognizer this repo already
+    //     uses for ta/gu/vi/th/mi/sw/zu's plus words):
+    //
+    //       … b i s   m i l i m e t ə r    b i s ts j e n   b y r    dʒ iː m …
+    //          бес     миллиметр           бес-тен   бір          дюйм
+    //
+    //     ⚠ SO THE DENOMINATOR COMES FIRST, IN THE ABLATIVE, AND THE NUMERATOR FOLLOWS — `бестен бір`, "one out
+    //     of five". Not the western order, and not recoverable from the digits: reading `1/5` left to right
+    //     gives the two numbers in the wrong sequence AND drops the case that carries the relation.
+    //
+    //     `withCase(…, "abl")` supplies the ending, including the voiceless variant the audio confirms
+    //     (бес ends in с, so -тен and not -ден). Verified across the numerals: бестен бір, үштен екі, төрттен үш,
+    //     оннан бір, жүзден бір.
+    //
+    //     Digits on both sides only, and AFTER the km/сағ rate rules above so a unit slash is already consumed.
+    s = s.replace(/(?<![\d.,])(\d{1,3})\s?\/\s?(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+        const num = orthographic(Number(a)), den = orthographic(Number(b));
+        return num === "" || den === "" ? m0 : `${withCase(den, "abl")} ${num}`;
+    });
+
     // 8) DECIMAL COMMA → the word. Kazakh reads the decimal comma as "бүтін" (whole) with the fraction
     //    as a separate number.
     s = s.replace(/(?<=\d),(?=\d)/gu, " бүтін ");
