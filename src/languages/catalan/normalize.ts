@@ -240,6 +240,12 @@ export function normalizeCatalan(input: string): string {
     //     letter name (`B&Bs` → be i bes — the corpus's only ampersand is the plural). A TRUE minus (`-5`)
     //     reads "menys"; the corpus's `-\d` are all ranges/scores (6-6, 11.000-22.500, 4.2-3.9) and stay as
     //     two bare numbers.
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
+    //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
+    //    rule, since ± is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " més menys ");
     s = s.replace(/\+\s?(?=\d)/gu, " més ");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "menys $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,

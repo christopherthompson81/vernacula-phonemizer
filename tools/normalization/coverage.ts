@@ -28,7 +28,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { DROPPABLE, SIGN_CASES, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
+import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
@@ -364,18 +364,30 @@ if (acceptedRows.length) {
  */
 console.log("\n=== signs still DROPPED, fleet-wide (#654) ===");
 const signDrops = new Map<string, string[]>(SIGN_CASES.map(([name]) => [name, []]));
+const signAccepted = new Map<string, string[]>(SIGN_CASES.map(([name]) => [name, []]));
 let measured = 0;
 for (const [lang] of TREATED) {
     const say = (t: string): string | undefined => {
         try { return phonemize(t, lang) as string; } catch { return undefined; }
     };
     measured++;
+    const exempt = ACCEPTED_SIGN_SILENCE[lang] ?? {};
     for (const [name, probe, strip] of SIGN_CASES) {
         const full = say(probe), bare = say(probe.replace(strip, ""));
-        if (full !== undefined && full === bare) signDrops.get(name)!.push(lang);
+        if (full === undefined || full !== bare) continue;
+        // ⚠ AN INTENTIONAL SILENCE IS COUNTED SEPARATELY, NOT SUBTRACTED SILENTLY. A class whose refusal is
+        // argued in the language's own file is not an outstanding gap, but hiding it would make the remaining
+        // count look like the whole truth — the failure mode this file's own accepted-cells section exists to
+        // avoid. So it leaves the `dropped` figure and appears in its own column.
+        (exempt[name] !== undefined ? signAccepted : signDrops).get(name)!.push(lang);
     }
 }
 for (const [name, langs] of signDrops) {
-    const n = langs.length;
-    console.log(`  ${name.padEnd(12)} ${String(n).padStart(2)}/${measured} dropped${n === 0 ? "" : `   ${langs.join(" ")}`}`);
+    const n = langs.length, acc = signAccepted.get(name)!;
+    const tail = acc.length === 0 ? "" : `   (+${acc.length} intentional: ${acc.join(" ")})`;
+    console.log(`  ${name.padEnd(12)} ${String(n).padStart(2)}/${measured} dropped${n === 0 ? "" : `   ${langs.join(" ")}`}${tail}`);
+}
+// The reasons, printed once, so a zero in the column above is never mistaken for "nothing to know here".
+for (const [name, langs] of signAccepted) {
+    for (const l of langs) console.log(`  ⓘ ${l} ${name}: ${ACCEPTED_SIGN_SILENCE[l]![name]!}`);
 }

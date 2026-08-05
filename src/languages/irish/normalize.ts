@@ -309,6 +309,13 @@ export function normalizeIrish(input: string): string {
 
     // 11) SIGNS. `+30°C` — the plus was dropped. `&` → *agus* (and). A TRUE minus (`-5`) reads "lúide";
     //     the corpus's `-\d` are all ranges/scores, now handled above. `%` → *faoin gcéad* (the tier).
+    //     ⚠ ± TAKES THE CONJUNCTION, unlike most of the fleet, and that is a fact about what these two words
+    //     ARE. `móide` and `lúide` are prepositional forms — "the more by", "the less by" — so juxtaposing them
+    //     bare reads as two successive operations rather than one tolerance. Irish joins them with `nó`, which is
+    //     this corpus's ×490-TOKEN word for "or", so the whole reading is built from vocabulary already here.
+    //     `en` is the other language that needs the conjunction ("plus or minus"), and for the same reason:
+    //     where the two halves are not sign NAMES, something has to mark them as alternatives.
+    s = s.replace(/±/gu, " móide nó lúide ");
     s = s.replace(/\+\s?(?=\d)/gu, " móide ");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "lúide $1");
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(s?)(?![\p{L}\p{M}])/gu,

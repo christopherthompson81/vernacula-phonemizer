@@ -416,13 +416,53 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/\s?=\s?/gu, " egyenlő ");
     s = s.replace(/\s?<\s?/gu, " kisebb mint ");
     s = s.replace(/\s?>\s?/gu, " nagyobb mint ");
-    // ⚠ THE DIVISION SIGN IS DELIBERATELY LEFT DROPPED, and the reason is morphological rather than a sourcing
-    //   gap: `osztva` is well attested (×8 / 7 articles) and it governs the INSTRUMENTAL on the operand, every
-    //   single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva". So `A ÷ B` is
-    //   "A B-vel osztva", which needs the numeral spelled here and the suffix built with vowel harmony AND
-    //   consonant assimilation (három → hárommal, négy → néggyel, öt → öttel, egy → eggyel). That is the
-    //   machinery `tr` and `ko` have, and it is a separate piece of work from reading a sign — the same reason
-    //   `az` is deferred. Emitting a bare "hat osztva három" would be an ungrammatical case, not an accent.
+    // THE DIVISION SIGN (#654). `osztva` is attested ×8 / 7 articles and it governs the INSTRUMENTAL on the
+    // operand, every single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva" — so
+    // `A ÷ B` is "A B-vel osztva" and a bare "hat osztva három" would be an ungrammatical CASE, not an accent.
+    //
+    // ⚠ SO THE RULE SPELLS ITS OWN OPERAND AND BUILDS THE SUFFIX, the machinery tr and ko already needed. Two
+    // things have to be right, and both are properties of the WORD rather than the digit:
+    //
+    //   VOWEL HARMONY picks -val or -vel from the stem's last vowel — hárommal vs öttel.
+    //   ⚠ `harminc` IS THE ONE IRREGULAR NUMERAL: its last vowel is the FRONT `i` but the word takes BACK
+    //   harmony (harminccal, not *harminccel). Named explicitly rather than derived, because no rule over the
+    //   vowel gets it right. Every other numeral is regular, checked across bir…ezer.
+    //
+    //   THE v ASSIMILATES to a final consonant and DOUBLES it — and for a DIGRAPH it is the digraph's first
+    //   letter that doubles, which a naive last-character rule gets wrong: négy → néggyel (not *négyvel or
+    //   *négyyel), húsz → hússzal, egy → eggyel. After a VOWEL there is no assimilation at all: kettő →
+    //   kettővel. Verified against the whole numeral vocabulary — eggyel, kettővel, hárommal, néggyel, öttel,
+    //   hattal, héttel, nyolccal, kilenccel, tízzel, hússzal, harminccal, ezerrel.
+    //
+    //   `stemForSuffix` deliberately does NOT apply: it shortens a stem before a VOWEL-initial suffix
+    //   (három → hárm-), and -val/-vel begins with a consonant, so `hárommal` is correct and `*hármmal` is not.
+    const HU_BACK = /[aáoóuú]/u;
+    /** The last vowel decides harmony; `harminc` is the one numeral where the vowel and the harmony disagree. */
+    const huLinkVowel = (stem: string): string => {
+        if (stem.endsWith("harminc")) return "a";
+        const vs = [...stem].filter((c) => /[aáeéiíoóöőuúüű]/u.test(c));
+        const last = vs[vs.length - 1];
+        return last !== undefined && HU_BACK.test(last) ? "a" : "e";
+    };
+    const HU_DIGRAPH = ["gy", "sz", "cs", "ny", "ly", "ty", "zs", "dz"];
+    /** Instrumental -val/-vel: harmony, then v→consonant assimilation with digraph-aware doubling. */
+    const huInstrumental = (w: string): string => {
+        const cut = w.lastIndexOf(" ") + 1, head = w.slice(0, cut), stem = w.slice(cut);
+        const v = huLinkVowel(stem);
+        if (/[aáeéiíoóöőuúüű]$/u.test(stem)) return `${head}${stem}v${v}l`;
+        // ⚠ THE DOUBLED LETTER GOES BEFORE THE DIGRAPH, NOT AFTER THE WORD. Hungarian writes the geminate by
+        // repeating the digraph's FIRST letter in front of it: egy → e+g+gy = eggyel, négy → néggyel,
+        // húsz → hússzal. Appending it instead produced *egygel* and *húszsal*, which the g2p duly read as
+        // [ɛɟɡɛl] and [huːsʃɒl] — two wrong consonants, caught by probing the whole numeral vocabulary rather
+        // than the one example the rule was written against.
+        const dg = HU_DIGRAPH.find((d) => stem.endsWith(d));
+        const doubled = dg !== undefined
+            ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}`
+            : stem + stem.slice(-1);
+        return `${head}${doubled}${v}l`;
+    };
+    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
+        `${numberToWords(Number(a))} ${huInstrumental(numberToWords(Number(b)))} osztva`);
 
     // 8) DECIMALS. The comma was reaching `clausePunctuation` as a COMMA PAUSE mid-number. Hungarian says
     //    *egész* between the parts (*három egész öt*). The digits are LEFT AS DIGITS so the existing

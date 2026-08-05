@@ -110,6 +110,49 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * reading of the probe equals the reading of the probe with the sign stripped out — i.e. the character
  * contributed nothing.
  */
+/**
+ * SIGN CLASSES A LANGUAGE IS INTENTIONALLY SILENT ON (#654) — the synthetic-probe counterpart of
+ * `ACCEPTED_SILENT` above, and the difference between the two matters.
+ *
+ * `ACCEPTED_SILENT` names CORPUS LINES: this exact sentence's hyphen is a designation, so the drop is correct.
+ * This names a whole CLASS for a language: no reading of this sign is shippable here at all, so `review.ts`'s
+ * synthetic probe (`-5`, `+5`) will always report DROPPED and always be right to.
+ *
+ * ⚠ WHY IT EXISTS RATHER THAN JUST LETTING THE GATE FAIL. A hard fail that can never be fixed is noise, and
+ * noise is how the audit's own hardcoded 37-of-67 list stayed wrong for months — a number nobody trusted
+ * enough to read. Three languages had a permanently red `sign classes` line for reasons already argued at
+ * length in their own files, which meant the line said nothing about whether anything had REGRESSED.
+ *
+ * ⚠ AND IT IS DELIBERATELY SHORT. Only a class whose refusal is ARGUED IN THE LANGUAGE'S OWN FILE belongs
+ * here; "no rule yet" is a TODO and must keep failing. Every other language in the `minus` and `plus-minus`
+ * columns is a real gap, and adding them here to quiet the gate would be exactly the wrong use of it.
+ *
+ * The reason string is printed by both tools, so the justification travels with the exemption.
+ */
+export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    mi: {
+        // ⚠ ATTESTED AND UNSAYABLE, which is a limit no sourcing can lift. Both mi_nz speakers voice this plus,
+        // and both use the English loan; Māori has no /l/ and no /s/, so every candidate spelling reduces to a
+        // wrong syllable (`plus` → [pu], `plas` → [pa]). The OPERATOR position between two numbers now reads
+        // `tāpiri` (maori/normalize.ts), so what remains silent is the SIGN position alone — `+5`, `+30°C` —
+        // where `tāpiri` would say "append" and the loan cannot be pronounced.
+        plus: "the sign position only: the attested reading is an English loan Māori's inventory cannot say "
+            + "(/l/, /s/ → [pa]), and the native `tāpiri` means append, not positive — see maori/normalize.ts",
+    },
+    mr: {
+        // Devanagari compounds are written with a hyphen (आस-पास), and the corpus's one hyphen-before-digit
+        // outside a range is `चंद्रयान -1`, a spacecraft name.
+        minus: "measured: the corpus's only hyphen-before-digit outside a range is the spacecraft `चंद्रयान -1`, "
+            + "so a minus rule would read a designation as arithmetic — see marathi/normalize.ts step 15",
+    },
+    nl: {
+        // Every `-\d` in nl_nl is a score or a range (`6-6`, `22:00-23:00`), which Dutch reads as two bare
+        // numbers. Writing the rule would have turned 14 scores into negatives.
+        minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
+            + "into negatives — see dutch/normalize.ts step 9",
+    },
+};
+
 export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
     ["minus", "-5", /[-−]/gu],
     ["plus", "+5", /\+/gu],

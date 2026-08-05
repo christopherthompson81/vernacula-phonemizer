@@ -349,6 +349,12 @@ export function normalizeKazakh(input: string): string {
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
+    //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
+    //    rule, since ± is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " плюс минус ");
     s = s.replace(/(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "минус $1");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 есе $2");
