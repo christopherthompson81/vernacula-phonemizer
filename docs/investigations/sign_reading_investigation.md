@@ -2870,3 +2870,97 @@ Seventeen languages read all four: de es fr pt it ru nl pl uk el ar ja ko tr vi 
 codes as one). Gates per language: tsc PASS; 208 files / 2951 tests; `review.ts` reports **"sign classes: none
 dropped"** for all four in this batch, where vi/th/fa had 3/2/3 dropped before; corpus diff id 0/1936, fa 0/1856,
 th 0/1906, vi 1/1978 (read: `B&amp;Bs` now voices the ampersand).
+
+## Run 43 — 2026-08-04 — #654: exploiting the parallel sentence, and the gate that caught a regression
+
+The user asked whether the parallel-sentence finding from Run 42 had been exhausted. **It had not** — I had used
+it for four languages and then gone straight back to probing one at a time, which is the slower route it was meant
+to replace. Fixed by making it a tool mode and then working the batch it is actually good for.
+
+    corpus-words.ts --sentence '3\s?:\s?2'      → the reading of the operation, in all 57 languages that carry it
+
+### What the harvest gives, and what it does not
+
+The division word, for every language with the sentence, spoken, in the slot, with a numeral operand:
+
+| lang | as the translator wrote it | shape |
+|---|---|---|
+| mr | बाराने भागणे | postpositional, instrumental on the operand |
+| gu | બાર દ્વારા વિભાજીત | postpositional |
+| ta | பன்னிரண்டால் வகுத்தல் | postpositional |
+| kn | ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ | postpositional |
+| ml | പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ | postpositional |
+| pa · ur · ne · sd · am | ਨਾਲ ਭਾਗ · سے تقسیم · विभाजन गरेर · سان ونڊ · በመክፈል | postpositional |
+| az · uz | on ikiyə bölmə · o'n ikkiga bo'lish | postpositional, dative/oblique |
+| hr · cy · ga · ca · sl | dijeli se s · rannu â · roinnt ar · dividint per · delimo z | infix |
+| yue · ja | 除以 12 · 12で割って | infix |
+| mi · ms | whakawehe ki · terbahagi kepada | infix |
+
+⚠ **A HIT IS A LEAD, NOT A READING**, and the tool now says so in its header. The verb is inflected *for that
+sentence*: el's `διαιρούμενος` agrees with `λόγος`, es and ca write gerunds/infinitives, ml writes "when divided".
+A sign reading has to be neutral, so the sentence settles **which word** the language uses and the **form** is
+still a per-language judgement. Read the output; do not paste it.
+
+### The batch this was for: four languages, one rule each
+
+`ca hr cy ga` already read `=` `<` `>` and dropped only the division sign. Of the eight languages in that
+position, `ms` and `uz` already read it, and two are deferred with reasons:
+
+- **az** puts the second operand in the DATIVE ("altı üçə bölünür"), so it needs Turkish's spelled-operand
+  machinery rather than a substitution. `bölü` (the Turkish-style infix) is ×0 on az.wikipedia; `bölünür` ×11.
+- **sl** has both `deljeno z` and `delimo z` at ×0 on sl.wikipedia, so only the corpus's one inflected instance
+  exists, which is not enough to pick a neutral form from.
+
+⚠ **TWO OF THE FOUR SOURCES READ THE SIGN ITSELF** — the strongest shape tier 4 takes — and both corroborate a
+word the file already emitted, which is the first time this issue got evidence in both directions at once:
+
+    hr   "a podijeljeno s b jednako c:  a ÷ b = c"        the ÷ glyph, its reading, and hr's own `jednako`
+    cy   "mae a rhannu â b yn hafal ag c"                 likewise with cy's own `yn hafal`
+         'Gellir ysgrifennu "a rhannu â b" fel a ganlyn'  and named again as a quoted expression
+
+Two choices went against the tidier-looking form, both on evidence: `ca` ships the participle `dividit per` over
+the corpus's gerund (a gerund is inflected for its clause, not for the notation), and `ga` ships the corpus's
+`roinnt ar` over `roinnte ar`, which is ×0.
+
+### ⚠ THE GATE CAUGHT ME DELETING A WORKING RULE
+
+My scripted edit to `croatian/normalize.ts` **replaced** the `>` rule line instead of appending after it, so
+`6 > 5` silently went back to reading two bare numbers. `review.ts` reported `DROPPED: greater-than` where the
+baseline had it passing, and that is the only reason it was noticed — the tests pass either way, and the corpus
+diff is 0 because the corpus contains no `>`.
+
+The lesson is not "be careful". *A sweep that edits several files needs a gate that fails on REGRESSION and not
+only on absence*, and the sign-class check is that gate because it re-measures every class in every language on
+every run. The corpus diff cannot serve here, precisely because these signs are absent from the corpora — which
+is the whole reason this issue needed tiers 3 and 4 in the first place.
+
+### The Indic/Dravidian group, and the shared rewrite
+
+`mr` and `gu` are done (Run 43's first commit) and both are POSTPOSITIONAL in all three of the relational and
+division readings. That made Hindi's comparative rewrite worth extracting to `core/postposedSign.ts`, since
+`ta kn ml pa ur ne` will all need it: the two non-obvious parts — keeping trailing punctuation off the operand,
+and the catch-all second pass without which a CHAINED comparison silently vanishes — were defects found in Hindi
+first and are exactly what decays when copied. Hindi's corpus diff is 0/1702 after the extraction.
+
+⚠ `mr`'s `बरोबर` is another **homograph majority**: most of its ×21 corpus tokens are the postposition "with"
+(`तुमच्या बरोबर`, `त्याच बरोबर`), and the equality sense is the minority but is the arithmetic reading
+(`तो बरोबर आहे`, `अनुक्रमे बरोबर`). Third instance after vi's `bằng` and ar's `في` — *for a sign reading, the
+count is not the evidence; the quoted sense is.*
+
+### Where #654 stands
+
+Measured behaviourally over every registered code, not counted by hand:
+
+| sign | dropped at Run 39 (the pilot) | dropped now |
+|---|---|---|
+| `=` `<` `>` | 149 codes | **118** |
+| `÷` | 163 | **126** |
+| `±` | 141 | **131** |
+
+Twenty-three languages read all four: de es fr pt it ru nl pl uk el ar ja ko tr vi th id fa mr gu (+ hi already),
+with ca hr cy ga completing the division sign. Counting `ar`'s ten codes separately, that is 31 registered codes
+for `=`/`<`/`>` and 37 for `÷`.
+
+Gates for this run: tsc PASS; 208 files / 2951 tests; corpus diff mr 0/1992, gu 0/1996, hi 0/1702, ca 0/1841,
+hr 0/2007, cy 0/2009, ga 0/1948 — and `review.ts` "sign classes: none dropped" for hr, with ca/cy/ga clean but
+for the pre-existing ± and mr/gu clean but for mr's deliberately declined minus.
