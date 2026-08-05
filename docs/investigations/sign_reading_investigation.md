@@ -3165,3 +3165,90 @@ say it*, which is a constraint no amount of sourcing can substitute for.
 Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit **0 defective cells across
 0/67**; corpus diff sr 0/1923, ur 0/1644, pa 0/1589, kn 0/1811, ne 0/1993, te 0/1757, bn 0/1981, sw 0/1938,
 or 0/1327, am 0/1922, mi 0/1994.
+
+## Run 46 — 2026-08-04 — #654: the ampersand was a missing CELL, and the Māori argument corrected
+
+### 📌 NINE OF THIRTEEN SIGN CLASSES ARE NOW AT ZERO
+
+    equals · less-than · greater-than · times · exponent · currency · percent · ampersand   0/67
+    plus 1/67 (mi, intentional)   ·   degrees 1/67 (mi)   ·   divide 8/67
+    minus 17/67   ·   plus-minus 27/67
+
+### ⚠ THE AMPERSAND NEEDED NO NEW CODE AT ALL, AND THE TIER HAD ALREADY SAID SO
+
+Fourteen languages dropped `&` outright — `am ar bn el kn ne or pa sr te ur fr hu sw` — and
+`core/normalizeSymbols.ts` already has an `ampersand` cell whose own note diagnosed the situation exactly:
+
+> *"Every one of them has a high-frequency conjunction to spend — und ×1135, dan ×1053, og ×1135, и ×1129,
+> және ×561 — so this was a missing CELL, not a sourcing problem."*
+
+All fourteen route through that tier and none had filled it in. **One line of declared data each.** Every
+conjunction was verified against its own corpus rather than assumed, and each is among the language's commonest
+words: `እና` ×1545 · `এবং` ×1987 · `και` ×2717 · `ಮತ್ತು` ×1683 · `र` ×2379 · `ଏବଂ` ×975 · `ਅਤੇ` ×1441 ·
+`మరియు` ×1003 · `اور` ×1476 · `et` ×2234 · `és` ×2257 · `na` ×3577 · `и` ×255.
+
+⚠ Arabic is the one case where the substring column is legitimately the larger number: `وَ` is ×71 standalone
+against ×12128 substring, because Arabic writes the conjunction as a **PREFIX**. A grammatical reason, not a
+misleading one — the mirror image of every substring trap in this issue.
+
+*The lesson is about where to look before writing anything: the fleet already had a slot for this, and eight
+languages' worth of #562's reasoning sitting in a comment above it.*
+
+### ⚠ AND FIXING A SIGN FIXED A FOREIGN-RUN LEAK — el improved twice over
+
+Greek previously read `B&B` through the ENGLISH fallback as *bˈiː bˈiː*. Substituting the ampersand SPLITS the
+token, which let Greek's own `LETTER_NAME` table claim each letter, so it now reads *bi ce bi* — μπι και μπι, in
+Greek phonology. Not the intent, and a coupling worth recording: **a sign rule can change which ENGINE reads the
+surrounding run**, the same shape as #663's routing work. Two of the other thirteen changed (am, sw), both the
+`B&B` sentence the tier's note names, both correct.
+
+### ⚠ THE MĀORI PLUS ARGUMENT WAS WRONG IN ITS REASONING, AND THE USER CAUGHT IT
+
+Māori now reads the plus BETWEEN TWO NUMBERS as `tāpiri`. Two questions decided the shape of that:
+
+**Does `tāpiri` mean "positive"?** No. mi.wikipedia uses it for appending and summing, twice on quantities —
+"te tāpiri i ngā rahinga whenua me rahinga wai" (the SUM of the land and water areas) and "kāore pea te tāpiri i
+ngā tatau … e **ōrite** ki te tapeke" (the sum of the counts may not EQUAL the total, which independently
+corroborates the equality word). It is a transitive verb, never a polarity marker.
+
+**Is it a sign-vs-operator contrast?** ⚠ **NO, AND CLAIMING SO IMPORTED KOREAN'S STRUCTURE ONTO MĀORI.** The first
+draft of that comment said the arrangement was "the same division of labour as ko's 더하기 vs 마이너스". Korean has
+TWO attested words, one per job. **Māori has ONE native word plus a GAP**: `tāpiri`'s semantics reach the
+operation and not the sign, and no native sign word turned up at all. The asymmetry is in what `tāpiri` MEANS.
+
+⚠ And the user's general principle is the reason to *expect* no split: **where a register is borrowed, the
+source's own conflations come with it.** English spells both jobs `plus`, so a borrowing register has no reason to
+separate them, and the loan the recordings show (`plas`, both speakers) most likely covers BOTH positions in
+speech. That is now the stated reason the sign arm stays silent — the attested reading there is the loan, the loan
+is unsayable (/l/, /s/ → [pa]), and `tāpiri` on `+30°C` would say *"thirty degrees APPEND"*.
+
+The rule is recorded as an **INFERENCE FROM THE WORD'S MEANING, not an attestation in the slot**: mi_nz contains
+no arithmetic expression at all, so there is no recording of a Māori speaker reading `3 + 4`, and no claim that
+one would prefer `tāpiri` to the loan. The narrow claim is only that where the loan cannot be pronounced, a native
+word whose sense is exactly this operation beats a wrong syllable.
+
+### Punjabi, and evidence arriving in both directions
+
+pa's corpus gives nothing usable for the additive signs — `ਜਮਾਂ` ×0, `ਪਲੱਸ` only inside the brand `ਮੈਟਰੋਪਲੱਸ`,
+`ਜੋੜ` ×1 token against ×33 substring (`ਜੋੜੇ`, "couples"). pa.wikipedia settles all of it by naming the sign and
+then reading an expression:
+
+    "ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ "+" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ …)"     addition, denoted by the "+" sign
+    "3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ।"                                              3 PLUS 2 EQUALS 5
+
+⚠ The second quote **corroborates the equality word committed earlier from the corpus** (`ਬਰਾਬਰ` ×8). Evidence in
+both directions from two different tiers, which has happened once before (hr/cy, where the source used the file's
+own equals word) and is the strongest confirmation shape this issue has produced.
+
+### What remains, with reasons
+
+| class | dropped | why |
+|---|---|---|
+| `minus` | 17 | ⚠ NOT a sourcing problem but a DISAMBIGUATION one. `nl` and `mr` already document deliberate refusals (every `-\d` in nl_nl is a score or a range; mr's is `चंद्रयान -1`), and th proved the hazard live — a year range read as a subtraction. Each needs the range/score/designation analysis per corpus; the guard built for th/vi/fa/pa is the reusable part. |
+| `plus-minus` | 27 | COUPLED to the above — ± is tier-1 free once a language has a minus word, so this collapses toward the 17 rather than being separate work. |
+| `divide` | 8 | az · hu MORPHOLOGICAL (the operand takes a case with harmony and assimilation — wants tr/ko's spell-then-suffix machinery) · sl no attestable neutral form · ff ha kk om zu the genuinely under-resourced tail |
+| `plus` | 1 | mi, and intentional: the SIGN position only, with the reasoning above |
+| `degrees` | 1 | mi — `pūtu` is "boots", so the obvious candidate is wrong; unsourced |
+
+Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; corpus diff 0 changed for eleven of
+the fourteen ampersand languages and 1 each for am/sw/el, every change read.
