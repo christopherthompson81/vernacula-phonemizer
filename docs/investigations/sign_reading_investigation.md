@@ -2547,3 +2547,120 @@ One language: four rules, one corpus count, one `attest.ts` run, one gate pass. 
 was four `s.replace` lines. That ratio is why this is per-language reading rather than a fan-out over a table.
 
 Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; review.ts de fills equals + divide.
+
+## Run 40 — 2026-08-04 — #654: six languages through the blueprint, and a defect in the tool it rests on
+
+Continuing one language at a time: **es fr pt it ru nl**, each sourced through the four tiers, each gated on its
+own. All six now read `=` `<` `>` `÷`; `it` and `nl` also gained the tier-1 `±` compound.
+
+    es  siete igual a tres · menor que · mayor que · dividido por
+    fr  sept est égal à trois · est inférieur à · est supérieur à · divisé par
+    pt  sete igual a três · menor que · maior que · dividido por
+    it  sette è uguale a tre · è minore di · è maggiore di · diviso per
+    ru  семь равно три · меньше чем · больше чем · разделить на
+    nl  zeven is gelijk aan drie · kleiner dan · groter dan · gedeeld door
+
+### ⚠ FIRST, A MANUFACTURED NEGATIVE IN `attest.ts` — and every prior verdict is affected
+
+Spanish `menor que` came back **absent**. It has 180,953 hits on es.wikipedia.
+
+The extracts call passed 20 titles with `exlimit: "20"`. The API accepts that, answers with a WARNING rather than
+an error — `"exlimit" was too large for a whole article extracts request, lowered to 1` — and returns **the first
+page only**. So the probe searched twenty articles, read one, and reported the other nineteen as containing
+nothing. This is precisely the failure mode the file's own `api()` comment warns about, arriving through a door
+nobody had checked: not a missing User-Agent but a silently downgraded parameter.
+
+**Verdicts recorded before this fix understate by up to 20×**, including the three German `absent` results in
+Run 39. Fixed to one title per request. `exintro=1` does permit the batch, but only lead paragraphs, and a
+relational word is body prose.
+
+⚠ The lesson generalises past this bug: *an API warning is not an error, and a tool that treats absence as a
+finding must check for both.*
+
+### Two new tools, both reuses of the existing tier structure
+
+**`corpus-words.ts`** — the tier-2 counter. Token / substring-only / phrase counts against FLEURS, with the
+unspaced-script flag `attest.ts` already carries. Validated by reproducing the German pilot's hand counts exactly
+(`gleich` 3t/107s, `kleiner als` ×7, `größer als` ×0 phrase, `geteilt durch` ×2).
+
+**`attest.ts --context`** — the tier-4 register restriction. Terms appended to the SEARCH query only; the hit
+test, boundaries and verdict are untouched, so it narrows *which articles are sampled* without loosening what
+counts as a hit. This is the mechanism that makes tier 4 usable with the tooling already here.
+
+### 📌 WHAT THE SIX LANGUAGES ADDED TO THE BLUEPRINT
+
+**1. Tier 2 settled the reading alone exactly ONCE — nl.** For the other five the corpus gave partial evidence at
+best, and twice gave *wrong* evidence:
+
+| lang | corpus evidence for the equality/comparison word | verdict |
+|---|---|---|
+| nl | `is gelijk aan` ×2 phrase, `kleiner dan` ×5 phrase | sufficient |
+| es | `menor que` ×9, `igual a` ×5, `mayor que` ×3 | sufficient but for `÷` |
+| de | `kleiner als` ×7, `gleich` ×3 token | sufficient, thin |
+| pt | `igual` ×0 token / ×0 substring — **absent entirely** | insufficient |
+| it | `minore di` ×2, `maggiore di` ×4 — **both the wrong sense** | misleading |
+| ru | `равно` ×4 token — **all `равно как и`, "as well as"** | misleading |
+
+**2. ⚠ THE WRONG-SENSE FAILURE IS NOW A NAMED TRAP, because two of six hit it.** Italian's `la sorella minore di
+germania` is the *younger sister of*; `il numero maggiore di basi` is a superlative plus a partitive, not a
+comparison at all. Russian's `равно как и` is a conjunction. Each is a genuine token hit of the exact phrase, in
+the corpus, in prose — and each argues for a different construction than the sign needs. **A phrase count cannot
+detect this; only the quoted example can.** That is the same lesson as `attest.ts`'s film title, one tier lower
+than where it was first recorded.
+
+**3. The register tier's best sources are ones that read the notation aloud.** Three of six produced evidence far
+stronger than "the word occurs in maths prose":
+
+- **ru** — a pronunciation gloss: `6 : 3 = 2` («шесть разделить на три равно два»), `65 : 5 = 13`, «два плюс два
+  равно четыре». The reading, quoted as speech, beside the notation.
+- **pt** — the article NAMES the signs: "o sinal de menor que ( < ), o sinal de maior que ( > )", then
+  "a ÷ b = c (a dividido por b é igual a c)".
+- **fr** — « a divisé par b est égal à c », both signs in one sentence between two operands.
+
+So tier 4 is not merely "a register-matched corpus". *The article class to look for is the one that has to
+explain the notation to a reader* — the division/arithmetic articles do this and general prose never does.
+
+**4. ⚠ INFLECTION MEANS AN EXACT-FORM TOKEN COUNT UNDER-REPORTS THE LEMMA — and the substring column is where
+the word is hiding, sometimes legitimately.** French `supérieur` is ×0 token / ×18 substring, and all 18 are
+`supérieure(s)`, the same adjective inflected; `divisé` ×0/×2 is `divisée`. Dutch `gedeeld` ×0/×3 is `gedeelde`.
+That is the *opposite* of the classic trap, where the containing word is unrelated — and the two are
+indistinguishable by count. Same column, opposite meanings, and only the examples separate them.
+
+The classic trap also produced its sharpest instance yet: **French `égale` is ×0 TOKEN / ×190 SUBSTRING, and every
+one of the 190 is inside `également` ("also")** — a word with no arithmetic sense whatever. Sixth time this error
+has been caught, first time the containing word is semantically unrelated rather than merely longer.
+
+**5. ⚠ A NEW TIER THE BLUEPRINT DID NOT HAVE: GRAMMATICAL COMPATIBILITY WITH `numbers.ts`.** Russian is the first
+language where the attested reading *cannot be shipped as attested*. `меньше` governs the GENITIVE — the register
+quotes are `меньше нуля`, `больше 1` — while `numbers.ts` emits NOMINATIVE cardinals, so `7 < 3` would read
+*семь меньше три*, an ungrammatical case. The `чем` construction takes the nominative and is itself corpus-attested
+(`меньше чем` ×8, `больше чем` ×6), so it is both correct and sourced.
+
+*Attestation of a reading is not sufficient if the reading requires case the number generator cannot produce.*
+Expect this again in every case-marking language still on the list — pl, cs, uk, lt, lv, et, fi, hu, tr all
+govern something.
+
+**6. The copula splits the fleet, and the split is grammatical rather than stylistic.** `de es pt en` emit the
+bare form; `fr it` keep the verb, because `sept égal à trois` / `sette uguale a tre` are not constructions those
+languages admit — the adjective needs its verb, so there is nothing to drop *to*. `lb` (`ass gläich`) and `nb`
+(`er lik`) already shipped the copular shape, so both forms were in the fleet before this. The test is not
+consistency across languages; it is whether the bare form is a construction the language has.
+
+### Recorded, not acted on
+
+`pt` reads `y` as NOTHING (`x y z` → *ʃ ʃ*) and this is pre-existing, not caused by anything here. It is the
+same class as the `sr`/`hr`/`bs` deferral: Portuguese has no nativiser, so #663's leak test — scoped to engines
+that DECLARE an inventory — could not see it. Belongs with the normalization-layer work, not with #654.
+
+### Where #654 stands
+
+| sign | dropped before | dropped now | note |
+|---|---|---|---|
+| `±` | 37 | **35** | it and nl gained the tier-1 compound |
+| `=` `<` `>` | 34 dirs | **28 dirs** | de es fr pt it ru nl read them |
+| `÷` | 48 | 41 | same six, plus de |
+
+Gates for all six, run separately: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67;
+`review.ts` fills `equals`/`less-than`/`greater-than`/`divide` for each; corpus diff 0 changed for every one
+(es 0/1948, fr 0/1972, pt 0/1943, it 0/1978, ru 0/1959, nl 0/1829) — zero is the correct result, because what
+the corpora lack is the notation, which is the whole reason these needed tiers 3 and 4.
