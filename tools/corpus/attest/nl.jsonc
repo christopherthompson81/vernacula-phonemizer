@@ -1,0 +1,59 @@
+// WIKIPEDIA WORD ATTESTATION — nl (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "nl",
+    "wiki": "nl.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "wiskunde rekenen deling",
+    "findings": [
+        {
+            "word": "gedeeld door",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…h nu nog afvragen of er een zinnige uitkomst bestaat voor 0 gedeeld door 0. Stel dat het resultaat het getal b {\\displaystyle b} is,…",
+                "…geven, heten rekenkundig congruent. === Voorbeelden === 13 gedeeld door 10 levert 1 als quotiënt en 3 als rest op, omdat 13 = 1 × 1…",
+                "…1 als quotiënt en 3 als rest op, omdat 13 = 1 × 10 + 3. 26 gedeeld door 4, levert 6 als quotiënt en 2 als rest op, omdat 26 = 6 × 4…",
+                "…t 6 als quotiënt en 2 als rest op, omdat 26 = 6 × 4 + 2. 56 gedeeld door 7, levert 8 als quotiënt en 0 als rest op, omdat 56 = 7 × 8…",
+                "…s dit direct te zien, die worden namelijk in de eerste stap gedeeld door 2. Een getal n {\\displaystyle n} dat modulo 4 gelijk is aan…",
+                "…2 {\\displaystyle 2^{p-1}-2} mod 2 p {\\displaystyle 2^{p}} . Gedeeld door 2: 2 p − 2 − 1 {\\displaystyle 2^{p-2}-1} of 2 p − 2 − 1 + 2…"
+            ]
+        },
+        {
+            "word": "groter dan",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…playstyle b} naar 0 nadert, wordt 1 / b {\\displaystyle 1/b} groter dan elk getal, dus is onbepaald. De uitkomst van het delen van…",
+                "…itkomst van het delen van een positief getal door een getal groter dan –1, maar kleiner dan en niet gelijk aan 0, levert vergelijk…",
+                "…een brief aan Leonhard Euler op 7 juni 1742: Elk even getal groter dan 2 kan geschreven worden als de som van twee priemgetallen,…",
+                "…lend van 0 voor alle gehele waarden van n {\\displaystyle n} groter dan 2. De stelling werd in november 1994 bewezen door de Britse…",
+                "…{n}+y^{n}=z^{n}} voor enig geheel getal n {\\displaystyle n} groter dan 2. Het bewijs hiervan is zeer ingewikkeld en wordt daarom i…",
+                "…aagstukken zijn: het Vermoeden van Goldbach: elk even getal groter dan 2 kan geschreven worden als som van twee priemgetallen de v…"
+            ]
+        }
+    ],
+}

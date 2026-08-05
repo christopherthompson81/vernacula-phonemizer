@@ -209,6 +209,32 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 mais $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1mais $2");
 
+    // 8b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
+    //     absent from pt_br; the vocabulary is ordinary comparative prose and is present:
+    //
+    //       `maior`     ×100 TOKEN  (`maior que` ×1 phrase — "o território da turquia é maior que 1.600 km")
+    //       `menor`     ×29 TOKEN
+    //       `dividido`  ×3 TOKEN
+    //       `igual`     ×0 token / ×0 substring   ⚠ ABSENT ENTIRELY — the corpus cannot source the equals word
+    //
+    //     ⚠ SO THE EQUALS WORD CAME FROM THE REGISTER TIER, and Portuguese produced the best evidence in this
+    //     whole issue: pt.wikipedia's Divisão article does not merely use the words, it NAMES THE SIGNS and then
+    //     reads the notation back —
+    //
+    //       "o sinal de menor que ( < ), o sinal de maior que ( > ) e o sinal de desigualdade ( ≠ )"
+    //       "a ÷ b = c   (a dividido por b é igual a c)"
+    //
+    //     — the sign and its reading in the same sentence, with the operands in place. That is the tier-4
+    //     source the German pilot argued was required: a general existence check cannot distinguish a sense,
+    //     and here the article states the mapping outright.
+    //
+    //     The copula is dropped because these strings are what the source calls the SIGNS themselves ("o sinal
+    //     de menor que"), so the bare form is the sourced form — the same call `es` and `en` make.
+    s = s.replace(/\s?=\s?/gu, " igual a ");
+    s = s.replace(/\s?<\s?/gu, " menor que ");
+    s = s.replace(/\s?>\s?/gu, " maior que ");
+    s = s.replace(/\s?÷\s?/gu, " dividido por ");
+
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);

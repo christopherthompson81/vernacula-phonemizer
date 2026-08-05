@@ -229,9 +229,44 @@ export function normalizeItalian(input: string): string {
     // 8) SIGNS. `+` occurs once (`UTC+1`); `-` does not occur in this corpus, but a dropped minus is silent
     //    content loss that inverts a temperature, and the guards keep it off the ranges that DO occur —
     //    `1894-1895` has a digit before the hyphen, and the football score `26 - 00` has a space after it.
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules immediately below, so nothing is invented. The FORM is the one every language
+    //    that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the outlier
+    //    that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single character, so
+    //    the + rule cannot see it, and putting it first keeps the sign audible either way.
+    s = s.replace(/±/gu, " più meno ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 più $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1più $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1meno $2");
+
+    // 8b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ TIER 2 LOOKED SUFFICIENT AND WAS THE WRONG SENSE TWICE —
+    //     this language is the clearest case in the issue for why the examples get read rather than the counts.
+    //     Both comparatives are attested in it_it as phrases, and neither hit is a comparison:
+    //
+    //       `minore di`   ×2 phrase — "l'italia era essenzialmente la sorella minore di germania e giappone"
+    //                                 (the YOUNGER SISTER of; `minore` as an age adjective)
+    //       `maggiore di`  ×4 phrase — "hanno il numero maggiore di basi" (the GREATEST number OF bases;
+    //                                 a superlative followed by a partitive, not a comparison at all)
+    //       `uguale`       ×0 token / ×0 substring — absent entirely
+    //       `diviso`       ×0 token / ×1 substring — inside `condiviso` (shared)
+    //
+    //     A count-only reading of that table would have shipped two attested phrases whose corpus evidence
+    //     argues for a different construction than the one the sign needs.
+    //
+    //     The register tier settles all four (`attest.ts --context "matematica aritmetica divisione"`), on
+    //     numeric operands, in the arithmetic sense:
+    //
+    //       "ogni numero dispari maggiore di 5 è somma di tre primi"     "39 non può essere diviso per 15"
+    //       "tre volte un quarto è uguale a un quarto di tre"            "ogni a minore di zero (negativo)"
+    //
+    //     ⚠ THE COPULA IS KEPT, as for `fr` and for the same reason: `sette uguale a tre` is not a construction
+    //     Italian admits — the adjective needs its verb — so the bare form de/es/en use has nothing to drop to
+    //     here. `diviso per` is a participle and stands without one. `lb` (`ass gläich`) and `nb` (`er lik`)
+    //     already ship the copular shape, so both are in the fleet.
+    s = s.replace(/\s?=\s?/gu, " è uguale a ");
+    s = s.replace(/\s?<\s?/gu, " è minore di ");
+    s = s.replace(/\s?>\s?/gu, " è maggiore di ");
+    s = s.replace(/\s?÷\s?/gu, " diviso per ");
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides and nothing
     //    numeric after.

@@ -1,0 +1,91 @@
+// WIKIPEDIA WORD ATTESTATION — ru (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ru",
+    "wiki": "ru.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "математика арифметика деление",
+    "findings": [
+        {
+            "word": "равно",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 16,
+            "articles": 9,
+            "substringOnly": 1,
+            "examples": [
+                "…; 6 : 3 = 2 {\\displaystyle 6:3=2} («шесть разделить на три равно два»); 65 : 5 = 13 {\\displaystyle 65:5=13} («шестьдесят пят…",
+                "…{\\displaystyle 65:5=13} («шестьдесят пять разделить на пять равно тринадцать»). Способ «деления столбиком», которому обучают…",
+                "…десятками яблок. Обычно это пальцы на двух руках (основание равно 10 {\\displaystyle 10} ), но в исторических источниках встре…",
+                "…оказал необходимость доказательства равенства «два плюс два равно четыре» в своих «Новых опытах о человеческом разуме» в 1705…",
+                "…vdots \\,a} , и частное (при a ≠ 0 {\\displaystyle a\\neq 0} ) равно нулю. На ноль делится только ноль: a ⋮ 0 ⇒ a = 0 {\\displays…",
+                "…енателей (здесь 2 {\\displaystyle 2} и 3 {\\displaystyle 3} ) равно 6 {\\displaystyle 6} . Приводим дробь 1 2 {\\displaystyle {\\f…"
+            ]
+        },
+        {
+            "word": "меньше",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…ую проблему составляло утверждение, что отрицательное число меньше нуля, то есть меньше, чем ничего. Полное геометрическое тол…",
+                "…о утверждение, что отрицательное число меньше нуля, то есть меньше, чем ничего. Полное геометрическое толкование комплексных ч…",
+                "…e a} и b {\\displaystyle b} , каждое из которых больше 1, но меньше n {\\displaystyle n} . Числа a {\\displaystyle a} и b {\\displ…",
+                "…} , которое, в свою очередь, является натуральным и которое меньше n {\\displaystyle n} . Из предположения индукции и вышеуказа…",
+                "…му в настоящее время знаний о математике Египта существенно меньше, чем о математике Вавилона или Греции. Вероятно, она была р…",
+                "…сти множеств, потом определил сравнение мощностей на больше-меньше и, наконец, классифицировал множества по величине их мощнос…"
+            ]
+        },
+        {
+            "word": "больше",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 11,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…ии математик Арйюна велел ему назвать все численные степени больше 10 9 {\\displaystyle 10^{9}} . Будда назвал двадцать две сте…",
+                "…странице. При этом следует руководствоваться правилом: чем больше разница в количестве знаков в записях делимого и делителя,…",
+                "…ница в количестве знаков в записях делимого и делителя, тем больше потребуется места. Как видим, процедура достаточно сложная,…",
+                "…езии и навигации. Как отмечает Б. В. Гнеденко, «Арифметика» больше похожа на энциклопедию, нежели на учебное пособие. В книге…",
+                "…{\\displaystyle a} и b {\\displaystyle b} , каждое из которых больше 1, но меньше n {\\displaystyle n} . Числа a {\\displaystyle a…",
+                "…льства единственности данного разложения. Однако аль-Фариси больше всего интересовало построение собственного доказательства д…"
+            ]
+        },
+        {
+            "word": "разделить на",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…{\\displaystyle m-1} ; это значит, что все целые числа можно разделить на m {\\displaystyle m} групп, каждая из которых отвечает опред…",
+                "…splaystyle a:b=c} ; 6 : 3 = 2 {\\displaystyle 6:3=2} («шесть разделить на три равно два»); 65 : 5 = 13 {\\displaystyle 65:5=13} («шест…",
+                "…ва»); 65 : 5 = 13 {\\displaystyle 65:5=13} («шестьдесят пять разделить на пять равно тринадцать»). Способ «деления столбиком», которо…",
+                "…ель заданной дроби имеют общий делитель, то обе части можно разделить на него; такая операция называется сокращением дроби. Пример:…",
+                "…ю Академию. Математиков, присоединившихся к Академии, можно разделить на две группы: на тех, кто получил своё математическое образов…",
+                "…playstyle b\\neq 0} , число a {\\displaystyle a} всегда можно разделить на b {\\displaystyle b} с остатком, то есть представить в виде:…"
+            ]
+        }
+    ],
+}

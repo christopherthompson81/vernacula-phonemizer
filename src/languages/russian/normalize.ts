@@ -224,6 +224,33 @@ export function normalizeRussian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 плюс $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1плюс $2");
 
+    // 7b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ RUSSIAN'S REGISTER SOURCE IS A PRONUNCIATION GLOSS, and it is
+    //     the strongest tier-4 evidence in the issue: ru.wikipedia's arithmetic articles do not merely use these
+    //     words, they QUOTE THE SPOKEN READING of the notation beside the notation itself —
+    //
+    //       6 : 3 = 2    («шесть разделить на три равно два»)
+    //       65 : 5 = 13  («шестьдесят пять разделить на пять равно тринадцать»)
+    //       «два плюс два равно четыре»
+    //
+    //     — so the division word and the equals word are sourced together, in the slot, as speech.
+    //
+    //     ⚠ AND THE CORPUS EVIDENCE FOR `равно` IS THE WRONG SENSE. It is ×4 TOKEN in ru_ru and every hit is the
+    //     conjunction `равно как и` ("as well as"), which has no arithmetic reading at all — the same shape as
+    //     it's `sorella minore di`. A count-only pass would have called the equals word corpus-sourced.
+    //
+    //     ⚠ THE COMPARATIVES TAKE `чем` RATHER THAN THE BARE GENITIVE, and that is a grammatical requirement,
+    //     not a stylistic choice. Russian `меньше` governs the GENITIVE — the register quotes are `меньше нуля`,
+    //     `больше 1` — and `numbers.ts` emits NOMINATIVE cardinals, so `7 < 3` would read *семь меньше три*,
+    //     an ungrammatical case. The `чем` construction takes the nominative and is what the corpus itself
+    //     uses (`меньше чем` ×8, `больше чем` ×6 phrase hits in ru_ru — "фотоны намного меньше чем те",
+    //     "в четыре раза больше чем у 35-миллиметрового негатива"), so it is both grammatical and tier-2
+    //     attested. `разделить на` governs the accusative, which for these numerals is identical to the
+    //     nominative, so the division rule needs no such repair.
+    s = s.replace(/\s?=\s?/gu, " равно ");
+    s = s.replace(/\s?<\s?/gu, " меньше чем ");
+    s = s.replace(/\s?>\s?/gu, " больше чем ");
+    s = s.replace(/\s?÷\s?/gu, " разделить на ");
+
     // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);

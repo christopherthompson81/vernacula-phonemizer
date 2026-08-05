@@ -1,0 +1,89 @@
+// WIKIPEDIA WORD ATTESTATION — it (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "it",
+    "wiki": "it.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "matematica aritmetica divisione",
+    "findings": [
+        {
+            "word": "uguale a",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 13,
+            "articles": 7,
+            "substringOnly": 0,
+            "examples": [
+                "…er 0, l'operazione è impossibile; infinite soluzioni se a è uguale a 0 (caso 3): l'operazione 0 : 0 è indeterminata . In entramb…",
+                "…{\\displaystyle 0} , e ne ha infinite se a {\\textstyle a} è uguale a 0 {\\displaystyle 0} . In entrambi i casi, a b {\\textstyle {…",
+                "…le {a \\over b}} è sempre definita se b {\\textstyle b} non è uguale a zero. === Dimostrazioni fallaci basate sulla divisione per…",
+                "…che l'ordine dei fattori non conta, e tre volte un quarto è uguale a un quarto di tre; numericamente: 3 × 1 4 = 1 4 × 3 = 3 4 .…",
+                "…di un numero decimale non periodico, avente cioè un periodo uguale a 0 (ad esempio: 3,5 = 3,50), la forma razionale è ottenibile…",
+                "…e radici numeriche del moltiplicando e del moltiplicatore è uguale a quella del prodotto è la seguente: siano A = 9 k a + r a ,…"
+            ]
+        },
+        {
+            "word": "minore di",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…}}{a \\over b}=+\\infty } invece per ogni a {\\displaystyle a} minore di zero (negativo), lim b → 0 + a b = − ∞ . {\\displaystyle \\li…",
+                "…ssumere qualsiasi valore positivo (anche zero) strettamente minore di b. == Esempi == Se a = 7 e b = 3, si ha q = 2 e r = 1 ovver…",
+                "…finizione è controllare che non sia diviso da nessun numero minore di n o, in modo più efficiente, da nessun primo minore di n. A…",
+                "…mero minore di n o, in modo più efficiente, da nessun primo minore di n. Ad esempio, per provare che 11 è primo, basta osservare…",
+                "…+3,\\cdots ,(N+1)!+N+1} sono tutti composti: infatti, se m è minore di N, allora (N + 1)! + m è divisibile per m, e quindi non è p…",
+                "…stono infiniti numeri primi consecutivi la cui differenza è minore di 246. Sul problema opposto, degli intervalli lunghi, ci si a…"
+            ]
+        },
+        {
+            "word": "maggiore di",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…style 0} da destra (positivo), per ogni a {\\displaystyle a} maggiore di zero (positivo), è noto che: lim b → 0 + a b = + ∞ {\\displa…",
+                "…laystyle M} tra b {\\displaystyle b} e d {\\displaystyle d} è maggiore di 1, è possibile semplificare l'operazione. Posto b ′ = b M {…",
+                "…egli scribi, a prezzo però dell'utilizzo di un numero molto maggiore di simboli, e di rendere molto più complessa la manipolazione…",
+                "…trato la congettura debole di Goldbach (ogni numero dispari maggiore di 5 è somma di tre primi), chiudendo una questione aperta dal…"
+            ]
+        },
+        {
+            "word": "diviso per",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…atica. Sarebbe corretto, piuttosto, affermare che un numero diviso per un valore che tende (ma non equivale) a 0 dà un risultato c…",
+                "…econdo Brahmagupta, infatti: \"Un numero positivo o negativo diviso per zero è una frazione avente lo zero al denominatore. Zero di…",
+                "…er zero è una frazione avente lo zero al denominatore. Zero diviso per un numero negativo o positivo è equivalente sia allo zero c…",
+                "…o al numeratore e una quantità finita al denominatore. Zero diviso per zero è zero.\" Nell'830, Mahavira tentò senza successo di co…",
+                "…anita Sara Samgraha: \"Un numero non viene modificato quando diviso per zero.\" Bhaskara II tentò di risolvere il problema definendo…",
+                "…mente la non definizione dell'operazione: 39 non può essere diviso per 15. Si può immergere l'insieme dei numeri interi in un insi…"
+            ]
+        }
+    ],
+}
