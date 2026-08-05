@@ -208,6 +208,15 @@ const normalizeInitialisms = makeInitialismNormalizer({
  * like these — the hazard `rateDenominators` exists for.
  */
 const normalizeSymbols = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // és is ×2257 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "és",
     percent: ["százalék"],
     /**
      * CURRENCY (#584). `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong

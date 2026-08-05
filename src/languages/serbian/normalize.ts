@@ -245,6 +245,15 @@ const NOT_LETTER = "(?![\\p{L}\\p{M}])";
  * *квадратних километара* out).
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // и is ×255 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "и",
     // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is

@@ -100,6 +100,15 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * `unitPer`, because they are written as one token with no slash for the rate machinery to find.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // ଏବଂ is ×975 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "ଏବଂ",
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`

@@ -180,6 +180,15 @@ export const ipaOnly = (value: string): string | undefined => {
 // written form, matching FLEURS' MSA-leaning register) reads cleanly through the diacritizer as
 // fi ilmiʔa; the Egyptian colloquial المية spelling vocalized worse. Shared path — only arz has corpus %.
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // وَ is ×71 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "وَ",
     // Every emitted word carries HARAKAT: the engine reads undiacritized Arabic as a consonant skeleton,
     // so "في المئة" came out [fj almʔ] where "فِي الْمِئَة" gives [fˈiː almˈiʔa].
     percent: ["فِي الْمِئَة"],
