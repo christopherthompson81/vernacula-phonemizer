@@ -50,7 +50,45 @@
  * Arabic الساعة defect the playbook records. ASCII `:` is not in `clausePunctuation`, so it is dropped without
  * a pause and the two numbers read adjacently, which is defensible. Left alone on purpose.
  */
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { lastKhmerWord } from "./segment.ts";
+
+/**
+ * THE SHARED SYMBOL TIER, not local regexes — playbook trap 16: before declaring a class out of scope, check
+ * whether the seam already exists. It did, for five of the classes this file first solved by hand, and it
+ * carries two Khmer needs that hand-written rules had missed entirely.
+ *
+ * `unspacedScript` is the load-bearing flag, and the tier's own header documents Khmer's exact symptoms against
+ * Chinese: the boundary guards assume spaces between words, so in an unspaced script the ORDINARY case is the one
+ * they reject — `20°C` read its C as English *sˈiː*, and `km²` dropped the `²`. Khmer separates words with
+ * U+200B rather than a space, so it belongs in the same class as cmn and yue.
+ *
+ * Sourcing, all corpus-attested with the sense checked against digit or unit adjacency:
+ *   percent      ភាគរយ    445, of which 230 directly after a digit
+ *   currency     ដុល្លារ  712
+ *   °C / °       អង្សាសេ 25 after a digit · អង្សា 74 — declared as UNITS, which is how the tier reads a scale
+ *   exponent     ការេ     ⚠ THIS WAS WRONGLY REFUSED FIRST TIME. It is 0/0 DIGIT-adjacent, and I concluded from
+ *                         that it was unsourceable — but `²` attaches to a UNIT, not a digit, and ការេ is
+ *                         exactly the square-metre word: ម៉ែត្រការេ ×17, គីឡូម៉ែត្រការេ ×10, ម៉ែតការេ ×20.
+ *                         `position: "compound"` because it FUSES, like Swedish kvadratkilometer.
+ *   multiply     គុណ      3,338, written out between numerals: `៣គុណ៥`, `១៤០០ គុណ ២០០០`
+ *   ampersand    និង      40,204 — the commonest word in the language
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["ភាគរយ"],
+    currency: { $: ["ដុល្លារ"] },
+    // A scale is a UNIT to this tier. `℃` is listed beside `°C` because the corpus carries both spellings, and
+    // the bare `°` last so the longer keys win — the tier sorts by length, but declaring the order makes it read.
+    // ⚠ THE KEYS MUST BE LOWERCASE. The tier looks a matched unit up as `d.units[u.toLowerCase()]` with a
+    // non-null assertion, so a capitalised key is not a missed match — it is a TypeError at runtime
+    // ("Cannot read properties of undefined") the first time that unit appears in real text. Declaring `°C`
+    // crashed on `៣៥°C`; `°c` matches the same input because the alternation is case-insensitive.
+    units: { "គម": ["គីឡូម៉ែត្រ"], "°c": ["អង្សាសេ"], "℃": ["អង្សាសេ"], "°": ["អង្សា"] },
+    exponentWords: { squared: ["ការេ"], position: "suffix" },
+    multiply: { times: "គុណ" },
+    ampersand: "និង",
+    unspacedScript: true,
+});
 
 /** Khmer letters, marks and signs — the run the tokenizer treats as one unit. Excludes ៗ by construction. */
 const KH = "ក-៓ៜ៝";
@@ -102,6 +140,12 @@ export function normalizeKhmer(text: string): string {
     // Applied repeatedly because the lookbehind cannot span a group it has already consumed.
     const degroup = new RegExp(`(?<=[${D}]),(?=[${D}]{3}(?![${D}]))`, "gu");
     for (let i = 0; i < 4 && degroup.test(s); i++) s = s.replace(degroup, "");
+    // ⚠ AND THE SPACE-GROUPED FORM, which this rule missed and `review.ts` surfaced: it printed `5 000` reading
+    // as "pram soun" — "five zero". Khmer groups with a space or a ZWSP as well as a comma, 567 times in the
+    // corpus (`៣០ ០០០`, `១១៨ ១៨៣`), and the artifact's own exponent example is `១៨១ ០៣៥ គម²`, which without this
+    // is two numbers and a stranded unit. Same three-digit-block guard, so a genuine list of numbers survives.
+    const degroupSpace = new RegExp(`(?<=[${D}])[ \u200b](?=[${D}]{3}(?![${D}]))`, "gu");
+    for (let i = 0; i < 4 && degroupSpace.test(s); i++) s = s.replace(degroupSpace, "");
 
     // ── 3. decimal point ─────────────────────────────────────────────────────────────────────────────
     // AFTER de-grouping, which would otherwise see `៣.៥` as a group boundary. The point becomes a SPACE, not
@@ -110,48 +154,51 @@ export function normalizeKhmer(text: string): string {
     // splits the number in half. Requires a digit on both sides, so an abbreviation dot (គ.ស) and a
     // sentence-final period are untouched. 4,018 in the corpus.
     s = s.replace(new RegExp(`(?<=[${D}])\\.(?=[${D}])`, "gu"), " ");
+    // ⚠ THE COMMA IS ALSO A DECIMAL SEPARATOR HERE, which `review.ts` caught: it printed `12,5` reading as
+    // "ɗɑp piː , pram" — twelve, pause, five. Khmer writes both forms (`៦,០%`, `០,៣៥`, `៥,៧`), and de-grouping
+    // above has already consumed every comma that introduces a three-digit block, so whatever survives to this
+    // point is a decimal rather than a group boundary. That ordering is the entire discrimination.
+    s = s.replace(new RegExp(`(?<=[${D}]),(?=[${D}])`, "gu"), " ");
 
-    // ── 4. percent ───────────────────────────────────────────────────────────────────────────────────
-    // POSTPOSED, which the corpus settles: of 445 ភាគរយ, 230 sit directly after a digit. 1,291 in the corpus.
-    s = s.replace(new RegExp(`(?<=[${D}])${SEP}%`, "gu"), " ភាគរយ");
-
-    // ── 5. degrees ───────────────────────────────────────────────────────────────────────────────────
-    // BEFORE any rule that could claim the trailing letter: `៣៥°C` left alone reads the C as an English letter
-    // name (sˈiː), so the scale letter must be consumed together with the sign. អង្សាសេ is "degrees Celsius"
-    // (25 after a digit); bare ° takes អង្សា (74 after a digit). F is not attested in this corpus and is not
-    // invented here — it falls through to the bare form.
-    s = s.replace(new RegExp(`(?<=[${D}])${SEP}°${SEP}[Cc]`, "gu"), " អង្សាសេ");
-    s = s.replace(new RegExp(`(?<=[${D}])${SEP}°`, "gu"), " អង្សា");
-
-    // ── 6. currency ──────────────────────────────────────────────────────────────────────────────────
-    // The sign PRECEDES the amount in writing and the word FOLLOWS it in speech, so this is a reorder rather
-    // than a substitution. 154 in the corpus; ដុល្លារ attested 712 times.
-    s = s.replace(new RegExp(`\\$\\s*([${D}][${D},. ]*)`, "gu"), (_m, num: string) => `${num.trim()} ដុល្លារ`);
-
-    // ── 7. ranges ────────────────────────────────────────────────────────────────────────────────────
+    // ── 4. ranges ────────────────────────────────────────────────────────────────────────────────────
     // BEFORE the arithmetic rule, because both compete for a hyphen. In this corpus a dash between two numbers
     // is overwhelmingly a range — 4,014 ranges against 399 signed numbers — so the range reading wins, and a
     // signed number is left to the deeper number path rather than guessed at here.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}[–—-]${SEP}(?=[${D}])`, "gu"), " ដល់ ");
 
-    // ── 8. arithmetic ────────────────────────────────────────────────────────────────────────────────
-    // AFTER ranges. Only `+` is treated: it is the one arithmetic sign this corpus attests between numbers
-    // with a sourced reading (បូក). ×, ÷ and = have no corpus-attested Khmer reading here and are NOT invented
-    // — they stay dropped, which is a recorded gap rather than a silent one. 864 in the arithmetic cell.
-    s = s.replace(new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
+    // ── 5. equals ────────────────────────────────────────────────────────────────────────────────────
+    // ⚠ THIS CLASS WAS REFUSED IN THE FIRST VERSION OF THIS FILE, on an assumption rather than a check —
+    // "× ÷ and = have no corpus-attested Khmer reading" — because `sources.ts` had no row for the sign classes
+    // and its silence read as absence. ស្មើ is attested 2,077 times, 24 before a digit and 33 after, and the
+    // corpus writes the arithmetic out: `៤ = ២៤`, `២=៣៥ តួ`. 5,844 `=` in the corpus.
+    // ⚠ DIGIT-FLANKED ONLY, and `review.ts` will report `equals` as DROPPED because its probe is `x = y` —
+    // letters, not digits. That divergence is deliberate and the corpus decides it. Of 5,844 `=`:
+    //     1,348  Khmer = word     a gloss (`ចក្រវាឡរណប=satellite`)
+    //     1,057  code-shaped      `==`, an assignment, a quoted value
+    //       109  digit = digit    arithmetic — this rule
+    //         9  URL query strings
+    // Widening to the probe's shape would fire on the code and the query strings, getting it wrong nearly as
+    // often as right, which is trap 9's misfire generator seen from the other side. The arithmetic reading is
+    // the only one the evidence supports.
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
 
-    // ── 9. fractions ─────────────────────────────────────────────────────────────────────────────────
-    // The frame is NUM ភាគ NUM, which the corpus writes out 74 times as `៥ភាគ៦` — so this is the language's
-    // own construction rather than a calque. 326 in the corpus.
+    // ── 6. minus ─────────────────────────────────────────────────────────────────────────────────────
+    // AFTER step 4, which has already claimed every dash BETWEEN two numbers — so what reaches here is
+    // a dash with no number before it, which is the negative/subtract reading. ដក is attested 3,808 times with
+    // `២៨ ដក៥` written out. The ordering is the whole guard: this corpus has 4,014 ranges against 399 signed
+    // numbers, so a digit-flanked dash belongs to the range and only a leading one is a minus.
+    s = s.replace(new RegExp(`(?<![${D}${KH}])[-−–](?=[${D}])`, "gu"), "ដក ");
+
+    // ── 7. fractions ─────────────────────────────────────────────────────────────────────────────────
+    // The frame is NUM ភាគ NUM, which the corpus writes out 74 times as `៥ភាគ៦` — the language's own
+    // construction rather than a calque. 326 in the corpus.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}/${SEP}(?=[${D}])`, "gu"), " ភាគ ");
 
-    // ── 10. ampersand ────────────────────────────────────────────────────────────────────────────────
-    // LAST, because it is the only rule not anchored to a digit and would otherwise fire inside a form another
-    // rule was still shaping. និង is the commonest word in Khmer (40,204), so the reading is not in doubt.
-    // 1,331 in the corpus.
-    // The negative lookahead is the entity guard described at step 0: `&nbsp;`, `&amp;`, `&#10084;` keep their
-    // ampersand rather than acquiring a spurious "and".
-    s = s.replace(new RegExp(`${SEP}&(?![a-zA-Z]{2,8};|#\\d{1,6};|#x[0-9a-fA-F]{1,5};)${SEP}`, "gu"), " និង ");
+    // ── 8. the shared symbol tier ────────────────────────────────────────────────────────────────────
+    // LAST, because it works on numbers and units that the rules above have finished shaping: de-grouping has
+    // joined `១៨១ ០៣៥` so the exponent rule can see one number, and the decimal rules have removed the marks
+    // that would have split it. See the SYMBOLS declaration for what it owns and where each word came from.
+    s = SYMBOLS(s);
 
     return s;
 }

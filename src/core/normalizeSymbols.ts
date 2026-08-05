@@ -303,6 +303,18 @@ const NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
 /** Build the text→text symbol normalizer for one language's data. */
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const cf = d.countForm ?? defaultCountForm;
+    /**
+     * ⚠ A SEPARATOR IS NOT ALWAYS `\s`. Khmer separates words with U+200B ZERO WIDTH SPACE — 33,285 occurrences
+     * in its corpus, the language's most frequent pattern cell — and `\s` does not match it in JavaScript. So
+     * every `\s?` below silently failed on the commonest way Khmer is written: `៣០​%` dropped its percent and
+     * `$​១០០` dropped its currency, while the space-separated forms worked.
+     *
+     * This rides on `unspacedScript` rather than being global, because that flag already means "this language's
+     * word boundaries are not spaces" — the case it was introduced for was Han, which uses no separator at all,
+     * and Khmer is the same problem with a zero-width one. Widening the class can only match MORE, and a
+     * zero-width space between a number and its sign is adjacency in any script that types one.
+     */
+    const OPT_SEP = d.unspacedScript ? "[\\s\u200b\u200c]?" : "\\s?";
     // LONGEST FIRST, because a shorter magnitude is often a prefix of a longer inflected one. Russian
     // lists both миллион and миллионов; in declaration order the short form matched first and stranded
     // the suffix, giving *пять миллион долларовов*. Same discipline as the currency keys below.
@@ -355,14 +367,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const wordCont = d.unspacedScript ? "\\p{sc=Latn}" : "\\p{L}";
     const CUR = `(?<![${wordCont}\\p{M}])(?:${curKeys})(?![${wordCont}\\p{M}])`;
     const curBefore = d.currency
-        ? new RegExp(`(${CUR})\\s?(${NUM})${magAlt}`, "gu")
+        ? new RegExp(`(${CUR})${OPT_SEP}(${NUM})${magAlt}`, "gu")
         : null;
     // The magnitude is matched on BOTH sides of the number. Without it on the postposed form, "5 millions $"
     // matched nothing at all and the sign was DROPPED — silent content loss, found while fixing the
     // connective below. `magAlt` is `()?` when a language declares no magnitudes, so the group indices
     // stay fixed either way.
     const curAfter = d.currency
-        ? new RegExp(`(${NUM})${magAlt}\\s?(${CUR})`, "gu")
+        ? new RegExp(`(${NUM})${magAlt}${OPT_SEP}(${CUR})`, "gu")
         : null;
     const unitAlt = d.units ? Object.keys(d.units).sort((a, b) => b.length - a.length).join("|") : "";
     // Denominators may come from either map; only `units` keys are matchable standalone.
@@ -421,7 +433,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // U+066A ٪ is the Arabic-script sign, U+FF05 ％ the FULL-WIDTH one that is ordinary CJK typography.
     // The Cantonese run had to fold ％ locally; accepting it here means the next CJK language does not.
     const PCT = "[%\u066a\uff05]";
-    const pctRe = new RegExp(`(${NUM})\\s?${PCT}`, "gu");
+    const pctRe = new RegExp(`(${NUM})${OPT_SEP}${PCT}`, "gu");
     // The %-before-number form (%40). The lookbehind stops a misfire after other rules run: currency turns
     // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.
     const pctPreRe = new RegExp(`(?<!\\d)${PCT}\\s?(${NUM})`, "gu");
