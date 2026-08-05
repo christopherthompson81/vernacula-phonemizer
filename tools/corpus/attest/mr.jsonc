@@ -1,0 +1,70 @@
+// WIKIPEDIA WORD ATTESTATION — mr (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "mr",
+    "wiki": "mr.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "अंकगणित गणितीय क्रिया",
+    "findings": [
+        {
+            "word": "बरोबर आहे",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "अधिक",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…क्रमगुणित काढला जाऊ शकतो, परंतु यासाठी गणितीय विश्लेषणातील अधिक प्रगत साधने (क्रिया) आवश्यक आहेत. गॅमा फल हे फॅक्टोरियलचे व…",
+                "…त्येक बटणावर फक्त एक अंक किंवा ऑपरेशन नियुक्त करतात; तथापि, अधिक विशिष्ट कॅल्क्युलेटरमध्ये, एक बटण की संयोजनांसह मल्टी-फंक्श…",
+                "…. बेसिक कॅल्क्युलेटर सहसा एका वेळी फक्त एकच संख्या साठवतात; अधिक विशिष्ट प्रकार व्हेरिएबल्समध्ये दर्शविलेल्या अनेक संख्या सं…",
+                "…ूत्रे तयार करण्यासाठीदेखील केला जाऊ शकतो. काही मॉडेल्समध्ये अधिक संख्या संग्रहित करण्यासाठी मेमरी क्षमता वाढवण्याची क्षमता अ…",
+                "…लभ केली जाऊ शकते. हे डिस्प्ले हार्डवेअरच्या भौतिक वास्तवाशी अधिक जवळून जुळते—उदाहरणार्थ, एक डिझायनर मीटरिंग सर्किट तयार करण्…",
+                "…ार आवश्यक नाही. बिट सिरीयल लॉजिक डिझाईन्स कॅल्क्युलेटरमध्ये अधिक सामान्य आहेत तर बिट समांतर डिझाईन्स सामान्य-उद्देशीय संगणका…"
+            ]
+        },
+        {
+            "word": "वजा",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "गुणिले",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}

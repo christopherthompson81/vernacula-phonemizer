@@ -66,6 +66,43 @@ function utterances(code: string): string[] {
     return out;
 }
 
+/**
+ * `--sentence <regex>` — THE PARALLEL-CORPUS MODE, and the strongest sourcing route this issue found (#654).
+ *
+ * FLEURS is a PARALLEL corpus: the same source sentences, translated and recorded per language. So a sentence
+ * that PERFORMS the operation you need to read gives you that reading in every language at once, spoken, in the
+ * slot, with a real operand — which is tier 2 rather than a Wikipedia existence check.
+ *
+ * The one that matters here is the aspect-ratio sentence, present in 57 of the 67 corpora:
+ *
+ *   en  "the aspect ratio of this format DIVIDING BY TWELVE to obtain the simplest whole-number ratio … 3:2"
+ *   de  geteilt durch zwölf     vi  chia cho mười hai      th  หารด้วย 12        ta  பன்னிரண்டால் வகுத்தல்
+ *   fa  تقسیم بر دوازده          uk  поділене на дванадцять  cy  rannu â deuddeg   ur  سے تقسیم دے کر
+ *
+ *   npx tsx tools/normalization/corpus-words.ts --sentence '3\s?:\s?2' --all
+ *
+ * ⚠ A HIT IS A LEAD, NOT A READING, and two languages proved why. The verb is inflected FOR THAT SENTENCE:
+ * el writes `διαιρούμενος` (a participle agreeing with `λόγος`) and es writes the infinitive `dividir`, while a
+ * sign reading has to be neutral. The sentence tells you WHICH WORD the language uses for the operation; the
+ * form still has to be judged per language. Read the output, do not paste it.
+ */
+const sentence = arg("sentence");
+if (sentence !== undefined) {
+    const re = new RegExp(sentence, "u");
+    const only = arg("lang");
+    for (const d of readdirSync(CORPUS_ROOT).sort()) {
+        if (only !== undefined && d !== only && !d.startsWith(`${only}_`)) continue;
+        const hits = new Set<string>();
+        for (const f of readdirSync(join(CORPUS_ROOT, d)).filter((x) => x.endsWith(".tsv")))
+            for (const line of readFileSync(join(CORPUS_ROOT, d, f), "utf8").split("\n")) {
+                const c = line.split("\t");
+                if (c.length > 3 && c[3] !== "" && re.test(c[3]!)) hits.add(c[3]!);
+            }
+        console.log(`${d.padEnd(14)} ${hits.size === 0 ? "— absent" : [...hits][0]!.slice(0, 220)}`);
+    }
+    process.exit(0);
+}
+
 const code = arg("lang");
 const words = (arg("words") ?? "").split(",").map((w) => w.trim().toLowerCase()).filter((w) => w !== "");
 const nExamples = Number(arg("examples", "2"));

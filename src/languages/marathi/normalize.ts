@@ -36,6 +36,7 @@
  * into a shape it would not otherwise take, it is called out at the step (5, 7, 12).
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 /** Ordinal suffixes → the agreement slot they mark. Marathi attaches these to the cardinal (सोळावा,
  *  पंधराव्या) and the suffix itself carries the agreement, so it is read off the text, not guessed.
@@ -360,6 +361,35 @@ export function makeMarathiNormalizer(
         //     "चंद्रयान -1" — a spacecraft name — and reading it as "उणे एक" is worse than silence.
         s = s.replace(/\+\s?(?=\d)/gu, " अधिक ");
         s = s.replace(/~\s?(?=\d)/gu, " सुमारे ");
+
+        // 15b) THE RELATIONAL AND DIVISION SIGNS, and ± (#654). All sourced from mr_in, because mr.wikipedia is
+        //      thin here — `बरोबर`, `भागिले` and `पेक्षा कमी` are all ×0 in its arithmetic articles, so tier 2 is
+        //      the whole of the evidence and tier 4 contributed nothing.
+        //
+        //      ⚠ THE COMPARATIVES ARE POSTPOSITIONAL, so they use core/postposedSign.ts rather than a
+        //      substitution: Marathi states the standard first and the comparative after it, and the corpus
+        //      writes पेक्षा FUSED to the standard — "एका मैलापेक्षा कमी" (less than one mile) ×8,
+        //      "१०० फुटांपेक्षा जास्त" (more than 100 feet) ×23. An infix rule would read the comparison
+        //      backwards, which is the ja/ko/fa lesson in a postpositional rather than verb-final language.
+        //
+        //      ⚠ THE DIVISION IS POSTPOSITIONAL TOO, and this is where FLEURS being a PARALLEL corpus paid: its
+        //      aspect-ratio sentence performs a division aloud in 57 of the 67 languages, and the Marathi
+        //      translator wrote "बाराने भागणे" — instrumental -ने on the operand, then भागणे. So `A ÷ B` is
+        //      "A, by B, dividing". `भागिले`, the infix school form, is ×0 in both corpus and wiki, so the
+        //      attested shape is the one shipped.
+        //
+        //      ⚠ AND `बरोबर` IS A HOMOGRAPH MAJORITY, like vi's `bằng`. Of its ×21 corpus tokens most are the
+        //      postposition "with" — "तुमच्या बरोबर" (with you), "त्याच बरोबर" (along with that) — but the
+        //      equality sense is present and is the arithmetic reading: "तो बरोबर आहे" (it is correct),
+        //      "अनुक्रमे बरोबर" (respectively equal). Counted alone the word looks wrong; read, it is right.
+        //
+        //      ± pairs this file's own अधिक with उणे — the word the minus note above names as the reading it
+        //      declined ("reading it as उणे एक is worse than silence"), so the vocabulary was already cited here.
+        s = s.replace(/±\s?/gu, "अधिक उणे ");
+        s = postposedSign(s, "<", "पेक्षा कमी");
+        s = postposedSign(s, ">", "पेक्षा जास्त");
+        s = postposedSign(s, "÷", "ने भागणे");
+        s = s.replace(/\s?=\s?/gu, " बरोबर ");
         s = s.replace(/ {2,}/gu, " ");
 
         return s;
