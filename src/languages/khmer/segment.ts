@@ -13,6 +13,14 @@
  * such a list prefers the COMPOUND every time, defeating its own purpose. So this is a unigram Viterbi: it
  * minimises total -log(frequency), and a run appearing 25 times loses to two words appearing 20,000 times each.
  *
+ * ⚠ AND THAT MITIGATION ONLY HOLDS WHILE THE COMPOUND IS RARE — the sentence above overstated it, and the
+ * correction is worth keeping. Splitting always pays an extra per-segment -log(p) term, so a compound that is
+ * ITSELF frequent wins outright no matter how common its parts are: `ខែមករា` ("month January") is in the table
+ * 505 times beside ខែ 2,576 and មករា 620, and this segmenter recovers the boundary in 0 of the 12 month
+ * compounds. Frequency data cannot fix a problem caused by frequency. That is why the boundaries the READER needs
+ * come from a trained tagger instead (khmerSegmenter.ts, the async path), and why this module's remit stays the
+ * one boundary the ៗ rule needs rather than all of them.
+ *
  * ⚠ ACCURACY IS 54.7% ON THE LAST BOUNDARY, and that is the honest number rather than a placeholder. Measured
  * against held-out human ZWSP boundaries the model never saw (80/20 split, 11,194 multi-token runs). Two things
  * make it a floor rather than a verdict: the gold standard is itself inconsistent, since writers disagree about
