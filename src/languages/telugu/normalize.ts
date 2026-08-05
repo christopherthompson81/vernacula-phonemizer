@@ -306,6 +306,24 @@ export function normalizeTelugu(input: string): string {
     //      operand must not get there first. Both arms, so the sign is read glued to a label or opening the
     //      quantity; the measurement position is voiced too because for a TTS target an explicitly typed
     //      character is content, not a reader's habit to copy.
+    // THE MINUS AND ± (#654). ⚠ MEASURED SAFE: every `-<digit>` in te_in is a range, score or closed
+    //    designation, with ZERO instances of `word · space · hyphen · digit` — the shape no guard can reject and
+    //    the reason gu, kn, mr, nl, ta and yue all decline this rule.
+    //
+    //    ⚠ AND THE SOURCE IS A NEGATIVE QUANTITY WITH THE SIGN NAMED, which is exactly this rule's case:
+    //
+    //      "రేడియల్ వేగాన్ని -5.5 కి.మీ./సె. ఖచ్చితంగా నిర్ధారించారు. ఈ మైనస్ గుర్తు …"
+    //         determined the radial velocity as -5.5 km/s. This MINUS SIGN …
+    //
+    //    `మైనస్ గుర్తు` ("minus sign") ×2, `మైనస్` ×13 / 8 articles, `రుణాత్మక` (negative) ×14. The first quote
+    //    is worth more than all the counts: a signed number in running prose, with the language naming the sign
+    //    it just used.
+    //
+    //    Three guards: a digit immediately after the sign, a letter or digit immediately before, and a digit
+    //    ANYWHERE to the left — the last for the SPACED range or score the fleet's usual guard misses.
+    s = s.replace(/±/gu, " ప్లస్ మైనస్ ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "మైనస్ ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ప్లస్ ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
 

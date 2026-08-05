@@ -138,6 +138,15 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // where `tāpiri` would say "append" and the loan cannot be pronounced.
         plus: "the sign position only: the attested reading is an English loan Māori's inventory cannot say "
             + "(/l/, /s/ → [pa]), and the native `tāpiri` means append, not positive — see maori/normalize.ts",
+        // ⚠ THE MINUS FAILS THE SAME WAY, AND FOR A REASON THAT NO SOURCING CAN LIFT. The loan is unsayable
+        // here too — `minus` carries /s/, which Māori does not have, so the g2p reduces it exactly as it does
+        // `plas`. And the native candidate is the wrong part of the vocabulary: `tango` ("take") is the
+        // SUBTRACTION verb, ×8 in mi_nz, and reading `-5` as "take five" states an operation where the sign
+        // marks polarity. mi_nz contains no negative quantity at all, so there is nothing to decode either.
+        // Same shape as the plus: an attested reading the inventory cannot produce, and a native word for a
+        // different job.
+        minus: "the loan carries /s/, which Māori lacks, and the native `tango` is the subtraction verb — "
+            + "reading `-5` as \"take five\" would state an operation where the sign marks polarity",
     },
     gu: {
         // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
