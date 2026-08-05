@@ -419,6 +419,29 @@ export function normalizeGreek(input: string): string {
     s = s.replace(/(\d)\s?¼/gu, "$1 και ένα τέταρτο");
     s = s.replace(/(\d)\s?¾/gu, "$1 και τρία τέταρτα");
 
+    // 11c) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give
+    //      here, and says so in the two ways this issue has learned to distinguish:
+    //
+    //        `ίσον`  ×0 token / ×0 substring — ABSENT
+    //        `διά`   ×0 token / ×338 SUBSTRING — every one inside `διάφορες`, `διαδικασία`, `διάρκεια`; the
+    //                substring trap, and the largest count it has produced anywhere in the fleet
+    //
+    //      el.wikipedia's arithmetic articles then read the notation out, which is exactly the article class
+    //      tier 4 wants — one that has to explain the signs to a reader:
+    //
+    //        "Το αποτέλεσμα εκφράζεται με ένα ίσον. Για παράδειγμα: 2 × 3 = 6"   (it NAMES the sign)
+    //        "9 + 4 ίσον 1 modulo 12"      ·   "Το x πράγμα συν ένα ίσον δύο"
+    //        "διαιρετός διά δύο (2)"       ·   "στη διαίρεση των πολυωνύμων Q(x) διά P(x)"
+    //        "το μεγαλύτερο δυνατό πολλαπλάσιο των 365, το οποίο είναι μικρότερο από 3200"
+    //
+    //      `ίσον` is emitted bare, and here that is not a policy choice but the attested form: the source reads
+    //      `9 + 4 ίσον 1` with no copula, and separately calls the sign "ένα ίσον". `διά` likewise sits directly
+    //      between its operands.
+    s = s.replace(/\s?=\s?/gu, " ίσον ");
+    s = s.replace(/\s?<\s?/gu, " μικρότερο από ");
+    s = s.replace(/\s?>\s?/gu, " μεγαλύτερο από ");
+    s = s.replace(/\s?÷\s?/gu, " διά ");
+
     // 11b) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
     //      and the classification was wrong: it is not a minus, not a designation, and not ambiguous. Greek
     //      writes an APPOSITION between dashes where English would use commas or brackets —
