@@ -256,7 +256,11 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     ± pairs this file's own audio-sourced પ્લસ with માઈનસ, its loan counterpart, in the juxtaposed form
         //     every language that reads ± uses. The minus is the same loan: the corpus has no minus sign to
         //     decode, so the pairing rests on પ્લસ having been decoded from the audio directly above.
-        s = s.replace(/±\s?/gu, "પ્લસ માઈનસ ");
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+        //    `તાપમાન±5` read *t̪apmanˈəpləs*, one token, with the stress of neither. The shared symbol tier's
+        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        s = s.replace(/±/gu, " પ્લસ માઈનસ ");
         s = postposedSign(s, "<", "કરતાં ઓછું");
         s = postposedSign(s, ">", "કરતાં વધુ");
         s = postposedSign(s, "÷", "દ્વારા વિભાજીત");

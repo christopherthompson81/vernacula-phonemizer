@@ -385,7 +385,11 @@ export function makeMarathiNormalizer(
         //
         //      ± pairs this file's own अधिक with उणे — the word the minus note above names as the reading it
         //      declined ("reading it as उणे एक is worse than silence"), so the vocabulary was already cited here.
-        s = s.replace(/±\s?/gu, "अधिक उणे ");
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+        //    `तापमान±5` read *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither. The shared symbol tier's
+        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        s = s.replace(/±/gu, " अधिक उणे ");
         s = postposedSign(s, "<", "पेक्षा कमी");
         s = postposedSign(s, ">", "पेक्षा जास्त");
         s = postposedSign(s, "÷", "ने भागणे");

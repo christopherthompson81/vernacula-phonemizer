@@ -280,7 +280,11 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         s = s.replace(/\s?×\s?/gu, " गुणा ");
         s = s.replace(/\s?÷\s?/gu, " भाग ");
         //     ± takes the pair named in the पूर्णांक citation above, in its conventional order.
-        s = s.replace(/±\s?/gu, "धन ऋण ");
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+        //    `तापमान±5` read *t̪aːpmˈaːnd̪ʱən*, one token, with the stress of neither. The shared symbol tier's
+        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        s = s.replace(/±/gu, " धन ऋण ");
         //     THE AMPERSAND, split the way the Mandarin pass split it: between LATIN letters it stays inside
         //     the run this engine already delegates to English (`AT&T`, `R&D` are English terms, and reading
         //     half of one in Hindi would be a code-switch mid-word); elsewhere it is और, which the corpus
