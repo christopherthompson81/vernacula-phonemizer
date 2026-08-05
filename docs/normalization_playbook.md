@@ -323,6 +323,31 @@ shaped the way it is.
 
 ## The traps, in order of how often they bit
 
+⚠ **THE NUMBERS ARE PERMANENT IDENTIFIERS. Do not renumber, merge or delete a trap.** 66 files across this
+repository cite a trap by number — `src/languages/*/normalize.ts` comments, investigation docs, tool headers —
+spanning 25 distinct numbers. A merge that renumbers repoints every one of those citations at a different trap
+and nothing detects it, which is the `negative` → `signed-number` rename that left 35 artifacts carrying a dead
+key. **New traps append. A superseded trap keeps its number and says what replaced it.**
+
+This section is long because it is a hazard log rather than a tutorial: each entry carries the measurement that
+found it, and deleting the evidence is how a settled question gets reopened. Read the index below instead of the
+whole thing — the traps cluster into eight principles, and most entries are a second or third instance of one
+you have already met.
+
+### Index — the eight principles, and which traps instance them
+
+| principle | traps | in one line |
+|---|---|---|
+| **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin |
+| **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
+| **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe |
+| **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
+| **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug; an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream |
+| **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
+| **A tool that cannot see its evidence fails toward a confident negative** | 29, 30, 31, 32, 33, 42, 43, 49, 51, 6, 11, 14, 15, 22 | a green artifact can answer last month's question; measure whether a fetch is slow at work or at waiting; re-mining is not monotone; an artifact that cannot be regenerated is not committed; an index from a folded string addresses the wrong text; a check reading one file goes blind on the rest; a code the registry throws on looks like breakage; mojibake misattributes damage; the wiki route has a floor |
+
+
 **1. `\b` is ASCII-defined.** Six appearances, including in shared code. French matched *inside* `siècle`
 at the accent; the Hindi, Bengali and Urdu rules matched nothing at all against their own scripts;
 `core/initialisms.ts` was a total no-op for Cyrillic, so США came out `[sʂa]`. **Never use `\b` here.** Use
@@ -536,7 +561,7 @@ that one was 31 lost pauses.
   but run the per-language corpus diff for every affected language before believing it.
 
 
-**18. A PROBE WHOSE DELETION MERGES ITS OPERANDS CANNOT DETECT A DROP.** The differential test is "phonemize
+**18. A PROBE WHOSE DELETION MERGES ITS OPERANDS CANNOT DETECT A DROP.** *(Trap 26 is this same cause in real text, and carries the fix: substitute a space.)* The differential test is "phonemize
 it, delete the symbol, phonemize again; identical means the symbol said nothing". That inference is only valid
 if deleting the symbol leaves the *rest* of the string tokenizing the same way. `review.ts` probed the
 ampersand with `A&B`, whose deletion yields `AB` — one initialism instead of two letters — so the reading
@@ -700,7 +725,7 @@ instances worked:
   the flag; yue and th show them too but declare only `percent` through the tier, so theirs is a missing
   DECLARATION, not a guard problem. Say which is which rather than filing one bug.
 
-**28. A DOTTED DESIGNATION IS NOT A QUANTITY — AND A ONE-LETTER UNIT KEY WILL CLAIM IT.** `802.11g` read as
+**28. A DOTTED DESIGNATION IS NOT A QUANTITY — AND A ONE-LETTER UNIT KEY WILL CLAIM IT.** *(Trap 46 is this again, with the sharper finding that corpus-clean is not safe.)* `802.11g` read as
 "802.11 GRAMS" in ten languages (ar bn cmn el es fr id ja pt ur), because `g` is a declared unit. Measured over
 all 66 corpora, since the Wi-Fi article was translated into nearly all of them:
 
@@ -998,7 +1023,7 @@ merely silent one. Declaring `"m/h": ["maero ia hāora"]` as its own unit key fi
 sorted longest-first and a 3-character key is tried before the bare `m` (this is how French's `km/h` key
 already works). Reach for a compound key whenever one abbreviation is not the composition of its parts.
 
-**45. ONE SENTENCE CAN SOURCE A WHOLE FLEET — FIND THE ONE THE CORPUS REPEATS.** The cube word for sixteen
+**45. ONE SENTENCE CAN SOURCE A WHOLE FLEET — FIND THE ONE THE CORPUS REPEATS.** *(Trap 48 is the negative half of this technique.)* The cube word for sixteen
 languages came out of a single utterance. FLEURS is a *translation* of one English set, so every corpus carries
 the same source text, and one of those sentences is "The Luno had 120-160 cubic metres of fuel aboard". Locate
 it by its FIGURES (`120` and `160` co-occurring) and the measure word is beside them, in that language's own
@@ -1019,7 +1044,7 @@ reasons:
   `xh` left the phrase in English (`ye-cubic metres`). A parallel corpus is a *set of translations*, and a
   translation can be wrong in exactly the cell you are reading.
 
-**46. A ONE-LETTER UNIT KEY IS NOT SAFE JUST BECAUSE THE CORPUS SAYS SO — CHECK WHAT SPENDS THE DOT.** Bare `m`
+**46. A ONE-LETTER UNIT KEY IS NOT SAFE JUST BECAUSE THE CORPUS SAYS SO — CHECK WHAT SPENDS THE DOT.** *(Trap 28 is the same trap; this entry is the second, stronger instance. Kept separate because 66 files cite these numbers.)* Bare `m`
 was measured clean in every one of these corpora (digit-adjacent `m` is ×0 in eight of them, and every instance
 in the rest is a genuine metre). Declaring it still broke four languages: `802.11m` read as "…eleven METRES" in
 af, ca, is and sd.
