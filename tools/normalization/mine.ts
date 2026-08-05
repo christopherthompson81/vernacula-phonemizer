@@ -34,7 +34,8 @@
  *   npx tsx tools/normalization/mine.ts mine  --in raw.txt --out my.hard.tsv [--per-cell 8] [--sample 200]
  *        [--terminators "။"] [--terms months.txt] [--audit-ascii]
  */
-import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, readSync, closeSync } from "node:fs";
+import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DROPPABLE, LEAK_CLASSES, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
@@ -93,6 +94,54 @@ export function segment(raw: string, mode: SegmentMode, terminators: string): st
             .map((s) => s.split(DOT_SENTINEL).join(".").replace(/\s+/gu, " ").trim())
             .filter((s) => s.length >= min && s.length <= max),
     )];
+}
+
+/**
+ * SEGMENT A FILE WITHOUT READING IT INTO ONE STRING.
+ *
+ * ⚠ NODE CANNOT HOLD A STRING LONGER THAN `0x1fffffe8` CHARACTERS (~512 MB), and four of the mined dumps are
+ * bigger than that: `tt` 1,030 MB of extracted text, `arz` 791, `ka` 754, `eu` 583. On those,
+ * `readFileSync(path, "utf8")` throws `ERR_STRING_TOO_LONG` before a single segment is produced, so the
+ * language cannot be mined at all — the failure is loud, but it is total, and it lands on the LARGEST wikis,
+ * which are the ones worth mining most.
+ *
+ * Paragraph mode makes streaming exact rather than approximate: `segment()` splits the whole text on `\n` and
+ * treats each line independently, so reading the file a chunk at a time and emitting complete lines does
+ * identical work. The deduplicating `Set` stays global, so output is byte-identical to the non-streaming path —
+ * verified, and it has to be, because the artifact is committed and diffed.
+ *
+ * A `StringDecoder` is used rather than `chunk.toString()`: an 8 MB boundary falls mid-codepoint often enough
+ * that decoding chunks independently corrupts multi-byte text, which for this fleet is most of it.
+ */
+export function segmentFile(path: string, mode: SegmentMode, terminators: string): string[] {
+    const [min, max] = BOUNDS[mode];
+    const fd = openSync(path, "r");
+    const decoder = new StringDecoder("utf8");
+    const buf = Buffer.alloc(1 << 23);
+    const out = new Set<string>();
+    let carry = "";
+    const take = (line: string): void => {
+        // Paragraph mode: the line IS the unit. Sentence mode: split within the line — a dump writes one
+        // paragraph per line, so no sentence spans a boundary and the result matches whole-text splitting.
+        const pieces = mode === "paragraph" ? [line] : segment(line, "sentence", terminators);
+        for (const piece of pieces) {
+            const t = piece.replace(/\s+/gu, " ").trim();
+            if (t.length >= min && t.length <= max) out.add(t);
+        }
+    };
+    try {
+        for (;;) {
+            const n = readSync(fd, buf, 0, buf.length, null);
+            if (n === 0) break;
+            carry += decoder.write(buf.subarray(0, n));
+            const lines = carry.split("\n");
+            carry = lines.pop() ?? "";
+            for (const line of lines) take(line);
+        }
+        carry += decoder.end();
+        if (carry !== "") take(carry);
+    } finally { closeSync(fd); }
+    return [...out];
 }
 
 export interface CellSelection {
@@ -166,6 +215,36 @@ export interface MinedCorpus {
  * a reader of this file needs (why `hard` is not frequency-representative, and why `sample` exists), so
  * the artifact explains itself without the investigation doc beside it.
  */
+/**
+ * Which frequency claim the artifact's `sample` tier can support, decided from its recorded source. A dump is
+ * the whole wiki, so a uniform stride over it is the real distribution; an API fetch is intros plus
+ * search-ranked articles, so it is not. Keyed on the source string because that is the only provenance the
+ * artifact carries, and an unrecognised source gets the cautious answer rather than the flattering one.
+ */
+export function SAMPLE_CAVEAT(source: string): string {
+    // ⚠ KEYWORD-SNIFFING A FREE-TEXT FIELD IS FRAGILE, AND IT INVERTED ITSELF ON THE FIRST AWKWARD SOURCE
+    // STRING. `mag` records `"… (random 400 + targeted insource: fill; NO DUMP is published for this wiki)"`,
+    // which `/\bdump\b/i` matched — so the artifact told its reader `✓ dump-sourced, sample IS the language's
+    // real distribution` about an API fetch with no dump behind it. Exactly backwards, in the one field whose
+    // job is to stop a reader over-trusting the data.
+    //
+    // Two defences. The pattern now requires the CANONICAL provenance form the dump converter emits —
+    // `dump (pages-articles…` — rather than the bare word; and an explicit negation anywhere in the string
+    // disqualifies it regardless. A free-text field cannot be made safe, but it can be made to fail closed.
+    if (/\bno\s+dump\b|\bnot\s+a\s+dump\b/iu.test(source)) return API_CAVEAT;
+    if (/\bdump\s*\(pages-articles/iu.test(source))
+        return "// ✓ THIS artifact is dump-sourced, so `sample` IS the language's real distribution — a rate computed\n"
+            + "//   from it is meaningful, which is what the ×33 and \"22.1% of the corpus\" counts in the rule comments\n"
+            + "//   rely on.";
+    if (/FLEURS/u.test(source))
+        return "// ✓ THIS artifact is corpus-sourced (FLEURS), so `sample` reflects that corpus's own distribution.";
+    return API_CAVEAT;
+}
+
+const API_CAVEAT = "// ⚠ THIS artifact is API-sourced (random article intros + `insource:` fill), so `sample` is NOT\n"
+    + "//   frequency-representative either — the fill's articles were chosen by a search ranked on the very\n"
+    + "//   patterns being counted. Do not compute a rate from it; re-mine from a dump if a rate is needed.";
+
 export function renderJsonc(c: MinedCorpus): string {
     const cov = CELLS.filter((x) => (c.counts[x.key] ?? 0) > 0).length;
     const rows = CELLS.map((x) => {
@@ -184,6 +263,13 @@ export function renderJsonc(c: MinedCorpus): string {
 // means nothing about the language. Use "sample" (uniform, deterministic stride) for anything that needs
 // real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
 // fire, not that nothing else broke.
+//
+// ⚠⚠ AND WHETHER "sample" CAN CARRY THAT DEPENDS ON THE SOURCE, which this warning used to assert
+// unconditionally. A uniform stride is only representative of what it strides OVER. Over a full dump it is
+// the language's real distribution. Over an API fetch it is a stride across random ARTICLE INTROS plus
+// articles chosen by a search ranked on the very patterns being measured — so a rate computed from it is a
+// fact about the fetch, not about the language. The line below states which case this artifact is.
+${SAMPLE_CAVEAT(c.source)}
 //
 // ⚠ AN EMPTY CELL IS NOT EVIDENCE. It is a query to run or a tool bug. Both have happened here: random
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the
@@ -230,14 +316,36 @@ const has = (n: string): boolean => argv.includes(`--${n}`);
 const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 const UA = "vernacula-phonemizer-corpus-probe/0.1 (https://github.com/christopherthompson81/vernacula-phonemizer)";
 
+const delay = (ms: number): Promise<void> => new Promise((res) => { setTimeout(res, ms); });
+
+/**
+ * ⚠ 429 IS THE FAILURE THAT SCALES WITH THE SWEEP, and it went unhandled until the sweep hit it. Fetching
+ * ten wikis back to back tripped Wikimedia's bot rate limit, and the shape of the failure is the dangerous
+ * one: every batch logged `429 Your bot is making too many requests`, the loop below caught each one and
+ * carried on, the tool printed `wrote 0 passages`, and **it exited 0**. Three of the ten languages ended up
+ * with an empty raw file — including `he`, whose wiki has 269 million words of article text. Under a 93-
+ * language sweep that produces empty corpora at a success exit code, which is the one thing a gate must
+ * never do.
+ *
+ * So a 429 is retried with backoff, honouring `Retry-After` when the server sends it, and the caller exits
+ * non-zero when a fetch comes back empty. A rate limit is a "wait", never an answer about a wiki.
+ */
 async function api(wiki: string, params: Record<string, string>): Promise<any> {
     const u = new URL(`https://${wiki}.wikipedia.org/w/api.php`);
     for (const [k, v] of Object.entries({ format: "json", ...params })) u.searchParams.set(k, v);
-    // A User-Agent is REQUIRED: without one the API returns non-JSON and the fetch silently yields nothing,
-    // which reads as "this wiki has no articles" rather than as an error.
-    const r = await fetch(u, { headers: { "User-Agent": UA } });
-    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-    return r.json();
+    for (let attempt = 0; ; attempt++) {
+        // A User-Agent is REQUIRED: without one the API returns non-JSON and the fetch silently yields
+        // nothing, which reads as "this wiki has no articles" rather than as an error.
+        const r = await fetch(u, { headers: { "User-Agent": UA } });
+        if (r.ok) return r.json();
+        // 429 and 5xx are TRANSIENT. A 404 or 400 is about the request and retrying it just repeats it.
+        const transient = r.status === 429 || r.status >= 500;
+        if (!transient || attempt >= 4) throw new Error(`${r.status} ${r.statusText}`);
+        const after = Number(r.headers.get("retry-after"));
+        const wait = Number.isFinite(after) && after > 0 ? 1000 * after : 1500 * 2 ** attempt;
+        console.error(`  ${r.status} — waiting ${(wait / 1000).toFixed(1)}s (attempt ${attempt + 1}/5)`);
+        await delay(wait);
+    }
 }
 
 /**
@@ -283,16 +391,82 @@ export async function mapPool<T, R>(items: readonly T[], limit: number, fn: (ite
     return out;
 }
 
-/** Article plain-text extracts → one line each, wiki heading/link syntax removed. */
-function extracts(json: any, intro: boolean): string[] {
+/**
+ * Article plain-text extracts → ONE PARAGRAPH PER LINE, wiki heading/link syntax removed.
+ *
+ * ⚠ THIS FUNCTION SILENTLY DESTROYED THE ENTIRE FILL STEP, and the fill step is the feature that makes an
+ * empty cell "a query to run, not a fact about the language". It collapsed `\s+` to a single space across
+ * the WHOLE extract, which is right for an intro (one paragraph) and catastrophic for the full article the
+ * fill pulls: the article became one line of a median **19,029 characters**. `segment()` in paragraph mode
+ * splits on `\n` alone — deliberately, so no dot is ever interpreted — and then discards anything over its
+ * 1,200-character ceiling. So:
+ *
+ *   he: 65 filled articles → 1 usable paragraph segment
+ *   fi: 59 filled articles → 2
+ *   ka: 111 filled articles → 12
+ *
+ * The sweep's symptom was that six languages reported thousands of `insource:` hits per cell, "pulled 8
+ * articles" for each, and then moved 23→24 cells. Nothing connected the two numbers, and the natural reading
+ * — "the pattern must live in infoboxes, which don't survive plain-text extraction" — was wrong and would
+ * have been recorded as a limit of the method.
+ *
+ * `segment()`'s own comment states the contract this violated: *"The extractor writes one paragraph per
+ * line, so the boundary is already decided and no dot is ever interpreted."* It didn't. Now it does, and
+ * whitespace is collapsed WITHIN a paragraph only.
+ *
+ * (`intro` stays unused, and is kept because the caller distinguishes the two cases and a future change to
+ * intro handling belongs here rather than at the call sites.)
+ */
+/**
+ * ⚠ A RENDERED TEMPLATE'S ERROR MESSAGE IS ENGLISH TEXT GLUED INTO THE SENTENCE, and only this route can
+ * produce it. `wikidump-to-text.py` carries a `RE_WIKI_ERROR` list for exactly this — added after three
+ * MediaWiki errors reached cmn's artifact and were read aloud as English — but the fix went into the dump path
+ * only, and the API path had no filter at all.
+ *
+ * THE TWO ROUTES ARE NOT EQUALLY EXPOSED, which is why this hid. A dump carries UNEXPANDED wikitext, so
+ * `{{...}}` is stripped before any error can be rendered; the API's `explaintext` renders templates and
+ * inherits whatever they emit. Measured across every committed artifact, this class appears in exactly one —
+ * `cmn`, the pre-existing documented case — and in none of the dump-mined set.
+ *
+ * Found in Magahi by the template-field detector, not by inspection: `is` and `deprecated` came back as
+ * field-like "words" present in 17% of segments at a rate of 1.02, which is the signature of a fixed string
+ * rather than vocabulary. The string is a language-tag deprecation notice spliced mid-word:
+ *
+ *   अजमेर जिल्लौcode: raj is deprecated raj
+ *   नामक्कल् (तमिल्: நாமக்கல்code: ta is deprecated ta
+ *
+ * 131 of 759 paragraphs. A paragraph carrying one is discarded whole rather than repaired: the surrounding
+ * text is a template expansion too, and there is no reliable prose boundary to cut at.
+ */
+/**
+ * ⚠ NOT SPEECH, AND THE CELL SELECTOR REACHES FOR IT. The Python converter carries the same guard, and it has
+ * to exist on BOTH routes for the same reason the template-error filter did: a fix on one path is not a fix on
+ * the other, and the API path is the one that serves the languages whose dumps exceed the size cap.
+ *
+ * A contact record is almost pure digits — dialling number, postcode, street number — and a URL path is almost
+ * pure slashes, so `digit-run`, `ranges`, `signed-number` and `fractions` all prefer that material to ordinary
+ * prose. Neither is anything a reader says aloud, and a URL sitting in a `fractions` slot tests nothing.
+ *
+ * Discarded WHOLE: there is no partial redaction that leaves trustworthy prose, because the text around a
+ * contact block is more contact block.
+ */
+const PERSONAL = /[\w.+-]+@[\w-]+\.[a-z]{2,}|(?:facebook|instagram|twitter|tiktok|whatsapp|t\.me|linkedin)\.com\/[\w./-]+|\b(?:tel|t[eé]l|tlf)\b\s*[.:]\s*\(?\+?\d|\b(?:phone|telephone|mobile)\b\s*(?:no\.?|number|:)\s*\(?\+?\d|\(\+\d{1,3}[\s)-]\s?\d[\d\s-]{6,}|https?:\/\/\S{12,}/iu;
+
+const WIKI_ERROR = /code:\s*\w[\w-]*\s+is\s+deprecated|Missing required parameter|Expression error|Template loop detected|Cite error|Invalid time|Unknown archive|script error|Lua error/iu;
+
+export function extracts(json: any, intro: boolean): string[] {
+    void intro;
     const out: string[] = [];
     for (const p of Object.values<any>(json?.query?.pages ?? {})) {
-        const t = String(p.extract ?? "")
-            .replace(/^=+.*?=+$/gmu, " ") // == Heading == survives plain-text extraction
-            .replace(/\[\[|\]\]/gu, "")
-            .replace(/\s+/gu, " ")
-            .trim();
-        if (t.length > 40) out.push(t);
+        const text = String(p.extract ?? "")
+            .replace(/^=+.*?=+$/gmu, "\n") // == Heading == survives plain-text extraction; keep the break
+            .replace(/\[\[|\]\]/gu, "");
+        // A paragraph is a run of non-empty lines: MediaWiki's plaintext extract separates paragraphs with
+        // newlines, and a single `\n` inside one is a soft wrap rather than a boundary worth keeping.
+        for (const para of text.split(/\n/u)) {
+            const t = para.replace(/\s+/gu, " ").trim();
+            if (t.length > 40 && !WIKI_ERROR.test(t) && !PERSONAL.test(t)) out.push(t);
+        }
     }
     return out;
 }
@@ -305,15 +479,20 @@ if (mode === "fetch") {
     let n = 0;
 
     const wantRandom = Number(arg("random", "0"));
-    for (let i = 0; i < Math.ceil(wantRandom / 20); i++) {
+    const batches = Math.ceil(wantRandom / 20);
+    let failedBatches = 0;
+    for (let i = 0; i < batches; i++) {
         try {
             const j = await api(wiki, { action: "query", generator: "random", grnnamespace: "0", grnlimit: "20", prop: "extracts", explaintext: "1", exintro: "1", exlimit: "20" });
             const lines = extracts(j, true);
             appendFileSync(out, lines.join("\n") + "\n", "utf8");
             n += lines.length;
-        } catch (e) { console.error(`  random batch ${i}: ${(e as Error).message}`); }
+        } catch (e) { failedBatches++; console.error(`  random batch ${i}: ${(e as Error).message}`); }
     }
-    if (wantRandom) console.log(`random: ${n} passages`);
+    // THE COUNT OF WHAT DID NOT ARRIVE, printed beside the count of what did. Reporting only the passages
+    // fetched made a rate-limited run look like a small wiki.
+    if (wantRandom) console.log(`random: ${n} passages from ${batches - failedBatches}/${batches} batches`
+        + (failedBatches > 0 ? `  ⚠ ${failedBatches} batch(es) LOST — this corpus is short by up to ${20 * failedBatches} articles` : ""));
 
     const fill = (arg("fill") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
     const perCell = Number(arg("per-cell-articles", "20"));
@@ -358,11 +537,23 @@ if (mode === "fetch") {
                 if (lines.length > 0) { appendFileSync(out, lines.join("\n") + "\n", "utf8"); got += lines.length; }
             }
             n += got;
-            console.log(`  ${key.padEnd(14)} ${String(total).padStart(6)} hits on the wiki → pulled ${got} articles`
+            // `got` counts PARAGRAPHS, not articles — `extracts` emits one line per paragraph, and saying
+            // "articles" here overstated the fetch by an order of magnitude once that was fixed.
+            console.log(`  ${key.padEnd(14)} ${String(total).padStart(6)} hits on the wiki → ${titles.length} articles, ${got} paragraphs`
                 + (failed > 0 ? `  (${failed} article fetch(es) failed)` : ""));
         } catch (e) { console.error(`  ${key}: ${(e as Error).message}`); }
     }
     console.log(`wrote ${n} passages → ${out}`);
+    // ⚠ EXIT NON-ZERO ON AN EMPTY FETCH. This tool is the first step of a 93-language sweep, so it will be
+    // driven from a loop, and a loop reads the exit code. A rate-limited run that reports success leaves an
+    // empty file behind and the next stage mines it, reports "0 segments", and the sweep records a language
+    // as having no minable text — which is a claim about the wiki, from an artifact of the request rate.
+    // Exiting 2 makes a lost fetch stop the loop, which is the only safe default at that scale.
+    if (n === 0) {
+        console.error(`\n⚠ NOTHING FETCHED. This is a fact about this run, NOT about ${wiki}.wikipedia.org.`
+            + `\n  Check for 429s above; wait and re-run rather than treating this wiki as empty.`);
+        process.exit(2);
+    }
     process.exit(0);
 }
 
@@ -496,8 +687,10 @@ if (mode === "__module__") {
 
     const sources = inPath.split(",").map((x) => x.trim()).filter(Boolean);
     const segments = [...new Set(
-        sources.flatMap((src) =>
-            segment(readSource(src), src.startsWith("fleurs:") ? "paragraph" : segmentMode, terminators)),
+        sources.flatMap((src) => (src.startsWith("fleurs:")
+            ? segment(readSource(src), "paragraph", terminators)
+            // Streamed, so a dump over Node's ~512 MB string cap is minable at all — see `segmentFile`.
+            : segmentFile(src, segmentMode, terminators))),
     )];
     if (sources.length > 1) console.log(`merged ${sources.length} sources: ${sources.join(" + ")}`);
 
@@ -529,8 +722,25 @@ if (mode === "__module__") {
         for (let i = 0; i < segments.length && sample.length < sampleN; i += stride) sample.push(segments[i]!);
     }
 
-    const lang = arg("lang", "und")!;
-    const source = arg("source", inPath)!;
+    /**
+     * ⚠ `--lang` IS REQUIRED, and it used to default to `"und"`. Seven artifacts were mined, reviewed,
+     * scanned and COMMITTED carrying `"language": "und"` before anyone read the field — the scan takes its
+     * own `--lang`, the staleness check does not look at this one, and nothing else in the toolchain reads
+     * it, so an artifact can be wrong here and pass every gate. A silent default on an identity field is
+     * worse than no default: it produces a plausible-looking artifact that names no language.
+     */
+    const lang = arg("lang");
+    if (lang === undefined) throw new Error("mine needs --lang <code> — the artifact records which language it describes, and there is no sensible default");
+    /**
+     * ⚠ AND `source` DEFAULTS TO THE BASENAME, never the path it was given. The same seven artifacts
+     * recorded the full absolute path of a machine-local scratch directory — session-scoped temp tree and
+     * all — committed to a public repo in the one field whose whole job is provenance. The existing
+     * artifacts say `"FLEURS de_de"` and `"my.wikipedia.org dump (pages-articles, paragraphs)"`, which is
+     * what this field is for.
+     *
+     * A basename is still not provenance — pass `--source` — but it cannot leak a local directory tree.
+     */
+    const source = arg("source") ?? inPath.replace(/^.*\//u, "");
     writeFileSync(outPath, renderJsonc({
         language: lang,
         source,

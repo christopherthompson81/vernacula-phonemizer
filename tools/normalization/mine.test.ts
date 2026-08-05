@@ -10,7 +10,7 @@
  */
 import { describe, expect, test } from "vitest";
 import { parseJsonc } from "../../src/core/jsonc.ts";
-import { mapPool, segment, selectCells, renderJsonc } from "./mine.ts";
+import { SAMPLE_CAVEAT, extracts, mapPool, segment, selectCells, renderJsonc } from "./mine.ts";
 import { CELLS } from "./cells.ts";
 
 const TERMINATORS = ".!?။።۔؟।॥…。！？៕";
@@ -70,6 +70,68 @@ describe("normalization miner", () => {
         expect(asciiCounts["percent"]).toBe(0); // ← \d finds none of them
         expect(counts["year"]).toBeGreaterThan(0);
         expect(asciiCounts["year"]).toBe(0);
+    });
+
+    /**
+     * ⚠ THE DEFECT THAT SILENTLY DESTROYED THE FILL STEP, and it was invisible to every other check.
+     *
+     * `extracts` collapsed `\s+` across the whole extract, which is right for an intro (one paragraph) and
+     * wrong for the full article the fill pulls: the article became one line of a median 19,029 characters,
+     * paragraph mode splits on `\n` alone, and the 1,200-character ceiling then discarded it. Measured:
+     * `he` 65 filled articles → **1** usable segment, `fi` 59 → 2, `ka` 111 → 12.
+     *
+     * The visible symptom was six languages reporting thousands of `insource:` hits per cell, "pulled 8
+     * articles" each, and coverage moving 23→24. The plausible explanation — the pattern lives in infoboxes,
+     * which plain-text extraction drops — was wrong, and would have been recorded as a limit of the method.
+     */
+    test("a full-article extract keeps its paragraph boundaries, so paragraph mode can segment it", () => {
+        const para = (n: number): string => `Paragraph ${n}. `.padEnd(400, `text about subject ${n} `);
+        const json = { query: { pages: { 1: { extract: `${para(1)}\n\n== Heading ==\n\n${para(2)}\n${para(3)}` } } } };
+        const lines = extracts(json, false);
+        expect(lines).toHaveLength(3);
+        // Every line must survive the paragraph-mode ceiling, which is what the old code failed.
+        const segs = segment(lines.join("\n"), "paragraph", TERMINATORS);
+        expect(segs).toHaveLength(3);
+        // And no line may carry a newline of its own — paragraph mode's contract is one paragraph per line.
+        expect(lines.every((l) => !l.includes("\n"))).toBe(true);
+    });
+
+    test("an intro-shaped extract is unchanged by the paragraph split", () => {
+        const json = { query: { pages: { 1: { extract: "Ein  einzelner   Absatz mit reichlich Text darin, lang genug für die Untergrenze." } } } };
+        expect(extracts(json, true)).toEqual(["Ein einzelner Absatz mit reichlich Text darin, lang genug für die Untergrenze."]);
+    });
+
+    /**
+     * ⚠ A RENDERED TEMPLATE ERROR IS ENGLISH SPLICED INTO THE SENTENCE, and only the API route can produce it —
+     * a dump carries unexpanded wikitext. Found in Magahi by the template-field detector: `is` and
+     * `deprecated` came back as field-like words in 17% of segments at rate 1.02, the signature of a fixed
+     * string rather than vocabulary. 131 of 759 paragraphs carried `code: raj is deprecated raj`.
+     */
+    test("a paragraph carrying a rendered template error is discarded whole", () => {
+        const good = "अजमेर मण्डल एगो भारत के राज्य में स्थित एगो जिला हवे जेकर मुख्यालय अजमेर शहर में बा।";
+        const bad = "अजमेर मण्डल (अजमेर जिला; मारवाड़ी: अजमेर जिल्लौcode: raj is deprecated raj) एगो जिला हवे।";
+        const json = { query: { pages: { 1: { extract: `${good}\n${bad}` } } } };
+        expect(extracts(json, false)).toEqual([good]);
+    });
+
+    /**
+     * ⚠ THE CAVEAT INVERTED ITSELF ON THE FIRST AWKWARD SOURCE STRING. `mag` records "… NO DUMP is published
+     * for this wiki", and a bare `/\bdump\b/i` matched it — so the artifact told its reader that its sample
+     * IS the language's real distribution, about an API fetch with no dump behind it. Backwards, in the one
+     * field whose job is to stop a reader over-trusting the data.
+     */
+    test("the sample caveat matches the canonical dump form and fails closed on a negation", () => {
+        const dumpish = SAMPLE_CAVEAT("bm.wikipedia.org dump (pages-articles, paragraphs)");
+        expect(dumpish).toContain("dump-sourced");
+        expect(dumpish).toContain("real distribution");
+        // The negation must win, whatever else the string says.
+        for (const s of [
+            "mag.wikipedia.org (random 400 + targeted insource: fill; NO DUMP is published for this wiki)",
+            "xx.wikipedia.org (api only — not a dump)",
+        ]) expect(SAMPLE_CAVEAT(s), s).toContain("API-sourced");
+        // The bare word alone is no longer enough to claim dump provenance.
+        expect(SAMPLE_CAVEAT("some notes mentioning a dump somewhere")).toContain("API-sourced");
+        expect(SAMPLE_CAVEAT("FLEURS de_de")).toContain("corpus-sourced");
     });
 
     test("every cell has a unique key, and each non-lexical cell has a fill query", () => {
