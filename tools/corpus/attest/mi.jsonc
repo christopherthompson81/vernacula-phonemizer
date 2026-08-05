@@ -1,0 +1,58 @@
+// WIKIPEDIA WORD ATTESTATION — mi (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "mi",
+    "wiki": "mi.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "tāpiri",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…i te “a”, ki te “e”, ki te “o”, ki te “k” rānei. Ka taea te tāpiri te “mau” ki muri, kia whakatakitinitia te tūingoa, e whai a…",
+                "…gā tāurunga o tēnei rārangi ki ērā o te paerewa ISO 3166-1, tāpiri atu ki ētahi wehenga nuinga whakamihi-kore kāore i te ISO 3…",
+                "…ore tētahi tatau raupapa i whakaratohia). Mō te nuinga, kua tāpiri te rahinga o ngā wehenga nuinga whakamihi-kore ki te rahing…",
+                "…toru ngā waeine rahinga o tēnei rārangi: Rahinga tapeke: te tāpiri i ngā rahinga whenua me rahinga wai o roto o ngā paenga me…",
+                "…, ka kīia hoki mō ngā tūkapi i muri i te tūmahi. Ka taea te tāpiri te “ŋā” ki muri, kia whakatakitinitia te tūingoa, e whai ak…",
+                "…ā ka whakataurite ngā raraunga. Me te aha anō, kāore pea te tāpiri i ngā tatau mō ngā whenua katoa e ōrite ki te tapeke aorere…"
+            ]
+        },
+        {
+            "word": "tāpiritanga",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "tōrunga",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}

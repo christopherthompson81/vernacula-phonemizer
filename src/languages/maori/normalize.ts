@@ -102,24 +102,35 @@ export function normalizeMaori(input: string): string {
     //     A native maths word was NOT substituted: the recordings say the readers use the loan, so choosing a
     //     different word because it happens to be pronounceable would be inventing a reading the evidence
     //     contradicts. Recorded here so the next pass does not re-derive the sourcing and reach for [pa].
-    // 1aa) THE PLUS AS AN OPERATOR → tāpiri (#654), which the note above declined and should not have — and the
-    //      reason is the OPERATOR/SIGN split this repo already documents for ko, vi and fa.
+    // 1aa) THE PLUS BETWEEN TWO NUMBERS → tāpiri (#654). The note above declines the plus outright; this narrows
+    //      that refusal to the position the evidence actually covers, and the argument is NOT the one an earlier
+    //      draft of this comment made.
     //
-    //      ⚠ THE TWO RECORDINGS THAT MOTIVATED THE REFUSAL ARE BOTH THE *SIGN*, NOT THE OPERATION. They are
-    //      `UTC+1` (a UTC offset) and `+30°C` (a positive temperature). In neither is anything being added, so
-    //      what the speakers voiced — the English loan `plas` — is Māori's reading of the POSITIVE SIGN, and the
-    //      note's conclusion holds for that position: the loan carries /l/ and /s/, which this inventory lacks,
-    //      so the g2p would emit [pa] and silence is better than a confidently wrong syllable.
+    //      ⚠ THIS IS NOT A SIGN-vs-OPERATOR LEXICAL CONTRAST IN MĀORI, and claiming it was ko's 더하기/마이너스
+    //      split would be importing another language's structure. Korean has TWO attested words, one per job.
+    //      Māori has ONE native word plus a GAP: `tāpiri` is a transitive verb meaning append / sum, so its
+    //      semantics reach the OPERATION and not the positive sign, and no native word for the sign turned up at
+    //      all. The asymmetry lives in what `tāpiri` MEANS, not in a distinction Māori draws.
     //
-    //      It says nothing about `3 + 4`, and for THAT position mi_nz has a native, sayable, well-attested word:
+    //      ⚠ AND WHERE A REGISTER IS BORROWED, THE SOURCE'S OWN CONFLATIONS COME WITH IT. English spells both
+    //      jobs `plus`, so a borrowing register has no reason to split them — the loan the recordings show
+    //      (`plas`, both speakers, on `+30°C`) most likely covers BOTH positions in speech. That is precisely why
+    //      the sign arm is left silent rather than given `tāpiri`: the attested reading there is the loan, and
+    //      the loan is unsayable in this inventory (/l/, /s/ → [pa]), while `tāpiri` would say "thirty degrees
+    //      APPEND".
     //
-    //        `tāpiri` ×38 TOKEN   "nāna i tāpiri" (he ADDED) · "i tāpiritia ia ki te rārangi" (was ADDED to the
-    //                             list) — the addition verb, built from Māori phonemes throughout
+    //      What `tāpiri` is good for is the arithmetic sense, and that IS attested on quantities:
     //
-    //      So the operator arm reads and the sign arm stays silent, which is the same division of labour as
-    //      ko's 더하기 vs 마이너스 and vi's trừ vs âm. ⚠ AND THE NATIVE WORD IS NOT A SUBSTITUTE FOR THE LOAN: it
-    //      is the word for a different job. Using `tāpiri` for `+30°C` would say "thirty degrees ADD", which is
-    //      why that arm is left alone rather than filled with it.
+    //        ×38 TOKEN in mi_nz  "nāna i tāpiri" (he ADDED) · "i tāpiritia ki te rārangi" (was ADDED to the list)
+    //        mi.wikipedia        "te tāpiri i ngā rahinga whenua me rahinga wai" — the SUM of the land and water
+    //                            areas · "kāore pea te tāpiri i ngā tatau … e ōrite ki te tapeke" — the sum of
+    //                            the counts may not EQUAL the total  (which also corroborates `rite`, below)
+    //
+    //      ⚠ IT IS AN INFERENCE FROM THE WORD'S MEANING, NOT AN ATTESTATION IN THE SLOT. mi_nz contains no
+    //      arithmetic expression, so there is no recording of a Māori speaker reading `3 + 4`, and there is no
+    //      claim here that one would say `tāpiri` rather than the loan. What is claimed is narrower: where the
+    //      loan cannot be pronounced, a native word whose sense is exactly this operation is the best available
+    //      reading, and unlike [pa] it is not a wrong syllable.
     //
     //      Digits required on BOTH sides, so a UTC offset or a signed temperature cannot reach this rule.
     s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 tāpiri ");
