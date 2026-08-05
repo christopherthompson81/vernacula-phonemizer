@@ -3252,3 +3252,100 @@ own equals word) and is the strongest confirmation shape this issue has produced
 
 Gates: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across 0/67; corpus diff 0 changed for eleven of
 the fourteen ampersand languages and 1 each for am/sw/el, every change read.
+
+## Run 47 — 2026-08-04 — #654: the residual worked down, and where it genuinely stops
+
+    === signs still DROPPED, fleet-wide (#654) ===
+      minus         2/67   am my            (+7 intentional: gu kn mi mr nl ta yue)
+      plus          0/67                    (+1 intentional: mi)
+      plus-minus   14/67
+      divide        4/67   ff ha om zu
+      degrees       1/67   mi
+      equals · less-than · greater-than · times · ampersand · exponent · currency · percent    0/67
+
+### 📌 THE GATES NOW DISTINGUISH INTENT FROM OMISSION
+
+`ACCEPTED_SIGN_SILENCE` (defects.ts) is the synthetic-probe counterpart of `ACCEPTED_SILENT`, and the difference
+is the unit: the older one names CORPUS LINES ("this sentence's hyphen is a designation"), this one names a whole
+CLASS for a language ("no reading of this sign is shippable here"). Three languages had a permanently red
+`sign classes` line for reasons already argued in their own files, which left the line unable to report a
+REGRESSION — its only job. `review.ts` now prints `INTENT` and passes; `coverage.ts` counts them in a separate
+column and prints the reason, never subtracting silently.
+
+⚠ It is deliberately short: only a refusal ARGUED IN THE LANGUAGE'S OWN FILE qualifies. "No rule yet" keeps
+failing, because quieting a TODO is the one use of this mechanism that would make the audit worse.
+
+### ⚠ THE MINUS CLASS TURNS ON ONE MEASURABLE QUESTION
+
+Not sourcing — **does the corpus contain `word · space · hyphen · digit`?** That shape is identical to a genuine
+`was -5`, so no guard can separate them; telling them apart needs a lexicon. Measured across every candidate:
+
+| verdict | languages | instance |
+|---|---|---|
+| MUST DECLINE | gu | the bill `એચજેઆર -3` **and** the spaced ordinal range `ગોથિક શૈલી 10મી -11મી` |
+| | kn · ta · mr · hi | `ಎಚ್‌ಜೆಆರ್ -3` · `சந்திரயான் -1` · `चंद्रयान -1` |
+| | yue | `伊 爾 -76` — ⚠ AN ARTEFACT OF THE TRANSCRIPT (see below) |
+| | nl | every `-\d` is a score or a range |
+| SAFE, shipped | hu pl sr sw ml ne or te | zero such instances, and zero unguarded of any kind |
+
+Three guards do the rest: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately
+before (rejects closed designations), and **a digit ANYWHERE to the left** — the last for the SPACED range or
+score, which the fleet's usual guard misses because the character before the hyphen is a space. That gap cost a
+real defect in `th`, where a year range read as a subtraction.
+
+⚠ **AND THE CORPUS DIFF REJECTED TAMIL AFTER THE GUARDS PASSED IT.** The rule refused every range, score and
+closed designation, then read `சந்திரயான் -1` as *minus one*. Worse than a gap: `ACCEPTED_SILENT` already listed
+that exact instance as CORRECTLY silent, so the rule converted an accepted silence into an audible error.
+*A guard that looks complete is not evidence; the diff is.*
+
+⚠ **AND IT IS THE SAME SENTENCE IN FIVE LANGUAGES.** FLEURS is parallel, so the Chandrayaan designation appears
+in gu, hi, kn, mr and ta — which are **exactly** the five languages `ACCEPTED_SILENT` lists for `minus`. Recorded
+in defects.ts so the decision is not rediscovered five times.
+
+⚠ **AND yue's INSTANCE IS THE TRANSCRIPT, NOT THE LANGUAGE.** FLEURS spaces Han per character, so `Il-76` is
+stored as `伊 爾 -76` — letter, space, hyphen. Third time in this issue that per-character spacing changed an
+answer, after it hid Cantonese's `除以` entirely and then its `小於`/`大於`.
+
+### The best sources this run, all naming the sign rather than using the word
+
+    te  "రేడియల్ వేగాన్ని -5.5 కి.మీ./సె. … ఈ మైనస్ గుర్తు"      a signed number, then "this MINUS SIGN"
+    ne  "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)"           names the minus SIGN
+    ml  "പ്ലസ്-മൈനസ് ചിഹ്നം, ±, ഒന്നിലധികം അർത്ഥങ്ങളുള്ള …"       names the ± GLYPH — minus and ± in one quote
+    hu  "A két előjel a pluszjel (+) és a mínuszjel (−)"        names BOTH signs
+    sw  "Namba hasi … ni namba halisi ambayo ni pungufu ya 0"   the negative-number article
+    kk  "3-ке бөлінеді"                                        divisible BY 3, on a numeric operand
+
+### ⚠ THE FILM-TITLE TRAP CLOSES THE ISSUE AS IT OPENED IT
+
+± is now blocked on a mismatch rather than on sourcing: the two halves a language has often do not pair. `bn` has
+`যোগ` (an operation, "addition") and `ঋণাত্মক` (a polarity, "negative"); `ur` has `جمع` and `منفی`; `xh` has `plas`
+and `thabatha` ("to subtract"). ± marks a TOLERANCE, so it needs two SIGN names, and juxtaposing an operation with
+a polarity reads as neither.
+
+So I probed for the ± glyph's own NAME, which is what worked for `ml`. Two hits:
+
+    bn  প্লাস মাইনাস ×1     — in a FILMOGRAPHY list
+    kn  ಪ್ಲಸ್ ಮೈನಸ್ ×2      — "ಕಿರುಚಿತ್ರ ಪ್ಲಸ್ ಮೈನಸ್", the SHORT FILM *Plus Minus*
+
+**The German pilot's first tier-3 result was `größer als` ×2, both from the film *"Gott ist größer als Elvis"*.**
+Forty-odd runs later the last unsourced cell fails the same way, in two more languages. It is the most durable
+finding in the issue: *a title is a string with no sense, and existence checks cannot see the difference.*
+
+### Where it genuinely stops, with reasons
+
+| class | left | why it stops |
+|---|---|---|
+| `minus` | am | `ኔጋቲቭ` ×14 is the PHOTOGRAPHIC negative (`ፎቶ ኔጋቲቭ`), the rest is the moral sense; `ማይነስ` ×0; `ከዜሮ በታች` ×2 is "below zero", a temperature idiom that does not generalise to a bare `-5` |
+| | my | ⚠ NO FLEURS CORPUS AT ALL, so the "measured safe" argument every shipped language rests on is unavailable. Its evidence would have to come from the mined artifact |
+| `plus-minus` | 14 | the pairing mismatch above; the glyph's name is a film title where it appears at all |
+| `divide` | ff ha om zu | ⚠ all four token counts were the WRONG SENSE, and I claimed otherwise one commit earlier: `feccere` is "part/region", `rabawa` is the fair-division economics article, `qooduu` is "divide into two types", `ahlukanise` is "severed the veins" |
+| `degrees` | mi | `pūtu` is BOOTS. And the inventory wall stands: `Celsius` carries /s/, which Māori lacks, exactly as `plus` and `minus` do |
+
+⚠ **THE MĀORI INVENTORY WALL IS NOW THREE CELLS DEEP** — plus, minus and degrees — and it is one fact, not three
+gaps: the attested reading in each is an English loan whose phones Māori does not have. `tāpiri` shows the shape
+of the only escape (a native word whose sense is exactly the operation), and there is no such word for a polarity
+marker or for a temperature scale.
+
+Gates for this run, every language separately: tsc PASS; 208 files / 2951 tests; audit 0 defective cells across
+0/67; corpus diff 0 changed for hu pl sr ml ne or te sl kk af ca cy ga zu hu az, and the two non-zero results
+read (ta reverted; sw's single change is the earlier ampersand work).
