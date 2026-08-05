@@ -273,6 +273,13 @@ export function normalizeKorean(input: string): string {
     relational(">", (y) => `${y}보다 크다`);
     s = s.replace(/\s?÷\s?/gu, " 나누기 ");
 
+    //     THE AMPERSAND, which was dropped outright, is not an arithmetic sign and is not Korean: it is a
+    //     Latin-script printing ligature, and in Korean text it occurs only inside a Latin run — R&B, P&R.
+    //     So its reading is a LOAN and not native vocabulary, which is why it is 앤드 rather than the native
+    //     conjunction 및. `ja` already ships exactly this (`&` → アンド), so the fleet has the precedent and the
+    //     register question is settled by it.
+    s = s.replace(/\s?&\s?/gu, " 앤드 ");
+
 
     // 5) RANGES (×12 for these three marks). The mark is in no table, so it was dropped outright and
     //    1894~1895 read as two bare years. 에서 is the standard reading of 물결표 between two numbers.

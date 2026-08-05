@@ -200,8 +200,68 @@ export function normalizeTurkish(input: string): string {
     s = s.replace(/(\d)\s?°/gu, "$1 derece");
 
     // 6) SIGNS. `UTC+1` ×1 — the sign vanished entirely.
+    // ⚠ ± AND THE MINUS ARE HERE ON THE STRENGTH OF THE SAME SOURCE AS THE RELATIONAL RULES BELOW (#654):
+    //    tr.wikipedia's arithmetic article names the subtraction sign outright — «Çıkarma sembolü "eksi" (-) ile
+    //    ifade edilir» — and `eksi` is ×64 token / 9 articles. With `artı` already in this file, ± is then the
+    //    juxtaposed pair every language that reads it uses (bg/da/is/nb/ro/sv), at no further sourcing cost.
+    //    ± first, since it is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " artı eksi ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 artı $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1artı $2");
+    s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1eksi $2");
+
+    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ TURKISH IS THE FIRST LANGUAGE WHERE THE READING REQUIRES CASE
+    //     MORPHOLOGY ON AN OPERAND, and the source states every reading in full. tr.wikipedia's arithmetic
+    //     article writes the sentence and the notation side by side:
+    //
+    //       "beş artı üç sekize eşittir"        5 + 3 = 8     — sekiz → sekizE, the DATIVE
+    //       "bir artı bir eşittir iki"          1 + 1 = 2     ⚠ AND THE SAME ARTICLE, INFIX AND CASE-FREE
+    //       "iki artı iki eşittir dört"         2 + 2 = 4     ⚠ likewise
+    //       "yirmi bölü beş dört eder"          20 / 5 = 4    — `bölü` is INFIX, no case
+    //       "6 bölü 3 kaçtır?"                                — and again with digits
+    //       "∣b∣'den kesinlikle küçüktür"                      ⚠ the comparative takes the ABLATIVE
+    //
+    //     ⚠ SO THE EQUALITY HAS TWO ATTESTED READINGS AND THE SIMPLER ONE WINS. `sekize eşittir` is dative and
+    //     postposed; `eşittir iki` is infix with no case at all, and both come from the same article. The infix
+    //     form is shipped because it does not require inflecting an operand — which matters beyond tidiness: a
+    //     case-marked reading can only be built for an operand the rule can SPELL, so the dative version would
+    //     have left `x = y` unread while the infix version handles any operand. Choosing between two attested
+    //     forms on what the rule can actually construct is a criterion the earlier languages never needed.
+    //
+    //     The comparatives have no such alternative — the ablative is the construction — so `<` and `>` are
+    //     postposed and fire only between two numbers, leaving the sign as it was where they cannot.
+    //
+    //     ⚠ WHICH MEANS THE RULE MUST INFLECT A NUMBER IT SPELLS ITSELF. The suffix's vowel is chosen by
+    //     harmony from the stem's LAST vowel and its consonant assimilates to a voiceless stem final — both
+    //     properties of the WORD — so the digits are spelled here and the suffix built from the result. The
+    //     harmony classes come from this file's existing `VOWEL` data rather than a second hand-written table.
+    //     Verified across the whole numeral vocabulary (bir…milyar): üçten, dörtten, altıdan, kırktan, yüzden.
+    const lowVowel = (stem: string): string => {
+        const v = lastVowelOf(stem);
+        return v !== undefined && "aıou".includes(v) ? "a" : "e";
+    };
+    /** Ablative -DEn: the consonant assimilates to a voiceless stem final (üç → üçten, dört → dörtten). */
+    const ablative = (w: string): string => {
+        const head = w.slice(0, w.lastIndexOf(" ") + 1), stem = w.slice(w.lastIndexOf(" ") + 1);
+        const d = "pçtkfhsş".includes(stem[stem.length - 1]!) ? "t" : "d";
+        return `${head}${stem}${d}${lowVowel(stem)}n`;
+    };
+    const trWord = (t: string): string => numberToWords(Number(t)) || t;
+    const OPERAND = String.raw`\d+`;
+    const postposed = (sign: string, inflect: (w: string) => string, verb: string): void => {
+        s = s.replace(new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),
+            (_m, a: string, b: string) => `${trWord(a)} ${inflect(trWord(b))} ${verb}`);
+    };
+    postposed("<", ablative, "küçüktür");
+    postposed(">", ablative, "büyüktür");
+    s = s.replace(/\s?=\s?/gu, " eşittir ");
+    s = s.replace(/\s?÷\s?/gu, " bölü ");
+
+    //     THE AMPERSAND, dropped before, is a Latin-script printing ligature rather than an arithmetic sign —
+    //     but Turkish IS a Latin-script language, so unlike `ko`/`ja` (where the symbol arrives inside a Latin
+    //     run and takes a LOAN reading, 앤드 / アンド) the natural reading here is the language's own conjunction.
+    //     `nl` already reads `&` as its native `en` on the same grounds.
+    s = s.replace(/\s?&\s?/gu, " ve ");
 
     // 7) INITIALISMS, LAST of the letter rules: it must run after step 1 (else MÖ → *me ö*) and after step 2
     //    (else an abbreviation's letters are spelled). Roman numerals need no sequencing here — `tr` is not
