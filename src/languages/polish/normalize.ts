@@ -341,7 +341,65 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
+    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    //    (1000–1300), a SCORE (1977-1981), a DESIGNATION (ił-76) or a clock range. The rule is written anyway on
+    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
+    //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
+    //    what verifies that rather than the guard looking plausible.
+    //
+    //    THREE GUARDS, each rejecting a shape this corpus actually contains:
+    //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
+    //      · a letter or digit IMMEDIATELY BEFORE — rejects `ił-76` and closed ranges
+    //      · a digit ANYWHERE to the left — rejects the SPACED range or score (`26 - 00`), which the fleet's
+    //        usual guard misses because the character before the hyphen is a SPACE. That gap cost a real defect
+    //        in th, where a year range was read as a subtraction.
+    //
+    //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` is the same shape as a genuine
+    //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
+    //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
+    //    not about the guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
+    // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
+    //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
+    //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
+    //    + rule, since ± is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " plus minus ");
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+
+    // 10b) ± AND THE RELATIONAL AND DIVISION SIGNS (#654). ± juxtaposes the `plus` from the rule above with
+    //      `minus`, which is simply the Polish name of the sign; the juxtaposed form is what every language that
+    //      already reads ± uses (bg/da/is/nb/ro/sv).
+    s = s.replace(/±/gu, " plus minus ");
+
+    //      ⚠ POLISH IS WHERE THE REGISTER RESTRICTION MADE THE ANSWER WORSE, and that is the finding worth
+    //      keeping. `attest.ts --context "matematyka arytmetyka dzielenie"` returned `równa się` ABSENT — because
+    //      pl.wikipedia's Dzielenie article is built out of LaTeX and never spells a reading out. Dropping the
+    //      restriction found it immediately, in a mountain-prominence article of all places:
+    //
+    //        "«Sucha wybitność» Mauna Kea równa się «mokrej wybitności» (4205 m) powiększonej o głębokość …"
+    //        "«Sucha wybitność» Aconcagui równa się mokrej wybitności (6962 m) plus głębokość …"
+    //
+    //      — a quantitative equality between measured values, with `plus` in the same sentence. The tier-4 rule
+    //      is therefore NOT "search maths articles": it is *find the article class that has to state the
+    //      quantity*, which is the same lesson `attest.ts`'s header records for ff's `kaaree` (place articles,
+    //      not scholarly maths, because a place cannot state its subject without an area figure).
+    //
+    //      ⚠ AND `równa` IS THE SUBSTRING TRAP, SEVENTH INSTANCE: ×0 TOKEN / ×25 SUBSTRING in pl_pl, and all 25
+    //      are `porównaniu` / `porównano` / `porównać` — the comparison verb, not the equality adjective.
+    //
+    //      The comparatives come from the corpus and take `niż` rather than `od`. Both are attested
+    //      (`mniejsze niż` ×2, `mniejsze od` ×3, `większe niż` ×4) and they are not interchangeable here: `od`
+    //      governs the GENITIVE while `numbers.ts` emits nominative cardinals, so `7 < 3` would read
+    //      *mniejsze od trzy* with the wrong case. `niż` takes the nominative. Same repair Russian needed.
+    //
+    //      `podzielić przez` is the infinitive, which is how the division is dictated in Polish ("sześć
+    //      podzielić przez trzy") and is what the wiki attests (×2, plus `dzielone przez` ×1); the participle
+    //      `podzielone` is ×0 token / ×0 substring in the corpus, so the attested form is the one shipped.
+    s = s.replace(/\s?=\s?/gu, " równa się ");
+    s = s.replace(/\s?<\s?/gu, " mniejsze niż ");
+    s = s.replace(/\s?>\s?/gu, " większe niż ");
+    s = s.replace(/\s?÷\s?/gu, " podzielić przez ");
 
     // 11) FRACTIONS — feminine, agreeing with the elided *część*: 1/5 is "jedna piąta". Digits on both
     //     sides only, so the corpus's " / " in "lokalizacji i / lub płeć" is untouched.

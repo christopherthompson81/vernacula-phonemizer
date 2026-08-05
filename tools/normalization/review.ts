@@ -28,7 +28,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
-import { DROPPABLE } from "./defects.ts";
+import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -234,21 +234,7 @@ const say = (t: string): string => { try { return (phonemize(t, lang) as string)
  *     corpus actually contains one.
  *   · nothing else. Every other DROPPABLE class is below.
  */
-const signCases: [string, string, RegExp][] = [
-    ["minus", "-5", /[-−]/gu],
-    ["plus", "+5", /\+/gu],
-    ["plus-minus", "±5", /±/gu],
-    ["ampersand", "A & B", /&/gu],
-    ["equals", "x = y", /=/gu],
-    ["less-than", "5 < 6", /</gu],
-    ["greater-than", "6 > 5", />/gu],
-    ["times", "6 × 6", /×/gu],
-    ["divide", "6 ÷ 3", /÷/gu],
-    ["exponent", "5 km²", /²/gu],
-    ["currency", "$5", /\$/gu],
-    ["percent", "25 %", /%/gu],
-    ["degrees", "20 °C", /°/gu],
-];
+const signCases = SIGN_CASES;
 /**
  * EVERY `DROPPABLE` CLASS MUST BE PROBED HERE, and this asserts it rather than trusting the comment above.
  *
@@ -288,14 +274,26 @@ const CLASS_PROBES: Readonly<Record<string, readonly string[]>> = {
 }
 
 const dropped: string[] = [];
+const accepted: string[] = [];
+// ⚠ AN INTENTIONAL SILENCE IS NOT A FAILURE, AND MARKING IT SO MADE THE LINE USELESS. Three languages had a
+// permanently red `sign classes` line for reasons argued at length in their own files, which meant the line
+// could no longer tell anyone whether something had REGRESSED — the only job it has. Those exemptions live in
+// ACCEPTED_SIGN_SILENCE with their reasoning; everything else still fails, because "no rule yet" is a TODO.
+const exempt = ACCEPTED_SIGN_SILENCE[lang] ?? {};
 console.log(`\n── sign classes (read these; a DROPPED line is a hard fail) ──`);
 for (const [name, probe, strip] of signCases) {
     const full = say(probe), bare = say(probe.replace(strip, ""));
     const isDropped = full === bare;
-    if (isDropped) dropped.push(name);
-    console.log(`  ${name.padEnd(13)} ${probe.padEnd(8)} ${isDropped ? "DROPPED" : "       "}  ${full.slice(0, 46)}`);
+    const why = exempt[name];
+    if (isDropped && why !== undefined) accepted.push(name);
+    else if (isDropped) dropped.push(name);
+    const tag = isDropped ? (why === undefined ? "DROPPED" : "  INTENT") : "       ";
+    console.log(`  ${name.padEnd(13)} ${probe.padEnd(8)} ${tag}  ${full.slice(0, 46)}`);
 }
 note("sign classes", dropped.length === 0, dropped.length === 0 ? "none dropped" : `DROPPED: ${dropped.join(" ")}`);
+// PRINTED, NEVER WITHHELD — the same rule the accepted-cells baseline follows: an exemption nobody can see is
+// indistinguishable from a bug nobody has found.
+for (const name of accepted) console.log(`  ⓘ ${name} is INTENTIONALLY silent — ${exempt[name]!}`);
 
 /**
  * ⚠ THE `exponent` LINE IS THE WEAKEST OF THE THIRTEEN — READ IT, DO NOT TRUST ITS MARKER.

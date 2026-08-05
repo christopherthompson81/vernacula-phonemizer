@@ -38,6 +38,7 @@
  * DNA, GPS, COVID…). A Latin→Malayalam letter-name table would be invented data.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import {
     cliticToWords,
@@ -236,8 +237,87 @@ export function normalizeMalayalam(input: string): string {
     //   +30°C  →  `… m a s a ŋ l i l p l a s v u p o d e d i ɡ …`  plus + മുപ്പതു, 1 of 1
     // ★ Like ta, gu and mi, and unlike en/hi/vi/te/xh/am/ne, ml says the MEASUREMENT plus. പ്ലസ് reads
     // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
+    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
+    //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
+    //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
+    //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
+    //    corpus, not about the guard.
+    //
+    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
+    //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
+    //    the fleet's usual guard misses — the gap that cost a real defect in th).
+    //
+    //    SOURCED, AND THE SAME SENTENCE GIVES ± DIRECTLY: ml.wikipedia writes "പ്ലസ്-മൈനസ് ചിഹ്നം, ±,
+    //    ഒന്നിലധികം അർത്ഥങ്ങളുള്ള ഒരു ഗണിത…" — the PLUS-MINUS SIGN, ±, a mathematical symbol with several
+    //    meanings. So both the minus word (x16 / 8 articles) and the ± pairing come from one quote naming the
+    //    glyph, which is the strongest shape tier 4 takes.
+    //
+    //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+    s = s.replace(/±/gu, " പ്ലസ് മൈനസ് ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "മൈനസ് ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
+
+    // THE DIVISION AND COMPARISON SIGNS (#654). The EQUALITY IS DELIBERATELY LEFT DROPPED — see the end.
+    //
+    // ⚠ THE PARALLEL-CORPUS FORM IS A SUBORDINATE CLAUSE, NOT A READING, and Malayalam is the clearest case of
+    // why a hit in FLEURS's aspect-ratio sentence is a lead rather than an answer. That sentence gives
+    // "പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ", and both halves are inflected FOR THAT SENTENCE:
+    //
+    //   ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ, and -ുമ്പോൾ IS the word "when" (historically -ഉം + പോൾ
+    //   "time"). So the form means "when dividing" — a temporal SUBORDINATOR, subordinated here to the main
+    //   predicate ആണെന്ന് പറയാം ("can be said to be"). Between two operands there is no main clause for it to
+    //   attach to, so `6 ÷ 3` would read "six when-divided three", a fragment awaiting a predicate.
+    //
+    //   ഉപയോഗിച്ച് ("using") is a converb, not the instrumental case -കൊണ്ട് that Malayalam puts on a divisor.
+    //   The translator wrote a two-clause paraphrase of the operation, not a reading of the notation.
+    //
+    // What the sentence DOES establish, with certainty, is the ROOT: ഹരി-. The form comes from ml.wikipedia's
+    // arithmetic article, which names the sign against the glyph in a section heading —
+    //
+    //     === ഹരണം (÷ or /) ===        then  "ഗുണനത്തിന്റെ വിപരീത ക്രിയയാണ് ഹരണം"
+    //
+    // — so ഹരണം (×12 token / 2 articles) is the sign's own NAME, and a sign name reads infix: `el` does exactly
+    // this with ίσον, `ja` with イコール, and `ta`'s wiki writes the parallel Dravidian nominal out in the slot
+    // ("a வகுத்தல் b"). ⚠ That last step is a fleet PATTERN rather than an attested "a ഹരണം b" string, and is
+    // marked as such: the naming citation is the evidence, the infix placement is the inference.
+    //
+    // ⚠ AND ഹരണം'S SIX CORPUS HITS ARE ALL INSIDE അപഹരണം, "ABDUCTION" — the substring trap, and the funniest
+    // instance of it so far. The corpus contributes the root and nothing else.
+    //
+    // ⚠ THE COMPARATIVE MORPHEME CANNOT BE TOKEN-COUNTED AT ALL. -എക്കാൾ ("than") is BOUND: it appears only
+    // fused (കൾച്ചർ ഷോക്കിനെക്കാൾ, പരമ്പരാഗത ഭാഷകളെക്കാൾ), so its token count is ×0 by construction, not by
+    // absence — the agglutinative counterpart of the ZWNJ false negative Persian produced. What IS countable is
+    // the head it governs: കൂടുതൽ ×182 token, കുറവ് ×12. Postposed, so the comparison cannot read backwards.
+    //
+    // Emitted UNFUSED, as ta's accusative is, and for the same reason: fusing needs the numeral spelled here
+    // plus its sandhi. The phones are unchanged; the tokenizer sees a boundary Malayalam would not write.
+    s = postposedSign(s, "<", "എക്കാൾ കുറവ്");
+    s = postposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
+    s = s.replace(/\s?÷\s?/gu, " ഹരണം ");
+
+    // THE EQUALITY, and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the Polish lesson, repeated exactly.
+    // This rule was first left DROPPED on the finding that സമം, തുല്യം and ഹരിച്ചാൽ were ×0 in both corpus and
+    // wiki. That was measured with `attest.ts --context "ഗണിതം അങ്കഗണിതം ഹരണം"`, i.e. inside maths articles, and
+    // those articles write the notation instead of reading it. Dropping the restriction found the word at once:
+    //
+    //   `തുല്യം`  ×11 token / 11 ARTICLES   "കിലോഗ്രാമിന്റെ പിണ്ഡത്തിന് തുല്യം" — EQUAL TO the mass of the
+    //                                       kilogram; "രാജസൂയത്തിനു തുല്യം ഫലം" — a result EQUAL TO the Rajasuya
+    //   `സമമാണ്`  ×19                       the predicative form, "is equal"
+    //
+    // ⚠ AND `സമം` IS THE WRONG WORD FOR THIS SLOT, which is why probing it first was misleading. It is ×22 but
+    // means "in equal MEASURE" adverbially ("ഇവ സമം കഷായം" — these in equal parts, "10 ഗ്രാം സമം നെയ്യും") and is
+    // separately the name of a rhetorical figure ("സമം എന്ന അലങ്കാരം"). Its Tamil, Kannada and Telugu cognates
+    // (சமம், ಸಮ, సమానం) ARE the equality word in those languages — all four are the same Sanskrit loan *sama* —
+    // so a sister-language inference would have picked exactly the wrong member of the set. The cognate tells
+    // you where to look; it does not tell you which sense the borrowing settled into.
+    //
+    // ⚠ POSTPOSED, because the attested construction is DATIVE + തുല്യം: the standard comes first
+    // (`പിണ്ഡത്തിന് തുല്യം`), so `A = B` is "A B-ന് തുല്യം". The dative is emitted unfused for the same reason
+    // the comparative's -എക്കാൾ is, and with the same known limitation.
+    s = postposedSign(s, "=", "ന് തുല്യം");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");
 

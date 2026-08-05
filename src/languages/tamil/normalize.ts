@@ -21,6 +21,7 @@
  * inventory is entirely ASCII — so there is no digit fold here. Same negative result as Persian.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalStem } from "./numbers.ts";
 
@@ -300,8 +301,50 @@ export function normalizeTamil(input: string): string {
     //     Both arms, so the sign is read whether it is glued to a label (`UTC+1`) or opens the quantity.
     //     After the decimal step and before degrees: the plus attaches to a number that later rules still
     //     need to see as a bare numeral.
+    // ⚠ ± FROM espeak's DICTSOURCE — A TIER THIS ISSUE HAD NEVER QUERIED (#654). `ta_list` carries the sign
+    //    itself with its reading, and it is the same pair the wiki attests:
+    //
+    //      ta_list:  ±   k'u:t.t.Vl||k'Vz.ittVl     = கூட்டல் கழித்தல்  (addition subtraction)
+    //      ta.wikipedia: `கூட்டல் கழித்தல்` ×1
+    //
+    //    Two independent tiers agreeing on a reading neither could have settled alone — the wiki hit is ×1,
+    //    which is a lead and not a finding, and espeak's entry is a hand-authored pronunciation rather than
+    //    running prose. Together they are the sourcing this cell needed.
+    //
+    //    ⚠ AND THE SAME FILE CORROBORATES TWO READINGS ALREADY SHIPPED HERE: `= sVmVm // சமம்` and
+    //    `÷ vVgUttVl // வகுத்தல்` are exactly what the wiki's quoted readings gave (see step 8b). Independent
+    //    confirmation of a per-language judgement, from a source consulted after the fact.
+    //
+    //    Both halves are OPERATION nouns rather than polarity words, which is why ± is shippable here while the
+    //    bare minus is not (see ACCEPTED_SIGN_SILENCE): ± names a pair of operations applied to a tolerance, and
+    //    `கழித்தல்` reading a bare `-5` would state a subtraction where the sign marks polarity.
+    s = s.replace(/±/gu, " கூட்டல் கழித்தல் ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
+
+    // 8b) THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ ta.wikipedia QUOTES THE READING BESIDE THE NOTATION, which
+    //     is the strongest shape tier 4 takes, and it settles the rule shape for two of the four at once:
+    //
+    //       「"3 + 2 = 5" அதாவது, "3 கூட்டல் 2 சமம் 5"」        the equality read INFIX, operands in place
+    //       "a வகுத்தல் b என்பது கீழுள்ளவாறு எழுதப்படுகிறது"    the division read INFIX (வகுத்தல் ×105 / 10 arts)
+    //       "அந்த x 1 ஐ விட அதிகமாக இருக்க வேண்டும்"           x must be GREATER THAN 1 — postposed, with ஐ
+    //
+    //     ⚠ SO TAMIL MIXES THE TWO SHAPES, and that is a fact about the constructions rather than about Tamil
+    //     being SOV: சமம் and வகுத்தல் are nominal ("equal", "division") and sit between the operands, while the
+    //     comparison is a postposition — விட follows the standard, so `A < B` is "A B ஐ விட குறைவாக". An infix
+    //     comparative would read the comparison backwards, exactly as in ja/ko; an infix equality is correct.
+    //     Corpus corroboration: `சமம்` ×2 ("இந்த இயல்பு விகிதத்திற்கு சமம்"), `விட அதிகமாக` ×3, `வகுத்தல்` ×2
+    //     from FLEURS's parallel division sentence ("பன்னிரண்டால் வகுத்தல்").
+    //
+    //     ⚠ THE ACCUSATIVE ஐ IS EMITTED AS ITS OWN TOKEN, not fused to the operand. Tamil writes it fused
+    //     (மூன்றை), and fusing would mean spelling the numeral here and applying its sandhi — the machinery `tr`
+    //     and `ko` needed. Left unfused deliberately: the phones are the same either way, the tokenizer sees a
+    //     word boundary where Tamil would have none, and that is a prosodic imperfection rather than a wrong
+    //     reading. Recorded as a known limitation, not as done.
+    s = postposedSign(s, "<", "ஐ விட குறைவாக");
+    s = postposedSign(s, ">", "ஐ விட அதிகமாக");
+    s = s.replace(/\s?=\s?/gu, " சமம் ");
+    s = s.replace(/\s?÷\s?/gu, " வகுத்தல் ");
 
     // 9) DEGREES. One bare `35 ° W` plus the spelled-out டிகிரி elsewhere; the scale letter is matched
     //    case-insensitively because the corpus writes both C and c.

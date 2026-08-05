@@ -85,7 +85,7 @@ export function normalizeMaori(input: string): string {
     //    `&amp;` would become "me amp ;". The corpus's two instances are the fleet's usual pair, `B&B` and
     //    `Arts & Sciences`; before this the sign was dropped outright and `B&B` read as two bare consonants.
     //    Spaced on both sides deliberately — `B&B` is two initialisms, and joining them would make one token.
-    const s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
+    let s = input.replace(/&amp;/giu, "&").replace(/&/gu, " me ");
     // 1b) ⚠ THE PLUS IS ATTESTED AND DELIBERATELY NOT SHIPPED, WHICH IS A DIFFERENT LIMIT FROM "UNSOURCED".
     //     The corpus's `(UTC+1)` and `+30°C` both drop the sign. The audio ANSWERS what the readers say —
     //     decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft over mi_nz/train:
@@ -94,14 +94,124 @@ export function normalizeMaori(input: string): string {
     //                 MEASUREMENT plus, like ta and gu and unlike en/hi/vi/te/xh/am
     //     So the word is known: the speakers use the English "plus".
     //
-    //     ⚠ AND THIS ENGINE CANNOT SAY IT. Māori has no /l/ and no /s/, so the g2p drops both letters:
-    //     `plus` → [pu], `plas` → [pa]. There is NO Māori spelling that reproduces the attested phones, and
-    //     emitting [pa] for a plus sign would be a confidently wrong syllable where there is currently silence
-    //     — the one outcome this repo ranks below a missing reading. (The same inventory gap already shows in
-    //     `Whitehall` → [ɸiteha].)
-    //     A native maths word was NOT substituted: the recordings say the readers use the loan, so choosing a
-    //     different word because it happens to be pronounceable would be inventing a reading the evidence
-    //     contradicts. Recorded here so the next pass does not re-derive the sourcing and reach for [pa].
+    //     ⚠ THIS PARAGRAPH USED TO SAY THE ENGINE COULD NOT SAY IT, AND #663 MADE THAT OBSOLETE. The claim was
+    //     that Māori has no /l/ and no /s/, so the g2p reduces `plus` → [pu] and `plas` → [pa], and that
+    //     emitting a wrong syllable is worse than silence. Both halves were true — of the NATIVE g2p path.
+    //
+    //     Since #663 this engine ROUTES a word it cannot spell to English (`createMaori` takes an injected
+    //     reader, and `isNativeWord` walks the word exactly as the g2p does). `plus` fails that walk at the
+    //     `l`, so it never reaches the native path at all:
+    //
+    //       plus → [plˈʌs]      minus → [mˈaᶦnəs]      Celsius → [sˈɛɫsiʲəs]      tāpiri → [taːpiɾi]
+    //
+    //     ⚠ AND THE ROUTED PHONES ARE THE ATTESTED ONES. The decode above is `p l a s`, i.e. the readers
+    //     producing ENGLISH phones for an English loan — which is what routing reproduces and what no Māori
+    //     spelling could. The old note reached the right conclusion from the facts it had; the facts changed
+    //     underneath it, in this same issue, and the refusal outlived them. Left in place rather than deleted
+    //     because "the engine cannot say it" is exactly the kind of claim that stops the next attempt.
+    //
+    //     THE NATIVE WORD IS STILL NOT A SUBSTITUTE, and that part stands: the recordings say the readers use
+    //     the loan for the SIGN, so `tāpiri` reads the OPERATOR (see below) and the loan reads the sign. Two
+    //     positions, two readings, both attested.
+    //     ⚠ THE MINUS IS THE SAME LOAN BY PARITY, AND MARKED AS AN INFERENCE. mi_nz contains no negative
+    //     quantity, so there is no decode for it — what is attested is that this reader used the English loan
+    //     for the sign in the one position the corpus does contain. The native alternative is worse than for
+    //     the plus: `tango` ("take") is the SUBTRACTION verb, so `-5` would read "take five", stating an
+    //     operation where the sign marks polarity. Guarded like the fleet's minus rules, plus the digit-left
+    //     test for a spaced range; mi_nz has no `word -digit` instance (measured), so the rule is safe here.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
+    // 1aa) THE PLUS BETWEEN TWO NUMBERS → tāpiri (#654). The note above declines the plus outright; this narrows
+    //      that refusal to the position the evidence actually covers, and the argument is NOT the one an earlier
+    //      draft of this comment made.
+    //
+    //      ⚠ THIS IS NOT A SIGN-vs-OPERATOR LEXICAL CONTRAST IN MĀORI, and claiming it was ko's 더하기/마이너스
+    //      split would be importing another language's structure. Korean has TWO attested words, one per job.
+    //      Māori has ONE native word plus a GAP: `tāpiri` is a transitive verb meaning append / sum, so its
+    //      semantics reach the OPERATION and not the positive sign, and no native word for the sign turned up at
+    //      all. The asymmetry lives in what `tāpiri` MEANS, not in a distinction Māori draws.
+    //
+    //      ⚠ AND WHERE A REGISTER IS BORROWED, THE SOURCE'S OWN CONFLATIONS COME WITH IT. English spells both
+    //      jobs `plus`, so a borrowing register has no reason to split them — the loan the recordings show
+    //      (`plas`, both speakers, on `+30°C`) most likely covers BOTH positions in speech. That is precisely why
+    //      the sign arm is left silent rather than given `tāpiri`: the attested reading there is the loan, and
+    //      the loan is unsayable in this inventory (/l/, /s/ → [pa]), while `tāpiri` would say "thirty degrees
+    //      APPEND".
+    //
+    //      What `tāpiri` is good for is the arithmetic sense, and that IS attested on quantities:
+    //
+    //        ×38 TOKEN in mi_nz  "nāna i tāpiri" (he ADDED) · "i tāpiritia ki te rārangi" (was ADDED to the list)
+    //        mi.wikipedia        "te tāpiri i ngā rahinga whenua me rahinga wai" — the SUM of the land and water
+    //                            areas · "kāore pea te tāpiri i ngā tatau … e ōrite ki te tapeke" — the sum of
+    //                            the counts may not EQUAL the total  (which also corroborates `rite`, below)
+    //
+    //      ⚠ IT IS AN INFERENCE FROM THE WORD'S MEANING, NOT AN ATTESTATION IN THE SLOT. mi_nz contains no
+    //      arithmetic expression, so there is no recording of a Māori speaker reading `3 + 4`, and there is no
+    //      claim here that one would say `tāpiri` rather than the loan. What is claimed is narrower: where the
+    //      loan cannot be pronounced, a native word whose sense is exactly this operation is the best available
+    //      reading, and unlike [pa] it is not a wrong syllable.
+    //
+    //      Digits required on BOTH sides, so a UTC offset or a signed temperature cannot reach this rule.
+    s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 tāpiri ");
+
+    //     ⚠ THE SIGN ARM RUNS AFTER THE OPERATOR ARM, and the order is load-bearing: `3 + 4` has a space before
+    //     the `+`, so a leading-sign pattern matches it and read *toru plus whā*, taking the operator case away
+    //     from `tāpiri`. The digit-flanked rule above claims the operation first; whatever `+` survives is a
+    //     sign. Both arms are needed — `(\S)\+` for the glued `UTC+1`, which the decode above shows voiced,
+    //     and the boundary arm for `+5` / `+30°C`.
+    //     ⚠ ± IS FREE NOW AND WAS NOT BEFORE, because it needs two SIGN names and this file had neither until the
+    //     routing above supplied them. Both halves are the English loans the decode attests, both reach the
+    //     English reader by the same route, and the juxtaposed form is the one the fleet uses.
+    s = s.replace(/±/gu, " plus minus ");
+    s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plus ");
+    s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
+
+    // 1b) THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from mi_nz — and unlike the plus above,
+    //     ⚠ ALL FOUR READINGS ARE NATIVE MĀORI WORDS THIS ENGINE CAN ACTUALLY SAY. That is the whole reason they
+    //     can be shipped where the plus cannot: the note above records that the plus is a LOAN in the recordings
+    //     (`plas`), and Māori having no /l/ and no /s/ means the g2p would emit [pa] — a confidently wrong
+    //     syllable. Here the corpus supplies words made of Māori phonemes, so there is nothing to approximate:
+    //
+    //       `rite ki`     ×43 phrase   "tana ōrite ki ngā raiona" — its EQUIVALENCE TO lions
+    //       `iti iho`     ×40 phrase   "he iti iho te wā hanimuni" — the honeymoon period is LESS
+    //       `nui ake`     ×100 phrase  "te taipitopito nui ake" — GREATER detail
+    //       `whakawehe`   ×15 token    and FLEURS's parallel division sentence, "te whakawehe ki te tekau mā rua"
+    //                                 ("dividing by twelve")
+    //
+    //     ⚠ ALL FOUR ARE INFIX, which is not what a VSO language would suggest and is a fact about the
+    //     constructions: the comparative takes `i` as its "than" and the standard follows it
+    //     ("he iti iho te wā X i te Y"), so `A < B` is "A iti iho i B" with the operands in written order. Same
+    //     for the equality (`rite ki`) and the division (`whakawehe ki`), both of which take their preposition
+    //     before the second operand. So no reordering is needed — the ja/ko/fa problem does not arise here.
+    //
+    //     Māori is the fleet's most extreme routing case (#663): a word it cannot spell goes to the English
+    //     reader. These words are all spellable, so they stay on the native branch and phonemize natively.
+    s = s.replace(/\s?=\s?/gu, " rite ki ");
+    s = s.replace(/\s?<\s?/gu, " iti iho i ");
+    s = s.replace(/\s?>\s?/gu, " nui ake i ");
+    s = s.replace(/\s?÷\s?/gu, " whakawehe ki ");
+
+    // 1d) THE DEGREE SIGN (#654), and ⚠ IT IS NATIVE AFTER ALL — a macron is what hid it. An earlier pass
+    //     dismissed the obvious candidate on the grounds that "pūtu is BOOTS", which is true of `pūtu` and not
+    //     of `putu`: mi_nz's ×12 are the footwear ("ka mau pūtu tika", wear proper boots) and the degree word is
+    //     the SHORT-VOWEL lexeme. Vowel length distinguishes them, and reading the corpus count without the
+    //     macron threw away the word being looked for.
+    //
+    //     mi.wikipedia states the whole reading, with the gloss:
+    //
+    //       "Ko te tio he wai totoka me tino makariri i te putu paemahana 0 Herehiūhu (Celsius)"
+    //          ice is frozen water and very cold at 0 DEGREES CELSIUS
+    //
+    //     ⚠ AND BOTH WORDS ARE SAYABLE HERE, which is why this cell needs no routing: `putu` and `Herehiūhu`
+    //     are built from Māori phonemes throughout — unlike `plus`, `minus` and `Celsius`, whose /l/ and /s/
+    //     forced the English route above. `Herehiūhu` is the language's own transliteration, glossed against
+    //     the English in the source, so it is a Māori word rather than a loan the engine cannot pronounce.
+    //
+    //     °F IS NOT DECLARED: Fahrenheit has no attested Māori form here, and the scale name is exactly the
+    //     kind of thing this file already declines to invent (see `mm` in the header).
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 putu Herehiūhu");
+    s = s.replace(/(\d)\s?°/gu, "$1 putu");
+
     // 2) The shared symbol tier. Everything else this language needs is declared data, not a local rule.
     return SYMBOLS(s);
 }

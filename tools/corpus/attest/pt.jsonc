@@ -1,0 +1,87 @@
+// WIKIPEDIA WORD ATTESTATION — pt (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "pt",
+    "wiki": "pt.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "matemática aritmética divisão",
+    "findings": [
+        {
+            "word": "igual a",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 27,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…pios: Princípio da identidade: garante que uma proposição é igual a ela mesma. Princípio da não-contradição: uma proposição não…",
+                "…posição. Considera-se p como uma proposição de valor lógico igual a verdadeiro, então sua negação é igual a falso. O mesmo seri…",
+                "…ção de valor lógico igual a verdadeiro, então sua negação é igual a falso. O mesmo seria se a proposição tivesse valor lógico i…",
+                "…O mesmo seria se a proposição tivesse valor lógico inicial igual a falso, sua negação seria igual a verdadeiro. De acordo com…",
+                "…vesse valor lógico inicial igual a falso, sua negação seria igual a verdadeiro. De acordo com esses conceitos podemos montar a…",
+                "…diferente de zero, e possui qualquer x como solução se a é igual a 0. Em qualquer caso, não há solução única, então a b {\\disp…"
+            ]
+        },
+        {
+            "word": "menor que",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…incipal problema foi a afirmação de que o número negativo é menor que zero, então não é menos do que nada. Na definição estrita d…",
+                "…restando três. O dividendo é subtraído até que o resto seja menor que o divisor. Mas, no caso do zero, repetidas subtrações por z…",
+                "…repetidas subtrações por zero nunca resultarão em um resto menor que o divisor, então a divisão não é definida. == Primeiras ten…",
+                "…or; Repetir o segundo passo até que o quociente obtido seja menor que o divisor, encerrando o processo e tornando o atual quocien…",
+                "…as subtrações continuarão sendo 18 e jamais serão um número menor que o dividendo (lembrando que o resto deve ser sempre menor qu…",
+                "…enor que o dividendo (lembrando que o resto deve ser sempre menor que o dividendo), portanto seria infinitas subtrações. == Outra…"
+            ]
+        },
+        {
+            "word": "maior que",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…rãos em uma esfera, cujo diâmetro é inferior a 10 mil vezes maior que o diâmetro da Terra não excede 10 63 {\\displaystyle 10^{63}…",
+                "…mo o sinal de menor que ( < {\\displaystyle <} ), o sinal de maior que ( > {\\displaystyle >} ) e o sinal de desigualdade ( ≠ {\\dis…"
+            ]
+        },
+        {
+            "word": "dividido por",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 11,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…ndendo do ambiente de programação e do tipo de número sendo dividido por zero (como o inteiro, por exemplo), é possível que: seja ge…",
+                "…por zero, é uma fração com o zero como denominador. O zero dividido por um número positivo ou negativo é tanto zero ou expresso com…",
+                "…o ou expresso como uma fração com zero como numerador. Zero dividido por zero é zero.\" Em 830, Mahavira tentou sem sucesso corrigir…",
+                "…anita Sara Samgraha: \"um número permanece inalterado quando dividido por zero.\" Bhaskara II tentou resolver o problema ao definir n…",
+                "…se percebe erro lógico ao afirmar que todo número que seja dividido por si resulte em 1, inclusive zero. == Subtrações sucessivas =…",
+                "…expressão algébrica a ÷ b = c {\\displaystyle a\\div b=c} (a dividido por b é igual a c) equivale à expressão algébrica a = b × c {\\d…"
+            ]
+        }
+    ],
+}

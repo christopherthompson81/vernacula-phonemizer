@@ -140,6 +140,29 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // BEFORE the degree rules — the ordering coupling zu's `[+]?` taught.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " 加 ");
 
+    // THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SOURCE SAYS "IS READ AS" AND THEN READS BOTH SIGNS —
+    // yue.wikipedia's division article writes, of the notation itself:
+    //
+    //   「A ÷ B = Q...R  讀做  A 除以 B 等於 Q 餘 R」        讀做 = "is read as"
+    //
+    // — an explicit pronunciation instruction covering ÷ and = together, operands in place. This is the same
+    // shape as ru's gloss and fa's 「می‌خوانیم」, and the strongest kind of evidence in the issue.
+    //
+    // The comparisons come from yue_hant_hk itself, with numeric operands: 「不會小於50公頃」 (not smaller than
+    // 50 hectares), 「遠大於定焦鏡頭」 (far greater than a prime lens), plus 除以 ×2 from FLEURS's parallel
+    // division sentence 「長寬比除以12」.
+    //
+    // ⚠ AND THOSE CORPUS HITS WERE FIRST REPORTED ABSENT — a defect in the probe, not a fact about Cantonese.
+    // FLEURS writes Han with a space between EVERY character (「此 格 式 的 長 寬 比 除 以 12」), so a
+    // two-character word never matches as written. Fixed in corpus-words.ts; the fourth manufactured negative
+    // this issue has found in its own tooling.
+    //
+    // Spaced on both sides for the reason the 加 rule above gives: an adjacent initialism would otherwise fuse.
+    s = s.replace(/\s*=\s*/gu, " 等於 ");
+    s = s.replace(/\s*<\s*/gu, " 小於 ");
+    s = s.replace(/\s*>\s*/gu, " 大於 ");
+    s = s.replace(/\s*÷\s*/gu, " 除以 ");
+
     s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}])/gu, "攝氏$1度");
     s = s.replace(/(\d+)\s?°\s?F(?![\p{sc=Latn}])/gu, "華氏$1度");
     s = s.replace(/(\d+)\s?°/gu, "$1度");

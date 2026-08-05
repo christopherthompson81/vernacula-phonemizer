@@ -160,6 +160,15 @@ function stripLatent(ipa: string, c: string): string {
 
 // #562 symbol normalization — French words for %, currency signs, and unit abbreviations.
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // et is ×2234 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "et",
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.

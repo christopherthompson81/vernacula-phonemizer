@@ -18,58 +18,30 @@
 {
     "language": "ga",
     "wiki": "ga.wikipedia.org",
-    "tier": "wikipedia",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "matamaitic uimhríocht roinnt",
     "findings": [
         {
-            "word": "ciliméadar cearnach",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…a, cad é achar na cearnóige atá 2 ciliméadar ar leithead? 4 ciliméadar cearnach atá an t-achar. == Féach freisin == == Tagairtí ==…"
-            ]
-        },
-        {
-            "word": "méadar cearnach",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 1,
-            "examples": []
-        },
-        {
-            "word": "méadar ciúbach",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…a habhann, arís sula dtéann an Fheoir isteach inti, ná 37.4 méadar ciúbach in aghaidh an tsoicind. Ag an gcumasc leis an bhFeoir, is é…"
-            ]
-        },
-        {
-            "word": "cearnach",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…domhain, agus tá achar 179.7 milliún km² (69.4 milliún míle cearnach) aige. Leathann sé 15,500 km (9,600 míle) ó Mhuir Bheiring…"
-            ]
-        },
-        {
-            "word": "ciliméadair chearnacha",
+            "word": "roinnte ar",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,
             "articles": 0,
             "substringOnly": 0,
             "examples": []
+        },
+        {
+            "word": "roinnt ar",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…b {Q} } . Is sórt fáinne spéisiúil é réimse, inarbh fhéidir roinnt ar eilimintí neamhnialasacha. Níl tacar na slánuimhreacha Z {\\…"
+            ]
         }
     ],
 }

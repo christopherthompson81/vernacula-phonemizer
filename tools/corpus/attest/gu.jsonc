@@ -18,56 +18,53 @@
 {
     "language": "gu",
     "wiki": "gu.wikipedia.org",
-    "tier": "wikipedia",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "ગણિત અંકગણિત ભાગાકાર",
     "findings": [
         {
-            "word": "ધન",
-            "verdict": "attested",
+            "word": "બરાબર",
+            "verdict": "absent",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 0,
+            "articles": 0,
             "substringOnly": 0,
-            "examples": [
-                "…િક્રમ સંવત આસો વદ બારસ : વાઘ બારસ વિક્રમ સંવત આસો વદ તેરસ : ધન તેરસ વિક્રમ સંવત આસો વદ ચૌદશ : કાળી ચૌદશ વિક્રમ સંવત આસો વદ…"
-            ]
+            "examples": []
         },
         {
-            "word": "ઋણ",
+            "word": "સમાન",
             "verdict": "attested",
             "bounded": true,
             "tokenHits": 3,
             "articles": 1,
             "substringOnly": 0,
             "examples": [
-                "…ી અપૂર્ણાંક સંખ્યાઓ માટે, તેઓ અપૂર્ણાંક ભાગ 0.934 માટે 10ની ઋણ ઘાતને બદલે 60ની ઋણ ઘાતનો ઉપયોગ કરતા. પ્રાચીન ચીની લોકો પાસે…",
-                "…માટે, તેઓ અપૂર્ણાંક ભાગ 0.934 માટે 10ની ઋણ ઘાતને બદલે 60ની ઋણ ઘાતનો ઉપયોગ કરતા. પ્રાચીન ચીની લોકો પાસે ઉચ્ચ અંકગણિતનો અભ્…",
-                "…ઈ.સ. પૂર્વે 400થી પહેલાં ઉપયોગ શરુ થયેલો. પ્રાચીન ચિની લોકો ઋણ સંખ્યાઓને સાર્થક રીતે શોધવા, સમજવા અને લાગુ કરવામાં પ્રથમ હ…"
+                "…અને આ રીતે આગળ વધતા. તેમની સરવાળાની રીત આધુનિક સરવાળાની રીત સમાન હતી, અને તેમની ગુણાકારની રીત થોડી અલગ હતી. તેમનો લાંબો ભાગા…",
+                "…થોડી અલગ હતી. તેમનો લાંબો ભાગાકારની પ્રવિધિ આધુનિક પ્રવિધિ સમાન હતી, અને 20મી સદી સુધી ઘણી ઉપયોગમાં લેવામાં આવતી એક પછી એક…",
+                "…યો. આથી સંખ્યા પદ્ધતિ વડે મોટા અને નાના બંને પૂર્ણાંકોને એક સમાન રીતે રજૂ કરવાનું શક્ય બન્યું- એક એવો અભિગમ જેણે આખરે અન્ય બ…"
             ]
+        },
+        {
+            "word": "ભાગ્યા",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
         },
         {
             "word": "વત્તા",
-            "verdict": "attested",
+            "verdict": "absent",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 0,
+            "articles": 0,
             "substringOnly": 0,
-            "examples": [
-                "…ધે છે, જેને CD4+ લિમ્ફોસાઇટ કાઉન્ટ 200 કોષો/μl અથવા HIV ચેપ વત્તા AIDS-વ્યાખ્યાયિત તકવાદી ચેપ સાથે સહ-ચેપ તરીકે વ્યાખ્યાયિત ક…"
-            ]
+            "examples": []
         },
         {
             "word": "ઓછા",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…મૂકી. મોટાપાયે નકારાત્મક પ્રતિસાદને પરિણામે ત્રણ મહિનાથી પણ ઓછા સમયમાં મૂળ ફોર્મ્યુલા બજારમાં પાછી મૂકાઈ. ૧૯૮૭ – સર્વોચ્ચ અ…"
-            ]
-        },
-        {
-            "word": "ધન સંખ્યા",
             "verdict": "absent",
             "bounded": true,
             "tokenHits": 0,

@@ -44,6 +44,7 @@
  *   - ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys. All ×3 ਸੈਮੀ in the corpus are ਸੈਮੀ ਆਧੁਨਿਕ / ਸੈਮੀਫਾਈਨਲ ("semi-"),
  *     and all ×18 ਗ੍ਰਾ are ਗ੍ਰਾਂਡ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ / ਗ੍ਰਾਨਵਿਲੇ. Playbook trap #2, live in this corpus.
  */
+import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -57,6 +58,15 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // ਅਤੇ is ×1441 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "ਅਤੇ",
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
@@ -191,6 +201,47 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         // 9) DEGREES. The bare sign was dropped outright. °C is left to emit ਡਿਗਰੀ + the Latin C: the
         //    Punjabi word for the scale is attested nowhere in this repo (see the header).
         s = s.replace(/(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
+
+        // THE ADDITIVE SIGNS (#654). pa_in gives nothing usable — ਜਮਾਂ is ×0, ਪਲੱਸ appears only inside the brand
+        // name ਮੈਟਰੋਪਲੱਸ, and ਜੋੜ is ×1 token against ×33 SUBSTRING (ਜੋੜੇ, "couples"). pa.wikipedia's arithmetic
+        // article settles all of it, naming the sign and then READING an expression with operands:
+        //
+        //   "ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ "+" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ …)"   addition, denoted by the "+" sign
+        //   "3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ।"                                          3 PLUS 2 EQUALS 5
+        //
+        // ⚠ THE SECOND QUOTE ALSO CORROBORATES THE EQUALITY WORD SHIPPED BELOW, which was sourced independently
+        // from the corpus (ਬਰਾਬਰ ×8). Evidence in both directions, from two different tiers.
+        //
+        // `ਘਟਾਓ` ×5 / 4 articles is the subtraction word, so ± is then this language's own two words juxtaposed —
+        // the tier-1 route, at no further sourcing cost.
+        //
+        // ⚠ THE MINUS TAKES THE RANGE GUARD th NEEDED. The fleet convention rejects a sign with a space AFTER it,
+        // which misses a range spaced only BEFORE the sign (`1000 -1300` read as a subtraction in th_th). A digit
+        // anywhere to the left rejects the match: a negative quantity does not follow a number, a range does.
+        s = s.replace(/±/gu, " ਜਮ੍ਹਾਂ ਘਟਾਓ ");
+        s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 ਜਮ੍ਹਾਂ ");
+        s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1ਜਮ੍ਹਾਂ ");
+        s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+            /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ਘਟਾਓ `);
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from pa_in:
+        //
+        //   `ਬਰਾਬਰ`     ×8 token    "ਬਰਾਬਰ ਜਾਂ ਇਸ ਪੱਖ ਅਨੁਪਾਤ ਦੇ ਲਗਪਗ ਨੇੜੇ" — EQUAL TO this aspect ratio
+        //   `ਤੋਂ ਘੱਟ`    ×14 phrase   "ਚੀਜ਼ਾਂ ਤੋਂ ਘੱਟ ਪੁਰਾਣੇ" — less old THAN things
+        //   `ਤੋਂ ਵੱਧ`    ×51 phrase
+        //   `ਨਾਲ ਭਾਗ`   ×1          "ਬਾਰ੍ਹਾਂ ਨਾਲ ਭਾਗ ਕਰਨਾ" — FLEURS's parallel division sentence
+        //
+        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL (ਤੋਂ follows the standard), so they use core/postposedSign.ts;
+        // an infix rule would read the comparison backwards.
+        //
+        // ⚠ AND `ਭਾਗ` IS A HOMOGRAPH: ×16 token, but the commonest sense in this corpus is "part / section"
+        // ("100 ਫੁੱਟ ਚੌੜੇ ਭਾਗ" — a 100-foot wide SECTION), not division. It is nonetheless the division word —
+        // `hi` ships the cognate भाग on its own wiki citation, and the parallel sentence puts this exact word in
+        // the division slot here. The count is not the evidence; the parallel sentence is.
+        s = postposedSign(s, "<", "ਤੋਂ ਘੱਟ");
+        s = postposedSign(s, ">", "ਤੋਂ ਵੱਧ");
+        s = s.replace(/\s?=\s?/gu, " ਬਰਾਬਰ ");
+        s = s.replace(/\s?÷\s?/gu, " ਭਾਗ ");
 
         return s;
     };

@@ -1,0 +1,106 @@
+// WIKIPEDIA WORD ATTESTATION — es (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "es",
+    "wiki": "es.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "matemáticas aritmética división",
+    "findings": [
+        {
+            "word": "igual a",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 8,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…manzanas, lo que significa que veinte dividido por cinco es igual a cuatro. Esto se denota como 20 / 5 = 4, o 20/5 = 4.​ Lo que…",
+                "…cociente como una parte fraccionaria, por lo que 10 / 3 es igual a 3 1/3 o 3.33..., pero en el contexto de la división entera,…",
+                "…no es conmutativa, lo que significa que a / b no siempre es igual a b / a.​ La división tampoco es, en general, asociativa, lo…",
+                "…e asignación\". Asigna el valor de la derecha de dicho signo igual a la variable de la izquierda. En la última expresión, se uti…",
+                "…división entre cero es una división en la que el divisor es igual a cero, y que no tiene un resultado bien definido. En aritmét…",
+                "…ión: ( a + b ) − b = a {\\displaystyle \\,(a+b)-b=a} , que es igual a sumar el Opuesto, a − b = a + ( − b ) {\\displaystyle \\,a-b=…"
+            ]
+        },
+        {
+            "word": "menor que",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 13,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…= 1 para todo i != j). Entonces cualquier número positivo S menor que m = m1m2 · · · mk se puede expresar mediante una n-tupla (r…",
+                "…- 0 = 2 - 0 = 2..., nunca se alcanza un resto estrictamente menor que 2 aunque se reste 0 infinitas veces. Por lo tanto, la divis…",
+                "…egativos, un divisor propio es aquel cuyo valor absoluto es menor que el número dado. En este caso, los divisores propios serían…",
+                "…conjunto de todos los números surreales con el «cumpleaños» menor que un cierto cardinal inaccesible es un cuerpo. Los números re…",
+                "…star por debajo del nivel del mar, y por tanto su altura es menor que cero metros, 0 m. Los números menores que cero son números…",
+                "…e, como de la propiedad que tenga ese número de ser mayor o menor que cero. Es habitual también distinguir entre la propiedad de…"
+            ]
+        },
+        {
+            "word": "mayor que",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…iere saber sumar: Si deseamos multiplicar X por Y, siendo X mayor que Y (si no lo fuera, se procedería a invertir el orden de los…",
+                "…ne la operación en B = 8, ya que la siguiente cifra (16) es mayor que Y (14). La matemática hierática del Imperio Medio mantuvo e…",
+                "…s naturales, el dividendo, m, y el divisor, d, que debe ser mayor que cero, llamamos cociente, q, al mayor de los números que mul…",
+                "…9 −1 y 223 −1 son primos entre sí y el producto de ellos es mayor que 2184. Ejemplo: Si tomamos m1 = 3, m2 = 4 se tiene que 0 = (…",
+                "…nto existe una expresión finita 1 + 1 + ⋯ + 1 cuyo valor es mayor que ese elemento, es decir, no hay infinitos elementos. De mane…"
+            ]
+        },
+        {
+            "word": "dividido entre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…r dos veces el [número de] pasos [s] incrementado por uno y dividido entre tres. La suma de los cubos es el cuadrado de esa suma. Las…",
+                "…número decimal 131 en binario. El método es muy simple: 131 dividido entre 2 da 65 con residuo igual a 1 65 dividido entre 2 da 32 con…",
+                "…simple: 131 dividido entre 2 da 65 con residuo igual a 1 65 dividido entre 2 da 32 con residuo igual a 1 32 dividido entre 2 da 16 con…",
+                "…gual a 1 65 dividido entre 2 da 32 con residuo igual a 1 32 dividido entre 2 da 16 con residuo igual a 0 16 dividido entre 2 da 8 con…",
+                "…gual a 1 32 dividido entre 2 da 16 con residuo igual a 0 16 dividido entre 2 da 8 con residuo igual a 0 8 dividido entre 2 da 4 con re…",
+                "…igual a 0 16 dividido entre 2 da 8 con residuo igual a 0 8 dividido entre 2 da 4 con residuo igual a 0 4 dividido entre 2 da 2 con re…"
+            ]
+        },
+        {
+            "word": "dividido por",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 10,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…inco grupos de cuatro manzanas, lo que significa que veinte dividido por cinco es igual a cuatro. Esto se denota como 20 / 5 = 4, o…",
+                "…igual, pero habría que añadir 1/8 pues 21 = 16 + 4 + 1 + 1 dividido por 8. Solución 21 + 1/8 Para dividir 170 entre 8 se opera igua…",
+                "…51. Resta los colores diferentes del primer color. El resto dividido por el primer coeficiente del color es la medida del primero. L…",
+                "…o difiere de nuestra comprensión moderna: 18.34 Un positivo dividido por un positivo o un negativo dividido por un negativo es posit…",
+                "…a: 18.34 Un positivo dividido por un positivo o un negativo dividido por un negativo es positivo; un cero dividido por un cero es ce…",
+                "…o un negativo dividido por un negativo es positivo; un cero dividido por un cero es cero; un positivo dividido por un negativo es ne…"
+            ]
+        }
+    ],
+}

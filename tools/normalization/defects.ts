@@ -93,6 +93,107 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
 ];
 
 /**
+ * THE SIGN-CLASS PROBES — one synthetic input per droppable sign, and the pair of readings that decides whether
+ * the engine voiced it (#586/#654).
+ *
+ * ⚠ SHARED, BECAUSE A HAND-KEPT LIST IN ONE TOOL IS A LIST THAT DRIFTS. This table lived inside `review.ts`,
+ * which is a CLI script and therefore cannot be imported — so `coverage.ts` could not sweep the fleet with the
+ * same probes `review.ts` uses per language, and the #654 progress number had to be re-derived in a scratch
+ * script each time. That is exactly the shape the `DROPPABLE` comment above warns about: this very list was
+ * once missing `÷ > ±`, the exponent and the currency sign, and nothing said so.
+ *
+ * ⚠ IT CANNOT BE DERIVED FROM `DROPPABLE`. A defect regex is not a probe string, and one class needs several
+ * probes — `math-sign` alone covers `+ ± = < > × ÷`. `review.ts` asserts the mapping between the two rather
+ * than trusting it, which turns the next omission into a loud failure.
+ *
+ * Each entry is [class name, the probe, the regex that REMOVES the sign from it]. A sign is DROPPED when the
+ * reading of the probe equals the reading of the probe with the sign stripped out — i.e. the character
+ * contributed nothing.
+ */
+/**
+ * SIGN CLASSES A LANGUAGE IS INTENTIONALLY SILENT ON (#654) — the synthetic-probe counterpart of
+ * `ACCEPTED_SILENT` above, and the difference between the two matters.
+ *
+ * `ACCEPTED_SILENT` names CORPUS LINES: this exact sentence's hyphen is a designation, so the drop is correct.
+ * This names a whole CLASS for a language: no reading of this sign is shippable here at all, so `review.ts`'s
+ * synthetic probe (`-5`, `+5`) will always report DROPPED and always be right to.
+ *
+ * ⚠ WHY IT EXISTS RATHER THAN JUST LETTING THE GATE FAIL. A hard fail that can never be fixed is noise, and
+ * noise is how the audit's own hardcoded 37-of-67 list stayed wrong for months — a number nobody trusted
+ * enough to read. Three languages had a permanently red `sign classes` line for reasons already argued at
+ * length in their own files, which meant the line said nothing about whether anything had REGRESSED.
+ *
+ * ⚠ AND IT IS DELIBERATELY SHORT. Only a class whose refusal is ARGUED IN THE LANGUAGE'S OWN FILE belongs
+ * here; "no rule yet" is a TODO and must keep failing. Every other language in the `minus` and `plus-minus`
+ * columns is a real gap, and adding them here to quiet the gate would be exactly the wrong use of it.
+ *
+ * The reason string is printed by both tools, so the justification travels with the exemption.
+ */
+export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    gu: {
+        // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
+        // designations — the bill number `એચજેઆર -3` (already in ACCEPTED_SILENT) and `ગોથિક શૈલી 10મી -11મી`,
+        // a spaced ORDINAL range, where the character before the hyphen is a letter and the one after is a digit.
+        minus: "measured: gu_in has two `word -digit` instances (the bill `એચજેઆર -3` and the ordinal range "
+            + "`10મી -11મી`), the shape no guard can reject — see ta's entry and ACCEPTED_SILENT",
+    },
+    kn: {
+        minus: "measured: kn_in has the bill number `ಎಚ್‌ಜೆಆರ್ -3`, the `word -digit` shape no guard can reject "
+            + "— see ta's entry and ACCEPTED_SILENT, which lists this instance as correctly silent",
+    },
+    yue: {
+        // ⚠ AND HERE THE SHAPE IS AN ARTEFACT OF THE TRANSCRIPT, not of Chinese. FLEURS writes Han with a space
+        // between EVERY character, so the aircraft designation `Il-76` is stored as `伊 爾 -76` — a letter, a
+        // space, then the hyphen. The undecidable shape arrives through the corpus's own formatting, which is
+        // the same source-orthography divergence zu/xh documented for the plus.
+        minus: "measured: the per-character spacing FLEURS uses for Han turns the designation `Il-76` into "
+            + "`伊 爾 -76`, producing the `word -digit` shape no guard can reject",
+    },
+    ta: {
+        // ⚠ TRIED, AND THE CORPUS DIFF REJECTED IT. A guarded minus rule was written for ta and correctly refused
+        // every range, score and closed designation — and then read `சந்திரயான் -1` as "கழித்தல் ஒன்று", minus
+        // one. That is the shape NO guard can reject: `word -1` is identical to a genuine `was -5`, so telling
+        // them apart needs a lexicon. `ACCEPTED_SILENT` already lists this exact instance as correctly silent,
+        // which means the rule converted an accepted silence into an audible error — strictly worse than the gap.
+        //
+        // ⚠ AND IT IS THE SAME SENTENCE IN FIVE LANGUAGES. FLEURS is parallel, so the Chandrayaan designation
+        // appears in gu, hi, kn, mr and ta — and those are exactly the five languages `ACCEPTED_SILENT` lists
+        // for `minus`. Whatever is decided here applies to all of them, and it is not a coincidence to be
+        // rediscovered per language.
+        minus: "measured, then TESTED: a guarded rule read the spacecraft `சந்திரயான் -1` as minus one, the one "
+            + "shape no guard can reject — see ACCEPTED_SILENT, which lists this instance as correctly silent",
+    },
+    mr: {
+        // Devanagari compounds are written with a hyphen (आस-पास), and the corpus's one hyphen-before-digit
+        // outside a range is `चंद्रयान -1`, a spacecraft name.
+        minus: "measured: the corpus's only hyphen-before-digit outside a range is the spacecraft `चंद्रयान -1`, "
+            + "so a minus rule would read a designation as arithmetic — see marathi/normalize.ts step 15",
+    },
+    nl: {
+        // Every `-\d` in nl_nl is a score or a range (`6-6`, `22:00-23:00`), which Dutch reads as two bare
+        // numbers. Writing the rule would have turned 14 scores into negatives.
+        minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
+            + "into negatives — see dutch/normalize.ts step 9",
+    },
+};
+
+export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
+    ["minus", "-5", /[-−]/gu],
+    ["plus", "+5", /\+/gu],
+    ["plus-minus", "±5", /±/gu],
+    ["ampersand", "A & B", /&/gu],
+    ["equals", "x = y", /=/gu],
+    ["less-than", "5 < 6", /</gu],
+    ["greater-than", "6 > 5", />/gu],
+    ["times", "6 × 6", /×/gu],
+    ["divide", "6 ÷ 3", /÷/gu],
+    ["exponent", "5 km²", /²/gu],
+    ["currency", "$5", /\$/gu],
+    ["percent", "25 %", /%/gu],
+    ["degrees", "20 °C", /°/gu],
+];
+
+/**
  * DESIGNATIONS ACCEPTED AS CORRECTLY SILENT (#586) — the sweep's permanent residual, named per instance.
  *
  * WHY A BASELINE AND NOT A GUARD. The `minus` class above explains why a spaced designation cannot be
@@ -158,15 +259,6 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // 40 mph" — so reading it as *thabatha* ("minus") would be confidently wrong. xhosa/normalize.ts
         // step 14 records this and measures its guarded pattern at 0 corpus matches.
         minus: ["kangange -40"],
-    },
-    mi: {
-        // ⚠ ATTESTED, AND THE ENGINE CANNOT SAY IT — a different limit from every other entry here. Both mi_nz
-        // speakers voice this plus, using the English loan. But Māori has no /l/ and no /s/, so the g2p reduces
-        // every candidate spelling to a wrong syllable (`plus` → [pu], `plas` → [pa]). Emitting [pa] would be a
-        // confidently wrong syllable where there is currently silence, which this repo ranks below a missing
-        // reading; substituting a native maths word would invent a reading the recordings contradict.
-        // maori/normalize.ts step 1b holds the full sourcing so no later pass re-derives it and reaches for [pa].
-        "math-sign": ["+30 tākiri"],
     },
 };
 

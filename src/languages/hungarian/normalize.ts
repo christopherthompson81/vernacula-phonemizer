@@ -208,6 +208,15 @@ const normalizeInitialisms = makeInitialismNormalizer({
  * like these — the hazard `rateDenominators` exists for.
  */
 const normalizeSymbols = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // és is ×2257 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "és",
     percent: ["százalék"],
     /**
      * CURRENCY (#584). `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong
@@ -396,8 +405,92 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 Celsius-fok");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit-fok");
     s = s.replace(/(\d)\s?°/gu, "$1 fok");
+    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    //    (1000 - 1300), a SCORE (6-6), a DESIGNATION (forma-1) or a clock range. The rule is written anyway on
+    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
+    //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
+    //    what verifies that rather than the guard looking plausible.
+    //
+    //    THREE GUARDS, each rejecting a shape this corpus actually contains:
+    //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
+    //      · a letter or digit IMMEDIATELY BEFORE — rejects `forma-1` and closed ranges
+    //      · a digit ANYWHERE to the left — rejects the SPACED range or score (`1000 - 1300`), which the fleet's
+    //        usual guard misses because the character before the hyphen is a SPACE. That gap cost a real defect
+    //        in th, where a year range was read as a subtraction.
+    //
+    //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` is the same shape as a genuine
+    //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
+    //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
+    //    not about the guard.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ");
+    // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
+    //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
+    //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
+    //    + rule, since ± is a single character the + rule cannot see.
+    //    ⚠ AND hu.wikipedia NAMES BOTH SIGNS TOGETHER, which is as direct as this gets: "A két előjel a
+    //    pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát" — the two
+    //    SIGNS are the plus sign and the minus sign, expressing positive and negative. Exactly the sense ±
+    //    needs, and the reason this pair is a tolerance marker rather than two operations.
+    s = s.replace(/±/gu, " plusz mínusz ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
+
+    // THE RELATIONAL SIGNS (#654). All three read INFIX and all three are attested, `egyenlő` ×12 token / 8
+    // articles in the arithmetic register with the sense in view ("nagyobb vagy egyenlő", "két egyenlő részre
+    // osztja") and `nagyobb mint` in both corpus (×3 phrase) and wiki. `kisebb mint` has ×0 phrase hits in
+    // either, while `kisebb` ×24 and `mint` ×259 are both common in hu_hu — the construction is ADJ + mint and
+    // its sibling proves it, exactly as `größer als` needed for German.
+    s = s.replace(/\s?=\s?/gu, " egyenlő ");
+    s = s.replace(/\s?<\s?/gu, " kisebb mint ");
+    s = s.replace(/\s?>\s?/gu, " nagyobb mint ");
+    // THE DIVISION SIGN (#654). `osztva` is attested ×8 / 7 articles and it governs the INSTRUMENTAL on the
+    // operand, every single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva" — so
+    // `A ÷ B` is "A B-vel osztva" and a bare "hat osztva három" would be an ungrammatical CASE, not an accent.
+    //
+    // ⚠ SO THE RULE SPELLS ITS OWN OPERAND AND BUILDS THE SUFFIX, the machinery tr and ko already needed. Two
+    // things have to be right, and both are properties of the WORD rather than the digit:
+    //
+    //   VOWEL HARMONY picks -val or -vel from the stem's last vowel — hárommal vs öttel.
+    //   ⚠ `harminc` IS THE ONE IRREGULAR NUMERAL: its last vowel is the FRONT `i` but the word takes BACK
+    //   harmony (harminccal, not *harminccel). Named explicitly rather than derived, because no rule over the
+    //   vowel gets it right. Every other numeral is regular, checked across bir…ezer.
+    //
+    //   THE v ASSIMILATES to a final consonant and DOUBLES it — and for a DIGRAPH it is the digraph's first
+    //   letter that doubles, which a naive last-character rule gets wrong: négy → néggyel (not *négyvel or
+    //   *négyyel), húsz → hússzal, egy → eggyel. After a VOWEL there is no assimilation at all: kettő →
+    //   kettővel. Verified against the whole numeral vocabulary — eggyel, kettővel, hárommal, néggyel, öttel,
+    //   hattal, héttel, nyolccal, kilenccel, tízzel, hússzal, harminccal, ezerrel.
+    //
+    //   `stemForSuffix` deliberately does NOT apply: it shortens a stem before a VOWEL-initial suffix
+    //   (három → hárm-), and -val/-vel begins with a consonant, so `hárommal` is correct and `*hármmal` is not.
+    const HU_BACK = /[aáoóuú]/u;
+    /** The last vowel decides harmony; `harminc` is the one numeral where the vowel and the harmony disagree. */
+    const huLinkVowel = (stem: string): string => {
+        if (stem.endsWith("harminc")) return "a";
+        const vs = [...stem].filter((c) => /[aáeéiíoóöőuúüű]/u.test(c));
+        const last = vs[vs.length - 1];
+        return last !== undefined && HU_BACK.test(last) ? "a" : "e";
+    };
+    const HU_DIGRAPH = ["gy", "sz", "cs", "ny", "ly", "ty", "zs", "dz"];
+    /** Instrumental -val/-vel: harmony, then v→consonant assimilation with digraph-aware doubling. */
+    const huInstrumental = (w: string): string => {
+        const cut = w.lastIndexOf(" ") + 1, head = w.slice(0, cut), stem = w.slice(cut);
+        const v = huLinkVowel(stem);
+        if (/[aáeéiíoóöőuúüű]$/u.test(stem)) return `${head}${stem}v${v}l`;
+        // ⚠ THE DOUBLED LETTER GOES BEFORE THE DIGRAPH, NOT AFTER THE WORD. Hungarian writes the geminate by
+        // repeating the digraph's FIRST letter in front of it: egy → e+g+gy = eggyel, négy → néggyel,
+        // húsz → hússzal. Appending it instead produced *egygel* and *húszsal*, which the g2p duly read as
+        // [ɛɟɡɛl] and [huːsʃɒl] — two wrong consonants, caught by probing the whole numeral vocabulary rather
+        // than the one example the rule was written against.
+        const dg = HU_DIGRAPH.find((d) => stem.endsWith(d));
+        const doubled = dg !== undefined
+            ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}`
+            : stem + stem.slice(-1);
+        return `${head}${doubled}${v}l`;
+    };
+    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
+        `${numberToWords(Number(a))} ${huInstrumental(numberToWords(Number(b)))} osztva`);
 
     // 8) DECIMALS. The comma was reaching `clausePunctuation` as a COMMA PAUSE mid-number. Hungarian says
     //    *egész* between the parts (*három egész öt*). The digits are LEFT AS DIGITS so the existing

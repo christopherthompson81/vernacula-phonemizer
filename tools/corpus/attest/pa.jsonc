@@ -1,0 +1,104 @@
+// WIKIPEDIA WORD ATTESTATION — pa (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "pa",
+    "wiki": "pa.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "ਗਣਿਤ ਹਿਸਾਬ ਜੋੜ",
+    "findings": [
+        {
+            "word": "ਜੋੜ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 47,
+            "articles": 11,
+            "substringOnly": 0,
+            "examples": [
+                "…ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ \"+\" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦ…",
+                "…ਵਾਂ ਵਿੱਚ ਘਟਾਅ, ਗੁਣਾ ਅਤੇ ਤਕਸੀਮ ਸ਼ਾਮਿਲ ਹਨ। ਦੋ ਕੁਦਰਤੀ ਅੰਕਾਂ ਦਾ ਜੋੜ ਉਹਨਾਂ ਦੋਹਾਂ ਨੂੰ ਮਿਲਾ ਕੇ ਜਾਂ ਰਲਾ ਕੇ ਬਣੀ ਕੁੱਲ ਗਿਣਤੀ ਜਿੰਨਾ ਹੁੰ…",
+                "…ਜਿਸ ਵਿੱਚ \"3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ। ਚੀਜ਼ਾਂ ਨੂੰ ਗਿਣਨ ਤੋਂ ਬਗੈਰ, ਜੋੜ ਨੂੰ ਹੋਰ ਤਰ੍ਹਾਂ ਦੇ ਅੰਕਾਂ ਨਾਲ ਵੀ ਪਰਿਭਾਸ਼ਿਤ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਜ…",
+                "…ਿਤ ਦਾ ਹਿੱਸਾ ਹੈ ਜਿਹੜੀ ਕਿ ਗਣਿਤ ਦੀ ਇੱਕ ਸ਼ਾਖ਼ਾ ਹੈ। ਅਲਜਬਰਾ ਵਿੱਚ, ਜੋੜ ਨੂੰ ਅਭੌਤਿਕ ਚੀਜ਼ਾਂ ਉੱਪਰ ਵੀ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਵੈਕਟਰ ਅਤੇ…",
+                "…ਜ਼ਾਂ ਉੱਪਰ ਵੀ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਵੈਕਟਰ ਅਤੇ ਮੈਟਰਿਕਸ ਆਦਿ। ਜੋੜ ਦੇ ਕੁਝ ਖ਼ਾਸ ਗੁਣ ਹੁੰਦੇ ਹਨ। ਇਹ ਕੰਮੂਟੇਟਿਵ ਅਤੇ ਸਹਿਯੋਗੀ (Commuta…",
+                "…ਬਰ ਹੁੰਦਾ ਹੈ; 0 ਦੇ ਜੋੜਨ ਨਾਲ ਸੰਖਿਆ ਵਿੱਚ ਕੋਈ ਬਦਲਾਅ ਨਹੀਂ ਆਉਂਦਾ। ਜੋੜ ਕਰਨਾ ਗਣਿਤ ਦੀਆਂ ਕਿਰਿਆਵਾਂ ਵਿੱਚੋਂ ਸਭ ਤੋਂ ਸੌਖਾ ਕੰਮ ਹੈ। ਛੋਟੇ ਅੰਕ…"
+            ]
+        },
+        {
+            "word": "ਜਮ੍ਹਾਂ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…'ਤੇ, ਅੰਕਾਂ ਦੀ ਗਿਣਤੀ ਨਾਲ ਸੰਬੰਧ ਰੱਖਦੀ ਹੈ। ਅੰਕ ਗਣਿਤ ਅਮਲਾਂ ਵਿੱਚ ਜਮ੍ਹਾਂ, ਵੰਡ, ਗੁਣਾ ਅਤੇ ਘਟਾਅ ਵਗੈਰਾ ਸ਼ਾਮਿਲ ਹੁੰਦੇ ਹਨ। ਹਿਸਾਬ ਦੀ ਉਹ ਸ਼ਾਖ…",
+                "…ਆਵਾਂ == ਅੰਕਗਣਿਤ ਦੀਆਂ ਇਹ ਚਾਰ ਮੂਲ ਕਿਰਿਆਵਾਂ ਹੁੰਦੀਆਂ ਹਨ ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ ਘਟਾਅ ਜਾਂ ਘਟਾਓ ਗੁਣਾ ਭਾਗ, ਤਕਸੀਮ ਜਾਂ ਵੰਡ === ਜੋੜ === ਜਦੋਂ ਕਿਸੇ…",
+                "…ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ (ਜਿਸਨੂੰ ਆਮ ਤੌਰ 'ਤੇ \"+\" ਦੇ ਚਿੰਨ੍ਹ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ) ਅੰਕਗਣ…",
+                "…ਇਹ ਪੜਚੋਲ ਗਣਿਤ ਦੀ ਇਬਾਰਤ \"3 + 2 = 5\" ਦੇ ਬਰਾਬਰ ਹੈ ਜਿਸ ਵਿੱਚ \"3 ਜਮ੍ਹਾਂ 2 ਬਰਾਬਰ 5 ਹਨ। ਚੀਜ਼ਾਂ ਨੂੰ ਗਿਣਨ ਤੋਂ ਬਗੈਰ, ਜੋੜ ਨੂੰ ਹੋਰ ਤਰ੍ਹਾਂ…"
+            ]
+        },
+        {
+            "word": "ਘਟਾਓ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…ਸਮਾਜਿਕ ਪ੍ਰਾਣੀ ਹੋਣ ਦੇ ਕਾਰਨ ਸਭ ਤੋਂ ਆਮ ਹਿਸਾਬ ਜਿਵੇਂ ਕਿ ਜੋੜ ਅਤੇ ਘਟਾਓ ਦੀ ਲੋੜ ਪਈ। ਅੰਕਾਂ ਦੇ ਇਤਿਹਾਸ ਦੇ ਬਾਰੇ ਵਿੱਚ ਬਹੁਤ ਹੀ ਘੱਟ ਜਾਣਕਾਰੀ…",
+                "…ਦੀਆਂ ਇਹ ਚਾਰ ਮੂਲ ਕਿਰਿਆਵਾਂ ਹੁੰਦੀਆਂ ਹਨ ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ ਘਟਾਅ ਜਾਂ ਘਟਾਓ ਗੁਣਾ ਭਾਗ, ਤਕਸੀਮ ਜਾਂ ਵੰਡ === ਜੋੜ === ਜਦੋਂ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ…",
+                "…ਲ ਨੂੰ ਇਸ਼ਾਰਾ ਕਰਨ ਵਾਲੀ ਦਿਸ਼ਾ ਇਸ ਵੈਕਟਰ ਦੀ ਦਿਸ਼ਾ ਹੁੰਦੀ ਹੈ। ਜੋੜ,ਘਟਾਓ, ਗੁਣਾ, ਨੈਗੈਟਿਵ ਕਰਨਾ ਵਰਗੇ ਕਈ ਵਾਸਤਵਿਕ ਨੰਬਰਾਂ ਉੱਤੇ ਅਲਜਬਰਿਕ ਓਪਰ…",
+                "…ਨੂੰ ਇਸ਼ਾਰਾ ਕਰਨ ਵਾਲੀ ਦਿਸ਼ਾ ਇਸ ਵੈਕਟਰ ਦੀ ਦਿਸ਼ਾ ਹੁੰਦੀ ਹੈ। ਜੋੜ, ਘਟਾਓ, ਗੁਣਾ, ਨੈਗੈਟਿਵ ਕਰਨਾ ਵਰਗੇ ਕਈ ਵਾਸਤਵਿਕ ਨੰਬਰਾਂ ਉੱਤੇ ਅਲਜਬਰਿਕ ਓਪਰ…",
+                "…ਏਸ਼ਨ ਦੇ ਕੰਪਲੈਕਸ ਕੰਜੂਗੇਟ ਨਾਲ ਗੁਣਨਫਲ ਕਰਨ ਤੇ, ਅਤੇ ਫੇਰ ਦੋਵਾਂ ਦਾ ਘਟਾਓ ਕਰਨ ਤੇ, ਪ੍ਰੋਬੇਬਿਲਿਟੀ ਲਈ ਨਿਰੰਤਰਤਾ ਸਮੀਕਰਨ ਮਿਲਦੀ ਹੈ: ∂ ∂ t ρ (…"
+            ]
+        },
+        {
+            "word": "ਗੁਣਾ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 46,
+            "articles": 11,
+            "substringOnly": 1,
+            "examples": [
+                "…ਗਿਣਤੀ ਨਾਲ ਸੰਬੰਧ ਰੱਖਦੀ ਹੈ। ਅੰਕ ਗਣਿਤ ਅਮਲਾਂ ਵਿੱਚ ਜਮ੍ਹਾਂ, ਵੰਡ, ਗੁਣਾ ਅਤੇ ਘਟਾਅ ਵਗੈਰਾ ਸ਼ਾਮਿਲ ਹੁੰਦੇ ਹਨ। ਹਿਸਾਬ ਦੀ ਉਹ ਸ਼ਾਖਾ ਜੋ ਕਿ ਅੰਕ…",
+                "…ਇਹ ਚਾਰ ਮੂਲ ਕਿਰਿਆਵਾਂ ਹੁੰਦੀਆਂ ਹਨ ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ ਘਟਾਅ ਜਾਂ ਘਟਾਓ ਗੁਣਾ ਭਾਗ, ਤਕਸੀਮ ਜਾਂ ਵੰਡ === ਜੋੜ === ਜਦੋਂ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਵਿੱਚ…",
+                "…ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦਾਹਰਨਾਂ: 14 - 6 = 8 80 - 50 = 30 === ਗੁਣਾ === ਜਦੋਂ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਨੂੰ ਉਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਨਾਲ ਇੱਕ ਜ…",
+                "…ਅੰਕ ਨਾਲ ਇੱਕ ਜਾਂ ਇੱਕ ਤੋਂ ਵਧੇਰੇ ਵਾਰ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਉਸਨੂੰ ਗੁਣਾ ਕਹਿੰਦੇ ਹਨ। ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਨੂੰ ਜਿੰਨੀ ਵਾਰ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਉ…",
+                "…ਖਿਆ ਜਾਂ ਅੰਕ ਨੂੰ ਜਿੰਨੀ ਵਾਰ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਉਹ ਉੰਨੀ ਵਾਰ ਹੀ ਗੁਣਾ ਹੁੰਦੀ ਜਾਵੇਗੀ। ਗੁਣਾ ਨੂੰ x ਦੇ ਚਿੰਨ੍ਹਾ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦ…",
+                "…ਨੀ ਵਾਰ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਉਹ ਉੰਨੀ ਵਾਰ ਹੀ ਗੁਣਾ ਹੁੰਦੀ ਜਾਵੇਗੀ। ਗੁਣਾ ਨੂੰ x ਦੇ ਚਿੰਨ੍ਹਾ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦਾਹਰਨਾਂ: 2 x 4 = 8 3…"
+            ]
+        },
+        {
+            "word": "ਭਾਗ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 36,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…ਰ ਮੂਲ ਕਿਰਿਆਵਾਂ ਹੁੰਦੀਆਂ ਹਨ ਜੋੜ ਜਾਂ ਜਮ੍ਹਾਂ ਘਟਾਅ ਜਾਂ ਘਟਾਓ ਗੁਣਾ ਭਾਗ, ਤਕਸੀਮ ਜਾਂ ਵੰਡ === ਜੋੜ === ਜਦੋਂ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਵਿੱਚ ਇੱਕ…",
+                "…ਨ੍ਹਾ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦਾਹਰਨਾਂ: 2 x 4 = 8 3 x 3 = 9 === ਭਾਗ === ਗੁਣਾ ਕਰਨ ਦੀ ਕਿਰਿਆ ਦੇ ਉਲਟ ਕਿਰਿਆ ਨੂੰ ਭਾਗ ਕਹਿੰਦੇ ਹਨ। ਜਦੋਂ…",
+                "…8 3 x 3 = 9 === ਭਾਗ === ਗੁਣਾ ਕਰਨ ਦੀ ਕਿਰਿਆ ਦੇ ਉਲਟ ਕਿਰਿਆ ਨੂੰ ਭਾਗ ਕਹਿੰਦੇ ਹਨ। ਜਦੋਂ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਨੂੰ ਕਿਸੇ ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਵ…",
+                "…ਖਿਆ ਜਾਂ ਅੰਕ ਵਿੱਚ ਇੱਕ ਤੋਂ ਵਧੇਰੇ ਵਾਰ ਘਟਾਇਆ ਜਾਂਦਾ ਹੈ ਤਾਂ ਉਸਨੂੰ ਭਾਗ, ਤਕਸੀਮ ਜਾਂ ਵੰਡ ਕਹਿੰਦੇ ਹਨ। ਸੰਖਿਆ ਜਾਂ ਅੰਕ ਨੂੰ ਜਿੰਨੀ ਵਾਰ ਵਿਭਾਜ…",
+                "…ਂ ਅੰਕ ਨੂੰ ਜਿੰਨੀ ਵਾਰ ਵਿਭਾਜਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਉੰਨੀ ਹੀ ਵਾਰ ਉਸਦਾ ਭਾਗ ਹੁੰਦਾ ਜਾਵੇਗਾ। ਭਾਗ ਨੂੰ / ਜਾਂ ÷ ਦੇ ਚਿੰਨ੍ਹਾਂ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ…",
+                "…ਰ ਵਿਭਾਜਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਉੰਨੀ ਹੀ ਵਾਰ ਉਸਦਾ ਭਾਗ ਹੁੰਦਾ ਜਾਵੇਗਾ। ਭਾਗ ਨੂੰ / ਜਾਂ ÷ ਦੇ ਚਿੰਨ੍ਹਾਂ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦਾਹਰਨਾਂ: 24 /…"
+            ]
+        }
+    ],
+}

@@ -276,6 +276,24 @@ export function normalizeZulu(input: string): string {
     //     arm claims the sign wherever it precedes a digit rather than inventing a separate temperature rule.
     //     The `-` is left silent (a prefix marker here, and zu's minus arm requires a digit directly after the
     //     dash, which `-+` does not give).
+    // ⚠ ± IS THE ONE READING IN THIS FILE THAT THE AUDIO GIVES DIRECTLY, and it comes from the very decode the
+    //    note above is careful NOT to over-read (#654). That recording is of `kuka-+30°C`, two adjacent marks,
+    //    and the reader voiced BOTH: `… kuka p l a s o m aɪ n a s v e d i …`. The note is right that this is no
+    //    evidence about a plus before a TEMPERATURE — but `±` is not a temperature question. The sign MEANS
+    //    "plus or minus", and what a zu speaker produced when reading a plus and a minus together is exactly
+    //    the reading this rule needs, connective included.
+    //
+    //    Spelled to reproduce the attested phones, following the same rule the `plas` note above sets out: this
+    //    orthography is phonemic and the conventional isiZulu spelling of either loan is unsourced, so
+    //    `plas o mayinas` is chosen because it reads back as the decoded syllables. `o` is the reduced English
+    //    "or" the decode shows, not Zulu's own conjunction (which would be `noma`) — writing `noma` would be
+    //    substituting a word the speaker did not say.
+    //
+    //    ⚠ AND THIS IS WHY ± IS *NOT* FREE FOR zu's SISTER xh, which is otherwise nearly identical here: xh's
+    //    minus word is `thabatha`, the VERB "subtract", so juxtaposing would read "plus subtract" — an operation
+    //    where the sign marks a tolerance. Same family, same corpus sentence, and the ± cell is sourced in one
+    //    and not the other.
+    s = s.replace(/±/gu, " plas o mayinas ");
     s = s.replace(/[  ]?\+[  ]?(?=\d)/gu, " plas ");
 
     // 9) DEGREES (×2). `°` was dropped and the scale letter read as a CLICK: `+30°C` → [… kǀ], `35°W` →

@@ -119,6 +119,32 @@ export function normalizeIndonesian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
+    // 6b) RELATIONAL AND DIVISION SIGNS (#654), and this language is sourced ENTIRELY from the corpus — tier 2,
+    //     audio-aligned, no Wikipedia needed. Counted in id_id as phrases:
+    //
+    //       `sama dengan`      ×17  — "polusi cahaya di masa mereka tidak sama dengan persoalan di masa sekarang"
+    //       `lebih besar dari` ×3   — the explicit magnitude comparative, which is what `>` means
+    //       `lebih kecil dari` ×3   — "foton bahkan ukurannya lebih kecil dari hal-hal penyusun atom"
+    //       `dibagi`           ×3   — "rasio aspek format ini dibagi dua belas"
+    //
+    //     The bare `lebih dari` ×65 / `kurang dari` ×6 ("more than", "fewer than") are commoner and are NOT what
+    //     these signs mean: the notation compares MAGNITUDE, which Indonesian marks with `besar`/`kecil`. Both
+    //     shapes are attested and the explicit pair is the one the sign denotes.
+    //
+    //     ⚠ THE DIVISION WORD COMES FROM THE PARALLEL SENTENCE, and that is worth naming because it generalises:
+    //     FLEURS is a PARALLEL corpus, and one of its sentences reads a division ALOUD with a numeral operand
+    //     ("…dividing by twelve to obtain the simplest whole-number ratio… 3:2"). It is present in 57 of the 67
+    //     corpora, so for almost every language in the fleet the division word is available at the STRONGEST
+    //     tier — a recording of a human saying it — rather than at tier 3 or 4. Measured, not assumed.
+    //
+    //     `lebih besar dari` is preferred over the commoner bare `lebih dari` ("more than") because the sign is a
+    //     magnitude comparison and Indonesian marks that with `besar`; both are attested, and the explicit one is
+    //     what the notation means.
+    s = s.replace(/\s?=\s?/gu, " sama dengan ");
+    s = s.replace(/\s?<\s?/gu, " lebih kecil dari ");
+    s = s.replace(/\s?>\s?/gu, " lebih besar dari ");
+    s = s.replace(/\s?÷\s?/gu, " dibagi ");
+
     // 7) FRACTIONS, as "numerator per denominator" — the ordinary spoken form; ½ is setengah.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (_m, a: string, b: string) =>
         Number(a) === 1 && Number(b) === 2 ? "setengah" : `${a} per ${b}`);

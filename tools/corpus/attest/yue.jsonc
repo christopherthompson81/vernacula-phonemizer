@@ -1,0 +1,76 @@
+// WIKIPEDIA WORD ATTESTATION — yue (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "yue",
+    "wiki": "yue.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "數學 算術 除法",
+    "findings": [
+        {
+            "word": "等於",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 19,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…= 2 同 ∛27 = 27^(1/3) = 3。 對數係冧次方嘅逆運算。以b為底嘅x嘅對數係指b要提升到幾多次方先至等於x。例如，因為1000 = 10^3，所以1000以10為底嘅對數係3。以b為底嘅x嘅對數記做 log_b(x)，或者唔…",
+                "…個數之間嘅「差」，即係「被減數」減去「減數」：差 = 被減數 - 減數。調返轉用加數嚟講嘅話，就係要搵一個數加上「減數」等於「被減數」：被減數 = 減數 + 差。 如果被減數係大過減數嘅話，個差就係正數；相反，如果被減數細過減數，咁個差就係負數…",
+                "…\\div B=Q...R} 讀做 A {\\displaystyle A} 除以 B {\\displaystyle B} 等於 Q {\\displaystyle Q} 餘 R {\\displaystyle R} ， 當中 A {\\displays…",
+                "…研究某啲數字特性嘅過程產生咗大量嘅數字類型，大多數冇特定嘅數學意義。佢哋可以歸類為數學遊戲。以下係一啲例子： 完美數: 等於佢嘅因數之和（包括1）嘅數。例如：6 = 1 + 2 + 3。 謝爾頓數: 數字73，係第21個質數，7 × 3 = 2…",
+                "…: 數字73，係第21個質數，7 × 3 = 21；而將佢嘅數字倒轉就係37，係第12個質數。 自戀數: n位數嘅數字，等於佢嘅每個數字嘅n次方之和。例如：153 = 1³ + 5³ + 3³。 反質數: 倒轉數字之後仍然係質數嘅質數。例如：1…",
+                "…224 = (5×7)²-1 畢達哥拉斯數: 畢達哥拉斯三元組係滿足以下條件嘅三個數：其中一個數嘅平方加上另一個數嘅平方等於第三個數嘅平方，例如：(3, 4, 5)，因為 3² + 4² = 9 + 16 = 25 = 5² 一旦明白咗數字嘅本…"
+            ]
+        },
+        {
+            "word": "除以",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 5,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…符號係 ÷ 同 /。例如 48 ÷ 8 = 6 同 29.4 / 1.4 = 21。除法經常當做乘法嘅一種特殊情況：與其除以一個數，我哋可以乘以佢嘅倒數。一個數嘅倒數就係1除以呢個數。例如，48 ÷ 8 = 48 × (1/8)。 乘法嘅單位元…",
+                "…29.4 / 1.4 = 21。除法經常當做乘法嘅一種特殊情況：與其除以一個數，我哋可以乘以佢嘅倒數。一個數嘅倒數就係1除以呢個數。例如，48 ÷ 8 = 48 × (1/8)。 乘法嘅單位元素係1，一個數嘅乘法逆元素就係佢嘅倒數。例如，13…",
+                "…，係某啲情況下，例如一啲程式語言，佢哋係會用前綴或者後綴表示法嘅。如果有一個集合，喺佢上面我哋可以做加減乘除呢四種運算（除以零除外），而且呢啲運算符合特定規則，例如分配律，咁呢個集同呢啲運算就形成咗一個場喇。 === 加 === 加數，符號係…",
+                "…. . R {\\displaystyle A\\div B=Q...R} 讀做 A {\\displaystyle A} 除以 B {\\displaystyle B} 等於 Q {\\displaystyle Q} 餘 R {\\displaysty…",
+                "…thbb {R} } —— 實數； Z 5 {\\displaystyle \\mathbb {Z} _{5}} —— 整數除以5嘅餘數嘅等價類。 以上呢三個都係場。 == 場係域 == 根據定義，明顯場就係一個域（Integral Domain）…"
+            ]
+        },
+        {
+            "word": "小於",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "大於",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}

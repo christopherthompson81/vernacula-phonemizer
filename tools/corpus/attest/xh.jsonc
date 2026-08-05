@@ -21,25 +21,28 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "iimitha",
-            "verdict": "attested",
+            "word": "plas minus",
+            "verdict": "absent",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 0,
+            "articles": 0,
             "substringOnly": 0,
-            "examples": [
-                "…o laseGandaki Pradesh, kumantla-embindi weNepal . No8 wakhe Iimitha ezili-167 ukuphakama ngaphezu komphakamo wolwandle yintaba…"
-            ]
+            "examples": []
         },
         {
-            "word": "imitha",
+            "word": "ukudibanisa",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
+            "tokenHits": 11,
+            "articles": 8,
             "substringOnly": 0,
             "examples": [
-                "…de ibonakala elubala ekukhanyeni okubonakalayo kodwa ifunxa imitha ye-infrared, isebenze njengegesi yegreenhouse. Ikharbon dio…"
+                "…aqela omabini, kukudibanisa laa manani eqela ngalinye. ==== Ukudibanisa ==== Enye indlela kukudibanisa amanani ezi-objects kwiqela…",
+                "…ngamakhulu amathathu (300) zidityaniswe neemitha ezili-120. Ukudibanisa kusenokuthatha okokuba wenza nkulu into. == Ukudibanisa kuy…",
+                "…20. Ukudibanisa kusenokuthatha okokuba wenza nkulu into. == Ukudibanisa kuyandisa == === Umzekelo wokudibanisa ngeenjongo zokwandis…",
+                "…anani. Izifundo zokuqala kwizibalo zezi: ukubala ngamanani; ukudibanisa okanye ukongeza; ukuthabatha okanye ukuphungula; ukuphinda-…",
+                "…a encinane ngaphakathi. == Imizekelo yezibalo == 2 + 3 = 5 (ukudibanisa akutshintshi ziphumo nokokuba kuqalwe ngeliphi na inani: is…",
+                "…hi, iinqaba zewotshi, iinqaba zomoya, njl. njl.) ngokufuthi ukudibanisa iimpawu ezimbini nangaphezulu zosetyenziso zibe sisiqalelo…"
             ]
         }
     ],

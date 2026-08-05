@@ -1,0 +1,69 @@
+// WIKIPEDIA WORD ATTESTATION — el (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "el",
+    "wiki": "el.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // `--context` set to exactly this string.
+    "context": "μαθηματικά αριθμητική διαίρεση",
+    "findings": [
+        {
+            "word": "ίσον",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…ιασμού \"×\" μεταξύ των όρων. Το αποτέλεσμα εκφράζεται με ένα ίσον. Για παράδειγμα: 2 × 3 = 6 {\\displaystyle 2\\times 3=6} (προ…",
+                "…όπως φαίνεται στα δεξιά. Μπορούμε δηλαδή να πούμε ότι 9 + 4 ίσον 1 \"modulo 12\" ή συμβολίζοντάς το έτσι: 9 + 4 ≡ 1 modulo 12.…",
+                "…ιγμα, η ρητορική μορφή x + 1 = 2 είναι \"Το x πράγμα συν ένα ίσον δύο\" ή, ενδεχομένως, «Το πράγμα x συν 1 ισούται με 2\". Η ρη…",
+                "…αι των ήχων του, ή σχετικά με την πρακτική της ψαλμωδίας με ίσον (ισοκράτημα). Ωστόσο, αυτές οι πρακτικές παρέμειναν αδιαμφι…"
+            ]
+        },
+        {
+            "word": "διά",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 16,
+            "articles": 9,
+            "substringOnly": 1,
+            "examples": [
+                "…ου πολλαπλασιαστή τοποθετούνται κατακόρυφα), και το οικός (\"διά το τετραγωνικώς λαμβάνειν τούς ψήφους\"). Για τον πολλαπλασι…",
+                "…έτες εκτός από τον εαυτόν του και τη μονάδα. Οι εκφράσεις η διά των τριών μεταχείρισις και διά του κανόνος του διά των τριώ…",
+                "…αι τη μονάδα. Οι εκφράσεις η διά των τριών μεταχείρισις και διά του κανόνος του διά των τριών αντιστοιχούν στη σημερινή μέθ…",
+                "…ράσεις η διά των τριών μεταχείρισις και διά του κανόνος του διά των τριών αντιστοιχούν στη σημερινή μέθοδο των τριών. Μία σ…",
+                "…τελεστές. === Διαίρεση === Στη διαίρεση των πολυωνύμων Q(x) διά P(x) το πρόβλημα είναι να βρεθούν δύο άλλων πολυωνύμων q(x)…",
+                "…). Το μηδέν είναι ένας άρτιος αριθμός, αφού είναι διαιρετός διά δύο (2). Το μηδέν δεν είναι ούτε θετικός, ούτε αρνητικός, α…"
+            ]
+        },
+        {
+            "word": "μικρότερο από",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…εί το μεγαλύτερο δυνατό πολλαπλάσιο των 365, το οποίο είναι μικρότερο από 3200. Σε αυτήν την περίπτωση, 8 φορές το 365 είναι 2920 και…",
+                "…στο να πούμε ότι το i {\\displaystyle i} είναι μεγαλύτερο ή μικρότερο από 1. Οι μιγαδικοί αριθμοί αντιστοιχούν σε σημεία στο μιγαδικό…"
+            ]
+        }
+    ],
+}

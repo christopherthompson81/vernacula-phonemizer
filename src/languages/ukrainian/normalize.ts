@@ -372,6 +372,34 @@ export function normalizeUkrainian(input: string): string {
     s = s.replace(/±/gu, " плюс мінус ");
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
 
+    // 8b) RELATIONAL AND DIVISION SIGNS (#654). uk.wikipedia's division article reads the whole expression
+    //     aloud, both signs, operands in place, and — the part that matters for a case language — with the
+    //     result in the NOMINATIVE:
+    //
+    //       "двадцять розділене на п'ять дорівнює чотири, або чотири є результатом ділення двадцяти на п'ять"
+    //
+    //     ⚠ `дорівнює` GOVERNS THE DATIVE IN CAREFUL PROSE (`дорівнює нулю`, ×12 attested that way), which
+    //     `numbers.ts` cannot produce — it emits nominative cardinals. The quote above is what makes this
+    //     shippable: in the arithmetic slot the source itself writes `дорівнює чотири`, nominative, so the
+    //     reading needs no case repair. Contrast `ru`, where no such nominative attestation existed and the
+    //     comparatives had to move to the `чем` construction.
+    //
+    //     ⚠ THE COMPARATIVES STILL DO NEED `ніж`, for the same reason as Russian: bare `менше` takes the
+    //     genitive (`менше нуля`). `ніж` takes the nominative and is corpus-attested (`менше ніж` ×6,
+    //     `більше ніж` ×7 phrase hits in uk_ua).
+    //
+    //     ⚠ ON `поділити на` (×5) VS `розділене на` (×1). These are NOT two senses — Ukrainian uses one
+    //     preposition for both, so `поділити на чотири` is ambiguous exactly where English distinguishes
+    //     *divide into* from *divide by*. The sense lives in the ARGUMENT: the ×5 hits take plural nouns
+    //     ("поділити на чотири періоди" — into four periods), which is neither evidence for a numeric operand
+    //     nor evidence against it. `розділене на` is chosen because the gloss above puts it in the exact slot
+    //     between two numerals, not because the alternative is wrong. (Italian's `sorella minore di` IS a
+    //     different construction — an age adjective plus a partitive — and that distinction is real.)
+    s = s.replace(/\s?=\s?/gu, " дорівнює ");
+    s = s.replace(/\s?<\s?/gu, " менше ніж ");
+    s = s.replace(/\s?>\s?/gu, " більше ніж ");
+    s = s.replace(/\s?÷\s?/gu, " розділене на ");
+
     // 9) NUMERIC RANGES. The dash between two numbers was dropped outright, fusing the endpoints
     //    (`1418-1450` became one run of words). Digits are required on BOTH sides so that `COVID-19`,
     //    `A1GP` and `Гран-прі` cannot match. Runs AFTER the ordinal rule (step 4), which needs the hyphen.

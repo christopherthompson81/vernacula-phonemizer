@@ -21,58 +21,20 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "plusz",
+            "word": "mínuszjel",
             "verdict": "attested",
             "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
+            "tokenHits": 12,
+            "articles": 4,
+            "substringOnly": 4,
             "examples": [
-                "…2-es termináljáig hosszabbították. 2000. augusztus 8-án BKV Plusz márkavédjegyes járattá változott és a Reptér-busz nevet vet…"
+                "…A két előjel a pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát…",
+                "…n használatos jelentését l. az Egyéb alkalmazásai alatt. == Mínuszjel == A mínuszjelnek (amely nem tévesztendő össze a kötőjellel…",
+                "…áskor viszont van köztük eltérés: az APL-ben emelt helyzetű mínuszjel ¯ (Unicode U+00AF) használatos, ha előjelről, nem pedig füg…",
+                "…0−5^2 pedig −25-öt ad eredményül. A pluszjelhez hasonlóan a mínuszjel is használatos a fizikában, a kémiában és más területeken,…",
+                "…z- és mínuszjelet. A kémiában a felső indexbe írt plusz- és mínuszjel pozitív és negatív töltésű iont jelöl (pl. NH+4). 1‑nél nag…",
+                "…özi fonetikai ábécé szerint a felső indexben lévő plusz- és mínuszjel (mint mellékjel) előrébb vagy hátrébb képzett beszédhangot…"
             ]
-        },
-        {
-            "word": "mínusz",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 4,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…lejátszott mérkőzéseken; fair play pontszám: egy sárga lap: mínusz 1 pont; piros lap (második sárga lap után): mínusz 3 pont;…",
-                "…rga lap: mínusz 1 pont; piros lap (második sárga lap után): mínusz 3 pont; közvetlen piros lap: mínusz 4 pont; egy sárga lap é…",
-                "…ásodik sárga lap után): mínusz 3 pont; közvetlen piros lap: mínusz 4 pont; egy sárga lap és közvetlen piros lap: mínusz 5 pont…",
-                "…s lap: mínusz 4 pont; egy sárga lap és közvetlen piros lap: mínusz 5 pont; sorsolás. === A csoport === === B csoport === == Eg…"
-            ]
-        },
-        {
-            "word": "szor",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…n állók === ENyolc versenyző állt az élen a versenyen és 13-szor változott az élen álló pilóta személye. == Külső hivatkozás…"
-            ]
-        },
-        {
-            "word": "szer",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 1,
-            "examples": []
-        },
-        {
-            "word": "ször",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
         }
     ],
 }

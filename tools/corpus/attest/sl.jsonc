@@ -1,0 +1,40 @@
+// WIKIPEDIA WORD ATTESTATION — sl (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "sl",
+    "wiki": "sl.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "deljeno z",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…tevilom ali negativnega z negativnim je pozitiven Pozitivno deljeno z negativnim je negativno. Negativno deljeno s pozitivnih je…",
+                "…s pozitivnih je negativno. Pozitivno ali negativno število, deljeno z nič, je ulomek z nič v imenovalcu Nič, deljeno s pozitivnim…",
+                "…a ulomek z nič v števcu in kočno količino v imenovalcu. nič deljeno z nič je nič Zadnja pravila, čeprav niso v skladu s sodobno t…",
+                "…za 52, zatem korenjeno in nato povečano za 8 ter končno še deljeno z 10, število 2? Rešitev: x = ± 28 {\\displaystyle x=\\pm 28} .…",
+                "…ogodka B pogojno na A je razmerje skupne verjetnosti A in B deljeno z verjetnostjo B. Bayesianski ekonometriki predpostavljajo, d…",
+                "…,} ki da za primer k = n² vrednost n²(n²+1)/2, kar je potem deljeno z n, ker obstaja n vrstic, katerih vsota je enaka. Magične ko…"
+            ]
+        }
+    ],
+}

@@ -239,6 +239,54 @@ export function normalizeThai(input: string): string {
     // dropped sign is inaudible, which is the one outcome that cannot be right.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " บวก ");
 
+    // ── 8b2. the MINUS and ±, and the sourcing doubt above is now resolved (#654) ──────────────────
+    // The note above records that `attest.ts` on ลบ "returns the ADJECTIVE negative — การป้อนกลับทางลบ,
+    // negative feedback — not the operator", and so no minus rule was written and `-5 °C` read as five
+    // degrees above zero. Probing the SIGN'S NAME rather than the bare word settles it: th.wikipedia's
+    // arithmetic article says
+    //
+    //   "เครื่องหมายลบ (−) ใช้ได้สามลักษณะในคณิตศาสตร์: ตัวดำเนินการลบ …"
+    //       the MINUS SIGN (−) has three uses in mathematics: the subtraction operator …
+    //
+    // so ลบ is the operator in the arithmetic register, not merely an adjective meaning negative
+    // (`เครื่องหมายลบ` ×9 / 5 articles). The same article incidentally corroborates the equals word directly
+    // below — "คำตอบจะอยู่หลังเครื่องหมายเท่ากับ", the answer comes after the EQUALS SIGN.
+    //
+    // ± juxtaposes this file's own บวก with the now-sourced ลบ, the form every language that reads ± uses.
+    // ⚠ AND THE MINUS NEEDS A RANGE GUARD THE FLEET'S USUAL ONE DOES NOT PROVIDE. The corpus diff caught this
+    // rule turning a year range into a subtraction: `ค.ศ. 1000 -1300` read "one thousand LOP one thousand three
+    // hundred". The convention elsewhere (it, es, ru …) rejects a sign with a space AFTER it, which catches the
+    // score `26 - 00` — but this range is spaced only BEFORE the sign, so that guard never fires. A digit
+    // anywhere to the left of the sign is therefore rejected outright: a negative quantity does not follow a
+    // number, a range does. Found by the diff, not by a probe — the one instance in 1,906 utterances.
+    s = s.replace(/±/gu, " บวก ลบ ");
+    s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ลบ `);
+
+    // ── 8bb. the relational and division signs (#654), ALL FOUR FROM THE CORPUS ───────────────────
+    // Unusually for this issue, no Wikipedia probe was needed: th_th attests every reading, and the division
+    // word is in the slot with a numeral operand.
+    //
+    //   `หารด้วย`  ×3   "อัตราส่วนของรูปแบบนี้ หารด้วย 12 เพื่อให้กลายเป็น…"   ← divided BY 12
+    //   `เท่ากับ`   ×4   "ซึ่งมีมูลค่าเท่ากับหนึ่งปอนด์อังกฤษ"                  ← a value EQUAL TO one pound
+    //   `น้อยกว่า`  ×20  ·  `มากกว่า` ×122
+    //
+    // ⚠ THE COUNTS ARE SUBSTRING COUNTS AND CANNOT BE ANYTHING ELSE. Thai does not space its words, so the
+    // boundary test that separates a real hit from a fragment is simply unavailable — `หาร` alone is ×176 and
+    // most of those are inside `อาหาร` (food), a word with no arithmetic sense whatever. The four-character
+    // `หารด้วย` is not subject to that, and the quoted examples are the whole of the evidence, which is the
+    // rule `attest.ts` already states for unspaced scripts.
+    //
+    // The division word also comes from FLEURS's PARALLEL division sentence, present in 57 of 67 corpora —
+    // so for Thai the strongest tier and the easiest tier are the same one.
+    //
+    // Spaces are inserted around the words even though Thai prose does not space: the corpus writes this
+    // sentence with spaces around the numeral too, and the tokenizer needs the boundary.
+    s = s.replace(/\s?=\s?/gu, " เท่ากับ ");
+    s = s.replace(/\s?<\s?/gu, " น้อยกว่า ");
+    s = s.replace(/\s?>\s?/gu, " มากกว่า ");
+    s = s.replace(/\s?÷\s?/gu, " หารด้วย ");
+
     // ── 8c. the dimension × → คูณ, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
     // The corpus's one instance is the manuscript sentence, `วัดขนาดได้ 29¾ นิ้ว × 24½ นิ้ว`, and the sign was
     // DROPPED — so a measurement read as two bare numbers.

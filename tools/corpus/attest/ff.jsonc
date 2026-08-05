@@ -21,85 +21,16 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "kikiiɗe",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…de alet 15 marse 2020 ; yiite ngee yani ko hedde waktu 23ɓo kikiiɗe.Nigeria]]. E wiyde Nigeria National Petroleum Corporation (…"
-            ]
-        },
-        {
-            "word": "kikiide",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "fajiri",
+            "word": "sendugo",
             "verdict": "attested",
             "bounded": true,
             "tokenHits": 3,
-            "articles": 1,
+            "articles": 3,
             "substringOnly": 0,
             "examples": [
-                "…TEŊKERE BINDI: Winndooɓe e yimooɓe Urdu maayɓe ko sukaaɓe\". FAJIRI.COM. \"BINDI URDU: Ganndo keeriiɗo\". FAJIRI.COM. 27 lewru ju…",
-                "…yɓe ko sukaaɓe\". FAJIRI.COM. \"BINDI URDU: Ganndo keeriiɗo\". FAJIRI.COM. 27 lewru juko hitaande 2010. \"KARACHI: Annduɓe ina cif…",
-                "…taande 2010. \"KARACHI: Annduɓe ina ciftora darnde Bijnori\". FAJIRI.COM. 8 noowammbar 2001.…"
-            ]
-        },
-        {
-            "word": "jamma",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 3,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…Al-Qaum (Aarabeeɓe: القوم) ko laamɗo Nabatae en konu e jamma, kadi ko gardiiɗo karallaagal.O anndiranoo kadi ko “Reenoow…",
-                "…o Gerek en/Roomnaaɓe biyeteeɗo Ares walla Mars. Ko o laamɗo jamma, o reeni ruuhuuji ɗaaniiɓe ɓee e mbaadi koode, o yahdi e ma…",
-                "…ɗaaniiɓe ɓee e mbaadi koode, o yahdi e maɓɓe e yahdu maɓɓe jamma e nder laylayti asamaan, o ardii karawanuuji e nder jeereen…"
-            ]
-        },
-        {
-            "word": "subaka",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 2,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…ngal e hoore mum. Ɓe njaha galle e galle, gila e waktu 2ɓo subaka, ɓe piya kettle maɓɓe e feggere, ɓe njima (wulla) e dow daa…",
-                "…ndee ummii ko e helmere aarabeeɓe \"Suhur\", firti ko ñaamde subaka law e nder lewru koorka teddundu nduu ; ɗum winndee e ɗum w…"
-            ]
-        },
-        {
-            "word": "ñalawma",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 3,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…a njeyaa heen \"Yiyngo Somali (Jaaynde maayo boɗeejo, 1995), Ñalawma ina ɓadii: binndol, leƴƴi, e dowla-leñol e nder Somali (Jaa…",
-                "…maayo boɗeejo: 1995), ISBN 978-0-932415-99-8, OCLC 31376757 Ñalawma ina ɓadii: Binndi, leƴƴi, e dowla ngenndi e nder Somali, (J…",
-                "…5), ISBN 978-0-932415-99-8, OCLC 31376757 Ali JImale Ahmed, Ñalawma ina ɓadii: Binndol, leƴƴi, e dowla ngenndi e nder Somali, (…"
-            ]
-        },
-        {
-            "word": "hiirnaange",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…erik, Ameerika ko Leydi Dentuɗe Ameerika taweteeɗe to taƴre hiirnaange duniiyaru lesde ndin laatiindi mawndi e ardungal leyɗe duun…"
+                "…3. Virgil holli wonde Thunderbird 2 ɓuri semmbe e ɗum footi sendugo signal diga duniyaaru. Yimɓe nder wakkere nde'e njaɓii ɓe ɗ…",
+                "…on. Jeff ɗon umri kuugal ɗaɓɓugo e kisndam nder ndiyam, ɗon sendugo Scott nder Thunderbird 1 ɗon tokki Virgil bee Gordon e Brai…",
+                "…ordinatiral huutoreeɗam ultrasonic ngal Olsen huutore ngam sendugo haɓɓugo radio. Jeff hokki anndal ngol to Washington, D.C.,…"
             ]
         }
     ],

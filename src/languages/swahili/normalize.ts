@@ -143,6 +143,26 @@ export function normalizeSwahili(input: string): string {
     //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
     //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
     //   and this spelling is chosen to reproduce the attested phones.
+    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
+    //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
+    //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
+    //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
+    //    corpus, not about the guard.
+    //
+    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
+    //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
+    //    the fleet's usual guard misses — the gap that cost a real defect in th).
+    //
+    //    SOURCED: sw.wikipedia's negative-number article — "Namba hasi katika hisabati ni namba halisi ambayo ni
+    //    pungufu ya namba 0. Namba hasi huwakilisha kinyume" (a NEGATIVE number is a real number less than 0).
+    //    `hasi` x27 / 8 articles, and it is the polarity word rather than the subtraction verb, which is what the
+    //    sign position needs.
+    //
+    //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+    s = s.replace(/±/gu, " plas hasi ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "hasi ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plas ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1plas ");
     s = s.replace(/(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gu, "nyuzi joto $1 Selsiasi");
@@ -175,6 +195,29 @@ export function normalizeSwahili(input: string): string {
     //    LAST, so that step 6 has already claimed every dash that sits between two numbers — a sports
     //    score like "26 - 00" must keep its bare juxtaposition rather than gain a spurious pause.
     s = s.replace(/(?<![\d])\s+[-–—]+\s+(?![\d])/gu, ", ");
+
+    // THE RELATIONAL AND DIVISION SIGNS (#654). Swahili is SVO, so all four read infix.
+    //
+    // ⚠ THE REGISTER SOURCE SHOWS THE ÷ GLYPH ITSELF: sw.wikipedia writes "hesabu ya kugawanya namba moja kwa
+    // nyingine. Kama swali ni 6 ÷ 3 basi hisa yake…" — the operation of dividing one number BY another, with
+    // the notation in the sentence. That also gives the construction: kugawanya X **kwa** Y.
+    //
+    // ⚠ AND THE CORPUS'S OWN DIVISION HITS ARE THE PARTITION SENSE, which per the Ukrainian correction is
+    // neither evidence for nor against: `kugawanya nyuklia` is nuclear FISSION and `inayogawanya picha kwa
+    // thuluthi` is dividing a picture into thirds. Same lemma, sense carried by the argument. The register
+    // quote is what puts it on a numeric operand.
+    //
+    // The other three come from sw_ke, where they are strongly attested with quantities:
+    //   `sawa na`   ×27  "ni sawa na au takribani sawa na uwiano huu" — EQUAL TO this ratio
+    //   `chini ya`  ×70  "huenda chini ya kiwango cha kugandisha" — goes BELOW freezing point
+    //   `zaidi ya`  ×107
+    // ⚠ `chini ya`'s two WIKI hits are the wrong sense ("Chini ya Elimu kwa wote" — UNDER the programme), so
+    // here the corpus is the better source and the register tier the weaker one — the reverse of the usual
+    // order in this issue, and a reminder that the tiers rank haystacks, not individual findings.
+    s = s.replace(/\s?=\s?/gu, " sawa na ");
+    s = s.replace(/\s?<\s?/gu, " chini ya ");
+    s = s.replace(/\s?>\s?/gu, " zaidi ya ");
+    s = s.replace(/\s?÷\s?/gu, " kugawanya kwa ");
 
     return s;
 }

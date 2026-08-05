@@ -202,6 +202,15 @@ const DOTTED_ALT = Object.keys(DOTTED)
  * like Russian — «783.562 τετραγωνικά χιλιόμετρα» — so `position: "before"`.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // και is ×2717 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "και",
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
@@ -418,6 +427,29 @@ export function normalizeGreek(input: string): string {
     s = s.replace(/(\d)\s?½/gu, "$1 και μισή");
     s = s.replace(/(\d)\s?¼/gu, "$1 και ένα τέταρτο");
     s = s.replace(/(\d)\s?¾/gu, "$1 και τρία τέταρτα");
+
+    // 11c) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give
+    //      here, and says so in the two ways this issue has learned to distinguish:
+    //
+    //        `ίσον`  ×0 token / ×0 substring — ABSENT
+    //        `διά`   ×0 token / ×338 SUBSTRING — every one inside `διάφορες`, `διαδικασία`, `διάρκεια`; the
+    //                substring trap, and the largest count it has produced anywhere in the fleet
+    //
+    //      el.wikipedia's arithmetic articles then read the notation out, which is exactly the article class
+    //      tier 4 wants — one that has to explain the signs to a reader:
+    //
+    //        "Το αποτέλεσμα εκφράζεται με ένα ίσον. Για παράδειγμα: 2 × 3 = 6"   (it NAMES the sign)
+    //        "9 + 4 ίσον 1 modulo 12"      ·   "Το x πράγμα συν ένα ίσον δύο"
+    //        "διαιρετός διά δύο (2)"       ·   "στη διαίρεση των πολυωνύμων Q(x) διά P(x)"
+    //        "το μεγαλύτερο δυνατό πολλαπλάσιο των 365, το οποίο είναι μικρότερο από 3200"
+    //
+    //      `ίσον` is emitted bare, and here that is not a policy choice but the attested form: the source reads
+    //      `9 + 4 ίσον 1` with no copula, and separately calls the sign "ένα ίσον". `διά` likewise sits directly
+    //      between its operands.
+    s = s.replace(/\s?=\s?/gu, " ίσον ");
+    s = s.replace(/\s?<\s?/gu, " μικρότερο από ");
+    s = s.replace(/\s?>\s?/gu, " μεγαλύτερο από ");
+    s = s.replace(/\s?÷\s?/gu, " διά ");
 
     // 11b) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
     //      and the classification was wrong: it is not a minus, not a designation, and not ambiguous. Greek

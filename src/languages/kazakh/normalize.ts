@@ -338,6 +338,31 @@ export function normalizeKazakh(input: string): string {
     //    decimal comma (2,3), so it runs before step 8 folds the comma into a word.
     s = SYMBOLS(s);
 
+    // 7z) FRACTIONS, AND THE READING COMES FROM THE CORPUS'S OWN AUDIO. There was no fraction rule at all here:
+    //     the slash was dropped and the digits read in order, so `1/5` came out *бір бес* ("one five") and `2/3`
+    //     *екі үш*. The corpus's only instance is the sample-depth sentence, `5 мм (1/5 дюйм)`, and the notation
+    //     is in the TEXT while the reading is only in the AUDIO — so the text tiers cannot answer it at all.
+    //
+    //     Decoded from kk_kz/train with facebook/wav2vec2-xlsr-53-espeak-cv-ft (the recognizer this repo already
+    //     uses for ta/gu/vi/th/mi/sw/zu's plus words):
+    //
+    //       … b i s   m i l i m e t ə r    b i s ts j e n   b y r    dʒ iː m …
+    //          бес     миллиметр           бес-тен   бір          дюйм
+    //
+    //     ⚠ SO THE DENOMINATOR COMES FIRST, IN THE ABLATIVE, AND THE NUMERATOR FOLLOWS — `бестен бір`, "one out
+    //     of five". Not the western order, and not recoverable from the digits: reading `1/5` left to right
+    //     gives the two numbers in the wrong sequence AND drops the case that carries the relation.
+    //
+    //     `withCase(…, "abl")` supplies the ending, including the voiceless variant the audio confirms
+    //     (бес ends in с, so -тен and not -ден). Verified across the numerals: бестен бір, үштен екі, төрттен үш,
+    //     оннан бір, жүзден бір.
+    //
+    //     Digits on both sides only, and AFTER the km/сағ rate rules above so a unit slash is already consumed.
+    s = s.replace(/(?<![\d.,])(\d{1,3})\s?\/\s?(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+        const num = orthographic(Number(a)), den = orthographic(Number(b));
+        return num === "" || den === "" ? m0 : `${withCase(den, "abl")} ${num}`;
+    });
+
     // 8) DECIMAL COMMA → the word. Kazakh reads the decimal comma as "бүтін" (whole) with the fraction
     //    as a separate number.
     s = s.replace(/(?<=\d),(?=\d)/gu, " бүтін ");
@@ -349,6 +374,31 @@ export function normalizeKazakh(input: string): string {
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
+    // THE DIVISION SIGN (#654). ⚠ THE DIVISOR TAKES THE DATIVE, exactly as in az, and kk.wikipedia attests the
+    //    construction on NUMERIC operands directly:
+    //
+    //      "санның цифрларының қосындысы 3-ке бөлінсе, онда санның өзі де 3-ке бөлінеді"
+    //          if the sum of the number's digits is divisible BY 3, then the number itself is divisible BY 3
+    //      "осы санның 2-дәрежесі (яғни квадраты) де 4-ке бөлінеді"
+    //
+    //    plus the division article itself — "Бөлу - берілген көбейтінді және көбейткіштердің біреуі бойынша …",
+    //    and "кейде бөлу амалы қиғаш сызықпен (x/b)" (sometimes the division operation is written with a slash).
+    //    `бөлінеді` ×22 / 10 articles, `-ке бөлінеді` ×11 / 9.
+    //
+    //    ⚠ AND THE SUFFIX MACHINERY WAS ALREADY HERE — `withCase`, built for the corpus's own `200-ге` / `60-тан`
+    //    forms, which does harmony AND the voiceless/nasal variants (қырық → қырыққа). So the dative is one
+    //    call and nothing about Kazakh morphology is re-derived. Verified across бір…мың: бірге, екіге, үшке,
+    //    төртке, беске, алтыға, жетіге, сегізге, тоғызға, онға, жиырмаға, отызға, қырыққа, елуге, алпысқа,
+    //    жетпіске, сексенге, тоқсанға, жүзге, мыңға.
+    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
+        `${orthographic(Number(a))} ${withCase(orthographic(Number(b)), "dat")} бөлінеді`);
+
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
+    //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
+    //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
+    //    rule, since ± is a single character the + rule cannot see.
+    s = s.replace(/±/gu, " плюс минус ");
     s = s.replace(/(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "минус $1");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 есе $2");

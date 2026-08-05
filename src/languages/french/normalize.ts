@@ -220,6 +220,44 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //    range or a score ("2-1", "1918-1939") is not turned into a subtraction.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1moins $2");
 
+    // 5b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN — the notation is
+    //     absent from fr_fr (every `<` in the fleet is an HTML tag) while the vocabulary is ordinary prose.
+    //
+    //     ⚠ AND FRENCH INFLECTS, SO AN EXACT-FORM TOKEN COUNT UNDER-REPORTS THE LEMMA. Counted in fr_fr
+    //     (4158 utterances) the citation forms look thin, and the substring column is where the word actually
+    //     is — as inflection, not as a longer unrelated word:
+    //
+    //       `inférieur`   ×5 TOKEN                      — attested outright
+    //       `supérieur`   ×0 token / ×18 SUBSTRING      — all `supérieure(s)`, the feminine/plural of the SAME
+    //                                                     adjective, in 16 distinct utterances
+    //       `divisé`      ×0 token / ×2 SUBSTRING       — `divisée`, `divisées`: same past participle
+    //       `égal`        ×3 TOKEN / ×211 substring     ⚠ the 211 are `également` — see below
+    //
+    //     ⚠ `égale` IS THE SUBSTRING TRAP, AND IT IS THE SHARPEST INSTANCE YET: ×0 TOKEN / ×190 SUBSTRING, and
+    //     every one of the 190 is inside `également` ("also"), a word with no arithmetic sense at all. A plain
+    //     grep would have called it the best-attested of the four. That is the sixth time this error has been
+    //     caught, and the first where the containing word means something entirely unrelated.
+    //
+    //     ⚠ THE READING IS QUOTED VERBATIM FROM THE CANONICAL SOURCE. The register tier
+    //     (`attest.ts --context "mathématiques arithmétique division"`) put fr.wikipedia's Division article in
+    //     the sample, and that article reads the whole expression aloud, both signs in one sentence, between
+    //     two operands:
+    //
+    //       « a divisé par b est égal à c »
+    //
+    //     with the inequalities attested in the same register on numeric operands ("le plus grand multiple de 7
+    //     inférieur à 93", "tout nombre pair strictement supérieur à 2").
+    //
+    //     ⚠ THE COPULA IS KEPT HERE, unlike de/es/en, and that is a fact about French rather than a change of
+    //     policy. `sept égal à trois` is not a French construction — the adjective needs its verb — so the
+    //     bare form those languages use has no French equivalent to drop to. `lb` (`ass gläich`) and `nb`
+    //     (`er lik`) already ship the copular form, so the fleet has both shapes and this picks the one the
+    //     language admits. `divisé par` is a participle and needs no verb ("3 564 divisé par 17").
+    s = s.replace(/\s?=\s?/gu, " est égal à ");
+    s = s.replace(/\s?<\s?/gu, " est inférieur à ");
+    s = s.replace(/\s?>\s?/gu, " est supérieur à ");
+    s = s.replace(/\s?÷\s?/gu, " divisé par ");
+
     // 6) FRACTIONS. Guarded against a date (14/07/1789) and against a unit ratio (km/h) by requiring
     //    digits on both sides and nothing numeric after.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)/gu, (m0, a: string, b: string) =>

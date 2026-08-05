@@ -19,6 +19,7 @@
  * corpus writes numbers with ASCII digits throughout — so no digit transliteration is needed here.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 /**
  * Ordinal suffix → the gender/number it marks. Hindi writes the ordinal as the numeral plus this suffix
@@ -262,25 +263,13 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //     "+ 30° C से अधिक तापमान" ("temperature above +30 °C") and "800,000 से ज़्यादा सैनिकों"
         //     ("more than 800,000 soldiers"). Emitting the western order would have been fluent nonsense.
         //
-        //     TRAILING PUNCTUATION MUST NOT TRAVEL WITH THE OPERAND. `(\S+)` is greedy about it, and
-        //     `यह 5 < 6, और वह …` came out as "पाँच छह , से कम और" — the comma stranded BETWEEN the operand
-        //     and its postposition, i.e. a clause pause in the middle of a phrase. So the second operand is
-        //     split from its trailing marks and they are re-emitted AFTER the comparative word.
-        //
-        //     THE CATCH-ALL SECOND PASS is not redundant. `/g` replaces in ONE pass over the input, so in a
-        //     chain (`a < b < c`) the first match consumes `b` and the second `<` is left with no left
-        //     operand — it matched nothing and then vanished, turning a reorder into a DROP. A chained
-        //     comparison is absent from the corpus and reads awkwardly either way, but nothing may go silent.
-        const comparative = (sign: string, word: string): void => {
-            s = s.replace(new RegExp(`(\\S+)\\s*${sign}\\s*(\\S+)`, "gu"), (_m, a: string, b: string) => {
-                const split = /^(.*?)([,;।॥!?)\]"'’]*)$/su.exec(b);
-                const operand = split?.[1] ?? b, marks = split?.[2] ?? "";
-                return `${a} ${operand} ${word}${marks}`;
-            });
-            s = s.replace(new RegExp(`\\s?${sign}\\s?`, "gu"), ` ${word} `);
-        };
-        comparative("<", "से कम");
-        comparative(">", "से अधिक");
+        //     THE MECHANISM MOVED TO core/postposedSign.ts (#654), because mr/gu/ta and the verb-final
+        //     languages ja/ko/fa all need the same rewrite and its two non-obvious parts — keeping trailing
+        //     punctuation off the operand, and the catch-all second pass that stops a chained comparison from
+        //     going silent — are exactly the sort of thing that decays when copied. Both were defects found
+        //     here first; the shared module records them.
+        s = postposedSign(s, "<", "से कम");
+        s = postposedSign(s, ">", "से अधिक");
         //     बराबर — corpus: "इस अभिमुखता अनुपात के लगभग बराबर" ("approximately equal to this aspect
         //     ratio"). Infix, which is the arithmetic reading (दस जमा दस बराबर बीस).
         s = s.replace(/\s?=\s?/gu, " बराबर ");
@@ -291,7 +280,11 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         s = s.replace(/\s?×\s?/gu, " गुणा ");
         s = s.replace(/\s?÷\s?/gu, " भाग ");
         //     ± takes the pair named in the पूर्णांक citation above, in its conventional order.
-        s = s.replace(/±\s?/gu, "धन ऋण ");
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+        //    `तापमान±5` read *t̪aːpmˈaːnd̪ʱən*, one token, with the stress of neither. The shared symbol tier's
+        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        s = s.replace(/±/gu, " धन ऋण ");
         //     THE AMPERSAND, split the way the Mandarin pass split it: between LATIN letters it stays inside
         //     the run this engine already delegates to English (`AT&T`, `R&D` are English terms, and reading
         //     half of one in Hindi would be a code-switch mid-word); elsewhere it is और, which the corpus

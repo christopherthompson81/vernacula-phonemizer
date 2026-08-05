@@ -37,7 +37,7 @@
 import { readFileSync, writeFileSync, appendFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { LEAK_CLASSES, dropsIn, makeContribution } from "./defects.ts";
+import { DROPPABLE, LEAK_CLASSES, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
 import { CELLS, type Cell } from "./cells.ts";
 
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo #602, `bara 1945 tti`).
@@ -401,6 +401,8 @@ if (mode === "scan") {
     const { parseJsonc } = await import(new URL("../../src/core/jsonc.ts", import.meta.url).href);
     const doc = parseJsonc(readFileSync(inPath, "utf8")) as MinedCorpus & { hard: { cell: string; text: string }[] };
     const lines = [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])];
+    /** class name → its detector, so an accepted line is matched on the same pattern the drop used. */
+    const DROP_RE = new Map(DROPPABLE);
     for (const sentence of lines) {
         let ipa: string;
         try { ipa = phonemize(sentence, lang) as string; } catch { bump("THROW", sentence); continue; }
@@ -412,16 +414,33 @@ if (mode === "scan") {
         for (const [name, re] of LEAK_CLASSES) { re.lastIndex = 0; if (re.test(ipa)) bump(`LEAK ${name}`, sentence); }
         // REDUNDANT is a permissible drop and is reported as a NOTE, not a defect: where the sentence
         // itself says what the symbol means, the correct reading is byte-identical with and without it.
-        for (const d of dropsIn(sentence, ipa, say, contribution))
+        for (const d of dropsIn(sentence, ipa, say, contribution)) {
+            // ⚠ AN ACCEPTED SILENCE IS NOT A DEFECT HERE EITHER, and this scan was the one place that did not
+            // know it. `coverage.ts` has consulted `ACCEPTED_SILENT` since #586, so the SAME sentence was
+            // accepted by the audit and failed by `review.ts`, which runs this scan — mr's `चंद्रयान -1` is
+            // accepted as a designation in one tool and reported as a `DROP minus` in the other. The baseline
+            // is per-LINE and the artifact's line is the same designation the corpus's is, so the check
+            // belongs on both paths; disagreeing about it made one of the two gates unreadable.
+            if (isAcceptedSilent(lang, d.klass, sentence, DROP_RE.get(d.klass) ?? /$^/u)) {
+                bump(`ACCEPTED ${d.klass}`, sentence);
+                continue;
+            }
             bump(`${d.redundant ? "REDUNDANT" : "DROP"} ${d.klass}`, sentence);
+        }
     }
     function bump(k: string, s: string): void {
         hits.set(k, (hits.get(k) ?? 0) + 1);
         if (!example.has(k)) example.set(k, s.slice(0, 80));
     }
     console.log(`scanned ${lines.length} lines of ${inPath} as ${lang}\n`);
-    const defects = [...hits.entries()].filter(([k]) => !k.startsWith("REDUNDANT"));
-    const notes = [...hits.entries()].filter(([k]) => k.startsWith("REDUNDANT"));
+    // ⚠ `ACCEPTED` JOINS `REDUNDANT` AS A NOTE RATHER THAN A DEFECT. Both are drops that are CORRECT: redundant
+    // because the sentence already says the symbol's word, accepted because the line is a designation whose
+    // hyphen is silent in speech (ACCEPTED_SILENT, per instance). Counting either as a defect made `review.ts`
+    // report a permanent hard fail for a decision recorded in defects.ts — mr's `चंद्रयान -1` was accepted by
+    // coverage.ts and failed here, in the same repo, on the same line.
+    const isNote = (k: string): boolean => k.startsWith("REDUNDANT") || k.startsWith("ACCEPTED");
+    const defects = [...hits.entries()].filter(([k]) => !isNote(k));
+    const notes = [...hits.entries()].filter(([k]) => isNote(k));
     if (defects.length === 0) console.log("no defects");
     for (const [k, v] of defects.sort((a, b) => b[1] - a[1]))
         console.log(`${k.padEnd(18)} ×${String(v).padEnd(5)} e.g. ${example.get(k)}`);

@@ -49,7 +49,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
     });
 
     test("the table covers the sweep's whole residual, per class", () => {
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "kn", "mi", "mr", "my", "ta", "xh"]);
+        // ⚠ `mi` WAS REMOVED FROM THIS LIST IN #654, and the removal is the point of the gate rather than an
+        // exception to it. Its entry accepted `+30 tākiri` as correctly silent because Māori's inventory could
+        // not say the attested English loan — but #663 gave that engine an English READER for words it cannot
+        // spell, so the plus now reads [plˈʌs], the drop no longer happens, and the accept had nothing left to
+        // cover. A baseline entry that can never fire is worse than none: it would mask exactly the regression
+        // this table exists to make visible. Removed there, and here, together.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "kn", "mr", "my", "ta", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

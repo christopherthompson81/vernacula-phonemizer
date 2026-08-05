@@ -21,6 +21,7 @@
  */
 import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 const BN_DIGIT = Object.keys(BENGALI_DIGITS).join("");
 /** Either digit system. */
@@ -130,6 +131,22 @@ export function makeBengaliNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(new RegExp(`(^|[\\s(])[-−–]([${D}])`, "gu"), "$1ঋণাত্মক $2");
         s = s.replace(new RegExp(`(\\S)\\+\\s?([${D}])`, "gu"), "$1 যোগ $2");
         s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${D}])`, "gu"), "$1যোগ $2");
+
+        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from bn_in:
+        //
+        //   `সমান`       ×14 token   "রেসিওর সমান বা কাছাকাছি" — EQUAL TO the ratio
+        //   `থেকে কম`     ×2 phrase   ·  `থেকে বেশি` ×14 phrase — both postposed, with real operands
+        //   `ভাগ`        ×12 token   the division word (cognate of hi's भाग, which hi cites from its own wiki)
+        //
+        // ⚠ `ভাগ` IS ALSO A SUBSTRING TRAP: ×12 token but ×202 SUBSTRING, most of them inside বেশিরভাগ ("most"),
+        // which has no arithmetic sense. The token count is the evidence; the raw count is 17× larger and lying.
+        //
+        // The comparatives are POSTPOSITIONAL (থেকে follows the standard), so they use core/postposedSign.ts;
+        // an infix rule would read the comparison backwards. This normalizer serves as/bpy as well as bn.
+        s = postposedSign(s, "<", "থেকে কম");
+        s = postposedSign(s, ">", "থেকে বেশি");
+        s = s.replace(/\s?=\s?/gu, " সমান ");
+        s = s.replace(/\s?÷\s?/gu, " ভাগ ");
 
         // 7) FRACTIONS. Bengali states them as "denominator ভাগের numerator", the spoken form; ½ is অর্ধেক.
         s = s.replace(new RegExp(`(?<![${D}.,/])([${D}]{1,3})/([${D}]{1,3})(?![${D}/])`, "gu"),

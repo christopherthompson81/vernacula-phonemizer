@@ -8,6 +8,11 @@
 // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
 // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
 //
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
 // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
 // speech and the sense against the examples before using any of this to justify a reading.
 {
@@ -16,42 +21,19 @@
     "tier": "wikipedia",
     "findings": [
         {
-            "word": "amadola",
+            "word": "ukuhlukanisa",
             "verdict": "attested",
-            "tokenHits": 1,
-            "articles": 1,
+            "bounded": true,
+            "tokenHits": 10,
+            "articles": 8,
             "substringOnly": 0,
             "examples": [
-                "…hukileyo, iTaliya idayisela amanye amazwe izikhali alingene amaDola ayizigidi angama-881 wamaDola aseMelika. iTaliya ithenga im…"
-            ]
-        },
-        {
-            "word": "idola",
-            "verdict": "attested",
-            "tokenHits": 1,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…IDola yisifunda esingaphansi kwesifundazwe se Ngounié, eGabhoni.…"
-            ]
-        },
-        {
-            "word": "iiyeni",
-            "verdict": "absent",
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
-        },
-        {
-            "word": "amaphuzu",
-            "verdict": "attested",
-            "tokenHits": 2,
-            "articles": 1,
-            "substringOnly": 0,
-            "examples": [
-                "…anje ophethe irekhodi lomhlaba elincane lohlelo olufushane (amaphuzu we-87.33). Ungumpetha wethusi we-Youth Youth 2020, i-2019 J…",
-                "…70 selokhu kuqale isizini ka-2015/2016. == Izinhlelo == == Amaphuzu avelele wokuncintisana == == Imiphumela enemininingwane ==…"
+                "…ane All pages with titles containing ubusathane I-Satanist (ukuhlukanisa) USathane (ukuhlukanisa)…",
+                "…s containing ubusathane I-Satanist (ukuhlukanisa) USathane (ukuhlukanisa)…",
+                "…zesayensi ngeminyaka yawo-1960, nakuba u-E. Fries ahlongoza ukuhlukanisa lo mbuso ngo-1831, futhi uCarl Linnaeus wazwakalisa ukungab…",
+                "…cytology kanye ne-biochemistry yayiqoqwe, okwenza kube lula ukuhlukanisa leli qembu lezinto eziphilayo zibe amagatsha amaningana ang…",
+                "…muntu siqu nezinqalahlelo, izihawuza zabasebenzisi zenzelwe ukuhlukanisa izinhlonhlo, izijinjo, nemibhalo ngokwezimo zomsebenzisi ng…",
+                "…aningo livela esenzweni sokucwaninga, esisho 'ukucusumbula, ukuhlukanisa ngemininingwane,' lihlobene nelinye ibizo elithi 'ukuhlwaya…"
             ]
         }
     ],

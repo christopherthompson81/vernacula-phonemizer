@@ -50,6 +50,7 @@
  * (`+30°C`, `UTC+1`) lose almost nothing by staying silent. A wrong word is worse than a dropped sign.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 
 /**
  * SUPPLETIVE ORDINALS 1-4 and 6, indexed [masc sg, fem, neut sg, oblique/plural]. Gujarati writes these
@@ -237,6 +238,33 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 પ્લસ ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1પ્લસ ");
+
+        // 8b) THE RELATIONAL AND DIVISION SIGNS, and ± (#654). Sourced from gu_in throughout — gu.wikipedia is
+        //     thin here (`બરાબર`, `ભાગ્યા`, `વત્તા` are all ×0 in its arithmetic articles), so tier 2 is the
+        //     whole of the evidence.
+        //
+        //     ⚠ THE COMPARATIVES ARE POSTPOSITIONAL and use core/postposedSign.ts: Gujarati puts કરતાં after the
+        //     standard of comparison — "કીબોર્ડ કરતાં વધુ નવું" (newer than a keyboard) ×17,
+        //     "ધાર્યા કરતાં ઓછું" (less than expected) ×2. Substituting between the operands would read the
+        //     comparison backwards.
+        //
+        //     ⚠ THE DIVISION WORD COMES FROM FLEURS BEING A PARALLEL CORPUS. Its aspect-ratio sentence performs
+        //     a division aloud in 57 of the 67 languages, and the Gujarati translator wrote
+        //     "બાર દ્વારા વિભાજીત" — દ્વારા after the operand, then વિભાજીત — so this is postpositional too, and
+        //     it is a recording of a human saying it rather than a register guess (×3).
+        //
+        //     ± pairs this file's own audio-sourced પ્લસ with માઈનસ, its loan counterpart, in the juxtaposed form
+        //     every language that reads ± uses. The minus is the same loan: the corpus has no minus sign to
+        //     decode, so the pairing rests on પ્લસ having been decoded from the audio directly above.
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
+        //    `તાપમાન±5` read *t̪apmanˈəpləs*, one token, with the stress of neither. The shared symbol tier's
+        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
+        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        s = s.replace(/±/gu, " પ્લસ માઈનસ ");
+        s = postposedSign(s, "<", "કરતાં ઓછું");
+        s = postposedSign(s, ">", "કરતાં વધુ");
+        s = postposedSign(s, "÷", "દ્વારા વિભાજીત");
+        s = s.replace(/\s?=\s?/gu, " બરાબર ");
 
         s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી સેલ્સિયસ");
         s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/giu, "$1 ડિગ્રી ફેરનહીટ");

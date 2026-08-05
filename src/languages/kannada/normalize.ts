@@ -33,6 +33,7 @@
  * KANNADA spellings, whose interior dots were being read as clause breaks (step 6).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, ordinalStem, DECIMAL_WORD } from "./numbers.ts";
 
@@ -70,6 +71,15 @@ const NA = "(?![\\p{L}\\p{M}])";
  * "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ". The shared postposed "A per B" idiom cannot express it. Handled in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // ಮತ್ತು is ×1683 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "ಮತ್ತು",
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
@@ -274,6 +284,36 @@ export function normalizeKannada(input: string): string {
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
+
+    // THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE REGISTER SOURCE IS A SYMBOL GLOSSARY — kn.wikipedia's
+    // arithmetic article lists the signs with their Kannada names, which is the most direct tier-4 shape of all:
+    //
+    //   "… ಗುಣಿಸು (ಇನ್'ಟು) ಗುರುತು. ಭಾಗಾಹಾರ ಭಾಗಿಸುವುದು: '÷'  ಸಮ ಎಡ ಮತ್ತು ಬಲದ ಸಂಖ್ಯೆಗಳ ಬೆಲೆ ಸಮ '=' ಸರಿ-ಸಮ,(ಈಕ್ವಲ್ಸ್)"
+    //     …'×' is ಗುಣಿಸು · '÷' is ಭಾಗಿಸುವುದು · '=' is ಸಮ / ಸರಿ-ಸಮ, glossed with the English loan ಈಕ್ವಲ್ಸ್
+    //
+    // ⚠ AND `ಸಮ` IS THE LARGEST SUBSTRING TRAP IN THE ISSUE: ×0 TOKEN / ×399 SUBSTRING in kn_in, inside
+    // ಸಮುದಾಯ (community), ಸಮಾನವಾಗಿ (equally), ಸಮಸ್ಯೆ (problem). It is also a HOMOGRAPH in the right register —
+    // several of its wiki hits are ಸಮ ಸಂಖ್ಯೆ, "EVEN number" — so neither count could have settled it. The
+    // glossary line pairing it with the '=' glyph is the whole of the evidence.
+    //
+    // The comparatives come from kn_in and are POSTPOSITIONAL (ಗಿಂತ fuses to the standard —
+    // ಸಾಮಗ್ರಿಗಳಿಗಿಂತ ಕಡಿಮೆ): `ಗಿಂತ ಕಡಿಮೆ` ×6, `ಗಿಂತ ಹೆಚ್ಚು` ×12. The division word is the corpus's own form from
+    // ⚠ THE DIVISION WORD WAS CHANGED AFTER espeak's DICTSOURCE WAS CONSULTED, and the parallel sentence is why
+    // it was wrong the first time. That sentence gives `ಭಾಗಿಸುವಿಕೆ` ×3 ("ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ"), a verbal noun
+    // inflected for its own clause — the exact trap recorded for ml, where the harvest supplies the ROOT and not
+    // the FORM. Three sources agree on the neutral term instead:
+    //
+    //   espeak kn_list:  ÷  b#a:ga:ka:ra   = ಭಾಗಾಕಾರ, a hand-authored pronunciation for the GLYPH
+    //   kn.wikipedia:    ಭಾಗಾಕಾರ ×11 / 7 articles, against ಭಾಗಿಸುವಿಕೆ ×0
+    //   and the hit is the FOUR-OPERATIONS article — "ನಾಲ್ಕು ಕ್ರಿಯೆಗಳಲ್ಲಿ ಒಂದಾಗಿದೆ. ಉಳಿದ ಕ್ರಿಯೆಗಳೆಂದರೆ ಸಂಕಲನ,
+    //   ವ್ಯವಕಲನ, ಗುಣಾಕಾರ" (one of the four operations; the others are addition, subtraction, multiplication)
+    //
+    // The corpus is the higher tier in general and is not the better source HERE, because what it contains is
+    // one translator's subordinate clause rather than the language's term for the operation.
+    s = postposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
+    s = postposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
+    s = s.replace(/\s?=\s?/gu, " ಸಮ ");
+    s = s.replace(/\s?÷\s?/gu, " ಭಾಗಾಕಾರ ");
 
     return s;
 }

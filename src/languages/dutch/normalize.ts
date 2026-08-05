@@ -231,6 +231,32 @@ export function normalizeDutch(input: string): string {
     //    negatives. AFTER step 8, so `+30°C` has already become `+30 graden Celsius`.
     s = s.replace(/\+\s?(?=\d)/gu, " plus ");
 
+    // 9b) ± AND THE RELATIONAL AND DIVISION SIGNS (#654). ± is this language's own two words juxtaposed, and
+    //     the `plus` half is lifted from the rule directly above; `min` is not otherwise in this file precisely
+    //     because nl_nl has no true minus sign (see the note above), so `min` is the one word here that comes
+    //     from the register rather than from the tree. It is the standard Dutch reading of the sign and matches
+    //     the juxtaposed form every language that already read ± uses (bg/da/is/nb/ro/sv).
+    s = s.replace(/±/gu, " plus min ");
+
+    //     ⚠ THE ONLY LANGUAGE IN THIS BATCH WHERE TIER 2 SETTLED THE READING ON ITS OWN. Counted in nl_nl:
+    //
+    //       `is gelijk aan` ×2 phrase   ("het cijfer is gelijk aan het cijfer van noorwegen")
+    //       `gelijk aan`    ×3 phrase   ·  `kleiner dan` ×5 phrase   ("fotonen zijn zelfs nog kleiner dan …")
+    //       `groter dan`    ×0 phrase but `groter` ×21 TOKEN — the construction is ADJ + `dan`, and its sibling
+    //                                   `kleiner dan` proves the construction, exactly as `de` needed for
+    //                                   `größer als`
+    //       `gedeeld door`  ×0 token / ×3 SUBSTRING — `gedeelde`, the inflected participle, not a longer word
+    //
+    //     The register tier confirms the division word in the slot with numeric operands rather than supplying
+    //     it: "13 gedeeld door 10 levert 1 als quotiënt en 3 als rest op", "Elk even getal groter dan 2".
+    //
+    //     The copula is kept for the equality only, because that is the attested string and Dutch says it that
+    //     way; the comparatives read as the sign names, which is how the register uses them.
+    s = s.replace(/\s?=\s?/gu, " is gelijk aan ");
+    s = s.replace(/\s?<\s?/gu, " kleiner dan ");
+    s = s.replace(/\s?>\s?/gu, " groter dan ");
+    s = s.replace(/\s?÷\s?/gu, " gedeeld door ");
+
     // 10) AMPERSAND → *en*, which is simply how Dutch reads it (×4, all silently dropped before). The
     //     tight `X&Y` form (`P&R`, `B&B`) is spelled with LETTER NAMES, because the shared initialism pass
     //     claims runs of two or more capitals and so cannot see a single letter either side of the `&`.

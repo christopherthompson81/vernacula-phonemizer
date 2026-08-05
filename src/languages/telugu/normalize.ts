@@ -34,6 +34,7 @@
  * as clause breaks (step 5).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, yearToWords, isCenturyYear } from "./numbers.ts";
 
@@ -65,6 +66,15 @@ const TE_LETTER = "\\u0C00-\\u0C65\\u0C70-\\u0C7F";
  * shared "A per B" postposed idiom cannot express it. Handled locally in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
+    // మరియు is ×1003 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
+    //
+    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
+    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
+    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    ampersand: "మరియు",
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
@@ -296,10 +306,46 @@ export function normalizeTelugu(input: string): string {
     //      operand must not get there first. Both arms, so the sign is read glued to a label or opening the
     //      quantity; the measurement position is voiced too because for a TTS target an explicitly typed
     //      character is content, not a reader's habit to copy.
+    // THE MINUS AND ± (#654). ⚠ MEASURED SAFE: every `-<digit>` in te_in is a range, score or closed
+    //    designation, with ZERO instances of `word · space · hyphen · digit` — the shape no guard can reject and
+    //    the reason gu, kn, mr, nl, ta and yue all decline this rule.
+    //
+    //    ⚠ AND THE SOURCE IS A NEGATIVE QUANTITY WITH THE SIGN NAMED, which is exactly this rule's case:
+    //
+    //      "రేడియల్ వేగాన్ని -5.5 కి.మీ./సె. ఖచ్చితంగా నిర్ధారించారు. ఈ మైనస్ గుర్తు …"
+    //         determined the radial velocity as -5.5 km/s. This MINUS SIGN …
+    //
+    //    `మైనస్ గుర్తు` ("minus sign") ×2, `మైనస్` ×13 / 8 articles, `రుణాత్మక` (negative) ×14. The first quote
+    //    is worth more than all the counts: a signed number in running prose, with the language naming the sign
+    //    it just used.
+    //
+    //    Three guards: a digit immediately after the sign, a letter or digit immediately before, and a digit
+    //    ANYWHERE to the left — the last for the SPACED range or score the fleet's usual guard misses.
+    s = s.replace(/±/gu, " ప్లస్ మైనస్ ");
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "మైనస్ ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ప్లస్ ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
 
     // 13) DEGREES, after the decimal step so a temperature like 1.5°C keeps its point. ×2.
+    // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from te_in:
+    //
+    //   `సమానం`        ×3 token   "కారక నిష్పత్తికి సమానంగా" — EQUAL TO the aspect ratio
+    //   `కంటే తక్కువ`   ×2 phrase  "బరువు కంటే తక్కువ" — less than the weight
+    //   `కంటే ఎక్కువ`   ×40 phrase
+    //   `భాగించడం`     ×2         "పన్నెండుతో భాగించడం" — FLEURS's parallel division sentence
+    //
+    // ⚠ AND TELUGU IS WHY THE HARVEST'S COUNT OF 57 WAS AN UNDERCOUNT. The `--sentence '3\s?:\s?2'` probe
+    // reported te as ABSENT, because this transcript writes the ratio WITHOUT the colon — "3 2 గా చెప్పబడింది".
+    // The sentence is there; the regex was too strict. A parallel-sentence probe has to be keyed on something
+    // the translators could not reformat, and a punctuation mark is not that.
+    //
+    // The comparatives are POSTPOSITIONAL (కంటే follows the standard), so they use core/postposedSign.ts.
+    s = postposedSign(s, "<", "కంటే తక్కువ");
+    s = postposedSign(s, ">", "కంటే ఎక్కువ");
+    s = s.replace(/\s?=\s?/gu, " సమానం ");
+    s = s.replace(/\s?÷\s?/gu, " భాగించడం ");
+
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");
     s = s.replace(/(\d)\s?°/gu, "$1 డిగ్రీలు");
