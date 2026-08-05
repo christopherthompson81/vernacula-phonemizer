@@ -85,6 +85,27 @@ if (lang === undefined) {
 }
 const wiki = arg("wiki", lang)!;
 const limit = Number(arg("limit", "40"));
+/**
+ * `--context` — THE REGISTER TIER (#654), and the one the sign-reading work showed is not optional.
+ *
+ * Terms appended to the SEARCH query only. The hit test, the token boundaries and the verdict are untouched:
+ * this narrows WHICH ARTICLES are sampled, it does not loosen what counts as a hit.
+ *
+ * ⚠ WHY A SEARCH-SIDE RESTRICTION AND NOT A BETTER WORD LIST. Plain `--words` asks whether a word exists, and
+ * for a mathematical reading that question has a false-positive answer. Probing German
+ * `ist gleich,kleiner als,größer als,geteilt durch` returned three `absent` and one `attested` — `größer als`
+ * ×2, **both from "Gott ist größer als Elvis", a film title.** The word existed; the sense was cinema. Appending
+ * the language's own words for arithmetic to the query puts the sample in maths prose, where a hit for a
+ * relational word is a hit in the slot the sign occupies.
+ *
+ * ⚠ AND IT IS STILL NOT A SENSE TEST. Restricting the sample raises the prior; it cannot check the reading.
+ * Read the examples — that instruction gets stronger here, not weaker, because a plausible register makes a
+ * wrong quote easier to accept.
+ *
+ *   npx tsx tools/normalization/attest.ts --lang es --words "igual a,dividido entre" \
+ *     --context "matemáticas aritmética división"
+ */
+const context = arg("context");
 const OUT_DIR = "tools/corpus/attest";
 const UA = "vernacula-phonemizer-attestation-probe/0.1 (https://github.com/christopherthompson81/vernacula-phonemizer)";
 
@@ -182,8 +203,10 @@ async function probe(word: string): Promise<Finding> {
     // CirrusSearch tokenises, so a plain term search is the right recall net; the token test below is what
     // supplies the precision. `insource:` regex was tried and is worse here — it is expensive on small wikis
     // and its own \b is ASCII-defined, which is the trap that disabled the initialism pass fleet-wide.
+    // ⚠ THE SEARCH QUERY MAY CARRY `--context` TERMS; THE HIT TEST NEVER DOES. Widening the query narrows the
+    // article sample to a register (see `--context` above); `hitRe` below still tests the probed word alone.
     const s = await api({
-        action: "query", list: "search", srsearch: word,
+        action: "query", list: "search", srsearch: context === undefined ? word : `${word} ${context}`,
         srlimit: String(Math.min(limit, 50)), srnamespace: "0", srprop: "snippet",
     });
     const hits: any[] = s?.query?.search ?? [];
@@ -195,10 +218,25 @@ async function probe(word: string): Promise<Finding> {
     // Same encoded-length budget as the slot probe: a count-based batch overflows the URI in a non-Latin
     // script, and only the FIRST batch is needed here since `limit` already caps the sample.
     const titles = titleBatches(hits.map((h) => String(h.title)))[0] ?? [];
-    const e = await api({ action: "query", titles: titles.join("|"), prop: "extracts", explaintext: "1", exlimit: "20" });
+    // ⚠ ONE TITLE PER REQUEST, AND THIS IS NOT AN INEFFICIENCY — IT IS THE FIX FOR A MANUFACTURED NEGATIVE.
+    //
+    // This call used to pass all 20 titles with `exlimit: "20"`. The API accepts that and answers with a
+    // WARNING rather than an error — `"exlimit" was too large for a whole article extracts request, lowered
+    // to 1` — and returns the first page only. So the probe searched twenty articles, read ONE, and reported
+    // the other nineteen as containing nothing. Every `absent` and every low `articles` count produced before
+    // this fix understates by up to 20×, including the #654 pilot's three German `absent` verdicts.
+    //
+    // The alternative the API offers is `exintro=1`, which does allow 20 pages — but only their LEAD
+    // paragraph, and a relational word or a unit modifier is body prose, not summary prose. Reading whole
+    // articles one at a time is the request this tool actually needs; `limit` already caps the sample size.
+    const pages: any[] = [];
+    for (const t of titles) {
+        const e = await api({ action: "query", titles: t, prop: "extracts", explaintext: "1", exlimit: "1" });
+        pages.push(...Object.values<any>(e?.query?.pages ?? {}));
+    }
     let tokenHits = 0, articles = 0, substringOnly = 0;
     const examples: string[] = [];
-    for (const p of Object.values<any>(e?.query?.pages ?? {})) {
+    for (const p of pages) {
         const text = String(p.extract ?? "").replace(/\s+/gu, " ");
         if (text === "") continue;
         // The token set gates the count for a bounded SINGLE WORD only. For an unspaced script it would gate
@@ -385,7 +423,10 @@ writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Writte
 {
     "language": ${esc(lang)},
     "wiki": ${esc(`${wiki}.wikipedia.org`)},
-    "tier": "wikipedia",
+    "tier": ${esc(context === undefined ? "wikipedia" : "wikipedia (register-restricted)")},${context === undefined ? "" : `
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // \`--context\` set to exactly this string.
+    "context": ${esc(context)},`}
     "findings": [
 ${findings.map((f) => `        {
             "word": ${esc(f.word)},
