@@ -301,6 +301,24 @@ export function normalizeTamil(input: string): string {
     //     Both arms, so the sign is read whether it is glued to a label (`UTC+1`) or opens the quantity.
     //     After the decimal step and before degrees: the plus attaches to a number that later rules still
     //     need to see as a bare numeral.
+    // ⚠ ± FROM espeak's DICTSOURCE — A TIER THIS ISSUE HAD NEVER QUERIED (#654). `ta_list` carries the sign
+    //    itself with its reading, and it is the same pair the wiki attests:
+    //
+    //      ta_list:  ±   k'u:t.t.Vl||k'Vz.ittVl     = கூட்டல் கழித்தல்  (addition subtraction)
+    //      ta.wikipedia: `கூட்டல் கழித்தல்` ×1
+    //
+    //    Two independent tiers agreeing on a reading neither could have settled alone — the wiki hit is ×1,
+    //    which is a lead and not a finding, and espeak's entry is a hand-authored pronunciation rather than
+    //    running prose. Together they are the sourcing this cell needed.
+    //
+    //    ⚠ AND THE SAME FILE CORROBORATES TWO READINGS ALREADY SHIPPED HERE: `= sVmVm // சமம்` and
+    //    `÷ vVgUttVl // வகுத்தல்` are exactly what the wiki's quoted readings gave (see step 8b). Independent
+    //    confirmation of a per-language judgement, from a source consulted after the fact.
+    //
+    //    Both halves are OPERATION nouns rather than polarity words, which is why ± is shippable here while the
+    //    bare minus is not (see ACCEPTED_SIGN_SILENCE): ± names a pair of operations applied to a tolerance, and
+    //    `கழித்தல்` reading a bare `-5` would state a subtraction where the sign marks polarity.
+    s = s.replace(/±/gu, " கூட்டல் கழித்தல் ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
 
