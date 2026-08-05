@@ -36,6 +36,7 @@
  *   npx tsx tools/normalization/corpus-words.ts --lang de --words gleich --examples 5
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
 
 const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
@@ -50,9 +51,37 @@ const arg = (n: string, d?: string): string | undefined => {
 const SPACELESS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Tibetan}\p{Script=Myanmar}]/u;
 
 /** Every utterance in this language's corpus — the normalized transcript column, one per line. */
+/**
+ * ⚠ "ABSENT" MUST MEAN "LOOKED AND DID NOT FIND", NOT "HAD NOWHERE TO LOOK. This tool is the tier-2 gate — the
+ * one #654 treats as the strongest text source and uses to decide whether a language's vocabulary is real — and
+ * for a language with no FLEURS corpus it reported, verbatim:
+ *
+ *     km: 0 utterances, 0 distinct tokens
+ *       ភាគរយ      absent      phrase ×0
+ *
+ * about words whose true counts in that language's own mined corpus are 445 (percent), 712 (dollar) and 172
+ * (degree). The verdict said ABSENT, not "no corpus", so it is indistinguishable from a real negative — and a
+ * real negative here is what drives an "attested nowhere" conclusion for a whole sign class.
+ *
+ * ⚠ AND THE ARTIFACT IS NOT A SUBSTITUTE FOR A CORPUS ON COUNTS. It holds a few hundred lines — an adversarial
+ * hard-set plus a strided sample — against a mined corpus of a hundred thousand segments. So it answers
+ * ATTESTATION ("this word is real in this language") and must never be read as frequency: a count of 2 here is
+ * not evidence of rarity. `--text <file>` points at a full extracted corpus when one is on disk, which is the
+ * only way to get a trustworthy count for these languages.
+ */
+function minedUtterances(code: string): string[] {
+    const art = new URL(`../corpus/mined/${code}.jsonc`, import.meta.url).pathname;
+    if (!existsSync(art)) return [];
+    const doc = parseJsonc(readFileSync(art, "utf8")) as { hard?: { text: string }[]; sample?: string[] };
+    return [...(doc.hard ?? []).map((h) => h.text), ...(doc.sample ?? [])];
+}
+
 function utterances(code: string): string[] {
-    if (!existsSync(CORPUS_ROOT)) throw new Error(`no corpus at ${CORPUS_ROOT} (set $FLEURS)`);
+    const local = arg("text");
+    if (local !== undefined) return readFileSync(local, "utf8").split("\n").filter((l) => l !== "");
+    if (!existsSync(CORPUS_ROOT)) return minedUtterances(code);
     const dirs = readdirSync(CORPUS_ROOT).filter((c) => c === code || c.startsWith(`${code}_`));
+    if (dirs.length === 0) return minedUtterances(code);
     const out: string[] = [];
     for (const d of dirs)
         for (const f of readdirSync(join(CORPUS_ROOT, d)).filter((f) => f.endsWith(".tsv")))
