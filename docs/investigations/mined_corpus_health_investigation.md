@@ -798,69 +798,32 @@ against 1,639. The rate is the only comparable figure, and computing it reversed
 
 ---
 
-## What these artifacts unlock, beyond their own gate
+## ⚠ CORRECTION — what `coverage.ts` is actually limited by
 
-`coverage.ts` — the fleet-wide sign sweep that drove every decision in #654 — reads FLEURS corpora directly
-(`CORPUS_ROOT`) and prints its results as `N/67`. That denominator is not a choice; it is the number of
-languages that had a corpus. Verified: the file has no path to any other text.
+An earlier version of this section, and the body of the pull request that merged this work, claimed that
+`coverage.ts` "reads FLEURS corpora directly and prints `N/67`", and that the denominator "was never a choice —
+it is the number of languages that had a corpus". **Both halves are wrong**, and the file says so plainly if
+read rather than skimmed.
 
-So #654's central table — *"`÷` dropped by 4/67, `±` by 12/67, `minus` by 2/67"* — is a statement about the
-FLEURS languages and silent about the other 121. Every question of that shape was capped the same way.
+- `evidence()` **already prefers the mined artifact** and falls back to FLEURS only when none exists. That has
+  been true since #585's Burmese pilot, which is listed in its own map as *"No FLEURS corpus — checked entirely
+  from its mined artifact"*. The file even documents a period when a wrong relative path made the artifact
+  branch silently never fire — so the behaviour was not only intended, it was debugged.
+- The `/67` denominator is `TREATED`, derived from **the presence of `src/languages/<dir>/normalize.ts`**.
+  Measured: 67 directories have a normalization layer, 66 FLEURS corpora exist, 154 artifacts are committed. The
+  denominator tracks TREATMENT, not evidence.
 
-**These 74 artifacts remove the cap.** The same sweep, pointed at mined artifacts instead of FLEURS
-transcripts, would answer the same questions with a denominator of 141. That is a larger consequence than the
-gate this issue asked for: #585 was scoped as "extend the normalization gate", and what it actually produces is
-a corpus for every fleet-wide measurement that was previously confined to the languages Google happened to
-record.
+So the artifacts do not unlock a larger denominator by being pointed at — they are already being read. What
+bounds the audit is that it only examines languages which already have a normalization layer, because a DROP
+there is a regression in finished work.
 
-Nothing here does that work — `coverage.ts` is untouched and still reads FLEURS — but the blocker was the
-corpora, and the corpora now exist.
+**The real gap is the other direction.** The 87 newly mined languages have evidence and no layer, so this audit
+skips them entirely — while an ad-hoc `mine.ts scan` across their artifacts found thousands of dropped symbols.
+Those are not regressions; they are the work items for treating each language. Extending the audit to report
+them, separated from the treated set so the two are never confused, is what would make the denominator 154.
 
----
-
-## Run 18 — 2026-08-05 13:05 · an adversarial selector concentrates contact data, so the pipeline discards it
-
-A cell selector that hunts digit density will preferentially choose the most digit-dense paragraphs a wiki
-contains — and in an encyclopedia those are not always measurements. A contact block is almost pure digits: a
-dialling number, a postcode, a street number. A URL path is almost pure slashes. So `digit-run`, `ranges`,
-`signed-number` and `fractions` will each reach for that material ahead of ordinary prose.
-
-That is a structural property of adversarial selection rather than a property of any particular wiki, and it has
-two separate consequences:
-
-1. **Personal contact details are not speech and must not enter a mined corpus at all.** This repository is
-   public, and the artifacts are committed. Nothing about a phone number, an email address or a residential
-   address belongs in a normalization hard-set.
-2. **A bare URL is a bad test case even setting that aside.** It was being selected as a FRACTION example
-   because its path contains slashes, which tests nothing a reader would ever say aloud.
-
-`RE_PERSONAL` therefore discards, whole, any paragraph carrying an email address, a `Tel:` / `phone no.`
-contact record, an international dialling number, a personal social-profile link, or a bare URL. Whole
-paragraph, because there is no partial redaction that leaves trustworthy prose behind — the text surrounding a
-contact block is more contact block.
-
-### Three false positives the pattern had to be taught
-
-- **A product name containing "Phone" followed by a version number.** The first pattern was
-  `\b(?:tel|phone|…)\b\s*[.:]?\s*\d`, which fires on ordinary prose about consumer hardware.
-- **An ISBN-13.** Indistinguishable from a phone number to a naive pattern — both are hyphen-grouped digit runs,
-  and ISBNs beginning `978-` filled the entire "phone-like" column of the first scan.
-- **Prose about the telephone as a social technology.** The word is not the number.
-
-So `phone` / `telephone` / `mobile` now require an explicit `:` or `no.`, while `tel` / `tél` / `tlf` keep the
-looser form, and a bare international dialling number is matched on its own shape.
-
-### Cost, measured
-
-Zero email, social-link or URL residue in the regenerated set, and **cell coverage unchanged in 15 of 16**
-languages measured (one dropped a single cell). The guard removes material that was standing IN FOR real
-examples rather than the examples themselves — a URL occupying a `fractions` slot that should hold a fraction.
-
-### Where these guards are tested
-
-`filter-markup.py --self-test` asserts nine cases, including the three false positives above and one "the
-symbols this corpus exists to test must survive". Every fixture is FABRICATED and labelled as such. The guards
-are Python and this repository's suite is TypeScript, so without that flag nothing would hold them.
+Recording the correction rather than quietly editing the claim, because the wrong version is already in a merged
+commit message and cannot be edited there.
 
 ## Open gaps, recorded rather than rediscovered
 
