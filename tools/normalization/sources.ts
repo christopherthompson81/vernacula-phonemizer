@@ -31,6 +31,7 @@
  *   npx tsx tools/normalization/sources.ts --all --blocked   # only the classes with no source
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
 
 const argv = process.argv.slice(2);
@@ -83,6 +84,24 @@ function context(code: string): Ctx {
         for (const cd of readdirSync(CORPUS_ROOT).filter((c) => c.startsWith(`${code}_`)))
             for (const f of readdirSync(join(CORPUS_ROOT, cd)).filter((f) => f.endsWith(".tsv")))
                 corpus += read(join(CORPUS_ROOT, cd, f));
+    /**
+     * ⚠ AND THE MINED ARTIFACT, BECAUSE OTHERWISE THIS TOOL MANUFACTURES SETTLED REFUSALS. Every "no % in
+     * corpus" verdict below is read off `ctx.corpus`, and for a language with no FLEURS corpus that string was
+     * EMPTY — so the report said `[ · ] percent-word — no % in corpus` about a language whose mined artifact
+     * carries 1,291 percent signs, 4,014 ranges and 15,952 iteration marks.
+     *
+     * That is the worst possible failure for THIS file specifically. Its whole purpose, stated in its own
+     * header, is that "the check becomes a lookup" so nobody re-investigates a settled class — and it cites a
+     * language that deferred 119 initialisms because someone concluded the seam did not exist. A false `·` here
+     * does not merely mislead one pass; it tells every later pass that the class does not apply.
+     *
+     * The artifact is appended rather than substituted, so a language with BOTH sources is judged on both.
+     */
+    const art = new URL(`../corpus/mined/${code}.jsonc`, import.meta.url).pathname;
+    if (existsSync(art)) {
+        const doc = parseJsonc(read(art)) as { hard?: { text: string }[]; sample?: string[] };
+        corpus += [...(doc.hard ?? []).map((h) => h.text), ...(doc.sample ?? [])].join("\n");
+    }
     let referee = "";
     if (existsSync(REFEREES))
         for (const f of readdirSync(REFEREES).filter((f) => f.startsWith(`${code}.`))) referee += read(join(REFEREES, f));
@@ -327,6 +346,7 @@ if (has("all")) {
     for (const r of rows) console.log(`  [${MARK[r.verdict]}] ${r.klass.padEnd(16)} ${r.detail}`);
     console.log(`\n  espeak: ${ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
         + ` · referee: ${ctx.referee === "" ? "none" : `${ctx.referee.split("\n").length} lines`}`
-        + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`);
+        + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`
+        + (existsSync(new URL(`../corpus/mined/${ctx.code}.jsonc`, import.meta.url).pathname) ? " (incl. mined artifact)" : ""));
     console.log(`\n  AVAILABILITY IS NOT CORRECTNESS. Read the source before using it (the Fula lesson).\n`);
 }
