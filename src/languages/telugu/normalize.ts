@@ -34,6 +34,7 @@
  * as clause breaks (step 5).
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
+import { postposedSign } from "../../core/postposedSign.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords, ordinalToWords, yearToWords, isCenturyYear } from "./numbers.ts";
 
@@ -300,6 +301,24 @@ export function normalizeTelugu(input: string): string {
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
 
     // 13) DEGREES, after the decimal step so a temperature like 1.5°C keeps its point. ×2.
+    // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from te_in:
+    //
+    //   `సమానం`        ×3 token   "కారక నిష్పత్తికి సమానంగా" — EQUAL TO the aspect ratio
+    //   `కంటే తక్కువ`   ×2 phrase  "బరువు కంటే తక్కువ" — less than the weight
+    //   `కంటే ఎక్కువ`   ×40 phrase
+    //   `భాగించడం`     ×2         "పన్నెండుతో భాగించడం" — FLEURS's parallel division sentence
+    //
+    // ⚠ AND TELUGU IS WHY THE HARVEST'S COUNT OF 57 WAS AN UNDERCOUNT. The `--sentence '3\s?:\s?2'` probe
+    // reported te as ABSENT, because this transcript writes the ratio WITHOUT the colon — "3 2 గా చెప్పబడింది".
+    // The sentence is there; the regex was too strict. A parallel-sentence probe has to be keyed on something
+    // the translators could not reformat, and a punctuation mark is not that.
+    //
+    // The comparatives are POSTPOSITIONAL (కంటే follows the standard), so they use core/postposedSign.ts.
+    s = postposedSign(s, "<", "కంటే తక్కువ");
+    s = postposedSign(s, ">", "కంటే ఎక్కువ");
+    s = s.replace(/\s?=\s?/gu, " సమానం ");
+    s = s.replace(/\s?÷\s?/gu, " భాగించడం ");
+
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}])/giu, "$1 డిగ్రీల సెల్సియస్");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}])/giu, "$1 డిగ్రీల ఫారెన్‌హీట్");
     s = s.replace(/(\d)\s?°/gu, "$1 డిగ్రీలు");

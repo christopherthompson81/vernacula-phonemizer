@@ -176,5 +176,28 @@ export function normalizeSwahili(input: string): string {
     //    score like "26 - 00" must keep its bare juxtaposition rather than gain a spurious pause.
     s = s.replace(/(?<![\d])\s+[-–—]+\s+(?![\d])/gu, ", ");
 
+    // THE RELATIONAL AND DIVISION SIGNS (#654). Swahili is SVO, so all four read infix.
+    //
+    // ⚠ THE REGISTER SOURCE SHOWS THE ÷ GLYPH ITSELF: sw.wikipedia writes "hesabu ya kugawanya namba moja kwa
+    // nyingine. Kama swali ni 6 ÷ 3 basi hisa yake…" — the operation of dividing one number BY another, with
+    // the notation in the sentence. That also gives the construction: kugawanya X **kwa** Y.
+    //
+    // ⚠ AND THE CORPUS'S OWN DIVISION HITS ARE THE PARTITION SENSE, which per the Ukrainian correction is
+    // neither evidence for nor against: `kugawanya nyuklia` is nuclear FISSION and `inayogawanya picha kwa
+    // thuluthi` is dividing a picture into thirds. Same lemma, sense carried by the argument. The register
+    // quote is what puts it on a numeric operand.
+    //
+    // The other three come from sw_ke, where they are strongly attested with quantities:
+    //   `sawa na`   ×27  "ni sawa na au takribani sawa na uwiano huu" — EQUAL TO this ratio
+    //   `chini ya`  ×70  "huenda chini ya kiwango cha kugandisha" — goes BELOW freezing point
+    //   `zaidi ya`  ×107
+    // ⚠ `chini ya`'s two WIKI hits are the wrong sense ("Chini ya Elimu kwa wote" — UNDER the programme), so
+    // here the corpus is the better source and the register tier the weaker one — the reverse of the usual
+    // order in this issue, and a reminder that the tiers rank haystacks, not individual findings.
+    s = s.replace(/\s?=\s?/gu, " sawa na ");
+    s = s.replace(/\s?<\s?/gu, " chini ya ");
+    s = s.replace(/\s?>\s?/gu, " zaidi ya ");
+    s = s.replace(/\s?÷\s?/gu, " kugawanya kwa ");
+
     return s;
 }
