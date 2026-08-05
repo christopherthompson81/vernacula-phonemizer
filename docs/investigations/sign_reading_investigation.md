@@ -2769,3 +2769,104 @@ it had no evidence for. Every subsequent diff in this session was run with an ex
 Thirteen languages now read all four: de es fr pt it ru nl pl uk el ar ja ko tr (fourteen counting `ar`'s ten
 codes as one). Gates per language, run separately: tsc PASS; 208 files / 2951 tests; corpus diff ar 0/1702,
 ko 0/1746, tr 0/1876, ja 4/1788 (every change read, all four the particle fix).
+
+## Run 42 — 2026-08-04 — #654: vi th id fa, and FLEURS is a PARALLEL corpus
+
+    vi  bảy bằng ba · nhỏ hơn · lớn hơn · chia cho          th  เจ็ด เท่ากับ สาม · น้อยกว่า · มากกว่า · หารด้วย
+    id  tujuh sama dengan tiga · lebih kecil/besar dari     fa  هفت برابر است با سه · کوچکتر از … است · تقسیم بر
+
+### 📌 THE FINDING THAT CHANGES THE REST OF THIS ISSUE
+
+**FLEURS is a parallel corpus, and one of its sentences reads a division ALOUD with a numeral operand.** The
+English is *"the aspect ratio of this format dividing by twelve to obtain the simplest whole-number ratio is
+therefore said to be 3:2"*, and it is present in **57 of the 67 corpora**:
+
+    de  geteilt durch zwölf     es  dividir por doce      fr  en divisant par douze   it  diviso per dodici
+    ru  поделенное на двенадцать uk  поділене на дванадцять pl  dzielimy przez dwanaście  el  διαιρούμενος με το δώδεκα
+    vi  chia cho mười hai       th  หารด้วย 12            id  dibagi dua belas        fa  تقسیم بر دوازده
+    ar  القسمة على 12           ja  —                     ko  —                       tr  on ikiye bölünür
+    hi  से भाग देना             ta  ஆல் வகுத்தல்           ml  ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ  ur  سے تقسیم دے کر
+    cy  rannu â deuddeg         ga  roinnt ar a dó dhéag  ms  terbahagi kepada        uz  o'n ikkiga bo'lish
+    …and 30 more.  MISSING in 10: af as bn ff ha om or sw te xh zu
+
+So for almost every language left, **the division word is available at the STRONGEST tier** — a recording of a
+human saying it, in the slot, with a numeral operand — rather than at tier 3 (Wikipedia existence) or tier 4
+(register). I had been treating tier 2 as "search the corpus for the word" and it is better than that: *search the
+corpus for the SENTENCE that performs the operation, then read what the translator wrote.*
+
+⚠ It also retroactively corroborates readings already shipped from other tiers (de `geteilt durch`, fa `تقسیم بر`,
+th `หารด้วย`, vi `chia cho`, id `dibagi` are all this sentence), and flags two to revisit: es_419 writes `dividir
+por` (infinitive) where I shipped the participle `dividido por`, and el writes `διαιρούμενος με` where I shipped
+`διά`. Neither is wrong — the corpus instance is inflected *for its sentence* (`διαιρούμενος` agrees with `λόγος`)
+while a sign reading must be neutral — but the tension is worth recording rather than smoothing over.
+
+### ⚠ THE HOMOGRAPH MAJORITY, AND THE ESCAPE FROM IT
+
+Vietnamese `bằng` is the في trap at full strength: **×352 token hits on vi.wikipedia, ×224 corpus phrase hits, and
+every sampled one is the INSTRUMENTAL preposition** — "bằng các chứng minh toán học" (by mathematical proofs),
+"tìm con mồi bằng mùi" (finds prey BY SMELL), plus `bằng chứng` (evidence). It is also, genuinely, the equals word.
+A count-only pass would have ranked it the best-attested word in the whole issue while proving nothing at all.
+
+**The escape is to probe the SLOT rather than the WORD** — search for the sign's NAME and for the reading WITH its
+operands:
+
+    dấu bằng ×5   "Kết quả được biểu thị sau dấu bằng. Ví dụ: 1 + 1 = 2  («một cộng một bằng hai»)"
+                  "cho biết chúng bằng nhau, biểu diễn thông qua dấu bằng ( = )"
+
+That generalises to every homograph case, and it is the same move `attest.ts --after` already makes for a unit
+modifier: *define the search by something you already know, so the word you are unsure of cannot hide.*
+
+It also worked for the pre-existing sourcing doubt in `th`. That file recorded that `attest.ts` on ลบ "returns the
+ADJECTIVE negative — การป้อนกลับทางลบ — not the operator", and wrote no minus rule. Probing the sign's name settles
+it: 「เครื่องหมายลบ (−) ใช้ได้สามลักษณะในคณิตศาสตร์: ตัวดำเนินการลบ」 — *the minus sign has three uses in
+mathematics: the subtraction operator…*. Same article incidentally confirms `เท่ากับ`.
+
+### Four pre-existing gaps closed, and the operator/sign split is now a pattern
+
+`vi`, `th` and `fa` had **no minus rule and no ±**, so `-5 °C` read as five degrees ABOVE zero — and the vi file
+had already argued the case for one ("omitting a plus is LOSSLESS while omitting a minus INVERTS") without a rule
+following. `fa` additionally had **no degree rule at all**, its header having recorded that the corpus spells units
+out; both scale readings turn out to be corpus-attested in the slot (`۳۰ درجه سانتی‌گراد` ×2, `۹۰ درجه فارنهایت` ×3).
+
+⚠ **THREE LANGUAGES NOW SPLIT THE SIGN FROM THE OPERATION**, and it is a real distinction rather than a stylistic
+one — the sign name reads a negative QUANTITY, the operator name reads a subtraction:
+
+| lang | sign (a negative number) | operator (a subtraction) |
+|---|---|---|
+| ko | 마이너스 / 플러스 | 빼기 / 더하기 |
+| vi | âm | trừ |
+| fa | منفی | منها, به اضافه |
+
+vi.wikipedia states it outright: "dấu trừ và số âm, đôi khi dấu âm được đặt cao hơn một chút so với dấu trừ".
+
+### ⚠ A FALSE POSITIVE THE FLEET'S GUARD DOES NOT COVER — found by the diff, not by a probe
+
+The new Thai minus rule read the year range `ค.ศ. 1000 -1300` as a subtraction. The fleet convention rejects a
+sign with a space AFTER it (`26 - 00`, a score — it's own note), and **this range is spaced only BEFORE the sign**,
+so that guard never fires. Now a digit anywhere to the left rejects the match: *a negative quantity does not follow
+a number; a range does.* One instance in 1,906 utterances, and no probe would have found it — only reading the
+diff did.
+
+### ⚠ AND ONE MORE TOOL DEFECT: `corpus-words.ts` SPLIT ON ZWNJ
+
+Persian writes compounds with U+200C, and the tool's token split treated it as a separator — so `سانتی‌گراد`,
+present twice in exactly the slot being probed, was reported `substring-only`, i.e. **as a negative**. The
+incoherence is what gave it away: *0 token hits with 2 PHRASE hits is impossible unless the tokenizer is wrong.*
+Fixed; the distinct-token count for fa went 7,017 → 8,108, so 1,091 further Persian tokens were being split.
+
+Third tool defect in three runs (Run 40's `exlimit`, Run 41's cwd null test, this), and all three share a shape:
+**the tool reported a confident NEGATIVE it had no evidence for.** For sourcing work that is the dangerous
+direction of error, because a negative ends the search.
+
+### Where #654 stands
+
+| sign | dropped at Run 41 | dropped now |
+|---|---|---|
+| `±` | 31 | **27** |
+| `=` `<` `>` | 24 dirs | **20 dirs** |
+| `÷` | 37 | 33 |
+
+Seventeen languages read all four: de es fr pt it ru nl pl uk el ar ja ko tr vi th id fa (eighteen with `ar`'s ten
+codes as one). Gates per language: tsc PASS; 208 files / 2951 tests; `review.ts` reports **"sign classes: none
+dropped"** for all four in this batch, where vi/th/fa had 3/2/3 dropped before; corpus diff id 0/1936, fa 0/1856,
+th 0/1906, vi 1/1978 (read: `B&amp;Bs` now voices the ampersand).
