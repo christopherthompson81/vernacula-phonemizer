@@ -82,7 +82,14 @@ def main():
     check("decode_chunks declines an OOV grapheme",
           decode_chunks(model, chars, itag, char_tags, "kzt", dev="cpu") is None)
 
-    # 6. hyperparameters are provenance — the committed .onnx files were trained at these settings
+    # 6. align.SEP is the single source of truth. `from align import SEP` binds a COPY, so a module that
+    #    re-exports it invites `othermodule.SEP = " "` — which silently does not reach the aligner.
+    sys.path.insert(0, os.path.join(HERE, "..", "norwegian"))
+    import nb_tagger_parallel  # the one module that still imports the aligner alongside its own code
+    check("SEP is not re-exported by aligner consumers", not hasattr(nb_tagger_parallel, "SEP"),
+          "nb_tagger_parallel re-exports SEP; setting it there would silently not reach align")
+
+    # 7. hyperparameters are provenance — the committed .onnx files were trained at these settings
     expected = {"norwegian/train_nb_bilstm.py": (128, 128, 5), "english/en_g2p_bilstm.py": (256, 256, 5),
                 "danish/da_bilstm.py": (256, 256, 10), "french/fr_g2p_bilstm.py": (256, 256, 10)}
     for rel, want in expected.items():

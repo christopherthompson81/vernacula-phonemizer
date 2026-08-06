@@ -14,15 +14,17 @@ align_parallel is what train_nb_bilstm.py imports for the SHIPPED model; the per
 comparison baseline (writes a tmp perceptron tsv, not shipped). Run UNBUFFERED for live logs:
   .venv/bin/python -u tools/norwegian/nb_tagger_parallel.py
 """
-import os, sys, math, time, random
+import os, sys, time, random
 from collections import defaultdict
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, ".."))
-from nb_tagger_prototype import load, split, feats, VOWELS  # loader + features (shared with the serial prototype)
-from bilstm_training.align import N_PROC, SEP, align_parallel, chunks  # noqa: F401 — the aligner now lives there
+from nb_tagger_prototype import load, split, feats  # loader + features (shared with the serial prototype)
+# The aligner lives in bilstm_training now. SEP is deliberately NOT re-exported: `from ... import SEP` binds a
+# COPY, so setting `nb_tagger_parallel.SEP` would silently not reach the aligner. Set `align.SEP` instead.
+from bilstm_training.align import N_PROC, align_parallel, chunks  # noqa: F401
 OUT = "/tmp/nb_holdout.tsv"
 # the perceptron baseline model — NOT shipped (serving loads the BiLSTM's nb-g2p-tagger.onnx); tmp path, not a lang dir
 MODEL = "/tmp/nb-g2p-perceptron.tsv"

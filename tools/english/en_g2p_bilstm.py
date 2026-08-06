@@ -9,7 +9,7 @@ per-position tag) on 90% of g2p-dict.tsv (117k words, public-domain CMUdict) and
 
     .venv/bin/python -u tools/english/en_g2p_bilstm.py
 """
-import os, sys, math, time, random, hashlib, json
+import os, sys, time, random, hashlib, json
 import torch
 
 HERE = os.path.dirname(os.path.abspath(__file__))

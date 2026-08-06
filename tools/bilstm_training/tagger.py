@@ -84,6 +84,7 @@ def train(model, X, Y, epochs=40, batch=256, lr=2e-3, log_every=5, dev=None):
     return model
 
 
+@torch.no_grad()
 def decode_chunks(model, chars, itag, char_tags, word, dev=None):
     """MASKED argmax over each letter's permitted chunk set → the list of emitted chunks, or None on an out-of-vocab
     grapheme (which is how serving declines rather than guessing). Callers assemble: "".join for single-char IPA,
