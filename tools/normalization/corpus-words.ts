@@ -156,6 +156,19 @@ const spaceless = utts0.some((u) => SPACELESS.test(u));
  * information at all, so it is removed from BOTH sides before the substring test.
  */
 const utts = spaceless ? utts0.map((u) => u.replace(/[ \t]+/gu, "")) : utts0;
+/**
+ * ⚠ THE STRIPPED TEXT MUST NOT BE WHAT THE READER IS SHOWN. Space-removal is right for the substring TEST (see
+ * above) and wrong for the EXAMPLES, because it hides the one thing the reader needs to judge the hit: whether the
+ * match spanned a space that was really there.
+ *
+ * Measured cost of getting this wrong. Probing km for `បូកដក` ("plus-minus") reported `attested* phrase ×4`, and
+ * the three examples it printed read `ប្រមាណវិធីបូកដកគុណចែក` — which looks like a compound. The corpus actually
+ * says `ប្រមាណវិធីបូក ដក គុណ ចែក`: "operations: add, subtract, multiply, divide", a LIST of four operations. All
+ * four hits were space-spanning, the compound does not occur, and a reading was declared on that evidence and
+ * shipped. Reading the examples could not have caught it, because the examples were stripped too.
+ */
+const origOf = new Map<string, string>();
+if (spaceless) for (let i = 0; i < utts.length; i++) origOf.set(utts[i]!, utts0[i]!);
 // One flat token set for the boundary test, and the joined text for the substring count.
 const toks = new Map<string, number>();
 // ⚠ U+200C ZWNJ IS WORD-INTERNAL, NOT A SEPARATOR. Persian writes compounds with a zero-width non-joiner —
@@ -175,10 +188,54 @@ for (const w0 of words) {
         const sub = utts.reduce((n, u) => n + (u.split(p).length - 1), 0);
         return { p, tok, sub };
     });
+    // How many phrase hits exist ONLY because the spaces were removed? Those are the weakest possible evidence:
+    // the characters are adjacent in the corpus but a writer put a boundary between them.
+    const hitsAll = utts.filter((u) => u.includes(w));
+    const spanning = spaceless ? hitsAll.filter((u) => !(origOf.get(u) ?? u).includes(w)).length : 0;
+
+    /**
+     * ⚠ A SUBSTRING HIT IN A SPACELESS SCRIPT IS THE WEAKEST EVIDENCE THERE IS, AND USED TO GET THE STRONGEST
+     * LABEL. This branch printed `attested*` while the SPACED branch, on identical evidence, printed the honest
+     * `substring-only` — inverted, because in a spaceless script every real word is a substring of running text,
+     * so the test discriminates less, not more. The asterisk carried the entire warning and an asterisk is easy to
+     * skip: `យ័ន` scored `attested* ×521` (every hit inside បាយ័ន/អារ្យ័ន) and `បូកដក` `attested* ×4` (every hit
+     * a space-spanning list), and both were written into shipped code as attestations. The playbook's own index
+     * says "a count is a lead, never a finding — read the instances"; the label was arguing the opposite.
+     */
+    // ⚠ TOKEN HITS COUNT EVEN IN A SPACELESS SCRIPT, and the first version of this fix forgot that — it labelled
+    // `ស្មើ` (283 TOKEN hits, the equals word this layer ships) as `substring-only?`. Khmer does have boundaries:
+    // writers type U+200B and spaces, so the token set is real evidence, just sparser. A gate that flags a
+    // genuinely attested word is a gate that gets ignored, which would trade one failure mode for a worse one.
     const verdict = spaceless
-        ? (per.every((x) => x.sub > 0) ? "attested*" : "absent")
+        ? (per.every((x) => x.tok > 0) ? "attested"
+            : !per.every((x) => x.sub > 0) ? "absent"
+            : spanning === hitsAll.length && hitsAll.length > 0 ? "SPACE-SPANNING"
+            : "substring-only?")
         : (per.every((x) => x.tok > 0) ? "attested" : per.some((x) => x.sub > 0) ? "substring-only" : "absent");
     const detail = per.map((x) => `${x.p} ${x.tok}t/${x.sub}s`).join("  ");
-    console.log(`  ${w.padEnd(24)} ${verdict.padEnd(15)} phrase ×${String(phrase).padEnd(4)} ${detail}`);
-    for (const u of utts.filter((u) => u.includes(w)).slice(0, nExamples)) console.log(`      · ${u.slice(0, 150)}`);
+    const span = spanning > 0 ? `  ⚠ ${spanning}/${hitsAll.length} span a space` : "";
+    /**
+     * ⚠ A WORD CAN BE "ATTESTED" AND STILL BE MOSTLY SOMETHING ELSE. `យ័ន` has 7 token hits against 543 substring
+     * hits — 1.3% — because almost every occurrence is inside បាយ័ន (the Bayon temple) or អារ្យ័ន (Aryan). The
+     * token count alone said attested and it was read as evidence for a currency word it is not.
+     *
+     * ⚠ AND THE THRESHOLD IS CALIBRATED, NOT GUESSED. A first attempt used 10% and fired on `គុណ` — 8.1%, but 354
+     * token hits and the word this layer ships for `×`. The ratio is CONFOUNDED: a token hit needs a writer to have
+     * marked BOTH boundaries, which happens for only ~15% of boundaries in this corpus, so a real word's ratio is
+     * depressed by annotation habit rather than by usage. A gate that flags real words is a gate that gets ignored.
+     *
+     * Measured over nine words this layer actually ships, against the known-bad case:
+     *     គីឡូម៉ែត្រ 28.3%  អឺរ៉ូ 18.5%  ភាគរយ 18.4%  ដុល្លារ 16.7%  ស្មើ 10.9%  ចែក 10.7%
+     *     គុណ 8.1%  បូក 5.4%  ដក 5.3%          ← real words, floor 5.3%
+     *     យ័ន 1.3%                              ← the one that was wrong
+     * 3% sits between them with margin on both sides.
+     */
+    const BURIED_RATIO = 0.03;
+    const tokSum = per.reduce((n, x) => n + x.tok, 0), subSum = per.reduce((n, x) => n + x.sub, 0);
+    const buried = tokSum > 0 && subSum >= 20 && tokSum / subSum < BURIED_RATIO
+        ? `  ⚠ only ${(100 * tokSum / subSum).toFixed(1)}% of occurrences are the whole word — mostly inside others`
+        : "";
+    console.log(`  ${w.padEnd(24)} ${verdict.padEnd(15)} phrase ×${String(phrase).padEnd(4)} ${detail}${span}${buried}`);
+    // Examples come from the ORIGINAL text — spaces intact — so a space-spanning hit is visible as one.
+    for (const u of hitsAll.slice(0, nExamples)) console.log(`      · ${(origOf.get(u) ?? u).slice(0, 150)}`);
 }

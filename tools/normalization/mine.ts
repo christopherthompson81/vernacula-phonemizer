@@ -237,6 +237,8 @@ export function selectCells(segments: string[], opts: { perCell: number; terms?:
 export interface MinedCorpus {
     language: string;
     source: string;
+    /** The exact invocation that produced this artifact. See `renderJsonc`'s note on why it is recorded. */
+    command?: string;
     segmentMode: SegmentMode;
     totalSegments: number;
     counts: Record<string, number>;
@@ -311,10 +313,19 @@ ${SAMPLE_CAVEAT(c.source)}
 // abbreviation dots and emptied three cells that a grep showed were well populated.
 //
 // source: ${c.source}
+//
+// ⚠ REGENERATE WITH THE COMMAND BELOW, NOT FROM MEMORY. This artifact's shape depends on flags that leave no
+// trace in the data — omit --sample and the whole sample tier silently disappears; omit --terms and the lexical
+// cells report EMPTY. Both happened while re-mining this fleet: km lost its 200-entry sample tier to a
+// reconstructed invocation, and my dropped from 35/35 cells to 33/35 because it is the one language with a terms
+// list and the sweep did not pass it. Neither failure is visible in the output — the run reports success.
+//
+// command: ${c.command ?? "(not recorded — this artifact predates the field; regenerate to capture it)"}
 // segmentation: ${c.segmentMode}${c.segmentMode === "paragraph" ? " (no dot is ever interpreted — correct when the target IS the period)" : " (abbreviation dots protected before splitting)"}
 {
     "language": ${esc(c.language)},
     "source": ${esc(c.source)},
+    "command": ${esc(c.command ?? "")},
     "segmentMode": ${esc(c.segmentMode)},
     "totalSegments": ${c.totalSegments},
     "cellsCovered": ${cov},
@@ -713,6 +724,21 @@ if (mode === "__module__") {
 } else {
     const inPath = arg("in"), outPath = arg("out");
     if (inPath === undefined || outPath === undefined) throw new Error("mine needs --in and --out");
+    /**
+     * The invocation, so the artifact can be rebuilt without reconstructing flags from memory.
+     *
+     * ⚠ PATHS ARE REDUCED TO BASENAMES, for the same reason `source` is a few lines below: an absolute path leaks
+     * a local directory tree — and in the first version of this field it recorded
+     * `/tmp/claude-.../-home-<user>-Programming-...`, a username included, into an artifact destined for a public
+     * repository. The corpus lives wherever the operator keeps it; the FLAGS are the part that cannot be
+     * reconstructed, and they are what this preserves.
+     *
+     * Arguments containing spaces are quoted so the line can be pasted back with the paths filled in.
+     */
+    const command = ["npx tsx tools/normalization/mine.ts", ...process.argv.slice(2)
+        // Only the ARGUMENTS are reduced — the tool's own repo-relative path is not a leak and is worth keeping.
+        .map((a) => (a.includes("/") ? a.replace(/^.*\//u, "") : a))
+        .map((a) => (/\s/u.test(a) ? `"${a}"` : a))].join(" ");
     const perCell = Number(arg("per-cell", "8"));
     const sampleN = Number(arg("sample", "0"));
     const segmentMode = (arg("segment", "sentence") === "paragraph" ? "paragraph" : "sentence") as SegmentMode;
@@ -804,6 +830,7 @@ if (mode === "__module__") {
     writeFileSync(outPath, renderJsonc({
         language: lang,
         source,
+        command,
         segmentMode,
         totalSegments: segments.length,
         counts: result.counts,
