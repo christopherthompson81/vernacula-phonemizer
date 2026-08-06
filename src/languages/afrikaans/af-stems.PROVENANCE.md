@@ -17,6 +17,6 @@ Derived work inherits **CC-BY-SA 4.0**.
 
 **History:** the previous 42,743-word list came from the Leipzig Corpora Collection (afwiki-based),
 whose license is **CC-BY-NC** — NonCommercial, incompatible with this repo's licensing goals
-(LICENCING/PROVENANCE.md §4.4). Replaced by this rebuild from NC-free sources covering 89.7% of the old
+(LICENSES/PROVENANCE.md §4.4). Replaced by this rebuild from NC-free sources covering 89.7% of the old
 list; the af referee eval is UNCHANGED at 74.7% folded backbone / 23.1% raw exact (symbol accuracy
 93.1% vs 93.2%), afrikaans unit tests green.

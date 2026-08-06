@@ -6,7 +6,7 @@ that measure whether the engines are right.
 
 Each tool is expected to state, in its header: what upstream source it reads (with a URL), that
 source's license, and which committed artifact it produces. That contract is what
-`LICENCING/PROVENANCE.md` indexes.
+`LICENSES/PROVENANCE.md` indexes.
 
 ## Layout — four roles, one home each
 

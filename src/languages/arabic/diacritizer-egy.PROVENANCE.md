@@ -26,7 +26,7 @@ student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
 - **No Wiktionary in the model** — the kaikki lexicon is a separate shipped supplement (egyptian-lexicon.tsv),
   not part of this model's training.
 
-## Licence posture (per `LICENCING/licencing_posture.md` — the project author's reasoned posture, not legal advice)
+## Licence posture (per `LICENSES/licencing_posture.md` — the project author's reasoned posture, not legal advice)
 
 A model trained on silver retains none of the teacher's or corpus's selection/arrangement — only the
 orthographic regularities of Egyptian Arabic, which are facts (Feist). GPL is a copyright license on the teacher

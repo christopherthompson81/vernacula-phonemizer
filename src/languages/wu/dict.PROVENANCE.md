@@ -14,7 +14,7 @@ Han → Wugniu (zaonhe romanization) readings, 101,308 entries: **11,714 single-
   wrong: github.com/rime/rime-wugniu has carried a GPL-3.0 LICENSE since 2012-07-26; it was missed during
   authoring). This derived `dict.tsv` is therefore distributed under **GPL-3.0** — the file is its own
   source, satisfying the source-availability condition. The runtime that reads it is not thereby GPL
-  (data consumption at runtime is not linking/derivation); see LICENCING/PROVENANCE.md §4.5 for the fence and
+  (data consumption at runtime is not linking/derivation); see LICENSES/PROVENANCE.md §4.5 for the fence and
   the kaikki-rebuild fallback if a GPL data file is unwanted in the shipped set. Simplified↔traditional
   folds via OpenCC `STCharacters` (Apache-2.0).
 

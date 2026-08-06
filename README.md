@@ -244,7 +244,7 @@ tools/<lang>/           that language's model train/export pipeline (mirrors src
 tools/corpus/           reusable wordlist/referee fetchers
 
 docs/language-maturity.md    per-language reliability + what's outstanding
-LICENCING/                   every data artifact → upstream source → parent license, and the posture
+LICENSES/                   every data artifact → upstream source → parent license, and the posture
 test/                        golden IPA tests
 ```
 
@@ -257,6 +257,6 @@ The engine and this project's own work are **MIT**. Third-party-derived data kee
 license, declared per file — CC0/public-domain (CMUdict, the NST lexicons, HomoRich), permissive
 with attribution (pypinyin, rime-cantonese, Google language-resources, the Sindhi Open Lexicon),
 CC-BY-SA for the Wiktionary-family lexica, and two GPL-lineage data files. Every artifact is
-mapped to its source and license in [`LICENCING/PROVENANCE.md`](LICENCING/PROVENANCE.md); the reasoning —
+mapped to its source and license in [`LICENSES/PROVENANCE.md`](LICENSES/PROVENANCE.md); the reasoning —
 including when a mechanical table of linguistic facts does *not* inherit an upstream license — is
-[`LICENCING/licencing_posture.md`](LICENCING/licencing_posture.md).
+[`LICENSES/licencing_posture.md`](LICENSES/licencing_posture.md).

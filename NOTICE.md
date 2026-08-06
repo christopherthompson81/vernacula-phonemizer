@@ -1,15 +1,16 @@
 # NOTICE
 
-`vernacula-phonemizer` is licensed **MIT**. The engine, the per-language rule
+`vernacula-phonemizer` is licensed **MIT** (see [`LICENSE`](LICENSE)). The engine, the per-language rule
 modules and `.jsonc` manifests, the hand-authored tables, the in-repo gold referees, and the tools
 are the project's own work.
 
 It also ships and distributes **data derived from third-party sources**, each of which keeps its own
 parent license. Those files are fenced per file; this NOTICE is the attribution roll-up. The
 authoritative per-artifact map — which file, which upstream, which license — is
-[`LICENCING/PROVENANCE.md`](LICENCING/PROVENANCE.md), and the reasoning behind the facts-based
-determinations is [`LICENCING/licencing_posture.md`](LICENCING/licencing_posture.md). Section numbers
-below refer to that map.
+[`LICENSES/PROVENANCE.md`](LICENSES/PROVENANCE.md), and the reasoning behind the facts-based
+determinations is [`LICENSES/licencing_posture.md`](LICENSES/licencing_posture.md). Section numbers
+below refer to that map. The full text of every license named here is in
+[`LICENSES/`](LICENSES/).
 
 ---
 
@@ -28,8 +29,9 @@ Affects `src/languages/japanese/readings.tsv`, `fallback.tsv`, `adverbs.txt`. JM
 
 **Sindhi Open Lexicon — Amar Fayaz Buriro (امر فياض ٻرڙو)**
 
-The Sindhi Open Lexicon is the work of **Amar Fayaz Buriro**, published via SindhiLanguage.org under
-CC-BY. Named attribution is mandatory. Affects the Devanagari tier of
+The Sindhi Open Lexicon is the work of **Amar Fayaz Buriro**, published via SindhiLanguage.org.
+Named attribution is mandatory under the dataset's own terms — a bespoke, permissive license, not
+CC-BY: `LICENSES/LicenseRef-SindhiOpenLexicon.txt`. Affects the Devanagari tier of
 `src/languages/sindhi/sindhi-lexicon.tsv` and the training data behind
 `src/languages/sindhi/sd-g2p-tagger.int8.onnx`.
 
@@ -61,9 +63,9 @@ Used without obligation beyond the credit given here.
 - **rime-cantonese**, via **pycantonese** — CC-BY 4.0. `cantonese/dict.tsv`.
 - **Google `language-resources/bn`** (<https://github.com/google/language-resources>) — CC-BY 4.0.
   `bengali/bengali-lexicon.tsv`, `bn-g2p-tagger.int8.onnx`.
-- **Phonikud** and **ReNikud** — thewh1teagle, CC-BY. Builders behind `hebrew/he-lexicon.tsv`.
-- **ICU `thaidict`** — Unicode, Inc., Unicode-DFS-2016. Part of `thai/seg-words.txt`. The
-  Unicode-DFS-2016 license text must accompany redistribution.
+- **Phonikud** and **ReNikud** — thewh1teagle, CC-BY 4.0. Builders behind `hebrew/he-lexicon.tsv`.
+- **ICU `thaidict`** — Unicode, Inc., Unicode-DFS-2016. Part of `thai/seg-words.txt`.
+  Text: `LICENSES/Unicode-DFS-2016.txt`.
 - **CATT — Character-based Arabic Tashkeel Transformer** — AbjadAI, Apache-2.0
   (arXiv:2407.03236). Offline teacher for `arabic/diacritizer.onnx`.
 - **OpenCC** — Apache-2.0. `TSCharacters` / `STCharacters` tables, used for the
@@ -71,9 +73,14 @@ Used without obligation beyond the credit given here.
 - **OpenJTalk / naist-jdic** — modified BSD. `tools/eval/ja_pitch_reference.tsv`, the Japanese
   counter gold, and one voter in `japanese/pitch-accent.tsv`.
 - **GE2PE** and the Persian homograph sets — Sharif SLPL, MIT. Persian referees (tools only).
-- **JIPA** *Journal of the IPA* illustrations (`bo`, `mad`) and **lexibank-lsi** (Grierson,
-  *Linguistic Survey of India*, `sd`) — CC-BY. Referees, tools only.
-- **Tatoeba** — CC-BY 2.0 FR. Japanese evaluation sentences, tools only.
+- **JIPA** — Zhang (2024), "Central Tibetan (Lhasa)", *J. Int. Phonetic Assoc.* 54:788–810,
+  CC-BY 4.0 (open access). The `bo` referee, tools only.
+- **lexibank-lsi** — Grierson, *Linguistic Survey of India*, CC-BY 4.0. The `sd` referee, tools only.
+- **Misnadin & Kirby** (2020), "Madurese", *J. Int. Phonetic Assoc.* 50:109–126,
+  doi:10.1017/S0025100318000257. The `mad` referee — 35 hand-read word→IPA facts.
+- **Tatoeba** — CC BY 2.0 FR. Japanese evaluation sentences, tools only. The FR port has no
+  plain-text form; referenced by URI as CC permits:
+  <https://creativecommons.org/licenses/by/2.0/fr/legalcode>
 - **arabic-dialect-corpus** — dataflare, MIT. Egyptian subset used in `arabic/diacritizer-egy.onnx`
   training.
 
@@ -115,7 +122,7 @@ with the data: `perso-arabic/riderDiacritizer.onnx`, `persian/fa-vowel-restorer.
   <https://github.com/rime/rime-wugniu>
 - **Tashkeela** — GPL-2.0. `arabic/diacritization.tsv` is a mechanical frequency aggregation over
   the Tashkeela corpus, whose underlying classical texts are public domain. It ships under the
-  facts-not-expression posture stated in `LICENCING/licencing_posture.md`: the artifact reproduces
+  facts-not-expression posture stated in `LICENSES/licencing_posture.md`: the artifact reproduces
   no selection or arrangement from the corpus, only the dominant vocalization of each wordform.
   Tashkeela is credited here regardless of that determination.
   <https://sourceforge.net/projects/tashkeela/>
@@ -133,10 +140,7 @@ depended on them.
   and the coverage baseline in the language catalogue. Its negative evidence — recording that a
   language ships no voice at all — closed as many sourcing questions as its positive entries.
   It is also the **instrument** behind `catalan/mid-vowels.tsv` and `bl-gl-geminate.tsv`: run over an
-  externally-chosen frequency wordlist, with a single abstract feature per word retained and the
-  transcription discarded. Nothing of espeak's source, rules, dictionary, or arrangement is present
-  in those tables; the determination is set out in `LICENCING/PROVENANCE.md` §5.1. espeak-ng is
-  credited here regardless of that determination.
+  externally-chosen frequency wordlist, one abstract feature per word retained (§5.1).
   <https://github.com/espeak-ng/espeak-ng>
 - **epitran** — MIT (David R. Mortensen et al., CMU). The independent programmatic second opinion
   across 32 languages, and row-level corroboration for `mandarin/syllable-ipa.tsv`.
@@ -161,6 +165,6 @@ Tucker 1994 (Dholuo) · Wilde (Rangpuri) · Ylikoski (Lule Sámi).
 
 ---
 
-*This file is generated from `LICENCING/PROVENANCE.md` by hand and must be updated with it. Any new
+*This file is generated from `LICENSES/PROVENANCE.md` by hand and must be updated with it. Any new
 data file or model lands with a `*.PROVENANCE.md` sidecar or a header naming source and license, a
 row in the provenance map, and — where attribution is owed — an entry here.*
