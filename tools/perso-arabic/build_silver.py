@@ -2,10 +2,10 @@
 """Build the silver training set for the shared Arabic-script short-vowel restorer.
 
 Source: wikipron Arabic-script sections (CC-BY-SA) — the one uniform, permissively licensed, multilingual
-IPA-aligned corpus for these languages (see docs/arabic_script_restorer_investigation.md). We fetch the `broad`
-transcription for every ABJAD-beneficiary language (Indo-Aryan + Iranian + Arabic-family; NOT the fully-vocalized
-Uyghur alphabet), strip the orthographic diacritics to recover the realistic undiacritized SKELETON (the model's
-runtime input), and pair it with the IPA (which carries the vowels — the target).
+IPA-aligned corpus for these languages. We fetch the `broad` transcription for every ABJAD-beneficiary language
+(Indo-Aryan + Iranian + Arabic-family; NOT the fully-vocalized Uyghur alphabet), strip the orthographic
+diacritics to recover the realistic undiacritized SKELETON (the model's runtime input), and pair it with the
+IPA (which carries the vowels — the target).
 
 Output: silver.tsv, one row per unique (skeleton, lang, ipa):
 

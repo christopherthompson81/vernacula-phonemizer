@@ -1,7 +1,7 @@
 /**
  * Emit (skeleton, IPA) pairs from the two vowelized-Urdu silver sources (harakat.ur.silver.tsv + lexicon.ur.tsv)
  * by running their vocalized forms through OUR Urdu g2p — same convention the tagger must output. Merged with the
- * Hindi-derived IPA silver, this ~doubles the tagger training pool. Run 3 of the ur-tagger investigation.
+ * Hindi-derived IPA silver, this ~doubles the tagger training pool.
  *   npx tsx tools/perso-arabic/ur_extra_pool.ts > tools/perso-arabic/ur_extra_pool.tsv
  */
 import { readFileSync } from "node:fs";

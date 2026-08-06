@@ -3,7 +3,7 @@
 # live beside each rider's g2p (src/languages/<lang>/lexicon.tsv). Strips to 2 columns (skeleton ⇥ vocalized),
 # DROPS identity rows (a bare-skeleton vocalization is a no-op — the g2p already yields that IPA), sorts, and
 # prepends a provenance header (loadTsvMap skips #-comment lines). This is the COVERAGE layer of the two-layer
-# rider phonemizer (lexicon lookup → default g2p); see PROVENANCE.md and docs/arabic_script_restorer_investigation.md.
+# rider phonemizer (lexicon lookup → default g2p);
 #
 #   npx tsx invert_harakat.ts --lexicon all   # (re)mine lexicon.<lang>.tsv from all sources
 #   ./export_lexicons.sh                       # → src/languages/<lang>/lexicon.tsv

@@ -7,7 +7,7 @@ under a consonant-consistency mask, so it CANNOT break the verified consonant ba
 Aimed at the measured headroom: the abjad leaves short vowels unwritten and the rule g2p defaults
 every one to [ə], but ə is only 48.6% of decision slots — 81.4% of WORD-FINAL slots are something
 else, overwhelmingly the retained grammatical -ʊ. That is morphologically conditioned, hence learnable.
-(Contrast Urdu, where ə is 71.5% and a tagger LOST to the always-ə prior — see ur_tagger_investigation.md.)
+(Contrast Urdu, where ə is 71.5% and a tagger LOST to the always-ə prior)
 
 Reports the model against three baselines so the number means something:
   always-ə          the Urdu comparison prior

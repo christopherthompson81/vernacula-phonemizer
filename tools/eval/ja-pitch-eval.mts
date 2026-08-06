@@ -13,7 +13,7 @@
  * so this is a conservative-but-not-fully-independent referee. No larger free Tokyo-accent source exists outside
  * those three (kaikki/Wiktionary carries ~3 Tokyo-accent words). Japanese accent is an inherent ~90-95% task —
  * dictionaries themselves disagree (映画 0/1, 毎日 0/1, 期間 1/2) — so ~95% is near the achievable ceiling, and the
- * residual is dominated by genuinely-contested accents, not systematic error. See docs/ja_native_bringup_investigation.md.
+ * residual is dominated by genuinely-contested accents, not systematic error.
  *
  *   npx tsx tools/eval/ja-pitch-eval.mts            # score
  *   npx tsx tools/eval/ja-pitch-eval.mts --list     # + list accent disagreements

@@ -9,8 +9,7 @@
  * cage') are excluded: our single lexicon reading can't match both, so they'd measure reading choice, not accent.
  * Only wikipron-accent-marked words are scorable (~1300); accent-2 is the reliably-marked class (Wiktionary marks
  * ¹ mostly to disambiguate, so the accent-1 referee subset is small + adversarial). Like Japanese pitch, Swedish
- * accent is an inherent ~95% task where two independent lexica disagree on the contested tail. See
- * docs/sv_bringup_investigation.md.
+ * accent is an inherent ~95% task where two independent lexica disagree on the contested tail.
  *
  *   npx tsx tools/eval/sv-accent-eval.mts            # score
  *   npx tsx tools/eval/sv-accent-eval.mts --list     # + list accent disagreements

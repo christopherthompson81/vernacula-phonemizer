@@ -23,8 +23,8 @@ describe("norwegian neural OOV tagger", () => {
 
     describe.skipIf(!haveModel)("with the ONNX model present", () => {
         // A genuinely-OOV word (not in the NST lexicon): the tagger reads its stress + vowel quality directly from
-        // spelling. The exact expectations are captured from the shipped model (see the probe in the investigation
-        // doc); they are OUR deliberate output, the OOV-tail refinement over the rule engine's first-syllable guess.
+        // spelling. The exact expectations are captured from the shipped model and they are OUR deliberate output,
+        // the OOV-tail refinement over the rule engine's first-syllable guess.
         test("OOV word: tagger fills the tail (differs from the rule-only reading)", async () => {
             const s = "Kvantekromodynamikken forbløffer.";
             expect(await phonemizeNbNeural(s)).not.toBe(phonemize(s, "nb"));

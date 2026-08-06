@@ -4,7 +4,7 @@
  * source: the tagger learns Bengali's ɔ/o raising + inherent-vowel deletion from Google's readings (which Run 12
  * established are NOT cleanly rule-derivable). The authoritative Kolkata gold + cross-source consensus lexicon
  * (bengali-lexicon.tsv) take PRECEDENCE at runtime, so Google's Dhaka-leaning convention only affects the OOV tail
- * — where the tagger's 90.5% ɔ/o beats the rule engine's 62.6% (see bn_native_bringup_investigation.md Run 17-18).
+ * — where the tagger's 90.5% ɔ/o beats the rule engine's 62.6%.
  *
  *   curl -sL https://raw.githubusercontent.com/google/language-resources/master/bn/data/lexicon.tsv -o /tmp/google_bn_lexicon.tsv
  *   npx tsx tools/bengali/build_tagger_data.ts /tmp/bn_tagger_train.tsv

@@ -10,7 +10,7 @@ sync engine.
 
 **Why a tagger, and why it replaces the n-gram.** English OOV is the classic hard G2P problem. The prior OOV path
 (compound-split → morph → joint n-gram) is weak on the non-compositional tail (proper nouns, foreign/novel words), and
-the noisy wikipron referee couldn't even measure it (see the investigation). On a CLEAN CMUdict 90/10 held-out
+the noisy wikipron referee couldn't even measure it. On a CLEAN CMUdict 90/10 held-out
 (11,748 words), the BiLSTM roughly HALVES the phone-error-rate:
 
 | model (held-out, stress-independent phones) | WORD-exact | PHONE-accuracy (1−PER) |

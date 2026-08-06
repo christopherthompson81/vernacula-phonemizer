@@ -1,7 +1,7 @@
 # KRNB (Kamta / Rajbanshi / Rangpuri / Northern Deshi Bangla) — data foundation
 
 Data-prep for the KRNB dialect-continuum bring-up (Eastern Indo-Aryan; `rkt` Rangpuri, `rjs` Rajbanshi, + Kamta /
-Northern Deshi Bangla). See the full investigation in.
+Northern Deshi Bangla).
 
 ## Referees (`referees/*.tsv`)
 
