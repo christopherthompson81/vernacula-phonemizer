@@ -39,7 +39,7 @@ function unit(n: number): string {
  * ⚠ 15 AND 25 ARE IRREGULAR AND THE IRREGULAR FORM IS THE COMMON ONE — mẹ́ẹ̀ẹ́dógún 127 against the regular
  * márùndínlógún 29. From 35 up only the regular form is attested, so this is two entries, not a pattern.
  */
-function below100(n: number): string {
+function belowTwoHundred(n: number): string {
     if (n === 15) return N.fifteen;
     if (n === 25) return N.twentyFive;
     // ⚠ THE UNIT GUARD COMES FIRST. Without it `2` fell through to the teens arm and read *méjìlá* (12) — the
@@ -54,9 +54,18 @@ function below100(n: number): string {
     return `${N.front[10 - u]!}${N.subtract}${N.tens[String(lower + 10)]!.fused}`;
 }
 
-/** 100-999: an irregular hundred word, plus any remainder joined by `ó lé`. */
+/**
+ * 100-999.
+ *
+ * ⚠ 100-199 IS NOT `ọgọ́rùn-ún ó lé <remainder>`, which is what this function did at first and what the corpus
+ * never writes. The vigesimal series CONTINUES past a hundred in single words on bases of twenty — ọgọ́fà 120,
+ * ogóje 140, ọgọ́jọ 160, ọgọ́sàn-án 180, with the intervening tens as àádọ́- forms — and the lé/dín machinery
+ * composes onto them exactly as it does below 100 (`mẹ́tàdínlógóje` = 137). So the tens table runs to 190 and
+ * this range goes through the same code. From 200 up the hundreds ARE their own words joined by `ó lé`, which
+ * the corpus glosses directly (`igba ó lé ọgọ́rin` = 280).
+ */
 function below1000(n: number): string {
-    if (n < 100) return below100(n);
+    if (n < 200) return belowTwoHundred(n);
     const h = Math.floor(n / 100), rest = n % 100;
     const hundred = N.hundreds[h]!;
     return rest === 0 ? hundred : `${hundred} ${N.join} ${below1000(rest)}`;

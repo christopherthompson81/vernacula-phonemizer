@@ -76,7 +76,22 @@ const SYMBOLS = makeSymbolNormalizer({
      * CUBED is NOT declared: ³ occurs 23 times and no cube word appears anywhere in the corpus, so there is
      * nothing to say. The bare-exponent reading is likewise absent — see `exponent` in the refusals above.
      */
-    units: { km: ["kìlómítà"], ha: ["hẹ́kítà"] },
+    units: { km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"] },
+    /**
+     * SPEEDS. `80km/w` is 36 occurrences in this corpus and its `/` was silent in every one — and the reading is
+     * GLOSSED beside the figure, repeatedly, which is how the frame is known rather than guessed:
+     *
+     *     iyara ti kilomita ọgọrin ni wakati okan (80km/w)      eighty kilometres in one hour
+     *     iyara ti àádóta kilomita ni wakati ọkan (50km/w)
+     *     máìlì méjìdínlọ́gọrin ní wákàtí kan (126km/h)
+     *
+     * ⚠ `w` IS THE YORUBA ABBREVIATION — wákàtí, "hour" — so the corpus writes both `km/w` and the borrowed
+     * `km/h`; both are declared. The denominators live here rather than in `units` for the reason this tier
+     * documents: a one-letter key in the standalone alternation turns the aircraft `Il-76s` into seconds. As a
+     * denominator it can only match after a slash.
+     */
+    rateDenominators: { w: "wákàtí kan", h: "wákàtí kan" },
+    unitPer: "ni",
     exponentWords: { squared: [SYM.squared], position: "after" },
 });
 

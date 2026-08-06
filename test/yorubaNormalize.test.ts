@@ -93,6 +93,15 @@ describe("yoruba text normalization", () => {
         expect(normalizeYoruba("12.76 km")).toBe("12 àti dásímà 7 6 kìlómítà");     // bare unit still expands
     });
 
+    test("⚠ a speed reads, and its frame is glossed 36 times", () => {
+        // `iyara ti kilomita ọgọrin ni wakati okan (80km/w)` — the corpus writes the reading beside the figure,
+        // repeatedly. `w` is the Yoruba abbreviation (wákàtí, hour); the borrowed `km/h` occurs too.
+        expect(normalizeYoruba("80km/w")).toBe("80 kìlómítà ni wákàtí kan");
+        expect(normalizeYoruba("126km/h")).toBe("126 kìlómítà ni wákàtí kan");
+        // ⚠ A one-letter denominator must not match standalone — the tier's `Il-76s` → "seconds" lesson.
+        expect(normalizeYoruba("Il-76s")).toBe("Il-76s");
+    });
+
     test("the ampersand is `àti`, the ordinary connective", () => {
         expect(normalizeYoruba("A & B")).toBe("A àti B");
     });
