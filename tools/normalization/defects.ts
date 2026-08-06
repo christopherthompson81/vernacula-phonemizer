@@ -130,6 +130,30 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ig: {
+        // ⚠ IGBO HAS NO REFEREE (wikipron ibo_latn, epitran ibo-Latn and the kaikki extract are all 404), so every
+        // reason below is a corpus measurement from a 558,991-line ig.wikipedia dump and nothing else can check it.
+        // Counts marked "sample" are from a 26 MB slice. See src/languages/igbo/normalize.ts.
+        minus: "measured: the digit-flanked dash in Igbo is a RANGE, not a minus — of 4,993 in a 26 MB sample, "
+            + "1,734 are year-year (`1967-1970`, `1979-1983`) and 1,741 small-small (`peeji 90-120`). A minus rule "
+            + "would read every date range as arithmetic. `ruo` ('to') IS read for the range, 1,687 digit-flanked "
+            + "instances — see nl/mr/ta/yue, which record the same shape",
+        degrees: "measured: ° occurs 41 times digit-flanked but NEITHER scale name occurs anywhere in the corpus — "
+            + "`dịgrii` 0 hits, `selsiọs` 0 hits. `sources.ts` reports [NONE] scale-names for this language. Most "
+            + "of the corpus's ° is geographic coordinates (`4°06′12′′S 141°39′54′′E`) rather than temperature",
+        times: "measured: × occurs 123 times digit-flanked and every one is a relay distance (`4 × 100` metres). "
+            + "The candidate `mụba` is the VERB 'to increase' (`na-amụba 6`), not the arithmetic operator; no "
+            + "operator word is attested",
+        plus: "measured: + is 23 digit-flanked in a 26 MB sample. `mgbakwunye` (4,685 hits) is the NOMINAL "
+            + "'addition', not what a reader says between two operands — the distinction concept.ts warns about",
+        equals: "measured: = is 1 digit-flanked and 24 leading in a 26 MB sample. `nhata` ('equal', 2,250 hits) is "
+            + "available but the sign is too rare in this corpus to sense-check a digit-flanked reading against",
+        "plus-minus": "measured: the sign does not occur digit-flanked in the corpus (1 instance in 26 MB)",
+        "less-than": "measured: the sign does not occur in the corpus (0 digit-flanked, 0 leading)",
+        "greater-than": "measured: 0 digit-flanked; the 6 leading instances are markup residue, not comparisons",
+        divide: "measured: the sign does not occur in the corpus at all (0 digit-flanked, 0 leading)",
+        exponent: "measured: `sources.ts` reports the sign does not occur in the evidence for this language",
+    },
     km: {
         // Both refusals are argued with a measured distribution in src/languages/khmer/normalize.ts, and in both
         // cases a rule DOES ship for the shape the corpus supports — it is the probe's shape that is undecidable,
