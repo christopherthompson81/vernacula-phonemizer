@@ -18,11 +18,24 @@
 {
     "language": "pt",
     "wiki": "pt.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "matemática aritmética divisão",
+    "tier": "wikipedia",
     "findings": [
+        {
+            "word": "vírgula",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 158,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…A vírgula é um sinal de pontuação. Seu nome vem do latim \"virgûla-\",…",
+                "…: Nova Froteira ). Ao contrário do que se costuma pensar, a vírgula não possui a função de representar pausas na oralidade (poi…",
+                "…pausas na oralidade (pois isso pode ser feito sem o uso da vírgula), mas a função de separar elementos que possuem a mesma fun…",
+                "…\". Esse elemento de pausa na oralidade não permite o uso da vírgula (sendo mais adequado o uso das reticências, neste último ca…",
+                "…outros casos.[carece de fontes?] == Uso == A utilização da vírgula não obedece as regras absolutas (existem casos debatidos en…",
+                "…explicativas. Geralmente, as restritivas não se separam por vírgula. Podem terminar com vírgula no caso de ter certa extensão o…"
+            ]
+        },
         {
             "word": "igual a",
             "verdict": "attested",

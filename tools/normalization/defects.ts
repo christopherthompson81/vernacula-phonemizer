@@ -111,6 +111,42 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * contributed nothing.
  */
 /**
+ * WORDS SOURCED FROM OUTSIDE THE CORPUS, each with its citation — the `sourcing` gate's escape hatch, and the
+ * narrowest one in this file.
+ *
+ * ⚠ WHY THIS IS NEEDED AT ALL: A CORPUS CANNOT ATTEST HOW A SYMBOL IS SPOKEN. Writers type `2.5`; they do not
+ * spell out how they say it. So the decimal word of a language whose wiki dump is 559k lines can score exactly
+ * zero and still be in universal spoken use — which is what happened to Igbo's `ntụkpọ`, declared "[NONE] — no
+ * word exists" on the strength of 0 hits for it and every variant, and then found in a dictionary with a
+ * definitional example. Khmer's `យូអាន` (yuan) is the same shape. For symbols with a small WRITTEN footprint,
+ * corpus silence is close to no evidence, and a gate that can only be satisfied by corpus hits pushes the layer
+ * toward dropping the symbol — the worse outcome.
+ *
+ * ⚠ AND WHY IT IS NOT SIMPLY THE MANIFEST. The `sourcing` haystack used to include the language's own `.jsonc`,
+ * which is where the gate EXTRACTS its needles from — so every declared word attested itself and the check was
+ * inert. A substituted nonsense word passed it. A declaration cannot be its own evidence; a citation naming a
+ * source outside this repository can be, and that is the only thing accepted here.
+ *
+ * ⚠ THE CITATION IS THE POINT, NOT THE EXEMPTION. Anything vague enough that a reader could not go and check it
+ * ("a dictionary", "standard usage") is a TODO wearing a citation's clothes and must keep failing the gate.
+ * Name the work, the headword and the sense, as the entries below do.
+ */
+export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ig: {
+        // Igbo has NO independent referee (wikipron ibo_latn, epitran ibo-Latn, kaikki: all 404), so a
+        // non-corpus tier is the only tier it has beyond the corpus itself. The referee config names Emenanjo
+        // 1978 and Green & Igwe 1963 for the same reason.
+        "ntụkpọ": "Nkọwa okwu (nkowaokwu.com), an Igbo dictionary published by a 501(c)(3) nonprofit: "
+            + "`ǹtụ̀kpọ`, n. 'decimal point; decimal number', with the definitional example "
+            + "\"E ji ntụkpọ ekewapụ nọmba nnuzuroke na nọmba ọgwa\" — 'ntụkpọ is used to separate whole "
+            + "numbers from fractions'. Corpus evidence is ZERO and that is expected: 0 hits for the word and "
+            + "every variant, 0 digit-point-digit instances, and the 89 whole-word `point` hits are all English "
+            + "text inside the Igbo wiki. Shipped untoned, matching the dictionary's own running-text examples "
+            + "and the register of every other word the layer emits (pasent, naira, dollar)",
+    },
+};
+
+/**
  * SIGN CLASSES A LANGUAGE IS INTENTIONALLY SILENT ON (#654) — the synthetic-probe counterpart of
  * `ACCEPTED_SILENT` above, and the difference between the two matters.
  *

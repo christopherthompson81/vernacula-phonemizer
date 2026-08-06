@@ -288,6 +288,16 @@ Four things that design gets right, each one a lesson from this playbook:
 - **`amaphuzu` ×2 is both a confirmation and a refusal.** Zulu declined it as a decimal-point word because
   its corpus instances were sports points; Wikipedia says the same independently. A probe that confirms a
   refusal is doing its job.
+- **⚠ BUT CORPUS SILENCE IS NOT A REFUSAL, and this trap cost Igbo a wrong reading.** `amaphuzu` was declined
+  on its SENSE — the instances were there and meant sports points. Igbo's decimal word was declined on
+  ABSENCE: 0 hits for `ntụkpọ` and every variant, 0 digit-point-digit instances, and the 89 `point` hits all
+  English text inside the Igbo wiki. That looked like an airtight `[NONE]` and it was wrong. A dictionary
+  (Nkọwa okwu) gives `ǹtụ̀kpọ`, "decimal point", with a definitional example. **A written corpus is the
+  weakest evidence there is about how a SYMBOL IS SPOKEN** — writers type `2.5`; they never spell out how they
+  would say it, so the word can be in universal spoken use and score zero. Khmer's `យូអាន` (yuan) is the same
+  shape: unattested, and correct. So: a sense-based refusal stands on the corpus alone; a refusal resting on
+  silence alone needs a dictionary check first, and the smaller the symbol's written footprint, the less the
+  silence means. Record the citation in the manifest beside the word, as `igbo.jsonc` does.
 - **Wikipedia is recorded as its OWN, WEAKER tier** in `tools/corpus/attest/<lang>.jsonc`, with the article
   count beside the hit count — one hit in one article is a lead, not a finding. `review.ts` reads only
   `attested` findings' example prose from that cache, never the file: the cache records the word it probed
