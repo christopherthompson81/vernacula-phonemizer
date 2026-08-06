@@ -44,6 +44,24 @@ CREATE TABLE languages (
 
     verdict          TEXT,                      -- for implemented rows: maturity ✅ 🟢 🟡 🔷 ⛔ (else NULL)
 
+    -- TEXT NORMALIZATION state — whether the symbols a reader says aloud (%, currency, ranges, decimals, signs)
+    -- are read for this language, which is a SEPARATE axis from `verdict`: a language can phonemize its words
+    -- excellently and still drop every percent sign. Empty is the planning signal — see the query in README.md.
+    --
+    -- ⚠ DERIVED, NOT HAND-KEPT: `python3 derive-normalization.py` recomputes it from the registry and the engine
+    -- directories. A hand-maintained column goes stale the moment a language is treated, and this one is only
+    -- worth planning from if it is true.
+    --
+    --   done       the engine directory has a normalize.ts AND the engine calls it
+    --   partial    the file exists but nothing calls it — those came apart in practice, so it is a real state
+    --   inherited  the row is served by another language's engine (served_by), so that engine's layer runs
+    --   NULL       no layer: a candidate
+    --
+    -- ⚠ `done` MAY MEAN A SHARED LAYER. Four directories serve sixteen codes — `arabic` alone serves ten dialect
+    -- codes — so `done` says a normalizer RUNS for this code, not that one was written for it specifically.
+    normalization    TEXT
+                       CHECK (normalization IS NULL OR normalization IN ('done','partial','inherited')),
+
     -- If this language is served by ANOTHER language's engine as a labelled approximation (rather than a bespoke
     -- module), the code of that sibling — e.g. Magahi (mag) served_by 'bho'. NULL = its own bespoke module (or
     -- not implemented). An aliased row is still `decision='implemented'` (the code works) but carries no verdict.
@@ -60,3 +78,5 @@ CREATE TABLE languages (
 CREATE INDEX idx_decision ON languages(decision);
 CREATE INDEX idx_reason   ON languages(rejection_reason);
 CREATE INDEX idx_family   ON languages(family);
+-- The planning index: "which unnormalized language has the most speakers?" is the query this table gets asked.
+CREATE INDEX idx_norm     ON languages(normalization);

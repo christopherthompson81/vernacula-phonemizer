@@ -10,6 +10,8 @@ data-availability verdicts** every time we pick the next language.
 - **`catalogue.tsv`** — the diffable **source of truth** (edit this, or `gen-seed.py`, to change data).
 - **`build.py`** — rebuilds `languages.db` from `schema.sql` + `catalogue.tsv`.
 - **`gen-seed.py`** — regenerates `catalogue.tsv` from inline data blocks (the bootstrap/bulk-edit aid).
+- **`derive-normalization.py`** — recomputes the `normalization` column from the repo. Run it after treating a
+  language; `--check` reports what it would write without touching the file.
 - **`languages.db`** — the built SQLite database (committed for immediate querying).
 
 ## Schema (columns)
@@ -25,6 +27,7 @@ data-availability verdicts** every time we pick the next language.
 | `decision` | `implemented` \| `rejected` \| `unimplemented` |
 | `rejection_reason` | one of the fixed set below (NULL for implemented) |
 | `verdict` | for implemented rows: maturity `✅ 🟢 🟡 🔷 ⛔` |
+| `normalization` | `done` \| `partial` \| `inherited` \| empty — whether the symbols a reader says aloud are read. **Derived**, see below |
 | `pr`, `notes` | provenance / free text |
 
 **`rejection_reason`** is an enforced enum: `unsuitable orthography`, `macrolanguage umbrella`, `spoken-only`,
@@ -90,3 +93,52 @@ When a language is implemented, flip its `decision` to `implemented`, set the `v
 
 > Populations are **estimates** (Ethnologue-style, rough); referee columns are filled **incrementally** as probed —
 > a NULL means "not yet checked", not "absent".
+
+## Planning the next normalization
+
+`normalization` is a **separate axis from `verdict`**: a language can phonemize its words excellently and still
+drop every percent sign, currency symbol and date range. Empty is the planning signal.
+
+```sql
+-- implemented, no normalization layer, biggest audience first
+SELECT code, name, script,
+       (COALESCE(l1_speakers,0)+COALESCE(l2_speakers,0))/1000000 AS m_speakers,
+       verdict, fleurs
+FROM languages
+WHERE decision='implemented' AND normalization IS NULL
+ORDER BY (COALESCE(l1_speakers,0)+COALESCE(l2_speakers,0)) DESC
+LIMIT 20;
+```
+
+```
+python3 derive-normalization.py && python3 build.py   # refresh after treating a language
+sqlite3 -column -header languages.db < the query above
+```
+
+### ⚠ The column is DERIVED, and it has to be
+
+A hand-kept column goes stale the moment a language is treated, and this one is only worth planning from if it is
+true. `derive-normalization.py` computes it from the two things that decide the answer: whether the engine
+directory has a `normalize.ts`, and whether the engine **calls** it. Those come apart in practice — `review.ts`
+checks them separately for that reason — so `partial` is a real state rather than being rounded up to `done`.
+
+⚠ **Delegation is followed, and it had to be.** 26 directories are wrappers with no `normalize.ts` of their own:
+`spanish-419` calls `createSpanish`, six Hindi-belt languages (Awadhi, Bhojpuri, Chhattisgarhi, Magahi, Maithili,
+Rangpuri) call the Hindi factory, four Sinitic lects call `sinitic`. Counting a missing file as a missing layer put
+**Latin-American Spanish — 420 million speakers — at the head of this query**, when its normalization had been
+running the whole time through the Spanish engine. The test is that the wrapper imports from another directory
+*and calls something it imported*; an import alone is not enough, since a wrapper may borrow only a vowel table.
+
+⚠ **A directory's own layer outranks `served_by`.** Testing `served_by` first got two rows wrong: `af` carries
+`served_by='native'` — a sentinel, not a language code — and Afrikaans has its own normalizer; `zsm` points at
+`id` but resolves to the `malay` directory, which has its own.
+
+⚠ **`done` may mean a SHARED layer.** Four directories serve sixteen codes — `arabic` alone serves ten dialect
+codes — so `done` says a normalizer *runs* for this code, not that one was written for it specifically. Whether a
+shared layer is right for each dialect is the same question `served_by` exists to record.
+
+⚠ **And `done` does not mean the review gate is clean.** It means a layer runs. `npx tsx
+tools/normalization/review.ts --lang <code>` is what says whether that layer has outstanding defects, and
+`tools/normalization/coverage.ts` gives the fleet matrix.
+
+Current state: **81 done, 17 inherited, 114 implemented-but-unnormalized.**
