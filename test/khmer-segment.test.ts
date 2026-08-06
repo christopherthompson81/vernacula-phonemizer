@@ -8,7 +8,7 @@
  * guarantees instead — the ones a caller can rely on and a refactor could break silently.
  */
 import { describe, expect, test } from "vitest";
-import { segmentKhmer, lastKhmerWord } from "./segment.ts";
+import { segmentKhmer, lastKhmerWord } from "../src/languages/khmer/segment.ts";
 
 describe("Khmer segmentation", () => {
     test("a single high-frequency word is never split", () => {

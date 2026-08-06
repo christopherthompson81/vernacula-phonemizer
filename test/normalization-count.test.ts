@@ -6,8 +6,8 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { DIGIT, digitFlanked, leading, literal, matches, wordAndSubstring } from "./count.ts";
-import { dominantScript } from "./scripts.ts";
+import { DIGIT, digitFlanked, leading, literal, matches, wordAndSubstring } from "../tools/normalization/count.ts";
+import { dominantScript } from "../tools/normalization/scripts.ts";
 
 describe("literal escaping", () => {
     test("⚠ a sign that is a metacharacter means ITSELF", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { phonemizeWordRules } from "./saraiki.ts";
+import { phonemizeWordRules } from "../src/languages/saraiki/saraiki.ts";
 
 // Diagnostic gold for the Saraiki (skr) engine — one word per signature feature. These are OUR canonical output
 // (rule-only, default-[ə] for the unwritten abjad short vowels + weight stress); they line up with the wikipron

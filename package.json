@@ -2,6 +2,18 @@
   "name": "vernacula-phonemizer",
   "version": "0.1.0",
   "license": "MIT",
+  "files": [
+    "src",
+    "LICENSES",
+    "NOTICE.md",
+    "!src/languages/english/en-g2p-tagger.onnx",
+    "!src/languages/french/fr-g2p-tagger.onnx",
+    "!src/languages/danish/da-g2p-tagger.onnx",
+    "!src/languages/khmer/km_segmenter.pt",
+    "!src/**/*.scratch.*",
+    "!src/**/*.log",
+    "!src/**/__pycache__"
+  ],
   "description": "Canonical-IPA phonemizer — native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
   "type": "module",
   "exports": {

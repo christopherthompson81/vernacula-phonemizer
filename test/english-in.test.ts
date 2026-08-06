@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { phonemizeWord } from "./english-in.ts";
+import { phonemizeWord } from "../src/languages/english-in/english-in.ts";
 
 // Hand-adjudicated DIAGNOSTIC GOLD for General Indian English (en-IN), from the documented phonology (Wells 1982
 // vol. 3; Sailaja 2009, *Indian English*). No en-IN pronunciation corpus exists (wikipron/kaikki have no Indian

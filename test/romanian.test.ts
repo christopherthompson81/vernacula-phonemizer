@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { phonemizeWord } from "./romanian.ts";
-import { normalizeRomanian } from "./normalize.ts";
-import { ROMAN_EXCLUSIONS } from "../../core/roman.ts";
-import { phonemize } from "../../index.ts";
-import { ROMAN_POLICY } from "./romanOrdinals.ts";
+import { phonemizeWord } from "../src/languages/romanian/romanian.ts";
+import { normalizeRomanian } from "../src/languages/romanian/normalize.ts";
+import { ROMAN_EXCLUSIONS } from "../src/core/roman.ts";
+import { phonemize } from "../src/index.ts";
+import { ROMAN_POLICY } from "../src/languages/romanian/romanOrdinals.ts";
 
 // Diagnostic gold for the Romanian (ro) g2p — common words, one per signature feature. These are OUR canonical
 // output; they match the wikipron ron_latn referee on the shared backbone (stress is deferred, unwritten). The

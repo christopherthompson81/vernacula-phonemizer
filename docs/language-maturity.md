@@ -2,7 +2,7 @@
 
 A per-language reliability reference: **is a language's output trustworthy, and what work (if any) is outstanding?**
 This exists because the single most visible number — the referee-corroboration % in
-`tools/referee-eval/referee-eval.test.ts` — is a **confounded** signal and a poor proxy for maturity on its own.
+`test/referee-eval.test.ts` — is a **confounded** signal and a poor proxy for maturity on its own.
 
 ## How to read this (why the referee % ≠ maturity)
 

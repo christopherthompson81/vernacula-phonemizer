@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { phonemizeWord } from "./french-ca.ts";
+import { phonemizeWord } from "../src/languages/french-ca/french-ca.ts";
 
 // Hand-adjudicated DIAGNOSTIC GOLD for Québécois French (fr-CA), from the documented phonology (Walker 1984, *The
 // Pronunciation of Canadian French*; Côté 2012). No fr-CA pronunciation corpus exists (wikipron/kaikki French is

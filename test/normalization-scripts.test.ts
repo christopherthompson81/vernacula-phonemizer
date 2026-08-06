@@ -8,8 +8,8 @@
  * sentences that merely quote a foreign name, which is the failure mode that would silently shrink the corpus.
  */
 import { describe, expect, test } from "vitest";
-import { dominantScript, isNativeSegment, scriptCounts } from "./scripts.ts";
-import { scriptProbe } from "./mine.ts";
+import { dominantScript, isNativeSegment, scriptCounts } from "../tools/normalization/scripts.ts";
+import { scriptProbe } from "../tools/normalization/mine.ts";
 
 const KM = "អក្សរខ្មែរ".repeat(40);      // enough Khmer to clear the evidence floor
 const EN = "the quick brown fox ".repeat(40);

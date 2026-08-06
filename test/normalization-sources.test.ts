@@ -17,8 +17,8 @@
  * next class added to `DROPPABLE` cannot arrive without either a row or a stated reason for having none.
  */
 import { describe, expect, test } from "vitest";
-import { DROPPABLE } from "./defects.ts";
-import { SOURCES_EXEMPT } from "./sources.ts";
+import { DROPPABLE } from "../tools/normalization/defects.ts";
+import { SOURCES_EXEMPT } from "../tools/normalization/sources.ts";
 import { readFileSync } from "node:fs";
 
 /** The class names `sources.ts` actually reports on, read from its own source rather than re-declared here. */

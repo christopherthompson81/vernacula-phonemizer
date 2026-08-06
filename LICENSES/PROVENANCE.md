@@ -257,9 +257,14 @@ Attribution is owed under CC-BY-SA regardless of whether a given use shipped byt
    Nakdimon, Sharif GE2PE, Lexibank/ASJP, **Amar Fayaz Buriro / SindhiLanguage.org** (named,
    mandatory), Toulmin/Wilde/Saksena/Grierson citations, and the §5 referee sources —
    **espeak-ng** (+posture statement, per §5.1) and **epitran**.
-4. **Package fencing** — the npm/dist package ships `src/` only; a `--permissive` build profile
-   that excludes §3/§4-fenced data files (engines fall back to rules/taggers) is mechanically
-   derivable from this map if a fully-MIT distributable is ever wanted.
+4. **Package fencing** — ✅ `package.json` `files: ["src", "LICENSES", "NOTICE.md"]`, so the package
+   ships `src/` plus the licensing files and nothing else: 2193 files / 253 MB → 884 / 148 MB, with
+   `docs/`, `tools/` and `test/` all at zero. The published set now equals the tracked set exactly.
+   Note a `files` allowlist **overrides `.gitignore`**, so each gitignored `src/` intermediate is
+   restated as a `!` negation; `test/packaging.test.ts` keeps the two lists in step.
+   **Still to do:** a `--permissive` build profile excluding §3/§4-fenced data files (engines fall
+   back to rules/taggers), mechanically derivable from this map if a fully-MIT distributable is ever
+   wanted.
 
 ---
 *Maintenance rules: any new data file or model lands with a `*.PROVENANCE.md` or a header naming
