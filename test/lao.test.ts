@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { phonemize } from "../../index.ts";
-import { phonemizeWord } from "./lao.ts";
+import { phonemize } from "../src/index.ts";
+import { phonemizeWord } from "../src/languages/lao/lao.ts";
 
 // Diagnostic gold for the Lao (lo) authored g2p — verified-correct common words + one per structural feature
 // (leading-vowel reorder, discontinuous vowels, ຫ-led high sonorant, Cວ→uːə, ຳ→am, tone-mark extraction).

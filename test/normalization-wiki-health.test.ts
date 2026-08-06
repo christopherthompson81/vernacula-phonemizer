@@ -12,7 +12,7 @@
  * test, and it means the test carries no third-party content.
  */
 import { describe, expect, test } from "vitest";
-import { health, verdict, histogram } from "./wiki-health.ts";
+import { health, verdict, histogram } from "../tools/normalization/wiki-health.ts";
 
 /** One template, slots varied. This is the `ceb` failure mode in miniature. */
 const TEMPLATE = Array.from({ length: 60 }, (_, i) =>

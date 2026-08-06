@@ -14,7 +14,7 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { CITED_WORDS, DROPPABLE, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "./defects.ts";
+import { CITED_WORDS, DROPPABLE, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "../tools/normalization/defects.ts";
 
 describe("a symbol in a FOREIGN-language span is not this language's defect", () => {
     // Mined artifacts contain BILINGUAL lines — legitimately, since most of such a line IS the language — and a

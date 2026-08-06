@@ -9,9 +9,9 @@
  * The rest of these are regressions for bugs the Burmese run actually produced.
  */
 import { describe, expect, test } from "vitest";
-import { parseJsonc } from "../../src/core/jsonc.ts";
-import { SAMPLE_CAVEAT, extracts, mapPool, segment, selectCells, renderJsonc } from "./mine.ts";
-import { CELLS } from "./cells.ts";
+import { parseJsonc } from "../src/core/jsonc.ts";
+import { SAMPLE_CAVEAT, extracts, mapPool, segment, selectCells, renderJsonc } from "../tools/normalization/mine.ts";
+import { CELLS } from "../tools/normalization/cells.ts";
 
 const TERMINATORS = ".!?။።۔؟।॥…。！？៕";
 

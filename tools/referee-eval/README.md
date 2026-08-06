@@ -54,7 +54,7 @@ Two languages need a non-default path, handled inside the one framework:
 
 ```bash
 npx tsx tools/referee-eval/eval.ts <ar|ca|cmn|cs|de|en|es|ff|fr|ha|hi|ja|kk|ko|pt|ru|si|sv|ta|th|tr|vi|zu> [--examples N]
-npx vitest run tools/referee-eval/referee-eval.test.ts   # primary-source floors
+npx vitest run test/referee-eval.test.ts   # primary-source floors
 ```
 
 Every language with a phonemizer has a referee (or a documented gap). Current backbone corroboration (primary;

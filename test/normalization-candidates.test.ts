@@ -12,8 +12,8 @@
  * RUN, and must be reported as such rather than counted.
  */
 import { describe, expect, test } from "vitest";
-import { classify, type Volume } from "./candidates.ts";
-import { SISTER_STANDARDS, sistersOf } from "./defects.ts";
+import { classify, type Volume } from "../tools/normalization/candidates.ts";
+import { SISTER_STANDARDS, sistersOf } from "../tools/normalization/defects.ts";
 
 const stats = (articles: number, words?: number): string =>
     JSON.stringify({ batchcomplete: "", query: { statistics: { articles, ...(words === undefined ? {} : { "cirrussearch-article-words": words }) } } });
