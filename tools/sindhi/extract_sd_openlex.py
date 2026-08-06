@@ -16,6 +16,7 @@ Writes:
 
   python3 extract_sd_openlex.py /path/to/sindhi_open_lexicon_master_223342.jsonl
 """
+import os
 import json
 import re
 import sys
