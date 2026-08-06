@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""The shared char→chunk BiLSTM tagger: vocab, encoding, training loop, and masked decode.
+
+The invariant middle of the g2p-tagger pipeline (nb, en, da, fr). Each language script keeps its own ENDS —
+`load()` (lexicon path, format, charset), `split()` (held-out policy), and the assembly of decoded chunks into a
+final pronunciation — because those are where the languages genuinely differ. Everything here was byte-identical
+(or differed only by hyperparameter) across the four before extraction.
+
+HYPERPARAMETERS ARE PROVENANCE. The committed .onnx artifacts were trained at specific settings, so every caller
+passes its own explicitly rather than relying on a default:
+    nb  hid=128  batch=128  log_every=5
+    en  hid=256  batch=256  log_every=5
+    da  hid=256  batch=256  log_every=10
+    fr  hid=256  batch=256  log_every=10
+Changing a default here does not silently change what a retrain produces; changing a call site does.
+"""
+import random
+
+import torch
+import torch.nn as nn
+from torch.nn.utils.rnn import pad_sequence
+
+PAD = 0
+DEV = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+class Tagger(nn.Module):
+    def __init__(self, n_chars, n_tags, emb=64, hid=256):
+        super().__init__()
+        self.emb = nn.Embedding(n_chars, emb, padding_idx=PAD)
+        self.lstm = nn.LSTM(emb, hid, num_layers=2, bidirectional=True, batch_first=True, dropout=0.3)
+        self.head = nn.Linear(2 * hid, n_tags)
+
+    def forward(self, x):
+        return self.head(self.lstm(self.emb(x))[0])
+
+
+def build_vocab(aligned):
+    """aligned → (chars, tags, char_tags). char_tags maps char-id → the set of tag-ids that char ever emitted:
+    the CONSONANT-CONSISTENCY MASK the serving decoders apply, so a letter can never emit a chunk unattested for it."""
+    chars = {"<pad>": PAD, "<unk>": 1}
+    tags = {"<pad>": PAD}
+    char_tags = {}
+    for _, a in aligned:
+        for g, t in a:
+            ci = chars.setdefault(g, len(chars))
+            ti = tags.setdefault(t, len(tags))
+            char_tags.setdefault(ci, set()).add(ti)
+    return chars, tags, char_tags
+
+
+def encode(aligned, chars, tags):
+    X, Y = [], []
+    for _, a in aligned:
+        X.append(torch.tensor([chars.get(g, 1) for g, _ in a]))
+        Y.append(torch.tensor([tags[t] for _, t in a]))
+    return X, Y
+
+
+def train(model, X, Y, epochs=40, batch=256, lr=2e-3, log_every=5, dev=None):
+    """COSINE LR decay lr → ~0 over the run: a fixed lr overshoots the minimum in late epochs (training loss bottomed
+    ~epoch 10 then climbed ~50%), so the last-epoch weights we export were PAST the minimum. Annealing lets the late
+    epochs settle INTO it, so the final weights are the best — no best-checkpoint selection needed."""
+    dev = dev or DEV
+    model.to(dev).train()
+    opt = torch.optim.Adam(model.parameters(), lr=lr)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
+    loss_fn = nn.CrossEntropyLoss(ignore_index=PAD)
+    idx = list(range(len(X)))
+    for ep in range(epochs):
+        random.shuffle(idx)
+        tot = 0.0
+        for b in range(0, len(idx), batch):
+            bi = idx[b:b + batch]
+            xb = pad_sequence([X[i] for i in bi], batch_first=True, padding_value=PAD).to(dev)
+            yb = pad_sequence([Y[i] for i in bi], batch_first=True, padding_value=PAD).to(dev)
+            opt.zero_grad()
+            out = model(xb)
+            loss = loss_fn(out.reshape(-1, out.size(-1)), yb.reshape(-1))
+            loss.backward(); opt.step(); tot += loss.item()
+        sched.step()
+        if ep % log_every == 0 or ep == epochs - 1:
+            print(f"  epoch {ep}: loss {tot/max(1,len(idx)//batch):.3f}  lr {sched.get_last_lr()[0]:.2e}", flush=True)
+    return model
+
+
+def decode_chunks(model, chars, itag, char_tags, word, dev=None):
+    """MASKED argmax over each letter's permitted chunk set → the list of emitted chunks, or None on an out-of-vocab
+    grapheme (which is how serving declines rather than guessing). Callers assemble: "".join for single-char IPA,
+    split(" ") per chunk for multi-token ARPABET, plus any language-specific post-pass (e.g. Norwegian one_stress)."""
+    dev = dev or DEV
+    model.eval()
+    ids = [chars.get(c) for c in word]
+    if any(i is None for i in ids):
+        return None
+    logits = model(torch.tensor([ids]).to(dev))[0]  # [T, nTags]
+    out = []
+    for k, cid in enumerate(ids):
+        permitted = char_tags.get(cid)
+        if not permitted:
+            return None
+        row = logits[k]
+        out.append(itag[max(permitted, key=lambda t: row[t].item())])
+    return out
