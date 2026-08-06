@@ -15,7 +15,12 @@ import { googleToIpa, isBengaliWord } from "./googlePhoneMap.ts";
 
 const DUMP = "/tmp/google_bn_lexicon.tsv";
 const OUT = process.argv[2] ?? "/tmp/bn_tagger_train.tsv";
-if (!existsSync(DUMP)) { console.error(`missing ${DUMP} — download the Google bn lexicon first (see header)`); process.exit(1); }
+if (!existsSync(DUMP)) {
+    console.error(
+        `missing ${DUMP} — download the Google bn lexicon first (see header)`,
+    );
+    process.exit(1);
+}
 
 // First reading per word (Google lists POS heteronyms as separate rows; the tagger sees whole words, so it learns
 // the dominant reading — the lexicon disambiguates the rare heteronym pairs). Bengali-script words ≥2 graphemes;
