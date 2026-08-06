@@ -24,6 +24,105 @@
     // Three level tones → Chao contour letters: High (acute ́), Mid (unmarked), Low (grave ̀).
     "tones": { "high": "˥", "mid": "˧", "low": "˩" },
 
+    // CARDINAL NUMBERS — a VIGESIMAL system with both ADDITION and SUBTRACTION, and every form below is either
+    // attested in a 112,738-paragraph yo.wikipedia dump or glossed with its own digits by the corpus.
+    //
+    // ⚠ THE CORPUS GLOSSES ITS OWN NUMERALS, which is what made this table verifiable rather than inferred. It
+    // writes the numeral out and repeats it in figures — `ẹgbẹ̀rún méjì (2,000)`, `irinwó ó lé ọgọ́rin (480)`,
+    // `ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m)`, and one instance that pins the whole multi-part shape:
+    //     ẹgbẹ̀rún lọ́nà méjìlélọ́gbọ̀n lé ẹgbẹ̀rin lé méjìlá  (32,812)   = 1000×32 + 800 + 12
+    // 576 such glosses were extracted; 186 numeral phrases are glossed consistently. See
+    // docs/investigations/yo_ig_numbers_investigation.md for the mining and every count.
+    //
+    // ⚠ AND THE DUMP CONTAINS DUPLICATE PARAGRAPHS (123,405 → 112,738 unique, 8.6%), which inflates exactly the
+    // rare forms this table depends on. One gloss, `mẹ́tàdínlọ́gọ́rin (75%)`, appeared four times and looked like
+    // corroboration; it is ONE sentence repeated, and it contradicts the rule 86 other values support
+    // (mẹ́tà-dín-lọ́gọ́rin is 3-from-80 = 77). Every count here is from the deduplicated text.
+    "numbers": {
+        // `òdo` is thin (28) but it is the only tone-marked candidate: the untoned `odo` (432) is dominated by
+        // odò "river". Digits rarely render as a bare zero, so little rests on it.
+        "zero": "òdo",
+        // FREE forms, for a numeral standing alone. ⚠ 1 is `ọ̀kan` (2,357) and NOT `kan`: `kan` has 19,097 hits
+        // because it is the ordinary determiner "a/certain", which is a count that would look like overwhelming
+        // evidence for the wrong word.
+        "units": ["", "ọ̀kan", "méjì", "mẹ́ta", "mẹ́rin", "márùn-ún", "mẹ́fà", "méje", "mẹ́jọ", "mẹ́sàn-án", "mẹ́wàá"],
+        //            2357    3023    1724    1111     804        794      518     376      191        597
+        // ⚠ `márùn` (964) and `mẹ́sàn` (232) look like competing spellings but are NOT: a hyphen is neither
+        // \p{L} nor \p{M}, so a whole-word count of `márùn` also matches the `márùn` inside `márùn-ún`. The true
+        // standalone counts are 160 and 41. Same trap as km's យ័ន.
+        //
+        // FUSING forms, used at the front of a compound. ⚠ 1 takes the m- prefix like every other unit —
+        // mọ́kànlá 171 : ọ̀kànlá 3, mọ́kàndínlógún 68 : 10 — and for 39 and 59 the ọ̀kàn- form has ZERO hits
+        // while the m- form has 12 and 13. Two values looked unattested purely from getting this wrong.
+        "front": ["", "mọ́kàn", "méjì", "mẹ́tà", "mẹ́rìn", "márùn", "mẹ́rìn", "mẹ́tà", "méjì", "mọ́kàn"],
+        // Tens as FREE words, and as the FUSED base that follows lé-/dín-. The fused base takes an l- and a tone
+        // change; ⚠ the àádọ́- bases KEEP their à (láàdọ́ta, not ládọ́ta — the one-à spelling has a single corpus
+        // hit and made 45-48 and 52-54 look unattested), and ⚠ 90's fused base DROPS its final -ún (láàdọ́rùn).
+        "tens": {
+            "20": { "free": "ogún", "fused": "lógún" },
+            "30": { "free": "ọgbọ̀n", "fused": "lọ́gbọ̀n" },
+            "40": { "free": "ogójì", "fused": "lógójì" },
+            "50": { "free": "àádọ́ta", "fused": "láàdọ́ta" },
+            "60": { "free": "ọgọ́ta", "fused": "lọ́gọ́ta" },
+            "70": { "free": "àádọ́rin", "fused": "láàdọ́rin" },
+            "80": { "free": "ọgọ́rin", "fused": "lọ́gọ́rin" },
+            "90": { "free": "àádọ́rùn-ún", "fused": "láàdọ́rùn" },
+            "100": { "free": "ọgọ́rùn-ún", "fused": "lọ́gọ́rùn-ún" }
+        },
+        // 11-14 are unit + `lá` (méjìlá 257, mẹ́tàlá 186, mẹ́rìnlá 206, mọ́kànlá 171).
+        "teen": "lá",
+        // 15 and 25 have their own mẹ́ẹ̀ẹ́d- shape, which OUTNUMBERS the regular subtractive form:
+        // mẹ́ẹ̀ẹ́dógún 127 : márùndínlógún 29, and mẹ́ẹ̀ẹ́dọ́gbọ̀n 65 : márùndínlọ́gbọ̀n 21. From 35 up the
+        // regular márùndín- form is the only one attested, so this is a two-entry irregularity, not a pattern.
+        "fifteen": "mẹ́ẹ̀ẹ́dógún",
+        "twentyFive": "mẹ́ẹ̀ẹ́dọ́gbọ̀n",
+        // The additive and subtractive infixes. 1-4 past a ten are ADDITIVE on it (mẹ́rìnlélógún 103 = 24);
+        // 5-9 are SUBTRACTIVE from the ten above (mẹ́rìndínlọ́gbọ̀n 54 = 26, márùndínlógójì 32 = 35).
+        "add": "lé",
+        "subtract": "dín",
+        // HUNDREDS, each glossed with its own digits by the corpus: 500 and 900 directly
+        // (`ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m)`), 700 inside `Ẹgbẹ̀rún-lọ́nà-ẹ̀ẹ́dẹ́gbẹ̀rin` (1000×700).
+        // ⚠ `igba` (200) is HOMOGRAPHIC with ìgbà "time" once tone is dropped, and this corpus is ~51%
+        // tone-marked — so its 1,387 whole-word hits are mostly the ordinary word. The numeral rests on the 21
+        // `igba (200)` glosses and the 70 uses before a multiplier, not on that number.
+        "hundreds": ["", "ọgọ́rùn-ún", "igba", "ọ̀ọ́dúnrún", "irinwó", "ẹ̀ẹ́dẹ́gbẹ̀ta", "ẹgbẹ̀ta",
+            "ẹ̀ẹ́dẹ́gbẹ̀rin", "ẹgbẹ̀rin", "ẹ̀ẹ́dẹ́gbẹ̀rún"],
+        // MAGNITUDE FIRST, multiplier second — counted, not assumed: ẹgbẹ̀rún 249:2, mílíọ̀nù 197:7, igba 70:4.
+        "thousand": "ẹgbẹ̀rún",
+        "million": "mílíọ̀nù",
+        "billion": "bílíọ̀nù",
+        // ⚠ A THOUSAND TAKES `kan` FOR ×1 BUT A HUNDRED DOES NOT: ẹgbẹ̀rún kan 52 and mílíọ̀nù kan 60 against
+        // ọgọ́rùn-ún kan 2 and irinwó kan 0, and the corpus glosses bare `ọgọ́rùn-ún (100)` eight times.
+        "multiplierOne": "kan",
+        // ⚠ `lọ́nà` MULTIPLIES when the multiplier is above ten, and a direct multiplier is used below it:
+        // ẹgbẹ̀rún + unit 249 : ẹgbẹ̀rún lọ́nà + unit 4, but ẹgbẹ̀rún lọ́nà + ten 46 : ẹgbẹ̀rún + ten 7.
+        // Attested with any multiplier over ten, not only round ones — `ẹgbẹ̀rún lọ́nà mẹ́ẹ̀ẹ́dógún (15,000)`.
+        "times": "lọ́nà",
+        // The joiner between a magnitude and its remainder: `irinwó ó lé ọgọ́rin (480)`, `igba ó lé ọgọ́rin (280)`.
+        "join": "ó lé"
+    },
+
+    // THE SYMBOL READINGS, for normalize.ts. Counts are from the same deduplicated dump.
+    "symbols": {
+        // `sí` ("to") — 1,427 digit-flanked, and glossed twice: `ọgọ́rùn-ún méjì sí mẹ́fà (200-600 kg)` for a
+        // range and `góòlù mẹ́rin sí òdo (4–0)` for a scoreline.
+        "range": "sí",
+        // ⚠ THE PERCENT IS A CIRCUMFIX: a word before the number AND a phrase after it. `ìdá 84 nínú ọgọ́rùn-ún`.
+        // 21 digit-form instances against 0 for the competing `ọgọ́rùn-ún lọ́nà X` order.
+        "percentBefore": "ìdá",
+        "percentAfter": "nínú ọgọ́rùn-ún",
+        // ⚠ `dásímà` is a BORROWING of "decimal", and the frame `X àti dásímà <digits>` is unanimous across all
+        // 18 instances, with the fraction read digit by digit. Native candidates (ààmì, àmì, ẹ̀là, pọ́ìntì, ojú)
+        // are all 0 between digits, and `ẹsẹ` — which a mathematics dictionary gives — means FOOT in all 478 of
+        // its corpus occurrences. See normalize.ts for why that dictionary entry is refused.
+        "decimalWord": "àti dásímà",
+        // The ordinary connective, 42,897 whole-word hits, 430 of them digit-flanked.
+        "and": "àti",
+        // The SQUARED measure word, which follows the unit noun: `kìlómítà onígun mẹ́rin`. 27 occurrences of
+        // the phrase, 9 of them directly after a unit word (kìlómítà/mítà/máìlì).
+        "squared": "onígun mẹ́rin"
+    },
+
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     }

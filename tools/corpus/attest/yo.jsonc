@@ -1,0 +1,72 @@
+// WIKIPEDIA WORD ATTESTATION — yo (#586). Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "yo",
+    "wiki": "yo.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "dásímà",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 18,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…é ní àpapọ̀ agbègbè igbó tó jẹ́ hẹ́kítà bílíọ̀nù mẹ́rin àti dásímà ọ̀kan mẹ́rin, èyí tó jẹ́ ìdá méjìlélọ́gbọ̀n nínú ọgọ́rùn-ún…",
+                "…ú ọgọ́rùn-ún àpapọ̀ ilẹ̀ káríayé tí ó sì dọ́gba mọ́ odo àti dásímà márùn-ún odo hẹ́kítà igbó fún ẹnì kọ̀ọ̀kan. Agbègbè ilẹ̀ ol…",
+                "…àdánù igbó káríayé dín kù láti hẹ́kítà mílíọ̀nù mẹ́wàá àti dásímà méje lọ́dọọdún lágàárín 1990–2000 sí hẹ́kítà mílíọ̀nù mẹ́ta…",
+                "…lọ́dọọdún lágàárín 1990–2000 sí hẹ́kítà mílíọ̀nù mẹ́ta àti dásímà mẹ́fà ẹjọ lọ́dọọdún ní 2000–2015, àwọn ohun tó fà á gangan…",
+                "…pọ̀ síi ní àsìkò 2015–2025, dé hẹ́kítà mílíọ̀nù mẹ́rin àti dásímà ọ̀kan méjì, èyí sì jẹ́ nítorí ìdínkù nínú ìwọ̀n èrè igbó (ì…",
+                "…apọ̀ ìpamọ́ kábọ́ọ̀nù igbó káríayé ti dín kù ní ìdá odo àti dásímà mẹ́sàn-án nínú ọgọ́rùn-ún, àti pé ìbòrí igi dín kù ní ìdá m…"
+            ]
+        },
+        {
+            "word": "sí",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 47,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Episteli sí Fílẹ́mónì je iwe Majemu Titun ninu Bibeli Mimo. == Itokasi…",
+                "…Episteli Kejì sí Timotéù je iwe Majemu Titun ninu Bibeli Mimo. == Itokasi ==…",
+                "…Episteli Kìnní sí Timotéù je iwe Majemu Titun ninu Bibeli Mimo. == Itokasi ==…",
+                "…Episteli sí àwọn ará Kólóssè je iwe Majemu Titun ninu Bibeli Mimo. == I…",
+                "…Episteli sí àwọn ará Fílíppì je iwe Majemu Titun ninu Bibeli Mimo. == I…",
+                "…Episteli sí àwọn ará Galátíà je iwe Majemu Titun ninu Bibeli Mimo. == I…"
+            ]
+        },
+        {
+            "word": "ìdá",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 34,
+            "articles": 15,
+            "substringOnly": 0,
+            "examples": [
+                "…è àbọ̀. Òun ni ó jẹ́ èdè ìjọba fún Aserbaijani níbi tí àwọn ìdá mẹ́ta nínú mẹ́rin àwọn tí ó ń gbé ibẹ̀ ti ń sọ ọ́. Àwọn ìdá…",
+                "…ìdá mẹ́ta nínú mẹ́rin àwọn tí ó ń gbé ibẹ̀ ti ń sọ ọ́. Àwọn ìdá mẹ́fà nínú ọgọ́rùn-ún àwọn ènìyàn tí ó ń gbé Rọ́sía ni ó ń…",
+                "…Kalisiomu jẹ́ kémíkàlì ìdá-ìpílè pẹ̀lú àmì ìdámò Ca àti ogún nọ́mbà átọ̀mù. Kalisiomu…",
+                "…́́ alàwọ eléérú rírọ̀̀, ẹgbẹ́́ alkaline earth metal, ikarun ìdá-ìpílè tí ó wúwo jú nílé ayé. == Ìtókasí ==…",
+                "…sí ti ilẹ̀-ayé. Èyí sì jẹ́ pé kíkún-inú (volume) òṣùpá jẹ́ ìdá àádọ́ta péré ti ilẹ̀-ayé. Fífà ìwúwosí rẹ̀ jẹ́ ìdá mẹ́fà sí…",
+                "…ṣùpá jẹ́ ìdá àádọ́ta péré ti ilẹ̀-ayé. Fífà ìwúwosí rẹ̀ jẹ́ ìdá mẹ́fà sí ti ilẹ̀-ayé. Òṣùpá ń yípo ilẹ̀-ayé ní ẹ̀ẹ̀kan láàá…"
+            ]
+        }
+    ],
+}

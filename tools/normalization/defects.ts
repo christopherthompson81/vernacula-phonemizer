@@ -166,6 +166,38 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    yo: {
+        // Yoruba HAS referees (wikipron yor, kaikki yor) but they are word→IPA: they can check how a word is
+        // pronounced, never whether it is the right word for a sign. So every reason below is a measurement from
+        // a 112,738-paragraph yo.wikipedia dump (deduplicated from 123,405). See src/languages/yoruba/normalize.ts.
+        minus: "measured: the digit-flanked dash in Yoruba is a RANGE, not a minus — 3,378 hyphens and 4,159 en "
+            + "dashes sit between digits, and the corpus glosses the reading twice: `ọgọ́rùn-ún méjì sí mẹ́fà "
+            + "(200-600 kg)` and, for a scoreline, `góòlù mẹ́rin sí òdo (4–0)`. `sí` IS read for the range, 1,427 "
+            + "digit-flanked instances — see ig/nl/mr/ta/yue, which record the same shape",
+        degrees: "measured: ° trails a number 390 times and is the sign this language most conspicuously writes, "
+            + "but there is no scale word to say — `dígírí` 0 hits ANYWHERE, `sẹ́lísíọ̀sì` 0, `fáránháìtì` 0. "
+            + "Most instances are °C/°F in climate tables (`26.46 °C tàbí 79.63 °F`)",
+        times: "measured: × is 72 digit-flanked, but `ìlọ́po` (75 whole-word) is never ONCE digit-adjacent, and "
+            + "`ìlọ́po méjì` (37) means 'double/twice' generally rather than an operator — measured against the "
+            + "unit nouns it is 0 after and 1 before, where the areal `onígun mẹ́rin` is 15 after. "
+            + "`ìsọdipúpọ̀` has 6 hits. No operator word is attested",
+        plus: "measured: + is 9 digit-flanked in 21 MB. `àfikún` (564 whole-word) is the nominal 'addition' and "
+            + "is digit-adjacent 3 times in running prose, not as an operator; `kún` is a verb 'to fill'",
+        "plus-minus": "measured: ± is 18 digit-flanked and NO tolerance word occurs — the sign appears in "
+            + "scientific ranges copied into the wiki, with nothing in the corpus that reads it",
+        equals: "measured: = is 7 digit-flanked. `dọ́gba` (124 whole-word) means 'is equal to' and is "
+            + "digit-adjacent 9 times, which is too thin to map a sign onto, and `jẹ́` (30,012) is the ordinary "
+            + "copula rather than an arithmetic reading",
+        "less-than": "measured: < occurs 13 times and NEVER between digits (0 digit-flanked); the sign is not "
+            + "used as a comparator in this corpus",
+        "greater-than": "measured: > occurs 39 times and 0 of them between digits",
+        divide: "measured: ÷ occurs twice in 21 MB and never between digits. `pín` (709) is the ordinary verb "
+            + "'to divide/share' and `ìpín` (349) a share or portion — neither is digit-adjacent as an operator",
+        exponent: "measured: the SQUARED UNIT is read (`km²` → `kìlómítà onígun mẹ́rin`, 754 occurrences of the "
+            + "sign, the reading attested 15 times after a unit noun), but a BARE exponent has no reading: ³ "
+            + "occurs 23 times with no cube word anywhere in the corpus, and no predicate form — the `20 squared` "
+            + "shape — is attested for a base with no unit noun",
+    },
     ig: {
         // ⚠ IGBO HAS NO REFEREE (wikipron ibo_latn, epitran ibo-Latn and the kaikki extract are all 404), so every
         // reason below is a corpus measurement from a 558,991-line ig.wikipedia dump and nothing else can check it.
