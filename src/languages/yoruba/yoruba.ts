@@ -9,15 +9,9 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
-
-interface YorubaDef {
-    consonants: Record<string, string>;
-    vowels: Record<string, string>;
-    tones: { high: string; mid: string; low: string };
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<YorubaDef>(import.meta.url, "yoruba.jsonc");
+import { MANIFEST as DEF } from "./manifest.ts";
+import { normalizeYoruba } from "./normalize.ts";
+import { yorubaCardinal } from "./numbers.ts";
 const CLAUSE_MARK = DEF.clausePunctuation;
 const DOT_BELOW = "̣", ACUTE = "́", GRAVE = "̀", MACRON = "̄";
 const TONE_MARK = new Set([ACUTE, GRAVE, MACRON]);
@@ -145,9 +139,18 @@ export type ForeignPhonemizer = (latin: string) => string;
 class YorubaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ NORMALIZE FIRST, then tokenize. The symbol layer turns `%`, `₦`, a digit-flanked dash and a decimal
+        // period into Yoruba words; TOKEN would otherwise drop the signs and read `.` as a clause break.
+        return assembleClauses(normalizeYoruba(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : m[2]);
+            // ⚠ DIGITS GO TO THE YORUBA COMPOSITOR, NEVER TO `foreign`. That fallback is an ENGLISH phonemizer,
+            // so `1945` used to read *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv* — fluent English inside Yoruba
+            // speech, which for TTS is worse than silence. numbers.ts reads every digit run, and above 10¹² it
+            // falls back to digit-by-digit in Yoruba units rather than to another language.
+            // ⚠ ONE emit PER WORD. A composed numeral is several words, and handing the whole string to
+            // `phonemizeWord` ran them together — `1945` came out as one 40-phone blob with no boundary, so the
+            // syllabifier re-parsed across every junction.
+            else if (m[2]) for (const w of yorubaCardinal(Number(m[2])).split(" ")) sink.emit(phonemizeWord(w));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
