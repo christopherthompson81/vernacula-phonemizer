@@ -334,6 +334,25 @@ found it, and deleting the evidence is how a settled question gets reopened. Rea
 whole thing — the traps cluster into eight principles, and most entries are a second or third instance of one
 you have already met.
 
+### ⚠ Where a principle is ENFORCED, and why that column exists
+
+This document is 1,500 lines and 55 numbered traps. A Khmer session read it start to finish and then broke
+"a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
+បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
+gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
+happened.
+
+So prefer moving a rule into a TOOL or a TEST over writing it here again, and record where it is enforced:
+
+| principle | enforced by | how |
+|---|---|---|
+| A count is a lead, never a finding | `corpus-words.ts`, `attest.ts` | a substring-only hit can no longer print as `attested`; a hit that exists only because spaces were stripped prints `SPACE-SPANNING`; a word that is <3% whole-word prints "mostly inside others"; examples come from the UNSTRIPPED text so a space-spanning hit is visible as one |
+| Counting must not be hand-rolled | `count.ts` | `digitFlanked`/`leading`/`wordAndSubstring` over escaped literals and `\p{Nd}`; the three regex traps that produced three wrong answers are pinned as tests |
+| A guard written for one writing system is blind in another | `count.ts`, `scripts.ts` | `DIGIT` is `\p{Nd}` and never `\d`; word boundaries are `(?<![\p{L}\p{M}])`, never `\b`; the script table has ONE copy |
+| Regenerate from the recorded invocation, not from memory | `mine.ts` | every artifact records the `command` that produced it, paths reduced to basenames; omitting `--sample` or `--terms` silently changes the artifact and left no other trace |
+| A refusal needs a check, not a feeling | `sources.ts` + `defects.test.ts` | the pre-flight report must cover every `DROPPABLE` class or declare an exemption; a class-level refusal is consulted by the artifact scan instead of failing it |
+| A differential test must hold everything but the variable still | `defects.ts` | substitute a space, never delete; and a harness measuring the DEFAULT path must build its baseline explicitly — shipping a change into the default silently rebased `eval_km_segmenter.mts`'s baseline and it compared a model against itself |
+
 ### Index — the eight principles, and which traps instance them
 
 | principle | traps | in one line |
