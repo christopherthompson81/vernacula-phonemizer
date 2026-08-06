@@ -105,7 +105,20 @@ export function phonemizeWordRules(word: string): string {
     let i = 0;
     while (i < n) {
         const c = s[i]!;
-        // An INDEPENDENT VOWEL is a complete syllable: emit it as its own unit so PASS 2 can still hand it a coda.
+        /**
+         * An INDEPENDENT VOWEL is a complete syllable: emit it as its own unit so PASS 2 can still hand it a coda.
+         *
+         * ⚠ A COENG AFTER ONE IS SKIPPED, AND THAT IS LOAD-BEARING FOR THE COMMONEST SHAPE. `ឲ្យ`/`ឱ្យ` ("to
+         * give/let") is 54,491 corpus occurrences — 98% of all IV+coeng sequences — and reads ʔaoj. An independent
+         * vowel cannot actually carry a subscript, so the coeng falls through as an unrecognised mark and the ⟨យ⟩
+         * becomes this syllable's CODA by the trailing-bare-unit rule in PASS 2. `ឲ្យ` and `ឲយ` therefore give the
+         * same reading, which is the correct one. Pinned by a test, because it happens by omission rather than by
+         * an explicit branch and would be easy to "tidy" away.
+         *
+         * ⚠ AND `ឣ្នក` IS A TYPO, NOT A WORD. U+17A3 ឣ and U+17A2 អ look nearly identical and writers confuse them:
+         * 462 corpus lines write ឣ្នក for អ្នក ("person"). Reading it as ʔɑn… is what the letters say, and a g2p
+         * should not silently repair a misspelling — the reading is phonetically close in any case.
+         */
         const ivIpa = DEF.independentVowels[c];
         if (ivIpa !== undefined) {
             i += 1;

@@ -97,3 +97,35 @@ segmenter and a g2p, and it was worth un-tangling.
 
 **Still open:** the 184 residual disagreements are cluster/loanword problems in the rest of the word, unrelated to
 this class. `ឨ`'s reading rests on one dictionary entry and one corpus occurrence.
+
+## Run 5 — 2026-08-05 21:05 · review, and the shape the change nearly broke silently
+
+Reviewing the change found two things worth recording and one worth pinning.
+
+**⚠ 55,417 corpus sequences put a COENG directly after an independent vowel, and 98% of them are one word.**
+`ឲ្យ`/`ឱ្យ` ("to give/let") is 54,491 occurrences. An independent vowel cannot carry a subscript, so the coeng
+falls through PASS 1 as an unrecognised mark and the ⟨យ⟩ becomes the vowel-syllable's CODA by the
+trailing-bare-unit rule — giving ʔaoj, which is correct. `ឲ្យ` and `ឲយ` read identically, which is how the
+mechanism was confirmed.
+
+It works, and it works **by omission rather than by an explicit branch**: nothing in the code says "a coeng after an
+independent vowel is skipped", so the commonest word in the language depends on a fall-through. Now documented in
+PASS 1 and pinned by a test. Had the review not looked at what those 55,417 sequences actually were, this would
+have been correct-by-accident and one refactor from silently wrong.
+
+**⚠ `ឣ្នក` is a typo, not a word — 462 corpus lines.** U+17A3 ឣ and U+17A2 អ are near-identical glyphs and writers
+confuse them, writing ឣ្នក for អ្នក ("person"). Reading it as ʔɑn… is what the letters say. A g2p should not
+silently repair a misspelling, and the reading is phonetically close anyway; noted so nobody "fixes" it.
+
+**Crash-path audit.** The unit for an independent vowel has an EMPTY `ons` and a sentinel `vs`, either of which
+would throw at `DEF.consonants[unit.ons[unit.ons.length - 1]!]` or `DEF.vowels[unit.vs]!`. Both are unreachable
+only because PASS 3 emits `iv` units and `continue`s before the onset/series logic. Checked every `.vs` and `.ons`
+consumer: all four PASS 2 rules exclude an `iv` unit as the coda PROVIDER (they require `vs === null` or
+`ons.length >= 2`) while admitting it as the coda RECEIVER, which is exactly what is wanted. The
+all-17-letters test exercises the path, so removing that `continue` fails the suite rather than throwing in
+production.
+
+**Left as known variability:** `ឥ` is genuinely ʔə / ʔi / ʔəj depending on the word (wikipron 30 / 18 / 7,
+dictionary 107 / — / 15). A single-value rule table takes the majority and the lexicon carries the exceptions —
+`ឥឡូវ` is ʔəjləw in both the lexicon and the dictionary while the rule path gives ʔəlouw. That is the correct
+division of labour, not a defect in the table.

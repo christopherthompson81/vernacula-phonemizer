@@ -202,6 +202,16 @@ describe("independent vowels (#670)", () => {
         expect(phonemize("ឧត្តម")).toContain("ʔut");
     });
 
+    test("⚠ ឲ្យ — 54,491 occurrences — reads ʔaoj, via the coeng being skipped", () => {
+        // 98% of all IV+coeng sequences in the corpus are ឲ្យ/ឱ្យ ("to give/let"). An independent vowel cannot
+        // carry a subscript, so the coeng falls through and the ⟨យ⟩ becomes the vowel-syllable's coda. That is the
+        // right answer, but it arrives by omission rather than an explicit branch — hence this pin.
+        expect(phonemize("ឲ្យ")).toBe("ʔaoj");
+        expect(phonemize("ឱ្យ")).toBe("ʔaoj");
+        expect(phonemize("ឲយ")).toBe("ʔaoj");   // same reading without the coeng — the mechanism, made visible
+        expect(phonemize("ឯង")).toBe("ʔaeŋ");   // and an ordinary coda still works
+    });
+
     test("every one of the 17 letters has a reading", () => {
         // The class was skipped wholesale, so a partial table would leave a silent deletion behind. All 17 are
         // sourced — 13 from dictionary word-initial counts, the rest from the standalone sources; see the manifest.
