@@ -1,7 +1,7 @@
 /**
- * NORMALIZATION REVIEW (#562) — the mechanical half of reviewing a language's normalization layer.
+ * NORMALIZATION REVIEW — the mechanical half of reviewing a language's normalization layer.
  *
- * WHY THIS EXISTS. Reviewing the Czech layer (#588) turned up four defects, and ALL FOUR were checklist
+ * WHY THIS EXISTS. Reviewing the Czech layer turned up four defects, and ALL FOUR were checklist
  * items rather than insights: no tests, three silently dropped sign classes, a numeral that did not agree
  * with its noun, and an uncommitted artifact. Every one is machine-checkable, and checking them by hand
  * cost about nine minutes of repeated `vitest` runs and one-probe-per-process startup — against five
@@ -72,12 +72,12 @@ if (dirArg === undefined) {
 }
 const dir: string = dirArg;
 
-const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 /**
  * PLURICENTRIC SETS — codes that are STANDARDS OF ONE LANGUAGE, whose sources attest for each other. Not
  * "related languages": the test is whether a speaker of one would recognise the other's word as their own.
  *
- * Croatian (#599) is why this exists. Its tier reads `¥` as `jen`, which the hr corpus never spells — but
+ * Croatian is why this exists. Its tier reads `¥` as `jen`, which the hr corpus never spells — but
  * the SERBIAN corpus renders the very same FLEURS sentence as "od 2500 i 130.000 japanskih jena", and `jen`
  * is in the Serbian referee. The evidence existed and a one-language haystack could not see it, so the
  * check asked a human to source a word the repo already had.
@@ -329,7 +329,7 @@ for (const probe of ["1990-1995", "12,5", "1.234", "5 000"])
     console.log(`  ${probe.padEnd(10)} ${say(probe).slice(0, 52)}`);
 
 // ── 4b. no SPELLING reaches the phoneme sink ──────────────────────────────────────────────────────
-// Uzbek (#590) pushed the decimal word into the sink as ORTHOGRAPHY: `12,5` read `ˈon ikkˈi vergul bˈeʃ`
+// Uzbek pushed the decimal word into the sink as ORTHOGRAPHY: `12,5` read `ˈon ikkˈi vergul bˈeʃ`
 // — ASCII v/g and no stress, where the g2p says `ʋerɡˈul`. Every other language routes the same literal
 // correctly (`sink.emit(phonemizeWord("Komma"))`), which is what makes the defect checkable: a word literal
 // inside `text()` that is NOT an argument of the g2p is the bug, and the wrapped form is the fix.
@@ -368,7 +368,7 @@ for (const f of engineFiles) {
             if (/phonemiz\w*\(\s*$/u.test(before)) continue;                // the CORRECT shape — routed through the g2p
             // A UNICODE NORMALIZATION FORM IS AN API ARGUMENT, NOT TEXT. `input.normalize("NFC")` inside a
             // `text()` body flagged `"NFC"` as a spelling leak reading [nft͡ʃʼ] — a FALSE POSITIVE, and the
-            // gate's first since it shipped at 0/60. Reported by the Swedish run (#605), which worked around
+            // gate's first since it shipped at 0/60. Reported by the Swedish run, which worked around
             // it by hoisting the fold out of `text()`; that is a real edit made to satisfy a broken check,
             // which is the worst thing a gate can cause. Reproduced by injecting the fold into Oromo's
             // `text()` before fixing. `.normalize(` only, so a genuine word literal elsewhere still reports.
@@ -384,7 +384,7 @@ note("spelling → g2p", spellings.length === 0,
     spellings.length === 0 ? "no unphonemized word literal in text()" : `${spellings.join(", ")} — wrap in the g2p`);
 
 // ── 4c. SOURCING: where did each high-traffic word come from? ────────────────────────────────────
-// Fula (#596) shipped `tere` as BOTH the decimal point and the percent word. It phonemised cleanly, so the
+// Fula shipped `tere` as BOTH the decimal point and the percent word. It phonemised cleanly, so the
 // scan, the corpus diff and the referee were all green — and the word appears in neither the language's
 // corpus nor the epitran referee's 1,777-word list. One word cannot be both "point" and "percent"; both
 // readings were wrong, in the highest-traffic rule the layer has.
@@ -483,7 +483,7 @@ function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): s
     // pairs quotes in the wrong phase: in `"$": ["dollar"]` the closing quote of the KEY pairs with the
     // opening quote of the value, the match consumes both, and `dollar` is never seen — which is how Hausa
     // reported "all 1 high-traffic words attested" while three of its four currency names went unchecked.
-    // A LAYER MAY EMIT ITS PERCENT WORD AS TEXT and declare no tier at all — Malay (#601) reads `%` in
+    // A LAYER MAY EMIT ITS PERCENT WORD AS TEXT and declare no tier at all — Malay reads `%` in
     // normalize.ts with `peratus` because the tier it inherits says the Indonesian `persen`. Reading only
     // the declaration made the check inert for exactly the language whose percent word was in question.
     // So: any `.replace()` whose PATTERN mentions `%` contributes the word literals in its REPLACEMENT.
@@ -505,7 +505,7 @@ const needles = highTrafficWords(hay);
 // arrays (`percent: ["odstotek", …]`); a language that declares the same data through a helper
 // (`percent: F("pct")`) yields no needles, and the arm below then reports "nothing declared" — which reads
 // as *there is nothing to check* when the truth is *the check went blind*. A false negative is worse than
-// a false positive: the NFC bug at least announced itself. Reported by the Slovenian run (#608), which
+// a false positive: the NFC bug at least announced itself. Reported by the Slovenian run, which
 // worked around it locally with literal arrays plus a drift test.
 // Measured before adding this: ZERO shipped languages declare tier data through a helper — all ~49 use
 // literal arrays — so this is latent, not a live blindness, and closing it costs nothing today.

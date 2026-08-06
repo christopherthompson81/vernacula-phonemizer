@@ -30,14 +30,14 @@ const NATIVE_CLASS = "[A-Za-zČčŠšŽžĆćĐđ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
@@ -126,7 +126,7 @@ const F = (k: string): string[] => [...COUNTED[k]!.forms];
  *
  *   percent  the corpus writes `odstotkov` 11 times and `%` 4 times (93 %, 88 %, 80 %, 3 %).
  *   currency ZERO currency SIGNS occur in sl_si, but the nouns all do (dolarjev ×8, evrov ×1, funtov ×5,
- *            jenov ×2) and a dropped sign is inaudible (#584), so the four signs are declared. `USD` is
+ *            jenov ×2) and a dropped sign is inaudible, so the four signs are declared. `USD` is
  *            declared as a compound KEY because the corpus's one ISO code carries a real amount
  *            (`10 milijard evrov (14,7 milijard USD)`), and the tier's letter-code support (Polish `zł`)
  *            is exactly for that.

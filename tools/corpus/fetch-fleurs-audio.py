@@ -18,8 +18,8 @@ under #586 (te_in was the one language with a cached `test` tarball and its `+` 
 and pulling dev/test as well would roughly double 58 GiB for no measured gain.
 
 Usage:
-  python3 tools/corpus/fetch-fleurs-audio.py --root /mnt/data/omnivoice_ipa/corpus/audio_cache \
-      --transcripts /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data [--langs te_in,fa_ir] [--dry-run]
+  python3 tools/corpus/fetch-fleurs-audio.py --root $AUDIO_CACHE \
+      --transcripts $FLEURS [--langs te_in,fa_ir] [--dry-run]
   # default: every language present in --transcripts but absent from <root>/data, plus any whose
   # train.tar.gz is missing or short.
 """

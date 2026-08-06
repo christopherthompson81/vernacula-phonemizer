@@ -1,5 +1,5 @@
 /**
- * RETROACTIVE COVERAGE AUDIT (#585) — check every ALREADY-TREATED language against the FULL pattern
+ * RETROACTIVE COVERAGE AUDIT — check every ALREADY-TREATED language against the FULL pattern
  * inventory, not the partial one that existed when it was treated.
  *
  * WHY THIS HAS TO EXIST. The 37 languages under #562 were done one at a time over many batches, and each
@@ -34,7 +34,7 @@ import { join } from "node:path";
 import { CELLS } from "./cells.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 
-const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 const TEXT_COLUMN = 2;
 
 /**
@@ -55,7 +55,7 @@ const FLEURS: [string, string | undefined][] = [
     ["pt", "pt_br"], ["ru", "ru_ru"], ["sr", "sr_rs"], ["sw", "sw_ke"], ["ta", "ta_in"],
     ["te", "te_in"], ["th", "th_th"], ["tr", "tr_tr"], ["uk", "uk_ua"], ["ur", "ur_pk"],
     ["vi", "vi_vn"], ["yue", "yue_hant_hk"],
-    // No FLEURS corpus — checked entirely from its mined artifact (#585).
+    // No FLEURS corpus — checked entirely from its mined artifact.
     ["my", undefined],
 ];
 const FLEURS_FOR = new Map(FLEURS);
@@ -64,7 +64,7 @@ const FLEURS_FOR = new Map(FLEURS);
  * THE TREATED LANGUAGES, DERIVED — the committed mined artifacts ARE the list.
  *
  * This file's header already states the invariant: "Every treated language should have a committed
- * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap (#586)". So the
+ * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap". So the
  * artifact directory is the authoritative register of what has been treated, and reading it removes the one
  * way this audit could under-report: by not knowing about a language.
  *
@@ -223,7 +223,7 @@ const rows: { lang: string; status: Record<string, string>; defects: string[]; a
 
 /**
  * A language's evidence, artifact FIRST. Every treated language should have a committed
- * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap (#586), and it
+ * tools/corpus/mined/<lang>.jsonc — that is what makes the second round of the sweep cheap, and it
  * is the only evidence a corpus-less language has at all. FLEURS is the fallback for a language whose
  * artifact has not been generated yet.
  */
@@ -344,7 +344,7 @@ if (acceptedRows.length) {
 }
 
 /**
- * FLEET-WIDE SIGN-CLASS SWEEP (#654) — which signs are still silently DROPPED, and by how many of the treated
+ * FLEET-WIDE SIGN-CLASS SWEEP — which signs are still silently DROPPED, and by how many of the treated
  * languages.
  *
  * ⚠ WHY IT BELONGS HERE AND NOT IN A PROBE SCRIPT. `review.ts` runs the same probes for ONE language, so the
@@ -362,7 +362,7 @@ if (acceptedRows.length) {
  * The probes come from `SIGN_CASES` in defects.ts, shared with `review.ts`, so the two cannot disagree about
  * what a dropped sign is.
  */
-console.log("\n=== signs still DROPPED, fleet-wide (#654) ===");
+console.log("\n=== signs still DROPPED, fleet-wide ===");
 const signDrops = new Map<string, string[]>(SIGN_CASES.map(([name]) => [name, []]));
 const signAccepted = new Map<string, string[]>(SIGN_CASES.map(([name]) => [name, []]));
 let measured = 0;

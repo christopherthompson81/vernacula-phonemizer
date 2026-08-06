@@ -53,7 +53,7 @@ function tokenize(w: string): Unit[] {
         if (c in V) { u.push({ ch: c, kind: "V", ph: V[c]!, soft: false }); i += 1; continue; }
         if (c in C) { u.push({ ch: c, kind: "C", ph: C[c]!, soft: false }); i += 1; continue; }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
-        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
         { const p = latinPhone(c, { initial: i === 0, includeH: true }); if (p !== undefined) u.push({ ch: c, kind: "C", ph: p, soft: false }); }
         i += 1;
     }

@@ -4,7 +4,7 @@
  * WHY THIS EXISTS. Khmer writes no space between words, so the engine's tokenizer takes a maximal run of Khmer
  * letters as one unit. That is fine for syllable-driven g2p and useless for anything needing to know where a
  * word ENDS — most immediately the iteration mark ៗ, which means "repeat the preceding WORD" and occurs 24,413
- * times in the mined corpus (#585). Repeating the whole run instead is correct only 24.3% of the time, because
+ * times in the mined corpus. Repeating the whole run instead is correct only 24.3% of the time, because
  * that is the share of ៗ antecedents which happen to be a single vocabulary word.
  *
  * HOW, AND WHY NOT LONGEST-MATCH. The vocabulary in `km-wordfreq.tsv` is harvested from where Khmer writers

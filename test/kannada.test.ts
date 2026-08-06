@@ -26,7 +26,7 @@ describe("kannada canonical IPA", () => {
     });
 
     /**
-     * NUMBERS — the largest defect this language had (#562), and it was NOT in the normalization layer.
+     * NUMBERS — the largest defect this language had, and it was NOT in the normalization layer.
      * Kannada fuses 21-99 into one word, has suppletive round hundreds and takes combining magnitude
      * forms before a remainder; the shared `indicNumberWords` composer expresses none of the last two,
      * so 561 corpus numerals read in a shape no speaker uses. Kannada now composes its own
@@ -66,7 +66,7 @@ describe("kannada canonical IPA", () => {
 });
 
 /**
- * TEXT NORMALIZATION (#562). Counts in the header of src/languages/kannada/normalize.ts; every rule
+ * TEXT NORMALIZATION. Counts in the header of src/languages/kannada/normalize.ts; every rule
  * below is measured against the kn_in FLEURS corpus (1,811 unique utterances, column 3).
  */
 describe("kannada text normalization", () => {
@@ -128,9 +128,9 @@ describe("kannada text normalization", () => {
         expect(normalizeKannada("35°W")).toBe("35 ಡಿಗ್ರಿ W");
     });
 
-    // #586 — `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ`, word-first beside ಚದರ. `m` had to be declared for it to have a
+    // `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ`, word-first beside ಚದರ. `m` had to be declared for it to have a
     // head noun (ಮೀಟರ್ ×10; digit-adjacent bare `m` is ×0, so the one-letter-key hazard is checked).
-    test("the bare metre and the cubed measure word (#586)", () => {
+    test("the bare metre and the cubed measure word", () => {
         expect(phonemize("5 m", "kn")).toContain("mˈiːʈaɾ");
         expect(phonemize("120 m³", "kn")).toContain("ɡʱˈana mˈiːʈaɾ");
         expect(phonemize("802.11m", "kn")).toContain("ˈɛm");

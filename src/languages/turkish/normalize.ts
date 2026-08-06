@@ -200,7 +200,7 @@ export function normalizeTurkish(input: string): string {
     s = s.replace(/(\d)\s?°/gu, "$1 derece");
 
     // 6) SIGNS. `UTC+1` ×1 — the sign vanished entirely.
-    // ⚠ ± AND THE MINUS ARE HERE ON THE STRENGTH OF THE SAME SOURCE AS THE RELATIONAL RULES BELOW (#654):
+    // ⚠ ± AND THE MINUS ARE HERE ON THE STRENGTH OF THE SAME SOURCE AS THE RELATIONAL RULES BELOW:
     //    tr.wikipedia's arithmetic article names the subtraction sign outright — «Çıkarma sembolü "eksi" (-) ile
     //    ifade edilir» — and `eksi` is ×64 token / 9 articles. With `artı` already in this file, ± is then the
     //    juxtaposed pair every language that reads it uses (bg/da/is/nb/ro/sv), at no further sourcing cost.
@@ -210,7 +210,7 @@ export function normalizeTurkish(input: string): string {
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1artı $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1eksi $2");
 
-    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ TURKISH IS THE FIRST LANGUAGE WHERE THE READING REQUIRES CASE
+    // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ TURKISH IS THE FIRST LANGUAGE WHERE THE READING REQUIRES CASE
     //     MORPHOLOGY ON AN OPERAND, and the source states every reading in full. tr.wikipedia's arithmetic
     //     article writes the sentence and the notation side by side:
     //

@@ -6,7 +6,7 @@
  * lists + the language's own data files + espeak `dictsource` + any sister standard. That is a strong haystack
  * for a well-resourced language and a thin one otherwise, and the #562 batches kept ending on the same
  * unresolvable prompt — one currency word, attested nowhere, shipped as a stated assumption because dropping
- * the sign would delete the currency from the only sentences that have one (#584):
+ * the sign would delete the currency from the only sentences that have one:
  *
  *   lb  Yen      · zu  amadola  · xh  iiyeni  · af/hr  jen
  *
@@ -86,7 +86,7 @@ if (lang === undefined) {
 const wiki = arg("wiki", lang)!;
 const limit = Number(arg("limit", "40"));
 /**
- * `--context` — THE REGISTER TIER (#654), and the one the sign-reading work showed is not optional.
+ * `--context` — THE REGISTER TIER, and the one the sign-reading work showed is not optional.
  *
  * Terms appended to the SEARCH query only. The hit test, the token boundaries and the verdict are untouched:
  * this narrows WHICH ARTICLES are sampled, it does not loosen what counts as a hit.
@@ -434,7 +434,7 @@ if (lost.length > 0) {
     process.exit(1);
 }
 const esc = (s: string): string => JSON.stringify(s);
-writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Written by tools/normalization/attest.ts.
+writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang}. Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's

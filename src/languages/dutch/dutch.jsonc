@@ -87,7 +87,7 @@
         ":": ",",
     },
 
-    // #562 — acronyms Dutch SPELLS OUT even though the letter run is phonotactically readable, so the OOV
+    // acronyms Dutch SPELLS OUT even though the letter run is phonotactically readable, so the OOV
     // rule in core/initialisms.ts would otherwise hand them to the g2p as a word (CEO → seːoː, VOC → vɔk).
     // Lexical facts, one per attested convention; runs that are already unreadable (VS, VN, GMT, DNA, FBI,
     // MRI, NBA, PBS, NSA) need no entry because the phonotactic rule catches them. Entries marked ✓ occur in

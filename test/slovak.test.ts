@@ -64,7 +64,7 @@ describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
 // #562 TEXT NORMALIZATION — asserted on normalizeSlovak (text→text) so the pins read as Slovak rather than
 // as IPA, plus phonemize() end-to-end where the point is that the pipeline speaks the result.
 // Evidence and counts:.
-describe("Slovak text normalization (#562)", () => {
+describe("Slovak text normalization", () => {
     // TRAP 13 — pin the rule's BRANCHES, not the corpus's instances. The ordinal has three: the 1–19
     // TABLE, the tens+units COMPOSITION, and the BOUNDARY between them (the hundreds/thousands prefix,
     // which stays cardinal while every ordinal element inflects). The corpus exercises only the first two.
@@ -148,7 +148,7 @@ describe("Slovak text normalization (#562)", () => {
     });
 
     // EVERY sign class: percent, currency, degree, plus, minus, times, ampersand, equals, less/greater,
-    // divide. A dropped sign is inaudible, which is the one outcome that cannot be right (#584).
+    // divide. A dropped sign is inaudible, which is the one outcome that cannot be right.
     test("every sign class is read", () => {
         expect(normalizeSlovak("získal 88 % čistých bodov")).toBe("získal 88 percent čistých bodov");
         expect(normalizeSlovak("od 11 000 $ do 22 500 $")).toBe("od 11000 dolárov do 22500 dolárov");

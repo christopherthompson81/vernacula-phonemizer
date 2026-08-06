@@ -87,7 +87,7 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
-        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        // Reached only when every rule above has declined, so the language's own reading always wins.
         const cons = CONS_IPA[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
     }

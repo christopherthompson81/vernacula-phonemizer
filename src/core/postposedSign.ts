@@ -1,5 +1,5 @@
 /**
- * A SIGN WHOSE READING FOLLOWS BOTH ITS OPERANDS (#654) — the rule shape a verb-final or postpositional
+ * A SIGN WHOSE READING FOLLOWS BOTH ITS OPERANDS — the rule shape a verb-final or postpositional
  * language needs, and which an infix substitution gets WRONG rather than merely awkward.
  *
  * ## Why this exists as shared code

@@ -178,13 +178,13 @@ const SYMBOLS = makeSymbolNormalizer({
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
     multiply: { times: "kali" },
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `dan` ×1053 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     ampersand: "dan",
     percent: ["persen"],
     currency: { $: ["dolar"], "€": ["euro"], "£": ["pound"], "¥": ["yen"] },
-    // #586 — REQUIRED BY THE `US$` FOLD, and found only because the fold exposed it. Unfolding `US$ 14,7
+    // REQUIRED BY THE `US$` FOLD, and found only because the fold exposed it. Unfolding `US$ 14,7
     // miliar` let the tier place the currency noun at last, and it placed it in the WRONG SLOT:
     // *empat belas koma tujuh DOLAR MILIAR*, because without this list the magnitude is not part of the
     // quantity and the noun lands directly after the digits. Indonesian puts the noun after the magnitude —
@@ -219,7 +219,7 @@ const NATIVE_WORD = /^[a-zA-Z]+$/u;
 class IndonesianPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        // #562: the Indonesian rewrites (clock, rupiah, abbreviations, slash units) run BEFORE the shared
+        // the Indonesian rewrites (clock, rupiah, abbreviations, slash units) run BEFORE the shared
         // symbol tier, and the clock must precede the number tokenizer so a dot-time is never read as
         // thousands grouping.
         return assembleClauses(SYMBOLS(normalizeIndonesian(input)), TOKEN, (m, sink) => {

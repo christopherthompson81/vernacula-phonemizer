@@ -1,5 +1,5 @@
 /**
- * CORPUS BEFORE/AFTER DIFF for a normalization change (#562) — the verification gate that caught more real
+ * CORPUS BEFORE/AFTER DIFF for a normalization change — the verification gate that caught more real
  * defects than any other check while the first thirteen languages were done by hand.
  *
  * Usage, in two steps, because "before" and "after" are two different CHECKOUTS of the code:
@@ -32,7 +32,7 @@ import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
 
-const CORPUS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 /** FLEURS transcript column 3 is the ORIGINAL cased text; column 4 is lowercased and stripped of the
  *  punctuation this layer exists to read. Normalization must always be judged on column 3. */
 const TEXT_COLUMN = 2; // 0-indexed
@@ -104,7 +104,7 @@ const DEFECTS: [string, RegExp][] = [
     // a digit leak in every language that writes its own numerals — Burmese ၀-၉, Thai ๐-๙, Bengali ০-৯,
     // Khmer, Lao. RAWMARK below happened to list the Devanagari, Arabic-Indic and Persian ranges, which
     // made the gap look smaller than it was: those three scripts were covered by accident and the rest
-    // were not covered at all. Found while mining a Burmese hard-set (#585).
+    // were not covered at all. Found while mining a Burmese hard-set.
     ["DIGIT", /\p{Nd}/u],
     ["SLOT-GAP", /\s{2,}|^\s|\s$/u],
     // NOT `.,;:!?` — those are the CANONICAL inline pause marks every engine emits via clauseSink, so
@@ -203,7 +203,7 @@ if (mode === "emit") {
   normalization/corpus-diff.ts compare --before <file> --after <file> [--foreign <regex>] [--examples N]
 
 --corpus takes either a FLEURS directory name or 'mined:<lang>' for a committed artifact — which is the only
-option for the 87 languages that have no FLEURS corpus (#585).
+option for the 87 languages that have no FLEURS corpus.
 
 FLEURS corpora under ${CORPUS_ROOT}:
   ${readdirSync(CORPUS_ROOT).join(" ")}

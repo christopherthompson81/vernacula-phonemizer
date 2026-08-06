@@ -16,7 +16,7 @@ export { phonemizeWord };
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Hausa Boko letters incl. ɓ ɗ ƙ ƴ (and their capitals) + apostrophe (a letter: 'yan, 'a'a).
-// #562: the corpus groups thousands with COMMAS (6,387, 783,562) and writes decimals with DOTS (1.5,
+// the corpus groups thousands with COMMAS (6,387, 783,562) and writes decimals with DOTS (1.5,
 // 12.8); the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
 
@@ -24,7 +24,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d{1,3}(?:,\\d{3
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zɓɗƙƴA-ZƁƊƘƳ'’]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

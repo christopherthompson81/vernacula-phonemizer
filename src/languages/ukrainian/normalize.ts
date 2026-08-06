@@ -364,7 +364,7 @@ export function normalizeUkrainian(input: string): string {
 
     // 8) SIGNS. `+30°C` lost its sign entirely (the ° rule above has already made it `+30 градусів …`).
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1мінус $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -372,7 +372,7 @@ export function normalizeUkrainian(input: string): string {
     s = s.replace(/±/gu, " плюс мінус ");
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
 
-    // 8b) RELATIONAL AND DIVISION SIGNS (#654). uk.wikipedia's division article reads the whole expression
+    // 8b) RELATIONAL AND DIVISION SIGNS. uk.wikipedia's division article reads the whole expression
     //     aloud, both signs, operands in place, and — the part that matters for a case language — with the
     //     result in the NOMINATIVE:
     //

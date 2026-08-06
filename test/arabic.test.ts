@@ -215,7 +215,7 @@ describe("arabic canonical IPA — diacritized path", () => {
     });
 });
 
-// #562 — the seventh language. Arabic arrived with its punctuation already right (، ؛ ؟ are clause marks)
+// the seventh language. Arabic arrived with its punctuation already right (، ؛ ؟ are clause marks)
 // and Arabic-Indic digits already folding, so the work was narrower: the Arabic-specific SYMBOL
 // characters, grouped/decimal number tokenization, and the clock.
 describe("arabic normalization", () => {
@@ -259,16 +259,16 @@ describe("arabic normalization", () => {
         expect(phonemize("يهضمونها بداخلهم. يمكن", "ar")).toBe("jhdˤmwnhˈaː bdˈaːxlhm . jmkn");
     });
 
-    // #586 — `كيلومتر مربع` ×8 in the corpus, the adjective FOLLOWING its noun as Arabic adjectives do.
+    // `كيلومتر مربع` ×8 in the corpus, the adjective FOLLOWING its noun as Arabic adjectives do.
     // Note Urdu writes the cognate مربع BEFORE the noun, so the position is per-language, not per-word.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783,562 km²", "ar")).toContain("kiːluːmˈitr murˈabːaʕ");
     });
 
-    // #586 — `متراً مكعّباً` from the corpus's cubic-metre sentence, the adjective FOLLOWING its noun as
+    // `متراً مكعّباً` from the corpus's cubic-metre sentence, the adjective FOLLOWING its noun as
     // Arabic adjectives do, same side as مربع. A token probe for the bare `متر مكعب` reads ×0 because the
     // corpus writes it with case endings — the sentence is the evidence, not the lemma.
-    test("the cubed measure word (#586)", () => {
+    test("the cubed measure word", () => {
         expect(phonemize("120 m³", "ar")).toContain("mˈitr mukˈaʕːab");
     });
 });

@@ -8,7 +8,7 @@ the sentence model reads the whole hemistich; the word model sees one word. Both
 IPA; evaluated per-word on held-out sentences.
 
   ctx_sent.tsv = fa-hemistich<TAB>ipa-hemistich ; ctx_words.tsv = fa-word<TAB>ipa-word (count-matched hemistichs).
-  /mnt/data/ar-diac-venv/bin/python train_context_model.py <dir-with-ctx_sent.tsv+ctx_words.tsv>
+  $ARDIAC_PY train_context_model.py <dir-with-ctx_sent.tsv+ctx_words.tsv>
 
 RESULT (2026-07-20, GPU, 15 epochs, 1203 held-out tokens):
   WORD model (no context):     70.2%

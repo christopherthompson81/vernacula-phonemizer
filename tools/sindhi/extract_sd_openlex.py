@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-DEFAULT = Path("/mnt/data/sindhi_open_lexicon/data/sindhi_open_lexicon_master_223342.jsonl")
+DEFAULT = Path(os.environ.get("DUMPS", ".")) / "sindhi_open_lexicon_master_223342.jsonl"
 
 DEVA = re.compile(r"[ऀ-ॿ]+")
 ARAB_ONLY = re.compile(r"^[؀-ۿݐ-ݿ]+$")

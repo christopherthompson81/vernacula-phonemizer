@@ -5,7 +5,7 @@ Reads (skeleton, lang) rows, prepends the language token, runs the BiLSTM, and r
 inserting the predicted diacritic after each base char. Emits `skeleton <TAB> lang <TAB> predicted_vocalized`, which
 eval_endtoend.ts then runs through the deterministic g2p to compare against the reference IPA.
 
-  /mnt/data/ar-diac-venv/bin/python predict_harakat.py --in eval.tsv --out /tmp/pred.tsv
+  $ARDIAC_PY predict_harakat.py --in eval.tsv --out /tmp/pred.tsv
 """
 import argparse, json, os, sys
 import torch, torch.nn as nn
@@ -13,7 +13,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
-ap.add_argument("--ckpt", default="/mnt/data/ar-diac/bilstm_multilingual.pt")
+ap.add_argument("--ckpt", default="$ARDIAC/bilstm_multilingual.pt")
 ap.add_argument("--in", dest="inp", default=os.path.join(HERE, "eval_set.tsv"))
 ap.add_argument("--out", default="/tmp/pred.tsv")
 args = ap.parse_args()

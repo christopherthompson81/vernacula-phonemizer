@@ -85,7 +85,7 @@ describe("Tamil numbers — sandhi-fused cardinals", () => {
     });
 });
 
-describe("Tamil normalization (#562)", () => {
+describe("Tamil normalization", () => {
     it("de-groups BOTH grouping systems before the comma is read as a pause", () => {
         // Western 3-digit and Indian 2-then-3. 5,000,000 used to read "ஐந்து <pause> பூஜ்ஜியம் …".
         expect(normalizeTamil("2,243")).toBe("2243");
@@ -180,7 +180,7 @@ describe("Tamil normalization (#562)", () => {
         expect(phonemize("௧௨", "ta")).toBe(phonemize("12", "ta"));
     });
 
-    it("the PLUS is read பிளஸ், sourced from the corpus's own audio (#586)", () => {
+    it("the PLUS is read பிளஸ், sourced from the corpus's own audio", () => {
         // Wikidata returns the bare character `+` as ta's label for "plus sign", and prose writes the glyph,
         // so no text tier could answer this. IndicConformer 600m over ta_in/train:
         //   UTC+1  → "…யூடிசி பிளஸ் ஒன்…"  (2 of 3 speakers; the third skipped the parenthetical entirely)

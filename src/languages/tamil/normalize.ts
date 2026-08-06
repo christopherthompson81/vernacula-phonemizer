@@ -52,7 +52,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "பெருக்கல்" },
-    // #586 — `&` was DROPPED outright, so `B&Bs` lost the sign and read as two bare consonants. `மற்றும்`
+    // `&` was DROPPED outright, so `B&Bs` lost the sign and read as two bare consonants. `மற்றும்`
     // is the ordinary conjunction, ×997 in the corpus, and the wiki examples put it in exactly this slot —
     // inside an institution name: `எண்ணெய் மற்றும் இயற்கை எரிவாயுக் கழகம்` (Oil and Natural Gas Corporation).
     // ⚠ `அண்ட்`, the transliterated English "and", was the adversarial candidate and is REJECTED on the

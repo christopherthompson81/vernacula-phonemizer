@@ -1,5 +1,5 @@
 /**
- * Swedish (sv) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the Swedish g2p
+ * Swedish (sv) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Swedish g2p
  * cannot already read into Swedish words the existing pipeline speaks. Pure text→text, no IPA. Runs inside
  * swedish.ts's `text()` BEFORE the shared symbol tier (`makeSymbolNormalizer`), so digits stay digits and
  * the tier can still see number–unit adjacency.

@@ -165,7 +165,7 @@ export function phonemizeWordSegmental(word: string): string {
 // ⚠ ALL OF LATIN, not just Oromo's own letters — `[A-Za-zʼ’']+` ended the token at a diacritic, so the letter
 // carrying it became an unclaimed gap read as an English LETTER NAME and the rest of the word started over:
 // `São Paulo` read *s ˈə ˈo paˈulo*. One word became three. Invisible to every gate: no digit or raw mark
-// survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot reach (#657).
+// survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot reach.
 // `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
 const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}ʼ’']*)|(\d+)|([.?!,;:])/gu;
 /** Oromo's OWN inventory — this is the token class as it stood before the widening above, lifted verbatim, so
@@ -174,7 +174,7 @@ const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}ʼ’']*)|(\d+)|([.?!,;:])
 const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
 
 /**
- * The shared SYMBOL tier (#562) — percent and currency, the two classes whose word is language DATA.
+ * The shared SYMBOL tier — percent and currency, the two classes whose word is language DATA.
  *
  * BOTH ARE PREFIXED, because Oromo is head-initial for measure phrases: the corpus writes
  * `parsantii 3 hanga 5`, `dhibbeentaan tokko`, `doolaara US biiliyoonotaan`, `paawundii 200`,

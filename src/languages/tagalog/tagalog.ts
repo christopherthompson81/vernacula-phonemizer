@@ -242,7 +242,7 @@ const NATIVE_CLASS = "[A-Za-zÑñ‑-]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 

@@ -1,5 +1,5 @@
 /**
- * CONCEPT SOURCING (#586) — ask what a language CALLS a thing, instead of guessing a word and probing for it.
+ * CONCEPT SOURCING — ask what a language CALLS a thing, instead of guessing a word and probing for it.
  *
  * WHY THIS EXISTS. Every sourcing avenue the sweep had reads TEXT and asks "does this word occur?" — the FLEURS
  * corpus, the referees, espeak's dictsource, `attest.ts` against Wikipedia. That works when you already have a

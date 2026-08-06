@@ -1,7 +1,7 @@
 /**
  * Igbo text normalization — the symbols a reader says aloud, before the tokenizer sees them.
  *
- * Every reading here is sourced from a 558,991-line ig.wikipedia dump (#585) and every count below is from it.
+ * Every reading here is sourced from a 558,991-line ig.wikipedia dump and every count below is from it.
  * ⚠ IGBO HAS NO INDEPENDENT REFEREE — wikipron ibo_latn, epitran ibo-Latn and the kaikki extract are all 404 — so
  * the corpus IS the evidence. Nothing external can adjudicate a reading; the counts and the sense-checks are the
  * whole justification, which is why each is recorded beside the rule that uses it.

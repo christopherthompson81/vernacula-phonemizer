@@ -57,7 +57,7 @@ describe("punjabi Shahmukhi front-end", () => {
 
 // #562 TEXT NORMALIZATION. Counts in the comments are measured over the pa_in FLEURS corpus (1,589 unique
 // utterances); "before" is what the engine produced at 6621b5a. See src/languages/punjabi/normalize.ts.
-describe("punjabi text normalization (#562)", () => {
+describe("punjabi text normalization", () => {
     test("fused 21-59 cardinals (compound map) — the corpus's largest defect, ×143", () => {
         // 21 was [ˈɪkː ʋˈiːɦ], "one twenty": core/numbers.ts's unit-then-tens fallback. Punjabi's 21-99 are
         // single words, sourced from pa.wikipron-pan-broad.tsv (see punjabi.jsonc).
@@ -121,9 +121,9 @@ describe("punjabi text normalization (#562)", () => {
         expect(phonemize("2.3 ਅਰਬ ਡਾਲਰ", "pa")).not.toContain(".");
     });
 
-    // #586 — `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, word-first. Bare ਵਰਗ is ×12 and its first instance is
+    // `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, word-first. Bare ਵਰਗ is ×12 and its first instance is
     // `ਉੱਚ ਵਰਗ` — "upper CLASS" — so only the collocation attests the unit sense.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783,562 km²", "pa")).toContain("ʋˈəɾəɡ kɪloːmˈiːʈəɾ");
         expect(phonemize("120 m³", "pa")).toContain("kˈə˨˩ɳ mˈiːʈəɾ");
     });

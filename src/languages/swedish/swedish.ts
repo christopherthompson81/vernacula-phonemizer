@@ -129,7 +129,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zåäöéA-ZÅÄÖÉ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
@@ -152,7 +152,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // loanwords, not something this declaration causes: `gitarr` reads [jɪtˈarː] for /ɡɪˈtar/ with no
     // symbol tier involved at all. So the declaration is CORRECT and only the g2p is wrong — which also
     // means a later g2p fix repairs these for free, where leaving the letters raw stays wrong forever.
-    // A recognisable word with one wrong segment beats a cluster that is not a word (#584).
+    // A recognisable word with one wrong segment beats a cluster that is not a word.
     // UNIT BORROWINGS are the class §5e excludes from the sourcing check by measurement — gigahertz and
     // megabit are absent from every in-repo Swedish source, as kilogram and millimetre are in some thirty
     // languages. The corpus writes the abbreviation `Mbit` ×3 and never the expansion.

@@ -1,5 +1,5 @@
 /**
- * Oromo / Afaan Oromoo (om) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything
+ * Oromo / Afaan Oromoo (om) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything
  * which is not already a pronounceable word into words the existing pipeline speaks. Pure text→text, no IPA.
  *
  * MEASURED over the 1,218 unique cased om_et FLEURS utterances (column 3):

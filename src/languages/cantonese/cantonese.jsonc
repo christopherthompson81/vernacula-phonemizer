@@ -40,7 +40,7 @@
         "1": "˥", "2": "˧˥", "3": "˧", "4": "˨˩", "5": "˩˧", "6": "˨"
     },
 
-    // #562: 、's rare sesame-dot variant ﹑ (×5) and the ellipsis … (×7) were unmapped and so silently lost
+    // 、's rare sesame-dot variant ﹑ (×5) and the ellipsis … (×7) were unmapped and so silently lost
     // their pause; ─ ── — – － (×21 together) are the appositive dash this corpus uses (科查莫谷──智利…).
     // ．U+FF0E ×16 is deliberately ABSENT: in this corpus it is the interpunct INSIDE transliterated foreign
     // names (瑪麗．安東尼, 巴布．狄倫), not a sentence period, so mapping it would break 16 names apart. Same
@@ -51,7 +51,7 @@
         ".": ".", ",": ",", "?": "?", "!": "!", ";": ",", ":": ","
     },
 
-    // #562: a standalone 2 before one of these classifiers reads colloquial 兩 loeng5 (兩個, 兩座, 兩種), not
+    // a standalone 2 before one of these classifiers reads colloquial 兩 loeng5 (兩個, 兩座, 兩種), not
     // 二. 月 and 日 are excluded on purpose — "2 月" is February (二月), a date, not a count of months.
     "measureWords": "個位本張隻條件對群種次天年歲塊層排組步口面首部台輛架座間扇頁杯碗瓶盒袋斤磅噸"
 }

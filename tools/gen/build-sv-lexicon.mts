@@ -3,7 +3,7 @@
  * We take only CONVENTION-INDEPENDENT abstract features (NOT the NST/espeak segments):
  *   - pitch accent (1|2): NST field 12 SAMPA primary-stress marker — `""` = accent 2, `"` = accent 1.
  *   - primary-stress ORDINAL (0-based syllable index): the `$`-delimited syllable that carries the `"` marker.
- * Restricted to the 50k frequency corpus (mirrors espeak-ng-portable's compaction); homographs resolve by
+ * Restricted to the 50k frequency corpus (the same compaction); homographs resolve by
  * majority. Output: src/languages/swedish/accent-stress.tsv — word<TAB>accent<TAB>stressOrd (ord omitted when 0,
  * i.e. first-syllable = the engine default). NST is CC0; only the derived abstract features are committed.
  *
@@ -15,7 +15,7 @@ function arg(name: string, fallback: string): string {
     const i = process.argv.indexOf(`--${name}`);
     return i >= 0 && process.argv[i + 1] ? process.argv[i + 1]! : fallback;
 }
-const EP = "/home/chris/Programming/espeak-ng-portable";
+const EP = process.env["ESPEAK_PORTABLE"] ?? "";  // set to the reference-engine checkout
 const NST = arg("nst", `${EP}/tools/corpus/.cache/sv/NST svensk leksikon/swe030224NST.pron/swe030224NST.pron`);
 const CORPUS = arg("corpus", `${EP}/tools/qa-compare/words-50000.sv.txt`);
 const OUT = "src/languages/swedish/accent-stress.tsv";

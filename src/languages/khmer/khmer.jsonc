@@ -36,7 +36,7 @@
     // INDEPENDENT VOWELS (U+17A3–U+17B3) — a letter that IS a syllable: its own onset (ʔ, or r/l for the vocalic
     // four) plus its own vowel, taking no dependent vowel sign. The syllabifier SKIPPED these entirely, marked
     // "Phase 1", so every one was silently deleted from the reading: ឬដក read *ɗɑːk*, ឯណា read *naː*. 176,282
-    // occurrences in the mined corpus (#585), 103,144 of them followed by a consonant.
+    // occurrences in the mined corpus, 103,144 of them followed by a consonant.
     //
     // ⚠ THESE ARE THE IN-WORD READINGS, NOT THE LETTER NAMES, and the two differ. Standing alone as a word ឧ is
     // ʔoʔ (km-lexicon.tsv and wikipron agree) while inside a word it is ʔu — ឧត្តម ʔutɗɑm. The lexicon already

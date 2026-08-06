@@ -1,5 +1,5 @@
 /**
- * Shared MARKUP stripping (#562) — render HTML to the text it stands for, before any engine sees it.
+ * Shared MARKUP stripping — render HTML to the text it stands for, before any engine sees it.
  *
  * WHY THIS EXISTS. The Vietnamese fan-out run found `km<sup>2</sup>` being SPOKEN: the tags reached the
  * phoneme stream and came out as "sup … sup", twice per occurrence. Auditing all 66 FLEURS corpora, 11

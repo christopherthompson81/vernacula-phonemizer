@@ -113,7 +113,7 @@ describe("Romanian Roman-numeral ordinal policy", () => {
     });
 });
 
-// #562 — the normalization layer. Every count is measured over the FLEURS ro_ro corpus (column 3), and
+// the normalization layer. Every count is measured over the FLEURS ro_ro corpus (column 3), and
 // every emitted word was probed through the rule g2p (Romanian has no pronunciation lexicon).
 describe("romanian normalization", () => {
     test("period- and space-grouped thousands stay ONE numeral", () => {

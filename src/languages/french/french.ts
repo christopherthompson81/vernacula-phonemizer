@@ -160,7 +160,7 @@ function stripLatent(ipa: string, c: string): string {
 
 // #562 symbol normalization — French words for %, currency signs, and unit abbreviations.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // et is ×2234 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -209,7 +209,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 
 /**
- * #562 — numeral normalization, run before tokenization. Three passes, in this order:
+ * numeral normalization, run before tokenization. Three passes, in this order:
  *   1. ROMAN ORDINALS (XVIIe siècle → dix-septième siècle). Must precede pass 3, or the bare-Roman pass
  *      would rewrite XVII to digits and leave a stranded "e" to be spoken as a word.
  *   2. DIGIT ORDINALS (1er → premier, 37e → trente-septième). This is what the corpus actually contains:

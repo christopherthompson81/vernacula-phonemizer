@@ -39,7 +39,7 @@
  * expectation is roughly 24% + 0.55 x 76% ≈ 66% correct against 24% for repeating the whole run.
  *
  * Run: npx tsx tools/gen/build-km-wordfreq.mts <km-paragraphs.txt>
- *   where the input is the output of tools/normalization/wikidump-to-text.py on a kmwiki dump (#585).
+ *   where the input is the output of tools/normalization/wikidump-to-text.py on a kmwiki dump.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

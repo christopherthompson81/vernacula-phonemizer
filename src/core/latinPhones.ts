@@ -1,5 +1,5 @@
 /**
- * THE PHONE A LATIN LETTER DENOTES, for a g2p that has NO RULE FOR IT (#663).
+ * THE PHONE A LATIN LETTER DENOTES, for a g2p that has NO RULE FOR IT.
  *
  * ## What this is for, and where it is allowed to fire
  *

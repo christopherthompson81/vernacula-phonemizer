@@ -45,7 +45,7 @@ describe("marathi canonical IPA", () => {
 // #562 TEXT NORMALIZATION. Assertions go through `phonemize`, not the normalizer, because the layer's
 // contract is what the ENGINE finally says; the counts quoted are from the mr_in FLEURS corpus (1,992
 // utterances) and are recorded in src/languages/marathi/normalize.ts.
-describe("marathi text normalization (#562)", () => {
+describe("marathi text normalization", () => {
     const mr = (s: string) => phonemize(s, "mr");
 
     test("21-99 are the fused irregular spellings, not tens+unit", () => {

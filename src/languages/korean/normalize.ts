@@ -194,13 +194,13 @@ export function normalizeKorean(input: string): string {
     // 4) DEGREES, before rule 9 — the C of 30°C is otherwise a single capital letter and rule 9 would
     //    spell it 씨. 섭씨 / 화씨 are the Korean names for the two scales and precede the number.
     // ⚠ THE SCALE NAME PRECEDES THE SIGNED NUMBER, NOT THE SIGN, so the sign is captured and carried across
-    //    (#654). This rule REORDERS — it lifts 섭씨 in front of the number — and without the capture it lifted
+    //. This rule REORDERS — it lifts 섭씨 in front of the number — and without the capture it lifted
     //    the scale name over the sign as well: `-5 °C` became `-섭씨 5도`, stranding the minus where the sign
     //    rules below can no longer see a digit after it, and reading `마이너스 섭씨 오도` ("minus Celsius five
     //    degrees") once they were taught to. Carrying it gives 섭씨 마이너스 오도, which is the Korean order.
     //    This is the ordering rule the sign work keeps rediscovering: a rule that consumes a sign next to an
     //    operand must run before — or be taught about — any rule that MOVES that operand.
-    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER (#586). Korean spaces its eojeol but not
+    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER. Korean spaces its eojeol but not
     // its particles, so a temperature is normally followed by one — and `(?![\p{L}])` rejected exactly that:
     // `20℃` read 섭씨 20도 while `20℃에` read "20도씨에", losing 섭씨 and spelling the C as 씨 through rule 9.
     // The corpus's own instance is `32℃에 달하는` (×3), so the ordinary case was the broken one.
@@ -228,7 +228,7 @@ export function normalizeKorean(input: string): string {
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1플러스 ");
     s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, "$1마이너스 ");
 
-    // 4b) RELATIONAL AND DIVISION SIGNS (#654). ko.wikipedia's arithmetic articles read the notation out beside
+    // 4b) RELATIONAL AND DIVISION SIGNS. ko.wikipedia's arithmetic articles read the notation out beside
     //     the notation, which is the article class this issue's tier 4 looks for:
     //
     //       "3을 4로 나눈 몫 3 ÷ 4(3 나누기 4)"          — the ÷ expression glossed, and INFIX
@@ -330,6 +330,6 @@ export function normalizeKorean(input: string): string {
     //    The second alternative is the isolated capital (×57 in the corpus: H5N1, 슈퍼-G, W. 부시).
     //    ⚠ THE BOUNDARY IS ALL OF LATIN, not `[A-Za-z]`. An ASCII-only lookaround does not see an accented
     //    letter as a letter, so the `S` of `São` passed the isolated-capital test and was spelled out as a
-    //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː* (#657).
+    //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
     return s.replace(/(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
 }

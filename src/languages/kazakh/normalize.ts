@@ -373,7 +373,7 @@ export function normalizeKazakh(input: string): string {
 
     // 9) SIGNS. `+` → "плюс" (the corpus's `+ 30`, `UTC + 1`). A TRUE minus (`-5`) reads "минус".
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");
-    // THE DIVISION SIGN (#654). ⚠ THE DIVISOR TAKES THE DATIVE, exactly as in az, and kk.wikipedia attests the
+    // THE DIVISION SIGN. ⚠ THE DIVISOR TAKES THE DATIVE, exactly as in az, and kk.wikipedia attests the
     //    construction on NUMERIC operands directly:
     //
     //      "санның цифрларының қосындысы 3-ке бөлінсе, онда санның өзі де 3-ке бөлінеді"
@@ -392,7 +392,7 @@ export function normalizeKazakh(input: string): string {
     s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
         `${orthographic(Number(a))} ${withCase(orthographic(Number(b)), "dat")} бөлінеді`);
 
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +

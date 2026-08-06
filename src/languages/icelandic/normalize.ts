@@ -1,5 +1,5 @@
 /**
- * Icelandic (is) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the
+ * Icelandic (is) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the
  * Icelandic g2p cannot already read into Icelandic words the existing pipeline speaks. Pure text→text, no
  * IPA. Runs inside icelandic.ts's `text()`, before the tokenizer.
  *

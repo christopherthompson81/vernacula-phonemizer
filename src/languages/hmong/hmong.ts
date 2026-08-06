@@ -85,7 +85,7 @@ export function phonemizeWord(word: string): string {
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls (#657).
+ * deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zA-Z]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

@@ -309,7 +309,7 @@ describe("German unstressed prefixes on dict-missing forms", () => {
     });
 });
 
-// #562 — the twelfth language, and the one the ordinal work was building towards: German writes the
+// the twelfth language, and the one the ordinal work was building towards: German writes the
 // ordinal as a numeral plus a bare PERIOD, the class Run 1 flagged as needing a detector.
 describe("german normalization", () => {
     test("ordinal N. is detected and DECLINED, without eating a sentence period", () => {
@@ -357,10 +357,10 @@ describe("german normalization", () => {
         expect(phonemize("1/5", "de")).toBe("aɪ̯n fˈʏnftəl"); // ordinal stem + -el
     });
 
-    // #586 — bare `m` was the RAW LETTER, so `5 m³` read as *fʏnf m* while `5 km³` read correctly: the
+    // bare `m` was the RAW LETTER, so `5 m³` read as *fʏnf m* while `5 km³` read correctly: the
     // exponent branch resolves its head noun from `units` first, and `Kubik` had nothing to attach to.
     // Meter ×6, and every digit-adjacent bare `m` in the corpus is a metre.
-    test("the bare metre, and the cube word it feeds (#586)", () => {
+    test("the bare metre, and the cube word it feeds", () => {
         expect(phonemize("4892 m", "de")).toContain("mˈeːtɐ");
         expect(phonemize("100 m und 200 m", "de")).toContain("mˈeːtɐ ʊnt");
         expect(phonemize("5 m³", "de")).toContain("kˈuːbɪkmeːtɐ"); // compound, one word

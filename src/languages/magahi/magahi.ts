@@ -8,7 +8,7 @@
  * alias until the reference revealed the delta.
  */
 /**
- * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Magahi, one of them by a
+ * NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Magahi, one of them by a
  * DEFINITION rather than a usage. Evidence from mag.wikipedia via `tools/normalization/attest.ts`
  * (`tools/corpus/attest/mag.jsonc`); sentences judged Magahi by हे / हल / हलै / आउ / -के:
  *

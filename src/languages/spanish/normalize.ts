@@ -187,7 +187,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     });
 
     // 6) SIGNS. A dropped sign is silent content loss, and for a temperature it inverts the meaning.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -197,7 +197,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1más $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
 
-    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
+    // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
     //     genuinely absent from the corpus — every `<` in the fleet is an HTML tag `stripMarkup` removes — but
     //     the readings are ordinary comparative prose, and those words are in es_419 in quantity:
     //

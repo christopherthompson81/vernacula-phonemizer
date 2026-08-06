@@ -96,7 +96,7 @@ a prediction there — so the 162,153 space-carried boundaries are deliberately 
 characters (digits, punctuation, Latin) also break runs.
 
   .venv/bin/python tools/khmer/build_km_segmenter_data.py <km-paragraphs.txt> /tmp/km_seg.tsv
-    where the input is tools/normalization/wikidump-to-text.py output for a kmwiki dump (#585).
+    where the input is tools/normalization/wikidump-to-text.py output for a kmwiki dump.
 
 Output is TSV: <run> \t <labels>, one label character per input character —
   '1' a word STARTS here · '0' it does not · '?' abstain (masked from loss and from scoring).

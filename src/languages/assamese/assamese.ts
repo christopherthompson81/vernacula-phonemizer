@@ -42,7 +42,7 @@ export function createAssamese(foreign?: ForeignPhonemizer): { text(input: strin
         loadSharedPhonology(),
         foreign,
     );
-    // #562 — the Assamese PRE-PASS runs BEFORE makeNativeBengali's text(), which internally runs the
+    // the Assamese PRE-PASS runs BEFORE makeNativeBengali's text(), which internally runs the
     // Bengali normalize + symbol tier. This pass handles only the Assamese-specific classes (শ ordinals,
     // নং, dotted runs, version dots, currency codes, &, regnal II); the Bengali layer below it owns the
     // shared digit-folding / ordinal / clock / decimal machinery.

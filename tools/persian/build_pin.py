@@ -7,6 +7,9 @@ memorization aid), tested on INDEPENDENT referees."""
 import sys, csv
 from collections import defaultdict, Counter
 import onnxruntime as ort, numpy as np, json
+
+import os
+REFEREES = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "referee-eval", "referees")
 SP = sys.argv[1]
 UNITS=["t͡ʃ","d͡ʒ","aː","uː","iː","eː","oː","a","e","o","u","i","b","p","t","s","h","x","d","z","ʒ","ʃ","ɾ","r","ʔ","ɣ","q","k","ɡ","l","m","n","j","v","f","w"]
 UNITS.sort(key=len,reverse=True); SHORT={"a","e","o"}
@@ -34,7 +37,7 @@ for l in open(f"{SP}/homorich_ipa_clean.tsv",encoding="utf8"):
         if fv: hr[g][fv]+=1
 # --- agreement gold first-vowel (cross-validation) ---
 agree_fv={}
-for l in open("/home/chris/Programming/vernacula-phonemizer/tools/referee-eval/referees/fa.synth-agreement.tsv",encoding="utf8"):
+for l in open(f"{REFEREES}/fa.synth-agreement.tsv",encoding="utf8"):
     if l.startswith("#") or "\t" not in l: continue
     w,pr,n=l.rstrip("\n").split("\t"); fv=first_sv(pr)
     if fv: agree_fv.setdefault(w,set()).add(fv)
@@ -88,7 +91,7 @@ def transplant(word,ipa):
     return "".join(tl)
 fold=lambda s:s.replace("ˈ","").replace("ˌ","").replace("ɣ","q")
 # GE2PE
-REF="/home/chris/Programming/vernacula-phonemizer/tools/referee-eval/referees/fa.ge2pe-ezafe-homograph.tsv"
+REF=f"{REFEREES}/fa.ge2pe-ezafe-homograph.tsv"
 b_ok=t_ok=fixed=broke=N=cov=0
 for line in open(REF,encoding="utf8"):
     if line.startswith("#") or "\t" not in line: continue
@@ -108,7 +111,7 @@ print(f"  + PIN transplant: {100*t_ok/N:.1f}%   (fixed {fixed}, broke {broke}, n
 
 # --- also measure on the AGREEMENT gold (where the first-vowel signal was found) ---
 gold=defaultdict(set)
-for l in open("/home/chris/Programming/vernacula-phonemizer/tools/referee-eval/referees/fa.synth-agreement.tsv",encoding="utf8"):
+for l in open(f"{REFEREES}/fa.synth-agreement.tsv",encoding="utf8"):
     if l.startswith("#") or "\t" not in l: continue
     w,pr,n=l.rstrip("\n").split("\t"); gold[w].add(pr)
 def tagw(w):

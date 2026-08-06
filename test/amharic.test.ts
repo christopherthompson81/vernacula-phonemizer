@@ -157,10 +157,10 @@ describe("Amharic #562 normalization", () => {
             .toBe("haɡəɾ , kətəma , səw . wɨha , bəɾədo , t͡ʃʼəw");
     });
 
-    // #586 — the two powers sit on OPPOSITE SIDES in this language, which is why the tier's `position`
+    // the two powers sit on OPPOSITE SIDES in this language, which is why the tier's `position`
     // takes a per-power record. The corpus writes `783,562 ስኩዌር ኪ.ሜ.` (word before) and `120-160 ሜትር ኪዩብ`
     // (word after); a single value would have had to be wrong about one of them.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783,562 km²", "am")).toContain("sɨkuweɾ kilo metɨɾ");
         expect(phonemize("120 m³", "am")).toContain("metɨɾ kijub");
     });

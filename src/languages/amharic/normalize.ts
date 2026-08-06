@@ -1,5 +1,5 @@
 /**
- * Amharic (am) text normalization (#562) — pure text→text, run inside `text()` before tokenization.
+ * Amharic (am) text normalization — pure text→text, run inside `text()` before tokenization.
  *
  * EVIDENCE. Counts are over the 1,922 unique FLEURS `am_et` transcripts, column 3 (the cased, punctuated
  * original). 399 of them (20.8%) contain digits.
@@ -242,7 +242,7 @@ export function makeAmharicNormalizer(
         s = s.replace(/(\S)\+[  ]?(?=\d)/gu, "$1 ፕላስ ");
         s = s.replace(/(^|[  ])\+[  ]?(?=\d)/gu, "$1ፕላስ ");
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from am_et — and Amharic needs a rule shape
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from am_et — and Amharic needs a rule shape
         // no other language in this issue has used.
         //
         // ⚠ THE STANDARD OF COMPARISON TAKES A PREFIX, NOT A POSTPOSITION. Amharic marks it with ከ- on the front

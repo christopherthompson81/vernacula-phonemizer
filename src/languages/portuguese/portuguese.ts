@@ -256,7 +256,7 @@ function wordIpa(
 
 // #562 symbol normalization — Portuguese (quilômetro: the BR spelling; pt-BR is the corpus variety).
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `e` ×1118 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus

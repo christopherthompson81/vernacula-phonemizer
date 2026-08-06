@@ -1,5 +1,5 @@
 /**
- * VOCABULARY-SOURCE REPORT (#586) — per language, which classes of normalizer vocabulary have a source, and
+ * VOCABULARY-SOURCE REPORT — per language, which classes of normalizer vocabulary have a source, and
  * which are blocked. Run this BEFORE writing a layer, and again when planning a re-sweep.
  *
  * WHY THIS EXISTS. Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25
@@ -13,11 +13,11 @@
  *   sports-time / colon          14
  *
  * Every one of those was hand-investigated, per language, by whoever wrote the layer — and the cost of doing
- * it by hand is not the time, it is that **it was got wrong**: Slovak (#603) deferred 119 initialisms with
+ * it by hand is not the time, it is that **it was got wrong**: Slovak deferred 119 initialisms with
  * "it is a separate seam", when the seam existed, 30 languages already wired it, and espeak carried Slovak's
  * full letter-name table. That is trap 16, and this file is trap 16 (before declaring a class out of scope) mechanised: the check becomes a lookup.
  *
- * The counterpart matters just as much. Luxembourgish (#604) and Zulu/Xhosa (#606/#607) deferred the same
+ * The counterpart matters just as much. Luxembourgish and Zulu/Xhosa (#606/#607) deferred the same
  * class CORRECTLY — lb_list has 2 of 26 letter names and espeak ships no Zulu or Xhosa at all — and the
  * report says so, so nobody re-investigates a settled refusal.
  *
@@ -42,9 +42,9 @@ const arg = (n: string): string | undefined => {
 };
 const has = (n: string): boolean => argv.includes(`--${n}`);
 
-const ESPEAK = process.env["ESPEAK_NG"] ?? "/home/chris/Programming/espeak-ng";
+const ESPEAK = process.env["ESPEAK_NG"] ?? ""; // set ESPEAK_NG to an espeak-ng checkout to enable the dictsource tier
 const DICT = join(ESPEAK, "dictsource");
-const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 const REFEREES = "tools/referee-eval/referees";
 
 /** Every `case "xx":` in the registry — the fleet, in the order the registry lists it. */
@@ -253,7 +253,7 @@ function tierWords(c: Ctx): Row[] {
     // this report wrong for en, da, nb, ro and is on its first fleet run — five false NONEs, i.e. five
     // languages the sweep would have re-investigated for a word they already have. English predates the
     // shared tier entirely and keeps its own implementation; the Nordic layers claim percent locally for
-    // ordering reasons. Same heuristic review.ts uses for the same reason (#601): a `.replace()` whose
+    // ordering reasons. Same heuristic review.ts uses for the same reason: a `.replace()` whose
     // PATTERN mentions the sign is emitting the word.
     // THE SIGN MUST BE FOUND IN THE PATTERN, NOT IN THE WHOLE `.replace(...)`, and getting that wrong made
     // this check report `have` for almost every language. `$` is the regex END-OF-STRING ANCHOR, the
@@ -303,7 +303,7 @@ function tierWords(c: Ctx): Row[] {
 }
 
 /**
- * SIGN VOCABULARY (#654) — minus, ±, =, <, >, ×, ÷ and the exponent.
+ * SIGN VOCABULARY — minus, ±, =, <, >, ×, ÷ and the exponent.
  *
  * ⚠ THIS FILE DID NOT KNOW ABOUT THESE CLASSES, AND THAT IS A REAL GAP RATHER THAN AN OMISSION. #654 spent a
  * whole issue establishing the sign vocabulary for the fleet, and taught `defects.ts` (SIGN_CASES), `review.ts`

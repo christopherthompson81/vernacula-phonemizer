@@ -176,7 +176,7 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
 
 // NOTE: in this file `phonemize` is the RULE-ONLY path (imported as `phonemizeWordRules as phonemize`) and
 // `phonemizeWord` is the lexicon-first one. That distinction is load-bearing for the standalone test below.
-describe("independent vowels (#670)", () => {
+describe("independent vowels", () => {
     // ⚠ THE SYLLABIFIER USED TO SKIP THESE ENTIRELY, marked "Phase 1" — so all 17 letters U+17A3–U+17B3 were
     // silently DELETED from every reading in which they were not the whole word. 176,282 occurrences in the mined
     // corpus, 6.0% of all Khmer-letter tokens, and agreement with wikipron on the 254 referee words containing one

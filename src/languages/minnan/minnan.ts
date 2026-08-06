@@ -242,13 +242,13 @@ export function phonemizeWord(word: string): string {
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls (#657).
+ * deciding where the script boundary falls.
  *
  * ⚠ ONE ADDITION BEYOND THE VERBATIM LIFT: the capitals `ÀÁÂĀǍ`. the Tâi-lô tone vowels were listed in lower case only, so `TÂI` lost the tone `tâi` kept — so a
  * CAPITALISED native word failed the inventory test and the fold stripped its diacritic. Harmless while the
  * class was only deciding tokenization (the letter fell out of the token and fragmented, which is the defect this
  * issue is about); it becomes a silent DELETION the moment the class also drives the fold. Found by checking every
- * class against the upper case of its own letters, not by a corpus (#657).
+ * class against the upper case of its own letters, not by a corpus.
  */
 const NATIVE_CLASS = "[A-Za-zàáâāǎÀÁÂĀǍ̀-̍]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

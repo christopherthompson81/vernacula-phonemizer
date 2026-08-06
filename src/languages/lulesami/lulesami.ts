@@ -65,7 +65,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "giu");
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zŋáåæäøö]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

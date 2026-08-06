@@ -197,7 +197,7 @@ function number(digits: string): string {
 
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
 // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
-// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
 const TOKEN = new RegExp(`([${SD_WORD}]+)|(${LATIN_RUN})|(\\d+)|([۔؟،؛.?,])`, "gu");
 
 /** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule engine (lexicon → oovOverride →
@@ -207,13 +207,13 @@ export type OovResolver = (word: string) => string | undefined;
 class SindhiPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(rawInput: string, oovOverride?: OovResolver): string {
-        // #562: everything the g2p cannot read is rewritten to Sindhi words FIRST — see normalize.ts.
-        // This layer was pointless until the number composer landed (#587), since every rule there
+        // everything the g2p cannot read is rewritten to Sindhi words FIRST — see normalize.ts.
+        // This layer was pointless until the number composer landed, since every rule there
         // produces digits for that composer to read.
         return assembleClauses(normalizeSindhi(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWordWith(m[1], oovOverride));
             // A LATIN run goes to the foreign phonemizer; a DIGIT run does NOT. Sending digits there
-            // meant every numeral in Sindhi text was spoken in English (#587).
+            // meant every numeral in Sindhi text was spoken in English.
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
             else if (m[4]) {

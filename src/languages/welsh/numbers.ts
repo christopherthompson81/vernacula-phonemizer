@@ -1,8 +1,8 @@
 /**
- * Welsh number → words (#562) — the modern DECIMAL system (un deg un, dau ddeg pump), which is what
+ * Welsh number → words — the modern DECIMAL system (un deg un, dau ddeg pump), which is what
  * school, media and figure-reading Welsh use; the traditional vigesimal forms (un ar bymtheg …) are a
  * register choice deferred with the rest of that system. Replaces the digit-by-digit stub (25 → "dau
- * pump"), the same stub Irish had before its compositor (#555).
+ * pump"), the same stub Irish had before its compositor.
  *
  * Every base word is attested in the wikipron NW referee: un dau dwy tri tair pedwar pedair pump pum
  * chwech chwe saith wyth naw deg cant chant mil fil miliwn (+ dim). The two unattested surface forms are

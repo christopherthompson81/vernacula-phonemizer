@@ -106,7 +106,7 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
         s = s.replace(/(\S)\+\s?(\d)/gu, "$1 جمع $2");
         s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1جمع $2");
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from ur_pk — no Wikipedia needed, which
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from ur_pk — no Wikipedia needed, which
         // makes Urdu one of the few languages in this issue where tier 2 settled all four readings:
         //
         //   `برابر`      ×4 token   "اس تناسبِ نظر کے برابر" — EQUAL TO this aspect ratio

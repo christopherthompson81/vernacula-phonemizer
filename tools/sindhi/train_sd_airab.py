@@ -19,7 +19,7 @@ model, and it is why the honest baseline here is always-none rather than always-
 
   python3 train_sd_airab.py            # 80/20 OOV split
   python3 train_sd_airab.py --folds 5
-Run under /mnt/data/omnivoice_ipa/train_venv/bin/python (torch + cuda).
+Run under .venv/bin/python (torch + cuda).
 """
 import json, random, sys
 from collections import Counter

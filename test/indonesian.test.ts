@@ -48,7 +48,7 @@ describe("indonesian canonical IPA", () => {
     });
 });
 
-// #562 — the eleventh language. Three defects were outside the normalization layer (padded punctuation, a
+// the eleventh language. Three defects were outside the normalization layer (padded punctuation, a
 // bare \d+ number token, no decimal word) and are fixed in the manifest and the engine.
 describe("indonesian normalization", () => {
     test("both number separators, which were clause pauses", () => {
@@ -97,9 +97,9 @@ describe("indonesian normalization", () => {
         expect(phonemize("-5 derajat", "id")).toBe("mˈinus lˈima dərˈad͡ʒat");
     });
 
-    // #586 — `kilometer persegi` ×3. Bare `persegi` ×9 includes the SHAPE ("persegi yang tidak memiliki
+    // `kilometer persegi` ×3. Bare `persegi` ×9 includes the SHAPE ("persegi yang tidak memiliki
     // sisi bawahnya"), so the collocation with the unit noun is what attests the unit sense.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783.562 km²", "id")).toContain("kilomətˈər pərsəɡˈi");
     });
 
@@ -121,7 +121,7 @@ describe("indonesian normalization", () => {
         expect(phonemize("suhu di atas 30°C", "id")).toContain("dərˈad͡ʒat t͡ʃəlsˈius");
     });
 
-    test("⚠ accented Latin stays ONE word and goes to the foreign reader (#654)", () => {
+    test("⚠ accented Latin stays ONE word and goes to the foreign reader", () => {
         // `[a-zA-Z]+` shredded every foreign name: a diacritic ended the token, the letter carrying it became an
         // unclaimed gap read as an English LETTER NAME, and the rest of the word started over.
         //   Cañitas → t͡ʃˈa ˈɛn ˈitas ("cha EN itas")   ·   São → s ˈə ˈo   ·   Klöcker → ʔl ˈoᶷ t͡ʃkˈər

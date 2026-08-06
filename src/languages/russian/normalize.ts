@@ -215,7 +215,7 @@ export function normalizeRussian(input: string): string {
 
     // 7) SIGNS.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1минус $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -224,7 +224,7 @@ export function normalizeRussian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 плюс $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1плюс $2");
 
-    // 7b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ RUSSIAN'S REGISTER SOURCE IS A PRONUNCIATION GLOSS, and it is
+    // 7b) RELATIONAL AND DIVISION SIGNS. ⚠ RUSSIAN'S REGISTER SOURCE IS A PRONUNCIATION GLOSS, and it is
     //     the strongest tier-4 evidence in the issue: ru.wikipedia's arithmetic articles do not merely use these
     //     words, they QUOTE THE SPOKEN READING of the notation beside the notation itself —
     //

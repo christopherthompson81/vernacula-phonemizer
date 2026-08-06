@@ -10,7 +10,7 @@ transfer — unlike the Urdu←Hindi "Hindi-fill" path, which scored only 50.3% 
 a different lexicon.
 
 ## Source
-`/mnt/data/kaikki-Sindhi.jsonl` — kaikki.org Sindhi (Wiktionary, **CC BY-SA 4.0**). Derived work inherits CC BY-SA 4.0.
+`$DUMPS/kaikki-Sindhi.jsonl` — kaikki.org Sindhi (Wiktionary, **CC BY-SA 4.0**). Derived work inherits CC BY-SA 4.0.
 1771 entries; 1285 Perso-Arabic words carry a linked Devanagari `forms` entry.
 
 ## Method

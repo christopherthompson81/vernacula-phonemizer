@@ -1,7 +1,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 /**
- * Māori (mi) TEXT NORMALIZATION (#586) — the pre-tokenizer pass. Pure text→text, no IPA. Runs inside
+ * Māori (mi) TEXT NORMALIZATION — the pre-tokenizer pass. Pure text→text, no IPA. Runs inside
  * maori.ts's `text()`, before the tokenizer.
  *
  * ⚠ THIS LAYER IS THE SYMBOL TIER AND NOTHING ELSE YET. Māori had no normalization of any kind — `text()`
@@ -121,7 +121,7 @@ export function normalizeMaori(input: string): string {
     //     test for a spaced range; mi_nz has no `word -digit` instance (measured), so the rule is safe here.
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
-    // 1aa) THE PLUS BETWEEN TWO NUMBERS → tāpiri (#654). The note above declines the plus outright; this narrows
+    // 1aa) THE PLUS BETWEEN TWO NUMBERS → tāpiri. The note above declines the plus outright; this narrows
     //      that refusal to the position the evidence actually covers, and the argument is NOT the one an earlier
     //      draft of this comment made.
     //
@@ -166,7 +166,7 @@ export function normalizeMaori(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plus ");
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
 
-    // 1b) THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from mi_nz — and unlike the plus above,
+    // 1b) THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from mi_nz — and unlike the plus above,
     //     ⚠ ALL FOUR READINGS ARE NATIVE MĀORI WORDS THIS ENGINE CAN ACTUALLY SAY. That is the whole reason they
     //     can be shipped where the plus cannot: the note above records that the plus is a LOAN in the recordings
     //     (`plas`), and Māori having no /l/ and no /s/ means the g2p would emit [pa] — a confidently wrong
@@ -184,14 +184,14 @@ export function normalizeMaori(input: string): string {
     //     for the equality (`rite ki`) and the division (`whakawehe ki`), both of which take their preposition
     //     before the second operand. So no reordering is needed — the ja/ko/fa problem does not arise here.
     //
-    //     Māori is the fleet's most extreme routing case (#663): a word it cannot spell goes to the English
+    //     Māori is the fleet's most extreme routing case: a word it cannot spell goes to the English
     //     reader. These words are all spellable, so they stay on the native branch and phonemize natively.
     s = s.replace(/\s?=\s?/gu, " rite ki ");
     s = s.replace(/\s?<\s?/gu, " iti iho i ");
     s = s.replace(/\s?>\s?/gu, " nui ake i ");
     s = s.replace(/\s?÷\s?/gu, " whakawehe ki ");
 
-    // 1d) THE DEGREE SIGN (#654), and ⚠ IT IS NATIVE AFTER ALL — a macron is what hid it. An earlier pass
+    // 1d) THE DEGREE SIGN, and ⚠ IT IS NATIVE AFTER ALL — a macron is what hid it. An earlier pass
     //     dismissed the obvious candidate on the grounds that "pūtu is BOOTS", which is true of `pūtu` and not
     //     of `putu`: mi_nz's ×12 are the footwear ("ka mau pūtu tika", wear proper boots) and the degree word is
     //     the SHORT-VOWEL lexeme. Vowel length distinguishes them, and reading the corpus count without the

@@ -8,7 +8,7 @@
  *
  *   curl -sL https://raw.githubusercontent.com/google/language-resources/master/bn/data/lexicon.tsv -o /tmp/google_bn_lexicon.tsv
  *   npx tsx tools/bengali/build_tagger_data.ts /tmp/bn_tagger_train.tsv
- *   /home/chris/base/bin/python3 tools/bengali/train_bn_tagger.py /tmp/bn_tagger_train.tsv src/languages/bengali
+ *   .venv/bin/python tools/bengali/train_bn_tagger.py /tmp/bn_tagger_train.tsv src/languages/bengali
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { googleToIpa, isBengaliWord } from "./googlePhoneMap.ts";

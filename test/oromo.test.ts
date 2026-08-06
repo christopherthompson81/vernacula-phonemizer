@@ -86,7 +86,7 @@ describe("Oromo stress (Dejene 2010 §5.3.1)", () => {
     });
 });
 
-// ── TEXT NORMALIZATION (#562) ────────────────────────────────────────────────────────────────────────
+// ── TEXT NORMALIZATION ────────────────────────────────────────────────────────────────────────
 // The pins are on the rule's BRANCHES, not on the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal and the
 // enclitic are COMPOSED from the cardinal, so the branch the corpus never writes (10ffaa, 8ffaa, a
 // consonant-final stem before -tti) is pinned beside the branch it does. The evidence for every word is
@@ -268,20 +268,20 @@ describe("Oromo text normalization", () => {
         expect(phonemize("D.K.D 5000 tti", "om")).toBe("ᶑalˈoːta kiristˈoːs dˈura kˈuma ʃanˈitːi");
     });
 
-    // #586 — the corpus's `iskuweer kiloometiiri 783,562` is a SQUARE KILOMETRE, and this language's units
+    // the corpus's `iskuweer kiloometiiri 783,562` is a SQUARE KILOMETRE, and this language's units
     // are local precisely because the shared tier could only postpose them. The exponent rule sits beside
     // the `sq mi` one and keeps the same noun-first, number-last order.
     // The `\s?²`-but-not-`\s?2` asymmetry is copied from the tier: `km 6,387` and `km 2-3` are real forms
     // in this corpus, so a SPACED ASCII 2 must stay the next number.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783.562 km²", "om")).toContain("iskuwˈeːr kiːloːmˈeːtira ᶑˈibːa");
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː");
     });
 
-    // #586 — an earlier pass recorded `kuubik` as ×0 and left `m³` alone; the corpus does have the word,
+    // an earlier pass recorded `kuubik` as ×0 and left `m³` alone; the corpus does have the word,
     // spelled `kubiik` and in this language's own noun-first order: "iibame boba'aa kubiik metirii 120-160
     // of irraa qaba ture". Same shape as the `iskuweer` rule beside it.
-    test("the cubed measure word, noun-first (#586)", () => {
+    test("the cubed measure word, noun-first", () => {
         expect(phonemize("120 m³", "om")).toContain("kubˈiːk mˈeːtira");
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː"); // guard still holds
     });

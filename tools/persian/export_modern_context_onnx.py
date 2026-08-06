@@ -12,7 +12,7 @@ HOMOGRAPH-SPECIFIC accuracy (on the annotated word) so that lever is visible. Ex
 RESUMABLE: a per-epoch checkpoint (<input>.ckpt.pt, keyed to the dataset) is written after every epoch; re-running
 picks up where it left off (RNG restored so batch shuffles continue identically). Delete the .ckpt.pt to start fresh.
 
-  /mnt/data/ar-diac-venv/bin/python export_modern_context_onnx.py <scratchdir> [input.tsv=homorich_ipa.tsv] [warm.ckpt.pt]
+  $ARDIAC_PY export_modern_context_onnx.py <scratchdir> [input.tsv=homorich_ipa.tsv] [warm.ckpt.pt]
 
 argv[3] (optional) = a warm-start checkpoint (a prior run's .ckpt.pt): load its best_state and fine-tune from there
 with scheduled sampling from epoch 1 (no teacher-forcing warmup) at a reduced LR — the efficient way to add SS to an

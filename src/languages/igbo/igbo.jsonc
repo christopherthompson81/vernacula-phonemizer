@@ -42,7 +42,7 @@
     // 11:1 to 275:1 in every case. `otu nde` is the irregular MULTIPLIER-1 form (otu narị 1,347, otu puku 1,256,
     // otu nde 479), which is why `one` is stored separately from the multiplier series.
     //
-    // Sourced from a 558,991-line ig.wikipedia dump (#585); counts are whole-word/phrase hits. Igbo has NO
+    // Sourced from a 558,991-line ig.wikipedia dump; counts are whole-word/phrase hits. Igbo has NO
     // independent referee — wikipron ibo_latn, epitran ibo-Latn and the kaikki Igbo extract are all 404 — so the
     // corpus IS the evidence and the anchor is the adjudicated gold in test/igbo.test.ts.
     //

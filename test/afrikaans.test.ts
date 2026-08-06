@@ -171,11 +171,11 @@ describe("Afrikaans text normalization", () => {
         expect(numberToWords(2_000_000)).toBe("twee miljoen");
     });
 
-    // #586 — bare `m` was the RAW LETTER: meter ×9, and every digit-adjacent instance in the corpus is a
+    // bare `m` was the RAW LETTER: meter ×9, and every digit-adjacent instance in the corpus is a
     // metre. `133 m/s` now composes the whole rate, and `kubieke` finally has a head noun to attach to.
     // The corpus's `40 m.p.u` (myl per uur) is safe because normalize.ts expands the dotted abbreviation
     // BEFORE the tier, so no bare `m` survives to be misread.
-    test("the bare metre, and the cube word it feeds (#586)", () => {
+    test("the bare metre, and the cube word it feeds", () => {
         expect(getPhonemizer("af").text("133 m/s").trim()).toContain("miətər pɛr siəkɔndə");
         expect(getPhonemizer("af").text("5 m³").trim()).toContain("kyːbikə miətər");
         expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pɛr yːr");

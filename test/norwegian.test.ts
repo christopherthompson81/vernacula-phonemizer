@@ -67,7 +67,7 @@ describe("Norwegian Bokmål canonical IPA", () => {
     });
 });
 
-// #562 — the normalization layer. Every count below is measured over the FLEURS nb_no corpus (column 3),
+// the normalization layer. Every count below is measured over the FLEURS nb_no corpus (column 3),
 // and every emitted word is in the NST lexicon at reference quality.
 describe("norwegian normalization", () => {
     test("space-grouped thousands stay ONE numeral", () => {
@@ -137,11 +137,11 @@ describe("norwegian normalization", () => {
         expect(normalizeNorwegian("Norsk er et språk.")).toBe("Norsk er et språk.");
     });
 
-    // #586 — ADOPTED THE SHARED TIER for units and rates, for the reason Danish did: the lexicon handles a
+    // ADOPTED THE SHARED TIER for units and rates, for the reason Danish did: the lexicon handles a
     // TOKEN and cannot compose across a slash, so a rate's denominator read as an English letter name.
     // `mm` is declared to FIX A DEFECT — the lexicon read the bare abbreviation as the GEMINATE [mː], and the
     // corpus writes `mm` ×10. Words from the corpus: kilometer ×15, meter ×9, `i timen` ×9, `i sekundet` ×2.
-    test("units and rates through the shared tier (#586)", () => {
+    test("units and rates through the shared tier", () => {
         expect(createNorwegian().text("160 km/t").trim()).toContain("ˈçiːlʊˌmeːtəɾ ˈiː ˈtiːmən"); // was the letter T
         expect(createNorwegian().text("133 m/s").trim()).toContain("ˈmeːtəɾ ˈiː səˈkʊnə");        // was ˈɛm ˈɛs
         expect(createNorwegian().text("5 m").trim()).toContain("ˈmeːtəɾ");                         // was ˈɛm

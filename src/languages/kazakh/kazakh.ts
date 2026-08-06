@@ -77,7 +77,7 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d{1,3}(?: \d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:]
 // км/кг, not km/kg — the same trap as Russian). Kept in the ENGINE file so the review tool's sourcing
 // check can see the words.
 export const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `және` ×561 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
@@ -88,7 +88,7 @@ export const SYMBOLS = makeSymbolNormalizer({
     ampersand: "және",
     percent: ["пайыз"],
     currency: { "$": ["доллар"], "€": ["еуро"], "¥": ["йен"], "£": ["фунт"] },
-    // #586 — LATIN KEYS TOO. The words below were already right; only the Cyrillic abbreviations were
+    // LATIN KEYS TOO. The words below were already right; only the Cyrillic abbreviations were
     // declared, and the corpus writes the LATIN ones — so `5 km` read as *bˈes ˈʊkm*, the abbreviation
     // reaching the phoneme sink while `5 км` read correctly. Same words, two spellings of the key.
     // Verified in kk_kz: километр ×7 "жеті километр қашықтықта", метр ×10, сантиметр ×2.

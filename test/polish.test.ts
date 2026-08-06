@@ -107,7 +107,7 @@ describe("Polish roman-numeral ordinals", () => {
     });
 });
 
-// TEXT NORMALIZATION (#562, src/languages/polish/normalize.ts). Assertions are on the text→text layer,
+// TEXT NORMALIZATION (src/languages/polish/normalize.ts). Assertions are on the text→text layer,
 // because that is what the layer is: the IPA is the existing word path's job. Counts in the comments are
 // from the pl_pl FLEURS corpus (1,919 unique cased utterances) and are the reason each rule exists.
 describe("Polish text normalization", () => {

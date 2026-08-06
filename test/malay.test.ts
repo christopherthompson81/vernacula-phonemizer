@@ -104,7 +104,7 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         expect(phonemize("Presiden A.S. mengatakan", "zsm")).toBe("presˈidɛn aɛs məŋatˈakan");
         // The corpus spells `sebelum Masihi` out elsewhere; `SM` was read as the letters `ɛsɛm`.
         expect(normalizeMalay("pada 323 SM.")).toBe("pada 323 sebelum Masihi.");
-        // The ampersand VANISHED — a symbol that is dropped is invisible to the leak classes (#584).
+        // The ampersand VANISHED — a symbol that is dropped is invisible to the leak classes.
         expect(normalizeMalay("Seni &amp; Sains")).toBe("Seni dan Sains");
         expect(phonemize("Pada skala mewah, B&B dengan", "zsm")).toBe("pˈada skˈala mewˈah , b dˈan b dəŋˈan");
     });
@@ -158,12 +158,12 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         expect(phonemize("Dr. Damadian", "id")).toBe("dˈoʔtər damadˈian");
     });
 
-    // #586 — `m³` lost the `³` outright. `padu` is a REAL Malay/Indonesian divergence rather than a shared
+    // `m³` lost the `³` outright. `padu` is a REAL Malay/Indonesian divergence rather than a shared
     // word, which is the whole reason this file's layer exists: ms_my writes `meter padu` ×2 ("Luno membawa
     // 120–160 meter padu bahan bakar") and `kubik` ×0, where Indonesian uses `kubik`.
     // ⚠ `isi padu` ×2 in the same corpus is the ordinary sense, "volume" (`isi padu air`) — the collocation
     // with the unit noun is the evidence, and the rule must not touch the bare word.
-    test("the cubed measure word is Malay's own, not Indonesian's (#586)", () => {
+    test("the cubed measure word is Malay's own, not Indonesian's", () => {
         expect(phonemize("120 m³", "zsm")).toContain("mɛtˈər pˈadu");
         expect(phonemize("120 m³", "id")).toContain("mɛtˈər");      // id has no cube word; not "padu"
         expect(phonemize("120 m³", "id")).not.toContain("pˈadu");

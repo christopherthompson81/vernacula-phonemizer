@@ -240,7 +240,7 @@ export function normalizeCatalan(input: string): string {
     //     letter name (`B&Bs` → be i bes — the corpus's only ampersand is the plural). A TRUE minus (`-5`)
     //     reads "menys"; the corpus's `-\d` are all ranges/scores (6-6, 11.000-22.500, 4.2-3.9) and stay as
     //     two bare numbers.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
@@ -253,7 +253,7 @@ export function normalizeCatalan(input: string): string {
             `${LETTER_NAME[a.toLowerCase()] ?? a} i ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " i ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 és igual a $2");
-    // THE DIVISION SIGN (#654), the one sign this file still dropped. ca.wikipedia's arithmetic prose uses the
+    // THE DIVISION SIGN, the one sign this file still dropped. ca.wikipedia's arithmetic prose uses the
     // participle in the slot — "21 = 16+4+1 +1 dividit per 8" — and FLEURS's parallel aspect-ratio sentence,
     // which performs a division aloud in 57 of its 67 languages, has the Catalan translator writing the gerund
     // of the same verb ("dividint per dotze"). Both are attested; the participle is the neutral sign reading,

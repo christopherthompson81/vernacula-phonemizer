@@ -5,8 +5,8 @@ Normalises notation (ɾ/r, ʋ/v, geminate, nasal order) but NOT vowel quality �
 candidates by diff type so systematic fixes surface."""
 import re, unicodedata
 from collections import Counter, defaultdict
-HERE="/home/chris/Programming/vernacula-phonemizer"
-
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 U=["t͡ʃ","d͡ʒ","t̪","d̪","ɑː","aː","uː","iː","eː","oː","ɔː","ɛː","ə","ɪ","ʊ","ɔ","ɛ","ɑ","æ","a","e","o","u","i","b","p","t","s","h","x","d","z","ʒ","ʃ","ɾ","r","ʔ","ɣ","f","q","k","ɡ","g","l","m","n","ʈ","ɖ","ɽ","ɳ","ɲ","ŋ","j","w","v","ʋ","ɦ","ʰ","ʱ","ː","̃","̪"]
 U=sorted(set(U),key=len,reverse=True)
 def toks(s):

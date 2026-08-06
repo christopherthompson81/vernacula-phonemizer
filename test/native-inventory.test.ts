@@ -1,5 +1,5 @@
 /**
- * A DECLARED INVENTORY IS A CLAIM ABOUT THE G2P (#657), so measure it instead of trusting it.
+ * A DECLARED INVENTORY IS A CLAIM ABOUT THE G2P, so measure it instead of trusting it.
  *
  * `NATIVE_CLASS` names the letters an engine's g2p has rules for. `makeNativiser` folds everything OUTSIDE it to
  * a base the g2p can read, and leaves everything inside alone — so a class that lists a letter the g2p CANNOT
@@ -66,7 +66,7 @@ const FRAMES: [RegExp, string, string][] = [
     [/\p{Script=Latin}/u, "ka", "o"],
 ];
 
-describe("a declared native inventory matches what the g2p can read (#657)", () => {
+describe("a declared native inventory matches what the g2p can read", () => {
     test("no engine claims a letter its own g2p drops", () => {
         const overclaims: string[] = [];
         for (const [dir, codes] of dirCodes()) {

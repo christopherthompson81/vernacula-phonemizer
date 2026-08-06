@@ -80,7 +80,7 @@ export function normalizeArabic(input: string): string {
 
     // 5) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(new RegExp(`(^|[\\s(])[-−–]([${DIGIT}])`, "gu"), "$1نَاقِص $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -89,7 +89,7 @@ export function normalizeArabic(input: string): string {
     s = s.replace(new RegExp(`(\\S)\\+\\s?([${DIGIT}])`, "gu"), "$1 زَائِد $2");
     s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${DIGIT}])`, "gu"), "$1زَائِد $2");
 
-    // 5aa) RELATIONAL AND DIVISION SIGNS (#654). The register source states the mapping outright — ar.wikipedia's
+    // 5aa) RELATIONAL AND DIVISION SIGNS. The register source states the mapping outright — ar.wikipedia's
     //      division article writes «يُرمز إلى القسمة بالعلامة ÷» ("division is denoted by the sign ÷") and then
     //      glosses the equality directly: «إذا كان جداء b و c يساوي a, أي a = b × c». The words in the slot,
     //      beside the very signs this rule reads.

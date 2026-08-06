@@ -40,10 +40,10 @@ describe("Nepali canonical IPA", () => {
 
 // ── #562 text normalization ───────────────────────────────────────────────────────────────────────
 // Nepali reuses Hindi's ENGINE but supplies its own normalizer and symbol words through the engine's
-// `overrides` parameter (#583). These assert through `text()`, which is the layer that owns the rules.
+// `overrides` parameter. These assert through `text()`, which is the layer that owns the rules.
 const t = (s: string): string => getPhonemizer("ne").text(s).trim();
 
-describe("Nepali normalization (#562)", () => {
+describe("Nepali normalization", () => {
     test("21-99 are FUSED single words, from nepali.jsonc `compound`", () => {
         // The core fallback composed tens+unit in the Hindi-belt order, so 21 read "one twenty".
         expect(t("21")).toBe("ˈekːais"); // एक्काइस, not ˈek bˈis
@@ -118,16 +118,16 @@ describe("Nepali normalization (#562)", () => {
         expect(t("युटिसी+1")).not.toContain("d̪ʱˈʌn"); // a UTC offset is not "plus one"
     });
 
-    // #586 — `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"). No cube word: घन is ×0, and
+    // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"). No cube word: घन is ×0, and
     // this is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(t("3,850 km²")).toContain("wˈʌɾɡʌ kˈilomiʈʌɾ");
     });
 
-    // #586 — `120–160 घनमिटर इन्धन`, and this is why a token probe for घन read ×0: the corpus writes it FUSED
+    // `120–160 घनमिटर इन्धन`, and this is why a token probe for घन read ×0: the corpus writes it FUSED
     // to the unit noun. `before` still spells it as two words, which the same corpus does for
     // `वर्ग किलोमिटर`. `m` had to be declared too — मिटर ×12 is the corpus's spelling (मीटर is ×0 here).
-    test("the bare metre and the cubed measure word (#586)", () => {
+    test("the bare metre and the cubed measure word", () => {
         expect(t("5 m")).toContain("mˈiʈʌɾ");
         expect(t("120 m³")).toContain("ɡʱˈʌn mˈiʈʌɾ");
         expect(t("802.11m")).toContain("ˈɛm");

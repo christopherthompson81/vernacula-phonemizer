@@ -40,7 +40,7 @@ describe("Malayalam canonical IPA", () => {
     });
 
     test("numbers compose (units/teens/tens/magnitudes)", () => {
-        // A bare hundred is നൂറ് alone; the shared composer was prefixing "one" unconditionally (#562).
+        // A bare hundred is നൂറ് alone; the shared composer was prefixing "one" unconditionally.
         expect(ml("100")).toBe("nˈuːrɨ"); // നൂറ്
         expect(ml("5")).toBe("ˈaɲt͡ʃɨ"); // അഞ്ച്
         // `bareMagnitude` now reaches lakh and crore too — these read "one lakh"/"one crore" before.
@@ -121,8 +121,8 @@ describe("Malayalam text normalization", () => {
         expect(ml("06:30")).toBe("ˈaːrɨ mˈupːat̪ɨ"); // was ˈaːrɨ , mˈupːat̪ɨ — a pause inside the time
     });
 
-    // #586 — `ക്യൂബിക് മീറ്റർ` ×1 joins the already-declared `ചതുരശ്ര കിലോമീറ്റർ` ×2; both word-first.
-    test("the squared/cubed measure word (#586)", () => {
+    // `ക്യൂബിക് മീറ്റർ` ×1 joins the already-declared `ചതുരശ്ര കിലോമീറ്റർ` ×2; both word-first.
+    test("the squared/cubed measure word", () => {
         expect(ml("120 m³")).toContain("kjˈuːbikɨ mˈiːrːaɾ");
     });
 });

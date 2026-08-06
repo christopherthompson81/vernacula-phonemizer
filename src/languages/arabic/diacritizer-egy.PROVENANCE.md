@@ -37,7 +37,7 @@ Wikipedia, MIT dialect corpus). The GPL teacher is offline-only and unshipped. S
 
 ## Regenerate
 
-Offline GPU pipeline (RTX 3090, staged on `/mnt/data/arz-diac`, camel-tools venv): extract Masri Wikipedia +
+Offline GPU pipeline (staged on `$ARZDIAC`, camel-tools venv): extract Masri Wikipedia +
 the MIT dialect Egyptian subset → `calima_egy_silver.py` (calima-egy + BERT disambig → silver, 6 parallel GPU
 workers) → `filter_split.py` (OOV-filter, 90/5/5) → `train_bilstm_sent.py --pausal 1` (silver-only) →
 `export_egy2.py` (legacy ONNX export + int8 `quantize_dynamic`). `diacritizer-egy.meta.json` (char/label maps)
@@ -52,5 +52,5 @@ train). Same BiLSTM (emb 128, hidden 512×2, 3 layers), 25 epochs, best-val at e
 The honest comparison is the NON-CIRCULAR wikipron-arz referee (rules-only, lexicon:false): **v1 41.9% → v2 42.7%
 (+0.8pp)**. So 5.3× more silver gave a MARGINAL real-referee gain — the model was near-saturated at 350k
 (teacher-distillation plateaus: the ceiling is the calima-egy teacher's quality + the abjad, not silver volume).
-Shipped v2 as the full-corpus model (better on the honest metric). Pipeline: /mnt/data/arz-diac/run_pipeline_v2.sh
+Shipped v2 as the full-corpus model (better on the honest metric). Pipeline: `$ARZDIAC/run_pipeline_v2.sh`
 (6 parallel silver shards → filter_split_v2.py → train_bilstm_sent.py → export_egy_v2.py).

@@ -117,7 +117,7 @@ export function phonemizeWord(word: string): string {
         .join("");
 }
 
-// #562 — Afrikaans in this corpus (FLEURS af_za, an English translation) uses the ENGLISH separators:
+// Afrikaans in this corpus (FLEURS af_za, an English translation) uses the ENGLISH separators:
 // a PERIOD is the decimal point and a COMMA groups thousands. The old class was a bare `(\d+)`, so BOTH
 // separators fell through to clausePunctuation: "12.8" read *twaalf . agt* and "17,500" *sewentien , vyf
 // honderd*. Clocks and the version-dot are claimed by normalize.ts first; a period reaching here is a

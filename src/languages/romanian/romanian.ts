@@ -338,21 +338,21 @@ const NATIVE_CLASS = "[a-zA-ZăâîșțA-ZĂÂÎȘȚ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /** Build the Romanian phonemizer. */
 export function createRomanian(): Phonemizer {
     return {
         text(rawInput: string): string {
-            // #562: everything the g2p cannot read is rewritten to Romanian words FIRST — see
+            // everything the g2p cannot read is rewritten to Romanian words FIRST — see
             // normalize.ts, in particular why there is NO ordinal-dot rule here despite it being the
             // largest rule in the Germanic languages.
             return assembleClauses(normalizeRomanian(rawInput), TOKEN, (m, sink) => {

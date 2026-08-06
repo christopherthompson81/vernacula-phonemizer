@@ -34,7 +34,7 @@ export function phonemizeWord(word: string): string {
         }
         // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
         // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
-        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        // has been tried, so it can never override a reading this language has an opinion about.
         const ph = G[w[i]!] ?? latinPhone(w[i]!, { initial: i === 0 });
         if (ph !== undefined) out.push(ph);
         i += 1;
@@ -49,7 +49,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'ʻ-")})|(\\d+)|([.!?…,;:
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
@@ -85,7 +85,7 @@ class MaoriPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(normalizeMaori(input), TOKEN, (m, sink) => {
-            // ⚠ A NON-MĀORI WORD IS ROUTED, NOT NATIVISED (#663). Māori is strictly (C)V — no codas, no clusters
+            // ⚠ A NON-MĀORI WORD IS ROUTED, NOT NATIVISED. Māori is strictly (C)V — no codas, no clusters
             // — and a letter-by-letter substitution cannot repair either, because it has no notion of syllable
             // structure. Giving each missing letter a phone stopped the DELETION (`Safari` had been reading
             // *aaɾi*, `United States` *unite tate*) and left the reading phonotactically illegal: `Xerox` →

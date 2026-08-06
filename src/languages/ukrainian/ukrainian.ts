@@ -131,7 +131,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // universal `4x4` sentence says just **на** — wav2vec2 over uk_ua/train gives
     // `… tʃ o t e r i  t aɪ … tʃ u t r i  n a  tʃ e t e r e …`, "chotyry NA chetery". `помножити на` is the full
     // verbal form a textbook uses; a reader saying a dimension uses the bare preposition.
-    // #586 — `&` was DROPPED outright, losing the sign from `готелі типу B&B`. `та` is the conjunction used
+    // `&` was DROPPED outright, losing the sign from `готелі типу B&B`. `та` is the conjunction used
     // to join two nouns, and it is the shape every other treated language took here (de *und*, pt *e*,
     // ru *и*, mi *me*): the plain conjunction, not a transliteration. `і` is the other Ukrainian "and" and
     // is equally correct as a word; `та` is preferred between two coordinate nouns, which is what an

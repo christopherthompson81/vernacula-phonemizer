@@ -263,7 +263,7 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //     "+ 30° C से अधिक तापमान" ("temperature above +30 °C") and "800,000 से ज़्यादा सैनिकों"
         //     ("more than 800,000 soldiers"). Emitting the western order would have been fluent nonsense.
         //
-        //     THE MECHANISM MOVED TO core/postposedSign.ts (#654), because mr/gu/ta and the verb-final
+        //     THE MECHANISM MOVED TO core/postposedSign.ts, because mr/gu/ta and the verb-final
         //     languages ja/ko/fa all need the same rewrite and its two non-obvious parts — keeping trailing
         //     punctuation off the operand, and the catch-all second pass that stops a chained comparison from
         //     going silent — are exactly the sort of thing that decays when copied. Both were defects found

@@ -180,7 +180,7 @@ export const ipaOnly = (value: string): string | undefined => {
 // written form, matching FLEURS' MSA-leaning register) reads cleanly through the diacritizer as
 // fi ilmiʔa; the Egyptian colloquial المية spelling vocalized worse. Shared path — only arz has corpus %.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // وَ is ×71 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -212,7 +212,7 @@ class ArabicPhonemizer implements Phonemizer {
         private useLexicon = false,
     ) {}
     text(input: string): string {
-        // #562: Arabic-specific rewrites (٪/٫/٬ folding, units, clock, signs) then the shared tier.
+        // Arabic-specific rewrites (٪/٫/٬ folding, units, clock, signs) then the shared tier.
         input = SYMBOLS(normalizeArabic(input));
         // The Egyptian lexicon keys on the BARE word; the input here is diacritized (post neural-diacritizer), so
         // strip the harakat to look it up, and only for the egyptian variety with the lexicon enabled (shipped).
@@ -380,7 +380,7 @@ export async function phonemizeArabic(
     const diac = await diacP;
     // The diacritizer + Tashkeela restore lexicon are MSA (shared): they restore the MSA vocalization, which the
     // variety g2p then transforms. Egyptian short vowels differ from MSA — the egyptian-lexicon.tsv supplies them.
-    // #562: symbol words must be inserted BEFORE diacritization — a percent word injected after it would
+    // symbol words must be inserted BEFORE diacritization — a percent word injected after it would
     // reach the g2p as a bare skeleton (المئة → ilimʔ) instead of being vocalized (fi ilmiʔa).
     text = SYMBOLS(text);
     const vocalized = diac ? await diac.diacritize(text) : text;

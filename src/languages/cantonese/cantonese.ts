@@ -91,7 +91,7 @@ function hanRun(run: string): string {
 /**
  * A SYNTHESIZED numeral string → IPA, read one character at a time.
  *
- * #562: it must NOT go through hanRun(). Greedy longest-match segmentation looks up whole words, and the
+ * it must NOT go through hanRun(). Greedy longest-match segmentation looks up whole words, and the
  * rime-cantonese dict carries a colloquial lexical entry 十九 = "sap1 gau1" — so every composed number
  * containing 十九 was mis-toned: 29 → 二十九 segmented as 二 + 十九 and came out ji6 sap1 gau1 instead of
  * ji6 sap6 gau2. 18 of the 208 distinct integers in the corpus were hit, all from that one entry, including
@@ -150,7 +150,7 @@ class CantonesePhonemizer implements Phonemizer {
     text(input: string): string {
         // Whole-string Jyutping input (tone digits present) → direct path.
         if (JYUTPING.test(input.trim())) return jyutpingToIpa(input);
-        // #562: the Cantonese normalization pass runs first, so what reaches the tokenizer is either a word
+        // the Cantonese normalization pass runs first, so what reaches the tokenizer is either a word
         // the dict speaks or a number whose CARDINAL reading is the correct one.
         input = normalizeCantonese(input, DEF.measureWords);
         // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape

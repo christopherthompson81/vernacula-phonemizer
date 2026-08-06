@@ -24,7 +24,7 @@ unlearn. So the maximally-clean model is also the best one — no provenance-vs-
 
 ## Regenerate
 
-Offline GPU pipeline (not in CI), staged on `/mnt/data/ar-diac`: download the arwiki dump → extract Arabic
+Offline GPU pipeline (not in CI), staged on `$ARDIAC`: download the arwiki dump → extract Arabic
 sentences → `catt_silver.py` (CATT → silver) → `train_bilstm_sent.py --pausal 1` (silver-only, no `--resume`)
 → `export_onnx.py` → int8 `quantize_dynamic`. The `.onnx` is tracked in git alongside `diacritizer.meta.json` (char/label
 maps) is committed beside it.

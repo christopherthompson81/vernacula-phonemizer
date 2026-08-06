@@ -96,7 +96,7 @@ export function posExpectation(tag: string): PosExpectation {
 /**
  * Tags that head an object noun phrase: a determiner (`the`/`a`/`this`/…) or an
  * object pronoun (`it`/`them`/…) or a possessive (`your`/`his`/…). Used to detect
- * the imperative "VERB <object>" shape at sentence start (#690), where the greedy
+ * the imperative "VERB <object>" shape at sentence start, where the greedy
  * tagger has no left context and falls back to the noun/preposition prior.
  */
 export function headsObjectPhrase(tag: string): boolean {
@@ -111,7 +111,7 @@ export function headsObjectPhrase(tag: string): boolean {
 
 /**
  * UPOS tags that are NOMINAL — they take FINAL stress in nominal-final-stress
- * languages (#680, Persian nouns/adjectives). Verbs/function words are excluded
+ * languages (Persian nouns/adjectives). Verbs/function words are excluded
  * (verbs need prefix stress, deferred; clitics are unstressed).
  */
 export function isNominalTag(tag: string): boolean {
@@ -119,7 +119,7 @@ export function isNominalTag(tag: string): boolean {
 }
 
 /**
- * UPOS tags that are VERBAL (#680, Persian verb prefix-stress). Persian verbs
+ * UPOS tags that are VERBAL (Persian verb prefix-stress). Persian verbs
  * are stressed on the FIRST syllable of the whole form — the prefix می/نمی/بـ/نـ
  * when present, else the first stem syllable — with the personal ending
  * (-am/-i/-ad/-im/-id/-and) unstressed. AUX (auxiliary/copula) is included:

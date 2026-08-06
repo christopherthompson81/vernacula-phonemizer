@@ -134,7 +134,7 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
         expect(phonemizeWordShipped("۽").replace(/[ˈˌ]/gu, "")).toBe("aẽ");
     });
 
-    // SUPERSEDED IN PART (#587). This asserted that a DIGIT run routes through the foreign phonemizer —
+    // SUPERSEDED IN PART. This asserted that a DIGIT run routes through the foreign phonemizer —
     // which is exactly why every number in Sindhi text was spoken in ENGLISH: `45` read "forty", `100`
     // read "one hundred". Latin still routes to English, correctly; digits now go to Sindhi's own
     // composer.
@@ -173,7 +173,7 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
     });
 });
 
-// #562 — the normalization layer. Counts are measured over the FLEURS sd_in corpus (column 3), and every
+// the normalization layer. Counts are measured over the FLEURS sd_in corpus (column 3), and every
 // emitted word is attested IN that corpus.
 describe("sindhi normalization", () => {
     // ⚠ Sindhi uses the ENGLISH numeric conventions, like Central Kurdish and unlike the four European
@@ -216,20 +216,20 @@ describe("sindhi normalization", () => {
         expect(normalizeSindhi("سنڌي هڪ ٻولي آهي.")).toBe("سنڌي هڪ ٻولي آهي.");
     });
 
-    // #586 — `ڪيوبڪ ميٽر` is the corpus's own ("لونو ۾ 120–160 ڪيوبڪ ميٽر تيل هو"), the loan preceding the
+    // `ڪيوبڪ ميٽر` is the corpus's own ("لونو ۾ 120–160 ڪيوبڪ ميٽر تيل هو"), the loan preceding the
     // noun exactly as مربع does in the squared rule above.
     // ⚠ Bare `m` is deliberately NOT in the unit table: adding it made `802.11m` read as a metre, because
     // this file rewrites the version dot to a word before the shared tier's guard can see it (trap 39 (a local rule that depends on a character…)).
-    test("the cubed unit, and why bare m stays out (#586)", () => {
+    test("the cubed unit, and why bare m stays out", () => {
         expect(phonemize("5 m³", "sd")).toContain("kˈiːʋbəkə mˈiːʈəɾə");
         expect(phonemize("5 km³", "sd")).toContain("kˈiːʋbəkə kəloːmˈiːʈəɾə");
         expect(phonemize("802.11m", "sd")).toContain("ˈɛm"); // still a letter
     });
 
-    // #586 — RATES, before the plain unit loop which would otherwise consume the numerator and leave the
+    // RATES, before the plain unit loop which would otherwise consume the numerator and leave the
     // denominator as an English letter name (`120 km/h` → …[ˈeᶦt͡ʃ], `133 m/s` → [ˈɛm ˈɛs]). Every word is the
     // corpus's own, spelled out in its rate sentence: "480 ڪلو ميٽر في ڪلاڪ (133 ميٽر في سيڪنڊ)".
-    test("the rate denominators (#586)", () => {
+    test("the rate denominators", () => {
         expect(phonemize("120 km/h", "sd")).toContain("fˈiː kəlˈaːk");
         expect(phonemize("133 m/s", "sd")).toContain("fˈiː siːkˈəɳɖə");
     });

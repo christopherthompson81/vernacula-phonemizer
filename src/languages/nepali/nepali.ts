@@ -31,7 +31,7 @@ import { makeNepaliNormalizer } from "./normalize.ts";
  *            `unitPer` at all, so "km/h" dropped its denominator and read the h as a letter name.
  */
 const NE_SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // र is ×2379 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //

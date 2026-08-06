@@ -114,7 +114,7 @@ describe("italian Roman-numeral ordinal policy", () => {
     });
 });
 
-// ── TEXT NORMALIZATION (#562, src/languages/italian/normalize.ts) ─────────────────────────────────────────
+// ── TEXT NORMALIZATION (src/languages/italian/normalize.ts) ─────────────────────────────────────────
 // Every case below is a surface form ATTESTED in the it_it FLEURS corpus (1,978 unique cased utterances),
 // with the count and the pre-change output recorded in normalize.ts's header. Assertions are on substrings
 // of the phonemized output, because what these rules fix is a wrong or missing WORD, not a whole utterance.

@@ -143,7 +143,7 @@ export function normalizeSwahili(input: string): string {
     //   ta/gu/ml/mi. Voiced anyway, per the standing choice that an explicitly typed character is content.
     //   `plas` reads plˈɑs, matching the decode; ⚠ the conventional Swahili spelling of the loan is UNSOURCED,
     //   and this spelling is chosen to reproduce the attested phones.
-    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
     //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
     //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
     //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
@@ -196,7 +196,7 @@ export function normalizeSwahili(input: string): string {
     //    score like "26 - 00" must keep its bare juxtaposition rather than gain a spurious pause.
     s = s.replace(/(?<![\d])\s+[-–—]+\s+(?![\d])/gu, ", ");
 
-    // THE RELATIONAL AND DIVISION SIGNS (#654). Swahili is SVO, so all four read infix.
+    // THE RELATIONAL AND DIVISION SIGNS. Swahili is SVO, so all four read infix.
     //
     // ⚠ THE REGISTER SOURCE SHOWS THE ÷ GLYPH ITSELF: sw.wikipedia writes "hesabu ya kugawanya namba moja kwa
     // nyingine. Kama swali ni 6 ÷ 3 basi hisa yake…" — the operation of dividing one number BY another, with

@@ -284,7 +284,7 @@ export function normalizeCroatian(input: string): string {
     s = s.replace(/(?<!\p{L}\p{M})(\p{Lu})&(\p{Lu})(?![^\p{L}\p{M}])/gu, "$1 i $2");
     s = s.replace(/\s&\s/gu, " i ");
     s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -296,7 +296,7 @@ export function normalizeCroatian(input: string): string {
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 jednako $2");
     s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 manje od $2");
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 veće od $2");
-    // 13b) THE DIVISION SIGN (#654), the one sign this file still dropped — `6 ÷ 3` read as two bare numbers.
+    // 13b) THE DIVISION SIGN, the one sign this file still dropped — `6 ÷ 3` read as two bare numbers.
     //      ⚠ THE SOURCE READS THE SIGN ITSELF, which is as direct as this issue's tier 4 gets: hr.wikipedia's
     //      Dijeljenje article writes "a podijeljeno s b jednako c: a ÷ b = c" — the ÷ glyph, its reading, and
     //      the very equals word this file already emits, in one sentence. Corroboration in both directions.

@@ -1,5 +1,5 @@
 /**
- * Cantonese / Yue (yue) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites what is not yet a
+ * Cantonese / Yue (yue) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites what is not yet a
  * pronounceable word into Han text the existing Han→Jyutping→IPA pipeline already speaks. Pure text→text,
  * no IPA. Numbers are left as ASCII digits wherever the engine's own cardinal composition is the right
  * reading, and written out as Han ONLY where it is not (years, decimal fractions, the colloquial 兩).
@@ -63,7 +63,7 @@ function spellDigits(s: string): string {
 // The percent word 百分之 PRECEDES its number, as in Mandarin — and the corpus corroborates it directly,
 // writing 百分之三十 in running text ×3. Declared through the shared tier rather than reimplemented.
 //
-// CURRENCY (#584). `$5` read as bare *ŋ̩˩˧*. yue_hant_hk contains ZERO `$` against 54 `%`, so the
+// CURRENCY. `$5` read as bare *ŋ̩˩˧*. yue_hant_hk contains ZERO `$` against 54 `%`, so the
 // corpus-driven gate could not see it — but the words are in that same corpus:
 //
 //   美元 ×8  "每次可被處以 1,000 美元的罰款"
@@ -74,9 +74,9 @@ function spellDigits(s: string): string {
 // `¥` is DELIBERATELY ABSENT — neither 日圓 nor 日元 occurs, and an unsourced word is left unread.
 //
 // `unspacedScript` because a sign in Chinese is normally flanked by Han, which the tier's letter-boundary
-// guard rejected: `$500。` read 美元 while `為$500，` dropped it (#586).
+// guard rejected: `$500。` read 美元 while `為$500，` dropped it.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright, losing the sign from `提供豪華的 B&B 服務`. 和 is the standard written
+    // `&` was DROPPED outright, losing the sign from `提供豪華的 B&B 服務`. 和 is the standard written
     // conjunction and the corpus's most frequent candidate (和 ×603, 與 ×320, 同 ×185). For an UNSPACED script
     // the substring match IS the hit test, which is what attest.ts's header establishes for cmn.
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
@@ -87,7 +87,7 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "和",
     percent: ["百分之"],
     percentPrefix: true,
-    // #586 — `5 km` read as *ŋ̩˩˧ ˈʊkm*: no unit was declared. Verified in yue_hant_hk:
+    // `5 km` read as *ŋ̩˩˧ ˈʊkm*: no unit was declared. Verified in yue_hant_hk:
     // 公里 ×50 "公園占地一萬九千平方公里", 公斤 ×2 "（ 90 公斤）的人".
     //
     // WIKIDATA'S OWN yue LABELS ARE THE WRONG VARIETY, and the corpus is what caught it: it offers 千米 and
@@ -122,7 +122,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
 
     // ── 1b. degrees ──────────────────────────────────────────────────────────────────────────────
     // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback,
-    // which is the whole unit lost rather than merely its sign (#586). The shared tier cannot express this
+    // which is the whole unit lost rather than merely its sign. The shared tier cannot express this
     // one: the scale name PRECEDES the number and 度 FOLLOWS it, so the reading wraps around the numeral
     // and a `units` entry can only append.
     //
@@ -140,7 +140,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // BEFORE the degree rules — the ordering coupling zu's `[+]?` taught.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " 加 ");
 
-    // THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SOURCE SAYS "IS READ AS" AND THEN READS BOTH SIGNS —
+    // THE RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE SAYS "IS READ AS" AND THEN READS BOTH SIGNS —
     // yue.wikipedia's division article writes, of the notation itself:
     //
     //   「A ÷ B = Q...R  讀做  A 除以 B 等於 Q 餘 R」        讀做 = "is read as"

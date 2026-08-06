@@ -68,7 +68,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-záéíóúüñ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
@@ -95,7 +95,7 @@ function wordIpa(word: string): string {
 
 // #562 symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `y` ×1141 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus

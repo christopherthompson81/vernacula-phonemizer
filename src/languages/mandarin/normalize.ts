@@ -19,7 +19,7 @@
  * from the western notation: 1/5 is 五分之一, "of five parts, one". Emitting the reordered form as DIGITS
  * lets the engine's own numeral substitution do the reading.
  *
- * ── THE SIGN CLASSES (#586) ────────────────────────────────────────────────────────────────────────────
+ * ── THE SIGN CLASSES ────────────────────────────────────────────────────────────────────────────
  *
  * The #562 pass left every math sign DROPPED, which the review gate reported as
  * `DROPPED: minus plus equals less-than times` and the artifact scan as `DROP math-sign ×1`. The minus was

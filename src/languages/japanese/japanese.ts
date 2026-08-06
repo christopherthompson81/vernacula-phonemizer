@@ -41,11 +41,11 @@ const SYMBOLS = makeSymbolNormalizer({
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "かける" },
     percent: ["パーセント"],
-    // #586 — `&` was DROPPED: the corpus's `高級B&Bが…` read *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together
+    // `&` was DROPPED: the corpus's `高級B&Bが…` read *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together
     // with nothing between them. SOURCED FROM THE CORPUS'S OWN AUDIO, because the word is absent from the text
     // by construction — `&` is written as a GLYPH, so no amount of Japanese prose contains its reading.
     ampersand: "アンド",
-    // MIGRATION TEST (#562): units + exponent from the shared tier instead of normalize.ts's local table.
+    // MIGRATION TEST: units + exponent from the shared tier instead of normalize.ts's local table.
     units: {
         km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"], nm: ["ナノメートル"], m: ["メートル"],
         kg: ["キログラム"], mg: ["ミリグラム"], g: ["グラム"], t: ["トン"], ha: ["ヘクタール"],
@@ -66,7 +66,7 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
     // Japanese has no spaces either, so the tier's letter-boundary guards were rejecting its ordinary case
     // the same way they were Chinese's: `20℃は暑い` dropped the ℃ and `50 km²の` lost the exponent, while their
-    // punctuation-adjacent twins worked. Found by extending the cmn measurement (#586) to the other unspaced
+    // punctuation-adjacent twins worked. Found by extending the cmn measurement to the other unspaced
     // scripts. yue and th show the same readings but declare only `percent` through this tier, so theirs is a
     // missing DECLARATION rather than a guard problem — recorded for the sweep, not fixed here.
     unspacedScript: true,
@@ -74,7 +74,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class JapanesePhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 — SYMBOLS first, because its % rule matches a NUMBER directly before the sign and
+        // SYMBOLS first, because its % rule matches a NUMBER directly before the sign and
         // normalization's decimal rewrite (1.5 → 1点ゴ) removes that adjacency. Normalization then folds
         // the widths, resolves the remaining numeric surface forms, and nativizes embedded Latin so it
         // never reaches the English fallback in core/foreign.ts.

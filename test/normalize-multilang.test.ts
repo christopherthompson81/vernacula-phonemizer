@@ -23,7 +23,7 @@ describe("shared symbol normalizer (core)", () => {
     // A MAGNITUDE MAY SIT BETWEEN THE NUMBER AND A UNIT too, not just a currency sign. Without it the
     // number is not adjacent to the unit, the match fails, and the unit reaches the IPA as RAW LETTERS —
     // `2,2 Millioune km²` read `km` plus a stranded "2". Seven corpus utterances across af/az/nl/el/lb/mk/ta,
-    // all the same FLEURS sentence; six languages shipped the defect (#604).
+    // all the same FLEURS sentence; six languages shipped the defect.
     test("a unit hops the magnitude too, and the magnitude governs the count", () => {
         const n = makeSymbolNormalizer({
             percent: ["percent"],
@@ -68,7 +68,7 @@ describe("shared symbol normalizer (core)", () => {
     // A DOTTED DESIGNATION IS NOT A QUANTITY. `802.11g` read as "802.11 grams" in ten languages, because the
     // one-letter unit key matched the version suffix. Measured over all 66 corpora: 444 dotted-version
     // instances against 4 decimals glued to a one-letter unit (and those are period thousands separators).
-    test("a dotted version is not a unit (#586)", () => {
+    test("a dotted version is not a unit", () => {
         const n = makeSymbolNormalizer({ percent: ["pct"], units: { g: ["gram"], km: ["km-word"], m: ["metre"] } });
         expect(n("802.11g")).toBe("802.11g"); // was "802.11 gram"
         expect(n("802.11n")).toBe("802.11n");
@@ -165,7 +165,7 @@ describe("Oromo number compositor", () => {
     });
 });
 
-// Round 3 (#562): the FLEURS-priority languages. Data is orthographic — each engine reads its own script,
+// Round 3: the FLEURS-priority languages. Data is orthographic — each engine reads its own script,
 // so no IPA was authored; attestation per word is in each language file's comment.
 describe("symbol normalization — FLEURS-priority round", () => {
     test("percent across the newly wired languages", () => {
@@ -195,7 +195,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
     });
 
     /**
-     * The magnitude hop, both defects found by the it/ko/th/tr fan-out (#562).
+     * The magnitude hop, both defects found by the it/ko/th/tr fan-out.
      *
      * The Italian run flagged that the shared tier emits "5 milioni dollari" where Italian needs the
      * partitive. Probing the languages that already ship a currency+magnitude pair showed it was not
@@ -275,7 +275,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("Die Note ist A. Der Rest folgt", "de")).toContain(" . ");
     });
 
-    /** Rate and exponent units, lifted into the shared tier (#562). */
+    /** Rate and exponent units, lifted into the shared tier. */
     test("rate units compose, and exponents take the language's position", () => {
         expect(phonemize("120 km/h", "ca")).toContain("pəɾ ˈɔɾə");   // the /h used to be dropped
         expect(phonemize("120 km/h", "sv")).toContain("peːr tˈɪ̀mːɛ"); // the h leaked as a letter
@@ -295,7 +295,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
      * spaced. It is the same omission `before`/`compound` were before they were split apart, arriving on
      * the other side.
      */
-    test("the exponent measure word can suffix, differ per power, and follow unitPrefix (#586)", () => {
+    test("the exponent measure word can suffix, differ per power, and follow unitPrefix", () => {
         const suffix = makeSymbolNormalizer({
             percent: ["yüzde"],
             units: { km: ["kilometre"], m: ["metre"] },
@@ -371,7 +371,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
      * it fixed the same two defects in its own private composer and then measured its relatives.
      */
     test("Dravidian reads tens-then-unit, and a bare hundred has no 'one'", () => {
-        // kn and ml have since moved OFF this composer entirely (#562): both fuse 21-99 into one word
+        // kn and ml have since moved OFF this composer entirely: both fuse 21-99 into one word
         // and have suppletive hundreds, neither of which `indicNumberWords` can express, so both now
         // compose through the SHARED Dravidian composer in core/numbers.ts. The assertions are kept
         // because the READING they pin — tens-then-unit, and a bare magnitude with no "one" — is still
@@ -440,7 +440,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
         expect(phonemize("US$30", "gu")).not.toContain("30");
     });
 
-    /** The percent word is suppressed on whichever side the language puts it (#562). */
+    /** The percent word is suppressed on whichever side the language puts it. */
     test("a written-out percent word is not doubled", () => {
         expect(phonemize("93% ശതമാനം", "ml")).toBe(phonemize("93%", "ml"));   // suffix, Malayalam
         expect(phonemize("yüzde 40%", "tr")).toBe(phonemize("40%", "tr"));     // prefix, Turkish
@@ -448,7 +448,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
 });
 
 /**
- * #584 — five languages that had been through the #562 pass read `%` correctly and dropped CURRENCY signs
+ * five languages that had been through the #562 pass read `%` correctly and dropped CURRENCY signs
  * SILENTLY: the sign contributed nothing and `$5` was byte-identical to `5`, so nothing downstream marked the
  * loss. The cause was the gate, not an oversight: each language got the symbol coverage its own corpus
  * exercised, and all five corpora contain ZERO `$` against 18–54 `%`.
@@ -457,7 +457,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
  * appears there. Two of the sourcing traps fired and are recorded at the declarations: Serbian `фунти` ×12 is
  * the WEIGHT pound ("200 фунти (90 кг)"), and `евр` returns 27 hits of Европа to one of евра.
  */
-describe("currency signs were dropped silently in five languages (#584)", () => {
+describe("currency signs were dropped silently in five languages", () => {
     test("each of the five now says its own currency word", () => {
         expect(phonemize("$5", "fa")).toBe("pˈand͡ʒ dolˈaːɾ");        // دلار ×18
         expect(phonemize("$5", "hu")).toBe("ˈøt ˈdolːaːr");            // dollár ×6
@@ -488,12 +488,12 @@ describe("currency signs were dropped silently in five languages (#584)", () => 
 });
 
 /**
- * #586 — an UNDECLARED measure word used to abandon the whole unit match, so `5 km²` lost the unit as well as
+ * an UNDECLARED measure word used to abandon the whole unit match, so `5 km²` lost the unit as well as
  * the power and the abbreviation reached the phoneme sink verbatim. Measured across the 66 languages with an
  * artifact: 21 read a raw `km` in the IPA while `5 km` read correctly in every one of them. No gate said a word,
  * because deleting the `²` changes the unit token and the drop test cannot isolate it (see review.ts's header).
  */
-describe("an undeclared exponent word must not cost the unit too (#586)", () => {
+describe("an undeclared exponent word must not cost the unit too", () => {
     test("the unit still reads, and the exponent is handed back to be seen", () => {
         const n = makeSymbolNormalizer({ percent: ["pct"], units: { km: ["kilometre"] } });
         expect(n("5 km²")).toBe("5 kilometre²"); // was "5 km²", wholly untouched
@@ -524,13 +524,13 @@ describe("an undeclared exponent word must not cost the unit too (#586)", () => 
 });
 
 /**
- * #586 — nine treated languages declared NO unit words, so `5 km` leaked the abbreviation into the IPA
+ * nine treated languages declared NO unit words, so `5 km` leaked the abbreviation into the IPA
  * (*bˈes ˈʊkm*, *hˈaː˥˩ ˈʊkm*, *tˈɑnɔ kˈm̩*). The words were sourced by inverting the search: name the concept
  * to Wikidata (`tools/normalization/concept.ts`), then verify the candidate in the language's OWN corpus.
  * Fleet effect: raw `km` in the IPA 21 → 4, and the four remaining are three languages with no symbol tier at
  * all (bg, ckb, fa) plus untreated mi.
  */
-describe("unit words for the languages that had none (#586)", () => {
+describe("unit words for the languages that had none", () => {
     test("each reads its own unit instead of leaking the abbreviation", () => {
         expect(phonemize("5 km", "kk")).toBe("bˈes kəjlomˈetr");            // Latin key was missing, not the word
         expect(phonemize("5 km", "pa")).toBe("pˈə̃ɲd͡ʒ kɪloːmˈiːʈəɾ");      // ਕਿਲੋਮੀਟਰ ×31
@@ -559,11 +559,11 @@ describe("unit words for the languages that had none (#586)", () => {
 });
 
 /**
- * #586 — the three languages with no symbol tier. Their local layers already handled units in the NATIVE
+ * the three languages with no symbol tier. Their local layers already handled units in the NATIVE
  * script (bg) or not at all (ckb, fa), and each needed a different answer. The measurement that decided it was
  * "how often does this abbreviation follow a NUMERAL", not "how often does it occur".
  */
-describe("unit abbreviations in the tier-less languages (#586)", () => {
+describe("unit abbreviations in the tier-less languages", () => {
     test("bg: the Latin aliases its corpus also writes", () => {
         // bg_bg writes Cyrillic км ×50 — which already read — AND Latin mm ×12 / cm ×2, which did not:
         // "Стандартният 35 mm филм (негатив 36 на 24 mm)".
@@ -595,7 +595,7 @@ describe("unit abbreviations in the tier-less languages (#586)", () => {
 });
 
 /**
- * #586 — ℃ (U+2103) is one code point meaning exactly what `°C` means, and 52 of the 65 languages with an
+ * ℃ (U+2103) is one code point meaning exactly what `°C` means, and 52 of the 65 languages with an
  * artifact read `°C` correctly while dropping `℃` — losing the whole unit, not just the sign. So it is folded
  * for every language at the registry's single dispatch point, beside the native-digit fold.
  *
@@ -603,7 +603,7 @@ describe("unit abbreviations in the tier-less languages (#586)", () => {
  * (erasing every exponent reading), `…` into three clause breaks in 18, and recompose nukta letters in five
  * Indic scripts. And № is deliberately excluded — NFKC gives "No", where Bulgarian (21 instances) says номер.
  */
-describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
+describe("℃ is folded fleet-wide, and the guards it exposed", () => {
     test("the fold reaches languages that never wrote a ℃ arm", () => {
         for (const l of ["de", "fr", "es", "ru", "tr", "sw"]) {
             expect(phonemize("20℃", l)).toBe(phonemize("20 °C", l));
@@ -643,7 +643,7 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
      * Measured safe across all 67 corpora: the signature (`Â`/`Ã` + a UTF-8 continuation byte) occurs 31
      * times, every one in id_id and zero elsewhere. Closed RAWMARK 2→0 and DROP 25→16 in that language.
      */
-    test("double-encoded UTF-8 is repaired before anything reads a character (#586)", () => {
+    test("double-encoded UTF-8 is repaired before anything reads a character", () => {
         // C2 XX: the code point EQUALS the trailing byte, so the `Â` is simply dropped.
         expect(phonemize("19.500 km\u00c2\u00b2 dan", "id")).toContain("kilomətˈər pərsəɡˈi");
         expect(phonemize("19.500 km\u00c2\u00b2 dan", "id")).toBe(phonemize("19.500 km² dan", "id"));
@@ -673,7 +673,7 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
      * THE STANDARD IS NAMED, not left to the general heuristic: 802.11's amendment suffixes are now TWO
      * letters (ac, ax, ah, be, bn), and `802.11ah` — Wi-Fi HaLow — collides with `Ah`, ampere-hours.
      */
-    test("a networking standard is not a quantity (#586)", () => {
+    test("a networking standard is not a quantity", () => {
         expect(phonemize("802.11g", "en")).not.toContain("ɡɹˈæmz");
         expect(phonemize("802.11g", "ro")).not.toContain("ɡrame");
         expect(phonemize("802.11ah", "en")).not.toContain("ˈaᶷɚ"); // ampere-HOURS
@@ -693,7 +693,7 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
      * SPACED on both sides: `B&B` is two initialisms and pl writes `bed&breakfast` glued, so substituting
      * without spaces would fuse them into one token — the merge defect review.ts's own probe once had.
      */
-    test("the ampersand is a tier cell, spaced on both sides (#586)", () => {
+    test("the ampersand is a tier cell, spaced on both sides", () => {
         const n = makeSymbolNormalizer({ percent: ["percent"], ampersand: "and" });
         expect(n("B&B")).toBe("B and B");            // three tokens, never one
         expect(n("bed&breakfast")).toBe("bed and breakfast");
@@ -709,7 +709,7 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
      * quantity failed — the area read as a length. Kept out of the CURRENCY path, where the connective is
      * generated by `join()` rather than present, or a text that already has one would get a second.
      */
-    test("a unit hops the magnitude AND its connective (#586)", () => {
+    test("a unit hops the magnitude AND its connective", () => {
         expect(phonemize("2,2 milions de km²", "ca")).toContain("kiɫˈɔmətɾəs kwəðɾˈats");
         expect(phonemize("2,2 millones de km²", "es")).toContain("kilˈometɾos kwaðɾˈaðos");
         expect(phonemize("2,2 millions de km²", "fr")).toContain("kilɔmɛtʁ kaʁˈe");
@@ -720,7 +720,7 @@ describe("℃ is folded fleet-wide, and the guards it exposed (#586)", () => {
 
     /** French typography spaces the degree sign; the tier reads `°C` through a unit KEY, which needs the two
      *  characters adjacent, so `32 ° C` dropped the unit entirely. Closed up in fr's own layer. */
-    test("the spaced degree sign still reads (#586)", () => {
+    test("the spaced degree sign still reads", () => {
         expect(phonemize("une chaleur de 32 ° C", "fr")).toContain("dəɡʁe sɛlsjˈys");
         expect(phonemize("32 ° F", "fr")).toContain("faʁɛnˈajt");
         expect(phonemize("n° 11", "fr")).toContain("nymeʁo");        // not a degree

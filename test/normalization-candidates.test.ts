@@ -1,5 +1,5 @@
 /**
- * The minable-wiki triage (#585) — that a failed request can never masquerade as a fact about a wiki.
+ * The minable-wiki triage — that a failed request can never masquerade as a fact about a wiki.
  *
  * WHY THIS EXISTS. `classify` decides, from one HTTP response, whether a language has a wiki worth mining. An
  * earlier version folded every failure into a single `undefined` and read that as "this project never

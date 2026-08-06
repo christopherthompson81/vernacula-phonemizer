@@ -1,5 +1,5 @@
 /**
- * Romanian (ro) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the Romanian
+ * Romanian (ro) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Romanian
  * g2p cannot already read into Romanian words the existing pipeline speaks. Pure text→text, no IPA. Runs
  * inside romanian.ts's `text()`, before the tokenizer.
  *

@@ -1,5 +1,5 @@
 /**
- * THE WORD ARM OF A TOKENIZER, DERIVED FROM A SCRIPT — not hand-enumerated letters (#657).
+ * THE WORD ARM OF A TOKENIZER, DERIVED FROM A SCRIPT — not hand-enumerated letters.
  *
  * ## The defect this exists to make impossible
  *

@@ -188,7 +188,7 @@ export function normalizeUzbek(input: string): string {
     //    `A&B` reads the letters BY NAME (*be va be*) — the shared initialism pass cannot, a lone capital
     //    is not an all-caps run.
     // INFIX before POSTPOSED: with the postposed rule first, `2+2` lost its separator (→ "2 plyus2").
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single

@@ -1,5 +1,5 @@
 /**
- * Macedonian (mk) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the
+ * Macedonian (mk) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the
  * Macedonian engine cannot already read into words the existing pipeline speaks. Pure text→text; no IPA.
  * Runs inside macedonian.ts's `text()`, before the tokenizer.
  *
@@ -320,7 +320,7 @@ export function normalizeMacedonian(input: string): string {
     //     ampersand are the handoff's sign classes — none occurs in the corpus but a dropped sign is
     //     inaudible, so each is read.
     s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1минус ");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single

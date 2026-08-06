@@ -362,7 +362,7 @@ export function makeMarathiNormalizer(
         s = s.replace(/\+\s?(?=\d)/gu, " अधिक ");
         s = s.replace(/~\s?(?=\d)/gu, " सुमारे ");
 
-        // 15b) THE RELATIONAL AND DIVISION SIGNS, and ± (#654). All sourced from mr_in, because mr.wikipedia is
+        // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. All sourced from mr_in, because mr.wikipedia is
         //      thin here — `बरोबर`, `भागिले` and `पेक्षा कमी` are all ×0 in its arithmetic articles, so tier 2 is
         //      the whole of the evidence and tier 4 contributed nothing.
         //

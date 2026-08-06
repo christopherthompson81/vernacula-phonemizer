@@ -178,12 +178,12 @@ describe("gujarati canonical IPA", () => {
         // ZERO ZWJ/ZWNJ: the Marathi tokenizer-splitting defect does not occur here.
     });
 
-    // #586 — `વર્ગ કિલોમીટર` ×10 and `ક્યુબિક મીટર` ×2, word-first. Neither BARE word is the evidence:
+    // `વર્ગ કિલોમીટર` ×10 and `ક્યુબિક મીટર` ×2, word-first. Neither BARE word is the evidence:
     // વર્ગ ×55 is the CLASSROOM ("વિદ્યાર્થીઓ તેમના વર્ગમાં બેસીને") and ઘન ×6 is SOLID, the state of matter —
     // so the corpus, not a label, is what picks the English loan ક્યુબિક over ઘન for the cube.
     // Bare `m` had to be declared for the cube to have a head noun (`120 m³` read as a bare letter *ˈɛm*
     // before); digit-adjacent `m` is ×0 in this corpus, and the version guard still holds below.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("7,83,562 km²", "gu")).toContain("ʋˈəɾɡ kˈilomiʈəɾ");
         expect(phonemize("20.2 લાખ km²", "gu")).toContain("lˈakʰ ʋˈəɾɡ kˈilomiʈəɾ"); // hops the magnitude
         expect(phonemize("120 m³", "gu")).toContain("kjˈubik mˈiʈəɾ");

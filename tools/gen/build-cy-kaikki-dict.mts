@@ -2,7 +2,7 @@
  * Build the Welsh LEXICON (src/languages/welsh/lexicon.tsv) from the kaikki.org Wiktionary Welsh dump — the words
  * the rules mis-derive: per-word ⟨ae⟩/⟨ai⟩ diphthong QUALITY (aeres→eɨ), lexical ⟨y⟩-obscure/clear irregularities,
  * loanword vowels, and monosyllable LENGTH. kaikki tags dialects, so we take the NORTH-WALES pron (our target + the
- * NW referee). Only exceptions are dictionaried (espeak-ng-portable's rules-can't-derive methodology, as cs/th).
+ * NW referee). Only exceptions are dictionaried (the rules-can't-derive methodology, as cs/th).
  *
  * CIRCULARITY (accepted, documented): kaikki cym and the wikipron cym-NW referee are BOTH Wiktionary — a
  * dictionaried word tends to match wikipron, so the wikipron number isn't independent for covered words. The
@@ -27,7 +27,7 @@ const KAIKKI = arg("kaikki");
 if (!KAIKKI) throw new Error("pass --kaikki <cym-kaikki.tsv>");
 const OUT = new URL("../../src/languages/welsh/lexicon.tsv", import.meta.url).pathname;
 const CORPUS =
-    process.env.HOME + "/Programming/espeak-ng-portable/tools/qa-compare/words-50000.cy.txt";
+    (process.env["ESPEAK_PORTABLE"] ?? ".") + "/tools/qa-compare/words-50000.cy.txt";
 
 // NUCLEUS = a plain vowel (+ optional length), NOT an offglide (ᶤᶦᶷᵘ) — for the stress re-placement.
 const NUCLEUS = /[aeɛiɪoɔuʊɨə]ː?/gu;

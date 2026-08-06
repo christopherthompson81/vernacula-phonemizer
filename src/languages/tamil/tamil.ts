@@ -119,7 +119,7 @@ const TOKEN = /([஀-௿]+)|(\d+)|([.!?…,;:])/gu;
 
 class TamilPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 — the ordered normalization pass (normalize.ts) owns the shared symbol tier too, because
+        // the ordered normalization pass (normalize.ts) owns the shared symbol tier too, because
         // its position in the sequence is load-bearing: units must run BEFORE decimals and AFTER
         // de-grouping and the rate rule. See the numbered steps there.
         return assembleClauses(normalizeTamil(input), TOKEN, (m, sink) => {

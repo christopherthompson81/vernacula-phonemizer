@@ -141,7 +141,7 @@ function numberWords(n: number): string {
 // or raw mark survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot see.
 // `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
 //
-// ⚠ AND THAT IS THE WHOLE FIX HERE — deliberately NO native-vs-foreign routing, unlike id (#654) and om (#657).
+// ⚠ AND THAT IS THE WHOLE FIX HERE — deliberately NO native-vs-foreign routing, unlike id and om.
 // This engine NATIVISES: the header states that the rule g2p is applied to English-spelled tokens rather than
 // routed to the English phonemizer, because "nativising is more correct for the creole", and the evidence is in
 // its own output — `water` → *wata*, `computer` → *kampjuta*, not English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Sending an
@@ -152,7 +152,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_WORD`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 
 class NaijaPhonemizer implements Phonemizer {

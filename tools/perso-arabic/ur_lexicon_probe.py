@@ -4,7 +4,8 @@ ACCURATE (non-circular vs wikipron — the Hindi source never saw wikipron)? Mea
 restoration accuracy for: (1) current shipped lexicon, (2) + Hindi-derived IPA pool, (3) + extra vowelized silver.
 Accuracy = does our restored IPA match a wikipron pron under the same canonical folds used elsewhere."""
 import unicodedata
-HERE="/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 SILVER=f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"
 EXTRA=f"{HERE}/tools/perso-arabic/ur_extra_pool.tsv"

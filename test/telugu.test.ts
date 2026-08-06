@@ -71,7 +71,7 @@ describe("telugu numbers (magnitude agreement)", () => {
     });
 });
 
-describe("telugu text normalization (#562)", () => {
+describe("telugu text normalization", () => {
     test("౦ (TELUGU DIGIT ZERO) is folded to the anusvara it is a homoglyph for", () => {
         // All 144 in the corpus are typos for ం; before the fold the G2P dropped them and lost the nasal.
         expect(normalizeTelugu("స౦వత్సర౦లో")).toBe("సంవత్సరంలో");
@@ -141,9 +141,9 @@ describe("telugu text normalization (#562)", () => {
         expect(normalizeTelugu("60వది")).toBe("అరవయ్యవది");
     });
 
-    // #586 — `120–160 క్యూబిక్ మీటర్ల ఇంధనాన్ని`, the loan, word-first. ఘన ×2 here is "solid/volume"
+    // `120–160 క్యూబిక్ మీటర్ల ఇంధనాన్ని`, the loan, word-first. ఘన ×2 here is "solid/volume"
     // (`నీటి ఘన పరిమాణం`, the volume of water) and not the measure word, so the sentence decides it.
-    test("the cubed measure word (#586)", () => {
+    test("the cubed measure word", () => {
         expect(phonemize("120 m³", "te")).toContain("kjˈuːbik mˈiːʈaɾlu");
     });
 });

@@ -145,7 +145,7 @@ describe("Russian roman-numeral ordinals", () => {
     });
 });
 
-// #562 — the ninth language, and the first Cyrillic one to reach the shared initialism pass, which
+// the ninth language, and the first Cyrillic one to reach the shared initialism pass, which
 // exposed an ASCII-only boundary inside core/initialisms.ts itself.
 describe("russian normalization", () => {
     test("ordinal notation: the suffix is the CASE ending, not an appendable marker", () => {
@@ -205,11 +205,11 @@ describe("russian normalization", () => {
         expect(phonemize("XV век", "ru")).toBe("pʲɪtnˈat͡sətɨj vʲek");
     });
 
-    // #586 — the BARE METRE, both spellings. `кубический` was declared but unreachable without a head noun,
+    // the BARE METRE, both spellings. `кубический` was declared but unreachable without a head noun,
     // so `120 m³` read as the letter name while `120 km³` read correctly. The agreement comes out of
     // slavicCountForm: 92 takes the paucal (метра), 200 and 30 the genitive plural (метров).
     // The apostrophe hazard that kept Ukrainian's `м` out is guarded by the tier itself.
-    test("the bare metre, both spellings, and the cube it feeds (#586)", () => {
+    test("the bare metre, both spellings, and the cube it feeds", () => {
         expect(phonemize("120 m³", "ru")).toContain("kʊbʲˈit͡ɕɪskʲɪx mʲˈetrəf");
         expect(phonemize("120 м³", "ru")).toContain("kʊbʲˈit͡ɕɪskʲɪx mʲˈetrəf");
         expect(phonemize("92 м", "ru")).toContain("mʲˈetrə");   // paucal

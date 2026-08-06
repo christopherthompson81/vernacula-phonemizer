@@ -1,5 +1,5 @@
 /**
- * THE FLOOR UNDER A LETTER NO G2P CAN READ (#663), and the input repairs that get a letter as far as the g2p.
+ * THE FLOOR UNDER A LETTER NO G2P CAN READ, and the input repairs that get a letter as far as the g2p.
  *
  * Three separate mechanisms, pinned together because they are easy to confuse and they run in this order:
  *   1. input repair (registry) — mojibake, homoglyphs, fullwidth forms: make the character the one that was meant
@@ -10,7 +10,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { latinPhone } from "../src/core/latinPhones.ts";
 
-describe("a letter the g2p cannot read still gets a sound (#663)", () => {
+describe("a letter the g2p cannot read still gets a sound", () => {
     test("⟨x⟩ is /ks/ medially and /z/ word-initially", () => {
         expect(latinPhone("x")).toBe("ks");
         expect(latinPhone("x", { initial: true })).toBe("z");

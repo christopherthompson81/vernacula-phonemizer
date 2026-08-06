@@ -60,7 +60,7 @@ function scan(word: string): Seg[] {
         if (c === "v") { segs.push({ ph: isVowelChar(w[i + 1] ?? "") ? "v" : "w", nucleus: false }); i += 1; continue; }
         if (c in C) { segs.push({ ph: C[c]!, nucleus: false }); i += 1; continue; }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
-        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
         { const p = latinPhone(c, { initial: i === 0, includeH: true }); if (p !== undefined) segs.push({ ph: p, nucleus: false }); }
         i += 1;
     }

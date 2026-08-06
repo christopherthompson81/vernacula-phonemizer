@@ -83,7 +83,7 @@
             "91": "એકાણું", "92": "બાણું", "93": "ત્રાણું", "94": "ચોરાણું", "95": "પંચાણું", "96": "છન્નું", "97": "સત્તાણું", "98": "અઠ્ઠાણું", "99": "નવ્વાણું"
         },
         "magnitudes": { "hundred": "સો", "thousand": "હજાર", "lakh": "લાખ", "crore": "કરોડ" },
-        // #562: without this the engine's number() bailed out and emitted the RAW ASCII DIGITS — "2.3
+        // without this the engine's number() bailed out and emitted the RAW ASCII DIGITS — "2.3
         // મિલિયન" phonemized to literally "2.3 mˈilijən", and 30 decimals in the gu_in corpus (802.11,
         // 12.8, 30.7, 3.50 …) were unreadable. દશાંશ is the exact cognate of the दशांश this repo already
         // ships for Marathi and is the ordinary Gujarati word for a decimal.

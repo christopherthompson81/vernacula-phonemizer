@@ -145,7 +145,7 @@ describe("swedish canonical IPA", () => {
 // and the corpus exercises only the first — every case below marked ⟨unattested⟩ is there precisely
 // because the corpus never writes it.
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
-describe("swedish text normalization (#562)", () => {
+describe("swedish text normalization", () => {
     test("ordinal(): all three branches, plus the unclaimed fallback", () => {
         expect(ordinal(1)).toBe("första"); //          table, suppletive
         expect(ordinal(3)).toBe("tredje"); //          table

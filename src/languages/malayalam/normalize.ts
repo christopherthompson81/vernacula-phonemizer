@@ -72,7 +72,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "ഗുണം" },
-    // #586 — `&` was DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
+    // `&` was DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
     // TRANSLITERATED English "and", and it is attested in exactly this construction rather than merely as a
     // word: every wiki hit is an English institution name rendered in Malayalam — `ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ്
     // ഗൈനക്കോളജി`, `അമേരിക്കൻ ബോർഡ് ഓഫ് ഒബ്സ്റ്റട്രിക്സ് ആൻഡ് ഗൈനക്കോളജി`, `റോയൽ കോളേജ് ഓഫ് ഒബ്സ്റ്റട്രീഷ്യൻസ്
@@ -208,7 +208,7 @@ export function normalizeMalayalam(input: string): string {
     //   +30°C  →  `… m a s a ŋ l i l p l a s v u p o d e d i ɡ …`  plus + മുപ്പതു, 1 of 1
     // ★ Like ta, gu and mi, and unlike en/hi/vi/te/xh/am/ne, ml says the MEASUREMENT plus. പ്ലസ് reads
     // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
-    // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+    // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
     //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
     //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
     //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
@@ -231,7 +231,7 @@ export function normalizeMalayalam(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
 
-    // THE DIVISION AND COMPARISON SIGNS (#654). The EQUALITY IS DELIBERATELY LEFT DROPPED — see the end.
+    // THE DIVISION AND COMPARISON SIGNS. The EQUALITY IS DELIBERATELY LEFT DROPPED — see the end.
     //
     // ⚠ THE PARALLEL-CORPUS FORM IS A SUBORDINATE CLAUSE, NOT A READING, and Malayalam is the clearest case of
     // why a hit in FLEURS's aspect-ratio sentence is a lead rather than an answer. That sentence gives

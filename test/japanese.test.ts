@@ -111,12 +111,12 @@ describe("Japanese pitch accent (Phase 3)", () => {
     });
 });
 
-// #552 — long-vowel coalescence used to run across MORPHEME boundaries, absorbing the next morpheme's initial
+// long-vowel coalescence used to run across MORPHEME boundaries, absorbing the next morpheme's initial
 // vowel into the previous one's length (経営 けい|えい → ke̞ːːː instead of ke̞ːe̞ː). Readings now carry their
 // boundaries (applyReadingSegments) and coalescence is confined to a segment. A compound whose stored reading
 // is NOT the sum of its characters' readings finds no alignment and stays fused — which is exactly the set
 // that legitimately DOES coalesce, so no exception list is needed.
-describe("Japanese morpheme-boundary coalescence (#552)", () => {
+describe("Japanese morpheme-boundary coalescence", () => {
     test("a boundary vowel is no longer absorbed into the preceding length", () => {
         expect(phonemizeWord("経営")).toBe("ke̞ːe̞ː"); // けい|えい — was ke̞ːːː
         expect(phonemizeWord("聖域")).toBe("se̞ːiki"); // せい|いき — was se̞ːːki
@@ -195,7 +195,7 @@ describe("Japanese particle segmentation (#552 residual)", () => {
  * #562 TEXT NORMALIZATION. Each expectation below is a defect the ja_jp corpus (3,208 utterances) proved
  * was there, with its count; the "was" comment is what the engine actually produced before normalize.ts.
  */
-describe("Japanese text normalization (#562)", () => {
+describe("Japanese text normalization", () => {
     test("comma-grouped thousands were a phrase break plus a second number", () => {
         // ×56, the largest numeric defect: the comma is clause punctuation, so 3,850 read as "さん , 850".
         expect(phonemizeText("3,850")).toBe("sänze̞ɴhäppʲäkɯᵝɡo̞d͡ʑɯᵝː");
@@ -206,7 +206,7 @@ describe("Japanese text normalization (#562)", () => {
     // #586. Japanese has no spaces, so a unit is normally followed by kana — and the shared tier's
     // letter-boundary guard was rejecting exactly that, letting the abbreviation reach the phoneme sink
     // verbatim. Measured over ja_jp: 14 utterances, all of this shape.
-    test("a unit survives a kana neighbour instead of leaking (#586)", () => {
+    test("a unit survives a kana neighbour instead of leaking", () => {
         expect(phonemizeText("35 mmで")).toBe("sänd͡ʑɯᵝːɡo̞ miɾime̞ːto̞ɾɯᵝde̞"); // was a raw `m`
         expect(phonemizeText("5tの車")).toBe("ɡo̞ to̞nno̞ kɯᵝɾɯᵝmä"); // was English *tʰˈiː*
         expect(phonemizeText("50 km²の")).toBe("ɡo̞d͡ʑɯᵝː he̞ːho̞ːkiɾo̞me̞to̞ɾɯᵝno̞"); // 平方キロメートル

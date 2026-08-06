@@ -1,5 +1,5 @@
 /**
- * Oromo number → words (#562) — replaces the English-digit STOPGAP wired in #560 (digits used to be
+ * Oromo number → words — replaces the English-digit STOPGAP wired in #560 (digits used to be
  * dropped entirely, then read in English; now they are read in Oromo).
  *
  * ATTESTATION per class — this corpus-first split matters because Oromo compounding was the open
@@ -9,7 +9,7 @@
  *   [t] jaatama/torbaatama: the Kamisee thesis attests the stems (jáatàm, torbáatàm).
  *   [r] afurtama/shantama/saddeettama/sagaltama and the TENS+UNIT linker -ii (digdamii tokko):
  *       standard Qubee reference forms, NOT corpus-attested here — the lowest-confidence pieces,
- *       same flag-and-state treatment as the Egyptian fused hundreds (#564).
+ *       same flag-and-state treatment as the Egyptian fused hundreds.
  *   "zeeroo" (0): the loan used in Ethiopian school usage; native duwwaa means "empty", not the digit.
  */
 const ONES = [

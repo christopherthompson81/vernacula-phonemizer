@@ -341,7 +341,7 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
-    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
     //    (1000–1300), a SCORE (1977-1981), a DESIGNATION (ił-76) or a clock range. The rule is written anyway on
     //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
     //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
@@ -367,7 +367,7 @@ export function normalizePolish(input: string): string {
     s = s.replace(/±/gu, " plus minus ");
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
 
-    // 10b) ± AND THE RELATIONAL AND DIVISION SIGNS (#654). ± juxtaposes the `plus` from the rule above with
+    // 10b) ± AND THE RELATIONAL AND DIVISION SIGNS. ± juxtaposes the `plus` from the rule above with
     //      `minus`, which is simply the Polish name of the sign; the juxtaposed form is what every language that
     //      already reads ± uses (bg/da/is/nb/ro/sv).
     s = s.replace(/±/gu, " plus minus ");

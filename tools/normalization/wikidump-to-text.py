@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Wikipedia dump (pages-articles.xml.bz2) -> one plain-text line per PARAGRAPH, for normalization mining (#585).
+Wikipedia dump (pages-articles.xml.bz2) -> one plain-text line per PARAGRAPH, for normalization mining.
 
 WHY NOT THE API. The MediaWiki route caps search results per query, rate-limits, and needs one request per
 article for full text. A local dump removes all three and — the reason that matters for the two-tier design

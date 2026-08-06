@@ -97,7 +97,7 @@ describe("hindi normalization", () => {
     // A narrower rule escapes the objection — the sign is unambiguous when it opens the string or a bracket,
     // or when a degree/percent word follows — and the corpus's own `+ 30° C` proves the signed temperature is
     // an attested shape here, which is the one where dropping the sign inverts the meaning.
-    test("the minus is claimed only where it cannot be a designation (#586)", () => {
+    test("the minus is claimed only where it cannot be a designation", () => {
         expect(phonemize("-5", "hi")).toBe("ɾˈɪɳ pˈaː̃t͡ʃ"); // ऋण पाँच
         expect(phonemize("-5 डिग्री", "hi")).toBe("ɾˈɪɳ pˈaː̃t͡ʃ ɖˈɪɡɾiː");
         expect(phonemize("तापमान -5 °C है।", "hi"))
@@ -111,11 +111,11 @@ describe("hindi normalization", () => {
         expect(phonemize("आस-पास", "hi")).toBe("ˈaːs pˈaːs"); // a compound
     });
 
-    // Found by the Wikipedia gap-fill (#586) — coordinates are absent from FLEURS entirely, and the two
+    // Found by the Wikipedia gap-fill — coordinates are absent from FLEURS entirely, and the two
     // sentences that carry them leaked THREE marks: `´` (U+00B4) and `'` as the minutes mark, and `º`
     // (U+00BA MASCULINE ORDINAL INDICATOR) standing in for the degree sign — the same substitution the
     // Italian run found in `dell'11º`.
-    test("coordinates: the minutes mark and the U+00BA degree sign (#586)", () => {
+    test("coordinates: the minutes mark and the U+00BA degree sign", () => {
         expect(phonemize("२८°२१´", "hi")).toBe("əʈʈʰaːˈiːs ɖˈɪɡɾiː ɪkːˈiːs mˈɪnəʈ");
         expect(phonemize("३०º ०५'", "hi")).toBe("t̪ˈiːs ɖˈɪɡɾiː pˈaː̃t͡ʃ mˈɪnəʈ");
         expect(phonemize("२८°२१´३०″", "hi")).toBe("əʈʈʰaːˈiːs ɖˈɪɡɾiː ɪkːˈiːs mˈɪnəʈ t̪ˈiːs seːkˈə̃ɳɖ");
@@ -128,7 +128,7 @@ describe("hindi normalization", () => {
     });
 
     // The real negative the gap-fill found, in a domain FLEURS has none of.
-    test("a real negative from the hybrid artifact reads (#586)", () => {
+    test("a real negative from the hybrid artifact reads", () => {
         expect(phonemize("ट्राइटन की सतह पर औसत तापमान -२३५.२° सेंटीग्रेड है।", "hi"))
             .toContain("ɾˈɪɳ d̪ˈoː sˈɔː pɛː̃n̪t̪ˈiːs d̪əʃˈəmləʋ d̪ˈoː ɖˈɪɡɾiː"); // ऋण २३५.२ डिग्री
         // …and the dash-as-SEPARATOR the same fill found, which must NOT become a sign. This is why the
@@ -136,7 +136,7 @@ describe("hindi normalization", () => {
         expect(phonemize("कोच (३१,३८१ -९८.५३% हिंदू)", "hi")).not.toContain("ɾˈɪɳ");
     });
 
-    test("the remaining signs, with Hindi's postpositional comparatives (#586)", () => {
+    test("the remaining signs, with Hindi's postpositional comparatives", () => {
         expect(phonemize("x = y", "hi")).toBe("ˈɛks bəɾˈaːbəɾ wˈaᶦ"); // बराबर
         expect(phonemize("6 × 6", "hi")).toBe("t͡ʃʰˈəɦ ɡˈʊɳaː t͡ʃʰˈəɦ"); // गुणा
         expect(phonemize("6 ÷ 3", "hi")).toBe("t͡ʃʰˈəɦ bʱˈaːɡ t̪ˈiːn"); // भाग
@@ -169,16 +169,16 @@ describe("Hindi ordinal suffix boundary", () => {
         expect(phonemize("21वें", "hi")).toBe("ɪkːˈiːsʋeː̃");
     });
 
-    // #586 — मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus. `घन` was already declared but
+    // मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus. `घन` was already declared but
     // unreachable: without a head noun in `units` the exponent branch cannot fire, so `120 m³` read as the
     // bare letter name *ˈɛm* while `120 km³` read correctly.
-    test("the bare metre makes the cube word reachable (#586)", () => {
+    test("the bare metre makes the cube word reachable", () => {
         expect(phonemize("5 m", "hi")).toContain("mˈiːʈəɾ");
         expect(phonemize("120 m³", "hi")).toContain("ɡʱˈən mˈiːʈəɾ");
         expect(phonemize("802.11m", "hi")).toContain("ˈɛm"); // a dotted designation is not a quantity
     });
 
-    test("⚠ accented Latin stays ONE word for the foreign reader (#654, 17 languages)", () => {
+    test("⚠ accented Latin stays ONE word for the foreign reader (17 languages)", () => {
         // `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read as
         // an English LETTER NAME and the rest of the word started over: `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* —
         // "ES ə O Paulo". Invisible to every gate: no digit or raw mark survives and nothing VANISHES, so it is a

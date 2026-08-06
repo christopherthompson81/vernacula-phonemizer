@@ -38,7 +38,7 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["ki lô mét"], mm: ["mi li mét"], cm: ["xen ti mét"], kg: ["ki lô gam"], m: ["mét"],
     },
-    // MIGRATION TEST (#562): squared units composed by the shared tier. Vietnamese puts the measure word
+    // MIGRATION TEST: squared units composed by the shared tier. Vietnamese puts the measure word
     // AFTER the unit and has no count agreement, so one form suffices.
     exponentWords: { squared: ["vuông"], cubed: ["khối"] },
 });

@@ -75,7 +75,7 @@ describe("burmese canonical IPA", () => {
         expect(phonemize("မြန်မာစကား", "my")).toBe("mja˨ɴma˨ zəɡa˥˩");
     });
 
-    test("cardinal numbers (#562)", () => {
+    test("cardinal numbers", () => {
         // Burmese names every power of ten from 10¹ to 10⁷, read place by place — and writes the
         // numeral SOLID, so the composed form must equal the single-word spelling (which is what
         // lets the engine compound voicing apply: 100 is [təja˨], not [tɪʔ ja˨]).

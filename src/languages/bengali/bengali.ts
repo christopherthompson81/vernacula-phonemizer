@@ -97,7 +97,7 @@ export function makeNativeBengali(
     // #562 Bengali had NO symbol tier at all, so % and every currency sign were DROPPED outright ("3%"
     // read as just "তিন") and the Latin unit abbreviations were unexpanded. শতাংশ follows the number.
     const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // এবং is ×1987 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -112,7 +112,7 @@ export function makeNativeBengali(
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "গুণ" },
         percent: ["শতাংশ"],
-        // #586 — `¥` ADDED, and the audio's answer here is about the SILENCE, not the word. The corpus's
+        // `¥` ADDED, and the audio's answer here is about the SILENCE, not the word. The corpus's
         // `টিকিটের দাম ¥2,500 থেকে ¥130,000` dropped all three signs; both bn_in speakers of the sentence read
         // the amounts and no currency at all (wav2vec2: `… d a m d u a z ɛ r p a ʃ o t e k …` — "dām dui hazār
         // pā̃cśata", straight on to the next number). or_in does the same.
@@ -147,7 +147,7 @@ export function makeNativeBengali(
     const symbolClass = [...Object.keys(symbols), ...strip].join("");
     // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
     // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
-    // engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+    // engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
     const tokenRe = new RegExp(
         `([${BENGALI_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:,[${DIGIT_CLASS}]+)*(?:\\.[${DIGIT_CLASS}]+)?)` +
             `|([।॥.?!,;:])${symbolClass ? `|([${symbolClass}])` : ""}`,

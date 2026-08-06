@@ -91,7 +91,7 @@ describe("bengali canonical IPA", () => {
     });
 });
 
-// #562 — the sixth language. Two of the three defects were NOT in the normalization layer: the numbers
+// the sixth language. Two of the three defects were NOT in the normalization layer: the numbers
 // data was missing its fused 21-99 forms, and clausePunctuation mapped every mark to ITSELF padded with
 // spaces, so raw dandas reached the output on 2,949 of 3,006 corpus utterances.
 describe("bengali normalization", () => {
@@ -150,17 +150,17 @@ describe("bengali normalization", () => {
         expect(phonemize("1/2", "bn")).toBe("ɔɾd̪ʱek"); // অর্ধেক
     });
 
-    // #586 — `বর্গকিলোমিটার` ×8. Declared SPACED because this tier is shared with Assamese and the two
+    // `বর্গকিলোমিটার` ×8. Declared SPACED because this tier is shared with Assamese and the two
     // corpora disagree about the space: bn fuses it here but writes `বর্গ মাইল` spaced in the same sentence,
     // and as writes `বৰ্গ কিলোমিটাৰ` spaced throughout. `before` is attested in both.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("19,500 km²", "bn")).toContain("bɔɾɡo kilomiʈaɾ");
     });
 
-    // #586 — `120-160 কিউবিক মিটার জ্বালানি তেল`, the loan, word-first. This is the word an earlier pass could
+    // `120-160 কিউবিক মিটার জ্বালানি তেল`, the loan, word-first. This is the word an earlier pass could
     // not find: it probed ঘন (×19 — the reduplicated adverb "frequently") and `ঘনমিটার` (×0), and the corpus
     // uses neither.
-    test("the cubed measure word (#586)", () => {
+    test("the cubed measure word", () => {
         expect(phonemize("120 m³", "bn")).toContain("kiubik miʈaɾ");
     });
 

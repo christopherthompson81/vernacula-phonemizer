@@ -208,7 +208,7 @@ const normalizeInitialisms = makeInitialismNormalizer({
  * like these — the hazard `rateDenominators` exists for.
  */
 const normalizeSymbols = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // és is ×2257 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -219,7 +219,7 @@ const normalizeSymbols = makeSymbolNormalizer({
     ampersand: "és",
     percent: ["százalék"],
     /**
-     * CURRENCY (#584). `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong
+     * CURRENCY. `$5` read as bare *ˈøt* — the sign contributed nothing, which is worse than a wrong
      * word because nothing in the output marks the loss. hu_hu contains ZERO `$` against 57 `%`, so the
      * corpus-driven gate that caught the percent could not see this; the WORDS are nonetheless in that same
      * corpus, spelled out:
@@ -403,7 +403,7 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 Celsius-fok");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit-fok");
     s = s.replace(/(\d)\s?°/gu, "$1 fok");
-    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
     //    (1000 - 1300), a SCORE (6-6), a DESIGNATION (forma-1) or a clock range. The rule is written anyway on
     //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
     //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
@@ -434,7 +434,7 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plusz $2"); // UTC+1
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plusz $2"); // "a + 30°C"
 
-    // THE RELATIONAL SIGNS (#654). All three read INFIX and all three are attested, `egyenlő` ×12 token / 8
+    // THE RELATIONAL SIGNS. All three read INFIX and all three are attested, `egyenlő` ×12 token / 8
     // articles in the arithmetic register with the sense in view ("nagyobb vagy egyenlő", "két egyenlő részre
     // osztja") and `nagyobb mint` in both corpus (×3 phrase) and wiki. `kisebb mint` has ×0 phrase hits in
     // either, while `kisebb` ×24 and `mint` ×259 are both common in hu_hu — the construction is ADJ + mint and
@@ -442,7 +442,7 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/\s?=\s?/gu, " egyenlő ");
     s = s.replace(/\s?<\s?/gu, " kisebb mint ");
     s = s.replace(/\s?>\s?/gu, " nagyobb mint ");
-    // THE DIVISION SIGN (#654). `osztva` is attested ×8 / 7 articles and it governs the INSTRUMENTAL on the
+    // THE DIVISION SIGN. `osztva` is attested ×8 / 7 articles and it governs the INSTRUMENTAL on the
     // operand, every single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva" — so
     // `A ÷ B` is "A B-vel osztva" and a bare "hat osztva három" would be an ungrammatical CASE, not an accent.
     //

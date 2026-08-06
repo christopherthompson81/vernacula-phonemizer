@@ -135,7 +135,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    ⚠ WHEN NO ORDINAL WORD IS AVAILABLE THE INDICATOR IS STRIPPED, NOT KEPT. `portugueseOrdinal` is
     //    bounded to 1–1000, so `2.500º` and `1.000.000º` have no word — and returning the match unchanged put
     //    a raw `º` in the phoneme string, which is the very thing this rule exists to prevent and the worst of
-    //    the three outcomes (#584). Dropping the indicator reads `2.500º` as the cardinal *dois mil e
+    //    the three outcomes. Dropping the indicator reads `2.500º` as the cardinal *dois mil e
     //    quinhentos*: it loses the ordinality, which is honest lossiness, and invents no morphology. Same
     //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
@@ -200,7 +200,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -209,7 +209,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 mais $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1mais $2");
 
-    // 8b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
+    // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ SEARCH FOR THE WORDS, NEVER FOR THE SIGN. The notation is
     //     absent from pt_br; the vocabulary is ordinary comparative prose and is present:
     //
     //       `maior`     ×100 TOKEN  (`maior que` ×1 phrase — "o território da turquia é maior que 1.600 km")

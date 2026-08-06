@@ -110,7 +110,7 @@ export function normalizeIndonesian(input: string): string {
 
     // 6) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -119,7 +119,7 @@ export function normalizeIndonesian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
-    // 6b) RELATIONAL AND DIVISION SIGNS (#654), and this language is sourced ENTIRELY from the corpus — tier 2,
+    // 6b) RELATIONAL AND DIVISION SIGNS, and this language is sourced ENTIRELY from the corpus — tier 2,
     //     audio-aligned, no Wikipedia needed. Counted in id_id as phrases:
     //
     //       `sama dengan`      ×17  — "polusi cahaya di masa mereka tidak sama dengan persoalan di masa sekarang"
