@@ -54,6 +54,11 @@ porter has no history to tell, so they write what the code does and what will bi
 
 Reference points in the tree: `src/core/hostWord.ts`, `src/languages/maori/normalize.ts`.
 
+⚠ Beware `*/` forming by accident inside a block comment. Markdown-style emphasis around a slashed
+alternative does it — `*tri*/*štiri*` terminates the comment early and the rest of the block parses as
+code. `npm run typecheck` always catches it (the remaining prose never parses), but the error points
+*past* the real cause and usually reads as an unterminated regex. Look for emphasis before a slash.
+
 When you cut comments, **do not touch code in the same commit**. Both files above were verified
 token-identical to their originals; that check is what makes a large comment pass reviewable.
 

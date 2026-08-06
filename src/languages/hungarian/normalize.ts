@@ -1,109 +1,37 @@
 /**
- * Hungarian (hu) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Hungarian (hu) text normalization — the pre-tokenizer pass that rewrites anything not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text, no IPA.
  *
- * MEASURED OVER THE 1,995 UNIQUE hu_hu FLEURS UTTERANCES (column 3, the cased one):
- *   hyphen-attached case suffix on a NUMERAL  ×166  (1848-ban, 1970-es, szeptember 17-én, 11:35-re, 12-kor)
- *   bare `N.`                                 ×80   (see the tabulation below — 60 of them ordinals)
- *   hyphen-attached suffix on an ACRONYM      ×18   (GPS-hez, FBI-nak, GDP-je, DNS-ét, ENSZ-tagország)
- *   all-caps initialisms                      ×~90 types (USA ×6, ENSZ ×6, UNESCO/MRI/GPS/FBI/DNS ×3 …)
- *   `/` compound units                        ×20 of 29 slashes (83 km/h, 133 m/s, 600Mbit/s, 105 mérföld/óra)
- *   ranges / scores                           ×27   (1644-1912, 35–40, 6-6, 5-3-as) — deliberately left
- *   unit abbreviations                        km ×26, mm ×8, m ×3, kg ×2, km² ×2, cm ×1
- *   space-grouped thousands ×14, dot-grouped ×7 (+1 written `400. 000`), comma-grouped ×3 (an English leak)
- *   comma decimals ×16, clock ×17, `%` ×8 (every one of them `N%-suffix`), `°` ×3, `+` ×3, `×` ×1
- *   dotted abbreviations  pl. ×7, Dr. ×6, stb. ×5, kb. ×5, Kr.e. ×3, i.sz. ×2, Kr. u. ×1, d.e. ×1, ld. ×1
+ * ⚠ THE ORDINAL DETECTOR. Hungarian writes an ordinal as a numeral plus a PERIOD (`19. század`), which a
+ * regex cannot distinguish from a sentence-final digit. The rule: `N.` is an ordinal when followed by
+ * whitespace and a LOWERCASE letter, or by a comma. Hungarian starts sentences with a capital, so
+ * "lowercase follows" is a STRONGER signal than "anything follows" — and the invariant that matters is that
+ * no sentence-final pause is lost. An ordinal before a capitalised word is knowingly given up to hold it.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `A 19. században`  → `ˈtizɛŋkilɛnt͡s . ˈsaːzɒdbɒn`   cardinal + a spurious PHRASE BREAK
- *   `1848-ban`         → `ˈɛzɛrɲold͡ʒzaːz… ˈbɒn`         the suffix split off as its own STRESSED word
- *   `100.000 taínó`    → `ˈsaːz . ˈnulːɒ ˈtɒiːnoː`       grouping dot → a pause, and `000` → *nulla*
- *   `30 000 ember`     → `ˈhɒrmint͡s ˈnulːɒ ˈɛmbɛr`      space grouping → *harminc nulla*
- *   `10:00 és 11:00`   → `ˈtiːz , ˈnulːɒ ˈeːʃ …`         the colon became a COMMA PAUSE
- *   `3,5 méter`        → `ˈhaːrom , ˈøt`                 the decimal comma became a COMMA PAUSE
- *   `a 25 %-a`         → `ˈɒ ˈhusonøt ˈɒ`                the `%` DROPPED outright
- *   `120 km/h`         → `ˈsaːzhuːs ˈkm ˈh`              unit + rate read as raw consonant clusters
- *   `25 °C`            → `ˈhusonøt ˈt͡s`                  ° dropped, C read as Hungarian ⟨c⟩
- *   `a GPS-hez`        → `ˈɒ ˈkpʃ ˈhɛz`                  a vowelless cluster (and G devoiced before P)
- *   `az FBI-nak`       → `ˈɒz ˈvbi ˈnɒk`                 F VOICED to [v] before B — a nonsense word
- *   `a GDP-je`         → `ˈɒ ˈktp ˈjɛ`
- *   `pl. édesség`      → `ˈpl . ˈeːdɛʃːeːɡ`              unreadable cluster + a phrase break
+ * A YEAR before a month name is read as a plain CARDINAL and its period is silent
+ * (`1759. szeptember 24-en`), so the detector must not turn those into ordinals either.
  *
- * THE ORDINAL DETECTOR IS BUILT FROM THE CORPUS. Hungarian writes the ordinal as a numeral plus a PERIOD
- * (`19. század`), and a regex cannot tell that from a sentence-final digit. Tabulating ALL 80 bare `N.`:
- *   LOWERCASE WORD AFTER ×59 — and every one is an ordinal or a date. 40 are ordinals proper (`század*`
- *     ×18, `évi` ×4, `helyet/helyezett`, `cikkelye`, `napján`, `bélyege`, `legnagyobb` ×2, `erősségű`,
- *     `huszárezred`, `számú`, `reaktorának`, `ábra`, `és`/`között` in a date range …); 19 are a YEAR
- *     followed by a month name, where Hungarian reads the year as a plain CARDINAL and the period is
- *     silent (`1759. szeptember 24-én` = *ezerhétszázötvenkilenc szeptember huszonnegyedikén*).
- *   COMMA AFTER ×1 — `a 11., 12. és 13. századokban`, an ordinal.
- *   DIGIT AFTER ×16 — dot-grouped thousands (`100.000`, `5.000.000`) and version/frequency codes
- *     (`802.11n`, `2.4Ghz`, `1.1. ábra`). Never an ordinal; step 2 de-groups the first kind and the
- *     lookarounds in step 9 refuse the rest.
- *   UPPERCASE WORD AFTER ×1 — `1. és 2. New Hampshire ezred`, which is ALSO an ordinal, so the corpus
- *     offers no counter-example to license claiming it; it is left alone anyway (see below).
- *   NOTHING AFTER ×2 — `…a görkorong és a Forma-1.` and `…rekordja 7 - 2.`. These are the sentence-final
- *     periods that must NOT be claimed.
- * So the rule is: `N.` is an ordinal when it is followed by whitespace and a LOWERCASE letter, or by a
- * comma. ZERO SENTENCE-FINAL PAUSES ARE LOST — both sentence-final instances (2 of 2) fail the lookahead,
- * as does every uppercase-initial continuation. Unlike German this needs no licensing article, and unlike
- * Turkish it needs more than "another token follows": Hungarian starts sentences with a capital, so
- * "lowercase follows" is a *stronger* signal than "anything follows", and it is what makes the rule safe
- * for the 1 uppercase case as well — that one ordinal is knowingly given up so that a numeral ending a
- * sentence before a capitalised next sentence can never be swallowed.
+ * VOWEL HARMONY COSTS NOTHING HERE, though it looks as if it should: Hungarian selects `-ban`/`-ben`,
+ * `-an`/`-en`, `-ra`/`-re` by the harmony of the SPOKEN numeral, and the orthography already writes the
+ * chosen form after the hyphen (`1848-ban`, `1970-es`). Plain concatenation onto the spoken numeral is
+ * therefore correct. The one place harmony IS computed is the bare date nominative, where nothing is
+ * written to copy — see `dateNominative`.
  *
- * MEASURED OVER THE WHOLE CORPUS AFTER THE CHANGE: 355 of 1,995 utterances differ. Periods went from
- * 2,373 to 2,254 — **119 removed, every one of them interior**, and the count of periods that end a
- * sentence (end of input, or before a capitalised word) is UNCHANGED except for 11 abbreviation dots that
- * are meant to go (`Dr.` ×6 and the personal initials `W.`/`F.`/`B.`/`N.`). ZERO SENTENCE-FINAL PAUSES
- * LOST. Spurious *nulla* from a grouping separator went from 19 to 4, and the 4 survivors are one real
- * *nulla* plus the dot-decimal `5.0Ghz` case below.
+ * DELIBERATELY LEFT:
+ *   · ranges and scores — Hungarian reads a range with `-tol …-ig` and a score with bare juxtaposition, and
+ *     nothing distinguishes them in text. A wrong connective is worse than none.
+ *   · the DOT decimal (`2.4Ghz`) — claiming `\d\.\d` would collide with version codes (`802.11n`).
+ *   · `2` before a counted noun, which wants the attributive *ket* rather than *ketto*. That needs a noun
+ *     test this layer has no business owning.
+ *   · currency — no sign occurs in Hungarian text this engine has seen; the words are always spelled out,
+ *     so declaring signs would be inventing them.
+ *   · `-al`/`-el` after a numeral — the standard forms are `-mal`/`-tel` with assimilation, so plain
+ *     concatenation gives *haromal* for *harommal*. The written form is the writer's shorthand.
  *
- * VOWEL HARMONY COSTS NOTHING HERE, and that is worth stating because it looks like it should. Hungarian
- * chooses `-ban`/`-ben`, `-án`/`-én`, `-ra`/`-re` by the harmony of the SPOKEN numeral, and the
- * orthography already writes the chosen form after the hyphen (`1848-ban`, `1970-es`, `március 18-án`).
- * Plain concatenation onto the spoken numeral is therefore correct and no harmony is computed — the same
- * result Turkish reached from its apostrophe suffixes. The one place harmony IS computed is the bare
- * date nominative (`augusztus 24.` → *huszonnegyedike* but `március 3.` → *harmadika*), where nothing is
- * written to copy; see `dateNominative`.
- *
- * DELIBERATELY LEFT (see the commit message):
- *   ranges / scores ×27 — `1644-1912`, `35–40`, `6-6`, `26-00`. The dash is dropped today, which is
- *     harmless; Hungarian reads a range with `-tól …-ig` and a score with a bare juxtaposition, and
- *     nothing in the corpus distinguishes them. A wrong connective is worse than no connective.
- *   `×` ×1 — `56 × 56 mm`. The Hungarian reading attaches `-szor/-szer/-ször` under three-way harmony to
- *     the first numeral; building that machinery for a single instance is not worth the surface it adds.
- *   `2` → *kettő* before a counted noun, where Hungarian wants the attributive *két* (`32%-kal` =
- *     *harminckét százalékkal*). Fixing it needs a noun test this layer has no business owning; the
- *     lexeme is right and only its attributive form is not. Reported, not worked around.
- *   the DOT decimal `2.4Ghz` / `5.0Ghz` ×2 (one utterance) and the ratio `3:2-re` ×1 — an English-style
- *     decimal point and a colon ratio. Both keep a pause today. Claiming `\d\.\d` as a decimal would
- *     collide with the version codes `802.11a/b/g/n` in the very same corpus, and `Ghz`/`Mhz` are not in
- *     `units` because only the one utterance attests them.
- *   the REGNAL Roman numeral (`II. Erzsébet`, `XVI. Lajos` — 3 instances). See romanOrdinals.ts: the
- *     licence that fixes them also makes core/roman.ts read the `C` of `39C` as a numeral.
- *   `-al`/`-el` written after a numeral ×2 (`2.243-al`, `4x4-el`) — the standard forms are `-mal`/`-tel`
- *     with assimilation, so concatenation gives *hárommal* → *háromal*. The orthography is the writer's
- *     shorthand and the alternation would have to guess which it meant.
- *   currency — the corpus contains NO currency sign at all (dollár/font/euró are always spelled out), so
- *     no currency data is declared. Inventing signs I have no corpus evidence for is exactly the
- *     "confidently wrong" failure the playbook warns about.
- *   readable-but-letter-spelled acronyms — AOL ×3, CEP ×3, HIV, SUV, IP, UCLA, USOC, USAF. The
- *     phonotactic OOV test lets them through as words because they ARE syllabifiable; whether Hungarian
- *     spells each of them out is a lexical fact I could not source per token, and `acronymLetters` is
- *     where it would go if I could. `WC` is the one exception, because *vécé* is a dictionary word.
- *
- * ⚠ THE MULTIPLICATION SIGN IS A VOWEL-HARMONIC SUFFIX HERE, NOT A WORD, and #586 leaves it UNSHIPPED for that
- * reason rather than for want of evidence. The corpus writes `6 x 6 cm-es formátumot, egészen pontosan 56 × 56
- * mm-es` — note BOTH spellings in one sentence, the ASCII `x` and U+00D7 — and the sign is dropped, so the
- * dimensions read as bare numbers.
- * The reading is settled: facebook/wav2vec2-xlsr-53-espeak-cv-ft over hu_hu/train gives
- *     `… f iː l m k ɔ m ɛ r ɔ  h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə …`      hatszor hat centiméter
- *     `… ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r …`      ötvenhatszor ötvenhat milliméter
- * So `×` is the multiplicative -szor/-szer/-ször FUSED ONTO THE FIRST NUMERAL, and which allomorph appears
- * depends on that numeral's vowels (hat→hatszor, öt→ötször, kettő→kétszer). That needs the number words plus
- * harmony, not a string substitution — the same shape `attachSuffix` handles for apostrophe suffixes — so it is
- * a separate change and is recorded here so the next pass does not re-derive the sourcing.
+ * ⚠ THE MULTIPLICATION SIGN IS A VOWEL-HARMONIC SUFFIX, NOT A WORD, which is why it is unshipped. `56 × 56`
+ * is *otvenhatszor otvenhat*: the multiplicative -szor/-szer/-szor fuses onto the FIRST numeral and the
+ * allomorph depends on that numeral vowels (hat→hatszor, ot→otszor, ketto→ketszer). That needs the number
+ * words plus harmony, not a string substitution — the shape `attachSuffix` handles for apostrophe suffixes.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -127,16 +55,49 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "ld": "lásd", // ×1
     "dr": "doktor", // ×6 (written `Dr.`)
 };
-const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+const ABBREV_ALT = Object.keys(DOTTED_ABBREV)
+    .sort((a, b) => b.length - a.length)
+    .join("|");
 
 /** Hungarian letter names (the traditional alphabet naming used when spelling an acronym: *gé-pé-es*,
  *  *ef-bé-í*, *á-bé-cé*). Vowels take their LONG name, which is what `USA`→*u-es-á* and `ABC`→*ábécé*
  *  show. `q/w/x/y` are the "foreign" letters but do have established names, so they are included. */
 const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "á", "á": "á", b: "bé", c: "cé", d: "dé", e: "é", "é": "é", f: "ef", g: "gé", h: "há",
-    i: "í", "í": "í", j: "jé", k: "ká", l: "el", m: "em", n: "en", o: "ó", "ó": "ó", "ö": "ő",
-    "ő": "ő", p: "pé", q: "kú", r: "er", s: "es", t: "té", u: "ú", "ú": "ú", "ü": "ű", "ű": "ű",
-    v: "vé", w: "dupla vé", x: "iksz", y: "ipszilon", z: "zé",
+    a: "á",
+    "á": "á",
+    b: "bé",
+    c: "cé",
+    d: "dé",
+    e: "é",
+    "é": "é",
+    f: "ef",
+    g: "gé",
+    h: "há",
+    i: "í",
+    "í": "í",
+    j: "jé",
+    k: "ká",
+    l: "el",
+    m: "em",
+    n: "en",
+    o: "ó",
+    "ó": "ó",
+    "ö": "ő",
+    "ő": "ő",
+    p: "pé",
+    q: "kú",
+    r: "er",
+    s: "es",
+    t: "té",
+    u: "ú",
+    "ú": "ú",
+    "ü": "ű",
+    "ű": "ű",
+    v: "vé",
+    w: "dupla vé",
+    x: "iksz",
+    y: "ipszilon",
+    z: "zé",
 };
 
 /**
@@ -148,7 +109,15 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
  */
 const DIGRAPH = /dzs|sz|zs|cs|gy|ny|ty|ly|dz/gu;
 const DIGRAPH_FOLD: Readonly<Record<string, string>> = {
-    dzs: "z", sz: "s", zs: "z", cs: "c", gy: "g", ny: "n", ty: "t", ly: "j", dz: "z",
+    dzs: "z",
+    sz: "s",
+    zs: "z",
+    cs: "c",
+    gy: "g",
+    ny: "n",
+    ty: "t",
+    ly: "j",
+    dz: "z",
 };
 const fold = (w: string): string => w.replace(DIGRAPH, (d) => DIGRAPH_FOLD[d]!);
 
@@ -158,15 +127,98 @@ const fold = (w: string): string => w.replace(DIGRAPH, (d) => DIGRAPH_FOLD[d]!);
 const unreadableFolded = makeUnreadableTest({
     vowels: /[aáeéiíoóöőuúüű]/u,
     legalOnsets: new Set([
-        "bl", "br", "cl", "cr", "dr", "dv", "fl", "fr", "gl", "gn", "gr", "hr", "kl", "kn", "kr",
-        "kv", "kw", "pl", "pn", "pr", "ps", "sc", "sf", "sk", "sl", "sm", "sn", "sp", "sr", "st",
-        "sv", "sw", "tr", "tv", "tw", "vl", "vr", "zl", "zn", "zv",
+        "bl",
+        "br",
+        "cl",
+        "cr",
+        "dr",
+        "dv",
+        "fl",
+        "fr",
+        "gl",
+        "gn",
+        "gr",
+        "hr",
+        "kl",
+        "kn",
+        "kr",
+        "kv",
+        "kw",
+        "pl",
+        "pn",
+        "pr",
+        "ps",
+        "sc",
+        "sf",
+        "sk",
+        "sl",
+        "sm",
+        "sn",
+        "sp",
+        "sr",
+        "st",
+        "sv",
+        "sw",
+        "tr",
+        "tv",
+        "tw",
+        "vl",
+        "vr",
+        "zl",
+        "zn",
+        "zv",
     ]),
     legalCodas: new Set([
-        "ct", "ft", "js", "jt", "kk", "ks", "kt", "lb", "lc", "ld", "lf", "lg", "lj", "lk", "lm",
-        "ln", "lp", "ls", "lt", "lz", "mb", "mp", "ms", "nc", "nd", "ng", "nj", "nk", "ns", "nt",
-        "nz", "ps", "pt", "rb", "rc", "rd", "rf", "rg", "rj", "rk", "rl", "rm", "rn", "rp", "rs",
-        "rt", "rz", "sk", "sp", "st",
+        "ct",
+        "ft",
+        "js",
+        "jt",
+        "kk",
+        "ks",
+        "kt",
+        "lb",
+        "lc",
+        "ld",
+        "lf",
+        "lg",
+        "lj",
+        "lk",
+        "lm",
+        "ln",
+        "lp",
+        "ls",
+        "lt",
+        "lz",
+        "mb",
+        "mp",
+        "ms",
+        "nc",
+        "nd",
+        "ng",
+        "nj",
+        "nk",
+        "ns",
+        "nt",
+        "nz",
+        "ps",
+        "pt",
+        "rb",
+        "rc",
+        "rd",
+        "rf",
+        "rg",
+        "rj",
+        "rk",
+        "rl",
+        "rm",
+        "rn",
+        "rp",
+        "rs",
+        "rt",
+        "rz",
+        "sk",
+        "sp",
+        "st",
     ]),
 });
 export const isUnreadableHungarian = (word: string): boolean => unreadableFolded(fold(word.toLowerCase()));
@@ -234,8 +286,13 @@ const normalizeSymbols = makeSymbolNormalizer({
      */
     currency: { $: ["dollár"], "£": ["font"] },
     units: {
-        km: ["kilométer"], m: ["méter"], cm: ["centiméter"], mm: ["milliméter"],
-        kg: ["kilogramm"], "mérföld": ["mérföld"], mbit: ["megabit"],
+        km: ["kilométer"],
+        m: ["méter"],
+        cm: ["centiméter"],
+        mm: ["milliméter"],
+        kg: ["kilogramm"],
+        "mérföld": ["mérföld"],
+        mbit: ["megabit"],
     },
     unitPer: "per",
     rateDenominators: { h: "óra", s: "másodperc", "ó": "óra", "óra": "óra", "órás": "órás" },
@@ -246,9 +303,15 @@ const normalizeSymbols = makeSymbolNormalizer({
  *  `g` is deliberately ABSENT: the corpus's only `g-vel` is `802.11g-vel`, the WiFi standard, and
  *  reading it as *grammal* would be confidently wrong. */
 const SUFFIXABLE_UNIT: Readonly<Record<string, string>> = {
-    km: "kilométer", mm: "milliméter", cm: "centiméter", kg: "kilogramm", "mérföld": "mérföld",
+    km: "kilométer",
+    mm: "milliméter",
+    cm: "centiméter",
+    kg: "kilogramm",
+    "mérföld": "mérföld",
 };
-const UNIT_ALT = Object.keys(SUFFIXABLE_UNIT).sort((a, b) => b.length - a.length).join("|");
+const UNIT_ALT = Object.keys(SUFFIXABLE_UNIT)
+    .sort((a, b) => b.length - a.length)
+    .join("|");
 
 /** Attach a suffix to the LAST word of a spoken numeral, applying the stem shortening a vowel-initial
  *  suffix triggers (`2022-es` → *kétezerhuszonkettes*, `1907-es` → *…hetes*; see numbers.ts). The split
@@ -293,29 +356,9 @@ const DATE_SUFFIX = /^(j?[áé]n|je|jei|ei|e|i)$/u;
 export function normalizeHungarian(input: string): string {
     let s = input;
 
-    // 1) DOTTED ABBREVIATIONS, multi-dot before single-dot so an interior dot cannot survive as a phrase
-    //    break, and before the initialism pass (step 11) which would otherwise spell `Kr` as *ká er*.
-    //    Boundaries are explicit lookarounds, never `\b` — `\b` is ASCII-defined and finds no boundary
-    //    against á/é/í/ó/ö/ő/ú/ü/ű.
-    // THE DIMENSION `×` → THE MULTIPLICATIVE, sourced from the corpus's own audio. The corpus writes
-    // `6 x 6 cm-es formátumot, egészen pontosan 56 × 56 mm-es` — ⚠ BOTH SPELLINGS IN ONE SENTENCE, the ASCII
-    // `x` and U+00D7, which is an internal control rather than a typo — and the sign was DROPPED, so the
-    // dimensions read as two bare numbers.
-    // facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer: no `×` and no digits in its vocabulary)
-    // over hu_hu/train:
-    //   `… f iː l m k ɔ m ɛ r ɔ  h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə …`   hatszor hat centiméter
-    //   `… ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r …`   ötvenhatszor ötvenhat milliméter
-    // So the sign is not a WORD here but a SUFFIX on the FIRST operand, which is why this emits the first
-    // number as words and leaves the second as digits for the tokenizer. See `multiplicativeWords` for why the
-    // allomorph is a table and not a harmony rule (`harminc` → harmincszor is anti-harmonic).
-    // Digit-flanked on both sides, which keeps an ordinary letter `x` and any algebraic use out of it.
-    // ⚠ THREE THINGS THE LOOKBEHINDS EXCLUDE, all found by probing the rule's neighbours rather than by
-    //   inspection. `(?<![\d.,])` alone was not enough:
-    //     `1 000 x 2`  Hungarian groups thousands with a SPACE, so the bare guard matched `000 x` and gave
-    //                  *1 nullaszor 2* — the thousand split apart. Hence `(?<!\d[ .,])`, which rejects a
-    //                  digit-then-separator while still allowing the ordinary leading space in `kamera 6 x 6`.
-    //     `6-8 x 10`   a RANGE's second operand became the base: *hatnyolcszor 10*. Hence `-` in the class.
-    //   `{1,6}` caps the operand so a 15-digit run falls through untouched rather than through numberToWords.
+    // 1) DOTTED ABBREVIATIONS, multi-dot before single-dot so an interior dot cannot be claimed by the
+    //    shorter pattern first (`et al.` before `al.`). The dot is consumed with the abbreviation, since
+    //    leaving it makes a phrase break inside the expansion.
     s = s.replace(/(?<![\d.,\-])(?<!\d[ .,])(\d{1,6})\s?[x×]\s?(?=\d)/gu, (m0, n: string) => {
         const w = multiplicativeWords(Number(n));
         return w === undefined ? m0 : `${w} `;
@@ -331,10 +374,14 @@ export function normalizeHungarian(input: string): string {
     //    sentence period (`…, stb.`).
     //    A DIGIT counts as a continuation as well as a letter: `kb. 20 km-re` and `kb. 1000 körül` are the
     //    commonest shape of all, and a `(?=\p{L})` lookahead alone left them as the cluster [ɡb] + a pause.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),
+        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`,
+    );
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)\\]]|$))`, "giu"),
+        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`,
+    );
 
     // 2) DIGIT DE-GROUPING, FIRST among the number rules: a grouping period is otherwise read as clause
     //    punctuation AND the trailing `000` becomes its own numeral *nulla* (`100.000` → *száz . nulla*),
@@ -346,7 +393,8 @@ export function normalizeHungarian(input: string): string {
     //    A COMMA followed by exactly three digits is the English convention leaking through the FLEURS
     //    translations (`100,000 ember`, `11,000 és 22,500 amerikai dollár` — 3 of 3 in the corpus are
     //    thousands, none is a decimal), so it is de-grouped too rather than read as *száz egész nulla*.
-    for (let i = 0; i < 3; i++) { // repeat: 5.000.000 has two separators
+    for (let i = 0; i < 3; i++) {
+        // repeat: 5.000.000 has two separators
         // THE TRAILING GUARD EXCLUDES A DECIMAL, NOT A CLAUSE MARK. `(?![\d.,])` refused to de-group a number
         // followed by its own sentence comma, so `24.000, és mások` read *huszonnégy . NULLA ,* — the group
         // split off, `000` spoken as zero, AND a spurious full stop. Hungarian marks the decimal with a
@@ -363,26 +411,31 @@ export function normalizeHungarian(input: string): string {
     //    *tizenegy nulla nulla*. Output stays DIGITS so the number path expands them, and so step 10's
     //    suffix rule can still attach (`11:35-re` → `11 35-re` → *harmincötre*).
     //    Two-digit minutes are REQUIRED, which is what keeps the score `3:2-re` out of this rule.
-    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[  ]?([0-5]\d)(?![\d:])/gu,
-        (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`));
+    s = s.replace(/(?<![\d.,:])([01]?\d|2[0-3]):[  ]?([0-5]\d)(?![\d:])/gu, (_m, h: string, min: string) =>
+        Number(min) === 0 ? h : `${h} ${min}`,
+    );
 
     // 4) UNIT ABBREVIATION + HYPHEN SUFFIX, BEFORE the shared symbol tier (step 6). The tier would
     //    otherwise claim `20 km-re` and leave `-re` stranded behind the substituted word, where the
     //    tokenizer drops the hyphen and *re* becomes its own stressed word.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${UNIT_ALT})([²³23])?-([${LOWER}]+)`, "giu"),
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}])(${UNIT_ALT})([²³23])?-([${LOWER}]+)`, "giu"),
         (whole, u: string, exp: string | undefined, suf: string) => {
             const head = SUFFIXABLE_UNIT[u.toLowerCase()];
             if (head === undefined) return whole;
             const pre = exp === undefined ? "" : exp === "³" || exp === "3" ? "köb" : "négyzet";
             return `${pre}${head}${suf}`;
-        });
+        },
+    );
     //    The single-letter `m` needs a preceding NUMBER to be a unit at all (`2m-es`); bare `m-` is far
     //    likelier to be an initial or a typo than a metre.
-    s = s.replace(new RegExp(`(\\d)\\s?m([²³23])?-([${LOWER}]+)`, "gu"),
+    s = s.replace(
+        new RegExp(`(\\d)\\s?m([²³23])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, exp: string | undefined, suf: string) => {
             const pre = exp === undefined ? "" : exp === "³" || exp === "3" ? "köb" : "négyzet";
             return `${d} ${pre}méter${suf}`;
-        });
+        },
+    );
 
     // 5) PERCENT + HYPHEN SUFFIX. Every one of the corpus's 8 percent signs carries a suffix (`29%-a`,
     //    `93%-ával`, `8%-kal`), so this must run before the shared tier in step 6 — the tier emits the
@@ -397,31 +450,20 @@ export function normalizeHungarian(input: string): string {
     // 7) DEGREES and SIGNS. `°` was dropped outright and a trailing C was read as Hungarian ⟨c⟩ → [t͡s].
     //    The suffixed form (`35°-tól`, a longitude) is claimed FIRST, for the reason step 4 exists: the
     //    plain rule would emit *fok* and leave `-tól` to become its own stressed word.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?([CF])?-([${LOWER}]+)`, "gu"),
+    s = s.replace(
+        new RegExp(`(\\d)\\s?°\\s?([CF])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, scale: string | undefined, suf: string) =>
-            `${d} ${scale === "C" ? "Celsius-" : scale === "F" ? "Fahrenheit-" : ""}fok${suf}`);
+            `${d} ${scale === "C" ? "Celsius-" : scale === "F" ? "Fahrenheit-" : ""}fok${suf}`,
+    );
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 Celsius-fok");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit-fok");
     s = s.replace(/(\d)\s?°/gu, "$1 fok");
-    // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
-    //    (1000 - 1300), a SCORE (6-6), a DESIGNATION (forma-1) or a clock range. The rule is written anyway on
-    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
-    //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
-    //    what verifies that rather than the guard looking plausible.
-    //
-    //    THREE GUARDS, each rejecting a shape this corpus actually contains:
-    //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
-    //      · a letter or digit IMMEDIATELY BEFORE — rejects `forma-1` and closed ranges
-    //      · a digit ANYWHERE to the left — rejects the SPACED range or score (`1000 - 1300`), which the fleet's
-    //        usual guard misses because the character before the hyphen is a SPACE. That gap cost a real defect
-    //        in th, where a year range was read as a subtraction.
-    //
-    //    ⚠ WHAT NONE OF THEM CAN REJECT is a spaced DESIGNATION: `word -1` is the same shape as a genuine
-    //    `was -5`, which is exactly why mr and nl decline the rule outright (see ACCEPTED_SIGN_SILENCE in
-    //    defects.ts). This corpus has no such instance, so the rule is safe HERE — a fact about this corpus,
-    //    not about the guard.
+    // THE MINUS. ⚠ EVERY `-<digit>` in Hungarian text of this kind is a RANGE or a score, not a negative, so
+    // a bare leading-dash rule would read date ranges as arithmetic. Restricted to positions a range cannot
+    // occupy.
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
-        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ");
+        /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ",
+    );
     // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
     //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
     //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
@@ -442,26 +484,9 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/\s?=\s?/gu, " egyenlő ");
     s = s.replace(/\s?<\s?/gu, " kisebb mint ");
     s = s.replace(/\s?>\s?/gu, " nagyobb mint ");
-    // THE DIVISION SIGN. `osztva` is attested ×8 / 7 articles and it governs the INSTRUMENTAL on the
-    // operand, every single time — "a-t b-vel osztva", "1 osztva x-szel", "negatív számmal osztva" — so
-    // `A ÷ B` is "A B-vel osztva" and a bare "hat osztva három" would be an ungrammatical CASE, not an accent.
-    //
-    // ⚠ SO THE RULE SPELLS ITS OWN OPERAND AND BUILDS THE SUFFIX, the machinery tr and ko already needed. Two
-    // things have to be right, and both are properties of the WORD rather than the digit:
-    //
-    //   VOWEL HARMONY picks -val or -vel from the stem's last vowel — hárommal vs öttel.
-    //   ⚠ `harminc` IS THE ONE IRREGULAR NUMERAL: its last vowel is the FRONT `i` but the word takes BACK
-    //   harmony (harminccal, not *harminccel). Named explicitly rather than derived, because no rule over the
-    //   vowel gets it right. Every other numeral is regular, checked across bir…ezer.
-    //
-    //   THE v ASSIMILATES to a final consonant and DOUBLES it — and for a DIGRAPH it is the digraph's first
-    //   letter that doubles, which a naive last-character rule gets wrong: négy → néggyel (not *négyvel or
-    //   *négyyel), húsz → hússzal, egy → eggyel. After a VOWEL there is no assimilation at all: kettő →
-    //   kettővel. Verified against the whole numeral vocabulary — eggyel, kettővel, hárommal, néggyel, öttel,
-    //   hattal, héttel, nyolccal, kilenccel, tízzel, hússzal, harminccal, ezerrel.
-    //
-    //   `stemForSuffix` deliberately does NOT apply: it shortens a stem before a VOWEL-initial suffix
-    //   (három → hárm-), and -val/-vel begins with a consonant, so `hárommal` is correct and `*hármmal` is not.
+    // THE DIVISION SIGN. `osztva` governs the INSTRUMENTAL on its operand, so the divisor must carry
+    // `-val`/`-vel` with assimilation — the suffix doubles the final consonant (`ottel`, `hattal`). Spelled
+    // from the number words rather than substituted, because the allomorph depends on the operand vowels.
     const HU_BACK = /[aáoóuú]/u;
     /** The last vowel decides harmony; `harminc` is the one numeral where the vowel and the harmony disagree. */
     const huLinkVowel = (stem: string): string => {
@@ -473,7 +498,9 @@ export function normalizeHungarian(input: string): string {
     const HU_DIGRAPH = ["gy", "sz", "cs", "ny", "ly", "ty", "zs", "dz"];
     /** Instrumental -val/-vel: harmony, then v→consonant assimilation with digraph-aware doubling. */
     const huInstrumental = (w: string): string => {
-        const cut = w.lastIndexOf(" ") + 1, head = w.slice(0, cut), stem = w.slice(cut);
+        const cut = w.lastIndexOf(" ") + 1,
+            head = w.slice(0, cut),
+            stem = w.slice(cut);
         const v = huLinkVowel(stem);
         if (/[aáeéiíoóöőuúüű]$/u.test(stem)) return `${head}${stem}v${v}l`;
         // ⚠ THE DOUBLED LETTER GOES BEFORE THE DIGRAPH, NOT AFTER THE WORD. Hungarian writes the geminate by
@@ -482,13 +509,13 @@ export function normalizeHungarian(input: string): string {
         // [ɛɟɡɛl] and [huːsʃɒl] — two wrong consonants, caught by probing the whole numeral vocabulary rather
         // than the one example the rule was written against.
         const dg = HU_DIGRAPH.find((d) => stem.endsWith(d));
-        const doubled = dg !== undefined
-            ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}`
-            : stem + stem.slice(-1);
+        const doubled = dg !== undefined ? `${stem.slice(0, -dg.length)}${dg[0]!}${dg}` : stem + stem.slice(-1);
         return `${head}${doubled}${v}l`;
     };
-    s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
-        `${numberToWords(Number(a))} ${huInstrumental(numberToWords(Number(b)))} osztva`);
+    s = s.replace(
+        /(\d+)\s?÷\s?(\d+)/gu,
+        (_m, a: string, b: string) => `${numberToWords(Number(a))} ${huInstrumental(numberToWords(Number(b)))} osztva`,
+    );
 
     // 8) DECIMALS. The comma was reaching `clausePunctuation` as a COMMA PAUSE mid-number. Hungarian says
     //    *egész* between the parts (*három egész öt*). The digits are LEFT AS DIGITS so the existing
@@ -504,16 +531,20 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(\\s+)(?=${MONTH})`, "giu"), "$1$2");
     // 9b) MONTH + DAY: the bare date nominative — `augusztus 24. és` is *augusztus huszonnegyedike és*.
     //     ×2. Licensed by a following lowercase word so a date ending a sentence keeps its period.
-    s = s.replace(new RegExp(`(${MONTH}\\p{L}*\\s+)(\\d{1,2})\\.(?=\\s+[${LOWER}])`, "giu"),
+    s = s.replace(
+        new RegExp(`(${MONTH}\\p{L}*\\s+)(\\d{1,2})\\.(?=\\s+[${LOWER}])`, "giu"),
         (whole, pre: string, d: string) => {
             const w = dateNominative(Number(d));
             return w === undefined ? whole : `${pre}${w}`;
-        });
+        },
+    );
     // 9c) THE GENERAL ORDINAL. The left lookbehind refuses a numeral that is itself preceded by a digit or
     //     a dot (`1.1. ábra`, `802.11a`); the lookahead refuses a digit, an uppercase continuation and the
     //     end of input. The period is CONSUMED — removing the spurious phrase break is half the fix.
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(?=\\s+[${LOWER}]|,)`, "gu"),
-        (whole, d: string) => ordinalWords(Number(d)) ?? whole);
+    s = s.replace(
+        new RegExp(`(?<![\\d.,])(\\d{1,4})\\.(?=\\s+[${LOWER}]|,)`, "gu"),
+        (whole, d: string) => ordinalWords(Number(d)) ?? whole,
+    );
     // 9d) The period after a Roman-numeral ORDINAL WORD. `XIX. század` has already become
     //     `tizenkilencedik. század` by the time this runs (the shared roman pass in registry.ts rewrites
     //     before `text()`), and that period was surviving as a phrase break — the artefact
@@ -542,23 +573,27 @@ export function normalizeHungarian(input: string): string {
     // 10a) DATES take the ORDINAL stem: `szeptember 17-én` is *tizenhetedikén*, not *tizenhétén*. Gated on
     //      a preceding month name — all 32 date-suffixed numerals in the corpus have one, and the gate is
     //      what keeps an ordinary superessive on a cardinal out of the ordinal path.
-    s = s.replace(new RegExp(`(?<=${MONTH}\\p{L}*\\s)(\\d{1,2})-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "giu"),
+    s = s.replace(
+        new RegExp(`(?<=${MONTH}\\p{L}*\\s)(\\d{1,2})-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "giu"),
         (whole, d: string, suf: string) => {
             if (!DATE_SUFFIX.test(suf)) return whole;
             const stem = dateStem(Number(d));
             if (stem === undefined) return whole;
             // day 1's stem is *elsej-*, so the written `j` of `1-jén` is already in the stem.
             return stem + (Number(d) === 1 ? suf.replace(/^j/u, "") : suf);
-        });
+        },
+    );
     // 10b) Everything else concatenates onto the cardinal, which is correct because the orthography
     //      already wrote the harmonically-chosen form (`1848-ban`, `1970-es`, `36-an`, `1945-ig`).
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "gu"),
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d+)-([${LOWER}]+)(?![\\p{L}\\p{M}])`, "gu"),
         (whole, d: string, suf: string) => {
             const n = Number(d);
             if (!Number.isSafeInteger(n)) return whole;
             const words = numberToWords(n);
             return /\d/u.test(words) ? whole : attachSuffix(words, suf);
-        });
+        },
+    );
 
     // 11) ACRONYMS, LAST of the letter rules: after step 1 (else `Kr`/`ld` are spelled) and after the
     //     roman pass, which has already run in registry.ts — so `II. Erzsébet` is a numeral by now and
@@ -567,14 +602,16 @@ export function normalizeHungarian(input: string): string {
     //      letter name (*gé pé eshez*), so it is glued here rather than left for the tokenizer to drop
     //      the hyphen and emit it as its own stressed word. The word-vs-letters decision mirrors the
     //      shared pass's: spell only what could not be read as a word at all.
-    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(\\p{Lu}{2,})-([${LOWER}]+)`, "gu"),
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}])(\\p{Lu}{2,})-([${LOWER}]+)`, "gu"),
         (whole, acr: string, suf: string) => {
             const lexical = ACRONYM_WORD[acr];
             if (lexical !== undefined) return lexical + suf;
             if (!isUnreadableHungarian(acr)) return acr.toLowerCase() + suf;
             const spelled = spellOut(acr);
             return spelled === undefined ? whole : spelled + suf;
-        });
+        },
+    );
     // 11b) The lexical overrides, before the shared pass can spell them out letter by letter.
     for (const [acr, word] of Object.entries(ACRONYM_WORD))
         s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])${acr}(?![\\p{L}\\p{M}])`, "gu"), word);

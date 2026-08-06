@@ -1,54 +1,23 @@
 /**
  * Khmer text normalization — symbols and marks the tokenizer cannot see, rewritten as Khmer words.
  *
- * WHY THESE DEFECTS EXIST, mechanically. `khmer.ts` tokenizes with
- * `TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu`, which is a deliberately minimal three-way split: a Khmer
- * run, a digit run, a clause mark. Everything else matches NO group and is therefore skipped in silence —
- * `%`, `$`, `°`, `&`, `+`, `/`, an en dash, and the iteration mark ៗ, whose code point U+17D7 falls in the gap
- * between `៓` (U+17D3) and `ៜ` (U+17DC). And two characters that DO match are in the wrong group: `,` and `.`
- * are clause punctuation, so a grouped number and a decimal are read as sentences with pauses in them.
+ * WHY THESE DEFECTS EXIST. `khmer.ts` tokenizes with a deliberately minimal three-way split: a Khmer run, a
+ * digit run, a clause mark. Everything else matches NO group and is skipped in silence — `%`, `$`, `°`, `&`,
+ * `+`, `/`, an en dash, and the iteration mark ៗ, whose code point falls in the gap between the two Khmer
+ * ranges. Two characters that DO match are in the wrong group: `,` and `.` are clause punctuation, so a
+ * grouped number and a decimal read as sentences with pauses inside them.
  *
- * WHAT THE MINED CORPUS CONTAINS (112,905 segments; #585's artifact, no FLEURS corpus exists for Khmer):
- *   ៗ iteration        15,952 in the artifact · 24,413 in the full corpus  ← the largest single defect
- *   digit-run          27,223   year 26,030   ← both read CORRECTLY already; native digits are handled
- *   decimals            4,018   ranges 4,014   grouped 2,788
- *   percent             1,291   ampersand 1,331   arithmetic 864   fractions 326   degrees 160   currency 154
+ * ⚠ NATIVE DIGITS ARE THE MAJORITY — Khmer ០-៩ far outnumber ASCII here, so `\d` alone would miss most digit
+ * runs and years. Every pattern in this file matches BOTH ranges explicitly.
  *
- * ⚠ NATIVE DIGITS ARE 74% OF THE CORPUS — 390,251 Khmer digits ០-៩ against 140,156 ASCII. `\d` would miss 68%
- * of the digit-runs and 71% of the years, so every pattern here matches BOTH ranges explicitly. This is the
- * ASCII trap the toolchain documents at three other levels; Khmer is where it bites hardest.
+ * ⚠ THE DECIMAL POINT HAS NO SOURCEABLE READING. Two candidates look available by frequency but fail on
+ * sense — neither occurs between digits, and ចុច collocates as "click"/"keyboard"/"press", the verb. So the
+ * fallback applies: read the fraction digit-by-digit with no separator word, which here means REMOVING the
+ * point so the digits are not split by a clause pause.
  *
- * WHAT THE ENGINE PRODUCED BEFORE, probed form by form:
- *   ថ្មីៗ         → tʰməj                    the reduplication silently DROPPED
- *   ១,០០០,០០០     → muəj , soun , soun       "one, zero, zero" — the grouping comma is a CLAUSE PAUSE
- *   ៣.៥ គីឡូ      → ɓəj . pram kiːlou        decimal point read as a phrase break, splitting the number
- *   ៩៨%           → kawsəp pramɓəj           the % vanished
- *   ១៩៩០–២០០០     → … kawsəp piː poən        two numbers, nothing between them
- *   ៣៥°C          → saːmsəp pram sˈiː        ° vanished; C fell through to the English letter name
- *   $១០០          → muəj rɔːj                the sign vanished
- *   ១/៤           → muəj ɓuən                "one four"
- *
- * ── SOURCING. Every word below is corpus-attested with the SENSE checked, per the Fula lesson. Counts are
- * from the full mined corpus:
- *   ភាគរយ   percent   445, and 230 of those directly after a digit — so it is POSTPOSED
- *   ដុល្លារ dollar    712
- *   អង្សា   degree     74 after a digit · អង្សាសេ "degrees Celsius" 25 after a digit
- *   ដល់     to (range) very frequent; 81 phrase hits in the artifact alone
- *   និង     and        40,204 — the single commonest word in the language
- *   បូក     plus       corpus-attested, 6 phrase hits in the artifact
- *   ភាគ     part       `៥ភាគ៦` = 5/6 attested 74 times, so the fraction frame is NUM ភាគ NUM
- *
- * ⚠ THE DECIMAL POINT HAS NO SOURCEABLE READING, and the near-miss is worth recording. `sources.ts` reports
- * `[NONE] decimal-point`. Two candidates were probed against the full corpus and both LOOKED available —
- * ចុច ×157, ក្បៀស ×18 — and both fail on sense: neither occurs between digits even once, and ចុច's
- * collocations are `ដោយចុច` "by clicking", `ក្តារចុច` "keyboard", `ទៅចុចចំបេះដូង` "press on the heart". It is
- * the verb "to press". So the documented fallback applies: read the fraction digit-by-digit with no separator
- * word, which here means removing the point so the digits are not split by a clause pause.
- *
- * ⚠ AND NO CLOCK RULE, deliberately. The corpus writes the frame word ITSELF — `ម៉ោង ៨:៣០` (76 instances),
- * `ម៉ោង ១១:០០ នាទីព្រឹក` (29) — so inserting ម៉ោង would duplicate what the writer already typed, which is the
- * Arabic الساعة defect the playbook records. ASCII `:` is not in `clausePunctuation`, so it is dropped without
- * a pause and the two numbers read adjacently, which is defensible. Left alone on purpose.
+ * ⚠ NO CLOCK RULE, deliberately. Khmer writes the frame word itself (`ម៉ោង ៨:៣០`), so inserting ម៉ោង would
+ * duplicate what the writer already typed. ASCII `:` is not clause punctuation here, so it is dropped without
+ * a pause and the two numbers read adjacently — defensible, and left alone on purpose.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { lastKhmerWord } from "./segment.ts";
@@ -77,34 +46,23 @@ import { havePerceptron, segmentRun } from "./khmerPerceptron.ts";
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["ភាគរយ"],
-    // ៛ is the riel, 97 occurrences — the country's own currency, and declaring only the dollar left it unread.
-    // ⚠ FOUR CURRENCIES, NOT ONE — and the three additions were pure omission rather than a judgement.
-    // The artifact's remaining `currency` drops were mostly £ and €, which the corpus writes with Khmer digits
-    // (`£៥ លាន`, `២,៣ €`) and which no rule could reach because they were not in this map. Both words are
-    // corpus-attested: អឺរ៉ូ ×84, ផោន ×39, រៀល ×451, ដុល្លារ ×435.
+    // ⚠ `US$` IS ITS OWN KEY because the bare `$` key cannot reach it: the tier refuses a sign preceded by a
+    // Latin letter — the guard that stops a sign being read out of the middle of a Latin word — and a
+    // multi-character key is matched as a unit, sidestepping it.
     //
-    // ⚠ `US$` IS DECLARED AS ITS OWN KEY, and the first version of this comment got the reason wrong. I recorded
-    // it as "the guard working — every US$ instance sits in an English sentence the wiki quotes verbatim", which
-    // was true only of the artifact's ENGLISH cells. Once those were filtered out of the corpus (see
-    // scripts.ts's isNativeSegment) the surviving `US$` instances were ordinary Khmer prose — `ប្រហែល US$3,236`,
-    // `តិចជាង US$ ១,០២៥` — so it was a real reading gap that foreign-line noise had been hiding. The bare `$`
-    // key cannot reach it because the tier refuses a sign preceded by a Latin letter, which is the guard that
-    // stops a sign being read out of the middle of a Latin word; a multi-character key is matched as a unit and
-    // sidesteps it. ដុល្លារអាមេរិក is attested ×116.
+    // ⚠ `CN¥` IS DECLARED AND BARE `¥` IS NOT: the SIGN is ambiguous between yen and yuan, the CODE is not.
+    // A bare `¥` rule would read `CN¥117,500` with the yen word, which is wrong.
     //
-    // ⚠ `CN¥` IS DECLARED AND BARE `¥` IS NOT, and the distinction is the whole point: the SIGN is ambiguous
-    // between yen and yuan while the CODE is not. `CN¥117,500` is unambiguously Chinese yuan, so reading it with
-    // the yen word យ៉េន — which is what a bare `¥` rule would do — would be wrong.
-    //
-    // ⚠ AND THE YUAN WORD CAME FROM THE DICTIONARY, NOT THE CORPUS, which is why an earlier pass wrongly recorded
-    // it as unsourceable. Currency names are LOANWORDS, so the Khmer form is a transliteration rather than
-    // something a corpus must invent — and `យូអាន` (j uu . ʔ aa n, the borrowing of "yuan") is in
-    // google/language-resources' Khmer pronunciation dictionary, CC BY 4.0, with ZERO occurrences in this wiki
-    // dump. Corpus frequency could never have found it. The apparent 521 hits for `យ័ន` that the first search
-    // turned up were all substrings of បាយ័ន (the Bayon temple) and អារ្យ័ន (Aryan) — the spaceless-script
-    // inflation `corpus-words.ts` warns about, which is what made the earlier refusal look justified.
+    // The yuan word comes from a pronunciation dictionary rather than the corpus. Currency names are
+    // LOANWORDS, so the Khmer form is a transliteration; corpus frequency could not have found it, and the
+    // apparent hits for the short spelling are all substrings of unrelated words (the spaceless-script
+    // inflation `corpus-words.ts` warns about).
     currency: {
-        $: ["ដុល្លារ"], "៛": ["រៀល"], "€": ["អឺរ៉ូ"], "£": ["ផោន"], "US$": ["ដុល្លារអាមេរិក"],
+        $: ["ដុល្លារ"],
+        "៛": ["រៀល"],
+        "€": ["អឺរ៉ូ"],
+        "£": ["ផោន"],
+        "US$": ["ដុល្លារអាមេរិក"],
         "CN¥": ["យូអាន"],
     },
     // A scale is a UNIT to this tier. `℃` is listed beside `°C` because the corpus carries both spellings, and
@@ -117,23 +75,19 @@ const SYMBOLS = makeSymbolNormalizer({
     // Latin `km` 95 times, so declaring only one leaves the other reading as a foreign-fallback mangle
     // (`1 km` came out as *muəj ˈʊkm*).
     units: { "គម": ["គីឡូម៉ែត្រ"], km: ["គីឡូម៉ែត្រ"], "°c": ["អង្សាសេ"], "℃": ["អង្សាសេ"], "°": ["អង្សា"] },
-    // ⚠ MAGNITUDES ARE WHAT LET A POSTPOSED SIGN COMPOSE. Khmer writes the sign AFTER the amount — `២៤៧០$`,
-    // `រយកោដិ$ស.រ.` — and the tier's postposed currency pattern needs a NUMBER before it. Where a magnitude
-    // word intervenes (`១ កោដិ$`, one koti dollars) the pattern found no number and the sign was DROPPED, which
-    // is 9 of the artifact's remaining drops. All four are corpus-attested after a digit: លាន 1,324,
-    // ពាន់ 558, ម៉ឺន 274, កោដិ 53.
-    // ⚠ THE STACKED FORMS MUST BE LISTED TOO, and they are not decoration: Khmer builds large scales by
-    // composing two magnitude words — ពាន់លាន ("thousand million") is 324 instances directly after a digit, and
-    // រយកោដិ ("hundred koti") 17. The tier matches ONE magnitude between the number and the sign, so a stacked
-    // phrase left the number non-adjacent and the sign was DROPPED: `១,៦ រយកោដិ$` read with no currency at all,
-    // which was the artifact scan's last remaining defect. Listing the compounds is enough because the tier sorts
-    // magnitudes longest-first, so ពាន់លាន wins over its own លាន.
-    //
-    // Attested counts are digit-adjacent occurrences in the mined corpus. ដប់លាន (30 total, 0 digit-adjacent) and
-    // ម៉ឺនកោដិ (1, 0) are real Khmer but unattested in this position, so they are left out rather than guessed in.
+    // ⚠ MAGNITUDES ARE WHAT LET A POSTPOSED SIGN COMPOSE. Khmer writes the sign AFTER the number, so without
+    // declared magnitudes the number is not adjacent to the sign and the match fails.
     magnitudes: [
-        "ពាន់លាន", "រយពាន់", "រយកោដិ", "ពាន់កោដិ", "រយលាន", "ដប់កោដិ",   // stacked: 324, 20, 17, 4, 2, 2
-        "លាន", "ពាន់", "ម៉ឺន", "កោដិ",                                    // simple: 1,324 · 558 · 274 · 53
+        "ពាន់លាន",
+        "រយពាន់",
+        "រយកោដិ",
+        "ពាន់កោដិ",
+        "រយលាន",
+        "ដប់កោដិ", // stacked: 324, 20, 17, 4, 2, 2
+        "លាន",
+        "ពាន់",
+        "ម៉ឺន",
+        "កោដិ", // simple: 1,324 · 558 · 274 · 53
     ],
     exponentWords: { squared: ["ការេ"], position: "suffix" },
     multiply: { times: "គុណ" },
@@ -198,7 +152,8 @@ export function normalizeKhmer(text: string): string {
     //
     // An empty antecedent drops the mark rather than inventing a word, matching Thai's ๆ rule.
     s = s.replace(new RegExp(`([${KH}]+)${SEP}ៗ`, "gu"), (_m, run: string) =>
-        run === "" ? "" : `${run} ${lastWord(run)}`);
+        run === "" ? "" : `${run} ${lastWord(run)}`,
+    );
 
     // ── 2. de-group thousands ─────────────────────────────────────────────────────────────────────────
     // FIRST among the numeric rules, and the playbook's standing coupling: the grouping comma is otherwise
@@ -269,7 +224,10 @@ export function normalizeKhmer(text: string): string {
      * 6% of the sites, all of them markup rather than language — and `allOccurrencesInMarkup` in defects.ts now
      * keeps the scan from reporting that class of line as a language defect.
      */
-    s = s.replace(new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"), " ស្មើ ");
+    s = s.replace(
+        new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"),
+        " ស្មើ ",
+    );
 
     // ── 5b. plus, and plus-minus ─────────────────────────────────────────────────────────────────────
     // ⚠ THE PLUS RULE EXISTED AND I DELETED IT while restructuring for the shared tier — the tier carries
@@ -321,20 +279,7 @@ export function normalizeKhmer(text: string): string {
     // — 11 sites, every one a real offset after an uppercase initialism, no misfires available. A reader says
     // "UTC plus seven", so the sign carries meaning here where an unspaced `+` inside LaTeX does not.
     s = s.replace(new RegExp(`(?<=[A-Z]{2,4})\\+(?=[${D}])`, "gu"), " បូក ");
-    // ± is 19 digit-flanked instances, every one a scientific tolerance — `១៨៣០ ±៤០ km`, `25,559 ± 4 គីឡូម៉ែត្រ`.
-    // I had recorded it as "the sign does not occur in the evidence", which was an artifact of testing with a
-    // grep whose `\$sg` escaped to a word boundary rather than a literal.
-    //
-    // ⚠ THE READING IS `បូកឬដក` ("plus OR minus") AND NOT `បូកដក`, and the first version had this wrong from a
-    // misread attestation. `corpus-words.ts` reported បូកដក as "attested, phrase ×4" — but as its own banner warns
-    // for a spaceless script, a phrase hit is a SUBSTRING hit. Reading the four: every one is the SPACED form
-    // inside an enumeration of arithmetic operations, `ប្រមាណវិធីបូក ដក គុណ ចែក` ("operations: add, subtract,
-    // multiply, divide"). That is a list of four operations, not a compound meaning ±, and the unspaced បូកដក has
-    // ZERO occurrences in the corpus and no entry in the CC BY 4.0 pronunciation dictionary either.
-    //
-    // What IS attested in the ± sense is `បូក​ឬ​ដក` — in `ខិតទៅរកបូកឬដកអនន្ត`, "approaching plus or minus
-    // infinity", which is exactly the mathematical use. One instance, semantically precise, against four that were
-    // the wrong sense entirely; the precise one wins.
+    // ± is always a scientific tolerance here, never a sign pair, so it reads as the two words juxtaposed.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូក ឬ ដក ");
     // AND THE LEADING FORM, which is what `review.ts`'s `±5` probe tests. Measured before adding rather than
     // after: stripping whitespace properly, exactly 4 sites in the corpus have a ± with no number before it, and
