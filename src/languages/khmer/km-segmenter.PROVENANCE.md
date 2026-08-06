@@ -59,6 +59,40 @@ shredding real words (`ថ្ងៃទីមករា` → `ថ្ងៃ|ទី|
 distribution holds far more ordinary words than compound junctions, so precision is the safer side to err on.
 Recorded because F1 alone would have picked the other model.
 
+## The linear baseline, and what it says about where the gain came from
+
+An averaged perceptron over the standard character-window features, trained on the same labels and scored on the
+same split (`tools/khmer/train_km_perceptron.py`, which replicates the split rather than re-drawing it):
+
+| model | P | R | F1 | end-to-end | dependency |
+|---|---|---|---|---|---|
+| unigram Viterbi | 53.5% | 75.5% | 62.6% | — | none |
+| averaged perceptron | 76.5% | 90.2% | 82.8% | 76.7% | **none** |
+| **BiLSTM (this model)** | 78.1% | 97.5% | **86.7%** | **80.4%** | onnxruntime-node |
+
+The perceptron uses features a segmenter could have used in 2007, so **62.6 → 82.8 is the LABEL CLEANING, not the
+architecture**; the BiLSTM adds 3.9 F1 on top. Its advantage is specifically RECALL on lexicalised collocations —
+it misses 301 boundaries where the perceptron misses 1,216, at the same spurious rate — which is what seeing the
+whole run buys over a 5-character window.
+
+## ⚠ The reported precision is a FLOOR, not an estimate
+
+Error analysis over 97,811 held-out positions (`tools/khmer/errors_km_segmenter.py`): 93% of this model's errors
+are over-splits, 87% of them inside tokens absent from `km-wordfreq.tsv` and 95% inside tokens of 7-13 characters
+(a typical Khmer word is 4-5). Testing where each gold `0` came from:
+
+    real model errors (label verified)      47   =  1.2%
+    label never verified at all          3,912   = 98.8%
+
+Those 3,912 are positions the label pipeline's layer 3 defaulted to 0 because the token was too rare to estimate,
+and 33.7% of them split between two KNOWN words — `និង(40204)|ជញ្ជាំង(158)`, `ចូល(3641)|រួម(1517)`. Verified errors
+are 348 of 97,811 = **0.36%**. True precision lies between 78.1% and ~99%; the corpus cannot settle it without
+annotation, so it is quoted as the floor.
+
+**What it genuinely misses** are junctions between two frequent known words — មហា|ក្សត្រ, ជា|មួយ, ដឹក|នាំ,
+មិន|មែន — i.e. lexicalised collocations, where "one word or two" is contested. 97 of the 301 misses are contested
+by the writers themselves (<90% split them).
+
 ## Training data, and the label cleaning that makes it usable
 
 Source: a `km.wikipedia.org` dump converted by `tools/normalization/wikidump-to-text.py` (#585) — 180,782

@@ -15,12 +15,19 @@
  * pronounced differently from its parts. So this measures AGREEMENT WITH THE BOUNDARY-AWARE READING, which is the
  * quantity the model is supposed to move — not "correctness" in the abstract.
  *
- *   npx tsx tools/khmer/eval_km_segmenter.mts <km-paragraphs.txt> [pairs]
+ *   npx tsx tools/khmer/eval_km_segmenter.mts <km-paragraphs.txt> [pairs] [bilstm|perceptron]
+ *
+ * ⚠ THIS METRIC IS THE FAIR ONE FOR COMPARING THE TWO MODELS, and the held-out F1 is not. The training labels
+ * leave any rare token of <= 13 characters at "no boundary" by default (build_km_segmenter_data.py layer 3), and
+ * 98.8% of the BiLSTM's scored precision errors land on exactly those unverified zeros — so F1 penalises both
+ * models for splitting compounds nobody ever labelled. This eval scores IPA against the boundary-aware reading,
+ * which no label pipeline touched.
  */
 import { readFileSync } from "node:fs";
 
 import { phonemize } from "../../src/index.ts";
 import { createKhmerSegmenter } from "../../src/languages/khmer/khmerSegmenter.ts";
+import { restoreBoundaries, havePerceptron } from "../../src/languages/khmer/khmerPerceptron.ts";
 
 const src = process.argv[2];
 const WANT = Number(process.argv[3] ?? 4000);
@@ -45,11 +52,17 @@ for (let i = 0; i < lines.length && pairs.length < WANT; i += step) {
     }
 }
 
-const segmenter = await createKhmerSegmenter();
-if (!segmenter) {
-    console.error("no model / onnxruntime-node — nothing to evaluate");
-    process.exit(3);
+const which = process.argv[4] ?? "bilstm";
+let restore: (t: string) => Promise<string>;
+if (which === "perceptron") {
+    if (!havePerceptron()) { console.error("no km-perceptron.tsv"); process.exit(3); }
+    restore = (t) => Promise.resolve(restoreBoundaries(t));
+} else {
+    const segmenter = await createKhmerSegmenter();
+    if (!segmenter) { console.error("no model / onnxruntime-node — nothing to evaluate"); process.exit(3); }
+    restore = (t) => segmenter.restore(t);
 }
+console.log(`  model: ${which}`);
 
 let syncOk = 0, neuralOk = 0, fixed = 0, broke = 0, n = 0, recovered = 0;
 const brokeEg: string[] = [];
@@ -60,7 +73,7 @@ for (const [a, b] of pairs) {
     try {
         ref = P(a) + P(b);
         sync = P(joined);
-        seg = await segmenter.restore(joined);
+        seg = await restore(joined);
         neural = P(seg);
     } catch { continue; }
     n++;

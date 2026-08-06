@@ -156,3 +156,69 @@ recovered.
 **Still open:** the perceptron/n-gram baseline the data now makes nearly free (same labels, same split, same
 `eval_km_segmenter.mts`); whether to promote segmentation into the sync path, which needs a referee before/after
 pass; and layer 3's 64.7% masking, which a local longest-word lookup would reduce.
+
+## Run 7 — 2026-08-05 18:20 · the perceptron baseline, and it changed how the BiLSTM's score reads
+
+Averaged perceptron, standard character-window features (the pre-neural segmentation feature set: characters
+either side of the candidate boundary, their bigrams, one jump bigram, the straddling trigram). The split is
+REPLICATED from the BiLSTM trainer rather than re-drawn — same filtering, same seed, same shuffle — so the
+comparison is one experiment. Confirmed identical: 829,998 runs, 8,032,436 supervised positions.
+
+| model | P | R | F1 | end-to-end reading match | dependency |
+|---|---|---|---|---|---|
+| unigram Viterbi | 53.5% | 75.5% | 62.6% | — | none |
+| averaged perceptron | 76.5% | 90.2% | 82.8% | 76.7% | **none** |
+| BiLSTM | 78.1% | 97.5% | 86.7% | 80.4% | onnxruntime-node |
+| _(sync engine, no segmentation)_ | | | | 44.7% | |
+
+**Where the gain actually came from.** The perceptron uses features a segmenter could have used in 2007, so the
+jump from 62.6 → 82.8 F1 is almost entirely THE LABEL CLEANING, not the architecture. The BiLSTM adds 3.9 F1 /
+3.7pp end-to-end on top. Worth stating plainly: the expensive part of this work was deciding which zeros to
+believe.
+
+## Run 8 — 2026-08-05 18:25 · which cases do we lose on — and the reported precision is a floor
+
+Error analysis over 97,811 held-out positions (`tools/khmer/errors_km_segmenter.py`), bucketing every mistake.
+
+**The headline is that 93% of the BiLSTM's errors are over-splits** — 3,959 spurious against 301 missed — and they
+are concentrated: 87% inside tokens that are NOT in `km-wordfreq.tsv`, and 95% inside tokens of 7-13 characters,
+against a typical Khmer word of 4-5.
+
+That distribution was suspicious enough to test, by asking where each gold `0` came from:
+
+    real model errors (the label was verified)        47   =  1.2%
+    label never verified at all                    3,912   = 98.8%
+
+**98.8% of the scored precision errors are positions layer 3 defaulted to 0** because the token was too rare to
+estimate and short enough (≤13 chars) to be a plausible word. So the metric penalises the model for splitting
+compounds nobody ever labelled. Checking whether those splits look real:
+
+    both sides are known words   33.7%     e.g. និង(40204)|ជញ្ជាំង(158), ចូល(3641)|រួម(1517), បន្ទាប់(981)|គ្នា(5185)
+    one side known               59.7%
+    neither side known            6.6%
+
+**So P 78.1% is a FLOOR, not an estimate.** Verified errors are 301 missed + 47 spurious = 348 of 97,811 positions
+= 0.36%. The true precision lies somewhere between 78.1% (if every unverified zero is right) and ~99% (if the
+model is right wherever it splits between two known words); the corpus cannot settle it without annotation, and
+this is stated as a range rather than resolved in the model's favour.
+
+**What we genuinely lose on** — the 301 missed boundaries, which are the errors that matter because a missed
+boundary leaves the corrupted joined reading:
+
+    មហា|ក្សត្រ (king)   ជា|មួយ   ដឹក|នាំ   មិន|មែន   ជុំ|វិញ   ទាំង|ឡាយ   ពិត|មែន   ទី|នេះ
+
+Every one is a junction between two FREQUENT KNOWN words (144 of 301 have a known-frequent left side, 159 a
+known-frequent right side) — i.e. LEXICALISED COLLOCATIONS, exactly where "one word or two" is genuinely contested.
+**97 of the 301 are contested by writers themselves** (<90% of them split it), so roughly a third of the misses
+are not clearly errors.
+
+**Where the perceptron actually loses.** It misses 1,216 boundaries against the BiLSTM's 301 — **4x more** — and
+the misses concentrate in the same place (775 with a known-frequent left side). Its spurious count is slightly
+LOWER (3,665 vs 3,959). So the BiLSTM's entire advantage is RECALL on lexicalised collocations, which is what the
+recurrence buys: it can see the whole run, while the perceptron sees a 5-character window. End-to-end this shows
+as the same broke count (239 vs 240) and 110 more fixes. The two models agree on 97.2% of positions.
+
+**The decision this sets up, not taken here.** The perceptron captures 90% of the BiLSTM's end-to-end gain
+(+32.0pp of +35.6pp) with NO optional dependency, so it could serve `phonemize` itself rather than only
+`phonemizeAsync`. Promoting either into the sync path changes every Khmer reading and still needs the referee
+before/after pass `segment.ts` names. Both models and both eval paths are committed so that pass can be run.
