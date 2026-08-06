@@ -582,7 +582,17 @@ else {
 if (tracked || existsSync(artifact)) {
     try {
         const out = execSync(`npx tsx tools/normalization/mine.ts scan --in ${artifact} --lang ${lang}`, { encoding: "utf8" });
-        const clean = out.includes("no defects");
+        /**
+         * ⚠ CLEAN MEANS NO DEFECT LINE, NOT THE LITERAL STRING "no defects". The scan prints that only when it
+         * reports NOTHING AT ALL, so an artifact whose every finding is a NOTE — FOREIGN, REDUNDANT, ACCEPTED,
+         * MARKUP, none of them a defect — failed this gate. Khmer hit it: every dropped math-sign was fixed or
+         * excused, the scan emitted four note lines and no DROP, and the gate still said FAIL and then printed
+         * the notes as the reason, because the message builder finds no DROP line and falls back to the last
+         * three lines of output. That is the same shape as the `slice(-3)` bug the comment below describes —
+         * a verdict derived from the shape of the output rather than from its content.
+         */
+        const defects = out.trim().split("\n").filter((l) => /^(DROP|LEAK|THROW)/u.test(l));
+        const clean = out.includes("no defects") || defects.length === 0;
         // A `REDUNDANT` line is a PERMISSIBLE drop, not a defect: the symbol's own word is already in the
         // reading because the sentence spells it out beside the sign ("93% ശതമാനം", "$2300 millones de
         // dólares"), and saying it ONCE in the language-idiomatic position is the correct reading. Surfaced
@@ -593,8 +603,8 @@ if (tracked || existsSync(artifact)) {
             // classes grew — the scan sorts defects before notes, so REDUNDANT/ACCEPTED/FOREIGN notes pushed real
             // DROP lines out of the window. km was reporting 13 dropped math-signs that this gate did not print,
             // and the omission fooled the author of this change into recording the class as fixed.
-            (clean ? "no defects" : out.trim().split("\n").filter((l) => /^(DROP|LEAK|THROW)/u.test(l)).join(" | ")
-                || out.trim().split("\n").slice(-3).join(" | "))
+            (clean ? (defects.length === 0 && !out.includes("no defects") ? "no defects — every finding is a note" : "no defects")
+                : defects.join(" | "))
             + (redundant.length > 0 ? ` — permissible: ${redundant.join(", ")} (the word is already in the sentence; read them anyway)` : ""));
     } catch { note("artifact scan", null, "scan failed to run"); }
 } else note("artifact scan", null, "no artifact");
