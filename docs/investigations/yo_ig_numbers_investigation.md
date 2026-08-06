@@ -75,3 +75,53 @@ The defensible shape is therefore: compose over the range the evidence supports,
 native units beyond it (an established pattern here — chichewa's compositor does exactly that above 10⁶), and never
 emit English again. That converts a confidently-wrong-language reading into a correct-language, unidiomatic one,
 which is a strictly better failure and is fully sourceable today.
+
+## Run 4 — 2026-08-05 22:10 · the dump WAS extensive enough, and I was too pessimistic
+
+Run 3 concluded the composition rules "are not attested the way the words are" and proposed a bounded partial
+compositor. Challenged on it — the dump is extensive — and testing rather than arguing showed the challenge was
+right. The rules ARE attested, as phrases:
+
+| Igbo pattern | reading | hits |
+|---|---|---|
+| `iri abụọ` | 20 (ten·two) | 7,814 |
+| `iri atọ` … `iri itoolu` | 30 … 90 | 3,094 … 774 — the ENTIRE series |
+| `iri na abụọ` | 12 (ten and two) | 2,613 |
+| `iri na otu` | 11 | 2,056 |
+| `puku abụọ` / `narị abụọ` | 2,000 / 200 | 1,099 / 492 |
+| `otu narị` / `otu puku` / `otu nde` | 100 / 1,000 / 10⁶ | 1,347 / 1,256 / 479 |
+| `nde` / `ijeri` | 10⁶ / 10⁹ | 6,983 whole-word / 1,709 |
+
+⚠ **MAGNITUDE FIRST, and it had to be counted rather than assumed.** One corpus phrase — `otu nde`, "one million" —
+looks multiplier-first and would have inverted the whole table. Counting both orders in every magnitude settles it:
+
+    iri abụọ 7,814 : abụọ iri 82      narị abụọ 492 : abụọ narị 10
+    puku abụọ 1,099 : abụọ puku 4     nde abụọ 77 : abụọ nde 7     ijeri abụọ 8 : abụọ ijeri 0
+
+11:1 to 275:1. `otu nde` is the irregular MULTIPLIER-1 form, which is why `one` is stored apart from the series.
+
+**And the corpus writes large numbers out in full**, which is how the structure was verified instead of inferred:
+
+    "otu nde, puku narị anọ na otu, narị asatọ na iri asaa na atọ"   = 1,401,873
+     1×10⁶       1000×401              800 + 70 + 3
+
+The compositor reproduces that exactly, except that it joins magnitude groups with `na` where the corpus writes a
+comma — a comma is not spoken.
+
+⚠ **AND MY "IGBO IS VIGESIMAL, DEFERRED" FRAMING WAS MISLEADING.** The referee config's deferral is about the
+TRADITIONAL vigesimal system, and `ọgụ` (a score) is genuinely current at 5,859 whole-word hits. But the decimal
+`iri abụọ` outnumbers it 7,814 to 5,859 and is what composes regularly to arbitrary size. Both are Igbo; the
+decimal one is what running text uses and what a compositor can be built on. Quoting the deferral as though it
+blocked the work was wrong.
+
+**Shipped:** `igbo/numbers.ts` + the manifest table, wired so digits can never reach the `foreign` (English)
+fallback again, with digit-by-digit in Igbo units above 10¹² as the floor. `1945` now reads
+*otu puku na naɾɪ itoolu na iɾi anɔ na ise*.
+
+**Still open for Igbo:** `1,500` reads *otu , naɾɪ ise* — the grouping comma is not de-grouped, because Igbo has no
+`normalize.ts` either. That is the normalization layer's job and is the natural next step; the compositor cannot
+fix it, since it never sees the two halves as one number.
+
+**Yoruba remains.** Its machinery is attested but unevenly — `lé` (additive) 598/756, `dín` (subtractive) 80/42,
+`méjìlá` 258, `ọ̀kànlá` 3, `ẹ́ẹ́dógún` 0 — so the same phrase-counting method needs to run per form before a
+compositor can claim the same footing. SLR86 supplies the tone-marked orthography for units 1-10.

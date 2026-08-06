@@ -27,6 +27,45 @@
     // Two tones → Chao contour letters: High (acute), Low (grave); downstep (macron) → a lowered mid.
     "tones": { "high": "˥", "low": "˩", "down": "˧" },
 
+    // CARDINAL NUMBERS — the MODERN DECIMAL system, which is what running text uses.
+    //
+    // ⚠ IGBO'S TRADITIONAL SYSTEM IS VIGESIMAL and this is not it. `ọgụ` (a score, 20) is real and current —
+    // 5,859 whole-word corpus hits — but the decimal `iri abụọ` ("two tens") outnumbers it 7,814 to 5,859 and is
+    // the form that composes regularly to arbitrary size. The referee config records the vigesimal numbers as
+    // deferred; this table deliberately does not attempt them, and a vigesimal reading is not wrong Igbo, just a
+    // different register.
+    //
+    // ⚠ MAGNITUDE FIRST, MULTIPLIER SECOND — settled by counting, not assumed, because one corpus phrase
+    // (`otu nde`, "one million") looks like the opposite:
+    //     iri abụọ 7,814 : abụọ iri 82        narị abụọ 492 : abụọ narị 10
+    //     puku abụọ 1,099 : abụọ puku 4       nde abụọ 77 : abụọ nde 7        ijeri abụọ 8 : abụọ ijeri 0
+    // 11:1 to 275:1 in every case. `otu nde` is the irregular MULTIPLIER-1 form (otu narị 1,347, otu puku 1,256,
+    // otu nde 479), which is why `one` is stored separately from the multiplier series.
+    //
+    // Sourced from a 558,991-line ig.wikipedia dump (#585); counts are whole-word/phrase hits. Igbo has NO
+    // independent referee — wikipron ibo_latn, epitran ibo-Latn and the kaikki Igbo extract are all 404 — so the
+    // corpus IS the evidence and the anchor is the adjudicated gold in test/igbo.test.ts.
+    //
+    // The corpus writes large numbers out in full, which is where the whole structure was read off:
+    //     "otu nde, puku narị anọ na otu, narị asatọ na iri asaa na atọ"  = 1,401,873
+    //      1×10⁶       1000×401             800 + 70 + 3
+    "numbers": {
+        // ⚠ `efu` IS THINLY SOURCED AND POLYSEMOUS. 5,239 whole-word hits, but most are "free"/"empty"
+        // (`n'efu` = for free, `furu efu` = lost). It does appear in numeric slots — a scoreline `efu - 2`, and
+        // `efu, akara` (zero, points) — which is the only numeral evidence for it. Digits never render as a bare
+        // zero in practice, so little rests on it.
+        "zero": "efu",
+        "one": "otu",                                                            // 104,534
+        // The multiplier series, used after a magnitude word. Index 2..9; index 0/1 unused (see `one`).
+        "units": ["", "", "abụọ", "atọ", "anọ", "ise", "isii", "asaa", "asatọ", "itoolu"],
+        //          57,990  26,470  16,985  16,098  isii    asaa    asatọ   itoolu
+        "ten": "iri",                                                            // 44,831
+        "hundred": "narị",                                                       // 11,804
+        "thousand": "puku",                                                      //  9,000-odd
+        "million": "nde",                                                        //  6,983 whole-word
+        "billion": "ijeri",                                                      //  1,709
+        "and": "na"                                                              // iri na otu 2,056
+    },
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
     }
