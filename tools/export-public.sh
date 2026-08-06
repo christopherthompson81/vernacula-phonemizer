@@ -14,6 +14,15 @@ git archive HEAD | tar -x -C "$DEST"
 rm -rf "$DEST/docs/investigations"          # per-language bring-up logs — not published
 echo "exported $(find "$DEST" -type f | wc -l) files to $DEST"
 echo
-echo "verify before pushing:"
-echo "  grep -rIn '/home/\|/mnt/data\|espeak-ng-portable' $DEST | grep -v corpus/mined   # expect none"
-echo "  grep -rIn 'docs/investigations' $DEST                                            # expect none"
+echo
+echo "verifying the export:"
+# corpus/mined carries Wikipedia text that legitimately contains these shapes; this script and
+# packaging.test.ts name docs/investigations on purpose, so both are excluded from their own check.
+SKIP='corpus/mined|export-public.sh|packaging.test.ts'
+for pat in '/home/[a-z]|/mnt/data|~/Programming' 'espeak-ng-portable' 'docs/investigations'; do
+    n=$( { grep -rInE "$pat" "$DEST" 2>/dev/null || true; } | { grep -vE "$SKIP" || true; } | wc -l)
+    if [ "$n" -eq 0 ]; then echo "  ok    no $pat"; else
+        echo "  FAIL  $n hits for $pat"
+        { grep -rInE "$pat" "$DEST" 2>/dev/null || true; } | { grep -vE "$SKIP" || true; } | head -5 | sed "s|^|        |"
+    fi
+done
