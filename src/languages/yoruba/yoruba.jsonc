@@ -67,7 +67,40 @@
             "70": { "free": "àádọ́rin", "fused": "láàdọ́rin" },
             "80": { "free": "ọgọ́rin", "fused": "lọ́gọ́rin" },
             "90": { "free": "àádọ́rùn-ún", "fused": "láàdọ́rùn" },
-            "100": { "free": "ọgọ́rùn-ún", "fused": "lọ́gọ́rùn-ún" }
+            "100": { "free": "ọgọ́rùn-ún", "fused": "lọ́gọ́rùn-ún" },
+            // ⚠ THE VIGESIMAL SERIES CONTINUES PAST 100, and the first version of this table stopped there —
+            // so 101-199 was composed as `ọgọ́rùn-ún ó lé <remainder>`, which the corpus does not write. It uses
+            // single words on bases of TWENTY (ọgọ́fà 120 = 6×20, ogóje 140 = 7×20, ọgọ́jọ 160, ọgọ́sàn-án 180)
+            // with the intervening tens formed by àádọ́- (150 = àádọ́jọ, ten less than 160). Found by READING the
+            // artifact rather than counting its cells: `Ogóje náírà (N140.00)` and `ọgọ́sàn-án náírà (N180.00)`
+            // sat in the `clock` cell, which the counting audit had called covered.
+            //
+            // Each is glossed with its own digits: 120 ×6, 130 ×2, 140 ×5, 150 ×3, 160 ×4, 170 ×1, 180 ×4. And
+            // the lé/dín machinery generalises onto them — `mẹ́tàdínlógóje` (137, three from 140),
+            // `márùn-ún-dín-lógósàn-án` (175, five from 180) — with the fused bases attested independently
+            // (lógóje 14, lọ́gọ́jọ 15, lọ́gọ́sàn 8, lógófà 1).
+            //
+            // ⚠ THE FUSED FORMS ARE READ OFF THE CORPUS, NOT DERIVED. My first guesses (`lédọ́je`, `lọ́gba`)
+            // have 0 and 1 hits; the attested shapes are `láàdó-` for the àádọ́ series and `nígba` for igba,
+            // which the glosses state outright: `marundinlaadoje(125)`, `kànléláàdóje(131)`, `marundinnigba(195)`,
+            // `kàndínnígba(199)`, `marundinlaadowaa(185)`. Counts: láàdóje 7, láàdówàá 1, nígba 117, lógófà 1,
+            // lógóje 14, lọ́gọ́jọ 15, lọ́gọ́sàn 8. THREE are unattested and composed by analogy with the rest —
+            // láàdófà (110), láàdójọ (150), láàdósàn (170).
+            //
+            // ⚠ AND ONE GLOSS DIVERGES: `márùn-ún lé lọ́gọ́jọ (165)` reads 5 as ADDITIVE on 160, where the rule
+            // (and 115, 125, 135, 155, 185, 195, all `márùndín-`) makes 5 subtractive from the ten above. Writers
+            // evidently pivot on the twenty-bases as well as the tens. The subtractive form is followed here
+            // because six glosses attest it against one.
+            "110": { "free": "àádọ́fà", "fused": "láàdófà" },
+            "120": { "free": "ọgọ́fà", "fused": "lógófà" },
+            "130": { "free": "àádọ́je", "fused": "láàdóje" },
+            "140": { "free": "ogóje", "fused": "lógóje" },
+            "150": { "free": "àádọ́jọ", "fused": "láàdójọ" },
+            "160": { "free": "ọgọ́jọ", "fused": "lọ́gọ́jọ" },
+            "170": { "free": "àádọ́sàn", "fused": "láàdósàn" },
+            "180": { "free": "ọgọ́sàn-án", "fused": "lọ́gọ́sàn" },
+            "190": { "free": "àádọ́wàá", "fused": "láàdówàá" },
+            "200": { "free": "igba", "fused": "nígba" }
         },
         // 11-14 are unit + `lá` (méjìlá 257, mẹ́tàlá 186, mẹ́rìnlá 206, mọ́kànlá 171).
         "teen": "lá",

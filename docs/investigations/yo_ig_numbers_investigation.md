@@ -478,3 +478,63 @@ at the next mine; rebuilding these artifacts safely needs the original flags, wh
 carry. That is a fleet re-mine, on its own, with a before/after cell count per language.
 
 `review.ts --lang yo`: 9 of 10. 3,089 tests.
+
+## Run 16 — 2026-08-06 — reading the artifact instead of counting it, which found four defects
+
+Challenged on the claim that re-mining would "lose coverage (30/35 against 32)": **falsely claimed coverage is not
+coverage**, and I had never checked whether the cells were covered by YORUBA. My first response was to write
+another classifier for an opaque boolean, which was the same mistake again. So: read all 253 examples and judge.
+
+### What the cells actually contain
+
+| cell | what its examples are |
+|---|---|
+| `ordinal-range` | **all 5 are GERMAN library catalogue entries** — `Bamberger Mittelasienstudien: Konferenzakten, Bamberg 15. - 16. Juni 1990` |
+| `clock` | `N140.00`, `N600.00`, `N180.00` — currency amounts matching `\d{1,2}[.:]\d{2}` — plus a Bible verse (`Johanu 8:34`). **No clock at all** |
+| `abbrev` | plain Ẹ̀gbá-history prose with no visible abbreviation |
+| `latin-in-native` | plain Yoruba prose — the cell is **meaningless for a Latin-script language** |
+| `ampersand` | English bibliography and HTML entities (`23&nbsp;cm`, `1938&ndash;February`) — an `&nbsp;` is not an ampersand anyone says |
+| `exponent` | 3 Greek, 1 English caption, 1 LaTeX, ~2 Yoruba |
+| `initialism` | mostly ALL-CAPS glossary headwords (ÀKÚNMI, ÒKELÈ), not initialisms |
+| `signs` | linguistics notation (`IS; + [----- APOR]`) and English dictionary entries |
+| `rate`, `roman`, `zero-width`, `grouped`, `percent`, `degrees`, `dotted`, `units`, `year` | genuinely covered, in Yoruba |
+
+So "32 cells covered" was substantially false and my comparison against the re-mine's 30 was not a comparison.
+
+### ⚠ Four real defects the reading found, all now fixed
+
+1. **The vigesimal series continues past 100 and the compositor did not.** `Ogóje náírà (N140.00)` and
+   `ọgọ́sàn-án náírà (N180.00)` sat in the `clock` cell. The bases step by TWENTY — ọgọ́fà 120 (6×20), ogóje 140,
+   ọgọ́jọ 160, ọgọ́sàn-án 180 — with the intervening tens as àádọ́- forms, each glossed with its own digits (120
+   ×6, 140 ×5, 150 ×3, 160 ×4). The layer had been emitting `ọgọ́rùn-ún ó lé ogójì` for 140, which the corpus
+   never writes. The lé/dín machinery composes onto those bases and the glosses prove it: `mẹ́tàdínlógóje` (137),
+   `márùn-ún-dín-lógósàn-án` (175), `marundinlogofa` (115), `marundinlaadoje` (125), `kàndínnígba` (199).
+   ⚠ And my GUESSED fused forms were wrong — `lédọ́je` 0 hits, `lọ́gba` 1 — where the corpus writes `láàdóje` (7)
+   and `nígba` (117). Read off the glosses rather than derived.
+2. **A speed reading, glossed 36 times, entirely unread.** `iyara ti kilomita ọgọrin ni wakati okan (80km/w)` —
+   and `w` is the Yoruba abbreviation (wákàtí), beside the borrowed `km/h`. `80km/w` now reads
+   *80 kìlómítà ni wákàtí kan*. Declared via `rateDenominators` so a one-letter key cannot match standalone —
+   the tier's `Il-76s` → "seconds" lesson.
+3. **`ìyí` is the angular degree word** — `o ni igun kan to je 90° (Aadorun iyi)`, glossed in a geometry article.
+   The bare ° is still refused, but now for the right reason: its instances here are Italian ordinal markers
+   (`17 °`, `2 °Annual` — foreign lines), English `360° view`, and temperatures, and `ìyí` (64) is ambiguous with
+   ìyì "value/honour". A better-informed refusal rather than "no word exists".
+4. Further numeral glosses to score against, all reproducing: `mẹ́tàlélẹ́ẹ̀dẹ́gbẹ́ta` (503),
+   `ẹgbẹ̀rún méjì-dún-láàádọrin` (68,000), `ìlú mẹ́tàlélẹ́ẹ̀dẹ́gbẹ́ta` (503), `ogóje` (140), `ẹgbẹ̀ta` (600).
+   ⚠ One diverges: `márùn-ún lé lọ́gọ́jọ (165)` makes 5 ADDITIVE on 160 where six other glosses make it
+   subtractive from the ten above. The majority is followed and the divergence recorded.
+
+### And the re-mine, judged the same way
+
+Ran it and READ the result rather than comparing counts. It is not an improvement:
+  · GAINS — the Greek SI lines and the HTML entities are gone; one genuine clock appears (`pm (15:30 UTC)`).
+  · LOSES — `ordinal-range` and `version-dot` disappear; several entries become MID-SENTENCE FRAGMENTS
+    (`82663 egbegberun km² .`, `2 egbegberun km² (11.`); `ampersand` becomes English date-lists (`S&P 500`,
+    `Canadian pop/R&B singer`); `signs` picks up wiki heading markup (`==Bí wọ́n ṣe tẹ ìlú ẹ̀gbá dó==`).
+
+Both artifacts carry a lot of non-Yoruba material for the same reason: selection is ADVERSARIAL — it prefers
+symbol-dense segments — and English bibliography, ISBNs, date-lists and citation strings are symbol-dense. That is
+a SELECTOR problem, not a filter one, and the filter added in Run 15 cannot reach it. The artifact is left as it
+is; the honest statement is that this language's hard-set is partly not Yoruba, in both versions.
+
+3,098 tests. `review.ts --lang yo`: 9 of 10.

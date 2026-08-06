@@ -68,6 +68,33 @@ describe("yoruba cardinals — the corpus's own numeral↔digit glosses", () => 
         expect(yorubaCardinal(900)).toBe("ẹ̀ẹ́dẹ́gbẹ̀rún");   // glossed `ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m)`
     });
 
+    test("⚠ the vigesimal series CONTINUES past 100 — 101-199 is not hundred-plus-remainder", () => {
+        // Found by READING the artifact instead of counting its cells: `Ogóje náírà (N140.00)` and
+        // `ọgọ́sàn-án náírà (N180.00)` sat in the `clock` cell, which a counting audit had called covered. The
+        // bases step by TWENTY (ọgọ́fà 120 = 6×20, ogóje 140 = 7×20, ọgọ́jọ 160, ọgọ́sàn-án 180) with the
+        // intervening tens as àádọ́- forms, each glossed with its own digits: 120 ×6, 140 ×5, 150 ×3, 160 ×4.
+        // This layer used to emit `ọgọ́rùn-ún ó lé ogójì` for 140, which the corpus never writes.
+        expect(yorubaCardinal(120)).toBe("ọgọ́fà");
+        expect(yorubaCardinal(130)).toBe("àádọ́je");
+        expect(yorubaCardinal(140)).toBe("ogóje");
+        expect(yorubaCardinal(150)).toBe("àádọ́jọ");
+        expect(yorubaCardinal(160)).toBe("ọgọ́jọ");
+        expect(yorubaCardinal(180)).toBe("ọgọ́sàn-án");
+    });
+
+    test("⚠ and lé/dín compose onto those bases, which is what the glosses prove", () => {
+        expect(yorubaCardinal(137)).toBe("mẹ́tàdínlógóje");          // glossed `mẹ́tàdínlógóje(137)` — 3 from 140
+        expect(yorubaCardinal(175)).toBe("márùndínlọ́gọ́sàn");       // glossed `márùn-ún-dín-lógósàn-án (175)`
+        expect(yorubaCardinal(115)).toBe("márùndínlógófà");           // glossed `marundinlogofa(115)`
+        expect(yorubaCardinal(125)).toBe("márùndínláàdóje");          // glossed `marundinlaadoje(125)`
+        expect(yorubaCardinal(139)).toBe("mọ́kàndínlógóje");          // glossed `kàndínlógóje(139)`
+        expect(yorubaCardinal(195)).toBe("márùndínnígba");            // glossed `marundinnigba(195)`
+        expect(yorubaCardinal(199)).toBe("mọ́kàndínnígba");           // glossed `kàndínnígba(199)`
+        // ⚠ ONE GLOSS DIVERGES: `márùn-ún lé lọ́gọ́jọ (165)` makes 5 ADDITIVE on 160, where six other glosses
+        // (115, 125, 135, 155, 185, 195) make it subtractive from the ten above. The majority is followed.
+        expect(yorubaCardinal(165)).toBe("márùndínláàdósàn");
+    });
+
     test("a hundred joins its remainder with `ó lé` — glossed twice over", () => {
         expect(yorubaCardinal(280)).toBe("igba ó lé ọgọ́rin");        // glossed (280) ×4
         expect(yorubaCardinal(450)).toBe("irinwó ó lé àádọ́ta");      // glossed (450) ×4
