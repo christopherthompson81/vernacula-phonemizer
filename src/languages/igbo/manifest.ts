@@ -23,6 +23,8 @@ export interface IgboManifest {
         million: string;
         billion: string;
         and: string;
+        /** The decimal separator, `ntụkpọ`. ⚠ DICTIONARY-SOURCED, not corpus — see igbo.jsonc for why. */
+        decimalWord: string;
     };
 }
 

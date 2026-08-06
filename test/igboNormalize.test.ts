@@ -25,7 +25,9 @@ describe("igbo normalization", () => {
         // Spoken: `pasent 60`, word first — 1,161 occurrences against 87 the other way, and those 87 are comma
         // boundaries (`2004, pasent`). Same shape as Turkish `yüzde 40`.
         expect(String(phonemize("60%", "ig"))).toBe("pasent iɾi isii");
-        expect(String(phonemize("8.3%", "ig"))).toBe("pasent asatɔ atɔ");
+        // With a decimal, the percent word still leads and the separator lands between the halves — this is the
+        // assertion that catches rule 4 running before the symbol tier (which gave *asatɔ pasent atɔ*).
+        expect(String(phonemize("8.3%", "ig"))).toBe("pasent asatɔ ntʊk͡pɔ atɔ");
     });
 
     test("currency: ₦ and $, word after the number", () => {
@@ -48,18 +50,24 @@ describe("igbo normalization", () => {
         expect(String(phonemize("A & B", "ig"))).toBe("a na b");
     });
 
-    test("⚠ the decimal fraction is read DIGIT BY DIGIT, and the period must not survive", () => {
-        // No word exists to voice it. Igbo borrows its symbol vocabulary freely (pasent, dollar, naira) but does NOT
-        // borrow "point": zero digit-point-digit instances, and the 89 whole-word `point` hits are all English text
-        // inside the Igbo wiki. `ntụpọ` (552) is a SPOT/blemish; `akara` (16,476) is a mark or score — the corpus
-        // writes `akara 2.3 na 2.7` with a bare period and no separator word. `ǹtụkpọ` and every variant: 0.
-        //
-        // Leaving the period alone is NOT neutral — TOKEN treats `.` as clause punctuation, so `2.5` read
-        // *abʊɔ . ise*, a sentence break inside a number. Digit-by-digit is what sources.ts prescribes for a
-        // "[NONE] decimal-point" language.
-        expect(normalizeIgbo("2.5")).toBe("2 5");
-        expect(normalizeIgbo("3.14159")).toBe("3 1 4 1 5 9");
-        expect(String(phonemize("3.14159", "ig"))).toBe("atɔ otu anɔ otu ise itoolu");
+    test("⚠ the separator is `ntụkpọ`, which the corpus does not contain — a dictionary settles it", () => {
+        // ⚠ THIS ASSERTION USED TO PIN THE OPPOSITE: `2.5` → "2 5", separator silent, on the grounds that no word
+        // exists. Every corpus probe was empty (zero digit-point-digit; `ntụkpọ` and every variant 0; the 89
+        // whole-word `point` hits all English text inside the Igbo wiki; `ntụpọ` 552 but meaning a SPOT/blemish;
+        // `akara` 16,476 but a mark or score, and the corpus writes `akara 2.3 na 2.7` with a bare period). The
+        // dictionary reading is `ǹtụ̀kpọ`, n. "decimal point; decimal number" — Nkọwa okwu, whose own example is
+        // definitional: "E ji ntụkpọ ekewapụ nọmba nnuzuroke na nọmba ọgwa". A written corpus is weak evidence
+        // about a SPOKEN symbol: writers type `2.5`, they never spell out how they say it.
+        expect(normalizeIgbo("2.5")).toBe("2 ntụkpọ 5");
+        // Untoned, like every other word this layer emits — igbo.ts reads tone only when marked, and the toned
+        // headword would voice ˩ tones (n̩˩tʊ˩k͡pɔ) that Igbo standard orthography does not write.
+        expect(String(phonemize("2.5", "ig"))).toBe("abʊɔ ntʊk͡pɔ ise");
+        // The fraction stays digit-by-digit AFTER the word: "three point one four one five nine".
+        expect(normalizeIgbo("3.14159")).toBe("3 ntụkpọ 1 4 1 5 9");
+        expect(String(phonemize("3.14159", "ig"))).toBe("atɔ ntʊk͡pɔ otu anɔ otu ise itoolu");
+        // And the period still must not survive as punctuation — TOKEN treats `.` as a clause break, so the
+        // untreated `2.5` read *abʊɔ . ise*, a sentence boundary inside a number.
+        expect(normalizeIgbo("2.5")).not.toContain(".");
     });
 
     test("a sentence-final period is untouched", () => {

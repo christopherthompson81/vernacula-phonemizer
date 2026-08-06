@@ -64,7 +64,21 @@
         "thousand": "puku",                                                      //  9,000-odd
         "million": "nde",                                                        //  6,983 whole-word
         "billion": "ijeri",                                                      //  1,709
-        "and": "na"                                                              // iri na otu 2,056
+        "and": "na",                                                             // iri na otu 2,056
+        // THE DECIMAL SEPARATOR — `ǹtụ̀kpọ`, n. "decimal point; decimal number".
+        //
+        // ⚠ THE ONLY WORD IN THIS TABLE WITH NO CORPUS COUNT BESIDE IT, and the only one a corpus could not have
+        // supplied: 0 hits for it and every variant, 0 digit-point-digit instances, and the 89 whole-word `point`
+        // hits are all English text inside the Igbo wiki. `ntụpọ` (552) is a near-miss meaning a SPOT/blemish.
+        // Sourced instead from Nkọwa okwu (nkowaokwu.com), an Igbo dictionary published by a 501(c)(3) nonprofit,
+        // whose own example is definitional: "E ji ntụkpọ ekewapụ nọmba nnuzuroke na nọmba ọgwa" — "ntụkpọ is used
+        // to separate whole numbers from fractions". Cited as one lexical fact; no site text is reproduced.
+        //
+        // A WRITTEN corpus is the weakest evidence there is about how a symbol is SPOKEN — writers type `2.5` and
+        // never spell out how they say it — so silence here meant nothing, and the layer's first version wrongly
+        // read the fraction with the separator dropped. Stored UNTONED like every other entry: standard Igbo
+        // orthography omits tone and igbo.ts voices it only when marked.
+        "decimalWord": "ntụkpọ"
     },
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ","
