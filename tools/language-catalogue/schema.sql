@@ -65,14 +65,25 @@ CREATE TABLE languages (
     -- If this language is served by ANOTHER language's engine as a labelled approximation (rather than a bespoke
     -- module), the code of that sibling — e.g. Magahi (mag) served_by 'bho'. NULL = its own bespoke module (or
     -- not implemented). An aliased row is still `decision='implemented'` (the code works) but carries no verdict.
-    served_by        TEXT REFERENCES languages(code),
+    -- ⚠ DEFERRABLE, because the rows arrive in catalogue.tsv's order and an alias may precede its target: `bgc`
+    -- references `hi`, which is inserted later, so an immediate check fails on a file that is perfectly valid.
+    -- Deferred to COMMIT, with build.py inserting inside one transaction.
+    served_by        TEXT REFERENCES languages(code) DEFERRABLE INITIALLY DEFERRED,
 
     pr               TEXT,                      -- PR / commit reference
     notes            TEXT,
 
     -- An implemented row carries no rejection reason; a rejected row must state one.
     CHECK (decision != 'implemented' OR rejection_reason IS NULL),
-    CHECK (decision != 'rejected'    OR rejection_reason IS NOT NULL)
+    CHECK (decision != 'rejected'    OR rejection_reason IS NOT NULL),
+
+    -- ⚠ AN ALIASED ROW CARRIES NO VERDICT, which the comment on `served_by` above has always said and nothing
+    -- enforced. `af` was recorded as `served_by='native'` — a SENTINEL, not a language code — while also carrying
+    -- a verdict and notes describing its own bespoke g2p, i.e. it was a native module wearing an alias marker for
+    -- what NULL already means. The pair is the tell: `bgc` and `zsm` are real aliases and have no verdict, `af`
+    -- had both. Enforced now, along with foreign keys (build.py turns them on), so `served_by` must name a row
+    -- that exists and cannot be used as a free-text flag again.
+    CHECK (served_by IS NULL OR verdict IS NULL)
 );
 
 CREATE INDEX idx_decision ON languages(decision);
