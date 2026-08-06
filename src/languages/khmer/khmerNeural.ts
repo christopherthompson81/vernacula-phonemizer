@@ -31,8 +31,8 @@ export async function phonemizeKmNeural(text: string): Promise<string> {
     if (segmenterP === undefined) segmenterP = createKhmerSegmenter();
     const segmenter = await segmenterP;
     if (!segmenter) {
-        // No BiLSTM → the ordinary sync path, perceptron boundaries and all (end-to-end 76.7% against the
-        // BiLSTM's 80.4%). Falling back to `segment: false` here would silently be the WORST of the three.
+        // No BiLSTM → the ordinary sync path, perceptron boundaries and all (end-to-end 79.2% against the
+        // BiLSTM's 83.5%). Falling back to `segment: false` here would silently be the WORST of the three.
         segmenting ??= createKhmer();
         return segmenting.text(text);
     }

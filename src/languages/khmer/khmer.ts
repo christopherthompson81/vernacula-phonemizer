@@ -231,9 +231,16 @@ const TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
  * cannot see: measured on 4,000 junctions where a writer actually typed U+200B, joining two words corrupts the
  * reading 54.6% of the time (`នៅ|សតវត្ស` → *nɨwhtɑʋɑt* against *nɨw + sɑtɑʋoət*, a coda stolen and a syllable
  * lost). `khmerPerceptron.ts` predicts those boundaries and inserts U+200B, which TOKEN already breaks runs on;
- * end-to-end agreement with the boundary-aware reading goes 44.7% → 76.7%.
+ * end-to-end agreement with the boundary-aware reading goes 44.7% → 79.2%, and against independent human
+ * gold (wikipron) 36.4% → 80.4%.
  *
- * ⚠ AND THE ASYNC PATH MUST PASS `segment: false`. `khmerNeural.ts` restores boundaries with the BiLSTM (80.4%)
+ * ⚠ IT COSTS ~2.6x THE SYNC PATH'S TIME, measured rather than assumed: 3,480 characters of Khmer prose take
+ * 2.4 ms unsegmented against 6.2 ms with restoration, i.e. ~1.8 µs per character. That is the price of a Map
+ * lookup for each of 11 features at every character position, and it is paid on every `phonemize` call for this
+ * language. Recorded because it is a real regression in a hot path, accepted because the readings it fixes are
+ * more than half of all word junctions.
+ *
+ * ⚠ AND THE ASYNC PATH MUST PASS `segment: false`. `khmerNeural.ts` restores boundaries with the BiLSTM (83.5%)
  * before calling this, and running the perceptron over an already-segmented run would let it split the pieces
  * AGAIN — two models compounding each other's over-splits. The flag exists for that one caller.
  */

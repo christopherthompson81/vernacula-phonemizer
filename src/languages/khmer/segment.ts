@@ -28,6 +28,12 @@
  * the hard half — only runs a human chose to split. End to end over all ៗ antecedents the expectation is roughly
  * 24% + 0.547 × 76% ≈ 66% correct, against 24% for repeating the whole run.
  *
+ * ⚠ AND IT NO LONGER HAS A RUNTIME CONSUMER. The ៗ rule — the reason this module was written — now takes its
+ * boundary from `khmerPerceptron.ts`, which scores 78.7% on exactly this task against this module's 51.9% on the
+ * same held-out runs. `lastKhmerWord` is retained as the FALLBACK for when the perceptron's weight table is
+ * missing, and `km-wordfreq.tsv` is still the baseline that `train_km_segmenter.py` scores the neural models
+ * against. Kept rather than deleted for that reason; not because anything reads it in the hot path.
+ *
  * ⚠ THIS IS NOT WIRED INTO THE g2p PATH, and that is deliberate. `khmer.ts` still phonemizes a maximal run as
  * one unit. Segmenting there would change the pronunciation of ALL Khmer text — the shipped exceptions lexicon
  * would start hitting on words rather than runs — and the measured gain is small: the lexicon hit rate moves

@@ -44,7 +44,6 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { phonemize } from "../../src/index.ts";
 import { createKhmer } from "../../src/languages/khmer/khmer.ts";
 import { createKhmerSegmenter } from "../../src/languages/khmer/khmerSegmenter.ts";
 import { makeFold } from "../referee-eval/eval.ts";

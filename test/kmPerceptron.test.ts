@@ -39,6 +39,22 @@ describe("khmer boundary perceptron", () => {
         expect(segmentRun("ខែមករា").length).toBeGreaterThan(1);
     });
 
+    test("⚠ the feature WIRE FORMAT still matches the trainer's", () => {
+        // The feature strings ("a"+char, "g"+bigram, "k"+trigram, "^" for padding) are a contract between
+        // tools/khmer/train_km_perceptron.py's `feats()` and khmerPerceptron.ts's `score()`. Nothing in the type
+        // system couples them: rename a prefix on one side and every affected weight silently stops being found —
+        // no error, just a quietly worse model. Cross-checked identical at generation time (Python and TS produced
+        // byte-identical score vectors), and these expectations were emitted BY THE PYTHON TRAINER so that a drift
+        // on either side breaks this test.
+        const FROM_TRAINER: readonly [string, readonly string[]][] = [
+        ["ខែមករា", ["ខែ", "មករា"]],
+        ["នៅសតវត្ស", ["នៅសតវត្ស"]],
+        ["ព្រះរាជាណាចក្រកម្ពុជា", ["ព្រះ", "រាជាណាចក្រ", "កម្ពុជា"]],
+        ["អារម្មណ៍នោះ", ["អារម្មណ៍", "នោះ"]],
+        ];
+        for (const [run, want] of FROM_TRAINER) expect(segmentRun(run), run).toEqual(want);
+    });
+
     test("it is deterministic — the same run always segments the same way", () => {
         const a = segmentRun("ព្រះរាជាណាចក្រកម្ពុជា");
         expect(segmentRun("ព្រះរាជាណាចក្រកម្ពុជា")).toEqual(a);

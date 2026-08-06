@@ -102,7 +102,7 @@ same split (`tools/khmer/train_km_perceptron.py`, which replicates the split rat
 | averaged perceptron | 80.1% | 91.8% | 85.5% | 79.2% | **none** |
 | **BiLSTM (this model)** | 82.3% | 96.8% | **89.0%** | **83.5%** | onnxruntime-node |
 
-The perceptron uses features a segmenter could have used in 2007, so **62.6 → 82.8 is the LABEL CLEANING, not the
+The perceptron uses features a segmenter could have used in 2007, so **66.8 → 85.5 is the LABEL CLEANING, not the
 architecture**; the BiLSTM adds 3.9 F1 on top. Its advantage is specifically RECALL on lexicalised collocations —
 it misses 301 boundaries where the perceptron misses 1,216, at the same spurious rate — which is what seeing the
 whole run buys over a 5-character window.
@@ -118,7 +118,7 @@ are over-splits, 87% of them inside tokens absent from `km-wordfreq.tsv` and 95%
 
 Those 3,912 are positions the label pipeline's layer 3 defaulted to 0 because the token was too rare to estimate,
 and 33.7% of them split between two KNOWN words — `និង(40204)|ជញ្ជាំង(158)`, `ចូល(3641)|រួម(1517)`. Verified errors
-are 348 of 97,811 = **0.36%**. True precision lies between 78.1% and ~99%; the corpus cannot settle it without
+are 348 of 97,811 = **0.36%**. True precision lies between 82.3% and ~99%; the corpus cannot settle it without
 annotation, so it is quoted as the floor.
 
 **What it genuinely misses** are junctions between two frequent known words — មហា|ក្សត្រ, ជា|មួយ, ដឹក|នាំ,
