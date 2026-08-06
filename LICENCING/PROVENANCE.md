@@ -19,7 +19,7 @@ by the git repo itself, so the repo-level license must account for them.
 
 The repo is structured as **MIT for the code and own-work data, with fenced data files that carry
 their parent licenses** (CC-BY-SA, CC-BY, CC0, and two GPL-lineage files), declared per file in
-this map. Remaining pre-publication work is §5 — the license-file architecture itself.
+this map. Remaining pre-publication work is §6 — the license-file architecture itself.
 
 ---
 
@@ -38,7 +38,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `hebrew/he-tagger.int8.onnx` (majority tier) | Nakdimon pre-modern PD subset | PD (modern/wiki slice → §3) |
 | `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts |
 | `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts |
-| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable; own word selection) | Facts |
+| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable): one abstract feature per word, measured with espeak-ng 1.52 over an external frequency wordlist — §5.1 for why the instrument is not the source | Facts |
 | `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist | Facts |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
@@ -109,6 +109,9 @@ derives from it and it is not wired into referee-eval).
 
 ## 4. Copyleft — fenced under GPL
 
+Shipped files only. GPL-licensed sources that were *consulted* without shipping anything — espeak-ng
+1.52, calima-egy — are in §5 and item 3 below.
+
 1. **`arabic/diacritization.tsv`** — upstream compilation (Tashkeela) is tagged GPL-2.0; the
    underlying classical texts are PD. Shipped under the facts posture (mechanical
    frequency table; no selection/arrangement reproduced), Tashkeela credited in NOTICE with the
@@ -122,7 +125,112 @@ derives from it and it is not wired into referee-eval).
 3. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
    in NOTICE; nothing distributed derives from it.
 
-## 5. License architecture (to implement at publication)
+## 5. Referee and verification sources — consulted, not shipped
+
+Sources that shaped **what** the repo ships without contributing distributable expression **to** it.
+They were read as *witnesses* — does this word exist, how is it spelled, what does an independent
+transcription say — and the artifact was then authored, adjudicated or measured here. They are listed
+because the determination that nothing distributable derives from them is part of this map, and
+because credit is owed either way. Only the Catalan pair below leaves an artifact in `src/`, and that
+one is a *measurement* taken with a tool rather than data copied from it (§5.1); everything else in
+this section informed a decision and left no bytes.
+
+| Source | License | Role |
+|---|---|---|
+| **espeak-ng 1.52** — `dictsource/<lang>_list`, `<lang>_extra` | GPL-3.0 | word-hole witness, coverage baseline, and the instrument behind one measured fact-table (§5.1) |
+| **Wiktionary** — via wikipron, kaikki, and the MediaWiki API | CC-BY-SA 3.0/4.0 | the primary referee family: the 188 human sets in the §3 eval stratum, and the measured floor behind every language in `docs/language-maturity.md` |
+| **epitran** | MIT (code); the wordlists it was run over are often kaikki | the independent *programmatic* second opinion — 32 outputs, used as a deliberately fallible corroborator, never as a target |
+
+### 5.1 espeak-ng 1.52
+
+The long-running fallback for the sourcing problem the normalization work kept hitting: a numeral
+spelling, a letter name, or a symbol word that no in-repo referee carries. The dictsource tier is read
+**as plain files** — `tools/normalization/sources.ts` reads `$ESPEAK_NG/dictsource/` directly and the
+playbook's standing rule is never to invoke the binary — so nothing links against it. (The one
+exception is the Catalan build below, which ran `espeak-ng -q --ipa` as a separate offline step; still
+no linkage, but worth stating rather than implying a blanket rule.) Four distinct contributions:
+
+1. **The sourcing haystack.** `sources.ts` mechanises espeak's dictsource as one tier — ranked
+   *below* the FLEURS corpus and the referees — for letter-name blocks, the decimal separator
+   (`_dpt` vs the punctuation mark `_.`), symbol words, and whether an ordinal/fraction series
+   exists to compose from. The same tier is named in `attest.ts`, `concept.ts`, `review.ts` and the
+   60 `tools/corpus/attest/*.jsonc` headers.
+2. **Word holes closed.** Where a language's corpus and referees were both silent, espeak was often
+   the single witness that settled a spelling — letter names for the initialism pass, currency and
+   unit words, `%`, `×`, `÷`, `<`, `>`, `&`, and the vulgar fractions.
+3. **Negative evidence, which mattered as much.** "espeak ships no Zulu and no Xhosa at all" is what
+   *closes* a sourcing question rather than leaving it open; several deliberate no-word-emitted
+   decisions rest on the haystack being provably empty, and espeak is one of the tiers that makes
+   that provable.
+4. **Coverage baseline.** The `espeak` column in `tools/language-catalogue/catalogue.tsv` (1 = a
+   voice exists, 0 = none) is one of the inputs to picking the next language.
+
+**It is a witness, never an oracle**, and that was measured rather than assumed: espeak is phonetic
+and cannot hand over orthography, so every spelling derived from it was round-tripped through this
+repo's own g2p and matched against an independent referee where one existed. The Punjabi 61–99 run
+built exactly that pipeline for the 39 numerals its referee lacked, then validated it against the 36
+the referee *does* carry — **8 of 36 (22%) were espeak being wrong about the word**, and the 39 were
+not shipped on that basis. The method and the measurement are in
+`docs/normalization_playbook.md` §5c. What ships is the adjudicated word — a linguistic fact. No
+dictsource rules, phoneme tables, or arrangement are reproduced.
+
+#### The Catalan tables — a measurement, not a copy
+
+`catalan/mid-vowels.tsv` and `bl-gl-geminate.tsv` (§1) are the only shipped files espeak touched, via
+`tools/gen/build-ca-midvowels.mts` / `build-ca-geminate.mts`. The *shape* of that build is the whole
+determination, so it is recorded here rather than left as "espeak-derived":
+
+- **The word list is external.** Rows are keyed by a 50k frequency wordlist, charset-filtered. espeak
+  contributed no words and chose no row of either table. The selection-and-arrangement that
+  compilation copyright attaches to points at the frequency corpus, not at espeak.
+- **espeak was the instrument, not the source** — run over that externally-chosen list as a measuring
+  device: word in, IPA out.
+- **One bit per word survives.** `build-ca-midvowels.mts` locates the stress mark and reads **the
+  single character after it**; if that character is `e` or `o` the word is flagged close, and the rest
+  of the transcription is discarded unread. `build-ca-geminate.mts` is one regex test
+  (`/bbl|ɡɡl|ggl/`) reduced to a boolean. Neither script retains an IPA string.
+- **Only deviations are stored.** The engine defaults to open (ɛ/ɔ), so a row exists only where a word
+  departs from the default. The tables are the *complement* of the rule, not a lexicon.
+
+Two independent grounds, strongest first. This is **program output**: the ordinary analysis — and the
+FSF's own, which is why GCC's output is not GPL and why Bison needed an explicit exception precisely
+because it copied skeleton *code* into its output — is that running a GPL program over your own input
+does not make the output a derivative of the program, absent parts of the program being embedded in
+it. Nothing of espeak's source, rules, or dictionary is embedded in `word<TAB>e`. Only as
+belt-and-braces does the facts posture apply: an enum-valued predicate over externally-chosen keys
+carries no expression, and **any correct source would produce the same table** — the mid-vowel height
+of *dona* vs *dóna* is a dictionary fact of Central Catalan (DCVB/GDLC-verifiable), so two engines
+that are both right are byte-identical here.
+
+**What does genuinely depend on espeak is its mistakes.** Where 1.52 was wrong about a word, the table
+carries the wrong bit. That is a *quality* dependency, not a licensing one, and it is falsifiable row
+by row against DCVB/GDLC — which is also the fallback if the posture is ever revisited: re-measure the
+same external wordlist against a dictionary source and both tables regenerate with espeak out of the
+loop. espeak-ng credited in NOTICE regardless.
+
+⚠ **Open item:** with espeak established as the instrument rather than the source, the 50k Catalan
+frequency wordlist becomes the only upstream that meaningfully touches these two tables, and its own
+provenance is not yet pinned down in this map (it lives outside this repo). Resolve before publication
+— if it is a Wikipedia-dump ranking or a hermitdave FrequencyWords list, it is CC-BY-SA and the
+*selection* needs the §3 treatment even though the per-word values do not.
+
+Note that `irish/lexicon.tsv` and the Welsh bootstrap are **not** espeak 1.52 derivatives, despite
+the surface similarity — both come from the author's own repaired engines (espeak 1.52's `ga` was
+broken, which is why the repair existed).
+
+### 5.2 Wiktionary and epitran
+
+Both already appear in this map as *shipped* data where their content is redistributed —
+Wiktionary-derived lexica are the §3 share-alike stratum, and the eval referee sets are fenced there
+too. They are repeated here for the role that fencing doesn't capture: they are the reason any
+quality claim in this repo is falsifiable. wikipron and kaikki supply the human transcriptions each
+engine is scored against; epitran supplies a *mechanically independent* second opinion whose
+disagreements are treated as candidates to adjudicate, not as bugs. A language with neither is
+recorded as `🔷 single-source` or `⛔ cannot-verify` in `docs/language-maturity.md` rather than
+quietly reported as fine — an evidence verdict those two sources define the boundary of.
+Attribution is owed under CC-BY-SA regardless of whether a given use shipped bytes.
+
+## 6. License architecture (to implement at publication)
 
 1. **Repo license: MIT** — covers all code, jsonc manifests, hand-authored tables, in-repo gold
    referees, and the §1 artifacts; the default for everything not fenced.
@@ -134,7 +242,8 @@ derives from it and it is not wired into referee-eval).
    kanjium, EDRDG (their required wording), Wiktionary/wikipron/kaikki, ChhoeTaigi (台華線頂對照典
    / iTaigi), Lexique (New & Pallier), Tashkeela (+posture statement), CATT, Phonikud/ReNikud,
    Nakdimon, Sharif GE2PE, Lexibank/ASJP, **Amar Fayaz Buriro / SindhiLanguage.org** (named,
-   mandatory), Toulmin/Wilde/Saksena/Grierson citations.
+   mandatory), Toulmin/Wilde/Saksena/Grierson citations, and the §5 referee sources —
+   **espeak-ng** (+posture statement, per §5.1) and **epitran**.
 4. **Package fencing** — the npm/dist package ships `src/` only; a `--permissive` build profile
    that excludes §3/§4-fenced data files (engines fall back to rules/taggers) is mechanically
    derivable from this map if a fully-MIT distributable is ever wanted.

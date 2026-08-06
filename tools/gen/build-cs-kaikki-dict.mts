@@ -2,8 +2,7 @@
  * Build the Czech LOANWORD lexicon (src/languages/czech/loanwords.tsv) from the kaikki.org Wiktionary Czech dump —
  * the words the native rules mis-derive, chiefly di/ti/ni NON-palatalization in loanwords (stadion→stadɪjon, not
  * the native staɟɪjon; studie, technik) + loanword long í + foreign names. The rules correctly palatalize NATIVE
- * di/ti/ni (tisíc→cɪsiːts), so ONLY the exceptions are dictionaried (espeak-ng-portable's "rules-can't-derive"
- * methodology, as used for Thai).
+ * di/ti/ni (tisíc→cɪsiːts), so ONLY the exceptions are dictionaried.
  *
  * CIRCULARITY (accepted, documented): kaikki ces and the wikipron ces referee are BOTH Wiktionary (separate
  * extractions), so a dictionaried word tends to match wikipron — the wikipron number is not fully independent for
