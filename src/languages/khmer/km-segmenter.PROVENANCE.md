@@ -38,8 +38,12 @@ than quoting two different experiments:
 
 | model | P | R | F1 |
 |---|---|---|---|
-| unigram Viterbi (`segment.ts`) | 53.5% | 75.5% | 62.6% |
-| **BiLSTM tagger (this model)** | **78.1%** | **97.5%** | **86.7%** |
+| unigram Viterbi (`segment.ts`) | 60.1% | 75.3% | 66.8% |
+| **BiLSTM tagger (this model)** | **82.3%** | **96.8%** | **89.0%** |
+
+⚠ These are measured against the DICTIONARY-EXPANDED labels (layer 4 below). The earlier label set gave
+78.1/97.5/86.7 for this model and 53.5/75.5/62.6 for the baseline — both moved, because a change to the labels
+changes what every model is scored against. Numbers are comparable WITHIN a label set, never across two.
 
 End-to-end on 3,000 writer-marked junctions (`tools/khmer/eval_km_segmenter.mts`) — agreement between the IPA and
 the boundary-aware reading, which is the quantity that actually matters:
@@ -47,17 +51,45 @@ the boundary-aware reading, which is the quantity that actually matters:
 | | matches the boundary-aware reading |
 |---|---|
 | sync engine, no segmentation | 44.7% |
-| **with this model** | **80.4%** |
+| **with this model** | **83.5%** |
 
-1,309 junctions fixed against 240 broken (5.5:1), net **+35.6%**. The boundary lands on the human's exact position
-78.0% of the time.
+1,380 junctions fixed against 218 broken (6.3:1), net **+38.7%**. The boundary lands on the human's exact position
+82.3% of the time.
 
-**⚠ F1 and the downstream metric disagreed, and the downstream one was a tie.** A positive class weight of 2.0
-scores F1 84.9 and 80.7% end-to-end; weight 1.0 scores F1 86.7 and 80.4%. The 0.3pp gap is nine utterances out of
-3,000 — noise. The shipped model is weight 1.0, chosen on the tie-breakers: 3.5pp more precision, and it stops
-shredding real words (`ថ្ងៃទីមករា` → `ថ្ងៃ|ទី|មករា` rather than `ថ្ងៃ|ទី|មក|រា`). Text outside this test
-distribution holds far more ordinary words than compound junctions, so precision is the safer side to err on.
-Recorded because F1 alone would have picked the other model.
+### Against INDEPENDENT human gold
+
+`tools/khmer/referee_km_segmenter.mts`. Gold is wikipron's human transcriptions; the input is REAL writer-marked
+junctions from the corpus, kept only where both words have a referee entry — natural text and independent gold at
+once. Scored on the folded segmental backbone with the fleet's own `makeFold`, applied PER WORD.
+
+| | agreement with the referee's two readings |
+|---|---|
+| each word read in ISOLATION (the ceiling) | 83.4% |
+| concatenated, NO segmentation | 36.4% |
+| concatenated + perceptron (sync) | 80.4% |
+| **concatenated + BiLSTM (async)** | **81.3%** |
+
+Share of the recoverable gap closed: perceptron **93.6%**, BiLSTM **95.4%**.
+
+⚠ **THREE EARLIER VERSIONS OF THIS MEASUREMENT WERE WRONG, AND ALL THREE READ TOO LOW** (~47%, then ~55%, then
+~63/70%). Recorded because each flaw is easy to reintroduce:
+  1. **Unnatural fixtures.** The pairs were built by combining referee ENTRIES rather than harvesting real text —
+     first alphabetically adjacent ones (which in Khmer share a mean 3.11-character prefix, with 729 pairs where
+     one word was literally a prefix of the other: `កង`+`កងពលតូច` → `កងកងពលតូច`), then randomly. Both feed models
+     trained on running prose strings no Khmer writer would produce, so the score described out-of-distribution
+     behaviour. This was the dominant error.
+  2. **The fold was applied to the wrong unit.** The km folds are WORD-anchored (`[ptkc]$ → ʔ` glottalises a
+     word-final stop), so folding two referee entries separately but the engine's whole output as one string
+     guarantees a mismatch whenever the first word ends in a stop — common in Khmer. Cost ~16 points: the boundary
+     was placed correctly (exactly one, right position) 72.2% of the time while the reading matched only 55.8%.
+  3. A **contamination worry that turned out not to be measurable, and not a problem.** The label dictionary and
+     this referee overlap 86.6%, so a "clean" subset was added to exclude the shared vocabulary — but on natural
+     text that subset contains **8 junctions**, because words in wikipron yet absent from a 62,101-form dictionary
+     barely occur in running prose. Which is the answer: the dictionary covers the vocabulary real text uses, and
+     teaching a model the words of the language is the intent rather than a leak.
+
+The corrected referee number (81.3%) now AGREES with the corpus eval (83.5%) instead of contradicting it, which is
+the outcome that should have been expected: two independent references on the same natural input.
 
 ## The linear baseline, and what it says about where the gain came from
 
@@ -67,8 +99,8 @@ same split (`tools/khmer/train_km_perceptron.py`, which replicates the split rat
 | model | P | R | F1 | end-to-end | dependency |
 |---|---|---|---|---|---|
 | unigram Viterbi | 53.5% | 75.5% | 62.6% | — | none |
-| averaged perceptron | 76.5% | 90.2% | 82.8% | 76.7% | **none** |
-| **BiLSTM (this model)** | 78.1% | 97.5% | **86.7%** | **80.4%** | onnxruntime-node |
+| averaged perceptron | 80.1% | 91.8% | 85.5% | 79.2% | **none** |
+| **BiLSTM (this model)** | 82.3% | 96.8% | **89.0%** | **83.5%** | onnxruntime-node |
 
 The perceptron uses features a segmenter could have used in 2007, so **62.6 → 82.8 is the LABEL CLEANING, not the
 architecture**; the BiLSTM adds 3.9 F1 on top. Its advantage is specifically RECALL on lexicalised collocations —
@@ -113,6 +145,16 @@ that most real boundaries are non-boundaries. `tools/khmer/build_km_segmenter_da
    ~85% no writer marked; ≤10% → trust the zero; **otherwise abstain**, masking the position out of loss and score.
 3. **Length guard** for sequences below 10 observations: a token longer than the dense subset's own p99 (13
    characters) is a suspected unmarked compound and is masked rather than fed as a negative.
+4. **An INDEPENDENT dictionary** — `tools/khmer/km-lexicon-words.txt`, 62,101 Khmer forms from
+   [google/language-resources](https://github.com/google/language-resources) `km/data/lexicon.tsv` under
+   **CC BY 4.0** (© 2018 Google Inc.; attribution recorded in that file's header). 57,577 were absent from our
+   ZWSP-harvested table. Layers 1-3 all derive from the same wiki text, so their blind spots are correlated — an
+   error analysis found 98.8% of this model's scored precision errors on positions layer 3 had merely DEFAULTED to
+   zero. A word list answers a different question: not "did a writer mark a boundary" but "is this a word at all".
+   A listed token needs no internal boundary (zeros CONFIRMED); an unlisted token that divides into two listed
+   words hides a real one. The `not listed` guard is what makes the split rule safe — `លើក` divides into two real
+   words but is itself listed, so it is never split. Yield: **+205,862 recovered boundaries** and **2,259,271
+   newly-confirmed zeros**, with undecidable masking falling 119,400 → 12,847.
 
 Yield: 1,504,641 runs / 32.7M characters, of which 1,202,385 typed boundaries plus **145,706 recovered** ones and
 10.05M supervised interior positions (32.2%). Abstention is what makes this sound rather than merely bigger —

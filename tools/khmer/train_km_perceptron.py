@@ -144,7 +144,16 @@ R = tp / max(1, tp + fn)
 F = 2 * P * R / max(1e-9, P + R)
 print(f"\nheld-out {len(hold):,} runs · {tp+fp+fn+tn:,} supervised positions")
 print(f"  averaged perceptron  P {100*P:.1f}%  R {100*R:.1f}%  F1 {100*F:.1f}%")
-print(f"  (BiLSTM on this split: P 78.1%  R 97.5%  F1 86.7% · unigram Viterbi: F1 62.6%)")
+# ⚠ Read from the BiLSTM checkpoint rather than hardcoded: the numbers moved when the labels gained the dictionary
+# layer, and a stale constant here would quietly misreport the comparison it exists to make.
+try:
+    import torch as _t
+    _h = _t.load(f"{OUTDIR}/km_segmenter.pt", map_location="cpu", weights_only=False).get("held_out", {})
+    _b = _h.get("baseline") or (None, None, None)
+    print(f"  (BiLSTM on this split: P {100*_h['P']:.1f}%  R {100*_h['R']:.1f}%  F1 {100*_h['F1']:.1f}%"
+          f" · unigram Viterbi: F1 {100*_b[2]:.1f}%)" if _h else "  (no BiLSTM checkpoint to compare against)")
+except Exception:
+    print("  (no BiLSTM checkpoint to compare against)")
 
 out = f"{OUTDIR}/km-perceptron.tsv"
 with open(out, "w", encoding="utf8") as fh:

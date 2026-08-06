@@ -304,3 +304,130 @@ lexicalisation, which matches the finding that 97 of the 301 misses are conteste
 **Not implemented.** Adopting it means rebuilding the labels, retraining both models and re-running both evals,
 and it incurs a CC BY 4.0 attribution obligation (the PROVENANCE convention already handles that). It is also a
 pronunciation dictionary, so it could separately feed the Khmer g2p exceptions lexicon.
+
+## Run 11 — 2026-08-05 19:15 · the dictionary layer, retrained — every metric moved
+
+Adopted `google/language-resources` `km/data/lexicon.tsv` as layer 4 (CC BY 4.0; 62,101 Khmer forms committed as
+`tools/khmer/km-lexicon-words.txt` with attribution). Label yield:
+
+    RECOVERED boundary (dictionary)      205,862      new positives
+    kept 0 (dictionary CONFIRMED)      2,259,271      previously-unverified zeros, now verified
+    masked (undecidable)          119,400 → 12,847    the dictionary resolves nearly every abstention
+
+Labels spot-checked again: `ទីក្រុង` → `|......` (the 11.3% abstention now resolved as one word) and
+`មហាក្សត្រ` → `|..|.....` (the model's single most-missed boundary, now labelled).
+
+| metric | ZWSP labels only | + dictionary |
+|---|---|---|
+| BiLSTM held-out P / R / F1 | 78.1 / 97.5 / 86.7 | **82.3 / 96.8 / 89.0** |
+| perceptron held-out P / R / F1 | 76.5 / 90.2 / 82.8 | **80.1 / 91.8 / 85.5** |
+| corpus end-to-end — BiLSTM | 80.4% | **83.5%** |
+| corpus end-to-end — perceptron | 76.7% | **79.2%** |
+| referee vs human gold | ⚠ every referee figure in Runs 9-12 was mis-measured — see Run 13 |
+
+Precision gains (+4.2pp BiLSTM, +3.6pp perceptron) are the expected shape: most of what the old metric scored as
+over-splitting was unverified labels, and confirming them converts phantom errors into correct predictions.
+
+⚠ **The unigram baseline moved too — 62.6 → 66.8 F1 — and that is not the baseline improving.** A change to the
+labels changes what every model is scored against. Numbers are comparable WITHIN a label set and never across
+two; both rows are kept for that reason.
+
+⚠ **A measurement bug my own sync change introduced, caught here.** `eval_km_segmenter.mts` built its
+"no segmentation" baseline with `phonemize()` — which now segments, because the perceptron ships in the sync path.
+Its baseline silently rose from 44.7% to 93.7% and the perceptron appeared to fix exactly ONE junction, because it
+was being compared against itself. Fixed by building the baseline with `createKhmer({ segment: false })`, which is
+what `referee_km_segmenter.mts` always did and why that tool was immune. The lesson is narrow and worth keeping:
+shipping a change into the default path can invalidate the harness that measured it.
+
+Full suite: 3,017 passing with the new models, no expectation changes needed.
+
+**Still open:** 20,995,495 positions remain masked by layer 3 — long unannotated runs whose whole token is neither
+a listed word nor a clean two-word division. A dictionary-DP segmentation of those runs would label them, but the
+labels would then be a heuristic's output rather than evidence, so it is deliberately not done.
+
+## Run 12 — 2026-08-05 19:30 · the referee jump was LEAKAGE, and the clean number says something different
+
+Run 11's referee gain (47.8% → 55.0%) was out of proportion to every other metric — +7.2pp against +2.3 F1 and
++3.1pp on corpus junctions. That asymmetry had an obvious candidate mechanism, and it was the right one.
+
+**The label dictionary and the referee are both word-level Khmer dictionaries, and they overlap almost
+completely: 6,119 of the referee's 7,062 words (86.6%) are in `km-lexicon-words.txt`.** Layer 4 tells the label
+pipeline "this string is a word"; the referee then tests the model on those same strings. The full-set score is
+therefore measuring, in large part, memorised vocabulary.
+
+Added a `clean` mode restricting the test to the 943 referee words the lexicon does NOT contain, and — because
+that subset is also intrinsically harder (unsegmented reads 11.4% against 27.3%) — ran BOTH model generations on
+it, which is the only comparison that is apples to apples:
+
+| clean subset, 439 pairs | v1 (ZWSP labels only) | v2 (+ dictionary) |
+|---|---|---|
+| ceiling / unsegmented | 94.3% / 11.4% | 94.3% / 11.4% |
+| perceptron | 33.3% | **35.3%** (+2.0) |
+| BiLSTM | **40.5%** | 38.5% (−2.0) |
+
+**On vocabulary the dictionary never saw, the perceptron gains ~2pp and the BiLSTM loses ~2pp.** Nine pairs of
+439 either way, well inside sampling noise, so the finding is "no measurable effect on unseen words" — not a
+confirmed regression, and not the improvement Run 11 reported.
+
+**What layer 4 actually bought** is accuracy on the 62,101 forms it covers. That is a COVERAGE gain rather than a
+generalisation gain, and it is still worth having: real text is mostly common vocabulary, and the precision
+improvements (+4.2pp BiLSTM, +3.6pp perceptron on held-out) are real within that coverage. But the honest headline
+is narrower than Run 11's table implied, and the full-set referee number is now marked contaminated wherever it
+appears.
+
+**Kept v2 anyway**, for reasons that do not depend on the disputed number: its labels are verified rather than
+defaulted (2.26M zeros confirmed, abstentions down from 119,400 to 12,847), the perceptron improves on both
+subsets, and the BiLSTM difference on unseen words is unresolvable at this sample size. Reverting would trade
+verified labels for defaulted ones to chase a 9-pair difference.
+
+**Method note worth keeping.** The contamination was invisible in every within-experiment check — held-out F1,
+corpus end-to-end and the full referee all moved the same direction. It surfaced only because one number moved
+much MORE than the others, and the explanation for the asymmetry turned out to be the flaw. A metric that
+improves too much is evidence, not a result.
+
+## Run 13 — 2026-08-05 19:50 · the referee eval was measuring the wrong thing, three ways
+
+The referee row sat ~30 points below every other metric, and the question "why is that number so low?" turned out
+to have three answers, all of them flaws in the harness rather than the model.
+
+**1. It was testing on text nobody would write.** The pairs were built by combining referee ENTRIES — first
+alphabetically adjacent ones, then (after that was spotted) randomly. Alphabetical adjacency in Khmer means shared
+prefixes: mean 3.11 characters against a mean word length of 5.6, and 729 pairs where one word was literally a
+prefix of the other (`កង` + `កងពលតូច` → `កងកងពលតូច`; `កក` + `កករ` → `កកកករ`, four consecutive ក). Randomising the
+pairing removed that pathology but not the deeper one: **a concatenation of two arbitrary dictionary entries is not
+Khmer**, and the models were trained on running prose. The whole construction measured out-of-distribution
+behaviour.
+
+**2. The fold was applied to the wrong unit — worth ~16 points.** The km referee folds are WORD-ANCHORED: `[ptkc]$
+→ ʔ` glottalises a word-FINAL stop. The gold side folded two referee entries separately (both stops glottalised);
+the prediction side folded the engine's entire output as one string (only the last stop glottalised). So
+`cɑt` + `riən` → `caʔriən` on one side and `catriən` on the other, a guaranteed mismatch for any pair whose first
+word ends in a stop. The tell was in the decomposition: the boundary was correct (exactly one, right position)
+**72.2%** of the time while the reading matched only **55.8%** — 16 points lost on pairs segmented perfectly.
+
+**3. The contamination worry was real but unmeasurable, and it was not a problem.** The label dictionary and the
+referee overlap 86.6%, so a `clean` mode was added to exclude shared vocabulary. On natural junctions that subset
+has **8 pairs** — words present in wikipron but absent from a 62,101-form dictionary barely occur in running text.
+That is itself the answer, and it is the one the user gave: the dictionary covers the vocabulary real text is made
+of, and teaching a model the words of a language is the intent, not leakage.
+
+Rebuilt on REAL writer-marked junctions whose both words the referee transcribes — natural input and independent
+gold together, which the two earlier evals each had only one of:
+
+| | agreement with the referee |
+|---|---|
+| each word in ISOLATION (the ceiling) | 83.4% |
+| concatenated, NO segmentation | 36.4% |
+| + perceptron (sync) | **80.4%** |
+| + BiLSTM (async) | **81.3%** |
+| gap closed | perceptron 93.6% · BiLSTM 95.4% |
+
+**The corrected number agrees with the corpus eval (83.5%) instead of contradicting it** — which is what should
+have been expected from two independent references on the same natural input, and is the strongest evidence yet
+that the segmentation is doing what it claims.
+
+**Method note.** Run 12 concluded from the contaminated full-set numbers that the dictionary layer bought a
+coverage gain and no generalisation gain. That conclusion rested on a comparison between two broken measurements
+and should be disregarded; the clean/dirty split it was based on is not measurable on natural text at all. What
+survives is Run 11's within-label-set evidence: precision up 4.2pp (BiLSTM) and 3.6pp (perceptron), and corpus
+end-to-end up 3.1pp — none of which depend on the referee harness.

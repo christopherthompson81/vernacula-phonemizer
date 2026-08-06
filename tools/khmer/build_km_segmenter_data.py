@@ -59,6 +59,34 @@ split a compound that is itself frequent.
    estimable, so a long unsplit token is treated as a probable unmarked compound and masked rather than fed as a
    negative. The ceiling is the dense subset's own token-length p99, computed at build time rather than guessed.
 
+4. THE DICTIONARY — an INDEPENDENT source, which is what layers 1-3 could not be. Everything above is derived from
+   the same wiki text, so its blind spots are correlated: an error analysis of the first model found that 98.8% of
+   its scored precision errors landed on positions layer 3 had merely DEFAULTED to zero, never verified. A word
+   list breaks that circularity, because it answers a different question — not "did a writer mark a boundary here"
+   but "is this string a word at all".
+
+   `km-lexicon-words.txt`, 62,101 Khmer forms from google/language-resources under CC BY 4.0 (attribution in that
+   file's header), of which 57,577 were absent from our ZWSP-harvested frequency table. Two rules, and the second
+   needs the first as its guard:
+       the token IS a listed word            → it needs no internal boundary: the zeros are CONFIRMED
+       the token is NOT listed, but divides
+       into two listed words at this cut     → the zeros hide a REAL boundary: relabel it
+
+   ⚠ THE `not listed` GUARD IS WHAT MAKES THE SPLIT RULE SAFE, and its absence is what sank the earlier frequency
+   heuristic. `លើក` divides into លើ + ក, both real words, and splitting it is wrong — but លើក is itself a listed
+   word, so the first rule fires and the second never runs. Verified on the cases both earlier heuristics got
+   wrong: លើក, ជាមួយ, ដឹកនាំ and ទីក្រុង are listed (so no boundary, and ទីក្រុង's layer-2 abstention at 11.3% is
+   resolved), while ខែមករា, ព្រះអង្គ, បូកដក and មហាក្សត្រ are not listed and divide cleanly.
+
+   Measured before adopting, over the 8,059,105 interior positions that previously sat inside all-zero tokens:
+       token IS a dictionary word → zeros CONFIRMED     4,894,141   60.7%
+       token divides into two listed words → BOUNDARY   1,239,472   15.4%
+       still unresolved                                 1,925,492   23.9%
+
+   ⚠ A TYPED BOUNDARY STILL WINS. Where a writer marked a split inside what the dictionary calls one word (ដឹកនាំ,
+   ជាមួយ), the typed instance keeps its label. Two independent sources disagreeing is the signature of a contested
+   lexicalisation rather than an error in either, and the corpus instance is evidence about THAT instance.
+
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 
 RUNS MATCH WHAT INFERENCE SEES. A training example is the concatenation of ZWSP-separated tokens with the
@@ -92,6 +120,7 @@ HIGH_SPLIT = 0.60                # >= this → a real boundary, relabel everywhe
 LOW_SPLIT = 0.10                 # <= this → a genuine non-boundary
 MIN_RUN = 4
 MAX_RUN = 200
+LEXICON = "tools/khmer/km-lexicon-words.txt"
 
 
 def tokens_of(chunk: str) -> list[str]:
@@ -168,6 +197,31 @@ def main() -> int:
     # A token seen often and NEVER split is decisive negative evidence for all of its interior positions.
     never_split = {t for t, g in single.items() if g >= MIN_TYPE_OBS and split_total.get(t, 0) == 0}
 
+    # ---- layer 4: the independent dictionary ----
+    lex: set[str] = set()
+    try:
+        with open(LEXICON, encoding="utf8") as fh:
+            for line in fh:
+                if not line.startswith("#"):
+                    w = line.strip()
+                    if w:
+                        lex.add(w)
+    except OSError:
+        print(f"  ⚠ {LEXICON} missing — layer 4 disabled, labels will be weaker", file=sys.stderr)
+    print(f"  dictionary {len(lex):,} forms")
+
+    def lex_cut(tok: str, cut: int) -> str | None:
+        """The dictionary's verdict for one cut: '0' confirmed non-boundary, '1' recovered boundary, None if silent."""
+        if not lex:
+            return None
+        if tok in lex:
+            return "0"                                  # a listed word needs no internal boundary
+        # NOT listed: does it divide into two listed words HERE? (the `tok in lex` guard above is what makes
+        # this safe — see the header on លើក)
+        if tok[:cut] in lex and tok[cut:] in lex:
+            return "1"
+        return None
+
     # ---- layer 3: the plausible-single-word ceiling, from the dense subset's own distribution ----
     total = sum(tok_len.values())
     acc, p99 = 0, max(tok_len) if tok_len else 12
@@ -210,21 +264,27 @@ def main() -> int:
                         if r is None and tok in never_split:
                             r = 0.0
                         i = pos + cut
-                        if r is None:
-                            # layer 3: too rare to estimate. A long token is a suspected unmarked compound.
-                            if len(tok) > p99:
-                                labels[i] = "?"
-                                stats["masked (rare, long token)"] += 1
-                            else:
-                                stats["kept 0 (rare, plausible word)"] += 1
-                        elif r >= HIGH_SPLIT:
+                        lv = lex_cut(tok, cut)
+                        if r is not None and r >= HIGH_SPLIT:
                             labels[i] = "1"
-                            stats["RECOVERED boundary"] += 1
-                        elif r <= LOW_SPLIT:
+                            stats["RECOVERED boundary (corpus rate)"] += 1
+                        elif r is not None and r <= LOW_SPLIT:
                             stats["kept 0 (measured non-boundary)"] += 1
-                        else:
+                        elif lv == "1":
+                            # the dictionary resolves it, whether layer 2 abstained or had no opinion at all
+                            labels[i] = "1"
+                            stats["RECOVERED boundary (dictionary)"] += 1
+                        elif lv == "0":
+                            stats["kept 0 (dictionary CONFIRMED)"] += 1
+                        elif r is not None:
                             labels[i] = "?"
-                            stats["masked (undecidable)"] += 1
+                            stats["masked (undecidable, no dictionary help)"] += 1
+                        elif len(tok) > p99:
+                            # layer 3: too rare to estimate and too long to be one word.
+                            labels[i] = "?"
+                            stats["masked (rare, long token)"] += 1
+                        else:
+                            stats["kept 0 (rare, plausible word)"] += 1
                     pos += len(tok)
 
                 out.write(f"{text}\t{''.join(labels)}\n")
@@ -232,16 +292,19 @@ def main() -> int:
                 stats["chars"] += len(text)
 
     print(f"  runs {stats['runs']:,} · chars {stats['chars']:,}")
-    for k in ("typed boundary", "RECOVERED boundary", "kept 0 (measured non-boundary)",
-              "kept 0 (rare, plausible word)", "masked (undecidable)", "masked (rare, long token)"):
-        print(f"    {k:32} {stats[k]:10,}")
-    pos_total = stats["typed boundary"] + stats["RECOVERED boundary"]
+    for k in ("typed boundary", "RECOVERED boundary (corpus rate)", "RECOVERED boundary (dictionary)",
+              "kept 0 (measured non-boundary)", "kept 0 (dictionary CONFIRMED)", "kept 0 (rare, plausible word)",
+              "masked (undecidable, no dictionary help)", "masked (rare, long token)"):
+        print(f"    {k:42} {stats[k]:10,}")
+    pos_total = (stats["typed boundary"] + stats["RECOVERED boundary (corpus rate)"]
+                 + stats["RECOVERED boundary (dictionary)"])
     if stats["chars"]:
         print(f"  positives {pos_total:,} ({100*pos_total/stats['chars']:.1f}% of positions) · "
               f"masked {100*(stats['masked (undecidable)']+stats['masked (rare, long token)'])/stats['chars']:.1f}%")
         if stats["typed boundary"]:
-            print(f"  ⚠ label recovery: {stats['RECOVERED boundary']:,} boundaries no writer marked, "
-                  f"{stats['RECOVERED boundary']/stats['typed boundary']:.2f}x the typed ones")
+            rec = stats["RECOVERED boundary (corpus rate)"] + stats["RECOVERED boundary (dictionary)"]
+            print(f"  ⚠ label recovery: {rec:,} boundaries no writer marked, "
+                  f"{rec/stats['typed boundary']:.2f}x the typed ones")
     print(f"  → {dst}")
     return 0
 

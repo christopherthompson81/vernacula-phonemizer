@@ -25,7 +25,7 @@
  */
 import { readFileSync } from "node:fs";
 
-import { phonemize } from "../../src/index.ts";
+import { createKhmer } from "../../src/languages/khmer/khmer.ts";
 import { createKhmerSegmenter } from "../../src/languages/khmer/khmerSegmenter.ts";
 import { restoreBoundaries, havePerceptron } from "../../src/languages/khmer/khmerPerceptron.ts";
 
@@ -37,7 +37,15 @@ if (src === undefined) {
 }
 
 const KH = /^[ក-៓ៜ-៝]+$/u;
-const P = (s: string): string => String(phonemize(s, "km")).replace(/\s+/gu, "");
+/**
+ * ⚠ EXPLICITLY UNSEGMENTED, and it has to be. This used `phonemize()`, which was correct until the perceptron
+ * shipped INTO the sync path — after which the "no segmentation" baseline was silently perceptron-segmented and
+ * read 93.7% instead of 27-45%, making the perceptron appear to fix ONE junction because it was being compared
+ * against itself. The baseline of a segmentation experiment must be built with `segment: false` or it stops being
+ * a baseline. (referee_km_segmenter.mts was immune because it always did this.)
+ */
+const engine = createKhmer({ segment: false });
+const P = (s: string): string => engine.text(s).replace(/\s+/gu, "");
 
 // Deterministic stride over the corpus so the set is reproducible; one pair per line at most, to avoid
 // over-weighting whichever lines happen to be densely annotated.
