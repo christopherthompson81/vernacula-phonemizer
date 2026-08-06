@@ -21,6 +21,10 @@ src/languages/danish/da-g2p-tagger.onnx
 # training artifacts. The MINED gold (sd.crossscript.tsv, sd.openlex*.tsv) IS committed — it is the
 # input the lexicon and model derive from. sd_deva_pairs.json / sd_airab.json are rebuilt from the
 # upstream dataset by extract_sd_openlex.py.
+# Khmer boundary tagger: the torch checkpoint is a regeneratable intermediate — only the int8 graph and its
+# meta ship. Rebuild with tools/khmer/build_km_segmenter_data.py + train_km_segmenter.py from a kmwiki dump.
+src/languages/khmer/km_segmenter.pt
+
 tools/sindhi/*.pt
 tools/sindhi/sd-g2p-tagger.onnx
 tools/sindhi/sd-g2p-tagger.int8.onnx

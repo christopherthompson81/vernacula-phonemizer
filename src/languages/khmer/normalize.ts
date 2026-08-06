@@ -52,6 +52,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { lastKhmerWord } from "./segment.ts";
+import { havePerceptron, segmentRun } from "./khmerPerceptron.ts";
 
 /**
  * THE SHARED SYMBOL TIER, not local regexes — playbook trap 16: before declaring a class out of scope, check
@@ -139,6 +140,13 @@ const D = "\\d០-៩";
  */
 const SEP = "[\\s\u200b\u200c]*";
 
+/** The final word of a Khmer run — the perceptron's answer, or the unigram segmenter's when it is unavailable. */
+function lastWord(run: string): string {
+    if (!havePerceptron()) return lastKhmerWord(run);
+    const parts = segmentRun(run);
+    return parts[parts.length - 1] ?? run;
+}
+
 export function normalizeKhmer(text: string): string {
     let s = text;
 
@@ -155,16 +163,25 @@ export function normalizeKhmer(text: string): string {
     // ── 1. ៗ (លេខទោ) = repeat the preceding WORD ──────────────────────────────────────────────────────
     // FIRST, because it is the only rule that reads a Khmer run as a unit; every later rule works on digits
     // and symbols and cannot disturb it. The antecedent is a WORD, not the whole run: Khmer writes no word
-    // space, so `អារម្មណ៍នោះៗ` must repeat នោះ ("that") and not អារម្មណ៍នោះ ("that feeling"). `segment.ts`
-    // supplies the boundary from writer-typed ZWSP frequencies — see its header for why the shipped
-    // pronunciation lexicon cannot (12% of top antecedents are entries; none has a lexicon word as a suffix).
+    // space, so `អារម្មណ៍នោះៗ` must repeat នោះ ("that") and not អារម្មណ៍នោះ ("that feeling"). The shipped
+    // pronunciation lexicon cannot supply the boundary — 12% of top antecedents are entries and none has a lexicon
+    // word as a suffix — so it comes from a segmenter.
     //
     // Measured over all 24,413 antecedents: 24.3% are already a single vocabulary word, and repeating the whole
     // run — the only option without a segmenter — would therefore be wrong three times in four.
     //
+    // ⚠ THIS USES THE PERCEPTRON, NOT `segment.ts`'s unigram Viterbi, and the difference is not marginal. On
+    // 20,000 held-out multi-word runs, scored on exactly what this rule needs — does the FINAL boundary match the
+    // human's last typed ZWSP — the two measure:
+    //     unigram Viterbi (segment.ts)   51.9%
+    //     averaged perceptron            78.7%
+    // The perceptron already ships in this path (khmer.ts restores boundaries with it), so leaving the rule on the
+    // weaker segmenter would have meant carrying two segmenters and consulting the worse one 24,413 times.
+    // `lastKhmerWord` remains the fallback for when the perceptron's weight table is absent.
+    //
     // An empty antecedent drops the mark rather than inventing a word, matching Thai's ๆ rule.
     s = s.replace(new RegExp(`([${KH}]+)${SEP}ៗ`, "gu"), (_m, run: string) =>
-        run === "" ? "" : `${run} ${lastKhmerWord(run)}`);
+        run === "" ? "" : `${run} ${lastWord(run)}`);
 
     // ── 2. de-group thousands ─────────────────────────────────────────────────────────────────────────
     // FIRST among the numeric rules, and the playbook's standing coupling: the grouping comma is otherwise

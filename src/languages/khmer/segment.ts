@@ -13,12 +13,26 @@
  * such a list prefers the COMPOUND every time, defeating its own purpose. So this is a unigram Viterbi: it
  * minimises total -log(frequency), and a run appearing 25 times loses to two words appearing 20,000 times each.
  *
+ * ⚠ AND THAT MITIGATION ONLY HOLDS WHILE THE COMPOUND IS RARE — the sentence above overstated it, and the
+ * correction is worth keeping. Splitting always pays an extra per-segment -log(p) term, so a compound that is
+ * ITSELF frequent wins outright no matter how common its parts are: `ខែមករា` ("month January") is in the table
+ * 505 times beside ខែ 2,576 and មករា 620, and this segmenter recovers the boundary in 0 of the 12 month
+ * compounds. Frequency data cannot fix a problem caused by frequency. That is why the boundaries the READER needs
+ * come from a trained tagger instead (khmerSegmenter.ts, the async path), and why this module's remit stays the
+ * one boundary the ៗ rule needs rather than all of them.
+ *
  * ⚠ ACCURACY IS 54.7% ON THE LAST BOUNDARY, and that is the honest number rather than a placeholder. Measured
  * against held-out human ZWSP boundaries the model never saw (80/20 split, 11,194 multi-token runs). Two things
  * make it a floor rather than a verdict: the gold standard is itself inconsistent, since writers disagree about
  * where a compound divides, so some "errors" are a defensible second opinion; and the test set is deliberately
  * the hard half — only runs a human chose to split. End to end over all ៗ antecedents the expectation is roughly
  * 24% + 0.547 × 76% ≈ 66% correct, against 24% for repeating the whole run.
+ *
+ * ⚠ AND IT NO LONGER HAS A RUNTIME CONSUMER. The ៗ rule — the reason this module was written — now takes its
+ * boundary from `khmerPerceptron.ts`, which scores 78.7% on exactly this task against this module's 51.9% on the
+ * same held-out runs. `lastKhmerWord` is retained as the FALLBACK for when the perceptron's weight table is
+ * missing, and `km-wordfreq.tsv` is still the baseline that `train_km_segmenter.py` scores the neural models
+ * against. Kept rather than deleted for that reason; not because anything reads it in the hot path.
  *
  * ⚠ THIS IS NOT WIRED INTO THE g2p PATH, and that is deliberate. `khmer.ts` still phonemizes a maximal run as
  * one unit. Segmenting there would change the pronunciation of ALL Khmer text — the shipped exceptions lexicon

@@ -12,6 +12,7 @@ import { phonemizeNbNeural } from "./languages/norwegian/norwegianNeural.ts";
 import { phonemizeFrNeural } from "./languages/french/frenchNeural.ts";
 import { phonemizeFaNeural } from "./languages/persian/persianNeural.ts";
 import { phonemizeHebrewNeural } from "./languages/hebrew/hebrewNeural.ts";
+import { phonemizeKmNeural } from "./languages/khmer/khmerNeural.ts";
 import { phonemizeRiderNeural } from "./languages/perso-arabic/riderNeural.ts";
 import { phonemizeSdNeural } from "./languages/sindhi/sindhiNeural.ts";
 
@@ -31,6 +32,9 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     fr: phonemizeFrNeural,
     fa: phonemizeFaNeural,
     he: phonemizeHebrewNeural, // the NAKDAN — restores niqqud on bare Hebrew
+    // per-character BiLSTM restoring the WORD BOUNDARIES Khmer does not write: joining two words
+    // corrupts the reading 54.6% of the time, measured on writer-typed U+200B junctions
+    km: phonemizeKmNeural,
     ur: (t) => phonemizeRiderNeural(t, "ur"),
     ps: (t) => phonemizeRiderNeural(t, "ps"),
     // Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic
