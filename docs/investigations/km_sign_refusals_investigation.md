@@ -52,22 +52,38 @@ So `+5` now reads *ʋɨcceəmiən pram*, "positive five".
 because a percent sign is neither a letter nor a digit and the plus looked like a fresh number. `%` is now an
 operand for that guard.
 
-### ⚠ The equals refusal HOLDS, and is better evidenced
+### ⚠ The equals refusal did NOT hold either — spacing splits it the same way
 
-Of 3,992 `=` in the deduplicated dump, only 66 are digit-flanked arithmetic — which is read. The letter-flanked
-shape the probe tests is something else:
+Of 3,992 `=` in the deduplicated dump, only 66 are digit-flanked arithmetic — which was all this layer read. My
+first pass concluded the letter-flanked shape was undecidable, on this distribution:
 
-    1,158  SPACED Khmer = Khmer   a definitional gloss — `ឧបាយកោសល្លបណ្ឌិត = បណ្ឌិត​ព្រោះ​ឈ្លាស…`, a term and
-                                  its explanation, from dictionary and commentary articles
+    1,158  SPACED Khmer = Khmer   a definitional gloss — `ឧបាយកោសល្លបណ្ឌិត = បណ្ឌិត​ព្រោះ​ឈ្លាស…`
       694  code-shaped            `==`, `!=`, `>=`
       193  Khmer = Latin          a translation gloss
-      112  spaced Latin = Latin   mostly EasyTimeline markup — `AlignBars = justify`, `BackgroundColors = canvas:c`
+      112  spaced Latin = Latin   mostly EasyTimeline markup — `AlignBars = justify`
 
-A definitional `=` is not read "equal", and reading it would fire on 1,158 of those against 66 arithmetic. I tried
-SPACING as the discriminator here too and it does not separate them, because the glosses are spaced.
+⚠ **AND THAT WAS THE SAME MISTAKE AS THE PLUS, ONE ROUND LATER.** Prompted not to forget the equals, I applied the
+discriminator I had just validated on the other sign, and it splits this one too:
 
-⚠ **But the probe's reading shows a DIFFERENT gap**: `x = y` gives *ˈɛks wˈaᶦ* — English letter names inside a
-Khmer engine. That is the letter-name seam, not this sign's, and it is worth its own work.
+| shape | sites | on a line containing Khmer |
+|---|---|---|
+| SPACED, operand-flanked, code operators excluded | **1,649** | 1,546 (94%) |
+| UNSPACED | 239 | — |
+| code operators `==` `!=` `>=` `<=` | 694 | — |
+
+The 1,546 Khmer prose sites are three things, and ស្មើ reads all three: DEFINITIONAL glosses (a term and its
+explanation — a literal reading of the sign, which keeps the boundary between them), GRAMMAR formulas
+(`(កន = នាម + ឈ្នាប់ + នាម)`), and ARITHMETIC whose left operand is algebraic (`12x 2 + 8x + 1 = 0`, invisible to
+the digit-flanked rule). `x = y` now reads *ˈɛks smaə wˈaᶦ*.
+
+Still silent, and now that is ALL the `equals` exemption claims: the UNSPACED shape — a translation gloss
+(`ចក្រវាឡរណប=satellite`, where the sign means "renders as") or a solution set (`x=-1/2`) — and the code operators.
+
+⚠ **The 103 Khmer-free spaced sites are mis-read** by the new rule. They are EasyTimeline markup that should never
+have been in a spoken-text corpus: 6% of the sites, all markup rather than language.
+
+⚠ **And the probe's residual is a DIFFERENT gap**: `x = y` gives *ˈɛks smaə wˈaᶦ* — the sign is right and the
+LETTER NAMES are English inside a Khmer engine. That is the letter-name seam, and it is its own work.
 
 ### ⚠ Two tooling defects found on the way
 
@@ -88,4 +104,4 @@ Khmer engine. That is the letter-name seam, not this sign's, and it is worth its
 Also read: the timezone offset. `UTC+7`, `GMT+9`, `JST (UTC+09:00)` — 11 sites, all genuine, no misfires
 available. A reader says "UTC plus seven", so this one unspaced shape is read where LaTeX is not.
 
-**`review.ts --lang km`: checklist clean.** 3,103 tests.
+**`review.ts --lang km`: checklist clean, and NO probe reads `INTENT` any more.** 3,104 tests.

@@ -257,10 +257,23 @@ describe("khmer signs the layer used to leave silent", () => {
         expect(String(phonemizeText("(UTC+09:00)", "km"))).toContain("ɓouk");
     });
 
-    test("the digit-flanked equals still reads ស្មើ, and the definitional one does not", () => {
+    test("⚠ a SPACED equals reads ស្មើ — the refusal split on spacing, like the plus", () => {
+        // Refused for two rounds as "glosses and code, wrong nearly as often as right" — true of the shape as a
+        // whole, false once spacing splits it: 1,649 spaced operand-flanked sites with the code operators
+        // excluded, 1,546 of them on Khmer prose lines, against 239 unspaced and 694 code operators.
+        expect(String(phonemizeText("x = y", "km"))).toBe("ˈɛks smaə wˈaᶦ");
         expect(String(phonemizeText("៤ = ២៤", "km"))).toContain("smaə");
-        // 1,158 spaced Khmer=Khmer sites are a term and its definition, which is not read "equal" — see
-        // ACCEPTED_SIGN_SILENCE. Only 66 of 3,992 `=` are arithmetic.
-        expect(String(phonemizeText("ឧបាយកោសល្ល = បណ្ឌិត", "km"))).not.toContain("smaə");
+        // A definitional gloss — a term and its explanation — reads the sign literally, which keeps the boundary.
+        expect(String(phonemizeText("ឧបាយកោសល្ល = បណ្ឌិត", "km"))).toContain("smaə");
+        // Algebra whose left operand the digit rule cannot see.
+        expect(String(phonemizeText("16x² + 24x + 9 = 0", "km"))).toContain("smaə");
+    });
+
+    test("⚠ but a code operator and an UNSPACED equals stay silent", () => {
+        // 694 `==`/`!=`/`>=`/`<=` and 239 unspaced sites — `ចក្រវាឡរណប=satellite` is a translation gloss and
+        // `x=-1/2` is a solution set. Unspaced is the code-and-markup shape in this corpus, as it is for the plus.
+        expect(String(phonemizeText("a == b", "km"))).not.toContain("smaə");
+        expect(String(phonemizeText("x=-1/2", "km"))).not.toContain("smaə");
+        expect(String(phonemizeText("ចក្រវាឡរណប=satellite", "km"))).not.toContain("smaə");
     });
 });

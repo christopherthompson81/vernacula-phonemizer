@@ -258,24 +258,27 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         exponent: "measured: `sources.ts` reports the sign does not occur in the evidence for this language",
     },
     km: {
-        // Both refusals are argued with a measured distribution in src/languages/khmer/normalize.ts, and in both
-        // cases a rule DOES ship for the shape the corpus supports — it is the probe's shape that is undecidable,
-        // the same structure as gu/kn's minus below.
         // ⚠ `plus` WAS HERE AND IS GONE — the refusal was wrong, and it was wrong because it measured the wrong
         // population. It pooled the unspaced `x+3\!` shape with the spaced one and concluded the leading plus was
         // undecidable. Measured separately on the deduplicated dump, a SPACED plus between operands has 312 sites
         // and ZERO carry a LaTeX or C marker; they are Khmer grammar formulas (`នាម + កំនត់ + ពង្រីក`) and
         // algebra. Both now read បូក, and a bare leading `+5` reads វិជ្ជមាន. See khmer/normalize.ts rule 5b.
-        equals: "measured on the deduplicated dump: of 3,992 `=`, only 66 are digit-flanked arithmetic — which IS "
-            + "read as ស្មើ. The letter-flanked shape the probe tests is something else entirely: 1,158 are a "
-            + "SPACED Khmer=Khmer definitional gloss from dictionary and commentary articles "
-            + "(`ឧបាយកោសល្លបណ្ឌិត = បណ្ឌិត​ព្រោះ​ឈ្លាស…`, a term and its explanation), 694 are code-shaped "
-            + "(`==`, `!=`, `>=`), 193 join Khmer to Latin as a translation gloss, and of the 112 spaced "
-            + "Latin=Latin sites most are EasyTimeline markup (`AlignBars = justify`, `BackgroundColors = "
-            + "canvas:c`). A definitional `=` is not read `equal`, and reading it would fire on 1,158 of those "
-            + "against 66 arithmetic. ⚠ NOTE the probe's own reading shows a SEPARATE gap: `x = y` gives "
-            + "*ˈɛks wˈaᶦ* — ENGLISH letter names inside a Khmer engine — which is the letter-name seam, not this "
-            + "sign's",
+        // ⚠ `equals` WAS HERE TOO AND IS ALSO GONE, for the same reason as `plus`: the refusal described the
+        // SHAPE as a whole ("glosses and code, wrong nearly as often as right") where SPACING splits it. Measured
+        // on the deduplicated dump: 1,649 spaced operand-flanked sites with the code operators excluded, 1,546 of
+        // them on Khmer prose lines — definitional glosses, grammar formulas, algebra — against 239 unspaced
+        // (`ចក្រវាឡរណប=satellite`, `x=-1/2`) and 694 `==`/`!=`/`>=`/`<=`, both still silent. The spaced form now
+        // reads ស្មើ; see khmer/normalize.ts rule 5. The 103 Khmer-free spaced sites are EasyTimeline markup and
+        // are mis-read by it — 6%, all markup rather than language, and `allOccurrencesInMarkup` keeps the scan
+        // from reporting that class as a language defect.
+        //
+        // ⚠ NOTE what remains in the probe's reading: `x = y` gives *ˈɛks smaə wˈaᶦ* — the sign is right and the
+        // LETTER NAMES are English inside a Khmer engine. That is the letter-name seam, and it is its own work.
+        equals: "measured: what is STILL silent is the UNSPACED equals only — 239 sites, and they are a "
+            + "translation gloss (`ចក្រវាឡរណប=satellite`, Khmer joined to its English equivalent) or a solution "
+            + "set (`x=-1/2`), plus 694 code operators `==`/`!=`/`>=`/`<=`. Reading `equal` in a translation gloss "
+            + "would voice a sign that means 'renders as'. The SPACED form — 1,649 sites, 1,546 of them Khmer "
+            + "prose — now reads ស្មើ, so this entry covers the unspaced shape and nothing else",
     },
     gu: {
         // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced

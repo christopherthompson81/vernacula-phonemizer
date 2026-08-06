@@ -248,6 +248,28 @@ export function normalizeKhmer(text: string): string {
     // often as right, which is trap 9 (a guard alternative with no attested…)'s misfire generator seen from the other side. The arithmetic reading is
     // the only one the evidence supports.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
+    /**
+     * ⚠ AND A SPACED `=` BETWEEN ANY TWO OPERANDS, which this file refused for two rounds. The refusal was that
+     * the letter-flanked shape is "glosses and code, getting it wrong nearly as often as right" — true of the
+     * shape as a whole, and false once SPACING splits it, the same discriminator the plus above needed:
+     *
+     *     1,649  SPACED, operand-flanked, code operators excluded   ← this rule
+     *              of which 1,546 are on a line containing KHMER (prose) and 103 on Khmer-free markup lines
+     *       239  UNSPACED                                          ← still silent: `ចក្រវាឡរណប=satellite`, `x=-1/2`
+     *       694  code operators `==`, `!=`, `>=`, `<=`             ← still silent, excluded by the lookarounds
+     *
+     * The 1,546 prose sites are three things, and ស្មើ ("equal, the same") reads all three:
+     *   · DEFINITIONAL glosses from dictionary and commentary articles — `ឧបាយកោសល្លបណ្ឌិត = បណ្ឌិត​ព្រោះ​ឈ្លាស…`,
+     *     a term and its explanation. A literal reading of the sign, and it keeps the boundary between them.
+     *   · GRAMMAR formulas — `(កន = នាម + ឈ្នាប់ + នាម)`, "compound = noun + connector + noun".
+     *   · ARITHMETIC whose left operand is algebraic — `12x 2 + 8x + 1 = 0`, which the digit rule cannot see.
+     *
+     * ⚠ THE 103 KHMER-FREE SITES ARE MIS-READ BY THIS RULE, and they are EasyTimeline markup
+     * (`AlignBars = justify`, `BackgroundColors = canvas:c`) that should never have been in a spoken-text corpus.
+     * 6% of the sites, all of them markup rather than language — and `allOccurrencesInMarkup` in defects.ts now
+     * keeps the scan from reporting that class of line as a language defect.
+     */
+    s = s.replace(new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"), " ស្មើ ");
 
     // ── 5b. plus, and plus-minus ─────────────────────────────────────────────────────────────────────
     // ⚠ THE PLUS RULE EXISTED AND I DELETED IT while restructuring for the shared tier — the tier carries
