@@ -1,6 +1,7 @@
 {
   "name": "vernacula-phonemizer",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Canonical-IPA phonemizer — native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
   "type": "module",
   "exports": {

@@ -1,6 +1,6 @@
 # `dict.tsv` + `dict-chars.tsv` provenance — Min Nan / Taiwanese Hokkien (nan)
 
-Rebuilt 2026-07-29 from PERMISSIVELY-licensed sources (LICENCING/PROVENANCE.md §4.6). The previous
+Rebuilt 2026-07-29 from PERMISSIVELY-licensed sources (LICENSES/PROVENANCE.md §4.6). The previous
 layer — MOE 臺灣閩南語常用詞辭典 (CC BY-**ND** 3.0 TW) words + a ChhoeTaigi extraction whose
 priority sources 甘字典/台日大辭典 are CC BY-**NC**-SA 3.0 TW — was unshippable (NoDerivatives /
 NonCommercial) and has been fully replaced. Builders:

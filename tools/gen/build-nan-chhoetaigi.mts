@@ -1,6 +1,6 @@
 /**
  * Rebuild the Min Nan dictionaries from ChhoeTaigi's PERMISSIVELY-licensed components
- * (LICENCING/PROVENANCE.md §4.6 — the previous MOE/甘字典/台日大辭典 layer was CC BY-ND / BY-NC-SA and
+ * (LICENSES/PROVENANCE.md §4.6 — the previous MOE/甘字典/台日大辭典 layer was CC BY-ND / BY-NC-SA and
  * unshippable):
  *
  *   • ChhoeTaigi_TaihoaSoanntengTuichiautian.csv — 台華線頂對照典 (2002+, 楊允言), CC BY-SA 4.0

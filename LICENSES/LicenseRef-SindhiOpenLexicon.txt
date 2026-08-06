@@ -1,0 +1,22 @@
+Sindhi Open Lexicon Master Dataset
+
+Publisher:
+SindhiLanguage.org
+https://sindhilanguage.org/
+
+Prepared and curated by:
+Amar Fayaz Buriro (امر فياض ٻرڙو)
+
+License / Usage:
+This dataset is released for research, education, AI/NLP development, software development, and non-malicious public-interest use.
+
+Mandatory Attribution:
+Any public use, redistribution, derivative dataset, application, model card, research paper, API, or AI/LLM training note using this dataset must acknowledge:
+
+SindhiLanguage.org
+https://sindhilanguage.org/
+
+Prepared and curated by Amar Fayaz Buriro (امر فياض ٻرڙو)
+
+No Warranty:
+The dataset is provided as-is. Users are responsible for validating suitability for their own projects.

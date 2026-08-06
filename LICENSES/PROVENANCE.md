@@ -4,7 +4,7 @@ The central mapping of every data artifact in this repo to its upstream source a
 license**, grouped by license family. Per-file detail lives in the `*.PROVENANCE.md` sidecars and
 data-file headers; this document is the index and the licensing structure.
 
-**Posture doc:** `LICENCING/licencing_posture.md` — the project is an original work; own work is
+**Posture doc:** `LICENSES/licencing_posture.md` — the project is an original work; own work is
 MIT; third-party-derived data keeps its parent license, declared per file; mechanical fact tables
 and (where applicable) model weights follow the facts-not-expression line (*Feist*;
 *CCH Canadian* 2004 SCC 13) under the conditions stated there.
@@ -19,7 +19,9 @@ by the git repo itself, so the repo-level license must account for them.
 
 The repo is structured as **MIT for the code and own-work data, with fenced data files that carry
 their parent licenses** (CC-BY-SA, CC-BY, CC0, and two GPL-lineage files), declared per file in
-this map. Remaining pre-publication work is §6 — the license-file architecture itself.
+this map. The repo license (`LICENSE`, MIT), the attribution roll-up (`NOTICE.md`) and the license
+texts (`LICENSES/`) are in place; what remains in §6 is the per-file declaration layer and
+the packaging fence.
 
 ---
 
@@ -38,7 +40,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `hebrew/he-tagger.int8.onnx` (majority tier) | Nakdimon pre-modern PD subset | PD (modern/wiki slice → §3) |
 | `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts |
 | `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts |
-| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable): one abstract feature per word, measured with espeak-ng 1.52 over an external frequency wordlist — §5.1 for why the instrument is not the source | Facts |
+| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable); one feature per word, measured with espeak-ng 1.52 over an external wordlist (§5.1) | Facts |
 | `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist | Facts |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
@@ -53,16 +55,34 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `mandarin/chars.tsv`, `phrases.tsv` | pypinyin | MIT | attribution |
 | `cantonese/dict.tsv` | rime-cantonese (via pycantonese) | CC-BY 4.0 | attribution |
 | `bengali/bn-g2p-tagger.int8.onnx`, `bengali-lexicon.tsv` | Google language-resources/bn | CC-BY 4.0 | attribution |
-| `sindhi/` lexicon Devanagari tier, `sd-g2p-tagger.int8.onnx` training data | Sindhi Open Lexicon (SindhiLanguage.org) | CC-BY | **named attribution: Amar Fayaz Buriro (امر فياض ٻرڙو) — mandatory** |
-| `hebrew/he-lexicon.tsv` builders | Phonikud + ReNikud (thewh1teagle) | CC-BY | attribution |
+| `sindhi/` lexicon Devanagari tier, `sd-g2p-tagger.int8.onnx` training data | Sindhi Open Lexicon (SindhiLanguage.org) | bespoke, permissive; **not CC-BY** (§2b) | **named attribution: Amar Fayaz Buriro (امر فياض ٻرڙو) — mandatory** |
+| `hebrew/he-lexicon.tsv` builders | Phonikud + ReNikud (thewh1teagle) | CC-BY 4.0 | attribution |
 | `thai/seg-words.txt` | ICU thaidict + PyThaiNLP | Unicode-DFS-2016 + CC0 | notice |
 | `arabic/diacritizer.onnx` teacher | CATT (AbjadAI) | Apache-2.0 | notice |
 | Chinese dict trad/simp folding (all) | OpenCC tables | Apache-2.0 | notice |
 | `balochi/balochi-lexicon.tsv` | Korn 2005, Jahani & Korn 2009 (scholarly facts, hand-read) | facts | citations in header |
 | tools: `ja_pitch_reference.tsv`, ja counter gold | OpenJTalk / naist-jdic | modified BSD | notice |
 | tools: GE2PE referee (fa) | Sharif SLPL | MIT | attribution |
-| tools: JIPA referees (`bo`, `mad`), Grierson LSI (`sd`) | JIPA / lexibank-lsi | CC-BY | attribution |
+| tools: JIPA referee (`bo`), Grierson LSI (`sd`) | JIPA (Zhang 2024, open access) / lexibank-lsi | CC-BY 4.0 | attribution |
+| tools: `mad.jipa-misnadin-kirby-2020.tsv` | JIPA "Madurese" (Misnadin & Kirby, doi:10.1017/S0025100318000257) | article under Cambridge terms; 35 hand-read word→IPA facts (§2b) | citation in header |
 | tools: Tatoeba jpn sentences (eval) | Tatoeba | CC-BY 2.0 FR | attribution |
+
+### 2b. Two §2 rows corrected
+
+Both were carried as unversioned "CC-BY" until an audit on 2026-08-06:
+
+1. **Sindhi Open Lexicon** — a bespoke license, not CC-BY. Text:
+   `LICENSES/LicenseRef-SindhiOpenLexicon.txt` (no SPDX identifier exists, hence `LicenseRef-`).
+   Broad, permissive, and attribution-mandatory; the named attribution to **Amar Fayaz Buriro** is in
+   NOTICE. If a downstream consumer needs a standard-licensed path, the Sindhi tier can be rebuilt
+   from kaikki/Wiktionary (CC-BY-SA, §3) at ~1/10 the scale.
+2. **The two JIPA Illustrations differ.** Zhang 2024 (`bo`) is CC-BY-4.0; Misnadin & Kirby (`mad`,
+   doi:10.1017/S0025100318000257) is under Cambridge subscription terms. Nothing verbatim is taken
+   from either — the referees are per-word IPA facts, cited in their file headers, the same basis as
+   Korn 2005 / Jahani & Korn 2009 for `balochi/`.
+
+The other two resolved cleanly: Phonikud and ReNikud are **CC-BY-4.0**, lexibank-lsi is
+**CC-BY-4.0**. `LICENSES/README.md` records how each was determined.
 
 ## 3. Share-alike (CC-BY-SA 3.0/4.0) — fenced under parent license
 
@@ -174,49 +194,36 @@ not shipped on that basis. The method and the measurement are in
 `docs/normalization_playbook.md` §5c. What ships is the adjudicated word — a linguistic fact. No
 dictsource rules, phoneme tables, or arrangement are reproduced.
 
-#### The Catalan tables — a measurement, not a copy
+#### The Catalan tables
 
-`catalan/mid-vowels.tsv` and `bl-gl-geminate.tsv` (§1) are the only shipped files espeak touched, via
-`tools/gen/build-ca-midvowels.mts` / `build-ca-geminate.mts`. The *shape* of that build is the whole
-determination, so it is recorded here rather than left as "espeak-derived":
+`catalan/mid-vowels.tsv` and `bl-gl-geminate.tsv` (§1) are the only shipped files espeak touched, built
+by `tools/gen/build-ca-midvowels.mts` / `build-ca-geminate.mts`. How, because the mechanics are the
+provenance:
 
-- **The word list is external.** Rows are keyed by a 50k frequency wordlist, charset-filtered. espeak
-  contributed no words and chose no row of either table. The selection-and-arrangement that
-  compilation copyright attaches to points at the frequency corpus, not at espeak.
-- **espeak was the instrument, not the source** — run over that externally-chosen list as a measuring
-  device: word in, IPA out.
-- **One bit per word survives.** `build-ca-midvowels.mts` locates the stress mark and reads **the
-  single character after it**; if that character is `e` or `o` the word is flagged close, and the rest
-  of the transcription is discarded unread. `build-ca-geminate.mts` is one regex test
-  (`/bbl|ɡɡl|ggl/`) reduced to a boolean. Neither script retains an IPA string.
-- **Only deviations are stored.** The engine defaults to open (ɛ/ɔ), so a row exists only where a word
-  departs from the default. The tables are the *complement* of the rule, not a lexicon.
+- **The word list is external** — a 50k frequency wordlist, charset-filtered. espeak contributed no
+  words and chose no row of either table.
+- **espeak was the instrument** — run over that list as a measuring device: word in, IPA out.
+- **One bit per word survives.** `build-ca-midvowels.mts` reads the single character after the stress
+  mark and flags `e`/`o`; `build-ca-geminate.mts` is one regex reduced to a boolean. Neither retains an
+  IPA string.
+- **Only deviations are stored** — the engine defaults to open (ɛ/ɔ), so the tables are the complement
+  of the rule, not a lexicon.
 
-Two independent grounds, strongest first. This is **program output**: the ordinary analysis — and the
-FSF's own, which is why GCC's output is not GPL and why Bison needed an explicit exception precisely
-because it copied skeleton *code* into its output — is that running a GPL program over your own input
-does not make the output a derivative of the program, absent parts of the program being embedded in
-it. Nothing of espeak's source, rules, or dictionary is embedded in `word<TAB>e`. Only as
-belt-and-braces does the facts posture apply: an enum-valued predicate over externally-chosen keys
-carries no expression, and **any correct source would produce the same table** — the mid-vowel height
-of *dona* vs *dóna* is a dictionary fact of Central Catalan (DCVB/GDLC-verifiable), so two engines
-that are both right are byte-identical here.
+No espeak source, rules, dictionary or arrangement is present in `word<TAB>e`, and any correct source
+would produce the same table: the mid-vowel height of *dona* vs *dóna* is a Central Catalan dictionary
+fact (DCVB/GDLC-verifiable). Shipped under the facts posture; espeak-ng credited in NOTICE.
 
-**What does genuinely depend on espeak is its mistakes.** Where 1.52 was wrong about a word, the table
-carries the wrong bit. That is a *quality* dependency, not a licensing one, and it is falsifiable row
-by row against DCVB/GDLC — which is also the fallback if the posture is ever revisited: re-measure the
-same external wordlist against a dictionary source and both tables regenerate with espeak out of the
-loop. espeak-ng credited in NOTICE regardless.
+What does depend on espeak is its *mistakes* — a wrong 1.52 reading is a wrong bit. That is a quality
+dependency, falsifiable row by row against DCVB/GDLC, which is also the regeneration path if the table
+is ever re-sourced without espeak.
 
-⚠ **Open item:** with espeak established as the instrument rather than the source, the 50k Catalan
-frequency wordlist becomes the only upstream that meaningfully touches these two tables, and its own
-provenance is not yet pinned down in this map (it lives outside this repo). Resolve before publication
-— if it is a Wikipedia-dump ranking or a hermitdave FrequencyWords list, it is CC-BY-SA and the
-*selection* needs the §3 treatment even though the per-word values do not.
+⚠ **Open item:** the 50k Catalan frequency wordlist is the only other upstream touching these tables
+and its provenance is not pinned down here (it lives outside this repo). If it is a Wikipedia-dump
+ranking or a hermitdave FrequencyWords list it is CC-BY-SA, and the *selection* needs §3 treatment even
+though the per-word values do not.
 
-Note that `irish/lexicon.tsv` and the Welsh bootstrap are **not** espeak 1.52 derivatives, despite
-the surface similarity — both come from the author's own repaired engines (espeak 1.52's `ga` was
-broken, which is why the repair existed).
+`irish/lexicon.tsv` and the Welsh bootstrap are **not** espeak 1.52 derivatives despite the surface
+similarity — both come from the author's own repaired engines.
 
 ### 5.2 Wiktionary and epitran
 
@@ -232,12 +239,18 @@ Attribution is owed under CC-BY-SA regardless of whether a given use shipped byt
 
 ## 6. License architecture (to implement at publication)
 
-1. **Repo license: MIT** — covers all code, jsonc manifests, hand-authored tables, in-repo gold
-   referees, and the §1 artifacts; the default for everything not fenced.
-2. **`LICENSES/` + per-file declarations** — REUSE convention (SPDX headers or a `.reuse/dep5`
-   manifest) mapping every §2/§3/§4 artifact to its license, keyed off this document. Fences are
-   directories where possible (`tools/referee-eval/referees/` is one line).
-3. **NOTICE** — attribution roll-up: CMUdict, NST/Språkbanken, HomoRich, Google
+1. **Repo license: MIT** — ✅ `LICENSE` at the repo root, and `license: "MIT"` in package.json.
+   Covers all code, jsonc manifests, hand-authored tables, in-repo gold referees, and the §1
+   artifacts; the default for everything not fenced.
+2. **License texts** — ✅ `LICENSES/`, SPDX-named verbatim copies of all ten licenses this
+   repo is obligated under, with their sourcing recorded in that folder's README. **Still to do:** the
+   per-file declarations that key off them — REUSE convention (SPDX headers or a `.reuse/dep5`
+   manifest) mapping every §2/§3/§4 artifact to its license. Fences are directories where possible
+   (`tools/referee-eval/referees/` is one line). The texts are already at the top-level `LICENSES/`
+   path REUSE expects — but that directory also holds `PROVENANCE.md`, `licencing_posture.md` and
+   `README.md`, which `reuse lint` would flag as non-license files. Move those out if REUSE
+   compliance is ever wanted; nothing else depends on their location.
+3. **NOTICE** — ✅ `NOTICE.md`. Attribution roll-up: CMUdict, NST/Språkbanken, HomoRich, Google
    language-resources, rime-cantonese, rime-wugniu, pypinyin, OpenCC, OpenJTalk/naist-jdic,
    kanjium, EDRDG (their required wording), Wiktionary/wikipron/kaikki, ChhoeTaigi (台華線頂對照典
    / iTaigi), Lexique (New & Pallier), Tashkeela (+posture statement), CATT, Phonikud/ReNikud,

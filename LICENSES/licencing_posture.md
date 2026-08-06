@@ -2,14 +2,14 @@
 
 - **Status**: Accepted — 2026-07-29 (owner decision, pre-publication)
 - **Deciders**: project author
-- **Relates to**: `LICENCING/PROVENANCE.md` (the per-artifact license map this posture governs)
+- **Relates to**: `LICENSES/PROVENANCE.md` (the per-artifact license map this posture governs)
 
 ## Context
 
 vernacula-phonemizer is an **original work**. It is a new engine, new per-language architectures,
 and a canonical-IPA focus. External data carried into this project are **linguistic facts only**
 — a word's pronunciation, a syllable inventory, a stress position. The per-artifact determinations
-are recorded in `LICENCING/PROVENANCE.md` §4.3.
+are recorded in `LICENSES/PROVENANCE.md` §4.3.
 
 The repository does, however, ship **data derived from many third-party sources** (Wiktionary/
 wikipron/kaikki, NST, CMUdict, Lexique, ChhoeTaigi, rime projects, and others) and **model
@@ -26,7 +26,7 @@ structure that keeps the two apart.
 2. **Mechanical fact tables are treated as unoriginal compilations of linguistic facts** and do
    not inherit an upstream license (the facts posture, below).
 3. **Third-party-derived data keeps its parent license, declared per file** — the fences in
-   `LICENCING/PROVENANCE.md` (CC-BY-SA for the Wiktionary family, CC-BY/CC0/BSD with attribution in
+   `LICENSES/PROVENANCE.md` (CC-BY-SA for the Wiktionary family, CC-BY/CC0/BSD with attribution in
    NOTICE, GPL-3.0 for the rime-wugniu-derived Wu dictionary, etc.). A data file's license
    never leaks onto the engine that merely reads it at runtime. This is strictly for cases where
    there is information beyond linguistic fact.
