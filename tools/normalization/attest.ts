@@ -401,7 +401,38 @@ for (const f of findings) {
 if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
 const outPath = join(OUT_DIR, `${lang}.jsonc`);
 const prior = existsSync(outPath) ? readFileSync(outPath, "utf8") : "";
-const kept = [...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!);
+/**
+ * ⚠ PRIOR FINDINGS ARE CARRIED FORWARD, BECAUSE THIS TOOL USED TO DESTROY THEM. The cache is per LANGUAGE and
+ * the file was rewritten from this run's findings alone, so probing one word deleted every word probed before
+ * it — `--lang hi --words दशमलव` replaced seven existing findings (ऋण, गुणा, भाजित, घन, माइनस, बराबर, ऋणात्मक)
+ * and the only trace was a cheerful "(replaced 7 prior finding(s))" in the log. The loss is worse than it
+ * sounds: each finding costs a live Wikipedia fetch, `review.ts`'s haystack reads the cache for its example
+ * prose, and its "wikipedia NOT probed" hint sends the next reader to this exact command. Following the gate's
+ * own advice silently unsourced seven other words.
+ *
+ * A word probed in THIS run always wins — that is a fresh measurement of the same question. Everything else is
+ * kept verbatim, block for block, so no re-parse can alter a finding this run did not make.
+ */
+const priorBlocks = [...prior.matchAll(/\{\s*"word":[\s\S]*?\n        \}/gu)].map((m) => m[0]);
+const probed = new Set(findings.map((f) => f.word));
+const carried = priorBlocks.filter((b) => {
+    const w = /"word":\s*"([^"]+)"/u.exec(b)?.[1];
+    return w !== undefined && !probed.has(w);
+});
+const replaced = priorBlocks.length - carried.length;
+// ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern above depends on the indentation THIS FILE
+// writes, and a hand-edited cache could defeat it — reintroducing the silent deletion by another route. The
+// word list is matched with a pattern that cannot miss, so any word neither probed nor carried means the
+// block parse failed. Loud, and non-zero exit, because the failure mode is data loss.
+const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
+const carriedWords = new Set(carried.map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1]));
+const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
+if (lost.length > 0) {
+    console.error(`\n  REFUSING TO WRITE: ${lost.length} existing finding(s) could not be parsed for carry-forward `
+        + `— ${lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
+        + `tool emits; if ${outPath} was hand-edited, restore it from git and re-run.`);
+    process.exit(1);
+}
 const esc = (s: string): string => JSON.stringify(s);
 writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Written by tools/normalization/attest.ts.
 //
@@ -436,9 +467,10 @@ ${findings.map((f) => `        {
             "articles": ${f.articles},
             "substringOnly": ${f.substringOnly},
             "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
-        }`).join(",\n")}
+        }`).join(",\n")}${carried.length ? `,\n${carried.map((b) => `        ${b.replace(/^\s+/u, "")}`).join(",\n")}` : ""}
     ],
 }
 `, "utf8");
-console.log(`  → ${outPath}${kept.length ? `  (replaced ${kept.length} prior finding(s))` : ""}`);
+console.log(`  → ${outPath}${replaced ? `  (re-probed ${replaced} existing finding(s))` : ""}`
+    + `${carried.length ? `, ${carried.length} earlier finding(s) kept` : ""}`);
 console.log(`  Only an \`attested\` verdict WITH a sense you have checked belongs in a sourcing argument.\n`);

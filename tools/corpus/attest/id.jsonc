@@ -18,11 +18,24 @@
 {
     "language": "id",
     "wiki": "id.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "matematika aritmetika pembagian",
+    "tier": "wikipedia",
     "findings": [
+        {
+            "word": "koma",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 177,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Dunia Tanpa Koma adalah serial televisi Indonesia produksi Sinemart yang dit…",
+                "…Koma dapat mengacu pada beberapa hal berikut: Koma (tanda baca)…",
+                "…Koma dapat mengacu pada beberapa hal berikut: Koma (tanda baca) (,) Koma (medis)…",
+                "…at mengacu pada beberapa hal berikut: Koma (tanda baca) (,) Koma (medis)…",
+                "…un berderet dari atas ke bawah atau dengan dipisahkan tanda koma (,). == Contoh == === Contoh 1 === Saya mengundang Ani, Bud…",
+                "…Tanda koma adalah tanda baca yang memiliki bentuk mirip apostrof atau…"
+            ]
+        },
         {
             "word": "lebih kecil dari",
             "verdict": "absent",

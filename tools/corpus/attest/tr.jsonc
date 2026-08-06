@@ -18,11 +18,24 @@
 {
     "language": "tr",
     "wiki": "tr.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "matematik çarpma",
+    "tier": "wikipedia",
     "findings": [
+        {
+            "word": "virgül",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 62,
+            "articles": 18,
+            "substringOnly": 1,
+            "examples": [
+                "…Virgül ⟨,⟩ farklı dillerde kullanılan bir noktalama işaretidir. Ge…",
+                "…da cümledeki bölümleri birbirinden ayırmaktır. == Tarihi == Virgül, MÖ 3. yüzyılda yaşayan Bizanslı Aristophanes'in geliştirdi…",
+                "…rtasına koyulan media distinctio ⟨·⟩ virgülün karşılığıydı. Virgül Türkçeye 19. yüzyılda Tanzimat Dönemi sırasında Fransızcada…",
+                "…e dönerdi. Uzun cümlelerde özneyi belirtmek için kullanılır.Virgül, MÖ 3. yüzyılda yaşayan Bizanslı Aristophanes'in geliştirdi…",
+                "…umlar === \"ve, veya, ya da\" gibi sözcüklerden önce ve sonra virgül kullanılmaz.Kal ya da git.Ekmek ve su al. İkilemelerin aras…",
+                "…anılmaz.Kal ya da git.Ekmek ve su al. İkilemelerin arasında virgül kullanılmaz.Gece gece ödev soruyor.Abuk sabuk konuşuyorlar.…"
+            ]
+        },
         {
             "word": "eşittir iki",
             "verdict": "attested",

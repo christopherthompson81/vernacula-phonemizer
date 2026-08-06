@@ -28,7 +28,7 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
-import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES, sistersOf } from "./defects.ts";
+import { ACCEPTED_SIGN_SILENCE, CITED_WORDS, DROPPABLE, SIGN_CASES, sistersOf } from "./defects.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -412,7 +412,13 @@ function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
         for (const f of readdirSync("tools/referee-eval/referees").filter((f) => f.startsWith(`${code}.`)))
             add(join("tools/referee-eval/referees", f));
     }
-    for (const f of readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc") || f.endsWith(".tsv")))
+    // ⚠ `.tsv` ONLY — NOT THE LANGUAGE'S OWN `.jsonc`, WHICH IS THE DECLARATION THIS CHECK EXISTS TO TEST.
+    // The manifests were added here too, and that made the gate self-fulfilling through the second door: the
+    // needles are EXTRACTED from `igbo.jsonc`'s `"decimalWord"`, so searching a haystack containing that same
+    // file finds the word every time. Igbo's dictionary-sourced `ntụkpọ` — 0 corpus hits, genuinely absent —
+    // reported "attested", and so did `zzqqxwood` substituted in its place. A declaration cannot be its own
+    // evidence. Lexicon `.tsv`s stay: those are human-verified word lists, independent of what a layer declares.
+    for (const f of readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".tsv")))
         add(join("src/languages", dir, f));
     // THE WIKIPEDIA ATTESTATION CACHE (`attest.ts`) — a weaker tier, added last, and added SELECTIVELY.
     //
@@ -553,14 +559,23 @@ else {
     };
     const verdictOf = (w: string): string => {
         const p = probed(w);
-        return `${w} — in NO source (corpus, artifact, referee, manifest, espeak`
+        return `${w} — in NO source (corpus, artifact, referee, lexicon, espeak`
             + `${p === undefined ? "; wikipedia NOT probed — try tools/normalization/attest.ts" : `, and ${p}`})`;
     };
-    const unattested = needles.filter((w) => (SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !near(w)));
+    // A CITATION IS SOURCING TOO — see CITED_WORDS. A corpus cannot attest how a SYMBOL is spoken (writers type
+    // `2.5`, they never write how they say it), so a decimal word can be in universal use and score zero. The
+    // citation must name a work outside this repository; the manifest deliberately does not count, because the
+    // needles are extracted from it.
+    const cited = CITED_WORDS[lang] ?? {};
+    const unattested = needles.filter((w) => cited[w] === undefined
+        && (SPACELESS.test(w) ? !hay.text.includes(fold(w)) : !near(w)));
+    const citedUsed = needles.filter((w) => cited[w] !== undefined);
+    const how = citedUsed.length === 0 ? "" : `; ${citedUsed.length} CITED — `
+        + citedUsed.map((w) => `${w}: ${cited[w]!}`).join(" · ");
     note("sourcing", unattested.length === 0 ? true : null,
         unattested.length === 0
-            ? `all ${needles.length} high-traffic words attested`
-            : `${unattested.map(verdictOf).join(", ")} — Say where each came from, or leave the symbol unread`);
+            ? `all ${needles.length} high-traffic words attested${how}`
+            : `${unattested.map(verdictOf).join(", ")} — Say where each came from, or leave the symbol unread${how}`);
 }
 
 // ── 5. the artifact scan ──────────────────────────────────────────────────────────────────────────

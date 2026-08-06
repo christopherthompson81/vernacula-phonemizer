@@ -9,6 +9,8 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { numberToWords } from "./numbers.ts";
+import { normalizeIgbo } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
@@ -90,9 +92,15 @@ export type ForeignPhonemizer = (latin: string) => string;
 class IgboPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Normalization BEFORE tokenizing: TOKEN is a three-way split that skips every symbol it does not name,
+        // so a symbol has to become an Igbo word before it gets here. See normalize.ts for each reading's source.
+        return assembleClauses(normalizeIgbo(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : m[2]);
+            // ⚠ DIGITS GO TO THE IGBO COMPOSITOR, NEVER TO `foreign`. The registry wires `foreign` to the ENGLISH
+            // phonemizer for Latin-script fallback, so `1945` used to read *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd
+            // fˈɔːɹt̬i fˈaᶦv* — fluent English inside Igbo speech. numbers.ts always answers (digit-by-digit in
+            // Igbo units beyond its range), so no digit can reach the foreign path again.
+            else if (m[2]) { for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

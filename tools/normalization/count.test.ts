@@ -7,6 +7,7 @@
 import { describe, expect, test } from "vitest";
 
 import { DIGIT, digitFlanked, leading, literal, matches, wordAndSubstring } from "./count.ts";
+import { dominantScript } from "./scripts.ts";
 
 describe("literal escaping", () => {
     test("⚠ a sign that is a metacharacter means ITSELF", () => {
@@ -66,5 +67,23 @@ describe("matches returns instances, not a number", () => {
         expect(ms.length).toBe(2);
         expect(ms[0]).toHaveProperty("index");
         expect(ms[0]!.text).toBe("+");
+    });
+});
+
+describe("⚠ spaceless-script detection must ask DOMINANCE, not existence", () => {
+    // corpus-words.ts used `utts.some(u => SPACELESS.test(u))`, so ONE katakana character anywhere flipped a whole
+    // language into spaceless mode — stripping every space and switching the hit test to substrings. Igbo (Latin,
+    // spaces and all) tripped it on 2,472 of 558,991 lines, every one from a Digimon article quoting デジモン, and
+    // its token counts collapsed from 104,534 to 294 for `otu` while substring counts inflated to 129,406. 69 of
+    // the fleet's 154 mined artifacts contain at least one CJK/SEA character, so 69 languages were measured this
+    // way. `dominantScript` answers the right question and is reused rather than re-derived.
+    test("a Latin corpus quoting katakana is NOT spaceless", () => {
+        const igbo = "Otu nwoke bịara. Digimon (デジモン Dejimon) bụ ihe nkiri. Ọ bụ ezigbo ihe. ".repeat(20);
+        expect(dominantScript(igbo)).toBe("Latin");
+    });
+
+    test("and a genuinely spaceless corpus still reads as such", () => {
+        expect(dominantScript("これは日本語のテキストです。".repeat(40))).not.toBe("Latin");
+        expect(dominantScript("អក្សរខ្មែរ".repeat(40))).toBe("Khmer");
     });
 });

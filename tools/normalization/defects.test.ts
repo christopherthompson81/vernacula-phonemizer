@@ -14,7 +14,7 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "./defects.ts";
+import { CITED_WORDS, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "./defects.ts";
 
 describe("a symbol in a FOREIGN-language span is not this language's defect", () => {
     // Mined artifacts contain BILINGUAL lines — legitimately, since most of such a line IS the language — and a
@@ -69,5 +69,39 @@ describe("a CLASS-level refusal is not a per-line defect either", () => {
 
     test("a language with no declared class refusal is unaffected", () => {
         expect(acceptedSignClass("cs", "math-sign", "4 = 4")).toBe(false);
+    });
+});
+
+describe("a citation is sourcing, but only if a reader could go and check it", () => {
+    // CITED_WORDS is the `sourcing` gate's only escape hatch, and it exists because a corpus cannot attest how a
+    // SYMBOL is spoken: writers type `2.5` and never write out how they say it, so Igbo's `ntụkpọ` scores 0 in a
+    // 559k-line dump and is still the right word. The risk is that the hatch becomes a way to quiet the gate, so
+    // these tests pin the properties that keep it narrow.
+    const entries = Object.entries(CITED_WORDS).flatMap(([lang, ws]) => Object.entries(ws).map(([w, c]) => [lang, w, c] as const));
+
+    test("every citation NAMES ITS SOURCE — a vague one is a TODO in a citation's clothes", () => {
+        // "a dictionary" or "standard usage" is not checkable and must not pass review. The test is deliberately
+        // crude (length + a named work) because the real check is human; what it forbids is a one-word placeholder.
+        for (const [lang, word, cite] of entries) {
+            expect(cite.length, `${lang}/${word}`).toBeGreaterThan(80);
+            expect(cite, `${lang}/${word}`).toMatch(/\p{Lu}/u);   // a proper noun: the work, the author, or the site
+        }
+    });
+
+    test("⚠ the cited word is the word, not a description of it", () => {
+        // A key here is matched against the needle `review.ts` extracts from the manifest, so a mismatch would
+        // silently do nothing — the gate would report the word unattested and the entry would look applied.
+        for (const [lang, word] of entries) {
+            expect(word.trim(), `${lang}: keys must be bare words`).toBe(word);
+            expect(word, `${lang}/${word}`).toMatch(/^[\p{L}\p{M}][\p{L}\p{M}'’ʻ·-]*$/u);
+        }
+    });
+
+    test("igbo's decimal word is cited, and the citation records that the corpus says nothing", () => {
+        const cite = CITED_WORDS["ig"]?.["ntụkpọ"];
+        expect(cite).toBeDefined();
+        expect(cite).toMatch(/Nkọwa okwu/u);
+        // The zero is part of the claim, not an omission from it — see the playbook's corpus-silence trap.
+        expect(cite).toMatch(/ZERO/u);
     });
 });
